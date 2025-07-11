@@ -40,6 +40,9 @@ const formDefaults = (key?: Apikey) =>
 		expiresAt: key?.expiresAt ? new Date(key.expiresAt) : undefined,
 	}) satisfies CreateOrUpdateAPIKeyFormValues
 
+// FIXME: The combobox transforms the values to lowercase, which makes things fucking annoying.
+// We need to either fix the combobox or handle the transformation ourselves.
+
 export default function CreateOrUpdateAPIKeyForm({
 	onSubmit,
 	editingKey,
@@ -68,6 +71,14 @@ export default function CreateOrUpdateAPIKeyForm({
 			} else {
 				form.setValue('expiresAt', undefined)
 			}
+		},
+		[form],
+	)
+
+	const handlePermissionsChange = useCallback(
+		(value?: string[]) => {
+			const adjustedValue = new Set(value?.map((v) => v.toUpperCase()))
+			form.setValue('explicitPermissions', Array.from(adjustedValue).filter(isUserPermission))
 		},
 		[form],
 	)
@@ -127,9 +138,7 @@ export default function CreateOrUpdateAPIKeyForm({
 									label: t(`userPermissions.${permission}.label`),
 								}))}
 								value={permissions}
-								onChange={(value) =>
-									form.setValue('explicitPermissions', value?.filter(isUserPermission) || [])
-								}
+								onChange={handlePermissionsChange}
 								isMultiSelect
 								disabled={inherit}
 							/>

@@ -98,11 +98,11 @@ export type ArrangementSection = {
   visible: Scalars['Boolean']['output'];
 };
 
-/** The metadata of an attachment that was sent with an email */
 export type AttachmentMeta = {
   __typename?: 'AttachmentMeta';
   /** The filename of the attachment */
   filename: Scalars['String']['output'];
+  media?: Maybe<Media>;
   /** The associated media ID of the attachment, if there is one */
   mediaId?: Maybe<Scalars['String']['output']>;
   /** The size of the attachment in bytes */
@@ -2006,7 +2006,7 @@ export type QueryEmailDeviceByIdArgs = {
 
 
 export type QueryEmailerByIdArgs = {
-  id: Scalars['ID']['input'];
+  id: Scalars['Int']['input'];
 };
 
 
@@ -3133,7 +3133,7 @@ export type LibraryLayoutQueryVariables = Exact<{
 
 
 export type LibraryLayoutQuery = { __typename?: 'Query', libraryById?: (
-    { __typename?: 'Library', id: string, name: string, description?: string | null, path: string, stats: { __typename?: 'LibraryStats', bookCount: number, completedBooks: number, inProgressBooks: number }, tags: Array<{ __typename?: 'Tag', id: number, name: string }> }
+    { __typename?: 'Library', id: string, name: string, description?: string | null, path: string, stats: { __typename?: 'LibraryStats', bookCount: number, completedBooks: number, inProgressBooks: number }, tags: Array<{ __typename?: 'Tag', id: number, name: string }>, thumbnail: { __typename?: 'ImageRef', url: string } }
     & { ' $fragmentRefs'?: { 'LibrarySettingsConfigFragment': LibrarySettingsConfigFragment } }
   ) | null };
 
@@ -3354,6 +3354,21 @@ export type CreateEmailerSceneCreateEmailerMutationVariables = Exact<{
 
 export type CreateEmailerSceneCreateEmailerMutation = { __typename?: 'Mutation', createEmailer: { __typename?: 'Emailer', id: number } };
 
+export type EditEmailerSceneQueryVariables = Exact<{
+  id: Scalars['Int']['input'];
+}>;
+
+
+export type EditEmailerSceneQuery = { __typename?: 'Query', emailers: Array<{ __typename?: 'Emailer', name: string }>, emailerById?: { __typename?: 'Emailer', id: number, name: string, isPrimary: boolean, smtpHost: string, smtpPort: number, lastUsedAt?: any | null, maxAttachmentSizeBytes?: number | null, senderDisplayName: string, senderEmail: string, tlsEnabled: boolean, username: string } | null };
+
+export type EditEmailerSceneEditEmailerMutationVariables = Exact<{
+  id: Scalars['Int']['input'];
+  input: EmailerInput;
+}>;
+
+
+export type EditEmailerSceneEditEmailerMutation = { __typename?: 'Mutation', updateEmailer: { __typename?: 'Emailer', id: number } };
+
 export type CreateOrUpdateDeviceModalCreateEmailDeviceMutationVariables = Exact<{
   input: EmailDeviceInput;
 }>;
@@ -3382,6 +3397,14 @@ export type EmailDevicesTableQueryVariables = Exact<{ [key: string]: never; }>;
 export type EmailDevicesTableQuery = { __typename?: 'Query', emailDevices: Array<{ __typename?: 'RegisteredEmailDevice', id: number, name: string, email: string, forbidden: boolean }> };
 
 export type EmailerListItemFragment = { __typename?: 'Emailer', id: number, name: string, isPrimary: boolean, smtpHost: string, smtpPort: number, lastUsedAt?: any | null, maxAttachmentSizeBytes?: number | null, senderDisplayName: string, senderEmail: string, tlsEnabled: boolean, username: string } & { ' $fragmentName'?: 'EmailerListItemFragment' };
+
+export type EmailerSendHistoryQueryVariables = Exact<{
+  id: Scalars['Int']['input'];
+  fetchUser: Scalars['Boolean']['input'];
+}>;
+
+
+export type EmailerSendHistoryQuery = { __typename?: 'Query', emailerById?: { __typename?: 'Emailer', sendHistory: Array<{ __typename?: 'EmailerSendRecord', sentAt: any, recipientEmail: string, sentByUserId?: string | null, sentBy?: { __typename?: 'User', id: string, username: string } | null, attachmentMeta: Array<{ __typename?: 'AttachmentMeta', filename: string, mediaId?: string | null, size: number, media?: { __typename?: 'Media', resolvedName: string } | null }> }> } | null };
 
 export type EmailersListQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -4197,6 +4220,9 @@ export const LibraryLayoutDocument = new TypedDocumentString(`
       id
       name
     }
+    thumbnail {
+      url
+    }
     ...LibrarySettingsConfig
   }
 }
@@ -4604,6 +4630,33 @@ export const CreateEmailerSceneCreateEmailerDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<CreateEmailerSceneCreateEmailerMutation, CreateEmailerSceneCreateEmailerMutationVariables>;
+export const EditEmailerSceneDocument = new TypedDocumentString(`
+    query EditEmailerScene($id: Int!) {
+  emailers {
+    name
+  }
+  emailerById(id: $id) {
+    id
+    name
+    isPrimary
+    smtpHost
+    smtpPort
+    lastUsedAt
+    maxAttachmentSizeBytes
+    senderDisplayName
+    senderEmail
+    tlsEnabled
+    username
+  }
+}
+    `) as unknown as TypedDocumentString<EditEmailerSceneQuery, EditEmailerSceneQueryVariables>;
+export const EditEmailerSceneEditEmailerDocument = new TypedDocumentString(`
+    mutation EditEmailerSceneEditEmailer($id: Int!, $input: EmailerInput!) {
+  updateEmailer(id: $id, input: $input) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<EditEmailerSceneEditEmailerMutation, EditEmailerSceneEditEmailerMutationVariables>;
 export const CreateOrUpdateDeviceModalCreateEmailDeviceDocument = new TypedDocumentString(`
     mutation CreateOrUpdateDeviceModalCreateEmailDevice($input: EmailDeviceInput!) {
   createEmailDevice(input: $input) {
@@ -4638,6 +4691,29 @@ export const EmailDevicesTableDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<EmailDevicesTableQuery, EmailDevicesTableQueryVariables>;
+export const EmailerSendHistoryDocument = new TypedDocumentString(`
+    query EmailerSendHistory($id: Int!, $fetchUser: Boolean!) {
+  emailerById(id: $id) {
+    sendHistory {
+      sentAt
+      recipientEmail
+      sentByUserId
+      sentBy @include(if: $fetchUser) {
+        id
+        username
+      }
+      attachmentMeta {
+        filename
+        mediaId
+        media {
+          resolvedName
+        }
+        size
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<EmailerSendHistoryQuery, EmailerSendHistoryQueryVariables>;
 export const EmailersListDocument = new TypedDocumentString(`
     query EmailersList {
   emailers {

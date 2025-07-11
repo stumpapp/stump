@@ -30,6 +30,9 @@ const query = graphql(`
 				id
 				name
 			}
+			thumbnail {
+				url
+			}
 			...LibrarySettingsConfig
 		}
 	}

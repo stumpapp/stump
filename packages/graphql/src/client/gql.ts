@@ -49,7 +49,7 @@ type Documents = {
     "\n\tquery HomeSceneQuery {\n\t\tnumberOfLibraries\n\t}\n": typeof types.HomeSceneQueryDocument,
     "\n\tquery RecentlyAddedMediaQuery($pagination: Pagination!) {\n\t\trecentlyAddedMedia(pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...BookCard\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\tcurrentCursor\n\t\t\t\t\tnextCursor\n\t\t\t\t\tlimit\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.RecentlyAddedMediaQueryDocument,
     "\n\tquery RecentlyAddedSeriesQuery($pagination: Pagination!) {\n\t\trecentlyAddedSeries(pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tresolvedName\n\t\t\t\tmediaCount\n\t\t\t\tpercentageCompleted\n\t\t\t\tstatus\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\tcurrentCursor\n\t\t\t\t\tnextCursor\n\t\t\t\t\tlimit\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.RecentlyAddedSeriesQueryDocument,
-    "\n\tquery LibraryLayout($id: ID!) {\n\t\tlibraryById(id: $id) {\n\t\t\tid\n\t\t\tname\n\t\t\tdescription\n\t\t\tpath\n\t\t\tstats {\n\t\t\t\tbookCount\n\t\t\t\tcompletedBooks\n\t\t\t\tinProgressBooks\n\t\t\t}\n\t\t\ttags {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t\t...LibrarySettingsConfig\n\t\t}\n\t}\n": typeof types.LibraryLayoutDocument,
+    "\n\tquery LibraryLayout($id: ID!) {\n\t\tlibraryById(id: $id) {\n\t\t\tid\n\t\t\tname\n\t\t\tdescription\n\t\t\tpath\n\t\t\tstats {\n\t\t\t\tbookCount\n\t\t\t\tcompletedBooks\n\t\t\t\tinProgressBooks\n\t\t\t}\n\t\t\ttags {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t\t...LibrarySettingsConfig\n\t\t}\n\t}\n": typeof types.LibraryLayoutDocument,
     "\n\tmutation VisitLibrary($id: ID!) {\n\t\tvisitLibrary(id: $id) {\n\t\t\tid\n\t\t}\n\t}\n": typeof types.VisitLibraryDocument,
     "\n\tquery LibraryBooksScene($filter: MediaFilterInput!, $pagination: Pagination!) {\n\t\tmedia(filter: $filter, pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...BookCard\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\tcurrentPage\n\t\t\t\t\ttotalPages\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.LibraryBooksSceneDocument,
     "\n\tquery LibrarySeries($filter: SeriesFilterInput!, $pagination: Pagination!) {\n\t\tseries(filter: $filter, pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tresolvedName\n\t\t\t\tmediaCount\n\t\t\t\tpercentageCompleted\n\t\t\t\tstatus\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\ttotalPages\n\t\t\t\t\tcurrentPage\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.LibrarySeriesDocument,
@@ -80,11 +80,14 @@ type Documents = {
     "\n\tmutation UpdateUserProfileForm($input: UpdateUserInput!) {\n\t\tupdateViewer(input: $input) {\n\t\t\tid\n\t\t\tusername\n\t\t\tavatarUrl\n\t\t}\n\t}\n": typeof types.UpdateUserProfileFormDocument,
     "\n\tquery CreateEmailerSceneEmailers {\n\t\temailers {\n\t\t\tname\n\t\t}\n\t}\n": typeof types.CreateEmailerSceneEmailersDocument,
     "\n\tmutation CreateEmailerSceneCreateEmailer($input: EmailerInput!) {\n\t\tcreateEmailer(input: $input) {\n\t\t\tid\n\t\t}\n\t}\n": typeof types.CreateEmailerSceneCreateEmailerDocument,
+    "\n\tquery EditEmailerScene($id: Int!) {\n\t\temailers {\n\t\t\tname\n\t\t}\n\t\temailerById(id: $id) {\n\t\t\tid\n\t\t\tname\n\t\t\tisPrimary\n\t\t\tsmtpHost\n\t\t\tsmtpPort\n\t\t\tlastUsedAt\n\t\t\tmaxAttachmentSizeBytes\n\t\t\tsenderDisplayName\n\t\t\tsenderEmail\n\t\t\ttlsEnabled\n\t\t\tusername\n\t\t}\n\t}\n": typeof types.EditEmailerSceneDocument,
+    "\n\tmutation EditEmailerSceneEditEmailer($id: Int!, $input: EmailerInput!) {\n\t\tupdateEmailer(id: $id, input: $input) {\n\t\t\tid\n\t\t}\n\t}\n": typeof types.EditEmailerSceneEditEmailerDocument,
     "\n\tmutation CreateOrUpdateDeviceModalCreateEmailDevice($input: EmailDeviceInput!) {\n\t\tcreateEmailDevice(input: $input) {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t}\n": typeof types.CreateOrUpdateDeviceModalCreateEmailDeviceDocument,
     "\n\tmutation CreateOrUpdateDeviceModalUpdateEmailDevice($id: Int!, $input: EmailDeviceInput!) {\n\t\tupdateEmailDevice(id: $id, input: $input) {\n\t\t\tid\n\t\t\tname\n\t\t\tforbidden\n\t\t}\n\t}\n": typeof types.CreateOrUpdateDeviceModalUpdateEmailDeviceDocument,
     "\n\tmutation DeleteDeviceConfirmationDeleteEmailDevice($id: Int!) {\n\t\tdeleteEmailDevice(id: $id) {\n\t\t\tid\n\t\t}\n\t}\n": typeof types.DeleteDeviceConfirmationDeleteEmailDeviceDocument,
     "\n\tquery EmailDevicesTable {\n\t\temailDevices {\n\t\t\tid\n\t\t\tname\n\t\t\temail\n\t\t\tforbidden\n\t\t}\n\t}\n": typeof types.EmailDevicesTableDocument,
     "\n\tfragment EmailerListItem on Emailer {\n\t\tid\n\t\tname\n\t\tisPrimary\n\t\tsmtpHost\n\t\tsmtpPort\n\t\tlastUsedAt\n\t\tmaxAttachmentSizeBytes\n\t\tsenderDisplayName\n\t\tsenderEmail\n\t\ttlsEnabled\n\t\tusername\n\t}\n": typeof types.EmailerListItemFragmentDoc,
+    "\n\tquery EmailerSendHistory($id: Int!, $fetchUser: Boolean!) {\n\t\temailerById(id: $id) {\n\t\t\tsendHistory {\n\t\t\t\tsentAt\n\t\t\t\trecipientEmail\n\t\t\t\tsentByUserId\n\t\t\t\tsentBy @include(if: $fetchUser) {\n\t\t\t\t\tid\n\t\t\t\t\tusername\n\t\t\t\t}\n\t\t\t\tattachmentMeta {\n\t\t\t\t\tfilename\n\t\t\t\t\tmediaId\n\t\t\t\t\tmedia {\n\t\t\t\t\t\tresolvedName\n\t\t\t\t\t}\n\t\t\t\t\tsize\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.EmailerSendHistoryDocument,
     "\n\tquery EmailersList {\n\t\temailers {\n\t\t\tid\n\t\t\t...EmailerListItem\n\t\t}\n\t}\n": typeof types.EmailersListDocument,
     "\n\tmutation DeleteJobHistoryConfirmation {\n\t\tdeleteJobHistory {\n\t\t\taffectedRows\n\t\t}\n\t}\n": typeof types.DeleteJobHistoryConfirmationDocument,
     "\n\tmutation JobActionMenuCancelJob($id: ID!) {\n\t\tcancelJob(id: $id)\n\t}\n": typeof types.JobActionMenuCancelJobDocument,
@@ -145,7 +148,7 @@ const documents: Documents = {
     "\n\tquery HomeSceneQuery {\n\t\tnumberOfLibraries\n\t}\n": types.HomeSceneQueryDocument,
     "\n\tquery RecentlyAddedMediaQuery($pagination: Pagination!) {\n\t\trecentlyAddedMedia(pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...BookCard\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\tcurrentCursor\n\t\t\t\t\tnextCursor\n\t\t\t\t\tlimit\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.RecentlyAddedMediaQueryDocument,
     "\n\tquery RecentlyAddedSeriesQuery($pagination: Pagination!) {\n\t\trecentlyAddedSeries(pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tresolvedName\n\t\t\t\tmediaCount\n\t\t\t\tpercentageCompleted\n\t\t\t\tstatus\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\tcurrentCursor\n\t\t\t\t\tnextCursor\n\t\t\t\t\tlimit\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.RecentlyAddedSeriesQueryDocument,
-    "\n\tquery LibraryLayout($id: ID!) {\n\t\tlibraryById(id: $id) {\n\t\t\tid\n\t\t\tname\n\t\t\tdescription\n\t\t\tpath\n\t\t\tstats {\n\t\t\t\tbookCount\n\t\t\t\tcompletedBooks\n\t\t\t\tinProgressBooks\n\t\t\t}\n\t\t\ttags {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t\t...LibrarySettingsConfig\n\t\t}\n\t}\n": types.LibraryLayoutDocument,
+    "\n\tquery LibraryLayout($id: ID!) {\n\t\tlibraryById(id: $id) {\n\t\t\tid\n\t\t\tname\n\t\t\tdescription\n\t\t\tpath\n\t\t\tstats {\n\t\t\t\tbookCount\n\t\t\t\tcompletedBooks\n\t\t\t\tinProgressBooks\n\t\t\t}\n\t\t\ttags {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t\t...LibrarySettingsConfig\n\t\t}\n\t}\n": types.LibraryLayoutDocument,
     "\n\tmutation VisitLibrary($id: ID!) {\n\t\tvisitLibrary(id: $id) {\n\t\t\tid\n\t\t}\n\t}\n": types.VisitLibraryDocument,
     "\n\tquery LibraryBooksScene($filter: MediaFilterInput!, $pagination: Pagination!) {\n\t\tmedia(filter: $filter, pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...BookCard\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\tcurrentPage\n\t\t\t\t\ttotalPages\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.LibraryBooksSceneDocument,
     "\n\tquery LibrarySeries($filter: SeriesFilterInput!, $pagination: Pagination!) {\n\t\tseries(filter: $filter, pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tresolvedName\n\t\t\t\tmediaCount\n\t\t\t\tpercentageCompleted\n\t\t\t\tstatus\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\ttotalPages\n\t\t\t\t\tcurrentPage\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.LibrarySeriesDocument,
@@ -176,11 +179,14 @@ const documents: Documents = {
     "\n\tmutation UpdateUserProfileForm($input: UpdateUserInput!) {\n\t\tupdateViewer(input: $input) {\n\t\t\tid\n\t\t\tusername\n\t\t\tavatarUrl\n\t\t}\n\t}\n": types.UpdateUserProfileFormDocument,
     "\n\tquery CreateEmailerSceneEmailers {\n\t\temailers {\n\t\t\tname\n\t\t}\n\t}\n": types.CreateEmailerSceneEmailersDocument,
     "\n\tmutation CreateEmailerSceneCreateEmailer($input: EmailerInput!) {\n\t\tcreateEmailer(input: $input) {\n\t\t\tid\n\t\t}\n\t}\n": types.CreateEmailerSceneCreateEmailerDocument,
+    "\n\tquery EditEmailerScene($id: Int!) {\n\t\temailers {\n\t\t\tname\n\t\t}\n\t\temailerById(id: $id) {\n\t\t\tid\n\t\t\tname\n\t\t\tisPrimary\n\t\t\tsmtpHost\n\t\t\tsmtpPort\n\t\t\tlastUsedAt\n\t\t\tmaxAttachmentSizeBytes\n\t\t\tsenderDisplayName\n\t\t\tsenderEmail\n\t\t\ttlsEnabled\n\t\t\tusername\n\t\t}\n\t}\n": types.EditEmailerSceneDocument,
+    "\n\tmutation EditEmailerSceneEditEmailer($id: Int!, $input: EmailerInput!) {\n\t\tupdateEmailer(id: $id, input: $input) {\n\t\t\tid\n\t\t}\n\t}\n": types.EditEmailerSceneEditEmailerDocument,
     "\n\tmutation CreateOrUpdateDeviceModalCreateEmailDevice($input: EmailDeviceInput!) {\n\t\tcreateEmailDevice(input: $input) {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t}\n": types.CreateOrUpdateDeviceModalCreateEmailDeviceDocument,
     "\n\tmutation CreateOrUpdateDeviceModalUpdateEmailDevice($id: Int!, $input: EmailDeviceInput!) {\n\t\tupdateEmailDevice(id: $id, input: $input) {\n\t\t\tid\n\t\t\tname\n\t\t\tforbidden\n\t\t}\n\t}\n": types.CreateOrUpdateDeviceModalUpdateEmailDeviceDocument,
     "\n\tmutation DeleteDeviceConfirmationDeleteEmailDevice($id: Int!) {\n\t\tdeleteEmailDevice(id: $id) {\n\t\t\tid\n\t\t}\n\t}\n": types.DeleteDeviceConfirmationDeleteEmailDeviceDocument,
     "\n\tquery EmailDevicesTable {\n\t\temailDevices {\n\t\t\tid\n\t\t\tname\n\t\t\temail\n\t\t\tforbidden\n\t\t}\n\t}\n": types.EmailDevicesTableDocument,
     "\n\tfragment EmailerListItem on Emailer {\n\t\tid\n\t\tname\n\t\tisPrimary\n\t\tsmtpHost\n\t\tsmtpPort\n\t\tlastUsedAt\n\t\tmaxAttachmentSizeBytes\n\t\tsenderDisplayName\n\t\tsenderEmail\n\t\ttlsEnabled\n\t\tusername\n\t}\n": types.EmailerListItemFragmentDoc,
+    "\n\tquery EmailerSendHistory($id: Int!, $fetchUser: Boolean!) {\n\t\temailerById(id: $id) {\n\t\t\tsendHistory {\n\t\t\t\tsentAt\n\t\t\t\trecipientEmail\n\t\t\t\tsentByUserId\n\t\t\t\tsentBy @include(if: $fetchUser) {\n\t\t\t\t\tid\n\t\t\t\t\tusername\n\t\t\t\t}\n\t\t\t\tattachmentMeta {\n\t\t\t\t\tfilename\n\t\t\t\t\tmediaId\n\t\t\t\t\tmedia {\n\t\t\t\t\t\tresolvedName\n\t\t\t\t\t}\n\t\t\t\t\tsize\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.EmailerSendHistoryDocument,
     "\n\tquery EmailersList {\n\t\temailers {\n\t\t\tid\n\t\t\t...EmailerListItem\n\t\t}\n\t}\n": types.EmailersListDocument,
     "\n\tmutation DeleteJobHistoryConfirmation {\n\t\tdeleteJobHistory {\n\t\t\taffectedRows\n\t\t}\n\t}\n": types.DeleteJobHistoryConfirmationDocument,
     "\n\tmutation JobActionMenuCancelJob($id: ID!) {\n\t\tcancelJob(id: $id)\n\t}\n": types.JobActionMenuCancelJobDocument,
@@ -346,7 +352,7 @@ export function graphql(source: "\n\tquery RecentlyAddedSeriesQuery($pagination:
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n\tquery LibraryLayout($id: ID!) {\n\t\tlibraryById(id: $id) {\n\t\t\tid\n\t\t\tname\n\t\t\tdescription\n\t\t\tpath\n\t\t\tstats {\n\t\t\t\tbookCount\n\t\t\t\tcompletedBooks\n\t\t\t\tinProgressBooks\n\t\t\t}\n\t\t\ttags {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t\t...LibrarySettingsConfig\n\t\t}\n\t}\n"): typeof import('./graphql').LibraryLayoutDocument;
+export function graphql(source: "\n\tquery LibraryLayout($id: ID!) {\n\t\tlibraryById(id: $id) {\n\t\t\tid\n\t\t\tname\n\t\t\tdescription\n\t\t\tpath\n\t\t\tstats {\n\t\t\t\tbookCount\n\t\t\t\tcompletedBooks\n\t\t\t\tinProgressBooks\n\t\t\t}\n\t\t\ttags {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t\t...LibrarySettingsConfig\n\t\t}\n\t}\n"): typeof import('./graphql').LibraryLayoutDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -470,6 +476,14 @@ export function graphql(source: "\n\tmutation CreateEmailerSceneCreateEmailer($i
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
+export function graphql(source: "\n\tquery EditEmailerScene($id: Int!) {\n\t\temailers {\n\t\t\tname\n\t\t}\n\t\temailerById(id: $id) {\n\t\t\tid\n\t\t\tname\n\t\t\tisPrimary\n\t\t\tsmtpHost\n\t\t\tsmtpPort\n\t\t\tlastUsedAt\n\t\t\tmaxAttachmentSizeBytes\n\t\t\tsenderDisplayName\n\t\t\tsenderEmail\n\t\t\ttlsEnabled\n\t\t\tusername\n\t\t}\n\t}\n"): typeof import('./graphql').EditEmailerSceneDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tmutation EditEmailerSceneEditEmailer($id: Int!, $input: EmailerInput!) {\n\t\tupdateEmailer(id: $id, input: $input) {\n\t\t\tid\n\t\t}\n\t}\n"): typeof import('./graphql').EditEmailerSceneEditEmailerDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
 export function graphql(source: "\n\tmutation CreateOrUpdateDeviceModalCreateEmailDevice($input: EmailDeviceInput!) {\n\t\tcreateEmailDevice(input: $input) {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t}\n"): typeof import('./graphql').CreateOrUpdateDeviceModalCreateEmailDeviceDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
@@ -487,6 +501,10 @@ export function graphql(source: "\n\tquery EmailDevicesTable {\n\t\temailDevices
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n\tfragment EmailerListItem on Emailer {\n\t\tid\n\t\tname\n\t\tisPrimary\n\t\tsmtpHost\n\t\tsmtpPort\n\t\tlastUsedAt\n\t\tmaxAttachmentSizeBytes\n\t\tsenderDisplayName\n\t\tsenderEmail\n\t\ttlsEnabled\n\t\tusername\n\t}\n"): typeof import('./graphql').EmailerListItemFragmentDoc;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tquery EmailerSendHistory($id: Int!, $fetchUser: Boolean!) {\n\t\temailerById(id: $id) {\n\t\t\tsendHistory {\n\t\t\t\tsentAt\n\t\t\t\trecipientEmail\n\t\t\t\tsentByUserId\n\t\t\t\tsentBy @include(if: $fetchUser) {\n\t\t\t\t\tid\n\t\t\t\t\tusername\n\t\t\t\t}\n\t\t\t\tattachmentMeta {\n\t\t\t\t\tfilename\n\t\t\t\t\tmediaId\n\t\t\t\t\tmedia {\n\t\t\t\t\t\tresolvedName\n\t\t\t\t\t}\n\t\t\t\t\tsize\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').EmailerSendHistoryDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

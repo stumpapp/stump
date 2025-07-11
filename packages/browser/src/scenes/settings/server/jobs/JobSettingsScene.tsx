@@ -8,7 +8,7 @@ import { SceneContainer } from '@/components/container'
 import ContentContainer from '@/components/container/ContentContainer.tsx'
 import { useAppContext } from '@/context'
 
-import DeleteJobHistoryConfirmation from './DeleteJObHistoryConfirmation.tsx'
+import DeleteJobHistoryConfirmation from './DeleteJobHistoryConfirmation.tsx'
 import JobScheduler from './JobScheduler.tsx'
 import JobTable from './JobTable.tsx'
 
@@ -38,7 +38,9 @@ export default function JobSettingsScene() {
 						</Text>
 					</div>
 
-					<JobScheduler />
+					<Suspense>
+						<JobScheduler />
+					</Suspense>
 				</div>
 
 				<div className="flex flex-col gap-4">

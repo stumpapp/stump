@@ -1,17 +1,43 @@
-import { useEmailerSendHistoryQuery } from '@stump/client'
+import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Drawer, Text, ToolTip } from '@stump/components'
+import { graphql, UserPermission } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import dayjs from 'dayjs'
 import localizedFormat from 'dayjs/plugin/localizedFormat'
 import relativeTime from 'dayjs/plugin/relativeTime'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import GenericEmptyState from '@/components/GenericEmptyState'
+import { useCheckPermission } from '@/context'
 
 import EmailerSendHistoryTable from './EmailerSendHistoryTable'
 
 dayjs.extend(localizedFormat)
 dayjs.extend(relativeTime)
+
+const query = graphql(`
+	query EmailerSendHistory($id: Int!, $fetchUser: Boolean!) {
+		emailerById(id: $id) {
+			sendHistory {
+				sentAt
+				recipientEmail
+				sentByUserId
+				sentBy @include(if: $fetchUser) {
+					id
+					username
+				}
+				attachmentMeta {
+					filename
+					mediaId
+					media {
+						resolvedName
+					}
+					size
+				}
+			}
+		}
+	}
+`)
 
 type Props = {
 	emailerId: number
@@ -20,11 +46,12 @@ type Props = {
 
 export default function EmailerSendHistory({ emailerId, lastUsedAt }: Props) {
 	const { t } = useLocaleContext()
-	const { sendHistory } = useEmailerSendHistoryQuery({
-		emailerId,
-		params: { include_sent_by: true },
-		suspense: true,
-	})
+	const { sdk } = useSDK()
+	const fetchUser = useCheckPermission(UserPermission.ReadUsers)
+	const {
+		data: { emailerById },
+	} = useSuspenseGraphQL(query, sdk.cacheKey('emailDevices', [emailerId, fetchUser]))
+	const sendHistory = useMemo(() => emailerById?.sendHistory ?? [], [emailerById])
 
 	const [drawerOpen, setDrawerOpen] = useState(false)
 

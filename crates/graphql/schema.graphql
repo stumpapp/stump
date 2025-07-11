@@ -64,7 +64,6 @@ type ArrangementSection {
 	visible: Boolean!
 }
 
-"The metadata of an attachment that was sent with an email"
 type AttachmentMeta {
 	"The filename of the attachment"
 	filename: String!
@@ -72,6 +71,7 @@ type AttachmentMeta {
 	mediaId: String
 	"The size of the attachment in bytes"
 	size: Int!
+	media: Media
 }
 
 type BookClub {
@@ -1447,7 +1447,7 @@ type Query {
 	bookClubs(all: Boolean = null): [BookClub!]!
 	bookClubById(id: ID!): BookClub
 	emailers: [Emailer!]!
-	emailerById(id: ID!): Emailer
+	emailerById(id: Int!): Emailer
 	emailDevices: [RegisteredEmailDevice!]!
 	emailDeviceById(id: Int!): RegisteredEmailDevice
 	listDirectory(pagination: Pagination!, input: DirectoryListingInput): PaginatedDirectoryListingResponse!

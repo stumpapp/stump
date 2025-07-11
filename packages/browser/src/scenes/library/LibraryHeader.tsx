@@ -1,4 +1,3 @@
-import { useSDK } from '@stump/client'
 import { AspectRatio, cn, Heading, Text } from '@stump/components'
 
 import { EntityImage } from '@/components/entity'
@@ -9,12 +8,11 @@ import { usePreferences } from '@/hooks'
 import { useLibraryContext } from './context'
 
 export default function LibraryHeader() {
-	const { sdk } = useSDK()
 	const {
 		preferences: { primaryNavigationMode, layoutMaxWidthPx, showThumbnailsInHeaders },
 	} = usePreferences()
 	const {
-		library: { id, name, description, stats, tags },
+		library: { name, description, stats, tags, thumbnail },
 	} = useLibraryContext()
 
 	const preferTopBar = primaryNavigationMode === 'TOPBAR'
@@ -58,7 +56,7 @@ export default function LibraryHeader() {
 				{showThumbnailsInHeaders && (
 					<div className="w-[200px]">
 						<AspectRatio ratio={2 / 3}>
-							<EntityImage src={sdk.library.thumbnailURL(id)} className="rounded-md object-cover" />
+							<EntityImage src={thumbnail.url} className="rounded-md object-cover" />
 						</AspectRatio>
 					</div>
 				)}

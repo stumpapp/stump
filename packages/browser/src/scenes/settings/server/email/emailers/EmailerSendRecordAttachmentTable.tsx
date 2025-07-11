@@ -1,5 +1,4 @@
 import { cn, Text } from '@stump/components'
-import { AttachmentMeta } from '@stump/sdk'
 import {
 	createColumnHelper,
 	flexRender,
@@ -14,8 +13,10 @@ import { getTableModels, SortIcon } from '@/components/table'
 import { usePreferences } from '@/hooks'
 import { formatBytes } from '@/utils/format'
 
+import { EmailerSendRecord } from './EmailerSendHistoryTable'
+
 type Props = {
-	attachments: AttachmentMeta[]
+	attachments: EmailerSendRecord['attachmentMeta']
 }
 export default function EmailerSendRecordAttachmentTable({ attachments }: Props) {
 	const {
@@ -105,8 +106,31 @@ export default function EmailerSendRecordAttachmentTable({ attachments }: Props)
 	)
 }
 
-const columnHelper = createColumnHelper<AttachmentMeta>()
+const columnHelper = createColumnHelper<EmailerSendRecord['attachmentMeta'][number]>()
 const columns = [
+	columnHelper.display({
+		id: 'media',
+		cell: ({ row }) => {
+			const {
+				original: { media },
+			} = row
+
+			if (!media) {
+				return <Text size="sm">Not Found</Text>
+			}
+
+			return (
+				<Text size="sm" className="cursor-pointer hover:underline">
+					{media.resolvedName}
+				</Text>
+			)
+		},
+		header: () => (
+			<Text size="sm" className="text-left" variant="muted">
+				Media
+			</Text>
+		),
+	}),
 	columnHelper.accessor('filename', {
 		cell: ({ getValue }) => <Text size="sm">{getValue()}</Text>,
 		header: () => (

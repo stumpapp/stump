@@ -2,14 +2,18 @@ use async_graphql::{ComplexObject, Context, Result, SimpleObject};
 
 use models::{
 	entity::{
-		emailer_send_record::{self, AttachmentMeta},
-		user,
+		emailer_send_record::{self, AttachmentMetaModel},
+		media, user,
 	},
 	shared::enums::UserPermission,
 };
 use sea_orm::prelude::*;
 
-use crate::{data::CoreContext, guard::PermissionGuard};
+use crate::{
+	data::{CoreContext, RequestContext},
+	guard::PermissionGuard,
+	object::media::Media,
+};
 
 use super::user::User;
 
@@ -43,11 +47,46 @@ impl EmailerSendRecord {
 		}
 	}
 
-	async fn attachment_meta(&self, _ctx: &Context<'_>) -> Result<Vec<AttachmentMeta>> {
+	async fn attachment_meta(&self) -> Result<Vec<AttachmentMeta>> {
 		match self.model.attachment_meta {
-			None => return Ok(vec![]),
-			Some(ref meta) => Ok(AttachmentMeta::try_from_data(meta)
-				.map_err(|_| "Failed to parse attachment meta")?),
+			None => Ok(vec![]),
+			Some(ref meta) => {
+				let models = AttachmentMetaModel::vec_from_data(meta.as_slice())
+					.map_err(|_| "Failed to parse attachment meta")?;
+				Ok(models.into_iter().map(AttachmentMeta::from).collect())
+			},
 		}
+	}
+}
+
+#[derive(Debug, SimpleObject)]
+#[graphql(complex)]
+pub struct AttachmentMeta {
+	#[graphql(flatten)]
+	pub model: emailer_send_record::AttachmentMetaModel,
+}
+
+impl From<emailer_send_record::AttachmentMetaModel> for AttachmentMeta {
+	fn from(entity: emailer_send_record::AttachmentMetaModel) -> Self {
+		Self { model: entity }
+	}
+}
+
+#[ComplexObject]
+impl AttachmentMeta {
+	async fn media(&self, ctx: &Context<'_>) -> Result<Option<Media>> {
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+
+		let Some(media_id) = &self.model.media_id else {
+			return Ok(None);
+		};
+
+		let model = media::ModelWithMetadata::find_by_id_for_user(media_id.clone(), user)
+			.into_model::<media::ModelWithMetadata>()
+			.one(conn)
+			.await?;
+
+		Ok(model.map(Media::from))
 	}
 }

@@ -1,15 +1,6 @@
-use std::{
-	pin::pin,
-	sync::{
-		atomic::{AtomicUsize, Ordering},
-		Arc,
-	},
-};
-
 use futures::{stream::FuturesUnordered, StreamExt};
 use serde::{Deserialize, Serialize};
 use specta::Type;
-use tokio::sync::Semaphore;
 use utoipa::ToSchema;
 
 use crate::{
@@ -21,10 +12,7 @@ use crate::{
 	prisma::{media, series},
 };
 
-use super::{
-	generate::{generate_book_thumbnail, GenerateThumbnailOptions},
-	ThumbnailGenerateError,
-};
+use super::generate::{generate_book_thumbnail, GenerateThumbnailOptions};
 
 // Note: I am type aliasing for the sake of clarity in what the provided Strings represent
 type Id = String;
@@ -241,64 +229,67 @@ pub async fn safely_generate_batch(
 	let mut logs = vec![];
 
 	let max_concurrency = options.core_config.max_thumbnail_concurrency;
-	let semaphore = Arc::new(Semaphore::new(max_concurrency));
-	tracing::debug!(
-		max_concurrency,
-		"Semaphore created for thumbnail generation"
-	);
+	let batch_size = max_concurrency;
+	let total_books = books.len();
+	tracing::debug!(batch_size, total_books, "Processing thumbnails in batches");
 
-	let futures = books
-		.iter()
-		.map(|book| {
-			let semaphore = semaphore.clone();
+	let mut processed_count = 0;
+
+	for chunk in books.chunks(batch_size) {
+		let mut chunk_futures = FuturesUnordered::new();
+
+		// Note: This originally spawned a bunch of futures all at once and then just
+		// kept them waiting until the semaphore was available. I've refactored this
+		// to use chunking as a potential solve for https://github.com/stumpapp/stump/issues/671.
+		// TODO: Port this to the develop branch and ask for feedback on whether it improves the situation.
+		// TODO: ^ Depending on outcome, definitely need to revisit ALL of the scanner logic since it also had that pattern
+		for book in chunk {
 			let options = options.clone();
 			let path = book.path.clone();
 
-			async move {
-				if semaphore.available_permits() == 0 {
-					tracing::trace!(?path, "Waiting for permit for thumbnail generation");
-				}
-				let _permit = semaphore.acquire().await.map_err(|e| {
-					(ThumbnailGenerateError::Unknown(e.to_string()), path.clone())
-				})?;
-				tracing::trace!(?path, "Acquired permit for thumbnail generation");
-				generate_book_thumbnail(book, options)
+			let future = async move {
+				tracing::trace!(?path, "Starting thumbnail generation");
+
+				let result = generate_book_thumbnail(book, options)
 					.await
-					.map_err(|e| (e, path))
-			}
-		})
-		.collect::<FuturesUnordered<_>>();
+					.map(|(_, path, did_generate)| (path, did_generate));
 
-	// An atomic usize to keep track of the current position in the stream
-	// to report progress to the UI
-	let atomic_cursor = Arc::new(AtomicUsize::new(1));
+				result.map_err(|e| (e, path))
+			};
 
-	let mut futures = pin!(futures);
-
-	while let Some(gen_output) = futures.next().await {
-		match gen_output {
-			Ok((_, _, did_generate)) => {
-				if did_generate {
-					output.generated_thumbnails += 1;
-				} else {
-					// If we didn't generate a thumbnail, and have a success result,
-					// then we skipped it
-					output.skipped_files += 1;
-				}
-			},
-			Err((error, path)) => {
-				logs.push(
-					JobExecuteLog::error(format!(
-						"Failed to generate thumbnail: {:?}",
-						error.to_string()
-					))
-					.with_ctx(format!("Media path: {path}")),
-				);
-			},
+			chunk_futures.push(future);
 		}
-		// We visit every file, regardless of success or failure
-		output.visited_files += 1;
-		reporter(atomic_cursor.fetch_add(1, Ordering::SeqCst));
+
+		while let Some(gen_output) = chunk_futures.next().await {
+			match gen_output {
+				Ok((_, did_generate)) => {
+					if did_generate {
+						output.generated_thumbnails += 1;
+					} else {
+						output.skipped_files += 1;
+					}
+				},
+				Err((error, path)) => {
+					logs.push(
+						JobExecuteLog::error(format!(
+							"Failed to generate thumbnail: {:?}",
+							error.to_string()
+						))
+						.with_ctx(format!("Media path: {path}")),
+					);
+				},
+			}
+
+			output.visited_files += 1;
+			processed_count += 1;
+			reporter(processed_count);
+		}
+
+		// TODO: Read up more on this, I added as an attempt to force garbage collection
+		// between batches to help with memory usage, but it may not be necessary.
+		if processed_count < total_books {
+			tokio::task::yield_now().await;
+		}
 	}
 
 	JobTaskOutput {

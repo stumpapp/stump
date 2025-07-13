@@ -1,7 +1,8 @@
-import { queryClient, useGraphQLMutation } from '@stump/client'
+import { useGraphQLMutation, useSDK } from '@stump/client'
 import { DropdownMenu } from '@stump/components'
-import { graphql, LibrarySideBarSectionQuery } from '@stump/graphql'
+import { graphql, LibrarySideBarSectionQuery, UserPermission } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
+import { useQueryClient } from '@tanstack/react-query'
 import { FolderSearch2, MoreHorizontal, ScanLine, Settings, Trash } from 'lucide-react'
 import { useCallback, useMemo, useState } from 'react'
 import { useLocation } from 'react-router'
@@ -25,29 +26,39 @@ const LOCALE_KEY = 'sidebar.libraryOptions'
 const getLocaleKey = (path: string) => `${LOCALE_KEY}.${path}`
 
 export default function LibraryOptionsMenu({ library }: Props) {
+	const client = useQueryClient()
 	const [isDeleting, setIsDeleting] = useState(false)
 
 	const { t } = useLocaleContext()
 	const { checkPermission } = useAppContext()
-	const { mutate: startScan } = useGraphQLMutation(mutation)
+	const { sdk } = useSDK()
+	const { mutate: startScan } = useGraphQLMutation(mutation, {
+		onSuccess: () => {
+			client.refetchQueries({
+				predicate: ({ queryKey: [baseKey] }) => baseKey === sdk.cacheKeys.jobs,
+			})
+		},
+	})
 
 	const isMobile = useMediaMatch('(max-width: 768px)')
 
 	const location = useLocation()
 	const isOnExplorer = location.pathname.startsWith(paths.libraryFileExplorer(library.id))
 
-	const canScan = useMemo(() => checkPermission('library:scan'), [checkPermission])
-	const canManage = useMemo(() => checkPermission('library:manage'), [checkPermission])
-	const canDelete = useMemo(() => checkPermission('library:delete'), [checkPermission])
-	const canUseExplorer = useMemo(() => checkPermission('file:explorer'), [checkPermission])
+	const canScan = useMemo(() => checkPermission(UserPermission.ScanLibrary), [checkPermission])
+	const canManage = useMemo(() => checkPermission(UserPermission.ManageLibrary), [checkPermission])
+	const canDelete = useMemo(() => checkPermission(UserPermission.DeleteLibrary), [checkPermission])
+	const canUseExplorer = useMemo(
+		() => checkPermission(UserPermission.FileExplorer),
+		[checkPermission],
+	)
 
-	const handleScan = useCallback(async () => {
+	const handleScan = useCallback(() => {
 		// extra protection, should not be possible to reach this.
 		if (!canScan) {
 			throw new Error('You do not have permission to scan libraries.')
 		}
-		await startScan({ id: library.id })
-		await queryClient.invalidateQueries({ queryKey: ['getJobReports'], exact: false })
+		startScan({ id: library.id })
 	}, [canScan, library.id, startScan])
 
 	const iconStyle = 'mr-2 h-4 w-4'

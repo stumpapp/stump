@@ -46,14 +46,14 @@ export function useCoreEventHandler({ liveRefetch, onConnectionWithServerChanged
 
 				switch (__typename) {
 					case 'JobStarted':
-						await handleInvalidate([sdk.job.keys.get])
+						await handleInvalidate([sdk.cacheKeys.jobs])
 						addJob(event.id)
 						break
 					case 'JobUpdate':
 						if (!!event.status && event.status !== 'RUNNING') {
 							await new Promise((resolve) => setTimeout(resolve, 1000))
 							removeJob(event.id)
-							await handleInvalidate([sdk.job.keys.get])
+							await handleInvalidate([sdk.cacheKeys.jobs])
 						} else {
 							upsertJob(event)
 						}
@@ -66,7 +66,7 @@ export function useCoreEventHandler({ liveRefetch, onConnectionWithServerChanged
 						break
 					case 'CreatedManySeries':
 						if (liveRefetch) {
-							await handleInvalidate([sdk.library.keys.getStats, 'series', 'media'])
+							await handleInvalidate([sdk.cacheKeys.getStats, 'series', 'media'])
 						}
 						break
 					case 'CreatedOrUpdatedManyMedia':
@@ -74,8 +74,8 @@ export function useCoreEventHandler({ liveRefetch, onConnectionWithServerChanged
 							await handleInvalidate([
 								'series',
 								'media',
-								sdk.library.keys.getStats,
-								sdk.library.keys.getByID,
+								sdk.cacheKeys.getStats,
+								sdk.cacheKeys.libraryById,
 							])
 						}
 						break

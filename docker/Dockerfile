@@ -2,7 +2,7 @@
 # PDFium Stage
 # ------------------------------------------------------------------------------
 
-FROM debian:buster-slim AS pdfium
+FROM debian:bookworm-slim AS pdfium
 
 # Update and install curl and tar
 RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/apt \
@@ -95,7 +95,6 @@ RUN --mount=type=cache,target=/usr/local/cargo/registry,id=${TARGETARCH} \
 # Final Stage
 # ------------------------------------------------------------------------------
 
-# FROM debian:buster-slim
 FROM gcr.io/distroless/cc-debian12:debug
 
 RUN [ "/busybox/ln", "-s", "/busybox/sh", "/bin/sh" ]

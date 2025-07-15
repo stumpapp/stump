@@ -1,7 +1,10 @@
 use async_graphql::Enum;
+use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString};
 
-#[derive(PartialEq, Eq, Clone, Copy, Enum, EnumString, Display)]
+#[derive(
+	Debug, PartialEq, Eq, Clone, Copy, Enum, EnumString, Display, Serialize, Deserialize,
+)]
 pub enum OrderDirection {
 	Asc,
 	Desc,

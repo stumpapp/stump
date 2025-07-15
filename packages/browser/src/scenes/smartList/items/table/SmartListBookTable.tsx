@@ -1,5 +1,5 @@
 import { cn } from '@stump/components'
-import { Media } from '@stump/sdk'
+import { Media } from '@stump/graphql'
 import {
 	flexRender,
 	getCoreRowModel,
@@ -31,7 +31,7 @@ export default function SmartListBookTable({ books, isIsolatedTable = true }: Pr
 	} = usePreferences()
 	const { workingView, updateWorkingView } = useSmartListContext()
 	const {
-		workingView: { search, enable_multi_sort },
+		workingView: { search, enableMultiSort },
 	} = useSafeWorkingView()
 
 	/**
@@ -39,14 +39,14 @@ export default function SmartListBookTable({ books, isIsolatedTable = true }: Pr
 	 */
 	const columns = useMemo(
 		() =>
-			workingView?.book_columns?.length ? buildColumns(workingView.book_columns) : defaultColumns,
+			workingView?.bookColumns?.length ? buildColumns(workingView.bookColumns) : defaultColumns,
 		[workingView],
 	)
 
 	/**
 	 * The current sorting state as it is stored in the working view
 	 */
-	const sorting = useMemo(() => workingView?.book_sorting ?? [], [workingView])
+	const sorting = useMemo(() => workingView?.bookSorting ?? [], [workingView])
 	/**
 	 * A callback to update the sorting state of the table. This updates the current working view
 	 */
@@ -55,11 +55,11 @@ export default function SmartListBookTable({ books, isIsolatedTable = true }: Pr
 			if (typeof updaterOrValue === 'function') {
 				const updated = updaterOrValue(sorting)
 				updateWorkingView({
-					book_sorting: updated.length ? updated : undefined,
+					bookSorting: updated.length ? updated : undefined,
 				})
 			} else {
 				updateWorkingView({
-					book_sorting: updaterOrValue.length ? updaterOrValue : undefined,
+					bookSorting: updaterOrValue.length ? updaterOrValue : undefined,
 				})
 			}
 		},
@@ -70,7 +70,7 @@ export default function SmartListBookTable({ books, isIsolatedTable = true }: Pr
 		columns,
 		data: books,
 		// FIXME: multi-sort not working when set
-		enableMultiSort: enable_multi_sort ?? false,
+		enableMultiSort: enableMultiSort ?? false,
 		getCoreRowModel: getCoreRowModel(),
 		getFilteredRowModel: getFilteredRowModel(),
 		getSortedRowModel: getSortedRowModel(),

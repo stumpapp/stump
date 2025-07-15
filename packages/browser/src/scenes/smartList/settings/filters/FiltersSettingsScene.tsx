@@ -7,8 +7,8 @@ import { useForm, useWatch } from 'react-hook-form'
 
 import {
 	createSchema,
-	intoAPI,
 	intoForm,
+	intoAPI,
 	SmartListFormSchema,
 } from '@/components/smartList/createOrUpdate'
 import { SmartListQueryBuilder } from '@/components/smartList/createOrUpdate/queryBuilder'

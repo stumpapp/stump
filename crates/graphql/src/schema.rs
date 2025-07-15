@@ -9,6 +9,7 @@ use crate::{
 	subscription::Subscription,
 };
 use async_graphql::{dataloader::DataLoader, ObjectType, Schema, SchemaBuilder};
+use models::shared::enums::AccessRole;
 use sea_orm::DatabaseConnection;
 use std::sync::Arc;
 
@@ -21,6 +22,8 @@ pub async fn build_schema(ctx: CoreContext) -> AppSchema {
 		Mutation::default(),
 		Subscription::default(),
 	)
+	// AccessRole is used in a serialized json for SmartList so we need to register it manually
+	.register_output_type::<AccessRole>()
 	.data(ctx);
 
 	add_data_loaders(schema_builder, conn).finish()
@@ -56,5 +59,7 @@ pub fn build_schema_bare() -> AppSchema {
 		Mutation::default(),
 		Subscription::default(),
 	)
+	// AccessRole is used in a serialized json for SmartList so we need to register it manually
+	.register_output_type::<AccessRole>()
 	.finish()
 }

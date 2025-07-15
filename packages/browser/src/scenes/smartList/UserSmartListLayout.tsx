@@ -1,11 +1,6 @@
-import {
-	useSmartListViewsManager,
-	useSmartListWithMetaQuery,
-	useUpdateSmartList,
-} from '@stump/client'
 import { cn } from '@stump/components'
+import { AccessRole, SaveSmartListView } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
-import { AccessRole, SmartList, SmartListView } from '@stump/sdk'
 import { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
 import toast from 'react-hot-toast'
 import { Outlet, useLocation, useParams } from 'react-router'
@@ -19,6 +14,12 @@ import { usePreferences } from '@/hooks/usePreferences'
 import { defaultWorkingView, SmartListContext, WorkingView } from './context'
 import { createRouteGroups } from './settings/routes'
 import SmartListSettingsSideBar from './settings/SmartListSettingsSideBar'
+import {
+	useSmartListById,
+	useSmartListMeta,
+	useSmartListView,
+	useUpdateSmartList,
+} from './smartListGraphQL'
 import UserSmartListHeader from './UserSmartListHeader'
 import UserSmartListNavigation from './UserSmartListNavigation'
 
@@ -33,8 +34,13 @@ export default function UserSmartListLayout() {
 
 	// TODO: I don't think I need both TBH, esp with how many more features I can add to the table...
 	const [layout, setLayout] = useState<'table' | 'list'>(() => getDefaultLayout())
-	const [selectedView, setSelectedView] = useState<SmartListView>()
 	const [workingView, setWorkingView] = useState<WorkingView>()
+	const {
+		view: selectedView,
+		setView: setSelectedViewCallback,
+		create: createView,
+		update: updateView,
+	} = useSmartListView({ id })
 
 	const {
 		preferences: {
@@ -66,26 +72,22 @@ export default function UserSmartListLayout() {
 		throw new Error(t(withLocaleKey('missingIdError')))
 	}
 
-	const {
-		list,
-		meta,
-		listQuery: { isLoading: isLoadingList },
-	} = useSmartListWithMetaQuery({
+	const { list: list, isLoading: isLoadingList } = useSmartListById({ id })
+	const { meta: meta, isLoading: isLoadingMeta } = useSmartListMeta({ id })
+
+	const { update: updateSmartList } = useUpdateSmartList({
 		id,
-		params: {
-			load_views: true,
-		},
+		list,
 	})
-	const { updateAsync } = useUpdateSmartList({ id })
-	const { createView, updateView } = useSmartListViewsManager({ listId: id })
+
 	const { user } = useAppContext()
 
 	/**
 	 * Whether or not the current user is the creator of the smart list
 	 */
 	const isCreator = useMemo(
-		() => !!list?.creator_id && list?.creator_id === user.id,
-		[user.id, list?.creator_id],
+		() => !!list?.creatorId && list?.creatorId === user.id,
+		[user.id, list?.creatorId],
 	)
 
 	/**
@@ -95,17 +97,8 @@ export default function UserSmartListLayout() {
 	 * TODO: Support actual roles from the backend, i.e. Writer, CoCreator, Creator, Reader
 	 */
 	const viewerRole = useMemo<AccessRole>(
-		() => (isCreator || user.isServerOwner ? 'CoCreator' : 'Reader'),
+		() => (isCreator || user.isServerOwner ? AccessRole.CoCreator : AccessRole.Reader),
 		[isCreator, user.isServerOwner],
-	)
-
-	const patchSmartList = useCallback(
-		async (updates: Partial<SmartList>) => {
-			if (list) {
-				await updateAsync({ ...list, ...updates })
-			}
-		},
-		[list, updateAsync],
 	)
 
 	/**
@@ -139,11 +132,13 @@ export default function UserSmartListLayout() {
 			}
 
 			try {
-				const createdView = await createView({
-					name,
-					...workingView,
+				createView({
+					input: {
+						listId: list?.id,
+						name,
+						...workingView,
+					} as SaveSmartListView,
 				})
-				setSelectedView(createdView)
 			} catch (error) {
 				console.error(error)
 				const prefix = t(withLocaleKey('viewCreateError'))
@@ -167,13 +162,14 @@ export default function UserSmartListLayout() {
 			}
 
 			try {
-				const updatedView = await updateView({
+				updateView({
 					originalName: selectedView.name,
-					...selectedView,
-					...workingView,
-					...(newName ? { name: newName } : {}),
+					input: {
+						...selectedView,
+						...workingView,
+						...(newName ? { name: newName } : {}),
+					} as SaveSmartListView,
 				})
-				setSelectedView(updatedView)
 			} catch (error) {
 				console.error(error)
 				const prefix = t(withLocaleKey('viewSaveError'))
@@ -200,12 +196,12 @@ export default function UserSmartListLayout() {
 			</>
 		)
 
-	if (isLoadingList) {
+	if (isLoadingList || isLoadingMeta) {
 		return null
 	}
 
 	// TODO: redirect for these?
-	if (!list) {
+	if (!list || !meta) {
 		throw new Error(t(withLocaleKey('smartListNotFound')))
 	}
 
@@ -215,10 +211,10 @@ export default function UserSmartListLayout() {
 				layout,
 				list,
 				meta,
-				patchSmartList,
+				patchSmartList: updateSmartList,
 				saveSelectedStoredView,
 				saveWorkingView,
-				selectStoredView: setSelectedView,
+				selectStoredView: setSelectedViewCallback,
 				selectedView,
 				setLayout,
 				updateWorkingView,

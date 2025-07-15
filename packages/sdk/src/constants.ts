@@ -31,4 +31,12 @@ export const cacheKeys = {
 	scheduler: 'jobScheduler',
 	users: 'users',
 	user: 'user',
+	smartLists: 'smartLists',
+	smartListDelete: 'smartListDelete',
+	smartListById: 'smartListById',
+	smartListMeta: 'smartListMeta',
+	smartListUpdate: 'smartListUpdate',
+	smartListViewCreate: 'smartListCreate',
+	smartListViewUpdate: 'smartListUpdate',
+	smartListItems: 'smartListItems',
 } as const

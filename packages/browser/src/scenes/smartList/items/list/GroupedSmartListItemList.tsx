@@ -1,5 +1,5 @@
 import { Accordion, cn, Text } from '@stump/components'
-import { Library, Series, SmartListItemGroup } from '@stump/sdk'
+import { SmartListGroupedItem, SmartListItemEntity } from '@stump/graphql'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import pluralize from 'pluralize'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -22,7 +22,7 @@ type AccordionState = {
 }
 
 type Props = {
-	items: SmartListItemGroup<Series>[] | SmartListItemGroup<Library>[]
+	items: SmartListGroupedItem[]
 }
 export default function GroupedSmartListItemList({ items }: Props) {
 	const {
@@ -93,7 +93,7 @@ export default function GroupedSmartListItemList({ items }: Props) {
 		overscan: 5,
 	})
 
-	const groupHeader = (groupedEntity: Series | Library) => groupedEntity.name
+	const groupHeader = (groupedEntity: SmartListItemEntity) => groupedEntity.name
 
 	useEffect(() => groupVirtualizer.measure(), [groupVirtualizer, accordionState])
 

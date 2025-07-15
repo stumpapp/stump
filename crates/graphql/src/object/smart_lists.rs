@@ -31,6 +31,9 @@ impl SmartList {
 		let views = smart_list_view::Entity::find_by_list_id(&self.model.id)
 			.all(conn)
 			.await?;
-		Ok(views.into_iter().map(SmartListView::from).collect())
+		views
+			.into_iter()
+			.map(SmartListView::try_from)
+			.collect::<Result<Vec<_>, _>>()
 	}
 }

@@ -41,39 +41,55 @@ fn apply_reading_status_filter(
 // TODO: Support filter by tags (requires join logic)
 
 #[derive(InputObject, Clone, Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
 pub struct MediaFilterInput {
 	#[graphql(default)]
+	#[serde(skip_serializing_if = "Option::is_none")]
 	pub name: Option<StringLikeFilter<String>>,
 	#[graphql(default)]
+	#[serde(skip_serializing_if = "Option::is_none")]
 	pub size: Option<NumericFilter<i64>>,
 	#[graphql(default)]
+	#[serde(skip_serializing_if = "Option::is_none")]
 	pub extension: Option<StringLikeFilter<String>>,
 	#[graphql(default)]
+	#[serde(skip_serializing_if = "Option::is_none")]
 	pub created_at: Option<NumericFilter<DateTimeWithTimeZone>>,
 	#[graphql(default)]
+	#[serde(skip_serializing_if = "Option::is_none")]
 	pub updated_at: Option<NumericFilter<DateTimeWithTimeZone>>,
 	#[graphql(default)]
+	#[serde(skip_serializing_if = "Option::is_none")]
 	pub series_id: Option<StringLikeFilter<String>>,
 	#[graphql(default)]
+	#[serde(skip_serializing_if = "Option::is_none")]
 	pub status: Option<StringLikeFilter<FileStatus>>,
 	#[graphql(default)]
+	#[serde(skip_serializing_if = "Option::is_none")]
 	pub path: Option<StringLikeFilter<String>>,
 	#[graphql(default)]
+	#[serde(skip_serializing_if = "Option::is_none")]
 	pub pages: Option<NumericFilter<i32>>,
 
 	#[graphql(default)]
+	#[serde(skip_serializing_if = "Option::is_none")]
 	pub reading_status: Option<ConceptualFilter<ReadingStatus>>,
 
 	#[graphql(default)]
+	#[serde(skip_serializing_if = "Option::is_none")]
 	pub metadata: Option<MediaMetadataFilterInput>,
 	#[graphql(default)]
+	#[serde(skip_serializing_if = "Option::is_none")]
 	pub series: Option<SeriesFilterInput>,
 
 	#[graphql(name = "_and", default)]
+	#[serde(skip_serializing_if = "Option::is_none")]
 	pub _and: Option<Vec<MediaFilterInput>>,
 	#[graphql(name = "_not", default)]
+	#[serde(skip_serializing_if = "Option::is_none")]
 	pub _not: Option<Vec<MediaFilterInput>>,
 	#[graphql(name = "_or", default)]
+	#[serde(skip_serializing_if = "Option::is_none")]
 	pub _or: Option<Vec<MediaFilterInput>>,
 }
 

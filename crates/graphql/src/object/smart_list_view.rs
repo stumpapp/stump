@@ -1,23 +1,24 @@
-use async_graphql::{ComplexObject, Result, SimpleObject};
+use async_graphql::{Result, SimpleObject};
 use models::entity::smart_list_view;
 
+use crate::input::smart_list_view::SmartListViewConfig;
+
 #[derive(Debug, SimpleObject)]
-#[graphql(complex)]
 pub struct SmartListView {
 	#[graphql(flatten)]
 	pub model: smart_list_view::Model,
+
+	#[graphql(flatten)]
+	pub config: SmartListViewConfig,
 }
 
-impl From<smart_list_view::Model> for SmartListView {
-	fn from(entity: smart_list_view::Model) -> Self {
-		Self { model: entity }
-	}
-}
-
-#[ComplexObject]
 impl SmartListView {
-	async fn config(&self) -> Result<String> {
-		//TODO(graphql): Implement deserialization of config
-		unimplemented!("Config serialization is not implemented yet");
+	pub fn try_from(entity: smart_list_view::Model) -> Result<Self> {
+		let config = serde_json::from_slice(&entity.data)?;
+
+		Ok(Self {
+			model: entity,
+			config,
+		})
 	}
 }

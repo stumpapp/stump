@@ -10,24 +10,33 @@ use super::{
 // TODO: Support filter by tags (requires join logic)
 
 #[derive(InputObject, Clone, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct SeriesFilterInput {
 	#[graphql(default)]
+	#[serde(skip_serializing_if = "Option::is_none")]
 	pub name: Option<StringLikeFilter<String>>,
 	#[graphql(default)]
+	#[serde(skip_serializing_if = "Option::is_none")]
 	pub path: Option<StringLikeFilter<String>>,
 	#[graphql(default)]
+	#[serde(skip_serializing_if = "Option::is_none")]
 	pub library_id: Option<StringLikeFilter<String>>,
 
 	#[graphql(default)]
+	#[serde(skip_serializing_if = "Option::is_none")]
 	pub metadata: Option<SeriesMetadataFilterInput>,
 	#[graphql(default)]
+	#[serde(skip_serializing_if = "Option::is_none")]
 	pub library: Option<LibraryFilterInput>,
 
 	#[graphql(name = "_and", default)]
+	#[serde(skip_serializing_if = "Option::is_none")]
 	pub _and: Option<Vec<SeriesFilterInput>>,
 	#[graphql(name = "_not", default)]
+	#[serde(skip_serializing_if = "Option::is_none")]
 	pub _not: Option<Vec<SeriesFilterInput>>,
 	#[graphql(name = "_or", default)]
+	#[serde(skip_serializing_if = "Option::is_none")]
 	pub _or: Option<Vec<SeriesFilterInput>>,
 }
 

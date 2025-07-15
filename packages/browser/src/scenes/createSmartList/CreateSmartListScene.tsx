@@ -1,5 +1,6 @@
-import { useCreateSmartList } from '@stump/client'
+import { useGraphQLMutation } from '@stump/client'
 import { Alert } from '@stump/components'
+import { graphql } from '@stump/graphql'
 import { handleApiError } from '@stump/sdk'
 import { Suspense, useCallback, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
@@ -12,12 +13,25 @@ import paths from '@/paths'
 import { intoAPI, SmartListFormSchema } from '../../components/smartList/createOrUpdate/schema'
 import CreateSmartListForm from './CreateSmartListForm'
 
+const mutation = graphql(`
+	mutation CreateSmartListScene($input: SaveSmartListInput!) {
+		createSmartList(input: $input) {
+			id
+			name
+		}
+	}
+`)
+
 export default function CreateSmartListScene() {
 	const navigate = useNavigate()
 
-	const { create, isCreating, error } = useCreateSmartList({
-		onSuccess: ({ id }) => {
-			navigate(paths.smartList(id))
+	const {
+		mutate: mutate,
+		isPending: isCreating,
+		error: error,
+	} = useGraphQLMutation(mutation, {
+		onSuccess: (data) => {
+			navigate(paths.smartList(data.createSmartList.id))
 		},
 	})
 	const createError = useMemo(() => (error ? handleApiError(error) : undefined), [error])
@@ -31,9 +45,9 @@ export default function CreateSmartListScene() {
 	const handleSubmit = useCallback(
 		(values: SmartListFormSchema) => {
 			const payload = intoAPI(values)
-			create(payload)
+			mutate({ input: payload })
 		},
-		[create],
+		[mutate],
 	)
 
 	return (

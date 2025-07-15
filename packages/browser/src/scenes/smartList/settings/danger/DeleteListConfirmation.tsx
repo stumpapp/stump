@@ -1,7 +1,9 @@
-import { useDeleteSmartList } from '@stump/client'
+import { useGraphQLMutation, useSDK } from '@stump/client'
 import { Alert, ConfirmationModal } from '@stump/components'
+import { graphql } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { handleApiError } from '@stump/sdk'
+import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useState } from 'react'
 import { useNavigate } from 'react-router'
 
@@ -14,13 +16,29 @@ type Props = {
 	trigger?: React.ReactNode
 }
 
+const mutation = graphql(`
+	mutation DeleteSmartList($id: ID!) {
+		deleteSmartList(id: $id) {
+			__typename
+		}
+	}
+`)
+
 export default function DeleteListConfirmation({ isOpen, id, onClose, trigger }: Props) {
 	const navigate = useNavigate()
+	const client = useQueryClient()
+	const { sdk } = useSDK()
 
 	const { t } = useLocaleContext()
-	const { deleteAsync: deleteList, isDeleting } = useDeleteSmartList({
-		onSuccess: () => {
-			navigate(paths.smartLists())
+	const { mutate, isPending: isDeleting } = useGraphQLMutation(mutation, {
+		mutationKey: [sdk.cacheKeys.smartListDelete, id],
+		onSettled: (_, error) => {
+			if (error) {
+				setErrorMessage(handleApiError(error))
+			} else {
+				client.invalidateQueries({ queryKey: [sdk.cacheKeys.smartLists], exact: false })
+				navigate(paths.smartLists())
+			}
 		},
 	})
 
@@ -29,11 +47,11 @@ export default function DeleteListConfirmation({ isOpen, id, onClose, trigger }:
 	const handleDelete = useCallback(async () => {
 		try {
 			setErrorMessage(null)
-			await deleteList(id)
+			mutate({ id })
 		} catch (err) {
 			setErrorMessage(handleApiError(err))
 		}
-	}, [deleteList, id])
+	}, [mutate, id])
 
 	return (
 		<ConfirmationModal

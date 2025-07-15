@@ -1,29 +1,30 @@
 import {
 	AccessRole,
+	SaveSmartListInput,
 	SmartList,
-	SmartListItemGrouping,
+	SmartListGrouping,
 	SmartListMeta,
 	SmartListView,
-} from '@stump/sdk'
+} from '@stump/graphql'
 import { createContext, useContext } from 'react'
 
 import { buildColumns as buildGroupColumns } from './items/table/groupColumns'
 import { defaultColumns } from './items/table/mediaColumns'
 
-export type WorkingView = Omit<SmartListView, 'name' | 'list_id'>
+export type WorkingView = Omit<SmartListView, 'id' | 'name' | 'listId'>
 export const defaultWorkingView: WorkingView = {
-	book_columns: defaultColumns.map(({ id }, position) => ({ id: id || '', position })),
-	book_sorting: null,
-	group_columns: [],
-	group_sorting: null,
+	bookColumns: defaultColumns.map(({ id }, position) => ({ id: id || '', position })),
+	bookSorting: [],
+	groupColumns: [],
+	groupSorting: [],
 }
-const buildDefaultWorkingView = (grouping?: SmartListItemGrouping): WorkingView => {
+const buildDefaultWorkingView = (grouping?: SmartListGrouping): WorkingView => {
 	if (!grouping || grouping === 'BY_BOOKS') {
 		return defaultWorkingView
 	} else {
 		return {
 			...defaultWorkingView,
-			group_columns: buildGroupColumns(grouping === 'BY_SERIES', []).map(({ id }, position) => ({
+			groupColumns: buildGroupColumns(grouping === 'BY_SERIES', []).map(({ id }, position) => ({
 				id: id || '',
 				position,
 			})),
@@ -43,7 +44,7 @@ export type ISmartListContext = {
 	selectStoredView: (view?: SmartListView) => void
 	saveSelectedStoredView: (newName?: string) => Promise<void>
 
-	patchSmartList: (updates: Partial<SmartList>) => Promise<void>
+	patchSmartList: (updates: Partial<SaveSmartListInput>) => Promise<void>
 
 	layout: 'table' | 'list'
 	setLayout: (layout: 'table' | 'list') => void
@@ -68,7 +69,7 @@ export const useSafeWorkingView = () => {
 		workingView,
 		saveWorkingView,
 		updateWorkingView,
-		list: { default_grouping },
+		list: { defaultGrouping },
 	} = useSmartListContext()
 
 	const workingViewIsDefined = !!workingView
@@ -76,7 +77,7 @@ export const useSafeWorkingView = () => {
 	return {
 		saveWorkingView,
 		updateWorkingView,
-		workingView: workingView || buildDefaultWorkingView(default_grouping),
+		workingView: workingView || buildDefaultWorkingView(defaultGrouping),
 		workingViewIsDefined,
 	}
 }

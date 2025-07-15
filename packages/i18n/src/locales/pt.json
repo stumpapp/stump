@@ -71,12 +71,12 @@
 	"createOrUpdateBookClubForm": {
 		"fields": {
 			"name": {
-				"label": "Name",
+				"label": "Nome",
 				"placeholder": "My book club",
 				"description": "The name of your book club"
 			},
 			"description": {
-				"label": "Description",
+				"label": "Descrição",
 				"placeholder": "An 'Our Flag Means Death' fan club. We read pirate fiction to our hearts content",
 				"description": "An optional, short description of your book club"
 			},

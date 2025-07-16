@@ -2955,6 +2955,16 @@ export type LibrarySideBarSectionQueryVariables = Exact<{ [key: string]: never; 
 
 export type LibrarySideBarSectionQuery = { __typename?: 'Query', libraries: { __typename?: 'PaginatedLibraryResponse', nodes: Array<{ __typename?: 'Library', id: string, name: string, emoji?: string | null }> } };
 
+export type TopNavigationQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type TopNavigationQuery = { __typename?: 'Query', me: { __typename?: 'User', id: string, preferences: { __typename?: 'UserPreferences', navigationArrangement: { __typename?: 'Arrangement', locked: boolean, sections: Array<{ __typename?: 'ArrangementSection', visible: boolean, config: { __typename: 'CustomArrangementConfig' } | { __typename: 'InProgressBooks' } | { __typename: 'RecentlyAdded' } | { __typename: 'SystemArrangmentConfig', variant: SystemArrangment, links: Array<FilterableArrangementEntityLink> } }> } } } };
+
+export type LibraryNavigationItemQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type LibraryNavigationItemQuery = { __typename?: 'Query', libraries: { __typename?: 'PaginatedLibraryResponse', nodes: Array<{ __typename?: 'Library', id: string, name: string, emoji?: string | null }> } };
+
 export type EpubJsReaderQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
@@ -3816,6 +3826,39 @@ export const LibrarySideBarSectionDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<LibrarySideBarSectionQuery, LibrarySideBarSectionQueryVariables>;
+export const TopNavigationDocument = new TypedDocumentString(`
+    query TopNavigation {
+  me {
+    id
+    preferences {
+      navigationArrangement {
+        locked
+        sections {
+          config {
+            __typename
+            ... on SystemArrangmentConfig {
+              variant
+              links
+            }
+          }
+          visible
+        }
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<TopNavigationQuery, TopNavigationQueryVariables>;
+export const LibraryNavigationItemDocument = new TypedDocumentString(`
+    query LibraryNavigationItem {
+  libraries(pagination: {none: {unpaginated: true}}) {
+    nodes {
+      id
+      name
+      emoji
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<LibraryNavigationItemQuery, LibraryNavigationItemQueryVariables>;
 export const EpubJsReaderDocument = new TypedDocumentString(`
     query EpubJsReader($id: ID!) {
   epubById(id: $id) {

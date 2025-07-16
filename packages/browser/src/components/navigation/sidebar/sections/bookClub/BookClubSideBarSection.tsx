@@ -1,5 +1,6 @@
 import { useBookClubsQuery } from '@stump/client'
 import { Accordion, Text } from '@stump/components'
+import { UserPermission } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { Club } from 'lucide-react'
 import { useLocation } from 'react-router'
@@ -67,7 +68,7 @@ export default function BookClubSideBarSection({
 		})
 	}
 
-	const canCreateBookClub = checkPermission('bookclub:create')
+	const canCreateBookClub = checkPermission(UserPermission.CreateBookClub)
 	const showCreateLink = canCreateBookClub && showCreate
 
 	return (

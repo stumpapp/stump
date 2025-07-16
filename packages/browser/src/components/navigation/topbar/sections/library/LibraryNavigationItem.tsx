@@ -1,5 +1,6 @@
-import { useLibraries } from '@stump/client'
+import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { cn, cx, Label, NavigationMenu, ScrollArea, Text } from '@stump/components'
+import { FilterableArrangementEntityLink, graphql, UserPermission } from '@stump/graphql'
 import { CircleSlash2, Library, LibrarySquare } from 'lucide-react'
 import { useMemo } from 'react'
 import { useLocation } from 'react-router-dom'
@@ -12,21 +13,44 @@ import paths from '@/paths'
 
 import TopBarLinkListItem from '../../TopBarLinkListItem'
 
-type Props = EntityOptionProps
+const query = graphql(`
+	query LibraryNavigationItem {
+		libraries(pagination: { none: { unpaginated: true } }) {
+			nodes {
+				id
+				name
+				emoji
+			}
+		}
+	}
+`)
+
+type Props = {
+	isMobile?: boolean
+} & EntityOptionProps
 
 export default function LibraryNavigationItem({
-	showCreate = true,
-	showLinkToAll = false,
+	isMobile,
+	links = [FilterableArrangementEntityLink.Create],
 	width,
 }: Props) {
-	const { libraries } = useLibraries()
+	const { sdk } = useSDK()
+	const {
+		data: {
+			libraries: { nodes: libraries },
+		},
+	} = useSuspenseGraphQL(query, sdk.cacheKey('libraries'))
 
 	const location = useLocation()
 
 	const { checkPermission } = useAppContext()
 
-	const canCreateLibrary = useMemo(() => checkPermission('library:create'), [checkPermission])
-	const showCreateLink = canCreateLibrary && showCreate
+	const canCreateLibrary = useMemo(
+		() => checkPermission(UserPermission.CreateLibrary),
+		[checkPermission],
+	)
+	const showCreateLink = canCreateLibrary && links.includes(FilterableArrangementEntityLink.Create)
+	const showLinkToAll = links.includes(FilterableArrangementEntityLink.ShowAll)
 
 	const renderLibraries = () => {
 		if (!libraries?.length) {

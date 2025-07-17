@@ -11,6 +11,7 @@ pub mod pagination;
 pub mod query;
 pub mod schema;
 pub mod subscription;
+pub(crate) mod utils;
 
 #[cfg(test)]
 mod tests;

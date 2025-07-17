@@ -6,6 +6,7 @@ use crate::{
 		AgeRestrictionInput, CreateUserInput, UpdateUserInput, UpdateUserPreferencesInput,
 	},
 	object::{user::User, user_preferences::UserPreferences},
+	utils::save_user_session,
 };
 use async_graphql::{Context, Object, Result, ID};
 use models::{
@@ -23,6 +24,7 @@ use sea_orm::{
 	TransactionTrait, TryIntoModel,
 };
 use stump_core::config::StumpConfig;
+use tower_sessions::Session;
 
 #[derive(Default)]
 pub struct UserMutation;
@@ -133,6 +135,7 @@ impl UserMutation {
 		input: UpdateUserPreferencesInput,
 	) -> Result<UserPreferences> {
 		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let session = ctx.data::<Session>()?;
 		let core_ctx = ctx.data::<CoreContext>()?;
 		let conn = core_ctx.conn.as_ref();
 
@@ -140,8 +143,6 @@ impl UserMutation {
 			.filter(user_preferences::Column::UserId.eq(user.id.clone()))
 			.one(conn)
 			.await?;
-
-		// TODO(graphql): update user session
 
 		if let Some(user_preferences_model) = user_preferences {
 			tracing::trace!(user_id = ?user.id, ?user_preferences_model, updates = ?input, "Updating viewer's preferences");
@@ -153,6 +154,16 @@ impl UserMutation {
 				conn,
 			)
 			.await?;
+
+			save_user_session(
+				session,
+				AuthUser {
+					preferences: Some(updated_user_preferences.model.clone()),
+					..user.clone()
+				},
+			)
+			.await;
+
 			Ok(updated_user_preferences)
 		} else {
 			Err("User preferences not found".into())
@@ -179,11 +190,11 @@ impl UserMutation {
 		tracing::debug!(?updated_user, "Updated user");
 
 		if user.id != id.to_string() {
-			// TODO(graphql): Insert user session
-		} else {
 			// When a server owner updates another user, we need to delete all sessions for that user
 			// because the user's permissions may have changed. This is a bit lazy but it works.
 			remove_all_session_for_user(id.to_string(), conn).await?;
+		} else {
+			// TODO(graphql): Insert user session
 		}
 
 		Ok(updated_user)

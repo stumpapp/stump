@@ -20,6 +20,7 @@ use graphql::{
 	data::{RequestContext, ServiceContext},
 	schema::{build_schema, AppSchema},
 };
+use tower_sessions::Session;
 
 use crate::{config::state::AppState, errors::APIError};
 
@@ -58,6 +59,7 @@ async fn graphql_handler(
 	schema: Extension<AppSchema>,
 	Extension(req_ctx): Extension<RequestContext>,
 	HostExtractor(details): HostExtractor,
+	session: Session,
 	req: GraphQLRequest,
 ) -> GraphQLResponse {
 	let mut req = req.into_inner();
@@ -67,6 +69,7 @@ async fn graphql_handler(
 		host: details.host,
 		scheme: details.scheme,
 	});
+	req = req.data(session);
 	schema.execute(req).await.into()
 }
 

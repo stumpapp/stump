@@ -162,7 +162,7 @@ export default function TopNavigation() {
 					/>
 				))
 				.otherwise(() => null),
-		[t, location.pathname],
+		[t, location.pathname, size],
 	)
 
 	const sections = useMemo(

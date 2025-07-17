@@ -1747,6 +1747,13 @@
 				},
 				"createSubmitButton": "Create user",
 				"updateSubmitButton": "Update user"
+			},
+			"loginActivity": {
+				"deleteConfirmation": {
+					"title": "Delete activity",
+					"description": "All records of login activity will be permanently deleted from the database",
+					"confirm": "Delete"
+				}
 			}
 		},
 		"server/email": {

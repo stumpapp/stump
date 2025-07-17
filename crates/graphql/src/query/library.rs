@@ -1,9 +1,12 @@
 use async_graphql::{Context, Object, Result, ID};
 use models::{
-	entity::library::{self, LibraryModelOrderBy},
+	entity::{
+		last_library_visit,
+		library::{self, LibraryModelOrderBy},
+	},
 	shared::ordering::{OrderBy, OrderDirection},
 };
-use sea_orm::{prelude::*, QuerySelect};
+use sea_orm::{prelude::*, QueryOrder, QuerySelect};
 
 use crate::{
 	data::{CoreContext, RequestContext},
@@ -122,5 +125,20 @@ impl LibraryQuery {
 		let count = library::Entity::find_for_user(user).count(conn).await?;
 
 		Ok(count)
+	}
+
+	async fn last_visited_library(&self, ctx: &Context<'_>) -> Result<Option<Library>> {
+		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let last_visited = last_library_visit::Entity::find()
+			.filter(last_library_visit::Column::UserId.eq(user.id.to_string()))
+			.find_also_related(library::Entity)
+			.order_by_desc(last_library_visit::Column::Timestamp)
+			.one(conn)
+			.await?
+			.and_then(|(_visit, library)| library.map(Library::from));
+
+		Ok(last_visited)
 	}
 }

@@ -1,6 +1,11 @@
 import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { cn, Spacer } from '@stump/components'
-import { FilterableArrangementEntityLink, graphql, SystemArrangment } from '@stump/graphql'
+import {
+	FilterableArrangementEntityLink,
+	graphql,
+	SystemArrangment,
+	UserPermission,
+} from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { NavigationItem } from '@stump/sdk'
 import { motion } from 'framer-motion'
@@ -87,9 +92,9 @@ export default function SideBar({ asChild, hidden }: Props) {
 	const checkSectionPermission = useCallback(
 		(section: NavigationItem['type']) => {
 			if (section === 'BookClubs') {
-				return checkPermission('bookclub:read')
+				return checkPermission(UserPermission.AccessBookClub)
 			} else if (section === 'SmartLists') {
-				return checkPermission('smartlist:read')
+				return checkPermission(UserPermission.AccessSmartList)
 			} else {
 				return true
 			}

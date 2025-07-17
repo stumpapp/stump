@@ -2,7 +2,7 @@ import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { cn, cx, Label, NavigationMenu, ScrollArea, Text } from '@stump/components'
 import { FilterableArrangementEntityLink, graphql, UserPermission } from '@stump/graphql'
 import { CircleSlash2, Library, LibrarySquare } from 'lucide-react'
-import { useMemo } from 'react'
+import { Suspense, useMemo } from 'react'
 import { useLocation } from 'react-router-dom'
 import AutoSizer from 'react-virtualized-auto-sizer'
 
@@ -25,12 +25,9 @@ const query = graphql(`
 	}
 `)
 
-type Props = {
-	isMobile?: boolean
-} & EntityOptionProps
+type Props = EntityOptionProps
 
 export default function LibraryNavigationItem({
-	isMobile,
 	links = [FilterableArrangementEntityLink.Create],
 	width,
 }: Props) {
@@ -68,7 +65,6 @@ export default function LibraryNavigationItem({
 				</div>
 			)
 		}
-		// const clonedLibraries = Array.from({ length: 20 }).flatMap(() => libraries)
 
 		return (
 			<AutoSizer>
@@ -145,7 +141,9 @@ export default function LibraryNavigationItem({
 						</div>
 					</div>
 
-					<LastVisitedLibrary container={(children) => <div className="w-1/3">{children}</div>} />
+					<Suspense>
+						<LastVisitedLibrary container={(children) => <div className="w-1/3">{children}</div>} />
+					</Suspense>
 				</div>
 			</NavigationMenu.Content>
 		</NavigationMenu.Item>

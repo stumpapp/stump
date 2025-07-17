@@ -1489,6 +1489,7 @@ type Query {
 	libraries(orderBy: [LibraryModelOrderBy!]! = [{field: NAME, direction: ASC}], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedLibraryResponse!
 	libraryById(id: ID!): Library
 	numberOfLibraries: Int!
+	lastVisitedLibrary: Library
 	mediaMetadataOverview(seriesId: ID): MediaMetadataOverview!
 	smartListViews: [SmartListView!]!
 	series(filter: SeriesFilterInput!, orderBy: [SeriesOrderBy!]! = [{series: {field: NAME, direction: ASC}}], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedSeriesResponse!

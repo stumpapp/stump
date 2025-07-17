@@ -3193,6 +3193,7 @@ dependencies = [
  "stump_core",
  "tempfile",
  "tokio",
+ "tower-sessions",
  "tracing",
  "zip",
 ]

@@ -530,5 +530,27 @@ FROM "finished_reading_sessions";
 DROP TABLE "finished_reading_sessions";
 ALTER TABLE "new_finshed_reading_sessions"
     RENAME TO "finished_reading_sessions";
+-- Changes:
+-- 1. Add id as an autoincrementing integer
+CREATE TABLE "new_last_library_visits" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "user_id" TEXT NOT NULL,
+    "library_id" TEXT NOT NULL,
+    "timestamp" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "last_library_visit_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT "last_library_visit_library_id_fkey" FOREIGN KEY ("library_id") REFERENCES "libraries" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+INSERT INTO "new_last_library_visits"(
+        "user_id",
+        "library_id",
+        "timestamp"
+    )
+SELECT "user_id",
+    "library_id",
+    "timestamp"
+FROM "last_library_visits";
+DROP TABLE "last_library_visits";
+ALTER TABLE "new_last_library_visits"
+    RENAME TO "last_library_visits";
 PRAGMA foreign_keys = ON;
 COMMIT;

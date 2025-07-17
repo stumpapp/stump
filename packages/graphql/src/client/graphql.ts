@@ -1928,6 +1928,7 @@ export type Query = {
   jobById?: Maybe<Job>;
   jobs: PaginatedJobResponse;
   keepReading: PaginatedMediaResponse;
+  lastVisitedLibrary?: Maybe<Library>;
   libraries: PaginatedLibraryResponse;
   libraryById?: Maybe<Library>;
   listDirectory: PaginatedDirectoryListingResponse;
@@ -2930,6 +2931,11 @@ export type DeleteLibraryMutationVariables = Exact<{
 
 export type DeleteLibraryMutation = { __typename?: 'Mutation', deleteLibrary: { __typename?: 'Library', id: string } };
 
+export type LastVisitedLibraryQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type LastVisitedLibraryQuery = { __typename?: 'Query', lastVisitedLibrary?: { __typename?: 'Library', id: string, name: string, thumbnail: { __typename?: 'ImageRef', url: string } } | null };
+
 export type SideBarQueryQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -3553,6 +3559,16 @@ export type UpdateUserSceneQueryVariables = Exact<{
 
 export type UpdateUserSceneQuery = { __typename?: 'Query', me: { __typename?: 'User', id: string }, userById?: { __typename?: 'User', id: string, avatarUrl?: string | null, username: string, permissions: Array<UserPermission>, maxSessionsAllowed?: number | null, isServerOwner: boolean, ageRestriction?: { __typename?: 'AgeRestriction', age: number, restrictOnUnset: boolean } | null }, users?: { __typename?: 'PaginatedUserResponse', nodes: Array<{ __typename?: 'User', username: string }> } };
 
+export type ClearLoginActivityConfirmationMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ClearLoginActivityConfirmationMutation = { __typename?: 'Mutation', deleteLoginActivity: number };
+
+export type LoginActivityTableQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type LoginActivityTableQuery = { __typename?: 'Query', loginActivity: Array<{ __typename?: 'UserLoginActivity', id: number, ipAddress: string, userAgent: string, authenticationSuccessful: boolean, timestamp: any, user: { __typename?: 'User', id: string, username: string, avatarUrl?: string | null } }> };
+
 export type DeleteUserMutationVariables = Exact<{
   id: Scalars['ID']['input'];
   hardDelete?: InputMaybe<Scalars['Boolean']['input']>;
@@ -3781,6 +3797,17 @@ export const DeleteLibraryDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<DeleteLibraryMutation, DeleteLibraryMutationVariables>;
+export const LastVisitedLibraryDocument = new TypedDocumentString(`
+    query LastVisitedLibrary {
+  lastVisitedLibrary {
+    id
+    name
+    thumbnail {
+      url
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<LastVisitedLibraryQuery, LastVisitedLibraryQueryVariables>;
 export const SideBarQueryDocument = new TypedDocumentString(`
     query SideBarQuery {
   me {
@@ -4998,6 +5025,27 @@ export const UpdateUserSceneDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<UpdateUserSceneQuery, UpdateUserSceneQueryVariables>;
+export const ClearLoginActivityConfirmationDocument = new TypedDocumentString(`
+    mutation ClearLoginActivityConfirmation {
+  deleteLoginActivity
+}
+    `) as unknown as TypedDocumentString<ClearLoginActivityConfirmationMutation, ClearLoginActivityConfirmationMutationVariables>;
+export const LoginActivityTableDocument = new TypedDocumentString(`
+    query LoginActivityTable {
+  loginActivity {
+    id
+    ipAddress
+    userAgent
+    authenticationSuccessful
+    timestamp
+    user {
+      id
+      username
+      avatarUrl
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<LoginActivityTableQuery, LoginActivityTableQueryVariables>;
 export const DeleteUserDocument = new TypedDocumentString(`
     mutation DeleteUser($id: ID!, $hardDelete: Boolean) {
   deleteUser(id: $id, hardDelete: $hardDelete) {

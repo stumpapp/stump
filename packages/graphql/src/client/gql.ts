@@ -22,6 +22,7 @@ type Documents = {
     "\n\tmutation UploadLibrarySeries($input: UploadSeriesInput!) {\n\t\tuploadSeries(input: $input)\n\t}\n": typeof types.UploadLibrarySeriesDocument,
     "\n\tquery MediaFilterForm($seriesId: ID) {\n\t\tmediaMetadataOverview(seriesId: $seriesId) {\n\t\t\tgenres\n\t\t\twriters\n\t\t\tpencillers\n\t\t\tcolorists\n\t\t\tletterers\n\t\t\tinkers\n\t\t\tpublishers\n\t\t\teditors\n\t\t\tcharacters\n\t\t}\n\t}\n": typeof types.MediaFilterFormDocument,
     "\n\tmutation DeleteLibrary($id: ID!) {\n\t\tdeleteLibrary(id: $id) {\n\t\t\tid\n\t\t}\n\t}\n": typeof types.DeleteLibraryDocument,
+    "\n\tquery LastVisitedLibrary {\n\t\tlastVisitedLibrary {\n\t\t\tid\n\t\t\tname\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": typeof types.LastVisitedLibraryDocument,
     "\n\tquery SideBarQuery {\n\t\tme {\n\t\t\tid\n\t\t\tpreferences {\n\t\t\t\tnavigationArrangement {\n\t\t\t\t\tlocked\n\t\t\t\t\tsections {\n\t\t\t\t\t\tconfig {\n\t\t\t\t\t\t\t__typename\n\t\t\t\t\t\t\t... on SystemArrangmentConfig {\n\t\t\t\t\t\t\t\tvariant\n\t\t\t\t\t\t\t\tlinks\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t\tvisible\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.SideBarQueryDocument,
     "\n\tmutation UpdateLibraryEmoji($id: ID!, $emoji: String) {\n\t\tupdateLibraryEmoji(id: $id, emoji: $emoji) {\n\t\t\tid\n\t\t}\n\t}\n": typeof types.UpdateLibraryEmojiDocument,
     "\n\tmutation ScanLibraryMutation($id: ID!) {\n\t\tscanLibrary(id: $id)\n\t}\n": typeof types.ScanLibraryMutationDocument,
@@ -108,6 +109,8 @@ type Documents = {
     "\n\tmutation CreateOrUpdateUserFormCreateUser($input: CreateUserInput!) {\n\t\tcreateUser(input: $input) {\n\t\t\tid\n\t\t}\n\t}\n": typeof types.CreateOrUpdateUserFormCreateUserDocument,
     "\n\tquery CreateUserScene {\n\t\tusers(pagination: { none: { unpaginated: true } }) {\n\t\t\tnodes {\n\t\t\t\tusername\n\t\t\t}\n\t\t}\n\t}\n": typeof types.CreateUserSceneDocument,
     "\n\tquery UpdateUserScene($id: ID!, $skip: Boolean!) {\n\t\tme {\n\t\t\tid\n\t\t}\n\t\tuserById(id: $id) @skip(if: $skip) {\n\t\t\tid\n\t\t\tavatarUrl\n\t\t\tusername\n\t\t\tageRestriction {\n\t\t\t\tage\n\t\t\t\trestrictOnUnset\n\t\t\t}\n\t\t\tpermissions\n\t\t\tmaxSessionsAllowed\n\t\t\tisServerOwner\n\t\t}\n\t\tusers(pagination: { none: { unpaginated: true } }) @skip(if: $skip) {\n\t\t\tnodes {\n\t\t\t\tusername\n\t\t\t}\n\t\t}\n\t}\n": typeof types.UpdateUserSceneDocument,
+    "\n\tmutation ClearLoginActivityConfirmation {\n\t\tdeleteLoginActivity\n\t}\n": typeof types.ClearLoginActivityConfirmationDocument,
+    "\n\tquery LoginActivityTable {\n\t\tloginActivity {\n\t\t\tid\n\t\t\tipAddress\n\t\t\tuserAgent\n\t\t\tauthenticationSuccessful\n\t\t\ttimestamp\n\t\t\tuser {\n\t\t\t\tid\n\t\t\t\tusername\n\t\t\t\tavatarUrl\n\t\t\t}\n\t\t}\n\t}\n": typeof types.LoginActivityTableDocument,
     "\n\tmutation DeleteUser($id: ID!, $hardDelete: Boolean) {\n\t\tdeleteUser(id: $id, hardDelete: $hardDelete) {\n\t\t\tid\n\t\t}\n\t}\n": typeof types.DeleteUserDocument,
     "\n\tmutation UserActionMenuLockUser($id: ID!, $lock: Boolean!) {\n\t\tupdateUserLockStatus(id: $id, lock: $lock) {\n\t\t\tid\n\t\t\tisLocked\n\t\t}\n\t}\n": typeof types.UserActionMenuLockUserDocument,
     "\n\tmutation UserActionMenuDeleteUserSessions($id: ID!) {\n\t\tdeleteUserSessions(id: $id)\n\t}\n": typeof types.UserActionMenuDeleteUserSessionsDocument,
@@ -123,6 +126,7 @@ const documents: Documents = {
     "\n\tmutation UploadLibrarySeries($input: UploadSeriesInput!) {\n\t\tuploadSeries(input: $input)\n\t}\n": types.UploadLibrarySeriesDocument,
     "\n\tquery MediaFilterForm($seriesId: ID) {\n\t\tmediaMetadataOverview(seriesId: $seriesId) {\n\t\t\tgenres\n\t\t\twriters\n\t\t\tpencillers\n\t\t\tcolorists\n\t\t\tletterers\n\t\t\tinkers\n\t\t\tpublishers\n\t\t\teditors\n\t\t\tcharacters\n\t\t}\n\t}\n": types.MediaFilterFormDocument,
     "\n\tmutation DeleteLibrary($id: ID!) {\n\t\tdeleteLibrary(id: $id) {\n\t\t\tid\n\t\t}\n\t}\n": types.DeleteLibraryDocument,
+    "\n\tquery LastVisitedLibrary {\n\t\tlastVisitedLibrary {\n\t\t\tid\n\t\t\tname\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": types.LastVisitedLibraryDocument,
     "\n\tquery SideBarQuery {\n\t\tme {\n\t\t\tid\n\t\t\tpreferences {\n\t\t\t\tnavigationArrangement {\n\t\t\t\t\tlocked\n\t\t\t\t\tsections {\n\t\t\t\t\t\tconfig {\n\t\t\t\t\t\t\t__typename\n\t\t\t\t\t\t\t... on SystemArrangmentConfig {\n\t\t\t\t\t\t\t\tvariant\n\t\t\t\t\t\t\t\tlinks\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t\tvisible\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.SideBarQueryDocument,
     "\n\tmutation UpdateLibraryEmoji($id: ID!, $emoji: String) {\n\t\tupdateLibraryEmoji(id: $id, emoji: $emoji) {\n\t\t\tid\n\t\t}\n\t}\n": types.UpdateLibraryEmojiDocument,
     "\n\tmutation ScanLibraryMutation($id: ID!) {\n\t\tscanLibrary(id: $id)\n\t}\n": types.ScanLibraryMutationDocument,
@@ -209,6 +213,8 @@ const documents: Documents = {
     "\n\tmutation CreateOrUpdateUserFormCreateUser($input: CreateUserInput!) {\n\t\tcreateUser(input: $input) {\n\t\t\tid\n\t\t}\n\t}\n": types.CreateOrUpdateUserFormCreateUserDocument,
     "\n\tquery CreateUserScene {\n\t\tusers(pagination: { none: { unpaginated: true } }) {\n\t\t\tnodes {\n\t\t\t\tusername\n\t\t\t}\n\t\t}\n\t}\n": types.CreateUserSceneDocument,
     "\n\tquery UpdateUserScene($id: ID!, $skip: Boolean!) {\n\t\tme {\n\t\t\tid\n\t\t}\n\t\tuserById(id: $id) @skip(if: $skip) {\n\t\t\tid\n\t\t\tavatarUrl\n\t\t\tusername\n\t\t\tageRestriction {\n\t\t\t\tage\n\t\t\t\trestrictOnUnset\n\t\t\t}\n\t\t\tpermissions\n\t\t\tmaxSessionsAllowed\n\t\t\tisServerOwner\n\t\t}\n\t\tusers(pagination: { none: { unpaginated: true } }) @skip(if: $skip) {\n\t\t\tnodes {\n\t\t\t\tusername\n\t\t\t}\n\t\t}\n\t}\n": types.UpdateUserSceneDocument,
+    "\n\tmutation ClearLoginActivityConfirmation {\n\t\tdeleteLoginActivity\n\t}\n": types.ClearLoginActivityConfirmationDocument,
+    "\n\tquery LoginActivityTable {\n\t\tloginActivity {\n\t\t\tid\n\t\t\tipAddress\n\t\t\tuserAgent\n\t\t\tauthenticationSuccessful\n\t\t\ttimestamp\n\t\t\tuser {\n\t\t\t\tid\n\t\t\t\tusername\n\t\t\t\tavatarUrl\n\t\t\t}\n\t\t}\n\t}\n": types.LoginActivityTableDocument,
     "\n\tmutation DeleteUser($id: ID!, $hardDelete: Boolean) {\n\t\tdeleteUser(id: $id, hardDelete: $hardDelete) {\n\t\t\tid\n\t\t}\n\t}\n": types.DeleteUserDocument,
     "\n\tmutation UserActionMenuLockUser($id: ID!, $lock: Boolean!) {\n\t\tupdateUserLockStatus(id: $id, lock: $lock) {\n\t\t\tid\n\t\t\tisLocked\n\t\t}\n\t}\n": types.UserActionMenuLockUserDocument,
     "\n\tmutation UserActionMenuDeleteUserSessions($id: ID!) {\n\t\tdeleteUserSessions(id: $id)\n\t}\n": types.UserActionMenuDeleteUserSessionsDocument,
@@ -245,6 +251,10 @@ export function graphql(source: "\n\tquery MediaFilterForm($seriesId: ID) {\n\t\
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n\tmutation DeleteLibrary($id: ID!) {\n\t\tdeleteLibrary(id: $id) {\n\t\t\tid\n\t\t}\n\t}\n"): typeof import('./graphql').DeleteLibraryDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tquery LastVisitedLibrary {\n\t\tlastVisitedLibrary {\n\t\t\tid\n\t\t\tname\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').LastVisitedLibraryDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -589,6 +599,14 @@ export function graphql(source: "\n\tquery CreateUserScene {\n\t\tusers(paginati
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n\tquery UpdateUserScene($id: ID!, $skip: Boolean!) {\n\t\tme {\n\t\t\tid\n\t\t}\n\t\tuserById(id: $id) @skip(if: $skip) {\n\t\t\tid\n\t\t\tavatarUrl\n\t\t\tusername\n\t\t\tageRestriction {\n\t\t\t\tage\n\t\t\t\trestrictOnUnset\n\t\t\t}\n\t\t\tpermissions\n\t\t\tmaxSessionsAllowed\n\t\t\tisServerOwner\n\t\t}\n\t\tusers(pagination: { none: { unpaginated: true } }) @skip(if: $skip) {\n\t\t\tnodes {\n\t\t\t\tusername\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').UpdateUserSceneDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tmutation ClearLoginActivityConfirmation {\n\t\tdeleteLoginActivity\n\t}\n"): typeof import('./graphql').ClearLoginActivityConfirmationDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tquery LoginActivityTable {\n\t\tloginActivity {\n\t\t\tid\n\t\t\tipAddress\n\t\t\tuserAgent\n\t\t\tauthenticationSuccessful\n\t\t\ttimestamp\n\t\t\tuser {\n\t\t\t\tid\n\t\t\t\tusername\n\t\t\t\tavatarUrl\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').LoginActivityTableDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

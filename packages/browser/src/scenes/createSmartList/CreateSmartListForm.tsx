@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useGraphQL } from '@stump/client'
+import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Button, cn, Form } from '@stump/components'
 import { graphql } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
@@ -30,10 +30,12 @@ const query = graphql(`
 
 export default function CreateSmartListForm({ onSubmit, isLoading }: Props) {
 	const { t } = useLocaleContext()
+	const { sdk } = useSDK()
 	const { currentStep, setStep } = useSteppedFormContext()
 
-	const { data: data } = useGraphQL(query, ['createSmartListForm'])
-	const lists = data?.smartLists ?? []
+	const {
+		data: { smartLists: lists },
+	} = useSuspenseGraphQL(query, [sdk.cacheKeys.smartListNames])
 
 	const form = useForm<SmartListFormSchema>({
 		defaultValues: {

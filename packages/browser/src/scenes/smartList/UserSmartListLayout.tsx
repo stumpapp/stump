@@ -1,6 +1,16 @@
+import { useGraphQLMutation, useSDK } from '@stump/client'
 import { cn } from '@stump/components'
-import { AccessRole, SaveSmartListView } from '@stump/graphql'
+import {
+	AccessRole,
+	CreateSmartListViewMutation,
+	Exact,
+	graphql,
+	SaveSmartListView,
+	SmartListView,
+	UpdateSmartListViewMutation,
+} from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
+import { UseMutateFunction, useQueryClient } from '@tanstack/react-query'
 import { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
 import toast from 'react-hot-toast'
 import { Outlet, useLocation, useParams } from 'react-router'
@@ -14,17 +24,113 @@ import { usePreferences } from '@/hooks/usePreferences'
 import { defaultWorkingView, SmartListContext, WorkingView } from './context'
 import { createRouteGroups } from './settings/routes'
 import SmartListSettingsSideBar from './settings/SmartListSettingsSideBar'
-import {
-	useSmartListById,
-	useSmartListMeta,
-	useSmartListView,
-	useUpdateSmartList,
-} from './smartListGraphQL'
+import { useSmartListById, useSmartListMeta, useUpdateSmartList } from './smartListGraphQL'
 import UserSmartListHeader from './UserSmartListHeader'
 import UserSmartListNavigation from './UserSmartListNavigation'
 
 const LOCALE_BASE_KEY = 'userSmartListScene.layout'
 const withLocaleKey = (key: string) => `${LOCALE_BASE_KEY}.${key}`
+
+const mutation_smart_list_view_create = graphql(`
+	mutation CreateSmartListView($input: SaveSmartListView!) {
+		createSmartListView(input: $input) {
+			id
+			listId
+			name
+			bookColumns {
+				id
+				position
+			}
+			bookSorting {
+				id
+				desc
+			}
+			groupColumns {
+				id
+				position
+			}
+			groupSorting {
+				id
+				desc
+			}
+		}
+	}
+`)
+
+const mutation_smart_list_view_update = graphql(`
+	mutation UpdateSmartListView($originalName: String!, $input: SaveSmartListView!) {
+		updateSmartListView(originalName: $originalName, input: $input) {
+			id
+			listId
+			name
+			bookColumns {
+				id
+				position
+			}
+			bookSorting {
+				id
+				desc
+			}
+			groupColumns {
+				id
+				position
+			}
+			groupSorting {
+				id
+				desc
+			}
+		}
+	}
+`)
+
+function useSmartListView({ id }: { id?: string }): {
+	view?: SmartListView
+	setView: (view?: SmartListView) => void
+	create: UseMutateFunction<
+		CreateSmartListViewMutation,
+		unknown,
+		Exact<{ input: SaveSmartListView }>,
+		unknown
+	>
+	update: UseMutateFunction<
+		UpdateSmartListViewMutation,
+		unknown,
+		Exact<{ originalName: string; input: SaveSmartListView }>,
+		unknown
+	>
+} {
+	const [view, setView] = useState<SmartListView>()
+	const client = useQueryClient()
+	const { sdk } = useSDK()
+	const setViewCallback = useCallback(
+		(newView?: SmartListView) => {
+			client.invalidateQueries({ queryKey: [sdk.cacheKeys.smartListById, id || ''] })
+			client.invalidateQueries({ queryKey: [sdk.cacheKeys.smartListMeta, id || ''] })
+			setView(newView)
+		},
+		[setView, client, id, sdk.cacheKeys],
+	)
+
+	const { mutate: create } = useGraphQLMutation(mutation_smart_list_view_create, {
+		mutationKey: [sdk.cacheKeys.smartListViewCreate, id],
+		onSuccess: (data) => {
+			setViewCallback(data.createSmartListView)
+		},
+	})
+	const { mutate: update } = useGraphQLMutation(mutation_smart_list_view_update, {
+		mutationKey: [sdk.cacheKeys.smartListViewUpdate, id],
+		onSuccess: (data) => {
+			setViewCallback(data.updateSmartListView)
+		},
+	})
+
+	return {
+		view,
+		setView: setViewCallback,
+		create,
+		update,
+	}
+}
 
 export default function UserSmartListLayout() {
 	const location = useLocation()

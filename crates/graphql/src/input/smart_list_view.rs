@@ -1,5 +1,5 @@
 use async_graphql::{InputObject, Result, SimpleObject, ID};
-use models::{entity::smart_list_view, shared::ordering::OrderDirection};
+use models::entity::smart_list_view;
 use sea_orm::{NotSet, Set};
 use serde::{Deserialize, Serialize};
 

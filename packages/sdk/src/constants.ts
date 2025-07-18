@@ -32,6 +32,7 @@ export const cacheKeys = {
 	users: 'users',
 	user: 'user',
 	smartLists: 'smartLists',
+	smartListNames: 'smartListNames',
 	smartListDelete: 'smartListDelete',
 	smartListById: 'smartListById',
 	smartListMeta: 'smartListMeta',

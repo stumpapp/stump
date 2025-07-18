@@ -4,23 +4,17 @@ import {
 	useGraphQL,
 	useGraphQLMutation,
 	useSDK,
+	useSuspenseGraphQL,
 } from '@stump/client'
 import {
-	CreateSmartListViewMutation,
-	Exact,
 	graphql,
 	SaveSmartListInput,
-	SaveSmartListView,
 	SmartList,
-	SmartListByIdQuery,
 	SmartListFilterGroupInput,
 	SmartListMetaQuery,
-	SmartListView,
-	UpdateSmartListViewMutation,
 } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
-import { UseMutateFunction } from '@tanstack/react-query'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo } from 'react'
 export type SmartListParsed = Omit<SmartList, 'filters'> & {
 	filters: Array<SmartListFilterGroupInput>
 }
@@ -77,58 +71,6 @@ const mutation_smart_list_update = graphql(`
 	mutation UpdateSmartList($id: ID!, $input: SaveSmartListInput!) {
 		updateSmartList(id: $id, input: $input) {
 			__typename
-		}
-	}
-`)
-
-const mutation_smart_list_view_create = graphql(`
-	mutation CreateSmartListView($input: SaveSmartListView!) {
-		createSmartListView(input: $input) {
-			id
-			listId
-			name
-			bookColumns {
-				id
-				position
-			}
-			bookSorting {
-				id
-				desc
-			}
-			groupColumns {
-				id
-				position
-			}
-			groupSorting {
-				id
-				desc
-			}
-		}
-	}
-`)
-
-const mutation_smart_list_view_update = graphql(`
-	mutation UpdateSmartListView($originalName: String!, $input: SaveSmartListView!) {
-		updateSmartListView(originalName: $originalName, input: $input) {
-			id
-			listId
-			name
-			bookColumns {
-				id
-				position
-			}
-			bookSorting {
-				id
-				desc
-			}
-			groupColumns {
-				id
-				position
-			}
-			groupSorting {
-				id
-				desc
-			}
 		}
 	}
 `)
@@ -287,7 +229,7 @@ export function useSmartListById({ id }: { id: string }): {
 	isLoading: boolean
 } {
 	const { sdk } = useSDK()
-	const { data: { smartListById: listUnparsed } = {}, isLoading: isLoading } = useGraphQL(
+	const { data: { smartListById: listUnparsed } = {}, isLoading: isLoading } = useSuspenseGraphQL(
 		query_smart_list_by_id,
 		[sdk.cacheKeys.smartListById, id || ''],
 		{
@@ -328,54 +270,5 @@ export function useSmartListMeta({ id, staleTime }: { id: string; staleTime?: nu
 	return {
 		meta,
 		isLoading,
-	}
-}
-
-export function useSmartListView({ id }: { id?: string }): {
-	view?: SmartListView
-	setView: (view?: SmartListView) => void
-	create: UseMutateFunction<
-		CreateSmartListViewMutation,
-		unknown,
-		Exact<{ input: SaveSmartListView }>,
-		unknown
-	>
-	update: UseMutateFunction<
-		UpdateSmartListViewMutation,
-		unknown,
-		Exact<{ originalName: string; input: SaveSmartListView }>,
-		unknown
-	>
-} {
-	const [view, setView] = useState<SmartListView>()
-	const client = useQueryClient()
-	const { sdk } = useSDK()
-	const setViewCallback = useCallback(
-		(newView?: SmartListView) => {
-			client.invalidateQueries({ queryKey: [sdk.cacheKeys.smartListById, id || ''] })
-			client.invalidateQueries({ queryKey: [sdk.cacheKeys.smartListMeta, id || ''] })
-			setView(newView)
-		},
-		[setView, client, id, sdk.cacheKeys],
-	)
-
-	const { mutate: create } = useGraphQLMutation(mutation_smart_list_view_create, {
-		mutationKey: [sdk.cacheKeys.smartListViewCreate, id],
-		onSuccess: (data) => {
-			setViewCallback(data.createSmartListView)
-		},
-	})
-	const { mutate: update } = useGraphQLMutation(mutation_smart_list_view_update, {
-		mutationKey: [sdk.cacheKeys.smartListViewUpdate, id],
-		onSuccess: (data) => {
-			setViewCallback(data.updateSmartListView)
-		},
-	})
-
-	return {
-		view,
-		setView: setViewCallback,
-		create,
-		update,
 	}
 }

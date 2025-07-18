@@ -110,14 +110,14 @@ type Documents = {
 	'\n\tmutation UserActionMenuLockUser($id: ID!, $lock: Boolean!) {\n\t\tupdateUserLockStatus(id: $id, lock: $lock) {\n\t\t\tid\n\t\t\tisLocked\n\t\t}\n\t}\n': typeof types.UserActionMenuLockUserDocument
 	'\n\tmutation UserActionMenuDeleteUserSessions($id: ID!) {\n\t\tdeleteUserSessions(id: $id)\n\t}\n': typeof types.UserActionMenuDeleteUserSessionsDocument
 	'\n\tquery UserTable($pagination: Pagination!) {\n\t\tusers(pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tavatarUrl\n\t\t\t\tusername\n\t\t\t\tisServerOwner\n\t\t\t\tisLocked\n\t\t\t\tcreatedAt\n\t\t\t\tlastLogin\n\t\t\t\tloginSessionsCount\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\ttotalPages\n\t\t\t\t\tcurrentPage\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n': typeof types.UserTableDocument
+	'\n\tmutation CreateSmartListView($input: SaveSmartListView!) {\n\t\tcreateSmartListView(input: $input) {\n\t\t\tid\n\t\t\tlistId\n\t\t\tname\n\t\t\tbookColumns {\n\t\t\t\tid\n\t\t\t\tposition\n\t\t\t}\n\t\t\tbookSorting {\n\t\t\t\tid\n\t\t\t\tdesc\n\t\t\t}\n\t\t\tgroupColumns {\n\t\t\t\tid\n\t\t\t\tposition\n\t\t\t}\n\t\t\tgroupSorting {\n\t\t\t\tid\n\t\t\t\tdesc\n\t\t\t}\n\t\t}\n\t}\n': typeof types.CreateSmartListViewDocument
+	'\n\tmutation UpdateSmartListView($originalName: String!, $input: SaveSmartListView!) {\n\t\tupdateSmartListView(originalName: $originalName, input: $input) {\n\t\t\tid\n\t\t\tlistId\n\t\t\tname\n\t\t\tbookColumns {\n\t\t\t\tid\n\t\t\t\tposition\n\t\t\t}\n\t\t\tbookSorting {\n\t\t\t\tid\n\t\t\t\tdesc\n\t\t\t}\n\t\t\tgroupColumns {\n\t\t\t\tid\n\t\t\t\tposition\n\t\t\t}\n\t\t\tgroupSorting {\n\t\t\t\tid\n\t\t\t\tdesc\n\t\t\t}\n\t\t}\n\t}\n': typeof types.UpdateSmartListViewDocument
 	'\n\tquery SmartListsWithSearch($input: SmartListsInput!) {\n\t\tsmartLists(input: $input) {\n\t\t\tid\n\t\t\tcreatorId\n\t\t\tdescription\n\t\t\tdefaultGrouping\n\t\t\tfilters\n\t\t\tjoiner\n\t\t\tname\n\t\t\tvisibility\n\t\t}\n\t}\n': typeof types.SmartListsWithSearchDocument
 	'\n\tquery SmartListBasicSettingsScene {\n\t\tsmartLists(input: { mine: true }) {\n\t\t\tname\n\t\t}\n\t}\n': typeof types.SmartListBasicSettingsSceneDocument
 	'\n\tmutation DeleteSmartList($id: ID!) {\n\t\tdeleteSmartList(id: $id) {\n\t\t\t__typename\n\t\t}\n\t}\n': typeof types.DeleteSmartListDocument
 	'\n\tquery SmartListById($id: ID!) {\n\t\tsmartListById(id: $id) {\n\t\t\tid\n\t\t\tcreatorId\n\t\t\tdescription\n\t\t\tdefaultGrouping\n\t\t\tfilters\n\t\t\tjoiner\n\t\t\tname\n\t\t\tvisibility\n\t\t\tviews {\n\t\t\t\tid\n\t\t\t\tlistId\n\t\t\t\tname\n\t\t\t\tbookColumns {\n\t\t\t\t\tid\n\t\t\t\t\tposition\n\t\t\t\t}\n\t\t\t\tbookSorting {\n\t\t\t\t\tid\n\t\t\t\t\tdesc\n\t\t\t\t}\n\t\t\t\tgroupColumns {\n\t\t\t\t\tid\n\t\t\t\t\tposition\n\t\t\t\t}\n\t\t\t\tgroupSorting {\n\t\t\t\t\tid\n\t\t\t\t\tdesc\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n': typeof types.SmartListByIdDocument
 	'\n\tquery SmartListMeta($id: ID!) {\n\t\tsmartListMeta(id: $id) {\n\t\t\tmatchedBooks\n\t\t\tmatchedSeries\n\t\t\tmatchedLibraries\n\t\t}\n\t}\n': typeof types.SmartListMetaDocument
 	'\n\tmutation UpdateSmartList($id: ID!, $input: SaveSmartListInput!) {\n\t\tupdateSmartList(id: $id, input: $input) {\n\t\t\t__typename\n\t\t}\n\t}\n': typeof types.UpdateSmartListDocument
-	'\n\tmutation CreateSmartListView($input: SaveSmartListView!) {\n\t\tcreateSmartListView(input: $input) {\n\t\t\tid\n\t\t\tlistId\n\t\t\tname\n\t\t\tbookColumns {\n\t\t\t\tid\n\t\t\t\tposition\n\t\t\t}\n\t\t\tbookSorting {\n\t\t\t\tid\n\t\t\t\tdesc\n\t\t\t}\n\t\t\tgroupColumns {\n\t\t\t\tid\n\t\t\t\tposition\n\t\t\t}\n\t\t\tgroupSorting {\n\t\t\t\tid\n\t\t\t\tdesc\n\t\t\t}\n\t\t}\n\t}\n': typeof types.CreateSmartListViewDocument
-	'\n\tmutation UpdateSmartListView($originalName: String!, $input: SaveSmartListView!) {\n\t\tupdateSmartListView(originalName: $originalName, input: $input) {\n\t\t\tid\n\t\t\tlistId\n\t\t\tname\n\t\t\tbookColumns {\n\t\t\t\tid\n\t\t\t\tposition\n\t\t\t}\n\t\t\tbookSorting {\n\t\t\t\tid\n\t\t\t\tdesc\n\t\t\t}\n\t\t\tgroupColumns {\n\t\t\t\tid\n\t\t\t\tposition\n\t\t\t}\n\t\t\tgroupSorting {\n\t\t\t\tid\n\t\t\t\tdesc\n\t\t\t}\n\t\t}\n\t}\n': typeof types.UpdateSmartListViewDocument
 	'\n\tquery SmartListItems($id: ID!) {\n\t\tsmartListItems(id: $id) {\n\t\t\t__typename\n\t\t\t... on SmartListGrouped {\n\t\t\t\titems {\n\t\t\t\t\tentity {\n\t\t\t\t\t\t__typename\n\t\t\t\t\t\t... on Series {\n\t\t\t\t\t\t\tid\n\t\t\t\t\t\t\tname\n\t\t\t\t\t\t}\n\t\t\t\t\t\t... on Library {\n\t\t\t\t\t\t\tid\n\t\t\t\t\t\t\tname\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t\tbooks {\n\t\t\t\t\t\t...BookCard\n\t\t\t\t\t\tmetadata {\n\t\t\t\t\t\t\tageRating\n\t\t\t\t\t\t\tcharacters\n\t\t\t\t\t\t\tcolorists\n\t\t\t\t\t\t\tcoverArtists\n\t\t\t\t\t\t\teditors\n\t\t\t\t\t\t\tgenres\n\t\t\t\t\t\t\tinkers\n\t\t\t\t\t\t\tletterers\n\t\t\t\t\t\t\tlinks\n\t\t\t\t\t\t\tpencillers\n\t\t\t\t\t\t\tpublisher\n\t\t\t\t\t\t\tteams\n\t\t\t\t\t\t\twriters\n\t\t\t\t\t\t\tyear\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t\t... on SmartListUngrouped {\n\t\t\t\tbooks {\n\t\t\t\t\t...BookCard\n\t\t\t\t\tmetadata {\n\t\t\t\t\t\tageRating\n\t\t\t\t\t\tcharacters\n\t\t\t\t\t\tcolorists\n\t\t\t\t\t\tcoverArtists\n\t\t\t\t\t\teditors\n\t\t\t\t\t\tgenres\n\t\t\t\t\t\tinkers\n\t\t\t\t\t\tletterers\n\t\t\t\t\t\tlinks\n\t\t\t\t\t\tpencillers\n\t\t\t\t\t\tpublisher\n\t\t\t\t\t\tteams\n\t\t\t\t\t\twriters\n\t\t\t\t\t\tyear\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n': typeof types.SmartListItemsDocument
 	'\n\tquery DirectoryListing($input: DirectoryListingInput!, $pagination: Pagination!) {\n\t\tlistDirectory(input: $input, pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tparent\n\t\t\t\tfiles {\n\t\t\t\t\tname\n\t\t\t\t\tpath\n\t\t\t\t\tisDirectory\n\t\t\t\t}\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\tcurrentPage\n\t\t\t\t\ttotalPages\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n': typeof types.DirectoryListingDocument
 	'\n\tquery UploadConfig {\n\t\tuploadConfig {\n\t\t\tenabled\n\t\t\tmaxFileUploadSize\n\t\t}\n\t}\n': typeof types.UploadConfigDocument
@@ -315,6 +315,10 @@ const documents: Documents = {
 		types.UserActionMenuDeleteUserSessionsDocument,
 	'\n\tquery UserTable($pagination: Pagination!) {\n\t\tusers(pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tavatarUrl\n\t\t\t\tusername\n\t\t\t\tisServerOwner\n\t\t\t\tisLocked\n\t\t\t\tcreatedAt\n\t\t\t\tlastLogin\n\t\t\t\tloginSessionsCount\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\ttotalPages\n\t\t\t\t\tcurrentPage\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n':
 		types.UserTableDocument,
+	'\n\tmutation CreateSmartListView($input: SaveSmartListView!) {\n\t\tcreateSmartListView(input: $input) {\n\t\t\tid\n\t\t\tlistId\n\t\t\tname\n\t\t\tbookColumns {\n\t\t\t\tid\n\t\t\t\tposition\n\t\t\t}\n\t\t\tbookSorting {\n\t\t\t\tid\n\t\t\t\tdesc\n\t\t\t}\n\t\t\tgroupColumns {\n\t\t\t\tid\n\t\t\t\tposition\n\t\t\t}\n\t\t\tgroupSorting {\n\t\t\t\tid\n\t\t\t\tdesc\n\t\t\t}\n\t\t}\n\t}\n':
+		types.CreateSmartListViewDocument,
+	'\n\tmutation UpdateSmartListView($originalName: String!, $input: SaveSmartListView!) {\n\t\tupdateSmartListView(originalName: $originalName, input: $input) {\n\t\t\tid\n\t\t\tlistId\n\t\t\tname\n\t\t\tbookColumns {\n\t\t\t\tid\n\t\t\t\tposition\n\t\t\t}\n\t\t\tbookSorting {\n\t\t\t\tid\n\t\t\t\tdesc\n\t\t\t}\n\t\t\tgroupColumns {\n\t\t\t\tid\n\t\t\t\tposition\n\t\t\t}\n\t\t\tgroupSorting {\n\t\t\t\tid\n\t\t\t\tdesc\n\t\t\t}\n\t\t}\n\t}\n':
+		types.UpdateSmartListViewDocument,
 	'\n\tquery SmartListsWithSearch($input: SmartListsInput!) {\n\t\tsmartLists(input: $input) {\n\t\t\tid\n\t\t\tcreatorId\n\t\t\tdescription\n\t\t\tdefaultGrouping\n\t\t\tfilters\n\t\t\tjoiner\n\t\t\tname\n\t\t\tvisibility\n\t\t}\n\t}\n':
 		types.SmartListsWithSearchDocument,
 	'\n\tquery SmartListBasicSettingsScene {\n\t\tsmartLists(input: { mine: true }) {\n\t\t\tname\n\t\t}\n\t}\n':
@@ -327,10 +331,6 @@ const documents: Documents = {
 		types.SmartListMetaDocument,
 	'\n\tmutation UpdateSmartList($id: ID!, $input: SaveSmartListInput!) {\n\t\tupdateSmartList(id: $id, input: $input) {\n\t\t\t__typename\n\t\t}\n\t}\n':
 		types.UpdateSmartListDocument,
-	'\n\tmutation CreateSmartListView($input: SaveSmartListView!) {\n\t\tcreateSmartListView(input: $input) {\n\t\t\tid\n\t\t\tlistId\n\t\t\tname\n\t\t\tbookColumns {\n\t\t\t\tid\n\t\t\t\tposition\n\t\t\t}\n\t\t\tbookSorting {\n\t\t\t\tid\n\t\t\t\tdesc\n\t\t\t}\n\t\t\tgroupColumns {\n\t\t\t\tid\n\t\t\t\tposition\n\t\t\t}\n\t\t\tgroupSorting {\n\t\t\t\tid\n\t\t\t\tdesc\n\t\t\t}\n\t\t}\n\t}\n':
-		types.CreateSmartListViewDocument,
-	'\n\tmutation UpdateSmartListView($originalName: String!, $input: SaveSmartListView!) {\n\t\tupdateSmartListView(originalName: $originalName, input: $input) {\n\t\t\tid\n\t\t\tlistId\n\t\t\tname\n\t\t\tbookColumns {\n\t\t\t\tid\n\t\t\t\tposition\n\t\t\t}\n\t\t\tbookSorting {\n\t\t\t\tid\n\t\t\t\tdesc\n\t\t\t}\n\t\t\tgroupColumns {\n\t\t\t\tid\n\t\t\t\tposition\n\t\t\t}\n\t\t\tgroupSorting {\n\t\t\t\tid\n\t\t\t\tdesc\n\t\t\t}\n\t\t}\n\t}\n':
-		types.UpdateSmartListViewDocument,
 	'\n\tquery SmartListItems($id: ID!) {\n\t\tsmartListItems(id: $id) {\n\t\t\t__typename\n\t\t\t... on SmartListGrouped {\n\t\t\t\titems {\n\t\t\t\t\tentity {\n\t\t\t\t\t\t__typename\n\t\t\t\t\t\t... on Series {\n\t\t\t\t\t\t\tid\n\t\t\t\t\t\t\tname\n\t\t\t\t\t\t}\n\t\t\t\t\t\t... on Library {\n\t\t\t\t\t\t\tid\n\t\t\t\t\t\t\tname\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t\tbooks {\n\t\t\t\t\t\t...BookCard\n\t\t\t\t\t\tmetadata {\n\t\t\t\t\t\t\tageRating\n\t\t\t\t\t\t\tcharacters\n\t\t\t\t\t\t\tcolorists\n\t\t\t\t\t\t\tcoverArtists\n\t\t\t\t\t\t\teditors\n\t\t\t\t\t\t\tgenres\n\t\t\t\t\t\t\tinkers\n\t\t\t\t\t\t\tletterers\n\t\t\t\t\t\t\tlinks\n\t\t\t\t\t\t\tpencillers\n\t\t\t\t\t\t\tpublisher\n\t\t\t\t\t\t\tteams\n\t\t\t\t\t\t\twriters\n\t\t\t\t\t\t\tyear\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t\t... on SmartListUngrouped {\n\t\t\t\tbooks {\n\t\t\t\t\t...BookCard\n\t\t\t\t\tmetadata {\n\t\t\t\t\t\tageRating\n\t\t\t\t\t\tcharacters\n\t\t\t\t\t\tcolorists\n\t\t\t\t\t\tcoverArtists\n\t\t\t\t\t\teditors\n\t\t\t\t\t\tgenres\n\t\t\t\t\t\tinkers\n\t\t\t\t\t\tletterers\n\t\t\t\t\t\tlinks\n\t\t\t\t\t\tpencillers\n\t\t\t\t\t\tpublisher\n\t\t\t\t\t\tteams\n\t\t\t\t\t\twriters\n\t\t\t\t\t\tyear\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n':
 		types.SmartListItemsDocument,
 	'\n\tquery DirectoryListing($input: DirectoryListingInput!, $pagination: Pagination!) {\n\t\tlistDirectory(input: $input, pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tparent\n\t\t\t\tfiles {\n\t\t\t\t\tname\n\t\t\t\t\tpath\n\t\t\t\t\tisDirectory\n\t\t\t\t}\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\tcurrentPage\n\t\t\t\t\ttotalPages\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n':
@@ -925,6 +925,18 @@ export function graphql(
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(
+	source: '\n\tmutation CreateSmartListView($input: SaveSmartListView!) {\n\t\tcreateSmartListView(input: $input) {\n\t\t\tid\n\t\t\tlistId\n\t\t\tname\n\t\t\tbookColumns {\n\t\t\t\tid\n\t\t\t\tposition\n\t\t\t}\n\t\t\tbookSorting {\n\t\t\t\tid\n\t\t\t\tdesc\n\t\t\t}\n\t\t\tgroupColumns {\n\t\t\t\tid\n\t\t\t\tposition\n\t\t\t}\n\t\t\tgroupSorting {\n\t\t\t\tid\n\t\t\t\tdesc\n\t\t\t}\n\t\t}\n\t}\n',
+): typeof import('./graphql').CreateSmartListViewDocument
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(
+	source: '\n\tmutation UpdateSmartListView($originalName: String!, $input: SaveSmartListView!) {\n\t\tupdateSmartListView(originalName: $originalName, input: $input) {\n\t\t\tid\n\t\t\tlistId\n\t\t\tname\n\t\t\tbookColumns {\n\t\t\t\tid\n\t\t\t\tposition\n\t\t\t}\n\t\t\tbookSorting {\n\t\t\t\tid\n\t\t\t\tdesc\n\t\t\t}\n\t\t\tgroupColumns {\n\t\t\t\tid\n\t\t\t\tposition\n\t\t\t}\n\t\t\tgroupSorting {\n\t\t\t\tid\n\t\t\t\tdesc\n\t\t\t}\n\t\t}\n\t}\n',
+): typeof import('./graphql').UpdateSmartListViewDocument
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(
 	source: '\n\tquery SmartListsWithSearch($input: SmartListsInput!) {\n\t\tsmartLists(input: $input) {\n\t\t\tid\n\t\t\tcreatorId\n\t\t\tdescription\n\t\t\tdefaultGrouping\n\t\t\tfilters\n\t\t\tjoiner\n\t\t\tname\n\t\t\tvisibility\n\t\t}\n\t}\n',
 ): typeof import('./graphql').SmartListsWithSearchDocument
 /**
@@ -957,18 +969,6 @@ export function graphql(
 export function graphql(
 	source: '\n\tmutation UpdateSmartList($id: ID!, $input: SaveSmartListInput!) {\n\t\tupdateSmartList(id: $id, input: $input) {\n\t\t\t__typename\n\t\t}\n\t}\n',
 ): typeof import('./graphql').UpdateSmartListDocument
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(
-	source: '\n\tmutation CreateSmartListView($input: SaveSmartListView!) {\n\t\tcreateSmartListView(input: $input) {\n\t\t\tid\n\t\t\tlistId\n\t\t\tname\n\t\t\tbookColumns {\n\t\t\t\tid\n\t\t\t\tposition\n\t\t\t}\n\t\t\tbookSorting {\n\t\t\t\tid\n\t\t\t\tdesc\n\t\t\t}\n\t\t\tgroupColumns {\n\t\t\t\tid\n\t\t\t\tposition\n\t\t\t}\n\t\t\tgroupSorting {\n\t\t\t\tid\n\t\t\t\tdesc\n\t\t\t}\n\t\t}\n\t}\n',
-): typeof import('./graphql').CreateSmartListViewDocument
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(
-	source: '\n\tmutation UpdateSmartListView($originalName: String!, $input: SaveSmartListView!) {\n\t\tupdateSmartListView(originalName: $originalName, input: $input) {\n\t\t\tid\n\t\t\tlistId\n\t\t\tname\n\t\t\tbookColumns {\n\t\t\t\tid\n\t\t\t\tposition\n\t\t\t}\n\t\t\tbookSorting {\n\t\t\t\tid\n\t\t\t\tdesc\n\t\t\t}\n\t\t\tgroupColumns {\n\t\t\t\tid\n\t\t\t\tposition\n\t\t\t}\n\t\t\tgroupSorting {\n\t\t\t\tid\n\t\t\t\tdesc\n\t\t\t}\n\t\t}\n\t}\n',
-): typeof import('./graphql').UpdateSmartListViewDocument
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

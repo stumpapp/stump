@@ -1,54 +1,43 @@
 use async_graphql::InputObject;
 use models::entity::series_metadata;
 use serde::{Deserialize, Serialize};
+use serde_with::skip_serializing_none;
 
 use super::{
 	apply_numeric_filter, apply_string_filter, IntoFilter, NumericFilter,
 	StringLikeFilter,
 };
 
+#[skip_serializing_none]
 #[derive(InputObject, Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SeriesMetadataFilterInput {
 	#[graphql(default)]
-	#[serde(skip_serializing_if = "Option::is_none")]
 	pub age_rating: Option<NumericFilter<i32>>,
 	#[graphql(default)]
-	#[serde(skip_serializing_if = "Option::is_none")]
 	pub meta_type: Option<StringLikeFilter<String>>,
 	#[graphql(default)]
-	#[serde(skip_serializing_if = "Option::is_none")]
 	pub title: Option<StringLikeFilter<String>>,
 	#[graphql(default)]
-	#[serde(skip_serializing_if = "Option::is_none")]
 	pub summary: Option<StringLikeFilter<String>>,
 	#[graphql(default)]
-	#[serde(skip_serializing_if = "Option::is_none")]
 	pub publisher: Option<StringLikeFilter<String>>,
 	#[graphql(default)]
-	#[serde(skip_serializing_if = "Option::is_none")]
 	pub imprint: Option<StringLikeFilter<String>>,
 	#[graphql(default)]
-	#[serde(skip_serializing_if = "Option::is_none")]
 	pub comicid: Option<NumericFilter<i32>>,
 	#[graphql(default)]
-	#[serde(skip_serializing_if = "Option::is_none")]
 	pub booktype: Option<StringLikeFilter<String>>,
 	#[graphql(default)]
-	#[serde(skip_serializing_if = "Option::is_none")]
 	pub volume: Option<NumericFilter<i32>>,
 	#[graphql(default)]
-	#[serde(skip_serializing_if = "Option::is_none")]
 	pub status: Option<StringLikeFilter<String>>,
 
 	#[graphql(name = "_and", default)]
-	#[serde(skip_serializing_if = "Option::is_none")]
 	pub _and: Option<Vec<SeriesMetadataFilterInput>>,
 	#[graphql(name = "_not", default)]
-	#[serde(skip_serializing_if = "Option::is_none")]
 	pub _not: Option<Vec<SeriesMetadataFilterInput>>,
 	#[graphql(name = "_or", default)]
-	#[serde(skip_serializing_if = "Option::is_none")]
 	pub _or: Option<Vec<SeriesMetadataFilterInput>>,
 }
 

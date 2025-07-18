@@ -1,32 +1,28 @@
 use async_graphql::InputObject;
 use models::entity::library;
 use serde::{Deserialize, Serialize};
+use serde_with::skip_serializing_none;
 
 use super::{apply_string_filter, IntoFilter, StringLikeFilter};
 
 // TODO: Support filter by tags (requires join logic)
 
+#[skip_serializing_none]
 #[derive(InputObject, Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct LibraryFilterInput {
 	#[graphql(default)]
-	#[serde(skip_serializing_if = "Option::is_none")]
 	pub id: Option<StringLikeFilter<String>>,
 	#[graphql(default)]
-	#[serde(skip_serializing_if = "Option::is_none")]
 	pub name: Option<StringLikeFilter<String>>,
 	#[graphql(default)]
-	#[serde(skip_serializing_if = "Option::is_none")]
 	pub path: Option<StringLikeFilter<String>>,
 
 	#[graphql(name = "_and", default)]
-	#[serde(skip_serializing_if = "Option::is_none")]
 	pub _and: Option<Vec<LibraryFilterInput>>,
 	#[graphql(name = "_not", default)]
-	#[serde(skip_serializing_if = "Option::is_none")]
 	pub _not: Option<Vec<LibraryFilterInput>>,
 	#[graphql(name = "_or", default)]
-	#[serde(skip_serializing_if = "Option::is_none")]
 	pub _or: Option<Vec<LibraryFilterInput>>,
 }
 

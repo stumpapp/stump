@@ -1,7 +1,8 @@
-import { useGraphQLMutation } from '@stump/client'
+import { useGraphQLMutation, useSDK } from '@stump/client'
 import { Alert } from '@stump/components'
 import { graphql } from '@stump/graphql'
 import { handleApiError } from '@stump/sdk'
+import { useQueryClient } from '@tanstack/react-query'
 import { Suspense, useCallback, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
 
@@ -23,6 +24,8 @@ const mutation = graphql(`
 `)
 
 export default function CreateSmartListScene() {
+	const client = useQueryClient()
+	const { sdk } = useSDK()
 	const navigate = useNavigate()
 
 	const {
@@ -32,6 +35,8 @@ export default function CreateSmartListScene() {
 	} = useGraphQLMutation(mutation, {
 		onSuccess: (data) => {
 			navigate(paths.smartList(data.createSmartList.id))
+			client.invalidateQueries({ queryKey: [sdk.cacheKeys.smartLists] })
+			client.invalidateQueries({ queryKey: [sdk.cacheKeys.smartListNames] })
 		},
 	})
 	const createError = useMemo(() => (error ? handleApiError(error) : undefined), [error])

@@ -1,13 +1,16 @@
 use async_graphql::InputObject;
 use models::entity::series_metadata;
 use serde::{Deserialize, Serialize};
+use serde_with::skip_serializing_none;
 
 use super::{
 	apply_numeric_filter, apply_string_filter, IntoFilter, NumericFilter,
 	StringLikeFilter,
 };
 
+#[skip_serializing_none]
 #[derive(InputObject, Clone, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct SeriesMetadataFilterInput {
 	#[graphql(default)]
 	pub age_rating: Option<NumericFilter<i32>>,

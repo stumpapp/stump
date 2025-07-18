@@ -1,33 +1,10 @@
 use crate::{
 	data::{CoreContext, RequestContext},
-	filter::IntoFilter,
 	guard::PermissionGuard,
-	input::smart_lists::{SmartListFilterInput, SmartListsInput},
-	object::{
-		media::Media,
-		smart_list_item::{
-			SmartListGrouped, SmartListGroupedItem, SmartListItemEntity, SmartListItems,
-			SmartListUngrouped,
-		},
-		smart_list_view::SmartListView,
-		smart_lists::SmartList,
-	},
-	query::media::{add_sessions_join_for_filter, should_add_sessions_join_for_filter},
+	object::smart_list_view::SmartListView,
 };
-use async_graphql::{Context, Object, Result, SimpleObject, ID};
-use models::{
-	entity::{
-		library, media, series,
-		smart_list::{self, SmartListGrouping},
-		smart_list_view,
-		user::AuthUser,
-	},
-	shared::enums::UserPermission,
-};
-use sea_orm::{
-	prelude::*, Condition, DatabaseTransaction, QuerySelect, Select, TransactionTrait,
-};
-use std::collections::{HashMap, HashSet};
+use async_graphql::{Context, Object, Result};
+use models::{entity::smart_list_view, shared::enums::UserPermission};
 
 #[derive(Default, Clone, Copy)]
 pub struct SmartListViewQuery;
@@ -43,9 +20,9 @@ impl SmartListViewQuery {
 			.all(conn)
 			.await?;
 
-		Ok(smart_list_views
+		smart_list_views
 			.into_iter()
-			.map(SmartListView::from)
-			.collect())
+			.map(SmartListView::try_from)
+			.collect::<Result<Vec<_>, _>>()
 	}
 }

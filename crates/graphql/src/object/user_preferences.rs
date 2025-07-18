@@ -1,19 +1,6 @@
-use async_graphql::{ComplexObject, Context, Result, SimpleObject};
+use async_graphql::{ComplexObject, SimpleObject};
 
-use models::{
-	entity::user_preferences,
-	shared::{
-		arrangement::Arrangement, enums::UserPermission, permission_set::PermissionSet,
-	},
-};
-
-use crate::{
-	guard::{PermissionGuard, SelfGuard, ServerOwnerGuard},
-	pagination::{PaginatedResponse, Pagination, PaginationValidator},
-	query::media::MediaQuery,
-};
-
-use super::media::Media;
+use models::{entity::user_preferences, shared::arrangement::Arrangement};
 
 #[derive(Debug, SimpleObject)]
 #[graphql(complex)]

@@ -1,5 +1,5 @@
 import { cn } from '@stump/components'
-import { Library, Series, SmartListItemGroup } from '@stump/sdk'
+import { SmartListGroupedItem } from '@stump/graphql'
 import {
 	ExpandedState,
 	flexRender,
@@ -22,7 +22,7 @@ import SmartListBookTable from './SmartListBookTable'
 import TableHeaderActions from './TableHeaderActions'
 
 type Props = {
-	items: SmartListItemGroup<Series>[] | SmartListItemGroup<Library>[]
+	items: SmartListGroupedItem[]
 }
 
 // TODO: virtualization
@@ -36,15 +36,15 @@ export default function GroupedSmartListItemTable({ items }: Props) {
 
 	const [expanded, setExpanded] = useState<ExpandedState>({})
 
-	const isGroupedBySeries = 'library_id' in (items[0]?.entity ?? {})
+	const isGroupedBySeries = items[0]?.entity.__typename === 'Series'
 
 	/**
 	 * The columns selected in the working view
 	 */
 	const columns = useMemo(
 		() =>
-			workingView?.group_columns?.length
-				? buildColumns(isGroupedBySeries, workingView.group_columns)
+			workingView?.groupColumns?.length
+				? buildColumns(isGroupedBySeries, workingView.groupColumns)
 				: buildDefaultColumns(isGroupedBySeries),
 		[workingView, isGroupedBySeries],
 	)
@@ -52,7 +52,7 @@ export default function GroupedSmartListItemTable({ items }: Props) {
 	/**
 	 * The current sorting state as it is stored in the working view
 	 */
-	const sorting = useMemo(() => workingView?.group_sorting ?? [], [workingView])
+	const sorting = useMemo(() => workingView?.groupSorting ?? [], [workingView])
 	/**
 	 * A callback to update the sorting state of the table. This updates the current working view
 	 */
@@ -61,17 +61,18 @@ export default function GroupedSmartListItemTable({ items }: Props) {
 			if (typeof updaterOrValue === 'function') {
 				const updated = updaterOrValue(sorting)
 				updateWorkingView({
-					group_sorting: updated.length ? updated : undefined,
+					groupSorting: updated.length ? updated : undefined,
 				})
 			} else {
 				updateWorkingView({
-					group_sorting: updaterOrValue.length ? updaterOrValue : undefined,
+					groupSorting: updaterOrValue.length ? updaterOrValue : undefined,
 				})
 			}
 		},
 		[updateWorkingView, sorting],
 	)
 
+	// TODO(graphql): fix this typing
 	const table = useReactTable({
 		columns,
 		data: items,

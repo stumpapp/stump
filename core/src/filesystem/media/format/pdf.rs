@@ -218,7 +218,7 @@ impl FileConverter for PdfProcessor {
 		let render_config = PdfRenderConfig::new();
 
 		let output_format =
-			into_image_format(format.clone().unwrap_or(SupportedImageFormat::Png));
+			into_image_format(format.unwrap_or(SupportedImageFormat::Png));
 
 		let converted_pages = iter
 			.enumerate()

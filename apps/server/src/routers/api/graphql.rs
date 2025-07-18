@@ -1,7 +1,4 @@
-use crate::middleware::{
-	auth::auth_middleware,
-	host::{HostDetails, HostExtractor},
-};
+use crate::middleware::{auth::auth_middleware, host::HostExtractor};
 use async_graphql::http::{
 	playground_source, GraphQLPlaygroundConfig, ALL_WEBSOCKET_PROTOCOLS,
 };

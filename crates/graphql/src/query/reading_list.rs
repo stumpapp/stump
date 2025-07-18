@@ -28,7 +28,7 @@ impl ReadingListQuery {
 	) -> Result<PaginatedResponse<ReadingList>> {
 		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
-		get_paginated_reading_list(&user, conn, pagination).await
+		get_paginated_reading_list(user, conn, pagination).await
 	}
 
 	/// Retrieves a reading list by ID for the current user.
@@ -39,7 +39,7 @@ impl ReadingListQuery {
 		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let query = reading_list::Entity::find_for_user_and_id(user, 1, &id.to_string())
+		let query = reading_list::Entity::find_for_user_and_id(user, 1, id.as_ref())
 			.into_model::<reading_list::Model>()
 			.one(conn)
 			.await?;

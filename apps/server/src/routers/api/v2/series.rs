@@ -40,7 +40,7 @@ pub(crate) async fn get_series_thumbnail(
 	config: &StumpConfig,
 ) -> APIResult<(ContentType, Vec<u8>)> {
 	let generated_thumb =
-		get_thumbnail(config.get_thumbnails_dir(), id, image_format.clone()).await?;
+		get_thumbnail(config.get_thumbnails_dir(), id, image_format).await?;
 
 	match (generated_thumb, first_book) {
 		(Some(result), _) => Ok(result),

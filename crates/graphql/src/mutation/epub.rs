@@ -173,7 +173,7 @@ impl EpubMutation {
 		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let bookmark = bookmark::Entity::find_for_user(&user)
+		let bookmark = bookmark::Entity::find_for_user(user)
 			.filter(bookmark::Column::Epubcfi.eq(epubcfi))
 			.one(conn)
 			.await?

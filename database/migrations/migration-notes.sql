@@ -552,5 +552,22 @@ FROM "last_library_visits";
 DROP TABLE "last_library_visits";
 ALTER TABLE "new_last_library_visits"
     RENAME TO "last_library_visits";
+-- Changes:
+-- 1. id is now an autoincrementing integer to smart_list_views
+CREATE TABLE temp_smart_list_views (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    list_id TEXT NOT NULL,
+    data BLOB NOT NULL,
+    CONSTRAINT smart_list_views_list_id_fkey FOREIGN KEY (list_id) REFERENCES smart_lists(id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+INSERT INTO temp_smart_list_views(name, list_id, data)
+SELECT name,
+    list_id,
+    data
+FROM smart_list_views;
+DROP TABLE smart_list_views;
+ALTER TABLE temp_smart_list_views
+    RENAME TO smart_list_views;
 PRAGMA foreign_keys = ON;
 COMMIT;

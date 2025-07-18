@@ -29,6 +29,7 @@ pub trait IntoFilter {
 #[derive(OneofObject, Clone, Debug, Serialize, Deserialize)]
 #[graphql(concrete(name = "FieldFilterString", params(String)))]
 #[graphql(concrete(name = "FieldFilterFileStatus", params(FileStatus)))]
+#[serde(rename_all = "camelCase")]
 pub enum StringLikeFilter<T>
 where
 	T: InputType,
@@ -91,6 +92,7 @@ where
 #[graphql(concrete(name = "NumericRangeU32", params(u32)))]
 #[graphql(concrete(name = "NumericRangeU64", params(u64)))]
 #[graphql(concrete(name = "NumericRangeDateTime", params(DateTimeWithTimeZone)))]
+#[serde(rename_all = "camelCase")]
 pub struct NumericRange<T>
 where
 	T: InputType,
@@ -107,6 +109,7 @@ where
 #[graphql(concrete(name = "NumericFilterU32", params(u32)))]
 #[graphql(concrete(name = "NumericFilterU64", params(u64)))]
 #[graphql(concrete(name = "NumericFilterDateTime", params(DateTimeWithTimeZone)))]
+#[serde(rename_all = "camelCase")]
 pub enum NumericFilter<T>
 where
 	T: InputType,
@@ -153,6 +156,7 @@ where
 
 #[derive(OneofObject, Clone, Debug, Serialize, Deserialize)]
 #[graphql(concrete(name = "ComputedFilterReadingStatus", params(ReadingStatus)))]
+#[serde(rename_all = "camelCase")]
 pub enum ConceptualFilter<T>
 where
 	T: InputType,

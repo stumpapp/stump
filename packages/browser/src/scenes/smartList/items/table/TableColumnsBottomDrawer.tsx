@@ -19,18 +19,18 @@ import { columnOptionMap as mediaColumnOptionMap } from './mediaColumns'
 export default function TableColumnsBottomDrawer() {
 	const [isOpen, setIsOpen] = useState(false)
 	const {
-		list: { default_grouping },
+		list: { defaultGrouping },
 	} = useSmartListContext()
 	const {
 		workingView: {
-			book_columns: selectedBookColumns,
-			group_columns: selectedGroupColumns,
-			enable_multi_sort,
+			bookColumns: selectedBookColumns,
+			groupColumns: selectedGroupColumns,
+			enableMultiSort,
 		},
 		updateWorkingView,
 	} = useSafeWorkingView()
 
-	const isGrouped = !default_grouping || default_grouping !== 'BY_BOOKS'
+	const isGrouped = !defaultGrouping || defaultGrouping !== 'BY_BOOKS'
 
 	/**
 	 * The local state to track the selected columns for the book table(s). This will be used to
@@ -60,7 +60,7 @@ export default function TableColumnsBottomDrawer() {
 	/**
 	 * The local state to track whether multi-sort is enabled
 	 */
-	const [multiSort, setMultiSort] = useState(() => enable_multi_sort ?? false)
+	const [multiSort, setMultiSort] = useState(() => enableMultiSort ?? false)
 
 	/**
 	 * The options available to the user to select from
@@ -75,7 +75,7 @@ export default function TableColumnsBottomDrawer() {
 		[bookColumnState],
 	)
 
-	const isGroupedBySeries = default_grouping === 'BY_SERIES'
+	const isGroupedBySeries = defaultGrouping === 'BY_SERIES'
 	const groupColumnOptions = useMemo(() => {
 		if (isGrouped) {
 			const all = getGroupColumnOptionMap(isGroupedBySeries)
@@ -122,9 +122,9 @@ export default function TableColumnsBottomDrawer() {
 			return
 		}
 
-		const enable_multi_sort = multiSort || undefined
+		const enableMultiSort = multiSort || undefined
 
-		updateWorkingView({ book_columns: bookColumns, enable_multi_sort, group_columns: groupColumns })
+		updateWorkingView({ bookColumns: bookColumns, enableMultiSort, groupColumns: groupColumns })
 		setIsOpen(false)
 	}
 
@@ -158,8 +158,8 @@ export default function TableColumnsBottomDrawer() {
 	 * An effect to update the local multi-sort state whenever the working view changes
 	 */
 	useEffect(() => {
-		setMultiSort(enable_multi_sort ?? false)
-	}, [enable_multi_sort])
+		setMultiSort(enableMultiSort ?? false)
+	}, [enableMultiSort])
 
 	const handleOpenChanged = (nowOpen: boolean) => {
 		if (!nowOpen) {

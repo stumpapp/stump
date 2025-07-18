@@ -1,10 +1,11 @@
-import { useSmartListItemsQuery } from '@stump/client'
 import { cn } from '@stump/components'
+import { Media, SmartListGroupedItem } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 
 import { SceneContainer } from '@/components/container'
 
 import { useSmartListContext } from '../context'
+import { useSmartListItems } from '../smartListGraphQL'
 import { GroupedSmartListItemList } from './list'
 import { GroupedSmartListItemTable, SmartListBookTable } from './table'
 
@@ -16,9 +17,9 @@ export default function UserSmartListItemsScene() {
 		layout,
 	} = useSmartListContext()
 
-	const { items, isLoading } = useSmartListItemsQuery({ id })
+	const { items, isLoading } = useSmartListItems({ id })
 
-	if (isLoading) {
+	if (isLoading || !items) {
 		return null
 	}
 
@@ -29,18 +30,17 @@ export default function UserSmartListItemsScene() {
 	}
 
 	const renderContent = () => {
-		const isGrouped = items.type !== 'Books'
-
+		const isGrouped = 'items' in items
 		if (isGrouped) {
 			return layout === 'table' ? (
-				<GroupedSmartListItemTable items={items.items} />
+				<GroupedSmartListItemTable items={items.items as SmartListGroupedItem[]} />
 			) : (
-				<GroupedSmartListItemList items={items.items} />
+				<GroupedSmartListItemList items={items.items as SmartListGroupedItem[]} />
 			)
 		}
 
 		return layout === 'table' ? (
-			<SmartListBookTable books={items.items} />
+			<SmartListBookTable books={items.books as Media[]} />
 		) : (
 			<pre className="text-xs text-foreground-subtle">{JSON.stringify({ items }, null, 2)}</pre>
 		)

@@ -787,12 +787,12 @@
 									"name": "Filnamn",
 									"size": "Storlek",
 									"extension": "Filnamnstillägg",
-									"created_at": "Skapad vid",
-									"updated_at": "Uppdaterad vid",
 									"status": "Status",
 									"path": "Sökväg",
 									"pages": "Sidor",
-									"tags": "Taggar"
+									"tags": "Taggar",
+									"createdAt": "Skapad vid",
+									"updatedAt": "Uppdaterad vid"
 								}
 							},
 							"book_meta": {
@@ -801,7 +801,6 @@
 									"title": "Titel",
 									"summary": "Sammanfattning",
 									"notes": "Anteckningar",
-									"genre": "Genre",
 									"writers": "Författare",
 									"pencillers": "Tecknare",
 									"inkers": "Tuschare",
@@ -809,10 +808,11 @@
 									"editors": "Redaktörer",
 									"publisher": "Utgivare",
 									"colorists": "Färgläggare",
-									"cover_artists": "Omslagsmålare",
 									"links": "Länkar",
 									"characters": "Karaktärer",
-									"teams": "Team"
+									"teams": "Team",
+									"genres": "Genre",
+									"coverArtists": "Omslagsmålare"
 								}
 							},
 							"series": {
@@ -825,16 +825,16 @@
 							"series_meta": {
 								"label": "Seriens Meta",
 								"attributes": {
-									"age_rating": "Åldersgräns",
 									"title": "Titel",
 									"summary": "Sammanfattning",
-									"meta_type": "Typ",
 									"publisher": "Utgivare",
 									"imprint": "Imprint",
 									"comicid": "Comic ID",
 									"booktype": "Boktyp",
 									"status": "Status",
-									"volume": "Volym"
+									"volume": "Volym",
+									"metaType": "Typ",
+									"ageRating": "Åldersgräns"
 								}
 							},
 							"library": {

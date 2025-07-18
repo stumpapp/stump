@@ -13,7 +13,7 @@ export default function SavedViewSelector() {
 		workingView,
 		selectedView,
 		selectStoredView,
-		list: { saved_views },
+		list: { views },
 	} = useSmartListContext()
 
 	const translateKey = useCallback((key: string) => t(withLocaleKey(key)), [t])
@@ -26,13 +26,13 @@ export default function SavedViewSelector() {
 	 * the smart list
 	 */
 	const options = useMemo(() => {
-		const baseOptions = (saved_views ?? []).map(({ name }) => ({ label: name, value: name }))
+		const baseOptions = (views ?? []).map(({ name }) => ({ label: name, value: name }))
 		if (baseOptions.length) {
 			return [{ label: defaultViewLabel, value: '' }, ...baseOptions]
 		} else {
 			return baseOptions
 		}
-	}, [saved_views, defaultViewLabel])
+	}, [views, defaultViewLabel])
 
 	/**
 	 * The empty option to display when there are no saved views. This will be undefined if there are
@@ -55,16 +55,16 @@ export default function SavedViewSelector() {
 			if (!name) {
 				selectStoredView(undefined)
 			} else {
-				const view = saved_views?.find((view) => view.name === name)
+				const view = views?.find((view) => view.name === name)
 				if (view) {
 					selectStoredView(view)
 				}
 			}
 		},
-		[saved_views, selectStoredView],
+		[views, selectStoredView],
 	)
 
-	const isDisabled = !saved_views || !saved_views.length
+	const isDisabled = !views || !views.length
 
 	return (
 		<NativeSelect

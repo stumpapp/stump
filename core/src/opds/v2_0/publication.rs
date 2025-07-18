@@ -159,7 +159,7 @@ impl OPDSPublication {
 		let description = metadata.summary.clone();
 
 		let page_dimensions = page_dimension::Entity::find()
-			.filter(page_dimension::Column::MetadataId.eq(metadata.id.clone()))
+			.filter(page_dimension::Column::MetadataId.eq(metadata.id))
 			.one(conn)
 			.await?
 			.map(|pd| pd.dimensions.dimensions)

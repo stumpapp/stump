@@ -14,6 +14,7 @@ use strum::{Display, EnumString};
 	Debug,
 	Clone,
 	Default,
+	Enum,
 	EnumIter,
 	PartialEq,
 	Serialize,

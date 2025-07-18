@@ -1,6 +1,6 @@
 use crate::guard::PermissionGuard;
 use crate::{data::CoreContext, object::emailer::Emailer};
-use async_graphql::{Context, Object, Result, ID};
+use async_graphql::{Context, Object, Result};
 use models::{entity::emailer, shared::enums::UserPermission};
 use sea_orm::prelude::*;
 

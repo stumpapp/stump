@@ -52,7 +52,7 @@ export default function RangeValue({ def: { field, value }, idx }: Props) {
 					<>
 						<DatePicker
 							placeholder={t(getKey('from.date'))}
-							selected={value.from ? dayjs(value.from).toDate() : undefined}
+							selected={value && value.from ? dayjs(value.from).toDate() : undefined}
 							onChange={changeHandler('from')}
 							className="md:w-52"
 							popover={{
@@ -61,7 +61,7 @@ export default function RangeValue({ def: { field, value }, idx }: Props) {
 						/>
 						<DatePicker
 							placeholder={t(getKey('to.date'))}
-							selected={value.to ? dayjs(value.to).toDate() : undefined}
+							selected={value && value.to ? dayjs(value.to).toDate() : undefined}
 							onChange={changeHandler('to')}
 							className="md:w-52"
 							popover={{

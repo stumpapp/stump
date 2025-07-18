@@ -86,15 +86,15 @@ where
 		.iter()
 		.map(|id| id.to_string())
 		.collect::<Vec<_>>();
-	let books = get_books(&user, conn, &media_ids).await?;
+	let books = get_books(user, conn, &media_ids).await?;
 	let recipients = get_and_validate_recipients(user, conn, &input.send_to).await?;
 
 	let mut errors = Vec::new();
 	let mut record_creates = Vec::new();
 
-	let mut attachment_chunks =
+	let attachment_chunks =
 		books.chunks(emailer.max_num_attachments.unwrap_or(1).try_into()?);
-	while let Some(chunk) = attachment_chunks.next() {
+	for chunk in attachment_chunks {
 		let result =
 			send_attachments(user, &emailer, chunk, &recipients, &sender).await?;
 		record_creates.extend(result.0);
@@ -599,7 +599,7 @@ mod tests {
 		let sender = MockEmailerSender { is_error: false };
 
 		let (records, errors) =
-			send_attachments(&user, &emailer, &vec![], &recipients, &sender)
+			send_attachments(&user, &emailer, &[], &recipients, &sender)
 				.await
 				.unwrap();
 
@@ -663,7 +663,7 @@ mod tests {
 
 	#[tokio::test]
 	async fn test_get_attachments_empty() {
-		let (meta_data, payload) = get_attachments(&vec![], None).await.unwrap();
+		let (meta_data, payload) = get_attachments(&[], None).await.unwrap();
 		let meta = AttachmentMetaModel::vec_from_data(&meta_data).unwrap();
 		assert_eq!(payload.len(), 0);
 		assert_eq!(meta.len(), 0);
@@ -675,7 +675,7 @@ mod tests {
 		book.path = get_test_epub_path();
 		let (meta_data, payload) = get_attachments(&[book], None).await.unwrap();
 		let meta = AttachmentMetaModel::vec_from_data(&meta_data).unwrap();
-		assert!(payload.len() > 0);
+		assert!(!payload.is_empty());
 		assert_eq!(meta.len(), 1);
 		assert_eq!(meta[0].media_id, Some("1".to_string()));
 		assert_eq!(meta[0].filename, "book.epub");
@@ -872,7 +872,7 @@ mod tests {
 			.append_query_results::<registered_email_device::Model, _, _>(vec![vec![]])
 			.into_connection();
 
-		let results = get_and_validate_recipients(&user, &conn, &vec![])
+		let results = get_and_validate_recipients(&user, &conn, &[])
 			.await
 			.unwrap();
 		assert_eq!(results.len(), 0);

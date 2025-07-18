@@ -802,12 +802,12 @@
 									"name": "Filename",
 									"size": "Size",
 									"extension": "Extension",
-									"created_at": "Created at",
-									"updated_at": "Updated at",
 									"status": "Status",
 									"path": "Path",
 									"pages": "Pages",
-									"tags": "Tags"
+									"tags": "Tags",
+									"createdAt": "Created at",
+									"updatedAt": "Updated at"
 								}
 							},
 							"book_meta": {
@@ -816,7 +816,6 @@
 									"title": "Title",
 									"summary": "Summary",
 									"notes": "Notes",
-									"genre": "Genre",
 									"writers": "Writers",
 									"pencillers": "Pencillers",
 									"inkers": "Inkers",
@@ -824,10 +823,11 @@
 									"editors": "Editors",
 									"publisher": "Publisher",
 									"colorists": "Colorist",
-									"cover_artists": "Cover artists",
 									"links": "Links",
 									"characters": "Characters",
-									"teams": "Teams"
+									"teams": "Teams",
+									"genres": "Genre",
+									"coverArtists": "Cover artists"
 								}
 							},
 							"series": {
@@ -840,16 +840,16 @@
 							"series_meta": {
 								"label": "Series Meta",
 								"attributes": {
-									"age_rating": "Age rating",
 									"title": "Title",
 									"summary": "Summary",
-									"meta_type": "Type",
 									"publisher": "Publisher",
 									"imprint": "Imprint",
 									"comicid": "Comic ID",
 									"booktype": "Book type",
 									"status": "Status",
-									"volume": "Volume"
+									"volume": "Volume",
+									"metaType": "Type",
+									"ageRating": "Age rating"
 								}
 							},
 							"library": {

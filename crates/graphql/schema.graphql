@@ -1,3 +1,13 @@
+"""
+The different roles a user may have for a role-based access control system scoped
+to a specific entity
+"""
+enum AccessRole {
+	READER
+	WRITER
+	CO_CREATOR
+}
+
 type ActiveReadingSession {
 	id: Int!
 	page: Int
@@ -1244,8 +1254,8 @@ type Mutation {
 	updateEmailDevice(id: Int!, input: EmailDeviceInput!): RegisteredEmailDevice!
 	patchEmailDevice(id: Int!, input: EmailDeviceInput!): Int!
 	deleteEmailDevice(id: Int!): RegisteredEmailDevice!
-	createSmartListView(input: SaveSmartListViewInput!): SmartListView!
-	updateSmartListView(input: SaveSmartListViewInput!): SmartListView!
+	createSmartListView(input: SaveSmartListView!): SmartListView!
+	updateSmartListView(originalName: String!, input: SaveSmartListView!): SmartListView!
 	deleteSmartListView(id: ID!, name: String!): SmartListView!
 	createScheduledJobConfig(input: ScheduledJobConfigInput!): ScheduledJobConfig!
 	updateScheduledJobConfig(id: Int!, input: ScheduledJobConfigInput!): ScheduledJobConfig!
@@ -1584,10 +1594,15 @@ input SaveSmartListInput {
 	visibility: EntityVisibility!
 }
 
-input SaveSmartListViewInput {
+input SaveSmartListView {
 	name: String!
 	listId: ID!
-	config: String!
+	bookColumns: [SmartListViewColumnInput!]!
+	groupColumns: [SmartListViewColumnInput!]!
+	bookSorting: [SmartListViewSortInput!]!
+	groupSorting: [SmartListViewSortInput!]!
+	enableMultiSort: Boolean
+	search: String
 }
 
 type ScaleEvenlyByFactor {
@@ -1854,7 +1869,32 @@ type SmartListView {
 	id: Int!
 	name: String!
 	listId: String!
-	config: String!
+	bookColumns: [SmartListViewColumn!]!
+	groupColumns: [SmartListViewColumn!]!
+	bookSorting: [SmartListViewSort!]!
+	groupSorting: [SmartListViewSort!]!
+	enableMultiSort: Boolean
+	search: String
+}
+
+type SmartListViewColumn {
+	id: String!
+	position: Int!
+}
+
+input SmartListViewColumnInput {
+	id: String!
+	position: Int!
+}
+
+type SmartListViewSort {
+	id: String!
+	desc: Boolean!
+}
+
+input SmartListViewSortInput {
+	id: String!
+	desc: Boolean!
 }
 
 input SmartListsInput {

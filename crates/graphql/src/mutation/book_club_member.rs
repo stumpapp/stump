@@ -19,7 +19,7 @@ impl BookClubMemberMutation {
 	) -> Result<BookClubMember> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 		let created_member = input
-			.into_active_model(&book_club_id.to_string())
+			.into_active_model(book_club_id.as_ref())
 			.insert(conn)
 			.await?;
 

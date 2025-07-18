@@ -1,6 +1,6 @@
 import { useSDK } from '@stump/client'
 import { Accordion, cn, Text } from '@stump/components'
-import { Media } from '@stump/sdk'
+import { Media } from '@stump/graphql'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { useCallback, useRef } from 'react'
 import { Link } from 'react-router-dom'
@@ -8,7 +8,6 @@ import { Link } from 'react-router-dom'
 import { EntityImage } from '@/components/entity'
 import { usePreferences } from '@/hooks'
 import paths from '@/paths'
-import { formatBookName } from '@/utils/format'
 
 export const ACCORDION_CONTENT_ITEM_HEIGHT = 64
 
@@ -78,7 +77,7 @@ export default function GroupedSmartListItemListGroupContent({ books }: Props) {
 										/>
 										<div className="flex flex-1 flex-col space-y-1.5 self-start px-2 pt-2">
 											<Text size="sm" className="line-clamp-1">
-												{formatBookName(book)}
+												{book.resolvedName}
 											</Text>
 										</div>
 									</Link>

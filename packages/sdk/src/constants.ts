@@ -33,4 +33,13 @@ export const cacheKeys = {
 	users: 'users',
 	user: 'user',
 	loginActivity: 'loginActivity',
+	smartLists: 'smartLists',
+	smartListNames: 'smartListNames',
+	smartListDelete: 'smartListDelete',
+	smartListById: 'smartListById',
+	smartListMeta: 'smartListMeta',
+	smartListUpdate: 'smartListUpdate',
+	smartListViewCreate: 'smartListCreate',
+	smartListViewUpdate: 'smartListUpdate',
+	smartListItems: 'smartListItems',
 } as const

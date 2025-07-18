@@ -5,9 +5,9 @@ use crate::{
 	utils::http::ImageResponse,
 };
 use axum::{
-	extract::{DefaultBodyLimit, Path, State},
+	extract::{Path, State},
 	middleware,
-	routing::{get, post},
+	routing::get,
 	Extension, Router,
 };
 use graphql::data::RequestContext;
@@ -54,7 +54,7 @@ pub(crate) async fn get_library_thumbnail(
 	config: &StumpConfig,
 ) -> APIResult<(ContentType, Vec<u8>)> {
 	let generated_thumb =
-		get_thumbnail(config.get_thumbnails_dir(), id, image_format.clone()).await?;
+		get_thumbnail(config.get_thumbnails_dir(), id, image_format).await?;
 
 	match (generated_thumb, first_series) {
 		(Some(result), _) => Ok(result),

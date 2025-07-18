@@ -75,7 +75,7 @@ impl Entity {
 		Entity::find()
 			.inner_join(book_club_schedule::Entity)
 			.filter(book_club_schedule::Column::BookClubId.eq(book_club_id))
-			.filter(Column::EndAt.gte(date.clone()))
+			.filter(Column::EndAt.gte(date))
 			.order_by_asc(Column::StartAt)
 	}
 }

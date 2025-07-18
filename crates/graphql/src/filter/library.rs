@@ -1,12 +1,15 @@
 use async_graphql::InputObject;
 use models::entity::library;
 use serde::{Deserialize, Serialize};
+use serde_with::skip_serializing_none;
 
 use super::{apply_string_filter, IntoFilter, StringLikeFilter};
 
 // TODO: Support filter by tags (requires join logic)
 
+#[skip_serializing_none]
 #[derive(InputObject, Clone, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct LibraryFilterInput {
 	#[graphql(default)]
 	pub id: Option<StringLikeFilter<String>>,

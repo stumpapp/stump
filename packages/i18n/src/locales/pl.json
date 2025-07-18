@@ -787,12 +787,12 @@
 									"name": "Nazwa pliku",
 									"size": "Rozmiar",
 									"extension": "Rozszerzenie",
-									"created_at": "Utworzono",
-									"updated_at": "Zaktualizowano",
 									"status": "Status",
 									"path": "Ścieżka",
 									"pages": "Strony",
-									"tags": "Etykiety"
+									"tags": "Etykiety",
+									"createdAt": "Utworzono",
+									"updatedAt": "Zaktualizowano"
 								}
 							},
 							"book_meta": {
@@ -801,7 +801,6 @@
 									"title": "Tytuł",
 									"summary": "Podsumowanie",
 									"notes": "Notatki",
-									"genre": "Gatunek",
 									"writers": "Pisarze",
 									"pencillers": "Rysownicy",
 									"inkers": "Kreślarz",
@@ -809,10 +808,11 @@
 									"editors": "Edytorzy",
 									"publisher": "Wydawca",
 									"colorists": "Kolorysta",
-									"cover_artists": "Artysta okładki",
 									"links": "Odnośniki",
 									"characters": "Postaci",
-									"teams": "Zespoły"
+									"teams": "Zespoły",
+									"genres": "Gatunek",
+									"coverArtists": "Artysta okładki"
 								}
 							},
 							"series": {
@@ -825,16 +825,16 @@
 							"series_meta": {
 								"label": "Metadane serii",
 								"attributes": {
-									"age_rating": "Klasyfikacja wiekowa",
 									"title": "Tytuł",
 									"summary": "Podsumowanie",
-									"meta_type": "Typ",
 									"publisher": "Wydawca",
 									"imprint": "Imprint",
 									"comicid": "Identyfikator komiksu",
 									"booktype": "Typ książki",
 									"status": "Status",
-									"volume": "Wolumen"
+									"volume": "Wolumen",
+									"metaType": "Typ",
+									"ageRating": "Klasyfikacja wiekowa"
 								}
 							},
 							"library": {

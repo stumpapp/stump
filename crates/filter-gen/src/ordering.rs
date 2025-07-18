@@ -209,7 +209,7 @@ fn generate_enum_def(
 	col_map: &HashMap<syn::Ident, syn::Ident>,
 ) -> Result<TokenStream, syn::Error> {
 	// generate the enum variants
-	let enum_variants = get_enum_variants(&fields, col_map, ident.span())?;
+	let enum_variants = get_enum_variants(fields, col_map, ident.span())?;
 	if enum_variants.is_empty() {
 		return Err(Error::new(
 			ident.span(),
@@ -230,14 +230,14 @@ fn get_ident_name(
 	input: &syn::DeriveInput,
 	span: proc_macro2::Span,
 ) -> Result<syn::Ident, syn::Error> {
-	if let Ok(graphql_name) = graphql_name(&input) {
+	if let Ok(graphql_name) = graphql_name(input) {
 		if let Some(name) = graphql_name {
 			Ok(name)
 		} else {
 			Ok(input.ident.clone())
 		}
 	} else {
-		return Err(Error::new(span, "Failed to parse graphql name attribute"));
+		Err(Error::new(span, "Failed to parse graphql name attribute"))
 	}
 }
 
@@ -358,7 +358,7 @@ mod tests {
 			_ => panic!("Expected named fields"),
 		};
 
-		let attrs0 = fields.iter().nth(0).unwrap().attrs.clone();
+		let attrs0 = fields.iter().next().unwrap().attrs.clone();
 		let attrs1 = fields.iter().nth(1).unwrap().attrs.clone();
 
 		let attr = find_attr("sea_orm", "enum_name", &attrs0).unwrap();

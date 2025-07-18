@@ -1,13 +1,16 @@
 use async_graphql::InputObject;
 use models::entity::media_metadata;
 use serde::{Deserialize, Serialize};
+use serde_with::skip_serializing_none;
 
 use super::{
 	apply_numeric_filter, apply_string_filter, IntoFilter, NumericFilter,
 	StringLikeFilter,
 };
 
+#[skip_serializing_none]
 #[derive(InputObject, Clone, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct MediaMetadataFilterInput {
 	#[graphql(default)]
 	pub title: Option<StringLikeFilter<String>>,
@@ -157,5 +160,45 @@ impl IntoFilter for MediaMetadataFilterInput {
 				self.series
 					.map(|f| apply_numeric_filter(media_metadata::Column::Series, f)),
 			)
+	}
+}
+
+#[cfg(test)]
+mod tests {
+
+	use super::*;
+
+	use pretty_assertions::assert_eq;
+
+	#[test]
+	fn test_media_metadata_filter_null_input_serialization() {
+		let filter = MediaMetadataFilterInput {
+			title: Some(StringLikeFilter::Eq(String::from("Test Title"))),
+			publisher: None,
+			genre: None,
+			characters: None,
+			colorists: None,
+			writers: None,
+			pencillers: None,
+			letterers: None,
+			cover_artists: None,
+			inkers: None,
+			editors: None,
+			age_rating: None,
+			year: None,
+			month: None,
+			day: None,
+			links: None,
+			teams: None,
+			summary: None,
+			series: None,
+			_and: None,
+			_not: None,
+			_or: None,
+		};
+
+		let serialized = serde_json::to_string(&filter).unwrap();
+		let expected = r#"{"title":{"eq":"Test Title"}}"#;
+		assert_eq!(serialized, expected);
 	}
 }

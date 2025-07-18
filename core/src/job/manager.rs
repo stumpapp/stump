@@ -11,9 +11,7 @@ use sea_orm::{
 use tokio::sync::{broadcast, mpsc, RwLock};
 
 use super::{error::JobManagerError, Executor, JobControllerCommand, Worker};
-use crate::{
-	config::StumpConfig, event::CoreEvent, job::JobStatus, prisma::PrismaClient,
-};
+use crate::{config::StumpConfig, event::CoreEvent, job::JobStatus};
 
 pub type JobManagerResult<T> = Result<T, JobManagerError>;
 

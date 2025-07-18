@@ -31,6 +31,7 @@ pub enum SmartListGroupJoiner {
 }
 
 #[derive(OneofObject, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub enum SmartListFilterInput {
 	Media(MediaFilterInput),
 	MediaMetadata(MediaMetadataFilterInput),

@@ -5,10 +5,7 @@ use crate::{
 	input::smart_lists::{
 		SmartListFilterGroupInput, SmartListFilterInput, SmartListsInput,
 	},
-	object::{
-		media::Media, smart_list_item::SmartListItems, smart_list_view::SmartListView,
-		smart_lists::SmartList,
-	},
+	object::{media::Media, smart_list_item::SmartListItems, smart_lists::SmartList},
 	query::media::{add_sessions_join_for_filter, should_add_sessions_join_for_filter},
 };
 use async_graphql::{Context, Object, Result, SimpleObject, ID};
@@ -16,7 +13,6 @@ use models::{
 	entity::{
 		library, media, series,
 		smart_list::{self},
-		smart_list_view,
 		user::AuthUser,
 	},
 	shared::enums::UserPermission,
@@ -126,25 +122,10 @@ impl SmartListsQuery {
 		txn.commit().await?;
 
 		Ok(Some(SmartListMeta {
-			matched_books: matched_books,
+			matched_books,
 			matched_series: matched_series.len() as i64,
 			matched_libraries: matched_libraries.len() as i64,
 		}))
-	}
-
-	#[graphql(guard = "PermissionGuard::one(UserPermission::AccessSmartList)")]
-	async fn smart_list_views(self, ctx: &Context<'_>) -> Result<Vec<SmartListView>> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
-		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
-
-		let smart_list_views = smart_list_view::Entity::find_by_user(user)
-			.all(conn)
-			.await?;
-
-		Ok(smart_list_views
-			.into_iter()
-			.map(SmartListView::from)
-			.collect())
 	}
 
 	#[graphql(guard = "PermissionGuard::one(UserPermission::AccessSmartList)")]
@@ -238,7 +219,7 @@ fn add_sessions_join(
 	if let Some(filter_group) = filter_using_session {
 		for filter in &filter_group.groups {
 			if let SmartListFilterInput::Media(media_filter) = filter {
-				return add_sessions_join_for_filter(user, &media_filter, query);
+				return add_sessions_join_for_filter(user, media_filter, query);
 			}
 		}
 	}

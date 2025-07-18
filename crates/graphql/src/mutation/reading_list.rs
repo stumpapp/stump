@@ -90,7 +90,7 @@ async fn create_reading_list_for_user_id(
 	input: ReadingListInput,
 	txn: &DatabaseTransaction,
 ) -> Result<reading_list::Model, DbErr> {
-	Ok(input.into_active_model(user_id).insert(txn).await?)
+	input.into_active_model(user_id).insert(txn).await
 }
 
 async fn create_reading_list_items(
@@ -109,9 +109,9 @@ async fn create_reading_list_items(
 		})
 		.collect::<Vec<_>>();
 
-	Ok(reading_list_item::Entity::insert_many(item_creates)
+	reading_list_item::Entity::insert_many(item_creates)
 		.exec_with_returning_many(txn)
-		.await?)
+		.await
 }
 
 async fn get_for_owner(

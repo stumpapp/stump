@@ -1,4 +1,4 @@
-import { useSmartListsQuery } from '@stump/client'
+import { useGraphQL, useSDK } from '@stump/client'
 import {
 	ButtonOrLink,
 	Heading,
@@ -8,6 +8,7 @@ import {
 	Text,
 	usePreviousIsDifferent,
 } from '@stump/components'
+import { graphql, SmartListsInput } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { Search } from 'lucide-react'
 import pluralize from 'pluralize'
@@ -25,6 +26,21 @@ import SmartListCard from './SmartListCard'
 
 const LOCALE_BASE_KEY = `userSmartListsScene`
 const withLocaleKey = (key: string) => `${LOCALE_BASE_KEY}.${key}`
+
+const query = graphql(`
+	query SmartListsWithSearch($input: SmartListsInput!) {
+		smartLists(input: $input) {
+			id
+			creatorId
+			description
+			defaultGrouping
+			filters
+			joiner
+			name
+			visibility
+		}
+	}
+`)
 
 export default function UserSmartListsScene() {
 	const { t } = useLocaleContext()
@@ -50,10 +66,15 @@ export default function UserSmartListsScene() {
 		}
 	}, [debouncedValue, setSearch, shouldUpdate])
 
-	const { lists, isLoading, isRefetching } = useSmartListsQuery({
-		params: {
+	const { sdk } = useSDK()
+	const {
+		data: { smartLists: lists } = {},
+		isLoading,
+		isRefetching,
+	} = useGraphQL(query, [sdk.cacheKeys.smartLists, search], {
+		input: {
 			search,
-		},
+		} as SmartListsInput,
 	})
 
 	if (isLoading) {

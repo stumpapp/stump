@@ -14,19 +14,12 @@ export const query = graphql(`
 			id
 			resolvedName
 			seriesId
+			extension
+			pages
 			metadata {
 				ageRating
-				characters
-				colorists
-				coverArtists
-				editors
 				genres
-				inkers
-				letterers
-				links
-				pencillers
 				publisher
-				teams
 				writers
 				year
 			}
@@ -49,10 +42,9 @@ interface MetadataTableItem {
 	searchKey: string
 }
 
-function build_metadata_table(
-	metadata: NonNullable<BookOverviewHeaderQuery['mediaById']>['metadata'] | null,
-): MetadataTableItem[] {
+function build_metadata_table(media: BookOverviewHeaderQuery['mediaById']): MetadataTableItem[] {
 	const table: MetadataTableItem[] = []
+	const metadata = media?.metadata
 
 	if (!metadata) {
 		return table
@@ -81,30 +73,27 @@ function build_metadata_table(
 
 	const age_rating_num = metadata.ageRating ?? 0
 	const year_num = metadata.year ?? 0
+	const is_epub = media?.extension === 'epub'
+	const pages = media?.pages ?? 0
 
 	const publishers = [metadata.publisher ?? '']
-	const characters = metadata.characters?.filter((c) => !!c) ?? []
-	const colorists = metadata.colorists?.filter((c) => !!c) ?? []
 	const writers = metadata.writers?.filter((w) => !!w) ?? []
-	const pencillers = metadata.pencillers?.filter((p) => !!p) ?? []
-	const inkers = metadata.inkers?.filter((i) => !!i) ?? []
-	const letterers = metadata.letterers?.filter((l) => !!l) ?? []
-	const editors = metadata.editors?.filter((e) => !!e) ?? []
 	const genres = metadata.genres?.filter((g) => !!g) ?? []
 	const age_rating = age_rating_num > 0 ? [age_rating_num.toString()] : []
 	const year = year_num > 0 ? [year_num.toString()] : []
 
-	add_to_table('writers', 'By ', writers, 'metadata[writer]')
+	if (is_epub) {
+		add_to_table('writers', 'By ', writers, 'metadata[writer]')
+	}
+
 	add_to_table('publisher', 'Publisher: ', publishers, 'metadata[publisher]')
-	add_to_table('genres', 'Genres: ', genres, 'metadata[genre]')
-	add_to_table('characters', 'Characters: ', characters, 'metadata[character]')
-	add_to_table('colorists', 'Colorists: ', colorists, 'metadata[colorist]')
-	add_to_table('pencillers', 'Pencillers: ', pencillers, 'metadata[penciller]')
-	add_to_table('inkers', 'Inkers: ', inkers, 'metadata[inker]')
-	add_to_table('letters', 'Letterers: ', letterers, 'metadata[letterer]')
-	add_to_table('editors', 'Editors: ', editors, 'metadata[editor]')
-	add_to_table('age_rating', 'Age Rating: ', age_rating, 'metadata[age_rating]')
+	add_to_table('genres', 'Genres: ', genres, 'metadata[genres]')
+	add_to_table('age_rating', 'Age Rating: ', age_rating, 'metadata[ageRating]')
 	add_to_table('year_published', 'Year: ', year, 'metadata[year]')
+
+	if (pages > 0) {
+		add_to_table('pages', 'Pages: ', [pages.toString()], 'metadata[pages]')
+	}
 
 	return table
 }
@@ -121,7 +110,7 @@ export default function BookOverviewSceneHeader({ id }: Props) {
 		throw new Error('Book not found')
 	}
 
-	const metadata_table = build_metadata_table(media.metadata)
+	const metadata_table = build_metadata_table(media)
 
 	return (
 		<div className="flex flex-col items-center text-center tablet:items-start tablet:text-left">
@@ -142,7 +131,7 @@ export default function BookOverviewSceneHeader({ id }: Props) {
 				</div>
 			)}
 
-			{media.seriesId && <BookLibrarySeriesLinks series_id={media.seriesId} />}
+			{media.seriesId && <BookLibrarySeriesLinks seriesId={media.seriesId} />}
 
 			<TagList tags={media.tags || null} baseUrl={paths.bookSearch()} />
 		</div>

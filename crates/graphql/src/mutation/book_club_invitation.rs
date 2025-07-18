@@ -60,7 +60,7 @@ async fn validate_book_club_invitation_input(
 	input: &BookClubInvitationInput,
 	conn: &DatabaseConnection,
 ) -> Result<()> {
-	let _book_club = get_book_club_for_admin(user, &id, conn)
+	let _book_club = get_book_club_for_admin(user, id, conn)
 		.await?
 		.ok_or("Book club not found or you lack permission to update")?;
 
@@ -86,7 +86,7 @@ async fn handle_book_club_invitation(
 	input: BookClubInvitationResponseInput,
 	conn: &DatabaseConnection,
 ) -> Result<book_club_invitation::Model> {
-	let invitation = get_book_club_invitation(&user, &id, conn).await?;
+	let invitation = get_book_club_invitation(user, id, conn).await?;
 
 	Ok(if !input.accept {
 		decline_invitation(invitation, conn).await?
@@ -101,7 +101,7 @@ async fn get_book_club_invitation(
 	conn: &DatabaseConnection,
 ) -> Result<book_club_invitation::Model> {
 	Ok(
-		book_club_invitation::Entity::find_for_user_and_id(user, &id.to_string())
+		book_club_invitation::Entity::find_for_user_and_id(user, id.as_ref())
 			.one(conn)
 			.await?
 			.ok_or("Invitation not found")?,
@@ -114,7 +114,7 @@ async fn decline_invitation(
 ) -> Result<book_club_invitation::Model> {
 	// TODO: soft delete?
 	invitation.clone().delete(conn).await?;
-	return Ok(invitation);
+	Ok(invitation)
 }
 
 async fn accept_invitation(

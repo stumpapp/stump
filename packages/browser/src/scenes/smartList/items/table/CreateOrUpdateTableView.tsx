@@ -19,7 +19,7 @@ type Props = {
 export default function CreateOrUpdateTableView({ isCreating, isOpen, onClose }: Props) {
 	const { t } = useLocaleContext()
 	const {
-		list: { saved_views },
+		list: { views },
 		selectedView,
 		saveWorkingView,
 		saveSelectedStoredView,
@@ -29,9 +29,7 @@ export default function CreateOrUpdateTableView({ isCreating, isOpen, onClose }:
 		defaultValues: {
 			name: isCreating ? '' : selectedView?.name || '',
 		},
-		resolver: zodResolver(
-			buildSchema(saved_views?.map((view) => view.name) || [], selectedView?.name),
-		),
+		resolver: zodResolver(buildSchema(views?.map((view) => view.name) || [], selectedView?.name)),
 	})
 
 	/**

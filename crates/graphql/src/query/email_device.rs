@@ -1,11 +1,8 @@
+use crate::data::CoreContext;
 use crate::guard::PermissionGuard;
 use crate::object::email_device::RegisteredEmailDevice;
-use crate::{data::CoreContext, object::emailer::Emailer};
-use async_graphql::{Context, Object, Result, ID};
-use models::{
-	entity::{emailer, registered_email_device},
-	shared::enums::UserPermission,
-};
+use async_graphql::{Context, Object, Result};
+use models::{entity::registered_email_device, shared::enums::UserPermission};
 use sea_orm::prelude::*;
 
 #[derive(Default)]

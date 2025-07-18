@@ -28,6 +28,16 @@ export type Scalars = {
   Upload: { input: any; output: any; }
 };
 
+/**
+ * The different roles a user may have for a role-based access control system scoped
+ * to a specific entity
+ */
+export enum AccessRole {
+  CoCreator = 'CO_CREATOR',
+  Reader = 'READER',
+  Writer = 'WRITER'
+}
+
 export type ActiveReadingSession = {
   __typename?: 'ActiveReadingSession';
   deviceId?: Maybe<Scalars['String']['output']>;
@@ -1425,7 +1435,7 @@ export type MutationCreateSmartListArgs = {
 
 
 export type MutationCreateSmartListViewArgs = {
-  input: SaveSmartListViewInput;
+  input: SaveSmartListView;
 };
 
 
@@ -1666,7 +1676,8 @@ export type MutationUpdateSmartListArgs = {
 
 
 export type MutationUpdateSmartListViewArgs = {
-  input: SaveSmartListViewInput;
+  input: SaveSmartListView;
+  originalName: Scalars['String']['input'];
 };
 
 
@@ -2224,10 +2235,15 @@ export type SaveSmartListInput = {
   visibility: EntityVisibility;
 };
 
-export type SaveSmartListViewInput = {
-  config: Scalars['String']['input'];
+export type SaveSmartListView = {
+  bookColumns: Array<SmartListViewColumnInput>;
+  bookSorting: Array<SmartListViewSortInput>;
+  enableMultiSort?: InputMaybe<Scalars['Boolean']['input']>;
+  groupColumns: Array<SmartListViewColumnInput>;
+  groupSorting: Array<SmartListViewSortInput>;
   listId: Scalars['ID']['input'];
   name: Scalars['String']['input'];
+  search?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type ScaleEvenlyByFactor = {
@@ -2508,10 +2524,37 @@ export type SmartListUngrouped = {
 
 export type SmartListView = {
   __typename?: 'SmartListView';
-  config: Scalars['String']['output'];
+  bookColumns: Array<SmartListViewColumn>;
+  bookSorting: Array<SmartListViewSort>;
+  enableMultiSort?: Maybe<Scalars['Boolean']['output']>;
+  groupColumns: Array<SmartListViewColumn>;
+  groupSorting: Array<SmartListViewSort>;
   id: Scalars['Int']['output'];
   listId: Scalars['String']['output'];
   name: Scalars['String']['output'];
+  search?: Maybe<Scalars['String']['output']>;
+};
+
+export type SmartListViewColumn = {
+  __typename?: 'SmartListViewColumn';
+  id: Scalars['String']['output'];
+  position: Scalars['Int']['output'];
+};
+
+export type SmartListViewColumnInput = {
+  id: Scalars['String']['input'];
+  position: Scalars['Int']['input'];
+};
+
+export type SmartListViewSort = {
+  __typename?: 'SmartListViewSort';
+  desc: Scalars['Boolean']['output'];
+  id: Scalars['String']['output'];
+};
+
+export type SmartListViewSortInput = {
+  desc: Scalars['Boolean']['input'];
+  id: Scalars['String']['input'];
 };
 
 export type SmartListsInput = {
@@ -3046,7 +3089,7 @@ export type BookOverviewHeaderQueryVariables = Exact<{
 }>;
 
 
-export type BookOverviewHeaderQuery = { __typename?: 'Query', mediaById?: { __typename?: 'Media', id: string, resolvedName: string, seriesId?: string | null, metadata?: { __typename?: 'MediaMetadata', ageRating?: number | null, characters: Array<string>, colorists: Array<string>, coverArtists: Array<string>, editors: Array<string>, genres: Array<string>, inkers: Array<string>, letterers: Array<string>, links: Array<string>, pencillers: Array<string>, publisher?: string | null, teams: Array<string>, writers: Array<string>, year?: number | null } | null, tags: Array<{ __typename?: 'Tag', id: number, name: string }> } | null };
+export type BookOverviewHeaderQuery = { __typename?: 'Query', mediaById?: { __typename?: 'Media', id: string, resolvedName: string, seriesId?: string | null, extension: string, pages: number, metadata?: { __typename?: 'MediaMetadata', ageRating?: number | null, genres: Array<string>, publisher?: string | null, writers: Array<string>, year?: number | null } | null, tags: Array<{ __typename?: 'Tag', id: number, name: string }> } | null };
 
 export type BooksAfterCurrentQueryQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -3110,6 +3153,18 @@ export type CreateLibrarySceneCreateLibraryMutationVariables = Exact<{
 
 
 export type CreateLibrarySceneCreateLibraryMutation = { __typename?: 'Mutation', createLibrary: { __typename?: 'Library', id: string } };
+
+export type CreateSmartListFormQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type CreateSmartListFormQuery = { __typename?: 'Query', smartLists: Array<{ __typename?: 'SmartList', name: string }> };
+
+export type CreateSmartListSceneMutationVariables = Exact<{
+  input: SaveSmartListInput;
+}>;
+
+
+export type CreateSmartListSceneMutation = { __typename?: 'Mutation', createSmartList: { __typename?: 'SmartList', id: string, name: string } };
 
 export type ContinueReadingMediaQueryQueryVariables = Exact<{
   pagination: Pagination;
@@ -3599,6 +3654,75 @@ export type UserTableQueryVariables = Exact<{
 
 export type UserTableQuery = { __typename?: 'Query', users: { __typename?: 'PaginatedUserResponse', nodes: Array<{ __typename?: 'User', id: string, avatarUrl?: string | null, username: string, isServerOwner: boolean, isLocked: boolean, createdAt: any, lastLogin?: any | null, loginSessionsCount: number }>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', totalPages: number, currentPage: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
 
+export type CreateSmartListViewMutationVariables = Exact<{
+  input: SaveSmartListView;
+}>;
+
+
+export type CreateSmartListViewMutation = { __typename?: 'Mutation', createSmartListView: { __typename?: 'SmartListView', id: number, listId: string, name: string, bookColumns: Array<{ __typename?: 'SmartListViewColumn', id: string, position: number }>, bookSorting: Array<{ __typename?: 'SmartListViewSort', id: string, desc: boolean }>, groupColumns: Array<{ __typename?: 'SmartListViewColumn', id: string, position: number }>, groupSorting: Array<{ __typename?: 'SmartListViewSort', id: string, desc: boolean }> } };
+
+export type UpdateSmartListViewMutationVariables = Exact<{
+  originalName: Scalars['String']['input'];
+  input: SaveSmartListView;
+}>;
+
+
+export type UpdateSmartListViewMutation = { __typename?: 'Mutation', updateSmartListView: { __typename?: 'SmartListView', id: number, listId: string, name: string, bookColumns: Array<{ __typename?: 'SmartListViewColumn', id: string, position: number }>, bookSorting: Array<{ __typename?: 'SmartListViewSort', id: string, desc: boolean }>, groupColumns: Array<{ __typename?: 'SmartListViewColumn', id: string, position: number }>, groupSorting: Array<{ __typename?: 'SmartListViewSort', id: string, desc: boolean }> } };
+
+export type SmartListsWithSearchQueryVariables = Exact<{
+  input: SmartListsInput;
+}>;
+
+
+export type SmartListsWithSearchQuery = { __typename?: 'Query', smartLists: Array<{ __typename?: 'SmartList', id: string, creatorId: string, description?: string | null, defaultGrouping: SmartListGrouping, filters: string, joiner: SmartListJoiner, name: string, visibility: EntityVisibility }> };
+
+export type SmartListBasicSettingsSceneQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type SmartListBasicSettingsSceneQuery = { __typename?: 'Query', smartLists: Array<{ __typename?: 'SmartList', name: string }> };
+
+export type DeleteSmartListMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteSmartListMutation = { __typename?: 'Mutation', deleteSmartList: { __typename: 'SmartList' } };
+
+export type SmartListByIdQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type SmartListByIdQuery = { __typename?: 'Query', smartListById?: { __typename?: 'SmartList', id: string, creatorId: string, description?: string | null, defaultGrouping: SmartListGrouping, filters: string, joiner: SmartListJoiner, name: string, visibility: EntityVisibility, views: Array<{ __typename?: 'SmartListView', id: number, listId: string, name: string, bookColumns: Array<{ __typename?: 'SmartListViewColumn', id: string, position: number }>, bookSorting: Array<{ __typename?: 'SmartListViewSort', id: string, desc: boolean }>, groupColumns: Array<{ __typename?: 'SmartListViewColumn', id: string, position: number }>, groupSorting: Array<{ __typename?: 'SmartListViewSort', id: string, desc: boolean }> }> } | null };
+
+export type SmartListMetaQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type SmartListMetaQuery = { __typename?: 'Query', smartListMeta?: { __typename?: 'SmartListMeta', matchedBooks: number, matchedSeries: number, matchedLibraries: number } | null };
+
+export type UpdateSmartListMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  input: SaveSmartListInput;
+}>;
+
+
+export type UpdateSmartListMutation = { __typename?: 'Mutation', updateSmartList: { __typename: 'SmartList' } };
+
+export type SmartListItemsQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type SmartListItemsQuery = { __typename?: 'Query', smartListItems: { __typename: 'SmartListGrouped', items: Array<{ __typename?: 'SmartListGroupedItem', entity: { __typename: 'Library', id: string, name: string } | { __typename: 'Series', id: string, name: string }, books: Array<(
+        { __typename?: 'Media', metadata?: { __typename?: 'MediaMetadata', ageRating?: number | null, characters: Array<string>, colorists: Array<string>, coverArtists: Array<string>, editors: Array<string>, genres: Array<string>, inkers: Array<string>, letterers: Array<string>, links: Array<string>, pencillers: Array<string>, publisher?: string | null, teams: Array<string>, writers: Array<string>, year?: number | null } | null }
+        & { ' $fragmentRefs'?: { 'BookCardFragment': BookCardFragment } }
+      )> }> } | { __typename: 'SmartListUngrouped', books: Array<(
+      { __typename?: 'Media', metadata?: { __typename?: 'MediaMetadata', ageRating?: number | null, characters: Array<string>, colorists: Array<string>, coverArtists: Array<string>, editors: Array<string>, genres: Array<string>, inkers: Array<string>, letterers: Array<string>, links: Array<string>, pencillers: Array<string>, publisher?: string | null, teams: Array<string>, writers: Array<string>, year?: number | null } | null }
+      & { ' $fragmentRefs'?: { 'BookCardFragment': BookCardFragment } }
+    )> } };
+
 export type DirectoryListingQueryVariables = Exact<{
   input: DirectoryListingInput;
   pagination: Pagination;
@@ -4012,19 +4136,12 @@ export const BookOverviewHeaderDocument = new TypedDocumentString(`
     id
     resolvedName
     seriesId
+    extension
+    pages
     metadata {
       ageRating
-      characters
-      colorists
-      coverArtists
-      editors
       genres
-      inkers
-      letterers
-      links
-      pencillers
       publisher
-      teams
       writers
       year
     }
@@ -4174,6 +4291,21 @@ export const CreateLibrarySceneCreateLibraryDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<CreateLibrarySceneCreateLibraryMutation, CreateLibrarySceneCreateLibraryMutationVariables>;
+export const CreateSmartListFormDocument = new TypedDocumentString(`
+    query CreateSmartListForm {
+  smartLists(input: {mine: true}) {
+    name
+  }
+}
+    `) as unknown as TypedDocumentString<CreateSmartListFormQuery, CreateSmartListFormQueryVariables>;
+export const CreateSmartListSceneDocument = new TypedDocumentString(`
+    mutation CreateSmartListScene($input: SaveSmartListInput!) {
+  createSmartList(input: $input) {
+    id
+    name
+  }
+}
+    `) as unknown as TypedDocumentString<CreateSmartListSceneMutation, CreateSmartListSceneMutationVariables>;
 export const ContinueReadingMediaQueryDocument = new TypedDocumentString(`
     query ContinueReadingMediaQuery($pagination: Pagination!) {
   keepReading(pagination: $pagination) {
@@ -5092,6 +5224,216 @@ export const UserTableDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<UserTableQuery, UserTableQueryVariables>;
+export const CreateSmartListViewDocument = new TypedDocumentString(`
+    mutation CreateSmartListView($input: SaveSmartListView!) {
+  createSmartListView(input: $input) {
+    id
+    listId
+    name
+    bookColumns {
+      id
+      position
+    }
+    bookSorting {
+      id
+      desc
+    }
+    groupColumns {
+      id
+      position
+    }
+    groupSorting {
+      id
+      desc
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<CreateSmartListViewMutation, CreateSmartListViewMutationVariables>;
+export const UpdateSmartListViewDocument = new TypedDocumentString(`
+    mutation UpdateSmartListView($originalName: String!, $input: SaveSmartListView!) {
+  updateSmartListView(originalName: $originalName, input: $input) {
+    id
+    listId
+    name
+    bookColumns {
+      id
+      position
+    }
+    bookSorting {
+      id
+      desc
+    }
+    groupColumns {
+      id
+      position
+    }
+    groupSorting {
+      id
+      desc
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<UpdateSmartListViewMutation, UpdateSmartListViewMutationVariables>;
+export const SmartListsWithSearchDocument = new TypedDocumentString(`
+    query SmartListsWithSearch($input: SmartListsInput!) {
+  smartLists(input: $input) {
+    id
+    creatorId
+    description
+    defaultGrouping
+    filters
+    joiner
+    name
+    visibility
+  }
+}
+    `) as unknown as TypedDocumentString<SmartListsWithSearchQuery, SmartListsWithSearchQueryVariables>;
+export const SmartListBasicSettingsSceneDocument = new TypedDocumentString(`
+    query SmartListBasicSettingsScene {
+  smartLists(input: {mine: true}) {
+    name
+  }
+}
+    `) as unknown as TypedDocumentString<SmartListBasicSettingsSceneQuery, SmartListBasicSettingsSceneQueryVariables>;
+export const DeleteSmartListDocument = new TypedDocumentString(`
+    mutation DeleteSmartList($id: ID!) {
+  deleteSmartList(id: $id) {
+    __typename
+  }
+}
+    `) as unknown as TypedDocumentString<DeleteSmartListMutation, DeleteSmartListMutationVariables>;
+export const SmartListByIdDocument = new TypedDocumentString(`
+    query SmartListById($id: ID!) {
+  smartListById(id: $id) {
+    id
+    creatorId
+    description
+    defaultGrouping
+    filters
+    joiner
+    name
+    visibility
+    views {
+      id
+      listId
+      name
+      bookColumns {
+        id
+        position
+      }
+      bookSorting {
+        id
+        desc
+      }
+      groupColumns {
+        id
+        position
+      }
+      groupSorting {
+        id
+        desc
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<SmartListByIdQuery, SmartListByIdQueryVariables>;
+export const SmartListMetaDocument = new TypedDocumentString(`
+    query SmartListMeta($id: ID!) {
+  smartListMeta(id: $id) {
+    matchedBooks
+    matchedSeries
+    matchedLibraries
+  }
+}
+    `) as unknown as TypedDocumentString<SmartListMetaQuery, SmartListMetaQueryVariables>;
+export const UpdateSmartListDocument = new TypedDocumentString(`
+    mutation UpdateSmartList($id: ID!, $input: SaveSmartListInput!) {
+  updateSmartList(id: $id, input: $input) {
+    __typename
+  }
+}
+    `) as unknown as TypedDocumentString<UpdateSmartListMutation, UpdateSmartListMutationVariables>;
+export const SmartListItemsDocument = new TypedDocumentString(`
+    query SmartListItems($id: ID!) {
+  smartListItems(id: $id) {
+    __typename
+    ... on SmartListGrouped {
+      items {
+        entity {
+          __typename
+          ... on Series {
+            id
+            name
+          }
+          ... on Library {
+            id
+            name
+          }
+        }
+        books {
+          ...BookCard
+          metadata {
+            ageRating
+            characters
+            colorists
+            coverArtists
+            editors
+            genres
+            inkers
+            letterers
+            links
+            pencillers
+            publisher
+            teams
+            writers
+            year
+          }
+        }
+      }
+    }
+    ... on SmartListUngrouped {
+      books {
+        ...BookCard
+        metadata {
+          ageRating
+          characters
+          colorists
+          coverArtists
+          editors
+          genres
+          inkers
+          letterers
+          links
+          pencillers
+          publisher
+          teams
+          writers
+          year
+        }
+      }
+    }
+  }
+}
+    fragment BookCard on Media {
+  id
+  resolvedName
+  extension
+  pages
+  size
+  status
+  thumbnail {
+    url
+  }
+  readProgress {
+    percentageCompleted
+    epubcfi
+    page
+  }
+  readHistory {
+    __typename
+    completedAt
+  }
+}`) as unknown as TypedDocumentString<SmartListItemsQuery, SmartListItemsQueryVariables>;
 export const DirectoryListingDocument = new TypedDocumentString(`
     query DirectoryListing($input: DirectoryListingInput!, $pagination: Pagination!) {
   listDirectory(input: $input, pagination: $pagination) {

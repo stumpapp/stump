@@ -1,7 +1,7 @@
 use crate::{
 	data::{CoreContext, RequestContext},
 	guard::PermissionGuard,
-	input::smart_list_view::SaveSmartListViewInput,
+	input::smart_list_view::SaveSmartListView,
 	object::smart_list_view::SmartListView,
 };
 use async_graphql::{Context, Object, Result, ID};
@@ -9,7 +9,7 @@ use models::{
 	entity::{smart_list, smart_list_view},
 	shared::enums::UserPermission,
 };
-use sea_orm::{prelude::*, ActiveModelTrait, TransactionTrait};
+use sea_orm::{prelude::*, ActiveModelTrait, Set, TransactionTrait};
 
 #[derive(Default)]
 pub struct SmartListViewMutation;
@@ -20,7 +20,7 @@ impl SmartListViewMutation {
 	async fn create_smart_list_view(
 		&self,
 		ctx: &Context<'_>,
-		input: SaveSmartListViewInput,
+		input: SaveSmartListView,
 	) -> Result<SmartListView> {
 		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
@@ -39,14 +39,15 @@ impl SmartListViewMutation {
 
 		txn.commit().await?;
 
-		return Ok(inserted_smart_list_view.into());
+		SmartListView::try_from(inserted_smart_list_view)
 	}
 
 	#[graphql(guard = "PermissionGuard::one(UserPermission::AccessSmartList)")]
 	async fn update_smart_list_view(
 		&self,
 		ctx: &Context<'_>,
-		input: SaveSmartListViewInput,
+		original_name: String,
+		input: SaveSmartListView,
 	) -> Result<SmartListView> {
 		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
@@ -55,18 +56,20 @@ impl SmartListViewMutation {
 		let smart_list_view = smart_list_view::Entity::find_by_user_list_id_name(
 			user,
 			&input.list_id,
-			&input.name,
+			&original_name,
 		)
 		.one(&txn)
 		.await?
 		.ok_or("Smart list view not found".to_string())?;
 
 		let mut active_model: smart_list_view::ActiveModel = smart_list_view.into();
-		// TODO(graphql): update config here
+		let value = serde_json::to_vec(&input.config)
+			.map_err(|_| "Failed to serialize view".to_string())?;
+		active_model.data = Set(value);
 		let updated = active_model.update(&txn).await?;
 		txn.commit().await?;
 
-		Ok(updated.into())
+		SmartListView::try_from(updated)
 	}
 
 	#[graphql(guard = "PermissionGuard::one(UserPermission::AccessSmartList)")]
@@ -89,6 +92,6 @@ impl SmartListViewMutation {
 		smart_list_view.clone().delete(&txn).await?;
 		txn.commit().await?;
 
-		Ok(smart_list_view.into())
+		SmartListView::try_from(smart_list_view)
 	}
 }

@@ -17,6 +17,6 @@ impl From<notifier::Model> for Notifier {
 #[ComplexObject]
 impl Notifier {
 	pub async fn config(&self, _ctx: &Context<'_>) -> Result<notifier::NotifierConfig> {
-		Ok(notifier::NotifierConfig::from_bytes(&self.model.config)?)
+		notifier::NotifierConfig::from_bytes(&self.model.config)
 	}
 }

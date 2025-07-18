@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useSmartListsQuery } from '@stump/client'
+import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Button, cn, Form } from '@stump/components'
+import { graphql } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { useCallback } from 'react'
 import { useForm } from 'react-hook-form'
@@ -19,16 +20,22 @@ type Props = {
 	isLoading?: boolean
 }
 
+const query = graphql(`
+	query CreateSmartListForm {
+		smartLists(input: { mine: true }) {
+			name
+		}
+	}
+`)
+
 export default function CreateSmartListForm({ onSubmit, isLoading }: Props) {
 	const { t } = useLocaleContext()
+	const { sdk } = useSDK()
 	const { currentStep, setStep } = useSteppedFormContext()
 
-	const { lists } = useSmartListsQuery({
-		params: {
-			mine: true,
-		},
-		suspense: true,
-	})
+	const {
+		data: { smartLists: lists },
+	} = useSuspenseGraphQL(query, [sdk.cacheKeys.smartListNames])
 
 	const form = useForm<SmartListFormSchema>({
 		defaultValues: {
@@ -62,6 +69,8 @@ export default function CreateSmartListForm({ onSubmit, isLoading }: Props) {
 
 			if (isValid) {
 				setStep(nextStep)
+			} else {
+				console.warn('Form validation failed, not changing step')
 			}
 		},
 		[form, currentStep, setStep],

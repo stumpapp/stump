@@ -64,7 +64,7 @@ impl Entity {
 		Query::select()
 			.column(book_club_member::Column::BookClubId)
 			.from(book_club_member::Entity)
-			.and_where(book_club_member::Column::UserId.eq(&user.id.clone()))
+			.and_where(book_club_member::Column::UserId.eq(user.id.clone()))
 			.to_owned()
 	}
 

@@ -122,7 +122,7 @@ impl SmartListsQuery {
 		txn.commit().await?;
 
 		Ok(Some(SmartListMeta {
-			matched_books: matched_books,
+			matched_books,
 			matched_series: matched_series.len() as i64,
 			matched_libraries: matched_libraries.len() as i64,
 		}))
@@ -219,7 +219,7 @@ fn add_sessions_join(
 	if let Some(filter_group) = filter_using_session {
 		for filter in &filter_group.groups {
 			if let SmartListFilterInput::Media(media_filter) = filter {
-				return add_sessions_join_for_filter(user, &media_filter, query);
+				return add_sessions_join_for_filter(user, media_filter, query);
 			}
 		}
 	}

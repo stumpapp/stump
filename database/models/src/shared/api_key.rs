@@ -2,8 +2,6 @@ use async_graphql::{Enum, OneofObject};
 use sea_orm::FromJsonQueryResult;
 use serde::{Deserialize, Serialize};
 
-use crate::{entity::api_key, error::EntityError};
-
 use super::enums::UserPermission;
 
 pub const API_KEY_PREFIX: &str = "stump";

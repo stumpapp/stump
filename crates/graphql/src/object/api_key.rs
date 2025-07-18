@@ -1,4 +1,4 @@
-use async_graphql::{ComplexObject, Context, Enum, SimpleObject, Union};
+use async_graphql::{ComplexObject, Context, SimpleObject, Union};
 use models::{
 	entity::api_key,
 	shared::{

@@ -34,7 +34,7 @@ impl BookClubQuery {
 		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let model = book_club::Entity::find_by_id_and_user(&id.to_string(), user)
+		let model = book_club::Entity::find_by_id_and_user(id.as_ref(), user)
 			.one(conn)
 			.await?;
 

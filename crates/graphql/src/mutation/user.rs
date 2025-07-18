@@ -14,9 +14,7 @@ use models::{
 		user::{self, AuthUser},
 		user_login_activity, user_preferences,
 	},
-	shared::{
-		arrangement::Arrangement, enums::UserPermission, permission_set::PermissionSet,
-	},
+	shared::{enums::UserPermission, permission_set::PermissionSet},
 };
 use sea_orm::{
 	prelude::*, ActiveValue::NotSet, DatabaseTransaction, IntoActiveModel, Set,
@@ -449,7 +447,7 @@ mod tests {
 			}])
 			.into_connection();
 		let txn = conn.begin().await.unwrap();
-		let _ = update_user_age_restriction("42", &None, &txn)
+		update_user_age_restriction("42", &None, &txn)
 			.await
 			.unwrap();
 		txn.commit().await.unwrap();
@@ -482,7 +480,7 @@ mod tests {
 			}])
 			.into_connection();
 		let txn = conn.begin().await.unwrap();
-		let _ = update_user_age_restriction("42", &None, &txn)
+		update_user_age_restriction("42", &None, &txn)
 			.await
 			.unwrap();
 		txn.commit().await.unwrap();

@@ -165,12 +165,10 @@ impl IntoFilter for MediaMetadataFilterInput {
 
 #[cfg(test)]
 mod tests {
-	use crate::tests::common::*;
 
 	use super::*;
-	use models::entity::book_club;
+
 	use pretty_assertions::assert_eq;
-	use sea_orm::TryIntoModel;
 
 	#[test]
 	fn test_media_metadata_filter_null_input_serialization() {

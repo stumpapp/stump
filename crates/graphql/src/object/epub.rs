@@ -142,7 +142,7 @@ impl Epub {
 		let id = self.media_id.clone();
 
 		Ok(
-			bookmark::Entity::find_for_user_and_media_id(&user, id.as_ref())
+			bookmark::Entity::find_for_user_and_media_id(user, id.as_ref())
 				.into_model::<bookmark::Model>()
 				.all(conn)
 				.await?

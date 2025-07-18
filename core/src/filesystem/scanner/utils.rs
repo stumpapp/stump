@@ -12,7 +12,7 @@ use std::{
 use chrono::{DateTime, Utc};
 use futures::{stream::FuturesUnordered, StreamExt};
 use models::{
-	entity::{library_config, media, media_metadata, series, series_metadata},
+	entity::{library_config, media, media_metadata, series},
 	shared::enums::FileStatus,
 };
 use sea_orm::{

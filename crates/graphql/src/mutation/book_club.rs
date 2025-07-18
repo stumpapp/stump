@@ -65,7 +65,7 @@ pub async fn get_book_club_for_admin(
 	Ok(book_club::Entity::find_for_member_enforce_role_and_id(
 		user,
 		BookClubMemberRole::Admin,
-		&id.to_string(),
+		id.as_ref(),
 	)
 	.one(conn)
 	.await?)

@@ -1,6 +1,6 @@
 use async_graphql::{Context, Object, Result, ID};
 use models::{entity::series, shared::enums::UserPermission};
-use sea_orm::{prelude::*, QuerySelect};
+use sea_orm::prelude::*;
 use stump_core::filesystem::{
 	media::analyze_media_job::AnalyzeMediaJob, scanner::SeriesScanJob,
 };

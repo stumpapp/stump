@@ -42,7 +42,7 @@ pub struct SaveSmartListView {
 impl SaveSmartListView {
 	pub fn into_active_model(self) -> Result<smart_list_view::ActiveModel> {
 		let value = serde_json::to_vec(&self.config)
-			.map_err(|_| format!("Failed to serialize view"))?;
+			.map_err(|_| "Failed to serialize view".to_string())?;
 		Ok(smart_list_view::ActiveModel {
 			id: NotSet,
 			list_id: Set(self.list_id.to_string()),

@@ -148,7 +148,7 @@ mod tests {
 	async fn test_get_unique_values() {
 		let mock_db = MockDatabase::new(sea_orm::DatabaseBackend::Sqlite)
 			.append_query_results([[maplit::btreemap! {
-				"0" => Into::<Value>::into(vec!["a", "a", "c"].join(&VALUE_SEPERATOR.to_string())),
+				"0" => Into::<Value>::into(["a", "a", "c"].join(&VALUE_SEPERATOR.to_string())),
 			}]])
 			.into_connection();
 
@@ -173,7 +173,7 @@ mod tests {
 	async fn test_empty_value_after_split() {
 		let mock_db = MockDatabase::new(sea_orm::DatabaseBackend::Sqlite)
 			.append_query_results([[maplit::btreemap! {
-				"0" => Into::<Value>::into(vec!["a", "", "c"].join(&VALUE_SEPERATOR.to_string())),
+				"0" => Into::<Value>::into(["a", "", "c"].join(&VALUE_SEPERATOR.to_string())),
 			}]])
 			.into_connection();
 

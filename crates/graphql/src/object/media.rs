@@ -3,10 +3,10 @@ use async_graphql::{
 };
 
 use models::{
-	entity::{library, library_config, media, media_to_tag, series, tag},
+	entity::{library, library_config, media, series, tag},
 	shared::image::ImageRef,
 };
-use sea_orm::{prelude::*, sea_query::Query, JoinType, QuerySelect};
+use sea_orm::{prelude::*, sea_query::Query, QuerySelect};
 
 use crate::{
 	data::{CoreContext, RequestContext, ServiceContext},

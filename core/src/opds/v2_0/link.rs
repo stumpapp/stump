@@ -333,7 +333,6 @@ mod tests {
 	use crate::opds::v2_0::properties::{OPDSDynamicProperties, OPDSPropertiesBuilder};
 
 	use super::*;
-	use prisma_client_rust::chrono;
 
 	#[test]
 	fn test_image_link_serialization() {

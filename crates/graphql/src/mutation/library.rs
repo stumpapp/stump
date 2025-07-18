@@ -222,7 +222,7 @@ impl LibraryMutation {
 			let to_link = existing_tags
 				.iter()
 				.chain(created_tags.iter())
-				.map(|tag| tag.id.clone())
+				.map(|tag| tag.id)
 				.collect::<Vec<_>>();
 
 			library_to_tag::Entity::insert_many(

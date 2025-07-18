@@ -64,7 +64,7 @@ impl SmartListViewMutation {
 
 		let mut active_model: smart_list_view::ActiveModel = smart_list_view.into();
 		let value = serde_json::to_vec(&input.config)
-			.map_err(|_| format!("Failed to serialize view"))?;
+			.map_err(|_| "Failed to serialize view".to_string())?;
 		active_model.data = Set(value);
 		let updated = active_model.update(&txn).await?;
 		txn.commit().await?;

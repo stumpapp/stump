@@ -52,13 +52,13 @@ impl BookClubScheduleMutation {
 			.await?
 			.ok_or("Book club not found or you lack permission to adjust the schedule")?;
 
-		let schedule = book_club_schedule::Entity::find_for_book_club_id(&id.to_string())
+		let schedule = book_club_schedule::Entity::find_for_book_club_id(id.as_ref())
 			.one(conn)
 			.await?
 			.ok_or("Schedule not found")?;
 		let existing_books = book_club_book::Entity::find_with_schedule_for_book_club_id(
-			&id.to_string(),
-			Utc::now().into(),
+			id.as_ref(),
+			Utc::now(),
 		)
 		.all(conn)
 		.await?;

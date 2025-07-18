@@ -75,7 +75,7 @@ async fn group_by_series(
 		})
 		.collect();
 
-	Ok(SmartListItems::Grouped(SmartListGrouped { items: items }))
+	Ok(SmartListItems::Grouped(SmartListGrouped { items }))
 }
 
 async fn group_by_library(
@@ -142,7 +142,7 @@ async fn group_by_library(
 		})
 		.collect();
 
-	Ok(SmartListItems::Grouped(SmartListGrouped { items: items }))
+	Ok(SmartListItems::Grouped(SmartListGrouped { items }))
 }
 
 pub fn build_filters(

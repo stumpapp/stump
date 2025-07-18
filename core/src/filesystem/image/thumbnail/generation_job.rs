@@ -1,16 +1,7 @@
-use std::{
-	pin::pin,
-	sync::{
-		atomic::{AtomicUsize, Ordering},
-		Arc,
-	},
-};
-
 use async_graphql::SimpleObject;
 use futures::{stream::FuturesUnordered, StreamExt};
 use serde::{Deserialize, Serialize};
 use specta::Type;
-use tokio::sync::Semaphore;
 
 use models::{
 	entity::{media, series},
@@ -23,10 +14,7 @@ use crate::job::{
 	WorkerCtx, WorkingState, WrappedJob,
 };
 
-use super::{
-	generate::{generate_book_thumbnail, GenerateThumbnailOptions},
-	ThumbnailGenerateError,
-};
+use super::generate::{generate_book_thumbnail, GenerateThumbnailOptions};
 
 // Note: I am type aliasing for the sake of clarity in what the provided Strings represent
 type Id = String;

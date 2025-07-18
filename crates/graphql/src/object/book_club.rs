@@ -35,7 +35,7 @@ impl BookClub {
 		.await?;
 
 		if let Some(book_club_book) = book_club_book {
-			return Ok(Some(book_club_book.into()));
+			Ok(Some(book_club_book.into()))
 		} else {
 			Ok(None)
 		}

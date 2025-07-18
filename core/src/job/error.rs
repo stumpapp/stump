@@ -31,9 +31,7 @@ pub enum JobError {
 // TODO(sea-orm): do something else
 impl From<EntityError> for JobError {
 	fn from(err: EntityError) -> Self {
-		match err {
-			_ => Self::Unknown(err.to_string()),
-		}
+		Self::Unknown(err.to_string())
 	}
 }
 

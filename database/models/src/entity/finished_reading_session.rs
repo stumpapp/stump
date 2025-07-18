@@ -2,10 +2,7 @@ use crate::prefixer::{parse_query_to_model, parse_query_to_model_optional, Prefi
 
 use super::{media, registered_reading_device, user::AuthUser};
 use async_graphql::SimpleObject;
-use sea_orm::{
-	entity::prelude::*, prelude::async_trait::async_trait, ActiveValue, FromQueryResult,
-	QuerySelect,
-};
+use sea_orm::{entity::prelude::*, FromQueryResult, QuerySelect};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
 #[graphql(name = "FinishedReadingSessionModel")]

@@ -1,4 +1,4 @@
-use async_graphql::{Context, Object, Result, SimpleObject, ID};
+use async_graphql::{Context, Object, Result, ID};
 use models::entity::{finished_reading_session, media, reading_session, user::AuthUser};
 use sea_orm::{
 	prelude::*, sea_query::OnConflict, DatabaseTransaction, QuerySelect, Set,

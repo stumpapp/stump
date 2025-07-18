@@ -3,7 +3,7 @@ use async_graphql::{ComplexObject, Context, Result, SimpleObject};
 use models::entity::{emailer, emailer_send_record};
 use sea_orm::prelude::*;
 
-use crate::{data::CoreContext, object::user::User};
+use crate::data::CoreContext;
 
 use super::emailer_send_record::EmailerSendRecord;
 

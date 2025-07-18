@@ -27,7 +27,7 @@ impl SmartListMutation {
 			.exec_with_returning(conn)
 			.await?;
 
-		return Ok(SmartList::from(inserted_smart_list));
+		Ok(SmartList::from(inserted_smart_list))
 	}
 
 	#[graphql(guard = "PermissionGuard::one(UserPermission::AccessSmartList)")]

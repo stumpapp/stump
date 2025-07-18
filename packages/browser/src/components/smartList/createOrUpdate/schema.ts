@@ -47,7 +47,7 @@ export const stringField = z.enum([
 	'description',
 	'summary',
 	'notes',
-	'genre',
+	'genres',
 	'writers',
 	'pencillers',
 	'inkers',
@@ -57,26 +57,26 @@ export const stringField = z.enum([
 	'publisher',
 	'colorists',
 	'letterers',
-	'cover_artists',
+	'coverArtists',
 	'links',
 	'characters',
 	'teams',
 	'comicid',
 	'booktype',
 	'status',
-	'meta_type',
+	'metaType',
 ])
 export type StringField = z.infer<typeof stringField>
 export const isStringField = (field: string): field is StringField =>
 	stringField.safeParse(field).success
 
 export const numberField = z.enum([
-	'age_rating',
+	'ageRating',
 	'year',
 	'day',
 	'month',
 	'pages',
-	'page_count',
+	'pageCount',
 	'size',
 	'volume',
 ])
@@ -84,23 +84,9 @@ export type NumberField = z.infer<typeof numberField>
 export const isNumberField = (field: string): field is NumberField =>
 	numberField.safeParse(field).success
 
-export const dateField = z.enum(['created_at', 'updated_at', 'completed_at'])
+export const dateField = z.enum(['createdAt', 'updatedAt', 'completedAt'])
 export type DateField = z.infer<typeof dateField>
 export const isDateField = (field: string): field is DateField => dateField.safeParse(field).success
-
-// TODO: use column names from the api and update the translation files
-const rename_fields_form_to_api = {
-	created_at: 'createdAt',
-	updated_at: 'updatedAt',
-	completed_at: 'completedAt',
-	age_rating: 'ageRating',
-	meta_type: 'metaType',
-	cover_artists: 'coverArtists',
-	genre: 'genres',
-}
-const rename_fields_api_to_form = Object.fromEntries(
-	Object.entries(rename_fields_form_to_api).map(([key, value]) => [value, key]),
-)
 
 export const filter = z
 	.object({
@@ -163,9 +149,7 @@ export const intoFormFilter = (input: SmartListFilterInput): z.infer<typeof filt
 		.with('library', () => input.library || {})
 		.exhaustive()
 
-	const fieldTmp = Object.keys(filterObj)[0] || ''
-	const field =
-		rename_fields_api_to_form[fieldTmp as keyof typeof rename_fields_api_to_form] || fieldTmp
+	const field = Object.keys(filterObj)[0] || ''
 	const filterValue = Object.entries(filterObj)[0]?.[1]
 
 	if (!filterValue) {
@@ -268,16 +252,13 @@ export const intoAPIFilters = ({
 export const intoAPIFilter = (input: z.infer<typeof filter>): SmartListFilterInput => {
 	const fieldValue = match(input.operation).otherwise(() => ({ [input.operation]: input.value }))
 
-	const fieldName =
-		rename_fields_form_to_api[input.field as keyof typeof rename_fields_form_to_api] || input.field
-
 	return match(input.source)
 		.with(
 			'book',
 			() =>
 				({
 					media: {
-						[fieldName]: fieldValue,
+						[input.field]: fieldValue,
 					} as MediaFilterInput,
 				}) as SmartListFilterInput,
 		)
@@ -286,7 +267,7 @@ export const intoAPIFilter = (input: z.infer<typeof filter>): SmartListFilterInp
 			() =>
 				({
 					mediaMetadata: {
-						[fieldName]: fieldValue,
+						[input.field]: fieldValue,
 					} as MediaMetadataFilterInput,
 				}) as SmartListFilterInput,
 		)
@@ -295,7 +276,7 @@ export const intoAPIFilter = (input: z.infer<typeof filter>): SmartListFilterInp
 			() =>
 				({
 					series: {
-						[fieldName]: fieldValue,
+						[input.field]: fieldValue,
 					},
 				}) as SeriesFilterInput as SmartListFilterInput,
 		)
@@ -304,7 +285,7 @@ export const intoAPIFilter = (input: z.infer<typeof filter>): SmartListFilterInp
 			() =>
 				({
 					seriesMetadata: {
-						[fieldName]: fieldValue,
+						[input.field]: fieldValue,
 					} as SeriesMetadataFilterInput,
 				}) as SmartListFilterInput,
 		)
@@ -313,7 +294,7 @@ export const intoAPIFilter = (input: z.infer<typeof filter>): SmartListFilterInp
 			() =>
 				({
 					library: {
-						[fieldName]: fieldValue,
+						[input.field]: fieldValue,
 					} as LibraryFilterInput,
 				}) as SmartListFilterInput,
 		)

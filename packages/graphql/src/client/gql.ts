@@ -34,7 +34,7 @@ type Documents = {
 	'\n\tfragment BookFileInformation on Media {\n\t\tid\n\t\tsize\n\t\textension\n\t\thash\n\t\trelativeLibraryPath\n\t}\n': typeof types.BookFileInformationFragmentDoc
 	'\n\tquery BookLibrarySeriesLinks($id: ID!) {\n\t\tseriesById(id: $id) {\n\t\t\tid\n\t\t\tname\n\t\t\tlibraryId\n\t\t}\n\t}\n': typeof types.BookLibrarySeriesLinksDocument
 	'\n\tquery BookOverviewScene($id: ID!) {\n\t\tmediaById(id: $id) {\n\t\t\tid\n\t\t\t...BookCard\n\t\t\t...BookFileInformation\n\t\t\tresolvedName\n\t\t\textension\n\t\t\tmetadata {\n\t\t\t\tlinks\n\t\t\t\tsummary\n\t\t\t}\n\t\t\treadHistory {\n\t\t\t\tcompletedAt\n\t\t\t}\n\t\t}\n\t}\n': typeof types.BookOverviewSceneDocument
-	'\n\tquery BookOverviewHeader($id: ID!) {\n\t\tmediaById(id: $id) {\n\t\t\tid\n\t\t\tresolvedName\n\t\t\tseriesId\n\t\t\tmetadata {\n\t\t\t\tageRating\n\t\t\t\tcharacters\n\t\t\t\tcolorists\n\t\t\t\tcoverArtists\n\t\t\t\teditors\n\t\t\t\tgenres\n\t\t\t\tinkers\n\t\t\t\tletterers\n\t\t\t\tlinks\n\t\t\t\tpencillers\n\t\t\t\tpublisher\n\t\t\t\tteams\n\t\t\t\twriters\n\t\t\t\tyear\n\t\t\t}\n\t\t\ttags {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t}\n\t}\n': typeof types.BookOverviewHeaderDocument
+	'\n\tquery BookOverviewHeader($id: ID!) {\n\t\tmediaById(id: $id) {\n\t\t\tid\n\t\t\tresolvedName\n\t\t\tseriesId\n\t\t\textension\n\t\t\tpages\n\t\t\tmetadata {\n\t\t\t\tageRating\n\t\t\t\tgenres\n\t\t\t\tpublisher\n\t\t\t\twriters\n\t\t\t\tyear\n\t\t\t}\n\t\t\ttags {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t}\n\t}\n': typeof types.BookOverviewHeaderDocument
 	'\n\tquery BooksAfterCurrentQuery($id: ID!, $pagination: Pagination) {\n\t\tmediaById(id: $id) {\n\t\t\tnextInSeries(pagination: $pagination) {\n\t\t\t\tnodes {\n\t\t\t\t\tid\n\t\t\t\t\t...BookCard\n\t\t\t\t}\n\t\t\t\tpageInfo {\n\t\t\t\t\t__typename\n\t\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\t\tcurrentCursor\n\t\t\t\t\t\tnextCursor\n\t\t\t\t\t\tlimit\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n': typeof types.BooksAfterCurrentQueryDocument
 	'\n\tquery EmailBookDropdownDevice {\n\t\temailDevices {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t}\n': typeof types.EmailBookDropdownDeviceDocument
 	'\n\tmutation SendEmailAttachment($id: ID!, $sendTo: [EmailerSendTo!]!) {\n\t\tsendAttachmentEmail(input: { mediaIds: [$id], sendTo: $sendTo }) {\n\t\t\tsentCount\n\t\t\terrors\n\t\t}\n\t}\n': typeof types.SendEmailAttachmentDocument
@@ -165,7 +165,7 @@ const documents: Documents = {
 		types.BookLibrarySeriesLinksDocument,
 	'\n\tquery BookOverviewScene($id: ID!) {\n\t\tmediaById(id: $id) {\n\t\t\tid\n\t\t\t...BookCard\n\t\t\t...BookFileInformation\n\t\t\tresolvedName\n\t\t\textension\n\t\t\tmetadata {\n\t\t\t\tlinks\n\t\t\t\tsummary\n\t\t\t}\n\t\t\treadHistory {\n\t\t\t\tcompletedAt\n\t\t\t}\n\t\t}\n\t}\n':
 		types.BookOverviewSceneDocument,
-	'\n\tquery BookOverviewHeader($id: ID!) {\n\t\tmediaById(id: $id) {\n\t\t\tid\n\t\t\tresolvedName\n\t\t\tseriesId\n\t\t\tmetadata {\n\t\t\t\tageRating\n\t\t\t\tcharacters\n\t\t\t\tcolorists\n\t\t\t\tcoverArtists\n\t\t\t\teditors\n\t\t\t\tgenres\n\t\t\t\tinkers\n\t\t\t\tletterers\n\t\t\t\tlinks\n\t\t\t\tpencillers\n\t\t\t\tpublisher\n\t\t\t\tteams\n\t\t\t\twriters\n\t\t\t\tyear\n\t\t\t}\n\t\t\ttags {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t}\n\t}\n':
+	'\n\tquery BookOverviewHeader($id: ID!) {\n\t\tmediaById(id: $id) {\n\t\t\tid\n\t\t\tresolvedName\n\t\t\tseriesId\n\t\t\textension\n\t\t\tpages\n\t\t\tmetadata {\n\t\t\t\tageRating\n\t\t\t\tgenres\n\t\t\t\tpublisher\n\t\t\t\twriters\n\t\t\t\tyear\n\t\t\t}\n\t\t\ttags {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t}\n\t}\n':
 		types.BookOverviewHeaderDocument,
 	'\n\tquery BooksAfterCurrentQuery($id: ID!, $pagination: Pagination) {\n\t\tmediaById(id: $id) {\n\t\t\tnextInSeries(pagination: $pagination) {\n\t\t\t\tnodes {\n\t\t\t\t\tid\n\t\t\t\t\t...BookCard\n\t\t\t\t}\n\t\t\t\tpageInfo {\n\t\t\t\t\t__typename\n\t\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\t\tcurrentCursor\n\t\t\t\t\t\tnextCursor\n\t\t\t\t\t\tlimit\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n':
 		types.BooksAfterCurrentQueryDocument,
@@ -469,7 +469,7 @@ export function graphql(
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(
-	source: '\n\tquery BookOverviewHeader($id: ID!) {\n\t\tmediaById(id: $id) {\n\t\t\tid\n\t\t\tresolvedName\n\t\t\tseriesId\n\t\t\tmetadata {\n\t\t\t\tageRating\n\t\t\t\tcharacters\n\t\t\t\tcolorists\n\t\t\t\tcoverArtists\n\t\t\t\teditors\n\t\t\t\tgenres\n\t\t\t\tinkers\n\t\t\t\tletterers\n\t\t\t\tlinks\n\t\t\t\tpencillers\n\t\t\t\tpublisher\n\t\t\t\tteams\n\t\t\t\twriters\n\t\t\t\tyear\n\t\t\t}\n\t\t\ttags {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t}\n\t}\n',
+	source: '\n\tquery BookOverviewHeader($id: ID!) {\n\t\tmediaById(id: $id) {\n\t\t\tid\n\t\t\tresolvedName\n\t\t\tseriesId\n\t\t\textension\n\t\t\tpages\n\t\t\tmetadata {\n\t\t\t\tageRating\n\t\t\t\tgenres\n\t\t\t\tpublisher\n\t\t\t\twriters\n\t\t\t\tyear\n\t\t\t}\n\t\t\ttags {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t}\n\t}\n',
 ): typeof import('./graphql').BookOverviewHeaderDocument
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.

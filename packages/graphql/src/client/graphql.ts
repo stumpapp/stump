@@ -3685,20 +3685,13 @@ export type BookOverviewHeaderQuery = {
 		id: string
 		resolvedName: string
 		seriesId?: string | null
+		extension: string
+		pages: number
 		metadata?: {
 			__typename?: 'MediaMetadata'
 			ageRating?: number | null
-			characters: Array<string>
-			colorists: Array<string>
-			coverArtists: Array<string>
-			editors: Array<string>
 			genres: Array<string>
-			inkers: Array<string>
-			letterers: Array<string>
-			links: Array<string>
-			pencillers: Array<string>
 			publisher?: string | null
-			teams: Array<string>
 			writers: Array<string>
 			year?: number | null
 		} | null
@@ -5118,7 +5111,7 @@ export class TypedDocumentString<TResult, TVariables>
 	extends String
 	implements DocumentTypeDecoration<TResult, TVariables>
 {
-	__apiType?: DocumentTypeDecoration<TResult, TVariables>['__apiType']
+	__apiType?: NonNullable<DocumentTypeDecoration<TResult, TVariables>['__apiType']>
 	private value: string
 	public __meta__?: Record<string, any> | undefined
 
@@ -5128,7 +5121,7 @@ export class TypedDocumentString<TResult, TVariables>
 		this.__meta__ = __meta__
 	}
 
-	toString(): string & DocumentTypeDecoration<TResult, TVariables> {
+	override toString(): string & DocumentTypeDecoration<TResult, TVariables> {
 		return this.value
 	}
 }
@@ -5515,19 +5508,12 @@ export const BookOverviewHeaderDocument = new TypedDocumentString(`
     id
     resolvedName
     seriesId
+    extension
+    pages
     metadata {
       ageRating
-      characters
-      colorists
-      coverArtists
-      editors
       genres
-      inkers
-      letterers
-      links
-      pencillers
       publisher
-      teams
       writers
       year
     }

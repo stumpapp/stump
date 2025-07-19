@@ -150,13 +150,13 @@ export default function HorizontalCardList_({ title, items, onFetchMore, emptySt
 const HorizontalScroller = forwardRef<HTMLDivElement, ScrollerProps>(
 	({ children, ...props }, ref) => {
 		const {
-			preferences: { enable_hide_scrollbar },
+			preferences: { enableHideScrollbar },
 		} = usePreferences()
 
 		return (
 			<div
 				className={cn('flex overflow-y-hidden', {
-					'scrollbar-hide': enable_hide_scrollbar,
+					'scrollbar-hide': enableHideScrollbar,
 				})}
 				ref={ref}
 				{...props}

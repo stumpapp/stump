@@ -9,8 +9,8 @@ export function useLayoutMode() {
 	}))
 
 	const preferredLayoutMode = useMemo(
-		() => userPreferences?.preferred_layout_mode as LayoutMode | undefined,
-		[userPreferences?.preferred_layout_mode],
+		() => userPreferences?.preferredLayoutMode as LayoutMode | undefined,
+		[userPreferences?.preferredLayoutMode],
 	)
 
 	const [localLayout, setLocalLayout] = useState<LayoutMode>(() => preferredLayoutMode || 'GRID')

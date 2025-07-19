@@ -22,6 +22,7 @@ import {
 } from '@/components/filters'
 import { Ordering } from '@/components/filters/context'
 import {
+	DEFAULT_SERIES_ORDER_BY,
 	useSearchSeriesFilter,
 	useURLKeywordSearch,
 	useURLPageParams,
@@ -65,7 +66,7 @@ export type UsePrefetchLibrarySeriesParams = {
 	page?: number
 	pageSize?: number
 	filter?: SeriesFilterInput
-	orderBy?: SeriesOrderBy[]
+	orderBy: SeriesOrderBy[]
 }
 
 export const usePrefetchLibrarySeries = () => {
@@ -76,7 +77,10 @@ export const usePrefetchLibrarySeries = () => {
 
 	const client = useQueryClient()
 	return useCallback(
-		(libraryId: string, params: UsePrefetchLibrarySeriesParams = {}) => {
+		(
+			libraryId: string,
+			params: UsePrefetchLibrarySeriesParams = { orderBy: DEFAULT_SERIES_ORDER_BY },
+		) => {
 			const pageParams = { page: params.page || 1, pageSize: params.pageSize || pageSize }
 			return client.prefetchQuery({
 				queryKey: getQueryKey(
@@ -123,7 +127,7 @@ function useSeriesURLOrderBy(ordering: Ordering): SeriesOrderBy[] {
 	return useMemo(() => {
 		// check for undefined values
 		if (!ordering || !ordering.order_by || !ordering.direction) {
-			return []
+			return DEFAULT_SERIES_ORDER_BY
 		}
 
 		return [

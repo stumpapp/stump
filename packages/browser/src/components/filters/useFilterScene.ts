@@ -1,4 +1,12 @@
-import { MediaFilterInput, OrderDirection, SeriesFilterInput } from '@stump/graphql'
+import {
+	MediaFilterInput,
+	MediaModelOrdering,
+	MediaOrderBy,
+	OrderDirection,
+	SeriesFilterInput,
+	SeriesModelOrdering,
+	SeriesOrderBy,
+} from '@stump/graphql'
 import { toObjectParams, toUrlParams } from '@stump/sdk'
 import { useCallback, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
@@ -7,6 +15,14 @@ import { useMediaMatch } from 'rooks'
 import { FilterInput, IFilterContext, Ordering, OrderingField } from './context'
 
 type Return = IFilterContext
+
+export const DEFAULT_SERIES_ORDER_BY: SeriesOrderBy[] = [
+	{ series: { field: SeriesModelOrdering.Name, direction: OrderDirection.Asc } },
+] as SeriesOrderBy[]
+
+export const DEFAULT_MEDIA_ORDER_BY: MediaOrderBy[] = [
+	{ media: { field: MediaModelOrdering.Name, direction: OrderDirection.Asc } },
+] as MediaOrderBy[]
 
 export const useURLPageParams = () => {
 	const [searchParams, setSearchParams] = useSearchParams()

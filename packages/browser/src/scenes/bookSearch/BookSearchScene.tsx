@@ -22,6 +22,7 @@ import {
 } from '@/components/filters'
 import { FilterContext, FilterInput, Ordering } from '@/components/filters/context'
 import {
+	DEFAULT_MEDIA_ORDER_BY,
 	useSearchMediaFilter,
 	useURLKeywordSearch,
 	useURLPageParams,
@@ -71,7 +72,7 @@ export const usePrefetchBookSearch = () => {
 	const client = useQueryClient()
 
 	const prefetch = useCallback(
-		(params: UsePrefetchBookSearchParams = { filter: {}, orderBy: [] }) => {
+		(params: UsePrefetchBookSearchParams = { filter: {}, orderBy: DEFAULT_MEDIA_ORDER_BY }) => {
 			const pageParams = { page: params.page || 1, pageSize: params.pageSize || pageSize }
 			return client.prefetchQuery({
 				queryKey: getQueryKey(
@@ -124,7 +125,7 @@ export function useMediaURLOrderBy(ordering: Ordering): MediaOrderBy[] {
 	return useMemo(() => {
 		// check for undefined values
 		if (!ordering || !ordering.order_by || !ordering.direction) {
-			return []
+			return DEFAULT_MEDIA_ORDER_BY
 		}
 
 		return [

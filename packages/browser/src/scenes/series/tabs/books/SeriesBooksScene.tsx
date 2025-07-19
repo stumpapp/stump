@@ -16,6 +16,7 @@ import {
 	useFilterScene,
 } from '@/components/filters'
 import {
+	DEFAULT_MEDIA_ORDER_BY,
 	useSearchMediaFilter,
 	useURLKeywordSearch,
 	useURLPageParams,
@@ -216,7 +217,10 @@ export const usePrefetchSeriesBooks = () => {
 	const client = useQueryClient()
 
 	const prefetch = useCallback(
-		(id: string, params: UsePrefetchSeriesBooksParams = { filter: {}, orderBy: [] }) => {
+		(
+			id: string,
+			params: UsePrefetchSeriesBooksParams = { filter: {}, orderBy: DEFAULT_MEDIA_ORDER_BY },
+		) => {
 			const pageParams = { page: params.page || 1, pageSize: params.pageSize || pageSize }
 			return client.prefetchQuery({
 				queryKey: getQueryKey(

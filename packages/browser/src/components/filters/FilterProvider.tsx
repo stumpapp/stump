@@ -74,7 +74,7 @@ export default function FilterProvider({ children }: Props) {
 				filters: params,
 				ordering,
 				removeFilter: handleRemoveFilter,
-				setFilter: handleSetFilter,
+				setSearch: handleSetFilter,
 				setFilters: handleSetFilters,
 			}}
 		>
@@ -137,7 +137,7 @@ export function ManualFilterProvider({ children }: Props) {
 				filters,
 				ordering,
 				removeFilter: handleRemoveFilter,
-				setFilter: handleSetFilter,
+				setSearch: handleSetFilter,
 				setFilters: handleSetFilters,
 			}}
 		>

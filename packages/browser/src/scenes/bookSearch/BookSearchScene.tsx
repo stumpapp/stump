@@ -1,5 +1,5 @@
 import { PREFETCH_STALE_TIME, useSDK, useSuspenseGraphQL } from '@stump/client'
-import { usePrevious } from '@stump/components'
+import { usePrevious, usePreviousIsDifferent } from '@stump/components'
 import {
 	graphql,
 	MediaFilterInput,
@@ -21,7 +21,11 @@ import {
 	useFilterScene,
 } from '@/components/filters'
 import { FilterContext, FilterInput, Ordering } from '@/components/filters/context'
-import { useURLPageParams } from '@/components/filters/useFilterScene'
+import {
+	useSearchMediaFilter,
+	useURLKeywordSearch,
+	useURLPageParams,
+} from '@/components/filters/useFilterScene'
 import TableOrGridLayout from '@/components/TableOrGridLayout'
 import useIsInView from '@/hooks/useIsInView'
 import { useBooksLayout } from '@/stores/layout'
@@ -54,24 +58,32 @@ const query = graphql(`
 export type UsePrefetchBookSearchParams = {
 	page?: number
 	pageSize?: number
-	filters: FilterInput
+	filter: FilterInput
 	orderBy: MediaOrderBy[]
 }
 
 export const usePrefetchBookSearch = () => {
 	const { sdk } = useSDK()
 	const { pageSize } = useURLPageParams()
+	const { search } = useURLKeywordSearch()
+	const searchFilter = useSearchMediaFilter(search)
 
 	const client = useQueryClient()
 
 	const prefetch = useCallback(
-		(params: UsePrefetchBookSearchParams = { filters: {}, orderBy: [] }) => {
+		(params: UsePrefetchBookSearchParams = { filter: {}, orderBy: [] }) => {
 			const pageParams = { page: params.page || 1, pageSize: params.pageSize || pageSize }
 			return client.prefetchQuery({
-				queryKey: getQueryKey(pageParams.page, pageParams.pageSize, params.filters, params.orderBy),
+				queryKey: getQueryKey(
+					pageParams.page,
+					pageParams.pageSize,
+					search,
+					params.filter,
+					params.orderBy,
+				),
 				queryFn: async () => {
 					const response = await sdk.execute(query, {
-						filter: params.filters,
+						filter: { ...params.filter, _or: searchFilter },
 						orderBy: params.orderBy,
 						pagination: {
 							offset: {
@@ -84,7 +96,7 @@ export const usePrefetchBookSearch = () => {
 				staleTime: PREFETCH_STALE_TIME,
 			})
 		},
-		[client, pageSize, sdk],
+		[client, search, searchFilter, pageSize, sdk],
 	)
 
 	return prefetch
@@ -101,13 +113,14 @@ export default function BookSearchSceneContainer() {
 function getQueryKey(
 	page: number,
 	pageSize: number,
+	search: string | undefined,
 	filters: FilterInput,
 	orderBy: MediaOrderBy[],
 ) {
-	return ['booksSearch', { page, pageSize, filters, orderBy }]
+	return ['booksSearch', { page, pageSize, search, filters, orderBy }]
 }
 
-function useMediaURLOrderBy(ordering: Ordering): MediaOrderBy[] {
+export function useMediaURLOrderBy(ordering: Ordering): MediaOrderBy[] {
 	return useMemo(() => {
 		// check for undefined values
 		if (!ordering || !ordering.order_by || !ordering.direction) {
@@ -135,6 +148,15 @@ function BookSearchScene() {
 		...rest
 	} = useFilterScene()
 	const filters = mediaFilters as MediaFilterInput
+	const { search } = useURLKeywordSearch()
+	const searchFilter = useSearchMediaFilter(search)
+
+	const differentSearch = usePreviousIsDifferent(search)
+	useEffect(() => {
+		if (differentSearch) {
+			setPage(1)
+		}
+	}, [differentSearch, setPage])
 
 	const { layoutMode, setLayout } = useBooksLayout((state) => ({
 		columns: state.columns,
@@ -151,8 +173,8 @@ function BookSearchScene() {
 			media: { nodes, pageInfo },
 		},
 		isLoading,
-	} = useSuspenseGraphQL(query, getQueryKey(page, pageSize, filters, orderBy), {
-		filter: filters,
+	} = useSuspenseGraphQL(query, getQueryKey(page, pageSize, search, filters, orderBy), {
+		filter: { ...filters, _or: searchFilter },
 		orderBy: orderBy,
 		pagination: {
 			offset: {
@@ -194,7 +216,7 @@ function BookSearchScene() {
 						prefetch({
 							page,
 							pageSize,
-							filters,
+							filter: filters,
 							orderBy,
 						})
 					}}

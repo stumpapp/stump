@@ -1,8 +1,9 @@
+import { OrderDirection } from '@stump/graphql'
 import { ReactTableGlobalSort } from '@stump/sdk'
 
-import { Ordering } from './context'
+import { Ordering, OrderingField } from './context'
 
-export const EXCLUDED_FILTER_KEYS = ['order_by', 'direction', 'page', 'page_size']
+export const EXCLUDED_FILTER_KEYS = ['order_by', 'direction', 'page', 'pageSize', 'search']
 export const EXCLUDED_FILTER_KEYS_FOR_COUNTS = EXCLUDED_FILTER_KEYS.concat(['search'])
 
 export const getActiveFilterCount = (filters: Record<string, unknown>) => {
@@ -28,8 +29,8 @@ export const clearFilters = (filters: Record<string, unknown>): Record<string, u
 export const tableSortToOrdering = (sort: ReactTableGlobalSort[]): Ordering => {
 	if (sort[0]) {
 		return {
-			direction: sort[0].desc ? 'desc' : 'asc',
-			order_by: sort[0].id,
+			direction: sort[0].desc ? OrderDirection.Desc : OrderDirection.Asc,
+			order_by: sort[0].id as OrderingField,
 		}
 	} else {
 		return {}
@@ -43,7 +44,7 @@ export const orderingToTableSort = (ordering: Ordering): ReactTableGlobalSort[] 
 	if (ordering.order_by) {
 		return [
 			{
-				desc: ordering.direction === 'desc',
+				desc: ordering.direction === OrderDirection.Desc,
 				id: ordering.order_by,
 			},
 		]

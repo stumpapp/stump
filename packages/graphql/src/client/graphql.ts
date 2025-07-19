@@ -3963,6 +3963,7 @@ export type VisitLibraryMutation = {
 
 export type LibraryBooksSceneQueryVariables = Exact<{
 	filter: MediaFilterInput
+	orderBy: Array<MediaOrderBy> | MediaOrderBy
 	pagination: Pagination
 }>
 
@@ -3990,6 +3991,7 @@ export type LibraryBooksSceneQuery = {
 
 export type LibrarySeriesQueryVariables = Exact<{
 	filter: SeriesFilterInput
+	orderBy: Array<SeriesOrderBy> | SeriesOrderBy
 	pagination: Pagination
 }>
 
@@ -4283,6 +4285,7 @@ export type SeriesLibrayLinkQuery = {
 
 export type SeriesBooksSceneQueryVariables = Exact<{
 	filter: MediaFilterInput
+	orderBy: Array<MediaOrderBy> | MediaOrderBy
 	pagination: Pagination
 }>
 
@@ -5877,8 +5880,8 @@ export const VisitLibraryDocument = new TypedDocumentString(`
 }
     `) as unknown as TypedDocumentString<VisitLibraryMutation, VisitLibraryMutationVariables>
 export const LibraryBooksSceneDocument = new TypedDocumentString(`
-    query LibraryBooksScene($filter: MediaFilterInput!, $pagination: Pagination!) {
-  media(filter: $filter, pagination: $pagination) {
+    query LibraryBooksScene($filter: MediaFilterInput!, $orderBy: [MediaOrderBy!]!, $pagination: Pagination!) {
+  media(filter: $filter, orderBy: $orderBy, pagination: $pagination) {
     nodes {
       id
       ...BookCard
@@ -5916,8 +5919,8 @@ export const LibraryBooksSceneDocument = new TypedDocumentString(`
   }
 }`) as unknown as TypedDocumentString<LibraryBooksSceneQuery, LibraryBooksSceneQueryVariables>
 export const LibrarySeriesDocument = new TypedDocumentString(`
-    query LibrarySeries($filter: SeriesFilterInput!, $pagination: Pagination!) {
-  series(filter: $filter, pagination: $pagination) {
+    query LibrarySeries($filter: SeriesFilterInput!, $orderBy: [SeriesOrderBy!]!, $pagination: Pagination!) {
+  series(filter: $filter, orderBy: $orderBy, pagination: $pagination) {
     nodes {
       id
       resolvedName
@@ -6150,8 +6153,8 @@ export const SeriesLibrayLinkDocument = new TypedDocumentString(`
 }
     `) as unknown as TypedDocumentString<SeriesLibrayLinkQuery, SeriesLibrayLinkQueryVariables>
 export const SeriesBooksSceneDocument = new TypedDocumentString(`
-    query SeriesBooksScene($filter: MediaFilterInput!, $pagination: Pagination!) {
-  media(filter: $filter, pagination: $pagination) {
+    query SeriesBooksScene($filter: MediaFilterInput!, $orderBy: [MediaOrderBy!]!, $pagination: Pagination!) {
+  media(filter: $filter, orderBy: $orderBy, pagination: $pagination) {
     nodes {
       id
       ...BookCard

@@ -1,4 +1,4 @@
-import { OrderDirection } from '@stump/graphql'
+import { MediaFilterInput, OrderDirection, SeriesFilterInput } from '@stump/graphql'
 import { toObjectParams, toUrlParams } from '@stump/sdk'
 import { useCallback, useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
@@ -80,6 +80,48 @@ export const useURLKeywordSearch = () => {
 	return { search, setSearch, removeSearch }
 }
 
+export function useSearchMediaFilter(search: string | undefined): MediaFilterInput[] | undefined {
+	return useMemo(() => {
+		if (!search) return undefined
+		return [
+			{
+				name: { contains: search },
+			},
+			{
+				metadata: {
+					summary: { contains: search },
+				},
+			},
+			{
+				metadata: {
+					title: { contains: search },
+				},
+			},
+		] as MediaFilterInput[]
+	}, [search])
+}
+
+export function useSearchSeriesFilter(search: string | undefined): SeriesFilterInput[] | undefined {
+	return useMemo(() => {
+		if (!search) return undefined
+		return [
+			{
+				name: { contains: search },
+			},
+			{
+				metadata: {
+					summary: { contains: search },
+				},
+			},
+			{
+				metadata: {
+					title: { contains: search },
+				},
+			},
+		] as SeriesFilterInput[]
+	}, [search])
+}
+
 export function useFilterScene(): Return {
 	const [searchParams, setSearchParams] = useSearchParams()
 
@@ -88,7 +130,7 @@ export function useFilterScene(): Return {
 
 	/**
 	 * An object representation of the url params without the excluded keys, such as
-	 * order_by, direction, search, page, and page_size.
+	 * order_by, direction, search, page, and pageSize.
 	 */
 	const filters = useMemo(
 		() =>
@@ -116,8 +158,8 @@ export function useFilterScene(): Return {
 	const pagination = useMemo(
 		() => ({
 			page: searchParams.get('page') ? parseInt(searchParams.get('page') as string) : 1,
-			page_size: searchParams.get('page_size')
-				? parseInt(searchParams.get('page_size') as string)
+			pageSize: searchParams.get('pageSize')
+				? parseInt(searchParams.get('pageSize') as string)
 				: defaultPageSize,
 		}),
 		[searchParams, defaultPageSize],

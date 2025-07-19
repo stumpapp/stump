@@ -1,17 +1,15 @@
-import {
-	PREFETCH_STALE_TIME,
-	useLibraryByID,
-	usePagedSeriesQuery,
-	usePrefetchPagedSeries,
-	useSDK,
-	useSuspenseGraphQL,
-} from '@stump/client'
+import { PREFETCH_STALE_TIME, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { usePrevious, usePreviousIsDifferent } from '@stump/components'
-import { graphql, SeriesFilterInput } from '@stump/graphql'
+import {
+	graphql,
+	OrderDirection,
+	SeriesFilterInput,
+	SeriesModelOrdering,
+	SeriesOrderBy,
+} from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo } from 'react'
 import { Helmet } from 'react-helmet'
-import { useParams } from 'react-router'
 
 import {
 	FilterContext,
@@ -22,19 +20,26 @@ import {
 	URLOrdering,
 	useFilterScene,
 } from '@/components/filters'
-import { useURLPageParams } from '@/components/filters/useFilterScene'
-import { SeriesTable } from '@/components/series'
+import { Ordering } from '@/components/filters/context'
+import {
+	useSearchSeriesFilter,
+	useURLKeywordSearch,
+	useURLPageParams,
+} from '@/components/filters/useFilterScene'
 import SeriesGrid from '@/components/series/SeriesGrid'
 import TableOrGridLayout from '@/components/TableOrGridLayout'
 import useIsInView from '@/hooks/useIsInView'
-import { usePrefetchSeriesBooks } from '@/scenes/series'
 import { useSeriesLayout } from '@/stores/layout'
 
 import { useLibraryContext } from '../../context'
 
 const query = graphql(`
-	query LibrarySeries($filter: SeriesFilterInput!, $pagination: Pagination!) {
-		series(filter: $filter, pagination: $pagination) {
+	query LibrarySeries(
+		$filter: SeriesFilterInput!
+		$orderBy: [SeriesOrderBy!]!
+		$pagination: Pagination!
+	) {
+		series(filter: $filter, orderBy: $orderBy, pagination: $pagination) {
 			nodes {
 				id
 				resolvedName
@@ -60,24 +65,37 @@ export type UsePrefetchLibrarySeriesParams = {
 	page?: number
 	pageSize?: number
 	filter?: SeriesFilterInput
+	orderBy?: SeriesOrderBy[]
 }
 
 export const usePrefetchLibrarySeries = () => {
 	const { sdk } = useSDK()
 	const { pageSize } = useURLPageParams()
+	const { search } = useURLKeywordSearch()
+	const searchFilter = useSearchSeriesFilter(search)
 
 	const client = useQueryClient()
 	return useCallback(
 		(libraryId: string, params: UsePrefetchLibrarySeriesParams = {}) => {
 			const pageParams = { page: params.page || 1, pageSize: params.pageSize || pageSize }
 			return client.prefetchQuery({
-				queryKey: ['librarySeries', libraryId],
+				queryKey: getQueryKey(
+					sdk.cacheKeys.librarySeries,
+					libraryId,
+					pageParams.page,
+					pageParams.pageSize,
+					search,
+					params.filter,
+					params.orderBy,
+				),
 				queryFn: async () => {
 					const response = await sdk.execute(query, {
 						filter: {
-							...params.filter,
 							libraryId: { eq: libraryId },
+							_and: [params.filter || {}],
+							_or: searchFilter,
 						},
+						orderBy: params.orderBy || ([] as SeriesOrderBy[]),
 						pagination: {
 							offset: {
 								...pageParams,
@@ -89,7 +107,7 @@ export const usePrefetchLibrarySeries = () => {
 				staleTime: PREFETCH_STALE_TIME,
 			})
 		},
-		[pageSize, sdk, client],
+		[pageSize, search, searchFilter, sdk, client],
 	)
 }
 
@@ -101,28 +119,91 @@ export default function LibrarySeriesSceneWrapper() {
 	)
 }
 
+function useSeriesURLOrderBy(ordering: Ordering): SeriesOrderBy[] {
+	return useMemo(() => {
+		// check for undefined values
+		if (!ordering || !ordering.order_by || !ordering.direction) {
+			return []
+		}
+
+		return [
+			{
+				series: {
+					field: ordering.order_by as SeriesModelOrdering,
+					direction: ordering.direction as OrderDirection,
+				},
+			},
+		] as SeriesOrderBy[]
+	}, [ordering])
+}
+
+function getQueryKey(
+	cacheKey: string,
+	libraryId: string,
+	page: number,
+	pageSize: number,
+	search: string | undefined,
+	filters: SeriesFilterInput | undefined,
+	orderBy: SeriesOrderBy[] | undefined,
+): (string | object | number | SeriesFilterInput | SeriesOrderBy[] | undefined)[] {
+	return [cacheKey, libraryId, page, pageSize, search, filters, orderBy]
+}
+
 function LibrarySeriesScene() {
 	const {
 		library: { id, name },
 	} = useLibraryContext()
-	const { page, pageSize, setPage } = useURLPageParams()
+	const {
+		filters: seriesFilters,
+		ordering,
+		pagination: { page, pageSize: pageSizeMaybeUndefined },
+		setPage,
+		...rest
+	} = useFilterScene()
+	const pageSize = pageSizeMaybeUndefined || 20 // Fallback to 20 if pageSize is undefined, this should never happen since we set a default in the useFilterScene hook
+	const filters = seriesFilters as SeriesFilterInput
+	const orderBy = useSeriesURLOrderBy(ordering)
+	const { search } = useURLKeywordSearch()
+	const searchFilter = useSearchSeriesFilter(search)
 
+	const differentSearch = usePreviousIsDifferent(search)
+	useEffect(() => {
+		if (differentSearch) {
+			setPage(1)
+		}
+	}, [differentSearch, setPage])
+
+	const { layoutMode, setLayout } = useSeriesLayout((state) => ({
+		columns: state.columns,
+		layoutMode: state.layout,
+		setColumns: state.setColumns,
+		setLayout: state.setLayout,
+	}))
+
+	const { sdk } = useSDK()
 	const {
 		data: {
 			series: { nodes, pageInfo },
 		},
 		isLoading,
-	} = useSuspenseGraphQL(query, ['librarySeries', id, { page, pageSize }], {
-		filter: {
-			libraryId: { eq: id },
-		},
-		pagination: {
-			offset: {
-				page,
-				pageSize,
+	} = useSuspenseGraphQL(
+		query,
+		[getQueryKey(sdk.cacheKeys.librarySeries, id, page, pageSize, search, filters, orderBy)],
+		{
+			filter: {
+				libraryId: { eq: id },
+				_and: [filters],
+				_or: searchFilter,
+			},
+			orderBy,
+			pagination: {
+				offset: {
+					page,
+					pageSize,
+				},
 			},
 		},
-	})
+	)
 
 	const [containerRef, isInView] = useIsInView<HTMLDivElement>()
 
@@ -149,42 +230,55 @@ function LibrarySeriesScene() {
 	)
 
 	return (
-		<div className="flex flex-1 flex-col pb-4 md:pb-0">
-			<Helmet>
-				<title>Stump | {name}</title>
-			</Helmet>
+		<FilterContext.Provider
+			value={{
+				filters,
+				ordering,
+				pagination: { page, pageSize },
+				setPage,
+				...rest,
+			}}
+		>
+			<div className="flex flex-1 flex-col pb-4 md:pb-0">
+				<Helmet>
+					<title>Stump | {name}</title>
+				</Helmet>
 
-			<section ref={containerRef} id="grid-top-indicator" className="h-0" />
+				<section ref={containerRef} id="grid-top-indicator" className="h-0" />
 
-			<FilterHeader
-				// layoutControls={<TableOrGridLayout layout={layoutMode} setLayout={setLayout} />}
-				// orderControls={<URLOrdering entity="media" />}
-				// filterControls={<URLFilterDrawer entity="media" />}
-				navOffset
-			/>
+				<FilterHeader
+					isSearching={isLoading}
+					layoutControls={<TableOrGridLayout layout={layoutMode} setLayout={setLayout} />}
+					orderControls={<URLOrdering entity="series" />}
+					filterControls={<URLFilterDrawer entity="series" />}
+					navOffset
+				/>
 
-			<URLFilterContainer
-				currentPage={pageInfo.currentPage || 1}
-				pages={pageInfo.totalPages || 1}
-				onChangePage={(page) => {
-					setPage(page)
-				}}
-				onPrefetchPage={(page) => {
-					prefetch(id, {
-						page,
-						pageSize,
-					})
-				}}
-			>
-				<div className="flex flex-1 px-4 pb-2 pt-4 md:pb-4">
-					<SeriesGrid
-						isLoading={isLoading}
-						series={nodes}
-						// hasFilters={Object.keys(filters || {}).length > 0}
-					/>
-				</div>
-			</URLFilterContainer>
-		</div>
+				<URLFilterContainer
+					currentPage={pageInfo.currentPage || 1}
+					pages={pageInfo.totalPages || 1}
+					onChangePage={(page) => {
+						setPage(page)
+					}}
+					onPrefetchPage={(page) => {
+						prefetch(id, {
+							page,
+							pageSize,
+							filter: filters,
+							orderBy,
+						})
+					}}
+				>
+					<div className="flex flex-1 px-4 pb-2 pt-4 md:pb-4">
+						<SeriesGrid
+							isLoading={isLoading}
+							series={nodes}
+							hasFilters={Object.keys(filters || {}).length > 0}
+						/>
+					</div>
+				</URLFilterContainer>
+			</div>
+		</FilterContext.Provider>
 	)
 }
 

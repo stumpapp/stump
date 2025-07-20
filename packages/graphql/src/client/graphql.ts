@@ -3125,6 +3125,8 @@ export type BookLibrarySeriesLinksQueryVariables = Exact<{
 
 export type BookLibrarySeriesLinksQuery = { __typename?: 'Query', seriesById?: { __typename?: 'Series', id: string, name: string, libraryId?: string | null } | null };
 
+export type BookMetadataFragment = { __typename?: 'Media', metadata?: { __typename?: 'MediaMetadata', ageRating?: number | null, characters: Array<string>, colorists: Array<string>, coverArtists: Array<string>, editors: Array<string>, genres: Array<string>, inkers: Array<string>, letterers: Array<string>, links: Array<string>, pencillers: Array<string>, publisher?: string | null, teams: Array<string>, writers: Array<string>, year?: number | null } | null } & { ' $fragmentName'?: 'BookMetadataFragment' };
+
 export type BookOverviewSceneQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
@@ -3190,7 +3192,7 @@ export type BookSearchSceneQueryVariables = Exact<{
 
 export type BookSearchSceneQuery = { __typename?: 'Query', media: { __typename?: 'PaginatedMediaResponse', nodes: Array<(
       { __typename?: 'Media', id: string }
-      & { ' $fragmentRefs'?: { 'BookCardFragment': BookCardFragment } }
+      & { ' $fragmentRefs'?: { 'BookCardFragment': BookCardFragment;'BookMetadataFragment': BookMetadataFragment } }
     )>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', currentPage: number, totalPages: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
 
 export type CreateLibrarySceneExistingLibrariesQueryVariables = Exact<{ [key: string]: never; }>;
@@ -3268,17 +3270,19 @@ export type VisitLibraryMutation = { __typename?: 'Mutation', visitLibrary: { __
 
 export type LibraryBooksSceneQueryVariables = Exact<{
   filter: MediaFilterInput;
+  orderBy: Array<MediaOrderBy> | MediaOrderBy;
   pagination: Pagination;
 }>;
 
 
 export type LibraryBooksSceneQuery = { __typename?: 'Query', media: { __typename?: 'PaginatedMediaResponse', nodes: Array<(
       { __typename?: 'Media', id: string }
-      & { ' $fragmentRefs'?: { 'BookCardFragment': BookCardFragment } }
+      & { ' $fragmentRefs'?: { 'BookCardFragment': BookCardFragment;'BookMetadataFragment': BookMetadataFragment } }
     )>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', currentPage: number, totalPages: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
 
 export type LibrarySeriesQueryVariables = Exact<{
   filter: SeriesFilterInput;
+  orderBy: Array<SeriesOrderBy> | SeriesOrderBy;
   pagination: Pagination;
 }>;
 
@@ -3414,13 +3418,14 @@ export type SeriesLibrayLinkQuery = { __typename?: 'Query', libraryById?: { __ty
 
 export type SeriesBooksSceneQueryVariables = Exact<{
   filter: MediaFilterInput;
+  orderBy: Array<MediaOrderBy> | MediaOrderBy;
   pagination: Pagination;
 }>;
 
 
 export type SeriesBooksSceneQuery = { __typename?: 'Query', media: { __typename?: 'PaginatedMediaResponse', nodes: Array<(
       { __typename?: 'Media', id: string }
-      & { ' $fragmentRefs'?: { 'BookCardFragment': BookCardFragment } }
+      & { ' $fragmentRefs'?: { 'BookCardFragment': BookCardFragment;'BookMetadataFragment': BookMetadataFragment } }
     )>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', currentPage: number, totalPages: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
 
 export type SeriesBookGridQueryVariables = Exact<{
@@ -3781,11 +3786,11 @@ export type SmartListItemsQueryVariables = Exact<{
 
 
 export type SmartListItemsQuery = { __typename?: 'Query', smartListItems: { __typename: 'SmartListGrouped', items: Array<{ __typename?: 'SmartListGroupedItem', entity: { __typename: 'Library', id: string, name: string } | { __typename: 'Series', id: string, name: string }, books: Array<(
-        { __typename?: 'Media', metadata?: { __typename?: 'MediaMetadata', ageRating?: number | null, characters: Array<string>, colorists: Array<string>, coverArtists: Array<string>, editors: Array<string>, genres: Array<string>, inkers: Array<string>, letterers: Array<string>, links: Array<string>, pencillers: Array<string>, publisher?: string | null, teams: Array<string>, writers: Array<string>, year?: number | null } | null }
-        & { ' $fragmentRefs'?: { 'BookCardFragment': BookCardFragment } }
+        { __typename?: 'Media' }
+        & { ' $fragmentRefs'?: { 'BookCardFragment': BookCardFragment;'BookMetadataFragment': BookMetadataFragment } }
       )> }> } | { __typename: 'SmartListUngrouped', books: Array<(
-      { __typename?: 'Media', metadata?: { __typename?: 'MediaMetadata', ageRating?: number | null, characters: Array<string>, colorists: Array<string>, coverArtists: Array<string>, editors: Array<string>, genres: Array<string>, inkers: Array<string>, letterers: Array<string>, links: Array<string>, pencillers: Array<string>, publisher?: string | null, teams: Array<string>, writers: Array<string>, year?: number | null } | null }
-      & { ' $fragmentRefs'?: { 'BookCardFragment': BookCardFragment } }
+      { __typename?: 'Media' }
+      & { ' $fragmentRefs'?: { 'BookCardFragment': BookCardFragment;'BookMetadataFragment': BookMetadataFragment } }
     )> } };
 
 export type DirectoryListingQueryVariables = Exact<{
@@ -3850,6 +3855,26 @@ export const BookFileInformationFragmentDoc = new TypedDocumentString(`
   relativeLibraryPath
 }
     `, {"fragmentName":"BookFileInformation"}) as unknown as TypedDocumentString<BookFileInformationFragment, unknown>;
+export const BookMetadataFragmentDoc = new TypedDocumentString(`
+    fragment BookMetadata on Media {
+  metadata {
+    ageRating
+    characters
+    colorists
+    coverArtists
+    editors
+    genres
+    inkers
+    letterers
+    links
+    pencillers
+    publisher
+    teams
+    writers
+    year
+  }
+}
+    `, {"fragmentName":"BookMetadata"}) as unknown as TypedDocumentString<BookMetadataFragment, unknown>;
 export const LibrarySettingsConfigFragmentDoc = new TypedDocumentString(`
     fragment LibrarySettingsConfig on Library {
   config {
@@ -4305,6 +4330,7 @@ export const BookSearchSceneDocument = new TypedDocumentString(`
     nodes {
       id
       ...BookCard
+      ...BookMetadata
     }
     pageInfo {
       __typename
@@ -4336,6 +4362,24 @@ export const BookSearchSceneDocument = new TypedDocumentString(`
   readHistory {
     __typename
     completedAt
+  }
+}
+fragment BookMetadata on Media {
+  metadata {
+    ageRating
+    characters
+    colorists
+    coverArtists
+    editors
+    genres
+    inkers
+    letterers
+    links
+    pencillers
+    publisher
+    teams
+    writers
+    year
   }
 }`) as unknown as TypedDocumentString<BookSearchSceneQuery, BookSearchSceneQueryVariables>;
 export const CreateLibrarySceneExistingLibrariesDocument = new TypedDocumentString(`
@@ -4537,11 +4581,12 @@ export const VisitLibraryDocument = new TypedDocumentString(`
 }
     `) as unknown as TypedDocumentString<VisitLibraryMutation, VisitLibraryMutationVariables>;
 export const LibraryBooksSceneDocument = new TypedDocumentString(`
-    query LibraryBooksScene($filter: MediaFilterInput!, $pagination: Pagination!) {
-  media(filter: $filter, pagination: $pagination) {
+    query LibraryBooksScene($filter: MediaFilterInput!, $orderBy: [MediaOrderBy!]!, $pagination: Pagination!) {
+  media(filter: $filter, orderBy: $orderBy, pagination: $pagination) {
     nodes {
       id
       ...BookCard
+      ...BookMetadata
     }
     pageInfo {
       __typename
@@ -4574,10 +4619,28 @@ export const LibraryBooksSceneDocument = new TypedDocumentString(`
     __typename
     completedAt
   }
+}
+fragment BookMetadata on Media {
+  metadata {
+    ageRating
+    characters
+    colorists
+    coverArtists
+    editors
+    genres
+    inkers
+    letterers
+    links
+    pencillers
+    publisher
+    teams
+    writers
+    year
+  }
 }`) as unknown as TypedDocumentString<LibraryBooksSceneQuery, LibraryBooksSceneQueryVariables>;
 export const LibrarySeriesDocument = new TypedDocumentString(`
-    query LibrarySeries($filter: SeriesFilterInput!, $pagination: Pagination!) {
-  series(filter: $filter, pagination: $pagination) {
+    query LibrarySeries($filter: SeriesFilterInput!, $orderBy: [SeriesOrderBy!]!, $pagination: Pagination!) {
+  series(filter: $filter, orderBy: $orderBy, pagination: $pagination) {
     nodes {
       id
       resolvedName
@@ -4774,11 +4837,12 @@ export const SeriesLibrayLinkDocument = new TypedDocumentString(`
 }
     `) as unknown as TypedDocumentString<SeriesLibrayLinkQuery, SeriesLibrayLinkQueryVariables>;
 export const SeriesBooksSceneDocument = new TypedDocumentString(`
-    query SeriesBooksScene($filter: MediaFilterInput!, $pagination: Pagination!) {
-  media(filter: $filter, pagination: $pagination) {
+    query SeriesBooksScene($filter: MediaFilterInput!, $orderBy: [MediaOrderBy!]!, $pagination: Pagination!) {
+  media(filter: $filter, orderBy: $orderBy, pagination: $pagination) {
     nodes {
       id
       ...BookCard
+      ...BookMetadata
     }
     pageInfo {
       __typename
@@ -4810,6 +4874,24 @@ export const SeriesBooksSceneDocument = new TypedDocumentString(`
   readHistory {
     __typename
     completedAt
+  }
+}
+fragment BookMetadata on Media {
+  metadata {
+    ageRating
+    characters
+    colorists
+    coverArtists
+    editors
+    genres
+    inkers
+    letterers
+    links
+    pencillers
+    publisher
+    teams
+    writers
+    year
   }
 }`) as unknown as TypedDocumentString<SeriesBooksSceneQuery, SeriesBooksSceneQueryVariables>;
 export const SeriesBookGridDocument = new TypedDocumentString(`
@@ -5451,44 +5533,14 @@ export const SmartListItemsDocument = new TypedDocumentString(`
         }
         books {
           ...BookCard
-          metadata {
-            ageRating
-            characters
-            colorists
-            coverArtists
-            editors
-            genres
-            inkers
-            letterers
-            links
-            pencillers
-            publisher
-            teams
-            writers
-            year
-          }
+          ...BookMetadata
         }
       }
     }
     ... on SmartListUngrouped {
       books {
         ...BookCard
-        metadata {
-          ageRating
-          characters
-          colorists
-          coverArtists
-          editors
-          genres
-          inkers
-          letterers
-          links
-          pencillers
-          publisher
-          teams
-          writers
-          year
-        }
+        ...BookMetadata
       }
     }
   }
@@ -5511,6 +5563,24 @@ export const SmartListItemsDocument = new TypedDocumentString(`
   readHistory {
     __typename
     completedAt
+  }
+}
+fragment BookMetadata on Media {
+  metadata {
+    ageRating
+    characters
+    colorists
+    coverArtists
+    editors
+    genres
+    inkers
+    letterers
+    links
+    pencillers
+    publisher
+    teams
+    writers
+    year
   }
 }`) as unknown as TypedDocumentString<SmartListItemsQuery, SmartListItemsQueryVariables>;
 export const DirectoryListingDocument = new TypedDocumentString(`

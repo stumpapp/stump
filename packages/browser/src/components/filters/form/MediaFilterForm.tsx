@@ -110,28 +110,90 @@ export default function MediaFilterForm() {
 	 * @param values The values from the form.
 	 */
 	const handleSubmit = (values: FieldValues) => {
-		const newFilters: MediaFilterInput = {
-			extension: values.extension ? { eq: values.extension } : null,
-			readingStatus: values.read_status
-				? {
-						isAnyOf: values.read_status?.map(
-							(elem: string) => (elem as string).toUpperCase() as ReadingStatus,
-						),
-					}
-				: null,
-			metadata: {
-				ageRating: values.metadata?.age_rating ? { lte: values.metadata.age_rating } : null,
-				characters: values.metadata?.character ? { likeAnyOf: values.metadata.character } : null,
-				colorists: values.metadata?.colorist ? { likeAnyOf: values.metadata.colorist } : null,
-				editors: values.metadata?.editor ? { likeAnyOf: values.metadata.editor } : null,
-				genre: values.metadata?.genre ? { likeAnyOf: values.metadata.genre } : null,
-				inkers: values.metadata?.inker ? { likeAnyOf: values.metadata.inker } : null,
-				letterers: values.metadata?.letterer ? { likeAnyOf: values.metadata.letterer } : null,
-				pencillers: values.metadata?.penciller ? { likeAnyOf: values.metadata.penciller } : null,
-				publisher: values.metadata?.publisher ? { likeAnyOf: values.metadata.publisher } : null,
-				writers: values.metadata?.writer ? { likeAnyOf: values.metadata.writer } : null,
-			},
+		const newFilters: MediaFilterInput = {}
+		if (values.extension) {
+			newFilters.extension = { eq: values.extension }
 		}
+
+		if (values.read_status) {
+			newFilters.readingStatus = {
+				isAnyOf: values.read_status.map(
+					(elem: string) => (elem as string).toUpperCase() as ReadingStatus,
+				),
+			}
+		}
+
+		if (values.metadata) {
+			if (values.metadata.age_rating !== null) {
+				newFilters.metadata = {
+					ageRating: values.metadata.age_rating ? { lte: values.metadata.age_rating } : null,
+				}
+			}
+
+			if (values.metadata.character?.length) {
+				newFilters.metadata = {
+					...newFilters.metadata,
+					characters: { likeAnyOf: values.metadata.character },
+				}
+			}
+
+			if (values.metadata.colorist?.length) {
+				newFilters.metadata = {
+					...newFilters.metadata,
+					colorists: { likeAnyOf: values.metadata.colorist },
+				}
+			}
+
+			if (values.metadata.editor?.length) {
+				newFilters.metadata = {
+					...newFilters.metadata,
+					editors: { likeAnyOf: values.metadata.editor },
+				}
+			}
+
+			if (values.metadata.genre?.length) {
+				newFilters.metadata = {
+					...newFilters.metadata,
+					genre: { likeAnyOf: values.metadata.genre },
+				}
+			}
+
+			if (values.metadata.inker?.length) {
+				newFilters.metadata = {
+					...newFilters.metadata,
+					inkers: { likeAnyOf: values.metadata.inker },
+				}
+			}
+
+			if (values.metadata.letterer?.length) {
+				newFilters.metadata = {
+					...newFilters.metadata,
+					letterers: { likeAnyOf: values.metadata.letterer },
+				}
+			}
+
+			if (values.metadata.penciller?.length) {
+				newFilters.metadata = {
+					...newFilters.metadata,
+					pencillers: { likeAnyOf: values.metadata.penciller },
+				}
+			}
+
+			if (values.metadata.publisher?.length) {
+				newFilters.metadata = {
+					...newFilters.metadata,
+					publisher: { likeAnyOf: values.metadata.publisher },
+				}
+			}
+
+			if (values.metadata.writer?.length) {
+				newFilters.metadata = {
+					...newFilters.metadata,
+					writers: { likeAnyOf: values.metadata.writer },
+				}
+			}
+		}
+
 		setFilters(newFilters)
 	}
 

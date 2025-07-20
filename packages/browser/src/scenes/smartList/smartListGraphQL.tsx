@@ -94,44 +94,14 @@ const query_smart_list_items = graphql(`
 					}
 					books {
 						...BookCard
-						metadata {
-							ageRating
-							characters
-							colorists
-							coverArtists
-							editors
-							genres
-							inkers
-							letterers
-							links
-							pencillers
-							publisher
-							teams
-							writers
-							year
-						}
+						...BookMetadata
 					}
 				}
 			}
 			... on SmartListUngrouped {
 				books {
 					...BookCard
-					metadata {
-						ageRating
-						characters
-						colorists
-						coverArtists
-						editors
-						genres
-						inkers
-						letterers
-						links
-						pencillers
-						publisher
-						teams
-						writers
-						year
-					}
+					...BookMetadata
 				}
 			}
 		}

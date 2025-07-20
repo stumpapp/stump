@@ -48,7 +48,7 @@ export default function FilterToolBar({
 	isRefetching,
 	isDisabled,
 }: Props) {
-	const { filters, setFilter, removeFilter } = useFilterContext()
+	const { search, setSearch, removeSearch } = useFilterContext()
 
 	const renderFilter = !!entity && !isDisabled
 	const renderOrderBy = !!orderBy && !!entity && !isDisabled
@@ -57,13 +57,13 @@ export default function FilterToolBar({
 		<header className="flex max-w-full flex-col gap-2 px-4">
 			<div className="flex flex-col items-center gap-2 md:flex-row">
 				<Search
-					initialValue={filters?.search as string}
+					initialValue={search || ''}
 					placeholder={searchPlaceholder}
 					onChange={(value) => {
 						if (value) {
-							setFilter('search', value)
+							setSearch(value)
 						} else {
-							removeFilter('search')
+							removeSearch()
 						}
 					}}
 					isLoading={isRefetching}

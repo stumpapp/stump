@@ -1,13 +1,28 @@
-import { OrderDirection } from '@stump/graphql'
+import {
+	MediaFilterInput,
+	MediaModelOrdering,
+	MediaOrderBy,
+	OrderDirection,
+	SeriesFilterInput,
+	SeriesModelOrdering,
+	SeriesOrderBy,
+} from '@stump/graphql'
 import { toObjectParams, toUrlParams } from '@stump/sdk'
-import { useCallback, useMemo } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useMediaMatch } from 'rooks'
 
 import { FilterInput, IFilterContext, Ordering, OrderingField } from './context'
-import { EXCLUDED_FILTER_KEYS } from './utils'
 
 type Return = IFilterContext
+
+export const DEFAULT_SERIES_ORDER_BY: SeriesOrderBy[] = [
+	{ series: { field: SeriesModelOrdering.Name, direction: OrderDirection.Asc } },
+] as SeriesOrderBy[]
+
+export const DEFAULT_MEDIA_ORDER_BY: MediaOrderBy[] = [
+	{ media: { field: MediaModelOrdering.Name, direction: OrderDirection.Asc } },
+] as MediaOrderBy[]
 
 export const useURLPageParams = () => {
 	const [searchParams, setSearchParams] = useSearchParams()
@@ -80,24 +95,64 @@ export const useURLKeywordSearch = () => {
 	return { search, setSearch, removeSearch }
 }
 
+export function useSearchMediaFilter(search: string | undefined): MediaFilterInput[] | undefined {
+	return useMemo(() => {
+		if (!search) return undefined
+		return [
+			{
+				name: { contains: search },
+			},
+			{
+				metadata: {
+					summary: { contains: search },
+				},
+			},
+			{
+				metadata: {
+					title: { contains: search },
+				},
+			},
+		] as MediaFilterInput[]
+	}, [search])
+}
+
+export function useSearchSeriesFilter(search: string | undefined): SeriesFilterInput[] | undefined {
+	return useMemo(() => {
+		if (!search) return undefined
+		return [
+			{
+				name: { contains: search },
+			},
+			{
+				metadata: {
+					summary: { contains: search },
+				},
+			},
+			{
+				metadata: {
+					title: { contains: search },
+				},
+			},
+		] as SeriesFilterInput[]
+	}, [search])
+}
+
 export function useFilterScene(): Return {
 	const [searchParams, setSearchParams] = useSearchParams()
+	const [search, setSearch] = useState<string | undefined>(undefined)
 
 	const is3XLScreenOrBigger = useMediaMatch('(min-width: 1600px)')
 	const defaultPageSize = is3XLScreenOrBigger ? 40 : 20
 
 	/**
 	 * An object representation of the url params without the excluded keys, such as
-	 * order_by, direction, search, page, and page_size.
+	 * order_by, direction, search, page, and pageSize.
 	 */
-	const filters = useMemo(
-		() =>
-			toObjectParams<FilterInput>(searchParams, {
-				ignoreKeys: EXCLUDED_FILTER_KEYS,
-				removeEmpty: true,
-			}),
-		[searchParams],
-	)
+	const filters = useMemo(() => {
+		const filtersJsonStr = searchParams.get('filters')
+		const filters: FilterInput = filtersJsonStr ? JSON.parse(filtersJsonStr) : {}
+		return filters
+	}, [searchParams])
 
 	/**
 	 * An object representation of the ordering params
@@ -116,8 +171,8 @@ export function useFilterScene(): Return {
 	const pagination = useMemo(
 		() => ({
 			page: searchParams.get('page') ? parseInt(searchParams.get('page') as string) : 1,
-			page_size: searchParams.get('page_size')
-				? parseInt(searchParams.get('page_size') as string)
+			pageSize: searchParams.get('pageSize')
+				? parseInt(searchParams.get('pageSize') as string)
 				: defaultPageSize,
 		}),
 		[searchParams, defaultPageSize],
@@ -129,8 +184,8 @@ export function useFilterScene(): Return {
 				toUrlParams(
 					{
 						...pagination,
-						...filters,
 						...newOrdering,
+						filters: JSON.stringify(filters),
 					},
 					undefined,
 					{ removeEmpty: true },
@@ -155,13 +210,12 @@ export function useFilterScene(): Return {
 	 */
 	const handleSetFilters = useCallback(
 		(newFilters: FilterInput) => {
-			// setFilters(toUrlParams(newFilters, undefined, { removeEmpty: true }))
 			setSearchParams(
 				toUrlParams(
 					{
 						...ordering,
 						...pagination,
-						...newFilters,
+						filters: JSON.stringify(newFilters),
 					},
 					undefined,
 					{ removeEmpty: true },
@@ -174,11 +228,12 @@ export function useFilterScene(): Return {
 	/**
 	 * Sets a single filter in the url with the provided value
 	 */
-	const handleSetFilter = useCallback(
-		(key: string, value: unknown) => {
+	const handleSetSearch = useCallback(
+		(value: string) => {
 			setSearchParams((prev) => {
 				const params = toObjectParams<Record<string, unknown>>(prev)
-				params[key] = value
+				params['search'] = value
+				setSearch(value)
 				return toUrlParams(params)
 			})
 		},
@@ -188,22 +243,20 @@ export function useFilterScene(): Return {
 	/**
 	 * Removes a filter from the url
 	 */
-	const removeFilter = useCallback(
-		(key: string) => {
-			setSearchParams((prev) => {
-				prev.delete(key)
-				return prev
-			})
-		},
-		[setSearchParams],
-	)
+	const removeSearch = useCallback(() => {
+		setSearchParams((prev) => {
+			prev.delete('search')
+			return prev
+		})
+	}, [setSearchParams])
 
 	return {
 		filters,
 		ordering,
 		pagination,
-		removeFilter,
-		setFilter: handleSetFilter,
+		removeSearch,
+		search,
+		setSearch: handleSetSearch,
 		setFilters: handleSetFilters,
 		setOrdering,
 		setPage,

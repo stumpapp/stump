@@ -1,4 +1,3 @@
-import { Series } from '@stump/sdk'
 import { OnChangeFn, SortingState } from '@tanstack/react-table'
 import { useCallback, useMemo } from 'react'
 
@@ -6,9 +5,10 @@ import { orderingToTableSort, tableSortToOrdering, useFilterContext } from '@/co
 import { EntityTable, EntityTableProps } from '@/components/table'
 import { useSeriesLayout } from '@/stores/layout'
 
+import { SeriesCardData } from '../SeriesCard'
 import { defaultColumns } from './columns'
 
-type Props = Omit<EntityTableProps<Series>, 'columns' | 'options'>
+type Props = Omit<EntityTableProps<SeriesCardData>, 'columns' | 'options'>
 
 export default function SeriesTable(props: Props) {
 	const configuration = useSeriesLayout((state) => ({

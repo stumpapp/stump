@@ -1,14 +1,8 @@
-import {
-	PREFETCH_STALE_TIME,
-	usePagedMediaQuery,
-	usePrefetchMediaPaged,
-	useSDK,
-	useSuspenseGraphQL,
-} from '@stump/client'
+import { PREFETCH_STALE_TIME, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { usePrevious, usePreviousIsDifferent } from '@stump/components'
 import { graphql, MediaFilterInput, MediaOrderBy } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
-import { Suspense, useCallback, useEffect, useMemo } from 'react'
+import { Suspense, useCallback, useEffect } from 'react'
 import { Helmet } from 'react-helmet'
 
 import { BookTable } from '@/components/book'
@@ -38,154 +32,6 @@ import { useBooksLayout } from '@/stores/layout'
 
 import { useLibraryContext } from '../../context'
 
-// export default function LibraryBooksScene() {
-// 	const [containerRef, isInView] = useIsInView<HTMLDivElement>()
-
-// 	const { prefetch } = usePrefetchMediaPaged()
-// 	const { library } = useLibraryContext()
-// 	const { layoutMode, setLayout, columns, setColumns } = useBooksLayout((state) => ({
-// 		columns: state.columns,
-// 		layoutMode: state.layout,
-// 		setColumns: state.setColumns,
-// 		setLayout: state.setLayout,
-// 	}))
-// 	const {
-// 		filters,
-// 		ordering,
-// 		pagination: { page, page_size },
-// 		setPage,
-// 		...rest
-// 	} = useFilterScene()
-// 	const params = useMemo(
-// 		() => ({
-// 			page,
-// 			page_size,
-// 			params: {
-// 				...filters,
-// 				...ordering,
-// 				series: {
-// 					library: {
-// 						id: [library.id],
-// 					},
-// 				},
-// 			},
-// 		}),
-// 		[page, page_size, ordering, filters, library.id],
-// 	)
-// 	const {
-// 		isLoading: isLoadingMedia,
-// 		isRefetching: isRefetchingMedia,
-// 		media,
-// 		pageData,
-// 	} = usePagedMediaQuery(params)
-// 	const { current_page, total_pages } = pageData || {}
-
-// 	const differentSearch = usePreviousIsDifferent(filters?.search as string)
-// 	useEffect(() => {
-// 		if (differentSearch) {
-// 			setPage(1)
-// 		}
-// 	}, [differentSearch, setPage])
-
-// 	const handlePrefetchPage = useCallback(
-// 		(page: number) => {
-// 			prefetch({
-// 				...params,
-// 				page,
-// 			})
-// 		},
-// 		[params, prefetch],
-// 	)
-
-// 	const shouldScroll = usePreviousIsDifferent(current_page)
-// 	useEffect(
-// 		() => {
-// 			if (!isInView && shouldScroll) {
-// 				containerRef.current?.scrollIntoView({
-// 					behavior: 'smooth',
-// 					block: 'nearest',
-// 					inline: 'start',
-// 				})
-// 			}
-// 		},
-// 		// eslint-disable-next-line react-hooks/exhaustive-deps
-// 		[isInView, shouldScroll],
-// 	)
-
-// 	const renderContent = () => {
-// 		if (layoutMode === 'GRID') {
-// 			return (
-// 				<URLFilterContainer
-// 					currentPage={current_page || 1}
-// 					pages={total_pages || 1}
-// 					onChangePage={setPage}
-// 					onPrefetchPage={handlePrefetchPage}
-// 				>
-// 					<div className="flex flex-1 px-4 pb-2 pt-4 md:pb-4">
-// 						<BookGrid
-// 							isLoading={isLoadingMedia}
-// 							books={media}
-// 							hasFilters={Object.keys(filters || {}).length > 0}
-// 						/>
-// 					</div>
-// 				</URLFilterContainer>
-// 			)
-// 		} else {
-// 			return (
-// 				<BookTable
-// 					items={media || []}
-// 					render={(props) => (
-// 						<URLFilterContainer
-// 							currentPage={current_page || 1}
-// 							pages={total_pages || 1}
-// 							onChangePage={setPage}
-// 							onPrefetchPage={handlePrefetchPage}
-// 							tableControls={
-// 								<EntityTableColumnConfiguration
-// 									entity="media"
-// 									configuration={columns || defaultBookColumnSort}
-// 									onSave={setColumns}
-// 								/>
-// 							}
-// 							{...props}
-// 						/>
-// 					)}
-// 				/>
-// 			)
-// 		}
-// 	}
-
-// 	return (
-// 		<FilterContext.Provider
-// 			value={{
-// 				filters,
-// 				ordering,
-// 				pagination: { page, page_size },
-// 				setPage,
-// 				...rest,
-// 			}}
-// 		>
-// 			<div className="flex flex-1 flex-col pb-4 md:pb-0">
-// 				<Helmet>
-// 					<title>Stump | {library.name || ''}</title>
-// 				</Helmet>
-
-// 				<section ref={containerRef} id="grid-top-indicator" className="h-0" />
-
-// 				<FilterHeader
-// 					isSearching={isRefetchingMedia}
-// 					layoutControls={<TableOrGridLayout layout={layoutMode} setLayout={setLayout} />}
-// 					orderControls={<URLOrdering entity="media" />}
-// 					filterControls={<URLFilterDrawer entity="media" />}
-// 					navOffset
-// 				/>
-
-// 				{renderContent()}
-// 			</div>
-// 		</FilterContext.Provider>
-// 	)
-// }
-
 const query = graphql(`
 	query LibraryBooksScene(
 		$filter: MediaFilterInput!
@@ -196,6 +42,7 @@ const query = graphql(`
 			nodes {
 				id
 				...BookCard
+				...BookMetadata
 			}
 			pageInfo {
 				__typename
@@ -312,7 +159,7 @@ function LibraryBooksScene() {
 	}, [differentSearch, setPage])
 
 	const [containerRef, isInView] = useIsInView<HTMLDivElement>()
-	const { layoutMode, setLayout } = useBooksLayout((state) => ({
+	const { layoutMode, setLayout, columns, setColumns } = useBooksLayout((state) => ({
 		columns: state.columns,
 		layoutMode: state.layout,
 		setColumns: state.setColumns,
@@ -368,31 +215,9 @@ function LibraryBooksScene() {
 		[shouldScroll, isInView],
 	)
 
-	return (
-		<FilterContext.Provider
-			value={{
-				filters,
-				ordering,
-				pagination: { page, pageSize },
-				setPage,
-				...rest,
-			}}
-		>
-			<div className="flex flex-1 flex-col pb-4 md:pb-0">
-				<Helmet>
-					<title>Stump | {library.name || ''}</title>
-				</Helmet>
-
-				<section ref={containerRef} id="grid-top-indicator" className="h-0" />
-
-				<FilterHeader
-					isSearching={isLoading}
-					layoutControls={<TableOrGridLayout layout={layoutMode} setLayout={setLayout} />}
-					orderControls={<URLOrdering entity="media" />}
-					filterControls={<URLFilterDrawer entity="media" />}
-					navOffset
-				/>
-
+	const renderContent = () => {
+		if (layoutMode === 'GRID') {
+			return (
 				<URLFilterContainer
 					currentPage={pageInfo.currentPage || 1}
 					pages={pageInfo.totalPages || 1}
@@ -418,6 +243,66 @@ function LibraryBooksScene() {
 						/>
 					</div>
 				</URLFilterContainer>
+			)
+		} else {
+			return (
+				<BookTable
+					items={nodes || []}
+					render={(props) => (
+						<URLFilterContainer
+							currentPage={pageInfo.currentPage || 1}
+							pages={pageInfo.totalPages || 1}
+							onChangePage={(page) => {
+								setPage(page)
+							}}
+							onPrefetchPage={(page) => {
+								prefetch(library.id, {
+									page,
+									pageSize,
+									filter: filters,
+									orderBy,
+								})
+							}}
+							tableControls={
+								<EntityTableColumnConfiguration
+									entity="media"
+									configuration={columns || defaultBookColumnSort}
+									onSave={setColumns}
+								/>
+							}
+							{...props}
+						/>
+					)}
+				/>
+			)
+		}
+	}
+	return (
+		<FilterContext.Provider
+			value={{
+				filters,
+				ordering,
+				pagination: { page, pageSize },
+				setPage,
+				...rest,
+			}}
+		>
+			<div className="flex flex-1 flex-col pb-4 md:pb-0">
+				<Helmet>
+					<title>Stump | {library.name || ''}</title>
+				</Helmet>
+
+				<section ref={containerRef} id="grid-top-indicator" className="h-0" />
+
+				<FilterHeader
+					isSearching={isLoading}
+					layoutControls={<TableOrGridLayout layout={layoutMode} setLayout={setLayout} />}
+					orderControls={<URLOrdering entity="media" />}
+					filterControls={<URLFilterDrawer entity="media" />}
+					navOffset
+				/>
+
+				{renderContent()}
 			</div>
 		</FilterContext.Provider>
 	)

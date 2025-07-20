@@ -3997,7 +3997,10 @@ export type LibraryBooksSceneQuery = {
 		__typename?: 'PaginatedMediaResponse'
 		nodes: Array<
 			{ __typename?: 'Media'; id: string } & {
-				' $fragmentRefs'?: { BookCardFragment: BookCardFragment }
+				' $fragmentRefs'?: {
+					BookCardFragment: BookCardFragment
+					BookMetadataFragment: BookMetadataFragment
+				}
 			}
 		>
 		pageInfo:
@@ -4319,7 +4322,10 @@ export type SeriesBooksSceneQuery = {
 		__typename?: 'PaginatedMediaResponse'
 		nodes: Array<
 			{ __typename?: 'Media'; id: string } & {
-				' $fragmentRefs'?: { BookCardFragment: BookCardFragment }
+				' $fragmentRefs'?: {
+					BookCardFragment: BookCardFragment
+					BookMetadataFragment: BookMetadataFragment
+				}
 			}
 		>
 		pageInfo:
@@ -5923,6 +5929,7 @@ export const LibraryBooksSceneDocument = new TypedDocumentString(`
     nodes {
       id
       ...BookCard
+      ...BookMetadata
     }
     pageInfo {
       __typename
@@ -5954,6 +5961,24 @@ export const LibraryBooksSceneDocument = new TypedDocumentString(`
   readHistory {
     __typename
     completedAt
+  }
+}
+fragment BookMetadata on Media {
+  metadata {
+    ageRating
+    characters
+    colorists
+    coverArtists
+    editors
+    genres
+    inkers
+    letterers
+    links
+    pencillers
+    publisher
+    teams
+    writers
+    year
   }
 }`) as unknown as TypedDocumentString<LibraryBooksSceneQuery, LibraryBooksSceneQueryVariables>
 export const LibrarySeriesDocument = new TypedDocumentString(`
@@ -6196,6 +6221,7 @@ export const SeriesBooksSceneDocument = new TypedDocumentString(`
     nodes {
       id
       ...BookCard
+      ...BookMetadata
     }
     pageInfo {
       __typename
@@ -6227,6 +6253,24 @@ export const SeriesBooksSceneDocument = new TypedDocumentString(`
   readHistory {
     __typename
     completedAt
+  }
+}
+fragment BookMetadata on Media {
+  metadata {
+    ageRating
+    characters
+    colorists
+    coverArtists
+    editors
+    genres
+    inkers
+    letterers
+    links
+    pencillers
+    publisher
+    teams
+    writers
+    year
   }
 }`) as unknown as TypedDocumentString<SeriesBooksSceneQuery, SeriesBooksSceneQueryVariables>
 export const SeriesBookGridDocument = new TypedDocumentString(`

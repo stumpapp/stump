@@ -240,7 +240,7 @@ function BookSearchScene() {
 		} else {
 			return (
 				<BookTable
-					items={nodes}
+					items={nodes || []}
 					render={(props) => (
 						<URLFilterContainer
 							currentPage={pageInfo.currentPage || 1}

@@ -1,6 +1,11 @@
 import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Heading, Text } from '@stump/components'
-import { BookOverviewHeaderQuery, graphql } from '@stump/graphql'
+import {
+	BookOverviewHeaderQuery,
+	graphql,
+	MediaFilterInput,
+	MediaMetadataFilterInput,
+} from '@stump/graphql'
 
 import SearchLinkBadge from '@/components/SearchLinkBadge'
 import TagList from '@/components/tags/TagList'
@@ -39,7 +44,7 @@ interface MetadataTableItem {
 	keynameBase: string
 	prefix: string
 	values: string[]
-	searchKey: string
+	search?: MediaFilterInput
 }
 
 function build_metadata_table(media: BookOverviewHeaderQuery['mediaById']): MetadataTableItem[] {
@@ -54,7 +59,7 @@ function build_metadata_table(media: BookOverviewHeaderQuery['mediaById']): Meta
 		keynameBase: string,
 		prefix: string,
 		values: string[],
-		searchKey: string,
+		search?: MediaMetadataFilterInput,
 	) => {
 		if (values && values.length > 0) {
 			// if all values are empty, don't add the key
@@ -62,11 +67,13 @@ function build_metadata_table(media: BookOverviewHeaderQuery['mediaById']): Meta
 				return
 			}
 
+			const searchMedia = search ? { metadata: search } : search
+
 			table.push({
 				keynameBase: keynameBase,
 				prefix: prefix,
 				values: values,
-				searchKey: searchKey,
+				search: searchMedia,
 			})
 		}
 	}
@@ -83,16 +90,22 @@ function build_metadata_table(media: BookOverviewHeaderQuery['mediaById']): Meta
 	const year = year_num > 0 ? [year_num.toString()] : []
 
 	if (is_epub) {
-		add_to_table('writers', 'By ', writers, 'metadata[writer]')
+		add_to_table('writers', 'By ', writers, {
+			writers: { likeAnyOf: metadata?.writers || '' },
+		})
 	}
 
-	add_to_table('publisher', 'Publisher: ', publishers, 'metadata[publisher]')
-	add_to_table('genres', 'Genres: ', genres, 'metadata[genres]')
-	add_to_table('age_rating', 'Age Rating: ', age_rating, 'metadata[ageRating]')
-	add_to_table('year_published', 'Year: ', year, 'metadata[year]')
+	add_to_table('publisher', 'Publisher: ', publishers, {
+		publisher: { contains: metadata?.publisher || '' },
+	})
+	add_to_table('genres', 'Genres: ', genres, {
+		genre: { likeAnyOf: metadata?.genres || '' },
+	})
+	add_to_table('age_rating', 'Age Rating: ', age_rating)
+	add_to_table('year_published', 'Year: ', year, { year: { eq: year_num } })
 
 	if (pages > 0) {
-		add_to_table('pages', 'Pages: ', [pages.toString()], 'metadata[pages]')
+		add_to_table('pages', 'Pages: ', [pages.toString()])
 	}
 
 	return table
@@ -123,7 +136,7 @@ export default function BookOverviewSceneHeader({ id }: Props) {
 							<Text>{metadata_row.prefix}</Text>
 							{metadata_row.values.map((element, index) => (
 								<div key={metadata_row.keynameBase + index}>
-									<SearchLinkBadge searchKey={metadata_row.searchKey} text={element} />
+									<SearchLinkBadge search={metadata_row.search} text={element} />
 								</div>
 							))}
 						</div>

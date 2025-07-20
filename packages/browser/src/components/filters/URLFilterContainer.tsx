@@ -22,7 +22,7 @@ type Props = {
 const URLFilterContainer = forwardRef<HTMLDivElement, Props>(
 	({ children, className, tableControls, ...paginationProps }, ref) => {
 		const {
-			preferences: { enable_hide_scrollbar, primary_navigation_mode },
+			preferences: { enableHideScrollbar, primaryNavigationMode },
 		} = usePreferences()
 		const { width } = useScrollbarSize()
 		const { storedWidth, storeWidth } = useWidthStore((state) => ({
@@ -60,7 +60,7 @@ const URLFilterContainer = forwardRef<HTMLDivElement, Props>(
 		 * The value used for computing the right position of the pagination controls.
 		 * If the scrollbar is hidden, we don't need to account for it.
 		 */
-		const scrollbarWidth = enable_hide_scrollbar ? 0 : adjustedWidth
+		const scrollbarWidth = enableHideScrollbar ? 0 : adjustedWidth
 
 		return (
 			<div
@@ -75,7 +75,7 @@ const URLFilterContainer = forwardRef<HTMLDivElement, Props>(
 					style={{
 						right: scrollbarWidth,
 						width:
-							isMobile || primary_navigation_mode === 'TOPBAR'
+							isMobile || primaryNavigationMode === 'TOPBAR'
 								? '100%'
 								: `calc(100% - ${SIDEBAR_WIDTH}px - ${scrollbarWidth}px)`,
 					}}

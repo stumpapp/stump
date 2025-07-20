@@ -56,10 +56,10 @@ const RouterContainer = (props: StumpClientProps) => {
 		setPlatform(props.platform)
 	}, [props.platform, setPlatform])
 
-	useApplyTheme({ appFont: userPreferences?.app_font, appTheme: userPreferences?.app_theme })
+	useApplyTheme({ appFont: userPreferences?.appFont, appTheme: userPreferences?.appTheme })
 
 	const { setUseDiscordPresence, setDiscordPresence } = props.tauriRPC ?? {}
-	const discordPresenceEnabled = userPreferences?.enable_discord_presence ?? false
+	const discordPresenceEnabled = userPreferences?.enableDiscordPresence ?? false
 	useEffect(() => {
 		setUseDiscordPresence?.(discordPresenceEnabled)
 		if (discordPresenceEnabled) {

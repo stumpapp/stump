@@ -24,7 +24,7 @@ export default function DiscordPresenceSwitch() {
 		if (userPreferences) {
 			const newPreferences = {
 				...userPreferences,
-				enable_discord_presence: !userPreferences?.enable_discord_presence,
+				enableDiscordPresence: !userPreferences?.enableDiscordPresence,
 			}
 			setUserPreferences(newPreferences)
 
@@ -43,7 +43,7 @@ export default function DiscordPresenceSwitch() {
 	 */
 	const handleReconnect = () => setDiscordPresence()
 
-	const isChecked = userPreferences?.enable_discord_presence ?? false
+	const isChecked = userPreferences?.enableDiscordPresence ?? false
 
 	return (
 		<div className="flex items-center justify-between">

@@ -51,7 +51,7 @@ export default function ThumbnailConfigForm() {
 					mode: 'scaleEvenlyByFactor',
 					factor: 0.65,
 				})
-				form.setValue('thumbnailConfig.quality', 0.75)
+				form.setValue('thumbnailConfig.quality', 75)
 				form.setValue('thumbnailConfig.format', SupportedImageFormat.Webp)
 			} else if (!checked) {
 				const existingConfig = intoFormThumbnailConfig(ctx?.library.config.thumbnailConfig)
@@ -280,10 +280,10 @@ export default function ThumbnailConfigForm() {
 							descriptionProps={{ className: 'text-xs' }}
 							description={t(getKey('quality.description'))}
 							errorMessage={form.formState.errors.thumbnailConfig?.quality?.message}
-							placeholder="0.75"
+							placeholder="75"
 							{...form.register('thumbnailConfig.quality', { valueAsNumber: true })}
 						/>
-						{/* 
+						{/*
 						{resizeOptionsError && resizeMethod?.mode === 'Scaled' && (
 							<Text className="mt-2" size="xs" variant="danger">
 								{resizeOptionsError}

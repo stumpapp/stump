@@ -3647,6 +3647,27 @@ export type BookLibrarySeriesLinksQuery = {
 	seriesById?: { __typename?: 'Series'; id: string; name: string; libraryId?: string | null } | null
 }
 
+export type BookMetadataFragment = {
+	__typename?: 'Media'
+	metadata?: {
+		__typename?: 'MediaMetadata'
+		ageRating?: number | null
+		characters: Array<string>
+		colorists: Array<string>
+		coverArtists: Array<string>
+		editors: Array<string>
+		genres: Array<string>
+		inkers: Array<string>
+		letterers: Array<string>
+		links: Array<string>
+		pencillers: Array<string>
+		publisher?: string | null
+		teams: Array<string>
+		writers: Array<string>
+		year?: number | null
+	} | null
+} & { ' $fragmentName'?: 'BookMetadataFragment' }
+
 export type BookOverviewSceneQueryVariables = Exact<{
 	id: Scalars['ID']['input']
 }>
@@ -3797,7 +3818,10 @@ export type BookSearchSceneQuery = {
 		__typename?: 'PaginatedMediaResponse'
 		nodes: Array<
 			{ __typename?: 'Media'; id: string } & {
-				' $fragmentRefs'?: { BookCardFragment: BookCardFragment }
+				' $fragmentRefs'?: {
+					BookCardFragment: BookCardFragment
+					BookMetadataFragment: BookMetadataFragment
+				}
 			}
 		>
 		pageInfo:
@@ -5021,52 +5045,24 @@ export type SmartListItemsQuery = {
 						| { __typename: 'Library'; id: string; name: string }
 						| { __typename: 'Series'; id: string; name: string }
 					books: Array<
-						{
-							__typename?: 'Media'
-							metadata?: {
-								__typename?: 'MediaMetadata'
-								ageRating?: number | null
-								characters: Array<string>
-								colorists: Array<string>
-								coverArtists: Array<string>
-								editors: Array<string>
-								genres: Array<string>
-								inkers: Array<string>
-								letterers: Array<string>
-								links: Array<string>
-								pencillers: Array<string>
-								publisher?: string | null
-								teams: Array<string>
-								writers: Array<string>
-								year?: number | null
-							} | null
-						} & { ' $fragmentRefs'?: { BookCardFragment: BookCardFragment } }
+						{ __typename?: 'Media' } & {
+							' $fragmentRefs'?: {
+								BookCardFragment: BookCardFragment
+								BookMetadataFragment: BookMetadataFragment
+							}
+						}
 					>
 				}>
 		  }
 		| {
 				__typename: 'SmartListUngrouped'
 				books: Array<
-					{
-						__typename?: 'Media'
-						metadata?: {
-							__typename?: 'MediaMetadata'
-							ageRating?: number | null
-							characters: Array<string>
-							colorists: Array<string>
-							coverArtists: Array<string>
-							editors: Array<string>
-							genres: Array<string>
-							inkers: Array<string>
-							letterers: Array<string>
-							links: Array<string>
-							pencillers: Array<string>
-							publisher?: string | null
-							teams: Array<string>
-							writers: Array<string>
-							year?: number | null
-						} | null
-					} & { ' $fragmentRefs'?: { BookCardFragment: BookCardFragment } }
+					{ __typename?: 'Media' } & {
+						' $fragmentRefs'?: {
+							BookCardFragment: BookCardFragment
+							BookMetadataFragment: BookMetadataFragment
+						}
+					}
 				>
 		  }
 }
@@ -5165,6 +5161,29 @@ export const BookFileInformationFragmentDoc = new TypedDocumentString(
     `,
 	{ fragmentName: 'BookFileInformation' },
 ) as unknown as TypedDocumentString<BookFileInformationFragment, unknown>
+export const BookMetadataFragmentDoc = new TypedDocumentString(
+	`
+    fragment BookMetadata on Media {
+  metadata {
+    ageRating
+    characters
+    colorists
+    coverArtists
+    editors
+    genres
+    inkers
+    letterers
+    links
+    pencillers
+    publisher
+    teams
+    writers
+    year
+  }
+}
+    `,
+	{ fragmentName: 'BookMetadata' },
+) as unknown as TypedDocumentString<BookMetadataFragment, unknown>
 export const LibrarySettingsConfigFragmentDoc = new TypedDocumentString(
 	`
     fragment LibrarySettingsConfig on Library {
@@ -5627,6 +5646,7 @@ export const BookSearchSceneDocument = new TypedDocumentString(`
     nodes {
       id
       ...BookCard
+      ...BookMetadata
     }
     pageInfo {
       __typename
@@ -5658,6 +5678,24 @@ export const BookSearchSceneDocument = new TypedDocumentString(`
   readHistory {
     __typename
     completedAt
+  }
+}
+fragment BookMetadata on Media {
+  metadata {
+    ageRating
+    characters
+    colorists
+    coverArtists
+    editors
+    genres
+    inkers
+    letterers
+    links
+    pencillers
+    publisher
+    teams
+    writers
+    year
   }
 }`) as unknown as TypedDocumentString<BookSearchSceneQuery, BookSearchSceneQueryVariables>
 export const CreateLibrarySceneExistingLibrariesDocument = new TypedDocumentString(`
@@ -6873,44 +6911,14 @@ export const SmartListItemsDocument = new TypedDocumentString(`
         }
         books {
           ...BookCard
-          metadata {
-            ageRating
-            characters
-            colorists
-            coverArtists
-            editors
-            genres
-            inkers
-            letterers
-            links
-            pencillers
-            publisher
-            teams
-            writers
-            year
-          }
+          ...BookMetadata
         }
       }
     }
     ... on SmartListUngrouped {
       books {
         ...BookCard
-        metadata {
-          ageRating
-          characters
-          colorists
-          coverArtists
-          editors
-          genres
-          inkers
-          letterers
-          links
-          pencillers
-          publisher
-          teams
-          writers
-          year
-        }
+        ...BookMetadata
       }
     }
   }
@@ -6933,6 +6941,24 @@ export const SmartListItemsDocument = new TypedDocumentString(`
   readHistory {
     __typename
     completedAt
+  }
+}
+fragment BookMetadata on Media {
+  metadata {
+    ageRating
+    characters
+    colorists
+    coverArtists
+    editors
+    genres
+    inkers
+    letterers
+    links
+    pencillers
+    publisher
+    teams
+    writers
+    year
   }
 }`) as unknown as TypedDocumentString<SmartListItemsQuery, SmartListItemsQueryVariables>
 export const DirectoryListingDocument = new TypedDocumentString(`

@@ -2,7 +2,7 @@ import { Label, NativeSelect } from '@stump/components'
 import { LibraryModelOrdering, MediaModelOrdering, SeriesModelOrdering } from '@stump/graphql'
 import { useMemo } from 'react'
 
-import { OrderingField } from '../contextGraphQL'
+import { OrderingField } from '../context'
 // const commonOptions = ['name', 'status', 'created_at', 'path']
 // const options: Record<FilterableEntity, string[]> = {
 // 	library: commonOptions,

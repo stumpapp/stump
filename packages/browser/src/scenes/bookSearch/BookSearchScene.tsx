@@ -11,8 +11,10 @@ import { useQueryClient } from '@tanstack/react-query'
 import { Suspense, useCallback, useEffect, useMemo } from 'react'
 import { Helmet } from 'react-helmet'
 
+import { BookTable } from '@/components/book'
 import BookCard from '@/components/book/BookCard'
 import BookGrid from '@/components/book/BookGrid'
+import { defaultBookColumnSort } from '@/components/book/table'
 import {
 	FilterHeader,
 	URLFilterContainer,
@@ -27,6 +29,7 @@ import {
 	useURLKeywordSearch,
 	useURLPageParams,
 } from '@/components/filters/useFilterScene'
+import { EntityTableColumnConfiguration } from '@/components/table'
 import TableOrGridLayout from '@/components/TableOrGridLayout'
 import useIsInView from '@/hooks/useIsInView'
 import { useBooksLayout } from '@/stores/layout'
@@ -41,6 +44,7 @@ const query = graphql(`
 			nodes {
 				id
 				...BookCard
+				...BookMetadata
 			}
 			pageInfo {
 				__typename
@@ -159,7 +163,7 @@ function BookSearchScene() {
 		}
 	}, [differentSearch, setPage])
 
-	const { layoutMode, setLayout } = useBooksLayout((state) => ({
+	const { layoutMode, setLayout, columns, setColumns } = useBooksLayout((state) => ({
 		columns: state.columns,
 		layoutMode: state.layout,
 		setColumns: state.setColumns,
@@ -234,33 +238,34 @@ function BookSearchScene() {
 				</URLFilterContainer>
 			)
 		} else {
-			return null
-			// return (
-			// 	<BookTable
-			// 		items={cards}
-			// 		render={(props) => (
-			// 			<URLFilterContainer
-			// 				currentPage={pageInfo.currentPage || 1}
-			// 				pages={pageInfo.totalPages || 1}
-			// 				onChangePage={setPage}
-			// 				onPrefetchPage={(page) => {
-			// 					prefetch({
-			// 						page,
-			// 						pageSize,
-			// 					})
-			// 				}}
-			// 				tableControls={
-			// 					<EntityTableColumnConfiguration
-			// 						entity="media"
-			// 						configuration={columns || defaultBookColumnSort}
-			// 						onSave={setColumns}
-			// 					/>
-			// 				}
-			// 				{...props}
-			// 			/>
-			// 		)}
-			// 	/>
-			// )
+			return (
+				<BookTable
+					items={nodes}
+					render={(props) => (
+						<URLFilterContainer
+							currentPage={pageInfo.currentPage || 1}
+							pages={pageInfo.totalPages || 1}
+							onChangePage={setPage}
+							onPrefetchPage={(page) => {
+								prefetch({
+									page,
+									pageSize,
+									filter: filters,
+									orderBy,
+								})
+							}}
+							tableControls={
+								<EntityTableColumnConfiguration
+									entity="media"
+									configuration={columns || defaultBookColumnSort}
+									onSave={setColumns}
+								/>
+							}
+							{...props}
+						/>
+					)}
+				/>
+			)
 		}
 	}
 

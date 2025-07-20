@@ -13,9 +13,9 @@ import {
 	sortableKeyboardCoordinates,
 	verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
-import { useNavigationArrangement } from '@stump/client'
+import { useGraphQLMutation, useNavigationArrangement } from '@stump/client'
 import { Button, Card, cn, Label, Text, ToolTip } from '@stump/components'
-import { UserPermission } from '@stump/graphql'
+import { graphql, NavigationArrangementInput, UserPermission } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { NavigationItem } from '@stump/sdk'
 import isEqual from 'lodash/isEqual'
@@ -29,13 +29,29 @@ import { usePreferences } from '@/hooks'
 import NavigationArrangementItem from './NavigationArrangementItem'
 import { IEntityOptions, isNavigationItemWithEntityOptions } from './types'
 
+const updateMutation = graphql(`
+	mutation NavigationArrangementUpdate($input: NavigationArrangementInput!) {
+		updateNavigationArrangement(input: $input) {
+			__typename
+		}
+	}
+`)
+
+const lockMutation = graphql(`
+	mutation NavigationArrangementUpdateLockStatus($locked: Boolean!) {
+		updateNavigationArrangementLock(locked: $locked) {
+			__typename
+		}
+	}
+`)
+
 export default function NavigationArrangement() {
 	const { t } = useLocaleContext()
 	const { checkPermission } = useAppContext()
 	const {
-		preferences: { primaryNavigationMode },
+		preferences: { primaryNavigationMode, navigationArrangement },
+		store: storePreferences,
 	} = usePreferences()
-	const { arrangement, updateArrangement } = useNavigationArrangement()
 
 	const sensors = useSensors(
 		useSensor(PointerSensor, {
@@ -68,39 +84,60 @@ export default function NavigationArrangement() {
 		[checkPermission],
 	)
 
-	const [localArrangement, setLocalArrangement] = useState(() => arrangement)
+	const [localArrangement, setLocalArrangement] = useState(() => navigationArrangement)
+
+	const { mutate: updateArrangement } = useGraphQLMutation(updateMutation, {
+		onSuccess: (_, { input }) => {
+			// TODO: store preferences locally
+			// storePreferences({
+			// 	navigationArrangement: {
+			// 		...navigationArrangement,
+			// 		sections: input.sections,
+			// 	},
+			// })
+		},
+	})
+
+	const { mutate: updateLockStatus } = useGraphQLMutation(lockMutation, {
+		onSuccess: (_, { locked }) => {
+			setLocalArrangement((curr) => ({ ...curr, locked }))
+			storePreferences({ navigationArrangement: { ...navigationArrangement, locked } })
+		},
+	})
 
 	/**
 	 * A callback to actually update the arrangement on the server.
 	 */
 	const handleUpdateArrangement = useCallback(
-		async (updates: typeof localArrangement) => {
-			try {
-				const result = await updateArrangement(updates)
-				if (!isEqual(result, localArrangement)) {
-					setLocalArrangement(result)
-				}
-			} catch (error) {
-				console.error(error)
-				toast.error('Failed to update navigation arrangement')
-			}
+		async (input: NavigationArrangementInput) => {
+			if (localArrangement.locked) return
+			updateArrangement({ input })
+			// try {
+			// 	const result = await updateArrangement(updates)
+			// 	if (!isEqual(result, localArrangement)) {
+			// 		setLocalArrangement(result)
+			// 	}
+			// } catch (error) {
+			// 	console.error(error)
+			// 	toast.error('Failed to update navigation arrangement')
+			// }
 		},
 		[updateArrangement, localArrangement],
 	)
 
-	const isDifferent = useMemo(
-		() => !isEqual(localArrangement, arrangement),
-		[localArrangement, arrangement],
-	)
+	// const isDifferent = useMemo(
+	// 	() => !isEqual(localArrangement, arrangement),
+	// 	[localArrangement, arrangement],
+	// )
 	/**
 	 * An effect which will update the arrangement whenever the local arrangement is different
 	 * from the current arrangement which has been fetched from the server.
 	 */
-	useEffect(() => {
-		if (isDifferent) {
-			handleUpdateArrangement(localArrangement)
-		}
-	}, [isDifferent, handleUpdateArrangement, localArrangement])
+	// useEffect(() => {
+	// 	if (isDifferent) {
+	// 		handleUpdateArrangement(localArrangement)
+	// 	}
+	// }, [isDifferent, handleUpdateArrangement, localArrangement])
 
 	/**
 	 * A callback to handle the end of a drag event. This will update the arrangement
@@ -122,10 +159,10 @@ export default function NavigationArrangement() {
 		}
 	}
 
-	const setLocked = (isLocked: boolean) =>
-		setLocalArrangement((curr) => ({ ...curr, locked: isLocked }))
+	// const setLocked = (isLocked: boolean) =>
+	// 	setLocalArrangement((curr) => ({ ...curr, locked: isLocked }))
 
-	const { items, locked } = localArrangement
+	const { sections, locked } = localArrangement
 
 	/**
 	 * A callback to set the visibility of an item in the arrangement.
@@ -137,16 +174,16 @@ export default function NavigationArrangement() {
 		async (index: number, visible: boolean) => {
 			if (locked) return
 
-			const targetItem = items[index]
+			const targetItem = sections[index]
 
 			if (!!targetItem && targetItem.visible !== visible) {
-				setLocalArrangement(({ items, ...curr }) => ({
-					items: items.map((item, idx) => (idx === index ? { ...item, visible } : item)),
+				setLocalArrangement(({ sections, ...curr }) => ({
+					sections: sections.map((item, idx) => (idx === index ? { ...item, visible } : item)),
 					...curr,
 				}))
 			}
 		},
-		[items, locked],
+		[sections, locked],
 	)
 
 	/**
@@ -160,19 +197,20 @@ export default function NavigationArrangement() {
 		async (idx: number, options: IEntityOptions) => {
 			if (locked) return
 
-			const targetItem = items[idx]
+			const targetItem = sections[idx]
 
-			if (!!targetItem && isNavigationItemWithEntityOptions(targetItem.item)) {
-				const newInternalItem = { ...targetItem.item, ...options }
-				setLocalArrangement(({ items, ...curr }) => ({
-					items: items.map((item, index) =>
-						index === idx ? { item: newInternalItem, visible: item.visible } : item,
-					),
-					...curr,
-				}))
-			}
+			// TODO(graphql): Fix please
+			// if (!!targetItem && isNavigationItemWithEntityOptions(targetItem.item)) {
+			// 	const newInternalItem = { ...targetItem.item, ...options }
+			// 	setLocalArrangement(({ items, ...curr }) => ({
+			// 		items: items.map((item, index) =>
+			// 			index === idx ? { item: newInternalItem, visible: item.visible } : item,
+			// 		),
+			// 		...curr,
+			// 	}))
+			// }
 		},
-		[items, locked],
+		[sections, locked],
 	)
 
 	const renderLockedButton = () => {
@@ -181,17 +219,26 @@ export default function NavigationArrangement() {
 
 		return (
 			<ToolTip content={help} align="end" size="sm">
-				<Button size="icon" aria-label={help} onClick={() => setLocked(!locked)} variant="ghost">
+				<Button
+					size="icon"
+					aria-label={help}
+					onClick={() => updateLockStatus({ locked: !locked })}
+					variant="ghost"
+				>
 					<Icon className="h-4 w-4 text-foreground-muted" />
 				</Button>
 			</ToolTip>
 		)
 	}
 
+	// TODO: Probably not a good ID...
 	/**
 	 * IDs used in the SortableContext, used to properly sort and drag items
 	 */
-	const identifiers = useMemo<string[]>(() => items.map(({ item }) => item.type), [items])
+	const identifiers = useMemo<string[]>(
+		() => sections.map((section) => `${section.__typename}-${section.config.__typename}`),
+		[sections],
+	)
 
 	return (
 		<div className="flex w-full flex-col space-y-4">
@@ -214,16 +261,17 @@ export default function NavigationArrangement() {
 			>
 				<DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
 					<SortableContext items={identifiers} strategy={verticalListSortingStrategy}>
-						{items.map(({ item, visible }, idx) => (
-							<NavigationArrangementItem
-								key={item.type}
-								item={item}
-								active={visible ?? true}
-								toggleActive={() => setItemVisibility(idx, !visible)}
-								onChangeOptions={(options) => setEntityOptions(idx, options)}
-								disabled={locked}
-								hidden={!checkItemPermission(item.type)}
-							/>
+						{sections.map(({ visible, config }, idx) => (
+							// <NavigationArrangementItem
+							// 	key={section.type}
+							// 	item={section}
+							// 	active={visible ?? true}
+							// 	toggleActive={() => setItemVisibility(idx, !visible)}
+							// 	onChangeOptions={(options) => setEntityOptions(idx, options)}
+							// 	disabled={locked}
+							// 	hidden={!checkItemPermission(item.type)}
+							// />
+							<div key={identifiers[idx]}>todo</div>
 						))}
 					</SortableContext>
 				</DndContext>

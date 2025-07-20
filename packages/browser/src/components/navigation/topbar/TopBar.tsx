@@ -1,4 +1,4 @@
-import { useNavigationArrangement, useSDK, useSuspenseGraphQL } from '@stump/client'
+import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { NavigationMenu } from '@stump/components'
 import {
 	FilterableArrangementEntityLink,

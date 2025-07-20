@@ -1,4 +1,4 @@
-use async_graphql::{Enum, Json, SimpleObject, Union};
+use async_graphql::{Enum, InputObject, Json, OneofObject, SimpleObject, Union};
 use sea_orm::{prelude::*, DeriveActiveEnum, EnumIter, FromJsonQueryResult};
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString};
@@ -37,7 +37,10 @@ pub enum SystemArrangment {
 	BookClubs,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, SimpleObject)]
+#[derive(
+	Debug, Clone, PartialEq, Eq, Serialize, Deserialize, SimpleObject, InputObject,
+)]
+#[graphql(input_name = "SystemArrangmentConfigInput")]
 pub struct SystemArrangmentConfig {
 	variant: SystemArrangment,
 	#[graphql(default)]
@@ -104,7 +107,18 @@ pub enum FilterableArrangementEntityLink {
 	ShowAll,
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, SimpleObject)]
+#[derive(
+	Debug,
+	Clone,
+	Default,
+	PartialEq,
+	Eq,
+	Serialize,
+	Deserialize,
+	SimpleObject,
+	InputObject,
+)]
+#[graphql(input_name = "FilterableArrangementEntityLinkInput")]
 pub struct CustomArrangementConfig {
 	entity: FilterableArrangementEntity,
 	name: Option<String>,
@@ -115,7 +129,18 @@ pub struct CustomArrangementConfig {
 	links: Vec<FilterableArrangementEntityLink>,
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, SimpleObject)]
+#[derive(
+	Debug,
+	Clone,
+	Default,
+	PartialEq,
+	Eq,
+	Serialize,
+	Deserialize,
+	SimpleObject,
+	InputObject,
+)]
+#[graphql(input_name = "InProgressBooksInput")]
 pub struct InProgressBooks {
 	name: Option<String>,
 	// filter: Option<Json<serde_json::Value>>,
@@ -123,7 +148,18 @@ pub struct InProgressBooks {
 	links: Vec<FilterableArrangementEntityLink>,
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, SimpleObject)]
+#[derive(
+	Debug,
+	Clone,
+	Default,
+	PartialEq,
+	Eq,
+	Serialize,
+	Deserialize,
+	SimpleObject,
+	InputObject,
+)]
+#[graphql(input_name = "RecentlyAddedInput")]
 pub struct RecentlyAdded {
 	entity: FilterableArrangementEntity,
 	name: Option<String>,
@@ -132,7 +168,8 @@ pub struct RecentlyAdded {
 	links: Vec<FilterableArrangementEntityLink>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Union)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Union, OneofObject)]
+#[graphql(input_name = "ArrangementConfigInput")]
 #[serde(untagged)]
 pub enum ArrangementConfig {
 	System(SystemArrangmentConfig),
@@ -141,7 +178,10 @@ pub enum ArrangementConfig {
 	Custom(CustomArrangementConfig),
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, SimpleObject)]
+#[derive(
+	Debug, Clone, PartialEq, Eq, Serialize, Deserialize, SimpleObject, InputObject,
+)]
+#[graphql(input_name = "ArrangementSectionInput")]
 pub struct ArrangementSection {
 	config: ArrangementConfig,
 	#[serde(default = "default_true")]
@@ -156,8 +196,8 @@ pub struct ArrangementSection {
 	Debug, Clone, SimpleObject, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult,
 )]
 pub struct Arrangement {
-	locked: bool,
-	sections: Vec<ArrangementSection>,
+	pub locked: bool,
+	pub sections: Vec<ArrangementSection>,
 }
 
 impl Arrangement {

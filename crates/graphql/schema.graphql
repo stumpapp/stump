@@ -69,9 +69,21 @@ type Arrangement {
 
 union ArrangementConfig = SystemArrangmentConfig | InProgressBooks | RecentlyAdded | CustomArrangementConfig
 
+input ArrangementConfigInput @oneOf {
+	system: SystemArrangmentConfigInput
+	inProgressBooks: InProgressBooksInput
+	recentlyAdded: RecentlyAddedInput
+	custom: FilterableArrangementEntityLinkInput
+}
+
 type ArrangementSection {
 	config: ArrangementConfig!
 	visible: Boolean!
+}
+
+input ArrangementSectionInput {
+	config: ArrangementConfigInput!
+	visible: Boolean! = true
 }
 
 type AttachmentMeta {
@@ -541,6 +553,14 @@ enum FilterableArrangementEntityLink {
 	SHOW_ALL
 }
 
+input FilterableArrangementEntityLinkInput {
+	entity: FilterableArrangementEntity!
+	name: String
+	filter: JSON
+	orderBy: String
+	links: [FilterableArrangementEntityLink!]! = []
+}
+
 type FinishedReadingSession {
 	id: Int!
 	startedAt: DateTime!
@@ -614,6 +634,11 @@ input ImageResizeMethodInput @oneOf {
 type InProgressBooks {
 	name: String
 	links: [FilterableArrangementEntityLink!]!
+}
+
+input InProgressBooksInput {
+	name: String
+	links: [FilterableArrangementEntityLink!]! = []
 }
 
 type InheritPermissionStruct {
@@ -1246,6 +1271,8 @@ type Mutation {
 	deleteUser(id: ID!, hardDelete: Boolean): User!
 	deleteUserSessions(id: ID!): Int!
 	updateUserLockStatus(id: ID!, lock: Boolean!): User!
+	updateNavigationArrangementLock(locked: Boolean!): Arrangement!
+	updateNavigationArrangement(input: NavigationArrangementInput!): Arrangement!
 	createEmailer(input: EmailerInput!): Emailer!
 	updateEmailer(id: Int!, input: EmailerInput!): Emailer!
 	deleteEmailer(id: Int!): Emailer!
@@ -1260,6 +1287,10 @@ type Mutation {
 	createScheduledJobConfig(input: ScheduledJobConfigInput!): ScheduledJobConfig!
 	updateScheduledJobConfig(id: Int!, input: ScheduledJobConfigInput!): ScheduledJobConfig!
 	deleteScheduledJobConfig(id: Int!): Boolean!
+}
+
+input NavigationArrangementInput {
+	sections: [ArrangementSectionInput!]!
 }
 
 type Notifier {
@@ -1575,6 +1606,12 @@ type RecentlyAdded {
 	entity: FilterableArrangementEntity!
 	name: String
 	links: [FilterableArrangementEntityLink!]!
+}
+
+input RecentlyAddedInput {
+	entity: FilterableArrangementEntity!
+	name: String
+	links: [FilterableArrangementEntityLink!]! = []
 }
 
 type RegisteredEmailDevice {
@@ -2029,6 +2066,11 @@ enum SystemArrangment {
 type SystemArrangmentConfig {
 	variant: SystemArrangment!
 	links: [FilterableArrangementEntityLink!]!
+}
+
+input SystemArrangmentConfigInput {
+	variant: SystemArrangment!
+	links: [FilterableArrangementEntityLink!]! = []
 }
 
 type Tag {

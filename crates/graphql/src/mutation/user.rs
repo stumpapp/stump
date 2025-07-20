@@ -3,7 +3,8 @@ use crate::{
 	error_message::FORBIDDEN_ACTION,
 	guard::{PermissionGuard, ServerOwnerGuard},
 	input::user::{
-		AgeRestrictionInput, CreateUserInput, UpdateUserInput, UpdateUserPreferencesInput,
+		AgeRestrictionInput, CreateUserInput, NavigationArrangementInput,
+		UpdateUserInput, UpdateUserPreferencesInput,
 	},
 	object::{user::User, user_preferences::UserPreferences},
 	utils::save_user_session,
@@ -15,7 +16,9 @@ use models::{
 		user::{self, AuthUser},
 		user_login_activity, user_preferences,
 	},
-	shared::{enums::UserPermission, permission_set::PermissionSet},
+	shared::{
+		arrangement::Arrangement, enums::UserPermission, permission_set::PermissionSet,
+	},
 };
 use sea_orm::{
 	prelude::*, ActiveValue::NotSet, DatabaseTransaction, IntoActiveModel, Set,
@@ -284,7 +287,73 @@ impl UserMutation {
 		Ok(User::from(updated_user))
 	}
 
-	// TODO(graphql): update_current_user_navigation_arrangement
+	async fn update_navigation_arrangement_lock(
+		&self,
+		ctx: &Context<'_>,
+		locked: bool,
+	) -> Result<Arrangement> {
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+
+		let preferences = user_preferences::Entity::find()
+			.filter(user_preferences::Column::UserId.eq(&user.id))
+			.one(conn)
+			.await?
+			.ok_or("User preferences not found")?;
+
+		let updated_arrangement = match preferences.navigation_arrangement {
+			Some(ref arrangement) => Arrangement {
+				locked,
+				..arrangement.clone()
+			},
+			None => Arrangement {
+				locked,
+				..Arrangement::default_navigation()
+			},
+		};
+
+		let mut active_model = preferences.into_active_model();
+		active_model.navigation_arrangement = Set(Some(updated_arrangement.clone()));
+		active_model.update(conn).await?;
+
+		Ok(updated_arrangement)
+	}
+
+	async fn update_navigation_arrangement(
+		&self,
+		ctx: &Context<'_>,
+		input: NavigationArrangementInput,
+	) -> Result<Arrangement> {
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+
+		let preferences = user_preferences::Entity::find()
+			.filter(user_preferences::Column::UserId.eq(&user.id))
+			.one(conn)
+			.await?
+			.ok_or("User preferences not found")?;
+
+		let arrangement = preferences
+			.navigation_arrangement
+			.clone()
+			.unwrap_or_else(Arrangement::default_navigation);
+
+		if arrangement.locked {
+			return Err("Navigation arrangement is locked".into());
+		}
+
+		let updated_arrangement = Arrangement {
+			locked: arrangement.locked,
+			sections: input.sections,
+		};
+
+		let mut active_model = preferences.into_active_model();
+		active_model.navigation_arrangement = Set(Some(updated_arrangement.clone()));
+
+		active_model.update(conn).await?;
+
+		Ok(updated_arrangement)
+	}
 }
 
 async fn remove_all_session_for_user(

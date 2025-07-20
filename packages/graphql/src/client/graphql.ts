@@ -102,10 +102,21 @@ export type Arrangement = {
 
 export type ArrangementConfig = CustomArrangementConfig | InProgressBooks | RecentlyAdded | SystemArrangmentConfig;
 
+export type ArrangementConfigInput =
+  { custom: FilterableArrangementEntityLinkInput; inProgressBooks?: never; recentlyAdded?: never; system?: never; }
+  |  { custom?: never; inProgressBooks: InProgressBooksInput; recentlyAdded?: never; system?: never; }
+  |  { custom?: never; inProgressBooks?: never; recentlyAdded: RecentlyAddedInput; system?: never; }
+  |  { custom?: never; inProgressBooks?: never; recentlyAdded?: never; system: SystemArrangmentConfigInput; };
+
 export type ArrangementSection = {
   __typename?: 'ArrangementSection';
   config: ArrangementConfig;
   visible: Scalars['Boolean']['output'];
+};
+
+export type ArrangementSectionInput = {
+  config: ArrangementConfigInput;
+  visible?: Scalars['Boolean']['input'];
 };
 
 export type AttachmentMeta = {
@@ -586,6 +597,14 @@ export enum FilterableArrangementEntityLink {
   ShowAll = 'SHOW_ALL'
 }
 
+export type FilterableArrangementEntityLinkInput = {
+  entity: FilterableArrangementEntity;
+  filter?: InputMaybe<Scalars['JSON']['input']>;
+  links?: Array<FilterableArrangementEntityLink>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  orderBy?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type FinishedReadingSession = {
   __typename?: 'FinishedReadingSession';
   completedAt: Scalars['DateTime']['output'];
@@ -661,6 +680,11 @@ export type InProgressBooks = {
   __typename?: 'InProgressBooks';
   links: Array<FilterableArrangementEntityLink>;
   name?: Maybe<Scalars['String']['output']>;
+};
+
+export type InProgressBooksInput = {
+  links?: Array<FilterableArrangementEntityLink>;
+  name?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type InheritPermissionStruct = {
@@ -1303,6 +1327,8 @@ export type Mutation = {
    */
   updateLibraryThumbnail: Library;
   updateMediaProgress: ReadingProgressOutput;
+  updateNavigationArrangement: Arrangement;
+  updateNavigationArrangementLock: Arrangement;
   updateNotifier: Notifier;
   /**
    * Updates an existing reading list.
@@ -1652,6 +1678,16 @@ export type MutationUpdateMediaProgressArgs = {
 };
 
 
+export type MutationUpdateNavigationArrangementArgs = {
+  input: NavigationArrangementInput;
+};
+
+
+export type MutationUpdateNavigationArrangementLockArgs = {
+  locked: Scalars['Boolean']['input'];
+};
+
+
 export type MutationUpdateNotifierArgs = {
   id: Scalars['Int']['input'];
   input: NotifierInput;
@@ -1721,6 +1757,10 @@ export type MutationUploadSeriesArgs = {
 
 export type MutationVisitLibraryArgs = {
   id: Scalars['ID']['input'];
+};
+
+export type NavigationArrangementInput = {
+  sections: Array<ArrangementSectionInput>;
 };
 
 export type Notifier = {
@@ -2217,6 +2257,12 @@ export type RecentlyAdded = {
   name?: Maybe<Scalars['String']['output']>;
 };
 
+export type RecentlyAddedInput = {
+  entity: FilterableArrangementEntity;
+  links?: Array<FilterableArrangementEntityLink>;
+  name?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type RegisteredEmailDevice = {
   __typename?: 'RegisteredEmailDevice';
   email: Scalars['String']['output'];
@@ -2691,6 +2737,11 @@ export enum SystemArrangment {
 export type SystemArrangmentConfig = {
   __typename?: 'SystemArrangmentConfig';
   links: Array<FilterableArrangementEntityLink>;
+  variant: SystemArrangment;
+};
+
+export type SystemArrangmentConfigInput = {
+  links?: Array<FilterableArrangementEntityLink>;
   variant: SystemArrangment;
 };
 
@@ -3398,6 +3449,20 @@ export type DeleteApiKeyConfirmModalMutationVariables = Exact<{
 
 
 export type DeleteApiKeyConfirmModalMutation = { __typename?: 'Mutation', deleteApiKey: { __typename?: 'Apikey', id: number } };
+
+export type NavigationArrangementUpdateMutationVariables = Exact<{
+  input: NavigationArrangementInput;
+}>;
+
+
+export type NavigationArrangementUpdateMutation = { __typename?: 'Mutation', updateNavigationArrangement: { __typename: 'Arrangement' } };
+
+export type NavigationArrangementUpdateLockStatusMutationVariables = Exact<{
+  locked: Scalars['Boolean']['input'];
+}>;
+
+
+export type NavigationArrangementUpdateLockStatusMutation = { __typename?: 'Mutation', updateNavigationArrangementLock: { __typename: 'Arrangement' } };
 
 export type UpdateUserLocaleSelectorMutationVariables = Exact<{
   input: UpdateUserPreferencesInput;
@@ -4802,6 +4867,20 @@ export const DeleteApiKeyConfirmModalDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<DeleteApiKeyConfirmModalMutation, DeleteApiKeyConfirmModalMutationVariables>;
+export const NavigationArrangementUpdateDocument = new TypedDocumentString(`
+    mutation NavigationArrangementUpdate($input: NavigationArrangementInput!) {
+  updateNavigationArrangement(input: $input) {
+    __typename
+  }
+}
+    `) as unknown as TypedDocumentString<NavigationArrangementUpdateMutation, NavigationArrangementUpdateMutationVariables>;
+export const NavigationArrangementUpdateLockStatusDocument = new TypedDocumentString(`
+    mutation NavigationArrangementUpdateLockStatus($locked: Boolean!) {
+  updateNavigationArrangementLock(locked: $locked) {
+    __typename
+  }
+}
+    `) as unknown as TypedDocumentString<NavigationArrangementUpdateLockStatusMutation, NavigationArrangementUpdateLockStatusMutationVariables>;
 export const UpdateUserLocaleSelectorDocument = new TypedDocumentString(`
     mutation UpdateUserLocaleSelector($input: UpdateUserPreferencesInput!) {
   updateViewerPreferences(input: $input) {

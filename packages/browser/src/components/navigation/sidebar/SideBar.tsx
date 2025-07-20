@@ -135,6 +135,13 @@ export default function SideBar({ asChild, hidden }: Props) {
 						links={config.links}
 					/>
 				))
+				.with(SystemArrangment.BookClubs, () => (
+					<BookClubSideBarSection
+						key="book-clubs-sidebar-navlink"
+						isMobile={isMobile}
+						links={config.links}
+					/>
+				))
 				.otherwise(() => null),
 		[t, location.pathname, prefetchHome, isMobile],
 	)

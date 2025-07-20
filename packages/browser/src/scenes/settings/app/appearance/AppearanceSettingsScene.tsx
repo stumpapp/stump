@@ -42,10 +42,9 @@ export default function AppearanceSettingsScene() {
 					<ReplacePrimarySidebarToggle />
 				</div>
 
-				{/* TODO(graphql): Fix this */}
-				{/* <Suspense fallback={null}>
+				<Suspense>
 					<NavigationArrangement />
-				</Suspense> */}
+				</Suspense>
 
 				<DisplaySpacingPreference />
 				<MaxWidthPreference />

@@ -13,6 +13,8 @@ export const cacheKeys = {
 	libraryBooks: 'libraryBooks',
 	librarySeries: 'librarySeries',
 	libraryOverview: 'libraryOverview',
+	libraryCreateLibraryQuery: 'createLibraryQuery',
+	libraryCreate: 'createLibrary',
 	scanHistory: 'scanHistory',
 	numberOfLibraries: 'numberOfLibraries',
 	bookReader: 'bookReader',

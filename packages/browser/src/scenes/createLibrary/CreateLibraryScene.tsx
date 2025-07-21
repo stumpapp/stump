@@ -1,4 +1,4 @@
-import { useGraphQLMutation, useSuspenseGraphQL } from '@stump/client'
+import { useGraphQLMutation, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Alert } from '@stump/components'
 import { CreateOrUpdateLibraryInput, graphql } from '@stump/graphql'
 import { handleApiError } from '@stump/sdk'
@@ -16,6 +16,7 @@ import { useConfetti } from '@/hooks/useConfetti'
 import paths from '@/paths'
 
 import CreateLibraryForm from './CreateLibraryForm'
+import { useQueryClient } from '@tanstack/react-query'
 
 const query = graphql(`
 	query CreateLibrarySceneExistingLibraries {
@@ -39,21 +40,25 @@ const mutation = graphql(`
 
 export default function CreateLibraryScene() {
 	const navigate = useNavigate()
+	const { sdk } = useSDK()
+	const client = useQueryClient()
 	const { start: startConfetti } = useConfetti({ duration: 5000 })
 	const {
 		data: {
 			libraries: { nodes: libraries },
 		},
-	} = useSuspenseGraphQL(query, ['createLibraryScene'])
+	} = useSuspenseGraphQL(query, [sdk.cacheKeys.libraryCreateLibraryQuery])
 
 	const {
 		mutate: createLibrary,
 		isPending,
 		error,
 	} = useGraphQLMutation(mutation, {
+		mutationKey: [sdk.cacheKeys.libraryCreate],
 		onSuccess: ({ createLibrary: { id } }) => {
 			navigate(paths.librarySeries(id))
 			startConfetti()
+			client.invalidateQueries({ queryKey: [sdk.cacheKeys.libraries] })
 		},
 	})
 	const createError = useMemo(() => (error ? handleApiError(error) : undefined), [error])

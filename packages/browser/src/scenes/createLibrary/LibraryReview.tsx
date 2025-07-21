@@ -1,4 +1,5 @@
 import { Heading, Label, Text } from '@stump/components'
+import { LibraryPattern } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import pluralize from 'pluralize'
 import { PropsWithChildren } from 'react'
@@ -125,7 +126,7 @@ export default function LibraryReview() {
 				<div>
 					<Label>{t(getLabelKey('pattern'))}</Label>
 					<Text variant="muted" size="sm">
-						{state.libraryPattern === 'COLLECTION_BASED'
+						{state.libraryPattern === LibraryPattern.CollectionBased
 							? t(getPatternKey('collectionPriority.label'))
 							: t(getPatternKey('seriesPriority.label'))}
 					</Text>

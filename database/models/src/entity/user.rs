@@ -79,7 +79,19 @@ impl FromQueryResult for AuthUser {
 			Err(err) => return Err(err),
 		};
 		let preferences = user_preferences::Model::from_query_result_optional(res, "")
-			.unwrap_or_default();
+			.unwrap_or_else(|error| {
+				tracing::error!(?error, "Failed to parse user preferences");
+				None
+			})
+			.map(|p| user_preferences::Model {
+				home_arrangement: p
+					.home_arrangement
+					.or_else(user_preferences::Model::default_home_arrangement),
+				navigation_arrangement: p
+					.navigation_arrangement
+					.or_else(user_preferences::Model::default_navigation_arrangement),
+				..p
+			});
 
 		Ok(AuthUser {
 			id,

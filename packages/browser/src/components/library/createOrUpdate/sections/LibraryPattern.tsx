@@ -1,6 +1,6 @@
 import { Heading, Link, RadioGroup, Text } from '@stump/components'
+import { LibraryPattern } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
-import { LibraryPattern } from '@stump/sdk'
 import { useCallback } from 'react'
 import { useFormContext } from 'react-hook-form'
 
@@ -12,14 +12,14 @@ export default function LibraryPatternRadioGroup() {
 
 	const { t } = useLocaleContext()
 
-	const libraryPattern: LibraryPattern = form.watch('library_pattern')
-	const isCollectionBasedSelected = libraryPattern === 'COLLECTION_BASED'
+	const libraryPattern: LibraryPattern = form.watch('libraryPattern')
+	const isCollectionBasedSelected = libraryPattern === LibraryPattern.CollectionBased
 	const isCreating = !ctx?.library
 
 	const handleChange = useCallback(
 		(pattern: LibraryPattern) => {
 			if (isCreating) {
-				form.setValue('library_pattern', pattern)
+				form.setValue('libraryPattern', pattern)
 			}
 		},
 		[form, isCreating],
@@ -36,7 +36,7 @@ export default function LibraryPatternRadioGroup() {
 			</div>
 
 			<div className="flex flex-col gap-y-4">
-				<input type="hidden" {...form.register('library_pattern')} />
+				<input type="hidden" {...form.register('libraryPattern')} />
 
 				<RadioGroup
 					value={libraryPattern}
@@ -51,7 +51,7 @@ export default function LibraryPatternRadioGroup() {
 						description={t(getOptionKey('collectionPriority.description'))}
 						innerContainerClassName="block sm:flex-col sm:items-start sm:gap-2"
 						isActive={isCollectionBasedSelected}
-						value="COLLECTION_BASED"
+						value={LibraryPattern.CollectionBased}
 						className="md:w-1/2"
 					/>
 

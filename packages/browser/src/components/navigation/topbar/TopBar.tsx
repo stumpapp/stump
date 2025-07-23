@@ -3,7 +3,7 @@ import { NavigationMenu } from '@stump/components'
 import {
 	FilterableArrangementEntityLink,
 	graphql,
-	SystemArrangment,
+	SystemArrangement,
 	UserPermission,
 } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
@@ -33,7 +33,7 @@ const query = graphql(`
 					sections {
 						config {
 							__typename
-							... on SystemArrangmentConfig {
+							... on SystemArrangementConfig {
 								variant
 								links
 							}
@@ -131,9 +131,9 @@ export default function TopNavigation() {
 	// )
 
 	const renderSystemSection = useCallback(
-		(config: { variant: SystemArrangment; links: Array<FilterableArrangementEntityLink> }) =>
+		(config: { variant: SystemArrangement; links: Array<FilterableArrangementEntityLink> }) =>
 			match(config.variant)
-				.with(SystemArrangment.Home, () => (
+				.with(SystemArrangement.Home, () => (
 					<TopBarNavLink
 						key="home-topbar-navlink"
 						to={paths.home()}
@@ -144,7 +144,7 @@ export default function TopNavigation() {
 						{t('sidebar.buttons.home')}
 					</TopBarNavLink>
 				))
-				.with(SystemArrangment.Explore, () => (
+				.with(SystemArrangement.Explore, () => (
 					<TopBarNavLink
 						key="explore-topbar-navlink"
 						to={paths.bookSearch()}
@@ -154,7 +154,7 @@ export default function TopNavigation() {
 						{t('sidebar.buttons.books')}
 					</TopBarNavLink>
 				))
-				.with(SystemArrangment.Libraries, () => (
+				.with(SystemArrangement.Libraries, () => (
 					<LibraryNavigationItem
 						key="libraries-topbar-navlink"
 						links={config.links}
@@ -171,7 +171,9 @@ export default function TopNavigation() {
 				.filter(({ visible }) => visible)
 				.map(({ config }) =>
 					match(config)
-						.with({ __typename: 'SystemArrangmentConfig' }, (config) => renderSystemSection(config))
+						.with({ __typename: 'SystemArrangementConfig' }, (config) =>
+							renderSystemSection(config),
+						)
 						.otherwise(() => null),
 				)
 				.filter(Boolean),

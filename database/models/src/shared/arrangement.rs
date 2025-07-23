@@ -29,7 +29,7 @@ fn default_true() -> bool {
 )]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 #[strum(serialize_all = "SCREAMING_SNAKE_CASE")]
-pub enum SystemArrangment {
+pub enum SystemArrangement {
 	Home,
 	Explore,
 	Libraries,
@@ -40,9 +40,9 @@ pub enum SystemArrangment {
 #[derive(
 	Debug, Clone, PartialEq, Eq, Serialize, Deserialize, SimpleObject, InputObject,
 )]
-#[graphql(input_name = "SystemArrangmentConfigInput")]
-pub struct SystemArrangmentConfig {
-	variant: SystemArrangment,
+#[graphql(input_name = "SystemArrangementConfigInput")]
+pub struct SystemArrangementConfig {
+	variant: SystemArrangement,
 	#[graphql(default)]
 	links: Vec<FilterableArrangementEntityLink>,
 }
@@ -172,7 +172,7 @@ pub struct RecentlyAdded {
 #[graphql(input_name = "ArrangementConfigInput")]
 #[serde(untagged)]
 pub enum ArrangementConfig {
-	System(SystemArrangmentConfig),
+	System(SystemArrangementConfig),
 	InProgressBooks(InProgressBooks),
 	RecentlyAdded(RecentlyAdded),
 	Custom(CustomArrangementConfig),
@@ -232,29 +232,29 @@ impl Arrangement {
 			locked: true,
 			sections: vec![
 				ArrangementSection {
-					config: ArrangementConfig::System(SystemArrangmentConfig {
-						variant: SystemArrangment::Home,
+					config: ArrangementConfig::System(SystemArrangementConfig {
+						variant: SystemArrangement::Home,
 						links: vec![],
 					}),
 					visible: true,
 				},
 				ArrangementSection {
-					config: ArrangementConfig::System(SystemArrangmentConfig {
-						variant: SystemArrangment::Explore,
+					config: ArrangementConfig::System(SystemArrangementConfig {
+						variant: SystemArrangement::Explore,
 						links: vec![],
 					}),
 					visible: true,
 				},
 				ArrangementSection {
-					config: ArrangementConfig::System(SystemArrangmentConfig {
-						variant: SystemArrangment::Libraries,
+					config: ArrangementConfig::System(SystemArrangementConfig {
+						variant: SystemArrangement::Libraries,
 						links: vec![FilterableArrangementEntityLink::Create],
 					}),
 					visible: true,
 				},
 				ArrangementSection {
-					config: ArrangementConfig::System(SystemArrangmentConfig {
-						variant: SystemArrangment::SmartLists,
+					config: ArrangementConfig::System(SystemArrangementConfig {
+						variant: SystemArrangement::SmartLists,
 						links: vec![FilterableArrangementEntityLink::Create],
 					}),
 					visible: true,

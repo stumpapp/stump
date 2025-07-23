@@ -3,7 +3,7 @@ import { cn, Spacer } from '@stump/components'
 import {
 	FilterableArrangementEntityLink,
 	graphql,
-	SystemArrangment,
+	SystemArrangement,
 	UserPermission,
 } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
@@ -37,7 +37,7 @@ const query = graphql(`
 					sections {
 						config {
 							__typename
-							... on SystemArrangmentConfig {
+							... on SystemArrangementConfig {
 								variant
 								links
 							}
@@ -105,9 +105,9 @@ export default function SideBar({ asChild, hidden }: Props) {
 	const prefetchHome = usePrefetchHomeScene()
 
 	const renderSystemSection = useCallback(
-		(config: { variant: SystemArrangment; links: Array<FilterableArrangementEntityLink> }) =>
+		(config: { variant: SystemArrangement; links: Array<FilterableArrangementEntityLink> }) =>
 			match(config.variant)
-				.with(SystemArrangment.Home, () => (
+				.with(SystemArrangement.Home, () => (
 					<SideBarButtonLink
 						key="home-sidebar-navlink"
 						to={paths.home()}
@@ -118,7 +118,7 @@ export default function SideBar({ asChild, hidden }: Props) {
 						{t('sidebar.buttons.home')}
 					</SideBarButtonLink>
 				))
-				.with(SystemArrangment.Explore, () => (
+				.with(SystemArrangement.Explore, () => (
 					<SideBarButtonLink
 						key="explore-sidebar-navlink"
 						to={paths.bookSearch()}
@@ -128,14 +128,14 @@ export default function SideBar({ asChild, hidden }: Props) {
 						{t('sidebar.buttons.books')}
 					</SideBarButtonLink>
 				))
-				.with(SystemArrangment.Libraries, () => (
+				.with(SystemArrangement.Libraries, () => (
 					<LibrarySideBarSection
 						key="libraries-sidebar-navlink"
 						isMobile={isMobile}
 						links={config.links}
 					/>
 				))
-				.with(SystemArrangment.BookClubs, () => (
+				.with(SystemArrangement.BookClubs, () => (
 					<BookClubSideBarSection
 						key="book-clubs-sidebar-navlink"
 						isMobile={isMobile}
@@ -152,7 +152,9 @@ export default function SideBar({ asChild, hidden }: Props) {
 				.filter(({ visible }) => visible)
 				.map(({ config }) =>
 					match(config)
-						.with({ __typename: 'SystemArrangmentConfig' }, (config) => renderSystemSection(config))
+						.with({ __typename: 'SystemArrangementConfig' }, (config) =>
+							renderSystemSection(config),
+						)
 						.otherwise(() => null),
 				)
 				.filter(Boolean),

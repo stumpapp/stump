@@ -100,13 +100,13 @@ export type Arrangement = {
   sections: Array<ArrangementSection>;
 };
 
-export type ArrangementConfig = CustomArrangementConfig | InProgressBooks | RecentlyAdded | SystemArrangmentConfig;
+export type ArrangementConfig = CustomArrangementConfig | InProgressBooks | RecentlyAdded | SystemArrangementConfig;
 
 export type ArrangementConfigInput =
   { custom: FilterableArrangementEntityLinkInput; inProgressBooks?: never; recentlyAdded?: never; system?: never; }
   |  { custom?: never; inProgressBooks: InProgressBooksInput; recentlyAdded?: never; system?: never; }
   |  { custom?: never; inProgressBooks?: never; recentlyAdded: RecentlyAddedInput; system?: never; }
-  |  { custom?: never; inProgressBooks?: never; recentlyAdded?: never; system: SystemArrangmentConfigInput; };
+  |  { custom?: never; inProgressBooks?: never; recentlyAdded?: never; system: SystemArrangementConfigInput; };
 
 export type ArrangementSection = {
   __typename?: 'ArrangementSection';
@@ -2726,7 +2726,7 @@ export enum SupportedImageFormat {
   Webp = 'WEBP'
 }
 
-export enum SystemArrangment {
+export enum SystemArrangement {
   BookClubs = 'BOOK_CLUBS',
   Explore = 'EXPLORE',
   Home = 'HOME',
@@ -2734,15 +2734,15 @@ export enum SystemArrangment {
   SmartLists = 'SMART_LISTS'
 }
 
-export type SystemArrangmentConfig = {
-  __typename?: 'SystemArrangmentConfig';
+export type SystemArrangementConfig = {
+  __typename?: 'SystemArrangementConfig';
   links: Array<FilterableArrangementEntityLink>;
-  variant: SystemArrangment;
+  variant: SystemArrangement;
 };
 
-export type SystemArrangmentConfigInput = {
+export type SystemArrangementConfigInput = {
   links?: Array<FilterableArrangementEntityLink>;
-  variant: SystemArrangment;
+  variant: SystemArrangement;
 };
 
 export type Tag = {
@@ -3033,7 +3033,7 @@ export type LastVisitedLibraryQuery = { __typename?: 'Query', lastVisitedLibrary
 export type SideBarQueryQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type SideBarQueryQuery = { __typename?: 'Query', me: { __typename?: 'User', id: string, preferences: { __typename?: 'UserPreferences', navigationArrangement: { __typename?: 'Arrangement', locked: boolean, sections: Array<{ __typename?: 'ArrangementSection', visible: boolean, config: { __typename: 'CustomArrangementConfig' } | { __typename: 'InProgressBooks' } | { __typename: 'RecentlyAdded' } | { __typename: 'SystemArrangmentConfig', variant: SystemArrangment, links: Array<FilterableArrangementEntityLink> } }> } } } };
+export type SideBarQueryQuery = { __typename?: 'Query', me: { __typename?: 'User', id: string, preferences: { __typename?: 'UserPreferences', navigationArrangement: { __typename?: 'Arrangement', locked: boolean, sections: Array<{ __typename?: 'ArrangementSection', visible: boolean, config: { __typename: 'CustomArrangementConfig' } | { __typename: 'InProgressBooks' } | { __typename: 'RecentlyAdded' } | { __typename: 'SystemArrangementConfig', variant: SystemArrangement, links: Array<FilterableArrangementEntityLink> } }> } } } };
 
 export type UpdateLibraryEmojiMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -3058,7 +3058,7 @@ export type LibrarySideBarSectionQuery = { __typename?: 'Query', libraries: { __
 export type TopNavigationQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type TopNavigationQuery = { __typename?: 'Query', me: { __typename?: 'User', id: string, preferences: { __typename?: 'UserPreferences', navigationArrangement: { __typename?: 'Arrangement', locked: boolean, sections: Array<{ __typename?: 'ArrangementSection', visible: boolean, config: { __typename: 'CustomArrangementConfig' } | { __typename: 'InProgressBooks' } | { __typename: 'RecentlyAdded' } | { __typename: 'SystemArrangmentConfig', variant: SystemArrangment, links: Array<FilterableArrangementEntityLink> } }> } } } };
+export type TopNavigationQuery = { __typename?: 'Query', me: { __typename?: 'User', id: string, preferences: { __typename?: 'UserPreferences', navigationArrangement: { __typename?: 'Arrangement', locked: boolean, sections: Array<{ __typename?: 'ArrangementSection', visible: boolean, config: { __typename: 'CustomArrangementConfig' } | { __typename: 'InProgressBooks' } | { __typename: 'RecentlyAdded' } | { __typename: 'SystemArrangementConfig', variant: SystemArrangement, links: Array<FilterableArrangementEntityLink> } }> } } } };
 
 export type LibraryNavigationItemQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -3454,6 +3454,11 @@ export type DeleteApiKeyConfirmModalMutationVariables = Exact<{
 
 
 export type DeleteApiKeyConfirmModalMutation = { __typename?: 'Mutation', deleteApiKey: { __typename?: 'Apikey', id: number } };
+
+export type NavigationArrangementQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type NavigationArrangementQuery = { __typename?: 'Query', me: { __typename?: 'User', preferences: { __typename?: 'UserPreferences', navigationArrangement: { __typename?: 'Arrangement', locked: boolean, sections: Array<{ __typename: 'ArrangementSection', visible: boolean, config: { __typename: 'CustomArrangementConfig' } | { __typename: 'InProgressBooks' } | { __typename: 'RecentlyAdded' } | { __typename: 'SystemArrangementConfig', variant: SystemArrangement, links: Array<FilterableArrangementEntityLink> } }> } } } };
 
 export type NavigationArrangementUpdateMutationVariables = Exact<{
   input: NavigationArrangementInput;
@@ -4032,7 +4037,7 @@ export const SideBarQueryDocument = new TypedDocumentString(`
         sections {
           config {
             __typename
-            ... on SystemArrangmentConfig {
+            ... on SystemArrangementConfig {
               variant
               links
             }
@@ -4077,7 +4082,7 @@ export const TopNavigationDocument = new TypedDocumentString(`
         sections {
           config {
             __typename
-            ... on SystemArrangmentConfig {
+            ... on SystemArrangementConfig {
               variant
               links
             }
@@ -4949,6 +4954,28 @@ export const DeleteApiKeyConfirmModalDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<DeleteApiKeyConfirmModalMutation, DeleteApiKeyConfirmModalMutationVariables>;
+export const NavigationArrangementDocument = new TypedDocumentString(`
+    query NavigationArrangement {
+  me {
+    preferences {
+      navigationArrangement {
+        locked
+        sections {
+          __typename
+          config {
+            __typename
+            ... on SystemArrangementConfig {
+              variant
+              links
+            }
+          }
+          visible
+        }
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<NavigationArrangementQuery, NavigationArrangementQueryVariables>;
 export const NavigationArrangementUpdateDocument = new TypedDocumentString(`
     mutation NavigationArrangementUpdate($input: NavigationArrangementInput!) {
   updateNavigationArrangement(input: $input) {

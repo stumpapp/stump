@@ -1232,11 +1232,11 @@
 					"lock": "Lock arrangement",
 					"unlock": "Unlock arrangement",
 					"options": {
-						"Home": "Home",
-						"Explore": "Explore",
-						"Libraries": "Libraries",
-						"BookClubs": "Book clubs",
-						"SmartLists": "Smart lists"
+						"HOME": "Home",
+						"EXPLORE": "Explore",
+						"LIBRARIES": "Libraries",
+						"BOOK_CLUBS": "Book clubs",
+						"SMART_LISTS": "Smart lists"
 					},
 					"entityOptions": {
 						"createAction": {

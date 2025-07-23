@@ -13,21 +13,50 @@ import {
 	sortableKeyboardCoordinates,
 	verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
-import { useGraphQLMutation, useNavigationArrangement } from '@stump/client'
+import { useGraphQLMutation, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Button, Card, cn, Label, Text, ToolTip } from '@stump/components'
-import { graphql, NavigationArrangementInput, UserPermission } from '@stump/graphql'
+import {
+	ArrangementSectionInput,
+	FilterableArrangementEntityLink,
+	graphql,
+	NavigationArrangementInput,
+	NavigationArrangementQuery,
+	UserPermission,
+} from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { NavigationItem } from '@stump/sdk'
-import isEqual from 'lodash/isEqual'
+import { useQueryClient } from '@tanstack/react-query'
 import { Lock, Unlock } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import toast from 'react-hot-toast'
+import { match } from 'ts-pattern'
 
 import { useAppContext } from '@/context'
 import { usePreferences } from '@/hooks'
 
 import NavigationArrangementItem from './NavigationArrangementItem'
-import { IEntityOptions, isNavigationItemWithEntityOptions } from './types'
+
+const query = graphql(`
+	query NavigationArrangement {
+		me {
+			preferences {
+				navigationArrangement {
+					locked
+					sections {
+						__typename
+						config {
+							__typename
+							... on SystemArrangementConfig {
+								variant
+								links
+							}
+						}
+						visible
+					}
+				}
+			}
+		}
+	}
+`)
 
 const updateMutation = graphql(`
 	mutation NavigationArrangementUpdate($input: NavigationArrangementInput!) {
@@ -47,11 +76,20 @@ const lockMutation = graphql(`
 
 export default function NavigationArrangement() {
 	const { t } = useLocaleContext()
+	const { sdk } = useSDK()
 	const { checkPermission } = useAppContext()
 	const {
-		preferences: { primaryNavigationMode, navigationArrangement },
-		store: storePreferences,
+		preferences: { primaryNavigationMode },
 	} = usePreferences()
+	const {
+		data: {
+			me: {
+				preferences: { navigationArrangement },
+			},
+		},
+	} = useSuspenseGraphQL(query, sdk.cacheKey('navigationArrangement'))
+
+	const client = useQueryClient()
 
 	const sensors = useSensors(
 		useSensor(PointerSensor, {
@@ -86,22 +124,20 @@ export default function NavigationArrangement() {
 
 	const [localArrangement, setLocalArrangement] = useState(() => navigationArrangement)
 
+	useEffect(() => {
+		setLocalArrangement(navigationArrangement)
+	}, [navigationArrangement])
+
 	const { mutate: updateArrangement } = useGraphQLMutation(updateMutation, {
-		onSuccess: (_, { input }) => {
-			// TODO: store preferences locally
-			// storePreferences({
-			// 	navigationArrangement: {
-			// 		...navigationArrangement,
-			// 		sections: input.sections,
-			// 	},
-			// })
+		onSuccess: () => {
+			client.refetchQueries({ queryKey: sdk.cacheKey('navigationArrangement') })
+			client.refetchQueries({ queryKey: sdk.cacheKey('sidebar') })
 		},
 	})
 
 	const { mutate: updateLockStatus } = useGraphQLMutation(lockMutation, {
 		onSuccess: (_, { locked }) => {
 			setLocalArrangement((curr) => ({ ...curr, locked }))
-			storePreferences({ navigationArrangement: { ...navigationArrangement, locked } })
 		},
 	})
 
@@ -147,14 +183,28 @@ export default function NavigationArrangement() {
 		const { active, over } = event
 
 		if (!!over?.id && active.id !== over.id) {
-			setLocalArrangement(({ items, ...curr }) => {
-				const oldIndex = items.findIndex(({ item }) => item.type === active.id)
-				const newIndex = items.findIndex(({ item }) => item.type === over.id)
+			// setLocalArrangement(({ items, ...curr }) => {
+			// 	const oldIndex = items.findIndex(({ item }) => item.type === active.id)
+			// 	const newIndex = items.findIndex(({ item }) => item.type === over.id)
 
-				return {
-					items: arrayMove(items, oldIndex, newIndex),
-					...curr,
-				}
+			// 	return {
+			// 		items: arrayMove(items, oldIndex, newIndex),
+			// 		...curr,
+			// 	}
+			// })
+
+			const oldIndex = localArrangement.sections.findIndex(
+				(section) => getSectionId(section) === active.id,
+			)
+			const newIndex = localArrangement.sections.findIndex(
+				(section) => getSectionId(section) === over.id,
+			)
+			const newSections = arrayMove(localArrangement.sections, oldIndex, newIndex)
+			setLocalArrangement((curr) => ({ ...curr, sections: newSections }))
+			updateArrangement({
+				input: {
+					sections: newSections.map(toArrangementInput),
+				},
 			})
 		}
 	}
@@ -170,47 +220,46 @@ export default function NavigationArrangement() {
 	 * @param index The index of the item in the arrangement
 	 * @param visible The visibility of the item
 	 */
-	const setItemVisibility = useCallback(
+	const onChangeVisibility = useCallback(
 		async (index: number, visible: boolean) => {
 			if (locked) return
 
 			const targetItem = sections[index]
 
 			if (!!targetItem && targetItem.visible !== visible) {
-				setLocalArrangement(({ sections, ...curr }) => ({
-					sections: sections.map((item, idx) => (idx === index ? { ...item, visible } : item)),
-					...curr,
-				}))
+				updateArrangement({
+					input: {
+						sections: sections
+							.map((item, idx) => (idx === index ? { ...item, visible } : item))
+							.map(toArrangementInput),
+					},
+				})
 			}
 		},
-		[sections, locked],
+		[sections, locked, updateArrangement],
 	)
 
-	/**
-	 * A callback to set the options of an entity, provided the entity is an entity with options
-	 * and exists in the current arrangement.
-	 *
-	 * @param idx The index of the item in the arrangement
-	 * @param options The options to set
-	 */
-	const setEntityOptions = useCallback(
-		async (idx: number, options: IEntityOptions) => {
+	const onChangeLinks = useCallback(
+		async (idx: number, links: FilterableArrangementEntityLink[]) => {
 			if (locked) return
 
 			const targetItem = sections[idx]
+			if (targetItem?.config.__typename !== 'SystemArrangementConfig') return
 
-			// TODO(graphql): Fix please
-			// if (!!targetItem && isNavigationItemWithEntityOptions(targetItem.item)) {
-			// 	const newInternalItem = { ...targetItem.item, ...options }
-			// 	setLocalArrangement(({ items, ...curr }) => ({
-			// 		items: items.map((item, index) =>
-			// 			index === idx ? { item: newInternalItem, visible: item.visible } : item,
-			// 		),
-			// 		...curr,
-			// 	}))
-			// }
+			const newConfig = {
+				...targetItem.config,
+				links,
+			}
+
+			updateArrangement({
+				input: {
+					sections: sections
+						.map((item, index) => (index === idx ? { ...item, config: newConfig } : item))
+						.map(toArrangementInput),
+				},
+			})
 		},
-		[sections, locked],
+		[sections, locked, updateArrangement],
 	)
 
 	const renderLockedButton = () => {
@@ -235,10 +284,7 @@ export default function NavigationArrangement() {
 	/**
 	 * IDs used in the SortableContext, used to properly sort and drag items
 	 */
-	const identifiers = useMemo<string[]>(
-		() => sections.map((section) => `${section.__typename}-${section.config.__typename}`),
-		[sections],
-	)
+	const identifiers = useMemo<string[]>(() => sections.map(getSectionId), [sections])
 
 	return (
 		<div className="flex w-full flex-col space-y-4">
@@ -261,17 +307,14 @@ export default function NavigationArrangement() {
 			>
 				<DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
 					<SortableContext items={identifiers} strategy={verticalListSortingStrategy}>
-						{sections.map(({ visible, config }, idx) => (
-							// <NavigationArrangementItem
-							// 	key={section.type}
-							// 	item={section}
-							// 	active={visible ?? true}
-							// 	toggleActive={() => setItemVisibility(idx, !visible)}
-							// 	onChangeOptions={(options) => setEntityOptions(idx, options)}
-							// 	disabled={locked}
-							// 	hidden={!checkItemPermission(item.type)}
-							// />
-							<div key={identifiers[idx]}>todo</div>
+						{sections.map((section, idx) => (
+							<NavigationArrangementItem
+								key={identifiers[idx]}
+								section={section}
+								disabled={locked}
+								onChangeLinks={(links) => onChangeLinks(idx, links)}
+								onChangeVisibility={() => onChangeVisibility(idx, !section.visible)}
+							/>
 						))}
 					</SortableContext>
 				</DndContext>
@@ -282,3 +325,39 @@ export default function NavigationArrangement() {
 
 const LOCALE_BASE = 'settingsScene.app/appearance.sections.navigationArrangement'
 const getKey = (key: string) => `${LOCALE_BASE}.${key}`
+
+type Section =
+	NavigationArrangementQuery['me']['preferences']['navigationArrangement']['sections'][number]
+
+const toArrangementInput = (arrangement: Section): ArrangementSectionInput => {
+	const config = match(arrangement)
+		.with(
+			{ config: { __typename: 'SystemArrangementConfig' } },
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
+			({ visible, config: { __typename: _, ...system } }) =>
+				({
+					visible,
+					config: {
+						system,
+					},
+				}) satisfies ArrangementSectionInput,
+		)
+		.otherwise(() => null)
+
+	if (!config) {
+		console.warn(
+			`NavigationArrangement: Unable to convert arrangement section with type "${arrangement.__typename}" to ArrangementSectionInput`,
+		)
+		throw new Error(`Invalid arrangement section type: ${arrangement.__typename}`)
+	}
+
+	return config
+}
+
+export const getSectionId = (section: Section): string => {
+	if (section.config.__typename === 'SystemArrangementConfig') {
+		return `${section.__typename}-${section.config.__typename}-${section.config.variant}`
+	}
+
+	return ''
+}

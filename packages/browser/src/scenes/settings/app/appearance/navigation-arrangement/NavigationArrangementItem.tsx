@@ -3,11 +3,8 @@ import { CSS } from '@dnd-kit/utilities'
 import { CheckBox, cn, IconButton, Text } from '@stump/components'
 import {
 	FilterableArrangementEntityLink,
-	FragmentType,
-	graphql,
 	NavigationArrangementQuery,
 	SystemArrangement,
-	useFragment,
 } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { Bolt, Eye, EyeOff } from 'lucide-react'

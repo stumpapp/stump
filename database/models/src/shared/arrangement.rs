@@ -259,6 +259,13 @@ impl Arrangement {
 					}),
 					visible: true,
 				},
+				ArrangementSection {
+					config: ArrangementConfig::System(SystemArrangementConfig {
+						variant: SystemArrangement::BookClubs,
+						links: vec![FilterableArrangementEntityLink::Create],
+					}),
+					visible: true,
+				},
 			],
 		}
 	}

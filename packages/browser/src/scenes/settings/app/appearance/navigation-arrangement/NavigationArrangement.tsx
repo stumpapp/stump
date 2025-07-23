@@ -19,12 +19,11 @@ import {
 	ArrangementSectionInput,
 	FilterableArrangementEntityLink,
 	graphql,
-	NavigationArrangementInput,
 	NavigationArrangementQuery,
+	SystemArrangement,
 	UserPermission,
 } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
-import { NavigationItem } from '@stump/sdk'
 import { useQueryClient } from '@tanstack/react-query'
 import { Lock, Unlock } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -104,24 +103,6 @@ export default function NavigationArrangement() {
 		}),
 	)
 
-	/**
-	 * A callback to check if the current user has permission to access a specific item.
-	 * There is no point in allowing a user to configure an item which is for a feature
-	 * they do not have access to.
-	 */
-	const checkItemPermission = useCallback(
-		(type: NavigationItem['type']) => {
-			if (type === 'SmartLists') {
-				return checkPermission(UserPermission.AccessSmartList)
-			} else if (type === 'BookClubs') {
-				return checkPermission(UserPermission.AccessBookClub)
-			} else {
-				return true
-			}
-		},
-		[checkPermission],
-	)
-
 	const [localArrangement, setLocalArrangement] = useState(() => navigationArrangement)
 
 	useEffect(() => {
@@ -142,40 +123,6 @@ export default function NavigationArrangement() {
 	})
 
 	/**
-	 * A callback to actually update the arrangement on the server.
-	 */
-	const handleUpdateArrangement = useCallback(
-		async (input: NavigationArrangementInput) => {
-			if (localArrangement.locked) return
-			updateArrangement({ input })
-			// try {
-			// 	const result = await updateArrangement(updates)
-			// 	if (!isEqual(result, localArrangement)) {
-			// 		setLocalArrangement(result)
-			// 	}
-			// } catch (error) {
-			// 	console.error(error)
-			// 	toast.error('Failed to update navigation arrangement')
-			// }
-		},
-		[updateArrangement, localArrangement],
-	)
-
-	// const isDifferent = useMemo(
-	// 	() => !isEqual(localArrangement, arrangement),
-	// 	[localArrangement, arrangement],
-	// )
-	/**
-	 * An effect which will update the arrangement whenever the local arrangement is different
-	 * from the current arrangement which has been fetched from the server.
-	 */
-	// useEffect(() => {
-	// 	if (isDifferent) {
-	// 		handleUpdateArrangement(localArrangement)
-	// 	}
-	// }, [isDifferent, handleUpdateArrangement, localArrangement])
-
-	/**
 	 * A callback to handle the end of a drag event. This will update the arrangement
 	 * based on the new order of the items.
 	 */
@@ -183,16 +130,6 @@ export default function NavigationArrangement() {
 		const { active, over } = event
 
 		if (!!over?.id && active.id !== over.id) {
-			// setLocalArrangement(({ items, ...curr }) => {
-			// 	const oldIndex = items.findIndex(({ item }) => item.type === active.id)
-			// 	const newIndex = items.findIndex(({ item }) => item.type === over.id)
-
-			// 	return {
-			// 		items: arrayMove(items, oldIndex, newIndex),
-			// 		...curr,
-			// 	}
-			// })
-
 			const oldIndex = localArrangement.sections.findIndex(
 				(section) => getSectionId(section) === active.id,
 			)
@@ -208,9 +145,6 @@ export default function NavigationArrangement() {
 			})
 		}
 	}
-
-	// const setLocked = (isLocked: boolean) =>
-	// 	setLocalArrangement((curr) => ({ ...curr, locked: isLocked }))
 
 	const { sections, locked } = localArrangement
 
@@ -280,11 +214,29 @@ export default function NavigationArrangement() {
 		)
 	}
 
-	// TODO: Probably not a good ID...
 	/**
 	 * IDs used in the SortableContext, used to properly sort and drag items
 	 */
 	const identifiers = useMemo<string[]>(() => sections.map(getSectionId), [sections])
+
+	const renderSections = useCallback(() => {
+		const guardedSections = sections.map((section) =>
+			applyPermissionGuard(section, checkPermission),
+		)
+
+		return guardedSections.map((section, index) => {
+			if (!section) return null // Skip sections that are not allowed
+
+			return (
+				<NavigationArrangementItem
+					key={getSectionId(section)}
+					section={section}
+					onChangeVisibility={() => onChangeVisibility(index, section.visible)}
+					onChangeLinks={(links) => onChangeLinks(index, links)}
+				/>
+			)
+		})
+	}, [sections, onChangeVisibility, onChangeLinks, checkPermission])
 
 	return (
 		<div className="flex w-full flex-col space-y-4">
@@ -307,15 +259,7 @@ export default function NavigationArrangement() {
 			>
 				<DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
 					<SortableContext items={identifiers} strategy={verticalListSortingStrategy}>
-						{sections.map((section, idx) => (
-							<NavigationArrangementItem
-								key={identifiers[idx]}
-								section={section}
-								disabled={locked}
-								onChangeLinks={(links) => onChangeLinks(idx, links)}
-								onChangeVisibility={() => onChangeVisibility(idx, !section.visible)}
-							/>
-						))}
+						{renderSections()}
 					</SortableContext>
 				</DndContext>
 			</Card>
@@ -360,4 +304,22 @@ export const getSectionId = (section: Section): string => {
 	}
 
 	return ''
+}
+
+const applyPermissionGuard = (
+	section: Section,
+	checkPermission: (permission: UserPermission) => boolean,
+): Section | null => {
+	const withGuard = match(section)
+		.with(
+			{ config: { __typename: 'SystemArrangementConfig', variant: SystemArrangement.SmartLists } },
+			() => (checkPermission(UserPermission.AccessSmartList) ? section : null),
+		)
+		.with(
+			{ config: { __typename: 'SystemArrangementConfig', variant: SystemArrangement.BookClubs } },
+			() => (checkPermission(UserPermission.AccessBookClub) ? section : null),
+		)
+		.otherwise(() => section)
+
+	return withGuard
 }

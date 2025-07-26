@@ -10,6 +10,7 @@ export const cacheKeys = {
 	recentlyAddedSeries: 'recentlyAddedSeries',
 	libraries: 'libraries',
 	libraryById: 'libraryById',
+	lastVisitedLibrary: 'lastVisitedLibrary',
 	libraryBooks: 'libraryBooks',
 	librarySeries: 'librarySeries',
 	libraryOverview: 'libraryOverview',
@@ -33,6 +34,7 @@ export const cacheKeys = {
 	scheduler: 'jobScheduler',
 	users: 'users',
 	user: 'user',
+	loginActivity: 'loginActivity',
 	smartLists: 'smartLists',
 	smartListNames: 'smartListNames',
 	smartListDelete: 'smartListDelete',
@@ -42,4 +44,7 @@ export const cacheKeys = {
 	smartListViewCreate: 'smartListCreate',
 	smartListViewUpdate: 'smartListUpdate',
 	smartListItems: 'smartListItems',
+	navigationArrangement: 'navigationArrangement',
+	bookClubs: 'bookClubs',
+	bookClubById: 'bookClubById',
 } as const

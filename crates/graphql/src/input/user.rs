@@ -1,5 +1,8 @@
 use async_graphql::InputObject;
-use models::shared::enums::{SupportedFont, UserPermission};
+use models::shared::{
+	arrangement::ArrangementSection,
+	enums::{SupportedFont, UserPermission},
+};
 
 #[derive(InputObject)]
 pub struct AgeRestrictionInput {
@@ -48,4 +51,9 @@ pub struct UpdateUserPreferencesInput {
 	pub prefer_accent_color: bool,
 	pub show_thumbnails_in_headers: bool,
 	pub enable_alphabet_select: bool,
+}
+
+#[derive(InputObject, Debug)]
+pub struct NavigationArrangementInput {
+	pub sections: Vec<ArrangementSection>,
 }

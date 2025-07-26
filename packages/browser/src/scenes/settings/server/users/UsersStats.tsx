@@ -18,6 +18,8 @@ type BookReadStats = {
 	inProgressCount: number
 }
 
+// TODO(graphql): Redo all this
+
 // type TopBook = {
 // 	bookId: string
 // 	readers: string[]

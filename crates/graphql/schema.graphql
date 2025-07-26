@@ -67,11 +67,23 @@ type Arrangement {
 	sections: [ArrangementSection!]!
 }
 
-union ArrangementConfig = SystemArrangmentConfig | InProgressBooks | RecentlyAdded | CustomArrangementConfig
+union ArrangementConfig = SystemArrangementConfig | InProgressBooks | RecentlyAdded | CustomArrangementConfig
+
+input ArrangementConfigInput @oneOf {
+	system: SystemArrangementConfigInput
+	inProgressBooks: InProgressBooksInput
+	recentlyAdded: RecentlyAddedInput
+	custom: FilterableArrangementEntityLinkInput
+}
 
 type ArrangementSection {
 	config: ArrangementConfig!
 	visible: Boolean!
+}
+
+input ArrangementSectionInput {
+	config: ArrangementConfigInput!
+	visible: Boolean! = true
 }
 
 type AttachmentMeta {
@@ -541,6 +553,14 @@ enum FilterableArrangementEntityLink {
 	SHOW_ALL
 }
 
+input FilterableArrangementEntityLinkInput {
+	entity: FilterableArrangementEntity!
+	name: String
+	filter: JSON
+	orderBy: String
+	links: [FilterableArrangementEntityLink!]! = []
+}
+
 type FinishedReadingSession {
 	id: Int!
 	startedAt: DateTime!
@@ -614,6 +634,11 @@ input ImageResizeMethodInput @oneOf {
 type InProgressBooks {
 	name: String
 	links: [FilterableArrangementEntityLink!]!
+}
+
+input InProgressBooksInput {
+	name: String
+	links: [FilterableArrangementEntityLink!]! = []
 }
 
 type InheritPermissionStruct {
@@ -1246,6 +1271,8 @@ type Mutation {
 	deleteUser(id: ID!, hardDelete: Boolean): User!
 	deleteUserSessions(id: ID!): Int!
 	updateUserLockStatus(id: ID!, lock: Boolean!): User!
+	updateNavigationArrangementLock(locked: Boolean!): Arrangement!
+	updateNavigationArrangement(input: NavigationArrangementInput!): Arrangement!
 	createEmailer(input: EmailerInput!): Emailer!
 	updateEmailer(id: Int!, input: EmailerInput!): Emailer!
 	deleteEmailer(id: Int!): Emailer!
@@ -1260,6 +1287,10 @@ type Mutation {
 	createScheduledJobConfig(input: ScheduledJobConfigInput!): ScheduledJobConfig!
 	updateScheduledJobConfig(id: Int!, input: ScheduledJobConfigInput!): ScheduledJobConfig!
 	deleteScheduledJobConfig(id: Int!): Boolean!
+}
+
+input NavigationArrangementInput {
+	sections: [ArrangementSectionInput!]!
 }
 
 type Notifier {
@@ -1499,6 +1530,7 @@ type Query {
 	libraries(orderBy: [LibraryModelOrderBy!]! = [{field: NAME, direction: ASC}], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedLibraryResponse!
 	libraryById(id: ID!): Library
 	numberOfLibraries: Int!
+	lastVisitedLibrary: Library
 	mediaMetadataOverview(seriesId: ID): MediaMetadataOverview!
 	smartListViews: [SmartListView!]!
 	series(filter: SeriesFilterInput!, orderBy: [SeriesOrderBy!]! = [{series: {field: NAME, direction: ASC}}], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedSeriesResponse!
@@ -1515,7 +1547,7 @@ type Query {
 	logfileInfo: LogFileInfo!
 	stumpConfig: StumpConfig!
 	uploadConfig: UploadConfig!
-	smartLists(input: SmartListsInput!): [SmartList!]!
+	smartLists(input: SmartListsInput! = {all: null, mine: true, search: null}): [SmartList!]!
 	smartListById(id: ID!): SmartList
 	smartListMeta(id: ID!): SmartListMeta
 	smartListItems(id: ID!): SmartListItems!
@@ -1574,6 +1606,12 @@ type RecentlyAdded {
 	entity: FilterableArrangementEntity!
 	name: String
 	links: [FilterableArrangementEntityLink!]!
+}
+
+input RecentlyAddedInput {
+	entity: FilterableArrangementEntity!
+	name: String
+	links: [FilterableArrangementEntityLink!]! = []
 }
 
 type RegisteredEmailDevice {
@@ -2017,7 +2055,7 @@ enum SupportedImageFormat {
 	PNG
 }
 
-enum SystemArrangment {
+enum SystemArrangement {
 	HOME
 	EXPLORE
 	LIBRARIES
@@ -2025,9 +2063,14 @@ enum SystemArrangment {
 	BOOK_CLUBS
 }
 
-type SystemArrangmentConfig {
-	variant: SystemArrangment!
+type SystemArrangementConfig {
+	variant: SystemArrangement!
 	links: [FilterableArrangementEntityLink!]!
+}
+
+input SystemArrangementConfigInput {
+	variant: SystemArrangement!
+	links: [FilterableArrangementEntityLink!]! = []
 }
 
 type Tag {

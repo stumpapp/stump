@@ -30,6 +30,7 @@ serde_with.workspace = true
 strum.workspace = true
 stump_core = { path = "../../core" }
 tokio.workspace = true
+tower-sessions.workspace = true
 tracing.workspace = true
 zip.workspace = true
 bcrypt.workspace = true

@@ -2,7 +2,7 @@ import { lazy, Suspense } from 'react'
 import { Navigate, Route, Routes } from 'react-router'
 
 import { useSmartListContext } from '../context'
-import { useUpdateSmartList } from '../smartListGraphQL'
+import { useUpdateSmartList } from '../graphql'
 import { SmartListSettingsContext } from './context'
 
 const BasicSettingsScene = lazy(() => import('./basics'))

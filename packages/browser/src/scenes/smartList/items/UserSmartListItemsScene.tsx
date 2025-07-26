@@ -5,7 +5,7 @@ import { useLocaleContext } from '@stump/i18n'
 import { SceneContainer } from '@/components/container'
 
 import { useSmartListContext } from '../context'
-import { useSmartListItems } from '../smartListGraphQL'
+import { useSmartListItems } from '../graphql'
 import { GroupedSmartListItemList } from './list'
 import { GroupedSmartListItemTable, SmartListBookTable } from './table'
 

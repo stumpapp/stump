@@ -1,31 +1,34 @@
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { cn, IconButton, Text } from '@stump/components'
+import { CheckBox, cn, IconButton, Text } from '@stump/components'
+import {
+	FilterableArrangementEntityLink,
+	NavigationArrangementQuery,
+	SystemArrangement,
+} from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
-import { NavigationItem } from '@stump/sdk'
 import { Bolt, Eye, EyeOff } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useCallback, useState } from 'react'
 
-import EntityOptions from './EntityOptions'
-import { IEntityOptions, isNavigationItemWithEntityOptions } from './types'
+import { getSectionId } from './NavigationArrangement'
+
+type Section =
+	NavigationArrangementQuery['me']['preferences']['navigationArrangement']['sections'][number]
 
 type Props = {
 	/**
 	 * The navigation item to render
 	 */
-	item: NavigationItem
-	/**
-	 * Whether the item is currently visible in the navigation
-	 */
-	active: boolean
+	section: Section
+
 	/**
 	 * A callback to toggle the visibility of the item
 	 */
-	toggleActive: () => void
+	onChangeVisibility: () => void
 	/**
 	 * A callback to change the options of an entity item
 	 */
-	onChangeOptions: (options: IEntityOptions) => void
+	onChangeLinks: (links: FilterableArrangementEntityLink[]) => void
 	/**
 	 * Whether the item is disabled, and cannot be interacted with. This is used to
 	 * lock items in place and prevent accidental reordering.
@@ -39,39 +42,56 @@ type Props = {
 }
 
 export default function NavigationArrangementItem({
-	item,
-	active,
-	toggleActive,
-	onChangeOptions,
+	section,
+	onChangeVisibility,
+	onChangeLinks,
 	disabled,
 	hidden,
 }: Props) {
 	const { t } = useLocaleContext()
 	const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
 		disabled,
-		id: item.type,
+		id: getSectionId(section),
 		transition: {
 			duration: 250,
 			easing: 'cubic-bezier(0.25, 1, 0.5, 1)',
 		},
 	})
 
+	const [showConfiguration, setShowConfiguration] = useState(false)
+
 	const style = {
 		transform: CSS.Transform.toString(transform),
 		transition,
 	}
 
-	const entityOptions = useMemo(
-		() => (isNavigationItemWithEntityOptions(item) ? item : null),
-		[item],
-	)
-	const [entityOptionsOpen, setEntityOptionsOpen] = useState(false)
+	const VisibilityIcon = section.visible ? Eye : EyeOff
 
-	const VisibilityIcon = active ? Eye : EyeOff
+	const createCheckboxHandler = useCallback(
+		(link: FilterableArrangementEntityLink) => () => {
+			if (section.config.__typename !== 'SystemArrangementConfig') return
+
+			const updatedLinks = section.config.links.includes(link)
+				? section.config.links.filter((l) => l !== link)
+				: [...section.config.links, link]
+
+			onChangeLinks(updatedLinks)
+		},
+		[section.config, onChangeLinks],
+	)
 
 	if (hidden) {
 		return null
 	}
+
+	if (section.config.__typename !== 'SystemArrangementConfig') {
+		console.warn('I have not implemented the UI for custom arrangements yet. Sorry <3')
+		return null
+	}
+
+	const isConfigurableSection = ![SystemArrangement.Home, SystemArrangement.Explore].includes(
+		section.config.variant,
+	)
 
 	return (
 		<div
@@ -85,7 +105,7 @@ export default function NavigationArrangementItem({
 					'cursor-not-allowed': disabled,
 				},
 				{
-					'bg-opacity-50': !active,
+					'bg-opacity-50': !section.visible,
 				},
 				{
 					'cursor-grabbing': isDragging,
@@ -93,31 +113,41 @@ export default function NavigationArrangementItem({
 			)}
 		>
 			<div className="flex items-center justify-between">
-				<div className={cn('flex-1 shrink-0 py-4 pl-4', { 'opacity-60': !active })}>
-					<Text size="sm">{t(getItemKey(item.type))}</Text>
+				<div className={cn('flex-1 shrink-0 py-4 pl-4', { 'opacity-60': !section.visible })}>
+					<Text size="sm">{t(getItemKey(section.config.variant))}</Text>
 				</div>
 				<div className="flex items-center space-x-2 pr-4">
-					{entityOptions && (
+					{isConfigurableSection && (
 						<IconButton
 							size="xs"
 							disabled={disabled}
-							onClick={() => setEntityOptionsOpen(!entityOptionsOpen)}
+							onClick={() => setShowConfiguration(!showConfiguration)}
 						>
 							<Bolt className="h-4 w-4" />
 						</IconButton>
 					)}
-					<IconButton size="xs" disabled={disabled} onClick={toggleActive}>
+					<IconButton size="xs" disabled={disabled} onClick={onChangeVisibility}>
 						<VisibilityIcon className="h-4 w-4" />
 					</IconButton>
 				</div>
 			</div>
 
-			{entityOptions && (
-				<EntityOptions
-					isOpen={!disabled && entityOptionsOpen}
-					options={entityOptions}
-					onChange={onChangeOptions}
-				/>
+			{isConfigurableSection && showConfiguration && (
+				<div className="flex flex-wrap items-center gap-3 p-4">
+					<CheckBox
+						variant="primary"
+						label={t(getConfigKey('createAction.label'))}
+						checked={section.config.links.includes(FilterableArrangementEntityLink.Create)}
+						onClick={createCheckboxHandler(FilterableArrangementEntityLink.Create)}
+					/>
+
+					<CheckBox
+						variant="primary"
+						label={t(getConfigKey('linkToAll.label'))}
+						checked={section.config.links.includes(FilterableArrangementEntityLink.ShowAll)}
+						onClick={createCheckboxHandler(FilterableArrangementEntityLink.ShowAll)}
+					/>
+				</div>
 			)}
 		</div>
 	)
@@ -126,3 +156,4 @@ export default function NavigationArrangementItem({
 const LOCALE_BASE = 'settingsScene.app/appearance.sections.navigationArrangement'
 const getKey = (key: string) => `${LOCALE_BASE}.${key}`
 const getItemKey = (key: string) => getKey(`options.${key}`)
+const getConfigKey = (key: string) => getKey(`entityOptions.${key}`)

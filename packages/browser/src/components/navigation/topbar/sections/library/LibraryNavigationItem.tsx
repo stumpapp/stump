@@ -1,7 +1,8 @@
-import { useLibraries } from '@stump/client'
+import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { cn, cx, Label, NavigationMenu, ScrollArea, Text } from '@stump/components'
+import { FilterableArrangementEntityLink, graphql, UserPermission } from '@stump/graphql'
 import { CircleSlash2, Library, LibrarySquare } from 'lucide-react'
-import { useMemo } from 'react'
+import { Suspense, useMemo } from 'react'
 import { useLocation } from 'react-router-dom'
 import AutoSizer from 'react-virtualized-auto-sizer'
 
@@ -12,21 +13,41 @@ import paths from '@/paths'
 
 import TopBarLinkListItem from '../../TopBarLinkListItem'
 
+const query = graphql(`
+	query LibraryNavigationItem {
+		libraries(pagination: { none: { unpaginated: true } }) {
+			nodes {
+				id
+				name
+				emoji
+			}
+		}
+	}
+`)
+
 type Props = EntityOptionProps
 
 export default function LibraryNavigationItem({
-	showCreate = true,
-	showLinkToAll = false,
+	links = [FilterableArrangementEntityLink.Create],
 	width,
 }: Props) {
-	const { libraries } = useLibraries()
+	const { sdk } = useSDK()
+	const {
+		data: {
+			libraries: { nodes: libraries },
+		},
+	} = useSuspenseGraphQL(query, sdk.cacheKey('libraries'))
 
 	const location = useLocation()
 
 	const { checkPermission } = useAppContext()
 
-	const canCreateLibrary = useMemo(() => checkPermission('library:create'), [checkPermission])
-	const showCreateLink = canCreateLibrary && showCreate
+	const canCreateLibrary = useMemo(
+		() => checkPermission(UserPermission.CreateLibrary),
+		[checkPermission],
+	)
+	const showCreateLink = canCreateLibrary && links.includes(FilterableArrangementEntityLink.Create)
+	const showLinkToAll = links.includes(FilterableArrangementEntityLink.ShowAll)
 
 	const renderLibraries = () => {
 		if (!libraries?.length) {
@@ -44,7 +65,6 @@ export default function LibraryNavigationItem({
 				</div>
 			)
 		}
-		// const clonedLibraries = Array.from({ length: 20 }).flatMap(() => libraries)
 
 		return (
 			<AutoSizer>
@@ -121,7 +141,9 @@ export default function LibraryNavigationItem({
 						</div>
 					</div>
 
-					<LastVisitedLibrary container={(children) => <div className="w-1/3">{children}</div>} />
+					<Suspense>
+						<LastVisitedLibrary container={(children) => <div className="w-1/3">{children}</div>} />
+					</Suspense>
 				</div>
 			</NavigationMenu.Content>
 		</NavigationMenu.Item>

@@ -44,8 +44,23 @@ export function usePreferences() {
 		[mutate, preferences],
 	)
 
+	const store = useCallback(
+		(input: Partial<UserPreferences>) => {
+			if (preferences) {
+				setPreferences({
+					...preferences,
+					...input,
+				} as UserPreferences)
+			} else {
+				console.warn('Preferences not loaded, cannot store new preferences')
+			}
+		},
+		[preferences, setPreferences],
+	)
+
 	return {
 		preferences: (preferences || {}) as UserPreferences,
 		update,
+		store,
 	}
 }

@@ -1,11 +1,15 @@
 import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { cn, Spacer } from '@stump/components'
-import { FilterableArrangementEntityLink, graphql, SystemArrangment } from '@stump/graphql'
+import {
+	FilterableArrangementEntityLink,
+	graphql,
+	SystemArrangement,
+	UserPermission,
+} from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
-import { NavigationItem } from '@stump/sdk'
 import { motion } from 'framer-motion'
 import { Book, Home } from 'lucide-react'
-import { useCallback, useMemo } from 'react'
+import { Suspense, useCallback, useMemo } from 'react'
 import { useLocation } from 'react-router'
 import { useMediaMatch } from 'rooks'
 import { match } from 'ts-pattern'
@@ -32,7 +36,7 @@ const query = graphql(`
 					sections {
 						config {
 							__typename
-							... on SystemArrangmentConfig {
+							... on SystemArrangementConfig {
 								variant
 								links
 							}
@@ -85,11 +89,11 @@ export default function SideBar({ asChild, hidden }: Props) {
 	}
 
 	const checkSectionPermission = useCallback(
-		(section: NavigationItem['type']) => {
-			if (section === 'BookClubs') {
-				return checkPermission('bookclub:read')
-			} else if (section === 'SmartLists') {
-				return checkPermission('smartlist:read')
+		(variant: SystemArrangement) => {
+			if (variant === SystemArrangement.BookClubs) {
+				return checkPermission(UserPermission.AccessBookClub)
+			} else if (variant === SystemArrangement.SmartLists) {
+				return checkPermission(UserPermission.AccessSmartList)
 			} else {
 				return true
 			}
@@ -100,9 +104,9 @@ export default function SideBar({ asChild, hidden }: Props) {
 	const prefetchHome = usePrefetchHomeScene()
 
 	const renderSystemSection = useCallback(
-		(config: { variant: SystemArrangment; links: Array<FilterableArrangementEntityLink> }) =>
+		(config: { variant: SystemArrangement; links: Array<FilterableArrangementEntityLink> }) =>
 			match(config.variant)
-				.with(SystemArrangment.Home, () => (
+				.with(SystemArrangement.Home, () => (
 					<SideBarButtonLink
 						key="home-sidebar-navlink"
 						to={paths.home()}
@@ -113,7 +117,7 @@ export default function SideBar({ asChild, hidden }: Props) {
 						{t('sidebar.buttons.home')}
 					</SideBarButtonLink>
 				))
-				.with(SystemArrangment.Explore, () => (
+				.with(SystemArrangement.Explore, () => (
 					<SideBarButtonLink
 						key="explore-sidebar-navlink"
 						to={paths.bookSearch()}
@@ -123,12 +127,20 @@ export default function SideBar({ asChild, hidden }: Props) {
 						{t('sidebar.buttons.books')}
 					</SideBarButtonLink>
 				))
-				.with(SystemArrangment.Libraries, () => (
-					<LibrarySideBarSection
-						key="libraries-sidebar-navlink"
-						isMobile={isMobile}
-						links={config.links}
-					/>
+				.with(SystemArrangement.Libraries, () => (
+					<Suspense key="libraries-sidebar-navlink">
+						<LibrarySideBarSection isMobile={isMobile} links={config.links} />
+					</Suspense>
+				))
+				.with(SystemArrangement.SmartLists, () => (
+					<Suspense key="smartlists-sidebar-navlink">
+						<SmartListSideBarSection links={config.links} />
+					</Suspense>
+				))
+				.with(SystemArrangement.BookClubs, () => (
+					<Suspense key="book-clubs-sidebar-navlink">
+						<BookClubSideBarSection isMobile={isMobile} links={config.links} />
+					</Suspense>
 				))
 				.otherwise(() => null),
 		[t, location.pathname, prefetchHome, isMobile],
@@ -140,33 +152,18 @@ export default function SideBar({ asChild, hidden }: Props) {
 				.filter(({ visible }) => visible)
 				.map(({ config }) =>
 					match(config)
-						.with({ __typename: 'SystemArrangmentConfig' }, (config) => renderSystemSection(config))
+						.with({ __typename: 'SystemArrangementConfig' }, (config) => {
+							const child = renderSystemSection(config)
+							if (!checkSectionPermission(config.variant)) {
+								return null
+							}
+							return child
+						})
 						.otherwise(() => null),
 				)
 				.filter(Boolean),
-		[navigationArrangement, renderSystemSection],
+		[navigationArrangement, renderSystemSection, checkSectionPermission],
 	)
-
-	// 					.with({ type: 'SmartLists' }, (ctx) => (
-	// 						<SmartListSideBarSection
-	// 							key="smartlists-sidebar-navlink"
-	// 							showCreate={ctx.show_create_action}
-	// 							showLinkToAll={ctx.show_link_to_all}
-	// 						/>
-	// 					))
-	// 					.with({ type: 'BookClubs' }, (ctx) => (
-	// 						<BookClubSideBarSection
-	// 							key="book-clubs-sidebar-navlink"
-	// 							isMobile={isMobile}
-	// 							showCreate={ctx.show_create_action}
-	// 							showLinkToAll={ctx.show_link_to_all}
-	// 						/>
-	// 					))
-	// 					.otherwise(() => null),
-	// 			)
-	// 			.filter(Boolean),
-	// 	[arrangement, checkSectionPermission, location, t, isMobile],
-	// )
 
 	const renderContent = () => {
 		return (

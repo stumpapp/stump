@@ -17,6 +17,10 @@ use super::{SessionCleanupJob, SESSION_USER_KEY};
 // TODO(axum-upgrade): Refactor this store. See https://github.com/maxcountryman/tower-sessions-stores/blob/main/sqlx-store/src/sqlite_store.rs
 // TODO(axum-upgrade): refactor error variants
 
+// TODO(graphql): I think it would be more appropriate to reduce what is stored. I want to refactor this
+// to just store a user ID, not the entire user object. This will result in 1-2 DB reads per-session, but
+// removes the need to wrangle the session whenever preferences are mutated or the user is updated.
+
 #[derive(Debug, thiserror::Error)]
 pub enum SessionError {
 	#[error("{0}")]

@@ -1,4 +1,4 @@
-use async_graphql::{Enum, Json, SimpleObject, Union};
+use async_graphql::{Enum, InputObject, Json, OneofObject, SimpleObject, Union};
 use sea_orm::{prelude::*, DeriveActiveEnum, EnumIter, FromJsonQueryResult};
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString};
@@ -29,7 +29,7 @@ fn default_true() -> bool {
 )]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 #[strum(serialize_all = "SCREAMING_SNAKE_CASE")]
-pub enum SystemArrangment {
+pub enum SystemArrangement {
 	Home,
 	Explore,
 	Libraries,
@@ -37,9 +37,12 @@ pub enum SystemArrangment {
 	BookClubs,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, SimpleObject)]
-pub struct SystemArrangmentConfig {
-	variant: SystemArrangment,
+#[derive(
+	Debug, Clone, PartialEq, Eq, Serialize, Deserialize, SimpleObject, InputObject,
+)]
+#[graphql(input_name = "SystemArrangementConfigInput")]
+pub struct SystemArrangementConfig {
+	variant: SystemArrangement,
 	#[graphql(default)]
 	links: Vec<FilterableArrangementEntityLink>,
 }
@@ -104,7 +107,18 @@ pub enum FilterableArrangementEntityLink {
 	ShowAll,
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, SimpleObject)]
+#[derive(
+	Debug,
+	Clone,
+	Default,
+	PartialEq,
+	Eq,
+	Serialize,
+	Deserialize,
+	SimpleObject,
+	InputObject,
+)]
+#[graphql(input_name = "FilterableArrangementEntityLinkInput")]
 pub struct CustomArrangementConfig {
 	entity: FilterableArrangementEntity,
 	name: Option<String>,
@@ -115,7 +129,18 @@ pub struct CustomArrangementConfig {
 	links: Vec<FilterableArrangementEntityLink>,
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, SimpleObject)]
+#[derive(
+	Debug,
+	Clone,
+	Default,
+	PartialEq,
+	Eq,
+	Serialize,
+	Deserialize,
+	SimpleObject,
+	InputObject,
+)]
+#[graphql(input_name = "InProgressBooksInput")]
 pub struct InProgressBooks {
 	name: Option<String>,
 	// filter: Option<Json<serde_json::Value>>,
@@ -123,7 +148,18 @@ pub struct InProgressBooks {
 	links: Vec<FilterableArrangementEntityLink>,
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, SimpleObject)]
+#[derive(
+	Debug,
+	Clone,
+	Default,
+	PartialEq,
+	Eq,
+	Serialize,
+	Deserialize,
+	SimpleObject,
+	InputObject,
+)]
+#[graphql(input_name = "RecentlyAddedInput")]
 pub struct RecentlyAdded {
 	entity: FilterableArrangementEntity,
 	name: Option<String>,
@@ -132,16 +168,20 @@ pub struct RecentlyAdded {
 	links: Vec<FilterableArrangementEntityLink>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Union)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Union, OneofObject)]
+#[graphql(input_name = "ArrangementConfigInput")]
 #[serde(untagged)]
 pub enum ArrangementConfig {
-	System(SystemArrangmentConfig),
+	System(SystemArrangementConfig),
 	InProgressBooks(InProgressBooks),
 	RecentlyAdded(RecentlyAdded),
 	Custom(CustomArrangementConfig),
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, SimpleObject)]
+#[derive(
+	Debug, Clone, PartialEq, Eq, Serialize, Deserialize, SimpleObject, InputObject,
+)]
+#[graphql(input_name = "ArrangementSectionInput")]
 pub struct ArrangementSection {
 	config: ArrangementConfig,
 	#[serde(default = "default_true")]
@@ -156,8 +196,8 @@ pub struct ArrangementSection {
 	Debug, Clone, SimpleObject, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult,
 )]
 pub struct Arrangement {
-	locked: bool,
-	sections: Vec<ArrangementSection>,
+	pub locked: bool,
+	pub sections: Vec<ArrangementSection>,
 }
 
 impl Arrangement {
@@ -192,29 +232,36 @@ impl Arrangement {
 			locked: true,
 			sections: vec![
 				ArrangementSection {
-					config: ArrangementConfig::System(SystemArrangmentConfig {
-						variant: SystemArrangment::Home,
+					config: ArrangementConfig::System(SystemArrangementConfig {
+						variant: SystemArrangement::Home,
 						links: vec![],
 					}),
 					visible: true,
 				},
 				ArrangementSection {
-					config: ArrangementConfig::System(SystemArrangmentConfig {
-						variant: SystemArrangment::Explore,
+					config: ArrangementConfig::System(SystemArrangementConfig {
+						variant: SystemArrangement::Explore,
 						links: vec![],
 					}),
 					visible: true,
 				},
 				ArrangementSection {
-					config: ArrangementConfig::System(SystemArrangmentConfig {
-						variant: SystemArrangment::Libraries,
+					config: ArrangementConfig::System(SystemArrangementConfig {
+						variant: SystemArrangement::Libraries,
 						links: vec![FilterableArrangementEntityLink::Create],
 					}),
 					visible: true,
 				},
 				ArrangementSection {
-					config: ArrangementConfig::System(SystemArrangmentConfig {
-						variant: SystemArrangment::SmartLists,
+					config: ArrangementConfig::System(SystemArrangementConfig {
+						variant: SystemArrangement::SmartLists,
+						links: vec![FilterableArrangementEntityLink::Create],
+					}),
+					visible: true,
+				},
+				ArrangementSection {
+					config: ArrangementConfig::System(SystemArrangementConfig {
+						variant: SystemArrangement::BookClubs,
 						links: vec![FilterableArrangementEntityLink::Create],
 					}),
 					visible: true,

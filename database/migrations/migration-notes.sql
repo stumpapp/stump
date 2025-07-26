@@ -530,7 +530,28 @@ FROM "finished_reading_sessions";
 DROP TABLE "finished_reading_sessions";
 ALTER TABLE "new_finshed_reading_sessions"
     RENAME TO "finished_reading_sessions";
-
+-- Changes:
+-- 1. Add id as an autoincrementing integer
+CREATE TABLE "new_last_library_visits" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "user_id" TEXT NOT NULL,
+    "library_id" TEXT NOT NULL,
+    "timestamp" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "last_library_visit_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT "last_library_visit_library_id_fkey" FOREIGN KEY ("library_id") REFERENCES "libraries" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+INSERT INTO "new_last_library_visits"(
+        "user_id",
+        "library_id",
+        "timestamp"
+    )
+SELECT "user_id",
+    "library_id",
+    "timestamp"
+FROM "last_library_visits";
+DROP TABLE "last_library_visits";
+ALTER TABLE "new_last_library_visits"
+    RENAME TO "last_library_visits";
 -- Changes:
 -- 1. id is now an autoincrementing integer to smart_list_views
 CREATE TABLE temp_smart_list_views (
@@ -538,13 +559,15 @@ CREATE TABLE temp_smart_list_views (
     name TEXT NOT NULL,
     list_id TEXT NOT NULL,
     data BLOB NOT NULL,
-    CONSTRAINT smart_list_views_list_id_fkey FOREIGN KEY (list_id)
-        REFERENCES smart_lists(id) ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT smart_list_views_list_id_fkey FOREIGN KEY (list_id) REFERENCES smart_lists(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 INSERT INTO temp_smart_list_views(name, list_id, data)
-SELECT name, list_id, data FROM smart_list_views;
+SELECT name,
+    list_id,
+    data
+FROM smart_list_views;
 DROP TABLE smart_list_views;
-ALTER TABLE temp_smart_list_views RENAME TO smart_list_views;
-
+ALTER TABLE temp_smart_list_views
+    RENAME TO smart_list_views;
 PRAGMA foreign_keys = ON;
 COMMIT;

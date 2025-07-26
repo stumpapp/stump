@@ -38,9 +38,11 @@ pub struct Model {
 	pub enable_alphabet_select: bool,
 	#[graphql(skip)]
 	#[sea_orm(column_type = "Json", nullable)]
+	#[serde(default = "Model::default_navigation_arrangement")]
 	pub navigation_arrangement: Option<Arrangement>,
 	#[sea_orm(column_type = "Json", nullable)]
 	#[graphql(skip)]
+	#[serde(default = "Model::default_home_arrangement")]
 	pub home_arrangement: Option<Arrangement>,
 	#[sea_orm(column_type = "Text", nullable, unique)]
 	pub user_id: Option<String>,
@@ -55,6 +57,16 @@ pub enum Relation {
 impl Related<super::user::Entity> for Entity {
 	fn to() -> RelationDef {
 		Relation::User.def()
+	}
+}
+
+impl Model {
+	pub fn default_navigation_arrangement() -> Option<Arrangement> {
+		Some(Arrangement::default_navigation())
+	}
+
+	pub fn default_home_arrangement() -> Option<Arrangement> {
+		Some(Arrangement::default_home())
 	}
 }
 

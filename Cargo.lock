@@ -3193,6 +3193,7 @@ dependencies = [
  "stump_core",
  "tempfile",
  "tokio",
+ "tower-sessions",
  "tracing",
  "zip",
 ]
@@ -4898,6 +4899,7 @@ dependencies = [
  "strum",
  "thiserror 1.0.63",
  "tokio-test",
+ "tracing",
  "uuid 1.10.0",
 ]
 

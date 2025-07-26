@@ -96,17 +96,18 @@ impl MediaMutation {
 		ctx: &Context<'_>,
 		id: ID,
 		page: Option<i32>,
+		elapsed_seconds: Option<i64>,
 	) -> Result<ReadingProgressOutput> {
 		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
 		let core = ctx.data::<CoreContext>()?;
 		let conn = core.conn.as_ref();
 
-		// upsert reading_session
 		let active_session = reading_session::ActiveModel {
 			user_id: Set(user.id.clone()),
 			media_id: Set(id.to_string()),
 			page: Set(page),
 			updated_at: Set(chrono::Utc::now().into()),
+			elapsed_seconds: Set(elapsed_seconds),
 			..Default::default()
 		};
 

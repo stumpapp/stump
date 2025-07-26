@@ -1,3 +1,4 @@
+import { ReadingMode } from '@stump/graphql'
 import { motion } from 'framer-motion'
 import { Fragment } from 'react'
 
@@ -15,7 +16,7 @@ export default function ControlsOverlay() {
 		bookPreferences: { readingMode },
 	} = useBookPreferences({ book })
 
-	const showBottomToolbar = readingMode === 'paged'
+	const showBottomToolbar = readingMode === ReadingMode.Paged
 
 	return (
 		<Fragment>

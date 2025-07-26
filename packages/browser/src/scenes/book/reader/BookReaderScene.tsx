@@ -27,6 +27,14 @@ export const BOOK_READER_SCENE_QUERY = graphql(`
 				defaultReadingMode
 				defaultReadingDir
 			}
+			metadata {
+				pageAnalysis {
+					dimensions {
+						height
+						width
+					}
+				}
+			}
 		}
 	}
 `)
@@ -52,8 +60,8 @@ export default function BookReaderSceneContainer() {
 }
 
 const mutation = graphql(`
-	mutation UpdateReadProgress($id: ID!, $page: Int!) {
-		updateMediaProgress(id: $id, page: $page) {
+	mutation UpdateReadProgress($id: ID!, $page: Int!, $elapsedSeconds: Int!) {
+		updateMediaProgress(id: $id, page: $page, elapsedSeconds: $elapsedSeconds) {
 			__typename
 		}
 	}
@@ -79,13 +87,14 @@ function BookReaderScene({ book }: Props) {
 		},
 	})
 	const updateProgress = useCallback(
-		(page: number) => {
+		(page: number, elapsedSeconds: number) => {
 			if (!book) return
 			if (isIncognito) return
 			if (book.readProgress?.page === page) return
 			mutate({
 				id: book.id,
 				page,
+				elapsedSeconds,
 			})
 		},
 		[book, mutate, isIncognito],
@@ -104,21 +113,6 @@ function BookReaderScene({ book }: Props) {
 			invalidateQueries({ exact: false, keys: [sdk.media.keys.inProgress] })
 		}
 	}, [sdk.media])
-
-	/**
-	 * An effect to update the read progress whenever the page changes in the URL
-	 */
-	useEffect(() => {
-		if (isIncognito) return
-
-		const parsedPage = parseInt(page || '', 10)
-		if (!parsedPage || isNaN(parsedPage) || !book) return
-
-		const maxPage = book.pages
-		if (parsedPage <= 0 || parsedPage > maxPage) return
-
-		updateProgress(parsedPage)
-	}, [page, book, isIncognito, updateProgress])
 
 	if (book.extension.match(EBOOK_EXTENSION)) {
 		const epubcfi = book.readProgress?.epubcfi || null

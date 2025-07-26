@@ -363,7 +363,7 @@ pub enum TagSmartFilter {
 }
 
 #[generate_smart_filter]
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type, ToSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type)]
 #[serde(untagged)]
 #[prisma_table("media")]
 pub enum MediaSmartFilter {

@@ -515,6 +515,7 @@ export type Epub = {
 };
 
 export type EpubProgressInput = {
+  elapsedSeconds?: InputMaybe<Scalars['Int']['input']>;
   epubcfi: Scalars['String']['input'];
   isComplete?: InputMaybe<Scalars['Boolean']['input']>;
   mediaId: Scalars['String']['input'];
@@ -1673,6 +1674,7 @@ export type MutationUpdateLibraryThumbnailArgs = {
 
 
 export type MutationUpdateMediaProgressArgs = {
+  elapsedSeconds?: InputMaybe<Scalars['Int']['input']>;
   id: Scalars['ID']['input'];
   page?: InputMaybe<Scalars['Int']['input']>;
 };
@@ -3183,11 +3185,12 @@ export type BookReaderSceneQueryVariables = Exact<{
 }>;
 
 
-export type BookReaderSceneQuery = { __typename?: 'Query', mediaById?: { __typename?: 'Media', id: string, resolvedName: string, pages: number, extension: string, readProgress?: { __typename?: 'ActiveReadingSession', percentageCompleted?: any | null, epubcfi?: string | null, page?: number | null } | null, libraryConfig: { __typename?: 'LibraryConfig', defaultReadingImageScaleFit: ReadingImageScaleFit, defaultReadingMode: ReadingMode, defaultReadingDir: ReadingDirection } } | null };
+export type BookReaderSceneQuery = { __typename?: 'Query', mediaById?: { __typename?: 'Media', id: string, resolvedName: string, pages: number, extension: string, readProgress?: { __typename?: 'ActiveReadingSession', percentageCompleted?: any | null, epubcfi?: string | null, page?: number | null, elapsedSeconds?: number | null } | null, libraryConfig: { __typename?: 'LibraryConfig', defaultReadingImageScaleFit: ReadingImageScaleFit, defaultReadingMode: ReadingMode, defaultReadingDir: ReadingDirection }, metadata?: { __typename?: 'MediaMetadata', pageAnalysis?: { __typename?: 'PageAnalysis', dimensions: Array<{ __typename?: 'PageDimension', height: number, width: number }> } | null } | null } | null };
 
 export type UpdateReadProgressMutationVariables = Exact<{
   id: Scalars['ID']['input'];
   page: Scalars['Int']['input'];
+  elapsedSeconds: Scalars['Int']['input'];
 }>;
 
 
@@ -4345,18 +4348,27 @@ export const BookReaderSceneDocument = new TypedDocumentString(`
       percentageCompleted
       epubcfi
       page
+      elapsedSeconds
     }
     libraryConfig {
       defaultReadingImageScaleFit
       defaultReadingMode
       defaultReadingDir
     }
+    metadata {
+      pageAnalysis {
+        dimensions {
+          height
+          width
+        }
+      }
+    }
   }
 }
     `) as unknown as TypedDocumentString<BookReaderSceneQuery, BookReaderSceneQueryVariables>;
 export const UpdateReadProgressDocument = new TypedDocumentString(`
-    mutation UpdateReadProgress($id: ID!, $page: Int!) {
-  updateMediaProgress(id: $id, page: $page) {
+    mutation UpdateReadProgress($id: ID!, $page: Int!, $elapsedSeconds: Int!) {
+  updateMediaProgress(id: $id, page: $page, elapsedSeconds: $elapsedSeconds) {
     __typename
   }
 }

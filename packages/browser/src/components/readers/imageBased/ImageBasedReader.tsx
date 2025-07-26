@@ -1,4 +1,5 @@
 import { useSDK } from '@stump/client'
+import { ReadingDirection, ReadingMode } from '@stump/graphql'
 import { generatePageSets } from '@stump/sdk'
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -56,10 +57,9 @@ export default function ImageBasedReader({
 	 */
 	const [currentPage, setCurrentPage] = useState(initialPage || 1)
 
-	// TODO(graphql): FIX ALL THIS
 	const [pageDimensions, setPageDimensions] = useState<Record<number, ImagePageDimensionRef>>(
 		() =>
-			media?.metadata?.page_dimensions?.dimensions
+			media?.metadata?.pageAnalysis?.dimensions
 				?.map(({ height, width }) => ({
 					height,
 					width,
@@ -86,7 +86,7 @@ export default function ImageBasedReader({
 	} = useBookPreferences({ book: media })
 
 	const { pause, resume, totalSeconds, isRunning, reset } = useBookTimer(media?.id || '', {
-		initial: media?.active_reading_session?.elapsed_seconds,
+		initial: media?.readProgress?.elapsedSeconds,
 		enabled: trackElapsedTime,
 	})
 
@@ -108,12 +108,12 @@ export default function ImageBasedReader({
 	const pages = media.pages
 	const pageSets = useMemo(() => {
 		const autoButOff = doublePageBehavior === 'auto' && deviceOrientation === 'portrait'
-		const modeForceOff = readingMode === 'continuous:vertical'
+		const modeForceOff = readingMode === ReadingMode.ContinuousVertical
 		if (doublePageBehavior === 'off' || autoButOff || modeForceOff) {
 			return Array.from({ length: pages }, (_, i) => [i])
 		}
 		const sets = generatePageSets({ imageSizes: pageDimensions, pages: pages })
-		if (readingDirection === 'rtl') {
+		if (readingDirection === ReadingDirection.Rtl) {
 			return sets.reverse()
 		}
 		return sets

@@ -475,6 +475,7 @@ input EpubProgressInput {
 	epubcfi: String!
 	percentage: Decimal!
 	isComplete: Boolean
+	elapsedSeconds: Int
 }
 
 """
@@ -1158,7 +1159,7 @@ type Mutation {
 	analyzeMedia(id: ID!): Boolean!
 	convertMedia(id: ID!): Boolean!
 	deleteMediaProgress(id: ID!): Media!
-	updateMediaProgress(id: ID!, page: Int): ReadingProgressOutput!
+	updateMediaProgress(id: ID!, page: Int, elapsedSeconds: Int): ReadingProgressOutput!
 	markMediaAsComplete(id: ID!, isComplete: Boolean!, page: Int): FinishedReadingSessionModel
 	"""
 	Delete media and series from a library that match one of the following conditions:

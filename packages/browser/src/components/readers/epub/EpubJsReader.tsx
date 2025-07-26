@@ -22,6 +22,7 @@ import EpubReaderContainer from './EpubReaderContainer'
 import { applyTheme, stumpDark } from './themes'
 
 // TODO: Fix all lifecycle lints
+// TODO: Support elapsed time tracking!!!!
 
 // NOTE: http://epubjs.org/documentation/0.3/ for epubjs documentation overview
 

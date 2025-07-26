@@ -18,6 +18,7 @@ pub struct EpubProgressInput {
 	pub epubcfi: String,
 	pub percentage: Decimal,
 	pub is_complete: Option<bool>,
+	pub elapsed_seconds: Option<i64>,
 }
 
 impl EpubProgressInput {
@@ -31,6 +32,7 @@ impl EpubProgressInput {
 			media_id: Set(self.media_id.clone()),
 			user_id: Set(user.id.clone()),
 			completed_at: Set(chrono::Utc::now().into()),
+			elapsed_seconds: Set(self.elapsed_seconds),
 			..Default::default()
 		}
 	}
@@ -45,6 +47,7 @@ impl EpubProgressInput {
 			media_id: Set(self.media_id.clone()),
 			user_id: Set(user.id.clone()),
 			updated_at: Set(chrono::Utc::now().into()),
+			elapsed_seconds: Set(self.elapsed_seconds),
 			..Default::default()
 		}
 	}
@@ -78,6 +81,7 @@ mod tests {
 			epubcfi: "epubcfi".to_string(),
 			percentage: Decimal::new(5, 1),
 			is_complete: Some(true),
+			elapsed_seconds: Some(60),
 		};
 		let active_model = input.into_reading_session_active_model(&user);
 		assert_eq!(active_model.media_id.unwrap(), "media_id");
@@ -96,6 +100,7 @@ mod tests {
 			epubcfi: "epubcfi".to_string(),
 			percentage: Decimal::new(1, 0),
 			is_complete: Some(false),
+			elapsed_seconds: Some(120),
 		};
 		let db = MockDatabase::new(sea_orm::DatabaseBackend::Sqlite).into_connection();
 		let active_model =

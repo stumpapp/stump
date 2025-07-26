@@ -1,9 +1,11 @@
 import { Button, Sheet, Text } from '@stump/components'
+import { LibraryFilterInput, MediaFilterInput, SeriesFilterInput } from '@stump/graphql'
 import { Filter } from 'lucide-react'
 import { useState } from 'react'
 import { useMediaMatch } from 'rooks'
+import { match } from 'ts-pattern'
 
-import { useFilterContext } from './context'
+import { FilterInput, useFilterContext } from './context'
 import { FilterableEntity, MediaFilterForm, SeriesFilterForm } from './form'
 
 type Props = {
@@ -29,7 +31,8 @@ export default function FilterSlideOver({ prompt, formVariant }: Props) {
 
 	// We don't apply search within the slideover, so we want to exclude it from the count. If any
 	// other 'filters' are added outside the context of this component we need to account for them, as well.
-	const nonSearchFilterCount = Object.keys(filters || {}).length - (filters?.search ? 1 : 0)
+	const nonSearchFilterCount =
+		Object.keys(filters || {}).length - extractSearchCount(filters, formVariant)
 
 	const onClose = () => setIsOpen(false)
 	const onOpen = () => setIsOpen(true)
@@ -81,4 +84,44 @@ export default function FilterSlideOver({ prompt, formVariant }: Props) {
 			{renderFormVariant()}
 		</Sheet>
 	)
+}
+
+// Search gets added to the input in the form of:
+// _or: [{name: {contains: 'search'}}, {metadata: {summary: {contains: 'search'}}}, {metadata: {title: {contains: 'search'}}}]
+// So it will always be a count of 3 for media and series. For library, it would just be 1.
+const extractSearchCount = (input: FilterInput, entity: FilterableEntity) => {
+	const searchCount = match(entity)
+		.with('media', () => {
+			const castedInput = input as MediaFilterInput
+			return castedInput._or?.find((or) => {
+				const values = new Set(
+					[or.name?.contains, or.metadata?.summary?.contains, or.metadata?.title?.contains].filter(
+						Boolean,
+					),
+				)
+				return values.size === 1 ? values.values().next().value || null : null
+			})
+				? 3
+				: 0
+		})
+		.with('series', () => {
+			const castedInput = input as SeriesFilterInput
+			return castedInput._or?.find((or) => {
+				const values = new Set(
+					[or.name?.contains, or.metadata?.summary?.contains, or.metadata?.title?.contains].filter(
+						Boolean,
+					),
+				)
+				return values.size === 1 ? values.values().next().value || null : null
+			})
+				? 3
+				: 0
+		})
+		.with('library', () => {
+			const castedInput = input as LibraryFilterInput
+			return castedInput.name?.contains ? 1 : 0
+		})
+		.otherwise(() => 0)
+
+	return searchCount
 }

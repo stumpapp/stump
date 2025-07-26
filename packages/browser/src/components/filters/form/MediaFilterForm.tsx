@@ -1,7 +1,13 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useSuspenseGraphQL } from '@stump/client'
+import { useGraphQL } from '@stump/client'
 import { CheckBox, Form } from '@stump/components'
-import { graphql, MediaFilterInput, MediaMetadataFilterInput, ReadingStatus } from '@stump/graphql'
+import {
+	graphql,
+	MediaFilterFormQuery,
+	MediaFilterInput,
+	MediaMetadataFilterInput,
+	ReadingStatus,
+} from '@stump/graphql'
 import { useEffect, useMemo, useState } from 'react'
 import { FieldValues, useForm } from 'react-hook-form'
 import z from 'zod'
@@ -70,9 +76,10 @@ export default function MediaFilterForm() {
 		return {}
 	}, [onlyFromSeries, seriesContext])
 
-	const {
-		data: { mediaMetadataOverview: data },
-	} = useSuspenseGraphQL(query, ['mediaFilterForm', params], params)
+	const { data: _data, isPending } = useGraphQL(query, ['mediaFilterForm', params], params, {
+		placeholderData: (prev) => prev,
+	})
+	const data = _data?.mediaMetadataOverview
 
 	const defaultValue = useMemo(() => {
 		const flattenMetadata = {
@@ -197,6 +204,8 @@ export default function MediaFilterForm() {
 		setFilters(newFilters)
 	}
 
+	const isEmptyState = useMemo(() => !isPending && isEmptyResult(data), [isPending, data])
+
 	return (
 		<Form
 			className="flex max-h-full grow flex-col overflow-y-auto overflow-x-visible px-6 py-2 scrollbar-hide"
@@ -216,84 +225,109 @@ export default function MediaFilterForm() {
 			<ReadStatusSelect />
 			<AgeRatingFilter />
 
-			<GenericFilterMultiselect
-				name="metadata.genre"
-				label="Genre"
-				options={data?.genres.map((genre) => ({ label: genre, value: genre.toLowerCase() })) || []}
-			/>
+			{!isEmptyState && (
+				<>
+					<GenericFilterMultiselect
+						name="metadata.genre"
+						label="Genre"
+						options={
+							data?.genres.map((genre) => ({ label: genre, value: genre.toLowerCase() })) || []
+						}
+					/>
 
-			<GenericFilterMultiselect
-				name="metadata.writer"
-				label="Writer"
-				options={
-					data?.writers.map((writer) => ({ label: writer, value: writer.toLowerCase() })) || []
-				}
-			/>
+					<GenericFilterMultiselect
+						name="metadata.writer"
+						label="Writer"
+						options={
+							data?.writers.map((writer) => ({ label: writer, value: writer.toLowerCase() })) || []
+						}
+					/>
 
-			<GenericFilterMultiselect
-				name="metadata.penciller"
-				label="Penciller"
-				options={
-					data?.pencillers.map((penciller) => ({
-						label: penciller,
-						value: penciller.toLowerCase(),
-					})) || []
-				}
-			/>
+					<GenericFilterMultiselect
+						name="metadata.penciller"
+						label="Penciller"
+						options={
+							data?.pencillers.map((penciller) => ({
+								label: penciller,
+								value: penciller.toLowerCase(),
+							})) || []
+						}
+					/>
 
-			<GenericFilterMultiselect
-				name="metadata.colorist"
-				label="Colorist"
-				options={
-					data?.colorists.map((colorist) => ({ label: colorist, value: colorist.toLowerCase() })) ||
-					[]
-				}
-			/>
+					<GenericFilterMultiselect
+						name="metadata.colorist"
+						label="Colorist"
+						options={
+							data?.colorists.map((colorist) => ({
+								label: colorist,
+								value: colorist.toLowerCase(),
+							})) || []
+						}
+					/>
 
-			<GenericFilterMultiselect
-				name="metadata.letterer"
-				label="Letterer"
-				options={
-					data?.letterers.map((letterer) => ({ label: letterer, value: letterer.toLowerCase() })) ||
-					[]
-				}
-			/>
+					<GenericFilterMultiselect
+						name="metadata.letterer"
+						label="Letterer"
+						options={
+							data?.letterers.map((letterer) => ({
+								label: letterer,
+								value: letterer.toLowerCase(),
+							})) || []
+						}
+					/>
 
-			<GenericFilterMultiselect
-				name="metadata.inker"
-				label="Inker"
-				options={data?.inkers.map((inker) => ({ label: inker, value: inker.toLowerCase() })) || []}
-			/>
+					<GenericFilterMultiselect
+						name="metadata.inker"
+						label="Inker"
+						options={
+							data?.inkers.map((inker) => ({ label: inker, value: inker.toLowerCase() })) || []
+						}
+					/>
 
-			<GenericFilterMultiselect
-				name="metadata.publisher"
-				label="Publisher"
-				options={
-					data?.publishers.map((publisher) => ({
-						label: publisher,
-						value: publisher.toLowerCase(),
-					})) || []
-				}
-			/>
+					<GenericFilterMultiselect
+						name="metadata.publisher"
+						label="Publisher"
+						options={
+							data?.publishers.map((publisher) => ({
+								label: publisher,
+								value: publisher.toLowerCase(),
+							})) || []
+						}
+					/>
 
-			<GenericFilterMultiselect
-				name="metadata.editor"
-				label="Editor"
-				options={
-					data?.editors.map((editor) => ({ label: editor, value: editor.toLowerCase() })) || []
-				}
-			/>
+					<GenericFilterMultiselect
+						name="metadata.editor"
+						label="Editor"
+						options={
+							data?.editors.map((editor) => ({ label: editor, value: editor.toLowerCase() })) || []
+						}
+					/>
 
-			<GenericFilterMultiselect
-				name="metadata.character"
-				label="Character"
-				options={
-					data?.characters.map((character) => ({
-						label: character,
-						value: character.toLowerCase(),
-					})) || []
-				}
-			/>
+					<GenericFilterMultiselect
+						name="metadata.character"
+						label="Character"
+						options={
+							data?.characters.map((character) => ({
+								label: character,
+								value: character.toLowerCase(),
+							})) || []
+						}
+					/>
+				</>
+			)}
 		</Form>
 	)
 }
+
+const isEmptyResult = (result?: MediaFilterFormQuery['mediaMetadataOverview']) =>
+	!(
+		result?.genres?.length ||
+		result?.writers?.length ||
+		result?.pencillers?.length ||
+		result?.colorists?.length ||
+		result?.letterers?.length ||
+		result?.inkers?.length ||
+		result?.publishers?.length ||
+		result?.editors?.length ||
+		result?.characters?.length
+	) || result == null

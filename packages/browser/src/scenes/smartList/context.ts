@@ -1,13 +1,13 @@
 import {
 	AccessRole,
 	SaveSmartListInput,
-	SmartList,
 	SmartListGrouping,
 	SmartListMeta,
 	SmartListView,
 } from '@stump/graphql'
 import { createContext, useContext } from 'react'
 
+import { SmartListParsed } from './graphql'
 import { buildColumns as buildGroupColumns } from './items/table/groupColumns'
 import { defaultColumns } from './items/table/mediaColumns'
 
@@ -33,7 +33,7 @@ const buildDefaultWorkingView = (grouping?: SmartListGrouping): WorkingView => {
 }
 
 export type ISmartListContext = {
-	list: SmartList
+	list: SmartListParsed
 	meta?: SmartListMeta
 
 	workingView?: WorkingView

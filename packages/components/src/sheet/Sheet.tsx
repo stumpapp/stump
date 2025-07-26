@@ -54,9 +54,13 @@ export function Sheet({
 		}
 	}
 
-	useEffect(() => {
-		onClose?.()
-	}, [location])
+	useEffect(
+		() => {
+			onClose?.()
+		},
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[location],
+	)
 
 	return (
 		<SheetPrimitive open={open} onOpenChange={handleOpenChange}>

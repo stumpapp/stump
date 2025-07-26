@@ -15,7 +15,7 @@ import {
 import { match } from 'ts-pattern'
 import { z } from 'zod'
 
-import { SmartListParsed } from '@/scenes/smartList/smartListGraphQL'
+import { SmartListParsed } from '@/scenes/smartList/graphql'
 
 export const stringOperation = z.enum(['contains', 'excludes', 'neq', 'eq'])
 export type StringOperation = z.infer<typeof stringOperation>

@@ -21,7 +21,7 @@ export type SmartListParsed = Omit<SmartList, 'filters'> & {
 
 export const DEFAULT_META_CACHE_TIME = 1000 * 60 * 15 // 15 minutes
 
-const query_smart_list_by_id = graphql(`
+const listByIdQuery = graphql(`
 	query SmartListById($id: ID!) {
 		smartListById(id: $id) {
 			id
@@ -57,7 +57,7 @@ const query_smart_list_by_id = graphql(`
 	}
 `)
 
-const query_smart_list_meta = graphql(`
+const smartListMetaQuery = graphql(`
 	query SmartListMeta($id: ID!) {
 		smartListMeta(id: $id) {
 			matchedBooks
@@ -67,7 +67,7 @@ const query_smart_list_meta = graphql(`
 	}
 `)
 
-const mutation_smart_list_update = graphql(`
+const smartListUpdateMutation = graphql(`
 	mutation UpdateSmartList($id: ID!, $input: SaveSmartListInput!) {
 		updateSmartList(id: $id, input: $input) {
 			__typename
@@ -75,7 +75,7 @@ const mutation_smart_list_update = graphql(`
 	}
 `)
 
-const query_smart_list_items = graphql(`
+const smartListItemsQuery = graphql(`
 	query SmartListItems($id: ID!) {
 		smartListItems(id: $id) {
 			__typename
@@ -111,7 +111,7 @@ const query_smart_list_items = graphql(`
 export function useSmartListItems({ id }: { id: string }) {
 	const { sdk } = useSDK()
 	const { data: { smartListItems: items } = {}, isLoading } = useGraphQL(
-		query_smart_list_items,
+		smartListItemsQuery,
 		[sdk.cacheKeys.smartListItems, id],
 		{
 			id: id || '',
@@ -132,7 +132,7 @@ export function usePrefetchSmartList() {
 				queryClient.prefetchQuery({
 					queryKey: [sdk.cacheKeys.smartListById, id],
 					queryFn: async () => {
-						const response = await sdk.execute(query_smart_list_by_id, { id })
+						const response = await sdk.execute(listByIdQuery, { id })
 						return response
 					},
 					staleTime: PREFETCH_STALE_TIME,
@@ -140,7 +140,7 @@ export function usePrefetchSmartList() {
 				queryClient.prefetchQuery({
 					queryKey: [sdk.cacheKeys.smartListMeta, id],
 					queryFn: async () => {
-						const response = await sdk.execute(query_smart_list_meta, { id })
+						const response = await sdk.execute(smartListMetaQuery, { id })
 						return response
 					},
 					staleTime: DEFAULT_META_CACHE_TIME,
@@ -148,7 +148,7 @@ export function usePrefetchSmartList() {
 				queryClient.prefetchQuery({
 					queryKey: [sdk.cacheKeys.smartListItems, id],
 					queryFn: async () => {
-						const response = await sdk.execute(query_smart_list_items, { id })
+						const response = await sdk.execute(smartListItemsQuery, { id })
 						return response
 					},
 					staleTime: PREFETCH_STALE_TIME,
@@ -176,7 +176,7 @@ export function useUpdateSmartList({ id, list }: { id: string; list?: SmartListP
 	}, [list])
 
 	const client = useQueryClient()
-	const { mutate } = useGraphQLMutation(mutation_smart_list_update, {
+	const { mutate } = useGraphQLMutation(smartListUpdateMutation, {
 		mutationKey: [sdk.cacheKeys.smartListUpdate, id],
 		onSuccess: () => {
 			client.invalidateQueries({ queryKey: [sdk.cacheKeys.smartListById, id || ''] })
@@ -194,19 +194,26 @@ export function useUpdateSmartList({ id, list }: { id: string; list?: SmartListP
 	}
 }
 
-export function useSmartListById({ id }: { id: string }): {
+type UseSmartListByIdParams = {
+	id: string
+}
+
+type UseSmartListByIdReturn = {
 	list?: SmartListParsed
 	isLoading: boolean
-} {
+}
+
+export function useSmartListById({ id }: UseSmartListByIdParams): UseSmartListByIdReturn {
 	const { sdk } = useSDK()
 	const { data: { smartListById: listUnparsed } = {}, isLoading: isLoading } = useSuspenseGraphQL(
-		query_smart_list_by_id,
+		listByIdQuery,
 		[sdk.cacheKeys.smartListById, id || ''],
 		{
 			id: id || '',
 		},
 	)
 
+	// TODO(graphql): wrap in try/catch to handle parse errors
 	const list = useMemo(() => {
 		if (listUnparsed) {
 			const filtersFromJson = JSON.parse(listUnparsed.filters) as Array<SmartListFilterGroupInput>
@@ -222,19 +229,29 @@ export function useSmartListById({ id }: { id: string }): {
 	}
 }
 
-export function useSmartListMeta({ id, staleTime }: { id: string; staleTime?: number }): {
-	meta: SmartListMetaQuery['smartListMeta']
+type UseSmartListMetaParams = {
+	id: string
+	staleTime?: number
+}
+
+type UseSmartListMetaReturn = {
+	meta?: SmartListMetaQuery['smartListMeta']
 	isLoading: boolean
-} {
+}
+
+export function useSmartListMeta({
+	id,
+	staleTime,
+}: UseSmartListMetaParams): UseSmartListMetaReturn {
 	const { sdk } = useSDK()
 	const options = staleTime ? { staleTime } : {}
 	const { data: { smartListMeta: meta } = {}, isLoading: isLoading } = useGraphQL(
-		query_smart_list_meta,
+		smartListMetaQuery,
 		[sdk.cacheKeys.smartListMeta, id || ''],
 		{
 			id: id || '',
 		},
-		options,
+		{ ...options, enabled: !!id },
 	)
 
 	return {

@@ -7,10 +7,9 @@ import {
 	UserPermission,
 } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
-import { NavigationItem } from '@stump/sdk'
 import { motion } from 'framer-motion'
 import { Book, Home } from 'lucide-react'
-import { useCallback, useMemo } from 'react'
+import { Suspense, useCallback, useMemo } from 'react'
 import { useLocation } from 'react-router'
 import { useMediaMatch } from 'rooks'
 import { match } from 'ts-pattern'
@@ -90,10 +89,10 @@ export default function SideBar({ asChild, hidden }: Props) {
 	}
 
 	const checkSectionPermission = useCallback(
-		(section: NavigationItem['type']) => {
-			if (section === 'BookClubs') {
+		(variant: SystemArrangement) => {
+			if (variant === SystemArrangement.BookClubs) {
 				return checkPermission(UserPermission.AccessBookClub)
-			} else if (section === 'SmartLists') {
+			} else if (variant === SystemArrangement.SmartLists) {
 				return checkPermission(UserPermission.AccessSmartList)
 			} else {
 				return true
@@ -129,18 +128,19 @@ export default function SideBar({ asChild, hidden }: Props) {
 					</SideBarButtonLink>
 				))
 				.with(SystemArrangement.Libraries, () => (
-					<LibrarySideBarSection
-						key="libraries-sidebar-navlink"
-						isMobile={isMobile}
-						links={config.links}
-					/>
+					<Suspense key="libraries-sidebar-navlink">
+						<LibrarySideBarSection isMobile={isMobile} links={config.links} />
+					</Suspense>
+				))
+				.with(SystemArrangement.SmartLists, () => (
+					<Suspense key="smartlists-sidebar-navlink">
+						<SmartListSideBarSection links={config.links} />
+					</Suspense>
 				))
 				.with(SystemArrangement.BookClubs, () => (
-					<BookClubSideBarSection
-						key="book-clubs-sidebar-navlink"
-						isMobile={isMobile}
-						links={config.links}
-					/>
+					<Suspense key="book-clubs-sidebar-navlink">
+						<BookClubSideBarSection isMobile={isMobile} links={config.links} />
+					</Suspense>
 				))
 				.otherwise(() => null),
 		[t, location.pathname, prefetchHome, isMobile],
@@ -152,35 +152,18 @@ export default function SideBar({ asChild, hidden }: Props) {
 				.filter(({ visible }) => visible)
 				.map(({ config }) =>
 					match(config)
-						.with({ __typename: 'SystemArrangementConfig' }, (config) =>
-							renderSystemSection(config),
-						)
+						.with({ __typename: 'SystemArrangementConfig' }, (config) => {
+							const child = renderSystemSection(config)
+							if (!checkSectionPermission(config.variant)) {
+								return null
+							}
+							return child
+						})
 						.otherwise(() => null),
 				)
 				.filter(Boolean),
-		[navigationArrangement, renderSystemSection],
+		[navigationArrangement, renderSystemSection, checkSectionPermission],
 	)
-
-	// 					.with({ type: 'SmartLists' }, (ctx) => (
-	// 						<SmartListSideBarSection
-	// 							key="smartlists-sidebar-navlink"
-	// 							showCreate={ctx.show_create_action}
-	// 							showLinkToAll={ctx.show_link_to_all}
-	// 						/>
-	// 					))
-	// 					.with({ type: 'BookClubs' }, (ctx) => (
-	// 						<BookClubSideBarSection
-	// 							key="book-clubs-sidebar-navlink"
-	// 							isMobile={isMobile}
-	// 							showCreate={ctx.show_create_action}
-	// 							showLinkToAll={ctx.show_link_to_all}
-	// 						/>
-	// 					))
-	// 					.otherwise(() => null),
-	// 			)
-	// 			.filter(Boolean),
-	// 	[arrangement, checkSectionPermission, location, t, isMobile],
-	// )
 
 	const renderContent = () => {
 		return (

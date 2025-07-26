@@ -1,6 +1,6 @@
-import { useBookClubsQuery } from '@stump/client'
+import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Accordion, Text } from '@stump/components'
-import { UserPermission } from '@stump/graphql'
+import { FilterableArrangementEntityLink, graphql, UserPermission } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { Club } from 'lucide-react'
 import { useLocation } from 'react-router'
@@ -12,20 +12,37 @@ import paths from '@/paths'
 import SideBarButtonLink from '../../SideBarButtonLink'
 import BookClubEmoji from './BookClubEmoji'
 
-type Props = {
+const query = graphql(`
+	query BookClubSideBarSection {
+		bookClubs {
+			id
+			name
+			emoji
+			members {
+				id
+				userId
+				role
+			}
+		}
+	}
+`)
+
+type Props = EntityOptionProps & {
 	isMobile?: boolean
-} & EntityOptionProps
+}
 
 export default function BookClubSideBarSection({
+	links = [FilterableArrangementEntityLink.Create],
 	isMobile,
-	showCreate = true,
-	showLinkToAll = false,
 }: Props) {
 	const location = useLocation()
 	const { user, isServerOwner, checkPermission } = useAppContext()
 
 	const { t } = useLocaleContext()
-	const { bookClubs } = useBookClubsQuery({ params: { all: false } })
+	const { sdk } = useSDK()
+	const {
+		data: { bookClubs },
+	} = useSuspenseGraphQL(query, sdk.cacheKey('bookClubs'))
 
 	const isCurrentBookClub = (id: string) => location.pathname.startsWith(paths.librarySeries(id))
 
@@ -40,7 +57,7 @@ export default function BookClubSideBarSection({
 
 		return bookClubs.map((bookClub) => {
 			const userId = user.id
-			const member = bookClub.members?.find((member) => member.user_id === userId)
+			const member = bookClub.members?.find((member) => member.userId === userId)
 			const canChange =
 				(isServerOwner || member?.role === 'CREATOR' || member?.role === 'ADMIN') && !isMobile
 
@@ -69,7 +86,8 @@ export default function BookClubSideBarSection({
 	}
 
 	const canCreateBookClub = checkPermission(UserPermission.CreateBookClub)
-	const showCreateLink = canCreateBookClub && showCreate
+	const showCreateLink = canCreateBookClub && links.includes(FilterableArrangementEntityLink.Create)
+	const showLinkToAll = links.includes(FilterableArrangementEntityLink.ShowAll)
 
 	return (
 		<Accordion type="single" collapsible className="w-full py-2">

@@ -7,7 +7,6 @@ import {
 	UserPermission,
 } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
-import { NavigationItem } from '@stump/sdk'
 import { Book, Home } from 'lucide-react'
 import { useCallback, useMemo } from 'react'
 import { useLocation } from 'react-router'
@@ -19,7 +18,6 @@ import { usePreferences } from '@/hooks'
 import paths from '@/paths'
 
 import { LibraryNavigationItem, SettingsNavigationItem } from './sections'
-import { BookClubNavigationItem } from './sections/book-club'
 import UserMenu from './sections/UserMenu'
 import TopBarNavLink from './TopBarNavLink'
 
@@ -66,10 +64,10 @@ export default function TopNavigation() {
 	} = usePreferences()
 
 	const checkSectionPermission = useCallback(
-		(section: NavigationItem['type']) => {
-			if (section === 'BookClubs') {
+		(variant: SystemArrangement) => {
+			if (variant === SystemArrangement.BookClubs) {
 				return checkPermission(UserPermission.AccessBookClub)
-			} else if (section === 'SmartLists') {
+			} else if (variant === SystemArrangement.SmartLists) {
 				return checkPermission(UserPermission.AccessSmartList)
 			} else {
 				return true
@@ -81,55 +79,10 @@ export default function TopNavigation() {
 	// TODO: Might need to pass a position prop to some of the menus in order to adjust
 	// their sizing accordingly
 
-	// const sections = useMemo(
-	// 	() =>
-	// 		arrangement.items
-	// 			.filter(({ item: { type }, visible }) => checkSectionPermission(type) && visible)
-	// 			.map(({ item }) =>
-	// 				match(item)
-	// 					.with({ type: 'Home' }, () => (
-	// 						<TopBarNavLink
-	// 							key="home-topbar-navlink"
-	// 							to={paths.home()}
-	// 							isActive={location.pathname === paths.home()}
-	// 						>
-	// 							<Home className="mr-2 h-4 w-4" />
-	// 							{t('sidebar.buttons.home')}
-	// 						</TopBarNavLink>
-	// 					))
-	// 					.with({ type: 'Explore' }, () => (
-	// 						<TopBarNavLink
-	// 							key="explore-topbar-navlink"
-	// 							to={paths.bookSearch()}
-	// 							isActive={location.pathname === paths.bookSearch()}
-	// 						>
-	// 							<Book className="mr-2 h-4 w-4" />
-	// 							{t('sidebar.buttons.books')}
-	// 						</TopBarNavLink>
-	// 					))
-	// 					.with({ type: 'Libraries' }, (ctx) => (
-	// 						<LibraryNavigationItem
-	// 							key="libraries-topbar-navlink"
-	// 							showCreate={ctx.show_create_action}
-	// 							showLinkToAll={ctx.show_link_to_all}
-	// 							width={size?.width}
-	// 						/>
-	// 					))
-	// 					// .with('SmartLists', () => <SmartListSideBarSection />)
-	// 					.with({ type: 'BookClubs' }, (ctx) => (
-	// 						<BookClubNavigationItem
-	// 							key="book-clubs-topbar-navlink"
-	// 							showCreate={ctx.show_create_action}
-	// 							showLinkToAll={ctx.show_link_to_all}
-	// 							width={size?.width}
-	// 						/>
-	// 					))
-	// 					.otherwise(() => null),
-	// 			)
-	// 			.filter(Boolean),
-	// 	[arrangement, checkSectionPermission, location, t, size?.width],
-	// )
-
+	// TODO(graphql): Re-introduce support for other sections:
+	// - Smart Lists
+	// - Book Clubs
+	// TODO(graphql): Re-introduce the prefetching
 	const renderSystemSection = useCallback(
 		(config: { variant: SystemArrangement; links: Array<FilterableArrangementEntityLink> }) =>
 			match(config.variant)
@@ -171,13 +124,17 @@ export default function TopNavigation() {
 				.filter(({ visible }) => visible)
 				.map(({ config }) =>
 					match(config)
-						.with({ __typename: 'SystemArrangementConfig' }, (config) =>
-							renderSystemSection(config),
-						)
+						.with({ __typename: 'SystemArrangementConfig' }, (config) => {
+							const child = renderSystemSection(config)
+							if (!checkSectionPermission(config.variant)) {
+								return null
+							}
+							return child
+						})
 						.otherwise(() => null),
 				)
 				.filter(Boolean),
-		[navigationArrangement, renderSystemSection],
+		[navigationArrangement, renderSystemSection, checkSectionPermission],
 	)
 
 	return (

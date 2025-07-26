@@ -2186,7 +2186,7 @@ export type QuerySmartListMetaArgs = {
 
 
 export type QuerySmartListsArgs = {
-  input: SmartListsInput;
+  input?: SmartListsInput;
 };
 
 
@@ -3035,6 +3035,11 @@ export type SideBarQueryQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type SideBarQueryQuery = { __typename?: 'Query', me: { __typename?: 'User', id: string, preferences: { __typename?: 'UserPreferences', navigationArrangement: { __typename?: 'Arrangement', locked: boolean, sections: Array<{ __typename?: 'ArrangementSection', visible: boolean, config: { __typename: 'CustomArrangementConfig' } | { __typename: 'InProgressBooks' } | { __typename: 'RecentlyAdded' } | { __typename: 'SystemArrangementConfig', variant: SystemArrangement, links: Array<FilterableArrangementEntityLink> } }> } } } };
 
+export type BookClubSideBarSectionQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type BookClubSideBarSectionQuery = { __typename?: 'Query', bookClubs: Array<{ __typename?: 'BookClub', id: string, name: string, emoji?: string | null, members: Array<{ __typename?: 'BookClubMember', id: string, userId: string, role: BookClubMemberRole }> }> };
+
 export type UpdateLibraryEmojiMutationVariables = Exact<{
   id: Scalars['ID']['input'];
   emoji?: InputMaybe<Scalars['String']['input']>;
@@ -3054,6 +3059,11 @@ export type LibrarySideBarSectionQueryVariables = Exact<{ [key: string]: never; 
 
 
 export type LibrarySideBarSectionQuery = { __typename?: 'Query', libraries: { __typename?: 'PaginatedLibraryResponse', nodes: Array<{ __typename?: 'Library', id: string, name: string, emoji?: string | null }> } };
+
+export type SmartListSideBarSectionQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type SmartListSideBarSectionQuery = { __typename?: 'Query', smartLists: Array<{ __typename?: 'SmartList', id: string, name: string }> };
 
 export type TopNavigationQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -3751,18 +3761,6 @@ export type SmartListsWithSearchQueryVariables = Exact<{
 
 export type SmartListsWithSearchQuery = { __typename?: 'Query', smartLists: Array<{ __typename?: 'SmartList', id: string, creatorId: string, description?: string | null, defaultGrouping: SmartListGrouping, filters: string, joiner: SmartListJoiner, name: string, visibility: EntityVisibility }> };
 
-export type SmartListBasicSettingsSceneQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type SmartListBasicSettingsSceneQuery = { __typename?: 'Query', smartLists: Array<{ __typename?: 'SmartList', name: string }> };
-
-export type DeleteSmartListMutationVariables = Exact<{
-  id: Scalars['ID']['input'];
-}>;
-
-
-export type DeleteSmartListMutation = { __typename?: 'Mutation', deleteSmartList: { __typename: 'SmartList' } };
-
 export type SmartListByIdQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
@@ -3797,6 +3795,18 @@ export type SmartListItemsQuery = { __typename?: 'Query', smartListItems: { __ty
       { __typename?: 'Media' }
       & { ' $fragmentRefs'?: { 'BookCardFragment': BookCardFragment;'BookMetadataFragment': BookMetadataFragment } }
     )> } };
+
+export type SmartListBasicSettingsSceneQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type SmartListBasicSettingsSceneQuery = { __typename?: 'Query', smartLists: Array<{ __typename?: 'SmartList', name: string }> };
+
+export type DeleteSmartListMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteSmartListMutation = { __typename?: 'Mutation', deleteSmartList: { __typename: 'SmartList' } };
 
 export type DirectoryListingQueryVariables = Exact<{
   input: DirectoryListingInput;
@@ -4049,6 +4059,20 @@ export const SideBarQueryDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<SideBarQueryQuery, SideBarQueryQueryVariables>;
+export const BookClubSideBarSectionDocument = new TypedDocumentString(`
+    query BookClubSideBarSection {
+  bookClubs {
+    id
+    name
+    emoji
+    members {
+      id
+      userId
+      role
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<BookClubSideBarSectionQuery, BookClubSideBarSectionQueryVariables>;
 export const UpdateLibraryEmojiDocument = new TypedDocumentString(`
     mutation UpdateLibraryEmoji($id: ID!, $emoji: String) {
   updateLibraryEmoji(id: $id, emoji: $emoji) {
@@ -4072,6 +4096,14 @@ export const LibrarySideBarSectionDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<LibrarySideBarSectionQuery, LibrarySideBarSectionQueryVariables>;
+export const SmartListSideBarSectionDocument = new TypedDocumentString(`
+    query SmartListSideBarSection {
+  smartLists {
+    id
+    name
+  }
+}
+    `) as unknown as TypedDocumentString<SmartListSideBarSectionQuery, SmartListSideBarSectionQueryVariables>;
 export const TopNavigationDocument = new TypedDocumentString(`
     query TopNavigation {
   me {
@@ -5476,20 +5508,6 @@ export const SmartListsWithSearchDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<SmartListsWithSearchQuery, SmartListsWithSearchQueryVariables>;
-export const SmartListBasicSettingsSceneDocument = new TypedDocumentString(`
-    query SmartListBasicSettingsScene {
-  smartLists(input: {mine: true}) {
-    name
-  }
-}
-    `) as unknown as TypedDocumentString<SmartListBasicSettingsSceneQuery, SmartListBasicSettingsSceneQueryVariables>;
-export const DeleteSmartListDocument = new TypedDocumentString(`
-    mutation DeleteSmartList($id: ID!) {
-  deleteSmartList(id: $id) {
-    __typename
-  }
-}
-    `) as unknown as TypedDocumentString<DeleteSmartListMutation, DeleteSmartListMutationVariables>;
 export const SmartListByIdDocument = new TypedDocumentString(`
     query SmartListById($id: ID!) {
   smartListById(id: $id) {
@@ -5610,6 +5628,20 @@ fragment BookMetadata on Media {
     year
   }
 }`) as unknown as TypedDocumentString<SmartListItemsQuery, SmartListItemsQueryVariables>;
+export const SmartListBasicSettingsSceneDocument = new TypedDocumentString(`
+    query SmartListBasicSettingsScene {
+  smartLists(input: {mine: true}) {
+    name
+  }
+}
+    `) as unknown as TypedDocumentString<SmartListBasicSettingsSceneQuery, SmartListBasicSettingsSceneQueryVariables>;
+export const DeleteSmartListDocument = new TypedDocumentString(`
+    mutation DeleteSmartList($id: ID!) {
+  deleteSmartList(id: $id) {
+    __typename
+  }
+}
+    `) as unknown as TypedDocumentString<DeleteSmartListMutation, DeleteSmartListMutationVariables>;
 export const DirectoryListingDocument = new TypedDocumentString(`
     query DirectoryListing($input: DirectoryListingInput!, $pagination: Pagination!) {
   listDirectory(input: $input, pagination: $pagination) {

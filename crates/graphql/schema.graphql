@@ -1547,7 +1547,7 @@ type Query {
 	logfileInfo: LogFileInfo!
 	stumpConfig: StumpConfig!
 	uploadConfig: UploadConfig!
-	smartLists(input: SmartListsInput!): [SmartList!]!
+	smartLists(input: SmartListsInput! = {all: null, mine: true, search: null}): [SmartList!]!
 	smartListById(id: ID!): SmartList
 	smartListMeta(id: ID!): SmartListMeta
 	smartListItems(id: ID!): SmartListItems!

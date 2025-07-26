@@ -45,4 +45,6 @@ export const cacheKeys = {
 	smartListViewUpdate: 'smartListUpdate',
 	smartListItems: 'smartListItems',
 	navigationArrangement: 'navigationArrangement',
+	bookClubs: 'bookClubs',
+	bookClubById: 'bookClubById',
 } as const

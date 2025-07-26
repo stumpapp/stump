@@ -6,7 +6,7 @@ import { useLocation } from 'react-router'
 import { usePreferences } from '@/hooks'
 
 import { useSmartListContext } from './context'
-import { usePrefetchSmartList } from './smartListGraphQL'
+import { usePrefetchSmartList } from './graphql'
 
 const LOCALE_BASE_KEY = 'userSmartListScene.navigation'
 const withLocaleKey = (key: string) => `${LOCALE_BASE_KEY}.${key}`

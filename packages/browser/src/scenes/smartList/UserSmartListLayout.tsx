@@ -22,16 +22,16 @@ import { useAppContext } from '@/context'
 import { usePreferences } from '@/hooks/usePreferences'
 
 import { defaultWorkingView, SmartListContext, WorkingView } from './context'
+import { useSmartListById, useSmartListMeta, useUpdateSmartList } from './graphql'
 import { createRouteGroups } from './settings/routes'
 import SmartListSettingsSideBar from './settings/SmartListSettingsSideBar'
-import { useSmartListById, useSmartListMeta, useUpdateSmartList } from './smartListGraphQL'
 import UserSmartListHeader from './UserSmartListHeader'
 import UserSmartListNavigation from './UserSmartListNavigation'
 
 const LOCALE_BASE_KEY = 'userSmartListScene.layout'
 const withLocaleKey = (key: string) => `${LOCALE_BASE_KEY}.${key}`
 
-const mutation_smart_list_view_create = graphql(`
+const createMutation = graphql(`
 	mutation CreateSmartListView($input: SaveSmartListView!) {
 		createSmartListView(input: $input) {
 			id
@@ -57,7 +57,7 @@ const mutation_smart_list_view_create = graphql(`
 	}
 `)
 
-const mutation_smart_list_view_update = graphql(`
+const updateMutation = graphql(`
 	mutation UpdateSmartListView($originalName: String!, $input: SaveSmartListView!) {
 		updateSmartListView(originalName: $originalName, input: $input) {
 			id
@@ -111,13 +111,13 @@ function useSmartListView({ id }: { id?: string }): {
 		[setView, client, id, sdk.cacheKeys],
 	)
 
-	const { mutate: create } = useGraphQLMutation(mutation_smart_list_view_create, {
+	const { mutate: create } = useGraphQLMutation(createMutation, {
 		mutationKey: [sdk.cacheKeys.smartListViewCreate, id],
 		onSuccess: (data) => {
 			setViewCallback(data.createSmartListView)
 		},
 	})
-	const { mutate: update } = useGraphQLMutation(mutation_smart_list_view_update, {
+	const { mutate: update } = useGraphQLMutation(updateMutation, {
 		mutationKey: [sdk.cacheKeys.smartListViewUpdate, id],
 		onSuccess: (data) => {
 			setViewCallback(data.updateSmartListView)
@@ -315,6 +315,8 @@ export default function UserSmartListLayout() {
 		<SmartListContext.Provider
 			value={{
 				layout,
+				// TODO(graphql): Figure out this type error during a cleanup phase of the migration
+				// I didn't work directly on this so don't want to get to deep into it
 				list,
 				meta,
 				patchSmartList: updateSmartList,

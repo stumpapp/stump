@@ -36,7 +36,7 @@ impl SmartListsQuery {
 	async fn smart_lists(
 		self,
 		ctx: &Context<'_>,
-		input: SmartListsInput,
+		#[graphql(default)] input: SmartListsInput,
 	) -> Result<Vec<SmartList>> {
 		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();

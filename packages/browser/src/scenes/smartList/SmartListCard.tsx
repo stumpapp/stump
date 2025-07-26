@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom'
 
 import paths from '@/paths'
 
-import { DEFAULT_META_CACHE_TIME, usePrefetchSmartList, useSmartListMeta } from './smartListGraphQL'
+import { DEFAULT_META_CACHE_TIME, usePrefetchSmartList, useSmartListMeta } from './graphql'
 
 const LOCALE_BASE_KEY = 'userSmartListsScene.list.card'
 const withLocaleKey = (key: string) => `${LOCALE_BASE_KEY}.${key}`

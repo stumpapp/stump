@@ -19,6 +19,16 @@ pub struct SmartListsInput {
 	pub search: Option<String>,
 }
 
+impl Default for SmartListsInput {
+	fn default() -> Self {
+		SmartListsInput {
+			all: None,
+			mine: Some(true),
+			search: None,
+		}
+	}
+}
+
 /// The different filter joiners that can be used in smart lists
 #[derive(
 	PartialEq, Eq, Copy, Hash, Debug, Clone, Default, Enum, Serialize, Deserialize,

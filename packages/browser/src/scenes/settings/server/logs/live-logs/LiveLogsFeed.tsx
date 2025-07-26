@@ -31,7 +31,7 @@ export default function LiveLogsFeed() {
 			newSource.onmessage = (event) => {
 				const newLog = event.data as string
 				// remove the " at the first and last character of the string
-				const formattedLog = newLog.slice(1, newLog.length - 1)
+				const formattedLog = stripAnsi(newLog.slice(1, newLog.length - 1))
 				setLogsBuffer((prevLogs) => {
 					const newLogs = [...prevLogs, formattedLog]
 					if (newLogs.length > MAX_BUFFER_SIZE) {
@@ -78,3 +78,5 @@ export default function LiveLogsFeed() {
 		</div>
 	)
 }
+
+const stripAnsi = (str: string) => str.replace(/\\u001b\[[0-9;]*m/g, '')

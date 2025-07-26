@@ -3,11 +3,13 @@ pub(crate) mod individual;
 pub(crate) mod thumbnails;
 
 use axum::{
-	extract::DefaultBodyLimit,
+	extract::{DefaultBodyLimit, Extension},
 	middleware,
 	routing::{get, post, put},
 	Router,
 };
+
+use serde_qs::axum::QsQueryConfig;
 
 use crate::{config::state::AppState, middleware::auth::auth_middleware};
 
@@ -17,9 +19,9 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		.route("/media/duplicates", get(bulk::get_duplicate_media))
 		.route("/media/keep-reading", get(bulk::get_in_progress_media))
 		.route("/media/recently-added", get(bulk::get_recently_added_media))
-		.route("/media/path/:path", get(individual::get_media_by_path))
+		.route("/media/path/{path}", get(individual::get_media_by_path))
 		.nest(
-			"/media/:id",
+			"/media/{id}",
 			Router::new()
 				.route("/", get(individual::get_media_by_id))
 				.route("/file", get(individual::get_media_file))
@@ -34,13 +36,13 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 						)),
 				)
 				.route("/analyze", post(individual::start_media_analysis))
-				.route("/page/:page", get(individual::get_media_page))
+				.route("/page/{page}", get(individual::get_media_page))
 				.route(
 					"/progress",
 					get(individual::get_media_progress)
 						.delete(individual::delete_media_progress),
 				)
-				.route("/progress/:page", put(individual::update_media_progress))
+				.route("/progress", put(individual::update_media_progress))
 				.route(
 					"/progress/complete",
 					get(individual::get_is_media_completed)
@@ -48,7 +50,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				)
 				.route("/dimensions", get(individual::get_media_dimensions))
 				.route(
-					"/page/:page/dimensions",
+					"/page/{page}/dimensions",
 					get(individual::get_media_page_dimensions),
 				)
 				.route(
@@ -57,5 +59,6 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 						.put(individual::put_media_metadata),
 				),
 		)
+		.layer(Extension(QsQueryConfig::new(5, false)))
 		.layer(middleware::from_fn_with_state(app_state, auth_middleware))
 }

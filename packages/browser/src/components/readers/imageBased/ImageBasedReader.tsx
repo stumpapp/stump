@@ -1,11 +1,13 @@
 import { queryClient, useSDK, useUpdateMediaProgress } from '@stump/client'
-import { Media } from '@stump/sdk'
+import { generatePageSets, Media } from '@stump/sdk'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
+import { useWindowSize } from 'rooks'
 
 import { usePreloadPage } from '@/hooks/usePreloadPage'
 import paths from '@/paths'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
+import { useBookTimer } from '@/stores/reader'
 
 import ReaderContainer from './container'
 import { ImageBaseReaderContext, ImagePageDimensionRef } from './context'
@@ -34,6 +36,7 @@ type Props = {
 	initialPage?: number
 }
 
+// TODO: support read time
 export default function ImageBasedReader({
 	media,
 	isAnimated = false,
@@ -47,18 +50,72 @@ export default function ImageBasedReader({
 	 * The current page of the reader
 	 */
 	const [currentPage, setCurrentPage] = useState(initialPage || 1)
-	const [pageDimensions, setPageDimensions] = useState<Record<number, ImagePageDimensionRef>>({})
+
+	const [pageDimensions, setPageDimensions] = useState<Record<number, ImagePageDimensionRef>>(
+		() =>
+			media?.metadata?.page_dimensions?.dimensions
+				?.map(({ height, width }) => ({
+					height,
+					width,
+					ratio: width / height,
+				}))
+				.reduce(
+					(acc, ref, index) => {
+						acc[index] = ref
+						return acc
+					},
+					{} as Record<number, { height: number; width: number; ratio: number }>,
+				) ?? {},
+	)
 
 	const {
-		settings: { preload },
-		bookPreferences: { readingMode },
+		settings: { preload, showToolBar },
+		bookPreferences: {
+			doublePageBehavior = 'auto',
+			readingMode,
+			readingDirection,
+			trackElapsedTime,
+		},
 		setSettings,
 	} = useBookPreferences({ book: media })
 
+	const { pause, resume, totalSeconds, isRunning, reset } = useBookTimer(media?.id || '', {
+		initial: media?.active_reading_session?.elapsed_seconds,
+		enabled: trackElapsedTime,
+	})
+
+	useEffect(() => {
+		if (showToolBar && isRunning) {
+			pause()
+		} else if (!showToolBar && !isRunning) {
+			resume()
+		}
+	}, [showToolBar, isRunning, pause, resume])
+
+	const windowSize = useWindowSize()
+
+	const deviceOrientation = useMemo(
+		() => ((windowSize.innerWidth || 0) > (windowSize.innerHeight || 0) ? 'landscape' : 'portrait'),
+		[windowSize],
+	)
+
+	const pages = media.pages
+	const pageSets = useMemo(() => {
+		const autoButOff = doublePageBehavior === 'auto' && deviceOrientation === 'portrait'
+		const modeForceOff = readingMode === 'continuous:vertical'
+		if (doublePageBehavior === 'off' || autoButOff || modeForceOff) {
+			return Array.from({ length: pages }, (_, i) => [i])
+		}
+		const sets = generatePageSets({ imageSizes: pageDimensions, pages: pages })
+		if (readingDirection === 'rtl') {
+			return sets.reverse()
+		}
+		return sets
+	}, [doublePageBehavior, pages, pageDimensions, deviceOrientation, readingMode, readingDirection])
+
 	const { updateReadProgress } = useUpdateMediaProgress(media.id, {
-		onError(err) {
-			console.error(err)
-		},
+		retry: (attempts) => attempts < 3,
+		useErrorBoundary: false,
 	})
 	/**
 	 * A callback to update the read progress, if the reader is not in incognito mode.
@@ -66,10 +123,10 @@ export default function ImageBasedReader({
 	const handleUpdateProgress = useCallback(
 		(page: number) => {
 			if (!isIncognito) {
-				updateReadProgress(page)
+				updateReadProgress({ page, elapsed_seconds: totalSeconds })
 			}
 		},
-		[updateReadProgress, isIncognito],
+		[updateReadProgress, isIncognito, totalSeconds],
 	)
 
 	/**
@@ -114,8 +171,9 @@ export default function ImageBasedReader({
 	 * prevent wait times for the next page to load.
 	 */
 	usePreloadPage({
-		onStoreDimensions: (page, dimensions) =>
-			setPageDimensions((prev) => ({ ...prev, [page]: dimensions })),
+		onStoreDimensions: (page, dimensions) => {
+			setPageDimensions((prev) => ({ ...prev, [page - 1]: dimensions }))
+		},
 		pages: pagesToPreload,
 		urlBuilder: getPageUrl,
 	})
@@ -175,6 +233,8 @@ export default function ImageBasedReader({
 				pageDimensions,
 				setCurrentPage: handleChangePage,
 				setDimensions: setPageDimensions,
+				pageSets,
+				resetTimer: reset,
 			}}
 		>
 			<ReaderContainer>{renderReader()}</ReaderContainer>

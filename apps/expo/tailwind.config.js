@@ -1,28 +1,99 @@
+const { hairlineWidth } = require('nativewind/theme')
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-	content: ['./src/**/*.{js,jsx,ts,tsx}'],
-	plugins: [],
+	darkMode: 'class',
+	content: ['./app/**/*.{ts,tsx}', './components/**/*.{ts,tsx}'],
+	presets: [require('nativewind/preset')],
 	theme: {
 		extend: {
 			colors: {
-				// FIXME: These colors simply won't work, they were built
-				// as separate light/dark themes for the web app, and merging them
-				// in this way is not going to work.
-				gray: {
-					DEFAULT: '#292C30',
-					50: '#E2E4E6',
-					100: '#CCCFD3',
-					200: '#A0A6AE',
-					300: '#747D88',
-					400: '#4F545C',
-					500: '#292C30',
-					600: '#242628',
-					700: '#1F2123',
-					800: '#1B1C1D',
-					900: '#161719',
-					950: '#0F1011',
+				background: {
+					DEFAULT: 'var(--background)',
+					inverse: 'var(--background-inverse)',
+					overlay: {
+						DEFAULT: 'var(--background-overlay)',
+						hover: 'var(--background-overlay-hover)',
+					},
+					surface: {
+						DEFAULT: 'var(--background-surface)',
+						hover: 'var(--background-surface-hover)',
+						secondary: 'var(--background-surface-secondary)',
+					},
+					// TODO: figure this out
+					tabs: 'var(--tabs)',
+					opaque: 'var(--background-opaque)',
 				},
+				edge: {
+					DEFAULT: 'var(--edge)',
+					brand: 'var(--edge-brand)',
+					danger: 'var(--edge-danger)',
+					info: 'var(--edge-info)',
+					strong: 'var(--edge-strong)',
+					subtle: 'var(--edge-subtle)',
+					success: 'var(--edge-success)',
+					warning: 'var(--edge-warning)',
+				},
+				fill: {
+					brand: {
+						DEFAULT: 'var(--fill-brand)',
+						hover: 'var(--fill-brand-hover)',
+						secondary: 'var(--fill-brand-secondary)',
+					},
+					danger: {
+						DEFAULT: 'var(--fill-danger)',
+						hover: 'var(--fill-danger-hover)',
+						secondary: 'var(--fill-danger-secondary)',
+					},
+					disabled: 'var(--fill-disabled)',
+					info: {
+						DEFAULT: 'var(--fill-info)',
+						hover: 'var(--fill-info-hover)',
+						secondary: 'var(--fill-info-secondary)',
+					},
+					success: {
+						DEFAULT: 'var(--fill-success)',
+						hover: 'var(--fill-success-hover)',
+						secondary: 'var(--fill-success-secondary)',
+					},
+					warning: {
+						DEFAULT: 'var(--fill-warning)',
+						hover: 'var(--fill-warning-hover)',
+						secondary: 'var(--fill-warning-secondary)',
+					},
+				},
+				foreground: {
+					DEFAULT: 'var(--foreground)',
+					brand: 'var(--foreground-brand)',
+					disabled: 'var(--foreground-disabled)',
+
+					muted: 'var(--foreground-muted)',
+					'on-inverse': 'var(--foreground-on-inverse)',
+					subtle: 'var(--foreground-subtle)',
+				},
+			},
+			borderWidth: {
+				hairline: hairlineWidth(),
+			},
+			keyframes: {
+				'accordion-down': {
+					from: { height: '0' },
+					to: { height: 'var(--radix-accordion-content-height)' },
+				},
+				'accordion-up': {
+					from: { height: 'var(--radix-accordion-content-height)' },
+					to: { height: '0' },
+				},
+			},
+			screens: {
+				tablet: '640px',
+				xs: '375px',
+			},
+			animation: {
+				'accordion-down': 'accordion-down 0.2s ease-out',
+				'accordion-up': 'accordion-up 0.2s ease-out',
 			},
 		},
 	},
+	plugins: [require('tailwindcss-animate')],
 }

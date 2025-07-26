@@ -93,7 +93,7 @@ model APIKey {
   name            String
   short_token     String
   long_token_hash String
-  permissions     Bytes // "inherit" or a list of permissions 
+  permissions     Bytes // "inherit" or a list of permissions
   created_at      DateTime  @default(now())
   last_used_at    DateTime?
   expires_at      DateTime?
@@ -105,14 +105,15 @@ model APIKey {
 }
 
 model Library {
-  id          String   @id @default(uuid())
-  name        String   @unique
-  description String?
-  path        String   @unique
-  status      String   @default("READY") // UNKNOWN, READY, UNSUPPORTED, ERROR, MISSING
-  updated_at  DateTime @updatedAt
-  created_at  DateTime @default(now())
-  emoji       String?
+  id              String    @id @default(uuid())
+  name            String    @unique
+  description     String?
+  path            String    @unique
+  status          String    @default("READY") // UNKNOWN, READY, UNSUPPORTED, ERROR, MISSING
+  last_scanned_at DateTime?
+  updated_at      DateTime  @updatedAt
+  created_at      DateTime  @default(now())
+  emoji           String?
 
   series Series[]
 
@@ -122,9 +123,10 @@ model Library {
   tags              Tag[]
   hidden_from_users User[]
 
-  job_schedule_config    JobScheduleConfig? @relation(fields: [job_schedule_config_id], references: [id])
+  job_schedule_config    JobScheduleConfig?  @relation(fields: [job_schedule_config_id], references: [id])
   job_schedule_config_id String?
   user_visits            LastLibraryVisit[]
+  scan_history           LibraryScanRecord[]
 
   @@map("libraries")
 }
@@ -140,6 +142,7 @@ model LibraryConfig {
   generate_koreader_hashes        Boolean @default(false)
   process_metadata                Boolean @default(true)
   library_pattern                 String  @default("SERIES_BASED") // SERIES_BASED or COLLECTION_BASED
+  watch                           Boolean @default(true)
 
   thumbnail_config Bytes? // { size_factor: "...", format: "...", quality: ... }
   ignore_rules     Bytes? // ["glob1", "glob2", ...]
@@ -161,6 +164,21 @@ model LastLibraryVisit {
 
   @@unique([user_id, library_id])
   @@map("last_library_visits")
+}
+
+model LibraryScanRecord {
+  id Int @id @default(autoincrement())
+
+  options   Bytes?
+  timestamp DateTime @default(now())
+
+  library_id String
+  library    Library @relation(fields: [library_id], references: [id], onDelete: Cascade)
+
+  job_id String? @unique
+  job    Job?    @relation(fields: [job_id], references: [id], onDelete: Cascade)
+
+  @@map("library_scan_records")
 }
 
 model Series {
@@ -311,8 +329,9 @@ model Review {
 model FinishedReadingSession {
   id String @id @default(cuid())
 
-  started_at   DateTime
-  completed_at DateTime @default(now())
+  started_at      DateTime
+  completed_at    DateTime @default(now())
+  elapsed_seconds BigInt? // The time spent reading in seconds
 
   // TODO: Support reading duration in the future
 
@@ -346,6 +365,7 @@ model ActiveReadingSession {
   percentage_completed Float? // 0.0 - 1.0
   epubcfi              String?
   koreader_progress    String?
+  elapsed_seconds      BigInt? // The time spent reading in seconds
 
   started_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -729,6 +749,8 @@ model Job {
 
   logs Log[]
 
+  library_scan_record LibraryScanRecord?
+
   @@map("jobs")
 }
 
@@ -869,7 +891,7 @@ model ServerConfig {
 
   initial_wal_setup_complete Boolean @default(false) // Whether the initial WAL setup has been completed
   // TODO: For obvious reasons, this is severely insecure lol i.e. don't store an encryption key in the database...
-  // However, I don't have a better solution at the moment. This, at best, provides a small barrier to entry I guess 
+  // However, I don't have a better solution at the moment. This, at best, provides a small barrier to entry I guess
   // for bad actors. I am not overly knowledgeable in cryptography, so I'm not sure what the best solution is here.
   encryption_key             String? // The encryption key used to encrypt sensitive data
 

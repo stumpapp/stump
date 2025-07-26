@@ -6,7 +6,10 @@ use utoipa::ToSchema;
 
 use crate::{
 	db::entity::common::{ReadingDirection, ReadingImageScaleFit, ReadingMode},
-	filesystem::image::ImageProcessorOptions,
+	filesystem::{
+		image::ImageProcessorOptions,
+		scanner::{CustomVisit, ScanConfig, ScanOptions},
+	},
 	prisma::library_config,
 };
 
@@ -21,6 +24,7 @@ pub struct LibraryConfig {
 	pub generate_file_hashes: bool,
 	pub generate_koreader_hashes: bool,
 	pub process_metadata: bool,
+	pub watch: bool,
 	pub library_pattern: LibraryPattern,
 	pub thumbnail_config: Option<ImageProcessorOptions>,
 	#[serde(default)] // TODO: remove this after update with experimental
@@ -41,6 +45,22 @@ impl LibraryConfig {
 	pub fn is_collection_based(&self) -> bool {
 		self.library_pattern == LibraryPattern::CollectionBased
 	}
+
+	pub fn apply(&mut self, options: ScanOptions) {
+		if let ScanConfig::Custom(CustomVisit {
+			regen_hashes,
+			regen_meta,
+		}) = options.config
+		{
+			self.generate_file_hashes = regen_hashes;
+			self.process_metadata = regen_meta;
+			tracing::trace!(
+				?regen_hashes,
+				?regen_meta,
+				"Applied custom visit options to library config"
+			);
+		}
+	}
 }
 
 // TODO: This should probably be a TryFrom, as annoying as that is
@@ -53,6 +73,7 @@ impl From<library_config::Data> for LibraryConfig {
 			generate_file_hashes: data.generate_file_hashes,
 			generate_koreader_hashes: data.generate_koreader_hashes,
 			process_metadata: data.process_metadata,
+			watch: data.watch,
 			library_pattern: LibraryPattern::from(data.library_pattern),
 			default_reading_dir: ReadingDirection::from_str(
 				data.default_reading_dir.as_str(),

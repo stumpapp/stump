@@ -12,4 +12,14 @@ pub enum ProcessorError {
 	InvalidSizedImage,
 	#[error("The processor configuration is invalid: {0}")]
 	InvalidConfiguration(String),
+	#[error("The image format is not supported")]
+	UnsupportedImageFormat,
+	#[error("An unknown error occurred: {0}")]
+	UnknownError(String),
+}
+
+impl From<std::io::Error> for ProcessorError {
+	fn from(value: std::io::Error) -> Self {
+		Self::FileError(FileError::from(value))
+	}
 }

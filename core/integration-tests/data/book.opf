@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+<package xmlns:opf="http://www.idpf.org/2007/opf" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="id">
+  <metadata>
+    <dc:rights>Public domain in the USA.</dc:rights>
+    <dc:identifier id="id">http://www.gutenberg.org/11</dc:identifier>
+    <meta property="file-as" refines="#author_0">Carroll, Lewis</meta>
+    <meta property="role" refines="#author_0" scheme="marc:relators">aut</meta>
+    <dc:title>Alice's Adventures in Wonderland - Test OPF</dc:title>
+    <dc:language>en</dc:language>
+    <dc:subject>Fantasy fiction</dc:subject>
+    <dc:subject>Children's stories</dc:subject>
+    <dc:subject>Imaginary places -- Juvenile fiction</dc:subject>
+    <dc:subject>Alice (Fictitious character from Carroll) -- Juvenile fiction</dc:subject>
+    <dc:date>2008-06-27</dc:date>
+    <meta property="dcterms:modified">2023-04-01T07:32:49Z</meta>
+    <dc:source>https://www.gutenberg.org/files/11/11-h/11-h.htm</dc:source>
+    <meta name="cover" content="id-3324512750020140212"/>
+  </metadata>
+</package>

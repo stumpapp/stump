@@ -1,0 +1,164 @@
+import {
+	ARCHIVE_EXTENSION,
+	EBOOK_EXTENSION,
+	PDF_EXTENSION,
+	queryClient,
+	useMediaByIdQuery,
+	useSDK,
+	useUpdateMediaProgress,
+} from '@stump/client'
+import { useKeepAwake } from 'expo-keep-awake'
+import * as NavigationBar from 'expo-navigation-bar'
+import { useLocalSearchParams } from 'expo-router'
+import { useCallback, useEffect, useMemo } from 'react'
+
+import { EpubJSReader, ImageBasedReader, UnsupportedReader } from '~/components/book/reader'
+import { useAppState } from '~/lib/hooks'
+import { useReaderStore } from '~/stores'
+import { useBookPreferences, useBookTimer } from '~/stores/reader'
+
+type Params = {
+	id: string
+	// restart?: boolean
+}
+
+export default function Screen() {
+	useKeepAwake()
+	const { id: bookID } = useLocalSearchParams<Params>()
+	const { sdk } = useSDK()
+	const { media: book } = useMediaByIdQuery(bookID, {
+		suspense: true,
+		params: {
+			load_pages: true,
+		},
+	})
+	const {
+		preferences: { preferSmallImages, trackElapsedTime },
+	} = useBookPreferences(book?.id || '')
+	const { pause, resume, totalSeconds, isRunning, reset } = useBookTimer(book?.id || '', {
+		initial: book?.active_reading_session?.elapsed_seconds,
+		enabled: trackElapsedTime,
+	})
+
+	const { updateReadProgressAsync } = useUpdateMediaProgress(book?.id || '', {
+		retry: (attempts) => attempts < 3,
+		useErrorBoundary: false,
+	})
+	const onPageChanged = useCallback(
+		(page: number) => {
+			updateReadProgressAsync({
+				page,
+				elapsed_seconds: totalSeconds,
+			})
+		},
+		[totalSeconds, updateReadProgressAsync],
+	)
+
+	const setIsReading = useReaderStore((state) => state.setIsReading)
+	useEffect(() => {
+		setIsReading(true)
+		return () => {
+			setIsReading(false)
+		}
+	}, [setIsReading])
+
+	const setShowControls = useReaderStore((state) => state.setShowControls)
+	useEffect(() => {
+		return () => {
+			setShowControls(false)
+		}
+	}, [setShowControls])
+
+	const onFocusedChanged = useCallback(
+		(focused: boolean) => {
+			if (!focused) {
+				pause()
+			} else if (focused) {
+				resume()
+			}
+		},
+		[pause, resume],
+	)
+
+	const appState = useAppState({
+		onStateChanged: onFocusedChanged,
+	})
+	const showControls = useReaderStore((state) => state.showControls)
+	useEffect(() => {
+		if ((showControls && isRunning) || appState !== 'active') {
+			pause()
+		} else if (!showControls && !isRunning && appState === 'active') {
+			resume()
+		}
+	}, [showControls, pause, resume, isRunning, appState])
+
+	/**
+	 * Invalidate the book query when a reader is unmounted so that the book overview
+	 * is updated with the latest read progress
+	 */
+	useEffect(
+		() => {
+			NavigationBar.setVisibilityAsync('hidden')
+			return () => {
+				NavigationBar.setVisibilityAsync('visible')
+				queryClient.refetchQueries({ queryKey: [sdk.media.keys.getByID, bookID], exact: false })
+				queryClient.refetchQueries({ queryKey: [sdk.media.keys.inProgress], exact: false })
+			}
+		},
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[],
+	)
+
+	const imageSizes = useMemo(
+		() =>
+			book?.metadata?.page_dimensions?.dimensions
+				?.map(({ height, width }) => ({
+					height,
+					width,
+					ratio: width / height,
+				}))
+				.reduce(
+					(acc, ref, index) => {
+						acc[index] = ref
+						return acc
+					},
+					{} as Record<number, { height: number; width: number; ratio: number }>,
+				),
+		[book?.metadata?.page_dimensions?.dimensions],
+	)
+
+	if (!book) return null
+
+	if (book.extension.match(EBOOK_EXTENSION)) {
+		const currentProgressCfi = book.current_epubcfi || undefined
+		// const initialCfi = restart ? undefined : currentProgressCfi
+		return <EpubJSReader book={book} initialCfi={currentProgressCfi} /*incognito={incognito}*/ />
+	} else if (book.extension.match(ARCHIVE_EXTENSION) || book.extension.match(PDF_EXTENSION)) {
+		const currentProgressPage = book.current_page || 1
+		// const initialPage = restart ? 1 : currentProgressPage
+		const initialPage = currentProgressPage
+		return (
+			<ImageBasedReader
+				initialPage={initialPage}
+				book={{ id: book.id, name: book.metadata?.title || book.name, pages: book.pages }}
+				pageURL={(page: number) => sdk.media.bookPageURL(book.id, page)}
+				pageThumbnailURL={
+					preferSmallImages
+						? (page: number) =>
+								sdk.media.bookPageURL(book.id, page, {
+									height: 600,
+								})
+						: undefined
+				}
+				imageSizes={imageSizes}
+				onPageChanged={onPageChanged}
+				resetTimer={reset}
+			/>
+		)
+	}
+
+	// TODO: support native PDF reader?
+	// else if (book.extension.match(PDF_EXTENSION)) {}
+
+	return <UnsupportedReader />
+}

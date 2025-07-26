@@ -1,9 +1,9 @@
 {
 	"name": "@stump/monorepo",
-	"version": "0.0.10",
+	"version": "0.0.11",
 	"repository": "https://github.com/stumpapp/stump.git",
 	"author": "Aaron Leopold <aaronleopold1221@gmail.com>",
-	"license": "MIT",
+	"license": "SEE README.md",
 	"private": true,
 	"workspaces": [
 		"apps/*",
@@ -28,7 +28,9 @@
 		"dev:expo": "concurrently -n server,expo -c green.bold,blue.bold \"cargo watch --ignore core/prisma -x run -p stump_server\" \"yarn expo dev\"",
 		"prisma-studio": "npx prisma studio --schema core/prisma/schema.prisma",
 		"format": "lerna run format --stream --parallel",
-		"nuke": "lerna run nuke"
+		"nuke": "lerna run nuke",
+		"android": "expo run:android",
+		"ios": "expo run:ios"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.25.8",
@@ -38,7 +40,7 @@
 		"@typescript-eslint/parser": "^8.10.0",
 		"concurrently": "^8.2.2",
 		"eslint": "^9.13.0",
-		"eslint-config-prettier": "^9.1.0",
+		"eslint-config-prettier": "=9.1.2",
 		"eslint-plugin-prettier": "^5.2.1",
 		"eslint-plugin-react": "^7.37.1",
 		"eslint-plugin-react-hooks": "^5.0.0",
@@ -55,6 +57,9 @@
 		"typescript": "^5.6.3",
 		"typescript-eslint": "^8.10.0"
 	},
+	"resolutions": {
+		"@types/react": "=18.3.12"
+	},
 	"lint-staged": {
 		"*.{js,jsx,ts,tsx,md,json}": [
 			"prettier --config prettier.config.js --check"
@@ -66,7 +71,7 @@
 		]
 	},
 	"engines": {
-		"node": "^20.0.0"
+		"node": ">=20.0.0"
 	},
 	"packageManager": "yarn@1.22.21",
 	"yarn": {
@@ -76,5 +81,8 @@
 			]
 		}
 	},
-	"dependencies": {}
+	"dependencies": {
+		"expo": "~52.0.37",
+		"react": "18.3.1"
+	}
 }

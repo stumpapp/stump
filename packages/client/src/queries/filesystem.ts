@@ -1,7 +1,8 @@
-import { AxiosError } from 'axios'
+import { DirectoryListingInput } from '@stump/sdk'
+import { isAxiosError } from 'axios'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
-import { queryClient, useQuery } from '../client'
+import { queryClient, useInfiniteQuery, useQuery } from '../client'
 import { useSDK } from '../sdk'
 
 type PrefetchFileParams = {
@@ -54,6 +55,10 @@ export type DirectoryListingQueryParams = {
 	 */
 	initialPath?: string
 	/**
+	 * Additional parameters to pass to the directory listing query.
+	 */
+	ignoreParams?: Omit<DirectoryListingInput, 'path'>
+	/**
 	 * The minimum path that can be queried for. This is useful for enforcing no access to parent
 	 * directories relative to the enforcedRoot.
 	 */
@@ -76,6 +81,7 @@ export type DirectoryListingQueryParams = {
 export function useDirectoryListing({
 	enabled,
 	initialPath,
+	ignoreParams = { ignore_hidden: true },
 	enforcedRoot,
 	page = 1,
 	onGoForward,
@@ -86,18 +92,55 @@ export function useDirectoryListing({
 	const [history, setHistory] = useState(currentPath ? [currentPath] : [])
 	const [currentIndex, setCurrentIndex] = useState(0)
 
-	const { isLoading, error, data, refetch } = useQuery(
-		[sdk.filesystem.keys.listDirectory, currentPath, page],
-		async () => sdk.filesystem.listDirectory({ page, path: currentPath }),
+	const [initialPage, setInitialPage] = useState(() => page)
+
+	const { isLoading, error, data, refetch, ...rest } = useInfiniteQuery(
+		[sdk.filesystem.keys.listDirectory, currentPath, ignoreParams, initialPage],
+		async ({ pageParam }) =>
+			sdk.filesystem.listDirectory({ page: pageParam, path: currentPath, ...ignoreParams }),
 		{
 			// Do not run query until `enabled` aka modal is opened.
 			enabled,
 			keepPreviousData: true,
 			suspense: false,
+			getNextPageParam: (lastPage) => {
+				const totalPages = lastPage?._page?.total_pages
+				const currentPage = lastPage?._page?.current_page
+				if (totalPages == null || currentPage == null) {
+					return undefined
+				}
+				return currentPage < totalPages ? currentPage + 1 : undefined
+			},
+			getPreviousPageParam: (firstPage) => {
+				const currentPage = firstPage?._page?.current_page
+				if (currentPage == null) {
+					return undefined
+				}
+				return currentPage > 1 ? currentPage - 1 : undefined
+			},
 		},
 	)
 
-	const directoryListing = data?.data
+	/**
+	 * Whenever the current path changes, reset the initial page to 1. This is because
+	 * we are using a somewhat complex pagination state that is shared between different
+	 * directories. For example, if I scroll 4 pages deep into one directory, then switch
+	 * to another directory, the new directory should start at page 1.
+	 */
+	useEffect(() => {
+		setInitialPage(1)
+	}, [currentPath])
+
+	const directoryListing = data?.pages
+		.flatMap((page) => page.data)
+		.filter((payload) => 'files' in payload)
+		.reduce(
+			(acc, curr) => ({
+				files: [...acc.files, ...curr.files],
+				parent: curr.parent,
+			}),
+			{ files: [], parent: null },
+		)
 	const parent = directoryListing?.parent
 
 	useEffect(() => {
@@ -223,18 +266,42 @@ export function useDirectoryListing({
 	}, [history, currentIndex, onGoForward])
 
 	const errorMessage = useMemo(() => {
-		const err = error as AxiosError
+		if (!error) return null
 
-		if (err?.response?.data) {
-			if (err.response.status === 404) {
+		if (!isAxiosError(error)) {
+			console.error('An unknown error occurred', error)
+			return 'An unknown error occurred'
+		}
+
+		if (error?.response?.data) {
+			if (error.response.status === 404) {
 				return 'Directory not found'
+			} else if (error.response.status === 403) {
+				return 'Access to the directory was denied by the OS'
 			} else {
-				return err.response.data as string
+				console.error('An error occurred while fetching the directory listing:', error)
+				const message =
+					typeof error.response.data === 'string'
+						? error.response.data
+						: 'An error occurred while fetching the directory listing'
+				return message
 			}
 		}
 
 		return null
 	}, [error])
+
+	useEffect(() => {
+		if (!isAxiosError(error)) return
+		if (error.response?.status === 403) {
+			const parent = currentPath?.split('/').slice(0, -1).join('/') || null
+			if (parent) {
+				onGoBack?.(parent)
+				setCurrentPath(parent)
+				setCurrentIndex((prev) => Math.max(prev - 1, 0))
+			}
+		}
+	}, [error, currentPath, onGoBack, setCurrentPath, setCurrentIndex])
 
 	return {
 		canGoBack,
@@ -251,6 +318,8 @@ export function useDirectoryListing({
 		path: currentPath,
 		refetch,
 		setPath,
+		canLoadMore: rest.hasNextPage || false,
+		loadMore: rest.fetchNextPage,
 	}
 }
 

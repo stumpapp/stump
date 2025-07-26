@@ -149,7 +149,7 @@ Whether or not to enable the KoReader sync integration. This is a special integr
 
 | Type    | Default Value |
 | ------- | ------------- |
-| Boolean | `true`        |
+| Boolean | `false`       |
 
 ### ENABLE_UPLOAD
 

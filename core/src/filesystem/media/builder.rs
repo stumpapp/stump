@@ -4,10 +4,16 @@ use prisma_client_rust::chrono::{DateTime, FixedOffset, Utc};
 
 use crate::{
 	config::StumpConfig,
-	db::entity::{LibraryConfig, Media, Series},
-	filesystem::{process, FileParts, PathUtils, SeriesJson},
+	db::entity::{LibraryConfig, Media, MediaMetadata, Series},
+	filesystem::{
+		process,
+		scanner::{CustomVisit, CustomVisitResult},
+		FileParts, PathUtils, SeriesJson,
+	},
 	CoreError, CoreResult,
 };
+
+use super::{generate_hashes, process_metadata, ProcessedFileHashes};
 
 pub struct MediaBuilder {
 	path: PathBuf,
@@ -93,6 +99,28 @@ impl MediaBuilder {
 			modified_at: last_modified_at.map(|dt| dt.to_rfc3339()),
 			..Default::default()
 		})
+	}
+
+	pub fn regen_hashes(&self) -> CoreResult<ProcessedFileHashes> {
+		Ok(generate_hashes(
+			self.path.clone(),
+			self.library_config.clone().into(),
+		)?)
+	}
+
+	pub fn regen_meta(&self) -> CoreResult<Option<MediaMetadata>> {
+		Ok(process_metadata(self.path.clone())?)
+	}
+
+	pub fn custom_visit(self, config: CustomVisit) -> CoreResult<CustomVisitResult> {
+		let mut result = CustomVisitResult::default();
+		if config.regen_hashes {
+			result.hashes = Some(self.regen_hashes()?);
+		}
+		if config.regen_meta {
+			result.meta = self.regen_meta()?.map(Box::new);
+		}
+		Ok(result)
 	}
 }
 
@@ -197,5 +225,22 @@ mod tests {
 		let series_id = "series_id";
 
 		MediaBuilder::new(path, series_id, library_config, &StumpConfig::debug()).build()
+	}
+
+	#[test]
+	fn test_regen_hashes() {
+		let path = get_test_zip_path();
+		let path = Path::new(&path);
+		let library_config = LibraryConfig {
+			generate_file_hashes: true,
+			..Default::default()
+		};
+		let series_id = "series_id";
+
+		let builder =
+			MediaBuilder::new(path, series_id, library_config, &StumpConfig::debug());
+		let hashes = builder.regen_hashes();
+		assert!(hashes.is_ok());
+		assert!(hashes.unwrap().hash.is_some());
 	}
 }

@@ -364,6 +364,10 @@
 					"label": "Zpracování metadat",
 					"description": "Extrahovat metadata ze souborů knihovny a ukládat výsledky v databázi"
 				},
+				"watch": {
+					"label": "Sledování",
+					"description": "Sledujte adresář knihovny pro změny a podle toho aktualizujte databázi"
+				},
 				"generateFileHashes": {
 					"label": "Generovat hash souborů",
 					"description": "Generovat hash pro každý soubor v knihovně pro detekci duplicit"
@@ -421,7 +425,7 @@
 				},
 				{
 					"label": "Skenování",
-					"heading": "Chování skeneru",
+					"heading": "Skenování",
 					"description": "Nastavení týkající se skenování této knihovny"
 				},
 				{
@@ -452,6 +456,7 @@
 					"ignoreRules": "Pravidla Ignorování",
 					"convertRar": "Konverze RAR/CBR",
 					"deleteConversions": "Smazat převedené soubory",
+					"watch": "Sledovaný adresář pro změny",
 					"processMetadata": "Zpracování metadat",
 					"generateFileHashes": "Generovat hash souborů"
 				}
@@ -517,8 +522,72 @@
 			"description": "Výchozí nastavení čtečky pro knihy v této knihovně. Kniha může přepsat tato nastavení"
 		},
 		"options/scanning": {
-			"title": "Chování skeneru",
-			"description": "Nastavení týkající se skenování této knihovny"
+			"title": "Skenování",
+			"description": "Nastavení týkající se skenování této knihovny",
+			"sections": {
+				"configureScan": {
+					"heading": "Nastavit skenování",
+					"description": "Další možnosti nastavení skenování",
+					"form": {
+						"alert": "Toto přepíše odpovídající nastavení pro celou knihovnu",
+						"options": {
+							"forceRebuild": {
+								"label": "Vynutit obnovu",
+								"description": "Znovu sestavit každou knihu v knihovně na disku",
+								"alert": "Toto obnoví každou knihu v knihovně od začátku, včetně metadat a hashů"
+							},
+							"custom": {
+								"label": "Vlastní",
+								"description": "Přizpůsobit nastavení skenování",
+								"validation": {
+									"noSelection": "Alespoň jedna možnost musí být povolena"
+								}
+							},
+							"rebuildMeta": {
+								"label": "Obnovit metadata",
+								"description": "Obnovit metadata pro knihy v knihovně"
+							},
+							"regenHashes": {
+								"label": "Regenerovat kontrolní součty",
+								"description": "Regenerovat kontrolní součty pro knihy v knihovně"
+							}
+						}
+					}
+				},
+				"defaultScan": {
+					"heading": "Výchozí sken",
+					"description": "Výchozí sken vyhledává nový obsah ve vaší knihovně"
+				},
+				"history": {
+					"heading": "Historie skenů",
+					"description": "Historie všech skenů zaznamenaných pro tuto knihovnu",
+					"empty": "Pro tuto knihovnu nejsou zaznamenány žádné skeny",
+					"runScan": "Spustit skenování",
+					"inspect": "Zobrazit detaily",
+					"inspector": {
+						"title": "Záznam skenu",
+						"description": "Podrobný náhled tohoto záznamu skenu",
+						"fields": {
+							"library": "Knihovna",
+							"date": "Datum",
+							"config": "Nastavení",
+							"jobOutput": "Výstup",
+							"logs": "Logy"
+						},
+						"logsPresent": "Logy pro tento výstup jsou perzistentní",
+						"seeLogs": "Zobrazit logy"
+					},
+					"table": {
+						"columns": {
+							"timestamp": "Skenováno",
+							"config": "Nastavení"
+						},
+						"default": "Výchozí",
+						"custom": "Vlastní"
+					},
+					"clearHistory": "Smazat historii skenování"
+				}
+			}
 		},
 		"options/thumbnails": {
 			"title": "Náhledy",
@@ -1220,6 +1289,14 @@
 			"title": "Nastavení čtečky",
 			"description": "Výchozí možnosti pro čtečky Stump. Jsou vázány pouze na vaše aktuální zařízení",
 			"sections": {
+				"universal": {
+					"sections": {
+						"readingDirection": {
+							"label": "Směr čtení",
+							"description": "Směr, ve kterém bude čtečka pokračovat přes stránky"
+						}
+					}
+				},
 				"imageBasedBooks": {
 					"label": "Obrázkové knihy",
 					"description": "Komiksy, manga a další knihy založené na obrázcích",
@@ -1231,6 +1308,33 @@
 						"preloadBehindCount": {
 							"label": "Přednačíst počet stran vzad",
 							"description": "Počet stránek, které se mají přednačíst před aktuální stránkou"
+						}
+					}
+				},
+				"textBasedBooks": {
+					"label": "Čtečka e-knih",
+					"description": "Výchozí nastavení pro textové knihy",
+					"sections": {
+						"fontSize": {
+							"label": "Velikost písma",
+							"description": "Velikost písma použitého v čtečce"
+						},
+						"fontFamily": {
+							"label": "Rodina písem",
+							"description": "Písmo použité v čtečce"
+						},
+						"lineHeight": {
+							"label": "Výška řádku",
+							"description": "Výška řádků ve čtečce"
+						}
+					}
+				},
+				"data": {
+					"sections": {
+						"clearStore": {
+							"label": "Vymazat nastavení",
+							"description": "Resetovat všechna individuální nastavení knihy, která přepíší výchozí hodnoty",
+							"button": "Vymazat nastavení"
 						}
 					}
 				}
@@ -1388,6 +1492,12 @@
 						},
 						"emptyHeading": "Žádné záznamy k zobrazení",
 						"emptySubtitle": "Váš server je buď velmi zdravý, nebo velmi nezdravý"
+					},
+					"deleteLogs": {
+						"title": "Smazat logy",
+						"description": "Trvale odstranit všechny perzistentní logy z databáze",
+						"disclaimer": "Tuto akci nelze vrátit zpět",
+						"confirm": "Smazat logy"
 					}
 				},
 				"liveLogs": {
@@ -1862,6 +1972,7 @@
 		"goToServers": "Jít na servery",
 		"notReady": "Tato funkce není připravena",
 		"notUsedYet": "Zatím nepoužito",
-		"never": "Nikdy"
+		"never": "Nikdy",
+		"scan": "Skenovat"
 	}
 }

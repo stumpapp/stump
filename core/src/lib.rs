@@ -231,6 +231,10 @@ impl StumpCore {
 	pub async fn init_scheduler(&self) -> Result<Arc<JobScheduler>, CoreError> {
 		JobScheduler::init(self.ctx.arced()).await
 	}
+
+	pub async fn init_library_watcher(&self) -> CoreResult<()> {
+		self.ctx.library_watcher.init().await
+	}
 }
 
 #[allow(unused_imports)]
@@ -360,6 +364,10 @@ mod tests {
 		file.write_all(format!("{}\n\n", ts_export::<Library>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<LibraryPattern>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<LibraryScanMode>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<CustomVisit>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<ScanConfig>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<ScanOptions>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<LastLibraryScan>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<IgnoreRules>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<LibraryConfig>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<LibraryStats>()?).as_bytes())?;
@@ -405,6 +413,7 @@ mod tests {
 		file.write_all(format!("{}\n\n", ts_export::<SmartListItems>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<SmartList>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<SmartFilter<()>>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<TagSmartFilter>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<MediaSmartFilter>()?).as_bytes())?;
 		file.write_all(
 			format!("{}\n\n", ts_export::<MediaMetadataSmartFilter>()?).as_bytes(),
@@ -466,6 +475,9 @@ mod tests {
 
 		file.write_all(format!("{}\n\n", ts_export::<ImageResizeMode>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<ImageResizeOptions>()?).as_bytes())?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<ScaledDimensionResize>()?).as_bytes(),
+		)?;
 		file.write_all(format!("{}\n\n", ts_export::<ImageFormat>()?).as_bytes())?;
 		file.write_all(
 			format!("{}\n\n", ts_export::<ImageProcessorOptions>()?).as_bytes(),

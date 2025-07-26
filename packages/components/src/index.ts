@@ -37,6 +37,8 @@ export {
 	type SwitchProps,
 	TextArea,
 	type TextAreaProps,
+	WideSwitch,
+	type WideSwitchProps,
 } from './input'
 export { Link } from './link'
 export { NavigationMenu, navigationMenuTriggerStyle } from './navigation'

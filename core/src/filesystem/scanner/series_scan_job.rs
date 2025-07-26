@@ -2,6 +2,7 @@ use std::{collections::VecDeque, path::PathBuf};
 
 use serde::{Deserialize, Serialize};
 use specta::Type;
+use utoipa::ToSchema;
 
 use crate::{
 	db::{
@@ -21,6 +22,7 @@ use crate::{
 };
 
 use super::{
+	options::BookVisitOperation,
 	utils::{
 		handle_missing_media, handle_restored_media, safely_build_and_insert_media,
 		visit_and_update_media, MediaBuildOperation, MediaOperationOutput,
@@ -34,7 +36,7 @@ pub enum SeriesScanTask {
 	MarkMissingMedia(Vec<PathBuf>),
 	RestoreMedia(Vec<String>),
 	CreateMedia(Vec<PathBuf>),
-	VisitMedia(Vec<PathBuf>),
+	VisitMedia(Vec<(PathBuf, BookVisitOperation)>),
 }
 
 #[derive(Clone)]
@@ -62,7 +64,7 @@ impl SeriesScanJob {
 
 // TODO: emit progress events. This job isn't exposed in the UI yet, so it's not a big deal for now
 
-#[derive(Clone, Serialize, Deserialize, Default, Debug, Type)]
+#[derive(Clone, Serialize, Deserialize, Default, Debug, Type, ToSchema)]
 pub struct SeriesScanOutput {
 	/// The number of files to scan relative to the series root
 	total_files: u64,
@@ -150,7 +152,7 @@ impl JobExt for SeriesScanJob {
 				db: ctx.db.clone(),
 				ignore_rules,
 				max_depth,
-				options: self.options.clone(),
+				options: self.options,
 			},
 		)
 		.await?;
@@ -303,9 +305,9 @@ impl JobExt for SeriesScanJob {
 				output.created_media += created_media;
 				logs.extend(new_logs);
 			},
-			SeriesScanTask::VisitMedia(paths) => {
+			SeriesScanTask::VisitMedia(params) => {
 				ctx.report_progress(JobProgress::msg(
-					format!("Visiting {} media entities on disk", paths.len()).as_str(),
+					format!("Visiting {} media entities on disk", params.len()).as_str(),
 				));
 				let MediaOperationOutput {
 					updated_media,
@@ -318,7 +320,7 @@ impl JobExt for SeriesScanJob {
 						max_concurrency,
 					},
 					ctx,
-					paths,
+					params,
 				)
 				.await?;
 				ctx.send_batch(vec![

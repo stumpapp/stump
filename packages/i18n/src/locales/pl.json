@@ -364,6 +364,10 @@
 					"label": "Przetwarzaj metadane",
 					"description": "Wyodrębnij metadane z plików biblioteki i zapisz wyniki w bazie danych"
 				},
+				"watch": {
+					"label": "Obserwuj",
+					"description": "Obserwuj zmiany w katalogu biblioteki i zaktualizuj odpowiednio bazę danych"
+				},
 				"generateFileHashes": {
 					"label": "Generuj skróty plików",
 					"description": "Generuj skrót dla każdego pliku w bibliotece w celu wykrycia duplikatów"
@@ -421,7 +425,7 @@
 				},
 				{
 					"label": "Skanowanie",
-					"heading": "Zachowanie skanera",
+					"heading": "Skanowanie",
 					"description": "Ustawienia związane z tym, jak Stump skanuje tę bibliotekę"
 				},
 				{
@@ -452,6 +456,7 @@
 					"ignoreRules": "Reguły pomijania",
 					"convertRar": "Konwertuj RAR/CBR",
 					"deleteConversions": "Usuń przekonwertowane pliki",
+					"watch": "Obserwuj zmiany w katalogu",
 					"processMetadata": "Przetwarzaj metadane",
 					"generateFileHashes": "Generuj skróty plików"
 				}
@@ -517,8 +522,72 @@
 			"description": "Domyślne ustawienia czytnika dla książek w tej bibliotece. Każda książka może nadpisać te ustawienia"
 		},
 		"options/scanning": {
-			"title": "Zachowanie skanera",
-			"description": "Ustawienia związane z tym, jak Stump skanuje tę bibliotekę"
+			"title": "Skanowanie",
+			"description": "Ustawienia związane z tym, jak Stump skanuje tę bibliotekę",
+			"sections": {
+				"configureScan": {
+					"heading": "Skonfiguruj skanowanie",
+					"description": "Skanowanie z dodatkowymi opcjami dla bardziej precyzyjnej kontroli",
+					"form": {
+						"alert": "Opcje te zastąpią analogiczne ustawienia globalne biblioteki",
+						"options": {
+							"forceRebuild": {
+								"label": "Wymuś odbudowę",
+								"description": "Odbuduj każdą książkę w bibliotece na dysku",
+								"alert": "Spowoduje odbudowę każdej książki w bibliotece od zera, w tym jej metadane i skrót pliku"
+							},
+							"custom": {
+								"label": "Niestandardowe",
+								"description": "Dostosuj konfigurację skanowania",
+								"validation": {
+									"noSelection": "Przynajmniej jedna z opcji musi być włączona"
+								}
+							},
+							"rebuildMeta": {
+								"label": "Odbuduj metadane",
+								"description": "Odbuduj metadane książek w bibliotece"
+							},
+							"regenHashes": {
+								"label": "Wygeneruj ponownie skróty plików",
+								"description": "Wygeneruj ponownie skrót pliku dla książek w bibliotece"
+							}
+						}
+					}
+				},
+				"defaultScan": {
+					"heading": "Skanowanie domyślne",
+					"description": "Standardowy skan w celu zindeksowania nowej zawartości w bibliotece"
+				},
+				"history": {
+					"heading": "Historia skanowania",
+					"description": "Historia wszystkich skanów zapisanych dla tej biblioteki",
+					"empty": "Brak zapisanych skanów dla tej biblioteki",
+					"runScan": "Rozpocznij skanowanie",
+					"inspect": "Zobacz szczegóły",
+					"inspector": {
+						"title": "Rejestr skanów",
+						"description": "Szczegółowy widok tego zapisu skanu",
+						"fields": {
+							"library": "Biblioteka",
+							"date": "Data",
+							"config": "Konfiguracja",
+							"jobOutput": "Dane wyjściowe zadania",
+							"logs": "Logi"
+						},
+						"logsPresent": "Logi dla tego zadania zostały zapisane",
+						"seeLogs": "Zobacz logi"
+					},
+					"table": {
+						"columns": {
+							"timestamp": "Zeskanowano o",
+							"config": "Konfiguracja"
+						},
+						"default": "Domyślne",
+						"custom": "Niestandardowe"
+					},
+					"clearHistory": "Usuń historię skanowania"
+				}
+			}
 		},
 		"options/thumbnails": {
 			"title": "Miniatury",
@@ -1220,6 +1289,14 @@
 			"title": "Ustawienia czytnika",
 			"description": "Domyślne opcje dla czytników Stump. Są one powiązane jedynie z bieżącym urządzeniem",
 			"sections": {
+				"universal": {
+					"sections": {
+						"readingDirection": {
+							"label": "Kierunek czytania",
+							"description": "Kierunek, w jakim czytelnik będzie przechodził przez strony"
+						}
+					}
+				},
 				"imageBasedBooks": {
 					"label": "Książki obrazkowe",
 					"description": "Komiksy, manga i inne książki obrazkowe",
@@ -1231,6 +1308,33 @@
 						"preloadBehindCount": {
 							"label": "Ilość do wstępnego załadowania do tyłu",
 							"description": "Ilość stron do wstępnego załadowania do tyłu względem aktualnej strony"
+						}
+					}
+				},
+				"textBasedBooks": {
+					"label": "Czytnik e-book",
+					"description": "Ustawienia domyślne dla książek tekstowych",
+					"sections": {
+						"fontSize": {
+							"label": "Rozmiar czcionki",
+							"description": "Rozmiar czcionki używanej w czytniku"
+						},
+						"fontFamily": {
+							"label": "Krój czcionki",
+							"description": "Czcionka używana w czytniku"
+						},
+						"lineHeight": {
+							"label": "Wysokość wiersza",
+							"description": "Wysokość wierszy w czytniku"
+						}
+					}
+				},
+				"data": {
+					"sections": {
+						"clearStore": {
+							"label": "Wyczyść preferencje",
+							"description": "Zresetuj wszystkie indywidualne ustawienia książki, które nadpisują ustawienia domyślne",
+							"button": "Wyczyść preferencje"
 						}
 					}
 				}
@@ -1388,6 +1492,12 @@
 						},
 						"emptyHeading": "Brak pozycji do wyświetlenia",
 						"emptySubtitle": "Twój serwer jest bardzo zdrowy lub bardzo niezdrowy"
+					},
+					"deleteLogs": {
+						"title": "Usuń logi",
+						"description": "Trwale usuń wszystkie zachowane logi z bazy danych",
+						"disclaimer": "Tej czynności nie można cofnąć",
+						"confirm": "Usuń logi"
 					}
 				},
 				"liveLogs": {
@@ -1862,6 +1972,7 @@
 		"goToServers": "Przejdź do serwerów",
 		"notReady": "Ta funkcja nie jest jeszcze gotowa",
 		"notUsedYet": "Jeszcze nieużywane",
-		"never": "Nigdy"
+		"never": "Nigdy",
+		"scan": "Skanuj"
 	}
 }

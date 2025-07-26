@@ -364,6 +364,10 @@
 					"label": "メタデータ処理",
 					"description": "ライブラリファイルからメタデータを抽出し、結果をデータベースに保存します"
 				},
+				"watch": {
+					"label": "Watch",
+					"description": "Watch the library directory for changes and update the database accordingly"
+				},
 				"generateFileHashes": {
 					"label": "ファイルハッシュの生成",
 					"description": "ライブラリ内の各ファイルのハッシュを生成して重複を検出します"
@@ -421,7 +425,7 @@
 				},
 				{
 					"label": "スキャン中",
-					"heading": "スキャンの動作",
+					"heading": "Scanning",
 					"description": "Stumpがこのライブラリをスキャンする方法に関する設定"
 				},
 				{
@@ -452,6 +456,7 @@
 					"ignoreRules": "無視ルール",
 					"convertRar": "RAR/CBR 変換",
 					"deleteConversions": "変換されたファイルを削除",
+					"watch": "Watch directory for changes",
 					"processMetadata": "プロセスメタデータ",
 					"generateFileHashes": "ファイルハッシュを生成"
 				}
@@ -517,8 +522,72 @@
 			"description": "このライブラリの書籍に使用するデフォルトのリーダー設定。どの書籍でもこれらの設定を上書きできます"
 		},
 		"options/scanning": {
-			"title": "スキャンの動作",
-			"description": "Stumpがこのライブラリをスキャンする方法に関する設定"
+			"title": "Scanning",
+			"description": "Stumpがこのライブラリをスキャンする方法に関する設定",
+			"sections": {
+				"configureScan": {
+					"heading": "Configure scan",
+					"description": "A scan with additional options for more fine-grained control",
+					"form": {
+						"alert": "These will override corresponding library-wide settings",
+						"options": {
+							"forceRebuild": {
+								"label": "Force rebuild",
+								"description": "Rebuild every book in the library on disk",
+								"alert": "This will rebuild every book in the library from scratch, including metadata and hashes"
+							},
+							"custom": {
+								"label": "Custom",
+								"description": "Customize the scan configuration",
+								"validation": {
+									"noSelection": "At least one option must be enabled"
+								}
+							},
+							"rebuildMeta": {
+								"label": "Rebuild metadata",
+								"description": "Rebuild metadata for books in the library"
+							},
+							"regenHashes": {
+								"label": "Regenerate hashes",
+								"description": "Recreate hashes for books in the library"
+							}
+						}
+					}
+				},
+				"defaultScan": {
+					"heading": "Default scan",
+					"description": "A standard scan to index your library for new content"
+				},
+				"history": {
+					"heading": "Scan history",
+					"description": "The history of all scans recorded for this library",
+					"empty": "There are no scans recorded for this library",
+					"runScan": "Run scan",
+					"inspect": "See details",
+					"inspector": {
+						"title": "Scan record",
+						"description": "A detailed view of this scan record",
+						"fields": {
+							"library": "Library",
+							"date": "Date",
+							"config": "Config",
+							"jobOutput": "Job output",
+							"logs": "Logs"
+						},
+						"logsPresent": "Logs were persisted for this job",
+						"seeLogs": "See logs"
+					},
+					"table": {
+						"columns": {
+							"timestamp": "Scanned at",
+							"config": "Config"
+						},
+						"default": "Default",
+						"custom": "Custom"
+					},
+					"clearHistory": "Delete scan history"
+				}
+			}
 		},
 		"options/thumbnails": {
 			"title": "サムネイル",
@@ -596,360 +665,360 @@
 		"buttons": {
 			"report": "バグを報告",
 			"copy": "エラーの詳細をコピー",
-			"goHome": "Go Home"
+			"goHome": "ホームへ移動"
 		}
 	},
 	"homeScene": {
 		"continueReading": {
-			"title": "Continue reading",
+			"title": "続きを読む",
 			"emptyState": {
-				"heading": "Nothing to show",
-				"message": "Any in-progress books you start will show up here"
+				"heading": "表示するものがありません",
+				"message": "進行中の本はすべてここに表示されます"
 			}
 		},
 		"recentlyAddedSeries": {
-			"title": "Recently added series",
+			"title": "最近追加されたシリーズ",
 			"emptyState": {
-				"heading": "No series to display",
-				"message": "Any series you add to your libraries will show up here"
+				"heading": "表示するシリーズがありません",
+				"message": "ライブラリに追加したシリーズはすべてここに表示されます"
 			}
 		},
 		"recentlyAddedBooks": {
-			"title": "Recently added books",
+			"title": "最近追加された本",
 			"emptyState": {
-				"heading": "Nothing to show",
-				"message": "Any recent books you add will show up here"
+				"heading": "表示するものがありません",
+				"message": "最近追加した本はここに表示されます"
 			}
 		}
 	},
 	"seriesOverviewScene": {
 		"buttons": {
-			"continueReading": "Continue Reading",
-			"downloadSeries": "Download Series"
+			"continueReading": "続きを読む",
+			"downloadSeries": "シリーズをダウンロード"
 		}
 	},
 	"createOrUpdateSmartListForm": {
 		"validation": {
-			"nameTooShort": "Name must be at least 2 characters",
-			"nameTaken": "Cannot use this name"
+			"nameTooShort": "名前は2文字以上必要です",
+			"nameTaken": "この名前は使用できません"
 		},
 		"fields": {
 			"name": {
-				"label": "Name",
-				"placeholder": "My smart list",
-				"description": "Must be unique, but can be changed later"
+				"label": "名前",
+				"placeholder": "自分のスマートリスト",
+				"description": "一意である必要がありますが、後で変更できます"
 			},
 			"description": {
-				"label": "Description",
-				"placeholder": "A very intelligent list",
-				"description": "An optional description of your smart list"
+				"label": "説明",
+				"placeholder": "非常に賢いリスト",
+				"description": "スマートリストの説明（オプション）"
 			},
 			"visibility": {
-				"label": "Visibility",
+				"label": "公開範囲",
 				"options": {
 					"public": {
-						"label": "Public",
-						"description": "Accessible to all users on the server"
+						"label": "公開",
+						"description": "サーバー上のすべてのユーザーがアクセス可能"
 					},
 					"shared": {
-						"label": "Shared",
-						"description": "Specific users can access this smart list",
-						"createDisclaimer": "You can select who this list is shared with after creation"
+						"label": "共有",
+						"description": "特定のユーザーがこのスマートリストにアクセスできます",
+						"createDisclaimer": "作成後にこのリストを共有する相手を選択できます"
 					},
 					"private": {
-						"label": "Private",
-						"description": "Only you can access this smart list"
+						"label": "非公開",
+						"description": "あなただけがこのスマートリストにアクセスできます"
 					}
 				}
 			},
 			"queryBuilder": {
-				"uiPerformance": "This feature is missing performance optimizations on the UI and may be slow with filters which produce large result sets. This will be improved in the future",
+				"uiPerformance": "この機能にはUIのパフォーマンス最適化が欠けており、大きな結果セットを生成するフィルターでは遅くなる可能性があります。これは将来改善される予定です",
 				"rootJoiner": {
 					"and": {
-						"label": "AND",
-						"description": "All filter groups must be true for a book to be matched"
+						"label": "かつ",
+						"description": "書籍が一致するにはすべてのフィルタグループが真である必要があります"
 					},
 					"or": {
-						"label": "OR",
-						"description": "At least one filter group must be true for a book to be matched"
+						"label": "または",
+						"description": "書籍が一致するには少なくとも1つのフィルタグループが真である必要があります"
 					}
 				},
 				"groupJoiner": {
 					"and": {
-						"label": "AND",
-						"description": "All must be true"
+						"label": "かつ",
+						"description": "すべてが真である必要があります"
 					},
 					"or": {
-						"label": "OR",
-						"description": "At least one must be true"
+						"label": "または",
+						"description": "少なくとも1つは真である必要があります"
 					},
 					"not": {
-						"label": "NOT",
-						"description": "None can be true"
+						"label": "でない",
+						"description": "どれも真ではありません"
 					}
 				},
 				"grouping": {
-					"label": "Group by",
-					"description": "How the books in this smart list should be grouped",
+					"label": "グループ化",
+					"description": "このスマートリスト内の書籍をグループ化する方法",
 					"options": {
 						"by_books": {
-							"label": "None"
+							"label": "なし"
 						},
 						"by_series": {
-							"label": "Series"
+							"label": "シリーズ"
 						},
 						"by_library": {
-							"label": "Library"
+							"label": "ライブラリ"
 						}
 					}
 				},
 				"filters": {
-					"emptyState": "Add a group to get started",
+					"emptyState": "開始するにはグループを追加してください",
 					"actions": {
-						"addFilter": "Add filter",
-						"addGroup": "Add group",
-						"deleteFilter": "Delete filter",
-						"deleteGroup": "Delete group"
+						"addFilter": "フィルターを追加",
+						"addGroup": "グループを追加",
+						"deleteFilter": "フィルターを削除",
+						"deleteGroup": "グループを削除"
 					},
-					"is": "is",
+					"is": "等しい",
 					"fieldSelect": {
-						"placeholder": "Attribute",
+						"placeholder": "属性",
 						"source": {
-							"label": "Source",
-							"back": "Back",
+							"label": "ソース",
+							"back": "戻る",
 							"book": {
-								"label": "Book",
+								"label": "本",
 								"attributes": {
-									"name": "Filename",
-									"size": "Size",
-									"extension": "Extension",
-									"created_at": "Created at",
-									"updated_at": "Updated at",
-									"status": "Status",
-									"path": "Path",
-									"pages": "Pages",
-									"tags": "Tags"
+									"name": "ファイル名",
+									"size": "サイズ",
+									"extension": "拡張機能",
+									"created_at": "作成日",
+									"updated_at": "更新日",
+									"status": "状態",
+									"path": "パス",
+									"pages": "ページ",
+									"tags": "タグ"
 								}
 							},
 							"book_meta": {
-								"label": "Book Meta",
+								"label": "本のメタ情報",
 								"attributes": {
-									"title": "Title",
-									"summary": "Summary",
-									"notes": "Notes",
-									"genre": "Genre",
-									"writers": "Writers",
-									"pencillers": "Pencillers",
-									"inkers": "Inkers",
-									"letterers": "Letterers",
-									"editors": "Editors",
-									"publisher": "Publisher",
-									"colorists": "Colorist",
-									"cover_artists": "Cover artists",
-									"links": "Links",
-									"characters": "Characters",
-									"teams": "Teams"
+									"title": "タイトル",
+									"summary": "概要",
+									"notes": "ノート",
+									"genre": "ジャンル",
+									"writers": "ライター",
+									"pencillers": "ペンシラー",
+									"inkers": "インカー",
+									"letterers": "レタラー",
+									"editors": "編集者",
+									"publisher": "発行元",
+									"colorists": "カラーリスト",
+									"cover_artists": "カバーアーティスト",
+									"links": "リンク",
+									"characters": "キャラクター",
+									"teams": "チーム"
 								}
 							},
 							"series": {
-								"label": "Series",
+								"label": "シリーズ",
 								"attributes": {
-									"name": "Name",
-									"path": "Path"
+									"name": "名前",
+									"path": "パス"
 								}
 							},
 							"series_meta": {
-								"label": "Series Meta",
+								"label": "シリーズのメタ情報",
 								"attributes": {
-									"age_rating": "Age rating",
-									"title": "Title",
-									"summary": "Summary",
-									"meta_type": "Type",
-									"publisher": "Publisher",
-									"imprint": "Imprint",
-									"comicid": "Comic ID",
-									"booktype": "Book type",
-									"status": "Status",
-									"volume": "Volume"
+									"age_rating": "年齢制限",
+									"title": "タイトル",
+									"summary": "概要",
+									"meta_type": "タイプ",
+									"publisher": "発行元",
+									"imprint": "沿革",
+									"comicid": "コミックID",
+									"booktype": "本の種類",
+									"status": "状態",
+									"volume": "ボリューム"
 								}
 							},
 							"library": {
-								"label": "Library",
+								"label": "ライブラリ",
 								"attributes": {
-									"name": "Name",
-									"path": "Path"
+									"name": "名前",
+									"path": "パス"
 								}
 							}
 						}
 					},
 					"basicValue": {
-						"placeholder": "Value",
-						"date": "Date"
+						"placeholder": "値",
+						"date": "日付"
 					},
 					"rangeValue": {
 						"from": {
-							"date": "From date",
-							"number": "From"
+							"date": "開始日",
+							"number": "開始"
 						},
 						"to": {
-							"date": "To date",
+							"date": "終了日",
 							"number": "To"
 						},
-						"inclusive": "Inclusive"
+						"inclusive": "含む"
 					},
 					"listValue": {
-						"placeholder": "Add values",
-						"emptyState": "No values to display"
+						"placeholder": "値を追加",
+						"emptyState": "表示する値がありません"
 					}
 				}
 			}
 		}
 	},
 	"createSmartListScene": {
-		"heading": "Create smart list",
-		"subtitle": "On-the-fly list creation based on a set of filters",
+		"heading": "スマートリストを作成",
+		"subtitle": "一連のフィルターに基づいたオンザフライリスト作成",
 		"form": {
-			"stepLabel": "Step",
+			"stepLabel": "ステップ",
 			"steps": [
 				{
-					"label": "Basics",
-					"heading": "Basic Information",
-					"description": "The details of this smart list, including its name, description, and visibility"
+					"label": "基本",
+					"heading": "基本情報",
+					"description": "このスマートリストの詳細（名前、説明、表示設定など）"
 				},
 				{
-					"label": "Filters",
-					"heading": "Filters",
-					"description": "The filters to apply to this smart list"
+					"label": "フィルター",
+					"heading": "フィルター",
+					"description": "このスマートリストに適用するフィルター"
 				},
 				{
-					"label": "Review",
-					"heading": "Review",
-					"description": "Review your smart list settings before creating it"
+					"label": "レビュー",
+					"heading": "レビュー",
+					"description": "スマートリストを作成する前に設定を確認してください"
 				}
 			],
 			"review": {
-				"yes": "Yes",
-				"no": "No",
-				"none": "None",
+				"yes": "はい",
+				"no": "いいえ",
+				"none": "なし",
 				"labels": {
-					"name": "Name",
-					"description": "Description",
-					"visibility": "Visibility",
-					"grouping": "Group by"
+					"name": "名前",
+					"description": "説明",
+					"visibility": "公開範囲",
+					"grouping": "グループ化"
 				}
 			},
 			"buttons": {
-				"confirm": "Create list"
+				"confirm": "リストを作成"
 			}
 		}
 	},
 	"createOrUpdateApiKey": {
 		"validation": {
-			"futureDate": "Expiration date must be in the future"
+			"futureDate": "有効期限は未来の日付にする必要があります"
 		},
 		"fields": {
 			"name": {
-				"label": "Name",
-				"placeholder": "Koreader Sync"
+				"label": "名前",
+				"placeholder": "韓国語同期"
 			},
 			"expiration": {
-				"label": "Expiration",
-				"placeholder": "Never"
+				"label": "有効期限",
+				"placeholder": "まったくない"
 			},
 			"expires_at": {
-				"label": "Expires at",
-				"placeholder": "Never"
+				"label": "有効期限",
+				"placeholder": "まったくない"
 			},
 			"permissions": {
 				"inherit": {
-					"label": "Inherit permissions",
-					"description": "The same permissions as your account"
+					"label": "権限を継承する",
+					"description": "アカウントと同じ権限"
 				},
 				"explicit": {
-					"label": "Explicit permissions",
-					"description": "Choose the permissions this key should have"
+					"label": "明示的な権限",
+					"description": "このキーに必要な権限を選択してください"
 				}
 			}
 		},
-		"inheritDisclaimer": "This API key will inherit your full permissions, which means it can do anything you can do. Be careful with this setting"
+		"inheritDisclaimer": "このAPIキーはあなたの権限をすべて継承します。つまり、あなたができることはすべて実行できます。この設定には注意してください"
 	},
 	"userSmartListsScene": {
-		"heading": "Smart lists",
-		"subtitle": "Your favorite searches and filters saved for easy access",
-		"searchPlaceholder": "Filter smart lists",
+		"heading": "スマートリスト",
+		"subtitle": "お気に入りの検索条件とフィルターを保存して簡単にアクセスできるようにします",
+		"searchPlaceholder": "スマートリストでフィルター",
 		"buttons": {
-			"createSmartList": "Create smart list"
+			"createSmartList": "スマートリストを作成"
 		},
 		"list": {
 			"emptyState": {
-				"heading": "No smart lists to display",
-				"noListsMessage": "Create a smart list to get started",
-				"noMatchesMessage": "Try changing your search query"
+				"heading": "表示するスマートリストがありません",
+				"noListsMessage": "スマートリストを作成して開始",
+				"noMatchesMessage": "検索クエリを変更してみてください"
 			},
 			"card": {
 				"meta": {
 					"figures": {
-						"books": "book",
-						"series": "series",
-						"library": "library"
+						"books": "本",
+						"series": "シリーズ",
+						"library": "ライブラリ"
 					},
-					"matches": "Matches"
+					"matches": "マッチ"
 				}
 			}
 		}
 	},
 	"smartListSettingsScene": {
 		"sidebar": {
-			"basics": "Basics",
+			"basics": "基本",
 			"configuration": {
-				"label": "Configuration",
-				"access": "Access",
-				"filters": "Filters"
+				"label": "構成",
+				"access": "アクセス",
+				"filters": "フィルター"
 			},
 			"danger-zone": {
-				"delete": "Deletion",
-				"label": "Danger Zone"
+				"delete": "削除",
+				"label": "危険な操作"
 			}
 		},
 		"basics": {
-			"title": "Basic Information",
-			"description": "The details of this smart list, including its name and description"
+			"title": "基本情報",
+			"description": "このスマートリストの詳細（名前と説明を含む）"
 		},
 		"access": {
-			"title": "Access",
-			"description": "Control who can access this smart list",
+			"title": "アクセス",
+			"description": "このスマートリストにアクセスできるユーザーを制御します",
 			"sections": {
 				"visibility": {
 					"confirmation": {
-						"public": "This will make the list visible to everyone",
-						"private": "This will change the list to be private, making anyone with access unable to see it",
-						"shared": "You will need to share the list with specific users to give them access",
-						"fallback": "Are you sure you want to change the visibility of this list?"
+						"public": "これによりリストは誰でも閲覧できるようになります",
+						"private": "これによりリストは非公開になり、アクセス権を持つ誰もがリストを見ることができなくなります",
+						"shared": "アクセス権を付与するには特定のユーザーとリストを共有する必要があります",
+						"fallback": "このリストの表示設定を変更してもよろしいですか？"
 					}
 				},
 				"accessManager": {
-					"disclaimer": "Sharing is not ready yet. Please check back later!"
+					"disclaimer": "共有はまだ準備ができていません。後でもう一度確認してください！"
 				}
 			}
 		},
 		"filters": {
-			"title": "Filter Builder",
-			"description": "Manage the filters which construct this smart list"
+			"title": "フィルタービルダー",
+			"description": "このスマートリストを構成するフィルターを管理します"
 		},
 		"danger-zone/delete": {
-			"title": "Deletion Actions",
-			"description": "Permanently delete this smart list and all of its contents or certain resources",
+			"title": "削除操作",
+			"description": "このスマートリストとそのすべてのコンテンツまたは特定のリソースを完全に削除します",
 			"sections": {
 				"deleteList": {
-					"heading": "Delete list",
+					"heading": "リストを削除",
 					"description": [
-						"Permanently delete this smart list and all its contents.",
-						"This action cannot be undone"
+						"このスマートリストとそのすべての内容を完全に削除します。",
+						"この操作は元に戻せません"
 					],
 					"confirmation": {
-						"title": "Delete list",
-						"description": "Are you sure you want to delete this smart list?",
-						"confirm": "Delete list"
+						"title": "リストを削除",
+						"description": "このスマートリストを削除してもよろしいですか？",
+						"confirm": "リストを削除"
 					}
 				}
 			}
@@ -957,66 +1026,66 @@
 	},
 	"userSmartListScene": {
 		"navigation": {
-			"items": "Items",
-			"settings": "Settings"
+			"items": "アイテム",
+			"settings": "設定"
 		},
 		"layout": {
-			"missingIdError": "This scene requires an ID in the URL",
-			"smartListNotFound": "Smart list not found",
-			"viewCreateError": "Failed to create view",
-			"viewSaveError": "Failed to save view"
+			"missingIdError": "このシーンにはURLにIDが必要です",
+			"smartListNotFound": "スマートリストが見つかりません",
+			"viewCreateError": "ビューの作成に失敗しました",
+			"viewSaveError": "ビューの保存に失敗しました"
 		},
 		"header": {
-			"backLink": "Lists"
+			"backLink": "リスト"
 		},
 		"itemsScene": {
-			"smartListNotFound": "Smart list not found",
+			"smartListNotFound": "スマートリストが見つかりません",
 			"actionHeader": {
 				"viewSelector": {
-					"customView": "Custom view",
-					"defaultView": "Default view",
-					"noViewsSaved": "No views saved",
-					"selectView": "Select a saved view"
+					"customView": "カスタムビュー",
+					"defaultView": "デフォルトビュー",
+					"noViewsSaved": "ビューが保存されていません",
+					"selectView": "保存したビューを選択"
 				},
 				"filterDrawer": {
-					"heading": "Smart list filters",
-					"description": "Change the filters for this viewing session",
+					"heading": "スマートリストフィルター",
+					"description": "この表示セッションのフィルターを変更する",
 					"rawData": {
-						"heading": "Raw filter data",
-						"description": "This is how Stump will process the filters"
+						"heading": "生のフィルターデータ",
+						"description": "Stumpがフィルターを処理する方法"
 					},
 					"buttons": {
-						"save": "Save",
-						"cancel": "Cancel"
+						"save": "保存",
+						"cancel": "キャンセル"
 					}
 				},
 				"search": {
-					"placeholder": "Quick filter"
+					"placeholder": "クイックフィルター"
 				},
 				"viewManager": {
-					"updateSelected": "Update selected",
-					"create": "Create new view",
+					"updateSelected": "選択したものを更新",
+					"create": "新しいビューを作成",
 					"modal": {
 						"heading": {
-							"create": "Create view",
-							"update": "Update view"
+							"create": "ビューを作成",
+							"update": "ビューを更新"
 						},
 						"description": {
-							"create": "Create a new view for this smart list",
-							"update": "Update the view"
+							"create": "このスマートリストの新しいビューを作成します",
+							"update": "ビューを更新"
 						},
 						"createForm": {
 							"name": {
-								"label": "Name",
-								"placeholder": "My view",
-								"description": "A friendly name to uniquely identify this view"
+								"label": "名前",
+								"placeholder": "マイビュー",
+								"description": "このビューを一意に識別するためのフレンドリ名"
 							}
 						},
 						"updateForm": {
 							"name": {
-								"label": "Name",
-								"placeholder": "My view",
-								"description": "The updated name for this view, if desired"
+								"label": "名前",
+								"placeholder": "マイビュー",
+								"description": "必要に応じてこのビューの更新された名前"
 							}
 						}
 					}
@@ -1026,225 +1095,260 @@
 	},
 	"settingsScene": {
 		"navigation": {
-			"general": "General",
-			"logs": "Logs",
-			"server": "Server",
-			"jobs": "Jobs and Configuration",
-			"users": "User Management",
-			"desktop": "Desktop"
+			"general": "一般",
+			"logs": "ログ",
+			"server": "サーバー",
+			"jobs": "ジョブと設定",
+			"users": "ユーザー管理",
+			"desktop": "デスクトップ"
 		},
 		"sidebar": {
 			"application": {
-				"account": "Account",
-				"appearance": "Appearance",
-				"api keys": "API keys",
-				"reader": "Reader",
-				"desktop": "Desktop",
-				"label": "Application"
+				"account": "アカウント",
+				"appearance": "外観",
+				"api keys": "APIキー",
+				"reader": "リーダー",
+				"desktop": "デスクトップ",
+				"label": "アプリケーション"
 			},
 			"server": {
-				"general": "General",
-				"logs": "Logs",
-				"users": "Users",
-				"jobs": "Jobs",
-				"access": "Access",
-				"email": "Email",
-				"notifications": "Notifications",
-				"label": "Server"
+				"general": "一般",
+				"logs": "ログ",
+				"users": "ユーザー",
+				"jobs": "ジョブ",
+				"access": "アクセス",
+				"email": "メール",
+				"notifications": "通知",
+				"label": "サーバー"
 			}
 		},
 		"app/account": {
-			"helmet": "Account settings",
-			"title": "Account settings",
-			"description": "Settings related to your account",
+			"helmet": "アカウント設定",
+			"title": "アカウント設定",
+			"description": "アカウント関連の設定",
 			"sections": {
 				"account": {
 					"validation": {
-						"invalidUrl": "Please enter a valid URL",
-						"missingUsername": "Username is required"
+						"invalidUrl": "有効なURLを入力してください",
+						"missingUsername": "ユーザー名が必要です"
 					},
 					"labels": {
-						"username": "Username",
-						"password": "Password",
-						"activeChangesPrompt": "You have unsaved changes"
+						"username": "ユーザー名",
+						"password": "パスワード",
+						"activeChangesPrompt": "保存されていない変更があります"
 					},
 					"errors": {
-						"updateFailed": "A server error occurred while updating your profile. Please try again."
+						"updateFailed": "プロフィールの更新中にサーバーエラーが発生しました。もう一度やり直してください。"
 					},
 					"avatarPicker": {
-						"heading": "Set your Avatar Image",
-						"subtitle": "Stump supports custom avatars, which can be set by providing a URL to an image. Image uploads are not supported in order to reduce the amount of data stored on the server.",
-						"preview": "A preview will appear here once you have entered a URL.",
+						"heading": "アバター画像を設定",
+						"subtitle": "Stumpは画像にURLを提供することで設定できるカスタムアバターをサポートします。サーバーに保存されているデータの量を減らすために画像のアップロードはサポートされていません。",
+						"preview": "URLを入力するとプレビューが表示されます。",
 						"labels": {
-							"imageUrl": "Image URL",
-							"customAvatar": "Custom Avatar"
+							"imageUrl": "画像のURL",
+							"customAvatar": "カスタムアバター"
 						},
 						"buttons": {
-							"confirm": "Confirm Image",
-							"cancel": "Cancel",
-							"edit": "Edit",
-							"changeImage": "Change Image",
-							"removeImage": "Remove Image"
+							"confirm": "画像の確認",
+							"cancel": "キャンセル",
+							"edit": "編集",
+							"changeImage": "画像を変更",
+							"removeImage": "画像を削除"
 						}
 					},
 					"buttons": {
-						"confirm": "Save Changes"
+						"confirm": "変更を保存"
 					}
 				},
 				"locale": {
 					"localeSelector": {
-						"label": "Language"
+						"label": "言語"
 					},
-					"heading": "Language and locale",
+					"heading": "言語とロケール",
 					"subtitle": [
-						"Stump supports multiple languages and locales, set your preferences below. Please consider helping improve the quality of",
-						"Stump's translations",
-						"if you're able to!"
+						"Stumpは複数の言語とロケールをサポートしています。以下の設定を行ってください。品質向上のためにご検討ください",
+						"Stumpの翻訳",
+						"できれば！"
 					]
 				}
 			}
 		},
 		"app/appearance": {
-			"helmet": "Appearance",
-			"title": "Appearance",
-			"description": "Customize the look and feel of the application",
+			"helmet": "外観",
+			"title": "外観",
+			"description": "アプリケーションの外観と感触をカスタマイズします",
 			"sections": {
 				"themeSelect": {
-					"label": "Theme",
+					"label": "テーマ",
 					"description": [
-						"If you're interested in creating your own custom theme, check out the",
-						"documentation"
+						"独自のカスタムテーマの作成に興味がある場合は、",
+						"ドキュメント"
 					],
 					"options": {
-						"light": "Light",
-						"dark": "Dark",
-						"bronze": "Bronze light",
-						"ocean": "Ocean",
-						"autumn": "Autumn",
-						"cosmic": "Cosmic",
-						"pumpkin": "Pumpkin",
-						"matrix": "Matrix"
+						"light": "ライト",
+						"dark": "ダーク",
+						"bronze": "ブロンズライト",
+						"ocean": "オーシャン",
+						"autumn": "秋",
+						"cosmic": "宇宙",
+						"pumpkin": "パンプキン",
+						"matrix": "マトリックス"
 					}
 				},
 				"fontSelect": {
-					"label": "Font",
-					"description": "Customize the font used in the application"
+					"label": "フォント",
+					"description": "アプリケーションで使用されるフォントをカスタマイズします"
 				},
 				"navigationArrangement": {
-					"label": "Navigation arrangement",
+					"label": "ナビゲーションの調整",
 					"description": {
-						"sidebar": "Arrange and customize the navigation items in the sidebar",
-						"topbar": "Arrange and customize the navigation items in the topbar"
+						"sidebar": "サイドバー内のナビゲーション項目を整列しカスタマイズする",
+						"topbar": "トップバーのナビゲーション項目を整列しカスタマイズします"
 					},
-					"isLocked": "Arrangement is locked",
-					"lock": "Lock arrangement",
-					"unlock": "Unlock arrangement",
+					"isLocked": "配置はロックされています",
+					"lock": "調整をロック",
+					"unlock": "調整をロック解除",
 					"options": {
 						"Home": "Home",
-						"Explore": "Explore",
-						"Libraries": "Libraries",
-						"BookClubs": "Book clubs",
-						"SmartLists": "Smart lists"
+						"Explore": "エクスプローラ",
+						"Libraries": "ライブラリ",
+						"BookClubs": "読書クラブ",
+						"SmartLists": "スマートリスト"
 					},
 					"entityOptions": {
 						"createAction": {
-							"label": "Show create action",
-							"help": "Show the create action in the navigation"
+							"label": "作成アクションを表示",
+							"help": "ナビゲーションに作成アクションを表示"
 						},
 						"linkToAll": {
-							"label": "See all link",
-							"help": "A link to a page dedicated to viewing all items of this type"
+							"label": "すべてのリンクを表示",
+							"help": "このタイプのすべてのアイテムを表示する専用のページへのリンク"
 						}
 					}
 				}
 			}
 		},
 		"app/apiKeys": {
-			"helmet": "API keys",
-			"title": "API keys",
-			"description": "Manage your generated Stump API keys",
+			"helmet": "APIキー",
+			"title": "APIキー",
+			"description": "生成されたStump APIキーを管理します",
 			"shared": {
 				"fields": {
-					"name": "Name",
-					"expiration": "Expiration",
-					"last_used": "Last used",
-					"created": "Created",
-					"permissions": "Permissions",
-					"inherited": "Inherited",
-					"explicit": "Explicit"
+					"name": "名前",
+					"expiration": "有効期限",
+					"last_used": "最終使用日",
+					"created": "作成日",
+					"permissions": "権限",
+					"inherited": "継承されました",
+					"explicit": "明示的"
 				}
 			},
 			"sections": {
 				"inspector": {
-					"heading": "API key",
-					"description": "A detailed view of this key",
+					"heading": "APIキー",
+					"description": "このキーの詳細表示",
 					"unrestrictedKey": {
-						"heading": "Unrestricted key",
-						"description": "Since you are the server owner, this key has unrestricted access when configured to inherit permissions. Please be careful."
+						"heading": "無制限のキー",
+						"description": "あなたはサーバーの所有者であるため、このキーは許可を継承するように構成された場合、無制限のアクセス権を持っています。注意してください。"
 					}
 				},
 				"createKey": {
 					"modal": {
-						"trigger": "Create API key",
+						"trigger": "APIキーを作成",
 						"heading": {
-							"creating": "Create API key",
-							"created": "Created key"
+							"creating": "APIキーを作成",
+							"created": "キーの作成"
 						},
 						"description": {
-							"creating": "API keys are long-lived credentials that can be used to authenticate with the API",
-							"created": "Your new API key has been created. Save the secret somewhere safe, as it will not be shown again"
+							"creating": "APIキーはAPIで認証するために使用できる期限の長い資格情報です",
+							"created": "新しいAPIキーが作成されました。再度表示されませんので、どこかに安全な場所に保存してください"
 						},
-						"inheritDisclaimer": "This API key will inherit your full permissions, which means it can do anything you can do. Be careful with this setting",
-						"createdKey": "Created key",
-						"savedConfirm": "I saved my key",
-						"submit": "Create key"
+						"inheritDisclaimer": "このAPIキーはあなたの権限をすべて継承します。つまり、あなたができることはすべて実行できます。この設定には注意してください",
+						"createdKey": "キーの作成",
+						"savedConfirm": "キーを保存しました",
+						"submit": "キーを作成"
 					}
 				},
 				"table": {
-					"title": "Your keys",
-					"description": "These are the API keys you have created",
+					"title": "あなたのキー",
+					"description": "これらは作成したAPIキーです",
 					"actionMenu": {
-						"inspect": "Inspect",
-						"delete": "Delete"
+						"inspect": "検査する",
+						"delete": "削除"
 					},
 					"empty": {
-						"title": "You haven't created any keys yet",
-						"action": "Create an API key to get started"
+						"title": "まだキーを作成していません",
+						"action": "APIキーを作成して開始します"
 					},
-					"noExpiration": "No expiration set"
+					"noExpiration": "有効期限はありません"
 				}
 			}
 		},
 		"app/reader": {
-			"helmet": "Reader settings",
-			"title": "Reader settings",
-			"description": "Default options for the Stump readers. These are bound to your current device only",
+			"helmet": "リーダー設定",
+			"title": "リーダー設定",
+			"description": "Stumpリーダーのデフォルトオプション。これらは現在のデバイスのみにバインドされています",
 			"sections": {
+				"universal": {
+					"sections": {
+						"readingDirection": {
+							"label": "Reading direction",
+							"description": "The direction in which the reader will progress through pages"
+						}
+					}
+				},
 				"imageBasedBooks": {
-					"label": "Image-based books",
-					"description": "Comic books, manga, and other image-based books",
+					"label": "画像ベースの本",
+					"description": "コミック本、漫画、その他の画像ベースの本",
 					"sections": {
 						"preloadAheadCount": {
-							"label": "Preload ahead count",
-							"description": "The number of pages to preload ahead of the current page"
+							"label": "先行読み込み数",
+							"description": "現在のページの前に読み込むするページ数"
 						},
 						"preloadBehindCount": {
-							"label": "Preload behind count",
-							"description": "The number of pages to preload behind the current page"
+							"label": "Countの後ろに事前読み込みします",
+							"description": "現在のページの後ろに読み込むするページ数"
+						}
+					}
+				},
+				"textBasedBooks": {
+					"label": "Ebook reader",
+					"description": "Default settings for text-based books",
+					"sections": {
+						"fontSize": {
+							"label": "Font size",
+							"description": "The size of the font used in the reader"
+						},
+						"fontFamily": {
+							"label": "Font family",
+							"description": "The font used in the reader"
+						},
+						"lineHeight": {
+							"label": "Line height",
+							"description": "The height of the lines in the reader"
+						}
+					}
+				},
+				"data": {
+					"sections": {
+						"clearStore": {
+							"label": "Clear preferences",
+							"description": "Reset all individual book settings that override the defaults",
+							"button": "Clear preferences"
 						}
 					}
 				}
 			}
 		},
 		"app/desktop": {
-			"helmet": "Desktop settings",
-			"title": "Desktop settings",
-			"description": "Settings related to the Stump desktop application",
+			"helmet": "デスクトップの設定",
+			"title": "デスクトップの設定",
+			"description": "Stumpデスクトップアプリケーションに関連する設定",
 			"sections": {
 				"configuredServers": {
-					"label": "Configured servers",
-					"description": "The list of Stump servers you can connect to",
-					"getStarted": "Add a server to get started",
+					"label": "サーバーの設定",
+					"description": "接続できるStumpサーバーのリスト",
+					"getStarted": "開始するサーバーを追加します",
 					"unreachableServer": {
 						"tooltip": "Server unreachable"
 					},
@@ -1388,6 +1492,12 @@
 						},
 						"emptyHeading": "No logs to display",
 						"emptySubtitle": "Your server is either very healthy or very unhealthy"
+					},
+					"deleteLogs": {
+						"title": "Delete logs",
+						"description": "Permanently delete all persisted logs from the database",
+						"disclaimer": "This action cannot be undone",
+						"confirm": "Delete logs"
 					}
 				},
 				"liveLogs": {
@@ -1470,14 +1580,14 @@
 						"documentation"
 					],
 					"bookclub": {
-						"label": "Book Clubs",
+						"label": "読書クラブ",
 						"read": {
 							"label": "Access book club features",
-							"description": "Allows the user to access book club features, including viewing and joining book clubs"
+							"description": "ユーザーがブッククラブの表示や参加など、ブッククラブ機能にアクセスできるようにします"
 						},
 						"create": {
-							"label": "Create book clubs",
-							"description": "Allows the user to create new book clubs"
+							"label": "読書クラブを作成",
+							"description": "ユーザーが新しい読書クラブを作成できるようにします"
 						}
 					},
 					"feature": {
@@ -1494,8 +1604,8 @@
 					"file": {
 						"label": "File Management",
 						"explorer": {
-							"label": "File Explorer",
-							"description": "Allows the user to access the Library File Explorer.\nContent restriction is not supported when this feature is granted"
+							"label": "ファイルエクスプローラ",
+							"description": "ユーザーがさまざまなファイルエクスプローラーにアクセスできるようにします。\nこの機能が許可された場合、コンテンツの制限は保証できません"
 						},
 						"download": {
 							"label": "Download files",
@@ -1766,12 +1876,12 @@
 		"buttons": {
 			"home": "Home",
 			"libraries": "Libraries",
-			"books": "Explore",
-			"bookClubs": "Book clubs",
+			"books": "エクスプローラ",
+			"bookClubs": "読書クラブ",
 			"createLibrary": "Create library",
 			"noLibraries": "No libraries",
 			"createBookClub": "Create book club",
-			"noBookClubs": "No book clubs",
+			"noBookClubs": "読書クラブがありません",
 			"settings": "Settings",
 			"themeToggle": "Toggle Theme",
 			"goForward": "Go Forward",
@@ -1783,7 +1893,7 @@
 		},
 		"libraryOptions": {
 			"scanLibrary": "Scan",
-			"fileExplorer": "Files",
+			"fileExplorer": "ファイル",
 			"manageLibrary": "Manage",
 			"deleteLibrary": "Delete"
 		},
@@ -1862,6 +1972,7 @@
 		"goToServers": "Go to servers",
 		"notReady": "This feature is not ready",
 		"notUsedYet": "Not used yet",
-		"never": "Never"
+		"never": "Never",
+		"scan": "Scan"
 	}
 }

@@ -81,7 +81,7 @@ export const usePrefetchLibrarySeries = ({ id }: { id: string }) => {
 type SeriesByIdOptions = {
 	params?: SeriesFilter & SeriesQueryRelation
 } & QueryOptions<Series, AxiosError>
-export function useSeriesByIdQuery(id: string, { params, ...options }: SeriesByIdOptions = {}) {
+export function useSeriesByID(id: string, { params, ...options }: SeriesByIdOptions = {}) {
 	const { sdk } = useSDK()
 	const { data, ...ret } = useQuery(
 		[sdk.series.keys.getByID, id, params],
@@ -113,6 +113,27 @@ export function usePagedSeriesQuery(options: PageQueryOptions<Series> = {}) {
 	}
 }
 
+export function useSeriesBookCursorQuery({
+	id,
+	queryKey,
+	...options
+}: CursorQueryOptions<Media> & { id: string }) {
+	const { sdk } = useSDK()
+	const { data, ...restReturn } = useCursorQuery(
+		queryKey ?? [sdk.library.keys.getSeriesCursor, id],
+		(params) => sdk.series.getSeriesMedia(id, params),
+		options,
+	)
+
+	const media = data ? data.pages.flatMap((page) => page.data) : []
+
+	return {
+		data,
+		media,
+		...restReturn,
+	}
+}
+
 export const usePrefetchPagedSeries = () => {
 	const { sdk } = useSDK()
 	const prefetch = useCallback(
@@ -137,7 +158,11 @@ export const usePrefetchPagedSeries = () => {
 	return { prefetch }
 }
 
-export function useSeriesCursorQuery({ queryKey, ...options }: CursorQueryOptions<Series>) {
+type SeriesCursorQueryOptions = CursorQueryOptions<Series> & {
+	params?: SeriesFilter
+}
+
+export function useSeriesCursorQuery({ queryKey, ...options }: SeriesCursorQueryOptions) {
 	const { sdk } = useSDK()
 	const { data, ...restReturn } = useCursorQuery(
 		queryKey ?? [sdk.series.keys.getCursor],

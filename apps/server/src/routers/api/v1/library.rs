@@ -4,7 +4,7 @@ use axum::{
 	routing::{get, post, put},
 	Extension, Json, Router,
 };
-use chrono::Duration;
+use chrono::{DateTime, Duration, FixedOffset};
 use prisma_client_rust::{chrono::Utc, not, or, raw, Direction, PrismaValue};
 use serde::{Deserialize, Serialize};
 use serde_qs::axum::QsQuery;
@@ -20,13 +20,16 @@ use stump_core::{
 	db::{
 		entity::{
 			macros::{
+				library_idents_select, library_scan_details,
 				library_series_ids_media_ids_include, library_tags_select,
 				library_thumbnails_deletion_include, series_or_library_thumbnail,
 			},
 			FileStatus, Library, LibraryConfig, LibraryScanMode, LibraryStats, Media,
 			Series, TagName, User, UserPermission,
 		},
-		query::pagination::{Pageable, Pagination, PaginationQuery},
+		query::pagination::{
+			Pageable, PageableLibraries, PageableSeries, Pagination, PaginationQuery,
+		},
 		PrismaCountTrait,
 	},
 	filesystem::{
@@ -37,11 +40,11 @@ use stump_core::{
 			GenerateThumbnailOptions, ImageFormat, ImageProcessorOptions,
 			ThumbnailGenerationJob, ThumbnailGenerationJobParams,
 		},
-		scanner::{LibraryScanJob, ScanOptions},
+		scanner::{LastLibraryScan, LibraryScanJob, LibraryScanRecord, ScanOptions},
 		ContentType,
 	},
 	prisma::{
-		last_library_visit, library, library_config,
+		last_library_visit, library, library_config, library_scan_record,
 		media::{self, OrderByParam as MediaOrderByParam},
 		series::{self, OrderByParam as SeriesOrderByParam},
 		tag, user,
@@ -52,7 +55,8 @@ use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
 	filter::{
-		chain_optional_iter, FilterableQuery, LibraryFilter, MediaFilter, SeriesFilter,
+		chain_optional_iter, FilterableLibraryQuery, FilterableQuery, LibraryFilter,
+		MediaFilter, SeriesFilter,
 	},
 	middleware::auth::{auth_middleware, RequestContext},
 	routers::api::filters::{
@@ -74,10 +78,10 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 			"/libraries/last-visited",
 			Router::new()
 				.route("/", get(get_last_visited_library))
-				.route("/:id", put(update_last_visited_library)),
+				.route("/{id}", put(update_last_visited_library)),
 		)
 		.nest(
-			"/libraries/:id",
+			"/libraries/{id}",
 			Router::new()
 				.route(
 					"/",
@@ -89,6 +93,11 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				.route(
 					"/excluded-users",
 					get(get_library_excluded_users).post(update_library_excluded_users),
+				)
+				.route("/last-scan", get(get_library_last_scan))
+				.route(
+					"/scan-history",
+					get(get_library_scan_history).delete(delete_library_scan_history),
 				)
 				.route("/scan", post(scan_library))
 				.route("/clean", put(clean_library))
@@ -316,7 +325,7 @@ async fn get_libraries_stats(
 
 #[utoipa::path(
 	get,
-	path = "/api/v1/libraries/:id",
+	path = "/api/v1/libraries/{id}",
 	tag = "library",
 	params(
 		("id" = String, Path, description = "The library ID")
@@ -357,7 +366,7 @@ async fn get_library_by_id(
 // TODO: remove? Not used on client
 #[utoipa::path(
 	get,
-	path = "/api/v1/libraries/:id/series",
+	path = "/api/v1/libraries/{id}/series",
 	tag = "library",
 	params(
 		("id" = String, Path, description = "The library ID"),
@@ -541,7 +550,7 @@ pub(crate) async fn get_library_thumbnail(
 // TODO: ImageResponse for utoipa
 #[utoipa::path(
 	get,
-	path = "/api/v1/libraries/:id/thumbnail",
+	path = "/api/v1/libraries/{id}/thumbnail",
 	tag = "library",
 	params(
 		("id" = String, Path, description = "The library ID"),
@@ -614,7 +623,7 @@ pub struct PatchLibraryThumbnail {
 
 #[utoipa::path(
     patch,
-    path = "/api/v1/libraries/:id/thumbnail",
+    path = "/api/v1/libraries/{id}/thumbnail",
     tag = "library",
     params(
         ("id" = String, Path, description = "The ID of the library")
@@ -694,6 +703,7 @@ async fn patch_library_thumbnail(
 			image_options,
 			core_config: ctx.config.as_ref().clone(),
 			force_regen: true,
+			filename: Some(id.clone()),
 		},
 	)
 	.await?;
@@ -737,7 +747,8 @@ async fn replace_library_thumbnail(
 
 	// Note: I chose to *safely* attempt the removal as to not block the upload, however after some
 	// user testing I'd like to see if this becomes a problem. We'll see!
-	match remove_thumbnails(&[library_id.clone()], &ctx.config.get_thumbnails_dir()) {
+	match remove_thumbnails(&[library_id.clone()], &ctx.config.get_thumbnails_dir()).await
+	{
 		Ok(count) => tracing::info!("Removed {} thumbnails!", count),
 		Err(e) => tracing::error!(
 			?e,
@@ -758,7 +769,7 @@ async fn replace_library_thumbnail(
 /// Deletes all media thumbnails in a library by id, if the current user has access to it.
 #[utoipa::path(
 	delete,
-	path = "/api/v1/libraries/:id/thumbnail",
+	path = "/api/v1/libraries/{id}/thumbnail",
 	tag = "library",
 	params(
 		("id" = String, Path, description = "The library ID"),
@@ -797,7 +808,7 @@ async fn delete_library_thumbnails(
 		.flat_map(|s| s.media.into_iter().map(|m| m.id))
 		.collect::<Vec<String>>();
 
-	remove_thumbnails(&media_ids, &thumbnails_dir)?;
+	remove_thumbnails(&media_ids, &thumbnails_dir).await?;
 
 	Ok(Json(()))
 }
@@ -813,7 +824,7 @@ pub struct GenerateLibraryThumbnails {
 /// Generate thumbnails for all the media in a library by id, if the current user has access to it.
 #[utoipa::path(
 	post,
-	path = "/api/v1/libraries/:id/thumbnail/generate",
+	path = "/api/v1/libraries/{id}/thumbnail/generate",
 	tag = "library",
 	params(
 		("id" = String, Path, description = "The library ID"),
@@ -867,7 +878,7 @@ async fn generate_library_thumbnails(
 
 #[utoipa::path(
 	get,
-	path = "/api/v1/libraries/:id/excluded-users",
+	path = "/api/v1/libraries/{id}/excluded-users",
 	tag = "library",
 	params(
 		("id" = String, Path, description = "The library ID")
@@ -910,7 +921,7 @@ pub struct UpdateLibraryExcludedUsers {
 
 #[utoipa::path(
 	post,
-	path = "/api/v1/libraries/:id/excluded-users",
+	path = "/api/v1/libraries/{id}/excluded-users",
 	tag = "library",
 	params(
 		("id" = String, Path, description = "The library ID")
@@ -991,9 +1002,114 @@ async fn update_library_excluded_users(
 	Ok(Json(Library::from(updated_library)))
 }
 
+#[derive(Debug, Deserialize, Serialize, ToSchema, Type)]
+pub struct LastScanDetails {
+	last_scanned_at: Option<DateTime<FixedOffset>>,
+	last_scan: Option<LastLibraryScan>,
+}
+
+#[utoipa::path(
+	get,
+	path = "/api/v1/libraries/{id}/last-scan",
+	tag = "library",
+	params(
+		("id" = String, Path, description = "The library ID")
+	),
+	responses(
+		(status = 200, description = "Successfully fetched library last scan details", body = LastScanDetails),
+		(status = 401, description = "Unauthorized"),
+		(status = 404, description = "Library not found"),
+		(status = 500, description = "Internal server error")
+	)
+)]
+/// Get the last scan details for a library by id, if the current user has access to it.
+/// This includes the last scanned at timestamp and the last custom scan details.
+async fn get_library_last_scan(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	Extension(req): Extension<RequestContext>,
+) -> APIResult<Json<LastScanDetails>> {
+	let client = &ctx.db;
+
+	let record = client
+		.library()
+		.find_first(vec![
+			library::id::equals(id.clone()),
+			library_not_hidden_from_user_filter(req.user()),
+		])
+		.with(
+			library::scan_history::fetch(vec![])
+				.order_by(library_scan_record::timestamp::order(Direction::Desc)),
+		)
+		.select(library_scan_details::select())
+		.exec()
+		.await?
+		.ok_or(APIError::NotFound("Library not found".to_string()))?;
+
+	let last_scan = record
+		.scan_history
+		.first()
+		.cloned()
+		.map(LastLibraryScan::try_from)
+		.transpose()?;
+	let last_scanned_at = record.last_scanned_at;
+
+	Ok(Json(LastScanDetails {
+		last_scanned_at,
+		last_scan,
+	}))
+}
+
+async fn get_library_scan_history(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	Extension(req): Extension<RequestContext>,
+) -> APIResult<Json<Vec<LibraryScanRecord>>> {
+	let client = &ctx.db;
+
+	let records = client
+		.library_scan_record()
+		.find_many(vec![library_scan_record::library::is(vec![
+			library::id::equals(id.clone()),
+			library_not_hidden_from_user_filter(req.user()),
+		])])
+		.order_by(library_scan_record::timestamp::order(Direction::Desc))
+		.exec()
+		.await?;
+
+	let scan_history = records
+		.into_iter()
+		.map(LibraryScanRecord::try_from)
+		.collect::<Result<_, _>>()?;
+
+	Ok(Json(scan_history))
+}
+
+async fn delete_library_scan_history(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	Extension(req): Extension<RequestContext>,
+) -> APIResult<Json<()>> {
+	req.enforce_permissions(&[UserPermission::ManageLibrary])?;
+
+	let client = &ctx.db;
+
+	let affected_rows = client
+		.library_scan_record()
+		.delete_many(vec![library_scan_record::library::is(vec![
+			library::id::equals(id.clone()),
+			library_not_hidden_from_user_filter(req.user()),
+		])])
+		.exec()
+		.await?;
+	tracing::debug!(affected_rows, "Deleted library scan history records");
+
+	Ok(Json(()))
+}
+
 #[utoipa::path(
 	post,
-	path = "/api/v1/libraries/:id/scan",
+	path = "/api/v1/libraries/{id}/scan",
 	tag = "library",
 	responses(
 		(status = 200, description = "Successfully queued library scan"),
@@ -1004,6 +1120,7 @@ async fn update_library_excluded_users(
 )]
 /// Queue a ScannerJob to scan the library by id. The job, when started, is
 /// executed in a separate thread.
+#[tracing::instrument(skip(ctx, req))]
 async fn scan_library(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
@@ -1019,6 +1136,7 @@ async fn scan_library(
 			library::id::equals(id.clone()),
 			library_not_hidden_from_user_filter(&user),
 		])
+		.select(library_idents_select::select())
 		.exec()
 		.await?
 		.ok_or(APIError::NotFound(format!(
@@ -1032,6 +1150,7 @@ async fn scan_library(
 				"Failed to enqueue library scan job".to_string(),
 			)
 		})?;
+	tracing::debug!("Enqueued library scan job");
 
 	Ok(())
 }
@@ -1045,7 +1164,7 @@ pub struct CleanLibraryResponse {
 
 #[utoipa::path(
 	put,
-	path = "/api/v1/libraries/:id/clean",
+	path = "/api/v1/libraries/{id}/clean",
 	tag = "library",
 	params(
 		("id" = String, Path, description = "The library ID")
@@ -1167,14 +1286,19 @@ async fn clean_library(
 	let (response, media_to_delete_ids) = result?;
 
 	if !media_to_delete_ids.is_empty() {
-		image::remove_thumbnails(&media_to_delete_ids, &thumbnails_dir).map_or_else(
-			|error| {
-				tracing::error!(?error, "Failed to remove thumbnails for library media");
-			},
-			|_| {
-				tracing::debug!("Removed thumbnails for deleted media");
-			},
-		);
+		image::remove_thumbnails(&media_to_delete_ids, &thumbnails_dir)
+			.await
+			.map_or_else(
+				|error| {
+					tracing::error!(
+						?error,
+						"Failed to remove thumbnails for library media"
+					);
+				},
+				|_| {
+					tracing::debug!("Removed thumbnails for deleted media");
+				},
+			);
 	}
 
 	Ok(Json(response))
@@ -1245,6 +1369,8 @@ async fn create_library(
 	// TODO(prisma-nested-create): Refactor once nested create is supported
 	// https://github.com/Brendonovich/prisma-client-rust/issues/44
 	let library_config = input.config.unwrap_or_default();
+	let watch = library_config.watch;
+	let path = input.path.clone();
 	let transaction_result: Result<Library, APIError> = db
 		._transaction()
 		.with_timeout(Duration::seconds(30).num_milliseconds() as u64)
@@ -1289,6 +1415,7 @@ async fn create_library(
 					),
 					library_config::thumbnail_config::set(thumbnail_config),
 					library_config::ignore_rules::set(ignore_rules),
+					library_config::watch::set(library_config.watch),
 				])
 				.exec()
 				.await?;
@@ -1391,6 +1518,16 @@ async fn create_library(
 		})?;
 	}
 
+	if watch {
+		ctx.library_watcher
+			.add_watcher(path.into())
+			.await
+			.map_err(|e| {
+				error!(?e, "Failed to add library watcher");
+				APIError::InternalServerError("Failed to add library watcher".to_string())
+			})?;
+	}
+
 	Ok(Json(library))
 }
 
@@ -1419,7 +1556,7 @@ pub struct UpdateLibrary {
 // TODO(prisma-nested-create): Refactor once nested create is supported
 #[utoipa::path(
 	put,
-	path = "/api/v1/libraries/:id",
+	path = "/api/v1/libraries/{id}",
 	tag = "library",
 	request_body = UpdateLibrary,
 	params(
@@ -1463,6 +1600,8 @@ async fn update_library(
 		.ok_or(APIError::NotFound("Library not found".to_string()))?;
 	let existing_tags = existing_library.tags;
 
+	let watch = input.config.watch;
+	let path = input.path.clone();
 	let update_result: Result<Library, APIError> = db
 		._transaction()
 		.with_timeout(Duration::seconds(30).num_milliseconds() as u64)
@@ -1506,6 +1645,7 @@ async fn update_library(
 							library_config.generate_koreader_hashes,
 						),
 						library_config::ignore_rules::set(ignore_rules),
+						library_config::watch::set(library_config.watch),
 						library_config::thumbnail_config::set(thumbnail_config),
 					],
 				)
@@ -1625,12 +1765,32 @@ async fn update_library(
 		})?;
 	}
 
+	if watch {
+		ctx.library_watcher
+			.add_watcher(path.into())
+			.await
+			.map_err(|e| {
+				error!(?e, "Failed to add library watcher");
+				APIError::InternalServerError("Failed to add library watcher".to_string())
+			})?;
+	} else {
+		ctx.library_watcher
+			.remove_watcher(path.into())
+			.await
+			.map_err(|e| {
+				error!(?e, "Failed to remove library watcher");
+				APIError::InternalServerError(
+					"Failed to remove library watcher".to_string(),
+				)
+			})?;
+	}
+
 	Ok(Json(updated_library))
 }
 
 #[utoipa::path(
 	delete,
-	path = "/api/v1/libraries/:id",
+	path = "/api/v1/libraries/{id}",
 	tag = "library",
 	params(
 		("id" = String, Path, description = "The id of the library to delete")
@@ -1690,7 +1850,7 @@ async fn delete_library(
 			media_ids.len()
 		);
 
-		if let Err(err) = image::remove_thumbnails(&media_ids, &thumbnails_dir) {
+		if let Err(err) = image::remove_thumbnails(&media_ids, &thumbnails_dir).await {
 			error!("Failed to remove thumbnails for library media: {:?}", err);
 		} else {
 			debug!("Removed thumbnails for library media (if present)");
@@ -1767,7 +1927,7 @@ async fn get_library_stats(
 
 #[utoipa::path(
 	post,
-	path = "/api/v1/libraries/:id/analyze",
+	path = "/api/v1/libraries/{id}/analyze",
 	tag = "library",
 	params(
 		("id" = String, Path, description = "The ID of the library to analyze")

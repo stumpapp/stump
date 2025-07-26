@@ -65,7 +65,7 @@ export class JobAPI extends APIBase {
 	 * Update the config for the job scheduler
 	 */
 	async updateSchedulerConfig(config: UpdateSchedulerConfig): Promise<JobSchedulerConfig> {
-		const { data: updatedConfig } = await this.axios.put<JobSchedulerConfig>(
+		const { data: updatedConfig } = await this.axios.post<JobSchedulerConfig>(
 			jobURL('scheduler-config'),
 			config,
 		)

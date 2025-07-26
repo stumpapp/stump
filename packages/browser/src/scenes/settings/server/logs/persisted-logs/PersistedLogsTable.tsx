@@ -107,7 +107,7 @@ export default function PersistedLogsTable() {
 	const pageCount = pageData?.total_pages ?? 1
 
 	return (
-		<Card className="bg-background-surface p-1">
+		<Card>
 			<Table
 				sortable
 				columns={baseColumns}

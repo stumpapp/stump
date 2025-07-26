@@ -1,8 +1,7 @@
+import { WideSwitch } from '@stump/components'
 import { useCallback } from 'react'
 
 import { usePreferences } from '@/hooks'
-
-import PreferenceToggle from '../../PreferenceToggle'
 
 export default function HideScrollbarToggle() {
 	const {
@@ -19,11 +18,11 @@ export default function HideScrollbarToggle() {
 	}, [enable_hide_scrollbar, update])
 
 	return (
-		<PreferenceToggle
+		<WideSwitch
 			label="Hide scrollbar"
 			description="Some pages simply look better without a scrollbar, this setting will hide it when possible"
-			isChecked={enable_hide_scrollbar}
-			onToggle={handleToggle}
+			checked={enable_hide_scrollbar}
+			onCheckedChange={handleToggle}
 			formId="enable_hide_scrollbar"
 			title={
 				enable_hide_scrollbar

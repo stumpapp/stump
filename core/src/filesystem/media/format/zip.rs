@@ -322,8 +322,11 @@ impl FileProcessor for ZipProcessor {
 #[cfg(test)]
 mod tests {
 	use super::*;
-	use crate::filesystem::media::tests::{
-		get_nested_macos_compressed_cbz_path, get_test_cbz_path, get_test_zip_path,
+	use crate::filesystem::{
+		media::tests::{
+			get_nested_macos_compressed_cbz_path, get_test_cbz_path, get_test_zip_path,
+		},
+		tests::get_test_complex_zip_path,
 	};
 
 	#[test]
@@ -426,5 +429,24 @@ mod tests {
 		assert!(content_types
 			.values()
 			.all(|ct| ct.mime_type() == "image/jpeg"));
+	}
+
+	#[test]
+	fn test_zip_with_complex_file_tree() {
+		let path = get_test_complex_zip_path();
+
+		let config = StumpConfig::debug();
+		let processed_file = ZipProcessor::process(
+			&path,
+			FileProcessorOptions {
+				process_metadata: true,
+				..Default::default()
+			},
+			&config,
+		)
+		.expect("Failed to process ZIP file");
+
+		// See https://github.com/stumpapp/stump/issues/641
+		assert!(processed_file.metadata.is_some());
 	}
 }

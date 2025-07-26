@@ -1,14 +1,15 @@
+import { FlashList } from '@shopify/flash-list'
 import { useSDK } from '@stump/client'
 import { OPDSFeedGroup } from '@stump/sdk'
-import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
 import { useMemo } from 'react'
-import { FlatList, Pressable, View } from 'react-native'
+import { Pressable, View } from 'react-native'
 
 import { useDisplay } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 
 import { useActiveServer } from '../activeServer'
+import { Image } from '../Image'
 import { Text } from '../ui'
 import EmptyFeed from './EmptyFeed'
 import { FeedComponentOptions } from './types'
@@ -68,7 +69,7 @@ export default function PublicationGroup({
 				)}
 			</View>
 
-			<FlatList
+			<FlashList
 				data={publications}
 				keyExtractor={({ metadata }) => metadata.title}
 				renderItem={({ item: publication }) => {
@@ -120,10 +121,8 @@ export default function PublicationGroup({
 					)
 				}}
 				horizontal
-				pagingEnabled
-				initialNumToRender={10}
-				maxToRenderPerBatch={10}
 				showsHorizontalScrollIndicator={false}
+				estimatedItemSize={itemWidth + 4}
 			/>
 
 			{!publications.length && <EmptyFeed message="No publications in group" />}

@@ -16,16 +16,16 @@
 			},
 			"labels": {
 				"username": "Username",
-				"password": "Password"
+				"password": "암호"
 			},
 			"buttons": {
-				"createAccount": "Create Account",
-				"login": "Log in"
+				"createAccount": "계정 생성",
+				"login": "로그인"
 			}
 		},
 		"toasts": {
-			"loggingIn": "Logging in...",
-			"loggedIn": "Welcome back!",
+			"loggingIn": "로그인 중...",
+			"loggedIn": "다시 오신 것을 환영합니다!",
 			"loggedInFirstTime": "Welcome!",
 			"registering": "Registering...",
 			"registered": "Registered!",
@@ -44,9 +44,9 @@
 		"fileInformation": {
 			"heading": "File Information",
 			"labels": {
-				"fileSize": "File Size",
-				"fileType": "File Type",
-				"fileLocation": "File Location",
+				"fileSize": "파일 크기",
+				"fileType": "파일 형식",
+				"fileLocation": "파일 위치",
 				"fileChecksum": "Checksum"
 			}
 		},
@@ -364,6 +364,10 @@
 					"label": "Process metadata",
 					"description": "Extract any metadata from library files and store the results in the database"
 				},
+				"watch": {
+					"label": "Watch",
+					"description": "Watch the library directory for changes and update the database accordingly"
+				},
 				"generateFileHashes": {
 					"label": "Generate file hashes",
 					"description": "Generate a hash for each file in the library to detect duplicates"
@@ -452,6 +456,7 @@
 					"ignoreRules": "Ignore rules",
 					"convertRar": "Convert RAR/CBR",
 					"deleteConversions": "Delete converted files",
+					"watch": "Watch directory for changes",
 					"processMetadata": "Process metadata",
 					"generateFileHashes": "Generate file hashes"
 				}
@@ -1174,7 +1179,7 @@
 			"description": "Customize the look and feel of the application",
 			"sections": {
 				"themeSelect": {
-					"label": "Theme",
+					"label": "테마",
 					"description": [
 						"If you're interested in creating your own custom theme, check out the",
 						"documentation"
@@ -1317,6 +1322,10 @@
 						"fontFamily": {
 							"label": "Font family",
 							"description": "The font used in the reader"
+						},
+						"lineHeight": {
+							"label": "Line height",
+							"description": "The height of the lines in the reader"
 						}
 					}
 				},

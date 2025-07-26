@@ -18,10 +18,11 @@ export default function EpubNavigationControls({ children }: Props) {
 	} = useEpubReaderContext()
 	const { visible, onPaginateBackward, onPaginateForward, setVisible } = useEpubReaderControls()
 	const {
-		bookPreferences: { readingDirection },
+		bookPreferences: { readingDirection, readingMode },
 	} = useBookPreferences({ book })
 
 	const invertControls = readingDirection === 'rtl'
+	const isVerticalScrolling = readingMode === 'continuous:vertical'
 
 	/**
 	 * A callback to navigate backward in the book, wrt the natural reading
@@ -59,14 +60,20 @@ export default function EpubNavigationControls({ children }: Props) {
 	 * Note that the swipe handler function semantics are inverted wrt the reading direction.
 	 */
 	const swipeHandlers = useSwipeable({
-		onSwipedLeft: onForwardNavigation,
-		onSwipedRight: onBackwardNavigation,
+		onSwipedLeft: readingMode === 'continuous:vertical' ? undefined : onForwardNavigation,
+		onSwipedRight: readingMode === 'continuous:vertical' ? undefined : onBackwardNavigation,
+		onSwipedUp: readingMode === 'continuous:vertical' ? onForwardNavigation : undefined,
+		onSwipedDown: readingMode === 'continuous:vertical' ? onBackwardNavigation : undefined,
 		preventScrollOnSwipe: true,
 	})
 
 	return (
 		<div className="relative flex h-full w-full flex-1 items-center gap-1" aria-hidden="true">
-			<div className="fixed left-2 z-[100] hidden h-1/2 w-12 items-center md:flex">
+			<div
+				className={cx('fixed left-2 z-[100] hidden h-1/2 w-12 items-center md:flex', {
+					hidden: isVerticalScrolling,
+				})}
+			>
 				<ControlButton className={cx({ hidden: !visible })} onClick={onBackwardNavigation}>
 					<ChevronLeft className="h-5 w-5" />
 				</ControlButton>
@@ -77,7 +84,11 @@ export default function EpubNavigationControls({ children }: Props) {
 				onClick={() => setVisible(false)}
 			/>
 			{children}
-			<div className="fixed right-2 z-[100] hidden h-1/2 w-12 items-center justify-end md:flex">
+			<div
+				className={cx('fixed right-2 z-[100] hidden h-1/2 w-12 items-center justify-end md:flex', {
+					hidden: isVerticalScrolling,
+				})}
+			>
 				<ControlButton className={cx({ hidden: !visible })} onClick={onForwardNavigation}>
 					<ChevronRight className="h-5 w-5" />
 				</ControlButton>

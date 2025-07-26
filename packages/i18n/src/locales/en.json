@@ -1345,6 +1345,10 @@
 						"fontFamily": {
 							"label": "Font family",
 							"description": "The font used in the reader"
+						},
+						"lineHeight": {
+							"label": "Line height",
+							"description": "The height of the lines in the reader"
 						}
 					}
 				},

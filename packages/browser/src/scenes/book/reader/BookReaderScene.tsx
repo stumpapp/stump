@@ -20,6 +20,7 @@ export const BOOK_READER_SCENE_QUERY = graphql(`
 				percentageCompleted
 				epubcfi
 				page
+				elapsedSeconds
 			}
 			libraryConfig {
 				defaultReadingImageScaleFit

@@ -1,4 +1,5 @@
 import { useSeriesBookCursorQuery, useSeriesByID } from '@stump/client'
+import { Media } from '@stump/sdk'
 import { useLocalSearchParams } from 'expo-router'
 import { useCallback } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -20,6 +21,13 @@ export default function Screen() {
 		}
 	}, [hasNextPage, fetchNextPage])
 
+	const renderItem = useCallback(
+		({ item: book, index }: { item: Media; index: number }) => (
+			<BookGridItem book={book} index={index} />
+		),
+		[],
+	)
+
 	if (!series) return null
 
 	const seriesName = series.metadata?.title || series.name
@@ -29,7 +37,8 @@ export default function Screen() {
 			<ImageGrid
 				header={seriesName}
 				data={media || []}
-				renderItem={({ item: book }) => <BookGridItem book={book} />}
+				renderItem={renderItem}
+				keyExtractor={(book) => book.id}
 				onEndReached={onEndReached}
 				onRefresh={refetch}
 				isRefetching={isRefetching}

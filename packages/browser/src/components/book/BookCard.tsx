@@ -104,7 +104,7 @@ export default function BookCard({
 					<Text size="xs" variant="muted">
 						{percentage}%
 					</Text>
-					{!isEpubProgress && (
+					{!isEpubProgress && percentage < 100 && (
 						<Text size="xs" variant="muted">
 							{pagesLeft} {pluralize('page', pagesLeft)} left
 						</Text>

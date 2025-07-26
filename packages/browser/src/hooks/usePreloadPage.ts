@@ -50,7 +50,7 @@ export function usePreloadPage({ pages, urlBuilder, onStoreDimensions }: Params)
 					if (image.width && image.height) {
 						onStoreDimensions?.(page, {
 							height: image.height,
-							isPortrait: image.height > image.width,
+							ratio: image.width / image.height,
 							width: image.width,
 						})
 					}

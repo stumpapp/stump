@@ -1,11 +1,14 @@
 import { useSDK } from '@stump/client'
+import { generatePageSets } from '@stump/sdk'
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
+import { useWindowSize } from 'rooks'
 
 import { usePreloadPage } from '@/hooks/usePreloadPage'
 import paths from '@/paths'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
+import { useBookTimer } from '@/stores/reader'
 
 import ReaderContainer from './container'
 import { ImageBaseReaderContext, ImagePageDimensionRef, ImageReaderBookRef } from './context'
@@ -32,7 +35,7 @@ type Props = {
 	 * The initial page to start on, if any. This is 1-indexed, and defaults to 1 if not provided.
 	 */
 	initialPage?: number
-	onProgress?: (page: number) => void
+	onProgress?: (page: number, elapsedSeconds: number) => void
 }
 
 // TODO: support read time
@@ -52,13 +55,69 @@ export default function ImageBasedReader({
 	 * The current page of the reader
 	 */
 	const [currentPage, setCurrentPage] = useState(initialPage || 1)
-	const [pageDimensions, setPageDimensions] = useState<Record<number, ImagePageDimensionRef>>({})
+
+	// TODO(graphql): FIX ALL THIS
+	const [pageDimensions, setPageDimensions] = useState<Record<number, ImagePageDimensionRef>>(
+		() =>
+			media?.metadata?.page_dimensions?.dimensions
+				?.map(({ height, width }) => ({
+					height,
+					width,
+					ratio: width / height,
+				}))
+				.reduce(
+					(acc, ref, index) => {
+						acc[index] = ref
+						return acc
+					},
+					{} as Record<number, { height: number; width: number; ratio: number }>,
+				) ?? {},
+	)
 
 	const {
-		settings: { preload },
-		bookPreferences: { readingMode },
+		settings: { preload, showToolBar },
+		bookPreferences: {
+			doublePageBehavior = 'auto',
+			readingMode,
+			readingDirection,
+			trackElapsedTime,
+		},
 		setSettings,
 	} = useBookPreferences({ book: media })
+
+	const { pause, resume, totalSeconds, isRunning, reset } = useBookTimer(media?.id || '', {
+		initial: media?.active_reading_session?.elapsed_seconds,
+		enabled: trackElapsedTime,
+	})
+
+	useEffect(() => {
+		if (showToolBar && isRunning) {
+			pause()
+		} else if (!showToolBar && !isRunning) {
+			resume()
+		}
+	}, [showToolBar, isRunning, pause, resume])
+
+	const windowSize = useWindowSize()
+
+	const deviceOrientation = useMemo(
+		() => ((windowSize.innerWidth || 0) > (windowSize.innerHeight || 0) ? 'landscape' : 'portrait'),
+		[windowSize],
+	)
+
+	const pages = media.pages
+	const pageSets = useMemo(() => {
+		const autoButOff = doublePageBehavior === 'auto' && deviceOrientation === 'portrait'
+		const modeForceOff = readingMode === 'continuous:vertical'
+		if (doublePageBehavior === 'off' || autoButOff || modeForceOff) {
+			return Array.from({ length: pages }, (_, i) => [i])
+		}
+		const sets = generatePageSets({ imageSizes: pageDimensions, pages: pages })
+		if (readingDirection === 'rtl') {
+			return sets.reverse()
+		}
+		return sets
+	}, [doublePageBehavior, pages, pageDimensions, deviceOrientation, readingMode, readingDirection])
 
 	/**
 	 * A callback to update the read progress, if the reader is not in incognito mode.
@@ -66,11 +125,16 @@ export default function ImageBasedReader({
 	const handleUpdateProgress = useCallback(
 		(page: number) => {
 			if (!isIncognito) {
-				onProgress?.(page)
+				onProgress?.(page, totalSeconds)
 			}
 		},
-		[onProgress, isIncognito],
+		[onProgress, isIncognito, totalSeconds],
 	)
+
+	// 			updateReadProgress({ page, elapsed_seconds: totalSeconds })
+	// 	}
+	// },
+	// [updateReadProgress, isIncognito, totalSeconds],
 
 	/**
 	 * A callback to handle when the page changes. This will update the URL to reflect the new page
@@ -114,8 +178,9 @@ export default function ImageBasedReader({
 	 * prevent wait times for the next page to load.
 	 */
 	usePreloadPage({
-		onStoreDimensions: (page, dimensions) =>
-			setPageDimensions((prev) => ({ ...prev, [page]: dimensions })),
+		onStoreDimensions: (page, dimensions) => {
+			setPageDimensions((prev) => ({ ...prev, [page - 1]: dimensions }))
+		},
 		pages: pagesToPreload,
 		urlBuilder: getPageUrl,
 	})
@@ -177,6 +242,8 @@ export default function ImageBasedReader({
 				pageDimensions,
 				setCurrentPage: handleChangePage,
 				setDimensions: setPageDimensions,
+				pageSets,
+				resetTimer: reset,
 			}}
 		>
 			<ReaderContainer>{renderReader()}</ReaderContainer>

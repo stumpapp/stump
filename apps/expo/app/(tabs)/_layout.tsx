@@ -2,13 +2,20 @@ import { Tabs } from 'expo-router'
 
 import { AddServerDialog } from '~/components/savedServer'
 import { icons } from '~/lib'
+import { useColors } from '~/lib/constants'
 import { cn } from '~/lib/utils'
 
 const { Server, HardDriveDownload, Settings } = icons
 
 export default function TabLayout() {
+	const colors = useColors()
+
 	return (
-		<Tabs screenOptions={{ tabBarActiveTintColor: 'white' }}>
+		<Tabs
+			screenOptions={{
+				tabBarActiveTintColor: colors.foreground.DEFAULT,
+			}}
+		>
 			<Tabs.Screen
 				name="index"
 				options={{

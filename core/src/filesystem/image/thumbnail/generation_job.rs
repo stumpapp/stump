@@ -239,20 +239,26 @@ pub async fn safely_generate_batch(
 
 	let mut processed_count = 0;
 
-	for chunk in books.chunks(batch_size) {
+	for (chunk_index, chunk) in books.chunks(batch_size).enumerate() {
 		let mut chunk_futures = FuturesUnordered::new();
+
+		tracing::trace!(
+			chunk_index,
+			chunk_size = chunk.len(),
+			"Processing thumbnail generation batch"
+		);
 
 		// Note: This originally spawned a bunch of futures all at once and then just
 		// kept them waiting until the semaphore was available. I've refactored this
 		// to use chunking as a potential solve for https://github.com/stumpapp/stump/issues/671.
 		// TODO: Port this to the develop branch and ask for feedback on whether it improves the situation.
 		// TODO: ^ Depending on outcome, definitely need to revisit ALL of the scanner logic since it also had that pattern
-		for book in chunk {
+		for (book_index, book) in chunk.iter().enumerate() {
 			let options = options.clone();
 			let path = book.path.clone();
 
 			let future = async move {
-				tracing::trace!(?path, "Starting thumbnail generation");
+				tracing::trace!(?path, "(Chunk {chunk_index}, Book {book_index}) Starting thumbnail generation");
 
 				let result = generate_book_thumbnail(book, options)
 					.await

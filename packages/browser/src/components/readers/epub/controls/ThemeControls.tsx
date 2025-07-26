@@ -4,7 +4,9 @@ import { Paintbrush } from 'lucide-react'
 import ControlButton from './ControlButton'
 import FontFamily from './FontFamily'
 import FontSizeControl from './FontSizeControl'
+import LineHeightControl from './LineHeightControl'
 import ReadingDirection from './ReadingDirection'
+import ReadingMode from './ReadingMode'
 
 export default function ThemeControls() {
 	return (
@@ -20,7 +22,9 @@ export default function ThemeControls() {
 
 				<FontFamily />
 				<FontSizeControl />
+				<LineHeightControl />
 				<ReadingDirection />
+				<ReadingMode />
 			</Dialog.Content>
 		</Dialog>
 	)
@@ -39,7 +43,9 @@ export default function ThemeControls() {
 				className="z-[101] flex flex-col gap-4 bg-background-surface"
 			>
 				<FontSizeControl />
+				<LineHeightControl />
 				<ReadingDirection />
+				<ReadingMode />
 			</Popover.Content>
 		</Popover>
 	)

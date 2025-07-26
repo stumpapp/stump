@@ -28,7 +28,9 @@
 		"dev:expo": "concurrently -n server,expo -c green.bold,blue.bold \"bacon run-server --headless\" \"yarn expo dev\"",
 		"prisma-studio": "npx prisma studio --schema core/prisma/schema.prisma",
 		"format": "lerna run format --stream --parallel",
-		"nuke": "concurrently -n root,monorepo -c green.bold,blue.bold \"yarn exec rimraf node_modules\" \"lerna run nuke\""
+		"nuke": "lerna run nuke",
+		"android": "expo run:android",
+		"ios": "expo run:ios"
 	},
 	"devDependencies": {
 		"@0no-co/graphqlsp": "^1.12.16",
@@ -39,7 +41,7 @@
 		"@typescript-eslint/parser": "^8.10.0",
 		"concurrently": "^8.2.2",
 		"eslint": "^9.13.0",
-		"eslint-config-prettier": "^9.1.0",
+		"eslint-config-prettier": "=9.1.2",
 		"eslint-plugin-prettier": "^5.2.1",
 		"eslint-plugin-react": "^7.37.1",
 		"eslint-plugin-react-hooks": "^5.0.0",

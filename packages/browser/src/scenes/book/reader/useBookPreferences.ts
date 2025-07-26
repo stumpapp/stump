@@ -15,7 +15,10 @@ type Params = {
 	book: ImageReaderBookRef
 }
 
-type Return = Omit<ReaderStore, 'bookPreferences' | 'setBookPreferences' | 'clearStore'> & {
+type Return = Omit<
+	ReaderStore,
+	'bookPreferences' | 'setBookPreferences' | 'clearStore' | 'bookTimers' | 'setBookTimer'
+> & {
 	bookPreferences: BookPreferences
 	setBookPreferences: (preferences: Partial<BookPreferences>) => void
 }

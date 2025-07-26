@@ -379,6 +379,10 @@
 					"label": "Process metadata",
 					"description": "Extract any metadata from library files and store the results in the database"
 				},
+				"watch": {
+					"label": "Watch",
+					"description": "Watch the library directory for changes and update the database accordingly"
+				},
 				"generateFileHashes": {
 					"label": "Generate file hashes",
 					"description": "Generate a hash for each file in the library to detect duplicates"
@@ -467,6 +471,7 @@
 					"ignoreRules": "Ignore rules",
 					"convertRar": "Convert RAR/CBR",
 					"deleteConversions": "Delete converted files",
+					"watch": "Watch directory for changes",
 					"processMetadata": "Process metadata",
 					"generateFileHashes": "Generate file hashes"
 				}
@@ -1332,6 +1337,10 @@
 						"fontFamily": {
 							"label": "Font family",
 							"description": "The font used in the reader"
+						},
+						"lineHeight": {
+							"label": "Line height",
+							"description": "The height of the lines in the reader"
 						}
 					}
 				},

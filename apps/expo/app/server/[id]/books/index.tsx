@@ -1,4 +1,5 @@
 import { useMediaCursorQuery } from '@stump/client'
+import { Media } from '@stump/sdk'
 import { useCallback } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
@@ -16,12 +17,19 @@ export default function Screen() {
 		}
 	}, [hasNextPage, fetchNextPage])
 
+	const renderItem = useCallback(
+		({ item: book, index }: { item: Media; index: number }) => (
+			<BookGridItem book={book} index={index} />
+		),
+		[],
+	)
+
 	return (
 		<SafeAreaView className="flex-1 bg-background">
 			<ImageGrid
 				header="Books"
 				data={media || []}
-				renderItem={({ item: book }) => <BookGridItem book={book} />}
+				renderItem={renderItem}
 				keyExtractor={(book) => book.id}
 				onEndReached={onFetchMore}
 				onRefresh={refetch}

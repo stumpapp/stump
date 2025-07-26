@@ -2,17 +2,12 @@ import { Label, NativeSelect } from '@stump/components'
 import { ReadingDirection } from '@stump/graphql'
 import { useCallback } from 'react'
 
-import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
+type Props = {
+	direction: ReadingDirection
+	onChange: (direction: ReadingDirection) => void
+}
 
-import { useImageBaseReaderContext } from '../context'
-
-export default function ReadingDirectionSelect() {
-	const { book } = useImageBaseReaderContext()
-	const {
-		bookPreferences: { readingDirection },
-		setBookPreferences,
-	} = useBookPreferences({ book })
-
+export default function ReadingDirectionSelect({ direction, onChange }: Props) {
 	/**
 	 * A change handler for the reading direction select, asserting that the value
 	 * is either 'ltr' or 'rtl' before setting the reading direction in the book preferences.
@@ -20,12 +15,12 @@ export default function ReadingDirectionSelect() {
 	const handleChange = useCallback(
 		(e: React.ChangeEvent<HTMLSelectElement>) => {
 			if (isReadingDirection(e.target.value)) {
-				setBookPreferences({ readingDirection: e.target.value })
+				onChange(e.target.value)
 			} else {
 				console.warn(`Invalid reading direction: ${e.target.value}`)
 			}
 		},
-		[setBookPreferences],
+		[onChange],
 	)
 
 	return (
@@ -38,7 +33,7 @@ export default function ReadingDirectionSelect() {
 					{ label: 'Left to right', value: 'LTR' },
 					{ label: 'Right to left', value: 'RTL' },
 				]}
-				value={readingDirection}
+				value={direction}
 				onChange={handleChange}
 				className="mt-1.5"
 			/>
@@ -47,4 +42,4 @@ export default function ReadingDirectionSelect() {
 }
 
 const isReadingDirection = (value: string): value is ReadingDirection =>
-	value === 'LTR' || value === 'RTL'
+	value === ReadingDirection.Ltr || value === ReadingDirection.Rtl

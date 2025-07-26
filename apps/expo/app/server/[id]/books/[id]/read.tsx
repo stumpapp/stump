@@ -10,7 +10,7 @@ import {
 import { useKeepAwake } from 'expo-keep-awake'
 import * as NavigationBar from 'expo-navigation-bar'
 import { useLocalSearchParams } from 'expo-router'
-import { useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 
 import { EpubJSReader, ImageBasedReader, UnsupportedReader } from '~/components/book/reader'
 import { useAppState } from '~/lib/hooks'
@@ -109,6 +109,24 @@ export default function Screen() {
 		[],
 	)
 
+	const imageSizes = useMemo(
+		() =>
+			book?.metadata?.page_dimensions?.dimensions
+				?.map(({ height, width }) => ({
+					height,
+					width,
+					ratio: width / height,
+				}))
+				.reduce(
+					(acc, ref, index) => {
+						acc[index] = ref
+						return acc
+					},
+					{} as Record<number, { height: number; width: number; ratio: number }>,
+				),
+		[book?.metadata?.page_dimensions?.dimensions],
+	)
+
 	if (!book) return null
 
 	if (book.extension.match(EBOOK_EXTENSION)) {
@@ -132,11 +150,7 @@ export default function Screen() {
 								})
 						: undefined
 				}
-				imageSizes={book.metadata?.page_dimensions?.dimensions?.map(({ height, width }) => ({
-					height,
-					width,
-					ratio: width / height,
-				}))}
+				imageSizes={imageSizes}
 				onPageChanged={onPageChanged}
 				resetTimer={reset}
 			/>

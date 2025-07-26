@@ -364,6 +364,10 @@
 					"label": "Behandla metadata",
 					"description": "Extrahera all metadata från bibliotekets filer och lagra resultaten i databasen"
 				},
+				"watch": {
+					"label": "Watch",
+					"description": "Watch the library directory for changes and update the database accordingly"
+				},
 				"generateFileHashes": {
 					"label": "Generera fil-hashar",
 					"description": "Generera en hash för varje fil i biblioteket för att upptäcka dubbletter"
@@ -452,6 +456,7 @@
 					"ignoreRules": "Ignorera regler",
 					"convertRar": "Konvertera RAR/CBR",
 					"deleteConversions": "Radera konverterade filer",
+					"watch": "Watch directory for changes",
 					"processMetadata": "Behandla metadata",
 					"generateFileHashes": "Generera fil-hashar"
 				}
@@ -1317,6 +1322,10 @@
 						"fontFamily": {
 							"label": "Typsnittsfamilj",
 							"description": "Typsnittet som används i läsaren"
+						},
+						"lineHeight": {
+							"label": "Line height",
+							"description": "The height of the lines in the reader"
 						}
 					}
 				},

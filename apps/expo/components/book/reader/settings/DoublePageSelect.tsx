@@ -13,8 +13,6 @@ type Props = {
 	onChange: (behavior: DoublePageBehavior) => void
 }
 
-// TODO: Remove hardcoded disabled values and double page modes
-
 export default function DoublePageSelect({ behavior, onChange }: Props) {
 	const [isOpen, setIsOpen] = useState(false)
 
@@ -35,7 +33,6 @@ export default function DoublePageSelect({ behavior, onChange }: Props) {
 						key="auto"
 						value={behavior === 'auto'}
 						onValueChange={() => onChange('auto')}
-						disabled
 					>
 						<DropdownMenu.ItemTitle>Auto</DropdownMenu.ItemTitle>
 					</DropdownMenu.CheckboxItem>
@@ -44,7 +41,6 @@ export default function DoublePageSelect({ behavior, onChange }: Props) {
 						key="always"
 						value={behavior === 'always'}
 						onValueChange={() => onChange('always')}
-						disabled
 					>
 						<DropdownMenu.ItemTitle>Always</DropdownMenu.ItemTitle>
 					</DropdownMenu.CheckboxItem>
@@ -53,7 +49,6 @@ export default function DoublePageSelect({ behavior, onChange }: Props) {
 						key="off"
 						value={behavior === 'off'}
 						onValueChange={() => onChange('off')}
-						disabled
 					>
 						<DropdownMenu.ItemTitle>Off</DropdownMenu.ItemTitle>
 					</DropdownMenu.CheckboxItem>

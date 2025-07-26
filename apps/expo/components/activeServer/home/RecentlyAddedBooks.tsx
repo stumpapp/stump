@@ -1,13 +1,16 @@
+import { FlashList } from '@shopify/flash-list'
 import { useRecentlyAddedMediaQuery } from '@stump/client'
-import { useCallback } from 'react'
-import { FlatList, View } from 'react-native'
+import { Media } from '@stump/sdk'
+import { memo, useCallback } from 'react'
+import { View } from 'react-native'
 
 import { BookListItem } from '~/components/book'
 import { Heading, Text } from '~/components/ui'
+import { useListItemSize } from '~/lib/hooks'
 
 import { useActiveServer } from '../context'
 
-export default function RecentlyAddedBooks() {
+function RecentlyAddedBooks() {
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
@@ -18,29 +21,33 @@ export default function RecentlyAddedBooks() {
 		useErrorBoundary: false,
 	})
 
-	const handleEndReached = useCallback(() => {
+	const onEndReached = useCallback(() => {
 		if (hasNextPage) {
 			fetchNextPage()
 		}
 	}, [hasNextPage, fetchNextPage])
 
+	const { width, gap } = useListItemSize()
+
+	const renderItem = useCallback(({ item }: { item: Media }) => <BookListItem book={item} />, [])
+
 	return (
 		<View className="flex gap-4">
 			<Heading size="lg">Recently Added Books</Heading>
 
-			<FlatList
+			<FlashList
 				data={media}
 				keyExtractor={({ id }) => id}
-				renderItem={({ item: book }) => <BookListItem book={book} />}
+				renderItem={renderItem}
 				horizontal
-				pagingEnabled
-				initialNumToRender={10}
-				maxToRenderPerBatch={10}
+				estimatedItemSize={width + gap}
+				onEndReached={onEndReached}
+				onEndReachedThreshold={0.85}
 				showsHorizontalScrollIndicator={false}
-				onEndReached={handleEndReached}
-				onEndReachedThreshold={0.75}
 				ListEmptyComponent={<Text className="text-foreground-muted">No books recently added</Text>}
 			/>
 		</View>
 	)
 }
+
+export default memo(RecentlyAddedBooks)

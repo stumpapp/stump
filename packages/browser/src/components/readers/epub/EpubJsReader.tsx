@@ -1,5 +1,11 @@
 import { BookPreferences, queryClient, useGraphQL, useGraphQLMutation, useSDK } from '@stump/client'
-import { Bookmark, EpubJsReaderQuery, EpubProgressInput, graphql } from '@stump/graphql'
+import {
+	Bookmark,
+	EpubJsReaderQuery,
+	EpubProgressInput,
+	graphql,
+	ReadingMode,
+} from '@stump/graphql'
 import { EpubContent } from '@stump/sdk'
 import { Book, Rendition } from 'epubjs'
 import uniqby from 'lodash/uniqBy'
@@ -230,7 +236,15 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 				rendition.themes.register('stump-light', applyTheme({}, preferences))
 				rendition.themes.select('stump-light')
 			}
-			rendition.direction(preferences.readingDirection)
+			rendition.direction(preferences.readingDirection === 'RTL' ? 'rtl' : 'ltr')
+			// Set flow based on reading mode
+			if (preferences.readingMode === ReadingMode.ContinuousVertical) {
+				rendition.flow('scrolled-doc')
+			} else {
+				// Default to paginated for 'paged' mode
+				rendition.flow('paginated')
+			}
+
 			if (preferences.fontSize) {
 				rendition.themes.fontSize(`${preferences.fontSize}px`)
 			}

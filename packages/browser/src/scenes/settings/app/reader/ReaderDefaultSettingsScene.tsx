@@ -7,6 +7,7 @@ import { useReaderStore } from '@/stores'
 
 import DefaultFontFamily from './DefaultFontFamily'
 import DefaultFontSize from './DefaultFontSize'
+import DefaultLineHeight from './DefaultLineHeight'
 import DefaultReadingDirection from './DefaultReadingDirection'
 import PreloadPagesSection from './PreloadPagesSection'
 
@@ -53,6 +54,7 @@ export default function ReaderDefaultSettingsScene() {
 					<div className="flex flex-col gap-y-1.5 md:max-w-md">
 						<DefaultFontFamily />
 						<DefaultFontSize />
+						<DefaultLineHeight />
 					</div>
 				</div>
 

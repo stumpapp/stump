@@ -25,7 +25,7 @@ export default function ImageReaderGlobalSettingsDialog({ isOpen, onClose }: Pro
 	} = useImageBasedReader()
 
 	const ref = useRef<BottomSheetModal | null>(null)
-	const snapPoints = useMemo(() => ['95%'], [])
+	const snapPoints = useMemo(() => ['100%'], [])
 	const animatedIndex = useSharedValue<number>(0)
 	const animatedPosition = useSharedValue<number>(0)
 
@@ -77,7 +77,10 @@ export default function ImageReaderGlobalSettingsDialog({ isOpen, onClose }: Pro
 					/>
 				)}
 			>
-				<BottomSheet.View className="flex-1 items-start bg-background p-6">
+				<BottomSheet.ScrollView
+					className="flex-1 bg-background p-6"
+					contentContainerStyle={{ alignItems: 'flex-start' }}
+				>
 					<View className="w-full flex-1 gap-8">
 						<View className="gap-1">
 							<View className="flex flex-row items-center justify-between">
@@ -111,7 +114,7 @@ export default function ImageReaderGlobalSettingsDialog({ isOpen, onClose }: Pro
 								: {})}
 						/>
 					</View>
-				</BottomSheet.View>
+				</BottomSheet.ScrollView>
 			</BottomSheet.Modal>
 		</View>
 	)

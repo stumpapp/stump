@@ -39,7 +39,7 @@ export function useBookPreferences({ book }: Params): Return {
 
 	const bookPreferences = useMemo(
 		() => buildPreferences(storedBookPreferences ?? {}, settings, libraryConfig),
-		[storedBookPreferences, libraryConfig],
+		[storedBookPreferences, libraryConfig, settings],
 	)
 
 	const setBookPreferences = useCallback(
@@ -70,12 +70,23 @@ const defaultsFromLibraryConfig = (libraryConfig?: LibraryConfig): BookPreferenc
 		readingMode: libraryConfig?.default_reading_mode || 'paged',
 	}) as BookPreferences
 
+const settingsAsBookPreferences = (settings: ReaderSettings): BookPreferences => ({
+	brightness: settings.brightness,
+	imageScaling: settings.imageScaling,
+	readingDirection: settings.readingDirection,
+	readingMode: settings.readingMode,
+	tapSidesToNavigate: settings.tapSidesToNavigate,
+	fontSize: settings.fontSize,
+	lineHeight: settings.lineHeight,
+	trackElapsedTime: settings.trackElapsedTime,
+})
+
 const buildPreferences = (
 	preferences: Partial<BookPreferences>,
 	settings: ReaderSettings,
 	libraryConfig?: LibraryConfig,
 ): BookPreferences => ({
-	...settings,
+	...settingsAsBookPreferences(settings),
 	...defaultsFromLibraryConfig(libraryConfig),
 	...preferences,
 })

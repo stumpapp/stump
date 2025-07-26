@@ -279,7 +279,12 @@ export function useDirectoryListing({
 			} else if (error.response.status === 403) {
 				return 'Access to the directory was denied by the OS'
 			} else {
-				return error.response.data as string
+				console.error('An error occurred while fetching the directory listing:', error)
+				const message =
+					typeof error.response.data === 'string'
+						? error.response.data
+						: 'An error occurred while fetching the directory listing'
+				return message
 			}
 		}
 

@@ -111,9 +111,7 @@ fn read_and_filter_directory(
 	let listing = std::fs::read_dir(start_path).map_err(|error| {
 		if error.kind() == std::io::ErrorKind::PermissionDenied {
 			tracing::error!(?error, directory = %start_path.display(), "Permission denied accessing directory. This may be due to file ownership or permission issues. If running in Docker, ensure PUID/PGID are set correctly and the directory is accessible to the container user.");
-			APIError::Forbidden(format!(
-				"Permission denied accessing directory. This may be due to file ownership or permission issues. If running in Docker, ensure PUID/PGID are set correctly and the directory is accessible to the container user.",
-			))
+			APIError::Forbidden("Permission denied accessing directory. This may be due to file ownership or permission issues. If running in Docker, ensure PUID/PGID are set correctly and the directory is accessible to the container user.".to_string())
 		} else {
 			APIError::from(error)
 		}

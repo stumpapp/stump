@@ -1,5 +1,5 @@
 import { DirectoryListingInput } from '@stump/sdk'
-import { AxiosError } from 'axios'
+import { isAxiosError } from 'axios'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { queryClient, useInfiniteQuery, useQuery } from '../client'
@@ -133,6 +133,7 @@ export function useDirectoryListing({
 
 	const directoryListing = data?.pages
 		.flatMap((page) => page.data)
+		.filter((payload) => 'files' in payload)
 		.reduce(
 			(acc, curr) => ({
 				files: [...acc.files, ...curr.files],
@@ -265,18 +266,37 @@ export function useDirectoryListing({
 	}, [history, currentIndex, onGoForward])
 
 	const errorMessage = useMemo(() => {
-		const err = error as AxiosError
+		if (!error) return null
 
-		if (err?.response?.data) {
-			if (err.response.status === 404) {
+		if (!isAxiosError(error)) {
+			console.error('An unknown error occurred', error)
+			return 'An unknown error occurred'
+		}
+
+		if (error?.response?.data) {
+			if (error.response.status === 404) {
 				return 'Directory not found'
+			} else if (error.response.status === 403) {
+				return 'Access to the directory was denied by the OS'
 			} else {
-				return err.response.data as string
+				return error.response.data as string
 			}
 		}
 
 		return null
 	}, [error])
+
+	useEffect(() => {
+		if (!isAxiosError(error)) return
+		if (error.response?.status === 403) {
+			const parent = currentPath?.split('/').slice(0, -1).join('/') || null
+			if (parent) {
+				onGoBack?.(parent)
+				setCurrentPath(parent)
+				setCurrentIndex((prev) => Math.max(prev - 1, 0))
+			}
+		}
+	}, [error, currentPath, onGoBack, setCurrentPath, setCurrentIndex])
 
 	return {
 		canGoBack,

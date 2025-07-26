@@ -108,11 +108,32 @@ fn read_and_filter_directory(
 	start_path: &Path,
 	ignore_params: DirectoryListingIgnoreParams,
 ) -> Result<Vec<DirectoryListingFile>, APIError> {
-	let listing = std::fs::read_dir(start_path)?;
+	let listing = std::fs::read_dir(start_path).map_err(|error| {
+		if error.kind() == std::io::ErrorKind::PermissionDenied {
+			tracing::error!(?error, directory = %start_path.display(), "Permission denied accessing directory. This may be due to file ownership or permission issues. If running in Docker, ensure PUID/PGID are set correctly and the directory is accessible to the container user.");
+			APIError::Forbidden(format!(
+				"Permission denied accessing directory. This may be due to file ownership or permission issues. If running in Docker, ensure PUID/PGID are set correctly and the directory is accessible to the container user.",
+			))
+		} else {
+			APIError::from(error)
+		}
+	})?;
 
 	let files = listing
-		.filter_map(Result::ok)
-		.filter_map(|entry| filter_from_params(entry, &ignore_params))
+		.filter_map(|entry_result| {
+			match entry_result {
+				Ok(entry) => filter_from_params(entry, &ignore_params),
+				Err(error) => {
+					// Log permission errors but don't fail the entire listing
+					if error.kind() == std::io::ErrorKind::PermissionDenied {
+						trace!(?error, "Skipping inaccessible file due to permissions");
+					} else {
+						trace!(?error, "Error reading directory entry");
+					}
+					None
+				},
+			}
+		})
 		.map(|entry| DirectoryListingFile::from(entry.path()))
 		.collect();
 

@@ -64,28 +64,28 @@ mod tests {
 
 	pub fn get_test_webp_path() -> String {
 		PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-			.join("integration-tests/data/example.webp")
+			.join("tests/data/example.webp")
 			.to_string_lossy()
 			.to_string()
 	}
 
 	pub fn get_test_jpg_path() -> String {
 		PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-			.join("integration-tests/data/example.jpeg")
+			.join("tests/data/example.jpeg")
 			.to_string_lossy()
 			.to_string()
 	}
 
 	pub fn get_test_png_path() -> String {
 		PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-			.join("integration-tests/data/example.png")
+			.join("tests/data/example.png")
 			.to_string_lossy()
 			.to_string()
 	}
 
 	// pub fn get_test_avif_path() -> String {
 	// 	PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-	// 		.join("integration-tests/data/example.avif")
+	// 		.join("tests/data/example.avif")
 	// 		.to_string_lossy()
 	// 		.to_string()
 	// }
@@ -93,5 +93,5 @@ mod tests {
 	// TODO(339): Avif + Jxl support
 	// pub fn get_test_jxl_path() -> String {
 	// 	PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-	// 		.join("integration-tests/data/example.jxl")
+	// 		.join("tests/data/example.jxl")
 }

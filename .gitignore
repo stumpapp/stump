@@ -38,8 +38,6 @@ target/
 .env
 docker-compose.yaml
 
-core/integration-tests/.*
-core/integration-tests/*libraries*
 static
 apps/server/client/*
 !apps/server/client/.placeholder

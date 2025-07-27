@@ -1,63 +1,78 @@
-import { useMediaByIdQuery, useSDK } from '@stump/client'
+import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Alert, Breadcrumbs, Button, Heading, Text } from '@stump/components'
+import { graphql } from '@stump/graphql'
 import { Construction } from 'lucide-react'
-import { useMemo } from 'react'
-import { Navigate, useParams } from 'react-router'
+import { useEffect, useMemo } from 'react'
+import { useNavigate, useParams } from 'react-router'
 
 import { SceneContainer } from '@/components/container'
 import paths from '@/paths'
-import { formatBookName } from '@/utils/format'
 
 import BookThumbnailSelector from './BookThumbnailSelector'
 
+const query = graphql(`
+	query BookManagementScene($id: ID!) {
+		mediaById(id: $id) {
+			id
+			resolvedName
+			library {
+				id
+				name
+			}
+			series {
+				id
+				resolvedName
+			}
+			...BookThumbnailSelector
+		}
+	}
+`)
+
 export default function BookManagementScene() {
+	const navigate = useNavigate()
+
 	const { sdk } = useSDK()
 	const { id } = useParams()
 
-	if (!id) {
-		throw new Error('You must provide a book ID for the reader')
-	}
-	const { media, isLoading } = useMediaByIdQuery(id, {
-		params: {
-			load_library: true,
-			load_series: true,
-		},
+	const {
+		data: { mediaById: book },
+	} = useSuspenseGraphQL(query, sdk.cacheKey('mediaById', [id]), {
+		id: id ?? '',
 	})
 
 	const breadcrumbs = useMemo(() => {
-		if (!media) return []
+		if (!book) return []
 
-		const { series } = media
+		const { series, library } = book
 
 		return [
-			...(series?.library
-				? [{ label: series.library.name, to: paths.librarySeries(series.library.id) }]
-				: []),
-			...(series
-				? [
-						{
-							label: series.metadata?.title || series.name,
-							to: paths.seriesOverview(series.id),
-						},
-					]
-				: []),
+			{ label: library.name, to: paths.librarySeries(library.id) },
 			{
-				label: formatBookName(media),
-				to: paths.bookOverview(media.id),
+				label: series.resolvedName,
+				to: paths.seriesOverview(series.id),
+			},
+			{
+				label: book.resolvedName,
+				to: paths.bookOverview(book.id),
 			},
 		]
-	}, [media])
+	}, [book])
 
-	if (isLoading) {
-		return null
-	} else if (!media) {
-		return <Navigate to={paths.notFound()} />
+	// TODO(graphql): Re-add analyze button with mutation
+	const handleAnalyze = () => {
+		if (id != undefined) {
+			// sdk.media.analyze(id)
+		}
 	}
 
-	function handleAnalyze() {
-		if (id != undefined) {
-			sdk.media.analyze(id)
+	useEffect(() => {
+		if (!book) {
+			navigate(paths.notFound())
 		}
+	}, [book, navigate])
+
+	if (!book) {
+		return null
 	}
 
 	return (
@@ -86,7 +101,7 @@ export default function BookManagementScene() {
 					</Button>
 				</div>
 
-				<BookThumbnailSelector book={media} />
+				<BookThumbnailSelector fragment={book} />
 			</div>
 		</SceneContainer>
 	)

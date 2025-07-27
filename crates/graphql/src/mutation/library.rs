@@ -28,7 +28,7 @@ use crate::{
 	data::{CoreContext, RequestContext},
 	error_message,
 	guard::PermissionGuard,
-	input::library::{CreateOrUpdateLibraryInput, UpdateLibraryThumbnailInput},
+	input::{library::CreateOrUpdateLibraryInput, thumbnail::UpdateThumbnailInput},
 	object::library::Library,
 };
 
@@ -468,7 +468,7 @@ impl LibraryMutation {
 		&self,
 		ctx: &Context<'_>,
 		id: ID,
-		input: UpdateLibraryThumbnailInput,
+		input: UpdateThumbnailInput,
 	) -> Result<Library> {
 		let core = ctx.data::<CoreContext>()?;
 		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
@@ -480,7 +480,7 @@ impl LibraryMutation {
 			.await?
 			.ok_or("Library not found")?;
 
-		let page = input.page();
+		let page = input.params.page();
 
 		// TODO: Does it really matter to enforce the book belongs to library? I
 		// have omitted it for now, but v1 API did that

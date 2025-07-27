@@ -108,27 +108,3 @@ impl LibraryConfigInput {
 		}
 	}
 }
-
-// TODO: Support using a series thumbnail?
-#[derive(Debug, Default, InputObject)]
-pub struct UpdateLibraryThumbnailInput {
-	/// The ID of the media inside the series to fetch
-	pub media_id: String,
-	/// The page of the media to use for the thumbnail
-	page: i32,
-	#[graphql(default)]
-	/// A flag indicating whether the page is zero based
-	is_zero_based: Option<bool>,
-}
-
-impl UpdateLibraryThumbnailInput {
-	pub fn page(&self) -> i32 {
-		self.is_zero_based.map_or(self.page, |is_zero_based| {
-			if is_zero_based {
-				self.page + 1
-			} else {
-				self.page
-			}
-		})
-	}
-}

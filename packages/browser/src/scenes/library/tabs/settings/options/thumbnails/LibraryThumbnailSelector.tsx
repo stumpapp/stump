@@ -14,7 +14,7 @@ import LibrarySeriesGrid, { SelectedSeries } from '../../LibrarySeriesGrid'
 // TODO: Redesign this ugly shit
 
 const updateMutation = graphql(`
-	mutation LibraryThumbnailSelectorUpdate($id: ID!, $input: UpdateLibraryThumbnailInput!) {
+	mutation LibraryThumbnailSelectorUpdate($id: ID!, $input: UpdateThumbnailInput!) {
 		updateLibraryThumbnail(id: $id, input: $input) {
 			id
 			thumbnail {

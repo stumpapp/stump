@@ -6,7 +6,10 @@ use std::{
 use async_graphql::{
 	Context, Error, InputObject, Object, Result, Upload, UploadValue, ID,
 };
-use models::{entity::library, shared::enums::UserPermission};
+use models::{
+	entity::{library, media},
+	shared::enums::UserPermission,
+};
 use sea_orm::{prelude::*, QuerySelect};
 use stump_core::filesystem::{
 	image::{place_thumbnail, remove_thumbnails},
@@ -19,7 +22,7 @@ use zip::{read::ZipFile, ZipArchive};
 use crate::{
 	data::{CoreContext, RequestContext},
 	guard::{OptionalFeature, OptionalFeatureGuard, PermissionGuard},
-	object::library::Library,
+	object::{library::Library, media::Media},
 };
 
 #[derive(Default)]
@@ -185,35 +188,13 @@ impl UploadMutation {
 			.ok_or("Library not found")?;
 
 		let value = file.value(ctx)?;
-		match value.size() {
-			Ok(size) if size as usize > core.config.max_file_upload_size => {
-				return Err(format!(
-					"File size exceeds maximum upload size of {} bytes",
-					core.config.max_file_upload_size
-				)
-				.into());
-			},
-			Err(e) => {
-				tracing::error!(?e, "Error getting file size");
-				return Err(format!("Error getting file size: {e}").into());
-			},
-			_ => {},
-		}
+
+		enforce_max_size(&value, core.config.max_file_upload_size)?;
+		enforce_valid_content_type(&value)?;
 
 		let mut image_buf = Vec::new();
 		let mut file = value.content;
 		file.read_to_end(&mut image_buf)?;
-
-		let content_type = value
-			.content_type
-			.clone()
-			.as_deref()
-			.map(ContentType::from)
-			.ok_or("Could not verify content of file".to_string())?;
-
-		if !content_type.is_image() {
-			return Err("Uploaded file is not an image".into());
-		}
 
 		let extension = Path::new(&value.filename)
 			.extension()
@@ -239,6 +220,91 @@ impl UploadMutation {
 
 		Ok(library.into())
 	}
+
+	#[graphql(
+		guard = "OptionalFeatureGuard::new(OptionalFeature::Upload).and(PermissionGuard::new(&[UserPermission::UploadFile, UserPermission::EditLibrary]))"
+	)]
+	async fn upload_media_thumbnail(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+		file: Upload,
+	) -> Result<Media> {
+		let RequestContext { user, .. } = ctx.data()?;
+		let core = ctx.data::<CoreContext>()?;
+
+		let book = media::ModelWithMetadata::find_for_user(user)
+			.filter(media::Column::Id.eq(id.to_string()))
+			.into_model::<media::ModelWithMetadata>()
+			.one(core.conn.as_ref())
+			.await?
+			.ok_or("Book not found")?;
+
+		let value = file.value(ctx)?;
+
+		enforce_max_size(&value, core.config.max_file_upload_size)?;
+		enforce_valid_content_type(&value)?;
+
+		let mut image_buf = Vec::new();
+		let mut file = value.content;
+		file.read_to_end(&mut image_buf)?;
+
+		let extension = Path::new(&value.filename)
+			.extension()
+			.and_then(|ext| ext.to_str())
+			.map(str::to_ascii_lowercase)
+			.ok_or("Expected file to have an extension")?;
+
+		// Note: I chose to *safely* attempt the removal as to not block the upload, however after some
+		// user testing I'd like to see if this becomes a problem. We'll see!
+		let removal_result = remove_thumbnails(
+			&[book.media.id.clone()],
+			&core.config.get_thumbnails_dir(),
+		)
+		.await;
+		match removal_result {
+			Ok(count) => tracing::info!("Removed {} thumbnails!", count),
+			Err(e) => tracing::error!(
+				?e,
+				"Failed to remove existing book thumbnail before replacing!"
+			),
+		}
+
+		let path_buf =
+			place_thumbnail(&book.media.id, &extension, &image_buf, &core.config).await?;
+		tracing::debug!(?path_buf, "Placed book thumbnail");
+
+		Ok(book.into())
+	}
+}
+
+fn enforce_max_size(value: &UploadValue, max_size: usize) -> Result<()> {
+	match value.size() {
+		Ok(size) if size as usize > max_size => Err(format!(
+			"File size exceeds maximum upload size of {max_size} bytes"
+		)
+		.into()),
+		Err(e) => {
+			tracing::error!(?e, "Error getting file size");
+			Err(format!("Error getting file size: {e}").into())
+		},
+		_ => Ok(()),
+	}
+}
+
+fn enforce_valid_content_type(value: &UploadValue) -> Result<()> {
+	let content_type = value
+		.content_type
+		.clone()
+		.as_deref()
+		.map(ContentType::from)
+		.ok_or("Could not verify content of file".to_string())?;
+
+	if !content_type.is_image() {
+		return Err("Uploaded file is not an image".into());
+	}
+
+	Ok(())
 }
 
 /// A helper function to copy a tempfile from a multipart to a provided path

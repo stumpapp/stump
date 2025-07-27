@@ -8,6 +8,7 @@ import AutoSizer from 'react-virtualized-auto-sizer'
 
 import { useTheme } from '@/hooks'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
+import { FontFamilyKey, getFontFamily, getFontPath, getFontCssPath } from '@/utils/fonts'
 
 import EpubReaderContainer from './EpubReaderContainer'
 import { applyTheme, stumpDark } from './themes'
@@ -69,6 +70,10 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	const { epub, isLoading } = useEpubLazy(id)
 
 	const ref = useRef<HTMLDivElement>(null)
+	// Add a force remount key that changes when fonts change
+	const [remountKey, setRemountKey] = useState<number>(0)
+	// Reference to store the cached font CSS
+	const fontCssRef = useRef<Record<string, string>>({})
 
 	const [book, setBook] = useState<Book | null>(null)
 	const [rendition, setRendition] = useState<Rendition | null>(null)
@@ -77,6 +82,9 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	const [currentLocation, setCurrentLocation] = useState<EpubLocationState>()
 
 	const { bookPreferences } = useBookPreferences({ book: epub?.media_entity || ({} as Media) })
+
+	// Track previous font family to detect changes
+	const previousFontFamilyRef = useRef<string | undefined>(bookPreferences.fontFamily)
 
 	const { data: bookmarks } = useQuery([sdk.epub.keys.getBookmarks, id], () =>
 		sdk.epub.getBookmarks(id),
@@ -172,7 +180,7 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	}, [book, epub, id, sdk.media])
 
 	/**
-	 *	A function for applying the epub reader preferences to the epubjs rendition instance
+	 *	A function for applying the epub reader preferences to the epubjs renFdition instance
 	 *
 	 * @param rendition: The epubjs rendition instance
 	 * @param preferences The epub reader preferences
@@ -185,6 +193,21 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 			rendition.themes.register('stump-light', applyTheme({}, preferences))
 			rendition.themes.select('stump-light')
 		}
+
+		// Get the actual font family value to use
+		const fontFamilyValue = getFontFamily(preferences.fontFamily || '')
+
+		// Register the font theme for the reader's frame with the specific font family
+		rendition.themes.registerRules('reader-font', {
+			'*': {
+				'font-family': `${fontFamilyValue} !important`,
+			},
+		})
+
+		// Select the font theme for the reader's frame
+		rendition.themes.select('reader-font')
+
+		// Left to right or right to left
 		rendition.direction(preferences.readingDirection)
 
 		// Set flow based on reading mode
@@ -208,7 +231,9 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	useEffect(() => {
 		if (!book) return
 
+		let cancelled = false
 		book.ready.then(() => {
+			if (cancelled) return
 			if (book.spine) {
 				const defaultLoc = book.rendition?.location?.start?.cfi
 
@@ -243,6 +268,16 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 				// When the epub page isn't in focus, the window fires them instead
 				window.addEventListener('keydown', keydown_callback)
 
+				// Add rendered event to apply styles after content is actually rendered
+				rendition_.on('rendered', (section: any) => {
+					// We still need a handler here to inject fonts for newly rendered sections
+					// But we'll use a function that reads from the latest preferences
+					const contents = rendition_.getContents()
+					if (contents) {
+						injectFontToContents(contents, bookPreferences)
+					}
+				})
+
 				applyEpubPreferences(rendition_, bookPreferences)
 				setRendition(rendition_)
 
@@ -258,7 +293,12 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 				createSectionLengths(book, setSectionLengths)
 			}
 		})
-	}, [book])
+
+		return () => {
+			cancelled = true
+			rendition?.destroy?.()
+		}
+	}, [book, bookPreferences])
 
 	// TODO: this needs to have fullscreen as an effect dependency
 	/**
@@ -298,6 +338,110 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	}, [rendition])
 
 	/**
+	 * Helper function to load and cache the font CSS for a specific font
+	 */
+	const loadFontCss = useCallback(async (fontKey: FontFamilyKey): Promise<string | null> => {
+		// Check if we already have this font CSS cached
+		if (fontCssRef.current[fontKey]) {
+			return fontCssRef.current[fontKey]
+		}
+
+		try {
+			// Generate path for the font CSS file
+			const fontCSSPath = getFontCssPath(fontKey, true)
+
+			// Fetch the CSS content
+			const response = await fetch(fontCSSPath)
+
+			if (!response.ok) {
+				throw new Error(`Failed to load font CSS: ${response.status}`)
+			}
+
+			const cssContent = await response.text()
+
+			// Replace relative paths with absolute paths
+			const fontDir = getFontPath(fontKey, '', true)
+
+			const modifiedCss = cssContent.replace(/url\(['"]?([^'")]+)['"]?\)/g, (match, p1) => {
+				// If the URL is already absolute, don't modify it
+				if (p1.startsWith('http') || p1.startsWith('/')) {
+					return match
+				}
+				// Otherwise, make it absolute
+				return `url('${fontDir}/${p1}')`
+			})
+
+			// Cache the modified CSS
+			fontCssRef.current[fontKey] = modifiedCss
+			return modifiedCss
+		} catch (error) {
+			console.error(`[FONT DEBUG] Failed to load ${fontKey} CSS file:`, error)
+			return null
+		}
+	}, [])
+
+	/**
+	 * Effect to preload font CSS when font family changes
+	 */
+	useEffect(() => {
+		if (bookPreferences.fontFamily) {
+			const fontKey = bookPreferences.fontFamily as FontFamilyKey
+			loadFontCss(fontKey)
+		}
+	}, [bookPreferences.fontFamily, loadFontCss])
+
+	/**
+	 * Helper function to inject font CSS to rendered contents
+	 * This can be called both from the effect and from the 'rendered' event handler
+	 */
+	const injectFontToContents = useCallback(
+		(contents: any, preferences: BookPreferences) => {
+			if (!contents || !Array.isArray(contents) || contents.length === 0) return
+
+			if (!contents || !Array.isArray(contents) || contents.length === 0) return
+
+			// Get the font key from the current preferences (not stale closure)
+			const fontKey = (preferences.fontFamily as FontFamilyKey) || 'inter'
+
+			// Use the cached CSS if available
+			const cachedCss = fontCssRef.current[fontKey]
+			if (!cachedCss) {
+				loadFontCss(fontKey).then((css) => {
+					if (css && contents) {
+						applyFontCssToContents(contents, css, fontKey)
+					}
+				})
+				return
+			}
+
+			// Apply the cached CSS directly
+			applyFontCssToContents(contents, cachedCss, fontKey)
+		},
+		[loadFontCss],
+	)
+
+	/**
+	 * Helper function to apply CSS to contents
+	 */
+	const applyFontCssToContents = (contents: any[], css: string, fontKey: string) => {
+		contents.forEach((currentContents) => {
+			if (currentContents.document && currentContents.document.head) {
+				// First, remove any previous font style elements to prevent duplicates
+				const existingFontStyles =
+					currentContents.document.head.querySelectorAll('style[data-stump-font]')
+				existingFontStyles.forEach((el: Element) => el.remove())
+
+				// Add new style with a data attribute for future identification
+				const styleEl = currentContents.document.createElement('style')
+				styleEl.setAttribute('data-stump-font', fontKey)
+				styleEl.innerHTML = css
+				currentContents.document.head.appendChild(styleEl)
+			} else {
+			}
+		})
+	}
+
+	/**
 	 * This effect is responsible for updating the epub theme options whenever the epub
 	 * preferences change. It will only run when the epub preferences change and the
 	 * rendition instance is set.
@@ -305,8 +449,78 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	useEffect(() => {
 		if (rendition) {
 			applyEpubPreferences(rendition, bookPreferences)
+
+			// Get contents to inject font-face declaration for already rendered sections
+			const contents = rendition.getContents()
+			if (contents) {
+				injectFontToContents(contents, bookPreferences)
+			}
+
+			return () => {
+				rendition.destroy?.()
+			}
 		}
-	}, [rendition, bookPreferences, theme])
+	}, [rendition, bookPreferences, theme, injectFontToContents])
+
+	/**
+	 * Helper function to completely destroy the current reader instance
+	 * to ensure proper cleanup before remounting
+	 */
+	const destroyCurrentReader = useCallback(() => {
+		// Clean up the rendition
+		if (rendition) {
+			// Remove event listeners
+			rendition.off('relocated', handleLocationChange)
+
+			// Try to destroy rendition properly
+			try {
+				// @ts-ignore: destroy method exists but isn't properly typed in epub.js
+				rendition.destroy?.()
+			} catch (e) {
+				console.error('[FONT DEBUG] Error destroying rendition:', e)
+			}
+
+			setRendition(null)
+		}
+
+		// Clean up the book
+		if (book) {
+			try {
+				// @ts-ignore: destroy method exists but isn't properly typed in epub.js
+				book.destroy?.()
+			} catch (e) {
+				console.error('[FONT DEBUG] Error destroying book:', e)
+			}
+
+			setBook(null)
+		}
+
+		// Clean up the DOM
+		if (ref.current) {
+			// Remove all child elements
+			while (ref.current.firstChild) {
+				ref.current.removeChild(ref.current.firstChild)
+			}
+		}
+
+		// Force a remount by updating the key
+		setRemountKey((prev) => prev + 1)
+	}, [book, rendition])
+
+	/**
+	 * This effect watches for font family changes and remounts the reader when needed
+	 */
+	useEffect(() => {
+		// If font family has changed, we need to completely remount the reader
+		if (previousFontFamilyRef.current !== bookPreferences.fontFamily) {
+			previousFontFamilyRef.current = bookPreferences.fontFamily
+
+			// If we have a current rendition, destroy it completely
+			if (rendition) {
+				destroyCurrentReader()
+			}
+		}
+	}, [bookPreferences.fontFamily, destroyCurrentReader, rendition])
 
 	/**
 	 * Invalidate the book query when a reader is unmounted so that the book overview
@@ -651,7 +865,13 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 			<div className="h-full w-full">
 				<AutoSizer>
 					{({ height, width }) => {
-						return <div ref={ref} key={epub.media_entity.id} style={{ height, width }} />
+						return (
+							<div
+								ref={ref}
+								key={`${epub.media_entity.id}-${remountKey}`}
+								style={{ height, width }}
+							/>
+						)
 					}}
 				</AutoSizer>
 			</div>

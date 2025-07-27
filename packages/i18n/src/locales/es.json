@@ -73,22 +73,22 @@
 			"name": {
 				"label": "Nombre",
 				"placeholder": "Mi club de libros",
-				"description": "The name of your book club"
+				"description": "El nombre de tu club de libros"
 			},
 			"description": {
 				"label": "Description",
 				"placeholder": "An 'Our Flag Means Death' fan club. We read pirate fiction to our hearts content",
-				"description": "An optional, short description of your book club"
+				"description": "Una breve descripción opcional de tu club de libros"
 			},
 			"is_private": {
-				"label": "Private club",
-				"description": "If enabled, only users you invite will be able to join your book club"
+				"label": "Club privado",
+				"description": "Si está habilitado, solo los usuarios que invites podrán unirse a tu club de libros"
 			},
 			"member_role_spec": {
 				"heading": "Custom role mapping",
 				"subtitle": [
 					"You can create custom names for the roles in your book club if you'd like. For more information, refer to the",
-					"documentation"
+					"documentación"
 				],
 				"member": {
 					"label": "Miembro",
@@ -136,7 +136,7 @@
 			"steps": [
 				{
 					"label": "Basics",
-					"heading": "Basic Information",
+					"heading": "Información básica",
 					"description": "The details of the club, including its name and description"
 				},
 				{

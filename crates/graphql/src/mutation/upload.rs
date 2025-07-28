@@ -7,7 +7,7 @@ use async_graphql::{
 	Context, Error, InputObject, Object, Result, Upload, UploadValue, ID,
 };
 use models::{
-	entity::{library, media},
+	entity::{library, media, series},
 	shared::enums::UserPermission,
 };
 use sea_orm::{prelude::*, QuerySelect};
@@ -22,7 +22,7 @@ use zip::{read::ZipFile, ZipArchive};
 use crate::{
 	data::{CoreContext, RequestContext},
 	guard::{OptionalFeature, OptionalFeatureGuard, PermissionGuard},
-	object::{library::Library, media::Media},
+	object::{library::Library, media::Media, series::Series},
 };
 
 #[derive(Default)]
@@ -167,6 +167,9 @@ impl UploadMutation {
 		Ok(true)
 	}
 
+	// TODO(graphql): There is a LOT of duplication here, and only subtle differences wrt the queries.
+	// I think we can refactor this into some utility function(s) that take the model type and the ID as parameters
+
 	#[graphql(
 		guard = "OptionalFeatureGuard::new(OptionalFeature::Upload).and(PermissionGuard::new(&[UserPermission::UploadFile, UserPermission::EditLibrary]))"
 	)]
@@ -219,6 +222,64 @@ impl UploadMutation {
 		tracing::debug!(?path_buf, "Placed library thumbnail");
 
 		Ok(library.into())
+	}
+
+	#[graphql(
+		guard = "OptionalFeatureGuard::new(OptionalFeature::Upload).and(PermissionGuard::new(&[UserPermission::UploadFile, UserPermission::EditLibrary]))"
+	)]
+	async fn upload_series_thumbnail(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+		file: Upload,
+	) -> Result<Series> {
+		let RequestContext { user, .. } = ctx.data()?;
+		let core = ctx.data::<CoreContext>()?;
+		let conn = core.conn.as_ref();
+
+		let series = series::ModelWithMetadata::find_for_user(user)
+			.filter(series::Column::Id.eq(id.to_string()))
+			.into_model::<series::ModelWithMetadata>()
+			.one(core.conn.as_ref())
+			.await?
+			.ok_or("Series not found")?;
+
+		let value = file.value(ctx)?;
+
+		enforce_max_size(&value, core.config.max_file_upload_size)?;
+		enforce_valid_content_type(&value)?;
+
+		let mut image_buf = Vec::new();
+		let mut file = value.content;
+		file.read_to_end(&mut image_buf)?;
+
+		let extension = Path::new(&value.filename)
+			.extension()
+			.and_then(|ext| ext.to_str())
+			.map(str::to_ascii_lowercase)
+			.ok_or("Expected file to have an extension")?;
+
+		// Note: I chose to *safely* attempt the removal as to not block the upload, however after some
+		// user testing I'd like to see if this becomes a problem. We'll see!
+		match remove_thumbnails(
+			&[series.series.id.clone()],
+			&core.config.get_thumbnails_dir(),
+		)
+		.await
+		{
+			Ok(count) => tracing::info!("Removed {} thumbnails!", count),
+			Err(e) => tracing::error!(
+				?e,
+				"Failed to remove existing series thumbnail before replacing!"
+			),
+		}
+
+		let path_buf =
+			place_thumbnail(&series.series.id, &extension, &image_buf, &core.config)
+				.await?;
+		tracing::debug!(?path_buf, "Placed series thumbnail");
+
+		Ok(series.into())
 	}
 
 	#[graphql(

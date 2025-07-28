@@ -1159,7 +1159,7 @@ type Mutation {
 	analyzeMedia(id: ID!): Boolean!
 	convertMedia(id: ID!): Boolean!
 	"""
-	Update the thumbnail for a library. This will replace the existing thumbnail with the the one
+	Update the thumbnail for a book. This will replace the existing thumbnail with the the one
 	associated with the provided input (book). If the book does not have a thumbnail, one
 	will be generated based on the library's thumbnail configuration.
 	"""
@@ -1251,6 +1251,12 @@ type Mutation {
 	"""
 	deleteReadingList(id: String!): ReadingList!
 	analyzeSeries(id: ID!): Boolean!
+	"""
+	Update the thumbnail for a series. This will replace the existing thumbnail with the the one
+	associated with the provided input (book). If the book does not have a thumbnail, one
+	will be generated based on the library's thumbnail configuration.
+	"""
+	updateSeriesThumbnail(id: ID!, input: UpdateThumbnailInput!): Series!
 	markSeriesAsComplete(id: ID!): Series!
 	scanSeries(id: ID!): Boolean!
 	"""
@@ -1270,6 +1276,7 @@ type Mutation {
 	uploadBooks(input: UploadBooksInput!): Boolean!
 	uploadSeries(input: UploadSeriesInput!): Boolean!
 	uploadLibraryThumbnail(id: ID!, file: Upload!): Library!
+	uploadSeriesThumbnail(id: ID!, file: Upload!): Series!
 	uploadMediaThumbnail(id: ID!, file: Upload!): Media!
 	deleteLoginActivity: Int!
 	createUser(input: CreateUserInput!): User!

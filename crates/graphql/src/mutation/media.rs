@@ -74,9 +74,7 @@ impl MediaMutation {
 		Err("Not implemented".into())
 	}
 
-	// TODO(graphql): (thumbnail API remains RESTful). This serves as a reminder, it won't live here
-
-	/// Update the thumbnail for a library. This will replace the existing thumbnail with the the one
+	/// Update the thumbnail for a book. This will replace the existing thumbnail with the the one
 	/// associated with the provided input (book). If the book does not have a thumbnail, one
 	/// will be generated based on the library's thumbnail configuration.
 	#[graphql(guard = "PermissionGuard::one(UserPermission::EditLibrary)")]

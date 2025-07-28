@@ -482,8 +482,6 @@ impl LibraryMutation {
 
 		let page = input.params.page();
 
-		// TODO: Does it really matter to enforce the book belongs to library? I
-		// have omitted it for now, but v1 API did that
 		let book = media::Entity::find_for_user(user)
 			.filter(media::Column::Id.eq(input.media_id))
 			.one(core.conn.as_ref())

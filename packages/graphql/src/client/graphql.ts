@@ -3232,6 +3232,13 @@ export type BookManagementSceneQuery = { __typename?: 'Query', mediaById?: (
     & { ' $fragmentRefs'?: { 'BookThumbnailSelectorFragment': BookThumbnailSelectorFragment } }
   ) | null };
 
+export type BookManagementSceneAnalyzeMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type BookManagementSceneAnalyzeMutation = { __typename?: 'Mutation', analyzeMedia: boolean };
+
 export type BookThumbnailSelectorFragment = { __typename?: 'Media', id: string, pages: number, thumbnail: { __typename?: 'ImageRef', url: string } } & { ' $fragmentName'?: 'BookThumbnailSelectorFragment' };
 
 export type BookThumbnailSelectorUpdateMutationVariables = Exact<{
@@ -4459,6 +4466,11 @@ export const BookManagementSceneDocument = new TypedDocumentString(`
   }
   pages
 }`) as unknown as TypedDocumentString<BookManagementSceneQuery, BookManagementSceneQueryVariables>;
+export const BookManagementSceneAnalyzeDocument = new TypedDocumentString(`
+    mutation BookManagementSceneAnalyze($id: ID!) {
+  analyzeMedia(id: $id)
+}
+    `) as unknown as TypedDocumentString<BookManagementSceneAnalyzeMutation, BookManagementSceneAnalyzeMutationVariables>;
 export const BookThumbnailSelectorUpdateDocument = new TypedDocumentString(`
     mutation BookThumbnailSelectorUpdate($id: ID!, $input: PageBasedThumbnailInput!) {
   updateMediaThumbnail(id: $id, input: $input) {

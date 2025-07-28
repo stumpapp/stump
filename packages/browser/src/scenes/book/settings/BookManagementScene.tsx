@@ -1,8 +1,8 @@
-import { useSDK, useSuspenseGraphQL } from '@stump/client'
+import { useGraphQLMutation, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Alert, Breadcrumbs, Button, Heading, Text } from '@stump/components'
 import { graphql } from '@stump/graphql'
 import { Construction } from 'lucide-react'
-import { useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import { useNavigate, useParams } from 'react-router'
 
 import { SceneContainer } from '@/components/container'
@@ -28,6 +28,12 @@ const query = graphql(`
 	}
 `)
 
+const analyzeMutation = graphql(`
+	mutation BookManagementSceneAnalyze($id: ID!) {
+		analyzeMedia(id: $id)
+	}
+`)
+
 export default function BookManagementScene() {
 	const navigate = useNavigate()
 
@@ -39,6 +45,8 @@ export default function BookManagementScene() {
 	} = useSuspenseGraphQL(query, sdk.cacheKey('mediaById', [id]), {
 		id: id ?? '',
 	})
+
+	const { data, mutate: analyze, isPending } = useGraphQLMutation(analyzeMutation)
 
 	const breadcrumbs = useMemo(() => {
 		if (!book) return []
@@ -58,12 +66,11 @@ export default function BookManagementScene() {
 		]
 	}, [book])
 
-	// TODO(graphql): Re-add analyze button with mutation
-	const handleAnalyze = () => {
-		if (id != undefined) {
-			// sdk.media.analyze(id)
+	const handleAnalyze = useCallback(() => {
+		if (id != null) {
+			analyze({ id })
 		}
-	}
+	}, [analyze, id])
 
 	useEffect(() => {
 		if (!book) {
@@ -96,7 +103,13 @@ export default function BookManagementScene() {
 				</Alert>
 
 				<div>
-					<Button size="md" variant="primary" onClick={handleAnalyze}>
+					<Button
+						title={data ? 'Analysis already in progress' : 'Analyze this book'}
+						size="md"
+						variant="primary"
+						onClick={handleAnalyze}
+						disabled={!!data || isPending}
+					>
 						Analyze Media
 					</Button>
 				</div>

@@ -52,15 +52,22 @@ export const light = {
 			hover: '#C07C08',
 			secondary: '#F59E0B26',
 		},
+		'on-black': {
+			DEFAULT: '#242628',
+			muted: '#242628',
+		},
 	},
 	foreground: {
 		DEFAULT: '#000000',
 		brand: '#C48259',
 		disabled: '#93979D',
-
 		muted: '#414347',
 		// #5B5F65 OR #7D828A
 		'on-inverse': dark.foreground.DEFAULT,
+		'on-black': {
+			DEFAULT: '#E9EAEB',
+			muted: '#B0B3B7',
+		},
 		subtle: '#26272A',
 	},
 	sidebar: {

@@ -152,7 +152,7 @@ export default function ReaderFooter() {
 			<div className="flex w-full flex-col gap-2 px-4 pb-4">
 				<ProgressBar
 					size="sm"
-					value={40}
+					value={currentPage}
 					max={book.pages}
 					className="bg-[#898d94]"
 					indicatorClassName="bg-[#f5f3ef]"

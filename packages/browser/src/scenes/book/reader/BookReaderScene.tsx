@@ -14,6 +14,7 @@ export default function BookReaderSceneContainer() {
 
 	const { media } = useMediaByIdQuery(id || '', {
 		params: {
+			load_series: true,
 			load_library: true,
 		},
 		suspense: true,

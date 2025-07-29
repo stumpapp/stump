@@ -103,13 +103,18 @@ export default function ImageBasedReader({
 	const pageSets = useMemo(() => {
 		const autoButOff = doublePageBehavior === 'auto' && deviceOrientation === 'portrait'
 		const modeForceOff = readingMode === 'continuous:vertical'
+		let sets: number[][] = []
+
 		if (doublePageBehavior === 'off' || autoButOff || modeForceOff) {
-			return Array.from({ length: pages }, (_, i) => [i])
+			sets = Array.from({ length: pages }, (_, i) => [i])
+		} else {
+			sets = generatePageSets({ imageSizes: pageDimensions, pages: pages })
 		}
-		const sets = generatePageSets({ imageSizes: pageDimensions, pages: pages })
+
 		if (readingDirection === 'rtl') {
-			return sets.reverse()
+			return [...sets.map((set) => [...set].reverse())].reverse()
 		}
+
 		return sets
 	}, [doublePageBehavior, pages, pageDimensions, deviceOrientation, readingMode, readingDirection])
 

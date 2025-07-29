@@ -22,6 +22,8 @@ export const BUTTON_VARIANTS = {
 		'bg-background-surface hover:bg-background-surface-hover text-foreground focus:ring-edge-brand',
 	ghost:
 		'bg-transparent hover:bg-background-surface-hover text-foreground-subtle data-[state=open]:bg-transparent',
+	'ghost-on-black':
+		'bg-transparent hover:bg-background-surface-hover text-foreground-on-black data-[state=open]:bg-transparent',
 	link: 'bg-transparent dark:bg-transparent underline-offset-4 hover:underline text-gray-900 dark:text-gray-100 hover:bg-transparent dark:hover:bg-transparent',
 	outline: 'bg-transparent border border-edge-subtle hover:bg-background-surface text-foreground',
 	primary:

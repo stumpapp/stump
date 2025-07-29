@@ -46,6 +46,7 @@ const transition = {
 			duration: 0.2,
 			ease: 'easeInOut',
 		},
+		display: 'none',
 	},
 	visible: {
 		opacity: 1,
@@ -53,5 +54,6 @@ const transition = {
 			duration: 0.2,
 			ease: 'easeInOut',
 		},
+		display: 'flex',
 	},
 }

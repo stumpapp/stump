@@ -154,8 +154,8 @@ export default function ReaderFooter() {
 					size="sm"
 					value={currentPage}
 					max={book.pages}
-					className={readingDirection === 'rtl' ? 'bg-[#0c0c0c]' : 'bg-[#898d94]'}
-					indicatorClassName={readingDirection === 'rtl' ? 'bg-[#898d94]' : 'bg-[#0c0c0c]'}
+					className="bg-[#0c0c0c]"
+					indicatorClassName="bg-[#898d94]"
 					inverted={readingDirection === 'rtl'}
 				/>
 
@@ -167,7 +167,7 @@ export default function ReaderFooter() {
 					)}
 
 					<Text className="text-sm text-[#898d94]">
-						{currentSet.join('-')} of {book.pages}
+						{currentSet.map((idx) => idx + 1).join('-')} of {book.pages}
 					</Text>
 				</div>
 			</div>

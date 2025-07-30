@@ -7,7 +7,7 @@ import ControlButton from './ControlButton'
 import ReaderSettings from './ReaderSettings'
 
 export default function SettingsDialog() {
-	const { book } = useImageBaseReaderContext()
+	const { book, currentPage } = useImageBaseReaderContext()
 
 	const [modality, setModality] = useState<'book' | 'global'>('book')
 
@@ -31,7 +31,10 @@ export default function SettingsDialog() {
 					</Tabs.List>
 				</Tabs>
 
-				<ReaderSettings forBook={modality === 'book' ? book.id : undefined} />
+				<ReaderSettings
+					forBook={modality === 'book' ? book.id : undefined}
+					currentPage={modality === 'book' ? currentPage : undefined}
+				/>
 			</Dialog.Content>
 		</Dialog>
 	)

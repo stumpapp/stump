@@ -154,8 +154,9 @@ export default function ReaderFooter() {
 					size="sm"
 					value={currentPage}
 					max={book.pages}
-					className="bg-[#898d94]"
-					indicatorClassName="bg-[#f5f3ef]"
+					className={readingDirection === 'rtl' ? 'bg-[#0c0c0c]' : 'bg-[#898d94]'}
+					indicatorClassName={readingDirection === 'rtl' ? 'bg-[#898d94]' : 'bg-[#0c0c0c]'}
+					inverted={readingDirection === 'rtl'}
 				/>
 
 				<div

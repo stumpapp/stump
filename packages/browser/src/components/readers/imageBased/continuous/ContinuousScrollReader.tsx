@@ -129,7 +129,7 @@ export default function ContinuousScrollReader({
 							</div>
 						)}
 						rangeChanged={setVisibleRange}
-						initialTopMostItemIndex={initialPage ? initialPage - 1 : undefined}
+						initialTopMostItemIndex={initialPage ? initialPage : undefined}
 						overscan={{ main: preload.ahead || 1, reverse: preload.behind || 1 }}
 					/>
 				)}

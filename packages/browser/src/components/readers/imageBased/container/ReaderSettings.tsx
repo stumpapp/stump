@@ -60,7 +60,7 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 	)
 
 	const currentReadingMode = activeSettings.readingMode || 'paged'
-	const onChangeReadingMode = useCallback(
+	const onChangeReadingModeForBook = useCallback(
 		(value: ReadingMode) => {
 			if (currentPage != null) {
 				// We need to set the page in the URL for the paged reader to start at the correct
@@ -76,6 +76,17 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 			setBookPreferences({ readingMode: value })
 		},
 		[search, setSearch, setBookPreferences, currentReadingMode, currentPage],
+	)
+
+	const onChangeReadingMode = useCallback(
+		(value: ReadingMode) => {
+			if (!forBook) {
+				store.setSettings({ readingMode: value })
+			} else {
+				onChangeReadingModeForBook(value)
+			}
+		},
+		[forBook, onChangeReadingModeForBook, store],
 	)
 
 	return (

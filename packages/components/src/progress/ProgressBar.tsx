@@ -42,13 +42,17 @@ const progressVariants = cva('relative overflow-hidden', {
 type BaseProps = ComponentPropsWithoutRef<typeof ProgressPrimitive.Root> &
 	VariantProps<typeof progressVariants>
 
-// TODO: indeterminate state
 // FIXME: https://github.com/jsx-eslint/eslint-plugin-react/issues/3284
 export type ProgressBarProps = {
 	className?: string
 	value?: number | null
 	isIndeterminate?: boolean
 	indicatorClassName?: string
+	/**
+	 * When true, the progress bar fills from right to left instead of left to right.
+	 * Useful for RTL (right-to-left) reading directions.
+	 */
+	inverted?: boolean
 } & BaseProps
 
 const safeValue = (value: number | null) => {
@@ -70,6 +74,7 @@ export const ProgressBar = React.forwardRef<
 			rounded = 'default',
 			isIndeterminate,
 			indicatorClassName,
+			inverted = false,
 			...props
 		},
 		ref,
@@ -93,7 +98,6 @@ export const ProgressBar = React.forwardRef<
 				<ProgressPrimitive.Indicator
 					className={cn(
 						'h-full flex-1 transition-all',
-						PROGRESS_BAR_INDICATOR_COLOR_VARIANTS[variant || 'default'],
 						{
 							'origin-left-to-right-indeterminate animate-indeterminate-progress': isIndeterminate,
 						},
@@ -102,7 +106,9 @@ export const ProgressBar = React.forwardRef<
 					style={
 						isIndeterminate
 							? undefined
-							: { transform: `translateX(-${100 - (adjustedValue || 0)}%)` }
+							: inverted
+								? { transform: `translateX(${100 - (adjustedValue || 0)}%)` }
+								: { transform: `translateX(-${100 - (adjustedValue || 0)}%)` }
 					}
 				/>
 			</ProgressPrimitive.Root>

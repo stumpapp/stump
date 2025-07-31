@@ -48,6 +48,11 @@ type Documents = {
     "\n\tmutation SendEmailAttachment($id: ID!, $sendTo: [EmailerSendTo!]!) {\n\t\tsendAttachmentEmail(input: { mediaIds: [$id], sendTo: $sendTo }) {\n\t\t\tsentCount\n\t\t\terrors\n\t\t}\n\t}\n": typeof types.SendEmailAttachmentDocument,
     "\n\tquery BookReaderScene($id: ID!) {\n\t\tmediaById(id: $id) {\n\t\t\tid\n\t\t\tresolvedName\n\t\t\tpages\n\t\t\textension\n\t\t\treadProgress {\n\t\t\t\tpercentageCompleted\n\t\t\t\tepubcfi\n\t\t\t\tpage\n\t\t\t\telapsedSeconds\n\t\t\t}\n\t\t\tlibraryConfig {\n\t\t\t\tdefaultReadingImageScaleFit\n\t\t\t\tdefaultReadingMode\n\t\t\t\tdefaultReadingDir\n\t\t\t}\n\t\t\tmetadata {\n\t\t\t\tpageAnalysis {\n\t\t\t\t\tdimensions {\n\t\t\t\t\t\theight\n\t\t\t\t\t\twidth\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.BookReaderSceneDocument,
     "\n\tmutation UpdateReadProgress($id: ID!, $page: Int!, $elapsedSeconds: Int!) {\n\t\tupdateMediaProgress(id: $id, page: $page, elapsedSeconds: $elapsedSeconds) {\n\t\t\t__typename\n\t\t}\n\t}\n": typeof types.UpdateReadProgressDocument,
+    "\n\tquery BookManagementScene($id: ID!) {\n\t\tmediaById(id: $id) {\n\t\t\tid\n\t\t\tresolvedName\n\t\t\tlibrary {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t\tseries {\n\t\t\t\tid\n\t\t\t\tresolvedName\n\t\t\t}\n\t\t\t...BookThumbnailSelector\n\t\t}\n\t}\n": typeof types.BookManagementSceneDocument,
+    "\n\tmutation BookManagementSceneAnalyze($id: ID!) {\n\t\tanalyzeMedia(id: $id)\n\t}\n": typeof types.BookManagementSceneAnalyzeDocument,
+    "\n\tfragment BookThumbnailSelector on Media {\n\t\tid\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t\tpages\n\t}\n": typeof types.BookThumbnailSelectorFragmentDoc,
+    "\n\tmutation BookThumbnailSelectorUpdate($id: ID!, $input: PageBasedThumbnailInput!) {\n\t\tupdateMediaThumbnail(id: $id, input: $input) {\n\t\t\tid\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": typeof types.BookThumbnailSelectorUpdateDocument,
+    "\n\tmutation BookThumbnailSelectorUpload($id: ID!, $file: Upload!) {\n\t\tuploadMediaThumbnail(id: $id, file: $file) {\n\t\t\tid\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": typeof types.BookThumbnailSelectorUploadDocument,
     "\n\tquery BookSearchScene(\n\t\t$filter: MediaFilterInput!\n\t\t$orderBy: [MediaOrderBy!]!\n\t\t$pagination: Pagination!\n\t) {\n\t\tmedia(filter: $filter, orderBy: $orderBy, pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...BookCard\n\t\t\t\t...BookMetadata\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\tcurrentPage\n\t\t\t\t\ttotalPages\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.BookSearchSceneDocument,
     "\n\tquery CreateLibrarySceneExistingLibraries {\n\t\tlibraries(pagination: { none: { unpaginated: true } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t\tpath\n\t\t\t}\n\t\t}\n\t}\n": typeof types.CreateLibrarySceneExistingLibrariesDocument,
     "\n\tmutation CreateLibrarySceneCreateLibrary($input: CreateOrUpdateLibraryInput!) {\n\t\tcreateLibrary(input: $input) {\n\t\t\tid\n\t\t}\n\t}\n": typeof types.CreateLibrarySceneCreateLibraryDocument,
@@ -74,13 +79,18 @@ type Documents = {
     "\n\tquery ScanHistoryTable($id: ID!) {\n\t\tlibraryById(id: $id) {\n\t\t\tid\n\t\t\tscanHistory {\n\t\t\t\tid\n\t\t\t\tjobId\n\t\t\t\ttimestamp\n\t\t\t\toptions\n\t\t\t}\n\t\t}\n\t}\n": typeof types.ScanHistoryTableDocument,
     "\n\tquery ScanRecordInspectorJobs($id: ID!, $loadLogs: Boolean!) {\n\t\tjobById(id: $id) {\n\t\t\tid\n\t\t\toutputData {\n\t\t\t\t__typename\n\t\t\t\t... on LibraryScanOutput {\n\t\t\t\t\ttotalFiles\n\t\t\t\t\ttotalDirectories\n\t\t\t\t\tignoredFiles\n\t\t\t\t\tskippedFiles\n\t\t\t\t\tignoredDirectories\n\t\t\t\t\tcreatedMedia\n\t\t\t\t\tupdatedMedia\n\t\t\t\t\tcreatedSeries\n\t\t\t\t\tupdatedSeries\n\t\t\t\t}\n\t\t\t}\n\t\t\tlogs @include(if: $loadLogs) {\n\t\t\t\tid\n\t\t\t}\n\t\t}\n\t}\n": typeof types.ScanRecordInspectorJobsDocument,
     "\n\tmutation DeleteLibraryThumbnails($id: ID!) {\n\t\tdeleteLibraryThumbnails(id: $id)\n\t}\n": typeof types.DeleteLibraryThumbnailsDocument,
-    "\n\tmutation LibraryThumbnailSelectorUpdate($id: ID!, $input: UpdateLibraryThumbnailInput!) {\n\t\tupdateLibraryThumbnail(id: $id, input: $input) {\n\t\t\tid\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": typeof types.LibraryThumbnailSelectorUpdateDocument,
+    "\n\tmutation LibraryThumbnailSelectorUpdate($id: ID!, $input: UpdateThumbnailInput!) {\n\t\tupdateLibraryThumbnail(id: $id, input: $input) {\n\t\t\tid\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": typeof types.LibraryThumbnailSelectorUpdateDocument,
     "\n\tmutation LibraryThumbnailSelectorUpload($id: ID!, $file: Upload!) {\n\t\tuploadLibraryThumbnail(id: $id, file: $file) {\n\t\t\tid\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": typeof types.LibraryThumbnailSelectorUploadDocument,
     "\n\tmutation RegenerateThumbnails($id: ID!, $forceRegenerate: Boolean!) {\n\t\tgenerateLibraryThumbnails(id: $id, forceRegenerate: $forceRegenerate)\n\t}\n": typeof types.RegenerateThumbnailsDocument,
     "\n\tquery SeriesLayout($id: ID!) {\n\t\tseriesById(id: $id) {\n\t\t\tid\n\t\t\tpath\n\t\t\tlibrary {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t\tresolvedName\n\t\t\tresolvedDescription\n\t\t\ttags {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t}\n\t}\n": typeof types.SeriesLayoutDocument,
     "\n\tquery SeriesLibrayLink($id: ID!) {\n\t\tlibraryById(id: $id) {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t}\n": typeof types.SeriesLibrayLinkDocument,
     "\n\tquery SeriesBooksScene(\n\t\t$filter: MediaFilterInput!\n\t\t$orderBy: [MediaOrderBy!]!\n\t\t$pagination: Pagination!\n\t) {\n\t\tmedia(filter: $filter, orderBy: $orderBy, pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...BookCard\n\t\t\t\t...BookMetadata\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\tcurrentPage\n\t\t\t\t\ttotalPages\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.SeriesBooksSceneDocument,
     "\n\tquery SeriesBookGrid($id: String!, $pagination: Pagination) {\n\t\tmedia(filter: { seriesId: { eq: $id } }, pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tthumbnail {\n\t\t\t\t\turl\n\t\t\t\t}\n\t\t\t\tpages\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\tcurrentCursor\n\t\t\t\t\tnextCursor\n\t\t\t\t\tlimit\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.SeriesBookGridDocument,
+    "\n\tquery SeriesSettingsScene($id: ID!) {\n\t\tseriesById(id: $id) {\n\t\t\t...SeriesThumbnailSelector\n\t\t}\n\t}\n": typeof types.SeriesSettingsSceneDocument,
+    "\n\tmutation SeriesSettingsSceneAnalyze($id: ID!) {\n\t\tanalyzeSeries(id: $id)\n\t}\n": typeof types.SeriesSettingsSceneAnalyzeDocument,
+    "\n\tfragment SeriesThumbnailSelector on Series {\n\t\tid\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t}\n": typeof types.SeriesThumbnailSelectorFragmentDoc,
+    "\n\tmutation SeriesThumbnailSelectorUpdate($id: ID!, $input: UpdateThumbnailInput!) {\n\t\tupdateSeriesThumbnail(id: $id, input: $input) {\n\t\t\tid\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": typeof types.SeriesThumbnailSelectorUpdateDocument,
+    "\n\tmutation SeriesThumbnailSelectorUpload($id: ID!, $file: Upload!) {\n\t\tuploadSeriesThumbnail(id: $id, file: $file) {\n\t\t\tid\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": typeof types.SeriesThumbnailSelectorUploadDocument,
     "\n\tquery APIKeyTable {\n\t\tapiKeys {\n\t\t\tid\n\t\t\tname\n\t\t\tpermissions {\n\t\t\t\t__typename\n\t\t\t\t... on UserPermissionStruct {\n\t\t\t\t\tvalue\n\t\t\t\t}\n\t\t\t}\n\t\t\tlastUsedAt\n\t\t\texpiresAt\n\t\t\tcreatedAt\n\t\t}\n\t}\n": typeof types.ApiKeyTableDocument,
     "\n\tmutation CreateAPIKeyModal($input: ApikeyInput!) {\n\t\tcreateApiKey(input: $input) {\n\t\t\tapiKey {\n\t\t\t\tid\n\t\t\t}\n\t\t\tsecret\n\t\t}\n\t}\n": typeof types.CreateApiKeyModalDocument,
     "\n\tmutation DeleteAPIKeyConfirmModal($id: Int!) {\n\t\tdeleteApiKey(id: $id) {\n\t\t\tid\n\t\t}\n\t}\n": typeof types.DeleteApiKeyConfirmModalDocument,
@@ -169,6 +179,11 @@ const documents: Documents = {
     "\n\tmutation SendEmailAttachment($id: ID!, $sendTo: [EmailerSendTo!]!) {\n\t\tsendAttachmentEmail(input: { mediaIds: [$id], sendTo: $sendTo }) {\n\t\t\tsentCount\n\t\t\terrors\n\t\t}\n\t}\n": types.SendEmailAttachmentDocument,
     "\n\tquery BookReaderScene($id: ID!) {\n\t\tmediaById(id: $id) {\n\t\t\tid\n\t\t\tresolvedName\n\t\t\tpages\n\t\t\textension\n\t\t\treadProgress {\n\t\t\t\tpercentageCompleted\n\t\t\t\tepubcfi\n\t\t\t\tpage\n\t\t\t\telapsedSeconds\n\t\t\t}\n\t\t\tlibraryConfig {\n\t\t\t\tdefaultReadingImageScaleFit\n\t\t\t\tdefaultReadingMode\n\t\t\t\tdefaultReadingDir\n\t\t\t}\n\t\t\tmetadata {\n\t\t\t\tpageAnalysis {\n\t\t\t\t\tdimensions {\n\t\t\t\t\t\theight\n\t\t\t\t\t\twidth\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.BookReaderSceneDocument,
     "\n\tmutation UpdateReadProgress($id: ID!, $page: Int!, $elapsedSeconds: Int!) {\n\t\tupdateMediaProgress(id: $id, page: $page, elapsedSeconds: $elapsedSeconds) {\n\t\t\t__typename\n\t\t}\n\t}\n": types.UpdateReadProgressDocument,
+    "\n\tquery BookManagementScene($id: ID!) {\n\t\tmediaById(id: $id) {\n\t\t\tid\n\t\t\tresolvedName\n\t\t\tlibrary {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t\tseries {\n\t\t\t\tid\n\t\t\t\tresolvedName\n\t\t\t}\n\t\t\t...BookThumbnailSelector\n\t\t}\n\t}\n": types.BookManagementSceneDocument,
+    "\n\tmutation BookManagementSceneAnalyze($id: ID!) {\n\t\tanalyzeMedia(id: $id)\n\t}\n": types.BookManagementSceneAnalyzeDocument,
+    "\n\tfragment BookThumbnailSelector on Media {\n\t\tid\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t\tpages\n\t}\n": types.BookThumbnailSelectorFragmentDoc,
+    "\n\tmutation BookThumbnailSelectorUpdate($id: ID!, $input: PageBasedThumbnailInput!) {\n\t\tupdateMediaThumbnail(id: $id, input: $input) {\n\t\t\tid\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": types.BookThumbnailSelectorUpdateDocument,
+    "\n\tmutation BookThumbnailSelectorUpload($id: ID!, $file: Upload!) {\n\t\tuploadMediaThumbnail(id: $id, file: $file) {\n\t\t\tid\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": types.BookThumbnailSelectorUploadDocument,
     "\n\tquery BookSearchScene(\n\t\t$filter: MediaFilterInput!\n\t\t$orderBy: [MediaOrderBy!]!\n\t\t$pagination: Pagination!\n\t) {\n\t\tmedia(filter: $filter, orderBy: $orderBy, pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...BookCard\n\t\t\t\t...BookMetadata\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\tcurrentPage\n\t\t\t\t\ttotalPages\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.BookSearchSceneDocument,
     "\n\tquery CreateLibrarySceneExistingLibraries {\n\t\tlibraries(pagination: { none: { unpaginated: true } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t\tpath\n\t\t\t}\n\t\t}\n\t}\n": types.CreateLibrarySceneExistingLibrariesDocument,
     "\n\tmutation CreateLibrarySceneCreateLibrary($input: CreateOrUpdateLibraryInput!) {\n\t\tcreateLibrary(input: $input) {\n\t\t\tid\n\t\t}\n\t}\n": types.CreateLibrarySceneCreateLibraryDocument,
@@ -195,13 +210,18 @@ const documents: Documents = {
     "\n\tquery ScanHistoryTable($id: ID!) {\n\t\tlibraryById(id: $id) {\n\t\t\tid\n\t\t\tscanHistory {\n\t\t\t\tid\n\t\t\t\tjobId\n\t\t\t\ttimestamp\n\t\t\t\toptions\n\t\t\t}\n\t\t}\n\t}\n": types.ScanHistoryTableDocument,
     "\n\tquery ScanRecordInspectorJobs($id: ID!, $loadLogs: Boolean!) {\n\t\tjobById(id: $id) {\n\t\t\tid\n\t\t\toutputData {\n\t\t\t\t__typename\n\t\t\t\t... on LibraryScanOutput {\n\t\t\t\t\ttotalFiles\n\t\t\t\t\ttotalDirectories\n\t\t\t\t\tignoredFiles\n\t\t\t\t\tskippedFiles\n\t\t\t\t\tignoredDirectories\n\t\t\t\t\tcreatedMedia\n\t\t\t\t\tupdatedMedia\n\t\t\t\t\tcreatedSeries\n\t\t\t\t\tupdatedSeries\n\t\t\t\t}\n\t\t\t}\n\t\t\tlogs @include(if: $loadLogs) {\n\t\t\t\tid\n\t\t\t}\n\t\t}\n\t}\n": types.ScanRecordInspectorJobsDocument,
     "\n\tmutation DeleteLibraryThumbnails($id: ID!) {\n\t\tdeleteLibraryThumbnails(id: $id)\n\t}\n": types.DeleteLibraryThumbnailsDocument,
-    "\n\tmutation LibraryThumbnailSelectorUpdate($id: ID!, $input: UpdateLibraryThumbnailInput!) {\n\t\tupdateLibraryThumbnail(id: $id, input: $input) {\n\t\t\tid\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": types.LibraryThumbnailSelectorUpdateDocument,
+    "\n\tmutation LibraryThumbnailSelectorUpdate($id: ID!, $input: UpdateThumbnailInput!) {\n\t\tupdateLibraryThumbnail(id: $id, input: $input) {\n\t\t\tid\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": types.LibraryThumbnailSelectorUpdateDocument,
     "\n\tmutation LibraryThumbnailSelectorUpload($id: ID!, $file: Upload!) {\n\t\tuploadLibraryThumbnail(id: $id, file: $file) {\n\t\t\tid\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": types.LibraryThumbnailSelectorUploadDocument,
     "\n\tmutation RegenerateThumbnails($id: ID!, $forceRegenerate: Boolean!) {\n\t\tgenerateLibraryThumbnails(id: $id, forceRegenerate: $forceRegenerate)\n\t}\n": types.RegenerateThumbnailsDocument,
     "\n\tquery SeriesLayout($id: ID!) {\n\t\tseriesById(id: $id) {\n\t\t\tid\n\t\t\tpath\n\t\t\tlibrary {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t\tresolvedName\n\t\t\tresolvedDescription\n\t\t\ttags {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t}\n\t}\n": types.SeriesLayoutDocument,
     "\n\tquery SeriesLibrayLink($id: ID!) {\n\t\tlibraryById(id: $id) {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t}\n": types.SeriesLibrayLinkDocument,
     "\n\tquery SeriesBooksScene(\n\t\t$filter: MediaFilterInput!\n\t\t$orderBy: [MediaOrderBy!]!\n\t\t$pagination: Pagination!\n\t) {\n\t\tmedia(filter: $filter, orderBy: $orderBy, pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...BookCard\n\t\t\t\t...BookMetadata\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\tcurrentPage\n\t\t\t\t\ttotalPages\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.SeriesBooksSceneDocument,
     "\n\tquery SeriesBookGrid($id: String!, $pagination: Pagination) {\n\t\tmedia(filter: { seriesId: { eq: $id } }, pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tthumbnail {\n\t\t\t\t\turl\n\t\t\t\t}\n\t\t\t\tpages\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\tcurrentCursor\n\t\t\t\t\tnextCursor\n\t\t\t\t\tlimit\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.SeriesBookGridDocument,
+    "\n\tquery SeriesSettingsScene($id: ID!) {\n\t\tseriesById(id: $id) {\n\t\t\t...SeriesThumbnailSelector\n\t\t}\n\t}\n": types.SeriesSettingsSceneDocument,
+    "\n\tmutation SeriesSettingsSceneAnalyze($id: ID!) {\n\t\tanalyzeSeries(id: $id)\n\t}\n": types.SeriesSettingsSceneAnalyzeDocument,
+    "\n\tfragment SeriesThumbnailSelector on Series {\n\t\tid\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t}\n": types.SeriesThumbnailSelectorFragmentDoc,
+    "\n\tmutation SeriesThumbnailSelectorUpdate($id: ID!, $input: UpdateThumbnailInput!) {\n\t\tupdateSeriesThumbnail(id: $id, input: $input) {\n\t\t\tid\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": types.SeriesThumbnailSelectorUpdateDocument,
+    "\n\tmutation SeriesThumbnailSelectorUpload($id: ID!, $file: Upload!) {\n\t\tuploadSeriesThumbnail(id: $id, file: $file) {\n\t\t\tid\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": types.SeriesThumbnailSelectorUploadDocument,
     "\n\tquery APIKeyTable {\n\t\tapiKeys {\n\t\t\tid\n\t\t\tname\n\t\t\tpermissions {\n\t\t\t\t__typename\n\t\t\t\t... on UserPermissionStruct {\n\t\t\t\t\tvalue\n\t\t\t\t}\n\t\t\t}\n\t\t\tlastUsedAt\n\t\t\texpiresAt\n\t\t\tcreatedAt\n\t\t}\n\t}\n": types.ApiKeyTableDocument,
     "\n\tmutation CreateAPIKeyModal($input: ApikeyInput!) {\n\t\tcreateApiKey(input: $input) {\n\t\t\tapiKey {\n\t\t\t\tid\n\t\t\t}\n\t\t\tsecret\n\t\t}\n\t}\n": types.CreateApiKeyModalDocument,
     "\n\tmutation DeleteAPIKeyConfirmModal($id: Int!) {\n\t\tdeleteApiKey(id: $id) {\n\t\t\tid\n\t\t}\n\t}\n": types.DeleteApiKeyConfirmModalDocument,
@@ -392,6 +412,26 @@ export function graphql(source: "\n\tmutation UpdateReadProgress($id: ID!, $page
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
+export function graphql(source: "\n\tquery BookManagementScene($id: ID!) {\n\t\tmediaById(id: $id) {\n\t\t\tid\n\t\t\tresolvedName\n\t\t\tlibrary {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t\tseries {\n\t\t\t\tid\n\t\t\t\tresolvedName\n\t\t\t}\n\t\t\t...BookThumbnailSelector\n\t\t}\n\t}\n"): typeof import('./graphql').BookManagementSceneDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tmutation BookManagementSceneAnalyze($id: ID!) {\n\t\tanalyzeMedia(id: $id)\n\t}\n"): typeof import('./graphql').BookManagementSceneAnalyzeDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tfragment BookThumbnailSelector on Media {\n\t\tid\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t\tpages\n\t}\n"): typeof import('./graphql').BookThumbnailSelectorFragmentDoc;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tmutation BookThumbnailSelectorUpdate($id: ID!, $input: PageBasedThumbnailInput!) {\n\t\tupdateMediaThumbnail(id: $id, input: $input) {\n\t\t\tid\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').BookThumbnailSelectorUpdateDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tmutation BookThumbnailSelectorUpload($id: ID!, $file: Upload!) {\n\t\tuploadMediaThumbnail(id: $id, file: $file) {\n\t\t\tid\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').BookThumbnailSelectorUploadDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
 export function graphql(source: "\n\tquery BookSearchScene(\n\t\t$filter: MediaFilterInput!\n\t\t$orderBy: [MediaOrderBy!]!\n\t\t$pagination: Pagination!\n\t) {\n\t\tmedia(filter: $filter, orderBy: $orderBy, pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...BookCard\n\t\t\t\t...BookMetadata\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\tcurrentPage\n\t\t\t\t\ttotalPages\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').BookSearchSceneDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
@@ -496,7 +536,7 @@ export function graphql(source: "\n\tmutation DeleteLibraryThumbnails($id: ID!) 
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n\tmutation LibraryThumbnailSelectorUpdate($id: ID!, $input: UpdateLibraryThumbnailInput!) {\n\t\tupdateLibraryThumbnail(id: $id, input: $input) {\n\t\t\tid\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').LibraryThumbnailSelectorUpdateDocument;
+export function graphql(source: "\n\tmutation LibraryThumbnailSelectorUpdate($id: ID!, $input: UpdateThumbnailInput!) {\n\t\tupdateLibraryThumbnail(id: $id, input: $input) {\n\t\t\tid\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').LibraryThumbnailSelectorUpdateDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -521,6 +561,26 @@ export function graphql(source: "\n\tquery SeriesBooksScene(\n\t\t$filter: Media
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n\tquery SeriesBookGrid($id: String!, $pagination: Pagination) {\n\t\tmedia(filter: { seriesId: { eq: $id } }, pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tthumbnail {\n\t\t\t\t\turl\n\t\t\t\t}\n\t\t\t\tpages\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\tcurrentCursor\n\t\t\t\t\tnextCursor\n\t\t\t\t\tlimit\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').SeriesBookGridDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tquery SeriesSettingsScene($id: ID!) {\n\t\tseriesById(id: $id) {\n\t\t\t...SeriesThumbnailSelector\n\t\t}\n\t}\n"): typeof import('./graphql').SeriesSettingsSceneDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tmutation SeriesSettingsSceneAnalyze($id: ID!) {\n\t\tanalyzeSeries(id: $id)\n\t}\n"): typeof import('./graphql').SeriesSettingsSceneAnalyzeDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tfragment SeriesThumbnailSelector on Series {\n\t\tid\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t}\n"): typeof import('./graphql').SeriesThumbnailSelectorFragmentDoc;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tmutation SeriesThumbnailSelectorUpdate($id: ID!, $input: UpdateThumbnailInput!) {\n\t\tupdateSeriesThumbnail(id: $id, input: $input) {\n\t\t\tid\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').SeriesThumbnailSelectorUpdateDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tmutation SeriesThumbnailSelectorUpload($id: ID!, $file: Upload!) {\n\t\tuploadSeriesThumbnail(id: $id, file: $file) {\n\t\t\tid\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').SeriesThumbnailSelectorUploadDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

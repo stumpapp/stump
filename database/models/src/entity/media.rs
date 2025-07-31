@@ -260,6 +260,12 @@ pub struct MediaThumbSelect {
 	pub series_id: String,
 }
 
+impl MediaThumbSelect {
+	pub fn columns() -> Vec<Column> {
+		vec![Column::Id, Column::Path, Column::SeriesId]
+	}
+}
+
 #[derive(Debug, FromQueryResult)]
 pub struct MediaNameCmpSelect {
 	pub name: String,

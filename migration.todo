@@ -1,6 +1,6 @@
 Backend / Core:
-- [ ] Typed GraphQL filter objects
-- [ ] Dynamic GraphQL ordering (e.g., `media(order_by: { title: ASC })`)
+- [x] Typed GraphQL filter objects
+- [x] Dynamic GraphQL ordering (e.g., `media(order_by: { title: ASC })`)
 - [ ] Finalize and test intial migration
 - [x] Unify `RequestContext` between REST and GraphQL APIs
   - [x] Port all middleware to work with updated types/structs/etc
@@ -10,16 +10,16 @@ Backend / Core:
   - [x] library
 - [x] Move all the deserializer utils (e.g., age_rating_deserializer)
 - [ ] Remove sse and ws from REST, move to GraphQL
-  - [ ] Port SSE to GraphQL
+  - [x] Port SSE to GraphQL
   - [ ] Remove SSE from REST
   - [x] Remove WS from REST
 - [ ] Port other remaining RESTful APIs:
-  - [ ] smart-lists
+  - [x] smart-lists
   - [ ] notifier
-  - [ ] emailer
+  - [x] emailer
   - [ ] config
-  - [ ] api_key
-  - [ ] user
+  - [x] api_key
+  - [x] user
   - [x] OPDS
     - [x] OPDS 1.2
     - [x] OPDS 2.0

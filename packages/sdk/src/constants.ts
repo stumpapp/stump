@@ -28,6 +28,7 @@ export const cacheKeys = {
 	getStats: 'getStats',
 	recentlyAddedMedia: 'recentlyAddedMedia',
 	media: 'media',
+	mediaById: 'mediaById',
 	apiKeys: 'apiKeys',
 	logs: 'logs',
 	jobs: 'jobs',

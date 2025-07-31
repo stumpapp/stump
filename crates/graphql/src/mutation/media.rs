@@ -1,13 +1,25 @@
 use async_graphql::{Context, Object, Result, ID};
-use models::entity::{finished_reading_session, media, reading_session, user::AuthUser};
-use sea_orm::{
-	prelude::*, sea_query::OnConflict, DatabaseTransaction, QuerySelect, Set,
-	TransactionTrait,
+use models::{
+	entity::{
+		finished_reading_session, library, library_config, media, reading_session,
+		series, user::AuthUser,
+	},
+	shared::enums::UserPermission,
 };
-use stump_core::filesystem::media::analyze_media_job::AnalyzeMediaJob;
+use sea_orm::{
+	prelude::*,
+	sea_query::{OnConflict, Query},
+	DatabaseTransaction, QuerySelect, Set, TransactionTrait,
+};
+use stump_core::filesystem::{
+	image::{generate_book_thumbnail, GenerateThumbnailOptions},
+	media::analyze_media_job::AnalyzeMediaJob,
+};
 
 use crate::{
 	data::{CoreContext, RequestContext},
+	guard::PermissionGuard,
+	input::thumbnail::PageBasedThumbnailInput,
 	mutation::epub::ReadingProgressOutput,
 	object::media::Media,
 };
@@ -62,7 +74,73 @@ impl MediaMutation {
 		Err("Not implemented".into())
 	}
 
-	// TODO(graphql): (thumbnail API remains RESTful). This serves as a reminder, it won't live here
+	/// Update the thumbnail for a book. This will replace the existing thumbnail with the the one
+	/// associated with the provided input (book). If the book does not have a thumbnail, one
+	/// will be generated based on the library's thumbnail configuration.
+	#[graphql(guard = "PermissionGuard::one(UserPermission::EditLibrary)")]
+	async fn update_media_thumbnail(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+		input: PageBasedThumbnailInput,
+	) -> Result<Media> {
+		let core = ctx.data::<CoreContext>()?;
+		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+
+		let book = media::ModelWithMetadata::find_for_user(user)
+			.filter(media::Column::Id.eq(id.to_string()))
+			.into_model::<media::ModelWithMetadata>()
+			.one(core.conn.as_ref())
+			.await?
+			.ok_or("Book not found")?;
+
+		let series_id = book
+			.media
+			.series_id
+			.clone()
+			.ok_or("Series ID not set on book")?;
+
+		let (_library, config) = library::Entity::find_for_user(user)
+			.filter(
+				library::Column::Id.in_subquery(
+					Query::select()
+						.column(series::Column::LibraryId)
+						.from(series::Entity)
+						.and_where(series::Column::Id.eq(series_id))
+						.to_owned(),
+				),
+			)
+			.find_also_related(library_config::Entity)
+			.one(core.conn.as_ref())
+			.await?
+			.ok_or("Associated library for book not found")?;
+
+		let page = input.page();
+
+		if book.media.extension == "epub" && page > 1 {
+			return Err("Cannot set thumbnail from EPUB chapter".into());
+		}
+
+		let image_options = config
+			.ok_or("Library config not found")?
+			.thumbnail_config
+			.unwrap_or_default()
+			.with_page(page);
+
+		let (_, path_buf, _) = generate_book_thumbnail(
+			&book.media.clone().into(),
+			GenerateThumbnailOptions {
+				image_options,
+				core_config: core.config.as_ref().clone(),
+				force_regen: true,
+				filename: Some(id.to_string()),
+			},
+		)
+		.await?;
+		tracing::debug!(path = ?path_buf, "Generated book thumbnail");
+
+		Ok(book.into())
+	}
 
 	async fn delete_media_progress(&self, ctx: &Context<'_>, id: ID) -> Result<Media> {
 		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;

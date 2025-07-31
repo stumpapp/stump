@@ -1158,6 +1158,12 @@ type Mutation {
 	deleteBookmark(epubcfi: String!): Bookmark!
 	analyzeMedia(id: ID!): Boolean!
 	convertMedia(id: ID!): Boolean!
+	"""
+	Update the thumbnail for a book. This will replace the existing thumbnail with the the one
+	associated with the provided input (book). If the book does not have a thumbnail, one
+	will be generated based on the library's thumbnail configuration.
+	"""
+	updateMediaThumbnail(id: ID!, input: PageBasedThumbnailInput!): Media!
 	deleteMediaProgress(id: ID!): Media!
 	updateMediaProgress(id: ID!, page: Int, elapsedSeconds: Int): ReadingProgressOutput!
 	markMediaAsComplete(id: ID!, isComplete: Boolean!, page: Int): FinishedReadingSessionModel
@@ -1190,7 +1196,7 @@ type Mutation {
 	associated with the provided input (book). If the book does not have a thumbnail, one
 	will be generated based on the library's thumbnail configuration.
 	"""
-	updateLibraryThumbnail(id: ID!, input: UpdateLibraryThumbnailInput!): Library!
+	updateLibraryThumbnail(id: ID!, input: UpdateThumbnailInput!): Library!
 	"""
 	Exclude users from a library, preventing them from seeing the library in the UI. This operates as a
 	full replacement of the excluded users list, so any users not included in the provided list will be
@@ -1245,6 +1251,12 @@ type Mutation {
 	"""
 	deleteReadingList(id: String!): ReadingList!
 	analyzeSeries(id: ID!): Boolean!
+	"""
+	Update the thumbnail for a series. This will replace the existing thumbnail with the the one
+	associated with the provided input (book). If the book does not have a thumbnail, one
+	will be generated based on the library's thumbnail configuration.
+	"""
+	updateSeriesThumbnail(id: ID!, input: UpdateThumbnailInput!): Series!
 	markSeriesAsComplete(id: ID!): Series!
 	scanSeries(id: ID!): Boolean!
 	"""
@@ -1264,6 +1276,8 @@ type Mutation {
 	uploadBooks(input: UploadBooksInput!): Boolean!
 	uploadSeries(input: UploadSeriesInput!): Boolean!
 	uploadLibraryThumbnail(id: ID!, file: Upload!): Library!
+	uploadSeriesThumbnail(id: ID!, file: Upload!): Series!
+	uploadMediaThumbnail(id: ID!, file: Upload!): Media!
 	deleteLoginActivity: Int!
 	createUser(input: CreateUserInput!): User!
 	updateViewer(input: UpdateUserInput!): User!
@@ -1400,6 +1414,13 @@ enum OrderDirection {
 "A struct containing the various analyses of a book in Stump, e.g., page dimensions."
 type PageAnalysis {
 	dimensions: [PageDimension!]!
+}
+
+input PageBasedThumbnailInput {
+	"The page to pull inside the media file for generating the thumbnail"
+	page: Int!
+	"A flag indicating whether the page is zero based (i.e. 0 is the first page)"
+	isZeroBased: Boolean = null
 }
 
 """
@@ -2117,12 +2138,12 @@ input UpdateBookClubInput {
 	emoji: String
 }
 
-input UpdateLibraryThumbnailInput {
+input UpdateThumbnailInput {
 	"The ID of the media inside the series to fetch"
 	mediaId: String!
-	"The page of the media to use for the thumbnail"
+	"The page to pull inside the media file for generating the thumbnail"
 	page: Int!
-	"A flag indicating whether the page is zero based"
+	"A flag indicating whether the page is zero based (i.e. 0 is the first page)"
 	isZeroBased: Boolean = null
 }
 

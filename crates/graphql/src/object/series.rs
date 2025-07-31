@@ -1,9 +1,11 @@
-use async_graphql::{ComplexObject, Context, Result, SimpleObject};
+use async_graphql::{
+	dataloader::DataLoader, ComplexObject, Context, Result, SimpleObject,
+};
 
 use models::{
 	entity::{
 		finished_reading_session, library, media, reading_session, series,
-		series_metadata, series_to_tag, tag, user::AuthUser,
+		series_metadata, series_to_tag, tag,
 	},
 	shared::image::ImageRef,
 };
@@ -11,7 +13,12 @@ use sea_orm::{
 	prelude::*, sea_query::Query, Condition, JoinType, QueryOrder, QuerySelect,
 };
 
-use crate::data::{CoreContext, RequestContext, ServiceContext};
+use crate::{
+	data::{CoreContext, RequestContext, ServiceContext},
+	loader::{
+		series_count::SeriesCountLoader, series_finished_count::SeriesFinishedCountLoader,
+	},
+};
 
 use super::{library::Library, media::Media, tag::Tag};
 
@@ -74,15 +81,10 @@ impl Series {
 		Ok(models.into_iter().map(Media::from).collect())
 	}
 
-	// TODO: put behind data loader
-
-	async fn media_count(&self, ctx: &Context<'_>) -> Result<u64> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
-		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
-
-		let media_count = media::Entity::find_for_series_id(user, self.model.id.clone())
-			.count(conn)
-			.await?;
+	async fn media_count(&self, ctx: &Context<'_>) -> Result<i64> {
+		let loader = ctx.data::<DataLoader<SeriesCountLoader>>()?;
+		let series_id = self.model.id.clone();
+		let media_count = loader.load_one(series_id).await?.unwrap_or(0i64);
 
 		Ok(media_count)
 	}
@@ -175,22 +177,15 @@ impl Series {
 	}
 
 	async fn is_complete(&self, ctx: &Context<'_>) -> Result<bool> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
-		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
-
 		let (media_count, finished_count) =
-			get_series_progress(user, self.model.id.clone(), conn).await?;
+			get_series_progress(ctx, self.model.id.clone()).await?;
 
 		Ok(finished_count >= media_count)
 	}
 
-	// TODO: put behind data loader
 	async fn percentage_completed(&self, ctx: &Context<'_>) -> Result<f32> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
-		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
-
 		let (media_count, finished_count) =
-			get_series_progress(user, self.model.id.clone(), conn).await?;
+			get_series_progress(ctx, self.model.id.clone()).await?;
 
 		if media_count == 0 {
 			return Ok(0.0);
@@ -201,26 +196,19 @@ impl Series {
 		Ok(percentage)
 	}
 
-	async fn read_count(&self, ctx: &Context<'_>) -> Result<u64> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
-		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
-
-		let finished_count = finished_reading_session::Entity::find_finished_in_series(
-			user,
-			self.model.id.clone(),
-		)
-		.count(conn)
-		.await?;
+	async fn read_count(&self, ctx: &Context<'_>) -> Result<i64> {
+		let finished_loader = ctx.data::<DataLoader<SeriesFinishedCountLoader>>()?;
+		let finished_count = finished_loader
+			.load_one(self.model.id.clone())
+			.await?
+			.unwrap_or(0i64);
 
 		Ok(finished_count)
 	}
 
-	async fn unread_count(&self, ctx: &Context<'_>) -> Result<u64> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
-		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
-
+	async fn unread_count(&self, ctx: &Context<'_>) -> Result<i64> {
 		let (media_count, finished_count) =
-			get_series_progress(user, self.model.id.clone(), conn).await?;
+			get_series_progress(ctx, self.model.id.clone()).await?;
 
 		Ok(std::cmp::max(0, media_count - finished_count))
 	}
@@ -264,21 +252,12 @@ impl Series {
 	}
 }
 
-async fn get_series_progress(
-	user: &AuthUser,
-	series_id: String,
-	conn: &DatabaseConnection,
-) -> Result<(u64, u64)> {
-	let media_count = media::Entity::find_for_series_id(user, series_id.clone())
-		.count(conn)
-		.await?;
+async fn get_series_progress(ctx: &Context<'_>, series_id: String) -> Result<(i64, i64)> {
+	let loader = ctx.data::<DataLoader<SeriesCountLoader>>()?;
+	let media_count = loader.load_one(series_id.clone()).await?.unwrap_or(0i64);
 
-	let finished_count = finished_reading_session::Entity::find_finished_in_series(
-		user,
-		series_id.clone(),
-	)
-	.count(conn)
-	.await?;
+	let finished_loader = ctx.data::<DataLoader<SeriesFinishedCountLoader>>()?;
+	let finished_count = finished_loader.load_one(series_id).await?.unwrap_or(0i64);
 
 	Ok((media_count, finished_count))
 }

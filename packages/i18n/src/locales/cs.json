@@ -275,7 +275,7 @@
 						"create": "Nastavení náhledů",
 						"update": "Generování"
 					},
-					"description": "Zlepšení dobu načítání při procházení knihovny generováním náhledů knih"
+					"description": "Zlepšení doby načítání při procházení knihovny generováním náhledů knih"
 				},
 				"enableSwitch": {
 					"label": "Zapnuto",

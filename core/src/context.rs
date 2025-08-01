@@ -13,7 +13,6 @@ use crate::{
 	event::CoreEvent,
 	filesystem::scanner::LibraryWatcher,
 	job::{Executor, JobController, JobControllerCommand},
-	prisma::{self, PrismaClient},
 	CoreError, CoreResult,
 };
 
@@ -26,7 +25,6 @@ type EventChannel = (Sender<CoreEvent>, Receiver<CoreEvent>);
 pub struct Ctx {
 	pub config: Arc<StumpConfig>,
 	pub conn: Arc<DatabaseConnection>,
-	pub db: Arc<PrismaClient>,
 	pub job_controller: Arc<JobController>,
 	pub event_channel: Arc<EventChannel>,
 	pub library_watcher: Arc<LibraryWatcher>,
@@ -51,7 +49,6 @@ impl Ctx {
 	pub async fn new(config: StumpConfig) -> Ctx {
 		let config = Arc::new(config.clone());
 		let conn = Arc::new(db::create_connection(&config).await);
-		let db = Arc::new(db::create_client(&config).await);
 		let event_channel = Arc::new(channel::<CoreEvent>(1024));
 
 		let job_controller =
@@ -62,43 +59,10 @@ impl Ctx {
 		Ctx {
 			config,
 			conn,
-			db,
 			job_controller,
 			event_channel,
 			library_watcher,
 		}
-	}
-
-	// TODO(sea-orm): Fix
-	// Note: I cannot use #[cfg(test)] here because the tests are in a different crate and
-	// the `cfg` attribute only works for the current crate. Potential workarounds:
-	// - https://github.com/rust-lang/cargo/issues/8379
-
-	/// Creates a [Ctx] instance for testing **only**. The prisma client is created
-	/// pointing to the `integration-tests` crate relative to the `core` crate.
-	///
-	/// **This should not be used in production.**
-	pub async fn integration_test_mock() -> Ctx {
-		let config = Arc::new(StumpConfig::debug());
-		let conn = Arc::new(db::create_connection(&config).await);
-		let event_channel = Arc::new(channel::<CoreEvent>(1024));
-
-		unimplemented!()
-
-		// // Create job manager
-		// let job_controller =
-		// 	JobController::new(db.clone(), config.clone(), event_channel.0.clone());
-
-		// let library_watcher =
-		// 	Arc::new(LibraryWatcher::new(db.clone(), job_controller.clone()));
-
-		// Ctx {
-		// 	config,
-		// 	db,
-		// 	job_controller,
-		// 	event_channel,
-		// 	library_watcher,
-		// }
 	}
 
 	/// Creates a [Ctx] instance for testing **only**. The prisma client is created
@@ -106,10 +70,8 @@ impl Ctx {
 	/// connect to a real database.
 	pub fn mock_sea(mock_db: MockDatabase) -> Ctx {
 		let config = Arc::new(StumpConfig::debug());
-		let (client, _) = prisma::PrismaClient::_mock();
 
 		let event_channel = Arc::new(channel::<CoreEvent>(1024));
-		let db = Arc::new(client);
 		let conn = Arc::new(mock_db.into_connection());
 
 		// Create job manager
@@ -120,42 +82,11 @@ impl Ctx {
 
 		Ctx {
 			config,
-			db,
 			conn,
 			job_controller,
 			event_channel,
 			library_watcher,
 		}
-	}
-
-	/// Creates a [Ctx] instance for testing **only**. The prisma client is created
-	/// with a mock store, allowing for easy testing of the core without needing to
-	/// connect to a real database.
-	pub fn mock() -> (Ctx, prisma_client_rust::MockStore) {
-		let config = Arc::new(StumpConfig::debug());
-		let (client, mock) = prisma::PrismaClient::_mock();
-
-		let event_channel = Arc::new(channel::<CoreEvent>(1024));
-		let db = Arc::new(client);
-		let mock_db = sea_orm::MockDatabase::new(sea_orm::DatabaseBackend::Sqlite);
-		let conn = Arc::new(mock_db.into_connection());
-
-		// Create job manager
-		let job_controller =
-			JobController::new(conn.clone(), config.clone(), event_channel.0.clone());
-		let library_watcher =
-			Arc::new(LibraryWatcher::new(conn.clone(), job_controller.clone()));
-
-		let ctx = Ctx {
-			config,
-			db,
-			conn,
-			job_controller,
-			event_channel,
-			library_watcher,
-		};
-
-		(ctx, mock)
 	}
 
 	/// Wraps the [Ctx] in an [Arc], allowing it to be shared across threads. This

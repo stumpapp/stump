@@ -63,10 +63,8 @@ FROM rust:1.85-bookworm AS builder
 
 ARG GIT_REV
 ARG TARGETARCH
-ARG RUN_PRISMA_GENERATE
 
 ENV GIT_REV=${GIT_REV}
-ENV RUN_PRISMA_GENERATE=${RUN_PRISMA_GENERATE}
 
 RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/apt \
     apt-get update && apt-get install -y \
@@ -88,7 +86,7 @@ COPY . .
 
 RUN --mount=type=cache,target=/usr/local/cargo/registry,id=${TARGETARCH} \
     --mount=type=cache,target=/app/target,id=${TARGETARCH} \
-    RUN_PRISMA_GENERATE=${RUN_PRISMA_GENERATE} ./docker/build_server.sh && \
+    ./docker/build_server.sh && \
     cp ./target/release/stump_server ./stump_server
 
 # ------------------------------------------------------------------------------

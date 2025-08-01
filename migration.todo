@@ -27,8 +27,8 @@ Backend / Core:
 - [ ] Develop migration system according to SeaORM standards
 - [ ] Investigate whether `init_journal_mode` is needed
 - [ ] Address any remaining SeaORM issues (see `TODO(sea-orm)` or `TODO(graphql)` comments)
-- [ ] Remove Prisma entirely
-- [ ] Remove codegen crate
+- [x] Remove Prisma entirely
+- [x] Remove codegen crate
 - [ ] Remove utoipa and other OpenAPI-related crates
 
 Frontend / JS-related Packages:

@@ -26,7 +26,6 @@
 		"dev:desktop": "concurrently -n server,desktop -c green.bold,blue.bold \"cargo run -p stump_server\" \"yarn desktop dev\"",
 		"dev:web": "concurrently -n server,web -c green.bold,blue.bold \"bacon run-server --headless\" \"yarn web dev\"",
 		"dev:expo": "concurrently -n server,expo -c green.bold,blue.bold \"bacon run-server --headless\" \"yarn expo dev\"",
-		"prisma-studio": "npx prisma studio --schema core/prisma/schema.prisma",
 		"format": "lerna run format --stream --parallel",
 		"nuke": "lerna run nuke",
 		"android": "expo run:android",

@@ -1,7 +1,7 @@
 use std::path::{Path, PathBuf};
 
+use chrono::{DateTime, FixedOffset, Utc};
 use models::entity::{library_config, media, media_metadata};
-use prisma_client_rust::chrono::{DateTime, FixedOffset, Utc};
 use sea_orm::Set;
 use uuid::Uuid;
 

@@ -12,7 +12,6 @@ harness = true
 
 [dev-dependencies]
 serde = { workspace = true }
-prisma-client-rust = { workspace = true }
 tokio = { workspace = true }
 stump_core = { path = ".." }
 tempfile = { workspace = true }

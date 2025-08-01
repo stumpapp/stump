@@ -5,10 +5,6 @@ use axum::{
 	Json,
 };
 use cli::CliError;
-use prisma_client_rust::{
-	prisma_errors::query_engine::{RecordNotFound, UniqueKeyViolation},
-	QueryError,
-};
 use stump_core::{
 	error::CoreError,
 	filesystem::{
@@ -133,8 +129,6 @@ pub enum APIError {
 	#[error("{0}")]
 	SessionFetchError(#[from] SessionError),
 	#[error("{0}")]
-	PrismaError(#[from] Box<QueryError>),
-	#[error("{0}")]
 	DbError(#[from] sea_orm::error::DbErr),
 }
 
@@ -150,19 +144,10 @@ impl APIError {
 			APIError::NotImplemented => StatusCode::NOT_IMPLEMENTED,
 			APIError::ServiceUnavailable(_) => StatusCode::SERVICE_UNAVAILABLE,
 			APIError::BadGateway(_) => StatusCode::BAD_GATEWAY,
-			APIError::PrismaError(e) => {
-				if e.is_prisma_error::<RecordNotFound>() {
-					StatusCode::NOT_FOUND
-				} else if e.is_prisma_error::<UniqueKeyViolation>() {
-					StatusCode::UNPROCESSABLE_ENTITY
-				} else {
-					StatusCode::INTERNAL_SERVER_ERROR
-				}
+			APIError::DbError(error) => match error {
+				sea_orm::error::DbErr::RecordNotFound(_) => StatusCode::NOT_FOUND,
+				_ => StatusCode::INTERNAL_SERVER_ERROR,
 			},
-			// APIError::DbError(error) => match error {
-			// 	sea_orm::error::DbErr::RecordNotFound(_) => StatusCode::NOT_FOUND,
-			// 	_ => StatusCode::INTERNAL_SERVER_ERROR,
-			// },
 			APIError::Redirect(_) => StatusCode::TEMPORARY_REDIRECT,
 			_ => StatusCode::INTERNAL_SERVER_ERROR,
 		}
@@ -219,7 +204,6 @@ impl From<CoreError> for APIError {
 			CoreError::InternalError(err) => APIError::InternalServerError(err),
 			CoreError::IoError(err) => APIError::InternalServerError(err.to_string()),
 			CoreError::MigrationError(err) => APIError::InternalServerError(err),
-			CoreError::QueryError(err) => APIError::InternalServerError(err.to_string()),
 			CoreError::Unknown(err) => APIError::InternalServerError(err),
 			CoreError::Utf8ConversionError(err) => {
 				APIError::InternalServerError(err.to_string())
@@ -268,12 +252,6 @@ impl From<mpsc::error::SendError<CoreEvent>> for APIError {
 	}
 }
 
-impl From<prisma_client_rust::RelationNotFetchedError> for APIError {
-	fn from(e: prisma_client_rust::RelationNotFetchedError) -> Self {
-		APIError::InternalServerError(e.to_string())
-	}
-}
-
 impl From<FileError> for APIError {
 	fn from(error: FileError) -> APIError {
 		APIError::InternalServerError(error.to_string())
@@ -296,12 +274,6 @@ impl From<ProcessorError> for APIError {
 impl From<std::io::Error> for APIError {
 	fn from(error: std::io::Error) -> APIError {
 		APIError::InternalServerError(error.to_string())
-	}
-}
-
-impl From<prisma_client_rust::QueryError> for APIError {
-	fn from(error: prisma_client_rust::QueryError) -> Self {
-		Self::PrismaError(Box::new(error))
 	}
 }
 

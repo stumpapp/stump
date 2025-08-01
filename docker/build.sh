@@ -4,7 +4,6 @@ _ENGINE=${ENGINE:-docker}
 _FORMAT=${FORMAT:-auto}
 _PLATFORMS=${PLATFORMS:-linux/amd64}
 _TAGS=${TAGS:-"aaronleopold/stump:nightly"}
-_RUN_PRISMA_GENERATE=${RUN_PRISMA_GENERATE:=false}
 _GIT_REV=${GIT_REV:-$(git rev-parse --short HEAD)}
 _PUSH=${PUSH:-false}
 
@@ -28,5 +27,4 @@ ${_ENGINE} buildx build \
   --progress=$_FORMAT \
   --platform=$_PLATFORMS \
   ${FORMATTED_TAGS} \
-  --build-arg GIT_REV=$_GIT_REV \
-  --build-arg RUN_PRISMA_GENERATE=$_RUN_PRISMA_GENERATE .
+  --build-arg GIT_REV=$_GIT_REV .

@@ -322,11 +322,9 @@ impl FileProcessor for ZipProcessor {
 #[cfg(test)]
 mod tests {
 	use super::*;
-	use crate::filesystem::{
-		media::tests::{
-			get_nested_macos_compressed_cbz_path, get_test_cbz_path, get_test_zip_path,
-		},
-		tests::get_test_complex_zip_path,
+	use crate::filesystem::media::tests::{
+		get_nested_macos_compressed_cbz_path, get_test_cbz_path,
+		get_test_complex_zip_path, get_test_zip_path,
 	};
 
 	#[test]

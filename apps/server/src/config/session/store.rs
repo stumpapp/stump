@@ -1,8 +1,8 @@
 use std::sync::Arc;
 
 use async_trait::async_trait;
+use chrono::{DateTime, Duration, FixedOffset, Utc};
 use models::entity::{session, user::AuthUser};
-use prisma_client_rust::chrono::{DateTime, Duration, FixedOffset, Utc};
 use sea_orm::{prelude::*, sea_query::OnConflict, DatabaseConnection, Iterable, Set};
 use stump_core::{config::StumpConfig, Ctx};
 use tokio::time::MissedTickBehavior;
@@ -27,8 +27,6 @@ pub enum SessionError {
 	DbError(#[from] sea_orm::error::DbErr),
 	#[error("Session not found")]
 	NotFound,
-	#[error("{0}")]
-	QueryError(#[from] prisma_client_rust::queries::QueryError),
 	#[error("An error occurred while serializing or deserializing session data: {0}")]
 	SerdeError(#[from] serde_json::Error),
 }
@@ -40,7 +38,6 @@ impl From<SessionError> for session_store::Error {
 				session_store::Error::Backend("Session not found".to_string())
 			},
 			SessionError::DbError(e) => session_store::Error::Backend(e.to_string()),
-			SessionError::QueryError(e) => session_store::Error::Backend(e.to_string()),
 			SessionError::SerdeError(e) => session_store::Error::Decode(e.to_string()),
 		}
 	}

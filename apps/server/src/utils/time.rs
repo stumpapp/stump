@@ -1,4 +1,4 @@
-use prisma_client_rust::chrono::{DateTime, Utc};
+use chrono::{DateTime, Utc};
 
 use crate::errors::{APIError, APIResult};
 

@@ -89,18 +89,5 @@ uuid = { version = "1.10.0", features = ["v4"] }
 tokio-test = "0.4.4"
 pretty_assertions = "1.4.1"
 
-prisma-client-rust = { git = "https://github.com/darby42/prisma-client-rust.git", rev = "40a69fd", features = [
-  "sqlite-create-many",
-  "migrations",
-  "sqlite",
-  "mocking"
-], default-features = false }
-prisma-client-rust-cli = { git = "https://github.com/darby42/prisma-client-rust.git", rev = "40a69fd", features = [
-  "sqlite-create-many",
-  "migrations",
-  "sqlite",
-  "mocking"
-], default-features = false }
-
 # Only used to test with sea-orm
 maplit = { version = "1.0.2" }

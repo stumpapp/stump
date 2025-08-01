@@ -1,11 +1,11 @@
 use std::collections::HashMap;
 
+use chrono::{Datelike, NaiveDate};
 use merge::Merge;
 use pdf::{
 	object::InfoDict,
 	primitive::{Dictionary, PdfString},
 };
-use prisma_client_rust::chrono::{Datelike, NaiveDate};
 use sea_orm::{prelude::*, Set};
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;

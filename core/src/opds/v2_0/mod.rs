@@ -9,14 +9,12 @@ pub mod feed;
 pub mod group;
 pub mod link;
 pub mod metadata;
-mod prisma_macros;
 pub mod progression;
 pub mod properties;
 pub mod publication;
 mod utils;
 
 pub use error::OPDSV2Error;
-pub use prisma_macros::*;
 pub use utils::{ArrayOrItem, OPDSV2QueryExt};
 
 // TODO(OPDS-V2): facet (kinda confused on this one still)

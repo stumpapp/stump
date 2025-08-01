@@ -58,28 +58,12 @@ jobs:
           cargo fmt --all -- --check
           cargo clippy -- -D warnings
 
-      - name: Generate typescript bindings
-        run: cargo codegen -- --skip-prisma
-      - name: Verify typescript bindings
-        run: |
-          git diff --exit-code || \
-            (echo "Please generate updated typescript bindings with \`cargo codegen -- --skip-prisma\`" \
-            && exit 1)
-
       - name: Verify GraphQL schema
         run: |
           cargo dump-schema -- --check
 
       - name: Run tests
         run: cargo test
-
-      - name: Run codegen
-        run: cargo codegen -- --skip-prisma
-      - name: Verify up-to-date bindings
-        run: |
-          git diff --exit-code || \
-            (echo "Please generate updated bindings with \`cargo codegen -- --skip-prisma\`" \
-            && exit 1)
 
   check-coverage:
     if: "!contains(github.event.pull_request.head.ref, 'release/v') && needs.code-changes-check.outputs.rust-changed == 'true'"

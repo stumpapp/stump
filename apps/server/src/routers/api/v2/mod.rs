@@ -8,7 +8,9 @@ use axum::{
 	routing::{get, post},
 	Json, Router,
 };
+use models::entity::user;
 use reqwest::header::USER_AGENT;
+use sea_orm::prelude::*;
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -34,11 +36,9 @@ pub struct ClaimResponse {
 }
 
 async fn claim(State(ctx): State<AppState>) -> APIResult<Json<ClaimResponse>> {
-	let db = &ctx.db;
+	let is_claimed = user::Entity::find().count(ctx.conn.as_ref()).await? > 0;
 
-	Ok(Json(ClaimResponse {
-		is_claimed: db.user().find_first(vec![]).exec().await?.is_some(),
-	}))
+	Ok(Json(ClaimResponse { is_claimed }))
 }
 
 async fn ping() -> APIResult<String> {

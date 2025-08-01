@@ -1,7 +1,6 @@
-use chrono::{DateTime, FixedOffset};
+use chrono::{DateTime, Duration, FixedOffset, Utc};
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
 use once_cell::sync::Lazy;
-use prisma_client_rust::chrono::{Duration, Utc};
 use rand::distributions::{Alphanumeric, DistString};
 use serde::{Deserialize, Serialize};
 use stump_core::config::StumpConfig;

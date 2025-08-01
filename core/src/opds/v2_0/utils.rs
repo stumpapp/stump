@@ -30,7 +30,7 @@ pub(crate) struct EntityPosition {
 	pub position: i64,
 }
 
-/// A trait to extend the PrismaClient with methods that are specific to the OPDS v2.0
+/// A trait to extend a [`DatabaseConnection`] with methods that are specific to the OPDS v2.0
 /// implementation.
 #[async_trait::async_trait]
 pub trait OPDSV2QueryExt {

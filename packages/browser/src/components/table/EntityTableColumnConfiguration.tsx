@@ -216,12 +216,7 @@ function DraggableColumn({ column, toggleSelected }: DraggableColumnProps) {
 			className="flex shrink-0 items-center justify-between rounded-md border border-edge bg-background-surface px-2 py-1"
 		>
 			<Text size="sm">{column.label}</Text>
-			<IconButton
-				size="xs"
-				title={column.id === 'name' ? 'Cannot hide name column' : 'Toggle visibility'}
-				disabled={column.id === 'name'}
-				onClick={toggleSelected}
-			>
+			<IconButton size="xs" title="Toggle visibility" onClick={toggleSelected}>
 				<VisibilityIcon className="h-4 w-4" />
 			</IconButton>
 		</div>

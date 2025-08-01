@@ -27,7 +27,7 @@ use crate::{
 use super::ScanOptions;
 
 pub struct WalkerCtx {
-	/// A reference to the Prisma client
+	/// A reference to the database connection
 	pub db: Arc<DatabaseConnection>,
 	/// The globset of ignore rules to apply during the walk
 	pub ignore_rules: GlobSet,

@@ -1,5 +1,5 @@
+use chrono::Utc;
 use derive_builder::Builder;
-use prisma_client_rust::chrono::Utc;
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 

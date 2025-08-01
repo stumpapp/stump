@@ -45,7 +45,6 @@ apps/server/client/*
 !apps/server/client/.placeholder
 *.db*
 *.sqlite*
-*prisma.rs*
 
 # nix
 .envrc

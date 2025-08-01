@@ -2,14 +2,11 @@ use std::{thread, time::Duration};
 
 use clap::Subcommand;
 use dialoguer::{theme::ColorfulTheme, Confirm, Input, Password};
+use models::entity::{session, user};
+use sea_orm::{prelude::*, ActiveValue::Set, IntoActiveModel, QueryTrait};
+use stump_core::{config::StumpConfig, db::create_connection};
 
-use stump_core::{
-	config::StumpConfig,
-	db::create_client,
-	prisma::{session, user},
-};
-
-use crate::{commands::chain_optional_iter, error::CliResult, CliError};
+use crate::{error::CliResult, CliError};
 
 use super::default_progress_spinner;
 
@@ -75,43 +72,43 @@ async fn set_account_lock_status(
 		"Unlocking account..."
 	});
 
-	let client = create_client(config).await;
+	let conn = create_connection(config).await;
 
-	let affected_rows = client
-		.user()
-		.update_many(
-			vec![user::username::equals(username.clone())],
-			vec![user::is_locked::set(lock)],
-		)
-		.exec()
-		.await?;
+	let user = user::Entity::find()
+		.filter(user::Column::Username.eq(username.clone()))
+		.one(&conn)
+		.await?
+		.ok_or_else(|| {
+			progress.abandon_with_message("No account with that username was found");
+			CliError::OperationFailed(String::from(
+				"No account with that username was found",
+			))
+		})?;
+
+	let mut active_model = user.into_active_model();
+	active_model.is_locked = Set(lock);
+	let updated_user = active_model.update(&conn).await?;
 
 	if lock {
 		progress.set_message("Removing active login sessions...");
-		client
-			.session()
-			.delete_many(vec![session::user::is(vec![user::username::equals(
-				username,
-			)])])
-			.exec()
-			.await?;
+
+		let delete_sessions = session::Entity::delete_many()
+			.filter(session::Column::UserId.eq(updated_user.id.clone()))
+			.exec(&conn)
+			.await?
+			.rows_affected;
+
+		progress.set_message(format!("Removed {} active session(s)", delete_sessions));
 	}
 
 	thread::sleep(Duration::from_millis(500));
 
-	if affected_rows == 0 {
-		progress.abandon_with_message("No account with that username was found");
-		Err(CliError::OperationFailed(String::from(
-			"No account with that username was found",
-		)))
+	progress.finish_with_message(if lock {
+		"Account locked successfully!"
 	} else {
-		progress.finish_with_message(if lock {
-			"Account locked successfully!"
-		} else {
-			"Account unlocked successfully!"
-		});
-		Ok(())
-	}
+		"Account unlocked successfully!"
+	});
+	Ok(())
 }
 
 async fn reset_account_password(
@@ -119,7 +116,7 @@ async fn reset_account_password(
 	hash_cost: u32,
 	config: &StumpConfig,
 ) -> CliResult<()> {
-	let client = create_client(config).await;
+	let conn = create_connection(config).await;
 
 	let theme = &ColorfulTheme::default();
 	let builder = Password::with_theme(theme)
@@ -134,50 +131,46 @@ async fn reset_account_password(
 
 	progress.set_message("Updating account...");
 
-	let affected_rows = client
-		.user()
-		.update_many(
-			vec![user::username::equals(username)],
-			vec![user::hashed_password::set(hashed_password)],
-		)
-		.exec()
-		.await?;
+	let user = user::Entity::find()
+		.filter(user::Column::Username.eq(username.clone()))
+		.one(&conn)
+		.await?
+		.ok_or_else(|| {
+			progress.abandon_with_message("No account with that username was found");
+			CliError::OperationFailed(String::from(
+				"No account with that username was found",
+			))
+		})?;
+
+	let mut active_model = user.into_active_model();
+	active_model.hashed_password = Set(hashed_password);
+
+	let _updated_user = active_model.update(&conn).await?;
 
 	thread::sleep(Duration::from_millis(500));
 
-	if affected_rows == 0 {
-		progress.abandon_with_message("No account with that username was found");
-		Err(CliError::OperationFailed(String::from(
-			"No account with that username was found",
-		)))
-	} else {
-		progress.finish_with_message("Account password updated successfully!");
-		Ok(())
-	}
+	progress.finish_with_message("Account password updated successfully!");
+	Ok(())
 }
 
 async fn print_accounts(locked: Option<bool>, config: &StumpConfig) -> CliResult<()> {
 	let progress = default_progress_spinner();
 	progress.set_message("Fetching accounts...");
 
-	// Fetch users from prisma database
-	let client = create_client(config).await;
-	let users = client
-		.user()
-		.find_many(chain_optional_iter(
-			[],
-			[locked.map(user::is_locked::equals)],
-		))
-		.exec()
+	let conn = create_connection(config).await;
+
+	let users = models::entity::user::Entity::find()
+		.apply_if(locked, |query, locked| {
+			query.filter(user::Column::IsLocked.eq(locked))
+		})
+		.all(&conn)
 		.await?;
 
-	// Print results from database
 	if users.is_empty() {
 		progress.finish_with_message("No accounts found.");
 	} else {
 		progress.finish_with_message("Accounts fetched successfully!");
 
-		// Create table using prettytable-rs
 		let mut table = prettytable::Table::new();
 		table.add_row(prettytable::row!["Account", "Status"]);
 
@@ -195,13 +188,13 @@ async fn print_accounts(locked: Option<bool>, config: &StumpConfig) -> CliResult
 }
 
 async fn change_server_owner(config: &StumpConfig) -> CliResult<()> {
-	let client = create_client(config).await;
+	let conn = create_connection(config).await;
 
-	let all_accounts = client
-		.user()
-		.find_many(vec![user::is_locked::equals(false)])
-		.exec()
+	let all_accounts = models::entity::user::Entity::find()
+		.filter(user::Column::IsLocked.eq(false))
+		.all(&conn)
 		.await?;
+
 	let current_server_owner = all_accounts
 		.iter()
 		.find(|user| user.is_server_owner)
@@ -239,36 +232,24 @@ async fn change_server_owner(config: &StumpConfig) -> CliResult<()> {
 	let progress = default_progress_spinner();
 	if let Some(user) = current_server_owner {
 		progress.set_message(format!("Removing owner status from {}", user.username));
-		client
-			.user()
-			.update(
-				user::id::equals(user.id.clone()),
-				vec![user::is_server_owner::set(false)],
-			)
-			.exec()
-			.await?;
-		client
-			.session()
-			.delete_many(vec![session::user_id::equals(user.id)])
-			.exec()
+		let mut active_model = user.into_active_model();
+		active_model.is_server_owner = Set(false);
+		let updated_user = active_model.update(&conn).await?;
+
+		session::Entity::delete_many()
+			.filter(session::Column::UserId.eq(updated_user.id))
+			.exec(&conn)
 			.await?;
 	}
 
 	progress.set_message(format!("Setting owner status for {}", target_user.username));
-	client
-		.user()
-		.update(
-			user::id::equals(target_user.id.clone()),
-			vec![user::is_server_owner::set(true)],
-		)
-		.exec()
+	let mut active_model = target_user.into_active_model();
+	active_model.is_server_owner = Set(true);
+	let _updated_user = active_model.update(&conn).await?;
+	session::Entity::delete_many()
+		.filter(session::Column::UserId.eq(_updated_user.id))
+		.exec(&conn)
 		.await?;
-	client
-		.session()
-		.delete_many(vec![session::user_id::equals(target_user.id)])
-		.exec()
-		.await?;
-
 	progress.finish_with_message("Successfully changed the server owner!");
 
 	Ok(())

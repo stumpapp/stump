@@ -59,9 +59,6 @@ tracing.workspace = true
 urlencoding.workspace = true
 zip.workspace = true
 
-# TODO(sea-orm): REMOVE
-prisma-client-rust.workspace = true
-
 [dev-dependencies]
 axum-test = "17.2.0"
 tokio = { workspace = true, features = ["full", "test-util"] }

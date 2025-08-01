@@ -3,7 +3,7 @@ description: Install Yarn and setup cache
 
 inputs:
   cache-dependencies:
-    description: 'Cache dependencies. This does not affect the Prisma client cache.'
+    description: 'Cache dependencies'
     required: false
     default: 'true'
 

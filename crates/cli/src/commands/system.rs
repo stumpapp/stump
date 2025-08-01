@@ -1,8 +1,11 @@
+use std::str::FromStr;
+
 use clap::Subcommand;
 use dialoguer::Confirm;
+use sea_orm::{ConnectionTrait, DatabaseBackend, Statement};
 use stump_core::{
 	config::StumpConfig,
-	db::{create_client, DBPragma, JournalMode},
+	db::{create_connection, JournalMode},
 };
 
 use super::default_progress_spinner;
@@ -41,25 +44,35 @@ async fn set_journal_mode(mode: JournalMode, config: &StumpConfig) -> CliResult<
 	let progress = default_progress_spinner();
 	progress.set_message("Connecting to database...");
 
-	let client = create_client(config).await;
+	let conn = create_connection(config).await;
 
 	progress.set_message("Fetching current journal mode...");
-	let current_journal_mode = client.get_journal_mode().await?;
 
-	if current_journal_mode == mode {
+	let journal_mode = match conn
+		.query_one(Statement::from_string(
+			DatabaseBackend::Sqlite,
+			"PRAGMA journal_mode;",
+		))
+		.await?
+	{
+		Some(result) => {
+			let raw = result.try_get::<String>("", "journal_mode")?;
+			JournalMode::from_str(&raw).map_err(|e| {
+				CliError::Unknown(format!("Failed to parse journal mode: {}", e))
+			})?
+		},
+		None => JournalMode::default(),
+	};
+
+	if journal_mode == mode {
 		progress.finish_with_message("Journal mode already set to desired value");
 		return Ok(());
 	}
 
 	progress.set_message("Updating journal mode...");
-	let new_journal_mode = client.set_journal_mode(mode).await?;
-
-	if new_journal_mode != mode {
-		progress.finish_with_message("Journal mode failed to be set");
-		return Err(CliError::OperationFailed(
-			"Journal mode failed to be set".to_string(),
-		));
-	}
+	let _result = conn
+		.execute_unprepared(&format!("PRAGMA journal_mode={};", mode.as_ref()))
+		.await?;
 
 	progress.finish_with_message("Journal mode successfully set");
 

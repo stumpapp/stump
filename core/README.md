@@ -1,10 +1,8 @@
 # Core 🏭
 
-The `core` crate contains Stump's core functionalities, including the database schema, models, and other shared code.
+The `core` crate contains Stump's core functionalities
 
 ## Structure 📦
-
-At the root of the crate, you will find a `prisma` directory, which contains the database schema and models.
 
 The `src` directory contains the following modules:
 
@@ -16,21 +14,6 @@ The `src` directory contains the following modules:
   - `scanner`: The bulk of the indexing and scanning logic
 - `job` (AGPL-3.0): Background job processing and execution
 - `opds`: OPDS feed generation and XML utilities
-
-## Database 🗄
-
-Stump uses [Prisma](https://www.prisma.io/) as its ORM. Whenever you make changes to the database schema, you will need to re-generate your local client and then update any exported TypeScript types. To do this, you may run the following commands:
-
-```bash
-# Generate the Prisma client
-cargo prisma generate --schema=./core/prisma/schema.prisma
-
-# Export the TypeScript types
-cargo codegen -- --skip-prisma
-
-# Optionally, if a migration is needed
-cargo prisma migrate dev --schema=./core/prisma/schema.prisma
-```
 
 ## License 📝
 

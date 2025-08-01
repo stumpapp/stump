@@ -18,11 +18,6 @@ pub mod utils;
 mod context;
 pub mod error;
 
-// TODO(sea-orm): Remove this once the sea-orm issue is fixed
-#[rustfmt::skip]
-#[allow(warnings, unused)]
-pub mod prisma;
-
 use config::logging::STUMP_SHADOW_TEXT;
 use config::StumpConfig;
 use db::JournalMode;

@@ -8,6 +8,4 @@ coverage:
         target: 0%
 ignore:
   - 'crates/cli'
-  - 'crates/codegen'
-  - 'crates/prisma-cli'
   - 'apps/desktop'

@@ -2,7 +2,6 @@
 
 pub mod config;
 mod errors;
-mod filter;
 mod http_server;
 pub mod middleware;
 mod routers;

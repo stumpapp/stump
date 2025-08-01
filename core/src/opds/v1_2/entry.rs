@@ -5,9 +5,8 @@ use std::collections::HashMap;
 use std::path::PathBuf;
 use std::vec;
 
+use chrono::{self, DateTime, FixedOffset};
 use models::entity::{library, series};
-use prisma_client_rust::chrono::DateTime;
-use prisma_client_rust::chrono::{self, FixedOffset};
 use urlencoding::encode;
 use xml::{writer::XmlEvent, EventWriter};
 

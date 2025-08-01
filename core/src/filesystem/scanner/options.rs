@@ -1,12 +1,7 @@
-use chrono::{DateTime, FixedOffset};
 use serde::{Deserialize, Serialize};
 use specta::Type;
 
-use crate::{
-	filesystem::media::{BuiltMedia, ProcessedFileHashes, ProcessedMediaMetadata},
-	prisma::library_scan_record,
-	CoreError,
-};
+use crate::filesystem::media::{BuiltMedia, ProcessedFileHashes, ProcessedMediaMetadata};
 
 #[derive(Debug, Default, Clone, Copy, Deserialize, Serialize, PartialEq, Type)]
 #[serde(default)]
@@ -114,34 +109,6 @@ impl ScanOptions {
 			},
 			_ => None,
 		}
-	}
-}
-
-#[derive(Debug, Clone, Deserialize, Serialize, Type)]
-pub struct LibraryScanRecord {
-	id: i32,
-	options: Option<ScanOptions>,
-	timestamp: DateTime<FixedOffset>,
-	library_id: String,
-	job_id: Option<String>,
-}
-
-impl TryFrom<library_scan_record::Data> for LibraryScanRecord {
-	type Error = CoreError;
-
-	fn try_from(data: library_scan_record::Data) -> Result<Self, Self::Error> {
-		let options = data
-			.options
-			.map(|options| serde_json::from_slice(&options))
-			.transpose()?;
-
-		Ok(Self {
-			id: data.id,
-			options,
-			timestamp: data.timestamp,
-			library_id: data.library_id,
-			job_id: data.job_id,
-		})
 	}
 }
 

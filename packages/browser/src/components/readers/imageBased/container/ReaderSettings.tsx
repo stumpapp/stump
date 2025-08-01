@@ -1,4 +1,4 @@
-import { BookPreferences } from '@stump/client'
+import { BookPreferences, DEFAULT_BOOK_PREFERENCES } from '@stump/client'
 import { Label, RawSwitch } from '@stump/components'
 import { ReadingMode } from '@stump/sdk'
 import omit from 'lodash/omit'
@@ -95,12 +95,12 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 				<Label className="text-xs font-medium uppercase text-foreground-muted">Mode</Label>
 
 				<ReadingModeSelect
-					value={activeSettings.readingMode || 'paged'}
+					value={activeSettings.readingMode || DEFAULT_BOOK_PREFERENCES.readingMode}
 					onChange={onChangeReadingMode}
 				/>
 
 				<ReadingDirectionSelect
-					direction={activeSettings.readingDirection || 'ltr'}
+					direction={activeSettings.readingDirection || DEFAULT_BOOK_PREFERENCES.readingDirection}
 					onChange={(direction) => onPreferenceChange({ readingDirection: direction })}
 				/>
 			</div>
@@ -109,7 +109,9 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 				<Label className="text-xs font-medium uppercase text-foreground-muted">Image Options</Label>
 
 				<DoubleSpreadBehavior
-					behavior={activeSettings.doublePageBehavior || 'auto'}
+					behavior={
+						activeSettings.doublePageBehavior || DEFAULT_BOOK_PREFERENCES.doublePageBehavior
+					}
 					onChange={(behavior) => onPreferenceChange({ doublePageBehavior: behavior })}
 				/>
 
@@ -148,12 +150,6 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 					/>
 				</Label>
 			</div>
-
-			{/* <ImageScalingSelect />
-			{renderDoubleSpreadOption()}
-			<ReadingModeSelect />
-			{renderDirectionalOptions()}
-			<BrightnessControl /> */}
 		</div>
 	)
 }

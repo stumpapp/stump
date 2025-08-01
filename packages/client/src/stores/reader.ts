@@ -122,6 +122,20 @@ export type ReaderStore = {
 	setBookPreferences: (id: BookID, preferences: BookPreferences) => void
 }
 
+export const DEFAULT_BOOK_PREFERENCES = {
+	fontSize: 13,
+	lineHeight: 1.5,
+	brightness: 1,
+	readingMode: 'paged',
+	readingDirection: 'ltr',
+	imageScaling: {
+		scaleToFit: 'height',
+	},
+	doublePageBehavior: 'auto',
+	trackElapsedTime: true,
+	tapSidesToNavigate: true,
+} as const
+
 export const createReaderStore = (storage?: StateStorage) =>
 	create<ReaderStore>()(
 		devtools(
@@ -154,17 +168,7 @@ export const createReaderStore = (storage?: StateStorage) =>
 								behind: 3,
 							},
 							showToolBar: false,
-							fontSize: 13,
-							lineHeight: 1.5,
-							brightness: 1,
-							readingMode: 'paged',
-							readingDirection: 'ltr',
-							imageScaling: {
-								scaleToFit: 'height',
-							},
-							doublePageBehavior: 'off',
-							trackElapsedTime: true,
-							tapSidesToNavigate: true,
+							...DEFAULT_BOOK_PREFERENCES,
 						},
 					}) as ReaderStore,
 				{

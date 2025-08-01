@@ -28,6 +28,7 @@ impl Loader<SeriesFinishedCountLoaderKey> for SeriesFinishedCountLoader {
 		let finished_count = finished_reading_session::Entity::find()
 			.inner_join(media::Entity)
 			.filter(media::Column::SeriesId.is_in(keys.to_vec()))
+			.select_only()
 			.column(media::Column::SeriesId)
 			.column_as(media::Column::Id.count(), "count")
 			.group_by(media::Column::SeriesId)

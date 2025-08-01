@@ -1,4 +1,9 @@
-import { queryClient, useSDK, useUpdateMediaProgress } from '@stump/client'
+import {
+	DEFAULT_BOOK_PREFERENCES,
+	queryClient,
+	useSDK,
+	useUpdateMediaProgress,
+} from '@stump/client'
 import { generatePageSets, Media } from '@stump/sdk'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
@@ -71,7 +76,7 @@ export default function ImageBasedReader({
 	const {
 		settings: { preload, showToolBar },
 		bookPreferences: {
-			doublePageBehavior = 'auto',
+			doublePageBehavior = DEFAULT_BOOK_PREFERENCES.doublePageBehavior,
 			readingMode,
 			readingDirection,
 			trackElapsedTime,

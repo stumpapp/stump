@@ -31,9 +31,9 @@ pub struct Ctx {
 }
 
 impl Ctx {
-	/// Creates a new [Ctx] instance, creating a new prisma client. This should only be called
-	/// once per application. It takes a sender for the internal event channel, so the
-	/// core can send events to the consumer.
+	/// Creates a new [Ctx] instance. This should only be called once per application.
+	/// It takes a sender for the internal event channel, so the core can send events
+	/// to the consumer.
 	///
 	/// ## Example
 	/// ```no_run
@@ -65,9 +65,7 @@ impl Ctx {
 		}
 	}
 
-	/// Creates a [Ctx] instance for testing **only**. The prisma client is created
-	/// with a mock store, allowing for easy testing of the core without needing to
-	/// connect to a real database.
+	/// Creates a [Ctx] instance for testing **only**
 	pub fn mock_sea(mock_db: MockDatabase) -> Ctx {
 		let config = Arc::new(StumpConfig::debug());
 

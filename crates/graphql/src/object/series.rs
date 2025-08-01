@@ -16,7 +16,8 @@ use sea_orm::{
 use crate::{
 	data::{CoreContext, RequestContext, ServiceContext},
 	loader::{
-		series_count::SeriesCountLoader, series_finished_count::SeriesFinishedCountLoader,
+		series_count::SeriesCountLoader,
+		series_finished_count::{FinishedCountLoaderKey, SeriesFinishedCountLoader},
 	},
 };
 
@@ -197,9 +198,13 @@ impl Series {
 	}
 
 	async fn read_count(&self, ctx: &Context<'_>) -> Result<i64> {
+		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
 		let finished_loader = ctx.data::<DataLoader<SeriesFinishedCountLoader>>()?;
 		let finished_count = finished_loader
-			.load_one(self.model.id.clone())
+			.load_one(FinishedCountLoaderKey {
+				user_id: user.id.clone(),
+				series_id: self.model.id.clone(),
+			})
 			.await?
 			.unwrap_or(0i64);
 
@@ -253,11 +258,19 @@ impl Series {
 }
 
 async fn get_series_progress(ctx: &Context<'_>, series_id: String) -> Result<(i64, i64)> {
+	let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+
 	let loader = ctx.data::<DataLoader<SeriesCountLoader>>()?;
 	let media_count = loader.load_one(series_id.clone()).await?.unwrap_or(0i64);
 
 	let finished_loader = ctx.data::<DataLoader<SeriesFinishedCountLoader>>()?;
-	let finished_count = finished_loader.load_one(series_id).await?.unwrap_or(0i64);
+	let finished_count = finished_loader
+		.load_one(FinishedCountLoaderKey {
+			user_id: user.id.clone(),
+			series_id,
+		})
+		.await?
+		.unwrap_or(0i64);
 
 	Ok((media_count, finished_count))
 }

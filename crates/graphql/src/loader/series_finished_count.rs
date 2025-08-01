@@ -1,6 +1,9 @@
 use async_graphql::dataloader::Loader;
 use models::entity::{finished_reading_session, media};
-use sea_orm::{prelude::*, ColumnTrait, DatabaseConnection, QueryFilter, QuerySelect};
+use sea_orm::{
+	prelude::*, ColumnTrait, DatabaseConnection, FromQueryResult, QueryFilter,
+	QuerySelect,
+};
 use std::{collections::HashMap, sync::Arc};
 
 pub struct SeriesFinishedCountLoader {
@@ -15,35 +18,54 @@ impl SeriesFinishedCountLoader {
 }
 
 /// A type alias for the key used in the SeriesLoader, which represents the series ID
-pub type SeriesFinishedCountLoaderKey = String;
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct FinishedCountLoaderKey {
+	pub user_id: String,
+	pub series_id: String,
+}
 
-impl Loader<SeriesFinishedCountLoaderKey> for SeriesFinishedCountLoader {
+#[derive(Debug, FromQueryResult)]
+pub struct UserIdSeriesIdCount {
+	pub user_id: String,
+	pub series_id: String,
+	pub count: i64,
+}
+
+impl Loader<FinishedCountLoaderKey> for SeriesFinishedCountLoader {
 	type Value = i64;
 	type Error = Arc<sea_orm::error::DbErr>;
 
 	async fn load(
 		&self,
-		keys: &[SeriesFinishedCountLoaderKey],
-	) -> Result<HashMap<SeriesFinishedCountLoaderKey, Self::Value>, Self::Error> {
+		keys: &[FinishedCountLoaderKey],
+	) -> Result<HashMap<FinishedCountLoaderKey, Self::Value>, Self::Error> {
+		let series_ids: Vec<String> =
+			keys.iter().map(|key| key.series_id.clone()).collect();
+
 		let finished_count = finished_reading_session::Entity::find()
 			.inner_join(media::Entity)
-			.filter(media::Column::SeriesId.is_in(keys.to_vec()))
+			.filter(media::Column::SeriesId.is_in(series_ids))
 			.select_only()
+			.column(finished_reading_session::Column::UserId)
 			.column(media::Column::SeriesId)
 			.column_as(media::Column::Id.count(), "count")
+			.group_by(finished_reading_session::Column::UserId)
 			.group_by(media::Column::SeriesId)
-			.into_tuple::<(String, i64)>()
+			.into_model::<UserIdSeriesIdCount>()
 			.all(self.conn.as_ref())
 			.await?;
 
 		let mut result = HashMap::new();
 
-		for series in finished_count {
-			let series_id = series.0;
-			let count = series.1;
-
+		for user_id_series_count in finished_count {
 			// Insert the count into the result map
-			result.insert(series_id, count);
+			result.insert(
+				FinishedCountLoaderKey {
+					user_id: user_id_series_count.user_id,
+					series_id: user_id_series_count.series_id,
+				},
+				user_id_series_count.count,
+			);
 		}
 
 		Ok(result)

@@ -1,7 +1,7 @@
 import { invalidateQueries, useGraphQLMutation, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { BookReaderSceneQuery, graphql, ReadingMode } from '@stump/graphql'
-import { Suspense, useCallback, useEffect } from 'react'
-import { Navigate, useParams, useSearchParams } from 'react-router-dom'
+import { Suspense, useCallback, useEffect, useMemo } from 'react'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
 import { ImageBasedReader } from '@/components/readers/imageBased'
 import paths from '@/paths'
@@ -40,6 +40,8 @@ export const BOOK_READER_SCENE_QUERY = graphql(`
 `)
 
 export default function BookReaderSceneContainer() {
+	const navigate = useNavigate()
+
 	const { id } = useParams()
 	const { sdk } = useSDK()
 	const {
@@ -48,8 +50,14 @@ export default function BookReaderSceneContainer() {
 		id: id || '',
 	})
 
+	useEffect(() => {
+		if (!media) {
+			navigate(paths.notFound(), { replace: true })
+		}
+	}, [media, navigate])
+
 	if (!media) {
-		return <Navigate to={paths.notFound()} />
+		return null
 	}
 
 	return (
@@ -72,6 +80,7 @@ type Props = {
 }
 
 function BookReaderScene({ book }: Props) {
+	const navigate = useNavigate()
 	const [search] = useSearchParams()
 
 	const { sdk } = useSDK()
@@ -114,47 +123,54 @@ function BookReaderScene({ book }: Props) {
 		}
 	}, [sdk.media])
 
-	if (book.extension.match(EBOOK_EXTENSION)) {
-		const epubcfi = book.readProgress?.epubcfi || null
-		return (
-			<Navigate
-				to={paths.bookReader(book.id, {
-					epubcfi,
+	/**
+	 * An effect to update the read progress whenever the page changes in the URL
+	 */
+	useEffect(() => {
+		if (isIncognito) return
+
+		const parsedPage = parseInt(page || '', 10)
+		if (!parsedPage || isNaN(parsedPage) || !book) return
+
+		const maxPage = book.pages
+		if (parsedPage <= 0 || parsedPage > maxPage) return
+
+		updateProgress(parsedPage, book.readProgress?.elapsedSeconds || 0)
+	}, [page, updateProgress, book, isIncognito])
+
+	const initialPage = useMemo(() => (page ? parseInt(page, 10) : undefined), [page])
+
+	useEffect(() => {
+		if (book.extension.match(EBOOK_EXTENSION)) {
+			navigate(
+				paths.bookReader(book.id, {
+					epubcfi: book.readProgress?.epubcfi || null,
 					isAnimated,
 					isEpub: true,
-				})}
-			/>
-		)
-	} else if (book.extension.match(PDF_EXTENSION) && !isStreaming) {
-		return (
-			<Navigate
-				to={paths.bookReader(book.id, {
-					isPdf: true,
-					isStreaming: false,
-				})}
-			/>
-		)
-	}
-
-	const initialPage = page ? parseInt(page, 10) : undefined
+				}),
+			)
+		} else if (book.extension.match(PDF_EXTENSION) && !isStreaming) {
+			navigate(paths.bookReader(book.id, { isPdf: true, isStreaming: false }))
+		} else if (book.extension.match(ARCHIVE_EXTENSION) || book.extension.match(PDF_EXTENSION)) {
+			if (!initialPage && readingMode === ReadingMode.Paged) {
+				navigate(paths.bookReader(book.id, { isAnimated, page: 1 }))
+			} else if (!!initialPage && initialPage > book.pages) {
+				navigate(paths.bookReader(book.id, { isAnimated, page: book.pages }))
+			}
+		}
+	}, [book, initialPage, isAnimated, readingMode, navigate, isStreaming])
 
 	if (book.extension.match(ARCHIVE_EXTENSION) || book.extension.match(PDF_EXTENSION)) {
-		if (!initialPage && readingMode === ReadingMode.Paged) {
-			return <Navigate to={paths.bookReader(book.id, { isAnimated, page: 1 })} />
-		} else if (!!initialPage && initialPage > book.pages) {
-			return <Navigate to={paths.bookReader(book.id, { isAnimated, page: book.pages })} />
-		} else {
-			return (
-				<ImageBasedReader
-					media={book}
-					isAnimated={isAnimated}
-					isIncognito={isIncognito}
-					initialPage={initialPage}
-					onProgress={updateProgress}
-				/>
-			)
-		}
+		return (
+			<ImageBasedReader
+				media={book}
+				isAnimated={isAnimated}
+				isIncognito={isIncognito}
+				initialPage={initialPage}
+				onProgress={updateProgress}
+			/>
+		)
 	}
 
-	return <div>Not a supported book or i just can&rsquo;t do that yet! :)</div>
+	return null
 }

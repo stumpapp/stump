@@ -9,7 +9,7 @@ members = [
 ]
 
 [workspace.package]
-version = "0.0.10"
+version = "0.0.11"
 rust-version = "1.85.0"
 
 [workspace.dependencies]

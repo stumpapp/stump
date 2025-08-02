@@ -1,4 +1,4 @@
-import { useSDK } from '@stump/client'
+import { DEFAULT_BOOK_PREFERENCES, useSDK } from '@stump/client'
 import { ReadingDirection, ReadingMode } from '@stump/graphql'
 import { generatePageSets } from '@stump/sdk'
 import { useQueryClient } from '@tanstack/react-query'
@@ -77,7 +77,7 @@ export default function ImageBasedReader({
 	const {
 		settings: { preload, showToolBar },
 		bookPreferences: {
-			doublePageBehavior = 'auto',
+			doublePageBehavior = DEFAULT_BOOK_PREFERENCES.doublePageBehavior,
 			readingMode,
 			readingDirection,
 			trackElapsedTime,
@@ -109,13 +109,18 @@ export default function ImageBasedReader({
 	const pageSets = useMemo(() => {
 		const autoButOff = doublePageBehavior === 'auto' && deviceOrientation === 'portrait'
 		const modeForceOff = readingMode === ReadingMode.ContinuousVertical
+
+		let sets: number[][] = []
 		if (doublePageBehavior === 'off' || autoButOff || modeForceOff) {
-			return Array.from({ length: pages }, (_, i) => [i])
+			sets = Array.from({ length: pages }, (_, i) => [i])
+		} else {
+			sets = generatePageSets({ imageSizes: pageDimensions, pages: pages })
 		}
-		const sets = generatePageSets({ imageSizes: pageDimensions, pages: pages })
+
 		if (readingDirection === ReadingDirection.Rtl) {
-			return sets.reverse()
+			return [...sets.map((set) => [...set].reverse())].reverse()
 		}
+
 		return sets
 	}, [doublePageBehavior, pages, pageDimensions, deviceOrientation, readingMode, readingDirection])
 
@@ -130,11 +135,6 @@ export default function ImageBasedReader({
 		},
 		[onProgress, isIncognito, totalSeconds],
 	)
-
-	// 			updateReadProgress({ page, elapsed_seconds: totalSeconds })
-	// 	}
-	// },
-	// [updateReadProgress, isIncognito, totalSeconds],
 
 	/**
 	 * A callback to handle when the page changes. This will update the URL to reflect the new page

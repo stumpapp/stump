@@ -34,7 +34,7 @@ export default function ReaderHeader() {
 			<div className="flex w-full items-center justify-between">
 				<div className="flex items-center space-x-4">
 					<Link
-						className="flex items-center"
+						className="text-foreground-on-black hover:text-foreground-on-black/80 flex items-center"
 						title="Go to media overview"
 						to={paths.bookOverview(id)}
 					>
@@ -42,7 +42,7 @@ export default function ReaderHeader() {
 					</Link>
 				</div>
 
-				<Text>{resolvedName}</Text>
+				<Text className="text-foreground-on-black">{resolvedName}</Text>
 
 				<div className="flex items-center space-x-2">
 					{isFullscreenAvailable && (

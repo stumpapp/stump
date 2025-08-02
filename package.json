@@ -1,6 +1,6 @@
 {
 	"name": "@stump/monorepo",
-	"version": "0.0.10",
+	"version": "0.0.11",
 	"repository": "https://github.com/stumpapp/stump.git",
 	"author": "Aaron Leopold <aaronleopold1221@gmail.com>",
 	"license": "SEE README.md",

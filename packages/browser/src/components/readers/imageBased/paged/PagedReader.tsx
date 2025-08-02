@@ -29,7 +29,8 @@ export type PagedReaderProps = {
  */
 function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedReaderProps) {
 	const {
-		settings: { showToolBar, tapSidesToNavigate },
+		bookPreferences: { tapSidesToNavigate },
+		settings: { showToolBar },
 		setSettings,
 	} = useBookPreferences({ book: media })
 

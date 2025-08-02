@@ -12,7 +12,7 @@
 			"validation": {
 				"missingUsername": "O nome de usuário é necessário",
 				"missingPassword": "A senha é necessária",
-				"usernameAlreadyExists": "Username already exists"
+				"usernameAlreadyExists": "O nome de usuário já existe"
 			},
 			"labels": {
 				"username": "Nome de usuário",
@@ -25,8 +25,8 @@
 		},
 		"toasts": {
 			"loggingIn": "Entrando...",
-			"loggedIn": "Welcome back!",
-			"loggedInFirstTime": "Welcome!",
+			"loggedIn": "Bem-vindo de volta!",
+			"loggedInFirstTime": "Bem-vindo!",
 			"registering": "Registrando...",
 			"registered": "Registrado!",
 			"loginFailed": "Falha no login. Tente novamente",
@@ -55,12 +55,12 @@
 			"description": "Send this book to device or email address",
 			"form": {
 				"email": {
-					"label": "Email",
+					"label": "E-mail",
 					"placeholder": "Email address",
 					"description": "An email address to send the book to. Click add to finalize each input"
 				},
 				"devices": {
-					"label": "Devices",
+					"label": "Dispositivos",
 					"placeholder": "Select devices",
 					"noFilterMatch": "No devices match the filter"
 				}
@@ -71,12 +71,12 @@
 	"createOrUpdateBookClubForm": {
 		"fields": {
 			"name": {
-				"label": "Name",
+				"label": "Nome",
 				"placeholder": "My book club",
 				"description": "The name of your book club"
 			},
 			"description": {
-				"label": "Description",
+				"label": "Descrição",
 				"placeholder": "An 'Our Flag Means Death' fan club. We read pirate fiction to our hearts content",
 				"description": "An optional, short description of your book club"
 			},
@@ -91,8 +91,8 @@
 					"documentation"
 				],
 				"member": {
-					"label": "Member",
-					"placeholder": "Member",
+					"label": "Membro",
+					"placeholder": "Membro",
 					"description": "The name of the default role for your book club"
 				},
 				"moderator": {
@@ -161,7 +161,7 @@
 				"none": "None",
 				"labels": {
 					"name": "Name",
-					"description": "Description"
+					"description": "Descrição"
 				}
 			},
 			"submit": "Create Book Club"

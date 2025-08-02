@@ -1,11 +1,6 @@
 import { BookPreferences, ReaderSettings, ReaderStore } from '@stump/client'
 import { PickSelect } from '@stump/components'
-import {
-	BookReaderSceneQuery,
-	ReadingDirection,
-	ReadingImageScaleFit,
-	ReadingMode,
-} from '@stump/graphql'
+import { BookReaderSceneQuery, ReadingImageScaleFit } from '@stump/graphql'
 import { useCallback, useMemo } from 'react'
 
 import { ImageReaderBookRef } from '@/components/readers/imageBased/context'
@@ -69,22 +64,37 @@ export function useBookPreferences({ book }: Params): Return {
 
 const defaultsFromLibraryConfig = (
 	libraryConfig?: PickSelect<NonNullable<BookReaderSceneQuery['mediaById']>, 'libraryConfig'>,
-): BookPreferences =>
-	({
-		brightness: 1,
-		imageScaling: {
-			scaleToFit: libraryConfig?.defaultReadingImageScaleFit || ReadingImageScaleFit.Height,
-		},
-		readingDirection: libraryConfig?.defaultReadingDir || ReadingDirection.Ltr,
-		readingMode: libraryConfig?.defaultReadingMode || ReadingMode.Paged,
-	}) as BookPreferences
+): Partial<BookPreferences> => ({
+	brightness: 1,
+	// imageScaling: {
+	// 	scaleToFit: libraryConfig?.defaultReadingImageScaleFit || ReadingImageScaleFit.Height,
+	// },
+	imageScaling: libraryConfig?.defaultReadingImageScaleFit
+		? {
+				scaleToFit: libraryConfig?.defaultReadingImageScaleFit as ReadingImageScaleFit,
+			}
+		: undefined,
+	readingDirection: libraryConfig?.defaultReadingDir,
+	readingMode: libraryConfig?.defaultReadingMode,
+})
+
+const settingsAsBookPreferences = (settings: ReaderSettings): BookPreferences => ({
+	brightness: settings.brightness,
+	imageScaling: settings.imageScaling,
+	readingDirection: settings.readingDirection,
+	readingMode: settings.readingMode,
+	tapSidesToNavigate: settings.tapSidesToNavigate,
+	fontSize: settings.fontSize,
+	lineHeight: settings.lineHeight,
+	trackElapsedTime: settings.trackElapsedTime,
+})
 
 const buildPreferences = (
 	preferences: Partial<BookPreferences>,
 	settings: ReaderSettings,
 	libraryConfig?: PickSelect<NonNullable<BookReaderSceneQuery['mediaById']>, 'libraryConfig'>,
 ): BookPreferences => ({
-	...settings,
+	...settingsAsBookPreferences(settings),
 	...defaultsFromLibraryConfig(libraryConfig),
 	...preferences,
 })

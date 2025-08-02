@@ -1,4 +1,85 @@
-# Changelog
+<a name="0.0.11"></a>
+## 0.0.11 (2025-07-26)
+
+### Added
+
+- ✨ feat(reader): add line-height customization and vertical reading mode per book ([#659](https://github.com/stumpapp/stump/issues/659)) [[40431af](https://github.com/stumpapp/stump/commit/40431af5a6b6dbd47425089f879859fa75c5d009)]
+- ✨ (expo,web): Double spread support and unify reader interfaces ([#632](https://github.com/stumpapp/stump/issues/632)) [[da4ee4d](https://github.com/stumpapp/stump/commit/da4ee4d2ce4bd5c13d713aeca999c48e464d101b)]
+- ✨ (expo): Image reader global and book-specific settings ([#621](https://github.com/stumpapp/stump/issues/621)) [[a2f0247](https://github.com/stumpapp/stump/commit/a2f024791164c8738866cb4cc684f69de4704ebd)]
+- ✨ Add support for library file watcher ([#617](https://github.com/stumpapp/stump/issues/617)) [[c420292](https://github.com/stumpapp/stump/commit/c420292c5fb5c1d3d90570d1f93a395b827b6531)]
+- ✨ (expo): Image gallery in controls footer ([#614](https://github.com/stumpapp/stump/issues/614)) [[011a56d](https://github.com/stumpapp/stump/commit/011a56dddf9e8fcb75e2a9ef99f37047b83a70a3)]
+- ✨ (expo): Add basic browse stack ([#609](https://github.com/stumpapp/stump/issues/609)) [[5426d37](https://github.com/stumpapp/stump/commit/5426d374187e98f2089f68833bd5a7783dec5935)]
+- ✨ Scan matching opf file when scanning metadata for epubs ([#607](https://github.com/stumpapp/stump/issues/607)) [[ecb8acf](https://github.com/stumpapp/stump/commit/ecb8acfa3247fa91a8d14e4d2f24b54ddb13a440)]
+- ✨ (expo): Support custom headers and arbitrary OPDS servers ([#604](https://github.com/stumpapp/stump/issues/604)) [[5fdb47e](https://github.com/stumpapp/stump/commit/5fdb47ef355a18bb4d7476281815177b37ecc2af)]
+- ✨ Add clickable progress bar for epubs ([#597](https://github.com/stumpapp/stump/issues/597)) [[718f78a](https://github.com/stumpapp/stump/commit/718f78a1a04f5867dde102b7bcfda0c88b7bead9)]
+- ✨ (expo): Dynamic app icons, minimal server management, context menus ([#594](https://github.com/stumpapp/stump/issues/594)) [[9a38fea](https://github.com/stumpapp/stump/commit/9a38feac27175625eb1edf3f012cf00b32e654aa)]
+- ✨ (expo): Support pinch and zoom while reading ([#591](https://github.com/stumpapp/stump/issues/591)) [[549d7bf](https://github.com/stumpapp/stump/commit/549d7bfc37637f289ea73aa794ff18a32410ef61)]
+- ✨ Scan history and basic override configs ([#583](https://github.com/stumpapp/stump/issues/583)) [[c980ed8](https://github.com/stumpapp/stump/commit/c980ed82a11de39624a93c37fc2f02068001310d)]
+
+### Changed
+
+- 📌 Pin &#x60;eslint-config-prettier&#x60; to &#x60;9.1.2&#x60; ([#677](https://github.com/stumpapp/stump/issues/677)) [[ff926b3](https://github.com/stumpapp/stump/commit/ff926b300390da93134d876e31721ae8f6669154)]
+- 🔧 Add &#x60;NSAllowsArbitraryLoads&#x60; to info plist ([#672](https://github.com/stumpapp/stump/issues/672)) [[2db6c84](https://github.com/stumpapp/stump/commit/2db6c8483748ff4702a366803567a34bd32af3e6)]
+- ⬆️ Bump MSRV ([#631](https://github.com/stumpapp/stump/issues/631)) [[d4d16fb](https://github.com/stumpapp/stump/commit/d4d16fbf59ecba90061461bbfde3b05c80d84157)]
+- ♻️ Add chrono feature to utoipa ([#629](https://github.com/stumpapp/stump/issues/629)) [[05a8469](https://github.com/stumpapp/stump/commit/05a846913868d503bb505538362916915471cb8a)]
+- ⬆️ Upgrade &#x60;axum&#x60; and related dependencies ([#626](https://github.com/stumpapp/stump/issues/626)) [[a34a745](https://github.com/stumpapp/stump/commit/a34a7458abf2d2f073b568aaa650f16441b513bc)]
+- 🍱 Add additional fonts ([#620](https://github.com/stumpapp/stump/issues/620)) [[ce3fd2e](https://github.com/stumpapp/stump/commit/ce3fd2e6fb4d81f1f23742122e90d35be2919ef8)]
+- ♻️ Rework book overview to include additional metadata ([#588](https://github.com/stumpapp/stump/issues/588)) [[9bad95c](https://github.com/stumpapp/stump/commit/9bad95c27847783caef46514b43210d4ddbd8ff4)]
+- 📌 Pin &#x60;release_binary&#x60; runner to &#x60;ubuntu-22.04&#x60; ([#584](https://github.com/stumpapp/stump/issues/584)) [[8678997](https://github.com/stumpapp/stump/commit/8678997d0b0bbd79b63d80e94cf5defaaade9f3d)]
+
+### Fixed
+
+- 🐛 Fix inaccessible files killing UI for directory picker ([#680](https://github.com/stumpapp/stump/issues/680)) [[8b7ba96](https://github.com/stumpapp/stump/commit/8b7ba96f33d8c011fec9b795e474e1c62567e469)]
+- 💚 Fix invalid debian tag ([#673](https://github.com/stumpapp/stump/issues/673)) [[8008ddd](https://github.com/stumpapp/stump/commit/8008dddc061ec30c2fdc066b35716260fad229c5)]
+- 🐛 Fix broken tags filter for smart filters ([#662](https://github.com/stumpapp/stump/issues/662)) [[9de5cf8](https://github.com/stumpapp/stump/commit/9de5cf807cd523aae1407d232781153fdb716cdc)]
+- 🐛 Remove text &quot;xx pages left&quot; from completed books ([#654](https://github.com/stumpapp/stump/issues/654)) [[69a3308](https://github.com/stumpapp/stump/commit/69a3308eb1c3fd4f876231a8a9e2b4f72144cb63)]
+- 🐛 Fix reading progress resetting due to cached data again ([#647](https://github.com/stumpapp/stump/issues/647)) [[72db41c](https://github.com/stumpapp/stump/commit/72db41c2731fbc0ed7c7963795773acc5d7c6d3f)]
+- 🐛 Fix addgroup error for numbers beyond busybox limit ([#652](https://github.com/stumpapp/stump/issues/652)) [[12cc0a5](https://github.com/stumpapp/stump/commit/12cc0a51247da9496b17d29c9438f048aeceb3d0)]
+- 🐛 Fix metadata detection in RAR processor ([#643](https://github.com/stumpapp/stump/issues/643)) [[d8a8f9c](https://github.com/stumpapp/stump/commit/d8a8f9cc5610076a6491e79f1e09703d0d11b816)]
+- 🐛 Actually scan opf when getting metadata ([#625](https://github.com/stumpapp/stump/issues/625)) [[57f03cb](https://github.com/stumpapp/stump/commit/57f03cb4893af0e65b8a51ce40776c635b7db64b)]
+- 🐛 Fix incorrect thumbnail names ([#622](https://github.com/stumpapp/stump/issues/622)) [[c6966d4](https://github.com/stumpapp/stump/commit/c6966d4fbaa06f0c160ac90ff10fa144bba84aa7)]
+- 🐛 Fix stale progress after exiting epub reader ([#615](https://github.com/stumpapp/stump/issues/615)) [[3e5e1d5](https://github.com/stumpapp/stump/commit/3e5e1d522b8eea1270fccad088c220d0e94680aa)]
+- 🐛 Fix epub reader footer page count on mobile ([#608](https://github.com/stumpapp/stump/issues/608)) [[ffe2515](https://github.com/stumpapp/stump/commit/ffe251554e00f57365d93b8fdd8b5038173a4d7f)]
+- 🐛 Fix scanning epub without cover ([#605](https://github.com/stumpapp/stump/issues/605)) [[91af565](https://github.com/stumpapp/stump/commit/91af565a7ade837e02e27d360d374390ad325685)]
+- 🐛 Fix fallback checks when looking for cover image ([#601](https://github.com/stumpapp/stump/issues/601)) [[5869ac0](https://github.com/stumpapp/stump/commit/5869ac027540e5f9e31fac99a137358f26d391ca)]
+- 🐛 Allow sorting media by the last time the file was modified ([#600](https://github.com/stumpapp/stump/issues/600)) [[6c012dd](https://github.com/stumpapp/stump/commit/6c012dde3111a10dec41527a50ca751c079f58d2)]
+- 🐛 Fix combobox issue with malformed user-defined URL filters ([#598](https://github.com/stumpapp/stump/issues/598)) [[27965f3](https://github.com/stumpapp/stump/commit/27965f3e4db6c8d75a4cd176b0fcec9293ede0eb)]
+- 🐛 Fix directory listing performance issues ([#595](https://github.com/stumpapp/stump/issues/595)) [[699a281](https://github.com/stumpapp/stump/commit/699a281eef07befede5a24e6b17e48797c43c0d1)]
+- 💚 Fix &#x60;libpdfium.so&#x60; download for &#x60;arm64&#x60; ([#592](https://github.com/stumpapp/stump/issues/592)) [[d800a3b](https://github.com/stumpapp/stump/commit/d800a3bc871c6e773b90708769c15b6c2074434d)]
+- 🐛 (api) Fix metadata api lookup ([#585](https://github.com/stumpapp/stump/issues/585)) [[5769f82](https://github.com/stumpapp/stump/commit/5769f82fc843bd5b7c283c0e0f4e8fba68364bb2)]
+- 🐛 (api) Fix path normalization for epub resource lookup ([#582](https://github.com/stumpapp/stump/issues/582)) [[fa3c0e4](https://github.com/stumpapp/stump/commit/fa3c0e41012c598186cbbd2bea1aeba83f1514f2)]
+
+### Miscellaneous
+
+- 🌐 Update translations ([#638](https://github.com/stumpapp/stump/issues/638)) [[69b10bb](https://github.com/stumpapp/stump/commit/69b10bb174828cd061facde075ca51caaf780625)]
+- 🔀 Promote experimental changes [[67fc511](https://github.com/stumpapp/stump/commit/67fc5118d92a86cda4f7dac9ed16fb04386bcf67)]
+-  Merge branch &#x27;develop&#x27; into experimental [[6a129b1](https://github.com/stumpapp/stump/commit/6a129b1c33d843bc99d3bc15924074f646a8228b)]
+-  Merge branch &#x27;develop&#x27; into experimental [[38f8813](https://github.com/stumpapp/stump/commit/38f8813e423fc2154b073838fb4898efb09b2137)]
+- 🌐 Update translations (Chinese) ([#644](https://github.com/stumpapp/stump/issues/644)) [[fc34eda](https://github.com/stumpapp/stump/commit/fc34eda03c1ddeef5d057ee7b124f910ab8f94f5)]
+- 📝 Update docs to reflect OPF scanning for EPUBs ([#636](https://github.com/stumpapp/stump/issues/636)) [[2890de3](https://github.com/stumpapp/stump/commit/2890de303f2b063e995ff7c809f02a5362dc2753)]
+- 🩹 Fix request method for updating job scheduler ([#630](https://github.com/stumpapp/stump/issues/630)) [[10e1f4e](https://github.com/stumpapp/stump/commit/10e1f4e051fb5ba2c547c11d1befeef513230315)]
+- 🌐 (multi-language): Update translations ([#623](https://github.com/stumpapp/stump/issues/623)) [[40f0e2c](https://github.com/stumpapp/stump/commit/40f0e2cc7cdac74a27a10275a32b31c46845e9d4)]
+- 🔨 Add android dev shell to nix flake ([#628](https://github.com/stumpapp/stump/issues/628)) [[bdb7e7b](https://github.com/stumpapp/stump/commit/bdb7e7bd5c21f36513458bfa6467b36b8c52159f)]
+- 🩹 (expo): Fix HTTP requests for older Android versions ([#624](https://github.com/stumpapp/stump/issues/624)) [[905695c](https://github.com/stumpapp/stump/commit/905695c1ca15945d3ffccaea2d3d4bb902fda894)]
+-  Merge remote-tracking branch &#x27;origin/develop&#x27; into experimental [[73d0346](https://github.com/stumpapp/stump/commit/73d03465119c9c6427a739e429f5cdd98e058b1b)]
+- 🌐 (multi-language): Update translations ([#618](https://github.com/stumpapp/stump/issues/618)) [[f17e245](https://github.com/stumpapp/stump/commit/f17e24536c424025c9f3bbcd393e5d32bb337cae)]
+- 📝 Correct misleading koreader docs [[1e9e627](https://github.com/stumpapp/stump/commit/1e9e627afe9a46c9dd1c3ef502db051cf99701e0)]
+-  Merge pull request [#612](https://github.com/stumpapp/stump/issues/612) from stumpapp/experimental [[31cbda6](https://github.com/stumpapp/stump/commit/31cbda62577c679fc0d1332003411b8db9cb0f3e)]
+- 🚧 (expo): Filesystem and downloads management ([#616](https://github.com/stumpapp/stump/issues/616)) [[a296875](https://github.com/stumpapp/stump/commit/a2968754f2cfe9ad4d944198747574ec0e2b4a4d)]
+-  Merge branch &#x27;develop&#x27; into experimental [[d6c3eed](https://github.com/stumpapp/stump/commit/d6c3eed9abb3ed8d0c4fb6e18a9ef29e37a73207)]
+- 🩹 Switch to ProcessorError and asyncify thumbnail removal ([#613](https://github.com/stumpapp/stump/issues/613)) [[74f395c](https://github.com/stumpapp/stump/commit/74f395ccb4456b6bcc526ec870e94826ed427195)]
+- 🌐 (multi-language): Update translations ([#602](https://github.com/stumpapp/stump/issues/602)) [[06e6d84](https://github.com/stumpapp/stump/commit/06e6d84c7c2106d8096c239dbf6eaaea66a3f30c)]
+- 🩹 Fix missing error logs for book failures ([#611](https://github.com/stumpapp/stump/issues/611)) [[811378f](https://github.com/stumpapp/stump/commit/811378f0145110345a64e158c5f30ec0f85e83d2)]
+- 🩹 Improve web manifest PWA file ([#610](https://github.com/stumpapp/stump/issues/610)) [[f9440a8](https://github.com/stumpapp/stump/commit/f9440a8bda73798be8e7c6ef31abed8fcf2aa040)]
+- 📄 Add mobile app license [[6154a46](https://github.com/stumpapp/stump/commit/6154a46b54175eb0aab3e616ef8f418a11a0817b)]
+-  Merge remote-tracking branch &#x27;origin/develop&#x27; into experimental [[45b491c](https://github.com/stumpapp/stump/commit/45b491c7743d332ab7c23f181af98a35664814e8)]
+- 🌐 (multi-language): Update translations ([#590](https://github.com/stumpapp/stump/issues/590)) [[326325e](https://github.com/stumpapp/stump/commit/326325eb325318385f2bbd4857865fce4b0c1d7b)]
+- 🌐 Update translations (multi) ([#581](https://github.com/stumpapp/stump/issues/581)) [[329eff2](https://github.com/stumpapp/stump/commit/329eff2b3b73c924ab3a81843d108bce83c8fd3d)]
+-  Merge remote-tracking branch &#x27;origin/develop&#x27; into experimental [[cf17ff6](https://github.com/stumpapp/stump/commit/cf17ff672fc0fcb93401f4afebd3130e45f7c23d)]
+-  Merge remote-tracking branch &#x27;origin/develop&#x27; into experimental [[299b3aa](https://github.com/stumpapp/stump/commit/299b3aa70369cf661fc2a3db08c132392780bd25)]
+-  Merge remote-tracking branch &#x27;origin/develop&#x27; into experimental [[9929525](https://github.com/stumpapp/stump/commit/9929525e6edec2aedbbcb8b58326d82c4074cf8f)]
+- 🚧 Rewrite RN app to use expo router and build out PoC ([#571](https://github.com/stumpapp/stump/issues/571)) [[8d5d55b](https://github.com/stumpapp/stump/commit/8d5d55b88bfb1d5132d052bdedfdc1e8fdd8fe5d)]
+
 
 <a name="0.0.10"></a>
 ## 0.0.10 (2025-02-01)

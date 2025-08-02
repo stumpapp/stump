@@ -65,7 +65,7 @@ export default function ContinuousScrollReader({
 	})
 
 	const {
-		bookPreferences: { imageScaling, brightness },
+		bookPreferences: { imageScaling, brightness, readingMode },
 		settings: { showToolBar, preload },
 		setSettings,
 	} = useBookPreferences({ book: media })
@@ -105,6 +105,7 @@ export default function ContinuousScrollReader({
 			<AutoSizer>
 				{({ height, width }) => (
 					<Virtuoso
+						key={readingMode}
 						style={{ height, width }}
 						useWindowScroll={false}
 						horizontalDirection={orientation === 'horizontal'}
@@ -130,7 +131,7 @@ export default function ContinuousScrollReader({
 							</div>
 						)}
 						rangeChanged={setVisibleRange}
-						initialTopMostItemIndex={initialPage ? initialPage - 1 : undefined}
+						initialTopMostItemIndex={initialPage ? initialPage : undefined}
 						overscan={{ main: preload.ahead || 1, reverse: preload.behind || 1 }}
 					/>
 				)}

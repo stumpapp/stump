@@ -3,3 +3,5 @@ name = "migrations"
 edition = "2021"
 
 [dependencies]
+sea-orm = { workspace = true }
+sea-orm-migration = { workspace = true }

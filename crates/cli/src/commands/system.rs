@@ -5,7 +5,7 @@ use dialoguer::Confirm;
 use sea_orm::{ConnectionTrait, DatabaseBackend, Statement};
 use stump_core::{
 	config::StumpConfig,
-	db::{create_connection, JournalMode},
+	database::{connect, JournalMode},
 };
 
 use super::default_progress_spinner;
@@ -44,7 +44,7 @@ async fn set_journal_mode(mode: JournalMode, config: &StumpConfig) -> CliResult<
 	let progress = default_progress_spinner();
 	progress.set_message("Connecting to database...");
 
-	let conn = create_connection(config).await;
+	let conn = connect(config).await?;
 
 	progress.set_message("Fetching current journal mode...");
 

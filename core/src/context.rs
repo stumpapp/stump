@@ -9,7 +9,7 @@ use tokio::sync::{
 
 use crate::{
 	config::StumpConfig,
-	db,
+	database,
 	event::CoreEvent,
 	filesystem::scanner::LibraryWatcher,
 	job::{Executor, JobController, JobControllerCommand},
@@ -48,7 +48,11 @@ impl Ctx {
 	/// ```
 	pub async fn new(config: StumpConfig) -> Ctx {
 		let config = Arc::new(config.clone());
-		let conn = Arc::new(db::create_connection(&config).await);
+		let conn = Arc::new(
+			database::connect(&config)
+				.await
+				.expect("Failed to connect to database"),
+		);
 		let event_channel = Arc::new(channel::<CoreEvent>(1024));
 
 		let job_controller =

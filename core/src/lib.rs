@@ -8,19 +8,17 @@ use std::{str::FromStr, sync::Arc};
 
 pub mod api_key;
 pub mod config;
-pub mod db;
+mod context;
+pub mod database;
+pub mod error;
 mod event;
 pub mod filesystem;
 pub mod job;
 pub mod opds;
 pub mod utils;
 
-mod context;
-pub mod error;
-
 use config::logging::STUMP_SHADOW_TEXT;
 use config::StumpConfig;
-use db::JournalMode;
 use job::{JobController, JobScheduler};
 use models::entity::server_config;
 use sea_orm::{
@@ -35,6 +33,8 @@ pub use event::CoreEvent;
 pub use email::{
 	AttachmentPayload, EmailContentType, EmailerClient, EmailerClientConfig,
 };
+
+use crate::database::JournalMode;
 
 /// A type alias strictly for explicitness in the return type of `init_journal_mode`.
 type JournalModeChanged = bool;

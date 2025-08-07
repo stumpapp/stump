@@ -16,13 +16,14 @@ derive_builder.workspace = true
 derivative.workspace = true
 dirs = "5.0.1"
 email = { path = "../crates/email" }
-models = { path = "../database/models" }
 epub.workspace = true
 futures.workspace = true
 globset = "0.4.14"
 image = { version = "0.25.2" }
 infer.workspace = true
 itertools.workspace = true
+migrations = { path = "../database/migrations" }
+models = { path = "../database/models" }
 md5.workspace = true
 rand.workspace = true
 sea-orm.workspace = true

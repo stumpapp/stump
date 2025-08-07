@@ -50,13 +50,17 @@ prefixed-api-key = { version = "0.3.0", features = ["sha2"] }
 rand = "0.8.5"
 regex = "1.10.6"
 reqwest = { version = "0.12.7", default-features = false, features = [ "json", "rustls-tls" ] }
-sea-orm = { version = "1.1.7", features = [
+sea-orm = { version = "1.1.14", features = [
   "mock",
   "macros",
   "sqlx-sqlite",
   "sqlite-use-returning-for-3_35",
   "runtime-tokio-native-tls",
   "debug-print",
+] }
+sea-orm-migration = { version = "1.1.14", features = [
+  "sqlx-sqlite",
+  "runtime-tokio-native-tls",
 ] }
 serde = { version = "1.0.209", features = ["derive"] }
 serde_json = "1.0.127"

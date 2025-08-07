@@ -87,6 +87,8 @@ const settingsAsBookPreferences = (settings: ReaderSettings): BookPreferences =>
 	fontSize: settings.fontSize,
 	lineHeight: settings.lineHeight,
 	trackElapsedTime: settings.trackElapsedTime,
+	doublePageBehavior: settings.doublePageBehavior,
+	fontFamily: settings.fontFamily,
 })
 
 const buildPreferences = (

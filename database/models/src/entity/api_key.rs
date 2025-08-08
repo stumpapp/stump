@@ -27,7 +27,10 @@ pub struct Model {
 	#[sea_orm(column_type = "Json", nullable)]
 	#[graphql(skip)]
 	pub permissions: APIKeyPermissions,
-	#[sea_orm(column_type = "custom(\"DATETIME\")")]
+	#[sea_orm(
+		column_type = "custom(\"DATETIME\")",
+		default_value = "CURRENT_TIMESTAMP"
+	)]
 	pub created_at: DateTimeWithTimeZone,
 	#[sea_orm(column_type = "custom(\"DATETIME\")", nullable)]
 	pub last_used_at: Option<DateTimeWithTimeZone>,

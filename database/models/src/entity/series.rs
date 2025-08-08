@@ -191,6 +191,8 @@ pub enum Relation {
 	Media,
 	#[sea_orm(has_one = "super::series_metadata::Entity")]
 	SeriesMetadata,
+	#[sea_orm(has_many = "super::series_tag::Entity")]
+	Tags,
 }
 
 impl Related<super::library::Entity> for Entity {

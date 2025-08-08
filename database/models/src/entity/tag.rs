@@ -1,4 +1,4 @@
-use super::media_to_tag;
+use super::media_tag;
 use async_graphql::SimpleObject;
 use sea_orm::{entity::prelude::*, JoinType, QuerySelect};
 
@@ -16,8 +16,12 @@ pub struct Model {
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
-	#[sea_orm(has_many = "super::media_to_tag::Entity")]
-	MediaToTag,
+	#[sea_orm(has_many = "super::media_tag::Entity")]
+	MediaTags,
+	#[sea_orm(has_many = "super::series_tag::Entity")]
+	SeriesTags,
+	#[sea_orm(has_many = "super::library_tag::Entity")]
+	LibraryTags,
 }
 
 impl ActiveModelBehavior for ActiveModel {}
@@ -25,8 +29,8 @@ impl ActiveModelBehavior for ActiveModel {}
 impl Entity {
 	pub fn find_for_media_id(media_id: &str) -> sea_orm::Select<Entity> {
 		Entity::find()
-			.join(JoinType::InnerJoin, Relation::MediaToTag.def())
-			.filter(media_to_tag::Column::MediaId.eq(media_id))
+			.join(JoinType::InnerJoin, Relation::MediaTags.def())
+			.filter(media_tag::Column::MediaId.eq(media_id))
 	}
 }
 

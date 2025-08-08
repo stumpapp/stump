@@ -3,7 +3,7 @@ use async_graphql::{ComplexObject, Context, Result, SimpleObject};
 use models::{
 	entity::{
 		library, library_config, library_hidden_to_user, library_scan_record,
-		library_to_tag, series, tag, user,
+		library_tag, series, tag, user,
 	},
 	shared::{enums::UserPermission, image::ImageRef},
 };
@@ -166,10 +166,10 @@ impl Library {
 			.filter(
 				tag::Column::Id.in_subquery(
 					Query::select()
-						.column(library_to_tag::Column::TagId)
-						.from(library_to_tag::Entity)
+						.column(library_tag::Column::TagId)
+						.from(library_tag::Entity)
 						.and_where(
-							library_to_tag::Column::LibraryId.eq(self.model.id.clone()),
+							library_tag::Column::LibraryId.eq(self.model.id.clone()),
 						)
 						.to_owned(),
 				),

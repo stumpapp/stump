@@ -2,7 +2,7 @@ BEGIN TRANSACTION;
 PRAGMA foreign_keys = OFF;
 -- We must convert all of Prisma's lookup tables to be something more readable:
 -- _LibraryToUser -> _library_hidden_to_user
--- _LibraryToTag -> _library_to_tag
+-- _LibraryToTag -> library_tags
 -- _MediaToTag -> _media_to_tag
 -- _SeriesToTag -> _series_to_tag
 CREATE TABLE "_library_hidden_to_user" (
@@ -17,13 +17,13 @@ SELECT "A",
     "B"
 FROM "_LibraryToUser";
 DROP TABLE "_LibraryToUser";
-CREATE TABLE "_library_to_tag" (
+CREATE TABLE "library_tags" (
     "library_id" TEXT NOT NULL,
     "tag_id" TEXT NOT NULL,
-    CONSTRAINT "_library_to_tag_library_id_fkey" FOREIGN KEY ("library_id") REFERENCES "libraries" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT "_library_to_tag_tag_id_fkey" FOREIGN KEY ("tag_id") REFERENCES "tags" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT "library_tag_library_id_fkey" FOREIGN KEY ("library_id") REFERENCES "libraries" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT "library_tag_tag_id_fkey" FOREIGN KEY ("tag_id") REFERENCES "tags" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
-INSERT INTO "_library_to_tag"("library_id", "tag_id")
+INSERT INTO "library_tags"("library_id", "tag_id")
 SELECT "A",
     "B"
 FROM "_LibraryToTag";
@@ -101,29 +101,29 @@ SELECT stg."series_id",
 FROM "_series_to_tag" stg
     JOIN "_tag_id_map" map ON stg."tag_id" = map."old_id";
 -- Update the library mapping
-CREATE TABLE "new_library_to_tag" (
+CREATE TABLE "newlibrary_tag" (
     "library_id" TEXT NOT NULL,
     "tag_id" INTEGER NOT NULL,
-    CONSTRAINT "_library_to_tag_library_id_fkey" FOREIGN KEY ("library_id") REFERENCES "libraries" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT "_library_to_tag_tag_id_fkey" FOREIGN KEY ("tag_id") REFERENCES "tags" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT "library_tag_library_id_fkey" FOREIGN KEY ("library_id") REFERENCES "libraries" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT "library_tag_tag_id_fkey" FOREIGN KEY ("tag_id") REFERENCES "tags" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
-INSERT INTO "new_library_to_tag" ("library_id", "tag_id")
+INSERT INTO "newlibrary_tag" ("library_id", "tag_id")
 SELECT ltg."library_id",
     map."new_id"
-FROM "_library_to_tag" ltg
+FROM "library_tags" ltg
     JOIN "_tag_id_map" map ON ltg."tag_id" = map."old_id";
 -- At this point, we should be good to drop the old tables and rename the new ones:
 DROP TABLE "_media_to_tag";
 DROP TABLE "_series_to_tag";
-DROP TABLE "_library_to_tag";
+DROP TABLE "library_tags";
 DROP TABLE "tags";
 -- Step 10: Rename new tables
 ALTER TABLE "new_media_to_tag"
     RENAME TO "_media_to_tag";
 ALTER TABLE "new_series_to_tag"
     RENAME TO "_series_to_tag";
-ALTER TABLE "new_library_to_tag"
-    RENAME TO "_library_to_tag";
+ALTER TABLE "newlibrary_tag"
+    RENAME TO "library_tags";
 ALTER TABLE "new_tags"
     RENAME TO "tags";
 -- And drop the temporary mapping table

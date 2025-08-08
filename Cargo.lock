@@ -4198,6 +4198,7 @@ dependencies = [
 name = "migrations"
 version = "0.0.0"
 dependencies = [
+ "models",
  "sea-orm",
  "sea-orm-migration",
 ]

@@ -190,14 +190,15 @@ impl LibraryMutation {
 		let (library, config) = input.into_active_model();
 
 		let created_config = config.insert(&txn).await?;
-		let created_library = library::Entity::insert(library::ActiveModel {
+		let created_library = library::ActiveModel {
 			id: Set(created_config
 				.library_id
 				.ok_or("Library config not created correctly")?),
 			config_id: Set(created_config.id),
+			status: Set(FileStatus::Ready),
 			..library
-		})
-		.exec_with_returning(&txn)
+		}
+		.insert(&txn)
 		.await?;
 
 		if let Some(tags) = tags {

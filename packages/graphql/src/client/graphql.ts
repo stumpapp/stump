@@ -764,7 +764,7 @@ export type Library = {
   id: Scalars['String']['output'];
   /** Get the details of the last scan job for this library, if any exists. */
   lastScan?: Maybe<LibraryScanRecord>;
-  lastScannedAt?: Maybe<Scalars['String']['output']>;
+  lastScannedAt?: Maybe<Scalars['DateTime']['output']>;
   name: Scalars['String']['output'];
   path: Scalars['String']['output'];
   /** Get the full history of scan jobs for this library. */
@@ -778,7 +778,7 @@ export type Library = {
    * qualified URL to the image.
    */
   thumbnail: ImageRef;
-  updatedAt: Scalars['DateTime']['output'];
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
 
@@ -3018,7 +3018,6 @@ export type UserPreferences = {
   enableLiveRefetch: Scalars['Boolean']['output'];
   enableReplacePrimarySidebar: Scalars['Boolean']['output'];
   homeArrangement: Arrangement;
-  id: Scalars['String']['output'];
   layoutMaxWidthPx?: Maybe<Scalars['Int']['output']>;
   locale: Scalars['String']['output'];
   navigationArrangement: Arrangement;

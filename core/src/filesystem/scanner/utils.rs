@@ -80,12 +80,10 @@ pub(crate) async fn create_media(
 ) -> CoreResult<media::Model> {
 	let txn = db.begin().await?;
 
-	let created_media = media::Entity::insert(media)
-		.exec_with_returning(&txn)
-		.await?;
+	let created_media = media.insert(&txn).await?;
 
 	if let Some(meta) = metadata {
-		media_metadata::Entity::insert(meta).exec(&txn).await?;
+		meta.insert(&txn).await?;
 	}
 
 	txn.commit().await?;

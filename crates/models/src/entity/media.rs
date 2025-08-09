@@ -1,6 +1,7 @@
 use crate::entity::age_restriction;
 use async_graphql::SimpleObject;
 use async_trait::async_trait;
+use chrono::Utc;
 use filter_gen::Ordering;
 use sea_orm::{
 	prelude::*, ActiveValue, Condition, FromQueryResult, JoinType, QueryOrder,
@@ -36,7 +37,7 @@ pub struct Model {
 	pub pages: i32,
 	/// The timestamp of the last time the media was updated. This will be set during creation, as well
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
-	pub updated_at: DateTimeWithTimeZone,
+	pub updated_at: Option<DateTimeWithTimeZone>,
 	/// The timestamp of the creation of the media
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
 	pub created_at: DateTimeWithTimeZone,
@@ -391,8 +392,17 @@ impl ActiveModelBehavior for ActiveModel {
 	where
 		C: ConnectionTrait,
 	{
-		if insert && self.id.is_not_set() {
-			self.id = ActiveValue::Set(Uuid::new_v4().to_string());
+		if insert {
+			if self.id.is_not_set() {
+				self.id = ActiveValue::Set(Uuid::new_v4().to_string());
+			}
+			if self.status.is_not_set() {
+				self.status = ActiveValue::Set(FileStatus::Unknown);
+			}
+			self.created_at = ActiveValue::Set(DateTimeWithTimeZone::from(Utc::now()));
+		} else {
+			self.updated_at =
+				ActiveValue::Set(Some(DateTimeWithTimeZone::from(Utc::now())));
 		}
 
 		Ok(self)

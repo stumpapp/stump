@@ -715,11 +715,11 @@ type Library {
 	description: String
 	path: String!
 	status: FileStatus!
-	updatedAt: DateTime!
 	createdAt: DateTime!
+	updatedAt: DateTime
 	emoji: String
 	configId: Int!
-	lastScannedAt: String
+	lastScannedAt: DateTime
 	config: LibraryConfig!
 	excludedUsers: [User!]!
 	"Get the details of the last scan job for this library, if any exists."
@@ -788,8 +788,8 @@ enum LibraryModelOrdering {
 	DESCRIPTION
 	PATH
 	STATUS
-	UPDATED_AT
 	CREATED_AT
+	UPDATED_AT
 	EMOJI
 	CONFIG_ID
 	LAST_SCANNED_AT
@@ -2298,7 +2298,6 @@ type UserPermissionStruct {
 }
 
 type UserPreferences {
-	id: String!
 	preferredLayoutMode: String!
 	locale: String!
 	appTheme: String!

@@ -240,12 +240,10 @@ async fn put_progress(
 	let tx = ctx.conn.as_ref().begin().await?;
 
 	let on_conflict = OnConflict::new()
-		.update_columns(registered_reading_device::Column::iter().filter(
-			|col| match col {
-				registered_reading_device::Column::Name => true,
-				_ => false,
-			},
-		))
+		.update_columns(
+			registered_reading_device::Column::iter()
+				.filter(|col| matches!(col, registered_reading_device::Column::Name)),
+		)
 		.to_owned();
 
 	let _device_record = registered_reading_device::Entity::insert(
@@ -280,9 +278,7 @@ async fn put_progress(
 			started_at: Set(started_at.unwrap_or_default()),
 			..Default::default()
 		};
-		let finished_session = finished_reading_session::Entity::insert(finished_session)
-			.exec_with_returning(&tx)
-			.await?;
+		let finished_session = finished_session.insert(&tx).await?;
 
 		(None, Some(finished_session))
 	} else {

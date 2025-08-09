@@ -1,4 +1,5 @@
 use async_graphql::SimpleObject;
+use chrono::Utc;
 use filter_gen::Ordering;
 use sea_orm::{
 	entity::prelude::*, prelude::async_trait::async_trait, ActiveValue,
@@ -27,14 +28,14 @@ pub struct Model {
 	#[sea_orm(column_type = "Text")]
 	pub status: FileStatus,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
-	pub updated_at: DateTimeWithTimeZone,
-	#[sea_orm(column_type = "custom(\"DATETIME\")")]
 	pub created_at: DateTimeWithTimeZone,
+	#[sea_orm(column_type = "custom(\"DATETIME\")")]
+	pub updated_at: Option<DateTimeWithTimeZone>,
 	#[sea_orm(column_type = "Text", nullable)]
 	pub emoji: Option<String>,
 	pub config_id: i32,
 	#[sea_orm(column_type = "custom(\"DATETIME\")", nullable)]
-	pub last_scanned_at: Option<String>,
+	pub last_scanned_at: Option<DateTimeWithTimeZone>,
 }
 
 impl Entity {
@@ -121,8 +122,19 @@ impl ActiveModelBehavior for ActiveModel {
 	where
 		C: ConnectionTrait,
 	{
-		if insert && self.id.is_not_set() {
-			self.id = ActiveValue::Set(Uuid::new_v4().to_string());
+		if insert {
+			if self.id.is_not_set() {
+				self.id = ActiveValue::Set(Uuid::new_v4().to_string());
+			}
+
+			if self.status.is_not_set() {
+				self.status = ActiveValue::Set(FileStatus::Unknown);
+			}
+
+			self.created_at = ActiveValue::Set(DateTimeWithTimeZone::from(Utc::now()));
+		} else {
+			self.updated_at =
+				ActiveValue::Set(Some(DateTimeWithTimeZone::from(Utc::now())));
 		}
 
 		Ok(self)

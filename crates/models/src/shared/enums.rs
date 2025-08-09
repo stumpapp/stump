@@ -29,6 +29,37 @@ pub enum AccessRole {
 	CoCreator = 3,
 }
 
+// #[derive(
+// 	Eq,
+// 	Copy,
+// 	Hash,
+// 	Debug,
+// 	Clone,
+// 	Default,
+// 	EnumIter,
+// 	PartialEq,
+// 	Serialize,
+// 	Deserialize,
+// 	DeriveActiveEnum,
+// 	Enum,
+// 	EnumString,
+// 	Display,
+// )]
+// #[sea_orm(
+// 	rs_type = "String",
+// 	rename_all = "SCREAMING_SNAKE_CASE",
+// 	db_type = "String(StringLen::None)"
+// )]
+// #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+// #[strum(serialize_all = "SCREAMING_SNAKE_CASE")]
+// pub enum DeviceKind {
+// 	EbookReader,
+// 	Phone,
+// 	Tablet,
+// 	#[default]
+// 	Unknown,
+// }
+
 /// The visibility of a shareable entity
 #[derive(
 	Eq,

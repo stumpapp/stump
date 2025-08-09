@@ -138,7 +138,7 @@ impl IntoOPDSEntry for OPDSEntryBuilder<library::Model> {
 
 		OpdsEntry {
 			id: self.data.id,
-			updated: self.data.updated_at,
+			updated: self.data.updated_at.unwrap_or_default(),
 			title: self.data.name,
 			content: self.data.description,
 			authors: None,
@@ -162,7 +162,7 @@ impl IntoOPDSEntry for OPDSEntryBuilder<series::Model> {
 
 		OpdsEntry {
 			id: self.data.id.to_string(),
-			updated: self.data.updated_at,
+			updated: self.data.updated_at.unwrap_or_default(),
 			title: self.data.name,
 			content: self.data.description,
 			authors: None,

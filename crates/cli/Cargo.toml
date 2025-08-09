@@ -9,7 +9,7 @@ path = "bin/main.rs"
 
 [dependencies]
 stump_core = { path = "../../core" }
-models = { path = "../../database/models" }
+models = { path = "../models" }
 
 sea-orm = { workspace = true }
 tokio = { workspace = true }

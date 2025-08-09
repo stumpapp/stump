@@ -83,6 +83,7 @@ const settingsAsBookPreferences = (settings: ReaderSettings): BookPreferences =>
 	trackElapsedTime: settings.trackElapsedTime,
 	doublePageBehavior: settings.doublePageBehavior,
 	fontFamily: settings.fontFamily,
+	secondPageSeparate: settings.secondPageSeparate,
 })
 
 const buildPreferences = (

@@ -1,9 +1,9 @@
-import { useUpdatePreferences } from '@stump/client'
 import { Button, Label, RawSwitch, Text, ToolTip } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { RefreshCcw } from 'lucide-react'
 import toast from 'react-hot-toast'
 
+import { usePreferences } from '@/hooks/usePreferences'
 import { useTauriRPC } from '@/hooks/useTauriRPC'
 import { useUserStore } from '@/stores'
 
@@ -14,7 +14,7 @@ export default function DiscordPresenceSwitch() {
 		setUserPreferences: state.setUserPreferences,
 		userPreferences: state.userPreferences,
 	}))
-	const { update } = useUpdatePreferences()
+	const { update } = usePreferences()
 
 	/**
 	 * Toggle the Discord Rich Presence setting. When toggled on, the default presence will be set
@@ -29,7 +29,6 @@ export default function DiscordPresenceSwitch() {
 			setUserPreferences(newPreferences)
 
 			try {
-				// @ts-expect-error: Investigate this type error when I have time TODO
 				await update(newPreferences)
 			} catch (err) {
 				console.error(err)

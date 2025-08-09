@@ -9,7 +9,7 @@ type Props = {
 	onSelect?: (item: JSX.Element) => void
 }
 // TODO: translate
-export default function BookGrid({ items, isLoading, hasFilters, onSelect }: Props) {
+export default function BookGrid({ items, isLoading, hasFilters }: Props) {
 	if (isLoading) {
 		return null
 	} else if (!items || !items.length) {

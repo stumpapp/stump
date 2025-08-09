@@ -142,7 +142,6 @@ type Documents = {
     "\n\tquery SmartListItems($id: ID!) {\n\t\tsmartListItems(id: $id) {\n\t\t\t__typename\n\t\t\t... on SmartListGrouped {\n\t\t\t\titems {\n\t\t\t\t\tentity {\n\t\t\t\t\t\t__typename\n\t\t\t\t\t\t... on Series {\n\t\t\t\t\t\t\tid\n\t\t\t\t\t\t\tname\n\t\t\t\t\t\t}\n\t\t\t\t\t\t... on Library {\n\t\t\t\t\t\t\tid\n\t\t\t\t\t\t\tname\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t\tbooks {\n\t\t\t\t\t\t...BookCard\n\t\t\t\t\t\t...BookMetadata\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t\t... on SmartListUngrouped {\n\t\t\t\tbooks {\n\t\t\t\t\t...BookCard\n\t\t\t\t\t...BookMetadata\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.SmartListItemsDocument,
     "\n\tquery SmartListBasicSettingsScene {\n\t\tsmartLists(input: { mine: true }) {\n\t\t\tname\n\t\t}\n\t}\n": typeof types.SmartListBasicSettingsSceneDocument,
     "\n\tmutation DeleteSmartList($id: ID!) {\n\t\tdeleteSmartList(id: $id) {\n\t\t\t__typename\n\t\t}\n\t}\n": typeof types.DeleteSmartListDocument,
-    "\n\tquery useAuthQuery {\n\t\tme {\n\t\t\tid\n\t\t\tavatarUrl\n\t\t\tisLocked\n\t\t\tisServerOwner\n\t\t\tlastLogin\n\t\t\tpermissions\n\t\t\tusername\n\t\t}\n\t}\n": typeof types.UseAuthQueryDocument,
     "\n\tquery DirectoryListing($input: DirectoryListingInput!, $pagination: Pagination!) {\n\t\tlistDirectory(input: $input, pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tparent\n\t\t\t\tfiles {\n\t\t\t\t\tname\n\t\t\t\t\tpath\n\t\t\t\t\tisDirectory\n\t\t\t\t}\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\tcurrentPage\n\t\t\t\t\ttotalPages\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.DirectoryListingDocument,
     "\n\tquery UploadConfig {\n\t\tuploadConfig {\n\t\t\tenabled\n\t\t\tmaxFileUploadSize\n\t\t}\n\t}\n": typeof types.UploadConfigDocument,
 };
@@ -274,7 +273,6 @@ const documents: Documents = {
     "\n\tquery SmartListItems($id: ID!) {\n\t\tsmartListItems(id: $id) {\n\t\t\t__typename\n\t\t\t... on SmartListGrouped {\n\t\t\t\titems {\n\t\t\t\t\tentity {\n\t\t\t\t\t\t__typename\n\t\t\t\t\t\t... on Series {\n\t\t\t\t\t\t\tid\n\t\t\t\t\t\t\tname\n\t\t\t\t\t\t}\n\t\t\t\t\t\t... on Library {\n\t\t\t\t\t\t\tid\n\t\t\t\t\t\t\tname\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t\tbooks {\n\t\t\t\t\t\t...BookCard\n\t\t\t\t\t\t...BookMetadata\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t\t... on SmartListUngrouped {\n\t\t\t\tbooks {\n\t\t\t\t\t...BookCard\n\t\t\t\t\t...BookMetadata\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.SmartListItemsDocument,
     "\n\tquery SmartListBasicSettingsScene {\n\t\tsmartLists(input: { mine: true }) {\n\t\t\tname\n\t\t}\n\t}\n": types.SmartListBasicSettingsSceneDocument,
     "\n\tmutation DeleteSmartList($id: ID!) {\n\t\tdeleteSmartList(id: $id) {\n\t\t\t__typename\n\t\t}\n\t}\n": types.DeleteSmartListDocument,
-    "\n\tquery useAuthQuery {\n\t\tme {\n\t\t\tid\n\t\t\tavatarUrl\n\t\t\tisLocked\n\t\t\tisServerOwner\n\t\t\tlastLogin\n\t\t\tpermissions\n\t\t\tusername\n\t\t}\n\t}\n": types.UseAuthQueryDocument,
     "\n\tquery DirectoryListing($input: DirectoryListingInput!, $pagination: Pagination!) {\n\t\tlistDirectory(input: $input, pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tparent\n\t\t\t\tfiles {\n\t\t\t\t\tname\n\t\t\t\t\tpath\n\t\t\t\t\tisDirectory\n\t\t\t\t}\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\tcurrentPage\n\t\t\t\t\ttotalPages\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.DirectoryListingDocument,
     "\n\tquery UploadConfig {\n\t\tuploadConfig {\n\t\t\tenabled\n\t\t\tmaxFileUploadSize\n\t\t}\n\t}\n": types.UploadConfigDocument,
 };
@@ -787,10 +785,6 @@ export function graphql(source: "\n\tquery SmartListBasicSettingsScene {\n\t\tsm
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n\tmutation DeleteSmartList($id: ID!) {\n\t\tdeleteSmartList(id: $id) {\n\t\t\t__typename\n\t\t}\n\t}\n"): typeof import('./graphql').DeleteSmartListDocument;
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n\tquery useAuthQuery {\n\t\tme {\n\t\t\tid\n\t\t\tavatarUrl\n\t\t\tisLocked\n\t\t\tisServerOwner\n\t\t\tlastLogin\n\t\t\tpermissions\n\t\t\tusername\n\t\t}\n\t}\n"): typeof import('./graphql').UseAuthQueryDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

@@ -3925,11 +3925,6 @@ export type DeleteSmartListMutationVariables = Exact<{
 
 export type DeleteSmartListMutation = { __typename?: 'Mutation', deleteSmartList: { __typename: 'SmartList' } };
 
-export type UseAuthQueryQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type UseAuthQueryQuery = { __typename?: 'Query', me: { __typename?: 'User', id: string, avatarUrl?: string | null, isLocked: boolean, isServerOwner: boolean, lastLogin?: any | null, permissions: Array<UserPermission>, username: string } };
-
 export type DirectoryListingQueryVariables = Exact<{
   input: DirectoryListingInput;
   pagination: Pagination;
@@ -5875,19 +5870,6 @@ export const DeleteSmartListDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<DeleteSmartListMutation, DeleteSmartListMutationVariables>;
-export const UseAuthQueryDocument = new TypedDocumentString(`
-    query useAuthQuery {
-  me {
-    id
-    avatarUrl
-    isLocked
-    isServerOwner
-    lastLogin
-    permissions
-    username
-  }
-}
-    `) as unknown as TypedDocumentString<UseAuthQueryQuery, UseAuthQueryQueryVariables>;
 export const DirectoryListingDocument = new TypedDocumentString(`
     query DirectoryListing($input: DirectoryListingInput!, $pagination: Pagination!) {
   listDirectory(input: $input, pagination: $pagination) {

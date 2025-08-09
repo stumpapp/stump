@@ -1,5 +1,5 @@
-import { usePrefetchClubChat } from '@stump/client'
 import { cn, cx, Link } from '@stump/components'
+import { noop } from 'lodash'
 import { useMemo } from 'react'
 import { useLocation } from 'react-router'
 
@@ -16,7 +16,9 @@ export default function BookClubNavigation() {
 		bookClub: { id },
 		viewerIsMember,
 	} = useBookClubContext()
-	const { prefetch } = usePrefetchClubChat({ id })
+	// const { prefetch } = usePrefetchClubChat({ id })
+	// TODO(graphql): Fix
+	const prefetch = noop
 
 	const tabs = useMemo(() => {
 		const base = [

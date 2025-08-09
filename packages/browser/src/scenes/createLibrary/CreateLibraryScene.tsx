@@ -2,6 +2,7 @@ import { useGraphQLMutation, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Alert } from '@stump/components'
 import { CreateOrUpdateLibraryInput, graphql } from '@stump/graphql'
 import { handleApiError } from '@stump/sdk'
+import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
 
@@ -16,7 +17,6 @@ import { useConfetti } from '@/hooks/useConfetti'
 import paths from '@/paths'
 
 import CreateLibraryForm from './CreateLibraryForm'
-import { useQueryClient } from '@tanstack/react-query'
 
 const query = graphql(`
 	query CreateLibrarySceneExistingLibraries {

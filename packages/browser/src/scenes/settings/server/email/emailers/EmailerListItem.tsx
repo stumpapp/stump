@@ -1,7 +1,7 @@
-import { useDeleteEmailer } from '@stump/client'
 import { Badge, Card, Text, ToolTip } from '@stump/components'
 import { FragmentType, graphql, useFragment } from '@stump/graphql'
 import dayjs from 'dayjs'
+import { noop } from 'lodash'
 import { Sparkles } from 'lucide-react'
 import { Suspense, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router'
@@ -41,7 +41,9 @@ export default function EmailerListItem({ fragment }: Props) {
 
 	// const { prefetch } = usePrefetchEmailerSendHistory({ emailerId: emailer.id })
 
-	const { deleteEmailer } = useDeleteEmailer()
+	// const { deleteEmailer } = useDeleteEmailer()
+	// TODO(graphql): Fix
+	const deleteEmailer = noop
 
 	const displayedHost = useMemo(
 		() =>

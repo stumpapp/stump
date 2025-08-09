@@ -7,9 +7,14 @@ export type ImageBasedBookPageRef = {
 export type GeneratePageSetsParams = {
 	imageSizes: Record<number, ImageBasedBookPageRef>
 	pages: number
+	secondPageSeparate?: boolean
 }
 
-export const generatePageSets = ({ imageSizes, pages }: GeneratePageSetsParams): number[][] => {
+export const generatePageSets = ({
+	imageSizes,
+	pages,
+	secondPageSeparate = false,
+}: GeneratePageSetsParams): number[][] => {
 	const sets: number[][] = []
 
 	const landscapePages = Object.keys(imageSizes).reduce(
@@ -45,6 +50,11 @@ export const generatePageSets = ({ imageSizes, pages }: GeneratePageSetsParams):
 
 	let currentSet: number[] = []
 	for (let i = 0; i < pages; i++) {
+		if (secondPageSeparate && i === 1) {
+			sets.push([1])
+			visitedSet.add(1)
+			continue
+		}
 		if (visitedSet.has(i)) {
 			continue // Skip already processed pages
 		}

@@ -80,6 +80,7 @@ export default function ImageBasedReader({
 			readingMode,
 			readingDirection,
 			trackElapsedTime,
+			secondPageSeparate,
 		},
 		setSettings,
 	} = useBookPreferences({ book: media })
@@ -113,7 +114,11 @@ export default function ImageBasedReader({
 		if (doublePageBehavior === 'off' || autoButOff || modeForceOff) {
 			sets = Array.from({ length: pages }, (_, i) => [i])
 		} else {
-			sets = generatePageSets({ imageSizes: pageDimensions, pages: pages })
+			sets = generatePageSets({
+				imageSizes: pageDimensions,
+				pages: pages,
+				secondPageSeparate: secondPageSeparate,
+			})
 		}
 
 		if (readingDirection === 'rtl') {
@@ -121,7 +126,15 @@ export default function ImageBasedReader({
 		}
 
 		return sets
-	}, [doublePageBehavior, pages, pageDimensions, deviceOrientation, readingMode, readingDirection])
+	}, [
+		doublePageBehavior,
+		pages,
+		pageDimensions,
+		deviceOrientation,
+		readingMode,
+		readingDirection,
+		secondPageSeparate,
+	])
 
 	const { updateReadProgress } = useUpdateMediaProgress(media.id, {
 		retry: (attempts) => attempts < 3,

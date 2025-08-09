@@ -61,6 +61,10 @@ export type BookPreferences = {
 	 * Whether or not to track elapsed time for the book
 	 */
 	trackElapsedTime: boolean
+	/**
+	 * Whether or not the page 2 should be displayed separately. This will have no effect if the book is not image-based
+	 */
+	secondPageSeparate: boolean
 }
 
 /**
@@ -132,6 +136,7 @@ export const DEFAULT_BOOK_PREFERENCES = {
 		scaleToFit: 'height',
 	},
 	doublePageBehavior: 'auto',
+	secondPageSeparate: false,
 	trackElapsedTime: true,
 	tapSidesToNavigate: true,
 } as const

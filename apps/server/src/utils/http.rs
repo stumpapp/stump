@@ -245,7 +245,7 @@ mod tests {
 	async fn test_named_file_response() {
 		let response = NamedFile::open(
 			PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-				.join("../../core/integration-tests/data/example.jpeg"),
+				.join("../../core/tests/data/example.jpeg"),
 		)
 		.await
 		.unwrap();

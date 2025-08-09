@@ -16,7 +16,7 @@ pub(crate) mod tests {
 
 	pub fn get_test_zip_path() -> String {
 		PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-			.join("integration-tests/data/book.zip")
+			.join("tests/data/book.zip")
 			.to_string_lossy()
 			.to_string()
 	}
@@ -30,7 +30,7 @@ pub(crate) mod tests {
 
 	pub fn get_test_rar_path() -> String {
 		PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-			.join("integration-tests/data/book.rar")
+			.join("tests/data/book.rar")
 			.to_string_lossy()
 			.to_string()
 	}
@@ -50,21 +50,21 @@ pub(crate) mod tests {
 
 	pub fn get_test_epub_path() -> String {
 		PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-			.join("integration-tests/data/book.epub")
+			.join("tests/data/book.epub")
 			.to_string_lossy()
 			.to_string()
 	}
 
 	pub fn get_test_pdf_path() -> String {
 		PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-			.join("integration-tests/data/rust_book.pdf")
+			.join("tests/data/rust_book.pdf")
 			.to_string_lossy()
 			.to_string()
 	}
 
 	pub fn get_test_cbz_path() -> String {
 		PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-			.join("integration-tests/data/science_comics_001.cbz")
+			.join("tests/data/science_comics_001.cbz")
 			.to_string_lossy()
 			.to_string()
 	}
@@ -73,7 +73,7 @@ pub(crate) mod tests {
 	// ignored by the processor. Commenting the sizes for posterity.
 	pub fn get_nested_macos_compressed_cbz_path() -> String {
 		PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-			.join("integration-tests/data/nested-macos-compressed.cbz")
+			.join("tests/data/nested-macos-compressed.cbz")
 			.to_string_lossy()
 			.to_string()
 	}

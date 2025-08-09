@@ -12,6 +12,7 @@ use crate::{
 // 1. Schedule multiple job types (complex config)
 // 2. Last run timestamp, so on boot we don't immediately trigger the scheduled tasks
 
+#[derive(Debug)]
 pub struct JobScheduler {
 	pub scheduler_handle: Option<tokio::task::JoinHandle<()>>,
 }

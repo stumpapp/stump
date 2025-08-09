@@ -5,7 +5,7 @@ use models::{
 	entity::{
 		last_library_visit,
 		library::{self, LibraryIdentSelect},
-		library_config, library_hidden_to_user, library_scan_record, library_tag, media,
+		library_config, library_exclusion, library_scan_record, library_tag, media,
 		series, tag, user,
 	},
 	shared::enums::{FileStatus, UserPermission},
@@ -557,8 +557,8 @@ impl LibraryMutation {
 			.await?
 			.ok_or("Library not found")?;
 
-		let existing_exclusions = library_hidden_to_user::Entity::find()
-			.filter(library_hidden_to_user::Column::LibraryId.eq(library.id.clone()))
+		let existing_exclusions = library_exclusion::Entity::find()
+			.filter(library_exclusion::Column::LibraryId.eq(library.id.clone()))
 			.all(core.conn.as_ref())
 			.await?;
 
@@ -569,7 +569,7 @@ impl LibraryMutation {
 					.iter()
 					.any(|exclusion| exclusion.user_id == **id)
 			})
-			.map(|id| library_hidden_to_user::ActiveModel {
+			.map(|id| library_exclusion::ActiveModel {
 				library_id: Set(library.id.clone()),
 				user_id: Set(id.clone()),
 				..Default::default()
@@ -590,15 +590,15 @@ impl LibraryMutation {
 		let txn = core.conn.as_ref().begin().await?;
 
 		if !to_add.is_empty() {
-			library_hidden_to_user::Entity::insert_many(to_add)
+			library_exclusion::Entity::insert_many(to_add)
 				.on_conflict_do_nothing()
 				.exec(&txn)
 				.await?;
 		}
 
 		if !to_remove.is_empty() {
-			library_hidden_to_user::Entity::delete_many()
-				.filter(library_hidden_to_user::Column::Id.is_in(to_remove))
+			library_exclusion::Entity::delete_many()
+				.filter(library_exclusion::Column::Id.is_in(to_remove))
 				.exec(&txn)
 				.await?;
 		}

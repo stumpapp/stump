@@ -13,7 +13,7 @@ use crate::{
 	},
 };
 
-use super::{library_hidden_to_user, series_metadata, user::AuthUser};
+use super::{library_exclusion, series_metadata, user::AuthUser};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject, Ordering)]
 #[graphql(name = "SeriesModel")]
@@ -61,7 +61,7 @@ impl Entity {
 
 		Entity::find()
 			.filter(Column::LibraryId.not_in_subquery(
-				library_hidden_to_user::Entity::library_hidden_to_user_query(user),
+				library_exclusion::Entity::library_hidden_to_user_query(user),
 			))
 			.apply_if(age_restriction_filter, |query, filter| {
 				query.left_join(series_metadata::Entity).filter(filter)
@@ -156,9 +156,9 @@ fn apply_hidden_library_filter(
 		.filter(
 			Column::LibraryId.not_in_subquery(
 				Query::select()
-					.column(library_hidden_to_user::Column::LibraryId)
-					.from(library_hidden_to_user::Entity)
-					.and_where(library_hidden_to_user::Column::UserId.eq(user.id.clone()))
+					.column(library_exclusion::Column::LibraryId)
+					.from(library_exclusion::Entity)
+					.and_where(library_exclusion::Column::UserId.eq(user.id.clone()))
 					.to_owned(),
 			),
 		)
@@ -251,7 +251,7 @@ mod tests {
 		let stmt_str = select_no_cols_to_string(select);
 		assert_eq!(
 			stmt_str,
-			r#"SELECT  FROM "series" WHERE "series"."library_id" NOT IN (SELECT "library_id" FROM "_library_hidden_to_user" WHERE "_library_hidden_to_user"."user_id" = '42')"#
+			r#"SELECT  FROM "series" WHERE "series"."library_id" NOT IN (SELECT "library_id" FROM "library_exclusions" WHERE "library_exclusions"."user_id" = '42')"#
 		);
 	}
 
@@ -269,7 +269,7 @@ mod tests {
 		let stmt_str = select_no_cols_to_string(select);
 		assert_eq!(
 			stmt_str,
-			r#"SELECT  FROM "series" LEFT JOIN "series_metadata" ON "series"."id" = "series_metadata"."series_id" WHERE "series"."library_id" NOT IN (SELECT "library_id" FROM "_library_hidden_to_user" WHERE "_library_hidden_to_user"."user_id" = '42') AND "series_metadata"."age_rating" IS NOT NULL AND "series_metadata"."age_rating" <= 18"#
+			r#"SELECT  FROM "series" LEFT JOIN "series_metadata" ON "series"."id" = "series_metadata"."series_id" WHERE "series"."library_id" NOT IN (SELECT "library_id" FROM "library_exclusions" WHERE "library_exclusions"."user_id" = '42') AND "series_metadata"."age_rating" IS NOT NULL AND "series_metadata"."age_rating" <= 18"#
 		);
 	}
 
@@ -296,7 +296,7 @@ mod tests {
 		let stmt_str = select_no_cols_to_string(select);
 		assert_eq!(
 			stmt_str,
-			r#"SELECT  FROM "series" WHERE "series"."library_id" NOT IN (SELECT "library_id" FROM "_library_hidden_to_user" WHERE "_library_hidden_to_user"."user_id" = '42') AND "series"."id" = '123'"#.to_string()
+			r#"SELECT  FROM "series" WHERE "series"."library_id" NOT IN (SELECT "library_id" FROM "library_exclusions" WHERE "library_exclusions"."user_id" = '42') AND "series"."id" = '123'"#.to_string()
 		);
 	}
 
@@ -307,7 +307,7 @@ mod tests {
 		let stmt_str = select_no_cols_to_string(select);
 		assert_eq!(
 			stmt_str,
-			r#"SELECT  FROM "series" LEFT JOIN "series_metadata" ON "series"."id" = "series_metadata"."series_id" WHERE "series"."library_id" NOT IN (SELECT "library_id" FROM "_library_hidden_to_user" WHERE "_library_hidden_to_user"."user_id" = '42')"#
+			r#"SELECT  FROM "series" LEFT JOIN "series_metadata" ON "series"."id" = "series_metadata"."series_id" WHERE "series"."library_id" NOT IN (SELECT "library_id" FROM "library_exclusions" WHERE "library_exclusions"."user_id" = '42')"#
 		);
 	}
 
@@ -318,7 +318,7 @@ mod tests {
 		let stmt_str = select_no_cols_to_string(select);
 		assert_eq!(
             stmt_str,
-            r#"SELECT  FROM "series" LEFT JOIN "series_metadata" ON "series"."id" = "series_metadata"."series_id" WHERE "series"."id" = '123' AND "series"."library_id" NOT IN (SELECT "library_id" FROM "_library_hidden_to_user" WHERE "_library_hidden_to_user"."user_id" = '42')"#.to_string()
+            r#"SELECT  FROM "series" LEFT JOIN "series_metadata" ON "series"."id" = "series_metadata"."series_id" WHERE "series"."id" = '123' AND "series"."library_id" NOT IN (SELECT "library_id" FROM "library_exclusions" WHERE "library_exclusions"."user_id" = '42')"#.to_string()
         );
 	}
 }

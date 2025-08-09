@@ -20,7 +20,7 @@ pub mod job;
 pub mod last_library_visit;
 pub mod library;
 pub mod library_config;
-pub mod library_hidden_to_user;
+pub mod library_exclusion;
 pub mod library_scan_record;
 pub mod library_tag;
 pub mod log;

@@ -200,7 +200,7 @@ pub enum Relation {
 	EmailerSendRecord,
 	#[sea_orm(has_many = "super::finished_reading_session::Entity")]
 	FinishedReadingSession,
-	#[sea_orm(has_many = "super::library_hidden_to_user::Entity")]
+	#[sea_orm(has_many = "super::library_exclusion::Entity")]
 	HiddenLibrary,
 	#[sea_orm(has_many = "super::last_library_visit::Entity")]
 	LastLibraryVisit,
@@ -272,7 +272,7 @@ impl Related<super::finished_reading_session::Entity> for Entity {
 	}
 }
 
-impl Related<super::library_hidden_to_user::Entity> for Entity {
+impl Related<super::library_exclusion::Entity> for Entity {
 	fn to() -> RelationDef {
 		Relation::HiddenLibrary.def()
 	}

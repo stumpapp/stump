@@ -1,18 +1,18 @@
 BEGIN TRANSACTION;
 PRAGMA foreign_keys = OFF;
 -- We must convert all of Prisma's lookup tables to be something more readable:
--- _LibraryToUser -> _library_hidden_to_user
+-- _LibraryToUser -> library_exclusions
 -- _LibraryToTag -> library_tags
 -- _MediaToTag -> _media_to_tag
 -- _SeriesToTag -> _series_to_tag
-CREATE TABLE "_library_hidden_to_user" (
+CREATE TABLE "library_exclusions" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     "library_id" TEXT NOT NULL,
     "user_id" TEXT NOT NULL,
-    CONSTRAINT "_library_hidden_to_user_library_id_fkey" FOREIGN KEY ("library_id") REFERENCES "libraries" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT "_library_hidden_to_user_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT "library_exclusions_library_id_fkey" FOREIGN KEY ("library_id") REFERENCES "libraries" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT "library_exclusions_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
-INSERT INTO "_library_hidden_to_user"("library_id", "user_id")
+INSERT INTO "library_exclusions"("library_id", "user_id")
 SELECT "A",
     "B"
 FROM "_LibraryToUser";

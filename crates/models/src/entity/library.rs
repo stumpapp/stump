@@ -10,7 +10,7 @@ use crate::shared::{
 	ordering::{OrderBy, OrderDirection},
 };
 
-use super::{library_hidden_to_user, user::AuthUser};
+use super::{library_exclusion, user::AuthUser};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject, Ordering)]
 #[graphql(name = "LibraryModel")]
@@ -40,7 +40,7 @@ pub struct Model {
 impl Entity {
 	pub fn find_for_user(user: &AuthUser) -> Select<Entity> {
 		Entity::find().filter(Column::Id.not_in_subquery(
-			library_hidden_to_user::Entity::library_hidden_to_user_query(user),
+			library_exclusion::Entity::library_hidden_to_user_query(user),
 		))
 	}
 }
@@ -69,7 +69,7 @@ pub struct LibraryNameCmpSelect {
 pub enum Relation {
 	#[sea_orm(has_many = "super::last_library_visit::Entity")]
 	LastLibraryVisit,
-	#[sea_orm(has_many = "super::library_hidden_to_user::Entity")]
+	#[sea_orm(has_many = "super::library_exclusion::Entity")]
 	HiddenFromUsers,
 	#[sea_orm(
 		belongs_to = "super::library_config::Entity",
@@ -91,7 +91,7 @@ impl Related<super::last_library_visit::Entity> for Entity {
 	}
 }
 
-impl Related<super::library_hidden_to_user::Entity> for Entity {
+impl Related<super::library_exclusion::Entity> for Entity {
 	fn to() -> RelationDef {
 		Relation::HiddenFromUsers.def()
 	}
@@ -142,7 +142,7 @@ mod tests {
 		let stmt_str = select_no_cols_to_string(select);
 		assert_eq!(
 			stmt_str,
-			r#"SELECT  FROM "libraries" WHERE "libraries"."id" NOT IN (SELECT "library_id" FROM "_library_hidden_to_user" WHERE "_library_hidden_to_user"."user_id" = '42')"#
+			r#"SELECT  FROM "libraries" WHERE "libraries"."id" NOT IN (SELECT "library_id" FROM "library_exclusions" WHERE "library_exclusions"."user_id" = '42')"#
 		);
 	}
 }

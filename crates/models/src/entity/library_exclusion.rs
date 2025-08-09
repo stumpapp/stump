@@ -5,7 +5,7 @@ use sea_orm::{
 };
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
-#[sea_orm(table_name = "_library_hidden_to_user")]
+#[sea_orm(table_name = "library_exclusions")]
 pub struct Model {
 	#[sea_orm(primary_key)]
 	pub id: i32,
@@ -72,7 +72,7 @@ mod tests {
 			.to_string(sea_orm::sea_query::SqliteQueryBuilder);
 		assert_eq!(
 			stmt_str,
-			r#"SELECT "library_id" FROM "_library_hidden_to_user" WHERE "_library_hidden_to_user"."user_id" = '42'"#
+			r#"SELECT "library_id" FROM "library_exclusions" WHERE "library_exclusions"."user_id" = '42'"#
 		);
 	}
 }

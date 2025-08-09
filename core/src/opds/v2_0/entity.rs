@@ -1,6 +1,6 @@
 use models::{
 	entity::{
-		library_hidden_to_user,
+		library_exclusion,
 		media::{self, get_age_restriction_filter},
 		media_metadata, page_dimension, reading_session, registered_reading_device,
 		series, series_metadata,
@@ -61,7 +61,7 @@ impl OPDSPublicationEntity {
 			.add_columns(reading_session::Entity)
 			.selector
 			.filter(series::Column::LibraryId.not_in_subquery(
-				library_hidden_to_user::Entity::library_hidden_to_user_query(user),
+				library_exclusion::Entity::library_hidden_to_user_query(user),
 			))
 			.filter(Condition::all().add_option(age_restriction_filter))
 			.left_join(media_metadata::Entity)

@@ -148,6 +148,18 @@ impl MigrationTrait for Migration {
 			.create_table(schema.create_table_from_entity(reading_session::Entity))
 			.await?;
 		manager
+			.create_index(
+				Index::create()
+					.unique()
+					.name("reading_session_media_id_user_id_idx")
+					.table(reading_session::Entity)
+					.col(reading_session::Column::MediaId)
+					.col(reading_session::Column::UserId)
+					.to_owned(),
+			)
+			.await?;
+
+		manager
 			.create_table(
 				schema.create_table_from_entity(finished_reading_session::Entity),
 			)

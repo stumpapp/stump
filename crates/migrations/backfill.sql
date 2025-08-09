@@ -8,7 +8,6 @@ ATTACH DATABASE '/replace/with/full/path/to/stump-before-migration.db' as 'backu
 BEGIN;
 PRAGMA foreign_keys = OFF;
 
--- TODO: Copy data from the old database to the new database
 -- Libraries which users cannot access via explicit join record
 INSERT INTO "library_exclusions"("library_id", "user_id")
 SELECT "A",
@@ -549,6 +548,18 @@ SELECT "user_id",
     "timestamp"
 FROM backup."last_library_visits";
 
+-- Remove the current server_config
+DELETE FROM "server_config";
+-- Insert the server_config from the backup database
+INSERT INTO "server_config"(
+        "public_url",
+        "initial_wal_setup_complete",
+        "encryption_key"
+    )
+SELECT "public_url",
+    "initial_wal_setup_complete",
+    "encryption_key"
+FROM backup."server_config";
 
 PRAGMA foreign_keys = ON;
 PRAGMA foreign_key_check;

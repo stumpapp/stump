@@ -3,16 +3,14 @@ use sea_orm::entity::prelude::*;
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
 #[sea_orm(table_name = "sessions")]
 pub struct Model {
-	#[sea_orm(primary_key, auto_increment = false, column_type = "Text")]
-	pub id: String,
+	#[sea_orm(primary_key, auto_increment = true)]
+	pub id: i32,
+	pub session_id: String,
+	pub user_id: String,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
 	pub created_at: DateTimeWithTimeZone,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
 	pub expiry_time: DateTimeWithTimeZone,
-	#[sea_orm(column_type = "Blob")]
-	pub data: Vec<u8>,
-	#[sea_orm(column_type = "Text")]
-	pub user_id: String,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

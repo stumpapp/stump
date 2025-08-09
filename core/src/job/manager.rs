@@ -109,8 +109,8 @@ impl JobManager {
 			created_at: Set(Utc::now().into()),
 			..Default::default()
 		};
-		let created_job = job::Entity::insert(active_model)
-			.exec(self.conn.as_ref())
+		let created_job = active_model
+			.insert(self.conn.as_ref())
 			.await
 			.map_err(|err| JobManagerError::JobPersistFailed(err.to_string()))?;
 		tracing::trace!(?created_job, "Persisted job to database");

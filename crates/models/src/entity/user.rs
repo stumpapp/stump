@@ -1,5 +1,6 @@
 use async_graphql::SimpleObject;
 
+use chrono::Utc;
 use sea_orm::{
 	entity::prelude::*, prelude::async_trait::async_trait, ActiveValue, FromQueryResult,
 	QuerySelect,
@@ -13,7 +14,6 @@ use crate::{
 
 use super::{age_restriction, user_preferences};
 
-// TODO: skip fields which most users shouldn't see
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
 #[graphql(name = "UserModel")]
 #[sea_orm(table_name = "users")]
@@ -38,8 +38,8 @@ pub struct Model {
 	#[sea_orm(column_type = "Text", nullable)]
 	pub permissions: Option<String>,
 	#[graphql(skip)]
-	#[sea_orm(column_type = "Text", nullable, unique)]
-	pub user_preferences_id: Option<String>,
+	#[sea_orm(nullable, unique)]
+	pub user_preferences_id: Option<i32>,
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
@@ -61,6 +61,7 @@ impl AuthUser {
 	}
 }
 
+// TODO(sea-orm): Either merge with LoginUser or remove?
 impl FromQueryResult for AuthUser {
 	fn from_query_result(
 		res: &sea_orm::QueryResult,
@@ -123,6 +124,16 @@ pub struct LoginUser {
 impl LoginUser {
 	pub fn find() -> Select<Entity> {
 		Prefixer::new(Entity::find().select_only())
+			.add_columns(Entity)
+			.add_columns(age_restriction::Entity)
+			.add_columns(user_preferences::Entity)
+			.selector
+			.left_join(age_restriction::Entity)
+			.left_join(user_preferences::Entity)
+	}
+
+	pub fn find_by_id(id: String) -> Select<Entity> {
+		Prefixer::new(Entity::find().filter(Column::Id.eq(id)).select_only())
 			.add_columns(Entity)
 			.add_columns(age_restriction::Entity)
 			.add_columns(user_preferences::Entity)
@@ -344,8 +355,12 @@ impl ActiveModelBehavior for ActiveModel {
 	where
 		C: ConnectionTrait,
 	{
-		if insert && self.id.is_not_set() {
-			self.id = ActiveValue::Set(Uuid::new_v4().to_string());
+		if insert {
+			if self.id.is_not_set() {
+				self.id = ActiveValue::Set(Uuid::new_v4().to_string());
+			}
+			self.created_at = ActiveValue::Set(DateTimeWithTimeZone::from(Utc::now()));
+			self.is_locked = ActiveValue::Set(false);
 		}
 
 		Ok(self)

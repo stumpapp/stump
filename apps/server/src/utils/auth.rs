@@ -1,13 +1,14 @@
 use models::{
-	entity::user::AuthUser,
+	entity::user::{AuthUser, LoginUser},
 	shared::{enums::UserPermission, permission_set::AssociatedPermission},
 };
+use sea_orm::DatabaseConnection;
 use stump_core::config::StumpConfig;
 use tower_sessions::Session;
 
 use crate::{
 	config::session::SESSION_USER_KEY,
-	errors::{APIResult, AuthError},
+	errors::{APIError, APIResult, AuthError},
 };
 
 /// A struct to represent the decoded username and (plaintext) password from a base64-encoded
@@ -49,8 +50,26 @@ pub fn decode_base64_credentials(
 	}
 }
 
-pub async fn get_session_user(session: &Session) -> APIResult<Option<AuthUser>> {
-	Ok(session.get::<AuthUser>(SESSION_USER_KEY).await?)
+pub async fn fetch_session_user(
+	session: &Session,
+	conn: &DatabaseConnection,
+) -> Result<Option<AuthUser>, APIError> {
+	if let Some(user_id) = session.get::<String>(SESSION_USER_KEY).await? {
+		let user = LoginUser::find_by_id(user_id)
+			.into_model::<LoginUser>()
+			.one(conn)
+			.await?
+			.ok_or(APIError::Unauthorized)?;
+
+		if user.is_locked {
+			return Err(APIError::AccountLocked);
+		}
+
+		Ok(Some(user.into()))
+	} else {
+		tracing::debug!("No user found in session");
+		Ok(None)
+	}
 }
 
 /// A function to determine whether a user has a specific permission. The permission

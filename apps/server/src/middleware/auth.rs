@@ -42,7 +42,7 @@ use crate::{
 	errors::{api_error_message, APIError, APIResult},
 	routers::{enforce_max_sessions, relative_favicon_path},
 	utils::{
-		current_utc_time, decode_base64_credentials, get_session_user, verify_password,
+		current_utc_time, decode_base64_credentials, fetch_session_user, verify_password,
 	},
 };
 
@@ -84,19 +84,19 @@ pub async fn auth_middleware(
 		|path| path.0.path().to_owned(),
 	);
 
-	let session_user = get_session_user(&session).await.map_err(|e| {
-		tracing::error!(error = ?e, "Failed to get user from session");
-		APIError::Unauthorized.into_response()
-	})?;
+	let session_user = fetch_session_user(&session, ctx.conn.as_ref())
+		.await
+		.map_err(|e| {
+			tracing::error!(error = ?e, "Failed to fetch user from session");
+			APIError::Unauthorized.into_response()
+		})?;
 
 	if let Some(user) = session_user {
-		if !user.is_locked {
-			req.extensions_mut().insert(RequestContext {
-				user,
-				api_key: None,
-			});
-			return Ok(next.run(req).await);
-		}
+		req.extensions_mut().insert(RequestContext {
+			user,
+			api_key: None,
+		});
+		return Ok(next.run(req).await);
 	}
 
 	let is_opds = request_uri.starts_with("/opds");

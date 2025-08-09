@@ -11,8 +11,10 @@ use crate::shared::{arrangement::Arrangement, enums::SupportedFont};
 #[graphql(name = "UserPreferencesModel")]
 #[sea_orm(table_name = "user_preferences")]
 pub struct Model {
-	#[sea_orm(primary_key, auto_increment = false, column_type = "Text")]
-	pub id: String,
+	#[graphql(skip)]
+	#[serde(skip)]
+	#[sea_orm(primary_key, auto_increment = true)]
+	pub id: i32,
 	#[sea_orm(column_type = "Text")]
 	pub preferred_layout_mode: String,
 	#[sea_orm(column_type = "Text")]
@@ -77,7 +79,24 @@ impl ActiveModelBehavior for ActiveModel {
 		C: ConnectionTrait,
 	{
 		if insert && self.id.is_not_set() {
-			self.id = ActiveValue::Set(Uuid::new_v4().to_string());
+			self.preferred_layout_mode = ActiveValue::Set("GRID".to_string());
+			self.locale = ActiveValue::Set("en".to_string());
+			self.app_theme = ActiveValue::Set("light".to_string());
+			self.app_font = ActiveValue::Set(SupportedFont::default());
+			self.primary_navigation_mode = ActiveValue::Set("SIDEBAR".to_string());
+			self.layout_max_width_px = ActiveValue::Set(Some(1280));
+			self.show_query_indicator = ActiveValue::Set(false);
+			self.enable_live_refetch = ActiveValue::Set(false);
+			self.enable_discord_presence = ActiveValue::Set(false);
+			self.enable_compact_display = ActiveValue::Set(false);
+			self.enable_gradients = ActiveValue::Set(false);
+			self.enable_double_sidebar = ActiveValue::Set(true);
+			self.enable_replace_primary_sidebar = ActiveValue::Set(false);
+			self.enable_hide_scrollbar = ActiveValue::Set(false);
+			self.prefer_accent_color = ActiveValue::Set(false);
+			self.show_thumbnails_in_headers = ActiveValue::Set(false);
+			self.enable_job_overlay = ActiveValue::Set(true);
+			self.enable_alphabet_select = ActiveValue::Set(false);
 		}
 
 		Ok(self)

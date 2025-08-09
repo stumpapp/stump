@@ -22,8 +22,8 @@ use config::StumpConfig;
 use job::{JobController, JobScheduler};
 use models::entity::server_config;
 use sea_orm::{
-	prelude::*, DatabaseBackend, EntityTrait, PaginatorTrait, QuerySelect, SelectColumns,
-	Statement,
+	prelude::*, ActiveValue::Set, DatabaseBackend, EntityTrait, PaginatorTrait,
+	QuerySelect, SelectColumns, Statement,
 };
 
 pub use context::Ctx;
@@ -136,6 +136,7 @@ impl StumpCore {
 
 		if !config_exists {
 			let active_model = server_config::ActiveModel {
+				initial_wal_setup_complete: Set(false),
 				..Default::default()
 			};
 			server_config::Entity::insert(active_model)

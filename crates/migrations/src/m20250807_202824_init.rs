@@ -103,6 +103,9 @@ impl MigrationTrait for Migration {
 			.create_table(schema.create_table_from_entity(library::Entity))
 			.await?;
 		manager
+			.create_table(schema.create_table_from_entity(library_exclusion::Entity))
+			.await?;
+		manager
 			.create_table(schema.create_table_from_entity(library_config::Entity))
 			.await?;
 		manager
@@ -186,6 +189,9 @@ impl MigrationTrait for Migration {
 		manager
 			.create_table(schema.create_table_from_entity(series::Entity))
 			.await?;
+		manager
+			.create_table(schema.create_table_from_entity(series_metadata::Entity))
+			.await?;
 		// Create an index on `series_id`
 		manager
 			.create_index(
@@ -196,9 +202,6 @@ impl MigrationTrait for Migration {
 					.col(series_metadata::Column::SeriesId)
 					.to_owned(),
 			)
-			.await?;
-		manager
-			.create_table(schema.create_table_from_entity(series_metadata::Entity))
 			.await?;
 		manager
 			.create_table(schema.create_table_from_entity(series_tag::Entity))

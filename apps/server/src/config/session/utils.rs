@@ -6,7 +6,7 @@ use tower_sessions::{cookie::SameSite, Expiry, SessionManagerLayer};
 
 use super::StumpSessionStore;
 
-pub const SESSION_USER_KEY: &str = "user";
+pub const SESSION_USER_KEY: &str = "user_id";
 pub const SESSION_NAME: &str = "stump_session";
 pub const SESSION_PATH: &str = "/";
 

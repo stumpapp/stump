@@ -1,5 +1,7 @@
 use async_graphql::SimpleObject;
-use sea_orm::{entity::prelude::*, FromQueryResult};
+use async_trait::async_trait;
+use chrono::Utc;
+use sea_orm::{entity::prelude::*, ActiveValue::Set, FromQueryResult};
 
 use crate::shared::enums::JobStatus;
 
@@ -65,4 +67,20 @@ impl Related<super::log::Entity> for Entity {
 	}
 }
 
-impl ActiveModelBehavior for ActiveModel {}
+#[async_trait]
+impl ActiveModelBehavior for ActiveModel {
+	async fn before_save<C>(mut self, _db: &C, insert: bool) -> Result<Self, DbErr>
+	where
+		C: ConnectionTrait,
+	{
+		if insert {
+			if self.id.is_not_set() {
+				self.id = Set(uuid::Uuid::new_v4().to_string());
+			}
+			self.ms_elapsed = Set(0);
+			self.created_at = Set(DateTimeWithTimeZone::from(Utc::now()));
+		}
+
+		Ok(self)
+	}
+}

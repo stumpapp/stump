@@ -11,10 +11,10 @@ use chrono::{DateTime, Duration, FixedOffset, Utc};
 use graphql::data::RequestContext;
 use models::entity::{
 	session,
-	user::{self, AuthUser},
+	user::{self, AuthUser, LoginUser},
 	user_login_activity, user_preferences,
 };
-use sea_orm::prelude::*;
+use sea_orm::{prelude::*, IntoActiveModel, TransactionTrait};
 use sea_orm::{DatabaseConnection, EntityTrait, Set};
 use serde::{Deserialize, Serialize};
 use tower_sessions::Session;
@@ -26,18 +26,16 @@ use crate::{
 		session::{delete_cookie_header, SESSION_USER_KEY},
 		state::AppState,
 	},
-	errors::{api_error_message, APIError, APIResult},
+	errors::{APIError, APIResult},
 	http_server::StumpRequestInfo,
 	middleware::auth::auth_middleware,
-	utils::{default_true, get_session_user, hash_password, verify_password},
+	utils::{default_true, fetch_session_user, hash_password, verify_password},
 };
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new().nest(
 		"/auth",
 		Router::new()
-			// TODO(graphql): Just remove this and use GraphQL for anything outside of
-			// login/logout/register. It is causing more headaches than it is worth.
 			.route(
 				"/me",
 				get(viewer)
@@ -69,7 +67,7 @@ pub async fn enforce_max_sessions(
 			let oldest_session_id = existing_sessions
 				.iter()
 				.min_by_key(|session| session.expiry_time)
-				.map(|session| session.id.clone());
+				.map(|session| session.id);
 
 			handle_remove_earliest_session(conn, for_user.id.clone(), oldest_session_id)
 				.await?;
@@ -80,8 +78,27 @@ pub async fn enforce_max_sessions(
 	Ok(())
 }
 
+async fn lock_account(conn: &DatabaseConnection, user_id: String) -> APIResult<()> {
+	let affected_rows = user::Entity::update_many()
+		.filter(user::Column::Id.eq(user_id.clone()))
+		.col_expr(user::Column::IsLocked, Expr::value(true))
+		.exec(conn)
+		.await?
+		.rows_affected;
+	tracing::debug!(?affected_rows, "Locked user account");
+
+	let deleted_sessions = session::Entity::delete_many()
+		.filter(session::Column::UserId.eq(user_id))
+		.exec(conn)
+		.await?
+		.rows_affected;
+	tracing::debug!(?deleted_sessions, "Removed all sessions for locked user");
+
+	Ok(())
+}
+
 #[derive(Deserialize)]
-pub struct LoginOrRegisterArgs {
+pub struct PasswordUserInput {
 	pub username: String,
 	pub password: String,
 }
@@ -117,7 +134,7 @@ async fn handle_login_attempt(
 async fn handle_remove_earliest_session(
 	conn: &DatabaseConnection,
 	for_user_id: String,
-	session_id: Option<String>,
+	session_id: Option<i32>,
 ) -> APIResult<u64> {
 	if let Some(oldest_session_id) = session_id {
 		let affected_rows = session::Entity::delete_by_id(oldest_session_id)
@@ -160,21 +177,33 @@ async fn login(
 		generate_token,
 		create_session,
 	}): Query<AuthenticationOptions>,
-	Json(input): Json<LoginOrRegisterArgs>,
+	Json(PasswordUserInput { username, password }): Json<PasswordUserInput>,
 ) -> APIResult<Json<LoginResponse>> {
-	match get_session_user(&session).await? {
-		Some(user) if user.username == input.username => {
+	let user = LoginUser::find()
+		.filter(
+			user::Column::Username
+				.eq(username)
+				.and(user::Column::DeletedAt.is_null()),
+		)
+		.into_model::<LoginUser>()
+		.one(state.conn.as_ref())
+		.await?
+		.ok_or(APIError::Unauthorized)?;
+
+	match session.get::<String>(SESSION_USER_KEY).await? {
+		Some(user_id) if user_id == user.id && !user.is_locked => {
 			// TODO: should this be tracked?
 			// TODO: should this be permission gated?
 			if generate_token {
 				let token = create_user_jwt(&user.id, &state.config)?;
 				return Ok(Json(LoginResponse::AccessToken {
-					for_user: user,
+					for_user: user.into(),
 					token,
 				}));
 			}
 
-			return Ok(Json(LoginResponse::User(user)));
+			// The user already has a session, so we just return them immediately
+			return Ok(Json(LoginResponse::User(user.into())));
 		},
 		_ => {},
 	}
@@ -183,104 +212,70 @@ async fn login(
 	// TODO: make this configurable via environment variable so knowledgeable attackers can't bypass this
 	let twenty_four_hours_ago = today - Duration::hours(24);
 
-	let conn = state.conn.as_ref();
+	let provided_valid_credentials = verify_password(&user.hashed_password, &password)?;
 
-	let fetch_result = user::LoginUser::find()
-		.filter(
-			user::Column::Username
-				.eq(input.username.to_owned())
-				.and(user::Column::DeletedAt.is_null()),
-		)
-		.into_model::<user::LoginUser>()
-		.one(conn)
-		.await?;
+	if user.is_locked && provided_valid_credentials {
+		return Err(APIError::AccountLocked);
+	} else if user.is_locked {
+		return Err(APIError::Unauthorized);
+	}
 
-	match fetch_result {
-		Some(user)
-			if user.is_locked
-				&& verify_password(&user.hashed_password, &input.password)? =>
-		{
-			Err(APIError::Forbidden(
-				api_error_message::LOCKED_ACCOUNT.to_string(),
-			))
-		},
-		Some(user) if !user.is_locked => {
-			let user_id = user.id.clone();
-			let matches = verify_password(&user.hashed_password, &input.password)?;
-
-			let should_lock_account = !matches && {
-				user_login_activity::Entity::find()
-					.filter(
-						user_login_activity::Column::UserId
-							.eq(user_id.clone())
-							.and(
-								user_login_activity::Column::Timestamp
-									.gte(twenty_four_hours_ago)
-									.and(
-										user_login_activity::Column::Timestamp.lte(today),
-									),
-							)
-							.and(
-								user_login_activity::Column::AuthenticationSuccessful
-									.eq(false),
-							),
+	let should_lock_account = !provided_valid_credentials && {
+		user_login_activity::Entity::find()
+			.filter(
+				user_login_activity::Column::UserId
+					.eq(user.id.clone())
+					.and(
+						user_login_activity::Column::Timestamp
+							.gte(twenty_four_hours_ago)
+							.and(user_login_activity::Column::Timestamp.lte(today)),
 					)
-					.count(conn)
-					.await? >= 9
-			};
+					.and(user_login_activity::Column::AuthenticationSuccessful.eq(false)),
+			)
+			.count(state.conn.as_ref())
+			.await? >= 9
+	};
 
-			let login_track_result =
-				handle_login_attempt(conn, &user, user_agent, request_info, matches)
-					.await;
-			// I don't want to kill the login here, so not bubbling up the error
-			if let Err(err) = login_track_result {
-				error!(error = ?err, "Failed to track login attempt!");
-			}
+	let login_track_result = handle_login_attempt(
+		state.conn.as_ref(),
+		&user,
+		user_agent,
+		request_info,
+		provided_valid_credentials,
+	)
+	.await;
+	// I don't want to kill the login here, so not bubbling up the error
+	if let Err(err) = login_track_result {
+		error!(error = ?err, "Failed to track login attempt!");
+	}
 
-			if should_lock_account {
-				let _locked_user = user::Entity::update_many()
-					.filter(user::Column::Id.eq(user_id.clone()))
-					.col_expr(user::Column::IsLocked, Expr::value(true))
-					.exec(conn)
-					.await?;
+	if should_lock_account {
+		lock_account(state.conn.as_ref(), user.id.clone()).await?;
+	}
 
-				let removed_sessions = user::Entity::delete_many()
-					.filter(user::Column::Id.eq(user_id.clone()))
-					.exec(conn)
-					.await?
-					.rows_affected;
-				tracing::debug!(
-					?removed_sessions,
-					?user_id,
-					"Locked user account and removed all associated sessions"
-				);
-			}
+	if !provided_valid_credentials {
+		return Err(APIError::Unauthorized);
+	}
 
-			if !matches {
-				return Err(APIError::Unauthorized);
-			}
+	enforce_max_sessions(&user, state.conn.as_ref()).await?;
 
-			enforce_max_sessions(&user, conn).await?;
+	let auth_user = AuthUser::from(user);
 
-			let auth_user = AuthUser::from(user);
+	if create_session {
+		session
+			.insert(SESSION_USER_KEY, auth_user.id.clone())
+			.await?;
+	}
 
-			if create_session {
-				session.insert(SESSION_USER_KEY, auth_user.clone()).await?;
-			}
-
-			// TODO: should this be permission gated?
-			if generate_token {
-				let token = create_user_jwt(&auth_user.id, &state.config)?;
-				Ok(Json(LoginResponse::AccessToken {
-					for_user: auth_user,
-					token,
-				}))
-			} else {
-				Ok(Json(LoginResponse::User(auth_user)))
-			}
-		},
-
-		_ => Err(APIError::Unauthorized),
+	// TODO: should this be permission gated?
+	if generate_token {
+		let token = create_user_jwt(&auth_user.id, &state.config)?;
+		Ok(Json(LoginResponse::AccessToken {
+			for_user: auth_user,
+			token,
+		}))
+	} else {
+		Ok(Json(LoginResponse::User(auth_user)))
 	}
 }
 
@@ -314,7 +309,7 @@ async fn logout(session: Session) -> APIResult<impl IntoResponse> {
 pub async fn register(
 	session: Session,
 	State(ctx): State<AppState>,
-	Json(input): Json<LoginOrRegisterArgs>,
+	Json(input): Json<PasswordUserInput>,
 ) -> APIResult<Json<AuthUser>> {
 	let conn = ctx.conn.as_ref();
 	let has_users = user::Entity::find()
@@ -325,7 +320,7 @@ pub async fn register(
 
 	let mut is_server_owner = false;
 
-	let session_user = get_session_user(&session).await?;
+	let session_user = fetch_session_user(&session, ctx.conn.as_ref()).await?;
 
 	if let Some(user) = session_user {
 		if !user.is_server_owner {
@@ -343,28 +338,38 @@ pub async fn register(
 
 	let hashed_password = hash_password(&input.password, &ctx.config)?;
 
+	let mut tx = conn.begin().await?;
+
 	let active_model = user::ActiveModel {
 		username: Set(input.username.clone()),
 		hashed_password: Set(hashed_password),
 		is_server_owner: Set(is_server_owner),
 		..Default::default()
 	};
-	let created_user = active_model.insert(conn).await?;
+	let created_user = active_model.insert(&tx).await?;
 
 	let active_model = user_preferences::ActiveModel {
 		user_id: Set(Some(created_user.id.clone())),
 		..Default::default()
 	};
-	let _created_user_preferences = active_model.insert(conn).await?;
+	let created_user_preferences = active_model.insert(&tx).await?;
+
+	// Write back the preferences ID to the user
+	let mut updated_user = created_user.into_active_model();
+	updated_user.user_preferences_id = Set(Some(created_user_preferences.id));
+	let updated_user = updated_user.update(&tx).await?;
 
 	let auth_user = user::LoginUser::find()
-		.filter(user::Column::Id.eq(created_user.id.clone()))
+		.filter(user::Column::Id.eq(updated_user.id.clone()))
 		.into_model::<user::LoginUser>()
-		.one(conn)
+		.one(&tx)
 		.await?
 		.ok_or(APIError::InternalServerError(
 			"Failed to fetch user after registration.".to_string(),
 		))?;
+
+	tx.commit().await?;
+
 	let auth_user = AuthUser::from(auth_user);
 
 	Ok(Json(auth_user))

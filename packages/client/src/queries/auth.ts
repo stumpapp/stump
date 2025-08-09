@@ -1,3 +1,4 @@
+import { graphql } from '@stump/graphql'
 import { AuthUser, isAxiosError, isUser, LoginOrRegisterArgs } from '@stump/sdk'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
@@ -7,6 +8,20 @@ import { useClientContext } from '../context'
 import { useSDK } from '../sdk'
 
 // TODO(graphql): Fix all the user types...
+
+const authQuery = graphql(`
+	query useAuthQuery {
+		me {
+			id
+			avatarUrl
+			isLocked
+			isServerOwner
+			lastLogin
+			permissions
+			username
+		}
+	}
+`)
 
 type Params = QueryOptions<AuthUser> & {
 	additionalKeys?: string[]

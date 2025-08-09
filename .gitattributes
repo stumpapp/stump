@@ -6,7 +6,7 @@
 *.sql linguist-detectable=false
 
 # I don't want docs website to be included in language stats
-docs/** linguist-vendored
+apps/docs/** linguist-vendored
 
 # Ignore all snapshots and test files
 **/__snapshots__/** linguist-vendored

@@ -16,13 +16,14 @@ derive_builder.workspace = true
 derivative.workspace = true
 dirs = "5.0.1"
 email = { path = "../crates/email" }
-models = { path = "../database/models" }
 epub.workspace = true
 futures.workspace = true
 globset = "0.4.14"
 image = { version = "0.25.2" }
 infer.workspace = true
 itertools.workspace = true
+migrations = { path = "../crates/migrations" }
+models = { path = "../crates/models" }
 md5.workspace = true
 rand.workspace = true
 sea-orm.workspace = true
@@ -32,7 +33,7 @@ serde_json.workspace = true
 serde_with.workspace = true
 simple_crypt.workspace = true
 specta.workspace = true
-stump-config-gen = { path = "../crates/stump-config-gen"}
+stump-config-gen = { path = "../crates/macros/stump-config-gen"}
 tokio.workspace = true
 toml.workspace = true
 trash = "3.1.2"

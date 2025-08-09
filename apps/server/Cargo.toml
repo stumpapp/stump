@@ -21,7 +21,7 @@ base64.workspace = true
 bcrypt.workspace = true
 cli = { path = "../../crates/cli" }
 chrono.workspace = true
-models = { path = "../../database/models" }
+models = { path = "../../crates/models" }
 futures-util.workspace = true
 graphql = { path = "../../crates/graphql" }
 hyper = "0.14.27"

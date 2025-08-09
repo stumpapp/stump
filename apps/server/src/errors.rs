@@ -104,6 +104,8 @@ impl IntoResponse for AuthError {
 #[allow(unused)]
 #[derive(Debug, Error)]
 pub enum APIError {
+	#[error("Your account has been locked by an administrator")]
+	AccountLocked,
 	#[error("{0}")]
 	BadRequest(String),
 	#[error("{0}")]
@@ -136,6 +138,7 @@ impl APIError {
 	/// A helper function to get the status code for an APIError
 	pub fn status_code(&self) -> StatusCode {
 		match self {
+			APIError::AccountLocked => StatusCode::FORBIDDEN,
 			APIError::BadRequest(_) => StatusCode::BAD_REQUEST,
 			APIError::NotFound(_) => StatusCode::NOT_FOUND,
 			APIError::InternalServerError(_) => StatusCode::INTERNAL_SERVER_ERROR,

@@ -16,12 +16,12 @@ chrono.workspace = true
 clap.workspace = true
 epub.workspace = true
 heck.workspace = true
-filter-gen = { path = "../filter-gen" }
+filter-gen = { path = "../macros/filter-gen" }
 futures-util.workspace = true
 infer.workspace = true
 itertools.workspace = true
 linemux = { git = "https://github.com/jmagnuson/linemux.git", rev = "acaafc602afac5d7a9cd3e087dafc937cac1e364" }
-models = { path = "../../database/models" }
+models = { path = "../models" }
 email = { path = "../email" }
 sea-orm.workspace = true
 serde.workspace = true

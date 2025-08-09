@@ -5,8 +5,7 @@ import {
 	SeriesFilterInput,
 	SeriesMetadataFilterInput,
 } from '@stump/graphql'
-import getProperty from 'lodash/get'
-import { match, P } from 'ts-pattern'
+import { match } from 'ts-pattern'
 import { z } from 'zod'
 
 export const stringLikeOperator = z.enum([

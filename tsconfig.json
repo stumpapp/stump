@@ -12,7 +12,7 @@
 			"path": "apps/web"
 		},
 		{
-			"path": "docs"
+			"path": "apps/docs"
 		},
 		{
 			"path": "packages/sdk"

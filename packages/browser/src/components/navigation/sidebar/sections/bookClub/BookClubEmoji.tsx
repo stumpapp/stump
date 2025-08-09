@@ -1,6 +1,6 @@
-import { useUpdateBookClub } from '@stump/client'
 import { EmojiPicker } from '@stump/components'
 import { BookClub } from '@stump/sdk'
+import { noop } from 'lodash'
 import toast from 'react-hot-toast'
 
 type Props = {
@@ -10,7 +10,9 @@ type Props = {
 	disabled?: boolean
 }
 export default function BookClubEmoji({ emoji, placeholder, bookClub, disabled }: Props) {
-	const { updateBookClub } = useUpdateBookClub({ id: bookClub.id })
+	// const { updateBookClub } = useUpdateBookClub({ id: bookClub.id })
+	// TODO(graphql): Fix
+	const updateBookClub = noop
 
 	const handleEmojiSelect = async (emoji?: { native: string }) => {
 		if (disabled) {

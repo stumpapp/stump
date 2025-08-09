@@ -1,5 +1,5 @@
-import { useUpdateBookClub } from '@stump/client'
 import { UpdateBookClub } from '@stump/sdk'
+import { noop } from 'lodash'
 import { lazy, Suspense, useCallback } from 'react'
 import { Navigate, Route, Routes } from 'react-router'
 
@@ -15,7 +15,9 @@ const BookClubSchedulerScene = lazy(() => import('./scheduler'))
 export default function BookClubSettingsRouter() {
 	const { bookClub } = useBookClubContext()
 
-	const { mutate: editClub } = useUpdateBookClub({ id: bookClub.id })
+	// const { mutate: editClub } = useUpdateBookClub({ id: bookClub.id })
+	// TODO(graphql): Fix
+	const editClub = noop
 
 	// TODO: implement a proper patch on backend
 	/**

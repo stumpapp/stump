@@ -4,7 +4,7 @@ use discord_rich_presence::{
 };
 use serde::Serialize;
 
-const STUMP_ICON: &str = "https://raw.githubusercontent.com/aaronleopold/stump/develop/docs/public/favicon.png";
+const STUMP_ICON: &str = "https://raw.githubusercontent.com/aaronleopold/stump/develop/apps/docs/public/favicon.png";
 const IPC_ID: &str = "1022185766677389392";
 
 #[derive(Debug, Serialize, thiserror::Error)]

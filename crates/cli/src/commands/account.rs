@@ -4,7 +4,7 @@ use clap::Subcommand;
 use dialoguer::{theme::ColorfulTheme, Confirm, Input, Password};
 use models::entity::{session, user};
 use sea_orm::{prelude::*, ActiveValue::Set, IntoActiveModel, QueryTrait};
-use stump_core::{config::StumpConfig, db::create_connection};
+use stump_core::{config::StumpConfig, database::connect};
 
 use crate::{error::CliResult, CliError};
 
@@ -72,7 +72,7 @@ async fn set_account_lock_status(
 		"Unlocking account..."
 	});
 
-	let conn = create_connection(config).await;
+	let conn = connect(config).await?;
 
 	let user = user::Entity::find()
 		.filter(user::Column::Username.eq(username.clone()))
@@ -116,7 +116,7 @@ async fn reset_account_password(
 	hash_cost: u32,
 	config: &StumpConfig,
 ) -> CliResult<()> {
-	let conn = create_connection(config).await;
+	let conn = connect(config).await?;
 
 	let theme = &ColorfulTheme::default();
 	let builder = Password::with_theme(theme)
@@ -157,7 +157,7 @@ async fn print_accounts(locked: Option<bool>, config: &StumpConfig) -> CliResult
 	let progress = default_progress_spinner();
 	progress.set_message("Fetching accounts...");
 
-	let conn = create_connection(config).await;
+	let conn = connect(config).await?;
 
 	let users = models::entity::user::Entity::find()
 		.apply_if(locked, |query, locked| {
@@ -188,7 +188,7 @@ async fn print_accounts(locked: Option<bool>, config: &StumpConfig) -> CliResult
 }
 
 async fn change_server_owner(config: &StumpConfig) -> CliResult<()> {
-	let conn = create_connection(config).await;
+	let conn = connect(config).await?;
 
 	let all_accounts = models::entity::user::Entity::find()
 		.filter(user::Column::IsLocked.eq(false))

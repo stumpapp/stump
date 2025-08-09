@@ -1,5 +1,5 @@
 use async_graphql::{ComplexObject, Context, Result, SimpleObject};
-use models::entity::{library, library_to_scheduled_job_config, scheduled_job_config};
+use models::entity::{library, scheduled_job_config, scheduled_job_library};
 use sea_orm::{prelude::*, sea_query::Query};
 
 use crate::{
@@ -32,11 +32,10 @@ impl ScheduledJobConfig {
 			.filter(
 				library::Column::Id.in_subquery(
 					Query::select()
-						.column(library_to_scheduled_job_config::Column::LibraryId)
-						.from(library_to_scheduled_job_config::Entity)
+						.column(scheduled_job_library::Column::LibraryId)
+						.from(scheduled_job_library::Entity)
 						.and_where(
-							library_to_scheduled_job_config::Column::ScheduleId
-								.eq(self.model.id),
+							scheduled_job_library::Column::ScheduleId.eq(self.model.id),
 						)
 						.to_owned(),
 				),

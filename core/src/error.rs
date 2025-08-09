@@ -23,6 +23,10 @@ pub enum CoreError {
 	InitializationError(String),
 	#[error("{0}")]
 	EmailerError(#[from] email::EmailError),
+	#[error(
+		"An attempt was made to reset the database, which is not allowed in this context"
+	)]
+	DatabaseResetNotAllowed,
 	#[error("Query error: {0}")]
 	DBError(#[from] sea_orm::error::DbErr),
 	#[error("Invalid query error: {0}")]

@@ -370,7 +370,7 @@ async fn remove_all_session_for_user(
 }
 
 async fn update_user_preferences_by_id(
-	id: String,
+	id: i32,
 	user_id: String,
 	user_preferences: UpdateUserPreferencesInput,
 	conn: &DatabaseConnection,

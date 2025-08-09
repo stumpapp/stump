@@ -1,6 +1,6 @@
-import { useDeleteBookClub } from '@stump/client'
 import { Alert, ConfirmationModal } from '@stump/components'
 import { handleApiError } from '@stump/sdk'
+import { noop } from 'lodash'
 import { useNavigate } from 'react-router'
 
 import paths from '../../paths'
@@ -15,12 +15,16 @@ type Props = {
 export default function DeleteBookClubConfirmation({ isOpen, id, onClose, trigger }: Props) {
 	const navigate = useNavigate()
 
-	const { deleteClub, isLoading, error } = useDeleteBookClub({
-		id,
-		onSuccess: () => {
-			navigate(paths.bookClubs())
-		},
-	})
+	// const { deleteClub, isLoading, error } = useDeleteBookClub({
+	// 	id,
+	// 	onSuccess: () => {
+	// 		navigate(paths.bookClubs())
+	// 	},
+	// })
+	// TODO(graphql): Fix
+	const deleteClub = noop
+	const isLoading = false
+	const error = null // TODO(graphql): Replace with actual error handling
 
 	const renderError = () => {
 		if (!error) return null

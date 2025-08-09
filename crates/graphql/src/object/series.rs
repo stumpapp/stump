@@ -5,7 +5,7 @@ use async_graphql::{
 use models::{
 	entity::{
 		finished_reading_session, library, media, reading_session, series,
-		series_metadata, series_to_tag, tag,
+		series_metadata, series_tag, tag,
 	},
 	shared::image::ImageRef,
 };
@@ -225,11 +225,9 @@ impl Series {
 			.filter(
 				tag::Column::Id.in_subquery(
 					Query::select()
-						.column(series_to_tag::Column::TagId)
-						.from(series_to_tag::Entity)
-						.and_where(
-							series_to_tag::Column::SeriesId.eq(self.model.id.clone()),
-						)
+						.column(series_tag::Column::TagId)
+						.from(series_tag::Entity)
+						.and_where(series_tag::Column::SeriesId.eq(self.model.id.clone()))
 						.to_owned(),
 				),
 			)

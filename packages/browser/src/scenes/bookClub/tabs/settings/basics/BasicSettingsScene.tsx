@@ -1,5 +1,4 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useBookClubsQuery } from '@stump/client'
 import { Button, Form } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { useCallback, useMemo } from 'react'
@@ -18,7 +17,8 @@ export default function BasicSettingsScene() {
 	const { club, patch } = useBookClubManagement()
 	const { t } = useLocaleContext()
 
-	const { bookClubs } = useBookClubsQuery({ params: { all: true }, suspense: true })
+	// const { bookClubs } = useBookClubsQuery({ params: { all: true }, suspense: true })
+	const bookClubs = [] // TODO(graphql): Replace with actual query
 	const existingClubNames = useMemo(
 		() => (bookClubs?.filter((c) => c.id !== club.id) ?? []).map(({ name }) => name),
 		[bookClubs, club],

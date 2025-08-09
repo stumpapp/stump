@@ -1,8 +1,7 @@
 import { AuthUser, isAxiosError, isUser, LoginOrRegisterArgs } from '@stump/sdk'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { QueryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 
-import { queryClient, QueryOptions } from '../client'
 import { useClientContext } from '../context'
 import { useSDK } from '../sdk'
 
@@ -47,6 +46,8 @@ export function useLoginOrRegister({
 	refetchClaimed,
 }: UseLoginOrRegisterOptions) {
 	const [isClaimed, setIsClaimed] = useState(true)
+
+	const client = useQueryClient()
 
 	const { onAuthenticated } = useClientContext()
 	const { sdk } = useSDK()
@@ -97,7 +98,7 @@ export function useLoginOrRegister({
 		mutationKey: [sdk.auth.register],
 		mutationFn: (params: LoginOrRegisterArgs) => sdk.auth.register(params),
 		onSuccess: async () => {
-			await queryClient.invalidateQueries({
+			await client.invalidateQueries({
 				queryKey: [sdk.server.keys.claimedStatus],
 				exact: false,
 			})
@@ -120,6 +121,7 @@ type UseLogoutParams = {
 }
 
 export function useLogout({ removeStoreUser }: UseLogoutParams = {}) {
+	const queryClient = useQueryClient()
 	const { sdk } = useSDK()
 	const { onLogout } = useClientContext()
 	const { mutateAsync: logout, isPending: isLoading } = useMutation({

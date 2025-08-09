@@ -1,4 +1,3 @@
-import { useBookClubMembersQuery } from '@stump/client'
 import { Avatar, Card } from '@stump/components'
 import { BookClubMember, BookClubMemberRoleSpec } from '@stump/sdk'
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
@@ -14,7 +13,8 @@ export default function MembersTable() {
 		club: { id, member_role_spec },
 	} = useBookClubManagement()
 	// TODO: implement backend pagination for better scalability
-	const { members } = useBookClubMembersQuery({ id, suspense: true })
+	// const { members } = useBookClubMembersQuery({ id, suspense: true })
+	const members = [] // TODO(graphql): Replace with actual query
 
 	const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 })
 	const pageCount = useMemo(

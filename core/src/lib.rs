@@ -8,24 +8,22 @@ use std::{str::FromStr, sync::Arc};
 
 pub mod api_key;
 pub mod config;
-pub mod db;
+mod context;
+pub mod database;
+pub mod error;
 mod event;
 pub mod filesystem;
 pub mod job;
 pub mod opds;
 pub mod utils;
 
-mod context;
-pub mod error;
-
 use config::logging::STUMP_SHADOW_TEXT;
 use config::StumpConfig;
-use db::JournalMode;
 use job::{JobController, JobScheduler};
 use models::entity::server_config;
 use sea_orm::{
-	prelude::*, DatabaseBackend, EntityTrait, PaginatorTrait, QuerySelect, SelectColumns,
-	Statement,
+	prelude::*, ActiveValue::Set, DatabaseBackend, EntityTrait, PaginatorTrait,
+	QuerySelect, SelectColumns, Statement,
 };
 
 pub use context::Ctx;
@@ -35,6 +33,8 @@ pub use event::CoreEvent;
 pub use email::{
 	AttachmentPayload, EmailContentType, EmailerClient, EmailerClientConfig,
 };
+
+use crate::database::JournalMode;
 
 /// A type alias strictly for explicitness in the return type of `init_journal_mode`.
 type JournalModeChanged = bool;
@@ -120,13 +120,6 @@ impl StumpCore {
 		STUMP_SHADOW_TEXT
 	}
 
-	/// Runs the database migrations
-	pub async fn run_migrations(&self) -> Result<(), CoreError> {
-		// db::migration::run_migrations(&self.ctx.db).await
-		// TODO(sea-orm): Fix
-		Ok(())
-	}
-
 	/// Initializes the server configuration record. This will only create a new record if one
 	/// does not already exist.
 	pub async fn init_server_config(&self) -> Result<(), CoreError> {
@@ -136,11 +129,10 @@ impl StumpCore {
 
 		if !config_exists {
 			let active_model = server_config::ActiveModel {
+				initial_wal_setup_complete: Set(false),
 				..Default::default()
 			};
-			server_config::Entity::insert(active_model)
-				.exec(self.ctx.conn.as_ref())
-				.await?;
+			active_model.insert(self.ctx.conn.as_ref()).await?;
 		}
 
 		Ok(())

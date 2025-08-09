@@ -1,4 +1,3 @@
-import { useBookClubQuery } from '@stump/client'
 import { cn } from '@stump/components'
 import { BookClub, Media, User } from '@stump/sdk'
 import dayjs from 'dayjs'
@@ -20,9 +19,12 @@ import { routeGroups } from './tabs/settings/routes'
 export default function BookClubLayout() {
 	const { id } = useParams<{ id: string }>()
 
-	const { bookClub, isLoading } = useBookClubQuery(id || '', {
-		enabled: !!id,
-	})
+	// const { bookClub, isLoading } = useBookClubQuery(id || '', {
+	// 	enabled: !!id,
+	// })
+	// TODO(graphql): Fix
+	const bookClub = mockBookClub
+	const isLoading = false
 
 	const location = useLocation()
 	const user = useUserStore((store) => store.user)

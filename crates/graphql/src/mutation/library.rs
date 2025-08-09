@@ -5,8 +5,8 @@ use models::{
 	entity::{
 		last_library_visit,
 		library::{self, LibraryIdentSelect},
-		library_config, library_hidden_to_user, library_scan_record, library_to_tag,
-		media, series, tag, user,
+		library_config, library_exclusion, library_scan_record, library_tag, media,
+		series, tag, user,
 	},
 	shared::enums::{FileStatus, UserPermission},
 };
@@ -190,14 +190,15 @@ impl LibraryMutation {
 		let (library, config) = input.into_active_model();
 
 		let created_config = config.insert(&txn).await?;
-		let created_library = library::Entity::insert(library::ActiveModel {
+		let created_library = library::ActiveModel {
 			id: Set(created_config
 				.library_id
 				.ok_or("Library config not created correctly")?),
 			config_id: Set(created_config.id),
+			status: Set(FileStatus::Ready),
 			..library
-		})
-		.exec_with_returning(&txn)
+		}
+		.insert(&txn)
 		.await?;
 
 		if let Some(tags) = tags {
@@ -225,15 +226,15 @@ impl LibraryMutation {
 				.map(|tag| tag.id)
 				.collect::<Vec<_>>();
 
-			library_to_tag::Entity::insert_many(
+			library_tag::Entity::insert_many(
 				to_link
 					.into_iter()
-					.map(|tag_id| library_to_tag::ActiveModel {
+					.map(|tag_id| library_tag::ActiveModel {
 						library_id: Set(created_library.id.clone()),
 						tag_id: Set(tag_id),
 						..Default::default()
 					})
-					.collect::<Vec<library_to_tag::ActiveModel>>(),
+					.collect::<Vec<library_tag::ActiveModel>>(),
 			)
 			.on_conflict_do_nothing()
 			.exec(&txn)
@@ -293,10 +294,10 @@ impl LibraryMutation {
 			.filter(
 				tag::Column::Id.in_subquery(
 					Query::select()
-						.column(library_to_tag::Column::TagId)
-						.from(library_to_tag::Entity)
+						.column(library_tag::Column::TagId)
+						.from(library_tag::Entity)
 						.and_where(
-							library_to_tag::Column::LibraryId
+							library_tag::Column::LibraryId
 								.eq(existing_library.id.clone()),
 						)
 						.to_owned(),
@@ -379,13 +380,10 @@ impl LibraryMutation {
 					.collect::<Vec<_>>();
 
 				if !tags_to_disconnect.is_empty() {
-					let affected_rows = library_to_tag::Entity::delete_many()
-						.filter(
-							library_to_tag::Column::Id.is_in(tags_to_disconnect).and(
-								library_to_tag::Column::LibraryId
-									.eq(updated_library.id.clone()),
-							),
-						)
+					let affected_rows = library_tag::Entity::delete_many()
+						.filter(library_tag::Column::Id.is_in(tags_to_disconnect).and(
+							library_tag::Column::LibraryId.eq(updated_library.id.clone()),
+						))
 						.exec(&txn)
 						.await?
 						.rows_affected;
@@ -396,14 +394,14 @@ impl LibraryMutation {
 					let library_id = updated_library.id.clone();
 					let to_link = tags_to_connect
 						.into_iter()
-						.map(|tag_id| library_to_tag::ActiveModel {
+						.map(|tag_id| library_tag::ActiveModel {
 							library_id: Set(library_id.clone()),
 							tag_id: Set(tag_id),
 							..Default::default()
 						})
-						.collect::<Vec<library_to_tag::ActiveModel>>();
+						.collect::<Vec<library_tag::ActiveModel>>();
 
-					library_to_tag::Entity::insert_many(to_link)
+					library_tag::Entity::insert_many(to_link)
 						.on_conflict_do_nothing()
 						.exec(&txn)
 						.await?;
@@ -560,8 +558,8 @@ impl LibraryMutation {
 			.await?
 			.ok_or("Library not found")?;
 
-		let existing_exclusions = library_hidden_to_user::Entity::find()
-			.filter(library_hidden_to_user::Column::LibraryId.eq(library.id.clone()))
+		let existing_exclusions = library_exclusion::Entity::find()
+			.filter(library_exclusion::Column::LibraryId.eq(library.id.clone()))
 			.all(core.conn.as_ref())
 			.await?;
 
@@ -572,7 +570,7 @@ impl LibraryMutation {
 					.iter()
 					.any(|exclusion| exclusion.user_id == **id)
 			})
-			.map(|id| library_hidden_to_user::ActiveModel {
+			.map(|id| library_exclusion::ActiveModel {
 				library_id: Set(library.id.clone()),
 				user_id: Set(id.clone()),
 				..Default::default()
@@ -593,15 +591,15 @@ impl LibraryMutation {
 		let txn = core.conn.as_ref().begin().await?;
 
 		if !to_add.is_empty() {
-			library_hidden_to_user::Entity::insert_many(to_add)
+			library_exclusion::Entity::insert_many(to_add)
 				.on_conflict_do_nothing()
 				.exec(&txn)
 				.await?;
 		}
 
 		if !to_remove.is_empty() {
-			library_hidden_to_user::Entity::delete_many()
-				.filter(library_hidden_to_user::Column::Id.is_in(to_remove))
+			library_exclusion::Entity::delete_many()
+				.filter(library_exclusion::Column::Id.is_in(to_remove))
 				.exec(&txn)
 				.await?;
 		}

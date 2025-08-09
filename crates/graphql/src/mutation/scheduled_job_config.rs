@@ -6,7 +6,7 @@ use crate::{
 };
 use async_graphql::{Context, Object, Result};
 use models::{
-	entity::{library_to_scheduled_job_config, scheduled_job_config},
+	entity::{scheduled_job_config, scheduled_job_library},
 	shared::enums::UserPermission,
 };
 use sea_orm::{prelude::*, ActiveModelTrait, Set, TransactionTrait};
@@ -35,7 +35,7 @@ impl ScheduledJobConfigMutation {
 		let joint_active_models = input
 			.included_library_ids
 			.iter()
-			.map(|library_id| library_to_scheduled_job_config::ActiveModel {
+			.map(|library_id| scheduled_job_library::ActiveModel {
 				library_id: Set(library_id.clone()),
 				schedule_id: Set(created_model.id),
 				..Default::default()
@@ -44,7 +44,7 @@ impl ScheduledJobConfigMutation {
 		dbg!(&joint_active_models);
 
 		let created_joint_records =
-			library_to_scheduled_job_config::Entity::insert_many(joint_active_models)
+			scheduled_job_library::Entity::insert_many(joint_active_models)
 				.exec_without_returning(core.conn.as_ref())
 				.await?;
 		dbg!(created_joint_records);
@@ -63,9 +63,7 @@ impl ScheduledJobConfigMutation {
 
 		let (model, libraries) = scheduled_job_config::Entity::find()
 			.filter(scheduled_job_config::Column::Id.eq(id))
-			.find_with_linked(
-				library_to_scheduled_job_config::ScheduledJobConfigsToLibraries,
-			)
+			.find_with_linked(scheduled_job_library::ScheduledJobConfigsToLibraries)
 			.all(core.conn.as_ref())
 			.await?
 			.pop()
@@ -93,12 +91,9 @@ impl ScheduledJobConfigMutation {
 
 		// Remove libraries that are no longer included
 		if !ids_to_remove.is_empty() {
-			library_to_scheduled_job_config::Entity::delete_many()
-				.filter(
-					library_to_scheduled_job_config::Column::LibraryId
-						.is_in(ids_to_remove),
-				)
-				.filter(library_to_scheduled_job_config::Column::ScheduleId.eq(id))
+			scheduled_job_library::Entity::delete_many()
+				.filter(scheduled_job_library::Column::LibraryId.is_in(ids_to_remove))
+				.filter(scheduled_job_library::Column::ScheduleId.eq(id))
 				.exec(&txn)
 				.await?;
 		}
@@ -106,13 +101,13 @@ impl ScheduledJobConfigMutation {
 		// Add new libraries that are included
 		if !ids_to_add.is_empty() {
 			let new_joints = ids_to_add.into_iter().map(|library_id| {
-				library_to_scheduled_job_config::ActiveModel {
+				scheduled_job_library::ActiveModel {
 					library_id: Set(library_id),
 					schedule_id: Set(updated_model.id),
 					..Default::default()
 				}
 			});
-			library_to_scheduled_job_config::Entity::insert_many(new_joints)
+			scheduled_job_library::Entity::insert_many(new_joints)
 				.exec(&txn)
 				.await?;
 		}

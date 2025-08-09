@@ -136,11 +136,11 @@ CREATE TABLE "scheduled_job_configs" (
     "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
-CREATE TABLE _library_to_scheduled_job_config (
+CREATE TABLE _scheduled_job_library (
     "library_id" TEXT NOT NULL,
     "schedule_id" INTEGER NOT NULL,
-    CONSTRAINT "_library_to_scheduled_job_config_library_id_fkey" FOREIGN KEY ("library_id") REFERENCES "libraries" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT "_library_to_scheduled_job_config_schedule_id_fkey" FOREIGN KEY ("schedule_id") REFERENCES "scheduled_job_configs" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT "_scheduled_job_library_library_id_fkey" FOREIGN KEY ("library_id") REFERENCES "libraries" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT "_scheduled_job_library_schedule_id_fkey" FOREIGN KEY ("schedule_id") REFERENCES "scheduled_job_configs" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 -- Prisma seemed to handle some non-nullable cols strangely (e.g., like setting `updated_at` on insert) _without_ default values on the column. So we need to adjust those:
 CREATE TABLE "new_media" (

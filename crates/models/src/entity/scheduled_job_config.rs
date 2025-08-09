@@ -12,11 +12,11 @@ pub struct Model {
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
-	#[sea_orm(has_many = "super::library_to_scheduled_job_config::Entity")]
+	#[sea_orm(has_many = "super::scheduled_job_library::Entity")]
 	Libraries,
 }
 
-impl Related<super::library_to_scheduled_job_config::Entity> for Entity {
+impl Related<super::scheduled_job_library::Entity> for Entity {
 	fn to() -> RelationDef {
 		Relation::Libraries.def()
 	}

@@ -92,6 +92,9 @@ impl MigrationTrait for Migration {
 		manager
 			.create_table(schema.create_table_from_entity(scheduled_job_config::Entity))
 			.await?;
+		manager
+			.create_table(schema.create_table_from_entity(scheduled_job_library::Entity))
+			.await?;
 
 		manager
 			.create_table(schema.create_table_from_entity(last_library_visit::Entity))
@@ -225,9 +228,6 @@ impl MigrationTrait for Migration {
 		manager
 			.create_table(schema.create_table_from_entity(user::Entity))
 			.await?;
-
-		// TODO: I think I want to rename some of these join tables:
-		// _library_to_scheduled_job_config -> ?
 
 		Ok(())
 	}

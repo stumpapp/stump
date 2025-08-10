@@ -1,6 +1,7 @@
+import Panzoom from '@panzoom/panzoom'
 import type { Media } from '@stump/sdk'
 import clsx from 'clsx'
-import { memo, useCallback, useMemo, useRef } from 'react'
+import { memo, useCallback, useEffect, useMemo, useRef } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { Hotkey } from 'react-hotkeys-hook/dist/types'
 import { useMediaMatch, useWindowSize } from 'rooks'
@@ -30,7 +31,7 @@ export type PagedReaderProps = {
  */
 function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedReaderProps) {
 	const {
-		bookPreferences: { tapSidesToNavigate },
+		bookPreferences: { tapSidesToNavigate, imageScaling, secondPageSeparate, doublePageBehavior },
 		settings: { showToolBar },
 		setSettings,
 	} = useBookPreferences({ book: media })
@@ -46,6 +47,79 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 	const isMobile = useMediaMatch('(max-width: 768px)')
 
 	const pageSetRef = useRef<HTMLDivElement | null>(null)
+	const panzoomRef = useRef<ReturnType<typeof Panzoom> | null>(null)
+
+	useEffect(() => {
+		const pageSetElement = pageSetRef.current
+		if (!pageSetElement) return
+
+		const parentElement = pageSetElement.parentElement
+		if (!parentElement) return
+
+		const createAndConfigurePanzoom = () => {
+			const viewportWidth = window.innerWidth
+			const panzoomElementWidth = pageSetElement.offsetWidth
+			const xOrigin = (1 - viewportWidth / (2 * panzoomElementWidth)) * 100
+
+			const origin = `${xOrigin}% 50%`
+
+			if (panzoomRef.current) {
+				panzoomRef.current.destroy()
+			}
+
+			const pz = Panzoom(pageSetElement, {
+				noBind: true, // Disable middle and left click panning
+				cursor: 'default',
+				minScale: 0.8,
+				maxScale: 2.5,
+				origin: origin,
+			})
+			panzoomRef.current = pz
+
+			const handleWheel = (event: WheelEvent) => {
+				if (event.ctrlKey) {
+					pz.zoomWithWheel(event)
+				}
+			}
+
+			// Re-enable panning with middle click
+			const handlePointerDown = (event: PointerEvent) => {
+				if (event.button === 1) {
+					pz.handleDown(event)
+					parentElement.style.cursor = 'move'
+					pageSetElement.style.cursor = 'move'
+					event.preventDefault()
+				}
+			}
+			const handlePointerUp = (event: PointerEvent) => {
+				if (event.button === 1) {
+					pz.handleUp(event)
+					parentElement.style.cursor = 'default'
+					pageSetElement.style.cursor = 'default'
+				}
+			}
+
+			parentElement.removeEventListener('wheel', handleWheel)
+			parentElement.removeEventListener('pointerdown', handlePointerDown)
+			document.removeEventListener('pointermove', pz.handleMove)
+			document.removeEventListener('pointerup', handlePointerUp)
+
+			parentElement.addEventListener('wheel', handleWheel)
+			parentElement.addEventListener('pointerdown', handlePointerDown)
+			document.addEventListener('pointermove', pz.handleMove)
+			document.addEventListener('pointerup', handlePointerUp)
+		}
+
+		createAndConfigurePanzoom()
+
+		window.addEventListener('resize', createAndConfigurePanzoom)
+
+		return () => {
+			window.removeEventListener('resize', createAndConfigurePanzoom)
+			// The others are already removed inside createAndConfigurePanzoom
+			panzoomRef.current?.destroy()
+		}
+	}, [currentPage, imageScaling, secondPageSeparate, doublePageBehavior])
 
 	const currentSet = useMemo(
 		() => pageSets.find((set) => set.includes(currentPage - 1)) || [currentPage - 1],

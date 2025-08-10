@@ -724,9 +724,11 @@ type Library {
 	excludedUsers: [User!]!
 	"Get the details of the last scan job for this library, if any exists."
 	lastScan: LibraryScanRecord
+	mediaAlphabet: JSONObject!
 	"Get the full history of scan jobs for this library."
 	scanHistory: [LibraryScanRecord!]!
 	series: [Series!]!
+	seriesAlphabet: JSONObject!
 	stats(allUsers: Boolean): LibraryStats!
 	tags: [Tag!]!
 	"""
@@ -902,7 +904,7 @@ type Media {
 	"The number of pages in the media, if applicable. Will be -1 for certain media types"
 	pages: Int!
 	"The timestamp of the last time the media was updated. This will be set during creation, as well"
-	updatedAt: DateTime!
+	updatedAt: DateTime
 	"The timestamp of the creation of the media"
 	createdAt: DateTime!
 	"""
@@ -1520,6 +1522,8 @@ type Query {
 	media(filter: MediaFilterInput!, orderBy: [MediaOrderBy!]! = [{media: {field: NAME, direction: ASC}}], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
 	mediaById(id: ID!): Media
 	mediaByPath(path: String!): Media
+	"Returns the available alphabet for all media in the server"
+	mediaAlphabet: JSONObject!
 	keepReading(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
 	recentlyAddedMedia(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
 	duplicateMedia: [Media!]!
@@ -1551,12 +1555,16 @@ type Query {
 	bookmarksByMediaId(id: ID!): [Bookmark!]!
 	libraries(orderBy: [LibraryModelOrderBy!]! = [{field: NAME, direction: ASC}], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedLibraryResponse!
 	libraryById(id: ID!): Library
+	"Returns the available alphabet for all libraries in the server"
+	librariesAlphabet: JSONObject!
 	numberOfLibraries: Int!
 	lastVisitedLibrary: Library
 	mediaMetadataOverview(seriesId: ID): MediaMetadataOverview!
 	smartListViews: [SmartListView!]!
 	series(filter: SeriesFilterInput!, orderBy: [SeriesOrderBy!]! = [{series: {field: NAME, direction: ASC}}], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedSeriesResponse!
 	seriesById(id: ID!): Series
+	"Returns the available alphabet for all series in the server"
+	seriesAlphabet: JSONObject!
 	numberOfSeries: Int!
 	recentlyAddedSeries(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedSeriesResponse!
 	"Returns a list of all tags."
@@ -1735,8 +1743,8 @@ type Series {
 	id: String!
 	name: String!
 	description: String
-	updatedAt: DateTime!
 	createdAt: DateTime!
+	updatedAt: DateTime
 	path: String!
 	status: FileStatus!
 	libraryId: String
@@ -1746,6 +1754,7 @@ type Series {
 	library: Library!
 	media: [Media!]!
 	mediaCount: Int!
+	mediaAlphabet: JSONObject!
 	upNext(take: Int! = 1, cursor: String): [Media!]!
 	isComplete: Boolean!
 	percentageCompleted: Float!
@@ -1823,8 +1832,8 @@ enum SeriesModelOrdering {
 	ID
 	NAME
 	DESCRIPTION
-	UPDATED_AT
 	CREATED_AT
+	UPDATED_AT
 	PATH
 	STATUS
 	LIBRARY_ID

@@ -765,11 +765,13 @@ export type Library = {
   /** Get the details of the last scan job for this library, if any exists. */
   lastScan?: Maybe<LibraryScanRecord>;
   lastScannedAt?: Maybe<Scalars['DateTime']['output']>;
+  mediaAlphabet: Scalars['JSONObject']['output'];
   name: Scalars['String']['output'];
   path: Scalars['String']['output'];
   /** Get the full history of scan jobs for this library. */
   scanHistory: Array<LibraryScanRecord>;
   series: Array<Series>;
+  seriesAlphabet: Scalars['JSONObject']['output'];
   stats: LibraryStats;
   status: FileStatus;
   tags: Array<Tag>;
@@ -1016,7 +1018,7 @@ export type Media = {
    */
   thumbnail: ImageRef;
   /** The timestamp of the last time the media was updated. This will be set during creation, as well */
-  updatedAt: Scalars['DateTime']['output'];
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
 
@@ -2028,6 +2030,8 @@ export type Query = {
   keepReading: PaginatedMediaResponse;
   lastVisitedLibrary?: Maybe<Library>;
   libraries: PaginatedLibraryResponse;
+  /** Returns the available alphabet for all libraries in the server */
+  librariesAlphabet: Scalars['JSONObject']['output'];
   libraryById?: Maybe<Library>;
   listDirectory: PaginatedDirectoryListingResponse;
   /**
@@ -2040,6 +2044,8 @@ export type Query = {
   logs: PaginatedLogResponse;
   me: User;
   media: PaginatedMediaResponse;
+  /** Returns the available alphabet for all media in the server */
+  mediaAlphabet: Scalars['JSONObject']['output'];
   mediaById?: Maybe<Media>;
   mediaByPath?: Maybe<Media>;
   mediaMetadataOverview: MediaMetadataOverview;
@@ -2064,6 +2070,8 @@ export type Query = {
   recentlyAddedSeries: PaginatedSeriesResponse;
   scheduledJobConfigs: Array<ScheduledJobConfig>;
   series: PaginatedSeriesResponse;
+  /** Returns the available alphabet for all series in the server */
+  seriesAlphabet: Scalars['JSONObject']['output'];
   seriesById?: Maybe<Series>;
   smartListById?: Maybe<SmartList>;
   smartListItems: SmartListItems;
@@ -2419,6 +2427,7 @@ export type Series = {
   library: Library;
   libraryId?: Maybe<Scalars['String']['output']>;
   media: Array<Media>;
+  mediaAlphabet: Scalars['JSONObject']['output'];
   mediaCount: Scalars['Int']['output'];
   metadata?: Maybe<SeriesMetadataModel>;
   name: Scalars['String']['output'];
@@ -2436,7 +2445,7 @@ export type Series = {
   thumbnail: ImageRef;
   unreadCount: Scalars['Int']['output'];
   upNext: Array<Media>;
-  updatedAt: Scalars['DateTime']['output'];
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
 
@@ -3148,6 +3157,13 @@ export type DeleteBookmarkMutationVariables = Exact<{
 
 
 export type DeleteBookmarkMutation = { __typename?: 'Mutation', deleteBookmark: { __typename: 'Bookmark' } };
+
+export type SeriesBooksAlphabetQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type SeriesBooksAlphabetQuery = { __typename?: 'Query', seriesById?: { __typename?: 'Series', mediaAlphabet: any } | null };
 
 export type UsePreferencesMutationVariables = Exact<{
   input: UpdateUserPreferencesInput;
@@ -4317,6 +4333,13 @@ export const DeleteBookmarkDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<DeleteBookmarkMutation, DeleteBookmarkMutationVariables>;
+export const SeriesBooksAlphabetDocument = new TypedDocumentString(`
+    query SeriesBooksAlphabet($id: ID!) {
+  seriesById(id: $id) {
+    mediaAlphabet
+  }
+}
+    `) as unknown as TypedDocumentString<SeriesBooksAlphabetQuery, SeriesBooksAlphabetQueryVariables>;
 export const UsePreferencesDocument = new TypedDocumentString(`
     mutation UsePreferences($input: UpdateUserPreferencesInput!) {
   updateViewerPreferences(input: $input) {

@@ -1,12 +1,19 @@
+use std::collections::HashMap;
+
 use async_graphql::{Context, Object, Result, ID};
 use models::{
 	entity::{
 		last_library_visit,
 		library::{self, LibraryModelOrderBy},
 	},
-	shared::ordering::{OrderBy, OrderDirection},
+	shared::{
+		alphabet::{AvailableAlphabet, EntityLetter},
+		ordering::{OrderBy, OrderDirection},
+	},
 };
-use sea_orm::{prelude::*, QueryOrder, QuerySelect};
+use sea_orm::{
+	prelude::*, DatabaseBackend, FromQueryResult, QueryOrder, QuerySelect, Statement,
+};
 
 use crate::{
 	data::{CoreContext, RequestContext},
@@ -116,6 +123,41 @@ impl LibraryQuery {
 			.await?;
 
 		Ok(model.map(Library::from))
+	}
+
+	/// Returns the available alphabet for all libraries in the server
+	async fn libraries_alphabet(
+		&self,
+		ctx: &Context<'_>,
+	) -> Result<HashMap<String, i64>> {
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let query_result = conn
+			.query_all(Statement::from_sql_and_values(
+				DatabaseBackend::Sqlite,
+				r"
+				SELECT
+					substr(libraries.name, 1, 1) AS letter,
+					COUNT(DISTINCT libraries.id) AS count
+				FROM
+					libraries
+				GROUP BY
+					letter
+				ORDER BY
+					letter ASC;
+				",
+				[],
+			))
+			.await?;
+
+		let result = query_result
+			.into_iter()
+			.map(|res| EntityLetter::from_query_result(&res, "").map_err(|e| e.into()))
+			.collect::<Result<Vec<EntityLetter>>>()?;
+
+		let alphabet = AvailableAlphabet::from(result);
+
+		Ok(alphabet.get())
 	}
 
 	async fn number_of_libraries(&self, ctx: &Context<'_>) -> Result<u64> {

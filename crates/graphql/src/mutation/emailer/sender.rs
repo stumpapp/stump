@@ -393,7 +393,7 @@ mod tests {
 			size: 1234,
 			extension: "epub".to_string(),
 			pages: 100,
-			updated_at: chrono::Utc::now().into(),
+			updated_at: Some(chrono::Utc::now().into()),
 			created_at: chrono::Utc::now().into(),
 			modified_at: None,
 			hash: None,

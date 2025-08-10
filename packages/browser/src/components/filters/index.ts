@@ -1,3 +1,4 @@
+export { default as Alphabet } from './Alphabet'
 export { FilterContext, type IFilterContext, useFilterContext } from './context'
 export { default as FilterHeader } from './FilterHeader'
 export { default as FilterProvider } from './FilterProvider'

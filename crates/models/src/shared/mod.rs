@@ -1,3 +1,4 @@
+pub mod alphabet;
 pub mod api_key;
 pub mod arrangement;
 pub mod book_club;

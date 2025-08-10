@@ -1,12 +1,18 @@
+use std::collections::HashMap;
+
 use async_graphql::{Context, Object, Result, ID};
 use models::{
 	entity::{finished_reading_session, media, reading_session, user::AuthUser},
-	shared::ordering::OrderBy,
+	shared::{
+		alphabet::{AvailableAlphabet, EntityLetter},
+		ordering::OrderBy,
+	},
 };
 use sea_orm::{
 	prelude::*,
 	sea_query::{ExprTrait, Query},
-	Condition, JoinType, QueryOrder, QuerySelect,
+	Condition, DatabaseBackend, FromQueryResult, JoinType, QueryOrder, QuerySelect,
+	Statement,
 };
 
 use crate::{
@@ -187,6 +193,39 @@ impl MediaQuery {
 			.await?;
 
 		Ok(model.map(Media::from))
+	}
+
+	/// Returns the available alphabet for all media in the server
+	async fn media_alphabet(&self, ctx: &Context<'_>) -> Result<HashMap<String, i64>> {
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let query_result = conn
+			.query_all(Statement::from_sql_and_values(
+				DatabaseBackend::Sqlite,
+				r"
+				SELECT
+					substr(COALESCE(media_metadata.title, media.name), 1, 1) AS letter,
+					COUNT(DISTINCT media.id) AS count
+				FROM
+					media
+				LEFT JOIN media_metadata ON media.id = media_metadata.media_id
+				GROUP BY
+					letter
+				ORDER BY
+					letter ASC;
+				",
+				[],
+			))
+			.await?;
+
+		let result = query_result
+			.into_iter()
+			.map(|res| EntityLetter::from_query_result(&res, "").map_err(|e| e.into()))
+			.collect::<Result<Vec<EntityLetter>>>()?;
+
+		let alphabet = AvailableAlphabet::from(result);
+
+		Ok(alphabet.get())
 	}
 
 	pub(crate) async fn keep_reading(

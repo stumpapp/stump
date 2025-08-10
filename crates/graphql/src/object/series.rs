@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use async_graphql::{
 	dataloader::DataLoader, ComplexObject, Context, Result, SimpleObject,
 };
@@ -7,10 +9,14 @@ use models::{
 		finished_reading_session, library, media, reading_session, series,
 		series_metadata, series_tag, tag,
 	},
-	shared::image::ImageRef,
+	shared::{
+		alphabet::{AvailableAlphabet, EntityLetter},
+		image::ImageRef,
+	},
 };
 use sea_orm::{
-	prelude::*, sea_query::Query, Condition, JoinType, QueryOrder, QuerySelect,
+	prelude::*, sea_query::Query, Condition, DatabaseBackend, FromQueryResult, JoinType,
+	QueryOrder, QuerySelect, Statement,
 };
 
 use crate::{
@@ -88,6 +94,40 @@ impl Series {
 		let media_count = loader.load_one(series_id).await?.unwrap_or(0i64);
 
 		Ok(media_count)
+	}
+
+	async fn media_alphabet(&self, ctx: &Context<'_>) -> Result<HashMap<String, i64>> {
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let query_result = conn
+			.query_all(Statement::from_sql_and_values(
+				DatabaseBackend::Sqlite,
+				r"
+				SELECT
+					substr(COALESCE(media_metadata.title, media.name), 1, 1) AS letter,
+					COUNT(DISTINCT media.id) AS count
+				FROM
+					media
+				LEFT JOIN media_metadata ON media.id = media_metadata.media_id
+				WHERE
+					media.series_id = $1
+				GROUP BY
+					letter
+				ORDER BY
+					letter ASC;
+				",
+				[self.model.id.clone().into()],
+			))
+			.await?;
+
+		let result = query_result
+			.into_iter()
+			.map(|res| EntityLetter::from_query_result(&res, "").map_err(|e| e.into()))
+			.collect::<Result<Vec<EntityLetter>>>()?;
+
+		let alphabet = AvailableAlphabet::from(result);
+
+		Ok(alphabet.get())
 	}
 
 	async fn up_next(

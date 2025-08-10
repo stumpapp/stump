@@ -2,7 +2,7 @@ import { PREFETCH_STALE_TIME, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { usePrevious, usePreviousIsDifferent } from '@stump/components'
 import { graphql, MediaFilterInput, MediaOrderBy } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
-import { Suspense, useCallback, useEffect } from 'react'
+import { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
 import { Helmet } from 'react-helmet'
 
 import { BookTable } from '@/components/book'
@@ -23,9 +23,11 @@ import {
 	useURLKeywordSearch,
 	useURLPageParams,
 } from '@/components/filters/useFilterScene'
+import { SeriesBooksAlphabet } from '@/components/series'
 import { EntityTableColumnConfiguration } from '@/components/table'
 import TableOrGridLayout from '@/components/TableOrGridLayout'
 import useIsInView from '@/hooks/useIsInView'
+import { usePreferences } from '@/hooks/usePreferences'
 import { useMediaURLOrderBy } from '@/scenes/bookSearch/BookSearchScene'
 import { useBooksLayout } from '@/stores/layout'
 
@@ -60,7 +62,7 @@ const query = graphql(`
 export type UsePrefetchSeriesBooksParams = {
 	page?: number
 	pageSize?: number
-	filter: MediaFilterInput
+	filter: MediaFilterInput[]
 	orderBy: MediaOrderBy[]
 }
 
@@ -75,7 +77,7 @@ export const usePrefetchSeriesBooks = () => {
 	const prefetch = useCallback(
 		(
 			id: string,
-			params: UsePrefetchSeriesBooksParams = { filter: {}, orderBy: DEFAULT_MEDIA_ORDER_BY },
+			params: UsePrefetchSeriesBooksParams = { filter: [], orderBy: DEFAULT_MEDIA_ORDER_BY },
 		) => {
 			const pageParams = { page: params.page || 1, pageSize: params.pageSize || pageSize }
 			return client.prefetchQuery({
@@ -92,7 +94,7 @@ export const usePrefetchSeriesBooks = () => {
 					const response = await sdk.execute(query, {
 						filter: {
 							seriesId: { eq: id },
-							_and: [params.filter],
+							_and: params.filter,
 							_or: searchFilter,
 						},
 						orderBy: params.orderBy,
@@ -127,7 +129,7 @@ function getQueryKey(
 	page: number,
 	pageSize: number,
 	search: string | undefined,
-	filters: MediaFilterInput | undefined,
+	filters: MediaFilterInput[] | undefined,
 	orderBy: MediaOrderBy[] | undefined,
 ): (string | object | number | MediaFilterInput | MediaOrderBy[] | undefined)[] {
 	return [cacheKey, libraryId, page, pageSize, search, filters, orderBy]
@@ -156,12 +158,65 @@ function SeriesBooksScene() {
 		}
 	}, [differentSearch, setPage])
 
+	const [startsWith, setStartsWith] = useState<string | undefined>(undefined)
+	const onSelectLetter = useCallback(
+		(letter?: string) => {
+			setStartsWith(letter)
+			setPage(1)
+		},
+		[setPage],
+	)
+
+	const prefetch = usePrefetchSeriesBooks()
+
+	const {
+		preferences: { enableAlphabetSelect },
+	} = usePreferences()
 	const { layoutMode, setLayout, columns, setColumns } = useBooksLayout((state) => ({
 		columns: state.columns,
 		layoutMode: state.layout,
 		setColumns: state.setColumns,
 		setLayout: state.setLayout,
 	}))
+
+	const resolvedFilters = useMemo(
+		() => [
+			filters,
+			...(startsWith
+				? [
+						{
+							_or: [
+								{ name: { startsWith } },
+								{
+									metadata: { title: { startsWith } },
+								},
+							],
+						},
+					]
+				: []),
+		],
+		[filters, startsWith],
+	)
+
+	const onPrefetchLetter = useCallback(
+		(letter: string) => {
+			prefetch(series.id, {
+				page: 1,
+				pageSize,
+				filter: [
+					filters,
+					{
+						_or: [
+							{ name: { startsWith: letter } },
+							{ metadata: { title: { startsWith: letter } } },
+						],
+					},
+				],
+				orderBy,
+			})
+		},
+		[prefetch, series.id, pageSize, orderBy, filters],
+	)
 
 	const { sdk } = useSDK()
 	const {
@@ -171,11 +226,19 @@ function SeriesBooksScene() {
 		isLoading,
 	} = useSuspenseGraphQL(
 		query,
-		getQueryKey(sdk.cacheKeys.seriesBooks, series.id, page, pageSize, search, filters, orderBy),
+		getQueryKey(
+			sdk.cacheKeys.seriesBooks,
+			series.id,
+			page,
+			pageSize,
+			search,
+			resolvedFilters,
+			orderBy,
+		),
 		{
 			filter: {
 				seriesId: { eq: series.id },
-				_and: [filters],
+				_and: resolvedFilters,
 				_or: searchFilter,
 			},
 			orderBy,
@@ -187,8 +250,6 @@ function SeriesBooksScene() {
 			},
 		},
 	)
-
-	const prefetch = usePrefetchSeriesBooks()
 
 	if (pageInfo.__typename !== 'OffsetPaginationInfo') {
 		throw new Error('Invalid pagination type, expected OffsetPaginationInfo')
@@ -223,12 +284,12 @@ function SeriesBooksScene() {
 						prefetch(series.id, {
 							page,
 							pageSize,
-							filter: filters,
+							filter: [filters],
 							orderBy: orderBy,
 						})
 					}}
 				>
-					<div className="flex flex-1 px-4 pb-2 pt-4 md:pb-4">
+					<div className="relative flex flex-1 px-4 pb-2 pt-4 md:pb-4">
 						<BookGrid
 							isLoading={isLoading}
 							items={nodes.map((node) => (
@@ -252,7 +313,7 @@ function SeriesBooksScene() {
 								prefetch(series.id, {
 									page,
 									pageSize,
-									filter: filters,
+									filter: resolvedFilters,
 									orderBy: orderBy,
 								})
 							}}
@@ -295,6 +356,14 @@ function SeriesBooksScene() {
 					filterControls={<URLFilterDrawer entity="media" />}
 					navOffset
 				/>
+
+				{enableAlphabetSelect && (
+					<SeriesBooksAlphabet
+						startsWith={startsWith}
+						onSelectLetter={onSelectLetter}
+						onPrefetchLetter={onPrefetchLetter}
+					/>
+				)}
 
 				{renderContent()}
 			</div>

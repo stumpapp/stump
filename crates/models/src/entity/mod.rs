@@ -34,6 +34,7 @@ pub mod reading_list;
 pub mod reading_list_item;
 pub mod reading_list_rule;
 pub mod reading_session;
+pub mod refresh_token;
 pub mod registered_email_device;
 pub mod registered_reading_device;
 pub mod review;

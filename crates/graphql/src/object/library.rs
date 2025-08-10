@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use async_graphql::{ComplexObject, Context, Result, SimpleObject};
 
 use models::{
@@ -5,7 +7,11 @@ use models::{
 		library, library_config, library_exclusion, library_scan_record, library_tag,
 		series, tag, user,
 	},
-	shared::{enums::UserPermission, image::ImageRef},
+	shared::{
+		alphabet::{AvailableAlphabet, EntityLetter},
+		enums::UserPermission,
+		image::ImageRef,
+	},
 };
 use sea_orm::{
 	prelude::*, sea_query::Query, DatabaseBackend, FromQueryResult, QueryOrder, Statement,
@@ -84,6 +90,44 @@ impl Library {
 		Ok(record.map(LibraryScanRecord::from))
 	}
 
+	async fn media_alphabet(&self, ctx: &Context<'_>) -> Result<HashMap<String, i64>> {
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let query_result = conn
+			.query_all(Statement::from_sql_and_values(
+				DatabaseBackend::Sqlite,
+				r"
+				SELECT
+					substr(COALESCE(media_metadata.title, media.name), 1, 1) AS letter,
+					COUNT(DISTINCT media.id) AS count
+				FROM
+					media
+				LEFT JOIN media_metadata ON media.id = media_metadata.media_id
+				WHERE
+					media.series_id IN (
+						SELECT series.id 
+						FROM series 
+						WHERE series.library_id = $1
+					)
+				GROUP BY
+					letter
+				ORDER BY
+					letter ASC;
+				",
+				[self.model.id.clone().into()],
+			))
+			.await?;
+
+		let result = query_result
+			.into_iter()
+			.map(|res| EntityLetter::from_query_result(&res, "").map_err(|e| e.into()))
+			.collect::<Result<Vec<EntityLetter>>>()?;
+
+		let alphabet = AvailableAlphabet::from(result);
+
+		Ok(alphabet.get())
+	}
+
 	/// Get the full history of scan jobs for this library.
 	async fn scan_history(&self, ctx: &Context<'_>) -> Result<Vec<LibraryScanRecord>> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
@@ -108,6 +152,40 @@ impl Library {
 			.await?;
 
 		Ok(models.into_iter().map(Series::from).collect())
+	}
+
+	async fn series_alphabet(&self, ctx: &Context<'_>) -> Result<HashMap<String, i64>> {
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let query_result = conn
+			.query_all(Statement::from_sql_and_values(
+				DatabaseBackend::Sqlite,
+				r"
+				SELECT
+					substr(COALESCE(series_metadata.title, series.name), 1, 1) AS letter,
+					COUNT(DISTINCT series.id) AS count
+				FROM
+					series
+				LEFT JOIN series_metadata ON series.id = series_metadata.series_id
+				WHERE
+					series.library_id = $1
+				GROUP BY
+					letter
+				ORDER BY
+					letter ASC;
+				",
+				[self.model.id.clone().into()],
+			))
+			.await?;
+
+		let result = query_result
+			.into_iter()
+			.map(|res| EntityLetter::from_query_result(&res, "").map_err(|e| e.into()))
+			.collect::<Result<Vec<EntityLetter>>>()?;
+
+		let alphabet = AvailableAlphabet::from(result);
+
+		Ok(alphabet.get())
 	}
 
 	async fn stats(

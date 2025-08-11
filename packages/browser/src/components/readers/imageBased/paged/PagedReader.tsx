@@ -251,7 +251,11 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 				ref={pageSetRef}
 				currentPage={currentPage}
 				getPageUrl={getPageUrl}
-				onPageClick={() => setSettings({ showToolBar: !showToolBar && !panningDetected.current })}
+				onPageClick={() => {
+					if (!panningDetected.current) {
+						setSettings({ showToolBar: !showToolBar })
+					}
+				}}
 			/>
 
 			{!showToolBar && tapSidesToNavigate && (

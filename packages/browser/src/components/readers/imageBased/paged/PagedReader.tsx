@@ -49,6 +49,8 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 	const pageSetRef = useRef<HTMLDivElement | null>(null)
 	const panzoomRef = useRef<ReturnType<typeof Panzoom> | null>(null)
 
+	const panningDetected = useRef(false)
+
 	useEffect(() => {
 		const pageSetElement = pageSetRef.current
 		if (!pageSetElement) return
@@ -68,11 +70,11 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 			}
 
 			const pz = Panzoom(pageSetElement, {
-				noBind: true, // Disable middle and left click panning
+				noBind: true,
 				cursor: 'default',
 				minScale: 0.8,
 				maxScale: 2.5,
-				origin: origin,
+				origin: origin, // Due to wrong origin calculation, we need to set this manually
 			})
 			panzoomRef.current = pz
 
@@ -82,21 +84,27 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 				}
 			}
 
-			// Re-enable panning with middle click
+			// Check panning vs clicking
+			let startX = 0
+			let startY = 0
 			const handlePointerDown = (event: PointerEvent) => {
-				if (event.button === 1) {
-					pz.handleDown(event)
-					parentElement.style.cursor = 'move'
-					pageSetElement.style.cursor = 'move'
-					event.preventDefault()
-				}
+				startX = event.clientX
+				startY = event.clientY
+				pz.handleDown(event)
+				parentElement.style.cursor = 'move'
+				pageSetElement.style.cursor = 'move'
+				event.preventDefault()
 			}
 			const handlePointerUp = (event: PointerEvent) => {
-				if (event.button === 1) {
-					pz.handleUp(event)
-					parentElement.style.cursor = 'default'
-					pageSetElement.style.cursor = 'default'
-				}
+				const deltaX = event.clientX - startX
+				const deltaY = event.clientY - startY
+				pz.handleUp(event)
+				parentElement.style.cursor = 'default'
+				pageSetElement.style.cursor = 'default'
+				panningDetected.current = Math.abs(deltaX) > 2 || Math.abs(deltaY) > 2
+				setTimeout(() => {
+					panningDetected.current = false
+				}, 100)
 			}
 
 			parentElement.removeEventListener('wheel', handleWheel)
@@ -168,7 +176,7 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 		const nextSet = pageSets[nextSetIdx]
 		const endOfNextSet = nextSet?.at(-1)
 
-		if (!nextSet || endOfNextSet == null) {
+		if (!nextSet || endOfNextSet == null || panningDetected.current) {
 			return
 		}
 
@@ -185,7 +193,7 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 		const nextSet = pageSets[nextSetIdx]
 		const startOfNextSet = nextSet?.at(0)
 
-		if (!nextSet || startOfNextSet == null) {
+		if (!nextSet || startOfNextSet == null || panningDetected.current) {
 			return
 		}
 
@@ -243,7 +251,7 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 				ref={pageSetRef}
 				currentPage={currentPage}
 				getPageUrl={getPageUrl}
-				onPageClick={() => setSettings({ showToolBar: !showToolBar })}
+				onPageClick={() => setSettings({ showToolBar: !showToolBar && !panningDetected.current })}
 			/>
 
 			{!showToolBar && tapSidesToNavigate && (

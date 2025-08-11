@@ -12,7 +12,7 @@ import {
 import { useLocaleContext } from '@stump/i18n'
 import { ImageResizeMode, ImageResizeOptions } from '@stump/sdk'
 import { AnimatePresence, motion } from 'framer-motion'
-import { useCallback, useMemo } from 'react'
+import { useCallback, useMemo, useRef } from 'react'
 import { useFormContext, useFormState } from 'react-hook-form'
 
 import { useLibraryContextSafe } from '@/scenes/library/context'
@@ -52,6 +52,8 @@ export default function ThumbnailConfigForm() {
 		[form, resize_options?.mode],
 	)
 
+	const toggleEnabledAtStart = useRef(form.getValues('thumbnail_config.enabled')).current
+	const buttonClicked = useRef(false)
 	/**
 	 * A function to render the save button. This will only render if there are changes to the form
 	 * that have not been saved, and if we are editing an existing library
@@ -61,7 +63,12 @@ export default function ThumbnailConfigForm() {
 			return null
 		}
 
-		const hasChanges = Object.keys(dirtyFields).length > 0
+		const toggleEnabledNow = form.getValues('thumbnail_config.enabled')
+
+		const hasChanges =
+			Object.keys(dirtyFields).length > 0 ||
+			(toggleEnabledAtStart && !toggleEnabledNow) ||
+			buttonClicked.current
 
 		return (
 			<div>
@@ -71,6 +78,9 @@ export default function ThumbnailConfigForm() {
 					disabled={!hasChanges}
 					variant="primary"
 					className="mt-4"
+					onClick={() => {
+						buttonClicked.current = true
+					}}
 				>
 					{t('common.saveChanges')}
 				</Button>

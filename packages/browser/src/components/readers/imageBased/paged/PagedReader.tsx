@@ -1,14 +1,14 @@
 import Panzoom from '@panzoom/panzoom'
 import type { Media } from '@stump/sdk'
 import clsx from 'clsx'
-import { memo, useCallback, useEffect, useMemo, useRef } from 'react'
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { Hotkey } from 'react-hotkeys-hook/dist/types'
 import { useMediaMatch, useWindowSize } from 'rooks'
 
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
-import { ImagePageDimensionRef, useImageBaseReaderContext } from '../context'
+import { useImageBaseReaderContext } from '../context'
 import PageSet from './PageSet'
 
 export type PagedReaderProps = {
@@ -36,11 +36,7 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 		setSettings,
 	} = useBookPreferences({ book: media })
 
-	const { pageDimensions, pageSets } = useImageBaseReaderContext()
-	/**
-	 * A memoized callback to get the dimensions of a given page
-	 */
-	const getDimensions = useCallback((idx: number) => pageDimensions[idx], [pageDimensions])
+	const { pageSets } = useImageBaseReaderContext()
 
 	const { innerWidth } = useWindowSize()
 
@@ -51,6 +47,22 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 
 	const panningDetected = useRef(false)
 
+	const [pageSetWidth, setPageSetWidth] = useState(0)
+	useEffect(() => {
+		const pageSetElement = pageSetRef.current
+		if (!pageSetElement) return
+
+		const resizeObserver = new ResizeObserver((entries) => {
+			if (!entries[0]) return
+			const newWidth = entries[0].contentRect.width
+			setPageSetWidth(newWidth)
+		})
+		resizeObserver.observe(pageSetElement)
+		return () => {
+			resizeObserver.disconnect()
+		}
+	}, [])
+
 	useEffect(() => {
 		const pageSetElement = pageSetRef.current
 		if (!pageSetElement) return
@@ -58,26 +70,10 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 		const parentElement = pageSetElement.parentElement
 		if (!parentElement) return
 
-		const createAndConfigurePanzoom = () => {
-			const viewportWidth = window.innerWidth
-			const panzoomElementWidth = pageSetElement.offsetWidth
-			const xOrigin = (1 - viewportWidth / (2 * panzoomElementWidth)) * 100
-
-			const origin = `${xOrigin}% 50%`
-
-			if (panzoomRef.current) {
-				panzoomRef.current.destroy()
-			}
-
-			const pz = Panzoom(pageSetElement, {
-				noBind: true,
-				cursor: 'default',
-				minScale: 0.8,
-				maxScale: 2.5,
-				origin: origin, // Due to wrong origin calculation, we need to set this manually
-			})
-			panzoomRef.current = pz
-
+		/**
+		 * Set up event handlers for pointer clicking and scroll wheel
+		 */
+		const setupEventHandlers = (pz: ReturnType<typeof Panzoom>) => {
 			const handleWheel = (event: WheelEvent) => {
 				if (event.ctrlKey) {
 					pz.zoomWithWheel(event)
@@ -90,10 +86,15 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 			const handlePointerDown = (event: PointerEvent) => {
 				startX = event.clientX
 				startY = event.clientY
-				pz.handleDown(event)
-				parentElement.style.cursor = 'move'
-				pageSetElement.style.cursor = 'move'
-				event.preventDefault()
+
+				const isSidebarClicked = !!(event.target as HTMLElement).closest('.z-50')
+
+				if (!isSidebarClicked) {
+					pz.handleDown(event)
+					parentElement.style.cursor = 'move'
+					pageSetElement.style.cursor = 'move'
+					event.preventDefault()
+				}
 			}
 			const handlePointerUp = (event: PointerEvent) => {
 				const deltaX = event.clientX - startX
@@ -118,6 +119,34 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 			document.addEventListener('pointerup', handlePointerUp)
 		}
 
+		/**
+		 * A function that manually calculates the correct panzoom origin
+		 * due to the default origin setting being wrong
+		 */
+		const panzoomOriginCalculation = () => {
+			const viewportWidth = window.innerWidth
+			const xOrigin = (1 - viewportWidth / (2 * pageSetWidth)) * 100
+			const origin = `${xOrigin}% 50%`
+			return origin
+		}
+
+		const createAndConfigurePanzoom = () => {
+			if (panzoomRef.current) {
+				panzoomRef.current.destroy()
+			}
+
+			const pz = Panzoom(pageSetElement, {
+				noBind: true,
+				cursor: 'default',
+				minScale: 0.8,
+				maxScale: 2.5,
+				origin: panzoomOriginCalculation(),
+			})
+
+			panzoomRef.current = pz
+			setupEventHandlers(pz)
+		}
+
 		createAndConfigurePanzoom()
 
 		window.addEventListener('resize', createAndConfigurePanzoom)
@@ -127,12 +156,7 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 			// The others are already removed inside createAndConfigurePanzoom
 			panzoomRef.current?.destroy()
 		}
-	}, [currentPage, imageScaling, secondPageSeparate, doublePageBehavior])
-
-	const currentSet = useMemo(
-		() => pageSets.find((set) => set.includes(currentPage - 1)) || [currentPage - 1],
-		[currentPage, pageSets],
-	)
+	}, [currentPage, imageScaling, secondPageSeparate, doublePageBehavior, pageSetWidth])
 
 	const currentSetIdx = useMemo(
 		() => pageSets.findIndex((set) => set.includes(currentPage - 1)),
@@ -140,16 +164,11 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 	)
 
 	/**
-	 * If the image parts are collective >= 80% of the screen width, we want to fix the side navigation
+	 * If the image parts are collective >= 86% of the screen width, we want to fix the side navigation
 	 */
 	const fixSideNavigation = useMemo(() => {
-		const dimensionSet = currentSet
-			.map((pageIdx) => getDimensions(pageIdx))
-			.filter(Boolean) as ImagePageDimensionRef[]
-		const totalWidth = dimensionSet.reduce((acc, dimensions) => acc + dimensions.width, 0)
-
-		return (!!innerWidth && totalWidth >= innerWidth * 0.8) || isMobile
-	}, [currentSet, getDimensions, innerWidth, isMobile])
+		return (!!innerWidth && pageSetWidth >= innerWidth * 0.86) || isMobile
+	}, [pageSetWidth, innerWidth, isMobile])
 
 	/**
 	 * A callback to actually change the page. This should not be called directly, but rather
@@ -287,8 +306,9 @@ function SideBarControl({ onClick, position, fixed }: SideBarControlProps) {
 	return (
 		<div
 			className={clsx(
-				'z-50 h-full shrink-0 border border-transparent transition-all duration-300 active:border-edge-subtle active:bg-background-surface active:bg-opacity-50',
-				fixed ? 'fixed w-[10%]' : 'relative flex flex-1 flex-grow',
+				'z-50 h-[300%] shrink-0 border border-transparent transition-all duration-300',
+				'active:border-edge-subtle active:bg-background-surface active:bg-opacity-50',
+				fixed ? 'fixed w-[10%]' : 'relative mx-[-3%] flex flex-1 flex-grow',
 				{ 'right-0': position === 'right' },
 				{ 'left-0': position === 'left' },
 			)}

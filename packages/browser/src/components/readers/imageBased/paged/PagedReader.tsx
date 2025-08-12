@@ -1,6 +1,7 @@
+import Panzoom from '@panzoom/panzoom'
 import type { Media } from '@stump/sdk'
 import clsx from 'clsx'
-import { memo, useCallback, useMemo, useRef } from 'react'
+import { memo, useCallback, useEffect, useMemo, useRef } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { Hotkey } from 'react-hotkeys-hook/dist/types'
 import { useMediaMatch, useWindowSize } from 'rooks'
@@ -30,7 +31,7 @@ export type PagedReaderProps = {
  */
 function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedReaderProps) {
 	const {
-		bookPreferences: { tapSidesToNavigate },
+		bookPreferences: { tapSidesToNavigate, imageScaling, secondPageSeparate, doublePageBehavior },
 		settings: { showToolBar },
 		setSettings,
 	} = useBookPreferences({ book: media })
@@ -46,6 +47,87 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 	const isMobile = useMediaMatch('(max-width: 768px)')
 
 	const pageSetRef = useRef<HTMLDivElement | null>(null)
+	const panzoomRef = useRef<ReturnType<typeof Panzoom> | null>(null)
+
+	const panningDetected = useRef(false)
+
+	useEffect(() => {
+		const pageSetElement = pageSetRef.current
+		if (!pageSetElement) return
+
+		const parentElement = pageSetElement.parentElement
+		if (!parentElement) return
+
+		const createAndConfigurePanzoom = () => {
+			const viewportWidth = window.innerWidth
+			const panzoomElementWidth = pageSetElement.offsetWidth
+			const xOrigin = (1 - viewportWidth / (2 * panzoomElementWidth)) * 100
+
+			const origin = `${xOrigin}% 50%`
+
+			if (panzoomRef.current) {
+				panzoomRef.current.destroy()
+			}
+
+			const pz = Panzoom(pageSetElement, {
+				noBind: true,
+				cursor: 'default',
+				minScale: 0.8,
+				maxScale: 2.5,
+				origin: origin, // Due to wrong origin calculation, we need to set this manually
+			})
+			panzoomRef.current = pz
+
+			const handleWheel = (event: WheelEvent) => {
+				if (event.ctrlKey) {
+					pz.zoomWithWheel(event)
+				}
+			}
+
+			// Check panning vs clicking
+			let startX = 0
+			let startY = 0
+			const handlePointerDown = (event: PointerEvent) => {
+				startX = event.clientX
+				startY = event.clientY
+				pz.handleDown(event)
+				parentElement.style.cursor = 'move'
+				pageSetElement.style.cursor = 'move'
+				event.preventDefault()
+			}
+			const handlePointerUp = (event: PointerEvent) => {
+				const deltaX = event.clientX - startX
+				const deltaY = event.clientY - startY
+				pz.handleUp(event)
+				parentElement.style.cursor = 'default'
+				pageSetElement.style.cursor = 'default'
+				panningDetected.current = Math.abs(deltaX) > 2 || Math.abs(deltaY) > 2
+				setTimeout(() => {
+					panningDetected.current = false
+				}, 100)
+			}
+
+			parentElement.removeEventListener('wheel', handleWheel)
+			parentElement.removeEventListener('pointerdown', handlePointerDown)
+			document.removeEventListener('pointermove', pz.handleMove)
+			document.removeEventListener('pointerup', handlePointerUp)
+
+			parentElement.addEventListener('wheel', handleWheel)
+			parentElement.addEventListener('pointerdown', handlePointerDown)
+			document.addEventListener('pointermove', pz.handleMove)
+			document.addEventListener('pointerup', handlePointerUp)
+		}
+
+		createAndConfigurePanzoom()
+
+		window.addEventListener('resize', createAndConfigurePanzoom)
+
+		return () => {
+			window.removeEventListener('resize', createAndConfigurePanzoom)
+			// The others are already removed inside createAndConfigurePanzoom
+			panzoomRef.current?.destroy()
+		}
+	}, [currentPage, imageScaling, secondPageSeparate, doublePageBehavior])
 
 	const currentSet = useMemo(
 		() => pageSets.find((set) => set.includes(currentPage - 1)) || [currentPage - 1],
@@ -94,7 +176,7 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 		const nextSet = pageSets[nextSetIdx]
 		const endOfNextSet = nextSet?.at(-1)
 
-		if (!nextSet || endOfNextSet == null) {
+		if (!nextSet || endOfNextSet == null || panningDetected.current) {
 			return
 		}
 
@@ -111,7 +193,7 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 		const nextSet = pageSets[nextSetIdx]
 		const startOfNextSet = nextSet?.at(0)
 
-		if (!nextSet || startOfNextSet == null) {
+		if (!nextSet || startOfNextSet == null || panningDetected.current) {
 			return
 		}
 
@@ -169,7 +251,11 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 				ref={pageSetRef}
 				currentPage={currentPage}
 				getPageUrl={getPageUrl}
-				onPageClick={() => setSettings({ showToolBar: !showToolBar })}
+				onPageClick={() => {
+					if (!panningDetected.current) {
+						setSettings({ showToolBar: !showToolBar })
+					}
+				}}
 			/>
 
 			{!showToolBar && tapSidesToNavigate && (

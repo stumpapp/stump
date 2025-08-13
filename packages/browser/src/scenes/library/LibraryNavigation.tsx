@@ -14,6 +14,7 @@ import { useAppContext } from '@/context'
 import { usePreferences } from '@/hooks'
 
 import { useLibraryContext } from './context'
+import { usePrefetchLibraryBooks } from './tabs/books/LibraryBooksScene'
 import { usePrefetchLibrarySeries } from './tabs/series'
 
 export default function LibraryNavigation() {
@@ -34,6 +35,7 @@ export default function LibraryNavigation() {
 	// const { prefetch: prefetchSeries } = usePrefetchLibrarySeries({ id })
 
 	const prefetchSeries = usePrefetchLibrarySeries()
+	const prefetchBooks = usePrefetchLibraryBooks()
 
 	// const prefetchFiles = usePrefetchFiles()
 	const handlePrefetchFiles = useCallback(() => {
@@ -56,7 +58,7 @@ export default function LibraryNavigation() {
 			{
 				isActive: location.pathname.match(/\/libraries\/[^/]+\/books(\/.*)?$/),
 				label: 'Books',
-				// onHover: () => prefetchBooks(),
+				onHover: () => prefetchBooks(id),
 				to: 'books',
 			},
 			...(canAccessFiles
@@ -75,7 +77,7 @@ export default function LibraryNavigation() {
 				to: 'settings',
 			},
 		],
-		[location, canAccessFiles, prefetchSeries],
+		[location, canAccessFiles, prefetchSeries, prefetchBooks, handlePrefetchFiles, id],
 	)
 
 	const preferTopBar = primaryNavigationMode === 'TOPBAR'

@@ -3,25 +3,25 @@ import { graphql } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
 import { Suspense } from 'react'
 
-import { useSeriesContext } from '@/scenes/series'
+import { useLibraryContext } from '@/scenes/library/context'
 
 import { Alphabet } from '../filters'
 
 const query = graphql(`
-	query SeriesBooksAlphabet($id: ID!) {
-		seriesById(id: $id) {
-			mediaAlphabet
+	query LibrarySeriesAlphabet($id: ID!) {
+		libraryById(id: $id) {
+			seriesAlphabet
 		}
 	}
 `)
 
-export const usePrefetchSeriesBooksAlphabet = () => {
+export const usePrefetchLibrarySeriesAlphabet = () => {
 	const client = useQueryClient()
 	const { sdk } = useSDK()
 
 	return (id: string) =>
 		client.prefetchQuery({
-			queryKey: ['seriesBooksAlphabet', id],
+			queryKey: ['librarySeriesAlphabet', id],
 			queryFn: async () => {
 				const response = await sdk.execute(query, {
 					id,
@@ -34,16 +34,16 @@ export const usePrefetchSeriesBooksAlphabet = () => {
 
 type Props = Omit<React.ComponentProps<typeof Alphabet>, 'alphabet'>
 
-function SeriesBooksAlphabet(props: Props) {
+function LibrarySeriesAlphabet(props: Props) {
 	const {
-		series: { id },
-	} = useSeriesContext()
+		library: { id },
+	} = useLibraryContext()
 
 	const {
-		data: { seriesById: series },
+		data: { libraryById: library },
 	} = useSuspenseGraphQL(
 		query,
-		['seriesBooksAlphabet', id],
+		['librarySeriesAlphabet', id],
 		{
 			id,
 		},
@@ -51,15 +51,15 @@ function SeriesBooksAlphabet(props: Props) {
 			staleTime: ALPHABET_STALE_TIME,
 		},
 	)
-	const { mediaAlphabet } = series || { mediaAlphabet: {} }
+	const { seriesAlphabet } = library || { seriesAlphabet: {} }
 
-	return <Alphabet alphabet={mediaAlphabet} {...props} />
+	return <Alphabet alphabet={seriesAlphabet} {...props} />
 }
 
-export default function SeriesBooksAlphabetContainer(props: Props) {
+export default function LibrarySeriesAlphabetContainer(props: Props) {
 	return (
 		<Suspense>
-			<SeriesBooksAlphabet {...props} />
+			<LibrarySeriesAlphabet {...props} />
 		</Suspense>
 	)
 }

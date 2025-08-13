@@ -399,7 +399,7 @@ async fn update_user_preferences_by_id(
 		enable_job_overlay: Set(user_preferences.enable_job_overlay),
 		prefer_accent_color: Set(user_preferences.prefer_accent_color),
 		show_thumbnails_in_headers: Set(user_preferences.show_thumbnails_in_headers),
-		enable_alphabet_select: NotSet,
+		enable_alphabet_select: Set(user_preferences.enable_alphabet_select),
 		home_arrangement: NotSet,
 		navigation_arrangement: NotSet,
 	};

@@ -2,7 +2,7 @@ import { cn } from '@stump/components'
 
 type Props = {
 	startsWith?: string
-	alphabet: Record<string, number>
+	alphabet?: Record<string, number>
 	onSelectLetter: (letter?: string) => void
 	onPrefetchLetter?: (letter: string) => void
 }
@@ -25,7 +25,7 @@ export default function Alphabet({
 						},
 
 						{
-							'pointer-events-none text-foreground-disabled text-opacity-20': !alphabet[letter],
+							'pointer-events-none text-foreground-disabled text-opacity-20': !alphabet?.[letter],
 						},
 					)}
 					onClick={() => onSelectLetter(startsWith === letter ? undefined : letter)}

@@ -2,7 +2,7 @@ import { PREFETCH_STALE_TIME, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { usePrevious, usePreviousIsDifferent } from '@stump/components'
 import { graphql, MediaFilterInput, MediaOrderBy } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
-import { Suspense, useCallback, useEffect } from 'react'
+import { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
 import { Helmet } from 'react-helmet'
 
 import { BookTable } from '@/components/book'
@@ -24,9 +24,11 @@ import {
 	useURLKeywordSearch,
 	useURLPageParams,
 } from '@/components/filters/useFilterScene'
+import { LibraryBooksAlphabet, usePrefetchLibraryBooksAlphabet } from '@/components/library'
 import { EntityTableColumnConfiguration } from '@/components/table'
 import TableOrGridLayout from '@/components/TableOrGridLayout'
 import useIsInView from '@/hooks/useIsInView'
+import { usePreferences } from '@/hooks/usePreferences'
 import { useMediaURLOrderBy } from '@/scenes/bookSearch/BookSearchScene'
 import { useBooksLayout } from '@/stores/layout'
 
@@ -61,7 +63,7 @@ const query = graphql(`
 export type UsePrefetchLibraryBooksParams = {
 	page?: number
 	pageSize?: number
-	filter: FilterInput
+	filter: FilterInput[]
 	orderBy: MediaOrderBy[]
 }
 
@@ -72,45 +74,49 @@ export const usePrefetchLibraryBooks = () => {
 	const searchFilter = useSearchMediaFilter(search)
 
 	const client = useQueryClient()
+	const prefetchAlphabet = usePrefetchLibraryBooksAlphabet()
 
 	const prefetch = useCallback(
 		(
 			id: string,
-			params: UsePrefetchLibraryBooksParams = { filter: {}, orderBy: DEFAULT_MEDIA_ORDER_BY },
+			params: UsePrefetchLibraryBooksParams = { filter: [], orderBy: DEFAULT_MEDIA_ORDER_BY },
 		) => {
 			const pageParams = { page: params.page || 1, pageSize: params.pageSize || pageSize }
-			return client.prefetchQuery({
-				queryKey: getQueryKey(
-					sdk.cacheKeys.libraryBooks,
-					id,
-					pageParams.page,
-					pageParams.pageSize,
-					search,
-					params.filter,
-					params.orderBy,
-				),
-				queryFn: async () => {
-					const response = await sdk.execute(query, {
-						filter: {
-							series: {
-								libraryId: { eq: id },
+			return Promise.all([
+				client.prefetchQuery({
+					queryKey: getQueryKey(
+						sdk.cacheKeys.libraryBooks,
+						id,
+						pageParams.page,
+						pageParams.pageSize,
+						search,
+						params.filter,
+						params.orderBy,
+					),
+					queryFn: async () => {
+						const response = await sdk.execute(query, {
+							filter: {
+								series: {
+									libraryId: { eq: id },
+								},
+								_and: params.filter,
+								_or: searchFilter,
 							},
-							_and: [params.filter],
-							_or: searchFilter,
-						},
-						orderBy: params.orderBy,
-						pagination: {
-							offset: {
-								...pageParams,
+							orderBy: params.orderBy,
+							pagination: {
+								offset: {
+									...pageParams,
+								},
 							},
-						},
-					})
-					return response
-				},
-				staleTime: PREFETCH_STALE_TIME,
-			})
+						})
+						return response
+					},
+					staleTime: PREFETCH_STALE_TIME,
+				}),
+				prefetchAlphabet(id),
+			])
 		},
-		[client, pageSize, search, searchFilter, sdk],
+		[client, pageSize, search, searchFilter, sdk, prefetchAlphabet],
 	)
 
 	return prefetch
@@ -124,15 +130,16 @@ export default function LibraryBooksSceneContainer() {
 	)
 }
 
+// TODO: This is used multiple times, let's generalize it
 function getQueryKey(
 	cacheKey: string,
 	libraryId: string,
 	page: number,
 	pageSize: number,
 	search: string | undefined,
-	filters: MediaFilterInput | undefined,
+	filters: MediaFilterInput[] | undefined,
 	orderBy: MediaOrderBy[] | undefined,
-): (string | object | number | MediaFilterInput | MediaOrderBy[] | undefined)[] {
+): (string | object | number | MediaFilterInput[] | MediaOrderBy[] | undefined)[] {
 	return [cacheKey, libraryId, page, pageSize, search, filters, orderBy]
 }
 
@@ -158,6 +165,15 @@ function LibraryBooksScene() {
 		}
 	}, [differentSearch, setPage])
 
+	const [startsWith, setStartsWith] = useState<string | undefined>(undefined)
+	const onSelectLetter = useCallback(
+		(letter?: string) => {
+			setStartsWith(letter)
+			setPage(1)
+		},
+		[setPage],
+	)
+
 	const [containerRef, isInView] = useIsInView<HTMLDivElement>()
 	const { layoutMode, setLayout, columns, setColumns } = useBooksLayout((state) => ({
 		columns: state.columns,
@@ -165,6 +181,50 @@ function LibraryBooksScene() {
 		setColumns: state.setColumns,
 		setLayout: state.setLayout,
 	}))
+
+	const {
+		preferences: { enableAlphabetSelect },
+	} = usePreferences()
+
+	const resolvedFilters = useMemo(
+		() => [
+			filters,
+			...(startsWith
+				? [
+						{
+							_or: [
+								{ name: { startsWith } },
+								{
+									metadata: { title: { startsWith } },
+								},
+							],
+						},
+					]
+				: []),
+		],
+		[filters, startsWith],
+	)
+	const prefetch = usePrefetchLibraryBooks()
+
+	const onPrefetchLetter = useCallback(
+		(letter: string) => {
+			prefetch(library.id, {
+				page: 1,
+				pageSize,
+				filter: [
+					filters,
+					{
+						_or: [
+							{ name: { startsWith: letter } },
+							{ metadata: { title: { startsWith: letter } } },
+						],
+					},
+				],
+				orderBy,
+			})
+		},
+		[prefetch, library.id, pageSize, orderBy, filters],
+	)
 
 	const { sdk } = useSDK()
 	const {
@@ -174,13 +234,21 @@ function LibraryBooksScene() {
 		isLoading,
 	} = useSuspenseGraphQL(
 		query,
-		getQueryKey(sdk.cacheKeys.libraryBooks, library.id, page, pageSize, search, filters, orderBy),
+		getQueryKey(
+			sdk.cacheKeys.libraryBooks,
+			library.id,
+			page,
+			pageSize,
+			search,
+			resolvedFilters,
+			orderBy,
+		),
 		{
 			filter: {
 				series: {
 					libraryId: { eq: library.id },
 				},
-				_and: [filters],
+				_and: resolvedFilters,
 				_or: searchFilter,
 			},
 			orderBy,
@@ -192,8 +260,6 @@ function LibraryBooksScene() {
 			},
 		},
 	)
-
-	const prefetch = usePrefetchLibraryBooks()
 
 	if (pageInfo.__typename !== 'OffsetPaginationInfo') {
 		throw new Error('Expected OffsetPaginationInfo for LibraryBooksScene')
@@ -228,7 +294,7 @@ function LibraryBooksScene() {
 						prefetch(library.id, {
 							page,
 							pageSize,
-							filter: filters,
+							filter: resolvedFilters,
 							orderBy,
 						})
 					}}
@@ -259,7 +325,7 @@ function LibraryBooksScene() {
 								prefetch(library.id, {
 									page,
 									pageSize,
-									filter: filters,
+									filter: resolvedFilters,
 									orderBy,
 								})
 							}}
@@ -301,6 +367,14 @@ function LibraryBooksScene() {
 					filterControls={<URLFilterDrawer entity="media" />}
 					navOffset
 				/>
+
+				{enableAlphabetSelect && (
+					<LibraryBooksAlphabet
+						startsWith={startsWith}
+						onSelectLetter={onSelectLetter}
+						onPrefetchLetter={onPrefetchLetter}
+					/>
+				)}
 
 				{renderContent()}
 			</div>

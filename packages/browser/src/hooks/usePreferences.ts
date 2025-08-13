@@ -33,7 +33,12 @@ export function usePreferences() {
 			if (preferences) {
 				return mutate({
 					input: {
-						...omit(preferences, ['id', 'navigationArrangement', 'homeArrangement', 'userId']),
+						...(omit(preferences, [
+							'id',
+							'navigationArrangement',
+							'homeArrangement',
+							'userId',
+						]) as UpdateUserPreferencesInput),
 						...input,
 					},
 				})

@@ -3085,6 +3085,20 @@ export type LastVisitedLibraryQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type LastVisitedLibraryQuery = { __typename?: 'Query', lastVisitedLibrary?: { __typename?: 'Library', id: string, name: string, thumbnail: { __typename?: 'ImageRef', url: string } } | null };
 
+export type LibraryBooksAlphabetQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type LibraryBooksAlphabetQuery = { __typename?: 'Query', libraryById?: { __typename?: 'Library', mediaAlphabet: any } | null };
+
+export type LibrarySeriesAlphabetQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type LibrarySeriesAlphabetQuery = { __typename?: 'Query', libraryById?: { __typename?: 'Library', seriesAlphabet: any } | null };
+
 export type SideBarQueryQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -4187,6 +4201,20 @@ export const LastVisitedLibraryDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<LastVisitedLibraryQuery, LastVisitedLibraryQueryVariables>;
+export const LibraryBooksAlphabetDocument = new TypedDocumentString(`
+    query LibraryBooksAlphabet($id: ID!) {
+  libraryById(id: $id) {
+    mediaAlphabet
+  }
+}
+    `) as unknown as TypedDocumentString<LibraryBooksAlphabetQuery, LibraryBooksAlphabetQueryVariables>;
+export const LibrarySeriesAlphabetDocument = new TypedDocumentString(`
+    query LibrarySeriesAlphabet($id: ID!) {
+  libraryById(id: $id) {
+    seriesAlphabet
+  }
+}
+    `) as unknown as TypedDocumentString<LibrarySeriesAlphabetQuery, LibrarySeriesAlphabetQueryVariables>;
 export const SideBarQueryDocument = new TypedDocumentString(`
     query SideBarQuery {
   me {

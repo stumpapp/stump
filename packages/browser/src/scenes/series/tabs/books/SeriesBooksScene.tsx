@@ -131,7 +131,7 @@ function getQueryKey(
 	search: string | undefined,
 	filters: MediaFilterInput[] | undefined,
 	orderBy: MediaOrderBy[] | undefined,
-): (string | object | number | MediaFilterInput | MediaOrderBy[] | undefined)[] {
+): (string | object | number | MediaFilterInput[] | MediaOrderBy[] | undefined)[] {
 	return [cacheKey, libraryId, page, pageSize, search, filters, orderBy]
 }
 

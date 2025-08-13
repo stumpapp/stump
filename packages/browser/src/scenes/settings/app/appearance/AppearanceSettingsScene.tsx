@@ -5,6 +5,7 @@ import { Helmet } from 'react-helmet'
 import { Container, ContentContainer } from '@/components/container'
 
 import DisplaySpacingPreference from './DisplaySpacingPreference'
+import EnableAlphabetFiltering from './EnableAlphabetFiltering'
 import EnableJobOverlayToggle from './EnableJobOverlayToggle'
 import FontSelect from './FontSelect'
 import GradientToggle from './GradientToggle'
@@ -53,6 +54,7 @@ export default function AppearanceSettingsScene() {
 					<ShowThumbnailsInHeader />
 					<PreferColorToggle />
 					<HideScrollbarToggle />
+					<EnableAlphabetFiltering />
 					<QueryIndicatorToggle />
 					<LiveRefetchToggle />
 					<EnableJobOverlayToggle />

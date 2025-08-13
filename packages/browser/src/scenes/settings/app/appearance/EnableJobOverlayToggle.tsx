@@ -11,7 +11,7 @@ export default function EnableJobOverlayToggle() {
 
 	const handleChange = useCallback(() => {
 		update({
-			enableJobOverlay: enableJobOverlay,
+			enableJobOverlay: !enableJobOverlay,
 		})
 	}, [enableJobOverlay, update])
 

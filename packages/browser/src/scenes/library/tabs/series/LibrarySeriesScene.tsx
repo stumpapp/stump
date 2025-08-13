@@ -8,7 +8,7 @@ import {
 	SeriesOrderBy,
 } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
-import { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Helmet } from 'react-helmet'
 
 import {
@@ -27,10 +27,14 @@ import {
 	useURLKeywordSearch,
 	useURLPageParams,
 } from '@/components/filters/useFilterScene'
+import { LibrarySeriesAlphabet, usePrefetchLibrarySeriesAlphabet } from '@/components/library'
 import { SeriesTable } from '@/components/series'
 import SeriesGrid from '@/components/series/SeriesGrid'
+import { defaultSeriesColumnSort } from '@/components/series/table'
+import { EntityTableColumnConfiguration } from '@/components/table'
 import TableOrGridLayout from '@/components/TableOrGridLayout'
 import useIsInView from '@/hooks/useIsInView'
+import { usePreferences } from '@/hooks/usePreferences'
 import { useSeriesLayout } from '@/stores/layout'
 
 import { useLibraryContext } from '../../context'
@@ -66,7 +70,7 @@ const query = graphql(`
 export type UsePrefetchLibrarySeriesParams = {
 	page?: number
 	pageSize?: number
-	filter?: SeriesFilterInput
+	filter?: SeriesFilterInput[]
 	orderBy: SeriesOrderBy[]
 }
 
@@ -77,42 +81,47 @@ export const usePrefetchLibrarySeries = () => {
 	const searchFilter = useSearchSeriesFilter(search)
 
 	const client = useQueryClient()
+	const prefetchAlphabet = usePrefetchLibrarySeriesAlphabet()
+
 	return useCallback(
 		(
 			libraryId: string,
-			params: UsePrefetchLibrarySeriesParams = { orderBy: DEFAULT_SERIES_ORDER_BY },
+			params: UsePrefetchLibrarySeriesParams = { filter: [], orderBy: DEFAULT_SERIES_ORDER_BY },
 		) => {
 			const pageParams = { page: params.page || 1, pageSize: params.pageSize || pageSize }
-			return client.prefetchQuery({
-				queryKey: getQueryKey(
-					sdk.cacheKeys.librarySeries,
-					libraryId,
-					pageParams.page,
-					pageParams.pageSize,
-					search,
-					params.filter,
-					params.orderBy,
-				),
-				queryFn: async () => {
-					const response = await sdk.execute(query, {
-						filter: {
-							libraryId: { eq: libraryId },
-							_and: [params.filter || {}],
-							_or: searchFilter,
-						},
-						orderBy: params.orderBy || ([] as SeriesOrderBy[]),
-						pagination: {
-							offset: {
-								...pageParams,
+			return Promise.all([
+				client.prefetchQuery({
+					queryKey: getQueryKey(
+						sdk.cacheKeys.librarySeries,
+						libraryId,
+						pageParams.page,
+						pageParams.pageSize,
+						search,
+						params.filter,
+						params.orderBy,
+					),
+					queryFn: async () => {
+						const response = await sdk.execute(query, {
+							filter: {
+								libraryId: { eq: libraryId },
+								_and: params.filter,
+								_or: searchFilter,
 							},
-						},
-					})
-					return response
-				},
-				staleTime: PREFETCH_STALE_TIME,
-			})
+							orderBy: params.orderBy || ([] as SeriesOrderBy[]),
+							pagination: {
+								offset: {
+									...pageParams,
+								},
+							},
+						})
+						return response
+					},
+					staleTime: PREFETCH_STALE_TIME,
+				}),
+				prefetchAlphabet(libraryId),
+			])
 		},
-		[pageSize, search, searchFilter, sdk, client],
+		[pageSize, search, searchFilter, sdk, client, prefetchAlphabet],
 	)
 }
 
@@ -148,9 +157,9 @@ function getQueryKey(
 	page: number,
 	pageSize: number,
 	search: string | undefined,
-	filters: SeriesFilterInput | undefined,
+	filters: SeriesFilterInput[] | undefined,
 	orderBy: SeriesOrderBy[] | undefined,
-): (string | object | number | SeriesFilterInput | SeriesOrderBy[] | undefined)[] {
+): (string | object | number | SeriesFilterInput[] | SeriesOrderBy[] | undefined)[] {
 	return [cacheKey, libraryId, page, pageSize, search, filters, orderBy]
 }
 
@@ -178,6 +187,59 @@ function LibrarySeriesScene() {
 		}
 	}, [differentSearch, setPage])
 
+	const [startsWith, setStartsWith] = useState<string | undefined>(undefined)
+	const onSelectLetter = useCallback(
+		(letter?: string) => {
+			setStartsWith(letter)
+			setPage(1)
+		},
+		[setPage],
+	)
+
+	const {
+		preferences: { enableAlphabetSelect },
+	} = usePreferences()
+
+	const resolvedFilters = useMemo(
+		() => [
+			filters,
+			...(startsWith
+				? [
+						{
+							_or: [
+								{ name: { startsWith } },
+								{
+									metadata: { title: { startsWith } },
+								},
+							],
+						},
+					]
+				: []),
+		],
+		[filters, startsWith],
+	)
+	const prefetch = usePrefetchLibrarySeries()
+
+	const onPrefetchLetter = useCallback(
+		(letter: string) => {
+			prefetch(id, {
+				page: 1,
+				pageSize,
+				filter: [
+					filters,
+					{
+						_or: [
+							{ name: { startsWith: letter } },
+							{ metadata: { title: { startsWith: letter } } },
+						],
+					},
+				],
+				orderBy,
+			})
+		},
+		[prefetch, id, pageSize, orderBy, filters],
+	)
+
 	const { layoutMode, setLayout, columns, setColumns } = useSeriesLayout((state) => ({
 		columns: state.columns,
 		layoutMode: state.layout,
@@ -193,11 +255,21 @@ function LibrarySeriesScene() {
 		isLoading,
 	} = useSuspenseGraphQL(
 		query,
-		[getQueryKey(sdk.cacheKeys.librarySeries, id, page, pageSize, search, filters, orderBy)],
+		[
+			getQueryKey(
+				sdk.cacheKeys.librarySeries,
+				id,
+				page,
+				pageSize,
+				search,
+				resolvedFilters,
+				orderBy,
+			),
+		],
 		{
 			filter: {
 				libraryId: { eq: id },
-				_and: [filters],
+				_and: resolvedFilters,
 				_or: searchFilter,
 			},
 			orderBy,
@@ -211,8 +283,6 @@ function LibrarySeriesScene() {
 	)
 
 	const [containerRef, isInView] = useIsInView<HTMLDivElement>()
-
-	const prefetch = usePrefetchLibrarySeries()
 
 	if (pageInfo.__typename !== 'OffsetPaginationInfo') {
 		throw new Error('Invalid pagination type, expected OffsetPaginationInfo')
@@ -247,7 +317,7 @@ function LibrarySeriesScene() {
 						prefetch(id, {
 							page,
 							pageSize,
-							filter: filters,
+							filter: resolvedFilters,
 							orderBy,
 						})
 					}}
@@ -276,17 +346,17 @@ function LibrarySeriesScene() {
 								prefetch(id, {
 									page,
 									pageSize,
-									filter: filters,
+									filter: resolvedFilters,
 									orderBy,
 								})
 							}}
-							// tableControls={
-							// 	<EntityTableColumnConfiguration
-							// 		entity="series"
-							// 		configuration={columns || defaultColumnSort}
-							// 		onSave={setColumns}
-							// 	/>
-							// }
+							tableControls={
+								<EntityTableColumnConfiguration
+									entity="series"
+									configuration={columns || defaultSeriesColumnSort}
+									onSave={setColumns}
+								/>
+							}
 							{...props}
 						/>
 					)}
@@ -319,6 +389,14 @@ function LibrarySeriesScene() {
 					filterControls={<URLFilterDrawer entity="series" />}
 					navOffset
 				/>
+
+				{enableAlphabetSelect && (
+					<LibrarySeriesAlphabet
+						startsWith={startsWith}
+						onSelectLetter={onSelectLetter}
+						onPrefetchLetter={onPrefetchLetter}
+					/>
+				)}
 
 				{renderContent()}
 			</div>

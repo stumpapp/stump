@@ -136,7 +136,7 @@ export type ReadingDirection = "ltr" | "rtl"
 
 export type ReadingMode = "paged" | "continuous:vertical" | "continuous:horizontal"
 
-export type ReadingImageScaleFit = "height" | "width" | "none"
+export type ReadingImageScaleFit = "height" | "width" | "auto" | "none"
 
 export type FileStatus = "UNKNOWN" | "READY" | "UNSUPPORTED" | "ERROR" | "MISSING"
 

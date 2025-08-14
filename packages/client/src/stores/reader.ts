@@ -2,7 +2,7 @@ import type { ReadingDirection, ReadingMode } from '@stump/sdk'
 import { create } from 'zustand'
 import { createJSONStorage, devtools, persist, StateStorage } from 'zustand/middleware'
 
-export type BookImageScalingFit = 'width' | 'height' | 'none'
+export type BookImageScalingFit = 'auto' | 'width' | 'height' | 'none'
 export type BookImageScaling = {
 	scaleToFit: BookImageScalingFit
 }

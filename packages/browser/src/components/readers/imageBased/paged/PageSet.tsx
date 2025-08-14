@@ -44,9 +44,10 @@ const PageSet = forwardRef<HTMLDivElement, Props>(
 				className="flex h-full justify-center"
 				style={{
 					filter: `brightness(${brightness * 100}%)`,
+					minWidth: imageScaling.scaleToFit === 'width' ? '100%' : '',
 				}}
 			>
-				{currentSet.map((idx) => (
+				{currentSet.map((idx, i) => (
 					<Page
 						key={`page-${idx + 1}`}
 						page={idx + 1}
@@ -54,6 +55,10 @@ const PageSet = forwardRef<HTMLDivElement, Props>(
 						onPageClick={onPageClick}
 						upsertDimensions={upsertDimensions}
 						imageScaling={imageScaling}
+						style={{
+							// objectPosition helps position pages correctly for 'auto'
+							objectPosition: currentSet.length === 2 ? (i === 0 ? 'right' : 'left') : 'center',
+						}}
 					/>
 				))}
 			</div>
@@ -68,6 +73,7 @@ type PageProps = Omit<Props, 'displayedPages' | 'currentPage'> & {
 	page: number
 	upsertDimensions: (page: number, dimensions: ImagePageDimensionRef) => void
 	imageScaling: BookImageScaling
+	style?: React.CSSProperties
 }
 
 // TODO(readers): consider exporting/relocating and sharing with the continuous reader(s)
@@ -77,6 +83,7 @@ const _Page = ({
 	onPageClick,
 	upsertDimensions,
 	imageScaling: { scaleToFit },
+	style,
 }: PageProps) => {
 	return (
 		<EntityImage
@@ -92,7 +99,11 @@ const _Page = ({
 				{
 					'mx-auto my-0 w-full object-contain': scaleToFit === 'width',
 				},
+				{
+					'm-auto h-full max-h-screen w-full object-contain': scaleToFit === 'auto',
+				},
 			)}
+			style={style}
 			src={getPageUrl(page)}
 			onLoad={({ height, width }) => {
 				upsertDimensions(page, {

@@ -25,7 +25,7 @@ describe('ImageScalingSelect', () => {
 		const onChange = jest.fn()
 		render(<ImageScalingSelect value="height" onChange={onChange} />)
 
-		const validOptions = ['height', 'width', 'none']
+		const validOptions = ['height', 'width', 'auto', 'none']
 		for (const option of validOptions) {
 			fireEvent.change(screen.getByLabelText('Image scaling'), { target: { value: option } })
 			expect(onChange).toHaveBeenCalledWith(option)

@@ -80,6 +80,8 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 				{
 					android: {
 						usesCleartextTraffic: true,
+						compileSdkVersion: 35,
+						targetSdkVersion: 35,
 					},
 				},
 			],

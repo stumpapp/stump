@@ -1,5 +1,4 @@
 import { BookImageScaling } from '@stump/client'
-import { cn } from '@stump/components'
 import React, { forwardRef, useCallback, useMemo } from 'react'
 
 import { EntityImage } from '@/components/entity'
@@ -41,13 +40,12 @@ const PageSet = forwardRef<HTMLDivElement, Props>(
 		return (
 			<div
 				ref={ref}
-				className="flex h-full justify-center"
 				style={{
+					...styles[imageScaling.scaleToFit].imagesHolder,
 					filter: `brightness(${brightness * 100}%)`,
-					minWidth: imageScaling.scaleToFit === 'width' ? '100%' : '',
 				}}
 			>
-				{currentSet.map((idx, i) => (
+				{currentSet.map((idx) => (
 					<Page
 						key={`page-${idx + 1}`}
 						page={idx + 1}
@@ -55,10 +53,7 @@ const PageSet = forwardRef<HTMLDivElement, Props>(
 						onPageClick={onPageClick}
 						upsertDimensions={upsertDimensions}
 						imageScaling={imageScaling}
-						style={{
-							// objectPosition helps position pages correctly for 'auto'
-							objectPosition: currentSet.length === 2 ? (i === 0 ? 'right' : 'left') : 'center',
-						}}
+						style={styles[imageScaling.scaleToFit].image}
 					/>
 				))}
 			</div>
@@ -88,21 +83,6 @@ const _Page = ({
 	return (
 		<EntityImage
 			key={`page-${page}-scaled-${scaleToFit}`}
-			className={cn(
-				'z-30 select-none',
-				{
-					'mx-auto my-0 w-auto self-center': scaleToFit === 'none',
-				},
-				{
-					'm-auto h-full max-h-screen w-auto object-cover': scaleToFit === 'height',
-				},
-				{
-					'mx-auto my-0 w-full object-contain': scaleToFit === 'width',
-				},
-				{
-					'm-auto h-full max-h-screen w-full object-contain': scaleToFit === 'auto',
-				},
-			)}
 			style={style}
 			src={getPageUrl(page)}
 			onLoad={({ height, width }) => {
@@ -121,3 +101,80 @@ const _Page = ({
 	)
 }
 const Page = React.memo(_Page)
+
+/**
+ * Styles for the image and page set holder
+ */
+const styles = {
+	auto: {
+		imagesHolder: {
+			display: 'flex',
+			flexDirection: 'row',
+			// no width
+			height: '100vh',
+			justifyContent: 'center',
+		} as React.CSSProperties,
+
+		image: {
+			minWidth: '0%',
+			maxWidth: '100%',
+			minHeight: '0%',
+			// no width
+			maxHeight: '100%',
+			height: '100%',
+			objectFit: 'contain',
+		} as React.CSSProperties,
+	},
+
+	height: {
+		imagesHolder: {
+			display: 'flex',
+			flexDirection: 'row',
+			// no width
+			height: '100vh',
+			justifyContent: 'center',
+		} as React.CSSProperties,
+
+		image: {
+			// no min width
+			// no max width
+			// no width
+			// no min height
+			// no max height
+			height: '100%',
+			objectFit: 'cover', // different fit
+		} as React.CSSProperties,
+	},
+
+	width: {
+		imagesHolder: {
+			display: 'flex',
+			flexDirection: 'row',
+			// no height
+			width: '100vw',
+			justifyContent: 'center',
+		} as React.CSSProperties,
+
+		image: {
+			minWidth: '0%',
+			maxWidth: '100%',
+			width: '100%',
+			minHeight: '0%',
+			maxHeight: '100%',
+			// no height
+			objectFit: 'contain',
+		} as React.CSSProperties,
+	},
+
+	none: {
+		imagesHolder: {
+			display: 'flex',
+			flexDirection: 'row',
+			// no width
+			// no height
+			justifyContent: 'center',
+		} as React.CSSProperties,
+
+		image: { objectFit: 'contain' } as React.CSSProperties,
+	},
+}

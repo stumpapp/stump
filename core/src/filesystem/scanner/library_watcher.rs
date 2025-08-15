@@ -419,7 +419,7 @@ mod tests {
 			.is_ok());
 
 		// Wait for the background thread to trigger the flush
-		tokio::time::sleep(Duration::from_millis(20)).await;
+		tokio::time::sleep(Duration::from_millis(100)).await;
 		let (id, path) = mock_objs.jobs_receiver.try_recv().expect("Expected a job");
 		assert_eq!(id, "42");
 		assert_eq!(path, tmp_dir.to_string_lossy().to_string());

@@ -19,65 +19,67 @@ import CreateBookClubForm from './CreateBookClubForm'
 export default function CreateBookClubScene() {
 	const [formStep, setFormStep] = useState(1)
 
-	const { create, error } = useCreateBookClub({
-		onSuccess: (club) => navigate(paths.bookClub(club.id)),
-	})
-	// TODO: APIError helper once merged
-	const createError = error?.message
+	// TODO(graphql): Fix me
 
-	const navigate = useNavigate()
-	/**
-	 * A callback to handle the form submission. This function will create a new book club
-	 * and navigate to the newly created club.
-	 */
-	const handleSubmit = useCallback(
-		(data: CreateOrUpdateBookClubSchema) => {
-			let member_role_spec: BookClubMemberRoleSpec | null = null
-			// if any field of the member role spec is set, we need to set the whole thing
-			// with the default values
-			const setRoles = Object.values(data.member_role_spec ?? {}).filter(Boolean)
-			if (setRoles.length) {
-				member_role_spec = {
-					...defaultMemberSpec,
-					...data.member_role_spec,
-				}
-			}
+	// const { create, error } = useCreateBookClub({
+	// 	onSuccess: (club) => navigate(paths.bookClub(club.id)),
+	// })
+	// // TODO: APIError helper once merged
+	// const createError = error?.message
 
-			const payload: CreateBookClub = {
-				...data,
-				member_role_spec,
-			}
-			create(payload)
-		},
-		[create],
-	)
+	// const navigate = useNavigate()
+	// /**
+	//  * A callback to handle the form submission. This function will create a new book club
+	//  * and navigate to the newly created club.
+	//  */
+	// const handleSubmit = useCallback(
+	// 	(data: CreateOrUpdateBookClubSchema) => {
+	// 		let member_role_spec: BookClubMemberRoleSpec | null = null
+	// 		// if any field of the member role spec is set, we need to set the whole thing
+	// 		// with the default values
+	// 		const setRoles = Object.values(data.member_role_spec ?? {}).filter(Boolean)
+	// 		if (setRoles.length) {
+	// 			member_role_spec = {
+	// 				...defaultMemberSpec,
+	// 				...data.member_role_spec,
+	// 			}
+	// 		}
 
-	return (
-		<div className="relative flex flex-1 flex-col">
-			<Helmet>
-				<title>Stump | Create a book club</title>
-			</Helmet>
+	// 		const payload: CreateBookClub = {
+	// 			...data,
+	// 			member_role_spec,
+	// 		}
+	// 		create(payload)
+	// 	},
+	// 	[create],
+	// )
 
-			<SteppedFormContext.Provider
-				value={{
-					currentStep: formStep,
-					localeBase: 'createBookClubScene',
-					setStep: setFormStep,
-					stepsBeforeReview: 3,
-				}}
-			>
-				<SteppedFormSceneHeader />
+	// return (
+	// 	<div className="relative flex flex-1 flex-col">
+	// 		<Helmet>
+	// 			<title>Stump | Create a book club</title>
+	// 		</Helmet>
 
-				<SceneContainer>
-					<div className="flex flex-col gap-12">
-						{createError && <Alert level="error">{createError}</Alert>}
+	// 		<SteppedFormContext.Provider
+	// 			value={{
+	// 				currentStep: formStep,
+	// 				localeBase: 'createBookClubScene',
+	// 				setStep: setFormStep,
+	// 				stepsBeforeReview: 3,
+	// 			}}
+	// 		>
+	// 			<SteppedFormSceneHeader />
 
-						<Suspense>
-							<CreateBookClubForm onSubmit={handleSubmit} />
-						</Suspense>
-					</div>
-				</SceneContainer>
-			</SteppedFormContext.Provider>
-		</div>
-	)
+	// 			<SceneContainer>
+	// 				<div className="flex flex-col gap-12">
+	// 					{createError && <Alert level="error">{createError}</Alert>}
+
+	// 					<Suspense>
+	// 						<CreateBookClubForm onSubmit={handleSubmit} />
+	// 					</Suspense>
+	// 				</div>
+	// 			</SceneContainer>
+	// 		</SteppedFormContext.Provider>
+	// 	</div>
+	// )
 }

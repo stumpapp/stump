@@ -8,7 +8,7 @@ import {
 	OrderDirection,
 } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
-import { Suspense, useCallback, useEffect, useMemo } from 'react'
+import { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
 import { Helmet } from 'react-helmet'
 
 import { BookTable } from '@/components/book'
@@ -32,7 +32,10 @@ import {
 import { EntityTableColumnConfiguration } from '@/components/table'
 import TableOrGridLayout from '@/components/TableOrGridLayout'
 import useIsInView from '@/hooks/useIsInView'
+import { usePreferences } from '@/hooks/usePreferences'
 import { useBooksLayout } from '@/stores/layout'
+
+import BooksAlphabet from '../book/BooksAlphabet'
 
 const query = graphql(`
 	query BookSearchScene(
@@ -63,7 +66,7 @@ const query = graphql(`
 export type UsePrefetchBookSearchParams = {
 	page?: number
 	pageSize?: number
-	filter: FilterInput
+	filter: FilterInput[]
 	orderBy: MediaOrderBy[]
 }
 
@@ -88,7 +91,10 @@ export const usePrefetchBookSearch = () => {
 				),
 				queryFn: async () => {
 					const response = await sdk.execute(query, {
-						filter: { ...params.filter, _or: searchFilter },
+						filter: {
+							_and: params.filter,
+							_or: searchFilter,
+						},
 						orderBy: params.orderBy,
 						pagination: {
 							offset: {
@@ -119,7 +125,7 @@ function getQueryKey(
 	page: number,
 	pageSize: number,
 	search: string | undefined,
-	filters: FilterInput,
+	filters: FilterInput[],
 	orderBy: MediaOrderBy[],
 ) {
 	return ['booksSearch', { page, pageSize, search, filters, orderBy }]
@@ -163,6 +169,15 @@ function BookSearchScene() {
 		}
 	}, [differentSearch, setPage])
 
+	const [startsWith, setStartsWith] = useState<string | undefined>(undefined)
+	const onSelectLetter = useCallback(
+		(letter?: string) => {
+			setStartsWith(letter)
+			setPage(1)
+		},
+		[setPage],
+	)
+
 	const { layoutMode, setLayout, columns, setColumns } = useBooksLayout((state) => ({
 		columns: state.columns,
 		layoutMode: state.layout,
@@ -170,16 +185,64 @@ function BookSearchScene() {
 		setLayout: state.setLayout,
 	}))
 
+	const {
+		preferences: { enableAlphabetSelect },
+	} = usePreferences()
+
+	const resolvedFilters = useMemo(
+		() => [
+			filters,
+			...(startsWith
+				? [
+						{
+							_or: [
+								{ name: { startsWith } },
+								{
+									metadata: { title: { startsWith } },
+								},
+							],
+						},
+					]
+				: []),
+		],
+		[filters, startsWith],
+	)
+
+	const prefetch = usePrefetchBookSearch()
+
 	const pageSize = pageSizeMaybeUndefined || 20 // Fallback to 20 if pageSize is undefined, this should never happen since we set a default in the useFilterScene hook
 	const orderBy = useMediaURLOrderBy(ordering)
+
+	const onPrefetchLetter = useCallback(
+		(letter: string) => {
+			prefetch({
+				page: 1,
+				pageSize,
+				filter: [
+					filters,
+					{
+						_or: [
+							{ name: { startsWith: letter } },
+							{ metadata: { title: { startsWith: letter } } },
+						],
+					},
+				],
+				orderBy,
+			})
+		},
+		[prefetch, pageSize, orderBy, filters],
+	)
 
 	const {
 		data: {
 			media: { nodes, pageInfo },
 		},
 		isLoading,
-	} = useSuspenseGraphQL(query, getQueryKey(page, pageSize, search, filters, orderBy), {
-		filter: { ...filters, _or: searchFilter },
+	} = useSuspenseGraphQL(query, getQueryKey(page, pageSize, search, resolvedFilters, orderBy), {
+		filter: {
+			_and: resolvedFilters,
+			_or: searchFilter,
+		},
 		orderBy: orderBy,
 		pagination: {
 			offset: {
@@ -189,7 +252,6 @@ function BookSearchScene() {
 		},
 	})
 	const cards = nodes.map((node) => <BookCard key={node.id} fragment={node} />)
-	const prefetch = usePrefetchBookSearch()
 	if (pageInfo.__typename !== 'OffsetPaginationInfo') {
 		throw new Error('Invalid pagination type, expected OffsetPaginationInfo')
 	}
@@ -221,7 +283,7 @@ function BookSearchScene() {
 						prefetch({
 							page,
 							pageSize,
-							filter: filters,
+							filter: resolvedFilters,
 							orderBy,
 						})
 					}}
@@ -292,6 +354,14 @@ function BookSearchScene() {
 					orderControls={<URLOrdering entity="media" />}
 					filterControls={<URLFilterDrawer entity="media" />}
 				/>
+
+				{enableAlphabetSelect && (
+					<BooksAlphabet
+						startsWith={startsWith}
+						onSelectLetter={onSelectLetter}
+						onPrefetchLetter={onPrefetchLetter}
+					/>
+				)}
 
 				{renderContent()}
 			</div>

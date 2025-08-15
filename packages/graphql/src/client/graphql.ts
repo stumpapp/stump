@@ -3241,6 +3241,11 @@ export type BooksAfterCurrentQueryQuery = { __typename?: 'Query', mediaById?: { 
         & { ' $fragmentRefs'?: { 'BookCardFragment': BookCardFragment } }
       )>, pageInfo: { __typename: 'CursorPaginationInfo', currentCursor?: string | null, nextCursor?: string | null, limit: number } | { __typename: 'OffsetPaginationInfo' } } } | null };
 
+export type BooksAlphabetQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type BooksAlphabetQuery = { __typename?: 'Query', mediaAlphabet: any };
+
 export type EmailBookDropdownDeviceQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -4503,6 +4508,11 @@ export const BooksAfterCurrentQueryDocument = new TypedDocumentString(`
     completedAt
   }
 }`) as unknown as TypedDocumentString<BooksAfterCurrentQueryQuery, BooksAfterCurrentQueryQueryVariables>;
+export const BooksAlphabetDocument = new TypedDocumentString(`
+    query BooksAlphabet {
+  mediaAlphabet
+}
+    `) as unknown as TypedDocumentString<BooksAlphabetQuery, BooksAlphabetQueryVariables>;
 export const EmailBookDropdownDeviceDocument = new TypedDocumentString(`
     query EmailBookDropdownDevice {
   emailDevices {

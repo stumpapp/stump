@@ -1,4 +1,4 @@
-name: 'Stump Experimental CI'
+name: 'Stump Unstable CI'
 
 on:
   pull_request:

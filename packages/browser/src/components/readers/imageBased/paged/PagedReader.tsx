@@ -262,6 +262,7 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 				display: 'flex',
 				justifyContent: 'center',
 				margin: 'auto',
+				width: '100%',
 			}}
 		>
 			{!showToolBar && tapSidesToNavigate && (

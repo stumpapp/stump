@@ -92,7 +92,7 @@ export default function Screen() {
 
 	const imageSizes = useMemo(
 		() =>
-			readingOrder
+			(readingOrder || [])
 				.filter(({ height, width }) => height && width)
 				?.map(
 					({ height, width }) =>
@@ -118,10 +118,10 @@ export default function Screen() {
 			book={{
 				id,
 				name: title,
-				pages: readingOrder.length,
+				pages: readingOrder!.length || 0,
 			}}
 			imageSizes={imageSizes}
-			pageURL={(page: number) => readingOrder[page - 1].href}
+			pageURL={(page: number) => readingOrder![page - 1].href}
 		/>
 	)
 }

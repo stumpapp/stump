@@ -157,13 +157,17 @@ async fn handle_remove_earliest_session(
 }
 
 #[derive(Debug, Serialize)]
-#[serde(untagged)]
+#[serde(rename_all = "camelCase")]
+pub struct TokenLoginResponse {
+	for_user: AuthUser,
+	token: CreatedToken,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(untagged, rename_all = "camelCase")]
 pub enum LoginResponse {
 	User(AuthUser),
-	AccessToken {
-		for_user: AuthUser,
-		token: CreatedToken,
-	},
+	AccessToken(TokenLoginResponse),
 }
 
 /// Authenticates the user and returns the user object. If the user is already logged in, returns the
@@ -196,10 +200,10 @@ async fn login(
 			// TODO: should this be permission gated?
 			if generate_token {
 				let token = create_user_jwt(&user.id, &state.config)?;
-				return Ok(Json(LoginResponse::AccessToken {
+				return Ok(Json(LoginResponse::AccessToken(TokenLoginResponse {
 					for_user: user.into(),
 					token,
-				}));
+				})));
 			}
 
 			// The user already has a session, so we just return them immediately
@@ -270,10 +274,10 @@ async fn login(
 	// TODO: should this be permission gated?
 	if generate_token {
 		let token = create_user_jwt(&auth_user.id, &state.config)?;
-		Ok(Json(LoginResponse::AccessToken {
+		Ok(Json(LoginResponse::AccessToken(TokenLoginResponse {
 			for_user: auth_user,
 			token,
-		}))
+		})))
 	} else {
 		Ok(Json(LoginResponse::User(auth_user)))
 	}
@@ -338,7 +342,7 @@ pub async fn register(
 
 	let hashed_password = hash_password(&input.password, &ctx.config)?;
 
-	let mut tx = conn.begin().await?;
+	let tx = conn.begin().await?;
 
 	let active_model = user::ActiveModel {
 		username: Set(input.username.clone()),

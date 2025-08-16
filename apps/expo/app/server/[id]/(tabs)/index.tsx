@@ -24,7 +24,8 @@ export default function Screen() {
 		>
 			<View className="flex flex-1 gap-8 pb-8">
 				<ContinueReading />
-				<RecentlyAddedBooks />
+				{/* <ContinueReading />
+				<RecentlyAddedBooks /> */}
 			</View>
 		</ScrollView>
 	)

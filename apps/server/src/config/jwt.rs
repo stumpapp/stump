@@ -24,6 +24,7 @@ struct Claims {
 }
 
 #[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct CreatedToken {
 	pub access_token: String,
 	pub expires_at: DateTime<FixedOffset>,

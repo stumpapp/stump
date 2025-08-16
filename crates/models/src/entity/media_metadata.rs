@@ -2,12 +2,14 @@ use async_graphql::SimpleObject;
 use filter_gen::Ordering;
 use sea_orm::{prelude::*, QueryOrder, QuerySelect};
 use serde::Serialize;
+use serde_with::skip_serializing_none;
 
 use crate::shared::{
 	ordering::{OrderBy, OrderDirection},
 	page_dimension::PageAnalysis,
 };
 
+#[skip_serializing_none]
 #[derive(
 	Clone,
 	Default,

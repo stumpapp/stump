@@ -1,5 +1,6 @@
 import { queryClient, SDKContext, StumpClientContextProvider } from '@stump/client'
-import { Api, LoginResponse, User, UserPermission } from '@stump/sdk'
+import { UserPermission } from '@stump/graphql'
+import { Api, AuthUser, LoginResponse } from '@stump/sdk'
 import { isAxiosError } from 'axios'
 import { Redirect, Stack, useLocalSearchParams, useRouter } from 'expo-router'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -26,7 +27,7 @@ export default function Screen() {
 
 	const [sdk, setSDK] = useState<Api | null>(null)
 	const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false)
-	const [user, setUser] = useState<User | null>(null)
+	const [user, setUser] = useState<AuthUser | null>(null)
 
 	const isServerAccessible = useRef(true)
 
@@ -100,24 +101,24 @@ export default function Screen() {
 
 	const handleAuthDialogClose = useCallback(
 		(loginResp?: LoginResponse) => {
-			if (!loginResp || !('for_user' in loginResp) || !activeServer) {
+			if (!loginResp || !('forUser' in loginResp) || !activeServer) {
 				router.dismissAll()
 			} else {
 				const {
-					for_user,
-					token: { access_token, expires_at },
+					forUser,
+					token: { accessToken, expiresAt },
 				} = loginResp
 				const instance = new Api({
 					baseURL: activeServer.url,
 					authMethod: 'token',
 				})
-				instance.token = access_token
+				instance.token = accessToken
 				setSDK(instance)
 				saveServerToken(activeServer?.id || 'dev', {
-					expiresAt: new Date(expires_at),
-					token: access_token,
+					expiresAt: new Date(expiresAt),
+					token: accessToken,
 				})
-				setUser(for_user)
+				setUser(forUser)
 				setIsAuthDialogOpen(false)
 			}
 		},
@@ -149,7 +150,7 @@ export default function Screen() {
 
 	const checkPermission = useCallback(
 		(permission: UserPermission) =>
-			user?.is_server_owner || user?.permissions.includes(permission) || false,
+			user?.isServerOwner || user?.permissions.includes(permission) || false,
 		[user],
 	)
 
@@ -183,7 +184,7 @@ export default function Screen() {
 			<StumpServerContext.Provider
 				value={{
 					user,
-					isServerOwner: user?.is_server_owner || false,
+					isServerOwner: user?.isServerOwner || false,
 					checkPermission,
 					enforcePermission,
 				}}

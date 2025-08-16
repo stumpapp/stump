@@ -99,6 +99,16 @@ pub async fn auth_middleware(
 		return Ok(next.run(req).await);
 	}
 
+	if cfg!(debug_assertions) {
+		tracing::debug!(
+			?auth_header,
+			?save_basic_session,
+			?request_uri,
+			?req_headers,
+			"No session in middleware, falling back to auth header"
+		);
+	}
+
 	let is_opds = request_uri.starts_with("/opds");
 	let is_swagger = request_uri.starts_with("/swagger-ui");
 

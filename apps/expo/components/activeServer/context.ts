@@ -1,4 +1,5 @@
-import { User, UserPermission } from '@stump/sdk'
+import { UserPermission } from '@stump/graphql'
+import { AuthUser } from '@stump/sdk'
 import { createContext, useContext } from 'react'
 
 import { SavedServer } from '~/stores/savedServer'
@@ -22,7 +23,7 @@ export type PermissionEnforcerOptions = {
 }
 
 export type IStumpServerContext = {
-	user: User | null
+	user: AuthUser | null
 	isServerOwner: boolean
 	checkPermission: (permission: UserPermission) => boolean
 	enforcePermission: (permission: UserPermission, options?: PermissionEnforcerOptions) => void

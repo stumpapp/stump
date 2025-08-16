@@ -1,6 +1,7 @@
 import { FlashList } from '@shopify/flash-list'
 import { useSDK } from '@stump/client'
 import { OPDSFeedGroup } from '@stump/sdk'
+import { STUMP_SAVE_BASIC_SESSION_HEADER } from '@stump/sdk/constants'
 import { useRouter } from 'expo-router'
 import { useMemo } from 'react'
 import { Pressable, View } from 'react-native'
@@ -103,6 +104,7 @@ export default function PublicationGroup({
 												uri: thumbnailURL,
 												headers: {
 													Authorization: sdk.authorizationHeader,
+													[STUMP_SAVE_BASIC_SESSION_HEADER]: false,
 												},
 											}}
 											contentFit="fill"

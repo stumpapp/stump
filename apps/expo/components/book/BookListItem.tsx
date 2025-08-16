@@ -1,5 +1,5 @@
 import { useSDK } from '@stump/client'
-import { Media } from '@stump/sdk'
+import { FragmentType, graphql, useFragment } from '@stump/graphql'
 import { useRouter } from 'expo-router'
 import { memo } from 'react'
 import { View } from 'react-native'
@@ -12,11 +12,25 @@ import { useActiveServer } from '../activeServer'
 import { FasterImage } from '../Image'
 import { Text } from '../ui'
 
+const fragment = graphql(`
+	fragment BookListItem on Media {
+		id
+		resolvedName
+		thumbnail {
+			url
+		}
+	}
+`)
+
+export type BookListItemFragmentType = FragmentType<typeof fragment>
+
 type Props = {
-	book: Media
+	book: BookListItemFragmentType
 }
 
 function BookListItem({ book }: Props) {
+	const data = useFragment(fragment, book)
+
 	const { sdk } = useSDK()
 	const {
 		activeServer: { id: serverID },
@@ -28,7 +42,7 @@ function BookListItem({ book }: Props) {
 	const { width } = useListItemSize()
 
 	return (
-		<Pressable onPress={() => router.navigate(`/server/${serverID}/books/${book.id}`)}>
+		<Pressable onPress={() => router.navigate(`/server/${serverID}/books/${data.id}`)}>
 			{({ pressed }) => (
 				<View
 					className={cn('flex items-start px-1 tablet:px-2', {
@@ -38,7 +52,7 @@ function BookListItem({ book }: Props) {
 					<View className="relative overflow-hidden rounded-lg">
 						<FasterImage
 							source={{
-								url: sdk.media.thumbnailURL(book.id),
+								url: data.thumbnail.url,
 								headers: {
 									Authorization: sdk.authorizationHeader || '',
 								},
@@ -50,7 +64,7 @@ function BookListItem({ book }: Props) {
 
 					<View>
 						<Text className="mt-2" style={{ maxWidth: width - 4 }} numberOfLines={2}>
-							{book.metadata?.title || book.name}
+							{data.resolvedName}
 						</Text>
 					</View>
 				</View>

@@ -46,7 +46,7 @@ impl EpubProgressInput {
 			percentage_completed: Set(Some(self.percentage)),
 			media_id: Set(self.media_id.clone()),
 			user_id: Set(user.id.clone()),
-			updated_at: Set(chrono::Utc::now().into()),
+			updated_at: Set(Some(chrono::Utc::now().into())),
 			elapsed_seconds: Set(self.elapsed_seconds),
 			..Default::default()
 		}

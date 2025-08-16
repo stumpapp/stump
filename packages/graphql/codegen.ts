@@ -11,6 +11,7 @@ const config: CodegenConfig = {
 		'../browser/src/**/*.tsx',
 		'../client/src/**/*.ts',
 		'../client/src/**/*.tsx',
+		'../../apps/expo/**/*.tsx',
 	],
 	generates: {
 		'./src/client/': {

@@ -1,5 +1,9 @@
 use async_graphql::SimpleObject;
-use sea_orm::{entity::prelude::*, FromQueryResult, QuerySelect};
+use chrono::Utc;
+use sea_orm::{
+	entity::prelude::*, prelude::async_trait::async_trait, ActiveValue, FromQueryResult,
+	QuerySelect,
+};
 
 use crate::prefixer::{parse_query_to_model, parse_query_to_model_optional, Prefixer};
 
@@ -20,7 +24,7 @@ pub struct Model {
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
 	pub started_at: DateTimeWithTimeZone,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
-	pub updated_at: DateTimeWithTimeZone,
+	pub updated_at: Option<DateTimeWithTimeZone>,
 	#[sea_orm(column_type = "Text")]
 	pub media_id: String,
 	#[sea_orm(column_type = "Text")]
@@ -105,7 +109,22 @@ impl Related<super::user::Entity> for Entity {
 	}
 }
 
-impl ActiveModelBehavior for ActiveModel {}
+#[async_trait]
+impl ActiveModelBehavior for ActiveModel {
+	async fn before_save<C>(mut self, _db: &C, insert: bool) -> Result<Self, DbErr>
+	where
+		C: ConnectionTrait,
+	{
+		if insert && self.started_at.is_not_set() {
+			self.started_at = ActiveValue::Set(DateTimeWithTimeZone::from(Utc::now()));
+		} else if !insert {
+			self.updated_at =
+				ActiveValue::Set(Some(DateTimeWithTimeZone::from(Utc::now())));
+		}
+
+		Ok(self)
+	}
+}
 
 impl Entity {
 	pub fn find_for_user_and_media_id(user: &AuthUser, media_id: &str) -> Select<Entity> {

@@ -1,4 +1,5 @@
 use async_graphql::{Context, Object, Result, ID};
+use chrono::Utc;
 use models::{
 	entity::{
 		finished_reading_session, library, library_config, media, reading_session,
@@ -168,7 +169,6 @@ impl MediaMutation {
 		Ok(Media::from(model))
 	}
 
-	// update_media_progress
 	async fn update_media_progress(
 		&self,
 		ctx: &Context<'_>,
@@ -184,8 +184,9 @@ impl MediaMutation {
 			user_id: Set(user.id.clone()),
 			media_id: Set(id.to_string()),
 			page: Set(page),
-			updated_at: Set(chrono::Utc::now().into()),
+			updated_at: Set(Some(Utc::now().into())),
 			elapsed_seconds: Set(elapsed_seconds),
+			started_at: Set(Utc::now().into()),
 			..Default::default()
 		};
 
@@ -216,7 +217,9 @@ impl MediaMutation {
 			let finished_reading_session = finished_reading_session::ActiveModel {
 				user_id: Set(user.id.clone()),
 				media_id: Set(id.to_string()),
-				started_at: Set(active_session.updated_at),
+				started_at: Set(active_session
+					.updated_at
+					.unwrap_or_else(|| chrono::Utc::now().into())),
 				completed_at: Set(chrono::Utc::now().into()),
 				..Default::default()
 			};
@@ -266,9 +269,6 @@ impl MediaMutation {
 			Ok(None)
 		}
 	}
-
-	// TODO: consider separate mutation object for media metadata?
-	// update_media_metadata (put_media_metadata)
 }
 
 async fn update_active_reading_session(
@@ -282,12 +282,11 @@ async fn update_active_reading_session(
 		_ => page.unwrap_or(model.media.pages),
 	};
 
-	// upsert reading_session
 	let active_session = reading_session::ActiveModel {
 		user_id: Set(user.id.clone()),
 		media_id: Set(model.media.id.to_string()),
 		page: Set(Some(page)),
-		updated_at: Set(chrono::Utc::now().into()),
+		updated_at: Set(Some(chrono::Utc::now().into())),
 		..Default::default()
 	};
 

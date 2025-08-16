@@ -13,10 +13,11 @@ import AppSettingsRow from '../AppSettingsRow'
 const { ChevronRight } = icons
 
 export default function AppDataUsageLink() {
-	const { data } = useQuery(['app-usage'], getAppUsage, {
-		suspense: true,
-		cacheTime: 1000 * 60 * 5, // 5 minutes
-		useErrorBoundary: false,
+	const { data } = useQuery({
+		queryKey: ['app-usage'],
+		queryFn: getAppUsage,
+		staleTime: 1000 * 60 * 5, // 5 minutes
+		throwOnError: false,
 	})
 
 	const formattedSize = formatBytes(data?.total || 0, 0, 'MB')

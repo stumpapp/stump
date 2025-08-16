@@ -1,4 +1,5 @@
-import { useQuery, useSDK } from '@stump/client'
+import { useSDK } from '@stump/client'
+import { useQuery } from '@tanstack/react-query'
 import { useLocalSearchParams } from 'expo-router'
 import { ScrollView } from 'react-native-gesture-handler'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -13,17 +14,18 @@ export default function Screen() {
 		data: feed,
 		refetch,
 		isRefetching,
+		isLoading,
 		error,
-	} = useQuery([sdk.opds.keys.feed, feedURL], () => sdk.opds.feed(feedURL), {
-		suspense: true,
-		useErrorBoundary: false,
+	} = useQuery({
+		queryKey: [sdk.opds.keys.feed, feedURL],
+		queryFn: () => sdk.opds.feed(feedURL),
+		throwOnError: false,
 	})
+
+	if (isLoading) return null
 
 	if (!feed) return <MaybeErrorFeed error={error} />
 
-	// const allGroupsEmpty = feed.groups.every(
-	// 	(group) => !group.navigation.length && !group.publications.length,
-	// )
 	const isPublicationFeed = feed.publications.length > 0
 
 	const renderContent = () => {

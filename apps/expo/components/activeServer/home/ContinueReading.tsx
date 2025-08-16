@@ -1,32 +1,47 @@
 import { FlashList } from '@shopify/flash-list'
-import { useContinueReading } from '@stump/client'
-import { Media } from '@stump/sdk'
+import { useInfiniteSuspenseGraphQL } from '@stump/client'
+import { graphql } from '@stump/graphql'
 import { Fragment, memo, useCallback, useMemo, useState } from 'react'
 import { View } from 'react-native'
 
 import { BookListItem } from '~/components/book'
+import { BookListItemFragmentType } from '~/components/book/BookListItem'
 import { Heading, Text } from '~/components/ui'
 import { useListItemSize } from '~/lib/hooks'
 
 import { useActiveServer } from '../context'
 import ReadingNow from './ReadingNow'
 
+const query = graphql(`
+	query ContinueReading($pagination: Pagination) {
+		keepReading(pagination: $pagination) {
+			nodes {
+				id
+				...BookListItem
+			}
+		}
+	}
+`)
+
 function ContinueReading() {
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
-	const { media, data, fetchNextPage, hasNextPage } = useContinueReading({
-		limit: 20,
-		suspense: true,
-		useErrorBoundary: false,
-		queryKey: [serverID],
-	})
 
-	const [activeBook] = useState(() => data?.pages.at(0)?.data.at(0))
+	const { data, fetchNextPage, hasNextPage } = useInfiniteSuspenseGraphQL(
+		query,
+		['continueReading', serverID],
+		{
+			pagination: { cursor: { limit: 20 } },
+		},
+	)
+	const nodes = useMemo(() => data?.pages.flatMap((page) => page.keepReading.nodes) || [], [data])
+
+	const [activeBook] = useState(() => data?.pages.at(0)?.keepReading.nodes.at(0))
 
 	const leftOffBooks = useMemo(
-		() => media.filter(({ id }) => id !== activeBook?.id),
-		[media, activeBook],
+		() => nodes.filter(({ id }) => id !== activeBook?.id),
+		[nodes, activeBook],
 	)
 
 	const onEndReached = useCallback(() => {
@@ -37,7 +52,10 @@ function ContinueReading() {
 
 	const { width, gap } = useListItemSize()
 
-	const renderItem = useCallback(({ item }: { item: Media }) => <BookListItem book={item} />, [])
+	const renderItem = useCallback(
+		({ item }: { item: BookListItemFragmentType }) => <BookListItem book={item} />,
+		[],
+	)
 
 	return (
 		<Fragment>

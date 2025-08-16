@@ -1,4 +1,4 @@
-import { Api, constants, User } from '@stump/sdk'
+import { Api, AuthUser, constants } from '@stump/sdk'
 import { isAxiosError } from 'axios'
 import { match, P } from 'ts-pattern'
 
@@ -7,7 +7,7 @@ import { ManagedToken, ServerConfig, ServerKind } from '~/stores/savedServer'
 type AuthSDKParams = {
 	config: ServerConfig | null
 	existingToken?: ManagedToken | null
-	saveToken?: (token: ManagedToken, forUser: User) => Promise<void>
+	saveToken?: (token: ManagedToken, forUser: AuthUser) => Promise<void>
 }
 
 /**
@@ -56,20 +56,19 @@ type LoginParams = {
 const login = async (instance: Api, { username, password, saveToken }: LoginParams) => {
 	try {
 		const result = await instance.auth.login({ password, username })
-		if ('for_user' in result) {
+		if ('forUser' in result) {
 			const {
-				token: { access_token, expires_at },
-				for_user,
+				token: { accessToken, expiresAt },
+				forUser,
 			} = result
 			await saveToken?.(
 				{
-					expiresAt: new Date(expires_at),
-					token: access_token,
+					expiresAt: new Date(expiresAt),
+					token: accessToken,
 				},
-				for_user,
+				forUser,
 			)
-			// return result as Exclude<typeof result, User>
-			return access_token
+			return accessToken
 		}
 	} catch (error) {
 		const axiosError = isAxiosError(error) ? error : null

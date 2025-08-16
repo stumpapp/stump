@@ -4281,6 +4281,7 @@ dependencies = [
  "sea-orm",
  "serde",
  "serde_json",
+ "serde_with",
  "strum",
  "thiserror 1.0.63",
  "tokio-test",

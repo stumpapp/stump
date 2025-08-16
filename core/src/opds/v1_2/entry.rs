@@ -180,10 +180,10 @@ impl IntoOPDSEntry for OPDSEntryBuilder<OPDSPublicationEntity> {
 		let FileParts { file_name, .. } = path_buf.file_parts();
 		let file_name_encoded = encode(&file_name);
 
-		let (current_page, last_read_at) =
-			self.data.reading_session.map_or((None, None), |session| {
-				(session.page, Some(session.updated_at))
-			});
+		let (current_page, last_read_at) = self
+			.data
+			.reading_session
+			.map_or((None, None), |session| (session.page, session.updated_at));
 
 		let target_pages = if let Some(page) = current_page {
 			vec![1, page]

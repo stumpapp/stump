@@ -1,13 +1,17 @@
-import { AuthUser, isAxiosError, isUser, LoginOrRegisterArgs } from '@stump/sdk'
-import { QueryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { AuthUser, isAxiosError, isUser, PasswordUserInput } from '@stump/sdk'
+import {
+	QueryOptions,
+	useMutation,
+	useQuery,
+	useQueryClient,
+	UseQueryOptions,
+} from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 
 import { useClientContext } from '../context'
 import { useSDK } from '../sdk'
 
-// TODO(graphql): Fix all the user types...
-
-type Params = QueryOptions<AuthUser> & {
+type Params = Omit<UseQueryOptions<AuthUser>, 'queryKey' | 'queryFn'> & {
 	additionalKeys?: string[]
 }
 
@@ -23,7 +27,7 @@ export function useAuthQuery({ additionalKeys, ...options }: Params = {}) {
 			}
 			return data
 		},
-		// useErrorBoundary: false,
+		throwOnError: false,
 		...options,
 	})
 
@@ -75,19 +79,19 @@ export function useLoginOrRegister({
 		error: loginError,
 	} = useMutation({
 		mutationKey: [sdk.auth.keys.login],
-		mutationFn: (params: LoginOrRegisterArgs) => sdk.auth.login(params),
+		mutationFn: (params: PasswordUserInput) => sdk.auth.login(params),
 		onError: (err) => {
 			onError?.(err)
 		},
 		onSuccess: async (response) => {
 			// TODO(token): refresh support
-			if ('for_user' in response && !!onAuthenticated) {
+			if ('forUser' in response && !!onAuthenticated) {
 				const {
-					for_user,
-					token: { access_token },
+					forUser,
+					token: { accessToken },
 				} = response
-				await onAuthenticated(for_user, access_token)
-				onSuccess?.(for_user)
+				await onAuthenticated(forUser, accessToken)
+				onSuccess?.(forUser)
 			} else if (isUser(response)) {
 				onSuccess?.(response)
 			}
@@ -96,7 +100,7 @@ export function useLoginOrRegister({
 
 	const { isPending: isRegistering, mutateAsync: registerUser } = useMutation({
 		mutationKey: [sdk.auth.register],
-		mutationFn: (params: LoginOrRegisterArgs) => sdk.auth.register(params),
+		mutationFn: (params: PasswordUserInput) => sdk.auth.register(params),
 		onSuccess: async () => {
 			await client.invalidateQueries({
 				queryKey: [sdk.server.keys.claimedStatus],

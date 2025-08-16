@@ -3,9 +3,8 @@ import { useQueryClient } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
-import { PREFETCH_STALE_TIME } from '@/client'
-import { useGraphQL, useInfiniteGraphQL } from '@/hooks'
-
+import { PREFETCH_STALE_TIME } from '../client'
+import { useGraphQL, useInfiniteGraphQL } from '../hooks'
 import { useSDK } from '../sdk'
 
 const query = graphql(`

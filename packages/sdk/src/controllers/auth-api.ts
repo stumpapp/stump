@@ -1,10 +1,22 @@
 import { User } from '@stump/graphql'
 
 import { APIBase } from '../base'
-import { LoginOrRegisterArgs, LoginResponse } from '../types'
 import { AuthUser } from '../types/graphql'
 import { ClassQueryKeys } from './types'
 import { createRouteURLHandler } from './utils'
+
+export type LoginResponse = {
+	forUser: AuthUser
+	token: {
+		accessToken: string
+		expiresAt: string // Date
+	}
+}
+
+export type PasswordUserInput = {
+	username: string
+	password: string
+}
 
 /**
  * The root route for the auth API
@@ -31,7 +43,7 @@ export class AuthAPI extends APIBase {
 	 * Authenticate a user with the given username and password. This will either rely on session-based
 	 * authentication or token-based authentication, depending on the API configuration.
 	 */
-	async login({ username, password }: LoginOrRegisterArgs): Promise<LoginResponse> {
+	async login({ username, password }: PasswordUserInput): Promise<LoginResponse> {
 		const response = await this.api.axios.post<LoginResponse>(
 			authURL(
 				'/login',
@@ -45,9 +57,9 @@ export class AuthAPI extends APIBase {
 
 		if ('token' in response.data) {
 			const {
-				token: { access_token },
+				token: { accessToken },
 			} = response.data
-			this.api.token = access_token
+			this.api.token = accessToken
 		}
 
 		return response.data
@@ -56,7 +68,7 @@ export class AuthAPI extends APIBase {
 	/**
 	 * Register a new user with the given username and password
 	 */
-	async register({ username, password }: LoginOrRegisterArgs): Promise<User> {
+	async register({ username, password }: PasswordUserInput): Promise<User> {
 		const response = await this.api.axios.post<User>(authURL('/register'), {
 			password,
 			username,

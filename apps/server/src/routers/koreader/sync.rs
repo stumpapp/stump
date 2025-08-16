@@ -145,7 +145,13 @@ async fn get_progress(
 				.model
 				.percentage_completed
 				.map(|dec| dec.try_into().unwrap_or(0.0)),
-			timestamp: Some(active_session.model.updated_at.timestamp_millis() as u64),
+			timestamp: Some(
+				active_session
+					.model
+					.updated_at
+					.unwrap_or_else(|| chrono::Utc::now().into())
+					.timestamp_millis() as u64,
+			),
 			device: active_session.device.as_ref().map(|d| d.name.clone()),
 			device_id: active_session.device.as_ref().map(|d| d.id.clone()),
 			progress: active_session
@@ -328,7 +334,10 @@ async fn put_progress(
 	tx.commit().await?;
 
 	let timestamp = match (active_session, finished_session) {
-		(Some(active_session), _) => active_session.updated_at.timestamp_millis() as u64,
+		(Some(active_session), _) => active_session
+			.updated_at
+			.unwrap_or_else(|| chrono::Utc::now().into())
+			.timestamp_millis() as u64,
 		(_, Some(finished_session)) => {
 			finished_session.completed_at.timestamp_millis() as u64
 		},

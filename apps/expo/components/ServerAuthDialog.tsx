@@ -62,7 +62,7 @@ export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogPr
 		async ({ username, password }: LoginSchema) => {
 			try {
 				const result = await loginUser({ password, username })
-				if ('for_user' in result) {
+				if ('forUser' in result) {
 					onClose(result)
 				}
 			} catch (error) {

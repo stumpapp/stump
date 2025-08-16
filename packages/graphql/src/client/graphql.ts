@@ -3038,6 +3038,18 @@ export type UserPreferences = {
   userId?: Maybe<Scalars['String']['output']>;
 };
 
+export type ContinueReadingQueryVariables = Exact<{
+  pagination?: InputMaybe<Pagination>;
+}>;
+
+
+export type ContinueReadingQuery = { __typename?: 'Query', keepReading: { __typename?: 'PaginatedMediaResponse', nodes: Array<(
+      { __typename?: 'Media', id: string }
+      & { ' $fragmentRefs'?: { 'BookListItemFragment': BookListItemFragment } }
+    )> } };
+
+export type BookListItemFragment = { __typename?: 'Media', id: string, resolvedName: string, thumbnail: { __typename?: 'ImageRef', url: string } } & { ' $fragmentName'?: 'BookListItemFragment' };
+
 export type TagSelectQueryQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -3991,6 +4003,15 @@ export class TypedDocumentString<TResult, TVariables>
     return this.value;
   }
 }
+export const BookListItemFragmentDoc = new TypedDocumentString(`
+    fragment BookListItem on Media {
+  id
+  resolvedName
+  thumbnail {
+    url
+  }
+}
+    `, {"fragmentName":"BookListItem"}) as unknown as TypedDocumentString<BookListItemFragment, unknown>;
 export const BookCardFragmentDoc = new TypedDocumentString(`
     fragment BookCard on Media {
   id
@@ -4144,6 +4165,22 @@ export const JobDataInspectorFragmentDoc = new TypedDocumentString(`
   }
 }
     `, {"fragmentName":"JobDataInspector"}) as unknown as TypedDocumentString<JobDataInspectorFragment, unknown>;
+export const ContinueReadingDocument = new TypedDocumentString(`
+    query ContinueReading($pagination: Pagination) {
+  keepReading(pagination: $pagination) {
+    nodes {
+      id
+      ...BookListItem
+    }
+  }
+}
+    fragment BookListItem on Media {
+  id
+  resolvedName
+  thumbnail {
+    url
+  }
+}`) as unknown as TypedDocumentString<ContinueReadingQuery, ContinueReadingQueryVariables>;
 export const TagSelectQueryDocument = new TypedDocumentString(`
     query TagSelectQuery {
   tags {

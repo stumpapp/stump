@@ -1,5 +1,7 @@
-import { useAuthQuery, useSDK } from '@stump/client'
+import { useAuthQuery, useClientContext, useSDK } from '@stump/client'
+import { isAxiosError } from 'axios'
 import { Tabs, useRouter } from 'expo-router'
+import { useEffect } from 'react'
 import { View } from 'react-native'
 import { Pressable } from 'react-native-gesture-handler'
 
@@ -18,11 +20,22 @@ export default function TabLayout() {
 	const animationEnabled = usePreferencesStore((state) => !state.reduceAnimations)
 	const setUser = useUserStore((state) => state.setUser)
 
-	const { user } = useAuthQuery({
+	const { onUnauthenticatedResponse } = useClientContext()
+
+	const { user, error } = useAuthQuery({
 		enabled: !!sdk.token,
-		onSuccess: setUser,
-		useErrorBoundary: false,
+		throwOnError: false,
 	})
+
+	useEffect(() => {
+		setUser(user)
+	}, [user, setUser])
+
+	useEffect(() => {
+		if (isAxiosError(error) && error.response?.status === 401) {
+			onUnauthenticatedResponse?.()
+		}
+	}, [error, onUnauthenticatedResponse])
 
 	if (!sdk.token || !user) {
 		return null

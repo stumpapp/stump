@@ -1,5 +1,6 @@
-import { useInfiniteQuery, useSDK } from '@stump/client'
+import { useSDK } from '@stump/client'
 import { OPDSFeed } from '@stump/sdk'
+import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query'
 import { useRouter } from 'expo-router'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Pressable, View } from 'react-native'
@@ -31,32 +32,32 @@ export default function PublicationFeed({ feed, onRefresh, isRefreshing }: Props
 	const feedURL = feed.links?.find((link) => link.rel === 'self')?.href || ''
 	const [pageSize, setPageSize] = useState(() => Math.max(10, feed.publications.length))
 
-	const { data, hasNextPage, fetchNextPage } = useInfiniteQuery(
-		[sdk.opds.keys.feed, feedURL, 'paged', pageSize],
-		({ pageParam = 1 }) =>
-			sdk.opds.feed(feedURL, {
+	const { data, hasNextPage, fetchNextPage } = useInfiniteQuery({
+		initialPageParam: 1,
+		queryKey: [sdk.opds.keys.feed, feedURL, 'paged', pageSize],
+		queryFn: ({ pageParam = 1 }) => {
+			return sdk.opds.feed(feedURL, {
 				page: pageParam,
 				page_size: pageSize,
-			}),
-		{
-			keepPreviousData: true,
-			getNextPageParam: (lastPage) => {
-				const metadata = lastPage.metadata
-				const numberOfItems = metadata.numberOfItems || feed.metadata.numberOfItems
-				const numberOfPages = metadata.itemsPerPage || feed.metadata.itemsPerPage
-				if (!numberOfPages || !numberOfItems) return undefined
-
-				const currentPage = metadata.currentPage || 1
-
-				const pagesRemaining = Math.ceil(numberOfItems / numberOfPages) - currentPage
-				if (pagesRemaining > 0) {
-					return currentPage + 1
-				}
-				return undefined
-			},
-			enabled: !!feedURL,
+			})
 		},
-	)
+		placeholderData: keepPreviousData,
+		getNextPageParam: (lastPage) => {
+			const metadata = lastPage.metadata
+			const numberOfItems = metadata.numberOfItems || feed.metadata.numberOfItems
+			const numberOfPages = metadata.itemsPerPage || feed.metadata.itemsPerPage
+			if (!numberOfPages || !numberOfItems) return undefined
+
+			const currentPage = metadata.currentPage || 1
+
+			const pagesRemaining = Math.ceil(numberOfItems / numberOfPages) - currentPage
+			if (pagesRemaining > 0) {
+				return currentPage + 1
+			}
+			return undefined
+		},
+		enabled: !!feedURL,
+	})
 
 	const firstPageSize = useMemo(() => data?.pages[0]?.metadata?.itemsPerPage, [data])
 	useEffect(() => {

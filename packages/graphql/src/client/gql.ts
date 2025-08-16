@@ -15,6 +15,8 @@ import * as types from './graphql';
  * Learn more about it here: https://the-guild.dev/graphql/codegen/plugins/presets/preset-client#reducing-bundle-size
  */
 type Documents = {
+    "\n\tquery ContinueReading($pagination: Pagination) {\n\t\tkeepReading(pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...BookListItem\n\t\t\t}\n\t\t}\n\t}\n": typeof types.ContinueReadingDocument,
+    "\n\tfragment BookListItem on Media {\n\t\tid\n\t\tresolvedName\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t}\n": typeof types.BookListItemFragmentDoc,
     "\n\tquery TagSelectQuery {\n\t\ttags {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t}\n": typeof types.TagSelectQueryDocument,
     "\n\tfragment BookCard on Media {\n\t\tid\n\t\tresolvedName\n\t\textension\n\t\tpages\n\t\tsize\n\t\tstatus\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t\treadProgress {\n\t\t\tpercentageCompleted\n\t\t\tepubcfi\n\t\t\tpage\n\t\t}\n\t\treadHistory {\n\t\t\t__typename\n\t\t\tcompletedAt\n\t\t}\n\t}\n": typeof types.BookCardFragmentDoc,
     "\n\tquery MediaAtPath($path: String!) {\n\t\tmediaByPath(path: $path) {\n\t\t\tid\n\t\t\tresolvedName\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": typeof types.MediaAtPathDocument,
@@ -150,6 +152,8 @@ type Documents = {
     "\n\tquery UploadConfig {\n\t\tuploadConfig {\n\t\t\tenabled\n\t\t\tmaxFileUploadSize\n\t\t}\n\t}\n": typeof types.UploadConfigDocument,
 };
 const documents: Documents = {
+    "\n\tquery ContinueReading($pagination: Pagination) {\n\t\tkeepReading(pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...BookListItem\n\t\t\t}\n\t\t}\n\t}\n": types.ContinueReadingDocument,
+    "\n\tfragment BookListItem on Media {\n\t\tid\n\t\tresolvedName\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t}\n": types.BookListItemFragmentDoc,
     "\n\tquery TagSelectQuery {\n\t\ttags {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t}\n": types.TagSelectQueryDocument,
     "\n\tfragment BookCard on Media {\n\t\tid\n\t\tresolvedName\n\t\textension\n\t\tpages\n\t\tsize\n\t\tstatus\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t\treadProgress {\n\t\t\tpercentageCompleted\n\t\t\tepubcfi\n\t\t\tpage\n\t\t}\n\t\treadHistory {\n\t\t\t__typename\n\t\t\tcompletedAt\n\t\t}\n\t}\n": types.BookCardFragmentDoc,
     "\n\tquery MediaAtPath($path: String!) {\n\t\tmediaByPath(path: $path) {\n\t\t\tid\n\t\t\tresolvedName\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": types.MediaAtPathDocument,
@@ -285,6 +289,14 @@ const documents: Documents = {
     "\n\tquery UploadConfig {\n\t\tuploadConfig {\n\t\t\tenabled\n\t\t\tmaxFileUploadSize\n\t\t}\n\t}\n": types.UploadConfigDocument,
 };
 
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tquery ContinueReading($pagination: Pagination) {\n\t\tkeepReading(pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...BookListItem\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').ContinueReadingDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tfragment BookListItem on Media {\n\t\tid\n\t\tresolvedName\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t}\n"): typeof import('./graphql').BookListItemFragmentDoc;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

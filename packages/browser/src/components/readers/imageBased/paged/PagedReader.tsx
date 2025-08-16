@@ -84,6 +84,8 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 			let startX = 0
 			let startY = 0
 			const handlePointerDown = (event: PointerEvent) => {
+				if (event.button === 2) return
+
 				startX = event.clientX
 				startY = event.clientY
 

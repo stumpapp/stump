@@ -83,7 +83,7 @@ const _Page = ({
 	return (
 		<EntityImage
 			key={`page-${page}-scaled-${scaleToFit}`}
-			className='z-30'
+			className="z-30"
 			style={style}
 			src={getPageUrl(page)}
 			onLoad={({ height, width }) => {

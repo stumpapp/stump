@@ -258,13 +258,17 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 	 */
 	useHotkeys('right, left, space, escape', (_, handler) => hotKeyHandler(handler))
 
+	const unconstrainedWidth =
+		imageScaling.scaleToFit === 'height' || imageScaling.scaleToFit === 'none'
+
 	return (
 		<div
 			style={{
 				display: 'flex',
 				justifyContent: 'center',
 				margin: 'auto',
-				width: '100%',
+				minWidth: '100%',
+				width: unconstrainedWidth ? 'max-content' : '100%',
 			}}
 		>
 			{!showToolBar && tapSidesToNavigate && (

@@ -143,7 +143,7 @@ const styles = {
 			// no min height
 			// no max height
 			height: '100%',
-			objectFit: 'cover', // different fit
+			objectFit: 'contain',
 		} as React.CSSProperties,
 	},
 
@@ -174,8 +174,17 @@ const styles = {
 			// no width
 			// no height
 			justifyContent: 'center',
+			alignItems: 'center', // add vertical alignment
 		} as React.CSSProperties,
 
-		image: { objectFit: 'contain' } as React.CSSProperties,
+		image: {
+			// no min width
+			// no max width
+			width: 'max-content',
+			// no min height
+			// no max height
+			height: 'max-content',
+			objectFit: 'contain',
+		} as React.CSSProperties,
 	},
 }

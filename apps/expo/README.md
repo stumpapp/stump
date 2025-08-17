@@ -48,6 +48,14 @@ yarn open:android
 
 You can edit the native code in `android` -> `readium` -> `src/main/java/expo.modules.readium`
 
+##### Generating an APK
+
+To generate an APK for the app, just use the `apk` profile:
+
+```bash
+eas build --profile apk --platform android --local
+```
+
 ## License 📝
 
 The `expo` app is licensed under [GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.html)

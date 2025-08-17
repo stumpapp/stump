@@ -81,6 +81,7 @@ export default function ImageBasedReader({
 			readingMode,
 			readingDirection,
 			trackElapsedTime,
+			secondPageSeparate,
 		},
 		setSettings,
 	} = useBookPreferences({ book: media })
@@ -114,7 +115,11 @@ export default function ImageBasedReader({
 		if (doublePageBehavior === 'off' || autoButOff || modeForceOff) {
 			sets = Array.from({ length: pages }, (_, i) => [i])
 		} else {
-			sets = generatePageSets({ imageSizes: pageDimensions, pages: pages })
+			sets = generatePageSets({
+				imageSizes: pageDimensions,
+				pages: pages,
+				secondPageSeparate: secondPageSeparate,
+			})
 		}
 
 		if (readingDirection === ReadingDirection.Rtl) {
@@ -122,7 +127,15 @@ export default function ImageBasedReader({
 		}
 
 		return sets
-	}, [doublePageBehavior, pages, pageDimensions, deviceOrientation, readingMode, readingDirection])
+	}, [
+		doublePageBehavior,
+		pages,
+		pageDimensions,
+		deviceOrientation,
+		readingMode,
+		readingDirection,
+		secondPageSeparate,
+	])
 
 	/**
 	 * A callback to update the read progress, if the reader is not in incognito mode.

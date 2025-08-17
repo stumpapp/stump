@@ -131,6 +131,16 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 				<Label className="text-xs font-medium uppercase text-foreground-muted">Preferences</Label>
 
 				<Label className="flex items-center justify-between px-1 pt-4">
+					<span>Separate second page</span>
+					<RawSwitch
+						primaryRing
+						variant="primary"
+						checked={activeSettings.secondPageSeparate}
+						onCheckedChange={(checked) => onPreferenceChange({ secondPageSeparate: checked })}
+					/>
+				</Label>
+
+				<Label className="flex items-center justify-between px-1 pt-4">
 					<span>Tap sides to navigate</span>
 					<RawSwitch
 						primaryRing

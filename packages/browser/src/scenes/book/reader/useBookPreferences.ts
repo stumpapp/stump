@@ -38,10 +38,11 @@ export function useBookPreferences({ book }: Params): Return {
 	 * should never be null once the query resolves
 	 */
 	const libraryConfig = useMemo(() => book.libraryConfig, [book])
+	const libraryDefaults = useMemo(() => defaultsFromLibraryConfig(libraryConfig), [libraryConfig])
 
 	const bookPreferences = useMemo(
-		() => buildPreferences(storedBookPreferences ?? {}, settings, libraryConfig),
-		[storedBookPreferences, libraryConfig, settings],
+		() => buildPreferences(storedBookPreferences ?? {}, settings, libraryDefaults),
+		[storedBookPreferences, libraryDefaults, settings],
 	)
 
 	const setBookPreferences = useCallback(
@@ -89,14 +90,15 @@ const settingsAsBookPreferences = (settings: ReaderSettings): BookPreferences =>
 	trackElapsedTime: settings.trackElapsedTime,
 	doublePageBehavior: settings.doublePageBehavior,
 	fontFamily: settings.fontFamily,
+	secondPageSeparate: settings.secondPageSeparate,
 })
 
 const buildPreferences = (
 	preferences: Partial<BookPreferences>,
 	settings: ReaderSettings,
-	libraryConfig?: PickSelect<NonNullable<BookReaderSceneQuery['mediaById']>, 'libraryConfig'>,
+	libraryDefaults: Partial<BookPreferences>,
 ): BookPreferences => ({
 	...settingsAsBookPreferences(settings),
-	...defaultsFromLibraryConfig(libraryConfig),
+	...libraryDefaults,
 	...preferences,
 })

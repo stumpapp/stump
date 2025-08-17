@@ -1,20 +1,36 @@
-import { useMediaCursorQuery, useSDK } from '@stump/client'
+import { useSuspenseGraphQL } from '@stump/client'
+import { graphql } from '@stump/graphql'
 
 import { useActiveServer } from '../activeServer'
 import StackedEffectThumbnail from '../StackedEffectThumbnail'
 
+const query = graphql(`
+	query StackedBookThumbnails {
+		media(pagination: { cursor: { limit: 1 } }) {
+			nodes {
+				id
+				thumbnail {
+					url
+				}
+			}
+		}
+	}
+`)
+
 export default function StackedBookThumbnails() {
-	const { sdk } = useSDK()
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
-	const { media } = useMediaCursorQuery({
-		limit: 1,
-		suspense: true,
-	})
+	const {
+		data: {
+			media: {
+				nodes: [book],
+			},
+		},
+	} = useSuspenseGraphQL(query, ['stackedBookThumbnails'])
 
-	const bookID = media?.[0]?.id || ''
-	const thumbnailURL = sdk.media.thumbnailURL(bookID)
+	const bookID = book?.id || ''
+	const thumbnailURL = book?.thumbnail?.url
 
 	if (!bookID) {
 		return null

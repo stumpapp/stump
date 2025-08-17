@@ -1,5 +1,5 @@
 export { default as BookGridItem } from './BookGridItem'
 export { default as BookListItem } from './BookListItem'
 export { default as BookMetaLink } from './BookMetaLink'
-export { default as BookSearchItem } from './BookSearchItem'
+export { default as BookSearchItem, IBookSearchItemFragment } from './BookSearchItem'
 export { default as StackedBookThumbnails } from './StackedBookThumbnails'

@@ -15,8 +15,20 @@ import * as types from './graphql';
  * Learn more about it here: https://the-guild.dev/graphql/codegen/plugins/presets/preset-client#reducing-bundle-size
  */
 type Documents = {
-    "\n\tquery ContinueReading($pagination: Pagination) {\n\t\tkeepReading(pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...BookListItem\n\t\t\t}\n\t\t}\n\t}\n": typeof types.ContinueReadingDocument,
+    "\n\tquery SearchMedia($filter: MediaFilterInput!) {\n\t\tmedia(filter: $filter, pagination: { cursor: { limit: 10 } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...BookSearchItem\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\tnextCursor\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.SearchMediaDocument,
+    "\n\tquery SearchSeries($filter: SeriesFilterInput!) {\n\t\tseries(filter: $filter, pagination: { cursor: { limit: 10 } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...SeriesSearchItem\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\tnextCursor\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.SearchSeriesDocument,
+    "\n\tquery SearchLibrary($search: String!) {\n\t\tlibraries(search: $search, pagination: { cursor: { limit: 10 } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...LibrarySearchItem\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\tnextCursor\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.SearchLibraryDocument,
+    "\n\tquery ContinueReading($pagination: Pagination) {\n\t\tkeepReading(pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...BookListItem\n\t\t\t\t...ReadingNow\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\tcurrentCursor\n\t\t\t\t\tnextCursor\n\t\t\t\t\tlimit\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.ContinueReadingDocument,
+    "\n\tfragment ReadingNow on Media {\n\t\tid\n\t\tresolvedName\n\t\tmetadata {\n\t\t\tsummary\n\t\t\tgenres\n\t\t\tlinks\n\t\t}\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t}\n": typeof types.ReadingNowFragmentDoc,
+    "\n\tquery RecentlyAddedBooks($pagination: Pagination) {\n\t\trecentlyAddedMedia(pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...BookListItem\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\tcurrentCursor\n\t\t\t\t\tnextCursor\n\t\t\t\t\tlimit\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.RecentlyAddedBooksDocument,
     "\n\tfragment BookListItem on Media {\n\t\tid\n\t\tresolvedName\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t}\n": typeof types.BookListItemFragmentDoc,
+    "\n\tfragment BookSearchItem on Media {\n\t\tid\n\t\tresolvedName\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t}\n": typeof types.BookSearchItemFragmentDoc,
+    "\n\tquery StackedBookThumbnails {\n\t\tmedia(pagination: { cursor: { limit: 1 } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tthumbnail {\n\t\t\t\t\turl\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.StackedBookThumbnailsDocument,
+    "\n\tfragment LibrarySearchItem on Library {\n\t\tid\n\t\tname\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t}\n": typeof types.LibrarySearchItemFragmentDoc,
+    "\n\tquery StackedLibraryThumbnails {\n\t\tlibraries(pagination: { none: { unpaginated: true } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tthumbnail {\n\t\t\t\t\turl\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.StackedLibraryThumbnailsDocument,
+    "\n\tfragment SeriesSearchItem on Series {\n\t\tid\n\t\tresolvedName\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t}\n": typeof types.SeriesSearchItemFragmentDoc,
+    "\n\tquery StackedSeriesThumbnails {\n\t\tseries(pagination: { cursor: { limit: 1 } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tthumbnail {\n\t\t\t\t\turl\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.StackedSeriesThumbnailsDocument,
+    "\n\tquery StackedSmartListThumbnails {\n\t\tsmartLists {\n\t\t\tid\n\t\t\t# thumbnail {\n\t\t\t# \turl\n\t\t\t# }\n\t\t}\n\t}\n": typeof types.StackedSmartListThumbnailsDocument,
     "\n\tquery TagSelectQuery {\n\t\ttags {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t}\n": typeof types.TagSelectQueryDocument,
     "\n\tfragment BookCard on Media {\n\t\tid\n\t\tresolvedName\n\t\textension\n\t\tpages\n\t\tsize\n\t\tstatus\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t\treadProgress {\n\t\t\tpercentageCompleted\n\t\t\tepubcfi\n\t\t\tpage\n\t\t}\n\t\treadHistory {\n\t\t\t__typename\n\t\t\tcompletedAt\n\t\t}\n\t}\n": typeof types.BookCardFragmentDoc,
     "\n\tquery MediaAtPath($path: String!) {\n\t\tmediaByPath(path: $path) {\n\t\t\tid\n\t\t\tresolvedName\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": typeof types.MediaAtPathDocument,
@@ -152,8 +164,20 @@ type Documents = {
     "\n\tquery UploadConfig {\n\t\tuploadConfig {\n\t\t\tenabled\n\t\t\tmaxFileUploadSize\n\t\t}\n\t}\n": typeof types.UploadConfigDocument,
 };
 const documents: Documents = {
-    "\n\tquery ContinueReading($pagination: Pagination) {\n\t\tkeepReading(pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...BookListItem\n\t\t\t}\n\t\t}\n\t}\n": types.ContinueReadingDocument,
+    "\n\tquery SearchMedia($filter: MediaFilterInput!) {\n\t\tmedia(filter: $filter, pagination: { cursor: { limit: 10 } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...BookSearchItem\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\tnextCursor\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.SearchMediaDocument,
+    "\n\tquery SearchSeries($filter: SeriesFilterInput!) {\n\t\tseries(filter: $filter, pagination: { cursor: { limit: 10 } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...SeriesSearchItem\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\tnextCursor\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.SearchSeriesDocument,
+    "\n\tquery SearchLibrary($search: String!) {\n\t\tlibraries(search: $search, pagination: { cursor: { limit: 10 } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...LibrarySearchItem\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\tnextCursor\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.SearchLibraryDocument,
+    "\n\tquery ContinueReading($pagination: Pagination) {\n\t\tkeepReading(pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...BookListItem\n\t\t\t\t...ReadingNow\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\tcurrentCursor\n\t\t\t\t\tnextCursor\n\t\t\t\t\tlimit\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.ContinueReadingDocument,
+    "\n\tfragment ReadingNow on Media {\n\t\tid\n\t\tresolvedName\n\t\tmetadata {\n\t\t\tsummary\n\t\t\tgenres\n\t\t\tlinks\n\t\t}\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t}\n": types.ReadingNowFragmentDoc,
+    "\n\tquery RecentlyAddedBooks($pagination: Pagination) {\n\t\trecentlyAddedMedia(pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...BookListItem\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\tcurrentCursor\n\t\t\t\t\tnextCursor\n\t\t\t\t\tlimit\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.RecentlyAddedBooksDocument,
     "\n\tfragment BookListItem on Media {\n\t\tid\n\t\tresolvedName\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t}\n": types.BookListItemFragmentDoc,
+    "\n\tfragment BookSearchItem on Media {\n\t\tid\n\t\tresolvedName\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t}\n": types.BookSearchItemFragmentDoc,
+    "\n\tquery StackedBookThumbnails {\n\t\tmedia(pagination: { cursor: { limit: 1 } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tthumbnail {\n\t\t\t\t\turl\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.StackedBookThumbnailsDocument,
+    "\n\tfragment LibrarySearchItem on Library {\n\t\tid\n\t\tname\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t}\n": types.LibrarySearchItemFragmentDoc,
+    "\n\tquery StackedLibraryThumbnails {\n\t\tlibraries(pagination: { none: { unpaginated: true } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tthumbnail {\n\t\t\t\t\turl\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.StackedLibraryThumbnailsDocument,
+    "\n\tfragment SeriesSearchItem on Series {\n\t\tid\n\t\tresolvedName\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t}\n": types.SeriesSearchItemFragmentDoc,
+    "\n\tquery StackedSeriesThumbnails {\n\t\tseries(pagination: { cursor: { limit: 1 } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tthumbnail {\n\t\t\t\t\turl\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.StackedSeriesThumbnailsDocument,
+    "\n\tquery StackedSmartListThumbnails {\n\t\tsmartLists {\n\t\t\tid\n\t\t\t# thumbnail {\n\t\t\t# \turl\n\t\t\t# }\n\t\t}\n\t}\n": types.StackedSmartListThumbnailsDocument,
     "\n\tquery TagSelectQuery {\n\t\ttags {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t}\n": types.TagSelectQueryDocument,
     "\n\tfragment BookCard on Media {\n\t\tid\n\t\tresolvedName\n\t\textension\n\t\tpages\n\t\tsize\n\t\tstatus\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t\treadProgress {\n\t\t\tpercentageCompleted\n\t\t\tepubcfi\n\t\t\tpage\n\t\t}\n\t\treadHistory {\n\t\t\t__typename\n\t\t\tcompletedAt\n\t\t}\n\t}\n": types.BookCardFragmentDoc,
     "\n\tquery MediaAtPath($path: String!) {\n\t\tmediaByPath(path: $path) {\n\t\t\tid\n\t\t\tresolvedName\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": types.MediaAtPathDocument,
@@ -292,11 +316,59 @@ const documents: Documents = {
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n\tquery ContinueReading($pagination: Pagination) {\n\t\tkeepReading(pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...BookListItem\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').ContinueReadingDocument;
+export function graphql(source: "\n\tquery SearchMedia($filter: MediaFilterInput!) {\n\t\tmedia(filter: $filter, pagination: { cursor: { limit: 10 } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...BookSearchItem\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\tnextCursor\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').SearchMediaDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tquery SearchSeries($filter: SeriesFilterInput!) {\n\t\tseries(filter: $filter, pagination: { cursor: { limit: 10 } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...SeriesSearchItem\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\tnextCursor\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').SearchSeriesDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tquery SearchLibrary($search: String!) {\n\t\tlibraries(search: $search, pagination: { cursor: { limit: 10 } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...LibrarySearchItem\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\tnextCursor\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').SearchLibraryDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tquery ContinueReading($pagination: Pagination) {\n\t\tkeepReading(pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...BookListItem\n\t\t\t\t...ReadingNow\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\tcurrentCursor\n\t\t\t\t\tnextCursor\n\t\t\t\t\tlimit\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').ContinueReadingDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tfragment ReadingNow on Media {\n\t\tid\n\t\tresolvedName\n\t\tmetadata {\n\t\t\tsummary\n\t\t\tgenres\n\t\t\tlinks\n\t\t}\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t}\n"): typeof import('./graphql').ReadingNowFragmentDoc;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tquery RecentlyAddedBooks($pagination: Pagination) {\n\t\trecentlyAddedMedia(pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...BookListItem\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\tcurrentCursor\n\t\t\t\t\tnextCursor\n\t\t\t\t\tlimit\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').RecentlyAddedBooksDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n\tfragment BookListItem on Media {\n\t\tid\n\t\tresolvedName\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t}\n"): typeof import('./graphql').BookListItemFragmentDoc;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tfragment BookSearchItem on Media {\n\t\tid\n\t\tresolvedName\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t}\n"): typeof import('./graphql').BookSearchItemFragmentDoc;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tquery StackedBookThumbnails {\n\t\tmedia(pagination: { cursor: { limit: 1 } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tthumbnail {\n\t\t\t\t\turl\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').StackedBookThumbnailsDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tfragment LibrarySearchItem on Library {\n\t\tid\n\t\tname\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t}\n"): typeof import('./graphql').LibrarySearchItemFragmentDoc;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tquery StackedLibraryThumbnails {\n\t\tlibraries(pagination: { none: { unpaginated: true } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tthumbnail {\n\t\t\t\t\turl\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').StackedLibraryThumbnailsDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tfragment SeriesSearchItem on Series {\n\t\tid\n\t\tresolvedName\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t}\n"): typeof import('./graphql').SeriesSearchItemFragmentDoc;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tquery StackedSeriesThumbnails {\n\t\tseries(pagination: { cursor: { limit: 1 } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tthumbnail {\n\t\t\t\t\turl\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').StackedSeriesThumbnailsDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tquery StackedSmartListThumbnails {\n\t\tsmartLists {\n\t\t\tid\n\t\t\t# thumbnail {\n\t\t\t# \turl\n\t\t\t# }\n\t\t}\n\t}\n"): typeof import('./graphql').StackedSmartListThumbnailsDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

@@ -1,7 +1,20 @@
-import { useSDK, useSmartListsQuery } from '@stump/client'
+import { useSDK, useSuspenseGraphQL } from '@stump/client'
+import { graphql } from '@stump/graphql'
 
 import { useActiveServer } from '../activeServer'
 import StackedEffectThumbnail from '../StackedEffectThumbnail'
+
+// TODO: Add thumbnail
+const query = graphql(`
+	query StackedSmartListThumbnails {
+		smartLists {
+			id
+			# thumbnail {
+			# 	url
+			# }
+		}
+	}
+`)
 
 export default function StackedSmartListThumbnails() {
 	const { sdk } = useSDK()
@@ -9,15 +22,12 @@ export default function StackedSmartListThumbnails() {
 		activeServer: { id: serverID },
 	} = useActiveServer()
 
-	// TODO: pagination/cursor/limit
-	const { lists } = useSmartListsQuery({
-		params: {
-			mine: true,
+	const {
+		data: {
+			smartLists: [list],
 		},
-		suspense: true,
-	})
-
-	const listID = lists?.[0]?.id || ''
+	} = useSuspenseGraphQL(query, ['stackedSmartListThumbnails'])
+	const listID = list?.id || ''
 	const thumbnailURL = sdk.smartlist.thumbnailURL(listID)
 
 	if (!listID) {

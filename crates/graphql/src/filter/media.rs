@@ -42,7 +42,7 @@ fn apply_reading_status_filter(
 // TODO: Support filter by tags (requires join logic)
 
 #[skip_serializing_none]
-#[derive(InputObject, Clone, Serialize, Deserialize, Debug)]
+#[derive(InputObject, Clone, Serialize, Deserialize, Debug, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct MediaFilterInput {
 	#[graphql(default)]

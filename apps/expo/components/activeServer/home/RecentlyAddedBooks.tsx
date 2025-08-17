@@ -1,25 +1,50 @@
 import { FlashList } from '@shopify/flash-list'
-import { useRecentlyAddedMediaQuery } from '@stump/client'
-import { Media } from '@stump/sdk'
-import { memo, useCallback } from 'react'
+import { useInfiniteSuspenseGraphQL } from '@stump/client'
+import { graphql } from '@stump/graphql'
+import { memo, useCallback, useMemo } from 'react'
 import { View } from 'react-native'
 
 import { BookListItem } from '~/components/book'
+import { BookListItemFragmentType } from '~/components/book/BookListItem'
 import { Heading, Text } from '~/components/ui'
 import { useListItemSize } from '~/lib/hooks'
 
 import { useActiveServer } from '../context'
 
+const query = graphql(`
+	query RecentlyAddedBooks($pagination: Pagination) {
+		recentlyAddedMedia(pagination: $pagination) {
+			nodes {
+				id
+				...BookListItem
+			}
+			pageInfo {
+				__typename
+				... on CursorPaginationInfo {
+					currentCursor
+					nextCursor
+					limit
+				}
+			}
+		}
+	}
+`)
+
 function RecentlyAddedBooks() {
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
-	const { media, hasNextPage, fetchNextPage } = useRecentlyAddedMediaQuery({
-		limit: 20,
-		suspense: true,
-		queryKey: [serverID],
-		useErrorBoundary: false,
-	})
+	const { data, fetchNextPage, hasNextPage } = useInfiniteSuspenseGraphQL(
+		query,
+		['recentlyAddedBooks', serverID],
+		{
+			pagination: { cursor: { limit: 20 } },
+		},
+	)
+	const nodes = useMemo(
+		() => data?.pages.flatMap((page) => page.recentlyAddedMedia.nodes) || [],
+		[data],
+	)
 
 	const onEndReached = useCallback(() => {
 		if (hasNextPage) {
@@ -29,14 +54,17 @@ function RecentlyAddedBooks() {
 
 	const { width, gap } = useListItemSize()
 
-	const renderItem = useCallback(({ item }: { item: Media }) => <BookListItem book={item} />, [])
+	const renderItem = useCallback(
+		({ item }: { item: BookListItemFragmentType }) => <BookListItem book={item} />,
+		[],
+	)
 
 	return (
 		<View className="flex gap-4">
 			<Heading size="lg">Recently Added Books</Heading>
 
 			<FlashList
-				data={media}
+				data={nodes}
 				keyExtractor={({ id }) => id}
 				renderItem={renderItem}
 				horizontal

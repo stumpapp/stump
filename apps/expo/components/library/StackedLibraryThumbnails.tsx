@@ -1,20 +1,36 @@
-import { useLibraries, useSDK } from '@stump/client'
+import { useSuspenseGraphQL } from '@stump/client'
+import { graphql } from '@stump/graphql'
 
 import { useActiveServer } from '../activeServer'
 import StackedEffectThumbnail from '../StackedEffectThumbnail'
 
+const query = graphql(`
+	query StackedLibraryThumbnails {
+		libraries(pagination: { none: { unpaginated: true } }) {
+			nodes {
+				id
+				thumbnail {
+					url
+				}
+			}
+		}
+	}
+`)
+
 export default function StackedLibraryThumbnails() {
-	const { sdk } = useSDK()
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
-	const { libraries } = useLibraries({
-		page_size: 1,
-		suspense: true,
-	})
+	const {
+		data: {
+			libraries: {
+				nodes: [library],
+			},
+		},
+	} = useSuspenseGraphQL(query, ['stackedLibraryThumbnails'])
 
-	const libraryID = libraries?.[0]?.id || ''
-	const thumbnailURL = sdk.library.thumbnailURL(libraryID)
+	const libraryID = library?.id || ''
+	const thumbnailURL = library?.thumbnail.url
 
 	if (!libraryID) {
 		return null

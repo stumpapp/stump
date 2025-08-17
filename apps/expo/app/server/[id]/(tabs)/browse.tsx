@@ -1,3 +1,4 @@
+import { UserPermission } from '@stump/graphql'
 import { useMemo } from 'react'
 import { useWindowDimensions, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
@@ -22,7 +23,7 @@ export default function Screen() {
 	} = useStumpServer()
 
 	const insets = useSafeAreaInsets()
-	const showSmartLists = checkPermission('smartlist:read')
+	const showSmartLists = checkPermission(UserPermission.AccessSmartList)
 	// iPad or other large screens can have more columns (i.e., smaller itemDimension) but most phones should have 2 columns
 	const isTablet = useMemo(() => width > 768, [width])
 	const itemDimension = useMemo(

@@ -15,7 +15,7 @@ type ActiveReadingSession {
 	epubcfi: String
 	koreaderProgress: String
 	startedAt: DateTime!
-	updatedAt: DateTime!
+	updatedAt: DateTime
 	mediaId: String!
 	userId: String!
 	deviceId: String
@@ -1519,7 +1519,7 @@ type Query {
 	jobs(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedJobResponse!
 	jobById(id: ID!): Job
 	scheduledJobConfigs: [ScheduledJobConfig!]!
-	media(filter: MediaFilterInput!, orderBy: [MediaOrderBy!]! = [{media: {field: NAME, direction: ASC}}], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
+	media(filter: MediaFilterInput! = {name: null, size: null, extension: null, createdAt: null, updatedAt: null, seriesId: null, status: null, path: null, pages: null, readingStatus: null, metadata: null, series: null, _and: null, _not: null, _or: null}, orderBy: [MediaOrderBy!]! = [{media: {field: NAME, direction: ASC}}], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
 	mediaById(id: ID!): Media
 	mediaByPath(path: String!): Media
 	"Returns the available alphabet for all media in the server"
@@ -1553,7 +1553,7 @@ type Query {
 	epubById(id: ID!): Epub!
 	"Get all bookmarks for a single epub by its media ID"
 	bookmarksByMediaId(id: ID!): [Bookmark!]!
-	libraries(orderBy: [LibraryModelOrderBy!]! = [{field: NAME, direction: ASC}], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedLibraryResponse!
+	libraries(orderBy: [LibraryModelOrderBy!]! = [{field: NAME, direction: ASC}], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}, search: String): PaginatedLibraryResponse!
 	libraryById(id: ID!): Library
 	"Returns the available alphabet for all libraries in the server"
 	librariesAlphabet: JSONObject!
@@ -1561,7 +1561,7 @@ type Query {
 	lastVisitedLibrary: Library
 	mediaMetadataOverview(seriesId: ID): MediaMetadataOverview!
 	smartListViews: [SmartListView!]!
-	series(filter: SeriesFilterInput!, orderBy: [SeriesOrderBy!]! = [{series: {field: NAME, direction: ASC}}], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedSeriesResponse!
+	series(filter: SeriesFilterInput! = {name: null, path: null, libraryId: null, metadata: null, library: null, _and: null, _not: null, _or: null}, orderBy: [SeriesOrderBy!]! = [{series: {field: NAME, direction: ASC}}], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedSeriesResponse!
 	seriesById(id: ID!): Series
 	"Returns the available alphabet for all series in the server"
 	seriesAlphabet: JSONObject!

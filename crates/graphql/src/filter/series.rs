@@ -11,7 +11,7 @@ use super::{
 // TODO: Support filter by tags (requires join logic)
 
 #[skip_serializing_none]
-#[derive(InputObject, Clone, Debug, Serialize, Deserialize)]
+#[derive(InputObject, Clone, Debug, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SeriesFilterInput {
 	#[graphql(default)]

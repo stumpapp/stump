@@ -1,20 +1,36 @@
-import { useSDK, useSeriesCursorQuery } from '@stump/client'
+import { useSuspenseGraphQL } from '@stump/client'
+import { graphql } from '@stump/graphql'
 
 import { useActiveServer } from '../activeServer'
 import StackedEffectThumbnail from '../StackedEffectThumbnail'
 
+const query = graphql(`
+	query StackedSeriesThumbnails {
+		series(pagination: { cursor: { limit: 1 } }) {
+			nodes {
+				id
+				thumbnail {
+					url
+				}
+			}
+		}
+	}
+`)
+
 export default function StackedSeriesThumbnails() {
-	const { sdk } = useSDK()
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
-	const { series } = useSeriesCursorQuery({
-		limit: 1,
-		suspense: true,
-	})
+	const {
+		data: {
+			series: {
+				nodes: [series],
+			},
+		},
+	} = useSuspenseGraphQL(query, ['stackedSeriesThumbnails'])
 
-	const seriesID = series?.[0]?.id || ''
-	const thumbnailURL = sdk.series.thumbnailURL(seriesID)
+	const seriesID = series?.id
+	const thumbnailURL = series?.thumbnail?.url
 
 	if (!seriesID) {
 		return null

@@ -83,7 +83,7 @@ impl MediaQuery {
 	async fn media(
 		&self,
 		ctx: &Context<'_>,
-		filter: MediaFilterInput,
+		#[graphql(default)] filter: MediaFilterInput,
 		#[graphql(default_with = "MediaOrderBy::default_vec()")] order_by: Vec<
 			MediaOrderBy,
 		>,
@@ -363,9 +363,9 @@ impl MediaQuery {
 						.one(conn)
 						.await?
 						.ok_or("Cursor not found")?;
-					cursor.desc().after(media.created_at);
+					cursor.after(media.created_at);
 				}
-				cursor.first(info.limit);
+				cursor.first(info.limit).desc();
 
 				let models = cursor
 					.into_model::<media::ModelWithMetadata>()

@@ -18,6 +18,15 @@ const query = graphql(`
 			nodes {
 				id
 				...BookListItem
+				...ReadingNow
+			}
+			pageInfo {
+				__typename
+				... on CursorPaginationInfo {
+					currentCursor
+					nextCursor
+					limit
+				}
 			}
 		}
 	}

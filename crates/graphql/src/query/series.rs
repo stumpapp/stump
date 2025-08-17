@@ -31,7 +31,7 @@ impl SeriesQuery {
 	async fn series(
 		&self,
 		ctx: &Context<'_>,
-		filter: SeriesFilterInput,
+		#[graphql(default)] filter: SeriesFilterInput,
 		#[graphql(default_with = "SeriesOrderBy::default_vec()")] order_by: Vec<
 			SeriesOrderBy,
 		>,

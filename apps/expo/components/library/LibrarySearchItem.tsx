@@ -9,39 +9,39 @@ import { FasterImage } from '../Image'
 import { Text } from '../ui'
 
 const fragment = graphql(`
-	fragment BookSearchItem on Media {
+	fragment LibrarySearchItem on Library {
 		id
-		resolvedName
+		name
 		thumbnail {
 			url
 		}
 	}
 `)
 
-export type IBookSearchItemFragment = FragmentType<typeof fragment>
+export type ILibrarySearchItemFragment = FragmentType<typeof fragment>
 
 type Props = {
 	/**
-	 * The query which was used that this book matches with. It will attempt to highlight
+	 * The query which was used that this library matches with. It will attempt to highlight
 	 * the matching text in the title and/or description
 	 */
 	search?: string
 	/**
-	 * The book to display
+	 * The library to display
 	 */
-	book: FragmentType<typeof fragment>
+	library: FragmentType<typeof fragment>
 }
 
-export default function BookSearchItem({ book }: Props) {
+export default function LibrarySearchItem({ library }: Props) {
 	const { sdk } = useSDK()
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
-	const data = useFragment(fragment, book)
+	const data = useFragment(fragment, library)
 	const router = useRouter()
 
 	return (
-		<Pressable onPress={() => router.navigate(`/server/${serverID}/books/${data.id}`)}>
+		<Pressable onPress={() => router.navigate(`/server/${serverID}/libraries/${data.id}`)}>
 			<View className="flex-row items-start gap-4 py-4">
 				<FasterImage
 					source={{
@@ -56,7 +56,7 @@ export default function BookSearchItem({ book }: Props) {
 				/>
 
 				<View className="flex-1">
-					<Text>{data.resolvedName}</Text>
+					<Text>{data.name}</Text>
 				</View>
 			</View>
 		</Pressable>

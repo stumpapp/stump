@@ -1,5 +1,5 @@
 import { useSDK } from '@stump/client'
-import { Media } from '@stump/sdk'
+import { FragmentType, graphql, useFragment } from '@stump/graphql'
 import { useRouter } from 'expo-router'
 import { useCallback, useMemo } from 'react'
 import { Pressable, View } from 'react-native'
@@ -12,11 +12,29 @@ import { getBookProgression } from '~/lib/sdk/utils'
 
 import { useActiveServer } from '../context'
 
+const fragment = graphql(`
+	fragment ReadingNow on Media {
+		id
+		resolvedName
+		metadata {
+			summary
+			genres
+			links
+		}
+		thumbnail {
+			url
+		}
+	}
+`)
+
+export type IReadingNowFragment = FragmentType<typeof fragment>
+
 type Props = {
-	book: Media
+	book: IReadingNowFragment
 }
 
 export default function ReadingNow({ book }: Props) {
+	const data = useFragment(fragment, book)
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
@@ -35,9 +53,9 @@ export default function ReadingNow({ book }: Props) {
 			400 * (2 / 3) - // image width
 			16 // gap between image and text
 
-		const description = book.metadata?.summary || ''
-		const genres = book.metadata?.genre?.map((genre) => `#${genre}`).join(', ')
-		const links = book.metadata?.links || []
+		const description = data.metadata?.summary || ''
+		const genres = data.metadata?.genres?.map((genre) => `#${genre}`).join(', ')
+		const links = data.metadata?.links || []
 
 		return (
 			<View className="flex flex-col flex-wrap gap-2">
@@ -46,7 +64,7 @@ export default function ReadingNow({ book }: Props) {
 						width: contentWidth,
 					}}
 				>
-					{book.metadata?.title || book.name}
+					{data.resolvedName}
 				</Heading>
 
 				{description && (
@@ -87,7 +105,7 @@ export default function ReadingNow({ book }: Props) {
 				)}
 			</View>
 		)
-	}, [isTablet, width, book])
+	}, [isTablet, width, data])
 
 	const router = useRouter()
 
@@ -98,13 +116,13 @@ export default function ReadingNow({ book }: Props) {
 			<View className="flex flex-row gap-4">
 				<Pressable
 					className="relative aspect-[2/3] shrink-0 overflow-hidden rounded-lg"
-					onPress={() => router.navigate(`/server/${serverID}/books/${book.id}`)}
+					onPress={() => router.navigate(`/server/${serverID}/books/${data.id}`)}
 				>
 					<View className="absolute inset-0 z-10 bg-black" style={{ opacity: 0.5 }} />
 
 					<FasterImage
 						source={{
-							url: sdk.media.thumbnailURL(book.id),
+							url: data.thumbnail.url,
 							headers: {
 								Authorization: sdk.authorizationHeader || '',
 							},
@@ -123,7 +141,7 @@ export default function ReadingNow({ book }: Props) {
 									textShadowColor: 'rgba(0, 0, 0, 0.5)',
 								}}
 							>
-								{book.metadata?.title || book.name}
+								{data.resolvedName}
 							</Text>
 						)}
 

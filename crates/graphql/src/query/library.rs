@@ -12,7 +12,8 @@ use models::{
 	},
 };
 use sea_orm::{
-	prelude::*, DatabaseBackend, FromQueryResult, QueryOrder, QuerySelect, Statement,
+	prelude::*, DatabaseBackend, FromQueryResult, QueryOrder, QuerySelect, QueryTrait,
+	Statement,
 };
 
 use crate::{
@@ -45,13 +46,20 @@ impl LibraryQuery {
 		>,
 		#[graphql(default, validator(custom = "PaginationValidator"))]
 		pagination: Pagination,
+		search: Option<String>,
 	) -> Result<PaginatedResponse<Library>> {
 		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let query = LibraryModelOrderBy::add_order_by(
 			&order_by,
-			library::Entity::find_for_user(user),
+			library::Entity::find_for_user(user).apply_if(search, |query, search| {
+				query.filter(
+					library::Column::Name
+						.contains(search.clone())
+						.or(library::Column::Path.contains(search)),
+				)
+			}),
 		)?;
 
 		match pagination.resolve() {

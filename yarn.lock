@@ -4137,6 +4137,11 @@
   dependencies:
     "@octokit/openapi-types" "^18.0.0"
 
+"@panzoom/panzoom@^4.6.0":
+  version "4.6.0"
+  resolved "https://registry.yarnpkg.com/@panzoom/panzoom/-/panzoom-4.6.0.tgz#ab9cb71403ed46fc5ac32bb9186761cdbd4a8177"
+  integrity sha512-3KxkY1lNKFn98fW5ZFR6vV0YzsXj3I4EQDyFWSXME6/cic86eSS7VjuqIjrA3PEpySo0r5fFtlX8eYCt4JPUFQ==
+
 "@parcel/watcher-android-arm64@2.5.1":
   version "2.5.1"
   resolved "https://registry.yarnpkg.com/@parcel/watcher-android-arm64/-/watcher-android-arm64-2.5.1.tgz#507f836d7e2042f798c7d07ad19c3546f9848ac1"

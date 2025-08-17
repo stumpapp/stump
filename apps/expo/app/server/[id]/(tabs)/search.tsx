@@ -1,5 +1,5 @@
-import { QueryClientContext, useSDK } from '@stump/client'
-import { Library, Media, Series } from '@stump/sdk'
+import { useSDK } from '@stump/client'
+import { graphql, PaginationInfo } from '@stump/graphql'
 import { useQueries } from '@tanstack/react-query'
 import debounce from 'lodash/debounce'
 import { useCallback, useMemo, useState } from 'react'
@@ -8,8 +8,58 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { match } from 'ts-pattern'
 
 import { useActiveServer } from '~/components/activeServer'
-import { BookSearchItem } from '~/components/book'
+import { BookSearchItem, IBookSearchItemFragment } from '~/components/book'
+import { ILibrarySearchItemFragment, LibrarySearchItem } from '~/components/library'
+import { ISeriesSearchItemFragment, SeriesSearchItem } from '~/components/series'
 import { Heading, Input, Text } from '~/components/ui'
+
+const mediaQuery = graphql(`
+	query SearchMedia($filter: MediaFilterInput!) {
+		media(filter: $filter, pagination: { cursor: { limit: 10 } }) {
+			nodes {
+				id
+				...BookSearchItem
+			}
+			pageInfo {
+				... on CursorPaginationInfo {
+					nextCursor
+				}
+			}
+		}
+	}
+`)
+
+const seriesQuery = graphql(`
+	query SearchSeries($filter: SeriesFilterInput!) {
+		series(filter: $filter, pagination: { cursor: { limit: 10 } }) {
+			nodes {
+				id
+				...SeriesSearchItem
+			}
+			pageInfo {
+				... on CursorPaginationInfo {
+					nextCursor
+				}
+			}
+		}
+	}
+`)
+
+const libraryQuery = graphql(`
+	query SearchLibrary($search: String!) {
+		libraries(search: $search, pagination: { cursor: { limit: 10 } }) {
+			nodes {
+				id
+				...LibrarySearchItem
+			}
+			pageInfo {
+				... on CursorPaginationInfo {
+					nextCursor
+				}
+			}
+		}
+	}
+`)
 
 export default function Screen() {
 	const {
@@ -22,27 +72,34 @@ export default function Screen() {
 
 	const getBooks = useCallback(
 		() =>
-			sdk.media.get({
-				search: searchQuery,
-				limit: 10,
+			sdk.execute(mediaQuery, {
+				filter: {
+					_or: [
+						{ name: { contains: searchQuery } },
+						{ metadata: { title: { contains: searchQuery } } },
+					],
+				},
 			}),
-		[searchQuery, sdk],
+		[sdk, searchQuery],
 	)
 
 	const getSeries = useCallback(
 		() =>
-			sdk.series.get({
-				search: searchQuery,
-				limit: 10,
+			sdk.execute(seriesQuery, {
+				filter: {
+					_or: [
+						{ name: { contains: searchQuery } },
+						{ metadata: { title: { contains: searchQuery } } },
+					],
+				},
 			}),
 		[searchQuery, sdk],
 	)
 
 	const getLibraries = useCallback(
 		() =>
-			sdk.library.get({
+			sdk.execute(libraryQuery, {
 				search: searchQuery,
-				limit: 10,
 			}),
 		[searchQuery, sdk],
 	)
@@ -52,7 +109,6 @@ export default function Screen() {
 		{ data: seriesResults, isLoading: isLoadingSeries },
 		{ data: librariesResults, isLoading: isLoadingLibraries },
 	] = useQueries({
-		context: QueryClientContext,
 		queries: [
 			{
 				queryKey: [sdk.media.keys.get, { serverID, query: searchQuery }],
@@ -72,33 +128,41 @@ export default function Screen() {
 		],
 	})
 
-	const sections = useMemo<SectionData[]>(
+	const sections = useMemo<Section[]>(
 		() =>
 			[
 				{
 					title: 'Books',
-					data: bookResults?.data || [],
+					data: bookResults?.media.nodes || [],
+					hasMore: getHasMore(bookResults?.media.pageInfo),
 				},
 				{
 					title: 'Series',
-					data: seriesResults?.data || [],
+					data: seriesResults?.series.nodes || [],
+					hasMore: getHasMore(seriesResults?.series.pageInfo),
 				},
 				{
 					title: 'Libraries',
-					data: librariesResults?.data || [],
+					data: librariesResults?.libraries.nodes || [],
+					hasMore: getHasMore(librariesResults?.libraries.pageInfo),
 				},
 			].filter((section) => section.data.length),
 		[bookResults, seriesResults, librariesResults],
 	)
 
-	const renderSectionItem = useCallback<
-		SectionListRenderItem<Media | Series | Library, SectionData>
-	>(
+	// TODO: don't do that
+	const renderSectionItem = useCallback<SectionListRenderItem<SectionData, Section>>(
 		({ item, section: { title: section } }) =>
 			match(section)
-				.with('Books', () => <BookSearchItem book={item as Media} search={searchQuery} />)
-				.with('Series', () => <Text>{item.name}</Text>)
-				.with('Libraries', () => <Text>{item.name}</Text>)
+				.with('Books', () => (
+					<BookSearchItem book={item as IBookSearchItemFragment} search={searchQuery} />
+				))
+				.with('Series', () => (
+					<SeriesSearchItem series={item as ISeriesSearchItemFragment} search={searchQuery} />
+				))
+				.with('Libraries', () => (
+					<LibrarySearchItem library={item as ILibrarySearchItemFragment} search={searchQuery} />
+				))
 				.otherwise(() => null),
 		[searchQuery],
 	)
@@ -140,7 +204,20 @@ export default function Screen() {
 	)
 }
 
-type SectionData = {
-	title: string
-	data: (Media | Series | Library)[]
+type SectionData = (
+	| IBookSearchItemFragment
+	| ISeriesSearchItemFragment
+	| ILibrarySearchItemFragment
+) & {
+	id: string
 }
+
+type Section = {
+	title: string
+	// TODO: type me
+	data: SectionData[]
+	hasMore: boolean
+}
+
+const getHasMore = (pageInfo: Partial<PaginationInfo> | undefined): boolean =>
+	pageInfo?.__typename === 'CursorPaginationInfo' && pageInfo.nextCursor != null

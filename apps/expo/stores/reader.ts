@@ -1,4 +1,5 @@
 import { BookPreferences as IBookPreferences } from '@stump/client'
+import { ReadingDirection, ReadingImageScaleFit, ReadingMode } from '@stump/graphql'
 import dayjs from 'dayjs'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useStopwatch } from 'react-timer-hook'
@@ -6,6 +7,7 @@ import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 
 import { useActiveServer } from '~/components/activeServer'
+import { ImageBasedBookRef } from '~/components/book/reader/image'
 
 import { ZustandMMKVStorage } from './store'
 
@@ -61,27 +63,31 @@ export type ReaderStore = {
 	setShowControls: (show: boolean) => void
 }
 
+export const DEFAULT_BOOK_PREFERENCES = {
+	fontSize: 13,
+	lineHeight: 1.5,
+	brightness: 1,
+	readingMode: ReadingMode.Paged,
+	readingDirection: ReadingDirection.Ltr,
+	imageScaling: {
+		scaleToFit: ReadingImageScaleFit.Height,
+	},
+	doublePageBehavior: 'off',
+	secondPageSeparate: false,
+	trackElapsedTime: true,
+	tapSidesToNavigate: true,
+	allowDownscaling: false,
+	cachePolicy: 'memory-disk',
+	footerControls: 'images',
+} satisfies GlobalSettings
+
 export const useReaderStore = create<ReaderStore>()(
 	persist(
 		(set, get) =>
 			({
 				isReading: false,
 				setIsReading: (reading) => set({ isReading: reading }),
-				globalSettings: {
-					brightness: 1,
-					readingDirection: 'ltr',
-					allowDownscaling: false,
-					imageScaling: {
-						scaleToFit: 'width',
-					},
-					cachePolicy: 'memory-disk',
-					doublePageBehavior: 'auto',
-					readingMode: 'paged',
-					preferSmallImages: false,
-					footerControls: 'images',
-					tapSidesToNavigate: true,
-					trackElapsedTime: true,
-				} satisfies GlobalSettings,
+				globalSettings: DEFAULT_BOOK_PREFERENCES,
 				setGlobalSettings: (updates: Partial<GlobalSettings>) =>
 					set({ globalSettings: { ...get().globalSettings, ...updates } }),
 
@@ -127,28 +133,32 @@ export const useReaderStore = create<ReaderStore>()(
 	),
 )
 
-export const useBookPreferences = (id: string) => {
+type Params = {
+	book: ImageBasedBookRef
+}
+
+export const useBookPreferences = ({ book }: Params) => {
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
 
 	const store = useReaderStore((state) => state)
 
-	const bookSettings = useMemo(() => store.bookSettings[id], [store.bookSettings, id])
+	const bookSettings = useMemo(() => store.bookSettings[book.id], [store.bookSettings, book.id])
 
 	const setBookPreferences = useCallback(
 		(updates: Partial<BookPreferences>) => {
 			if (!bookSettings) {
-				store.addBookSettings(id, {
+				store.addBookSettings(book.id, {
 					...store.globalSettings,
 					...updates,
 					serverID,
 				})
 			} else {
-				store.setBookSettings(id, { ...updates, serverID })
+				store.setBookSettings(book.id, { ...updates, serverID })
 			}
 		},
-		[id, bookSettings, store, serverID],
+		[book.id, bookSettings, store, serverID],
 	)
 
 	return {

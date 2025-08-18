@@ -7,7 +7,17 @@ export default function Screen() {
 
 	return (
 		<Stack
-			screenOptions={{ headerShown: false, animation: animationEnabled ? 'default' : 'none' }}
-		/>
+			screenOptions={{
+				headerShown: false,
+				animation: animationEnabled ? 'default' : 'none',
+			}}
+		>
+			<Stack.Screen
+				name="index"
+				options={{
+					headerShown: false,
+				}}
+			/>
+		</Stack>
 	)
 }

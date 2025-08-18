@@ -38,6 +38,13 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		Router::new()
 			.route(
 				"/me",
+				get(viewer).layer(middleware::from_fn_with_state(
+					app_state.clone(),
+					auth_middleware,
+				)),
+			)
+			.route(
+				"/viewer",
 				get(viewer)
 					.layer(middleware::from_fn_with_state(app_state, auth_middleware)),
 			)

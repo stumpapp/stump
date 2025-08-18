@@ -1,26 +1,35 @@
-import { useSDK } from '@stump/client'
-import { Library } from '@stump/sdk'
+import { FragmentType, graphql, useFragment } from '@stump/graphql'
 
 import { useActiveServer } from '../activeServer'
 import GridImageItem from '../grid/GridImageItem'
 
+const fragment = graphql(`
+	fragment LibraryGridItem on Library {
+		id
+		name
+		thumbnail {
+			url
+		}
+	}
+`)
+
+export type ILibraryGridItemFragment = FragmentType<typeof fragment>
+
 type Props = {
-	library: Library
-	index: number
+	library: ILibraryGridItemFragment
 }
 
-export default function LibraryGridItem({ library, index }: Props) {
+export default function LibraryGridItem({ library }: Props) {
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
-	const { sdk } = useSDK()
+	const data = useFragment(fragment, library)
 
 	return (
 		<GridImageItem
-			uri={sdk.library.thumbnailURL(library.id)}
-			title={library.name}
-			href={`/server/${serverID}/libraries/${library.id}`}
-			index={index}
+			uri={data.thumbnail.url}
+			title={data.name}
+			href={`/server/${serverID}/libraries/${data.id}`}
 		/>
 	)
 }

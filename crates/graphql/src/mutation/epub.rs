@@ -6,7 +6,7 @@ use crate::{
 		reading_session::{ActiveReadingSession, FinishedReadingSession},
 	},
 };
-use async_graphql::{Context, Object, Result, SimpleObject};
+use async_graphql::{Context, Object, Result, SimpleObject, ID};
 use models::entity::{
 	bookmark, finished_reading_session, reading_session, user::AuthUser,
 };
@@ -35,13 +35,13 @@ impl ReadingProgressOutput {
 
 async fn update_epub_progress_finished(
 	conn: &DatabaseConnection,
+	id: String,
 	user: &AuthUser,
 	input: EpubProgressInput,
 ) -> Result<ReadingProgressOutput> {
-	let active_session =
-		reading_session::Entity::find_for_user_and_media_id(user, &input.media_id)
-			.one(conn)
-			.await?;
+	let active_session = reading_session::Entity::find_for_user_and_media_id(user, &id)
+		.one(conn)
+		.await?;
 
 	let started_at = active_session
 		.as_ref()
@@ -49,7 +49,7 @@ async fn update_epub_progress_finished(
 		.unwrap_or_default();
 
 	let finished_reading_session =
-		input.into_finished_session_active_model(user, started_at);
+		input.into_finished_session_active_model(id.clone(), user, started_at);
 
 	let txn = conn.begin().await?;
 	let finished_reading_session =
@@ -82,9 +82,10 @@ pub async fn insert_finished_reading_session(
 async fn update_epub_progress_active(
 	conn: &DatabaseConnection,
 	user: &AuthUser,
+	id: String,
 	input: EpubProgressInput,
 ) -> Result<ReadingProgressOutput> {
-	let active_session = input.into_reading_session_active_model(user);
+	let active_session = input.into_reading_session_active_model(id, user);
 
 	let upserted_session = reading_session::Entity::insert(active_session)
 		.on_conflict(
@@ -118,6 +119,7 @@ impl EpubMutation {
 	async fn update_epub_progress(
 		&self,
 		ctx: &Context<'_>,
+		id: ID,
 		input: EpubProgressInput,
 	) -> Result<ReadingProgressOutput> {
 		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
@@ -128,9 +130,9 @@ impl EpubMutation {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		if is_complete {
-			update_epub_progress_finished(conn, user, input).await
+			update_epub_progress_finished(conn, id.to_string(), user, input).await
 		} else {
-			update_epub_progress_active(conn, user, input).await
+			update_epub_progress_active(conn, user, id.to_string(), input).await
 		}
 	}
 

@@ -3,7 +3,7 @@ import * as NavigationBar from 'expo-navigation-bar'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { ImageBasedReader } from '~/components/book/reader'
-import { ImageBasedBookPageRef } from '~/components/book/reader/image'
+import { ImageReaderBookRef } from '~/components/book/reader/image/context'
 import { useAppState } from '~/lib/hooks'
 import { useReaderStore } from '~/stores'
 import { useBookPreferences, useBookTimer } from '~/stores/reader'
@@ -24,9 +24,35 @@ export default function Screen() {
 
 	const [id] = useState(() => identifier || hashFromURL(url))
 
+	const book = useMemo(
+		() =>
+			({
+				id,
+				name: title,
+				pages: readingOrder?.length || 0,
+				...(readingOrder?.length
+					? {
+							metadata: {
+								__typename: 'MediaMetadata',
+								pageAnalysis: {
+									__typename: 'PageAnalysis',
+									dimensions: readingOrder
+										.filter(({ height, width }) => height != null && width != null)
+										.map(({ height, width }) => ({
+											height: height as number,
+											width: width as number,
+										})),
+								},
+							},
+						}
+					: {}),
+			}) satisfies ImageReaderBookRef,
+		[id, title, readingOrder],
+	)
+
 	const {
 		preferences: { trackElapsedTime },
-	} = useBookPreferences(id)
+	} = useBookPreferences({ book })
 	const { pause, resume, isRunning } = useBookTimer(id, {
 		enabled: trackElapsedTime,
 	})
@@ -90,37 +116,10 @@ export default function Screen() {
 		}
 	}, [])
 
-	const imageSizes = useMemo(
-		() =>
-			(readingOrder || [])
-				.filter(({ height, width }) => height && width)
-				?.map(
-					({ height, width }) =>
-						({
-							height,
-							width,
-							ratio: (width as number) / (height as number),
-						}) as ImageBasedBookPageRef,
-				)
-				.reduce(
-					(acc, ref, index) => {
-						acc[index] = ref
-						return acc
-					},
-					{} as Record<number, ImageBasedBookPageRef>,
-				),
-		[readingOrder],
-	)
-
 	return (
 		<ImageBasedReader
 			initialPage={currentPage}
-			book={{
-				id,
-				name: title,
-				pages: readingOrder!.length || 0,
-			}}
-			imageSizes={imageSizes}
+			book={book}
 			pageURL={(page: number) => readingOrder![page - 1].href}
 		/>
 	)

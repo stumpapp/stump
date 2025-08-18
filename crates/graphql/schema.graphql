@@ -471,7 +471,6 @@ type Epub {
 }
 
 input EpubProgressInput {
-	mediaId: String!
 	epubcfi: String!
 	percentage: Decimal!
 	isComplete: Boolean
@@ -1150,7 +1149,7 @@ type Mutation {
 	If the epub is already finished and the percentage is 1 or greater, the old finished
 	session is deleted and a new one is created.
 	"""
-	updateEpubProgress(input: EpubProgressInput!): ReadingProgressOutput!
+	updateEpubProgress(id: ID!, input: EpubProgressInput!): ReadingProgressOutput!
 	"""
 	Create or update a bookmark for a user. If a bookmark already exists for the given media
 	and epubcfi, the preview content is updated.

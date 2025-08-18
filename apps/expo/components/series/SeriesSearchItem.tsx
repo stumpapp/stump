@@ -4,6 +4,8 @@ import { useRouter } from 'expo-router'
 import { View } from 'react-native'
 import { Pressable } from 'react-native-gesture-handler'
 
+import { useDisplay } from '~/lib/hooks'
+
 import { useActiveServer } from '../activeServer'
 import { FasterImage } from '../Image'
 import { Text } from '../ui'
@@ -15,6 +17,9 @@ const fragment = graphql(`
 		thumbnail {
 			url
 		}
+		readCount
+		mediaCount
+		percentageCompleted
 	}
 `)
 
@@ -37,11 +42,18 @@ export default function SeriesSearchItem({ series }: Props) {
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
+	const { width } = useDisplay()
+
 	const data = useFragment(fragment, series)
 	const router = useRouter()
 
 	return (
-		<Pressable onPress={() => router.navigate(`/server/${serverID}/series/${data.id}`)}>
+		<Pressable
+			onPress={() => router.navigate(`/server/${serverID}/series/${data.id}`)}
+			style={{
+				width: width * 0.75,
+			}}
+		>
 			<View className="flex-row items-start gap-4 py-4">
 				<FasterImage
 					source={{
@@ -52,11 +64,15 @@ export default function SeriesSearchItem({ series }: Props) {
 						resizeMode: 'fill',
 						borderRadius: 5,
 					}}
-					style={{ width: 50, height: 50 / (2 / 3) }}
+					style={{ width: 75, height: 75 / (2 / 3) }}
 				/>
 
-				<View className="flex-1">
+				<View className="flex flex-1 flex-col gap-1">
 					<Text>{data.resolvedName}</Text>
+
+					<Text className="text-foreground-muted">
+						{data.readCount}/{data.mediaCount} books • {data.percentageCompleted}%
+					</Text>
 				</View>
 			</View>
 		</Pressable>

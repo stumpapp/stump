@@ -6,7 +6,6 @@ import {
 	graphql,
 	ReadingMode,
 } from '@stump/graphql'
-import { EpubContent } from '@stump/sdk'
 import { Book, Rendition } from 'epubjs'
 import uniqby from 'lodash/uniqBy'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -94,8 +93,8 @@ const query = graphql(`
 `)
 
 const mutation = graphql(`
-	mutation UpdateEpubProgress($input: EpubProgressInput!) {
-		updateEpubProgress(input: $input) {
+	mutation UpdateEpubProgress($id: ID!, $input: EpubProgressInput!) {
+		updateEpubProgress(id: $id, input: $input) {
 			__typename
 		}
 	}
@@ -517,7 +516,10 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 			if (!book) return
 			if (isIncognito) return
 			if (media?.mediaById?.readProgress?.epubcfi === input.epubcfi) return
-			mutate({ input: input })
+			mutate({
+				id: media?.mediaById?.id || '',
+				input: input,
+			})
 		}
 
 		if (!currentLocation) {
@@ -560,7 +562,6 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 
 			if (media?.mediaById?.id) {
 				updateProgress({
-					mediaId: media?.mediaById?.id,
 					epubcfi: start.cfi,
 					isComplete: atEnd ?? percentage === 1.0,
 					percentage,

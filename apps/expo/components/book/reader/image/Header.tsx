@@ -1,3 +1,4 @@
+import { ReadingDirection, ReadingMode } from '@stump/graphql'
 import { useRouter } from 'expo-router'
 import { useCallback, useEffect, useState } from 'react'
 import { Pressable, View } from 'react-native'
@@ -23,17 +24,12 @@ type Props = {
 
 export default function Header({ onShowGlobalSettings }: Props) {
 	const { height } = useDisplay()
-	const {
-		book: { name, id },
-		currentPage,
-		resetTimer,
-		flatListRef,
-	} = useImageBasedReader()
+	const { book, currentPage, resetTimer, flatListRef } = useImageBasedReader()
 	const {
 		preferences: { readingDirection, readingMode, trackElapsedTime },
 		setBookPreferences,
 		updateGlobalSettings,
-	} = useBookPreferences(id)
+	} = useBookPreferences({ book })
 
 	const incognito = useReaderStore((state) => state.globalSettings.incognito)
 	const insets = useSafeAreaInsets()
@@ -56,7 +52,10 @@ export default function Header({ onShowGlobalSettings }: Props) {
 	})
 
 	const onChangeReadingDirection = useCallback(() => {
-		setBookPreferences({ readingDirection: readingDirection === 'ltr' ? 'rtl' : 'ltr' })
+		setBookPreferences({
+			readingDirection:
+				readingDirection === ReadingDirection.Ltr ? ReadingDirection.Rtl : ReadingDirection.Ltr,
+		})
 		flatListRef.current?.scrollToIndex({ index: (currentPage || 1) - 1, animated: false })
 	}, [currentPage, readingDirection, setBookPreferences, flatListRef])
 
@@ -130,15 +129,17 @@ export default function Header({ onShowGlobalSettings }: Props) {
 								<DropdownMenu.SubContent>
 									<DropdownMenu.CheckboxItem
 										key="standard"
-										value={readingMode === 'paged'}
-										onValueChange={() => setBookPreferences({ readingMode: 'paged' })}
+										value={readingMode === ReadingMode.Paged}
+										onValueChange={() => setBookPreferences({ readingMode: ReadingMode.Paged })}
 									>
 										<DropdownMenu.ItemTitle>Paged</DropdownMenu.ItemTitle>
 									</DropdownMenu.CheckboxItem>
 									<DropdownMenu.CheckboxItem
 										key="vscroll"
-										value={readingMode === 'continuous:vertical'}
-										onValueChange={() => setBookPreferences({ readingMode: 'continuous:vertical' })}
+										value={readingMode === ReadingMode.ContinuousVertical}
+										onValueChange={() =>
+											setBookPreferences({ readingMode: ReadingMode.ContinuousVertical })
+										}
 										disabled
 									>
 										<DropdownMenu.ItemTitle>Vertical Scroll</DropdownMenu.ItemTitle>
@@ -146,9 +147,9 @@ export default function Header({ onShowGlobalSettings }: Props) {
 
 									<DropdownMenu.CheckboxItem
 										key="hscroll"
-										value={readingMode === 'continuous:horizontal'}
+										value={readingMode === ReadingMode.ContinuousHorizontal}
 										onValueChange={() =>
-											setBookPreferences({ readingMode: 'continuous:horizontal' })
+											setBookPreferences({ readingMode: ReadingMode.ContinuousHorizontal })
 										}
 									>
 										<DropdownMenu.ItemTitle>Horizontal Scroll</DropdownMenu.ItemTitle>
@@ -173,7 +174,7 @@ export default function Header({ onShowGlobalSettings }: Props) {
 								<DropdownMenu.ItemIcon
 									ios={{
 										name:
-											readingDirection === 'ltr'
+											readingDirection === ReadingDirection.Ltr
 												? 'inset.filled.righthalf.arrow.right.rectangle'
 												: 'inset.filled.lefthalf.arrow.left.rectangle',
 									}}
@@ -234,7 +235,7 @@ export default function Header({ onShowGlobalSettings }: Props) {
 					color: COLORS.dark.foreground.DEFAULT,
 				}}
 			>
-				{name}
+				{book.name}
 			</Heading>
 		</Animated.View>
 	)

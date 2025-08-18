@@ -83,7 +83,7 @@ export default function Screen() {
 	)
 
 	return (
-		<ScrollView className="flex-1 bg-background">
+		<ScrollView className="flex-1 bg-background" contentInsetAdjustmentBehavior="automatic">
 			<DeleteServerConfirmation
 				deletingServer={deletingServer}
 				onClose={() => setDeletingServer(null)}

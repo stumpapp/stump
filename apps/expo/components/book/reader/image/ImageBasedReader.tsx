@@ -1,5 +1,6 @@
 import { Zoomable } from '@likashefqet/react-native-image-zoom'
 import { useSDK } from '@stump/client'
+import { ReadingDirection, ReadingMode } from '@stump/graphql'
 import { ImageLoadEventData } from 'expo-image'
 import React, { useCallback, useEffect, useMemo } from 'react'
 import { FlatList, useWindowDimensions, View } from 'react-native'
@@ -56,7 +57,7 @@ export default function ImageBasedReader({ initialPage }: Props) {
 	} = useImageBasedReader()
 	const {
 		preferences: { readingMode, incognito, readingDirection },
-	} = useBookPreferences(book.id)
+	} = useBookPreferences({ book })
 	const { height, width } = useWindowDimensions()
 
 	const deviceOrientation = useMemo(
@@ -101,7 +102,9 @@ export default function ImageBasedReader({ initialPage }: Props) {
 		<FlatList
 			ref={flatListRef}
 			data={pageSets}
-			inverted={readingDirection === 'rtl' && readingMode !== 'continuous:vertical'}
+			inverted={
+				readingDirection === ReadingDirection.Rtl && readingMode !== ReadingMode.ContinuousVertical
+			}
 			renderItem={({ item, index }) => (
 				<Page
 					deviceOrientation={deviceOrientation}
@@ -114,8 +117,10 @@ export default function ImageBasedReader({ initialPage }: Props) {
 				/>
 			)}
 			keyExtractor={(item) => item.toString()}
-			horizontal={readingMode === 'paged' || readingMode === 'continuous:horizontal'}
-			pagingEnabled={readingMode === 'paged'}
+			horizontal={
+				readingMode === ReadingMode.Paged || readingMode === ReadingMode.ContinuousHorizontal
+			}
+			pagingEnabled={readingMode === ReadingMode.Paged}
 			onViewableItemsChanged={({ viewableItems }) => {
 				const firstVisibleItem = viewableItems.filter(({ isViewable }) => isViewable).at(0)
 				if (!firstVisibleItem) return
@@ -176,15 +181,10 @@ const Page = React.memo(
 		maxHeight,
 		// readingDirection,
 	}: PageProps) => {
-		const {
-			book: { id },
-			pageURL,
-			flatListRef,
-			setImageSizes,
-		} = useImageBasedReader()
+		const { book, pageURL, flatListRef, setImageSizes } = useImageBasedReader()
 		const {
 			preferences: { tapSidesToNavigate, readingDirection, cachePolicy },
-		} = useBookPreferences(id)
+		} = useBookPreferences({ book })
 		const { isTablet } = useDisplay()
 		const { sdk } = useSDK()
 
@@ -202,10 +202,10 @@ const Page = React.memo(
 				const isRight = x > maxWidth - maxWidth / tapThresholdRatio
 
 				if (isLeft) {
-					const modifier = readingDirection === 'rtl' ? 1 : -1
+					const modifier = readingDirection === ReadingDirection.Rtl ? 1 : -1
 					flatListRef.current?.scrollToIndex({ index: index + modifier, animated: true })
 				} else if (isRight) {
-					const modifier = readingDirection === 'rtl' ? -1 : 1
+					const modifier = readingDirection === ReadingDirection.Rtl ? -1 : 1
 					flatListRef.current?.scrollToIndex({ index: index + modifier, animated: true })
 				}
 

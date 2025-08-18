@@ -173,3 +173,5 @@ export default function RootLayout() {
 
 const useIsomorphicLayoutEffect =
 	Platform.OS === 'web' && typeof window === 'undefined' ? React.useEffect : React.useLayoutEffect
+
+// TODO: https://hugeicons.com/ ?

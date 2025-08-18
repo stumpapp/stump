@@ -10,7 +10,7 @@ import { useDisplay } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 
 import { useActiveServer } from '../activeServer'
-import { Image } from '../Image'
+import { FasterImage } from '../Image'
 import { Text } from '../ui'
 import EmptyFeed from './EmptyFeed'
 import { FeedComponentOptions } from './types'
@@ -72,7 +72,7 @@ export default function PublicationGroup({
 
 			<FlashList
 				data={publications}
-				keyExtractor={({ metadata }) => metadata.title}
+				keyExtractor={({ metadata }) => metadata.identifier || metadata.title}
 				renderItem={({ item: publication }) => {
 					const thumbnailURL = publication.images?.at(0)?.href
 					const selfURL = publication.links?.find((link) => link.rel === 'self')?.href
@@ -97,18 +97,22 @@ export default function PublicationGroup({
 										'opacity-90': pressed,
 									})}
 								>
-									<View className="relative aspect-[2/3] overflow-hidden rounded-lg">
-										<Image
-											className="z-0"
+									<View style={{ height: isTablet ? 225 : 150, width: itemWidth }}>
+										<FasterImage
 											source={{
-												uri: thumbnailURL,
+												url: thumbnailURL || '',
 												headers: {
-													Authorization: sdk.authorizationHeader,
-													[STUMP_SAVE_BASIC_SESSION_HEADER]: false,
+													Authorization: sdk.authorizationHeader || '',
+													[STUMP_SAVE_BASIC_SESSION_HEADER]: 'false',
 												},
+												resizeMode: 'cover',
+												borderRadius: 8,
+												cachePolicy: 'discWithCacheControl',
 											}}
-											contentFit="fill"
-											style={{ height: isTablet ? 225 : 150, width: itemWidth }}
+											style={{
+												height: '100%',
+												width: '100%',
+											}}
 										/>
 									</View>
 

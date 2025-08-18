@@ -1,30 +1,87 @@
-import { useLibraries } from '@stump/client'
-import { Library } from '@stump/sdk'
+import { FlashList } from '@shopify/flash-list'
+import { useInfiniteSuspenseGraphQL } from '@stump/client'
+import { graphql } from '@stump/graphql'
+import { useNavigation } from 'expo-router'
+import { ChevronLeft } from 'lucide-react-native'
 import { useCallback } from 'react'
+import { Platform } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
-import { ImageGrid } from '~/components/grid'
+import { useActiveServer } from '~/components/activeServer'
+import { ColumnItem } from '~/components/grid'
+import { useGridItemSize } from '~/components/grid/useGridItemSize'
 import { LibraryGridItem } from '~/components/library'
+import { ILibraryGridItemFragment } from '~/components/library/LibraryGridItem'
+import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
+
+const query = graphql(`
+	query LibrariesScreen($pagination: Pagination) {
+		libraries(pagination: $pagination) {
+			nodes {
+				id
+				...LibraryGridItem
+			}
+			pageInfo {
+				__typename
+				... on CursorPaginationInfo {
+					currentCursor
+					nextCursor
+					limit
+				}
+			}
+		}
+	}
+`)
 
 export default function Screen() {
-	const { libraries, refetch, isRefetching } = useLibraries({ suspense: true })
+	const {
+		activeServer: { id: serverID },
+	} = useActiveServer()
+
+	const navigation = useNavigation()
+	useDynamicHeader({
+		title: 'Libraries',
+		headerLeft: () => <ChevronLeft onPress={() => navigation.goBack()} />,
+	})
+
+	const { data, hasNextPage, fetchNextPage } = useInfiniteSuspenseGraphQL(query, [
+		'libraries',
+		serverID,
+	])
+	const { numColumns, sizeEstimate } = useGridItemSize()
+
+	const onEndReached = useCallback(() => {
+		if (hasNextPage) {
+			fetchNextPage()
+		}
+	}, [hasNextPage, fetchNextPage])
 
 	const renderItem = useCallback(
-		({ item: library, index }: { item: Library; index: number }) => (
-			<LibraryGridItem library={library} index={index} />
+		({ item, index }: { item: ILibraryGridItemFragment; index: number }) => (
+			<ColumnItem index={index} numColumns={numColumns}>
+				<LibraryGridItem library={item} />
+			</ColumnItem>
 		),
-		[],
+		[numColumns],
 	)
 
 	return (
-		<SafeAreaView className="flex-1 bg-background">
-			<ImageGrid
-				header="Libraries"
-				data={libraries || []}
+		<SafeAreaView
+			style={{ flex: 1 }}
+			edges={Platform.OS === 'ios' ? ['top', 'left', 'right'] : ['left', 'right']}
+		>
+			<FlashList
+				data={data?.pages.flatMap((page) => page.libraries.nodes) || []}
 				renderItem={renderItem}
-				keyExtractor={(library) => library.id}
-				onRefresh={refetch}
-				isRefetching={isRefetching}
+				contentContainerStyle={{
+					padding: 16,
+				}}
+				centerContent
+				estimatedItemSize={sizeEstimate}
+				numColumns={numColumns}
+				onEndReachedThreshold={0.75}
+				onEndReached={onEndReached}
+				contentInsetAdjustmentBehavior="automatic"
 			/>
 		</SafeAreaView>
 	)

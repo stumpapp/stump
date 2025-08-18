@@ -1,16 +1,18 @@
-import { useMediaByIdQuery, useSDK } from '@stump/client'
-import { ActiveReadingSession } from '@stump/sdk'
+import { useSDK, useSuspenseGraphQL } from '@stump/client'
+import { BookByIdQuery, graphql } from '@stump/graphql'
 import dayjs from 'dayjs'
 import duration from 'dayjs/plugin/duration'
 import relativeTime from 'dayjs/plugin/relativeTime'
-import { useLocalSearchParams, useRouter } from 'expo-router'
-import { View } from 'react-native'
+import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router'
+import { ChevronLeft, Ellipsis } from 'lucide-react-native'
+import { useLayoutEffect } from 'react'
+import { Platform, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { useActiveServer } from '~/components/activeServer'
 import { BookMetaLink } from '~/components/book'
-import { BookDescription, InfoRow, InfoStat } from '~/components/book/overview'
+import { BookDescription, InfoRow, InfoSection, InfoStat } from '~/components/book/overview'
 import { FasterImage } from '~/components/Image'
 import RefreshControl from '~/components/RefreshControl'
 import { Button, Heading, Text } from '~/components/ui'
@@ -19,13 +21,70 @@ import { formatBytes } from '~/lib/format'
 dayjs.extend(relativeTime)
 dayjs.extend(duration)
 
+const query = graphql(`
+	query BookById($id: ID!) {
+		mediaById(id: $id) {
+			id
+			extension
+			metadata {
+				writers
+				genres
+				links
+				pageCount
+				characters
+				coverArtists
+				publisher
+				inkers
+				colorists
+				letterers
+				series
+				summary
+				number
+				volume
+			}
+			pages
+			readProgress {
+				page
+				percentageCompleted
+				epubcfi
+				startedAt
+				elapsedSeconds
+			}
+			readHistory {
+				completedAt
+			}
+			resolvedName
+			series {
+				resolvedName
+			}
+			size
+			thumbnail {
+				url
+			}
+		}
+	}
+`)
+
+type ActiveReadingSession = NonNullable<
+	NonNullable<Pick<NonNullable<BookByIdQuery['mediaById']>, 'readProgress'>>['readProgress']
+>
+
+// TODO: Figure out what to do with this header shit. It looks OK on Apple
+// but couldn't get anything similar working on Android
+
 export default function Screen() {
 	const { id: bookID } = useLocalSearchParams<{ id: string }>()
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
 	const { sdk } = useSDK()
-	const { media, refetch, isRefetching } = useMediaByIdQuery(bookID, { suspense: true })
+	const {
+		data: { mediaById: book },
+		isRefetching,
+		refetch,
+	} = useSuspenseGraphQL(query, ['bookById', bookID], {
+		id: bookID,
+	})
 
 	const router = useRouter()
 
@@ -40,81 +99,105 @@ export default function Screen() {
 	// 	}
 	// }, [sdk, media?.current_page, media?.id])
 
-	if (!media) return null
+	const navigation = useNavigation()
+	useLayoutEffect(() => {
+		navigation.setOptions({
+			headerLeft: () => <ChevronLeft onPress={() => navigation.goBack()} />,
+			headerRight: () => <Ellipsis />,
+			headerShown: Platform.OS === 'ios',
+			headerTransparent: true,
+			headerTitle: Platform.OS === 'ios' ? book?.resolvedName : '',
+			headerLargeTitleStyle: {
+				fontSize: 24,
+				lineHeight: 32,
+			},
+			headerLargeTitle: true,
+			headerBlurEffect: 'regular',
+		})
+	}, [navigation, book])
 
-	const progression = media.active_reading_session
-	const lastCompletion = media.finished_reading_sessions?.[0]
-	const formattedSize = formatBytes(media.size)
-	const description = media.metadata?.summary || ''
-	const genres = media.metadata?.genre?.map((genre) => `#${genre}`).join(', ')
-	const links = media.metadata?.links || []
-	const pages = media.metadata?.page_count || media.pages
-	const characters = media.metadata?.characters?.join(', ')
+	if (!book) return null
 
-	const seriesName = media.metadata?.series
-	const seriesPosition = media.metadata?.number
-	const seriesVolume = media.metadata?.volume
+	const progression = book.readProgress || null
+	const lastCompletion = book.readHistory?.at(0) || null
+
+	const formattedSize = formatBytes(book.size)
+	const description = book.metadata?.summary || ''
+	const genres = book.metadata?.genres?.map((genre) => `#${genre}`).join(', ')
+	const links = book.metadata?.links || []
+	const pages = book.metadata?.pageCount || book.pages
+	const characters = book.metadata?.characters?.join(', ')
+
+	const seriesName = book.metadata?.series || book.series.resolvedName
+	const seriesPosition = book.metadata?.number
+	const seriesVolume = book.metadata?.volume
 
 	const noMetadata = !description && !seriesName && !genres && !characters
 
-	const publisher = media.metadata?.publisher
-	const writers = media.metadata?.writers?.join(', ')
-	const colorists = media.metadata?.colorists?.join(', ')
-	const inkers = media.metadata?.inkers?.join(', ')
-	const letterers = media.metadata?.letterers?.join(', ')
-	const coverArtists = media.metadata?.cover_artists?.join(', ')
+	const publisher = book.metadata?.publisher
+	const writers = book.metadata?.writers?.join(', ')
+	const colorists = book.metadata?.colorists?.join(', ')
+	const inkers = book.metadata?.inkers?.join(', ')
+	const letterers = book.metadata?.letterers?.join(', ')
+	const coverArtists = book.metadata?.coverArtists?.join(', ')
 
 	const noAcknowledgements =
 		!publisher && !writers && !colorists && !inkers && !letterers && !coverArtists
 
 	const renderRead = () => {
-		const { page, percentage_completed, epubcfi } = progression || {}
-		if (page || percentage_completed || !!epubcfi) {
+		const { page, percentageCompleted, epubcfi } = book.readProgress || {}
+
+		if (page || percentageCompleted || !!epubcfi) {
 			return <Text>Continue</Text>
-		} else if (media.finished_reading_sessions?.length) {
+		} else if (book.readHistory?.length) {
 			return <Text>Read again</Text>
 		} else {
 			return <Text>Read</Text>
 		}
 	}
 
-	const renderPercentage = ({ page, percentage_completed }: ActiveReadingSession) => {
-		if (!page && !percentage_completed) {
+	const renderPercentage = ({ page, percentageCompleted }: ActiveReadingSession) => {
+		if (!page && !percentageCompleted) {
 			return null
 		}
-		const percentageCompleted =
-			percentage_completed?.toFixed(2) ?? Math.round(((page || 0) / pages) * 100)
-		return <InfoStat label="Completed" value={`${percentageCompleted}%`} />
+		const percentage = percentageCompleted?.toFixed(2) ?? Math.round(((page || 0) / pages) * 100)
+		return <InfoStat label="Completed" value={`${percentage}%`} />
 	}
 
-	const renderReadTime = ({ elapsed_seconds, started_at }: ActiveReadingSession) => {
-		if (!elapsed_seconds || !started_at) {
+	const renderReadTime = ({ elapsedSeconds, startedAt }: ActiveReadingSession) => {
+		if (!elapsedSeconds || !startedAt) {
 			return null
 		}
 
-		if (elapsed_seconds) {
-			const readTime = dayjs.duration(elapsed_seconds, 'seconds').humanize()
+		if (elapsedSeconds) {
+			const readTime = dayjs.duration(elapsedSeconds, 'seconds').humanize()
 			return <InfoStat label="Read time" value={readTime} />
 		} else {
-			return <InfoStat label="Started" value={dayjs(started_at).fromNow(true)} />
+			return <InfoStat label="Started" value={dayjs(startedAt).fromNow(true)} />
 		}
 	}
 
 	return (
-		<SafeAreaView className="flex-1 bg-background">
+		<SafeAreaView
+			style={{ flex: 1 }}
+			edges={Platform.OS === 'ios' ? ['top', 'left', 'right'] : ['left', 'right']}
+		>
 			<ScrollView
-				className="flex-1 bg-background px-6 py-3"
+				className="flex-1 bg-background px-6 pb-3"
 				refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
+				contentInsetAdjustmentBehavior="automatic"
 			>
 				<View className="flex-1 gap-8">
-					<View className="flex items-center gap-4">
-						<Heading size="lg" className="mt-6 leading-6">
-							{media.metadata?.title || media.name}
-						</Heading>
+					<View className="mt-6 flex items-center gap-4">
+						{Platform.OS === 'android' && (
+							<Heading size="lg" className="leading-6">
+								{book.resolvedName}
+							</Heading>
+						)}
 						<View className="aspect-[2/3] self-center overflow-hidden rounded-lg">
 							<FasterImage
 								source={{
-									url: sdk.media.thumbnailURL(media.id),
+									url: book.thumbnail.url,
 									headers: {
 										Authorization: sdk.authorizationHeader || '',
 									},
@@ -159,69 +242,82 @@ export default function Screen() {
 					{lastCompletion && !progression && (
 						<View className="flex flex-row justify-around">
 							<InfoStat label="Pages" value={pages.toString()} />
-							{lastCompletion.completed_at && (
+							{lastCompletion.completedAt && (
 								<InfoStat
 									label="Finished"
-									value={dayjs(lastCompletion.completed_at).fromNow(false)}
+									value={dayjs(lastCompletion.completedAt).fromNow(false)}
 								/>
 							)}
 						</View>
 					)}
 
-					<View className="flex w-full gap-2">
-						<Text className="text-lg text-foreground-muted">Information</Text>
+					<InfoSection
+						label="Information"
+						rows={[
+							<InfoRow key="identifier" label="Identifier" value={book.id} />,
+							<InfoRow key="pages" label="Pages" value={pages.toString()} />,
+							<InfoRow key="kind" label="Kind" value={book.extension.toUpperCase()} />,
+							...(formattedSize ? [<InfoRow key="size" label="Size" value={formattedSize} />] : []),
+						]}
+					/>
 
-						<View className="flex flex-col gap-2 rounded-lg bg-background-surface p-3">
-							<InfoRow label="Identifier" value={media.id} />
-							<InfoRow label="Pages" value={pages.toString()} />
-							<InfoRow label="Kind" value={media.extension.toUpperCase()} />
-							{formattedSize && <InfoRow label="Size" value={formattedSize} />}
-						</View>
-					</View>
-
-					<View className="flex w-full gap-2">
-						<Text className="text-lg text-foreground-muted">Metadata</Text>
-
-						<View className="flex flex-col gap-2 rounded-lg bg-background-surface p-3">
-							{noMetadata && <InfoRow label="No metadata available" value="" />}
-
-							{description && <BookDescription description={description} />}
-
-							{seriesName && <InfoRow label="Series Name" value={seriesName} />}
-							{seriesPosition && (
-								<InfoRow
-									label={seriesName ? 'Position' : 'Series Position'}
-									value={seriesPosition.toString()}
-								/>
-							)}
-							{seriesVolume && <InfoRow label="Volume" value={seriesVolume.toString()} />}
-
-							{/* TODO: split into separate section to support click-to-search */}
-							{genres && <InfoRow label="Genres" value={genres} />}
-							{characters && <InfoRow label="Characters" value={characters} />}
-						</View>
-					</View>
+					<InfoSection
+						label="Metadata"
+						rows={[
+							...(noMetadata
+								? [<InfoRow key="noMetadata" label="No metadata available" value="" />]
+								: []),
+							...(description
+								? [<BookDescription key="description" description={description} />]
+								: []),
+							...(seriesName ? [<InfoRow key="series" label="Series" value={seriesName} />] : []),
+							...(seriesPosition
+								? [
+										<InfoRow
+											key="seriesPosition"
+											label={seriesName ? 'Position' : 'Series Position'}
+											value={seriesPosition.toString()}
+										/>,
+									]
+								: []),
+							...(seriesVolume
+								? [<InfoRow key="seriesVolume" label="Volume" value={seriesVolume.toString()} />]
+								: []),
+							// TODO: Separate into separate section, maybe merge with links?
+							...(genres ? [<InfoRow key="genres" label="Genres" value={genres} />] : []),
+							...(characters
+								? [<InfoRow key="characters" label="Characters" value={characters} />]
+								: []),
+						]}
+					/>
 
 					{!noAcknowledgements && (
-						<View className="flex w-full gap-2">
-							<Text className="text-lg text-foreground-muted">Acknowledgements</Text>
-
-							<View className="flex flex-col gap-2 rounded-lg bg-background-surface p-3">
-								{publisher && <InfoRow label="Publisher" value={publisher} />}
-								{writers && <InfoRow label="Writers" value={writers} />}
-								{colorists && <InfoRow label="Colorists" value={colorists} />}
-								{inkers && <InfoRow label="Inkers" value={inkers} />}
-								{letterers && <InfoRow label="Letterers" value={letterers} />}
-								{coverArtists && <InfoRow label="Cover Artists" value={coverArtists} />}
-							</View>
-						</View>
+						<InfoSection
+							label="Acknowledgements"
+							rows={[
+								...(publisher
+									? [<InfoRow key="publisher" label="Publisher" value={publisher} />]
+									: []),
+								...(writers ? [<InfoRow key="writers" label="Writers" value={writers} />] : []),
+								...(colorists
+									? [<InfoRow key="colorists" label="Colorists" value={colorists} />]
+									: []),
+								...(inkers ? [<InfoRow key="inkers" label="Inkers" value={inkers} />] : []),
+								...(letterers
+									? [<InfoRow key="letterers" label="Letterers" value={letterers} />]
+									: []),
+								...(coverArtists
+									? [<InfoRow key="coverArtists" label="Cover Artists" value={coverArtists} />]
+									: []),
+							]}
+						/>
 					)}
 
 					{links.length > 0 && (
 						<View className="flex w-full gap-2">
 							<Text className="text-lg text-foreground-muted">Links</Text>
 
-							<View className="flex flex-row flex-wrap gap-2 p-3">
+							<View className="flex flex-row flex-wrap gap-2">
 								{links.map((link) => (
 									<BookMetaLink key={link} href={link} />
 								))}

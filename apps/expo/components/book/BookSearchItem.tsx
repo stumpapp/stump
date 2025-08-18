@@ -1,8 +1,12 @@
 import { useSDK } from '@stump/client'
 import { FragmentType, graphql, useFragment } from '@stump/graphql'
 import { useRouter } from 'expo-router'
+import pluralize from 'pluralize'
 import { View } from 'react-native'
 import { Pressable } from 'react-native-gesture-handler'
+
+import { formatBytes } from '~/lib/format'
+import { useDisplay } from '~/lib/hooks'
 
 import { useActiveServer } from '../activeServer'
 import { FasterImage } from '../Image'
@@ -15,6 +19,8 @@ const fragment = graphql(`
 		thumbnail {
 			url
 		}
+		size
+		pages
 	}
 `)
 
@@ -37,11 +43,17 @@ export default function BookSearchItem({ book }: Props) {
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
+	const { width } = useDisplay()
 	const data = useFragment(fragment, book)
 	const router = useRouter()
 
 	return (
-		<Pressable onPress={() => router.navigate(`/server/${serverID}/books/${data.id}`)}>
+		<Pressable
+			onPress={() => router.navigate(`/server/${serverID}/books/${data.id}`)}
+			style={{
+				width: width * 0.75,
+			}}
+		>
 			<View className="flex-row items-start gap-4 py-4">
 				<FasterImage
 					source={{
@@ -52,11 +64,15 @@ export default function BookSearchItem({ book }: Props) {
 						resizeMode: 'fill',
 						borderRadius: 5,
 					}}
-					style={{ width: 50, height: 50 / (2 / 3) }}
+					style={{ width: 75, height: 75 / (2 / 3) }}
 				/>
 
-				<View className="flex-1">
+				<View className="flex flex-1 flex-col gap-1">
 					<Text>{data.resolvedName}</Text>
+
+					<Text className="text-foreground-muted">
+						{formatBytes(data.size)} • {data.pages} {pluralize('page', data.pages)}
+					</Text>
 				</View>
 			</View>
 		</Pressable>

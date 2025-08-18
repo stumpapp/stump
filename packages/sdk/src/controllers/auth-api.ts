@@ -35,7 +35,7 @@ export class AuthAPI extends APIBase {
 	 * Fetch the currently authenticated user, if any. This will throw an error if unauthenticated.
 	 */
 	async me(): Promise<AuthUser> {
-		const { data: user } = await this.api.axios.get<AuthUser>(authURL('/me'))
+		const { data: user } = await this.api.axios.get<AuthUser>(authURL('/viewer'))
 		return user
 	}
 

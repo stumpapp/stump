@@ -2,7 +2,6 @@ import axios, { AxiosError } from 'axios'
 import qs from 'qs'
 
 import { APIError } from '../types'
-import { CursorQueryParams, PagedQueryParams } from './types'
 
 export const createRouteURLHandler =
 	(baseURL: string) => (endpoint: string, params?: Record<string, unknown>) => {
@@ -103,32 +102,6 @@ export const toObjectParams = <T extends object>(
 	}
 
 	return qs.parse(newParams.toString(), { ignoreQueryPrefix: true }) as T
-}
-
-export const mergeCursorParams = ({
-	cursor,
-	limit,
-	params,
-}: CursorQueryParams): URLSearchParams => {
-	const searchParams = toUrlParams(params)
-	if (cursor) {
-		searchParams.set('cursor', cursor)
-	}
-	if (limit) {
-		searchParams.set('limit', limit.toString())
-	}
-	return searchParams
-}
-
-export const mergePageParams = ({ page, page_size, params }: PagedQueryParams): URLSearchParams => {
-	const searchParams = toUrlParams(params)
-	if (page) {
-		searchParams.set('page', page.toString())
-	}
-	if (page_size) {
-		searchParams.set('page_size', page_size.toString())
-	}
-	return searchParams
 }
 
 export const isAxiosError = (error: unknown): error is AxiosError => {

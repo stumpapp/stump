@@ -13,17 +13,17 @@ export default function EpubJSReaderContainer({ children }: Props) {
 	const insets = useSafeAreaInsets()
 
 	return (
-		<View
-			className="flex-1 bg-background"
-			style={{
-				paddingTop: insets.top,
-				paddingBottom: insets.bottom,
-			}}
-		>
-			<ReaderProvider>
+		<ReaderProvider>
+			<View
+				className="flex-1 bg-background"
+				style={{
+					paddingTop: insets.top,
+					paddingBottom: insets.bottom,
+				}}
+			>
 				<View className="flex-1 items-center">{children}</View>
 				<EpubJSFooter />
-			</ReaderProvider>
-		</View>
+			</View>
+		</ReaderProvider>
 	)
 }

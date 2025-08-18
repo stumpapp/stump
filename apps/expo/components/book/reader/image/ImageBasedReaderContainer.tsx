@@ -1,37 +1,51 @@
-import { generatePageSets } from '@stump/sdk'
+import { ReadingDirection, ReadingMode } from '@stump/graphql'
+import { generatePageSets, ImageBasedBookPageRef } from '@stump/sdk'
 import { ComponentProps, useCallback, useMemo, useRef, useState } from 'react'
 import { Dimensions, View } from 'react-native'
 import { FlatList } from 'react-native-gesture-handler'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { useDisplay } from '~/lib/hooks'
-import { useBookPreferences } from '~/stores/reader'
+import { DEFAULT_BOOK_PREFERENCES, useBookPreferences } from '~/stores/reader'
 
 import { IImageBasedReaderContext, ImageBasedReaderContext } from './context'
 import ControlsOverlay from './ControlsOverlay'
 import ImageBasedReader from './ImageBasedReader'
-import { useDimensions } from './useDimensions'
 
 type Props = Omit<
 	IImageBasedReaderContext,
-	'currentPage' | 'flatListRef' | 'setImageSizes' | 'pageSets'
+	'currentPage' | 'flatListRef' | 'setImageSizes' | 'pageSets' | 'imageSizes'
 > &
 	ComponentProps<typeof ImageBasedReader>
 
-export default function ImageBasedReaderContainer({
-	initialPage,
-	onPageChanged,
-	imageSizes,
-	...ctx
-}: Props) {
+export default function ImageBasedReaderContainer({ initialPage, onPageChanged, ...ctx }: Props) {
 	const { height, width } = useDisplay()
 	const {
-		preferences: { incognito, doublePageBehavior = 'auto', readingMode },
-	} = useBookPreferences(ctx.book.id)
-	const { sizes, setSizes } = useDimensions({
-		bookID: ctx.book.id,
-		imageSizes,
-	})
+		preferences: {
+			incognito,
+			doublePageBehavior = DEFAULT_BOOK_PREFERENCES.doublePageBehavior,
+			readingMode,
+			readingDirection,
+			secondPageSeparate,
+		},
+	} = useBookPreferences({ book: ctx.book })
+
+	const [imageSizes, setImageSizes] = useState<Record<number, ImageBasedBookPageRef>>(
+		() =>
+			ctx.book?.metadata?.pageAnalysis?.dimensions
+				?.map(({ height, width }) => ({
+					height,
+					width,
+					ratio: width / height,
+				}))
+				.reduce(
+					(acc, ref, index) => {
+						acc[index] = ref
+						return acc
+					},
+					{} as Record<number, { height: number; width: number; ratio: number }>,
+				) ?? {},
+	)
 
 	const deviceOrientation = useMemo(
 		() => (width > height ? 'landscape' : 'portrait'),
@@ -41,12 +55,33 @@ export default function ImageBasedReaderContainer({
 	const pages = ctx.book.pages
 	const pageSets = useMemo(() => {
 		const autoButOff = doublePageBehavior === 'auto' && deviceOrientation === 'portrait'
-		const modeForceOff = readingMode === 'continuous:vertical'
+		const modeForceOff = readingMode === ReadingMode.ContinuousVertical
+
+		let sets: number[][] = []
 		if (doublePageBehavior === 'off' || autoButOff || modeForceOff) {
-			return Array.from({ length: pages }, (_, i) => [i])
+			sets = Array.from({ length: pages }, (_, i) => [i])
+		} else {
+			sets = generatePageSets({
+				imageSizes,
+				pages: pages,
+				secondPageSeparate: secondPageSeparate,
+			})
 		}
-		return generatePageSets({ imageSizes: sizes, pages: pages })
-	}, [doublePageBehavior, pages, sizes, deviceOrientation, readingMode])
+
+		if (readingDirection === ReadingDirection.Rtl) {
+			return [...sets.map((set) => [...set].reverse())].reverse()
+		}
+
+		return sets
+	}, [
+		doublePageBehavior,
+		pages,
+		imageSizes,
+		deviceOrientation,
+		readingMode,
+		readingDirection,
+		secondPageSeparate,
+	])
 
 	const [currentPage, setCurrentPage] = useState(() => initialPage)
 
@@ -83,8 +118,8 @@ export default function ImageBasedReaderContainer({
 				...ctx,
 				currentPage,
 				onPageChanged: onPageChangedHandler,
-				imageSizes: sizes,
-				setImageSizes: setSizes,
+				imageSizes,
+				setImageSizes,
 				pageSets,
 				flatListRef,
 			}}

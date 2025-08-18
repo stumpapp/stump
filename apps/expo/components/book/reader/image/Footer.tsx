@@ -1,5 +1,6 @@
 import { Slider } from '@miblanchard/react-native-slider'
 import { useSDK } from '@stump/client'
+import { ReadingDirection } from '@stump/graphql'
 import dayjs from 'dayjs'
 import duration from 'dayjs/plugin/duration'
 import { Image as EImage } from 'expo-image'
@@ -27,7 +28,7 @@ export default function Footer() {
 	const { sdk } = useSDK()
 	const { isTablet, height, width } = useDisplay()
 	const {
-		book: { pages, id },
+		book,
 		pageURL,
 		pageThumbnailURL,
 		currentPage = 1,
@@ -36,10 +37,10 @@ export default function Footer() {
 		imageSizes,
 		setImageSizes,
 	} = useImageBasedReader()
-	const elapsedSeconds = useBookReadTime(id)
+	const elapsedSeconds = useBookReadTime(book.id)
 	const {
 		preferences: { footerControls = 'slider', trackElapsedTime, readingDirection },
-	} = useBookPreferences(id)
+	} = useBookPreferences({ book })
 
 	const galleryRef = useRef<FlatList>(null)
 	const insets = useSafeAreaInsets()
@@ -63,7 +64,7 @@ export default function Footer() {
 		}
 	})
 
-	const percentage = (currentPage / pages) * 100
+	const percentage = (currentPage / book.pages) * 100
 
 	const baseSize = useMemo(() => {
 		const baseWidth = isTablet ? 120 : 75
@@ -199,10 +200,11 @@ export default function Footer() {
 
 			const windowSize = isTablet ? 8 : 6
 
-			const actualPage = readingDirection === 'rtl' ? pages - currentPage : currentPage
+			const actualPage =
+				readingDirection === ReadingDirection.Rtl ? book.pages - currentPage : currentPage
 
 			const start = Math.max(0, actualPage - windowSize)
-			const end = Math.min(pages, actualPage + windowSize)
+			const end = Math.min(book.pages, actualPage + windowSize)
 			const urls = Array.from({ length: end - start }, (_, i) =>
 				pageThumbnailURL ? pageThumbnailURL(i + start) : pageURL(i + start),
 			)
@@ -224,11 +226,11 @@ export default function Footer() {
 			if (footerControls !== 'slider') return
 
 			const currentIdx = currentPage - 1
-			if (idx < 0 || idx >= pages) return
+			if (idx < 0 || idx >= book.pages) return
 			if (idx === currentIdx) return
 			setSliderValue(idx)
 		},
-		[currentPage, pages, footerControls],
+		[currentPage, book.pages, footerControls],
 	)
 
 	const getSliderImageContainerStyles = useCallback(
@@ -275,7 +277,7 @@ export default function Footer() {
 
 	const renderAboveThumbComponent = useCallback(
 		(_: number, value: number) => {
-			if (value < 0 || value >= pages) return null
+			if (value < 0 || value >= book.pages) return null
 			if (!visible) return null
 			if (!isSliderDragging) return null
 
@@ -333,7 +335,7 @@ export default function Footer() {
 			)
 		},
 		[
-			pages,
+			book.pages,
 			isSliderDragging,
 			pageSource,
 			getSliderImageContainerStyles,
@@ -347,24 +349,22 @@ export default function Footer() {
 		(page: number) => {
 			setIsSliderDragging(false)
 			if (footerControls !== 'slider') return
-			const resolvedPage = (readingDirection === 'rtl' ? pages - page : page) - 1
+			const resolvedPage =
+				(readingDirection === ReadingDirection.Rtl ? book.pages - page : page) - 1
 			const idx = pageSets.findIndex((set) => set.includes(resolvedPage))
 			if (idx === -1) return
 			onChangePage(idx)
 		},
-		[onChangePage, pages, readingDirection, footerControls, pageSets],
+		[onChangePage, book.pages, readingDirection, footerControls, pageSets],
 	)
 
-	useEffect(
-		() => {
-			if (visible) {
-				const actualPage = readingDirection === 'rtl' ? pages - currentPage : currentPage
-				setSliderValue(actualPage)
-			}
-		},
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[visible, readingDirection, currentPage],
-	)
+	useEffect(() => {
+		if (visible) {
+			const actualPage =
+				readingDirection === ReadingDirection.Rtl ? book.pages - currentPage : currentPage
+			setSliderValue(actualPage)
+		}
+	}, [book.pages, visible, readingDirection, currentPage])
 
 	const previousReadingDirection = usePrevious(readingDirection)
 	/**
@@ -375,19 +375,22 @@ export default function Footer() {
 		if (previousReadingDirection === readingDirection) return
 
 		if (footerControls === 'slider') {
-			const newValue = readingDirection === 'rtl' ? pages - currentPage : currentPage
+			const newValue =
+				readingDirection === ReadingDirection.Rtl ? book.pages - currentPage : currentPage
 			setSliderValue(newValue)
 		}
-	}, [currentPage, pages, readingDirection, previousReadingDirection, footerControls])
+	}, [currentPage, book.pages, readingDirection, previousReadingDirection, footerControls])
 
 	// Note: The minimum and maximum track styles are inverted based on the reading direction, as
 	// to give the appearance of either ltr or rtl (minimum track is ltr, maximum track is rtl)
 	const minimumTrackStyle = useMemo(
-		() => (readingDirection === 'ltr' ? { backgroundColor: 'rgb(196, 130, 89)' } : {}),
+		() =>
+			readingDirection === ReadingDirection.Ltr ? { backgroundColor: 'rgb(196, 130, 89)' } : {},
 		[readingDirection],
 	)
 	const maximumTrackStyle = useMemo(
-		() => (readingDirection === 'rtl' ? { backgroundColor: 'rgb(196, 130, 89)' } : {}),
+		() =>
+			readingDirection === ReadingDirection.Rtl ? { backgroundColor: 'rgb(196, 130, 89)' } : {},
 		[readingDirection],
 	)
 
@@ -409,7 +412,10 @@ export default function Footer() {
 			return (
 				<Pressable onPress={() => onChangePage(index)}>
 					<View
-						className={cn('flex flex-row', { 'pl-1': index === 0, 'pr-1': index === pages - 1 })}
+						className={cn('flex flex-row', {
+							'pl-1': index === 0,
+							'pr-1': index === book.pages - 1,
+						})}
 						style={{
 							...getGalleryItemSize(index),
 							gap: 1,
@@ -447,7 +453,7 @@ export default function Footer() {
 		[
 			onChangePage,
 			currentPage,
-			pages,
+			book.pages,
 			pageSource,
 			getGalleryItemSize,
 			onImageLoaded,
@@ -463,7 +469,7 @@ export default function Footer() {
 				<FlatList
 					ref={galleryRef}
 					data={pageSets}
-					inverted={readingDirection === 'rtl'}
+					inverted={readingDirection === ReadingDirection.Rtl}
 					keyExtractor={(item) => `gallery-${item.join('-')}`}
 					renderItem={renderGalleryItem}
 					contentContainerStyle={{ gap: 6, alignItems: 'flex-end' }}
@@ -482,7 +488,7 @@ export default function Footer() {
 						className="h-1 bg-[#898d94]"
 						indicatorClassName="bg-[#f5f3ef]"
 						value={percentage}
-						inverted={readingDirection === 'rtl'}
+						inverted={readingDirection === ReadingDirection.Rtl}
 						max={100}
 					/>
 				)}
@@ -519,7 +525,7 @@ export default function Footer() {
 
 					<View>
 						<Text className="text-sm text-[#898d94]">
-							Page {currentPage} of {pages}
+							Page {currentPage} of {book.pages}
 						</Text>
 					</View>
 				</View>

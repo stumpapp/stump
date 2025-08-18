@@ -58,6 +58,18 @@ export default function Screen() {
 		[activeServer.id, router, searchURL],
 	)
 
+	// TODO: Do this instead
+	// useLayoutEffect(() => {
+	// 	navigation.setOptions({
+	// 		headerShown: true,
+	// 		headerSearchBarOptions: {
+	// 			placeholder: 'Search',
+	// 			onChangeText: (e: NativeSyntheticEvent<TextInputChangeEventData>) =>
+	// 				setQuery(e.nativeEvent.text),
+	// 		},
+	// 	})
+	// }, [navigation, setQuery])
+
 	if (!feed) return <MaybeErrorFeed error={error} />
 
 	const [navGroups, publicationGroups] = partition(

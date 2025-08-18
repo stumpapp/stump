@@ -19,6 +19,7 @@ export default function TabLayout() {
 			<Tabs.Screen
 				name="index"
 				options={{
+					headerShown: true,
 					title: 'Servers',
 					tabBarIcon: ({ focused }) => (
 						<Server

@@ -1,21 +1,20 @@
-import { Location, Reader } from '@epubjs-react-native/core'
+import { Location, Reader, Theme } from '@epubjs-react-native/core'
 import { useFileSystem } from '@epubjs-react-native/expo-file-system'
 import { useSDK } from '@stump/client'
-import { isAxiosError } from '@stump/sdk'
-import { Media } from '@stump/sdk'
 import { useColorScheme } from 'nativewind'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { useDisplay } from '~/lib/hooks'
 
+import { EbookReaderBookRef } from '../image/context'
 import EpubJSReaderContainer from './EpubJSReaderContainer'
 
 type Props = {
 	/**
 	 * The media which is being read
 	 */
-	book: Media
+	book: EbookReaderBookRef
 	/**
 	 * The initial CFI to start the reader on
 	 */
@@ -24,6 +23,8 @@ type Props = {
 	 * Whether the reader should be in incognito mode
 	 */
 	incognito?: boolean
+
+	onEpubCfiChanged: (cfi: string, percentage: number) => void
 }
 
 /**
@@ -32,7 +33,7 @@ type Props = {
  * TODO: create a custom reader component, this is a HUGE effort but will pay off in
  * the long run
  */
-export default function EpubJSReader({ book, initialCfi, incognito }: Props) {
+export default function EpubJSReader({ book, initialCfi, incognito, onEpubCfiChanged }: Props) {
 	const { width, height } = useDisplay()
 	const { colorScheme } = useColorScheme()
 	const { sdk } = useSDK()
@@ -43,6 +44,16 @@ export default function EpubJSReader({ book, initialCfi, incognito }: Props) {
 	 */
 	const [base64, setBase64] = useState<string | null>(null)
 
+	const defaultTheme = useMemo(
+		() =>
+			(colorScheme === 'dark'
+				? {
+						body: { background: '#0F1011 !important', color: '#E8EDF4' },
+					}
+				: { body: { color: 'black' } }) as Theme,
+		[colorScheme],
+	)
+
 	const insets = useSafeAreaInsets()
 
 	/**
@@ -52,7 +63,6 @@ export default function EpubJSReader({ book, initialCfi, incognito }: Props) {
 	useEffect(() => {
 		async function fetchBook() {
 			try {
-				// const response = await fetch(sdk.media.downloadURL(book.id))
 				const response = await fetch(sdk.media.downloadURL(book.id), {
 					headers: {
 						...sdk.customHeaders,
@@ -91,22 +101,10 @@ export default function EpubJSReader({ book, initialCfi, incognito }: Props) {
 					start: { cfi },
 				} = currentLocation
 
-				try {
-					await sdk.epub.updateProgress({
-						epubcfi: cfi,
-						id: book.id,
-						is_complete: progress >= 1.0,
-						percentage: Math.min(1, progress),
-					})
-				} catch (e) {
-					console.error(e)
-					if (isAxiosError(e)) {
-						console.error(e.response?.data)
-					}
-				}
+				onEpubCfiChanged(cfi, progress)
 			}
 		},
-		[incognito, book.id, sdk.epub],
+		[incognito, onEpubCfiChanged],
 	)
 
 	if (!base64) {
@@ -125,13 +123,7 @@ export default function EpubJSReader({ book, initialCfi, incognito }: Props) {
 				initialLocation={initialCfi}
 				onLocationChange={handleLocationChanged}
 				// renderLoadingFileComponent={LoadingSpinner}
-				defaultTheme={
-					colorScheme === 'dark'
-						? {
-								body: { background: '#0F1011 !important', color: '#E8EDF4' },
-							}
-						: { body: { color: 'black' } }
-				}
+				defaultTheme={defaultTheme}
 			/>
 		</EpubJSReaderContainer>
 	)

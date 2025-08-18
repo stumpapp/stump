@@ -1,11 +1,5 @@
 import { AuthUser, isAxiosError, isUser, PasswordUserInput } from '@stump/sdk'
-import {
-	QueryOptions,
-	useMutation,
-	useQuery,
-	useQueryClient,
-	UseQueryOptions,
-} from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient, UseQueryOptions } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 
 import { useClientContext } from '../context'
@@ -23,9 +17,44 @@ export function useAuthQuery({ additionalKeys, ...options }: Params = {}) {
 			const data = await sdk.auth.me()
 			if (!data.id) {
 				console.warn('Malformed response received from server', data)
+				// console.log('LOGIN', await sdk.auth.login({ username: 'oromei', password: 'oromei' }))
+				// console.log('ME', await sdk.auth.me(), data)
 				throw new Error('Malformed response received from server')
 			}
+
 			return data
+			// return {
+			// 	id: 'c5caa5c4-544b-4412-9be2-abdebb4945f2',
+			// 	avatarUrl: null,
+			// 	username: 'oromei',
+			// 	isServerOwner: true,
+			// 	isLocked: false,
+			// 	permissions: [],
+			// 	ageRestriction: null,
+			// 	preferences: {
+			// 		preferredLayoutMode: 'GRID',
+			// 		locale: 'en',
+			// 		appTheme: 'dark',
+			// 		appFont: 'INTER',
+			// 		primaryNavigationMode: 'SIDEBAR',
+			// 		layoutMaxWidthPx: 1280,
+			// 		showQueryIndicator: false,
+			// 		enableLiveRefetch: false,
+			// 		enableDiscordPresence: false,
+			// 		enableCompactDisplay: false,
+			// 		enableGradients: false,
+			// 		enableDoubleSidebar: true,
+			// 		enableReplacePrimarySidebar: false,
+			// 		enableHideScrollbar: false,
+			// 		preferAccentColor: false,
+			// 		showThumbnailsInHeaders: false,
+			// 		enableJobOverlay: true,
+			// 		enableAlphabetSelect: true,
+			// 		navigationArrangement: null,
+			// 		homeArrangement: null,
+			// 		userId: 'c5caa5c4-544b-4412-9be2-abdebb4945f2',
+			// 	},
+			// }
 		},
 		throwOnError: false,
 		...options,

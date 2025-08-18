@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { Redirect, useLocalSearchParams } from 'expo-router'
 import { useCallback } from 'react'
-import { View } from 'react-native'
+import { Platform, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
@@ -10,6 +10,7 @@ import { Button, Heading, Text } from '~/components/ui'
 import { icons } from '~/lib'
 import { getServerStoredPreferencesUsage } from '~/lib/filesystem'
 import { formatBytesSeparate, humanizeByteUnit } from '~/lib/format'
+import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
 import { useReaderStore } from '~/stores'
 import { useServerDownloads } from '~/stores/download'
 import { useSavedServerStore } from '~/stores/savedServer'
@@ -23,10 +24,11 @@ export default function Screen() {
 		data: preferencesBytes,
 		refetch,
 		isRefetching,
+		isLoading,
 	} = useQuery({
 		queryKey: ['server-pref-usage', serverID],
 		queryFn: () => getServerStoredPreferencesUsage(serverID),
-		suspense: true,
+		throwOnError: false,
 	})
 
 	const server = useSavedServerStore((state) =>
@@ -41,19 +43,27 @@ export default function Screen() {
 		refetch()
 	}, [serverID, clearLibrarySettings, refetch])
 
+	useDynamicHeader({
+		title: server?.name || '',
+	})
+
 	if (!server) {
 		return <Redirect href="/settings/usage" />
 	}
 
+	if (isLoading) return null
+
 	return (
-		<SafeAreaView className="flex-1 bg-background">
+		<SafeAreaView
+			style={{ flex: 1 }}
+			edges={Platform.OS === 'ios' ? ['top', 'left', 'right'] : ['left', 'right']}
+		>
 			<ScrollView
 				className="flex-1 bg-background"
 				refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
+				contentInsetAdjustmentBehavior="automatic"
 			>
-				<View className="flex-1 gap-8 bg-background px-4">
-					<Heading size="lg">{server?.name || 'Server'}</Heading>
-
+				<View className="flex-1 gap-8 bg-background px-4 pt-8">
 					<View className="flex-1 gap-4">
 						<Heading>Downloads</Heading>
 
@@ -73,7 +83,7 @@ export default function Screen() {
 
 					<View className="flex-1 gap-4">
 						<View>
-							<Heading>Stored preferences</Heading>
+							<Heading>Stored Preferences</Heading>
 							<Text className="text-foreground-muted">
 								Miscellaneous data like book preferences, offline reading progress, etc.
 							</Text>

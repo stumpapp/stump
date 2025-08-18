@@ -1,24 +1,35 @@
-import { useSDK } from '@stump/client'
-import { Series } from '@stump/sdk'
+import { FragmentType, graphql, useFragment } from '@stump/graphql'
 
 import { useActiveServer } from '../activeServer'
 import GridImageItem from '../grid/GridImageItem'
 
+const fragment = graphql(`
+	fragment SeriesGridItem on Series {
+		id
+		resolvedName
+		thumbnail {
+			url
+		}
+	}
+`)
+
+export type ISeriesGridItemFragment = FragmentType<typeof fragment>
+
 type Props = {
-	series: Series
+	series: ISeriesGridItemFragment
 }
 
 export default function SeriesGridItem({ series }: Props) {
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
-	const { sdk } = useSDK()
+	const data = useFragment(fragment, series)
 
 	return (
 		<GridImageItem
-			uri={sdk.series.thumbnailURL(series.id)}
-			title={series.metadata?.title || series.name}
-			href={`/server/${serverID}/series/${series.id}`}
+			uri={data.thumbnail.url}
+			title={data.resolvedName}
+			href={`/server/${serverID}/series/${data.id}`}
 		/>
 	)
 }

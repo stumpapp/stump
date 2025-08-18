@@ -4,6 +4,8 @@ import { useRouter } from 'expo-router'
 import { View } from 'react-native'
 import { Pressable } from 'react-native-gesture-handler'
 
+import { useDisplay } from '~/lib/hooks'
+
 import { useActiveServer } from '../activeServer'
 import { FasterImage } from '../Image'
 import { Text } from '../ui'
@@ -37,11 +39,17 @@ export default function LibrarySearchItem({ library }: Props) {
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
+	const { width } = useDisplay()
 	const data = useFragment(fragment, library)
 	const router = useRouter()
 
 	return (
-		<Pressable onPress={() => router.navigate(`/server/${serverID}/libraries/${data.id}`)}>
+		<Pressable
+			onPress={() => router.navigate(`/server/${serverID}/libraries/${data.id}`)}
+			style={{
+				width: width * 0.75,
+			}}
+		>
 			<View className="flex-row items-start gap-4 py-4">
 				<FasterImage
 					source={{
@@ -52,7 +60,7 @@ export default function LibrarySearchItem({ library }: Props) {
 						resizeMode: 'fill',
 						borderRadius: 5,
 					}}
-					style={{ width: 50, height: 50 / (2 / 3) }}
+					style={{ width: 75, height: 75 / (2 / 3) }}
 				/>
 
 				<View className="flex-1">

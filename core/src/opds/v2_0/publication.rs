@@ -64,8 +64,6 @@ impl OPDSPublication {
 		"https://readium.org/webpub-manifest/context.jsonld".to_string()
 	}
 
-	// FIXME: This fucks with the ordering of the publications in the feed. Figure something
-	// else out...
 	pub async fn vec_from_books(
 		conn: &DatabaseConnection,
 		finalizer: OPDSLinkFinalizer,
@@ -74,68 +72,66 @@ impl OPDSPublication {
 		let mut series_to_books_map = HashMap::new();
 		let mut series_id_to_series_map = HashMap::new();
 
-		for book in books {
+		for book in &books {
 			series_to_books_map
 				.entry(book.series.id.clone())
 				.or_insert_with(Vec::new)
-				.push(book.clone());
-			series_id_to_series_map
-				.insert(book.series.id.to_string(), book.series.clone());
+				.push(book.media.id.clone());
+			series_id_to_series_map.insert(book.series.id.clone(), book.series.clone());
 		}
 
-		let mut publications = vec![];
+		let mut all_positions = HashMap::new();
+		for (series_id, book_ids) in &series_to_books_map {
+			let positions = conn
+				.book_positions_in_series(book_ids.clone(), series_id.clone())
+				.await?;
+			all_positions.extend(positions);
+		}
 
-		for (series_id, books) in series_to_books_map {
+		let mut publications = Vec::with_capacity(books.len());
+
+		for book in books {
 			let series = series_id_to_series_map
-				.get(&series_id)
+				.get(&book.series.id)
 				.ok_or_else(|| {
 					CoreError::InternalError("Series not found in series map".to_string())
 				})?
 				.clone();
 
-			let positions = conn
-				.book_positions_in_series(
-					books.iter().map(|book| book.media.id.clone()).collect(),
-					series.id.clone(),
-				)
-				.await?;
+			let links = OPDSPublication::links_for_book(&book, &finalizer)?;
+			let images = OPDSPublication::images_for_book(&book, &finalizer).await?;
 
-			for book in books {
-				let links = OPDSPublication::links_for_book(&book, &finalizer)?;
-				let images = OPDSPublication::images_for_book(&book, &finalizer).await?;
+			let position = all_positions.get(&book.media.id).copied();
 
-				let position = positions.get(&book.media.id).copied();
+			let metadata = book.metadata.clone().unwrap_or_default();
+			let title = metadata.title.clone().unwrap_or(book.media.name);
+			let description = metadata.summary.clone();
 
-				let metadata = book.metadata.clone().unwrap_or_default();
-				let title = metadata.title.clone().unwrap_or(book.media.name);
-				let description = metadata.summary.clone();
+			// TODO(sea-orm): skip ID in metadata...
+			// Unset the title and summary so they don't get serialized twice
+			let media_metadata = media_metadata::Model {
+				title: None,
+				summary: None,
+				..metadata
+			};
 
-				// TODO(sea-orm): skip ID in metadata...
-				// Unset the title and summary so they don't get serialized twice
-				let media_metadata = media_metadata::Model {
-					title: None,
-					summary: None,
-					..metadata
-				};
+			let metadata = OPDSMetadataBuilder::default()
+				.title(title)
+				.modified(OPDSMetadata::generate_modified())
+				.description(description)
+				.belongs_to(OPDSEntryBelongsTo::from((series, position)))
+				.dynamic_metadata(OPDSDynamicMetadata(serde_json::to_value(
+					media_metadata,
+				)?))
+				.build()?;
 
-				let metadata = OPDSMetadataBuilder::default()
-					.title(title)
-					.modified(OPDSMetadata::generate_modified())
-					.description(description)
-					.belongs_to(OPDSEntryBelongsTo::from((series.clone(), position)))
-					.dynamic_metadata(OPDSDynamicMetadata(serde_json::to_value(
-						media_metadata,
-					)?))
-					.build()?;
+			let publication = OPDSPublicationBuilder::default()
+				.metadata(metadata)
+				.links(links)
+				.images(images)
+				.build()?;
 
-				let publication = OPDSPublicationBuilder::default()
-					.metadata(metadata)
-					.links(links)
-					.images(images)
-					.build()?;
-
-				publications.push(publication);
-			}
+			publications.push(publication);
 		}
 
 		Ok(publications)

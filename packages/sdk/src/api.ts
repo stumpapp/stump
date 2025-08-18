@@ -236,6 +236,7 @@ export class Api {
 		return {
 			...this.customHeaders,
 			...(this.authorizationHeader ? { Authorization: this.authorizationHeader } : {}),
+			// 'Content-Type': 'application/json',
 		}
 	}
 

@@ -3,55 +3,126 @@ import {
 	EBOOK_EXTENSION,
 	PDF_EXTENSION,
 	queryClient,
-	useMediaByIdQuery,
+	useGraphQLMutation,
 	useSDK,
-	useUpdateMediaProgress,
+	useSuspenseGraphQL,
 } from '@stump/client'
+import { graphql } from '@stump/graphql'
 import { useKeepAwake } from 'expo-keep-awake'
 import * as NavigationBar from 'expo-navigation-bar'
 import { useLocalSearchParams } from 'expo-router'
-import { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useEffect } from 'react'
 
 import { EpubJSReader, ImageBasedReader, UnsupportedReader } from '~/components/book/reader'
 import { useAppState } from '~/lib/hooks'
 import { useReaderStore } from '~/stores'
 import { useBookPreferences, useBookTimer } from '~/stores/reader'
 
+export const query = graphql(`
+	query BookReadScreen($id: ID!) {
+		mediaById(id: $id) {
+			id
+			name: resolvedName
+			pages
+			extension
+			readProgress {
+				percentageCompleted
+				epubcfi
+				page
+				elapsedSeconds
+			}
+			libraryConfig {
+				defaultReadingImageScaleFit
+				defaultReadingMode
+				defaultReadingDir
+			}
+			metadata {
+				pageAnalysis {
+					dimensions {
+						height
+						width
+					}
+				}
+			}
+		}
+	}
+`)
+
+const pageMutation = graphql(`
+	mutation UpdateReadProgress($id: ID!, $page: Int!, $elapsedSeconds: Int!) {
+		updateMediaProgress(id: $id, page: $page, elapsedSeconds: $elapsedSeconds) {
+			__typename
+		}
+	}
+`)
+
+const ebookMutation = graphql(`
+	mutation UpdateEpubCfi($id: ID!, $input: EpubProgressInput!) {
+		updateEpubProgress(id: $id, input: $input) {
+			__typename
+		}
+	}
+`)
+
 type Params = {
 	id: string
-	// restart?: boolean
 }
 
 export default function Screen() {
 	useKeepAwake()
 	const { id: bookID } = useLocalSearchParams<Params>()
 	const { sdk } = useSDK()
-	const { media: book } = useMediaByIdQuery(bookID, {
-		suspense: true,
-		params: {
-			load_pages: true,
-		},
+	const {
+		data: { mediaById: book },
+	} = useSuspenseGraphQL(query, ['readBook', bookID], {
+		id: bookID,
 	})
+
+	if (!book) {
+		throw new Error('Book not found')
+	}
+
 	const {
 		preferences: { preferSmallImages, trackElapsedTime },
-	} = useBookPreferences(book?.id || '')
+	} = useBookPreferences({ book })
 	const { pause, resume, totalSeconds, isRunning, reset } = useBookTimer(book?.id || '', {
-		initial: book?.active_reading_session?.elapsed_seconds,
+		initial: book?.readProgress?.elapsedSeconds,
 		enabled: trackElapsedTime,
 	})
 
-	const { updateReadProgressAsync } = useUpdateMediaProgress(book?.id || '', {
+	const { mutate: updateProgress } = useGraphQLMutation(pageMutation, {
 		retry: (attempts) => attempts < 3,
-		useErrorBoundary: false,
+		throwOnError: false,
 	})
+
 	const onPageChanged = useCallback(
 		(page: number) => {
-			updateReadProgressAsync({
+			updateProgress({
+				id: book.id,
 				page,
-				elapsed_seconds: totalSeconds,
+				elapsedSeconds: totalSeconds,
 			})
 		},
-		[totalSeconds, updateReadProgressAsync],
+		[book.id, totalSeconds, updateProgress],
+	)
+
+	const { mutate: updateEbookProgress } = useGraphQLMutation(ebookMutation, {
+		retry: (attempts) => attempts < 3,
+		throwOnError: false,
+	})
+
+	const onEpubCfiChanged = useCallback(
+		(cfi: string, percentage: number) => {
+			updateEbookProgress({
+				id: book.id,
+				input: {
+					epubcfi: cfi,
+					elapsedSeconds: totalSeconds,
+					percentage,
+				},
+			})
+		},
+		[book.id, totalSeconds, updateEbookProgress],
 	)
 
 	const setIsReading = useReaderStore((state) => state.setIsReading)
@@ -101,46 +172,34 @@ export default function Screen() {
 			NavigationBar.setVisibilityAsync('hidden')
 			return () => {
 				NavigationBar.setVisibilityAsync('visible')
-				queryClient.refetchQueries({ queryKey: [sdk.media.keys.getByID, bookID], exact: false })
-				queryClient.refetchQueries({ queryKey: [sdk.media.keys.inProgress], exact: false })
+				queryClient.refetchQueries({ queryKey: ['bookById', bookID], exact: false })
+				queryClient.refetchQueries({ queryKey: ['continueReading'], exact: false })
 			}
 		},
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[],
 	)
 
-	const imageSizes = useMemo(
-		() =>
-			book?.metadata?.page_dimensions?.dimensions
-				?.map(({ height, width }) => ({
-					height,
-					width,
-					ratio: width / height,
-				}))
-				.reduce(
-					(acc, ref, index) => {
-						acc[index] = ref
-						return acc
-					},
-					{} as Record<number, { height: number; width: number; ratio: number }>,
-				),
-		[book?.metadata?.page_dimensions?.dimensions],
-	)
-
 	if (!book) return null
 
 	if (book.extension.match(EBOOK_EXTENSION)) {
-		const currentProgressCfi = book.current_epubcfi || undefined
+		const currentProgressCfi = book.readProgress?.epubcfi || undefined
 		// const initialCfi = restart ? undefined : currentProgressCfi
-		return <EpubJSReader book={book} initialCfi={currentProgressCfi} /*incognito={incognito}*/ />
+		return (
+			<EpubJSReader
+				book={book}
+				initialCfi={currentProgressCfi} /*incognito={incognito}*/
+				onEpubCfiChanged={onEpubCfiChanged}
+			/>
+		)
 	} else if (book.extension.match(ARCHIVE_EXTENSION) || book.extension.match(PDF_EXTENSION)) {
-		const currentProgressPage = book.current_page || 1
+		const currentProgressPage = book.readProgress?.page || 1
 		// const initialPage = restart ? 1 : currentProgressPage
 		const initialPage = currentProgressPage
 		return (
 			<ImageBasedReader
 				initialPage={initialPage}
-				book={{ id: book.id, name: book.metadata?.title || book.name, pages: book.pages }}
+				book={book}
 				pageURL={(page: number) => sdk.media.bookPageURL(book.id, page)}
 				pageThumbnailURL={
 					preferSmallImages
@@ -150,7 +209,6 @@ export default function Screen() {
 								})
 						: undefined
 				}
-				imageSizes={imageSizes}
 				onPageChanged={onPageChanged}
 				resetTimer={reset}
 			/>

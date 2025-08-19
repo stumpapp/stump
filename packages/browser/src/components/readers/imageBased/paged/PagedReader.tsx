@@ -173,6 +173,21 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 	}, [pageSetWidth, innerWidth, isMobile])
 
 	/**
+	 * Record previous scroll position to restore if backtracked within 3 seconds
+	 */
+	const scrollPositionMap = useRef(new Map<number, { scrollTop: number; timestamp: number }>())
+
+	useEffect(() => {
+		const scrollElement = pageSetRef.current?.parentElement?.parentElement?.parentElement
+		const storedScrollState = scrollPositionMap.current.get(currentSetIdx)
+		let scrollTop = 0
+		if (storedScrollState && Date.now() - storedScrollState.timestamp < 3000) {
+			scrollTop = storedScrollState.scrollTop
+		}
+		scrollElement?.scrollTo({ top: scrollTop, behavior: 'smooth' })
+	}, [currentSetIdx])
+
+	/**
 	 * A callback to actually change the page. This should not be called directly, but rather
 	 * through the `handleLeftwardPageChange` and `handleRightwardPageChange` callbacks to
 	 * ensure that the reading direction is respected.
@@ -181,11 +196,15 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 	 */
 	const doChangePage = useCallback(
 		(newPage: number) => {
+			const scrollElement = pageSetRef.current?.parentElement?.parentElement?.parentElement
+			const scrollTop = scrollElement?.scrollTop ?? 0
+			scrollPositionMap.current.set(currentSetIdx, { scrollTop: scrollTop, timestamp: Date.now() })
+
 			if (newPage <= media.pages && newPage > 0) {
 				onPageChange(newPage)
 			}
 		},
-		[media.pages, onPageChange],
+		[media.pages, onPageChange, currentSetIdx],
 	)
 
 	/**
@@ -258,17 +277,14 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 	 */
 	useHotkeys('right, left, space, escape', (_, handler) => hotKeyHandler(handler))
 
-	const unconstrainedWidth =
-		imageScaling.scaleToFit === 'height' || imageScaling.scaleToFit === 'none'
-
 	return (
 		<div
 			style={{
 				display: 'flex',
 				justifyContent: 'center',
 				margin: 'auto',
-				minWidth: '100%',
-				width: unconstrainedWidth ? 'max-content' : '100%',
+				width: '100vw',
+				position: 'relative',
 			}}
 		>
 			{!showToolBar && tapSidesToNavigate && (
@@ -319,9 +335,9 @@ function SideBarControl({ onClick, position, fixed }: SideBarControlProps) {
 	return (
 		<div
 			className={clsx(
-				'z-50 mt-[-50vh] h-[150vh] shrink-0 border border-transparent transition-all duration-300',
+				'z-50 h-full shrink-0 border border-transparent transition-all duration-300',
 				'active:border-edge-subtle active:bg-background-surface active:bg-opacity-50',
-				fixed ? 'fixed w-[10%]' : 'relative mx-[-3%] flex flex-1 flex-grow',
+				fixed ? 'absolute w-[10%]' : 'relative mx-[-3%] flex flex-1 flex-grow',
 				{ 'right-0': position === 'right' },
 				{ 'left-0': position === 'left' },
 			)}

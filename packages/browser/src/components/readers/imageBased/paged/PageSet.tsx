@@ -43,6 +43,9 @@ const PageSet = forwardRef<HTMLDivElement, Props>(
 				style={{
 					...styles[imageScaling.scaleToFit].imagesHolder,
 					filter: `brightness(${brightness * 100}%)`,
+					display: 'flex',
+					flexDirection: 'row',
+					justifyContent: 'center',
 				}}
 			>
 				{currentSet.map((idx) => (
@@ -83,7 +86,7 @@ const _Page = ({
 	return (
 		<EntityImage
 			key={`page-${page}-scaled-${scaleToFit}`}
-			className="z-30"
+			className="z-30 object-contain"
 			style={style}
 			src={getPageUrl(page)}
 			onLoad={({ height, width }) => {
@@ -109,11 +112,10 @@ const Page = React.memo(_Page)
 const styles = {
 	auto: {
 		imagesHolder: {
-			display: 'flex',
-			flexDirection: 'row',
+			// no min width
 			// no width
+			// no min height
 			height: '100vh',
-			justifyContent: 'center',
 		} as React.CSSProperties,
 
 		image: {
@@ -123,17 +125,15 @@ const styles = {
 			// no width
 			maxHeight: '100%',
 			height: '100%',
-			objectFit: 'contain',
 		} as React.CSSProperties,
 	},
 
 	height: {
 		imagesHolder: {
-			display: 'flex',
-			flexDirection: 'row',
+			minWidth: 'max-content',
 			// no width
+			// no min height
 			height: '100vh',
-			justifyContent: 'center',
 		} as React.CSSProperties,
 
 		image: {
@@ -143,17 +143,15 @@ const styles = {
 			// no min height
 			// no max height
 			height: '100%',
-			objectFit: 'contain',
 		} as React.CSSProperties,
 	},
 
 	width: {
 		imagesHolder: {
-			display: 'flex',
-			flexDirection: 'row',
-			// no height
+			// no min width
 			width: '100vw',
-			justifyContent: 'center',
+			minHeight: '100vh',
+			// no neight
 		} as React.CSSProperties,
 
 		image: {
@@ -163,17 +161,15 @@ const styles = {
 			minHeight: '0%',
 			maxHeight: '100%',
 			// no height
-			objectFit: 'contain',
 		} as React.CSSProperties,
 	},
 
 	none: {
 		imagesHolder: {
-			display: 'flex',
-			flexDirection: 'row',
+			minWidth: 'max-content',
 			// no width
+			minHeight: '100vh',
 			// no height
-			justifyContent: 'center',
 			alignItems: 'center', // add vertical alignment
 		} as React.CSSProperties,
 
@@ -184,7 +180,6 @@ const styles = {
 			// no min height
 			// no max height
 			height: 'max-content',
-			objectFit: 'contain',
 		} as React.CSSProperties,
 	},
 }

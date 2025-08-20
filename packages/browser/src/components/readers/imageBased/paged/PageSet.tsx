@@ -16,7 +16,7 @@ const PageSet = forwardRef<HTMLDivElement, Props>(
 	({ currentPage, getPageUrl, onPageClick }, ref) => {
 		const { setDimensions, book, pageSets } = useImageBaseReaderContext()
 		const {
-			bookPreferences: { imageScaling, brightness },
+			bookPreferences: { imageScaling, brightness, readingDirection },
 		} = useBookPreferences({ book })
 
 		/**
@@ -32,10 +32,14 @@ const PageSet = forwardRef<HTMLDivElement, Props>(
 			[setDimensions],
 		)
 
-		const currentSet = useMemo(
-			() => pageSets.find((set) => set.includes(currentPage - 1)) || [currentPage - 1],
+		const currentSetIdx = useMemo(
+			() => pageSets.findIndex((set) => set.includes(currentPage - 1)),
 			[currentPage, pageSets],
 		)
+		const currentSet = pageSets[currentSetIdx] || [currentPage - 1]
+
+		const nextSetIdx = currentSetIdx + (readingDirection === 'ltr' ? 1 : -1)
+		const nextSet = pageSets[nextSetIdx] || []
 
 		return (
 			<div
@@ -54,6 +58,23 @@ const PageSet = forwardRef<HTMLDivElement, Props>(
 						upsertDimensions={upsertDimensions}
 						imageScaling={imageScaling}
 						style={styles[imageScaling.scaleToFit].image}
+					/>
+				))}
+				{nextSet.map((idx) => (
+					<Page
+						key={`page-${idx + 1}`}
+						page={idx + 1}
+						getPageUrl={getPageUrl}
+						onPageClick={() => {}}
+						upsertDimensions={() => {}}
+						imageScaling={imageScaling}
+						style={{
+							position: 'fixed',
+							maxWidth: 'max-content',
+							maxHeight: '100%',
+							zIndex: -1,
+							opacity: 0,
+						}}
 					/>
 				))}
 			</div>

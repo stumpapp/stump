@@ -11,6 +11,7 @@ use sea_orm::{prelude::*, sea_query::Query, QuerySelect};
 use crate::{
 	data::{CoreContext, RequestContext, ServiceContext},
 	loader::{
+		favorite::{FavoriteMediaLoaderKey, FavoritesLoader},
 		reading_session::{
 			ActiveReadingSessionLoaderKey, FinishedReadingSessionLoaderKey,
 			ReadingSessionLoader,
@@ -57,6 +58,20 @@ impl Media {
 
 #[ComplexObject]
 impl Media {
+	async fn is_favorite(&self, ctx: &Context<'_>) -> Result<bool> {
+		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let loader = ctx.data::<DataLoader<FavoritesLoader>>()?;
+
+		let is_favorite = loader
+			.load_one(FavoriteMediaLoaderKey {
+				user_id: user.id.clone(),
+				media_id: self.model.id.clone(),
+			})
+			.await?;
+
+		Ok(is_favorite.unwrap_or(false))
+	}
+
 	async fn tags(&self, ctx: &Context<'_>) -> Result<Vec<Tag>> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 		let model = tag::Entity::find_for_media_id(&self.model.id.clone())

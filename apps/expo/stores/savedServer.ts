@@ -43,15 +43,11 @@ const serverConfig = z.object({
 })
 export type ServerConfig = z.infer<typeof serverConfig>
 
-const managedToken = z
-	.object({
-		token: z.string(),
-		expiresAt: z.string(),
-	})
-	.transform((data) => ({
-		...data,
-		expiresAt: new Date(data.expiresAt),
-	}))
+const managedToken = z.object({
+	accessToken: z.string(),
+	refreshToken: z.string().nullish(),
+	expiresAt: z.string(),
+})
 export type ManagedToken = z.infer<typeof managedToken>
 
 const SAVED_TOKEN_PREFIX = 'stump-mobile-saved-tokens-' as const
@@ -195,12 +191,19 @@ export const useSavedServers = () => {
 	const getServerToken = async (id: ServerID) => {
 		const record = await SecureStore.getItemAsync(formatPrefix('token', id))
 
-		const token = record ? managedToken.parse(JSON.parse(record)) : null
+		const token = record ? managedToken.safeParse(JSON.parse(record))?.data : null
+
+		if (record && !token) {
+			console.warn('Malformed token record detected')
+			await deleteServerToken(id)
+		}
+
 		if (!token) return null
 
-		if (token.expiresAt < new Date()) {
+		if (new Date(token.expiresAt) < new Date()) {
 			await deleteServerToken(id)
-			return null
+			// We delete the token in storage but still return it so the caller can
+			// handle the refresh
 		}
 
 		return token

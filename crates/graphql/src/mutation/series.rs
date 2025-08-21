@@ -1,9 +1,14 @@
 use async_graphql::{Context, Object, Result, ID};
+use chrono::Utc;
 use models::{
-	entity::{library, library_config, media, series},
+	entity::{favorite_series, library, library_config, media, series},
 	shared::enums::UserPermission,
 };
-use sea_orm::{prelude::*, sea_query::Query};
+use sea_orm::{
+	prelude::*,
+	sea_query::{OnConflict, Query},
+	ActiveValue::Set,
+};
 use stump_core::filesystem::{
 	image::{generate_book_thumbnail, GenerateThumbnailOptions},
 	media::analyze_media_job::AnalyzeMediaJob,
@@ -38,6 +43,54 @@ impl SeriesMutation {
 		core.enqueue_job(AnalyzeMediaJob::analyze_series(model.id))?;
 
 		Ok(true)
+	}
+
+	async fn favorite_series(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+		is_favorite: bool,
+	) -> Result<Series> {
+		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let core = ctx.data::<CoreContext>()?;
+		let conn = core.conn.as_ref();
+
+		let model = series::ModelWithMetadata::find_for_user(user)
+			.filter(
+				series::Column::Id
+					.eq(id.to_string())
+					.and(series::Column::DeletedAt.is_null()),
+			)
+			.into_model::<series::ModelWithMetadata>()
+			.one(conn)
+			.await?
+			.ok_or("Series not found")?;
+
+		if is_favorite {
+			let last_insert_id =
+				favorite_series::Entity::insert(favorite_series::ActiveModel {
+					user_id: Set(user.id.clone()),
+					series_id: Set(model.series.id.clone()),
+					favorited_at: Set(DateTimeWithTimeZone::from(Utc::now())),
+				})
+				.on_conflict(OnConflict::new().do_nothing().to_owned())
+				.exec(core.conn.as_ref())
+				.await?
+				.last_insert_id;
+			tracing::debug!(?last_insert_id, "Added favorite series");
+		} else {
+			let affected_rows =
+				favorite_series::Entity::delete_many()
+					.filter(favorite_series::Column::UserId.eq(user.id.clone()).and(
+						favorite_series::Column::SeriesId.eq(model.series.id.clone()),
+					))
+					.exec(core.conn.as_ref())
+					.await?
+					.rows_affected;
+			tracing::debug!(?affected_rows, "Removed favorite series");
+		}
+
+		Ok(model.into())
 	}
 
 	/// Update the thumbnail for a series. This will replace the existing thumbnail with the the one

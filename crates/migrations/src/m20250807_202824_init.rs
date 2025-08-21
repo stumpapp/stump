@@ -218,6 +218,9 @@ impl MigrationTrait for Migration {
 		manager
 			.create_table(schema.create_table_from_entity(session::Entity))
 			.await?;
+		manager
+			.create_table(schema.create_table_from_entity(refresh_token::Entity))
+			.await?;
 
 		manager
 			.create_table(schema.create_table_from_entity(smart_list_access_rule::Entity))
@@ -242,6 +245,16 @@ impl MigrationTrait for Migration {
 
 		manager
 			.create_table(schema.create_table_from_entity(user::Entity))
+			.await?;
+
+		manager
+			.create_table(schema.create_table_from_entity(favorite_library::Entity))
+			.await?;
+		manager
+			.create_table(schema.create_table_from_entity(favorite_media::Entity))
+			.await?;
+		manager
+			.create_table(schema.create_table_from_entity(favorite_series::Entity))
 			.await?;
 
 		Ok(())

@@ -1,4 +1,4 @@
-import { AuthenticationMethod, CredentialStoreTokenState, User } from '@stump/sdk'
+import { AuthenticationMethod, AuthUser, JwtTokenPair } from '@stump/sdk'
 import { QueryClient } from '@tanstack/react-query'
 import { createContext, useContext } from 'react'
 
@@ -8,7 +8,7 @@ export type IStumpClientContext = {
 	onRedirect?: (url: string) => void
 	onUnauthenticatedResponse?: (redirectUrl?: string, data?: unknown) => void
 	onConnectionWithServerChanged?: (isConnected: boolean) => void
-	onAuthenticated?: (user: User, token?: string) => Promise<void>
+	onAuthenticated?: (user: AuthUser, token?: JwtTokenPair) => Promise<void>
 	onLogout?: () => Promise<void>
 	tauriRPC?: TauriRPC
 }
@@ -32,7 +32,7 @@ export type TauriRPC = {
 	 * Get the current state of the credential store. This **will not** return actual
 	 * tokens, but will return a record for which servers have tokens stored
 	 */
-	getCredentialStoreState: () => Promise<CredentialStoreTokenState>
+	getCredentialStoreState: () => Promise<Record<string, boolean>>
 	/**
 	 * Clear the credential store
 	 */

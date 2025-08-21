@@ -721,6 +721,7 @@ type Library {
 	lastScannedAt: DateTime
 	config: LibraryConfig!
 	excludedUsers: [User!]!
+	isFavorite: Boolean!
 	"Get the details of the last scan job for this library, if any exists."
 	lastScan: LibraryScanRecord
 	mediaAlphabet: JSONObject!
@@ -936,6 +937,7 @@ type Media {
 	"The timestamp of when the media was **soft** deleted. This will act like a trash bin."
 	deletedAt: DateTime
 	metadata: MediaMetadata
+	isFavorite: Boolean!
 	tags: [Tag!]!
 	series: Series!
 	library: Library!
@@ -1159,6 +1161,8 @@ type Mutation {
 	deleteBookmark(epubcfi: String!): Bookmark!
 	analyzeMedia(id: ID!): Boolean!
 	convertMedia(id: ID!): Boolean!
+	deleteMedia(id: ID!): Media!
+	favoriteMedia(id: ID!, isFavorite: Boolean!): Media!
 	"""
 	Update the thumbnail for a book. This will replace the existing thumbnail with the the one
 	associated with the provided input (book). If the book does not have a thumbnail, one
@@ -1252,6 +1256,7 @@ type Mutation {
 	"""
 	deleteReadingList(id: String!): ReadingList!
 	analyzeSeries(id: ID!): Boolean!
+	favoriteSeries(id: ID!, isFavorite: Boolean!): Series!
 	"""
 	Update the thumbnail for a series. This will replace the existing thumbnail with the the one
 	associated with the provided input (book). If the book does not have a thumbnail, one
@@ -1744,10 +1749,12 @@ type Series {
 	description: String
 	createdAt: DateTime!
 	updatedAt: DateTime
+	deletedAt: DateTime
 	path: String!
 	status: FileStatus!
 	libraryId: String
 	metadata: SeriesMetadataModel
+	isFavorite: Boolean!
 	resolvedName: String!
 	resolvedDescription: String
 	library: Library!
@@ -1833,6 +1840,7 @@ enum SeriesModelOrdering {
 	DESCRIPTION
 	CREATED_AT
 	UPDATED_AT
+	DELETED_AT
 	PATH
 	STATUS
 	LIBRARY_ID
@@ -2036,6 +2044,7 @@ type StumpConfig {
 	"The time in seconds that a login session will be valid for."
 	sessionTtl: Int!
 	accessTokenTtl: Int!
+	refreshTokenTtl: Int!
 	"The interval at which automatic deleted session cleanup is performed."
 	expiredSessionCleanupInterval: Int!
 	"""

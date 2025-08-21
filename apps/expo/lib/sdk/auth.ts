@@ -24,10 +24,12 @@ export const authSDKInstance = async (
 	{ config, existingToken, saveToken }: AuthSDKParams,
 ): Promise<Api | null> => {
 	if (existingToken) {
-		instance.token = existingToken.token
+		instance.tokens = existingToken
 	} else {
-		instance.token = await match(config?.auth)
-			.with({ bearer: P.string }, ({ bearer }) => bearer)
+		await match(config?.auth)
+			.with({ bearer: P.string }, ({ bearer }) => {
+				instance.staticToken = bearer
+			})
 			.with(
 				{
 					basic: P.shape({
@@ -35,10 +37,12 @@ export const authSDKInstance = async (
 						password: P.string,
 					}),
 				},
-				async ({ basic: { username, password } }) =>
-					login(instance, { password, saveToken, username }),
+				async ({ basic: { username, password } }) => {
+					const tokens = await login(instance, { password, saveToken, username })
+					instance.tokens = tokens
+				},
 			)
-			.otherwise(() => undefined)
+			.otherwise(() => {})
 	}
 
 	if (!instance.isAuthed) {
@@ -57,18 +61,9 @@ const login = async (instance: Api, { username, password, saveToken }: LoginPara
 	try {
 		const result = await instance.auth.login({ password, username })
 		if ('forUser' in result) {
-			const {
-				token: { accessToken, expiresAt },
-				forUser,
-			} = result
-			await saveToken?.(
-				{
-					expiresAt: new Date(expiresAt),
-					token: accessToken,
-				},
-				forUser,
-			)
-			return accessToken
+			const { forUser, ...token } = result
+			await saveToken?.(token, forUser)
+			return token
 		}
 	} catch (error) {
 		const axiosError = isAxiosError(error) ? error : null
@@ -100,8 +95,8 @@ export const getOPDSInstance = async ({ config, serverKind, url }: GetOPDSParams
 			},
 		)
 		.with({ bearer: P.string }, ({ bearer: token }) => {
-			const api = new Api({ baseURL: url, authMethod: 'token', shouldFormatURL })
-			api.token = token
+			const api = new Api({ baseURL: url, authMethod: 'api-key', shouldFormatURL })
+			api.staticToken = token
 			return api
 		})
 		.otherwise(() => new Api({ baseURL: url, authMethod: 'basic', shouldFormatURL }))

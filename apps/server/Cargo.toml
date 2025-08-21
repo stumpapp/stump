@@ -32,7 +32,7 @@ linemux = { git = "https://github.com/jmagnuson/linemux.git", rev = "acaafc602af
 local-ip-address = "0.6.2"
 once_cell.workspace = true
 prefixed-api-key = { workspace = true}
-rand = "0.8.5"
+rand = { workspace = true }
 reqwest.workspace = true
 sea-orm.workspace = true
 serde.workspace = true

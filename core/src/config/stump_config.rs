@@ -43,6 +43,7 @@ pub mod defaults {
 	pub const DEFAULT_PASSWORD_HASH_COST: u32 = 12;
 	pub const DEFAULT_SESSION_TTL: i64 = 3600 * 24 * 3; // 3 days
 	pub const DEFAULT_ACCESS_TOKEN_TTL: i64 = 3600 * 24; // 1 days
+	pub const DEFAULT_REFRESH_TOKEN_TTL: i64 = 3600 * 24 * 30; // 30 days
 	pub const DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL: u64 = 60 * 60 * 24; // 24 hours
 	pub const DEFAULT_MAX_SCANNER_CONCURRENCY: usize = 200;
 	pub const DEFAULT_MAX_THUMBNAIL_CONCURRENCY: usize = 10;
@@ -165,9 +166,15 @@ pub struct StumpConfig {
 	#[default_value(DEFAULT_SESSION_TTL)]
 	#[env_key(SESSION_TTL_KEY)]
 	pub session_ttl: i64,
+
 	#[default_value(DEFAULT_ACCESS_TOKEN_TTL)]
 	#[env_key("ACCESS_TOKEN_TTL")]
 	pub access_token_ttl: i64,
+
+	#[default_value(DEFAULT_REFRESH_TOKEN_TTL)]
+	#[env_key("REFRESH_TOKEN_TTL")]
+	pub refresh_token_ttl: i64,
+
 	/// The interval at which automatic deleted session cleanup is performed.
 	#[default_value(DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL)]
 	#[env_key(SESSION_EXPIRY_INTERVAL_KEY)]
@@ -343,6 +350,7 @@ mod tests {
 			password_hash_cost: None,
 			session_ttl: None,
 			access_token_ttl: None,
+			refresh_token_ttl: None,
 			expired_session_cleanup_interval: None,
 			max_scanner_concurrency: None,
 			max_thumbnail_concurrency: None,
@@ -380,6 +388,7 @@ mod tests {
 				password_hash_cost: Some(DEFAULT_PASSWORD_HASH_COST),
 				session_ttl: Some(DEFAULT_SESSION_TTL),
 				access_token_ttl: Some(DEFAULT_ACCESS_TOKEN_TTL),
+				refresh_token_ttl: Some(DEFAULT_REFRESH_TOKEN_TTL),
 				expired_session_cleanup_interval: Some(
 					DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL
 				),
@@ -434,6 +443,7 @@ mod tests {
 						password_hash_cost: 1,
 						session_ttl: DEFAULT_SESSION_TTL,
 						access_token_ttl: DEFAULT_ACCESS_TOKEN_TTL,
+						refresh_token_ttl: DEFAULT_REFRESH_TOKEN_TTL,
 						expired_session_cleanup_interval:
 							DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL,
 						custom_templates_dir: None,

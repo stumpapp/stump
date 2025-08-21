@@ -2,7 +2,7 @@ import { AnyFunction } from 'ts-essentials'
 
 import { APIError } from '../types'
 
-export type { LoginResponse, PasswordUserInput } from './auth-api'
+export type { JwtTokenPair, LoginResponse, PasswordUserInput } from './auth-api'
 export {
 	type UploaderParams,
 	type UploadLibraryBooks,

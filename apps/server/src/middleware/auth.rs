@@ -35,7 +35,7 @@ use tower_sessions::Session;
 
 use crate::{
 	config::{
-		jwt::verify_user_jwt,
+		jwt::extract_user_from_jwt,
 		session::{delete_cookie_header, SESSION_USER_KEY},
 		state::AppState,
 	},
@@ -333,7 +333,7 @@ async fn handle_bearer_auth(
 		_ => (),
 	};
 
-	let user_id = verify_user_jwt(&token)?;
+	let user_id = extract_user_from_jwt(&token)?;
 
 	let fetched_user = user::LoginUser::find()
 		.filter(user::Column::Id.eq(user_id.clone()))

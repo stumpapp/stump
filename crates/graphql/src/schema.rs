@@ -1,7 +1,7 @@
 use crate::{
 	data::CoreContext,
 	loader::{
-		library::LibraryLoader, log::JobAssociatedLogLoader,
+		favorite::FavoritesLoader, library::LibraryLoader, log::JobAssociatedLogLoader,
 		reading_session::ReadingSessionLoader, series::SeriesLoader,
 		series_count::SeriesCountLoader,
 		series_finished_count::SeriesFinishedCountLoader,
@@ -62,6 +62,10 @@ pub fn add_data_loaders<
 		))
 		.data(DataLoader::new(
 			SeriesFinishedCountLoader::new(conn.clone()),
+			tokio::spawn,
+		))
+		.data(DataLoader::new(
+			FavoritesLoader::new(conn.clone()),
 			tokio::spawn,
 		))
 }

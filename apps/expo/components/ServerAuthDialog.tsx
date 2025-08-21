@@ -64,6 +64,8 @@ export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogPr
 				const result = await loginUser({ password, username })
 				if ('forUser' in result) {
 					onClose(result)
+				} else {
+					console.warn('Unexpected login response:', result)
 				}
 			} catch (error) {
 				console.error(error)

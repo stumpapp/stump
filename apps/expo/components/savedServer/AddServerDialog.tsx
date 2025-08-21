@@ -8,7 +8,7 @@ import { cn } from '~/lib/utils'
 import { useSavedServers } from '~/stores'
 import { CreateServer } from '~/stores/savedServer'
 
-import { Heading, icons, Text } from '../ui'
+import { icons } from '../ui'
 import { BottomSheet } from '../ui/bottom-sheet'
 import AddOrEditServerForm from './AddOrEditServerForm'
 
@@ -87,16 +87,13 @@ export default function AddServerDialog() {
 			>
 				<BottomSheet.ScrollView className="flex-1 gap-4 bg-background p-6">
 					<View className="w-full gap-4">
-						<View>
-							<Heading size="lg" className="font-bold leading-6">
-								Add server
-							</Heading>
-							<Text className="text-foreground-muted">
-								Configure a new server to access your content
-							</Text>
-						</View>
-
-						<AddOrEditServerForm onSubmit={onSubmit} />
+						<AddOrEditServerForm
+							onSubmit={onSubmit}
+							onClose={() => {
+								ref.current?.dismiss()
+								setIsOpen(false)
+							}}
+						/>
 					</View>
 				</BottomSheet.ScrollView>
 			</BottomSheet.Modal>

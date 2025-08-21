@@ -1,14 +1,14 @@
 import upperFirst from 'lodash/upperFirst'
 import { ChevronRight } from 'lucide-react-native'
+import { useState } from 'react'
 import { Pressable, View } from 'react-native'
+import * as DropdownMenu from 'zeego/dropdown-menu'
 
 import { Text } from '~/components/ui'
 import { useColorScheme } from '~/lib/useColorScheme'
-import * as DropdownMenu from 'zeego/dropdown-menu'
+import { cn } from '~/lib/utils'
 
 import AppSettingsRow from '../AppSettingsRow'
-import { useState } from 'react'
-import { cn } from '~/lib/utils'
 
 export default function AppTheme() {
 	const { colorScheme, setColorScheme } = useColorScheme()

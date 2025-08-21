@@ -1,6 +1,8 @@
 use std::collections::HashMap;
 
-use async_graphql::{ComplexObject, Context, Result, SimpleObject};
+use async_graphql::{
+	dataloader::DataLoader, ComplexObject, Context, Result, SimpleObject,
+};
 
 use models::{
 	entity::{
@@ -20,6 +22,7 @@ use sea_orm::{
 use crate::{
 	data::{CoreContext, RequestContext, ServiceContext},
 	guard::PermissionGuard,
+	loader::favorite::{FavoriteLibraryLoaderKey, FavoritesLoader},
 	object::library_scan_record::LibraryScanRecord,
 };
 
@@ -75,6 +78,20 @@ impl Library {
 			.await?;
 
 		Ok(users.into_iter().map(User::from).collect())
+	}
+
+	async fn is_favorite(&self, ctx: &Context<'_>) -> Result<bool> {
+		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let loader = ctx.data::<DataLoader<FavoritesLoader>>()?;
+
+		let is_favorite = loader
+			.load_one(FavoriteLibraryLoaderKey {
+				user_id: user.id.clone(),
+				library_id: self.model.id.clone(),
+			})
+			.await?;
+
+		Ok(is_favorite.unwrap_or(false))
 	}
 
 	/// Get the details of the last scan job for this library, if any exists.

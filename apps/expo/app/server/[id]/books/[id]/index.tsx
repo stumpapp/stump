@@ -4,7 +4,7 @@ import dayjs from 'dayjs'
 import duration from 'dayjs/plugin/duration'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router'
-import { ChevronLeft, Ellipsis } from 'lucide-react-native'
+import { ChevronLeft } from 'lucide-react-native'
 import { useLayoutEffect } from 'react'
 import { Platform, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
@@ -12,6 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { useActiveServer } from '~/components/activeServer'
 import { BookMetaLink } from '~/components/book'
+import { BookActionMenu } from '~/components/book/overview'
 import { BookDescription, InfoRow, InfoSection, InfoStat } from '~/components/book/overview'
 import { FasterImage } from '~/components/Image'
 import RefreshControl from '~/components/RefreshControl'
@@ -26,6 +27,7 @@ const query = graphql(`
 		mediaById(id: $id) {
 			id
 			extension
+			isFavorite
 			metadata {
 				writers
 				genres
@@ -103,7 +105,7 @@ export default function Screen() {
 	useLayoutEffect(() => {
 		navigation.setOptions({
 			headerLeft: () => <ChevronLeft onPress={() => navigation.goBack()} />,
-			headerRight: () => <Ellipsis />,
+			headerRight: () => <BookActionMenu id={bookID} isFavorite={book?.isFavorite || false} />,
 			headerShown: Platform.OS === 'ios',
 			headerTransparent: true,
 			headerTitle: Platform.OS === 'ios' ? book?.resolvedName : '',
@@ -114,7 +116,7 @@ export default function Screen() {
 			headerLargeTitle: true,
 			headerBlurEffect: 'regular',
 		})
-	}, [navigation, book])
+	}, [navigation, book, bookID])
 
 	if (!book) return null
 

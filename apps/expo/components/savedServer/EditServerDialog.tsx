@@ -6,7 +6,7 @@ import { useSharedValue } from 'react-native-reanimated'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { CreateServer, SavedServerWithConfig } from '~/stores/savedServer'
 
-import { BottomSheet, Heading, Text } from '../ui'
+import { BottomSheet } from '../ui'
 import AddOrEditServerForm from './AddOrEditServerForm'
 
 type Props = {
@@ -62,16 +62,14 @@ export default function EditServerDialog({ editingServer, onClose, onSubmit }: P
 			>
 				<BottomSheet.ScrollView className="flex-1 bg-background p-6">
 					<View className="gap-4">
-						<View>
-							<Heading size="lg" className="font-bold leading-6">
-								Edit server
-							</Heading>
-							<Text className="text-base text-foreground-muted">
-								Make changes to the server configuration
-							</Text>
-						</View>
-
-						<AddOrEditServerForm editingServer={editingServer || undefined} onSubmit={onSubmit} />
+						<AddOrEditServerForm
+							editingServer={editingServer || undefined}
+							onSubmit={onSubmit}
+							onClose={() => {
+								ref.current?.dismiss()
+								onClose()
+							}}
+						/>
 					</View>
 				</BottomSheet.ScrollView>
 			</BottomSheet.Modal>

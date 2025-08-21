@@ -16,6 +16,8 @@ use crate::{
 
 use super::{library_exclusion, series_metadata, user::AuthUser};
 
+// TODO: Properly support soft deletion
+
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject, Ordering)]
 #[graphql(name = "SeriesModel")]
 #[sea_orm(table_name = "series")]
@@ -28,8 +30,10 @@ pub struct Model {
 	pub description: Option<String>,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
 	pub created_at: DateTimeWithTimeZone,
-	#[sea_orm(column_type = "custom(\"DATETIME\")")]
+	#[sea_orm(column_type = "custom(\"DATETIME\")", nullable)]
 	pub updated_at: Option<DateTimeWithTimeZone>,
+	#[sea_orm(column_type = "custom(\"DATETIME\")", nullable)]
+	pub deleted_at: Option<DateTimeWithTimeZone>,
 	#[sea_orm(column_type = "Text")]
 	pub path: String,
 	#[sea_orm(column_type = "Text")]
@@ -61,6 +65,7 @@ impl Entity {
 			});
 
 		Entity::find()
+			.filter(Column::DeletedAt.is_null())
 			.filter(Column::LibraryId.not_in_subquery(
 				library_exclusion::Entity::library_hidden_to_user_query(user),
 			))

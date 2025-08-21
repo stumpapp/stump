@@ -78,13 +78,9 @@ export function useLoginOrRegister({
 			onError?.(err)
 		},
 		onSuccess: async (response) => {
-			// TODO(token): refresh support
 			if ('forUser' in response && !!onAuthenticated) {
-				const {
-					forUser,
-					token: { accessToken },
-				} = response
-				await onAuthenticated(forUser, accessToken)
+				const { forUser, ...token } = response
+				await onAuthenticated(forUser, token)
 				onSuccess?.(forUser)
 			} else if (isUser(response)) {
 				onSuccess?.(response)

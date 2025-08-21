@@ -5,13 +5,17 @@ import { AuthUser } from '../types/graphql'
 import { ClassQueryKeys } from './types'
 import { createRouteURLHandler } from './utils'
 
-export type LoginResponse = {
-	forUser: AuthUser
-	token: {
-		accessToken: string
-		expiresAt: string // Date
-	}
+export type JwtTokenPair = {
+	accessToken: string
+	refreshToken?: string | null
+	expiresAt: string // Date
 }
+
+export type LoginResponse =
+	| AuthUser
+	| ({
+			forUser: AuthUser
+	  } & JwtTokenPair)
 
 export type PasswordUserInput = {
 	username: string
@@ -55,11 +59,26 @@ export class AuthAPI extends APIBase {
 			},
 		)
 
-		if ('token' in response.data) {
-			const {
-				token: { accessToken },
-			} = response.data
-			this.api.token = accessToken
+		if ('forUser' in response.data) {
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
+			const { forUser: _, ...token } = response.data
+			this.api.tokens = token
+		}
+
+		return response.data
+	}
+
+	async refreshToken(): Promise<JwtTokenPair> {
+		const response = await this.api.axios.post<JwtTokenPair>(authURL('/refresh-token'), undefined, {
+			headers: {
+				Authorization: `Bearer ${this.api.tokens?.refreshToken}`,
+			},
+		})
+
+		if ('accessToken' in response.data) {
+			this.api.tokens = response.data
+		} else {
+			throw new Error('Malformed exchange payload')
 		}
 
 		return response.data
@@ -84,7 +103,7 @@ export class AuthAPI extends APIBase {
 	async logout(): Promise<void> {
 		if (this.api.isTokenAuth) {
 			await this.api.axios.post(authURL('/logout'))
-			this.api.token = undefined
+			this.api.tokens = undefined
 		} else {
 			await this.api.axios.post(authURL('/logout'))
 		}
@@ -94,6 +113,12 @@ export class AuthAPI extends APIBase {
 	 * The query keys for the auth API, used for query caching on a client (e.g. react-query)
 	 */
 	get keys(): ClassQueryKeys<InstanceType<typeof AuthAPI>> {
-		return { login: 'auth.login', logout: 'auth.logout', me: 'auth.me', register: 'auth.register' }
+		return {
+			login: 'auth.login',
+			logout: 'auth.logout',
+			me: 'auth.me',
+			register: 'auth.register',
+			refreshToken: 'auth.refreshToken',
+		}
 	}
 }

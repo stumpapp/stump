@@ -22,6 +22,7 @@ use sea_orm::{
 use crate::{
 	data::{CoreContext, RequestContext, ServiceContext},
 	loader::{
+		favorite::{FavoriteSeriesLoaderKey, FavoritesLoader},
 		series_count::SeriesCountLoader,
 		series_finished_count::{FinishedCountLoaderKey, SeriesFinishedCountLoader},
 	},
@@ -48,6 +49,20 @@ impl From<series::ModelWithMetadata> for Series {
 
 #[ComplexObject]
 impl Series {
+	async fn is_favorite(&self, ctx: &Context<'_>) -> Result<bool> {
+		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let loader = ctx.data::<DataLoader<FavoritesLoader>>()?;
+
+		let is_favorite = loader
+			.load_one(FavoriteSeriesLoaderKey {
+				user_id: user.id.clone(),
+				series_id: self.model.id.clone(),
+			})
+			.await?;
+
+		Ok(is_favorite.unwrap_or(false))
+	}
+
 	async fn resolved_name(&self) -> String {
 		self.metadata
 			.as_ref()

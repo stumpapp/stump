@@ -11,6 +11,7 @@ import {
 	EpubAPI,
 	FilesystemAPI,
 	JobAPI,
+	JwtTokenPair,
 	LibraryAPI,
 	LogAPI,
 	MediaAPI,
@@ -70,10 +71,10 @@ export class Api {
 	 * The Axios instance used to make requests to the API
 	 */
 	private axiosInstance: AxiosInstance
-	/**
-	 * The current access token for the API, if any
-	 */
-	private accessToken?: string
+
+	private _tokens?: JwtTokenPair
+	private _apiKey?: string
+
 	/**
 	 * The basic auth string for the API, if any. This will be encoded and sent as an
 	 * Authorization header, if present.
@@ -96,7 +97,7 @@ export class Api {
 		this.configuration = new Configuration(authMethod)
 
 		if (apiKey) {
-			this.accessToken = apiKey
+			this._apiKey = apiKey
 		}
 
 		if (params.customHeaders) {
@@ -111,8 +112,9 @@ export class Api {
 			baseURL: this.serviceURL,
 			withCredentials: this.configuration.authMethod === 'session',
 		})
-		instance.interceptors.request.use((config) => {
-			config.headers = config.headers.concat(this.headers)
+
+		instance.interceptors.request.use(async (config) => {
+			config.headers = config.headers.concat(await this.getHeaders())
 			if (this._basicAuth) {
 				config.auth = this._basicAuth
 			}
@@ -125,7 +127,7 @@ export class Api {
 	 * Check if the current authentication method is token-based
 	 */
 	get isTokenAuth(): boolean {
-		return this.configuration.authMethod === 'token'
+		return this.configuration.authMethod === 'token' || this.configuration.authMethod === 'api-key'
 	}
 
 	/**
@@ -135,18 +137,49 @@ export class Api {
 		return this.axiosInstance
 	}
 
-	/**
-	 * Get the current access token for the API, if any
-	 */
 	get token(): string | undefined {
-		return this.accessToken
+		return this._tokens?.accessToken || this._apiKey
 	}
 
-	/**
-	 * Set the current access token for the API
-	 */
-	set token(token: string | undefined) {
-		this.accessToken = token
+	get tokens(): JwtTokenPair | undefined {
+		return this._tokens
+	}
+
+	set tokens(tokens: JwtTokenPair | undefined) {
+		this._tokens = tokens
+	}
+
+	get staticToken(): string | undefined {
+		return this._apiKey
+	}
+
+	set staticToken(token: string | undefined) {
+		this._apiKey = token
+	}
+
+	async getOrRefreshTokens(): Promise<JwtTokenPair | undefined> {
+		const tokens = this._tokens
+
+		if (!tokens) return undefined
+
+		// Let's exchange the token if the expiry is <= 5 minute
+		const expiresAt = new Date(tokens.expiresAt)
+		if (expiresAt <= new Date(Date.now() + 5 * 60 * 1000)) {
+			try {
+				const newTokens = await this.auth.refreshToken()
+				this.tokens = newTokens
+			} catch (error) {
+				console.error('Failed to exchange token!', { error })
+				// If we fail to exchange the token, we should clear it
+				this.tokens = undefined
+			}
+		}
+
+		return this._tokens
+	}
+
+	async accessToken(): Promise<string | undefined> {
+		return (await this.getOrRefreshTokens())?.accessToken
 	}
 
 	/**
@@ -170,7 +203,7 @@ export class Api {
 	 * access token is expired or invalid.
 	 */
 	get isAuthed(): boolean {
-		return !!this.accessToken || !!this._basicAuth
+		return !!this._tokens || !!this._basicAuth || !!this._apiKey
 	}
 
 	/**
@@ -216,17 +249,43 @@ export class Api {
 		return `${this.baseURL.replace(/\/api(\/v\d)?$/, '')}`
 	}
 
-	/**
-	 * Get the current access token for the API formatted as a Bearer token
-	 */
-	get authorizationHeader(): string | undefined {
-		if (this.accessToken) {
-			return `Bearer ${this.accessToken}`
+	async getAuthorizationHeader(): Promise<string | undefined> {
+		const bearerToken = this._apiKey || (await this.accessToken())
+		if (bearerToken) {
+			return `Bearer ${bearerToken}`
 		} else if (this.basicAuthHeader) {
 			return `Basic ${this.basicAuthHeader}`
 		} else {
 			return undefined
 		}
+	}
+
+	/**
+	 * Get the current access token for the API formatted as a Bearer token. This
+	 * has the potential to return an expired token
+	 */
+	get authorizationHeader(): string | undefined {
+		const bearerToken = this._tokens?.accessToken || this._apiKey
+		if (bearerToken) {
+			return `Bearer ${bearerToken}`
+		} else if (this.basicAuthHeader) {
+			return `Basic ${this.basicAuthHeader}`
+		} else {
+			return undefined
+		}
+	}
+
+	async getHeaders(): Promise<Record<string, string>> {
+		const headers: Record<string, string> = {
+			...this.customHeaders,
+		}
+
+		const authHeader = await this.getAuthorizationHeader()
+		if (authHeader) {
+			headers.Authorization = authHeader
+		}
+
+		return headers
 	}
 
 	/**
@@ -236,7 +295,6 @@ export class Api {
 		return {
 			...this.customHeaders,
 			...(this.authorizationHeader ? { Authorization: this.authorizationHeader } : {}),
-			// 'Content-Type': 'application/json',
 		}
 	}
 

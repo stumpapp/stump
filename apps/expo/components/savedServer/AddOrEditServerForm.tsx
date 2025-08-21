@@ -14,14 +14,15 @@ import { cn } from '~/lib/utils'
 import { usePreferencesStore, useSavedServers } from '~/stores'
 import { SavedServerWithConfig } from '~/stores/savedServer'
 
-import { Button, Input, Label, Switch, Tabs, Text } from '../ui'
+import { Button, Heading, Input, Label, Switch, Tabs, Text } from '../ui'
 
 type Props = {
 	editingServer?: SavedServerWithConfig | null
 	onSubmit: (data: AddOrEditServerSchema) => void
+	onClose: () => void
 }
 
-export default function AddOrEditServerForm({ editingServer, onSubmit }: Props) {
+export default function AddOrEditServerForm({ editingServer, onSubmit, onClose }: Props) {
 	const { savedServers, stumpEnabled } = useSavedServers()
 
 	const { control, handleSubmit, ...form } = useForm<AddOrEditServerSchema>({
@@ -224,6 +225,32 @@ export default function AddOrEditServerForm({ editingServer, onSubmit }: Props) 
 
 	return (
 		<View className="w-full gap-4">
+			<View className="flex-row items-center justify-between pb-2">
+				<Pressable onPress={onClose}>
+					<Text className="text-foreground-muted">Cancel</Text>
+				</Pressable>
+
+				<Button
+					size="sm"
+					variant="brand"
+					onPress={handleSubmit(onSubmit)}
+					disabled={editingServer ? !isUpdateReady : false}
+				>
+					<Text className="text-foreground">Save</Text>
+				</Button>
+			</View>
+
+			<View>
+				<Heading size="lg" className="font-bold leading-6">
+					{editingServer ? 'Edit Server' : 'Add Server'}
+				</Heading>
+				<Text className="text-foreground-muted">
+					{editingServer
+						? 'Make changes to the server configuration'
+						: 'Configure a new server to access your content'}
+				</Text>
+			</View>
+
 			<View className="w-full flex-row items-center justify-between">
 				<Text className="flex-1 text-base font-medium text-foreground-muted">Kind</Text>
 
@@ -288,16 +315,20 @@ export default function AddOrEditServerForm({ editingServer, onSubmit }: Props) 
 				name="url"
 			/>
 
-			{/* <Button
-				className={cn('-mt-1 rounded-lg bg-background-surface p-2', {
-					'opacity-70': !url,
-					'bg-fill-success-secondary': didConnect,
-				})}
-				disabled={!url}
-				onPress={checkConnection}
-			>
-				<Text>{didConnect ? 'Connected' : 'Check connection'}</Text>
-			</Button> */}
+			<View className="flex-row justify-end">
+				<Button
+					variant="outline"
+					size="sm"
+					className={cn('rounded-lg bg-background-surface', {
+						'opacity-70': !url,
+						'bg-fill-success-secondary': didConnect,
+					})}
+					disabled={!url}
+					onPress={checkConnection}
+				>
+					<Text>{didConnect ? 'Connected' : 'Check connection'}</Text>
+				</Button>
+			</View>
 
 			<View className="w-full gap-2">
 				<Text className="flex-1 text-base font-medium text-foreground-muted">Custom Headers</Text>
@@ -423,15 +454,6 @@ export default function AddOrEditServerForm({ editingServer, onSubmit }: Props) 
 					</View>
 				)}
 			</View>
-
-			<Button
-				variant="brand"
-				className="mt-4 w-full"
-				onPress={handleSubmit(onSubmit)}
-				disabled={editingServer ? !isUpdateReady : false}
-			>
-				<Text>{editingServer ? 'Update' : 'Add'} server</Text>
-			</Button>
 		</View>
 	)
 }

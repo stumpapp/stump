@@ -4,6 +4,7 @@ import { Api, AuthUser, LoginResponse } from '@stump/sdk'
 import { isAxiosError } from 'axios'
 import { Redirect, Stack, useLocalSearchParams, useRouter } from 'expo-router'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { match, P } from 'ts-pattern'
 
 import { ActiveServerContext, StumpServerContext } from '~/components/activeServer'
 import { PermissionEnforcerOptions } from '~/components/activeServer/context'
@@ -36,16 +37,25 @@ export default function Screen() {
 
 		const configureSDK = async () => {
 			const { id, url } = activeServer
-			const existingToken = await getServerToken(id)
+			const storedToken = await getServerToken(id)
 			const serverConfig = await getServerConfig(id)
-			const instance = new Api({ baseURL: url, authMethod: 'token' })
+
+			const authMethod = match(serverConfig?.auth)
+				.with({ bearer: P.string }, () => 'api-key' as const)
+				.otherwise(() => 'token' as const)
+
+			const instance = new Api({ baseURL: url, authMethod })
+			instance.tokens = storedToken || undefined
+			const existingToken = await instance.getOrRefreshTokens()
 
 			try {
 				const authedInstance = await authSDKInstance(instance, {
 					config: serverConfig,
 					existingToken,
 					saveToken: async (token, forUser) => {
-						await saveServerToken(activeServer?.id || 'dev', token)
+						if (token) {
+							await saveServerToken(activeServer?.id || 'dev', token)
+						}
 						setUser(forUser)
 					},
 				})
@@ -104,20 +114,14 @@ export default function Screen() {
 			if (!loginResp || !('forUser' in loginResp) || !activeServer) {
 				router.dismissAll()
 			} else {
-				const {
-					forUser,
-					token: { accessToken, expiresAt },
-				} = loginResp
+				const { forUser, ...token } = loginResp
 				const instance = new Api({
 					baseURL: activeServer.url,
 					authMethod: 'token',
 				})
-				instance.token = accessToken
+				instance.tokens = token
 				setSDK(instance)
-				saveServerToken(activeServer?.id || 'dev', {
-					expiresAt: new Date(expiresAt),
-					token: accessToken,
-				})
+				saveServerToken(activeServer?.id || 'dev', token)
 				setUser(forUser)
 				setIsAuthDialogOpen(false)
 			}

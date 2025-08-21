@@ -8,7 +8,7 @@ use tower_sessions::Session;
 
 use crate::{
 	config::session::SESSION_USER_KEY,
-	errors::{APIError, APIResult, AuthError},
+	errors::{APIError, AuthError},
 };
 
 /// A struct to represent the decoded username and (plaintext) password from a base64-encoded

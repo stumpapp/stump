@@ -2,8 +2,8 @@ use async_graphql::{Context, Object, Result, ID};
 use chrono::Utc;
 use models::{
 	entity::{
-		finished_reading_session, library, library_config, media, reading_session,
-		series, user::AuthUser,
+		favorite_media, finished_reading_session, library, library_config, media,
+		reading_session, series, user::AuthUser,
 	},
 	shared::enums::UserPermission,
 };
@@ -94,6 +94,55 @@ impl MediaMutation {
 			media: deleted_book,
 			..model
 		}))
+	}
+
+	async fn favorite_media(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+		is_favorite: bool,
+	) -> Result<Media> {
+		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let core = ctx.data::<CoreContext>()?;
+		let conn = core.conn.as_ref();
+
+		let model = media::ModelWithMetadata::find_for_user(user)
+			.filter(
+				media::Column::Id
+					.eq(id.to_string())
+					.and(media::Column::DeletedAt.is_null()),
+			)
+			.into_model::<media::ModelWithMetadata>()
+			.one(conn)
+			.await?
+			.ok_or("Media not found")?;
+
+		if is_favorite {
+			let last_insert_id =
+				favorite_media::Entity::insert(favorite_media::ActiveModel {
+					user_id: Set(user.id.clone()),
+					media_id: Set(model.media.id.clone()),
+					favorited_at: Set(DateTimeWithTimeZone::from(Utc::now())),
+				})
+				.on_conflict(OnConflict::new().do_nothing().to_owned())
+				.exec(core.conn.as_ref())
+				.await?
+				.last_insert_id;
+			tracing::debug!(?last_insert_id, "Added favorite media");
+		} else {
+			let affected_rows = favorite_media::Entity::delete_many()
+				.filter(
+					favorite_media::Column::UserId
+						.eq(user.id.clone())
+						.and(favorite_media::Column::MediaId.eq(model.media.id.clone())),
+				)
+				.exec(core.conn.as_ref())
+				.await?
+				.rows_affected;
+			tracing::debug!(?affected_rows, "Removed favorite media");
+		}
+
+		Ok(model.into())
 	}
 
 	/// Update the thumbnail for a book. This will replace the existing thumbnail with the the one

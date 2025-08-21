@@ -761,6 +761,7 @@ export type Library = {
   emoji?: Maybe<Scalars['String']['output']>;
   excludedUsers: Array<User>;
   id: Scalars['String']['output'];
+  isFavorite: Scalars['Boolean']['output'];
   /** Get the details of the last scan job for this library, if any exists. */
   lastScan?: Maybe<LibraryScanRecord>;
   lastScannedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -963,6 +964,7 @@ export type Media = {
   hash?: Maybe<Scalars['String']['output']>;
   /** The unique identifier for the media */
   id: Scalars['String']['output'];
+  isFavorite: Scalars['Boolean']['output'];
   /**
    * A hash of the media file that adheres to the KoReader hash algorithm. This is used to identify
    * books from the KoReader application so progress can be synced between the two applications
@@ -1261,6 +1263,7 @@ export type Mutation = {
   deleteLogFile: Scalars['Boolean']['output'];
   deleteLoginActivity: Scalars['Int']['output'];
   deleteLogs: LogDeleteOutput;
+  deleteMedia: Media;
   deleteMediaProgress: Media;
   deleteNotifier: Notifier;
   /**
@@ -1282,6 +1285,8 @@ export type Mutation = {
   deleteTags: Array<Tag>;
   deleteUser: User;
   deleteUserSessions: Scalars['Int']['output'];
+  favoriteMedia: Media;
+  favoriteSeries: Series;
   generateLibraryThumbnails: Scalars['Boolean']['output'];
   markMediaAsComplete?: Maybe<FinishedReadingSessionModel>;
   markSeriesAsComplete: Series;
@@ -1542,6 +1547,11 @@ export type MutationDeleteLogsArgs = {
 };
 
 
+export type MutationDeleteMediaArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type MutationDeleteMediaProgressArgs = {
   id: Scalars['ID']['input'];
 };
@@ -1586,6 +1596,18 @@ export type MutationDeleteUserArgs = {
 
 export type MutationDeleteUserSessionsArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type MutationFavoriteMediaArgs = {
+  id: Scalars['ID']['input'];
+  isFavorite: Scalars['Boolean']['input'];
+};
+
+
+export type MutationFavoriteSeriesArgs = {
+  id: Scalars['ID']['input'];
+  isFavorite: Scalars['Boolean']['input'];
 };
 
 
@@ -2422,9 +2444,11 @@ export type SendToEmail = {
 export type Series = {
   __typename?: 'Series';
   createdAt: Scalars['DateTime']['output'];
+  deletedAt?: Maybe<Scalars['DateTime']['output']>;
   description?: Maybe<Scalars['String']['output']>;
   id: Scalars['String']['output'];
   isComplete: Scalars['Boolean']['output'];
+  isFavorite: Scalars['Boolean']['output'];
   library: Library;
   libraryId?: Maybe<Scalars['String']['output']>;
   media: Array<Media>;
@@ -2518,6 +2542,7 @@ export type SeriesMetadataOrderByField = {
 
 export enum SeriesModelOrdering {
   CreatedAt = 'CREATED_AT',
+  DeletedAt = 'DELETED_AT',
   Description = 'DESCRIPTION',
   Id = 'ID',
   LibraryId = 'LIBRARY_ID',
@@ -2753,6 +2778,7 @@ export type StumpConfig = {
   prettyLogs: Scalars['Boolean']['output'];
   /** The "release" | "debug" profile with which the application is running. */
   profile: Scalars['String']['output'];
+  refreshTokenTtl: Scalars['Int']['output'];
   /** The time in seconds that a login session will be valid for. */
   sessionTtl: Scalars['Int']['output'];
   /** The verbosity with which to log errors (default: 0). */
@@ -3074,7 +3100,7 @@ export type BookByIdQueryVariables = Exact<{
 }>;
 
 
-export type BookByIdQuery = { __typename?: 'Query', mediaById?: { __typename?: 'Media', id: string, extension: string, pages: number, resolvedName: string, size: number, metadata?: { __typename?: 'MediaMetadata', writers: Array<string>, genres: Array<string>, links: Array<string>, pageCount?: number | null, characters: Array<string>, coverArtists: Array<string>, publisher?: string | null, inkers: Array<string>, colorists: Array<string>, letterers: Array<string>, series?: string | null, summary?: string | null, number?: any | null, volume?: number | null } | null, readProgress?: { __typename?: 'ActiveReadingSession', page?: number | null, percentageCompleted?: any | null, epubcfi?: string | null, startedAt: any, elapsedSeconds?: number | null } | null, readHistory: Array<{ __typename?: 'FinishedReadingSession', completedAt: any }>, series: { __typename?: 'Series', resolvedName: string }, thumbnail: { __typename?: 'ImageRef', url: string } } | null };
+export type BookByIdQuery = { __typename?: 'Query', mediaById?: { __typename?: 'Media', id: string, extension: string, isFavorite: boolean, pages: number, resolvedName: string, size: number, metadata?: { __typename?: 'MediaMetadata', writers: Array<string>, genres: Array<string>, links: Array<string>, pageCount?: number | null, characters: Array<string>, coverArtists: Array<string>, publisher?: string | null, inkers: Array<string>, colorists: Array<string>, letterers: Array<string>, series?: string | null, summary?: string | null, number?: any | null, volume?: number | null } | null, readProgress?: { __typename?: 'ActiveReadingSession', page?: number | null, percentageCompleted?: any | null, epubcfi?: string | null, startedAt: any, elapsedSeconds?: number | null } | null, readHistory: Array<{ __typename?: 'FinishedReadingSession', completedAt: any }>, series: { __typename?: 'Series', resolvedName: string }, thumbnail: { __typename?: 'ImageRef', url: string } } | null };
 
 export type BookReadScreenQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -3232,6 +3258,14 @@ export type StackedSmartListThumbnailsQueryVariables = Exact<{ [key: string]: ne
 
 
 export type StackedSmartListThumbnailsQuery = { __typename?: 'Query', smartLists: Array<{ __typename?: 'SmartList', id: string }> };
+
+export type UseFavoriteBookMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  isFavorite: Scalars['Boolean']['input'];
+}>;
+
+
+export type UseFavoriteBookMutation = { __typename?: 'Mutation', favoriteMedia: { __typename?: 'Media', id: string, isFavorite: boolean } };
 
 export type TagSelectQueryQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -4494,6 +4528,7 @@ export const BookByIdDocument = new TypedDocumentString(`
   mediaById(id: $id) {
     id
     extension
+    isFavorite
     metadata {
       writers
       genres
@@ -4837,6 +4872,14 @@ export const StackedSmartListThumbnailsDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<StackedSmartListThumbnailsQuery, StackedSmartListThumbnailsQueryVariables>;
+export const UseFavoriteBookDocument = new TypedDocumentString(`
+    mutation UseFavoriteBook($id: ID!, $isFavorite: Boolean!) {
+  favoriteMedia(id: $id, isFavorite: $isFavorite) {
+    id
+    isFavorite
+  }
+}
+    `) as unknown as TypedDocumentString<UseFavoriteBookMutation, UseFavoriteBookMutationVariables>;
 export const TagSelectQueryDocument = new TypedDocumentString(`
     query TagSelectQuery {
   tags {

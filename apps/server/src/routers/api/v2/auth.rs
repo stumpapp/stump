@@ -1,5 +1,5 @@
 use axum::{
-	extract::{ConnectInfo, Query, State},
+	extract::{ConnectInfo, Query, Request, State},
 	http::{Response, StatusCode},
 	middleware,
 	response::IntoResponse,
@@ -14,6 +14,7 @@ use models::entity::{
 	user::{self, AuthUser, LoginUser},
 	user_login_activity, user_preferences,
 };
+use reqwest::header;
 use sea_orm::{prelude::*, IntoActiveModel, TransactionTrait};
 use sea_orm::{DatabaseConnection, EntityTrait, Set};
 use serde::{Deserialize, Serialize};
@@ -22,7 +23,10 @@ use tracing::error;
 
 use crate::{
 	config::{
-		jwt::{create_user_jwt, CreatedToken},
+		jwt::{
+			create_jwt_auth, exchange_refresh_token, extract_jti_from_refresh_token,
+			JwtTokenPair,
+		},
 		session::{delete_cookie_header, SESSION_USER_KEY},
 		state::AppState,
 	},
@@ -49,6 +53,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 					.layer(middleware::from_fn_with_state(app_state, auth_middleware)),
 			)
 			.route("/login", post(login))
+			.route("/refresh-token", post(refresh_token))
 			.route("/logout", post(logout))
 			.route("/register", post(register)),
 	)
@@ -165,16 +170,17 @@ async fn handle_remove_earliest_session(
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct TokenLoginResponse {
+pub struct GeneratedToken {
+	#[serde(flatten)]
+	token: JwtTokenPair,
 	for_user: AuthUser,
-	token: CreatedToken,
 }
 
 #[derive(Debug, Serialize)]
 #[serde(untagged, rename_all = "camelCase")]
 pub enum LoginResponse {
 	User(AuthUser),
-	AccessToken(TokenLoginResponse),
+	AccessToken(GeneratedToken),
 }
 
 /// Authenticates the user and returns the user object. If the user is already logged in, returns the
@@ -206,8 +212,8 @@ async fn login(
 			// TODO: should this be tracked?
 			// TODO: should this be permission gated?
 			if generate_token {
-				let token = create_user_jwt(&user.id, &state.config)?;
-				return Ok(Json(LoginResponse::AccessToken(TokenLoginResponse {
+				let token = create_jwt_auth(&user.id, state.clone()).await?;
+				return Ok(Json(LoginResponse::AccessToken(GeneratedToken {
 					for_user: user.into(),
 					token,
 				})));
@@ -268,7 +274,9 @@ async fn login(
 		return Err(APIError::Unauthorized);
 	}
 
-	enforce_max_sessions(&user, state.conn.as_ref()).await?;
+	if create_session {
+		enforce_max_sessions(&user, state.conn.as_ref()).await?;
+	}
 
 	let auth_user = AuthUser::from(user);
 
@@ -280,8 +288,8 @@ async fn login(
 
 	// TODO: should this be permission gated?
 	if generate_token {
-		let token = create_user_jwt(&auth_user.id, &state.config)?;
-		Ok(Json(LoginResponse::AccessToken(TokenLoginResponse {
+		let token = create_jwt_auth(&auth_user.id, state.clone()).await?;
+		Ok(Json(LoginResponse::AccessToken(GeneratedToken {
 			for_user: auth_user,
 			token,
 		})))
@@ -384,4 +392,27 @@ pub async fn register(
 	let auth_user = AuthUser::from(auth_user);
 
 	Ok(Json(auth_user))
+}
+
+/// Exchange a refresh token for a new access token and refresh token pair. This endpoint
+/// expects a valid refresh token in the Authorization header as a Bearer token. The
+/// access token should not be used for this endpoint.
+async fn refresh_token(
+	State(state): State<AppState>,
+	req: Request,
+) -> Result<Json<JwtTokenPair>, APIError> {
+	let req_headers = req.headers().clone();
+	let auth_header = req_headers
+		.get(header::AUTHORIZATION)
+		.and_then(|header| header.to_str().ok())
+		.ok_or(APIError::Unauthorized)?;
+
+	if auth_header.starts_with("Bearer ") {
+		let token = auth_header.trim_start_matches("Bearer ").to_string();
+		let jti = extract_jti_from_refresh_token(&token)?;
+		let jwt_pair = exchange_refresh_token(&jti, state).await?;
+		return Ok(Json(jwt_pair));
+	}
+
+	Err(APIError::Unauthorized)
 }

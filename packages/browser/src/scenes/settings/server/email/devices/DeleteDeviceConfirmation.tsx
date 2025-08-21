@@ -4,7 +4,7 @@ import { graphql } from '@stump/graphql'
 import { RegisteredEmailDevice } from '@stump/sdk'
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback } from 'react'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 
 const mutation = graphql(`
 	mutation DeleteDeviceConfirmationDeleteEmailDevice($id: Int!) {

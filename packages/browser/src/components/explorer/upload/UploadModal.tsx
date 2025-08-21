@@ -16,7 +16,7 @@ import { AxiosProgressEvent } from 'axios'
 import { Book, FolderArchive } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { FileRejection, useDropzone } from 'react-dropzone'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 
 import { useCurrentOrPrevious } from '@/hooks/useCurrentOrPrevious'
 import { useSeriesContextSafe } from '@/scenes/series'

@@ -3,7 +3,7 @@ import { Button } from '@stump/components'
 import { BookCardFragment, graphql } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useMemo } from 'react'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 
 import { EBOOK_EXTENSION } from '@/utils/patterns'
 

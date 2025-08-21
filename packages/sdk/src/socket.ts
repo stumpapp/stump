@@ -49,14 +49,22 @@ export const attemptWebsocketConnect = async <TResult, TVariables>({
 			reject(new Error('Failed to establish WebSocket connection'))
 		}
 
-		const openHandler = () => {
+		const openHandler = (ev: Event) => {
 			clearTimeout(timeout)
 			socket.removeEventListener('error', errorHandler)
+			events.onOpen?.(ev)
 			resolve()
+		}
+
+		const closeHandler = (ev: CloseEvent) => {
+			clearTimeout(timeout)
+			socket.removeEventListener('error', errorHandler)
+			events.onClose?.(ev)
 		}
 
 		socket.addEventListener('open', openHandler)
 		socket.addEventListener('error', errorHandler)
+		socket.addEventListener('close', closeHandler)
 	})
 
 	socket.addEventListener('message', (event) => {

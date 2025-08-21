@@ -3,7 +3,7 @@ import { Button, Dialog, Form, Input } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { useCallback, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 import { z } from 'zod'
 
 import { useSmartListContext } from '../../context'

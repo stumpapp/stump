@@ -5,8 +5,8 @@ import { useLocation } from 'react-router'
 
 import { useSceneContainer } from '@/components/container'
 
-import { routeGroups } from './routes'
 import SettingsNavigation from './SettingsNavigation'
+import { useSettingsRoutes } from './useSettingsRoutes'
 
 type Props = {
 	renderNavigation?: boolean
@@ -21,15 +21,15 @@ export default function SettingsHeader({ renderNavigation }: Props) {
 	const { maxWidth } = useSceneContainer()
 	const location = useLocation()
 
+	const { groups } = useSettingsRoutes()
+
 	/**
 	 * The active route based on the current location
 	 */
 	const activeRouteGroup = useMemo(
 		() =>
-			routeGroups
-				.flatMap((group) => group.items)
-				.find((page) => location.pathname.startsWith(page.to)),
-		[location.pathname],
+			groups.flatMap((group) => group.items).find((page) => location.pathname.startsWith(page.to)),
+		[location.pathname, groups],
 	)
 
 	/**

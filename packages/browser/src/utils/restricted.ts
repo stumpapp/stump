@@ -1,4 +1,4 @@
-import { toast } from 'react-hot-toast'
+import { toast } from 'sonner'
 
 export const RESTRICTED_MODE = Boolean(import.meta.env.RESTRICTED_MODE)
 

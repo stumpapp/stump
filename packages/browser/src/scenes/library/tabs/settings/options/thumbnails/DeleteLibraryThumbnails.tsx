@@ -3,7 +3,7 @@ import { Alert, Button, ConfirmationModal } from '@stump/components'
 import { graphql } from '@stump/graphql'
 import { AlertTriangle } from 'lucide-react'
 import { useCallback, useState } from 'react'
-import { toast } from 'react-hot-toast'
+import { toast } from 'sonner'
 
 import { useLibraryManagement } from '../../context'
 

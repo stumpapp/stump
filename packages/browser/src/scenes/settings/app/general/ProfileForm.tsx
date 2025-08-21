@@ -5,7 +5,7 @@ import { graphql } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { isUrl } from '@stump/sdk'
 import { useForm } from 'react-hook-form'
-import { toast } from 'react-hot-toast'
+import { toast } from 'sonner'
 import { z } from 'zod'
 
 import { useUser } from '@/stores'

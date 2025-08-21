@@ -1,34 +1,19 @@
-import { invalidateQueries, useSDK } from '@stump/client'
 import { ConfirmationModal, IconButton, ToolTip, useBoolean } from '@stump/components'
 import { LogOut } from 'lucide-react'
-import toast from 'react-hot-toast'
-import { useNavigate } from 'react-router-dom'
 
-import { useUserStore } from '@/stores'
+import { useAppContext } from '@/context'
 
 type Props = {
 	trigger?: (setOpen: (state: boolean) => void) => JSX.Element
 }
 
 export default function Logout({ trigger }: Props) {
-	const { sdk } = useSDK()
+	const { logout } = useAppContext()
 	const [isOpen, { on, off }] = useBoolean()
 
-	const setUser = useUserStore((store) => store.setUser)
-	const navigate = useNavigate()
-
 	async function handleLogout() {
-		toast
-			.promise(sdk.auth.logout(), {
-				error: 'There was an error logging you out. Please try again.',
-				loading: null,
-				success: 'You have been logged out',
-			})
-			.then(() => {
-				invalidateQueries({ keys: [sdk.server.keys.claimedStatus] })
-				setUser(null)
-				navigate('/auth')
-			})
+		off()
+		logout()
 	}
 
 	return (

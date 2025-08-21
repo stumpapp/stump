@@ -3,7 +3,7 @@ import { Alert, Button, ConfirmationModal, Heading, Text } from '@stump/componen
 import { graphql } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { useCallback, useState } from 'react'
-import { toast } from 'react-hot-toast'
+import { toast } from 'sonner'
 
 import { useLibraryManagement } from '../../context'
 
@@ -35,7 +35,7 @@ export default function CleanLibrary() {
 				loading: t(getKey('confirmation.loading')),
 				success: ({ cleanLibrary: result }) => {
 					if (result.isEmpty) {
-						return t(getKey('confirmation.empty'))
+						return t(getKey('emptyText'))
 					} else if (result.deletedMediaCount === 0 && result.deletedSeriesCount === 0) {
 						return t(getKey('confirmation.nothingToDelete'))
 					} else {

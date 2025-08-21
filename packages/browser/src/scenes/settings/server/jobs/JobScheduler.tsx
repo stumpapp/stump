@@ -3,12 +3,13 @@ import { useGraphQLMutation, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Alert, Button, ComboBox, Form, Input, Label, NativeSelect } from '@stump/components'
 import { graphql, JobSchedulerConfigQuery } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
-import { useQueryClient } from '@tanstack/react-query'
+import { Api } from '@stump/sdk'
+import { QueryClient, useQueryClient } from '@tanstack/react-query'
 import { Construction } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useForm, useFormState } from 'react-hook-form'
-import toast from 'react-hot-toast'
 import { useMediaMatch } from 'rooks'
+import { toast } from 'sonner'
 import z from 'zod'
 
 const query = graphql(`
@@ -31,6 +32,16 @@ const query = graphql(`
 		}
 	}
 `)
+
+export const prefetchScheduler = (client: QueryClient, sdk: Api) => {
+	client.prefetchQuery({
+		queryKey: sdk.cacheKey('scheduler'),
+		queryFn: async () => {
+			const response = await sdk.execute(query)
+			return response
+		},
+	})
+}
 
 const updateMutation = graphql(`
 	mutation JobSchedulerUpdate($id: Int!, $input: ScheduledJobConfigInput!) {

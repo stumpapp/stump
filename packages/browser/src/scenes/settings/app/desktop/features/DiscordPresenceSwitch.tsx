@@ -1,7 +1,7 @@
 import { Button, Label, RawSwitch, Text, ToolTip } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { RefreshCcw } from 'lucide-react'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 
 import { usePreferences } from '@/hooks/usePreferences'
 import { useTauriRPC } from '@/hooks/useTauriRPC'

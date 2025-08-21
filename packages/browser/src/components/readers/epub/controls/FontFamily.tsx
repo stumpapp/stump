@@ -4,7 +4,7 @@ import { isSupportedFont } from '@stump/sdk'
 import { useCallback } from 'react'
 
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
-import { SUPPORTED_FONT_OPTIONS } from '@/scenes/settings/app/appearance/FontSelect'
+import { SUPPORTED_FONT_OPTIONS } from '@/scenes/settings/app/preferences/FontSelect'
 
 import { useEpubReaderContext } from '../context'
 

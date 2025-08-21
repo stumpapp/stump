@@ -1111,7 +1111,7 @@
 				"desktop": "Stationär Dator",
 				"label": "Program"
 			},
-			"server": {
+			"management": {
 				"general": "Allmänt",
 				"logs": "Loggar",
 				"users": "Användare",
@@ -1119,7 +1119,7 @@
 				"access": "Åtkomst",
 				"email": "E-post",
 				"notifications": "Notifikationer",
-				"label": "Server"
+				"label": "Management"
 			}
 		},
 		"app/account": {
@@ -1173,7 +1173,7 @@
 				}
 			}
 		},
-		"app/appearance": {
+		"app/preferences": {
 			"helmet": "Utseende",
 			"title": "Utseende",
 			"description": "Anpassa utseendet i programmet",

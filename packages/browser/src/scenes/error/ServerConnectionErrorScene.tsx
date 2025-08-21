@@ -3,8 +3,8 @@ import { useLocaleContext } from '@stump/i18n'
 import { motion, Variants } from 'framer-motion'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { toast } from 'react-hot-toast'
 import { Navigate, useLocation } from 'react-router'
+import { toast } from 'sonner'
 
 import { ConfiguredServersList } from '@/components/savedServer'
 import { useAppStore } from '@/stores'
@@ -56,13 +56,14 @@ export default function ServerConnectionErrorScene() {
 
 	useEffect(() => {
 		if (backOnline) {
-			toast
-				.promise(new Promise((resolve) => setTimeout(resolve, 2000)), {
+			toast.promise(
+				new Promise((resolve) => setTimeout(resolve, 2000)).then(() => setGoHome(true)),
+				{
 					error: t('serverSOS.reconnectFailed'),
 					loading: t('serverSOS.reconnected'),
 					success: t('serverSOS.reconnected'),
-				})
-				.then(() => setGoHome(true))
+				},
+			)
 		}
 	}, [backOnline, t])
 

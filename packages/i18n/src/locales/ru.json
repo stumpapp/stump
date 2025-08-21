@@ -1111,7 +1111,7 @@
 				"desktop": "Рабочий стол",
 				"label": "Приложение"
 			},
-			"server": {
+			"management": {
 				"general": "Общие",
 				"logs": "Логи",
 				"users": "Пользователи",
@@ -1173,7 +1173,7 @@
 				}
 			}
 		},
-		"app/appearance": {
+		"app/preferences": {
 			"helmet": "Внешний вид",
 			"title": "Внешний вид",
 			"description": "Настроить внешний вид приложения",

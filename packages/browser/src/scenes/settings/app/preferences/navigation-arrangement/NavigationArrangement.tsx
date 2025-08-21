@@ -267,7 +267,7 @@ export default function NavigationArrangement() {
 	)
 }
 
-const LOCALE_BASE = 'settingsScene.app/appearance.sections.navigationArrangement'
+const LOCALE_BASE = 'settingsScene.app/preferences.sections.navigationArrangement'
 const getKey = (key: string) => `${LOCALE_BASE}.${key}`
 
 type Section =

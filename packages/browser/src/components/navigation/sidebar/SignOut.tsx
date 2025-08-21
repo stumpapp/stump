@@ -1,30 +1,15 @@
-import { queryClient, useSDK } from '@stump/client'
 import { ConfirmationModal, Text, useBoolean } from '@stump/components'
 import { LogOut } from 'lucide-react'
-import toast from 'react-hot-toast'
-import { useNavigate } from 'react-router-dom'
 
-import { useUserStore } from '@/stores'
+import { useAppContext } from '@/context'
 
 export default function SignOut() {
-	const { sdk } = useSDK()
+	const { logout } = useAppContext()
 	const [isOpen, { on, off }] = useBoolean()
 
-	const setUser = useUserStore((store) => store.setUser)
-	const navigate = useNavigate()
-
 	async function handleLogout() {
-		toast
-			.promise(sdk.auth.logout(), {
-				error: 'There was an error logging you out. Please try again.',
-				loading: null,
-				success: 'You have been logged out. Redirecting...',
-			})
-			.then(() => {
-				queryClient.clear()
-				setUser(null)
-				navigate('/auth')
-			})
+		off()
+		logout()
 	}
 
 	return (

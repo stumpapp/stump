@@ -10,7 +10,7 @@ use models::{
 use sea_orm::{
 	prelude::*,
 	sea_query::{OnConflict, Query},
-	DatabaseTransaction, QuerySelect, Set, TransactionTrait,
+	DatabaseTransaction, IntoActiveModel, QuerySelect, Set, TransactionTrait,
 };
 use stump_core::filesystem::{
 	image::{generate_book_thumbnail, GenerateThumbnailOptions},
@@ -73,6 +73,27 @@ impl MediaMutation {
 		// }
 
 		Err("Not implemented".into())
+	}
+
+	async fn delete_media(&self, ctx: &Context<'_>, id: ID) -> Result<Media> {
+		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let core = ctx.data::<CoreContext>()?;
+		let conn = core.conn.as_ref();
+
+		let model = media::ModelWithMetadata::find_for_user(user)
+			.filter(media::Column::Id.eq(id.to_string()))
+			.into_model::<media::ModelWithMetadata>()
+			.one(conn)
+			.await?
+			.ok_or("Media not found")?;
+		let mut active_model = model.media.clone().into_active_model();
+		active_model.deleted_at = Set(Some(Utc::now().into()));
+		let deleted_book = active_model.update(conn).await?;
+
+		Ok(Media::from(media::ModelWithMetadata {
+			media: deleted_book,
+			..model
+		}))
 	}
 
 	/// Update the thumbnail for a book. This will replace the existing thumbnail with the the one

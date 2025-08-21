@@ -1111,7 +1111,7 @@
 				"desktop": "デスクトップ",
 				"label": "アプリケーション"
 			},
-			"server": {
+			"management": {
 				"general": "一般",
 				"logs": "ログ",
 				"users": "ユーザー",
@@ -1173,7 +1173,7 @@
 				}
 			}
 		},
-		"app/appearance": {
+		"app/preferences": {
 			"helmet": "外観",
 			"title": "外観",
 			"description": "アプリケーションの外観と感触をカスタマイズします",

@@ -1,9 +1,9 @@
-import { Label, Link, NativeSelect, Text } from '@stump/components'
+import { Label, NativeSelect } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 
 import { useTheme } from '@/hooks'
 
-const localeKey = 'settingsScene.app/appearance.sections.themeSelect'
+const localeKey = 'settingsScene.app/preferences.sections.themeSelect'
 
 // TODO: We officially have enough themes to warrant a filterable combobox IMO, so do that
 export default function ThemeSelect() {
@@ -28,12 +28,12 @@ export default function ThemeSelect() {
 				]}
 				onChange={(e) => changeTheme(e.target.value)}
 			/>
-			<Text variant="muted" size="xs">
+			{/* <Text variant="muted" size="xs">
 				{t(`${localeKey}.description.0`)}{' '}
 				<Link href="https://stumpapp.dev/guides/configuration/theming">
 					{t(`${localeKey}.description.1`)}
 				</Link>
-			</Text>
+			</Text> */}
 		</div>
 	)
 }

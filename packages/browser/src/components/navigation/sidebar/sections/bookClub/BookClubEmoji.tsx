@@ -1,7 +1,7 @@
 import { EmojiPicker } from '@stump/components'
 import { BookClub } from '@stump/sdk'
 import { noop } from 'lodash'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 
 type Props = {
 	emoji?: string

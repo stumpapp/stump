@@ -27,9 +27,9 @@ export const themes = {
 }
 ```
 
-Then we should add it to the main [`ThemeSelect` component](https://github.com/stumpapp/stump/tree/develop/packages/browser/src/scenes/settings/app/appearance/ThemeSelect.tsx) so that it can be selected:
+Then we should add it to the main [`ThemeSelect` component](https://github.com/stumpapp/stump/tree/develop/packages/browser/src/scenes/settings/app/preferences/ThemeSelect.tsx) so that it can be selected:
 
-```tsx filename="scenes/settings/app/appearance/ThemeSelect.tsx" copy
+```tsx filename="scenes/settings/app/preferences/ThemeSelect.tsx" copy
 <NativeSelect
 	value={theme}
 	options={[
@@ -80,7 +80,7 @@ module.exports = {
 
 Then, the font can be used in the `FontSelect` component:
 
-```tsx filename="scenes/settings/app/appearance/FontSelect.tsx" copy
+```tsx filename="scenes/settings/app/preferences/FontSelect.tsx" copy
 <NativeSelect
 	value={app_font || 'inter'}
 	options={[

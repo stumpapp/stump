@@ -125,6 +125,7 @@ type UseGraphQLMutationOptions<TResult, TVariables> = Omit<
 
 export function useGraphQLMutation<TResult, TVariables>(
 	document: TypedDocumentString<TResult, TVariables>,
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	{ config, ...options }: UseGraphQLMutationOptions<TResult, TVariables> = {},
 ) {
 	const { sdk } = useSDK()
@@ -440,6 +441,11 @@ export const getNextPageParam = (paginationInfo?: PaginationInfo): Pagination | 
 		})
 		.otherwise(() => undefined)
 
+export type GraphQLSubscriptionLifecycleParams = {
+	onConnected?: (event: Event) => void
+	onDisconnected?: (event: CloseEvent) => void
+}
+
 export type UseGraphQLSubscriptionCacheParams<TResult, TVariables> = {
 	variables?: TVariables extends Record<string, never> ? never : TVariables
 	/**
@@ -451,7 +457,7 @@ export type UseGraphQLSubscriptionCacheParams<TResult, TVariables> = {
 	 * The maximum number of items to keep in the cache. If not provided, the default is 10,000.
 	 */
 	maxCacheSize?: number
-}
+} & GraphQLSubscriptionLifecycleParams
 
 export type UseGraphQLSubscriptionCacheReturn<TResult> = [
 	TResult[] | undefined,
@@ -465,6 +471,7 @@ export function useGraphQLSubscriptionCache<TResult, TVariables>(
 		variables,
 		onDataChangeCapture,
 		maxCacheSize = 10_000,
+		...params
 	}: UseGraphQLSubscriptionCacheParams<TResult, TVariables> = {},
 ): UseGraphQLSubscriptionCacheReturn<TResult> {
 	const { sdk } = useSDK()
@@ -502,6 +509,8 @@ export function useGraphQLSubscriptionCache<TResult, TVariables>(
 					onConnectionWithServerChanged,
 				})
 			},
+			onOpen: (ev) => params?.onConnected?.(ev),
+			onClose: (ev) => params?.onDisconnected?.(ev),
 		}),
 		[
 			sdk,
@@ -509,6 +518,7 @@ export function useGraphQLSubscriptionCache<TResult, TVariables>(
 			onConnectionWithServerChanged,
 			onDataChangeCapture,
 			maxCacheSize,
+			params,
 		],
 	)
 
@@ -557,13 +567,13 @@ export type UseGraphQLSubscriptionParams<TResult, TVariables> = {
 	 * An optional function that is called when a new message is received
 	 */
 	onMessage?: (payload: TResult) => void
-}
+} & GraphQLSubscriptionLifecycleParams
 
 export type UseGraphQLSubscriptionReturn = [WebSocket | null, () => void]
 
 export function useGraphQLSubscription<TResult, TVariables>(
 	document: TypedDocumentString<TResult, TVariables>,
-	{ variables, onMessage }: UseGraphQLSubscriptionParams<TResult, TVariables> = {},
+	{ variables, onMessage, ...params }: UseGraphQLSubscriptionParams<TResult, TVariables> = {},
 ): UseGraphQLSubscriptionReturn {
 	const { sdk } = useSDK()
 	const { onUnauthenticatedResponse, onConnectionWithServerChanged } = useClientContext()
@@ -584,8 +594,10 @@ export function useGraphQLSubscription<TResult, TVariables>(
 					onConnectionWithServerChanged,
 				})
 			},
+			onOpen: (ev) => params?.onConnected?.(ev),
+			onClose: (ev) => params?.onDisconnected?.(ev),
 		}),
-		[sdk, onUnauthenticatedResponse, onConnectionWithServerChanged, onMessage],
+		[sdk, onUnauthenticatedResponse, onConnectionWithServerChanged, onMessage, params],
 	)
 
 	const didConfigure = useRef(false)

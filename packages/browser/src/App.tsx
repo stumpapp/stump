@@ -9,13 +9,11 @@ import { Helmet } from 'react-helmet'
 import { BrowserRouter, createSearchParams, useLocation, useNavigate } from 'react-router-dom'
 
 import { ErrorFallback } from '@/components/ErrorFallback'
-import Notifications from '@/components/Notifications'
 
 import { AppRouter } from './AppRouter'
+import { Toaster } from './components/Toaster'
 import { useApplyTheme } from './hooks'
-import { useAppStore, useUserStore } from './stores'
-
-const IS_DEVELOPMENT = import.meta.env.MODE === 'development'
+import { useAppStore, useDebugStore, useUserStore } from './stores'
 
 export default function StumpWebClient(props: StumpClientProps) {
 	return (
@@ -30,6 +28,8 @@ export default function StumpWebClient(props: StumpClientProps) {
 const RouterContainer = (props: StumpClientProps) => {
 	const location = useLocation()
 	const navigate = useNavigate()
+
+	const showQueryTools = useDebugStore((state) => state.showQueryTools)
 
 	const [mounted, setMounted] = useState(false)
 
@@ -101,12 +101,12 @@ const RouterContainer = (props: StumpClientProps) => {
 			onLogout={props.onLogout}
 		>
 			<SDKProvider baseURL={baseUrl || ''} authMethod={props.authMethod || 'session'}>
-				{IS_DEVELOPMENT && <ReactQueryDevtools position="right" />}
+				{showQueryTools && <ReactQueryDevtools position="right" />}
 				<Helmet defaultTitle="Stump">
 					<title>Stump</title>
 				</Helmet>
 				<AppRouter />
-				<Notifications />
+				<Toaster />
 			</SDKProvider>
 		</StumpClientContextProvider>
 	)

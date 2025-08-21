@@ -1,8 +1,8 @@
 import { useDirectoryListing, useSDK } from '@stump/client'
 import { DirectoryListingFile } from '@stump/graphql'
 import { useCallback, useState } from 'react'
-import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router'
+import { toast } from 'sonner'
 
 import paths from '@/paths'
 

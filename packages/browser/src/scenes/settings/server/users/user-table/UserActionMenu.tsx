@@ -4,7 +4,7 @@ import { graphql } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
 import { Database, Lock, MoreVertical, Pencil, Search, Trash, Unlock } from 'lucide-react'
 import { useCallback, useMemo } from 'react'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 import { useNavigate } from 'react-router'
 
 import { useAppContext } from '@/context'

@@ -670,7 +670,8 @@
 					"confirmation": {
 						"label": "Clean library",
 						"text": "Are you sure you want to clean this library?"
-					}
+					},
+					"emptyText": "There was nothing to clean"
 				},
 				"deleteLibrary": {
 					"heading": "Delete library",
@@ -1126,23 +1127,23 @@
 			"desktop": "Desktop"
 		},
 		"sidebar": {
-			"application": {
+			"personal": {
 				"account": "Account",
-				"appearance": "Appearance",
+				"appearance": "Preferences",
 				"api keys": "API keys",
 				"reader": "Reader",
 				"desktop": "Desktop",
-				"label": "Application"
+				"label": "Personal"
 			},
-			"server": {
-				"general": "General",
+			"management": {
+				"general": "Server",
 				"logs": "Logs",
 				"users": "Users",
 				"jobs": "Jobs",
 				"access": "Access",
 				"email": "Email",
 				"notifications": "Notifications",
-				"label": "Server"
+				"label": "Management"
 			}
 		},
 		"app/account": {
@@ -1196,9 +1197,9 @@
 				}
 			}
 		},
-		"app/appearance": {
-			"helmet": "Appearance",
-			"title": "Appearance",
+		"app/preferences": {
+			"helmet": "Preferences",
+			"title": "Preferences",
 			"description": "Customize the look and feel of the application",
 			"sections": {
 				"themeSelect": {
@@ -1473,8 +1474,8 @@
 			}
 		},
 		"server/general": {
-			"helmet": "General server settings",
-			"title": "General settings",
+			"helmet": "Server settings",
+			"title": "Server settings",
 			"description": "General settings related to your Stump server instance",
 			"sections": {
 				"updateAvailable": {

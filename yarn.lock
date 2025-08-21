@@ -11518,7 +11518,7 @@ cssstyle@^2.3.0:
   dependencies:
     cssom "~0.3.6"
 
-csstype@^3.0.2, csstype@^3.1.3:
+csstype@^3.0.2:
   version "3.1.3"
   resolved "https://registry.yarnpkg.com/csstype/-/csstype-3.1.3.tgz#d80ff294d114fb0e6ac500fbf85b60137d7eff81"
   integrity sha512-M1uQkMl8rQK/szD0LNhtqxIPLpimGm8sOBwU7lLnCpSbTyY3yeU1Vc7l4KT5zT4s/yOxHH5O7tIuuLOCnLADRw==
@@ -15001,11 +15001,6 @@ globby@11.1.0, globby@^11.0.1, globby@^11.0.2, globby@^11.0.3, globby@^11.1.0:
     ignore "^5.2.0"
     merge2 "^1.4.1"
     slash "^3.0.0"
-
-goober@^2.1.16:
-  version "2.1.16"
-  resolved "https://registry.yarnpkg.com/goober/-/goober-2.1.16.tgz#7d548eb9b83ff0988d102be71f271ca8f9c82a95"
-  integrity sha512-erjk19y1U33+XAMe1VTvIONHYoSqE4iS7BYUZfHaqeohLmnC0FdxEh7rQU+6MZ4OajItzjZFSRtVANrQwNq6/g==
 
 gopd@^1.0.1, gopd@^1.2.0:
   version "1.2.0"
@@ -22372,14 +22367,6 @@ react-hook-form@^7.53.0:
   resolved "https://registry.yarnpkg.com/react-hook-form/-/react-hook-form-7.54.2.tgz#8c26ed54c71628dff57ccd3c074b1dd377cfb211"
   integrity sha512-eHpAUgUjWbZocoQYUHposymRb4ZP6d0uwUnooL2uOybA9/3tPUvoAKqEWK1WaSiTxxOfTpffNZP7QwlnM3/gEg==
 
-react-hot-toast@^2.4.1:
-  version "2.5.1"
-  resolved "https://registry.yarnpkg.com/react-hot-toast/-/react-hot-toast-2.5.1.tgz#fcb182d96353c803ee5af82e96c806d5eaa4dcfa"
-  integrity sha512-54Gq1ZD1JbmAb4psp9bvFHjS7lje+8ubboUmvKZkCsQBLH6AOpZ9JemfRvIdHcfb9AZXRaFLrb3qUobGYDJhFQ==
-  dependencies:
-    csstype "^3.1.3"
-    goober "^2.1.16"
-
 react-hotkeys-hook@^4.5.0:
   version "4.6.1"
   resolved "https://registry.yarnpkg.com/react-hotkeys-hook/-/react-hotkeys-hook-4.6.1.tgz#db9066c07377a1c8be067a238ab16e328266345a"
@@ -24380,6 +24367,11 @@ socks@~2.3.2:
   dependencies:
     ip "1.1.5"
     smart-buffer "^4.1.0"
+
+sonner@^2.0.7:
+  version "2.0.7"
+  resolved "https://registry.yarnpkg.com/sonner/-/sonner-2.0.7.tgz#810c1487a67ec3370126e0f400dfb9edddc3e4f6"
+  integrity sha512-W6ZN4p58k8aDKA4XPcx2hpIQXBRAgyiWVkYhT7CvK6D3iAu7xjvVyhQHg2/iaKJZ1XVJ4r7XuwGL+WGEK37i9w==
 
 sort-keys@^2.0.0:
   version "2.0.0"

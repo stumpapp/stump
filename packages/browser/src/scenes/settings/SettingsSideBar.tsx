@@ -48,7 +48,7 @@ export default function SettingsSideBar() {
 								<Label>{groupLabel}</Label>
 
 								<ul className="flex flex-col gap-y-0.5 pt-2 text-sm">
-									{items.map(({ to, icon, label, disabled }) => {
+									{items.map(({ to, icon, label, disabled, prefetch }) => {
 										if (platform === 'browser' && to.includes('desktop')) {
 											return null
 										}
@@ -60,6 +60,7 @@ export default function SettingsSideBar() {
 												isActive={location.pathname.startsWith(to)}
 												isDisabled={disabled}
 												icon={icon}
+												prefetch={prefetch}
 											>
 												{t(withGroup(label.toLowerCase()))}
 											</SettingsSideBarLink>

@@ -9,7 +9,7 @@ import {
 import { Book, Rendition } from 'epubjs'
 import uniqby from 'lodash/uniqBy'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 import AutoSizer from 'react-virtualized-auto-sizer'
 
 import { ImageReaderBookRef } from '@/components/readers/imageBased/context'

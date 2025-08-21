@@ -3,7 +3,7 @@ import { useLocaleContext } from '@stump/i18n'
 import { isSupportedFont } from '@stump/sdk'
 import { useCallback } from 'react'
 
-import { SUPPORTED_FONT_OPTIONS } from '@/scenes/settings/app/appearance/FontSelect'
+import { SUPPORTED_FONT_OPTIONS } from '@/scenes/settings/app/preferences/FontSelect'
 import { useReaderStore } from '@/stores'
 
 export default function DefaultFontFamily() {

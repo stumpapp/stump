@@ -78,6 +78,11 @@ const DialogContent = React.forwardRef<
 						className,
 					)}
 					{...props}
+					// https://github.com/radix-ui/primitives/issues/1241#issuecomment-2589438039
+					onCloseAutoFocus={(event) => {
+						event.preventDefault()
+						document.body.style.pointerEvents = ''
+					}}
 				>
 					{children}
 					<DialogPrimitive.Close

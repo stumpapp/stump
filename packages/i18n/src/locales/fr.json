@@ -1111,7 +1111,7 @@
 				"desktop": "Bureau",
 				"label": "Application"
 			},
-			"server": {
+			"management": {
 				"general": "Général",
 				"logs": "Journaux",
 				"users": "Utilisateurs",
@@ -1173,7 +1173,7 @@
 				}
 			}
 		},
-		"app/appearance": {
+		"app/preferences": {
 			"helmet": "Apparence",
 			"title": "Apparence",
 			"description": "Personnaliser l'apparence de l'application",

@@ -1111,7 +1111,7 @@
 				"desktop": "Desktop",
 				"label": "Application"
 			},
-			"server": {
+			"management": {
 				"general": "General",
 				"logs": "Logs",
 				"users": "Users",
@@ -1119,7 +1119,7 @@
 				"access": "Access",
 				"email": "Email",
 				"notifications": "Notifications",
-				"label": "Server"
+				"label": "Management"
 			}
 		},
 		"app/account": {
@@ -1173,7 +1173,7 @@
 				}
 			}
 		},
-		"app/appearance": {
+		"app/preferences": {
 			"helmet": "Appearance",
 			"title": "Appearance",
 			"description": "Customize the look and feel of the application",

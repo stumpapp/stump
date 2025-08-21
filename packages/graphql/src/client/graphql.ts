@@ -3378,7 +3378,7 @@ export type SeriesBooksAlphabetQuery = { __typename?: 'Query', seriesById?: { __
 export type UseCoreEventSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
 
-export type UseCoreEventSubscription = { __typename?: 'Subscription', readEvents: { __typename: 'CreatedManySeries', count: number, libraryId: string } | { __typename: 'CreatedMedia', id: string, seriesId: string } | { __typename: 'CreatedOrUpdatedManyMedia', count: number, seriesId: string } | { __typename: 'DiscoveredMissingLibrary', id: string } | { __typename: 'JobOutput', id: string, output: { __typename: 'ExternalJobOutput' } | { __typename: 'LibraryScanOutput' } | { __typename: 'SeriesScanOutput' } | { __typename: 'ThumbnailGenerationOutput' } } | { __typename: 'JobStarted', id: string } | { __typename: 'JobUpdate', id: string, status?: JobStatus | null, message?: string | null, completedTasks?: number | null, remainingTasks?: number | null, completedSubtasks?: number | null, totalSubtasks?: number | null } };
+export type UseCoreEventSubscription = { __typename?: 'Subscription', readEvents: { __typename: 'CreatedManySeries', count: number, libraryId: string } | { __typename: 'CreatedMedia', id: string, seriesId: string } | { __typename: 'CreatedOrUpdatedManyMedia', count: number, seriesId: string } | { __typename: 'DiscoveredMissingLibrary', id: string } | { __typename: 'JobOutput', id: string, output: { __typename: 'ExternalJobOutput' } | { __typename: 'LibraryScanOutput', createdMedia: number, createdSeries: number, updatedMedia: number, updatedSeries: number } | { __typename: 'SeriesScanOutput', createdMedia: number, updatedMedia: number } | { __typename: 'ThumbnailGenerationOutput' } } | { __typename: 'JobStarted', id: string } | { __typename: 'JobUpdate', id: string, status?: JobStatus | null, message?: string | null, completedTasks?: number | null, remainingTasks?: number | null, completedSubtasks?: number | null, totalSubtasks?: number | null } };
 
 export type UsePreferencesMutationVariables = Exact<{
   input: UpdateUserPreferencesInput;
@@ -3809,6 +3809,20 @@ export type DeleteApiKeyConfirmModalMutationVariables = Exact<{
 
 export type DeleteApiKeyConfirmModalMutation = { __typename?: 'Mutation', deleteApiKey: { __typename?: 'Apikey', id: number } };
 
+export type UpdateUserLocaleSelectorMutationVariables = Exact<{
+  input: UpdateUserPreferencesInput;
+}>;
+
+
+export type UpdateUserLocaleSelectorMutation = { __typename?: 'Mutation', updateViewerPreferences: { __typename?: 'UserPreferences', locale: string } };
+
+export type UpdateUserProfileFormMutationVariables = Exact<{
+  input: UpdateUserInput;
+}>;
+
+
+export type UpdateUserProfileFormMutation = { __typename?: 'Mutation', updateViewer: { __typename?: 'User', id: string, username: string, avatarUrl?: string | null } };
+
 export type NavigationArrangementQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -3827,20 +3841,6 @@ export type NavigationArrangementUpdateLockStatusMutationVariables = Exact<{
 
 
 export type NavigationArrangementUpdateLockStatusMutation = { __typename?: 'Mutation', updateNavigationArrangementLock: { __typename: 'Arrangement' } };
-
-export type UpdateUserLocaleSelectorMutationVariables = Exact<{
-  input: UpdateUserPreferencesInput;
-}>;
-
-
-export type UpdateUserLocaleSelectorMutation = { __typename?: 'Mutation', updateViewerPreferences: { __typename?: 'UserPreferences', locale: string } };
-
-export type UpdateUserProfileFormMutationVariables = Exact<{
-  input: UpdateUserInput;
-}>;
-
-
-export type UpdateUserProfileFormMutation = { __typename?: 'Mutation', updateViewer: { __typename?: 'User', id: string, username: string, avatarUrl?: string | null } };
 
 export type CreateEmailerSceneEmailersQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -5102,6 +5102,16 @@ export const UseCoreEventDocument = new TypedDocumentString(`
       id
       output {
         __typename
+        ... on LibraryScanOutput {
+          createdMedia
+          createdSeries
+          updatedMedia
+          updatedSeries
+        }
+        ... on SeriesScanOutput {
+          createdMedia
+          updatedMedia
+        }
       }
     }
   }
@@ -6002,6 +6012,22 @@ export const DeleteApiKeyConfirmModalDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<DeleteApiKeyConfirmModalMutation, DeleteApiKeyConfirmModalMutationVariables>;
+export const UpdateUserLocaleSelectorDocument = new TypedDocumentString(`
+    mutation UpdateUserLocaleSelector($input: UpdateUserPreferencesInput!) {
+  updateViewerPreferences(input: $input) {
+    locale
+  }
+}
+    `) as unknown as TypedDocumentString<UpdateUserLocaleSelectorMutation, UpdateUserLocaleSelectorMutationVariables>;
+export const UpdateUserProfileFormDocument = new TypedDocumentString(`
+    mutation UpdateUserProfileForm($input: UpdateUserInput!) {
+  updateViewer(input: $input) {
+    id
+    username
+    avatarUrl
+  }
+}
+    `) as unknown as TypedDocumentString<UpdateUserProfileFormMutation, UpdateUserProfileFormMutationVariables>;
 export const NavigationArrangementDocument = new TypedDocumentString(`
     query NavigationArrangement {
   me {
@@ -6038,22 +6064,6 @@ export const NavigationArrangementUpdateLockStatusDocument = new TypedDocumentSt
   }
 }
     `) as unknown as TypedDocumentString<NavigationArrangementUpdateLockStatusMutation, NavigationArrangementUpdateLockStatusMutationVariables>;
-export const UpdateUserLocaleSelectorDocument = new TypedDocumentString(`
-    mutation UpdateUserLocaleSelector($input: UpdateUserPreferencesInput!) {
-  updateViewerPreferences(input: $input) {
-    locale
-  }
-}
-    `) as unknown as TypedDocumentString<UpdateUserLocaleSelectorMutation, UpdateUserLocaleSelectorMutationVariables>;
-export const UpdateUserProfileFormDocument = new TypedDocumentString(`
-    mutation UpdateUserProfileForm($input: UpdateUserInput!) {
-  updateViewer(input: $input) {
-    id
-    username
-    avatarUrl
-  }
-}
-    `) as unknown as TypedDocumentString<UpdateUserProfileFormMutation, UpdateUserProfileFormMutationVariables>;
 export const CreateEmailerSceneEmailersDocument = new TypedDocumentString(`
     query CreateEmailerSceneEmailers {
   emailers {

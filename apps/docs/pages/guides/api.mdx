@@ -2,7 +2,9 @@ import { Callout } from 'nextra/components'
 
 # API
 
-Stump exposes an API that allows you to interact with your Stump server programmatically. The API is a fairly standard RESTful API backed by a few different [authentication methods](#authentication). The API is constantly being developed, and while it is generally stable at this point it is still subject to change.
+Stump exposes a GraphQL API that allows you to interact with your Stump server programmatically. The API is backed by a few different [authentication methods](#authentication). The API is constantly being developed, and while it is generally stable at this point it is still subject to change.
+
+{/* TODO(graphql): Rewrite these! */}
 
 ## Stump SDK
 
@@ -101,10 +103,12 @@ There are instances where you can embed an API key in the URL directly. This wil
 
 For more information on API keys, see the [API keys](/guides/features/api-keys) guide.
 
-## Swagger UI
+## GraphQL Playground
 
-Stump's REST API is documented using Swagger. You can access Swagger UI by visiting visiting `http(s)://your-server(:10801)/swagger-ui`. If you aren't familiar with Swagger, you can read more about it [here](https://swagger.io/). Under the hood, Stump uses [utoipa](https://github.com/juhaku/utoipa) for semi-automated Swagger generation. If you find any issues or inconsistencies with the API options available while using the Swagger UI, please open an [issue](https://github.com/stumpapp/stump/issues) outlining the problem.
+The playground should be enabled by default when running the server in debug mode, or if the `enable_playground` config variable is set to `true`, and will be available at `http(s)://your-server(:10801)/api/graphql`.
 
-### Disabling Swagger UI
+If you're new to GraphQL, I would recommend giving the [GraphQL documentation](https://graphql.org/learn/) a quick read, and then trying out the playground.
 
-If you don't want to expose Swagger UI, you can disable it by setting the `ENABLE_SWAGGER_UI` environment variable to `false`. See the [configuration guide](/guides/configuration) for more information.
+### Disabling GraphQL Playground
+
+If you don't want to expose the GraphQL Playground, you can disable it by setting the `ENABLE_GRAPHQL_PLAYGROUND` environment variable to `false`. See the [configuration guide](/guides/configuration) for more information.

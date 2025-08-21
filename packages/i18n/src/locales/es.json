@@ -1111,7 +1111,7 @@
 				"desktop": "Ordenador",
 				"label": "Aplicación"
 			},
-			"server": {
+			"management": {
 				"general": "General",
 				"logs": "Registros",
 				"users": "Usuarios",
@@ -1173,7 +1173,7 @@
 				}
 			}
 		},
-		"app/appearance": {
+		"app/preferences": {
 			"helmet": "Apariencia",
 			"title": "Apariencia",
 			"description": "Personaliza la apariencia de la aplicación",

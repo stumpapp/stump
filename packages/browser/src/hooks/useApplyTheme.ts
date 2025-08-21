@@ -52,9 +52,9 @@ export function useApplyTheme({ appTheme, appFont = SupportedFont.Inter }: Param
 			console.warn('More than one font class found on body:', fontClasses)
 		}
 		// Only change the font if we actually need to (i.e. the font on the body is diff)
-		if (!fontClasses.length || fontClasses.some((c) => c !== `font-${appFont}`)) {
+		if (!fontClasses.length || fontClasses.some((c) => c !== `font-${appFont.toLowerCase()}`)) {
 			body?.classList.remove(...fontClasses)
-			body?.classList.add(`font-${appFont}`)
+			body?.classList.add(`font-${appFont.toLowerCase()}`)
 		}
 	}, [appFont])
 }

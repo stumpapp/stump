@@ -7,7 +7,7 @@ import {
 	useFragment,
 } from '@stump/graphql'
 import { useCallback, useState } from 'react'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 
 import { EntityCard } from '@/components/entity'
 import EditThumbnailDropdown from '@/components/thumbnail/EditThumbnailDropdown'

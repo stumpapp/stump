@@ -2,7 +2,7 @@ import { useGraphQLMutation, useSDK } from '@stump/client'
 import { Button, Dialog, Label, PickSelect, Text } from '@stump/components'
 import { graphql, LibraryThumbnailSelectorUpdateMutation } from '@stump/graphql'
 import { Suspense, useCallback, useEffect, useState } from 'react'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 
 import EditThumbnailDropdown from '@/components/thumbnail/EditThumbnailDropdown'
 import BookPageGrid from '@/scenes/book/settings/BookPageGrid'

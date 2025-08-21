@@ -10,7 +10,7 @@ type BookReaderParams = {
 
 type SettingsPage =
 	| 'app/general'
-	| 'app/appearance'
+	| 'app/preferences'
 	| 'app/desktop'
 	| 'server/general'
 	| 'server/logs'

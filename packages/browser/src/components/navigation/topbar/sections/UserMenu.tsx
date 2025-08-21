@@ -1,7 +1,7 @@
 import { invalidateQueries, useSDK } from '@stump/client'
 import { Avatar, cn, NavigationMenu } from '@stump/components'
 import { Bell, LogOut } from 'lucide-react'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 import { useNavigate } from 'react-router'
 
 import { useAppContext } from '@/context'

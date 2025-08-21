@@ -12,4 +12,4 @@ target
 # ignore contents in excess directories, some are kept only so cargo 
 # doesn't yell at me
 docs
-apps/mobile
+apps/expo

@@ -1111,7 +1111,7 @@
 				"desktop": "Domovská obrazovka",
 				"label": "Aplikace"
 			},
-			"server": {
+			"management": {
 				"general": "Obecné",
 				"logs": "Logy",
 				"users": "Uživatelé",
@@ -1119,7 +1119,7 @@
 				"access": "Přístup",
 				"email": "E-mail",
 				"notifications": "Notifikace",
-				"label": "Server"
+				"label": "Management"
 			}
 		},
 		"app/account": {
@@ -1173,7 +1173,7 @@
 				}
 			}
 		},
-		"app/appearance": {
+		"app/preferences": {
 			"helmet": "Vzhled",
 			"title": "Vzhled",
 			"description": "Přizpůsobte si vzhled aplikace",

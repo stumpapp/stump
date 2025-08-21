@@ -153,7 +153,7 @@ export default function NavigationArrangementItem({
 	)
 }
 
-const LOCALE_BASE = 'settingsScene.app/appearance.sections.navigationArrangement'
+const LOCALE_BASE = 'settingsScene.app/preferences.sections.navigationArrangement'
 const getKey = (key: string) => `${LOCALE_BASE}.${key}`
 const getItemKey = (key: string) => getKey(`options.${key}`)
 const getConfigKey = (key: string) => getKey(`entityOptions.${key}`)

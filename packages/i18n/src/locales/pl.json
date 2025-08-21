@@ -1111,7 +1111,7 @@
 				"desktop": "Pulpit",
 				"label": "Aplikacja"
 			},
-			"server": {
+			"management": {
 				"general": "Ogólne",
 				"logs": "Logi",
 				"users": "Użytkownicy",
@@ -1173,7 +1173,7 @@
 				}
 			}
 		},
-		"app/appearance": {
+		"app/preferences": {
 			"helmet": "Wygląd",
 			"title": "Wygląd",
 			"description": "Dostosuj wygląd aplikacji",

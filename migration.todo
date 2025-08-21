@@ -9,9 +9,9 @@ Backend / Core:
   - [x] series
   - [x] library
 - [x] Move all the deserializer utils (e.g., age_rating_deserializer)
-- [ ] Remove sse and ws from REST, move to GraphQL
+- [x] Remove sse and ws from REST, move to GraphQL
   - [x] Port SSE to GraphQL
-  - [ ] Remove SSE from REST
+  - [x] Remove SSE from REST
   - [x] Remove WS from REST
 - [ ] Port other remaining RESTful APIs:
   - [x] smart-lists
@@ -29,12 +29,12 @@ Backend / Core:
 - [ ] Address any remaining SeaORM issues (see `TODO(sea-orm)` or `TODO(graphql)` comments)
 - [x] Remove Prisma entirely
 - [x] Remove codegen crate
-- [ ] Remove utoipa and other OpenAPI-related crates
+- [x] Remove utoipa and other OpenAPI-related crates
 
 Frontend / JS-related Packages:
 - [ ] Rewrite `sdk` package to basically be a slim wrapper around an authed axios instance
-  - [ ] Port any v1 features which are staying to v2
-  - [ ] Retain OPDS client sdk impl
-- [ ] Investigate relay vs apollo and select one (lean towards relay)
+  - [x] Port any v1 features which are staying to v2
+  - [x] Retain OPDS client sdk impl
+- [x] Investigate relay vs apollo and select one (lean towards relay)
   - [x] Setup generic client to share between web, desktop, mobile
-  - [ ] Port all RESTful API calls to GraphQL (easily one of the biggest tasks)
+  - [x] Port all RESTful API calls to GraphQL (easily one of the biggest tasks)

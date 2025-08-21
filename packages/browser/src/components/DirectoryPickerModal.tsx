@@ -2,9 +2,9 @@ import { useDirectoryListing } from '@stump/client'
 import { Button, CheckBox, cx, Dialog, Input, Text, useBoolean } from '@stump/components'
 import { ArrowLeft, Folder } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
-import toast from 'react-hot-toast'
 import AutoSizer from 'react-virtualized-auto-sizer'
 import { Virtuoso, VirtuosoHandle } from 'react-virtuoso'
+import { toast } from 'sonner'
 
 interface Props {
 	isOpen: boolean

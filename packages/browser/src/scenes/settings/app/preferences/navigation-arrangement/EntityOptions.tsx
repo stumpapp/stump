@@ -35,6 +35,6 @@ export default function EntityOptions({ isOpen, options, onChange }: Props) {
 	)
 }
 
-const LOCALE_BASE = 'settingsScene.app/appearance.sections.navigationArrangement.entityOptions'
+const LOCALE_BASE = 'settingsScene.app/preferences.sections.navigationArrangement.entityOptions'
 const getKey = (key: string) => `${LOCALE_BASE}.${key}`
 const getLabel = (key: string) => getKey(`${key}.label`)

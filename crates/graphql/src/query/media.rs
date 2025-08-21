@@ -96,7 +96,8 @@ impl MediaQuery {
 		let mut query = media::ModelWithMetadata::find_for_user(user);
 		query = MediaOrderBy::add_order_by(&order_by, query)?;
 		query = add_sessions_join_for_filter(user, &filter, query)
-			.filter(filter.into_filter());
+			.filter(filter.into_filter())
+			.filter(media::Column::DeletedAt.is_null());
 
 		match pagination.resolve() {
 			Pagination::Cursor(info) => {
@@ -105,7 +106,11 @@ impl MediaQuery {
 					let media = media::Entity::find_for_user(user)
 						.select_only()
 						.column(media::Column::Name)
-						.filter(media::Column::Id.eq(id.clone()))
+						.filter(
+							media::Column::Id
+								.eq(id.clone())
+								.and(media::Column::DeletedAt.is_null()),
+						)
 						.into_model::<media::MediaNameCmpSelect>()
 						.one(conn)
 						.await?
@@ -171,6 +176,7 @@ impl MediaQuery {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let model = media::ModelWithMetadata::find_by_id_for_user(id.to_string(), user)
+			.filter(media::Column::DeletedAt.is_null())
 			.into_model::<media::ModelWithMetadata>()
 			.one(conn)
 			.await?;
@@ -187,7 +193,11 @@ impl MediaQuery {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let model = media::ModelWithMetadata::find_for_user(user)
-			.filter(media::Column::Path.eq(path))
+			.filter(
+				media::Column::Path
+					.eq(path)
+					.and(media::Column::DeletedAt.is_null()),
+			)
 			.into_model::<media::ModelWithMetadata>()
 			.one(conn)
 			.await?;
@@ -209,6 +219,8 @@ impl MediaQuery {
 				FROM
 					media
 				LEFT JOIN media_metadata ON media.id = media_metadata.media_id
+				WHERE
+					media.deleted_at IS NULL
 				GROUP BY
 					letter
 				ORDER BY
@@ -240,6 +252,7 @@ impl MediaQuery {
 		let user_id = user.id.clone();
 		// FIXME(sea-orm): I think this might be wrong, see https://github.com/SeaQL/sea-orm/issues/2407
 		let query = media::ModelWithMetadata::find_for_user(user)
+			.filter(media::Column::DeletedAt.is_null())
 			.join_rev(
 				JoinType::InnerJoin,
 				reading_session::Entity::belongs_to(media::Entity)
@@ -349,7 +362,8 @@ impl MediaQuery {
 		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let query = media::ModelWithMetadata::find_for_user(user);
+		let query = media::ModelWithMetadata::find_for_user(user)
+			.filter(media::Column::DeletedAt.is_null());
 
 		match pagination.resolve() {
 			Pagination::Cursor(info) => {
@@ -358,7 +372,11 @@ impl MediaQuery {
 					let media = media::Entity::find_for_user(user)
 						.select_only()
 						.column(media::Column::CreatedAt)
-						.filter(media::Column::Id.eq(id.clone()))
+						.filter(
+							media::Column::Id
+								.eq(id.clone())
+								.and(media::Column::DeletedAt.is_null()),
+						)
 						.into_model::<media::MediaCreatedAtCmpSelect>()
 						.one(conn)
 						.await?
@@ -426,6 +444,7 @@ impl MediaQuery {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let models = media::ModelWithMetadata::find_for_user(user)
+			.filter(media::Column::DeletedAt.is_null())
 			.filter(
 				media::Column::Hash.in_subquery(
 					Query::select()

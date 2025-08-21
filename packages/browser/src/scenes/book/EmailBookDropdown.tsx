@@ -4,7 +4,7 @@ import { EmailerSendTo, graphql, UserPermission } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { Send } from 'lucide-react'
 import { Suspense, useCallback, useMemo, useState } from 'react'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 
 import { useAppContext } from '@/context'
 

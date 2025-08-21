@@ -2,7 +2,8 @@ import { useJobStore, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Badge, Card, Heading, Text } from '@stump/components'
 import { graphql, JobStatus, JobTableQuery, UserPermission } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
-import { useQueryClient } from '@tanstack/react-query'
+import { Api } from '@stump/sdk'
+import { QueryClient, useQueryClient } from '@tanstack/react-query'
 import { ColumnDef, createColumnHelper, PaginationState } from '@tanstack/react-table'
 import dayjs from 'dayjs'
 import duration from 'dayjs/plugin/duration'
@@ -51,6 +52,22 @@ const query = graphql(`
 		}
 	}
 `)
+
+export const prefetchJobs = (client: QueryClient, sdk: Api) =>
+	client.prefetchQuery({
+		queryKey: sdk.cacheKey('jobs', [{ pagination: { offset: { page: 1, pageSize: 10 } } }]),
+		queryFn: async () => {
+			const response = await sdk.execute(query, {
+				pagination: {
+					offset: {
+						page: 1,
+						pageSize: 10,
+					},
+				},
+			})
+			return response
+		},
+	})
 
 export type PersistedJob = JobTableQuery['jobs']['nodes'][number]
 

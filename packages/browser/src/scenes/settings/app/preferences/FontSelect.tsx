@@ -54,7 +54,7 @@ export default function FontSelect() {
 	)
 }
 
-const localeKey = 'settingsScene.app/appearance.sections.fontSelect'
+const localeKey = 'settingsScene.app/preferences.sections.fontSelect'
 
 export const SUPPORTED_FONT_OPTIONS = [
 	{ label: 'Atkinson Hyperlegible', value: 'ATKINSON_HYPERLEGIBLE' },

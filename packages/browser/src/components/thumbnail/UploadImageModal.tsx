@@ -3,7 +3,7 @@ import { useLocaleContext } from '@stump/i18n'
 import { X } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { type FileRejection, useDropzone } from 'react-dropzone'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 
 const LOCALE_BASE_KEY = 'thumbnailDropdown.uploadImage'
 const withLocaleKey = (key: string) => `${LOCALE_BASE_KEY}.${key}`

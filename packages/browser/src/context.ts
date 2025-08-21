@@ -11,6 +11,7 @@ export type IAppContext = {
 	isServerOwner: boolean
 	checkPermission: (permission: UserPermission) => boolean
 	enforcePermission: (permission: UserPermission, options?: PermissionEnforcerOptions) => void
+	logout: () => Promise<void>
 }
 
 export const AppContext = createContext<IAppContext>({} as IAppContext)

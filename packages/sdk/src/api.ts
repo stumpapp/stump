@@ -270,6 +270,36 @@ export class Api {
 		return data
 	}
 
+	async executeRaw<TResult = unknown, TVariables = Record<string, unknown> | never>(
+		queryString: string,
+		variables?: TVariables extends Record<string, never> ? never : TVariables,
+		config?: Omit<AxiosRequestConfig, 'headers'>,
+	): Promise<TResult> {
+		const response = await this.axiosInstance.post<GraphQLResponse<TResult>>(
+			'/api/graphql',
+			{
+				query: queryString,
+				variables,
+			},
+			{
+				headers: {
+					...this.headers,
+				},
+				baseURL: this.rootURL,
+				...config,
+			},
+		)
+
+		const { data, errors } = response.data
+
+		if (errors) {
+			// TODO: Create specialized error to handle this better
+			throw new Error(errors.map((error) => error.message).join(', '))
+		}
+
+		return data
+	}
+
 	async connect<TResult, TVariables>(
 		query: TypedDocumentString<TResult, TVariables>,
 		variables?: TVariables extends Record<string, never> ? never : TVariables,

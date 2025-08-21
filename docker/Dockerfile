@@ -74,7 +74,6 @@ RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/
         git \
         libssl-dev \
         pkg-config \
-        # See https://github.com/juhaku/utoipa/issues/958#issuecomment-2165300584
         curl \
         libsqlite3-dev;
 

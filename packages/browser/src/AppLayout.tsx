@@ -1,13 +1,15 @@
-import { useAuthQuery, useCoreEventHandler } from '@stump/client'
+import { useAuthQuery, useSDK } from '@stump/client'
 import { cn, cx } from '@stump/components'
 import { UserPermission, UserPreferences } from '@stump/graphql'
 import { isAxiosError } from '@stump/sdk'
+import { useQueryClient } from '@tanstack/react-query'
 import { useOverlayScrollbars } from 'overlayscrollbars-react'
 import { Suspense, useCallback, useEffect, useMemo, useRef } from 'react'
 import Confetti from 'react-confetti'
 import { useErrorBoundary } from 'react-error-boundary'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useMediaMatch, useWindowSize } from 'rooks'
+import { toast } from 'sonner'
 
 import BackgroundFetchIndicator from '@/components/BackgroundFetchIndicator'
 import JobOverlay from '@/components/jobs/JobOverlay'
@@ -16,6 +18,7 @@ import RouteLoadingIndicator from '@/components/RouteLoadingIndicator'
 
 import { AppContext, PermissionEnforcerOptions } from './context'
 import { useTheme } from './hooks'
+import { useCoreEvent } from './hooks/useCoreEvent'
 import { useAppStore, useUserStore } from './stores'
 
 export function AppLayout() {
@@ -28,6 +31,7 @@ export function AppLayout() {
 
 	const { showBoundary } = useErrorBoundary()
 
+	const { sdk } = useSDK()
 	const { showConfetti, setShowConfetti, onConnectionWithServerChanged } = useAppStore((state) => ({
 		onConnectionWithServerChanged: state.setIsConnectedWithServer,
 		platform: state.platform,
@@ -139,7 +143,7 @@ export function AppLayout() {
 	const hideSidebar = hideAllNavigation || preferTopBar
 	const hideTopBar = isMobile || hideAllNavigation || !preferTopBar
 
-	useCoreEventHandler({ liveRefetch, onConnectionWithServerChanged })
+	useCoreEvent({ liveRefetch, onConnectionWithServerChanged })
 
 	/**
 	 * A callback to enforce a permission on the currently logged in user.
@@ -163,6 +167,20 @@ export function AppLayout() {
 	const { error, user } = useAuthQuery({
 		enabled: !storeUser,
 	})
+
+	const client = useQueryClient()
+	const logout = useCallback(async () => {
+		try {
+			await sdk.auth.logout()
+			client.clear()
+			setUser(null)
+			navigate('/auth')
+			toast.success('You have been logged out')
+		} catch (error) {
+			console.error('Error logging out:', { error })
+			toast.error('There was an error logging you out. Please try again.')
+		}
+	}, [sdk, client, setUser, navigate])
 
 	useEffect(() => {
 		if (user) {
@@ -197,6 +215,7 @@ export function AppLayout() {
 				enforcePermission,
 				isServerOwner: storeUser.isServerOwner,
 				user: storeUser,
+				logout,
 			}}
 		>
 			<Suspense fallback={<RouteLoadingIndicator />}>

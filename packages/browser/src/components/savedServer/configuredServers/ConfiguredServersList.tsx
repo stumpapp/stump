@@ -1,8 +1,8 @@
-import { QueryClientContext, useLogout } from '@stump/client'
+import { useLogout } from '@stump/client'
+import { SavedServer } from '@stump/client'
 import { Card, cn, Heading, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { checkUrl, formatApiURL } from '@stump/sdk'
-import { SavedServer } from '@stump/sdk'
 import { useQueries } from '@tanstack/react-query'
 import { useCallback, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router'
@@ -34,8 +34,8 @@ export default function ConfiguredServersSection() {
 
 	const { t } = useLocaleContext()
 	const {
-		connected_servers,
-		active_server,
+		connectedServers,
+		activeServer,
 		setActiveServer,
 		addServer,
 		editServer,
@@ -63,14 +63,15 @@ export default function ConfiguredServersSection() {
 	const [switchingServer, setSwitchingServer] = useState<SavedServer | null>(null)
 
 	const serverStatuses = useQueries({
-		context: QueryClientContext,
-		queries: connected_servers.map((server) => ({
+		// @ts-expect-error: FIXME: Figure out the type issue here
+		queries: connectedServers.map((server) => ({
 			queryFn: async () =>
 				({
 					name: server.name,
 					status: await checkUrl(formatApiURL(server.uri, 'v1')),
 				}) as PingResult,
 			queryKey: ['ping', server.uri, server.name],
+			// refetchInterval: (query: Query<unknown, Error, unknown, readonly unknown[]>) => number | false | undefined
 			refetchInterval: (result?: PingResult) => {
 				if (!result) return false
 				return result.status ? PING_HEALTHY_INTERVAL_MS : PING_UNHEALTHY_INTERVAL_MS
@@ -141,7 +142,7 @@ export default function ConfiguredServersSection() {
 	 * A callback to delete a server from the list of connected servers
 	 */
 	const onDeleteServer = useCallback(async () => {
-		const isLastServer = connected_servers.length === 1
+		const isLastServer = connectedServers.length === 1
 		if (isLastServer && deletingServer) {
 			await onDeleteAllServers()
 			setDeletingServer(null)
@@ -149,7 +150,7 @@ export default function ConfiguredServersSection() {
 			await removeServer(deletingServer.name)
 			setDeletingServer(null)
 		}
-	}, [deletingServer, removeServer, connected_servers.length, onDeleteAllServers])
+	}, [deletingServer, removeServer, connectedServers.length, onDeleteAllServers])
 	/**
 	 * A callback to switch to a server in the list of connected servers, which will
 	 * logout the user and redirect them to the auth page to authenticate with the selected
@@ -183,7 +184,7 @@ export default function ConfiguredServersSection() {
 
 			<EditServerModal
 				editingServer={editingServer}
-				existingServers={connected_servers}
+				existingServers={connectedServers}
 				onEditServer={onEditServer}
 				onCancel={() => setEditingServer(null)}
 			/>
@@ -192,8 +193,8 @@ export default function ConfiguredServersSection() {
 				isOpen={!!deletingServer}
 				onClose={() => setDeletingServer(null)}
 				onConfirm={onDeleteServer}
-				isLastServer={connected_servers.length === 1}
-				isActiveServer={deletingServer?.name === active_server?.name}
+				isLastServer={connectedServers.length === 1}
+				isActiveServer={deletingServer?.name === activeServer?.name}
 			/>
 
 			<div className="flex flex-col gap-y-6">
@@ -205,22 +206,22 @@ export default function ConfiguredServersSection() {
 						</Text>
 					</div>
 
-					<AddServerModal existingServers={connected_servers} onCreateServer={onCreateServer} />
+					<AddServerModal existingServers={connectedServers} onCreateServer={onCreateServer} />
 				</div>
 
-				{isOnboarding && !connected_servers.length && (
+				{isOnboarding && !connectedServers.length && (
 					<div className="select-none rounded-lg border border-dashed border-edge-subtle p-4 text-foreground-muted">
 						{t(getKey('getStarted'))}
 					</div>
 				)}
 
-				{connected_servers.length > 0 && (
+				{connectedServers.length > 0 && (
 					<Card className="flex flex-col divide-y divide-edge bg-background-surface">
-						{connected_servers.map((server) => (
+						{connectedServers.map((server) => (
 							<ConfiguredServer
 								key={`configured-server-${server.name}_${server.uri}`}
 								server={server}
-								isActive={server.name === active_server?.name}
+								isActive={server.name === activeServer?.name}
 								onEdit={() => setEditingServer(server)}
 								onDelete={() => setDeletingServer(server)}
 								onSwitch={() => setSwitchingServer(server)}
@@ -232,7 +233,7 @@ export default function ConfiguredServersSection() {
 
 				<div
 					className={cn('flex flex-col gap-y-6', {
-						'pointer-events-none opacity-50': connected_servers.length === 0,
+						'pointer-events-none opacity-50': connectedServers.length === 0,
 					})}
 				>
 					<RemoveAllTokensSection onConfirmClear={onClearTokens} />

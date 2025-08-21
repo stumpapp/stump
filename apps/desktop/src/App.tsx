@@ -1,9 +1,22 @@
+import '@stump/browser/styles/index.css'
+import '@stump/components/styles/overrides.css'
+
 import { StumpWebClient } from '@stump/browser'
-import { DesktopAppContext, Platform, useDesktopAppContext } from '@stump/client'
-import { SavedServer, User } from '@stump/sdk'
+import {
+	DesktopAppContext,
+	JwtTokenPair,
+	Platform,
+	SavedServer,
+	useDesktopAppContext,
+} from '@stump/client'
+import { LocaleProvider } from '@stump/i18n'
+import { AuthUser } from '@stump/sdk'
 import { createStore, Store } from '@tauri-apps/plugin-store'
 import { useCallback, useEffect, useState } from 'react'
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
 
+import Home from './Home'
+import SavedServerEntry from './SavedServerEntry'
 import { useTauriRPC } from './utils'
 
 // It looks like Apple fully blocks non-local IP addresses now. This is actually infuriating. OH WELL.
@@ -47,11 +60,11 @@ function App() {
 	}, [getNativePlatform, mounted, tauriRPC, store])
 
 	const handleAuthenticated = useCallback(
-		async (_user: User, token?: string) => {
+		async (_user: AuthUser, tokens?: JwtTokenPair) => {
 			try {
 				const currentServer = await store.get<SavedServer>('active_server')
-				if (token && currentServer) {
-					await tauriRPC.setApiToken(currentServer.name, token)
+				if (tokens && currentServer) {
+					await tauriRPC.setTokens(currentServer.name, tokens)
 				}
 			} catch (err) {
 				console.error('Failed to initialize the credential store', err)
@@ -64,7 +77,7 @@ function App() {
 		try {
 			const currentServer = await store.get<SavedServer>('active_server')
 			if (currentServer) {
-				await tauriRPC.deleteApiToken(currentServer.name)
+				await tauriRPC.deleteTokens(currentServer.name)
 			} else {
 				await tauriRPC.clearCredentialStore()
 			}
@@ -79,16 +92,32 @@ function App() {
 	}
 
 	return (
-		<StumpWebClient
-			platform={platform}
-			authMethod="token"
-			baseUrl={baseURL}
-			tauriRPC={tauriRPC}
-			onAuthenticated={handleAuthenticated}
-			onLogout={handleLogout}
-			onUnauthenticatedResponse={handleLogout}
-		/>
+		<BrowserRouter>
+			<Routes>
+				<Route
+					path="/"
+					element={
+						<LocaleProvider>
+							<Home />
+						</LocaleProvider>
+					}
+				/>
+				<Route path="server/*" element={<SavedServerEntry />} />
+			</Routes>
+		</BrowserRouter>
 	)
+
+	// return (
+	// 	<StumpWebClient
+	// 		platform={platform}
+	// 		authMethod="token"
+	// 		baseUrl={baseURL}
+	// 		tauriRPC={tauriRPC}
+	// 		onAuthenticated={handleAuthenticated}
+	// 		onLogout={handleLogout}
+	// 		onUnauthenticatedResponse={handleLogout}
+	// 	/>
+	// )
 }
 
 export default function AppEntry() {

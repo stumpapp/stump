@@ -5,7 +5,10 @@ use crate::{
 	state::WrappedState,
 	store::{
 		app_store::AppStoreExt,
-		secure_store::{CredentialStoreTokenState, SecureStore, SecureStoreError},
+		secure_store::{
+			CredentialStoreTokenState, JwtTokenPair, SecureStore, SecureStoreError,
+			StoredCredentials,
+		},
 		AppStore, StoreError,
 	},
 	utils::discord::DiscordIntegrationError,
@@ -99,37 +102,49 @@ pub async fn get_credential_store_state(
 }
 
 #[tauri::command]
-pub async fn get_api_token(
+pub async fn get_credentials(
 	server: String,
 	state: State<'_, WrappedState>,
-) -> Result<Option<String>, DesktopRPCError> {
+) -> Result<Option<StoredCredentials>, DesktopRPCError> {
 	let state = state.lock().map_err(|_| DesktopRPCError::MutexPoisoned)?;
 
-	let token = state.secure_store.get_api_token(server)?;
+	let credentials = state.secure_store.get_credentials(server)?;
 
-	Ok(token)
+	Ok(credentials)
 }
 
 #[tauri::command]
-pub async fn set_api_token(
+pub async fn get_tokens(
 	server: String,
-	token: String,
+	state: State<'_, WrappedState>,
+) -> Result<Option<JwtTokenPair>, DesktopRPCError> {
+	let state = state.lock().map_err(|_| DesktopRPCError::MutexPoisoned)?;
+
+	let tokens = state.secure_store.get_tokens(server)?;
+
+	Ok(tokens)
+}
+
+#[tauri::command]
+pub async fn set_tokens(
+	server: String,
+	tokens: JwtTokenPair,
 	state: State<'_, WrappedState>,
 ) -> Result<(), DesktopRPCError> {
 	let state = state.lock().map_err(|_| DesktopRPCError::MutexPoisoned)?;
 
-	state.secure_store.set_api_token(server, token)?;
+	state.secure_store.set_tokens(server, tokens)?;
 
 	Ok(())
 }
 
 #[tauri::command]
-pub async fn delete_api_token(
+pub async fn delete_tokens(
 	server: String,
 	state: State<'_, WrappedState>,
 ) -> Result<bool, DesktopRPCError> {
 	let state = state.lock().map_err(|_| DesktopRPCError::MutexPoisoned)?;
-	Ok(state.secure_store.delete_api_token(server)?)
+	Ok(state.secure_store.delete_tokens(server)?)
 }
 
 #[tauri::command]

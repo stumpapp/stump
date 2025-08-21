@@ -1,5 +1,10 @@
-import { Platform, TauriRPC } from '@stump/client'
-import { CredentialStoreTokenState } from '@stump/sdk'
+import {
+	CredentialStoreTokenState,
+	JwtTokenPair,
+	Platform,
+	ServerConfig,
+	TauriRPC,
+} from '@stump/client'
 import { invoke } from '@tauri-apps/api/core'
 import * as os from '@tauri-apps/plugin-os'
 
@@ -45,24 +50,27 @@ export function useTauriRPC(): Return {
 
 	const clearCredentialStore = () => invoke<void>('clear_credential_store')
 
-	const deleteApiToken = (forServer: string) =>
-		invoke<void>('delete_api_token', { server: forServer })
+	const getCredentials = (forServer: string) =>
+		invoke<ServerConfig | null>('get_credentials', { server: forServer })
 
-	const getApiToken = (forServer: string) =>
-		invoke<string | null>('get_api_token', { server: forServer })
+	const deleteTokens = (forServer: string) => invoke<void>('delete_tokens', { server: forServer })
 
-	const setApiToken = (forServer: string, token: string) =>
-		invoke<void>('set_api_token', { server: forServer, token })
+	const getTokens = (forServer: string) =>
+		invoke<string | null>('get_tokens', { server: forServer })
+
+	const setTokens = (forServer: string, tokens: JwtTokenPair) =>
+		invoke<void>('set_tokens', { server: forServer, tokens })
 
 	return {
 		clearCredentialStore,
-		deleteApiToken,
-		getApiToken,
+		deleteTokens,
+		getTokens,
 		getCredentialStoreState,
 		getCurrentServerName,
 		getNativePlatform,
+		getCredentials,
 		initCredentialStore,
-		setApiToken,
+		setTokens,
 		setDiscordPresence,
 		setUseDiscordPresence,
 	}

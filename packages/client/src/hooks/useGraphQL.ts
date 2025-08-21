@@ -44,7 +44,7 @@ const handleError = ({
 	const isNetworkError = axiosError && error?.code === 'ERR_NETWORK'
 	const isAuthError = axiosError && error.response?.status === 401
 	if (isAuthError) {
-		sdk.token = undefined
+		sdk.tokens = undefined
 		onUnauthenticatedResponse?.('/auth', error.response?.data)
 	} else if (isNetworkError) {
 		onConnectionWithServerChanged?.(false)

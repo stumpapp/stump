@@ -1,12 +1,15 @@
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use specta::Type;
 use tauri::Url;
 
-#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct SavedServer {
+	pub id: String,
 	pub name: String,
 	pub uri: Url,
+	#[serde(default, alias = "isDefault")]
+	pub is_default: bool,
 }
 
 impl SavedServer {

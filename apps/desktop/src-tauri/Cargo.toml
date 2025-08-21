@@ -11,6 +11,7 @@ tauri-build = { version = "2.0.1", features = [] }
 
 [dependencies]
 stump_server = { path = "../../server", optional = true }
+chrono = { workspace = true }
 discord-rich-presence = "0.2.3"
 keyring = { workspace = true }
 serde_json = { workspace = true }

@@ -2,7 +2,12 @@ import { AuthenticationMethod, AuthUser, JwtTokenPair } from '@stump/sdk'
 import { QueryClient } from '@tanstack/react-query'
 import { createContext, useContext } from 'react'
 
+import { ServerConfig } from './desktop'
+
+// TODO: Not sure I need this...?
 export const QueryClientContext = createContext<QueryClient | undefined>(undefined)
+
+export type CredentialStoreTokenState = Record<string, boolean>
 
 export type IStumpClientContext = {
 	onRedirect?: (url: string) => void
@@ -37,25 +42,27 @@ export type TauriRPC = {
 	 * Clear the credential store
 	 */
 	clearCredentialStore: () => Promise<void>
+
+	getCredentials: (forServer: string) => Promise<ServerConfig | null>
 	/**
 	 * Get the API token for the given server
 	 *
 	 * @param forServer The server which the token was created by / to be used for
 	 */
-	getApiToken: (forServer: string) => Promise<string | null>
+	getTokens: (forServer: string) => Promise<string | null>
 	/**
 	 * Set the API token for the given server
 	 *
 	 * @param forServer The server which the token was created by / to be used for
 	 * @param token The JWT token to store in the credential store
 	 */
-	setApiToken: (forServer: string, token: string) => Promise<void>
+	setTokens: (forServer: string, tokens: JwtTokenPair) => Promise<void>
 	/**
 	 * Delete the API token for the given server
 	 *
 	 * @param forServer The server which the token was created by / to be used for
 	 */
-	deleteApiToken: (forServer: string) => Promise<void>
+	deleteTokens: (forServer: string) => Promise<void>
 }
 
 export const StumpClientContext = createContext<IStumpClientContext | undefined>(undefined)

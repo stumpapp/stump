@@ -6,7 +6,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { useEffect, useState } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 import { Helmet } from 'react-helmet'
-import { BrowserRouter, createSearchParams, useLocation, useNavigate } from 'react-router-dom'
+import { createSearchParams, useLocation, useNavigate } from 'react-router-dom'
 
 import { ErrorFallback } from '@/components/ErrorFallback'
 
@@ -17,11 +17,9 @@ import { useAppStore, useDebugStore, useUserStore } from './stores'
 
 export default function StumpWebClient(props: StumpClientProps) {
 	return (
-		<BrowserRouter>
-			<ErrorBoundary FallbackComponent={ErrorFallback}>
-				<RouterContainer {...props} />
-			</ErrorBoundary>
-		</BrowserRouter>
+		<ErrorBoundary FallbackComponent={ErrorFallback}>
+			<RouterContainer {...props} />
+		</ErrorBoundary>
 	)
 }
 

@@ -1,4 +1,5 @@
 import { StumpWebClient } from '@stump/browser'
+import { BrowserRouter } from 'react-router-dom'
 
 const getDebugUrl = () => {
 	const { hostname } = window.location
@@ -8,5 +9,9 @@ const getDebugUrl = () => {
 export const baseUrl = import.meta.env.PROD ? window.location.origin : getDebugUrl()
 
 export default function App() {
-	return <StumpWebClient platform={'browser'} baseUrl={baseUrl} />
+	return (
+		<BrowserRouter>
+			<StumpWebClient platform={'browser'} baseUrl={baseUrl} />
+		</BrowserRouter>
+	)
 }

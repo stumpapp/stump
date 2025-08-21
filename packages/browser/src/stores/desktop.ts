@@ -1,5 +1,4 @@
-import { useDesktopAppContext } from '@stump/client'
-import { DesktopAppStore, SavedServer } from '@stump/sdk'
+import { DesktopAppStore, SavedServer, useDesktopAppContext } from '@stump/client'
 import { useCallback, useEffect } from 'react'
 import { create } from 'zustand'
 
@@ -16,8 +15,9 @@ type LocalStore = DesktopAppStore & {
  * across the application
  */
 const useLocalStore = create<LocalStore>()((set) => ({
-	connected_servers: [],
-	run_bundled_server: true,
+	activeServer: null,
+	connectedServers: [],
+	runBundledServer: true,
 	set: (partial) => set((state) => ({ ...state, ...partial })),
 }))
 
@@ -64,7 +64,7 @@ export const useTauriStore = () => {
 						{} as Record<string, unknown>,
 					)
 					// TODO: smarter type assertions here
-					if ('connected_servers' in loadedStore) {
+					if ('connectedServers' in loadedStore) {
 						localStore.set(loadedStore as DesktopAppStore)
 					}
 				} catch (e) {
@@ -86,14 +86,14 @@ export const useTauriStore = () => {
 	 */
 	const addServer = useCallback(
 		async (server: SavedServer) => {
-			const isEmpty = localStore.connected_servers.length === 0
-			await store.set('connected_servers', [...localStore.connected_servers, server])
+			const isEmpty = localStore.connectedServers.length === 0
+			await store.set('connectedServers', [...localStore.connectedServers, server])
 			if (isEmpty) {
-				await store.set('active_server', server)
+				await store.set('activeServer', server)
 			}
 			localStore.set({
-				connected_servers: [...localStore.connected_servers, server],
-				...(isEmpty ? { active_server: server } : {}),
+				connectedServers: [...localStore.connectedServers, server],
+				...(isEmpty ? { activeServer: server } : {}),
 			})
 			return server
 		},
@@ -108,18 +108,18 @@ export const useTauriStore = () => {
 	 */
 	const editServer = useCallback(
 		async (originalName: string, server: SavedServer) => {
-			const existingServer = localStore.connected_servers.find((s) => s.name === originalName)
+			const existingServer = localStore.connectedServers.find((s) => s.name === originalName)
 			if (!existingServer) {
 				return
 			}
-			const isActiveServer = localStore.active_server?.name === originalName
-			const newServers = localStore.connected_servers.map((s) =>
+			const isActiveServer = localStore.activeServer?.name === originalName
+			const newServers = localStore.connectedServers.map((s) =>
 				s.name === originalName ? server : s,
 			)
-			await store.set('connected_servers', newServers)
+			await store.set('connectedServers', newServers)
 			localStore.set({
-				connected_servers: newServers,
-				...(isActiveServer ? { active_server: server } : {}),
+				connectedServers: newServers,
+				...(isActiveServer ? { activeServer: server } : {}),
 			})
 		},
 		[store, localStore],
@@ -132,10 +132,10 @@ export const useTauriStore = () => {
 	 */
 	const removeServer = useCallback(
 		async (name: string) => {
-			const newServers = localStore.connected_servers.filter((server) => server.name !== name)
-			await store.set('connected_servers', newServers)
+			const newServers = localStore.connectedServers.filter((server) => server.name !== name)
+			await store.set('connectedServers', newServers)
 			localStore.set({
-				connected_servers: newServers,
+				connectedServers: newServers,
 			})
 		},
 		[store, localStore],
@@ -147,8 +147,8 @@ export const useTauriStore = () => {
 	const resetStore = useCallback(async () => {
 		await store.clear()
 		localStore.set({
-			active_server: undefined,
-			connected_servers: [],
+			activeServer: undefined,
+			connectedServers: [],
 		})
 	}, [store, localStore])
 	/**
@@ -158,9 +158,9 @@ export const useTauriStore = () => {
 	 */
 	const setActiveServer = useCallback(
 		async (name: string) => {
-			const activeServer = localStore.connected_servers.find((server) => server.name === name)
+			const activeServer = localStore.connectedServers.find((server) => server.name === name)
 			if (activeServer) {
-				await store.set('active_server', activeServer)
+				await store.set('activeServer', activeServer)
 			}
 		},
 		[store, localStore],
@@ -170,9 +170,9 @@ export const useTauriStore = () => {
 	 */
 	const setRunBundledServer = useCallback(
 		async (value: boolean) => {
-			await store.set('run_bundled_server', value)
+			await store.set('runBundledServer', value)
 			localStore.set({
-				run_bundled_server: value,
+				runBundledServer: value,
 			})
 		},
 		[store, localStore],

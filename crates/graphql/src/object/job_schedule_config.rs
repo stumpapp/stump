@@ -3,7 +3,7 @@ use models::entity::{library, scheduled_job_config, scheduled_job_library};
 use sea_orm::{prelude::*, sea_query::Query};
 
 use crate::{
-	data::{CoreContext, RequestContext},
+	data::{AuthContext, CoreContext},
 	object::library::Library,
 };
 
@@ -25,7 +25,7 @@ impl ScheduledJobConfig {
 	// TODO(scheduler): This will need to be a complex object in the future to allow for
 	// different configs for different job types
 	async fn scan_configs(&self, ctx: &Context<'_>) -> Result<Vec<Library>> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let models = library::Entity::find_for_user(user)

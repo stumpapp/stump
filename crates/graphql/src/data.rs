@@ -49,12 +49,12 @@ impl ServiceContext {
 /// - They have a valid bearer token (session may not exist)
 /// - They have valid basic auth credentials (session is created after successful authentication)
 #[derive(Clone, Debug)]
-pub struct RequestContext {
+pub struct AuthContext {
 	pub user: AuthUser,
 	pub api_key: Option<String>,
 }
 
-impl RequestContext {
+impl AuthContext {
 	/// Get the current user
 	pub fn user(&self) -> AuthUser {
 		self.user.clone()

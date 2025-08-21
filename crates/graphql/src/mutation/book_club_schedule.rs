@@ -7,7 +7,7 @@ use models::{
 use sea_orm::{prelude::*, Set, TransactionTrait};
 
 use crate::{
-	data::{CoreContext, RequestContext},
+	data::{AuthContext, CoreContext},
 	input::book_club::{CreateBookClubScheduleBook, CreateBookClubScheduleInput},
 	mutation::book_club::get_book_club_for_admin,
 	object::book_club::BookClub,
@@ -24,7 +24,7 @@ impl BookClubScheduleMutation {
 		id: ID,
 		input: CreateBookClubScheduleInput,
 	) -> Result<BookClub> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let book_club = get_book_club_for_admin(user, &id, conn)
@@ -45,7 +45,7 @@ impl BookClubScheduleMutation {
 		id: ID,
 		#[graphql(validator(min_items = 1))] books: Vec<CreateBookClubScheduleBook>,
 	) -> Result<BookClub> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let book_club = get_book_club_for_admin(user, &id, conn)

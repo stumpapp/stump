@@ -16,7 +16,7 @@ use sea_orm::{
 };
 
 use crate::{
-	data::{CoreContext, RequestContext},
+	data::{AuthContext, CoreContext},
 	filter::{media::MediaFilterInput, IntoFilter},
 	object::media::Media,
 	order::MediaOrderBy,
@@ -90,7 +90,7 @@ impl MediaQuery {
 		#[graphql(default, validator(custom = "PaginationValidator"))]
 		pagination: Pagination,
 	) -> Result<PaginatedResponse<Media>> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let mut query = media::ModelWithMetadata::find_for_user(user);
@@ -172,7 +172,7 @@ impl MediaQuery {
 	}
 
 	async fn media_by_id(&self, ctx: &Context<'_>, id: ID) -> Result<Option<Media>> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let model = media::ModelWithMetadata::find_by_id_for_user(id.to_string(), user)
@@ -189,7 +189,7 @@ impl MediaQuery {
 		ctx: &Context<'_>,
 		path: String,
 	) -> Result<Option<Media>> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let model = media::ModelWithMetadata::find_for_user(user)
@@ -246,7 +246,7 @@ impl MediaQuery {
 		#[graphql(default, validator(custom = "PaginationValidator"))]
 		pagination: Pagination,
 	) -> Result<PaginatedResponse<Media>> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let user_id = user.id.clone();
@@ -359,7 +359,7 @@ impl MediaQuery {
 		#[graphql(default, validator(custom = "PaginationValidator"))]
 		pagination: Pagination,
 	) -> Result<PaginatedResponse<Media>> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let query = media::ModelWithMetadata::find_for_user(user)
@@ -440,7 +440,7 @@ impl MediaQuery {
 	}
 
 	async fn duplicate_media(&self, ctx: &Context<'_>) -> Result<Vec<Media>> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let models = media::ModelWithMetadata::find_for_user(user)

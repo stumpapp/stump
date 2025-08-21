@@ -1,5 +1,5 @@
 use crate::{
-	data::{CoreContext, RequestContext},
+	data::{AuthContext, CoreContext},
 	guard::PermissionGuard,
 	input::smart_list_view::SaveSmartListView,
 	object::smart_list_view::SmartListView,
@@ -22,7 +22,7 @@ impl SmartListViewMutation {
 		ctx: &Context<'_>,
 		input: SaveSmartListView,
 	) -> Result<SmartListView> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 		let txn = conn.begin().await?;
 
@@ -49,7 +49,7 @@ impl SmartListViewMutation {
 		original_name: String,
 		input: SaveSmartListView,
 	) -> Result<SmartListView> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 		let txn = conn.begin().await?;
 
@@ -79,7 +79,7 @@ impl SmartListViewMutation {
 		id: ID,
 		name: String,
 	) -> Result<SmartListView> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 		let txn = conn.begin().await?;
 

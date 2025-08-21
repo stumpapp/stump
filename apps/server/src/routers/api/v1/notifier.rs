@@ -16,7 +16,7 @@ use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
 	filter::chain_optional_iter,
-	middleware::auth::{auth_middleware, RequestContext},
+	middleware::auth::{auth_middleware, AuthContext},
 };
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
@@ -52,7 +52,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 )]
 async fn get_notifiers(
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<Vec<Notifier>>> {
 	req.enforce_permissions(&[UserPermission::ReadNotifier])?;
 	let client = &ctx.db;
@@ -87,7 +87,7 @@ async fn get_notifiers(
 async fn get_notifier_by_id(
 	State(ctx): State<AppState>,
 	Path(id): Path<i32>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<Notifier>> {
 	req.enforce_permissions(&[UserPermission::ReadNotifier])?;
 	let client = &ctx.db;
@@ -124,7 +124,7 @@ pub struct CreateOrUpdateNotifier {
 )]
 async fn create_notifier(
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	Json(payload): Json<CreateOrUpdateNotifier>,
 ) -> APIResult<Json<Notifier>> {
 	req.enforce_permissions(&[UserPermission::CreateNotifier])?;
@@ -160,7 +160,7 @@ async fn create_notifier(
 async fn update_notifier(
 	State(ctx): State<AppState>,
 	Path(id): Path<i32>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	Json(payload): Json<CreateOrUpdateNotifier>,
 ) -> APIResult<Json<Notifier>> {
 	req.enforce_permissions(&[UserPermission::ManageNotifier])?;
@@ -207,7 +207,7 @@ pub struct PatchNotifier {
 async fn patch_notifier(
 	State(ctx): State<AppState>,
 	Path(id): Path<i32>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	Json(payload): Json<PatchNotifier>,
 ) -> APIResult<Json<Notifier>> {
 	req.enforce_permissions(&[UserPermission::ManageNotifier])?;
@@ -257,7 +257,7 @@ async fn patch_notifier(
 async fn delete_notifier(
 	State(ctx): State<AppState>,
 	Path(id): Path<i32>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<Notifier>> {
 	req.enforce_permissions(&[UserPermission::DeleteNotifier])?;
 

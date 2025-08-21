@@ -6,7 +6,7 @@ use stump_core::{config::StumpConfig, db::entity::UserPermission};
 use crate::{
 	config::state::AppState,
 	errors::APIResult,
-	middleware::auth::{auth_middleware, RequestContext},
+	middleware::auth::{auth_middleware, AuthContext},
 };
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
@@ -28,7 +28,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 )]
 async fn get_server_config(
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<StumpConfig>> {
 	req.enforce_permissions(&[UserPermission::ManageServer])?;
 
@@ -53,7 +53,7 @@ pub struct UploadConfig {
 )]
 async fn get_upload_config(
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<UploadConfig>> {
 	req.enforce_permissions(&[UserPermission::UploadFile])?;
 

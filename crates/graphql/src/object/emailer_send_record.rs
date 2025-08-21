@@ -10,7 +10,7 @@ use models::{
 use sea_orm::prelude::*;
 
 use crate::{
-	data::{CoreContext, RequestContext},
+	data::{AuthContext, CoreContext},
 	guard::PermissionGuard,
 	object::media::Media,
 };
@@ -76,7 +76,7 @@ impl From<emailer_send_record::AttachmentMetaModel> for AttachmentMeta {
 impl AttachmentMeta {
 	async fn media(&self, ctx: &Context<'_>) -> Result<Option<Media>> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 
 		let Some(media_id) = &self.model.media_id else {
 			return Ok(None);

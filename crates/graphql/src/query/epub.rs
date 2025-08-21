@@ -2,7 +2,7 @@ use async_graphql::{Context, Object, Result, ID};
 use models::entity::{bookmark, media};
 
 use crate::{
-	data::{CoreContext, RequestContext},
+	data::{AuthContext, CoreContext},
 	object::{bookmark::Bookmark, epub::Epub},
 };
 
@@ -13,7 +13,7 @@ pub struct EpubQuery;
 impl EpubQuery {
 	/// Get a single epub by its media ID
 	async fn epub_by_id(&self, ctx: &Context<'_>, id: ID) -> Result<Epub> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let model = media::Entity::find_media_ids_for_user(id.to_string(), user)
@@ -31,7 +31,7 @@ impl EpubQuery {
 		ctx: &Context<'_>,
 		id: ID,
 	) -> Result<Vec<Bookmark>> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		Ok(

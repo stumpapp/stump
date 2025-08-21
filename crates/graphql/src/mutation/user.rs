@@ -1,5 +1,5 @@
 use crate::{
-	data::{CoreContext, RequestContext},
+	data::{AuthContext, CoreContext},
 	error_message::FORBIDDEN_ACTION,
 	guard::{PermissionGuard, ServerOwnerGuard},
 	input::user::{
@@ -117,7 +117,7 @@ impl UserMutation {
 		ctx: &Context<'_>,
 		input: UpdateUserInput,
 	) -> Result<User> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let core_ctx = ctx.data::<CoreContext>()?;
 		let config = core_ctx.config.as_ref();
 		let conn = core_ctx.conn.as_ref();
@@ -135,7 +135,7 @@ impl UserMutation {
 		ctx: &Context<'_>,
 		input: UpdateUserPreferencesInput,
 	) -> Result<UserPreferences> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let session = ctx.data::<Session>()?;
 		let core_ctx = ctx.data::<CoreContext>()?;
 		let conn = core_ctx.conn.as_ref();
@@ -177,7 +177,7 @@ impl UserMutation {
 		id: ID,
 		input: UpdateUserInput,
 	) -> Result<User> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let core_ctx = ctx.data::<CoreContext>()?;
 		let config = core_ctx.config.as_ref();
 		let conn = core_ctx.conn.as_ref();
@@ -208,7 +208,7 @@ impl UserMutation {
 		id: ID,
 		hard_delete: Option<bool>,
 	) -> Result<User> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let core_ctx = ctx.data::<CoreContext>()?;
 		let conn = core_ctx.conn.as_ref();
 
@@ -261,7 +261,7 @@ impl UserMutation {
 		id: ID,
 		lock: bool,
 	) -> Result<User> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let core_ctx = ctx.data::<CoreContext>()?;
 		let conn = core_ctx.conn.as_ref();
 
@@ -293,7 +293,7 @@ impl UserMutation {
 		locked: bool,
 	) -> Result<Arrangement> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 
 		let preferences = user_preferences::Entity::find()
 			.filter(user_preferences::Column::UserId.eq(&user.id))
@@ -325,7 +325,7 @@ impl UserMutation {
 		input: NavigationArrangementInput,
 	) -> Result<Arrangement> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 
 		let preferences = user_preferences::Entity::find()
 			.filter(user_preferences::Column::UserId.eq(&user.id))

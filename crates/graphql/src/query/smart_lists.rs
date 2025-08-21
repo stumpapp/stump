@@ -1,6 +1,6 @@
 use super::smart_lists_builder::{build_filters, build_smart_list_items};
 use crate::{
-	data::{CoreContext, RequestContext},
+	data::{AuthContext, CoreContext},
 	guard::PermissionGuard,
 	input::smart_lists::{
 		SmartListFilterGroupInput, SmartListFilterInput, SmartListsInput,
@@ -38,7 +38,7 @@ impl SmartListsQuery {
 		ctx: &Context<'_>,
 		#[graphql(default)] input: SmartListsInput,
 	) -> Result<Vec<SmartList>> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let query_all = input.all.unwrap_or(false);
@@ -71,7 +71,7 @@ impl SmartListsQuery {
 		ctx: &Context<'_>,
 		id: ID,
 	) -> Result<Option<SmartList>> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let smart_list = smart_list::Entity::find_by_id(user, id).one(conn).await?;
@@ -85,7 +85,7 @@ impl SmartListsQuery {
 		ctx: &Context<'_>,
 		id: ID,
 	) -> Result<Option<SmartListMeta>> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 		let txn = conn.begin().await?;
 
@@ -130,7 +130,7 @@ impl SmartListsQuery {
 
 	#[graphql(guard = "PermissionGuard::one(UserPermission::AccessSmartList)")]
 	async fn smart_list_items(self, ctx: &Context<'_>, id: ID) -> Result<SmartListItems> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 		let txn = conn.begin().await?;
 

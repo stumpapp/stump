@@ -18,7 +18,7 @@ use zip::read::ZipFile;
 use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
-	middleware::auth::{auth_middleware, RequestContext},
+	middleware::auth::{auth_middleware, AuthContext},
 	routers::api::filters::library_not_hidden_from_user_filter,
 };
 use stump_core::{
@@ -66,7 +66,7 @@ struct UploadBooksRequest {
 async fn upload_books(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	TypedMultipart(books_request): TypedMultipart<UploadBooksRequest>,
 ) -> APIResult<Json<()>> {
 	let user = req.user_and_enforce_permissions(&[
@@ -136,7 +136,7 @@ struct UploadSeriesRequest {
 async fn upload_series(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	TypedMultipart(series_request): TypedMultipart<UploadSeriesRequest>,
 ) -> APIResult<Json<()>> {
 	let user = req.user_and_enforce_permissions(&[

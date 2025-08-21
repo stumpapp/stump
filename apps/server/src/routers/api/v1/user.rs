@@ -34,7 +34,7 @@ use crate::{
 	config::{session::SESSION_USER_KEY, state::AppState},
 	errors::{APIError, APIResult},
 	filter::{chain_optional_iter, UserQueryRelation},
-	middleware::auth::{auth_middleware, RequestContext},
+	middleware::auth::{auth_middleware, AuthContext},
 	utils::{get_session_user, http::ImageResponse, validate_and_load_image},
 };
 
@@ -125,7 +125,7 @@ async fn get_users(
 	State(ctx): State<AppState>,
 	relation_query: Query<UserQueryRelation>,
 	pagination_query: Query<PaginationQuery>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<Pageable<Vec<User>>>> {
 	req.enforce_permissions(&[UserPermission::ReadUsers])?;
 
@@ -200,7 +200,7 @@ async fn get_users(
 )]
 async fn get_user_login_activity(
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<Vec<LoginActivity>>> {
 	req.enforce_server_owner()?;
 
@@ -232,7 +232,7 @@ async fn get_user_login_activity(
 )]
 async fn delete_user_login_activity(
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<()>> {
 	req.enforce_server_owner()?;
 
@@ -438,7 +438,7 @@ pub struct CreateUser {
 )]
 /// Creates a new user.
 async fn create_user(
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	State(ctx): State<AppState>,
 	Json(input): Json<CreateUser>,
 ) -> APIResult<Json<User>> {
@@ -536,7 +536,7 @@ async fn create_user(
 )]
 /// Updates the session user
 async fn update_current_user(
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	session: Session,
 	State(ctx): State<AppState>,
 	Json(input): Json<UpdateUser>,
@@ -592,7 +592,7 @@ pub struct UpdateUserPreferences {
 )]
 /// Updates a user's preferences.
 async fn update_current_user_preferences(
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	session: Session,
 	State(ctx): State<AppState>,
 	Json(input): Json<UpdateUserPreferences>,
@@ -635,7 +635,7 @@ async fn update_current_user_preferences(
 	)
 )]
 async fn get_navigation_arrangement(
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	State(ctx): State<AppState>,
 ) -> APIResult<Json<Arrangement<NavigationItem>>> {
 	let user = req.user();
@@ -671,7 +671,7 @@ async fn get_navigation_arrangement(
 	)
 )]
 async fn update_navigation_arrangement(
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	State(ctx): State<AppState>,
 	Json(input): Json<Arrangement<NavigationItem>>,
 ) -> APIResult<Json<Arrangement<NavigationItem>>> {
@@ -735,7 +735,7 @@ pub struct DeleteUser {
 async fn delete_user_by_id(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	Json(input): Json<DeleteUser>,
 ) -> APIResult<Json<User>> {
 	let db = &ctx.db;
@@ -785,7 +785,7 @@ async fn delete_user_by_id(
 async fn get_user_by_id(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<User>> {
 	req.enforce_server_owner()?;
 	let db = &ctx.db;
@@ -819,7 +819,7 @@ async fn get_user_by_id(
 async fn get_user_login_activity_by_id(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<Vec<LoginActivity>>> {
 	let user = req.user();
 
@@ -860,7 +860,7 @@ async fn get_user_login_activity_by_id(
 )]
 /// Updates a user by ID.
 async fn update_user_handler(
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	session: Session,
 	State(ctx): State<AppState>,
 	Path(id): Path<String>,
@@ -909,7 +909,7 @@ async fn update_user_handler(
 async fn delete_user_sessions(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<()> {
 	req.enforce_server_owner()?;
 
@@ -948,7 +948,7 @@ pub struct UpdateAccountLock {
 async fn update_user_lock_status(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	Json(input): Json<UpdateAccountLock>,
 ) -> APIResult<Json<User>> {
 	let user = req.server_owner_user()?;
@@ -1000,7 +1000,7 @@ async fn update_user_lock_status(
 async fn get_user_preferences(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<UserPreferences>> {
 	let db = &ctx.db;
 	let user = req.user();
@@ -1043,7 +1043,7 @@ async fn get_user_preferences(
 )]
 /// Updates a user's preferences.
 async fn update_user_preferences(
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	session: Session,
 	State(ctx): State<AppState>,
 	Path(id): Path<String>,
@@ -1146,7 +1146,7 @@ async fn get_user_avatar(
 async fn upload_user_avatar(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	mut upload: Multipart,
 ) -> APIResult<ImageResponse> {
 	let by_user = req.user_and_enforce_permissions(&[UserPermission::UploadFile])?;

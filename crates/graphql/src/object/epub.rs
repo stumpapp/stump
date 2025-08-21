@@ -1,4 +1,4 @@
-use crate::data::{CoreContext, RequestContext};
+use crate::data::{AuthContext, CoreContext};
 use async_graphql::{ComplexObject, Context, Result, SimpleObject};
 use epub::doc::{EpubDoc, NavPoint};
 use models::entity::{bookmark, media, media_annotation};
@@ -119,7 +119,7 @@ impl Epub {
 		&self,
 		ctx: &Context<'_>,
 	) -> Result<Vec<media_annotation::Model>> {
-		let user_id = ctx.data::<RequestContext>()?.id();
+		let user_id = ctx.data::<AuthContext>()?.id();
 		let media_id = self.media_id.clone();
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
@@ -133,7 +133,7 @@ impl Epub {
 	}
 
 	async fn bookmarks(&self, ctx: &Context<'_>) -> Result<Vec<Bookmark>> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 		if self.media_id.is_empty() {
 			return Err("Media ID not set".into());

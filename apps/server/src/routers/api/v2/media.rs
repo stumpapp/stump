@@ -4,7 +4,7 @@ use axum::{
 	routing::get,
 	Extension, Router,
 };
-use graphql::data::RequestContext;
+use graphql::data::AuthContext;
 use models::{
 	entity::{library, library_config, media, series, user::AuthUser},
 	shared::{enums::UserPermission, image_processor_options::SupportedImageFormat},
@@ -39,7 +39,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 pub(crate) async fn get_media_file(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<NamedFile> {
 	let user = req
 		.user_and_enforce_permissions(&[UserPermission::DownloadFile])
@@ -117,7 +117,7 @@ pub(crate) async fn get_media_thumbnail_by_id(
 pub(crate) async fn get_media_thumbnail_handler(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<ImageResponse> {
 	get_media_thumbnail_by_id(&ctx, &req.user(), id)
 		.await
@@ -127,7 +127,7 @@ pub(crate) async fn get_media_thumbnail_handler(
 async fn get_media_page(
 	Path((id, page)): Path<(String, u32)>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<ImageResponse> {
 	let book = media::Entity::find_for_user(&req.user())
 		.filter(media::Column::Id.eq(id.clone()))

@@ -5,7 +5,7 @@ use axum::{
 	routing::{get, put},
 	Extension, Router,
 };
-use graphql::data::RequestContext;
+use graphql::data::AuthContext;
 use models::{
 	entity::{
 		finished_reading_session, media, reading_session, registered_reading_device,
@@ -62,7 +62,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 async fn authorize(req: Request, next: Next) -> APIResult<Response> {
 	let ctx = req
 		.extensions()
-		.get::<RequestContext>()
+		.get::<AuthContext>()
 		.ok_or(APIError::Unauthorized)?;
 	ctx.enforce_permissions(&[UserPermission::AccessKoreaderSync])
 		.map_err(|_| {
@@ -112,7 +112,7 @@ struct GetProgressResponse {
 
 async fn get_progress(
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	Path(KOReaderURLParams {
 		params: KOReaderDocumentURLParams { document },
 		..
@@ -214,7 +214,7 @@ struct PutProgressResponse {
 
 async fn put_progress(
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	Json(PutProgressInput {
 		document,
 		progress,

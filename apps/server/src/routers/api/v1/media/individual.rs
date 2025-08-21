@@ -36,7 +36,7 @@ use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
 	filter::chain_optional_iter,
-	middleware::auth::RequestContext,
+	middleware::auth::AuthContext,
 	routers::api::filters::{
 		apply_media_age_restriction, apply_media_library_not_hidden_for_user_filter,
 	},
@@ -88,7 +88,7 @@ pub(crate) struct PutMediaCompletionStatus {
 pub async fn get_media_by_path(
 	Path(path): Path<PathBuf>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<Media>> {
 	let client = &ctx.db;
 
@@ -136,7 +136,7 @@ pub async fn get_media_by_id(
 	Path(id): Path<String>,
 	params: Query<BookRelations>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<Media>> {
 	let db = &ctx.db;
 	let user = req.user();
@@ -210,7 +210,7 @@ pub async fn get_media_by_id(
 pub(crate) async fn get_media_file(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<NamedFile> {
 	let db = &ctx.db;
 
@@ -259,7 +259,7 @@ pub(crate) async fn get_media_file(
 pub(crate) async fn convert_media(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> Result<(), APIError> {
 	let db = &ctx.db;
 
@@ -333,7 +333,7 @@ impl RequestPageScaled {
 pub(crate) async fn get_media_page(
 	Path((id, page)): Path<(String, i32)>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	Query(requested_scale): Query<RequestPageScaled>,
 ) -> APIResult<ImageResponse> {
 	let db = &ctx.db;
@@ -408,7 +408,7 @@ pub struct PutMediaProgress {
 pub(crate) async fn update_media_progress(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	Json(PutMediaProgress {
 		page,
 		epubcfi,
@@ -516,7 +516,7 @@ pub(crate) async fn update_media_progress(
 pub(crate) async fn get_media_progress(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<Option<ActiveReadingSession>>> {
 	let db = &ctx.db;
 	let user = req.user();
@@ -564,7 +564,7 @@ pub(crate) async fn get_media_progress(
 pub(crate) async fn delete_media_progress(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<MediaIsComplete>> {
 	let client = &ctx.db;
 	let user_id = req.id();
@@ -596,7 +596,7 @@ pub(crate) async fn delete_media_progress(
 pub(crate) async fn get_is_media_completed(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<MediaIsComplete>> {
 	let client = &ctx.db;
 	let user = req.user();
@@ -651,7 +651,7 @@ pub(crate) async fn get_is_media_completed(
 pub(crate) async fn put_media_complete_status(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	Json(payload): Json<PutMediaCompletionStatus>,
 ) -> APIResult<Json<MediaIsComplete>> {
 	let client = &ctx.db;
@@ -758,7 +758,7 @@ pub(crate) async fn put_media_complete_status(
 pub(crate) async fn start_media_analysis(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<()> {
 	req.enforce_permissions(&[UserPermission::ManageLibrary])?;
 
@@ -791,7 +791,7 @@ pub(crate) async fn start_media_analysis(
 pub(crate) async fn get_media_dimensions(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<Vec<PageDimension>>> {
 	// Fetch the media item in question from the database while enforcing permissions
 	let dimensions_entity =
@@ -819,7 +819,7 @@ pub(crate) async fn get_media_dimensions(
 pub(crate) async fn get_media_page_dimensions(
 	Path((id, page)): Path<(String, i32)>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<PageDimension>> {
 	// Fetch the media item in question from the database while enforcing permissions
 	let dimensions_entity =
@@ -905,7 +905,7 @@ async fn fetch_media_page_dimensions_with_permissions(
 pub(crate) async fn get_media_metadata(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<Option<MediaMetadata>>> {
 	let db = &ctx.db;
 	let user = req.user();
@@ -950,7 +950,7 @@ pub(crate) async fn get_media_metadata(
 pub(crate) async fn put_media_metadata(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	Json(metadata): Json<MediaMetadata>,
 ) -> APIResult<Json<MediaMetadata>> {
 	req.enforce_permissions(&[UserPermission::ManageLibrary])?;

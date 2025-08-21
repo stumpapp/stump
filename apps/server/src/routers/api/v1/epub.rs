@@ -23,7 +23,7 @@ use stump_core::{
 use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
-	middleware::auth::{auth_middleware, RequestContext},
+	middleware::auth::{auth_middleware, AuthContext},
 	utils::http::BufferResponse,
 };
 
@@ -50,7 +50,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 async fn get_epub_by_id(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<Epub>> {
 	let user_id = req.id();
 
@@ -83,7 +83,7 @@ async fn get_epub_by_id(
 async fn update_epub_progress(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	Json(input): Json<UpdateEpubProgress>,
 ) -> APIResult<Json<ProgressUpdateReturn>> {
 	let client = &ctx.db;
@@ -156,7 +156,7 @@ async fn update_epub_progress(
 async fn get_bookmarks(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<Vec<Bookmark>>> {
 	let client = &ctx.db;
 
@@ -191,7 +191,7 @@ pub struct CreateOrUpdateBookmark {
 async fn create_or_update_bookmark(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	Json(input): Json<CreateOrUpdateBookmark>,
 ) -> APIResult<Json<Bookmark>> {
 	let client = &ctx.db;
@@ -237,7 +237,7 @@ pub struct DeleteBookmark {
 async fn delete_bookmark(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	Json(input): Json<DeleteBookmark>,
 ) -> APIResult<Json<Bookmark>> {
 	let client = &ctx.db;

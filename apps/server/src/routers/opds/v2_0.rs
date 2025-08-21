@@ -8,7 +8,7 @@ use axum::{
 	routing::get,
 	Extension, Json, Router,
 };
-use graphql::{data::RequestContext, pagination::OffsetPagination};
+use graphql::{data::AuthContext, pagination::OffsetPagination};
 use models::{
 	entity::{
 		library, media, media_metadata, reading_session, series, series_metadata,
@@ -143,7 +143,7 @@ async fn auth(HostExtractor(host): HostExtractor) -> APIResult<OPDSAuthDocWrappe
 async fn catalog(
 	State(ctx): State<AppState>,
 	HostExtractor(host): HostExtractor,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<OPDSFeed>> {
 	let user = req.user();
 	let link_finalizer = OPDSLinkFinalizer::from(host);
@@ -311,7 +311,7 @@ async fn search(
 	State(ctx): State<AppState>,
 	HostExtractor(host): HostExtractor,
 	Query(OPDSSearchQuery { query }): Query<OPDSSearchQuery>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<OPDSFeed>> {
 	let user = req.user();
 	let link_finalizer = OPDSLinkFinalizer::from(host);
@@ -469,7 +469,7 @@ async fn browse_libraries(
 	State(ctx): State<AppState>,
 	HostExtractor(host): HostExtractor,
 	pagination: Query<OffsetPagination>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<OPDSFeed>> {
 	let link_finalizer = OPDSLinkFinalizer::from(host);
 
@@ -561,7 +561,7 @@ async fn browse_library_by_id(
 	State(ctx): State<AppState>,
 	HostExtractor(host): HostExtractor,
 	Path(id): Path<String>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<OPDSFeed>> {
 	let link_finalizer = OPDSLinkFinalizer::from(host);
 
@@ -817,7 +817,7 @@ async fn browse_library_books(
 	HostExtractor(host): HostExtractor,
 	Path(id): Path<String>,
 	pagination: Query<OffsetPagination>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<OPDSFeed>> {
 	let user = req.user();
 
@@ -840,7 +840,7 @@ async fn latest_library_books(
 	HostExtractor(host): HostExtractor,
 	Path(id): Path<String>,
 	pagination: Query<OffsetPagination>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<OPDSFeed>> {
 	let user = req.user();
 
@@ -862,7 +862,7 @@ async fn browse_series(
 	State(ctx): State<AppState>,
 	HostExtractor(host): HostExtractor,
 	pagination: Query<OffsetPagination>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<OPDSFeed>> {
 	let user = req.user();
 
@@ -924,7 +924,7 @@ async fn browse_series_by_id(
 	HostExtractor(host): HostExtractor,
 	pagination: Query<OffsetPagination>,
 	Path(id): Path<String>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<OPDSFeed>> {
 	let user = req.user();
 
@@ -961,7 +961,7 @@ async fn browse_books(
 	State(ctx): State<AppState>,
 	HostExtractor(host): HostExtractor,
 	pagination: Query<OffsetPagination>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<OPDSFeed>> {
 	let user = req.user();
 
@@ -984,7 +984,7 @@ async fn latest_books(
 	State(ctx): State<AppState>,
 	HostExtractor(host): HostExtractor,
 	pagination: Query<OffsetPagination>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<OPDSFeed>> {
 	let user = req.user();
 
@@ -1010,7 +1010,7 @@ async fn keep_reading(
 	State(ctx): State<AppState>,
 	HostExtractor(host): HostExtractor,
 	pagination: Query<OffsetPagination>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<OPDSFeed>> {
 	let user = req.user();
 
@@ -1060,7 +1060,7 @@ async fn get_book_by_id(
 	Path(id): Path<String>,
 	HostExtractor(host): HostExtractor,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<OPDSPublication>> {
 	let book = OPDSPublicationEntity::find_for_user(&req.user())
 		.filter(media::Column::Id.eq(id.clone()))
@@ -1084,7 +1084,7 @@ async fn get_book_by_id(
 async fn get_book_thumbnail(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<ImageResponse> {
 	let (content_type, image_buffer) =
 		get_media_thumbnail_by_id(&ctx, &req.user(), id).await?;
@@ -1097,7 +1097,7 @@ async fn get_book_thumbnail(
 async fn get_book_page(
 	Path((id, page)): Path<(String, i32)>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<ImageResponse> {
 	fetch_book_page_for_user(&ctx, &req.user(), id, page).await
 }
@@ -1112,7 +1112,7 @@ async fn get_book_progression(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	HostExtractor(host): HostExtractor,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<OPDSProgression>> {
 	let link_finalizer = OPDSLinkFinalizer::from(host);
 
@@ -1145,7 +1145,7 @@ async fn get_book_progression(
 async fn download_book(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<NamedFile> {
 	let user = req
 		.user_and_enforce_permissions(&[UserPermission::DownloadFile])

@@ -14,7 +14,7 @@ use axum::{
 };
 
 use graphql::{
-	data::{RequestContext, ServiceContext},
+	data::{AuthContext, ServiceContext},
 	schema::{build_schema, AppSchema},
 };
 use tower_sessions::Session;
@@ -38,7 +38,7 @@ pub(crate) async fn mount(app_state: AppState) -> Router<AppState> {
 
 // TODO(sea-orm): Consider new user permission
 async fn playground(
-	Extension(req_ctx): Extension<RequestContext>,
+	Extension(req_ctx): Extension<AuthContext>,
 ) -> Result<impl IntoResponse, APIError> {
 	if !req_ctx.user().is_server_owner {
 		return Err(APIError::forbidden_discreet());
@@ -54,14 +54,13 @@ async fn playground(
 // TODO(sea-orm): Move to separate file, get OPTIONAL user(?), enforce user for all but login-related mutations? Or just retain restful login?
 async fn graphql_handler(
 	schema: Extension<AppSchema>,
-	Extension(req_ctx): Extension<RequestContext>,
+	Extension(auth): Extension<AuthContext>,
 	HostExtractor(details): HostExtractor,
 	session: Session,
 	req: GraphQLRequest,
 ) -> GraphQLResponse {
 	let mut req = req.into_inner();
-	req = req.data(req_ctx);
-	// TODO(graphql): Refactor extractor to use ServiceContext instead
+	req = req.data(auth);
 	req = req.data(ServiceContext {
 		host: details.host,
 		scheme: details.scheme,
@@ -73,12 +72,12 @@ async fn graphql_handler(
 async fn graphql_subscription_handler(
 	schema: Extension<AppSchema>,
 	State(ctx): State<AppState>,
-	Extension(req_ctx): Extension<RequestContext>,
+	Extension(auth): Extension<AuthContext>,
 	protocol: GraphQLProtocol,
 	websocket: WebSocketUpgrade,
 ) -> impl IntoResponse {
 	let mut data = async_graphql::Data::default();
-	data.insert(req_ctx);
+	data.insert(auth);
 	data.insert(ctx);
 
 	websocket

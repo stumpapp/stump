@@ -7,7 +7,7 @@ use axum::{
 	Extension, Router,
 };
 use chrono::Utc;
-use graphql::{data::RequestContext, pagination::OffsetPagination};
+use graphql::{data::AuthContext, pagination::OffsetPagination};
 use models::{
 	entity::{
 		finished_reading_session, library, media, reading_session, series,
@@ -138,7 +138,7 @@ fn pagination_bounds(page: i64, page_size: i64) -> (i64, i64) {
 	(skip, page_size)
 }
 
-fn catalog_url(req_ctx: &RequestContext, path: &str) -> String {
+fn catalog_url(req_ctx: &AuthContext, path: &str) -> String {
 	if let Some(api_key) = req_ctx.api_key() {
 		format!("/opds/{}/v1.2/{}", api_key, path)
 	} else {
@@ -146,7 +146,7 @@ fn catalog_url(req_ctx: &RequestContext, path: &str) -> String {
 	}
 }
 
-fn service_url(req_ctx: &RequestContext) -> String {
+fn service_url(req_ctx: &AuthContext) -> String {
 	if let Some(api_key) = req_ctx.api_key() {
 		format!("/opds/{}/v1.2", api_key)
 	} else {
@@ -154,7 +154,7 @@ fn service_url(req_ctx: &RequestContext) -> String {
 	}
 }
 
-async fn catalog(Extension(req): Extension<RequestContext>) -> APIResult<Xml> {
+async fn catalog(Extension(req): Extension<AuthContext>) -> APIResult<Xml> {
 	let entries = vec![
 		OpdsEntry::new(
 			"keepReading".to_string(),
@@ -241,7 +241,7 @@ async fn catalog(Extension(req): Extension<RequestContext>) -> APIResult<Xml> {
 	Ok(Xml(feed.build()?))
 }
 
-async fn search_description(Extension(req): Extension<RequestContext>) -> APIResult<Xml> {
+async fn search_description(Extension(req): Extension<AuthContext>) -> APIResult<Xml> {
 	Ok(OpdsOpenSearch::new(Some(service_url(&req)))
 		.build()
 		.map(Xml)?)
@@ -249,7 +249,7 @@ async fn search_description(Extension(req): Extension<RequestContext>) -> APIRes
 
 async fn keep_reading(
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Xml> {
 	let books = OPDSPublicationEntity::find_for_user(&req.user())
 		.filter(reading_session::Column::UserId.eq(req.id()))
@@ -291,7 +291,7 @@ async fn keep_reading(
 async fn get_libraries(
 	State(ctx): State<AppState>,
 	Query(OPDSSearchQuery { search }): Query<OPDSSearchQuery>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Xml> {
 	let user = req.user();
 
@@ -337,7 +337,7 @@ async fn get_library_by_id(
 		..
 	}): Path<OPDSURLParams<OPDSIDURLParams>>,
 	pagination: Query<OffsetPagination>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Xml> {
 	let user = req.user();
 
@@ -396,7 +396,7 @@ async fn get_series(
 	State(ctx): State<AppState>,
 	Query(pagination): Query<OffsetPagination>,
 	Query(OPDSSearchQuery { search }): Query<OPDSSearchQuery>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Xml> {
 	let user = req.user();
 	let search_cpy = search.clone();
@@ -450,7 +450,7 @@ async fn get_series(
 async fn get_latest_series(
 	State(ctx): State<AppState>,
 	pagination: Query<OffsetPagination>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Xml> {
 	let user = req.user();
 	let series = series::Entity::find_for_user(&user)
@@ -492,7 +492,7 @@ async fn get_series_by_id(
 	}): Path<OPDSURLParams<OPDSIDURLParams>>,
 	State(ctx): State<AppState>,
 	pagination: Query<OffsetPagination>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Xml> {
 	let user = req.user();
 	let series::ModelWithMetadata { series, metadata } =
@@ -599,7 +599,7 @@ async fn get_book_thumbnail(
 		..
 	}): Path<OPDSURLParams<OPDSIDURLParams>>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<ImageResponse> {
 	fetch_book_page_for_user(&ctx, &req.user(), id, 1).await
 }
@@ -612,7 +612,7 @@ async fn get_book_page(
 	}): Path<OPDSURLParams<OPDSPageURLParams>>,
 	State(ctx): State<AppState>,
 	pagination: Query<OffsetPagination>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<ImageResponse> {
 	// OPDS defaults to zero-indexed pages, I don't even think it allows the
 	// zero_based query param to be set.
@@ -691,7 +691,7 @@ async fn download_book(
 		..
 	}): Path<OPDSURLParams<OPDSFilenameURLParams>>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<NamedFile> {
 	let user = req
 		.user_and_enforce_permissions(&[UserPermission::DownloadFile])

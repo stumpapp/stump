@@ -16,7 +16,7 @@ use stump_core::filesystem::{
 };
 
 use crate::{
-	data::{CoreContext, RequestContext},
+	data::{AuthContext, CoreContext},
 	guard::PermissionGuard,
 	input::thumbnail::UpdateThumbnailInput,
 	object::series::Series,
@@ -29,7 +29,7 @@ pub struct SeriesMutation;
 impl SeriesMutation {
 	#[graphql(guard = "PermissionGuard::one(UserPermission::ManageLibrary)")]
 	async fn analyze_series(&self, ctx: &Context<'_>, id: ID) -> Result<bool> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let core = ctx.data::<CoreContext>()?;
 		let conn = core.conn.as_ref();
 
@@ -51,7 +51,7 @@ impl SeriesMutation {
 		id: ID,
 		is_favorite: bool,
 	) -> Result<Series> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let core = ctx.data::<CoreContext>()?;
 		let conn = core.conn.as_ref();
 
@@ -104,7 +104,7 @@ impl SeriesMutation {
 		input: UpdateThumbnailInput,
 	) -> Result<Series> {
 		let core = ctx.data::<CoreContext>()?;
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 
 		let series = series::ModelWithMetadata::find_for_user(user)
 			.filter(series::Column::Id.eq(id.to_string()))
@@ -169,7 +169,7 @@ impl SeriesMutation {
 
 	#[graphql(guard = "PermissionGuard::one(UserPermission::ScanLibrary)")]
 	async fn scan_series(&self, ctx: &Context<'_>, id: ID) -> Result<bool> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let core = ctx.data::<CoreContext>()?;
 		let conn = core.conn.as_ref();
 

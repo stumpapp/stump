@@ -26,7 +26,7 @@ use crate::{
 	},
 	errors::{api_error_message, APIError, APIResult},
 	http_server::StumpRequestInfo,
-	middleware::auth::{auth_middleware, RequestContext},
+	middleware::auth::{auth_middleware, AuthContext},
 	utils::{default_true, get_session_user, hash_password, verify_password},
 };
 
@@ -99,7 +99,7 @@ pub struct AuthenticationOptions {
 )]
 /// Returns the currently logged in user from the session. If no user is logged in, returns an
 /// unauthorized error.
-async fn viewer(Extension(req): Extension<RequestContext>) -> APIResult<Json<User>> {
+async fn viewer(Extension(req): Extension<AuthContext>) -> APIResult<Json<User>> {
 	Ok(Json(req.user().clone()))
 }
 

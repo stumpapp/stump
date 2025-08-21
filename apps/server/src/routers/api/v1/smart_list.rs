@@ -27,7 +27,7 @@ use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
 	filter::chain_optional_iter,
-	middleware::auth::{auth_middleware, RequestContext},
+	middleware::auth::{auth_middleware, AuthContext},
 };
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
@@ -130,7 +130,7 @@ pub struct GetSmartListsParams {
 )]
 async fn get_smart_lists(
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	QsQuery(params): QsQuery<GetSmartListsParams>,
 ) -> APIResult<Json<Vec<SmartList>>> {
 	let user = req.user_and_enforce_permissions(&[UserPermission::AccessSmartList])?;
@@ -203,7 +203,7 @@ pub struct CreateOrUpdateSmartList {
 )]
 async fn create_smart_list(
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	Json(input): Json<CreateOrUpdateSmartList>,
 ) -> APIResult<Json<SmartList>> {
 	let user = req.user_and_enforce_permissions(&[UserPermission::AccessSmartList])?;
@@ -267,7 +267,7 @@ async fn get_smart_list_by_id(
 	Path(id): Path<String>,
 	QsQuery(options): QsQuery<SmartListRelationOptions>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<SmartList>> {
 	let user = req.user_and_enforce_permissions(&[UserPermission::AccessSmartList])?;
 	let client = &ctx.db;
@@ -304,7 +304,7 @@ async fn get_smart_list_by_id(
 async fn update_smart_list_by_id(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	Json(input): Json<CreateOrUpdateSmartList>,
 ) -> APIResult<Json<SmartList>> {
 	let user = req.user_and_enforce_permissions(&[UserPermission::AccessSmartList])?;
@@ -366,7 +366,7 @@ async fn update_smart_list_by_id(
 async fn delete_smart_list_by_id(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<SmartList>> {
 	let user = req.user_and_enforce_permissions(&[UserPermission::AccessSmartList])?;
 	let client = &ctx.db;
@@ -416,7 +416,7 @@ async fn delete_smart_list_by_id(
 async fn get_smart_list_items(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<SmartListItems>> {
 	let user = req.user_and_enforce_permissions(&[UserPermission::AccessSmartList])?;
 
@@ -467,7 +467,7 @@ pub struct SmartListMeta {
 async fn get_smart_list_meta(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<SmartListMeta>> {
 	let user = req.user_and_enforce_permissions(&[UserPermission::AccessSmartList])?;
 	let client = &ctx.db;
@@ -536,7 +536,7 @@ async fn get_smart_list_access_rules() {
 async fn get_smart_list_views(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<Vec<SmartListView>>> {
 	let user = req.user_and_enforce_permissions(&[UserPermission::AccessSmartList])?;
 	let client = &ctx.db;
@@ -573,7 +573,7 @@ async fn get_smart_list_views(
 async fn get_smart_list_view(
 	Path((id, name)): Path<(String, String)>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<SmartListView>> {
 	let user = req.user_and_enforce_permissions(&[UserPermission::AccessSmartList])?;
 	let client = &ctx.db;
@@ -615,7 +615,7 @@ pub struct CreateOrUpdateSmartListView {
 async fn create_smart_list_view(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	Json(input): Json<CreateOrUpdateSmartListView>,
 ) -> APIResult<Json<SmartListView>> {
 	let user = req.user_and_enforce_permissions(&[UserPermission::AccessSmartList])?;
@@ -667,7 +667,7 @@ async fn create_smart_list_view(
 async fn update_smart_list_view(
 	Path((id, name)): Path<(String, String)>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	Json(input): Json<CreateOrUpdateSmartListView>,
 ) -> APIResult<Json<SmartListView>> {
 	let user = req.user_and_enforce_permissions(&[UserPermission::AccessSmartList])?;
@@ -715,7 +715,7 @@ async fn update_smart_list_view(
 async fn delete_smart_list_view(
 	Path((id, name)): Path<(String, String)>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<SmartListView>> {
 	let user = req.user_and_enforce_permissions(&[UserPermission::AccessSmartList])?;
 	let client = &ctx.db;

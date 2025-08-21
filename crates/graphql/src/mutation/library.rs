@@ -25,7 +25,7 @@ use stump_core::filesystem::{
 use tokio::fs;
 
 use crate::{
-	data::{CoreContext, RequestContext},
+	data::{AuthContext, CoreContext},
 	error_message,
 	guard::PermissionGuard,
 	input::{library::CreateOrUpdateLibraryInput, thumbnail::UpdateThumbnailInput},
@@ -57,7 +57,7 @@ impl LibraryMutation {
 		ctx: &Context<'_>,
 		id: ID,
 	) -> Result<CleanLibraryResponse> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let core = ctx.data::<CoreContext>()?;
 
 		// This is primarily for access control assertion
@@ -149,7 +149,7 @@ impl LibraryMutation {
 		guard = "PermissionGuard::new(&[UserPermission::ReadJobs, UserPermission::ManageLibrary])"
 	)]
 	async fn clear_scan_history(&self, ctx: &Context<'_>, id: ID) -> Result<u64> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let core = ctx.data::<CoreContext>()?;
 
 		// This is primarily for access control assertion
@@ -269,7 +269,7 @@ impl LibraryMutation {
 		id: ID,
 		mut input: CreateOrUpdateLibraryInput,
 	) -> Result<Library> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let core = ctx.data::<CoreContext>()?;
 
 		let (existing_library, existing_config) = library::Entity::find_for_user(user)
@@ -444,7 +444,7 @@ impl LibraryMutation {
 		emoji: Option<String>,
 	) -> Result<Library> {
 		let core = ctx.data::<CoreContext>()?;
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 
 		let existing_library = library::Entity::find_for_user(user)
 			.filter(library::Column::Id.eq(id.to_string()))
@@ -469,7 +469,7 @@ impl LibraryMutation {
 		input: UpdateThumbnailInput,
 	) -> Result<Library> {
 		let core = ctx.data::<CoreContext>()?;
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 
 		let (library, config) = library::Entity::find_for_user(user)
 			.filter(library::Column::Id.eq(id.to_string()))
@@ -526,7 +526,7 @@ impl LibraryMutation {
 		id: ID,
 		user_ids: Vec<String>,
 	) -> Result<Library> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let core = ctx.data::<CoreContext>()?;
 
 		if user_ids.contains(&user.id) {
@@ -616,7 +616,7 @@ impl LibraryMutation {
 		ctx: &Context<'_>,
 		id: ID,
 	) -> Result<Library> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let core = ctx.data::<CoreContext>()?;
 
 		let library = library::Entity::find_for_user(user)
@@ -638,7 +638,7 @@ impl LibraryMutation {
 	/// operation cannot be undone.
 	#[graphql(guard = "PermissionGuard::one(UserPermission::DeleteLibrary)")]
 	async fn delete_library(&self, ctx: &Context<'_>, id: ID) -> Result<Library> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let core = ctx.data::<CoreContext>()?;
 
 		let library = library::Entity::find_for_user(user)
@@ -662,7 +662,7 @@ impl LibraryMutation {
 		id: ID,
 		#[graphql(default = false)] force_regenerate: bool,
 	) -> Result<bool> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let core = ctx.data::<CoreContext>()?;
 
 		let (library, config) = library::Entity::find_for_user(user)
@@ -689,7 +689,7 @@ impl LibraryMutation {
 
 	#[graphql(guard = "PermissionGuard::one(UserPermission::ManageLibrary)")]
 	async fn delete_library_thumbnails(&self, ctx: &Context<'_>, id: ID) -> Result<bool> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let core = ctx.data::<CoreContext>()?;
 
 		let library = library::Entity::find_for_user(user)
@@ -750,7 +750,7 @@ impl LibraryMutation {
 		// out on the types.
 		options: Option<Json<ScanOptions>>,
 	) -> Result<bool> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let core = ctx.data::<CoreContext>()?;
 
 		let library = library::Entity::find_for_user(user)
@@ -773,7 +773,7 @@ impl LibraryMutation {
 	/// "Visit" a library, which will upsert a record of the user's last visit to the library.
 	/// This is used to inform the UI of the last library which was visited by the user
 	async fn visit_library(&self, ctx: &Context<'_>, id: ID) -> Result<Library> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let core = ctx.data::<CoreContext>()?;
 
 		let library = library::Entity::find_for_user(user)

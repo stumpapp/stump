@@ -20,7 +20,7 @@ use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
 	filter::{FilterableMediaQuery, FilterableQuery, MediaFilter},
-	middleware::auth::RequestContext,
+	middleware::auth::AuthContext,
 	routers::api::filters::{
 		apply_media_age_restriction, apply_media_filters_for_user,
 		apply_media_library_not_hidden_for_user_filter, apply_media_pagination,
@@ -49,7 +49,7 @@ pub(crate) async fn get_media(
 	filter_query: QsQuery<FilterableQuery<MediaFilter>>,
 	pagination_query: Query<PaginationQuery>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<Pageable<Vec<Media>>>> {
 	let FilterableQuery { filters, ordering } = filter_query.0.get();
 	let pagination = pagination_query.0.get();
@@ -217,7 +217,7 @@ pub(crate) async fn get_duplicate_media(
 /// total number of pages available (i.e not completed).
 pub(crate) async fn get_in_progress_media(
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	pagination_query: Query<PaginationQuery>,
 ) -> APIResult<Json<Pageable<Vec<Media>>>> {
 	let user = req.user();
@@ -308,7 +308,7 @@ pub(crate) async fn get_in_progress_media(
 pub(crate) async fn get_recently_added_media(
 	filter_query: QsQuery<FilterableQuery<MediaFilter>>,
 	pagination_query: Query<PaginationQuery>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	State(ctx): State<AppState>,
 ) -> APIResult<Json<Pageable<Vec<Media>>>> {
 	let FilterableQuery { filters, .. } = filter_query.0.get();

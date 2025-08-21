@@ -1,5 +1,5 @@
 use crate::{
-	data::{CoreContext, RequestContext},
+	data::{AuthContext, CoreContext},
 	guard::PermissionGuard,
 	input::api_key::APIKeyInput,
 	object::api_key::{APIKey, CreatedAPIKey},
@@ -20,7 +20,7 @@ impl APIKeyMutation {
 		ctx: &Context<'_>,
 		input: APIKeyInput,
 	) -> Result<CreatedAPIKey> {
-		let req_ctx = ctx.data::<RequestContext>()?;
+		let req_ctx = ctx.data::<AuthContext>()?;
 		let core_ctx = ctx.data::<CoreContext>()?;
 		let conn = core_ctx.conn.as_ref();
 
@@ -42,7 +42,7 @@ impl APIKeyMutation {
 		id: i32,
 		input: APIKeyInput,
 	) -> Result<APIKey> {
-		let req_ctx = ctx.data::<RequestContext>()?;
+		let req_ctx = ctx.data::<AuthContext>()?;
 		let core_ctx = ctx.data::<CoreContext>()?;
 		let conn = core_ctx.conn.as_ref();
 		let user = &req_ctx.user;
@@ -63,7 +63,7 @@ impl APIKeyMutation {
 
 	#[graphql(guard = "PermissionGuard::one(UserPermission::AccessAPIKeys)")]
 	async fn delete_api_key(&self, ctx: &Context<'_>, id: i32) -> Result<APIKey> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let core_ctx = ctx.data::<CoreContext>()?;
 		let conn = core_ctx.conn.as_ref();
 
@@ -79,7 +79,7 @@ impl APIKeyMutation {
 }
 
 fn check_permissions(
-	req_ctx: &RequestContext,
+	req_ctx: &AuthContext,
 	permissions: &APIKeyPermissions,
 ) -> Result<()> {
 	if let APIKeyPermissions::Custom(permissions) = permissions {

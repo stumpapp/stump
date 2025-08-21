@@ -1,5 +1,5 @@
 use crate::{
-	data::{CoreContext, RequestContext},
+	data::{AuthContext, CoreContext},
 	guard::PermissionGuard,
 	input::smart_lists::SaveSmartListInput,
 	object::smart_lists::SmartList,
@@ -19,7 +19,7 @@ impl SmartListMutation {
 		ctx: &Context<'_>,
 		input: SaveSmartListInput,
 	) -> Result<SmartList> {
-		let user_id = ctx.data::<RequestContext>()?.id();
+		let user_id = ctx.data::<AuthContext>()?.id();
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let active_model = input.into_active_model(&user_id)?;
@@ -37,7 +37,7 @@ impl SmartListMutation {
 		id: ID,
 		input: SaveSmartListInput,
 	) -> Result<SmartList> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 		let txn = conn.begin().await?;
 
@@ -56,7 +56,7 @@ impl SmartListMutation {
 
 	#[graphql(guard = "PermissionGuard::one(UserPermission::AccessSmartList)")]
 	async fn delete_smart_list(&self, ctx: &Context<'_>, id: ID) -> Result<SmartList> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 		let txn = conn.begin().await?;
 

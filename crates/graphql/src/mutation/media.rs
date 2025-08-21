@@ -18,7 +18,7 @@ use stump_core::filesystem::{
 };
 
 use crate::{
-	data::{CoreContext, RequestContext},
+	data::{AuthContext, CoreContext},
 	guard::PermissionGuard,
 	input::thumbnail::PageBasedThumbnailInput,
 	mutation::epub::ReadingProgressOutput,
@@ -33,7 +33,7 @@ pub struct MediaMutation;
 #[Object]
 impl MediaMutation {
 	async fn analyze_media(&self, ctx: &Context<'_>, id: ID) -> Result<bool> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let core = ctx.data::<CoreContext>()?;
 		let conn = core.conn.as_ref();
 
@@ -53,7 +53,7 @@ impl MediaMutation {
 
 	// TODO(graphql): Implement convert_media in core then here
 	async fn convert_media(&self, ctx: &Context<'_>, id: ID) -> Result<bool> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let core = ctx.data::<CoreContext>()?;
 		let conn = core.conn.as_ref();
 
@@ -76,7 +76,7 @@ impl MediaMutation {
 	}
 
 	async fn delete_media(&self, ctx: &Context<'_>, id: ID) -> Result<Media> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let core = ctx.data::<CoreContext>()?;
 		let conn = core.conn.as_ref();
 
@@ -102,7 +102,7 @@ impl MediaMutation {
 		id: ID,
 		is_favorite: bool,
 	) -> Result<Media> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let core = ctx.data::<CoreContext>()?;
 		let conn = core.conn.as_ref();
 
@@ -156,7 +156,7 @@ impl MediaMutation {
 		input: PageBasedThumbnailInput,
 	) -> Result<Media> {
 		let core = ctx.data::<CoreContext>()?;
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 
 		let book = media::ModelWithMetadata::find_for_user(user)
 			.filter(media::Column::Id.eq(id.to_string()))
@@ -214,7 +214,7 @@ impl MediaMutation {
 	}
 
 	async fn delete_media_progress(&self, ctx: &Context<'_>, id: ID) -> Result<Media> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let model = media::ModelWithMetadata::find_for_user(user)
@@ -246,7 +246,7 @@ impl MediaMutation {
 		page: Option<i32>,
 		elapsed_seconds: Option<i64>,
 	) -> Result<ReadingProgressOutput> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let core = ctx.data::<CoreContext>()?;
 		let conn = core.conn.as_ref();
 
@@ -317,7 +317,7 @@ impl MediaMutation {
 		is_complete: bool,
 		page: Option<i32>,
 	) -> Result<Option<finished_reading_session::Model>> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let model = media::ModelWithMetadata::find_for_user(user)

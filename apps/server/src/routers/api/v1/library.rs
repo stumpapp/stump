@@ -60,7 +60,7 @@ use crate::{
 		chain_optional_iter, FilterableLibraryQuery, FilterableQuery, LibraryFilter,
 		MediaFilter, SeriesFilter,
 	},
-	middleware::auth::{auth_middleware, RequestContext},
+	middleware::auth::{auth_middleware, AuthContext},
 	routers::api::filters::{
 		apply_library_filters_for_user, apply_media_age_restriction, apply_media_filters,
 		apply_media_pagination, apply_series_age_restriction, apply_series_filters,
@@ -146,7 +146,7 @@ async fn get_libraries(
 	filter_query: QsQuery<FilterableQuery<LibraryFilter>>,
 	pagination_query: Query<PaginationQuery>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<Pageable<Vec<Library>>>> {
 	let user = req.user();
 	let FilterableQuery { filters, ordering } = filter_query.0.get();
@@ -202,7 +202,7 @@ async fn get_libraries(
 
 async fn get_last_visited_library(
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<Option<Library>>> {
 	let client = &ctx.db;
 	let user = req.user();
@@ -224,7 +224,7 @@ async fn get_last_visited_library(
 async fn update_last_visited_library(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<Library>> {
 	let client = &ctx.db;
 	let user = req.user();
@@ -273,7 +273,7 @@ pub struct LibraryStatsParams {
 async fn get_libraries_stats(
 	State(ctx): State<AppState>,
 	Query(params): Query<LibraryStatsParams>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<LibraryStats>> {
 	let user = req.user();
 	let db = &ctx.db;
@@ -343,7 +343,7 @@ async fn get_libraries_stats(
 async fn get_library_by_id(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<Library>> {
 	let user = req.user();
 	let db = &ctx.db;
@@ -388,7 +388,7 @@ async fn get_library_series(
 	pagination_query: Query<PaginationQuery>,
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<Pageable<Vec<Series>>>> {
 	let FilterableQuery {
 		ordering, filters, ..
@@ -473,7 +473,7 @@ async fn get_library_media(
 	pagination_query: Query<PaginationQuery>,
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<Pageable<Vec<Media>>>> {
 	let user = req.user();
 
@@ -568,7 +568,7 @@ pub(crate) async fn get_library_thumbnail(
 async fn get_library_thumbnail_handler(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<ImageResponse> {
 	let db = &ctx.db;
 
@@ -643,7 +643,7 @@ pub struct PatchLibraryThumbnail {
 async fn patch_library_thumbnail(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	Json(body): Json<PatchLibraryThumbnail>,
 ) -> APIResult<ImageResponse> {
 	let user = req.user_and_enforce_permissions(&[UserPermission::ManageLibrary])?;
@@ -726,7 +726,7 @@ async fn patch_library_thumbnail(
 async fn replace_library_thumbnail(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	mut upload: Multipart,
 ) -> APIResult<ImageResponse> {
 	let user = req.user_and_enforce_permissions(&[
@@ -793,7 +793,7 @@ async fn replace_library_thumbnail(
 async fn delete_library_thumbnails(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<()>> {
 	let user = req.user_and_enforce_permissions(&[UserPermission::ManageLibrary])?;
 
@@ -848,7 +848,7 @@ pub struct GenerateLibraryThumbnails {
 async fn generate_library_thumbnails(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	Json(input): Json<GenerateLibraryThumbnails>,
 ) -> APIResult<Json<()>> {
 	let user = req.user_and_enforce_permissions(&[UserPermission::ManageLibrary])?;
@@ -907,7 +907,7 @@ async fn generate_library_thumbnails(
 async fn get_library_excluded_users(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<Vec<User>>> {
 	req.enforce_permissions(&[UserPermission::ReadUsers, UserPermission::ManageLibrary])?;
 
@@ -950,7 +950,7 @@ pub struct UpdateLibraryExcludedUsers {
 async fn update_library_excluded_users(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	Json(input): Json<UpdateLibraryExcludedUsers>,
 ) -> APIResult<Json<Library>> {
 	req.enforce_permissions(&[UserPermission::ReadUsers, UserPermission::ManageLibrary])?;
@@ -1040,7 +1040,7 @@ pub struct LastScanDetails {
 async fn get_library_last_scan(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<LastScanDetails>> {
 	let client = &ctx.db;
 
@@ -1076,7 +1076,7 @@ async fn get_library_last_scan(
 async fn get_library_scan_history(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<Vec<LibraryScanRecord>>> {
 	let client = &ctx.db;
 
@@ -1101,7 +1101,7 @@ async fn get_library_scan_history(
 async fn delete_library_scan_history(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<()>> {
 	req.enforce_permissions(&[UserPermission::ManageLibrary])?;
 
@@ -1137,7 +1137,7 @@ async fn delete_library_scan_history(
 async fn scan_library(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	Json(options): Json<Option<ScanOptions>>,
 ) -> Result<(), APIError> {
 	let user = req.user_and_enforce_permissions(&[UserPermission::ScanLibrary])?;
@@ -1194,7 +1194,7 @@ pub struct CleanLibraryResponse {
 async fn clean_library(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<CleanLibraryResponse>> {
 	let user = req.user_and_enforce_permissions(&[UserPermission::ManageLibrary])?;
 
@@ -1353,7 +1353,7 @@ pub struct CreateLibrary {
 /// Create a new library. Will queue a ScannerJob to scan the library, and return the library
 #[tracing::instrument(skip(ctx, req))]
 async fn create_library(
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	State(ctx): State<AppState>,
 	Json(input): Json<CreateLibrary>,
 ) -> APIResult<Json<Library>> {
@@ -1586,7 +1586,7 @@ pub struct UpdateLibrary {
 )]
 /// Update a library by id, if the current user is a SERVER_OWNER.
 async fn update_library(
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	State(ctx): State<AppState>,
 	Path(id): Path<String>,
 	Json(input): Json<UpdateLibrary>,
@@ -1819,7 +1819,7 @@ async fn update_library(
 )]
 /// Delete a library by id
 async fn delete_library(
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 ) -> APIResult<Json<String>> {
@@ -1879,7 +1879,7 @@ async fn get_library_stats(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	Query(params): Query<LibraryStatsParams>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<LibraryStats>> {
 	let user = req.user();
 	let db = &ctx.db;
@@ -1956,7 +1956,7 @@ async fn get_library_stats(
 async fn start_media_analysis(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<()> {
 	req.enforce_permissions(&[UserPermission::ManageLibrary])?;
 

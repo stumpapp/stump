@@ -29,7 +29,7 @@ use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
 	filter::chain_optional_iter,
-	middleware::auth::RequestContext,
+	middleware::auth::AuthContext,
 	routers::api::filters::{
 		apply_media_age_restriction, apply_media_library_not_hidden_for_user_filter,
 	},
@@ -122,7 +122,7 @@ pub(crate) async fn get_media_thumbnail(
 pub(crate) async fn get_media_thumbnail_handler(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<ImageResponse> {
 	let db = &ctx.db;
 	get_media_thumbnail_by_id(id, db, req.user(), &ctx.config)
@@ -148,7 +148,7 @@ pub(crate) async fn get_media_thumbnail_handler(
 pub(crate) async fn patch_media_thumbnail(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	Json(body): Json<PatchMediaThumbnail>,
 ) -> APIResult<ImageResponse> {
 	let user = req.user_and_enforce_permissions(&[UserPermission::ManageLibrary])?;
@@ -248,7 +248,7 @@ pub(crate) async fn patch_media_thumbnail(
 pub(crate) async fn replace_media_thumbnail(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	mut upload: Multipart,
 ) -> APIResult<ImageResponse> {
 	let user = req.user_and_enforce_permissions(&[

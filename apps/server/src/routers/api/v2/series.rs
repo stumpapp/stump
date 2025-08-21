@@ -4,7 +4,7 @@ use axum::{
 	routing::get,
 	Extension, Router,
 };
-use graphql::data::RequestContext;
+use graphql::data::AuthContext;
 use models::{
 	entity::{library_config, media, series},
 	shared::image_processor_options::SupportedImageFormat,
@@ -56,7 +56,7 @@ pub(crate) async fn get_series_thumbnail(
 async fn get_series_thumbnail_handler(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<ImageResponse> {
 	let user = req.user();
 	let series = series::Entity::find_for_user(&user)

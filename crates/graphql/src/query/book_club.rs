@@ -2,7 +2,7 @@ use async_graphql::{Context, Object, Result, ID};
 use models::entity::book_club;
 
 use crate::{
-	data::{CoreContext, RequestContext},
+	data::{AuthContext, CoreContext},
 	object::book_club::BookClub,
 };
 
@@ -16,7 +16,7 @@ impl BookClubQuery {
 		ctx: &Context<'_>,
 		#[graphql(default)] all: Option<bool>,
 	) -> Result<Vec<BookClub>> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let models = book_club::Entity::find_all_for_user(all.unwrap_or(false), user)
@@ -31,7 +31,7 @@ impl BookClubQuery {
 		ctx: &Context<'_>,
 		id: ID,
 	) -> Result<Option<BookClub>> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let model = book_club::Entity::find_by_id_and_user(id.as_ref(), user)

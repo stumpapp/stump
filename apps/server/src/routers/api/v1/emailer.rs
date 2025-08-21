@@ -26,7 +26,7 @@ use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
 	filter::{chain_optional_iter, MediaFilter},
-	middleware::auth::{auth_middleware, RequestContext},
+	middleware::auth::{auth_middleware, AuthContext},
 	routers::api::filters::apply_media_filters_for_user,
 };
 
@@ -91,7 +91,7 @@ pub struct EmailerIncludeParams {
 async fn get_emailers(
 	State(ctx): State<AppState>,
 	QsQuery(include_params): QsQuery<EmailerIncludeParams>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<Vec<SMTPEmailer>>> {
 	req.enforce_permissions(&[UserPermission::EmailerRead])?;
 
@@ -132,7 +132,7 @@ async fn get_emailers(
 async fn get_emailer_by_id(
 	State(ctx): State<AppState>,
 	Path(id): Path<i32>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<SMTPEmailer>> {
 	req.enforce_permissions(&[UserPermission::EmailerRead])?;
 
@@ -175,7 +175,7 @@ pub struct CreateOrUpdateEmailer {
 )]
 async fn create_emailer(
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	Json(payload): Json<CreateOrUpdateEmailer>,
 ) -> APIResult<Json<SMTPEmailer>> {
 	req.enforce_permissions(&[UserPermission::EmailerCreate])?;
@@ -229,7 +229,7 @@ async fn create_emailer(
 async fn update_emailer(
 	State(ctx): State<AppState>,
 	Path(id): Path<i32>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	Json(payload): Json<CreateOrUpdateEmailer>,
 ) -> APIResult<Json<SMTPEmailer>> {
 	req.enforce_permissions(&[UserPermission::EmailerManage])?;
@@ -288,7 +288,7 @@ async fn update_emailer(
 // async fn patch_emailer(
 // 	State(ctx): State<AppState>,
 // 	Path(id): Path<i32>,
-// 	Extension(req): Extension<RequestContext>,
+// 	Extension(req): Extension<AuthContext>,
 // 	Json(payload): Json<PatchEmailer>,
 // ) -> APIResult<Json<SMTPEmailer>> {
 // 	// enforce_session_permissions(&session, &[UserPermission::ManageNotifier])?;
@@ -318,7 +318,7 @@ async fn update_emailer(
 async fn delete_emailer(
 	State(ctx): State<AppState>,
 	Path(id): Path<i32>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<SMTPEmailer>> {
 	req.enforce_permissions(&[UserPermission::EmailerManage])?;
 
@@ -357,7 +357,7 @@ async fn get_emailer_send_history(
 	State(ctx): State<AppState>,
 	Path(emailer_id): Path<i32>,
 	QsQuery(include_params): QsQuery<EmailerSendRecordIncludeParams>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<Vec<EmailerSendRecord>>> {
 	tracing::trace!(?emailer_id, ?include_params, "get_emailer_send_history");
 	req.enforce_permissions(&[UserPermission::EmailerRead])?;
@@ -447,7 +447,7 @@ async fn get_and_validate_recipients(
 
 async fn send_attachment_email(
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	Json(payload): Json<SendAttachmentEmailsPayload>,
 ) -> APIResult<Json<SendAttachmentEmailResponse>> {
 	let by_user = req.user_and_enforce_permissions(&chain_optional_iter(
@@ -646,7 +646,7 @@ async fn send_attachment_email(
 )]
 async fn get_email_devices(
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<Vec<RegisteredEmailDevice>>> {
 	req.enforce_permissions(&[UserPermission::EmailSend])?;
 
@@ -685,7 +685,7 @@ async fn get_email_devices(
 async fn get_email_device_by_id(
 	State(ctx): State<AppState>,
 	Path(id): Path<i32>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<RegisteredEmailDevice>> {
 	req.enforce_permissions(&[UserPermission::EmailSend])?;
 
@@ -726,7 +726,7 @@ pub struct CreateOrUpdateEmailDevice {
 )]
 async fn create_email_device(
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	Json(payload): Json<CreateOrUpdateEmailDevice>,
 ) -> APIResult<Json<RegisteredEmailDevice>> {
 	req.enforce_permissions(&[UserPermission::EmailerManage])?;
@@ -765,7 +765,7 @@ async fn create_email_device(
 async fn update_email_device(
 	State(ctx): State<AppState>,
 	Path(id): Path<i32>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	Json(payload): Json<CreateOrUpdateEmailDevice>,
 ) -> APIResult<Json<RegisteredEmailDevice>> {
 	req.enforce_permissions(&[UserPermission::EmailerManage])?;
@@ -817,7 +817,7 @@ pub struct PatchEmailDevice {
 async fn patch_email_device(
 	State(ctx): State<AppState>,
 	Path(id): Path<i32>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	Json(payload): Json<PatchEmailDevice>,
 ) -> APIResult<Json<RegisteredEmailDevice>> {
 	req.enforce_permissions(&[UserPermission::EmailerManage])?;
@@ -864,7 +864,7 @@ async fn patch_email_device(
 async fn delete_email_device(
 	State(ctx): State<AppState>,
 	Path(id): Path<i32>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<RegisteredEmailDevice>> {
 	req.enforce_permissions(&[UserPermission::EmailerManage])?;
 

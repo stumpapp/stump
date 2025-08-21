@@ -1,5 +1,5 @@
 use crate::{
-	data::{CoreContext, RequestContext},
+	data::{AuthContext, CoreContext},
 	guard::PermissionGuard,
 	input::emailer::{EmailerInput, EmailerSendTo, SendAttachmentEmailsInput},
 	object::emailer::Emailer,
@@ -75,7 +75,7 @@ impl EmailerMutation {
 		input: SendAttachmentEmailsInput,
 	) -> Result<SendAttachmentEmailOutput> {
 		let core_ctx = ctx.data::<CoreContext>()?;
-		let req_ctx = ctx.data::<RequestContext>()?;
+		let req_ctx = ctx.data::<AuthContext>()?;
 		let conn = core_ctx.conn.as_ref();
 		let encryption_key = core_ctx.get_encryption_key().await?;
 		let templates_dir = core_ctx.config.get_templates_dir();
@@ -98,7 +98,7 @@ impl EmailerMutation {
 }
 
 fn validate_send_permissions(
-	req_ctx: &RequestContext,
+	req_ctx: &AuthContext,
 	send_to: &Vec<EmailerSendTo>,
 ) -> Result<()> {
 	let is_sending_to_anonymous = send_to

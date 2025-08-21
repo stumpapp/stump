@@ -8,7 +8,7 @@ use axum::{
 };
 use axum_extra::{headers::UserAgent, TypedHeader};
 use chrono::{DateTime, Duration, FixedOffset, Utc};
-use graphql::data::RequestContext;
+use graphql::data::AuthContext;
 use models::entity::{
 	session,
 	user::{self, AuthUser, LoginUser},
@@ -59,7 +59,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	)
 }
 
-async fn viewer(Extension(req): Extension<RequestContext>) -> APIResult<Json<AuthUser>> {
+async fn viewer(Extension(req): Extension<AuthContext>) -> APIResult<Json<AuthUser>> {
 	Ok(Json(req.user()))
 }
 

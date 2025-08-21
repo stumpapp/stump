@@ -1,5 +1,5 @@
 use crate::{
-	data::{CoreContext, RequestContext},
+	data::{AuthContext, CoreContext},
 	guard::PermissionGuard,
 	object::smart_list_view::SmartListView,
 };
@@ -13,7 +13,7 @@ pub struct SmartListViewQuery;
 impl SmartListViewQuery {
 	#[graphql(guard = "PermissionGuard::one(UserPermission::AccessSmartList)")]
 	async fn smart_list_views(self, ctx: &Context<'_>) -> Result<Vec<SmartListView>> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let smart_list_views = smart_list_view::Entity::find_by_user(user)

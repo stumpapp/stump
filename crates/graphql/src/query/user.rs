@@ -3,7 +3,7 @@ use models::{entity::user, entity::user_login_activity, shared::enums::UserPermi
 use sea_orm::{prelude::*, QueryOrder, QuerySelect};
 
 use crate::{
-	data::{CoreContext, RequestContext},
+	data::{AuthContext, CoreContext},
 	guard::{PermissionGuard, SelfGuard, ServerOwnerGuard},
 	object::{user::User, user_login_activity::UserLoginActivity},
 	pagination::{
@@ -18,7 +18,7 @@ pub struct UserQuery;
 #[Object]
 impl UserQuery {
 	async fn me(&self, ctx: &Context<'_>) -> Result<User> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let first = user::Entity::find()

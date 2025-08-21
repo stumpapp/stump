@@ -9,7 +9,7 @@ use axum::{
 	Extension, Json,
 };
 use base64::{engine::general_purpose::STANDARD, Engine};
-use graphql::data::RequestContext;
+use graphql::data::AuthContext;
 use models::{
 	entity::{
 		api_key::{self, APIKeyWithUser},
@@ -92,7 +92,7 @@ pub async fn auth_middleware(
 		})?;
 
 	if let Some(user) = session_user {
-		req.extensions_mut().insert(RequestContext {
+		req.extensions_mut().insert(AuthContext {
 			user,
 			api_key: None,
 		});
@@ -207,7 +207,7 @@ pub async fn api_key_middleware(
 		.await
 		.map_err(|e| e.into_response())?;
 
-	req.extensions_mut().insert(RequestContext {
+	req.extensions_mut().insert(AuthContext {
 		user,
 		api_key: Some(api_key),
 	});
@@ -220,7 +220,7 @@ pub async fn api_key_middleware(
 #[tracing::instrument(skip(req, next))]
 pub async fn permission_middleware(
 	State(permissions): State<Vec<UserPermission>>,
-	Extension(ctx): Extension<RequestContext>,
+	Extension(ctx): Extension<AuthContext>,
 	req: Request,
 	next: Next,
 ) -> Result<Response, Response> {
@@ -236,7 +236,7 @@ pub async fn permission_middleware(
 /// middleware will reject the request.
 #[tracing::instrument(skip(req, next))]
 pub async fn server_owner_middleware(
-	Extension(ctx): Extension<RequestContext>,
+	Extension(ctx): Extension<AuthContext>,
 	req: Request,
 	next: Next,
 ) -> Result<Response, Response> {
@@ -320,12 +320,12 @@ pub async fn validate_api_key(
 async fn handle_bearer_auth(
 	token: String,
 	conn: &DatabaseConnection,
-) -> APIResult<RequestContext> {
+) -> APIResult<AuthContext> {
 	match PrefixedApiKey::from_string(token.as_str()) {
 		Ok(api_key) if api_key.prefix() == API_KEY_PREFIX => {
 			return validate_api_key(api_key, conn)
 				.await
-				.map(|user| RequestContext {
+				.map(|user| AuthContext {
 					user,
 					api_key: Some(token),
 				});
@@ -356,7 +356,7 @@ async fn handle_bearer_auth(
 		));
 	}
 
-	Ok(RequestContext {
+	Ok(AuthContext {
 		user: AuthUser::from(user),
 		api_key: None,
 	})
@@ -373,7 +373,7 @@ async fn handle_basic_auth(
 	conn: &DatabaseConnection,
 	session: &mut Session,
 	save_session: bool,
-) -> APIResult<RequestContext> {
+) -> APIResult<AuthContext> {
 	let decoded_bytes = STANDARD
 		.decode(encoded_credentials.as_bytes())
 		.map_err(|e| APIError::InternalServerError(e.to_string()))?;
@@ -417,7 +417,7 @@ async fn handle_basic_auth(
 			.await?;
 	}
 
-	Ok(RequestContext {
+	Ok(AuthContext {
 		user: AuthUser::from(user.clone()),
 		api_key: None,
 	})
@@ -533,7 +533,7 @@ mod tests {
 	#[test]
 	fn test_request_context_user() {
 		let user = AuthUser::default();
-		let request_context = RequestContext {
+		let request_context = AuthContext {
 			user: user.clone(),
 			api_key: None,
 		};
@@ -543,7 +543,7 @@ mod tests {
 	#[test]
 	fn test_request_context_id() {
 		let user = AuthUser::default();
-		let request_context = RequestContext {
+		let request_context = AuthContext {
 			user: user.clone(),
 			api_key: None,
 		};
@@ -556,7 +556,7 @@ mod tests {
 			is_server_owner: true,
 			..Default::default()
 		};
-		let request_context = RequestContext {
+		let request_context = AuthContext {
 			user: user.clone(),
 			api_key: None,
 		};
@@ -571,7 +571,7 @@ mod tests {
 			permissions: vec![UserPermission::AccessBookClub],
 			..Default::default()
 		};
-		let request_context = RequestContext {
+		let request_context = AuthContext {
 			user: user.clone(),
 			api_key: None,
 		};
@@ -583,7 +583,7 @@ mod tests {
 	#[test]
 	fn test_request_context_enforce_permissions_when_denied() {
 		let user = AuthUser::default();
-		let request_context = RequestContext {
+		let request_context = AuthContext {
 			user: user.clone(),
 			api_key: None,
 		};
@@ -598,7 +598,7 @@ mod tests {
 			permissions: vec![UserPermission::AccessBookClub],
 			..Default::default()
 		};
-		let request_context = RequestContext {
+		let request_context = AuthContext {
 			user: user.clone(),
 			api_key: None,
 		};
@@ -616,7 +616,7 @@ mod tests {
 			permissions: vec![UserPermission::AccessBookClub],
 			..Default::default()
 		};
-		let request_context = RequestContext {
+		let request_context = AuthContext {
 			user: user.clone(),
 			api_key: None,
 		};
@@ -628,7 +628,7 @@ mod tests {
 	#[test]
 	fn test_request_context_user_and_enforce_permissions_when_denied() {
 		let user = AuthUser::default();
-		let request_context = RequestContext {
+		let request_context = AuthContext {
 			user: user.clone(),
 			api_key: None,
 		};
@@ -643,7 +643,7 @@ mod tests {
 			is_server_owner: true,
 			..Default::default()
 		};
-		let request_context = RequestContext {
+		let request_context = AuthContext {
 			user: user.clone(),
 			api_key: None,
 		};
@@ -653,7 +653,7 @@ mod tests {
 	#[test]
 	fn test_request_context_enforce_server_owner_when_not_server_owner() {
 		let user = AuthUser::default();
-		let request_context = RequestContext {
+		let request_context = AuthContext {
 			user: user.clone(),
 			api_key: None,
 		};
@@ -724,7 +724,7 @@ mod tests {
 	// 	let router = Router::new()
 	// 		.route(
 	// 			"/test",
-	// 			get(|Extension(_): Extension<RequestContext>| async { "Hello, world!" }),
+	// 			get(|Extension(_): Extension<AuthContext>| async { "Hello, world!" }),
 	// 		)
 	// 		.route("/opds/v1.2", get(|| async { "Hello, OPDS v1.2!" }))
 	// 		.route("/opds/v2.0", get(|| async { "Hello, OPDS v2.0!" }))

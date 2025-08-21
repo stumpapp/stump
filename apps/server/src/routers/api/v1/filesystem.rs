@@ -19,7 +19,7 @@ use tracing::trace;
 use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
-	middleware::auth::{auth_middleware, RequestContext},
+	middleware::auth::{auth_middleware, AuthContext},
 };
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
@@ -48,7 +48,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 )]
 pub async fn list_directory(
 	pagination: Query<PageQuery>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	Json(input): Json<Option<DirectoryListingInput>>,
 ) -> APIResult<Json<Pageable<DirectoryListing>>> {
 	req.enforce_permissions(&[UserPermission::FileExplorer])?;

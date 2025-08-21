@@ -5,7 +5,7 @@ use models::entity::{reading_list, user::AuthUser};
 use sea_orm::prelude::*;
 
 use crate::{
-	data::{CoreContext, RequestContext},
+	data::{AuthContext, CoreContext},
 	object::reading_list::ReadingList,
 	pagination::{PaginatedResponse, Pagination, PaginationValidator},
 };
@@ -26,7 +26,7 @@ impl ReadingListQuery {
 		#[graphql(default, validator(custom = "PaginationValidator"))]
 		pagination: Pagination,
 	) -> Result<PaginatedResponse<ReadingList>> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 		get_paginated_reading_list(user, conn, pagination).await
 	}
@@ -36,7 +36,7 @@ impl ReadingListQuery {
 	/// # Returns
 	/// A reading list with the given ID. If no reading list with this ID exists for the current user, an error will be returned.
 	async fn reading_list_by_id(&self, ctx: &Context<'_>, id: ID) -> Result<ReadingList> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let query = reading_list::Entity::find_for_user_and_id(user, 1, id.as_ref())

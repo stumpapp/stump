@@ -25,7 +25,7 @@ use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
 	filter::{chain_optional_iter, LogFilter},
-	middleware::auth::{auth_middleware, RequestContext},
+	middleware::auth::{auth_middleware, AuthContext},
 	routers::sse::stream_shutdown_guard,
 };
 
@@ -70,7 +70,7 @@ async fn get_logs(
 	filters: QsQuery<LogFilter>,
 	order: QsQuery<QueryOrder>,
 	pagination: QsQuery<PaginationQuery>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<Pageable<Vec<Log>>>> {
 	req.enforce_permissions(&[UserPermission::ManageServer])?;
 
@@ -153,7 +153,7 @@ async fn get_logs(
 async fn delete_logs(
 	State(ctx): State<AppState>,
 	filters: QsQuery<LogFilter>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<()> {
 	req.enforce_permissions(&[UserPermission::ManageServer])?;
 
@@ -167,7 +167,7 @@ async fn delete_logs(
 
 async fn tail_log_file(
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Sse<impl Stream<Item = Result<Event, APIError>>>> {
 	req.enforce_permissions(&[UserPermission::ManageServer])?;
 
@@ -206,7 +206,7 @@ async fn tail_log_file(
 /// Get information about the Stump log file, located at STUMP_CONFIG_DIR/Stump.log, or
 /// ~/.stump/Stump.log by default. Information such as the file size, last modified date, etc.
 async fn get_logfile_info(
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	State(ctx): State<AppState>,
 ) -> APIResult<Json<LogMetadata>> {
 	req.enforce_permissions(&[UserPermission::ManageServer])?;
@@ -243,7 +243,7 @@ async fn get_logfile_info(
 // this route *WILL* delete all of the file contents.
 // #[delete("/logs")]
 async fn delete_log_file(
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	State(ctx): State<AppState>,
 ) -> APIResult<()> {
 	req.enforce_permissions(&[UserPermission::ManageServer])?;

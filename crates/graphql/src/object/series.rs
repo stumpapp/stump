@@ -20,7 +20,7 @@ use sea_orm::{
 };
 
 use crate::{
-	data::{CoreContext, RequestContext, ServiceContext},
+	data::{AuthContext, CoreContext, ServiceContext},
 	loader::{
 		favorite::{FavoriteSeriesLoaderKey, FavoritesLoader},
 		series_count::SeriesCountLoader,
@@ -50,7 +50,7 @@ impl From<series::ModelWithMetadata> for Series {
 #[ComplexObject]
 impl Series {
 	async fn is_favorite(&self, ctx: &Context<'_>) -> Result<bool> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let loader = ctx.data::<DataLoader<FavoritesLoader>>()?;
 
 		let is_favorite = loader
@@ -91,7 +91,7 @@ impl Series {
 	}
 
 	async fn media(&self, ctx: &Context<'_>) -> Result<Vec<Media>> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let models = media::ModelWithMetadata::find_for_user(user)
@@ -151,7 +151,7 @@ impl Series {
 		#[graphql(default = 1, validator(minimum = 1))] take: u64,
 		cursor: Option<String>,
 	) -> Result<Vec<Media>> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let user_id = user.id.clone();
@@ -253,7 +253,7 @@ impl Series {
 	}
 
 	async fn read_count(&self, ctx: &Context<'_>) -> Result<i64> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let finished_loader = ctx.data::<DataLoader<SeriesFinishedCountLoader>>()?;
 		let finished_count = finished_loader
 			.load_one(FinishedCountLoaderKey {
@@ -311,7 +311,7 @@ impl Series {
 }
 
 async fn get_series_progress(ctx: &Context<'_>, series_id: String) -> Result<(i64, i64)> {
-	let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+	let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 
 	let loader = ctx.data::<DataLoader<SeriesCountLoader>>()?;
 	let media_count = loader.load_one(series_id.clone()).await?.unwrap_or(0i64);

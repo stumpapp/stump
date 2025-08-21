@@ -1,4 +1,4 @@
-use crate::{data::RequestContext, schema::add_data_loaders};
+use crate::{data::AuthContext, schema::add_data_loaders};
 use async_graphql::{EmptyMutation, EmptySubscription, ObjectType, Request, Schema};
 use chrono::{DateTime, Duration, Utc};
 use models::entity::user::AuthUser;
@@ -39,7 +39,7 @@ pub async fn get_graphql_query_response<QueryType: ObjectType + 'static>(
 	user: AuthUser,
 ) -> String {
 	let core_ctx = Arc::new(Ctx::mock_sea(db));
-	let req_ctx = RequestContext {
+	let req_ctx = AuthContext {
 		user: user.clone(),
 		api_key: None,
 	};

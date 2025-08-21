@@ -2,7 +2,7 @@ use async_graphql::{Context, Guard, Result};
 use models::shared::enums::UserPermission;
 
 use crate::{
-	data::{CoreContext, RequestContext},
+	data::{AuthContext, CoreContext},
 	error_message,
 };
 
@@ -11,7 +11,7 @@ pub struct ServerOwnerGuard;
 
 impl Guard for ServerOwnerGuard {
 	async fn check(&self, ctx: &Context<'_>) -> Result<()> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 
 		if user.is_server_owner {
 			Ok(())
@@ -38,7 +38,7 @@ impl SelfGuard {
 
 impl Guard for SelfGuard {
 	async fn check(&self, ctx: &Context<'_>) -> Result<()> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 
 		if user.id == self.user_id {
 			Ok(())
@@ -70,7 +70,7 @@ impl PermissionGuard {
 
 impl Guard for PermissionGuard {
 	async fn check(&self, ctx: &Context<'_>) -> Result<()> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 
 		if user.is_server_owner {
 			return Ok(());

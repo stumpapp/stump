@@ -13,7 +13,7 @@ use sea_orm::{
 };
 
 use crate::{
-	data::{CoreContext, RequestContext},
+	data::{AuthContext, CoreContext},
 	filter::{series::SeriesFilterInput, IntoFilter},
 	object::series::Series,
 	order::SeriesOrderBy,
@@ -38,7 +38,7 @@ impl SeriesQuery {
 		#[graphql(default, validator(custom = "PaginationValidator"))]
 		pagination: Pagination,
 	) -> Result<PaginatedResponse<Series>> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let conditions = filter.into_filter();
@@ -116,7 +116,7 @@ impl SeriesQuery {
 	}
 
 	async fn series_by_id(&self, ctx: &Context<'_>, id: ID) -> Result<Option<Series>> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 		let model = series::ModelWithMetadata::find_for_user(user)
 			.filter(series::Column::Id.eq(id.to_string()))
@@ -161,7 +161,7 @@ impl SeriesQuery {
 	}
 
 	async fn number_of_series(&self, ctx: &Context<'_>) -> Result<u64> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 		let count = series::Entity::find_for_user(user).count(conn).await?;
 		Ok(count)
@@ -173,7 +173,7 @@ impl SeriesQuery {
 		#[graphql(default, validator(custom = "PaginationValidator"))]
 		pagination: Pagination,
 	) -> Result<PaginatedResponse<Series>> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let query = series::ModelWithMetadata::find_for_user(user);

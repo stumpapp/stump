@@ -1,5 +1,5 @@
 use crate::{
-	data::{CoreContext, RequestContext},
+	data::{AuthContext, CoreContext},
 	input::epub::{BookmarkInput, EpubProgressInput},
 	object::{
 		bookmark::Bookmark,
@@ -122,7 +122,7 @@ impl EpubMutation {
 		id: ID,
 		input: EpubProgressInput,
 	) -> Result<ReadingProgressOutput> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 
 		let is_complete = input
 			.is_complete
@@ -143,7 +143,7 @@ impl EpubMutation {
 		ctx: &Context<'_>,
 		input: BookmarkInput,
 	) -> Result<Bookmark> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let bookmark = input.into_active_model(user);
@@ -172,7 +172,7 @@ impl EpubMutation {
 		ctx: &Context<'_>,
 		epubcfi: String,
 	) -> Result<Bookmark> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let bookmark = bookmark::Entity::find_for_user(user)

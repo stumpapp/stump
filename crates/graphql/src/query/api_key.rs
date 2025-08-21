@@ -3,7 +3,7 @@ use models::{entity::api_key, shared::enums::UserPermission};
 use sea_orm::prelude::*;
 
 use crate::{
-	data::{CoreContext, RequestContext},
+	data::{AuthContext, CoreContext},
 	guard::PermissionGuard,
 	object::api_key::APIKey,
 };
@@ -15,7 +15,7 @@ pub struct APIKeyQuery;
 impl APIKeyQuery {
 	#[graphql(guard = "PermissionGuard::one(UserPermission::AccessAPIKeys)")]
 	async fn api_keys(&self, ctx: &Context<'_>) -> Result<Vec<APIKey>> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let api_keys = api_key::Entity::find_for_user(user)
@@ -28,7 +28,7 @@ impl APIKeyQuery {
 
 	#[graphql(guard = "PermissionGuard::one(UserPermission::AccessAPIKeys)")]
 	async fn api_key_by_id(&self, ctx: &Context<'_>, id: i32) -> Result<APIKey> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let api_key = api_key::Entity::find_for_user(user)

@@ -17,7 +17,7 @@ use sea_orm::{
 };
 
 use crate::{
-	data::{CoreContext, RequestContext},
+	data::{AuthContext, CoreContext},
 	object::library::Library,
 	pagination::{
 		CursorPaginationInfo, OffsetPaginationInfo, PaginatedResponse, Pagination,
@@ -48,7 +48,7 @@ impl LibraryQuery {
 		pagination: Pagination,
 		search: Option<String>,
 	) -> Result<PaginatedResponse<Library>> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let query = LibraryModelOrderBy::add_order_by(
@@ -122,7 +122,7 @@ impl LibraryQuery {
 	}
 
 	async fn library_by_id(&self, ctx: &Context<'_>, id: ID) -> Result<Option<Library>> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let model = library::Entity::find_for_user(user)
@@ -169,7 +169,7 @@ impl LibraryQuery {
 	}
 
 	async fn number_of_libraries(&self, ctx: &Context<'_>) -> Result<u64> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let count = library::Entity::find_for_user(user).count(conn).await?;
@@ -178,7 +178,7 @@ impl LibraryQuery {
 	}
 
 	async fn last_visited_library(&self, ctx: &Context<'_>) -> Result<Option<Library>> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let last_visited = last_library_visit::Entity::find()

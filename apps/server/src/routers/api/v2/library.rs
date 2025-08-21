@@ -10,7 +10,7 @@ use axum::{
 	routing::get,
 	Extension, Router,
 };
-use graphql::data::RequestContext;
+use graphql::data::AuthContext;
 use models::{
 	entity::{
 		library, library_config, media,
@@ -70,7 +70,7 @@ pub(crate) async fn get_library_thumbnail(
 async fn get_library_thumbnail_handler(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<ImageResponse> {
 	let user = req.user();
 	let (library, library_config) = library::Entity::find_for_user(&user)

@@ -1,5 +1,5 @@
 use super::{book_club_member::BookClubMember, book_club_schedule::BookClubSchedule};
-use crate::data::{CoreContext, RequestContext};
+use crate::data::{AuthContext, CoreContext};
 use crate::object::book_club_invitation::BookClubInvitation;
 use async_graphql::{ComplexObject, Context, Result, SimpleObject};
 use models::entity::{
@@ -56,7 +56,7 @@ impl BookClub {
 	}
 
 	async fn members(&self, ctx: &Context<'_>) -> Result<Vec<BookClubMember>> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 		let book_club_members =
 			book_club_member::Entity::find_members_accessible_to_user_for_book_club_id(

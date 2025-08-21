@@ -18,7 +18,7 @@ use stump_core::{
 use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
-	middleware::auth::{auth_middleware, validate_api_key, RequestContext},
+	middleware::auth::{auth_middleware, validate_api_key, AuthContext},
 };
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
@@ -43,7 +43,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 async fn authorize(req: Request, next: Next) -> APIResult<Response> {
 	let ctx = req
 		.extensions()
-		.get::<RequestContext>()
+		.get::<AuthContext>()
 		.ok_or(APIError::Unauthorized)?;
 	ctx.enforce_permissions(&[UserPermission::AccessAPIKeys])?;
 	Ok(next.run(req).await)
@@ -52,7 +52,7 @@ async fn authorize(req: Request, next: Next) -> APIResult<Response> {
 /// Get all API keys for the current user
 async fn get_api_keys(
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<Vec<APIKey>>> {
 	let user = req.user();
 	let client = &ctx.db;
@@ -74,7 +74,7 @@ async fn get_api_keys(
 async fn get_api_key(
 	Path(id): Path<i32>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<APIKey>> {
 	let user = req.user();
 	let client = &ctx.db;
@@ -95,7 +95,7 @@ async fn get_api_key(
 // TODO: perhaps a more meaningful response when it is valid?
 async fn validate_api_key_handler(
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	headers: HeaderMap,
 ) -> APIResult<Json<bool>> {
 	let api_key = headers
@@ -142,7 +142,7 @@ pub struct CreatedAPIKey {
 /// Create a new API key for the current user
 async fn create_api_key(
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	Json(body): Json<CreateOrUpdateAPIKey>,
 ) -> APIResult<Json<CreatedAPIKey>> {
 	let user = req.user();
@@ -184,7 +184,7 @@ async fn create_api_key(
 async fn update_api_key(
 	Path(id): Path<i32>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	Json(body): Json<CreateOrUpdateAPIKey>,
 ) -> APIResult<Json<APIKey>> {
 	let user = req.user();
@@ -233,7 +233,7 @@ async fn update_api_key(
 async fn delete_api_key(
 	Path(id): Path<i32>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<()> {
 	let user = req.user();
 	let client = &ctx.db;
@@ -261,7 +261,7 @@ async fn delete_api_key(
 /// existing pek and hash and create a new one.
 async fn regenerate_api_key_secret(
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	Path(id): Path<i32>,
 ) -> APIResult<Json<CreatedAPIKey>> {
 	let user = req.user();

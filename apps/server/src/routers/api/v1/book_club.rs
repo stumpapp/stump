@@ -33,7 +33,7 @@ use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
 	filter::chain_optional_iter,
-	middleware::auth::{auth_middleware, permission_middleware, RequestContext},
+	middleware::auth::{auth_middleware, permission_middleware, AuthContext},
 	utils::{safe_string_to_date, string_to_date},
 };
 
@@ -175,7 +175,7 @@ pub struct GetBookClubsParams {
 async fn get_book_clubs(
 	State(ctx): State<AppState>,
 	QsQuery(params): QsQuery<GetBookClubsParams>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<Vec<BookClub>>> {
 	let client = &ctx.db;
 	let viewer = req.user();
@@ -227,7 +227,7 @@ pub struct CreateBookClub {
 #[tracing::instrument(err, skip(ctx, req))]
 async fn create_book_club(
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	Json(payload): Json<CreateBookClub>,
 ) -> APIResult<Json<BookClub>> {
 	let db = &ctx.db;
@@ -287,7 +287,7 @@ async fn create_book_club(
 async fn get_book_club(
 	State(ctx): State<AppState>,
 	Path(id): Path<String>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<BookClub>> {
 	let client = &ctx.db;
 	let viewer = req.user();
@@ -335,7 +335,7 @@ pub struct UpdateBookClub {
 async fn update_book_club(
 	State(ctx): State<AppState>,
 	Path(id): Path<String>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	Json(payload): Json<UpdateBookClub>,
 ) -> APIResult<Json<BookClub>> {
 	let client = &ctx.db;
@@ -398,7 +398,7 @@ pub struct CreateBookClubInvitation {
 async fn create_book_club_invitation(
 	State(ctx): State<AppState>,
 	Path(id): Path<String>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	Json(payload): Json<CreateBookClubInvitation>,
 ) -> APIResult<Json<BookClubInvitation>> {
 	let client = &ctx.db;
@@ -465,7 +465,7 @@ async fn create_book_club_invitation(
 async fn get_book_club_members(
 	State(ctx): State<AppState>,
 	Path(id): Path<String>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<Vec<BookClubMember>>> {
 	let client = &ctx.db;
 
@@ -540,7 +540,7 @@ pub struct BookClubInvitationAnswer {
 async fn respond_to_book_club_invitation(
 	State(ctx): State<AppState>,
 	Path((id, invitation_id)): Path<(String, String)>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	Json(payload): Json<BookClubInvitationAnswer>,
 ) -> APIResult<Json<Option<BookClubMember>>> {
 	let client = &ctx.db;
@@ -599,7 +599,7 @@ async fn respond_to_book_club_invitation(
 async fn create_book_club_member_handler(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	Json(payload): Json<CreateBookClubMember>,
 ) -> APIResult<Json<BookClubMember>> {
 	req.enforce_server_owner()?;
@@ -622,7 +622,7 @@ async fn create_book_club_member_handler(
 async fn get_book_club_member(
 	State(ctx): State<AppState>,
 	Path((id, member_id)): Path<(String, String)>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<BookClubMember>> {
 	let client = &ctx.db;
 
@@ -667,7 +667,7 @@ pub struct UpdateBookClubMember {
 async fn update_book_club_member(
 	State(ctx): State<AppState>,
 	Path((_id, member_id)): Path<(String, String)>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	Json(payload): Json<UpdateBookClubMember>,
 ) -> APIResult<Json<BookClubMember>> {
 	let client = &ctx.db;
@@ -700,7 +700,7 @@ async fn update_book_club_member(
 async fn delete_book_club_member(
 	State(ctx): State<AppState>,
 	Path((id, member_id)): Path<(String, String)>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<BookClubMember>> {
 	let client = &ctx.db;
 
@@ -803,7 +803,7 @@ pub struct CreateBookClubSchedule {
 async fn create_book_club_schedule(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	Json(payload): Json<CreateBookClubSchedule>,
 ) -> APIResult<Json<BookClubSchedule>> {
 	let client = &ctx.db;
@@ -915,7 +915,7 @@ async fn create_book_club_schedule(
 async fn get_book_club_schedule(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<BookClubSchedule>> {
 	let client = &ctx.db;
 
@@ -953,7 +953,7 @@ pub struct AddBooksToBookClubSchedule {
 async fn add_books_to_book_club_schedule(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	Json(payload): Json<AddBooksToBookClubSchedule>,
 ) -> APIResult<Json<Vec<BookClubBook>>> {
 	let client = &ctx.db;
@@ -1089,7 +1089,7 @@ async fn add_books_to_book_club_schedule(
 async fn get_book_club_current_book(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<BookClubBook>> {
 	let client = &ctx.db;
 

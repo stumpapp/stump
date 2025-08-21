@@ -20,7 +20,7 @@ use tokio::fs;
 use zip::{read::ZipFile, ZipArchive};
 
 use crate::{
-	data::{CoreContext, RequestContext},
+	data::{AuthContext, CoreContext},
 	guard::{OptionalFeature, OptionalFeatureGuard, PermissionGuard},
 	object::{library::Library, media::Media, series::Series},
 };
@@ -59,7 +59,7 @@ impl UploadMutation {
 		ctx: &Context<'_>,
 		input: UploadBooksInput,
 	) -> Result<bool> {
-		let RequestContext { user, .. } = ctx.data()?;
+		let AuthContext { user, .. } = ctx.data()?;
 		let UploadBooksInput {
 			library_id,
 			place_at,
@@ -110,7 +110,7 @@ impl UploadMutation {
 		ctx: &Context<'_>,
 		input: UploadSeriesInput,
 	) -> Result<bool> {
-		let RequestContext { user, .. } = ctx.data()?;
+		let AuthContext { user, .. } = ctx.data()?;
 		let UploadSeriesInput {
 			library_id,
 			place_at,
@@ -179,7 +179,7 @@ impl UploadMutation {
 		id: ID,
 		file: Upload,
 	) -> Result<Library> {
-		let RequestContext { user, .. } = ctx.data()?;
+		let AuthContext { user, .. } = ctx.data()?;
 		let core = ctx.data::<CoreContext>()?;
 		let conn = core.conn.as_ref();
 
@@ -233,7 +233,7 @@ impl UploadMutation {
 		id: ID,
 		file: Upload,
 	) -> Result<Series> {
-		let RequestContext { user, .. } = ctx.data()?;
+		let AuthContext { user, .. } = ctx.data()?;
 		let core = ctx.data::<CoreContext>()?;
 		let conn = core.conn.as_ref();
 
@@ -291,7 +291,7 @@ impl UploadMutation {
 		id: ID,
 		file: Upload,
 	) -> Result<Media> {
-		let RequestContext { user, .. } = ctx.data()?;
+		let AuthContext { user, .. } = ctx.data()?;
 		let core = ctx.data::<CoreContext>()?;
 
 		let book = media::ModelWithMetadata::find_for_user(user)

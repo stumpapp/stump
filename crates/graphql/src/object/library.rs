@@ -20,7 +20,7 @@ use sea_orm::{
 };
 
 use crate::{
-	data::{CoreContext, RequestContext, ServiceContext},
+	data::{AuthContext, CoreContext, ServiceContext},
 	guard::PermissionGuard,
 	loader::favorite::{FavoriteLibraryLoaderKey, FavoritesLoader},
 	object::library_scan_record::LibraryScanRecord,
@@ -81,7 +81,7 @@ impl Library {
 	}
 
 	async fn is_favorite(&self, ctx: &Context<'_>) -> Result<bool> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let loader = ctx.data::<DataLoader<FavoritesLoader>>()?;
 
 		let is_favorite = loader
@@ -210,7 +210,7 @@ impl Library {
 		ctx: &Context<'_>,
 		all_users: Option<bool>,
 	) -> Result<LibraryStats> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let result = conn

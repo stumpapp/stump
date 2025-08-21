@@ -56,7 +56,7 @@ use crate::{
 		chain_optional_iter, FilterableQuery, FilterableSeriesQuery, SeriesFilter,
 		SeriesQueryRelation,
 	},
-	middleware::auth::{auth_middleware, RequestContext},
+	middleware::auth::{auth_middleware, AuthContext},
 	routers::api::{
 		filters::{
 			apply_media_age_restriction, apply_series_age_restriction,
@@ -124,7 +124,7 @@ async fn get_series(
 	pagination_query: Query<PaginationQuery>,
 	relation_query: Query<SeriesQueryRelation>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<Pageable<Vec<Series>>>> {
 	let FilterableQuery { ordering, filters } = filter_query.0.get();
 	let pagination = pagination_query.0.get();
@@ -244,7 +244,7 @@ async fn get_series_by_id(
 	query: Query<SeriesQueryRelation>,
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<Series>> {
 	let db = &ctx.db;
 
@@ -316,7 +316,7 @@ async fn get_series_by_id(
 async fn scan_series(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> Result<(), APIError> {
 	let db = &ctx.db;
 	req.enforce_permissions(&[UserPermission::ScanLibrary])?;
@@ -355,7 +355,7 @@ async fn scan_series(
 async fn get_recently_added_series_handler(
 	State(ctx): State<AppState>,
 	pagination: Query<PageQuery>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<Pageable<Vec<Series>>>> {
 	if pagination.page.is_none() {
 		return Err(APIError::BadRequest(
@@ -422,7 +422,7 @@ pub(crate) async fn get_series_thumbnail(
 async fn get_series_thumbnail_handler(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<ImageResponse> {
 	let db = &ctx.db;
 
@@ -492,7 +492,7 @@ pub struct PatchSeriesThumbnail {
 async fn patch_series_thumbnail(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	Json(body): Json<PatchSeriesThumbnail>,
 ) -> APIResult<ImageResponse> {
 	let user = req.user_and_enforce_permissions(&[UserPermission::ManageLibrary])?;
@@ -605,7 +605,7 @@ async fn patch_series_thumbnail(
 async fn replace_series_thumbnail(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	mut upload: Multipart,
 ) -> APIResult<ImageResponse> {
 	let user = req.user_and_enforce_permissions(&[
@@ -680,7 +680,7 @@ async fn replace_series_thumbnail(
 async fn get_series_media(
 	pagination_query: Query<PaginationQuery>,
 	ordering: Query<QueryOrder>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 ) -> APIResult<Json<Pageable<Vec<Media>>>> {
@@ -805,7 +805,7 @@ async fn get_series_media(
 async fn get_next_in_series(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<Option<Media>>> {
 	let db = &ctx.db;
 	let user = req.user();
@@ -899,7 +899,7 @@ pub struct SeriesIsComplete {
 async fn get_series_is_complete(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<SeriesIsComplete>> {
 	let client = &ctx.db;
 
@@ -980,7 +980,7 @@ async fn put_series_is_complete() -> APIResult<Json<SeriesIsComplete>> {
 async fn start_media_analysis(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<()> {
 	req.enforce_permissions(&[UserPermission::ManageLibrary])?;
 

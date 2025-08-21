@@ -6,7 +6,7 @@ use models::{
 use sea_orm::{prelude::*, IntoActiveModel, TransactionTrait};
 
 use crate::{
-	data::{CoreContext, RequestContext},
+	data::{AuthContext, CoreContext},
 	guard::PermissionGuard,
 	input::book_club::{CreateBookClubInput, UpdateBookClubInput},
 	object::book_club::BookClub,
@@ -23,7 +23,7 @@ impl BookClubMutation {
 		ctx: &Context<'_>,
 		input: CreateBookClubInput,
 	) -> Result<BookClub> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let txn = conn.begin().await?;
@@ -44,7 +44,7 @@ impl BookClubMutation {
 		id: ID,
 		input: UpdateBookClubInput,
 	) -> Result<BookClub> {
-		let RequestContext { user, .. } = ctx.data::<RequestContext>()?;
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let book_club = get_book_club_for_admin(user, &id, conn)

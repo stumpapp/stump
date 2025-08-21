@@ -3375,6 +3375,11 @@ export type SeriesBooksAlphabetQueryVariables = Exact<{
 
 export type SeriesBooksAlphabetQuery = { __typename?: 'Query', seriesById?: { __typename?: 'Series', mediaAlphabet: any } | null };
 
+export type UseCoreEventSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type UseCoreEventSubscription = { __typename?: 'Subscription', readEvents: { __typename: 'CreatedManySeries', count: number, libraryId: string } | { __typename: 'CreatedMedia', id: string, seriesId: string } | { __typename: 'CreatedOrUpdatedManyMedia', count: number, seriesId: string } | { __typename: 'DiscoveredMissingLibrary', id: string } | { __typename: 'JobOutput', id: string, output: { __typename: 'ExternalJobOutput' } | { __typename: 'LibraryScanOutput' } | { __typename: 'SeriesScanOutput' } | { __typename: 'ThumbnailGenerationOutput' } } | { __typename: 'JobStarted', id: string } | { __typename: 'JobUpdate', id: string, status?: JobStatus | null, message?: string | null, completedTasks?: number | null, remainingTasks?: number | null, completedSubtasks?: number | null, totalSubtasks?: number | null } };
+
 export type UsePreferencesMutationVariables = Exact<{
   input: UpdateUserPreferencesInput;
 }>;
@@ -5061,6 +5066,47 @@ export const SeriesBooksAlphabetDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<SeriesBooksAlphabetQuery, SeriesBooksAlphabetQueryVariables>;
+export const UseCoreEventDocument = new TypedDocumentString(`
+    subscription UseCoreEvent {
+  readEvents {
+    __typename
+    ... on CreatedManySeries {
+      count
+      libraryId
+    }
+    ... on CreatedMedia {
+      id
+      seriesId
+    }
+    ... on CreatedOrUpdatedManyMedia {
+      count
+      seriesId
+    }
+    ... on DiscoveredMissingLibrary {
+      id
+    }
+    ... on JobStarted {
+      id
+    }
+    ... on JobUpdate {
+      __typename
+      id
+      status
+      message
+      completedTasks
+      remainingTasks
+      completedSubtasks
+      totalSubtasks
+    }
+    ... on JobOutput {
+      id
+      output {
+        __typename
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<UseCoreEventSubscription, UseCoreEventSubscriptionVariables>;
 export const UsePreferencesDocument = new TypedDocumentString(`
     mutation UsePreferences($input: UpdateUserPreferencesInput!) {
   updateViewerPreferences(input: $input) {

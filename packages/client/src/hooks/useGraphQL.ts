@@ -440,7 +440,7 @@ export const getNextPageParam = (paginationInfo?: PaginationInfo): Pagination | 
 		})
 		.otherwise(() => undefined)
 
-export type UseGraphQLSubscriptionParams<TResult, TVariables> = {
+export type UseGraphQLSubscriptionCacheParams<TResult, TVariables> = {
 	variables?: TVariables extends Record<string, never> ? never : TVariables
 	/**
 	 * An optional function that is called when the data changes to override how the hook
@@ -453,20 +453,20 @@ export type UseGraphQLSubscriptionParams<TResult, TVariables> = {
 	maxCacheSize?: number
 }
 
-export type UseGraphQLSubscriptionReturn<TResult> = [
+export type UseGraphQLSubscriptionCacheReturn<TResult> = [
 	TResult[] | undefined,
 	WebSocket | null,
 	() => void,
 ]
 
-export function useGraphQLSubscription<TResult, TVariables>(
+export function useGraphQLSubscriptionCache<TResult, TVariables>(
 	document: TypedDocumentString<TResult, TVariables>,
 	{
 		variables,
 		onDataChangeCapture,
 		maxCacheSize = 10_000,
-	}: UseGraphQLSubscriptionParams<TResult, TVariables> = {},
-): UseGraphQLSubscriptionReturn<TResult> {
+	}: UseGraphQLSubscriptionCacheParams<TResult, TVariables> = {},
+): UseGraphQLSubscriptionCacheReturn<TResult> {
 	const { sdk } = useSDK()
 	const { onUnauthenticatedResponse, onConnectionWithServerChanged } = useClientContext()
 
@@ -546,4 +546,80 @@ export function useGraphQLSubscription<TResult, TVariables>(
 	}, [socket, sdk, document, variables, events, dispose])
 
 	return [data, socket, dispose] as const
+}
+
+// TODO: Consolidate the socket logic
+// TODO: Add socket lifecycle callback options (e.g., onconnect, onclose, etc)
+
+export type UseGraphQLSubscriptionParams<TResult, TVariables> = {
+	variables?: TVariables extends Record<string, never> ? never : TVariables
+	/**
+	 * An optional function that is called when a new message is received
+	 */
+	onMessage?: (payload: TResult) => void
+}
+
+export type UseGraphQLSubscriptionReturn = [WebSocket | null, () => void]
+
+export function useGraphQLSubscription<TResult, TVariables>(
+	document: TypedDocumentString<TResult, TVariables>,
+	{ variables, onMessage }: UseGraphQLSubscriptionParams<TResult, TVariables> = {},
+): UseGraphQLSubscriptionReturn {
+	const { sdk } = useSDK()
+	const { onUnauthenticatedResponse, onConnectionWithServerChanged } = useClientContext()
+
+	const [socket, setSocket] = useState<WebSocket | null>(null)
+	const [dispose, setDispose] = useState<() => void>(() => () => {})
+
+	const events = useMemo<Partial<GraphQLWebsocketConnectEventHandlers<TResult>>>(
+		() => ({
+			onMessage: (payload) => {
+				onMessage?.(payload)
+			},
+			onError: (error) => {
+				handleError({
+					sdk,
+					error,
+					onUnauthenticatedResponse,
+					onConnectionWithServerChanged,
+				})
+			},
+		}),
+		[sdk, onUnauthenticatedResponse, onConnectionWithServerChanged, onMessage],
+	)
+
+	const didConfigure = useRef(false)
+	/**
+	 * An effect responsible for kicking off the socket connection and managing the
+	 * lifecycle of the socket. It will only run once, and will clean up the socket when
+	 * the component unmounts or when the socket is closed.
+	 */
+	useEffect(() => {
+		if (socket || didConfigure.current) return
+
+		didConfigure.current = true
+		const configureSocket = async () => {
+			const { socket, unsubscribe } = await sdk.connect<TResult, TVariables>(
+				document,
+				variables,
+				events,
+			)
+
+			setSocket(socket)
+			setDispose(() => () => {
+				unsubscribe()
+				socket.close()
+				setSocket(null)
+				didConfigure.current = false
+			})
+		}
+
+		configureSocket()
+
+		return () => {
+			dispose()
+		}
+	}, [socket, sdk, document, variables, events, dispose])
+
+	return [socket, dispose] as const
 }

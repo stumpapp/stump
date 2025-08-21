@@ -21,12 +21,13 @@ impl LogSubscription {
 		}
 
 		async_stream::stream! {
-			if log_file_path.is_none() {
+			let Some(log_file_path) = log_file_path else {
+				tracing::error!("Log file path is not set in the context!");
 				return;
-			}
+			};
 
 			let mut lines = MuxedLines::new()?;
-			lines.add_file(log_file_path.unwrap().as_path()).await?;
+			lines.add_file(log_file_path.as_path()).await?;
 
 			while let Ok(Some(line)) = lines.next_line().await {
 				yield Ok(line.line().to_string());

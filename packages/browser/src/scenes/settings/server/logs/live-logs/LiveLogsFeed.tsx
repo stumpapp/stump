@@ -1,4 +1,4 @@
-import { useGraphQLSubscription } from '@stump/client'
+import { useGraphQLSubscriptionCache } from '@stump/client'
 import { graphql } from '@stump/graphql'
 import { useEffect, useRef } from 'react'
 import stripAnsi from 'strip-ansi'
@@ -13,7 +13,7 @@ const subscription = graphql(`
  * A component that displays a live feed of logs from the server
  */
 export default function LiveLogsFeed() {
-	const [data, , dispose] = useGraphQLSubscription(subscription)
+	const [data, , dispose] = useGraphQLSubscriptionCache(subscription)
 
 	const scrollRef = useRef<HTMLDivElement>(null)
 	const logContainerRef = useRef<HTMLDivElement>(null)

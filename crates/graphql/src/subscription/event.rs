@@ -17,12 +17,12 @@ impl EventSubscription {
 		}
 
 		async_stream::stream! {
-			if client_recv.is_none() {
+			let Some(mut rx) = client_recv else {
+				tracing::error!("Failed to get client receiver from context!");
 				return;
-			}
+			};
 
-			let mut client_recv = client_recv.unwrap();
-			while let Ok(event) = client_recv.recv().await {
+			while let Ok(event) = rx.recv().await {
 				yield Ok(event);
 			}
 		}

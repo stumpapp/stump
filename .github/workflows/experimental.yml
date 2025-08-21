@@ -54,8 +54,5 @@ jobs:
           tags: 'experimental'
           load: ${{ github.event_name == 'pull_request' }}
           push: ${{ github.event_name == 'push' }}
-          # tags: 'unstable'
-          # load: false
-          # push: true
           archs: 'amd64'
           discord-webhook: ${{ secrets.DISCORD_WEBHOOK }}

@@ -56,15 +56,21 @@ export default function IgnoreRulesConfig() {
 		if (!isValidGlob(newRule)) {
 			setNewRuleError(t(getKey('invalidGlob')))
 			return
-		} else {
-			setNewRuleError(undefined)
-			append({
-				glob: newRule,
-				ignore_parents: newRule.startsWith('**/'),
-				ignore_subdirs: newRule.endsWith('/**'),
-			})
-			setNewRule('')
 		}
+
+		const isDuplicate = ignoreRules.some((rule) => rule.glob === newRule)
+		if (isDuplicate) {
+			setNewRuleError(t(getKey('duplicateGlob')))
+			return
+		}
+
+		setNewRuleError(undefined)
+		append({
+			glob: newRule,
+			ignore_parents: newRule.startsWith('**/'),
+			ignore_subdirs: newRule.endsWith('/**'),
+		})
+		setNewRule('')
 	}, [newRule, append, t])
 
 	/**
@@ -94,11 +100,16 @@ export default function IgnoreRulesConfig() {
 		}
 
 		const existingRules = ctx.library.config.ignore_rules
-		const hasChanges = ignoreRules.some((rule) =>
-			existingRules?.every((glob) => glob !== rule.glob),
-		)
+		const newRules = ignoreRules.map((rule) => rule.glob)
 
-		if (!hasChanges) return null
+		/**
+		 * length increased -> added at least one thing -> has changes,
+		 * length decreased -> removed at least one thing -> has changes,
+		 * same length -> check if something has been removed -> if so: has changes, if not: no changes
+		 */
+		const hasChanges =
+			existingRules?.length !== newRules.length ||
+			!existingRules.every((glob) => newRules.includes(glob))
 
 		return (
 			<div>

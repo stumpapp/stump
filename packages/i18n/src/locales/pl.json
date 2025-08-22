@@ -331,6 +331,7 @@
 					}
 				},
 				"invalidGlob": "Nieprawidłowy wzorzec",
+				"duplicateGlob": "Duplicate of an existing rule",
 				"lockConfig": {
 					"lock": "Zablokuj konfigurację",
 					"unlock": "Odblokuj konfigurację"

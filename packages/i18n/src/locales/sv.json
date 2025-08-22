@@ -331,7 +331,7 @@
 					}
 				},
 				"invalidGlob": "Ogiltigt glob-mönster",
-				"duplicateGlob": "Duplicate of an existing rule",
+				"duplicateGlob": "Dubblett av en redan existerande regel",
 				"lockConfig": {
 					"lock": "Lås konfiguration",
 					"unlock": "Lås upp konfiguration"
@@ -366,8 +366,8 @@
 					"description": "Extrahera all metadata från bibliotekets filer och lagra resultaten i databasen"
 				},
 				"watch": {
-					"label": "Watch",
-					"description": "Watch the library directory for changes and update the database accordingly"
+					"label": "Bevaka",
+					"description": "Bevaka biblioteksmappen för förändringar och uppdatera databasen"
 				},
 				"generateFileHashes": {
 					"label": "Generera fil-hashar",
@@ -457,7 +457,7 @@
 					"ignoreRules": "Ignorera regler",
 					"convertRar": "Konvertera RAR/CBR",
 					"deleteConversions": "Radera konverterade filer",
-					"watch": "Watch directory for changes",
+					"watch": "Bevaka mappen för förändringar",
 					"processMetadata": "Behandla metadata",
 					"generateFileHashes": "Generera fil-hashar"
 				}
@@ -1325,8 +1325,8 @@
 							"description": "Typsnittet som används i läsaren"
 						},
 						"lineHeight": {
-							"label": "Line height",
-							"description": "The height of the lines in the reader"
+							"label": "Radavstånd",
+							"description": "Höjden på raderna i läsaren"
 						}
 					}
 				},

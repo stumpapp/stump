@@ -331,6 +331,7 @@
 					}
 				},
 				"invalidGlob": "Ungültige Glob-Regel",
+				"duplicateGlob": "Duplicate of an existing rule",
 				"lockConfig": {
 					"lock": "Konfiguration sperren",
 					"unlock": "Konfiguration entsperren"

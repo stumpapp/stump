@@ -7,7 +7,7 @@ use crate::{
 		app_store::AppStoreExt,
 		secure_store::{
 			CredentialStoreTokenState, JwtTokenPair, SecureStore, SecureStoreError,
-			StoredCredentials,
+			StoredCredentials, StoredTokens,
 		},
 		AppStore, StoreError,
 	},
@@ -114,10 +114,35 @@ pub async fn get_credentials(
 }
 
 #[tauri::command]
+pub async fn set_credentials(
+	server: String,
+	credentials: StoredCredentials,
+	state: State<'_, WrappedState>,
+) -> Result<(), DesktopRPCError> {
+	let state = state.lock().map_err(|_| DesktopRPCError::MutexPoisoned)?;
+
+	state.secure_store.set_credentials(server, credentials)?;
+
+	Ok(())
+}
+
+#[tauri::command]
+pub async fn delete_credentials(
+	server: String,
+	state: State<'_, WrappedState>,
+) -> Result<(), DesktopRPCError> {
+	let state = state.lock().map_err(|_| DesktopRPCError::MutexPoisoned)?;
+
+	state.secure_store.delete_credentials(server)?;
+
+	Ok(())
+}
+
+#[tauri::command]
 pub async fn get_tokens(
 	server: String,
 	state: State<'_, WrappedState>,
-) -> Result<Option<JwtTokenPair>, DesktopRPCError> {
+) -> Result<Option<StoredTokens>, DesktopRPCError> {
 	let state = state.lock().map_err(|_| DesktopRPCError::MutexPoisoned)?;
 
 	let tokens = state.secure_store.get_tokens(server)?;

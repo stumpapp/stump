@@ -79,7 +79,7 @@ function App() {
 			if (currentServer) {
 				await tauriRPC.deleteTokens(currentServer.name)
 			} else {
-				await tauriRPC.clearCredentialStore()
+				await tauriRPC.clearStore()
 			}
 		} catch (err) {
 			console.error('Failed to clear credential store', err)
@@ -102,7 +102,7 @@ function App() {
 						</LocaleProvider>
 					}
 				/>
-				<Route path="server/*" element={<SavedServerEntry />} />
+				<Route path="server/:serverId/*" element={<SavedServerEntry />} />
 			</Routes>
 		</BrowserRouter>
 	)

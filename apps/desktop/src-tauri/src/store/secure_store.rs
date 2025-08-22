@@ -31,6 +31,13 @@ pub struct JwtTokenPair {
 	pub expires_at: DateTime<FixedOffset>,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum StoredTokens {
+	ApiKey(String),
+	Jwt(JwtTokenPair),
+}
+
 #[derive(Debug, thiserror::Error)]
 pub enum SecureStoreError {
 	#[error("Keyring error: {0}")]
@@ -133,11 +140,40 @@ impl SecureStore {
 		Ok(Some(decoded))
 	}
 
+	pub fn set_credentials(
+		&self,
+		server: ServerName,
+		credentials: StoredCredentials,
+	) -> Result<(), SecureStoreError> {
+		let entry = self
+			.credentials_records
+			.get(&server)
+			.ok_or(SecureStoreError::EntryMissing)?;
+		let encoded_str = serde_json::to_string(&credentials)?;
+		entry.set_password(&encoded_str)?;
+		Ok(())
+	}
+
+	pub fn delete_credentials(
+		&self,
+		server: ServerName,
+	) -> Result<bool, SecureStoreError> {
+		let entry = self
+			.credentials_records
+			.get(&server)
+			.ok_or(SecureStoreError::EntryMissing)?;
+		match entry.delete_credential() {
+			Ok(_) => Ok(true),
+			Err(keyring::Error::NoEntry) => Ok(false),
+			Err(e) => Err(e.into()),
+		}
+	}
+
 	/// Get the tokens for the given server, if it exists
 	pub fn get_tokens(
 		&self,
 		server: ServerName,
-	) -> Result<Option<JwtTokenPair>, SecureStoreError> {
+	) -> Result<Option<StoredTokens>, SecureStoreError> {
 		let entry = self
 			.token_records
 			.get(&server)
@@ -149,7 +185,7 @@ impl SecureStore {
 			Err(e) => return Err(e.into()),
 		};
 
-		let decoded: JwtTokenPair = serde_json::from_str(&encoded_str)?;
+		let decoded: StoredTokens = serde_json::from_str(&encoded_str)?;
 
 		Ok(Some(decoded))
 	}

@@ -1,9 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { SavedServer } from '@stump/client'
-import { Form, Input, Label, NativeSelect, Tabs, Text } from '@stump/components'
+import { Form, Input, Label, NativeSelect, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
+import { useCallback } from 'react'
 import { useForm, useFormState } from 'react-hook-form'
+import { match, P } from 'ts-pattern'
 
+import { CreateServer, SavedServer } from '../../stores/savedServer'
 import { buildSchema, CreateOrUpdateServerSchema } from './schema'
 
 export const CREATE_OR_UPDATE_SERVER_FORM_ID = 'createOrUpdateServerForm'
@@ -11,7 +13,7 @@ export const CREATE_OR_UPDATE_SERVER_FORM_ID = 'createOrUpdateServerForm'
 type Props = {
 	editingServer?: SavedServer
 	existingServers: SavedServer[]
-	onSubmit: (server: Omit<SavedServer, 'id'>) => void
+	onSubmit: (server: CreateServer) => void
 }
 
 export default function CreateOrUpdateSavedServerForm({
@@ -24,7 +26,7 @@ export default function CreateOrUpdateSavedServerForm({
 	const form = useForm<CreateOrUpdateServerSchema>({
 		defaultValues: {
 			name: editingServer?.name || '',
-			uri: editingServer?.uri || '',
+			url: editingServer?.url || '',
 			authMode: 'login',
 			isDefault: false,
 		} as CreateOrUpdateServerSchema,
@@ -34,8 +36,34 @@ export default function CreateOrUpdateSavedServerForm({
 
 	const authMode = form.watch('authMode')
 
+	const handleSubmit = useCallback(
+		(data: CreateOrUpdateServerSchema) => {
+			const payload: CreateServer = {
+				name: data.name,
+				url: data.url,
+				isDefault: data.isDefault,
+				config: {
+					auth: match(data)
+						.with({ authMode: 'login' }, () => undefined)
+						.with({ authMode: 'token', token: P.string }, (token) => ({
+							bearer: token.token,
+						}))
+						.with({ authMode: 'basic', username: P.string, password: P.string }, (creds) => ({
+							basic: {
+								username: creds.username,
+								password: creds.password,
+							},
+						}))
+						.otherwise(() => undefined),
+				},
+			}
+			onSubmit(payload)
+		},
+		[onSubmit],
+	)
+
 	return (
-		<Form id={CREATE_OR_UPDATE_SERVER_FORM_ID} form={form} onSubmit={onSubmit}>
+		<Form id={CREATE_OR_UPDATE_SERVER_FORM_ID} form={form} onSubmit={handleSubmit}>
 			<Input
 				fullWidth
 				id="name"
@@ -48,12 +76,12 @@ export default function CreateOrUpdateSavedServerForm({
 
 			<Input
 				fullWidth
-				id="uri"
+				id="url"
 				label={t(getKey('uri.label'))}
 				description={t(getKey('uri.description'))}
 				placeholder={t(getKey('uri.placeholder'))}
-				{...form.register('uri')}
-				errorMessage={errors.uri?.message}
+				{...form.register('url')}
+				errorMessage={errors.url?.message}
 			/>
 
 			<div className="flex flex-col gap-2">
@@ -75,14 +103,20 @@ export default function CreateOrUpdateSavedServerForm({
 			{authMode === 'basic' && (
 				<>
 					<Input label="Username" fullWidth id="username" {...form.register('username')} />
-					<Input label="Password" fullWidth id="password" {...form.register('password')} />
+					<Input
+						label="Password"
+						fullWidth
+						id="password"
+						type="password"
+						{...form.register('password')}
+					/>
 				</>
 			)}
 
 			{authMode === 'login' && (
 				<div className="rounded-lg border border-dashed border-edge p-2">
 					<Text variant="muted" size="sm">
-						You will be prompted to log in when you connect to this server
+						You will occasionally be prompted to log in when you connect to this server
 					</Text>
 				</div>
 			)}

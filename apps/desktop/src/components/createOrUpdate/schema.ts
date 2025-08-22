@@ -1,6 +1,7 @@
 import { FORBIDDEN_ENTITY_NAMES } from '@stump/browser/utils'
-import { SavedServer } from '@stump/client'
 import { z } from 'zod'
+
+import { SavedServer } from '../../stores/savedServer'
 
 /**
  * A function to build a schema for creating or editing a saved server
@@ -30,10 +31,10 @@ export const buildSchema = (
 			.refine((value) => !FORBIDDEN_ENTITY_NAMES.includes(value), {
 				message: t(getKey('nameForbidden')),
 			}),
-		uri: z
+		url: z
 			.string()
-			.url()
-			.refine((value) => !adjustedExistingServers.some((server) => server.uri === value), {
+			// .url()
+			.refine((value) => !adjustedExistingServers.some((server) => server.url === value), {
 				message: t(getKey('urlExists')),
 			}),
 		isDefault: z.boolean().default(false),
@@ -41,8 +42,8 @@ export const buildSchema = (
 			.union([z.literal('token'), z.literal('basic'), z.literal('login')])
 			.default('login'),
 		token: z.string().optional(),
-		basicUser: z.string().optional(),
-		basicPassword: z.string().optional(),
+		username: z.string().optional(),
+		password: z.string().optional(),
 	})
 }
 export type CreateOrUpdateServerSchema = z.infer<ReturnType<typeof buildSchema>>

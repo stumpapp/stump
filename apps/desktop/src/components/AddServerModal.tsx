@@ -1,13 +1,13 @@
-import { SavedServer } from '@stump/client'
 import { Button, ConfirmationModal } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { useCallback, useState } from 'react'
 
+import { CreateServer, SavedServer } from '../stores/savedServer'
 import { CREATE_OR_UPDATE_SERVER_FORM_ID, CreateOrUpdateSavedServerForm } from './createOrUpdate'
 
 type Props = {
 	existingServers: SavedServer[]
-	onCreateServer: (server: SavedServer) => void
+	onCreateServer: (server: CreateServer) => void
 }
 
 export default function AddServerModal({ existingServers, onCreateServer }: Props) {
@@ -16,7 +16,7 @@ export default function AddServerModal({ existingServers, onCreateServer }: Prop
 	const [isCreatingServer, setIsCreatingServer] = useState(false)
 
 	const handleCreateServer = useCallback(
-		(server: SavedServer) => {
+		(server: CreateServer) => {
 			onCreateServer(server)
 			setIsCreatingServer(false)
 		},

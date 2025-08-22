@@ -6,6 +6,7 @@ import localizedFormat from 'dayjs/plugin/localizedFormat'
 import relativeTime from 'dayjs/plugin/relativeTime'
 
 import StumpWebClient from './App'
+import { AppRouter } from './AppRouter'
 
 // https://stackoverflow.com/questions/72114775/vite-global-is-not-defined
 window.global ||= window
@@ -17,4 +18,4 @@ dayjs.extend(localizedFormat)
 dayjs.extend(relativeTime)
 dayjs.extend(durationPlugin)
 
-export { StumpWebClient }
+export { AppRouter as StumpRouter, StumpWebClient }

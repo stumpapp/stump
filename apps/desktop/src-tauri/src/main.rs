@@ -15,9 +15,10 @@ use store::AppStore;
 use state::AppState;
 
 use commands::{
-	clear_credential_store, delete_tokens, get_credential_store_state, get_credentials,
-	get_current_server, get_tokens, init_credential_store, set_discord_presence,
-	set_tokens, set_use_discord_connection,
+	clear_credential_store, delete_credentials, delete_tokens,
+	get_credential_store_state, get_credentials, get_current_server, get_tokens,
+	init_credential_store, set_credentials, set_discord_presence, set_tokens,
+	set_use_discord_connection,
 };
 
 #[cfg(feature = "bundled-server")]
@@ -71,6 +72,8 @@ fn main() {
 			get_current_server,
 			init_credential_store,
 			get_credentials,
+			set_credentials,
+			delete_credentials,
 			get_tokens,
 			set_tokens,
 			delete_tokens,

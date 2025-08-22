@@ -4,19 +4,10 @@ import { Card, cn, Heading, Text } from '@stump/components'
 import { useCallback } from 'react'
 
 import AddServerModal from './components/AddServerModal'
+import { CreateServer, useSavedServers } from './stores/savedServer'
 
 export default function Home() {
-	const {
-		connectedServers,
-		activeServer,
-		setActiveServer,
-		addServer,
-		editServer,
-		removeServer,
-		resetStore,
-	} = useTauriStore()
-
-	const onCreateServer = useCallback(() => {}, [])
+	const { savedServers, createServer } = useSavedServers()
 
 	return (
 		<div data-tauri-drag-region className="flex h-screen w-screen items-center bg-background py-6">
@@ -30,19 +21,19 @@ export default function Home() {
 							</Text>
 						</div>
 
-						<AddServerModal existingServers={connectedServers} onCreateServer={onCreateServer} />
+						<AddServerModal existingServers={savedServers} onCreateServer={createServer} />
 					</div>
 
-					{!connectedServers.length && (
+					{!savedServers.length && (
 						<div className="select-none rounded-lg border border-dashed border-edge-subtle p-4 text-foreground-muted">
 							{/* {t(getKey('getStarted'))} */}
 							Add a server to get started
 						</div>
 					)}
 
-					{connectedServers.length > 0 && (
+					{savedServers.length > 0 && (
 						<Card className="flex flex-col divide-y divide-edge bg-background-surface">
-							{connectedServers.map((server) => (
+							{savedServers.map((server) => (
 								// <ConfiguredServer
 								// 	key={`configured-server-${server.name}_${server.uri}`}
 								// 	// server={server}
@@ -52,9 +43,9 @@ export default function Home() {
 								// 	// onSwitch={() => setSwitchingServer(server)}
 								// 	// isReachable={serverStatus[server.name]}
 								// />
-								<Card key={`configured-server-${server.name}_${server.uri}`}>
+								<Card key={`configured-server-${server.name}_${server.url}`}>
 									<Text>{server.name}</Text>
-									<Text>{server.uri}</Text>
+									<Text>{server.url}</Text>
 								</Card>
 							))}
 						</Card>
@@ -62,7 +53,7 @@ export default function Home() {
 
 					<div
 						className={cn('flex flex-col gap-y-6', {
-							'pointer-events-none opacity-50': connectedServers.length === 0,
+							'pointer-events-none opacity-50': savedServers.length === 0,
 						})}
 					>
 						{/* <RemoveAllTokensSection onConfirmClear={onClearTokens} />

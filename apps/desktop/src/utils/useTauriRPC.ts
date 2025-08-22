@@ -1,12 +1,8 @@
-import {
-	CredentialStoreTokenState,
-	JwtTokenPair,
-	Platform,
-	ServerConfig,
-	TauriRPC,
-} from '@stump/client'
+import { CredentialStoreTokenState, Platform, ServerConfig, TauriRPC } from '@stump/client'
 import { invoke } from '@tauri-apps/api/core'
 import * as os from '@tauri-apps/plugin-os'
+
+import { StoredTokens } from '../stores/savedServer'
 
 type Return = TauriRPC & {
 	getNativePlatform: () => Promise<Platform>
@@ -45,30 +41,37 @@ export function useTauriRPC(): Return {
 
 	const initCredentialStore = () => invoke<void>('init_credential_store')
 
-	const getCredentialStoreState = () =>
-		invoke<CredentialStoreTokenState>('get_credential_store_state')
+	const getStoreAuthState = () => invoke<CredentialStoreTokenState>('get_credential_store_state')
 
-	const clearCredentialStore = () => invoke<void>('clear_credential_store')
+	const clearStore = () => invoke<void>('clear_credential_store')
 
 	const getCredentials = (forServer: string) =>
 		invoke<ServerConfig | null>('get_credentials', { server: forServer })
 
+	const setCredentials = (forServer: string, config: ServerConfig) =>
+		invoke<ServerConfig>('set_credentials', { server: forServer, credentials: config })
+
+	const deleteCredentials = (forServer: string) =>
+		invoke<void>('delete_credentials', { server: forServer })
+
 	const deleteTokens = (forServer: string) => invoke<void>('delete_tokens', { server: forServer })
 
 	const getTokens = (forServer: string) =>
-		invoke<string | null>('get_tokens', { server: forServer })
+		invoke<StoredTokens | null>('get_tokens', { server: forServer })
 
-	const setTokens = (forServer: string, tokens: JwtTokenPair) =>
+	const setTokens = (forServer: string, tokens: StoredTokens) =>
 		invoke<void>('set_tokens', { server: forServer, tokens })
 
 	return {
-		clearCredentialStore,
+		clearStore,
 		deleteTokens,
 		getTokens,
-		getCredentialStoreState,
+		getStoreAuthState,
 		getCurrentServerName,
 		getNativePlatform,
 		getCredentials,
+		setCredentials,
+		deleteCredentials,
 		initCredentialStore,
 		setTokens,
 		setDiscordPresence,

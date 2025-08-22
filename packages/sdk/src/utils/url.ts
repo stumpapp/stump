@@ -1,3 +1,5 @@
+import { isAxiosError } from 'axios'
+
 import { ApiVersion } from '../api'
 
 export const formatApiURL = (url: string, version: ApiVersion) => {
@@ -64,4 +66,9 @@ export async function checkOPDSURL(url: string) {
 	const res = await fetch(url).catch((err) => err)
 
 	return res.status === 200
+}
+
+export const isNetworkError = (error: unknown) => {
+	const axiosError = isAxiosError(error) ? error : null
+	return axiosError?.code === 'ERR_NETWORK'
 }

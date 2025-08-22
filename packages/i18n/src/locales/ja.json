@@ -331,6 +331,7 @@
 					}
 				},
 				"invalidGlob": "無効なglobパターン",
+				"duplicateGlob": "Duplicate of an existing rule",
 				"lockConfig": {
 					"lock": "設定をロック",
 					"unlock": "設定のロックを解除"

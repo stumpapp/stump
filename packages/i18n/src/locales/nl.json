@@ -331,6 +331,7 @@
 					}
 				},
 				"invalidGlob": "Invalid glob pattern",
+				"duplicateGlob": "Duplicate of an existing rule",
 				"lockConfig": {
 					"lock": "Lock configuration",
 					"unlock": "Unlock configuration"

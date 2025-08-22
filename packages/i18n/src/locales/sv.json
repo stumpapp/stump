@@ -331,6 +331,7 @@
 					}
 				},
 				"invalidGlob": "Ogiltigt glob-mönster",
+				"duplicateGlob": "Duplicate of an existing rule",
 				"lockConfig": {
 					"lock": "Lås konfiguration",
 					"unlock": "Lås upp konfiguration"

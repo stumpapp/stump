@@ -10,7 +10,6 @@
 					localStorage.getItem('stump-user-store') || '{"state": {}}',
 				).state
 				const appTheme = zustandState.userPreferences?.app_theme || 'dark'
-				console.log('appTheme', appTheme)
 				const alreadyHasTheme =
 					!appTheme || document.querySelector('html').classList.contains(appTheme)
 				if (!alreadyHasTheme) {

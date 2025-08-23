@@ -1,7 +1,7 @@
 import { BookImageScaling } from '@stump/client'
 import { cn } from '@stump/components'
 import { ReadingImageScaleFit } from '@stump/graphql'
-import React, { forwardRef, useCallback, useEffect, useMemo, useRef } from 'react'
+import React, { forwardRef, useCallback, useMemo } from 'react'
 
 import { EntityImage } from '@/components/entity'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
@@ -12,11 +12,10 @@ type Props = {
 	currentPage: number
 	getPageUrl: (page: number) => string
 	onPageClick: () => void
-	onMount?: () => void
 }
 
 const PageSet = forwardRef<HTMLDivElement, Props>(
-	({ currentPage, getPageUrl, onPageClick, onMount }, ref) => {
+	({ currentPage, getPageUrl, onPageClick }, ref) => {
 		const { setPageSize, book, pageSets } = useImageBaseReaderContext()
 		const {
 			bookPreferences: { imageScaling, brightness },
@@ -36,14 +35,6 @@ const PageSet = forwardRef<HTMLDivElement, Props>(
 			() => pageSets.find((set) => set.includes(currentPage - 1)) || [currentPage - 1],
 			[currentPage, pageSets],
 		)
-
-		const didMount = useRef(false)
-		useEffect(() => {
-			if (onMount && !didMount.current) {
-				onMount()
-			}
-			didMount.current = true
-		}, [onMount])
 
 		return (
 			<div

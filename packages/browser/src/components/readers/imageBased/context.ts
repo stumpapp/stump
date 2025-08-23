@@ -9,6 +9,9 @@ export type ImagePageDimensionRef = {
 	ratio: number
 }
 
+// TODO: I think we can move this and useImageSizes to the client package so we can
+// introduce better code sharing between platforms.
+
 export type IImageBaseReaderContext = {
 	/**
 	 * The media entity associated with the reader

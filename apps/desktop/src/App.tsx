@@ -1,15 +1,14 @@
 import '@stump/browser/styles/index.css'
 import '@stump/components/styles/overrides.css'
 
-import { StumpWebClient } from '@stump/browser'
 import { ErrorFallback } from '@stump/browser/components/ErrorFallback'
 import { Toaster } from '@stump/browser/components/Toaster'
-import { DesktopAppContext, Platform, SavedServer, useDesktopAppContext } from '@stump/client'
+import { useAppStore } from '@stump/browser/stores'
+import { DesktopAppContext, useDesktopAppContext } from '@stump/client'
 import { LocaleProvider } from '@stump/i18n'
-import { AuthUser, JwtTokenPair } from '@stump/sdk'
 import { QueryClient, QueryClientContext } from '@tanstack/react-query'
 import { createStore, Store } from '@tauri-apps/plugin-store'
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 
@@ -33,9 +32,9 @@ function App() {
 
 	const servers = useSavedServerStore((store) => store.servers)
 
-	const [platform, setPlatform] = useState<Platform>('unknown')
-	const [baseURL, setBaseURL] = useState<string>()
 	const [mounted, setMounted] = useState(false)
+
+	const setPlatform = useAppStore((state) => state.setPlatform)
 
 	/**
 	 * An effect to initialize the application, setting the platform and base URL
@@ -45,10 +44,6 @@ function App() {
 			try {
 				await tauriRPC.initCredentialStore(servers.map((s) => s.id))
 				const platform = await getNativePlatform()
-				// const activeServer = await store.get<SavedServer>('active_server')
-				// if (activeServer) {
-				// 	setBaseURL(activeServer.uri)
-				// }
 				setPlatform(platform)
 			} catch (error) {
 				console.error('Critical failure! Unable to initialize the application', error)
@@ -60,34 +55,7 @@ function App() {
 		if (!mounted) {
 			init()
 		}
-	}, [getNativePlatform, mounted, tauriRPC, store, servers])
-
-	// const handleAuthenticated = useCallback(
-	// 	async (_user: AuthUser, tokens?: JwtTokenPair) => {
-	// 		try {
-	// 			const currentServer = await store.get<SavedServer>('active_server')
-	// 			if (tokens && currentServer) {
-	// 				await tauriRPC.setTokens(currentServer.name, tokens)
-	// 			}
-	// 		} catch (err) {
-	// 			console.error('Failed to initialize the credential store', err)
-	// 		}
-	// 	},
-	// 	[tauriRPC, store],
-	// )
-
-	// const handleLogout = useCallback(async () => {
-	// 	try {
-	// 		const currentServer = await store.get<SavedServer>('active_server')
-	// 		if (currentServer) {
-	// 			await tauriRPC.deleteTokens(currentServer.name)
-	// 		} else {
-	// 			await tauriRPC.clearStore()
-	// 		}
-	// 	} catch (err) {
-	// 		console.error('Failed to clear credential store', err)
-	// 	}
-	// }, [tauriRPC, store])
+	}, [getNativePlatform, mounted, tauriRPC, store, servers, setPlatform])
 
 	// I want to wait until platform is properly set before rendering the app
 	if (!mounted) {

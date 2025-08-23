@@ -195,6 +195,7 @@ export default function SavedServerEntry({ tauriRPC }: Props) {
 		return null
 	}
 
+	// TODO(desktop): ServerAuthDialog
 	return (
 		<StumpClientContextProvider
 			onUnauthenticatedResponse={onAuthError}
@@ -205,8 +206,6 @@ export default function SavedServerEntry({ tauriRPC }: Props) {
 		>
 			<SDKContext.Provider value={{ sdk, setSDK }}>
 				{/* <ServerAuthDialog isOpen={isAuthDialogOpen} onClose={handleAuthDialogClose} /> */}
-				{/* TODO(desktop): I need to inform the router that it exists at a specific path, that way
-					all of the internal navigation can take it into account and land on the correct route */}
 				{sdk.isAuthed && <StumpRouter basePath={`/server/${serverId}`} />}
 			</SDKContext.Provider>
 		</StumpClientContextProvider>
@@ -219,6 +218,7 @@ type AuthSDKParams = {
 	saveToken?: (token: JwtTokenPair, forUser: AuthUser) => Promise<void>
 }
 
+// TODO: See if we can move this to the client for better code sharing between platforms
 /**
  * Authenticate an SDK instance with the provided configuration and token information.
  *

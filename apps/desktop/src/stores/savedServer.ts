@@ -106,15 +106,14 @@ export const useSavedServers = () => {
 	const getServerConfig = useCallback(
 		async (id: string) => {
 			const config = await rpc.getCredentials(id)
-			return config ? serverConfig.safeParse(config)?.data || null : null
+			return config ? serverConfig.safeParse({ auth: config })?.data || null : null
 		},
 		[rpc],
 	)
 
 	const createServerConfig = useCallback(
-		async (id: string, config: ServerConfig) => {
-			await rpc.setCredentials(id, config)
-			return config
+		async (id: string, credentials: NonNullable<Pick<ServerConfig, 'auth'>['auth']>) => {
+			await rpc.setCredentials(id, credentials)
 		},
 		[rpc],
 	)
@@ -126,17 +125,18 @@ export const useSavedServers = () => {
 		async ({ config, ...server }: CreateServer) => {
 			const id = uuid()
 			const serverMeta = { ...server, id }
+			await rpc.createServerEntry(id)
 			addServer(serverMeta)
 			if (server.isDefault) {
 				// Ensure only one default server
 				setDefaultServer(serverMeta.id)
 			}
-			if (config) {
-				await createServerConfig(id, config)
+			if (config?.auth) {
+				await createServerConfig(id, config.auth)
 			}
 			return serverMeta
 		},
-		[addServer, setDefaultServer, createServerConfig],
+		[addServer, setDefaultServer, createServerConfig, rpc],
 	)
 
 	/**
@@ -152,8 +152,8 @@ export const useSavedServers = () => {
 				// Ensure only one default server
 				setDefaultServer(serverMeta.id)
 			}
-			if (config) {
-				await createServerConfig(id, config)
+			if (config?.auth) {
+				await createServerConfig(id, config?.auth)
 			}
 			return serverMeta
 		},

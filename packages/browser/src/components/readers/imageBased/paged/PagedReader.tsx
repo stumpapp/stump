@@ -7,18 +7,14 @@ import { useMediaMatch, useWindowSize } from 'rooks'
 
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
-import { ImageReaderBookRef, useImageBaseReaderContext } from '../context'
+import { useImageBaseReaderContext } from '../context'
 import PageSet from './PageSet'
 
 export type PagedReaderProps = {
 	/** The current page which the reader should render */
 	currentPage: number
-	/** The media entity associated with the reader */
-	media: ImageReaderBookRef
 	/** A callback that is called in order to change the page */
 	onPageChange: (page: number) => void
-	/** A function that returns the url for a given page */
-	getPageUrl(page: number): string
 }
 
 /**
@@ -28,14 +24,13 @@ export type PagedReaderProps = {
  * Note: This component lacks animations between pages. The `AnimatedPagedReader` component
  * will have animations between pages, but is currently a WIP
  */
-function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedReaderProps) {
+function PagedReader({ currentPage, onPageChange }: PagedReaderProps) {
+	const { pageSets, book, getPageUrl } = useImageBaseReaderContext()
 	const {
 		bookPreferences: { tapSidesToNavigate, imageScaling, secondPageSeparate, doublePageBehavior },
 		settings: { showToolBar },
 		setSettings,
-	} = useBookPreferences({ book: media })
-
-	const { pageSets } = useImageBaseReaderContext()
+	} = useBookPreferences({ book })
 
 	const { innerWidth } = useWindowSize()
 
@@ -178,11 +173,11 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 	 */
 	const doChangePage = useCallback(
 		(newPage: number) => {
-			if (newPage <= media.pages && newPage > 0) {
+			if (newPage <= book.pages && newPage > 0) {
 				onPageChange(newPage)
 			}
 		},
-		[media.pages, onPageChange],
+		[book.pages, onPageChange],
 	)
 
 	/**

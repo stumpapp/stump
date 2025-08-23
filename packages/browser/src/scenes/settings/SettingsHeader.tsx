@@ -4,6 +4,7 @@ import { useMemo } from 'react'
 import { useLocation } from 'react-router'
 
 import { useSceneContainer } from '@/components/container'
+import { useRouterContext } from '@/context'
 
 import SettingsNavigation from './SettingsNavigation'
 import { useSettingsRoutes } from './useSettingsRoutes'
@@ -19,6 +20,8 @@ type Props = {
 export default function SettingsHeader({ renderNavigation }: Props) {
 	const { t } = useLocaleContext()
 	const { maxWidth } = useSceneContainer()
+	const { basePath } = useRouterContext()
+
 	const location = useLocation()
 
 	const { groups } = useSettingsRoutes()
@@ -28,8 +31,10 @@ export default function SettingsHeader({ renderNavigation }: Props) {
 	 */
 	const activeRouteGroup = useMemo(
 		() =>
-			groups.flatMap((group) => group.items).find((page) => location.pathname.startsWith(page.to)),
-		[location.pathname, groups],
+			groups
+				.flatMap((group) => group.items)
+				.find((page) => location.pathname.startsWith(`${basePath}${page.to}`)),
+		[location.pathname, groups, basePath],
 	)
 
 	/**
@@ -42,12 +47,14 @@ export default function SettingsHeader({ renderNavigation }: Props) {
 			return null
 		}
 
+		const trimmedPath = location.pathname.replace(`${basePath}/`, '')
+
 		const matchedSubItemKey = activeRouteGroup.subItems?.find((subItem) =>
-			subItem.matcher(location.pathname),
+			subItem.matcher(trimmedPath),
 		)?.localeKey
 
 		return matchedSubItemKey || activeRouteGroup?.localeKey
-	}, [activeRouteGroup, location.pathname])
+	}, [activeRouteGroup, location.pathname, basePath])
 
 	const backlink = useMemo(() => {
 		const matchedSubItem = activeRouteGroup?.subItems?.find((subItem) =>
@@ -79,7 +86,10 @@ export default function SettingsHeader({ renderNavigation }: Props) {
 			<div className="text-foreground-muted">
 				{backlink && (
 					<span className="flex items-center gap-x-1 text-xs text-foreground-muted">
-						<Link to={backlink.to} className="text-foreground-muted no-underline hover:underline">
+						<Link
+							to={`${basePath}${backlink.to}`}
+							className="text-foreground-muted no-underline hover:underline"
+						>
 							{t(`settingsScene.${backlink.localeKey}`) ?? 'Back'}
 						</Link>
 						{' /'}

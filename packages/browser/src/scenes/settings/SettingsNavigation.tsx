@@ -1,8 +1,9 @@
 import { Label, NativeSelect, Tabs } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { useMemo } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 
+import { useNavigate, useRouterContext } from '@/context'
 import { useAppStore } from '@/stores'
 
 import { useSettingsRoutes } from './useSettingsRoutes'
@@ -14,6 +15,7 @@ export default function SettingsNavigation() {
 	const location = useLocation()
 	const platform = useAppStore((store) => store.platform)
 
+	const { basePath } = useRouterContext()
 	const { t } = useLocaleContext()
 	const { groups } = useSettingsRoutes()
 
@@ -57,7 +59,7 @@ export default function SettingsNavigation() {
 					<Tabs.List>
 						{groups.map((group) => (
 							<Tabs.Trigger key={group.label} value={group.label} asChild>
-								<Link className="truncate" to={group.defaultRoute}>
+								<Link className="truncate" to={`${basePath}${group.defaultRoute}`}>
 									{t(`settingsScene.sidebar.${group.label.toLowerCase()}.label`)}
 								</Link>
 							</Tabs.Trigger>

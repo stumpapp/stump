@@ -6,7 +6,7 @@ import { useLocation, useNavigate } from 'react-router'
 import { usePreferences } from '@/hooks/usePreferences'
 import { formatRouteKey, useRouteGroups } from '@/hooks/useRouteGroups'
 import { useTheme } from '@/hooks/useTheme'
-import paths from '@/paths'
+import { usePaths } from '@/paths'
 import { SideBarLinkButton } from '@/scenes/settings'
 
 import { useLibraryContext } from '../../context'
@@ -15,6 +15,7 @@ import { routeGroups } from './routes'
 export default function LibrarySettingsSidebar() {
 	const location = useLocation()
 	const navigate = useNavigate()
+	const paths = usePaths()
 
 	const { library } = useLibraryContext()
 	const { t } = useLocaleContext()

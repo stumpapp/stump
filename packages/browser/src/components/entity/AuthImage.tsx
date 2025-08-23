@@ -19,8 +19,9 @@ export const AuthImage = forwardRef<HTMLImageElement, Props>(({ token, src, ...p
 	)
 	const fetchImage = useCallback(
 		async (url: string) => {
-			const data = await queryClient.fetchQuery(['AuthImage.fetchImage', url], {
-				cacheTime: 1000 * 60 * 60 * 24 * 5, // 5 days
+			const data = await queryClient.fetchQuery({
+				queryKey: ['AuthImage.fetchImage', url],
+				staleTime: 1000 * 60 * 60 * 24 * 5, // 5 days
 				queryFn: async () => doFetch(url),
 			})
 

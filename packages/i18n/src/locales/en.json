@@ -1445,16 +1445,16 @@
 						}
 					},
 					"resetTokens": {
-						"label": "Clear authentication",
+						"label": "Delete tokens",
 						"description": [
-							"Remove all securely-stored access tokens for your servers",
-							"You will have to re-authenticate with each server"
+							"Remove all securely-stored tokens for your servers, including API keys",
+							"You will have to re-authenticate with and/or re-configure each server"
 						],
 						"confirmation": {
-							"trigger": "Clear authentication",
-							"title": "Clear authentication",
-							"description": "This will remove all securely-stored access tokens for your servers",
-							"confirm": "Clear authentication"
+							"trigger": "Delete tokens",
+							"title": "Delete tokens",
+							"description": "Are you sure you want to delete all stored tokens?",
+							"confirm": "Delete tokens"
 						}
 					}
 				},

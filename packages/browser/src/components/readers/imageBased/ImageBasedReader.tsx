@@ -7,27 +7,21 @@ import { useNavigate } from 'react-router'
 import { useWindowSize } from 'rooks'
 
 import { usePreloadPage } from '@/hooks/usePreloadPage'
-import paths from '@/paths'
+import { usePaths } from '@/paths'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 import { useBookTimer } from '@/stores/reader'
 
 import ReaderContainer from './container'
-import { ImageBaseReaderContext, ImagePageDimensionRef, ImageReaderBookRef } from './context'
+import { ImageBaseReaderContext, ImageReaderBookRef } from './context'
 import { ContinuousScrollReader } from './continuous'
-import { PagedReader } from './paged'
+import { AnimatedPagedReader, PagedReader } from './paged'
+import { useImageSizes } from './useImageSizes'
 
 type Props = {
 	/**
 	 * The media which is being read
 	 */
 	media: ImageReaderBookRef
-	/**
-	 * Whether or not the reader(s) should be animated
-	 *
-	 * Note: This is only used to conditionally render either the `PagedReader` or `AnimatedPagedReader` component.
-	 * This won't be used for the `ContinuousScrollReader` component.
-	 */
-	isAnimated?: boolean
 	/**
 	 * Whether or not the reader is in incognito mode. If true, no progress will be reported.
 	 */
@@ -40,14 +34,9 @@ type Props = {
 }
 
 // TODO: support read time
-export default function ImageBasedReader({
-	media,
-	isAnimated = false,
-	isIncognito,
-	initialPage,
-	onProgress,
-}: Props) {
+export default function ImageBasedReader({ media, isIncognito, initialPage, onProgress }: Props) {
 	const { sdk } = useSDK()
+	const paths = usePaths()
 
 	const client = useQueryClient()
 	const navigate = useNavigate()
@@ -55,27 +44,12 @@ export default function ImageBasedReader({
 	/**
 	 * The current page of the reader
 	 */
-	const [currentPage, setCurrentPage] = useState(initialPage || 1)
+	const [currentPage, setCurrentPage] = useState(() => initialPage || 1)
 
-	const [pageDimensions, setPageDimensions] = useState<Record<number, ImagePageDimensionRef>>(
-		() =>
-			media?.metadata?.pageAnalysis?.dimensions
-				?.map(({ height, width }) => ({
-					height,
-					width,
-					ratio: width / height,
-				}))
-				.reduce(
-					(acc, ref, index) => {
-						acc[index] = ref
-						return acc
-					},
-					{} as Record<number, { height: number; width: number; ratio: number }>,
-				) ?? {},
-	)
+	const { imageSizes, setPageSize } = useImageSizes({ book: media })
 
 	const {
-		settings: { preload, showToolBar },
+		settings: { preload, showToolBar, animatedReader },
 		bookPreferences: {
 			doublePageBehavior = DEFAULT_BOOK_PREFERENCES.doublePageBehavior,
 			readingMode,
@@ -116,7 +90,7 @@ export default function ImageBasedReader({
 			sets = Array.from({ length: pages }, (_, i) => [i])
 		} else {
 			sets = generatePageSets({
-				imageSizes: pageDimensions,
+				imageSizes,
 				pages: pages,
 				secondPageSeparate: secondPageSeparate,
 			})
@@ -130,7 +104,7 @@ export default function ImageBasedReader({
 	}, [
 		doublePageBehavior,
 		pages,
-		pageDimensions,
+		imageSizes,
 		deviceOrientation,
 		readingMode,
 		readingDirection,
@@ -159,10 +133,10 @@ export default function ImageBasedReader({
 				setCurrentPage(newPage)
 			} else {
 				setCurrentPage(newPage)
-				navigate(paths.bookReader(media.id, { isAnimated, isIncognito, page: newPage }))
+				// navigate(paths.bookReader(media.id, { isIncognito, page: newPage }))
 			}
 		},
-		[media.id, isAnimated, isIncognito, navigate, readingMode],
+		[media.id, isIncognito, navigate, readingMode, paths],
 	)
 
 	/**
@@ -190,9 +164,10 @@ export default function ImageBasedReader({
 	 * Preload pages that are not currently visible. This is done to try and
 	 * prevent wait times for the next page to load.
 	 */
+	// TODO: Fix on desktop
 	usePreloadPage({
 		onStoreDimensions: (page, dimensions) => {
-			setPageDimensions((prev) => ({ ...prev, [page - 1]: dimensions }))
+			setPageSize(page - 1, dimensions)
 		},
 		pages: pagesToPreload,
 		urlBuilder: getPageUrl,
@@ -235,15 +210,11 @@ export default function ImageBasedReader({
 					}
 				/>
 			)
+		} else if (animatedReader) {
+			const Component = AnimatedPagedReader
+			return <Component initialPage={initialPage || 1} onPageChanged={handleChangePage} />
 		} else {
-			return (
-				<PagedReader
-					media={media}
-					currentPage={initialPage || 1}
-					getPageUrl={(pageNumber) => sdk.media.bookPageURL(media.id, pageNumber)}
-					onPageChange={handleChangePage}
-				/>
-			)
+			return <PagedReader currentPage={initialPage || 1} onPageChange={handleChangePage} />
 		}
 	}
 
@@ -252,11 +223,13 @@ export default function ImageBasedReader({
 			value={{
 				book: media,
 				currentPage,
-				pageDimensions,
+				imageSizes,
 				setCurrentPage: handleChangePage,
-				setDimensions: setPageDimensions,
+				getPageUrl: (pageNumber) => sdk.media.bookPageURL(media.id, pageNumber),
+				setPageSize,
 				pageSets,
 				resetTimer: reset,
+				toggleToolbar: () => setSettings({ showToolBar: !showToolBar }),
 			}}
 		>
 			<ReaderContainer>{renderReader()}</ReaderContainer>

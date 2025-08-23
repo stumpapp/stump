@@ -17,7 +17,7 @@ const WIDTH_MODIFIER = 2 / 3
 
 export default function ReaderFooter() {
 	const { sdk } = useSDK()
-	const { book, currentPage, setCurrentPage, pageDimensions, setDimensions, pageSets } =
+	const { book, currentPage, setCurrentPage, imageSizes, setPageSize, pageSets } =
 		useImageBaseReaderContext()
 	const {
 		settings: { showToolBar, preload },
@@ -64,7 +64,7 @@ export default function ReaderFooter() {
 				<div className="flex h-full items-center">
 					{indexes.map((index) => {
 						const url = sdk.media.bookPageURL(book.id, index + 1)
-						const imageSize = pageDimensions[index]
+						const imageSize = imageSizes[index]
 						const isPortraitOrUnknown = !imageSize || imageSize.ratio < 1
 						const isCurrentSet = currentPageSetIdx === idx
 
@@ -99,14 +99,7 @@ export default function ReaderFooter() {
 										src={url}
 										className="object-contain"
 										onLoad={({ height, width }) =>
-											setDimensions((prev) => ({
-												...prev,
-												[index]: {
-													height,
-													width,
-													ratio: width / height,
-												},
-											}))
+											setPageSize(index, { height, width, ratio: width / height })
 										}
 									/>
 								</div>
@@ -119,7 +112,7 @@ export default function ReaderFooter() {
 				</div>
 			)
 		},
-		[pageDimensions, sdk, book.id, setCurrentPage, setDimensions, currentPageSetIdx],
+		[imageSizes, sdk, book.id, setCurrentPage, setPageSize, currentPageSetIdx],
 	)
 
 	return (
@@ -159,7 +152,7 @@ export default function ReaderFooter() {
 					max={book.pages}
 					className="bg-[#0c0c0c]"
 					indicatorClassName="bg-[#898d94]"
-					inverted={readingDirection === 'rtl'}
+					inverted={readingDirection === ReadingDirection.Rtl}
 				/>
 
 				<div

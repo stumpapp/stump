@@ -4,10 +4,10 @@ import { lazy } from 'react'
 import { Route, Routes } from 'react-router-dom'
 
 import { AppLayout } from './AppLayout.tsx'
+import { RouterProvider } from './context/RouterContext.tsx'
 import { BookRouter } from './scenes/book'
 import { BookClubRouter } from './scenes/bookClub'
 import { LibraryRouter } from './scenes/library'
-import { OnBoardingRouter } from './scenes/onboarding'
 import { SeriesRouter } from './scenes/series'
 import { SettingsRouter } from './scenes/settings'
 import { SmartListRouter } from './scenes/smartList'
@@ -20,43 +20,48 @@ const ServerConnectionErrorScene = lazy(
 )
 const LoginOrClaimScene = lazy(() => import('./scenes/auth'))
 
-export function AppRouter() {
+type AppRouterProps = {
+	basePath?: string
+}
+
+export function AppRouter({ basePath }: AppRouterProps = {}) {
 	const locale = useUserStore((store) => store.userPreferences?.locale)
 
-	const { baseUrl, platform } = useAppStore((store) => ({
+	const { baseUrl } = useAppStore((store) => ({
 		baseUrl: store.baseUrl,
-		platform: store.platform,
 	}))
 
 	if (!baseUrl) {
-		if (platform === 'browser') {
-			throw new Error('Base URL is not set')
-		}
+		throw new Error('Base URL is not set')
 
-		return (
-			<LocaleProvider locale={(locale as AllowedLocale) || 'en'}>
-				<OnBoardingRouter />
-			</LocaleProvider>
-		)
+		// return (
+		// 	<LocaleProvider locale={(locale as AllowedLocale) || 'en'}>
+		// 		<RouterProvider basePath={basePath}>
+		// 			<OnBoardingRouter />
+		// 		</RouterProvider>
+		// 	</LocaleProvider>
+		// )
 	}
 
 	return (
 		<LocaleProvider locale={(locale as AllowedLocale) || 'en'}>
-			<Routes>
-				<Route path="/" element={<AppLayout />}>
-					<Route path="" element={<HomeScene />} />
-					<Route path="libraries/*" element={<LibraryRouter />} />
-					<Route path="series/*" element={<SeriesRouter />} />
-					<Route path="books/*" element={<BookRouter />} />
-					<Route path="book-clubs/*" element={<BookClubRouter />} />
-					<Route path="/smart-lists/*" element={<SmartListRouter />} />
-					<Route path="settings/*" element={<SettingsRouter />} />
-				</Route>
+			<RouterProvider basePath={basePath}>
+				<Routes>
+					<Route path="/" element={<AppLayout />}>
+						<Route path="" element={<HomeScene />} />
+						<Route path="libraries/*" element={<LibraryRouter />} />
+						<Route path="series/*" element={<SeriesRouter />} />
+						<Route path="books/*" element={<BookRouter />} />
+						<Route path="book-clubs/*" element={<BookClubRouter />} />
+						<Route path="/smart-lists/*" element={<SmartListRouter />} />
+						<Route path="settings/*" element={<SettingsRouter />} />
+					</Route>
 
-				<Route path="/auth" element={<LoginOrClaimScene />} />
-				<Route path="/server-connection-error" element={<ServerConnectionErrorScene />} />
-				<Route path="*" element={<FourOhFour />} />
-			</Routes>
+					<Route path="/auth" element={<LoginOrClaimScene />} />
+					<Route path="/server-connection-error" element={<ServerConnectionErrorScene />} />
+					<Route path="*" element={<FourOhFour />} />
+				</Routes>
+			</RouterProvider>
 		</LocaleProvider>
 	)
 }

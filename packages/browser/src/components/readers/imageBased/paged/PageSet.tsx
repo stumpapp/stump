@@ -1,7 +1,7 @@
 import { BookImageScaling } from '@stump/client'
 import { cn } from '@stump/components'
 import { ReadingImageScaleFit } from '@stump/graphql'
-import React, { forwardRef, useCallback, useMemo } from 'react'
+import React, { forwardRef, useCallback, useEffect, useMemo, useRef } from 'react'
 
 import { EntityImage } from '@/components/entity'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
@@ -12,11 +12,12 @@ type Props = {
 	currentPage: number
 	getPageUrl: (page: number) => string
 	onPageClick: () => void
+	onMount?: () => void
 }
 
 const PageSet = forwardRef<HTMLDivElement, Props>(
-	({ currentPage, getPageUrl, onPageClick }, ref) => {
-		const { setDimensions, book, pageSets } = useImageBaseReaderContext()
+	({ currentPage, getPageUrl, onPageClick, onMount }, ref) => {
+		const { setPageSize, book, pageSets } = useImageBaseReaderContext()
 		const {
 			bookPreferences: { imageScaling, brightness },
 		} = useBookPreferences({ book })
@@ -26,12 +27,9 @@ const PageSet = forwardRef<HTMLDivElement, Props>(
 		 */
 		const upsertDimensions = useCallback(
 			(page: number, dimensions: ImagePageDimensionRef) => {
-				setDimensions((prev) => ({
-					...prev,
-					[page - 1]: dimensions,
-				}))
+				setPageSize(page - 1, dimensions)
 			},
-			[setDimensions],
+			[setPageSize],
 		)
 
 		const currentSet = useMemo(
@@ -39,24 +37,38 @@ const PageSet = forwardRef<HTMLDivElement, Props>(
 			[currentPage, pageSets],
 		)
 
+		const didMount = useRef(false)
+		useEffect(() => {
+			if (onMount && !didMount.current) {
+				onMount()
+			}
+			didMount.current = true
+		}, [onMount])
+
 		return (
 			<div
 				ref={ref}
-				className="flex h-full justify-center"
+				className="flex h-full shrink-0 justify-center"
 				style={{
 					filter: `brightness(${brightness * 100}%)`,
 				}}
 			>
-				{currentSet.map((idx) => (
-					<Page
-						key={`page-${idx + 1}`}
-						page={idx + 1}
-						getPageUrl={getPageUrl}
-						onPageClick={onPageClick}
-						upsertDimensions={upsertDimensions}
-						imageScaling={imageScaling}
-					/>
-				))}
+				<div
+					className={cn('relative flex justify-center', {
+						'mx-auto flex-row gap-0': currentSet.length > 1,
+					})}
+				>
+					{currentSet.map((idx) => (
+						<Page
+							key={`page-${idx + 1}`}
+							page={idx + 1}
+							getPageUrl={getPageUrl}
+							onPageClick={onPageClick}
+							upsertDimensions={upsertDimensions}
+							imageScaling={imageScaling}
+						/>
+					))}
+				</div>
 			</div>
 		)
 	},

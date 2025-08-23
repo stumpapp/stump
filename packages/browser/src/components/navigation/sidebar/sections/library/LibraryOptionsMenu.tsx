@@ -10,7 +10,7 @@ import { useMediaMatch } from 'rooks'
 
 import DeleteLibraryConfirmation from '@/components/library/DeleteLibraryConfirmation'
 import { useAppContext } from '@/context'
-import paths from '@/paths'
+import { usePaths } from '@/paths'
 
 const mutation = graphql(`
 	mutation ScanLibraryMutation($id: ID!) {
@@ -27,6 +27,8 @@ const getLocaleKey = (path: string) => `${LOCALE_KEY}.${path}`
 
 export default function LibraryOptionsMenu({ library }: Props) {
 	const client = useQueryClient()
+	const paths = usePaths()
+
 	const [isDeleting, setIsDeleting] = useState(false)
 
 	const { t } = useLocaleContext()

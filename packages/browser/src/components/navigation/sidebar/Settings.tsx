@@ -2,11 +2,12 @@ import { cn, IconButton, ToolTip } from '@stump/components'
 import { Settings } from 'lucide-react'
 import { useLocation, useNavigate } from 'react-router'
 
-import paths from '../../../paths'
+import { usePaths } from '@/paths'
 
 export default function SettingsButton() {
 	const navigate = useNavigate()
 	const location = useLocation()
+	const paths = usePaths()
 
 	const isActive = location.pathname.startsWith(paths.settings())
 

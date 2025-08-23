@@ -5,7 +5,8 @@ use keyring::Entry;
 use serde::{Deserialize, Serialize};
 use specta::Type;
 
-const STORAGE_USER: &str = "stump-desktop-operator";
+const TOKEN_STORAGE: &str = "stump-desktop-operator-tokens";
+const CREDENTIALS_STORAGE: &str = "stump-desktop-operator-credentials";
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct StoredUsernamePassword {
@@ -48,12 +49,12 @@ pub enum SecureStoreError {
 	InvalidTokenPair(#[from] serde_json::Error),
 }
 
-type ServerName = String;
+type ServerId = String;
 
 #[derive(Default)]
 pub struct SecureStore {
-	token_records: HashMap<ServerName, Entry>,
-	credentials_records: HashMap<ServerName, Entry>,
+	token_records: HashMap<ServerId, Entry>,
+	credentials_records: HashMap<ServerId, Entry>,
 }
 
 impl std::fmt::Debug for SecureStore {
@@ -65,7 +66,7 @@ impl std::fmt::Debug for SecureStore {
 }
 
 #[derive(Debug, Serialize, Deserialize, Type)]
-pub struct CredentialStoreTokenState(HashMap<ServerName, bool>);
+pub struct CredentialStoreTokenState(HashMap<ServerId, bool>);
 
 // TODO: it would be nice to manage refreshes as well as expiration times?
 
@@ -77,12 +78,12 @@ impl SecureStore {
 	/// If a server did not exist before this store was initialized, it should be added via this function to ensure
 	/// the store is up to date. If that step is skipped, the store will continue throwing [`SecureStoreError::EntryMissing`]
 	/// until the entry is created.
-	pub fn create_entry(&mut self, server: ServerName) -> Result<(), SecureStoreError> {
-		let entry = Entry::new_with_target("tokens", &server, STORAGE_USER)?;
+	pub fn create_entry(&mut self, server: ServerId) -> Result<(), SecureStoreError> {
+		let entry = Entry::new_with_target("user", &server, TOKEN_STORAGE)?;
 		self.token_records.insert(server.clone(), entry);
 		self.credentials_records.insert(
 			server.clone(),
-			Entry::new_with_target("credentials", &server, STORAGE_USER)?,
+			Entry::new_with_target("user", &server, CREDENTIALS_STORAGE)?,
 		);
 		Ok(())
 	}
@@ -122,7 +123,7 @@ impl SecureStore {
 
 	pub fn get_credentials(
 		&self,
-		server: ServerName,
+		server: ServerId,
 	) -> Result<Option<StoredCredentials>, SecureStoreError> {
 		let entry = self
 			.credentials_records
@@ -142,7 +143,7 @@ impl SecureStore {
 
 	pub fn set_credentials(
 		&self,
-		server: ServerName,
+		server: ServerId,
 		credentials: StoredCredentials,
 	) -> Result<(), SecureStoreError> {
 		let entry = self
@@ -154,10 +155,7 @@ impl SecureStore {
 		Ok(())
 	}
 
-	pub fn delete_credentials(
-		&self,
-		server: ServerName,
-	) -> Result<bool, SecureStoreError> {
+	pub fn delete_credentials(&self, server: ServerId) -> Result<bool, SecureStoreError> {
 		let entry = self
 			.credentials_records
 			.get(&server)
@@ -172,7 +170,7 @@ impl SecureStore {
 	/// Get the tokens for the given server, if it exists
 	pub fn get_tokens(
 		&self,
-		server: ServerName,
+		server: ServerId,
 	) -> Result<Option<StoredTokens>, SecureStoreError> {
 		let entry = self
 			.token_records
@@ -193,8 +191,8 @@ impl SecureStore {
 	/// Set the API token for the given server
 	pub fn set_tokens(
 		&self,
-		server: ServerName,
-		tokens: JwtTokenPair,
+		server: ServerId,
+		tokens: StoredTokens,
 	) -> Result<(), SecureStoreError> {
 		let entry = self
 			.token_records
@@ -206,7 +204,7 @@ impl SecureStore {
 	}
 
 	/// Delete the API token for the given server
-	pub fn delete_tokens(&self, server: ServerName) -> Result<bool, SecureStoreError> {
+	pub fn delete_tokens(&self, server: ServerId) -> Result<bool, SecureStoreError> {
 		let entry = self
 			.token_records
 			.get(&server)

@@ -1,6 +1,11 @@
 import { StumpRouter } from '@stump/browser'
 import { useUserStore } from '@stump/browser/stores'
-import { queryClient, SDKContext, StumpClientContextProvider } from '@stump/client'
+import {
+	queryClient,
+	SDKContext,
+	StumpClientContextProvider,
+	StumpClientProps,
+} from '@stump/client'
 import {
 	Api,
 	AuthUser,
@@ -15,7 +20,9 @@ import { match, P } from 'ts-pattern'
 
 import { ServerConfig, useSavedServers } from './stores/savedServer'
 
-export default function SavedServerEntry() {
+type Props = Pick<StumpClientProps, 'tauriRPC'>
+
+export default function SavedServerEntry({ tauriRPC }: Props) {
 	const navigate = useNavigate()
 
 	const { savedServers, getServerToken, saveServerToken, deleteServerToken, getServerConfig } =
@@ -151,6 +158,19 @@ export default function SavedServerEntry() {
 		setUser(null)
 	}, [activeServer, deleteServerToken, setUser])
 
+	const handleAuthenticated = useCallback(
+		async (_user: AuthUser, tokens?: JwtTokenPair) => {
+			try {
+				if (tokens && activeServer) {
+					await tauriRPC?.setTokens(activeServer.id, { jwt: tokens })
+				}
+			} catch (err) {
+				console.error('Failed to store tokens in secure store', err)
+			}
+		},
+		[tauriRPC, activeServer],
+	)
+
 	const onServerConnectionError = useCallback(
 		(connected: boolean) => {
 			queryClient.clear()
@@ -160,6 +180,10 @@ export default function SavedServerEntry() {
 		},
 		[setUser],
 	)
+
+	const onLogout = useCallback(async () => {
+		navigate('/')
+	}, [navigate])
 
 	useEffect(() => {
 		if (!activeServer) {
@@ -175,10 +199,15 @@ export default function SavedServerEntry() {
 		<StumpClientContextProvider
 			onUnauthenticatedResponse={onAuthError}
 			onConnectionWithServerChanged={onServerConnectionError}
+			onLogout={onLogout}
+			onAuthenticated={handleAuthenticated}
+			tauriRPC={tauriRPC}
 		>
 			<SDKContext.Provider value={{ sdk, setSDK }}>
 				{/* <ServerAuthDialog isOpen={isAuthDialogOpen} onClose={handleAuthDialogClose} /> */}
-				<StumpRouter />
+				{/* TODO(desktop): I need to inform the router that it exists at a specific path, that way
+					all of the internal navigation can take it into account and land on the correct route */}
+				{sdk.isAuthed && <StumpRouter basePath={`/server/${serverId}`} />}
 			</SDKContext.Provider>
 		</StumpClientContextProvider>
 	)

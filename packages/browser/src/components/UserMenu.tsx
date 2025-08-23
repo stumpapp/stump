@@ -1,11 +1,13 @@
 import { Avatar, Card, cn, Popover, Text } from '@stump/components'
-import { Bell, Settings } from 'lucide-react'
+import { Bell, Server, Settings } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import AutoSizer from 'react-virtualized-auto-sizer'
 
+import { usePaths } from '@/paths'
+import { useAppStore } from '@/stores'
+
 import { useAppContext } from '../context'
-import paths from '../paths'
 import SignOut from './navigation/sidebar/SignOut'
 
 type Props = {
@@ -17,7 +19,10 @@ export default function UserMenu({ variant = 'sidebar' }: Props) {
 
 	const { user } = useAppContext()
 
-	const avatarUrl = user.avatar_url || undefined
+	const platform = useAppStore((store) => store.platform)
+	const paths = usePaths()
+
+	const avatarUrl = user.avatarUrl || undefined
 	const fallback = user.username.slice(0, 2).toUpperCase()
 	const isSidebar = variant === 'sidebar'
 
@@ -79,6 +84,13 @@ export default function UserMenu({ variant = 'sidebar' }: Props) {
 						</div>
 
 						<div className="w-full">
+							{platform !== 'browser' && (
+								<Link className={linkClasses(isSidebar)} to="/" onClick={() => setIsOpen(false)}>
+									<Server className="mr-1.5 h-4 w-4" />
+									Switch server
+								</Link>
+							)}
+
 							<SignOut />
 						</div>
 					</Popover.Content>

@@ -87,7 +87,6 @@ function BookReaderScene({ book }: Props) {
 
 	const page = search.get('page')
 	const isIncognito = search.get('incognito') === 'true'
-	const isAnimated = search.get('animated') === 'true'
 	const isStreaming = !search.get('stream') || search.get('stream') === 'true'
 
 	const { mutate } = useGraphQLMutation(mutation, {
@@ -110,7 +109,7 @@ function BookReaderScene({ book }: Props) {
 	)
 
 	const {
-		bookPreferences: { readingMode },
+		bookPreferences: { readingMode, animatedReader },
 	} = useBookPreferences({ book })
 
 	/**
@@ -145,26 +144,24 @@ function BookReaderScene({ book }: Props) {
 			navigate(
 				paths.bookReader(book.id, {
 					epubcfi: book.readProgress?.epubcfi || null,
-					isAnimated,
 					isEpub: true,
 				}),
 			)
 		} else if (book.extension.match(PDF_EXTENSION) && !isStreaming) {
 			navigate(paths.bookReader(book.id, { isPdf: true, isStreaming: false }))
 		} else if (book.extension.match(ARCHIVE_EXTENSION) || book.extension.match(PDF_EXTENSION)) {
-			if (!initialPage && readingMode === ReadingMode.Paged) {
-				navigate(paths.bookReader(book.id, { isAnimated, page: 1 }))
+			if (!initialPage && readingMode === ReadingMode.Paged && !animatedReader) {
+				navigate(paths.bookReader(book.id, { page: 1 }))
 			} else if (!!initialPage && initialPage > book.pages) {
-				navigate(paths.bookReader(book.id, { isAnimated, page: book.pages }))
+				navigate(paths.bookReader(book.id, { page: book.pages }))
 			}
 		}
-	}, [book, initialPage, isAnimated, readingMode, navigate, isStreaming])
+	}, [book, initialPage, readingMode, navigate, isStreaming, animatedReader])
 
 	if (book.extension.match(ARCHIVE_EXTENSION) || book.extension.match(PDF_EXTENSION)) {
 		return (
 			<ImageBasedReader
 				media={book}
-				isAnimated={isAnimated}
 				isIncognito={isIncognito}
 				initialPage={initialPage}
 				onProgress={updateProgress}

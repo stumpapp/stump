@@ -15,6 +15,7 @@ export const isDoublePageBehavior = (value: string): value is DoublePageBehavior
  * specific book
  */
 export type BookPreferences = {
+	animatedReader?: boolean
 	/**
 	 * A brightness value for the book, which will apply a filter to dim / brighten the page.
 	 * This must be a value between 0 and 1.
@@ -126,6 +127,7 @@ export type ReaderStore = {
 }
 
 export const DEFAULT_BOOK_PREFERENCES = {
+	animatedReader: false,
 	fontSize: 13,
 	lineHeight: 1.5,
 	brightness: 1,

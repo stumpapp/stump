@@ -1,19 +1,23 @@
 import { cn, IconButton, Label } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { Home } from 'lucide-react'
-import { useLocation, useNavigate } from 'react-router'
+import { useNavigate } from 'react-router'
 
+import { useRouterContext } from '@/context'
 import { usePreferences, useTheme } from '@/hooks'
-import paths from '@/paths'
+import { usePathActive, usePaths } from '@/paths'
 import { useAppStore } from '@/stores'
 
 import SettingsSideBarLink from './SettingsSideBarLink'
 import { useSettingsRoutes } from './useSettingsRoutes'
 
 export default function SettingsSideBar() {
-	const location = useLocation()
 	const navigate = useNavigate()
+	const paths = usePaths()
 
+	const isActive = usePathActive()
+
+	const { basePath } = useRouterContext()
 	const { t } = useLocaleContext()
 	const platform = useAppStore((store) => store.platform)
 	const {
@@ -56,8 +60,8 @@ export default function SettingsSideBar() {
 										return (
 											<SettingsSideBarLink
 												key={to}
-												to={to}
-												isActive={location.pathname.startsWith(to)}
+												to={`${basePath}${to}`}
+												isActive={isActive(to)}
 												isDisabled={disabled}
 												icon={icon}
 												prefetch={prefetch}

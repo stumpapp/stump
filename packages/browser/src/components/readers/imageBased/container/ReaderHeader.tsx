@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import { ArrowLeft, Fullscreen, Shrink } from 'lucide-react'
 import { useFullscreen } from 'rooks'
 
-import paths from '@/paths'
+import { usePaths } from '@/paths'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
 import { useImageBaseReaderContext } from '../context'
@@ -16,6 +16,7 @@ export default function ReaderHeader() {
 	const {
 		settings: { showToolBar },
 	} = useBookPreferences({ book })
+	const paths = usePaths()
 
 	const { id, resolvedName } = book
 

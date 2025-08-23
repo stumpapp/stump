@@ -3,7 +3,7 @@ import { Navigate, Route, Routes, useNavigate } from 'react-router'
 
 import { UnderConstruction } from '@/components/unimplemented'
 
-import { useAppContext } from '../../context.ts'
+import { useAppContext } from '../../context'
 import BookClubHomeLayout from './BookClubLayout.tsx'
 import BookClubSettingsRouter from './tabs/settings'
 

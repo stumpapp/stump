@@ -4,7 +4,7 @@ import { ChevronDown } from 'lucide-react'
 import { useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router'
 
-import paths from '@/paths'
+import { usePaths } from '@/paths'
 import { EBOOK_EXTENSION } from '@/utils/patterns'
 
 type Props = {
@@ -13,6 +13,7 @@ type Props = {
 
 export default function BookReaderDropdown({ book }: Props) {
 	const navigate = useNavigate()
+	const paths = usePaths()
 
 	const currentPage = useMemo(() => book.readProgress?.page ?? -1, [book])
 	/**

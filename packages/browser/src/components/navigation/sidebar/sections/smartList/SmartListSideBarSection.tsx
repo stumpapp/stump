@@ -4,7 +4,7 @@ import { FilterableArrangementEntityLink, graphql } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { useLocation } from 'react-router'
 
-import paths from '@/paths'
+import { usePaths } from '@/paths'
 import { usePrefetchSmartList } from '@/scenes/smartList'
 
 import { EntityOptionProps } from '../../../types'
@@ -25,6 +25,7 @@ export default function SmartListSideBarSection({
 	links = [FilterableArrangementEntityLink.Create],
 }: Props) {
 	const location = useLocation()
+	const paths = usePaths()
 
 	const { t } = useLocaleContext()
 	const { sdk } = useSDK()

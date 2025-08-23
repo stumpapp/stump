@@ -13,7 +13,7 @@ import { SceneContainer } from '@/components/container'
 import LinkBadge from '@/components/LinkBadge'
 import ReadMore from '@/components/ReadMore'
 import { useAppContext } from '@/context'
-import paths from '@/paths'
+import { usePaths } from '@/paths'
 import { PDF_EXTENSION } from '@/utils/patterns'
 
 import BookCompletionToggleButton from './BookCompletionToggleButton'
@@ -65,6 +65,8 @@ export default function BookOverviewScene() {
 		id: id || '',
 	})
 	const { checkPermission, isServerOwner } = useAppContext()
+
+	const paths = usePaths()
 
 	const canDownload = useMemo(() => checkPermission(UserPermission.DownloadFile), [checkPermission])
 	const canManage = useMemo(() => checkPermission(UserPermission.ManageLibrary), [checkPermission])

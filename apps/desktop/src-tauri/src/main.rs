@@ -15,7 +15,7 @@ use store::AppStore;
 use state::AppState;
 
 use commands::{
-	clear_credential_store, delete_credentials, delete_tokens,
+	clear_credential_store, create_server_entry, delete_credentials, delete_tokens,
 	get_credential_store_state, get_credentials, get_current_server, get_tokens,
 	init_credential_store, set_credentials, set_discord_presence, set_tokens,
 	set_use_discord_connection,
@@ -78,7 +78,8 @@ fn main() {
 			set_tokens,
 			delete_tokens,
 			clear_credential_store,
-			get_credential_store_state
+			get_credential_store_state,
+			create_server_entry
 		])
 		.run(tauri::generate_context!())
 		.expect("error while running tauri application");

@@ -1,6 +1,6 @@
 import { BookPreferences, DEFAULT_BOOK_PREFERENCES } from '@stump/client'
 import { Label, RawSwitch } from '@stump/components'
-import { ReadingMode } from '@stump/sdk'
+import { ReadingMode } from '@stump/graphql'
 import omit from 'lodash/omit'
 import { useCallback, useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
@@ -59,13 +59,17 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 		[forBook, setBookPreferences, store],
 	)
 
-	const currentReadingMode = activeSettings.readingMode || 'paged'
+	const currentReadingMode = activeSettings.readingMode || ReadingMode.Paged
 	const onChangeReadingModeForBook = useCallback(
 		(value: ReadingMode) => {
 			if (currentPage != null) {
 				// We need to set the page in the URL for the paged reader to start at the correct
 				// page but remove the page from the URL for the continuous readers
-				const urlPage = currentReadingMode.startsWith('continuous') ? currentPage.toString() : null
+				// const urlPage = currentReadingMode.startsWith('continuous') ? currentPage.toString() : null
+				let urlPage: string | null = null
+				if (currentReadingMode !== ReadingMode.Paged && !store.settings.animatedReader) {
+					urlPage = currentPage?.toString()
+				}
 				if (urlPage) {
 					search.set('page', urlPage)
 				} else {
@@ -75,7 +79,7 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 			}
 			setBookPreferences({ readingMode: value })
 		},
-		[search, setSearch, setBookPreferences, currentReadingMode, currentPage],
+		[search, setSearch, setBookPreferences, currentReadingMode, currentPage, store],
 	)
 
 	const onChangeReadingMode = useCallback(
@@ -87,6 +91,15 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 			}
 		},
 		[forBook, onChangeReadingModeForBook, store],
+	)
+
+	const onChangeExperimentalReader = useCallback(
+		(checked: boolean) => {
+			if (!forBook) {
+				store.setSettings({ animatedReader: checked })
+			}
+		},
+		[forBook, store],
 	)
 
 	return (
@@ -129,36 +142,52 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 
 			<div>
 				<Label className="text-xs font-medium uppercase text-foreground-muted">Preferences</Label>
+				<div className="flex flex-col gap-3 pt-2">
+					<Label className="flex items-center justify-between px-1">
+						<span>Separate second page</span>
+						<RawSwitch
+							primaryRing
+							variant="primary"
+							checked={activeSettings.secondPageSeparate}
+							onCheckedChange={(checked) => onPreferenceChange({ secondPageSeparate: checked })}
+						/>
+					</Label>
 
-				<Label className="flex items-center justify-between px-1 pt-4">
-					<span>Separate second page</span>
-					<RawSwitch
-						primaryRing
-						variant="primary"
-						checked={activeSettings.secondPageSeparate}
-						onCheckedChange={(checked) => onPreferenceChange({ secondPageSeparate: checked })}
-					/>
-				</Label>
+					<Label className="flex items-center justify-between px-1">
+						<span>Tap sides to navigate</span>
+						<RawSwitch
+							primaryRing
+							variant="primary"
+							checked={activeSettings.tapSidesToNavigate}
+							onCheckedChange={(checked) => onPreferenceChange({ tapSidesToNavigate: checked })}
+						/>
+					</Label>
 
-				<Label className="flex items-center justify-between px-1 pt-4">
-					<span>Tap sides to navigate</span>
-					<RawSwitch
-						primaryRing
-						variant="primary"
-						checked={activeSettings.tapSidesToNavigate}
-						onCheckedChange={(checked) => onPreferenceChange({ tapSidesToNavigate: checked })}
-					/>
-				</Label>
+					<Label className="flex items-center justify-between px-1">
+						<span>Reading timer</span>
+						<RawSwitch
+							primaryRing
+							variant="primary"
+							checked={activeSettings.trackElapsedTime}
+							onCheckedChange={(checked) => onPreferenceChange({ trackElapsedTime: checked })}
+						/>
+					</Label>
 
-				<Label className="flex items-center justify-between px-1 pt-4">
-					<span>Reading timer</span>
-					<RawSwitch
-						primaryRing
-						variant="primary"
-						checked={activeSettings.trackElapsedTime}
-						onCheckedChange={(checked) => onPreferenceChange({ trackElapsedTime: checked })}
-					/>
-				</Label>
+					{/* TODO: Once UX for settings is settled remove this */}
+					{!forBook && (
+						<div>
+							<Label className="flex items-center justify-between rounded-lg border border-dashed border-fill-brand/40 bg-fill-brand-secondary p-3">
+								<span>Experimental animated reader</span>
+								<RawSwitch
+									primaryRing
+									variant="primary"
+									checked={store.settings.animatedReader || false}
+									onCheckedChange={(checked) => onChangeExperimentalReader(checked)}
+								/>
+							</Label>
+						</div>
+					)}
+				</div>
 			</div>
 		</div>
 	)

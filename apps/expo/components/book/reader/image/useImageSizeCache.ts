@@ -1,4 +1,5 @@
 import { useSDK } from '@stump/client'
+import { ReadingDirection } from '@stump/graphql'
 import sizeOf from 'image-size'
 import { useEffect } from 'react'
 
@@ -13,19 +14,14 @@ type Params = {
 // TODO: probably write this to disk so we don't need to refetch every time
 
 export function useImageSizeCache({ windowSize = 10 }: Params = {}) {
-	const {
-		currentPage = 1,
-		pageURL,
-		book: { id, pages },
-		imageSizes,
-		setImageSizes,
-	} = useImageBasedReader()
+	const { currentPage = 1, pageURL, book, imageSizes, setImageSizes } = useImageBasedReader()
 	const { sdk } = useSDK()
 	const {
 		preferences: { readingDirection },
-	} = useBookPreferences(id)
+	} = useBookPreferences({ book })
 
-	const actualPage = readingDirection === 'rtl' ? pages - currentPage : currentPage
+	const actualPage =
+		readingDirection === ReadingDirection.Rtl ? book.pages - currentPage : currentPage
 
 	useEffect(() => {
 		const fetchPages = async (params: { url: string; index: number }[]) => {

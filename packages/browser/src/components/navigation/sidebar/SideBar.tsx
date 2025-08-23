@@ -14,9 +14,9 @@ import { useLocation } from 'react-router'
 import { useMediaMatch } from 'rooks'
 import { match } from 'ts-pattern'
 
-import { useAppContext } from '@/context'
+import { useAppContext, useRouterContext } from '@/context'
 import { useTheme } from '@/hooks'
-import paths from '@/paths'
+import { usePathActive, usePaths } from '@/paths'
 import { usePrefetchHomeScene } from '@/scenes/home'
 import { useAppStore } from '@/stores'
 
@@ -58,6 +58,9 @@ export default function SideBar({ asChild, hidden }: Props) {
 	const location = useLocation()
 	const platform = useAppStore((store) => store.platform)
 
+	const paths = usePaths()
+
+	const { basePath } = useRouterContext()
 	const { t } = useLocaleContext()
 	const { sdk } = useSDK()
 	const {
@@ -110,7 +113,7 @@ export default function SideBar({ asChild, hidden }: Props) {
 					<SideBarButtonLink
 						key="home-sidebar-navlink"
 						to={paths.home()}
-						isActive={location.pathname === '/'}
+						isActive={location.pathname === basePath + '/'}
 						onMouseEnter={() => prefetchHome()}
 					>
 						<Home className="mr-2 h-4 w-4 shrink-0" />
@@ -143,7 +146,7 @@ export default function SideBar({ asChild, hidden }: Props) {
 					</Suspense>
 				))
 				.otherwise(() => null),
-		[t, location.pathname, prefetchHome, isMobile],
+		[t, location.pathname, prefetchHome, isMobile, paths],
 	)
 
 	const sections = useMemo(

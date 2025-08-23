@@ -7,7 +7,7 @@ import { useMemo } from 'react'
 import { useLocation } from 'react-router'
 
 import { useAppContext } from '@/context'
-import paths from '@/paths'
+import { usePaths } from '@/paths'
 
 import { EntityOptionProps } from '../../../types'
 import SideBarButtonLink from '../../SideBarButtonLink'
@@ -35,6 +35,7 @@ export default function LibrarySideBarSection({
 	links = [FilterableArrangementEntityLink.Create],
 }: Props) {
 	const location = useLocation()
+	const paths = usePaths()
 
 	const { t } = useLocaleContext()
 	const { sdk } = useSDK()

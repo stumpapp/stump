@@ -30,6 +30,8 @@ type StoredTokens =
 			}
 	  }
 
+export type StoredCredentials = NonNullable<Pick<ServerConfig, 'auth'>['auth']>
+
 // TODO: If we fully isolate the desktop app then there is no need for this to live here
 export type TauriRPC = {
 	setDiscordPresence: (status?: string, details?: string) => Promise<void>
@@ -45,7 +47,7 @@ export type TauriRPC = {
 	/**
 	 * Initialize the credential store
 	 */
-	initCredentialStore: () => Promise<void>
+	initCredentialStore: (servers: string[]) => Promise<void>
 	/**
 	 * Get the current state of the credential store. This **will not** return actual
 	 * tokens, but will return a record for which servers have tokens stored
@@ -56,8 +58,8 @@ export type TauriRPC = {
 	 */
 	clearStore: () => Promise<void>
 
-	getCredentials: (forServer: string) => Promise<ServerConfig | null>
-	setCredentials: (forServer: string, config: ServerConfig) => Promise<ServerConfig>
+	getCredentials: (forServer: string) => Promise<StoredCredentials | null>
+	setCredentials: (forServer: string, config: StoredCredentials) => Promise<ServerConfig>
 	deleteCredentials: (forServer: string) => Promise<void>
 
 	/**
@@ -79,6 +81,8 @@ export type TauriRPC = {
 	 * @param forServer The server which the token was created by / to be used for
 	 */
 	deleteTokens: (forServer: string) => Promise<void>
+
+	createServerEntry: (forServer: string) => Promise<void>
 }
 
 export const StumpClientContext = createContext<IStumpClientContext | undefined>(undefined)

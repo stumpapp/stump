@@ -1,7 +1,9 @@
 import { cn, ProgressBar, Text } from '@stump/components'
 import { Book } from 'lucide-react'
 import { type ComponentPropsWithoutRef, useState } from 'react'
-import { Link, To } from 'react-router-dom'
+import { To } from 'react-router-dom'
+
+import { Link } from '@/context'
 
 import { EntityImage } from './EntityImage'
 

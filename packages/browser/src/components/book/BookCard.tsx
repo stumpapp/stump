@@ -3,7 +3,7 @@ import { FragmentType, graphql, useFragment } from '@stump/graphql'
 import pluralize from 'pluralize'
 import { type ComponentPropsWithoutRef, useCallback, useMemo } from 'react'
 
-import paths from '@/paths'
+import { usePaths } from '@/paths'
 import { usePrefetchBook, usePrefetchBooksAfterCursor } from '@/scenes/book'
 import { formatBytes } from '@/utils/format'
 
@@ -51,6 +51,7 @@ export default function BookCard({
 }: BookCardProps) {
 	const data = useFragment(BookCardFragment, fragment)
 	const isCoverOnly = variant === 'cover'
+	const paths = usePaths()
 
 	const prefetchBook = usePrefetchBook()
 	const prefetchBooksAfterCursor = usePrefetchBooksAfterCursor()
@@ -139,7 +140,7 @@ export default function BookCard({
 					page: data.readProgress?.page ?? undefined,
 				})
 			: paths.bookOverview(data.id)
-	}, [readingLink, data.id, onSelect, data.readProgress])
+	}, [readingLink, data.id, onSelect, data.readProgress, paths])
 
 	const propsOverrides = useMemo(() => {
 		let overrides = (

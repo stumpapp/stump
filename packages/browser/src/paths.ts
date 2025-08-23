@@ -1,3 +1,8 @@
+import { useCallback } from 'react'
+import { useLocation } from 'react-router'
+
+import { useRouterContext } from './context/RouterContext'
+
 type BookReaderParams = {
 	page?: number
 	isEpub?: boolean
@@ -22,25 +27,25 @@ type SettingsPage =
 type DocTopic = 'access-control' | 'features/book-clubs'
 type BookClubTab = 'overview' | 'members' | 'discussion' | 'settings'
 
-const paths = {
+const pathsInternal = {
 	bookClub: (id: string, tab?: BookClubTab) => `/book-clubs/${id}${tab ? `/${tab}` : ''}`,
 	bookClubCreate: () => '/book-clubs/create',
 	bookClubDiscussion: (id: string, discussionId?: string) => {
-		const url = paths.bookClub(id, 'discussion')
+		const url = pathsInternal.bookClub(id, 'discussion')
 		if (discussionId?.length) {
 			return `${url}?archived_chat_id=${discussionId}`
 		}
 		return url
 	},
 	bookClubDiscussionMessage: (id: string, messageId: string, discussionId?: string) => {
-		const url = paths.bookClubDiscussion(id, discussionId) + '/thread/' + messageId
+		const url = pathsInternal.bookClubDiscussion(id, discussionId) + '/thread/' + messageId
 		if (discussionId?.length) {
 			return `${url}?archived_chat_id=${discussionId}`
 		}
 		return url
 	},
-	bookClubScheduler: (id: string) => paths.bookClub(id, 'settings') + '/scheduler',
-	bookClubSettings: (id: string) => paths.bookClub(id, 'settings'),
+	bookClubScheduler: (id: string) => pathsInternal.bookClub(id, 'settings') + '/scheduler',
+	bookClubSettings: (id: string) => pathsInternal.bookClub(id, 'settings'),
 	bookClubs: () => '/book-clubs',
 	bookManagement: (id: string) => `/books/${id}/manage`,
 	bookOverview: (id: string) => `/books/${id}`,
@@ -48,7 +53,7 @@ const paths = {
 		id: string,
 		{ isEpub, isPdf, epubcfi, isAnimated, page, isStreaming, isIncognito }: BookReaderParams,
 	) => {
-		const baseUrl = paths.bookOverview(id)
+		const baseUrl = pathsInternal.bookOverview(id)
 		const searchParams = new URLSearchParams()
 
 		if (isIncognito) {
@@ -78,10 +83,10 @@ const paths = {
 		return `${baseUrl}/reader?${searchParams.toString()}`
 	},
 	bookSearch: () => '/books',
-	createEmailer: () => paths.settings('server/email/new'),
+	createEmailer: () => pathsInternal.settings('server/email/new'),
 	docs: (topic?: DocTopic, section?: string) =>
 		`https://www.stumpapp.dev/guides/${topic || ''}${section ? `#${section}` : ''}`,
-	editEmailer: (id: number) => paths.settings('server/email') + `/${id}/edit`,
+	editEmailer: (id: number) => pathsInternal.settings('server/email') + `/${id}/edit`,
 	home: () => '/',
 	libraries: () => '/libraries',
 	libraryBooks: (id: string, page?: number) => {
@@ -108,12 +113,77 @@ const paths = {
 		}
 		return `/series/${id}`
 	},
-	serverLogs: (jobId?: string) => paths.settings('server/logs') + (jobId ? `?job_id=${jobId}` : ''),
+	serverLogs: (jobId?: string) =>
+		pathsInternal.settings('server/logs') + (jobId ? `?job_id=${jobId}` : ''),
 	settings: (subpath: SettingsPage = 'app/general') => `/settings/${subpath || ''}`,
 	smartList: (id: string) => `/smart-lists/${id}`,
 	smartListCreate: () => '/smart-lists/create',
 	smartLists: () => '/smart-lists',
-	updateUser: (id: string) => `${paths.settings('server/users')}/${id}/manage`,
+	updateUser: (id: string) => `${pathsInternal.settings('server/users')}/${id}/manage`,
 } as const
 
+/**
+ * Creates a paths object that's aware of the router base path.
+ * This function should be used within React components to get properly prefixed paths.
+ */
+export function usePaths() {
+	const { basePath } = useRouterContext()
+
+	if (!basePath) {
+		return pathsInternal
+	}
+
+	return {
+		bookClub: (id: string, tab?: BookClubTab) => `${basePath}${pathsInternal.bookClub(id, tab)}`,
+		bookClubCreate: () => `${basePath}${pathsInternal.bookClubCreate()}`,
+		bookClubDiscussion: (id: string, discussionId?: string) =>
+			`${basePath}${pathsInternal.bookClubDiscussion(id, discussionId)}`,
+		bookClubDiscussionMessage: (id: string, messageId: string, discussionId?: string) =>
+			`${basePath}${pathsInternal.bookClubDiscussionMessage(id, messageId, discussionId)}`,
+		bookClubScheduler: (id: string) => `${basePath}${pathsInternal.bookClubScheduler(id)}`,
+		bookClubSettings: (id: string) => `${basePath}${pathsInternal.bookClubSettings(id)}`,
+		bookClubs: () => `${basePath}${pathsInternal.bookClubs()}`,
+		bookManagement: (id: string) => `${basePath}${pathsInternal.bookManagement(id)}`,
+		bookOverview: (id: string) => `${basePath}${pathsInternal.bookOverview(id)}`,
+		bookReader: (id: string, params: BookReaderParams) =>
+			`${basePath}${pathsInternal.bookReader(id, params)}`,
+		bookSearch: () => `${basePath}${pathsInternal.bookSearch()}`,
+		createEmailer: () => `${basePath}${pathsInternal.createEmailer()}`,
+		docs: pathsInternal.docs, // Don't prefix external URLs
+		editEmailer: (id: number) => `${basePath}${pathsInternal.editEmailer(id)}`,
+		home: () => `${basePath}${pathsInternal.home()}`,
+		libraries: () => `${basePath}${pathsInternal.libraries()}`,
+		libraryBooks: (id: string, page?: number) =>
+			`${basePath}${pathsInternal.libraryBooks(id, page)}`,
+		libraryCreate: () => `${basePath}${pathsInternal.libraryCreate()}`,
+		libraryFileExplorer: (id: string) => `${basePath}${pathsInternal.libraryFileExplorer(id)}`,
+		libraryManage: (id: string) => `${basePath}${pathsInternal.libraryManage(id)}`,
+		librarySeries: (id: string, page?: number) =>
+			`${basePath}${pathsInternal.librarySeries(id, page)}`,
+		notFound: () => `${basePath}${pathsInternal.notFound()}`,
+		notifications: () => `${basePath}${pathsInternal.notifications()}`,
+		seriesManagement: (id: string) => `${basePath}${pathsInternal.seriesManagement(id)}`,
+		seriesOverview: (id: string, page?: number) =>
+			`${basePath}${pathsInternal.seriesOverview(id, page)}`,
+		serverLogs: (jobId?: string) => `${basePath}${pathsInternal.serverLogs(jobId)}`,
+		settings: (subpath?: SettingsPage) => `${basePath}${pathsInternal.settings(subpath)}`,
+		smartList: (id: string) => `${basePath}${pathsInternal.smartList(id)}`,
+		smartListCreate: () => `${basePath}${pathsInternal.smartListCreate()}`,
+		smartLists: () => `${basePath}${pathsInternal.smartLists()}`,
+		updateUser: (id: string) => `${basePath}${pathsInternal.updateUser(id)}`,
+	}
+}
+
+const paths = pathsInternal
+
 export default paths
+
+export const usePathActive = () => {
+	const location = useLocation()
+	const { basePath } = useRouterContext()
+
+	return useCallback(
+		(cmp: string) => location.pathname.startsWith(`${basePath}${cmp}`),
+		[basePath, location.pathname],
+	)
+}

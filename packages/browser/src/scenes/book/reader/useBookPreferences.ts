@@ -80,6 +80,7 @@ const defaultsFromLibraryConfig = (
 })
 
 const settingsAsBookPreferences = (settings: ReaderSettings): BookPreferences => ({
+	animatedReader: settings.animatedReader,
 	brightness: settings.brightness,
 	imageScaling: settings.imageScaling,
 	readingDirection: settings.readingDirection,

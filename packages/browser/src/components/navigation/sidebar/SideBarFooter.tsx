@@ -6,7 +6,6 @@ export default function SideBarFooter() {
 			<div className="flex items-center justify-between">
 				<SettingsButton />
 			</div>
-			{/* <ApplicationVersion /> */}
 		</footer>
 	)
 }

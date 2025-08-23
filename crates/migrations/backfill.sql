@@ -80,9 +80,9 @@ INSERT INTO "library_configs"(
     )
 SELECT "convert_rar_to_zip",
     "hard_delete_conversions",
-    "default_reading_dir",
-    "default_reading_mode",
-    "default_reading_image_scale_fit",
+    UPPER("default_reading_dir"),
+    "default_reading_mode", -- TODO: Can't backfill
+    UPPER("default_reading_image_scale_fit"),
     "generate_file_hashes",
     "generate_koreader_hashes",
     "process_metadata",
@@ -106,7 +106,7 @@ SELECT "id",
     "name",
     "description",
     "path",
-    "status",
+    UPPER("status"),
     "updated_at",
     "created_at",
     "emoji",
@@ -132,7 +132,7 @@ SELECT "id",
     "updated_at",
     "created_at",
     "path",
-    "status",
+    UPPER("status"),
     "library_id"
 FROM backup."series";
 -- TODO: metadata
@@ -165,13 +165,14 @@ SELECT "id",
     "modified_at",
     "hash",
     "path",
-    "status",
+    UPPER("status"),
     "series_id",
     "deleted_at",
     "koreader_hash"
 FROM backup."media";
 
 -- Dump pretty much everything from the backup table, excluding ID since it is auto-incrementing in the new schema
+-- Missing: page_analysis
 INSERT INTO "media_metadata"(
         "title",
         "series",
@@ -223,7 +224,6 @@ SELECT "title",
     "media_id",
     "age_rating"
 FROM backup."media_metadata";
--- TODO: We need to figure out how to handle the page_analysis column
 
 -- Now just go in alpha-ish order and dump everything:
 
@@ -323,7 +323,7 @@ INSERT INTO "jobs"(
 SELECT "id",
     "name",
     "description",
-    "status",
+    UPPER("status"),
     "save_state",
     "output_data",
     "ms_elapsed",
@@ -405,7 +405,7 @@ SELECT "id",
     "kind"
 FROM backup."registered_reading_devices";
 
-
+-- Missing: permissions
 INSERT INTO "users"(
         "id",
         "username",
@@ -416,7 +416,6 @@ INSERT INTO "users"(
         "deleted_at",
         "is_locked",
         "max_sessions_allowed",
-        "permissions",
         "user_preferences_id"
     )
 SELECT "id",
@@ -428,16 +427,18 @@ SELECT "id",
     "deleted_at",
     "is_locked",
     "max_sessions_allowed",
-    "permissions",
     "user_preferences_id"
 FROM backup."users";
 
+-- Missing: 
+-- app_font
+-- navigation_arrangement
+-- home_arrangement
 INSERT INTO "user_preferences"(
         "id",
         "preferred_layout_mode",
         "locale",
         "app_theme",
-        "app_font",
         "primary_navigation_mode",
         "layout_max_width_px",
         "show_query_indicator",
@@ -457,7 +458,6 @@ SELECT "id",
     "preferred_layout_mode",
     "locale",
     "app_theme",
-    "app_font",
     "primary_navigation_mode",
     "layout_max_width_px",
     "show_query_indicator",

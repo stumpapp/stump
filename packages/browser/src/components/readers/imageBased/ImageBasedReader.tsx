@@ -133,7 +133,7 @@ export default function ImageBasedReader({ media, isIncognito, initialPage, onPr
 				setCurrentPage(newPage)
 			} else {
 				setCurrentPage(newPage)
-				// navigate(paths.bookReader(media.id, { isIncognito, page: newPage }))
+				navigate(paths.bookReader(media.id, { isIncognito, page: newPage }))
 			}
 		},
 		[media.id, isIncognito, navigate, readingMode, paths],

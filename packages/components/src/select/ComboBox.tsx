@@ -20,6 +20,7 @@ import { cn } from '../utils'
 export type ComboBoxOption = {
 	label: string
 	value: string
+	className?: string
 }
 
 type SingleSelectComboBoxProps = {
@@ -254,7 +255,11 @@ export function ComboBox({
 										key={option.value}
 										// Note: For some reason, this transforms the `value` to lowercase...
 										onSelect={handleChange}
-										className={cn('transition-all duration-75', { 'text-brand': isSelected })}
+										className={cn(
+											'transition-all duration-75',
+											{ 'text-brand': isSelected },
+											option.className,
+										)}
 										value={option.value}
 									>
 										<Check

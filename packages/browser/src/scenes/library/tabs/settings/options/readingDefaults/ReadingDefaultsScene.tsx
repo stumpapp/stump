@@ -16,7 +16,7 @@ import { useLibraryManagement } from '../../context'
 type PatchParams = Partial<
 	Pick<
 		CreateOrUpdateLibrarySchema,
-		'default_reading_dir' | 'default_reading_image_scale_fit' | 'default_reading_mode'
+		'defaultReadingDir' | 'defaultReadingImageScaleFit' | 'defaultReadingMode'
 	>
 >
 
@@ -26,6 +26,7 @@ export default function ReadingDefaultsScene() {
 	const handleSubmit = useCallback(
 		(params: PatchParams) => {
 			patch({
+				// @ts-expect-error: This is fine
 				config: {
 					...library.config,
 					...params,
@@ -42,17 +43,17 @@ export default function ReadingDefaultsScene() {
 	})
 
 	const formValues = form.watch([
-		'default_reading_dir',
-		'default_reading_image_scale_fit',
-		'default_reading_mode',
+		'defaultReadingDir',
+		'defaultReadingImageScaleFit',
+		'defaultReadingMode',
 	])
 	const didChange = useMemo(() => {
 		const config = library.config
 		const [dir, scale, mode] = formValues
 		return (
-			config.default_reading_dir !== dir ||
-			config.default_reading_image_scale_fit !== scale ||
-			config.default_reading_mode !== mode
+			config.defaultReadingDir !== dir ||
+			config.defaultReadingImageScaleFit !== scale ||
+			config.defaultReadingMode !== mode
 		)
 	}, [formValues, library])
 	const [debouncedDidChange] = useDebouncedValue(didChange, 500)

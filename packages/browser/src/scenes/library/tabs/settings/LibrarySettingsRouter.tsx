@@ -1,6 +1,5 @@
 import { useGraphQLMutation } from '@stump/client'
 import { CreateOrUpdateLibraryInput, graphql, useFragment, UserPermission } from '@stump/graphql'
-import { ScanOptions } from '@stump/sdk'
 import { useQueryClient } from '@tanstack/react-query'
 import omit from 'lodash/omit'
 import pick from 'lodash/pick'
@@ -11,6 +10,7 @@ import { useAppContext } from '@/context'
 
 import { useLibraryContext } from '../../context'
 import { LibraryManagementContext } from './context'
+import { ScanOptions } from './options/scanner/history/ScanHistoryTable'
 
 const BasicSettingsScene = lazy(() => import('./basics/BasicSettingsScene'))
 const ThumbnailSettingsScene = lazy(() => import('./options/thumbnails/ThumbnailSettingsScene'))

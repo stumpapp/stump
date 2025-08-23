@@ -26,9 +26,8 @@ CREATE TABLE "tag_id_map" (
 );
 
 -- Step 2: Insert the existing tags from backup into the new database
-INSERT INTO "tags" ("name", "created_at")
-SELECT "name",
-    "created_at"
+INSERT INTO "tags" ("name")
+SELECT "name"
 FROM backup."tags";
 
 -- Step 3: Create a mapping of old tag IDs to new tag IDs
@@ -42,30 +41,40 @@ FROM backup."tags" t_old
 
 -- Media tags
 INSERT INTO "media_tags" ("media_id", "tag_id")
-SELECT mtg."media_id",
+SELECT mtg."A",
     map."new_id"
 FROM backup."_MediaToTag" mtg
-    JOIN "tag_id_map" map ON mtg."tag_id" = map."old_id";
+    JOIN "tag_id_map" map ON mtg."B" = map."old_id";
 
 -- Series tags
 INSERT INTO "series_tags" ("series_id", "tag_id")
-SELECT stg."series_id",
+SELECT stg."A",
     map."new_id"
 FROM backup."_SeriesToTag" stg
-    JOIN "tag_id_map" map ON stg."tag_id" = map."old_id";
+    JOIN "tag_id_map" map ON stg."B" = map."old_id";
 
 -- Library tags
 INSERT INTO "library_tags" ("library_id", "tag_id")
-SELECT ltg."library_id",
+SELECT ltg."A",
     map."new_id"
 FROM backup."_LibraryToTag" ltg
-    JOIN "tag_id_map" map ON ltg."tag_id" = map."old_id";
+    JOIN "tag_id_map" map ON ltg."B" = map."old_id";
 
 -- Step 5: Clean up the temporary mapping table. We should be done at this point with tags
 DROP TABLE "tag_id_map";
 
 -- Backfill the library and library-related tables:
+-- Library configs now use auto-incrementing integer IDs, so we need mapping like user preferences
 
+-- Step 1: Create a temporary mapping table for library config IDs
+CREATE TABLE "library_config_id_map" (
+    "old_id" TEXT NOT NULL,
+    "new_id" INTEGER NOT NULL,
+    PRIMARY KEY ("old_id")
+);
+
+-- Step 2: Insert library configs with new auto-increment IDs (excluding the old text ID)
+-- Note: Can't backfill default_reading_mode
 INSERT INTO "library_configs"(
         "convert_rar_to_zip",
         "hard_delete_conversions",
@@ -76,20 +85,36 @@ INSERT INTO "library_configs"(
         "generate_koreader_hashes",
         "process_metadata",
         "library_pattern",
+        "watch",
         "library_id"
     )
 SELECT "convert_rar_to_zip",
     "hard_delete_conversions",
     UPPER("default_reading_dir"),
-    "default_reading_mode", -- TODO: Can't backfill
+    'PAGED',
     UPPER("default_reading_image_scale_fit"),
     "generate_file_hashes",
     "generate_koreader_hashes",
     "process_metadata",
     "library_pattern",
+    "watch",
     "library_id"
 FROM backup."library_configs";
 
+-- Step 3: Create mapping of old library config IDs to new ones by insertion order
+INSERT INTO "library_config_id_map" ("old_id", "new_id")
+SELECT lc_old."id",
+    lc_new."id"
+FROM (
+    SELECT "id", ROW_NUMBER() OVER (ORDER BY "id") as rn
+    FROM backup."library_configs"
+) lc_old
+JOIN (
+    SELECT "id", ROW_NUMBER() OVER (ORDER BY "id") as rn
+    FROM "library_configs"
+) lc_new ON lc_old.rn = lc_new.rn;
+
+-- Step 4: Insert libraries with mapped config_id
 INSERT INTO "libraries"(
         "id",
         "name",
@@ -110,9 +135,13 @@ SELECT "id",
     "updated_at",
     "created_at",
     "emoji",
-    "config_id",
+    map."new_id", -- Use mapped config_id
     "last_scanned_at"
-FROM backup."libraries";
+FROM backup."libraries" lib
+JOIN "library_config_id_map" map ON lib."config_id" = map."old_id";
+
+-- Step 5: Clean up the library config mapping table
+DROP TABLE "library_config_id_map";
 
 -- Backfill the series and series metadata tables:
 
@@ -406,6 +435,7 @@ SELECT "id",
 FROM backup."registered_reading_devices";
 
 -- Missing: permissions
+-- Note: user_preferences_id will be updated after we create the mapping
 INSERT INTO "users"(
         "id",
         "username",
@@ -415,8 +445,7 @@ INSERT INTO "users"(
         "created_at",
         "deleted_at",
         "is_locked",
-        "max_sessions_allowed",
-        "user_preferences_id"
+        "max_sessions_allowed"
     )
 SELECT "id",
     "username",
@@ -426,16 +455,20 @@ SELECT "id",
     "created_at",
     "deleted_at",
     "is_locked",
-    "max_sessions_allowed",
-    "user_preferences_id"
+    "max_sessions_allowed"
 FROM backup."users";
 
--- Missing: 
--- app_font
--- navigation_arrangement
--- home_arrangement
+-- Backfilling user preferences requires mapping old IDs to new auto-increment IDs
+-- Step 1: Create a temporary mapping table for user preferences
+CREATE TABLE "user_preferences_id_map" (
+    "old_id" TEXT NOT NULL,
+    "new_id" INTEGER NOT NULL,
+    PRIMARY KEY ("old_id")
+);
+
+-- Step 2: Insert user preferences with new auto-increment IDs
+-- Missing: app_font, navigation_arrangement, home_arrangement
 INSERT INTO "user_preferences"(
-        "id",
         "preferred_layout_mode",
         "locale",
         "app_theme",
@@ -452,10 +485,10 @@ INSERT INTO "user_preferences"(
         "prefer_accent_color",
         "show_thumbnails_in_headers",
         "enable_job_overlay",
-        "enable_alphabet_select"
+        "enable_alphabet_select",
+        "app_font"
     )
-SELECT "id",
-    "preferred_layout_mode",
+SELECT "preferred_layout_mode",
     "locale",
     "app_theme",
     "primary_navigation_mode",
@@ -471,8 +504,54 @@ SELECT "id",
     "prefer_accent_color",
     "show_thumbnails_in_headers",
     "enable_job_overlay",
-    FALSE -- "enable_alphabet_select" is not in the new old database
+    0, -- "enable_alphabet_select" is not in the old database (FALSE = 0 in SQLite)
+    'INTER'
 FROM backup."user_preferences";
+
+-- Step 3: Create mapping of old user preferences IDs to new ones
+-- We need to match each old record to its corresponding new record by insertion order
+INSERT INTO "user_preferences_id_map" ("old_id", "new_id")
+SELECT up_old."id",
+    up_new."id"
+FROM (
+    SELECT "id", ROW_NUMBER() OVER (ORDER BY "id") as rn
+    FROM backup."user_preferences"
+) up_old
+JOIN (
+    SELECT "id", ROW_NUMBER() OVER (ORDER BY "id") as rn
+    FROM "user_preferences"
+) up_new ON up_old.rn = up_new.rn;
+
+-- Step 4: Update users table with mapped user_preferences_id
+UPDATE "users" 
+SET "user_preferences_id" = (
+    SELECT map."new_id" 
+    FROM "user_preferences_id_map" map 
+    JOIN backup."users" bu ON bu."user_preferences_id" = map."old_id"
+    WHERE bu."id" = "users"."id"
+)
+WHERE EXISTS (
+    SELECT 1 
+    FROM backup."users" bu 
+    JOIN "user_preferences_id_map" map ON bu."user_preferences_id" = map."old_id"
+    WHERE bu."id" = "users"."id"
+);
+
+-- Step 5: Update user_preferences table with user_id to complete the relationship
+UPDATE "user_preferences" 
+SET "user_id" = (
+    SELECT u."id"
+    FROM "users" u
+    WHERE u."user_preferences_id" = "user_preferences"."id"
+)
+WHERE EXISTS (
+    SELECT 1 
+    FROM "users" u
+    WHERE u."user_preferences_id" = "user_preferences"."id"
+);
+
+-- Step 6: Clean up the temporary mapping table
+DROP TABLE "user_preferences_id_map";
 
 INSERT INTO "user_login_activity"(
         "ip_address",
@@ -522,7 +601,7 @@ SELECT "page",
     "elapsed_seconds"
 FROM backup."reading_sessions";
 
-INSERT INTO "finshed_reading_sessions"(
+INSERT INTO "finished_reading_sessions"(
         "started_at",
         "completed_at",
         "media_id",

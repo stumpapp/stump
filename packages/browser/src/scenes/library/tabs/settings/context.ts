@@ -1,8 +1,8 @@
 import { CreateOrUpdateLibraryInput, LibrarySettingsConfigFragment } from '@stump/graphql'
-import { ScanOptions } from '@stump/sdk'
 import { createContext, useContext } from 'react'
 
 import { ILibraryContext } from '../../context'
+import { ScanOptions } from './options/scanner/history/ScanHistoryTable'
 
 export type ILibraryManagementContext = {
 	library: ILibraryContext['library'] & LibrarySettingsConfigFragment

@@ -7,8 +7,8 @@ import { Helmet } from 'react-helmet'
 
 import { BookTable } from '@/components/book'
 import BookCard from '@/components/book/BookCard'
-import BookGrid from '@/components/book/BookGrid'
 import { defaultBookColumnSort } from '@/components/book/table'
+import { DynamicCardGrid, GridSizeSlider } from '@/components/container'
 import {
 	FilterContext,
 	FilterHeader,
@@ -24,6 +24,7 @@ import {
 	useURLKeywordSearch,
 	useURLPageParams,
 } from '@/components/filters/useFilterScene'
+import GenericEmptyState from '@/components/GenericEmptyState'
 import { LibraryBooksAlphabet, usePrefetchLibraryBooksAlphabet } from '@/components/library'
 import { EntityTableColumnConfiguration } from '@/components/table'
 import TableOrGridLayout from '@/components/TableOrGridLayout'
@@ -299,14 +300,29 @@ function LibraryBooksScene() {
 						})
 					}}
 				>
-					<div className="flex flex-1 px-4 pb-2 pt-4 md:pb-4">
-						<BookGrid
-							isLoading={isLoading}
-							items={nodes.map((node) => (
-								<BookCard key={node.id} fragment={node} />
-							))}
-							hasFilters={Object.keys(filters || {}).length > 0}
-						/>
+					<div className="flex flex-1 px-4 pt-4">
+						{nodes.length && (
+							<DynamicCardGrid
+								count={nodes.length}
+								renderItem={(index) => <BookCard key={nodes[index]!.id} fragment={nodes[index]!} />}
+							/>
+						)}
+						{!nodes.length && !isLoading && (
+							<div className="col-span-full grid flex-1 place-self-center">
+								<GenericEmptyState
+									title={
+										Object.keys(filters || {}).length > 0
+											? 'No books match your search'
+											: "It doesn't look like there are any books here"
+									}
+									subtitle={
+										Object.keys(filters || {}).length > 0
+											? 'Try removing some filters to see more books'
+											: 'Do you have any books in your library?'
+									}
+								/>
+							</div>
+						)}
 					</div>
 				</URLFilterContainer>
 			)
@@ -365,6 +381,7 @@ function LibraryBooksScene() {
 					layoutControls={<TableOrGridLayout layout={layoutMode} setLayout={setLayout} />}
 					orderControls={<URLOrdering entity="media" />}
 					filterControls={<URLFilterDrawer entity="media" />}
+					sizeControls={layoutMode === 'GRID' ? <GridSizeSlider /> : undefined}
 					navOffset
 				/>
 

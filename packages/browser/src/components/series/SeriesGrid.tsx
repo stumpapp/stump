@@ -9,6 +9,7 @@ interface Props {
 	hasFilters?: boolean
 }
 
+// TODO(sea-orm): Remove in favor of DynamicCardGrid
 export default function SeriesGrid({ series, isLoading, hasFilters }: Props) {
 	if (isLoading) {
 		return null

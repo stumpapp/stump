@@ -9,6 +9,7 @@ type Props = {
 	onSelect?: (item: JSX.Element) => void
 }
 // TODO: translate
+// TODO(sea-orm): Remove in favor of DynamicCardGrid
 export default function BookGrid({ items, isLoading, hasFilters }: Props) {
 	if (isLoading) {
 		return null

@@ -11,6 +11,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Helmet } from 'react-helmet'
 
+import { DynamicCardGrid, GridSizeSlider } from '@/components/container'
 import {
 	FilterContext,
 	FilterHeader,
@@ -27,8 +28,10 @@ import {
 	useURLKeywordSearch,
 	useURLPageParams,
 } from '@/components/filters/useFilterScene'
+import GenericEmptyState from '@/components/GenericEmptyState'
 import { LibrarySeriesAlphabet, usePrefetchLibrarySeriesAlphabet } from '@/components/library'
 import { SeriesTable } from '@/components/series'
+import SeriesCard from '@/components/series/SeriesCard'
 import SeriesGrid from '@/components/series/SeriesGrid'
 import { defaultSeriesColumnSort } from '@/components/series/table'
 import { EntityTableColumnConfiguration } from '@/components/table'
@@ -322,12 +325,29 @@ function LibrarySeriesScene() {
 						})
 					}}
 				>
-					<div className="flex flex-1 px-4 pb-2 pt-4 md:pb-4">
-						<SeriesGrid
-							isLoading={isLoading}
-							series={nodes}
-							hasFilters={Object.keys(filters || {}).length > 0}
-						/>
+					<div className="flex flex-1 px-4 pt-4">
+						{nodes.length && (
+							<DynamicCardGrid
+								count={nodes.length}
+								renderItem={(index) => <SeriesCard key={nodes[index]!.id} data={nodes[index]!} />}
+							/>
+						)}
+						{!nodes.length && !isLoading && (
+							<div className="col-span-full grid flex-1 place-self-center">
+								<GenericEmptyState
+									title={
+										Object.keys(filters || {}).length > 0
+											? 'No series match your search'
+											: "It doesn't look like there are any series here"
+									}
+									subtitle={
+										Object.keys(filters || {}).length > 0
+											? 'Try removing some filters to see more series'
+											: 'Do you have any series in your library?'
+									}
+								/>
+							</div>
+						)}
 					</div>
 				</URLFilterContainer>
 			)
@@ -387,6 +407,7 @@ function LibrarySeriesScene() {
 					layoutControls={<TableOrGridLayout layout={layoutMode} setLayout={setLayout} />}
 					orderControls={<URLOrdering entity="series" />}
 					filterControls={<URLFilterDrawer entity="series" />}
+					sizeControls={layoutMode === 'GRID' ? <GridSizeSlider /> : undefined}
 					navOffset
 				/>
 

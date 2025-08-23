@@ -1,63 +1,63 @@
 @font-face {
-	font-family: Liberata;
+	font-family: 'Literata';
 	font-weight: 100;
 	src: url('Literata-ExtraLight.woff2') format('woff');
 }
 @font-face {
-	font-family: Liberata;
+	font-family: 'Literata';
 	font-weight: 100;
 	font-style: italic;
 	src: url('Literata-ExtraLightItalic.woff2') format('woff');
 }
 @font-face {
-	font-family: Liberata;
+	font-family: 'Literata';
 	font-weight: 300;
 	src: url('Literata-Light.woff2') format('woff');
 }
 @font-face {
-	font-family: Liberata;
+	font-family: 'Literata';
 	font-weight: 300;
 	font-style: italic;
 	src: url('Literata-LightItalic.woff2') format('woff');
 }
 @font-face {
-	font-family: Liberata;
+	font-family: 'Literata';
 	src: url('Literata-Regular.woff2') format('woff2');
 }
 @font-face {
-	font-family: Liberata;
+	font-family: 'Literata';
 	src: url('Literata-Italic.woff2') format('woff2');
 	font-style: italic;
 }
 @font-face {
-	font-family: Liberata;
+	font-family: 'Literata';
 	font-weight: 500;
 	src: url('Literata-Medium.woff2') format('woff2');
 }
 @font-face {
-	font-family: Liberata;
+	font-family: 'Literata';
 	font-weight: 500;
 	font-style: italic;
 	src: url('Literata-MediumItalic.woff2') format('woff2');
 }
 @font-face {
-	font-family: Liberata;
+	font-family: 'Literata';
 	src: url('Literata-Bold.woff2') format('woff2');
 	font-weight: bold;
 }
 @font-face {
-	font-family: Liberata;
+	font-family: 'Literata';
 	font-weight: bold;
 	font-style: italic;
 	src: url('Literata-BoldItalic.woff2') format('woff2');
 }
 @font-face {
-	font-family: Liberata;
+	font-family: 'Literata';
 	font-weight: 700;
 	src: url('Literata-ExtraBold.woff2') format('woff2');
 }
 @font-face {
-	font-family: Liberata;
+	font-family: 'Literata';
 	font-weight: 700;
 	font-style: italic;
 	src: url('Literata-ExtraBoldItalic.woff2') format('woff2');

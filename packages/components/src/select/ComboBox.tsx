@@ -20,7 +20,7 @@ import { cn } from '../utils'
 export type ComboBoxOption = {
 	label: string
 	value: string
-	className?: string
+	fontClassName?: string
 }
 
 type SingleSelectComboBoxProps = {
@@ -219,6 +219,7 @@ export function ComboBox({
 							{ [SIZE_VARIANTS[size || 'default']]: !!size },
 							{ 'text-foreground-muted': !hasSelectedSomething },
 							triggerClassName,
+							options.find((option) => option.value === value)?.fontClassName,
 						)}
 					>
 						{renderSelected()}
@@ -248,7 +249,9 @@ export function ComboBox({
 						)}
 						<Command.Group>
 							{options.map((option) => {
-								const isSelected = value?.includes(option.value) || false
+								const isSelected = isMultiSelect
+									? value?.includes(option.value)
+									: value === option.value
 
 								return (
 									<Command.Item
@@ -258,7 +261,7 @@ export function ComboBox({
 										className={cn(
 											'transition-all duration-75',
 											{ 'text-brand': isSelected },
-											option.className,
+											option.fontClassName,
 										)}
 										value={option.value}
 									>

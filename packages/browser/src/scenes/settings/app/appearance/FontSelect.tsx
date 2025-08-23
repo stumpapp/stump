@@ -60,41 +60,41 @@ export const SUPPORTED_FONT_OPTIONS = [
 	{
 		label: 'Atkinson Hyperlegible',
 		value: 'atkinsonhyperlegible',
-		className: 'font-atkinsonhyperlegible',
+		fontClassName: 'font-atkinsonhyperlegible',
 	},
 	{
 		label: 'Bitter',
 		value: 'bitter',
-		className: 'font-bitter',
+		fontClassName: 'font-bitter',
 	},
 	{
 		label: 'Charis SIL',
 		value: 'charis',
-		className: 'font-charis',
+		fontClassName: 'font-charis',
 	},
 	{
 		label: 'Inter',
 		value: 'inter',
-		className: 'font-inter',
+		fontClassName: 'font-inter',
 	},
 	{
 		label: 'Libre Baskerville',
 		value: 'librebaskerville',
-		className: 'font-librebaskerville',
+		fontClassName: 'font-librebaskerville',
 	},
 	{
 		label: 'Literata',
 		value: 'literata',
-		className: 'font-literata',
+		fontClassName: 'font-literata',
 	},
 	{
 		label: 'Nunito',
 		value: 'nunito',
-		className: 'font-nunito',
+		fontClassName: 'font-nunito',
 	},
 	{
 		label: 'OpenDyslexic',
 		value: 'opendyslexic',
-		className: 'font-opendyslexic',
+		fontClassName: 'font-opendyslexic',
 	},
 ]

@@ -65,7 +65,7 @@ const injectFontStylesheet = (rendition: Rendition) => {
 	const link = doc.createElement('link')
 	link.rel = 'stylesheet'
 	link.id = 'stump-fonts-stylesheet'
-	link.href = '/assets/font/fonts.css'
+	link.href = '/assets/fonts/fonts.css'
 	head.appendChild(link)
 }
 

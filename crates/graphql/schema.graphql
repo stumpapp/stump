@@ -650,6 +650,15 @@ enum InheritPermissionValue {
 }
 
 
+"""
+The different types of layouts a client-side interface might present to a user
+for a collection of items
+"""
+enum InterfaceLayout {
+	GRID
+	TABLE
+}
+
 "A scalar that can represent any JSON value."
 scalar JSON
 
@@ -2178,7 +2187,7 @@ input UpdateUserInput {
 
 input UpdateUserPreferencesInput {
 	locale: String!
-	preferredLayoutMode: String!
+	preferredLayoutMode: InterfaceLayout!
 	primaryNavigationMode: String!
 	layoutMaxWidthPx: Int
 	appTheme: String!
@@ -2318,7 +2327,7 @@ type UserPermissionStruct {
 }
 
 type UserPreferences {
-	preferredLayoutMode: String!
+	preferredLayoutMode: InterfaceLayout!
 	locale: String!
 	appTheme: String!
 	appFont: SupportedFont!

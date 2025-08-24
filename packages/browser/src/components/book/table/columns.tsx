@@ -1,6 +1,6 @@
 import { Link, Text } from '@stump/components'
 import { FragmentType, Media, MediaModelOrdering } from '@stump/graphql'
-import { ReactTableColumnSort } from '@stump/sdk'
+import { ColumnSort } from '@stump/sdk'
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
 import dayjs from 'dayjs'
 
@@ -380,7 +380,7 @@ export const defaultColumns = [
 	addedColumn,
 ] as ColumnDef<FragmentType<typeof BookCardFragment>>[]
 
-export const defaultColumnSort: ReactTableColumnSort[] = defaultColumns.map((column, idx) => ({
+export const defaultColumnSort: ColumnSort[] = defaultColumns.map((column, idx) => ({
 	id: column.id || '',
 	position: idx,
 }))
@@ -389,7 +389,7 @@ export const defaultColumnSort: ReactTableColumnSort[] = defaultColumns.map((col
  * A helper function to build the columns for the table based on the stored column selection. If
  * no columns are selected, or if the selection is empty, the default columns will be used.
  */
-export const buildColumns = (columns?: ReactTableColumnSort[]) => {
+export const buildColumns = (columns?: ColumnSort[]) => {
 	if (!columns || columns.length === 0) {
 		return defaultColumns
 	}

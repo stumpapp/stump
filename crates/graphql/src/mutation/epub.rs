@@ -1,6 +1,6 @@
 use crate::{
 	data::{AuthContext, CoreContext},
-	input::epub::BookmarkInput,
+	input::media::BookmarkInput,
 	object::bookmark::Bookmark,
 };
 use async_graphql::{Context, Object, Result};

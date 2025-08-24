@@ -2,6 +2,7 @@ import { PREFETCH_STALE_TIME, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { usePrevious, usePreviousIsDifferent } from '@stump/components'
 import {
 	graphql,
+	InterfaceLayout,
 	MediaFilterInput,
 	MediaModelOrdering,
 	MediaOrderBy,
@@ -13,8 +14,8 @@ import { Helmet } from 'react-helmet'
 
 import { BookTable } from '@/components/book'
 import BookCard from '@/components/book/BookCard'
-import BookGrid from '@/components/book/BookGrid'
 import { defaultBookColumnSort } from '@/components/book/table'
+import { DynamicCardGrid, GridSizeSlider } from '@/components/container'
 import {
 	FilterHeader,
 	URLFilterContainer,
@@ -29,6 +30,7 @@ import {
 	useURLKeywordSearch,
 	useURLPageParams,
 } from '@/components/filters/useFilterScene'
+import GenericEmptyState from '@/components/GenericEmptyState'
 import { EntityTableColumnConfiguration } from '@/components/table'
 import TableOrGridLayout from '@/components/TableOrGridLayout'
 import useIsInView from '@/hooks/useIsInView'
@@ -79,7 +81,7 @@ export const usePrefetchBookSearch = () => {
 	const client = useQueryClient()
 
 	const prefetch = useCallback(
-		(params: UsePrefetchBookSearchParams = { filter: {}, orderBy: DEFAULT_MEDIA_ORDER_BY }) => {
+		(params: UsePrefetchBookSearchParams = { filter: [], orderBy: DEFAULT_MEDIA_ORDER_BY }) => {
 			const pageParams = { page: params.page || 1, pageSize: params.pageSize || pageSize }
 			return client.prefetchQuery({
 				queryKey: getQueryKey(
@@ -251,7 +253,6 @@ function BookSearchScene() {
 			},
 		},
 	})
-	const cards = nodes.map((node) => <BookCard key={node.id} fragment={node} />)
 	if (pageInfo.__typename !== 'OffsetPaginationInfo') {
 		throw new Error('Invalid pagination type, expected OffsetPaginationInfo')
 	}
@@ -273,7 +274,7 @@ function BookSearchScene() {
 	)
 
 	const renderContent = () => {
-		if (layoutMode === 'GRID') {
+		if (layoutMode === InterfaceLayout.Grid) {
 			return (
 				<URLFilterContainer
 					currentPage={pageInfo.currentPage || 1}
@@ -288,14 +289,29 @@ function BookSearchScene() {
 						})
 					}}
 				>
-					<div className="flex flex-1 px-4 pb-2 pt-4 md:pb-4">
-						<BookGrid
-							isLoading={isLoading}
-							items={cards}
-							hasFilters={
-								Object.keys(filters).length > 0 || Object.keys(filters?.metadata || {}).length > 0
-							}
-						/>
+					<div className="flex flex-1 px-4 pt-4">
+						{nodes.length && (
+							<DynamicCardGrid
+								count={nodes.length}
+								renderItem={(index) => <BookCard key={nodes[index]!.id} fragment={nodes[index]!} />}
+							/>
+						)}
+						{!nodes.length && !isLoading && (
+							<div className="col-span-full grid flex-1 place-self-center">
+								<GenericEmptyState
+									title={
+										Object.keys(filters || {}).length > 0
+											? 'No books match your search'
+											: "It doesn't look like there are any books here"
+									}
+									subtitle={
+										Object.keys(filters || {}).length > 0
+											? 'Try removing some filters to see more books'
+											: 'Do you have any books in your library?'
+									}
+								/>
+							</div>
+						)}
 					</div>
 				</URLFilterContainer>
 			)
@@ -312,7 +328,7 @@ function BookSearchScene() {
 								prefetch({
 									page,
 									pageSize,
-									filter: filters,
+									filter: resolvedFilters,
 									orderBy,
 								})
 							}}
@@ -352,6 +368,7 @@ function BookSearchScene() {
 					isSearching={isLoading}
 					layoutControls={<TableOrGridLayout layout={layoutMode} setLayout={setLayout} />}
 					orderControls={<URLOrdering entity="media" />}
+					sizeControls={layoutMode === InterfaceLayout.Grid ? <GridSizeSlider /> : undefined}
 					filterControls={<URLFilterDrawer entity="media" />}
 				/>
 

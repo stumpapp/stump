@@ -65,7 +65,7 @@ export default function FilterHeader({
 			className={cn(
 				'sticky z-10 flex h-12 w-full shrink-0 justify-between gap-2 border-b border-edge px-4 md:top-0',
 				{
-					'bg-background': isSticky,
+					'bg-background': isSticky || !isMobile,
 				},
 				navOffset ? 'top-12' : 'top-0',
 			)}

@@ -731,6 +731,7 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 	)
 }
 
+// TODO(graphql): Need types for EpubContent
 function parseToc(toc: EpubJsReaderQuery['epubById']['toc']): EpubContent[] {
 	if (!toc) return []
 

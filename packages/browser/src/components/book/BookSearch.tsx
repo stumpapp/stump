@@ -6,7 +6,6 @@ import useIsInView from '@/hooks/useIsInView'
 
 import { FilterToolBar, useFilterContext } from '../filters'
 import Pagination from '../Pagination'
-import BookGrid from './BookGrid'
 
 type Props = {
 	page: number

@@ -1,5 +1,5 @@
 import { OrderDirection } from '@stump/graphql'
-import { ReactTableGlobalSort } from '@stump/sdk'
+import { ColumnOrder } from '@stump/sdk'
 
 import { Ordering, OrderingField } from './context'
 
@@ -26,7 +26,7 @@ export const clearFilters = (filters: Record<string, unknown>): Record<string, u
  *
  * Note that only the **first** sort is considered.
  */
-export const tableSortToOrdering = (sort: ReactTableGlobalSort[]): Ordering => {
+export const tableSortToOrdering = (sort: ColumnOrder[]): Ordering => {
 	if (sort[0]) {
 		return {
 			direction: sort[0].desc ? OrderDirection.Desc : OrderDirection.Asc,
@@ -40,7 +40,7 @@ export const tableSortToOrdering = (sort: ReactTableGlobalSort[]): Ordering => {
 /**
  * Converts the ordering object to a react-table sort object.
  */
-export const orderingToTableSort = (ordering: Ordering): ReactTableGlobalSort[] => {
+export const orderingToTableSort = (ordering: Ordering): ColumnOrder[] => {
 	if (ordering.order_by) {
 		return [
 			{

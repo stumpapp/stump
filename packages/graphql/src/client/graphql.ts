@@ -696,6 +696,15 @@ export enum InheritPermissionValue {
   Inherit = 'INHERIT'
 }
 
+/**
+ * The different types of layouts a client-side interface might present to a user
+ * for a collection of items
+ */
+export enum InterfaceLayout {
+  Grid = 'GRID',
+  Table = 'TABLE'
+}
+
 export type Job = {
   __typename?: 'Job';
   completedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -2902,7 +2911,7 @@ export type UpdateUserPreferencesInput = {
   layoutMaxWidthPx?: InputMaybe<Scalars['Int']['input']>;
   locale: Scalars['String']['input'];
   preferAccentColor: Scalars['Boolean']['input'];
-  preferredLayoutMode: Scalars['String']['input'];
+  preferredLayoutMode: InterfaceLayout;
   primaryNavigationMode: Scalars['String']['input'];
   showQueryIndicator: Scalars['Boolean']['input'];
   showThumbnailsInHeaders: Scalars['Boolean']['input'];
@@ -3053,7 +3062,7 @@ export type UserPreferences = {
   locale: Scalars['String']['output'];
   navigationArrangement: Arrangement;
   preferAccentColor: Scalars['Boolean']['output'];
-  preferredLayoutMode: Scalars['String']['output'];
+  preferredLayoutMode: InterfaceLayout;
   primaryNavigationMode: Scalars['String']['output'];
   showQueryIndicator: Scalars['Boolean']['output'];
   showThumbnailsInHeaders: Scalars['Boolean']['output'];

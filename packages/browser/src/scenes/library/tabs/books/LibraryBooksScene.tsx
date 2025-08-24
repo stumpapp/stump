@@ -1,6 +1,6 @@
 import { PREFETCH_STALE_TIME, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { usePrevious, usePreviousIsDifferent } from '@stump/components'
-import { graphql, MediaFilterInput, MediaOrderBy } from '@stump/graphql'
+import { graphql, InterfaceLayout, MediaFilterInput, MediaOrderBy } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
 import { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
 import { Helmet } from 'react-helmet'
@@ -283,7 +283,7 @@ function LibraryBooksScene() {
 	)
 
 	const renderContent = () => {
-		if (layoutMode === 'GRID') {
+		if (layoutMode === InterfaceLayout.Grid) {
 			return (
 				<URLFilterContainer
 					currentPage={pageInfo.currentPage || 1}
@@ -381,7 +381,7 @@ function LibraryBooksScene() {
 					layoutControls={<TableOrGridLayout layout={layoutMode} setLayout={setLayout} />}
 					orderControls={<URLOrdering entity="media" />}
 					filterControls={<URLFilterDrawer entity="media" />}
-					sizeControls={layoutMode === 'GRID' ? <GridSizeSlider /> : undefined}
+					sizeControls={layoutMode === InterfaceLayout.Grid ? <GridSizeSlider /> : undefined}
 					navOffset
 				/>
 

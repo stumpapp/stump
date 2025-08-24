@@ -39,3 +39,13 @@ export type StumpVersion = {
 	rev: string
 	compileTime: string
 }
+
+export type ColumnSort = {
+	id: string
+	position: number
+}
+
+export type ColumnOrder = {
+	id: string
+	desc: boolean
+}

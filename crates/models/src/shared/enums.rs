@@ -139,6 +139,7 @@ impl From<FileStatus> for String {
 	Debug,
 	Clone,
 	EnumIter,
+	Enum,
 	PartialEq,
 	Serialize,
 	Deserialize,

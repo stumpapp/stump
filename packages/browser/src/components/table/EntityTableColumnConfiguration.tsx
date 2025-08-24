@@ -17,7 +17,7 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import { Button, IconButton, Sheet, Text, ToolTip } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import { ReactTableColumnSort } from '@stump/sdk'
+import { ColumnSort } from '@stump/sdk'
 import { Columns, Eye, EyeOff } from 'lucide-react'
 import { useCallback, useMemo, useState } from 'react'
 import { useMediaMatch } from 'rooks'
@@ -26,8 +26,8 @@ import { bookTableColumnMap } from '../book/table'
 
 type Props = {
 	entity: 'media' | 'series' | 'library'
-	configuration: ReactTableColumnSort[]
-	onSave: (columns: ReactTableColumnSort[]) => void
+	configuration: ColumnSort[]
+	onSave: (columns: ColumnSort[]) => void
 }
 
 export default function EntityTableColumnConfiguration({ entity, configuration, onSave }: Props) {
@@ -170,10 +170,7 @@ export default function EntityTableColumnConfiguration({ entity, configuration, 
 	)
 }
 
-const resolveConfiguration = (
-	configuration: ReactTableColumnSort[],
-	columnMap: Record<string, string>,
-) =>
+const resolveConfiguration = (configuration: ColumnSort[], columnMap: Record<string, string>) =>
 	Object.entries(columnMap)
 		.map(([key, label], idx) => {
 			const configPosition = configuration.findIndex((column) => column.id === key)

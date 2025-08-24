@@ -2,7 +2,6 @@ pub mod api_key;
 pub mod book_club;
 pub mod email_device;
 pub mod emailer;
-pub mod epub;
 pub mod filesystem;
 pub mod library;
 pub mod media;

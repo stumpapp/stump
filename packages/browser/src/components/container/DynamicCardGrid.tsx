@@ -1,6 +1,5 @@
 import { forwardRef, memo } from 'react'
-import AutoSizer from 'react-virtualized-auto-sizer'
-import { GridItemProps, GridListProps, VirtuosoGrid } from 'react-virtuoso'
+import { GridItemProps, GridListProps } from 'react-virtuoso'
 
 import { GRID_GAP, sizeToPercentageWidth, useGridSize } from '@/components/container/useGridSize'
 
@@ -10,33 +9,17 @@ type Props = {
 }
 
 function DynamicCardGrid({ count, renderItem }: Props) {
+	const { columns } = useGridSize()
 	return (
-		<AutoSizer>
-			{({ height, width }) => {
-				return (
-					<VirtuosoGrid
-						style={{ height, width }}
-						totalCount={count}
-						components={{
-							List,
-							Item,
-						}}
-						itemContent={(index) => renderItem(index)}
-					/>
-					// <div
-					// 	data-testid="dynamic-card-grid"
-					// 	style={{
-					// 		height,
-					// 		width,
-					// 		gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
-					// 	}}
-					// 	className="grid flex-1 auto-rows-max items-start justify-center gap-2 md:justify-start"
-					// >
-					// 	{Array.from({ length: count }).map((_, index) => renderItem(index))}
-					// </div>
-				)
+		<div
+			data-testid="dynamic-card-grid"
+			style={{
+				gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
 			}}
-		</AutoSizer>
+			className="grid flex-1 auto-rows-max items-start justify-center gap-2 py-2 md:justify-start"
+		>
+			{Array.from({ length: count }).map((_, index) => renderItem(index))}
+		</div>
 	)
 }
 export default memo(DynamicCardGrid)

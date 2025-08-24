@@ -2,6 +2,7 @@ import { PREFETCH_STALE_TIME, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { usePrevious, usePreviousIsDifferent } from '@stump/components'
 import {
 	graphql,
+	InterfaceLayout,
 	OrderDirection,
 	SeriesFilterInput,
 	SeriesModelOrdering,
@@ -32,7 +33,6 @@ import GenericEmptyState from '@/components/GenericEmptyState'
 import { LibrarySeriesAlphabet, usePrefetchLibrarySeriesAlphabet } from '@/components/library'
 import { SeriesTable } from '@/components/series'
 import SeriesCard from '@/components/series/SeriesCard'
-import SeriesGrid from '@/components/series/SeriesGrid'
 import { defaultSeriesColumnSort } from '@/components/series/table'
 import { EntityTableColumnConfiguration } from '@/components/table'
 import TableOrGridLayout from '@/components/TableOrGridLayout'
@@ -308,7 +308,7 @@ function LibrarySeriesScene() {
 	)
 
 	const renderContent = () => {
-		if (layoutMode === 'GRID') {
+		if (layoutMode === InterfaceLayout.Grid) {
 			return (
 				<URLFilterContainer
 					currentPage={pageInfo.currentPage || 1}
@@ -407,7 +407,7 @@ function LibrarySeriesScene() {
 					layoutControls={<TableOrGridLayout layout={layoutMode} setLayout={setLayout} />}
 					orderControls={<URLOrdering entity="series" />}
 					filterControls={<URLFilterDrawer entity="series" />}
-					sizeControls={layoutMode === 'GRID' ? <GridSizeSlider /> : undefined}
+					sizeControls={layoutMode === InterfaceLayout.Grid ? <GridSizeSlider /> : undefined}
 					navOffset
 				/>
 

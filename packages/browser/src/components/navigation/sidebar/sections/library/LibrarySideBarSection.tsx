@@ -8,6 +8,7 @@ import { useLocation } from 'react-router'
 
 import { useAppContext } from '@/context'
 import { usePaths } from '@/paths'
+import { usePrefetchLibrarySeries } from '@/scenes/library/tabs/series'
 
 import { EntityOptionProps } from '../../../types'
 import SideBarButtonLink from '../../SideBarButtonLink'
@@ -47,6 +48,8 @@ export default function LibrarySideBarSection({
 
 	const { checkPermission } = useAppContext()
 
+	const prefetchSeries = usePrefetchLibrarySeries()
+
 	const isCurrentLibrary = (id: string) => location.pathname.startsWith(paths.librarySeries(id))
 
 	const canCreateLibrary = useMemo(
@@ -78,12 +81,12 @@ export default function LibrarySideBarSection({
 			return (
 				<SideBarButtonLink
 					key={library.id}
-					to={paths.librarySeries(library.id)}
+					to={paths.librarySeries(library.id, 1)}
 					isActive={isCurrentLibrary(library.id)}
 					className="pl-2 pr-0"
 					leftContent={canChange ? leftContent : undefined}
 					rightContent={<LibraryOptionsMenu library={library} />}
-					// onMouseEnter={() => prefetchLibrarySeries(library.id)}
+					onMouseEnter={() => prefetchSeries(library.id)}
 				>
 					{!canChange && leftContent}
 					{library.name}

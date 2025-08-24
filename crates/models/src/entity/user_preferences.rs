@@ -2,7 +2,10 @@ use async_graphql::SimpleObject;
 use sea_orm::{entity::prelude::*, prelude::async_trait::async_trait, ActiveValue};
 use serde::{Deserialize, Serialize};
 
-use crate::shared::{arrangement::Arrangement, enums::SupportedFont};
+use crate::shared::{
+	arrangement::Arrangement,
+	enums::{InterfaceLayout, SupportedFont},
+};
 
 #[derive(
 	Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject, Serialize, Deserialize,
@@ -16,7 +19,7 @@ pub struct Model {
 	#[sea_orm(primary_key, auto_increment = true)]
 	pub id: i32,
 	#[sea_orm(column_type = "Text")]
-	pub preferred_layout_mode: String,
+	pub preferred_layout_mode: InterfaceLayout,
 	#[sea_orm(column_type = "Text")]
 	pub locale: String,
 	#[sea_orm(column_type = "Text")]
@@ -79,7 +82,7 @@ impl ActiveModelBehavior for ActiveModel {
 		C: ConnectionTrait,
 	{
 		if insert && self.id.is_not_set() {
-			self.preferred_layout_mode = ActiveValue::Set("GRID".to_string());
+			self.preferred_layout_mode = ActiveValue::Set(InterfaceLayout::Grid);
 			self.locale = ActiveValue::Set("en".to_string());
 			self.app_theme = ActiveValue::Set("light".to_string());
 			self.app_font = ActiveValue::Set(SupportedFont::default());

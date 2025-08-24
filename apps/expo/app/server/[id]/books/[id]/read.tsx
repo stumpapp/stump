@@ -48,17 +48,9 @@ export const query = graphql(`
 	}
 `)
 
-const pageMutation = graphql(`
-	mutation UpdateReadProgress($id: ID!, $page: Int!, $elapsedSeconds: Int!) {
-		updateMediaProgress(id: $id, page: $page, elapsedSeconds: $elapsedSeconds) {
-			__typename
-		}
-	}
-`)
-
-const ebookMutation = graphql(`
-	mutation UpdateEpubCfi($id: ID!, $input: EpubProgressInput!) {
-		updateEpubProgress(id: $id, input: $input) {
+const mutation = graphql(`
+	mutation UpdateReadProgression($id: ID!, $input: MediaProgressInput!) {
+		updateMediaProgress(id: $id, input: $input) {
 			__typename
 		}
 	}
@@ -90,7 +82,7 @@ export default function Screen() {
 		enabled: trackElapsedTime,
 	})
 
-	const { mutate: updateProgress } = useGraphQLMutation(pageMutation, {
+	const { mutate: updateProgress } = useGraphQLMutation(mutation, {
 		retry: (attempts) => attempts < 3,
 		throwOnError: false,
 	})
@@ -99,30 +91,31 @@ export default function Screen() {
 		(page: number) => {
 			updateProgress({
 				id: book.id,
-				page,
-				elapsedSeconds: totalSeconds,
+				input: {
+					paged: {
+						page,
+						elapsedSeconds: totalSeconds,
+					},
+				},
 			})
 		},
 		[book.id, totalSeconds, updateProgress],
 	)
 
-	const { mutate: updateEbookProgress } = useGraphQLMutation(ebookMutation, {
-		retry: (attempts) => attempts < 3,
-		throwOnError: false,
-	})
-
 	const onEpubCfiChanged = useCallback(
 		(cfi: string, percentage: number) => {
-			updateEbookProgress({
+			updateProgress({
 				id: book.id,
 				input: {
-					epubcfi: cfi,
-					elapsedSeconds: totalSeconds,
-					percentage,
+					epub: {
+						epubcfi: cfi,
+						elapsedSeconds: totalSeconds,
+						percentage,
+					},
 				},
 			})
 		},
-		[book.id, totalSeconds, updateEbookProgress],
+		[book.id, totalSeconds, updateProgress],
 	)
 
 	const setIsReading = useReaderStore((state) => state.setIsReading)

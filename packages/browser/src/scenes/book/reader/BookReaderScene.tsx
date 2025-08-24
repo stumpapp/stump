@@ -68,8 +68,8 @@ export default function BookReaderSceneContainer() {
 }
 
 const mutation = graphql(`
-	mutation UpdateReadProgress($id: ID!, $page: Int!, $elapsedSeconds: Int!) {
-		updateMediaProgress(id: $id, page: $page, elapsedSeconds: $elapsedSeconds) {
+	mutation UpdateReadProgress($id: ID!, $input: MediaProgressInput!) {
+		updateMediaProgress(id: $id, input: $input) {
 			__typename
 		}
 	}
@@ -101,8 +101,12 @@ function BookReaderScene({ book }: Props) {
 			if (book.readProgress?.page === page) return
 			mutate({
 				id: book.id,
-				page,
-				elapsedSeconds,
+				input: {
+					paged: {
+						page,
+						elapsedSeconds,
+					},
+				},
 			})
 		},
 		[book, mutate, isIncognito],

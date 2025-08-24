@@ -5,6 +5,7 @@ pub mod emailer;
 pub mod epub;
 pub mod filesystem;
 pub mod library;
+pub mod media;
 pub mod notifier;
 pub mod reading_list;
 pub mod scheduled_job_config;

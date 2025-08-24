@@ -1188,6 +1188,10 @@ export type MediaOrderByField = {
   field: MediaModelOrdering;
 };
 
+export type MediaProgressInput =
+  { epub: EpubProgressInput; paged?: never; }
+  |  { epub?: never; paged: PagedProgressInput; };
+
 export type Mutation = {
   __typename?: 'Mutation';
   addBooksToBookClubSchedule: BookClub;
@@ -1303,14 +1307,6 @@ export type Mutation = {
   updateBookClub: BookClub;
   updateEmailDevice: RegisteredEmailDevice;
   updateEmailer: Emailer;
-  /**
-   * Update the progress of an epub for a user. If the percentage is 1 or greater, the epub is
-   * considered finished and the active session is deleted and a finished session is created.
-   *
-   * If the epub is already finished and the percentage is 1 or greater, the old finished
-   * session is deleted and a new one is created.
-   */
-  updateEpubProgress: ReadingProgressOutput;
   /**
    * Update an existing library with the provided configuration. If `scan_after_persist` is `true`,
    * the library will be scanned immediately after updating.
@@ -1681,12 +1677,6 @@ export type MutationUpdateEmailerArgs = {
 };
 
 
-export type MutationUpdateEpubProgressArgs = {
-  id: Scalars['ID']['input'];
-  input: EpubProgressInput;
-};
-
-
 export type MutationUpdateLibraryArgs = {
   id: Scalars['ID']['input'];
   input: CreateOrUpdateLibraryInput;
@@ -1712,9 +1702,8 @@ export type MutationUpdateLibraryThumbnailArgs = {
 
 
 export type MutationUpdateMediaProgressArgs = {
-  elapsedSeconds?: InputMaybe<Scalars['Int']['input']>;
   id: Scalars['ID']['input'];
-  page?: InputMaybe<Scalars['Int']['input']>;
+  input: MediaProgressInput;
 };
 
 
@@ -1949,6 +1938,11 @@ export type PageDimension = {
   __typename?: 'PageDimension';
   height: Scalars['Int']['output'];
   width: Scalars['Int']['output'];
+};
+
+export type PagedProgressInput = {
+  elapsedSeconds?: InputMaybe<Scalars['Int']['input']>;
+  page: Scalars['Int']['input'];
 };
 
 export type PaginatedDirectoryListingResponse = {
@@ -3110,22 +3104,13 @@ export type BookReadScreenQueryVariables = Exact<{
 
 export type BookReadScreenQuery = { __typename?: 'Query', mediaById?: { __typename?: 'Media', id: string, pages: number, extension: string, name: string, readProgress?: { __typename?: 'ActiveReadingSession', percentageCompleted?: any | null, epubcfi?: string | null, page?: number | null, elapsedSeconds?: number | null } | null, libraryConfig: { __typename?: 'LibraryConfig', defaultReadingImageScaleFit: ReadingImageScaleFit, defaultReadingMode: ReadingMode, defaultReadingDir: ReadingDirection }, metadata?: { __typename?: 'MediaMetadata', pageAnalysis?: { __typename?: 'PageAnalysis', dimensions: Array<{ __typename?: 'PageDimension', height: number, width: number }> } | null } | null } | null };
 
-export type UpdateReadProgressMutationVariables = Exact<{
+export type UpdateReadProgressionMutationVariables = Exact<{
   id: Scalars['ID']['input'];
-  page: Scalars['Int']['input'];
-  elapsedSeconds: Scalars['Int']['input'];
+  input: MediaProgressInput;
 }>;
 
 
-export type UpdateReadProgressMutation = { __typename?: 'Mutation', updateMediaProgress: { __typename: 'ReadingProgressOutput' } };
-
-export type UpdateEpubCfiMutationVariables = Exact<{
-  id: Scalars['ID']['input'];
-  input: EpubProgressInput;
-}>;
-
-
-export type UpdateEpubCfiMutation = { __typename?: 'Mutation', updateEpubProgress: { __typename: 'ReadingProgressOutput' } };
+export type UpdateReadProgressionMutation = { __typename?: 'Mutation', updateMediaProgress: { __typename: 'ReadingProgressOutput' } };
 
 export type BooksScreenQueryVariables = Exact<{
   pagination?: InputMaybe<Pagination>;
@@ -3379,15 +3364,15 @@ export type EpubJsReaderQueryVariables = Exact<{
 }>;
 
 
-export type EpubJsReaderQuery = { __typename?: 'Query', epubById: { __typename?: 'Epub', mediaId: string, rootBase: string, rootFile: string, extraCss: Array<string>, toc: Array<string>, resources: any, metadata: any, spine: Array<{ __typename?: 'SpineItem', id?: string | null, idref: string, properties?: string | null, linear: boolean }>, bookmarks: Array<{ __typename?: 'Bookmark', id: string, userId: string, epubcfi?: string | null, mediaId: string }> } };
+export type EpubJsReaderQuery = { __typename?: 'Query', epubById: { __typename?: 'Epub', mediaId: string, rootBase: string, rootFile: string, extraCss: Array<string>, toc: Array<string>, resources: any, metadata: any, spine: Array<{ __typename?: 'SpineItem', id?: string | null, idref: string, properties?: string | null, linear: boolean }>, bookmarks: Array<{ __typename?: 'Bookmark', id: string, userId: string, epubcfi?: string | null, mediaId: string }>, media: { __typename?: 'Media', id: string, resolvedName: string, pages: number, extension: string, readProgress?: { __typename?: 'ActiveReadingSession', percentageCompleted?: any | null, epubcfi?: string | null, page?: number | null, elapsedSeconds?: number | null } | null, libraryConfig: { __typename?: 'LibraryConfig', defaultReadingImageScaleFit: ReadingImageScaleFit, defaultReadingMode: ReadingMode, defaultReadingDir: ReadingDirection } } } };
 
 export type UpdateEpubProgressMutationVariables = Exact<{
   id: Scalars['ID']['input'];
-  input: EpubProgressInput;
+  input: MediaProgressInput;
 }>;
 
 
-export type UpdateEpubProgressMutation = { __typename?: 'Mutation', updateEpubProgress: { __typename: 'ReadingProgressOutput' } };
+export type UpdateEpubProgressMutation = { __typename?: 'Mutation', updateMediaProgress: { __typename: 'ReadingProgressOutput' } };
 
 export type CreateOrUpdateBookmarkMutationVariables = Exact<{
   input: BookmarkInput;
@@ -3501,6 +3486,14 @@ export type BookReaderSceneQueryVariables = Exact<{
 
 
 export type BookReaderSceneQuery = { __typename?: 'Query', mediaById?: { __typename?: 'Media', id: string, resolvedName: string, pages: number, extension: string, readProgress?: { __typename?: 'ActiveReadingSession', percentageCompleted?: any | null, epubcfi?: string | null, page?: number | null, elapsedSeconds?: number | null } | null, libraryConfig: { __typename?: 'LibraryConfig', defaultReadingImageScaleFit: ReadingImageScaleFit, defaultReadingMode: ReadingMode, defaultReadingDir: ReadingDirection }, metadata?: { __typename?: 'MediaMetadata', pageAnalysis?: { __typename?: 'PageAnalysis', dimensions: Array<{ __typename?: 'PageDimension', height: number, width: number }> } | null } | null } | null };
+
+export type UpdateReadProgressMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  input: MediaProgressInput;
+}>;
+
+
+export type UpdateReadProgressMutation = { __typename?: 'Mutation', updateMediaProgress: { __typename: 'ReadingProgressOutput' } };
 
 export type BookManagementSceneQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -4597,20 +4590,13 @@ export const BookReadScreenDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<BookReadScreenQuery, BookReadScreenQueryVariables>;
-export const UpdateReadProgressDocument = new TypedDocumentString(`
-    mutation UpdateReadProgress($id: ID!, $page: Int!, $elapsedSeconds: Int!) {
-  updateMediaProgress(id: $id, page: $page, elapsedSeconds: $elapsedSeconds) {
+export const UpdateReadProgressionDocument = new TypedDocumentString(`
+    mutation UpdateReadProgression($id: ID!, $input: MediaProgressInput!) {
+  updateMediaProgress(id: $id, input: $input) {
     __typename
   }
 }
-    `) as unknown as TypedDocumentString<UpdateReadProgressMutation, UpdateReadProgressMutationVariables>;
-export const UpdateEpubCfiDocument = new TypedDocumentString(`
-    mutation UpdateEpubCfi($id: ID!, $input: EpubProgressInput!) {
-  updateEpubProgress(id: $id, input: $input) {
-    __typename
-  }
-}
-    `) as unknown as TypedDocumentString<UpdateEpubCfiMutation, UpdateEpubCfiMutationVariables>;
+    `) as unknown as TypedDocumentString<UpdateReadProgressionMutation, UpdateReadProgressionMutationVariables>;
 export const BooksScreenDocument = new TypedDocumentString(`
     query BooksScreen($pagination: Pagination) {
   media(pagination: $pagination) {
@@ -5079,12 +5065,29 @@ export const EpubJsReaderDocument = new TypedDocumentString(`
       epubcfi
       mediaId
     }
+    media {
+      id
+      resolvedName
+      pages
+      extension
+      readProgress {
+        percentageCompleted
+        epubcfi
+        page
+        elapsedSeconds
+      }
+      libraryConfig {
+        defaultReadingImageScaleFit
+        defaultReadingMode
+        defaultReadingDir
+      }
+    }
   }
 }
     `) as unknown as TypedDocumentString<EpubJsReaderQuery, EpubJsReaderQueryVariables>;
 export const UpdateEpubProgressDocument = new TypedDocumentString(`
-    mutation UpdateEpubProgress($id: ID!, $input: EpubProgressInput!) {
-  updateEpubProgress(id: $id, input: $input) {
+    mutation UpdateEpubProgress($id: ID!, $input: MediaProgressInput!) {
+  updateMediaProgress(id: $id, input: $input) {
     __typename
   }
 }
@@ -5346,6 +5349,13 @@ export const BookReaderSceneDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<BookReaderSceneQuery, BookReaderSceneQueryVariables>;
+export const UpdateReadProgressDocument = new TypedDocumentString(`
+    mutation UpdateReadProgress($id: ID!, $input: MediaProgressInput!) {
+  updateMediaProgress(id: $id, input: $input) {
+    __typename
+  }
+}
+    `) as unknown as TypedDocumentString<UpdateReadProgressMutation, UpdateReadProgressMutationVariables>;
 export const BookManagementSceneDocument = new TypedDocumentString(`
     query BookManagementScene($id: ID!) {
   mediaById(id: $id) {

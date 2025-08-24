@@ -1,6 +1,26 @@
-use async_graphql::InputObject;
+use async_graphql::{InputObject, OneofObject};
 use models::entity::{bookmark, user::AuthUser};
 use sea_orm::{prelude::*, ActiveValue::Set};
+
+#[derive(Debug, Clone, InputObject)]
+pub struct EpubProgressInput {
+	pub epubcfi: String,
+	pub percentage: Decimal,
+	pub is_complete: Option<bool>,
+	pub elapsed_seconds: Option<i64>,
+}
+
+#[derive(Debug, Clone, InputObject)]
+pub struct PagedProgressInput {
+	pub page: i32,
+	pub elapsed_seconds: Option<i64>,
+}
+
+#[derive(Debug, Clone, OneofObject)]
+pub enum MediaProgressInput {
+	Epub(EpubProgressInput),
+	Paged(PagedProgressInput),
+}
 
 #[derive(InputObject)]
 pub struct BookmarkInput {

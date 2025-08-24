@@ -1,4 +1,10 @@
-import { BookPreferences, queryClient, useGraphQL, useGraphQLMutation, useSDK } from '@stump/client'
+import {
+	BookPreferences,
+	queryClient,
+	useGraphQLMutation,
+	useSDK,
+	useSuspenseGraphQL,
+} from '@stump/client'
 import {
 	Bookmark,
 	EpubJsReaderQuery,
@@ -9,14 +15,13 @@ import {
 import { Book, Rendition } from 'epubjs'
 import uniqby from 'lodash/uniqBy'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { toast } from 'sonner'
 import AutoSizer from 'react-virtualized-auto-sizer'
+import { toast } from 'sonner'
 
 import { ImageReaderBookRef } from '@/components/readers/imageBased/context'
 import { useTheme } from '@/hooks'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
-import { BOOK_READER_SCENE_QUERY } from '../../../scenes/book/reader/BookReaderScene'
 import EpubReaderContainer from './EpubReaderContainer'
 import { applyTheme, stumpDark } from './themes'
 
@@ -88,17 +93,35 @@ const query = graphql(`
 				epubcfi
 				mediaId
 			}
+			media {
+				id
+				resolvedName
+				pages
+				extension
+				readProgress {
+					percentageCompleted
+					epubcfi
+					page
+					elapsedSeconds
+				}
+				libraryConfig {
+					defaultReadingImageScaleFit
+					defaultReadingMode
+					defaultReadingDir
+				}
+			}
 		}
 	}
 `)
 
 const mutation = graphql(`
-	mutation UpdateEpubProgress($id: ID!, $input: EpubProgressInput!) {
-		updateEpubProgress(id: $id, input: $input) {
+	mutation UpdateEpubProgress($id: ID!, $input: MediaProgressInput!) {
+		updateMediaProgress(id: $id, input: $input) {
 			__typename
 		}
 	}
 `)
+
 /**
  * A component for rendering a reader capable of reading epub files. This component uses
  * epubjs internally for the main rendering logic.
@@ -110,16 +133,11 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 	const { sdk } = useSDK()
 	const { theme } = useTheme()
 
-	const { data: epub, isLoading } = useGraphQL(query, ['epubJsReader', id], {
+	const {
+		data: { epubById: ebook },
+	} = useSuspenseGraphQL(query, ['epubJsReader', id], {
 		id: id || '',
 	})
-	const { data: media, isLoading: isPreferencesLoading } = useGraphQL(
-		BOOK_READER_SCENE_QUERY,
-		['epubJsReaderBook', id],
-		{
-			id: id || '',
-		},
-	)
 
 	const ref = useRef<HTMLDivElement>(null)
 
@@ -130,12 +148,12 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 	const [currentLocation, setCurrentLocation] = useState<EpubLocationState>()
 
 	const { bookPreferences } = useBookPreferences({
-		book: media?.mediaById || ({} as ImageReaderBookRef),
+		book: ebook.media || ({} as ImageReaderBookRef),
 	})
 
 	const existingBookmarks = useMemo(
 		() =>
-			(epub?.epubById?.bookmarks ?? []).reduce(
+			(ebook?.bookmarks ?? []).reduce(
 				(acc: Record<string, Bookmark>, bookmark: Bookmark) => {
 					if (!bookmark.epubcfi) {
 						return acc
@@ -147,7 +165,7 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 				{} as Record<string, Bookmark>,
 			),
 
-		[epub],
+		[ebook],
 	)
 
 	//* Note: some books have entries in the spine for each href, some don't. It seems
@@ -210,7 +228,7 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 	 * otherwise not be able to authenticate with the server.
 	 */
 	useEffect(() => {
-		if (!book && epub && media) {
+		if (!book && ebook && ebook.media) {
 			setBook(
 				new Book(sdk.media.downloadURL(id), {
 					openAs: 'epub',
@@ -219,7 +237,7 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 				}),
 			)
 		}
-	}, [book, epub, id, media, sdk])
+	}, [book, ebook, id, sdk])
 
 	/**
 	 *	A function for applying the epub reader preferences to the epubjs rendition instance
@@ -298,7 +316,7 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 				applyEpubPreferences(rendition_, bookPreferences)
 				setRendition(rendition_)
 
-				const targetCfi = media?.mediaById?.readProgress?.epubcfi
+				const targetCfi = ebook.media?.readProgress?.epubcfi
 				if (targetCfi && !isIncognito) {
 					rendition_.display(targetCfi)
 				} else if (defaultLoc) {
@@ -310,14 +328,7 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 				createSectionLengths(book, setSectionLengths)
 			}
 		})
-	}, [
-		book,
-		applyEpubPreferences,
-		bookPreferences,
-		handleLocationChange,
-		isIncognito,
-		media?.mediaById?.readProgress?.epubcfi,
-	])
+	}, [book, applyEpubPreferences, bookPreferences, handleLocationChange, isIncognito, ebook])
 
 	// TODO: this needs to have fullscreen as an effect dependency
 	/**
@@ -510,15 +521,17 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 	useEffect(() => {
 		//* We can't do anything without the entity, so short circuit. This shouldn't
 		//* really happen, though.
-		if (!epub || !media) return
+		if (!ebook || !ebook.media) return
 
 		const updateProgress = (input: EpubProgressInput) => {
 			if (!book) return
 			if (isIncognito) return
-			if (media?.mediaById?.readProgress?.epubcfi === input.epubcfi) return
+			if (ebook.media?.readProgress?.epubcfi === input.epubcfi) return
 			mutate({
-				id: media?.mediaById?.id || '',
-				input: input,
+				id: ebook.media?.id || '',
+				input: {
+					epub: input,
+				},
 			})
 		}
 
@@ -534,7 +547,7 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 
 		let percentage: number | null = null
 
-		const spineSize = epub?.epubById?.spine.length
+		const spineSize = ebook.spine.length
 		if (spineSize) {
 			const currentChapterPage = start.displayed.page
 			const pagesInChapter = start.displayed.total
@@ -560,7 +573,7 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 				percentage = naiveTotal
 			}
 
-			if (media?.mediaById?.id) {
+			if (ebook.media?.id) {
 				updateProgress({
 					epubcfi: start.cfi,
 					isComplete: atEnd ?? percentage === 1.0,
@@ -568,7 +581,7 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 				})
 			}
 		}
-	}, [currentLocation, epub, media, book, isIncognito, mutate])
+	}, [currentLocation, ebook, book, isIncognito, mutate])
 
 	/**
 	 * A callback for attempting to extract preview text from a given cfi. This is used for bookmarks,
@@ -669,16 +682,16 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 	// 	'epubcfi(/6/12!/4[3Q280-a9efbf2f573d4345819e3829f80e5dbc]/2[prologue]/4[prologue-text]/8/1:56)',
 	// ).then((res) => console.log('cfiWithinAnother', res))
 
-	if (isLoading || isPreferencesLoading || !media?.mediaById || !epub?.epubById) {
+	if (!ebook || !ebook.media) {
 		return null
 	}
 
-	const toc = parseToc(epub?.epubById?.toc)
+	const toc = parseToc(ebook.toc)
 
 	return (
 		<EpubReaderContainer
 			readerMeta={{
-				bookEntity: media?.mediaById,
+				bookEntity: ebook.media,
 				bookMeta: {
 					bookmarks: existingBookmarks,
 					chapter: {
@@ -695,7 +708,7 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 					toc: toc,
 					sectionLengths: sectionsLengths?.lengths ?? {},
 				},
-				progress: media?.mediaById?.readProgress?.percentageCompleted || null,
+				progress: ebook.media.readProgress?.percentageCompleted || null,
 			}}
 			controls={{
 				getCfiPreviewText,
@@ -710,7 +723,7 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 			<div className="h-full w-full">
 				<AutoSizer>
 					{({ height, width }) => {
-						return <div ref={ref} key={media?.mediaById?.id} style={{ height, width }} />
+						return <div ref={ref} key={ebook.media.id} style={{ height, width }} />
 					}}
 				</AutoSizer>
 			</div>

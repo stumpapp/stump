@@ -1,4 +1,4 @@
-use async_graphql::{Context, Object, Result, ID};
+use async_graphql::{Context, Object, Result, SimpleObject, ID};
 use chrono::Utc;
 use models::{
 	entity::{
@@ -12,20 +12,41 @@ use sea_orm::{
 	sea_query::{OnConflict, Query},
 	DatabaseTransaction, IntoActiveModel, QuerySelect, Set, TransactionTrait,
 };
-use stump_core::filesystem::{
-	image::{generate_book_thumbnail, GenerateThumbnailOptions},
-	media::analyze_media_job::AnalyzeMediaJob,
+use stump_core::{
+	filesystem::{
+		image::{generate_book_thumbnail, GenerateThumbnailOptions},
+		media::analyze_media_job::AnalyzeMediaJob,
+	},
+	utils::chain_optional_iter,
 };
 
 use crate::{
 	data::{AuthContext, CoreContext},
 	guard::PermissionGuard,
-	input::thumbnail::PageBasedThumbnailInput,
-	mutation::epub::ReadingProgressOutput,
-	object::media::Media,
+	input::{media::MediaProgressInput, thumbnail::PageBasedThumbnailInput},
+	object::{
+		media::Media,
+		reading_session::{ActiveReadingSession, FinishedReadingSession},
+	},
 };
 
-use super::epub::insert_finished_reading_session;
+#[derive(Debug, SimpleObject)]
+pub struct ReadingProgressOutput {
+	active_session: Option<ActiveReadingSession>,
+	finished_session: Option<FinishedReadingSession>,
+}
+
+impl ReadingProgressOutput {
+	pub fn new(
+		active_session: Option<ActiveReadingSession>,
+		finished_session: Option<FinishedReadingSession>,
+	) -> Self {
+		Self {
+			active_session,
+			finished_session,
+		}
+	}
+}
 
 #[derive(Default)]
 pub struct MediaMutation;
@@ -243,22 +264,48 @@ impl MediaMutation {
 		&self,
 		ctx: &Context<'_>,
 		id: ID,
-		page: Option<i32>,
-		elapsed_seconds: Option<i64>,
+		input: MediaProgressInput,
 	) -> Result<ReadingProgressOutput> {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let core = ctx.data::<CoreContext>()?;
 		let conn = core.conn.as_ref();
 
-		let active_session = reading_session::ActiveModel {
+		let mut active_session = reading_session::ActiveModel {
 			user_id: Set(user.id.clone()),
 			media_id: Set(id.to_string()),
-			page: Set(page),
 			updated_at: Set(Some(Utc::now().into())),
-			elapsed_seconds: Set(elapsed_seconds),
 			started_at: Set(Utc::now().into()),
 			..Default::default()
 		};
+
+		let is_complete: bool;
+
+		match input.clone() {
+			MediaProgressInput::Epub(input) => {
+				active_session.epubcfi = Set(Some(input.epubcfi.clone()));
+				active_session.percentage_completed = Set(Some(input.percentage));
+				active_session.elapsed_seconds = Set(input.elapsed_seconds);
+				is_complete = input
+					.is_complete
+					.unwrap_or(input.percentage >= Decimal::new(1, 0));
+			},
+			MediaProgressInput::Paged(input) => {
+				active_session.page = Set(Some(input.page));
+				active_session.elapsed_seconds = Set(input.elapsed_seconds);
+				is_complete =
+					is_progress_complete(id.to_string(), Some(input.page), conn).await?;
+			},
+		}
+
+		let on_conflict_update_cols = chain_optional_iter(
+			[reading_session::Column::UpdatedAt],
+			[
+				(matches!(input, MediaProgressInput::Epub(_)))
+					.then(|| reading_session::Column::Epubcfi),
+				(matches!(input, MediaProgressInput::Paged(_)))
+					.then(|| reading_session::Column::Page),
+			],
+		);
 
 		let active_session = reading_session::Entity::insert(active_session.clone())
 			.on_conflict(
@@ -266,17 +313,11 @@ impl MediaMutation {
 					reading_session::Column::MediaId,
 					reading_session::Column::UserId,
 				])
-				.update_columns(vec![
-					reading_session::Column::Page,
-					reading_session::Column::UpdatedAt,
-				])
+				.update_columns(on_conflict_update_cols)
 				.to_owned(),
 			)
 			.exec_with_returning(conn)
 			.await?;
-
-		let is_complete =
-			is_progress_complete(active_session.media_id.clone(), page, conn).await?;
 
 		if !is_complete {
 			Ok(ReadingProgressOutput::new(
@@ -373,6 +414,22 @@ async fn update_active_reading_session(
 		.await?;
 
 	Ok(active_session)
+}
+
+async fn insert_finished_reading_session(
+	active_session: Option<reading_session::Model>,
+	finished_reading_session: finished_reading_session::ActiveModel,
+	txn: &DatabaseTransaction,
+) -> Result<finished_reading_session::Model> {
+	// Note that finished reading session is used as a read history, so we don't
+	// clean up existing ones. The active reading session is deleted, though.
+	let finished_reading_session = finished_reading_session.insert(txn).await?;
+
+	if let Some(active_session) = active_session.clone() {
+		let _ = active_session.delete(txn).await?;
+	}
+
+	Ok(finished_reading_session)
 }
 
 async fn set_completed_media(

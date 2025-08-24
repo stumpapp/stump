@@ -71,6 +71,20 @@ const DENSITY_TO_COLUMNS: Record<DeviceType, Record<GridDensity, number>> = {
 	},
 }
 
+export const getDensityTextSize = (density?: GridDensity): 'sm' | 'xs' => {
+	if (!density) return 'sm'
+	switch (density) {
+		case 'ultra-compact':
+		case 'compact':
+			return 'xs'
+		case 'cozy':
+		case 'comfortable':
+		case 'spacious':
+		case 'expansive':
+			return 'sm'
+	}
+}
+
 type IGridSizeStore = {
 	density?: GridDensity
 	setDensity: (density: GridDensity) => void

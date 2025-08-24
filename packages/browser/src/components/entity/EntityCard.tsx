@@ -5,6 +5,7 @@ import { To } from 'react-router-dom'
 
 import { Link } from '@/context'
 
+import { getDensityTextSize, useGridSizeStore } from '../container/useGridSize'
 import { EntityImage } from './EntityImage'
 
 type ContainerProps = ComponentPropsWithoutRef<'div'> & {
@@ -78,6 +79,8 @@ export default function EntityCard({
 
 	const isFullWidth = typeof fullWidth === 'function' ? fullWidth(isImageFailed) : fullWidth
 
+	const gridDensity = useGridSizeStore((store) => store.density)
+
 	/**
 	 * Renders the title of the card. If the title is a string, it will be truncated to 2 lines
 	 *
@@ -86,7 +89,10 @@ export default function EntityCard({
 	const renderTitle = () => {
 		if (typeof title === 'string') {
 			return (
-				<Text size="sm" className="line-clamp-2 h-[40px] min-w-0 whitespace-normal">
+				<Text
+					size={getDensityTextSize(gridDensity)}
+					className="line-clamp-2 h-[40px] min-w-0 whitespace-normal"
+				>
 					{title}
 				</Text>
 			)

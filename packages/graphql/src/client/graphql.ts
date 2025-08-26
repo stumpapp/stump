@@ -3316,6 +3316,8 @@ export type BookSearchOverlayQuery = { __typename?: 'Query', media: { __typename
       & { ' $fragmentRefs'?: { 'BookCardFragment': BookCardFragment } }
     )>, pageInfo: { __typename: 'CursorPaginationInfo', currentCursor?: string | null, nextCursor?: string | null, limit: number } | { __typename: 'OffsetPaginationInfo' } } };
 
+export type MetadataEditorFragment = { __typename?: 'MediaMetadata', ageRating?: number | null, characters: Array<string>, colorists: Array<string>, coverArtists: Array<string>, day?: number | null, editors: Array<string>, genres: Array<string>, inkers: Array<string>, letterers: Array<string>, links: Array<string>, month?: number | null, number?: any | null, pageCount?: number | null, pencillers: Array<string>, publisher?: string | null, series?: string | null, summary?: string | null, teams: Array<string>, volume?: number | null, writers: Array<string> } & { ' $fragmentName'?: 'MetadataEditorFragment' };
+
 export type DeleteBookClubConfirmationMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
@@ -3503,7 +3505,10 @@ export type BookOverviewSceneQueryVariables = Exact<{
 
 
 export type BookOverviewSceneQuery = { __typename?: 'Query', mediaById?: (
-    { __typename?: 'Media', id: string, resolvedName: string, extension: string, metadata?: { __typename?: 'MediaMetadata', links: Array<string>, summary?: string | null } | null, readHistory: Array<{ __typename?: 'FinishedReadingSession', completedAt: any }> }
+    { __typename?: 'Media', id: string, resolvedName: string, extension: string, metadata?: (
+      { __typename?: 'MediaMetadata', links: Array<string>, summary?: string | null }
+      & { ' $fragmentRefs'?: { 'MetadataEditorFragment': MetadataEditorFragment } }
+    ) | null, readHistory: Array<{ __typename?: 'FinishedReadingSession', completedAt: any }> }
     & { ' $fragmentRefs'?: { 'BookCardFragment': BookCardFragment;'BookFileInformationFragment': BookFileInformationFragment } }
   ) | null };
 
@@ -4423,6 +4428,30 @@ export const BookCardFragmentDoc = new TypedDocumentString(`
   }
 }
     `, {"fragmentName":"BookCard"}) as unknown as TypedDocumentString<BookCardFragment, unknown>;
+export const MetadataEditorFragmentDoc = new TypedDocumentString(`
+    fragment MetadataEditor on MediaMetadata {
+  ageRating
+  characters
+  colorists
+  coverArtists
+  day
+  editors
+  genres
+  inkers
+  letterers
+  links
+  month
+  number
+  pageCount
+  pencillers
+  publisher
+  series
+  summary
+  teams
+  volume
+  writers
+}
+    `, {"fragmentName":"MetadataEditor"}) as unknown as TypedDocumentString<MetadataEditorFragment, unknown>;
 export const BookFileInformationFragmentDoc = new TypedDocumentString(`
     fragment BookFileInformation on Media {
   id
@@ -5368,6 +5397,7 @@ export const BookOverviewSceneDocument = new TypedDocumentString(`
     metadata {
       links
       summary
+      ...MetadataEditor
     }
     readHistory {
       completedAt
@@ -5394,6 +5424,28 @@ export const BookOverviewSceneDocument = new TypedDocumentString(`
     __typename
     completedAt
   }
+}
+fragment MetadataEditor on MediaMetadata {
+  ageRating
+  characters
+  colorists
+  coverArtists
+  day
+  editors
+  genres
+  inkers
+  letterers
+  links
+  month
+  number
+  pageCount
+  pencillers
+  publisher
+  series
+  summary
+  teams
+  volume
+  writers
 }
 fragment BookFileInformation on Media {
   id

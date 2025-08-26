@@ -10,6 +10,7 @@ import { useParams } from 'react-router'
 import { useMediaMatch } from 'rooks'
 
 import BookCard, { BookCardFragment } from '@/components/book/BookCard'
+import MetadataEditor from '@/components/book/metadata/MetadataEditor'
 import { SceneContainer } from '@/components/container'
 import LinkBadge from '@/components/LinkBadge'
 import ReadMore from '@/components/ReadMore'
@@ -36,6 +37,7 @@ const query = graphql(`
 			metadata {
 				links
 				summary
+				...MetadataEditor
 			}
 			readHistory {
 				completedAt
@@ -155,7 +157,10 @@ export default function BookOverviewScene() {
 					)}
 
 					{isServerOwner && <BookFileInformation fragment={media} />}
+
 					<BooksAfterCursor cursor={media.id} />
+
+					<MetadataEditor data={media.metadata} />
 				</div>
 			</Suspense>
 		</SceneContainer>

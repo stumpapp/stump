@@ -111,7 +111,7 @@ export default function MetadataEditor({ data }: Props) {
 					}}
 				>
 					<thead>
-						<tr className="flex divide-x divide-edge">
+						<tr className="flex">
 							{table.getFlatHeaders().map((header) => (
 								<th
 									key={header.id}
@@ -148,7 +148,7 @@ export default function MetadataEditor({ data }: Props) {
 							<tr key={row.id} className="flex divide-x divide-edge">
 								{row.getVisibleCells().map((cell) => (
 									<td
-										className="py-1 pl-1.5 pr-1.5 first:pl-4 last:pr-4"
+										className="py-2 pl-1.5 pr-1.5 first:pl-4 last:pr-4"
 										key={cell.id}
 										style={{
 											width: cell.column.getSize(),

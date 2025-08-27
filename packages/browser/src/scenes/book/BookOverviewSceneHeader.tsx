@@ -99,7 +99,7 @@ function build_metadata_table(media: BookOverviewHeaderQuery['mediaById']): Meta
 		publisher: { contains: metadata?.publisher || '' },
 	})
 	add_to_table('genres', 'Genres: ', genres, {
-		genre: { likeAnyOf: metadata?.genres || '' },
+		genres: { likeAnyOf: metadata?.genres || '' },
 	})
 	add_to_table('age_rating', 'Age Rating: ', age_rating)
 	add_to_table('year_published', 'Year: ', year, { year: { eq: year_num } })

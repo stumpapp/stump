@@ -1,3 +1,5 @@
+import { MediaFilterInput } from '@stump/graphql'
+import { toUrlParams } from '@stump/sdk'
 import { useCallback } from 'react'
 import { useLocation } from 'react-router'
 
@@ -80,6 +82,10 @@ const pathsInternal = {
 		return `${baseUrl}/reader?${searchParams.toString()}`
 	},
 	bookSearch: () => '/books',
+	bookSearchWithFilter: (filters: MediaFilterInput) => {
+		const params = toUrlParams({ filters: JSON.stringify(filters) })
+		return `/books?${params.toString()}`
+	},
 	createEmailer: () => pathsInternal.settings('server/email/new'),
 	docs: (topic?: DocTopic, section?: string) =>
 		`https://www.stumpapp.dev/guides/${topic || ''}${section ? `#${section}` : ''}`,
@@ -145,6 +151,8 @@ export function usePaths() {
 		bookReader: (id: string, params: BookReaderParams) =>
 			`${basePath}${pathsInternal.bookReader(id, params)}`,
 		bookSearch: () => `${basePath}${pathsInternal.bookSearch()}`,
+		bookSearchWithFilter: (filters: MediaFilterInput) =>
+			`${basePath}${pathsInternal.bookSearchWithFilter(filters)}`,
 		createEmailer: () => `${basePath}${pathsInternal.createEmailer()}`,
 		docs: pathsInternal.docs, // Don't prefix external URLs
 		editEmailer: (id: number) => `${basePath}${pathsInternal.editEmailer(id)}`,

@@ -1,13 +1,21 @@
-import { Card, CheckBox, cn, Heading, Label, Text } from '@stump/components'
+import { Button, Card, CheckBox, cn, Heading, Input, Label, Text } from '@stump/components'
 import { FragmentType, graphql, MetadataEditorFragment, useFragment } from '@stump/graphql'
 import {
 	createColumnHelper,
 	flexRender,
 	getCoreRowModel,
+	Header,
 	useReactTable,
 } from '@tanstack/react-table'
 import getProperty from 'lodash/get'
-import { useMemo, useState } from 'react'
+import { useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useNavigate } from 'react-router'
+import { useWindowSize } from 'rooks'
+import { match, P } from 'ts-pattern'
+
+import { usePaths } from '@/paths'
+
+import { BadgeListCell, TextCell } from './cells'
 
 const fragment = graphql(`
 	fragment MetadataEditor on MediaMetadata {
@@ -40,22 +48,27 @@ type Props = {
 
 export default function MetadataEditor({ data }: Props) {
 	const metadata = useFragment(fragment, data)
+	const navigate = useNavigate()
+	const paths = usePaths()
 
 	const [showMissing, setShowMissing] = useState(false)
+	const [isEditing, setIsEditing] = useState(false)
 
 	const columns = useMemo(
 		() => [
 			columnHelper.accessor('label', {
 				header: ({ table }) => (
-					<Label className="flex h-full items-center pl-4 font-bold leading-6 text-foreground/90">
-						<CheckBox
-							variant="primary"
-							checked={table.getIsSomeRowsExpanded()}
-							onClick={() => setShowMissing((prev) => !prev)}
-						/>
+					<div className="flex h-full items-center pl-4 font-bold leading-6 text-foreground/90">
+						<Label className="flex items-center">
+							<CheckBox
+								variant="primary"
+								checked={table.getIsSomeRowsExpanded()}
+								onClick={() => setShowMissing((prev) => !prev)}
+							/>
 
-						<span className="ml-2">Missing</span>
-					</Label>
+							<span className="ml-2">Missing</span>
+						</Label>
+					</div>
 				),
 				cell: (info) => (
 					<Text variant="muted" className="text-sm font-medium">
@@ -65,9 +78,81 @@ export default function MetadataEditor({ data }: Props) {
 				enableResizing: true,
 			}),
 			columnHelper.accessor('field', {
-				header: () => null,
-				cell: (info) => <Text>{getProperty(metadata, info.getValue())}</Text>,
+				header: () => (
+					<div className="flex h-full flex-1 items-center justify-end pr-1.5">
+						<Button
+							size="sm"
+							newYork
+							variant="outline"
+							className="rounded-lg"
+							onClick={() => setIsEditing((prev) => !prev)}
+						>
+							Edit
+						</Button>
+					</div>
+				),
+				cell: (info) =>
+					match(info.getValue())
+						.with(
+							P.union(
+								'genres',
+								'characters',
+								'colorists',
+								'coverArtists',
+								'editors',
+								'inkers',
+								'letterers',
+								'pencillers',
+								'teams',
+								'writers',
+							),
+							(field) => {
+								const values = getProperty(metadata, field) ?? []
+								return (
+									<BadgeListCell
+										values={values}
+										onItemClick={(index) => {
+											const item = values[index]
+											if (!item) return
+											navigate(
+												paths.bookSearchWithFilter({
+													metadata: { [field]: { likeAnyOf: [item] } },
+												}),
+											)
+										}}
+									/>
+								)
+							},
+						)
+						.with('links', () => {
+							const safeUrls = (getProperty(metadata, 'links') ?? []).map((url) => {
+								try {
+									return new URL(url).hostname
+								} catch {
+									return url
+								}
+							})
+							return (
+								<BadgeListCell
+									values={safeUrls}
+									onItemClick={(index) => window.open(metadata?.links?.[index], '_blank')}
+								/>
+							)
+						})
+						.otherwise(() => <TextCell value={getProperty(metadata, info.getValue())} />),
+				// cell: (info) => (
+				// 	<Input
+				// 		value={getProperty(metadata, info.getValue()) || ''}
+				// 		onChange={(e) => {
+				// 			// Handle input change
+				// 		}}
+				// 		size="sm"
+				// 	/>
+				// ),
 				enableResizing: false,
+				meta: {
+					isGrow: true,
+				},
 			}),
 		],
 		[metadata],
@@ -96,6 +181,27 @@ export default function MetadataEditor({ data }: Props) {
 		},
 	})
 
+	const windowDimensions = useWindowSize()
+	const tableContainerRef = useRef<HTMLDivElement>(null)
+
+	useLayoutEffect(() => {
+		if (!tableContainerRef.current) return
+		const resizeObserver = new ResizeObserver((entries) => {
+			const entry = entries[0]
+			if (entry) {
+				const initialColumnSizing = calculateTableSizing(
+					table.getFlatHeaders(),
+					entry.contentRect.width,
+				)
+				table.setColumnSizing(initialColumnSizing)
+			}
+		})
+		resizeObserver.observe(tableContainerRef.current)
+		return () => {
+			resizeObserver.disconnect()
+		}
+	}, [table, windowDimensions.innerWidth])
+
 	const { rows } = table.getRowModel()
 
 	return (
@@ -103,15 +209,22 @@ export default function MetadataEditor({ data }: Props) {
 			<div>
 				<Heading size="sm">Metadata</Heading>
 			</div>
-			<Card className="overflow-hidden rounded-xl border-edge">
+			<Card
+				className="overflow-hidden rounded-xl border-edge"
+				ref={tableContainerRef}
+				style={{
+					direction: table.options.columnResizeDirection,
+					width: '100%',
+				}}
+			>
 				<table
-					className="min-w-full table-fixed divide-y divide-edge"
+					className="w-fit divide-y divide-edge"
 					style={{
 						width: table.getCenterTotalSize(),
 					}}
 				>
 					<thead>
-						<tr className="flex">
+						<tr className="relative flex">
 							{table.getFlatHeaders().map((header) => (
 								<th
 									key={header.id}
@@ -121,23 +234,25 @@ export default function MetadataEditor({ data }: Props) {
 											width: header.getSize(),
 										},
 									}}
-									className="relative min-h-8"
+									className="relative min-h-10"
 								>
 									{flexRender(header.column.columnDef.header, header.getContext())}
 
-									<div
-										onMouseDown={header.getResizeHandler()}
-										onTouchStart={header.getResizeHandler()}
-										className={cn(
-											'absolute -right-px top-0 z-50 h-full w-px cursor-col-resize touch-none opacity-0 transition-opacity duration-75 hover:opacity-50',
-											{
-												'opacity-100': header.column.getIsResizing(),
-											},
-											{
-												'bg-foreground': !header.column.getIsResizing(),
-											},
-										)}
-									/>
+									{header.column.getCanResize() && (
+										<div
+											onMouseDown={header.getResizeHandler()}
+											onTouchStart={header.getResizeHandler()}
+											className={cn(
+												'absolute -right-px top-0 z-50 h-full w-px cursor-col-resize touch-none opacity-0 transition-opacity duration-75 hover:opacity-50',
+												{
+													'opacity-100': header.column.getIsResizing(),
+												},
+												{
+													'bg-foreground': !header.column.getIsResizing(),
+												},
+											)}
+										/>
+									)}
 								</th>
 							))}
 						</tr>
@@ -145,7 +260,7 @@ export default function MetadataEditor({ data }: Props) {
 
 					<tbody className="divide-y divide-edge">
 						{rows.map((row) => (
-							<tr key={row.id} className="flex divide-x divide-edge">
+							<tr key={row.id} className="flex w-fit divide-x divide-edge">
 								{row.getVisibleCells().map((cell) => (
 									<td
 										className="py-2 pl-1.5 pr-1.5 first:pl-4 last:pr-4"
@@ -207,4 +322,60 @@ const isEmptyField = (data: unknown) => {
 	} else {
 		return !data
 	}
+}
+
+function getSize(size = 100, max = Number.MAX_SAFE_INTEGER, min = 40) {
+	return Math.max(Math.min(size, max), min)
+}
+
+declare module '@tanstack/react-table' {
+	interface ColumnMeta {
+		isGrow?: boolean
+		widthPercentage?: number
+	}
+}
+
+function calculateTableSizing<DataType>(
+	columns: Header<DataType, unknown>[],
+	totalWidth: number,
+): Record<string, number> {
+	let totalAvailableWidth = totalWidth
+	let totalIsGrow = 0
+
+	columns.forEach((header) => {
+		const column = header.column.columnDef
+		if (!column.size) {
+			if (!column.meta?.isGrow) {
+				let calculatedSize = 100
+				if (column?.meta?.widthPercentage) {
+					calculatedSize = column.meta.widthPercentage * totalWidth * 0.01
+				} else {
+					calculatedSize = totalWidth / columns.length
+				}
+
+				const size = getSize(calculatedSize, column.maxSize, column.minSize)
+
+				column.size = size
+			}
+		}
+
+		if (column.meta?.isGrow) totalIsGrow += 1
+		else totalAvailableWidth -= getSize(column.size, column.maxSize, column.minSize)
+	})
+
+	const sizing: Record<string, number> = {}
+
+	columns.forEach((header) => {
+		const column = header.column.columnDef
+		if (column.meta?.isGrow) {
+			let calculatedSize = 100
+			calculatedSize = Math.floor(totalAvailableWidth / totalIsGrow)
+			const size = getSize(calculatedSize, column.maxSize, column.minSize)
+			column.size = size
+		}
+
+		sizing[`${column.id}`] = Number(column.size)
+	})
+
+	return sizing
 }

@@ -1047,7 +1047,7 @@ type MediaMetadata {
 input MediaMetadataFilterInput {
 	title: FieldFilterString = null
 	publisher: FieldFilterString = null
-	genre: FieldFilterString = null
+	genres: FieldFilterString = null
 	characters: FieldFilterString = null
 	colorists: FieldFilterString = null
 	writers: FieldFilterString = null

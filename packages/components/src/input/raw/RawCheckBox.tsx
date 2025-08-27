@@ -7,7 +7,7 @@ import React from 'react'
 import { cn } from '../../utils'
 
 export const RAW_CHECKBOX_BASE_CLASSES =
-	'shrink-0 border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:focus:ring-offset-gray-900'
+	'shrink-0 border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50  focus:ring-offset-background'
 export const RAW_CHECKBOX_SIZE_VARIANTS = {
 	default: 'h-4 w-4',
 	lg: 'h-6 w-6',

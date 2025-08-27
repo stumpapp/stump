@@ -1119,7 +1119,7 @@ export type MediaMetadataFilterInput = {
   coverArtists?: InputMaybe<FieldFilterString>;
   day?: InputMaybe<NumericFilterI32>;
   editors?: InputMaybe<FieldFilterString>;
-  genre?: InputMaybe<FieldFilterString>;
+  genres?: InputMaybe<FieldFilterString>;
   inkers?: InputMaybe<FieldFilterString>;
   letterers?: InputMaybe<FieldFilterString>;
   links?: InputMaybe<FieldFilterString>;

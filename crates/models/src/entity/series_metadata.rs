@@ -7,8 +7,10 @@ use sea_orm::{entity::prelude::*, QueryOrder};
 #[graphql(name = "SeriesMetadataModel")]
 #[sea_orm(table_name = "series_metadata")]
 pub struct Model {
+	#[sea_orm(primary_key, auto_increment = false, column_type = "Text")]
+	pub series_id: String,
 	#[sea_orm(column_type = "Text")]
-	pub meta_type: String,
+	pub meta_type: Option<String>,
 	#[sea_orm(column_type = "Text", nullable)]
 	pub title: Option<String>,
 	#[sea_orm(column_type = "Text", nullable)]
@@ -24,8 +26,6 @@ pub struct Model {
 	pub age_rating: Option<i32>,
 	#[sea_orm(column_type = "Text", nullable)]
 	pub status: Option<String>,
-	#[sea_orm(primary_key, auto_increment = false, column_type = "Text")]
-	pub series_id: String,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

@@ -1,5 +1,5 @@
 import { PREFETCH_STALE_TIME, useSDK, useSuspenseGraphQL } from '@stump/client'
-import { usePrevious, usePreviousIsDifferent } from '@stump/components'
+import { usePrevious } from '@stump/components'
 import { graphql, InterfaceLayout, MediaFilterInput, MediaOrderBy } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
 import { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
@@ -152,7 +152,9 @@ function SeriesBooksScene() {
 	const searchFilter = useSearchMediaFilter(search)
 
 	const [containerRef, isInView] = useIsInView<HTMLDivElement>()
-	const differentSearch = usePreviousIsDifferent(search)
+
+	const previous = usePrevious(search)
+	const differentSearch = previous != null && search !== previous
 	useEffect(() => {
 		if (differentSearch) {
 			setPage(1)
@@ -291,7 +293,7 @@ function SeriesBooksScene() {
 					}}
 				>
 					<div className="flex flex-1 px-4 pt-4">
-						{nodes.length && (
+						{!!nodes.length && (
 							<DynamicCardGrid
 								count={nodes.length}
 								renderItem={(index) => <BookCard key={nodes[index]!.id} fragment={nodes[index]!} />}

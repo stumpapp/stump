@@ -33,6 +33,8 @@ export {
 	Input,
 	PasswordInput,
 	RawSwitch,
+	RawTextArea,
+	type RawTextAreaProps,
 	Switch,
 	type SwitchProps,
 	TextArea,

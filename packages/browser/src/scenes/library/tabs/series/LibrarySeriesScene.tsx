@@ -1,5 +1,5 @@
 import { PREFETCH_STALE_TIME, useSDK, useSuspenseGraphQL } from '@stump/client'
-import { usePrevious, usePreviousIsDifferent } from '@stump/components'
+import { usePrevious } from '@stump/components'
 import {
 	graphql,
 	InterfaceLayout,
@@ -183,7 +183,8 @@ function LibrarySeriesScene() {
 	const { search } = useURLKeywordSearch()
 	const searchFilter = useSearchSeriesFilter(search)
 
-	const differentSearch = usePreviousIsDifferent(search)
+	const previous = usePrevious(search)
+	const differentSearch = previous != null && search !== previous
 	useEffect(() => {
 		if (differentSearch) {
 			setPage(1)
@@ -316,7 +317,7 @@ function LibrarySeriesScene() {
 					}}
 				>
 					<div className="flex flex-1 px-4 pt-4">
-						{nodes.length && (
+						{!!nodes.length && (
 							<DynamicCardGrid
 								count={nodes.length}
 								renderItem={(index) => <SeriesCard key={nodes[index]!.id} data={nodes[index]!} />}

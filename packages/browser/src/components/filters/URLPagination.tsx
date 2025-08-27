@@ -70,7 +70,7 @@ export default function URLPagination({ pages, currentPage, onChangePage, onPref
 					size="sm"
 					className="h-7 w-7 p-0 text-center text-xs [appearance:textfield] sm:h-6 sm:w-6 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
 					disabled={pages <= 1}
-					value={inputPage || currentPage}
+					value={inputPage ?? ''}
 					onChange={handleInputChange}
 					onBlur={handleInputBlur}
 					max={pages}

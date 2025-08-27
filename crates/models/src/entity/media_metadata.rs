@@ -39,6 +39,7 @@ pub struct Model {
 	pub summary: Option<String>,
 	#[sea_orm(column_type = "Text", nullable)]
 	pub notes: Option<String>,
+	// TODO: Pluralize
 	#[sea_orm(column_type = "Text", nullable)]
 	pub genre: Option<String>,
 	pub year: Option<i32>,

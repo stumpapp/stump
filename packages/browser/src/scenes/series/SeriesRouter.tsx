@@ -1,3 +1,4 @@
+import { UserPermission } from '@stump/graphql'
 import { lazy, useMemo } from 'react'
 import { Navigate, Route, Routes } from 'react-router'
 
@@ -14,7 +15,10 @@ const SeriesSearchScene = lazy(() => import('@/scenes/seriesSearch'))
 export default function SeriesRouter() {
 	const { checkPermission } = useAppContext()
 
-	const canAccessExplorer = useMemo(() => checkPermission('file:explorer'), [checkPermission])
+	const canAccessExplorer = useMemo(
+		() => checkPermission(UserPermission.FileExplorer),
+		[checkPermission],
+	)
 
 	return (
 		<Routes>

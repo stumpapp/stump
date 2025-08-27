@@ -1,4 +1,5 @@
 import { cn, useSticky } from '@stump/components'
+import { useCallback } from 'react'
 import { useMediaMatch } from 'rooks'
 
 import { usePreferences } from '@/hooks/usePreferences'
@@ -58,6 +59,21 @@ export default function FilterHeader({
 	})
 
 	const { search, setSearch, removeSearch } = useFilterContext()
+	const onSearchChange = useCallback(
+		(value: string) => {
+			if (value === search) return
+			// Note: This prevents unnecessary state updates which causes unneeded location state
+			// changes which causes an IRRITATING bug where you have to back out of the page like
+			// 4-6 times to actually go back when using the browser back button lol
+			if (!value && !search) return
+			if (value) {
+				setSearch(value)
+			} else {
+				removeSearch()
+			}
+		},
+		[setSearch, removeSearch, search],
+	)
 
 	return (
 		<header
@@ -73,13 +89,7 @@ export default function FilterHeader({
 			<Search
 				initialValue={search || ''}
 				placeholder={searchPlaceholder}
-				onChange={(value) => {
-					if (value) {
-						setSearch(value)
-					} else {
-						removeSearch()
-					}
-				}}
+				onChange={onSearchChange}
 				isLoading={isSearching}
 				isDisabled={isSearchDisabled}
 			/>

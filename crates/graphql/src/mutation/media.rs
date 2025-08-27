@@ -3,7 +3,7 @@ use chrono::Utc;
 use models::{
 	entity::{
 		favorite_media, finished_reading_session, library, library_config, media,
-		reading_session, series, user::AuthUser,
+		media_metadata, reading_session, series, user::AuthUser,
 	},
 	shared::enums::UserPermission,
 };
@@ -23,7 +23,10 @@ use stump_core::{
 use crate::{
 	data::{AuthContext, CoreContext},
 	guard::PermissionGuard,
-	input::{media::MediaProgressInput, thumbnail::PageBasedThumbnailInput},
+	input::{
+		media::{MediaMetadataInput, MediaProgressInput},
+		thumbnail::PageBasedThumbnailInput,
+	},
 	object::{
 		media::Media,
 		reading_session::{ActiveReadingSession, FinishedReadingSession},
@@ -220,6 +223,42 @@ impl MediaMutation {
 		tracing::debug!(path = ?path_buf, "Generated book thumbnail");
 
 		Ok(book.into())
+	}
+
+	#[graphql(guard = "PermissionGuard::one(UserPermission::EditMetadata)")]
+	async fn update_media_metadata(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+		input: MediaMetadataInput,
+	) -> Result<Media> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let model = media::ModelWithMetadata::find_for_user(user)
+			.filter(media::Column::Id.eq(id.to_string()))
+			.into_model::<media::ModelWithMetadata>()
+			.one(conn)
+			.await?
+			.ok_or("Media not found")?;
+
+		let updated_metadata = if let Some(existing) = model.metadata {
+			let mut active_model = input.into_active_model();
+			active_model.id = Set(existing.id);
+			active_model.media_id = Set(Some(model.media.id.clone()));
+			active_model.update(conn).await?
+		} else {
+			let mut active_model = input.into_active_model();
+			active_model.media_id = Set(Some(model.media.id.clone()));
+			active_model.insert(conn).await?
+		};
+
+		let model = media::ModelWithMetadata {
+			media: model.media,
+			metadata: Some(updated_metadata),
+		};
+
+		Ok(model.into())
 	}
 
 	async fn delete_media_progress(&self, ctx: &Context<'_>, id: ID) -> Result<Media> {

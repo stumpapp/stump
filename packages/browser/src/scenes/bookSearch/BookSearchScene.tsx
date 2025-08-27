@@ -1,5 +1,5 @@
 import { PREFETCH_STALE_TIME, useSDK, useSuspenseGraphQL } from '@stump/client'
-import { usePrevious, usePreviousIsDifferent } from '@stump/components'
+import { usePrevious } from '@stump/components'
 import {
 	graphql,
 	InterfaceLayout,
@@ -164,7 +164,8 @@ function BookSearchScene() {
 	const { search } = useURLKeywordSearch()
 	const searchFilter = useSearchMediaFilter(search)
 
-	const differentSearch = usePreviousIsDifferent(search)
+	const previous = usePrevious(search)
+	const differentSearch = previous != null && previous !== search
 	useEffect(() => {
 		if (differentSearch) {
 			setPage(1)
@@ -290,7 +291,7 @@ function BookSearchScene() {
 					}}
 				>
 					<div className="flex flex-1 px-4 pt-4">
-						{nodes.length && (
+						{!!nodes.length && (
 							<DynamicCardGrid
 								count={nodes.length}
 								renderItem={(index) => <BookCard key={nodes[index]!.id} fragment={nodes[index]!} />}
@@ -346,6 +347,18 @@ function BookSearchScene() {
 			)
 		}
 	}
+
+	// return <FilterContext.Provider
+	// 		value={{
+	// 			filters,
+	// 			ordering,
+	// 			pagination: { page, pageSize },
+	// 			setPage,
+	// 			...rest,
+	// 		}}
+	// 	>
+	// 		Foo
+	// 	</FilterContext.Provider>
 
 	return (
 		<FilterContext.Provider

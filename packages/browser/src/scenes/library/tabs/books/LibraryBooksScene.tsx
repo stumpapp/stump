@@ -301,7 +301,7 @@ function LibraryBooksScene() {
 					}}
 				>
 					<div className="flex flex-1 px-4 pt-4">
-						{nodes.length && (
+						{!!nodes.length && (
 							<DynamicCardGrid
 								count={nodes.length}
 								renderItem={(index) => <BookCard key={nodes[index]!.id} fragment={nodes[index]!} />}

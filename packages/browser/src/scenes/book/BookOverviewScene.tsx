@@ -9,7 +9,7 @@ import { useParams } from 'react-router'
 import { useMediaMatch } from 'rooks'
 
 import BookCard, { BookCardFragment } from '@/components/book/BookCard'
-import MetadataEditor from '@/components/book/metadata/MetadataEditor'
+import { MediaMetadataEditor } from '@/components/book/metadata'
 import { SceneContainer } from '@/components/container'
 import LinkBadge from '@/components/LinkBadge'
 import ReadMore from '@/components/ReadMore'
@@ -154,7 +154,10 @@ export default function BookOverviewScene() {
 
 					<BooksAfterCursor cursor={media.id} />
 
-					<MetadataEditor data={media.metadata} />
+					<div className="flex flex-col gap-y-2">
+						<Heading size="sm">Metadata</Heading>
+						<MediaMetadataEditor data={media.metadata} />
+					</div>
 				</div>
 			</Suspense>
 		</SceneContainer>

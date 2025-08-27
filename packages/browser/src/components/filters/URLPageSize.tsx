@@ -15,7 +15,7 @@ export default function URLPageSize() {
 	const handleInputSubmit = useCallback(
 		(e: React.FormEvent<HTMLFormElement>) => {
 			e.preventDefault()
-			if (inputPageSize !== undefined && inputPageSize > 0) {
+			if (inputPageSize != undefined && inputPageSize > 0) {
 				setPageSize(inputPageSize)
 			}
 		},
@@ -33,7 +33,7 @@ export default function URLPageSize() {
 				variant="activeGhost"
 				size="sm"
 				className="h-7 w-7 p-0 text-center text-xs [appearance:textfield] sm:h-6 sm:w-6 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-				value={inputPageSize || pageSize}
+				value={inputPageSize ?? ''}
 				onChange={handleInputChange}
 				min={1}
 			/>

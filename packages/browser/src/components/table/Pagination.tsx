@@ -43,6 +43,7 @@ export default function TablePagination({
 				disabled={currentPage <= 1}
 				onClick={() => onChangePage(currentPage - 1)}
 				onMouseEnter={onPrefetchPage ? () => onPrefetchPage(currentPage - 1) : undefined}
+				className="h-5 w-5"
 			>
 				<ArrowLeft className="h-4 w-4" />
 			</Button>
@@ -68,7 +69,7 @@ export default function TablePagination({
 						totalPages={pages}
 						onPageChange={onChangePage}
 						trigger={
-							<Button>
+							<Button size="icon" className="h-5 w-5">
 								<MoreHorizontal className="h-4 w-4" />
 							</Button>
 						}
@@ -82,6 +83,7 @@ export default function TablePagination({
 				disabled={currentPage >= pages}
 				onClick={() => onChangePage(currentPage + 1)}
 				onMouseEnter={onPrefetchPage ? () => onPrefetchPage(currentPage + 1) : undefined}
+				className="h-5 w-5"
 			>
 				<ArrowRight className="h-4 w-4" />
 			</Button>

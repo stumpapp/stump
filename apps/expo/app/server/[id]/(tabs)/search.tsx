@@ -176,7 +176,7 @@ export default function Screen() {
 	return (
 		<ScrollView className="flex-1 bg-background p-4 tablet:p-7">
 			<View className="gap-4">
-				{bookResults?.media.nodes.length && (
+				{!!bookResults?.media.nodes.length && (
 					<View>
 						<View className="mb-1 flex flex-row items-center justify-between">
 							<Heading size="default">Books</Heading>
@@ -208,7 +208,7 @@ export default function Screen() {
 					</View>
 				)}
 
-				{seriesResults?.series.nodes.length && (
+				{!!seriesResults?.series.nodes.length && (
 					<View>
 						<View className="mb-1 flex flex-row items-center justify-between">
 							<Heading size="default">Series</Heading>
@@ -240,7 +240,7 @@ export default function Screen() {
 					</View>
 				)}
 
-				{librariesResults?.libraries.nodes.length && (
+				{!!librariesResults?.libraries.nodes.length && (
 					<View>
 						<View className="mb-1 flex flex-row items-center justify-between">
 							<Heading size="default">Libraries</Heading>

@@ -95,6 +95,7 @@ impl AssociatedPermission for UserPermission {
 			UserPermission::ReadPersistedLogs => {
 				vec![UserPermission::ReadJobs]
 			},
+			UserPermission::WriteBackMetadata => vec![UserPermission::EditMetadata],
 			_ => vec![],
 		}
 	}
@@ -120,9 +121,6 @@ pub fn user_has_all_permissions(user: &AuthUser, permissions: &[UserPermission])
 		.iter()
 		.filter(|&permission| !user_has_permission(user, *permission))
 		.collect::<Vec<_>>();
-	// if !missing_permissions.is_empty() {
-	// 	tracing::error!(?user, ?missing_permissions, "User does not have permission");
-	// }
 
 	missing_permissions.is_empty()
 }

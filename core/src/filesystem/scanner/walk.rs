@@ -6,10 +6,7 @@ use std::{
 
 use globset::GlobSet;
 use itertools::Either;
-use models::{
-	entity::{media, series},
-	shared::enums::FileStatus,
-};
+use models::entity::{media, series};
 use rayon::iter::{
 	IntoParallelIterator, IntoParallelRefIterator, ParallelBridge, ParallelIterator,
 };
@@ -175,7 +172,7 @@ pub async fn walk_library(
 			let recovered_series = existing_records
 				.into_iter()
 				.filter(|s| {
-					s.status == FileStatus::Missing && PathBuf::from(path).exists()
+					s.status.is_recovered_if_present() && PathBuf::from(path).exists()
 				})
 				.map(|s| s.id)
 				.collect::<Vec<String>>();
@@ -401,7 +398,7 @@ pub async fn walk_series(
 	let recovered_media = existing_media_map
 		.into_par_iter()
 		.filter(|(path, media)| {
-			media.status == FileStatus::Missing && PathBuf::from(path).exists()
+			media.status.is_recovered_if_present() && PathBuf::from(path).exists()
 		})
 		.map(|(_, media)| media.id)
 		.collect::<Vec<String>>();

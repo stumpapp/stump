@@ -124,6 +124,12 @@ pub enum FileStatus {
 	Missing,
 }
 
+impl FileStatus {
+	pub fn is_recovered_if_present(&self) -> bool {
+		matches!(self, FileStatus::Missing | FileStatus::Unknown)
+	}
+}
+
 impl From<FileStatus> for String {
 	fn from(val: FileStatus) -> Self {
 		val.to_string()
@@ -491,6 +497,13 @@ pub enum UserPermission {
 	ScanLibrary,
 	/// Grant access to manage the library (scan,edit,manage relations)
 	ManageLibrary,
+	/// Grants access to edit any existing metadata for media/series. This will only
+	/// be applied to the database-level metadata.
+	EditMetadata,
+	/// Grants access to write back the database-level metadata for media/series.
+	/// This should be treated with caution, as technically it would allow for
+	/// overwriting existing metadata at the file-level
+	WriteBackMetadata,
 	/// Grant access to delete the library (manage library)
 	DeleteLibrary,
 	/// Grant access to read users.
@@ -500,6 +513,7 @@ pub enum UserPermission {
 	ReadUsers,
 	/// Grant access to manage users (create,edit,delete)
 	ManageUsers,
+	/// Grant access to read notifiers
 	ReadNotifier,
 	/// Grant access to create a notifier
 	CreateNotifier,

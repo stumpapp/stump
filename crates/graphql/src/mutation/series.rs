@@ -8,6 +8,7 @@ use sea_orm::{
 	prelude::*,
 	sea_query::{OnConflict, Query},
 	ActiveValue::Set,
+	IntoActiveModel,
 };
 use stump_core::filesystem::{
 	image::{generate_book_thumbnail, GenerateThumbnailOptions},
@@ -18,7 +19,7 @@ use stump_core::filesystem::{
 use crate::{
 	data::{AuthContext, CoreContext},
 	guard::PermissionGuard,
-	input::thumbnail::UpdateThumbnailInput,
+	input::{series::SeriesMetadataInput, thumbnail::UpdateThumbnailInput},
 	object::series::Series,
 };
 
@@ -160,6 +161,40 @@ impl SeriesMutation {
 		tracing::debug!(path = ?path_buf, "Generated series thumbnail");
 
 		Ok(series.into())
+	}
+
+	#[graphql(guard = "PermissionGuard::one(UserPermission::EditMetadata)")]
+	async fn update_series_metadata(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+		input: SeriesMetadataInput,
+	) -> Result<Series> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let model = series::ModelWithMetadata::find_for_user(user)
+			.filter(series::Column::Id.eq(id.to_string()))
+			.into_model::<series::ModelWithMetadata>()
+			.one(conn)
+			.await?
+			.ok_or("Series not found")?;
+
+		let mut active_model = input.into_active_model();
+		active_model.series_id = Set(model.series.id.clone());
+
+		let updated_metadata = if model.metadata.is_some() {
+			active_model.update(conn).await?
+		} else {
+			active_model.insert(conn).await?
+		};
+
+		let model = series::ModelWithMetadata {
+			series: model.series,
+			metadata: Some(updated_metadata),
+		};
+
+		Ok(model.into())
 	}
 
 	// TODO(graphql): Implement mark_series_as_complete

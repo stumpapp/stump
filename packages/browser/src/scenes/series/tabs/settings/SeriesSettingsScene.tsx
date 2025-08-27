@@ -1,11 +1,12 @@
 import { useGraphQLMutation, useSDK, useSuspenseGraphQL } from '@stump/client'
-import { Alert, Button } from '@stump/components'
+import { Alert, Button, Heading } from '@stump/components'
 import { graphql } from '@stump/graphql'
 import { Construction } from 'lucide-react'
 import { useCallback, useEffect } from 'react'
 import { useNavigate } from 'react-router'
 
 import { SceneContainer } from '@/components/container'
+import { SeriesMetadataEditor } from '@/components/series/metadata'
 import paths from '@/paths'
 
 import { useSeriesContext } from '../../context'
@@ -15,6 +16,9 @@ const query = graphql(`
 	query SeriesSettingsScene($id: ID!) {
 		seriesById(id: $id) {
 			...SeriesThumbnailSelector
+			metadata {
+				...SeriesMetadataEditor
+			}
 		}
 	}
 `)
@@ -32,7 +36,7 @@ export default function SeriesSettingsScene() {
 	const navigate = useNavigate()
 
 	const {
-		data: { seriesById: fragment },
+		data: { seriesById },
 	} = useSuspenseGraphQL(query, sdk.cacheKey('seriesById', [series.id, 'settings']), {
 		id: series.id ?? '',
 	})
@@ -42,12 +46,12 @@ export default function SeriesSettingsScene() {
 	const handleAnalyze = useCallback(() => analyze({ id: series.id }), [analyze, series.id])
 
 	useEffect(() => {
-		if (!fragment) {
+		if (!seriesById) {
 			navigate(paths.notFound())
 		}
-	}, [fragment, navigate])
+	}, [seriesById, navigate])
 
-	if (!fragment) {
+	if (!seriesById) {
 		return null
 	}
 
@@ -70,7 +74,12 @@ export default function SeriesSettingsScene() {
 					Analyze Series
 				</Button>
 
-				<SeriesThumbnailSelector fragment={fragment} />
+				<SeriesThumbnailSelector fragment={seriesById} />
+
+				<div className="flex w-full flex-col gap-y-2">
+					<Heading size="sm">Metadata</Heading>
+					<SeriesMetadataEditor data={seriesById.metadata} />
+				</div>
 			</div>
 		</SceneContainer>
 	)

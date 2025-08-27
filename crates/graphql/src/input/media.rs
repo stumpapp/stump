@@ -1,6 +1,6 @@
 use async_graphql::{InputObject, OneofObject};
-use models::entity::{bookmark, user::AuthUser};
-use sea_orm::{prelude::*, ActiveValue::Set};
+use models::entity::{bookmark, media_metadata, user::AuthUser};
+use sea_orm::{prelude::*, ActiveValue::Set, IntoActiveModel};
 
 #[derive(Debug, Clone, InputObject)]
 pub struct EpubProgressInput {
@@ -39,5 +39,70 @@ impl BookmarkInput {
 			user_id: Set(user.id.clone()),
 			page: Set(Some(-1)),
 		}
+	}
+}
+
+#[derive(Debug, Clone, InputObject)]
+pub struct MediaMetadataInput {
+	pub title: Option<String>,
+	pub series: Option<String>,
+	pub number: Option<Decimal>,
+	pub volume: Option<i32>,
+	pub summary: Option<String>,
+	pub notes: Option<String>,
+	pub genres: Option<Vec<String>>,
+	pub year: Option<i32>,
+	pub month: Option<i32>,
+	pub day: Option<i32>,
+	pub writers: Option<Vec<String>>,
+	pub pencillers: Option<Vec<String>>,
+	pub inkers: Option<Vec<String>>,
+	pub colorists: Option<Vec<String>>,
+	pub letterers: Option<Vec<String>>,
+	pub cover_artists: Option<Vec<String>>,
+	pub editors: Option<Vec<String>>,
+	pub publisher: Option<String>,
+	pub links: Option<Vec<String>>,
+	pub characters: Option<Vec<String>>,
+	pub teams: Option<Vec<String>>,
+	pub page_count: Option<i32>,
+	pub age_rating: Option<i32>,
+}
+
+impl IntoActiveModel<media_metadata::ActiveModel> for MediaMetadataInput {
+	fn into_active_model(self) -> media_metadata::ActiveModel {
+		media_metadata::ActiveModel {
+			title: Set(self.title),
+			series: Set(self.series),
+			number: Set(self.number),
+			volume: Set(self.volume),
+			summary: Set(self.summary),
+			notes: Set(self.notes),
+			genre: Set(into_array_string(self.genres)),
+			year: Set(self.year),
+			month: Set(self.month),
+			day: Set(self.day),
+			writers: Set(into_array_string(self.writers)),
+			pencillers: Set(into_array_string(self.pencillers)),
+			inkers: Set(into_array_string(self.inkers)),
+			colorists: Set(into_array_string(self.colorists)),
+			letterers: Set(into_array_string(self.letterers)),
+			cover_artists: Set(into_array_string(self.cover_artists)),
+			editors: Set(into_array_string(self.editors)),
+			publisher: Set(self.publisher),
+			links: Set(into_array_string(self.links)),
+			characters: Set(into_array_string(self.characters)),
+			teams: Set(into_array_string(self.teams)),
+			page_count: Set(self.page_count),
+			age_rating: Set(self.age_rating),
+			..Default::default()
+		}
+	}
+}
+
+fn into_array_string(s: Option<Vec<String>>) -> Option<String> {
+	match s {
+		Some(v) if !v.is_empty() => Some(v.join(", ")),
+		_ => None,
 	}
 }

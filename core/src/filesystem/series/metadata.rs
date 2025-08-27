@@ -8,7 +8,7 @@ use std::{fs::File, io::BufReader, path::Path};
 pub struct ProcessedSeriesMetadata {
 	/// The type of series. ex: "comicSeries"
 	#[serde(alias = "type")]
-	pub _type: String,
+	pub _type: Option<String>,
 	/// The title of the series, renamed from 'name' to keep consistency with the rest of the models
 	pub title: Option<String>,
 	/// The associated series' description, renamed from 'description' to keep consistency with the rest of the models

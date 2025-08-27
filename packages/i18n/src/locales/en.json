@@ -716,6 +716,38 @@
 			}
 		}
 	},
+	"metadataEditor": {
+		"labels": {
+			"ageRating": "Age rating",
+			"characters": "Characters",
+			"colorists": "Colorists",
+			"coverArtists": "Cover artists",
+			"day": "Day",
+			"editors": "Editors",
+			"genres": "Genres",
+			"inkers": "Inkers",
+			"letterers": "Letterers",
+			"links": "Links",
+			"month": "Month",
+			"notes": "Notes",
+			"number": "Number",
+			"pageCount": "Pages",
+			"pencillers": "Pencillers",
+			"publisher": "Publisher",
+			"series": "Series",
+			"summary": "Summary",
+			"teams": "Teams",
+			"title": "Title",
+			"volume": "Volume",
+			"writers": "Writers",
+			"year": "Year",
+			"metaType": "Type",
+			"imprint":"Imprint",
+			"comicid": "Comic ID",
+			"booktype":"Book type",
+			"status":"Status"
+		}
+	},
 	"seriesOverviewScene": {
 		"buttons": {
 			"continueReading": "Continue Reading",

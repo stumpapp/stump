@@ -128,7 +128,7 @@ impl ActiveModelBehavior for ActiveModel {
 			}
 
 			if self.status.is_not_set() {
-				self.status = ActiveValue::Set(FileStatus::Unknown);
+				self.status = ActiveValue::Set(FileStatus::Ready);
 			}
 
 			self.created_at = ActiveValue::Set(DateTimeWithTimeZone::from(Utc::now()));

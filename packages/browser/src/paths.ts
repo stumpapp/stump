@@ -111,10 +111,10 @@ const pathsInternal = {
 	notifications: () => '/notifications',
 	seriesManagement: (id: string) => `/series/${id}/manage`,
 	seriesOverview: (id: string, page?: number) => {
-		if (page !== undefined) {
-			return `/series/${id}?page=${page}`
+		if (page != undefined) {
+			return `/series/${id}/books?page=${page}`
 		}
-		return `/series/${id}`
+		return `/series/${id}/books`
 	},
 	serverLogs: (jobId?: string) =>
 		pathsInternal.settings('server/logs') + (jobId ? `?job_id=${jobId}` : ''),

@@ -88,11 +88,11 @@
 				"heading": "Custom role mapping",
 				"subtitle": [
 					"You can create custom names for the roles in your book club if you'd like. For more information, refer to the",
-					"documentation"
+					"documentatie"
 				],
 				"member": {
-					"label": "Member",
-					"placeholder": "Member",
+					"label": "Gebruiker",
+					"placeholder": "Gebruiker",
 					"description": "The name of the default role for your book club"
 				},
 				"moderator": {
@@ -101,8 +101,8 @@
 					"description": "The name of the moderator role for your book club"
 				},
 				"admin": {
-					"label": "Admin",
-					"placeholder": "Admin",
+					"label": "Beheerder",
+					"placeholder": "Beheerder",
 					"description": "The name of the admin role for your book club"
 				},
 				"creator": {
@@ -118,13 +118,13 @@
 					"description": "An optional display name for your membership in the book club. If set, this takes precedence over your username"
 				},
 				"hideProgress": {
-					"label": "Hide Progress",
+					"label": "Verberg voortgang",
 					"description": "If enabled, your read progress will be hidden from other members of the book club"
 				}
 			}
 		},
 		"validation": {
-			"missingName": "Name is required",
+			"missingName": "Naam is verplicht",
 			"alreadyTaken": "is already taken"
 		}
 	},
@@ -132,7 +132,7 @@
 		"heading": "Maak een nieuwe boekenclub",
 		"subtitle": "U kunt een privéboekenclub maken met bepaalde personen, of deze openbaar maken zodat iedereen op de server eraan kan deelnemen",
 		"form": {
-			"stepLabel": "Step",
+			"stepLabel": "Stap",
 			"steps": [
 				{
 					"label": "Basics",
@@ -140,12 +140,12 @@
 					"description": "The details of the club, including its name and description"
 				},
 				{
-					"label": "Roles",
-					"heading": "Roles",
+					"label": "Rollen",
+					"heading": "Rollen",
 					"description": "Customize the roles in your book club"
 				},
 				{
-					"label": "Membership",
+					"label": "Lidmaatschap",
 					"heading": "Membership Preferences",
 					"description": "Additional options for your book club"
 				},
@@ -156,12 +156,12 @@
 				}
 			],
 			"review": {
-				"yes": "Yes",
+				"yes": "Ja",
 				"no": "No",
-				"none": "None",
+				"none": "Geen",
 				"labels": {
-					"name": "Name",
-					"description": "Description"
+					"name": "Naam",
+					"description": "Omschrijving"
 				}
 			},
 			"submit": "Maak een boekenclub"
@@ -171,18 +171,18 @@
 		"sidebar": {
 			"basics": "Basics",
 			"members": {
-				"members": "Members",
+				"members": "Gebruikers",
 				"roles": "Roles",
 				"label": "Membership"
 			},
 			"scheduling": {
 				"scheduler": "Scheduler",
-				"options": "Options",
+				"options": "Opties",
 				"label": "Scheduling"
 			},
 			"danger-zone": {
 				"delete": "Deletion",
-				"label": "Danger Zone"
+				"label": "Gevarenzone"
 			}
 		},
 		"basics": {
@@ -193,7 +193,7 @@
 			}
 		},
 		"members": {
-			"title": "Members",
+			"title": "Gebruikers",
 			"description": "Manage the members of this book club",
 			"sections": {}
 		},
@@ -233,9 +233,9 @@
 	"createOrUpdateLibraryForm": {
 		"fields": {
 			"name": {
-				"label": "Name",
+				"label": "Naam",
 				"description": "A friendly name for your library",
-				"placeholder": "My Library"
+				"placeholder": "Mijn bibliotheek"
 			},
 			"path": {
 				"label": "Path",
@@ -253,11 +253,11 @@
 			},
 			"readingSettings": {
 				"section": {
-					"heading": "Reading settings",
+					"heading": "Leesinstellingen",
 					"description": "Default reader settings to use for books"
 				},
 				"imageScaling": {
-					"label": "Image scaling",
+					"label": "Afbeelding schalen",
 					"description": "How the image-based reader scales images to the page"
 				},
 				"readingMode": {
@@ -278,7 +278,7 @@
 					"description": "Improve loading times while browsing your library by generating thumbnails for your books"
 				},
 				"enableSwitch": {
-					"label": "Enabled",
+					"label": "Ingeschakeld",
 					"description": "Generate thumbnail images for this library"
 				},
 				"scaled": {
@@ -295,10 +295,10 @@
 					"label": "Explicitly Sized",
 					"description": "Set each dimension of the thumbnail (in pixels)",
 					"width": {
-						"label": "Width"
+						"label": "Breedte"
 					},
 					"height": {
-						"label": "Height"
+						"label": "Hoogte"
 					}
 				},
 				"format": {
@@ -306,7 +306,7 @@
 					"description": "The format of the generated thumbnail images"
 				},
 				"quality": {
-					"label": "Quality",
+					"label": "Kwaliteit",
 					"description": "The quality of the generated thumbnail images, between 0 and 1.0"
 				}
 			},
@@ -441,17 +441,17 @@
 				}
 			],
 			"review": {
-				"yes": "Yes",
+				"yes": "Ja",
 				"no": "No",
-				"none": "None",
+				"none": "Geen",
 				"labels": {
 					"generateThumbnails": "Generate thumbnails",
 					"mode": "Mode",
-					"format": "Format",
-					"quality": "Quality",
-					"name": "Name",
+					"format": "Formaat",
+					"quality": "Kwaliteit",
+					"name": "Naam",
 					"path": "Path",
-					"description": "Description",
+					"description": "Omschrijving",
 					"tags": "Tags",
 					"pattern": "Pattern",
 					"ignoreRules": "Ignore rules",
@@ -497,13 +497,13 @@
 		"sidebar": {
 			"basics": "Basics",
 			"options": {
-				"general": "General",
-				"reading": "Reading",
-				"scanning": "Scanning",
+				"general": "Algemeen",
+				"reading": "Lezen",
+				"scanning": "Scannen",
 				"thumbnails": "Thumbnails",
 				"ignore-rules": "Ignore Rules",
 				"analysis": "Analysis",
-				"label": "Options"
+				"label": "Opties"
 			},
 			"danger-zone": {
 				"access-control": "Access Control",

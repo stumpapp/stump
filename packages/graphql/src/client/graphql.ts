@@ -3404,7 +3404,7 @@ export type BookSearchOverlayQuery = { __typename?: 'Query', media: { __typename
       & { ' $fragmentRefs'?: { 'BookCardFragment': BookCardFragment } }
     )>, pageInfo: { __typename: 'CursorPaginationInfo', currentCursor?: string | null, nextCursor?: string | null, limit: number } | { __typename: 'OffsetPaginationInfo' } } };
 
-export type MediaMetadataEditorFragment = { __typename?: 'MediaMetadata', ageRating?: number | null, characters: Array<string>, colorists: Array<string>, coverArtists: Array<string>, day?: number | null, editors: Array<string>, identifierAmazon?: string | null, identifierCalibre?: string | null, identifierGoogle?: string | null, identifierIsbn?: string | null, identifierMobiAsin?: string | null, identifierUuid?: string | null, genres: Array<string>, inkers: Array<string>, language?: string | null, letterers: Array<string>, links: Array<string>, month?: number | null, notes?: string | null, number?: any | null, pageCount?: number | null, pencillers: Array<string>, publisher?: string | null, series?: string | null, summary?: string | null, teams: Array<string>, title?: string | null, titleSort?: string | null, volume?: number | null, writers: Array<string>, year?: number | null, mediaId?: string | null } & { ' $fragmentName'?: 'MediaMetadataEditorFragment' };
+export type MediaMetadataEditorFragment = { __typename?: 'MediaMetadata', ageRating?: number | null, characters: Array<string>, colorists: Array<string>, coverArtists: Array<string>, day?: number | null, editors: Array<string>, identifierAmazon?: string | null, identifierCalibre?: string | null, identifierGoogle?: string | null, identifierIsbn?: string | null, identifierMobiAsin?: string | null, identifierUuid?: string | null, genres: Array<string>, inkers: Array<string>, language?: string | null, letterers: Array<string>, links: Array<string>, month?: number | null, notes?: string | null, number?: any | null, pageCount?: number | null, pencillers: Array<string>, publisher?: string | null, series?: string | null, summary?: string | null, teams: Array<string>, title?: string | null, titleSort?: string | null, volume?: number | null, writers: Array<string>, year?: number | null } & { ' $fragmentName'?: 'MediaMetadataEditorFragment' };
 
 export type UpdateMediaMetadataMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -3559,7 +3559,7 @@ export type SeriesBooksAlphabetQueryVariables = Exact<{
 
 export type SeriesBooksAlphabetQuery = { __typename?: 'Query', seriesById?: { __typename?: 'Series', mediaAlphabet: any } | null };
 
-export type SeriesMetadataEditorFragment = { __typename?: 'SeriesMetadataModel', metaType?: string | null, title?: string | null, summary?: string | null, publisher?: string | null, imprint?: string | null, comicid?: number | null, volume?: number | null, booktype?: string | null, ageRating?: number | null, status?: string | null, seriesId: string } & { ' $fragmentName'?: 'SeriesMetadataEditorFragment' };
+export type SeriesMetadataEditorFragment = { __typename?: 'SeriesMetadataModel', metaType?: string | null, title?: string | null, summary?: string | null, publisher?: string | null, imprint?: string | null, comicid?: number | null, volume?: number | null, booktype?: string | null, ageRating?: number | null, status?: string | null } & { ' $fragmentName'?: 'SeriesMetadataEditorFragment' };
 
 export type UpdateSeriesMetadataMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -4013,7 +4013,7 @@ export type SeriesSettingsSceneQueryVariables = Exact<{
 
 
 export type SeriesSettingsSceneQuery = { __typename?: 'Query', seriesById?: (
-    { __typename?: 'Series', metadata?: (
+    { __typename?: 'Series', id: string, metadata?: (
       { __typename?: 'SeriesMetadataModel' }
       & { ' $fragmentRefs'?: { 'SeriesMetadataEditorFragment': SeriesMetadataEditorFragment } }
     ) | null }
@@ -4576,7 +4576,6 @@ export const MediaMetadataEditorFragmentDoc = new TypedDocumentString(`
   volume
   writers
   year
-  mediaId
 }
     `, {"fragmentName":"MediaMetadataEditor"}) as unknown as TypedDocumentString<MediaMetadataEditorFragment, unknown>;
 export const SeriesMetadataEditorFragmentDoc = new TypedDocumentString(`
@@ -4591,7 +4590,6 @@ export const SeriesMetadataEditorFragmentDoc = new TypedDocumentString(`
   booktype
   ageRating
   status
-  seriesId
 }
     `, {"fragmentName":"SeriesMetadataEditor"}) as unknown as TypedDocumentString<SeriesMetadataEditorFragment, unknown>;
 export const BookFileInformationFragmentDoc = new TypedDocumentString(`
@@ -5254,7 +5252,6 @@ export const UpdateMediaMetadataDocument = new TypedDocumentString(`
   volume
   writers
   year
-  mediaId
 }`) as unknown as TypedDocumentString<UpdateMediaMetadataMutation, UpdateMediaMetadataMutationVariables>;
 export const DeleteBookClubConfirmationDocument = new TypedDocumentString(`
     mutation DeleteBookClubConfirmation($id: ID!) {
@@ -5527,7 +5524,6 @@ export const UpdateSeriesMetadataDocument = new TypedDocumentString(`
   booktype
   ageRating
   status
-  seriesId
 }`) as unknown as TypedDocumentString<UpdateSeriesMetadataMutation, UpdateSeriesMetadataMutationVariables>;
 export const UseCoreEventDocument = new TypedDocumentString(`
     subscription UseCoreEvent {
@@ -5681,7 +5677,6 @@ fragment MediaMetadataEditor on MediaMetadata {
   volume
   writers
   year
-  mediaId
 }
 fragment BookFileInformation on Media {
   id
@@ -6555,6 +6550,7 @@ export const SeriesBookGridDocument = new TypedDocumentString(`
 export const SeriesSettingsSceneDocument = new TypedDocumentString(`
     query SeriesSettingsScene($id: ID!) {
   seriesById(id: $id) {
+    id
     ...SeriesThumbnailSelector
     metadata {
       ...SeriesMetadataEditor
@@ -6572,7 +6568,6 @@ export const SeriesSettingsSceneDocument = new TypedDocumentString(`
   booktype
   ageRating
   status
-  seriesId
 }
 fragment SeriesThumbnailSelector on Series {
   id

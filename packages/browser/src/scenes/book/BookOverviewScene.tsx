@@ -156,7 +156,7 @@ export default function BookOverviewScene() {
 
 					<div className="flex flex-col gap-y-2">
 						<Heading size="sm">Metadata</Heading>
-						<MediaMetadataEditor data={media.metadata} />
+						<MediaMetadataEditor mediaId={media.id} data={media.metadata} />
 					</div>
 				</div>
 			</Suspense>

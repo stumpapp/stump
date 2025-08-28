@@ -44,7 +44,39 @@ export const getEditorDefaultValues = (
 	data?: MediaMetadataEditorFragment | null,
 ): MetadataEditorValues => {
 	if (!data) {
-		return {}
+		return {
+			ageRating: null,
+			characters: null,
+			colorists: null,
+			coverArtists: null,
+			day: null,
+			editors: null,
+			identifierAmazon: null,
+			identifierCalibre: null,
+			identifierGoogle: null,
+			identifierIsbn: null,
+			identifierMobiAsin: null,
+			identifierUuid: null,
+			genres: null,
+			inkers: null,
+			language: null,
+			letterers: null,
+			links: null,
+			month: null,
+			number: null,
+			notes: null,
+			pageCount: null,
+			pencillers: null,
+			publisher: null,
+			series: null,
+			summary: null,
+			teams: null,
+			title: null,
+			titleSort: null,
+			volume: null,
+			writers: null,
+			year: null,
+		}
 	}
 
 	const result = schema.safeParse(data)

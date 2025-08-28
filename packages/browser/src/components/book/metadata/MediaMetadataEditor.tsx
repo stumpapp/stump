@@ -62,8 +62,6 @@ const fragment = graphql(`
 		volume
 		writers
 		year
-
-		mediaId
 	}
 `)
 
@@ -78,10 +76,13 @@ const mutation = graphql(`
 `)
 
 type Props = {
+	mediaId: string
 	data?: FragmentType<typeof fragment> | null
 }
 
-export default function MediaMetadataEditor({ data }: Props) {
+// TODO(ux): Improve error states within form
+
+export default function MediaMetadataEditor({ mediaId, data }: Props) {
 	const [_data, setData] = useState(() => data)
 
 	const metadata = useFragment(fragment, _data)
@@ -244,9 +245,9 @@ export default function MediaMetadataEditor({ data }: Props) {
 
 	const onRefetchParents = useCallback(() => {
 		client.refetchQueries({
-			queryKey: sdk.cacheKey('bookOverview', [metadata?.mediaId]),
+			queryKey: sdk.cacheKey('bookOverview', [mediaId]),
 		})
-	}, [client, sdk, metadata])
+	}, [client, sdk, mediaId])
 
 	const { mutate: updateMetadata } = useGraphQLMutation(mutation, {
 		onSuccess: ({ updateMediaMetadata: { metadata } }) => {
@@ -264,14 +265,14 @@ export default function MediaMetadataEditor({ data }: Props) {
 
 	const onSaveMetadata = useCallback(
 		(values: MetadataEditorValues) => {
-			if (metadata?.mediaId) {
+			if (mediaId) {
 				updateMetadata({
-					id: metadata.mediaId,
+					id: mediaId,
 					input: values,
 				})
 			}
 		},
-		[metadata, updateMetadata],
+		[mediaId, updateMetadata],
 	)
 
 	const onCancelEdits = useCallback(() => {
@@ -286,14 +287,18 @@ export default function MediaMetadataEditor({ data }: Props) {
 					state,
 					setState,
 					onCancel: onCancelEdits,
-					onSave: () => form.handleSubmit(onSaveMetadata),
+					onSave: () => {
+						form.handleSubmit(onSaveMetadata)
+					},
 				}}
 			>
-				<MetadataEditorTable<MediaMetadataEditorRow>
-					columns={columns}
-					items={items}
-					showMissing={showMissing}
-				/>
+				<form onSubmit={form.handleSubmit(onSaveMetadata)}>
+					<MetadataEditorTable<MediaMetadataEditorRow>
+						columns={columns}
+						items={items}
+						showMissing={showMissing}
+					/>
+				</form>
 			</MetadataEditorContext.Provider>
 		</FormProvider>
 	)

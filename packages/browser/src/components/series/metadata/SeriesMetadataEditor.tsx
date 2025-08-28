@@ -40,8 +40,6 @@ const fragment = graphql(`
 		booktype
 		ageRating
 		status
-
-		seriesId
 	}
 `)
 
@@ -56,10 +54,13 @@ const mutation = graphql(`
 `)
 
 type Props = {
+	seriesId: string
 	data?: FragmentType<typeof fragment> | null
 }
 
-export default function SeriesMetadataEditor({ data }: Props) {
+// TODO(ux): Improve error states within form
+
+export default function SeriesMetadataEditor({ seriesId, data }: Props) {
 	const [_data, setData] = useState(() => data)
 
 	const metadata = useFragment(fragment, _data)
@@ -154,9 +155,9 @@ export default function SeriesMetadataEditor({ data }: Props) {
 
 	const onRefetchParents = useCallback(() => {
 		client.refetchQueries({
-			queryKey: sdk.cacheKey('seriesById', [metadata?.seriesId, 'settings']),
+			queryKey: sdk.cacheKey('seriesById', [seriesId, 'settings']),
 		})
-	}, [client, sdk, metadata])
+	}, [client, sdk, seriesId])
 
 	const { mutate: updateMetadata } = useGraphQLMutation(mutation, {
 		onSuccess: ({ updateSeriesMetadata: { metadata } }) => {
@@ -174,14 +175,14 @@ export default function SeriesMetadataEditor({ data }: Props) {
 
 	const onSaveMetadata = useCallback(
 		(values: SeriesMetadataEditorValues) => {
-			if (metadata?.seriesId) {
+			if (seriesId) {
 				updateMetadata({
-					id: metadata.seriesId,
+					id: seriesId,
 					input: values,
 				})
 			}
 		},
-		[metadata, updateMetadata],
+		[seriesId, updateMetadata],
 	)
 
 	const onCancelEdits = useCallback(() => {
@@ -199,11 +200,13 @@ export default function SeriesMetadataEditor({ data }: Props) {
 					onSave: () => form.handleSubmit(onSaveMetadata),
 				}}
 			>
-				<MetadataEditorTable<SeriesMetadataEditorRow>
-					columns={columns}
-					items={items}
-					showMissing={showMissing}
-				/>
+				<form onSubmit={form.handleSubmit(onSaveMetadata)}>
+					<MetadataEditorTable<SeriesMetadataEditorRow>
+						columns={columns}
+						items={items}
+						showMissing={showMissing}
+					/>
+				</form>
 			</MetadataEditorContext.Provider>
 		</FormProvider>
 	)

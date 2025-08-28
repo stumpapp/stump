@@ -22,7 +22,18 @@ export const getEditorDefaultValues = (
 	data?: SeriesMetadataEditorFragment | null,
 ): SeriesMetadataEditorValues => {
 	if (!data) {
-		return {}
+		return {
+			ageRating: null,
+			booktype: null,
+			comicid: null,
+			imprint: null,
+			metaType: null,
+			publisher: null,
+			status: null,
+			summary: null,
+			title: null,
+			volume: null,
+		}
 	}
 
 	const result = schema.safeParse(data)

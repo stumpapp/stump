@@ -27,7 +27,12 @@ export default function TextCell<Field extends string>({
 		const extraProps = isLong ? {} : { size: 'sm' }
 		return (
 			// @ts-expect-error: TS doesn't know I am doing this correctly lol
-			<Component defaultValue={value || ''} {...extraProps} {...form.register(binding)} />
+			<Component
+				defaultValue={value || ''}
+				{...extraProps}
+				required={false}
+				{...form.register(binding)}
+			/>
 		)
 	}
 

@@ -15,6 +15,7 @@ import SeriesThumbnailSelector from './SeriesThumbnailSelector'
 const query = graphql(`
 	query SeriesSettingsScene($id: ID!) {
 		seriesById(id: $id) {
+			id
 			...SeriesThumbnailSelector
 			metadata {
 				...SeriesMetadataEditor
@@ -78,7 +79,7 @@ export default function SeriesSettingsScene() {
 
 				<div className="flex w-full flex-col gap-y-2">
 					<Heading size="sm">Metadata</Heading>
-					<SeriesMetadataEditor data={seriesById.metadata} />
+					<SeriesMetadataEditor seriesId={seriesById.id} data={seriesById.metadata} />
 				</div>
 			</div>
 		</SceneContainer>

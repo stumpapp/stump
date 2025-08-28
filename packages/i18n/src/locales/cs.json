@@ -331,7 +331,7 @@
 					}
 				},
 				"invalidGlob": "Neplatný globální vzor",
-				"duplicateGlob": "Duplicate of an existing rule",
+				"duplicateGlob": "Duplikovat existující pravidlo",
 				"lockConfig": {
 					"lock": "Uzamknout nastavení",
 					"unlock": "Odemknout nastavení"

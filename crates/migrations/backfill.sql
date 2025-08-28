@@ -209,7 +209,7 @@ INSERT INTO "media_metadata"(
         "volume",
         "summary",
         "notes",
-        "genre",
+        "genres",
         "year",
         "month",
         "day",

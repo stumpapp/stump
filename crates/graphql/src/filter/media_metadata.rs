@@ -93,7 +93,7 @@ impl IntoFilter for MediaMetadataFilterInput {
 			)
 			.add_option(
 				self.genres
-					.map(|f| apply_string_filter(media_metadata::Column::Genre, f)),
+					.map(|f| apply_string_filter(media_metadata::Column::Genres, f)),
 			)
 			.add_option(
 				self.characters

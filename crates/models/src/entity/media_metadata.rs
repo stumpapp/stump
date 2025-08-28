@@ -30,57 +30,75 @@ pub struct Model {
 	#[sea_orm(column_type = "Text", nullable, unique)]
 	pub media_id: Option<String>,
 	#[sea_orm(column_type = "Text", nullable)]
-	pub title: Option<String>,
-	#[sea_orm(column_type = "Text", nullable)]
-	pub series: Option<String>,
-	pub number: Option<Decimal>,
-	pub volume: Option<i32>,
-	#[sea_orm(column_type = "Text", nullable)]
-	pub summary: Option<String>,
-	#[sea_orm(column_type = "Text", nullable)]
-	pub notes: Option<String>,
-	// TODO: Pluralize
-	#[sea_orm(column_type = "Text", nullable)]
-	pub genre: Option<String>,
-	pub year: Option<i32>,
-	pub month: Option<i32>,
-	pub day: Option<i32>,
-	#[sea_orm(column_type = "Text", nullable)]
-	#[graphql(skip)]
-	pub writers: Option<String>,
-	#[sea_orm(column_type = "Text", nullable)]
-	#[graphql(skip)]
-	pub pencillers: Option<String>,
-	#[sea_orm(column_type = "Text", nullable)]
-	#[graphql(skip)]
-	pub inkers: Option<String>,
-	#[sea_orm(column_type = "Text", nullable)]
-	#[graphql(skip)]
-	pub colorists: Option<String>,
-	#[sea_orm(column_type = "Text", nullable)]
-	#[graphql(skip)]
-	pub letterers: Option<String>,
-	#[sea_orm(column_type = "Text", nullable)]
-	#[graphql(skip)]
-	pub cover_artists: Option<String>,
-	#[sea_orm(column_type = "Text", nullable)]
-	#[graphql(skip)]
-	pub editors: Option<String>,
-	#[sea_orm(column_type = "Text", nullable)]
-	pub publisher: Option<String>,
-	#[sea_orm(column_type = "Text", nullable)]
-	#[graphql(skip)]
-	pub links: Option<String>,
+	pub page_analysis: Option<PageAnalysis>,
+
+	pub age_rating: Option<i32>,
 	#[sea_orm(column_type = "Text", nullable)]
 	#[graphql(skip)]
 	pub characters: Option<String>,
 	#[sea_orm(column_type = "Text", nullable)]
 	#[graphql(skip)]
-	pub teams: Option<String>,
-	pub page_count: Option<i32>,
-	pub age_rating: Option<i32>,
+	pub colorists: Option<String>,
 	#[sea_orm(column_type = "Text", nullable)]
-	pub page_analysis: Option<PageAnalysis>,
+	#[graphql(skip)]
+	pub cover_artists: Option<String>,
+	pub day: Option<i32>,
+	#[sea_orm(column_type = "Text", nullable)]
+	#[graphql(skip)]
+	pub editors: Option<String>,
+	#[sea_orm(column_type = "Text", nullable)]
+	#[graphql(skip)]
+	pub genres: Option<String>,
+	#[sea_orm(column_type = "Text", nullable)]
+	pub identifier_amazon: Option<String>,
+	#[sea_orm(column_type = "Text", nullable)]
+	pub identifier_calibre: Option<String>,
+	#[sea_orm(column_type = "Text", nullable)]
+	pub identifier_google: Option<String>,
+	#[sea_orm(column_type = "Text", nullable)]
+	pub identifier_isbn: Option<String>,
+	#[sea_orm(column_type = "Text", nullable)]
+	pub identifier_mobi_asin: Option<String>,
+	#[sea_orm(column_type = "Text", nullable)]
+	pub identifier_uuid: Option<String>,
+	#[sea_orm(column_type = "Text", nullable)]
+	#[graphql(skip)]
+	pub inkers: Option<String>,
+	#[sea_orm(column_type = "Text", nullable)]
+	pub language: Option<String>,
+	#[sea_orm(column_type = "Text", nullable)]
+	#[graphql(skip)]
+	pub letterers: Option<String>,
+	#[sea_orm(column_type = "Text", nullable)]
+	#[graphql(skip)]
+	pub links: Option<String>,
+	pub month: Option<i32>,
+	#[sea_orm(column_type = "Text", nullable)]
+	pub notes: Option<String>,
+	// Note: this is also used as series_index
+	pub number: Option<Decimal>,
+	pub page_count: Option<i32>,
+	#[sea_orm(column_type = "Text", nullable)]
+	#[graphql(skip)]
+	pub pencillers: Option<String>,
+	#[sea_orm(column_type = "Text", nullable)]
+	pub publisher: Option<String>,
+	#[sea_orm(column_type = "Text", nullable)]
+	pub series: Option<String>,
+	#[sea_orm(column_type = "Text", nullable)]
+	pub summary: Option<String>,
+	#[sea_orm(column_type = "Text", nullable)]
+	#[graphql(skip)]
+	pub teams: Option<String>,
+	#[sea_orm(column_type = "Text", nullable)]
+	pub title: Option<String>,
+	#[sea_orm(column_type = "Text", nullable)]
+	pub title_sort: Option<String>,
+	pub volume: Option<i32>,
+	#[sea_orm(column_type = "Text", nullable)]
+	#[graphql(skip)]
+	pub writers: Option<String>,
+	pub year: Option<i32>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

@@ -66,3 +66,15 @@ export function calculateTableSizing<DataType>(
 
 	return sizing
 }
+
+export function calculateOptimalColumnWidth(columnId: string): number {
+	const columnElement = document.getElementById(columnId)
+	if (!columnElement) return 100
+
+	// Get the computed styles
+	const styles = window.getComputedStyle(columnElement)
+	const padding = parseFloat(styles.paddingLeft) + parseFloat(styles.paddingRight)
+	const border = parseFloat(styles.borderLeftWidth) + parseFloat(styles.borderRightWidth)
+
+	return columnElement.scrollWidth + padding + border
+}

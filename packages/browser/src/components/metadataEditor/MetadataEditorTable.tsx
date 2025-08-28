@@ -6,10 +6,11 @@ import {
 	RowData,
 	useReactTable,
 } from '@tanstack/react-table'
-import { useLayoutEffect, useRef } from 'react'
+import { useCallback, useLayoutEffect, useRef } from 'react'
 import { useWindowSize } from 'rooks'
 
-import { calculateTableSizing } from './utils'
+import { getCommonPinningStyles } from '../table/Table'
+import { calculateOptimalColumnWidth, calculateTableSizing } from './utils'
 
 type Props<Item> = {
 	columns: ColumnDef<Item>[]
@@ -31,11 +32,18 @@ export default function MetadataEditorTable<Item extends RowData>({
 			expanded: {
 				missing: showMissing,
 			},
+			columnPinning: {
+				right: ['actions'],
+			},
+		},
+		defaultColumn: {
+			size: 120,
 		},
 	})
 
 	const windowDimensions = useWindowSize()
 	const tableContainerRef = useRef<HTMLDivElement>(null)
+	const tableRef = useRef<HTMLTableElement>(null)
 
 	useLayoutEffect(() => {
 		if (!tableContainerRef.current) return
@@ -55,6 +63,33 @@ export default function MetadataEditorTable<Item extends RowData>({
 		}
 	}, [table, windowDimensions.innerWidth])
 
+	const ensureResizeFillsSpace = useCallback(
+		(headerId: string, adjustedWidth: number) => {
+			if (tableContainerRef.current === null) {
+				table.setColumnSizing((prev) => ({
+					...prev,
+					[headerId]: adjustedWidth,
+				}))
+			} else {
+				const adjustedHeaders = table.getFlatHeaders().map((header) => {
+					if (header.id === headerId) {
+						return {
+							...header,
+							size: adjustedWidth,
+						}
+					}
+					return header
+				})
+				const adjustedSize = calculateTableSizing(
+					adjustedHeaders,
+					tableContainerRef.current.clientWidth,
+				)
+				table.setColumnSizing(adjustedSize)
+			}
+		},
+		[table],
+	)
+
 	const { rows } = table.getRowModel()
 
 	return (
@@ -71,6 +106,7 @@ export default function MetadataEditorTable<Item extends RowData>({
 				style={{
 					width: table.getCenterTotalSize(),
 				}}
+				ref={tableRef}
 			>
 				<thead>
 					<tr className="relative flex">
@@ -81,6 +117,7 @@ export default function MetadataEditorTable<Item extends RowData>({
 									colSpan: header.colSpan,
 									style: {
 										width: header.getSize(),
+										...getCommonPinningStyles(header.column),
 									},
 								}}
 								className="relative min-h-10"
@@ -91,6 +128,10 @@ export default function MetadataEditorTable<Item extends RowData>({
 									<div
 										onMouseDown={header.getResizeHandler()}
 										onTouchStart={header.getResizeHandler()}
+										onDoubleClick={() => {
+											const optimalWidth = calculateOptimalColumnWidth(header.column.id)
+											ensureResizeFillsSpace(header.column.id, optimalWidth)
+										}}
 										className={cn(
 											'absolute -right-px top-0 z-50 h-full w-px cursor-col-resize touch-none opacity-0 transition-opacity duration-75 hover:opacity-50',
 											{
@@ -109,13 +150,14 @@ export default function MetadataEditorTable<Item extends RowData>({
 
 				<tbody className="divide-y divide-edge">
 					{rows.map((row) => (
-						<tr key={row.id} className="flex w-fit divide-x divide-edge">
+						<tr key={row.id} className="flex w-fit">
 							{row.getVisibleCells().map((cell) => (
 								<td
-									className="py-2 pl-1.5 pr-1.5 first:pl-4 last:pr-4"
+									className="py-2 pl-1.5 pr-1.5 first:border-r first:border-edge first:pl-4 last:pr-4"
 									key={cell.id}
 									style={{
 										width: cell.column.getSize(),
+										...getCommonPinningStyles(cell.column),
 									}}
 								>
 									{flexRender(cell.column.columnDef.cell, cell.getContext())}

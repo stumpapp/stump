@@ -17,7 +17,7 @@ import { BookDescription, InfoRow, InfoSection, InfoStat } from '~/components/bo
 import { FasterImage } from '~/components/Image'
 import RefreshControl from '~/components/RefreshControl'
 import { Button, Heading, Text } from '~/components/ui'
-import { formatBytes } from '~/lib/format'
+import { formatBytes, parseGraphQLDecimal } from '~/lib/format'
 
 dayjs.extend(relativeTime)
 dayjs.extend(duration)
@@ -29,20 +29,37 @@ const query = graphql(`
 			extension
 			isFavorite
 			metadata {
-				writers
-				genres
-				links
-				pageCount
+				ageRating
 				characters
-				coverArtists
-				publisher
-				inkers
 				colorists
+				coverArtists
+				day
+				editors
+				identifierAmazon
+				identifierCalibre
+				identifierGoogle
+				identifierIsbn
+				identifierMobiAsin
+				identifierUuid
+				genres
+				inkers
+				language
 				letterers
+				links
+				month
+				notes
+				number
+				pageCount
+				pencillers
+				publisher
 				series
 				summary
-				number
+				teams
+				title
+				titleSort
 				volume
+				writers
+				year
 			}
 			pages
 			readProgress {
@@ -143,6 +160,21 @@ export default function Screen() {
 	const letterers = book.metadata?.letterers?.join(', ')
 	const coverArtists = book.metadata?.coverArtists?.join(', ')
 
+	const identifierAmazon = book.metadata?.identifierAmazon
+	const identifierCalibre = book.metadata?.identifierCalibre
+	const identifierGoogle = book.metadata?.identifierGoogle
+	const identifierIsbn = book.metadata?.identifierIsbn
+	const identifierMobiAsin = book.metadata?.identifierMobiAsin
+	const identifierUuid = book.metadata?.identifierUuid
+
+	const noExternalIdentifiers =
+		!identifierAmazon &&
+		!identifierCalibre &&
+		!identifierGoogle &&
+		!identifierIsbn &&
+		!identifierMobiAsin &&
+		!identifierUuid
+
 	const noAcknowledgements =
 		!publisher && !writers && !colorists && !inkers && !letterers && !coverArtists
 
@@ -162,7 +194,14 @@ export default function Screen() {
 		if (!page && !percentageCompleted) {
 			return null
 		}
-		const percentage = percentageCompleted?.toFixed(2) ?? Math.round(((page || 0) / pages) * 100)
+
+		let percentage: number
+		const decimal = percentageCompleted ? parseGraphQLDecimal(percentageCompleted) : null
+		if (decimal) {
+			percentage = Number((decimal * 100).toFixed(2))
+		} else {
+			percentage = Math.round(((page || 0) / pages) * 100)
+		}
 		return <InfoStat label="Completed" value={`${percentage}%`} />
 	}
 
@@ -257,11 +296,43 @@ export default function Screen() {
 						label="Information"
 						rows={[
 							<InfoRow key="identifier" label="Identifier" value={book.id} />,
+							...(book.metadata?.language
+								? [<InfoRow key="language" label="Language" value={book.metadata.language} />]
+								: []),
 							<InfoRow key="pages" label="Pages" value={pages.toString()} />,
 							<InfoRow key="kind" label="Kind" value={book.extension.toUpperCase()} />,
 							...(formattedSize ? [<InfoRow key="size" label="Size" value={formattedSize} />] : []),
 						]}
 					/>
+
+					{!noExternalIdentifiers && (
+						<InfoSection
+							label="External Identifiers"
+							rows={[
+								...(identifierAmazon
+									? [<InfoRow key="identifierAmazon" label="Amazon" value={identifierAmazon} />]
+									: []),
+								...(identifierCalibre
+									? [<InfoRow key="identifierCalibre" label="Calibre" value={identifierCalibre} />]
+									: []),
+								...(identifierGoogle
+									? [<InfoRow key="identifierGoogle" label="Google" value={identifierGoogle} />]
+									: []),
+								...(identifierIsbn
+									? [<InfoRow key="identifierIsbn" label="ISBN" value={identifierIsbn} />]
+									: []),
+								...(identifierMobiAsin
+									? [
+											<InfoRow
+												key="identifierMobiAsin"
+												label="Mobi ASIN"
+												value={identifierMobiAsin}
+											/>,
+										]
+									: []),
+							]}
+						/>
+					)}
 
 					<InfoSection
 						label="Metadata"

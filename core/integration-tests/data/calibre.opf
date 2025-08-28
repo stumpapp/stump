@@ -1,0 +1,31 @@
+<?xml version='1.0' encoding='utf-8'?>
+<package xmlns="http://www.idpf.org/2007/opf" unique-identifier="uuid_id" version="2.0">
+    <metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:opf="http://www.idpf.org/2007/opf">
+        <dc:identifier opf:scheme="calibre" id="calibre_id">106</dc:identifier>
+        <dc:identifier opf:scheme="uuid" id="uuid_id">373c64ba-39fd-40b3-99ba-0223ebab0fec</dc:identifier>
+        <dc:title>After the Funeral</dc:title>
+        <dc:creator opf:file-as="Christie, Agatha" opf:role="aut">Agatha Christie</dc:creator>
+        <dc:contributor opf:file-as="calibre" opf:role="bkp">calibre (8.2.1) [https://calibre-ebook.com]</dc:contributor>
+        <dc:date>1953-02-28T18:30:00+00:00</dc:date>
+        <dc:description>&lt;div&gt;
+&lt;p&gt;The master of a Victorian mansion dies suddenly – and his sister is convinced it was murder…. When Cora is savagely murdered with a hatchet, the extraordinary remark she made the previous day at her brother Richard’s funeral suddenly takes on a chilling significance. At the reading of Richard’s will, Cora was clearly heard to say: ‘It’s been hushed up very nicely, hasn’t it…But he was murdered, wasn’t he?’ In desperation, the family solicitor turns to Hercule Poirot to unravel the mystery.&lt;/p&gt;&lt;/div&gt;</dc:description>
+        <dc:publisher>HarperCollins</dc:publisher>
+        <dc:identifier opf:scheme="ISBN">9780007562695</dc:identifier>
+        <dc:identifier opf:scheme="AMAZON">0007562691</dc:identifier>
+        <dc:identifier opf:scheme="GOODREADS">60458674</dc:identifier>
+        <dc:language>eng</dc:language>
+        <dc:subject>Mystery</dc:subject>
+        <dc:subject>Crime</dc:subject>
+        <dc:subject>Classics</dc:subject>
+        <dc:subject>Thriller</dc:subject>
+        <dc:subject>Detective</dc:subject>
+        <meta name="calibre:series" content="Hercule Poirot"/>
+        <meta name="calibre:series_index" content="33"/>
+        <meta name="calibre:rating" content="8"/>
+        <meta name="calibre:timestamp" content="2025-04-14T15:01:21.815534+00:00"/>
+        <meta name="calibre:title_sort" content="After the Funeral"/>
+    </metadata>
+    <guide>
+        <reference type="cover" title="Cover" href="cover.jpg"/>
+    </guide>
+</package>

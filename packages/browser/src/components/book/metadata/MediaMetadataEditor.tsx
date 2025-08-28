@@ -30,15 +30,22 @@ import { usePaths } from '@/paths'
 import { getEditorDefaultValues, MetadataEditorValues, schema } from './schema'
 
 const fragment = graphql(`
-	fragment MetadataEditor on MediaMetadata {
+	fragment MediaMetadataEditor on MediaMetadata {
 		ageRating
 		characters
 		colorists
 		coverArtists
 		day
 		editors
+		identifierAmazon
+		identifierCalibre
+		identifierGoogle
+		identifierIsbn
+		identifierMobiAsin
+		identifierUuid
 		genres
 		inkers
+		language
 		letterers
 		links
 		month
@@ -51,6 +58,7 @@ const fragment = graphql(`
 		summary
 		teams
 		title
+		titleSort
 		volume
 		writers
 		year
@@ -63,7 +71,7 @@ const mutation = graphql(`
 	mutation UpdateMediaMetadata($id: ID!, $input: MediaMetadataInput!) {
 		updateMediaMetadata(id: $id, input: $input) {
 			metadata {
-				...MetadataEditor
+				...MediaMetadataEditor
 			}
 		}
 	}
@@ -110,8 +118,7 @@ export default function MediaMetadataEditor({ data }: Props) {
 				enableResizing: true,
 			}),
 			columnHelper.accessor('field', {
-				header: () =>
-					checkPermission(UserPermission.EditMetadata) ? <MetadataEditorHeader /> : null,
+				header: () => null,
 				cell: (info) =>
 					match(info.getValue())
 						.with(
@@ -180,13 +187,39 @@ export default function MediaMetadataEditor({ data }: Props) {
 								}}
 							/>
 						))
+						.with(
+							P.union(
+								'identifierAmazon',
+								'identifierCalibre',
+								'identifierGoogle',
+								'identifierIsbn',
+								'identifierMobiAsin',
+								'identifierUuid',
+							),
+							(field) => (
+								<TextCell
+									binding={field}
+									value={String(getProperty(metadata, info.getValue()) || '')}
+									isMonoText
+								/>
+							),
+						)
 						.otherwise((field) => (
-							<TextCell binding={field} value={getProperty(metadata, info.getValue())} />
+							<TextCell
+								binding={field}
+								value={String(getProperty(metadata, info.getValue()) || '')}
+							/>
 						)),
 				enableResizing: false,
 				meta: {
 					isGrow: true,
 				},
+			}),
+			columnHelper.display({
+				id: 'actions',
+				header: () =>
+					checkPermission(UserPermission.EditMetadata) ? <MetadataEditorHeader /> : null,
+				cell: () => null,
 			}),
 		],
 		[metadata, paths, checkPermission],

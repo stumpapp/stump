@@ -96,8 +96,7 @@ export default function SeriesMetadataEditor({ data }: Props) {
 				enableResizing: true,
 			}),
 			columnHelper.accessor('field', {
-				header: () =>
-					checkPermission(UserPermission.EditMetadata) ? <MetadataEditorHeader /> : null,
+				header: () => null,
 				cell: (info) =>
 					match(info.getValue())
 						.with(P.union('ageRating', 'volume', 'comicid'), (field) => (
@@ -125,6 +124,12 @@ export default function SeriesMetadataEditor({ data }: Props) {
 				meta: {
 					isGrow: true,
 				},
+			}),
+			columnHelper.display({
+				id: 'actions',
+				header: () =>
+					checkPermission(UserPermission.EditMetadata) ? <MetadataEditorHeader /> : null,
+				cell: () => null,
 			}),
 		],
 		[metadata, paths, checkPermission],

@@ -45,6 +45,7 @@ impl BookmarkInput {
 #[derive(Debug, Clone, InputObject)]
 pub struct MediaMetadataInput {
 	pub title: Option<String>,
+	pub title_sort: Option<String>,
 	pub series: Option<String>,
 	pub number: Option<Decimal>,
 	pub volume: Option<i32>,
@@ -67,18 +68,26 @@ pub struct MediaMetadataInput {
 	pub teams: Option<Vec<String>>,
 	pub page_count: Option<i32>,
 	pub age_rating: Option<i32>,
+	pub identifier_amazon: Option<String>,
+	pub identifier_calibre: Option<String>,
+	pub identifier_google: Option<String>,
+	pub identifier_isbn: Option<String>,
+	pub identifier_mobi_asin: Option<String>,
+	pub identifier_uuid: Option<String>,
+	pub language: Option<String>,
 }
 
 impl IntoActiveModel<media_metadata::ActiveModel> for MediaMetadataInput {
 	fn into_active_model(self) -> media_metadata::ActiveModel {
 		media_metadata::ActiveModel {
 			title: Set(self.title),
+			title_sort: Set(self.title_sort),
 			series: Set(self.series),
 			number: Set(self.number),
 			volume: Set(self.volume),
 			summary: Set(self.summary),
 			notes: Set(self.notes),
-			genre: Set(into_array_string(self.genres)),
+			genres: Set(into_array_string(self.genres)),
 			year: Set(self.year),
 			month: Set(self.month),
 			day: Set(self.day),
@@ -95,6 +104,13 @@ impl IntoActiveModel<media_metadata::ActiveModel> for MediaMetadataInput {
 			teams: Set(into_array_string(self.teams)),
 			page_count: Set(self.page_count),
 			age_rating: Set(self.age_rating),
+			identifier_amazon: Set(self.identifier_amazon),
+			identifier_calibre: Set(self.identifier_calibre),
+			identifier_google: Set(self.identifier_google),
+			identifier_isbn: Set(self.identifier_isbn),
+			identifier_mobi_asin: Set(self.identifier_mobi_asin),
+			identifier_uuid: Set(self.identifier_uuid),
+			language: Set(self.language),
 			..Default::default()
 		}
 	}

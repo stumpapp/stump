@@ -94,54 +94,10 @@ impl FileProcessor for EpubProcessor {
 		let epub_file = Self::open(path)?;
 		let embedded_metadata = ProcessedMediaMetadata::from(epub_file.metadata);
 
-		// try get opf file
 		let file_path = std::path::Path::new(path).with_extension("opf");
 		if file_path.exists() {
-			// extract OPF data
 			let opf_string = std::fs::read_to_string(file_path)?;
-			let mut reader = Reader::from_str(opf_string.as_str());
-			reader.config_mut().trim_text(true);
-			let mut current_tag = String::new();
-
-			let mut opf_metadata: HashMap<String, Vec<String>> = HashMap::new();
-
-			while let Ok(event) = reader.read_event() {
-				match event {
-					Event::Start(ref e) | Event::Empty(ref e) => {
-						let tag_name =
-							String::from_utf8_lossy(e.name().as_ref()).to_string();
-
-						// normalize tags
-						current_tag = tag_name
-							.strip_prefix("dc:")
-							.unwrap_or(tag_name.as_str())
-							.to_string();
-
-						if let Some(attr) =
-							e.attributes().filter_map(|a| a.ok()).find(|a| {
-								a.key.as_ref() == b"property" || a.key.as_ref() == b"name"
-							}) {
-							current_tag = format!(
-								"{}: {}",
-								current_tag,
-								String::from_utf8_lossy(&attr.value)
-							);
-						}
-					},
-					Event::Text(e) => {
-						if let Ok(text) = e.unescape() {
-							opf_metadata
-								.entry(current_tag.clone())
-								.or_default()
-								.push(text.to_string());
-						}
-					},
-					Event::Eof => {
-						break;
-					},
-					_ => {},
-				}
-			}
+			let opf_metadata = parse_opf_xml(&opf_string)?;
 
 			// merge opf and embedded, prioritizing opf
 			let opf_metadata = ProcessedMediaMetadata::from(opf_metadata);
@@ -478,6 +434,139 @@ impl EpubProcessor {
 	}
 }
 
+/// Parse OPF XML content and extract supported metadata
+fn parse_opf_xml(opf_content: &str) -> Result<HashMap<String, Vec<String>>, FileError> {
+	let mut reader = Reader::from_str(opf_content);
+	reader.config_mut().trim_text(true);
+	let mut current_tag = String::new();
+	let mut buf = Vec::new();
+	let mut opf_metadata: HashMap<String, Vec<String>> = HashMap::new();
+
+	loop {
+		match reader.read_event_into(&mut buf) {
+			Ok(Event::Start(ref e)) => {
+				let tag_name = String::from_utf8_lossy(e.name().as_ref()).to_string();
+				let base_tag = tag_name
+					.strip_prefix("dc:")
+					.unwrap_or(tag_name.as_str())
+					.to_string();
+
+				current_tag = base_tag.clone();
+
+				// Check for attributes that modify the tag name
+				for attr in e.attributes().flatten() {
+					match attr.key.as_ref() {
+						b"opf:scheme" if base_tag == "identifier" => {
+							let scheme =
+								String::from_utf8_lossy(&attr.value).to_lowercase();
+							current_tag = format!("identifier_{}", scheme);
+						},
+						b"name" if tag_name == "meta" => {
+							let name = String::from_utf8_lossy(&attr.value);
+							current_tag = name.trim_start_matches("calibre:").to_string();
+						},
+						b"property" if tag_name == "meta" => {
+							let property = String::from_utf8_lossy(&attr.value);
+							current_tag = property.to_string();
+						},
+						_ => {},
+					}
+				}
+			},
+			Ok(Event::Empty(ref e)) => {
+				let tag_name = String::from_utf8_lossy(e.name().as_ref()).to_string();
+
+				if tag_name == "meta" {
+					let mut meta_name = String::new();
+					let mut meta_content = String::new();
+
+					for attr in e.attributes().flatten() {
+						match attr.key.as_ref() {
+							b"name" => {
+								let name = String::from_utf8_lossy(&attr.value);
+								meta_name =
+									name.trim_start_matches("calibre:").to_string();
+							},
+							b"property" => {
+								let property = String::from_utf8_lossy(&attr.value);
+								meta_name = property.to_string();
+							},
+							b"content" => {
+								meta_content = String::from_utf8_lossy(&attr.value)
+									.trim()
+									.to_string();
+							},
+							_ => {},
+						}
+					}
+
+					if !meta_name.is_empty() && !meta_content.is_empty() {
+						tracing::trace!(?meta_name, ?meta_content, "Found meta tag");
+						opf_metadata
+							.entry(meta_name)
+							.or_default()
+							.push(meta_content);
+					}
+				} else {
+					let base_tag = tag_name
+						.strip_prefix("dc:")
+						.unwrap_or(tag_name.as_str())
+						.to_string();
+
+					let mut tag_key = base_tag.clone();
+					let mut tag_content = String::new();
+
+					for attr in e.attributes().flatten() {
+						match attr.key.as_ref() {
+							b"opf:scheme" if base_tag == "identifier" => {
+								let scheme =
+									String::from_utf8_lossy(&attr.value).to_lowercase();
+								tag_key = format!("identifier_{}", scheme);
+							},
+							b"content" => {
+								tag_content = String::from_utf8_lossy(&attr.value)
+									.trim()
+									.to_string();
+							},
+							_ => {},
+						}
+					}
+
+					if !tag_key.is_empty() && !tag_content.is_empty() {
+						opf_metadata.entry(tag_key).or_default().push(tag_content);
+					}
+				}
+			},
+			Ok(Event::Text(e)) => {
+				if !current_tag.is_empty() {
+					if let Ok(text) = e.unescape() {
+						let content = text.trim().to_string();
+						if !content.is_empty() {
+							opf_metadata
+								.entry(current_tag.clone())
+								.or_default()
+								.push(content);
+						}
+					}
+				}
+			},
+			Ok(Event::End(_)) => {
+				current_tag.clear();
+			},
+			Ok(Event::Eof) => break,
+			Err(e) => {
+				tracing::warn!("Error parsing OPF XML: {}", e);
+				break;
+			},
+			_ => {},
+		}
+		buf.clear();
+	}
+
+	tracing::trace!(?opf_metadata, "Extracted OPF metadata");
+	Ok(opf_metadata)
+}
+
 pub(crate) fn normalize_resource_path(path: PathBuf, root: &str) -> PathBuf {
 	let mut adjusted_path = path.clone();
 
@@ -716,6 +805,114 @@ mod tests {
 			},
 			Ok(None) => panic!("No metadata returned"),
 			Err(e) => panic!("Failed to get metadata: {:?}", e),
+		}
+	}
+
+	#[test]
+	fn test_parse_calibre_opf() {
+		let opf_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+			.join("integration-tests")
+			.join("data")
+			.join("calibre.opf");
+
+		let opf_content = std::fs::read_to_string(&opf_path)
+			.expect("Failed to read calibre.opf test file");
+
+		let metadata = parse_opf_xml(&opf_content).expect("Failed to parse calibre.opf");
+
+		assert_eq!(
+			metadata.get("title"),
+			Some(&vec!["After the Funeral".to_string()])
+		);
+		assert_eq!(
+			metadata.get("creator"),
+			Some(&vec!["Agatha Christie".to_string()])
+		);
+		assert_eq!(
+			metadata.get("publisher"),
+			Some(&vec!["HarperCollins".to_string()])
+		);
+		assert_eq!(metadata.get("language"), Some(&vec!["eng".to_string()]));
+		assert_eq!(
+			metadata.get("date"),
+			Some(&vec!["1953-02-28T18:30:00+00:00".to_string()])
+		);
+
+		let contributors = metadata
+			.get("contributor")
+			.expect("Should have contributor");
+		assert_eq!(contributors.len(), 1);
+		assert!(contributors[0].contains("calibre"));
+
+		let descriptions = metadata
+			.get("description")
+			.expect("Should have description");
+		assert_eq!(descriptions.len(), 1);
+		assert!(descriptions[0].contains("Victorian mansion"));
+
+		assert_eq!(
+			metadata.get("identifier_calibre"),
+			Some(&vec!["106".to_string()])
+		);
+		assert_eq!(
+			metadata.get("identifier_uuid"),
+			Some(&vec!["373c64ba-39fd-40b3-99ba-0223ebab0fec".to_string()])
+		);
+		assert_eq!(
+			metadata.get("identifier_isbn"),
+			Some(&vec!["9780007562695".to_string()])
+		);
+		assert_eq!(
+			metadata.get("identifier_amazon"),
+			Some(&vec!["0007562691".to_string()])
+		);
+		assert_eq!(
+			metadata.get("identifier_goodreads"),
+			Some(&vec!["60458674".to_string()])
+		);
+
+		let subjects = metadata.get("subject").expect("Should have subjects");
+		assert_eq!(subjects.len(), 5);
+		assert!(subjects.contains(&"Mystery".to_string()));
+		assert!(subjects.contains(&"Crime".to_string()));
+		assert!(subjects.contains(&"Classics".to_string()));
+		assert!(subjects.contains(&"Thriller".to_string()));
+		assert!(subjects.contains(&"Detective".to_string()));
+
+		assert_eq!(
+			metadata.get("series"),
+			Some(&vec!["Hercule Poirot".to_string()])
+		);
+		assert_eq!(metadata.get("series_index"), Some(&vec!["33".to_string()]));
+		assert_eq!(metadata.get("rating"), Some(&vec!["8".to_string()]));
+		assert_eq!(
+			metadata.get("title_sort"),
+			Some(&vec!["After the Funeral".to_string()])
+		);
+
+		let expected_keys = [
+			"title",
+			"creator",
+			"contributor",
+			"date",
+			"description",
+			"publisher",
+			"language",
+			"subject",
+			"identifier_calibre",
+			"identifier_uuid",
+			"identifier_isbn",
+			"identifier_amazon",
+			"identifier_goodreads",
+			"series",
+			"series_index",
+			"rating",
+			"timestamp",
+			"title_sort",
+		];
+
+		for key in expected_keys.iter() {
+			assert!(metadata.contains_key(*key), "Missing expected key: {}", key);
 		}
 	}
 

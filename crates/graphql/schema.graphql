@@ -1017,22 +1017,29 @@ input MediaFilterInput {
 type MediaMetadata {
 	id: Int!
 	mediaId: String
-	title: String
-	series: String
-	number: Decimal
-	volume: Int
-	summary: String
-	notes: String
-	genre: String
-	year: Int
-	month: Int
-	day: Int
-	publisher: String
-	pageCount: Int
-	ageRating: Int
 	pageAnalysis: PageAnalysis
-	writers: [String!]!
+	ageRating: Int
+	day: Int
 	genres: [String!]!
+	identifierAmazon: String
+	identifierCalibre: String
+	identifierGoogle: String
+	identifierIsbn: String
+	identifierMobiAsin: String
+	identifierUuid: String
+	language: String
+	month: Int
+	notes: String
+	number: Decimal
+	pageCount: Int
+	publisher: String
+	series: String
+	summary: String
+	title: String
+	titleSort: String
+	volume: Int
+	year: Int
+	writers: [String!]!
 	characters: [String!]!
 	colorists: [String!]!
 	coverArtists: [String!]!
@@ -1071,6 +1078,7 @@ input MediaMetadataFilterInput {
 
 input MediaMetadataInput {
 	title: String
+	titleSort: String
 	series: String
 	number: Decimal
 	volume: Int
@@ -1093,35 +1101,50 @@ input MediaMetadataInput {
 	teams: [String!]
 	pageCount: Int
 	ageRating: Int
+	identifierAmazon: String
+	identifierCalibre: String
+	identifierGoogle: String
+	identifierIsbn: String
+	identifierMobiAsin: String
+	identifierUuid: String
+	language: String
 }
 
 enum MediaMetadataModelOrdering {
 	ID
 	MEDIA_ID
-	TITLE
-	SERIES
-	NUMBER
-	VOLUME
-	SUMMARY
-	NOTES
-	GENRE
-	YEAR
-	MONTH
-	DAY
-	WRITERS
-	PENCILLERS
-	INKERS
-	COLORISTS
-	LETTERERS
-	COVER_ARTISTS
-	EDITORS
-	PUBLISHER
-	LINKS
-	CHARACTERS
-	TEAMS
-	PAGE_COUNT
-	AGE_RATING
 	PAGE_ANALYSIS
+	AGE_RATING
+	CHARACTERS
+	COLORISTS
+	COVER_ARTISTS
+	DAY
+	EDITORS
+	GENRES
+	IDENTIFIER_AMAZON
+	IDENTIFIER_CALIBRE
+	IDENTIFIER_GOOGLE
+	IDENTIFIER_ISBN
+	IDENTIFIER_MOBI_ASIN
+	IDENTIFIER_UUID
+	INKERS
+	LANGUAGE
+	LETTERERS
+	LINKS
+	MONTH
+	NOTES
+	NUMBER
+	PAGE_COUNT
+	PENCILLERS
+	PUBLISHER
+	SERIES
+	SUMMARY
+	TEAMS
+	TITLE
+	TITLE_SORT
+	VOLUME
+	WRITERS
+	YEAR
 }
 
 input MediaMetadataOrderByField {

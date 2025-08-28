@@ -80,3 +80,15 @@ export const humanizeByteUnit = (value: number | bigint, unit: ByteUnit): string
 	}
 	return `${BYTE_UNIT_NAMES[unit]}s`
 }
+
+// Note: GraphQL Decimals are strings, but come back as an any type. This will try to
+// parse a string (e.g., "0.543") into a number.
+export const parseGraphQLDecimal = (value: unknown): number | null => {
+	if (typeof value === 'string') {
+		const parsed = parseFloat(value)
+		return isNaN(parsed) ? null : parsed
+	} else if (typeof value === 'number') {
+		return value
+	}
+	return null
+}

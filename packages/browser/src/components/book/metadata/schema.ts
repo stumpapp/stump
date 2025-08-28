@@ -1,4 +1,4 @@
-import { MetadataEditorFragment } from '@stump/graphql'
+import { MediaMetadataEditorFragment } from '@stump/graphql'
 import { z } from 'zod'
 
 const nonEmptyString = z.string().min(1)
@@ -11,8 +11,15 @@ export const schema = z.object({
 	coverArtists: stringArray.nullish(),
 	day: z.number().min(1).max(31).nullish(),
 	editors: stringArray.nullish(),
+	identifierAmazon: nonEmptyString.nullish(),
+	identifierCalibre: nonEmptyString.nullish(),
+	identifierGoogle: nonEmptyString.nullish(),
+	identifierIsbn: nonEmptyString.nullish(),
+	identifierMobiAsin: nonEmptyString.nullish(),
+	identifierUuid: nonEmptyString.nullish(),
 	genres: stringArray.nullish(),
 	inkers: stringArray.nullish(),
+	language: nonEmptyString.nullish(),
 	letterers: stringArray.nullish(),
 	links: z.array(z.string().url()).nullish(),
 	month: z.number().min(1).max(12).nullish(),
@@ -25,6 +32,7 @@ export const schema = z.object({
 	summary: nonEmptyString.nullish(),
 	teams: stringArray.nullish(),
 	title: nonEmptyString.nullish(),
+	titleSort: nonEmptyString.nullish(),
 	volume: z.number().min(1).nullish(),
 	writers: stringArray.nullish(),
 	year: z.number().min(1900).max(new Date().getFullYear()).nullish(),
@@ -33,7 +41,7 @@ export const schema = z.object({
 export type MetadataEditorValues = z.infer<typeof schema>
 
 export const getEditorDefaultValues = (
-	data?: MetadataEditorFragment | null,
+	data?: MediaMetadataEditorFragment | null,
 ): MetadataEditorValues => {
 	if (!data) {
 		return {}
@@ -49,8 +57,15 @@ export const getEditorDefaultValues = (
 			coverArtists: data.coverArtists,
 			day: data.day,
 			editors: data.editors,
+			identifierAmazon: data.identifierAmazon,
+			identifierCalibre: data.identifierCalibre,
+			identifierGoogle: data.identifierGoogle,
+			identifierIsbn: data.identifierIsbn,
+			identifierMobiAsin: data.identifierMobiAsin,
+			identifierUuid: data.identifierUuid,
 			genres: data.genres,
 			inkers: data.inkers,
+			language: data.language,
 			letterers: data.letterers,
 			links: data.links,
 			month: data.month,
@@ -63,6 +78,7 @@ export const getEditorDefaultValues = (
 			summary: data.summary,
 			teams: data.teams,
 			title: data.title,
+			titleSort: data.titleSort,
 			volume: data.volume,
 			writers: data.writers,
 			year: data.year,

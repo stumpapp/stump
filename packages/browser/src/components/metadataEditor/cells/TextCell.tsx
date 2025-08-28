@@ -1,4 +1,4 @@
-import { Input, Text, TextArea } from '@stump/components'
+import { cn, Input, Text, TextArea } from '@stump/components'
 import { useFormContext } from 'react-hook-form'
 
 import { MarkdownText } from '@/components/markdown'
@@ -9,9 +9,15 @@ type Props<Field> = {
 	binding: Field
 	value?: string | null
 	isLong?: boolean
+	isMonoText?: boolean
 }
 
-export default function TextCell<Field extends string>({ binding, value, isLong }: Props<Field>) {
+export default function TextCell<Field extends string>({
+	binding,
+	value,
+	isLong,
+	isMonoText,
+}: Props<Field>) {
 	const form = useFormContext()
 
 	const { isEditing } = useMetadataEditorContext()
@@ -29,5 +35,5 @@ export default function TextCell<Field extends string>({ binding, value, isLong 
 		return <MarkdownText>{value ?? ''}</MarkdownText>
 	}
 
-	return <Text>{value}</Text>
+	return <Text className={cn({ 'font-mono text-sm': isMonoText })}>{value}</Text>
 }

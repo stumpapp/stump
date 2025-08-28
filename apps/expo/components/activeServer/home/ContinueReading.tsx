@@ -22,10 +22,12 @@ const query = graphql(`
 			}
 			pageInfo {
 				__typename
-				... on CursorPaginationInfo {
-					currentCursor
-					nextCursor
-					limit
+				... on OffsetPaginationInfo {
+					totalPages
+					currentPage
+					pageSize
+					pageOffset
+					zeroBased
 				}
 			}
 		}
@@ -41,7 +43,7 @@ function ContinueReading() {
 		query,
 		['continueReading', serverID],
 		{
-			pagination: { cursor: { limit: 20 } },
+			pagination: { offset: { pageSize: 20, page: 1 } },
 		},
 	)
 	const nodes = useMemo(() => data?.pages.flatMap((page) => page.keepReading.nodes) || [], [data])

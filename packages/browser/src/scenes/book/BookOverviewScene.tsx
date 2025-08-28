@@ -36,7 +36,7 @@ const query = graphql(`
 			metadata {
 				links
 				summary
-				...MetadataEditor
+				...MediaMetadataEditor
 			}
 			readHistory {
 				completedAt

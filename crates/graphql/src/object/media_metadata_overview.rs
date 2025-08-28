@@ -57,7 +57,7 @@ impl MediaMetadataOverview {
 	async fn genres(&self, ctx: &Context<'_>) -> Result<Vec<String>> {
 		let conn: &DatabaseConnection = ctx.data::<CoreContext>()?.conn.as_ref();
 		let series_id = self.series_id.clone();
-		get_unique_values_inner!(Genre, conn, series_id)
+		get_unique_values_inner!(Genres, conn, series_id)
 	}
 
 	async fn writers(&self, ctx: &Context<'_>) -> Result<Vec<String>> {
@@ -128,19 +128,19 @@ mod tests {
 	async fn get_unique_values_inner_test(
 		conn: &DatabaseConnection,
 	) -> Result<Vec<String>> {
-		get_unique_values_inner!(Genre, conn, None)
+		get_unique_values_inner!(Genres, conn, None)
 	}
 
 	#[test]
 	fn get_base_query_test() {
 		let series_id = Some("test_series".to_string());
-		let query = get_base_query(media_metadata::Column::Genre, series_id);
+		let query = get_base_query(media_metadata::Column::Genres, series_id);
 		assert_eq!(
 			query.to_owned().into_query().to_string(SqliteQueryBuilder),
-			r#"SELECT DISTINCT "media_metadata"."genre" FROM "media_metadata" "#
+			r#"SELECT DISTINCT "media_metadata"."genres" FROM "media_metadata" "#
 				.to_string() + r#"INNER JOIN "media" ON "media"."id" = "media_metadata"."media_id" "#
-				+ r#"WHERE "media_metadata"."genre" IS NOT NULL AND "media"."series_id" = 'test_series' "#
-				+ r#"ORDER BY "media_metadata"."genre" ASC"#
+				+ r#"WHERE "media_metadata"."genres" IS NOT NULL AND "media"."series_id" = 'test_series' "#
+				+ r#"ORDER BY "media_metadata"."genres" ASC"#
 		);
 	}
 

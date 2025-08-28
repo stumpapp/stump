@@ -1086,10 +1086,16 @@ export type MediaMetadata = {
   coverArtists: Array<Scalars['String']['output']>;
   day?: Maybe<Scalars['Int']['output']>;
   editors: Array<Scalars['String']['output']>;
-  genre?: Maybe<Scalars['String']['output']>;
   genres: Array<Scalars['String']['output']>;
   id: Scalars['Int']['output'];
+  identifierAmazon?: Maybe<Scalars['String']['output']>;
+  identifierCalibre?: Maybe<Scalars['String']['output']>;
+  identifierGoogle?: Maybe<Scalars['String']['output']>;
+  identifierIsbn?: Maybe<Scalars['String']['output']>;
+  identifierMobiAsin?: Maybe<Scalars['String']['output']>;
+  identifierUuid?: Maybe<Scalars['String']['output']>;
   inkers: Array<Scalars['String']['output']>;
+  language?: Maybe<Scalars['String']['output']>;
   letterers: Array<Scalars['String']['output']>;
   links: Array<Scalars['String']['output']>;
   mediaId?: Maybe<Scalars['String']['output']>;
@@ -1104,6 +1110,7 @@ export type MediaMetadata = {
   summary?: Maybe<Scalars['String']['output']>;
   teams: Array<Scalars['String']['output']>;
   title?: Maybe<Scalars['String']['output']>;
+  titleSort?: Maybe<Scalars['String']['output']>;
   volume?: Maybe<Scalars['Int']['output']>;
   writers: Array<Scalars['String']['output']>;
   year?: Maybe<Scalars['Int']['output']>;
@@ -1142,7 +1149,14 @@ export type MediaMetadataInput = {
   day?: InputMaybe<Scalars['Int']['input']>;
   editors?: InputMaybe<Array<Scalars['String']['input']>>;
   genres?: InputMaybe<Array<Scalars['String']['input']>>;
+  identifierAmazon?: InputMaybe<Scalars['String']['input']>;
+  identifierCalibre?: InputMaybe<Scalars['String']['input']>;
+  identifierGoogle?: InputMaybe<Scalars['String']['input']>;
+  identifierIsbn?: InputMaybe<Scalars['String']['input']>;
+  identifierMobiAsin?: InputMaybe<Scalars['String']['input']>;
+  identifierUuid?: InputMaybe<Scalars['String']['input']>;
   inkers?: InputMaybe<Array<Scalars['String']['input']>>;
+  language?: InputMaybe<Scalars['String']['input']>;
   letterers?: InputMaybe<Array<Scalars['String']['input']>>;
   links?: InputMaybe<Array<Scalars['String']['input']>>;
   month?: InputMaybe<Scalars['Int']['input']>;
@@ -1155,6 +1169,7 @@ export type MediaMetadataInput = {
   summary?: InputMaybe<Scalars['String']['input']>;
   teams?: InputMaybe<Array<Scalars['String']['input']>>;
   title?: InputMaybe<Scalars['String']['input']>;
+  titleSort?: InputMaybe<Scalars['String']['input']>;
   volume?: InputMaybe<Scalars['Int']['input']>;
   writers?: InputMaybe<Array<Scalars['String']['input']>>;
   year?: InputMaybe<Scalars['Int']['input']>;
@@ -1167,9 +1182,16 @@ export enum MediaMetadataModelOrdering {
   CoverArtists = 'COVER_ARTISTS',
   Day = 'DAY',
   Editors = 'EDITORS',
-  Genre = 'GENRE',
+  Genres = 'GENRES',
   Id = 'ID',
+  IdentifierAmazon = 'IDENTIFIER_AMAZON',
+  IdentifierCalibre = 'IDENTIFIER_CALIBRE',
+  IdentifierGoogle = 'IDENTIFIER_GOOGLE',
+  IdentifierIsbn = 'IDENTIFIER_ISBN',
+  IdentifierMobiAsin = 'IDENTIFIER_MOBI_ASIN',
+  IdentifierUuid = 'IDENTIFIER_UUID',
   Inkers = 'INKERS',
+  Language = 'LANGUAGE',
   Letterers = 'LETTERERS',
   Links = 'LINKS',
   MediaId = 'MEDIA_ID',
@@ -1184,6 +1206,7 @@ export enum MediaMetadataModelOrdering {
   Summary = 'SUMMARY',
   Teams = 'TEAMS',
   Title = 'TITLE',
+  TitleSort = 'TITLE_SORT',
   Volume = 'VOLUME',
   Writers = 'WRITERS',
   Year = 'YEAR'
@@ -3205,7 +3228,7 @@ export type BookByIdQueryVariables = Exact<{
 }>;
 
 
-export type BookByIdQuery = { __typename?: 'Query', mediaById?: { __typename?: 'Media', id: string, extension: string, isFavorite: boolean, pages: number, resolvedName: string, size: number, metadata?: { __typename?: 'MediaMetadata', writers: Array<string>, genres: Array<string>, links: Array<string>, pageCount?: number | null, characters: Array<string>, coverArtists: Array<string>, publisher?: string | null, inkers: Array<string>, colorists: Array<string>, letterers: Array<string>, series?: string | null, summary?: string | null, number?: any | null, volume?: number | null } | null, readProgress?: { __typename?: 'ActiveReadingSession', page?: number | null, percentageCompleted?: any | null, epubcfi?: string | null, startedAt: any, elapsedSeconds?: number | null } | null, readHistory: Array<{ __typename?: 'FinishedReadingSession', completedAt: any }>, series: { __typename?: 'Series', resolvedName: string }, thumbnail: { __typename?: 'ImageRef', url: string } } | null };
+export type BookByIdQuery = { __typename?: 'Query', mediaById?: { __typename?: 'Media', id: string, extension: string, isFavorite: boolean, pages: number, resolvedName: string, size: number, metadata?: { __typename?: 'MediaMetadata', ageRating?: number | null, characters: Array<string>, colorists: Array<string>, coverArtists: Array<string>, day?: number | null, editors: Array<string>, identifierAmazon?: string | null, identifierCalibre?: string | null, identifierGoogle?: string | null, identifierIsbn?: string | null, identifierMobiAsin?: string | null, identifierUuid?: string | null, genres: Array<string>, inkers: Array<string>, language?: string | null, letterers: Array<string>, links: Array<string>, month?: number | null, notes?: string | null, number?: any | null, pageCount?: number | null, pencillers: Array<string>, publisher?: string | null, series?: string | null, summary?: string | null, teams: Array<string>, title?: string | null, titleSort?: string | null, volume?: number | null, writers: Array<string>, year?: number | null } | null, readProgress?: { __typename?: 'ActiveReadingSession', page?: number | null, percentageCompleted?: any | null, epubcfi?: string | null, startedAt: any, elapsedSeconds?: number | null } | null, readHistory: Array<{ __typename?: 'FinishedReadingSession', completedAt: any }>, series: { __typename?: 'Series', resolvedName: string }, thumbnail: { __typename?: 'ImageRef', url: string } } | null };
 
 export type BookReadScreenQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -3307,7 +3330,7 @@ export type ContinueReadingQueryVariables = Exact<{
 export type ContinueReadingQuery = { __typename?: 'Query', keepReading: { __typename?: 'PaginatedMediaResponse', nodes: Array<(
       { __typename?: 'Media', id: string }
       & { ' $fragmentRefs'?: { 'BookListItemFragment': BookListItemFragment;'ReadingNowFragment': ReadingNowFragment } }
-    )>, pageInfo: { __typename: 'CursorPaginationInfo', currentCursor?: string | null, nextCursor?: string | null, limit: number } | { __typename: 'OffsetPaginationInfo' } } };
+    )>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', totalPages: number, currentPage: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
 
 export type ReadingNowFragment = { __typename?: 'Media', id: string, resolvedName: string, metadata?: { __typename?: 'MediaMetadata', summary?: string | null, genres: Array<string>, links: Array<string> } | null, thumbnail: { __typename?: 'ImageRef', url: string } } & { ' $fragmentName'?: 'ReadingNowFragment' };
 
@@ -3381,7 +3404,7 @@ export type BookSearchOverlayQuery = { __typename?: 'Query', media: { __typename
       & { ' $fragmentRefs'?: { 'BookCardFragment': BookCardFragment } }
     )>, pageInfo: { __typename: 'CursorPaginationInfo', currentCursor?: string | null, nextCursor?: string | null, limit: number } | { __typename: 'OffsetPaginationInfo' } } };
 
-export type MetadataEditorFragment = { __typename?: 'MediaMetadata', ageRating?: number | null, characters: Array<string>, colorists: Array<string>, coverArtists: Array<string>, day?: number | null, editors: Array<string>, genres: Array<string>, inkers: Array<string>, letterers: Array<string>, links: Array<string>, month?: number | null, notes?: string | null, number?: any | null, pageCount?: number | null, pencillers: Array<string>, publisher?: string | null, series?: string | null, summary?: string | null, teams: Array<string>, title?: string | null, volume?: number | null, writers: Array<string>, year?: number | null, mediaId?: string | null } & { ' $fragmentName'?: 'MetadataEditorFragment' };
+export type MediaMetadataEditorFragment = { __typename?: 'MediaMetadata', ageRating?: number | null, characters: Array<string>, colorists: Array<string>, coverArtists: Array<string>, day?: number | null, editors: Array<string>, identifierAmazon?: string | null, identifierCalibre?: string | null, identifierGoogle?: string | null, identifierIsbn?: string | null, identifierMobiAsin?: string | null, identifierUuid?: string | null, genres: Array<string>, inkers: Array<string>, language?: string | null, letterers: Array<string>, links: Array<string>, month?: number | null, notes?: string | null, number?: any | null, pageCount?: number | null, pencillers: Array<string>, publisher?: string | null, series?: string | null, summary?: string | null, teams: Array<string>, title?: string | null, titleSort?: string | null, volume?: number | null, writers: Array<string>, year?: number | null, mediaId?: string | null } & { ' $fragmentName'?: 'MediaMetadataEditorFragment' };
 
 export type UpdateMediaMetadataMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -3391,7 +3414,7 @@ export type UpdateMediaMetadataMutationVariables = Exact<{
 
 export type UpdateMediaMetadataMutation = { __typename?: 'Mutation', updateMediaMetadata: { __typename?: 'Media', metadata?: (
       { __typename?: 'MediaMetadata' }
-      & { ' $fragmentRefs'?: { 'MetadataEditorFragment': MetadataEditorFragment } }
+      & { ' $fragmentRefs'?: { 'MediaMetadataEditorFragment': MediaMetadataEditorFragment } }
     ) | null } };
 
 export type DeleteBookClubConfirmationMutationVariables = Exact<{
@@ -3596,7 +3619,7 @@ export type BookOverviewSceneQueryVariables = Exact<{
 export type BookOverviewSceneQuery = { __typename?: 'Query', mediaById?: (
     { __typename?: 'Media', id: string, resolvedName: string, extension: string, metadata?: (
       { __typename?: 'MediaMetadata', links: Array<string>, summary?: string | null }
-      & { ' $fragmentRefs'?: { 'MetadataEditorFragment': MetadataEditorFragment } }
+      & { ' $fragmentRefs'?: { 'MediaMetadataEditorFragment': MediaMetadataEditorFragment } }
     ) | null, readHistory: Array<{ __typename?: 'FinishedReadingSession', completedAt: any }> }
     & { ' $fragmentRefs'?: { 'BookCardFragment': BookCardFragment;'BookFileInformationFragment': BookFileInformationFragment } }
   ) | null };
@@ -4520,16 +4543,23 @@ export const BookCardFragmentDoc = new TypedDocumentString(`
   }
 }
     `, {"fragmentName":"BookCard"}) as unknown as TypedDocumentString<BookCardFragment, unknown>;
-export const MetadataEditorFragmentDoc = new TypedDocumentString(`
-    fragment MetadataEditor on MediaMetadata {
+export const MediaMetadataEditorFragmentDoc = new TypedDocumentString(`
+    fragment MediaMetadataEditor on MediaMetadata {
   ageRating
   characters
   colorists
   coverArtists
   day
   editors
+  identifierAmazon
+  identifierCalibre
+  identifierGoogle
+  identifierIsbn
+  identifierMobiAsin
+  identifierUuid
   genres
   inkers
+  language
   letterers
   links
   month
@@ -4542,12 +4572,13 @@ export const MetadataEditorFragmentDoc = new TypedDocumentString(`
   summary
   teams
   title
+  titleSort
   volume
   writers
   year
   mediaId
 }
-    `, {"fragmentName":"MetadataEditor"}) as unknown as TypedDocumentString<MetadataEditorFragment, unknown>;
+    `, {"fragmentName":"MediaMetadataEditor"}) as unknown as TypedDocumentString<MediaMetadataEditorFragment, unknown>;
 export const SeriesMetadataEditorFragmentDoc = new TypedDocumentString(`
     fragment SeriesMetadataEditor on SeriesMetadataModel {
   metaType
@@ -4772,20 +4803,37 @@ export const BookByIdDocument = new TypedDocumentString(`
     extension
     isFavorite
     metadata {
-      writers
-      genres
-      links
-      pageCount
+      ageRating
       characters
-      coverArtists
-      publisher
-      inkers
       colorists
+      coverArtists
+      day
+      editors
+      identifierAmazon
+      identifierCalibre
+      identifierGoogle
+      identifierIsbn
+      identifierMobiAsin
+      identifierUuid
+      genres
+      inkers
+      language
       letterers
+      links
+      month
+      notes
+      number
+      pageCount
+      pencillers
+      publisher
       series
       summary
-      number
+      teams
+      title
+      titleSort
       volume
+      writers
+      year
     }
     pages
     readProgress {
@@ -5013,10 +5061,12 @@ export const ContinueReadingDocument = new TypedDocumentString(`
     }
     pageInfo {
       __typename
-      ... on CursorPaginationInfo {
-        currentCursor
-        nextCursor
-        limit
+      ... on OffsetPaginationInfo {
+        totalPages
+        currentPage
+        pageSize
+        pageOffset
+        zeroBased
       }
     }
   }
@@ -5168,19 +5218,26 @@ export const UpdateMediaMetadataDocument = new TypedDocumentString(`
     mutation UpdateMediaMetadata($id: ID!, $input: MediaMetadataInput!) {
   updateMediaMetadata(id: $id, input: $input) {
     metadata {
-      ...MetadataEditor
+      ...MediaMetadataEditor
     }
   }
 }
-    fragment MetadataEditor on MediaMetadata {
+    fragment MediaMetadataEditor on MediaMetadata {
   ageRating
   characters
   colorists
   coverArtists
   day
   editors
+  identifierAmazon
+  identifierCalibre
+  identifierGoogle
+  identifierIsbn
+  identifierMobiAsin
+  identifierUuid
   genres
   inkers
+  language
   letterers
   links
   month
@@ -5193,6 +5250,7 @@ export const UpdateMediaMetadataDocument = new TypedDocumentString(`
   summary
   teams
   title
+  titleSort
   volume
   writers
   year
@@ -5563,7 +5621,7 @@ export const BookOverviewSceneDocument = new TypedDocumentString(`
     metadata {
       links
       summary
-      ...MetadataEditor
+      ...MediaMetadataEditor
     }
     readHistory {
       completedAt
@@ -5591,15 +5649,22 @@ export const BookOverviewSceneDocument = new TypedDocumentString(`
     completedAt
   }
 }
-fragment MetadataEditor on MediaMetadata {
+fragment MediaMetadataEditor on MediaMetadata {
   ageRating
   characters
   colorists
   coverArtists
   day
   editors
+  identifierAmazon
+  identifierCalibre
+  identifierGoogle
+  identifierIsbn
+  identifierMobiAsin
+  identifierUuid
   genres
   inkers
+  language
   letterers
   links
   month
@@ -5612,6 +5677,7 @@ fragment MetadataEditor on MediaMetadata {
   summary
   teams
   title
+  titleSort
   volume
   writers
   year

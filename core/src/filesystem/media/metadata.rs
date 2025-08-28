@@ -28,13 +28,16 @@ pub struct ProcessedMediaMetadata {
 	/// The title of the media.
 	#[serde(alias = "Title")]
 	pub title: Option<String>,
+	/// Alternative title used for sorting
+	#[serde(alias = "TitleSort")]
+	pub title_sort: Option<String>,
 	/// The series name which the media belongs to. This isn't necessarily the same as the
 	/// series name as it was interpreted by Stump.
 	#[serde(alias = "Series")]
 	pub series: Option<String>,
 	/// The number this media is in the series. This can be a float, e.g. 20.1,
 	/// which typically represents a one-shot or special issue.
-	#[serde(alias = "Number")]
+	#[serde(alias = "Number", alias = "series_index")]
 	pub number: Option<f64>,
 	#[serde(alias = "Volume")]
 	pub volume: Option<i32>,
@@ -58,7 +61,10 @@ pub struct ProcessedMediaMetadata {
 		deserialize_with = "string_list_deserializer",
 		default = "Option::default"
 	)]
-	pub genre: Option<Vec<String>>,
+	pub genres: Option<Vec<String>>,
+	/// The language of the media
+	#[serde(alias = "Language")]
+	pub language: Option<String>,
 
 	/// The year the media was published.
 	#[serde(alias = "Year")]
@@ -69,6 +75,20 @@ pub struct ProcessedMediaMetadata {
 	/// The day the media was published (1-31). The day is not validated against the month.
 	#[serde(alias = "Day")]
 	pub day: Option<i32>,
+
+	// Note: We don't really need the PascalCase aliases for ebook-specific data
+	/// Amazon identifier
+	pub identifier_amazon: Option<String>,
+	/// Calibre identifier
+	pub identifier_calibre: Option<String>,
+	/// Google Books identifier
+	pub identifier_google: Option<String>,
+	/// ISBN identifier
+	pub identifier_isbn: Option<String>,
+	/// Mobi ASIN identifier
+	pub identifier_mobi_asin: Option<String>,
+	/// UUID identifier
+	pub identifier_uuid: Option<String>,
 
 	/// The writer(s) of the associated media
 	#[serde(
@@ -154,13 +174,14 @@ impl ProcessedMediaMetadata {
 	pub fn into_active_model(self) -> models::entity::media_metadata::ActiveModel {
 		models::entity::media_metadata::ActiveModel {
 			title: Set(self.title),
+			title_sort: Set(self.title_sort),
 			series: Set(self.series),
 			number: Set(self.number.and_then(|n| Decimal::try_from(n).ok())),
 			volume: Set(self.volume),
 			summary: Set(self.summary),
 			notes: Set(self.notes),
 			age_rating: Set(self.age_rating),
-			genre: Set(self.genre.map(|v| v.join(", "))),
+			genres: Set(self.genres.map(|v| v.join(", "))),
 			year: Set(self.year),
 			month: Set(self.month),
 			day: Set(self.day),
@@ -176,6 +197,13 @@ impl ProcessedMediaMetadata {
 			characters: Set(self.characters.map(|v| v.join(", "))),
 			teams: Set(self.teams.map(|v| v.join(", "))),
 			page_count: Set(self.page_count),
+			language: Set(self.language),
+			identifier_amazon: Set(self.identifier_amazon),
+			identifier_calibre: Set(self.identifier_calibre),
+			identifier_google: Set(self.identifier_google),
+			identifier_isbn: Set(self.identifier_isbn),
+			identifier_mobi_asin: Set(self.identifier_mobi_asin),
+			identifier_uuid: Set(self.identifier_uuid),
 			..Default::default()
 		}
 	}
@@ -189,8 +217,9 @@ impl From<HashMap<String, Vec<String>>> for ProcessedMediaMetadata {
 		for (key, value) in map {
 			match key.to_lowercase().as_str() {
 				"title" => metadata.title = Some(value.join("\n").to_string()),
+				"title_sort" => metadata.title_sort = Some(value.join("\n").to_string()),
 				"series" => metadata.series = Some(value.join("\n").to_string()),
-				"number" => {
+				"number" | "series_index" => {
 					metadata.number =
 						value.into_iter().next().and_then(|n| n.parse().ok());
 				},
@@ -200,7 +229,9 @@ impl From<HashMap<String, Vec<String>>> for ProcessedMediaMetadata {
 				},
 				"summary" => metadata.summary = Some(value.join("\n").to_string()),
 				"notes" => metadata.notes = Some(value.join("\n").to_string()),
-				"genre" => metadata.genre = Some(value),
+				"genre" | "genres" | "subject" | "subjects" => {
+					metadata.genres = Some(value)
+				},
 				"year" => {
 					metadata.year = value.into_iter().next().and_then(|n| n.parse().ok());
 				},
@@ -210,6 +241,25 @@ impl From<HashMap<String, Vec<String>>> for ProcessedMediaMetadata {
 				},
 				"day" => {
 					metadata.day = value.into_iter().next().and_then(|n| n.parse().ok());
+				},
+				"language" => metadata.language = Some(value.join("\n").to_string()),
+				"identifier_amazon" => {
+					metadata.identifier_amazon = Some(value.join("\n").to_string())
+				},
+				"identifier_calibre" => {
+					metadata.identifier_calibre = Some(value.join("\n").to_string())
+				},
+				"identifier_google" => {
+					metadata.identifier_google = Some(value.join("\n").to_string())
+				},
+				"identifier_isbn" => {
+					metadata.identifier_isbn = Some(value.join("\n").to_string())
+				},
+				"identifier_mobi_asin" | "identifier_mobi-asin" => {
+					metadata.identifier_mobi_asin = Some(value.join("\n").to_string())
+				},
+				"identifier_uuid" => {
+					metadata.identifier_uuid = Some(value.join("\n").to_string())
 				},
 				"pencillers" => metadata.pencillers = Some(value),
 				"inkers" => metadata.inkers = Some(value),
@@ -308,7 +358,7 @@ impl From<InfoDict> for ProcessedMediaMetadata {
 	fn from(dict: InfoDict) -> Self {
 		ProcessedMediaMetadata {
 			title: dict.title.and_then(pdf_string_to_string),
-			genre: dict.subject.and_then(pdf_string_to_string).map(|v| vec![v]),
+			genres: dict.subject.and_then(pdf_string_to_string).map(|v| vec![v]),
 			year: dict.creation_date.as_ref().map(|date| date.year as i32),
 			month: dict.creation_date.as_ref().map(|date| date.month as i32),
 			day: dict.creation_date.as_ref().map(|date| date.day as i32),
@@ -357,7 +407,7 @@ mod tests {
 		assert_eq!(metadata.year, Some(2010));
 		assert_eq!(metadata.month, Some(8));
 		assert_eq!(metadata.day, Some(31));
-		assert_eq!(metadata.genre, Some(vec!["Fantasy".to_string()]));
+		assert_eq!(metadata.genres, Some(vec!["Fantasy".to_string()]));
 		assert_eq!(metadata.summary, Some("A book, you know?".to_string()));
 	}
 

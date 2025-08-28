@@ -27,7 +27,7 @@ impl MediaMetadata {
 
 	async fn genres(&self) -> Vec<String> {
 		self.model
-			.genre
+			.genres
 			.clone()
 			.map(comma_separated_list_to_vec)
 			.unwrap_or_default()

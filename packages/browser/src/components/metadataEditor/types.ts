@@ -1,4 +1,4 @@
-import { MetadataEditorFragment, SeriesMetadataEditorFragment } from '@stump/graphql'
+import { MediaMetadataEditorFragment, SeriesMetadataEditorFragment } from '@stump/graphql'
 
 export type MetadataEditorRow<Field extends string> = {
 	label: string
@@ -6,7 +6,7 @@ export type MetadataEditorRow<Field extends string> = {
 }
 
 export type MediaMetadataField = keyof Omit<
-	MetadataEditorFragment,
+	MediaMetadataEditorFragment,
 	'__typename' | ' $fragmentName' | 'mediaId'
 >
 
@@ -34,8 +34,15 @@ export const MediaMetadataKeys: MediaMetadataField[] = [
 	'coverArtists',
 	'day',
 	'editors',
+	'identifierAmazon',
+	'identifierCalibre',
+	'identifierGoogle',
+	'identifierIsbn',
+	'identifierMobiAsin',
+	'identifierUuid',
 	'genres',
 	'inkers',
+	'language',
 	'letterers',
 	'links',
 	'month',
@@ -48,6 +55,7 @@ export const MediaMetadataKeys: MediaMetadataField[] = [
 	'summary',
 	'teams',
 	'title',
+	'titleSort',
 	'volume',
 	'writers',
 	'year',

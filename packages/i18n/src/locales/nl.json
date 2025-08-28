@@ -569,8 +569,8 @@
 						"title": "Scan record",
 						"description": "A detailed view of this scan record",
 						"fields": {
-							"library": "Library",
-							"date": "Date",
+							"library": "Bibliotheek",
+							"date": "Datum",
 							"config": "Config",
 							"jobOutput": "Job output",
 							"logs": "Logs"
@@ -581,10 +581,10 @@
 					"table": {
 						"columns": {
 							"timestamp": "Scanned at",
-							"config": "Config"
+							"config": "Configuratie"
 						},
-						"default": "Default",
-						"custom": "Custom"
+						"default": "Standaard",
+						"custom": "Aangepast"
 					},
 					"clearHistory": "Delete scan history"
 				}
@@ -613,7 +613,7 @@
 					"analyzeButton": "Analyze books"
 				},
 				"missingFiles": {
-					"heading": "Missing files",
+					"heading": "Ontbrekende bestanden",
 					"description": "Files that are referenced in the database but cannot be located on disk",
 					"noMissingFiles": "There are no missing files in this library"
 				},
@@ -642,11 +642,11 @@
 			"description": "Permanently delete this library and all of its contents or certain resources",
 			"sections": {
 				"cleanLibrary": {
-					"heading": "Clean library",
+					"heading": "Bibliotheek opschonen",
 					"description": "Remove all media and series that cannot be located on disk",
 					"disclaimer": "While this action will not delete any files, it will permanently delete all records relating to media and series which have a missing status",
 					"confirmation": {
-						"label": "Clean library",
+						"label": "Bibliotheek opschonen",
 						"text": "Are you sure you want to clean this library?"
 					}
 				},
@@ -705,12 +705,12 @@
 		},
 		"fields": {
 			"name": {
-				"label": "Name",
+				"label": "Naam",
 				"placeholder": "My smart list",
 				"description": "Must be unique, but can be changed later"
 			},
 			"description": {
-				"label": "Description",
+				"label": "Omschrijving",
 				"placeholder": "A very intelligent list",
 				"description": "An optional description of your smart list"
 			},
@@ -718,7 +718,7 @@
 				"label": "Visibility",
 				"options": {
 					"public": {
-						"label": "Public",
+						"label": "Openbaar",
 						"description": "Accessible to all users on the server"
 					},
 					"shared": {
@@ -727,7 +727,7 @@
 						"createDisclaimer": "You can select who this list is shared with after creation"
 					},
 					"private": {
-						"label": "Private",
+						"label": "Privé",
 						"description": "Only you can access this smart list"
 					}
 				}
@@ -898,12 +898,12 @@
 				}
 			],
 			"review": {
-				"yes": "Yes",
-				"no": "No",
-				"none": "None",
+				"yes": "Ja",
+				"no": "Nee",
+				"none": "Geen",
 				"labels": {
-					"name": "Name",
-					"description": "Description",
+					"name": "Naam",
+					"description": "Omschrijving",
 					"visibility": "Visibility",
 					"grouping": "Group by"
 				}
@@ -919,16 +919,16 @@
 		},
 		"fields": {
 			"name": {
-				"label": "Name",
+				"label": "Naam",
 				"placeholder": "Koreader Sync"
 			},
 			"expiration": {
 				"label": "Expiration",
-				"placeholder": "Never"
+				"placeholder": "Nooit"
 			},
 			"expires_at": {
 				"label": "Expires at",
-				"placeholder": "Never"
+				"placeholder": "Nooit"
 			},
 			"permissions": {
 				"inherit": {
@@ -972,7 +972,7 @@
 		"sidebar": {
 			"basics": "Basics",
 			"configuration": {
-				"label": "Configuration",
+				"label": "Configuratie",
 				"access": "Access",
 				"filters": "Filters"
 			},
@@ -1107,13 +1107,13 @@
 			"application": {
 				"account": "Account",
 				"appearance": "Weergave",
-				"api keys": "API keys",
+				"api keys": "API-sleutels",
 				"reader": "Lezer",
 				"desktop": "Desktop",
 				"label": "Application"
 			},
 			"server": {
-				"general": "General",
+				"general": "Algemeen",
 				"logs": "Logs",
 				"users": "Users",
 				"jobs": "Jobs",
@@ -1151,7 +1151,7 @@
 						},
 						"buttons": {
 							"confirm": "Confirm Image",
-							"cancel": "Cancel",
+							"cancel": "Annuleer",
 							"edit": "Edit",
 							"changeImage": "Change Image",
 							"removeImage": "Remove Image"
@@ -1183,11 +1183,11 @@
 					"label": "Theme",
 					"description": [
 						"If you're interested in creating your own custom theme, check out the",
-						"documentation"
+						"documentatie"
 					],
 					"options": {
-						"light": "Light",
-						"dark": "Dark",
+						"light": "Licht",
+						"dark": "Donker",
 						"bronze": "Bronze light",
 						"ocean": "Ocean",
 						"autumn": "Autumn",
@@ -1230,14 +1230,14 @@
 			}
 		},
 		"app/apiKeys": {
-			"helmet": "API keys",
-			"title": "API keys",
+			"helmet": "API-sleutels",
+			"title": "API-sleutels",
 			"description": "Manage your generated Stump API keys",
 			"shared": {
 				"fields": {
-					"name": "Name",
+					"name": "Naam",
 					"expiration": "Expiration",
-					"last_used": "Last used",
+					"last_used": "Laatst gebruikt",
 					"created": "Created",
 					"permissions": "Permissions",
 					"inherited": "Inherited",

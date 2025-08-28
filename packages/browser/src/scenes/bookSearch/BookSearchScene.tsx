@@ -348,18 +348,6 @@ function BookSearchScene() {
 		}
 	}
 
-	// return <FilterContext.Provider
-	// 		value={{
-	// 			filters,
-	// 			ordering,
-	// 			pagination: { page, pageSize },
-	// 			setPage,
-	// 			...rest,
-	// 		}}
-	// 	>
-	// 		Foo
-	// 	</FilterContext.Provider>
-
 	return (
 		<FilterContext.Provider
 			value={{

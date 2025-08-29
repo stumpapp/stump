@@ -2,7 +2,7 @@ import { forwardRef, memo } from 'react'
 import AutoSizer from 'react-virtualized-auto-sizer'
 import { GridItemProps, GridListProps, VirtuosoGrid } from 'react-virtuoso'
 
-import { GRID_GAP, sizeToPercentageWidth, useGridSize } from '@/components/container/useGridSize'
+import { GRID_GAP, sizeToPercentageWidth, useGridSize } from './useGridSize'
 
 type Props = {
 	count: number

@@ -3,7 +3,8 @@ import { Text, ToolTip } from '@stump/components'
 import { DirectoryListingFile } from '@stump/graphql'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
-import { usePrefetchBook, usePrefetchBooksAfterCursor } from '@/scenes/book'
+import { usePrefetchBook } from '@/components/book'
+import { usePrefetchBooksAfterCursor } from '@/scenes/book/BooksAfterCursor'
 
 import { useFileExplorerContext } from '../context'
 import FileThumbnail, { getBook, MediaAtPath } from '../FileThumbnail'

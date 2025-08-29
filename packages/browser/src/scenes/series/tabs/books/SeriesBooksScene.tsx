@@ -19,6 +19,7 @@ import {
 } from '@/components/filters'
 import {
 	DEFAULT_MEDIA_ORDER_BY,
+	useMediaURLOrderBy,
 	useSearchMediaFilter,
 	useURLKeywordSearch,
 	useURLPageParams,
@@ -29,7 +30,6 @@ import { EntityTableColumnConfiguration } from '@/components/table'
 import TableOrGridLayout from '@/components/TableOrGridLayout'
 import useIsInView from '@/hooks/useIsInView'
 import { usePreferences } from '@/hooks/usePreferences'
-import { useMediaURLOrderBy } from '@/scenes/bookSearch/BookSearchScene'
 import { useBooksLayout } from '@/stores/layout'
 
 import { useSeriesContext } from '../../context'

@@ -1,13 +1,6 @@
 import { PREFETCH_STALE_TIME, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { usePrevious } from '@stump/components'
-import {
-	graphql,
-	InterfaceLayout,
-	MediaFilterInput,
-	MediaModelOrdering,
-	MediaOrderBy,
-	OrderDirection,
-} from '@stump/graphql'
+import { graphql, InterfaceLayout, MediaFilterInput, MediaOrderBy } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
 import { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
 import { Helmet } from 'react-helmet'
@@ -23,9 +16,10 @@ import {
 	URLOrdering,
 	useFilterScene,
 } from '@/components/filters'
-import { FilterContext, FilterInput, Ordering } from '@/components/filters/context'
+import { FilterContext, FilterInput } from '@/components/filters/context'
 import {
 	DEFAULT_MEDIA_ORDER_BY,
+	useMediaURLOrderBy,
 	useSearchMediaFilter,
 	useURLKeywordSearch,
 	useURLPageParams,
@@ -131,24 +125,6 @@ function getQueryKey(
 	orderBy: MediaOrderBy[],
 ) {
 	return ['booksSearch', { page, pageSize, search, filters, orderBy }]
-}
-
-export function useMediaURLOrderBy(ordering: Ordering): MediaOrderBy[] {
-	return useMemo(() => {
-		// check for undefined values
-		if (!ordering || !ordering.order_by || !ordering.direction) {
-			return DEFAULT_MEDIA_ORDER_BY
-		}
-
-		return [
-			{
-				media: {
-					field: ordering.order_by as MediaModelOrdering,
-					direction: ordering.direction as OrderDirection,
-				},
-			},
-		] as MediaOrderBy[]
-	}, [ordering])
 }
 
 function BookSearchScene() {

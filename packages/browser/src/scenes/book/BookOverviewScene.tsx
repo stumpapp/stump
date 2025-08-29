@@ -1,6 +1,5 @@
-import { PREFETCH_STALE_TIME, queryClient, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { ButtonOrLink, Heading, Spacer, Text } from '@stump/components'
-import { graphql, useFragment, UserPermission } from '@stump/graphql'
+import { useFragment, UserPermission } from '@stump/graphql'
 import dayjs from 'dayjs'
 import sortBy from 'lodash/sortBy'
 import { Suspense, useMemo } from 'react'
@@ -8,6 +7,7 @@ import { Helmet } from 'react-helmet'
 import { useParams } from 'react-router'
 import { useMediaMatch } from 'rooks'
 
+import { useBookOverview } from '@/components/book'
 import BookCard, { BookCardFragment } from '@/components/book/BookCard'
 import { MediaMetadataEditor } from '@/components/book/metadata'
 import { SceneContainer } from '@/components/container'
@@ -25,47 +25,11 @@ import BooksAfterCursor from './BooksAfterCursor'
 import DownloadMediaButton from './DownloadMediaButton'
 import EmailBookDropdown from './EmailBookDropdown'
 
-const query = graphql(`
-	query BookOverviewScene($id: ID!) {
-		mediaById(id: $id) {
-			id
-			...BookCard
-			...BookFileInformation
-			resolvedName
-			extension
-			metadata {
-				links
-				summary
-				...MediaMetadataEditor
-			}
-			readHistory {
-				completedAt
-			}
-		}
-	}
-`)
-
-export const usePrefetchBook = () => {
-	const { sdk } = useSDK()
-	return (id: string) =>
-		queryClient.prefetchQuery({
-			queryKey: ['bookOverview', id],
-			queryFn: async () => {
-				const response = await sdk.execute(query, { id })
-				return response
-			},
-			staleTime: PREFETCH_STALE_TIME,
-		})
-}
-
 export default function BookOverviewScene() {
 	const { id } = useParams()
-	const { sdk } = useSDK()
 	const {
 		data: { mediaById: media },
-	} = useSuspenseGraphQL(query, sdk.cacheKey('bookOverview', [id]), {
-		id: id || '',
-	})
+	} = useBookOverview(id || '')
 	const { checkPermission, isServerOwner } = useAppContext()
 
 	const paths = usePaths()

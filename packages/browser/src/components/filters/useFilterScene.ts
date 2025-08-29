@@ -262,3 +262,21 @@ export function useFilterScene(): Return {
 		setPage,
 	}
 }
+
+export function useMediaURLOrderBy(ordering: Ordering): MediaOrderBy[] {
+	return useMemo(() => {
+		// check for undefined values
+		if (!ordering || !ordering.order_by || !ordering.direction) {
+			return DEFAULT_MEDIA_ORDER_BY
+		}
+
+		return [
+			{
+				media: {
+					field: ordering.order_by as MediaModelOrdering,
+					direction: ordering.direction as OrderDirection,
+				},
+			},
+		] as MediaOrderBy[]
+	}, [ordering])
+}

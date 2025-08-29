@@ -3417,6 +3417,19 @@ export type UpdateMediaMetadataMutation = { __typename?: 'Mutation', updateMedia
       & { ' $fragmentRefs'?: { 'MediaMetadataEditorFragment': MediaMetadataEditorFragment } }
     ) | null } };
 
+export type BookOverviewSceneQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type BookOverviewSceneQuery = { __typename?: 'Query', mediaById?: (
+    { __typename?: 'Media', id: string, resolvedName: string, extension: string, metadata?: (
+      { __typename?: 'MediaMetadata', links: Array<string>, summary?: string | null }
+      & { ' $fragmentRefs'?: { 'MediaMetadataEditorFragment': MediaMetadataEditorFragment } }
+    ) | null, readHistory: Array<{ __typename?: 'FinishedReadingSession', completedAt: any }> }
+    & { ' $fragmentRefs'?: { 'BookCardFragment': BookCardFragment;'BookFileInformationFragment': BookFileInformationFragment } }
+  ) | null };
+
 export type DeleteBookClubConfirmationMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
@@ -3610,19 +3623,6 @@ export type BookLibrarySeriesLinksQueryVariables = Exact<{
 export type BookLibrarySeriesLinksQuery = { __typename?: 'Query', seriesById?: { __typename?: 'Series', id: string, name: string, libraryId?: string | null } | null };
 
 export type BookMetadataFragment = { __typename?: 'Media', metadata?: { __typename?: 'MediaMetadata', ageRating?: number | null, characters: Array<string>, colorists: Array<string>, coverArtists: Array<string>, editors: Array<string>, genres: Array<string>, inkers: Array<string>, letterers: Array<string>, links: Array<string>, pencillers: Array<string>, publisher?: string | null, teams: Array<string>, writers: Array<string>, year?: number | null } | null } & { ' $fragmentName'?: 'BookMetadataFragment' };
-
-export type BookOverviewSceneQueryVariables = Exact<{
-  id: Scalars['ID']['input'];
-}>;
-
-
-export type BookOverviewSceneQuery = { __typename?: 'Query', mediaById?: (
-    { __typename?: 'Media', id: string, resolvedName: string, extension: string, metadata?: (
-      { __typename?: 'MediaMetadata', links: Array<string>, summary?: string | null }
-      & { ' $fragmentRefs'?: { 'MediaMetadataEditorFragment': MediaMetadataEditorFragment } }
-    ) | null, readHistory: Array<{ __typename?: 'FinishedReadingSession', completedAt: any }> }
-    & { ' $fragmentRefs'?: { 'BookCardFragment': BookCardFragment;'BookFileInformationFragment': BookFileInformationFragment } }
-  ) | null };
 
 export type BookOverviewHeaderQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -5253,6 +5253,85 @@ export const UpdateMediaMetadataDocument = new TypedDocumentString(`
   writers
   year
 }`) as unknown as TypedDocumentString<UpdateMediaMetadataMutation, UpdateMediaMetadataMutationVariables>;
+export const BookOverviewSceneDocument = new TypedDocumentString(`
+    query BookOverviewScene($id: ID!) {
+  mediaById(id: $id) {
+    id
+    ...BookCard
+    ...BookFileInformation
+    resolvedName
+    extension
+    metadata {
+      links
+      summary
+      ...MediaMetadataEditor
+    }
+    readHistory {
+      completedAt
+    }
+  }
+}
+    fragment BookCard on Media {
+  id
+  resolvedName
+  extension
+  pages
+  size
+  status
+  thumbnail {
+    url
+  }
+  readProgress {
+    percentageCompleted
+    epubcfi
+    page
+    updatedAt
+  }
+  readHistory {
+    __typename
+    completedAt
+  }
+}
+fragment MediaMetadataEditor on MediaMetadata {
+  ageRating
+  characters
+  colorists
+  coverArtists
+  day
+  editors
+  identifierAmazon
+  identifierCalibre
+  identifierGoogle
+  identifierIsbn
+  identifierMobiAsin
+  identifierUuid
+  genres
+  inkers
+  language
+  letterers
+  links
+  month
+  notes
+  number
+  pageCount
+  pencillers
+  publisher
+  series
+  summary
+  teams
+  title
+  titleSort
+  volume
+  writers
+  year
+}
+fragment BookFileInformation on Media {
+  id
+  size
+  extension
+  hash
+  relativeLibraryPath
+}`) as unknown as TypedDocumentString<BookOverviewSceneQuery, BookOverviewSceneQueryVariables>;
 export const DeleteBookClubConfirmationDocument = new TypedDocumentString(`
     mutation DeleteBookClubConfirmation($id: ID!) {
   deleteBookClub(id: $id) {
@@ -5606,85 +5685,6 @@ export const BookLibrarySeriesLinksDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<BookLibrarySeriesLinksQuery, BookLibrarySeriesLinksQueryVariables>;
-export const BookOverviewSceneDocument = new TypedDocumentString(`
-    query BookOverviewScene($id: ID!) {
-  mediaById(id: $id) {
-    id
-    ...BookCard
-    ...BookFileInformation
-    resolvedName
-    extension
-    metadata {
-      links
-      summary
-      ...MediaMetadataEditor
-    }
-    readHistory {
-      completedAt
-    }
-  }
-}
-    fragment BookCard on Media {
-  id
-  resolvedName
-  extension
-  pages
-  size
-  status
-  thumbnail {
-    url
-  }
-  readProgress {
-    percentageCompleted
-    epubcfi
-    page
-    updatedAt
-  }
-  readHistory {
-    __typename
-    completedAt
-  }
-}
-fragment MediaMetadataEditor on MediaMetadata {
-  ageRating
-  characters
-  colorists
-  coverArtists
-  day
-  editors
-  identifierAmazon
-  identifierCalibre
-  identifierGoogle
-  identifierIsbn
-  identifierMobiAsin
-  identifierUuid
-  genres
-  inkers
-  language
-  letterers
-  links
-  month
-  notes
-  number
-  pageCount
-  pencillers
-  publisher
-  series
-  summary
-  teams
-  title
-  titleSort
-  volume
-  writers
-  year
-}
-fragment BookFileInformation on Media {
-  id
-  size
-  extension
-  hash
-  relativeLibraryPath
-}`) as unknown as TypedDocumentString<BookOverviewSceneQuery, BookOverviewSceneQueryVariables>;
 export const BookOverviewHeaderDocument = new TypedDocumentString(`
     query BookOverviewHeader($id: ID!) {
   mediaById(id: $id) {

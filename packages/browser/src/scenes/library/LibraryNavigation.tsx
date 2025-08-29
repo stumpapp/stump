@@ -15,7 +15,7 @@ import { usePreferences } from '@/hooks'
 
 import { useLibraryContext } from './context'
 import { usePrefetchLibraryBooks } from './tabs/books/LibraryBooksScene'
-import { usePrefetchLibrarySeries } from './tabs/series'
+import { usePrefetchLibrarySeries } from './tabs/series/LibrarySeriesScene'
 
 export default function LibraryNavigation() {
 	const location = useLocation()
@@ -38,6 +38,7 @@ export default function LibraryNavigation() {
 	const prefetchBooks = usePrefetchLibraryBooks()
 
 	// const prefetchFiles = usePrefetchFiles()
+	// TODO(sea-orm): Fix me
 	const handlePrefetchFiles = useCallback(() => {
 		// prefetchFiles({ path, fetchConfig: checkPermission('file:upload') })
 	}, [path, checkPermission])

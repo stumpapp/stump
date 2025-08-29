@@ -4,10 +4,11 @@ import pluralize from 'pluralize'
 import { type ComponentPropsWithoutRef, useCallback, useMemo } from 'react'
 
 import { usePaths } from '@/paths'
-import { usePrefetchBook, usePrefetchBooksAfterCursor } from '@/scenes/book'
+import { usePrefetchBooksAfterCursor } from '@/scenes/book/BooksAfterCursor'
 import { formatBytes } from '@/utils/format'
 
 import { EntityCard } from '../entity'
+import { usePrefetchBook } from './useBookOverview'
 
 export const BookCardFragment = graphql(`
 	fragment BookCard on Media {

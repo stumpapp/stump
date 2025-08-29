@@ -8,7 +8,7 @@ import { useLocation } from 'react-router'
 
 import { useAppContext } from '@/context'
 import { usePaths } from '@/paths'
-import { usePrefetchLibrarySeries } from '@/scenes/library/tabs/series'
+import { usePrefetchLibrarySeries } from '@/scenes/library/tabs/series/LibrarySeriesScene'
 
 import { EntityOptionProps } from '../../../types'
 import SideBarButtonLink from '../../SideBarButtonLink'

@@ -6,7 +6,8 @@ use std::{
 use futures::future::join_all;
 use models::entity::job;
 use sea_orm::{
-	prelude::*, sqlx::types::chrono::Utc, ActiveValue::Set, DatabaseConnection,
+	prelude::*, sea_query::OnConflict, sqlx::types::chrono::Utc, ActiveValue::Set,
+	DatabaseConnection,
 };
 use tokio::sync::{broadcast, mpsc, RwLock};
 
@@ -107,10 +108,19 @@ impl JobManager {
 			description: Set(job.description()),
 			status: Set(JobStatus::Queued),
 			created_at: Set(Utc::now().into()),
+			ms_elapsed: Set(0),
 			..Default::default()
 		};
-		let created_job = active_model
-			.insert(self.conn.as_ref())
+		let created_job = job::Entity::insert(active_model)
+			// Note: This needs to be an "upsert" since jobs get written when
+			// added to queue, and so they would exist when re-queued for execution
+			// which causes a conflict and throws
+			.on_conflict(
+				OnConflict::new()
+					.update_column(job::Column::Status)
+					.to_owned(),
+			)
+			.exec(self.conn.as_ref())
 			.await
 			.map_err(|err| JobManagerError::JobPersistFailed(err.to_string()))?;
 		tracing::trace!(?created_job, "Persisted job to database");

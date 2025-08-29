@@ -1,14 +1,14 @@
 use async_graphql::{Context, Object, Result, ID};
 use chrono::Utc;
 use models::{
-	entity::{favorite_series, library, library_config, media, series},
-	shared::enums::UserPermission,
+	entity::{favorite_series, library, library_config, media, media_metadata, series},
+	shared::enums::{MetadataResetImpact, UserPermission},
 };
 use sea_orm::{
 	prelude::*,
 	sea_query::{OnConflict, Query},
 	ActiveValue::Set,
-	IntoActiveModel,
+	IntoActiveModel, TransactionTrait,
 };
 use stump_core::filesystem::{
 	image::{generate_book_thumbnail, GenerateThumbnailOptions},
@@ -193,6 +193,72 @@ impl SeriesMutation {
 			series: model.series,
 			metadata: Some(updated_metadata),
 		};
+
+		Ok(model.into())
+	}
+
+	#[graphql(guard = "PermissionGuard::one(UserPermission::EditMetadata)")]
+	async fn reset_series_metadata(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+		impact: MetadataResetImpact,
+	) -> Result<Series> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let core = ctx.data::<CoreContext>()?;
+		let conn = core.conn.as_ref();
+
+		let mut model = series::ModelWithMetadata::find_for_user(user)
+			.filter(series::Column::Id.eq(id.to_string()))
+			.into_model::<series::ModelWithMetadata>()
+			.one(conn)
+			.await?
+			.ok_or("Series not found")?;
+
+		let tx = conn.begin().await?;
+
+		if matches!(
+			impact,
+			MetadataResetImpact::Series | MetadataResetImpact::Everything
+		) {
+			if let Some(metadata) = model.metadata.take() {
+				metadata.delete(&tx).await?;
+			} else {
+				tracing::debug!(series_id = ?model.series.id, "No metadata to reset");
+			}
+		}
+
+		if matches!(
+			impact,
+			MetadataResetImpact::Books | MetadataResetImpact::Everything
+		) {
+			let media_metadata_models = media_metadata::Entity::find()
+				.filter(
+					media_metadata::Column::MediaId.in_subquery(
+						Query::select()
+							.column(media::Column::Id)
+							.from(media::Entity)
+							.and_where(
+								media::Column::SeriesId.eq(model.series.id.clone()),
+							)
+							.to_owned(),
+					),
+				)
+				.all(&tx)
+				.await?;
+			tracing::trace!(
+				count = media_metadata_models.len(),
+				"Found media metadata to delete"
+			);
+
+			for media_metadata in media_metadata_models {
+				media_metadata.delete(&tx).await?;
+			}
+		}
+
+		tx.commit().await?;
+
+		tracing::debug!(?impact, series_id = ?model.series.id, "Reset metadata for series");
 
 		Ok(model.into())
 	}

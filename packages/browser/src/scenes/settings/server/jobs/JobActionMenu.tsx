@@ -55,7 +55,14 @@ export default function JobActionMenu({ job, onInspectData }: Props) {
 					predicate: ({ queryKey }) => queryKey.includes(sdk.cacheKeys.jobs),
 				}),
 			onError: (error: unknown) => {
-				if (error instanceof Error) {
+				if (isBadStateError(error)) {
+					toast.warning('This job was found in an invalid state', {
+						description: 'Please check server logs and report this issue',
+					})
+					client.refetchQueries({
+						predicate: ({ queryKey }) => queryKey.includes(sdk.cacheKeys.jobs),
+					})
+				} else if (error instanceof Error) {
 					toast.error(error.message)
 				} else {
 					console.error(error)
@@ -164,3 +171,7 @@ export default function JobActionMenu({ job, onInspectData }: Props) {
 		/>
 	)
 }
+
+const isBadStateError = (error: unknown) =>
+	error instanceof Error &&
+	error.message.includes('A job was found which was in a deeply invalid state')

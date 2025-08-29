@@ -25,7 +25,11 @@ export default function NumberCell<Field extends string>({ binding, value }: Pro
 				size="sm"
 				min={rules?.min}
 				max={rules?.max}
-				{...form.register(binding, { valueAsNumber: true })}
+				onChange={(e) => {
+					const value = e.target.value
+					// @ts-expect-error: TS is really complex for this generic form
+					form.setValue(binding, value ? Number(value) : null)
+				}}
 			/>
 		)
 	}

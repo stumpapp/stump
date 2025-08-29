@@ -279,6 +279,40 @@ pub enum LogLevel {
 	Debug,
 }
 
+/// An enum representing the different types of metadata resets that can occur,
+/// which manifest differently depending on the context
+#[derive(
+	Eq,
+	Copy,
+	Hash,
+	Debug,
+	Clone,
+	PartialEq,
+	Serialize,
+	Deserialize,
+	Enum,
+	EnumString,
+	Display,
+)]
+#[strum(serialize_all = "SCREAMING_SNAKE_CASE")]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum MetadataResetImpact {
+	/// A reset which affects one or more series depending on context:
+	/// - When mutating a library, will reset all series metadata
+	/// - When mutating a series, will reset all its own metadata
+	Series,
+	/// A reset which affects one or more books depending on context:
+	/// - When mutating a library, will reset all book metadata in all
+	///   library's series
+	/// - When mutating a series, will reset all its own books
+	/// - When mutating a book, will reset all its own metadata
+	Books,
+	/// A reset which affects multiple different entities (series, books) depending on context:
+	/// - When mutating a library, will reset all metadata in all library's series and books
+	/// - When mutating a series, will reset all its own metadata and books
+	Everything,
+}
+
 /// The different reading directions supported by any Stump reader
 #[derive(
 	Eq,

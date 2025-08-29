@@ -310,7 +310,10 @@ export class Api {
 		const { data, errors } = response.data
 
 		if (errors) {
-			// TODO: Create specialized error to handle this better
+			const firstExtensionError = errors.find((error) => error.extensions?.error)?.extensions?.error
+			if (firstExtensionError && typeof firstExtensionError === 'string') {
+				throw new Error(firstExtensionError)
+			}
 			throw new Error(errors.map((error) => error.message).join(', '))
 		}
 

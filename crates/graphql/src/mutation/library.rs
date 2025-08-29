@@ -6,9 +6,9 @@ use models::{
 		last_library_visit,
 		library::{self, LibraryIdentSelect},
 		library_config, library_exclusion, library_scan_record, library_tag, media,
-		series, tag, user,
+		media_metadata, series, series_metadata, tag, user,
 	},
-	shared::enums::{FileStatus, UserPermission},
+	shared::enums::{FileStatus, MetadataResetImpact, UserPermission},
 };
 use sea_orm::{
 	prelude::*,
@@ -266,6 +266,84 @@ impl LibraryMutation {
 		}
 
 		Ok(Library::from(created_library))
+	}
+
+	#[graphql(guard = "PermissionGuard::one(UserPermission::EditMetadata)")]
+	async fn reset_library_metadata(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+		impact: MetadataResetImpact,
+	) -> Result<Library> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let core = ctx.data::<CoreContext>()?;
+		let conn = core.conn.as_ref();
+
+		let library = library::Entity::find_for_user(user)
+			.filter(library::Column::Id.eq(id.to_string()))
+			.one(conn)
+			.await?
+			.ok_or("Library not found")?;
+
+		let tx = conn.begin().await?;
+
+		let series_ids: Vec<String> = series::Entity::find()
+			.select_only()
+			.column(series::Column::Id)
+			.filter(series::Column::LibraryId.eq(library.id.clone()))
+			.into_tuple()
+			.all(&tx)
+			.await?;
+
+		if matches!(
+			impact,
+			MetadataResetImpact::Series | MetadataResetImpact::Everything
+		) {
+			let metadata_models = series_metadata::Entity::find()
+				.filter(series_metadata::Column::SeriesId.is_in(series_ids.clone()))
+				.all(&tx)
+				.await?;
+			tracing::trace!(
+				count = metadata_models.len(),
+				"Found series metadata to delete"
+			);
+
+			for metadata in metadata_models {
+				metadata.delete(&tx).await?;
+			}
+		}
+
+		if matches!(
+			impact,
+			MetadataResetImpact::Books | MetadataResetImpact::Everything
+		) {
+			let media_metadata_models = media_metadata::Entity::find()
+				.filter(
+					media_metadata::Column::MediaId.in_subquery(
+						Query::select()
+							.column(media::Column::Id)
+							.from(media::Entity)
+							.and_where(media::Column::SeriesId.is_in(series_ids))
+							.to_owned(),
+					),
+				)
+				.all(&tx)
+				.await?;
+			tracing::trace!(
+				count = media_metadata_models.len(),
+				"Found media metadata to delete"
+			);
+
+			for media_metadata in media_metadata_models {
+				media_metadata.delete(&tx).await?;
+			}
+		}
+
+		tx.commit().await?;
+
+		tracing::debug!(?impact, library_id = ?library.id, "Reset metadata for library");
+
+		Ok(library.into())
 	}
 
 	/// Update an existing library with the provided configuration. If `scan_after_persist` is `true`,

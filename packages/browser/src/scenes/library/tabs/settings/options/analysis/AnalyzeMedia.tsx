@@ -1,7 +1,8 @@
 import { useGraphQLMutation } from '@stump/client'
-import { Alert, Button, Heading, Text } from '@stump/components'
+import { Alert, AlertDescription, AlertTitle, Button, Heading, Text } from '@stump/components'
 import { graphql } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
+import { Info } from 'lucide-react'
 import { useCallback } from 'react'
 
 import { useLibraryContext } from '@/scenes/library/context'
@@ -29,8 +30,10 @@ export default function AnalyzeMedia() {
 				</Text>
 			</div>
 
-			<Alert level="info" icon="info">
-				<Alert.Content>{t(getKey('disclaimer'))}</Alert.Content>
+			<Alert variant="info" dismissible id="analyze-media-info">
+				<Info />
+				<AlertTitle>{t(getKey('disclaimerTitle'))}</AlertTitle>
+				<AlertDescription>{t(getKey('disclaimer'))}</AlertDescription>
 			</Alert>
 
 			<div>

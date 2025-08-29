@@ -1,5 +1,5 @@
 import { queryClient, useGraphQLMutation, useSDK } from '@stump/client'
-import { Alert, Button, ConfirmationModal } from '@stump/components'
+import { Alert, AlertDescription, Button, ConfirmationModal } from '@stump/components'
 import { graphql, PersistedLogsQuery } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
@@ -69,8 +69,8 @@ export default function DeleteLogsConfirmationDialog() {
 			}
 			size="md"
 		>
-			<Alert level="warning" className="p-3 text-sm">
-				<Alert.Content>{t(getKey('disclaimer'))} </Alert.Content>
+			<Alert variant="warning" className="p-3 text-sm">
+				<AlertDescription>{t(getKey('disclaimer'))} </AlertDescription>
 			</Alert>
 		</ConfirmationModal>
 	)

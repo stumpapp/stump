@@ -1,5 +1,5 @@
 import { useGraphQLMutation, useSDK, useSuspenseGraphQL } from '@stump/client'
-import { Alert, Breadcrumbs, Button, Heading, Text } from '@stump/components'
+import { Alert, AlertDescription, Breadcrumbs, Button, Heading, Text } from '@stump/components'
 import { graphql } from '@stump/graphql'
 import { Construction } from 'lucide-react'
 import { useCallback, useEffect, useMemo } from 'react'
@@ -96,10 +96,11 @@ export default function BookManagementScene() {
 					</Text>
 				</div>
 
-				<Alert level="warning" rounded="sm" icon={Construction}>
-					<Alert.Content>
+				<Alert variant="warning">
+					<Construction />
+					<AlertDescription>
 						Book management is currently under development and has very limited functionality
-					</Alert.Content>
+					</AlertDescription>
 				</Alert>
 
 				<div>

@@ -1,5 +1,13 @@
 import { useGraphQLMutation } from '@stump/client'
-import { Alert, Button, ConfirmationModal } from '@stump/components'
+import {
+	Alert,
+	AlertDescription,
+	AlertTitle,
+	Button,
+	ConfirmationModal,
+	Heading,
+	Text,
+} from '@stump/components'
 import { graphql } from '@stump/graphql'
 import { AlertTriangle } from 'lucide-react'
 import { useCallback, useState } from 'react'
@@ -41,31 +49,45 @@ export default function DeleteLibraryThumbnails() {
 
 	return (
 		<>
-			<Alert level="error" icon={AlertTriangle}>
-				<Alert.Content className="flex flex-col gap-3 md:flex-row">
-					<span>Delete all generated thumbnails for this library</span>
-					<Button
-						variant="danger"
-						onClick={() => setShowConfirmation(true)}
-						className="flex-shrink-0"
-						disabled={isPending || !!data}
-						size="md"
-					>
-						Delete thumbnails
-					</Button>
-				</Alert.Content>
-			</Alert>
+			<div>
+				<Heading size="sm">Delete thumbnails</Heading>
+				<Text size="sm" variant="muted">
+					Remove all generated thumbnails for this library
+				</Text>
+			</div>
+
+			<div className="flex">
+				<Button
+					variant="danger"
+					onClick={() => setShowConfirmation(true)}
+					className="flex-shrink-0"
+					disabled={isPending || !!data}
+					size="md"
+				>
+					Delete thumbnails
+				</Button>
+			</div>
 
 			<ConfirmationModal
 				title="Delete library thumbnails"
-				description="Are you sure you want to delete all thumbnails for this library? You will have to manually regenerate them."
+				description="Are you sure you want to delete all thumbnails for this library?"
 				confirmText="Delete thumbnails"
 				confirmVariant="danger"
 				isOpen={showConfirmation && !data}
 				onClose={() => setShowConfirmation(false)}
 				onConfirm={handleDeleteThumbnails}
 				confirmIsLoading={isPending}
-			/>
+				size="md"
+			>
+				<Alert variant="warning">
+					<AlertTriangle />
+					<AlertTitle>This cannot be undone</AlertTitle>
+					<AlertDescription>
+						Deleting the library thumbnails will remove all generated images and you will have to
+						manually regenerate them
+					</AlertDescription>
+				</Alert>
+			</ConfirmationModal>
 		</>
 	)
 }

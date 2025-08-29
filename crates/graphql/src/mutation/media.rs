@@ -3,7 +3,7 @@ use chrono::Utc;
 use models::{
 	entity::{
 		favorite_media, finished_reading_session, library, library_config, media,
-		media_metadata, reading_session, series, user::AuthUser,
+		reading_session, series, user::AuthUser,
 	},
 	shared::enums::UserPermission,
 };

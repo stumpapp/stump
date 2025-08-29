@@ -1,5 +1,6 @@
-import { Alert, Button, ConfirmationModal } from '@stump/components'
+import { Alert, AlertDescription, Button, ConfirmationModal } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
+import { AlertTriangle } from 'lucide-react'
 import { useCallback, useState } from 'react'
 
 type Props = {
@@ -39,8 +40,9 @@ export default function ResetConfigurationConfirmation({ onConfirmReset }: Props
 				}
 				size="md"
 			>
-				<Alert level="warning" icon="warning">
-					<Alert.Content>{t(getKey('disclaimer'))} </Alert.Content>
+				<Alert variant="warning">
+					<AlertTriangle />
+					<AlertDescription>{t(getKey('disclaimer'))} </AlertDescription>
 				</Alert>
 			</ConfirmationModal>
 		</div>

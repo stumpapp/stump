@@ -1,7 +1,16 @@
 import { useGraphQLMutation } from '@stump/client'
-import { Alert, Button, ConfirmationModal, Heading, Text } from '@stump/components'
+import {
+	Alert,
+	AlertDescription,
+	AlertTitle,
+	Button,
+	ConfirmationModal,
+	Heading,
+	Text,
+} from '@stump/components'
 import { graphql } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
+import { Info } from 'lucide-react'
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -71,8 +80,10 @@ export default function CleanLibrary() {
 				</Text>
 			</div>
 
-			<Alert level="info" icon="warning">
-				<Alert.Content>{t(getKey('disclaimer'))}</Alert.Content>
+			<Alert variant="info" id="clean-library-info" dismissible>
+				<Info />
+				<AlertTitle>{t(getKey('disclaimerTitle'))}</AlertTitle>
+				<AlertDescription>{t(getKey('disclaimer'))}</AlertDescription>
 			</Alert>
 
 			<ConfirmationModal

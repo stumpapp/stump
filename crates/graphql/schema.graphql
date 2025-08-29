@@ -1020,7 +1020,6 @@ type MediaMetadata {
 	pageAnalysis: PageAnalysis
 	ageRating: Int
 	day: Int
-	genres: [String!]!
 	identifierAmazon: String
 	identifierCalibre: String
 	identifierGoogle: String
@@ -1040,6 +1039,7 @@ type MediaMetadata {
 	volume: Int
 	year: Int
 	writers: [String!]!
+	genres: [String!]!
 	characters: [String!]!
 	colorists: [String!]!
 	coverArtists: [String!]!
@@ -1197,6 +1197,33 @@ input MediaProgressInput @oneOf {
 	paged: PagedProgressInput
 }
 
+"""
+An enum representing the different types of metadata resets that can occur,
+which manifest differently depending on the context
+"""
+enum MetadataResetImpact {
+	"""
+	A reset which affects one or more series depending on context:
+	- When mutating a library, will reset all series metadata
+	- When mutating a series, will reset all its own metadata
+	"""
+	SERIES
+	"""
+	A reset which affects one or more books depending on context:
+	- When mutating a library, will reset all book metadata in all
+	library's series
+	- When mutating a series, will reset all its own books
+	- When mutating a book, will reset all its own metadata
+	"""
+	BOOKS
+	"""
+	A reset which affects multiple different entities (series, books) depending on context:
+	- When mutating a library, will reset all metadata in all library's series and books
+	- When mutating a series, will reset all its own metadata and books
+	"""
+	EVERYTHING
+}
+
 type Mutation {
 	createApiKey(input: ApikeyInput!): CreatedAPIKey!
 	updateApiKey(id: Int!, input: ApikeyInput!): Apikey!
@@ -1262,6 +1289,7 @@ type Mutation {
 	the library will be scanned immediately after creation.
 	"""
 	createLibrary(input: CreateOrUpdateLibraryInput!): Library!
+	resetLibraryMetadata(id: ID!, impact: MetadataResetImpact!): Library!
 	"""
 	Update an existing library with the provided configuration. If `scan_after_persist` is `true`,
 	the library will be scanned immediately after updating.
@@ -1337,6 +1365,7 @@ type Mutation {
 	"""
 	updateSeriesThumbnail(id: ID!, input: UpdateThumbnailInput!): Series!
 	updateSeriesMetadata(id: ID!, input: SeriesMetadataInput!): Series!
+	resetSeriesMetadata(id: ID!, impact: MetadataResetImpact!): Series!
 	markSeriesAsComplete(id: ID!): Series!
 	scanSeries(id: ID!): Boolean!
 	"""
@@ -1831,7 +1860,7 @@ type Series {
 	path: String!
 	status: FileStatus!
 	libraryId: String
-	metadata: SeriesMetadataModel
+	metadata: SeriesMetadata
 	isFavorite: Boolean!
 	resolvedName: String!
 	resolvedDescription: String
@@ -1863,6 +1892,24 @@ input SeriesFilterInput {
 	_or: [SeriesFilterInput!] = null
 }
 
+type SeriesMetadata {
+	seriesId: String!
+	ageRating: Int
+	booktype: String
+	comicid: Int
+	imprint: String
+	metaType: String
+	publisher: String
+	status: String
+	summary: String
+	title: String
+	volume: Int
+	characters: [String!]!
+	genres: [String!]!
+	links: [String!]!
+	writers: [String!]!
+}
+
 input SeriesMetadataFilterInput {
 	ageRating: NumericFilterI32 = null
 	metaType: FieldFilterString = null
@@ -1880,44 +1927,38 @@ input SeriesMetadataFilterInput {
 }
 
 input SeriesMetadataInput {
-	metaType: String
-	title: String
-	summary: String
-	publisher: String
-	imprint: String
-	comicid: Int
-	volume: Int
-	booktype: String
 	ageRating: Int
-	status: String
-}
-
-type SeriesMetadataModel {
-	seriesId: String!
-	metaType: String
-	title: String
-	summary: String
-	publisher: String
-	imprint: String
-	comicid: Int
-	volume: Int
 	booktype: String
-	ageRating: Int
+	characters: [String!]
+	comicid: Int
+	genres: [String!]
+	imprint: String
+	links: [String!]
+	metaType: String
+	publisher: String
 	status: String
+	summary: String
+	title: String
+	volume: Int
+	writers: [String!]
 }
 
 enum SeriesMetadataModelOrdering {
 	SERIES_ID
-	META_TYPE
-	TITLE
-	SUMMARY
-	PUBLISHER
-	IMPRINT
-	COMICID
-	VOLUME
-	BOOKTYPE
 	AGE_RATING
+	CHARACTERS
+	BOOKTYPE
+	COMICID
+	GENRES
+	IMPRINT
+	LINKS
+	META_TYPE
+	PUBLISHER
 	STATUS
+	SUMMARY
+	TITLE
+	VOLUME
+	WRITERS
 }
 
 input SeriesMetadataOrderByField {

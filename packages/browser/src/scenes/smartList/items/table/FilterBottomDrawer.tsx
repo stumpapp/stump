@@ -1,6 +1,7 @@
 import {
 	Accordion,
 	Alert,
+	AlertDescription,
 	Button,
 	Drawer,
 	IconButton,
@@ -58,10 +59,11 @@ export default function FilterBottomDrawer() {
 								</Accordion.Item>
 							</Accordion>
 
-							<Alert level="warning" icon={Construction} rounded="sm">
-								<Alert.Content>
+							<Alert variant="warning">
+								<Construction />
+								<AlertDescription>
 									<span>This functionality is not yet implemented</span>
-								</Alert.Content>
+								</AlertDescription>
 							</Alert>
 						</div>
 					</div>

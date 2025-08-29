@@ -13,6 +13,7 @@ import { match, P } from 'ts-pattern'
 
 import {
 	BadgeCell,
+	BadgeListCell,
 	isEmptyField,
 	MetadataEditorContext,
 	MetadataEditorHeader,
@@ -29,17 +30,21 @@ import { usePaths } from '@/paths'
 import { getEditorDefaultValues, schema, SeriesMetadataEditorValues } from './schema'
 
 const fragment = graphql(`
-	fragment SeriesMetadataEditor on SeriesMetadataModel {
-		metaType
-		title
-		summary
-		publisher
-		imprint
-		comicid
-		volume
-		booktype
+	fragment SeriesMetadataEditor on SeriesMetadata {
 		ageRating
+		booktype
+		characters
+		comicid
+		genres
+		imprint
+		links
+		metaType
+		publisher
 		status
+		summary
+		title
+		volume
+		writers
 	}
 `)
 
@@ -115,6 +120,38 @@ export default function SeriesMetadataEditor({ seriesId, data }: Props) {
 								}}
 							/>
 						))
+						.with(P.union('genres', 'characters', 'writers'), (field) => {
+							const values = getProperty(metadata, field) ?? []
+							return (
+								<BadgeListCell
+									binding={field}
+									values={values}
+									itemUrl={(index) => {
+										const item = values[index]
+										if (!item) return undefined
+										return paths.bookSearchWithFilter({
+											metadata: { [field]: { likeAnyOf: [item] } },
+										})
+									}}
+								/>
+							)
+						})
+						.with('links', () => {
+							const safeUrls = (getProperty(metadata, 'links') ?? []).map((url) => {
+								try {
+									return new URL(url).hostname
+								} catch {
+									return url
+								}
+							})
+							return (
+								<BadgeListCell
+									binding="links"
+									values={safeUrls}
+									itemUrl={(index) => metadata?.links?.[index]}
+								/>
+							)
+						})
 						.otherwise((field) => (
 							<TextCell
 								binding={field}

@@ -1,6 +1,15 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useGraphQLMutation, useSDK, useSuspenseGraphQL } from '@stump/client'
-import { Alert, Button, ComboBox, Form, Input, Label, NativeSelect } from '@stump/components'
+import {
+	Alert,
+	AlertDescription,
+	Button,
+	ComboBox,
+	Form,
+	Input,
+	Label,
+	NativeSelect,
+} from '@stump/components'
 import { graphql, JobSchedulerConfigQuery } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { Api } from '@stump/sdk'
@@ -245,10 +254,11 @@ export default function JobScheduler() {
 
 	return (
 		<div className="my-2 flex flex-col gap-6">
-			<Alert id="futureSchedulerFeatures" level="info" icon={Construction} closable>
-				<Alert.Content>
+			<Alert id="futureSchedulerFeatures" variant="info" dismissible>
+				<Construction />
+				<AlertDescription>
 					{t('settingsScene.server/jobs.sections.scheduling.disclaimer')}
-				</Alert.Content>
+				</AlertDescription>
 			</Alert>
 
 			<Form form={form} onSubmit={handleSubmit}>

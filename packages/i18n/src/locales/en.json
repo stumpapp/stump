@@ -618,7 +618,7 @@
 			"description": "Settings and management options for thumbnails in this library",
 			"sections": {
 				"management": {
-					"heading": "Management",
+					"heading": "Manage thumbnails",
 					"description": "Manage the existing thumbnails for this library",
 					"thumbnailSelector": {},
 					"deleteThumbnails": {}
@@ -632,7 +632,8 @@
 				"analyzeBooks": {
 					"heading": "Analyze books",
 					"description": "Analyze the books in this library to attach additional metadata in the database, such as page dimensions for image-based books",
-					"disclaimer": "This process is resource-intensive and may take a while to complete. In the future, it will be more configurable",
+					"disclaimerTitle": "This process is resource-intensive",
+					"disclaimer": "It may take a while to complete. In the future, it will be more configurable",
 					"analyzeButton": "Analyze books"
 				},
 				"missingFiles": {
@@ -654,6 +655,7 @@
 				"libraryExclusions": {
 					"heading": "Exclude users",
 					"description": "Prevent certain users from accessing this library or its contents",
+					"noUsersTitle": "No users to exclude",
 					"noUsers": "There are no other registered users to exclude from this library",
 					"updated": "Exclusions updated",
 					"failure": "Failed to update exclusions"
@@ -661,12 +663,13 @@
 			}
 		},
 		"danger-zone/delete": {
-			"title": "Deletion Actions",
+			"title": "Deletion",
 			"description": "Permanently delete this library and all of its contents or certain resources",
 			"sections": {
 				"cleanLibrary": {
 					"heading": "Clean library",
 					"description": "Remove all media and series that cannot be located on disk",
+					"disclaimerTitle": "No files will be deleted",
 					"disclaimer": "While this action will not delete any files, it will permanently delete all records relating to media and series which have a missing status",
 					"confirmation": {
 						"label": "Clean library",
@@ -754,6 +757,9 @@
 			"comicid": "Comic ID",
 			"booktype":"Book type",
 			"status":"Status"
+		},
+		"addFields": {
+			"description": "Add each addition on its own line"
 		}
 	},
 	"seriesOverviewScene": {
@@ -2054,6 +2060,7 @@
 		"add": "Add",
 		"cancel": "Cancel",
 		"confirm": "Confirm",
+		"enter": "Enter",
 		"save": "Save",
 		"send": "Send",
 		"saveChanges": "Save changes",
@@ -2074,7 +2081,8 @@
 		"notReady": "This feature is not ready",
 		"notUsedYet": "Not used yet",
 		"never": "Never",
-		"scan": "Scan"
+		"scan": "Scan",
+		"somethingWentWrong": "Something went wrong"
 	},
 	"userPermissions": {
 		"ACCESS_API_KEYS": {

@@ -1,5 +1,6 @@
-import { Alert, Button, cn, cx, Tabs, Text } from '@stump/components'
+import { Alert, AlertDescription, Button, cn, cx, Tabs, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
+import { AlertTriangle } from 'lucide-react'
 import { useFormContext, useWatch } from 'react-hook-form'
 
 import { SmartListFormSchema } from '../schema'
@@ -24,8 +25,9 @@ export default function SmartListQueryBuilder({ disabled }: Props) {
 	return (
 		<>
 			<div className={cn('flex flex-col space-y-4', { 'cursor-not-allowed opacity-65': disabled })}>
-				<Alert level="info" icon="warning">
-					<Alert.Content>{t(getKey('uiPerformance'))}</Alert.Content>
+				<Alert variant="info" id="smart-list-performance" dismissible>
+					<AlertTriangle />
+					<AlertDescription>{t(getKey('uiPerformance'))}</AlertDescription>
 				</Alert>
 
 				<GroupBy disabled={disabled} />

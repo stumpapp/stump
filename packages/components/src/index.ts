@@ -3,7 +3,7 @@
 export type Any = any
 
 export { Accordion } from './accordion'
-export { Alert } from './alert'
+export { Alert, AlertDescription, AlertTitle } from './alert'
 export { Badge, type BadgeProps } from './badge'
 export { Breadcrumbs, type BreadcrumbsProps } from './breadcrumbs'
 export {

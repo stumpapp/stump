@@ -1,5 +1,5 @@
 import { useGraphQL } from '@stump/client'
-import { Alert, ButtonOrLink, cn, Label, Sheet, Text } from '@stump/components'
+import { Alert, AlertDescription, ButtonOrLink, cn, Label, Sheet, Text } from '@stump/components'
 import { graphql, UserPermission } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import dayjs from 'dayjs'
@@ -131,10 +131,10 @@ export default function ScanRecordInspector({ record, onClose }: Props) {
 					<div className="flex flex-col gap-y-3 px-4 py-2">
 						<Label className="text-foreground-muted">{t(getFieldKey('logs'))}</Label>
 
-						<Alert level="warning" className="p-2">
-							<Alert.Content className="text-sm text-foreground-subtle">
+						<Alert variant="warning" className="p-2">
+							<AlertDescription className="text-sm text-foreground-subtle">
 								{t(getKey('logsPresent'))} ({associatedJob.logs.length})
-							</Alert.Content>
+							</AlertDescription>
 						</Alert>
 
 						<div>

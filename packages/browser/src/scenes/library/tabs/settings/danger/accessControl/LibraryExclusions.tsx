@@ -1,8 +1,17 @@
 import { useGraphQLMutation, useSuspenseGraphQLQueries } from '@stump/client'
-import { Alert, ComboBox, Heading, Text, usePrevious } from '@stump/components'
+import {
+	Alert,
+	AlertDescription,
+	AlertTitle,
+	ComboBox,
+	Heading,
+	Text,
+	usePrevious,
+} from '@stump/components'
 import { graphql } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
+import { Info } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useDebouncedValue } from 'rooks'
 
@@ -132,8 +141,10 @@ export default function LibraryExclusions() {
 			</div>
 
 			{allUsers?.length === 1 && (
-				<Alert icon="info" level="info">
-					<Alert.Content>{t(getKey('noUsers'))}</Alert.Content>
+				<Alert variant="info">
+					<Info />
+					<AlertTitle>{t(getKey('noUsersTitle'))}</AlertTitle>
+					<AlertDescription>{t(getKey('noUsers'))}</AlertDescription>
 				</Alert>
 			)}
 

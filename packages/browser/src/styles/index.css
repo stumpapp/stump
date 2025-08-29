@@ -11,6 +11,11 @@ html {
 	@apply flex h-full flex-col overflow-hidden bg-background;
 }
 
+/* TODO: Upgrade tailwind and follow latest shadcn guides, I'm way dated */
+:root {
+	--spacing: 0.25rem;
+}
+
 form {
 	margin-block-end: 0;
 }

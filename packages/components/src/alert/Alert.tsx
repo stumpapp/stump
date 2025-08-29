@@ -1,225 +1,110 @@
-import { cva, VariantProps } from 'class-variance-authority'
-import { AlertCircle, AlertTriangle, CheckCircle, Info, LucideIcon, X } from 'lucide-react'
-import type { ComponentPropsWithoutRef } from 'react'
-import { forwardRef, useCallback, useState } from 'react'
+import { cva, type VariantProps } from 'class-variance-authority'
+import { X } from 'lucide-react'
+import * as React from 'react'
 
-import { cn, cx } from '../utils'
-import { AlertContext } from './context'
+import { cn } from '../utils'
 
-export const ALERT_ICONS = {
-	error: AlertCircle,
-	grayscale: Info,
-	info: Info,
-	success: CheckCircle,
-	warning: AlertTriangle,
-}
-
-export const ALERT_VARIANTS: Record<keyof typeof ALERT_ICONS, string> = {
-	error: 'bg-fill-danger-secondary text-foreground-subtle',
-	grayscale: 'bg-background-surface text-foreground',
-	info: 'bg-fill-info-secondary text-foreground-subtle',
-	success: 'bg-fill-success-secondary text-foreground-subtle',
-	warning: 'bg-fill-warning-secondary text-foreground-subtle',
-}
-
-const alertVariants = cva('p-4', {
-	defaultVariants: {
-		level: 'info',
-		rounded: 'default',
-	},
-	variants: {
-		level: ALERT_VARIANTS,
-		rounded: {
-			default: 'rounded-md',
-			lg: 'rounded-lg',
-			none: 'rounded-none',
-			sm: 'rounded-sm',
+const alertVariants = cva(
+	'relative w-full rounded-lg border border-edge px-4 py-3 text-sm grid has-[>svg]:grid-cols-[calc(var(--spacing)*4)_1fr] grid-cols-[0_1fr] has-[>svg]:gap-x-3 gap-y-0.5 items-start [&>svg]:size-4 [&>svg]:translate-y-0.5 [&>svg]:text-current',
+	{
+		variants: {
+			variant: {
+				default: 'bg-background-surface text-foreground',
+				info: 'bg-fill-info-secondary text-foreground-subtle border-fill-info/10',
+				success: 'bg-fill-success-secondary text-foreground-subtle border-fill-success/10',
+				warning: 'bg-fill-warning-secondary text-foreground-subtle border-fill-warning/10',
+				destructive:
+					'bg-fill-danger-secondary text-foreground-danger [&>svg]:text-current *:data-[slot=alert-description]:text-destructive/90',
+			},
+		},
+		defaultVariants: {
+			variant: 'default',
 		},
 	},
-})
+)
 
-type ClosableAlertProps = {
-	closable: boolean
+type DismissableProps = {
 	id: string
+	dismissible: true
 }
 
-type NonClosableAlertProps = {
-	closable?: never
-	id?: string
+type NormalProps = {
+	id?: never
+	dismissible?: false
 }
 
-type ClosableAlertVariant = ClosableAlertProps | NonClosableAlertProps
+type Props = (DismissableProps | NormalProps) & VariantProps<typeof alertVariants>
 
-export type AlertProps = {
-	icon?: LucideIcon | keyof typeof ALERT_ICONS
-	alignIcon?: 'center' | 'start'
-} & VariantProps<typeof alertVariants> &
-	ComponentPropsWithoutRef<'div'> &
-	ClosableAlertVariant
+function Alert({
+	className,
+	variant,
+	dismissible,
+	id,
+	children,
+	...props
+}: React.ComponentProps<'div'> & Props) {
+	const [isVisible, setIsVisible] = React.useState(() => {
+		if (!dismissible) return true
+		const storedValue = localStorage.getItem(`stump-alert-dismissed-${id}`)
+		return !storedValue || storedValue === 'true'
+	})
 
-const Alert = forwardRef<HTMLDivElement, AlertProps>(
-	(
-		{ id, className, level, rounded, icon, alignIcon = 'center', children, closable, ...props },
-		ref,
-	) => {
-		// TODO: implement me, inspiration from https://chakra-ui.com/docs/components/alert/usage
-		const [isClosed, setIsClosed] = useState(() => getIsAlertClosed(id))
+	const onDismiss = () => {
+		setIsVisible(false)
+		localStorage.setItem(`stump-alert-dismissed-${id}`, 'true')
+	}
 
-		const renderIcon = () => {
-			let Icon: LucideIcon | null = null
+	if (!isVisible) return null
 
-			if (typeof icon === 'string') {
-				Icon = ALERT_ICONS[icon || level || 'info'] || ALERT_ICONS.info
-			} else if (icon) {
-				Icon = icon
-			}
+	return (
+		<div
+			data-slot="alert"
+			role="alert"
+			className={cn(
+				alertVariants({ variant }),
+				{
+					'group relative transition-opacity duration-200': dismissible,
+				},
+				className,
+			)}
+			{...props}
+		>
+			{children}
 
-			if (!Icon) {
-				return null
-			}
-
-			return (
-				<Icon
-					className={cn(
-						'h-5 w-5',
-						ALERT_VARIANTS[level || 'info'] || ALERT_VARIANTS.info,
-						'bg-transparent dark:bg-transparent',
-					)}
-					aria-hidden="true"
-				/>
-			)
-		}
-
-		const handleCloseClick = useCallback(() => {
-			if (id) {
-				setAlertClosed(id)
-			}
-			setIsClosed(true)
-		}, [id])
-
-		if (isClosed) {
-			return null
-		}
-
-		return (
-			<AlertContext.Provider value={{ level: level || 'info' }}>
-				<div
-					ref={ref}
-					{...props}
-					className={cn(
-						'group relative',
-						alertVariants({ className, level, rounded }),
-						{ 'p-[18px]': closable },
-						className,
-					)}
+			{dismissible && (
+				<button
+					aria-label="Dismiss this alert"
+					className="absolute right-2 top-2 opacity-50 outline-none hover:opacity-100 group-hover:opacity-80"
+					onClick={onDismiss}
 				>
-					<div
-						className={cx(
-							'flex',
-							{ 'items-start md:items-center': alignIcon === 'center' },
-							{ 'items-start': alignIcon === 'start' },
-						)}
-					>
-						<div
-							className={cn('flex-shrink-0', {
-								'mt-1 md:mt-0': alignIcon === 'center',
-							})}
-						>
-							{renderIcon()}
-						</div>
-						{children}
-					</div>
-
-					{closable && (
-						<button
-							type="button"
-							className="absolute right-1 top-1 hidden text-foreground-muted hover:text-foreground group-hover:block"
-							onClick={handleCloseClick}
-						>
-							<X className="h-4 w-4" aria-hidden="true" />
-						</button>
-					)}
-				</div>
-			</AlertContext.Provider>
-		)
-	},
-)
-Alert.displayName = 'Alert'
-
-const AlertContent = forwardRef<HTMLDivElement, ComponentPropsWithoutRef<'div'>>(
-	({ className, ...props }, ref) => {
-		return (
-			<div
-				ref={ref}
-				{...props}
-				className={cn('ml-3 flex-1 md:flex md:items-center md:justify-between', className)}
-			/>
-		)
-	},
-)
-AlertContent.displayName = 'AlertContent'
-
-const AlertTitle = forwardRef<HTMLHeadingElement, ComponentPropsWithoutRef<'h2'>>(
-	({ className, ...props }, ref) => {
-		return (
-			<AlertContext.Consumer>
-				{({ level }) => (
-					<h2
-						ref={ref}
-						{...props}
-						className={cn(
-							'text-base font-medium',
-							ALERT_VARIANTS[level || 'info'] || ALERT_VARIANTS.info,
-							className,
-						)}
-					/>
-				)}
-			</AlertContext.Consumer>
-		)
-	},
-)
-AlertTitle.displayName = 'AlertTitle'
-
-type AlertSubComponents = {
-	Title: typeof AlertTitle
-	Content: typeof AlertContent
-}
-const TypedAlert = Alert as typeof Alert & AlertSubComponents
-TypedAlert.Title = AlertTitle
-TypedAlert.Content = AlertContent
-
-export { TypedAlert as Alert }
-
-const getClosedAlerts = () => {
-	try {
-		const closedAlerts = JSON.parse(localStorage.getItem('closedStumpAlerts') || '[]')
-		if (!Array.isArray(closedAlerts)) {
-			return []
-		}
-		return closedAlerts
-	} catch (error) {
-		console.error(`Failed to parse closed alerts from localStorage:`, error)
-		return []
-	}
+					<X className="size-4" />
+				</button>
+			)}
+		</div>
+	)
 }
 
-const getIsAlertClosed = (id: string | undefined) => {
-	if (!id) {
-		return false
-	}
-	const closedAlerts = getClosedAlerts()
-
-	return closedAlerts.includes(id)
+function AlertTitle({ className, ...props }: React.ComponentProps<'div'>) {
+	return (
+		<div
+			data-slot="alert-title"
+			className={cn('col-start-2 line-clamp-1 min-h-4 font-medium tracking-tight', className)}
+			{...props}
+		/>
+	)
 }
 
-const setAlertClosed = (id: string) => {
-	try {
-		const closedAlerts = getClosedAlerts()
-		if (!closedAlerts.includes(id)) {
-			closedAlerts.push(id)
-			localStorage.setItem('closedStumpAlerts', JSON.stringify(closedAlerts))
-		}
-	} catch (error) {
-		console.error(`Failed to set alert as closed:`, error)
-	}
+function AlertDescription({ className, ...props }: React.ComponentProps<'div'>) {
+	return (
+		<div
+			data-slot="alert-description"
+			className={cn(
+				'text-muted-foreground col-start-2 grid justify-items-start gap-1 text-sm [&_p]:leading-relaxed',
+				className,
+			)}
+			{...props}
+		/>
+	)
 }
+
+export { Alert, AlertDescription, AlertTitle }

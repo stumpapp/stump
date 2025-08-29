@@ -14,7 +14,6 @@ export default function AddFieldsDialog<Field extends string>({ binding, onSave 
 
 	const { t } = useLocaleContext()
 	const label = lowerFirst(t(getLabelKey(binding)))
-	const singular = label.endsWith('s') ? label.slice(0, -1) : label
 
 	const [value, setValue] = useState('')
 
@@ -42,16 +41,16 @@ export default function AddFieldsDialog<Field extends string>({ binding, onSave 
 			</Dialog.Trigger>
 			<Dialog.Content>
 				<Dialog.Header>
-					<Dialog.Title>Add {label}</Dialog.Title>
-					<Dialog.Description>
-						Add each {singular} you want to include on its own line
-					</Dialog.Description>
+					<Dialog.Title>
+						{t('common.add')} {label}
+					</Dialog.Title>
+					<Dialog.Description>{t('metadataEditor.addFields.description')}</Dialog.Description>
 					<Dialog.Close />
 				</Dialog.Header>
 
 				<div className="flex flex-col gap-y-4">
 					<TextArea
-						placeholder={`Enter ${label}...`}
+						placeholder={`${t('common.enter')} ${label}...`}
 						rows={4}
 						value={value}
 						onChange={(e) => setValue(e.target.value)}
@@ -65,7 +64,7 @@ export default function AddFieldsDialog<Field extends string>({ binding, onSave 
 				</div>
 
 				<Dialog.Footer>
-					<Button onClick={() => setIsOpen(false)}>Cancel</Button>
+					<Button onClick={() => setIsOpen(false)}>{t('common.cancel')}</Button>
 					<Button
 						variant="primary"
 						disabled={parsedValues.length === 0}
@@ -74,7 +73,7 @@ export default function AddFieldsDialog<Field extends string>({ binding, onSave 
 							setIsOpen(false)
 						}}
 					>
-						Add
+						{t('common.add')}
 					</Button>
 				</Dialog.Footer>
 			</Dialog.Content>

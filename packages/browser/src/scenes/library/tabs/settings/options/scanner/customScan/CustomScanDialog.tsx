@@ -1,8 +1,8 @@
 import { Button, Dialog } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import { ScanOptions } from '@stump/sdk'
 import { useCallback, useState } from 'react'
 
+import { ScanOptions } from '../history/ScanHistoryTable'
 import ScanConfigForm, { FORM_ID } from './ScanConfigForm'
 
 type Props = {

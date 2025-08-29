@@ -75,6 +75,15 @@ const mutation = graphql(`
 	}
 `)
 
+// TODO(graphql): Add this
+// const resetMetadataMutation = graphql(`
+// 	mutation MediaMetadataEditorResetMetadata($id: ID!) {
+// 		resetMediaMetadata(id: $id) {
+// 			id
+// 		}
+// 	}
+// `)
+
 type Props = {
 	mediaId: string
 	data?: FragmentType<typeof fragment> | null

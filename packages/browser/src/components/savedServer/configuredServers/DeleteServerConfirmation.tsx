@@ -1,5 +1,6 @@
-import { Alert, ConfirmationModal } from '@stump/components'
+import { Alert, AlertDescription, ConfirmationModal } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
+import { AlertTriangle } from 'lucide-react'
 import { useCallback } from 'react'
 
 type Props = {
@@ -30,8 +31,9 @@ export default function DeleteServerConfirmation({
 		)
 
 		return (
-			<Alert level={isLastServer ? 'error' : 'warning'} icon={isLastServer ? 'warning' : 'info'}>
-				<Alert.Content>{message}</Alert.Content>
+			<Alert variant={isLastServer ? 'destructive' : 'warning'}>
+				<AlertTriangle />
+				<AlertDescription>{message}</AlertDescription>
 			</Alert>
 		)
 	}, [isActiveServer, isLastServer, t])

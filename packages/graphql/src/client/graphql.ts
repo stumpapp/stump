@@ -1261,6 +1261,33 @@ export type MediaProgressInput =
   { epub: EpubProgressInput; paged?: never; }
   |  { epub?: never; paged: PagedProgressInput; };
 
+/**
+ * An enum representing the different types of metadata resets that can occur,
+ * which manifest differently depending on the context
+ */
+export enum MetadataResetImpact {
+  /**
+   * A reset which affects one or more books depending on context:
+   * - When mutating a library, will reset all book metadata in all
+   * library's series
+   * - When mutating a series, will reset all its own books
+   * - When mutating a book, will reset all its own metadata
+   */
+  Books = 'BOOKS',
+  /**
+   * A reset which affects multiple different entities (series, books) depending on context:
+   * - When mutating a library, will reset all metadata in all library's series and books
+   * - When mutating a series, will reset all its own metadata and books
+   */
+  Everything = 'EVERYTHING',
+  /**
+   * A reset which affects one or more series depending on context:
+   * - When mutating a library, will reset all series metadata
+   * - When mutating a series, will reset all its own metadata
+   */
+  Series = 'SERIES'
+}
+
 export type Mutation = {
   __typename?: 'Mutation';
   addBooksToBookClubSchedule: BookClub;
@@ -1370,6 +1397,8 @@ export type Mutation = {
   patchEmailDevice: Scalars['Int']['output'];
   /** Removes a member from the book club */
   removeBookClubMember: BookClubMember;
+  resetLibraryMetadata: Library;
+  resetSeriesMetadata: Series;
   respondToBookClubInvitation: BookClubInvitation;
   /**
    * Enqueue a scan job for a library. This will index the filesystem from the library's root path
@@ -1721,6 +1750,18 @@ export type MutationPatchEmailDeviceArgs = {
 export type MutationRemoveBookClubMemberArgs = {
   bookClubId: Scalars['ID']['input'];
   memberId: Scalars['ID']['input'];
+};
+
+
+export type MutationResetLibraryMetadataArgs = {
+  id: Scalars['ID']['input'];
+  impact: MetadataResetImpact;
+};
+
+
+export type MutationResetSeriesMetadataArgs = {
+  id: Scalars['ID']['input'];
+  impact: MetadataResetImpact;
 };
 
 
@@ -2556,7 +2597,7 @@ export type Series = {
   media: Array<Media>;
   mediaAlphabet: Scalars['JSONObject']['output'];
   mediaCount: Scalars['Int']['output'];
-  metadata?: Maybe<SeriesMetadataModel>;
+  metadata?: Maybe<SeriesMetadata>;
   name: Scalars['String']['output'];
   path: Scalars['String']['output'];
   percentageCompleted: Scalars['Float']['output'];
@@ -2592,6 +2633,25 @@ export type SeriesFilterInput = {
   path?: InputMaybe<FieldFilterString>;
 };
 
+export type SeriesMetadata = {
+  __typename?: 'SeriesMetadata';
+  ageRating?: Maybe<Scalars['Int']['output']>;
+  booktype?: Maybe<Scalars['String']['output']>;
+  characters: Array<Scalars['String']['output']>;
+  comicid?: Maybe<Scalars['Int']['output']>;
+  genres: Array<Scalars['String']['output']>;
+  imprint?: Maybe<Scalars['String']['output']>;
+  links: Array<Scalars['String']['output']>;
+  metaType?: Maybe<Scalars['String']['output']>;
+  publisher?: Maybe<Scalars['String']['output']>;
+  seriesId: Scalars['String']['output'];
+  status?: Maybe<Scalars['String']['output']>;
+  summary?: Maybe<Scalars['String']['output']>;
+  title?: Maybe<Scalars['String']['output']>;
+  volume?: Maybe<Scalars['Int']['output']>;
+  writers: Array<Scalars['String']['output']>;
+};
+
 export type SeriesMetadataFilterInput = {
   _and?: InputMaybe<Array<SeriesMetadataFilterInput>>;
   _not?: InputMaybe<Array<SeriesMetadataFilterInput>>;
@@ -2611,43 +2671,36 @@ export type SeriesMetadataFilterInput = {
 export type SeriesMetadataInput = {
   ageRating?: InputMaybe<Scalars['Int']['input']>;
   booktype?: InputMaybe<Scalars['String']['input']>;
+  characters?: InputMaybe<Array<Scalars['String']['input']>>;
   comicid?: InputMaybe<Scalars['Int']['input']>;
+  genres?: InputMaybe<Array<Scalars['String']['input']>>;
   imprint?: InputMaybe<Scalars['String']['input']>;
+  links?: InputMaybe<Array<Scalars['String']['input']>>;
   metaType?: InputMaybe<Scalars['String']['input']>;
   publisher?: InputMaybe<Scalars['String']['input']>;
   status?: InputMaybe<Scalars['String']['input']>;
   summary?: InputMaybe<Scalars['String']['input']>;
   title?: InputMaybe<Scalars['String']['input']>;
   volume?: InputMaybe<Scalars['Int']['input']>;
-};
-
-export type SeriesMetadataModel = {
-  __typename?: 'SeriesMetadataModel';
-  ageRating?: Maybe<Scalars['Int']['output']>;
-  booktype?: Maybe<Scalars['String']['output']>;
-  comicid?: Maybe<Scalars['Int']['output']>;
-  imprint?: Maybe<Scalars['String']['output']>;
-  metaType?: Maybe<Scalars['String']['output']>;
-  publisher?: Maybe<Scalars['String']['output']>;
-  seriesId: Scalars['String']['output'];
-  status?: Maybe<Scalars['String']['output']>;
-  summary?: Maybe<Scalars['String']['output']>;
-  title?: Maybe<Scalars['String']['output']>;
-  volume?: Maybe<Scalars['Int']['output']>;
+  writers?: InputMaybe<Array<Scalars['String']['input']>>;
 };
 
 export enum SeriesMetadataModelOrdering {
   AgeRating = 'AGE_RATING',
   Booktype = 'BOOKTYPE',
+  Characters = 'CHARACTERS',
   Comicid = 'COMICID',
+  Genres = 'GENRES',
   Imprint = 'IMPRINT',
+  Links = 'LINKS',
   MetaType = 'META_TYPE',
   Publisher = 'PUBLISHER',
   SeriesId = 'SERIES_ID',
   Status = 'STATUS',
   Summary = 'SUMMARY',
   Title = 'TITLE',
-  Volume = 'VOLUME'
+  Volume = 'VOLUME',
+  Writers = 'WRITERS'
 }
 
 export type SeriesMetadataOrderByField = {
@@ -3572,7 +3625,7 @@ export type SeriesBooksAlphabetQueryVariables = Exact<{
 
 export type SeriesBooksAlphabetQuery = { __typename?: 'Query', seriesById?: { __typename?: 'Series', mediaAlphabet: any } | null };
 
-export type SeriesMetadataEditorFragment = { __typename?: 'SeriesMetadataModel', metaType?: string | null, title?: string | null, summary?: string | null, publisher?: string | null, imprint?: string | null, comicid?: number | null, volume?: number | null, booktype?: string | null, ageRating?: number | null, status?: string | null } & { ' $fragmentName'?: 'SeriesMetadataEditorFragment' };
+export type SeriesMetadataEditorFragment = { __typename?: 'SeriesMetadata', ageRating?: number | null, booktype?: string | null, characters: Array<string>, comicid?: number | null, genres: Array<string>, imprint?: string | null, links: Array<string>, metaType?: string | null, publisher?: string | null, status?: string | null, summary?: string | null, title?: string | null, volume?: number | null, writers: Array<string> } & { ' $fragmentName'?: 'SeriesMetadataEditorFragment' };
 
 export type UpdateSeriesMetadataMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -3581,7 +3634,7 @@ export type UpdateSeriesMetadataMutationVariables = Exact<{
 
 
 export type UpdateSeriesMetadataMutation = { __typename?: 'Mutation', updateSeriesMetadata: { __typename?: 'Series', metadata?: (
-      { __typename?: 'SeriesMetadataModel' }
+      { __typename?: 'SeriesMetadata' }
       & { ' $fragmentRefs'?: { 'SeriesMetadataEditorFragment': SeriesMetadataEditorFragment } }
     ) | null } };
 
@@ -4014,7 +4067,7 @@ export type SeriesSettingsSceneQueryVariables = Exact<{
 
 export type SeriesSettingsSceneQuery = { __typename?: 'Query', seriesById?: (
     { __typename?: 'Series', id: string, metadata?: (
-      { __typename?: 'SeriesMetadataModel' }
+      { __typename?: 'SeriesMetadata' }
       & { ' $fragmentRefs'?: { 'SeriesMetadataEditorFragment': SeriesMetadataEditorFragment } }
     ) | null }
     & { ' $fragmentRefs'?: { 'SeriesThumbnailSelectorFragment': SeriesThumbnailSelectorFragment } }
@@ -4026,6 +4079,14 @@ export type SeriesSettingsSceneAnalyzeMutationVariables = Exact<{
 
 
 export type SeriesSettingsSceneAnalyzeMutation = { __typename?: 'Mutation', analyzeSeries: boolean };
+
+export type SeriesSettingsSceneResetMetadataMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  impact: MetadataResetImpact;
+}>;
+
+
+export type SeriesSettingsSceneResetMetadataMutation = { __typename?: 'Mutation', resetSeriesMetadata: { __typename?: 'Series', id: string } };
 
 export type SeriesThumbnailSelectorFragment = { __typename?: 'Series', id: string, thumbnail: { __typename?: 'ImageRef', url: string } } & { ' $fragmentName'?: 'SeriesThumbnailSelectorFragment' };
 
@@ -4579,17 +4640,21 @@ export const MediaMetadataEditorFragmentDoc = new TypedDocumentString(`
 }
     `, {"fragmentName":"MediaMetadataEditor"}) as unknown as TypedDocumentString<MediaMetadataEditorFragment, unknown>;
 export const SeriesMetadataEditorFragmentDoc = new TypedDocumentString(`
-    fragment SeriesMetadataEditor on SeriesMetadataModel {
-  metaType
-  title
-  summary
-  publisher
-  imprint
-  comicid
-  volume
-  booktype
+    fragment SeriesMetadataEditor on SeriesMetadata {
   ageRating
+  booktype
+  characters
+  comicid
+  genres
+  imprint
+  links
+  metaType
+  publisher
   status
+  summary
+  title
+  volume
+  writers
 }
     `, {"fragmentName":"SeriesMetadataEditor"}) as unknown as TypedDocumentString<SeriesMetadataEditorFragment, unknown>;
 export const BookFileInformationFragmentDoc = new TypedDocumentString(`
@@ -5592,17 +5657,21 @@ export const UpdateSeriesMetadataDocument = new TypedDocumentString(`
     }
   }
 }
-    fragment SeriesMetadataEditor on SeriesMetadataModel {
-  metaType
-  title
-  summary
-  publisher
-  imprint
-  comicid
-  volume
-  booktype
+    fragment SeriesMetadataEditor on SeriesMetadata {
   ageRating
+  booktype
+  characters
+  comicid
+  genres
+  imprint
+  links
+  metaType
+  publisher
   status
+  summary
+  title
+  volume
+  writers
 }`) as unknown as TypedDocumentString<UpdateSeriesMetadataMutation, UpdateSeriesMetadataMutationVariables>;
 export const UseCoreEventDocument = new TypedDocumentString(`
     subscription UseCoreEvent {
@@ -6557,17 +6626,21 @@ export const SeriesSettingsSceneDocument = new TypedDocumentString(`
     }
   }
 }
-    fragment SeriesMetadataEditor on SeriesMetadataModel {
-  metaType
-  title
-  summary
-  publisher
-  imprint
-  comicid
-  volume
-  booktype
+    fragment SeriesMetadataEditor on SeriesMetadata {
   ageRating
+  booktype
+  characters
+  comicid
+  genres
+  imprint
+  links
+  metaType
+  publisher
   status
+  summary
+  title
+  volume
+  writers
 }
 fragment SeriesThumbnailSelector on Series {
   id
@@ -6580,6 +6653,13 @@ export const SeriesSettingsSceneAnalyzeDocument = new TypedDocumentString(`
   analyzeSeries(id: $id)
 }
     `) as unknown as TypedDocumentString<SeriesSettingsSceneAnalyzeMutation, SeriesSettingsSceneAnalyzeMutationVariables>;
+export const SeriesSettingsSceneResetMetadataDocument = new TypedDocumentString(`
+    mutation SeriesSettingsSceneResetMetadata($id: ID!, $impact: MetadataResetImpact!) {
+  resetSeriesMetadata(id: $id, impact: $impact) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<SeriesSettingsSceneResetMetadataMutation, SeriesSettingsSceneResetMetadataMutationVariables>;
 export const SeriesThumbnailSelectorUpdateDocument = new TypedDocumentString(`
     mutation SeriesThumbnailSelectorUpdate($id: ID!, $input: UpdateThumbnailInput!) {
   updateSeriesThumbnail(id: $id, input: $input) {

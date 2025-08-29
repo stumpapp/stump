@@ -1,4 +1,4 @@
-import { Alert, CheckBox, Heading, Text } from '@stump/components'
+import { Alert, AlertDescription, CheckBox, Heading, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { useCallback, useMemo } from 'react'
 import { useFormContext } from 'react-hook-form'
@@ -92,8 +92,8 @@ export default function ScannerOptInFeatures({ onDidChange }: Props) {
 			</div>
 
 			{isCreating && (
-				<Alert level="info">
-					<Alert.Content>{t(getKey('section.disclaimer'))}</Alert.Content>
+				<Alert variant="info">
+					<AlertDescription>{t(getKey('section.disclaimer'))}</AlertDescription>
 				</Alert>
 			)}
 

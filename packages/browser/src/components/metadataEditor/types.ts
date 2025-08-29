@@ -70,13 +70,17 @@ export type SeriesMetadataEditorRow = MetadataEditorRow<SeriesMetadataField>
 
 export const SeriesMetadataKeys: SeriesMetadataField[] = [
 	'ageRating',
+	'booktype',
+	'characters',
+	'comicid',
+	'genres',
+	'imprint',
+	'links',
+	'metaType',
 	'publisher',
+	'status',
 	'summary',
 	'title',
 	'volume',
-	'metaType',
-	'imprint',
-	'comicid',
-	'booktype',
-	'status',
+	'writers',
 ]

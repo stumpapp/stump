@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useGraphQLMutation, useSDK } from '@stump/client'
-import { Alert, Button, Form, Heading, Text } from '@stump/components'
+import { Alert, AlertDescription, Button, Form, Heading, Text } from '@stump/components'
 import { CreateUserInput, extractErrorMessage, graphql, UpdateUserInput } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
@@ -139,13 +139,13 @@ export default function CreateOrUpdateUserForm({ user, existingUsernames }: Prop
 		return (
 			<>
 				{createError && (
-					<Alert level="error">
-						<Alert.Content>{extractErrorMessage(createError)}</Alert.Content>
+					<Alert variant="destructive">
+						<AlertDescription>{extractErrorMessage(createError)}</AlertDescription>
 					</Alert>
 				)}
 				{updateError && (
-					<Alert level="error">
-						<Alert.Content>{extractErrorMessage(updateError)}</Alert.Content>
+					<Alert variant="destructive">
+						<AlertDescription>{extractErrorMessage(updateError)}</AlertDescription>
 					</Alert>
 				)}
 			</>

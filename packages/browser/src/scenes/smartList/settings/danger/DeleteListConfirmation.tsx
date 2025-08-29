@@ -1,9 +1,10 @@
 import { useGraphQLMutation, useSDK } from '@stump/client'
-import { Alert, ConfirmationModal } from '@stump/components'
+import { Alert, AlertDescription, AlertTitle, ConfirmationModal } from '@stump/components'
 import { graphql } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { handleApiError } from '@stump/sdk'
 import { useQueryClient } from '@tanstack/react-query'
+import { AlertCircle } from 'lucide-react'
 import { useCallback, useState } from 'react'
 import { useNavigate } from 'react-router'
 
@@ -66,8 +67,10 @@ export default function DeleteListConfirmation({ isOpen, id, onClose, trigger }:
 			trigger={trigger}
 		>
 			{errorMessage && (
-				<Alert level="error" icon="error">
-					<Alert.Content>{errorMessage}</Alert.Content>
+				<Alert variant="destructive">
+					<AlertCircle />
+					<AlertTitle>{t('common.somethingWentWrong')}</AlertTitle>
+					<AlertDescription>{errorMessage}</AlertDescription>
 				</Alert>
 			)}
 		</ConfirmationModal>

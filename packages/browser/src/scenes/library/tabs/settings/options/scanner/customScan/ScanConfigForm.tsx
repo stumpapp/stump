@@ -1,12 +1,13 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Alert, cn, Form, RadioGroup, WideSwitch } from '@stump/components'
+import { Alert, AlertDescription, cn, Form, RadioGroup, WideSwitch } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import { ScanOptions } from '@stump/sdk'
+import { AlertTriangle } from 'lucide-react'
 import { useCallback } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
 
 import { useLibraryManagement } from '../../../context'
+import { ScanOptions } from '../history/ScanHistoryTable'
 
 export const FORM_ID = 'scan-config-form'
 
@@ -44,16 +45,17 @@ export default function ScanConfigForm({ onScan }: Props) {
 	const regenHashes = !!config && 'regen_hashes' in config ? config?.regen_hashes : false
 
 	const showOverrideAlert =
-		(regenMeta && !libraryConfig.process_metadata) ||
-		(regenHashes && !libraryConfig.generate_file_hashes)
+		(regenMeta && !libraryConfig.processMetadata) ||
+		(regenHashes && !libraryConfig.generateFileHashes)
 
 	return (
 		<Form form={form} onSubmit={handleSubmit} id={FORM_ID}>
 			{showOverrideAlert && (
-				<Alert level="warning" className="rounded-xl p-3" icon="warning">
-					<Alert.Content className="text-sm text-foreground-subtle">
+				<Alert variant="warning" className="rounded-xl p-3">
+					<AlertTriangle />
+					<AlertDescription className="text-sm text-foreground-subtle">
 						{t(getKey('alert'))}
-					</Alert.Content>
+					</AlertDescription>
 				</Alert>
 			)}
 
@@ -82,10 +84,10 @@ export default function ScanConfigForm({ onScan }: Props) {
 			</RadioGroup>
 
 			{variant === 'force-rebuild' && (
-				<Alert level="info" className="rounded-xl p-3">
-					<Alert.Content className="text-sm text-foreground-subtle">
+				<Alert variant="info" className="rounded-xl p-3">
+					<AlertDescription className="text-sm text-foreground-subtle">
 						{t(getOptionKey('forceRebuild', 'alert'))}
-					</Alert.Content>
+					</AlertDescription>
 				</Alert>
 			)}
 
@@ -112,6 +114,7 @@ export default function ScanConfigForm({ onScan }: Props) {
 	)
 }
 
+// TODO(graphql): Fix
 const createSchema = (t: (key: string) => string) =>
 	z
 		.object({

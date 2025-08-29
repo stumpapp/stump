@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { queryClient, useLoginOrRegister, useSDK } from '@stump/client'
-import { Alert, Button, cx, Form, Heading, Input } from '@stump/components'
+import { Alert, AlertDescription, Button, cx, Form, Heading, Input } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { isAxiosError } from '@stump/sdk'
 import { motion, Variants } from 'framer-motion'
@@ -121,8 +121,9 @@ export default function LoginOrClaimScene() {
 		if (isAxiosError(loginError) && loginError.response?.status === 403) {
 			const message = loginError.response?.data as string
 			return (
-				<Alert level="error" icon={ShieldAlert} className="sm:max-w-md md:max-w-lg">
-					<Alert.Content>{message || 'An unknown error occurred'}</Alert.Content>
+				<Alert variant="destructive" className="sm:max-w-md md:max-w-lg">
+					<ShieldAlert />
+					<AlertDescription>{message || 'An unknown error occurred'}</AlertDescription>
 				</Alert>
 			)
 		}

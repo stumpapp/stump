@@ -1,6 +1,6 @@
-import { Alert, Label, NativeSelect, Text } from '@stump/components'
+import { Alert, AlertDescription, Label, NativeSelect, Text } from '@stump/components'
+import { EntityVisibility } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
-import { EntityVisibility } from '@stump/sdk'
 import { useFormContext } from 'react-hook-form'
 
 import { SmartListFormSchema } from '../schema'
@@ -11,6 +11,7 @@ type Props = {
 	isCreating?: boolean
 }
 
+// TODO(graphql): Fix
 export default function AccessSettings({ isCreating }: Props) {
 	const form = useFormContext<SubSchema>()
 	const visibility = form.watch('visibility')
@@ -35,8 +36,8 @@ export default function AccessSettings({ isCreating }: Props) {
 			</div>
 
 			{isCreating && visibility === 'SHARED' && (
-				<Alert level="info" className="-mt-4 max-w-lg">
-					<Alert.Content>{t(getOptionKey(visibility, 'createDisclaimer'))}</Alert.Content>
+				<Alert variant="info" className="-mt-4 max-w-lg">
+					<AlertDescription>{t(getOptionKey(visibility, 'createDisclaimer'))}</AlertDescription>
 				</Alert>
 			)}
 		</>

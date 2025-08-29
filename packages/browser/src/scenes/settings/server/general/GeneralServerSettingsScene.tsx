@@ -1,6 +1,7 @@
 import { useCheckForServerUpdate } from '@stump/client'
-import { Alert } from '@stump/components'
+import { Alert, AlertDescription } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
+import { AlertTriangle } from 'lucide-react'
 import { Helmet } from 'react-helmet'
 
 import { ContentContainer } from '@/components/container'
@@ -23,10 +24,11 @@ export default function GeneralServerSettingsScene() {
 			<ContentContainer>
 				<div className="flex flex-col gap-12">
 					{updateAvailable && (
-						<Alert level="warning" rounded="sm" icon="warning">
-							<Alert.Content>
+						<Alert variant="warning">
+							<AlertTriangle />
+							<AlertDescription>
 								{t('settingsScene.server/general.sections.updateAvailable.message')}
-							</Alert.Content>
+							</AlertDescription>
 						</Alert>
 					)}
 

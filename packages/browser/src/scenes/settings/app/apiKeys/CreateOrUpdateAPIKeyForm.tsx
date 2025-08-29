@@ -1,5 +1,13 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Alert, ComboBox, DatePicker, Form, Input, RadioGroup } from '@stump/components'
+import {
+	Alert,
+	AlertDescription,
+	ComboBox,
+	DatePicker,
+	Form,
+	Input,
+	RadioGroup,
+} from '@stump/components'
 import { Apikey } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { allPermissions, isUserPermission } from '@stump/sdk'
@@ -117,8 +125,8 @@ export default function CreateOrUpdateAPIKeyForm({
 				>
 					{inherit && (
 						<div className="pl-4">
-							<Alert level="warning">
-								<Alert.Content>{t(getKey('inheritDisclaimer'))}</Alert.Content>
+							<Alert variant="warning">
+								<AlertDescription>{t(getKey('inheritDisclaimer'))}</AlertDescription>
 							</Alert>
 						</div>
 					)}

@@ -6,8 +6,8 @@ use async_graphql::{
 
 use models::{
 	entity::{
-		finished_reading_session, library, media, reading_session, series,
-		series_metadata, series_tag, tag,
+		finished_reading_session, library, media, reading_session, series, series_tag,
+		tag,
 	},
 	shared::{
 		alphabet::{AvailableAlphabet, EntityLetter},
@@ -26,6 +26,7 @@ use crate::{
 		series_count::SeriesCountLoader,
 		series_finished_count::{FinishedCountLoaderKey, SeriesFinishedCountLoader},
 	},
+	object::series_metadata::SeriesMetadata,
 };
 
 use super::{library::Library, media::Media, tag::Tag};
@@ -35,14 +36,14 @@ use super::{library::Library, media::Media, tag::Tag};
 pub struct Series {
 	#[graphql(flatten)]
 	pub model: series::Model,
-	pub metadata: Option<series_metadata::Model>,
+	pub metadata: Option<SeriesMetadata>,
 }
 
 impl From<series::ModelWithMetadata> for Series {
 	fn from(entity: series::ModelWithMetadata) -> Self {
 		Self {
 			model: entity.series,
-			metadata: entity.metadata,
+			metadata: entity.metadata.map(SeriesMetadata::from),
 		}
 	}
 }
@@ -66,14 +67,14 @@ impl Series {
 	async fn resolved_name(&self) -> String {
 		self.metadata
 			.as_ref()
-			.and_then(|m| m.title.clone())
+			.and_then(|m| m.model.title.clone())
 			.unwrap_or_else(|| self.model.name.clone())
 	}
 
 	async fn resolved_description(&self) -> Option<String> {
 		self.metadata
 			.as_ref()
-			.and_then(|m| m.summary.clone())
+			.and_then(|m| m.model.summary.clone())
 			.or_else(|| self.model.description.clone())
 	}
 

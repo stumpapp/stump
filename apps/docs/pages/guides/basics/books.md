@@ -70,3 +70,7 @@ There are a few special metadata fields that Stump will use for additional funct
 #### Age rating
 
 The age rating field can be used in-conjunction with [access controls](/guides/access-control) to restrict access to books based on their age rating. There are a **LOT** of different age rating systems, and Stump does not currently support all of them, so be sure to review the [age restriction](/guides/access-control#age-restrictions) section for more information.
+
+## Sorting
+
+Stump does not support natural sorting at this time. It is [being investigated](https://github.com/stumpapp/stump/issues/733) for a future release, though. This means that you should ensure to pad your numbers with leading zeros (e.g., `001`, `010`, etc) when naming your files. The general rule of thumb is to pad the numbers enough so that they are all the same length (e.g., `001`, `002`, `010`, `100`, etc) within an entire series. So if a series goes into the 1000s, you should pad the numbers to at least four digits (e.g., `0001`, `0010`, `0100`, `1000`, etc).

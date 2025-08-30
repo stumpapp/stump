@@ -101,10 +101,7 @@ export default function SeriesSettingsScene() {
 							<Text variant="muted">Extra information about your series</Text>
 						</div>
 						{checkPermission(UserPermission.EditMetadata) && (
-							<ResetMetadata
-								onConfirmReset={handleResetMetadata}
-								isDisabled={!seriesById.metadata}
-							/>
+							<ResetMetadata onConfirmReset={handleResetMetadata} />
 						)}
 					</div>
 					<SeriesMetadataEditor seriesId={seriesById.id} data={seriesById.metadata} />

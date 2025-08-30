@@ -22,9 +22,9 @@ export default function FontFamily() {
 		(font?: string) => {
 			if (!font) {
 				setBookPreferences({ fontFamily: undefined })
-			} else if (isSupportedFont(font)) {
+			} else if (isSupportedFont(font) || isSupportedFont(font.toUpperCase())) {
 				// Note: useApplyTheme will apply the font to the body element after the preferences are updated
-				setBookPreferences({ fontFamily: font })
+				setBookPreferences({ fontFamily: font.toUpperCase() })
 			}
 		},
 		[setBookPreferences],

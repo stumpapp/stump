@@ -1,4 +1,5 @@
 import { ComboBox, Label, Text } from '@stump/components'
+import { SupportedFont } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { isSupportedFont } from '@stump/sdk'
 import { useCallback } from 'react'
@@ -24,6 +25,10 @@ export default function FontSelect() {
 	 */
 	const changeFont = useCallback(
 		async (font?: string) => {
+			if (font && isSupportedFont(font.toUpperCase())) {
+				font = font.toUpperCase() as SupportedFont
+			}
+
 			if (font && isSupportedFont(font)) {
 				// Note: useApplyTheme will apply the font to the body element after the preferences are updated
 				try {
@@ -42,7 +47,7 @@ export default function FontSelect() {
 				{t(`${localeKey}.label`)}
 			</Label>
 			<ComboBox
-				value={appFont || 'INTER'}
+				value={appFont || SupportedFont.Inter}
 				options={SUPPORTED_FONT_OPTIONS}
 				onChange={changeFont}
 				size="full"
@@ -59,42 +64,42 @@ const localeKey = 'settingsScene.app/preferences.sections.fontSelect'
 export const SUPPORTED_FONT_OPTIONS = [
 	{
 		label: 'Atkinson Hyperlegible',
-		value: 'ATKINSON_HYPERLEGIBLE',
+		value: SupportedFont.AtkinsonHyperlegible,
 		fontClassName: 'font-atkinsonhyperlegible',
 	},
 	{
 		label: 'Bitter',
-		value: 'BITTER',
+		value: SupportedFont.Bitter,
 		fontClassName: 'font-bitter',
 	},
 	{
 		label: 'Charis SIL',
-		value: 'CHARIS',
+		value: SupportedFont.Charis,
 		fontClassName: 'font-charis',
 	},
 	{
 		label: 'Inter',
-		value: 'INTER',
+		value: SupportedFont.Inter,
 		fontClassName: 'font-inter',
 	},
 	{
 		label: 'Libre Baskerville',
-		value: 'LIBRE_BASKERVILLE',
+		value: SupportedFont.LibreBaskerville,
 		fontClassName: 'font-librebaskerville',
 	},
 	{
 		label: 'Literata',
-		value: 'LITERATA',
+		value: SupportedFont.Literata,
 		fontClassName: 'font-literata',
 	},
 	{
 		label: 'Nunito',
-		value: 'NUNITO',
+		value: SupportedFont.Nunito,
 		fontClassName: 'font-nunito',
 	},
 	{
 		label: 'OpenDyslexic',
-		value: 'OPEN_DYSLEXIC',
+		value: SupportedFont.OpenDyslexic,
 		fontClassName: 'font-opendyslexic',
 	},
 ]

@@ -1,5 +1,5 @@
 import { BookPreferences } from '@stump/client'
-import { SupportedFont } from '@stump/sdk'
+import { SupportedFont } from '@stump/graphql'
 
 export interface EpubTheme {
 	[tag: string]: object
@@ -82,21 +82,21 @@ export const applyTheme = (theme: EpubTheme, preferences: BookPreferences) => {
 
 const toFamilyName = (font: SupportedFont) => {
 	switch (font) {
-		case 'inter':
+		case SupportedFont.Inter:
 			return 'Inter var'
-		case 'opendyslexic':
+		case SupportedFont.OpenDyslexic:
 			return 'OpenDyslexic'
-		case 'atkinsonhyperlegible':
+		case SupportedFont.AtkinsonHyperlegible:
 			return 'Atkinson Hyperlegible'
-		case 'charis':
+		case SupportedFont.Charis:
 			return 'Charis SIL'
-		case 'literata':
+		case SupportedFont.Literata:
 			return 'Literata'
-		case 'bitter':
+		case SupportedFont.Bitter:
 			return 'Bitter'
-		case 'librebaskerville':
+		case SupportedFont.LibreBaskerville:
 			return 'Libre Baskerville'
-		case 'nunito':
+		case SupportedFont.Nunito:
 			return 'Nunito'
 		default:
 			return font

@@ -24,10 +24,17 @@ import {
 	SeriesMetadataKeys,
 	TextCell,
 } from '@/components/metadataEditor'
+import EnumCell from '@/components/metadataEditor/cells/EnumCell'
 import { useAppContext } from '@/context'
 import { usePaths } from '@/paths'
 
-import { getEditorDefaultValues, schema, SeriesMetadataEditorValues } from './schema'
+import {
+	getEditorDefaultValues,
+	schema,
+	SeriesMetadataEditorValues,
+	SeriesStatus,
+	VALID_SERIES_STATUS,
+} from './schema'
 
 const fragment = graphql(`
 	fragment SeriesMetadataEditor on SeriesMetadata {
@@ -152,6 +159,14 @@ export default function SeriesMetadataEditor({ seriesId, data }: Props) {
 								/>
 							)
 						})
+						.with('status', () => (
+							<EnumCell
+								binding="status"
+								value={metadata?.status as SeriesStatus}
+								// TODO: Translation support
+								options={VALID_SERIES_STATUS.map((status) => ({ label: status, value: status }))}
+							/>
+						))
 						.otherwise((field) => (
 							<TextCell
 								binding={field}

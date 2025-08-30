@@ -4,6 +4,20 @@ import { z } from 'zod'
 const nonEmptyString = z.string().min(1)
 const stringArray = z.array(nonEmptyString)
 
+export const VALID_SERIES_STATUS = [
+	'Abandoned',
+	'Ongoing',
+	'Completed',
+	'Cancelled',
+	'Hiatus',
+] as const
+export const seriesStatus = z.enum(VALID_SERIES_STATUS)
+export type SeriesStatus = z.infer<typeof seriesStatus>
+
+export const isSeriesStatus = (value: unknown): value is SeriesStatus => {
+	return seriesStatus.safeParse(value).success
+}
+
 export const schema = z.object({
 	ageRating: z.number().min(0).nullish(),
 	booktype: nonEmptyString.nullish(),

@@ -171,6 +171,7 @@ export default function SeriesMetadataEditor({ seriesId, data }: Props) {
 							<TextCell
 								binding={field}
 								value={String(getProperty(metadata, info.getValue()) ?? '')}
+								isLong={field === 'summary'}
 							/>
 						)),
 				enableResizing: false,

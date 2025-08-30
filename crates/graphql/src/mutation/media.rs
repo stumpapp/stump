@@ -288,6 +288,41 @@ impl MediaMutation {
 		Ok(Media::from(model))
 	}
 
+	/// Deletes all of a user's reading history for a specific media item. This cannot be undone, so
+	/// use with caution.
+	async fn delete_media_read_history(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+	) -> Result<Media> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let model = media::ModelWithMetadata::find_for_user(user)
+			.filter(media::Column::Id.eq(id.to_string()))
+			.into_model::<media::ModelWithMetadata>()
+			.one(conn)
+			.await?
+			.ok_or("Media not found")?;
+
+		let affected_sessions = finished_reading_session::Entity::delete_many()
+			.filter(
+				finished_reading_session::Column::MediaId
+					.eq(model.media.id.clone())
+					.and(finished_reading_session::Column::UserId.eq(user.id.clone())),
+			)
+			.exec(conn)
+			.await?
+			.rows_affected;
+		tracing::debug!(
+			affected_sessions,
+			"Deleted user finished reading sessions for media"
+		);
+
+		// Note: We return the full node for cache invalidation purposes
+		Ok(Media::from(model))
+	}
+
 	async fn update_media_progress(
 		&self,
 		ctx: &Context<'_>,

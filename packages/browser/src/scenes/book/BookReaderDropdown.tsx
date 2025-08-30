@@ -76,7 +76,7 @@ export default function BookReaderDropdown({ book }: Props) {
 				return paths.bookReader(id, { isIncognito: incognito || undefined, page: 1 })
 			}
 		},
-		[book],
+		[book, paths],
 	)
 
 	/**
@@ -98,23 +98,25 @@ export default function BookReaderDropdown({ book }: Props) {
 		} else {
 			return paths.bookReader(id, { page: isReadAgain ? 1 : page || 1 })
 		}
-	}, [book, isReadAgain])
+	}, [book, isReadAgain, paths])
 
 	return (
 		<div className="flex items-center">
 			<ButtonOrLink
 				className="w-full rounded-r-none"
 				variant="primary"
+				newYork
 				href={readUrl}
 				title={title}
 			>
 				{title}
 			</ButtonOrLink>
+
 			<DropdownMenu
 				align="end"
 				contentWrapperClassName="w-18"
 				trigger={
-					<IconButton className="rounded-l-none" variant="primary">
+					<IconButton className="h-7 rounded-l-none" variant="primary">
 						<ChevronDown className="h-4 w-4" />
 					</IconButton>
 				}
@@ -145,14 +147,9 @@ export default function BookReaderDropdown({ book }: Props) {
 export const isReadAgainPrompt = (
 	book: Pick<BookCardFragment, 'pages' | 'readProgress' | 'readHistory' | 'extension'>,
 ) => {
-	const { pages, readProgress, readHistory, extension } = book
-	const { page, epubcfi } = readProgress || {}
+	const { readProgress, readHistory } = book
 
 	const isHistoricallyCompleted = readHistory?.some((h) => h.completedAt) ?? false
 
-	const isEpub = extension.match(EBOOK_EXTENSION)
-	const epubCompleted = isEpub && !epubcfi && isHistoricallyCompleted
-	const otherCompleted = !isEpub && page === pages && isHistoricallyCompleted
-
-	return epubCompleted || otherCompleted
+	return isHistoricallyCompleted && !readProgress
 }

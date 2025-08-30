@@ -1,8 +1,8 @@
 import { ButtonOrLink, Heading, Spacer, Text } from '@stump/components'
-import { useFragment, UserPermission } from '@stump/graphql'
+import { useFragment } from '@stump/graphql'
 import dayjs from 'dayjs'
 import sortBy from 'lodash/sortBy'
-import { Suspense, useMemo } from 'react'
+import { Suspense } from 'react'
 import { Helmet } from 'react-helmet'
 import { useParams } from 'react-router'
 import { useMediaMatch } from 'rooks'
@@ -17,25 +17,22 @@ import { useAppContext } from '@/context'
 import { usePaths } from '@/paths'
 import { PDF_EXTENSION } from '@/utils/patterns'
 
-import BookCompletionToggleButton from './BookCompletionToggleButton'
+import BookActionMenu from './BookActionMenu'
 import BookFileInformation from './BookFileInformation'
 import BookOverviewSceneHeader from './BookOverviewSceneHeader'
 import BookReaderDropdown from './BookReaderDropdown'
 import BooksAfterCursor from './BooksAfterCursor'
-import DownloadMediaButton from './DownloadMediaButton'
-import EmailBookDropdown from './EmailBookDropdown'
+
+// FIXME: This looks actually ass on mobile
 
 export default function BookOverviewScene() {
 	const { id } = useParams()
 	const {
 		data: { mediaById: media },
 	} = useBookOverview(id || '')
-	const { checkPermission, isServerOwner } = useAppContext()
+	const { isServerOwner } = useAppContext()
 
 	const paths = usePaths()
-
-	const canDownload = useMemo(() => checkPermission(UserPermission.DownloadFile), [checkPermission])
-	const canManage = useMemo(() => checkPermission(UserPermission.ManageLibrary), [checkPermission])
 
 	const isAtLeastTablet = useMediaMatch('(min-width: 640px)')
 
@@ -74,8 +71,10 @@ export default function BookOverviewScene() {
 							{!isAtLeastTablet && <Spacer />}
 
 							<div className="flex w-full flex-col gap-2 md:flex-row md:items-center">
-								<BookReaderDropdown book={fragmentData} />
-								<BookCompletionToggleButton book={fragmentData} />
+								<div className="flex w-full flex-row items-center gap-2">
+									<BookReaderDropdown book={fragmentData} />
+									<BookActionMenu book={fragmentData} />
+								</div>
 								{media.extension?.match(PDF_EXTENSION) && (
 									<ButtonOrLink
 										variant="outline"
@@ -86,13 +85,6 @@ export default function BookOverviewScene() {
 										Read with the native PDF viewer
 									</ButtonOrLink>
 								)}
-								{canManage && (
-									<ButtonOrLink variant="subtle" href={paths.bookManagement(media.id)}>
-										Manage
-									</ButtonOrLink>
-								)}
-								{canDownload && <DownloadMediaButton id={media.id} name={media.resolvedName} />}
-								<EmailBookDropdown mediaId={media.id} />
 							</div>
 
 							{!isAtLeastTablet && !!media.metadata?.summary && (

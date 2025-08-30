@@ -76,8 +76,9 @@ type Documents = {
     "\n\tmutation UpdateSeriesMetadata($id: ID!, $input: SeriesMetadataInput!) {\n\t\tupdateSeriesMetadata(id: $id, input: $input) {\n\t\t\tmetadata {\n\t\t\t\t...SeriesMetadataEditor\n\t\t\t}\n\t\t}\n\t}\n": typeof types.UpdateSeriesMetadataDocument,
     "\n\tsubscription UseCoreEvent {\n\t\treadEvents {\n\t\t\t__typename\n\t\t\t... on CreatedManySeries {\n\t\t\t\tcount\n\t\t\t\tlibraryId\n\t\t\t}\n\t\t\t... on CreatedMedia {\n\t\t\t\tid\n\t\t\t\tseriesId\n\t\t\t}\n\t\t\t... on CreatedOrUpdatedManyMedia {\n\t\t\t\tcount\n\t\t\t\tseriesId\n\t\t\t}\n\t\t\t... on DiscoveredMissingLibrary {\n\t\t\t\tid\n\t\t\t}\n\t\t\t... on JobStarted {\n\t\t\t\tid\n\t\t\t}\n\t\t\t... on JobUpdate {\n\t\t\t\t__typename\n\t\t\t\tid\n\t\t\t\tstatus\n\t\t\t\tmessage\n\t\t\t\tcompletedTasks\n\t\t\t\tremainingTasks\n\t\t\t\tcompletedSubtasks\n\t\t\t\ttotalSubtasks\n\t\t\t}\n\t\t\t... on JobOutput {\n\t\t\t\tid\n\t\t\t\toutput {\n\t\t\t\t\t__typename\n\t\t\t\t\t... on LibraryScanOutput {\n\t\t\t\t\t\tcreatedMedia\n\t\t\t\t\t\tcreatedSeries\n\t\t\t\t\t\tupdatedMedia\n\t\t\t\t\t\tupdatedSeries\n\t\t\t\t\t}\n\t\t\t\t\t... on SeriesScanOutput {\n\t\t\t\t\t\tcreatedMedia\n\t\t\t\t\t\tupdatedMedia\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.UseCoreEventDocument,
     "\n\tmutation UsePreferences($input: UpdateUserPreferencesInput!) {\n\t\tupdateViewerPreferences(input: $input) {\n\t\t\t__typename\n\t\t}\n\t}\n": typeof types.UsePreferencesDocument,
-    "\n\tmutation BookCompletionToggleButtonComplete($id: ID!, $isComplete: Boolean!, $page: Int) {\n\t\tmarkMediaAsComplete(id: $id, isComplete: $isComplete, page: $page) {\n\t\t\tcompletedAt\n\t\t}\n\t}\n": typeof types.BookCompletionToggleButtonCompleteDocument,
-    "\n\tmutation BookCompletionToggleButtonDeleteSession($id: ID!) {\n\t\tdeleteMediaProgress(id: $id) {\n\t\t\t__typename\n\t\t}\n\t}\n": typeof types.BookCompletionToggleButtonDeleteSessionDocument,
+    "\n\tmutation BookActionMenuComplete($id: ID!, $isComplete: Boolean!, $page: Int) {\n\t\tmarkMediaAsComplete(id: $id, isComplete: $isComplete, page: $page) {\n\t\t\tcompletedAt\n\t\t}\n\t}\n": typeof types.BookActionMenuCompleteDocument,
+    "\n\tmutation BookActionMenuDeleteSession($id: ID!) {\n\t\tdeleteMediaProgress(id: $id) {\n\t\t\t__typename\n\t\t}\n\t}\n": typeof types.BookActionMenuDeleteSessionDocument,
+    "\n\tmutation BookActionMenuDeleteHistory($id: ID!) {\n\t\tdeleteMediaReadHistory(id: $id) {\n\t\t\t__typename\n\t\t}\n\t}\n": typeof types.BookActionMenuDeleteHistoryDocument,
     "\n\tfragment BookFileInformation on Media {\n\t\tid\n\t\tsize\n\t\textension\n\t\thash\n\t\trelativeLibraryPath\n\t}\n": typeof types.BookFileInformationFragmentDoc,
     "\n\tquery BookLibrarySeriesLinks($id: ID!) {\n\t\tseriesById(id: $id) {\n\t\t\tid\n\t\t\tname\n\t\t\tlibraryId\n\t\t}\n\t}\n": typeof types.BookLibrarySeriesLinksDocument,
     "\n\tfragment BookMetadata on Media {\n\t\tmetadata {\n\t\t\tageRating\n\t\t\tcharacters\n\t\t\tcolorists\n\t\t\tcoverArtists\n\t\t\teditors\n\t\t\tgenres\n\t\t\tinkers\n\t\t\tletterers\n\t\t\tlinks\n\t\t\tpencillers\n\t\t\tpublisher\n\t\t\tteams\n\t\t\twriters\n\t\t\tyear\n\t\t}\n\t}\n": typeof types.BookMetadataFragmentDoc,
@@ -255,8 +256,9 @@ const documents: Documents = {
     "\n\tmutation UpdateSeriesMetadata($id: ID!, $input: SeriesMetadataInput!) {\n\t\tupdateSeriesMetadata(id: $id, input: $input) {\n\t\t\tmetadata {\n\t\t\t\t...SeriesMetadataEditor\n\t\t\t}\n\t\t}\n\t}\n": types.UpdateSeriesMetadataDocument,
     "\n\tsubscription UseCoreEvent {\n\t\treadEvents {\n\t\t\t__typename\n\t\t\t... on CreatedManySeries {\n\t\t\t\tcount\n\t\t\t\tlibraryId\n\t\t\t}\n\t\t\t... on CreatedMedia {\n\t\t\t\tid\n\t\t\t\tseriesId\n\t\t\t}\n\t\t\t... on CreatedOrUpdatedManyMedia {\n\t\t\t\tcount\n\t\t\t\tseriesId\n\t\t\t}\n\t\t\t... on DiscoveredMissingLibrary {\n\t\t\t\tid\n\t\t\t}\n\t\t\t... on JobStarted {\n\t\t\t\tid\n\t\t\t}\n\t\t\t... on JobUpdate {\n\t\t\t\t__typename\n\t\t\t\tid\n\t\t\t\tstatus\n\t\t\t\tmessage\n\t\t\t\tcompletedTasks\n\t\t\t\tremainingTasks\n\t\t\t\tcompletedSubtasks\n\t\t\t\ttotalSubtasks\n\t\t\t}\n\t\t\t... on JobOutput {\n\t\t\t\tid\n\t\t\t\toutput {\n\t\t\t\t\t__typename\n\t\t\t\t\t... on LibraryScanOutput {\n\t\t\t\t\t\tcreatedMedia\n\t\t\t\t\t\tcreatedSeries\n\t\t\t\t\t\tupdatedMedia\n\t\t\t\t\t\tupdatedSeries\n\t\t\t\t\t}\n\t\t\t\t\t... on SeriesScanOutput {\n\t\t\t\t\t\tcreatedMedia\n\t\t\t\t\t\tupdatedMedia\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.UseCoreEventDocument,
     "\n\tmutation UsePreferences($input: UpdateUserPreferencesInput!) {\n\t\tupdateViewerPreferences(input: $input) {\n\t\t\t__typename\n\t\t}\n\t}\n": types.UsePreferencesDocument,
-    "\n\tmutation BookCompletionToggleButtonComplete($id: ID!, $isComplete: Boolean!, $page: Int) {\n\t\tmarkMediaAsComplete(id: $id, isComplete: $isComplete, page: $page) {\n\t\t\tcompletedAt\n\t\t}\n\t}\n": types.BookCompletionToggleButtonCompleteDocument,
-    "\n\tmutation BookCompletionToggleButtonDeleteSession($id: ID!) {\n\t\tdeleteMediaProgress(id: $id) {\n\t\t\t__typename\n\t\t}\n\t}\n": types.BookCompletionToggleButtonDeleteSessionDocument,
+    "\n\tmutation BookActionMenuComplete($id: ID!, $isComplete: Boolean!, $page: Int) {\n\t\tmarkMediaAsComplete(id: $id, isComplete: $isComplete, page: $page) {\n\t\t\tcompletedAt\n\t\t}\n\t}\n": types.BookActionMenuCompleteDocument,
+    "\n\tmutation BookActionMenuDeleteSession($id: ID!) {\n\t\tdeleteMediaProgress(id: $id) {\n\t\t\t__typename\n\t\t}\n\t}\n": types.BookActionMenuDeleteSessionDocument,
+    "\n\tmutation BookActionMenuDeleteHistory($id: ID!) {\n\t\tdeleteMediaReadHistory(id: $id) {\n\t\t\t__typename\n\t\t}\n\t}\n": types.BookActionMenuDeleteHistoryDocument,
     "\n\tfragment BookFileInformation on Media {\n\t\tid\n\t\tsize\n\t\textension\n\t\thash\n\t\trelativeLibraryPath\n\t}\n": types.BookFileInformationFragmentDoc,
     "\n\tquery BookLibrarySeriesLinks($id: ID!) {\n\t\tseriesById(id: $id) {\n\t\t\tid\n\t\t\tname\n\t\t\tlibraryId\n\t\t}\n\t}\n": types.BookLibrarySeriesLinksDocument,
     "\n\tfragment BookMetadata on Media {\n\t\tmetadata {\n\t\t\tageRating\n\t\t\tcharacters\n\t\t\tcolorists\n\t\t\tcoverArtists\n\t\t\teditors\n\t\t\tgenres\n\t\t\tinkers\n\t\t\tletterers\n\t\t\tlinks\n\t\t\tpencillers\n\t\t\tpublisher\n\t\t\tteams\n\t\t\twriters\n\t\t\tyear\n\t\t}\n\t}\n": types.BookMetadataFragmentDoc,
@@ -620,11 +622,15 @@ export function graphql(source: "\n\tmutation UsePreferences($input: UpdateUserP
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n\tmutation BookCompletionToggleButtonComplete($id: ID!, $isComplete: Boolean!, $page: Int) {\n\t\tmarkMediaAsComplete(id: $id, isComplete: $isComplete, page: $page) {\n\t\t\tcompletedAt\n\t\t}\n\t}\n"): typeof import('./graphql').BookCompletionToggleButtonCompleteDocument;
+export function graphql(source: "\n\tmutation BookActionMenuComplete($id: ID!, $isComplete: Boolean!, $page: Int) {\n\t\tmarkMediaAsComplete(id: $id, isComplete: $isComplete, page: $page) {\n\t\t\tcompletedAt\n\t\t}\n\t}\n"): typeof import('./graphql').BookActionMenuCompleteDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n\tmutation BookCompletionToggleButtonDeleteSession($id: ID!) {\n\t\tdeleteMediaProgress(id: $id) {\n\t\t\t__typename\n\t\t}\n\t}\n"): typeof import('./graphql').BookCompletionToggleButtonDeleteSessionDocument;
+export function graphql(source: "\n\tmutation BookActionMenuDeleteSession($id: ID!) {\n\t\tdeleteMediaProgress(id: $id) {\n\t\t\t__typename\n\t\t}\n\t}\n"): typeof import('./graphql').BookActionMenuDeleteSessionDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tmutation BookActionMenuDeleteHistory($id: ID!) {\n\t\tdeleteMediaReadHistory(id: $id) {\n\t\t\t__typename\n\t\t}\n\t}\n"): typeof import('./graphql').BookActionMenuDeleteHistoryDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

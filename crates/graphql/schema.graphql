@@ -1270,6 +1270,11 @@ type Mutation {
 	updateMediaThumbnail(id: ID!, input: PageBasedThumbnailInput!): Media!
 	updateMediaMetadata(id: ID!, input: MediaMetadataInput!): Media!
 	deleteMediaProgress(id: ID!): Media!
+	"""
+	Deletes all of a user's reading history for a specific media item. This cannot be undone, so
+	use with caution.
+	"""
+	deleteMediaReadHistory(id: ID!): Media!
 	updateMediaProgress(id: ID!, input: MediaProgressInput!): ReadingProgressOutput!
 	markMediaAsComplete(id: ID!, isComplete: Boolean!, page: Int): FinishedReadingSessionModel
 	"""

@@ -230,6 +230,7 @@ export default function MediaMetadataEditor({ mediaId, data }: Props) {
 				header: () =>
 					checkPermission(UserPermission.EditMetadata) ? <MetadataEditorHeader /> : null,
 				cell: () => null,
+				size: 0,
 			}),
 		],
 		[metadata, paths, checkPermission],

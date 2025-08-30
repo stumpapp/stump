@@ -1367,6 +1367,11 @@ export type Mutation = {
   deleteLogs: LogDeleteOutput;
   deleteMedia: Media;
   deleteMediaProgress: Media;
+  /**
+   * Deletes all of a user's reading history for a specific media item. This cannot be undone, so
+   * use with caution.
+   */
+  deleteMediaReadHistory: Media;
   deleteNotifier: Notifier;
   /**
    * Deletes a reading list by ID.
@@ -1660,6 +1665,11 @@ export type MutationDeleteMediaArgs = {
 
 
 export type MutationDeleteMediaProgressArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationDeleteMediaReadHistoryArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -3650,21 +3660,28 @@ export type UsePreferencesMutationVariables = Exact<{
 
 export type UsePreferencesMutation = { __typename?: 'Mutation', updateViewerPreferences: { __typename: 'UserPreferences' } };
 
-export type BookCompletionToggleButtonCompleteMutationVariables = Exact<{
+export type BookActionMenuCompleteMutationVariables = Exact<{
   id: Scalars['ID']['input'];
   isComplete: Scalars['Boolean']['input'];
   page?: InputMaybe<Scalars['Int']['input']>;
 }>;
 
 
-export type BookCompletionToggleButtonCompleteMutation = { __typename?: 'Mutation', markMediaAsComplete?: { __typename?: 'FinishedReadingSessionModel', completedAt: any } | null };
+export type BookActionMenuCompleteMutation = { __typename?: 'Mutation', markMediaAsComplete?: { __typename?: 'FinishedReadingSessionModel', completedAt: any } | null };
 
-export type BookCompletionToggleButtonDeleteSessionMutationVariables = Exact<{
+export type BookActionMenuDeleteSessionMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type BookCompletionToggleButtonDeleteSessionMutation = { __typename?: 'Mutation', deleteMediaProgress: { __typename: 'Media' } };
+export type BookActionMenuDeleteSessionMutation = { __typename?: 'Mutation', deleteMediaProgress: { __typename: 'Media' } };
+
+export type BookActionMenuDeleteHistoryMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type BookActionMenuDeleteHistoryMutation = { __typename?: 'Mutation', deleteMediaReadHistory: { __typename: 'Media' } };
 
 export type BookFileInformationFragment = { __typename?: 'Media', id: string, size: number, extension: string, hash?: string | null, relativeLibraryPath: string } & { ' $fragmentName'?: 'BookFileInformationFragment' };
 
@@ -5731,20 +5748,27 @@ export const UsePreferencesDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<UsePreferencesMutation, UsePreferencesMutationVariables>;
-export const BookCompletionToggleButtonCompleteDocument = new TypedDocumentString(`
-    mutation BookCompletionToggleButtonComplete($id: ID!, $isComplete: Boolean!, $page: Int) {
+export const BookActionMenuCompleteDocument = new TypedDocumentString(`
+    mutation BookActionMenuComplete($id: ID!, $isComplete: Boolean!, $page: Int) {
   markMediaAsComplete(id: $id, isComplete: $isComplete, page: $page) {
     completedAt
   }
 }
-    `) as unknown as TypedDocumentString<BookCompletionToggleButtonCompleteMutation, BookCompletionToggleButtonCompleteMutationVariables>;
-export const BookCompletionToggleButtonDeleteSessionDocument = new TypedDocumentString(`
-    mutation BookCompletionToggleButtonDeleteSession($id: ID!) {
+    `) as unknown as TypedDocumentString<BookActionMenuCompleteMutation, BookActionMenuCompleteMutationVariables>;
+export const BookActionMenuDeleteSessionDocument = new TypedDocumentString(`
+    mutation BookActionMenuDeleteSession($id: ID!) {
   deleteMediaProgress(id: $id) {
     __typename
   }
 }
-    `) as unknown as TypedDocumentString<BookCompletionToggleButtonDeleteSessionMutation, BookCompletionToggleButtonDeleteSessionMutationVariables>;
+    `) as unknown as TypedDocumentString<BookActionMenuDeleteSessionMutation, BookActionMenuDeleteSessionMutationVariables>;
+export const BookActionMenuDeleteHistoryDocument = new TypedDocumentString(`
+    mutation BookActionMenuDeleteHistory($id: ID!) {
+  deleteMediaReadHistory(id: $id) {
+    __typename
+  }
+}
+    `) as unknown as TypedDocumentString<BookActionMenuDeleteHistoryMutation, BookActionMenuDeleteHistoryMutationVariables>;
 export const BookLibrarySeriesLinksDocument = new TypedDocumentString(`
     query BookLibrarySeriesLinks($id: ID!) {
   seriesById(id: $id) {

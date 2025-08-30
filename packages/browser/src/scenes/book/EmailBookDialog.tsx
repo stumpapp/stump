@@ -1,8 +1,7 @@
 import { useGraphQLMutation, useSDK, useSuspenseGraphQL } from '@stump/client'
-import { Badge, Button, ComboBox, Dialog, IconButton, Input } from '@stump/components'
+import { Badge, Button, ComboBox, Dialog, Input } from '@stump/components'
 import { EmailerSendTo, graphql, UserPermission } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
-import { Send } from 'lucide-react'
 import { Suspense, useCallback, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -28,8 +27,11 @@ const mutation = graphql(`
 
 type ContainerProps = {
 	mediaId: string
+	isOpen: boolean
+	onClose: () => void
 }
-export default function EmailBookDropdownContainer({ mediaId }: ContainerProps) {
+
+export default function EmailBookDialogContainer(props: ContainerProps) {
 	const { checkPermission } = useAppContext()
 
 	const canSendEmail = useMemo(() => checkPermission(UserPermission.EmailSend), [checkPermission])
@@ -44,7 +46,7 @@ export default function EmailBookDropdownContainer({ mediaId }: ContainerProps) 
 
 	return (
 		<Suspense fallback={null}>
-			<EmailBookDropdown mediaId={mediaId} canArbitrarySendEmail={canArbitrarySendEmail} />
+			<EmailBookDialog canArbitrarySendEmail={canArbitrarySendEmail} {...props} />
 		</Suspense>
 	)
 }
@@ -53,7 +55,7 @@ type Props = {
 	canArbitrarySendEmail: boolean
 } & ContainerProps
 
-function EmailBookDropdown({ mediaId, canArbitrarySendEmail }: Props) {
+function EmailBookDialog({ mediaId, isOpen, onClose, canArbitrarySendEmail }: Props) {
 	const { t } = useLocaleContext()
 	const { sdk } = useSDK()
 	const {
@@ -69,8 +71,8 @@ function EmailBookDropdown({ mediaId, canArbitrarySendEmail }: Props) {
 				console.error('Error sending email:', error)
 			}
 			const errors = data?.sendAttachmentEmail?.errors || []
-			setIsOpen(errors.length > 0)
 			if (errors.length > 0) {
+				onClose()
 				console.warn(errors)
 				toast.error('Some errors occurred while sending email(s). Check the logs for more detail')
 			}
@@ -78,7 +80,6 @@ function EmailBookDropdown({ mediaId, canArbitrarySendEmail }: Props) {
 	})
 	const isSending = status === 'pending'
 
-	const [isOpen, setIsOpen] = useState(false)
 	const [deviceIds, setDeviceIds] = useState<number[]>([])
 	const [emails, setEmails] = useState<string[]>([])
 
@@ -152,17 +153,12 @@ function EmailBookDropdown({ mediaId, canArbitrarySendEmail }: Props) {
 	}
 
 	return (
-		<Dialog open={isOpen} onOpenChange={setIsOpen}>
-			<Dialog.Trigger asChild>
-				<IconButton size="sm" variant="ghost">
-					<Send size="1.25rem" />
-				</IconButton>
-			</Dialog.Trigger>
+		<Dialog open={isOpen} onOpenChange={onClose}>
 			<Dialog.Content size="md">
 				<Dialog.Header>
 					<Dialog.Title>{t(getKey('heading'))}</Dialog.Title>
 					<Dialog.Description>{t(getKey('description'))}</Dialog.Description>
-					<Dialog.Close onClick={() => setIsOpen(false)} disabled={isSending} />
+					<Dialog.Close onClick={onClose} disabled={isSending} />
 				</Dialog.Header>
 
 				<div className="flex flex-col space-y-4">
@@ -186,7 +182,7 @@ function EmailBookDropdown({ mediaId, canArbitrarySendEmail }: Props) {
 				</div>
 
 				<Dialog.Footer>
-					<Button onClick={() => setIsOpen(false)} disabled={isSending}>
+					<Button onClick={onClose} disabled={isSending}>
 						Cancel
 					</Button>
 					<Button variant="primary" onClick={handleSend} disabled={isSending} isLoading={isSending}>

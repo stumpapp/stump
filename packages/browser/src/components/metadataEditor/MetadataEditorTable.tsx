@@ -18,6 +18,9 @@ type Props<Item> = {
 	showMissing: boolean
 }
 
+// FIXME: This looks not great on mobile. It might be better to just have a separate, read-only
+// table rendered on mobile which looks more like the mobile app
+
 export default function MetadataEditorTable<Item extends RowData>({
 	columns,
 	items,
@@ -153,7 +156,7 @@ export default function MetadataEditorTable<Item extends RowData>({
 						<tr key={row.id} className="flex w-fit">
 							{row.getVisibleCells().map((cell) => (
 								<td
-									className="py-2 pl-1.5 pr-1.5 first:border-r first:border-edge first:pl-4 last:pr-4"
+									className="py-2 pl-1.5 pr-1.5 first:border-r first:border-edge first:pl-4 last:pl-0 last:pr-0"
 									key={cell.id}
 									style={{
 										width: cell.column.getSize(),

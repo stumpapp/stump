@@ -31,7 +31,7 @@ export function calculateTableSizing<DataType>(
 
 	columns.forEach((header) => {
 		const column = header.column.columnDef
-		if (!column.size) {
+		if (column.size == null) {
 			if (!column.meta?.isGrow) {
 				let calculatedSize = 100
 				if (column?.meta?.widthPercentage) {

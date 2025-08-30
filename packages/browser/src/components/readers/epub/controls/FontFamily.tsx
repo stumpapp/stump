@@ -1,4 +1,4 @@
-import { Label, NativeSelect } from '@stump/components'
+import { ComboBox, Label } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { isSupportedFont } from '@stump/sdk'
 import { useCallback } from 'react'
@@ -19,7 +19,7 @@ export default function FontFamily() {
 	} = useBookPreferences({ book: bookEntity })
 
 	const changeFont = useCallback(
-		(font: string) => {
+		(font?: string) => {
 			if (!font) {
 				setBookPreferences({ fontFamily: undefined })
 			} else if (isSupportedFont(font)) {
@@ -33,13 +33,13 @@ export default function FontFamily() {
 	return (
 		<div className="py-1.5">
 			<Label htmlFor="font-family">{t(getKey('fontFamily.label'))}</Label>
-			<NativeSelect
-				id="font-family"
-				size="sm"
-				options={[{ value: '', label: 'Default' }].concat(SUPPORTED_FONT_OPTIONS)}
+			<ComboBox
+				size="full"
+				options={[{ value: '', label: 'Default', fontClassName: '' }].concat(
+					SUPPORTED_FONT_OPTIONS,
+				)}
 				value={fontFamily ?? ''}
-				onChange={(e) => changeFont(e.target.value)}
-				className="mt-1.5"
+				onChange={changeFont}
 			/>
 		</div>
 	)

@@ -41,7 +41,7 @@ export default function EpubReaderHeader() {
 			<Text
 				size="sm"
 				className={cn('line-clamp-1', {
-					[`font-${fontFamily}`]: !!fontFamily,
+					[`font-${fontFamily?.toLowerCase().replace(/_/g, '')}`]: !!fontFamily,
 				})}
 			>
 				{bookEntity.resolvedName}

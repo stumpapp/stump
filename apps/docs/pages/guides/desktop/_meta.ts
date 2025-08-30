@@ -1,5 +1,7 @@
 import { Meta } from 'nextra'
 
 export default {
-	index: 'Overview',
+	index: 'App',
+	'bundled-server': 'Bundled Server',
+	security: 'Security',
 } satisfies Meta

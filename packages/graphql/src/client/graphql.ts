@@ -2971,7 +2971,7 @@ export type Subscription = {
 };
 
 export enum SupportedFont {
-  AtkinsonHyperlegible = 'ATKINSON_HYPERLEGIBLE',
+  AtkinsonHyperlegibleNext = 'ATKINSON_HYPERLEGIBLE_NEXT',
   Bitter = 'BITTER',
   Charis = 'CHARIS',
   Inter = 'INTER',

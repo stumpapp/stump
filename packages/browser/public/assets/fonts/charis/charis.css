@@ -1,35 +1,31 @@
-/*
-This file is derived from the Charis SIL project (https://software.sil.org/charis/).
-Copyright (c) 1997-2023 SIL International (http://www.sil.org/) with Reserved
-Font Names "Charis" and "SIL". This Font Software is licensed under the SIL
-Open Font License, Version 1.1 (http://scripts.sil.org/OFL).
-*/
+@font-face {
+	font-family: 'Charis';
+	font-style: normal;
+	font-display: swap;
+	font-weight: 400;
+	src: url(./files/Charis-Regular.woff2) format('woff2');
+}
 
 @font-face {
-	font-family: 'Charis SIL';
-	src:
-		url(CharisSIL-Regular.woff),
-		url(CharisSIL-Regular.woff2) format('woff2');
-}
-@font-face {
-	font-family: 'Charis SIL';
+	font-family: 'Charis';
 	font-style: italic;
-	src:
-		url(CharisSIL-Italic.woff),
-		url(CharisSIL-Italic.woff2) format('woff2');
+	font-display: swap;
+	font-weight: 400;
+	src: url(./files/Charis-Italic.woff2) format('woff2');
 }
+
 @font-face {
-	font-family: 'Charis SIL';
-	font-weight: bold;
-	src:
-		url(CharisSIL-Bold.woff),
-		url(CharisSIL-Bold.woff2) format('woff2');
+	font-family: 'Charis';
+	font-style: normal;
+	font-display: swap;
+	font-weight: 700;
+	src: url(./files/Charis-Bold.woff2) format('woff2');
 }
+
 @font-face {
-	font-family: 'Charis SIL';
-	font-weight: bold;
+	font-family: 'Charis';
 	font-style: italic;
-	src:
-		url(CharisSIL-BoldItalic.woff),
-		url(CharisSIL-BoldItalic.woff2) format('woff2');
+	font-display: swap;
+	font-weight: 700;
+	src: url(./files/Charis-BoldItalic.woff2) format('woff2');
 }

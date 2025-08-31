@@ -63,9 +63,9 @@ const localeKey = 'settingsScene.app/preferences.sections.fontSelect'
 
 export const SUPPORTED_FONT_OPTIONS = [
 	{
-		label: 'Atkinson Hyperlegible',
-		value: SupportedFont.AtkinsonHyperlegible,
-		fontClassName: 'font-atkinsonhyperlegible',
+		label: 'Atkinson Hyperlegible Next',
+		value: SupportedFont.AtkinsonHyperlegibleNext,
+		fontClassName: 'font-atkinsonhyperlegiblenext',
 	},
 	{
 		label: 'Bitter',
@@ -73,9 +73,14 @@ export const SUPPORTED_FONT_OPTIONS = [
 		fontClassName: 'font-bitter',
 	},
 	{
-		label: 'Charis SIL',
+		label: 'Charis',
 		value: SupportedFont.Charis,
 		fontClassName: 'font-charis',
+	},
+	{
+		label: 'Hina Mincho',
+		value: SupportedFont.HinaMincho,
+		fontClassName: 'font-hinamincho',
 	},
 	{
 		label: 'Inter',

@@ -20,8 +20,8 @@ export default function DefaultFontFamily() {
 		(font?: string) => {
 			if (!font) {
 				setSettings({ fontFamily: undefined })
-			} else if (isSupportedFont(font)) {
-				setSettings({ fontFamily: font })
+			} else if (isSupportedFont(font) || isSupportedFont(font.toUpperCase())) {
+				setSettings({ fontFamily: font.toUpperCase() })
 			}
 		},
 		[setSettings],

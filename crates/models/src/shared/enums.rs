@@ -454,7 +454,7 @@ pub enum ReadingMode {
 )]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum SupportedFont {
-	AtkinsonHyperlegible,
+	AtkinsonHyperlegibleNext,
 	Bitter,
 	Charis,
 	#[default]

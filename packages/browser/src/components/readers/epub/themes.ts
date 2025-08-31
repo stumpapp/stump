@@ -25,13 +25,13 @@ export const stumpDark: EpubTheme = {
 export const toFamilyName = (font: SupportedFont) => {
 	switch (font) {
 		case SupportedFont.Inter:
-			return 'Inter var'
+			return 'Inter'
 		case SupportedFont.OpenDyslexic:
 			return 'OpenDyslexic'
-		case SupportedFont.AtkinsonHyperlegible:
-			return 'Atkinson Hyperlegible'
+		case SupportedFont.AtkinsonHyperlegibleNext:
+			return 'Atkinson Hyperlegible Next'
 		case SupportedFont.Charis:
-			return 'Charis SIL'
+			return 'Charis'
 		case SupportedFont.Literata:
 			return 'Literata'
 		case SupportedFont.Bitter:
@@ -40,6 +40,8 @@ export const toFamilyName = (font: SupportedFont) => {
 			return 'Libre Baskerville'
 		case SupportedFont.Nunito:
 			return 'Nunito'
+		case SupportedFont.HinaMincho:
+			return 'Hina Mincho'
 		default:
 			return font
 	}

@@ -2215,7 +2215,7 @@ type Subscription {
 }
 
 enum SupportedFont {
-	ATKINSON_HYPERLEGIBLE
+	ATKINSON_HYPERLEGIBLE_NEXT
 	BITTER
 	CHARIS
 	INTER

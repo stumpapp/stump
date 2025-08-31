@@ -11,9 +11,10 @@ import {
 	EpubProgressInput,
 	graphql,
 	ReadingMode,
+	SupportedFont,
 } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
-import { Book, Rendition } from 'epubjs'
+import { Book, Contents, Rendition } from 'epubjs'
 import uniqby from 'lodash/uniqBy'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import AutoSizer from 'react-virtualized-auto-sizer'
@@ -24,7 +25,7 @@ import { useTheme } from '@/hooks'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
 import EpubReaderContainer from './EpubReaderContainer'
-import { applyTheme, stumpDark } from './themes'
+import { stumpDark, toFamilyName } from './themes'
 
 // TODO: Fix all lifecycle lints
 // TODO: Consider a total re-write or at least thorough review of this component, it was written a while
@@ -391,7 +392,7 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 	}, [book, ebook, id, sdk])
 
 	/**
-	 *	A function for applying the epub reader preferences to the epubjs rendition instance
+	 *	A function for applying the initial epub reader preferences to the epubjs rendition instance
 	 *
 	 * @param rendition: The epubjs rendition instance
 	 * @param preferences The epub reader preferences
@@ -399,10 +400,10 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 	const applyEpubPreferences = useCallback(
 		(rendition: Rendition, preferences: BookPreferences) => {
 			if (theme === 'dark') {
-				rendition.themes.register('stump-dark', applyTheme(stumpDark, preferences))
+				rendition.themes.register('stump-dark', stumpDark)
 				rendition.themes.select('stump-dark')
 			} else {
-				rendition.themes.register('stump-light', applyTheme({}, preferences))
+				rendition.themes.register('stump-light', {})
 				rendition.themes.select('stump-light')
 			}
 			rendition.direction(preferences.readingDirection === 'RTL' ? 'rtl' : 'ltr')
@@ -413,12 +414,33 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 				// Default to paginated for 'paged' mode
 				rendition.flow('paginated')
 			}
-
-			if (preferences.fontSize) {
-				rendition.themes.fontSize(`${preferences.fontSize}px`)
-			}
 		},
 		[theme],
+	)
+
+	/**	A function for applying updates to the the epub reader preferences to the epubjs rendition instance */
+	const updateEpubPreferences = useCallback(
+		(rendition: Rendition, fontSize?: number, lineHeight?: number, fontFamily?: string) => {
+			const newStylesheetRules = {
+				'a, blockquote, body, h1, h2, h3, h4, h5, p, span, ul': {
+					'font-size': `${fontSize}px !important`,
+					'line-height': `${lineHeight} !important`,
+					'font-family': `${toFamilyName(fontFamily as SupportedFont)} !important`,
+				},
+			}
+
+			const contents = rendition.getContents()
+			// Only applies temporarily for the current section
+			// @ts-expect-error: epubjs is a silly bean
+			contents.forEach((content: Contents) => {
+				content.addStylesheetRules(newStylesheetRules, 'font-stylesheet-rules')
+			})
+			// Only applies once section changes
+			rendition.hooks.content.register(function (contents: Contents) {
+				contents.addStylesheetRules(newStylesheetRules, 'font-stylesheet-rules')
+			})
+		},
+		[],
 	)
 
 	const generateLocations = useCallback(
@@ -464,10 +486,7 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 					await generateLocations(book)
 				}
 
-				const rendition_ = book.renderTo(ref.current!, {
-					width,
-					height,
-				})
+				const rendition_ = book.renderTo(ref.current!, { width, height })
 
 				rendition_.hooks.content.register(() => {
 					injectFontStylesheet(rendition_)
@@ -475,8 +494,8 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 
 				//? TODO: I guess here I would need to wait for and load in custom theme blobs...
 				//* Color manipulation reference: https://github.com/futurepress/epub.js/issues/1019
-				rendition_.themes.register('stump-dark', applyTheme(stumpDark, bookPreferences))
-				rendition_.themes.register('stump-light', applyTheme({}, bookPreferences))
+				rendition_.themes.register('stump-dark', stumpDark)
+				rendition_.themes.register('stump-light', {})
 
 				rendition_.on('relocated', handleLocationChange)
 
@@ -559,16 +578,16 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 		}
 	}, [rendition])
 
+	const { fontSize, lineHeight, fontFamily } = bookPreferences
 	/**
 	 * This effect is responsible for updating the epub theme options whenever the epub
 	 * preferences change. It will only run when the epub preferences change and the
 	 * rendition instance is set.
 	 */
 	useEffect(() => {
-		if (rendition) {
-			applyEpubPreferences(rendition, bookPreferences)
-		}
-	}, [rendition, bookPreferences, theme, applyEpubPreferences])
+		if (!rendition) return
+		updateEpubPreferences(rendition, fontSize, lineHeight, fontFamily)
+	}, [rendition, fontSize, fontFamily, lineHeight, updateEpubPreferences])
 
 	/**
 	 * Invalidate the book query when a reader is unmounted so that the book overview

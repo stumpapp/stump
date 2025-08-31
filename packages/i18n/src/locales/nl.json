@@ -1911,64 +1911,64 @@
 	"serverSOS": {
 		"heading": "Server niet beschikbaar",
 		"desktop": {
-			"message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device.\nIf your server URL has changed, you can update it using the form below"
+			"message": "Er is een netwerkfout opgetreden die erop wijst dat uw Stump-server momenteel niet beschikbaar is. Zorg ervoor dat deze actief is en toegankelijk vanaf dit apparaat.\nAls de URL van uw server is gewijzigd, kunt u deze bijwerken met behulp van het onderstaande formulier."
 		},
 		"web": {
-			"message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device"
+			"message": "Er is een netwerkfout opgetreden die erop wijst dat je Stump-server momenteel niet beschikbaar is. Zorg ervoor dat deze actief is en toegankelijk vanaf dit apparaat."
 		},
 		"reconnected": "Opnieuw verbonden met server! Doorsturen...",
 		"reconnectionFailed": "Er is iets misgegaan!"
 	},
 	"serverStatusOverlay": {
-		"heading": "Server isn't connected",
+		"heading": "Server is niet verbonden",
 		"message": [
-			"Please check your internet connection",
+			"Controleer je internetverbinding",
 			"Klik hier",
-			"to change your server URL"
+			"om de server-URL te wijzigen"
 		]
 	},
 	"slidingList": {
-		"empty": "No items to display",
+		"empty": "Geen items om weer te geven",
 		"buttons": {
-			"next": "Seek Ahead",
-			"previous": "Seek Backwards"
+			"next": "Vooruitzoeken",
+			"previous": "Terugzoeken"
 		}
 	},
 	"tagSelect": {
-		"placeholder": "Select or create tag",
-		"placeholderNoTags": "No tags available"
+		"placeholder": "Kies of maak een tag",
+		"placeholderNoTags": "Geen tags beschikbaar"
 	},
 	"thumbnailDropdown": {
 		"label": "Edit thumbnail",
 		"options": {
-			"selectFromBooks": "Select from books",
-			"uploadImage": "Upload image"
+			"selectFromBooks": "Kies uit boeken",
+			"uploadImage": "Afbeelding uploaden"
 		},
 		"uploadImage": {
-			"emptyState": "A preview of your image will appear here",
+			"emptyState": "Een voorbeeld van je afbeelding verschijnt hier",
 			"prompt": "Drop image here or click to select",
 			"remove": "Remove image"
 		}
 	},
 	"common": {
-		"add": "Add",
-		"cancel": "Cancel",
-		"confirm": "Confirm",
-		"save": "Save",
-		"send": "Send",
-		"saveChanges": "Save changes",
-		"noChanges": "No changes",
-		"create": "Create",
-		"edit": "Edit",
+		"add": "Toevoegen",
+		"cancel": "Annuleren",
+		"confirm": "Bevestigen",
+		"save": "Opslaan",
+		"send": "Verzenden",
+		"saveChanges": "Wijzigen opslaan",
+		"noChanges": "Geen wijzigingen",
+		"create": "Maken",
+		"edit": "Bewerken",
 		"update": "Update",
 		"upload": "Upload",
-		"uploading": "Uploading",
-		"unimplemented": "This functionality is not yet implemented! Check back later",
-		"limitedFunctionality": "This is not yet fully implemented and is lacking some features. Check back later",
-		"logIn": "Log in",
-		"login": "Login",
-		"seeError": "See error",
-		"remove": "Remove",
+		"uploading": "Uploaden",
+		"unimplemented": "Deze functionaliteit is nog niet ingebouwd! Kom later terug",
+		"limitedFunctionality": "Dit is nog niet volledig ingebouwd en mist nog wat functies. Kom later terug",
+		"logIn": "Inloggen",
+		"login": "Inloggen",
+		"seeError": "Zie foutmelding",
+		"remove": "Verwijderen",
 		"goBack": "Go back",
 		"goToServers": "Go to servers",
 		"notReady": "This feature is not ready",

@@ -13,7 +13,7 @@ import {
 	ReadingMode,
 } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
-import { Book, Rendition } from 'epubjs'
+import { Book, Contents, Rendition } from 'epubjs'
 import uniqby from 'lodash/uniqBy'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import AutoSizer from 'react-virtualized-auto-sizer'
@@ -397,7 +397,31 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 	 * @param preferences The epub reader preferences
 	 */
 	const applyEpubPreferences = useCallback(
-		(rendition: Rendition, preferences: BookPreferences) => {
+		(
+			rendition: Rendition,
+			preferences: BookPreferences,
+			lang: string,
+			pageFlipDirection: string,
+		) => {
+			// ja should be ltr no matter what because text is always written "forwards"
+			const isJaWithPageFlipRtl =
+				(lang === 'ja' || lang === 'zh-TW' || lang === 'zh-HK') && pageFlipDirection === 'rtl'
+			if (isJaWithPageFlipRtl) {
+				rendition.hooks.content.register(function (contents: Contents) {
+					const textDirection = contents.window.getComputedStyle(contents.documentElement).direction
+					if (textDirection === 'rtl') {
+						contents.addStylesheetRules(
+							{
+								'p, div, span, h1, h2, h3, h4, h5, h6, blockquote': {
+									direction: 'ltr !important',
+								},
+							},
+							'ja-ltr',
+						)
+					}
+				})
+			}
+
 			if (theme === 'dark') {
 				rendition.themes.register('stump-dark', applyTheme(stumpDark, preferences))
 				rendition.themes.select('stump-dark')
@@ -495,7 +519,10 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 				// When the epub page isn't in focus, the window fires them instead
 				window.addEventListener('keydown', keydown_callback)
 
-				applyEpubPreferences(rendition_, bookPreferences)
+				const lang = book?.packaging?.metadata?.language
+				// @ts-expect-error: PackagingMetadataObject does have property 'direction'
+				const pageFlipDirection = book?.packaging?.metadata?.direction
+				applyEpubPreferences(rendition_, bookPreferences, lang, pageFlipDirection)
 
 				setRendition(rendition_)
 

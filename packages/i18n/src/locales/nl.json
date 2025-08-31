@@ -1842,7 +1842,7 @@
 	},
 	"noLibraries": {
 		"heading": "Nothing to see here",
-		"messagePrefix": "You can't see what you don't have",
+		"messagePrefix": "Je kunt niet zien wat je niet hebt",
 		"message": {
 			"create": "Create a library to get started",
 			"wait": "Once libraries are created, they'll be displayed here"
@@ -1906,24 +1906,24 @@
 		}
 	},
 	"search": {
-		"placeholder": "Search"
+		"placeholder": "Zoeken"
 	},
 	"serverSOS": {
-		"heading": "Server Unavailable",
+		"heading": "Server niet beschikbaar",
 		"desktop": {
 			"message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device.\nIf your server URL has changed, you can update it using the form below"
 		},
 		"web": {
 			"message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device"
 		},
-		"reconnected": "Reconnected to server! Redirecting...",
-		"reconnectionFailed": "Something went wrong!"
+		"reconnected": "Opnieuw verbonden met server! Doorsturen...",
+		"reconnectionFailed": "Er is iets misgegaan!"
 	},
 	"serverStatusOverlay": {
 		"heading": "Server isn't connected",
 		"message": [
 			"Please check your internet connection",
-			"Click here",
+			"Klik hier",
 			"to change your server URL"
 		]
 	},

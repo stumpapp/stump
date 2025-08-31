@@ -1,4 +1,3 @@
-import { BookPreferences } from '@stump/client'
 import { SupportedFont } from '@stump/graphql'
 
 export interface EpubTheme {
@@ -23,64 +22,7 @@ export const stumpDark: EpubTheme = {
 	ul: { color: '#E8EDF4' },
 }
 
-export const applyTheme = (theme: EpubTheme, preferences: BookPreferences) => {
-	const fontFamily = preferences.fontFamily
-		? `${toFamilyName(preferences.fontFamily as SupportedFont)} !important`
-		: undefined
-	const fontStyles = {
-		...(fontFamily ? { 'font-family': fontFamily } : {}),
-		...(preferences.lineHeight ? { 'line-height': `${preferences.lineHeight}` } : {}),
-	}
-
-	return {
-		a: {
-			...theme.a,
-			...fontStyles,
-		},
-		blockquote: {
-			...theme.blockquote,
-			...fontStyles,
-		},
-		body: {
-			...theme.body,
-			...fontStyles,
-		},
-		h1: {
-			...theme.h1,
-			...fontStyles,
-		},
-		h2: {
-			...theme.h2,
-			...fontStyles,
-		},
-		h3: {
-			...theme.h3,
-			...fontStyles,
-		},
-		h4: {
-			...theme.h4,
-			...fontStyles,
-		},
-		h5: {
-			...theme.h5,
-			...fontStyles,
-		},
-		p: {
-			...theme.p,
-			...fontStyles,
-		},
-		span: {
-			...theme.span,
-			...fontStyles,
-		},
-		ul: {
-			...theme.ul,
-			...fontStyles,
-		},
-	}
-}
-
-const toFamilyName = (font: SupportedFont) => {
+export const toFamilyName = (font: SupportedFont) => {
 	switch (font) {
 		case SupportedFont.Inter:
 			return 'Inter var'

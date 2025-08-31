@@ -3,7 +3,13 @@ import { checkUrl, formatApiURL } from '@stump/sdk'
 import isEqual from 'lodash/isEqual'
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 import { Controller, useForm, useFormState, useWatch } from 'react-hook-form'
-import { NativeSyntheticEvent, Pressable, TextInputFocusEventData, View } from 'react-native'
+import {
+	NativeSyntheticEvent,
+	Platform,
+	Pressable,
+	TextInputFocusEventData,
+	View,
+} from 'react-native'
 import Dialog from 'react-native-dialog'
 import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable'
 import Reanimated, { SharedValue, useAnimatedStyle } from 'react-native-reanimated'
@@ -224,7 +230,7 @@ export default function AddOrEditServerForm({ editingServer, onSubmit, onClose }
 	}
 
 	return (
-		<View className="w-full gap-4">
+		<View className="w-full gap-4" style={{ paddingBottom: Platform.OS === 'android' ? 32 : 0 }}>
 			<View className="flex-row items-center justify-between pb-2">
 				<Pressable onPress={onClose}>
 					<Text className="text-foreground-muted">Cancel</Text>

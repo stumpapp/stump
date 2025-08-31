@@ -6,9 +6,10 @@ import chunk from 'lodash/chunk'
 import debounce from 'lodash/debounce'
 import { Search } from 'lucide-react-native'
 import { useCallback, useLayoutEffect, useState } from 'react'
-import { FlatList, TextInputChangeEventData, View } from 'react-native'
+import { FlatList, Platform, TextInputChangeEventData, View } from 'react-native'
 import { NativeSyntheticEvent } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { useActiveServer } from '~/components/activeServer'
 import { BookSearchItem, IBookSearchItemFragment } from '~/components/book'
@@ -174,105 +175,113 @@ export default function Screen() {
 	// TODO: Bring focus to the search input when the screen is focused, sorta like portal? Figure out what iOS does
 	// TODO: Animate list in/out instead
 	return (
-		<ScrollView className="flex-1 bg-background p-4 tablet:p-7">
-			<View className="gap-4">
-				{!!bookResults?.media.nodes.length && (
-					<View>
-						<View className="mb-1 flex flex-row items-center justify-between">
-							<Heading size="default">Books</Heading>
-							{getHasMore(bookResults?.media.pageInfo) && (
-								<Link href={`/server/${serverID}/books/search[q]?q=${searchQuery}`}>
-									<Text>See More</Text>
-								</Link>
-							)}
+		<SafeAreaView
+			style={{ flex: 1 }}
+			edges={Platform.OS === 'ios' ? ['top', 'left', 'right', 'bottom'] : ['left', 'right']}
+		>
+			<ScrollView
+				className="flex-1 bg-background p-4 tablet:p-7"
+				contentInsetAdjustmentBehavior="automatic"
+			>
+				<View className="gap-4">
+					{!!bookResults?.media.nodes.length && (
+						<View>
+							<View className="mb-1 flex flex-row items-center justify-between">
+								<Heading size="default">Books</Heading>
+								{getHasMore(bookResults?.media.pageInfo) && (
+									<Link href={`/server/${serverID}/books/search[q]?q=${searchQuery}`}>
+										<Text>See More</Text>
+									</Link>
+								)}
+							</View>
+
+							<FlatList
+								data={chunk(bookResults?.media.nodes, 3)}
+								renderItem={({ item }) => {
+									return (
+										<View>
+											{item.map((book) => (
+												<BookSearchItem
+													key={book.id}
+													book={book as IBookSearchItemFragment}
+													search={searchQuery}
+												/>
+											))}
+										</View>
+									)
+								}}
+								keyExtractor={(item) => item.map((book) => book.id).join('-')}
+								horizontal
+							/>
 						</View>
+					)}
 
-						<FlatList
-							data={chunk(bookResults?.media.nodes, 3)}
-							renderItem={({ item }) => {
-								return (
-									<View>
-										{item.map((book) => (
-											<BookSearchItem
-												key={book.id}
-												book={book as IBookSearchItemFragment}
-												search={searchQuery}
-											/>
-										))}
-									</View>
-								)
-							}}
-							keyExtractor={(item) => item.map((book) => book.id).join('-')}
-							horizontal
-						/>
-					</View>
-				)}
-
-				{!!seriesResults?.series.nodes.length && (
-					<View>
-						<View className="mb-1 flex flex-row items-center justify-between">
-							<Heading size="default">Series</Heading>
-							{/* {getHasMore(seriesResults?.series.pageInfo) && (
+					{!!seriesResults?.series.nodes.length && (
+						<View>
+							<View className="mb-1 flex flex-row items-center justify-between">
+								<Heading size="default">Series</Heading>
+								{/* {getHasMore(seriesResults?.series.pageInfo) && (
 									<Link href={`/server/${serverID}/books/search[q]?q=${searchQuery}`}>
 										See More
 									</Link>
 								)} */}
+							</View>
+
+							<FlatList
+								data={chunk(seriesResults?.series.nodes, 3)}
+								renderItem={({ item }) => {
+									return (
+										<View>
+											{item.map((series) => (
+												<SeriesSearchItem
+													key={series.id}
+													series={series as ISeriesSearchItemFragment}
+													search={searchQuery}
+												/>
+											))}
+										</View>
+									)
+								}}
+								keyExtractor={(item) => item.map((book) => book.id).join('-')}
+								horizontal
+							/>
 						</View>
+					)}
 
-						<FlatList
-							data={chunk(seriesResults?.series.nodes, 3)}
-							renderItem={({ item }) => {
-								return (
-									<View>
-										{item.map((series) => (
-											<SeriesSearchItem
-												key={series.id}
-												series={series as ISeriesSearchItemFragment}
-												search={searchQuery}
-											/>
-										))}
-									</View>
-								)
-							}}
-							keyExtractor={(item) => item.map((book) => book.id).join('-')}
-							horizontal
-						/>
-					</View>
-				)}
-
-				{!!librariesResults?.libraries.nodes.length && (
-					<View>
-						<View className="mb-1 flex flex-row items-center justify-between">
-							<Heading size="default">Libraries</Heading>
-							{/* {getHasMore(seriesResults?.series.pageInfo) && (
+					{!!librariesResults?.libraries.nodes.length && (
+						<View className="pb-4">
+							<View className="mb-1 flex flex-row items-center justify-between">
+								<Heading size="default">Libraries</Heading>
+								{/* {getHasMore(seriesResults?.series.pageInfo) && (
 									<Link href={`/server/${serverID}/books/search[q]?q=${searchQuery}`}>
 										See More
 									</Link>
 								)} */}
-						</View>
+							</View>
 
-						<FlatList
-							data={chunk(librariesResults?.libraries.nodes, 3)}
-							renderItem={({ item }) => {
-								return (
-									<View>
-										{item.map((library) => (
-											<LibrarySearchItem
-												key={library.id}
-												library={library as ILibrarySearchItemFragment}
-												search={searchQuery}
-											/>
-										))}
-									</View>
-								)
-							}}
-							keyExtractor={(item) => item.map((book) => book.id).join('-')}
-							horizontal
-						/>
-					</View>
-				)}
-			</View>
-		</ScrollView>
+							<FlatList
+								data={chunk(librariesResults?.libraries.nodes, 3)}
+								renderItem={({ item }) => {
+									return (
+										<View>
+											{item.map((library) => (
+												<LibrarySearchItem
+													key={library.id}
+													library={library as ILibrarySearchItemFragment}
+													search={searchQuery}
+												/>
+											))}
+										</View>
+									)
+								}}
+								keyExtractor={(item) => item.map((book) => book.id).join('-')}
+								horizontal
+							/>
+						</View>
+					)}
+				</View>
+			</ScrollView>
+		</SafeAreaView>
 	)
 }
 

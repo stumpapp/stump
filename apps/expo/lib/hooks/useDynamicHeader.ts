@@ -1,14 +1,20 @@
 import { useNavigation } from 'expo-router'
 import { useLayoutEffect } from 'react'
-import { Platform } from 'react-native'
+import { NativeSyntheticEvent, Platform, TextInputChangeEventData } from 'react-native'
 
 type Params = {
 	title: string
 	headerLeft?: () => React.ReactNode
 	headerRight?: () => React.ReactNode
+	headerSearchBarOptions?: {
+		placeholder: string
+		shouldShowHintSearchIcon?: boolean
+		onChangeText: (e: NativeSyntheticEvent<TextInputChangeEventData>) => void
+		onSearchButtonPress?: () => void
+	}
 }
 
-export function useDynamicHeader({ title, headerLeft, headerRight }: Params) {
+export function useDynamicHeader({ title, headerLeft, headerRight, ...rest }: Params) {
 	const navigation = useNavigation()
 	useLayoutEffect(() => {
 		navigation.setOptions({
@@ -23,6 +29,7 @@ export function useDynamicHeader({ title, headerLeft, headerRight }: Params) {
 			},
 			headerLargeTitle: true,
 			headerBlurEffect: 'regular',
+			...rest,
 		})
-	}, [navigation, title, headerLeft, headerRight])
+	}, [navigation, title, headerLeft, headerRight, rest])
 }

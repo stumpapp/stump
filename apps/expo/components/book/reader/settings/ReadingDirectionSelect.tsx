@@ -1,4 +1,4 @@
-import { ReadingDirection } from '@stump/sdk'
+import { ReadingDirection } from '@stump/graphql'
 import { useState } from 'react'
 import { View } from 'react-native'
 import * as DropdownMenu from 'zeego/dropdown-menu'
@@ -31,16 +31,16 @@ export default function ReadingDirectionSelect({ direction, onChange }: Props) {
 				<DropdownMenu.Content>
 					<DropdownMenu.CheckboxItem
 						key="ltr"
-						value={direction === 'ltr'}
-						onValueChange={() => onChange('ltr')}
+						value={direction === ReadingDirection.Ltr}
+						onValueChange={() => onChange(ReadingDirection.Ltr)}
 					>
 						<DropdownMenu.ItemTitle>Left to Right</DropdownMenu.ItemTitle>
 					</DropdownMenu.CheckboxItem>
 
 					<DropdownMenu.CheckboxItem
 						key="rtl"
-						value={direction === 'rtl'}
-						onValueChange={() => onChange('rtl')}
+						value={direction === ReadingDirection.Rtl}
+						onValueChange={() => onChange(ReadingDirection.Rtl)}
 					>
 						<DropdownMenu.ItemTitle>Right to Left</DropdownMenu.ItemTitle>
 					</DropdownMenu.CheckboxItem>

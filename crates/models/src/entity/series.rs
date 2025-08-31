@@ -55,6 +55,8 @@ pub fn get_age_restriction_filter(min_age: i32, restrict_on_unset: bool) -> Cond
 }
 
 impl Entity {
+	// TODO: This conditional join with metadata means the caller might not be able to
+	// know if they should join
 	pub fn find_for_user(user: &AuthUser) -> Select<Entity> {
 		let age_restriction_filter =
 			user.age_restriction.as_ref().map(|age_restriction| {

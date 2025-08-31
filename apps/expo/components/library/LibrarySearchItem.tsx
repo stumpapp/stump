@@ -58,7 +58,7 @@ export default function LibrarySearchItem({ library }: Props) {
 							Authorization: sdk.authorizationHeader || '',
 						},
 						resizeMode: 'fill',
-						borderRadius: 5,
+						borderRadius: 8,
 					}}
 					style={{ width: 75, height: 75 / (2 / 3) }}
 				/>

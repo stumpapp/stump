@@ -1,4 +1,4 @@
-import { ReadingMode } from '@stump/sdk'
+import { ReadingMode } from '@stump/graphql'
 import { useState } from 'react'
 import { View } from 'react-native'
 import * as DropdownMenu from 'zeego/dropdown-menu'
@@ -33,24 +33,24 @@ export default function ReadingModeSelect({ mode, onChange }: Props) {
 				<DropdownMenu.Content>
 					<DropdownMenu.CheckboxItem
 						key="paged"
-						value={mode === 'paged'}
-						onValueChange={() => onChange('paged')}
+						value={mode === ReadingMode.Paged}
+						onValueChange={() => onChange(ReadingMode.Paged)}
 					>
 						<DropdownMenu.ItemTitle>Paged</DropdownMenu.ItemTitle>
 					</DropdownMenu.CheckboxItem>
 
 					<DropdownMenu.CheckboxItem
 						key="continuous:horizontal"
-						value={mode === 'continuous:horizontal'}
-						onValueChange={() => onChange('continuous:horizontal')}
+						value={mode === ReadingMode.ContinuousHorizontal}
+						onValueChange={() => onChange(ReadingMode.ContinuousHorizontal)}
 					>
 						<DropdownMenu.ItemTitle>Scroll (Horizontal)</DropdownMenu.ItemTitle>
 					</DropdownMenu.CheckboxItem>
 
 					<DropdownMenu.CheckboxItem
 						key="continuous:vertical"
-						value={mode === 'continuous:vertical'}
-						onValueChange={() => onChange('continuous:vertical')}
+						value={mode === ReadingMode.ContinuousVertical}
+						onValueChange={() => onChange(ReadingMode.ContinuousVertical)}
 						disabled
 					>
 						<DropdownMenu.ItemTitle>Scroll (Vertical)</DropdownMenu.ItemTitle>
@@ -62,7 +62,7 @@ export default function ReadingModeSelect({ mode, onChange }: Props) {
 }
 
 const READ_FLOW: Record<ReadingMode, string> = {
-	paged: 'Paged',
-	'continuous:horizontal': 'Scroll (Horizontal)',
-	'continuous:vertical': 'Scroll (Vertical)',
+	[ReadingMode.Paged]: 'Paged',
+	[ReadingMode.ContinuousHorizontal]: 'Scroll (Horizontal)',
+	[ReadingMode.ContinuousVertical]: 'Scroll (Vertical)',
 }

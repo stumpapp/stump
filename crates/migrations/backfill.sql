@@ -7,6 +7,7 @@ ATTACH DATABASE '/replace/with/full/path/to/stump-before-migration.db' as 'backu
 -- 2. run the following SQL to copy the data from the old database to the new database:
 BEGIN;
 PRAGMA foreign_keys = OFF;
+PRAGMA defer_foreign_keys = ON;
 
 -- Libraries which users cannot access via explicit join record
 INSERT INTO "library_exclusions"("library_id", "user_id")
@@ -256,27 +257,28 @@ FROM backup."media_metadata";
 
 -- Now just go in alpha-ish order and dump everything:
 
-INSERT INTO "api_keys"(
-        "id",
-        "name",
-        "short_token",
-        "long_token_hash",
-        "permissions",
-        "created_at",
-        "last_used_at",
-        "expires_at",
-        "user_id"
-    )
-SELECT "id",
-    "name",
-    "short_token",
-    "long_token_hash",
-    "permissions",
-    "created_at",
-    "last_used_at",
-    "expires_at",
-    "user_id"
-FROM backup."api_keys";
+-- Note: It is not feasible to port over the api_keys because a few columns were changed
+-- INSERT INTO "api_keys"(
+--         "id",
+--         "name",
+--         "short_token",
+--         "long_token_hash",
+--         "permissions",
+--         "created_at",
+--         "last_used_at",
+--         "expires_at",
+--         "user_id"
+--     )
+-- SELECT "id",
+--     "name",
+--     "short_token",
+--     "long_token_hash",
+--     "permissions",
+--     "created_at",
+--     "last_used_at",
+--     "expires_at",
+--     "user_id"
+-- FROM backup."api_keys";
 
 INSERT INTO "bookmarks"(
         "id",
@@ -641,6 +643,7 @@ SELECT "public_url",
 FROM backup."server_config";
 
 PRAGMA foreign_keys = ON;
+PRAGMA defer_foreign_keys = OFF;
 PRAGMA foreign_key_check;
 COMMIT;
 

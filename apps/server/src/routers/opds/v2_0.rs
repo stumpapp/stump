@@ -361,12 +361,13 @@ async fn search(
 		.add(series::Column::Name.contains(query.clone()))
 		.add(series_metadata::Column::Title.contains(query.clone()));
 	let series = series::Entity::find_for_user(&user)
-		.filter(series_condition.clone())
 		.left_join(series_metadata::Entity)
+		.filter(series_condition.clone())
 		.limit(DEFAULT_LIMIT)
 		.all(ctx.conn.as_ref())
 		.await?;
 	let series_count = series::Entity::find_for_user(&user)
+		.left_join(series_metadata::Entity)
 		.filter(series_condition)
 		.count(ctx.conn.as_ref())
 		.await?;

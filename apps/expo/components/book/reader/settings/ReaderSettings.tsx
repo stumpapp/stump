@@ -1,7 +1,9 @@
+import { ReadingMode } from '@stump/graphql'
 import { Fragment, useCallback, useMemo } from 'react'
 import { View } from 'react-native'
 
 import { Card, Switch, Text } from '~/components/ui'
+import { cn } from '~/lib/utils'
 import { BookPreferences, GlobalSettings, useReaderStore } from '~/stores/reader'
 
 import CachePolicySelect from './CachePolicySelect'
@@ -70,7 +72,7 @@ export default function ReaderSettings({ forBook, forServer }: Props) {
 						onChange={(mode) => onPreferenceChange({ readingMode: mode })}
 					/>
 
-					{activeSettings.readingMode !== 'continuous:vertical' && (
+					{activeSettings.readingMode !== ReadingMode.ContinuousVertical && (
 						<Fragment>
 							<View className="h-px w-full bg-edge" />
 
@@ -98,6 +100,23 @@ export default function ReaderSettings({ forBook, forServer }: Props) {
 						behavior={activeSettings.doublePageBehavior || 'auto'}
 						onChange={(behavior) => onPreferenceChange({ doublePageBehavior: behavior })}
 					/>
+
+					<View className="h-px w-full bg-edge" />
+
+					<View
+						className={cn('flex flex-row items-center justify-between p-4', {
+							'opacity-50': activeSettings.doublePageBehavior === 'off',
+						})}
+					>
+						<Text>Separate Second Page</Text>
+
+						<Switch
+							checked={
+								activeSettings.secondPageSeparate && activeSettings.doublePageBehavior !== 'off'
+							}
+							onCheckedChange={(value) => onPreferenceChange({ secondPageSeparate: value })}
+						/>
+					</View>
 
 					<View className="h-px w-full bg-edge" />
 

@@ -2974,6 +2974,7 @@ export enum SupportedFont {
   AtkinsonHyperlegibleNext = 'ATKINSON_HYPERLEGIBLE_NEXT',
   Bitter = 'BITTER',
   Charis = 'CHARIS',
+  HinaMincho = 'HINA_MINCHO',
   Inter = 'INTER',
   LibreBaskerville = 'LIBRE_BASKERVILLE',
   Literata = 'LITERATA',

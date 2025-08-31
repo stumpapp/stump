@@ -457,6 +457,7 @@ pub enum SupportedFont {
 	AtkinsonHyperlegibleNext,
 	Bitter,
 	Charis,
+	HinaMincho,
 	#[default]
 	Inter,
 	LibreBaskerville,

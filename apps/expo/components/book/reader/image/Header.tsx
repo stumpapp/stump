@@ -1,7 +1,7 @@
 import { ReadingDirection, ReadingMode } from '@stump/graphql'
 import { useRouter } from 'expo-router'
 import { useCallback, useEffect, useState } from 'react'
-import { Pressable, View } from 'react-native'
+import { Platform, Pressable, View } from 'react-native'
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import * as DropdownMenu from 'zeego/dropdown-menu'
@@ -44,7 +44,7 @@ export default function Header({ onShowGlobalSettings }: Props) {
 
 	const animatedStyles = useAnimatedStyle(() => {
 		return {
-			top: insets.top,
+			top: insets.top + (Platform.OS === 'android' ? 12 : 0),
 			left: insets.left,
 			right: insets.right,
 			transform: [{ translateY: translateY.value }],

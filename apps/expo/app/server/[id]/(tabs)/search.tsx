@@ -85,6 +85,8 @@ export default function Screen() {
 	useLayoutEffect(() => {
 		navigation.setOptions({
 			headerShown: true,
+			headerTransparent: Platform.OS === 'ios',
+			headerBlurEffect: 'regular',
 			headerSearchBarOptions: {
 				placeholder: 'Search',
 				onChangeText: (e: NativeSyntheticEvent<TextInputChangeEventData>) =>
@@ -177,7 +179,7 @@ export default function Screen() {
 	return (
 		<SafeAreaView
 			style={{ flex: 1 }}
-			edges={Platform.OS === 'ios' ? ['top', 'left', 'right', 'bottom'] : ['left', 'right']}
+			edges={Platform.OS === 'ios' ? ['top', 'left', 'right'] : ['left', 'right']}
 		>
 			<ScrollView
 				className="flex-1 bg-background p-4 tablet:p-7"

@@ -22,7 +22,7 @@ export default function Screen() {
 	const [editingServer, setEditingServer] = useState<SavedServerWithConfig | null>(null)
 	const [deletingServer, setDeletingServer] = useState<SavedServer | null>(null)
 
-	const allOPDSServers = [...stumpServers.filter((server) => !!server.stumpOPDS), ...opdsServers]
+	const allOPDSServers = [...stumpServers.filter((server) => server.stumpOPDS), ...opdsServers]
 	const defaultServer = allOPDSServers.find((server) => server.defaultServer)
 
 	const [didMount, setDidMount] = useState(false)
@@ -32,16 +32,20 @@ export default function Screen() {
 		}
 	}, [didMount])
 
-	useEffect(() => {
-		if (!didMount) return
+	useEffect(
+		() => {
+			if (!didMount) return
 
-		if (defaultServer) {
-			router.push({
-				pathname: defaultServer.kind === 'stump' ? '/server/[id]' : '/opds/[id]',
-				params: { id: defaultServer.id },
-			})
-		}
-	}, [defaultServer, router, didMount])
+			if (defaultServer) {
+				router.push({
+					pathname: defaultServer.kind === 'stump' ? '/server/[id]' : '/opds/[id]',
+					params: { id: defaultServer.id },
+				})
+			}
+		},
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[router, didMount],
+	)
 
 	// const serverStatuses = useQueries({
 	// 	queries: stumpServers.map((server) => ({

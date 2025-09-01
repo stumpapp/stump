@@ -26,8 +26,8 @@ const query = graphql(`
 	query BookById($id: ID!) {
 		mediaById(id: $id) {
 			id
+			...BookMenu
 			extension
-			isFavorite
 			metadata {
 				ageRating
 				characters
@@ -122,7 +122,7 @@ export default function Screen() {
 	useLayoutEffect(() => {
 		navigation.setOptions({
 			headerLeft: () => <ChevronLeft onPress={() => navigation.goBack()} />,
-			headerRight: () => <BookActionMenu id={bookID} isFavorite={book?.isFavorite || false} />,
+			headerRight: () => (book ? <BookActionMenu data={book} /> : null),
 			headerShown: Platform.OS === 'ios',
 			headerTransparent: true,
 			headerTitle: Platform.OS === 'ios' ? book?.resolvedName : '',
@@ -221,15 +221,20 @@ export default function Screen() {
 	return (
 		<SafeAreaView
 			style={{ flex: 1 }}
-			edges={Platform.OS === 'ios' ? ['top', 'left', 'right'] : ['left', 'right']}
+			edges={Platform.OS === 'ios' ? ['top', 'left', 'right'] : ['top', 'left', 'right', 'bottom']}
 		>
 			<ScrollView
-				className="flex-1 bg-background px-6 pb-3"
+				className="flex-1 bg-background px-6"
 				refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
 				contentInsetAdjustmentBehavior="automatic"
 			>
 				<View className="flex-1 gap-8">
-					<View className="mt-6 flex items-center gap-4">
+					{Platform.OS === 'android' && book && (
+						<View className="flex flex-row justify-end">
+							<BookActionMenu data={book} />
+						</View>
+					)}
+					<View className="flex items-center gap-4">
 						{Platform.OS === 'android' && (
 							<Heading size="lg" className="leading-6">
 								{book.resolvedName}

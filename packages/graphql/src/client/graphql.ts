@@ -992,6 +992,7 @@ export type Media = {
   koreaderHash?: Maybe<Scalars['String']['output']>;
   library: Library;
   libraryConfig: LibraryConfig;
+  libraryId: Scalars['String']['output'];
   metadata?: Maybe<MediaMetadata>;
   /**
    * The timestamp of when the underlying file was last modified on disk. This will only be set if
@@ -3291,7 +3292,10 @@ export type BookByIdQueryVariables = Exact<{
 }>;
 
 
-export type BookByIdQuery = { __typename?: 'Query', mediaById?: { __typename?: 'Media', id: string, extension: string, isFavorite: boolean, pages: number, resolvedName: string, size: number, metadata?: { __typename?: 'MediaMetadata', ageRating?: number | null, characters: Array<string>, colorists: Array<string>, coverArtists: Array<string>, day?: number | null, editors: Array<string>, identifierAmazon?: string | null, identifierCalibre?: string | null, identifierGoogle?: string | null, identifierIsbn?: string | null, identifierMobiAsin?: string | null, identifierUuid?: string | null, genres: Array<string>, inkers: Array<string>, language?: string | null, letterers: Array<string>, links: Array<string>, month?: number | null, notes?: string | null, number?: any | null, pageCount?: number | null, pencillers: Array<string>, publisher?: string | null, series?: string | null, summary?: string | null, teams: Array<string>, title?: string | null, titleSort?: string | null, volume?: number | null, writers: Array<string>, year?: number | null } | null, readProgress?: { __typename?: 'ActiveReadingSession', page?: number | null, percentageCompleted?: any | null, epubcfi?: string | null, startedAt: any, elapsedSeconds?: number | null } | null, readHistory: Array<{ __typename?: 'FinishedReadingSession', completedAt: any }>, series: { __typename?: 'Series', resolvedName: string }, thumbnail: { __typename?: 'ImageRef', url: string } } | null };
+export type BookByIdQuery = { __typename?: 'Query', mediaById?: (
+    { __typename?: 'Media', id: string, extension: string, pages: number, resolvedName: string, size: number, metadata?: { __typename?: 'MediaMetadata', ageRating?: number | null, characters: Array<string>, colorists: Array<string>, coverArtists: Array<string>, day?: number | null, editors: Array<string>, identifierAmazon?: string | null, identifierCalibre?: string | null, identifierGoogle?: string | null, identifierIsbn?: string | null, identifierMobiAsin?: string | null, identifierUuid?: string | null, genres: Array<string>, inkers: Array<string>, language?: string | null, letterers: Array<string>, links: Array<string>, month?: number | null, notes?: string | null, number?: any | null, pageCount?: number | null, pencillers: Array<string>, publisher?: string | null, series?: string | null, summary?: string | null, teams: Array<string>, title?: string | null, titleSort?: string | null, volume?: number | null, writers: Array<string>, year?: number | null } | null, readProgress?: { __typename?: 'ActiveReadingSession', page?: number | null, percentageCompleted?: any | null, epubcfi?: string | null, startedAt: any, elapsedSeconds?: number | null } | null, readHistory: Array<{ __typename?: 'FinishedReadingSession', completedAt: any }>, series: { __typename?: 'Series', resolvedName: string }, thumbnail: { __typename?: 'ImageRef', url: string } }
+    & { ' $fragmentRefs'?: { 'BookMenuFragment': BookMenuFragment } }
+  ) | null };
 
 export type BookReadScreenQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -3417,6 +3421,31 @@ export type StackedBookThumbnailsQueryVariables = Exact<{ [key: string]: never; 
 
 
 export type StackedBookThumbnailsQuery = { __typename?: 'Query', media: { __typename?: 'PaginatedMediaResponse', nodes: Array<{ __typename?: 'Media', id: string, thumbnail: { __typename?: 'ImageRef', url: string } }> } };
+
+export type BookMenuFragment = { __typename?: 'Media', id: string, isFavorite: boolean, library: { __typename?: 'Library', id: string, name: string }, series: { __typename?: 'Series', id: string, resolvedName: string }, readProgress?: { __typename: 'ActiveReadingSession' } | null, readHistory: Array<{ __typename: 'FinishedReadingSession' }> } & { ' $fragmentName'?: 'BookMenuFragment' };
+
+export type BookMenuCompleteMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  isComplete: Scalars['Boolean']['input'];
+  page?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type BookMenuCompleteMutation = { __typename?: 'Mutation', markMediaAsComplete?: { __typename?: 'FinishedReadingSessionModel', completedAt: any } | null };
+
+export type BookMenuDeleteSessionMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type BookMenuDeleteSessionMutation = { __typename?: 'Mutation', deleteMediaProgress: { __typename: 'Media' } };
+
+export type BookMenuDeleteHistoryMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type BookMenuDeleteHistoryMutation = { __typename?: 'Mutation', deleteMediaReadHistory: { __typename: 'Media' } };
 
 export type LibraryGridItemFragment = { __typename?: 'Library', id: string, name: string, thumbnail: { __typename?: 'ImageRef', url: string } } & { ' $fragmentName'?: 'LibraryGridItemFragment' };
 
@@ -4559,6 +4588,26 @@ export const BookSearchItemFragmentDoc = new TypedDocumentString(`
   pages
 }
     `, {"fragmentName":"BookSearchItem"}) as unknown as TypedDocumentString<BookSearchItemFragment, unknown>;
+export const BookMenuFragmentDoc = new TypedDocumentString(`
+    fragment BookMenu on Media {
+  id
+  isFavorite
+  library {
+    id
+    name
+  }
+  series {
+    id
+    resolvedName
+  }
+  readProgress {
+    __typename
+  }
+  readHistory {
+    __typename
+  }
+}
+    `, {"fragmentName":"BookMenu"}) as unknown as TypedDocumentString<BookMenuFragment, unknown>;
 export const LibraryGridItemFragmentDoc = new TypedDocumentString(`
     fragment LibraryGridItem on Library {
   id
@@ -4880,8 +4929,8 @@ export const BookByIdDocument = new TypedDocumentString(`
     query BookById($id: ID!) {
   mediaById(id: $id) {
     id
+    ...BookMenu
     extension
-    isFavorite
     metadata {
       ageRating
       characters
@@ -4936,7 +4985,24 @@ export const BookByIdDocument = new TypedDocumentString(`
     }
   }
 }
-    `) as unknown as TypedDocumentString<BookByIdQuery, BookByIdQueryVariables>;
+    fragment BookMenu on Media {
+  id
+  isFavorite
+  library {
+    id
+    name
+  }
+  series {
+    id
+    resolvedName
+  }
+  readProgress {
+    __typename
+  }
+  readHistory {
+    __typename
+  }
+}`) as unknown as TypedDocumentString<BookByIdQuery, BookByIdQueryVariables>;
 export const BookReadScreenDocument = new TypedDocumentString(`
     query BookReadScreen($id: ID!) {
   mediaById(id: $id) {
@@ -5206,6 +5272,27 @@ export const StackedBookThumbnailsDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<StackedBookThumbnailsQuery, StackedBookThumbnailsQueryVariables>;
+export const BookMenuCompleteDocument = new TypedDocumentString(`
+    mutation BookMenuComplete($id: ID!, $isComplete: Boolean!, $page: Int) {
+  markMediaAsComplete(id: $id, isComplete: $isComplete, page: $page) {
+    completedAt
+  }
+}
+    `) as unknown as TypedDocumentString<BookMenuCompleteMutation, BookMenuCompleteMutationVariables>;
+export const BookMenuDeleteSessionDocument = new TypedDocumentString(`
+    mutation BookMenuDeleteSession($id: ID!) {
+  deleteMediaProgress(id: $id) {
+    __typename
+  }
+}
+    `) as unknown as TypedDocumentString<BookMenuDeleteSessionMutation, BookMenuDeleteSessionMutationVariables>;
+export const BookMenuDeleteHistoryDocument = new TypedDocumentString(`
+    mutation BookMenuDeleteHistory($id: ID!) {
+  deleteMediaReadHistory(id: $id) {
+    __typename
+  }
+}
+    `) as unknown as TypedDocumentString<BookMenuDeleteHistoryMutation, BookMenuDeleteHistoryMutationVariables>;
 export const StackedLibraryThumbnailsDocument = new TypedDocumentString(`
     query StackedLibraryThumbnails {
   libraries(pagination: {none: {unpaginated: true}}) {

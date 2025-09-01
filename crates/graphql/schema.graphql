@@ -960,6 +960,7 @@ type Media {
 	isFavorite: Boolean!
 	tags: [Tag!]!
 	series: Series!
+	libraryId: String!
 	library: Library!
 	libraryConfig: LibraryConfig!
 	"""

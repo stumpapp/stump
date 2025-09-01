@@ -93,6 +93,30 @@ impl Media {
 		Ok(series)
 	}
 
+	async fn library_id(&self, ctx: &Context<'_>) -> Result<String> {
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let series_id = self.model.series_id.clone().ok_or("Series ID not set")?;
+		let id: String = library::Entity::find()
+			.select_only()
+			.column(library::Column::Id)
+			.filter(
+				library::Column::Id.in_subquery(
+					Query::select()
+						.column(series::Column::LibraryId)
+						.from(series::Entity)
+						.and_where(series::Column::Id.eq(series_id))
+						.to_owned(),
+				),
+			)
+			.into_tuple()
+			.one(conn)
+			.await?
+			.ok_or("Library not found")?;
+
+		Ok(id)
+	}
+
 	async fn library(&self, ctx: &Context<'_>) -> Result<Library> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 

@@ -246,7 +246,9 @@ export const useSavedServers = () => {
 	)
 
 	return {
-		savedServers: showStumpServers ? servers : servers.filter((server) => server.kind !== 'stump'),
+		savedServers: showStumpServers
+			? servers
+			: servers.filter((server) => server.kind !== 'stump' || server.stumpOPDS),
 		stumpEnabled: showStumpServers,
 		setStumpEnabled,
 		createServer,

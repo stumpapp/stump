@@ -3,6 +3,7 @@ import { useColorScheme } from 'nativewind'
 import { useCallback, useMemo, useRef, useState } from 'react'
 import { Pressable, View } from 'react-native'
 import { useSharedValue } from 'react-native-reanimated'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { cn } from '~/lib/utils'
 import { useSavedServers } from '~/stores'
@@ -54,6 +55,8 @@ export default function AddServerDialog() {
 		[isOpen],
 	)
 
+	const insets = useSafeAreaInsets()
+
 	return (
 		<View>
 			<Pressable onPress={handlePresentModalPress}>
@@ -86,7 +89,12 @@ export default function AddServerDialog() {
 				)}
 			>
 				<BottomSheet.ScrollView className="flex-1 gap-4 bg-background p-6">
-					<View className="w-full gap-4">
+					<View
+						className="w-full gap-4"
+						style={{
+							paddingBottom: insets.bottom,
+						}}
+					>
 						<AddOrEditServerForm
 							onSubmit={onSubmit}
 							onClose={() => {

@@ -17,7 +17,7 @@ import { Text } from '~/components/ui/text'
 
 export default function Screen() {
 	return (
-		<ScrollView className="flex-1 bg-background">
+		<ScrollView className="flex-1 bg-background" contentInsetAdjustmentBehavior="automatic">
 			<View className="flex-1 gap-8 bg-background p-6">
 				<View>
 					<Text className="mb-3 text-foreground-muted">Preferences</Text>

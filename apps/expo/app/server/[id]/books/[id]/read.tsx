@@ -2,12 +2,12 @@ import {
 	ARCHIVE_EXTENSION,
 	EBOOK_EXTENSION,
 	PDF_EXTENSION,
-	queryClient,
 	useGraphQLMutation,
 	useSDK,
 	useSuspenseGraphQL,
 } from '@stump/client'
-import { graphql } from '@stump/graphql'
+import { Dimension, graphql } from '@stump/graphql'
+import { useQueryClient } from '@tanstack/react-query'
 import { useKeepAwake } from 'expo-keep-awake'
 import * as NavigationBar from 'expo-navigation-bar'
 import { useLocalSearchParams } from 'expo-router'
@@ -69,6 +69,7 @@ export default function Screen() {
 	} = useSuspenseGraphQL(query, ['readBook', bookID], {
 		id: bookID,
 	})
+	const queryClient = useQueryClient()
 
 	if (!book) {
 		throw new Error('Book not found')
@@ -198,7 +199,8 @@ export default function Screen() {
 					preferSmallImages
 						? (page: number) =>
 								sdk.media.bookPageURL(book.id, page, {
-									height: 600,
+									dimension: Dimension.Height,
+									size: 600,
 								})
 						: undefined
 				}

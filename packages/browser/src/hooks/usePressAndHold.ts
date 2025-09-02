@@ -53,8 +53,7 @@ export function usePressAndHold({ intervalMs = 100 }: Params = {}) {
 	 */
 	const bindButton = useCallback(
 		({ callback }: { callback: () => void }) => ({
-			onMouseDown: () => start(callback),
-			onTouchStart: () => start(callback),
+			onPointerDown: () => start(callback),
 		}),
 		[start],
 	)

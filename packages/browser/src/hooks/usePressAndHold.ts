@@ -20,8 +20,7 @@ export function usePressAndHold({ intervalMs = 100 }: Params = {}) {
 			intervalRef.current = null
 		}
 		setIsHolding(false)
-		window.removeEventListener('mouseup', stop)
-		window.removeEventListener('touchend', stop)
+		window.removeEventListener('pointerup', stop)
 		window.removeEventListener('touchcancel', stop)
 	}, [])
 
@@ -36,8 +35,7 @@ export function usePressAndHold({ intervalMs = 100 }: Params = {}) {
 			setIsHolding(true)
 			callback()
 			intervalRef.current = setInterval(callback, intervalMs)
-			window.addEventListener('mouseup', stop)
-			window.addEventListener('touchend', stop)
+			window.addEventListener('pointerup', stop)
 			window.addEventListener('touchcancel', stop)
 		},
 		[intervalMs, stop],

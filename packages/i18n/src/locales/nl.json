@@ -81,24 +81,24 @@
 				"description": "Een korte, optionele beschrijving van je boekenclub"
 			},
 			"is_private": {
-				"label": "Private club",
-				"description": "If enabled, only users you invite will be able to join your book club"
+				"label": "Privéclub",
+				"description": "Als je dit aanzet, kunnen alleen mensen die jij uitnodigt lid worden van je boekenclub"
 			},
 			"member_role_spec": {
-				"heading": "Custom role mapping",
+				"heading": "Aangepaste roltoewijzing",
 				"subtitle": [
-					"You can create custom names for the roles in your book club if you'd like. For more information, refer to the",
+					"Je kunt zelf namen verzinnen voor de rollen in je boekenclub als je dat leuk vindt. Voor meer info kun je kijken bij de",
 					"documentatie"
 				],
 				"member": {
 					"label": "Gebruiker",
 					"placeholder": "Gebruiker",
-					"description": "The name of the default role for your book club"
+					"description": "De naam van de standaardrol voor je boekenclub"
 				},
 				"moderator": {
 					"label": "Moderator",
 					"placeholder": "Moderator",
-					"description": "The name of the moderator role for your book club"
+					"description": "De naam van de moderatorrol voor je boekenclub"
 				},
 				"admin": {
 					"label": "Beheerder",

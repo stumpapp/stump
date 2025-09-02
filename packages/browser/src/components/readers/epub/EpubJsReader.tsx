@@ -509,21 +509,6 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 
 				rendition_.on('relocated', handleLocationChange)
 
-				// This callback is used to change the page when a keydown event is received.
-				const keydown_callback = (event: KeyboardEvent) => {
-					// Check arrow keys
-					if (event.key == 'ArrowLeft') {
-						rendition_.prev()
-					}
-					if (event.key == 'ArrowRight') {
-						rendition_.next()
-					}
-				}
-				// The rendition fires keydown events when the epub page is in focus
-				rendition_.on('keydown', keydown_callback)
-				// When the epub page isn't in focus, the window fires them instead
-				window.addEventListener('keydown', keydown_callback)
-
 				const lang = book?.packaging?.metadata?.language
 				// @ts-expect-error: PackagingMetadataObject does have property 'direction'
 				const pageFlipDirection = book?.packaging?.metadata?.direction
@@ -552,6 +537,23 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 		ebook,
 		generateLocations,
 	])
+
+	/** This effect handles page turning via keyboard keys */
+	useEffect(() => {
+		const handleKeyDown = (event: KeyboardEvent) => {
+			if (event.key === 'ArrowLeft') {
+				rendition?.prev()
+			} else if (event.key === 'ArrowRight') {
+				rendition?.next()
+			}
+		}
+		window.addEventListener('keydown', handleKeyDown, { capture: true })
+		rendition?.on('keydown', handleKeyDown)
+		return () => {
+			window.removeEventListener('keydown', handleKeyDown, { capture: true })
+			rendition?.off('keydown', handleKeyDown)
+		}
+	}, [rendition])
 
 	// I'm hopeful this solves: https://github.com/stumpapp/stump/issues/726
 	// Honestly though epub.js is such a migraine that I'm OK just waiting until

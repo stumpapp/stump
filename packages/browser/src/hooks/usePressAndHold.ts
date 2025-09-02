@@ -21,7 +21,7 @@ export function usePressAndHold({ intervalMs = 100 }: Params = {}) {
 		}
 		setIsHolding(false)
 		window.removeEventListener('pointerup', stop)
-		window.removeEventListener('touchcancel', stop)
+		window.removeEventListener('pointercancel', stop)
 	}, [])
 
 	/**
@@ -36,7 +36,7 @@ export function usePressAndHold({ intervalMs = 100 }: Params = {}) {
 			callback()
 			intervalRef.current = setInterval(callback, intervalMs)
 			window.addEventListener('pointerup', stop)
-			window.addEventListener('touchcancel', stop)
+			window.addEventListener('pointercancel', stop)
 		},
 		[intervalMs, stop],
 	)

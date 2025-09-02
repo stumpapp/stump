@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react'
+import { useCallback, useRef, useState } from 'react'
 
 type Params = {
 	intervalMs?: number
@@ -9,20 +9,7 @@ type Params = {
  */
 export function usePressAndHold({ intervalMs = 100 }: Params = {}) {
 	const intervalRef = useRef<NodeJS.Timeout | null>(null)
-
-	/**
-	 * Start the press and hold event, using the given callback. The callback will be
-	 * called every `intervalMs` milliseconds.
-	 */
-	const start = useCallback(
-		(callback: () => void) => {
-			if (intervalRef.current) return
-
-			callback()
-			intervalRef.current = setInterval(callback, intervalMs)
-		},
-		[intervalMs],
-	)
+	const [isHolding, setIsHolding] = useState(false)
 
 	/**
 	 * Stop the press and hold event. This will clear the interval.
@@ -32,23 +19,45 @@ export function usePressAndHold({ intervalMs = 100 }: Params = {}) {
 			clearTimeout(intervalRef.current)
 			intervalRef.current = null
 		}
+		setIsHolding(false)
+		window.removeEventListener('mouseup', stop)
+		window.removeEventListener('touchend', stop)
+		window.removeEventListener('touchcancel', stop)
 	}, [])
+
+	/**
+	 * Start the press and hold event, using the given callback. The callback will be
+	 * called every `intervalMs` milliseconds.
+	 */
+	const start = useCallback(
+		(callback: () => void) => {
+			if (intervalRef.current) return
+
+			setIsHolding(true)
+			callback()
+			intervalRef.current = setInterval(callback, intervalMs)
+			window.addEventListener('mouseup', stop)
+			window.addEventListener('touchend', stop)
+			window.addEventListener('touchcancel', stop)
+		},
+		[intervalMs, stop],
+	)
 
 	/**
 	 * A utility function that returns the necessary props for creating a press and hold
 	 * event on a button. The general idea is:
 	 *
 	 * 1. When the mouse is pressed down, start the press and hold event
-	 * 2. When the mouse is released, stop the press and hold event
+	 * 2. Even if the mouse moves off the button, it will still be held
+	 * 3. When the mouse is released, stop the press and hold event
 	 */
 	const bindButton = useCallback(
 		({ callback }: { callback: () => void }) => ({
 			onMouseDown: () => start(callback),
-			onMouseLeave: stop,
-			onMouseUp: stop,
+			onTouchStart: () => start(callback),
 		}),
-		[start, stop],
+		[start],
 	)
 
-	return { bindButton, start, stop }
+	return { bindButton, isHolding, start, stop }
 }

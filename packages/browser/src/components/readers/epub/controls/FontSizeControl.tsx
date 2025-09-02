@@ -1,4 +1,4 @@
-import { cx, Label, Text, TEXT_VARIANTS } from '@stump/components'
+import { cx, IconButton, Label, Text, TEXT_VARIANTS } from '@stump/components'
 import { Minus, Plus } from 'lucide-react'
 import { useCallback, useEffect, useRef } from 'react'
 
@@ -31,7 +31,8 @@ export default function FontSizeControl() {
 		[setBookPreferences],
 	)
 
-	const { bindButton } = usePressAndHold()
+	const { bindButton: bindMinus, isHolding: isHoldingMinus } = usePressAndHold()
+	const { bindButton: bindPlus, isHolding: isHoldingPlus } = usePressAndHold()
 
 	/**
 	 * Used to preview the font size as it will be displayed in the reader. The max
@@ -44,28 +45,32 @@ export default function FontSizeControl() {
 		<div className="flex flex-col gap-y-2.5">
 			<Label>Font size</Label>
 			<div className="flex items-center gap-x-2">
-				<button
-					{...bindButton({
+				<IconButton
+					{...bindMinus({
 						callback: () => handleSetFontSize(fontSizeRef.current - 1),
 					})}
-					className={cx('text-base', TEXT_VARIANTS.secondary)}
+					variant="ghost"
+					size="xs"
+					className={isHoldingMinus ? 'select-none bg-background-surface-hover' : ''}
 				>
-					<Minus className="h-3 w-3" />
-				</button>
+					<Minus className="h-4 w-4" />
+				</IconButton>
 				<span
 					className={cx('flex items-center justify-center', TEXT_VARIANTS.default)}
 					style={{ fontSize: `${displayedFontSize}px` }}
 				>
 					{fontSize}px
 				</span>
-				<button
-					{...bindButton({
+				<IconButton
+					{...bindPlus({
 						callback: () => handleSetFontSize(fontSizeRef.current + 1),
 					})}
-					className={cx('text-base', TEXT_VARIANTS.secondary)}
+					variant="ghost"
+					size="xs"
+					className={isHoldingPlus ? 'select-none bg-background-surface-hover' : ''}
 				>
-					<Plus className="h-3 w-3" />
-				</button>
+					<Plus className="h-4 w-4" />
+				</IconButton>
 			</div>
 			{fontSize > 50 && (
 				<Text size="xs" className="text-left" variant="muted">

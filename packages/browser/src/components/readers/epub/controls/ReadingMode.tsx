@@ -1,5 +1,5 @@
 import { Label, NativeSelect } from '@stump/components'
-import { ReadingMode as ReadingModeType } from '@stump/sdk'
+import { ReadingMode as ReadingModeType } from '@stump/graphql'
 
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
@@ -25,8 +25,8 @@ export default function ReadingMode() {
 				id="reading-mode"
 				size="sm"
 				options={[
-					{ label: 'Paged', value: 'paged' },
-					{ label: 'Continuous', value: 'continuous:vertical' },
+					{ label: 'Paged', value: ReadingModeType.Paged },
+					{ label: 'Continuous', value: ReadingModeType.ContinuousVertical },
 				]}
 				value={readingMode}
 				onChange={handleChange}

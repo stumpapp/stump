@@ -1,10 +1,4 @@
-import {
-	BookPreferences,
-	queryClient,
-	useGraphQLMutation,
-	useSDK,
-	useSuspenseGraphQL,
-} from '@stump/client'
+import { queryClient, useGraphQLMutation, useSDK, useSuspenseGraphQL } from '@stump/client'
 import {
 	Bookmark,
 	EpubJsReaderQuery,
@@ -198,9 +192,9 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 	const [currentLocation, setCurrentLocation] = useState<EpubLocationState>()
 	const [isInitialLoading, setIsInitialLoading] = useState(true)
 
-	const { bookPreferences } = useBookPreferences({
-		book: ebook.media,
-	})
+	const {
+		bookPreferences: { fontSize, lineHeight, fontFamily, readingMode },
+	} = useBookPreferences({ book: ebook.media })
 
 	const client = useQueryClient()
 	const { mutate } = useGraphQLMutation(mutation, {
@@ -398,12 +392,7 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 	 * @param preferences The epub reader preferences
 	 */
 	const applyEpubPreferences = useCallback(
-		(
-			rendition: Rendition,
-			preferences: BookPreferences,
-			lang: string,
-			pageFlipDirection: string,
-		) => {
+		(rendition: Rendition, readingMode: ReadingMode, lang: string, pageFlipDirection: string) => {
 			// ja should be ltr no matter what because text is always written "forwards"
 			const isJaWithPageFlipRtl =
 				(lang === 'ja' || lang === 'zh-TW' || lang === 'zh-HK') && pageFlipDirection === 'rtl'
@@ -430,10 +419,10 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 				rendition.themes.register('stump-light', {})
 				rendition.themes.select('stump-light')
 			}
-			rendition.direction(preferences.readingDirection === 'RTL' ? 'rtl' : 'ltr')
+
 			// Set flow based on reading mode
-			if (preferences.readingMode === ReadingMode.ContinuousVertical) {
-				rendition.flow('scrolled-doc')
+			if (readingMode === ReadingMode.ContinuousVertical) {
+				rendition.flow('scrolled')
 			} else {
 				// Default to paginated for 'paged' mode
 				rendition.flow('paginated')
@@ -510,7 +499,11 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 					await generateLocations(book)
 				}
 
-				const rendition_ = book.renderTo(ref.current!, { width, height })
+				const rendition_ = book.renderTo(ref.current!, {
+					width: width,
+					height: height,
+					overflow: readingMode === ReadingMode.ContinuousVertical ? 'scroll' : 'hidden',
+				})
 
 				rendition_.hooks.content.register(() => {
 					injectFontStylesheet(rendition_)
@@ -541,7 +534,7 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 				const lang = book?.packaging?.metadata?.language
 				// @ts-expect-error: PackagingMetadataObject does have property 'direction'
 				const pageFlipDirection = book?.packaging?.metadata?.direction
-				applyEpubPreferences(rendition_, bookPreferences, lang, pageFlipDirection)
+				applyEpubPreferences(rendition_, readingMode, lang, pageFlipDirection)
 
 				setRendition(rendition_)
 
@@ -560,7 +553,7 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 	}, [
 		book,
 		applyEpubPreferences,
-		bookPreferences,
+		readingMode,
 		handleLocationChange,
 		isIncognito,
 		ebook,
@@ -605,7 +598,6 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 		}
 	}, [rendition])
 
-	const { fontSize, lineHeight, fontFamily } = bookPreferences
 	/**
 	 * This effect is responsible for updating the epub theme options whenever the epub
 	 * preferences change. It will only run when the epub preferences change and the
@@ -615,6 +607,23 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 		if (!rendition) return
 		updateEpubPreferences(rendition, fontSize, lineHeight, fontFamily)
 	}, [rendition, fontSize, fontFamily, lineHeight, updateEpubPreferences])
+
+	/**
+	 * This effect updates the reading mode
+	 *
+	 * For 'scrolled' mode: 'scroll' removes the horizontal scroll bar that appears due to the vertical scroll bar taking some space
+	 * For 'paginated' mode: we must put back 'hidden', otherwise 'scroll' makes horizontal a scroll bar appear
+	 */
+	useEffect(() => {
+		// @ts-expect-error: Property 'manager' does exist on type 'Rendition'
+		if (!rendition || !rendition.manager) return
+
+		const flowStyle = readingMode === ReadingMode.ContinuousVertical ? 'scrolled' : 'paginated'
+		const overflowStyle = readingMode === ReadingMode.ContinuousVertical ? 'scroll' : 'hidden'
+		rendition.flow(flowStyle)
+		// @ts-expect-error: Property 'manager' does exist on type 'Rendition'
+		rendition.manager.stage.overflow(overflowStyle)
+	}, [rendition, readingMode])
 
 	/**
 	 * Invalidate the book query when a reader is unmounted so that the book overview

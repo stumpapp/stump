@@ -1,3 +1,5 @@
+import 'tsx/cjs'
+
 import type { ConfigContext, ExpoConfig } from 'expo/config'
 
 export default ({ config }: ConfigContext): ExpoConfig => {
@@ -95,6 +97,14 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 					android: {
 						image: './assets/images/splash-icon.png',
 					},
+				},
+			],
+			[
+				'./plugins/withDrawableAssets.ts',
+				{
+					sourceDir: 'assets/icons',
+					extensions: ['.svg'],
+					createDensityFolders: false,
 				},
 			],
 		],

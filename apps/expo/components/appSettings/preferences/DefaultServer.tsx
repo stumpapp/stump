@@ -1,13 +1,14 @@
-import { ChevronsUpDown } from 'lucide-react-native'
 import { useState } from 'react'
 import { View } from 'react-native'
 import * as DropdownMenu from 'zeego/dropdown-menu'
 
-import { Text } from '~/components/ui'
+import { icons, Text } from '~/components/ui'
 import { cn } from '~/lib/utils'
 import { useSavedServers } from '~/stores'
 
 import AppSettingsRow from '../AppSettingsRow'
+
+const { ChevronsUpDown } = icons
 
 export default function DefaultServer() {
 	const [isOpen, setIsOpen] = useState(false)

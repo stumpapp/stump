@@ -123,6 +123,8 @@ export default function BookMenu({ data }: Props) {
 
 	const [isOpen, setIsOpen] = useState(false)
 
+	// https://docs.expo.dev/versions/latest/sdk/symbols/
+	// https://github.com/nandorojo/zeego/issues/90
 	return (
 		<DropdownMenu.Root open={isOpen} onOpenChange={setIsOpen}>
 			<DropdownMenu.Trigger>
@@ -139,7 +141,10 @@ export default function BookMenu({ data }: Props) {
 				<DropdownMenu.Item key="isFavorite" onSelect={() => favoriteBook()}>
 					<DropdownMenu.ItemIndicator />
 					<DropdownMenu.ItemTitle>{isFavorite ? 'Unfavorite' : 'Favorite'}</DropdownMenu.ItemTitle>
-					<DropdownMenu.ItemIcon ios={{ name: isFavorite ? 'heart.fill' : 'heart' }} />
+					<DropdownMenu.ItemIcon
+						ios={{ name: isFavorite ? 'heart.fill' : 'heart' }}
+						androidIconName="favorite"
+					/>
 				</DropdownMenu.Item>
 
 				<DropdownMenu.Group>

@@ -19,6 +19,8 @@ import { Heading, Text } from '~/components/ui'
 
 import { prefetchBookSearch } from '../books/search[q]'
 
+// TODO: Put in a stack and push for search
+
 const mediaQuery = graphql(`
 	query SearchMedia($filter: MediaFilterInput!) {
 		media(filter: $filter, pagination: { cursor: { limit: 10 } }) {

@@ -7,7 +7,7 @@ import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router'
 import { ChevronLeft } from 'lucide-react-native'
 import { useLayoutEffect } from 'react'
 import { Platform, View } from 'react-native'
-import { ScrollView } from 'react-native-gesture-handler'
+import { Pressable, ScrollView } from 'react-native-gesture-handler'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { useActiveServer } from '~/components/activeServer'
@@ -230,7 +230,11 @@ export default function Screen() {
 			>
 				<View className="flex-1 gap-8">
 					{Platform.OS === 'android' && book && (
-						<View className="flex flex-row justify-end">
+						<View className="flex flex-row justify-between pt-2">
+							<Pressable onPress={() => router.back()}>
+								<ChevronLeft className="h-6 w-6" />
+							</Pressable>
+
 							<BookActionMenu data={book} />
 						</View>
 					)}

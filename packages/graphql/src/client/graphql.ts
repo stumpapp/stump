@@ -3456,6 +3456,16 @@ export type StackedLibraryThumbnailsQueryVariables = Exact<{ [key: string]: neve
 
 export type StackedLibraryThumbnailsQuery = { __typename?: 'Query', libraries: { __typename?: 'PaginatedLibraryResponse', nodes: Array<{ __typename?: 'Library', id: string, thumbnail: { __typename?: 'ImageRef', url: string } }> } };
 
+export type RecentlyAddedSeriesGridQueryVariables = Exact<{
+  pagination?: InputMaybe<Pagination>;
+}>;
+
+
+export type RecentlyAddedSeriesGridQuery = { __typename?: 'Query', series: { __typename?: 'PaginatedSeriesResponse', nodes: Array<(
+      { __typename?: 'Series', id: string }
+      & { ' $fragmentRefs'?: { 'SeriesGridItemFragment': SeriesGridItemFragment } }
+    )>, pageInfo: { __typename: 'CursorPaginationInfo', currentCursor?: string | null, nextCursor?: string | null, limit: number } | { __typename: 'OffsetPaginationInfo' } } };
+
 export type SeriesGridItemFragment = { __typename?: 'Series', id: string, resolvedName: string, thumbnail: { __typename?: 'ImageRef', url: string } } & { ' $fragmentName'?: 'SeriesGridItemFragment' };
 
 export type SeriesSearchItemFragment = { __typename?: 'Series', id: string, resolvedName: string, readCount: number, mediaCount: number, percentageCompleted: number, thumbnail: { __typename?: 'ImageRef', url: string } } & { ' $fragmentName'?: 'SeriesSearchItemFragment' };
@@ -5305,6 +5315,33 @@ export const StackedLibraryThumbnailsDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<StackedLibraryThumbnailsQuery, StackedLibraryThumbnailsQueryVariables>;
+export const RecentlyAddedSeriesGridDocument = new TypedDocumentString(`
+    query RecentlyAddedSeriesGrid($pagination: Pagination) {
+  series(
+    pagination: $pagination
+    orderBy: {series: {field: CREATED_AT, direction: DESC}}
+  ) {
+    nodes {
+      id
+      ...SeriesGridItem
+    }
+    pageInfo {
+      __typename
+      ... on CursorPaginationInfo {
+        currentCursor
+        nextCursor
+        limit
+      }
+    }
+  }
+}
+    fragment SeriesGridItem on Series {
+  id
+  resolvedName
+  thumbnail {
+    url
+  }
+}`) as unknown as TypedDocumentString<RecentlyAddedSeriesGridQuery, RecentlyAddedSeriesGridQueryVariables>;
 export const StackedSeriesThumbnailsDocument = new TypedDocumentString(`
     query StackedSeriesThumbnails {
   series(pagination: {cursor: {limit: 1}}) {

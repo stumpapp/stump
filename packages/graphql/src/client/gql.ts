@@ -43,6 +43,7 @@ type Documents = {
     "\n\tfragment LibraryGridItem on Library {\n\t\tid\n\t\tname\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t}\n": typeof types.LibraryGridItemFragmentDoc,
     "\n\tfragment LibrarySearchItem on Library {\n\t\tid\n\t\tname\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t}\n": typeof types.LibrarySearchItemFragmentDoc,
     "\n\tquery StackedLibraryThumbnails {\n\t\tlibraries(pagination: { none: { unpaginated: true } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tthumbnail {\n\t\t\t\t\turl\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.StackedLibraryThumbnailsDocument,
+    "\n\tquery RecentlyAddedSeriesGrid($pagination: Pagination) {\n\t\tseries(pagination: $pagination, orderBy: { series: { field: CREATED_AT, direction: DESC } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...SeriesGridItem\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\tcurrentCursor\n\t\t\t\t\tnextCursor\n\t\t\t\t\tlimit\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.RecentlyAddedSeriesGridDocument,
     "\n\tfragment SeriesGridItem on Series {\n\t\tid\n\t\tresolvedName\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t}\n": typeof types.SeriesGridItemFragmentDoc,
     "\n\tfragment SeriesSearchItem on Series {\n\t\tid\n\t\tresolvedName\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t\treadCount\n\t\tmediaCount\n\t\tpercentageCompleted\n\t}\n": typeof types.SeriesSearchItemFragmentDoc,
     "\n\tquery StackedSeriesThumbnails {\n\t\tseries(pagination: { cursor: { limit: 1 } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tthumbnail {\n\t\t\t\t\turl\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.StackedSeriesThumbnailsDocument,
@@ -227,6 +228,7 @@ const documents: Documents = {
     "\n\tfragment LibraryGridItem on Library {\n\t\tid\n\t\tname\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t}\n": types.LibraryGridItemFragmentDoc,
     "\n\tfragment LibrarySearchItem on Library {\n\t\tid\n\t\tname\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t}\n": types.LibrarySearchItemFragmentDoc,
     "\n\tquery StackedLibraryThumbnails {\n\t\tlibraries(pagination: { none: { unpaginated: true } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tthumbnail {\n\t\t\t\t\turl\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.StackedLibraryThumbnailsDocument,
+    "\n\tquery RecentlyAddedSeriesGrid($pagination: Pagination) {\n\t\tseries(pagination: $pagination, orderBy: { series: { field: CREATED_AT, direction: DESC } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...SeriesGridItem\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\tcurrentCursor\n\t\t\t\t\tnextCursor\n\t\t\t\t\tlimit\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.RecentlyAddedSeriesGridDocument,
     "\n\tfragment SeriesGridItem on Series {\n\t\tid\n\t\tresolvedName\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t}\n": types.SeriesGridItemFragmentDoc,
     "\n\tfragment SeriesSearchItem on Series {\n\t\tid\n\t\tresolvedName\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t\treadCount\n\t\tmediaCount\n\t\tpercentageCompleted\n\t}\n": types.SeriesSearchItemFragmentDoc,
     "\n\tquery StackedSeriesThumbnails {\n\t\tseries(pagination: { cursor: { limit: 1 } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tthumbnail {\n\t\t\t\t\turl\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.StackedSeriesThumbnailsDocument,
@@ -495,6 +497,10 @@ export function graphql(source: "\n\tfragment LibrarySearchItem on Library {\n\t
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n\tquery StackedLibraryThumbnails {\n\t\tlibraries(pagination: { none: { unpaginated: true } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tthumbnail {\n\t\t\t\t\turl\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').StackedLibraryThumbnailsDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tquery RecentlyAddedSeriesGrid($pagination: Pagination) {\n\t\tseries(pagination: $pagination, orderBy: { series: { field: CREATED_AT, direction: DESC } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...SeriesGridItem\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\tcurrentCursor\n\t\t\t\t\tnextCursor\n\t\t\t\t\tlimit\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').RecentlyAddedSeriesGridDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

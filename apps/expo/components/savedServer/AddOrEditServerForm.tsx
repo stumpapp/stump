@@ -13,6 +13,7 @@ import {
 import Dialog from 'react-native-dialog'
 import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable'
 import Reanimated, { SharedValue, useAnimatedStyle } from 'react-native-reanimated'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { match, P } from 'ts-pattern'
 import { z } from 'zod'
 
@@ -229,8 +230,13 @@ export default function AddOrEditServerForm({ editingServer, onSubmit, onClose }
 		)
 	}
 
+	const insets = useSafeAreaInsets()
+
 	return (
-		<View className="w-full gap-4" style={{ paddingBottom: Platform.OS === 'android' ? 32 : 0 }}>
+		<View
+			className="w-full gap-4"
+			style={{ paddingBottom: Platform.OS === 'android' ? 32 : insets.bottom }}
+		>
 			<View className="flex-row items-center justify-between pb-2">
 				<Pressable onPress={onClose}>
 					<Text className="text-foreground-muted">Cancel</Text>

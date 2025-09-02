@@ -1,12 +1,13 @@
 import upperFirst from 'lodash/upperFirst'
-import { ChevronRight } from 'lucide-react-native'
 import { useState } from 'react'
 import { Pressable, View } from 'react-native'
 import * as DropdownMenu from 'zeego/dropdown-menu'
 
-import { Text } from '~/components/ui'
+import { icons, Text } from '~/components/ui'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { cn } from '~/lib/utils'
+
+const { ChevronsUpDown } = icons
 
 import AppSettingsRow from '../AppSettingsRow'
 
@@ -23,7 +24,7 @@ export default function AppTheme() {
 						{({ pressed }) => (
 							<View className={cn('flex flex-row items-center gap-2', pressed && 'opacity-70')}>
 								<Text className="text-foreground-muted">{upperFirst(colorScheme)}</Text>
-								<ChevronRight size={20} className="text-foreground-muted" />
+								<ChevronsUpDown className="h-5 text-foreground-muted" />
 							</View>
 						)}
 					</Pressable>

@@ -36,8 +36,8 @@
 		"@rn-primitives/tabs": "^1.1.0",
 		"@rn-primitives/tooltip": "~1.1.0",
 		"@rn-primitives/types": "^1.1.0",
-		"@tanstack/react-query": "^5.74.4",
 		"@shopify/flash-list": "1.7.3",
+		"@tanstack/react-query": "^5.74.4",
 		"axios": "^1.7.9",
 		"class-variance-authority": "^0.7.0",
 		"clsx": "^2.1.0",
@@ -91,6 +91,7 @@
 	"devDependencies": {
 		"@babel/core": "^7.26.0",
 		"@types/react": "^18.3.12",
+		"tsx": "^4.20.5",
 		"typescript": "^5.3.3"
 	},
 	"private": true

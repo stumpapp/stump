@@ -76,7 +76,6 @@ export default function Screen() {
 				contentContainerStyle={{
 					padding: 16,
 				}}
-				centerContent
 				estimatedItemSize={sizeEstimate}
 				numColumns={numColumns}
 				onEndReachedThreshold={0.75}

@@ -492,7 +492,11 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 					await generateLocations(book)
 				}
 
-				const rendition_ = book.renderTo(ref.current!, { width, height })
+				const rendition_ = book.renderTo(ref.current!, {
+					width: width,
+					height: height,
+					allowScriptedContent: true,
+				})
 
 				rendition_.hooks.content.register(() => {
 					injectFontStylesheet(rendition_)

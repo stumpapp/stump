@@ -7,12 +7,12 @@
 	},
 	"authScene": {
 		"claimHeading": "Initialiseer je server",
-		"claimText": "This Stump server is not initialized. Use the form below to create your account. Once created, you will have full access to all server features.",
+		"claimText": "Deze Stump-server is nog niet ingesteld. Gebruik het onderstaande formulier om je account aan te maken. Zodra je dat hebt gedaan, heb je volledige toegang tot alle functies van de server.",
 		"form": {
 			"validation": {
 				"missingUsername": "Gebruikersnaam is vereist",
 				"missingPassword": "Wachtwoord is vereist",
-				"usernameAlreadyExists": "Username already exists"
+				"usernameAlreadyExists": "Gebruikersnaam bestaat al"
 			},
 			"labels": {
 				"username": "Gebruikersnaam",
@@ -72,8 +72,8 @@
 		"fields": {
 			"name": {
 				"label": "Naam",
-				"placeholder": "My book club",
-				"description": "The name of your book club"
+				"placeholder": "Mijn boekenclub",
+				"description": "De naam van jouw boekenclub"
 			},
 			"description": {
 				"label": "Omschrijving",
@@ -1813,7 +1813,7 @@
 				},
 				"maxAttachmentSize": {
 					"label": "Max attachment size",
-					"description": "The maximum size, in bytes, that an attachment can be"
+					"description": "De maximale grootte, in bytes, die een bijlage mag hebben"
 				},
 				"submit": {
 					"create": "Create emailer",
@@ -1823,7 +1823,7 @@
 			"createEmailer": {
 				"helmet": "Create emailer",
 				"title": "Create emailer",
-				"description": "Create a new SMTP emailer for your Stump server instance"
+				"description": "Maak een nieuwe SMTP-mailer aan voor je Stump-server"
 			},
 			"updateEmailer": {
 				"helmet": "Update emailer",
@@ -1836,54 +1836,54 @@
 		"backupHeading": "Job in Progress"
 	},
 	"libraryStats": {
-		"seriesCount": "Total Series",
-		"bookCount": "Total Books",
-		"diskUsage": "Disk Usage"
+		"seriesCount": "Totaal aantal series",
+		"bookCount": "Totaal aantal boeken",
+		"diskUsage": "Schijfgebruik"
 	},
 	"noLibraries": {
-		"heading": "Nothing to see here",
+		"heading": "Hier valt niks te zien",
 		"messagePrefix": "Je kunt niet zien wat je niet hebt",
 		"message": {
-			"create": "Create a library to get started",
-			"wait": "Once libraries are created, they'll be displayed here"
+			"create": "Maak een bibliotheek om te beginnen",
+			"wait": "Zodra er bibliotheken zijn aangemaakt, worden ze hier weergegeven"
 		},
 		"links": {
-			"create": "Create library",
-			"settings": "Go to settings"
+			"create": "Bibliotheek aanmaken",
+			"settings": "Ga naar instellingen"
 		}
 	},
 	"pagination": {
 		"buttons": {
-			"next": "Next",
-			"previous": "Previous"
+			"next": "Volgende",
+			"previous": "Vorige"
 		},
 		"popover": {
-			"heading": "Go to page",
+			"heading": "Ga naar pagina",
 			"buttons": {
-				"confirm": "Go",
-				"cancel": "Cancel"
+				"confirm": "Start",
+				"cancel": "Annuleren"
 			}
 		}
 	},
 	"signOutModal": {
-		"title": "Sign out",
-		"message": "Are you sure you want to sign out?",
+		"title": "Uitloggen",
+		"message": "Weet je zeker dat je wilt uitloggen?",
 		"buttons": {
-			"cancel": "Cancel",
-			"signOut": "Sign out"
+			"cancel": "Annuleren",
+			"signOut": "Uitloggen"
 		}
 	},
 	"sidebar": {
 		"buttons": {
 			"home": "Home",
-			"libraries": "Libraries",
-			"books": "Explore",
-			"bookClubs": "Book clubs",
-			"createLibrary": "Create library",
-			"noLibraries": "No libraries",
-			"createBookClub": "Create book club",
-			"noBookClubs": "No book clubs",
-			"settings": "Settings",
+			"libraries": "Bibliotheken",
+			"books": "Ontdekken",
+			"bookClubs": "Boekenclubs",
+			"createLibrary": "Bibliotheek aanmaken",
+			"noLibraries": "Geen bibliotheken",
+			"createBookClub": "Maak een boekenclub",
+			"noBookClubs": "Geen boekenclubs",
+			"settings": "Instellingen",
 			"themeToggle": "Toggle Theme",
 			"goForward": "Go Forward",
 			"goBack": "Go Back",
@@ -1893,8 +1893,8 @@
 			"seeAll": "See all"
 		},
 		"libraryOptions": {
-			"scanLibrary": "Scan",
-			"fileExplorer": "Files",
+			"scanLibrary": "Scannen",
+			"fileExplorer": "Bestanden",
 			"manageLibrary": "Manage",
 			"deleteLibrary": "Delete"
 		},

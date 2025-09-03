@@ -267,19 +267,6 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 		return { chapter: position, chapterName: name, sectionIndex: sectionIndex }
 	}, [book, currentLocation])
 
-	/**
-	 * A function for focusing the iframe in the epub reader. This will be used to ensure
-	 * the iframe is focused whenever the reader is loaded and/or the location changes.
-	 */
-	const focusIframe = () => {
-		const iframe = ref.current?.querySelector('iframe')
-		if (iframe) {
-			iframe.focus()
-		} else {
-			console.warn('Failed to find iframe in epub reader')
-		}
-	}
-
 	const computeNaiveProgress = useCallback(
 		({ start }: EpubLocationState) => {
 			let percentage: number | null = null
@@ -358,7 +345,6 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 				return
 			}
 			setCurrentLocation(changeState)
-			focusIframe()
 			computeProgress(changeState)
 		},
 		[computeProgress],
@@ -495,7 +481,8 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 				const rendition_ = book.renderTo(ref.current!, {
 					width: width,
 					height: height,
-					allowScriptedContent: true,
+					// enable the following line to allow rendition?.on('keydown', handleKeyDown) to work for Safari
+					// allowScriptedContent: true,
 				})
 
 				rendition_.hooks.content.register(() => {

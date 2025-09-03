@@ -1,6 +1,6 @@
 import { cx, IconButton, Label, Text, TEXT_VARIANTS } from '@stump/components'
 import { Minus, Plus } from 'lucide-react'
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import { usePressAndHold } from '@/hooks/usePressAndHold'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
@@ -15,21 +15,24 @@ export default function FontSizeControl() {
 		bookPreferences: { fontSize = 13 },
 		setBookPreferences,
 	} = useBookPreferences({ book: bookEntity })
-	const fontSizeRef = useRef(fontSize)
-	useEffect(() => {
-		fontSizeRef.current = fontSize
-	}, [fontSize])
 
-	const handleSetFontSize = useCallback(
-		(newSize: number) => {
-			if (newSize < 1) {
-				return
-			} else {
-				setBookPreferences({ fontSize: newSize })
-			}
-		},
-		[setBookPreferences],
-	)
+	const [localFontSize, setLocalFontSize] = useState(fontSize)
+
+	useEffect(() => {
+		if (localFontSize === fontSize) return
+		const bookPreferencesTimeout = setTimeout(() => {
+			setBookPreferences({ fontSize: localFontSize })
+		}, 0)
+		return () => clearTimeout(bookPreferencesTimeout)
+	}, [localFontSize, fontSize, setBookPreferences])
+
+	const incrementFontSize = useCallback((increment: number) => {
+		setLocalFontSize((currentSize) => {
+			const newSize = currentSize + increment
+			if (newSize >= 1) return newSize
+			return currentSize
+		})
+	}, [])
 
 	const { bindButton: bindMinus, isHolding: isHoldingMinus } = usePressAndHold()
 	const { bindButton: bindPlus, isHolding: isHoldingPlus } = usePressAndHold()
@@ -39,7 +42,7 @@ export default function FontSizeControl() {
 	 * font size for the preview is 50px. However, there is no limit to the font size
 	 * that can be set on the upper bound. The lower bound is 1px.
 	 */
-	const displayedFontSize = fontSize > 50 ? 50 : fontSize
+	const displayedFontSize = localFontSize > 50 ? 50 : localFontSize
 
 	return (
 		<div className="flex flex-col gap-y-2.5">
@@ -47,7 +50,7 @@ export default function FontSizeControl() {
 			<div className="flex items-center gap-x-2">
 				<IconButton
 					{...bindMinus({
-						callback: () => handleSetFontSize(fontSizeRef.current - 1),
+						callback: () => incrementFontSize(-1),
 					})}
 					variant="ghost"
 					size="xs"
@@ -59,11 +62,11 @@ export default function FontSizeControl() {
 					className={cx('flex items-center justify-center', TEXT_VARIANTS.default)}
 					style={{ fontSize: `${displayedFontSize}px` }}
 				>
-					{fontSize}px
+					{localFontSize}px
 				</span>
 				<IconButton
 					{...bindPlus({
-						callback: () => handleSetFontSize(fontSizeRef.current + 1),
+						callback: () => incrementFontSize(+1),
 					})}
 					variant="ghost"
 					size="xs"
@@ -72,7 +75,7 @@ export default function FontSizeControl() {
 					<Plus className="h-4 w-4" />
 				</IconButton>
 			</div>
-			{fontSize > 50 && (
+			{localFontSize > 50 && (
 				<Text size="xs" className="text-left" variant="muted">
 					Live font preview is capped at 50px
 				</Text>

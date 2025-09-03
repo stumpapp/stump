@@ -1,6 +1,6 @@
 import { cx, IconButton, Label, TEXT_VARIANTS } from '@stump/components'
 import { Minus, Plus } from 'lucide-react'
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import { usePressAndHold } from '@/hooks/usePressAndHold'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
@@ -15,21 +15,25 @@ export default function LineHeightControl() {
 		bookPreferences: { lineHeight = 1.5 },
 		setBookPreferences,
 	} = useBookPreferences({ book: bookEntity })
-	const lineHeightRef = useRef(lineHeight)
-	useEffect(() => {
-		lineHeightRef.current = lineHeight
-	}, [lineHeight])
 
-	const handleSetLineHeight = useCallback(
-		(newHeight: number) => {
+	const [localLineHeight, setLocalLineHeight] = useState(lineHeight)
+
+	useEffect(() => {
+		if (localLineHeight === lineHeight) return
+		const bookPreferencesTimeout = setTimeout(() => {
+			setBookPreferences({ lineHeight: localLineHeight })
+		}, 0)
+		return () => clearTimeout(bookPreferencesTimeout)
+	}, [localLineHeight, lineHeight, setBookPreferences])
+
+	const incrementLineHeight = useCallback((increment: number) => {
+		setLocalLineHeight((currentHeight) => {
+			const newHeight = Math.round((currentHeight + increment) * 10) / 10
 			// Limit to reasonable minimum and maximum
-			if (newHeight >= 1.0 && newHeight <= 3.0) {
-				// Round to 1 decimal place for clean display
-				setBookPreferences({ lineHeight: Math.round(newHeight * 10) / 10 })
-			}
-		},
-		[setBookPreferences],
-	)
+			if (newHeight >= 1.0 && newHeight <= 3.0) return newHeight
+			return currentHeight
+		})
+	}, [])
 
 	const { bindButton: bindMinus, isHolding: isHoldingMinus } = usePressAndHold()
 	const { bindButton: bindPlus, isHolding: isHoldingPlus } = usePressAndHold()
@@ -40,7 +44,7 @@ export default function LineHeightControl() {
 			<div className="flex items-center gap-x-2">
 				<IconButton
 					{...bindMinus({
-						callback: () => handleSetLineHeight(lineHeightRef.current - 0.1),
+						callback: () => incrementLineHeight(-0.1),
 					})}
 					variant="ghost"
 					size="xs"
@@ -49,11 +53,11 @@ export default function LineHeightControl() {
 					<Minus className="h-4 w-4" />
 				</IconButton>
 				<span className={cx('flex items-center justify-center', TEXT_VARIANTS.default)}>
-					{lineHeight.toFixed(1)}
+					{localLineHeight.toFixed(1)}
 				</span>
 				<IconButton
 					{...bindPlus({
-						callback: () => handleSetLineHeight(lineHeightRef.current + 0.1),
+						callback: () => incrementLineHeight(+0.1),
 					})}
 					variant="ghost"
 					size="xs"

@@ -4,6 +4,7 @@ import {
 	EpubJsReaderQuery,
 	EpubProgressInput,
 	graphql,
+	ReadingDirection,
 	ReadingMode,
 	SupportedFont,
 } from '@stump/graphql'
@@ -193,7 +194,7 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 	const [isInitialLoading, setIsInitialLoading] = useState(true)
 
 	const {
-		bookPreferences: { fontSize, lineHeight, fontFamily, readingMode },
+		bookPreferences: { fontSize, lineHeight, fontFamily, readingMode, readingDirection },
 	} = useBookPreferences({ book: ebook.media })
 
 	const client = useQueryClient()
@@ -528,10 +529,15 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 	/** This effect handles page turning via keyboard keys */
 	useEffect(() => {
 		const handleKeyDown = (event: KeyboardEvent) => {
-			if (event.key === 'ArrowLeft') {
-				rendition?.prev()
-			} else if (event.key === 'ArrowRight') {
+			const isLtr = readingDirection === ReadingDirection.Ltr
+
+			const nextKey = isLtr ? 'ArrowRight' : 'ArrowLeft'
+			const prevKey = isLtr ? 'ArrowLeft' : 'ArrowRight'
+
+			if (event.key === nextKey) {
 				rendition?.next()
+			} else if (event.key === prevKey) {
+				rendition?.prev()
 			}
 		}
 		window.addEventListener('keydown', handleKeyDown, { capture: true })
@@ -540,7 +546,7 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 			window.removeEventListener('keydown', handleKeyDown, { capture: true })
 			rendition?.off('keydown', handleKeyDown)
 		}
-	}, [rendition])
+	}, [rendition, readingDirection])
 
 	// I'm hopeful this solves: https://github.com/stumpapp/stump/issues/726
 	// Honestly though epub.js is such a migraine that I'm OK just waiting until

@@ -3,9 +3,10 @@ import { useInfiniteSuspenseGraphQL } from '@stump/client'
 import { graphql } from '@stump/graphql'
 import { useNavigation } from 'expo-router'
 import { ChevronLeft } from 'lucide-react-native'
-import { useCallback } from 'react'
+import { useCallback, useRef } from 'react'
 import { Platform } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { useStore } from 'zustand'
 
 import { useActiveServer } from '~/components/activeServer'
 import { BookGridItem } from '~/components/book'
@@ -15,7 +16,7 @@ import { ColumnItem } from '~/components/grid'
 import { useGridItemSize } from '~/components/grid/useGridItemSize'
 import RefreshControl from '~/components/RefreshControl'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
-import { useBookFilterStore } from '~/stores/filters'
+import { BookFilterContext, createBookFilterStore } from '~/stores/filters'
 
 const query = graphql(`
 	query BooksScreen(
@@ -53,9 +54,11 @@ export default function Screen() {
 		headerLeft: () => <ChevronLeft onPress={() => navigation.goBack()} />,
 	})
 
-	const { filters, sort } = useBookFilterStore((store) => ({
-		filters: store.filters,
-		sort: store.sort,
+	const store = useRef(createBookFilterStore()).current
+
+	const { filters, sort } = useStore(store, (state) => ({
+		filters: state.filters,
+		sort: state.sort,
 	}))
 
 	const { data, hasNextPage, fetchNextPage, refetch, isRefetching } = useInfiniteSuspenseGraphQL(
@@ -81,25 +84,27 @@ export default function Screen() {
 	)
 
 	return (
-		<SafeAreaView
-			style={{ flex: 1 }}
-			edges={Platform.OS === 'ios' ? ['top', 'left', 'right'] : ['left', 'right']}
-		>
-			<FlashList
-				data={data?.pages.flatMap((page) => page.media.nodes) || []}
-				renderItem={renderItem}
-				contentContainerStyle={{
-					padding: 16,
-				}}
-				estimatedItemSize={sizeEstimate}
-				numColumns={numColumns}
-				onEndReachedThreshold={0.75}
-				onEndReached={onEndReached}
-				contentInsetAdjustmentBehavior="automatic"
-				ListHeaderComponent={<BookFilterHeader />}
-				ListHeaderComponentStyle={{ paddingBottom: 16 }}
-				refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
-			/>
-		</SafeAreaView>
+		<BookFilterContext.Provider value={store}>
+			<SafeAreaView
+				style={{ flex: 1 }}
+				edges={Platform.OS === 'ios' ? ['top', 'left', 'right'] : ['left', 'right']}
+			>
+				<FlashList
+					data={data?.pages.flatMap((page) => page.media.nodes) || []}
+					renderItem={renderItem}
+					contentContainerStyle={{
+						padding: 16,
+					}}
+					estimatedItemSize={sizeEstimate}
+					numColumns={numColumns}
+					onEndReachedThreshold={0.75}
+					onEndReached={onEndReached}
+					contentInsetAdjustmentBehavior="automatic"
+					ListHeaderComponent={<BookFilterHeader />}
+					ListHeaderComponentStyle={{ paddingBottom: 16 }}
+					refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
+				/>
+			</SafeAreaView>
+		</BookFilterContext.Provider>
 	)
 }

@@ -1,17 +1,21 @@
+import { useScrollToTop } from '@react-navigation/native'
 import { FlashList } from '@shopify/flash-list'
 import { useInfiniteSuspenseGraphQL, useSuspenseGraphQL } from '@stump/client'
 import { graphql } from '@stump/graphql'
-import { useLocalSearchParams, useNavigation } from 'expo-router'
-import { ChevronLeft } from 'lucide-react-native'
-import { useCallback } from 'react'
+import { useLocalSearchParams } from 'expo-router'
+import { useCallback, useRef } from 'react'
 import { Platform } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { useStore } from 'zustand'
 
 import { BookGridItem } from '~/components/book'
 import { IBookGridItemFragment } from '~/components/book/BookGridItem'
+import { BookFilterHeader } from '~/components/book/filterHeader'
 import { ColumnItem } from '~/components/grid'
 import { useGridItemSize } from '~/components/grid/useGridItemSize'
+import RefreshControl from '~/components/RefreshControl'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
+import { BookFilterContext, createBookFilterStore } from '~/stores/filters'
 
 const query = graphql(`
 	query SeriesBooksSceneSeriesName($id: ID!) {
@@ -22,18 +26,24 @@ const query = graphql(`
 `)
 
 const booksQuery = graphql(`
-	query SeriesBooksScreen($filter: MediaFilterInput!, $pagination: Pagination) {
-		media(filter: $filter, pagination: $pagination) {
+	query SeriesBooksScreen(
+		$filter: MediaFilterInput!
+		$pagination: Pagination
+		$orderBy: [MediaOrderBy!]
+	) {
+		media(filter: $filter, pagination: $pagination, orderBy: $orderBy) {
 			nodes {
 				id
 				...BookGridItem
 			}
 			pageInfo {
 				__typename
-				... on CursorPaginationInfo {
-					currentCursor
-					nextCursor
-					limit
+				... on OffsetPaginationInfo {
+					totalPages
+					currentPage
+					pageSize
+					pageOffset
+					zeroBased
 				}
 			}
 		}
@@ -50,19 +60,26 @@ export default function Screen() {
 		throw new Error(`Series with ID ${id} not found`)
 	}
 
-	const navigation = useNavigation()
 	useDynamicHeader({
 		title: series.resolvedName,
-		headerLeft: () => <ChevronLeft onPress={() => navigation.goBack()} />,
 	})
 
-	const { data, hasNextPage, fetchNextPage } = useInfiniteSuspenseGraphQL(
+	const store = useRef(createBookFilterStore()).current
+	const { filters, sort } = useStore(store, (state) => ({
+		filters: state.filters,
+		sort: state.sort,
+	}))
+
+	const { data, hasNextPage, fetchNextPage, refetch, isRefetching } = useInfiniteSuspenseGraphQL(
 		booksQuery,
-		['seriesBooks', id],
+		['seriesBooks', id, filters, sort],
 		{
 			filter: {
+				...filters,
 				seriesId: { eq: id },
 			},
+			orderBy: [sort],
+			pagination: { offset: { page: 1 } },
 		},
 	)
 	const { numColumns, sizeEstimate } = useGridItemSize()
@@ -82,24 +99,35 @@ export default function Screen() {
 		[numColumns],
 	)
 
+	const listRef = useRef<FlashList<IBookGridItemFragment>>(null)
+	useScrollToTop(listRef)
+
 	return (
-		<SafeAreaView
-			style={{ flex: 1 }}
-			edges={Platform.OS === 'ios' ? ['top', 'left', 'right'] : ['left', 'right']}
-		>
-			<FlashList
-				data={data?.pages.flatMap((page) => page.media.nodes) || []}
-				renderItem={renderItem}
-				contentContainerStyle={{
-					padding: 16,
-				}}
-				centerContent
-				estimatedItemSize={sizeEstimate}
-				numColumns={numColumns}
-				onEndReachedThreshold={0.75}
-				onEndReached={onEndReached}
-				contentInsetAdjustmentBehavior="automatic"
-			/>
-		</SafeAreaView>
+		<BookFilterContext.Provider value={store}>
+			<SafeAreaView
+				style={{ flex: 1 }}
+				edges={Platform.OS === 'ios' ? ['top', 'left', 'right'] : ['left', 'right']}
+			>
+				<FlashList
+					ref={listRef}
+					data={data?.pages.flatMap((page) => page.media.nodes) || []}
+					renderItem={renderItem}
+					contentContainerStyle={{
+						padding: 16,
+					}}
+					estimatedItemSize={sizeEstimate}
+					numColumns={numColumns}
+					onEndReachedThreshold={0.75}
+					onEndReached={onEndReached}
+					ListHeaderComponent={<BookFilterHeader seriesId={id} />}
+					// FIXME: I don't understand why this performs so terribly
+					// contentInsetAdjustmentBehavior="never"
+					// ListHeaderComponentStyle={{ paddingBottom: 16, paddingTop: insets.top * 2 }}
+					ListHeaderComponentStyle={{ paddingBottom: 16 }}
+					contentInsetAdjustmentBehavior="always"
+					refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
+				/>
+			</SafeAreaView>
+		</BookFilterContext.Provider>
 	)
 }

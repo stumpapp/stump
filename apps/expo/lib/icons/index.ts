@@ -1,3 +1,4 @@
+export { ArrowDownUp } from './ArrowDownUp'
 export { ArrowUpRight } from './ArrowUpRight'
 export { BookCopy } from './BookCopy'
 export { Box } from './Box'

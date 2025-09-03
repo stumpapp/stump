@@ -123,15 +123,7 @@ export default function Screen() {
 		navigation.setOptions({
 			headerLeft: () => <ChevronLeft onPress={() => navigation.goBack()} />,
 			headerRight: () => (book ? <BookActionMenu data={book} /> : null),
-			headerShown: Platform.OS === 'ios',
-			headerTransparent: true,
 			headerTitle: Platform.OS === 'ios' ? book?.resolvedName : '',
-			headerLargeTitleStyle: {
-				fontSize: 24,
-				lineHeight: 32,
-			},
-			headerLargeTitle: true,
-			headerBlurEffect: 'regular',
 		})
 	}, [navigation, book, bookID])
 
@@ -224,7 +216,7 @@ export default function Screen() {
 			edges={Platform.OS === 'ios' ? ['top', 'left', 'right'] : ['top', 'left', 'right', 'bottom']}
 		>
 			<ScrollView
-				className="flex-1 bg-background px-6"
+				className="flex-1 bg-background px-6 pt-4"
 				refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
 				contentInsetAdjustmentBehavior="automatic"
 			>

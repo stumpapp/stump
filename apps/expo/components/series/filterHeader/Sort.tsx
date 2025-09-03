@@ -1,4 +1,4 @@
-import { MediaMetadataModelOrdering, MediaModelOrdering, MediaOrderBy } from '@stump/graphql'
+import { SeriesMetadataModelOrdering, SeriesModelOrdering, SeriesOrderBy } from '@stump/graphql'
 import { useCallback } from 'react'
 import { Platform, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -7,20 +7,20 @@ import { match, P } from 'ts-pattern'
 import { FilterSheet } from '~/components/filter'
 import { Heading, icons, Label, RadioGroup, RadioGroupItem, Text } from '~/components/ui'
 import { cn } from '~/lib/utils'
-import { useBookFilterStore } from '~/stores/filters'
+import { useSeriesFilterStore } from '~/stores/filters'
 
 // TODO: Support tiered ordering, e.g.: primary sort of metadata.title, secondary fallback of media.name
 
 export default function Sort() {
 	const insets = useSafeAreaInsets()
 
-	const { sort, setSort } = useBookFilterStore((state) => ({
+	const { sort, setSort } = useSeriesFilterStore((state) => ({
 		sort: state.sort,
 		setSort: state.setSort,
 	}))
 
 	const { field, direction } = match(sort)
-		.with({ media: P.not(P.nullish) }, ({ media: { field, direction } }) => ({
+		.with({ series: P.not(P.nullish) }, ({ series: { field, direction } }) => ({
 			field,
 			direction,
 		}))
@@ -35,18 +35,18 @@ export default function Sort() {
 			if (dir !== 'ASC' && dir !== 'DESC') return
 			const config = match(sort)
 				.with(
-					{ media: P.not(P.nullish) },
-					({ media: { field } }) =>
+					{ series: P.not(P.nullish) },
+					({ series: { field } }) =>
 						({
-							media: { field, direction: dir },
-						}) as MediaOrderBy,
+							series: { field, direction: dir },
+						}) as SeriesOrderBy,
 				)
 				.with(
 					{ metadata: P.not(P.nullish) },
 					({ metadata: { field } }) =>
 						({
 							metadata: { field, direction: dir },
-						}) as MediaOrderBy,
+						}) as SeriesOrderBy,
 				)
 				.otherwise(() => sort)
 			setSort(config)
@@ -58,11 +58,11 @@ export default function Sort() {
 		(field: string, isMetadata: boolean) => {
 			const config = isMetadata
 				? ({
-						metadata: { field: field as MediaMetadataModelOrdering, direction },
-					} as MediaOrderBy)
+						metadata: { field: field as SeriesMetadataModelOrdering, direction },
+					} as SeriesOrderBy)
 				: ({
-						media: { field: field as MediaModelOrdering, direction },
-					} as MediaOrderBy)
+						series: { field: field as SeriesModelOrdering, direction },
+					} as SeriesOrderBy)
 			setSort(config)
 		},
 		[setSort, direction],
@@ -78,7 +78,7 @@ export default function Sort() {
 			>
 				<View>
 					<Heading size="xl">Sort</Heading>
-					<Text className="text-foreground-muted">Change the order of displayed books</Text>
+					<Text className="text-foreground-muted">Change the order of displayed series</Text>
 				</View>
 
 				<View className="gap-3">
@@ -102,7 +102,7 @@ export default function Sort() {
 				</View>
 
 				<View className="gap-3">
-					<Label className="font-medium leading-6 text-foreground-muted">Book Field</Label>
+					<Label className="font-medium leading-6 text-foreground-muted">Series Field</Label>
 
 					<RadioGroup
 						value={field}
@@ -124,43 +124,8 @@ export default function Sort() {
 						<Divider />
 
 						<View className="flex flex-row items-center gap-3 p-3">
-							<RadioGroupItem value="EXTENSION" id="extension" />
-							<Label htmlFor="extension">Extension</Label>
-						</View>
-
-						<Divider />
-
-						<View className="flex flex-row items-center gap-3 p-3">
-							<RadioGroupItem value="MODIFIED_AT" id="modifiedAt" />
-							<Label htmlFor="modifiedAt">Modified At (on disk)</Label>
-						</View>
-
-						<Divider />
-
-						<View className="flex flex-row items-center gap-3 p-3">
-							<RadioGroupItem value="PAGES" id="pages" />
-							<Label htmlFor="pages">Pages</Label>
-						</View>
-
-						<Divider />
-
-						<View className="flex flex-row items-center gap-3 p-3">
 							<RadioGroupItem value="PATH" id="path" />
 							<Label htmlFor="path">Path</Label>
-						</View>
-
-						<Divider />
-
-						<View className="flex flex-row items-center gap-3 p-3">
-							<RadioGroupItem value="SIZE" id="size" />
-							<Label htmlFor="size">Size</Label>
-						</View>
-
-						<Divider />
-
-						<View className="flex flex-row items-center gap-3 p-3">
-							<RadioGroupItem value="STATUS" id="status" />
-							<Label htmlFor="status">Status</Label>
 						</View>
 
 						<Divider />

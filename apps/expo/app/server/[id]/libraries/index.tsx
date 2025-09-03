@@ -41,7 +41,8 @@ export default function Screen() {
 	const navigation = useNavigation()
 	useDynamicHeader({
 		title: 'Libraries',
-		headerLeft: () => <ChevronLeft onPress={() => navigation.goBack()} />,
+		headerLeft:
+			Platform.OS === 'ios' ? () => <ChevronLeft onPress={() => navigation.goBack()} /> : undefined,
 	})
 
 	const { data, hasNextPage, fetchNextPage } = useInfiniteSuspenseGraphQL(query, [

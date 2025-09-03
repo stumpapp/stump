@@ -49,7 +49,7 @@ pub struct MediaMetadataFilterInput {
 	#[graphql(default)]
 	pub summary: Option<StringLikeFilter<String>>,
 	#[graphql(default)]
-	pub series: Option<NumericFilter<i32>>,
+	pub series: Option<StringLikeFilter<String>>,
 
 	#[graphql(name = "_and", default)]
 	pub _and: Option<Vec<MediaMetadataFilterInput>>,
@@ -158,7 +158,7 @@ impl IntoFilter for MediaMetadataFilterInput {
 			)
 			.add_option(
 				self.series
-					.map(|f| apply_numeric_filter(media_metadata::Column::Series, f)),
+					.map(|f| apply_string_filter(media_metadata::Column::Series, f)),
 			)
 	}
 }

@@ -1,4 +1,5 @@
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
+import { LucideIcon } from 'lucide-react-native'
 import { useCallback, useMemo, useRef, useState } from 'react'
 import { View } from 'react-native'
 import { Pressable } from 'react-native-gesture-handler'
@@ -16,15 +17,18 @@ type Props = {
 	children: React.ReactNode
 	isActive?: boolean
 	snapPoints?: string[]
+	icon?: LucideIcon
 }
 
-export default function FilterSheet({ label, children, isActive, snapPoints }: Props) {
+export default function FilterSheet({ label, children, isActive, snapPoints, icon }: Props) {
 	const [isOpen, setIsOpen] = useState(false)
 
 	const ref = useRef<BottomSheetModal | null>(null)
 	const snaps = useMemo(() => snapPoints ?? ['90%'], [snapPoints])
 	const animatedIndex = useSharedValue<number>(0)
 	const animatedPosition = useSharedValue<number>(0)
+
+	const Icon = icon ?? ListFilter
 
 	const { colorScheme } = useColorScheme()
 
@@ -62,7 +66,7 @@ export default function FilterSheet({ label, children, isActive, snapPoints }: P
 						style={{ flex: 0 }}
 					>
 						<Text>{label}</Text>
-						<ListFilter className="ml-2 h-4 w-4 text-foreground-muted" />
+						<Icon className="ml-2 h-4 w-4 text-foreground-muted" />
 					</View>
 				)}
 			</Pressable>

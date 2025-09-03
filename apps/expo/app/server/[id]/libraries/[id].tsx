@@ -1,14 +1,14 @@
 import { FlashList } from '@shopify/flash-list'
 import { useInfiniteSuspenseGraphQL, useSuspenseGraphQL } from '@stump/client'
 import { graphql } from '@stump/graphql'
-import { useLocalSearchParams, useNavigation } from 'expo-router'
-import { ChevronLeft } from 'lucide-react-native'
+import { useLocalSearchParams } from 'expo-router'
 import { useCallback } from 'react'
 import { Platform } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { ColumnItem } from '~/components/grid'
 import { useGridItemSize } from '~/components/grid/useGridItemSize'
+import RefreshControl from '~/components/RefreshControl'
 import SeriesGridItem, { ISeriesGridItemFragment } from '~/components/series/SeriesGridItem'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
 
@@ -49,13 +49,11 @@ export default function Screen() {
 		throw new Error(`Series with ID ${id} not found`)
 	}
 
-	const navigation = useNavigation()
 	useDynamicHeader({
 		title: library.name,
-		headerLeft: () => <ChevronLeft onPress={() => navigation.goBack()} />,
 	})
 
-	const { data, hasNextPage, fetchNextPage } = useInfiniteSuspenseGraphQL(
+	const { data, hasNextPage, fetchNextPage, refetch, isRefetching } = useInfiniteSuspenseGraphQL(
 		seriesQuery,
 		['librarySeries', id],
 		{
@@ -98,6 +96,7 @@ export default function Screen() {
 				onEndReachedThreshold={0.75}
 				onEndReached={onEndReached}
 				contentInsetAdjustmentBehavior="automatic"
+				refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
 			/>
 		</SafeAreaView>
 	)

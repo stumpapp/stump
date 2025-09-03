@@ -1,11 +1,12 @@
 import { useNavigation } from 'expo-router'
-import { useLayoutEffect } from 'react'
+import { useLayoutEffect, useState } from 'react'
 import { NativeSyntheticEvent, Platform, TextInputChangeEventData } from 'react-native'
 
 type Params = {
 	title: string
 	headerLeft?: () => React.ReactNode
 	headerRight?: () => React.ReactNode
+	headerLargeTitle?: boolean
 	headerSearchBarOptions?: {
 		placeholder: string
 		shouldShowHintSearchIcon?: boolean
@@ -16,7 +17,9 @@ type Params = {
 
 export function useDynamicHeader({ title, headerLeft, headerRight, ...rest }: Params) {
 	const navigation = useNavigation()
+	const [didSetOptions, setDidSetOptions] = useState(false)
 	useLayoutEffect(() => {
+		if (didSetOptions) return
 		navigation.setOptions({
 			headerLeft,
 			headerRight,
@@ -27,9 +30,10 @@ export function useDynamicHeader({ title, headerLeft, headerRight, ...rest }: Pa
 				fontSize: 24,
 				lineHeight: 32,
 			},
-			headerLargeTitle: true,
 			headerBlurEffect: 'regular',
 			...rest,
 		})
-	}, [navigation, title, headerLeft, headerRight, rest])
+		setDidSetOptions(true)
+	}, [navigation, title, headerLeft, headerRight, rest, didSetOptions])
+	return didSetOptions
 }

@@ -1,32 +1,42 @@
+import { useScrollToTop } from '@react-navigation/native'
 import { FlashList } from '@shopify/flash-list'
 import { useInfiniteSuspenseGraphQL } from '@stump/client'
 import { graphql } from '@stump/graphql'
 import { useNavigation } from 'expo-router'
 import { ChevronLeft } from 'lucide-react-native'
-import { useCallback } from 'react'
+import { useCallback, useRef } from 'react'
 import { Platform } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { useActiveServer } from '~/components/activeServer'
 import { ColumnItem } from '~/components/grid'
 import { useGridItemSize } from '~/components/grid/useGridItemSize'
+import RefreshControl from '~/components/RefreshControl'
 import { SeriesGridItem } from '~/components/series'
+import { SeriesFilterHeader } from '~/components/series/filterHeader'
 import { ISeriesGridItemFragment } from '~/components/series/SeriesGridItem'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
+import { useSeriesFilterStore } from '~/stores/filters'
 
 const query = graphql(`
-	query SeriesScreen($pagination: Pagination) {
-		series(pagination: $pagination) {
+	query SeriesScreen(
+		$pagination: Pagination
+		$filters: SeriesFilterInput
+		$orderBy: [SeriesOrderBy!]
+	) {
+		series(pagination: $pagination, filter: $filters, orderBy: $orderBy) {
 			nodes {
 				id
 				...SeriesGridItem
 			}
 			pageInfo {
 				__typename
-				... on CursorPaginationInfo {
-					currentCursor
-					nextCursor
-					limit
+				... on OffsetPaginationInfo {
+					totalPages
+					currentPage
+					pageSize
+					pageOffset
+					zeroBased
 				}
 			}
 		}
@@ -41,13 +51,21 @@ export default function Screen() {
 	const navigation = useNavigation()
 	useDynamicHeader({
 		title: 'Series',
-		headerLeft: () => <ChevronLeft onPress={() => navigation.goBack()} />,
+		// FIXME: Why is this required?
+		headerLeft:
+			Platform.OS === 'ios' ? () => <ChevronLeft onPress={() => navigation.goBack()} /> : undefined,
 	})
 
-	const { data, hasNextPage, fetchNextPage } = useInfiniteSuspenseGraphQL(query, [
-		'series',
-		serverID,
-	])
+	const { filters, sort } = useSeriesFilterStore((store) => ({
+		filters: store.filters,
+		sort: store.sort,
+	}))
+
+	const { data, hasNextPage, fetchNextPage, refetch, isRefetching } = useInfiniteSuspenseGraphQL(
+		query,
+		['series', serverID, filters, sort],
+		{ filters, orderBy: [sort], pagination: { offset: { page: 1 } } },
+	)
 	const { numColumns, sizeEstimate } = useGridItemSize()
 
 	const onEndReached = useCallback(() => {
@@ -65,12 +83,16 @@ export default function Screen() {
 		[numColumns],
 	)
 
+	const listRef = useRef<FlashList<ISeriesGridItemFragment>>(null)
+	useScrollToTop(listRef)
+
 	return (
 		<SafeAreaView
 			style={{ flex: 1 }}
 			edges={Platform.OS === 'ios' ? ['top', 'left', 'right'] : ['left', 'right']}
 		>
 			<FlashList
+				ref={listRef}
 				data={data?.pages.flatMap((page) => page.series.nodes) || []}
 				renderItem={renderItem}
 				contentContainerStyle={{
@@ -80,7 +102,10 @@ export default function Screen() {
 				numColumns={numColumns}
 				onEndReachedThreshold={0.75}
 				onEndReached={onEndReached}
-				contentInsetAdjustmentBehavior="automatic"
+				contentInsetAdjustmentBehavior="always"
+				ListHeaderComponent={<SeriesFilterHeader />}
+				ListHeaderComponentStyle={{ paddingBottom: 16 }}
+				refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
 			/>
 		</SafeAreaView>
 	)

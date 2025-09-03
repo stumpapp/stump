@@ -142,13 +142,7 @@ export default function RootLayout() {
 								animation: animationEnabled ? 'default' : 'none',
 							}}
 						/>
-						<Stack.Screen
-							name="server/[id]/series/[id]"
-							options={{
-								headerShown: false,
-								animation: animationEnabled ? 'default' : 'none',
-							}}
-						/>
+
 						<Stack.Screen
 							name="server/[id]/books/[id]"
 							options={{

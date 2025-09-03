@@ -53,7 +53,7 @@ const PageSet = forwardRef<HTMLDivElement, Props>(
 				}}
 			>
 				<div
-					className={cn('relative flex justify-center', {
+					className={cn('relative flex w-full justify-center', {
 						'mx-auto flex-row gap-0': currentSet.length > 1,
 					})}
 				>

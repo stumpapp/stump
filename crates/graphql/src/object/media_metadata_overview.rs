@@ -118,6 +118,12 @@ impl MediaMetadataOverview {
 		let series_id = self.series_id.clone();
 		get_unique_values_inner!(Teams, conn, series_id)
 	}
+
+	async fn series(&self, ctx: &Context<'_>) -> Result<Vec<String>> {
+		let conn: &DatabaseConnection = ctx.data::<CoreContext>()?.conn.as_ref();
+		let series_id = self.series_id.clone();
+		get_unique_values_inner!(Series, conn, series_id)
+	}
 }
 
 #[cfg(test)]

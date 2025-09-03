@@ -4,11 +4,10 @@ import { Platform, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { match, P } from 'ts-pattern'
 
+import { FilterSheet } from '~/components/filter'
 import { Checkbox, Heading, Label, Text } from '~/components/ui'
 import { cn } from '~/lib/utils'
 import { useBookFilterStore } from '~/stores/filters'
-
-import FilterSheet from './FilterSheet'
 
 const STATUSES = ['READING', 'FINISHED', 'ABANDONED', 'NOT_STARTED'] as const
 const LABELS: Record<(typeof STATUSES)[number], string> = {

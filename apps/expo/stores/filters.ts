@@ -1,9 +1,19 @@
-import { MediaFilterInput, MediaModelOrdering, MediaOrderBy, OrderDirection } from '@stump/graphql'
-import { create } from 'zustand'
+import {
+	MediaFilterInput,
+	MediaModelOrdering,
+	MediaOrderBy,
+	OrderDirection,
+	SeriesFilterInput,
+	SeriesModelOrdering,
+	SeriesOrderBy,
+} from '@stump/graphql'
+import { createContext, useContext } from 'react'
+import { create, useStore } from 'zustand'
 
 export type IFilterStore<F, O> = {
 	filters: F
 	setFilters: (filters: F) => void
+	resetFilters: () => void
 	sort: O
 	setSort: (sort: O) => void
 	secondarySort?: O | null
@@ -14,6 +24,7 @@ export function createFilterStore<F, O>(defaultFilter: F, defaultSort: O) {
 	return create<IFilterStore<F, O>>((set) => ({
 		filters: defaultFilter,
 		setFilters: (filters) => set({ filters }),
+		resetFilters: () => set({ filters: defaultFilter }),
 		sort: defaultSort,
 		setSort: (sort) => set({ sort }),
 		secondarySort: null,
@@ -21,9 +32,29 @@ export function createFilterStore<F, O>(defaultFilter: F, defaultSort: O) {
 	}))
 }
 
-export const useBookFilterStore = createFilterStore<MediaFilterInput, MediaOrderBy>(
+export const createBookFilterStore = () =>
+	createFilterStore<MediaFilterInput, MediaOrderBy>(
+		{},
+		{
+			media: { field: MediaModelOrdering.Name, direction: OrderDirection.Asc },
+		},
+	)
+
+export type BookFilterStore = ReturnType<typeof createBookFilterStore>
+
+export const BookFilterContext = createContext<BookFilterStore | null>(null)
+
+export const useBookFilterStore = <T>(
+	selector: (state: IFilterStore<MediaFilterInput, MediaOrderBy>) => T,
+): T => {
+	const store = useContext(BookFilterContext)
+	if (!store) throw new Error('useBookFilterStore must be used within a BookFilterProvider')
+	return useStore(store, selector)
+}
+
+export const useSeriesFilterStore = createFilterStore<SeriesFilterInput, SeriesOrderBy>(
 	{},
 	{
-		media: { field: MediaModelOrdering.Name, direction: OrderDirection.Asc },
+		series: { field: SeriesModelOrdering.Name, direction: OrderDirection.Asc },
 	},
 )

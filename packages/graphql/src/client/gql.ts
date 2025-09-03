@@ -27,8 +27,8 @@ type Documents = {
     "\n\tquery LibrarySeriesScreen($filter: SeriesFilterInput!, $pagination: Pagination) {\n\t\tseries(filter: $filter, pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...SeriesGridItem\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\tcurrentCursor\n\t\t\t\t\tnextCursor\n\t\t\t\t\tlimit\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.LibrarySeriesScreenDocument,
     "\n\tquery LibrariesScreen($pagination: Pagination) {\n\t\tlibraries(pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...LibraryGridItem\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\tcurrentCursor\n\t\t\t\t\tnextCursor\n\t\t\t\t\tlimit\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.LibrariesScreenDocument,
     "\n\tquery SeriesBooksSceneSeriesName($id: ID!) {\n\t\tseriesById(id: $id) {\n\t\t\tresolvedName\n\t\t}\n\t}\n": typeof types.SeriesBooksSceneSeriesNameDocument,
-    "\n\tquery SeriesBooksScreen($filter: MediaFilterInput!, $pagination: Pagination) {\n\t\tmedia(filter: $filter, pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...BookGridItem\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\tcurrentCursor\n\t\t\t\t\tnextCursor\n\t\t\t\t\tlimit\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.SeriesBooksScreenDocument,
-    "\n\tquery SeriesScreen($pagination: Pagination) {\n\t\tseries(pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...SeriesGridItem\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\tcurrentCursor\n\t\t\t\t\tnextCursor\n\t\t\t\t\tlimit\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.SeriesScreenDocument,
+    "\n\tquery SeriesBooksScreen(\n\t\t$filter: MediaFilterInput!\n\t\t$pagination: Pagination\n\t\t$orderBy: [MediaOrderBy!]\n\t) {\n\t\tmedia(filter: $filter, pagination: $pagination, orderBy: $orderBy) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...BookGridItem\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\ttotalPages\n\t\t\t\t\tcurrentPage\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.SeriesBooksScreenDocument,
+    "\n\tquery SeriesScreen(\n\t\t$pagination: Pagination\n\t\t$filters: SeriesFilterInput\n\t\t$orderBy: [SeriesOrderBy!]\n\t) {\n\t\tseries(pagination: $pagination, filter: $filters, orderBy: $orderBy) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...SeriesGridItem\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\ttotalPages\n\t\t\t\t\tcurrentPage\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.SeriesScreenDocument,
     "\n\tquery ContinueReading($pagination: Pagination) {\n\t\tkeepReading(pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...BookListItem\n\t\t\t\t...ReadingNow\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\ttotalPages\n\t\t\t\t\tcurrentPage\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.ContinueReadingDocument,
     "\n\tfragment ReadingNow on Media {\n\t\tid\n\t\tresolvedName\n\t\tmetadata {\n\t\t\tsummary\n\t\t\tgenres\n\t\t\tlinks\n\t\t}\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t}\n": typeof types.ReadingNowFragmentDoc,
     "\n\tquery RecentlyAddedBooks($pagination: Pagination) {\n\t\trecentlyAddedMedia(pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...BookListItem\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\tcurrentCursor\n\t\t\t\t\tnextCursor\n\t\t\t\t\tlimit\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.RecentlyAddedBooksDocument,
@@ -36,7 +36,10 @@ type Documents = {
     "\n\tfragment BookListItem on Media {\n\t\tid\n\t\tresolvedName\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t}\n": typeof types.BookListItemFragmentDoc,
     "\n\tfragment BookSearchItem on Media {\n\t\tid\n\t\tresolvedName\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t\tsize\n\t\tpages\n\t}\n": typeof types.BookSearchItemFragmentDoc,
     "\n\tquery StackedBookThumbnails {\n\t\tmedia(pagination: { cursor: { limit: 1 } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tthumbnail {\n\t\t\t\t\turl\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.StackedBookThumbnailsDocument,
-    "\n\tquery Genres {\n\t\tmediaMetadataOverview {\n\t\t\tgenres\n\t\t}\n\t}\n": typeof types.GenresDocument,
+    "\n\tquery Characters($seriesId: ID) {\n\t\tmediaMetadataOverview(seriesId: $seriesId) {\n\t\t\tcharacters\n\t\t}\n\t}\n": typeof types.CharactersDocument,
+    "\n\tquery Genres($seriesId: ID) {\n\t\tmediaMetadataOverview(seriesId: $seriesId) {\n\t\t\tgenres\n\t\t}\n\t}\n": typeof types.GenresDocument,
+    "\n\tquery SeriesMetadata($seriesId: ID) {\n\t\tmediaMetadataOverview(seriesId: $seriesId) {\n\t\t\tseries\n\t\t}\n\t}\n": typeof types.SeriesMetadataDocument,
+    "\n\tquery Writers($seriesId: ID) {\n\t\tmediaMetadataOverview(seriesId: $seriesId) {\n\t\t\twriters\n\t\t}\n\t}\n": typeof types.WritersDocument,
     "\n\tfragment BookMenu on Media {\n\t\tid\n\t\tisFavorite\n\t\tlibrary {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t\tseries {\n\t\t\tid\n\t\t\tresolvedName\n\t\t}\n\t\treadProgress {\n\t\t\t__typename\n\t\t}\n\t\treadHistory {\n\t\t\t__typename\n\t\t}\n\t}\n": typeof types.BookMenuFragmentDoc,
     "\n\tmutation BookMenuComplete($id: ID!, $isComplete: Boolean!, $page: Int) {\n\t\tmarkMediaAsComplete(id: $id, isComplete: $isComplete, page: $page) {\n\t\t\tcompletedAt\n\t\t}\n\t}\n": typeof types.BookMenuCompleteDocument,
     "\n\tmutation BookMenuDeleteSession($id: ID!) {\n\t\tdeleteMediaProgress(id: $id) {\n\t\t\t__typename\n\t\t}\n\t}\n": typeof types.BookMenuDeleteSessionDocument,
@@ -213,8 +216,8 @@ const documents: Documents = {
     "\n\tquery LibrarySeriesScreen($filter: SeriesFilterInput!, $pagination: Pagination) {\n\t\tseries(filter: $filter, pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...SeriesGridItem\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\tcurrentCursor\n\t\t\t\t\tnextCursor\n\t\t\t\t\tlimit\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.LibrarySeriesScreenDocument,
     "\n\tquery LibrariesScreen($pagination: Pagination) {\n\t\tlibraries(pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...LibraryGridItem\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\tcurrentCursor\n\t\t\t\t\tnextCursor\n\t\t\t\t\tlimit\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.LibrariesScreenDocument,
     "\n\tquery SeriesBooksSceneSeriesName($id: ID!) {\n\t\tseriesById(id: $id) {\n\t\t\tresolvedName\n\t\t}\n\t}\n": types.SeriesBooksSceneSeriesNameDocument,
-    "\n\tquery SeriesBooksScreen($filter: MediaFilterInput!, $pagination: Pagination) {\n\t\tmedia(filter: $filter, pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...BookGridItem\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\tcurrentCursor\n\t\t\t\t\tnextCursor\n\t\t\t\t\tlimit\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.SeriesBooksScreenDocument,
-    "\n\tquery SeriesScreen($pagination: Pagination) {\n\t\tseries(pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...SeriesGridItem\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\tcurrentCursor\n\t\t\t\t\tnextCursor\n\t\t\t\t\tlimit\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.SeriesScreenDocument,
+    "\n\tquery SeriesBooksScreen(\n\t\t$filter: MediaFilterInput!\n\t\t$pagination: Pagination\n\t\t$orderBy: [MediaOrderBy!]\n\t) {\n\t\tmedia(filter: $filter, pagination: $pagination, orderBy: $orderBy) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...BookGridItem\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\ttotalPages\n\t\t\t\t\tcurrentPage\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.SeriesBooksScreenDocument,
+    "\n\tquery SeriesScreen(\n\t\t$pagination: Pagination\n\t\t$filters: SeriesFilterInput\n\t\t$orderBy: [SeriesOrderBy!]\n\t) {\n\t\tseries(pagination: $pagination, filter: $filters, orderBy: $orderBy) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...SeriesGridItem\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\ttotalPages\n\t\t\t\t\tcurrentPage\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.SeriesScreenDocument,
     "\n\tquery ContinueReading($pagination: Pagination) {\n\t\tkeepReading(pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...BookListItem\n\t\t\t\t...ReadingNow\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\ttotalPages\n\t\t\t\t\tcurrentPage\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.ContinueReadingDocument,
     "\n\tfragment ReadingNow on Media {\n\t\tid\n\t\tresolvedName\n\t\tmetadata {\n\t\t\tsummary\n\t\t\tgenres\n\t\t\tlinks\n\t\t}\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t}\n": types.ReadingNowFragmentDoc,
     "\n\tquery RecentlyAddedBooks($pagination: Pagination) {\n\t\trecentlyAddedMedia(pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...BookListItem\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\tcurrentCursor\n\t\t\t\t\tnextCursor\n\t\t\t\t\tlimit\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.RecentlyAddedBooksDocument,
@@ -222,7 +225,10 @@ const documents: Documents = {
     "\n\tfragment BookListItem on Media {\n\t\tid\n\t\tresolvedName\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t}\n": types.BookListItemFragmentDoc,
     "\n\tfragment BookSearchItem on Media {\n\t\tid\n\t\tresolvedName\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t\tsize\n\t\tpages\n\t}\n": types.BookSearchItemFragmentDoc,
     "\n\tquery StackedBookThumbnails {\n\t\tmedia(pagination: { cursor: { limit: 1 } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tthumbnail {\n\t\t\t\t\turl\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.StackedBookThumbnailsDocument,
-    "\n\tquery Genres {\n\t\tmediaMetadataOverview {\n\t\t\tgenres\n\t\t}\n\t}\n": types.GenresDocument,
+    "\n\tquery Characters($seriesId: ID) {\n\t\tmediaMetadataOverview(seriesId: $seriesId) {\n\t\t\tcharacters\n\t\t}\n\t}\n": types.CharactersDocument,
+    "\n\tquery Genres($seriesId: ID) {\n\t\tmediaMetadataOverview(seriesId: $seriesId) {\n\t\t\tgenres\n\t\t}\n\t}\n": types.GenresDocument,
+    "\n\tquery SeriesMetadata($seriesId: ID) {\n\t\tmediaMetadataOverview(seriesId: $seriesId) {\n\t\t\tseries\n\t\t}\n\t}\n": types.SeriesMetadataDocument,
+    "\n\tquery Writers($seriesId: ID) {\n\t\tmediaMetadataOverview(seriesId: $seriesId) {\n\t\t\twriters\n\t\t}\n\t}\n": types.WritersDocument,
     "\n\tfragment BookMenu on Media {\n\t\tid\n\t\tisFavorite\n\t\tlibrary {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t\tseries {\n\t\t\tid\n\t\t\tresolvedName\n\t\t}\n\t\treadProgress {\n\t\t\t__typename\n\t\t}\n\t\treadHistory {\n\t\t\t__typename\n\t\t}\n\t}\n": types.BookMenuFragmentDoc,
     "\n\tmutation BookMenuComplete($id: ID!, $isComplete: Boolean!, $page: Int) {\n\t\tmarkMediaAsComplete(id: $id, isComplete: $isComplete, page: $page) {\n\t\t\tcompletedAt\n\t\t}\n\t}\n": types.BookMenuCompleteDocument,
     "\n\tmutation BookMenuDeleteSession($id: ID!) {\n\t\tdeleteMediaProgress(id: $id) {\n\t\t\t__typename\n\t\t}\n\t}\n": types.BookMenuDeleteSessionDocument,
@@ -438,11 +444,11 @@ export function graphql(source: "\n\tquery SeriesBooksSceneSeriesName($id: ID!) 
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n\tquery SeriesBooksScreen($filter: MediaFilterInput!, $pagination: Pagination) {\n\t\tmedia(filter: $filter, pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...BookGridItem\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\tcurrentCursor\n\t\t\t\t\tnextCursor\n\t\t\t\t\tlimit\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').SeriesBooksScreenDocument;
+export function graphql(source: "\n\tquery SeriesBooksScreen(\n\t\t$filter: MediaFilterInput!\n\t\t$pagination: Pagination\n\t\t$orderBy: [MediaOrderBy!]\n\t) {\n\t\tmedia(filter: $filter, pagination: $pagination, orderBy: $orderBy) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...BookGridItem\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\ttotalPages\n\t\t\t\t\tcurrentPage\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').SeriesBooksScreenDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n\tquery SeriesScreen($pagination: Pagination) {\n\t\tseries(pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...SeriesGridItem\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\tcurrentCursor\n\t\t\t\t\tnextCursor\n\t\t\t\t\tlimit\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').SeriesScreenDocument;
+export function graphql(source: "\n\tquery SeriesScreen(\n\t\t$pagination: Pagination\n\t\t$filters: SeriesFilterInput\n\t\t$orderBy: [SeriesOrderBy!]\n\t) {\n\t\tseries(pagination: $pagination, filter: $filters, orderBy: $orderBy) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\t...SeriesGridItem\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\ttotalPages\n\t\t\t\t\tcurrentPage\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').SeriesScreenDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -474,7 +480,19 @@ export function graphql(source: "\n\tquery StackedBookThumbnails {\n\t\tmedia(pa
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n\tquery Genres {\n\t\tmediaMetadataOverview {\n\t\t\tgenres\n\t\t}\n\t}\n"): typeof import('./graphql').GenresDocument;
+export function graphql(source: "\n\tquery Characters($seriesId: ID) {\n\t\tmediaMetadataOverview(seriesId: $seriesId) {\n\t\t\tcharacters\n\t\t}\n\t}\n"): typeof import('./graphql').CharactersDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tquery Genres($seriesId: ID) {\n\t\tmediaMetadataOverview(seriesId: $seriesId) {\n\t\t\tgenres\n\t\t}\n\t}\n"): typeof import('./graphql').GenresDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tquery SeriesMetadata($seriesId: ID) {\n\t\tmediaMetadataOverview(seriesId: $seriesId) {\n\t\t\tseries\n\t\t}\n\t}\n"): typeof import('./graphql').SeriesMetadataDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tquery Writers($seriesId: ID) {\n\t\tmediaMetadataOverview(seriesId: $seriesId) {\n\t\t\twriters\n\t\t}\n\t}\n"): typeof import('./graphql').WritersDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

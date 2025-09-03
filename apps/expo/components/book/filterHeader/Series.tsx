@@ -14,69 +14,69 @@ import { useBookFilterStore } from '~/stores/filters'
 import { useBookFilterHeaderContext } from './context'
 
 const query = graphql(`
-	query Genres($seriesId: ID) {
+	query SeriesMetadata($seriesId: ID) {
 		mediaMetadataOverview(seriesId: $seriesId) {
-			genres
+			series
 		}
 	}
 `)
 
-export default function Genres() {
+export default function Series() {
 	const insets = useSafeAreaInsets()
 
 	const { seriesId } = useBookFilterHeaderContext()
 	const {
 		data: {
-			mediaMetadataOverview: { genres },
+			mediaMetadataOverview: { series: seriesList },
 		},
-	} = useSuspenseGraphQL(query, ['genres', seriesId], { seriesId })
+	} = useSuspenseGraphQL(query, ['seriesMetadata', seriesId], { seriesId })
 
 	const { filters, setFilters } = useBookFilterStore((store) => ({
 		filters: store.filters,
 		setFilters: store.setFilters,
 	}))
 
-	const genreFilter = useMemo(() => filters.metadata?.genres?.likeAnyOf, [filters])
+	const seriesFilter = useMemo(() => filters.metadata?.series?.likeAnyOf, [filters])
 
 	const [selectionState, setSelectionState] = useState(() => {
-		return match(genreFilter)
+		return match(seriesFilter)
 			.with(P.array(P.string), (likeAnyOf) =>
 				likeAnyOf.reduce(
-					(acc, genre) => ({ ...acc, [genre]: true }),
+					(acc, series) => ({ ...acc, [series]: true }),
 					{} as Record<string, boolean>,
 				),
 			)
 			.otherwise(() => ({}) as Record<string, boolean>)
 	})
 
-	const onSelectGenre = useCallback(
-		(genre: string, checked: boolean) => {
+	const onSelectSeries = useCallback(
+		(series: string, checked: boolean) => {
 			setSelectionState((prev) => ({
 				...prev,
-				[genre]: checked,
+				[series]: checked,
 			}))
 
-			const adjusted = match(genreFilter)
+			const adjusted = match(seriesFilter)
 				.with(P.array(P.string), (likeAnyOf) =>
-					checked ? [...(likeAnyOf || []), genre] : likeAnyOf.filter((g) => g !== genre),
+					checked ? [...(likeAnyOf || []), series] : likeAnyOf.filter((g) => g !== series),
 				)
-				.otherwise(() => (checked ? [genre] : ([] as string[])))
+				.otherwise(() => (checked ? [series] : ([] as string[])))
 
 			if (adjusted.length) {
-				const adjustedFilters = setProperty(filters, `metadata.genres.likeAnyOf`, adjusted)
+				const adjustedFilters = setProperty(filters, `metadata.series.likeAnyOf`, adjusted)
 				setFilters(adjustedFilters)
 			} else {
-				const adjustedFilters = setProperty(filters, `metadata.genres`, undefined)
+				const adjustedFilters = setProperty(filters, `metadata.series`, undefined)
 				setFilters(adjustedFilters)
 			}
 		},
-		[filters, setFilters, genreFilter],
+		[filters, setFilters, seriesFilter],
 	)
 
 	const isActive = useMemo(() => Object.values(selectionState).some(Boolean), [selectionState])
 
 	return (
-		<FilterSheet label="Genres" isActive={isActive}>
+		<FilterSheet label="Series" isActive={isActive}>
 			<View
 				className="gap-8"
 				style={{
@@ -84,27 +84,30 @@ export default function Genres() {
 				}}
 			>
 				<View>
-					<Heading size="xl">Genres</Heading>
-					<Text className="text-foreground-muted">Filter by genres</Text>
+					<Heading size="xl">Series</Heading>
+					<Text className="text-foreground-muted">Filter by series</Text>
 				</View>
 
 				<View className="gap-3">
-					<Text>Available Genres</Text>
+					<Text>Available Series</Text>
 
 					<View className="gap-0 rounded-lg border border-edge bg-background-surface">
-						{genres.map((genre, idx) => (
-							<Fragment key={genre}>
-								<View className="flex flex-row items-center gap-3 p-3">
-									<Checkbox
-										checked={selectionState[genre]}
-										onCheckedChange={(checked) => onSelectGenre(genre, checked)}
-									/>
-									<Label htmlFor={genre}>{genre}</Label>
-								</View>
+						{seriesList.map((series, idx) => {
+							const isLast = idx === seriesList.length - 1
+							return (
+								<Fragment key={series}>
+									<View className="flex flex-row items-center gap-3 p-3">
+										<Checkbox
+											checked={selectionState[series]}
+											onCheckedChange={(checked) => onSelectSeries(series, checked)}
+										/>
+										<Label htmlFor={series}>{series}</Label>
+									</View>
 
-								{idx < genres.length - 1 && <Divider />}
-							</Fragment>
-						))}
+									{!isLast && <Divider />}
+								</Fragment>
+							)
+						})}
 					</View>
 				</View>
 			</View>

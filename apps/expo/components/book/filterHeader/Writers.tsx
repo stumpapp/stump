@@ -14,69 +14,69 @@ import { useBookFilterStore } from '~/stores/filters'
 import { useBookFilterHeaderContext } from './context'
 
 const query = graphql(`
-	query Genres($seriesId: ID) {
+	query Writers($seriesId: ID) {
 		mediaMetadataOverview(seriesId: $seriesId) {
-			genres
+			writers
 		}
 	}
 `)
 
-export default function Genres() {
+export default function Writers() {
 	const insets = useSafeAreaInsets()
 
 	const { seriesId } = useBookFilterHeaderContext()
 	const {
 		data: {
-			mediaMetadataOverview: { genres },
+			mediaMetadataOverview: { writers },
 		},
-	} = useSuspenseGraphQL(query, ['genres', seriesId], { seriesId })
+	} = useSuspenseGraphQL(query, ['writers', seriesId], { seriesId })
 
 	const { filters, setFilters } = useBookFilterStore((store) => ({
 		filters: store.filters,
 		setFilters: store.setFilters,
 	}))
 
-	const genreFilter = useMemo(() => filters.metadata?.genres?.likeAnyOf, [filters])
+	const writerFilter = useMemo(() => filters.metadata?.writers?.likeAnyOf, [filters])
 
 	const [selectionState, setSelectionState] = useState(() => {
-		return match(genreFilter)
+		return match(writerFilter)
 			.with(P.array(P.string), (likeAnyOf) =>
 				likeAnyOf.reduce(
-					(acc, genre) => ({ ...acc, [genre]: true }),
+					(acc, writer) => ({ ...acc, [writer]: true }),
 					{} as Record<string, boolean>,
 				),
 			)
 			.otherwise(() => ({}) as Record<string, boolean>)
 	})
 
-	const onSelectGenre = useCallback(
-		(genre: string, checked: boolean) => {
+	const onSelectWriter = useCallback(
+		(writer: string, checked: boolean) => {
 			setSelectionState((prev) => ({
 				...prev,
-				[genre]: checked,
+				[writer]: checked,
 			}))
 
-			const adjusted = match(genreFilter)
+			const adjusted = match(writerFilter)
 				.with(P.array(P.string), (likeAnyOf) =>
-					checked ? [...(likeAnyOf || []), genre] : likeAnyOf.filter((g) => g !== genre),
+					checked ? [...(likeAnyOf || []), writer] : likeAnyOf.filter((g) => g !== writer),
 				)
-				.otherwise(() => (checked ? [genre] : ([] as string[])))
+				.otherwise(() => (checked ? [writer] : ([] as string[])))
 
 			if (adjusted.length) {
-				const adjustedFilters = setProperty(filters, `metadata.genres.likeAnyOf`, adjusted)
+				const adjustedFilters = setProperty(filters, `metadata.writers.likeAnyOf`, adjusted)
 				setFilters(adjustedFilters)
 			} else {
-				const adjustedFilters = setProperty(filters, `metadata.genres`, undefined)
+				const adjustedFilters = setProperty(filters, `metadata.writers`, undefined)
 				setFilters(adjustedFilters)
 			}
 		},
-		[filters, setFilters, genreFilter],
+		[filters, setFilters, writerFilter],
 	)
 
 	const isActive = useMemo(() => Object.values(selectionState).some(Boolean), [selectionState])
 
 	return (
-		<FilterSheet label="Genres" isActive={isActive}>
+		<FilterSheet label="Writers" isActive={isActive}>
 			<View
 				className="gap-8"
 				style={{
@@ -84,25 +84,25 @@ export default function Genres() {
 				}}
 			>
 				<View>
-					<Heading size="xl">Genres</Heading>
-					<Text className="text-foreground-muted">Filter by genres</Text>
+					<Heading size="xl">Writers</Heading>
+					<Text className="text-foreground-muted">Filter by writers</Text>
 				</View>
 
 				<View className="gap-3">
-					<Text>Available Genres</Text>
+					<Text>Available Writers</Text>
 
 					<View className="gap-0 rounded-lg border border-edge bg-background-surface">
-						{genres.map((genre, idx) => (
-							<Fragment key={genre}>
+						{writers.map((writer, idx) => (
+							<Fragment key={writer}>
 								<View className="flex flex-row items-center gap-3 p-3">
 									<Checkbox
-										checked={selectionState[genre]}
-										onCheckedChange={(checked) => onSelectGenre(genre, checked)}
+										checked={selectionState[writer]}
+										onCheckedChange={(checked) => onSelectWriter(writer, checked)}
 									/>
-									<Label htmlFor={genre}>{genre}</Label>
+									<Label htmlFor={writer}>{writer}</Label>
 								</View>
 
-								{idx < genres.length - 1 && <Divider />}
+								{idx < writers.length - 1 && <Divider />}
 							</Fragment>
 						))}
 					</View>

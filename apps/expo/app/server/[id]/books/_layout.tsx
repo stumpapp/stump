@@ -15,7 +15,7 @@ export default function Screen() {
 			<Stack.Screen
 				name="index"
 				options={{
-					headerShown: false,
+					headerShown: true,
 				}}
 			/>
 		</Stack>

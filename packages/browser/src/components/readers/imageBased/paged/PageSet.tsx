@@ -47,13 +47,10 @@ const PageSet = forwardRef<HTMLDivElement, Props>(
 				style={{
 					...styles[imageScaling.scaleToFit].imagesHolder,
 					filter: `brightness(${brightness * 100}%)`,
-					display: 'flex',
-					flexDirection: 'row',
-					justifyContent: 'center',
 				}}
 			>
 				<div
-					className={cn('relative flex justify-center', {
+					className={cn('relative flex w-full justify-center', {
 						'mx-auto flex-row gap-0': currentSet.length > 1,
 					})}
 				>
@@ -140,6 +137,7 @@ const styles = {
 	[ReadingImageScaleFit.Auto]: {
 		imagesHolder: {
 			// no min width
+			maxWidth: '100%',
 			// no width
 			// no min height
 			height: '100vh',
@@ -158,6 +156,7 @@ const styles = {
 	[ReadingImageScaleFit.Height]: {
 		imagesHolder: {
 			minWidth: 'max-content',
+			// no max width
 			// no width
 			// no min height
 			height: '100vh',
@@ -176,6 +175,7 @@ const styles = {
 	[ReadingImageScaleFit.Width]: {
 		imagesHolder: {
 			// no min width
+			// no max width
 			width: '100vw',
 			minHeight: '100vh',
 			// no neight
@@ -194,6 +194,7 @@ const styles = {
 	[ReadingImageScaleFit.None]: {
 		imagesHolder: {
 			minWidth: 'max-content',
+			// no max width
 			// no width
 			minHeight: '100vh',
 			// no height

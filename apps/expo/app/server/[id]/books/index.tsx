@@ -10,23 +10,32 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { useActiveServer } from '~/components/activeServer'
 import { BookGridItem } from '~/components/book'
 import { IBookGridItemFragment } from '~/components/book/BookGridItem'
+import { BookFilterHeader } from '~/components/book/filterHeader'
 import { ColumnItem } from '~/components/grid'
 import { useGridItemSize } from '~/components/grid/useGridItemSize'
+import RefreshControl from '~/components/RefreshControl'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
+import { useBookFilterStore } from '~/stores/filters'
 
 const query = graphql(`
-	query BooksScreen($pagination: Pagination) {
-		media(pagination: $pagination) {
+	query BooksScreen(
+		$pagination: Pagination
+		$filters: MediaFilterInput
+		$orderBy: [MediaOrderBy!]
+	) {
+		media(pagination: $pagination, filter: $filters, orderBy: $orderBy) {
 			nodes {
 				id
 				...BookGridItem
 			}
 			pageInfo {
 				__typename
-				... on CursorPaginationInfo {
-					currentCursor
-					nextCursor
-					limit
+				... on OffsetPaginationInfo {
+					totalPages
+					currentPage
+					pageSize
+					pageOffset
+					zeroBased
 				}
 			}
 		}
@@ -44,10 +53,16 @@ export default function Screen() {
 		headerLeft: () => <ChevronLeft onPress={() => navigation.goBack()} />,
 	})
 
-	const { data, hasNextPage, fetchNextPage } = useInfiniteSuspenseGraphQL(query, [
-		'books',
-		serverID,
-	])
+	const { filters, sort } = useBookFilterStore((store) => ({
+		filters: store.filters,
+		sort: store.sort,
+	}))
+
+	const { data, hasNextPage, fetchNextPage, refetch, isRefetching } = useInfiniteSuspenseGraphQL(
+		query,
+		['books', serverID, filters, sort],
+		{ filters, orderBy: [sort], pagination: { offset: { page: 1 } } },
+	)
 	const { numColumns, sizeEstimate } = useGridItemSize()
 
 	const onEndReached = useCallback(() => {
@@ -76,12 +91,14 @@ export default function Screen() {
 				contentContainerStyle={{
 					padding: 16,
 				}}
-				centerContent
 				estimatedItemSize={sizeEstimate}
 				numColumns={numColumns}
 				onEndReachedThreshold={0.75}
 				onEndReached={onEndReached}
 				contentInsetAdjustmentBehavior="automatic"
+				ListHeaderComponent={<BookFilterHeader />}
+				ListHeaderComponentStyle={{ paddingBottom: 16 }}
+				refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
 			/>
 		</SafeAreaView>
 	)

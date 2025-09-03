@@ -79,25 +79,29 @@ export default function Screen() {
 			edges={Platform.OS === 'android' ? [] : []}
 		>
 			<ScrollView contentInsetAdjustmentBehavior="automatic">
-				{visibleItems.map((item, idx) => (
-					<Fragment key={item.id}>
-						{/* @ts-expect-error: String path */}
-						<Pressable onPress={() => router.push({ pathname: item.to, params: { id: serverID } })}>
-							<View className="flex flex-row items-center gap-4 p-4">
-								<item.icon
-									className="h-6 w-6"
-									color={colors.foreground.muted}
-									stroke={colors.foreground.muted}
-								/>
-								<Text>{item.title}</Text>
-							</View>
-						</Pressable>
+				<View className="px-4">
+					{visibleItems.map((item, idx) => (
+						<Fragment key={item.id}>
+							<Pressable
+								// @ts-expect-error: String path
+								onPress={() => router.push({ pathname: item.to, params: { id: serverID } })}
+							>
+								<View className="flex flex-row items-center gap-4 py-4">
+									<item.icon
+										className="h-6 w-6"
+										color={colors.foreground.muted}
+										stroke={colors.foreground.muted}
+									/>
+									<Text>{item.title}</Text>
+								</View>
+							</Pressable>
 
-						{idx < visibleItems.length - 1 && <Divider />}
-					</Fragment>
-				))}
+							{idx < visibleItems.length - 1 && <Divider />}
+						</Fragment>
+					))}
 
-				<RecentlyAddedSeries />
+					<RecentlyAddedSeries />
+				</View>
 			</ScrollView>
 		</SafeAreaView>
 	)

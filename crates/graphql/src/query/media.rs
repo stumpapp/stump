@@ -119,6 +119,7 @@ impl MediaQuery {
 						.ok_or("Cursor not found")?;
 					cursor.after(media.name);
 				}
+				// FIXME: Cursor ordering is broken
 				cursor.first(info.limit);
 
 				let models = cursor

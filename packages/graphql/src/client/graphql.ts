@@ -3314,13 +3314,15 @@ export type UpdateReadProgressionMutation = { __typename?: 'Mutation', updateMed
 
 export type BooksScreenQueryVariables = Exact<{
   pagination?: InputMaybe<Pagination>;
+  filters?: InputMaybe<MediaFilterInput>;
+  orderBy?: InputMaybe<Array<MediaOrderBy> | MediaOrderBy>;
 }>;
 
 
 export type BooksScreenQuery = { __typename?: 'Query', media: { __typename?: 'PaginatedMediaResponse', nodes: Array<(
       { __typename?: 'Media', id: string }
       & { ' $fragmentRefs'?: { 'BookGridItemFragment': BookGridItemFragment } }
-    )>, pageInfo: { __typename: 'CursorPaginationInfo', currentCursor?: string | null, nextCursor?: string | null, limit: number } | { __typename: 'OffsetPaginationInfo' } } };
+    )>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', totalPages: number, currentPage: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
 
 export type BookSearchScreenQueryVariables = Exact<{
   filter: MediaFilterInput;
@@ -3421,6 +3423,11 @@ export type StackedBookThumbnailsQueryVariables = Exact<{ [key: string]: never; 
 
 
 export type StackedBookThumbnailsQuery = { __typename?: 'Query', media: { __typename?: 'PaginatedMediaResponse', nodes: Array<{ __typename?: 'Media', id: string, thumbnail: { __typename?: 'ImageRef', url: string } }> } };
+
+export type GenresQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GenresQuery = { __typename?: 'Query', mediaMetadataOverview: { __typename?: 'MediaMetadataOverview', genres: Array<string> } };
 
 export type BookMenuFragment = { __typename?: 'Media', id: string, isFavorite: boolean, library: { __typename?: 'Library', id: string, name: string }, series: { __typename?: 'Series', id: string, resolvedName: string }, readProgress?: { __typename: 'ActiveReadingSession' } | null, readHistory: Array<{ __typename: 'FinishedReadingSession' }> } & { ' $fragmentName'?: 'BookMenuFragment' };
 
@@ -5050,18 +5057,20 @@ export const UpdateReadProgressionDocument = new TypedDocumentString(`
 }
     `) as unknown as TypedDocumentString<UpdateReadProgressionMutation, UpdateReadProgressionMutationVariables>;
 export const BooksScreenDocument = new TypedDocumentString(`
-    query BooksScreen($pagination: Pagination) {
-  media(pagination: $pagination) {
+    query BooksScreen($pagination: Pagination, $filters: MediaFilterInput, $orderBy: [MediaOrderBy!]) {
+  media(pagination: $pagination, filter: $filters, orderBy: $orderBy) {
     nodes {
       id
       ...BookGridItem
     }
     pageInfo {
       __typename
-      ... on CursorPaginationInfo {
-        currentCursor
-        nextCursor
-        limit
+      ... on OffsetPaginationInfo {
+        totalPages
+        currentPage
+        pageSize
+        pageOffset
+        zeroBased
       }
     }
   }
@@ -5282,6 +5291,13 @@ export const StackedBookThumbnailsDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<StackedBookThumbnailsQuery, StackedBookThumbnailsQueryVariables>;
+export const GenresDocument = new TypedDocumentString(`
+    query Genres {
+  mediaMetadataOverview {
+    genres
+  }
+}
+    `) as unknown as TypedDocumentString<GenresQuery, GenresQueryVariables>;
 export const BookMenuCompleteDocument = new TypedDocumentString(`
     mutation BookMenuComplete($id: ID!, $isComplete: Boolean!, $page: Int) {
   markMediaAsComplete(id: $id, isComplete: $isComplete, page: $page) {

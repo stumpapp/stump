@@ -58,7 +58,8 @@ export default function RecentlyAddedSeries() {
 			data={data?.pages.flatMap((page) => page.series.nodes) || []}
 			renderItem={renderItem}
 			contentContainerStyle={{
-				padding: 16,
+				paddingTop: 16,
+				paddingBottom: 16,
 			}}
 			estimatedItemSize={sizeEstimate}
 			numColumns={numColumns}

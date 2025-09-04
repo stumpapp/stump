@@ -65,6 +65,13 @@ export const pumpkin: StumpTheme = {
 			secondary: '#00000040',
 		},
 	},
+	scrollbar: {
+		DEFAULT: '#0C0C0C',
+		thumb: {
+			DEFAULT: 'hsla(0, 0%, 100%, 0.4)',
+			hover: 'hsla(0, 0%, 100%, 0.3)',
+		},
+	},
 }
 
 /*

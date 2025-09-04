@@ -34,3 +34,26 @@ form {
 #nprogress .bar {
 	@apply fixed left-0 top-0 z-50 h-0.5 w-full bg-brand-500;
 }
+
+/* For Safari & Chrome only */
+::-webkit-scrollbar {
+	width: 12px;
+	height: 12px;
+}
+::-webkit-scrollbar-track {
+	background: hsl(var(--twc-scrollbar));
+}
+::-webkit-scrollbar-corner {
+	background: hsl(var(--twc-scrollbar));
+}
+::-webkit-scrollbar-thumb {
+	background-color: hsl(var(--twc-scrollbar-thumb) / var(--twc-scrollbar-thumb-opacity));
+	border-radius: 6px;
+	border: 3px solid transparent;
+	background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+	background-color: hsl(
+		var(--twc-scrollbar-thumb-hover) / var(--twc-scrollbar-thumb-hover-opacity)
+	);
+}

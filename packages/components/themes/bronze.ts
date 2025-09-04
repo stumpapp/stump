@@ -35,4 +35,11 @@ export const bronze = {
 			secondary: '#D3C4BA',
 		},
 	},
+	scrollbar: {
+		DEFAULT: '#EDE8E4',
+		thumb: {
+			DEFAULT: 'hsla(0, 0%, 0%, 0.3)',
+			hover: 'hsla(0, 0%, 0%, 0.5)',
+		},
+	},
 } satisfies StumpTheme

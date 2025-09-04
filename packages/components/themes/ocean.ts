@@ -81,4 +81,11 @@ export const ocean = {
 			secondary: '#1B6B7D',
 		},
 	},
+	scrollbar: {
+		DEFAULT: '#0A3644',
+		thumb: {
+			DEFAULT: 'hsla(0, 0%, 100%, 0.4)',
+			hover: 'hsla(0, 0%, 100%, 0.3)',
+		},
+	},
 } satisfies StumpTheme

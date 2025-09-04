@@ -83,4 +83,11 @@ export const light = {
 			secondary: '#F1F1F2',
 		},
 	},
+	scrollbar: {
+		DEFAULT: '#F2F2F3',
+		thumb: {
+			DEFAULT: 'hsla(0, 0%, 0%, 0.3)',
+			hover: 'hsla(0, 0%, 0%, 0.5)',
+		},
+	},
 } satisfies StumpTheme

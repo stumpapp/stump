@@ -170,7 +170,7 @@ export default function BookMenu({ data }: Props) {
 						</DropdownMenu.Item>
 					)}
 
-					{!isPreviouslyCompleted && (
+					{isPreviouslyCompleted && (
 						<DropdownMenu.Item
 							key="deleteHistory"
 							onSelect={() => deleteReadHistory({ id: book.id })}

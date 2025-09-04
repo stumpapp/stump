@@ -18,6 +18,7 @@ import { FasterImage } from '~/components/Image'
 import RefreshControl from '~/components/RefreshControl'
 import { Button, Heading, Text } from '~/components/ui'
 import { formatBytes, parseGraphQLDecimal } from '~/lib/format'
+import { cn } from '~/lib/utils'
 
 dayjs.extend(relativeTime)
 dayjs.extend(duration)
@@ -216,11 +217,15 @@ export default function Screen() {
 			edges={Platform.OS === 'ios' ? ['top', 'left', 'right'] : ['top', 'left', 'right', 'bottom']}
 		>
 			<ScrollView
-				className="flex-1 bg-background px-6 pt-4"
+				className="flex-1 bg-background px-6"
 				refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
 				contentInsetAdjustmentBehavior="automatic"
 			>
-				<View className="flex-1 gap-8">
+				<View
+					className={cn('flex-1 gap-8', {
+						'pt-4': Platform.OS === 'ios',
+					})}
+				>
 					{Platform.OS === 'android' && book && (
 						<View className="flex flex-row justify-between pt-2">
 							<Pressable onPress={() => router.back()}>

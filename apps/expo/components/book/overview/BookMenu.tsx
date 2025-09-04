@@ -4,12 +4,13 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'expo-router'
 import { Ellipsis } from 'lucide-react-native'
 import { useCallback, useState } from 'react'
-import { View } from 'react-native'
+import { Platform, View } from 'react-native'
 import { Pressable } from 'react-native-gesture-handler'
 import * as DropdownMenu from 'zeego/dropdown-menu'
 
 import { useFavoriteBook } from '~/lib/hooks/useFavoriteBook'
 import { cn } from '~/lib/utils'
+import AndroidBookMenu from './AndroidBookMenu'
 
 const fragment = graphql(`
 	fragment BookMenu on Media {
@@ -122,6 +123,19 @@ export default function BookMenu({ data }: Props) {
 	const router = useRouter()
 
 	const [isOpen, setIsOpen] = useState(false)
+
+	if (Platform.OS === 'android') {
+		return (
+			<AndroidBookMenu
+				book={book}
+				isFavorite={isFavorite}
+				favoriteBook={favoriteBook}
+				completeBook={() => completeBook({ id: book.id, isComplete: true })}
+				deleteCurrentSession={() => deleteCurrentSession({ id: book.id })}
+				deleteReadHistory={() => deleteReadHistory({ id: book.id })}
+			/>
+		)
+	}
 
 	// https://docs.expo.dev/versions/latest/sdk/symbols/
 	// https://github.com/nandorojo/zeego/issues/90

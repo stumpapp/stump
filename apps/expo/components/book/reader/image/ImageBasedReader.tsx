@@ -2,8 +2,14 @@ import { Zoomable } from '@likashefqet/react-native-image-zoom'
 import { useSDK } from '@stump/client'
 import { ReadingDirection, ReadingMode } from '@stump/graphql'
 import { ImageLoadEventData } from 'expo-image'
-import React, { useCallback, useEffect, useMemo } from 'react'
-import { FlatList, useWindowDimensions, View } from 'react-native'
+import React, { useCallback, useEffect, useMemo, useRef } from 'react'
+import {
+	FlatList,
+	NativeScrollEvent,
+	NativeSyntheticEvent,
+	useWindowDimensions,
+	View,
+} from 'react-native'
 import {
 	GestureStateChangeEvent,
 	State,
@@ -41,12 +47,13 @@ type Props = {
 	 * The initial page to start the reader on
 	 */
 	initialPage: number
+	onPastEndReached?: () => void
 }
 
 /**
  * A reader for books that are image-based, where each page should be displayed as an image
  */
-export default function ImageBasedReader({ initialPage }: Props) {
+export default function ImageBasedReader({ initialPage, onPastEndReached }: Props) {
 	const {
 		book,
 		imageSizes = {},
@@ -97,6 +104,34 @@ export default function ImageBasedReader({ initialPage }: Props) {
 		},
 		[onPageChanged, incognito],
 	)
+
+	useEffect(() => {
+		didCallEndReached.current = false
+	}, [currentPage])
+
+	// Note: This does not work for Android so we need an alternative solution
+	const didCallEndReached = useRef(false)
+	const handleScroll = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
+		if (didCallEndReached.current) return
+
+		const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent
+
+		const targetContentOffset = event.nativeEvent.targetContentOffset || contentOffset
+
+		const isPastEnd =
+			(readingDirection === ReadingDirection.Ltr &&
+				contentOffset.x + layoutMeasurement.width > contentSize.width) ||
+			(readingDirection === ReadingDirection.Rtl && contentOffset.x < 0)
+		const isTargetPastEnd =
+			(readingDirection === ReadingDirection.Ltr &&
+				targetContentOffset.x + layoutMeasurement.width > contentSize.width) ||
+			(readingDirection === ReadingDirection.Rtl && targetContentOffset.x < 0)
+
+		if (isPastEnd && isTargetPastEnd) {
+			didCallEndReached.current = true
+			onPastEndReached?.()
+		}
+	}, [])
 
 	return (
 		<FlatList
@@ -157,6 +192,7 @@ export default function ImageBasedReader({ initialPage }: Props) {
 			showsVerticalScrollIndicator={false}
 			showsHorizontalScrollIndicator={false}
 			removeClippedSubviews
+			onScroll={handleScroll}
 		/>
 	)
 }

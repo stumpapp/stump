@@ -468,7 +468,7 @@ export default function Footer() {
 			{footerControls === 'images' && (
 				<FlatList
 					ref={galleryRef}
-					data={pageSets}
+					data={pageSets ?? []}
 					inverted={readingDirection === ReadingDirection.Rtl}
 					keyExtractor={(item) => `gallery-${item.join('-')}`}
 					renderItem={renderGalleryItem}

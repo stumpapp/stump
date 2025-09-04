@@ -8,17 +8,25 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDisplay } from '~/lib/hooks'
 import { DEFAULT_BOOK_PREFERENCES, useBookPreferences } from '~/stores/reader'
 
-import { IImageBasedReaderContext, ImageBasedReaderContext } from './context'
+import { IImageBasedReaderContext, ImageBasedReaderContext, NextInSeriesBookRef } from './context'
 import ControlsOverlay from './ControlsOverlay'
 import ImageBasedReader from './ImageBasedReader'
+import NextUpOverlay from './NextUpOverlay'
 
 type Props = Omit<
 	IImageBasedReaderContext,
 	'currentPage' | 'flatListRef' | 'setImageSizes' | 'pageSets' | 'imageSizes'
 > &
-	ComponentProps<typeof ImageBasedReader>
+	ComponentProps<typeof ImageBasedReader> & {
+		nextInSeries?: NextInSeriesBookRef | null
+	}
 
-export default function ImageBasedReaderContainer({ initialPage, onPageChanged, ...ctx }: Props) {
+export default function ImageBasedReaderContainer({
+	initialPage,
+	onPageChanged,
+	nextInSeries,
+	...ctx
+}: Props) {
 	const { height, width } = useDisplay()
 	const {
 		preferences: {
@@ -46,6 +54,7 @@ export default function ImageBasedReaderContainer({ initialPage, onPageChanged, 
 					{} as Record<number, { height: number; width: number; ratio: number }>,
 				) ?? {},
 	)
+	const [showNextUp, setShowNextUp] = useState(false)
 
 	const deviceOrientation = useMemo(
 		() => (width > height ? 'landscape' : 'portrait'),
@@ -133,7 +142,21 @@ export default function ImageBasedReaderContainer({ initialPage, onPageChanged, 
 				}}
 			>
 				<ControlsOverlay />
-				<ImageBasedReader initialPage={initialPage} />
+
+				{nextInSeries && (
+					<NextUpOverlay
+						isVisible={showNextUp}
+						book={nextInSeries}
+						onClose={() => setShowNextUp(false)}
+					/>
+				)}
+
+				<ImageBasedReader
+					initialPage={initialPage}
+					// Note: This does not work for Android so we need an alternative solution. I'm
+					// thinking maybe adding a menu entry for it in the controls overlay
+					onPastEndReached={() => setShowNextUp(!!nextInSeries)}
+				/>
 			</View>
 		</ImageBasedReaderContext.Provider>
 	)

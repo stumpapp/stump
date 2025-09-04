@@ -4,15 +4,44 @@ import { useCallback, useEffect, useState } from 'react'
 import { Platform, Pressable, View } from 'react-native'
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import * as DropdownMenu from 'zeego/dropdown-menu'
+import * as NativeDropdownMenu from 'zeego/dropdown-menu'
 
-import { Heading, icons } from '~/components/ui'
+import {
+	Button,
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuGroup,
+	DropdownMenuItem,
+	DropdownMenuLabel,
+	DropdownMenuPortal,
+	DropdownMenuRadioGroup,
+	DropdownMenuRadioItem,
+	DropdownMenuSeparator,
+	DropdownMenuShortcut,
+	DropdownMenuSub,
+	DropdownMenuSubContent,
+	DropdownMenuSubTrigger,
+	DropdownMenuTrigger,
+	Heading,
+	icons,
+	Switch,
+	Text,
+} from '~/components/ui'
 import { COLORS } from '~/lib/constants'
 import { useDisplay } from '~/lib/hooks'
 import { useReaderStore } from '~/stores'
 import { useBookPreferences } from '~/stores/reader'
 
 import { useImageBasedReader } from './context'
+import { Icon } from '~/components/ui/icon'
+import {
+	ArrowLeft,
+	ArrowRight,
+	Glasses,
+	Settings2,
+	SquareArrowLeft,
+	SquareArrowRight,
+} from 'lucide-react-native'
 
 const { X, CircleEllipsis } = icons
 
@@ -63,6 +92,272 @@ export default function Header({ onShowGlobalSettings }: Props) {
 
 	const [isOpen, setIsOpen] = useState(false)
 
+	const contentInsets = {
+		top: insets.top,
+		bottom: insets.bottom,
+		left: 4,
+		right: 4,
+	}
+
+	const DropdownComponent = Platform.select({
+		ios: (
+			<NativeDropdownMenu.Root open={isOpen} onOpenChange={setIsOpen}>
+				<NativeDropdownMenu.Trigger>
+					<Pressable
+						onPress={() => setIsOpen((prev) => !prev)}
+						style={{
+							zIndex: 100,
+						}}
+					>
+						{({ pressed }) => (
+							<View
+								className="rounded-full border p-1 tablet:p-2"
+								style={{
+									backgroundColor: COLORS.dark.background.overlay.DEFAULT,
+									borderColor: COLORS.dark.edge.DEFAULT,
+								}}
+							>
+								<CircleEllipsis
+									style={{
+										opacity: isOpen ? 0.5 : pressed ? 0.85 : 1,
+										// @ts-expect-error: This is fine
+										color: COLORS.dark.foreground.DEFAULT,
+									}}
+								/>
+							</View>
+						)}
+					</Pressable>
+				</NativeDropdownMenu.Trigger>
+
+				<NativeDropdownMenu.Content>
+					<NativeDropdownMenu.Group>
+						<NativeDropdownMenu.Sub>
+							<NativeDropdownMenu.SubTrigger key="preset">
+								<NativeDropdownMenu.ItemTitle>Presets</NativeDropdownMenu.ItemTitle>
+								<NativeDropdownMenu.ItemIcon ios={{ name: 'slider.horizontal.below.rectangle' }} />
+							</NativeDropdownMenu.SubTrigger>
+
+							<NativeDropdownMenu.SubContent>
+								<NativeDropdownMenu.CheckboxItem
+									key="standard"
+									value={readingMode === ReadingMode.Paged}
+									onValueChange={() => setBookPreferences({ readingMode: ReadingMode.Paged })}
+								>
+									<NativeDropdownMenu.ItemTitle>Paged</NativeDropdownMenu.ItemTitle>
+								</NativeDropdownMenu.CheckboxItem>
+								<NativeDropdownMenu.CheckboxItem
+									key="vscroll"
+									value={readingMode === ReadingMode.ContinuousVertical}
+									onValueChange={() =>
+										setBookPreferences({ readingMode: ReadingMode.ContinuousVertical })
+									}
+									disabled
+								>
+									<NativeDropdownMenu.ItemTitle>Vertical Scroll</NativeDropdownMenu.ItemTitle>
+								</NativeDropdownMenu.CheckboxItem>
+
+								<NativeDropdownMenu.CheckboxItem
+									key="hscroll"
+									value={readingMode === ReadingMode.ContinuousHorizontal}
+									onValueChange={() =>
+										setBookPreferences({ readingMode: ReadingMode.ContinuousHorizontal })
+									}
+								>
+									<NativeDropdownMenu.ItemTitle>Horizontal Scroll</NativeDropdownMenu.ItemTitle>
+								</NativeDropdownMenu.CheckboxItem>
+							</NativeDropdownMenu.SubContent>
+						</NativeDropdownMenu.Sub>
+
+						<NativeDropdownMenu.CheckboxItem
+							key="incognito"
+							value={!!incognito}
+							onValueChange={() => updateGlobalSettings({ incognito: !incognito })}
+						>
+							<NativeDropdownMenu.ItemIndicator />
+							<NativeDropdownMenu.ItemTitle>Incognito</NativeDropdownMenu.ItemTitle>
+							<NativeDropdownMenu.ItemIcon
+								ios={{ name: incognito ? 'eyeglasses.slash' : 'eyeglasses' }}
+							/>
+						</NativeDropdownMenu.CheckboxItem>
+
+						<NativeDropdownMenu.Item key="readingDirection" onSelect={onChangeReadingDirection}>
+							<NativeDropdownMenu.ItemTitle>Reading Direction</NativeDropdownMenu.ItemTitle>
+							<NativeDropdownMenu.ItemIcon
+								ios={{
+									name:
+										readingDirection === ReadingDirection.Ltr
+											? 'arrow.right.square'
+											: 'arrow.backward.square',
+								}}
+							/>
+						</NativeDropdownMenu.Item>
+
+						<NativeDropdownMenu.Sub>
+							<NativeDropdownMenu.SubTrigger key="preset">
+								<NativeDropdownMenu.ItemTitle>Reading Timer</NativeDropdownMenu.ItemTitle>
+								<NativeDropdownMenu.ItemIcon
+									ios={{
+										name: 'timer',
+									}}
+								/>
+							</NativeDropdownMenu.SubTrigger>
+
+							<NativeDropdownMenu.SubContent>
+								<NativeDropdownMenu.CheckboxItem
+									key="enabled"
+									value={!!trackElapsedTime}
+									onValueChange={() => setBookPreferences({ trackElapsedTime: !trackElapsedTime })}
+								>
+									<NativeDropdownMenu.ItemTitle>Enabled</NativeDropdownMenu.ItemTitle>
+								</NativeDropdownMenu.CheckboxItem>
+								<NativeDropdownMenu.Item
+									key="reset"
+									destructive
+									disabled={!trackElapsedTime || !resetTimer}
+									onSelect={resetTimer}
+								>
+									<NativeDropdownMenu.ItemTitle>Reset Timer</NativeDropdownMenu.ItemTitle>
+								</NativeDropdownMenu.Item>
+							</NativeDropdownMenu.SubContent>
+						</NativeDropdownMenu.Sub>
+					</NativeDropdownMenu.Group>
+
+					<NativeDropdownMenu.Group>
+						<NativeDropdownMenu.Item key="globalSettings" onSelect={onShowGlobalSettings}>
+							<NativeDropdownMenu.ItemTitle>Preferences</NativeDropdownMenu.ItemTitle>
+							<NativeDropdownMenu.ItemIcon
+								ios={{
+									name: 'slider.horizontal.3',
+								}}
+							/>
+						</NativeDropdownMenu.Item>
+					</NativeDropdownMenu.Group>
+				</NativeDropdownMenu.Content>
+			</NativeDropdownMenu.Root>
+		),
+		android: (
+			<DropdownMenu>
+				<DropdownMenuTrigger asChild>
+					<Button
+						className="h-[unset] w-[unset] rounded-full border p-1 tablet:p-2"
+						variant="ghost"
+						size="icon"
+						style={{
+							backgroundColor: COLORS.dark.background.overlay.DEFAULT,
+							borderColor: COLORS.dark.edge.DEFAULT,
+						}}
+					>
+						{({ pressed }) => (
+							<View
+								style={{
+									backgroundColor: COLORS.dark.background.overlay.DEFAULT,
+									borderColor: COLORS.dark.edge.DEFAULT,
+								}}
+							>
+								<CircleEllipsis
+									style={{
+										opacity: isOpen ? 0.5 : pressed ? 0.85 : 1,
+										// @ts-expect-error: This is fine
+										color: COLORS.dark.foreground.DEFAULT,
+									}}
+								/>
+							</View>
+						)}
+					</Button>
+				</DropdownMenuTrigger>
+
+				<DropdownMenuContent
+					insets={contentInsets}
+					sideOffset={2}
+					className="w-2/3 tablet:w-64"
+					align="end"
+				>
+					<DropdownMenuGroup>
+						<DropdownMenuSub>
+							<DropdownMenuSubTrigger className="text-foreground">
+								<Text className="text-lg">Presets</Text>
+							</DropdownMenuSubTrigger>
+							<DropdownMenuSubContent>
+								<DropdownMenuRadioGroup
+									value={readingMode}
+									onValueChange={(value) => {
+										console.log(value)
+									}}
+								>
+									<DropdownMenuRadioItem value="PAGED" className="text-foreground">
+										<Text className="text-lg">Paged</Text>
+									</DropdownMenuRadioItem>
+									<DropdownMenuRadioItem value="CONTINUOUS_VERTICAL" className="text-foreground">
+										<Text className="text-lg">Vertical Scroll</Text>
+									</DropdownMenuRadioItem>
+									<DropdownMenuRadioItem value="CONTINUOUS_HORIZONTAL" className="text-foreground">
+										<Text className="text-lg">Horizontal Scroll</Text>
+									</DropdownMenuRadioItem>
+								</DropdownMenuRadioGroup>
+							</DropdownMenuSubContent>
+						</DropdownMenuSub>
+					</DropdownMenuGroup>
+					<DropdownMenuSeparator />
+					<DropdownMenuItem
+						className="text-foreground"
+						onPress={() => updateGlobalSettings({ incognito: !incognito })}
+					>
+						<Text className="text-lg">Incognito</Text>
+						<Icon as={Glasses} size={20} className="ml-auto text-foreground-muted" />
+					</DropdownMenuItem>
+					<DropdownMenuSeparator />
+					<DropdownMenuItem className="text-foreground" onPress={onChangeReadingDirection}>
+						<Text className="text-lg">Reading Direction</Text>
+						<Icon
+							as={readingDirection === ReadingDirection.Ltr ? SquareArrowRight : SquareArrowLeft}
+							size={20}
+							className="ml-auto text-foreground-muted"
+						/>
+					</DropdownMenuItem>
+					<DropdownMenuSeparator />
+
+					<DropdownMenuSub>
+						<DropdownMenuSubTrigger className="text-foreground">
+							<Text className="text-lg">Reading Timer</Text>
+						</DropdownMenuSubTrigger>
+						<DropdownMenuSubContent>
+							<DropdownMenuItem
+								className="text-foreground"
+								onPress={() => setBookPreferences({ trackElapsedTime: !trackElapsedTime })}
+								closeOnPress={false}
+							>
+								<Text className="text-lg">Enabled</Text>
+								<View className="ml-auto">
+									<Switch
+										size="tiny"
+										checked={trackElapsedTime}
+										onCheckedChange={() =>
+											setBookPreferences({ trackElapsedTime: !trackElapsedTime })
+										}
+									/>
+								</View>
+							</DropdownMenuItem>
+							<DropdownMenuItem
+								className="text-foreground"
+								disabled={!trackElapsedTime || !resetTimer}
+								onPress={resetTimer}
+							>
+								<Text className="text-lg">Reset Timer</Text>
+							</DropdownMenuItem>
+						</DropdownMenuSubContent>
+					</DropdownMenuSub>
+
+					<DropdownMenuSeparator variant="group" />
+
+					<DropdownMenuItem className="text-foreground" onPress={onShowGlobalSettings}>
+						<Text className="text-lg">Preferences</Text>
+						<Icon as={Settings2} size={20} className="ml-auto text-foreground-muted" />
+					</DropdownMenuItem>
+				</DropdownMenuContent>
+			</DropdownMenu>
+		),
+	})
+
 	return (
 		<Animated.View className="absolute z-20 gap-2 px-2" style={animatedStyles}>
 			<View className="flex-row items-center justify-between">
@@ -91,140 +386,7 @@ export default function Header({ onShowGlobalSettings }: Props) {
 					)}
 				</Pressable>
 
-				<DropdownMenu.Root open={isOpen} onOpenChange={setIsOpen}>
-					<DropdownMenu.Trigger>
-						<Pressable
-							onPress={() => setIsOpen((prev) => !prev)}
-							style={{
-								zIndex: 100,
-							}}
-						>
-							{({ pressed }) => (
-								<View
-									className="rounded-full border p-1 tablet:p-2"
-									style={{
-										backgroundColor: COLORS.dark.background.overlay.DEFAULT,
-										borderColor: COLORS.dark.edge.DEFAULT,
-									}}
-								>
-									<CircleEllipsis
-										style={{
-											opacity: isOpen ? 0.5 : pressed ? 0.85 : 1,
-											// @ts-expect-error: This is fine
-											color: COLORS.dark.foreground.DEFAULT,
-										}}
-									/>
-								</View>
-							)}
-						</Pressable>
-					</DropdownMenu.Trigger>
-
-					<DropdownMenu.Content>
-						<DropdownMenu.Group>
-							<DropdownMenu.Sub>
-								<DropdownMenu.SubTrigger key="preset">
-									<DropdownMenu.ItemTitle>Presets</DropdownMenu.ItemTitle>
-								</DropdownMenu.SubTrigger>
-
-								<DropdownMenu.SubContent>
-									<DropdownMenu.CheckboxItem
-										key="standard"
-										value={readingMode === ReadingMode.Paged}
-										onValueChange={() => setBookPreferences({ readingMode: ReadingMode.Paged })}
-									>
-										<DropdownMenu.ItemTitle>Paged</DropdownMenu.ItemTitle>
-									</DropdownMenu.CheckboxItem>
-									<DropdownMenu.CheckboxItem
-										key="vscroll"
-										value={readingMode === ReadingMode.ContinuousVertical}
-										onValueChange={() =>
-											setBookPreferences({ readingMode: ReadingMode.ContinuousVertical })
-										}
-										disabled
-									>
-										<DropdownMenu.ItemTitle>Vertical Scroll</DropdownMenu.ItemTitle>
-									</DropdownMenu.CheckboxItem>
-
-									<DropdownMenu.CheckboxItem
-										key="hscroll"
-										value={readingMode === ReadingMode.ContinuousHorizontal}
-										onValueChange={() =>
-											setBookPreferences({ readingMode: ReadingMode.ContinuousHorizontal })
-										}
-									>
-										<DropdownMenu.ItemTitle>Horizontal Scroll</DropdownMenu.ItemTitle>
-									</DropdownMenu.CheckboxItem>
-								</DropdownMenu.SubContent>
-							</DropdownMenu.Sub>
-
-							<DropdownMenu.CheckboxItem
-								key="incognito"
-								value={!!incognito}
-								onValueChange={() => updateGlobalSettings({ incognito: !incognito })}
-							>
-								<DropdownMenu.ItemIndicator />
-								<DropdownMenu.ItemTitle>Incognito</DropdownMenu.ItemTitle>
-								<DropdownMenu.ItemIcon
-									ios={{ name: incognito ? 'eyeglasses.slash' : 'eyeglasses' }}
-								/>
-							</DropdownMenu.CheckboxItem>
-
-							<DropdownMenu.Item key="readingDirection" onSelect={onChangeReadingDirection}>
-								<DropdownMenu.ItemTitle>Reading Direction</DropdownMenu.ItemTitle>
-								<DropdownMenu.ItemIcon
-									ios={{
-										name:
-											readingDirection === ReadingDirection.Ltr
-												? 'inset.filled.righthalf.arrow.right.rectangle'
-												: 'inset.filled.lefthalf.arrow.left.rectangle',
-									}}
-								/>
-							</DropdownMenu.Item>
-
-							<DropdownMenu.Sub>
-								<DropdownMenu.SubTrigger key="preset">
-									<DropdownMenu.ItemTitle>Reading Timer</DropdownMenu.ItemTitle>
-									<DropdownMenu.ItemIcon
-										ios={{
-											name: 'timer',
-										}}
-									/>
-								</DropdownMenu.SubTrigger>
-
-								<DropdownMenu.SubContent>
-									<DropdownMenu.CheckboxItem
-										key="enabled"
-										value={!!trackElapsedTime}
-										onValueChange={() =>
-											setBookPreferences({ trackElapsedTime: !trackElapsedTime })
-										}
-									>
-										<DropdownMenu.ItemTitle>Enabled</DropdownMenu.ItemTitle>
-									</DropdownMenu.CheckboxItem>
-									<DropdownMenu.Item
-										key="reset"
-										destructive
-										disabled={!trackElapsedTime || !resetTimer}
-										onSelect={resetTimer}
-									>
-										<DropdownMenu.ItemTitle>Reset Timer</DropdownMenu.ItemTitle>
-									</DropdownMenu.Item>
-								</DropdownMenu.SubContent>
-							</DropdownMenu.Sub>
-						</DropdownMenu.Group>
-
-						<DropdownMenu.Group>
-							<DropdownMenu.Item key="globalSettings" onSelect={onShowGlobalSettings}>
-								<DropdownMenu.ItemTitle>Preferences</DropdownMenu.ItemTitle>
-								<DropdownMenu.ItemIcon
-									ios={{
-										name: 'slider.horizontal.2.square.on.square',
-									}}
-								/>
-							</DropdownMenu.Item>
-						</DropdownMenu.Group>
-					</DropdownMenu.Content>
-				</DropdownMenu.Root>
+				{DropdownComponent}
 			</View>
 
 			<Heading

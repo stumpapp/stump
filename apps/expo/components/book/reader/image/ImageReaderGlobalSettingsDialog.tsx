@@ -10,6 +10,7 @@ import { useColorScheme } from '~/lib/useColorScheme'
 
 import { ReaderSettings } from '../settings'
 import { useImageBasedReader } from './context'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 type Props = {
 	isOpen: boolean
@@ -59,6 +60,8 @@ export default function ImageReaderGlobalSettingsDialog({ isOpen, onClose }: Pro
 		}
 	}
 
+	const insets = useSafeAreaInsets()
+
 	return (
 		<View className="fixed inset-0 z-30 flex-1">
 			<BottomSheet.Modal
@@ -81,7 +84,12 @@ export default function ImageReaderGlobalSettingsDialog({ isOpen, onClose }: Pro
 					className="flex-1 bg-background p-6"
 					contentContainerStyle={{ alignItems: 'flex-start' }}
 				>
-					<View className="w-full flex-1 gap-8">
+					<View
+						className="w-full flex-1 gap-8"
+						style={{
+							paddingBottom: insets.bottom,
+						}}
+					>
 						<View className="gap-1">
 							<View className="flex flex-row items-center justify-between">
 								<Heading size="lg">Settings</Heading>

@@ -19,6 +19,12 @@ export type ImageBasedBookPageRef = {
 	ratio: number
 }
 
+export type NextInSeriesBookRef = {
+	id: string
+	name: string
+	thumbnailUrl: string
+}
+
 export type IImageBasedReaderContext = {
 	flatListRef: React.RefObject<FlatList>
 	book: ImageReaderBookRef

@@ -10,6 +10,8 @@ import AppSettingsRow from '../AppSettingsRow'
 
 const { ChevronsUpDown } = icons
 
+// TODO(android): Use non-native dropdown
+
 export default function DefaultServer() {
 	const [isOpen, setIsOpen] = useState(false)
 

@@ -18,6 +18,8 @@ type Props = {
 	forServer?: string
 }
 
+// TODO(android): Use non-native dropdown for all of these
+
 export default function ReaderSettings({ forBook, forServer }: Props) {
 	const store = useReaderStore((state) => state)
 

@@ -11,6 +11,7 @@ export default function Screen() {
 			<Stack.Screen
 				name="index"
 				options={{
+					headerTitle: '',
 					headerShown: Platform.OS === 'ios',
 					headerTransparent: true,
 					headerLargeTitleStyle: {

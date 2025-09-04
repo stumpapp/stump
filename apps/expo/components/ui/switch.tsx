@@ -35,15 +35,23 @@ const RGB_COLORS = {
 } as const
 
 const SIZES = {
+	tiny: {
+		view: 'h-5 w-[30px]',
+		root: 'h-5 w-[30px]',
+		thumb: 'h-4 w-4',
+		translateX: 13,
+	},
 	sm: {
 		view: 'h-7 w-[42px]',
 		root: 'h-7 w-[42px]',
 		thumb: 'h-6 w-6',
+		translateX: 16,
 	},
 	default: {
 		view: 'h-8 w-[46px]',
 		root: 'h-8 w-[46px]',
 		thumb: 'h-7 w-7',
+		translateX: 18,
 	},
 }
 
@@ -55,7 +63,8 @@ type Props = {
 const SwitchNative = React.forwardRef<SwitchPrimitives.RootRef, Props>(
 	({ className, variant = 'brand', size = 'default', ...props }, ref) => {
 		const { colorScheme } = useColorScheme()
-		const translateX = useDerivedValue(() => (props.checked ? 18 : 0))
+		const xValue = SIZES[size]?.translateX || SIZES.default.translateX
+		const translateX = useDerivedValue(() => (props.checked ? xValue : 0))
 		const colors = RGB_COLORS[variant][colorScheme]
 		const animatedRootStyle = useAnimatedStyle(() => {
 			return {

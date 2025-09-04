@@ -22,11 +22,11 @@ function Checkbox({
 	return (
 		<CheckboxPrimitive.Root
 			className={cn(
-				'h-6 w-6 shrink-0 rounded-[4px] border border-edge shadow-sm shadow-black/5 dark:bg-background-surface',
+				'h-6 w-6 shrink-0 rounded-md border border-edge bg-background-surface shadow-sm shadow-black/5',
 				Platform.select({
 					native: 'overflow-hidden',
 				}),
-				props.checked && cn('border-primary', checkedClassName),
+				props.checked && cn('border-fill-brand-secondary', checkedClassName),
 				props.disabled && 'opacity-50',
 				className,
 			)}
@@ -35,7 +35,7 @@ function Checkbox({
 		>
 			<CheckboxPrimitive.Indicator
 				className={cn(
-					'h-full w-full items-center justify-center bg-fill-brand',
+					'h-full w-full items-center justify-center rounded-md bg-fill-brand',
 					indicatorClassName,
 				)}
 			>

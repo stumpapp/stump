@@ -3,6 +3,7 @@ import { View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import EpubJSFooter from './EpubJSFooter'
+import EpubControlsOverlay from './EpubControlsOverlay'
 
 type Props = {
 	children: React.ReactNode
@@ -21,6 +22,7 @@ export default function EpubJSReaderContainer({ children }: Props) {
 					paddingBottom: insets.bottom,
 				}}
 			>
+				<EpubControlsOverlay />
 				<View className="flex-1 items-center">{children}</View>
 				<EpubJSFooter />
 			</View>

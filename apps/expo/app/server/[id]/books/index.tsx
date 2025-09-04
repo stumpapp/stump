@@ -49,10 +49,10 @@ export default function Screen() {
 	} = useActiveServer()
 
 	const navigation = useNavigation()
-	useDynamicHeader({
-		title: 'Books',
-		headerLeft: () => <ChevronLeft onPress={() => navigation.goBack()} />,
-	})
+	// useDynamicHeader({
+	// 	title: 'Books',
+	// 	headerLeft: () => <ChevronLeft onPress={() => navigation.goBack()} />,
+	// })
 
 	const store = useRef(createBookFilterStore()).current
 

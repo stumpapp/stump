@@ -11,9 +11,10 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useKeepAwake } from 'expo-keep-awake'
 import * as NavigationBar from 'expo-navigation-bar'
 import { useLocalSearchParams } from 'expo-router'
-import { useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 
 import { EpubJSReader, ImageBasedReader, UnsupportedReader } from '~/components/book/reader'
+import { NextInSeriesBookRef } from '~/components/book/reader/image/context'
 import { useAppState } from '~/lib/hooks'
 import { useReaderStore } from '~/stores'
 import { useBookPreferences, useBookTimer } from '~/stores/reader'
@@ -44,6 +45,15 @@ export const query = graphql(`
 					}
 				}
 			}
+			nextInSeries(pagination: { cursor: { limit: 1 } }) {
+				nodes {
+					id
+					name: resolvedName
+					thumbnail {
+						url
+					}
+				}
+			}
 		}
 	}
 `)
@@ -62,6 +72,7 @@ type Params = {
 
 export default function Screen() {
 	useKeepAwake()
+
 	const { id: bookID } = useLocalSearchParams<Params>()
 	const { sdk } = useSDK()
 	const {
@@ -74,6 +85,16 @@ export default function Screen() {
 	if (!book) {
 		throw new Error('Book not found')
 	}
+
+	const nextInSeries = useMemo(() => {
+		const next = book.nextInSeries.nodes.at(0)
+		if (!next) return null
+		return {
+			id: next.id,
+			name: next.name,
+			thumbnailUrl: next.thumbnail.url,
+		} satisfies NextInSeriesBookRef
+	}, [book.nextInSeries.nodes])
 
 	const {
 		preferences: { preferSmallImages, trackElapsedTime },
@@ -206,6 +227,7 @@ export default function Screen() {
 				}
 				onPageChanged={onPageChanged}
 				resetTimer={reset}
+				nextInSeries={nextInSeries}
 			/>
 		)
 	}

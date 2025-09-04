@@ -9,6 +9,7 @@ import { useDisplay } from '~/lib/hooks'
 
 import { EbookReaderBookRef } from '../image/context'
 import EpubJSReaderContainer from './EpubJSReaderContainer'
+import { useReaderStore } from '~/stores'
 
 type Props = {
 	/**
@@ -37,6 +38,12 @@ export default function EpubJSReader({ book, initialCfi, incognito, onEpubCfiCha
 	const { width, height } = useDisplay()
 	const { colorScheme } = useColorScheme()
 	const { sdk } = useSDK()
+
+	const controls = useReaderStore((state) => ({
+		isVisible: state.showControls,
+		setVisible: state.setShowControls,
+	}))
+
 	/**
 	 * The base64 representation of the book file. The reader component does not accept
 	 * credentials in the fetch, so we just have to fetch manually and pass the base64
@@ -111,18 +118,18 @@ export default function EpubJSReader({ book, initialCfi, incognito, onEpubCfiCha
 		return null
 	}
 
+	// FIXME: Just delete epubjs. The callbacks (e.g., onSingleTap) don't even work.
+	// I started to build out basic controls but I can't even do that lmao
 	return (
 		<EpubJSReaderContainer>
 			<Reader
 				src={base64}
 				onDisplayError={(error) => console.error(error)}
 				width={width}
-				// height={height - height * 0.08}
 				height={height - (insets.top + insets.bottom)}
 				fileSystem={useFileSystem}
 				initialLocation={initialCfi}
 				onLocationChange={handleLocationChanged}
-				// renderLoadingFileComponent={LoadingSpinner}
 				defaultTheme={defaultTheme}
 			/>
 		</EpubJSReaderContainer>

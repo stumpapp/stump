@@ -9,6 +9,8 @@ import { CachePolicy } from '~/stores/reader'
 
 import AppSettingsRow from '../AppSettingsRow'
 
+// TODO(android): Use non-native dropdown
+
 const { ChevronsUpDown } = icons
 
 export default function CachePolicySelect() {

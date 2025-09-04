@@ -11,6 +11,8 @@ const { ChevronsUpDown } = icons
 
 import AppSettingsRow from '../AppSettingsRow'
 
+// TODO(android): Use non-native dropdown
+
 export default function AppTheme() {
 	const { colorScheme, setColorScheme } = useColorScheme()
 

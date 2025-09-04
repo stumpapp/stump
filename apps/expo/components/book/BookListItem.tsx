@@ -39,7 +39,7 @@ function BookListItem({ book }: Props) {
 
 	const router = useRouter()
 
-	const { width } = useListItemSize()
+	const { width, height } = useListItemSize()
 
 	return (
 		<Pressable onPress={() => router.navigate(`/server/${serverID}/books/${data.id}`)}>
@@ -58,7 +58,7 @@ function BookListItem({ book }: Props) {
 								},
 								resizeMode: 'fill',
 							}}
-							style={{ height: isTablet ? 225 : 150, width: width }}
+							style={{ height, width }}
 						/>
 					</View>
 

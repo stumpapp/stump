@@ -2,13 +2,20 @@ import { View } from 'react-native'
 
 import { FilterHeader } from '~/components/filter'
 
+import { ISeriesFilterHeaderContext, SeriesFilterHeaderContext } from './context'
 import Sort from './Sort'
+import Status from './Status'
 
-export default function SeriesFilterHeader() {
+type Props = ISeriesFilterHeaderContext
+
+export default function SeriesFilterHeader(context: Props) {
 	return (
-		<FilterHeader>
-			<Sort />
-			<View className="w-2" />
-		</FilterHeader>
+		<SeriesFilterHeaderContext.Provider value={context}>
+			<FilterHeader>
+				<Sort />
+				<View className="w-2" />
+				<Status />
+			</FilterHeader>
+		</SeriesFilterHeaderContext.Provider>
 	)
 }

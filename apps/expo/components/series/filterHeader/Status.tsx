@@ -1,4 +1,4 @@
-import { ReadingStatus } from '@stump/graphql'
+import setProperty from 'lodash/set'
 import { Fragment, useCallback, useMemo, useState } from 'react'
 import { Platform, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -7,30 +7,31 @@ import { match, P } from 'ts-pattern'
 import { FilterSheet } from '~/components/filter'
 import { Checkbox, Heading, Label, Text } from '~/components/ui'
 import { cn } from '~/lib/utils'
-import { useBookFilterStore } from '~/stores/filters'
+import { useSeriesFilterStore } from '~/stores/filters'
 
-const STATUSES = ['READING', 'FINISHED', 'ABANDONED', 'NOT_STARTED'] as const
+export const STATUSES = ['Abandoned', 'Ongoing', 'Completed', 'Cancelled', 'Hiatus'] as const
 const LABELS: Record<(typeof STATUSES)[number], string> = {
-	READING: 'Currently Reading',
-	FINISHED: 'Finished Reading',
-	ABANDONED: 'Abandoned',
-	NOT_STARTED: 'Not Started',
+	Abandoned: 'Abandoned',
+	Ongoing: 'Ongoing',
+	Completed: 'Completed',
+	Cancelled: 'Cancelled',
+	Hiatus: 'Hiatus',
 }
 
-export default function ReadStatus() {
+export default function Status() {
 	const insets = useSafeAreaInsets()
 
-	const { filters, setFilters } = useBookFilterStore((store) => ({
+	const { filters, setFilters } = useSeriesFilterStore((store) => ({
 		filters: store.filters,
 		setFilters: store.setFilters,
 	}))
 
-	const statusFilter = useMemo(() => filters.readingStatus?.isAnyOf, [filters])
+	const statusFilter = useMemo(() => filters.metadata?.status?.likeAnyOf, [filters])
 
 	const [selectionState, setSelectionState] = useState(() => {
 		return match(statusFilter)
-			.with(P.array(P.string), (isAnyOf) =>
-				isAnyOf.reduce(
+			.with(P.array(P.string), (likeAnyOf) =>
+				likeAnyOf.reduce(
 					(acc, status) => ({ ...acc, [status]: true }),
 					{} as Record<string, boolean>,
 				),
@@ -52,15 +53,11 @@ export default function ReadStatus() {
 				.otherwise(() => (checked ? [status] : ([] as string[])))
 
 			if (adjusted.length) {
-				setFilters({
-					...filters,
-					readingStatus: { isAnyOf: adjusted as ReadingStatus[] },
-				})
+				const adjustedFilters = setProperty(filters, `metadata.status.likeAnyOf`, adjusted)
+				setFilters(adjustedFilters)
 			} else {
-				setFilters({
-					...filters,
-					readingStatus: undefined,
-				})
+				const adjustedFilters = setProperty(filters, `metadata.status`, undefined)
+				setFilters(adjustedFilters)
 			}
 		},
 		[filters, setFilters, statusFilter],
@@ -77,28 +74,24 @@ export default function ReadStatus() {
 				}}
 			>
 				<View>
-					<Heading size="xl">Read Status</Heading>
-					<Text className="text-foreground-muted">Filter by read status</Text>
+					<Heading size="xl">Status</Heading>
+					<Text className="text-foreground-muted">Filter by status</Text>
 				</View>
 
-				<View className="gap-3">
-					<Text>Available Read Status</Text>
+				<View className="gap-0 rounded-lg border border-edge bg-background-surface">
+					{STATUSES.map((status, idx) => (
+						<Fragment key={status}>
+							<View className="flex flex-row items-center gap-3 p-3">
+								<Checkbox
+									checked={selectionState[status]}
+									onCheckedChange={(checked) => onSelectStatus(status, checked)}
+								/>
+								<Label htmlFor={status}>{LABELS[status]}</Label>
+							</View>
 
-					<View className="gap-0 rounded-lg border border-edge bg-background-surface">
-						{STATUSES.map((status, idx) => (
-							<Fragment key={status}>
-								<View className="flex flex-row items-center gap-3 p-3">
-									<Checkbox
-										checked={selectionState[status]}
-										onCheckedChange={(checked) => onSelectStatus(status, checked)}
-									/>
-									<Label htmlFor={status}>{LABELS[status]}</Label>
-								</View>
-
-								{idx < STATUSES.length - 1 && <Divider />}
-							</Fragment>
-						))}
-					</View>
+							{idx < STATUSES.length - 1 && <Divider />}
+						</Fragment>
+					))}
 				</View>
 			</View>
 		</FilterSheet>

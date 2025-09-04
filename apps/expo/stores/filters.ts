@@ -52,9 +52,22 @@ export const useBookFilterStore = <T>(
 	return useStore(store, selector)
 }
 
-export const useSeriesFilterStore = createFilterStore<SeriesFilterInput, SeriesOrderBy>(
-	{},
-	{
-		series: { field: SeriesModelOrdering.Name, direction: OrderDirection.Asc },
-	},
-)
+export const createSeriesFilterStore = () =>
+	createFilterStore<SeriesFilterInput, SeriesOrderBy>(
+		{},
+		{
+			series: { field: SeriesModelOrdering.Name, direction: OrderDirection.Asc },
+		},
+	)
+
+export type SeriesFilterStore = ReturnType<typeof createSeriesFilterStore>
+
+export const SeriesFilterContext = createContext<SeriesFilterStore | null>(null)
+
+export const useSeriesFilterStore = <T>(
+	selector: (state: IFilterStore<SeriesFilterInput, SeriesOrderBy>) => T,
+): T => {
+	const store = useContext(SeriesFilterContext)
+	if (!store) throw new Error('useSeriesFilterStore must be used within a SeriesFilterProvider')
+	return useStore(store, selector)
+}

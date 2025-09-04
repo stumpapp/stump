@@ -13,6 +13,7 @@ import { IBookGridItemFragment } from '~/components/book/BookGridItem'
 import { BookFilterHeader } from '~/components/book/filterHeader'
 import { ColumnItem } from '~/components/grid'
 import { useGridItemSize } from '~/components/grid/useGridItemSize'
+import ListEmpty from '~/components/ListEmpty'
 import RefreshControl from '~/components/RefreshControl'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
 import { BookFilterContext, createBookFilterStore } from '~/stores/filters'
@@ -102,6 +103,8 @@ export default function Screen() {
 	const listRef = useRef<FlashList<IBookGridItemFragment>>(null)
 	useScrollToTop(listRef)
 
+	const isFiltered = Object.keys(filters).length > 0
+
 	return (
 		<BookFilterContext.Provider value={store}>
 			<SafeAreaView
@@ -126,6 +129,11 @@ export default function Screen() {
 					ListHeaderComponentStyle={{ paddingBottom: 16 }}
 					contentInsetAdjustmentBehavior="always"
 					refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
+					ListEmptyComponent={
+						<ListEmpty
+							message={isFiltered ? 'No books found matching your filters' : 'No books returned'}
+						/>
+					}
 				/>
 			</SafeAreaView>
 		</BookFilterContext.Provider>

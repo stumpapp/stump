@@ -31,15 +31,25 @@ export default function ReadingDefaultsScene() {
 					...library.config,
 					...params,
 				},
-				scan_mode: 'NONE',
+				scanAfterPersist: false,
 			})
 		},
 		[patch, library.config],
 	)
 
+	const schema = useMemo(
+		() =>
+			buildSchema([], library).pick({
+				defaultReadingDir: true,
+				defaultReadingImageScaleFit: true,
+				defaultReadingMode: true,
+			}),
+		[library],
+	)
+
 	const form = useForm<PatchParams>({
 		defaultValues: formDefaults(library),
-		resolver: zodResolver(buildSchema([], library)),
+		resolver: zodResolver(schema),
 	})
 
 	const formValues = form.watch([

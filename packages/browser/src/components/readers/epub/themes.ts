@@ -8,10 +8,10 @@ export interface EpubTheme {
 // blockquote: {p: {color: '...'}}
 
 // Note: Not React CSS, has to be true CSS fields. E.g. font-size not fontSize.
-export const stumpDark: EpubTheme = {
+export const darkVariantText: EpubTheme = {
 	a: { color: '#4299E1' },
 	blockquote: { color: 'rgb(168 172 176) !important' },
-	body: { background: '#161719 !important', color: '#E8EDF4' },
+	body: { color: '#E8EDF4' },
 	h1: { color: '#E8EDF4' },
 	h2: { color: '#E8EDF4' },
 	h3: { color: '#E8EDF4' },

@@ -19,7 +19,7 @@ import { useTheme } from '@/hooks'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
 import EpubReaderContainer from './EpubReaderContainer'
-import { stumpDark, toFamilyName } from './themes'
+import { darkVariantText, toFamilyName } from './themes'
 
 // TODO: Fix all lifecycle lints
 // TODO: Consider a total re-write or at least thorough review of this component, it was written a while
@@ -175,7 +175,7 @@ const injectFontStylesheet = (rendition: Rendition) => {
  */
 export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 	const { sdk } = useSDK()
-	const { theme } = useTheme()
+	const { isDarkVariant } = useTheme()
 
 	const {
 		data: { epubById: ebook },
@@ -398,15 +398,15 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 				})
 			}
 
-			if (theme === 'dark') {
-				rendition.themes.register('stump-dark', stumpDark)
-				rendition.themes.select('stump-dark')
+			if (isDarkVariant) {
+				rendition.themes.register('dark-variant', darkVariantText)
+				rendition.themes.select('dark-variant')
 			} else {
-				rendition.themes.register('stump-light', {})
-				rendition.themes.select('stump-light')
+				rendition.themes.register('light-variant', {})
+				rendition.themes.select('light-variant')
 			}
 		},
-		[theme],
+		[isDarkVariant],
 	)
 
 	/**	A function for applying updates to the the epub reader preferences to the epubjs rendition instance */
@@ -491,8 +491,8 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 
 				//? TODO: I guess here I would need to wait for and load in custom theme blobs...
 				//* Color manipulation reference: https://github.com/futurepress/epub.js/issues/1019
-				rendition_.themes.register('stump-dark', stumpDark)
-				rendition_.themes.register('stump-light', {})
+				rendition_.themes.register('dark-variant', darkVariantText)
+				rendition_.themes.register('light-variant', {})
 
 				rendition_.on('relocated', handleLocationChange)
 

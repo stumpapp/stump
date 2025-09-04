@@ -20,7 +20,7 @@ export default function HorizontalCardList_({ title, items, onFetchMore, emptySt
 	const isAtLeastMedium = useMediaMatch('(min-width: 768px)')
 
 	const height = useMemo(
-		() => (!isAtLeastSmall ? 325 : !isAtLeastMedium ? 350 : 385),
+		() => (!isAtLeastSmall ? 330 : !isAtLeastMedium ? 350 : 385),
 		[isAtLeastSmall, isAtLeastMedium],
 	)
 

@@ -73,7 +73,8 @@ export default function Genres() {
 		[filters, setFilters, genreFilter],
 	)
 
-	const isActive = useMemo(() => Object.values(selectionState).some(Boolean), [selectionState])
+	const isActive =
+		!!filters.metadata?.genres?.likeAnyOf && filters.metadata.genres.likeAnyOf.length > 0
 
 	return (
 		<FilterSheet label="Genres" isActive={isActive}>

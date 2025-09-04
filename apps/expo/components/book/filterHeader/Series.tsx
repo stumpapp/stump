@@ -73,7 +73,8 @@ export default function Series() {
 		[filters, setFilters, seriesFilter],
 	)
 
-	const isActive = useMemo(() => Object.values(selectionState).some(Boolean), [selectionState])
+	const isActive =
+		!!filters.metadata?.series?.likeAnyOf && filters.metadata.series.likeAnyOf.length > 0
 
 	return (
 		<FilterSheet label="Series" isActive={isActive}>

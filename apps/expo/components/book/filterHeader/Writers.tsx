@@ -73,7 +73,8 @@ export default function Writers() {
 		[filters, setFilters, writerFilter],
 	)
 
-	const isActive = useMemo(() => Object.values(selectionState).some(Boolean), [selectionState])
+	const isActive =
+		!!filters.metadata?.writers?.likeAnyOf && filters.metadata.writers.likeAnyOf.length > 0
 
 	return (
 		<FilterSheet label="Writers" isActive={isActive}>

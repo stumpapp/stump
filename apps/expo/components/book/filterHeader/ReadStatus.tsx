@@ -66,7 +66,7 @@ export default function ReadStatus() {
 		[filters, setFilters, statusFilter],
 	)
 
-	const isActive = useMemo(() => Object.values(selectionState).some(Boolean), [selectionState])
+	const isActive = !!filters.readingStatus?.isAnyOf && filters.readingStatus.isAnyOf.length > 0
 
 	return (
 		<FilterSheet label="Status" isActive={isActive}>

@@ -63,7 +63,8 @@ export default function Status() {
 		[filters, setFilters, statusFilter],
 	)
 
-	const isActive = useMemo(() => Object.values(selectionState).some(Boolean), [selectionState])
+	const isActive =
+		!!filters.metadata?.status?.likeAnyOf && filters.metadata.status.likeAnyOf.length > 0
 
 	return (
 		<FilterSheet label="Status" isActive={isActive}>

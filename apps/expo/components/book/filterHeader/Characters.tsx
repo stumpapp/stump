@@ -72,7 +72,8 @@ export default function Characters() {
 		[filters, setFilters, characterFilter],
 	)
 
-	const isActive = useMemo(() => Object.values(selectionState).some(Boolean), [selectionState])
+	const isActive =
+		!!filters.metadata?.characters?.likeAnyOf && filters.metadata.characters.likeAnyOf.length > 0
 
 	return (
 		<FilterSheet label="Characters" isActive={isActive}>

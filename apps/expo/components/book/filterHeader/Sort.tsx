@@ -191,6 +191,13 @@ export default function Sort() {
 							<RadioGroupItem value="AGE_RATING" id="ageRating" />
 							<Label htmlFor="ageRating">Age Rating</Label>
 						</View>
+
+						<Divider />
+
+						<View className="flex flex-row items-center gap-3 p-3">
+							<RadioGroupItem value="NUMBER" id="number" />
+							<Label htmlFor="number">Series Position</Label>
+						</View>
 					</RadioGroup>
 				</View>
 			</View>

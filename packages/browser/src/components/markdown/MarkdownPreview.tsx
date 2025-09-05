@@ -2,6 +2,7 @@
 import { cn, cx, Divider, Heading, Text } from '@stump/components'
 import { forwardRef, PropsWithChildren, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
+import rehypeRaw from 'rehype-raw'
 import remarkDirective from 'remark-directive'
 import remarkDirectiveRehype from 'remark-directive-rehype'
 import remarkGfm from 'remark-gfm'
@@ -15,6 +16,7 @@ export default function MarkdownPreview({ children, className }: Props) {
 	return (
 		<ReactMarkdown
 			remarkPlugins={[remarkDirective, remarkDirectiveRehype, remarkGfm]}
+			rehypePlugins={[rehypeRaw]}
 			className={cn('text-foreground-subtle', className)}
 			components={{
 				h1: ({ ref: _, ...props }) => (

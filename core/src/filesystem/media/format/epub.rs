@@ -91,15 +91,31 @@ impl FileProcessor for EpubProcessor {
 	}
 
 	fn process_metadata(path: &str) -> Result<Option<ProcessedMediaMetadata>, FileError> {
-		let epub_file = Self::open(path)?;
-		let embedded_metadata = ProcessedMediaMetadata::from(epub_file.metadata);
+		let mut epub_file = Self::open(path)?;
+		let mut embedded_metadata =
+			ProcessedMediaMetadata::from(epub_file.metadata.clone());
+
+		tracing::debug!(before = ?embedded_metadata, "Processing embedded metadata");
+
+		let root_file_path = epub_file.root_file.clone();
+		if let Some(Ok(parsed_embedded_metadata)) = epub_file
+			.get_resource_str_by_path(&root_file_path)
+			.map(|xml| parse_opf_xml(&xml))
+		{
+			let additional_metadata =
+				ProcessedMediaMetadata::from(parsed_embedded_metadata);
+			// Prioritize the additional over epub-rs since it is less comprehensive
+			embedded_metadata.merge(additional_metadata);
+		}
+
+		tracing::debug!(after = ?embedded_metadata, "Merged embedded metadata");
 
 		let file_path = std::path::Path::new(path).with_extension("opf");
 		if file_path.exists() {
 			let opf_string = std::fs::read_to_string(file_path)?;
 			let opf_metadata = parse_opf_xml(&opf_string)?;
 
-			// merge opf and embedded, prioritizing opf
+			// Prioritize the OPF metadata over the embedded metadata
 			let opf_metadata = ProcessedMediaMetadata::from(opf_metadata);
 			let mut combined_metadata = opf_metadata.clone();
 
@@ -469,6 +485,10 @@ fn parse_opf_xml(opf_content: &str) -> Result<HashMap<String, Vec<String>>, File
 							let property = String::from_utf8_lossy(&attr.value);
 							current_tag = property.to_string();
 						},
+						b"property" if tag_name == "opf:meta" => {
+							let property = String::from_utf8_lossy(&attr.value);
+							current_tag = property.to_string();
+						},
 						_ => {},
 					}
 				}
@@ -542,10 +562,47 @@ fn parse_opf_xml(opf_content: &str) -> Result<HashMap<String, Vec<String>>, File
 					if let Ok(text) = e.unescape() {
 						let content = text.trim().to_string();
 						if !content.is_empty() {
-							opf_metadata
-								.entry(current_tag.clone())
-								.or_default()
-								.push(content);
+							match current_tag.as_str() {
+								"belongs-to-collection" => {
+									opf_metadata
+										.entry("collection_name".to_string())
+										.or_default()
+										.push(content.clone());
+								},
+								"collection-type" => {
+									opf_metadata
+										.entry("collection_type".to_string())
+										.or_default()
+										.push(content.clone());
+								},
+								"group-position" => {
+									opf_metadata
+										.entry("collection_position".to_string())
+										.or_default()
+										.push(content.clone());
+								},
+								"identifier" => {
+									// Some books seem to have prefixed identifiers (e.g., "isbn:9780062444134")
+									if let Some(colon_pos) = content.find(':') {
+										let scheme = content[..colon_pos].to_lowercase();
+										let value = content[colon_pos + 1..].to_string();
+										let key = format!("identifier_{}", scheme);
+										opf_metadata.entry(key).or_default().push(value);
+									} else {
+										// No prefix, treat as generic identifier
+										opf_metadata
+											.entry(current_tag.clone())
+											.or_default()
+											.push(content);
+									}
+								},
+								_ => {
+									opf_metadata
+										.entry(current_tag.clone())
+										.or_default()
+										.push(content);
+								},
+							}
 						}
 					}
 				}
@@ -911,6 +968,92 @@ mod tests {
 			"title_sort",
 		];
 
+		for key in expected_keys.iter() {
+			assert!(metadata.contains_key(*key), "Missing expected key: {}", key);
+		}
+	}
+
+	#[test]
+	fn test_parse_calibre_3_opf() {
+		let opf_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+			.join("integration-tests")
+			.join("data")
+			.join("calibre-2.opf");
+
+		let opf_content = std::fs::read_to_string(&opf_path)
+			.expect("Failed to read calibre-2.opf test file");
+
+		let metadata =
+			parse_opf_xml(&opf_content).expect("Failed to parse calibre-3.opf");
+
+		assert_eq!(
+			metadata.get("title"),
+			Some(&vec!["The Long Way to a Small, Angry Planet".to_string()])
+		);
+		assert_eq!(
+			metadata.get("creator"),
+			Some(&vec!["Becky Chambers".to_string()])
+		);
+		assert_eq!(
+			metadata.get("publisher"),
+			Some(&vec!["Harper Voyager".to_string()])
+		);
+		assert_eq!(metadata.get("language"), Some(&vec!["en".to_string()]));
+		assert_eq!(
+			metadata.get("date"),
+			Some(&vec!["2014-07-29T04:00:00+00:00".to_string()])
+		);
+
+		let subjects = metadata.get("subject").expect("Should have subjects");
+		assert_eq!(subjects.len(), 5);
+		assert!(subjects.contains(&"Science fiction".to_string()));
+		assert!(subjects.contains(&"Space Opera".to_string()));
+		assert!(subjects.contains(&"LGBT".to_string()));
+		assert!(subjects.contains(&"Fiction".to_string()));
+		assert!(subjects.contains(&"Queer".to_string()));
+
+		// Test the different format for series info
+		assert_eq!(
+			metadata.get("collection_name"),
+			Some(&vec!["Wayfarers".to_string()])
+		);
+		assert_eq!(
+			metadata.get("collection_type"),
+			Some(&vec!["series".to_string()])
+		);
+		assert_eq!(
+			metadata.get("collection_position"),
+			Some(&vec!["1".to_string()])
+		);
+
+		// Test prefixed identifiers
+		assert_eq!(
+			metadata.get("identifier_isbn"),
+			Some(&vec!["9780062444134".to_string()])
+		);
+		assert_eq!(
+			metadata.get("identifier_mobi-asin"),
+			Some(&vec!["B00M0DRZ56".to_string()])
+		);
+		assert_eq!(
+			metadata.get("identifier_calibre"),
+			Some(&vec!["42".to_string()])
+		);
+
+		let expected_keys = [
+			"title",
+			"creator",
+			"date",
+			"publisher",
+			"language",
+			"subject",
+			"identifier_isbn",
+			"identifier_mobi-asin",
+			"identifier_calibre",
+			"collection_name",
+			"collection_type",
+			"collection_position",
+		];
 		for key in expected_keys.iter() {
 			assert!(metadata.contains_key(*key), "Missing expected key: {}", key);
 		}

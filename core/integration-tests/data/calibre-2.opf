@@ -1,0 +1,36 @@
+<package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="uuid_id" prefix="calibre: https://calibre-ebook.com">
+  <metadata xmlns:opf="http://www.idpf.org/2007/opf"
+    xmlns:dc="http://purl.org/dc/elements/1.1/"
+    xmlns:dcterms="http://purl.org/dc/terms/"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:calibre="http://calibre.kovidgoyal.net/2009/metadata">
+    <dc:title id="id">The Long Way to a Small, Angry Planet</dc:title>
+    <dc:creator id="id-1">Becky Chambers</dc:creator>
+    <dc:identifier>isbn:9780062444134</dc:identifier>
+    <dc:identifier>mobi-asin:B00M0DRZ56</dc:identifier>
+    <dc:identifier>calibre:42</dc:identifier>
+    <dc:identifier>uuid:0fbf1b90-f134-4315-9a8a-c135cfe7a605</dc:identifier>
+    <dc:identifier id="uuid_id">uuid:0fbf1b90-f134-4315-9a8a-c135cfe7a605</dc:identifier>
+    <dc:rights>Copyright © Becky Chambers 2014</dc:rights>
+    <dc:language>en</dc:language>
+    <dc:date>2014-07-29T04:00:00+00:00</dc:date>
+    <dc:description>&lt;div&gt;
+&lt;p&gt;&lt;em&gt;Follow a motley crew on an exciting journey through space-and one adventurous young explorer who discovers the meaning of family in the far reaches of the universe-in this light-hearted debut space opera from a rising sci-fi star.&lt;/em&gt;&lt;br&gt;&lt;br&gt;Rosemary Harper doesn't expect much when she joins the crew of the aging Wayfarer. While the patched-up ship has seen better days, it offers her a bed, a chance to explore the far-off corners of the galaxy, and most importantly, some distance from her past. An introspective young woman who learned early to keep to herself, she's never met anyone remotely like the ship's diverse crew. Life aboard the Wayfarer is chaotic and crazy—exactly what Rosemary wants. It's also about to get extremely dangerous when the crew is offered the job of a lifetime.&lt;/p&gt;&lt;/div&gt;</dc:description>
+    <dc:publisher>Harper Voyager</dc:publisher>
+    <dc:subject>Science fiction</dc:subject>
+    <dc:subject>Space Opera</dc:subject>
+    <dc:subject>LGBT</dc:subject>
+    <dc:subject>Fiction</dc:subject>
+    <dc:subject>Queer</dc:subject>
+    <opf:meta refines="#id" property="title-type">main</opf:meta>
+    <opf:meta refines="#id" property="file-as">Long Way to a Small, Angry Planet, The</opf:meta>
+    <meta name="primary-writing-mode" content="horizontal-lr"/>
+    <meta property="dcterms:modified" scheme="dcterms:W3CDTF">2025-09-02T16:04:09Z</meta>
+    <meta property="calibre:timestamp" scheme="dcterms:W3CDTF">2025-06-12T19:14:18Z</meta>
+    <opf:meta refines="#id-1" property="role" scheme="marc:relators">aut</opf:meta>
+    <opf:meta refines="#id-1" property="file-as">Chambers, Becky</opf:meta>
+    <opf:meta property="belongs-to-collection" id="id-2">Wayfarers</opf:meta>
+    <opf:meta refines="#id-2" property="collection-type">series</opf:meta>
+    <opf:meta refines="#id-2" property="group-position">1</opf:meta>
+  </metadata>
+</package>

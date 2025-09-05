@@ -218,8 +218,10 @@ impl From<HashMap<String, Vec<String>>> for ProcessedMediaMetadata {
 			match key.to_lowercase().as_str() {
 				"title" => metadata.title = Some(value.join("\n").to_string()),
 				"title_sort" => metadata.title_sort = Some(value.join("\n").to_string()),
-				"series" => metadata.series = Some(value.join("\n").to_string()),
-				"number" | "series_index" => {
+				"series" | "collection_name" => {
+					metadata.series = Some(value.join("\n").to_string())
+				},
+				"number" | "series_index" | "collection_position" => {
 					metadata.number =
 						value.into_iter().next().and_then(|n| n.parse().ok());
 				},
@@ -227,7 +229,9 @@ impl From<HashMap<String, Vec<String>>> for ProcessedMediaMetadata {
 					metadata.volume =
 						value.into_iter().next().and_then(|n| n.parse().ok());
 				},
-				"summary" => metadata.summary = Some(value.join("\n").to_string()),
+				"summary" | "description" | "synopsis" => {
+					metadata.summary = Some(value.join("\n").to_string())
+				},
 				"notes" => metadata.notes = Some(value.join("\n").to_string()),
 				"genre" | "genres" | "subject" | "subjects" => {
 					metadata.genres = Some(value)

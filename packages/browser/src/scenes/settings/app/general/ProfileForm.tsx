@@ -93,9 +93,12 @@ export default function ProfileForm() {
 
 		mutate({
 			input: {
-				...user,
+				username: values.username,
+				avatarUrl: values.avatarUrl,
+				password: values.password || undefined, // undefined -> no change, null or "" -> no password :(
+				permissions: user.permissions,
 				ageRestriction: user.ageRestriction || null,
-				...values,
+				maxSessionsAllowed: user.maxSessionsAllowed,
 			},
 		})
 	}

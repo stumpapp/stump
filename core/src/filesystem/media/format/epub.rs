@@ -95,7 +95,7 @@ impl FileProcessor for EpubProcessor {
 		let mut embedded_metadata =
 			ProcessedMediaMetadata::from(epub_file.metadata.clone());
 
-		tracing::debug!(before = ?embedded_metadata, "Processing embedded metadata");
+		tracing::trace!(before = ?embedded_metadata, "Processing embedded metadata");
 
 		let root_file_path = epub_file.root_file.clone();
 		if let Some(Ok(parsed_embedded_metadata)) = epub_file
@@ -108,7 +108,7 @@ impl FileProcessor for EpubProcessor {
 			embedded_metadata.merge(additional_metadata);
 		}
 
-		tracing::debug!(after = ?embedded_metadata, "Merged embedded metadata");
+		tracing::trace!(after = ?embedded_metadata, "Merged embedded metadata");
 
 		let file_path = std::path::Path::new(path).with_extension("opf");
 		if file_path.exists() {

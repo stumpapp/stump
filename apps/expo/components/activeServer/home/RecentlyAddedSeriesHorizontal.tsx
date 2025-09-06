@@ -36,7 +36,7 @@ function RecentlyAddedSeriesHorizontal() {
 	} = useActiveServer()
 	const { data, fetchNextPage, hasNextPage } = useInfiniteSuspenseGraphQL(
 		query,
-		['recentlyAddedSeries', serverID],
+		['recentlyAddedSeries', serverID, 'horizontal'],
 		{
 			pagination: { cursor: { limit: 20 } },
 		},

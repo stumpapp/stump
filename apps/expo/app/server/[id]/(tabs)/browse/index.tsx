@@ -1,19 +1,24 @@
 import { UserPermission } from '@stump/graphql'
 import { useRouter } from 'expo-router'
-import { BookCopy, BookText, FolderTree, Heart, LibraryBig, Rows3 } from 'lucide-react-native'
+import {
+	BookCopy,
+	BookText,
+	ChevronRight,
+	FolderTree,
+	Heart,
+	LibraryBig,
+	Rows3,
+} from 'lucide-react-native'
 import { Fragment } from 'react'
 import { Platform, View } from 'react-native'
-import { Pressable, ScrollView } from 'react-native-gesture-handler'
+import { Pressable } from 'react-native-gesture-handler'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { useStumpServer } from '~/components/activeServer'
 import { RecentlyAddedSeries } from '~/components/series'
-import { Text } from '~/components/ui'
-import { useColors } from '~/lib/constants'
-import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
+import { Heading, Text } from '~/components/ui'
+import { Icon } from '~/components/ui/icon'
 import { cn } from '~/lib/utils'
-
-// TODO: Use icons icons (lol i know what i mean)
 
 const ITEMS = [
 	{
@@ -64,7 +69,6 @@ export default function Screen() {
 	} = useStumpServer()
 
 	const router = useRouter()
-	const colors = useColors()
 
 	const visibleItems = ITEMS.filter((item) => !item.permission || checkPermission(item.permission))
 
@@ -76,26 +80,45 @@ export default function Screen() {
 		>
 			<RecentlyAddedSeries
 				header={
-					<View>
-						{visibleItems.map((item, idx) => (
-							<Fragment key={item.id}>
-								<Pressable
-									// @ts-expect-error: String path
-									onPress={() => router.push({ pathname: item.to, params: { id: serverID } })}
-								>
-									<View className="flex flex-row items-center gap-4 py-4">
-										<item.icon
-											className="h-6 w-6"
-											color={colors.foreground.muted}
-											stroke={colors.foreground.muted}
-										/>
-										<Text className="text-lg">{item.title}</Text>
-									</View>
-								</Pressable>
+					<View className="flex gap-4">
+						<View>
+							{visibleItems.map((item, idx) => (
+								<Fragment key={item.id}>
+									<Pressable
+										// @ts-expect-error: String path
+										onPress={() => router.push({ pathname: item.to, params: { id: serverID } })}
+									>
+										{({ pressed }) => (
+											<View
+												className={cn('flex-row items-center justify-between px-4', {
+													'opacity-60': pressed,
+												})}
+											>
+												<View
+													className={cn('flex flex-row items-center gap-4 py-4', {
+														'pt-1': idx === 0,
+													})}
+												>
+													<Icon as={item.icon} className="h-6 w-6" />
+													<Text className="text-lg">{item.title}</Text>
+												</View>
 
-								{idx < visibleItems.length - 1 && <Divider />}
-							</Fragment>
-						))}
+												<Icon
+													as={ChevronRight}
+													className="h-6 w-6 text-foreground-muted opacity-70"
+												/>
+											</View>
+										)}
+									</Pressable>
+
+									<Divider />
+								</Fragment>
+							))}
+						</View>
+
+						<Heading size="xl" className="px-4">
+							Recently Added Series
+						</Heading>
 					</View>
 				}
 			/>
@@ -103,7 +126,15 @@ export default function Screen() {
 	)
 }
 
-const Divider = () => <View className={cn('h-px w-full bg-edge')} />
+const Divider = () => (
+	<View
+		className={cn('h-px w-full bg-edge')}
+		style={{
+			// px-4 is 16, icon is 24, so 16 + 24 = 40 to edge of icon, then add 8px padding
+			marginLeft: Platform.OS === 'android' ? 0 : 48,
+		}}
+	/>
+)
 
 // import { UserPermission } from '@stump/graphql'
 // import { useMemo } from 'react'

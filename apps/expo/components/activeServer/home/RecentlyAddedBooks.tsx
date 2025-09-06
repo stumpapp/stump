@@ -7,7 +7,6 @@ import { View } from 'react-native'
 import { BookListItem } from '~/components/book'
 import { BookListItemFragmentType } from '~/components/book/BookListItem'
 import { Heading, Text } from '~/components/ui'
-import { useListItemSize } from '~/lib/hooks'
 
 import { useActiveServer } from '../context'
 
@@ -52,8 +51,6 @@ function RecentlyAddedBooks() {
 		}
 	}, [hasNextPage, fetchNextPage])
 
-	const { width, gap } = useListItemSize()
-
 	const renderItem = useCallback(
 		({ item }: { item: BookListItemFragmentType }) => <BookListItem book={item} />,
 		[],
@@ -68,7 +65,6 @@ function RecentlyAddedBooks() {
 				keyExtractor={({ id }) => id}
 				renderItem={renderItem}
 				horizontal
-				estimatedItemSize={width + gap}
 				onEndReached={onEndReached}
 				onEndReachedThreshold={0.85}
 				showsHorizontalScrollIndicator={false}

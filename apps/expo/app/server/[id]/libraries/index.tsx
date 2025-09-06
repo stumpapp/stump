@@ -52,7 +52,7 @@ export default function Screen() {
 		query,
 		['libraries', serverID],
 	)
-	const { numColumns, sizeEstimate } = useGridItemSize()
+	const { numColumns } = useGridItemSize()
 
 	const onEndReached = useCallback(() => {
 		if (hasNextPage) {
@@ -80,7 +80,6 @@ export default function Screen() {
 				contentContainerStyle={{
 					padding: 16,
 				}}
-				estimatedItemSize={sizeEstimate}
 				numColumns={numColumns}
 				onEndReachedThreshold={0.75}
 				onEndReached={onEndReached}

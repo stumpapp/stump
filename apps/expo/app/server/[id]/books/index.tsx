@@ -13,7 +13,6 @@ import { BookFilterHeader } from '~/components/book/filterHeader'
 import { ColumnItem } from '~/components/grid'
 import { useGridItemSize } from '~/components/grid/useGridItemSize'
 import RefreshControl from '~/components/RefreshControl'
-import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
 import { BookFilterContext, createBookFilterStore } from '~/stores/filters'
 
 const query = graphql(`
@@ -58,7 +57,7 @@ export default function Screen() {
 		['books', serverID, filters, sort],
 		{ filters, orderBy: [sort], pagination: { offset: { page: 1 } } },
 	)
-	const { numColumns, sizeEstimate } = useGridItemSize()
+	const { numColumns } = useGridItemSize()
 
 	const onEndReached = useCallback(() => {
 		if (hasNextPage) {
@@ -87,7 +86,6 @@ export default function Screen() {
 					contentContainerStyle={{
 						padding: 16,
 					}}
-					estimatedItemSize={sizeEstimate}
 					numColumns={numColumns}
 					onEndReachedThreshold={0.75}
 					onEndReached={onEndReached}

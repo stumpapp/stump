@@ -4,12 +4,12 @@ import { graphql } from '@stump/graphql'
 import { memo, useCallback, useMemo } from 'react'
 import { View } from 'react-native'
 
+import { RecentlyAddedSeriesItem } from '~/components/series'
+import { IRecentlyAddedSeriesItemFragment } from '~/components/series/RecentlyAddedSeriesItem'
 import { Heading, Text } from '~/components/ui'
 import { useListItemSize } from '~/lib/hooks'
 
 import { useActiveServer } from '../context'
-import { RecentlyAddedSeriesItem } from '~/components/series'
-import { IRecentlyAddedSeriesItemFragment } from '~/components/series/RecentlyAddedSeriesItem'
 
 const query = graphql(`
 	query RecentlyAddedSeriesHorizontal($pagination: Pagination) {
@@ -54,25 +54,11 @@ function RecentlyAddedSeriesHorizontal() {
 
 	const { gap } = useListItemSize()
 
-	const gapSize = gap * 2
-
 	const renderItem = useCallback(
-		({ item, index }: { item: IRecentlyAddedSeriesItemFragment; index: number }) => {
-			const marginLeft = index === 0 ? 0 : gapSize / 2
-			const marginRight = index === nodes.length - 1 ? gapSize : gapSize / 2
-			return (
-				<View
-					style={{
-						flexGrow: 1,
-						marginLeft,
-						marginRight,
-					}}
-				>
-					<RecentlyAddedSeriesItem series={item} />
-				</View>
-			)
-		},
-		[gapSize],
+		({ item }: { item: IRecentlyAddedSeriesItemFragment }) => (
+			<RecentlyAddedSeriesItem series={item} />
+		),
+		[],
 	)
 
 	return (
@@ -84,7 +70,7 @@ function RecentlyAddedSeriesHorizontal() {
 				keyExtractor={({ id }) => id}
 				renderItem={renderItem}
 				horizontal
-				estimatedItemSize={240 * (2 / 3) + gap}
+				ItemSeparatorComponent={() => <View style={{ width: gap * 2 }} />}
 				onEndReached={onEndReached}
 				onEndReachedThreshold={0.85}
 				showsHorizontalScrollIndicator={false}

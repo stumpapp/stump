@@ -81,7 +81,7 @@ export default function Screen() {
 		},
 	)
 
-	const { numColumns, sizeEstimate } = useGridItemSize()
+	const { numColumns } = useGridItemSize()
 
 	const renderItem = useCallback(
 		({ item, index }: { item: IBookGridItemFragment; index: number }) => (
@@ -104,7 +104,6 @@ export default function Screen() {
 			renderItem={renderItem}
 			contentContainerStyle={{ padding: 16 }}
 			centerContent
-			estimatedItemSize={sizeEstimate}
 			numColumns={numColumns}
 			onEndReachedThreshold={0.75}
 			onEndReached={onEndReached}

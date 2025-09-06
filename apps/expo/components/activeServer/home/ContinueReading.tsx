@@ -7,7 +7,6 @@ import { View } from 'react-native'
 import { BookListItem } from '~/components/book'
 import { BookListItemFragmentType } from '~/components/book/BookListItem'
 import { Heading, Text } from '~/components/ui'
-import { useListItemSize } from '~/lib/hooks'
 
 import { useActiveServer } from '../context'
 import ReadingNow from './ReadingNow'
@@ -62,8 +61,6 @@ function ContinueReading() {
 		}
 	}, [hasNextPage, fetchNextPage])
 
-	const { width, gap } = useListItemSize()
-
 	const renderItem = useCallback(
 		({ item }: { item: BookListItemFragmentType }) => <BookListItem book={item} />,
 		[],
@@ -82,7 +79,6 @@ function ContinueReading() {
 						keyExtractor={({ id }) => id}
 						renderItem={renderItem}
 						horizontal
-						estimatedItemSize={width + gap}
 						onEndReached={onEndReached}
 						onEndReachedThreshold={0.85}
 						showsHorizontalScrollIndicator={false}

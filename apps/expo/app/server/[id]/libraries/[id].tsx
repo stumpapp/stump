@@ -62,7 +62,7 @@ export default function Screen() {
 			},
 		},
 	)
-	const { numColumns, sizeEstimate } = useGridItemSize()
+	const { numColumns } = useGridItemSize()
 
 	const onEndReached = useCallback(() => {
 		if (hasNextPage) {
@@ -91,7 +91,6 @@ export default function Screen() {
 					padding: 16,
 				}}
 				centerContent
-				estimatedItemSize={sizeEstimate}
 				numColumns={numColumns}
 				onEndReachedThreshold={0.75}
 				onEndReached={onEndReached}

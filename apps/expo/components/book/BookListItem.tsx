@@ -5,7 +5,7 @@ import { memo } from 'react'
 import { View } from 'react-native'
 import { Pressable } from 'react-native-gesture-handler'
 
-import { useDisplay, useListItemSize } from '~/lib/hooks'
+import { useListItemSize } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 
 import { useActiveServer } from '../activeServer'
@@ -35,7 +35,6 @@ function BookListItem({ book }: Props) {
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
-	const { isTablet } = useDisplay()
 
 	const router = useRouter()
 

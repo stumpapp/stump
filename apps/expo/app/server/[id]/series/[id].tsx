@@ -1,8 +1,8 @@
 import { useNavigationState, useScrollToTop } from '@react-navigation/native'
-import { FlashList } from '@shopify/flash-list'
+import { FlashList, FlashListRef } from '@shopify/flash-list'
 import { useInfiniteSuspenseGraphQL, useSuspenseGraphQL } from '@stump/client'
 import { graphql } from '@stump/graphql'
-import { useLocalSearchParams, useSegments } from 'expo-router'
+import { useLocalSearchParams } from 'expo-router'
 import { useCallback, useMemo, useRef } from 'react'
 import { Platform } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -89,7 +89,7 @@ export default function Screen() {
 			pagination: { offset: { page: 1 } },
 		},
 	)
-	const { numColumns, sizeEstimate } = useGridItemSize()
+	const { numColumns } = useGridItemSize()
 
 	const onEndReached = useCallback(() => {
 		if (hasNextPage) {
@@ -106,7 +106,7 @@ export default function Screen() {
 		[numColumns],
 	)
 
-	const listRef = useRef<FlashList<IBookGridItemFragment>>(null)
+	const listRef = useRef<FlashListRef<IBookGridItemFragment>>(null)
 	useScrollToTop(listRef)
 
 	const isFiltered = Object.keys(filters).length > 0
@@ -124,7 +124,6 @@ export default function Screen() {
 					contentContainerStyle={{
 						padding: 16,
 					}}
-					estimatedItemSize={sizeEstimate}
 					numColumns={numColumns}
 					onEndReachedThreshold={0.75}
 					onEndReached={onEndReached}

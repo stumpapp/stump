@@ -17,10 +17,12 @@ const query = graphql(`
 			}
 			pageInfo {
 				__typename
-				... on CursorPaginationInfo {
-					currentCursor
-					nextCursor
-					limit
+				... on OffsetPaginationInfo {
+					totalPages
+					currentPage
+					pageSize
+					pageOffset
+					zeroBased
 				}
 			}
 		}
@@ -39,9 +41,9 @@ export default function RecentlyAddedSeries({ header }: Props) {
 	const { data, hasNextPage, fetchNextPage } = useInfiniteSuspenseGraphQL(
 		query,
 		['recentlyAddedSeries', serverID],
-		{ pagination: { cursor: { limit: 20 } } },
+		{ pagination: { offset: { page: 1, pageSize: 20 } } },
 	)
-	const { numColumns, sizeEstimate } = useGridItemSize()
+	const { numColumns } = useGridItemSize()
 
 	const onEndReached = useCallback(() => {
 		if (hasNextPage) {
@@ -65,13 +67,12 @@ export default function RecentlyAddedSeries({ header }: Props) {
 			contentContainerStyle={{
 				padding: 16,
 			}}
-			estimatedItemSize={sizeEstimate}
 			numColumns={numColumns}
 			onEndReachedThreshold={0.75}
 			onEndReached={onEndReached}
 			contentInsetAdjustmentBehavior="always"
 			ListHeaderComponent={header}
-			ListHeaderComponentStyle={header ? { paddingBottom: 16 } : undefined}
+			ListHeaderComponentStyle={header ? { paddingBottom: 16, marginHorizontal: -16 } : undefined}
 		/>
 	)
 }

@@ -128,7 +128,6 @@ export default function PublicationGroup({
 				}}
 				horizontal
 				showsHorizontalScrollIndicator={false}
-				estimatedItemSize={itemWidth + 4}
 			/>
 
 			{!publications.length && <EmptyFeed message="No publications in group" />}

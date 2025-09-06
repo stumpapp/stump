@@ -1,9 +1,9 @@
 import { useScrollToTop } from '@react-navigation/native'
-import { FlashList } from '@shopify/flash-list'
+import { FlashList, FlashListRef } from '@shopify/flash-list'
 import { useInfiniteSuspenseGraphQL } from '@stump/client'
 import { graphql } from '@stump/graphql'
 import { useNavigation } from 'expo-router'
-import { useCallback, useMemo, useRef } from 'react'
+import { useCallback, useRef } from 'react'
 import { Platform } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useStore } from 'zustand'
@@ -74,7 +74,7 @@ export default function Screen() {
 		['series', serverID, filters, sort],
 		{ filters, orderBy: [sort], pagination: { offset: { page: 1 } } },
 	)
-	const { numColumns, sizeEstimate } = useGridItemSize()
+	const { numColumns } = useGridItemSize()
 
 	const onEndReached = useCallback(() => {
 		if (hasNextPage) {
@@ -93,7 +93,7 @@ export default function Screen() {
 
 	const isFiltered = Object.keys(filters).length > 0
 
-	const listRef = useRef<FlashList<ISeriesGridItemFragment>>(null)
+	const listRef = useRef<FlashListRef<ISeriesGridItemFragment>>(null)
 	useScrollToTop(listRef)
 
 	return (
@@ -109,7 +109,6 @@ export default function Screen() {
 					contentContainerStyle={{
 						padding: 16,
 					}}
-					estimatedItemSize={sizeEstimate}
 					numColumns={numColumns}
 					onEndReachedThreshold={0.75}
 					onEndReached={onEndReached}

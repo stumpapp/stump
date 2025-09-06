@@ -30,35 +30,33 @@ export default function BasicLibraryInformation({ onSetShowDirectoryPicker }: Pr
 
 	return (
 		<div className="flex flex-grow flex-col gap-6">
-			<div className="flex flex-col flex-wrap gap-y-6 md:flex-row md:gap-x-6 md:gap-y-0">
-				<Input
-					variant="primary"
-					label={t(getKey('name.label'))}
-					description={t(getKey('name.description'))}
-					placeholder={t(getKey('name.placeholder'))}
-					containerClassName="max-w-full md:max-w-sm"
-					required={isCreatingLibrary}
-					errorMessage={errors.name?.message}
-					data-1p-ignore
-					{...form.register('name')}
-				/>
+			<Input
+				variant="primary"
+				label={t(getKey('name.label'))}
+				description={t(getKey('name.description'))}
+				placeholder={t(getKey('name.placeholder'))}
+				containerClassName="max-w-full md:max-w-sm"
+				required={isCreatingLibrary}
+				errorMessage={errors.name?.message}
+				data-1p-ignore
+				{...form.register('name')}
+			/>
 
-				<Input
-					variant="primary"
-					label={t(getKey('path.label'))}
-					description={t(getKey('path.description'))}
-					placeholder={t(getKey('path.placeholder'))}
-					containerClassName="max-w-full md:max-w-sm"
-					rightDecoration={
-						<Button size="icon" type="button" onClick={() => onSetShowDirectoryPicker(true)}>
-							<Folder className="h-4 w-4 text-foreground-muted" />
-						</Button>
-					}
-					required={isCreatingLibrary}
-					errorMessage={errors.path?.message}
-					{...form.register('path')}
-				/>
-			</div>
+			<Input
+				variant="primary"
+				label={t(getKey('path.label'))}
+				description={t(getKey('path.description'))}
+				placeholder={t(getKey('path.placeholder'))}
+				containerClassName="max-w-full md:max-w-sm"
+				rightDecoration={
+					<Button size="icon" type="button" onClick={() => onSetShowDirectoryPicker(true)}>
+						<Folder className="h-4 w-4 text-foreground-muted" />
+					</Button>
+				}
+				required={isCreatingLibrary}
+				errorMessage={errors.path?.message}
+				{...form.register('path')}
+			/>
 
 			<TextArea
 				className="flex"

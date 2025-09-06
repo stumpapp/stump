@@ -52,10 +52,8 @@ export default function RecentlyAddedSeriesItem({ series }: Props) {
 				width: 240 * (2 / 3),
 			}}
 		>
-			{/* <View className="absolute inset-0 z-10 bg-black" style={{ opacity: 0. }} /> */}
-
 			<LinearGradient
-				colors={['transparent', 'rgba(0, 0, 0, 0.75)']}
+				colors={['transparent', 'rgba(0, 0, 0, 0.80)']}
 				style={{ position: 'absolute', inset: 0, zIndex: 10 }}
 			/>
 

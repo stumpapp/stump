@@ -137,7 +137,10 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 				className="relative aspect-[2/3] shrink-0 overflow-hidden rounded-lg"
 				onPress={() => router.navigate(`/server/${serverID}/books/${data.id}`)}
 			>
-				<View className="absolute inset-0 z-10 bg-black" style={{ opacity: 0.6 }} />
+				<LinearGradient
+					colors={['transparent', 'rgba(0, 0, 0, 0.90)']}
+					style={{ position: 'absolute', inset: 0, zIndex: 10 }}
+				/>
 
 				<FasterImage
 					source={{

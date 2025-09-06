@@ -3418,6 +3418,16 @@ export type RecentlyAddedBooksQuery = { __typename?: 'Query', recentlyAddedMedia
       & { ' $fragmentRefs'?: { 'BookListItemFragment': BookListItemFragment } }
     )>, pageInfo: { __typename: 'CursorPaginationInfo', currentCursor?: string | null, nextCursor?: string | null, limit: number } | { __typename: 'OffsetPaginationInfo' } } };
 
+export type RecentlyAddedSeriesHorizontalQueryVariables = Exact<{
+  pagination?: InputMaybe<Pagination>;
+}>;
+
+
+export type RecentlyAddedSeriesHorizontalQuery = { __typename?: 'Query', recentlyAddedSeries: { __typename?: 'PaginatedSeriesResponse', nodes: Array<(
+      { __typename?: 'Series', id: string }
+      & { ' $fragmentRefs'?: { 'RecentlyAddedSeriesItemFragment': RecentlyAddedSeriesItemFragment } }
+    )>, pageInfo: { __typename: 'CursorPaginationInfo', currentCursor?: string | null, nextCursor?: string | null, limit: number } | { __typename: 'OffsetPaginationInfo' } } };
+
 export type BookGridItemFragment = { __typename?: 'Media', id: string, resolvedName: string, thumbnail: { __typename?: 'ImageRef', url: string } } & { ' $fragmentName'?: 'BookGridItemFragment' };
 
 export type BookListItemFragment = { __typename?: 'Media', id: string, resolvedName: string, thumbnail: { __typename?: 'ImageRef', url: string } } & { ' $fragmentName'?: 'BookListItemFragment' };
@@ -3500,6 +3510,8 @@ export type RecentlyAddedSeriesGridQuery = { __typename?: 'Query', series: { __t
       { __typename?: 'Series', id: string }
       & { ' $fragmentRefs'?: { 'SeriesGridItemFragment': SeriesGridItemFragment } }
     )>, pageInfo: { __typename: 'CursorPaginationInfo', currentCursor?: string | null, nextCursor?: string | null, limit: number } | { __typename: 'OffsetPaginationInfo' } } };
+
+export type RecentlyAddedSeriesItemFragment = { __typename?: 'Series', id: string, resolvedName: string, readCount: number, mediaCount: number, createdAt: any, thumbnail: { __typename?: 'ImageRef', url: string } } & { ' $fragmentName'?: 'RecentlyAddedSeriesItemFragment' };
 
 export type SeriesGridItemFragment = { __typename?: 'Series', id: string, resolvedName: string, thumbnail: { __typename?: 'ImageRef', url: string } } & { ' $fragmentName'?: 'SeriesGridItemFragment' };
 
@@ -4671,6 +4683,18 @@ export const LibrarySearchItemFragmentDoc = new TypedDocumentString(`
   }
 }
     `, {"fragmentName":"LibrarySearchItem"}) as unknown as TypedDocumentString<LibrarySearchItemFragment, unknown>;
+export const RecentlyAddedSeriesItemFragmentDoc = new TypedDocumentString(`
+    fragment RecentlyAddedSeriesItem on Series {
+  id
+  resolvedName
+  thumbnail {
+    url
+  }
+  readCount
+  mediaCount
+  createdAt
+}
+    `, {"fragmentName":"RecentlyAddedSeriesItem"}) as unknown as TypedDocumentString<RecentlyAddedSeriesItemFragment, unknown>;
 export const SeriesGridItemFragmentDoc = new TypedDocumentString(`
     fragment SeriesGridItem on Series {
   id
@@ -5320,6 +5344,33 @@ export const RecentlyAddedBooksDocument = new TypedDocumentString(`
     url
   }
 }`) as unknown as TypedDocumentString<RecentlyAddedBooksQuery, RecentlyAddedBooksQueryVariables>;
+export const RecentlyAddedSeriesHorizontalDocument = new TypedDocumentString(`
+    query RecentlyAddedSeriesHorizontal($pagination: Pagination) {
+  recentlyAddedSeries(pagination: $pagination) {
+    nodes {
+      id
+      ...RecentlyAddedSeriesItem
+    }
+    pageInfo {
+      __typename
+      ... on CursorPaginationInfo {
+        currentCursor
+        nextCursor
+        limit
+      }
+    }
+  }
+}
+    fragment RecentlyAddedSeriesItem on Series {
+  id
+  resolvedName
+  thumbnail {
+    url
+  }
+  readCount
+  mediaCount
+  createdAt
+}`) as unknown as TypedDocumentString<RecentlyAddedSeriesHorizontalQuery, RecentlyAddedSeriesHorizontalQueryVariables>;
 export const StackedBookThumbnailsDocument = new TypedDocumentString(`
     query StackedBookThumbnails {
   media(pagination: {cursor: {limit: 1}}) {

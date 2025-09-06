@@ -48,11 +48,12 @@ function ContinueReading() {
 	)
 	const nodes = useMemo(() => data?.pages.flatMap((page) => page.keepReading.nodes) || [], [data])
 
-	const [activeBook] = useState(() => data?.pages.at(0)?.keepReading.nodes.at(0))
+	// Take the first 5 books as "currently reading"
+	const [activeBooks] = useState(() => data?.pages.at(0)?.keepReading.nodes.slice(0, 5) || [])
 
 	const leftOffBooks = useMemo(
-		() => nodes.filter(({ id }) => id !== activeBook?.id),
-		[nodes, activeBook],
+		() => nodes.filter(({ id }) => !activeBooks.some((book) => book.id === id)),
+		[nodes, activeBooks],
 	)
 
 	const onEndReached = useCallback(() => {
@@ -70,23 +71,25 @@ function ContinueReading() {
 
 	return (
 		<Fragment>
-			{activeBook && <ReadingNow book={activeBook} />}
+			{activeBooks.length > 0 && <ReadingNow books={activeBooks} />}
 
-			<View className="flex gap-4">
-				<Heading size="lg">Continue Reading</Heading>
+			{(leftOffBooks.length > 0 || activeBooks.length === 0) && (
+				<View className="flex gap-4">
+					<Heading size="lg">Continue Reading</Heading>
 
-				<FlashList
-					data={leftOffBooks}
-					keyExtractor={({ id }) => id}
-					renderItem={renderItem}
-					horizontal
-					estimatedItemSize={width + gap}
-					onEndReached={onEndReached}
-					onEndReachedThreshold={0.85}
-					showsHorizontalScrollIndicator={false}
-					ListEmptyComponent={<Text className="text-foreground-muted">No books in progress</Text>}
-				/>
-			</View>
+					<FlashList
+						data={leftOffBooks}
+						keyExtractor={({ id }) => id}
+						renderItem={renderItem}
+						horizontal
+						estimatedItemSize={width + gap}
+						onEndReached={onEndReached}
+						onEndReachedThreshold={0.85}
+						showsHorizontalScrollIndicator={false}
+						ListEmptyComponent={<Text className="text-foreground-muted">No books in progress</Text>}
+					/>
+				</View>
+			)}
 		</Fragment>
 	)
 }

@@ -84,7 +84,6 @@ function RecentlyAddedSeriesHorizontal() {
 				keyExtractor={({ id }) => id}
 				renderItem={renderItem}
 				horizontal
-				// estimateItemSize={width + gap}
 				estimatedItemSize={240 * (2 / 3) + gap}
 				onEndReached={onEndReached}
 				onEndReachedThreshold={0.85}

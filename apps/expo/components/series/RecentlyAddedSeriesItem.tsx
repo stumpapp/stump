@@ -1,16 +1,15 @@
 import { useSDK } from '@stump/client'
 import { FragmentType, graphql, useFragment } from '@stump/graphql'
 import { useRouter } from 'expo-router'
-import { View } from 'react-native'
+import { Platform, View } from 'react-native'
 import { Pressable } from 'react-native-gesture-handler'
-
-import { useDisplay } from '~/lib/hooks'
 
 import { useActiveServer } from '../activeServer'
 import { FasterImage } from '../Image'
-import { Heading, Text } from '../ui'
+import { Text } from '../ui'
 import dayjs from 'dayjs'
 import LinearGradient from 'react-native-linear-gradient'
+import { COLORS } from '~/lib/constants'
 
 const fragment = graphql(`
 	fragment RecentlyAddedSeriesItem on Series {
@@ -39,22 +38,18 @@ export default function RecentlyAddedSeriesItem({ series }: Props) {
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
-	const { width } = useDisplay()
 
 	const data = useFragment(fragment, series)
 	const router = useRouter()
 
 	return (
 		<Pressable
-			className="relative aspect-[2/3] shrink-0 overflow-hidden"
+			className="relative shrink-0 overflow-hidden rounded-lg"
 			onPress={() => router.navigate(`/server/${serverID}/series/${data.id}`)}
-			style={{
-				width: 240 * (2 / 3),
-			}}
 		>
 			<LinearGradient
 				colors={['transparent', 'rgba(0, 0, 0, 0.80)']}
-				style={{ position: 'absolute', inset: 0, zIndex: 10 }}
+				style={{ position: 'absolute', inset: 0, zIndex: 10, borderRadius: 8 }}
 			/>
 
 			<FasterImage
@@ -64,31 +59,34 @@ export default function RecentlyAddedSeriesItem({ series }: Props) {
 						Authorization: sdk.authorizationHeader || '',
 					},
 					resizeMode: 'fill',
-					borderRadius: 8,
+					// FIXME: I REALLY shouldn't have to do this
+					borderRadius: Platform.OS === 'android' ? 24 : 8,
 				}}
-				style={{ height: 240, width: 240 * (2 / 3) }}
+				style={{ width: 240 * (2 / 3), height: 240 }}
 			/>
 
 			<View className="absolute bottom-0 z-20 w-full p-2">
 				<Text
-					className="flex-1 flex-wrap text-xl font-bold text-foreground"
+					className="flex-1 flex-wrap text-xl font-bold"
 					style={{
 						textShadowOffset: { width: 2, height: 1 },
 						textShadowRadius: 2,
 						textShadowColor: 'rgba(0, 0, 0, 0.5)',
 						zIndex: 20,
+						color: COLORS.dark.foreground.DEFAULT,
 					}}
 					numberOfLines={0}
 				>
 					{data.resolvedName}
 				</Text>
 				<Text
-					className="flex-1 flex-wrap font-medium text-foreground-subtle"
+					className="flex-1 flex-wrap font-medium"
 					style={{
 						textShadowOffset: { width: 2, height: 1 },
 						textShadowRadius: 2,
 						textShadowColor: 'rgba(0, 0, 0, 0.5)',
 						zIndex: 20,
+						color: COLORS.dark.foreground.subtle,
 					}}
 					numberOfLines={0}
 				>
@@ -98,34 +96,34 @@ export default function RecentlyAddedSeriesItem({ series }: Props) {
 		</Pressable>
 	)
 
-	return (
-		<Pressable
-			onPress={() => router.navigate(`/server/${serverID}/series/${data.id}`)}
-			style={{
-				width: width * 0.75,
-			}}
-		>
-			<View className="flex-row items-start gap-4 py-4">
-				<FasterImage
-					source={{
-						url: data.thumbnail.url,
-						headers: {
-							Authorization: sdk.authorizationHeader || '',
-						},
-						resizeMode: 'fill',
-						borderRadius: 8,
-					}}
-					style={{ width: 75, height: 75 / (2 / 3) }}
-				/>
+	// return (
+	// 	<Pressable
+	// 		onPress={() => router.navigate(`/server/${serverID}/series/${data.id}`)}
+	// 		style={{
+	// 			width: width * 0.75,
+	// 		}}
+	// 	>
+	// 		<View className="flex-row items-start gap-4 py-4">
+	// 			<FasterImage
+	// 				source={{
+	// 					url: data.thumbnail.url,
+	// 					headers: {
+	// 						Authorization: sdk.authorizationHeader || '',
+	// 					},
+	// 					resizeMode: 'fill',
+	// 					borderRadius: 8,
+	// 				}}
+	// 				style={{ width: 75, height: 75 / (2 / 3) }}
+	// 			/>
 
-				<View className="flex flex-1 flex-col gap-1">
-					<Text>{data.resolvedName}</Text>
+	// 			<View className="flex flex-1 flex-col gap-1">
+	// 				<Text>{data.resolvedName}</Text>
 
-					<Text className="text-foreground-muted">
-						{data.readCount}/{data.mediaCount} books • {dayjs(data.createdAt).fromNow()}
-					</Text>
-				</View>
-			</View>
-		</Pressable>
-	)
+	// 				<Text className="text-foreground-muted">
+	// 					{data.readCount}/{data.mediaCount} books • {dayjs(data.createdAt).fromNow()}
+	// 				</Text>
+	// 			</View>
+	// 		</View>
+	// 	</Pressable>
+	// )
 }

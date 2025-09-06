@@ -139,7 +139,7 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 			>
 				<LinearGradient
 					colors={['transparent', 'rgba(0, 0, 0, 0.90)']}
-					style={{ position: 'absolute', inset: 0, zIndex: 10 }}
+					style={{ position: 'absolute', inset: 0, zIndex: 10, borderRadius: 8 }}
 				/>
 
 				<FasterImage
@@ -149,6 +149,7 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 							Authorization: sdk.authorizationHeader || '',
 						},
 						resizeMode: 'fill',
+						borderRadius: 8,
 					}}
 					style={{ height: 400, width: 400 * (2 / 3) }}
 				/>

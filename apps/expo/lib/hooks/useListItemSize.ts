@@ -5,7 +5,7 @@ import { useDisplay } from './useDisplay'
 export function useListItemSize() {
 	const { isTablet, width } = useDisplay()
 
-	const itemHeight = useMemo(() => (isTablet ? 225 : 150), [isTablet])
+	const itemHeight = useMemo(() => (isTablet ? 240 : 175), [isTablet])
 	const itemWidth = useMemo(() => itemHeight * (2 / 3), [itemHeight])
 	const gap = useMemo(() => (isTablet ? 8 : 4), [isTablet])
 

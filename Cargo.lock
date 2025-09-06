@@ -2878,6 +2878,7 @@ dependencies = [
  "linemux",
  "maplit",
  "models",
+ "num-traits",
  "pretty_assertions",
  "sea-orm",
  "serde",

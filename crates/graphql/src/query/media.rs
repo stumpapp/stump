@@ -374,6 +374,217 @@ impl MediaQuery {
 		}
 	}
 
+	async fn on_deck(
+		&self,
+		ctx: &Context<'_>,
+		#[graphql(default, validator(custom = "PaginationValidator"))]
+		pagination: Pagination,
+	) -> Result<PaginatedResponse<Media>> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let offset_info = match pagination.resolve() {
+			Pagination::Offset(info) => info,
+			_ => return Err("Only offset pagination is supported for onDeck".into()),
+		};
+
+		let user_id = user.id.clone();
+		let limit = offset_info.limit();
+		let offset = offset_info.offset();
+
+		#[derive(Debug, FromQueryResult)]
+		struct OnDeckMediaId {
+			id: String,
+		}
+
+		let on_deck_media_ids =
+			OnDeckMediaId::find_by_statement(Statement::from_sql_and_values(
+				DatabaseBackend::Sqlite,
+				r#"
+				WITH 
+				-- Find all series where the user has read at least one book
+				user_read_series AS (
+					SELECT DISTINCT m.series_id 
+					FROM media m
+					JOIN finished_reading_sessions frs ON frs.media_id = m.id
+					WHERE frs.user_id = ?
+					AND m.series_id IS NOT NULL
+				),
+
+				-- Find all media IDs that user has read or is currently reading
+				user_read_or_reading_media AS (
+					SELECT media_id 
+					FROM finished_reading_sessions
+					WHERE user_id = ?
+					
+					UNION
+					
+					SELECT media_id 
+					FROM reading_sessions
+					WHERE user_id = ?
+				),
+
+				-- For each series, get last read date for sorting priority
+				series_last_read AS (
+					SELECT 
+						m.series_id,
+						MAX(frs.completed_at) as last_read_date
+					FROM finished_reading_sessions frs
+					JOIN media m ON m.id = frs.media_id
+					WHERE frs.user_id = ?
+					AND m.series_id IN (SELECT series_id FROM user_read_series)
+					GROUP BY m.series_id
+				),
+
+				-- Find the first unread book for each series
+				next_in_series AS (
+					SELECT 
+						m.id, 
+						m.name,
+						m.series_id,
+						ROW_NUMBER() OVER(
+							PARTITION BY m.series_id 
+							ORDER BY m.name
+						) as book_rank,
+						COALESCE(srl.last_read_date, '1970-01-01') as series_last_read_date
+					FROM 
+						media m
+					LEFT JOIN
+						series_last_read srl ON srl.series_id = m.series_id
+					WHERE 
+						m.series_id IN (SELECT series_id FROM user_read_series)
+						-- Exclude media that user has read or is currently reading
+						AND m.id NOT IN (SELECT media_id FROM user_read_or_reading_media)
+						AND m.deleted_at IS NULL
+				)
+
+				-- Get only the first book for each series
+				SELECT 
+					id
+				FROM 
+					next_in_series
+				WHERE 
+					book_rank = 1
+				ORDER BY
+					-- Most recently read series first
+					series_last_read_date DESC
+				LIMIT ?
+				OFFSET ?
+				"#,
+				[
+					user_id.clone().into(),
+					user_id.clone().into(),
+					user_id.clone().into(),
+					user_id.clone().into(),
+					limit.into(),
+					offset.into(),
+				],
+			))
+			.all(conn)
+			.await?;
+
+		let media_ids: Vec<String> =
+			on_deck_media_ids.into_iter().map(|row| row.id).collect();
+
+		if media_ids.is_empty() {
+			return Ok(PaginatedResponse {
+				nodes: vec![],
+				page_info: OffsetPaginationInfo::new(offset_info, 0).into(),
+			});
+		}
+
+		let mut media_map: HashMap<String, media::ModelWithMetadata> = HashMap::new();
+
+		let models = media::ModelWithMetadata::find_for_user(user)
+			.filter(media::Column::Id.is_in(media_ids.clone()))
+			.into_model::<media::ModelWithMetadata>()
+			.all(conn)
+			.await?;
+
+		for model in models {
+			media_map.insert(model.media.id.clone(), model);
+		}
+
+		// Note: The requery likely lost original order, so manually reorder
+		let ordered_results: Vec<Media> = media_ids
+			.into_iter()
+			.filter_map(|id| media_map.remove(&id))
+			.map(Media::from)
+			.collect();
+
+		let total_count = conn
+			.query_one(Statement::from_sql_and_values(
+				DatabaseBackend::Sqlite,
+				r#"
+					-- Count total number of on deck items (for pagination)
+					WITH 
+					-- Find all series where the user has read at least one book
+					user_read_series AS (
+						SELECT DISTINCT m.series_id 
+						FROM media m
+						JOIN finished_reading_sessions frs ON frs.media_id = m.id
+						WHERE frs.user_id = ?
+						AND m.series_id IS NOT NULL
+					),
+
+					-- Find all media IDs that user has read or is currently reading
+					user_read_or_reading_media AS (
+						-- Media that user has finished
+						SELECT media_id 
+						FROM finished_reading_sessions
+						WHERE user_id = ?
+						
+						UNION
+						
+						-- Media that user is currently reading
+						SELECT media_id 
+						FROM reading_sessions
+						WHERE user_id = ?
+					),
+
+					-- Find the first unread book for each series
+					next_in_series AS (
+						SELECT 
+							m.id, 
+							ROW_NUMBER() OVER(
+								PARTITION BY m.series_id 
+								ORDER BY m.name
+							) as book_rank
+						FROM 
+							media m
+						WHERE 
+							m.series_id IN (SELECT series_id FROM user_read_series)
+							-- Exclude media that user has read or is currently reading
+							AND m.id NOT IN (SELECT media_id FROM user_read_or_reading_media)
+							-- Ensure the media is not deleted
+							AND m.deleted_at IS NULL
+					)
+
+					-- Count only the first book for each series
+					SELECT 
+						COUNT(*) as count
+					FROM 
+						next_in_series
+					WHERE 
+						book_rank = 1
+					"#,
+				[
+					user_id.clone().into(),
+					user_id.clone().into(),
+					user_id.into(),
+				],
+			))
+			.await?
+			.ok_or_else(|| async_graphql::Error::new("Failed to get count"))?
+			.try_get::<i64>("", "count")?
+			.try_into()?;
+
+		Ok(PaginatedResponse {
+			nodes: ordered_results,
+			page_info: OffsetPaginationInfo::new(offset_info, total_count).into(),
+		})
+	}
+
 	async fn recently_added_media(
 		&self,
 		ctx: &Context<'_>,

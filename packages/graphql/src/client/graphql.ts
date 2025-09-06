@@ -1026,6 +1026,7 @@ export type Media = {
    * expected that all media will belong to a series
    */
   seriesId?: Maybe<Scalars['String']['output']>;
+  seriesPosition?: Maybe<Scalars['Int']['output']>;
   /** The size of the media file in bytes */
   size: Scalars['Int']['output'];
   /**
@@ -2226,6 +2227,7 @@ export type Query = {
   mediaMetadataOverview: MediaMetadataOverview;
   numberOfLibraries: Scalars['Int']['output'];
   numberOfSeries: Scalars['Int']['output'];
+  onDeck: PaginatedMediaResponse;
   /**
    * Retrieves a reading list by ID for the current user.
    *
@@ -2371,6 +2373,11 @@ export type QueryMediaByPathArgs = {
 
 export type QueryMediaMetadataOverviewArgs = {
   seriesId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type QueryOnDeckArgs = {
+  pagination?: Pagination;
 };
 
 

@@ -6,7 +6,11 @@ use models::{
 	entity::{library, library_config, media, series, tag},
 	shared::image::ImageRef,
 };
-use sea_orm::{prelude::*, sea_query::Query, QuerySelect};
+use num_traits::cast::ToPrimitive;
+use sea_orm::{
+	prelude::*, sea_query::Query, DatabaseBackend, FromQueryResult, QuerySelect,
+	Statement,
+};
 
 use crate::{
 	data::{AuthContext, CoreContext, ServiceContext},
@@ -222,6 +226,48 @@ impl Media {
 			.unwrap_or_default();
 
 		Ok(history)
+	}
+
+	async fn series_position(&self, ctx: &Context<'_>) -> Result<Option<i32>> {
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		if let Some(position) = self.metadata.as_ref().and_then(|m| m.model.number) {
+			if position.fract().is_zero() {
+				return Ok(Some(position.to_i32().unwrap_or(0)));
+			}
+		}
+
+		#[derive(Debug, FromQueryResult)]
+		struct PositionResult {
+			position: i32,
+		}
+
+		let series_id = self.model.series_id.clone().ok_or("Series ID not set")?;
+
+		let position = PositionResult::find_by_statement(Statement::from_sql_and_values(
+			DatabaseBackend::Sqlite,
+			r#"
+            SELECT position
+            FROM (
+                SELECT 
+                    id,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY series_id 
+                        ORDER BY name
+                    ) as position
+                FROM media
+                WHERE series_id = ?
+                AND deleted_at IS NULL
+            ) ranked
+            WHERE id = ?
+            "#,
+			[series_id.into(), self.model.id.clone().into()],
+		))
+		.one(conn)
+		.await?
+		.map(|result| result.position);
+
+		Ok(position)
 	}
 
 	/// The next media in the series, ordered by name

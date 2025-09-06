@@ -975,6 +975,7 @@ type Media {
 	resolvedName: String!
 	readProgress: ActiveReadingSession
 	readHistory: [FinishedReadingSession!]!
+	seriesPosition: Int
 	"The next media in the series, ordered by name"
 	nextInSeries(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
 	"""
@@ -1645,6 +1646,7 @@ type Query {
 	"Returns the available alphabet for all media in the server"
 	mediaAlphabet: JSONObject!
 	keepReading(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
+	onDeck(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
 	recentlyAddedMedia(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
 	duplicateMedia: [Media!]!
 	me: User!

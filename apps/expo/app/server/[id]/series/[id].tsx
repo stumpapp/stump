@@ -1,9 +1,9 @@
-import { useScrollToTop } from '@react-navigation/native'
+import { useNavigationState, useScrollToTop } from '@react-navigation/native'
 import { FlashList } from '@shopify/flash-list'
 import { useInfiniteSuspenseGraphQL, useSuspenseGraphQL } from '@stump/client'
 import { graphql } from '@stump/graphql'
-import { useLocalSearchParams } from 'expo-router'
-import { useCallback, useRef } from 'react'
+import { useLocalSearchParams, useSegments } from 'expo-router'
+import { useCallback, useMemo, useRef } from 'react'
 import { Platform } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useStore } from 'zustand'
@@ -52,10 +52,15 @@ const booksQuery = graphql(`
 `)
 
 export default function Screen() {
+	const navigationState = useNavigationState((state) => state.routes)
 	const { id } = useLocalSearchParams<{ id: string }>()
 	const {
 		data: { seriesById: series },
 	} = useSuspenseGraphQL(query, ['seriesById', id], { id })
+
+	const showBackButton = useMemo(() => {
+		return navigationState?.length <= 1 && Platform.OS === 'ios'
+	}, [navigationState])
 
 	if (!series) {
 		throw new Error(`Series with ID ${id} not found`)
@@ -63,6 +68,7 @@ export default function Screen() {
 
 	useDynamicHeader({
 		title: series.resolvedName,
+		showBackButton,
 	})
 
 	const store = useRef(createBookFilterStore()).current

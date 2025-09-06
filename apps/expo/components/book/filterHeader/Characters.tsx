@@ -105,6 +105,12 @@ export default function Characters() {
 								{idx < characters.length - 1 && <Divider />}
 							</Fragment>
 						))}
+
+						{!characters.length && (
+							<View className="p-3">
+								<Text className="text-foreground-muted">No characters found</Text>
+							</View>
+						)}
 					</View>
 				</View>
 			</View>

@@ -45,7 +45,7 @@ export default function RecentlyAddedSeriesItem({ series }: Props) {
 	return (
 		<Pressable
 			className="relative shrink-0 overflow-hidden rounded-lg"
-			onPress={() => router.navigate(`/server/${serverID}/series/${data.id}`)}
+			onPress={() => router.push(`/server/${serverID}/series/${data.id}`)}
 		>
 			<LinearGradient
 				colors={['transparent', 'rgba(0, 0, 0, 0.80)']}

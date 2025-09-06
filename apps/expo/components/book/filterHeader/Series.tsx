@@ -109,6 +109,12 @@ export default function Series() {
 								</Fragment>
 							)
 						})}
+
+						{!seriesList.length && (
+							<View className="p-3">
+								<Text className="text-foreground-muted">No series found</Text>
+							</View>
+						)}
 					</View>
 				</View>
 			</View>

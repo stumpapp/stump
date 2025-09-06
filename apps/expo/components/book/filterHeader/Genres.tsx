@@ -106,6 +106,12 @@ export default function Genres() {
 								{idx < genres.length - 1 && <Divider />}
 							</Fragment>
 						))}
+
+						{!genres.length && (
+							<View className="p-3">
+								<Text className="text-foreground-muted">No genres found</Text>
+							</View>
+						)}
 					</View>
 				</View>
 			</View>

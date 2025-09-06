@@ -106,6 +106,12 @@ export default function Writers() {
 								{idx < writers.length - 1 && <Divider />}
 							</Fragment>
 						))}
+
+						{!writers.length && (
+							<View className="p-3">
+								<Text className="text-foreground-muted">No writers found</Text>
+							</View>
+						)}
 					</View>
 				</View>
 			</View>

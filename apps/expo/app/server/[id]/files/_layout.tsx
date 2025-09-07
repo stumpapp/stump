@@ -44,6 +44,7 @@ export default function Screen() {
 					headerTransparent: Platform.OS === 'ios',
 					headerBlurEffect: 'regular',
 				}}
+				getId={({ params }) => (params as { path: string }).path as string}
 			/>
 		</Stack>
 	)

@@ -11,10 +11,14 @@ import { useActiveServer } from '~/components/activeServer'
 import { Text } from '~/components/ui'
 
 export default function Screen() {
-	const { path: rootPath, friendlyName } = useLocalSearchParams<{
+	const params = useLocalSearchParams<{
 		path: string
 		friendlyName?: string
+		navigationKey?: string // Handle the navigation key
 	}>()
+	const rootPath = params.path
+	const friendlyName = params.friendlyName
+
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
@@ -31,13 +35,13 @@ export default function Screen() {
 
 	const {
 		entries,
-		setPath,
-		path,
-		goForward,
-		goBack,
-		canGoBack,
-		canGoForward,
-		refetch,
+		// setPath,
+		// path,
+		// goForward,
+		// goBack,
+		// canGoBack,
+		// canGoForward,
+		// refetch,
 		canLoadMore,
 		loadMore,
 	} = useDirectoryListing({
@@ -52,11 +56,11 @@ export default function Screen() {
 					onPress={() => {
 						if (item.isDirectory) {
 							router.push({
-								// @ts-expect-error: String path
-								pathname: `/server/[id]/files/[path]?friendlyName=${item.name}`,
+								pathname: `/server/[id]/files/[path]`,
 								params: {
 									id: serverID,
 									path: item.path,
+									friendlyName: item.name,
 								},
 							})
 						}

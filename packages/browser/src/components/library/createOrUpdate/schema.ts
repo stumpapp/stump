@@ -116,9 +116,14 @@ export const buildSchema = (
 			.string()
 			.min(1, { message: 'Library name is required' })
 			.refine(
-				// return falsy value to indicate failure. In this case, if library name is already taken,
-				// and we aren't editing that library, then it should fail.
-				(val) => !(existingLibraries.some((l) => l.name === val) && library?.name !== val),
+				// return falsy value to indicate failure.
+				// If the library name is already taken -> fail
+				// If the name is not changing -> pass (override the fail)
+				(val) => {
+					const isTaken = existingLibraries.some((l) => l.name === val)
+					const isUnchanged = library?.name === val
+					return !isTaken || isUnchanged
+				},
 				(val) => ({
 					message: `You already have a library named ${val}.`,
 				}),
@@ -127,9 +132,14 @@ export const buildSchema = (
 			.string()
 			.min(1, { message: 'Library path is required' })
 			.refine(
-				// check if path is parent to any existing library
-				// if so, and we aren't editing that library, return falsy value to indicate failure
-				(val) => !(existingLibraries.some((l) => l.path.startsWith(val)) && library?.path !== val),
+				// return falsy value to indicate failure.
+				// If the path is a parent to any existing library -> fail
+				// If the path is not changing -> pass (override the fail)
+				(val) => {
+					const isParent = existingLibraries.some((l) => l.path.startsWith(val))
+					const isUnchanged = library?.path === val
+					return !isParent || isUnchanged
+				},
 				() => ({
 					message: 'Invalid library, parent directory already exists as library.',
 				}),

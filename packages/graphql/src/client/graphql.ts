@@ -4030,6 +4030,11 @@ export type LibrarySettingsRouterScanLibraryMutationMutationVariables = Exact<{
 
 export type LibrarySettingsRouterScanLibraryMutationMutation = { __typename?: 'Mutation', scanLibrary: boolean };
 
+export type BasicSettingsSceneExistingLibrariesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type BasicSettingsSceneExistingLibrariesQuery = { __typename?: 'Query', libraries: { __typename?: 'PaginatedLibraryResponse', nodes: Array<{ __typename?: 'Library', id: string, name: string, path: string }> } };
+
 export type LibraryExclusionsUsersQueryQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -6619,6 +6624,17 @@ export const LibrarySettingsRouterScanLibraryMutationDocument = new TypedDocumen
   scanLibrary(id: $id, options: $options)
 }
     `) as unknown as TypedDocumentString<LibrarySettingsRouterScanLibraryMutationMutation, LibrarySettingsRouterScanLibraryMutationMutationVariables>;
+export const BasicSettingsSceneExistingLibrariesDocument = new TypedDocumentString(`
+    query BasicSettingsSceneExistingLibraries {
+  libraries(pagination: {none: {unpaginated: true}}) {
+    nodes {
+      id
+      name
+      path
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<BasicSettingsSceneExistingLibrariesQuery, BasicSettingsSceneExistingLibrariesQueryVariables>;
 export const LibraryExclusionsUsersQueryDocument = new TypedDocumentString(`
     query LibraryExclusionsUsersQuery {
   users(pagination: {none: {unpaginated: true}}) {

@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button, Form } from '@stump/components'
+import { graphql } from '@stump/graphql'
 import { useCallback, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
@@ -8,15 +9,35 @@ import {
 	buildSchema,
 	CreateOrUpdateLibrarySchema,
 	formDefaults,
+	intoThumbnailConfig,
 } from '@/components/library/createOrUpdate'
 import { BasicLibraryInformation } from '@/components/library/createOrUpdate/sections'
 
+import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { useLibraryManagement } from '../context'
+
+const query = graphql(`
+	query BasicSettingsSceneExistingLibraries {
+		libraries(pagination: { none: { unpaginated: true } }) {
+			nodes {
+				id
+				name
+				path
+			}
+		}
+	}
+`)
 
 export default function BasicSettingsScene() {
 	const { library, patch } = useLibraryManagement()
+	const { sdk } = useSDK()
+	const {
+		data: {
+			libraries: { nodes: libraries },
+		},
+	} = useSuspenseGraphQL(query, [sdk.cacheKeys.libraryCreateLibraryQuery])
 
-	const schema = useMemo(() => buildSchema([], library), [library])
+	const schema = useMemo(() => buildSchema(libraries, library), [libraries, library])
 	const form = useForm<CreateOrUpdateLibrarySchema>({
 		defaultValues: formDefaults(library),
 		reValidateMode: 'onChange',
@@ -42,6 +63,7 @@ export default function BasicSettingsScene() {
 	const handleSubmit = useCallback(
 		(values: CreateOrUpdateLibrarySchema) => {
 			patch({
+				config: { thumbnailConfig: intoThumbnailConfig(values.thumbnailConfig) },
 				description: values.description,
 				name: values.name,
 				path: values.path,

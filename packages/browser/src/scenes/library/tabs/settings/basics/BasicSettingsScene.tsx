@@ -11,6 +11,7 @@ import {
 	CreateOrUpdateLibrarySchema,
 	formDefaults,
 	intoThumbnailConfig,
+	normalizePath,
 } from '@/components/library/createOrUpdate'
 import { BasicLibraryInformation } from '@/components/library/createOrUpdate/sections'
 
@@ -52,7 +53,7 @@ export default function BasicSettingsScene() {
 		const libraryTagSet = new Set(library?.tags?.map(({ name }) => name) || [])
 
 		return (
-			library?.path !== path ||
+			library?.path !== normalizePath(path) ||
 			library?.name !== name ||
 			library?.description !== description ||
 			[...currentTagSet].some((tag) => !libraryTagSet.has(tag)) ||

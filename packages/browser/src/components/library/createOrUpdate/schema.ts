@@ -27,6 +27,13 @@ const isLibraryPattern = (input: string): input is LibraryPattern => {
 }
 
 /**
+ * A function to normalise paths (remove all trailing slashes)
+ */
+export const normalizePath = (path: string) => {
+	return path.replace(/\/+$/, '')
+}
+
+/**
  * A helper function to convert persisted ignore rules to the form format
  */
 export const toFormIgnoreRules = (ignoreRules: string[] = []) =>
@@ -131,10 +138,7 @@ export const buildSchema = (
 		path: z
 			.string()
 			.min(1, { message: 'Library path is required' })
-			.transform(
-				// Remove all trailing slashes
-				(val) => val.replace(/\/+$/, ''),
-			)
+			.transform((val) => normalizePath(val))
 			.refine(
 				// return falsy value to indicate failure.
 				// If the path is a parent to any existing library -> fail

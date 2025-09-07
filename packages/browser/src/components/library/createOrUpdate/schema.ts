@@ -139,21 +139,38 @@ export const buildSchema = (
 			.string()
 			.min(1, { message: 'Library path is required' })
 			.transform((val) => normalizePath(val))
-			.refine(
-				// return falsy value to indicate failure.
-				// If the path is a parent to any existing library -> fail
-				// If the path is a child to any existing library -> fail
-				// If the path is not changing -> pass (override the fail)
-				(val) => {
-					const isParent = existingLibraries.some((l) => (l.path + '/').startsWith(val + '/'))
-					const isChild = existingLibraries.some((l) => (val + '/').startsWith(l.path + '/'))
-					const isUnchanged = library?.path === val
-					return (!isParent && !isChild) || isUnchanged
-				},
-				() => ({
-					message: 'Invalid library path, a parent or sub-directory already exists as a library.',
-				}),
-			),
+			.superRefine((val, ctx) => {
+				/**
+				 * If the path is already taken -> fail
+				 * If the path is a parent to any other library -> fail
+				 * If the path is a child to any other library -> fail
+				 */
+				const isTaken = existingLibraries.some((l) => l.path === val)
+				if (isTaken) {
+					ctx.addIssue({ code: 'custom', message: 'This path is taken by an existing library' })
+					return
+				}
+
+				const filteredLibraries = existingLibraries.filter((l) => l.id !== library?.id)
+
+				const isParent = filteredLibraries.some((l) => (l.path + '/').startsWith(val + '/'))
+				if (isParent) {
+					ctx.addIssue({
+						code: 'custom',
+						message: 'This path is a parent directory of an existing library',
+					})
+					return
+				}
+
+				const isChild = filteredLibraries.some((l) => (val + '/').startsWith(l.path + '/'))
+				if (isChild) {
+					ctx.addIssue({
+						code: 'custom',
+						message: 'This path is a sub-directory of an existing library',
+					})
+					return
+				}
+			}),
 		processMetadata: z.boolean().default(true),
 		scanAfterPersist: z.boolean().default(true),
 		tags: z

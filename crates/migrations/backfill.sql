@@ -133,11 +133,11 @@ SELECT "id",
     "description",
     "path",
     UPPER("status"),
-    "updated_at",
-    "created_at",
+    datetime("updated_at"/1000, 'unixepoch'),
+    datetime("created_at"/1000, 'unixepoch'),
     "emoji",
     map."new_id", -- Use mapped config_id
-    "last_scanned_at"
+    CASE WHEN "last_scanned_at" IS NOT NULL THEN datetime("last_scanned_at"/1000, 'unixepoch') ELSE NULL END
 FROM backup."libraries" lib
 JOIN "library_config_id_map" map ON lib."config_id" = map."old_id";
 
@@ -159,8 +159,8 @@ INSERT INTO "series"(
 SELECT "id",
     "name",
     "description",
-    "updated_at",
-    "created_at",
+    datetime("updated_at"/1000, 'unixepoch'),
+    datetime("created_at"/1000, 'unixepoch'),
     "path",
     UPPER("status"),
     "library_id"
@@ -190,14 +190,14 @@ SELECT "id",
     "size",
     "extension",
     "pages",
-    "updated_at",
-    "created_at",
-    "modified_at",
+    datetime("updated_at"/1000, 'unixepoch'),
+    datetime("created_at"/1000, 'unixepoch'),
+    CASE WHEN "modified_at" IS NOT NULL THEN datetime("modified_at"/1000, 'unixepoch') ELSE NULL END,
     "hash",
     "path",
     UPPER("status"),
     "series_id",
-    "deleted_at",
+    CASE WHEN "deleted_at" IS NOT NULL THEN datetime("deleted_at"/1000, 'unixepoch') ELSE NULL END,
     "koreader_hash"
 FROM backup."media";
 
@@ -308,7 +308,7 @@ SELECT "id",
     "emailer_id",
     "recipient_email",
     "attachment_meta",
-    "sent_at",
+    datetime("sent_at"/1000, 'unixepoch'),
     "sent_by_user_id"
 FROM backup."emailer_send_records";
 
@@ -337,7 +337,7 @@ SELECT "id",
     "smtp_port",
     "tls_enabled",
     "max_attachment_size_bytes",
-    "last_used_at"
+    CASE WHEN "last_used_at" IS NOT NULL THEN datetime("last_used_at"/1000, 'unixepoch') ELSE NULL END
 FROM backup."emailers";
 
 INSERT INTO "jobs"(
@@ -358,8 +358,8 @@ SELECT "id",
     "save_state",
     "output_data",
     "ms_elapsed",
-    "created_at",
-    "completed_at"
+    datetime("created_at"/1000, 'unixepoch'),
+    CASE WHEN "completed_at" IS NOT NULL THEN datetime("completed_at"/1000, 'unixepoch') ELSE NULL END
 FROM backup."jobs";
 
 INSERT INTO "library_scan_records"(
@@ -371,7 +371,7 @@ INSERT INTO "library_scan_records"(
     )
 SELECT "id",
     "options",
-    "timestamp",
+    datetime("timestamp"/1000, 'unixepoch'),
     "library_id",
     "job_id"
 FROM backup."library_scan_records";
@@ -388,7 +388,7 @@ SELECT "id",
     "level",
     "message",
     "context",
-    "timestamp",
+    datetime("timestamp"/1000, 'unixepoch'),
     "job_id"
 FROM backup."logs";
 
@@ -454,8 +454,8 @@ SELECT "id",
     "hashed_password",
     "is_server_owner",
     "avatar_url",
-    "created_at",
-    "deleted_at",
+    datetime("created_at"/1000, 'unixepoch'),
+    CASE WHEN "deleted_at" IS NOT NULL THEN datetime("deleted_at"/1000, 'unixepoch') ELSE NULL END,
     "is_locked",
     "max_sessions_allowed"
 FROM backup."users";
@@ -565,7 +565,7 @@ INSERT INTO "user_login_activity"(
 SELECT "ip_address",
     "user_agent",
     "authentication_successful",
-    "timestamp",
+    datetime("timestamp"/1000, 'unixepoch'),
     "user_id"
 FROM backup."user_login_activity";
 
@@ -595,8 +595,8 @@ SELECT "page",
     "percentage_completed",
     "epubcfi",
     "koreader_progress",
-    "started_at",
-    "updated_at",
+    datetime("started_at"/1000, 'unixepoch'),
+    datetime("updated_at"/1000, 'unixepoch'),
     "media_id",
     "user_id",
     "device_id",
@@ -611,8 +611,8 @@ INSERT INTO "finished_reading_sessions"(
         "device_id",
         "elapsed_seconds"
     )
-SELECT "started_at",
-    "completed_at",
+SELECT datetime("started_at"/1000, 'unixepoch'),
+    datetime("completed_at"/1000, 'unixepoch'),
     "media_id",
     "user_id",
     "device_id",
@@ -626,7 +626,7 @@ INSERT INTO "last_library_visits"(
     )
 SELECT "user_id",
     "library_id",
-    "timestamp"
+    datetime("timestamp"/1000, 'unixepoch')
 FROM backup."last_library_visits";
 
 -- Remove the current server_config

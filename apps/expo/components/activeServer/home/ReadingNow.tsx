@@ -223,7 +223,13 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 							)}
 						</View>
 
-						{percentageCompleted && <Progress className="h-1" value={percentageCompleted * 100} />}
+						{percentageCompleted && (
+							<Progress
+								className="h-1 bg-[#898d94]"
+								indicatorClassName="bg-[#f5f3ef]"
+								value={percentageCompleted * 100}
+							/>
+						)}
 					</View>
 				</View>
 			</Pressable>

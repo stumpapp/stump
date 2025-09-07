@@ -134,6 +134,7 @@ export const buildSchema = (
 			.refine(
 				// return falsy value to indicate failure.
 				// If the path is a parent to any existing library -> fail
+				// If the path is a child to any existing library -> fail
 				// If the path is not changing -> pass (override the fail)
 				(val) => {
 					const isParent = existingLibraries.some((l) => l.path.startsWith(val))

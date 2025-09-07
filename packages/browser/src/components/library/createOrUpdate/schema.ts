@@ -37,7 +37,8 @@ export const normalizePath = (path: string) => {
  * A function to add a single trailing slash
  */
 const addTrailingSlash = (path: string) => {
-	if (path.includes('/')) return path + '/'
+	if (path.endsWith('/') || path.endsWith('\\')) return path
+	else if (path.includes('/')) return path + '/'
 	else return path + '\\'
 }
 

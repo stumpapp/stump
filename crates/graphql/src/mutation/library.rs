@@ -892,10 +892,8 @@ impl LibraryMutation {
 ///  Normalises a path by removing trailing slashes
 fn normalize_path(path: &str) -> &str {
 	let trimmed = path.trim_end_matches(['/', '\\']);
-	let is_windows_root =
-		trimmed.len() == 2 && trimmed.ends_with(':') && trimmed.is_ascii();
-	if path == "/" || is_windows_root {
-		path
+	if trimmed.is_empty() || path == "/" {
+		"/"
 	} else {
 		trimmed
 	}
@@ -903,7 +901,11 @@ fn normalize_path(path: &str) -> &str {
 /// Adds a single trailing slash to a path
 fn add_trailing_slash(path: &str) -> String {
 	if path.contains('/') {
-		format!("{}/", path)
+		if path.ends_with('/') {
+			path.to_string()
+		} else {
+			format!("{}/", path)
+		}
 	} else {
 		format!("{}\\", path)
 	}

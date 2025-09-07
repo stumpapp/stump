@@ -137,11 +137,12 @@ export const buildSchema = (
 				// If the path is not changing -> pass (override the fail)
 				(val) => {
 					const isParent = existingLibraries.some((l) => l.path.startsWith(val))
+					const isChild = existingLibraries.some((l) => val.startsWith(l.path))
 					const isUnchanged = library?.path === val
-					return !isParent || isUnchanged
+					return (!isParent && !isChild) || isUnchanged
 				},
 				() => ({
-					message: 'Invalid library, parent directory already exists as library.',
+					message: 'Invalid library path, a parent or sub-directory already exists as a library.',
 				}),
 			),
 		processMetadata: z.boolean().default(true),

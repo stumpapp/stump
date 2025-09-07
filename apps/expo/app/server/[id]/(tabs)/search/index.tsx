@@ -9,6 +9,7 @@ import { NativeSyntheticEvent } from 'react-native'
 
 import { useActiveServer } from '~/components/activeServer'
 import { Text } from '~/components/ui'
+import { useColors } from '~/lib/constants'
 
 import { prefetchBookSearch } from '../../books/search[q]'
 
@@ -36,6 +37,7 @@ export default function Screen() {
 		[sdk, client],
 	)
 	const setQuery = debounce(onSearchChange, 200)
+	const colors = useColors()
 
 	const onSearch = useCallback(() => {
 		if (!searchQuery) return
@@ -60,9 +62,13 @@ export default function Screen() {
 					setQuery(e.nativeEvent.text),
 				shouldShowHintSearchIcon: true,
 				onSearchButtonPress: () => onSearch(),
+				headerIconColor: colors.foreground.subtle,
+				hintTextColor: colors.foreground.muted,
+				tintColor: colors.fill.danger.DEFAULT,
+				textColor: colors.foreground.DEFAULT,
 			},
 		})
-	}, [navigation, setQuery])
+	}, [navigation, setQuery, onSearch, colors])
 
 	return (
 		<View className="flex-1 items-center justify-center gap-4 bg-background p-4 tablet:p-7">

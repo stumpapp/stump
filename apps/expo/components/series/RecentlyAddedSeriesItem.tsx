@@ -1,15 +1,16 @@
 import { useSDK } from '@stump/client'
 import { FragmentType, graphql, useFragment } from '@stump/graphql'
+import dayjs from 'dayjs'
 import { useRouter } from 'expo-router'
 import { Platform, View } from 'react-native'
 import { Pressable } from 'react-native-gesture-handler'
+import LinearGradient from 'react-native-linear-gradient'
+
+import { COLORS } from '~/lib/constants'
 
 import { useActiveServer } from '../activeServer'
 import { FasterImage } from '../Image'
 import { Text } from '../ui'
-import dayjs from 'dayjs'
-import LinearGradient from 'react-native-linear-gradient'
-import { COLORS } from '~/lib/constants'
 
 const fragment = graphql(`
 	fragment RecentlyAddedSeriesItem on Series {

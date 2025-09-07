@@ -108,6 +108,14 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 			// 		createDensityFolders: false,
 			// 	},
 			// ],
+			[
+				'@sentry/react-native/expo',
+				{
+					url: 'https://app.glitchtip.com/',
+					project: 'stump-expo',
+					organization: 'stumpapp',
+				},
+			],
 		],
 		owner: 'stumpapp',
 		experiments: {

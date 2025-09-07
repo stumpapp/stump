@@ -1,4 +1,4 @@
-import { useSuspenseGraphQL } from '@stump/client'
+import { useGraphQL } from '@stump/client'
 import { graphql } from '@stump/graphql'
 import setProperty from 'lodash/set'
 import { Fragment, useCallback, useMemo, useState } from 'react'
@@ -26,10 +26,14 @@ export default function Genres() {
 
 	const { seriesId } = useBookFilterHeaderContext()
 	const {
-		data: {
-			mediaMetadataOverview: { genres },
-		},
-	} = useSuspenseGraphQL(query, ['genres', seriesId], { seriesId })
+		// data: {
+		// 	mediaMetadataOverview: { genres },
+		// },
+		data,
+		isLoading,
+	} = useGraphQL(query, ['genres', seriesId], { seriesId })
+
+	const genres = data?.mediaMetadataOverview?.genres ?? []
 
 	const { filters, setFilters } = useBookFilterStore((store) => ({
 		filters: store.filters,
@@ -75,6 +79,8 @@ export default function Genres() {
 
 	const isActive =
 		!!filters.metadata?.genres?.likeAnyOf && filters.metadata.genres.likeAnyOf.length > 0
+
+	if (isLoading) return null
 
 	return (
 		<FilterSheet label="Genres" isActive={isActive}>

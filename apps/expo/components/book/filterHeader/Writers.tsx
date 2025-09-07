@@ -1,4 +1,4 @@
-import { useSuspenseGraphQL } from '@stump/client'
+import { useGraphQL } from '@stump/client'
 import { graphql } from '@stump/graphql'
 import setProperty from 'lodash/set'
 import { Fragment, useCallback, useMemo, useState } from 'react'
@@ -25,11 +25,9 @@ export default function Writers() {
 	const insets = useSafeAreaInsets()
 
 	const { seriesId } = useBookFilterHeaderContext()
-	const {
-		data: {
-			mediaMetadataOverview: { writers },
-		},
-	} = useSuspenseGraphQL(query, ['writers', seriesId], { seriesId })
+	const { data, isLoading } = useGraphQL(query, ['writers', seriesId], { seriesId })
+
+	const writers = data?.mediaMetadataOverview?.writers ?? []
 
 	const { filters, setFilters } = useBookFilterStore((store) => ({
 		filters: store.filters,
@@ -75,6 +73,8 @@ export default function Writers() {
 
 	const isActive =
 		!!filters.metadata?.writers?.likeAnyOf && filters.metadata.writers.likeAnyOf.length > 0
+
+	if (isLoading) return null
 
 	return (
 		<FilterSheet label="Writers" isActive={isActive}>

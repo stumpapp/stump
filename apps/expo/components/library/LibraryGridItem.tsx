@@ -56,7 +56,7 @@ export default function LibraryGridItem({ library }: Props) {
 					}}
 				>
 					<LinearGradient
-						colors={['transparent', 'rgba(0, 0, 0, 0.80)']}
+						colors={['transparent', 'rgba(0, 0, 0, 0.50)', 'rgba(0, 0, 0, 0.85)']}
 						style={{ position: 'absolute', inset: 0, zIndex: 10, borderRadius: 8 }}
 					/>
 

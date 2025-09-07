@@ -1,7 +1,7 @@
 import { FlashList } from '@shopify/flash-list'
 import { useInfiniteSuspenseGraphQL } from '@stump/client'
 import { graphql } from '@stump/graphql'
-import { useCallback, useRef } from 'react'
+import { Suspense, useCallback, useRef } from 'react'
 import { Platform } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useStore } from 'zustand'
@@ -90,7 +90,11 @@ export default function Screen() {
 					onEndReachedThreshold={0.75}
 					onEndReached={onEndReached}
 					contentInsetAdjustmentBehavior="automatic"
-					ListHeaderComponent={<BookFilterHeader />}
+					ListHeaderComponent={() => (
+						<Suspense fallback={null}>
+							<BookFilterHeader />
+						</Suspense>
+					)}
 					ListHeaderComponentStyle={{ paddingBottom: 16 }}
 					refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
 				/>

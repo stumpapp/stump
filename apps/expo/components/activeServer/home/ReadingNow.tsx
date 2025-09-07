@@ -1,7 +1,8 @@
 import { useSDK } from '@stump/client'
 import { FragmentType, graphql, useFragment } from '@stump/graphql'
+import dayjs from 'dayjs'
 import { useRouter } from 'expo-router'
-import { useCallback, useMemo } from 'react'
+import { useCallback } from 'react'
 import { Pressable, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import LinearGradient from 'react-native-linear-gradient'
@@ -9,8 +10,9 @@ import LinearGradient from 'react-native-linear-gradient'
 import { BookMetaLink } from '~/components/book'
 import { FasterImage } from '~/components/Image'
 import { Heading, Progress, Text } from '~/components/ui'
+import { COLORS } from '~/lib/constants'
+import { parseGraphQLDecimal } from '~/lib/format'
 import { useDisplay } from '~/lib/hooks'
-import { getBookProgression } from '~/lib/sdk/utils'
 
 import { useActiveServer } from '../context'
 
@@ -25,6 +27,13 @@ const fragment = graphql(`
 		}
 		thumbnail {
 			url
+		}
+		pages
+		readProgress {
+			epubcfi
+			page
+			percentageCompleted
+			updatedAt
 		}
 	}
 `)
@@ -68,7 +77,7 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 	const { sdk } = useSDK()
 	const { width, isTablet } = useDisplay()
 
-	const activeBookProgress = useMemo(() => getBookProgression(book), [book])
+	const percentageCompleted = parseGraphQLDecimal(data.readProgress?.percentageCompleted)
 
 	// TODO: figure out why I need explicit widths for *each* elem
 	const renderBookContent = useCallback(() => {
@@ -162,19 +171,60 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 				<View className="absolute bottom-0 z-20 w-full gap-2 p-2">
 					{!isTablet && (
 						<Text
-							className="text-2xl font-bold leading-8 text-white"
+							className="text-2xl font-bold leading-8"
 							style={{
 								textShadowOffset: { width: 2, height: 1 },
 								textShadowRadius: 2,
 								textShadowColor: 'rgba(0, 0, 0, 0.5)',
 								zIndex: 20,
+								color: COLORS.dark.foreground.DEFAULT,
 							}}
 						>
 							{data.resolvedName}
 						</Text>
 					)}
 
-					{activeBookProgress && <Progress className="h-1" value={activeBookProgress} />}
+					<View className="flex items-start gap-2">
+						<View className="flex w-full flex-row items-center justify-between">
+							{!!data.readProgress?.page && data.readProgress.page > 0 && (
+								<Text
+									className="flex-wrap text-base"
+									style={{
+										color: COLORS.dark.foreground.subtle,
+										opacity: 0.9,
+									}}
+								>
+									{data.readProgress?.page} of {data.pages}
+								</Text>
+							)}
+
+							{!!data.readProgress?.epubcfi && percentageCompleted != null && (
+								<Text
+									className="flex-wrap text-base"
+									style={{
+										color: COLORS.dark.foreground.subtle,
+										opacity: 0.9,
+									}}
+								>
+									{(percentageCompleted * 100).toFixed(0)}%
+								</Text>
+							)}
+
+							{!!data.readProgress?.updatedAt && (
+								<Text
+									className="flex-wrap text-base"
+									style={{
+										color: COLORS.dark.foreground.subtle,
+										opacity: 0.9,
+									}}
+								>
+									{dayjs(data.readProgress?.updatedAt).fromNow()}
+								</Text>
+							)}
+						</View>
+
+						{percentageCompleted && <Progress className="h-1" value={percentageCompleted * 100} />}
+					</View>
 				</View>
 			</Pressable>
 

@@ -1,7 +1,7 @@
-import { Suspense } from 'react'
 import { View } from 'react-native'
 
 import { ClearFilters, FilterHeader } from '~/components/filter'
+import { useBookFilterStore } from '~/stores/filters'
 
 import Characters from './Characters'
 import { BookFilterHeaderContext, IBookFilterHeaderContext } from './context'
@@ -10,7 +10,6 @@ import ReadStatus from './ReadStatus'
 import Series from './Series'
 import Sort from './Sort'
 import Writers from './Writers'
-import { useBookFilterStore } from '~/stores/filters'
 
 // TODO: A LOT of these are largely duplicated logic, but different fields and
 // queries (optionally). It would be good to generalize it at some point but I'm lazy
@@ -19,6 +18,7 @@ import { useBookFilterStore } from '~/stores/filters'
 
 type Props = IBookFilterHeaderContext
 
+// Note: The FlashList header doesn't seem to like Suspense
 export default function BookFilterHeader(context: Props) {
 	const clear = useBookFilterStore((state) => state.resetFilters)
 
@@ -28,27 +28,19 @@ export default function BookFilterHeader(context: Props) {
 				<Sort />
 
 				<View className="w-2" />
-				<Suspense>
-					<Characters />
-				</Suspense>
+				<Characters />
 
 				<View className="w-2" />
-				<Suspense>
-					<Genres />
-				</Suspense>
+				<Genres />
 
 				<View className="w-2" />
-				<Suspense>
-					<Series />
-				</Suspense>
+				<Series />
 
 				<View className="w-2" />
 				<ReadStatus />
 
 				<View className="w-2" />
-				<Suspense>
-					<Writers />
-				</Suspense>
+				<Writers />
 
 				<View className="w-2" />
 				<ClearFilters onPress={clear} />

@@ -1,4 +1,4 @@
-import { useSuspenseGraphQL } from '@stump/client'
+import { useGraphQL } from '@stump/client'
 import { graphql } from '@stump/graphql'
 import setProperty from 'lodash/set'
 import { Fragment, useCallback, useMemo, useState } from 'react'
@@ -23,12 +23,11 @@ const query = graphql(`
 
 export default function Characters() {
 	const insets = useSafeAreaInsets()
+
 	const { seriesId } = useBookFilterHeaderContext()
-	const {
-		data: {
-			mediaMetadataOverview: { characters },
-		},
-	} = useSuspenseGraphQL(query, ['characters', seriesId], { seriesId })
+	const { data, isLoading } = useGraphQL(query, ['characters', seriesId], { seriesId })
+
+	const characters = data?.mediaMetadataOverview?.characters ?? []
 
 	const { filters, setFilters } = useBookFilterStore((store) => ({
 		filters: store.filters,
@@ -37,7 +36,7 @@ export default function Characters() {
 
 	const characterFilter = useMemo(() => filters.metadata?.characters?.likeAnyOf, [filters])
 
-	const [selectionState, setSelectionState] = useState(() => {
+	const initialSelectionState = useMemo(() => {
 		return match(characterFilter)
 			.with(P.array(P.string), (likeAnyOf) =>
 				likeAnyOf.reduce(
@@ -46,7 +45,9 @@ export default function Characters() {
 				),
 			)
 			.otherwise(() => ({}) as Record<string, boolean>)
-	})
+	}, [characterFilter])
+
+	const [selectionState, setSelectionState] = useState(initialSelectionState)
 
 	const onSelectCharacter = useCallback(
 		(character: string, checked: boolean) => {
@@ -74,6 +75,8 @@ export default function Characters() {
 
 	const isActive =
 		!!filters.metadata?.characters?.likeAnyOf && filters.metadata.characters.likeAnyOf.length > 0
+
+	if (isLoading) return null
 
 	return (
 		<FilterSheet label="Characters" isActive={isActive}>

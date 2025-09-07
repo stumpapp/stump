@@ -4,7 +4,7 @@ import { graphql } from '@stump/graphql'
 import { useNavigation } from 'expo-router'
 import { ChevronLeft } from 'lucide-react-native'
 import { useCallback } from 'react'
-import { Platform } from 'react-native'
+import { Platform, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { useActiveServer } from '~/components/activeServer'
@@ -52,7 +52,7 @@ export default function Screen() {
 		query,
 		['libraries', serverID],
 	)
-	const { numColumns } = useGridItemSize()
+	const { numColumns, gap } = useGridItemSize()
 
 	const onEndReached = useCallback(() => {
 		if (hasNextPage) {
@@ -83,6 +83,7 @@ export default function Screen() {
 				numColumns={numColumns}
 				onEndReachedThreshold={0.75}
 				onEndReached={onEndReached}
+				ItemSeparatorComponent={() => <View style={{ height: gap * 2 }} />}
 				contentInsetAdjustmentBehavior="automatic"
 				refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
 			/>

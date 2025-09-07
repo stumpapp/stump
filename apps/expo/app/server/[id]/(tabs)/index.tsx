@@ -13,9 +13,14 @@ export default function Screen() {
 	const client = useQueryClient()
 	const onRefresh = useCallback(async () => {
 		setRefreshing(true)
-		await client.invalidateQueries({ queryKey: ['continueReading'], exact: false })
+		await Promise.all([
+			client.invalidateQueries({ queryKey: ['continueReading'], exact: false }),
+			client.invalidateQueries({ queryKey: ['onDeck'], exact: false }),
+			client.invalidateQueries({ queryKey: ['recentlyAddedBooks'], exact: false }),
+			client.invalidateQueries({ queryKey: ['recentlyAddedSeries'], exact: false }),
+		])
 		setRefreshing(false)
-	}, [])
+	}, [client])
 
 	return (
 		<ScrollView

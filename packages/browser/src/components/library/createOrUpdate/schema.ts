@@ -131,14 +131,18 @@ export const buildSchema = (
 		path: z
 			.string()
 			.min(1, { message: 'Library path is required' })
+			.transform(
+				// Remove all trailing slashes
+				(val) => val.replace(/\/+$/, ''),
+			)
 			.refine(
 				// return falsy value to indicate failure.
 				// If the path is a parent to any existing library -> fail
 				// If the path is a child to any existing library -> fail
 				// If the path is not changing -> pass (override the fail)
 				(val) => {
-					const isParent = existingLibraries.some((l) => l.path.startsWith(val))
-					const isChild = existingLibraries.some((l) => val.startsWith(l.path))
+					const isParent = existingLibraries.some((l) => (l.path + '/').startsWith(val + '/'))
+					const isChild = existingLibraries.some((l) => (val + '/').startsWith(l.path + '/'))
 					const isUnchanged = library?.path === val
 					return (!isParent && !isChild) || isUnchanged
 				},

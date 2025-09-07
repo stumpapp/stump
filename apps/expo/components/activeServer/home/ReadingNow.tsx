@@ -3,6 +3,8 @@ import { FragmentType, graphql, useFragment } from '@stump/graphql'
 import { useRouter } from 'expo-router'
 import { useCallback, useMemo } from 'react'
 import { Pressable, View } from 'react-native'
+import { ScrollView } from 'react-native-gesture-handler'
+import LinearGradient from 'react-native-linear-gradient'
 
 import { BookMetaLink } from '~/components/book'
 import { FasterImage } from '~/components/Image'
@@ -11,8 +13,6 @@ import { useDisplay } from '~/lib/hooks'
 import { getBookProgression } from '~/lib/sdk/utils'
 
 import { useActiveServer } from '../context'
-import { ScrollView } from 'react-native-gesture-handler'
-import LinearGradient from 'react-native-linear-gradient'
 
 const fragment = graphql(`
 	fragment ReadingNow on Media {
@@ -40,7 +40,12 @@ export default function ReadingNow({ books }: Props) {
 		<View className="flex items-start gap-4">
 			<Heading size="xl">Jump Back In</Heading>
 
-			<ScrollView horizontal showsHorizontalScrollIndicator={false} className="w-full">
+			<ScrollView
+				horizontal
+				showsHorizontalScrollIndicator={false}
+				className="w-full"
+				pagingEnabled
+			>
 				<View className="flex flex-row gap-4">
 					{books.map((book) => (
 						<ReadingNowItem key={book.id} book={book} />

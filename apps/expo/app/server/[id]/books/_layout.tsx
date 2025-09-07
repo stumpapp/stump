@@ -1,14 +1,13 @@
-import { Stack, useNavigation, useRouter } from 'expo-router'
+import { Stack, useNavigation } from 'expo-router'
 import { Platform } from 'react-native'
-import { icons } from '~/lib'
 
+import { icons } from '~/lib'
 import { usePreferencesStore } from '~/stores'
 
 const { ChevronLeft } = icons
 
 export default function Screen() {
 	const animationEnabled = usePreferencesStore((state) => !state.reduceAnimations)
-	const router = useRouter()
 	const navigation = useNavigation()
 
 	return (

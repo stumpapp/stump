@@ -1,6 +1,7 @@
 import { useNavigation, useRouter } from 'expo-router'
 import { useLayoutEffect, useMemo, useState } from 'react'
 import { NativeSyntheticEvent, Platform, TextInputChangeEventData } from 'react-native'
+
 import { icons } from '..'
 
 const { ChevronLeft } = icons
@@ -36,7 +37,7 @@ export function useDynamicHeader({
 			(showBackButton
 				? () => <ChevronLeft className="text-foreground" onPress={() => router.back()} />
 				: undefined),
-		[headerLeft, showBackButton],
+		[headerLeft, showBackButton, router],
 	)
 
 	useLayoutEffect(() => {
@@ -55,6 +56,6 @@ export function useDynamicHeader({
 			...rest,
 		})
 		setDidSetOptions(true)
-	}, [navigation, title, headerLeft, headerRight, rest, didSetOptions])
+	}, [navigation, title, headerLeft, headerRight, rest, didSetOptions, resolvedHeaderLeft])
 	return didSetOptions
 }

@@ -3344,6 +3344,11 @@ export type BookSearchScreenQuery = { __typename?: 'Query', media: { __typename?
       & { ' $fragmentRefs'?: { 'BookGridItemFragment': BookGridItemFragment } }
     )>, pageInfo: { __typename: 'CursorPaginationInfo', currentCursor?: string | null, nextCursor?: string | null, limit: number } | { __typename: 'OffsetPaginationInfo' } } };
 
+export type LibraryPathsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type LibraryPathsQuery = { __typename?: 'Query', libraries: { __typename?: 'PaginatedLibraryResponse', nodes: Array<{ __typename?: 'Library', id: string, name: string, path: string }> } };
+
 export type LibrarySeriesScreenSeriesNameQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
@@ -5206,6 +5211,17 @@ export const BookSearchScreenDocument = new TypedDocumentString(`
     url
   }
 }`) as unknown as TypedDocumentString<BookSearchScreenQuery, BookSearchScreenQueryVariables>;
+export const LibraryPathsDocument = new TypedDocumentString(`
+    query LibraryPaths {
+  libraries(pagination: {none: {unpaginated: true}}) {
+    nodes {
+      id
+      name
+      path
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<LibraryPathsQuery, LibraryPathsQueryVariables>;
 export const LibrarySeriesScreenSeriesNameDocument = new TypedDocumentString(`
     query LibrarySeriesScreenSeriesName($id: ID!) {
   libraryById(id: $id) {

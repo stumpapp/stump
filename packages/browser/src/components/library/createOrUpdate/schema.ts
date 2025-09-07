@@ -30,7 +30,15 @@ const isLibraryPattern = (input: string): input is LibraryPattern => {
  * A function to normalise paths (remove all trailing slashes)
  */
 export const normalizePath = (path: string) => {
-	return path.replace(/\/+$/, '')
+	if (path === '/' || /^[A-Za-z]:\\?$/.test(path)) return path
+	else return path.replace(/[/\\]+$/, '')
+}
+/**
+ * A function to add a single trailing slash
+ */
+const addTrailingSlash = (path: string) => {
+	if (path.includes('/')) return path + '/'
+	else return path + '\\'
 }
 
 /**
@@ -153,7 +161,7 @@ export const buildSchema = (
 
 				const filteredLibraries = existingLibraries.filter((l) => l.id !== library?.id)
 
-				const isParent = filteredLibraries.some((l) => (l.path + '/').startsWith(val + '/'))
+				const isParent = filteredLibraries.some((l) => l.path.startsWith(addTrailingSlash(val)))
 				if (isParent) {
 					ctx.addIssue({
 						code: 'custom',
@@ -162,7 +170,7 @@ export const buildSchema = (
 					return
 				}
 
-				const isChild = filteredLibraries.some((l) => (val + '/').startsWith(l.path + '/'))
+				const isChild = filteredLibraries.some((l) => val.startsWith(addTrailingSlash(l.path)))
 				if (isChild) {
 					ctx.addIssue({
 						code: 'custom',

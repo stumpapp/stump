@@ -889,8 +889,24 @@ impl LibraryMutation {
 	}
 }
 
+///  Normalises a path by removing trailing slashes
 fn normalize_path(path: &str) -> &str {
-	path.trim_end_matches('/')
+	let trimmed = path.trim_end_matches(['/', '\\']);
+	let is_windows_root =
+		trimmed.len() == 2 && trimmed.ends_with(':') && trimmed.is_ascii();
+	if path == "/" || is_windows_root {
+		path
+	} else {
+		trimmed
+	}
+}
+/// Adds a single trailing slash to a path
+fn add_trailing_slash(path: &str) -> String {
+	if path.contains('/') {
+		format!("{}/", path)
+	} else {
+		format!("{}\\", path)
+	}
 }
 /// A helper function to enforce that a library path is valid and does not conflict with
 /// other libraries.
@@ -919,8 +935,9 @@ async fn enforce_valid_library_path(
 
 	// example: new_path = "/books", existing_library = "/books/fiction"
 	// check if any libraries start with "/books/" (can't use "/books" else it flags e.g. "/books2")
-	let mut child_query = library::Entity::find()
-		.filter(library::Column::Path.starts_with(format!("{}/", normalize_path(path))));
+	let mut child_query = library::Entity::find().filter(
+		library::Column::Path.starts_with(add_trailing_slash(normalize_path(path))),
+	);
 
 	if let Some(existing_path) = existing_path {
 		child_query =

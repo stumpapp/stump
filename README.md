@@ -41,6 +41,7 @@ Stump is a free and open source comics, manga and digital book server with OPDS 
   - [Packages](#packages)
 - [Similar Projects 👯](#similar-projects-)
 - [License 📝](#license-)
+- [Attribution](#attribution)
 </details>
 
 > **🚧 Disclaimer 🚧**: Stump is under active development and is an ongoing **WIP**. Anyone is welcome to try it out, but **DO NOT** expect a fully featured or bug-free experience. If you'd like to contribute and help expedite feature development, please review the [developer guide](#developer-guide-).
@@ -201,3 +202,8 @@ There are a number of other projects that are similar to Stump, it certainly isn
 ## License 📝
 
 Stump is broken up into a number of different packages and applications. Some of these have their own licenses. For example, the `expo` app is licensed under [GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.html). If a package has its own license, it will be noted in the package's README or LICENSE file. In such cases, the license file(s) in the subfolder/package take precedence. If such a license or disclaimer is not present, it is safe to assume that the code is licensed under the [MIT License](https://www.tldrlegal.com/license/mit-license).
+
+## Attribution
+
+- Some of the icons used in the web and mobile applications are from the [Spacedrive](https://github.com/spacedriveapp/spacedrive/tree/main/packages/assets/icons) repository, and are licensed under the [AGPL-3.0](<https://www.tldrlegal.com/license/gnu-affero-general-public-license-v3-(agpl-3.0)>) license.
+- The `job` crate could not be possible without the work of other open source projects which had a significant influence on the design and implementation. See the [corresponding section](core/README.md#license-) in the `core` crate for more information.

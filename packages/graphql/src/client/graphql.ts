@@ -400,6 +400,7 @@ export type DirectoryListing = {
 export type DirectoryListingFile = {
   __typename?: 'DirectoryListingFile';
   isDirectory: Scalars['Boolean']['output'];
+  media?: Maybe<Media>;
   name: Scalars['String']['output'];
   path: Scalars['String']['output'];
 };
@@ -4601,7 +4602,7 @@ export type DirectoryListingQueryVariables = Exact<{
 }>;
 
 
-export type DirectoryListingQuery = { __typename?: 'Query', listDirectory: { __typename?: 'PaginatedDirectoryListingResponse', nodes: Array<{ __typename?: 'DirectoryListing', parent?: string | null, files: Array<{ __typename?: 'DirectoryListingFile', name: string, path: string, isDirectory: boolean }> }>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', currentPage: number, totalPages: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
+export type DirectoryListingQuery = { __typename?: 'Query', listDirectory: { __typename?: 'PaginatedDirectoryListingResponse', nodes: Array<{ __typename?: 'DirectoryListing', parent?: string | null, files: Array<{ __typename?: 'DirectoryListingFile', name: string, path: string, isDirectory: boolean, media?: { __typename?: 'Media', resolvedName: string, extension: string, thumbnail: { __typename?: 'ImageRef', url: string } } | null }> }>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', currentPage: number, totalPages: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
 
 export type UploadConfigQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -7751,6 +7752,13 @@ export const DirectoryListingDocument = new TypedDocumentString(`
         name
         path
         isDirectory
+        media {
+          resolvedName
+          thumbnail {
+            url
+          }
+          extension
+        }
       }
     }
     pageInfo {

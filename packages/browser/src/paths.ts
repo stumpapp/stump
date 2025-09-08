@@ -16,16 +16,16 @@ type BookReaderParams = {
 }
 
 type SettingsPage =
-	| 'app/general'
-	| 'app/preferences'
-	| 'app/desktop'
-	| 'server/general'
-	| 'server/logs'
-	| 'server/users'
-	| 'server/access'
-	| 'server/email'
-	| 'server/email/new'
-	| 'server/notifications'
+	| 'account'
+	| 'preferences'
+	| 'desktop'
+	| 'server'
+	| 'logs'
+	| 'users'
+	| 'access'
+	| 'email'
+	| 'email/new'
+	| 'notifications'
 type DocTopic = 'access-control' | 'features/book-clubs'
 type BookClubTab = 'overview' | 'members' | 'discussion' | 'settings'
 
@@ -86,10 +86,10 @@ const pathsInternal = {
 		const params = toUrlParams({ filters: JSON.stringify(filters) })
 		return `/books?${params.toString()}`
 	},
-	createEmailer: () => pathsInternal.settings('server/email/new'),
+	createEmailer: () => pathsInternal.settings('email/new'),
 	docs: (topic?: DocTopic, section?: string) =>
 		`https://www.stumpapp.dev/guides/${topic || ''}${section ? `#${section}` : ''}`,
-	editEmailer: (id: number) => pathsInternal.settings('server/email') + `/${id}/edit`,
+	editEmailer: (id: number) => pathsInternal.settings('email') + `/${id}/edit`,
 	home: () => '/',
 	libraries: () => '/libraries',
 	libraryBooks: (id: string, page?: number) => {
@@ -117,12 +117,12 @@ const pathsInternal = {
 		return `/series/${id}/books`
 	},
 	serverLogs: (jobId?: string) =>
-		pathsInternal.settings('server/logs') + (jobId ? `?job_id=${jobId}` : ''),
-	settings: (subpath: SettingsPage = 'app/general') => `/settings/${subpath || ''}`,
+		pathsInternal.settings('logs') + (jobId ? `?job_id=${jobId}` : ''),
+	settings: (subpath: SettingsPage = 'account') => `/settings/${subpath || ''}`,
 	smartList: (id: string) => `/smart-lists/${id}`,
 	smartListCreate: () => '/smart-lists/create',
 	smartLists: () => '/smart-lists',
-	updateUser: (id: string) => `${pathsInternal.settings('server/users')}/${id}/manage`,
+	updateUser: (id: string) => `${pathsInternal.settings('users')}/${id}/manage`,
 } as const
 
 /**

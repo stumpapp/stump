@@ -34,7 +34,7 @@ use super::{
 	tag::Tag,
 };
 
-#[derive(Debug, SimpleObject)]
+#[derive(Debug, Clone, SimpleObject)]
 #[graphql(complex)]
 pub struct Media {
 	#[graphql(flatten)]

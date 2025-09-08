@@ -1,7 +1,11 @@
 use std::path::PathBuf;
 
-use async_graphql::SimpleObject;
+use async_graphql::{
+	dataloader::DataLoader, ComplexObject, Context, Result, SimpleObject,
+};
 use stump_core::filesystem::PathUtils;
+
+use crate::{loader::media::MediaLoader, object::media::Media};
 
 #[derive(Debug, Clone, SimpleObject)]
 pub struct DirectoryListing {
@@ -10,6 +14,7 @@ pub struct DirectoryListing {
 }
 
 #[derive(Debug, Clone, SimpleObject)]
+#[graphql(complex)]
 pub struct DirectoryListingFile {
 	pub is_directory: bool,
 	pub name: String,
@@ -41,5 +46,18 @@ impl From<PathBuf> for DirectoryListingFile {
 			is_directory: path.is_dir(),
 			path: path.to_string_lossy().to_string(),
 		}
+	}
+}
+
+#[ComplexObject]
+impl DirectoryListingFile {
+	async fn media(&self, ctx: &Context<'_>) -> Result<Option<Media>> {
+		if self.is_directory {
+			return Ok(None);
+		}
+
+		let loader = ctx.data::<DataLoader<MediaLoader>>()?;
+		let media = loader.load_one(self.path.clone()).await?;
+		Ok(media)
 	}
 }

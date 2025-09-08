@@ -362,6 +362,7 @@ type DirectoryListingFile {
 	isDirectory: Boolean!
 	name: String!
 	path: String!
+	media: Media
 }
 
 input DirectoryListingInput {

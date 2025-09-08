@@ -95,11 +95,7 @@ export default function Screen() {
 				refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
 				contentInsetAdjustmentBehavior="automatic"
 			>
-				<View className="flex-1 gap-6 tablet:gap-8">
-					<Heading size="lg" className="mt-6">
-						{activeServer?.name || 'OPDS Feed'}
-					</Heading>
-
+				<View className="mt-6 flex-1 gap-6 tablet:gap-8">
 					<OPDSNavigation navigation={feed.navigation} renderEmpty />
 
 					{navGroups.map((group) => (

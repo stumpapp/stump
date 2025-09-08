@@ -39,7 +39,7 @@ export default function PublicationGroup({
 	return (
 		<View key={metadata.title}>
 			<View className="flex flex-row items-center justify-between pb-2">
-				<Text className="text-xl font-medium text-foreground">
+				<Text className="text-xl font-medium leading-6 tracking-wide text-foreground">
 					{metadata.title || 'Publications'}
 				</Text>
 

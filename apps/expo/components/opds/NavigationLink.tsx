@@ -7,6 +7,7 @@ import { cn } from '~/lib/utils'
 
 import { useActiveServer } from '../activeServer'
 import { icons, Text } from '../ui'
+import { Icon } from '../ui/icon'
 
 const { ChevronRight } = icons
 
@@ -32,12 +33,12 @@ export default function NavigationLink({ link }: Props) {
 		>
 			{({ pressed }) => (
 				<View
-					className={cn('flex-row items-center justify-between py-2 tablet:py-3', {
-						'opacity-70': pressed,
+					className={cn('flex-row items-center justify-between py-4', {
+						'opacity-60': pressed,
 					})}
 				>
 					<Text size="lg">{link.title}</Text>
-					<ChevronRight size={20} className="text-foreground-muted" />
+					<Icon as={ChevronRight} className="h-6 w-6 text-foreground-muted opacity-70" />
 				</View>
 			)}
 		</Pressable>

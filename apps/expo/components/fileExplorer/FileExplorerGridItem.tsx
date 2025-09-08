@@ -41,6 +41,8 @@ export default function FileExplorerGridItem({ file }: Props) {
 					friendlyName,
 				},
 			})
+		} else if (file.media) {
+			router.push(`/server/${serverID}/books/${file.media.id}`)
 		}
 	}, [file, router, serverID, friendlyName])
 

@@ -17,6 +17,7 @@ const query = graphql(`
 					path
 					isDirectory
 					media {
+						id
 						resolvedName
 						thumbnail {
 							url

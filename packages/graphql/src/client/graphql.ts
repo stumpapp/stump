@@ -4602,7 +4602,7 @@ export type DirectoryListingQueryVariables = Exact<{
 }>;
 
 
-export type DirectoryListingQuery = { __typename?: 'Query', listDirectory: { __typename?: 'PaginatedDirectoryListingResponse', nodes: Array<{ __typename?: 'DirectoryListing', parent?: string | null, files: Array<{ __typename?: 'DirectoryListingFile', name: string, path: string, isDirectory: boolean, media?: { __typename?: 'Media', resolvedName: string, extension: string, thumbnail: { __typename?: 'ImageRef', url: string } } | null }> }>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', currentPage: number, totalPages: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
+export type DirectoryListingQuery = { __typename?: 'Query', listDirectory: { __typename?: 'PaginatedDirectoryListingResponse', nodes: Array<{ __typename?: 'DirectoryListing', parent?: string | null, files: Array<{ __typename?: 'DirectoryListingFile', name: string, path: string, isDirectory: boolean, media?: { __typename?: 'Media', id: string, resolvedName: string, extension: string, thumbnail: { __typename?: 'ImageRef', url: string } } | null }> }>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', currentPage: number, totalPages: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
 
 export type UploadConfigQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -7753,6 +7753,7 @@ export const DirectoryListingDocument = new TypedDocumentString(`
         path
         isDirectory
         media {
+          id
           resolvedName
           thumbnail {
             url

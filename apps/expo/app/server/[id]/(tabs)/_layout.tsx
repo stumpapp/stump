@@ -1,22 +1,19 @@
 import { useAuthQuery, useClientContext, useSDK } from '@stump/client'
 import { isAxiosError } from 'axios'
-import { Tabs, useRouter } from 'expo-router'
+import { Tabs } from 'expo-router'
 import { useEffect } from 'react'
-import { View } from 'react-native'
-import { Pressable } from 'react-native-gesture-handler'
 
 import { icons } from '~/components/ui'
 import { useColors } from '~/lib/constants'
 import { cn } from '~/lib/utils'
 import { usePreferencesStore, useUserStore } from '~/stores'
 
-const { Unplug, Home, SquareLibrary, Search } = icons
+const { Home, SquareLibrary, Search } = icons
 
 export default function TabLayout() {
 	const { sdk } = useSDK()
 
 	const colors = useColors()
-	const router = useRouter()
 	const animationEnabled = usePreferencesStore((state) => !state.reduceAnimations)
 	const setUser = useUserStore((state) => state.setUser)
 
@@ -55,20 +52,7 @@ export default function TabLayout() {
 					tabBarIcon: ({ focused }) => (
 						<Home className={cn('h-6 w-6 text-foreground-muted', { 'text-foreground': focused })} />
 					),
-					headerLeft: () => (
-						<Pressable onPress={() => router.dismissAll()}>
-							{({ pressed }) => (
-								<View
-									className={cn(
-										'aspect-square flex-1 items-start justify-center px-2',
-										pressed && 'opacity-70',
-									)}
-								>
-									<Unplug size={20} className="text-foreground-muted" />
-								</View>
-							)}
-						</Pressable>
-					),
+					headerShown: false,
 				}}
 			/>
 

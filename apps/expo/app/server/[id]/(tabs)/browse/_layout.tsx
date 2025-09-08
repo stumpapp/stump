@@ -12,6 +12,9 @@ export default function Layout() {
 					headerTransparent: Platform.OS === 'ios',
 					headerBlurEffect: 'regular',
 					headerLargeTitle: true,
+					headerLargeTitleStyle: {
+						fontSize: 30,
+					},
 				}}
 			/>
 		</Stack>

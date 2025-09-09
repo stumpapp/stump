@@ -4,9 +4,10 @@ import dayjs from 'dayjs'
 import { useRouter } from 'expo-router'
 import { useCallback, useRef } from 'react'
 import { Pressable, View } from 'react-native'
-import Carousel, { ICarouselInstance, Pagination } from 'react-native-reanimated-carousel'
-import { useSharedValue } from 'react-native-reanimated'
+import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 import LinearGradient from 'react-native-linear-gradient'
+import { runOnJS, useSharedValue } from 'react-native-reanimated'
+import Carousel, { ICarouselInstance, Pagination } from 'react-native-reanimated-carousel'
 
 import { BookMetaLink } from '~/components/book'
 import { FasterImage } from '~/components/Image'
@@ -45,12 +46,16 @@ type Props = {
 	books: (IReadingNowFragment & { id: string })[]
 }
 
+const IMAGE_HEIGHT = 430
+const IMAGE_WIDTH = IMAGE_HEIGHT * (2 / 3)
+
 export default function ReadingNow({ books }: Props) {
 	const { width } = useDisplay()
 
 	const colors = useColors()
 	const carouselRef = useRef<ICarouselInstance>(null)
 	const progressValue = useSharedValue<number>(0)
+	const activeDotIndex = useSharedValue(-1) // -1 means inactive
 
 	const onPressPagination = (index: number) => {
 		carouselRef.current?.scrollTo({
@@ -58,6 +63,29 @@ export default function ReadingNow({ books }: Props) {
 			animated: true,
 		})
 	}
+
+	const paginationDotsContainerWidth =
+		books.length * 8 + // total width of all dots
+		(books.length - 1) * 8 + // total gap between dots
+		16 * 2 // container padding
+
+	const pan = Gesture.Pan()
+		.activeOffsetX([-3, 3])
+		.failOffsetY([-5, 5])
+		.onUpdate((event) => {
+			const totalItems = books.length
+			const activeAreaWidth = paginationDotsContainerWidth / totalItems
+			const index = Math.min(4, Math.max(0, Math.floor(event.x / activeAreaWidth)))
+
+			// only update onPressPagination when the index actually changes (not when same number due to tiny movements)
+			if (activeDotIndex.value !== index) {
+				activeDotIndex.value = index
+				runOnJS(onPressPagination)(index)
+			}
+		})
+		.onEnd(() => {
+			activeDotIndex.value = -1
+		})
 
 	return (
 		<View className="flex items-start gap-4">
@@ -67,11 +95,12 @@ export default function ReadingNow({ books }: Props) {
 				<Carousel
 					ref={carouselRef}
 					width={width}
-					height={400}
+					height={IMAGE_HEIGHT}
 					data={books}
 					loop={false}
 					mode="parallax"
 					modeConfig={{
+						parallaxScrollingOffset: 90,
 						parallaxScrollingScale: 0.98,
 					}}
 					onProgressChange={progressValue}
@@ -87,7 +116,7 @@ export default function ReadingNow({ books }: Props) {
 							style={{
 								flex: 1,
 								justifyContent: 'center',
-								paddingLeft: 16,
+								margin: 'auto',
 							}}
 						>
 							<ReadingNowItem book={item} />
@@ -95,24 +124,28 @@ export default function ReadingNow({ books }: Props) {
 					)}
 				/>
 
-				<Pagination.Basic
-					progress={progressValue}
-					data={books}
-					dotStyle={{
-						width: 8,
-						height: 8,
-						borderRadius: 4,
-						backgroundColor: colors.dots.inactive,
-					}}
-					activeDotStyle={{
-						backgroundColor: colors.dots.active,
-					}}
-					containerStyle={{
-						marginTop: 16,
-						gap: 6,
-					}}
-					onPress={onPressPagination}
-				/>
+				<GestureDetector gesture={pan}>
+					<View className="mx-auto">
+						<Pagination.Custom
+							progress={progressValue}
+							data={books}
+							dotStyle={{
+								width: 8,
+								height: 8,
+								borderRadius: 4,
+								backgroundColor: colors.dots.inactive,
+							}}
+							activeDotStyle={{
+								backgroundColor: colors.dots.active,
+							}}
+							containerStyle={{
+								padding: 16,
+								gap: 8,
+							}}
+							onPress={onPressPagination}
+						/>
+					</View>
+				</GestureDetector>
 			</View>
 		</View>
 	)
@@ -139,7 +172,7 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 		const contentWidth =
 			width -
 			16 * 2 - // page padding
-			400 * (2 / 3) - // image width
+			IMAGE_WIDTH - // image width
 			16 - // gap between image and text
 			60 // gap between other carousel items
 
@@ -228,8 +261,8 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 						borderRadius: 8,
 					}}
 					style={{
-						height: 400,
-						width: 400 * (2 / 3),
+						height: IMAGE_HEIGHT,
+						width: IMAGE_WIDTH,
 					}}
 				/>
 

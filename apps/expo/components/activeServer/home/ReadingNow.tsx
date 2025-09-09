@@ -101,8 +101,7 @@ export default function ReadingNow({ books }: Props) {
 					mode="parallax"
 					modeConfig={{
 						parallaxScrollingOffset: 90,
-						parallaxScrollingScale: 1.0,
-						parallaxAdjacentItemScale: 0.97,
+						parallaxScrollingScale: 0.98,
 					}}
 					onProgressChange={progressValue}
 					// Note: I added this to fix vertical scroll conflicts

@@ -58,7 +58,7 @@ export default function RecentlyAddedSeriesItem({ series }: Props) {
 			<LinearGradient
 				colors={['transparent', 'rgba(0, 0, 0, 0.90)']}
 				style={{ position: 'absolute', inset: 0, zIndex: 10, borderRadius: 8 }}
-				locations={[0.5, 1]}
+				locations={[0.3, 1]}
 			/>
 
 			<FasterImage

@@ -71,11 +71,11 @@ export default function ReadingNow({ books }: Props) {
 
 	const pan = Gesture.Pan()
 		.activeOffsetX([-3, 3])
-		.failOffsetY([-5, 5])
+		.failOffsetY([-6, 6])
 		.onUpdate((event) => {
 			const totalItems = books.length
 			const activeAreaWidth = paginationDotsContainerWidth / totalItems
-			const index = Math.min(4, Math.max(0, Math.floor(event.x / activeAreaWidth)))
+			const index = Math.min(totalItems - 1, Math.max(0, Math.floor(event.x / activeAreaWidth)))
 
 			// only update onPressPagination when the index actually changes (not when same number due to tiny movements)
 			if (activeDotIndex.value !== index) {
@@ -101,13 +101,14 @@ export default function ReadingNow({ books }: Props) {
 					mode="parallax"
 					modeConfig={{
 						parallaxScrollingOffset: 90,
-						parallaxScrollingScale: 0.98,
+						parallaxScrollingScale: 1.0,
+						parallaxAdjacentItemScale: 0.97,
 					}}
 					onProgressChange={progressValue}
 					// Note: I added this to fix vertical scroll conflicts
 					onConfigurePanGesture={(pan) => {
-						pan.activeOffsetX([-10, 10])
-						pan.failOffsetY([-5, 5])
+						pan.activeOffsetX([-6, 6])
+						pan.failOffsetY([-12, 12])
 						return pan
 					}}
 					snapEnabled={true}

@@ -246,9 +246,9 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 				}}
 			>
 				<LinearGradient
-					colors={['transparent', 'rgba(0, 0, 0, 0.90)']}
+					colors={['transparent', 'rgba(0, 0, 0, 0.06)', 'rgba(0, 0, 0, 0.90)']}
 					style={{ position: 'absolute', inset: 0, zIndex: 10, borderRadius: 8 }}
-					locations={[0.5, 1]}
+					locations={[0.5, 0.6, 1]}
 				/>
 
 				<FasterImage

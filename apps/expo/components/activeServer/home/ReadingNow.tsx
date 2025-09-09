@@ -66,7 +66,7 @@ export default function ReadingNow({ books }: Props) {
 
 	const paginationDotsContainerWidth =
 		books.length * 8 + // total width of all dots
-		(books.length - 1) * 8 + // total gap between dots
+		(books.length - 1) * 6 + // total gap between dots
 		16 * 2 // container padding
 
 	const pan = Gesture.Pan()
@@ -140,7 +140,7 @@ export default function ReadingNow({ books }: Props) {
 							}}
 							containerStyle={{
 								padding: 16,
-								gap: 8,
+								gap: 6,
 							}}
 							onPress={onPressPagination}
 						/>

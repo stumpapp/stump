@@ -46,7 +46,7 @@ type Props = {
 	books: (IReadingNowFragment & { id: string })[]
 }
 
-const IMAGE_HEIGHT = 430
+const IMAGE_HEIGHT = 425
 const IMAGE_WIDTH = IMAGE_HEIGHT * (2 / 3)
 
 export default function ReadingNow({ books }: Props) {
@@ -88,7 +88,7 @@ export default function ReadingNow({ books }: Props) {
 		})
 
 	return (
-		<View className="flex items-start gap-4">
+		<View className="mb-[-16px] flex items-start gap-4">
 			{/* <Heading size="xl">Jump Back In</Heading> */}
 
 			<View className="w-full">
@@ -100,8 +100,9 @@ export default function ReadingNow({ books }: Props) {
 					loop={false}
 					mode="parallax"
 					modeConfig={{
-						parallaxScrollingOffset: 90,
-						parallaxScrollingScale: 0.98,
+						parallaxScrollingOffset: 95,
+						parallaxScrollingScale: 0.99,
+						parallaxAdjacentItemScale: 0.94,
 					}}
 					onProgressChange={progressValue}
 					// Note: I added this to fix vertical scroll conflicts
@@ -116,7 +117,7 @@ export default function ReadingNow({ books }: Props) {
 							style={{
 								flex: 1,
 								justifyContent: 'center',
-								margin: 'auto',
+								paddingLeft: 16,
 							}}
 						>
 							<ReadingNowItem book={item} />
@@ -125,7 +126,7 @@ export default function ReadingNow({ books }: Props) {
 				/>
 
 				<GestureDetector gesture={pan}>
-					<View className="mx-auto">
+					<View className="mx-auto flex-row">
 						<Pagination.Custom
 							progress={progressValue}
 							data={books}

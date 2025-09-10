@@ -92,6 +92,9 @@ export default function ReadingNow({ books }: Props) {
 		<View className="mb-[-16px] flex items-start gap-4">
 			{/* <Heading size="xl">Jump Back In</Heading> */}
 
+			{/* This view prevents the left 20px of the carousel from overriding swipe back navigation */}
+			<View className="absolute left-0 top-0 z-30 w-[20px]" style={{ height: IMAGE_HEIGHT }} />
+
 			<View className="w-full">
 				<Carousel
 					ref={carouselRef}

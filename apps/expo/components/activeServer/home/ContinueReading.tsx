@@ -81,6 +81,7 @@ function ContinueReading() {
 						keyExtractor={({ id }) => id}
 						renderItem={renderItem}
 						horizontal
+						contentContainerStyle={{ paddingHorizontal: 16 }}
 						onEndReached={onEndReached}
 						onEndReachedThreshold={0.85}
 						showsHorizontalScrollIndicator={false}

@@ -3,7 +3,8 @@ import { FragmentType, graphql, useFragment } from '@stump/graphql'
 import dayjs from 'dayjs'
 import { useRouter } from 'expo-router'
 import { useCallback, useRef } from 'react'
-import { Pressable, View } from 'react-native'
+import { Easing, Pressable, View } from 'react-native'
+import { easeGradient } from 'react-native-easing-gradient'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 import LinearGradient from 'react-native-linear-gradient'
 import { runOnJS, useSharedValue } from 'react-native-reanimated'
@@ -233,6 +234,14 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 
 	const router = useRouter()
 	const isEbookProgress = !!data.readProgress?.epubcfi
+	const { colors: gradientColors, locations: gradientLocations } = easeGradient({
+		colorStops: {
+			0.5: { color: 'transparent' },
+			1: { color: 'rgba(0, 0, 0, 0.90)' },
+		},
+		extraColorStopsPerTransition: 16,
+		easing: Easing.bezier(0.42, 0, 1, 1), // https://cubic-bezier.com/#.42,0,1,1
+	})
 
 	return (
 		<View className="flex flex-row gap-4">
@@ -247,9 +256,9 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 				}}
 			>
 				<LinearGradient
-					colors={['transparent', 'rgba(0, 0, 0, 0.06)', 'rgba(0, 0, 0, 0.90)']}
+					colors={gradientColors}
 					style={{ position: 'absolute', inset: 0, zIndex: 10, borderRadius: 8 }}
-					locations={[0.5, 0.6, 1]}
+					locations={gradientLocations}
 				/>
 
 				<FasterImage

@@ -2,7 +2,8 @@ import { useSDK } from '@stump/client'
 import { FragmentType, graphql, useFragment } from '@stump/graphql'
 import dayjs from 'dayjs'
 import { useRouter } from 'expo-router'
-import { Platform, View } from 'react-native'
+import { Easing, Platform, View } from 'react-native'
+import { easeGradient } from 'react-native-easing-gradient'
 import { Pressable } from 'react-native-gesture-handler'
 import LinearGradient from 'react-native-linear-gradient'
 
@@ -43,6 +44,15 @@ export default function RecentlyAddedSeriesItem({ series }: Props) {
 	const data = useFragment(fragment, series)
 	const router = useRouter()
 
+	const { colors: gradientColors, locations: gradientLocations } = easeGradient({
+		colorStops: {
+			0.2: { color: 'transparent' },
+			1: { color: 'rgba(0, 0, 0, 0.90)' },
+		},
+		extraColorStopsPerTransition: 16,
+		easing: Easing.bezier(0.42, 0, 1, 1), // https://cubic-bezier.com/#.42,0,1,1
+	})
+
 	return (
 		<Pressable
 			className="relative shrink-0"
@@ -56,9 +66,9 @@ export default function RecentlyAddedSeriesItem({ series }: Props) {
 			}}
 		>
 			<LinearGradient
-				colors={['transparent', 'rgba(0, 0, 0, 0.90)']}
+				colors={gradientColors}
 				style={{ position: 'absolute', inset: 0, zIndex: 10, borderRadius: 8 }}
-				locations={[0.3, 1]}
+				locations={gradientLocations}
 			/>
 
 			<FasterImage

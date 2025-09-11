@@ -58,7 +58,7 @@ The following items are the major targets for Stump's first stable release:
 - 👀 Fully responsive, built-in UI with a dark mode
 - 🏃 Low resource utilization with excellent performance
 - 🧰 Easily consumable and documented REST API, so community tools and scripts can interact with Stump
-- 🌏 Language support _(look [here](https://github.com/stumpapp/stump/issues/106))_
+- 🌏 Language support _(look [here](https://crowdin.com/project/stump))_
 - 🌈 And more!
 
 Things you can expect to see afterwards:

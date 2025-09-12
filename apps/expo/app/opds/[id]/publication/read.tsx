@@ -32,20 +32,18 @@ export default function Screen() {
 				pages: readingOrder?.length || 0,
 				...(readingOrder?.length
 					? {
-							metadata: {
-								__typename: 'MediaMetadata',
-								pageAnalysis: {
-									__typename: 'PageAnalysis',
-									dimensions: readingOrder
-										.filter(({ height, width }) => height != null && width != null)
-										.map(({ height, width }) => ({
-											height: height as number,
-											width: width as number,
-										})),
-								},
+							pageAnalysis: {
+								__typename: 'PageAnalysis',
+								dimensions: readingOrder
+									.filter(({ height, width }) => height != null && width != null)
+									.map(({ height, width }) => ({
+										height: height as number,
+										width: width as number,
+									})),
 							},
 						}
 					: {}),
+				nextInSeries: { nodes: [] },
 			}) satisfies ImageReaderBookRef,
 		[id, title, readingOrder],
 	)

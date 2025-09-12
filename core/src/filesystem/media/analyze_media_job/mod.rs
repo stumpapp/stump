@@ -14,6 +14,8 @@ type MediaID = String;
 type SeriesID = String;
 type LibraryID = String;
 
+// FIXME: This operation needs to be re-thought. I've noticed it can be a reallllll hog
+
 #[derive(Clone)]
 pub enum AnalyzeMediaJobVariant {
 	/// Analyze an individual media item, specified by ID.

@@ -4,10 +4,7 @@ use sea_orm::{prelude::*, QueryOrder, QuerySelect};
 use serde::Serialize;
 use serde_with::skip_serializing_none;
 
-use crate::shared::{
-	ordering::{OrderBy, OrderDirection},
-	page_dimension::PageAnalysis,
-};
+use crate::shared::ordering::{OrderBy, OrderDirection};
 
 #[skip_serializing_none]
 #[derive(
@@ -29,9 +26,6 @@ pub struct Model {
 	pub id: i32,
 	#[sea_orm(column_type = "Text", nullable, unique)]
 	pub media_id: Option<String>,
-	#[sea_orm(column_type = "Text", nullable)]
-	pub page_analysis: Option<PageAnalysis>,
-
 	pub age_rating: Option<i32>,
 	#[sea_orm(column_type = "Text", nullable)]
 	#[graphql(skip)]
@@ -111,19 +105,11 @@ pub enum Relation {
 		on_delete = "Cascade"
 	)]
 	Media,
-	#[sea_orm(has_one = "super::page_dimension::Entity")]
-	PageDimension,
 }
 
 impl Related<super::media::Entity> for Entity {
 	fn to() -> RelationDef {
 		Relation::Media.def()
-	}
-}
-
-impl Related<super::page_dimension::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::PageDimension.def()
 	}
 }
 

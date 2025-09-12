@@ -4,7 +4,7 @@
 use std::collections::HashMap;
 
 use derive_builder::Builder;
-use models::entity::{media_metadata, page_dimension};
+use models::entity::{media_metadata, page_analysis};
 use sea_orm::{prelude::*, DatabaseConnection, EntityTrait, QueryFilter};
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
@@ -154,11 +154,11 @@ impl OPDSPublication {
 		let title = metadata.title.clone().unwrap_or(book.media.name);
 		let description = metadata.summary.clone();
 
-		let page_dimensions = page_dimension::Entity::find()
-			.filter(page_dimension::Column::MetadataId.eq(metadata.id))
+		let page_dimensions = page_analysis::Entity::find()
+			.filter(page_analysis::Column::MediaId.eq(book.media.id.clone()))
 			.one(conn)
 			.await?
-			.map(|pd| pd.dimensions.dimensions)
+			.map(|pd| pd.data.dimensions)
 			.unwrap_or_default();
 
 		let mut reading_order = vec![];

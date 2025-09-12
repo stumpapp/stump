@@ -37,12 +37,10 @@ export const query = graphql(`
 				defaultReadingMode
 				defaultReadingDir
 			}
-			metadata {
-				pageAnalysis {
-					dimensions {
-						height
-						width
-					}
+			pageAnalysis {
+				dimensions {
+					height
+					width
 				}
 			}
 			nextInSeries(pagination: { cursor: { limit: 1 } }) {

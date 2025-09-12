@@ -219,7 +219,7 @@ const Page = React.memo(
 	}: PageProps) => {
 		const { book, pageURL, flatListRef, setImageSizes } = useImageBasedReader()
 		const {
-			preferences: { tapSidesToNavigate, readingDirection, cachePolicy },
+			preferences: { tapSidesToNavigate, readingDirection },
 		} = useBookPreferences({ book })
 		const { isTablet } = useDisplay()
 		const { sdk } = useSDK()
@@ -317,9 +317,10 @@ const Page = React.memo(
 							source={{
 								uri: pageURL(pageIdx + 1),
 								headers: {
-									Authorization: sdk.authorizationHeader,
+									Authorization: sdk.authorizationHeader || '',
 								},
-								cachePolicy,
+								// FIXME: I can't remember why this was here or why its complaining
+								// cachePolicy,
 							}}
 							style={{
 								height: '100%',

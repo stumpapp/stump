@@ -1004,6 +1004,7 @@ export type Media = {
   name: Scalars['String']['output'];
   /** The next media in the series, ordered by name */
   nextInSeries: PaginatedMediaResponse;
+  pageAnalysis?: Maybe<PageAnalysis>;
   /** The number of pages in the media, if applicable. Will be -1 for certain media types */
   pages: Scalars['Int']['output'];
   /** The path of the underlying media file on disk */
@@ -1105,7 +1106,6 @@ export type MediaMetadata = {
   month?: Maybe<Scalars['Int']['output']>;
   notes?: Maybe<Scalars['String']['output']>;
   number?: Maybe<Scalars['Decimal']['output']>;
-  pageAnalysis?: Maybe<PageAnalysis>;
   pageCount?: Maybe<Scalars['Int']['output']>;
   pencillers: Array<Scalars['String']['output']>;
   publisher?: Maybe<Scalars['String']['output']>;
@@ -1201,7 +1201,6 @@ export enum MediaMetadataModelOrdering {
   Month = 'MONTH',
   Notes = 'NOTES',
   Number = 'NUMBER',
-  PageAnalysis = 'PAGE_ANALYSIS',
   PageCount = 'PAGE_COUNT',
   Pencillers = 'PENCILLERS',
   Publisher = 'PUBLISHER',
@@ -1295,6 +1294,7 @@ export enum MetadataResetImpact {
 export type Mutation = {
   __typename?: 'Mutation';
   addBooksToBookClubSchedule: BookClub;
+  analyzeLibrary: Scalars['Boolean']['output'];
   analyzeMedia: Scalars['Boolean']['output'];
   analyzeSeries: Scalars['Boolean']['output'];
   cancelJob: Scalars['Boolean']['output'];
@@ -1490,6 +1490,11 @@ export type Mutation = {
 
 export type MutationAddBooksToBookClubScheduleArgs = {
   books: Array<CreateBookClubScheduleBook>;
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationAnalyzeLibraryArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -3312,7 +3317,7 @@ export type BookReadScreenQueryVariables = Exact<{
 }>;
 
 
-export type BookReadScreenQuery = { __typename?: 'Query', mediaById?: { __typename?: 'Media', id: string, pages: number, extension: string, name: string, readProgress?: { __typename?: 'ActiveReadingSession', percentageCompleted?: any | null, epubcfi?: string | null, page?: number | null, elapsedSeconds?: number | null } | null, libraryConfig: { __typename?: 'LibraryConfig', defaultReadingImageScaleFit: ReadingImageScaleFit, defaultReadingMode: ReadingMode, defaultReadingDir: ReadingDirection }, metadata?: { __typename?: 'MediaMetadata', pageAnalysis?: { __typename?: 'PageAnalysis', dimensions: Array<{ __typename?: 'PageDimension', height: number, width: number }> } | null } | null, nextInSeries: { __typename?: 'PaginatedMediaResponse', nodes: Array<{ __typename?: 'Media', id: string, name: string, thumbnail: { __typename?: 'ImageRef', url: string } }> } } | null };
+export type BookReadScreenQuery = { __typename?: 'Query', mediaById?: { __typename?: 'Media', id: string, pages: number, extension: string, name: string, readProgress?: { __typename?: 'ActiveReadingSession', percentageCompleted?: any | null, epubcfi?: string | null, page?: number | null, elapsedSeconds?: number | null } | null, libraryConfig: { __typename?: 'LibraryConfig', defaultReadingImageScaleFit: ReadingImageScaleFit, defaultReadingMode: ReadingMode, defaultReadingDir: ReadingDirection }, pageAnalysis?: { __typename?: 'PageAnalysis', dimensions: Array<{ __typename?: 'PageDimension', height: number, width: number }> } | null, nextInSeries: { __typename?: 'PaginatedMediaResponse', nodes: Array<{ __typename?: 'Media', id: string, name: string, thumbnail: { __typename?: 'ImageRef', url: string } }> } } | null };
 
 export type UpdateReadProgressionMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -3846,7 +3851,7 @@ export type BookReaderSceneQueryVariables = Exact<{
 }>;
 
 
-export type BookReaderSceneQuery = { __typename?: 'Query', mediaById?: { __typename?: 'Media', id: string, resolvedName: string, pages: number, extension: string, readProgress?: { __typename?: 'ActiveReadingSession', percentageCompleted?: any | null, epubcfi?: string | null, page?: number | null, elapsedSeconds?: number | null } | null, libraryConfig: { __typename?: 'LibraryConfig', defaultReadingImageScaleFit: ReadingImageScaleFit, defaultReadingMode: ReadingMode, defaultReadingDir: ReadingDirection }, metadata?: { __typename?: 'MediaMetadata', pageAnalysis?: { __typename?: 'PageAnalysis', dimensions: Array<{ __typename?: 'PageDimension', height: number, width: number }> } | null } | null } | null };
+export type BookReaderSceneQuery = { __typename?: 'Query', mediaById?: { __typename?: 'Media', id: string, resolvedName: string, pages: number, extension: string, readProgress?: { __typename?: 'ActiveReadingSession', percentageCompleted?: any | null, epubcfi?: string | null, page?: number | null, elapsedSeconds?: number | null } | null, libraryConfig: { __typename?: 'LibraryConfig', defaultReadingImageScaleFit: ReadingImageScaleFit, defaultReadingMode: ReadingMode, defaultReadingDir: ReadingDirection }, pageAnalysis?: { __typename?: 'PageAnalysis', dimensions: Array<{ __typename?: 'PageDimension', height: number, width: number }> } | null } | null };
 
 export type UpdateReadProgressMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -4104,7 +4109,7 @@ export type AnalyzeLibraryMediaMutationVariables = Exact<{
 }>;
 
 
-export type AnalyzeLibraryMediaMutation = { __typename?: 'Mutation', analyzeMedia: boolean };
+export type AnalyzeLibraryMediaMutation = { __typename?: 'Mutation', analyzeLibrary: boolean };
 
 export type ScanHistorySectionClearHistoryMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -5142,12 +5147,10 @@ export const BookReadScreenDocument = new TypedDocumentString(`
       defaultReadingMode
       defaultReadingDir
     }
-    metadata {
-      pageAnalysis {
-        dimensions {
-          height
-          width
-        }
+    pageAnalysis {
+      dimensions {
+        height
+        width
       }
     }
     nextInSeries(pagination: {cursor: {limit: 1}}) {
@@ -6234,12 +6237,10 @@ export const BookReaderSceneDocument = new TypedDocumentString(`
       defaultReadingMode
       defaultReadingDir
     }
-    metadata {
-      pageAnalysis {
-        dimensions {
-          height
-          width
-        }
+    pageAnalysis {
+      dimensions {
+        height
+        width
       }
     }
   }
@@ -6825,7 +6826,7 @@ export const CleanLibraryDocument = new TypedDocumentString(`
     `) as unknown as TypedDocumentString<CleanLibraryMutation, CleanLibraryMutationVariables>;
 export const AnalyzeLibraryMediaDocument = new TypedDocumentString(`
     mutation AnalyzeLibraryMedia($id: ID!) {
-  analyzeMedia(id: $id)
+  analyzeLibrary(id: $id)
 }
     `) as unknown as TypedDocumentString<AnalyzeLibraryMediaMutation, AnalyzeLibraryMediaMutationVariables>;
 export const ScanHistorySectionClearHistoryDocument = new TypedDocumentString(`

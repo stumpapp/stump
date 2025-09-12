@@ -2,7 +2,7 @@ use models::{
 	entity::{
 		library_exclusion,
 		media::{self, get_age_restriction_filter},
-		media_metadata, page_dimension, reading_session, registered_reading_device,
+		media_metadata, page_analysis, reading_session, registered_reading_device,
 		series, series_metadata,
 		user::AuthUser,
 	},
@@ -148,22 +148,15 @@ impl OPDSProgressionEntity {
 				],
 				"bookref",
 			)
-			.add_named_columns(&[page_dimension::Column::Dimensions], "bookref")
+			.add_named_columns(&[page_analysis::Column::Data], "bookref")
 			.selector
 			.left_join(registered_reading_device::Entity)
 			.inner_join(media::Entity)
 			.join_rev(
 				JoinType::LeftJoin,
-				page_dimension::Entity::belongs_to(media::Entity)
-					.from(page_dimension::Column::MetadataId)
+				page_analysis::Entity::belongs_to(media::Entity)
+					.from(page_analysis::Column::MediaId)
 					.to(media::Column::Id)
-					.into(),
-			)
-			.join_rev(
-				JoinType::LeftJoin,
-				page_dimension::Entity::belongs_to(media_metadata::Entity)
-					.from(page_dimension::Column::MetadataId)
-					.to(media_metadata::Column::Id)
 					.into(),
 			)
 	}

@@ -964,6 +964,7 @@ type Media {
 	libraryId: String!
 	library: Library!
 	libraryConfig: LibraryConfig!
+	pageAnalysis: PageAnalysis
 	"""
 	A reference to the thumbnail image for the media. This will be a fully
 	qualified URL to the image.
@@ -1020,7 +1021,6 @@ input MediaFilterInput {
 type MediaMetadata {
 	id: Int!
 	mediaId: String
-	pageAnalysis: PageAnalysis
 	ageRating: Int
 	day: Int
 	identifierAmazon: String
@@ -1116,7 +1116,6 @@ input MediaMetadataInput {
 enum MediaMetadataModelOrdering {
 	ID
 	MEDIA_ID
-	PAGE_ANALYSIS
 	AGE_RATING
 	CHARACTERS
 	COLORISTS
@@ -1281,6 +1280,7 @@ type Mutation {
 	deleteMediaReadHistory(id: ID!): Media!
 	updateMediaProgress(id: ID!, input: MediaProgressInput!): ReadingProgressOutput!
 	markMediaAsComplete(id: ID!, isComplete: Boolean!, page: Int): FinishedReadingSessionModel
+	analyzeLibrary(id: ID!): Boolean!
 	"""
 	Delete media and series from a library that match one of the following conditions:
 	

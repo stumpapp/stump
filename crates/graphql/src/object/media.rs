@@ -3,8 +3,8 @@ use async_graphql::{
 };
 
 use models::{
-	entity::{library, library_config, media, series, tag},
-	shared::image::ImageRef,
+	entity::{library, library_config, media, page_analysis, series, tag},
+	shared::{image::ImageRef, page_dimension::PageAnalysis},
 };
 use num_traits::cast::ToPrimitive;
 use sea_orm::{
@@ -163,16 +163,28 @@ impl Media {
 		Ok(LibraryConfig::from(model))
 	}
 
+	async fn page_analysis(&self, ctx: &Context<'_>) -> Result<Option<PageAnalysis>> {
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let model = page_analysis::Entity::find()
+			.filter(page_analysis::Column::MediaId.eq(self.model.id.clone()))
+			.one(conn)
+			.await?;
+
+		Ok(model.map(|m| m.data))
+	}
+
 	/// A reference to the thumbnail image for the media. This will be a fully
 	/// qualified URL to the image.
 	async fn thumbnail(&self, ctx: &Context<'_>) -> Result<ImageRef> {
 		let service = ctx.data::<ServiceContext>()?;
 
-		let page_dimension = self
-			.metadata
-			.as_ref()
-			.and_then(|meta| meta.model.page_analysis.as_ref())
-			.and_then(|page_analysis| page_analysis.dimensions.first().cloned());
+		// TODO: DEFINITELY behind a dataloader here
+		let page_dimension = page_analysis::Entity::find()
+			.filter(page_analysis::Column::MediaId.eq(self.model.id.clone()))
+			.one(ctx.data::<CoreContext>()?.conn.as_ref())
+			.await?
+			.and_then(|pa| pa.data.dimensions.first().cloned());
 
 		Ok(ImageRef {
 			url: service.format_url(format!("/api/v2/media/{}/thumbnail", self.model.id)),

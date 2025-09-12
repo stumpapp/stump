@@ -1,5 +1,6 @@
 import { ReadingDirection, ReadingMode } from '@stump/graphql'
 import { useRouter } from 'expo-router'
+import { Glasses, Settings2, SquareArrowLeft, SquareArrowRight } from 'lucide-react-native'
 import { useCallback, useEffect, useState } from 'react'
 import { Platform, Pressable, View } from 'react-native'
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
@@ -12,12 +13,9 @@ import {
 	DropdownMenuContent,
 	DropdownMenuGroup,
 	DropdownMenuItem,
-	DropdownMenuLabel,
-	DropdownMenuPortal,
 	DropdownMenuRadioGroup,
 	DropdownMenuRadioItem,
 	DropdownMenuSeparator,
-	DropdownMenuShortcut,
 	DropdownMenuSub,
 	DropdownMenuSubContent,
 	DropdownMenuSubTrigger,
@@ -27,29 +25,19 @@ import {
 	Switch,
 	Text,
 } from '~/components/ui'
+import { Icon } from '~/components/ui/icon'
 import { COLORS } from '~/lib/constants'
 import { useDisplay } from '~/lib/hooks'
 import { useReaderStore } from '~/stores'
 import { useBookPreferences } from '~/stores/reader'
 
 import { useImageBasedReader } from './context'
-import { Icon } from '~/components/ui/icon'
-import {
-	ArrowLeft,
-	ArrowRight,
-	Glasses,
-	Settings2,
-	SquareArrowLeft,
-	SquareArrowRight,
-} from 'lucide-react-native'
 
 const { X, CircleEllipsis } = icons
 
 type Props = {
 	onShowGlobalSettings: () => void
 }
-
-// TODO: Remove hardcoded disabled values and support vertical continuous scrolling
 
 export default function Header({ onShowGlobalSettings }: Props) {
 	const { height } = useDisplay()
@@ -281,7 +269,7 @@ export default function Header({ onShowGlobalSettings }: Props) {
 								<DropdownMenuRadioGroup
 									value={readingMode}
 									onValueChange={(value) => {
-										console.log(value)
+										setBookPreferences({ readingMode: value as ReadingMode })
 									}}
 								>
 									<DropdownMenuRadioItem value="PAGED" className="text-foreground">

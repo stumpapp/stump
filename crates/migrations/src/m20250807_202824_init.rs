@@ -145,7 +145,7 @@ impl MigrationTrait for Migration {
 			.create_table(schema.create_table_from_entity(media_tag::Entity))
 			.await?;
 		manager
-			.create_table(schema.create_table_from_entity(page_dimension::Entity))
+			.create_table(schema.create_table_from_entity(page_analysis::Entity))
 			.await?;
 		manager
 			.create_table(schema.create_table_from_entity(reading_session::Entity))

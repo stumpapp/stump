@@ -32,7 +32,7 @@ pub mod media_annotation;
 pub mod media_metadata;
 pub mod media_tag;
 pub mod notifier;
-pub mod page_dimension;
+pub mod page_analysis;
 pub mod reading_list;
 pub mod reading_list_item;
 pub mod reading_list_rule;

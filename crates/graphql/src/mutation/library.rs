@@ -20,6 +20,7 @@ use stump_core::filesystem::{
 		generate_book_thumbnail, remove_thumbnails, GenerateThumbnailOptions,
 		ImageProcessorOptionsExt, ThumbnailGenerationJob, ThumbnailGenerationJobParams,
 	},
+	media::analyze_media_job::AnalyzeMediaJob,
 	scanner::{LibraryScanJob, ScanOptions},
 };
 use tokio::fs;
@@ -44,6 +45,24 @@ pub struct LibraryMutation;
 
 #[Object]
 impl LibraryMutation {
+	#[graphql(guard = "PermissionGuard::one(UserPermission::ManageLibrary)")]
+	async fn analyze_library(&self, ctx: &Context<'_>, id: ID) -> Result<bool> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let core = ctx.data::<CoreContext>()?;
+		let conn = core.conn.as_ref();
+
+		let model = library::Entity::find_for_user(user)
+			.filter(library::Column::Id.eq(id.to_string()))
+			.into_model::<LibraryIdentSelect>()
+			.one(conn)
+			.await?
+			.ok_or("Library not found")?;
+
+		core.enqueue_job(AnalyzeMediaJob::analyze_library(model.id))?;
+
+		Ok(true)
+	}
+
 	/// Delete media and series from a library that match one of the following conditions:
 	///
 	/// - A series that is missing from disk (status is not `Ready`)

@@ -9,7 +9,7 @@ import { useLibraryContext } from '@/scenes/library/context'
 
 const mutation = graphql(`
 	mutation AnalyzeLibraryMedia($id: ID!) {
-		analyzeMedia(id: $id)
+		analyzeLibrary(id: $id)
 	}
 `)
 

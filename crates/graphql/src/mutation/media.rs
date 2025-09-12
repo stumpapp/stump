@@ -246,7 +246,6 @@ impl MediaMutation {
 			let mut active_model = input.into_active_model();
 			active_model.id = Set(existing.id);
 			active_model.media_id = Set(Some(model.media.id.clone()));
-			active_model.page_analysis = Set(existing.page_analysis);
 			active_model.update(conn).await?
 		} else {
 			let mut active_model = input.into_active_model();

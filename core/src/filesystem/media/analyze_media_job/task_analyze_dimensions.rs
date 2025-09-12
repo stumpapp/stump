@@ -5,10 +5,13 @@ use crate::{
 	job::{error::JobError, JobProgress, WorkerCtx},
 };
 use models::{
-	entity::{media, media_metadata, page_dimension},
+	entity::{media, media_metadata, page_analysis},
 	shared::page_dimension::{PageAnalysis, PageDimension},
 };
-use sea_orm::{prelude::*, FromQueryResult, JoinType, QuerySelect};
+use sea_orm::{
+	prelude::*, sea_query::OnConflict, ActiveValue::Set, FromQueryResult, JoinType,
+	QuerySelect,
+};
 
 #[derive(Debug, FromQueryResult)]
 struct MediaWithDimensions {
@@ -28,6 +31,7 @@ struct MediaWithDimensions {
 /// * `id` - The id for the media item being analyzed
 /// * `ctx` - A reference to the [`WorkerCtx`] for the job
 /// * `output` - A mutable reference to the job output
+#[tracing::instrument(skip(ctx, output), fields(media_id = %id))]
 pub(crate) async fn execute(
 	id: String,
 	ctx: &WorkerCtx,
@@ -45,9 +49,9 @@ pub(crate) async fn execute(
 		.left_join(media_metadata::Entity)
 		.join_rev(
 			JoinType::LeftJoin,
-			page_dimension::Entity::belongs_to(media_metadata::Entity)
-				.from(page_dimension::Column::MetadataId)
-				.to(media_metadata::Column::Id)
+			page_analysis::Entity::belongs_to(media::Entity)
+				.from(page_analysis::Column::MediaId)
+				.to(media::Column::Id)
 				.into(),
 		)
 		.filter(media::Column::Id.eq(id.clone()))
@@ -92,21 +96,28 @@ pub(crate) async fn execute(
 
 	ctx.report_progress(JobProgress::msg("Writing to database"));
 
-	let update_expr = match media_item.page_analysis {
+	let dimensions = match media_item.page_analysis {
 		Some(PageAnalysis { dimensions }) if dimensions != image_dimensions => {
-			Expr::value(PageAnalysis {
-				dimensions: image_dimensions,
-			})
+			image_dimensions
 		},
-		None => Expr::value(PageAnalysis {
-			dimensions: image_dimensions,
-		}),
+		None => image_dimensions,
 		_ => return Ok(()),
 	};
 
-	media_metadata::Entity::update_many()
-		.filter(media_metadata::Column::Id.eq(media_item.id))
-		.col_expr(media_metadata::Column::PageAnalysis, update_expr)
+	tracing::trace!(?dimensions, "Writing page dimensions to database");
+
+	let model = page_analysis::ActiveModel {
+		media_id: Set(media_item.id.clone()),
+		data: Set(PageAnalysis { dimensions }),
+		..Default::default()
+	};
+
+	page_analysis::Entity::insert(model)
+		.on_conflict(
+			OnConflict::columns([page_analysis::Column::MediaId])
+				.update_columns([page_analysis::Column::Data])
+				.to_owned(),
+		)
 		.exec(ctx.conn.as_ref())
 		.await?;
 

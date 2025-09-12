@@ -118,7 +118,8 @@ export default function Screen() {
 		<ImageBasedReader
 			initialPage={currentPage}
 			book={book}
-			pageURL={(page: number) => readingOrder![page - 1].href}
+			pageURL={(page: number) => readingOrder![page - 1]?.href}
+			isOPDS
 		/>
 	)
 }

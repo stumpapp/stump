@@ -1,6 +1,7 @@
 import { Slider } from '@miblanchard/react-native-slider'
 import { useSDK } from '@stump/client'
 import { ReadingDirection } from '@stump/graphql'
+import { STUMP_SAVE_BASIC_SESSION_HEADER } from '@stump/sdk/constants'
 import dayjs from 'dayjs'
 import duration from 'dayjs/plugin/duration'
 import { Image as EImage } from 'expo-image'
@@ -36,6 +37,7 @@ export default function Footer() {
 		flatListRef: readerRef,
 		imageSizes,
 		setImageSizes,
+		isOPDS,
 	} = useImageBasedReader()
 	const elapsedSeconds = useBookReadTime(book.id)
 	const {
@@ -171,6 +173,7 @@ export default function Footer() {
 			uri: pageThumbnailURL ? pageThumbnailURL(page) : pageURL(page),
 			headers: {
 				Authorization: sdk.authorizationHeader,
+				[STUMP_SAVE_BASIC_SESSION_HEADER]: 'false',
 			},
 		}),
 		[pageURL, pageThumbnailURL, sdk],
@@ -196,7 +199,7 @@ export default function Footer() {
 	// TODO: prefetch, see https://github.com/candlefinance/faster-image/issues/73
 	useEffect(
 		() => {
-			if (footerControls !== 'images') return
+			if (footerControls !== 'images' || isOPDS) return
 
 			const windowSize = isTablet ? 8 : 6
 
@@ -208,15 +211,17 @@ export default function Footer() {
 			const urls = Array.from({ length: end - start }, (_, i) =>
 				pageThumbnailURL ? pageThumbnailURL(i + start) : pageURL(i + start),
 			)
+			// FIXME: This crashes when in OPDS for some reason
 			EImage.prefetch(urls, {
 				headers: {
 					Authorization: sdk.authorizationHeader || '',
+					[STUMP_SAVE_BASIC_SESSION_HEADER]: 'false',
 				},
 				cachePolicy: 'disk',
 			})
 		},
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[currentPage, readingDirection],
+		[currentPage, readingDirection, isOPDS],
 	)
 
 	const [sliderValue, setSliderValue] = useState(currentPage - 1)

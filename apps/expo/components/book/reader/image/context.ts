@@ -36,6 +36,7 @@ export type IImageBasedReaderContext = {
 	currentPage?: number
 	onPageChanged?: (page: number) => void
 	resetTimer?: () => void
+	isOPDS?: boolean
 }
 
 export const ImageBasedReaderContext = createContext<IImageBasedReaderContext | null>(null)

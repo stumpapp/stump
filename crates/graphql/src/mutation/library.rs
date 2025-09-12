@@ -953,15 +953,10 @@ async fn enforce_valid_library_path(
 	}
 
 	// example: new_path = "/data/books/fiction", existing_library = "/data/books"
-	// check if any libraries exist from ["/data/books", "/data"] (all parents of new_path)
-	let potential_parents: Vec<&str> = Path::new(&path)
-		.ancestors()
-		.skip(1) // Skip itself
-		.filter_map(|p| p.to_str())
-		.collect();
-
-	let mut parent_query =
-		library::Entity::find().filter(library::Column::Path.is_in(potential_parents));
+	// check if new_path matches the pattern "/data/books/_%".
+	let values: [sea_orm::Value; 1] = [path.into()];
+	let mut parent_query = library::Entity::find()
+		.filter(Expr::cust_with_values("? LIKE path || '/_%'", values));
 
 	if let Some(existing_path) = existing_path {
 		parent_query = parent_query.filter(library::Column::Path.ne(existing_path));

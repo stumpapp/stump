@@ -21,7 +21,7 @@ import { cn } from '~/lib/utils'
 import { usePreferencesStore, useSavedServers } from '~/stores'
 import { SavedServerWithConfig } from '~/stores/savedServer'
 
-import { Button, Heading, Input, Label, Switch, Tabs, Text } from '../ui'
+import { BottomSheet, Button, Heading, Label, Switch, Tabs, Text } from '../ui'
 
 type Props = {
 	editingServer?: SavedServerWithConfig | null
@@ -126,10 +126,10 @@ export default function AddOrEditServerForm({ editingServer, onSubmit, onClose }
 					<Controller
 						control={control}
 						render={({ field: { onChange, onBlur, value } }) => (
-							<Input
-								label="Username"
+							<BottomSheet.Input
 								autoCorrect={false}
 								autoCapitalize="none"
+								label="Username"
 								placeholder="oromei"
 								onBlur={onBlur}
 								onChangeText={onChange}
@@ -143,7 +143,7 @@ export default function AddOrEditServerForm({ editingServer, onSubmit, onClose }
 					<Controller
 						control={control}
 						render={({ field: { onChange, onBlur, value } }) => (
-							<Input
+							<BottomSheet.Input
 								label="Password"
 								autoCorrect={false}
 								autoCapitalize="none"
@@ -164,7 +164,7 @@ export default function AddOrEditServerForm({ editingServer, onSubmit, onClose }
 				<Controller
 					control={control}
 					render={({ field: { onChange, onBlur, value } }) => (
-						<Input
+						<BottomSheet.Input
 							label="Token"
 							autoCorrect={false}
 							autoCapitalize="none"
@@ -291,7 +291,7 @@ export default function AddOrEditServerForm({ editingServer, onSubmit, onClose }
 					required: true,
 				}}
 				render={({ field: { onChange, onBlur, value } }) => (
-					<Input
+					<BottomSheet.Input
 						label="Name"
 						autoCorrect={false}
 						autoCapitalize="none"
@@ -311,7 +311,7 @@ export default function AddOrEditServerForm({ editingServer, onSubmit, onClose }
 					required: true,
 				}}
 				render={({ field: { onChange, onBlur, value } }) => (
-					<Input
+					<BottomSheet.Input
 						label={kind === 'stump' ? 'URL' : 'Catalog URL'}
 						autoCorrect={false}
 						autoCapitalize="none"

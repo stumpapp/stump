@@ -38,7 +38,7 @@ export default function Screen() {
 
 			if (defaultServer) {
 				router.push({
-					pathname: defaultServer.kind === 'stump' ? '/server/[id]' : '/opds/[id]',
+					pathname: defaultServer.kind === 'stump' ? '/server/[id]/(tabs)/index' : '/opds/[id]',
 					params: { id: defaultServer.id },
 				})
 			}

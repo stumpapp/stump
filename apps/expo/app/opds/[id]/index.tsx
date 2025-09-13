@@ -15,7 +15,7 @@ import {
 	OPDSPublicationGroup,
 } from '~/components/opds'
 import RefreshControl from '~/components/RefreshControl'
-import { Heading, icons } from '~/components/ui'
+import { icons } from '~/components/ui'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
 
 const { ChevronLeft } = icons

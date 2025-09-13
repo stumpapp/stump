@@ -1,8 +1,6 @@
 import * as React from 'react'
 import { TextInput, type TextInputProps, View } from 'react-native'
 
-import { cn } from '~/lib/utils'
-
 import { Text } from '../text'
 import { RawInput } from './raw-input'
 

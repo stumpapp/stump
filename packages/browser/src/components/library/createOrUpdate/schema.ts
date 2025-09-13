@@ -149,11 +149,13 @@ export const buildSchema = (
 			.min(1, { message: 'Library path is required' })
 			.transform((val) => normalizePath(val))
 			.superRefine((val, ctx) => {
-				/**
-				 * If the path is already taken -> fail
-				 * If the path is a parent to any other library -> fail
-				 * If the path is a child to any other library -> fail
-				 */
+				// If the path is unchanged -> pass
+				// If the path is already taken -> fail
+				// If the path is a parent to any other library -> fail
+				// If the path is a child to any other library -> fail
+				const isUnchanged = library?.path === val
+				if (isUnchanged) return
+
 				const isTaken = existingLibraries.some((l) => l.path === val)
 				if (isTaken) {
 					ctx.addIssue({ code: 'custom', message: 'This path is taken by an existing library' })

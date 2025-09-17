@@ -331,7 +331,7 @@
 					}
 				},
 				"invalidGlob": "Неверный глобальный шаблон",
-				"duplicateGlob": "Duplicate of an existing rule",
+				"duplicateGlob": "Скопировать существующее правило",
 				"lockConfig": {
 					"lock": "Заблокировать настройку",
 					"unlock": "Разблокировать настройку"

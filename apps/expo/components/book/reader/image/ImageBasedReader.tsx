@@ -2,8 +2,7 @@ import { Zoomable } from '@likashefqet/react-native-image-zoom'
 import { useSDK } from '@stump/client'
 import { ReadingDirection, ReadingMode } from '@stump/graphql'
 import { STUMP_SAVE_BASIC_SESSION_HEADER } from '@stump/sdk/constants'
-import { ImageLoadEventData } from 'expo-image'
-import React, { useCallback, useEffect, useMemo, useRef } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
 	FlatList,
 	NativeScrollEvent,
@@ -18,8 +17,9 @@ import {
 } from 'react-native-gesture-handler'
 import { useSharedValue } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { Success } from 'react-native-turbo-image'
 
-import { Image } from '~/components/Image'
+import { TurboImage } from '~/components/Image'
 import { useDisplay, usePrevious } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 import { useReaderStore } from '~/stores'
@@ -192,7 +192,6 @@ export default function ImageBasedReader({ initialPage, onPastEndReached }: Prop
 			})}
 			showsVerticalScrollIndicator={false}
 			showsHorizontalScrollIndicator={false}
-			removeClippedSubviews
 			onScroll={handleScroll}
 		/>
 	)
@@ -220,7 +219,7 @@ const Page = React.memo(
 	}: PageProps) => {
 		const { book, pageURL, flatListRef, setImageSizes } = useImageBasedReader()
 		const {
-			preferences: { tapSidesToNavigate, readingDirection },
+			preferences: { tapSidesToNavigate, readingDirection, allowDownscaling },
 		} = useBookPreferences({ book })
 		const { isTablet } = useDisplay()
 		const { sdk } = useSDK()
@@ -269,10 +268,11 @@ const Page = React.memo(
 		)
 
 		const onImageLoaded = useCallback(
-			(event: ImageLoadEventData, idxIdx: number) => {
-				const { height, width } = event.source
+			(event: NativeSyntheticEvent<Success>, idxIdx: number) => {
+				const { height, width } = event.nativeEvent
 				if (!height || !width) return
 				const ratio = width / height
+				setImageRatio(ratio)
 
 				const pageSize = sizes[idxIdx]
 				const isDifferent = pageSize?.height !== height || pageSize?.width !== width
@@ -288,11 +288,9 @@ const Page = React.memo(
 		)
 
 		const safeMaxHeight = maxHeight - insets.top - insets.bottom
+		const [imageRatio, setImageRatio] = useState<number | undefined>(undefined)
+		const [renderedWidth, setRenderedWidth] = useState<number | undefined>(undefined)
 
-		// TODO: Absolutely don't do this, this is terrible. We need my PRs to be merged upstream:
-		// https://github.com/candlefinance/faster-image/pulls
-
-		// https://github.com/candlefinance/faster-image/issues/75
 		return (
 			<Zoomable
 				minScale={1}
@@ -312,28 +310,31 @@ const Page = React.memo(
 						width: maxWidth,
 					}}
 				>
-					{indexes.map((pageIdx, i) => (
-						<Image
-							key={`${pageIdx}-${i}`}
-							source={{
-								uri: pageURL(pageIdx + 1),
-								headers: {
-									Authorization: sdk.authorizationHeader || '',
-									[STUMP_SAVE_BASIC_SESSION_HEADER]: 'false',
-								},
-								// FIXME: I can't remember why this was here or why its complaining
-								// cachePolicy,
-							}}
-							style={{
-								height: '100%',
-								width: indexes.length > 1 ? '50%' : '100%',
-							}}
-							contentFit="contain"
-							contentPosition={indexes.length > 1 ? (i === 0 ? 'right' : 'left') : 'center'}
-							onLoad={(e) => onImageLoaded(e, i)}
-							allowDownscaling={false}
-						/>
-					))}
+					{indexes.map((pageIdx, i) => {
+						return (
+							<TurboImage
+								key={`${pageIdx}-${i}`}
+								source={{
+									uri: pageURL(pageIdx + 1),
+									headers: {
+										Authorization: sdk.authorizationHeader || '',
+										[STUMP_SAVE_BASIC_SESSION_HEADER]: 'false',
+									},
+								}}
+								style={{
+									maxHeight: '100%',
+									maxWidth: indexes.length > 1 ? '50%' : '100%',
+									aspectRatio: imageRatio,
+								}}
+								onLayout={(event) => {
+									if (allowDownscaling) setRenderedWidth(event.nativeEvent.layout.width)
+								}}
+								resizeMode="contain"
+								resize={allowDownscaling && renderedWidth ? renderedWidth * 1.5 : undefined}
+								onSuccess={(event) => onImageLoaded(event, i)}
+							/>
+						)
+					})}
 				</View>
 			</Zoomable>
 		)

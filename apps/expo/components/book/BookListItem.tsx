@@ -9,7 +9,7 @@ import { useListItemSize } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 
 import { useActiveServer } from '../activeServer'
-import { FasterImage } from '../Image'
+import { TurboImage } from '../Image'
 import { Text } from '../ui'
 
 const fragment = graphql(`
@@ -49,14 +49,15 @@ function BookListItem({ book }: Props) {
 					})}
 				>
 					<View className="relative overflow-hidden rounded-lg">
-						<FasterImage
+						<TurboImage
 							source={{
-								url: data.thumbnail.url,
+								uri: data.thumbnail.url,
 								headers: {
 									Authorization: sdk.authorizationHeader || '',
 								},
-								resizeMode: 'fill',
 							}}
+							resizeMode="cover"
+							resize={width * 1.5}
 							style={{ height, width }}
 						/>
 					</View>

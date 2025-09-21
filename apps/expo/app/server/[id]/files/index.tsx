@@ -1,13 +1,13 @@
 import { FlashList } from '@shopify/flash-list'
 import { useSuspenseGraphQL } from '@stump/client'
 import { graphql } from '@stump/graphql'
-import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
-import { Platform, View } from 'react-native'
+import { Image, Platform, View } from 'react-native'
 import { Pressable } from 'react-native-gesture-handler'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { useActiveServer } from '~/components/activeServer'
+import { TurboImage } from '~/components/Image'
 import { Text } from '~/components/ui'
 import { useDisplay } from '~/lib/hooks'
 
@@ -63,9 +63,13 @@ export default function Screen() {
 					>
 						{({ pressed }) => (
 							<View className="items-center" style={{ opacity: pressed ? 0.75 : 1 }}>
-								<Image
-									// eslint-disable-next-line @typescript-eslint/no-require-imports
-									source={require('../../../../assets/icons/Folder.png')}
+								<TurboImage
+									source={{
+										// eslint-disable-next-line @typescript-eslint/no-require-imports
+										uri: Image.resolveAssetSource(require('../../../../assets/icons/Folder.png'))
+											.uri,
+									}}
+									resize={100 * 1.5}
 									style={{ width: 100, height: 100 }}
 								/>
 								<View>

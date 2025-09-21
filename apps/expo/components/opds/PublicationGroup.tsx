@@ -10,7 +10,7 @@ import { useDisplay } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 
 import { useActiveServer } from '../activeServer'
-import { FasterImage } from '../Image'
+import { TurboImage } from '../Image'
 import { Text } from '../ui'
 import EmptyFeed from './EmptyFeed'
 import { FeedComponentOptions } from './types'
@@ -98,20 +98,19 @@ export default function PublicationGroup({
 									})}
 								>
 									<View style={{ height: isTablet ? 225 : 150, width: itemWidth }}>
-										<FasterImage
+										<TurboImage
 											source={{
-												url: thumbnailURL || '',
+												uri: thumbnailURL || '',
 												headers: {
 													Authorization: sdk.authorizationHeader || '',
 													[STUMP_SAVE_BASIC_SESSION_HEADER]: 'false',
 												},
-												resizeMode: 'cover',
-												borderRadius: 8,
-												cachePolicy: 'discWithCacheControl',
 											}}
+											resizeMode="cover"
 											style={{
 												height: '100%',
 												width: '100%',
+												borderRadius: 8,
 											}}
 										/>
 									</View>

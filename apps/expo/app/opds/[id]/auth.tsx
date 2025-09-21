@@ -6,13 +6,12 @@ import { isAxiosError } from 'axios'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useCallback, useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
-import { View } from 'react-native'
+import { Image, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import urlJoin from 'url-join'
 import { z } from 'zod'
 
 import { useActiveServer } from '~/components/activeServer'
-import { Image } from '~/components/Image'
 import { Button, Input, Text } from '~/components/ui'
 
 type Credentials = {

@@ -11,7 +11,7 @@ import { runOnJS, useSharedValue } from 'react-native-reanimated'
 import Carousel, { ICarouselInstance, Pagination } from 'react-native-reanimated-carousel'
 
 import { BookMetaLink } from '~/components/book'
-import { FasterImage } from '~/components/Image'
+import { TurboImage } from '~/components/Image'
 import { Heading, Progress, Text } from '~/components/ui'
 import { COLORS, useColors } from '~/lib/constants'
 import { parseGraphQLDecimal } from '~/lib/format'
@@ -264,18 +264,19 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 					locations={gradientLocations}
 				/>
 
-				<FasterImage
+				<TurboImage
 					source={{
-						url: data.thumbnail.url,
+						uri: data.thumbnail.url,
 						headers: {
 							Authorization: sdk.authorizationHeader || '',
 						},
-						resizeMode: 'fill',
-						borderRadius: 8,
 					}}
+					resizeMode="stretch"
+					resize={IMAGE_WIDTH * 1.5}
 					style={{
 						height: IMAGE_HEIGHT,
 						width: IMAGE_WIDTH,
+						borderRadius: 8,
 					}}
 				/>
 

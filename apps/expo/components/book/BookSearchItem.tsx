@@ -9,7 +9,7 @@ import { formatBytes } from '~/lib/format'
 import { useDisplay } from '~/lib/hooks'
 
 import { useActiveServer } from '../activeServer'
-import { FasterImage } from '../Image'
+import { TurboImage } from '../Image'
 import { Text } from '../ui'
 
 const fragment = graphql(`
@@ -55,16 +55,16 @@ export default function BookSearchItem({ book }: Props) {
 			}}
 		>
 			<View className="flex-row items-start gap-4 py-4">
-				<FasterImage
+				<TurboImage
 					source={{
-						url: data.thumbnail.url,
+						uri: data.thumbnail.url,
 						headers: {
 							Authorization: sdk.authorizationHeader || '',
 						},
-						resizeMode: 'fill',
-						borderRadius: 8,
 					}}
-					style={{ width: 75, height: 75 / (2 / 3) }}
+					resizeMode="stretch"
+					resize={75 * 1.5}
+					style={{ width: 75, height: 75 / (2 / 3), borderRadius: 8 }}
 				/>
 
 				<View className="flex flex-1 flex-col gap-1">

@@ -9,7 +9,7 @@ import LinearGradient from 'react-native-linear-gradient'
 import { COLORS } from '~/lib/constants'
 
 import { useActiveServer } from '../activeServer'
-import { FasterImage } from '../Image'
+import { TurboImage } from '../Image'
 import { Text } from '../ui'
 import { useListItemSize } from '~/lib/hooks'
 
@@ -60,17 +60,16 @@ function OnDeckBookItem({ book }: Props) {
 						locations={[0.4, 1]}
 					/>
 
-					<FasterImage
+					<TurboImage
 						source={{
-							url: data.thumbnail.url,
+							uri: data.thumbnail.url,
 							headers: {
 								Authorization: sdk.authorizationHeader || '',
 							},
-							resizeMode: 'fill',
-							// FIXME: I REALLY shouldn't have to do this
-							borderRadius: Platform.OS === 'android' ? 24 : 8,
 						}}
-						style={{ width, height }}
+						resizeMode="stretch"
+						resize={width * 1.5}
+						style={{ width, height, borderRadius: 8 }}
 					/>
 
 					<View className="absolute bottom-0 z-20 w-full gap-1 p-2">

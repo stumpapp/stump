@@ -9,7 +9,7 @@ import { match } from 'ts-pattern'
 import { useDisplay } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 
-import { FasterImage } from './Image'
+import { TurboImage } from './Image'
 import { Text } from './ui'
 
 type Props = {
@@ -60,14 +60,14 @@ export default function StackedEffectThumbnail({ label, uri, href }: Props) {
 								'opacity-80': pressed,
 							})}
 						>
-							<FasterImage
+							<TurboImage
 								source={{
-									url: uri,
+									uri: uri,
 									headers: {
 										Authorization: sdk.authorizationHeader || '',
 									},
-									resizeMode: 'fill',
 								}}
+								resizeMode="stretch"
 								style={{ height: itemDimension * 1.5, width: itemDimension }}
 							/>
 						</View>

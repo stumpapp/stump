@@ -1,16 +1,15 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 import { ARCHIVE_EXTENSION, EBOOK_EXTENSION, PDF_EXTENSION, useSDK } from '@stump/client'
 import { DirectoryListingQuery } from '@stump/graphql'
-import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
 import { useCallback } from 'react'
-import { View } from 'react-native'
+import { Image, View } from 'react-native'
 import { Pressable } from 'react-native-gesture-handler'
 
 import { useColorScheme } from '~/lib/useColorScheme'
 
 import { useActiveServer } from '../activeServer'
-import { FasterImage } from '../Image'
+import { TurboImage } from '../Image'
 import { Text } from '../ui'
 
 type ListedFile = DirectoryListingQuery['listDirectory']['nodes'][number]['files'][number]
@@ -28,7 +27,6 @@ export default function FileExplorerGridItem({ file }: Props) {
 	} = useActiveServer()
 
 	const router = useRouter()
-
 	const friendlyName = file?.media?.resolvedName || file.name
 
 	const onSelect = useCallback(() => {
@@ -50,19 +48,25 @@ export default function FileExplorerGridItem({ file }: Props) {
 		<Pressable onPress={onSelect}>
 			{({ pressed }) => (
 				<View className="items-center" style={{ opacity: pressed ? 0.75 : 1 }}>
-					{!file.media && <Image source={iconSource} style={{ width: 100, height: 100 }} />}
+					{!file.media && (
+						<TurboImage
+							source={{ uri: Image.resolveAssetSource(iconSource).uri }}
+							style={{ width: 100, height: 100 }}
+							resize={100 * 1.5}
+						/>
+					)}
 					{!!file.media?.thumbnail.url && (
 						<View className="items-center justify-center" style={{ width: 100, height: 100 }}>
-							<FasterImage
+							<TurboImage
 								source={{
-									url: file.media.thumbnail.url,
+									uri: file.media.thumbnail.url,
 									headers: {
 										Authorization: sdk.authorizationHeader || '',
 									},
-									borderRadius: 8,
-									resizeMode: 'fill',
 								}}
-								style={{ height: 100, width: 100 * (2 / 3) }}
+								resizeMode="stretch"
+								resize={100 * 1.5}
+								style={{ height: 100, width: 100 * (2 / 3), borderRadius: 8 }}
 							/>
 						</View>
 					)}

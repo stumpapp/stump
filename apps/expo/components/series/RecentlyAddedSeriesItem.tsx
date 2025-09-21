@@ -10,7 +10,7 @@ import LinearGradient from 'react-native-linear-gradient'
 import { COLORS } from '~/lib/constants'
 
 import { useActiveServer } from '../activeServer'
-import { FasterImage } from '../Image'
+import { TurboImage } from '../Image'
 import { Text } from '../ui'
 
 const fragment = graphql(`
@@ -71,17 +71,16 @@ export default function RecentlyAddedSeriesItem({ series }: Props) {
 				locations={gradientLocations}
 			/>
 
-			<FasterImage
+			<TurboImage
 				source={{
-					url: data.thumbnail.url,
+					uri: data.thumbnail.url,
 					headers: {
 						Authorization: sdk.authorizationHeader || '',
 					},
-					resizeMode: 'fill',
-					// FIXME: I REALLY shouldn't have to do this
-					borderRadius: Platform.OS === 'android' ? 24 : 8,
 				}}
-				style={{ width: 240 * (2 / 3), height: 240 }}
+				resizeMode="stretch"
+				resize={240 * (2 / 3)}
+				style={{ width: 240 * (2 / 3), height: 240, borderRadius: 8 }}
 			/>
 
 			<View className="absolute bottom-0 z-20 w-full p-2">

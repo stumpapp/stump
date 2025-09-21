@@ -6,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { useActiveServer } from '~/components/activeServer'
 import { InfoRow, InfoSection } from '~/components/book/overview'
-import { FasterImage } from '~/components/Image'
+import { TurboImage } from '~/components/Image'
 import {
 	getDateField,
 	getNumberField,
@@ -89,14 +89,14 @@ export default function Screen() {
 				<View className="flex-1 gap-8 pb-3">
 					<View className="mt-6 flex items-center gap-4">
 						<View className="aspect-[2/3] self-center overflow-hidden rounded-lg">
-							<FasterImage
+							<TurboImage
 								source={{
-									url: thumbnailURL || '',
+									uri: thumbnailURL || '',
 									headers: {
 										Authorization: sdk.authorizationHeader || '',
 									},
-									resizeMode: 'fill',
 								}}
+								resizeMode="cover"
 								style={{ height: 350, width: 'auto' }}
 							/>
 						</View>

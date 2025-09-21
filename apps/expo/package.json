@@ -14,7 +14,6 @@
 		"postinstall": "npx tailwindcss -i ./global.css -o ./node_modules/.cache/nativewind/global.css"
 	},
 	"dependencies": {
-		"@candlefinance/faster-image": "1.7.2",
 		"@codeherence/react-native-header": "^0.14.0",
 		"@craftzdog/react-native-buffer": "^6.0.5",
 		"@epubjs-react-native/core": "^1.4.6",
@@ -52,7 +51,6 @@
 		"expo-constants": "~17.1.7",
 		"expo-file-system": "~18.1.11",
 		"expo-font": "~13.3.2",
-		"expo-image": "~2.4.0",
 		"expo-keep-awake": "~14.1.4",
 		"expo-linking": "~7.1.7",
 		"expo-navigation-bar": "~4.2.8",
@@ -87,6 +85,7 @@
 		"react-native-screens": "~4.16.0",
 		"react-native-super-grid": "^6.0.1",
 		"react-native-svg": "15.11.2",
+		"react-native-turbo-image": "^1.23.0",
 		"react-native-web": "^0.20.0",
 		"react-native-webview": "13.13.5",
 		"react-timer-hook": "^3.0.8",

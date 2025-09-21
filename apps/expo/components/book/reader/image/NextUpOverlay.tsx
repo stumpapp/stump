@@ -8,7 +8,7 @@ import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-na
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { useActiveServer } from '~/components/activeServer'
-import { FasterImage } from '~/components/Image'
+import { TurboImage } from '~/components/Image'
 import { Button, Heading, icons, Label, Text } from '~/components/ui'
 import { COLORS } from '~/lib/constants'
 import { useDisplay } from '~/lib/hooks'
@@ -122,16 +122,16 @@ export default function NextUpOverlay({ isVisible, book, onClose }: Props) {
 						{book.name}
 					</Heading>
 				</View>
-				<FasterImage
+				<TurboImage
 					source={{
-						url: book.thumbnailUrl,
+						uri: book.thumbnailUrl,
 						headers: {
 							Authorization: sdk.authorizationHeader || '',
 						},
-						resizeMode: 'fill',
-						borderRadius: 8,
 					}}
-					style={{ width: size, height: size / (2 / 3) }}
+					resizeMode="stretch"
+					resize={size * 1.5}
+					style={{ width: size, height: size / (2 / 3), borderRadius: 8 }}
 				/>
 
 				<View

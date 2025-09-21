@@ -10,7 +10,7 @@ import { useDisplay } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 
 import { useActiveServer } from '../activeServer'
-import { Image } from '../Image'
+import { TurboImage } from '../Image'
 import RefreshControl from '../RefreshControl'
 import { Text } from '../ui'
 import FeedTitle from './FeedTitle'
@@ -140,15 +140,15 @@ export default function PublicationFeed({ feed, onRefresh, isRefreshing }: Props
 									})}
 								>
 									<View className="relative aspect-[2/3] overflow-hidden rounded-lg">
-										<Image
+										<TurboImage
 											className="z-0"
 											source={{
-												uri: thumbnailURL,
+												uri: thumbnailURL || '',
 												headers: {
-													Authorization: sdk.authorizationHeader,
+													Authorization: sdk.authorizationHeader || '',
 												},
 											}}
-											contentFit="scale-down"
+											resizeMode="contain"
 											style={{
 												height: itemHeight,
 												width: itemWidth,

@@ -4,14 +4,14 @@ import { ReadingDirection } from '@stump/graphql'
 import { STUMP_SAVE_BASIC_SESSION_HEADER } from '@stump/sdk/constants'
 import dayjs from 'dayjs'
 import duration from 'dayjs/plugin/duration'
-import { Image as EImage } from 'expo-image'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Platform, View } from 'react-native'
 import { FlatList, Pressable } from 'react-native-gesture-handler'
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import TImage from 'react-native-turbo-image'
 
-import { FasterImage } from '~/components/Image'
+import { TurboImage } from '~/components/Image'
 import { Progress, Text } from '~/components/ui'
 import { useDisplay, usePrevious } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
@@ -196,7 +196,6 @@ export default function Footer() {
 		[imageSizes, setImageSizes],
 	)
 
-	// TODO: prefetch, see https://github.com/candlefinance/faster-image/issues/73
 	useEffect(
 		() => {
 			if (footerControls !== 'images' || isOPDS) return
@@ -211,14 +210,17 @@ export default function Footer() {
 			const urls = Array.from({ length: end - start }, (_, i) =>
 				pageThumbnailURL ? pageThumbnailURL(i + start) : pageURL(i + start),
 			)
-			// FIXME: This crashes when in OPDS for some reason
-			EImage.prefetch(urls, {
-				headers: {
-					Authorization: sdk.authorizationHeader || '',
-					[STUMP_SAVE_BASIC_SESSION_HEADER]: 'false',
-				},
-				cachePolicy: 'disk',
-			})
+			// TODO: Test if turbo image crashes when in OPDS (it previously did with expo image)
+			TImage.prefetch(
+				urls.map((url) => ({
+					uri: url,
+					headers: {
+						Authorization: sdk.authorizationHeader || '',
+						[STUMP_SAVE_BASIC_SESSION_HEADER]: 'false',
+					},
+				})),
+				'dataCache',
+			)
 		},
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[currentPage, readingDirection, isOPDS],
@@ -317,17 +319,17 @@ export default function Footer() {
 						{pageSet.map((pageIdx, i) => {
 							const source = pageSource(pageIdx + 1)
 							return (
-								<FasterImage
+								<TurboImage
 									key={`thumb-${pageIdx + 1}-${i}`}
 									source={{
-										url: source.uri,
+										uri: source.uri,
 										headers: source.headers as Record<string, string>,
-										resizeMode: 'fill',
-										borderRadius: 8,
 									}}
+									resizeMode="stretch"
 									style={{
 										width: pageSet.length === 1 ? '100%' : '50%',
 										height: '100%',
+										borderRadius: 8,
 									}}
 									onSuccess={({ nativeEvent }) => onImageLoaded(pageIdx, nativeEvent)}
 								/>
@@ -431,17 +433,18 @@ export default function Footer() {
 					>
 						{item.map((pageIdx, i) => {
 							return (
-								<FasterImage
+								<TurboImage
 									key={`thumb-${pageIdx + 1}-${i}`}
 									source={{
-										url: pageSource(pageIdx + 1).uri,
+										uri: pageSource(pageIdx + 1).uri,
 										headers: pageSource(pageIdx + 1).headers as Record<string, string>,
-										resizeMode: 'fill',
-										borderRadius: 8,
 									}}
+									resizeMode="stretch"
+									resize={(baseSize.width / WIDTH_MODIFIER) * 1.5}
 									style={{
 										width: item.length === 1 ? '100%' : '50%',
 										height: '100%',
+										borderRadius: 8,
 									}}
 									onSuccess={({ nativeEvent }) => onImageLoaded(pageIdx, nativeEvent)}
 								/>

@@ -5,7 +5,7 @@ import { Pressable } from 'react-native-gesture-handler'
 
 import { cn } from '~/lib/utils'
 
-import { FasterImage } from '../Image'
+import { TurboImage } from '../Image'
 import { Text } from '../ui'
 import { useGridItemSize } from './useGridItemSize'
 
@@ -34,19 +34,19 @@ export default function GridImageItem({ uri, title, href }: Props) {
 							width: itemDimension,
 						}}
 					>
-						<FasterImage
+						<TurboImage
 							source={{
-								url: uri,
+								uri: uri,
 								headers: {
 									Authorization: sdk.authorizationHeader || '',
 								},
-								resizeMode: 'cover',
-								borderRadius: 8,
-								cachePolicy: 'discWithCacheControl',
 							}}
+							resizeMode="cover"
+							resize={itemDimension * 1.5}
 							style={{
 								height: '100%',
 								width: '100%',
+								borderRadius: 8,
 							}}
 						/>
 					</View>

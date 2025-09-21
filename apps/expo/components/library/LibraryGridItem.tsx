@@ -10,7 +10,7 @@ import { cn } from '~/lib/utils'
 
 import { useActiveServer } from '../activeServer'
 import { useGridItemSize } from '../grid/useGridItemSize'
-import { FasterImage } from '../Image'
+import { TurboImage } from '../Image'
 import { Text } from '../ui'
 
 const fragment = graphql(`
@@ -60,19 +60,20 @@ export default function LibraryGridItem({ library }: Props) {
 						style={{ position: 'absolute', inset: 0, zIndex: 10, borderRadius: 8 }}
 					/>
 
-					<FasterImage
+					<TurboImage
 						source={{
-							url: uri,
+							uri: uri,
 							headers: {
 								Authorization: sdk.authorizationHeader || '',
 							},
-							resizeMode: 'cover',
-							borderRadius: 8,
-							cachePolicy: 'discWithCacheControl',
 						}}
+						resizeMode="cover"
+						// This 1.5 is unrelated to height. It is to do downscaling, but not too much.
+						resize={itemDimension * 1.5}
 						style={{
 							height: '100%',
 							width: '100%',
+							borderRadius: 8,
 						}}
 					/>
 

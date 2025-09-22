@@ -62,7 +62,7 @@ function RecentlyAddedSeriesHorizontal() {
 	)
 
 	return (
-		<View className="flex gap-4">
+		<View className="flex">
 			<Heading size="xl" className="px-4">
 				Recently Added Series
 			</Heading>
@@ -73,9 +73,7 @@ function RecentlyAddedSeriesHorizontal() {
 				renderItem={renderItem}
 				horizontal
 				ItemSeparatorComponent={() => <View style={{ width: gap * 2 }} />}
-				contentContainerStyle={{
-					paddingHorizontal: 16,
-				}}
+				contentContainerStyle={{ padding: 16 }}
 				onEndReached={onEndReached}
 				onEndReachedThreshold={0.85}
 				showsHorizontalScrollIndicator={false}

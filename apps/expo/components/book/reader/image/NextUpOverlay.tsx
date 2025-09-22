@@ -131,7 +131,7 @@ export default function NextUpOverlay({ isVisible, book, onClose }: Props) {
 					}}
 					resizeMode="stretch"
 					resize={size * 1.5}
-					style={{ width: size, height: size / (2 / 3), borderRadius: 8 }}
+					style={{ width: size, height: size / (2 / 3), borderRadius: 12 }}
 				/>
 
 				<View

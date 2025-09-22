@@ -1,11 +1,12 @@
 import { Fragment, useEffect, useState } from 'react'
-import { Pressable } from 'react-native'
+import { Easing, Pressable } from 'react-native'
 import LinearGradient from 'react-native-linear-gradient'
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
 
 import { cn } from '~/lib/utils'
 import { useReaderStore } from '~/stores'
 
+import { easeGradient } from 'react-native-easing-gradient'
 import Footer from './Footer'
 import Header from './Header'
 import ImageReaderGlobalSettingsDialog from './ImageReaderGlobalSettingsDialog'
@@ -37,6 +38,17 @@ export default function ControlsOverlay() {
 		}
 	})
 
+	const { colors: gradientColors, locations: gradientLocations } = easeGradient({
+		colorStops: {
+			0: { color: 'rgba(0, 0, 0, 0.8)' },
+			0.4: { color: 'rgba(0, 0, 0, 0.50)' },
+			0.6: { color: 'rgba(0, 0, 0, 0.50)' },
+			1: { color: 'rgba(0, 0, 0, 0.8)' },
+		},
+		extraColorStopsPerTransition: 16,
+		easing: Easing.bezier(0.62, 0, 0.38, 1), // https://cubic-bezier.com/#.62,0,.38,1
+	})
+
 	return (
 		<Fragment>
 			<Header onShowGlobalSettings={() => setShowGlobalSettings(true)} />
@@ -49,19 +61,9 @@ export default function ControlsOverlay() {
 					}}
 				>
 					<LinearGradient
-						colors={[
-							'hsla(0, 0%, 0%, 0.75)',
-							'hsla(0, 0%, 0%, 0.75)',
-							'hsla(0, 0%, 0%, 0.5)',
-							'hsla(0, 0%, 0%, 0.5)',
-							'hsla(0, 0%, 0%, 0.5)',
-							'hsla(0, 0%, 0%, 0.5)',
-							'hsla(0, 0%, 0%, 0.75)',
-							'hsla(0, 0%, 0%, 0.95)',
-						]}
-						style={{
-							flex: 1,
-						}}
+						colors={gradientColors}
+						locations={gradientLocations}
+						style={{ flex: 1 }}
 					/>
 				</Pressable>
 			</Animated.View>

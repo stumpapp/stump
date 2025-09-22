@@ -9,6 +9,7 @@ import { BookListItemFragmentType } from '~/components/book/BookListItem'
 import { Heading, Text } from '~/components/ui'
 
 import { useActiveServer } from '../context'
+import { useListItemSize } from '~/lib/hooks'
 
 const query = graphql(`
 	query RecentlyAddedBooks($pagination: Pagination) {
@@ -56,8 +57,10 @@ function RecentlyAddedBooks() {
 		[],
 	)
 
+	const { gap } = useListItemSize()
+
 	return (
-		<View className="flex gap-4">
+		<View className="flex">
 			<Heading size="xl" className="px-4">
 				Recently Added Books
 			</Heading>
@@ -67,12 +70,11 @@ function RecentlyAddedBooks() {
 				keyExtractor={({ id }) => id}
 				renderItem={renderItem}
 				horizontal
-				contentContainerStyle={{
-					paddingHorizontal: 16,
-				}}
+				contentContainerStyle={{ padding: 16 }}
 				onEndReached={onEndReached}
 				onEndReachedThreshold={0.85}
 				showsHorizontalScrollIndicator={false}
+				ItemSeparatorComponent={() => <View style={{ width: gap * 2 }} />}
 				ListEmptyComponent={<Text className="text-foreground-muted">No books recently added</Text>}
 			/>
 		</View>

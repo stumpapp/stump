@@ -11,6 +11,7 @@ import { useColorScheme } from '~/lib/useColorScheme'
 import { useActiveServer } from '../activeServer'
 import { TurboImage } from '../Image'
 import { Text } from '../ui'
+import { BorderAndShadow } from '../BorderAndShadow'
 
 type ListedFile = DirectoryListingQuery['listDirectory']['nodes'][number]['files'][number]
 
@@ -56,7 +57,9 @@ export default function FileExplorerGridItem({ file }: Props) {
 						/>
 					)}
 					{!!file.media?.thumbnail.url && (
-						<View className="items-center justify-center" style={{ width: 100, height: 100 }}>
+						<BorderAndShadow
+							style={{ borderRadius: 4, borderWidth: 0.3, shadowRadius: 1.41, elevation: 2 }}
+						>
 							<TurboImage
 								source={{
 									uri: file.media.thumbnail.url,
@@ -66,9 +69,9 @@ export default function FileExplorerGridItem({ file }: Props) {
 								}}
 								resizeMode="stretch"
 								resize={100 * 1.5}
-								style={{ height: 100, width: 100 * (2 / 3), borderRadius: 8 }}
+								style={{ height: 100, width: 100 * (2 / 3) }}
 							/>
-						</View>
+						</BorderAndShadow>
 					)}
 
 					<View>

@@ -12,6 +12,7 @@ import { useActiveServer } from '../activeServer'
 import { useGridItemSize } from '../grid/useGridItemSize'
 import { TurboImage } from '../Image'
 import { Text } from '../ui'
+import { BorderAndShadow } from '../BorderAndShadow'
 
 const fragment = graphql(`
 	fragment LibraryGridItem on Library {
@@ -46,55 +47,46 @@ export default function LibraryGridItem({ library }: Props) {
 		// @ts-expect-error: String path
 		<Pressable onPress={() => router.navigate(href)}>
 			{({ pressed }) => (
-				<View
-					className={cn('relative', {
-						'opacity-80': pressed,
-					})}
-					style={{
-						height: itemDimension * 1.5,
-						width: itemDimension,
-					}}
-				>
-					<LinearGradient
-						colors={['transparent', 'rgba(0, 0, 0, 0.50)', 'rgba(0, 0, 0, 0.85)']}
-						style={{ position: 'absolute', inset: 0, zIndex: 10, borderRadius: 8 }}
-					/>
+				<View className={cn('relative', { 'opacity-80': pressed })}>
+					<BorderAndShadow
+						style={{ borderRadius: 8, borderWidth: 0.3, shadowRadius: 1.41, elevation: 2 }}
+					>
+						<LinearGradient
+							colors={['transparent', 'rgba(0, 0, 0, 0.50)', 'rgba(0, 0, 0, 0.85)']}
+							style={{ position: 'absolute', inset: 0, zIndex: 10 }}
+						/>
 
-					<TurboImage
-						source={{
-							uri: uri,
-							headers: {
-								Authorization: sdk.authorizationHeader || '',
-							},
-						}}
-						resizeMode="cover"
-						// This 1.5 is unrelated to height. It is to do downscaling, but not too much.
-						resize={itemDimension * 1.5}
-						style={{
-							height: '100%',
-							width: '100%',
-							borderRadius: 8,
-						}}
-					/>
-
-					<View className="absolute inset-0 z-20 w-full items-center justify-center">
-						<Text
-							size="2xl"
-							className="font-bold leading-8 tracking-wide"
-							numberOfLines={2}
-							ellipsizeMode="tail"
-							style={{
-								maxWidth: itemDimension - 4,
-								textShadowOffset: { width: 2, height: 1 },
-								textShadowRadius: 2,
-								textShadowColor: 'rgba(0, 0, 0, 0.5)',
-								zIndex: 20,
-								color: COLORS.dark.foreground.DEFAULT,
+						<TurboImage
+							source={{
+								uri: uri,
+								headers: {
+									Authorization: sdk.authorizationHeader || '',
+								},
 							}}
-						>
-							{title}
-						</Text>
-					</View>
+							resizeMode="stretch"
+							resize={itemDimension * 1.5}
+							style={{ height: itemDimension / (2 / 3), width: itemDimension }}
+						/>
+
+						<View className="absolute inset-0 z-20 w-full items-center justify-center">
+							<Text
+								size="2xl"
+								className="font-bold leading-8 tracking-wide"
+								numberOfLines={2}
+								ellipsizeMode="tail"
+								style={{
+									maxWidth: itemDimension - 4,
+									textShadowOffset: { width: 2, height: 1 },
+									textShadowRadius: 2,
+									textShadowColor: 'rgba(0, 0, 0, 0.5)',
+									zIndex: 20,
+									color: COLORS.dark.foreground.DEFAULT,
+								}}
+							>
+								{title}
+							</Text>
+						</View>
+					</BorderAndShadow>
 				</View>
 			)}
 		</Pressable>

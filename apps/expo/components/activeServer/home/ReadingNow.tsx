@@ -11,6 +11,7 @@ import { runOnJS, useSharedValue } from 'react-native-reanimated'
 import Carousel, { ICarouselInstance, Pagination } from 'react-native-reanimated-carousel'
 
 import { BookMetaLink } from '~/components/book'
+import { BorderAndShadow } from '~/components/BorderAndShadow'
 import { TurboImage } from '~/components/Image'
 import { Heading, Progress, Text } from '~/components/ui'
 import { COLORS, useColors } from '~/lib/constants'
@@ -89,7 +90,7 @@ export default function ReadingNow({ books }: Props) {
 		})
 
 	return (
-		<View className="mb-[-16px] flex items-start gap-4">
+		<View className="flex items-start gap-4">
 			{/* <Heading size="xl">Jump Back In</Heading> */}
 
 			{/* This view prevents the left 20px of the carousel from overriding swipe back navigation */}
@@ -99,14 +100,14 @@ export default function ReadingNow({ books }: Props) {
 				<Carousel
 					ref={carouselRef}
 					width={width}
-					height={IMAGE_HEIGHT}
+					height={IMAGE_HEIGHT + 8} // add some padding to not cut it off the shadow
 					data={books}
 					loop={false}
 					mode="parallax"
 					modeConfig={{
 						parallaxScrollingOffset: 95,
-						parallaxScrollingScale: 0.99,
-						parallaxAdjacentItemScale: 0.94,
+						parallaxScrollingScale: 1,
+						parallaxAdjacentItemScale: 0.95,
 					}}
 					onProgressChange={progressValue}
 					// Note: I added this to fix vertical scroll conflicts
@@ -236,6 +237,7 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 	}, [isTablet, width, data])
 
 	const router = useRouter()
+	const colors = useColors()
 	const isEbookProgress = !!data.readProgress?.epubcfi
 	const { colors: gradientColors, locations: gradientLocations } = easeGradient({
 		colorStops: {
@@ -248,102 +250,96 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 
 	return (
 		<View className="flex flex-row gap-4">
-			<Pressable
-				className="relative aspect-[2/3] shrink-0 rounded-lg"
-				onPress={() => router.navigate(`/server/${serverID}/books/${data.id}`)}
-				style={{
-					shadowColor: '#000',
-					shadowOffset: { width: 0, height: 1 },
-					shadowOpacity: 0.2,
-					shadowRadius: 1.41,
-				}}
-			>
-				<LinearGradient
-					colors={gradientColors}
-					style={{ position: 'absolute', inset: 0, zIndex: 10, borderRadius: 8 }}
-					locations={gradientLocations}
-				/>
+			<Pressable onPress={() => router.navigate(`/server/${serverID}/books/${data.id}`)}>
+				<BorderAndShadow
+					style={{ borderRadius: 12, borderWidth: 0.4, shadowRadius: 1.41, elevation: 2 }}
+				>
+					<LinearGradient
+						colors={gradientColors}
+						style={{ position: 'absolute', inset: 0, zIndex: 10 }}
+						locations={gradientLocations}
+					/>
 
-				<TurboImage
-					source={{
-						uri: data.thumbnail.url,
-						headers: {
-							Authorization: sdk.authorizationHeader || '',
-						},
-					}}
-					resizeMode="stretch"
-					resize={IMAGE_WIDTH * 1.5}
-					style={{
-						height: IMAGE_HEIGHT,
-						width: IMAGE_WIDTH,
-						borderRadius: 8,
-					}}
-				/>
+					<TurboImage
+						source={{
+							uri: data.thumbnail.url,
+							headers: {
+								Authorization: sdk.authorizationHeader || '',
+							},
+						}}
+						resizeMode="stretch"
+						resize={IMAGE_WIDTH * 1.5}
+						style={{
+							height: IMAGE_HEIGHT,
+							width: IMAGE_WIDTH,
+						}}
+					/>
 
-				<View className="absolute bottom-0 z-20 w-full gap-2 p-2">
-					{!isTablet && (
-						<Text
-							className="text-2xl font-bold leading-8"
-							style={{
-								textShadowOffset: { width: 2, height: 1 },
-								textShadowRadius: 2,
-								textShadowColor: 'rgba(0, 0, 0, 0.5)',
-								zIndex: 20,
-								color: COLORS.dark.foreground.DEFAULT,
-							}}
-						>
-							{data.resolvedName}
-						</Text>
-					)}
+					<View className="absolute bottom-0 z-20 w-full gap-2 p-3">
+						{!isTablet && (
+							<Text
+								className="text-2xl font-bold leading-8"
+								style={{
+									textShadowOffset: { width: 2, height: 1 },
+									textShadowRadius: 2,
+									textShadowColor: 'rgba(0, 0, 0, 0.5)',
+									zIndex: 20,
+									color: COLORS.dark.foreground.DEFAULT,
+								}}
+							>
+								{data.resolvedName}
+							</Text>
+						)}
 
-					<View className="flex items-start gap-2">
-						<View className="flex w-full flex-row items-center justify-between">
-							{!isEbookProgress && !!data.readProgress?.page && data.readProgress.page > 0 && (
-								<Text
-									className="flex-wrap text-base"
-									style={{
-										color: COLORS.dark.foreground.subtle,
-										opacity: 0.9,
-									}}
-								>
-									Page {data.readProgress?.page} of {data.pages}
-								</Text>
-							)}
+						<View className="flex items-start gap-2">
+							<View className="flex w-full flex-row items-center justify-between">
+								{!isEbookProgress && !!data.readProgress?.page && data.readProgress.page > 0 && (
+									<Text
+										className="flex-wrap text-base"
+										style={{
+											color: COLORS.dark.foreground.subtle,
+											opacity: 0.9,
+										}}
+									>
+										Page {data.readProgress?.page} of {data.pages}
+									</Text>
+								)}
 
-							{isEbookProgress && percentageCompleted != null && (
-								<Text
-									className="flex-wrap text-base"
-									style={{
-										color: COLORS.dark.foreground.subtle,
-										opacity: 0.9,
-									}}
-								>
-									{(percentageCompleted * 100).toFixed(0)}%
-								</Text>
-							)}
+								{isEbookProgress && percentageCompleted != null && (
+									<Text
+										className="flex-wrap text-base"
+										style={{
+											color: COLORS.dark.foreground.subtle,
+											opacity: 0.9,
+										}}
+									>
+										{(percentageCompleted * 100).toFixed(0)}%
+									</Text>
+								)}
 
-							{!!data.readProgress?.updatedAt && (
-								<Text
-									className="flex-wrap text-base"
-									style={{
-										color: COLORS.dark.foreground.subtle,
-										opacity: 0.9,
-									}}
-								>
-									{dayjs(data.readProgress?.updatedAt).fromNow()}
-								</Text>
+								{!!data.readProgress?.updatedAt && (
+									<Text
+										className="flex-wrap text-base"
+										style={{
+											color: COLORS.dark.foreground.subtle,
+											opacity: 0.9,
+										}}
+									>
+										{dayjs(data.readProgress?.updatedAt).fromNow()}
+									</Text>
+								)}
+							</View>
+
+							{percentageCompleted && (
+								<Progress
+									className="h-1 bg-[#898d94]"
+									indicatorClassName="bg-[#f5f3ef]"
+									value={percentageCompleted * 100}
+								/>
 							)}
 						</View>
-
-						{percentageCompleted && (
-							<Progress
-								className="h-1 bg-[#898d94]"
-								indicatorClassName="bg-[#f5f3ef]"
-								value={percentageCompleted * 100}
-							/>
-						)}
 					</View>
-				</View>
+				</BorderAndShadow>
 			</Pressable>
 
 			{renderBookContent()}

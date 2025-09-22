@@ -8,7 +8,7 @@ export default function ChevronBackLink() {
 	const router = useRouter()
 	return (
 		<TouchableOpacity onPress={() => router.back()}>
-			<Icon as={ChevronLeft} className="text-foreground" />
+			<Icon as={ChevronLeft} className="text-foreground" size={24} />
 		</TouchableOpacity>
 	)
 }

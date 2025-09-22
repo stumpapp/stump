@@ -289,26 +289,23 @@ const Page = React.memo(
 
 		const safeMaxHeight = maxHeight - insets.top - insets.bottom
 		const [imageRatio, setImageRatio] = useState<number | undefined>(undefined)
-		const [renderedWidth, setRenderedWidth] = useState<number | undefined>(undefined)
+		const roughPageRenderWidth = indexes.length > 1 ? maxWidth / 2 : maxWidth
 
 		return (
 			<Zoomable
 				minScale={1}
 				maxScale={5}
 				scale={scale}
-				doubleTapScale={3}
+				doubleTapScale={2.5}
 				isSingleTapEnabled={true}
 				isDoubleTapEnabled={true}
 				onSingleTap={onSingleTap}
 			>
 				<View
-					className={cn('relative flex justify-center', {
-						'mx-auto flex-row gap-0': indexes.length > 1,
+					className={cn('relative flex-row items-center justify-center', {
+						'mx-auto gap-0': indexes.length > 1,
 					})}
-					style={{
-						height: safeMaxHeight,
-						width: maxWidth,
-					}}
+					style={{ height: maxHeight, width: maxWidth }}
 				>
 					{indexes.map((pageIdx, i) => {
 						return (
@@ -322,15 +319,13 @@ const Page = React.memo(
 									},
 								}}
 								style={{
-									maxHeight: '100%',
+									height: '100%',
 									maxWidth: indexes.length > 1 ? '50%' : '100%',
 									aspectRatio: imageRatio,
 								}}
-								onLayout={(event) => {
-									if (allowDownscaling) setRenderedWidth(event.nativeEvent.layout.width)
-								}}
+								indicator={{ color: 'transparent' }}
 								resizeMode="contain"
-								resize={allowDownscaling && renderedWidth ? renderedWidth * 1.5 : undefined}
+								resize={allowDownscaling ? roughPageRenderWidth * 1.2 : undefined}
 								onSuccess={(event) => onImageLoaded(event, i)}
 							/>
 						)

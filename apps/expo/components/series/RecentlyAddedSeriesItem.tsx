@@ -7,11 +7,12 @@ import { easeGradient } from 'react-native-easing-gradient'
 import { Pressable } from 'react-native-gesture-handler'
 import LinearGradient from 'react-native-linear-gradient'
 
-import { COLORS } from '~/lib/constants'
+import { COLORS, useColors } from '~/lib/constants'
 
 import { useActiveServer } from '../activeServer'
 import { TurboImage } from '../Image'
 import { Text } from '../ui'
+import { BorderAndShadow } from '../BorderAndShadow'
 
 const fragment = graphql(`
 	fragment RecentlyAddedSeriesItem on Series {
@@ -43,6 +44,7 @@ export default function RecentlyAddedSeriesItem({ series }: Props) {
 
 	const data = useFragment(fragment, series)
 	const router = useRouter()
+	const colors = useColors()
 
 	const { colors: gradientColors, locations: gradientLocations } = easeGradient({
 		colorStops: {
@@ -54,63 +56,61 @@ export default function RecentlyAddedSeriesItem({ series }: Props) {
 	})
 
 	return (
-		<Pressable
-			className="relative shrink-0"
-			onPress={() => router.push(`/server/${serverID}/series/${data.id}`)}
-			style={{
-				shadowColor: '#000',
-				shadowOffset: { width: 0, height: 1 },
-				shadowOpacity: 0.2,
-				shadowRadius: 1.41,
-				borderRadius: 8,
-			}}
-		>
-			<LinearGradient
-				colors={gradientColors}
-				style={{ position: 'absolute', inset: 0, zIndex: 10, borderRadius: 8 }}
-				locations={gradientLocations}
-			/>
+		<Pressable onPress={() => router.push(`/server/${serverID}/series/${data.id}`)}>
+			{({ pressed }) => (
+				<View className="relative" style={{ opacity: pressed ? 0.8 : 1 }}>
+					<BorderAndShadow
+						style={{ borderRadius: 8, borderWidth: 0.3, shadowRadius: 1.41, elevation: 2 }}
+					>
+						<LinearGradient
+							colors={gradientColors}
+							style={{ position: 'absolute', inset: 0, zIndex: 10 }}
+							locations={gradientLocations}
+						/>
 
-			<TurboImage
-				source={{
-					uri: data.thumbnail.url,
-					headers: {
-						Authorization: sdk.authorizationHeader || '',
-					},
-				}}
-				resizeMode="stretch"
-				resize={240 * (2 / 3)}
-				style={{ width: 240 * (2 / 3), height: 240, borderRadius: 8 }}
-			/>
+						<TurboImage
+							source={{
+								uri: data.thumbnail.url,
+								headers: {
+									Authorization: sdk.authorizationHeader || '',
+								},
+							}}
+							resizeMode="stretch"
+							resize={240 * (2 / 3)}
+							style={{ width: 240 * (2 / 3), height: 240 }}
+						/>
 
-			<View className="absolute bottom-0 z-20 w-full p-2">
-				<Text
-					className="flex-1 flex-wrap text-xl font-bold"
-					style={{
-						textShadowOffset: { width: 2, height: 1 },
-						textShadowRadius: 2,
-						textShadowColor: 'rgba(0, 0, 0, 0.5)',
-						zIndex: 20,
-						color: COLORS.dark.foreground.DEFAULT,
-					}}
-					numberOfLines={0}
-				>
-					{data.resolvedName}
-				</Text>
-				<Text
-					className="flex-1 flex-wrap font-medium"
-					style={{
-						textShadowOffset: { width: 2, height: 1 },
-						textShadowRadius: 2,
-						textShadowColor: 'rgba(0, 0, 0, 0.5)',
-						zIndex: 20,
-						color: COLORS.dark.foreground.subtle,
-					}}
-					numberOfLines={0}
-				>
-					{dayjs(data.createdAt).fromNow()}
-				</Text>
-			</View>
+						<View className="absolute bottom-0 z-20 w-full p-2">
+							<Text
+								className="flex-1 flex-wrap text-xl font-bold"
+								style={{
+									textShadowOffset: { width: 2, height: 1 },
+									textShadowRadius: 2,
+									textShadowColor: 'rgba(0, 0, 0, 0.5)',
+									zIndex: 20,
+									color: COLORS.dark.foreground.DEFAULT,
+								}}
+								numberOfLines={0}
+							>
+								{data.resolvedName}
+							</Text>
+							<Text
+								className="flex-1 flex-wrap font-medium"
+								style={{
+									textShadowOffset: { width: 2, height: 1 },
+									textShadowRadius: 2,
+									textShadowColor: 'rgba(0, 0, 0, 0.5)',
+									zIndex: 20,
+									color: COLORS.dark.foreground.subtle,
+								}}
+								numberOfLines={0}
+							>
+								{dayjs(data.createdAt).fromNow()}
+							</Text>
+						</View>
+					</BorderAndShadow>
+				</View>
+			)}
 		</Pressable>
 	)
 

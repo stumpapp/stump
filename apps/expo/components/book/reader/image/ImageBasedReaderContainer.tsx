@@ -1,7 +1,7 @@
 import { ReadingDirection, ReadingMode } from '@stump/graphql'
 import { generatePageSets, ImageBasedBookPageRef } from '@stump/sdk'
 import { ComponentProps, useCallback, useMemo, useRef, useState } from 'react'
-import { Dimensions, View } from 'react-native'
+import { View } from 'react-native'
 import { FlatList } from 'react-native-gesture-handler'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
@@ -133,14 +133,7 @@ export default function ImageBasedReaderContainer({
 				flatListRef,
 			}}
 		>
-			<View
-				className="fixed inset-0 flex-1 bg-black"
-				style={{
-					paddingTop: insets.top,
-					paddingBottom: insets.bottom,
-					height: Dimensions.get('screen').height - insets.top - insets.bottom,
-				}}
-			>
+			<View className="fixed inset-0 flex-1 bg-black">
 				<ControlsOverlay />
 
 				{nextInSeries && (

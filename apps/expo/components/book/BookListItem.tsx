@@ -8,7 +8,9 @@ import { Pressable } from 'react-native-gesture-handler'
 import { useListItemSize } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 
+import { useColors } from '~/lib/constants'
 import { useActiveServer } from '../activeServer'
+import { BorderAndShadow } from '../BorderAndShadow'
 import { TurboImage } from '../Image'
 import { Text } from '../ui'
 
@@ -37,18 +39,17 @@ function BookListItem({ book }: Props) {
 	} = useActiveServer()
 
 	const router = useRouter()
+	const colors = useColors()
 
 	const { width, height } = useListItemSize()
 
 	return (
 		<Pressable onPress={() => router.navigate(`/server/${serverID}/books/${data.id}`)}>
 			{({ pressed }) => (
-				<View
-					className={cn('flex items-start px-1 tablet:px-2', {
-						'opacity-90': pressed,
-					})}
-				>
-					<View className="relative overflow-hidden rounded-lg">
+				<View className="relative" style={{ opacity: pressed ? 0.8 : 1 }}>
+					<BorderAndShadow
+						style={{ borderRadius: 8, borderWidth: 0.3, shadowRadius: 1.41, elevation: 2 }}
+					>
 						<TurboImage
 							source={{
 								uri: data.thumbnail.url,
@@ -56,11 +57,11 @@ function BookListItem({ book }: Props) {
 									Authorization: sdk.authorizationHeader || '',
 								},
 							}}
-							resizeMode="cover"
+							resizeMode="stretch"
 							resize={width * 1.5}
 							style={{ height, width }}
 						/>
-					</View>
+					</BorderAndShadow>
 
 					<View>
 						<Text className="mt-2" style={{ maxWidth: width - 4 }} numberOfLines={2}>

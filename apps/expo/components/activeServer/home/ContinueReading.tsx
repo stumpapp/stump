@@ -10,6 +10,7 @@ import { Heading, Text } from '~/components/ui'
 
 import { useActiveServer } from '../context'
 import ReadingNow from './ReadingNow'
+import { useListItemSize } from '~/lib/hooks'
 
 const query = graphql(`
 	query ContinueReading($pagination: Pagination) {
@@ -66,12 +67,14 @@ function ContinueReading() {
 		[],
 	)
 
+	const { gap } = useListItemSize()
+
 	return (
 		<Fragment>
 			{activeBooks.length > 0 && <ReadingNow books={activeBooks} />}
 
 			{(leftOffBooks.length > 0 || activeBooks.length === 0) && (
-				<View className="flex gap-4">
+				<View className="flex">
 					<Heading size="xl" className="px-4">
 						Continue Reading
 					</Heading>
@@ -81,10 +84,11 @@ function ContinueReading() {
 						keyExtractor={({ id }) => id}
 						renderItem={renderItem}
 						horizontal
-						contentContainerStyle={{ paddingHorizontal: 16 }}
+						contentContainerStyle={{ padding: 16 }}
 						onEndReached={onEndReached}
 						onEndReachedThreshold={0.85}
 						showsHorizontalScrollIndicator={false}
+						ItemSeparatorComponent={() => <View style={{ width: gap * 2 }} />}
 						ListEmptyComponent={
 							<Text className="px-4 text-foreground-muted">No books in progress</Text>
 						}

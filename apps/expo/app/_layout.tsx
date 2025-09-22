@@ -130,6 +130,7 @@ export default function RootLayout() {
 								options={{
 									headerShown: false,
 									animation: animationEnabled ? 'default' : 'none',
+									autoHideHomeIndicator: shouldHideStatusBar,
 								}}
 							/>
 							<Stack.Screen

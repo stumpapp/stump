@@ -18,6 +18,7 @@ import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
 import { cn } from '~/lib/utils'
 
 import { usePublicationContext } from './context'
+import { BorderAndShadow } from '~/components/BorderAndShadow'
 
 const { Info, Slash, BookCopy, ChevronLeft } = icons
 
@@ -86,9 +87,11 @@ export default function Screen() {
 				className="flex-1 gap-5 bg-background px-4 tablet:px-6"
 				contentInsetAdjustmentBehavior="automatic"
 			>
-				<View className="flex-1 gap-8 pb-3">
-					<View className="mt-6 flex items-center gap-4">
-						<View className="aspect-[2/3] self-center overflow-hidden rounded-lg">
+				<View className="flex-1 gap-8 py-4">
+					<View className="flex items-center gap-4">
+						<BorderAndShadow
+							style={{ borderRadius: 10, borderWidth: 0.4, shadowRadius: 5, elevation: 8 }}
+						>
 							<TurboImage
 								source={{
 									uri: thumbnailURL || '',
@@ -96,10 +99,11 @@ export default function Screen() {
 										Authorization: sdk.authorizationHeader || '',
 									},
 								}}
-								resizeMode="cover"
-								style={{ height: 350, width: 'auto' }}
+								resizeMode="stretch"
+								resize={350 * (2 / 3) * 1.5}
+								style={{ height: 350, width: 350 * (2 / 3) }}
 							/>
-						</View>
+						</BorderAndShadow>
 					</View>
 
 					<View className="flex w-full flex-row items-center gap-2 tablet:max-w-sm tablet:self-center">

@@ -59,7 +59,7 @@ function OnDeck() {
 	const { gap } = useListItemSize()
 
 	return (
-		<View className="flex gap-4">
+		<View className="flex">
 			<Heading size="xl" className="px-4">
 				Your Next Read
 			</Heading>
@@ -69,7 +69,7 @@ function OnDeck() {
 				keyExtractor={({ id }) => id}
 				renderItem={renderItem}
 				horizontal
-				contentContainerStyle={{ paddingHorizontal: 16 }}
+				contentContainerStyle={{ padding: 16 }}
 				onEndReached={onEndReached}
 				onEndReachedThreshold={0.85}
 				showsHorizontalScrollIndicator={false}

@@ -13,6 +13,7 @@ import { useActiveServer } from '~/components/activeServer'
 import { BookMetaLink } from '~/components/book'
 import { BookActionMenu } from '~/components/book/overview'
 import { BookDescription, InfoRow, InfoSection, InfoStat } from '~/components/book/overview'
+import { BorderAndShadow } from '~/components/BorderAndShadow'
 import { TurboImage } from '~/components/Image'
 import RefreshControl from '~/components/RefreshControl'
 import { Button, Heading, icons, Text } from '~/components/ui'
@@ -246,27 +247,21 @@ export default function Screen() {
 					)}
 
 					<View className="flex items-center gap-4">
-						<TurboImage
-							source={{
-								uri: book.thumbnail.url,
-								headers: {
-									Authorization: sdk.authorizationHeader || '',
-								},
-							}}
-							resizeMode="stretch"
-							resize={350 * (2 / 3) * 1.5}
-							style={{
-								height: 350,
-								width: 350 * (2 / 3),
-								shadowColor: '#000',
-								shadowOffset: { width: 0, height: 1 },
-								shadowOpacity: 0.2,
-								shadowRadius: 5,
-								borderRadius: 8,
-								borderWidth: 0.2,
-								borderColor: colors.edge.DEFAULT,
-							}}
-						/>
+						<BorderAndShadow
+							style={{ borderRadius: 10, borderWidth: 0.4, shadowRadius: 5, elevation: 8 }}
+						>
+							<TurboImage
+								source={{
+									uri: book.thumbnail.url,
+									headers: {
+										Authorization: sdk.authorizationHeader || '',
+									},
+								}}
+								resizeMode="stretch"
+								resize={350 * (2 / 3) * 1.5}
+								style={{ height: 350, width: 350 * (2 / 3) }}
+							/>
+						</BorderAndShadow>
 					</View>
 
 					<View className="gap-2">

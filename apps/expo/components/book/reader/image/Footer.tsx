@@ -326,10 +326,11 @@ export default function Footer() {
 										headers: source.headers as Record<string, string>,
 									}}
 									resizeMode="stretch"
+									resize={containerSize.width * 1.5}
 									style={{
 										width: pageSet.length === 1 ? '100%' : '50%',
 										height: '100%',
-										borderRadius: 8,
+										borderRadius: 6,
 									}}
 									onSuccess={({ nativeEvent }) => onImageLoaded(pageIdx, nativeEvent)}
 								/>
@@ -444,7 +445,7 @@ export default function Footer() {
 									style={{
 										width: item.length === 1 ? '100%' : '50%',
 										height: '100%',
-										borderRadius: 8,
+										borderRadius: 6,
 									}}
 									onSuccess={({ nativeEvent }) => onImageLoaded(pageIdx, nativeEvent)}
 								/>

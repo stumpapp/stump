@@ -79,7 +79,7 @@ Stump uses server-side sessions to authenticate users. These sessions are stored
 	Authentication on the REST API
 </Callout>
 
-Stump supports [Basic Authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication) in order to properly support OPDS clients. Authenticating using this method will still create a server-side session for you.
+Stump supports [Basic Authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication) in order to properly support OPDS clients. Authenticating using this method will **not** create a server-side session. It is only intended for OPDS client authentication.
 
 ### JWT Access Tokens
 

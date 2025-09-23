@@ -243,7 +243,7 @@ impl IntoOPDSEntry for OPDSEntryBuilder<OPDSPublicationEntity> {
 			OpdsLink::new(
 				thumbnail_opds_link_type,
 				OpdsLinkRel::Image,
-				format!("{base_url}/pages/1"),
+				format!("{base_url}/pages/0?zero_based=true"),
 			),
 			OpdsLink::new(
 				entry_file_acquisition_link_type,

@@ -133,11 +133,6 @@ struct OPDSSearchQuery {
 	search: Option<String>,
 }
 
-fn pagination_bounds(page: i64, page_size: i64) -> (i64, i64) {
-	let skip = page * page_size;
-	(skip, page_size)
-}
-
 fn catalog_url(req_ctx: &AuthContext, path: &str) -> String {
 	if let Some(api_key) = req_ctx.api_key() {
 		format!("/opds/{}/v1.2/{}", api_key, path)
@@ -347,6 +342,7 @@ async fn get_library_by_id(
 	let library = library::Entity::find_for_user(&user)
 		.select_only()
 		.columns(library::LibraryIdentSelect::columns())
+		.filter(library::Column::Id.eq(id.clone()))
 		.into_model::<library::LibraryIdentSelect>()
 		.one(ctx.conn.as_ref())
 		.await?
@@ -604,7 +600,10 @@ async fn get_book_thumbnail(
 	fetch_book_page_for_user(&ctx, &req.user(), id, 1).await
 }
 
+// TODO: Support a config which disables reading session tracking for page access since
+// some clients preload pages and this can lead to inaccurate tracking
 /// A handler for GET /opds/v1.2/books/{id}/page/{page}, returns the page
+#[tracing::instrument(skip(ctx, req), fields(book_id = %id, page, zero_based = ?pagination.zero_based))]
 async fn get_book_page(
 	Path(OPDSURLParams {
 		params: OPDSPageURLParams { id, page },
@@ -670,6 +669,7 @@ async fn get_book_page(
 			media_id: Set(id.clone()),
 			device_id: Set(None),
 			page: Set(Some(correct_page)),
+			started_at: Set(Utc::now().into()),
 			..Default::default()
 		};
 		let reading_session = reading_session::Entity::insert(active_model)
@@ -680,7 +680,8 @@ async fn get_book_page(
 	}
 
 	let (content_type, image_buffer) =
-		get_page_async(PathBuf::from(book.path), page, &ctx.config).await?;
+		get_page_async(PathBuf::from(book.path), correct_page, &ctx.config).await?;
+
 	handle_opds_image_response(content_type, image_buffer)
 }
 

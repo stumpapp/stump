@@ -77,7 +77,7 @@ pub async fn auth_middleware(
 	let save_basic_session = req_headers
 		.get(STUMP_SAVE_BASIC_SESSION_HEADER)
 		.and_then(|header| header.to_str().ok())
-		.is_none_or(|header| header == "true");
+		.is_some_and(|header| header == "true");
 
 	let request_uri = req.extensions().get::<OriginalUri>().cloned().map_or_else(
 		|| req.uri().path().to_owned(),
@@ -412,9 +412,12 @@ async fn handle_basic_auth(
 	if save_session {
 		tracing::trace!("Saving session for user");
 		enforce_max_sessions(&user, conn).await?;
-		session
+		if let Err(error) = session
 			.insert(SESSION_USER_KEY, AuthUser::from(user.clone()))
-			.await?;
+			.await
+		{
+			tracing::error!(error = ?error, "Failed to save session");
+		}
 	}
 
 	Ok(AuthContext {

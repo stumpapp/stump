@@ -49,7 +49,9 @@ export default function EditServerDialog({ editingServer, onClose, onSubmit }: P
 				snapPoints={snapPoints}
 				onChange={handleChange}
 				open={isOpen}
-				backgroundComponent={(props) => <View {...props} className="rounded-t-xl bg-background" />}
+				backgroundComponent={(props) => (
+					<View {...props} className="squircle rounded-t-xl bg-background" />
+				)}
 				handleIndicatorStyle={{ backgroundColor: colorScheme === 'dark' ? '#333' : '#ccc' }}
 				handleComponent={(props) => (
 					<BottomSheet.Handle

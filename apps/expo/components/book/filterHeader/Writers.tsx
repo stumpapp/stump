@@ -92,7 +92,7 @@ export default function Writers() {
 				<View className="gap-3">
 					<Text>Available Writers</Text>
 
-					<View className="gap-0 rounded-lg border border-edge bg-background-surface">
+					<View className="squircle gap-0 rounded-lg border border-edge bg-background-surface">
 						{writers.map((writer, idx) => (
 							<Fragment key={writer}>
 								<View className="flex flex-row items-center gap-3 p-3">

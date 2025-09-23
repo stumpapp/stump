@@ -1,4 +1,5 @@
 const { hairlineWidth } = require('nativewind/theme')
+const plugin = require('tailwindcss/plugin')
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
@@ -93,7 +94,30 @@ module.exports = {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
 			},
+			borderCurve: {
+				continuous: 'continuous',
+				curve: 'curve',
+			},
 		},
 	},
-	plugins: [require('tailwindcss-animate')],
+	plugins: [
+		require('tailwindcss-animate'),
+		plugin(function ({ addUtilities }) {
+			addUtilities({
+				'.border-continuous': {
+					'@rn-move -rn-border-curve border-curve': 'true',
+					'-rn-border-curve': 'continuous',
+				},
+				'.border-circular': {
+					'@rn-move -rn-border-curve border-curve': 'true',
+					'-rn-border-curve': 'circular',
+				},
+				'.squircle': {
+					'@rn-move -rn-border-curve border-curve': 'true',
+					'-rn-border-curve': 'continuous',
+					overflow: 'hidden',
+				},
+			})
+		}),
+	],
 }

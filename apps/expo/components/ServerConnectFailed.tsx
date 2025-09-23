@@ -17,7 +17,7 @@ export default function ServerConnectFailed() {
 				</Heading>
 
 				<View className="relative flex flex-row justify-center">
-					<View className="flex items-center justify-center rounded-lg bg-background-surface p-2">
+					<View className="squircle flex items-center justify-center rounded-lg bg-background-surface p-2">
 						<WifiOff className="h-10 w-10 text-foreground-muted" />
 					</View>
 				</View>

@@ -56,7 +56,7 @@ export default function StackedEffectThumbnail({ label, uri, href }: Props) {
 				<Pressable style={{ zIndex: 10 }} onPress={() => router.push(href)}>
 					{({ pressed }) => (
 						<View
-							className={cn('aspect-[2/3] overflow-hidden rounded-lg', {
+							className={cn('squircle aspect-[2/3] overflow-hidden rounded-lg', {
 								'opacity-80': pressed,
 							})}
 						>
@@ -76,7 +76,7 @@ export default function StackedEffectThumbnail({ label, uri, href }: Props) {
 
 				<View
 					className={cn(
-						'absolute -left-1 top-0 aspect-[2/3] rotate-[-5deg] transform overflow-hidden rounded-lg',
+						'squircle absolute -left-1 top-0 aspect-[2/3] rotate-[-5deg] transform overflow-hidden rounded-lg',
 						{
 							'bg-background': !colors,
 						},
@@ -91,7 +91,7 @@ export default function StackedEffectThumbnail({ label, uri, href }: Props) {
 
 				<View
 					className={cn(
-						'absolute left-0 top-1 aspect-[2/3] rotate-[4deg] transform overflow-hidden rounded-lg',
+						'squircle absolute left-0 top-1 aspect-[2/3] rotate-[4deg] transform overflow-hidden rounded-lg',
 						{
 							'bg-background': !colors,
 						},

@@ -94,7 +94,7 @@ export default function Characters() {
 				<View className="gap-3">
 					<Text>Available Characters</Text>
 
-					<View className="gap-0 rounded-lg border border-edge bg-background-surface">
+					<View className="squircle gap-0 rounded-lg border border-edge bg-background-surface">
 						{characters.map((character, idx) => (
 							<Fragment key={character}>
 								<View className="flex flex-row items-center gap-3 p-3">

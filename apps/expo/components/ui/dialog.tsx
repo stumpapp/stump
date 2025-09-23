@@ -71,7 +71,7 @@ const DialogContent = React.forwardRef<
 				<DialogPrimitive.Content
 					ref={ref}
 					className={cn(
-						'border-border web:cursor-default web:duration-200 max-w-lg gap-4 rounded-lg border bg-background-surface p-6 shadow-lg',
+						'border-border web:cursor-default web:duration-200 squircle max-w-lg gap-4 rounded-lg border bg-background-surface p-6 shadow-lg',
 						open
 							? 'web:animate-in web:fade-in-0 web:zoom-in-95'
 							: 'web:animate-out web:fade-out-0 web:zoom-out-95',
@@ -87,7 +87,7 @@ const DialogContent = React.forwardRef<
 					{children}
 					<DialogPrimitive.Close
 						className={
-							'web:group web:ring-offset-background web:transition-opacity web:hover:opacity-100 web:focus:outline-none web:focus:ring-2 web:focus:ring-ring web:focus:ring-offset-2 web:disabled:pointer-events-none absolute right-4 top-4 rounded-sm p-0.5 opacity-70'
+							'web:group web:ring-offset-background web:transition-opacity web:hover:opacity-100 web:focus:outline-none web:focus:ring-2 web:focus:ring-ring web:focus:ring-offset-2 web:disabled:pointer-events-none squircle absolute right-4 top-4 rounded-sm p-0.5 opacity-70'
 						}
 					>
 						<X

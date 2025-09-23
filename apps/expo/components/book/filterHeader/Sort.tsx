@@ -87,7 +87,7 @@ export default function Sort() {
 					<RadioGroup
 						value={direction}
 						onValueChange={handleSortDirectionChanged}
-						className="gap-0 rounded-lg border border-edge bg-background-surface"
+						className="squircle gap-0 rounded-lg border border-edge bg-background-surface"
 					>
 						<View className="flex flex-row items-center gap-3 p-3">
 							<RadioGroupItem value="ASC" id="ascending" />
@@ -107,7 +107,7 @@ export default function Sort() {
 					<RadioGroup
 						value={field}
 						onValueChange={(value) => handleSortFieldChanged(value, false)}
-						className="gap-0 rounded-lg border border-edge bg-background-surface"
+						className="squircle gap-0 rounded-lg border border-edge bg-background-surface"
 					>
 						<View className="flex flex-row items-center gap-3 p-3">
 							<RadioGroupItem value="NAME" id="name" />
@@ -178,7 +178,7 @@ export default function Sort() {
 					<RadioGroup
 						value={field}
 						onValueChange={(value) => handleSortFieldChanged(value, true)}
-						className="gap-0 rounded-lg border border-edge bg-background-surface"
+						className="squircle gap-0 rounded-lg border border-edge bg-background-surface"
 					>
 						<View className="flex flex-row items-center gap-3 p-3">
 							<RadioGroupItem value="TITLE" id="title" />

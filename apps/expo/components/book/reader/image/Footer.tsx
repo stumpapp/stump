@@ -512,6 +512,7 @@ export default function Footer() {
 						trackStyle={{
 							height: 12,
 							borderRadius: 6,
+							borderCurve: 'continuous',
 							backgroundColor: '#898d9490',
 						}}
 						minimumTrackStyle={minimumTrackStyle}

@@ -51,7 +51,7 @@ function DropdownMenuSubTrigger({
 		>
 			<DropdownMenuPrimitive.SubTrigger
 				className={cn(
-					'group flex flex-row items-center rounded-sm px-2 py-2 active:bg-background-surface sm:py-1.5',
+					'squircle group flex flex-row items-center rounded-sm px-2 py-2 active:bg-background-surface sm:py-1.5',
 					open && 'bg-background-surface',
 					inset && 'pl-8',
 				)}
@@ -77,7 +77,7 @@ function DropdownMenuSubContent({
 		<NativeOnlyAnimatedView entering={FadeIn}>
 			<DropdownMenuPrimitive.SubContent
 				className={cn(
-					'overflow-hidden rounded-md border border-edge bg-background p-1 shadow-lg shadow-black/5',
+					'squircle overflow-hidden rounded-md border border-edge bg-background p-1 shadow-lg shadow-black/5',
 					className,
 				)}
 				{...props}
@@ -118,7 +118,7 @@ function DropdownMenuContent({
 						<TextClassContext.Provider value="text-foreground-subtle">
 							<DropdownMenuPrimitive.Content
 								className={cn(
-									'min-w-[8rem] overflow-hidden rounded-xl border border-edge bg-background p-1 shadow-lg shadow-black/5',
+									'squircle min-w-[8rem] overflow-hidden rounded-xl border border-edge bg-background p-1 shadow-lg shadow-black/5',
 									className,
 								)}
 								{...props}
@@ -151,7 +151,7 @@ function DropdownMenuItem({
 		>
 			<DropdownMenuPrimitive.Item
 				className={cn(
-					'group relative flex flex-row items-center gap-2 rounded-sm px-2 py-2 active:bg-background-surface sm:py-1.5',
+					'squircle group relative flex flex-row items-center gap-2 rounded-sm px-2 py-2 active:bg-background-surface sm:py-1.5',
 					variant === 'destructive' && 'active:bg-fill-danger-secondary',
 					props.disabled && 'opacity-50',
 					inset && 'pl-8',
@@ -175,7 +175,7 @@ function DropdownMenuCheckboxItem({
 		<TextClassContext.Provider value="text-base text-foreground select-none group-active:text-accent-foreground">
 			<DropdownMenuPrimitive.CheckboxItem
 				className={cn(
-					'group relative flex flex-row items-center gap-2 rounded-sm py-2 pl-8 pr-2 active:bg-background-surface sm:py-1.5',
+					'squircle group relative flex flex-row items-center gap-2 rounded-sm py-2 pl-8 pr-2 active:bg-background-surface sm:py-1.5',
 					props.disabled && 'opacity-50',
 					className,
 				)}
@@ -210,7 +210,7 @@ function DropdownMenuRadioItem({
 		<TextClassContext.Provider value="text-base text-foreground select-none group-active:text-accent-foreground">
 			<DropdownMenuPrimitive.RadioItem
 				className={cn(
-					'group relative flex flex-row items-center gap-2 rounded-sm py-2 pl-8 pr-2 active:bg-background-surface sm:py-1.5',
+					'squircle group relative flex flex-row items-center gap-2 rounded-sm py-2 pl-8 pr-2 active:bg-background-surface sm:py-1.5',
 					props.disabled && 'opacity-50',
 					className,
 				)}

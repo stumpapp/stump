@@ -26,7 +26,7 @@ export default function MaybeErrorFeed({ error }: Props) {
 				<View className="flex-1 items-center gap-2">
 					<Text>{`This feed is not valid. It contains ${error.issues.length} issue${error.issues.length !== 1 ? 's' : ''}:`}</Text>
 
-					<View className="rounded-xl bg-background-surface p-4">
+					<View className="squircle rounded-xl bg-background-surface p-4">
 						<Text>{JSON.stringify(error.issues, null, 2)}</Text>
 					</View>
 				</View>
@@ -37,7 +37,7 @@ export default function MaybeErrorFeed({ error }: Props) {
 					<Text>{error.message}</Text>
 
 					{typeof error.cause === 'string' && (
-						<View className="rounded-xl bg-background-surface p-4">
+						<View className="squircle rounded-xl bg-background-surface p-4">
 							<Text>{error.cause}</Text>
 						</View>
 					)}
@@ -53,7 +53,7 @@ export default function MaybeErrorFeed({ error }: Props) {
 			<ScrollView className="flex-1 bg-background p-4">
 				<View className="flex-1 items-center justify-center gap-2">
 					<View className="relative flex justify-center">
-						<View className="flex items-center justify-center rounded-lg bg-background-surface p-2">
+						<View className="squircle flex items-center justify-center rounded-lg bg-background-surface p-2">
 							<Rss className="h-6 w-6 text-foreground-muted" />
 							<Slash className="absolute h-6 w-6 scale-x-[-1] transform text-foreground opacity-80" />
 						</View>

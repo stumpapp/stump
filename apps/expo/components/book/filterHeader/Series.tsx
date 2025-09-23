@@ -92,7 +92,7 @@ export default function Series() {
 				<View className="gap-3">
 					<Text>Available Series</Text>
 
-					<View className="gap-0 rounded-lg border border-edge bg-background-surface">
+					<View className="squircle gap-0 rounded-lg border border-edge bg-background-surface">
 						{seriesList.map((series, idx) => {
 							const isLast = idx === seriesList.length - 1
 							return (

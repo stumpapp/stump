@@ -68,7 +68,7 @@ export default function ReaderSettings({ forBook, forServer }: Props) {
 			<View>
 				<Text className="mb-3 text-foreground-muted">Mode</Text>
 
-				<Card className="flex rounded-xl border border-edge bg-background-surface">
+				<Card className="squircle flex rounded-xl border border-edge bg-background-surface">
 					<ReadingModeSelect
 						mode={activeSettings.readingMode}
 						onChange={(mode) => onPreferenceChange({ readingMode: mode })}
@@ -90,7 +90,7 @@ export default function ReaderSettings({ forBook, forServer }: Props) {
 			<View>
 				<Text className="mb-3 text-foreground-muted">Image Options</Text>
 
-				<Card className="flex rounded-xl border border-edge bg-background-surface">
+				<Card className="squircle flex rounded-xl border border-edge bg-background-surface">
 					<CachePolicySelect
 						policy={activeSettings.cachePolicy || 'memory-disk'}
 						onChange={(policy) => onPreferenceChange({ cachePolicy: policy })}
@@ -152,7 +152,7 @@ export default function ReaderSettings({ forBook, forServer }: Props) {
 			<View>
 				<Text className="mb-3 text-foreground-muted">Navigation</Text>
 
-				<Card className="flex rounded-xl border border-edge bg-background-surface">
+				<Card className="squircle flex rounded-xl border border-edge bg-background-surface">
 					<View className="flex flex-row items-center justify-between border-b border-b-edge p-4">
 						<Text>Tap Sides to Navigate</Text>
 						<Switch

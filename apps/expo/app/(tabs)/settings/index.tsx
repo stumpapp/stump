@@ -35,7 +35,7 @@ export default function Screen() {
 				<View>
 					<Text className="mb-3 text-foreground-muted">Stump</Text>
 
-					<View className="mb-2 rounded-xl bg-fill-info-secondary p-2 tablet:p-3">
+					<View className="squircle mb-2 rounded-xl bg-fill-info-secondary p-2 tablet:p-3">
 						<Text className="text-fill-info">
 							Stump features are optional, you can completely turn them off if you just want OPDS
 							support

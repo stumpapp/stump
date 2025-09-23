@@ -35,7 +35,7 @@ export default function SavedServerListItem({ server, onEdit, onDelete, forceOPD
 	const router = useRouter()
 
 	return (
-		<View className="w-full rounded-2xl">
+		<View className="w-full">
 			<ContextMenu.Root>
 				<ContextMenu.Trigger className="w-full">
 					<Pressable
@@ -49,7 +49,7 @@ export default function SavedServerListItem({ server, onEdit, onDelete, forceOPD
 							})
 						}
 					>
-						<View className="bg-background-muted w-full items-start rounded-2xl border border-edge bg-background-surface p-3">
+						<View className="bg-background-muted squircle w-full items-start rounded-2xl border border-edge bg-background-surface p-3">
 							<View className="flex-1 items-start justify-center gap-1">
 								<Text className="text-lg">{server.name}</Text>
 								<Text className="flex-1 text-foreground-muted">{formatURL(server.url)}</Text>

@@ -125,7 +125,7 @@ export default function Screen() {
 				)}
 
 				{loginError && (
-					<View className="mb-2 rounded-xl bg-fill-danger-secondary p-2">
+					<View className="squircle mb-2 rounded-xl bg-fill-danger-secondary p-2">
 						<Text className="text-fill-danger">{loginError}</Text>
 					</View>
 				)}

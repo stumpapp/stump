@@ -98,7 +98,7 @@ export default function Genres() {
 				<View className="gap-3">
 					<Text>Available Genres</Text>
 
-					<View className="gap-0 rounded-lg border border-edge bg-background-surface">
+					<View className="squircle gap-0 rounded-lg border border-edge bg-background-surface">
 						{genres.map((genre, idx) => (
 							<Fragment key={genre}>
 								<View className="flex flex-row items-center gap-3 p-3">

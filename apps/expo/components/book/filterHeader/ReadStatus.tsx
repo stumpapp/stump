@@ -84,7 +84,7 @@ export default function ReadStatus() {
 				<View className="gap-3">
 					<Text>Available Read Status</Text>
 
-					<View className="gap-0 rounded-lg border border-edge bg-background-surface">
+					<View className="squircle gap-0 rounded-lg border border-edge bg-background-surface">
 						{STATUSES.map((status, idx) => (
 							<Fragment key={status}>
 								<View className="flex flex-row items-center gap-3 p-3">

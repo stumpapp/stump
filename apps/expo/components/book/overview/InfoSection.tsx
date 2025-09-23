@@ -12,7 +12,7 @@ export default function InfoSection({ label, rows }: Props) {
 	return (
 		<View className="flex w-full gap-2">
 			<Text className="text-lg text-foreground-muted">{label}</Text>
-			<View className="flex flex-col rounded-lg border border-edge bg-background-surface">
+			<View className="squircle flex flex-col rounded-lg border border-edge bg-background-surface">
 				{rows.map((row, index) => (
 					<View key={`section-${label}-${index}`}>
 						{row}

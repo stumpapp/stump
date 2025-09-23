@@ -7,7 +7,7 @@ import { TextClassContext } from '~/components/ui/text'
 import { cn } from '~/lib/utils'
 
 const badgeVariants = cva(
-	'web:inline-flex items-center rounded-lg border border-border px-2.5 py-2 web:transition-colors web:focus:outline-none web:focus:ring-2 web:focus:ring-ring web:focus:ring-offset-2',
+	'web:inline-flex items-center squircle rounded-lg border border-border px-2.5 py-2 web:transition-colors web:focus:outline-none web:focus:ring-2 web:focus:ring-ring web:focus:ring-offset-2',
 	{
 		variants: {
 			variant: {

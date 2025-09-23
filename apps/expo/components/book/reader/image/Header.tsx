@@ -99,7 +99,7 @@ export default function Header({ onShowGlobalSettings }: Props) {
 					>
 						{({ pressed }) => (
 							<View
-								className="rounded-full border p-1 tablet:p-2"
+								className="squircle rounded-full border p-1 tablet:p-2"
 								style={{
 									backgroundColor: COLORS.dark.background.overlay.DEFAULT,
 									borderColor: COLORS.dark.edge.DEFAULT,
@@ -227,7 +227,7 @@ export default function Header({ onShowGlobalSettings }: Props) {
 			<DropdownMenu>
 				<DropdownMenuTrigger asChild>
 					<Button
-						className="h-[unset] w-[unset] rounded-full border p-1 tablet:p-2"
+						className="squircle h-[unset] w-[unset] rounded-full border p-1 tablet:p-2"
 						variant="ghost"
 						size="icon"
 						style={{
@@ -357,7 +357,7 @@ export default function Header({ onShowGlobalSettings }: Props) {
 				>
 					{({ pressed }) => (
 						<View
-							className="rounded-full border p-1 tablet:p-2"
+							className="squircle rounded-full border p-1 tablet:p-2"
 							style={{
 								backgroundColor: COLORS.dark.background.overlay.DEFAULT,
 								borderColor: COLORS.dark.edge.DEFAULT,

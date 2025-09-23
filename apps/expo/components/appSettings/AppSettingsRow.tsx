@@ -30,7 +30,7 @@ const AppSettingsRow = forwardRef<View, Props>(
 							style={{ opacity: pressed && isLink ? 0.7 : 1 }}
 						>
 							<View className="flex-row items-center gap-4">
-								<View className="flex h-8 w-8 items-center justify-center rounded-xl bg-background-surface">
+								<View className="squircle flex h-8 w-8 items-center justify-center rounded-xl bg-background-surface">
 									<Icon
 										as={(icons[icon] as LucideIcon) || BadgeQuestionMark}
 										className="h-6 w-6 text-foreground-muted"

@@ -120,7 +120,7 @@ export default function AddOrEditServerForm({
 	const renderAuthMode = () => {
 		if (authMode === 'default') {
 			return (
-				<View className="rounded-lg border border-dashed border-edge p-3">
+				<View className="squircle rounded-lg border border-dashed border-edge p-3">
 					<Text className="text-foreground-muted">
 						You will be prompted to login when accessing content as needed
 					</Text>
@@ -340,7 +340,7 @@ export default function AddOrEditServerForm({
 				<Button
 					variant="outline"
 					size="sm"
-					className={cn('rounded-lg bg-background-surface', {
+					className={cn('squircle rounded-lg bg-background-surface', {
 						'opacity-70': !url,
 						'bg-fill-success-secondary': didConnect,
 					})}
@@ -355,7 +355,7 @@ export default function AddOrEditServerForm({
 				<Text className="flex-1 text-base font-medium text-foreground-muted">Custom Headers</Text>
 
 				{formValues.customHeaders?.length && (
-					<View className="w-full overflow-hidden rounded-lg border border-edge">
+					<View className="squircle w-full overflow-hidden rounded-lg border border-edge">
 						{formValues.customHeaders.map((header, index) => (
 							<Swipeable
 								key={index}

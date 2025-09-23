@@ -74,7 +74,7 @@ const BottomSheetTextInput = forwardRef<
 				ref={ref}
 				{...rest}
 				className={cn(
-					'native:h-12 native:text-lg native:leading-[1.25] h-10 rounded-lg border border-edge bg-background px-3 text-base text-foreground file:border-0 file:bg-transparent file:font-medium lg:text-sm',
+					'native:h-12 native:text-lg native:leading-[1.25] squircle h-10 rounded-lg border border-edge bg-background px-3 text-base text-foreground file:border-0 file:bg-transparent file:font-medium lg:text-sm',
 					rest.editable === false && 'opacity-50',
 					{ 'border-edge-danger': !!errorMessage },
 					rest.className,

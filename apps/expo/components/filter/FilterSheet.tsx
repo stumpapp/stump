@@ -59,7 +59,7 @@ export default function FilterSheet({ label, children, isActive, snapPoints, ico
 				{({ pressed }) => (
 					<View
 						className={cn(
-							'flex flex-grow-0 flex-row items-center justify-center rounded-full bg-background-surface-secondary px-3 py-2',
+							'squircle flex flex-grow-0 flex-row items-center justify-center rounded-full bg-background-surface-secondary px-3 py-2',
 							pressed && 'opacity-70',
 							{ 'bg-fill-brand-secondary': isActive },
 						)}
@@ -76,7 +76,9 @@ export default function FilterSheet({ label, children, isActive, snapPoints, ico
 				index={snaps.length - 1}
 				snapPoints={snaps}
 				onChange={handleChange}
-				backgroundComponent={(props) => <View {...props} className="rounded-t-xl bg-background" />}
+				backgroundComponent={(props) => (
+					<View {...props} className="squircle rounded-t-xl bg-background" />
+				)}
 				handleIndicatorStyle={{ backgroundColor: colorScheme === 'dark' ? '#333' : '#ccc' }}
 				handleComponent={(props) => (
 					<BottomSheet.Handle

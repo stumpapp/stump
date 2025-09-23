@@ -76,7 +76,7 @@ export default function NextUpOverlay({ isVisible, book, onClose }: Props) {
 			>
 				<View className="flex-row items-center justify-between">
 					<Button
-						className="h-[unset] w-[unset] rounded-full border p-1 tablet:p-2"
+						className="squircle h-[unset] w-[unset] rounded-full border p-1 tablet:p-2"
 						variant="ghost"
 						size="icon"
 						style={{

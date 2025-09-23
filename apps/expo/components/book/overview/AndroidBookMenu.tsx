@@ -53,7 +53,7 @@ export default function AndroidBookMenu({
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
-				<Button className="h-8 w-8 rounded-full p-0" variant="ghost" size="icon">
+				<Button className="squircle h-8 w-8 rounded-full p-0" variant="ghost" size="icon">
 					<View>
 						<Ellipsis size={20} className="text-foreground" />
 					</View>

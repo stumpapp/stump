@@ -85,7 +85,9 @@ export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogPr
 				index={snapPoints.length - 1}
 				snapPoints={snapPoints}
 				onChange={handleChange}
-				backgroundComponent={(props) => <View {...props} className="rounded-t-xl bg-background" />}
+				backgroundComponent={(props) => (
+					<View {...props} className="squircle rounded-t-xl bg-background" />
+				)}
 				handleIndicatorStyle={{ backgroundColor: colorScheme === 'dark' ? '#333' : '#ccc' }}
 				handleComponent={(props) => (
 					<BottomSheet.Handle

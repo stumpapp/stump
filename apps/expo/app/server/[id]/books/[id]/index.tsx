@@ -17,7 +17,6 @@ import { BorderAndShadow } from '~/components/BorderAndShadow'
 import { TurboImage } from '~/components/Image'
 import RefreshControl from '~/components/RefreshControl'
 import { Button, Heading, icons, Text } from '~/components/ui'
-import { useColors } from '~/lib/constants'
 import { formatBytes, parseGraphQLDecimal } from '~/lib/format'
 import { cn } from '~/lib/utils'
 
@@ -114,7 +113,6 @@ export default function Screen() {
 	})
 
 	const router = useRouter()
-	const colors = useColors()
 
 	// TODO: prefetch, see https://github.com/candlefinance/faster-image/issues/73
 	// useEffect(() => {

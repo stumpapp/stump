@@ -2,12 +2,12 @@ import { useSDK } from '@stump/client'
 import { FragmentType, graphql, useFragment } from '@stump/graphql'
 import dayjs from 'dayjs'
 import { useRouter } from 'expo-router'
-import { Easing, Platform, View } from 'react-native'
+import { Easing, View } from 'react-native'
 import { easeGradient } from 'react-native-easing-gradient'
 import { Pressable } from 'react-native-gesture-handler'
 import LinearGradient from 'react-native-linear-gradient'
 
-import { COLORS, useColors } from '~/lib/constants'
+import { COLORS } from '~/lib/constants'
 
 import { useActiveServer } from '../activeServer'
 import { TurboImage } from '../Image'
@@ -44,7 +44,6 @@ export default function RecentlyAddedSeriesItem({ series }: Props) {
 
 	const data = useFragment(fragment, series)
 	const router = useRouter()
-	const colors = useColors()
 
 	const { colors: gradientColors, locations: gradientLocations } = easeGradient({
 		colorStops: {

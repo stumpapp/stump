@@ -5,7 +5,6 @@ import { Pressable } from 'react-native-gesture-handler'
 
 import { cn } from '~/lib/utils'
 
-import { useColors } from '~/lib/constants'
 import { TurboImage } from '../Image'
 import { Text } from '../ui'
 import { useGridItemSize } from './useGridItemSize'
@@ -22,10 +21,9 @@ export default function GridImageItem({ uri, title, href }: Props) {
 	const { itemDimension } = useGridItemSize()
 
 	const router = useRouter()
-	const colors = useColors()
 
 	return (
-		<Pressable onPress={() => router.navigate(href)} style={{}}>
+		<Pressable onPress={() => router.navigate(href)}>
 			{({ pressed }) => (
 				<View className={cn('flex-1 gap-2 pb-4', { 'opacity-80': pressed })}>
 					<BorderAndShadow

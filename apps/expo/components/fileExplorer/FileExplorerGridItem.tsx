@@ -28,6 +28,7 @@ export default function FileExplorerGridItem({ file }: Props) {
 	} = useActiveServer()
 
 	const router = useRouter()
+
 	const friendlyName = file?.media?.resolvedName || file.name
 
 	const onSelect = useCallback(() => {

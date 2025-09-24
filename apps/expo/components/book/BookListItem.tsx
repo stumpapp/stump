@@ -6,9 +6,7 @@ import { View } from 'react-native'
 import { Pressable } from 'react-native-gesture-handler'
 
 import { useListItemSize } from '~/lib/hooks'
-import { cn } from '~/lib/utils'
 
-import { useColors } from '~/lib/constants'
 import { useActiveServer } from '../activeServer'
 import { BorderAndShadow } from '../BorderAndShadow'
 import { TurboImage } from '../Image'
@@ -39,7 +37,6 @@ function BookListItem({ book }: Props) {
 	} = useActiveServer()
 
 	const router = useRouter()
-	const colors = useColors()
 
 	const { width, height } = useListItemSize()
 

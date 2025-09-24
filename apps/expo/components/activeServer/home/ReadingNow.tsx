@@ -100,7 +100,7 @@ export default function ReadingNow({ books }: Props) {
 				<Carousel
 					ref={carouselRef}
 					width={width}
-					height={IMAGE_HEIGHT + 8} // add some padding to not cut it off the shadow
+					height={IMAGE_HEIGHT + 8} // add some padding to not cut off the shadow
 					data={books}
 					loop={false}
 					mode="parallax"
@@ -237,7 +237,6 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 	}, [isTablet, width, data])
 
 	const router = useRouter()
-	const colors = useColors()
 	const isEbookProgress = !!data.readProgress?.epubcfi
 	const { colors: gradientColors, locations: gradientLocations } = easeGradient({
 		colorStops: {
@@ -252,7 +251,7 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 		<View className="flex flex-row gap-4">
 			<Pressable onPress={() => router.navigate(`/server/${serverID}/books/${data.id}`)}>
 				<BorderAndShadow
-					style={{ borderRadius: 12, borderWidth: 0.4, shadowRadius: 1.41, elevation: 2 }}
+					style={{ borderRadius: 12, borderWidth: 0.5, shadowRadius: 1.41, elevation: 2 }}
 				>
 					<LinearGradient
 						colors={gradientColors}

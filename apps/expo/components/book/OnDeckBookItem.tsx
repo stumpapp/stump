@@ -2,17 +2,18 @@ import { useSDK } from '@stump/client'
 import { FragmentType, graphql, useFragment } from '@stump/graphql'
 import { useRouter } from 'expo-router'
 import { memo } from 'react'
-import { Platform, View } from 'react-native'
+import { Easing, View } from 'react-native'
+import { easeGradient } from 'react-native-easing-gradient'
 import { Pressable } from 'react-native-gesture-handler'
 import LinearGradient from 'react-native-linear-gradient'
 
-import { COLORS, useColors } from '~/lib/constants'
+import { COLORS } from '~/lib/constants'
 
 import { useListItemSize } from '~/lib/hooks'
 import { useActiveServer } from '../activeServer'
+import { BorderAndShadow } from '../BorderAndShadow'
 import { TurboImage } from '../Image'
 import { Text } from '../ui'
-import { BorderAndShadow } from '../BorderAndShadow'
 
 const fragment = graphql(`
 	fragment OnDeckBookItem on Media {
@@ -45,7 +46,15 @@ function OnDeckBookItem({ book }: Props) {
 	const { height, width } = useListItemSize()
 
 	const router = useRouter()
-	const colors = useColors()
+
+	const { colors: gradientColors, locations: gradientLocations } = easeGradient({
+		colorStops: {
+			0.2: { color: 'transparent' },
+			1: { color: 'rgba(0, 0, 0, 0.90)' },
+		},
+		extraColorStopsPerTransition: 16,
+		easing: Easing.bezier(0.42, 0, 1, 1), // https://cubic-bezier.com/#.42,0,1,1
+	})
 
 	return (
 		<Pressable onPress={() => router.navigate(`/server/${serverID}/books/${data.id}`)}>
@@ -55,9 +64,9 @@ function OnDeckBookItem({ book }: Props) {
 						style={{ borderRadius: 8, borderWidth: 0.3, shadowRadius: 1.41, elevation: 2 }}
 					>
 						<LinearGradient
-							colors={['transparent', 'rgba(0, 0, 0, 0.9)']}
+							colors={gradientColors}
 							style={{ position: 'absolute', inset: 0, zIndex: 10 }}
-							locations={[0.4, 1]}
+							locations={gradientLocations}
 						/>
 
 						<TurboImage

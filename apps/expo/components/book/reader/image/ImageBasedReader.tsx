@@ -16,7 +16,6 @@ import {
 	TapGestureHandlerEventPayload,
 } from 'react-native-gesture-handler'
 import { useSharedValue } from 'react-native-reanimated'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Success } from 'react-native-turbo-image'
 
 import { TurboImage } from '~/components/Image'
@@ -217,14 +216,12 @@ const Page = React.memo(
 		maxHeight,
 		// readingDirection,
 	}: PageProps) => {
-		const { book, pageURL, flatListRef, setImageSizes } = useImageBasedReader()
+		const { book, pageURL, flatListRef, pageSets, setImageSizes } = useImageBasedReader()
 		const {
 			preferences: { tapSidesToNavigate, readingDirection, allowDownscaling },
 		} = useBookPreferences({ book })
 		const { isTablet } = useDisplay()
 		const { sdk } = useSDK()
-
-		const insets = useSafeAreaInsets()
 
 		const scale = useSharedValue(1)
 		const showControls = useReaderStore((state) => state.showControls)
@@ -237,17 +234,18 @@ const Page = React.memo(
 				const isLeft = x < maxWidth / tapThresholdRatio
 				const isRight = x > maxWidth - maxWidth / tapThresholdRatio
 
-				if (isLeft) {
-					const modifier = readingDirection === ReadingDirection.Rtl ? 1 : -1
-					flatListRef.current?.scrollToIndex({ index: index + modifier, animated: true })
-				} else if (isRight) {
-					const modifier = readingDirection === ReadingDirection.Rtl ? -1 : 1
-					flatListRef.current?.scrollToIndex({ index: index + modifier, animated: true })
+				let modifier = 0
+				if (isLeft) modifier = readingDirection === ReadingDirection.Rtl ? 1 : -1
+				if (isRight) modifier = readingDirection === ReadingDirection.Rtl ? -1 : 1
+
+				const nextIndex = index + modifier
+				if (nextIndex >= 0 && nextIndex < pageSets.length) {
+					flatListRef.current?.scrollToIndex({ index: nextIndex, animated: true })
 				}
 
 				return isLeft || isRight
 			},
-			[maxWidth, index, flatListRef, tapThresholdRatio, readingDirection],
+			[maxWidth, index, flatListRef, tapThresholdRatio, readingDirection, pageSets],
 		)
 
 		const onSingleTap = useCallback(
@@ -287,7 +285,6 @@ const Page = React.memo(
 			[setImageSizes, sizes, indexes],
 		)
 
-		const safeMaxHeight = maxHeight - insets.top - insets.bottom
 		const [imageRatio, setImageRatio] = useState<number | undefined>(undefined)
 		const roughPageRenderWidth = indexes.length > 1 ? maxWidth / 2 : maxWidth
 

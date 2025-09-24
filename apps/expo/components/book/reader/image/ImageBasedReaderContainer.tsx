@@ -3,7 +3,6 @@ import { generatePageSets, ImageBasedBookPageRef } from '@stump/sdk'
 import { ComponentProps, useCallback, useMemo, useRef, useState } from 'react'
 import { View } from 'react-native'
 import { FlatList } from 'react-native-gesture-handler'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { useDisplay } from '~/lib/hooks'
 import { DEFAULT_BOOK_PREFERENCES, useBookPreferences } from '~/stores/reader'
@@ -106,7 +105,6 @@ export default function ImageBasedReaderContainer({
 
 	const flatListRef = useRef<FlatList>(null)
 	// const flatListRef = useRef<FlashList<number>>(null)
-	const insets = useSafeAreaInsets()
 
 	// TODO: prefetch, see https://github.com/candlefinance/faster-image/issues/73
 	// useEffect(

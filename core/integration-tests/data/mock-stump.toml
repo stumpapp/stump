@@ -5,4 +5,5 @@ db_path = "not_a_real_path"
 client_dir = "not_a_real_dir"
 config_dir = "also_not_a_real_dir"
 allowed_origins = ["origin1", "origin2"]
-pdfium_path = "not_a_path_to_pdfium"
+pdf_render_dpi = 150.0
+pdf_image_format = "png"

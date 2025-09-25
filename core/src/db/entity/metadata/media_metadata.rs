@@ -1,10 +1,8 @@
 use std::collections::HashMap;
 
 use merge::Merge;
-use pdf::{
-	object::InfoDict,
-	primitive::{Dictionary, PdfString},
-};
+// Removed pdf imports as we migrated to MuPDF
+// TODO: If InfoDict functionality is needed, implement with MuPDF
 use prisma_client_rust::chrono::{Datelike, NaiveDate};
 use serde::{Deserialize, Serialize};
 use specta::Type;
@@ -346,55 +344,15 @@ impl From<HashMap<String, Vec<String>>> for MediaMetadata {
 	}
 }
 
-impl From<Dictionary> for MediaMetadata {
-	fn from(dict: Dictionary) -> Self {
-		// FIXME: this is pretty hacky! I need to match on the type of the value
-		let map = dict
-			.into_iter()
-			.map(|(k, v)| v.to_string().map(|v| (k, v)))
-			.filter_map(Result::ok)
-			.map(|(k, v)| (k.to_lowercase(), vec![v]))
-			.collect::<HashMap<String, Vec<String>>>();
-		Self::from(map)
-	}
-}
-
-fn pdf_string_to_string(pdf_string: PdfString) -> Option<String> {
-	pdf_string.to_string().map_or_else(
-		|error| {
-			tracing::error!(error = ?error, "Failed to convert PdfString to String");
-			None
-		},
-		|str| Some(str.trim().to_owned()),
-	)
-}
-
-impl From<InfoDict> for MediaMetadata {
-	fn from(dict: InfoDict) -> Self {
-		MediaMetadata {
-			title: dict.title.and_then(pdf_string_to_string),
-			genre: dict.subject.and_then(pdf_string_to_string).map(|v| vec![v]),
-			year: dict.creation_date.as_ref().map(|date| date.year as i32),
-			month: dict.creation_date.as_ref().map(|date| date.month as i32),
-			day: dict.creation_date.as_ref().map(|date| date.day as i32),
-			writers: dict.author.and_then(pdf_string_to_string).map(|v| vec![v]),
-			..Default::default()
-		}
-	}
-}
+// Old PDF-specific implementations removed as part of MuPDF migration
+// The PDF processor now handles metadata extraction directly using MuPDF API
 
 #[cfg(test)]
 mod tests {
 	use super::*;
 
-	#[test]
-	fn test_pdf_string_to_string() {
-		let pdf_string = PdfString::from("Hello, world!");
-		assert_eq!(
-			pdf_string_to_string(pdf_string),
-			Some("Hello, world!".to_string())
-		);
-	}
+	// PDF-specific test removed as part of MuPDF migration
+	// The old pdf_string_to_string function was removed
 
 	#[test]
 	fn test_from_hashmap() {

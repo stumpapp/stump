@@ -22,12 +22,8 @@ pub enum FileError {
 	EpubReadError(String),
 	#[error("Could not find an image")]
 	NoImageError,
-	#[error("{0}")]
-	PdfError(#[from] pdf::error::PdfError),
-	#[error("{0}")]
-	PdfRendererError(#[from] pdfium_render::prelude::PdfiumError),
-	#[error("Stump is not properly configured to render PDFs")]
-	PdfConfigurationError,
+	#[error("MuPDF error: {0}")]
+	MuPdfError(#[from] mupdf::Error),
 	#[error("Failed to process PDF file: {0}")]
 	PdfProcessingError(String),
 	#[error("{0}")]

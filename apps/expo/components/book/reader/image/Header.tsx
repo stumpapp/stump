@@ -3,7 +3,12 @@ import { useRouter } from 'expo-router'
 import { Glasses, Settings2, SquareArrowLeft, SquareArrowRight } from 'lucide-react-native'
 import { useCallback, useEffect, useState } from 'react'
 import { Platform, Pressable, View } from 'react-native'
-import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
+import Animated, {
+	Easing,
+	useAnimatedStyle,
+	useSharedValue,
+	withTiming,
+} from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import * as NativeDropdownMenu from 'zeego/dropdown-menu'
 
@@ -52,10 +57,11 @@ export default function Header({ onShowGlobalSettings }: Props) {
 	const insets = useSafeAreaInsets()
 	const visible = useReaderStore((state) => state.showControls)
 
-	const translateY = useSharedValue(-400)
+	const translateY = useSharedValue(-150)
 	useEffect(() => {
-		translateY.value = withTiming(visible ? 0 : 400 * -1, {
-			duration: 200,
+		translateY.value = withTiming(visible ? 0 : -150, {
+			duration: 250,
+			easing: visible ? Easing.out(Easing.quad) : Easing.in(Easing.quad),
 		})
 	}, [visible, translateY, height, insets.top])
 

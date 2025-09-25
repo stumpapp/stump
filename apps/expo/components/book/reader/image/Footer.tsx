@@ -7,7 +7,12 @@ import duration from 'dayjs/plugin/duration'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Platform, View } from 'react-native'
 import { FlatList, Pressable } from 'react-native-gesture-handler'
-import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
+import Animated, {
+	Easing,
+	useAnimatedStyle,
+	useSharedValue,
+	withTiming,
+} from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import TImage from 'react-native-turbo-image'
 
@@ -52,10 +57,22 @@ export default function Footer() {
 
 	const [isSliderDragging, setIsSliderDragging] = useState(false)
 
-	const translateY = useSharedValue(height / 2)
+	const baseSize = useMemo(() => {
+		const baseWidth = isTablet ? 120 : 75
+		return {
+			height: baseWidth / HEIGHT_MODIFIER,
+			width: baseWidth,
+		}
+	}, [isTablet])
+
+	const largestHeight = baseSize.height / HEIGHT_MODIFIER
+	const translateY = useSharedValue(largestHeight * 2)
 	useEffect(() => {
-		translateY.value = withTiming(visible ? 0 : height / 2)
-	}, [visible, translateY, height])
+		translateY.value = withTiming(visible ? 0 : largestHeight * 1.8, {
+			duration: 250,
+			easing: visible ? Easing.out(Easing.quad) : Easing.in(Easing.quad),
+		})
+	}, [visible])
 
 	const animatedStyles = useAnimatedStyle(() => {
 		return {
@@ -67,14 +84,6 @@ export default function Footer() {
 	})
 
 	const percentage = (currentPage / book.pages) * 100
-
-	const baseSize = useMemo(() => {
-		const baseWidth = isTablet ? 120 : 75
-		return {
-			height: baseWidth / HEIGHT_MODIFIER,
-			width: baseWidth,
-		}
-	}, [isTablet])
 
 	const calcSetContainerSize = useCallback(
 		(set: number[]) => {

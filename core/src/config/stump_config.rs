@@ -25,7 +25,8 @@ pub mod env_keys {
 	pub const DB_PATH_KEY: &str = "STUMP_DB_PATH";
 	pub const CLIENT_KEY: &str = "STUMP_CLIENT_DIR";
 	pub const ORIGINS_KEY: &str = "STUMP_ALLOWED_ORIGINS";
-	pub const PDFIUM_KEY: &str = "PDFIUM_PATH";
+	pub const PDF_DPI_KEY: &str = "STUMP_PDF_DPI";
+	pub const PDF_IMAGE_FORMAT_KEY: &str = "STUMP_PDF_IMAGE_FORMAT";
 	pub const ENABLE_SWAGGER_KEY: &str = "ENABLE_SWAGGER_UI";
 	pub const ENABLE_KOREADER_SYNC_KEY: &str = "ENABLE_KOREADER_SYNC";
 	pub const HASH_COST_KEY: &str = "HASH_COST";
@@ -142,10 +143,15 @@ pub struct StumpConfig {
 	#[env_key(ORIGINS_KEY)]
 	pub allowed_origins: Vec<String>,
 
-	/// Path to the PDFium binary for PDF support.
-	#[default_value(None)]
-	#[env_key(PDFIUM_KEY)]
-	pub pdfium_path: Option<String>,
+	/// PDF rendering DPI for image generation.
+	#[default_value(150.0)]
+	#[env_key(PDF_DPI_KEY)]
+	pub pdf_render_dpi: f32,
+
+	/// Target image format for PDF rendering (png, jpeg).
+	#[default_value("png".to_string())]
+	#[env_key(PDF_IMAGE_FORMAT_KEY)]
+	pub pdf_image_format: String,
 
 	/// Indicates if the Swagger UI should be disabled.
 	#[default_value(false)]
@@ -344,7 +350,8 @@ mod tests {
 			custom_templates_dir: None,
 			config_dir: None,
 			allowed_origins: Some(vec!["origin1".to_string(), "origin2".to_string()]),
-			pdfium_path: Some("not_a_path_to_pdfium".to_string()),
+			pdf_render_dpi: Some(150.0),
+			pdf_image_format: Some("png".to_string()),
 			enable_swagger: Some(false),
 			enable_koreader_sync: Some(false),
 			password_hash_cost: None,
@@ -382,7 +389,8 @@ mod tests {
 				config_dir: Some(config_dir),
 				custom_templates_dir: None,
 				allowed_origins: Some(vec!["origin1".to_string(), "origin2".to_string()]),
-				pdfium_path: Some("not_a_path_to_pdfium".to_string()),
+				pdf_render_dpi: Some(150.0),
+				pdf_image_format: Some("png".to_string()),
 				enable_swagger: Some(false),
 				enable_koreader_sync: Some(false),
 				password_hash_cost: Some(DEFAULT_PASSWORD_HASH_COST),
@@ -437,7 +445,8 @@ mod tests {
 						client_dir: "./client".to_string(),
 						config_dir,
 						allowed_origins: vec![],
-						pdfium_path: None,
+						pdf_render_dpi: 150.0,
+						pdf_image_format: "png".to_string(),
 						enable_swagger: true,
 						enable_koreader_sync: false,
 						password_hash_cost: 1,

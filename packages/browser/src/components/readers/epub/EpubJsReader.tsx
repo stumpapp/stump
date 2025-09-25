@@ -55,6 +55,20 @@ class SectionLengths {
 	public lengths: { [key: number]: number } = {}
 }
 
+const injectFontStylesheet = (rendition: Rendition) => {
+	const doc = Object.values(rendition.getContents())[0]?.document
+	if (!doc) return
+
+	const head = doc.head
+	if (!head) return
+
+	const link = doc.createElement('link')
+	link.rel = 'stylesheet'
+	link.id = 'stump-fonts-stylesheet'
+	link.href = '/assets/fonts/fonts.css'
+	head.appendChild(link)
+}
+
 /**
  * A component for rendering a reader capable of reading epub files. This component uses
  * epubjs internally for the main rendering logic.
@@ -219,6 +233,10 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 				const rendition_ = book.renderTo(ref.current!, {
 					width,
 					height,
+				})
+
+				rendition_.hooks.content.register(() => {
+					injectFontStylesheet(rendition_)
 				})
 
 				//? TODO: I guess here I would need to wait for and load in custom theme blobs...

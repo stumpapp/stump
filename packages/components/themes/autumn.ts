@@ -51,6 +51,10 @@ export const autumn = {
 			hover: '#FFB70326',
 			secondary: '#FFB70326',
 		},
+		'on-black': {
+			DEFAULT: '#242628',
+			muted: '#242628',
+		},
 	},
 	foreground: {
 		DEFAULT: '#F7F0E4',
@@ -58,6 +62,10 @@ export const autumn = {
 		disabled: '#A29A8D',
 		muted: '#A29A8D',
 		'on-inverse': '#2C1A12',
+		'on-black': {
+			DEFAULT: '#F7F0E4',
+			muted: '#A29A8D',
+		},
 		subtle: '#E5DCC5',
 	},
 	sidebar: {

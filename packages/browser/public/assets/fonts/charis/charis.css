@@ -6,27 +6,27 @@ Open Font License, Version 1.1 (http://scripts.sil.org/OFL).
 */
 
 @font-face {
-	font-family: CharisSILW;
+	font-family: 'Charis SIL';
 	src:
 		url(CharisSIL-Regular.woff),
 		url(CharisSIL-Regular.woff2) format('woff2');
 }
 @font-face {
-	font-family: CharisSILW;
+	font-family: 'Charis SIL';
 	font-style: italic;
 	src:
 		url(CharisSIL-Italic.woff),
 		url(CharisSIL-Italic.woff2) format('woff2');
 }
 @font-face {
-	font-family: CharisSILW;
+	font-family: 'Charis SIL';
 	font-weight: bold;
 	src:
 		url(CharisSIL-Bold.woff),
 		url(CharisSIL-Bold.woff2) format('woff2');
 }
 @font-face {
-	font-family: CharisSILW;
+	font-family: 'Charis SIL';
 	font-weight: bold;
 	font-style: italic;
 	src:

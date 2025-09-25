@@ -16,7 +16,7 @@ export default function TimerMenu() {
 	return (
 		<Dropdown>
 			<Dropdown.Trigger asChild>
-				<ControlButton>
+				<ControlButton className="text-foreground-on-black">
 					<Clock className="h-4 w-4" />
 				</ControlButton>
 			</Dropdown.Trigger>

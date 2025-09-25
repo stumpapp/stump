@@ -51,6 +51,10 @@ export const ocean = {
 			hover: '#FF8C00',
 			secondary: '#F77F0026',
 		},
+		'on-black': {
+			DEFAULT: '#242628',
+			muted: '#242628',
+		},
 	},
 	foreground: {
 		DEFAULT: '#EDF2F4',
@@ -58,6 +62,10 @@ export const ocean = {
 		disabled: '#94A1AC',
 		muted: '#94A1AC',
 		'on-inverse': '#0B3D4D',
+		'on-black': {
+			DEFAULT: '#EDF2F4',
+			muted: '#B0B3B7',
+		},
 		subtle: '#D9E4EA',
 	},
 	sidebar: {

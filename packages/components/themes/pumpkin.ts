@@ -47,6 +47,10 @@ export const pumpkin: StumpTheme = {
 		// DEFAULT: '#DE9887',
 		// muted: '#883926',
 		// subtle: '#F84D11',
+		'on-black': {
+			DEFAULT: '#F0C4AE',
+			muted: '#E7A17F',
+		},
 	},
 	sidebar: {
 		DEFAULT: '#090909',

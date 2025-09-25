@@ -88,6 +88,8 @@ pub enum ReadingImageScaleFit {
 	Height,
 	#[serde(rename = "width")]
 	Width,
+	#[serde(rename = "auto")]
+	Auto,
 	#[serde(rename = "none", alias = "original")]
 	None,
 }
@@ -99,6 +101,7 @@ impl FromStr for ReadingImageScaleFit {
 		match s {
 			"height" => Ok(ReadingImageScaleFit::Height),
 			"width" => Ok(ReadingImageScaleFit::Width),
+			"auto" => Ok(ReadingImageScaleFit::Auto),
 			"none" | "original" => Ok(ReadingImageScaleFit::None),
 			_ => Err(format!("\"{s}\" is not a valid image scale fit")),
 		}
@@ -110,6 +113,7 @@ impl fmt::Display for ReadingImageScaleFit {
 		match self {
 			ReadingImageScaleFit::Height => write!(f, "height"),
 			ReadingImageScaleFit::Width => write!(f, "width"),
+			ReadingImageScaleFit::Auto => write!(f, "auto"),
 			ReadingImageScaleFit::None => write!(f, "none"),
 		}
 	}

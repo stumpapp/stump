@@ -1,4 +1,4 @@
-import { Label, NativeSelect, Text } from '@stump/components'
+import { ComboBox, Label, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { isSupportedFont } from '@stump/sdk'
 import { useCallback } from 'react'
@@ -23,8 +23,8 @@ export default function FontSelect() {
 	 * TODO(383): support custom fonts
 	 */
 	const changeFont = useCallback(
-		async (font: string) => {
-			if (isSupportedFont(font)) {
+		async (font?: string) => {
+			if (font && isSupportedFont(font)) {
 				// Note: useApplyTheme will apply the font to the body element after the preferences are updated
 				try {
 					await update({ app_font: font })
@@ -41,11 +41,11 @@ export default function FontSelect() {
 			<Label htmlFor="extension" className="mb-1.5">
 				{t(`${localeKey}.label`)}
 			</Label>
-			{/* TODO: don't use a native select, instead some combobox which renders each option in the font */}
-			<NativeSelect
+			<ComboBox
 				value={app_font || 'inter'}
 				options={SUPPORTED_FONT_OPTIONS}
-				onChange={(e) => changeFont(e.target.value)}
+				onChange={changeFont}
+				size="full"
 			/>
 			<Text variant="muted" size="xs">
 				{t(`${localeKey}.description`)}
@@ -57,12 +57,44 @@ export default function FontSelect() {
 const localeKey = 'settingsScene.app/appearance.sections.fontSelect'
 
 export const SUPPORTED_FONT_OPTIONS = [
-	{ label: 'Atkinson Hyperlegible', value: 'atkinsonhyperlegible' },
-	{ label: 'Bitter', value: 'bitter' },
-	{ label: 'Charis SIL', value: 'charis' },
-	{ label: 'Inter', value: 'inter' },
-	{ label: 'Libre Baskerville', value: 'librebaskerville' },
-	{ label: 'Literata', value: 'literata' },
-	{ label: 'Nunito', value: 'nunito' },
-	{ label: 'OpenDyslexic', value: 'opendyslexic' },
+	{
+		label: 'Atkinson Hyperlegible',
+		value: 'atkinsonhyperlegible',
+		fontClassName: 'font-atkinsonhyperlegible',
+	},
+	{
+		label: 'Bitter',
+		value: 'bitter',
+		fontClassName: 'font-bitter',
+	},
+	{
+		label: 'Charis SIL',
+		value: 'charis',
+		fontClassName: 'font-charis',
+	},
+	{
+		label: 'Inter',
+		value: 'inter',
+		fontClassName: 'font-inter',
+	},
+	{
+		label: 'Libre Baskerville',
+		value: 'librebaskerville',
+		fontClassName: 'font-librebaskerville',
+	},
+	{
+		label: 'Literata',
+		value: 'literata',
+		fontClassName: 'font-literata',
+	},
+	{
+		label: 'Nunito',
+		value: 'nunito',
+		fontClassName: 'font-nunito',
+	},
+	{
+		label: 'OpenDyslexic',
+		value: 'opendyslexic',
+		fontClassName: 'font-opendyslexic',
+	},
 ]

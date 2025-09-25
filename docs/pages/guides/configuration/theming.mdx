@@ -56,12 +56,12 @@ If you would like a new font, it will have to be added to the project manually. 
 
 ```css filename="font/my-font.css" copy
 @font-face {
-	font-family: 'MyFont';
+	font-family: 'My Font';
 	src: url('path/to/font.woff2') format('woff2');
 }
 ```
 
-You can see how this is done in the [fonts](https://github.com/stumpapp/stump/tree/main/packages/components/src/font) directory of the `components` package.
+You can see how this is done in the [fonts](https://github.com/stumpapp/stump/tree/main/packages/browser/public/assets/fonts) directory of the `browser` package.
 
 Once the font is defined, it can be added to the `fontFamily` object in the custom tailwind preset file:
 
@@ -71,25 +71,43 @@ module.exports = {
 	theme: {
 		fontFamily: {
 			// ... other fonts
-			'font-my-font': ['MyFont', 'sans'], // <- the `font-` prefix is important!
+			'myfont': ['My Font', 'sans'],
 		},
 	},
 	// ... other configurations
 }
 ```
 
-Then, the font can be used in the `FontSelect` component:
+Then, the font can be used in the `FontSelect` component by adding it to `SUPPORTED_FONT_OPTIONS`:
 
 ```tsx filename="scenes/settings/app/appearance/FontSelect.tsx" copy
-<NativeSelect
+<ComboBox
 	value={app_font || 'inter'}
-	options={[
-		{ label: 'Inter', value: 'inter' },
-		{ label: 'OpenDyslexic', value: 'opendyslexic' },
-		{ label: 'MyFont', value: 'my-font' }, // <- our new font
-	]}
-	onChange={(e) => changeFont(e.target.value)}
+	options={SUPPORTED_FONT_OPTIONS}
+	onChange={changeFont}
+	size="full"
 />
+
+// ... skipping to the bottom ...
+
+export const SUPPORTED_FONT_OPTIONS = [
+	{
+		label: 'Atkinson Hyperlegible',
+		value: 'atkinsonhyperlegible',
+		fontClassName: 'font-atkinsonhyperlegible',
+	},
+	{
+		label: 'Bitter',
+		value: 'bitter',
+		fontClassName: 'font-bitter',
+	},
+	{
+		label: 'My Font',
+		value: 'myfont',
+		fontClassName: 'font-myfont',
+	},
+	// ... other fonts
+]
 ```
 
 This will allow users to select the new font from the settings page. In the future, it is planned to allow for the mapping of local fonts so that users can use their own fonts without needing to modify the source code. See the [Future plans](#future-plans) section for more information.

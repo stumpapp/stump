@@ -3373,6 +3373,11 @@
   dependencies:
     "@octokit/openapi-types" "^18.0.0"
 
+"@panzoom/panzoom@^4.6.0":
+  version "4.6.0"
+  resolved "https://registry.yarnpkg.com/@panzoom/panzoom/-/panzoom-4.6.0.tgz#ab9cb71403ed46fc5ac32bb9186761cdbd4a8177"
+  integrity sha512-3KxkY1lNKFn98fW5ZFR6vV0YzsXj3I4EQDyFWSXME6/cic86eSS7VjuqIjrA3PEpySo0r5fFtlX8eYCt4JPUFQ==
+
 "@pkgjs/parseargs@^0.11.0":
   version "0.11.0"
   resolved "https://registry.yarnpkg.com/@pkgjs/parseargs/-/parseargs-0.11.0.tgz#a77ea742fab25775145434eb1d2328cf5013ac33"

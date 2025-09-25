@@ -55,6 +55,10 @@ export const cosmic = {
 			hover: '#F5AC39',
 			secondary: '#F39C1226',
 		},
+		'on-black': {
+			DEFAULT: '#242628',
+			muted: '#242628',
+		},
 	},
 	foreground: {
 		DEFAULT: '#F4F2FF',
@@ -62,6 +66,10 @@ export const cosmic = {
 		disabled: '#A29BCC',
 		muted: '#A29BCC',
 		'on-inverse': '#1C0F45',
+		'on-black': {
+			DEFAULT: '#F4F2FF',
+			muted: '#A29BCC',
+		},
 		subtle: '#D1C5E5',
 	},
 	sidebar: {

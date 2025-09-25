@@ -42,19 +42,28 @@ const progressVariants = cva('relative overflow-hidden', {
 type BaseProps = ComponentPropsWithoutRef<typeof ProgressPrimitive.Root> &
 	VariantProps<typeof progressVariants>
 
-// TODO: indeterminate state
 // FIXME: https://github.com/jsx-eslint/eslint-plugin-react/issues/3284
 export type ProgressBarProps = {
 	className?: string
 	value?: number | null
 	isIndeterminate?: boolean
 	indicatorClassName?: string
+	/**
+	 * When true, the progress bar fills from right to left instead of left to right.
+	 * Useful for RTL (right-to-left) reading directions.
+	 */
+	inverted?: boolean
 } & BaseProps
 
-const safeValue = (value: number | null) => {
+const safeValue = (value: number | null, max = 100) => {
 	if (value === null) return null
 
-	return isNaN(value) ? null : Math.min(100, Math.max(0, value))
+	return isNaN(value) ? null : Math.min(max, Math.max(0, value))
+}
+
+const calculatePercentage = (value: number | null, max = 100) => {
+	if (value === null || max <= 0) return 0
+	return Math.min(100, Math.max(0, (value / max) * 100))
 }
 
 export const ProgressBar = React.forwardRef<
@@ -70,11 +79,27 @@ export const ProgressBar = React.forwardRef<
 			rounded = 'default',
 			isIndeterminate,
 			indicatorClassName,
+			inverted = false,
 			...props
 		},
 		ref,
 	) => {
-		const adjustedValue = useMemo(() => safeValue(value ?? null), [value])
+		const adjustedValue = useMemo(() => safeValue(value ?? null, props.max), [value, props.max])
+
+		const percentage = useMemo(
+			() => calculatePercentage(adjustedValue, props.max),
+			[adjustedValue, props.max],
+		)
+
+		const style = useMemo(() => {
+			if (isIndeterminate) {
+				return undefined
+			} else {
+				return inverted
+					? { transform: `translateX(${100 - percentage}%)` }
+					: { transform: `translateX(-${100 - percentage}%)` }
+			}
+		}, [isIndeterminate, inverted, percentage])
 
 		return (
 			<ProgressPrimitive.Root
@@ -99,11 +124,7 @@ export const ProgressBar = React.forwardRef<
 						},
 						indicatorClassName,
 					)}
-					style={
-						isIndeterminate
-							? undefined
-							: { transform: `translateX(-${100 - (adjustedValue || 0)}%)` }
-					}
+					style={style}
 				/>
 			</ProgressPrimitive.Root>
 		)

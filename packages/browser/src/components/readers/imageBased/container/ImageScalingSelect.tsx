@@ -31,6 +31,7 @@ export default function ImageScalingSelect({ value, onChange }: Props) {
 				id="image-scaling-fit"
 				size="sm"
 				options={[
+					{ label: 'Auto', value: 'auto' },
 					{ label: 'Height', value: 'height' },
 					{ label: 'Width', value: 'width' },
 					{ label: 'Original', value: 'none' },
@@ -44,4 +45,4 @@ export default function ImageScalingSelect({ value, onChange }: Props) {
 }
 
 const isBookImageScalingFit = (value: string): value is BookImageScalingFit =>
-	['height', 'width', 'none'].includes(value)
+	['height', 'width', 'auto', 'none'].includes(value)

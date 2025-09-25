@@ -63,7 +63,7 @@ export default function ContinuousScrollReader({
 	})
 
 	const {
-		bookPreferences: { imageScaling, brightness },
+		bookPreferences: { imageScaling, brightness, readingMode },
 		settings: { showToolBar, preload },
 		setSettings,
 	} = useBookPreferences({ book: media })
@@ -103,6 +103,7 @@ export default function ContinuousScrollReader({
 			<AutoSizer>
 				{({ height, width }) => (
 					<Virtuoso
+						key={readingMode}
 						style={{ height, width }}
 						useWindowScroll={false}
 						horizontalDirection={orientation === 'horizontal'}

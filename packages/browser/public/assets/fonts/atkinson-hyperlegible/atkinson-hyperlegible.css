@@ -1,5 +1,5 @@
 @font-face {
-	font-family: Atkinson-Hyperlegible;
+	font-family: 'Atkinson Hyperlegible';
 	font-style: normal;
 	font-weight: 400;
 	src:
@@ -7,7 +7,7 @@
 		url('Atkinson-Hyperlegible-Regular-102.woff2') format('woff2');
 }
 @font-face {
-	font-family: Atkinson-Hyperlegible;
+	font-family: 'Atkinson Hyperlegible';
 	font-style: italic;
 	font-weight: 400;
 	src:
@@ -15,7 +15,7 @@
 		url('Atkinson-Hyperlegible-Italic-102.woff2') format('woff2');
 }
 @font-face {
-	font-family: Atkinson-Hyperlegible;
+	font-family: 'Atkinson Hyperlegible';
 	font-style: normal;
 	font-weight: 700;
 	src:

@@ -2,7 +2,7 @@ import type { ReadingDirection, ReadingMode } from '@stump/sdk'
 import { create } from 'zustand'
 import { createJSONStorage, devtools, persist, StateStorage } from 'zustand/middleware'
 
-export type BookImageScalingFit = 'width' | 'height' | 'none'
+export type BookImageScalingFit = 'auto' | 'width' | 'height' | 'none'
 export type BookImageScaling = {
 	scaleToFit: BookImageScalingFit
 }
@@ -61,6 +61,10 @@ export type BookPreferences = {
 	 * Whether or not to track elapsed time for the book
 	 */
 	trackElapsedTime: boolean
+	/**
+	 * Whether or not the page 2 should be displayed separately. This will have no effect if the book is not image-based
+	 */
+	secondPageSeparate: boolean
 }
 
 /**
@@ -122,6 +126,21 @@ export type ReaderStore = {
 	setBookPreferences: (id: BookID, preferences: BookPreferences) => void
 }
 
+export const DEFAULT_BOOK_PREFERENCES = {
+	fontSize: 13,
+	lineHeight: 1.5,
+	brightness: 1,
+	readingMode: 'paged',
+	readingDirection: 'ltr',
+	imageScaling: {
+		scaleToFit: 'height',
+	},
+	doublePageBehavior: 'auto',
+	secondPageSeparate: false,
+	trackElapsedTime: true,
+	tapSidesToNavigate: true,
+} as const
+
 export const createReaderStore = (storage?: StateStorage) =>
 	create<ReaderStore>()(
 		devtools(
@@ -154,17 +173,7 @@ export const createReaderStore = (storage?: StateStorage) =>
 								behind: 3,
 							},
 							showToolBar: false,
-							fontSize: 13,
-							lineHeight: 1.5,
-							brightness: 1,
-							readingMode: 'paged',
-							readingDirection: 'ltr',
-							imageScaling: {
-								scaleToFit: 'height',
-							},
-							doublePageBehavior: 'off',
-							trackElapsedTime: true,
-							tapSidesToNavigate: true,
+							...DEFAULT_BOOK_PREFERENCES,
 						},
 					}) as ReaderStore,
 				{

@@ -1,4 +1,9 @@
-import { queryClient, useSDK, useUpdateMediaProgress } from '@stump/client'
+import {
+	DEFAULT_BOOK_PREFERENCES,
+	queryClient,
+	useSDK,
+	useUpdateMediaProgress,
+} from '@stump/client'
 import { generatePageSets, Media } from '@stump/sdk'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
@@ -71,10 +76,11 @@ export default function ImageBasedReader({
 	const {
 		settings: { preload, showToolBar },
 		bookPreferences: {
-			doublePageBehavior = 'auto',
+			doublePageBehavior = DEFAULT_BOOK_PREFERENCES.doublePageBehavior,
 			readingMode,
 			readingDirection,
 			trackElapsedTime,
+			secondPageSeparate,
 		},
 		setSettings,
 	} = useBookPreferences({ book: media })
@@ -103,15 +109,32 @@ export default function ImageBasedReader({
 	const pageSets = useMemo(() => {
 		const autoButOff = doublePageBehavior === 'auto' && deviceOrientation === 'portrait'
 		const modeForceOff = readingMode === 'continuous:vertical'
+		let sets: number[][] = []
+
 		if (doublePageBehavior === 'off' || autoButOff || modeForceOff) {
-			return Array.from({ length: pages }, (_, i) => [i])
+			sets = Array.from({ length: pages }, (_, i) => [i])
+		} else {
+			sets = generatePageSets({
+				imageSizes: pageDimensions,
+				pages: pages,
+				secondPageSeparate: secondPageSeparate,
+			})
 		}
-		const sets = generatePageSets({ imageSizes: pageDimensions, pages: pages })
+
 		if (readingDirection === 'rtl') {
-			return sets.reverse()
+			return [...sets.map((set) => [...set].reverse())].reverse()
 		}
+
 		return sets
-	}, [doublePageBehavior, pages, pageDimensions, deviceOrientation, readingMode, readingDirection])
+	}, [
+		doublePageBehavior,
+		pages,
+		pageDimensions,
+		deviceOrientation,
+		readingMode,
+		readingDirection,
+		secondPageSeparate,
+	])
 
 	const { updateReadProgress } = useUpdateMediaProgress(media.id, {
 		retry: (attempts) => attempts < 3,

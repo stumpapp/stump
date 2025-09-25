@@ -63,7 +63,7 @@ export const buildSchema = (existingLibraries: Library[], library?: Library) =>
 		convert_rar_to_zip: z.boolean().default(false),
 		default_reading_dir: z.enum(['ltr', 'rtl']).default('ltr').optional(),
 		default_reading_image_scale_fit: z
-			.enum(['height', 'width', 'none'])
+			.enum(['auto', 'height', 'width', 'none'])
 			.default('height')
 			.optional(),
 		default_reading_mode: z

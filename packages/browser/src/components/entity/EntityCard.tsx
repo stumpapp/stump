@@ -99,7 +99,16 @@ export default function EntityCard({
 	 */
 	const renderProgress = () => {
 		if (progress != null) {
-			return <ProgressBar value={progress} variant="primary-dark" size="sm" className="!-mt-1" />
+			return (
+				<ProgressBar
+					value={progress}
+					max={100}
+					variant="primary-dark"
+					size="sm"
+					className="!-mt-1"
+					rounded="none"
+				/>
+			)
 		}
 
 		return null

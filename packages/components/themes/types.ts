@@ -33,6 +33,12 @@ type SecondaryVariant = {
 	secondary: string
 } & DefaultVariant
 
+type OnBlackVariant = {
+	'on-black': {
+		muted: string
+	} & DefaultVariant
+}
+
 export const colorVariant = ['info', 'success', 'warning', 'danger', 'brand'] as const
 
 type Border = Record<(typeof colorVariant)[number], string> & {
@@ -102,7 +108,8 @@ type Foreground = {
 	 */
 	'on-inverse': string
 } & DefaultVariant &
-	DisabledVariant
+	DisabledVariant &
+	OnBlackVariant
 
 // TODO: add secondary fill variant
 /**
@@ -110,7 +117,8 @@ type Foreground = {
  * follows the standard color variants of 'info', 'success', 'warning', 'danger', and 'brand'
  */
 type Color = Record<(typeof colorVariant)[number], SecondaryVariant & HoverVariant> &
-	DisabledVariant
+	DisabledVariant &
+	OnBlackVariant
 
 /**
  * The primary type which represents the color tokens for the Stump UI. These are translated for use as

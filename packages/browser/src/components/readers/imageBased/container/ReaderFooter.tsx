@@ -152,10 +152,11 @@ export default function ReaderFooter() {
 			<div className="flex w-full flex-col gap-2 px-4 pb-4">
 				<ProgressBar
 					size="sm"
-					value={40}
+					value={currentPage}
 					max={book.pages}
-					className="bg-[#898d94]"
-					indicatorClassName="bg-[#f5f3ef]"
+					className="bg-[#0c0c0c]"
+					indicatorClassName="bg-[#898d94]"
+					inverted={readingDirection === 'rtl'}
 				/>
 
 				<div
@@ -166,7 +167,7 @@ export default function ReaderFooter() {
 					)}
 
 					<Text className="text-sm text-[#898d94]">
-						{currentSet.join('-')} of {book.pages}
+						{currentSet.map((idx) => idx + 1).join('-')} of {book.pages}
 					</Text>
 				</div>
 			</div>

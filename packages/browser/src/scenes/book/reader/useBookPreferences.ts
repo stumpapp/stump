@@ -36,10 +36,11 @@ export function useBookPreferences({ book }: Params): Return {
 	 * should never be null once the query resolves
 	 */
 	const libraryConfig = useMemo(() => book?.series?.library?.config, [book])
+	const libraryDefaults = useMemo(() => defaultsFromLibraryConfig(libraryConfig), [libraryConfig])
 
 	const bookPreferences = useMemo(
-		() => buildPreferences(storedBookPreferences ?? {}, settings, libraryConfig),
-		[storedBookPreferences, libraryConfig],
+		() => buildPreferences(storedBookPreferences ?? {}, settings, libraryDefaults),
+		[storedBookPreferences, libraryDefaults, settings],
 	)
 
 	const setBookPreferences = useCallback(
@@ -60,22 +61,38 @@ export function useBookPreferences({ book }: Params): Return {
 	}
 }
 
-const defaultsFromLibraryConfig = (libraryConfig?: LibraryConfig): BookPreferences =>
+const defaultsFromLibraryConfig = (libraryConfig?: LibraryConfig): Partial<BookPreferences> =>
 	({
 		brightness: 1,
-		imageScaling: {
-			scaleToFit: libraryConfig?.default_reading_image_scale_fit || 'height',
-		},
-		readingDirection: libraryConfig?.default_reading_dir || 'ltr',
-		readingMode: libraryConfig?.default_reading_mode || 'paged',
-	}) as BookPreferences
+		imageScaling: libraryConfig?.default_reading_image_scale_fit
+			? {
+					scaleToFit: libraryConfig?.default_reading_image_scale_fit,
+				}
+			: undefined,
+		readingDirection: libraryConfig?.default_reading_dir,
+		readingMode: libraryConfig?.default_reading_mode,
+	}) as Partial<BookPreferences>
+
+const settingsAsBookPreferences = (settings: ReaderSettings): BookPreferences => ({
+	brightness: settings.brightness,
+	imageScaling: settings.imageScaling,
+	readingDirection: settings.readingDirection,
+	readingMode: settings.readingMode,
+	tapSidesToNavigate: settings.tapSidesToNavigate,
+	fontSize: settings.fontSize,
+	lineHeight: settings.lineHeight,
+	trackElapsedTime: settings.trackElapsedTime,
+	doublePageBehavior: settings.doublePageBehavior,
+	fontFamily: settings.fontFamily,
+	secondPageSeparate: settings.secondPageSeparate,
+})
 
 const buildPreferences = (
 	preferences: Partial<BookPreferences>,
 	settings: ReaderSettings,
-	libraryConfig?: LibraryConfig,
+	libraryDefaults: Partial<BookPreferences>,
 ): BookPreferences => ({
-	...settings,
-	...defaultsFromLibraryConfig(libraryConfig),
+	...settingsAsBookPreferences(settings),
+	...libraryDefaults,
 	...preferences,
 })

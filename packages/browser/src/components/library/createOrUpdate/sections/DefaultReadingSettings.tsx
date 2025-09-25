@@ -16,6 +16,7 @@ export default function DefaultReadingSettings() {
 					<Label>{t(getKey('imageScaling.label'))}</Label>
 					<NativeSelect
 						options={[
+							{ label: 'Auto', value: 'auto' },
 							{ label: 'Height', value: 'height' },
 							{ label: 'Width', value: 'width' },
 							{ label: 'Original', value: 'none' },

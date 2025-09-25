@@ -1,15 +1,13 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
-import { IconButton } from '@stump/components'
+import { cn, IconButton } from '@stump/components'
 import { ComponentProps, forwardRef } from 'react'
 
 const ControlButton = forwardRef<HTMLButtonElement, ComponentProps<typeof IconButton>>(
 	({ className, ...props }, ref) => {
 		return (
 			<IconButton
-				variant="ghost"
+				variant="ghost-on-black"
 				size="xs"
-				className="hover:bg-background-surface-hover"
+				className={cn('hover:bg-fill-on-black focus:ring-offset-black', className)}
 				ref={ref}
 				pressEffect={false}
 				{...props}

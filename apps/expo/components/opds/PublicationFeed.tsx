@@ -8,6 +8,7 @@ import { FlatGrid } from 'react-native-super-grid'
 
 import { useDisplay } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
+import { usePreferencesStore } from '~/stores'
 
 import { useActiveServer } from '../activeServer'
 import { TurboImage } from '../Image'
@@ -74,27 +75,20 @@ export default function PublicationFeed({ feed, onRefresh, isRefreshing }: Props
 	}, [hasNextPage, fetchNextPage])
 
 	const router = useRouter()
+	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
 
-	// Each item will be height 150 OR 200 on tablets, plus up to 2 lines of text.
+	// Each item will be width 100 OR 135 on tablets.
+	// The height will also include up to 2 lines of text.
 	// We want to fill the width of the screen as best as possible. So:
 	const itemWidth = useMemo(() => {
-		// isTablet ? 200 * 0.665 : 150 * 0.665
-		if (isTablet) {
-			return 200 * 0.665
-		} else if (isXSmall) {
-			return width / 2
-		} else {
-			return 150 * 0.665
-		}
+		if (isTablet) return 135
+		else if (isXSmall) return width / 2
+		else return 100
 	}, [isTablet, isXSmall, width])
 	const itemHeight = useMemo(() => {
-		if (isTablet) {
-			return 200
-		} else if (isXSmall) {
-			return (width * 2) / 3 - 1
-		} else {
-			return 150
-		}
+		if (isTablet) return 135 / thumbnailRatio
+		else if (isXSmall) return width / 2 / thumbnailRatio
+		else return 100 / thumbnailRatio
 	}, [isTablet, isXSmall, width])
 
 	const itemsPerRow = Math.floor(width / itemWidth)
@@ -114,7 +108,7 @@ export default function PublicationFeed({ feed, onRefresh, isRefreshing }: Props
 				itemDimension={itemWidth}
 				data={publications}
 				fixed
-				spacing={availableSpaceX / itemsPerRow}
+				spacing={availableSpaceX / itemsPerRow - 8}
 				renderItem={({ item: publication }) => {
 					const thumbnailURL = getPublicationThumbnailURL(publication)
 					const selfURL = publication.links?.find((link) => link.rel === 'self')?.href
@@ -157,11 +151,7 @@ export default function PublicationFeed({ feed, onRefresh, isRefreshing }: Props
 										/>
 									</BorderAndShadow>
 
-									<View
-										style={{
-											maxWidth: isTablet ? 200 * 0.665 : 150 * 0.665,
-										}}
-									>
+									<View style={{ maxWidth: itemWidth }}>
 										<Text className="xs:text-center mt-2 line-clamp-2 text-sm tablet:text-sm">
 											{publication.metadata.title}
 										</Text>

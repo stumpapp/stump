@@ -8,6 +8,7 @@ import { Pressable } from 'react-native-gesture-handler'
 import LinearGradient from 'react-native-linear-gradient'
 
 import { COLORS } from '~/lib/constants'
+import { usePreferencesStore } from '~/stores'
 
 import { useActiveServer } from '../activeServer'
 import { TurboImage } from '../Image'
@@ -45,6 +46,8 @@ export default function RecentlyAddedSeriesItem({ series }: Props) {
 	const data = useFragment(fragment, series)
 	const router = useRouter()
 
+	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
+
 	const { colors: gradientColors, locations: gradientLocations } = easeGradient({
 		colorStops: {
 			0.2: { color: 'transparent' },
@@ -75,8 +78,8 @@ export default function RecentlyAddedSeriesItem({ series }: Props) {
 								},
 							}}
 							resizeMode="stretch"
-							resize={240 * (2 / 3)}
-							style={{ width: 240 * (2 / 3), height: 240 }}
+							resize={160 * 1.5}
+							style={{ height: 160 / thumbnailRatio, width: 160 }}
 						/>
 
 						<View className="absolute bottom-0 z-20 w-full p-2">

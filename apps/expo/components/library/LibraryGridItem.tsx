@@ -7,6 +7,7 @@ import LinearGradient from 'react-native-linear-gradient'
 
 import { COLORS } from '~/lib/constants'
 import { cn } from '~/lib/utils'
+import { usePreferencesStore } from '~/stores'
 
 import { useActiveServer } from '../activeServer'
 import { useGridItemSize } from '../grid/useGridItemSize'
@@ -38,6 +39,7 @@ export default function LibraryGridItem({ library }: Props) {
 	const { itemDimension } = useGridItemSize()
 	const router = useRouter()
 	const data = useFragment(fragment, library)
+	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
 
 	const uri = data.thumbnail?.url ?? undefined
 	const title = data.name
@@ -65,7 +67,7 @@ export default function LibraryGridItem({ library }: Props) {
 							}}
 							resizeMode="stretch"
 							resize={itemDimension * 1.5}
-							style={{ height: itemDimension / (2 / 3), width: itemDimension }}
+							style={{ height: itemDimension / thumbnailRatio, width: itemDimension }}
 						/>
 
 						<View className="absolute inset-0 z-20 w-full items-center justify-center">

@@ -20,6 +20,7 @@ import RefreshControl from '~/components/RefreshControl'
 import { Button, Heading, icons, Text } from '~/components/ui'
 import { formatBytes, parseGraphQLDecimal } from '~/lib/format'
 import { cn } from '~/lib/utils'
+import { usePreferencesStore } from '~/stores'
 
 const { ChevronLeft } = icons
 
@@ -122,6 +123,7 @@ export default function Screen() {
 	})
 
 	const router = useRouter()
+	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
 
 	// TODO: prefetch, see https://github.com/candlefinance/faster-image/issues/73
 	// useEffect(() => {
@@ -283,8 +285,8 @@ export default function Screen() {
 									},
 								}}
 								resizeMode="stretch"
-								resize={350 * (2 / 3) * 1.5}
-								style={{ height: 350, width: 350 * (2 / 3) }}
+								resize={235 * 1.5}
+								style={{ height: 235 / thumbnailRatio, width: 235 }}
 							/>
 						</BorderAndShadow>
 					</View>

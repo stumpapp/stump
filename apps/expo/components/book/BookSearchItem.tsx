@@ -7,6 +7,7 @@ import { Pressable } from 'react-native-gesture-handler'
 
 import { formatBytes } from '~/lib/format'
 import { useDisplay } from '~/lib/hooks'
+import { usePreferencesStore } from '~/stores'
 
 import { useActiveServer } from '../activeServer'
 import { BorderAndShadow } from '../BorderAndShadow'
@@ -47,6 +48,7 @@ export default function BookSearchItem({ book }: Props) {
 	const { width } = useDisplay()
 	const data = useFragment(fragment, book)
 	const router = useRouter()
+	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
 
 	return (
 		<Pressable
@@ -68,7 +70,7 @@ export default function BookSearchItem({ book }: Props) {
 						}}
 						resizeMode="stretch"
 						resize={75 * 1.5}
-						style={{ width: 75, height: 75 / (2 / 3) }}
+						style={{ height: 75 / thumbnailRatio, width: 75 }}
 					/>
 				</BorderAndShadow>
 

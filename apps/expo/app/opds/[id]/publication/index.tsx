@@ -16,6 +16,7 @@ import {
 import { Button, icons, Text } from '~/components/ui'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
 import { cn } from '~/lib/utils'
+import { usePreferencesStore } from '~/stores'
 
 import { usePublicationContext } from './context'
 import { BorderAndShadow } from '~/components/BorderAndShadow'
@@ -34,6 +35,7 @@ export default function Screen() {
 	const { title, identifier, belongsTo } = metadata || {}
 
 	const router = useRouter()
+	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
 
 	useDynamicHeader({
 		title: title || 'Publication',
@@ -100,8 +102,8 @@ export default function Screen() {
 									},
 								}}
 								resizeMode="stretch"
-								resize={350 * (2 / 3) * 1.5}
-								style={{ height: 350, width: 350 * (2 / 3) }}
+								resize={235 * 1.5}
+								style={{ height: 235 / thumbnailRatio, width: 235 }}
 							/>
 						</BorderAndShadow>
 					</View>

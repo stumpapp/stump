@@ -12,6 +12,7 @@ import { Button, Heading, icons, Label, Text } from '~/components/ui'
 import { COLORS } from '~/lib/constants'
 import { useDisplay } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
+import { usePreferencesStore } from '~/stores'
 
 import { NextInSeriesBookRef } from './context'
 
@@ -29,6 +30,7 @@ export default function NextUpOverlay({ isVisible, book, onClose }: Props) {
 	} = useActiveServer()
 
 	const router = useRouter()
+	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
 	const container = useSharedValue(isVisible ? 1 : 0)
 
 	const { isTablet, width } = useDisplay()
@@ -130,7 +132,7 @@ export default function NextUpOverlay({ isVisible, book, onClose }: Props) {
 					}}
 					resizeMode="stretch"
 					resize={size * 1.5}
-					style={{ width: size, height: size / (2 / 3), borderRadius: 12 }}
+					style={{ width: size, height: size / thumbnailRatio, borderRadius: 12 }}
 				/>
 
 				<View

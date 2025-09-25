@@ -17,6 +17,7 @@ import { Heading, Progress, Text } from '~/components/ui'
 import { COLORS, useColors } from '~/lib/constants'
 import { parseGraphQLDecimal } from '~/lib/format'
 import { useDisplay } from '~/lib/hooks'
+import { usePreferencesStore } from '~/stores'
 
 import { useActiveServer } from '../context'
 
@@ -48,8 +49,7 @@ type Props = {
 	books: (IReadingNowFragment & { id: string })[]
 }
 
-const IMAGE_HEIGHT = 425
-const IMAGE_WIDTH = IMAGE_HEIGHT * (2 / 3)
+const IMAGE_WIDTH = 280
 
 export default function ReadingNow({ books }: Props) {
 	const { width } = useDisplay()
@@ -58,6 +58,9 @@ export default function ReadingNow({ books }: Props) {
 	const carouselRef = useRef<ICarouselInstance>(null)
 	const progressValue = useSharedValue<number>(0)
 	const activeDotIndex = useSharedValue(-1) // -1 means inactive
+
+	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
+	const imageHeight = IMAGE_WIDTH / thumbnailRatio
 
 	const onPressPagination = (index: number) => {
 		carouselRef.current?.scrollTo({
@@ -94,13 +97,13 @@ export default function ReadingNow({ books }: Props) {
 			{/* <Heading size="xl">Jump Back In</Heading> */}
 
 			{/* This view prevents the left 20px of the carousel from overriding swipe back navigation */}
-			<View className="absolute left-0 top-0 z-30 w-[20px]" style={{ height: IMAGE_HEIGHT }} />
+			<View className="absolute left-0 top-0 z-30 w-[20px]" style={{ height: imageHeight + 8 }} />
 
 			<View className="w-full">
 				<Carousel
 					ref={carouselRef}
 					width={width}
-					height={IMAGE_HEIGHT + 8} // add some padding to not cut off the shadow
+					height={imageHeight + 8} // add some padding to not cut off the shadow
 					data={books}
 					loop={false}
 					mode="parallax"
@@ -170,6 +173,9 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 	const { width, isTablet } = useDisplay()
 
 	const percentageCompleted = parseGraphQLDecimal(data.readProgress?.percentageCompleted)
+
+	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
+	const imageHeight = IMAGE_WIDTH / thumbnailRatio
 
 	// TODO: figure out why I need explicit widths for *each* elem
 	const renderBookContent = useCallback(() => {
@@ -269,7 +275,7 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 						resizeMode="stretch"
 						resize={IMAGE_WIDTH * 1.5}
 						style={{
-							height: IMAGE_HEIGHT,
+							height: imageHeight,
 							width: IMAGE_WIDTH,
 						}}
 					/>

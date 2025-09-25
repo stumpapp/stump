@@ -8,6 +8,7 @@ import { Pressable, View } from 'react-native'
 
 import { useDisplay } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
+import { usePreferencesStore } from '~/stores'
 
 import { useActiveServer } from '../activeServer'
 import { TurboImage } from '../Image'
@@ -31,9 +32,10 @@ export default function PublicationGroup({
 	} = useActiveServer()
 	const { sdk } = useSDK()
 	const { isTablet } = useDisplay()
+	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
 
-	const itemHeight = useMemo(() => (isTablet ? 225 : 150), [isTablet])
-	const itemWidth = useMemo(() => itemHeight * (2 / 3), [itemHeight])
+	const itemWidth = useMemo(() => (isTablet ? 150 : 100), [isTablet])
+	const itemHeight = useMemo(() => itemWidth / thumbnailRatio, [itemWidth])
 
 	if (!publications.length && !renderEmpty) return null
 
@@ -101,7 +103,7 @@ export default function PublicationGroup({
 									<BorderAndShadow
 										style={{ borderRadius: 6, borderWidth: 0.3, shadowRadius: 1.41, elevation: 2 }}
 									>
-										<View style={{ height: isTablet ? 225 : 150, width: itemWidth }}>
+										<View style={{ height: itemHeight, width: itemWidth }}>
 											<TurboImage
 												source={{
 													uri: thumbnailURL || '',

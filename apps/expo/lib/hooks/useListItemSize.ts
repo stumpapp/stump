@@ -1,12 +1,15 @@
 import { useMemo } from 'react'
 
+import { usePreferencesStore } from '~/stores'
+
 import { useDisplay } from './useDisplay'
 
 export function useListItemSize() {
 	const { isTablet, width } = useDisplay()
+	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
 
-	const itemHeight = useMemo(() => (isTablet ? 240 : 200), [isTablet])
-	const itemWidth = useMemo(() => itemHeight * (2 / 3), [itemHeight])
+	const itemWidth = useMemo(() => (isTablet ? 160 : 135), [isTablet])
+	const itemHeight = useMemo(() => itemWidth / thumbnailRatio, [itemWidth])
 	const gap = useMemo(() => (isTablet ? 8 : 4), [isTablet])
 
 	const windowSize = useMemo(() => Math.round(width / itemWidth) + 1, [width, itemWidth])

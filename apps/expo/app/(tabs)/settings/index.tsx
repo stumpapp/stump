@@ -11,6 +11,7 @@ import {
 	MaskURLs,
 	ReaderSettingsLink,
 	ReduceAnimations,
+	ThumbnailRatio,
 } from '~/components/appSettings/preferences'
 import { StumpEnabled } from '~/components/appSettings/stump'
 import { Text } from '~/components/ui/text'
@@ -24,6 +25,7 @@ export default function Screen() {
 					<AppTheme />
 					<AppLanguage />
 					<DefaultServer />
+					<ThumbnailRatio />
 				</View>
 
 				<View>

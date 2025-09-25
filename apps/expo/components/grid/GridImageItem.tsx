@@ -4,6 +4,7 @@ import { View } from 'react-native'
 import { Pressable } from 'react-native-gesture-handler'
 
 import { cn } from '~/lib/utils'
+import { usePreferencesStore } from '~/stores'
 
 import { TurboImage } from '../Image'
 import { Text } from '../ui'
@@ -21,6 +22,7 @@ export default function GridImageItem({ uri, title, href }: Props) {
 	const { itemDimension } = useGridItemSize()
 
 	const router = useRouter()
+	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
 
 	return (
 		<Pressable onPress={() => router.navigate(href)}>
@@ -38,10 +40,7 @@ export default function GridImageItem({ uri, title, href }: Props) {
 							}}
 							resizeMode="stretch"
 							resize={itemDimension * 1.5}
-							style={{
-								width: itemDimension,
-								height: itemDimension / (2 / 3),
-							}}
+							style={{ height: itemDimension / thumbnailRatio, width: itemDimension }}
 						/>
 					</BorderAndShadow>
 

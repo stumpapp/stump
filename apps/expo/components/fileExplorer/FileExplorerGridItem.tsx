@@ -7,6 +7,7 @@ import { Image, View } from 'react-native'
 import { Pressable } from 'react-native-gesture-handler'
 
 import { useColorScheme } from '~/lib/useColorScheme'
+import { usePreferencesStore } from '~/stores'
 
 import { useActiveServer } from '../activeServer'
 import { TurboImage } from '../Image'
@@ -28,6 +29,8 @@ export default function FileExplorerGridItem({ file }: Props) {
 	} = useActiveServer()
 
 	const router = useRouter()
+
+	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
 
 	const friendlyName = file?.media?.resolvedName || file.name
 
@@ -69,8 +72,8 @@ export default function FileExplorerGridItem({ file }: Props) {
 									},
 								}}
 								resizeMode="stretch"
-								resize={100 * 1.5}
-								style={{ height: 100, width: 100 * (2 / 3) }}
+								resize={70 * 1.5}
+								style={{ height: 70 / thumbnailRatio, width: 70 }}
 							/>
 						</BorderAndShadow>
 					)}

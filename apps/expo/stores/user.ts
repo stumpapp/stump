@@ -15,6 +15,7 @@ type MobilePreferencesStore = {
 	reduceAnimations: boolean
 	cachePolicy: CachePolicy
 	allowDownscaling: boolean
+	thumbnailRatio: number
 	/**
 	 * Patch the store with new values.
 	 */
@@ -35,6 +36,7 @@ export const usePreferencesStore = create<MobilePreferencesStore>()(
 			reduceAnimations: false,
 			cachePolicy: 'memory-disk',
 			allowDownscaling: true,
+			thumbnailRatio: 2 / 3,
 			patch: (data) => set(data),
 		}),
 		{

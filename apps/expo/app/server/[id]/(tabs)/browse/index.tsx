@@ -80,7 +80,7 @@ export default function Screen() {
 		>
 			<RecentlyAddedSeries
 				header={
-					<View className="flex gap-4">
+					<View className="flex gap-5">
 						<View>
 							{visibleItems.map((item, idx) => (
 								<Fragment key={item.id}>
@@ -102,11 +102,12 @@ export default function Screen() {
 													<Icon as={item.icon} className="h-6 w-6" />
 													<Text className="text-lg">{item.title}</Text>
 												</View>
-
-												<Icon
-													as={ChevronRight}
-													className="h-6 w-6 text-foreground-muted opacity-70"
-												/>
+												<View className={cn('py-4', { 'pt-1': idx === 0 })}>
+													<Icon
+														as={ChevronRight}
+														className="h-6 w-6 text-foreground-muted opacity-70"
+													/>
+												</View>
 											</View>
 										)}
 									</Pressable>

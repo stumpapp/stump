@@ -65,7 +65,8 @@ export default function RecentlyAddedSeries({ header }: Props) {
 			data={data?.pages.flatMap((page) => page.series.nodes) || []}
 			renderItem={renderItem}
 			contentContainerStyle={{
-				padding: 16,
+				paddingHorizontal: 16,
+				paddingTop: 16,
 			}}
 			numColumns={numColumns}
 			onEndReachedThreshold={0.75}

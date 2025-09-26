@@ -12,6 +12,7 @@ export default function Screen() {
 			<Stack.Screen
 				name="index"
 				options={{
+					headerShown: true,
 					headerTransparent: Platform.OS === 'ios',
 					headerLargeTitleStyle: {
 						fontSize: 24,

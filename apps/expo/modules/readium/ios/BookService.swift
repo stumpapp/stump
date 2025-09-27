@@ -32,7 +32,7 @@ class NullPDFDocumentFactory: PDFDocumentFactory {
      /// An instance of AssetRetriever for accessing publication assets
      private let assetRetriever: AssetRetriever
      
-     /// An instance of PublicationOpener for opening publications using the new Readium 3.0 API
+     /// An instance of PublicationOpener for opening publications
      private let publicationOpener: PublicationOpener
 
      /// A cache of publications, keyed by their identifier. A publication is added

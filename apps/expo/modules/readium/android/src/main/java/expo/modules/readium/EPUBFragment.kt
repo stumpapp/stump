@@ -14,6 +14,9 @@ import org.readium.r2.navigator.epub.EpubDefaults
 import org.readium.r2.navigator.epub.EpubNavigatorFactory
 import org.readium.r2.navigator.epub.EpubNavigatorFragment
 import org.readium.r2.navigator.epub.EpubPreferences
+import org.readium.r2.navigator.epub.css.FontStyle
+import org.readium.r2.navigator.epub.css.FontWeight
+import org.readium.r2.navigator.preferences.FontFamily
 import org.readium.r2.navigator.util.BaseActionModeCallback
 import org.readium.r2.shared.ExperimentalReadiumApi
 import org.readium.r2.shared.InternalReadiumApi
@@ -64,55 +67,170 @@ class EPUBFragment(
             listener.props!!.locator,
             listener = listener,
             configuration = EpubNavigatorFragment.Configuration {
-                // servedAssets = listOf(
-                //     "fonts/OpenDyslexic.otf",
-                //     "fonts/Literata_500Medium.ttf"
-                // )
+                servedAssets = listOf(
+                    "fonts/OpenDyslexic-Regular.otf",
+                    "fonts/OpenDyslexic-Bold.otf",
+                    "fonts/OpenDyslexic-Italic.otf",
+                    "fonts/OpenDyslexic-Bold-Italic.otf",
+                    "fonts/Literata[opsz,wght].ttf",
+                    "fonts/Literata-Italic[opsz,wght].ttf",
+                    "fonts/Atkinson-Hyperlegible-Regular.ttf",
+                    "fonts/Atkinson-Hyperlegible-Bold.ttf",
+                    "fonts/Atkinson-Hyperlegible-Italic.ttf",
+                    "fonts/Atkinson-Hyperlegible-BoldItalic.ttf",
+                    "fonts/CharisSIL-Regular.ttf",
+                    "fonts/CharisSIL-Bold.ttf",
+                    "fonts/CharisSIL-Italic.ttf",
+                    "fonts/CharisSIL-BoldItalic.ttf",
+                    "fonts/Bitter-VariableFont_wght.ttf",
+                    "fonts/Bitter-Italic-VariableFont_wght.ttf"
+                )
+
                 shouldApplyInsetsPadding = false
 
-                // addFontFamilyDeclaration(FontFamily("OpenDyslexic")) {
-                //     addFontFace {
-                //         addSource("fonts/OpenDyslexic-Regular.ttf")
-                //         setFontStyle(FontStyle.NORMAL)
-                //         setFontWeight(FontWeight.NORMAL)
-                //     }
+                // OpenDyslexic font family
+                addFontFamilyDeclaration(FontFamily("OpenDyslexic")) {
+                    addFontFace {
+                        addSource("fonts/OpenDyslexic-Regular.otf")
+                        setFontStyle(FontStyle.NORMAL)
+                        setFontWeight(FontWeight.NORMAL)
+                    }
+                    addFontFace {
+                        addSource("fonts/OpenDyslexic-Bold.otf")
+                        setFontStyle(FontStyle.NORMAL)
+                        setFontWeight(FontWeight.BOLD)
+                    }
+                    addFontFace {
+                        addSource("fonts/OpenDyslexic-Italic.otf")
+                        setFontStyle(FontStyle.ITALIC)
+                        setFontWeight(FontWeight.NORMAL)
+                    }
+                    addFontFace {
+                        addSource("fonts/OpenDyslexic-Bold-Italic.otf")
+                        setFontStyle(FontStyle.ITALIC)
+                        setFontWeight(FontWeight.BOLD)
+                    }
+                }
 
-                //     addFontFace {
-                //         addSource("fonts/OpenDyslexic-Bold.ttf")
-                //         setFontStyle(FontStyle.NORMAL)
-                //         setFontWeight(FontWeight.BOLD)
-                //     }
+                // Literata via Literata-Italic[opsz,wght].ttf and Literata[opsz,wght].ttf
+                addFontFamilyDeclaration(FontFamily("Literata")) {
+                    // Regular weights
+                    addFontFace {
+                        addSource("fonts/Literata[opsz,wght].ttf")
+                        setFontStyle(FontStyle.NORMAL)
+                        setFontWeight(FontWeight.NORMAL)
+                    }
+                    addFontFace {
+                        addSource("fonts/Literata[opsz,wght].ttf")
+                        setFontStyle(FontStyle.NORMAL)
+                        setFontWeight(FontWeight.BOLD)
+                    }
+                    addFontFace {
+                        addSource("fonts/Literata[opsz,wght].ttf")
+                        setFontStyle(FontStyle.NORMAL)
+                        setFontWeight(FontWeight.LIGHT)
+                    }
+                    // Italic weights
+                    addFontFace {
+                        addSource("fonts/Literata-Italic[opsz,wght].ttf")
+                        setFontStyle(FontStyle.ITALIC)
+                        setFontWeight(FontWeight.NORMAL)
+                    }
+                    addFontFace {
+                        addSource("fonts/Literata-Italic[opsz,wght].ttf")
+                        setFontStyle(FontStyle.ITALIC)
+                        setFontWeight(FontWeight.BOLD)
+                    }
+                    addFontFace {
+                        addSource("fonts/Literata-Italic[opsz,wght].ttf")
+                        setFontStyle(FontStyle.ITALIC)
+                        setFontWeight(FontWeight.LIGHT)
+                    }
+                }
 
-                //     addFontFace {
-                //         addSource("fonts/OpenDyslexic-Bold-Italic.ttf")
-                //         setFontStyle(FontStyle.ITALIC)
-                //         setFontWeight(FontWeight.BOLD)
-                //     }
+                // Atkinson-Hyperlegible-{Bold,Regular,Italic,BoldItalic}.ttf
+                addFontFamilyDeclaration(FontFamily("Atkinson-Hyperlegible")) {
+                    addFontFace {
+                        addSource("fonts/Atkinson-Hyperlegible-Regular.ttf")
+                        setFontStyle(FontStyle.NORMAL)
+                        setFontWeight(FontWeight.NORMAL)
+                    }
+                    addFontFace {
+                        addSource("fonts/Atkinson-Hyperlegible-Bold.ttf")
+                        setFontStyle(FontStyle.NORMAL)
+                        setFontWeight(FontWeight.BOLD)
+                    }
+                    addFontFace {
+                        addSource("fonts/Atkinson-Hyperlegible-Italic.ttf")
+                        setFontStyle(FontStyle.ITALIC)
+                        setFontWeight(FontWeight.NORMAL)
+                    }
+                    addFontFace {
+                        addSource("fonts/Atkinson-Hyperlegible-BoldItalic.ttf")
+                        setFontStyle(FontStyle.ITALIC)
+                        setFontWeight(FontWeight.BOLD)
+                    }
+                }
 
-                //     addFontFace {
-                //         addSource("fonts/OpenDyslexic-Italic.ttf")
-                //         setFontStyle(FontStyle.ITALIC)
-                //         setFontWeight(FontWeight.NORMAL)
-                //     }
-                // }
+                 // CharisSIL-{Bold,Italic,BoldItalic,Regular}.ttf
+                addFontFamilyDeclaration(FontFamily("CharisSIL")) {
+                    addFontFace {
+                        addSource("fonts/CharisSIL-Regular.ttf")
+                        setFontStyle(FontStyle.NORMAL)
+                        setFontWeight(FontWeight.NORMAL)
+                    }
+                    addFontFace {
+                        addSource("fonts/CharisSIL-Bold.ttf")
+                        setFontStyle(FontStyle.NORMAL)
+                        setFontWeight(FontWeight.BOLD)
+                    }
+                    addFontFace {
+                        addSource("fonts/CharisSIL-Italic.ttf")
+                        setFontStyle(FontStyle.ITALIC)
+                        setFontWeight(FontWeight.NORMAL)
+                    }
+                    addFontFace {
+                        addSource("fonts/CharisSIL-BoldItalic.ttf")
+                        setFontStyle(FontStyle.ITALIC)
+                        setFontWeight(FontWeight.BOLD)
+                    }
+                }
 
-                // addFontFamilyDeclaration(FontFamily("Literata")) {
-                //     addFontFace {
-                //         addSource("fonts/Literata_500Medium.ttf")
-                //         setFontStyle(FontStyle.NORMAL)
-                //         setFontWeight(FontWeight.NORMAL)
-                //     }
-                // }
-
-//                listener.props!!.customFonts.forEach {
-//                    addFontFamilyDeclaration(FontFamily(it.name)) {
-//                        addFontFace {
-//                            addSource(it.uri)
-//                            setFontStyle(FontStyle.NORMAL)
-//                            setFontWeight(FontWeight.NORMAL)
-//                        }
-//                    }
-//                }
+                // Bitter-Italic-VariableFont_wght and Bitter-VariableFont_wght
+                addFontFamilyDeclaration(FontFamily("Bitter")) {
+                    // Regular weights
+                    addFontFace {
+                        addSource("fonts/Bitter-VariableFont_wght.ttf")
+                        setFontStyle(FontStyle.NORMAL)
+                        setFontWeight(FontWeight.NORMAL)
+                    }
+                    addFontFace {
+                        addSource("fonts/Bitter-VariableFont_wght.ttf")
+                        setFontStyle(FontStyle.NORMAL)
+                        setFontWeight(FontWeight.BOLD)
+                    }
+                    addFontFace {
+                        addSource("fonts/Bitter-VariableFont_wght.ttf")
+                        setFontStyle(FontStyle.NORMAL)
+                        setFontWeight(FontWeight.LIGHT)
+                    }
+                    // Italic weights
+                    addFontFace {
+                        addSource("fonts/Bitter-Italic-VariableFont_wght.ttf")
+                        setFontStyle(FontStyle.ITALIC)
+                        setFontWeight(FontWeight.NORMAL)
+                    }
+                    addFontFace {
+                        addSource("fonts/Bitter-Italic-VariableFont_wght.ttf")
+                        setFontStyle(FontStyle.ITALIC)
+                        setFontWeight(FontWeight.BOLD)
+                    }
+                    addFontFace {
+                        addSource("fonts/Bitter-Italic-VariableFont_wght.ttf")
+                        setFontStyle(FontStyle.ITALIC)
+                        setFontWeight(FontWeight.LIGHT)
+                    }
+                }
 
                 selectionActionModeCallback = SelectionActionModeCallback(listener)
             },

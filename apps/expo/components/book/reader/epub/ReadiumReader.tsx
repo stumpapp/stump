@@ -29,7 +29,7 @@ type Props = {
 	onLocationChanged: (locator: ReadiumLocator, percentage: number) => void
 }
 
-// TODO: Figure out epubcfi handling, that will "unlock" the rest of these unused props
+// TODO: Don't assume loading book. Intake an optional localUri which effectively unlocks offline reading
 export default function ReadiumReader({
 	book,
 	initialLocator,

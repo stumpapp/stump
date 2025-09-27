@@ -55,6 +55,7 @@ class EPUBFragment(
 ) : Fragment(R.layout.fragment_reader) {
     var navigator: EpubNavigatorFragment? = null
 
+    // FIXME(expo): Pretty much every font except OpenDyslexic isn't working right for Android
     override fun onCreate(savedInstanceState: Bundle?) {
         childFragmentManager.fragmentFactory = EpubNavigatorFactory(
             publication,

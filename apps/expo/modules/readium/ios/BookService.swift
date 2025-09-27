@@ -71,13 +71,11 @@ class NullPDFDocumentFactory: PDFDocumentFactory {
      public func openPublication(for bookID: String, at url: URL) async throws -> Publication {
          print("Opening publication for bookID: \(bookID) at: \(url)")
 
-         // Create FileURL from the URL
          guard let fileURL = FileURL(url: url) else {
              print("Failed to create FileURL from: \(url)")
              throw BookServiceError.openFailed(URLError(.badURL))
          }
 
-         // Retrieve the asset using AssetRetriever
          let assetResult = await assetRetriever.retrieve(url: fileURL)
          let asset: Asset
          
@@ -91,7 +89,6 @@ class NullPDFDocumentFactory: PDFDocumentFactory {
 
          print("Opening publication with media type: \(asset.format.mediaType)")
 
-         // Open the publication using PublicationOpener
          let publicationResult = await publicationOpener.open(
              asset: asset,
              allowUserInteraction: false,
@@ -125,7 +122,6 @@ class NullPDFDocumentFactory: PDFDocumentFactory {
          do {
              try fileManager.createDirectory(at: extractedUrl, withIntermediateDirectories: true, attributes: nil)
              
-             // Use ZIPFoundation for extraction (Readium 3.0 uses ZIPFoundation instead of Minizip by default)
              try await fileManager.unzipItem(at: archiveUrl, to: extractedUrl)
              print("Successfully extracted archive")
          } catch {

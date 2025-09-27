@@ -132,7 +132,14 @@ export default function NextUpOverlay({ isVisible, book, onClose }: Props) {
 					}}
 					resizeMode="stretch"
 					resize={size * 1.5}
-					style={{ width: size, height: size / thumbnailRatio, borderRadius: 12 }}
+					style={{
+						width: size,
+						height: size / thumbnailRatio,
+						borderRadius: 12,
+						// @ts-expect-error bug in library. StyleProp<ImageStyle> should be StyleProp<ViewStyle>
+						borderCurve: 'continuous',
+						overflow: 'hidden',
+					}}
 				/>
 
 				<View

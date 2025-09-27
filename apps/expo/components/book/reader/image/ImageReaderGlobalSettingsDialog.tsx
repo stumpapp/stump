@@ -11,6 +11,7 @@ import { useColorScheme } from '~/lib/useColorScheme'
 import { ReaderSettings } from '../settings'
 import { useImageBasedReader } from './context'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useColors } from '~/lib/constants'
 
 type Props = {
 	isOpen: boolean
@@ -61,6 +62,7 @@ export default function ImageReaderGlobalSettingsDialog({ isOpen, onClose }: Pro
 	}
 
 	const insets = useSafeAreaInsets()
+	const colors = useColors()
 
 	return (
 		<View className="fixed inset-0 z-30 flex-1">
@@ -68,10 +70,18 @@ export default function ImageReaderGlobalSettingsDialog({ isOpen, onClose }: Pro
 				ref={ref}
 				index={snapPoints.length - 1}
 				snapPoints={snapPoints}
+				topInset={insets.top}
+				enableDynamicSizing={false}
 				onChange={handleChange}
-				backgroundComponent={(props) => (
-					<View {...props} className="squircle rounded-t-xl bg-background" />
-				)}
+				backgroundStyle={{
+					borderTopLeftRadius: 24,
+					borderTopRightRadius: 24,
+					borderCurve: 'continuous',
+					overflow: 'hidden',
+					borderWidth: 1,
+					borderColor: colors.edge.DEFAULT,
+					backgroundColor: colors.background.DEFAULT,
+				}}
 				handleIndicatorStyle={{ backgroundColor: colorScheme === 'dark' ? '#333' : '#ccc' }}
 				handleComponent={(props) => (
 					<BottomSheet.Handle
@@ -83,7 +93,7 @@ export default function ImageReaderGlobalSettingsDialog({ isOpen, onClose }: Pro
 				)}
 			>
 				<BottomSheet.ScrollView
-					className="flex-1 bg-background p-6"
+					className="flex-1 p-6"
 					contentContainerStyle={{ alignItems: 'flex-start' }}
 				>
 					<View

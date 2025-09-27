@@ -7,12 +7,14 @@ import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { View } from 'react-native'
 import { useSharedValue } from 'react-native-reanimated'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { z } from 'zod'
 
 import { useUserStore } from '~/stores'
 
 import { Button, Text } from './ui'
 import { BottomSheet } from './ui/bottom-sheet'
+import { useColors } from '~/lib/constants'
 
 type ServerAuthDialogProps = {
 	isOpen: boolean
@@ -27,7 +29,6 @@ export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogPr
 	})
 
 	const ref = useRef<BottomSheetModal | null>(null)
-	const snapPoints = useMemo(() => ['95%'], [])
 	const animatedIndex = useSharedValue<number>(0)
 	const animatedPosition = useSharedValue<number>(0)
 
@@ -78,16 +79,25 @@ export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogPr
 		throw new Error('Not supported yet')
 	}
 
+	const insets = useSafeAreaInsets()
+	const colors = useColors()
+
 	return (
 		<View>
 			<BottomSheet.Modal
 				ref={ref}
-				index={snapPoints.length - 1}
-				snapPoints={snapPoints}
+				topInset={insets.top}
 				onChange={handleChange}
-				backgroundComponent={(props) => (
-					<View {...props} className="squircle rounded-t-xl bg-background" />
-				)}
+				backgroundStyle={{
+					borderTopLeftRadius: 24,
+					borderTopRightRadius: 24,
+					borderCurve: 'continuous',
+					overflow: 'hidden',
+					borderWidth: 1,
+					borderColor: colors.edge.DEFAULT,
+					backgroundColor: colors.background.DEFAULT,
+				}}
+				keyboardBlurBehavior="restore"
 				handleIndicatorStyle={{ backgroundColor: colorScheme === 'dark' ? '#333' : '#ccc' }}
 				handleComponent={(props) => (
 					<BottomSheet.Handle
@@ -98,7 +108,7 @@ export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogPr
 					/>
 				)}
 			>
-				<BottomSheet.View className="flex-1 items-start gap-4 bg-background p-6">
+				<BottomSheet.View className="flex-1 items-start gap-4 p-6">
 					<View>
 						<Text className="text-2xl font-bold leading-6">Login</Text>
 						<Text className="text-base text-foreground-muted">

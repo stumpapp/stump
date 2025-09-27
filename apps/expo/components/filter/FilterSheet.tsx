@@ -1,12 +1,14 @@
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
+import { useHeaderHeight } from '@react-navigation/elements'
 import { LucideIcon } from 'lucide-react-native'
 import { useCallback, useMemo, useRef, useState } from 'react'
-import { View } from 'react-native'
+import { Platform, View } from 'react-native'
 import { Pressable } from 'react-native-gesture-handler'
 import { useSharedValue } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { BottomSheet, icons, Text } from '~/components/ui'
+import { useColors } from '~/lib/constants'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { cn } from '~/lib/utils'
 
@@ -24,7 +26,7 @@ export default function FilterSheet({ label, children, isActive, snapPoints, ico
 	const [isOpen, setIsOpen] = useState(false)
 
 	const ref = useRef<BottomSheetModal | null>(null)
-	const snaps = useMemo(() => snapPoints ?? ['90%'], [snapPoints])
+	const snaps = useMemo(() => snapPoints ?? ['100%'], [snapPoints])
 	const animatedIndex = useSharedValue<number>(0)
 	const animatedPosition = useSharedValue<number>(0)
 
@@ -52,6 +54,10 @@ export default function FilterSheet({ label, children, isActive, snapPoints, ico
 	)
 
 	const insets = useSafeAreaInsets()
+	const colors = useColors()
+	const iosHeaderHeight = useHeaderHeight() // this is not getting the correct android height so
+	const androidHeaderHeight = insets.top + 56 // inset + default android header height
+	const headerHeight = Platform.OS === 'ios' ? iosHeaderHeight : androidHeaderHeight
 
 	return (
 		<View className="flex flex-row">
@@ -76,9 +82,25 @@ export default function FilterSheet({ label, children, isActive, snapPoints, ico
 				index={snaps.length - 1}
 				snapPoints={snaps}
 				onChange={handleChange}
-				backgroundComponent={(props) => (
-					<View {...props} className="squircle rounded-t-xl bg-background" />
-				)}
+				topInset={
+					headerHeight + // header height
+					16 + // top padding
+					34 + // FilterHeader height
+					16 // bottom padding
+				}
+				enableDynamicSizing={false}
+				backgroundStyle={{
+					borderTopLeftRadius: 24,
+					borderTopRightRadius: 24,
+					borderCurve: 'continuous',
+					overflow: 'hidden',
+					borderWidth: 1,
+					borderColor: colors.edge.DEFAULT,
+					backgroundColor: colors.background.DEFAULT,
+				}}
+				// TODO: fix type error: the types in /ui/bottom-sheet looks scary but
+				// @ts-expect-error this is part of BottomSheetModalProps
+				stackBehavior="replace"
 				handleIndicatorStyle={{ backgroundColor: colorScheme === 'dark' ? '#333' : '#ccc' }}
 				handleComponent={(props) => (
 					<BottomSheet.Handle
@@ -89,7 +111,7 @@ export default function FilterSheet({ label, children, isActive, snapPoints, ico
 					/>
 				)}
 			>
-				<BottomSheet.ScrollView className="flex-1 gap-4 bg-background p-6">
+				<BottomSheet.ScrollView className="flex-1 gap-4 p-6">
 					<View
 						className="w-full gap-4"
 						style={{

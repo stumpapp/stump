@@ -12,6 +12,7 @@ import { CreateServer } from '~/stores/savedServer'
 import { icons } from '../ui'
 import { BottomSheet } from '../ui/bottom-sheet'
 import AddOrEditServerForm from './AddOrEditServerForm'
+import { useColors } from '~/lib/constants'
 
 const { Plus } = icons
 
@@ -21,7 +22,7 @@ export default function AddServerDialog() {
 	const ref = useRef<BottomSheetModal | null>(null)
 	const scrollRef = useRef<BottomSheetScrollViewMethods>(null)
 
-	const snapPoints = useMemo(() => ['95%'], [])
+	const snapPoints = useMemo(() => ['100%'], [])
 	const animatedIndex = useSharedValue<number>(0)
 	const animatedPosition = useSharedValue<number>(0)
 
@@ -58,6 +59,7 @@ export default function AddServerDialog() {
 	)
 
 	const insets = useSafeAreaInsets()
+	const colors = useColors()
 
 	return (
 		<View>
@@ -78,10 +80,18 @@ export default function AddServerDialog() {
 				ref={ref}
 				index={snapPoints.length - 1}
 				snapPoints={snapPoints}
+				enableDynamicSizing={false}
+				topInset={insets.top}
 				onChange={handleChange}
-				backgroundComponent={(props) => (
-					<View {...props} className="squircle rounded-t-xl bg-background" />
-				)}
+				backgroundStyle={{
+					borderTopLeftRadius: 24,
+					borderTopRightRadius: 24,
+					borderCurve: 'continuous',
+					overflow: 'hidden',
+					borderWidth: 1,
+					borderColor: colors.edge.DEFAULT,
+					backgroundColor: colors.background.DEFAULT,
+				}}
 				handleIndicatorStyle={{ backgroundColor: colorScheme === 'dark' ? '#333' : '#ccc' }}
 				handleComponent={(props) => (
 					<BottomSheet.Handle
@@ -92,16 +102,8 @@ export default function AddServerDialog() {
 					/>
 				)}
 			>
-				<BottomSheet.KeyboardAwareScrollView
-					ref={scrollRef}
-					className="flex-1 gap-4 bg-background p-6"
-				>
-					<View
-						className="w-full gap-4"
-						style={{
-							paddingBottom: insets.bottom,
-						}}
-					>
+				<BottomSheet.KeyboardAwareScrollView ref={scrollRef} className="flex-1 gap-4 p-6">
+					<View className="w-full gap-4">
 						<AddOrEditServerForm
 							onSubmit={onSubmit}
 							onClose={() => {

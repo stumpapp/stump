@@ -61,6 +61,8 @@ fn default_type() -> String {
 #[graphql(input_name = "ReadiumLocatorInput")]
 #[serde(rename_all = "camelCase")]
 pub struct ReadiumLocator {
+	#[graphql(default = "")]
+	#[serde(default)]
 	pub chapter_title: String,
 	pub href: String,
 	pub title: Option<String>,

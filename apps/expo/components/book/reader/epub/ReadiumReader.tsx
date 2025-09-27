@@ -42,7 +42,7 @@ export default function ReadiumReader({
 	const { downloadBook } = useDownload()
 
 	const [localUri, setLocalUri] = useState<string | null>(null)
-	const [locator, setLocator] = useState<ReadiumLocator | undefined>(initialLocator)
+	const [locator, setLocator] = useState<ReadiumLocator | undefined>(() => initialLocator)
 
 	const controlsVisible = useReaderStore((state) => state.showControls)
 	const setControlsVisible = useReaderStore((state) => state.setShowControls)

@@ -31,6 +31,7 @@ export default function CustomizeTheme({ onCancel }: Props) {
 	useEffect(
 		() => {
 			setCustomTheme(resolveTheme(themes, selectedTheme || '', colorScheme))
+			setName(resolveThemeName(themes, selectedTheme || '', colorScheme))
 		},
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[selectedTheme],

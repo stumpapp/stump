@@ -77,8 +77,8 @@ export default function PublicationFeed({ feed, onRefresh, isRefreshing }: Props
 	const router = useRouter()
 	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
 
-	// Each item will be width 100 OR 135 on tablets.
-	// The height will also include up to 2 lines of text.
+	// Each item will be width 100 OR 135 on tablets
+	// And we have the height plus up to 2 lines of text.
 	// We want to fill the width of the screen as best as possible. So:
 	const itemWidth = useMemo(() => {
 		if (isTablet) return 135

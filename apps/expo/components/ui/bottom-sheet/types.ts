@@ -1,6 +1,6 @@
 //#region Gorhom Bottom Sheet
 
-import { BottomSheetHandleProps, BottomSheetProps as BSProps } from '@gorhom/bottom-sheet'
+import { BottomSheetHandleProps, BottomSheetModalProps as BSModalProps } from '@gorhom/bottom-sheet'
 
 export interface BSHandleProps extends BottomSheetHandleProps {
 	className?: string
@@ -39,9 +39,9 @@ interface DialogProps extends WithFadeFromProps, WithoutFadeFromProps {
 //#endregion
 
 //#region Shared types
-export interface BottomSheetProps extends DialogProps, BSProps {
+export interface BottomSheetModalProps extends DialogProps, BSModalProps {
 	children: React.ReactNode
 	isOpen?: boolean
-	snapPoints?: Pick<BSProps, 'snapPoints'>['snapPoints']
+	snapPoints?: Pick<BSModalProps, 'snapPoints'>['snapPoints']
 }
 //#endregion

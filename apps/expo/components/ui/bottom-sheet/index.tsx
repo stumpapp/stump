@@ -24,7 +24,7 @@ import Reanimated from 'react-native-reanimated'
 import { cn } from '~/lib/utils'
 
 import { Text } from '../text'
-import { BottomSheetProps, BSHandleProps } from './types'
+import { BottomSheetModalProps, BSHandleProps } from './types'
 
 const BottomSheetTrigger = Fragment
 
@@ -32,8 +32,8 @@ type BottomSheetModal = BSModalType
 
 const BottomSheetModal = forwardRef<
 	BSModal,
-	BottomSheetProps & { children: React.ReactNode; isOpen?: boolean }
->(({ children, ...rest }: BottomSheetProps, ref) => {
+	BottomSheetModalProps & { children: React.ReactNode; isOpen?: boolean }
+>(({ children, ...rest }: BottomSheetModalProps, ref) => {
 	return (
 		<BSModal ref={ref} {...rest}>
 			{children}

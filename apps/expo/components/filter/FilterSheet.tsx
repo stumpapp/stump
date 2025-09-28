@@ -88,7 +88,6 @@ export default function FilterSheet({ label, children, isActive, snapPoints, ico
 					34 + // FilterHeader height
 					16 // bottom padding
 				}
-				enableDynamicSizing={false}
 				backgroundStyle={{
 					borderTopLeftRadius: 24,
 					borderTopRightRadius: 24,
@@ -98,8 +97,6 @@ export default function FilterSheet({ label, children, isActive, snapPoints, ico
 					borderColor: colors.edge.DEFAULT,
 					backgroundColor: colors.background.DEFAULT,
 				}}
-				// TODO: fix type error: the types in /ui/bottom-sheet looks scary but
-				// @ts-expect-error this is part of BottomSheetModalProps
 				stackBehavior="replace"
 				handleIndicatorStyle={{ backgroundColor: colorScheme === 'dark' ? '#333' : '#ccc' }}
 				handleComponent={(props) => (

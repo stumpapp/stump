@@ -330,12 +330,22 @@ pub fn get_page(
 
 /// A function to extract the bytes of a page from a file in the context of a spawned, blocking task.
 /// This will call the [get_page] function and send the result back out through a oneshot channel.
+/// For PDF files, it uses optimized caching and pre-rendering.
 #[tracing::instrument(err, fields(path = %path.as_ref().display()))]
 pub async fn get_page_async(
 	path: impl AsRef<Path>,
 	page: i32,
 	config: &StumpConfig,
 ) -> Result<(ContentType, Vec<u8>), FileError> {
+	let path_str = path.as_ref().to_str().unwrap_or_default();
+	let mime = ContentType::from_file(path_str).mime_type();
+
+	// Use optimized PDF rendering for PDF files (includes caching if enabled)
+	if mime == "application/pdf" {
+		return PdfProcessor::get_page_async(path_str, page, config).await;
+	}
+
+	// For other file types, use the original blocking approach
 	let (tx, rx) = oneshot::channel();
 
 	let handle = spawn_blocking({

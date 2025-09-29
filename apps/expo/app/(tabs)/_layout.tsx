@@ -1,4 +1,6 @@
 import { Tabs } from 'expo-router'
+import { Icon, Label, NativeTabs } from 'expo-router/unstable-native-tabs'
+import { Platform } from 'react-native'
 
 import { AddServerDialog } from '~/components/savedServer'
 import { icons } from '~/lib'
@@ -10,49 +12,68 @@ const { Server, HardDriveDownload, Settings } = icons
 export default function TabLayout() {
 	const colors = useColors()
 
-	return (
-		<Tabs
-			screenOptions={{
-				tabBarActiveTintColor: colors.foreground.DEFAULT,
-			}}
-		>
-			<Tabs.Screen
-				name="index"
-				options={{
-					headerShown: true,
-					title: 'Servers',
-					tabBarIcon: ({ focused }) => (
-						<Server
-							className={cn('h-6 w-6 text-foreground-muted', { 'text-foreground': focused })}
-						/>
-					),
-					headerRight: () => <AddServerDialog />,
+	return Platform.select({
+		ios: (
+			<NativeTabs>
+				<NativeTabs.Trigger name="index">
+					<Label>Servers</Label>
+					<Icon sf="server.rack" drawable="custom_android_drawable" />
+				</NativeTabs.Trigger>
+				<NativeTabs.Trigger name="downloads">
+					<Label>Downloads</Label>
+					<Icon sf="arrow.down.circle" drawable="custom_android_drawable" />
+				</NativeTabs.Trigger>
+				<NativeTabs.Trigger name="settings">
+					<Label>Settings</Label>
+					<Icon sf="gear" drawable="custom_android_drawable" />
+				</NativeTabs.Trigger>
+			</NativeTabs>
+		),
+
+		android: (
+			<Tabs
+				screenOptions={{
+					tabBarActiveTintColor: colors.foreground.DEFAULT,
 				}}
-			/>
-			<Tabs.Screen
-				name="downloads"
-				options={{
-					title: 'Downloads',
-					tabBarIcon: ({ focused }) => (
-						<HardDriveDownload
-							className={cn('h-6 w-6 text-foreground-muted', { 'text-foreground': focused })}
-						/>
-					),
-				}}
-			/>
-			<Tabs.Screen
-				name="settings"
-				options={{
-					title: 'Settings',
-					tabBarIcon: ({ focused }) => (
-						<Settings
-							className={cn('h-6 w-6 text-foreground-muted', { 'text-foreground': focused })}
-						/>
-					),
-					// Hide the header for this route
-					headerShown: false,
-				}}
-			/>
-		</Tabs>
-	)
+			>
+				<Tabs.Screen
+					name="index"
+					options={{
+						headerShown: true,
+						title: 'Servers',
+						tabBarIcon: ({ focused }) => (
+							<Server
+								className={cn('h-6 w-6 text-foreground-muted', { 'text-foreground': focused })}
+							/>
+						),
+						headerRight: () => <AddServerDialog />,
+					}}
+				/>
+				<Tabs.Screen
+					name="downloads"
+					options={{
+						title: 'Downloads',
+						tabBarIcon: ({ focused }) => (
+							<HardDriveDownload
+								className={cn('h-6 w-6 text-foreground-muted', { 'text-foreground': focused })}
+							/>
+						),
+					}}
+				/>
+				<Tabs.Screen
+					name="settings"
+					options={{
+						title: 'Settings',
+						tabBarIcon: ({ focused }) => (
+							<Settings
+								className={cn('h-6 w-6 text-foreground-muted', { 'text-foreground': focused })}
+							/>
+						),
+						// Hide the header for this route
+						headerShown: false,
+					}}
+				/>
+			</Tabs>
+		),
+	})
 }

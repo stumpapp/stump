@@ -1,18 +1,21 @@
 import { useAuthQuery, useClientContext, useSDK } from '@stump/client'
 import { isAxiosError } from 'axios'
 import { Tabs } from 'expo-router'
+import { Icon, Label, NativeTabs } from 'expo-router/unstable-native-tabs'
 import { useEffect } from 'react'
+import { Platform } from 'react-native'
 
-import { icons } from '~/components/ui'
+import { icons } from '~/lib'
 import { useColors } from '~/lib/constants'
 import { cn } from '~/lib/utils'
 import { usePreferencesStore, useUserStore } from '~/stores'
 
-const { Home, SquareLibrary, Search } = icons
+const { Home, Search, SquareLibrary } = icons
 
 export default function TabLayout() {
 	const { sdk } = useSDK()
 
+	// TODO(expo-54): Figure out what is needed for Android
 	const colors = useColors()
 	const animationEnabled = usePreferencesStore((state) => !state.reduceAnimations)
 	const setUser = useUserStore((state) => state.setUser)
@@ -38,49 +41,79 @@ export default function TabLayout() {
 		return null
 	}
 
-	return (
-		<Tabs
-			screenOptions={{
-				tabBarActiveTintColor: colors.foreground.DEFAULT,
-				animation: animationEnabled ? undefined : 'none',
-			}}
-		>
-			<Tabs.Screen
-				name="index"
-				options={{
-					title: 'Home',
-					tabBarIcon: ({ focused }) => (
-						<Home className={cn('h-6 w-6 text-foreground-muted', { 'text-foreground': focused })} />
-					),
-					headerShown: false,
+	return Platform.select({
+		ios: (
+			<NativeTabs
+				labelStyle={{
+					color: colors.foreground.DEFAULT,
 				}}
-			/>
+				// TODO: Support custom accent colors
+				// tintColor={colors.foreground.brand}
+			>
+				<NativeTabs.Trigger name="index">
+					<Label>Home</Label>
+					<Icon
+						sf={{ default: 'house', selected: 'house.fill' }}
+						drawable="custom_android_drawable"
+					/>
+				</NativeTabs.Trigger>
+				<NativeTabs.Trigger name="browse">
+					<Label>Browse</Label>
+					<Icon sf="books.vertical.fill" drawable="custom_android_drawable" />
+				</NativeTabs.Trigger>
+				<NativeTabs.Trigger name="search" role="search">
+					<Label>Search</Label>
+					<Icon sf="magnifyingglass" drawable="custom_android_drawable" />
+				</NativeTabs.Trigger>
+			</NativeTabs>
+		),
 
-			<Tabs.Screen
-				name="browse"
-				options={{
-					title: 'Browse',
-					tabBarIcon: ({ focused }) => (
-						<SquareLibrary
-							className={cn('h-6 w-6 text-foreground-muted', { 'text-foreground': focused })}
-						/>
-					),
-					headerShown: false,
+		android: (
+			<Tabs
+				screenOptions={{
+					tabBarActiveTintColor: colors.foreground.DEFAULT,
+					animation: animationEnabled ? undefined : 'none',
 				}}
-			/>
+			>
+				<Tabs.Screen
+					name="index"
+					options={{
+						title: 'Home',
+						tabBarIcon: ({ focused }) => (
+							<Home
+								className={cn('h-6 w-6 text-foreground-muted', { 'text-foreground': focused })}
+							/>
+						),
+						headerShown: false,
+					}}
+				/>
 
-			<Tabs.Screen
-				name="search"
-				options={{
-					headerShown: false,
-					title: 'Search',
-					tabBarIcon: ({ focused }) => (
-						<Search
-							className={cn('h-6 w-6 text-foreground-muted', { 'text-foreground': focused })}
-						/>
-					),
-				}}
-			/>
-		</Tabs>
-	)
+				<Tabs.Screen
+					name="browse"
+					options={{
+						title: 'Browse',
+						tabBarIcon: ({ focused }) => (
+							<SquareLibrary
+								className={cn('h-6 w-6 text-foreground-muted', { 'text-foreground': focused })}
+							/>
+						),
+						headerShown: false,
+					}}
+				/>
+
+				<Tabs.Screen
+					name="search"
+					options={{
+						headerShown: false,
+						title: 'Search',
+						tabBarIcon: ({ focused }) => (
+							<Search
+								className={cn('h-6 w-6 text-foreground-muted', { 'text-foreground': focused })}
+							/>
+						),
+					}}
+				/>
+			</Tabs>
+		),
+	})
 }

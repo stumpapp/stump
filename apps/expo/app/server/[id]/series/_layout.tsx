@@ -1,7 +1,7 @@
 import { Stack } from 'expo-router'
 import { Platform } from 'react-native'
-import { ENABLE_LARGE_HEADER } from '~/lib/constants'
 
+import { ENABLE_LARGE_HEADER, IS_IOS_24_PLUS } from '~/lib/constants'
 import { usePreferencesStore } from '~/stores'
 
 export default function Screen() {
@@ -22,7 +22,7 @@ export default function Screen() {
 						fontSize: 24,
 					},
 					headerLargeTitle: ENABLE_LARGE_HEADER,
-					headerBlurEffect: 'regular',
+					headerBlurEffect: IS_IOS_24_PLUS ? undefined : 'regular',
 					animation: animationEnabled ? 'default' : 'none',
 				}}
 			/>
@@ -37,7 +37,7 @@ export default function Screen() {
 						fontSize: 24,
 					},
 					// headerLargeTitle: true,
-					headerBlurEffect: 'regular',
+					headerBlurEffect: IS_IOS_24_PLUS ? undefined : 'regular',
 					animation: animationEnabled ? 'default' : 'none',
 				}}
 			/>

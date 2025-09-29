@@ -1,0 +1,13 @@
+diff --git a/node_modules/react-native-quick-md5/android/CMakeLists.txt b/node_modules/react-native-quick-md5/android/CMakeLists.txt
+index 19b5f8a..c1f263c 100644
+--- a/node_modules/react-native-quick-md5/android/CMakeLists.txt
++++ b/node_modules/react-native-quick-md5/android/CMakeLists.txt
+@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.9.0)
+ 
+ set (PACKAGE_NAME "react-native-quick-md5")
+ set (CMAKE_VERBOSE_MAKEFILE ON)
+-set (CMAKE_CXX_STANDARD 14)
++set (CMAKE_CXX_STANDARD 17)
+ 
+ file(TO_CMAKE_PATH "${NODE_MODULES_DIR}/react-native/ReactCommon/jsi/jsi/jsi.cpp" libPath)
+ 

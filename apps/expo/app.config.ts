@@ -120,15 +120,6 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 					},
 				},
 			],
-			// Note: Gradle complained about .svg files
-			// [
-			// 	'./plugins/withDrawableAssets.ts',
-			// 	{
-			// 		sourceDir: 'assets/icons',
-			// 		extensions: ['.svg'],
-			// 		createDensityFolders: false,
-			// 	},
-			// ],
 			[
 				'@sentry/react-native/expo',
 				{
@@ -137,15 +128,16 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 					organization: 'stumpapp',
 				},
 			],
-			[
-				'react-native-edge-to-edge',
-				{
-					android: {
-						parentTheme: 'Default',
-						enforceNavigationBarContrast: false,
-					},
-				},
-			],
+			// TODO(expo-54): Figure out if this is still needed
+			// [
+			// 	'react-native-edge-to-edge',
+			// 	{
+			// 		android: {
+			// 			parentTheme: 'Default',
+			// 			enforceNavigationBarContrast: false,
+			// 		},
+			// 	},
+			// ],
 		],
 		owner: 'stumpapp',
 		experiments: {

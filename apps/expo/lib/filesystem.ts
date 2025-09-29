@@ -1,4 +1,4 @@
-import * as FileSystem from 'expo-file-system'
+import * as FileSystem from 'expo-file-system/legacy'
 import urlJoin from 'url-join'
 
 import { useReaderStore } from '~/stores'
@@ -23,6 +23,8 @@ Filesystem structure:
 				- /styles
 				- etc
 */
+
+// FIXME: Need to migrate off of legacy FS methods
 
 export const baseDirectory = `${FileSystem.documentDirectory}`
 

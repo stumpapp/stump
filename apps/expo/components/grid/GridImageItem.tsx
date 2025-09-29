@@ -1,7 +1,6 @@
 import { useSDK } from '@stump/client'
 import { Href, useRouter } from 'expo-router'
-import { View } from 'react-native'
-import { Pressable } from 'react-native-gesture-handler'
+import { Pressable, View } from 'react-native'
 
 import { cn } from '~/lib/utils'
 import { usePreferencesStore } from '~/stores'

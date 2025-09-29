@@ -1,6 +1,8 @@
 import { Stack } from 'expo-router'
 import { Platform } from 'react-native'
 
+import { IS_IOS_24_PLUS } from '~/lib/constants'
+
 export default function Screen() {
 	return (
 		<Stack
@@ -14,7 +16,7 @@ export default function Screen() {
 					headerTitle: '',
 					headerShown: Platform.OS === 'ios',
 					headerTransparent: true,
-					headerBlurEffect: 'regular',
+					headerBlurEffect: IS_IOS_24_PLUS ? undefined : 'regular',
 				}}
 			/>
 

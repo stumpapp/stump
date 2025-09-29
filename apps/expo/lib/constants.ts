@@ -8,6 +8,9 @@ export const ENABLE_LARGE_HEADER = Platform.select({
 	default: true,
 })
 
+export const IS_IOS_24_PLUS =
+	Platform.OS === 'ios' && (typeof Platform.Version === 'number' ? Platform.Version >= 24 : true)
+
 const light = {
 	background: {
 		DEFAULT: '#ffffff',

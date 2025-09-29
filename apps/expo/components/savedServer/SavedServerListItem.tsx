@@ -1,6 +1,5 @@
 import { useRouter } from 'expo-router'
-import { View } from 'react-native'
-import { Pressable } from 'react-native-gesture-handler'
+import { Pressable, View } from 'react-native'
 import * as ContextMenu from 'zeego/context-menu'
 
 import { usePreferencesStore } from '~/stores'

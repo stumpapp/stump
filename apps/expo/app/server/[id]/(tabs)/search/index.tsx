@@ -9,7 +9,7 @@ import { NativeSyntheticEvent } from 'react-native'
 
 import { useActiveServer } from '~/components/activeServer'
 import { Text } from '~/components/ui'
-import { useColors } from '~/lib/constants'
+import { IS_IOS_24_PLUS, useColors } from '~/lib/constants'
 
 import { prefetchBookSearch } from '../../books/search[q]'
 
@@ -55,7 +55,7 @@ export default function Screen() {
 		navigation.setOptions({
 			headerShown: true,
 			headerTransparent: Platform.OS === 'ios',
-			headerBlurEffect: 'regular',
+			headerBlurEffect: IS_IOS_24_PLUS ? undefined : 'regular',
 			headerSearchBarOptions: {
 				placeholder: 'Search',
 				onChangeText: (e: NativeSyntheticEvent<TextInputChangeEventData>) =>

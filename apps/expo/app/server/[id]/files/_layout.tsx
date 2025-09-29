@@ -1,8 +1,8 @@
 import { Stack, useNavigation } from 'expo-router'
-import { Platform } from 'react-native'
+import { Platform, View } from 'react-native'
 
 import { icons } from '~/lib'
-import { ENABLE_LARGE_HEADER } from '~/lib/constants'
+import { ENABLE_LARGE_HEADER, IS_IOS_24_PLUS } from '~/lib/constants'
 import { usePreferencesStore } from '~/stores'
 const { ChevronLeft } = icons
 
@@ -26,13 +26,26 @@ export default function Screen() {
 						Platform.OS === 'android'
 							? undefined
 							: () => (
-									<ChevronLeft className="text-foreground" onPress={() => navigation.goBack()} />
+									<View
+										style={{
+											width: 35,
+											height: 35,
+											justifyContent: 'center',
+											alignItems: 'center',
+										}}
+									>
+										<ChevronLeft
+											className="text-foreground"
+											onPress={() => navigation.goBack()}
+											size={24}
+										/>
+									</View>
 								),
 					headerTransparent: Platform.OS === 'ios',
 					headerLargeTitleStyle: {
 						fontSize: 24,
 					},
-					headerBlurEffect: 'regular',
+					headerBlurEffect: IS_IOS_24_PLUS ? undefined : 'regular',
 					headerLargeTitle: ENABLE_LARGE_HEADER,
 				}}
 			/>
@@ -43,7 +56,7 @@ export default function Screen() {
 					headerShown: true,
 					headerTitle: '',
 					headerTransparent: Platform.OS === 'ios',
-					headerBlurEffect: 'regular',
+					headerBlurEffect: IS_IOS_24_PLUS ? undefined : 'regular',
 				}}
 				dangerouslySingular
 			/>

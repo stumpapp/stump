@@ -48,7 +48,7 @@ export function useDynamicHeader({
 	useLayoutEffect(() => {
 		if (didSetOptions) return
 		navigation.setOptions({
-			headerLeft: resolvedHeaderLeft,
+			...(headerLeft || showBackButton ? { headerLeft: resolvedHeaderLeft } : {}),
 			headerRight,
 			headerShown: true,
 			headerTransparent: Platform.OS === 'ios',
@@ -61,6 +61,15 @@ export function useDynamicHeader({
 			...rest,
 		})
 		setDidSetOptions(true)
-	}, [navigation, title, headerLeft, headerRight, rest, didSetOptions, resolvedHeaderLeft])
+	}, [
+		navigation,
+		title,
+		headerLeft,
+		headerRight,
+		rest,
+		didSetOptions,
+		resolvedHeaderLeft,
+		showBackButton,
+	])
 	return didSetOptions
 }

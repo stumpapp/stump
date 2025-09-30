@@ -10,8 +10,7 @@ import {
 	Rows3,
 } from 'lucide-react-native'
 import { Fragment } from 'react'
-import { Platform, View } from 'react-native'
-import { Pressable } from 'react-native-gesture-handler'
+import { Platform, Pressable, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { useStumpServer } from '~/components/activeServer'

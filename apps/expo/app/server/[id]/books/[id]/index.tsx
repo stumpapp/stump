@@ -139,13 +139,7 @@ export default function Screen() {
 	const navigation = useNavigation()
 	useLayoutEffect(() => {
 		navigation.setOptions({
-			headerLeft: () => (
-				<View style={{ width: 35, height: 35, justifyContent: 'center', alignItems: 'center' }}>
-					<ChevronLeft className="text-foreground" onPress={() => navigation.goBack()} size={24} />
-				</View>
-			),
 			headerRight: () => (book ? <BookActionMenu data={book} /> : null),
-			// headerTitle: Platform.OS === 'ios' ? book?.resolvedName : '',
 		})
 	}, [navigation, book, bookID])
 

@@ -1,8 +1,6 @@
 import { FlashList } from '@shopify/flash-list'
 import { useInfiniteSuspenseGraphQL } from '@stump/client'
 import { graphql } from '@stump/graphql'
-import { useNavigation } from 'expo-router'
-import { ChevronLeft } from 'lucide-react-native'
 import { useCallback } from 'react'
 import { Platform, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -39,13 +37,8 @@ export default function Screen() {
 		activeServer: { id: serverID },
 	} = useActiveServer()
 
-	const navigation = useNavigation()
 	useDynamicHeader({
 		title: 'Libraries',
-		headerLeft:
-			Platform.OS === 'ios'
-				? () => <ChevronLeft className="text-foreground" onPress={() => navigation.goBack()} />
-				: undefined,
 	})
 
 	const { data, hasNextPage, fetchNextPage, refetch, isRefetching } = useInfiniteSuspenseGraphQL(

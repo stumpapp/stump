@@ -3,8 +3,7 @@ import { ARCHIVE_EXTENSION, EBOOK_EXTENSION, PDF_EXTENSION, useSDK } from '@stum
 import { DirectoryListingQuery } from '@stump/graphql'
 import { useRouter } from 'expo-router'
 import { useCallback } from 'react'
-import { Image, View } from 'react-native'
-import { Pressable } from 'react-native-gesture-handler'
+import { Image, Pressable, View } from 'react-native'
 
 import { useColorScheme } from '~/lib/useColorScheme'
 import { usePreferencesStore } from '~/stores'

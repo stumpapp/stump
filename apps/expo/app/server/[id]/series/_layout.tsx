@@ -1,6 +1,7 @@
 import { Stack } from 'expo-router'
 import { Platform } from 'react-native'
 
+import ChevronBackLink from '~/components/ChevronBackLink'
 import { ENABLE_LARGE_HEADER, IS_IOS_24_PLUS } from '~/lib/constants'
 import { usePreferencesStore } from '~/stores'
 
@@ -24,6 +25,7 @@ export default function Screen() {
 					headerLargeTitle: ENABLE_LARGE_HEADER,
 					headerBlurEffect: IS_IOS_24_PLUS ? undefined : 'regular',
 					animation: animationEnabled ? 'default' : 'none',
+					headerLeft: Platform.OS === 'android' ? undefined : () => <ChevronBackLink />,
 				}}
 			/>
 
@@ -36,7 +38,6 @@ export default function Screen() {
 					headerLargeTitleStyle: {
 						fontSize: 24,
 					},
-					// headerLargeTitle: true,
 					headerBlurEffect: IS_IOS_24_PLUS ? undefined : 'regular',
 					animation: animationEnabled ? 'default' : 'none',
 				}}

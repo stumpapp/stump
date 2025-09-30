@@ -20,10 +20,10 @@ export default function Screen() {
 				options={{
 					headerShown: true,
 					headerTitle: 'Books',
-					headerLeft: Platform.OS === 'android' ? undefined : () => <ChevronBackLink />,
 					headerTransparent: Platform.OS === 'ios',
 					headerBlurEffect: IS_IOS_24_PLUS ? undefined : 'regular',
 					headerLargeTitle: false,
+					headerLeft: Platform.OS === 'android' ? undefined : () => <ChevronBackLink />,
 				}}
 			/>
 		</Stack>

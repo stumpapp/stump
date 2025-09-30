@@ -49,6 +49,7 @@ export default function TabLayout() {
 				}}
 				// TODO: Support custom accent colors
 				// tintColor={colors.foreground.brand}
+				minimizeBehavior="onScrollDown"
 			>
 				<NativeTabs.Trigger name="index">
 					<Label>Home</Label>

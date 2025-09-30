@@ -14,7 +14,7 @@ export default function TabLayout() {
 
 	return Platform.select({
 		ios: (
-			<NativeTabs>
+			<NativeTabs minimizeBehavior="onScrollDown">
 				<NativeTabs.Trigger name="index">
 					<Label>Servers</Label>
 					<Icon sf="server.rack" drawable="custom_android_drawable" />

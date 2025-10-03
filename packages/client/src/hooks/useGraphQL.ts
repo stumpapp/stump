@@ -429,9 +429,8 @@ export const getNextPageParam = (paginationInfo?: PaginationInfo): Pagination | 
 			} satisfies Pagination
 		})
 		.with({ __typename: 'OffsetPaginationInfo' }, (info) => {
-			const { currentPage, totalPages, zeroBased } = info
-			const modifier = zeroBased ? 0 : 1
-			const nextPage = currentPage + 1 + modifier
+			const { currentPage, totalPages } = info
+			const nextPage = currentPage + 1
 			if (nextPage > totalPages) return undefined
 			return {
 				offset: {

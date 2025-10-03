@@ -66,9 +66,15 @@ export default function FilterSheet({ label, children, isActive, snapPoints, ico
 						className={cn(
 							'squircle flex flex-grow-0 flex-row items-center justify-center rounded-full bg-background-surface-secondary px-3 py-2',
 							pressed && 'opacity-70',
-							{ 'bg-fill-brand-secondary': isActive },
 						)}
-						style={{ flex: 0 }}
+						style={{
+							flex: 0,
+							...(isActive
+								? {
+										backgroundColor: colors.fill.brand.secondary,
+									}
+								: {}),
+						}}
 					>
 						<Text>{label}</Text>
 						<Icon className="ml-2 h-4 w-4 text-foreground-muted" />

@@ -1,4 +1,8 @@
+import clone from 'lodash/cloneDeep'
+import setProperty from 'lodash/set'
 import { Platform } from 'react-native'
+
+import { usePreferencesStore } from '~/stores'
 
 import { useColorScheme } from './useColorScheme'
 
@@ -163,7 +167,17 @@ export const COLORS = {
 
 export const useColors = () => {
 	const { isDarkColorScheme } = useColorScheme()
-	return isDarkColorScheme ? dark : light
+	const accentColor = usePreferencesStore((state) => state.accentColor)
+	const resolvedTheme = clone(isDarkColorScheme ? dark : light)
+
+	if (accentColor) {
+		setProperty(resolvedTheme, 'foreground.brand', accentColor)
+		setProperty(resolvedTheme, 'fill.brand.DEFAULT', accentColor)
+		setProperty(resolvedTheme, 'fill.brand.hover', accentColor)
+		setProperty(resolvedTheme, 'fill.brand.secondary', `${accentColor}36`)
+	}
+
+	return resolvedTheme
 }
 
 export const NAV_THEME = {

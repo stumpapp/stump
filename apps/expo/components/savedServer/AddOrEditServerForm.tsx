@@ -3,13 +3,7 @@ import { checkUrl, formatApiURL } from '@stump/sdk'
 import isEqual from 'lodash/isEqual'
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 import { Controller, useForm, useFormState, useWatch } from 'react-hook-form'
-import {
-	NativeSyntheticEvent,
-	Platform,
-	Pressable,
-	TextInputFocusEventData,
-	View,
-} from 'react-native'
+import { FocusEvent, Platform, Pressable, View } from 'react-native'
 import Dialog from 'react-native-dialog'
 import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable'
 import Reanimated, { SharedValue, useAnimatedStyle } from 'react-native-reanimated'
@@ -27,7 +21,7 @@ type Props = {
 	editingServer?: SavedServerWithConfig | null
 	onSubmit: (data: AddOrEditServerSchema) => void
 	onClose: () => void
-	onInputFocused?: (e: NativeSyntheticEvent<TextInputFocusEventData>) => void
+	onInputFocused?: (e: FocusEvent) => void
 }
 
 export default function AddOrEditServerForm({
@@ -198,7 +192,8 @@ export default function AddOrEditServerForm({
 	)
 
 	const onURLFocused = useCallback(
-		(e: NativeSyntheticEvent<TextInputFocusEventData>) => {
+		(e: FocusEvent) => {
+			// @ts-expect-error: It's fine
 			if (e.nativeEvent.text === '') {
 				form.setValue('url', 'http://')
 			}

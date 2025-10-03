@@ -23,7 +23,7 @@ export default function AppPrimaryColor() {
 
 	return Platform.select({
 		ios: (
-			<AppSettingsRow icon="Pipette" title="Accent Color">
+			<AppSettingsRow icon="Pipette" title="Accent">
 				<Host matchContents>
 					<ColorPicker
 						label=""

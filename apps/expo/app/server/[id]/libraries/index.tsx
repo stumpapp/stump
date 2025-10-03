@@ -12,7 +12,6 @@ import { LibraryGridItem } from '~/components/library'
 import { ILibraryGridItemFragment } from '~/components/library/LibraryGridItem'
 import RefreshControl from '~/components/RefreshControl'
 import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
-import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
 
 const query = graphql(`
 	query LibrariesScreen($pagination: Pagination) {
@@ -37,10 +36,6 @@ export default function Screen() {
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
-
-	useDynamicHeader({
-		title: 'Libraries',
-	})
 
 	const { data, hasNextPage, fetchNextPage, refetch, isRefetching } = useInfiniteSuspenseGraphQL(
 		query,

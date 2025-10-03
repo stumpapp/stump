@@ -4,6 +4,7 @@ import { Pressable } from 'react-native'
 
 import { TextClassContext } from '~/components/ui/text'
 import { cn } from '~/lib/utils'
+import { usePreferencesStore } from '~/stores'
 
 // TODO: Use native buttons where applicable, once expo ui stabilizes
 
@@ -59,7 +60,10 @@ type ButtonProps = React.ComponentPropsWithoutRef<typeof Pressable> &
 	VariantProps<typeof buttonVariants>
 
 const Button = React.forwardRef<React.ElementRef<typeof Pressable>, ButtonProps>(
-	({ className, variant, size, ...props }, ref) => {
+	({ className, variant, size, style, ...props }, ref) => {
+		const accentColor = usePreferencesStore((state) => state.accentColor)
+		const isBrand = variant === 'brand' || !variant
+
 		return (
 			<TextClassContext.Provider
 				value={cn(
@@ -75,7 +79,10 @@ const Button = React.forwardRef<React.ElementRef<typeof Pressable>, ButtonProps>
 					ref={ref}
 					role="button"
 					{...props}
-					// style={[props.style || {}, { height: '40px' }]}
+					style={{
+						...(typeof style === 'object' ? style : undefined),
+						...(accentColor && isBrand ? { backgroundColor: accentColor } : undefined),
+					}}
 				/>
 			</TextClassContext.Provider>
 		)

@@ -44,9 +44,6 @@ export default function TabLayout() {
 	return Platform.select({
 		ios: (
 			<NativeTabs
-				labelStyle={{
-					color: colors.foreground.DEFAULT,
-				}}
 				tintColor={accentColor || colors.fill.brand.DEFAULT}
 				minimizeBehavior="onScrollDown"
 			>

@@ -1,11 +1,11 @@
 import { View } from 'react-native'
 
 import { ClearFilters, FilterHeader } from '~/components/filter'
+import { useSeriesFilterStore } from '~/stores/filters'
 
 import { ISeriesFilterHeaderContext, SeriesFilterHeaderContext } from './context'
 import Sort from './Sort'
 import Status from './Status'
-import { useSeriesFilterStore } from '~/stores/filters'
 
 type Props = ISeriesFilterHeaderContext
 

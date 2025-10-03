@@ -1,8 +1,9 @@
-import { View } from 'react-native'
-import { Pressable } from 'react-native-gesture-handler'
-import { cn } from '~/lib/utils'
-import { Text } from '../ui'
 import { FilterX } from 'lucide-react-native'
+import { Pressable, View } from 'react-native'
+
+import { cn } from '~/lib/utils'
+
+import { Text } from '../ui'
 import { Icon } from '../ui/icon'
 
 type Props = {

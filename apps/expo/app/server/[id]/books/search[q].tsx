@@ -10,6 +10,7 @@ import BookGridItem, { IBookGridItemFragment } from '~/components/book/BookGridI
 import { ColumnItem } from '~/components/grid'
 import { useGridItemSize } from '~/components/grid/useGridItemSize'
 import { icons } from '~/lib'
+import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
 
 const { ChevronLeft } = icons
 
@@ -105,7 +106,7 @@ export default function Screen() {
 			contentContainerStyle={{ padding: 16 }}
 			centerContent
 			numColumns={numColumns}
-			onEndReachedThreshold={0.75}
+			onEndReachedThreshold={ON_END_REACHED_THRESHOLD}
 			onEndReached={onEndReached}
 		/>
 	)

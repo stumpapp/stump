@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { FileExplorerGridItem } from '~/components/fileExplorer'
 import { Heading, Text } from '~/components/ui'
+import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
 
 export default function Screen() {
 	const params = useLocalSearchParams<{
@@ -62,7 +63,7 @@ export default function Screen() {
 					numColumns={3}
 					renderItem={renderItem}
 					contentInsetAdjustmentBehavior="automatic"
-					onEndReachedThreshold={0.75}
+					onEndReachedThreshold={ON_END_REACHED_THRESHOLD}
 					onEndReached={() => {
 						if (canLoadMore) {
 							loadMore()

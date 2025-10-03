@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { useRouter } from 'expo-router'
 import { View } from 'react-native'
-import { Pressable } from 'react-native-gesture-handler'
 
 import { icons, Text } from '~/components/ui'
 import { getAppUsage } from '~/lib/filesystem'

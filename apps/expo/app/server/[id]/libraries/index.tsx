@@ -11,6 +11,7 @@ import { useGridItemSize } from '~/components/grid/useGridItemSize'
 import { LibraryGridItem } from '~/components/library'
 import { ILibraryGridItemFragment } from '~/components/library/LibraryGridItem'
 import RefreshControl from '~/components/RefreshControl'
+import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
 
 const query = graphql(`
@@ -74,7 +75,7 @@ export default function Screen() {
 					padding: 16,
 				}}
 				numColumns={numColumns}
-				onEndReachedThreshold={0.75}
+				onEndReachedThreshold={ON_END_REACHED_THRESHOLD}
 				onEndReached={onEndReached}
 				ItemSeparatorComponent={() => <View style={{ height: gap * 2 }} />}
 				contentInsetAdjustmentBehavior="automatic"

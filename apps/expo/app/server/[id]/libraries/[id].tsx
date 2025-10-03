@@ -10,6 +10,7 @@ import { ColumnItem } from '~/components/grid'
 import { useGridItemSize } from '~/components/grid/useGridItemSize'
 import RefreshControl from '~/components/RefreshControl'
 import SeriesGridItem, { ISeriesGridItemFragment } from '~/components/series/SeriesGridItem'
+import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
 
 const query = graphql(`
@@ -92,7 +93,7 @@ export default function Screen() {
 				}}
 				centerContent
 				numColumns={numColumns}
-				onEndReachedThreshold={0.75}
+				onEndReachedThreshold={ON_END_REACHED_THRESHOLD}
 				onEndReached={onEndReached}
 				contentInsetAdjustmentBehavior="automatic"
 				refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}

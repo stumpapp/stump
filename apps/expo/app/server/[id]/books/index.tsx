@@ -13,6 +13,7 @@ import { BookFilterHeader } from '~/components/book/filterHeader'
 import { ColumnItem } from '~/components/grid'
 import { useGridItemSize } from '~/components/grid/useGridItemSize'
 import RefreshControl from '~/components/RefreshControl'
+import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
 import { BookFilterContext, createBookFilterStore } from '~/stores/filters'
 
 const query = graphql(`
@@ -87,7 +88,7 @@ export default function Screen() {
 						padding: 16,
 					}}
 					numColumns={numColumns}
-					onEndReachedThreshold={0.75}
+					onEndReachedThreshold={ON_END_REACHED_THRESHOLD}
 					onEndReached={onEndReached}
 					contentInsetAdjustmentBehavior="automatic"
 					ListHeaderComponent={() => (

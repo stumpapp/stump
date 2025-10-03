@@ -14,6 +14,7 @@ import RefreshControl from '~/components/RefreshControl'
 import { SeriesGridItem } from '~/components/series'
 import { SeriesFilterHeader } from '~/components/series/filterHeader'
 import { ISeriesGridItemFragment } from '~/components/series/SeriesGridItem'
+import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
 import { createSeriesFilterStore, SeriesFilterContext } from '~/stores/filters'
 
 const query = graphql(`
@@ -91,7 +92,7 @@ export default function Screen() {
 						padding: 16,
 					}}
 					numColumns={numColumns}
-					onEndReachedThreshold={0.75}
+					onEndReachedThreshold={ON_END_REACHED_THRESHOLD}
 					onEndReached={onEndReached}
 					contentInsetAdjustmentBehavior="always"
 					ListHeaderComponent={<SeriesFilterHeader />}

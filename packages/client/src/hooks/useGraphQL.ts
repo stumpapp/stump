@@ -257,14 +257,7 @@ export function useInfiniteSuspenseGraphQL<TResult, TVariables>(
 	queryKey: QueryKey,
 	variables?: TVariables extends Record<string, never> ? never : TVariables,
 	options?: Omit<
-		UseSuspenseInfiniteQueryOptions<
-			TResult,
-			Error,
-			TResult,
-			TResult,
-			readonly unknown[],
-			Pagination
-		>,
+		UseSuspenseInfiniteQueryOptions<TResult, Error, TResult, readonly unknown[], Pagination>,
 		'queryKey' | 'queryFn'
 	>,
 ): UseSuspenseInfiniteQueryResult<InfiniteData<TResult>> {

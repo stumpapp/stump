@@ -3,8 +3,7 @@ import { FlashList } from '@shopify/flash-list'
 import { useSuspenseGraphQL } from '@stump/client'
 import { graphql } from '@stump/graphql'
 import { useRouter } from 'expo-router'
-import { Image, Platform, View } from 'react-native'
-import { Pressable } from 'react-native-gesture-handler'
+import { Image, Platform, Pressable, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { useActiveServer } from '~/components/activeServer'
@@ -55,6 +54,7 @@ export default function Screen() {
 					<Pressable
 						onPress={() =>
 							router.push({
+								// @ts-expect-error: String path
 								pathname: `/server/[id]/files/[path]?friendlyName=${item.name}`,
 								params: {
 									id: serverID,

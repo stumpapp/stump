@@ -1,19 +1,20 @@
 import { BookMenuFragment } from '@stump/graphql'
 import { useRouter } from 'expo-router'
-import { ArrowUpRight, Book, BookCheck, CircleMinus, CopyMinus } from 'lucide-react-native'
-import React, { Fragment } from 'react'
+import { ArrowUpRight, BookCheck, CircleMinus, CopyMinus } from 'lucide-react-native'
+import { Fragment } from 'react'
 import { View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+
 import {
 	Button,
 	DropdownMenu,
-	DropdownMenuTrigger,
-	Text,
 	DropdownMenuContent,
-	DropdownMenuSeparator,
 	DropdownMenuGroup,
 	DropdownMenuItem,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
 	icons,
+	Text,
 } from '~/components/ui'
 import { Icon } from '~/components/ui/icon'
 import { cn } from '~/lib/utils'
@@ -90,7 +91,7 @@ export default function AndroidBookMenu({
 
 					{isReading && (
 						<Fragment>
-							<DropdownMenuItem onPress={completeBook}>
+							<DropdownMenuItem onPress={deleteCurrentSession}>
 								<Text className="text-lg">Clear Progress</Text>
 								<Icon as={CircleMinus} size={20} className={cn('ml-auto text-foreground-muted')} />
 							</DropdownMenuItem>

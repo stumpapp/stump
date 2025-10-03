@@ -1,8 +1,7 @@
 import { useRouter } from 'expo-router'
 import { ALargeSmall, Ellipsis, TableOfContents } from 'lucide-react-native'
 import { useEffect } from 'react'
-import { Platform, View } from 'react-native'
-import { Pressable } from 'react-native-gesture-handler'
+import { Platform, Pressable, View } from 'react-native'
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
@@ -41,7 +40,7 @@ export default function ReadiumHeader({ settingsUrl, locationsUrl }: Props) {
 
 	const animatedStyles = useAnimatedStyle(() => {
 		return {
-			top: insets.top + (Platform.OS === 'android' ? 12 : 0),
+			top: insets.top + (Platform.OS === 'android' ? 0 : 0),
 			left: insets.left,
 			right: insets.right,
 			transform: [{ translateY: translateY.value }],
@@ -77,7 +76,7 @@ export default function ReadiumHeader({ settingsUrl, locationsUrl }: Props) {
 			</View>
 
 			<View className="absolute left-0 right-0 items-center justify-center px-16">
-				<Text numberOfLines={1} style={{ color: colors?.foreground }}>
+				<Text numberOfLines={1} style={{ color: colors?.foreground }} className="max-w-[90%]">
 					{chapterTitle}
 				</Text>
 			</View>

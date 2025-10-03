@@ -3,6 +3,8 @@ import { useInfiniteSuspenseGraphQL } from '@stump/client'
 import { graphql } from '@stump/graphql'
 import { useCallback } from 'react'
 
+import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
+
 import { useActiveServer } from '../activeServer'
 import { ColumnItem } from '../grid'
 import { useGridItemSize } from '../grid/useGridItemSize'
@@ -66,11 +68,10 @@ export default function RecentlyAddedSeries({ header }: Props) {
 			data={data?.pages.flatMap((page) => page.series.nodes) || []}
 			renderItem={renderItem}
 			contentContainerStyle={{
-				paddingHorizontal: 16,
-				paddingTop: 16,
+				padding: 16,
 			}}
 			numColumns={numColumns}
-			onEndReachedThreshold={0.75}
+			onEndReachedThreshold={ON_END_REACHED_THRESHOLD}
 			onEndReached={onEndReached}
 			contentInsetAdjustmentBehavior="always"
 			ListHeaderComponent={header}

@@ -11,6 +11,8 @@ import { booksDirectory, ensureDirectoryExists } from '~/lib/filesystem'
 
 // TODO(offline-reading): Migrate to SQLite, this won't scale well I think
 
+// Empty object yada yada
+// eslint-disable-next-line
 type UnsyncedReadProgress = {}
 
 type FileStumpRef = {

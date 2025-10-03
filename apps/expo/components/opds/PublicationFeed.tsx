@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Pressable, View } from 'react-native'
 import { FlatGrid } from 'react-native-super-grid'
 
+import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
 import { useDisplay } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 import { usePreferencesStore } from '~/stores'
@@ -164,7 +165,7 @@ export default function PublicationFeed({ feed, onRefresh, isRefreshing }: Props
 				}}
 				keyExtractor={(item) => item.metadata.title}
 				onEndReached={onEndReached}
-				onEndReachedThreshold={0.75}
+				onEndReachedThreshold={ON_END_REACHED_THRESHOLD}
 				refreshControl={
 					onRefresh ? (
 						<RefreshControl refreshing={isRefreshing || false} onRefresh={onRefresh} />

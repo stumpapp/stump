@@ -15,6 +15,7 @@ import { ColumnItem } from '~/components/grid'
 import { useGridItemSize } from '~/components/grid/useGridItemSize'
 import ListEmpty from '~/components/ListEmpty'
 import RefreshControl from '~/components/RefreshControl'
+import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
 import { BookFilterContext, createBookFilterStore } from '~/stores/filters'
 
@@ -125,7 +126,7 @@ export default function Screen() {
 						padding: 16,
 					}}
 					numColumns={numColumns}
-					onEndReachedThreshold={0.75}
+					onEndReachedThreshold={ON_END_REACHED_THRESHOLD}
 					onEndReached={onEndReached}
 					ListHeaderComponent={<BookFilterHeader seriesId={id} />}
 					ListHeaderComponentStyle={{ paddingBottom: 16 }}

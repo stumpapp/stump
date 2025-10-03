@@ -205,6 +205,7 @@ export default function BookMenu({ data }: Props) {
 							systemImage="arrow.up.right"
 							onPress={() =>
 								router.push({
+									// @ts-expect-error: I need to use less ambiguous [id]s, e.g. [libraryId]
 									pathname: `/server/${book.id}/libraries/${book.library.id}`,
 								})
 							}
@@ -217,6 +218,7 @@ export default function BookMenu({ data }: Props) {
 							systemImage="arrow.up.right"
 							onPress={() =>
 								router.push({
+									// @ts-expect-error: I need to use less ambiguous [id]s, e.g. [libraryId]
 									pathname: `/server/${book.id}/series/${book.series.id}`,
 								})
 							}
@@ -294,6 +296,7 @@ export default function BookMenu({ data }: Props) {
 						key="library"
 						onSelect={() =>
 							router.push({
+								// @ts-expect-error: I need to use less ambiguous [id]s, e.g. [libraryId]
 								pathname: `/server/${book.id}/libraries/${book.library.id}`,
 							})
 						}
@@ -308,6 +311,7 @@ export default function BookMenu({ data }: Props) {
 						key="series"
 						onSelect={() =>
 							router.push({
+								// @ts-expect-error: I need to use less ambiguous [id]s, e.g. [libraryId]
 								pathname: `/server/${book.id}/series/${book.series.id}`,
 							})
 						}

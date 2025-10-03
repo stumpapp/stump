@@ -111,7 +111,13 @@ class ReadiumModule : Module() {
           view.go(locator, animated = false)
       }
 
-      Prop("locator") { view: EPUBView, prop: Map<String, Any> ->
+      Prop("locator") { view: EPUBView, prop: Map<String, Any?>? ->
+        if (prop == null) {
+          Log.d("ReadiumModule", "Received null locator prop")
+          view.pendingProps.locator = null
+          return@Prop
+        }
+        Log.d("ReadiumModule", "Received locator prop: $prop")
         val locator = Locator.fromJSON(JSONObject(prop)) ?: return@Prop
         view.pendingProps.locator = locator
       }

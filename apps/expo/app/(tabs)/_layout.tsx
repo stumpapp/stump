@@ -6,15 +6,20 @@ import { AddServerDialog } from '~/components/savedServer'
 import { icons } from '~/lib'
 import { useColors } from '~/lib/constants'
 import { cn } from '~/lib/utils'
+import { usePreferencesStore } from '~/stores'
 
 const { Server, HardDriveDownload, Settings } = icons
 
 export default function TabLayout() {
 	const colors = useColors()
+	const accentColor = usePreferencesStore((state) => state.accentColor)
 
 	return Platform.select({
 		ios: (
-			<NativeTabs minimizeBehavior="onScrollDown">
+			<NativeTabs
+				minimizeBehavior="onScrollDown"
+				tintColor={accentColor || colors.fill.brand.DEFAULT}
+			>
 				<NativeTabs.Trigger name="index">
 					<Label>Servers</Label>
 					<Icon sf="server.rack" drawable="custom_android_drawable" />

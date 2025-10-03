@@ -15,8 +15,8 @@ const { Home, Search, SquareLibrary } = icons
 export default function TabLayout() {
 	const { sdk } = useSDK()
 
-	// TODO(expo-54): Figure out what is needed for Android
 	const colors = useColors()
+	const accentColor = usePreferencesStore((state) => state.accentColor)
 	const animationEnabled = usePreferencesStore((state) => !state.reduceAnimations)
 	const setUser = useUserStore((state) => state.setUser)
 
@@ -47,8 +47,7 @@ export default function TabLayout() {
 				labelStyle={{
 					color: colors.foreground.DEFAULT,
 				}}
-				// TODO: Support custom accent colors
-				// tintColor={colors.foreground.brand}
+				tintColor={accentColor || colors.fill.brand.DEFAULT}
 				minimizeBehavior="onScrollDown"
 			>
 				<NativeTabs.Trigger name="index">

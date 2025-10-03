@@ -13,6 +13,7 @@ import {
 	ReduceAnimations,
 	ThumbnailRatio,
 } from '~/components/appSettings/preferences'
+import AppPrimaryColor from '~/components/appSettings/preferences/AppPrimaryColor'
 import { StumpEnabled } from '~/components/appSettings/stump'
 import { Text } from '~/components/ui/text'
 
@@ -23,6 +24,7 @@ export default function Screen() {
 				<View>
 					<Text className="mb-3 text-foreground-muted">Preferences</Text>
 					<AppTheme />
+					<AppPrimaryColor />
 					<AppLanguage />
 					<DefaultServer />
 					<ThumbnailRatio />

@@ -5,6 +5,8 @@ import { Pressable } from 'react-native'
 import { TextClassContext } from '~/components/ui/text'
 import { cn } from '~/lib/utils'
 
+// TODO: Use native buttons where applicable, once expo ui stabilizes
+
 const buttonVariants = cva('group flex items-center justify-center squircle rounded-lg', {
 	variants: {
 		variant: {

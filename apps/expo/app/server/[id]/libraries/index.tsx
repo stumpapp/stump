@@ -65,7 +65,7 @@ export default function Screen() {
 	return (
 		<SafeAreaView
 			style={{ flex: 1 }}
-			edges={Platform.OS === 'ios' ? ['top', 'left', 'right'] : ['left', 'right']}
+			edges={['left', 'right', ...(Platform.OS === 'ios' ? [] : ['bottom' as const])]}
 		>
 			<FlashList
 				data={data?.pages.flatMap((page) => page.libraries.nodes) || []}

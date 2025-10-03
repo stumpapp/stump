@@ -65,6 +65,7 @@ function OnDeck() {
 			</Heading>
 
 			<FlashList
+				key={`on-deck-list-${nodes.length ? 'at-least-one-item' : 'empty'}`} // Force re-render when switching between empty and non-empty states
 				data={nodes}
 				keyExtractor={({ id }) => id}
 				renderItem={renderItem}

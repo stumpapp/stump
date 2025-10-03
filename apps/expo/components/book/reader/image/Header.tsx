@@ -1,8 +1,15 @@
 import { ReadingDirection, ReadingMode } from '@stump/graphql'
 import { useRouter } from 'expo-router'
-import { Glasses, Settings2, SquareArrowLeft, SquareArrowRight } from 'lucide-react-native'
+import {
+	CircleEllipsis,
+	Glasses,
+	Settings2,
+	SquareArrowLeft,
+	SquareArrowRight,
+	X,
+} from 'lucide-react-native'
 import { useCallback, useEffect, useState } from 'react'
-import { Platform, Pressable, View } from 'react-native'
+import { Platform, View } from 'react-native'
 import Animated, {
 	Easing,
 	useAnimatedStyle,
@@ -26,7 +33,6 @@ import {
 	DropdownMenuSubTrigger,
 	DropdownMenuTrigger,
 	Heading,
-	icons,
 	Switch,
 	Text,
 } from '~/components/ui'
@@ -37,8 +43,6 @@ import { useReaderStore } from '~/stores'
 import { useBookPreferences } from '~/stores/reader'
 
 import { useImageBasedReader } from './context'
-
-const { X, CircleEllipsis } = icons
 
 type Props = {
 	onShowGlobalSettings: () => void
@@ -97,21 +101,28 @@ export default function Header({ onShowGlobalSettings }: Props) {
 		ios: (
 			<NativeDropdownMenu.Root open={isOpen} onOpenChange={setIsOpen}>
 				<NativeDropdownMenu.Trigger>
-					<Pressable
-						onPress={() => setIsOpen((prev) => !prev)}
+					<Button
+						className="squircle h-[unset] w-[unset] rounded-full border p-1 tablet:p-2"
+						variant="ghost"
+						size="icon"
 						style={{
-							zIndex: 100,
+							backgroundColor: COLORS.dark.background.overlay.DEFAULT,
+							borderColor: COLORS.dark.edge.DEFAULT,
 						}}
 					>
 						{({ pressed }) => (
 							<View
-								className="squircle rounded-full border p-1 tablet:p-2"
+								className="squircle items-center justify-center rounded-full"
 								style={{
 									backgroundColor: COLORS.dark.background.overlay.DEFAULT,
 									borderColor: COLORS.dark.edge.DEFAULT,
+									height: 35,
+									width: 35,
 								}}
 							>
-								<CircleEllipsis
+								<Icon
+									as={CircleEllipsis}
+									size={24}
 									style={{
 										opacity: isOpen ? 0.5 : pressed ? 0.85 : 1,
 										// @ts-expect-error: This is fine
@@ -120,7 +131,7 @@ export default function Header({ onShowGlobalSettings }: Props) {
 								/>
 							</View>
 						)}
-					</Pressable>
+					</Button>
 				</NativeDropdownMenu.Trigger>
 
 				<NativeDropdownMenu.Content>
@@ -243,12 +254,17 @@ export default function Header({ onShowGlobalSettings }: Props) {
 					>
 						{({ pressed }) => (
 							<View
+								className="squircle items-center justify-center rounded-full"
 								style={{
 									backgroundColor: COLORS.dark.background.overlay.DEFAULT,
 									borderColor: COLORS.dark.edge.DEFAULT,
+									height: 35,
+									width: 35,
 								}}
 							>
-								<CircleEllipsis
+								<Icon
+									as={CircleEllipsis}
+									size={24}
 									style={{
 										opacity: isOpen ? 0.5 : pressed ? 0.85 : 1,
 										// @ts-expect-error: This is fine
@@ -355,30 +371,38 @@ export default function Header({ onShowGlobalSettings }: Props) {
 	return (
 		<Animated.View className="absolute z-20 gap-2 px-2" style={animatedStyles}>
 			<View className="flex-row items-center justify-between">
-				<Pressable
-					onPress={() => router.back()}
+				<Button
+					className="squircle h-[unset] w-[unset] rounded-full border p-1 tablet:p-2"
+					variant="ghost"
+					size="icon"
 					style={{
-						zIndex: 100,
+						backgroundColor: COLORS.dark.background.overlay.DEFAULT,
+						borderColor: COLORS.dark.edge.DEFAULT,
 					}}
+					onPress={() => router.back()}
 				>
 					{({ pressed }) => (
 						<View
-							className="squircle rounded-full border p-1 tablet:p-2"
+							className="squircle items-center justify-center rounded-full"
 							style={{
 								backgroundColor: COLORS.dark.background.overlay.DEFAULT,
 								borderColor: COLORS.dark.edge.DEFAULT,
+								height: 35,
+								width: 35,
 							}}
 						>
-							<X
+							<Icon
+								as={X}
+								size={24}
 								style={{
-									opacity: pressed ? 0.85 : 1,
+									opacity: isOpen ? 0.5 : pressed ? 0.85 : 1,
 									// @ts-expect-error: This is fine
 									color: COLORS.dark.foreground.DEFAULT,
 								}}
 							/>
 						</View>
 					)}
-				</Pressable>
+				</Button>
 
 				{DropdownComponent}
 			</View>

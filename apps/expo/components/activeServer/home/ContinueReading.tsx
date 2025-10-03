@@ -1,16 +1,16 @@
 import { FlashList } from '@shopify/flash-list'
 import { useInfiniteSuspenseGraphQL } from '@stump/client'
 import { graphql } from '@stump/graphql'
-import { Fragment, memo, useCallback, useMemo, useState } from 'react'
+import { Fragment, memo, useCallback, useMemo } from 'react'
 import { View } from 'react-native'
 
 import { BookListItem } from '~/components/book'
 import { BookListItemFragmentType } from '~/components/book/BookListItem'
 import { Heading, Text } from '~/components/ui'
+import { useListItemSize } from '~/lib/hooks'
 
 import { useActiveServer } from '../context'
 import ReadingNow from './ReadingNow'
-import { useListItemSize } from '~/lib/hooks'
 
 const query = graphql(`
 	query ContinueReading($pagination: Pagination) {
@@ -49,7 +49,7 @@ function ContinueReading() {
 	const nodes = useMemo(() => data?.pages.flatMap((page) => page.keepReading.nodes) || [], [data])
 
 	// Take the first 5 books as "currently reading"
-	const [activeBooks] = useState(() => data?.pages.at(0)?.keepReading.nodes.slice(0, 5) || [])
+	const activeBooks = useMemo(() => data?.pages.at(0)?.keepReading.nodes.slice(0, 5) || [], [data])
 
 	const leftOffBooks = useMemo(
 		() => nodes.filter(({ id }) => !activeBooks.some((book) => book.id === id)),
@@ -70,7 +70,9 @@ function ContinueReading() {
 	const { gap } = useListItemSize()
 
 	return (
-		<Fragment>
+		<Fragment
+			key={`continue-reading-section-${nodes.length ? 'at-least-one-item' : 'empty'}`} // Force re-render when switching between empty and non-empty states
+		>
 			{activeBooks.length > 0 && <ReadingNow books={activeBooks} />}
 
 			{(leftOffBooks.length > 0 || activeBooks.length === 0) && (

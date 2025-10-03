@@ -78,7 +78,7 @@ export default function Screen() {
 		<BookFilterContext.Provider value={store}>
 			<SafeAreaView
 				style={{ flex: 1 }}
-				edges={Platform.OS === 'ios' ? ['top', 'left', 'right'] : ['left', 'right']}
+				edges={['left', 'right', ...(Platform.OS === 'ios' ? [] : ['bottom' as const])]}
 			>
 				<FlashList
 					data={data?.pages.flatMap((page) => page.media.nodes) || []}

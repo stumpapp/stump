@@ -1,7 +1,3 @@
-import { Icon } from '~/components/ui/icon'
-import { NativeOnlyAnimatedView } from '~/components/ui/native-only-animated-view'
-import { TextClassContext } from '~/components/ui/text'
-import { cn } from '~/lib/utils'
 import * as DropdownMenuPrimitive from '@rn-primitives/dropdown-menu'
 import { Check, ChevronDown, ChevronRight, ChevronUp } from 'lucide-react-native'
 import * as React from 'react'
@@ -16,6 +12,11 @@ import {
 } from 'react-native'
 import { FadeIn } from 'react-native-reanimated'
 import { FullWindowOverlay as RNFullWindowOverlay } from 'react-native-screens'
+
+import { Icon } from '~/components/ui/icon'
+import { NativeOnlyAnimatedView } from '~/components/ui/native-only-animated-view'
+import { TextClassContext } from '~/components/ui/text'
+import { cn } from '~/lib/utils'
 
 // TODO(android): Would be nice to add https://docs.expo.dev/versions/latest/sdk/blur-view/
 
@@ -51,9 +52,10 @@ function DropdownMenuSubTrigger({
 		>
 			<DropdownMenuPrimitive.SubTrigger
 				className={cn(
-					'squircle group flex flex-row items-center rounded-sm px-2 py-2 active:bg-background-surface sm:py-1.5',
+					'squircle group flex flex-row items-center rounded-lg px-2 py-2 active:bg-background-surface sm:py-1.5',
 					open && 'bg-background-surface',
 					inset && 'pl-8',
+					className,
 				)}
 				{...props}
 			>
@@ -151,7 +153,7 @@ function DropdownMenuItem({
 		>
 			<DropdownMenuPrimitive.Item
 				className={cn(
-					'squircle group relative flex flex-row items-center gap-2 rounded-sm px-2 py-2 active:bg-background-surface sm:py-1.5',
+					'squircle group relative flex flex-row items-center gap-2 rounded-lg px-2 py-2 active:bg-background-surface sm:py-1.5',
 					variant === 'destructive' && 'active:bg-fill-danger-secondary',
 					props.disabled && 'opacity-50',
 					inset && 'pl-8',
@@ -175,7 +177,7 @@ function DropdownMenuCheckboxItem({
 		<TextClassContext.Provider value="text-base text-foreground select-none group-active:text-accent-foreground">
 			<DropdownMenuPrimitive.CheckboxItem
 				className={cn(
-					'squircle group relative flex flex-row items-center gap-2 rounded-sm py-2 pl-8 pr-2 active:bg-background-surface sm:py-1.5',
+					'squircle group relative flex flex-row items-center gap-2 rounded-lg py-2 pl-8 pr-2 active:bg-background-surface sm:py-1.5',
 					props.disabled && 'opacity-50',
 					className,
 				)}
@@ -210,7 +212,7 @@ function DropdownMenuRadioItem({
 		<TextClassContext.Provider value="text-base text-foreground select-none group-active:text-accent-foreground">
 			<DropdownMenuPrimitive.RadioItem
 				className={cn(
-					'squircle group relative flex flex-row items-center gap-2 rounded-sm py-2 pl-8 pr-2 active:bg-background-surface sm:py-1.5',
+					'squircle group relative flex flex-row items-center gap-2 rounded-lg py-2 pl-8 pr-2 active:bg-background-surface sm:py-1.5',
 					props.disabled && 'opacity-50',
 					className,
 				)}

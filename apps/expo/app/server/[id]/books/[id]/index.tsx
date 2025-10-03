@@ -138,9 +138,11 @@ export default function Screen() {
 
 	const navigation = useNavigation()
 	useLayoutEffect(() => {
-		navigation.setOptions({
-			headerRight: () => (book ? <BookActionMenu data={book} /> : null),
-		})
+		if (book) {
+			navigation.setOptions({
+				headerRight: () => <BookActionMenu data={book} />,
+			})
+		}
 	}, [navigation, book, bookID])
 
 	if (!book) return null
@@ -247,7 +249,7 @@ export default function Screen() {
 	return (
 		<SafeAreaView
 			style={{ flex: 1 }}
-			edges={Platform.OS === 'ios' ? ['top', 'left', 'right'] : ['top', 'left', 'right', 'bottom']}
+			edges={['left', 'right', ...(Platform.OS === 'ios' ? [] : ['bottom' as const])]}
 		>
 			<ScrollView
 				className="flex-1 bg-background px-6"
@@ -309,7 +311,6 @@ export default function Screen() {
 							className="flex-1 border border-edge"
 							onPress={() =>
 								router.push({
-									// @ts-expect-error: It is fine, expects string literal with [id]
 									pathname: `/server/${serverID}/books/${bookID}/read`,
 								})
 							}

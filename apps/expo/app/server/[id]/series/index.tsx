@@ -3,7 +3,6 @@ import { FlashList, FlashListRef } from '@shopify/flash-list'
 import { useInfiniteSuspenseGraphQL } from '@stump/client'
 import { graphql } from '@stump/graphql'
 import { useCallback, useRef } from 'react'
-import { Platform } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useStore } from 'zustand'
 
@@ -15,7 +14,6 @@ import RefreshControl from '~/components/RefreshControl'
 import { SeriesGridItem } from '~/components/series'
 import { SeriesFilterHeader } from '~/components/series/filterHeader'
 import { ISeriesGridItemFragment } from '~/components/series/SeriesGridItem'
-import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
 import { createSeriesFilterStore, SeriesFilterContext } from '~/stores/filters'
 
 const query = graphql(`
@@ -47,10 +45,6 @@ export default function Screen() {
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
-
-	useDynamicHeader({
-		title: 'Series',
-	})
 
 	const store = useRef(createSeriesFilterStore()).current
 
@@ -88,10 +82,7 @@ export default function Screen() {
 
 	return (
 		<SeriesFilterContext.Provider value={store}>
-			<SafeAreaView
-				style={{ flex: 1 }}
-				edges={Platform.OS === 'ios' ? ['top', 'left', 'right'] : ['left', 'right']}
-			>
+			<SafeAreaView style={{ flex: 1 }} edges={['left', 'right']}>
 				<FlashList
 					ref={listRef}
 					data={data?.pages.flatMap((page) => page.series.nodes) || []}

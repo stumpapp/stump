@@ -4,12 +4,13 @@ import { useColorScheme } from './useColorScheme'
 
 export const ENABLE_LARGE_HEADER = Platform.select({
 	// iOS 26+ has a bug that causes freezes when using large headers
-	ios: typeof Platform.Version === 'number' ? Platform.Version < 26 : Platform.Version < '26',
+	ios: typeof Platform.Version === 'number' ? Platform.Version < 26 : Number(Platform.Version) < 26,
 	default: true,
 })
 
 export const IS_IOS_24_PLUS =
-	Platform.OS === 'ios' && (typeof Platform.Version === 'number' ? Platform.Version >= 24 : true)
+	Platform.OS === 'ios' &&
+	(typeof Platform.Version === 'number' ? Platform.Version >= 24 : Number(Platform.Version) >= 24)
 
 const light = {
 	background: {

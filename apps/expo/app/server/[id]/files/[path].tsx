@@ -45,43 +45,44 @@ export default function Screen() {
 		return <FileExplorerGridItem file={item} />
 	}, [])
 
-	if (errorMessage) {
-		return (
-			<SafeAreaView
-				style={{ flex: 1 }}
-				edges={Platform.OS === 'ios' ? ['top', 'left', 'right'] : ['left', 'right']}
-			>
+	const render = () => {
+		if (errorMessage) {
+			return (
 				<View className="flex-1 items-center justify-center px-4">
 					<Heading size="lg" className="text-center">
 						Something went wrong
 					</Heading>
 					<Text className="text-muted-foreground text-center text-base">{errorMessage}</Text>
 				</View>
-			</SafeAreaView>
-		)
+			)
+		} else {
+			return (
+				<FlashList
+					data={entries}
+					numColumns={3}
+					renderItem={renderItem}
+					contentInsetAdjustmentBehavior="automatic"
+					onEndReachedThreshold={0.75}
+					onEndReached={() => {
+						if (canLoadMore) {
+							loadMore()
+						}
+					}}
+					contentContainerStyle={{
+						padding: 8,
+					}}
+					ItemSeparatorComponent={() => <View className="h-4" />}
+				/>
+			)
+		}
 	}
 
 	return (
 		<SafeAreaView
 			style={{ flex: 1 }}
-			edges={Platform.OS === 'ios' ? ['top', 'left', 'right'] : ['left', 'right']}
+			edges={['left', 'right', ...(Platform.OS === 'ios' ? [] : ['bottom' as const])]}
 		>
-			<FlashList
-				data={entries}
-				numColumns={3}
-				renderItem={renderItem}
-				contentInsetAdjustmentBehavior="automatic"
-				onEndReachedThreshold={0.75}
-				onEndReached={() => {
-					if (canLoadMore) {
-						loadMore()
-					}
-				}}
-				contentContainerStyle={{
-					padding: 8,
-				}}
-				ItemSeparatorComponent={() => <View className="h-4" />}
-			/>
+			{render()}
 		</SafeAreaView>
 	)
 }

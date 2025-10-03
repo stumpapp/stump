@@ -62,6 +62,7 @@ export default function RecentlyAddedSeries({ header }: Props) {
 
 	return (
 		<FlashList
+			key={`recently-added-series-list-${data?.pages[0].series.nodes.length ? 'at-least-one-item' : 'empty'}`} // Force re-render when switching between empty and non-empty states
 			data={data?.pages.flatMap((page) => page.series.nodes) || []}
 			renderItem={renderItem}
 			contentContainerStyle={{

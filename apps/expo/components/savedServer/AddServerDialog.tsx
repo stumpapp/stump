@@ -1,20 +1,19 @@
 import { BottomSheetModal, BottomSheetScrollViewMethods } from '@gorhom/bottom-sheet'
+import { Plus } from 'lucide-react-native'
 import { useColorScheme } from 'nativewind'
 import { useCallback, useMemo, useRef, useState } from 'react'
 import { Pressable, View } from 'react-native'
 import { useSharedValue } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
+import { IS_IOS_24_PLUS, useColors } from '~/lib/constants'
 import { cn } from '~/lib/utils'
 import { useSavedServers } from '~/stores'
 import { CreateServer } from '~/stores/savedServer'
 
-import { icons } from '../ui'
 import { BottomSheet } from '../ui/bottom-sheet'
+import { Icon } from '../ui/icon'
 import AddOrEditServerForm from './AddOrEditServerForm'
-import { useColors } from '~/lib/constants'
-
-const { Plus } = icons
 
 export default function AddServerDialog() {
 	const [isOpen, setIsOpen] = useState(false)
@@ -63,16 +62,26 @@ export default function AddServerDialog() {
 
 	return (
 		<View>
-			<Pressable onPress={handlePresentModalPress}>
+			<Pressable
+				onPress={handlePresentModalPress}
+				style={
+					IS_IOS_24_PLUS
+						? {
+								width: 35,
+								height: 35,
+								justifyContent: 'center',
+								alignItems: 'center',
+							}
+						: undefined
+				}
+			>
 				{({ pressed }) => (
-					<View
-						className={cn(
-							'aspect-square flex-1 items-start justify-center p-1',
-							pressed && 'opacity-70',
-						)}
-					>
-						<Plus className="text-foreground-muted" size={24} strokeWidth={1.25} />
-					</View>
+					<Icon
+						as={Plus}
+						className={cn('text-foreground', pressed && 'opacity-70')}
+						size={24}
+						strokeWidth={1.25}
+					/>
 				)}
 			</Pressable>
 

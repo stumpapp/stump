@@ -9,6 +9,8 @@ import { createJSONStorage, persist } from 'zustand/middleware'
 import { useActiveServer } from '~/components/activeServer'
 import { booksDirectory, ensureDirectoryExists } from '~/lib/filesystem'
 
+// TODO(offline-reading): Migrate to SQLite, this won't scale well I think
+
 type UnsyncedReadProgress = {}
 
 type FileStumpRef = {

@@ -9,6 +9,7 @@ import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 import LinearGradient from 'react-native-linear-gradient'
 import { runOnJS, useSharedValue } from 'react-native-reanimated'
 import Carousel, { ICarouselInstance, Pagination } from 'react-native-reanimated-carousel'
+import { stripHtml } from 'string-strip-html'
 
 import { BookMetaLink } from '~/components/book'
 import { BorderAndShadow } from '~/components/BorderAndShadow'
@@ -188,7 +189,7 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 			16 - // gap between image and text
 			60 // gap between other carousel items
 
-		const description = data.metadata?.summary || ''
+		const description = stripHtml(data.metadata?.summary || '').result
 		const genres = data.metadata?.genres?.map((genre) => `#${genre}`).join(', ')
 		const links = data.metadata?.links || []
 

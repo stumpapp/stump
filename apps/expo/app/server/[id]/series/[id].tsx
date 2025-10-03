@@ -115,7 +115,7 @@ export default function Screen() {
 		<BookFilterContext.Provider value={store}>
 			<SafeAreaView
 				style={{ flex: 1 }}
-				edges={Platform.OS === 'ios' ? ['top', 'left', 'right'] : ['left', 'right']}
+				edges={['left', 'right', ...(Platform.OS === 'ios' ? [] : ['bottom' as const])]}
 			>
 				<FlashList
 					ref={listRef}
@@ -128,9 +128,6 @@ export default function Screen() {
 					onEndReachedThreshold={0.75}
 					onEndReached={onEndReached}
 					ListHeaderComponent={<BookFilterHeader seriesId={id} />}
-					// FIXME: I don't understand why this performs so terribly
-					// contentInsetAdjustmentBehavior="never"
-					// ListHeaderComponentStyle={{ paddingBottom: 16, paddingTop: insets.top * 2 }}
 					ListHeaderComponentStyle={{ paddingBottom: 16 }}
 					contentInsetAdjustmentBehavior="always"
 					refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}

@@ -1,3 +1,4 @@
+import { Button, ContextMenu, Host, Text } from '@expo/ui/swift-ui'
 import { useGraphQLMutation } from '@stump/client'
 import { BookByIdQuery, FragmentType, graphql, useFragment } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
@@ -8,6 +9,7 @@ import { Platform, View } from 'react-native'
 import { Pressable } from 'react-native-gesture-handler'
 import * as DropdownMenu from 'zeego/dropdown-menu'
 
+import { IS_IOS_24_PLUS } from '~/lib/constants'
 import { useFavoriteBook } from '~/lib/hooks/useFavoriteBook'
 import { cn } from '~/lib/utils'
 
@@ -69,7 +71,6 @@ export default function BookMenu({ data }: Props) {
 	const onFavoriteChanged = useCallback(
 		(isFavorite: boolean) => {
 			client.setQueryData(['bookById', book.id], (oldData: BookByIdQuery | undefined) => {
-				// You can transform oldData or return new data entirely
 				if (!oldData) return
 
 				return {
@@ -91,7 +92,14 @@ export default function BookMenu({ data }: Props) {
 	})
 
 	const onSuccess = useCallback(
-		() => client.refetchQueries({ queryKey: ['bookById', book.id] }),
+		() =>
+			Promise.all([
+				client.refetchQueries({ queryKey: ['bookById', book.id] }),
+				client.invalidateQueries({ queryKey: ['continueReading'], exact: false }),
+				client.refetchQueries({ queryKey: ['onDeck'], exact: false }),
+				client.refetchQueries({ queryKey: ['recentlyAddedBooks'], exact: false }),
+				client.refetchQueries({ queryKey: ['recentlyAddedSeries'], exact: false }),
+			]),
 		[client, book.id],
 	)
 
@@ -135,6 +143,90 @@ export default function BookMenu({ data }: Props) {
 				deleteCurrentSession={() => deleteCurrentSession({ id: book.id })}
 				deleteReadHistory={() => deleteReadHistory({ id: book.id })}
 			/>
+		)
+	}
+
+	if (IS_IOS_24_PLUS) {
+		return (
+			<Host matchContents>
+				<ContextMenu>
+					<ContextMenu.Trigger>
+						<View
+							accessibilityLabel="options"
+							style={{
+								height: 35,
+								width: 35,
+								justifyContent: 'center',
+								alignItems: 'center',
+							}}
+						>
+							{/* <Ionicons name="filter" size={25} color="label" style={styles.rightIcon} /> */}
+							<Ellipsis size={24} className="text-foreground" />
+						</View>
+					</ContextMenu.Trigger>
+					<ContextMenu.Items>
+						<Button
+							systemImage={isFavorite ? 'heart.fill' : 'heart'}
+							onPress={() => favoriteBook()}
+						>
+							{isFavorite ? 'Unfavorite' : 'Favorite'}
+						</Button>
+
+						{(isUntouched || isReading) && (
+							<Button
+								systemImage="book.closed"
+								onPress={() => completeBook({ id: book.id, isComplete: true })}
+							>
+								Mark as Read
+							</Button>
+						)}
+
+						{isReading && (
+							<Button
+								systemImage="minus.circle"
+								onPress={() => deleteCurrentSession({ id: book.id })}
+							>
+								Clear Progress
+							</Button>
+						)}
+
+						{isPreviouslyCompleted && (
+							<Button
+								systemImage="rectangle.stack.badge.minus"
+								onPress={() => deleteReadHistory({ id: book.id })}
+							>
+								Delete Read History
+							</Button>
+						)}
+
+						<Text>Go to Library</Text>
+
+						<Button
+							systemImage="arrow.up.right"
+							onPress={() =>
+								router.push({
+									pathname: `/server/${book.id}/libraries/${book.library.id}`,
+								})
+							}
+						>
+							{/* TODO: Expo UI doesn't seem to support anything but strings as children, which means the subtitle is not available :( */}
+							{`Go to Library \n${book.library.name}`}
+						</Button>
+
+						<Button
+							systemImage="arrow.up.right"
+							onPress={() =>
+								router.push({
+									pathname: `/server/${book.id}/series/${book.series.id}`,
+								})
+							}
+						>
+							{/* TODO: Expo UI doesn't seem to support anything but strings as children, which means the subtitle is not available :( */}
+							{`Go to Series \n${book.series.resolvedName}`}
+						</Button>
+					</ContextMenu.Items>
+				</ContextMenu>
+			</Host>
 		)
 	}
 
@@ -202,7 +294,6 @@ export default function BookMenu({ data }: Props) {
 						key="library"
 						onSelect={() =>
 							router.push({
-								// @ts-expect-error: I need to use less ambiguous [id]s, e.g. [libraryId]
 								pathname: `/server/${book.id}/libraries/${book.library.id}`,
 							})
 						}
@@ -217,7 +308,6 @@ export default function BookMenu({ data }: Props) {
 						key="series"
 						onSelect={() =>
 							router.push({
-								// @ts-expect-error: I need to use less ambiguous [id]s, e.g. [seriesId]
 								pathname: `/server/${book.id}/series/${book.series.id}`,
 							})
 						}

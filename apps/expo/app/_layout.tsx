@@ -10,7 +10,7 @@ import * as SplashScreen from 'expo-splash-screen'
 import LottieView from 'lottie-react-native'
 import * as React from 'react'
 import { Platform, View } from 'react-native'
-// import { SystemBars } from 'react-native-edge-to-edge'
+import { SystemBars } from 'react-native-edge-to-edge'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { KeyboardProvider } from 'react-native-keyboard-controller'
 
@@ -105,9 +105,7 @@ export default function RootLayout() {
 			<ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
 				<BottomSheet.Provider>
 					<KeyboardProvider>
-						{/* TODO(expo-54): Figure out if this is still needed */}
-						{/* Note: https://github.com/react-navigation/react-navigation/issues/12579 */}
-						{/* <SystemBars style={isDarkColorScheme ? 'light' : 'dark'} hidden={shouldHideStatusBar} /> */}
+						<SystemBars style={isDarkColorScheme ? 'light' : 'dark'} hidden={shouldHideStatusBar} />
 						<Stack
 							// https://github.com/expo/expo/issues/15244 ?
 							// screenOptions={{

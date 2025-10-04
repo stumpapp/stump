@@ -158,7 +158,8 @@ export default function Screen() {
 	const characters = book.metadata?.characters?.join(', ')
 
 	const seriesName = book.metadata?.series || book.series.resolvedName
-	const seriesPosition = book.metadata?.number
+	const seriesPosition = Number(book.metadata?.number) || book.seriesPosition
+
 	const seriesVolume = book.metadata?.volume
 
 	const noMetadata = !description && !seriesName && !genres && !characters
@@ -299,12 +300,10 @@ export default function Screen() {
 							{book.resolvedName}
 						</Heading>
 
-						{seriesName && book.seriesPosition != null && (
+						{seriesName && seriesPosition != null && (
 							<Text className="text-center text-base text-foreground-muted">
-								{book.seriesPosition}
-								{book.seriesPosition > book.series.mediaCount
-									? null
-									: ` of ${book.series.mediaCount} `}
+								{seriesPosition}
+								{seriesPosition > book.series.mediaCount ? null : ` of ${book.series.mediaCount} `}
 								in {seriesName}
 							</Text>
 						)}

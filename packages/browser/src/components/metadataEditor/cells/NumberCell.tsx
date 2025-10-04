@@ -8,9 +8,14 @@ import { useMetadataEditorContext } from '../context'
 type Props<Field> = {
 	binding: Field
 	value?: number | null
+	isDecimal?: boolean
 }
 
-export default function NumberCell<Field extends string>({ binding, value }: Props<Field>) {
+export default function NumberCell<Field extends string>({
+	binding,
+	value,
+	isDecimal,
+}: Props<Field>) {
 	const form = useFormContext()
 
 	const { isEditing } = useMetadataEditorContext()
@@ -22,6 +27,7 @@ export default function NumberCell<Field extends string>({ binding, value }: Pro
 			<div className="group flex items-center gap-2">
 				<Input
 					type="number"
+					step={isDecimal ? 'any' : 1}
 					defaultValue={value ?? ''}
 					className="font-mono text-sm"
 					containerClassName="md:w-[unset]"

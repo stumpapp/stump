@@ -183,7 +183,13 @@ export default function MediaMetadataEditor({ mediaId, data }: Props) {
 						// TODO: Consider breaking out ageRating
 						.with(
 							P.union('ageRating', 'day', 'month', 'number', 'pageCount', 'volume', 'year'),
-							(field) => <NumberCell binding={field} value={metadata?.[field]} />,
+							(field) => (
+								<NumberCell
+									binding={field}
+									value={metadata?.[field]}
+									isDecimal={field === 'number'}
+								/>
+							),
 						)
 						.with('publisher', () => (
 							<BadgeCell

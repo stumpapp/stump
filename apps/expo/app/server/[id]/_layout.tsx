@@ -10,8 +10,10 @@ import { ActiveServerContext, StumpServerContext } from '~/components/activeServ
 import { PermissionEnforcerOptions } from '~/components/activeServer/context'
 import ServerAuthDialog from '~/components/ServerAuthDialog'
 import ServerConnectFailed from '~/components/ServerConnectFailed'
+import { FullScreenLoader } from '~/components/ui'
 import { authSDKInstance } from '~/lib/sdk/auth'
 import { usePreferencesStore, useSavedServers } from '~/stores'
+import { useCacheStore } from '~/stores/cache'
 
 export default function Screen() {
 	const router = useRouter()
@@ -26,7 +28,14 @@ export default function Screen() {
 		[serverID, savedServers],
 	)
 
-	const [sdk, setSDK] = useState<Api | null>(null)
+	const cachedInstance = useRef(useCacheStore((state) => state.sdks[serverID || '']))
+	const cacheStore = useCacheStore((state) => ({
+		addInstanceToCache: state.addSDK,
+		removeInstanceFromCache: state.removeSDK,
+	}))
+
+	const [sdk, setSDK] = useState<Api | null>(() => cachedInstance.current || null)
+	const [isInitiallyConnecting, setIsInitiallyConnecting] = useState(() => !cachedInstance.current)
 	const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false)
 	const [user, setUser] = useState<AuthUser | null>(null)
 
@@ -36,6 +45,8 @@ export default function Screen() {
 		if (!activeServer) return
 
 		const configureSDK = async () => {
+			setIsInitiallyConnecting(false)
+
 			const { id, url } = activeServer
 			const storedToken = await getServerToken(id)
 			const serverConfig = await getServerConfig(id)
@@ -69,6 +80,9 @@ export default function Screen() {
 				}
 
 				setSDK(authedInstance || instance)
+				if (authedInstance) {
+					cacheStore.addInstanceToCache(activeServer.id, authedInstance)
+				}
 			} catch (error) {
 				const axiosError = isAxiosError(error) ? error : null
 				const isNetworkError = axiosError?.code === 'ERR_NETWORK'
@@ -128,9 +142,10 @@ export default function Screen() {
 				saveServerToken(activeServer?.id || 'dev', token)
 				setUser(forUser)
 				setIsAuthDialogOpen(false)
+				cacheStore.removeInstanceFromCache(activeServer.id)
 			}
 		},
-		[activeServer, router, saveServerToken],
+		[activeServer, router, saveServerToken, cacheStore],
 	)
 
 	// TODO: attempt reauth automatically when able
@@ -171,7 +186,11 @@ export default function Screen() {
 		[checkPermission],
 	)
 
+	// TODO: Maybe a conditional useFocusEffect to redirect to fix the issue someone reported
+	// wrt the not auto-navigating to active server on initial load?
+
 	if (!activeServer) {
+		// @ts-expect-error: It's fine
 		return <Redirect href="/" />
 	}
 
@@ -179,8 +198,12 @@ export default function Screen() {
 		return <ServerConnectFailed />
 	}
 
-	if (!sdk) {
+	if (isInitiallyConnecting) {
 		return null
+	}
+
+	if (!sdk) {
+		return <FullScreenLoader label="Connecting..." />
 	}
 
 	return (

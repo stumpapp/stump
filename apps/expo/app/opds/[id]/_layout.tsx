@@ -7,6 +7,7 @@ import { ActiveServerContext } from '~/components/activeServer'
 import { getOPDSInstance } from '~/lib/sdk/auth'
 import { usePreferencesStore, useSavedServers } from '~/stores'
 
+// TODO: Support cached instances like in /server/[id]/_layout.tsx
 export default function Screen() {
 	const router = useRouter()
 	const animationEnabled = usePreferencesStore((state) => !state.reduceAnimations)

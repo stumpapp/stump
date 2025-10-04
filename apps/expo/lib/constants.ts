@@ -12,9 +12,7 @@ export const ENABLE_LARGE_HEADER = Platform.select({
 	default: true,
 })
 
-export const IS_IOS_24_PLUS =
-	Platform.OS === 'ios' &&
-	(typeof Platform.Version === 'number' ? Platform.Version >= 24 : Number(Platform.Version) >= 24)
+export const IS_IOS_24_PLUS = Platform.OS === 'ios' && parseInt(Platform.Version, 10) >= 24
 
 export const ON_END_REACHED_THRESHOLD = Platform.OS === 'ios' ? 75 : 0.6
 

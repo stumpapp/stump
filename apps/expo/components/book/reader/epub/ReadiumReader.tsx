@@ -52,6 +52,7 @@ export default function ReadiumReader({
 		fontFamily: state.globalSettings.fontFamily,
 		lineHeight: state.globalSettings.lineHeight,
 		brightness: state.globalSettings.brightness,
+		publisherStyles: state.globalSettings.allowPublisherStyles,
 	}))
 	const { colors } = useEpubTheme()
 

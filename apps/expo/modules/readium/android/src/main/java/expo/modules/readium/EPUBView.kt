@@ -42,7 +42,8 @@ data class Props(
     var fontFamily: FontFamily? = null,
     var lineHeight: Double? = null,
     var fontSize: Double? = null,
-    var readingDirection: String? = null
+    var readingDirection: String? = null,
+    var publisherStyles: Boolean? = null
 )
 
 data class FinalizedProps(
@@ -54,7 +55,8 @@ data class FinalizedProps(
     val fontFamily: FontFamily,
     val lineHeight: Double,
     val fontSize: Double,
-    val readingDirection: String
+    val readingDirection: String,
+    val publisherStyles: Boolean
 )
 
 @SuppressLint("ViewConstructor", "ResourceType")
@@ -121,7 +123,8 @@ class EPUBView(context: Context, appContext: AppContext) : ExpoView(context, app
                 ?: oldProps?.fontFamily ?: FontFamily("Literata"),
             lineHeight = pendingProps.lineHeight ?: oldProps?.lineHeight ?: 1.4,
             fontSize = pendingProps.fontSize ?: oldProps?.fontSize ?: 1.0,
-            readingDirection = pendingProps.readingDirection ?: oldProps?.readingDirection ?: "ltr"
+            readingDirection = pendingProps.readingDirection ?: oldProps?.readingDirection ?: "ltr",
+            publisherStyles = pendingProps.publisherStyles ?: oldProps?.publisherStyles ?: true
         )
 
         if (props!!.bookId != oldProps?.bookId || props!!.url != oldProps?.url) {
@@ -143,6 +146,7 @@ class EPUBView(context: Context, appContext: AppContext) : ExpoView(context, app
                 fontFamily = props!!.fontFamily,
                 fontSize = props!!.fontSize,
                 lineHeight = props!!.lineHeight,
+                publisherStyles = props!!.publisherStyles,
 //                paragraphSpacing = props!!.paragraphSpacing,
 //                textAlign = props!!.textAlign,
                 textColor = org.readium.r2.navigator.preferences.Color(props!!.foreground),

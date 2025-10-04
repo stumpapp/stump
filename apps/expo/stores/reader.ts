@@ -29,6 +29,7 @@ export type BookPreferences = IBookPreferences & {
 	tapSidesToNavigate: boolean
 	footerControls: FooterControls
 	trackElapsedTime: boolean
+	allowPublisherStyles?: boolean
 }
 export type GlobalSettings = Omit<BookPreferences, 'serverID'>
 
@@ -79,6 +80,7 @@ export const DEFAULT_BOOK_PREFERENCES = {
 	allowDownscaling: false,
 	cachePolicy: 'memory-disk',
 	footerControls: 'images',
+	allowPublisherStyles: true,
 } satisfies GlobalSettings
 
 export const useReaderStore = create<ReaderStore>()(

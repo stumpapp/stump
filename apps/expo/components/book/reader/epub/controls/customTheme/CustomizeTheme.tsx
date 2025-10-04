@@ -1,17 +1,16 @@
 import { Fragment, useEffect, useState } from 'react'
 import { View } from 'react-native'
-import { Pressable } from 'react-native-gesture-handler'
 import ColorPicker, { HueSlider, OpacitySlider, Panel1 } from 'reanimated-color-picker'
 
 import { Checkbox, Input, Label, Tabs, Text } from '~/components/ui'
 import { useColorScheme } from '~/lib/useColorScheme'
-import { resolveTheme, resolveThemeName, StoredConfig, useEpubThemesStore } from '~/stores/epub'
+import { Color, resolveTheme, resolveThemeName, useEpubThemesStore } from '~/stores/epub'
+
+import { ThemeHeaderPreview } from './ThemeHeaderPreview'
 
 type Props = {
 	onCancel: () => void
 }
-
-type Color = keyof NonNullable<StoredConfig['colors']>
 
 export default function CustomizeTheme({ onCancel }: Props) {
 	const { colorScheme } = useColorScheme()
@@ -56,59 +55,7 @@ export default function CustomizeTheme({ onCancel }: Props) {
 
 	return (
 		<Fragment>
-			<View
-				style={{
-					height: 228,
-					backgroundColor: customTheme.colors?.background,
-				}}
-			>
-				<View className="h-12 flex-row items-center justify-between px-2">
-					<Pressable onPress={handleCancel}>
-						{({ pressed }) => (
-							<Text
-								className="text-lg"
-								style={{ color: customTheme.colors?.foreground, opacity: pressed ? 0.6 : 1 }}
-							>
-								Cancel
-							</Text>
-						)}
-					</Pressable>
-
-					<Pressable>
-						{({ pressed }) => (
-							<Text
-								className="text-lg font-medium"
-								style={{ color: customTheme.colors?.foreground, opacity: pressed ? 0.6 : 1 }}
-							>
-								Done
-							</Text>
-						)}
-					</Pressable>
-				</View>
-
-				<View className="gap-2 px-6 py-4">
-					<Text
-						style={{
-							color: customTheme.colors?.foreground,
-							fontSize: 32,
-							lineHeight: 32,
-						}}
-					>
-						Aa
-					</Text>
-
-					<Text
-						style={{
-							color: customTheme.colors?.foreground,
-							fontSize: 24,
-							lineHeight: 32,
-						}}
-						numberOfLines={3}
-					>
-						{DEMO_TEXT}
-					</Text>
-				</View>
-			</View>
+			<ThemeHeaderPreview onCancel={handleCancel} onSaved={() => {}} />
 
 			<View className="gap-4 px-4">
 				<View className="flex-row items-center justify-center gap-4">
@@ -162,5 +109,3 @@ export default function CustomizeTheme({ onCancel }: Props) {
 		</Fragment>
 	)
 }
-
-const DEMO_TEXT = `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.`

@@ -21,7 +21,7 @@ export default function Brightness() {
 	}
 
 	return (
-		<View className="max-w-full flex-row items-center gap-3 px-4">
+		<View className="max-w-full flex-row items-center gap-3 px-6">
 			<Icon as={SunDim} className="h-4 w-4 shrink-0 text-foreground-muted" />
 			<View className="flex-1">
 				<Slider

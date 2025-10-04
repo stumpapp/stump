@@ -16,6 +16,7 @@
      var lineHeight: Double?
      var fontSize: Double?
      var textAlign: TextAlignment?
+     var publisherStyles: Bool?
  }
 
  public struct FinalizedProps {
@@ -28,6 +29,7 @@
      var lineHeight: Double
      var fontSize: Double
      var textAlign: TextAlignment
+     var publisherStyles: Bool = true
  }
 
  public class EPUBView: ExpoView {
@@ -245,13 +247,13 @@
                          fontFamily: props.fontFamily,
                          fontSize: props.fontSize,
                          lineHeight: props.lineHeight,
-                         publisherStyles: false,
+                         publisherStyles: props.publisherStyles ?? true,
                          scroll: false,
                          textAlign: props.textAlign,
                          textColor: props.foreground
                      ),
                      defaults: EPUBDefaults(
-                         publisherStyles: false,
+                         publisherStyles: true,
                          scroll: false
                      ),
                      contentInset: [
@@ -390,7 +392,7 @@
              fontFamily: props.fontFamily,
              fontSize: props.fontSize,
              lineHeight: props.lineHeight,
-             publisherStyles: false,
+             publisherStyles: props.publisherStyles ?? true,
              scroll: false,
              textAlign: props.textAlign,
              textColor: props.foreground

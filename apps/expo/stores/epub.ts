@@ -121,6 +121,8 @@ const defaultThemes: Record<string, EPUBReaderThemeConfig> = {
 
 export type StoredConfig = Pick<EPUBReaderThemeConfig, 'colors'>
 
+export type Color = keyof NonNullable<StoredConfig['colors']>
+
 export type IEpubThemesStore = {
 	selectedTheme?: string
 	themes: Record<string, StoredConfig>
@@ -192,4 +194,34 @@ export const useEpubTheme = () => {
 		() => resolveTheme(themes, selectedTheme || '', colorScheme),
 		[themes, selectedTheme, colorScheme],
 	)
+}
+
+export type SupportedMobileFont =
+	| 'OpenDyslexic'
+	| 'Literata'
+	| 'Atkinson-Hyperlegible'
+	| 'CharisSIL'
+	| 'Bitter'
+
+export const Fonts = [
+	{ label: 'OpenDyslexic', value: 'OpenDyslexic' },
+	{ label: 'Literata', value: 'Literata' },
+	{ label: 'Atkinson Hyperlegible', value: 'Atkinson-Hyperlegible' },
+	{ label: 'Charis SIL', value: 'CharisSIL' },
+	{ label: 'Bitter', value: 'Bitter' },
+] satisfies { label: string; value: SupportedMobileFont }[]
+
+export const getFontPath = (font: SupportedMobileFont) => {
+	switch (font) {
+		case 'OpenDyslexic':
+			return 'OpenDyslexic-Regular'
+		case 'Literata':
+			return 'Literata'
+		case 'Atkinson-Hyperlegible':
+			return 'Atkinson Hyperlegible'
+		case 'CharisSIL':
+			return 'CharisSIL'
+		case 'Bitter':
+			return 'Bitter'
+	}
 }

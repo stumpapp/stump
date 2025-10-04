@@ -149,6 +149,10 @@ class ReadiumModule : Module() {
         view.pendingProps.readingDirection = prop
       }
 
+      Prop("publisherStyles") { view: EPUBView, prop: Boolean ->
+        view.pendingProps.publisherStyles = prop
+      }
+
       OnViewDidUpdateProps { view: EPUBView ->
         view.finalizeProps()
       }

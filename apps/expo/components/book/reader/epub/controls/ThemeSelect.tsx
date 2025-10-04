@@ -28,7 +28,7 @@ export default function ThemeSelect({ onCustomizePress }: Props) {
 
 	// TODO: Grid
 	return (
-		<View>
+		<View className="gap-2">
 			<ScrollView
 				horizontal
 				showsHorizontalScrollIndicator={false}

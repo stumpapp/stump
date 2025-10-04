@@ -1,27 +1,37 @@
 import { useRef } from 'react'
-import { View } from 'react-native'
+import { ScrollView, View } from 'react-native'
 import PagerView from 'react-native-pager-view'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { Brightness, FontConfig, ThemeSelect } from './controls'
-import CustomizeTheme from './controls/CustomizeTheme'
+import { Brightness, FontConfig, PublisherStyles, ThemeSelect } from './controls'
+import { CustomizeTheme, ThemeHeaderPreview } from './controls/customTheme'
 
 export default function ThemeSheetContent() {
 	const pagerRef = useRef<PagerView>(null)
 
+	const insets = useSafeAreaInsets()
+
 	return (
-		<PagerView
-			ref={pagerRef}
-			initialPage={0}
-			style={{ flex: 1 }}
-			scrollEnabled={false}
-			// onPageSelected={(e) => setActivePage(e.nativeEvent.position)}
-		>
-			<View className="flex-1 gap-8 bg-background pt-4" key="0">
-				<Brightness />
+		<PagerView ref={pagerRef} initialPage={0} style={{ flex: 1 }} scrollEnabled={false}>
+			<View className="flex-1 bg-background" key="0">
+				<ThemeHeaderPreview />
 
-				<ThemeSelect onCustomizePress={() => pagerRef.current?.setPage(1)} />
+				<ScrollView
+					contentContainerStyle={{
+						padding: 0,
+						paddingTop: 32,
+						paddingBottom: insets.bottom,
+						gap: 32,
+					}}
+				>
+					<Brightness />
 
-				<FontConfig />
+					<ThemeSelect onCustomizePress={() => pagerRef.current?.setPage(1)} />
+
+					<FontConfig />
+
+					<PublisherStyles />
+				</ScrollView>
 			</View>
 
 			<View className="flex-1 gap-8" key="1">

@@ -5,6 +5,7 @@ import {
 	AccordionContent,
 	AccordionItem,
 	AccordionTrigger,
+	Heading,
 	Label,
 	RadioGroup,
 	RadioGroupItem,
@@ -21,14 +22,16 @@ export default function FontConfig() {
 	}))
 
 	return (
-		<View className="">
-			<View className="flex-row px-4 py-2">
+		<View className="gap-2">
+			<Heading className="pl-4">Font</Heading>
+
+			<View className="flex-row px-6 py-2">
 				<FontSizeSlider />
 			</View>
 
-			<View className="flex-row justify-between px-4 py-2">
+			<View className="flex-row justify-between px-6 py-2">
 				<View className="flex-1">
-					<Text className="text-lg text-foreground">Font</Text>
+					<Text className="text-lg text-foreground">Font family</Text>
 					<Accordion type="single" collapsible className="w-full">
 						<AccordionItem value="item-1" className="border-0">
 							<AccordionTrigger>

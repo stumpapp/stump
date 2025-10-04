@@ -25,7 +25,7 @@ export default function FontSizeSlider() {
 
 	return (
 		<View className="flex-1">
-			<Text>Font Scale</Text>
+			<Text>Size</Text>
 
 			<Slider
 				style={{ width: '100%', height: 40 }}

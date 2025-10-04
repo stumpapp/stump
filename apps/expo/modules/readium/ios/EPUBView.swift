@@ -17,6 +17,7 @@
      var fontSize: Double?
      var textAlign: TextAlignment?
      var publisherStyles: Bool?
+     var imageFilter: ImageFilter?
  }
 
  public struct FinalizedProps {
@@ -30,6 +31,7 @@
      var fontSize: Double
      var textAlign: TextAlignment
      var publisherStyles: Bool = true
+     var imageFilter: ImageFilter?
  }
 
  public class EPUBView: ExpoView {
@@ -69,7 +71,8 @@
              fontFamily: pendingProps.fontFamily ?? oldProps?.fontFamily ?? FontFamily(rawValue: "systemFont"),
              lineHeight: pendingProps.lineHeight ?? oldProps?.lineHeight ?? 1.4,
              fontSize: pendingProps.fontSize ?? oldProps?.fontSize ?? 1.0,
-             textAlign: pendingProps.textAlign ?? oldProps?.textAlign ?? TextAlignment.justify
+             textAlign: pendingProps.textAlign ?? oldProps?.textAlign ?? TextAlignment.justify,
+             imageFilter: pendingProps.imageFilter ?? oldProps?.imageFilter
          )
 
          // If this is a new book or first initialization, load the publication
@@ -246,6 +249,7 @@
                          backgroundColor: props.background,
                          fontFamily: props.fontFamily,
                          fontSize: props.fontSize,
+                         imageFilter: props.imageFilter,
                          lineHeight: props.lineHeight,
                          publisherStyles: props.publisherStyles ?? true,
                          scroll: false,
@@ -391,6 +395,7 @@
              backgroundColor: props.background,
              fontFamily: props.fontFamily,
              fontSize: props.fontSize,
+             imageFilter: props.imageFilter,
              lineHeight: props.lineHeight,
              publisherStyles: props.publisherStyles ?? true,
              scroll: false,

@@ -15,6 +15,7 @@ import org.readium.r2.shared.publication.Locator
 import org.readium.r2.shared.ExperimentalReadiumApi
 import android.util.Log
 import org.readium.r2.navigator.preferences.FontFamily
+import org.readium.r2.navigator.preferences.ImageFilter
 import org.readium.r2.shared.InternalReadiumApi
 import org.readium.r2.shared.util.getOrElse
 
@@ -151,6 +152,14 @@ class ReadiumModule : Module() {
 
       Prop("publisherStyles") { view: EPUBView, prop: Boolean ->
         view.pendingProps.publisherStyles = prop
+      }
+
+      Prop("imageFilter") { view: EPUBView, prop: String? ->
+        view.pendingProps.imageFilter = when (prop) {
+          "darken" -> ImageFilter.DARKEN
+          "invert" -> ImageFilter.INVERT
+          else -> null
+        }
       }
 
       OnViewDidUpdateProps { view: EPUBView ->

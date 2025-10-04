@@ -119,6 +119,21 @@
                  view.pendingProps.textAlign = textAlign
              }
 
+             Prop("publisherStyles") { (view: EPUBView, prop: Bool) in
+                 view.pendingProps.publisherStyles = prop
+             }
+
+             Prop("imageFilter") { (view: EPUBView, prop: String?) in
+                 switch prop {
+                 case "darken":
+                     view.pendingProps.imageFilter = .darken
+                 case "invert":
+                     view.pendingProps.imageFilter = .invert
+                 default:
+                     view.pendingProps.imageFilter = nil
+                 }
+             }
+
              OnViewDidUpdateProps { (view: EPUBView) in
                  view.finalizeProps()
              }

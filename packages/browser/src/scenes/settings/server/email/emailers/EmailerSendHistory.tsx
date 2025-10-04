@@ -50,7 +50,10 @@ export default function EmailerSendHistory({ emailerId, lastUsedAt }: Props) {
 	const fetchUser = useCheckPermission(UserPermission.ReadUsers)
 	const {
 		data: { emailerById },
-	} = useSuspenseGraphQL(query, sdk.cacheKey('emailDevices', [emailerId, fetchUser]))
+	} = useSuspenseGraphQL(query, sdk.cacheKey('emailDevices', [emailerId, fetchUser]), {
+		id: emailerId,
+		fetchUser,
+	})
 	const sendHistory = useMemo(() => emailerById?.sendHistory ?? [], [emailerById])
 
 	const [drawerOpen, setDrawerOpen] = useState(false)

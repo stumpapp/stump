@@ -43,7 +43,7 @@ export default function CreateEmailerScene() {
 			await client.invalidateQueries({
 				predicate: ({ queryKey: [baseKey] }) => baseKey === sdk.cacheKeys.emailers,
 			})
-			await navigate(paths.settings('server/email'))
+			await navigate(paths.settings('email'))
 		},
 	})
 

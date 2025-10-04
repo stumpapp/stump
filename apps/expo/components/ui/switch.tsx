@@ -1,6 +1,6 @@
+import { Host, Switch as IosSwitch } from '@expo/ui/swift-ui'
 import * as SwitchPrimitives from '@rn-primitives/switch'
 import * as React from 'react'
-import { Platform } from 'react-native'
 import Animated, {
 	interpolateColor,
 	useAnimatedStyle,
@@ -8,6 +8,7 @@ import Animated, {
 	withTiming,
 } from 'react-native-reanimated'
 
+import { IS_IOS_24_PLUS } from '~/lib/constants'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { cn } from '~/lib/utils'
 import { usePreferencesStore } from '~/stores'
@@ -61,7 +62,7 @@ type Props = {
 	size?: keyof typeof SIZES
 } & SwitchPrimitives.RootProps
 
-const SwitchNative = React.forwardRef<SwitchPrimitives.RootRef, Props>(
+const Switch = React.forwardRef<SwitchPrimitives.RootRef, Props>(
 	({ className, variant = 'brand', size = 'default', ...props }, ref) => {
 		const { colorScheme } = useColorScheme()
 		const accentColor = usePreferencesStore((state) => state.accentColor)
@@ -85,6 +86,21 @@ const SwitchNative = React.forwardRef<SwitchPrimitives.RootRef, Props>(
 			transform: [{ translateX: withTiming(translateX.value, { duration: 200 }) }],
 		}))
 		const resolvedSize = SIZES[size] || SIZES.default
+
+		if (IS_IOS_24_PLUS) {
+			return (
+				<Host matchContents>
+					<IosSwitch
+						value={props.checked}
+						onValueChange={(checked) => {
+							props.onCheckedChange?.(checked)
+						}}
+						color={colors.primary}
+						variant="switch"
+					/>
+				</Host>
+			)
+		}
 
 		return (
 			<Animated.View
@@ -116,10 +132,6 @@ const SwitchNative = React.forwardRef<SwitchPrimitives.RootRef, Props>(
 		)
 	},
 )
-SwitchNative.displayName = 'SwitchNative'
-
-const Switch = Platform.select({
-	default: SwitchNative,
-})
+Switch.displayName = 'Switch'
 
 export { Switch }

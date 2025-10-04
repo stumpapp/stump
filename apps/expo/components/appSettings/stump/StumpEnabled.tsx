@@ -5,7 +5,7 @@ import { useSavedServers } from '~/stores/savedServer'
 
 import AppSettingsRow from '../AppSettingsRow'
 
-export default function MaskURLs() {
+export default function StumpEnabled() {
 	const { stumpEnabled, setStumpEnabled } = useSavedServers()
 
 	return (

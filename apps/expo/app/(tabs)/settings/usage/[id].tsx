@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { Redirect, useLocalSearchParams } from 'expo-router'
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 import { Platform, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -36,6 +36,12 @@ export default function Screen() {
 	)
 	const downloadedFiles = useServerDownloads({ id: serverID })
 	const preferences = formatBytesSeparate(preferencesBytes, 1, 'B')
+
+	const downloadedFilesSum = useMemo(
+		() => downloadedFiles.reduce((acc, file) => acc + (file.size || 0), 0),
+		[downloadedFiles],
+	)
+	const downloadedFilesCount = useMemo(() => downloadedFiles.length, [downloadedFiles])
 
 	const clearLibrarySettings = useReaderStore((state) => state.clearLibrarySettings)
 	const onClearPreferences = useCallback(() => {
@@ -77,6 +83,31 @@ export default function Screen() {
 								</View>
 
 								<Text>No downloaded files for this server</Text>
+							</View>
+						)}
+
+						{(downloadedFiles.length > 0 || downloadedFilesSum > 0) && (
+							<View className="gap-2">
+								<View className="flex-row items-center justify-between">
+									<Text className="text-foreground-muted">Total files</Text>
+									<Text>{downloadedFilesCount}</Text>
+								</View>
+
+								<View className="flex-row items-center justify-between">
+									<Text className="text-foreground-muted">Total size</Text>
+									{downloadedFilesSum > 0 && (
+										<Text>{humanizeByteUnit(downloadedFilesSum, 'B')}</Text>
+									)}
+									{/* TODO: Infer from usage */}
+									{downloadedFilesSum === 0 && <Text>Unknown</Text>}
+								</View>
+
+								<View className="squircle mt-2 rounded-xl bg-fill-info-secondary p-4 tablet:p-5">
+									<Text className="text-fill-info">
+										Removing downloads is not currently supported, but you may clear them by
+										clearing app data if possible on your device
+									</Text>
+								</View>
 							</View>
 						)}
 					</View>

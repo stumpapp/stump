@@ -31,6 +31,7 @@ type DownloadedFile = {
 	serverID: string
 	unsyncedProgress?: UnsyncedReadProgress
 	stumpRef?: FileStumpRef
+	size?: number // in bytes
 }
 
 type SeriesRef = {
@@ -155,10 +156,13 @@ export function useDownload() {
 					return null
 				}
 
+				const size = Number(result.headers['Content-Length'] ?? 0)
+
 				addFile({
 					id,
 					filename,
 					serverID,
+					size: !isNaN(size) && size > 0 ? size : undefined,
 				})
 
 				return result.uri

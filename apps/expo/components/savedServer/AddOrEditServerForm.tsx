@@ -430,14 +430,7 @@ export default function AddOrEditServerForm({
 
 			<View className="w-full gap-6">
 				<Text className="flex-1 text-base font-medium text-foreground-muted">Options</Text>
-				<View className="w-full flex-row items-center gap-6">
-					<Switch
-						checked={defaultServer}
-						onCheckedChange={(value) => form.setValue('defaultServer', value)}
-						nativeID="defaultServer"
-						disabled={kind !== 'stump'}
-					/>
-
+				<View className="w-full flex-row items-center justify-between gap-6">
 					<Label
 						nativeID="defaultServer"
 						onPress={() => {
@@ -447,17 +440,17 @@ export default function AddOrEditServerForm({
 					>
 						Set as default server
 					</Label>
+
+					<Switch
+						checked={defaultServer}
+						onCheckedChange={(value) => form.setValue('defaultServer', value)}
+						nativeID="defaultServer"
+						disabled={kind !== 'stump'}
+					/>
 				</View>
 
 				{kind === 'stump' && (
-					<View className="w-full flex-row items-center gap-6">
-						<Switch
-							checked={stumpOPDS}
-							onCheckedChange={(value) => form.setValue('stumpOPDS', value)}
-							nativeID="stumpOPDS"
-							disabled={kind !== 'stump'}
-						/>
-
+					<View className="w-full flex-row items-center justify-between gap-6">
 						<Label
 							nativeID="stumpOPDS"
 							onPress={() => {
@@ -467,6 +460,13 @@ export default function AddOrEditServerForm({
 						>
 							Enable OPDS
 						</Label>
+
+						<Switch
+							checked={stumpOPDS}
+							onCheckedChange={(value) => form.setValue('stumpOPDS', value)}
+							nativeID="stumpOPDS"
+							disabled={kind !== 'stump'}
+						/>
 					</View>
 				)}
 			</View>

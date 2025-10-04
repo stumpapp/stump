@@ -11,7 +11,6 @@ import { useStore } from 'zustand'
 import { BookGridItem } from '~/components/book'
 import { IBookGridItemFragment } from '~/components/book/BookGridItem'
 import { BookFilterHeader } from '~/components/book/filterHeader'
-import { ColumnItem } from '~/components/grid'
 import { useGridItemSize } from '~/components/grid/useGridItemSize'
 import ListEmpty from '~/components/ListEmpty'
 import RefreshControl from '~/components/RefreshControl'
@@ -90,22 +89,13 @@ export default function Screen() {
 			pagination: { offset: { page: 1 } },
 		},
 	)
-	const { numColumns } = useGridItemSize()
+	const { numColumns, paddingHorizontal } = useGridItemSize()
 
 	const onEndReached = useCallback(() => {
 		if (hasNextPage) {
 			fetchNextPage()
 		}
 	}, [hasNextPage, fetchNextPage])
-
-	const renderItem = useCallback(
-		({ item, index }: { item: IBookGridItemFragment; index: number }) => (
-			<ColumnItem index={index} numColumns={numColumns}>
-				<BookGridItem book={item} />
-			</ColumnItem>
-		),
-		[numColumns],
-	)
 
 	const listRef = useRef<FlashListRef<IBookGridItemFragment>>(null)
 	useScrollToTop(listRef)
@@ -121,15 +111,16 @@ export default function Screen() {
 				<FlashList
 					ref={listRef}
 					data={data?.pages.flatMap((page) => page.media.nodes) || []}
-					renderItem={renderItem}
+					renderItem={({ item }) => <BookGridItem book={item} />}
 					contentContainerStyle={{
-						padding: 16,
+						paddingHorizontal: paddingHorizontal,
+						paddingVertical: 16,
 					}}
 					numColumns={numColumns}
 					onEndReachedThreshold={ON_END_REACHED_THRESHOLD}
 					onEndReached={onEndReached}
 					ListHeaderComponent={<BookFilterHeader seriesId={id} />}
-					ListHeaderComponentStyle={{ paddingBottom: 16 }}
+					ListHeaderComponentStyle={{ paddingBottom: 16, marginHorizontal: -paddingHorizontal }}
 					contentInsetAdjustmentBehavior="always"
 					refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
 					ListEmptyComponent={

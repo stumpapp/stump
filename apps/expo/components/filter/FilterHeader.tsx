@@ -1,6 +1,5 @@
 import { Suspense } from 'react'
-import { View } from 'react-native'
-import { ScrollView } from 'react-native-gesture-handler'
+import { ScrollView, View } from 'react-native'
 
 type Props = {
 	children: React.ReactNode

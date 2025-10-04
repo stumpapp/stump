@@ -6,7 +6,6 @@ import { Platform, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { useActiveServer } from '~/components/activeServer'
-import { ColumnItem } from '~/components/grid'
 import { useGridItemSize } from '~/components/grid/useGridItemSize'
 import { LibraryGridItem } from '~/components/library'
 import { ILibraryGridItemFragment } from '~/components/library/LibraryGridItem'
@@ -41,22 +40,13 @@ export default function Screen() {
 		query,
 		['libraries', serverID],
 	)
-	const { numColumns, gap } = useGridItemSize()
+	const { numColumns, gap, paddingHorizontal } = useGridItemSize()
 
 	const onEndReached = useCallback(() => {
 		if (hasNextPage) {
 			fetchNextPage()
 		}
 	}, [hasNextPage, fetchNextPage])
-
-	const renderItem = useCallback(
-		({ item, index }: { item: ILibraryGridItemFragment; index: number }) => (
-			<ColumnItem index={index} numColumns={numColumns}>
-				<LibraryGridItem library={item} />
-			</ColumnItem>
-		),
-		[numColumns],
-	)
 
 	return (
 		<SafeAreaView
@@ -65,9 +55,10 @@ export default function Screen() {
 		>
 			<FlashList
 				data={data?.pages.flatMap((page) => page.libraries.nodes) || []}
-				renderItem={renderItem}
+				renderItem={({ item }) => <LibraryGridItem library={item} />}
 				contentContainerStyle={{
-					padding: 16,
+					paddingHorizontal: paddingHorizontal,
+					paddingVertical: 16,
 				}}
 				numColumns={numColumns}
 				onEndReachedThreshold={ON_END_REACHED_THRESHOLD}

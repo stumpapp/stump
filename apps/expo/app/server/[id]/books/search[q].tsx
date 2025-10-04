@@ -7,7 +7,6 @@ import { useLocalSearchParams, useNavigation } from 'expo-router'
 import { useCallback, useLayoutEffect, useMemo } from 'react'
 
 import BookGridItem, { IBookGridItemFragment } from '~/components/book/BookGridItem'
-import { ColumnItem } from '~/components/grid'
 import { useGridItemSize } from '~/components/grid/useGridItemSize'
 import { icons } from '~/lib'
 import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
@@ -82,16 +81,7 @@ export default function Screen() {
 		},
 	)
 
-	const { numColumns } = useGridItemSize()
-
-	const renderItem = useCallback(
-		({ item, index }: { item: IBookGridItemFragment; index: number }) => (
-			<ColumnItem index={index} numColumns={numColumns}>
-				<BookGridItem book={item} />
-			</ColumnItem>
-		),
-		[numColumns],
-	)
+	const { numColumns, paddingHorizontal } = useGridItemSize()
 
 	const onEndReached = useCallback(() => {
 		if (hasNextPage) {
@@ -102,8 +92,8 @@ export default function Screen() {
 	return (
 		<FlashList
 			data={data?.pages.flatMap((page) => page.media.nodes) || []}
-			renderItem={renderItem}
-			contentContainerStyle={{ padding: 16 }}
+			renderItem={({ item }) => <BookGridItem book={item} />}
+			contentContainerStyle={{ paddingHorizontal: paddingHorizontal, paddingVertical: 16 }}
 			centerContent
 			numColumns={numColumns}
 			onEndReachedThreshold={ON_END_REACHED_THRESHOLD}

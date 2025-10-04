@@ -12,7 +12,7 @@ type Props = {
 
 export default function ListEmpty({ message }: Props) {
 	return (
-		<View className="squircle h-24 w-full items-center justify-center gap-2 rounded-lg border border-dashed border-edge p-3">
+		<View className="squircle h-24 w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-edge p-3">
 			<View className="relative flex justify-center">
 				<View className="squircle flex items-center justify-center rounded-lg bg-background-surface p-2">
 					<Rss className="h-6 w-6 text-foreground-muted" />

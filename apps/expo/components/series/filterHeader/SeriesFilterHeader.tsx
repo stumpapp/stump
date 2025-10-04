@@ -15,12 +15,14 @@ export default function SeriesFilterHeader(context: Props) {
 	return (
 		<SeriesFilterHeaderContext.Provider value={context}>
 			<FilterHeader>
+				<View className="w-[16]" />
 				<Sort />
 				<View className="w-2" />
 				<Status />
 
 				<View className="w-2" />
 				<ClearFilters onPress={clear} />
+				<View className="w-[16]" />
 			</FilterHeader>
 		</SeriesFilterHeaderContext.Provider>
 	)

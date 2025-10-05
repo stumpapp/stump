@@ -51,7 +51,7 @@
 			}
 		},
 		"emailBook": {
-			"heading": "Email book",
+			"heading": "",
 			"description": "Send this book to device or email address",
 			"form": {
 				"email": {

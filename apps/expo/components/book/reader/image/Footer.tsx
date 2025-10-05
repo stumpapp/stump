@@ -255,14 +255,7 @@ export default function Footer() {
 
 			let containerSize = baseSize
 
-			if (isLandscape) {
-				containerSize = {
-					height: containerSize.width,
-					width: containerSize.height,
-				}
-			}
-
-			if (pageSet.length === 2) {
+			if (pageSet.length === 2 || isLandscape) {
 				containerSize = {
 					height: containerSize.height,
 					width: containerSize.width * 2,
@@ -297,7 +290,8 @@ export default function Footer() {
 			if (!visible) return null
 			if (!isSliderDragging) return null
 
-			const pageSet = pageSets.find((set) => set.includes(value - 1)) || []
+			const actualValue = readingDirection === ReadingDirection.Rtl ? book.pages - value : value
+			const pageSet = pageSets.find((set) => set.includes(actualValue - 1)) || []
 
 			const { translateX, translateY, containerSize } = getSliderImageContainerStyles(
 				value,

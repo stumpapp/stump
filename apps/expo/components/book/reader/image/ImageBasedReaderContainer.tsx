@@ -76,10 +76,6 @@ export default function ImageBasedReaderContainer({
 			})
 		}
 
-		if (readingDirection === ReadingDirection.Rtl) {
-			return [...sets.map((set) => [...set].reverse())].reverse()
-		}
-
 		return sets
 	}, [
 		doublePageBehavior,

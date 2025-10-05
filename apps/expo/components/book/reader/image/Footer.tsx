@@ -20,15 +20,12 @@ import { TurboImage } from '~/components/Image'
 import { Progress, Text } from '~/components/ui'
 import { useDisplay, usePrevious } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
-import { useReaderStore } from '~/stores'
+import { usePreferencesStore, useReaderStore } from '~/stores'
 import { useBookPreferences, useBookReadTime } from '~/stores/reader'
 
 import { useImageBasedReader } from './context'
 
 dayjs.extend(duration)
-
-const HEIGHT_MODIFIER = 2 / 3
-const WIDTH_MODIFIER = 2 / 3
 
 export default function Footer() {
 	const { sdk } = useSDK()
@@ -54,18 +51,19 @@ export default function Footer() {
 
 	const visible = useReaderStore((state) => state.showControls)
 	const setShowControls = useReaderStore((state) => state.setShowControls)
+	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
 
 	const [isSliderDragging, setIsSliderDragging] = useState(false)
 
 	const baseSize = useMemo(() => {
 		const baseWidth = isTablet ? 120 : 75
 		return {
-			height: baseWidth / HEIGHT_MODIFIER,
+			height: baseWidth / thumbnailRatio,
 			width: baseWidth,
 		}
-	}, [isTablet])
+	}, [isTablet, thumbnailRatio])
 
-	const largestHeight = baseSize.height / HEIGHT_MODIFIER
+	const largestHeight = baseSize.height / thumbnailRatio
 	const translateY = useSharedValue(largestHeight * 2)
 	useEffect(() => {
 		translateY.value = withTiming(visible ? 0 : largestHeight * 1.8, {
@@ -91,24 +89,19 @@ export default function Footer() {
 			const isLandscape = set.some((page) => (imageSizes?.[page]?.ratio || 0) >= 1)
 
 			let containerSize = baseSize
-			if (isLandscape) {
-				containerSize = {
-					height: containerSize.width,
-					width: containerSize.height,
-				}
-			}
 
-			if (isDoubleSpread) {
+			if (isDoubleSpread || isLandscape) {
 				containerSize = {
 					height: containerSize.height,
 					width: containerSize.width * 2,
 				}
 			}
 
+			// Make the current page set's images larger by 1.5 times
 			if (set.includes(currentPage - 1)) {
 				containerSize = {
-					height: containerSize.height / HEIGHT_MODIFIER,
-					width: containerSize.width / WIDTH_MODIFIER,
+					height: containerSize.height * 1.5,
+					width: containerSize.width * 1.5,
 				}
 			}
 
@@ -348,7 +341,12 @@ export default function Footer() {
 						})}
 					</View>
 
-					<Text className="text-center">{pageSet.map((i) => i + 1).join('-')}</Text>
+					<Text className="text-center">
+						{pageSet
+							.sort((a, b) => a - b) // we always use (from left to right) the smaller then larger number even if using RTL (e.g. pages 3-4 and never 4-3)
+							.map((i) => i + 1)
+							.join('-')}
+					</Text>
 				</View>
 			)
 		},
@@ -451,7 +449,8 @@ export default function Footer() {
 										headers: pageSource(pageIdx + 1).headers as Record<string, string>,
 									}}
 									resizeMode="stretch"
-									resize={(baseSize.width / WIDTH_MODIFIER) * 1.5}
+									// we downscale (resize) by width, so when we resize an individual image, the gallery size is halved when the item length is 2.
+									resize={(getGalleryItemSize(index).width / item.length) * 1.5}
 									style={{
 										width: item.length === 1 ? '100%' : '50%',
 										height: '100%',
@@ -465,7 +464,10 @@ export default function Footer() {
 
 					{!isCurrentPage && (
 						<Text size="sm" className="shrink-0 text-center text-[#898d94]">
-							{item.map((i) => i + 1).join('-')}
+							{item
+								.sort((a, b) => a - b) // we always use (from left to right) the smaller then larger number even if using RTL (e.g. pages 3-4 and never 4-3)
+								.map((i) => i + 1)
+								.join('-')}
 						</Text>
 					)}
 				</Pressable>

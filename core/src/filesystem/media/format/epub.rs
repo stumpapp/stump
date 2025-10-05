@@ -313,8 +313,17 @@ impl EpubProcessor {
 			DEFAULT_EPUB_COVER_ID.to_string()
 		});
 
-		if let Some((buf, mime)) = epub_file.get_resource(&cover_id) {
-			return Ok((ContentType::from(mime.as_str()), buf));
+		match epub_file.get_resource(&cover_id) {
+			Some((buf, mime)) if mime.starts_with("image/") => {
+				return Ok((ContentType::from(mime.as_str()), buf));
+			},
+			Some((_, mime)) => {
+				tracing::debug!(
+					?mime,
+					"Found explicit cover image via metadata, but mime is not an image",
+				);
+			},
+			_ => tracing::debug!("Epub file does not contain explicit cover resource"),
 		}
 
 		tracing::debug!(

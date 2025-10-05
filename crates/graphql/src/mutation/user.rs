@@ -617,7 +617,7 @@ mod tests {
 		let stmt = &txn.statements()[1];
 		assert_eq!(
 			stmt.to_string(),
-			r#"UPDATE "users" SET "username" = 'test_user', "avatar_url" = 'http://example.com/avatar.png', "max_sessions_allowed" = 5 WHERE "users"."id" = '42' RETURNING "id", "username", "hashed_password", "is_server_owner", "avatar_url", "last_login", "created_at", "deleted_at", "is_locked", "max_sessions_allowed", "permissions", "user_preferences_id""#
+			r#"UPDATE "users" SET "username" = 'test_user', "avatar_url" = 'http://example.com/avatar.png', "max_sessions_allowed" = 5 WHERE "users"."id" = '42' RETURNING "id", "username", "hashed_password", "is_server_owner", "avatar_url", "created_at", "deleted_at", "is_locked", "max_sessions_allowed", "permissions", "user_preferences_id""#
 		);
 	}
 }

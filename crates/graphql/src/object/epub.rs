@@ -28,7 +28,7 @@ impl From<NavPoint> for EpubContent {
 				.into_iter()
 				.map(EpubContent::from)
 				.collect(),
-			play_order: nav_point.play_order as u32,
+			play_order: nav_point.play_order.unwrap_or(0) as u32,
 		}
 	}
 }
@@ -64,7 +64,12 @@ impl Epub {
 		let resources_serialized = epub_file
 			.resources
 			.into_iter()
-			.map(|(k, v)| Ok((k, (v.0.to_str().ok_or("Invalid path")?.to_string(), v.1))))
+			.map(|(k, v)| {
+				Ok((
+					k,
+					(v.path.to_str().ok_or("Invalid path")?.to_string(), v.mime),
+				))
+			})
 			.collect::<Result<HashMap<String, (String, String)>>>()?;
 
 		// serialize toc to string, return error if any path fails to serialize
@@ -85,12 +90,20 @@ impl Epub {
 			})
 			.collect();
 
+		let metadata_map = epub_file.metadata.into_iter().fold(
+			HashMap::new(),
+			|mut map: HashMap<String, Vec<String>>, item| {
+				map.entry(item.property).or_default().push(item.value);
+				map
+			},
+		);
+
 		Ok(Self {
 			media_id: ident.id,
 			spine,
 			resources: resources_serialized,
 			toc: toc_serialized,
-			metadata: epub_file.metadata,
+			metadata: metadata_map,
 			root_base: epub_file
 				.root_base
 				.to_str()
@@ -169,19 +182,25 @@ impl Epub {
 #[cfg(test)]
 mod tests {
 	use super::*;
+	use epub::doc::ResourceItem;
 	use models::entity::media::MediaIdentSelect;
+
 	#[tokio::test]
 	async fn test_epub_try_from() {
 		let mut epub_doc = EpubDoc::mock().unwrap();
 		epub_doc.resources.insert(
 			"test.css".to_string(),
-			(PathBuf::from("test.css"), "text/css".to_string()),
+			ResourceItem {
+				path: PathBuf::from("test.css"),
+				mime: "text/css".to_string(),
+				properties: None,
+			},
 		);
 		epub_doc.toc = vec![NavPoint {
 			label: "test".to_string(),
 			content: PathBuf::from("test.html"),
 			children: vec![],
-			play_order: 0,
+			play_order: Some(0),
 		}];
 		epub_doc.root_base = PathBuf::from("/");
 		epub_doc.root_file = PathBuf::from("test.html");

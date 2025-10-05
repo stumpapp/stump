@@ -92,8 +92,8 @@ impl FileProcessor for EpubProcessor {
 
 	fn process_metadata(path: &str) -> Result<Option<ProcessedMediaMetadata>, FileError> {
 		let mut epub_file = Self::open(path)?;
-		let mut embedded_metadata =
-			ProcessedMediaMetadata::from(epub_file.metadata.clone());
+		let metadata_map = Self::metadata_to_map(epub_file.metadata.clone());
+		let mut embedded_metadata = ProcessedMediaMetadata::from(metadata_map);
 
 		tracing::trace!(before = ?embedded_metadata, "Processing embedded metadata");
 
@@ -143,7 +143,10 @@ impl FileProcessor for EpubProcessor {
 		// Get metadata from epub file if process_metadata failed
 		let metadata = match metadata {
 			Ok(Some(m)) => m,
-			_ => ProcessedMediaMetadata::from(epub_file.metadata),
+			_ => {
+				let metadata_map = Self::metadata_to_map(epub_file.metadata);
+				ProcessedMediaMetadata::from(metadata_map)
+			},
 		};
 		let ProcessedFileHashes {
 			hash,
@@ -227,6 +230,16 @@ impl EpubProcessor {
 		EpubDoc::new(path).map_err(|e| FileError::EpubOpenError(e.to_string()))
 	}
 
+	fn metadata_to_map(
+		metadata: Vec<epub::doc::MetadataItem>,
+	) -> HashMap<String, Vec<String>> {
+		let mut map: HashMap<String, Vec<String>> = HashMap::new();
+		for item in metadata {
+			map.entry(item.property).or_default().push(item.value);
+		}
+		map
+	}
+
 	fn get_cover_path(resources: &HashMap<String, (PathBuf, String)>) -> Option<String> {
 		let search_result = resources
 			.iter()
@@ -307,7 +320,12 @@ impl EpubProcessor {
 		tracing::debug!(
 			"Explicit cover image could not be found, falling back to searching for best match..."
 		);
-		let id = Self::get_cover_path(&epub_file.resources);
+		let resources_map: HashMap<String, (PathBuf, String)> = epub_file
+			.resources
+			.iter()
+			.map(|(id, item)| (id.clone(), (item.path.clone(), item.mime.clone())))
+			.collect();
+		let id = Self::get_cover_path(&resources_map);
 		if let Some(id) = id {
 			if let Some((buf, mime)) = epub_file.get_resource(id.as_str()) {
 				return Ok((ContentType::from(mime.as_str()), buf));
@@ -559,50 +577,49 @@ fn parse_opf_xml(opf_content: &str) -> Result<HashMap<String, Vec<String>>, File
 			},
 			Ok(Event::Text(e)) => {
 				if !current_tag.is_empty() {
-					if let Ok(text) = e.unescape() {
-						let content = text.trim().to_string();
-						if !content.is_empty() {
-							match current_tag.as_str() {
-								"belongs-to-collection" => {
-									opf_metadata
-										.entry("collection_name".to_string())
-										.or_default()
-										.push(content.clone());
-								},
-								"collection-type" => {
-									opf_metadata
-										.entry("collection_type".to_string())
-										.or_default()
-										.push(content.clone());
-								},
-								"group-position" => {
-									opf_metadata
-										.entry("collection_position".to_string())
-										.or_default()
-										.push(content.clone());
-								},
-								"identifier" => {
-									// Some books seem to have prefixed identifiers (e.g., "isbn:9780062444134")
-									if let Some(colon_pos) = content.find(':') {
-										let scheme = content[..colon_pos].to_lowercase();
-										let value = content[colon_pos + 1..].to_string();
-										let key = format!("identifier_{}", scheme);
-										opf_metadata.entry(key).or_default().push(value);
-									} else {
-										// No prefix, treat as generic identifier
-										opf_metadata
-											.entry(current_tag.clone())
-											.or_default()
-											.push(content);
-									}
-								},
-								_ => {
+					let text = String::from_utf8_lossy(&e).to_string();
+					let content = text.trim().to_string();
+					if !content.is_empty() {
+						match current_tag.as_str() {
+							"belongs-to-collection" => {
+								opf_metadata
+									.entry("collection_name".to_string())
+									.or_default()
+									.push(content.clone());
+							},
+							"collection-type" => {
+								opf_metadata
+									.entry("collection_type".to_string())
+									.or_default()
+									.push(content.clone());
+							},
+							"group-position" => {
+								opf_metadata
+									.entry("collection_position".to_string())
+									.or_default()
+									.push(content.clone());
+							},
+							"identifier" => {
+								// Some books seem to have prefixed identifiers (e.g., "isbn:9780062444134")
+								if let Some(colon_pos) = content.find(':') {
+									let scheme = content[..colon_pos].to_lowercase();
+									let value = content[colon_pos + 1..].to_string();
+									let key = format!("identifier_{}", scheme);
+									opf_metadata.entry(key).or_default().push(value);
+								} else {
+									// No prefix, treat as generic identifier
 									opf_metadata
 										.entry(current_tag.clone())
 										.or_default()
 										.push(content);
-								},
-							}
+								}
+							},
+							_ => {
+								opf_metadata
+									.entry(current_tag.clone())
+									.or_default()
+									.push(content);
+							},
 						}
 					}
 				}

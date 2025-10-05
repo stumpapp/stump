@@ -144,6 +144,7 @@ export default function ImageBasedReader({ initialPage, onPastEndReached }: Prop
 					maxWidth={width}
 					maxHeight={height}
 					readingDirection="horizontal"
+					onPastEndReached={onPastEndReached}
 				/>
 			)}
 			keyExtractor={(item) => item.toString()}
@@ -199,6 +200,7 @@ type PageProps = {
 	maxWidth: number
 	maxHeight: number
 	readingDirection: 'vertical' | 'horizontal'
+	onPastEndReached?: () => void
 }
 
 const Page = React.memo(
@@ -209,6 +211,7 @@ const Page = React.memo(
 		sizes,
 		maxWidth,
 		maxHeight,
+		onPastEndReached,
 		// readingDirection,
 	}: PageProps) => {
 		const { book, pageURL, flatListRef, pageSets, setImageSizes } = useImageBasedReader()
@@ -239,6 +242,8 @@ const Page = React.memo(
 				if (nextIndex >= 0 && nextIndex < pageSets.length) {
 					flatListRef.current?.scrollToIndex({ index: nextIndex, animated: true })
 				}
+
+				if (nextIndex === pageSets.length) onPastEndReached?.()
 
 				return isLeft || isRight
 			},

@@ -122,7 +122,7 @@ export default function Footer() {
 	const getItemLayout = useCallback(
 		(_: ArrayLike<number[]> | null | undefined, index: number) => {
 			const totalOffset =
-				7.5 +
+				8 +
 				pageSets.slice(0, index).reduce(
 					(acc, set) =>
 						acc +
@@ -236,22 +236,22 @@ export default function Footer() {
 	)
 
 	/**
-	 * A function that takes the pageSet index and returns the corresponding slider value
+	 * A function that takes the slider value and returns the corresponding pageSet index
 	 */
-	const getSliderValue = useCallback(
-		(idx: number) => {
+	const getPageSetIndex = useCallback(
+		(value: number) => {
 			if (readingDirection === ReadingDirection.Rtl) {
-				return pageSets.length - 1 - idx
-			} else return idx
+				return pageSets.length - 1 - value
+			} else return value
 		},
 		[pageSets.length, readingDirection],
 	)
 
 	/**
-	 * A function that takes the slider value and returns the corresponding pageSet index
-	 * It uses the same logic as getSliderValue
+	 * A function that takes the pageSet index and returns the corresponding slider value
+	 * It uses the same logic as getPageSetIndex
 	 */
-	const getPageSetIndex = useCallback((value: number) => getSliderValue(value), [getSliderValue])
+	const getSliderValue = useCallback((idx: number) => getPageSetIndex(idx), [getPageSetIndex])
 
 	const currentIdx = pageSets.findIndex((set) => set.includes(currentPage - 1))
 	const [sliderValue, setSliderValue] = useState(() => getSliderValue(currentIdx))

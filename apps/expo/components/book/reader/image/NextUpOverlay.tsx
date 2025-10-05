@@ -2,7 +2,6 @@ import { useSDK } from '@stump/client'
 import { useRouter } from 'expo-router'
 import { useCallback, useEffect } from 'react'
 import { View } from 'react-native'
-import LinearGradient from 'react-native-linear-gradient'
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
@@ -13,6 +12,7 @@ import { COLORS } from '~/lib/constants'
 import { useDisplay } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 import { usePreferencesStore } from '~/stores'
+import { BorderAndShadow } from '~/components/BorderAndShadow'
 
 import { NextInSeriesBookRef } from './context'
 
@@ -100,21 +100,7 @@ export default function NextUpOverlay({ isVisible, book, onClose }: Props) {
 				</View>
 			</View>
 
-			<LinearGradient
-				colors={[
-					'hsla(0, 0%, 0%, 0.75)',
-					'hsla(0, 0%, 0%, 0.75)',
-					'hsla(0, 0%, 0%, 0.5)',
-					'hsla(0, 0%, 0%, 0.5)',
-					'hsla(0, 0%, 0%, 0.5)',
-					'hsla(0, 0%, 0%, 0.5)',
-					'hsla(0, 0%, 0%, 0.75)',
-					'hsla(0, 0%, 0%, 0.95)',
-				]}
-				style={{
-					flex: 1,
-				}}
-			/>
+			<View style={{ flex: 1, backgroundColor: 'hsla(0, 0%, 0%, 0.75)' }} />
 
 			<View className="absolute inset-0 flex-1 items-center justify-center gap-4">
 				<View>
@@ -123,25 +109,26 @@ export default function NextUpOverlay({ isVisible, book, onClose }: Props) {
 						{book.name}
 					</Heading>
 				</View>
-				<TurboImage
-					source={{
-						uri: book.thumbnailUrl,
-						headers: {
-							...sdk.customHeaders,
-							Authorization: sdk.authorizationHeader || '',
-						},
-					}}
-					resizeMode="stretch"
-					resize={size * 1.5}
-					style={{
-						width: size,
-						height: size / thumbnailRatio,
-						borderRadius: 12,
-						// @ts-expect-error bug in library. StyleProp<ImageStyle> should be StyleProp<ViewStyle>
-						borderCurve: 'continuous',
-						overflow: 'hidden',
-					}}
-				/>
+				<BorderAndShadow
+					style={{ borderRadius: 12, borderWidth: 0.8, shadowRadius: 5, elevation: 8 }}
+					outerStyle={{ shadowColor: 'white' }}
+				>
+					<TurboImage
+						source={{
+							uri: book.thumbnailUrl,
+							headers: {
+								...sdk.customHeaders,
+								Authorization: sdk.authorizationHeader || '',
+							},
+						}}
+						resizeMode="stretch"
+						resize={size * 1.5}
+						style={{
+							width: size,
+							height: size / thumbnailRatio,
+						}}
+					/>
+				</BorderAndShadow>
 
 				<View
 					className="flex flex-row items-center tablet:max-w-sm tablet:self-center"

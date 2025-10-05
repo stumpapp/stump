@@ -118,14 +118,9 @@ export default function ImageBasedReader({ initialPage, onPastEndReached }: Prop
 
 		const targetContentOffset = event.nativeEvent.targetContentOffset || contentOffset
 
-		const isPastEnd =
-			(readingDirection === ReadingDirection.Ltr &&
-				contentOffset.x + layoutMeasurement.width > contentSize.width) ||
-			(readingDirection === ReadingDirection.Rtl && contentOffset.x < 0)
-		const isTargetPastEnd =
-			(readingDirection === ReadingDirection.Ltr &&
-				targetContentOffset.x + layoutMeasurement.width > contentSize.width) ||
-			(readingDirection === ReadingDirection.Rtl && targetContentOffset.x < 0)
+		// inverted prop on FlatList accounts for RTL already
+		const isPastEnd = contentOffset.x + layoutMeasurement.width > contentSize.width
+		const isTargetPastEnd = targetContentOffset.x + layoutMeasurement.width > contentSize.width
 
 		if (isPastEnd && isTargetPastEnd) {
 			didCallEndReached.current = true
@@ -288,6 +283,9 @@ const Page = React.memo(
 		const [imageRatio, setImageRatio] = useState<number | undefined>(undefined)
 		const roughPageRenderWidth = indexes.length > 1 ? maxWidth / 2 : maxWidth
 
+		const directionRespectingIndexes =
+			readingDirection === ReadingDirection.Rtl ? [...indexes].reverse() : indexes
+
 		return (
 			<Zoomable
 				minScale={1}
@@ -304,7 +302,7 @@ const Page = React.memo(
 					})}
 					style={{ height: maxHeight, width: maxWidth }}
 				>
-					{indexes.map((pageIdx, i) => {
+					{directionRespectingIndexes.map((pageIdx, i) => {
 						return (
 							<TurboImage
 								key={`${pageIdx}-${i}`}

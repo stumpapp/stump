@@ -1,7 +1,6 @@
 use async_graphql::SimpleObject;
 use futures::{stream::FuturesUnordered, StreamExt};
 use serde::{Deserialize, Serialize};
-use specta::Type;
 
 use models::{
 	entity::{media, series},
@@ -20,7 +19,7 @@ use super::generate::{generate_book_thumbnail, GenerateThumbnailOptions};
 type Id = String;
 type MediaIds = Vec<Id>;
 
-#[derive(Clone, Debug, Serialize, Deserialize, Type)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "type")]
 pub enum ThumbnailGenerationJobVariant {
 	SingleLibrary(Id),
@@ -28,7 +27,7 @@ pub enum ThumbnailGenerationJobVariant {
 	MediaGroup(MediaIds),
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, Type)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ThumbnailGenerationJobParams {
 	variant: ThumbnailGenerationJobVariant,
 	force_regenerate: bool,
@@ -62,7 +61,7 @@ pub enum ThumbnailGenerationTask {
 	GenerateBatch(MediaIds),
 }
 
-#[derive(Clone, Serialize, Deserialize, Default, Debug, Type, SimpleObject)]
+#[derive(Clone, Serialize, Deserialize, Default, Debug, SimpleObject)]
 // Note: This container attribute is used to ensure future additions to the struct do not break deserialization
 #[serde(default, rename_all = "camelCase")]
 pub struct ThumbnailGenerationOutput {

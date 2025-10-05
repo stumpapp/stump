@@ -80,14 +80,7 @@ use defaults::*;
 /// }
 /// ```
 #[derive(
-	StumpConfigGenerator,
-	Serialize,
-	Deserialize,
-	Debug,
-	Clone,
-	PartialEq,
-	specta::Type,
-	SimpleObject,
+	StumpConfigGenerator, Serialize, Deserialize, Debug, Clone, PartialEq, SimpleObject,
 )]
 #[graphql(name = "StumpConfig")]
 #[config_file_location(self.get_config_dir().join("Stump.toml"))]

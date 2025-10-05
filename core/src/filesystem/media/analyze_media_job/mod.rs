@@ -8,7 +8,6 @@ use crate::job::{
 use models::entity::{media, series};
 use sea_orm::{prelude::*, QuerySelect};
 use serde::{Deserialize, Serialize};
-use specta::Type;
 
 type MediaID = String;
 type SeriesID = String;
@@ -39,7 +38,7 @@ pub enum AnalyzeMediaTask {
 	FullAnalysis(MediaID),
 }
 
-#[derive(Clone, Serialize, Deserialize, Default, Debug, Type)]
+#[derive(Clone, Serialize, Deserialize, Default, Debug)]
 pub struct AnalyzeMediaOutput {
 	/// The number of page counts analyzed.
 	page_counts_analyzed: u64,

@@ -1,9 +1,8 @@
 use serde::{Deserialize, Serialize};
-use specta::Type;
 
 use crate::filesystem::media::{BuiltMedia, ProcessedFileHashes, ProcessedMediaMetadata};
 
-#[derive(Debug, Default, Clone, Copy, Deserialize, Serialize, PartialEq, Type)]
+#[derive(Debug, Default, Clone, Copy, Deserialize, Serialize, PartialEq)]
 #[serde(default)]
 pub struct CustomVisit {
 	pub regen_meta: bool,
@@ -61,13 +60,13 @@ impl BookVisitResult {
 /// The override options for a scan job. These options are used to override the default behavior, which generally
 /// means that the scanner will visit books it otherwise would not. How much extra work is done depends on the
 /// specific options.
-#[derive(Debug, Default, Clone, Copy, Deserialize, Serialize, Type)]
+#[derive(Debug, Default, Clone, Copy, Deserialize, Serialize)]
 pub struct ScanOptions {
 	#[serde(default)]
 	pub config: ScanConfig,
 }
 
-#[derive(Default, Debug, Clone, Copy, Deserialize, Serialize, Type)]
+#[derive(Default, Debug, Clone, Copy, Deserialize, Serialize)]
 #[serde(untagged)]
 pub enum ScanConfig {
 	#[default]

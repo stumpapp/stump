@@ -93,7 +93,7 @@ pub fn generate_koreader_hash<P: AsRef<std::path::Path>>(
 		md5_context.consume(&buffer);
 	}
 
-	let hash = format!("{:x}", md5_context.compute());
+	let hash = format!("{:x}", md5_context.finalize());
 	tracing::debug!(hash = %hash, "Generated hash");
 
 	Ok(hash)

@@ -3,7 +3,6 @@ use std::collections::HashMap;
 use chrono::{DateTime, FixedOffset};
 use keyring::Entry;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 
 const TOKEN_STORAGE: &str = "stump-desktop-operator-tokens";
 const CREDENTIALS_STORAGE: &str = "stump-desktop-operator-credentials";
@@ -65,7 +64,7 @@ impl std::fmt::Debug for SecureStore {
 	}
 }
 
-#[derive(Debug, Serialize, Deserialize, Type)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct CredentialStoreTokenState(HashMap<ServerId, bool>);
 
 // TODO: it would be nice to manage refreshes as well as expiration times?

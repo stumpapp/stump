@@ -1,4 +1,4 @@
-import { Zoomable } from '@likashefqet/react-native-image-zoom'
+import { Zoomable, ZoomableRef } from '@likashefqet/react-native-image-zoom'
 import { useSDK } from '@stump/client'
 import { ReadingDirection, ReadingMode } from '@stump/graphql'
 import { STUMP_SAVE_BASIC_SESSION_HEADER } from '@stump/sdk/constants'
@@ -224,6 +224,8 @@ const Page = React.memo(
 
 		const tapThresholdRatio = isTablet ? 4 : 5
 
+		const zoomableRef = useRef<ZoomableRef>(null)
+
 		const onCheckForNavigationTaps = useCallback(
 			(x: number) => {
 				const isLeft = x < maxWidth / tapThresholdRatio
@@ -253,7 +255,9 @@ const Page = React.memo(
 				}
 
 				const didNavigate = onCheckForNavigationTaps(event.x)
-				if (!didNavigate) {
+				if (didNavigate) {
+					zoomableRef.current?.reset()
+				} else {
 					setShowControls(!showControls)
 				}
 			},
@@ -288,6 +292,7 @@ const Page = React.memo(
 
 		return (
 			<Zoomable
+				ref={zoomableRef}
 				minScale={1}
 				maxScale={5}
 				scale={scale}

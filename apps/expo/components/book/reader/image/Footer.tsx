@@ -235,23 +235,45 @@ export default function Footer() {
 		[currentPage, readingDirection, isOPDS],
 	)
 
-	const [sliderValue, setSliderValue] = useState(currentPage - 1)
+	/**
+	 * A function that takes the pageSet index and returns the corresponding slider value
+	 */
+	const getSliderValue = useCallback(
+		(idx: number) => {
+			if (readingDirection === ReadingDirection.Rtl) {
+				return pageSets.length - 1 - idx
+			} else return idx
+		},
+		[pageSets.length, readingDirection],
+	)
+
+	/**
+	 * A function that takes the slider value and returns the corresponding pageSet index
+	 * It uses the same logic as getSliderValue
+	 */
+	const getPageSetIndex = useCallback((value: number) => getSliderValue(value), [getSliderValue])
+
+	const currentIdx = pageSets.findIndex((set) => set.includes(currentPage - 1))
+	const [sliderValue, setSliderValue] = useState(() => getSliderValue(currentIdx))
 
 	const handleSlideValueChange = useCallback(
-		(idx: number) => {
+		(value: number) => {
 			if (footerControls !== 'slider') return
 
-			const currentIdx = currentPage - 1
-			if (idx < 0 || idx >= book.pages) return
-			if (idx === currentIdx) return
-			setSliderValue(idx)
+			if (value < 0 || value >= pageSets.length) return
+
+			const currentIdx = pageSets.findIndex((set) => set.includes(currentPage - 1))
+			const currentValue = getPageSetIndex(currentIdx)
+			if (value === currentValue) return
+
+			setSliderValue(value)
 		},
-		[currentPage, book.pages, footerControls],
+		[currentPage, pageSets.length, footerControls],
 	)
 
 	const getSliderImageContainerStyles = useCallback(
 		(value: number, pageSet: number[]) => {
-			const isLandscape = (imageSizes?.[value - 1]?.ratio || 0) >= 1
+			const isLandscape = (imageSizes?.[pageSet[0]]?.ratio || 0) >= 1
 
 			let containerSize = baseSize
 
@@ -286,17 +308,20 @@ export default function Footer() {
 
 	const renderAboveThumbComponent = useCallback(
 		(_: number, value: number) => {
-			if (value < 0 || value >= book.pages) return null
+			if (value < 0 || value >= pageSets.length) return null
 			if (!visible) return null
 			if (!isSliderDragging) return null
 
-			const actualValue = readingDirection === ReadingDirection.Rtl ? book.pages - value : value
-			const pageSet = pageSets.find((set) => set.includes(actualValue - 1)) || []
+			const pageSetIndex = getPageSetIndex(value)
+			const pageSet = pageSets[pageSetIndex] || []
 
 			const { translateX, translateY, containerSize } = getSliderImageContainerStyles(
 				value,
 				pageSet,
 			)
+
+			const directionRespectingPageSet =
+				readingDirection === ReadingDirection.Rtl ? [...pageSet].reverse() : pageSet
 
 			return (
 				<View
@@ -319,7 +344,7 @@ export default function Footer() {
 							gap: 1,
 						}}
 					>
-						{pageSet.map((pageIdx, i) => {
+						{directionRespectingPageSet.map((pageIdx, i) => {
 							const source = pageSource(pageIdx + 1)
 							return (
 								<TurboImage
@@ -354,51 +379,49 @@ export default function Footer() {
 			)
 		},
 		[
-			book.pages,
 			isSliderDragging,
 			pageSource,
 			getSliderImageContainerStyles,
 			visible,
 			pageSets,
 			onImageLoaded,
+			readingDirection,
 		],
 	)
 
 	const onSlidingComplete = useCallback(
-		(page: number) => {
+		(value: number) => {
 			setIsSliderDragging(false)
 			if (footerControls !== 'slider') return
-			const resolvedPage =
-				(readingDirection === ReadingDirection.Rtl ? book.pages - page : page) - 1
-			const idx = pageSets.findIndex((set) => set.includes(resolvedPage))
-			if (idx === -1) return
-			onChangePage(idx)
-		},
-		[onChangePage, book.pages, readingDirection, footerControls, pageSets],
-	)
+			if (value < 0 || value >= pageSets.length) return
 
-	useEffect(() => {
-		if (visible) {
-			const actualPage =
-				readingDirection === ReadingDirection.Rtl ? book.pages - currentPage : currentPage
-			setSliderValue(actualPage)
-		}
-	}, [book.pages, visible, readingDirection, currentPage])
+			const pageSetIdx = getPageSetIndex(value)
+			onChangePage(pageSetIdx)
+		},
+		[onChangePage, pageSets.length, readingDirection, footerControls, pageSets],
+	)
 
 	const previousReadingDirection = usePrevious(readingDirection)
 	/**
-	 * An effect to update the slider value when the reading direction changes. The slider
-	 * doesn't support an inverted mode, so we manually invert the numbers
+	 * An effect to update the slider value when either:
+	 * 1. The reading direction changes
+	 * 2. The controls overlay is opened
 	 */
 	useEffect(() => {
-		if (previousReadingDirection === readingDirection) return
-
-		if (footerControls === 'slider') {
-			const newValue =
-				readingDirection === ReadingDirection.Rtl ? book.pages - currentPage : currentPage
-			setSliderValue(newValue)
+		if (footerControls !== 'slider') return
+		if (visible || previousReadingDirection !== readingDirection) {
+			const currentSetIndex = pageSets.findIndex((set) => set.includes(currentPage - 1))
+			setSliderValue(getSliderValue(currentSetIndex))
 		}
-	}, [currentPage, book.pages, readingDirection, previousReadingDirection, footerControls])
+	}, [
+		visible,
+		currentPage,
+		pageSets.length,
+		readingDirection,
+		previousReadingDirection,
+		footerControls,
+		getSliderValue,
+	])
 
 	// Note: The minimum and maximum track styles are inverted based on the reading direction, as
 	// to give the appearance of either ltr or rtl (minimum track is ltr, maximum track is rtl)
@@ -419,6 +442,9 @@ export default function Footer() {
 
 			const isCurrentPage = item.includes(currentPage - 1)
 
+			const directionRespectingItem =
+				readingDirection === ReadingDirection.Rtl ? [...item].reverse() : item
+
 			return (
 				<Pressable onPress={() => onChangePage(index)}>
 					<View
@@ -428,7 +454,7 @@ export default function Footer() {
 							gap: 1,
 						}}
 					>
-						{item.map((pageIdx, i) => {
+						{directionRespectingItem.map((pageIdx, i) => {
 							return (
 								<TurboImage
 									key={`thumb-${pageIdx + 1}-${i}`}
@@ -521,10 +547,10 @@ export default function Footer() {
 						minimumTrackStyle={minimumTrackStyle}
 						maximumTrackStyle={maximumTrackStyle}
 						thumbStyle={{ width: 24, height: 24, backgroundColor: 'white', borderRadius: 999 }}
-						onValueChange={([page]) => handleSlideValueChange(page)}
+						onValueChange={([value]) => handleSlideValueChange(value)}
 						animationType="timing"
 						renderAboveThumbComponent={renderAboveThumbComponent}
-						onSlidingComplete={([page]) => onSlidingComplete(page)}
+						onSlidingComplete={([value]) => onSlidingComplete(value)}
 						onSlidingStart={() => setIsSliderDragging(true)}
 					/>
 				)}

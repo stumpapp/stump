@@ -121,9 +121,15 @@ export default function Footer() {
 
 	const getItemLayout = useCallback(
 		(_: ArrayLike<number[]> | null | undefined, index: number) => {
-			const totalOffset = pageSets
-				.slice(0, index)
-				.reduce((acc, set) => acc + calcSetContainerSize(set).width, 0)
+			const totalOffset =
+				7.5 +
+				pageSets.slice(0, index).reduce(
+					(acc, set) =>
+						acc +
+						6 + // add gap between pages
+						calcSetContainerSize(set).width,
+					0,
+				)
 
 			return {
 				length: getGalleryItemSize(index).width,
@@ -334,6 +340,9 @@ export default function Footer() {
 										width: pageSet.length === 1 ? '100%' : '50%',
 										height: '100%',
 										borderRadius: 6,
+										// @ts-expect-error bug in library (to be fixed soon). StyleProp<ImageStyle> should be StyleProp<ViewStyle>
+										borderCurve: 'continuous',
+										overflow: 'hidden',
 									}}
 									onSuccess={({ nativeEvent }) => onImageLoaded(pageIdx, nativeEvent)}
 								/>
@@ -415,29 +424,14 @@ export default function Footer() {
 			if (!item || !item.length) return null
 
 			const isCurrentPage = item.includes(currentPage - 1)
-			const isLandscape = item.some((page) => (imageSizes?.[page]?.ratio || 0) >= 1)
-
-			const transform =
-				isLandscape && isCurrentPage
-					? [
-							{
-								// Text size
-								translateY: isTablet ? -20 : -18,
-							},
-						]
-					: []
 
 			return (
 				<Pressable onPress={() => onChangePage(index)}>
 					<View
-						className={cn('flex flex-row', {
-							'pl-1': index === 0,
-							'pr-1': index === book.pages - 1,
-						})}
+						className="flex flex-row"
 						style={{
 							...getGalleryItemSize(index),
 							gap: 1,
-							transform,
 						}}
 					>
 						{item.map((pageIdx, i) => {
@@ -454,6 +448,9 @@ export default function Footer() {
 									style={{
 										width: item.length === 1 ? '100%' : '50%',
 										height: '100%',
+										// @ts-expect-error bug in library (to be fixed soon). StyleProp<ImageStyle> should be StyleProp<ViewStyle>
+										borderCurve: 'continuous',
+										overflow: 'hidden',
 										borderRadius: 6,
 									}}
 									onSuccess={({ nativeEvent }) => onImageLoaded(pageIdx, nativeEvent)}
@@ -487,7 +484,7 @@ export default function Footer() {
 
 	// TODO: swap to flashlist, does NOT like dynamic height though...
 	return (
-		<Animated.View className="absolute z-20 shrink gap-4 px-1" style={animatedStyles}>
+		<Animated.View className="absolute z-20 shrink gap-4" style={animatedStyles}>
 			{footerControls === 'images' && (
 				<FlatList
 					ref={galleryRef}
@@ -495,7 +492,7 @@ export default function Footer() {
 					inverted={readingDirection === ReadingDirection.Rtl}
 					keyExtractor={(item) => `gallery-${item?.join('-')}`}
 					renderItem={renderGalleryItem}
-					contentContainerStyle={{ gap: 6, alignItems: 'flex-end' }}
+					contentContainerStyle={{ gap: 6, alignItems: 'flex-end', paddingHorizontal: 8 }}
 					getItemLayout={getItemLayout}
 					horizontal
 					showsHorizontalScrollIndicator={false}
@@ -505,7 +502,7 @@ export default function Footer() {
 				/>
 			)}
 
-			<View className={cn('gap-2 px-1', { 'pb-1': Platform.OS === 'android' })}>
+			<View className={cn('gap-2 px-3', { 'pb-1': Platform.OS === 'android' })}>
 				{footerControls === 'images' && (
 					<Progress
 						className="h-1 bg-[#898d94]"

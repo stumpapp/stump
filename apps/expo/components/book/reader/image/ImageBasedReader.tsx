@@ -300,6 +300,13 @@ const Page = React.memo(
 				isSingleTapEnabled={true}
 				isDoubleTapEnabled={true}
 				onSingleTap={onSingleTap}
+				onDoubleTap={(zoomType) => {
+					if (zoomType === 'ZOOM_OUT') {
+						setTimeout(() => {
+							zoomableRef.current?.reset()
+						}, 0)
+					}
+				}}
 			>
 				<View
 					className={cn('relative flex-row items-center justify-center', {

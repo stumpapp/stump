@@ -1,9 +1,9 @@
 {
 	"underConstruction": {
-		"heading": "C'est embarrassant",
+		"heading": "Oups, c’est gênant",
 		"message": "Vous êtes tombé sur une page encore en cours de développement. J’aimerais pouvoir vous la montrer, mais elle n’est pas encore prête.",
 		"homeLink": "Aller à l'accueil",
-		"githubLink": "Voir le ticket GitHub"
+		"githubLink": "Voir le problème sur GitHub"
 	},
 	"authScene": {
 		"claimHeading": "Initialisez votre serveur",
@@ -51,7 +51,7 @@
 			}
 		},
 		"emailBook": {
-			"heading": "",
+			"heading": "Partage du livre",
 			"description": "Partager ce livre à un appareil ou une adresse e-mail",
 			"form": {
 				"email": {
@@ -77,7 +77,7 @@
 			},
 			"description": {
 				"label": "Description",
-				"placeholder": "Un club de fans de « Our Flag Means Death ».\nNous lisons de la fiction sur les pirates à cœur joie.",
+				"placeholder": "Un club de fans de Tintin et le Secret de la Licorne.\nNous lisons de la fiction sur les pirates à cœur joie",
 				"description": "Une brève description facultative de votre club de lecture"
 			},
 			"is_private": {
@@ -85,7 +85,7 @@
 				"description": "Si cette option est activée, seuls les utilisateurs que vous invitez pourront rejoindre votre club de lecture"
 			},
 			"member_role_spec": {
-				"heading": "",
+				"heading": "Mappage personnalisé des rôles",
 				"subtitle": [
 					"Vous pouvez créer des noms personnalisés pour les rôles dans votre club de lecture si vous le souhaitez. Pour plus d’informations, consultez la",
 					"documentation"
@@ -176,7 +176,7 @@
 				"label": "Adhésion"
 			},
 			"scheduling": {
-				"scheduler": "Planificateur",
+				"scheduler": "Calendrier",
 				"options": "Options",
 				"label": "Planification"
 			},
@@ -208,7 +208,7 @@
 			}
 		},
 		"scheduling/scheduler": {
-			"title": "Planificateur",
+			"title": "Calendrier",
 			"description": "Créer et gérer le calendrier de lecture de ce club de lecture"
 		},
 		"scheduling/options": {
@@ -279,11 +279,11 @@
 				},
 				"enableSwitch": {
 					"label": "Activé",
-					"description": "Générer les images de couvertures pour cette bibliothèque"
+					"description": "Générer les vignettes pour cette bibliothèque"
 				},
 				"scaled": {
 					"label": "Redimensionné",
-					"description": "Redimensionner l’image selon un facteur personnalisé pour chaque dimension",
+					"description": "Redimensionner l’image selon un facteur personnalisé",
 					"width": {
 						"label": "Largeur"
 					},
@@ -319,7 +319,7 @@
 				"save": "Sauvegarder les changements",
 				"addRule": {
 					"label": "Nouvelle règle",
-					"description": "Règle pour ignorer des fichiers ou des répertoires\n",
+					"description": "Règle pour ignorer des fichiers ou des répertoires",
 					"addButton": "Ajouter une règle",
 					"ignoreParents": {
 						"title": "Ignorer tous les répertoires parents",
@@ -385,13 +385,13 @@
 					"docs": [
 						"Vous ne savez pas quoi choisir ? Cliquez",
 						"ici",
-						"pour plus d'informations.",
+						"Le paramètre qui détermi.ne la façon dont Stump organisera votre bibliothèque",
 						"Vous ne pourrez pas modifier ce paramètre plus tard"
 					],
 					"disabled": "Vous ne pourrez pas modifier ce paramètre"
 				},
 				"options": {
-					"label": "Modéle de bibliothèque",
+					"label": "Modèle de bibliothèque",
 					"description": "Le paramètre qui détermine la façon dont Stump organisera votre bibliothèque",
 					"collectionPriority": {
 						"label": "Priorité de la collection",
@@ -420,7 +420,7 @@
 			"stepLabel": "Étape",
 			"steps": [
 				{
-					"label": "Informations de base",
+					"label": "Informations",
 					"heading": "Informations de base",
 					"description": "Les détails de cette bibliothèque, y compris son nom, son chemin et sa description"
 				},
@@ -499,7 +499,7 @@
 			"options": {
 				"general": "Général",
 				"reading": "Lecture",
-				"scanning": "Analyse",
+				"scanning": "Scan",
 				"thumbnails": "Vignettes",
 				"ignore-rules": "Règles d'exclusion",
 				"analysis": "Analyse",
@@ -583,7 +583,7 @@
 							"timestamp": "Scanné à",
 							"config": "Configuration"
 						},
-						"default": "Défaut",
+						"default": "Par défaut",
 						"custom": "Personnalisé"
 					},
 					"clearHistory": "Supprimer l'historique des scans"
@@ -633,28 +633,28 @@
 					"description": "Empêchez certains utilisateurs d’accéder à cette bibliothèque ou à son contenu",
 					"noUsers": "Aucun autre utilisateur enregistré à exclure de cette bibliothèque",
 					"updated": "Exclusions mises à jour",
-					"failure": "Failed to update exclusions"
+					"failure": "Échec de la mise à jour des exclusions"
 				}
 			}
 		},
 		"danger-zone/delete": {
-			"title": "Deletion Actions",
-			"description": "Permanently delete this library and all of its contents or certain resources",
+			"title": "Actions de suppression",
+			"description": "Supprimer définitivement cette bibliothèque et tout son contenu",
 			"sections": {
 				"cleanLibrary": {
-					"heading": "Clean library",
-					"description": "Remove all media and series that cannot be located on disk",
-					"disclaimer": "While this action will not delete any files, it will permanently delete all records relating to media and series which have a missing status",
+					"heading": "Nettoyer la bibliothèque",
+					"description": "Supprimer tous les médias et séries introuvables sur le disque",
+					"disclaimer": "Bien que cette action ne supprime aucun fichier, elle supprimera définitivement tous les enregistrements liés aux médias et séries ayant le statut « manquant »",
 					"confirmation": {
-						"label": "Clean library",
-						"text": "Are you sure you want to clean this library?"
+						"label": "Nettoyer la bibliothèque",
+						"text": "Êtes-vous sûr de vouloir nettoyer cette bibliothèque ?"
 					}
 				},
 				"deleteLibrary": {
-					"heading": "Delete library",
+					"heading": "Supprimer la bibliothèque",
 					"description": [
-						"Permanently delete this library and all its contents.",
-						"This action cannot be undone"
+						"Supprimer définitivement cette bibliothèque ainsi que tout son contenu.",
+						"Cette action est irréversible"
 					]
 				}
 			}
@@ -671,14 +671,14 @@
 	},
 	"homeScene": {
 		"continueReading": {
-			"title": "Continue reading",
+			"title": "Reprendre la lecture",
 			"emptyState": {
-				"heading": "Nothing to show",
-				"message": "Any in-progress books you start will show up here"
+				"heading": "Rien à afficher",
+				"message": "Les livres que vous commencerez apparaîtront ici"
 			}
 		},
 		"recentlyAddedSeries": {
-			"title": "Recently added series",
+			"title": "Séries ajoutées récemment",
 			"emptyState": {
 				"heading": "Aucune série à afficher",
 				"message": "Toutes les séries que vous ajoutez à vos bibliothèques apparaîtront ici"
@@ -706,7 +706,7 @@
 		"fields": {
 			"name": {
 				"label": "Nom",
-				"placeholder": "Ma liste intelligente",
+				"placeholder": "Ma collection",
 				"description": "Doit être unique, mais peut être modifié plus tard"
 			},
 			"description": {
@@ -795,56 +795,56 @@
 									"extension": "Extension",
 									"created_at": "Créé le",
 									"updated_at": "Mis à jour le",
-									"status": "Status",
-									"path": "Path",
+									"status": "Statut",
+									"path": "Répertoire",
 									"pages": "Pages",
 									"tags": "Tags"
 								}
 							},
 							"book_meta": {
-								"label": "Book Meta",
+								"label": "Métadonnées du livre",
 								"attributes": {
-									"title": "Title",
-									"summary": "Summary",
+									"title": "Titre",
+									"summary": "Résumé",
 									"notes": "Notes",
 									"genre": "Genre",
-									"writers": "Writers",
-									"pencillers": "Pencillers",
-									"inkers": "Inkers",
-									"letterers": "Letterers",
-									"editors": "Editors",
-									"publisher": "Publisher",
-									"colorists": "Colorist",
-									"cover_artists": "Cover artists",
-									"links": "Links",
-									"characters": "Characters",
-									"teams": "Teams"
+									"writers": "Auteurs",
+									"pencillers": "Dessinateurs",
+									"inkers": "Encreurs",
+									"letterers": "Lettreurs",
+									"editors": "Éditeurs",
+									"publisher": "Distributeur",
+									"colorists": "Coloristes",
+									"cover_artists": "Artistes de couverture",
+									"links": "Liens",
+									"characters": "Personnages",
+									"teams": "Équipes"
 								}
 							},
 							"series": {
-								"label": "Series",
+								"label": "Séries",
 								"attributes": {
-									"name": "Name",
-									"path": "Path"
+									"name": "Nom",
+									"path": "Répertoire"
 								}
 							},
 							"series_meta": {
-								"label": "Series Meta",
+								"label": "Métadonnées de la série",
 								"attributes": {
-									"age_rating": "Age rating",
-									"title": "Title",
-									"summary": "Summary",
+									"age_rating": "Classification",
+									"title": "Titre",
+									"summary": "Résumé",
 									"meta_type": "Type",
-									"publisher": "Publisher",
-									"imprint": "Imprint",
+									"publisher": "Distributeur",
+									"imprint": "Collection éditoriale",
 									"comicid": "Comic ID",
-									"booktype": "Book type",
-									"status": "Status",
+									"booktype": "Type de livre",
+									"status": "Statut",
 									"volume": "Volume"
 								}
 							},
 							"library": {
-								"label": "Library",
+								"label": "Bibliothèque",
 								"attributes": {
 									"name": "Nom",
 									"path": "Répertoire"
@@ -858,8 +858,8 @@
 					},
 					"rangeValue": {
 						"from": {
-							"date": "Depuis",
-							"number": "Depuis"
+							"date": "Date de début",
+							"number": "Depuis le"
 						},
 						"to": {
 							"date": "Date de fin",
@@ -1008,7 +1008,7 @@
 		},
 		"danger-zone/delete": {
 			"title": "Actions de suppression",
-			"description": "Supprimer définitivement cette collection dynamique ainsi que tout son contenu ou certaines ressources",
+			"description": "Supprimer définitivement cette collection ainsi que tout son contenu ou certaines ressources",
 			"sections": {
 				"deleteList": {
 					"heading": "Supprimer la collection",
@@ -1425,7 +1425,7 @@
 						"label": "Effacer l’authentification",
 						"description": [
 							"Supprimer tous les jetons d’accès stockés de manière sécurisée pour vos serveurs",
-							"Vous devrez vous réauthentifier auprès de chaque serveur"
+							"Vous devrez vous ré-authentifier auprès de chaque serveur"
 						],
 						"confirmation": {
 							"trigger": "Effacer l’authentification",
@@ -1466,14 +1466,14 @@
 						"description": "Détails à propos de la version",
 						"version": {
 							"semver": "Version",
-							"commitHash": "Commit exact",
+							"commitHash": "Publication",
 							"date": "Date de compilation"
 						}
 					}
 				},
 				"serverPublicUrl": {
-					"label": "Public URL",
-					"description": "The URL that your server is accessible from outside your network, if applicable. This will enable invite links and other features"
+					"label": "URL Publique",
+					"description": "L’URL depuis laquelle votre serveur est accessible en dehors de votre réseau, si applicable. Cela activera les liens d’invitation et d’autres fonctionnalités"
 				}
 			}
 		},
@@ -1495,10 +1495,10 @@
 						"emptySubtitle": "Votre serveur est soit très sain, soit en très mauvais état"
 					},
 					"deleteLogs": {
-						"title": "Delete logs",
-						"description": "Permanently delete all persisted logs from the database",
-						"disclaimer": "This action cannot be undone",
-						"confirm": "Delete logs"
+						"title": "Supprimer les journaux",
+						"description": "Supprimer définitivement tous les journaux conservés de la base de données",
+						"disclaimer": "Cette action est irréversible",
+						"confirm": "Supprimer les journaux"
 					}
 				},
 				"liveLogs": {
@@ -1592,14 +1592,14 @@
 						}
 					},
 					"feature": {
-						"label": "Feature Opt-In",
+						"label": "Activation des fonctionnalités facultatives",
 						"api_keys": {
-							"label": "API keys",
-							"description": "Allow the user to manage their own API keys"
+							"label": "Clés API",
+							"description": "Autoriser l’utilisateur à gérer ses propres clés API"
 						},
 						"koreader_sync": {
-							"label": "KoReader sync",
-							"description": "Allow the user to access the KoReader sync integration"
+							"label": "Synchronisation KOReader",
+							"description": "Autoriser l’utilisateur à accéder à l’intégration de synchronisation KOReader"
 						}
 					},
 					"file": {
@@ -1618,29 +1618,29 @@
 						}
 					},
 					"emailer": {
-						"label": "Emailers",
+						"label": "Expéditeurs",
 						"read": {
-							"label": "Access emailers",
-							"description": "Allows the user to view the configured emailers"
+							"label": "Accéder aux expéditeurs",
+							"description": "Autorise l’utilisateur à afficher les expéditeurs configurés"
 						},
 						"create": {
-							"label": "Create emailers",
-							"description": "Allows the user to create new emailers"
+							"label": "Créer des expéditeurs",
+							"description": "Autorise l'utilisateur à créer de nouveaux expéditeurs"
 						},
 						"manage": {
-							"label": "Manage emailers",
-							"description": "Allows the user to manage existing emailers"
+							"label": "Gérer les expéditeurs",
+							"description": "Autorise l’utilisateur à gérer les expéditeurs existants"
 						}
 					},
 					"email": {
-						"label": "Emailing",
+						"label": "Messagerie",
 						"send": {
-							"label": "Send emails",
-							"description": "Allows the user to send emails from the server to any configured aliases"
+							"label": "Envoyer des e-mails",
+							"description": "Autorise l’utilisateur à envoyer des e-mails depuis le serveur vers n’importe quel alias configuré"
 						},
 						"arbitrary_send": {
-							"label": "Send arbitrary emails",
-							"description": "Allows the user to send emails from the server to any email address"
+							"label": "Envoyer des e-mails personnalisés",
+							"description": "Autorise l’utilisateur à envoyer des e-mails depuis le serveur vers n’importe quelle adresse e-mail"
 						}
 					},
 					"library": {
@@ -1694,32 +1694,32 @@
 				},
 				"validation": {
 					"ageRestrictionTooLow": "La restriction d'âge ne peut pas être inférieure à 0",
-					"missingUsername": "Username is required",
-					"missingPassword": "Password is required",
-					"usernameAlreadyExists": "Username already exists"
+					"missingUsername": "Le nom d’utilisateur est requis",
+					"missingPassword": "Le mot de passe est requis",
+					"usernameAlreadyExists": "Le nom d'utilisateur existe déjà"
 				},
 				"createSubmitButton": "Créer un utilisateur",
 				"updateSubmitButton": "Modifier l'utilisateur"
 			}
 		},
 		"server/email": {
-			"helmet": "Email settings",
-			"title": "Email",
-			"description": "Settings related to the configuring an SMTP emailer for your Stump server instance",
+			"helmet": "Paramètres de messagerie",
+			"title": "Messagerie",
+			"description": "Paramètres relatifs à la configuration d’un expéditeur SMTP pour votre serveur Stump",
 			"sections": {
 				"emailers": {
-					"title": "SMTP emailers",
-					"description": "The clients you have configured for sending emails from your Stump server instance",
-					"singleInstanceDisclaimer": "While Stump supports multiple SMTP configurations in the backend, only one can be configured on the UI. This will be improved in the future",
+					"title": "Expéditeurs SMTP",
+					"description": "Les clients que vous avez configurés pour l’envoi d’e-mails depuis votre serveur Stump",
+					"singleInstanceDisclaimer": "Bien que Stump prenne en charge plusieurs configurations SMTP en arrière-plan, une seule peut être configurée via l’interface utilisateur. Cela sera amélioré à l’avenir",
 					"list": {
-						"emptyHeading": "No SMTP emailers configured",
-						"primaryEmailer": "Primary emailer",
+						"emptyHeading": "Aucun expéditeur configuré",
+						"primaryEmailer": "Expéditeur principal",
 						"sendHistory": {
-							"heading": "Send history",
-							"description": "A record of emails sent from this emailer",
+							"heading": "Historique des envois",
+							"description": "Un enregistrement des e-mails envoyés depuis cet expéditeur",
 							"table": {
 								"columns": {
-									"to": "To",
+									"to": "À",
 									"subject": "Sujet",
 									"status": "Statut",
 									"createdAt": "Envoyer à"
@@ -1733,15 +1733,15 @@
 				"devices": {
 					"title": "Appareils de messagerie",
 					"description": "Les alias d’appareils que vous avez configurés pour recevoir des e-mails depuis votre instance de serveur Stump",
-					"addDevice": "Ajouter un alias d’appareil",
+					"addDevice": "Ajouter un alias",
 					"addOrUpdateDevice": {
 						"title": {
-							"create": "Créer un alias d'appareil",
-							"update": "Mettre à jour un alias pour un appareil"
+							"create": "Créer un alias",
+							"update": "Mettre à jour un alias"
 						},
 						"name": {
 							"label": "Nom",
-							"description": "Un nom convivial pour identifier l'alias de cet appareil"
+							"description": "Un nom convivial pour identifier l'alias"
 						},
 						"email": {
 							"label": "E-mail",
@@ -1901,7 +1901,7 @@
 		"versionInformation": {
 			"heading": "Informations de version",
 			"semVer": "Version sémantique",
-			"commitHash": "Hachage de validation",
+			"commitHash": "Empreinte de publication",
 			"buildDate": "Date de construction"
 		}
 	},

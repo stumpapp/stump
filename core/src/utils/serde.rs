@@ -1,8 +1,6 @@
 use regex::Regex;
 use serde::{Deserialize, Deserializer};
 
-// TODO(sea-orm): Move all of these
-
 pub fn string_list_deserializer<'de, D>(
 	deserializer: D,
 ) -> Result<Option<Vec<String>>, D::Error>

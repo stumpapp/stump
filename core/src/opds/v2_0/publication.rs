@@ -107,7 +107,6 @@ impl OPDSPublication {
 			let title = metadata.title.clone().unwrap_or(book.media.name);
 			let description = metadata.summary.clone();
 
-			// TODO(sea-orm): skip ID in metadata...
 			// Unset the title and summary so they don't get serialized twice
 			let media_metadata = media_metadata::Model {
 				title: None,
@@ -267,160 +266,275 @@ impl OPDSPublication {
 	}
 }
 
-// TODO(sea-orm): Fix tests
-// #[cfg(test)]
-// mod tests {
-// 	use prisma_client_rust::chrono::Utc;
+#[cfg(test)]
+mod tests {
+	use std::collections::BTreeMap;
 
-// 	use crate::{
-// 		filesystem::media::tests::get_test_epub_path,
-// 		opds::v2_0::{
-// 			metadata::OPDSEntryBelongsToEntityBuilder,
-// 			utils::{book_positions_in_series_raw_query, EntityPosition},
-// 		},
-// 	};
+	use chrono::Utc;
+	use models::{
+		entity::{media, media_metadata, page_analysis},
+		shared::{
+			enums::FileStatus,
+			page_dimension::{PageAnalysis, PageDimension},
+		},
+	};
+	use sea_orm::{DatabaseBackend::Sqlite, IntoMockRow, MockDatabase, Value};
 
-// 	use super::*;
+	use crate::{
+		filesystem::media::tests::get_test_epub_path,
+		opds::v2_0::{entity::OPDSSeries, metadata::OPDSEntryBelongsToEntityBuilder},
+	};
 
-// 	fn mock_book() -> books_as_publications::Data {
-// 		books_as_publications::Data {
-// 			id: "1".to_string(),
-// 			name: "Book 1".to_string(),
-// 			metadata: None,
-// 			series: Some(books_as_publications::series::Data {
-// 				id: "1".to_string(),
-// 				name: "Series 1".to_string(),
-// 				metadata: None,
-// 			}),
-// 			created_at: Utc::now().into(),
-// 			updated_at: Utc::now().into(),
-// 			deleted_at: None,
-// 			extension: String::from("epub"),
-// 			path: get_test_epub_path(),
-// 			status: FileStatus::Ready.to_string(),
-// 			hash: Some(String::from("hash")),
-// 			koreader_hash: None,
-// 			series_id: Some("1".to_string()),
-// 			pages: 0,
-// 			modified_at: None,
-// 			size: 2000,
-// 		}
-// 	}
+	use super::*;
 
-// 	#[test]
-// 	fn test_publication_serialization() {
-// 		let publication = OPDSPublication {
-// 			context: OPDSPublication::default_context(),
-// 			metadata: OPDSMetadataBuilder::default()
-// 				.title("Book".to_string())
-// 				.modified("2021-08-01T00:00:00Z".to_string())
-// 				.description(Some("A cool book".to_string()))
-// 				.belongs_to(OPDSEntryBelongsTo::Series(
-// 					OPDSEntryBelongsToEntityBuilder::default()
-// 						.name("Test Series".to_string())
-// 						.position(Some(1))
-// 						.build()
-// 						.expect("Failed to build belongs_to"),
-// 				))
-// 				.dynamic_metadata(OPDSDynamicMetadata(serde_json::json!({
-// 					"test": "value"
-// 				})))
-// 				.build()
-// 				.expect("Failed to build metadata"),
-// 			..Default::default()
-// 		};
+	fn mock_book() -> OPDSPublicationEntity {
+		OPDSPublicationEntity {
+			media: media::Model {
+				id: "1".to_string(),
+				name: "Book 1".to_string(),
+				created_at: Utc::now().into(),
+				updated_at: Some(Utc::now().into()),
+				deleted_at: None,
+				extension: "epub".to_string(),
+				path: get_test_epub_path(),
+				status: FileStatus::Ready,
+				hash: Some("hash".to_string()),
+				koreader_hash: None,
+				series_id: Some("1".to_string()),
+				pages: 3,
+				modified_at: None,
+				size: 2000,
+			},
+			metadata: Some(media_metadata::Model {
+				media_id: Some("1".to_string()),
+				title: Some("Book 1 Title".to_string()),
+				summary: Some("A cool book".to_string()),
+				..Default::default()
+			}),
+			series: OPDSSeries {
+				id: "1".to_string(),
+				name: "Series 1".to_string(),
+				metadata: None,
+			},
+			reading_session: None,
+		}
+	}
 
-// 		let json = serde_json::to_string(&publication).unwrap();
-// 		assert_eq!(
-// 			json,
-// 			r#"{"context":"https://readium.org/webpub-manifest/context.jsonld","metadata":{"title":"Book","modified":"2021-08-01T00:00:00Z","description":"A cool book","belongsTo":{"series":{"name":"Test Series","position":1}},"test":"value"}}"#
-// 		);
-// 	}
+	#[test]
+	fn test_publication_serialization() {
+		let publication = OPDSPublication {
+			context: OPDSPublication::default_context(),
+			metadata: OPDSMetadataBuilder::default()
+				.title("Book".to_string())
+				.modified("2021-08-01T00:00:00Z".to_string())
+				.description(Some("A cool book".to_string()))
+				.belongs_to(OPDSEntryBelongsTo::Series(
+					OPDSEntryBelongsToEntityBuilder::default()
+						.name("Test Series".to_string())
+						.position(Some(1))
+						.build()
+						.expect("Failed to build belongs_to"),
+				))
+				.dynamic_metadata(OPDSDynamicMetadata(serde_json::json!({
+					"test": "value"
+				})))
+				.build()
+				.expect("Failed to build metadata"),
+			..Default::default()
+		};
 
-// 	#[tokio::test]
-// 	async fn test_vec_from_books() {
-// 		let books = vec![
-// 			mock_book(),
-// 			books_as_publications::Data {
-// 				id: "2".to_string(),
-// 				name: "Book 2".to_string(),
-// 				..mock_book()
-// 			},
-// 		];
+		let json = serde_json::to_string(&publication).unwrap();
+		assert_eq!(
+			json,
+			r#"{"context":"https://readium.org/webpub-manifest/context.jsonld","metadata":{"title":"Book","modified":"2021-08-01T00:00:00Z","description":"A cool book","belongsTo":{"series":{"name":"Test Series","position":1}},"test":"value"}}"#
+		);
+	}
 
-// 		let (client, mock) = PrismaClient::_mock();
+	#[tokio::test]
+	async fn test_vec_from_books() {
+		let books = vec![
+			mock_book(),
+			OPDSPublicationEntity {
+				media: media::Model {
+					id: "2".to_string(),
+					name: "Book 2".to_string(),
+					..mock_book().media
+				},
+				..mock_book()
+			},
+		];
 
-// 		mock.expect(
-// 			client._query_raw(book_positions_in_series_raw_query(
-// 				&["1".to_string(), "2".to_string()],
-// 				"1".to_string(),
-// 			)),
-// 			vec![
-// 				EntityPosition {
-// 					id: "1".to_string(),
-// 					position: 1,
-// 				},
-// 				EntityPosition {
-// 					id: "2".to_string(),
-// 					position: 2,
-// 				},
-// 			],
-// 		)
-// 		.await;
+		let position_results = vec![
+			BTreeMap::from([
+				("id".to_string(), Value::from("1")),
+				("position".to_string(), Value::from(1i64)),
+			])
+			.into_mock_row(),
+			BTreeMap::from([
+				("id".to_string(), Value::from("2")),
+				("position".to_string(), Value::from(2i64)),
+			])
+			.into_mock_row(),
+		];
 
-// 		let publications = OPDSPublication::vec_from_books(
-// 			&client,
-// 			OPDSLinkFinalizer::new("https://my-stump-instance.cloud".to_string()),
-// 			books,
-// 		)
-// 		.await
-// 		.expect("Failed to generate publications");
+		let db = MockDatabase::new(Sqlite)
+			.append_query_results([position_results])
+			.into_connection();
 
-// 		assert_eq!(publications.len(), 2);
-// 		assert!(publications[0].reading_order.is_none());
-// 	}
+		let finalizer =
+			OPDSLinkFinalizer::new("https://my-stump-instance.cloud".to_string());
+		let publications = OPDSPublication::vec_from_books(&db, finalizer, books)
+			.await
+			.expect("Failed to generate publications");
 
-// 	#[tokio::test]
-// 	async fn test_from_book() {
-// 		let book = mock_book();
+		assert_eq!(publications.len(), 2);
+		// vec_from_books doesn't create reading_order, only from_book does
+		assert!(publications[0].reading_order.is_none());
+		assert!(publications[0].links.is_some());
+		assert!(publications[0].images.is_some());
 
-// 		let (client, mock) = PrismaClient::_mock();
+		// Verify serialization works and contains expected fields
+		let json = serde_json::to_value(&publications[0]).unwrap();
+		assert!(json["metadata"]["title"].as_str().is_some());
+		assert!(json["metadata"]["belongsTo"]["series"]["name"]
+			.as_str()
+			.is_some());
+		assert!(json["links"].is_array());
+		assert!(json["images"].is_array());
+	}
 
-// 		mock.expect(
-// 			client._query_raw(book_positions_in_series_raw_query(
-// 				&["1".to_string()],
-// 				"1".to_string(),
-// 			)),
-// 			vec![EntityPosition {
-// 				id: "1".to_string(),
-// 				position: 1,
-// 			}],
-// 		)
-// 		.await;
+	#[tokio::test]
+	async fn test_from_book() {
+		let book = mock_book();
 
-// 		mock.expect(
-// 			client
-// 				.page_dimensions()
-// 				// When metadata is not set, the metadata ID is an empty string. This will never load, but for
-// 				// the sake of the test it should be acceptable
-// 				.find_first(vec![page_dimensions::metadata_id::equals(String::new())]),
-// 			Some(page_dimensions::Data {
-// 				id: "1".to_string(),
-// 				metadata_id: "1".to_string(),
-// 				dimensions: "1920,1080;800,600;1920,1080".to_string(),
-// 				metadata: None,
-// 			}),
-// 		)
-// 		.await;
+		let position_results = vec![BTreeMap::from([
+			("id".to_string(), Value::from("1")),
+			("position".to_string(), Value::from(1i64)),
+		])
+		.into_mock_row()];
 
-// 		let publication = OPDSPublication::from_book(
-// 			&client,
-// 			OPDSLinkFinalizer::new("https://my-stump-instance.cloud".to_string()),
-// 			book,
-// 		)
-// 		.await
-// 		.expect("Failed to generate publication");
+		// Mock the page analysis query result
+		let page_analysis_results = vec![page_analysis::Model {
+			id: 1,
+			media_id: "1".to_string(),
+			data: PageAnalysis {
+				dimensions: vec![
+					PageDimension {
+						width: 1920,
+						height: 1080,
+					},
+					PageDimension {
+						width: 800,
+						height: 600,
+					},
+					PageDimension {
+						width: 1920,
+						height: 1080,
+					},
+				],
+			},
+		}];
 
-// 		assert!(publication.reading_order.is_some());
-// 	}
-// }
+		let db = MockDatabase::new(Sqlite)
+			.append_query_results([position_results])
+			.append_query_results([page_analysis_results])
+			.into_connection();
+
+		let finalizer =
+			OPDSLinkFinalizer::new("https://my-stump-instance.cloud".to_string());
+		let publication = OPDSPublication::from_book(&db, finalizer, book)
+			.await
+			.expect("Failed to generate publication");
+
+		assert!(publication.reading_order.is_some());
+		let reading_order = publication.reading_order.as_ref().unwrap();
+		assert_eq!(reading_order.len(), 3);
+
+		let json = serde_json::to_value(&publication).unwrap();
+
+		assert!(json["metadata"]["title"].as_str().is_some());
+		assert!(json["metadata"]["identifier"].as_str().is_some());
+		assert!(json["metadata"]["belongsTo"]["series"].is_object());
+
+		assert!(publication.links.is_some());
+		let links = publication.links.as_ref().unwrap();
+		assert!(links.len() >= 2); // At least self and acquisition links
+
+		assert!(json["readingOrder"].is_array());
+		let reading_order_json = json["readingOrder"].as_array().unwrap();
+		assert_eq!(reading_order_json.len(), 3);
+
+		for page in reading_order_json {
+			assert!(page["height"].as_u64().is_some());
+			assert!(page["width"].as_u64().is_some());
+			assert!(page["href"].as_str().is_some());
+		}
+
+		assert!(publication.resources.is_some());
+		assert!(publication.toc.is_some());
+		assert!(publication.landmarks.is_some());
+		assert!(publication.page_list.is_some());
+	}
+
+	#[test]
+	fn test_links_for_book() {
+		let book = mock_book();
+		let finalizer = OPDSLinkFinalizer::new("https://example.com".to_string());
+
+		let links = OPDSPublication::links_for_book(&book, &finalizer)
+			.expect("Failed to generate links");
+
+		assert_eq!(links.len(), 3);
+
+		// Verify we have self, acquisition, and progression links
+		let has_self = links.iter().any(|l| {
+			if let OPDSLink::Link(link) = l {
+				link.rel
+					.as_ref()
+					.map(|rel| rel.contains(&OPDSLinkRel::SelfLink))
+					.unwrap_or(false)
+			} else {
+				false
+			}
+		});
+		assert!(has_self);
+
+		let has_acquisition = links.iter().any(|l| {
+			if let OPDSLink::Link(link) = l {
+				link.rel
+					.as_ref()
+					.map(|rel| rel.contains(&OPDSLinkRel::Acquisition))
+					.unwrap_or(false)
+			} else {
+				false
+			}
+		});
+		assert!(has_acquisition);
+	}
+
+	#[tokio::test]
+	async fn test_images_for_book() {
+		let book = mock_book();
+		let finalizer = OPDSLinkFinalizer::new("https://example.com".to_string());
+
+		let images = OPDSPublication::images_for_book(&book, &finalizer)
+			.await
+			.expect("Failed to generate images");
+
+		assert_eq!(images.len(), 1);
+
+		let json = serde_json::to_value(&images[0]).unwrap();
+		assert!(json["href"]
+			.as_str()
+			.unwrap()
+			.contains("/opds/v2.0/books/1/thumbnail"));
+	}
+
+	#[test]
+	fn test_default_context() {
+		assert_eq!(
+			OPDSPublication::default_context(),
+			"https://readium.org/webpub-manifest/context.jsonld"
+		);
+	}
+}

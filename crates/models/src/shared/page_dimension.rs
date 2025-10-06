@@ -8,8 +8,6 @@
 //! and [`dimension_vec_from_str`] methods can be used for serializing and deserializing this
 //! structure
 
-// TODO(sea-orm): rename page_analysis and add content_types
-
 use async_graphql::SimpleObject;
 use sea_orm::FromJsonQueryResult;
 use serde::{Deserialize, Serialize};

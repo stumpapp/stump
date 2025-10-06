@@ -150,8 +150,6 @@ impl JobExt for LibraryScanJob {
 			.ok_or(JobError::InitFailed(
 				"Library is missing configuration".to_string(),
 			))?;
-		// TODO(sea-orm): Fix
-		// library_config.apply(self.options);
 		let is_collection_based = config.is_collection_based();
 		let ignore_rules = config.ignore_rules().build()?;
 

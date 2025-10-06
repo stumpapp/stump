@@ -24,7 +24,6 @@ pub enum JobError {
 	Unknown(String),
 }
 
-// TODO(sea-orm): do something else
 impl From<EntityError> for JobError {
 	fn from(err: EntityError) -> Self {
 		Self::Unknown(err.to_string())

@@ -5,7 +5,6 @@ import IgnoreRulesPatchForm from './IgnoreRulesPatchForm'
 import ScannerActionsSection from './ScannerActionsSection'
 import ScannerFeaturesPatchForm from './ScannerFeaturesPatchForm'
 
-// TODO(sea-orm): Re-add all the settings
 export default function GeneralFileOptionsScene() {
 	const { scan } = useLibraryManagement()
 

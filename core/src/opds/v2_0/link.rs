@@ -18,7 +18,7 @@ use super::{
 /// This struct was derived from multiple sources within the OPDS 2.0 spec, including:
 /// - https://drafts.opds.io/opds-2.0#21-navigation
 /// - https://drafts.opds.io/opds-2.0#4-pagination
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "lowercase")]
 pub enum OPDSLinkRel {
 	#[serde(rename = "self")]
@@ -46,6 +46,15 @@ impl OPDSLinkRel {
 
 	pub fn array(rels: Vec<OPDSLinkRel>) -> ArrayOrItem<OPDSLinkRel> {
 		ArrayOrItem::Array(rels)
+	}
+}
+
+impl ArrayOrItem<OPDSLinkRel> {
+	pub fn contains(&self, rel: &OPDSLinkRel) -> bool {
+		match self {
+			ArrayOrItem::Item(item) => item == rel,
+			ArrayOrItem::Array(arr) => arr.contains(rel),
+		}
 	}
 }
 
@@ -330,6 +339,8 @@ impl From<series::Model> for OPDSNavigationLink {
 
 #[cfg(test)]
 mod tests {
+	use models::shared::enums::FileStatus;
+
 	use crate::opds::v2_0::properties::{OPDSDynamicProperties, OPDSPropertiesBuilder};
 
 	use super::*;
@@ -439,38 +450,29 @@ mod tests {
 		);
 	}
 
-	// TODO(sea-orm): Fix test
-	// #[test]
-	// fn test_navigation_link_from_library_data() {
-	// 	let library = library::Data {
-	// 		id: "123".to_string(),
-	// 		name: "A library".to_string(),
-	// 		created_at: chrono::Utc::now().into(),
-	// 		updated_at: chrono::Utc::now().into(),
-	// 		description: None,
-	// 		emoji: None,
-	// 		hidden_from_users: None,
-	// 		job_schedule_config: None,
-	// 		job_schedule_config_id: None,
-	// 		last_scanned_at: None,
-	// 		scan_history: None,
-	// 		config: None,
-	// 		config_id: String::default(),
-	// 		path: String::default(),
-	// 		series: None,
-	// 		status: String::from("READY"),
-	// 		tags: None,
-	// 		user_visits: None,
-	// 	};
+	#[test]
+	fn test_navigation_link_from_library_data() {
+		let library = library::Model {
+			id: "123".to_string(),
+			name: "A library".to_string(),
+			created_at: chrono::Utc::now().into(),
+			updated_at: Some(chrono::Utc::now().into()),
+			description: None,
+			emoji: None,
+			last_scanned_at: None,
+			config_id: 1,
+			path: String::default(),
+			status: FileStatus::Ready,
+		};
 
-	// 	let link: OPDSNavigationLink = library.into();
+		let link: OPDSNavigationLink = library.into();
 
-	// 	let json = serde_json::to_string(&link).unwrap();
-	// 	assert_eq!(
-	// 		json,
-	// 		r#"{"title":"A library","rel":"subsection","href":"/opds/v2.0/libraries/123","type":"application/opds+json"}"#,
-	// 	);
-	// }
+		let json = serde_json::to_string(&link).unwrap();
+		assert_eq!(
+			json,
+			r#"{"title":"A library","rel":"subsection","href":"/opds/v2.0/libraries/123","type":"application/opds+json"}"#,
+		);
+	}
 
 	#[test]
 	fn test_finalizer_format_link() {

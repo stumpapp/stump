@@ -5,8 +5,6 @@ use crate::shared::readium::ReadiumLocator;
 
 use super::user::AuthUser;
 
-// TODO(sea-orm): Consider i32 for ID
-
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
 #[sea_orm(table_name = "bookmarks")]
 #[graphql(name = "BookmarkModel")]
@@ -58,6 +56,18 @@ impl Related<super::user::Entity> for Entity {
 	}
 }
 
+impl Entity {
+	pub fn find_for_user(user: &AuthUser) -> Select<Entity> {
+		Entity::find().filter(Column::UserId.eq(&user.id))
+	}
+
+	pub fn find_for_user_and_media_id(user: &AuthUser, media_id: &str) -> Select<Entity> {
+		Entity::find()
+			.filter(Column::UserId.eq(&user.id))
+			.filter(Column::MediaId.eq(media_id))
+	}
+}
+
 #[async_trait]
 impl ActiveModelBehavior for ActiveModel {
 	async fn before_save<C>(mut self, _db: &C, insert: bool) -> Result<Self, DbErr>
@@ -69,17 +79,5 @@ impl ActiveModelBehavior for ActiveModel {
 		}
 
 		Ok(self)
-	}
-}
-
-impl Entity {
-	pub fn find_for_user(user: &AuthUser) -> Select<Entity> {
-		Entity::find().filter(Column::UserId.eq(&user.id))
-	}
-
-	pub fn find_for_user_and_media_id(user: &AuthUser, media_id: &str) -> Select<Entity> {
-		Entity::find()
-			.filter(Column::UserId.eq(&user.id))
-			.filter(Column::MediaId.eq(media_id))
 	}
 }

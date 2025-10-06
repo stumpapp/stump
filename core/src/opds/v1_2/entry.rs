@@ -294,6 +294,8 @@ impl IntoOPDSEntry for OPDSEntryBuilder<OPDSPublicationEntity> {
 mod tests {
 	use std::str::FromStr;
 
+	use models::shared::enums::FileStatus;
+
 	use super::*;
 	use crate::opds::v1_2::tests::normalize_xml;
 
@@ -337,7 +339,7 @@ mod tests {
 		let result = String::from_utf8(writer.into_inner()).unwrap();
 		let expected_result = normalize_xml(
 			r#"
-			<?xml version="1.0" encoding="utf-8"?>
+			<?xml version="1.0" encoding="UTF-8"?>
 			<entry>
 				<title>Modern Online Philately</title>
 				<id>urn:uuid:6409a00b-7bf2-405e-826c-3fdff0fd0734</id>
@@ -366,41 +368,32 @@ mod tests {
 		assert_eq!(result, expected_result);
 	}
 
-	// TODO(sea-orm): Fix tests
-	// fn library() -> library::Data {
-	// 	library::Data {
-	// 		id: "123".to_string(),
-	// 		name: "Library".to_string(),
-	// 		created_at: chrono::Utc::now().into(),
-	// 		updated_at: chrono::Utc::now().into(),
-	// 		description: None,
-	// 		emoji: None,
-	// 		hidden_from_users: None,
-	// 		job_schedule_config: None,
-	// 		job_schedule_config_id: None,
-	// 		last_scanned_at: None,
-	// 		scan_history: None,
-	// 		config: None,
-	// 		config_id: String::default(),
-	// 		path: String::default(),
-	// 		series: None,
-	// 		status: String::from("READY"),
-	// 		tags: None,
-	// 		user_visits: None,
-	// 	}
-	// }
+	fn library() -> library::Model {
+		library::Model {
+			id: "123".to_string(),
+			name: "A library".to_string(),
+			created_at: chrono::Utc::now().into(),
+			updated_at: Some(chrono::Utc::now().into()),
+			description: None,
+			emoji: None,
+			last_scanned_at: None,
+			config_id: 1,
+			path: String::default(),
+			status: FileStatus::Ready,
+		}
+	}
 
-	// #[test]
-	// fn test_builder_url_format_with_api_key() {
-	// 	let builder = OPDSEntryBuilder::new(library(), Some("api_key".to_string()));
-	// 	let entry = builder.into_opds_entry();
-	// 	assert_eq!(entry.links[0].href, "/opds/api_key/v1.2/libraries/123");
-	// }
+	#[test]
+	fn test_builder_url_format_with_api_key() {
+		let builder = OPDSEntryBuilder::new(library(), Some("api_key".to_string()));
+		let entry = builder.into_opds_entry();
+		assert_eq!(entry.links[0].href, "/opds/api_key/v1.2/libraries/123");
+	}
 
-	// #[test]
-	// fn test_builder_url_format_without_api_key() {
-	// 	let builder = OPDSEntryBuilder::new(library(), None);
-	// 	let entry = builder.into_opds_entry();
-	// 	assert_eq!(entry.links[0].href, "/opds/v1.2/libraries/123");
-	// }
+	#[test]
+	fn test_builder_url_format_without_api_key() {
+		let builder = OPDSEntryBuilder::new(library(), None);
+		let entry = builder.into_opds_entry();
+		assert_eq!(entry.links[0].href, "/opds/v1.2/libraries/123");
+	}
 }

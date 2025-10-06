@@ -101,20 +101,6 @@ impl JobExecuteLog {
 			..self
 		}
 	}
-
-	// TODO(sea-orm): Port
-	// /// Constructs a Prisma create payload for the error
-	// pub fn into_prisma(self, job_id: String) -> (String, Vec<log::SetParam>) {
-	// 	(
-	// 		self.msg,
-	// 		vec![
-	// 			log::context::set(self.context),
-	// 			log::level::set(self.level.to_string()),
-	// 			log::timestamp::set(self.timestamp.into()),
-	// 			log::job::connect(job::id::equals(job_id.clone())),
-	// 		],
-	// 	)
-	// }
 }
 
 /// The working state of a job. This is frequently updated during execution, and is used to track

@@ -1,4 +1,4 @@
-import { Zoomable } from '@likashefqet/react-native-image-zoom'
+import { Zoomable, ZoomableRef } from '@likashefqet/react-native-image-zoom'
 import { useSDK } from '@stump/client'
 import { ReadingDirection, ReadingMode } from '@stump/graphql'
 import { STUMP_SAVE_BASIC_SESSION_HEADER } from '@stump/sdk/constants'
@@ -118,14 +118,9 @@ export default function ImageBasedReader({ initialPage, onPastEndReached }: Prop
 
 		const targetContentOffset = event.nativeEvent.targetContentOffset || contentOffset
 
-		const isPastEnd =
-			(readingDirection === ReadingDirection.Ltr &&
-				contentOffset.x + layoutMeasurement.width > contentSize.width) ||
-			(readingDirection === ReadingDirection.Rtl && contentOffset.x < 0)
-		const isTargetPastEnd =
-			(readingDirection === ReadingDirection.Ltr &&
-				targetContentOffset.x + layoutMeasurement.width > contentSize.width) ||
-			(readingDirection === ReadingDirection.Rtl && targetContentOffset.x < 0)
+		// inverted prop on FlatList accounts for RTL already
+		const isPastEnd = contentOffset.x + layoutMeasurement.width > contentSize.width
+		const isTargetPastEnd = targetContentOffset.x + layoutMeasurement.width > contentSize.width
 
 		if (isPastEnd && isTargetPastEnd) {
 			didCallEndReached.current = true
@@ -149,6 +144,7 @@ export default function ImageBasedReader({ initialPage, onPastEndReached }: Prop
 					maxWidth={width}
 					maxHeight={height}
 					readingDirection="horizontal"
+					onPastEndReached={onPastEndReached}
 				/>
 			)}
 			keyExtractor={(item) => item.toString()}
@@ -204,6 +200,7 @@ type PageProps = {
 	maxWidth: number
 	maxHeight: number
 	readingDirection: 'vertical' | 'horizontal'
+	onPastEndReached?: () => void
 }
 
 const Page = React.memo(
@@ -214,6 +211,7 @@ const Page = React.memo(
 		sizes,
 		maxWidth,
 		maxHeight,
+		onPastEndReached,
 		// readingDirection,
 	}: PageProps) => {
 		const { book, pageURL, flatListRef, pageSets, setImageSizes } = useImageBasedReader()
@@ -229,6 +227,8 @@ const Page = React.memo(
 
 		const tapThresholdRatio = isTablet ? 4 : 5
 
+		const zoomableRef = useRef<ZoomableRef>(null)
+
 		const onCheckForNavigationTaps = useCallback(
 			(x: number) => {
 				const isLeft = x < maxWidth / tapThresholdRatio
@@ -242,6 +242,8 @@ const Page = React.memo(
 				if (nextIndex >= 0 && nextIndex < pageSets.length) {
 					flatListRef.current?.scrollToIndex({ index: nextIndex, animated: true })
 				}
+
+				if (nextIndex === pageSets.length) onPastEndReached?.()
 
 				return isLeft || isRight
 			},
@@ -258,7 +260,9 @@ const Page = React.memo(
 				}
 
 				const didNavigate = onCheckForNavigationTaps(event.x)
-				if (!didNavigate) {
+				if (didNavigate) {
+					zoomableRef.current?.reset()
+				} else {
 					setShowControls(!showControls)
 				}
 			},
@@ -288,8 +292,12 @@ const Page = React.memo(
 		const [imageRatio, setImageRatio] = useState<number | undefined>(undefined)
 		const roughPageRenderWidth = indexes.length > 1 ? maxWidth / 2 : maxWidth
 
+		const directionRespectingIndexes =
+			readingDirection === ReadingDirection.Rtl ? [...indexes].reverse() : indexes
+
 		return (
 			<Zoomable
+				ref={zoomableRef}
 				minScale={1}
 				maxScale={5}
 				scale={scale}
@@ -297,6 +305,13 @@ const Page = React.memo(
 				isSingleTapEnabled={true}
 				isDoubleTapEnabled={true}
 				onSingleTap={onSingleTap}
+				onDoubleTap={(zoomType) => {
+					if (zoomType === 'ZOOM_OUT') {
+						setTimeout(() => {
+							zoomableRef.current?.reset()
+						}, 0)
+					}
+				}}
 			>
 				<View
 					className={cn('relative flex-row items-center justify-center', {
@@ -304,7 +319,7 @@ const Page = React.memo(
 					})}
 					style={{ height: maxHeight, width: maxWidth }}
 				>
-					{indexes.map((pageIdx, i) => {
+					{directionRespectingIndexes.map((pageIdx, i) => {
 						return (
 							<TurboImage
 								key={`${pageIdx}-${i}`}

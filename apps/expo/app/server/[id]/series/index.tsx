@@ -7,7 +7,6 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { useStore } from 'zustand'
 
 import { useActiveServer } from '~/components/activeServer'
-import { ColumnItem } from '~/components/grid'
 import { useGridItemSize } from '~/components/grid/useGridItemSize'
 import ListEmpty from '~/components/ListEmpty'
 import RefreshControl from '~/components/RefreshControl'
@@ -59,22 +58,13 @@ export default function Screen() {
 		['series', serverID, filters, sort],
 		{ filters, orderBy: [sort], pagination: { offset: { page: 1 } } },
 	)
-	const { numColumns } = useGridItemSize()
+	const { numColumns, paddingHorizontal } = useGridItemSize()
 
 	const onEndReached = useCallback(() => {
 		if (hasNextPage) {
 			fetchNextPage()
 		}
 	}, [hasNextPage, fetchNextPage])
-
-	const renderItem = useCallback(
-		({ item, index }: { item: ISeriesGridItemFragment; index: number }) => (
-			<ColumnItem index={index} numColumns={numColumns}>
-				<SeriesGridItem series={item} />
-			</ColumnItem>
-		),
-		[numColumns],
-	)
 
 	const isFiltered = Object.keys(filters).length > 0
 
@@ -87,16 +77,17 @@ export default function Screen() {
 				<FlashList
 					ref={listRef}
 					data={data?.pages.flatMap((page) => page.series.nodes) || []}
-					renderItem={renderItem}
+					renderItem={({ item }) => <SeriesGridItem series={item} />}
 					contentContainerStyle={{
-						padding: 16,
+						paddingVertical: 16,
+						paddingHorizontal: paddingHorizontal,
 					}}
 					numColumns={numColumns}
 					onEndReachedThreshold={ON_END_REACHED_THRESHOLD}
 					onEndReached={onEndReached}
 					contentInsetAdjustmentBehavior="always"
 					ListHeaderComponent={<SeriesFilterHeader />}
-					ListHeaderComponentStyle={{ paddingBottom: 16 }}
+					ListHeaderComponentStyle={{ paddingBottom: 16, marginHorizontal: -paddingHorizontal }}
 					refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
 					ListEmptyComponent={
 						<ListEmpty

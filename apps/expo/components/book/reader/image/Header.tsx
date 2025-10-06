@@ -61,9 +61,9 @@ export default function Header({ onShowGlobalSettings }: Props) {
 	const insets = useSafeAreaInsets()
 	const visible = useReaderStore((state) => state.showControls)
 
-	const translateY = useSharedValue(-150)
+	const translateY = useSharedValue(-200)
 	useEffect(() => {
-		translateY.value = withTiming(visible ? 0 : -150, {
+		translateY.value = withTiming(visible ? 0 : -200, {
 			duration: 250,
 			easing: visible ? Easing.out(Easing.quad) : Easing.in(Easing.quad),
 		})

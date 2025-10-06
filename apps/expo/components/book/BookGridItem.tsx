@@ -2,6 +2,7 @@ import { FragmentType, graphql, useFragment } from '@stump/graphql'
 
 import { useActiveServer } from '../activeServer'
 import GridImageItem from '../grid/GridImageItem'
+import { View } from 'react-native'
 
 const fragment = graphql(`
 	fragment BookGridItem on Media {
@@ -27,10 +28,12 @@ export default function BookGridItem({ book }: Props) {
 	const data = useFragment(fragment, book)
 
 	return (
-		<GridImageItem
-			uri={data.thumbnail.url}
-			title={data.resolvedName}
-			href={`/server/${serverID}/books/${data.id}`}
-		/>
+		<View className="w-full items-center">
+			<GridImageItem
+				uri={data.thumbnail.url}
+				title={data.resolvedName}
+				href={`/server/${serverID}/books/${data.id}`}
+			/>
+		</View>
 	)
 }

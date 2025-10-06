@@ -25,6 +25,7 @@ export default function BookFilterHeader(context: Props) {
 	return (
 		<BookFilterHeaderContext.Provider value={context}>
 			<FilterHeader>
+				<View className="w-[16]" />
 				<Sort />
 
 				<View className="w-2" />
@@ -44,6 +45,7 @@ export default function BookFilterHeader(context: Props) {
 
 				<View className="w-2" />
 				<ClearFilters onPress={clear} />
+				<View className="w-[16]" />
 			</FilterHeader>
 		</BookFilterHeaderContext.Provider>
 	)

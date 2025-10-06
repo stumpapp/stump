@@ -10,7 +10,6 @@ import { useActiveServer } from '~/components/activeServer'
 import { BookGridItem } from '~/components/book'
 import { IBookGridItemFragment } from '~/components/book/BookGridItem'
 import { BookFilterHeader } from '~/components/book/filterHeader'
-import { ColumnItem } from '~/components/grid'
 import { useGridItemSize } from '~/components/grid/useGridItemSize'
 import RefreshControl from '~/components/RefreshControl'
 import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
@@ -58,22 +57,13 @@ export default function Screen() {
 		['books', serverID, filters, sort],
 		{ filters, orderBy: [sort], pagination: { offset: { page: 1 } } },
 	)
-	const { numColumns } = useGridItemSize()
+	const { numColumns, paddingHorizontal } = useGridItemSize()
 
 	const onEndReached = useCallback(() => {
 		if (hasNextPage) {
 			fetchNextPage()
 		}
 	}, [hasNextPage, fetchNextPage])
-
-	const renderItem = useCallback(
-		({ item, index }: { item: IBookGridItemFragment; index: number }) => (
-			<ColumnItem index={index} numColumns={numColumns}>
-				<BookGridItem book={item} />
-			</ColumnItem>
-		),
-		[numColumns],
-	)
 
 	return (
 		<BookFilterContext.Provider value={store}>
@@ -83,9 +73,10 @@ export default function Screen() {
 			>
 				<FlashList
 					data={data?.pages.flatMap((page) => page.media.nodes) || []}
-					renderItem={renderItem}
+					renderItem={({ item }) => <BookGridItem book={item} />}
 					contentContainerStyle={{
-						padding: 16,
+						paddingVertical: 16,
+						paddingHorizontal: paddingHorizontal,
 					}}
 					numColumns={numColumns}
 					onEndReachedThreshold={ON_END_REACHED_THRESHOLD}
@@ -96,7 +87,7 @@ export default function Screen() {
 							<BookFilterHeader />
 						</Suspense>
 					)}
-					ListHeaderComponentStyle={{ paddingBottom: 16 }}
+					ListHeaderComponentStyle={{ paddingBottom: 16, marginHorizontal: -paddingHorizontal }}
 					refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
 				/>
 			</SafeAreaView>

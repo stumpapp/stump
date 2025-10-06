@@ -2,6 +2,7 @@ import { FragmentType, graphql, useFragment } from '@stump/graphql'
 
 import { useActiveServer } from '../activeServer'
 import GridImageItem from '../grid/GridImageItem'
+import { View } from 'react-native'
 
 const fragment = graphql(`
 	fragment SeriesGridItem on Series {
@@ -26,10 +27,12 @@ export default function SeriesGridItem({ series }: Props) {
 	const data = useFragment(fragment, series)
 
 	return (
-		<GridImageItem
-			uri={data.thumbnail.url}
-			title={data.resolvedName}
-			href={`/server/${serverID}/series/${data.id}`}
-		/>
+		<View className="w-full items-center">
+			<GridImageItem
+				uri={data.thumbnail.url}
+				title={data.resolvedName}
+				href={`/server/${serverID}/series/${data.id}`}
+			/>
+		</View>
 	)
 }

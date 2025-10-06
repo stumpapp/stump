@@ -6,7 +6,6 @@ import { useCallback } from 'react'
 import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
 
 import { useActiveServer } from '../activeServer'
-import { ColumnItem } from '../grid'
 import { useGridItemSize } from '../grid/useGridItemSize'
 import SeriesGridItem, { ISeriesGridItemFragment } from './SeriesGridItem'
 
@@ -45,7 +44,7 @@ export default function RecentlyAddedSeries({ header }: Props) {
 		['recentlyAddedSeries', serverID],
 		{ pagination: { offset: { page: 1, pageSize: 20 } } },
 	)
-	const { numColumns } = useGridItemSize()
+	const { numColumns, paddingHorizontal } = useGridItemSize()
 
 	const onEndReached = useCallback(() => {
 		if (hasNextPage) {
@@ -53,29 +52,23 @@ export default function RecentlyAddedSeries({ header }: Props) {
 		}
 	}, [hasNextPage, fetchNextPage])
 
-	const renderItem = useCallback(
-		({ item, index }: { item: ISeriesGridItemFragment; index: number }) => (
-			<ColumnItem index={index} numColumns={numColumns}>
-				<SeriesGridItem series={item} />
-			</ColumnItem>
-		),
-		[numColumns],
-	)
-
 	return (
 		<FlashList
 			key={`recently-added-series-list-${data?.pages[0].series.nodes.length ? 'at-least-one-item' : 'empty'}`} // Force re-render when switching between empty and non-empty states
 			data={data?.pages.flatMap((page) => page.series.nodes) || []}
-			renderItem={renderItem}
+			renderItem={({ item }) => <SeriesGridItem series={item} />}
 			contentContainerStyle={{
-				padding: 16,
+				paddingHorizontal: paddingHorizontal,
+				paddingTop: 16,
 			}}
 			numColumns={numColumns}
 			onEndReachedThreshold={ON_END_REACHED_THRESHOLD}
 			onEndReached={onEndReached}
 			contentInsetAdjustmentBehavior="always"
 			ListHeaderComponent={header}
-			ListHeaderComponentStyle={header ? { paddingBottom: 16, marginHorizontal: -16 } : undefined}
+			ListHeaderComponentStyle={
+				header ? { paddingBottom: 16, marginHorizontal: -paddingHorizontal } : undefined
+			}
 		/>
 	)
 }

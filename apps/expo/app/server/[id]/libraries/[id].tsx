@@ -6,7 +6,6 @@ import { useCallback } from 'react'
 import { Platform } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
-import { ColumnItem } from '~/components/grid'
 import { useGridItemSize } from '~/components/grid/useGridItemSize'
 import RefreshControl from '~/components/RefreshControl'
 import SeriesGridItem, { ISeriesGridItemFragment } from '~/components/series/SeriesGridItem'
@@ -63,22 +62,13 @@ export default function Screen() {
 			},
 		},
 	)
-	const { numColumns } = useGridItemSize()
+	const { numColumns, paddingHorizontal } = useGridItemSize()
 
 	const onEndReached = useCallback(() => {
 		if (hasNextPage) {
 			fetchNextPage()
 		}
 	}, [hasNextPage, fetchNextPage])
-
-	const renderItem = useCallback(
-		({ item, index }: { item: ISeriesGridItemFragment; index: number }) => (
-			<ColumnItem index={index} numColumns={numColumns}>
-				<SeriesGridItem series={item} />
-			</ColumnItem>
-		),
-		[numColumns],
-	)
 
 	return (
 		<SafeAreaView
@@ -87,11 +77,11 @@ export default function Screen() {
 		>
 			<FlashList
 				data={data?.pages.flatMap((page) => page.series.nodes) || []}
-				renderItem={renderItem}
+				renderItem={({ item }) => <SeriesGridItem series={item} />}
 				contentContainerStyle={{
-					padding: 16,
+					paddingHorizontal: paddingHorizontal,
+					paddingVertical: 16,
 				}}
-				centerContent
 				numColumns={numColumns}
 				onEndReachedThreshold={ON_END_REACHED_THRESHOLD}
 				onEndReached={onEndReached}

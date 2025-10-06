@@ -2,7 +2,7 @@ import { queryClient, SDKContext, StumpClientContextProvider } from '@stump/clie
 import { UserPermission } from '@stump/graphql'
 import { Api, AuthUser, LoginResponse } from '@stump/sdk'
 import { isAxiosError } from 'axios'
-import { Redirect, Stack, useLocalSearchParams, useRouter } from 'expo-router'
+import { Redirect, Stack, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { match, P } from 'ts-pattern'
 
@@ -10,6 +10,7 @@ import { ActiveServerContext, StumpServerContext } from '~/components/activeServ
 import { PermissionEnforcerOptions } from '~/components/activeServer/context'
 import ServerAuthDialog from '~/components/ServerAuthDialog'
 import ServerConnectFailed from '~/components/ServerConnectFailed'
+import ServerErrorBoundary from '~/components/ServerErrorBoundary'
 import { FullScreenLoader } from '~/components/ui'
 import { authSDKInstance } from '~/lib/sdk/auth'
 import { usePreferencesStore, useSavedServers } from '~/stores'
@@ -44,6 +45,7 @@ export default function Screen() {
 
 	useEffect(() => {
 		if (!activeServer) return
+		if (isAutoAuthenticating || !isServerAccessible.current) return
 
 		const configureSDK = async () => {
 			setIsInitiallyConnecting(false)
@@ -111,6 +113,7 @@ export default function Screen() {
 		getServerConfig,
 		saveServerToken,
 		cacheStore,
+		isAutoAuthenticating,
 	])
 
 	useEffect(
@@ -135,14 +138,32 @@ export default function Screen() {
 		[sdk, user],
 	)
 
-	useEffect(() => {
-		return () => {
-			if (!isServerAccessible.current) {
-				queryClient.removeQueries({ predicate: ({ queryKey }) => queryKey.includes(serverID) })
+	const onResetState = useCallback(() => {
+		isServerAccessible.current = true
+		setIsInitiallyConnecting(true)
+		setSDK(null)
+		setUser(null)
+		setIsAuthDialogOpen(false)
+		setIsAutoAuthenticating(false)
+	}, [])
+
+	/**
+	 * At a glace this is a little hard to parse, but what we're doing here is setting up an
+	 * effect to run each time this screen is focused which, on cleanup, resets the state if
+	 * the server was not accessible. This ensures that we actually retry the connection
+	 * when the user comes back, since expo-router doesn't seem to unmount/remount the layout
+	 */
+	useFocusEffect(
+		useCallback(() => {
+			return () => {
+				if (!isServerAccessible.current) {
+					queryClient.removeQueries({ predicate: ({ queryKey }) => queryKey.includes(serverID) })
+					onResetState()
+				}
+				isServerAccessible.current = true
 			}
-			isServerAccessible.current = true
-		}
-	}, [serverID])
+		}, [serverID, onResetState]),
+	)
 
 	const handleAuthDialogClose = useCallback(
 		(loginResp?: LoginResponse) => {
@@ -212,7 +233,7 @@ export default function Screen() {
 	}
 
 	if (!isServerAccessible.current) {
-		return <ServerConnectFailed />
+		return <ServerConnectFailed onRetry={onResetState} />
 	}
 
 	if (isInitiallyConnecting) {
@@ -263,4 +284,8 @@ export default function Screen() {
 const isNetworkError = (error: unknown) => {
 	const axiosError = isAxiosError(error) ? error : null
 	return axiosError?.code === 'ERR_NETWORK'
+}
+
+export function ErrorBoundary({ error, retry }: { error: Error; retry: () => Promise<void> }) {
+	return <ServerErrorBoundary error={error} onRetry={() => retry()} />
 }

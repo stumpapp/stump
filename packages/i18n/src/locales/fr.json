@@ -1,7 +1,7 @@
 {
 	"underConstruction": {
 		"heading": "C'est embarrassant",
-		"message": "Vous êtes tombé sur une page qui est encore en cours de développement. J'aimerais vous la montrer, mais elle n'est pas encore tout à fait prête.",
+		"message": "Vous êtes tombé sur une page encore en cours de développement. J’aimerais pouvoir vous la montrer, mais elle n’est pas encore prête.",
 		"homeLink": "Aller à l'accueil",
 		"githubLink": "Voir le ticket GitHub"
 	},
@@ -160,7 +160,7 @@
 				"no": "Non",
 				"none": "Aucun",
 				"labels": {
-					"name": "Name",
+					"name": "Nom",
 					"description": "Description"
 				}
 			},
@@ -169,63 +169,63 @@
 	},
 	"bookClubSettingsScene": {
 		"sidebar": {
-			"basics": "Basics",
+			"basics": "Informations de base",
 			"members": {
-				"members": "Members",
-				"roles": "Roles",
-				"label": "Membership"
+				"members": "Membres",
+				"roles": "Rôles",
+				"label": "Adhésion"
 			},
 			"scheduling": {
-				"scheduler": "Scheduler",
+				"scheduler": "Planificateur",
 				"options": "Options",
-				"label": "Scheduling"
+				"label": "Planification"
 			},
 			"danger-zone": {
-				"delete": "Deletion",
-				"label": "Danger Zone"
+				"delete": "Suppression",
+				"label": "Zone de danger"
 			}
 		},
 		"basics": {
-			"title": "Basic Information",
-			"description": "The details of this book club, including its name and description",
+			"title": "Informations de base",
+			"description": "Les détails de ce club de lecture, y compris son nom et sa description",
 			"form": {
-				"submit": "Update club"
+				"submit": "Mettre à jour le club"
 			}
 		},
 		"members": {
-			"title": "Members",
-			"description": "Manage the members of this book club",
+			"title": "Membres",
+			"description": "Gérer les membres du club",
 			"sections": {}
 		},
 		"roles": {
-			"title": "Roles",
-			"description": "Customize the roles in this book club",
+			"title": "Rôles",
+			"description": "Personnaliser les rôles de ce club de lecture",
 			"sections": {
 				"roleMappings": {
-					"heading": "Existing role mappings",
-					"description": "The current role mappings for this book club"
+					"heading": "Mappage de rôles existants",
+					"description": "Les mappages de rôles actuels pour ce club de lecture"
 				}
 			}
 		},
 		"scheduling/scheduler": {
-			"title": "Scheduler",
-			"description": "Create and manage the schedule readings for this book club"
+			"title": "Planificateur",
+			"description": "Créer et gérer le calendrier de lecture de ce club de lecture"
 		},
 		"scheduling/options": {
 			"title": "Options",
-			"description": "Additional options for this book club's scheduling"
+			"description": "Options supplémentaires pour le calendrier"
 		},
 		"danger-zone/delete": {
-			"title": "Deletion Actions",
-			"description": "Permanently delete this book club and all of its contents or certain resources",
+			"title": "Actions de suppression",
+			"description": "Supprimer définitivement ce club de lecture ainsi que tout son contenu",
 			"sections": {
 				"deleteClub": {
-					"heading": "Delete club",
+					"heading": "Supprimer le club",
 					"description": [
-						"Permanently delete this book club and all its contents.",
-						"This action cannot be undone"
+						"Supprimer définitivement ce club de lecture ainsi que tout son contenu.",
+						"Cette action est irréversible"
 					],
-					"trigger": "Delete club"
+					"trigger": "Supprimer le club"
 				}
 			}
 		}
@@ -233,31 +233,31 @@
 	"createOrUpdateLibraryForm": {
 		"fields": {
 			"name": {
-				"label": "Name",
-				"description": "A friendly name for your library",
-				"placeholder": "My Library"
+				"label": "Nom",
+				"description": "Un nom convivial pour votre bibliothèque",
+				"placeholder": "Ma bibliothèque"
 			},
 			"path": {
-				"label": "Path",
-				"description": "The path to the library as it exists on your server",
-				"placeholder": "/path/to/library"
+				"label": "Répertoire",
+				"description": "Le répertoire de votre bibliothèque sur votre serveur",
+				"placeholder": "/chemin/vers/votre/répertoire"
 			},
 			"description": {
 				"label": "Description",
-				"description": "A short description of your library",
-				"placeholder": "A library of all my favorite books"
+				"description": "Une brève description de votre bibliothèque",
+				"placeholder": "Une bibliothèque avec tous mes livres préférés"
 			},
 			"tags": {
 				"label": "Tags",
-				"description": "Used to categorize your library or enforce access rules"
+				"description": "Utilisé pour catégoriser votre bibliothèque et améliorer le contrôle d'accès"
 			},
 			"readingSettings": {
 				"section": {
-					"heading": "Reading settings",
-					"description": "Default reader settings to use for books"
+					"heading": "Paramètres de lecture",
+					"description": "Paramètres de lecture par défaut"
 				},
 				"imageScaling": {
-					"label": "Image scaling",
+					"label": "Redimensionnement de l'image",
 					"description": "How the image-based reader scales images to the page"
 				},
 				"readingMode": {
@@ -1733,102 +1733,102 @@
 				"devices": {
 					"title": "Appareils de messagerie",
 					"description": "Les alias d’appareils que vous avez configurés pour recevoir des e-mails depuis votre instance de serveur Stump",
-					"addDevice": "Add device alias",
+					"addDevice": "Ajouter un alias d’appareil",
 					"addOrUpdateDevice": {
 						"title": {
-							"create": "Create device alias",
-							"update": "Update device alias"
+							"create": "Créer un alias d'appareil",
+							"update": "Mettre à jour un alias pour un appareil"
 						},
 						"name": {
-							"label": "Name",
-							"description": "A friendly name to uniquely identify this device alias"
+							"label": "Nom",
+							"description": "Un nom convivial pour identifier l'alias de cet appareil"
 						},
 						"email": {
-							"label": "Email",
-							"description": "The email address this alias will be associated with"
+							"label": "E-mail",
+							"description": "L’adresse e-mail à laquelle cet alias sera associé"
 						},
 						"forbidden": {
-							"label": "Forbidden",
-							"description": "When enabled, no user may send emails to the address associated with this alias"
+							"label": "Interdit",
+							"description": "Si activé, aucun utilisateur ne pourra envoyer d’e-mails à l’adresse associée à cet alias"
 						},
 						"submit": {
-							"create": "Create device alias",
-							"update": "Update device alias"
+							"create": "Créer un alias",
+							"update": "Mettre à jour un alias"
 						}
 					},
 					"table": {
-						"emptyHeading": "No devices registered",
-						"emptySubtitle": "Create a new device alias for future use"
+						"emptyHeading": "Aucun appareil enregistré",
+						"emptySubtitle": "Créer un nouvel alias pour une utilisation future"
 					}
 				}
 			},
 			"createOrUpdateForm": {
 				"name": {
-					"label": "Name",
-					"description": "A friendly name to uniquely identify this emailer"
+					"label": "Nom",
+					"description": "Un nom convivial pour identifier l'expéditeur"
 				},
 				"smtpSettings": {
-					"heading": "SMTP settings",
-					"description": "The SMTP-specific settings for this emailer"
+					"heading": "Réglages SMTP",
+					"description": "Les paramètres SMTP pour cet expéditeur d’e-mails"
 				},
 				"smtpProvider": {
-					"label": "SMTP provider preset",
-					"description": "The provider of the SMTP server. This is used to prefill some common settings, but doesn't capture all providers"
+					"label": "Préréglage du fournisseur SMTP",
+					"description": "Le fournisseur du serveur SMTP. Cela permet de préremplir certains paramètres courants, mais ne couvre pas tous les fournisseurs"
 				},
 				"smtpHost": {
-					"label": "SMTP host",
-					"description": "The hostname of the SMTP server"
+					"label": "Hôte SMTP",
+					"description": "Le nom d’hôte du serveur SMTP"
 				},
 				"smtpPort": {
-					"label": "SMTP port",
-					"description": "The port of the SMTP server"
+					"label": "Port SMTP",
+					"description": "Le port du serveur SMTP"
 				},
 				"tlsEnabled": {
-					"label": "TLS enabled",
-					"description": "If enabled, the connection to the SMTP server will be encrypted"
+					"label": "TLS activé",
+					"description": "Si activé, la connexion au serveur SMTP sera chiffrée"
 				},
 				"username": {
-					"label": "Username",
-					"description": "The username for authenticating with the SMTP server. This is typically the email address"
+					"label": "Nom d'utilisateur",
+					"description": "Le nom d’utilisateur pour s’authentifier auprès du serveur SMTP. Il s’agit généralement de l’adresse e-mail"
 				},
 				"password": {
-					"label": "Password",
-					"description": "The password for authenticating with the SMTP server. If you're using Gmail, you may need to generate an app-specific password"
+					"label": "Mot de passe",
+					"description": "Le mot de passe pour s’authentifier auprès du serveur SMTP. Si vous utilisez Gmail, il peut être nécessaire de générer un mot de passe spécifique à l’application"
 				},
 				"senderSettings": {
-					"heading": "Sender settings",
-					"description": "The settings for the sender of the email"
+					"heading": "Paramètres de l’expéditeur",
+					"description": "Les paramètres de l’expéditeur de l’e-mail"
 				},
 				"senderDisplayName": {
-					"label": "Sender display name",
-					"description": "The name that will be displayed to recipients"
+					"label": "Nom d'affichage de l'expéditeur",
+					"description": "Le nom qui sera affiché aux destinataires"
 				},
 				"senderEmail": {
-					"label": "Sender email address",
-					"description": "The email address that will be displayed to recipients"
+					"label": "Adresse e-mail de l'expéditeur",
+					"description": "L'adresse e-mail qui sera affiché aux destinataires"
 				},
 				"additionalSettings": {
-					"heading": "Additional settings",
-					"description": "Additional settings for the emailer"
+					"heading": "Paramètres supplémentaires",
+					"description": "Paramètres supplémentaires pour l'expéditeur"
 				},
 				"maxAttachmentSize": {
-					"label": "Max attachment size",
-					"description": "The maximum size, in bytes, that an attachment can be"
+					"label": "Taille maximale des pièces jointes",
+					"description": "La taille maximale, en octets, qu’une pièce jointe peut avoir"
 				},
 				"submit": {
-					"create": "Create emailer",
-					"update": "Update emailer"
+					"create": "Créer l'expéditeur",
+					"update": "Mettre à jour l'expéditeur"
 				}
 			},
 			"createEmailer": {
-				"helmet": "Create emailer",
-				"title": "Create emailer",
-				"description": "Create a new SMTP emailer for your Stump server instance"
+				"helmet": "Créer l'expéditeur",
+				"title": "Créer l'expéditeur",
+				"description": "Créer un nouvel expéditeur SMTP pour votre instance de serveur Stump"
 			},
 			"updateEmailer": {
-				"helmet": "Update emailer",
-				"title": "Update emailer",
-				"description": "Update the details of this SMTP emailer"
+				"helmet": "Créer un expéditeur",
+				"title": "Créer un expéditeur",
+				"description": "Mettre à jour les informations de l'expéditeur SMTP"
 			}
 		}
 	},
@@ -1841,15 +1841,15 @@
 		"diskUsage": "Utilisation du disque"
 	},
 	"noLibraries": {
-		"heading": "Nothing to see here",
-		"messagePrefix": "You can't see what you don't have",
+		"heading": "Rien à afficher ici",
+		"messagePrefix": "On ne peut pas voir ce que l’on n’a pas",
 		"message": {
-			"create": "Create a library to get started",
-			"wait": "Once libraries are created, they'll be displayed here"
+			"create": "Créez une bibliothèque pour commencer",
+			"wait": "Une fois les bibliothèques créées, elles s’afficheront ici"
 		},
 		"links": {
-			"create": "Create library",
-			"settings": "Go to settings"
+			"create": "Créer une bibliothèque",
+			"settings": "Aller aux paramètres"
 		}
 	},
 	"pagination": {
@@ -1894,7 +1894,7 @@
 		},
 		"libraryOptions": {
 			"scanLibrary": "Scanner",
-			"fileExplorer": "Files",
+			"fileExplorer": "Fichiers",
 			"manageLibrary": "Gérer",
 			"deleteLibrary": "Supprimer"
 		},
@@ -1935,7 +1935,7 @@
 		}
 	},
 	"tagSelect": {
-		"placeholder": "Select or create tag",
+		"placeholder": "Sélectionner ou créer un tag",
 		"placeholderNoTags": "Aucune étiquette disponible"
 	},
 	"thumbnailDropdown": {
@@ -1951,29 +1951,29 @@
 		}
 	},
 	"common": {
-		"add": "Add",
+		"add": "Ajouter",
 		"cancel": "Annuler",
 		"confirm": "Confirmer",
 		"save": "Sauvegarder",
-		"send": "Send",
+		"send": "Envoyer",
 		"saveChanges": "Enregistrer les modifications",
-		"noChanges": "No changes",
+		"noChanges": "Aucun changement",
 		"create": "Créer",
 		"edit": "Éditer",
-		"update": "Update",
-		"upload": "Upload",
-		"uploading": "Uploading",
+		"update": "Mise à jour",
+		"upload": "Importer",
+		"uploading": "Importation",
 		"unimplemented": "Cette fonctionnalité n'est pas encore implémentée ! Revenez plus tard",
 		"limitedFunctionality": "Ceci n'est pas encore totalement implémenté et manque de certaines fonctionnalités. Revenez plus tard",
-		"logIn": "Log in",
-		"login": "Login",
-		"seeError": "See error",
-		"remove": "Remove",
-		"goBack": "Go back",
-		"goToServers": "Go to servers",
-		"notReady": "This feature is not ready",
-		"notUsedYet": "Not used yet",
-		"never": "Never",
+		"logIn": "Connexion",
+		"login": "Connexion",
+		"seeError": "Voir l'erreur",
+		"remove": "Supprimer",
+		"goBack": "Revenir",
+		"goToServers": "Aller aux serveurs",
+		"notReady": "Cette fonctionnalité n'est pas prête",
+		"notUsedYet": "Pas encore utilisé",
+		"never": "Jamais",
 		"scan": "Scan"
 	}
 }

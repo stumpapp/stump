@@ -261,18 +261,18 @@
 					"description": "How the image-based reader scales images to the page"
 				},
 				"readingMode": {
-					"label": "Default reader",
-					"description": "The default reader to use for image-based books"
+					"label": "Lecteur par défaut",
+					"description": "Le lecteur par défaut a utilisé pour les livres composés d'images"
 				},
 				"readingDirection": {
-					"label": "Reading direction",
-					"description": "Which direction the reader progresses through pages"
+					"label": "Sens de lecture",
+					"description": "La direction dans laquelle le lecteur progresse à travers les pages"
 				}
 			},
 			"thumbnailConfig": {
 				"section": {
 					"heading": {
-						"create": "Thumbnail configuration",
+						"create": "Configuration des vignettes",
 						"update": "Génération"
 					},
 					"description": "Améliorez les temps de chargement lors de la navigation dans votre bibliothèque en générant des vignettes pour vos livres"

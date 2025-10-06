@@ -3,7 +3,6 @@ pub mod http;
 mod serde;
 mod signal;
 mod time;
-mod upload;
 
 pub(crate) use auth::*;
 pub(crate) use serde::*;

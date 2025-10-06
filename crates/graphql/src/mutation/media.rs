@@ -35,8 +35,8 @@ use crate::{
 
 #[derive(Debug, Union)]
 pub enum ReadingProgressOutput {
-	Active(ActiveReadingSession),
-	Finished(FinishedReadingSession),
+	Active(Box<ActiveReadingSession>),
+	Finished(Box<FinishedReadingSession>),
 }
 
 #[derive(Default)]
@@ -392,7 +392,9 @@ impl MediaMutation {
 			.await?;
 
 		if !is_complete {
-			Ok(ReadingProgressOutput::Active(active_session.into()))
+			Ok(ReadingProgressOutput::Active(Box::new(
+				active_session.into(),
+			)))
 		} else {
 			let finished_reading_session = finished_reading_session::ActiveModel {
 				user_id: Set(user.id.clone()),
@@ -414,9 +416,9 @@ impl MediaMutation {
 			.await?;
 			txn.commit().await?;
 
-			Ok(ReadingProgressOutput::Finished(
+			Ok(ReadingProgressOutput::Finished(Box::new(
 				finished_reading_session.into(),
-			))
+			)))
 		}
 	}
 

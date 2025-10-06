@@ -43,11 +43,7 @@ struct UploadSeriesInput {
 	upload: Upload,
 }
 
-// TODO: consider thumbnail upload for this mutation object, e.g. `upload_media_thumbnail`
-
-// TODO: Might need to consider making these restful if we cannot hook into progress callbacks on the client
-
-// TODO(graphql): Enforce upload limits, e.g. max file size
+// TODO(graphql): Enforce upload limits, e.g. max file size at router
 
 #[Object]
 impl UploadMutation {

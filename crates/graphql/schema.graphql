@@ -217,7 +217,6 @@ input BookmarkInput {
 	previewContent: String
 }
 
-
 type CleanLibraryResponse {
 	deletedMediaCount: Int!
 	deletedSeriesCount: Int!
@@ -600,8 +599,6 @@ type FinishedReadingSessionModel {
 	elapsedSeconds: Int
 }
 
-
-
 "Options for processing images throughout Stump."
 type ImageProcessorOptions {
 	"The size factor to use when generating an image. See [`ImageResizeOptions`]"
@@ -667,7 +664,6 @@ type InheritPermissionStruct {
 enum InheritPermissionValue {
 	INHERIT
 }
-
 
 """
 The different types of layouts a client-side interface might present to a user
@@ -1793,7 +1789,7 @@ type ReadiumLocator {
 }
 
 input ReadiumLocatorInput {
-	chapterTitle: String!
+	chapterTitle: String! = ""
 	href: String!
 	title: String
 	locations: ReadiumLocationInput
@@ -2188,7 +2184,6 @@ type SpineItem {
 	linear: Boolean!
 }
 
-
 """
 Represents the configuration of a Stump application. This struct is generated at startup
 using a TOML file, environment variables, or both and is input when creating a `StumpCore`
@@ -2554,9 +2549,13 @@ type UserPreferences {
 	navigationArrangement: Arrangement!
 }
 
+"Directs the executor to include this field or fragment only when the `if` argument is true."
 directive @include(if: Boolean!) on FIELD | FRAGMENT_SPREAD | INLINE_FRAGMENT
+"Indicates that an Input Object is a OneOf Input Object (and thus requires exactly one of its field be provided)"
 directive @oneOf on INPUT_OBJECT
+"Directs the executor to skip this field or fragment when the `if` argument is true."
 directive @skip(if: Boolean!) on FIELD | FRAGMENT_SPREAD | INLINE_FRAGMENT
+"Provides a scalar specification URL for specifying the behavior of custom scalar types."
 directive @specifiedBy(url: String!) on SCALAR
 schema {
 	query: Query

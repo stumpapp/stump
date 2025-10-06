@@ -6,7 +6,7 @@ use axum::{
 	http::{header, StatusCode},
 	middleware::Next,
 	response::{IntoResponse, Redirect, Response},
-	Extension, Json,
+	Json,
 };
 use base64::{engine::general_purpose::STANDARD, Engine};
 use graphql::data::AuthContext;
@@ -212,21 +212,6 @@ pub async fn api_key_middleware(
 		api_key: Some(api_key),
 	});
 
-	Ok(next.run(req).await)
-}
-
-/// Middleware to check if a user is the server owner. If the user is not the server owner, the
-/// middleware will reject the request.
-#[tracing::instrument(skip(req, next))]
-pub async fn server_owner_middleware(
-	Extension(ctx): Extension<AuthContext>,
-	req: Request,
-	next: Next,
-) -> Result<Response, Response> {
-	ctx.enforce_server_owner().map_err(|e| {
-		tracing::error!(error = ?e, "User is not the server owner");
-		APIError::forbidden_discreet().into_response()
-	})?;
 	Ok(next.run(req).await)
 }
 

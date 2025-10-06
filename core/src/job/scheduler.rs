@@ -4,11 +4,10 @@ use crate::{filesystem::scanner::LibraryScanJob, job::WrappedJob, CoreResult, Ct
 use models::entity::{
 	library, library_config, scheduled_job_config, scheduled_job_library,
 };
-use sea_orm::{prelude::*, Iterable, QuerySelect};
+use sea_orm::prelude::*;
 
 // TODO(scheduler): Support multiple scheduled job configs
 // TODO(scheduler): Last run timestamp, so on boot we don't immediately trigger the scheduled tasks
-
 // TODO(graphql): Be sure to add note in release notes about the inverted logic of the scheduler, where
 // libraries are opt-in rather than opt-out. This is a "breaking" change for the scheduler config
 
@@ -60,12 +59,7 @@ impl JobScheduler {
 
 					tracing::info!("Scanning libraries on schedule");
 
-					// TODO(sea-orm): Confirm this is OK without a partial model
 					let libraries_to_scan = library::Entity::find()
-						.select_only()
-						.column(library::Column::Id)
-						.column(library::Column::Path)
-						.columns(library_config::Column::iter())
 						.filter(library::Column::Id.is_in(included_library_ids.clone()))
 						.find_also_related(library_config::Entity)
 						.all(conn.as_ref())

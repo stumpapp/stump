@@ -168,82 +168,105 @@ impl MediaBuilder {
 	}
 }
 
-// TODO(sea-orm): Fix
-// #[cfg(test)]
-// mod tests {
-// 	use super::*;
-// 	use crate::filesystem::media::tests::{
-// 		get_test_cbz_path, get_test_epub_path, get_test_pdf_path, get_test_rar_path,
-// 		get_test_zip_path,
-// 	};
+#[cfg(test)]
+mod tests {
+	use models::shared::enums::{
+		LibraryPattern, ReadingDirection, ReadingImageScaleFit, ReadingMode,
+	};
+	use sea_orm::ActiveValue;
 
-// 	#[test]
-// 	fn test_build_media_zip() {
-// 		// Test with zip
-// 		let media = build_media_test_helper(get_test_zip_path());
-// 		assert!(media.is_ok());
-// 		let media = media.unwrap();
-// 		assert_eq!(media.extension, "zip");
-// 	}
+	use super::*;
+	use crate::filesystem::media::tests::{
+		get_test_cbz_path, get_test_epub_path, get_test_pdf_path, get_test_rar_path,
+		get_test_zip_path,
+	};
 
-// 	#[test]
-// 	fn test_build_media_cbz() {
-// 		let media = build_media_test_helper(get_test_cbz_path());
-// 		assert!(media.is_ok());
-// 		let media = media.unwrap();
-// 		assert_eq!(media.extension, "cbz");
-// 	}
+	#[test]
+	fn test_build_media_zip() {
+		// Test with zip
+		let media = build_media_test_helper(get_test_zip_path());
+		assert!(media.is_ok());
+		let media = media.unwrap().media;
+		assert_eq!(media.extension, ActiveValue::Set("zip".to_string()));
+	}
 
-// 	#[test]
-// 	fn test_build_media_rar() {
-// 		let media = build_media_test_helper(get_test_rar_path());
-// 		assert!(media.is_ok());
-// 		let media = media.unwrap();
-// 		assert_eq!(media.extension, "rar");
-// 	}
+	#[test]
+	fn test_build_media_cbz() {
+		let media = build_media_test_helper(get_test_cbz_path());
+		assert!(media.is_ok());
+		let media = media.unwrap().media;
+		assert_eq!(media.extension, ActiveValue::Set("cbz".to_string()));
+	}
 
-// 	#[test]
-// 	fn test_build_media_epub() {
-// 		let media = build_media_test_helper(get_test_epub_path());
-// 		assert!(media.is_ok());
-// 		let media = media.unwrap();
-// 		assert_eq!(media.extension, "epub");
-// 	}
+	#[test]
+	fn test_build_media_rar() {
+		let media = build_media_test_helper(get_test_rar_path());
+		assert!(media.is_ok());
+		let media = media.unwrap().media;
+		assert_eq!(media.extension, ActiveValue::Set("rar".to_string()));
+	}
 
-// 	#[test]
-// 	fn test_build_media_pdf() {
-// 		let media = build_media_test_helper(get_test_pdf_path());
-// 		assert!(media.is_ok());
-// 		let media = media.unwrap();
-// 		assert_eq!(media.extension, "pdf");
-// 	}
+	#[test]
+	fn test_build_media_epub() {
+		let media = build_media_test_helper(get_test_epub_path());
+		assert!(media.is_ok());
+		let media = media.unwrap().media;
+		assert_eq!(media.extension, ActiveValue::Set("epub".to_string()));
+	}
 
-// 	fn build_media_test_helper(path: String) -> Result<Media, CoreError> {
-// 		let path = Path::new(&path);
-// 		let library_config = library_config::Model {
-// 			convert_rar_to_zip: false,
-// 			hard_delete_conversions: false,
-// 			..Default::default()
-// 		};
-// 		let series_id = "series_id";
+	#[test]
+	fn test_build_media_pdf() {
+		let media = build_media_test_helper(get_test_pdf_path());
+		assert!(media.is_ok());
+		let media = media.unwrap().media;
+		assert_eq!(media.extension, ActiveValue::Set("pdf".to_string()));
+	}
 
-// 		MediaBuilder::new(path, series_id, library_config, &StumpConfig::debug()).build()
-// 	}
+	fn build_media_test_helper(path: String) -> CoreResult<BuiltMedia> {
+		let path = Path::new(&path);
+		let library_config = library_config::Model {
+			convert_rar_to_zip: false,
+			hard_delete_conversions: false,
+			..library_config()
+		};
+		let series_id = "series_id";
 
-// 	#[test]
-// 	fn test_regen_hashes() {
-// 		let path = get_test_zip_path();
-// 		let path = Path::new(&path);
-// 		let library_config = library_config::Model {
-// 			generate_file_hashes: true,
-// 			..Default::default()
-// 		};
-// 		let series_id = "series_id";
+		MediaBuilder::new(path, series_id, library_config, &StumpConfig::debug()).build()
+	}
 
-// 		let builder =
-// 			MediaBuilder::new(path, series_id, library_config, &StumpConfig::debug());
-// 		let hashes = builder.regen_hashes();
-// 		assert!(hashes.is_ok());
-// 		assert!(hashes.unwrap().hash.is_some());
-// 	}
-// }
+	#[test]
+	fn test_regen_hashes() {
+		let path = get_test_zip_path();
+		let path = Path::new(&path);
+		let library_config = library_config::Model {
+			generate_file_hashes: true,
+			..library_config()
+		};
+		let series_id = "series_id";
+
+		let builder =
+			MediaBuilder::new(path, series_id, library_config, &StumpConfig::debug());
+		let hashes = builder.regen_hashes();
+		assert!(hashes.is_ok());
+		assert!(hashes.unwrap().hash.is_some());
+	}
+
+	fn library_config() -> library_config::Model {
+		library_config::Model {
+			id: 1,
+			convert_rar_to_zip: false,
+			generate_file_hashes: false,
+			default_reading_dir: ReadingDirection::Ltr,
+			default_reading_image_scale_fit: ReadingImageScaleFit::Auto,
+			default_reading_mode: ReadingMode::Paged,
+			generate_koreader_hashes: false,
+			hard_delete_conversions: false,
+			ignore_rules: None,
+			library_id: Some("library_id".to_string()),
+			library_pattern: LibraryPattern::SeriesBased,
+			process_metadata: true,
+			thumbnail_config: None,
+			watch: false,
+		}
+	}
+}

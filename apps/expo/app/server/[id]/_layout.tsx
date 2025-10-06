@@ -36,6 +36,7 @@ export default function Screen() {
 
 	const [sdk, setSDK] = useState<Api | null>(() => cachedInstance.current || null)
 	const [isInitiallyConnecting, setIsInitiallyConnecting] = useState(() => !cachedInstance.current)
+	const [isAutoAuthenticating, setIsAutoAuthenticating] = useState(false)
 	const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false)
 	const [user, setUser] = useState<AuthUser | null>(null)
 
@@ -73,6 +74,9 @@ export default function Screen() {
 						}
 						setUser(forUser)
 					},
+					onAttemptingAutoAuth: (attempting) => {
+						setIsAutoAuthenticating(attempting)
+					},
 				})
 
 				if (!authedInstance) {
@@ -99,24 +103,37 @@ export default function Screen() {
 		if (!sdk && !isAuthDialogOpen) {
 			configureSDK()
 		}
-	}, [activeServer, sdk, getServerToken, isAuthDialogOpen, getServerConfig, saveServerToken])
+	}, [
+		activeServer,
+		sdk,
+		getServerToken,
+		isAuthDialogOpen,
+		getServerConfig,
+		saveServerToken,
+		cacheStore,
+	])
 
-	useEffect(() => {
-		if (user || !sdk || !sdk.isAuthed) return
+	useEffect(
+		() => {
+			if (user || !sdk || !sdk.isAuthed) return
 
-		const fetchUser = async () => {
-			try {
-				const user = await sdk.auth.me()
-				setUser(user)
-			} catch (error) {
-				if (isNetworkError(error)) {
-					isServerAccessible.current = false
+			const fetchUser = async () => {
+				try {
+					const user = await sdk.auth.me()
+					setUser(user)
+				} catch (error) {
+					if (isNetworkError(error)) {
+						isServerAccessible.current = false
+						cacheStore.removeInstanceFromCache(activeServer?.id || 'unknown')
+					}
 				}
 			}
-		}
 
-		fetchUser()
-	}, [sdk, user])
+			fetchUser()
+		},
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[sdk, user],
+	)
 
 	useEffect(() => {
 		return () => {
@@ -200,6 +217,10 @@ export default function Screen() {
 
 	if (isInitiallyConnecting) {
 		return null
+	}
+
+	if (isAutoAuthenticating) {
+		return <FullScreenLoader label="Authenticating..." />
 	}
 
 	if (!sdk) {

@@ -4,12 +4,12 @@ import { View } from 'react-native'
 import { useSharedValue } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
+import { useColors } from '~/lib/constants'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { CreateServer, SavedServerWithConfig } from '~/stores/savedServer'
 
 import { BottomSheet } from '../ui'
 import AddOrEditServerForm from './AddOrEditServerForm'
-import { useColors } from '~/lib/constants'
 
 type Props = {
 	editingServer: SavedServerWithConfig | null

@@ -8,6 +8,7 @@ type AuthSDKParams = {
 	config: ServerConfig | null
 	existingToken?: ManagedToken | null
 	saveToken?: (token: ManagedToken, forUser: AuthUser) => Promise<void>
+	onAttemptingAutoAuth?: (attempting: boolean) => void
 }
 
 /**
@@ -21,7 +22,7 @@ type AuthSDKParams = {
  */
 export const authSDKInstance = async (
 	instance: Api,
-	{ config, existingToken, saveToken }: AuthSDKParams,
+	{ config, existingToken, saveToken, onAttemptingAutoAuth }: AuthSDKParams,
 ): Promise<Api | null> => {
 	if (existingToken) {
 		instance.tokens = existingToken
@@ -38,7 +39,13 @@ export const authSDKInstance = async (
 					}),
 				},
 				async ({ basic: { username, password } }) => {
-					const tokens = await login(instance, { password, saveToken, username })
+					onAttemptingAutoAuth?.(true)
+					const tokens = await login(instance, {
+						password,
+						saveToken,
+						username,
+						onAttemptingAutoAuth,
+					})
 					instance.tokens = tokens
 				},
 			)
@@ -55,9 +62,12 @@ export const authSDKInstance = async (
 type LoginParams = {
 	username: string
 	password: string
-} & Pick<AuthSDKParams, 'saveToken'>
+} & Pick<AuthSDKParams, 'saveToken' | 'onAttemptingAutoAuth'>
 
-const login = async (instance: Api, { username, password, saveToken }: LoginParams) => {
+const login = async (
+	instance: Api,
+	{ username, password, saveToken, onAttemptingAutoAuth }: LoginParams,
+) => {
 	try {
 		const result = await instance.auth.login({ password, username })
 		if ('forUser' in result) {
@@ -73,6 +83,8 @@ const login = async (instance: Api, { username, password, saveToken }: LoginPara
 		} else {
 			console.warn('Failed to login:', error)
 		}
+	} finally {
+		onAttemptingAutoAuth?.(false)
 	}
 }
 

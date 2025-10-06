@@ -212,7 +212,7 @@ async fn login(
 			// TODO: should this be tracked?
 			// TODO: should this be permission gated?
 			if generate_token {
-				let token = create_jwt_auth(&user.id, state.clone()).await?;
+				let token = create_jwt_auth(&user.id, &state.conn, &state.config).await?;
 				return Ok(Json(LoginResponse::AccessToken(GeneratedToken {
 					for_user: user.into(),
 					token,
@@ -288,7 +288,7 @@ async fn login(
 
 	// TODO: should this be permission gated?
 	if generate_token {
-		let token = create_jwt_auth(&auth_user.id, state.clone()).await?;
+		let token = create_jwt_auth(&auth_user.id, &state.conn, &state.config).await?;
 		Ok(Json(LoginResponse::AccessToken(GeneratedToken {
 			for_user: auth_user,
 			token,

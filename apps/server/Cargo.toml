@@ -60,6 +60,7 @@ zip.workspace = true
 
 [dev-dependencies]
 axum-test = "17.2.0"
+maplit.workspace = true
 tokio = { workspace = true, features = ["full", "test-util"] }
 
 [build-dependencies]

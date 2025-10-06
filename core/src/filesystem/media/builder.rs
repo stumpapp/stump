@@ -27,7 +27,6 @@ pub struct MediaBuilder {
 	config: StumpConfig,
 }
 
-// TODO(sea-orm): Rename ProcessedMedia ?
 #[derive(Debug, Clone)]
 pub struct BuiltMedia {
 	pub media: media::ActiveModel,

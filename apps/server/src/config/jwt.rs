@@ -55,12 +55,13 @@ struct RefreshTokenClaims {
 
 pub(crate) async fn create_jwt_auth(
 	user_id: &str,
-	state: AppState,
+	conn: &DatabaseConnection,
+	config: &StumpConfig,
 ) -> APIResult<JwtTokenPair> {
 	let CreatedToken {
 		token: access_token,
 		expires_at,
-	} = generate_access_token(user_id, &state.config)?;
+	} = generate_access_token(user_id, config)?;
 
 	let (
 		jti,
@@ -68,7 +69,7 @@ pub(crate) async fn create_jwt_auth(
 			token: refresh_token,
 			expires_at: refresh_expiry,
 		},
-	) = generate_refresh_token(user_id, &state.config)?;
+	) = generate_refresh_token(user_id, config)?;
 
 	let active_model = refresh_token::ActiveModel {
 		id: ActiveValue::Set(jti),
@@ -76,7 +77,7 @@ pub(crate) async fn create_jwt_auth(
 		expires_at: ActiveValue::Set(refresh_expiry),
 		..Default::default()
 	};
-	let _ = active_model.insert(state.conn.as_ref()).await?;
+	let _ = active_model.insert(conn).await?;
 
 	Ok(JwtTokenPair {
 		access_token,
@@ -185,7 +186,7 @@ pub(crate) async fn exchange_refresh_token(
 	}
 
 	let user_id = &refresh_token.user_id;
-	let jwt_pair = create_jwt_auth(user_id, state).await?;
+	let jwt_pair = create_jwt_auth(user_id, &state.conn, &state.config).await?;
 	tracing::debug!(?user_id, "Exchanged refresh token for new JWT");
 
 	Ok(jwt_pair)

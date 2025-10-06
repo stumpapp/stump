@@ -61,7 +61,6 @@ impl AuthUser {
 	}
 }
 
-// TODO(sea-orm): Either merge with LoginUser or remove?
 impl FromQueryResult for AuthUser {
 	fn from_query_result(
 		res: &sea_orm::QueryResult,

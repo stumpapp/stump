@@ -7937,6 +7937,7 @@ dependencies = [
  "jsonwebtoken",
  "linemux",
  "local-ip-address",
+ "maplit",
  "models",
  "once_cell",
  "openssl",

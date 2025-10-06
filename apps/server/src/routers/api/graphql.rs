@@ -36,7 +36,7 @@ pub(crate) async fn mount(app_state: AppState) -> Router<AppState> {
 		.layer(Extension(schema))
 }
 
-// TODO(sea-orm): Consider new user permission
+// TODO: Consider new user permission
 async fn playground(
 	Extension(req_ctx): Extension<AuthContext>,
 ) -> Result<impl IntoResponse, APIError> {
@@ -51,7 +51,6 @@ async fn playground(
 	)))
 }
 
-// TODO(sea-orm): Move to separate file, get OPTIONAL user(?), enforce user for all but login-related mutations? Or just retain restful login?
 async fn graphql_handler(
 	schema: Extension<AppSchema>,
 	Extension(auth): Extension<AuthContext>,

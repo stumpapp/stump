@@ -122,100 +122,106 @@ pub fn resized_dimensions(
 	}
 }
 
-// TODO(sea-orm): Fix
-// #[cfg(test)]
-// mod tests {
-// 	use super::*;
+#[cfg(test)]
+mod tests {
+	use models::shared::image_processor_options::{
+		ExactDimensionResize, ScaleEvenlyByFactor,
+	};
+	use rust_decimal::Decimal;
 
-// 	#[test]
-// 	fn test_image_format_extension() {
-// 		assert_eq!(ImageFormat::Webp.extension(), "webp");
-// 		// assert_eq!(ImageFormat::Avif.extension(), "avif");
-// 		assert_eq!(ImageFormat::Jpeg.extension(), "jpeg");
-// 		// assert_eq!(ImageFormat::JpegXl.extension(), "jxl");
-// 		assert_eq!(ImageFormat::Png.extension(), "png");
-// 	}
+	use super::*;
 
-// 	#[test]
-// 	fn test_image_format_into_image_output_format() {
-// 		assert_eq!(
-// 			image::ImageFormat::from(ImageFormat::Webp),
-// 			image::ImageFormat::WebP
-// 		);
-// 		assert_eq!(
-// 			image::ImageFormat::from(ImageFormat::Jpeg),
-// 			image::ImageFormat::Jpeg
-// 		);
-// 		assert_eq!(
-// 			image::ImageFormat::from(ImageFormat::Png),
-// 			image::ImageFormat::Png
-// 		);
-// 	}
+	#[test]
+	fn test_resized_dimensions_scale_evenly() {
+		let (height, width) = resized_dimensions(
+			100,
+			100,
+			ImageResizeMethod::ScaleEvenlyByFactor(ScaleEvenlyByFactor {
+				factor: Decimal::new(75, 2),
+			}),
+		);
+		assert_eq!(height, 75);
+		assert_eq!(width, 75);
+	}
 
-// 	#[test]
-// 	fn test_resized_dimensions_scaled() {
-// 		let (height, width) =
-// 			resized_dimensions(100, 100, &ImageResizeOptions::scaled(0.75, 0.5));
-// 		assert_eq!(height, 75);
-// 		assert_eq!(width, 50);
-// 	}
+	#[test]
+	fn test_resized_dimensions_exact() {
+		let (height, width) = resized_dimensions(
+			100,
+			100,
+			ImageResizeMethod::Exact(ExactDimensionResize {
+				height: 50,
+				width: 50,
+			}),
+		);
+		assert_eq!(height, 50);
+		assert_eq!(width, 50);
+	}
 
-// 	#[test]
-// 	fn test_resized_dimensions_sized() {
-// 		let (height, width) =
-// 			resized_dimensions(100, 100, &ImageResizeOptions::sized(50.0, 50.0));
-// 		assert_eq!(height, 50);
-// 		assert_eq!(width, 50);
-// 	}
+	#[test]
+	fn test_validate_quality() {
+		let options = ImageProcessorOptions {
+			quality: Some(50),
+			..Default::default()
+		};
 
-// 	#[test]
-// 	fn test_validate_quality() {
-// 		let options = ImageProcessorOptions {
-// 			quality: Some(50.0),
-// 			..Default::default()
-// 		};
+		assert!(options.validate().is_ok());
 
-// 		assert!(options.validate().is_ok());
+		let options = ImageProcessorOptions {
+			quality: Some(101),
+			..Default::default()
+		};
 
-// 		let options = ImageProcessorOptions {
-// 			quality: Some(101.0),
-// 			..Default::default()
-// 		};
+		assert!(options.validate().is_err());
+	}
 
-// 		assert!(options.validate().is_err());
-// 	}
+	#[test]
+	fn test_validate_resize() {
+		let options = ImageProcessorOptions {
+			resize_method: Some(ImageResizeMethod::Exact(ExactDimensionResize {
+				height: 100,
+				width: 100,
+			})),
+			..Default::default()
+		};
 
-// 	#[test]
-// 	fn test_validate_resize() {
-// 		let options = ImageProcessorOptions {
-// 			resize_options: Some(ImageResizeOptions::sized(100.0, 100.0)),
-// 			..Default::default()
-// 		};
+		assert!(options.validate().is_ok());
 
-// 		assert!(options.validate().is_ok());
+		let options = ImageProcessorOptions {
+			resize_method: Some(ImageResizeMethod::Exact(ExactDimensionResize {
+				height: 0,
+				width: 100,
+			})),
+			..Default::default()
+		};
 
-// 		let options = ImageProcessorOptions {
-// 			resize_options: Some(ImageResizeOptions::sized(0.5, 0.5)),
-// 			..Default::default()
-// 		};
+		assert!(options.validate().is_err());
+	}
 
-// 		assert!(options.validate().is_err());
-// 	}
+	#[test]
+	fn test_validate_scaled_resize() {
+		let options = ImageProcessorOptions {
+			resize_method: Some(ImageResizeMethod::ScaleDimension(
+				ScaledDimensionResize {
+					dimension: Dimension::Width,
+					size: 100,
+				},
+			)),
+			..Default::default()
+		};
 
-// 	#[test]
-// 	fn test_validate_scaled_resize() {
-// 		let options = ImageProcessorOptions {
-// 			resize_options: Some(ImageResizeOptions::scaled(0.5, 0.5)),
-// 			..Default::default()
-// 		};
+		assert!(options.validate().is_ok());
 
-// 		assert!(options.validate().is_ok());
+		let options = ImageProcessorOptions {
+			resize_method: Some(ImageResizeMethod::ScaleDimension(
+				ScaledDimensionResize {
+					dimension: Dimension::Height,
+					size: 0,
+				},
+			)),
+			..Default::default()
+		};
 
-// 		let options = ImageProcessorOptions {
-// 			resize_options: Some(ImageResizeOptions::scaled(1.5, 1.5)),
-// 			..Default::default()
-// 		};
-
-// 		assert!(options.validate().is_err());
-// 	}
-// }
+		assert!(options.validate().is_err());
+	}
+}

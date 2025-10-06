@@ -190,7 +190,10 @@ mod tests {
 
 	#[test]
 	fn test_buffer_response() {
-		let response = BufferResponse::new(ContentType::HTML, b"Hello, world!".to_vec());
+		let response = BufferResponse {
+			content_type: ContentType::HTML,
+			data: b"Hello, world!".to_vec(),
+		};
 		let axum_response = response.into_response();
 
 		assert_eq!(

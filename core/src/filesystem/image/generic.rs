@@ -109,279 +109,307 @@ impl ImageProcessor for GenericImageProcessor {
 	}
 }
 
-// TODO(sea-orm): Fix
-// #[cfg(test)]
-// mod tests {
-// 	use process::ImageResizeOptions;
+#[cfg(test)]
+mod tests {
 
-// 	use super::*;
-// 	use crate::filesystem::image::{
-// 		tests::{get_test_jpg_path, get_test_png_path},
-// 		ImageFormat, ImageProcessorOptions,
-// 	};
+	use models::shared::image_processor_options::{
+		ExactDimensionResize, ImageResizeMethod, ScaleEvenlyByFactor,
+	};
+	use rust_decimal::Decimal;
 
-// 	//JPG -> other Tests
-// 	//JPG -> JPG
-// 	#[test]
-// 	fn test_generate_jpg_to_jpg() {
-// 		let jpg_path = get_test_jpg_path();
-// 		let options = ImageProcessorOptions {
-// 			format: ImageFormat::Jpeg,
-// 			..Default::default()
-// 		};
+	use super::*;
+	use crate::filesystem::image::tests::{get_test_jpg_path, get_test_png_path};
 
-// 		let buffer = GenericImageProcessor::generate_from_path(&jpg_path, options)
-// 			.expect("Failed to generate image buffer");
-// 		assert!(!buffer.is_empty());
-// 		// should *still* be a valid JPEG
-// 		assert!(
-// 			image::load_from_memory_with_format(&buffer, image::ImageFormat::Jpeg)
-// 				.is_ok()
-// 		);
-// 	}
+	//JPG -> other Tests
+	//JPG -> JPG
+	#[test]
+	fn test_generate_jpg_to_jpg() {
+		let jpg_path = get_test_jpg_path();
+		let options = ImageProcessorOptions {
+			format: SupportedImageFormat::Jpeg,
+			..Default::default()
+		};
 
-// 	#[test]
-// 	fn test_generate_jpg_to_jpg_with_rescale() {
-// 		let jpg_path = get_test_jpg_path();
-// 		let options = ImageProcessorOptions {
-// 			format: ImageFormat::Jpeg,
-// 			resize_options: Some(ImageResizeOptions::scaled(0.5, 0.5)),
-// 			..Default::default()
-// 		};
+		let buffer = GenericImageProcessor::generate_from_path(&jpg_path, options)
+			.expect("Failed to generate image buffer");
+		assert!(!buffer.is_empty());
+		// should *still* be a valid JPEG
+		assert!(
+			image::load_from_memory_with_format(&buffer, image::ImageFormat::Jpeg)
+				.is_ok()
+		);
+	}
 
-// 		let current_dimensions =
-// 			image::image_dimensions(&jpg_path).expect("Failed to get dimensions");
+	#[test]
+	fn test_generate_jpg_to_jpg_with_rescale() {
+		let jpg_path = get_test_jpg_path();
+		let options = ImageProcessorOptions {
+			format: SupportedImageFormat::Jpeg,
+			resize_method: Some(ImageResizeMethod::ScaleEvenlyByFactor(
+				ScaleEvenlyByFactor {
+					factor: Decimal::new(5, 1),
+				},
+			)),
+			..Default::default()
+		};
 
-// 		let buffer = GenericImageProcessor::generate_from_path(&jpg_path, options)
-// 			.expect("Failed to generate image buffer");
+		let current_dimensions =
+			image::image_dimensions(&jpg_path).expect("Failed to get dimensions");
 
-// 		let new_dimensions = image::load_from_memory(&buffer)
-// 			.expect("Failed to load image from buffer")
-// 			.dimensions();
+		let buffer = GenericImageProcessor::generate_from_path(&jpg_path, options)
+			.expect("Failed to generate image buffer");
 
-// 		assert_eq!(new_dimensions.0, (current_dimensions.0 as f32 * 0.5) as u32);
-// 		assert_eq!(new_dimensions.1, (current_dimensions.1 as f32 * 0.5) as u32);
-// 	}
+		let new_dimensions = image::load_from_memory(&buffer)
+			.expect("Failed to load image from buffer")
+			.dimensions();
 
-// 	#[test]
-// 	fn test_generate_jpg_to_jpg_with_resize() {
-// 		let jpg_path = get_test_jpg_path();
-// 		let options = ImageProcessorOptions {
-// 			format: ImageFormat::Jpeg,
-// 			resize_options: Some(ImageResizeOptions::sized(100f32, 100f32)),
-// 			..Default::default()
-// 		};
+		assert_eq!(new_dimensions.0, (current_dimensions.0 as f32 * 0.5) as u32);
+		assert_eq!(new_dimensions.1, (current_dimensions.1 as f32 * 0.5) as u32);
+	}
 
-// 		let buffer = GenericImageProcessor::generate_from_path(&jpg_path, options)
-// 			.expect("Failed to generate image buffer");
+	#[test]
+	fn test_generate_jpg_to_jpg_with_resize() {
+		let jpg_path = get_test_jpg_path();
+		let options = ImageProcessorOptions {
+			format: SupportedImageFormat::Jpeg,
+			resize_method: Some(ImageResizeMethod::Exact(ExactDimensionResize {
+				width: 100,
+				height: 100,
+			})),
+			..Default::default()
+		};
 
-// 		let dimensions = image::load_from_memory(&buffer)
-// 			.expect("Failed to load image from buffer")
-// 			.dimensions();
+		let buffer = GenericImageProcessor::generate_from_path(&jpg_path, options)
+			.expect("Failed to generate image buffer");
 
-// 		assert_eq!(dimensions.0, 100);
-// 		assert_eq!(dimensions.1, 100);
-// 	}
+		let dimensions = image::load_from_memory(&buffer)
+			.expect("Failed to load image from buffer")
+			.dimensions();
 
-// 	//JPG -> PNG
-// 	#[test]
-// 	fn test_generate_jpg_to_png() {
-// 		let jpg_path = get_test_jpg_path();
-// 		let options = ImageProcessorOptions {
-// 			format: ImageFormat::Png,
-// 			..Default::default()
-// 		};
+		assert_eq!(dimensions.0, 100);
+		assert_eq!(dimensions.1, 100);
+	}
 
-// 		let buffer = GenericImageProcessor::generate_from_path(&jpg_path, options)
-// 			.expect("Failed to generate image buffer");
-// 		assert!(!buffer.is_empty());
-// 		// should be a valid PNG
-// 		assert!(
-// 			image::load_from_memory_with_format(&buffer, image::ImageFormat::Png).is_ok()
-// 		);
-// 	}
+	//JPG -> PNG
+	#[test]
+	fn test_generate_jpg_to_png() {
+		let jpg_path = get_test_jpg_path();
+		let options = ImageProcessorOptions {
+			format: SupportedImageFormat::Png,
+			..Default::default()
+		};
 
-// 	#[test]
-// 	fn test_generate_jpg_to_png_with_rescale() {
-// 		let jpg_path = get_test_jpg_path();
-// 		let options = ImageProcessorOptions {
-// 			format: ImageFormat::Png,
-// 			resize_options: Some(ImageResizeOptions::scaled(0.5, 0.5)),
-// 			..Default::default()
-// 		};
+		let buffer = GenericImageProcessor::generate_from_path(&jpg_path, options)
+			.expect("Failed to generate image buffer");
+		assert!(!buffer.is_empty());
+		// should be a valid PNG
+		assert!(
+			image::load_from_memory_with_format(&buffer, image::ImageFormat::Png).is_ok()
+		);
+	}
 
-// 		let current_dimensions =
-// 			image::image_dimensions(&jpg_path).expect("Failed to get dimensions");
+	#[test]
+	fn test_generate_jpg_to_png_with_rescale() {
+		let jpg_path = get_test_jpg_path();
+		let options = ImageProcessorOptions {
+			format: SupportedImageFormat::Png,
+			resize_method: Some(ImageResizeMethod::ScaleEvenlyByFactor(
+				ScaleEvenlyByFactor {
+					factor: Decimal::new(5, 1),
+				},
+			)),
+			..Default::default()
+		};
 
-// 		let buffer = GenericImageProcessor::generate_from_path(&jpg_path, options)
-// 			.expect("Failed to generate image buffer");
+		let current_dimensions =
+			image::image_dimensions(&jpg_path).expect("Failed to get dimensions");
 
-// 		let new_dimensions = image::load_from_memory(&buffer)
-// 			.expect("Failed to load image from buffer")
-// 			.dimensions();
+		let buffer = GenericImageProcessor::generate_from_path(&jpg_path, options)
+			.expect("Failed to generate image buffer");
 
-// 		assert_eq!(new_dimensions.0, (current_dimensions.0 as f32 * 0.5) as u32);
-// 		assert_eq!(new_dimensions.1, (current_dimensions.1 as f32 * 0.5) as u32);
-// 	}
+		let new_dimensions = image::load_from_memory(&buffer)
+			.expect("Failed to load image from buffer")
+			.dimensions();
 
-// 	#[test]
-// 	fn test_generate_jpg_to_png_with_resize() {
-// 		let jpg_path = get_test_jpg_path();
-// 		let options = ImageProcessorOptions {
-// 			format: ImageFormat::Png,
-// 			resize_options: Some(ImageResizeOptions::sized(100f32, 100f32)),
-// 			..Default::default()
-// 		};
+		assert_eq!(new_dimensions.0, (current_dimensions.0 as f32 * 0.5) as u32);
+		assert_eq!(new_dimensions.1, (current_dimensions.1 as f32 * 0.5) as u32);
+	}
 
-// 		let buffer = GenericImageProcessor::generate_from_path(&jpg_path, options)
-// 			.expect("Failed to generate image buffer");
+	#[test]
+	fn test_generate_jpg_to_png_with_resize() {
+		let jpg_path = get_test_jpg_path();
+		let options = ImageProcessorOptions {
+			format: SupportedImageFormat::Png,
+			resize_method: Some(ImageResizeMethod::Exact(ExactDimensionResize {
+				width: 100,
+				height: 100,
+			})),
+			..Default::default()
+		};
 
-// 		let dimensions = image::load_from_memory(&buffer)
-// 			.expect("Failed to load image from buffer")
-// 			.dimensions();
+		let buffer = GenericImageProcessor::generate_from_path(&jpg_path, options)
+			.expect("Failed to generate image buffer");
 
-// 		assert_eq!(dimensions.0, 100);
-// 		assert_eq!(dimensions.1, 100);
-// 	}
+		let dimensions = image::load_from_memory(&buffer)
+			.expect("Failed to load image from buffer")
+			.dimensions();
 
-// 	//JPG -> webp
-// 	#[test]
-// 	fn test_generate_jpg_to_webp_fail() {
-// 		let jpg_path = get_test_jpg_path();
-// 		let options = ImageProcessorOptions {
-// 			format: ImageFormat::Webp,
-// 			..Default::default()
-// 		};
+		assert_eq!(dimensions.0, 100);
+		assert_eq!(dimensions.1, 100);
+	}
 
-// 		let result = GenericImageProcessor::generate_from_path(&jpg_path, options);
-// 		assert!(result.is_err());
-// 		assert!(matches!(
-// 			result.unwrap_err(),
-// 			ProcessorError::FileError(FileError::IncorrectProcessorError)
-// 		));
-// 	}
+	//JPG -> webp
+	#[test]
+	fn test_generate_jpg_to_webp_fail() {
+		let jpg_path = get_test_jpg_path();
+		let options = ImageProcessorOptions {
+			format: SupportedImageFormat::Webp,
+			..Default::default()
+		};
 
-// 	// PNG -> other
-// 	// PNG -> PNG
-// 	#[test]
-// 	fn test_generate_png_to_png() {
-// 		let png_path = get_test_png_path();
-// 		let options = ImageProcessorOptions {
-// 			format: ImageFormat::Png,
-// 			..Default::default()
-// 		};
+		let result = GenericImageProcessor::generate_from_path(&jpg_path, options);
+		assert!(result.is_err());
+		assert!(matches!(
+			result.unwrap_err(),
+			ProcessorError::FileError(FileError::IncorrectProcessorError)
+		));
+	}
 
-// 		let buffer = GenericImageProcessor::generate_from_path(&png_path, options)
-// 			.expect("Failed to generate image buffer");
-// 		assert!(!buffer.is_empty());
-// 		// should *still* be a valid PNG
-// 		assert!(
-// 			image::load_from_memory_with_format(&buffer, image::ImageFormat::Png).is_ok()
-// 		);
-// 	}
+	// PNG -> other
+	// PNG -> PNG
+	#[test]
+	fn test_generate_png_to_png() {
+		let png_path = get_test_png_path();
+		let options = ImageProcessorOptions {
+			format: SupportedImageFormat::Png,
+			..Default::default()
+		};
 
-// 	#[test]
-// 	fn test_generate_png_to_png_with_rescale() {
-// 		let png_path = get_test_png_path();
-// 		let options = ImageProcessorOptions {
-// 			format: ImageFormat::Png,
-// 			resize_options: Some(ImageResizeOptions::scaled(0.5, 0.5)),
-// 			..Default::default()
-// 		};
+		let buffer = GenericImageProcessor::generate_from_path(&png_path, options)
+			.expect("Failed to generate image buffer");
+		assert!(!buffer.is_empty());
+		// should *still* be a valid PNG
+		assert!(
+			image::load_from_memory_with_format(&buffer, image::ImageFormat::Png).is_ok()
+		);
+	}
 
-// 		let current_dimensions =
-// 			image::image_dimensions(&png_path).expect("Failed to get dimensions");
+	#[test]
+	fn test_generate_png_to_png_with_rescale() {
+		let png_path = get_test_png_path();
+		let options = ImageProcessorOptions {
+			format: SupportedImageFormat::Png,
+			resize_method: Some(ImageResizeMethod::ScaleEvenlyByFactor(
+				ScaleEvenlyByFactor {
+					factor: Decimal::new(5, 1),
+				},
+			)),
+			..Default::default()
+		};
 
-// 		let buffer = GenericImageProcessor::generate_from_path(&png_path, options)
-// 			.expect("Failed to generate image buffer");
+		let current_dimensions =
+			image::image_dimensions(&png_path).expect("Failed to get dimensions");
 
-// 		let new_dimensions = image::load_from_memory(&buffer)
-// 			.expect("Failed to load image from buffer")
-// 			.dimensions();
+		let buffer = GenericImageProcessor::generate_from_path(&png_path, options)
+			.expect("Failed to generate image buffer");
 
-// 		assert_eq!(new_dimensions.0, (current_dimensions.0 as f32 * 0.5) as u32);
-// 		assert_eq!(new_dimensions.1, (current_dimensions.1 as f32 * 0.5) as u32);
-// 	}
+		let new_dimensions = image::load_from_memory(&buffer)
+			.expect("Failed to load image from buffer")
+			.dimensions();
 
-// 	#[test]
-// 	fn test_generate_png_to_png_with_resize() {
-// 		let png_path = get_test_png_path();
-// 		let options = ImageProcessorOptions {
-// 			format: ImageFormat::Png,
-// 			resize_options: Some(ImageResizeOptions::sized(100f32, 100f32)),
-// 			..Default::default()
-// 		};
+		assert_eq!(new_dimensions.0, (current_dimensions.0 as f32 * 0.5) as u32);
+		assert_eq!(new_dimensions.1, (current_dimensions.1 as f32 * 0.5) as u32);
+	}
 
-// 		let buffer = GenericImageProcessor::generate_from_path(&png_path, options)
-// 			.expect("Failed to generate image buffer");
+	#[test]
+	fn test_generate_png_to_png_with_resize() {
+		let png_path = get_test_png_path();
+		let options = ImageProcessorOptions {
+			format: SupportedImageFormat::Png,
+			resize_method: Some(ImageResizeMethod::Exact(ExactDimensionResize {
+				width: 100,
+				height: 100,
+			})),
+			..Default::default()
+		};
 
-// 		let dimensions = image::load_from_memory(&buffer)
-// 			.expect("Failed to load image from buffer")
-// 			.dimensions();
+		let buffer = GenericImageProcessor::generate_from_path(&png_path, options)
+			.expect("Failed to generate image buffer");
 
-// 		assert_eq!(dimensions.0, 100);
-// 		assert_eq!(dimensions.1, 100);
-// 	}
+		let dimensions = image::load_from_memory(&buffer)
+			.expect("Failed to load image from buffer")
+			.dimensions();
 
-// 	//PNG -> JPG
-// 	#[test]
-// 	fn test_generate_png_to_jpg() {
-// 		let png_path = get_test_png_path();
-// 		let options = ImageProcessorOptions {
-// 			format: ImageFormat::Jpeg,
-// 			..Default::default()
-// 		};
+		assert_eq!(dimensions.0, 100);
+		assert_eq!(dimensions.1, 100);
+	}
 
-// 		let buffer = GenericImageProcessor::generate_from_path(&png_path, options)
-// 			.expect("Failed to generate image buffer");
-// 		assert!(!buffer.is_empty());
-// 		// should be a valid JPEG
-// 		assert!(
-// 			image::load_from_memory_with_format(&buffer, image::ImageFormat::Jpeg)
-// 				.is_ok()
-// 		);
-// 	}
+	//PNG -> JPG
+	#[test]
+	fn test_generate_png_to_jpg() {
+		let png_path = get_test_png_path();
+		let options = ImageProcessorOptions {
+			format: SupportedImageFormat::Jpeg,
+			..Default::default()
+		};
 
-// 	#[test]
-// 	fn test_generate_png_to_jpg_with_rescale() {
-// 		let png_path = get_test_png_path();
-// 		let options = ImageProcessorOptions {
-// 			format: ImageFormat::Jpeg,
-// 			resize_options: Some(ImageResizeOptions::scaled(0.5, 0.5)),
-// 			..Default::default()
-// 		};
+		let buffer = GenericImageProcessor::generate_from_path(&png_path, options)
+			.expect("Failed to generate image buffer");
+		assert!(!buffer.is_empty());
+		// should be a valid JPEG
+		assert!(
+			image::load_from_memory_with_format(&buffer, image::ImageFormat::Jpeg)
+				.is_ok()
+		);
+	}
 
-// 		let current_dimensions =
-// 			image::image_dimensions(&png_path).expect("Failed to get dimensions");
+	#[test]
+	fn test_generate_png_to_jpg_with_rescale() {
+		let png_path = get_test_png_path();
+		let options = ImageProcessorOptions {
+			format: SupportedImageFormat::Jpeg,
+			resize_method: Some(ImageResizeMethod::ScaleEvenlyByFactor(
+				ScaleEvenlyByFactor {
+					factor: Decimal::new(5, 1),
+				},
+			)),
+			..Default::default()
+		};
 
-// 		let buffer = GenericImageProcessor::generate_from_path(&png_path, options)
-// 			.expect("Failed to generate image buffer");
+		let current_dimensions =
+			image::image_dimensions(&png_path).expect("Failed to get dimensions");
 
-// 		let new_dimensions = image::load_from_memory(&buffer)
-// 			.expect("Failed to load image from buffer")
-// 			.dimensions();
+		let buffer = GenericImageProcessor::generate_from_path(&png_path, options)
+			.expect("Failed to generate image buffer");
 
-// 		assert_eq!(new_dimensions.0, (current_dimensions.0 as f32 * 0.5) as u32);
-// 		assert_eq!(new_dimensions.1, (current_dimensions.1 as f32 * 0.5) as u32);
-// 	}
+		let new_dimensions = image::load_from_memory(&buffer)
+			.expect("Failed to load image from buffer")
+			.dimensions();
 
-// 	#[test]
-// 	fn test_generate_png_to_jpg_with_resize() {
-// 		let png_path = get_test_png_path();
-// 		let options = ImageProcessorOptions {
-// 			format: ImageFormat::Jpeg,
-// 			resize_options: Some(ImageResizeOptions::sized(100f32, 100f32)),
-// 			..Default::default()
-// 		};
+		assert_eq!(new_dimensions.0, (current_dimensions.0 as f32 * 0.5) as u32);
+		assert_eq!(new_dimensions.1, (current_dimensions.1 as f32 * 0.5) as u32);
+	}
 
-// 		let buffer = GenericImageProcessor::generate_from_path(&png_path, options)
-// 			.expect("Failed to generate image buffer");
+	#[test]
+	fn test_generate_png_to_jpg_with_resize() {
+		let png_path = get_test_png_path();
+		let options = ImageProcessorOptions {
+			format: SupportedImageFormat::Jpeg,
+			resize_method: Some(ImageResizeMethod::Exact(ExactDimensionResize {
+				width: 100,
+				height: 100,
+			})),
+			..Default::default()
+		};
 
-// 		let dimensions = image::load_from_memory(&buffer)
-// 			.expect("Failed to load image from buffer")
-// 			.dimensions();
+		let buffer = GenericImageProcessor::generate_from_path(&png_path, options)
+			.expect("Failed to generate image buffer");
 
-// 		assert_eq!(dimensions.0, 100);
-// 		assert_eq!(dimensions.1, 100);
-// 	}
-// }
+		let dimensions = image::load_from_memory(&buffer)
+			.expect("Failed to load image from buffer")
+			.dimensions();
+
+		assert_eq!(dimensions.0, 100);
+		assert_eq!(dimensions.1, 100);
+	}
+}

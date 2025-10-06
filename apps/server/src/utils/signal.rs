@@ -1,3 +1,5 @@
+use std::future::Future;
+
 use tokio::signal;
 
 pub async fn shutdown_signal() {

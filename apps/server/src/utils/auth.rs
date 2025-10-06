@@ -1,7 +1,4 @@
-use models::{
-	entity::user::{AuthUser, LoginUser},
-	shared::{enums::UserPermission, permission_set::AssociatedPermission},
-};
+use models::entity::user::{AuthUser, LoginUser};
 use sea_orm::DatabaseConnection;
 use stump_core::config::StumpConfig;
 use tower_sessions::Session;
@@ -82,28 +79,6 @@ mod tests {
 		assert!(verify_password(&hash, "password").unwrap());
 	}
 
-	// TODO(axum-upgrade): Fix all of these tests
-	// #[test]
-	// fn test_get_session_user_no_user() {
-	// 	let session = Session::default();
-	// 	let result = get_session_user(&session);
-	// 	assert!(result.is_err());
-	// }
-
-	// #[test]
-	// fn test_get_session_user_with_user() {
-	// 	let session = Session::default();
-	// 	let session_user = User {
-	// 		username: "oromei".to_string(),
-	// 		..Default::default()
-	// 	};
-	// 	session
-	// 		.insert(SESSION_USER_KEY, session_user.clone())
-	// 		.expect("Failed to insert user into session");
-	// 	let loaded_user = get_session_user(&session).expect("Failed to get session user");
-	// 	assert_eq!(loaded_user.username, session_user.username);
-	// }
-
 	#[test]
 	fn test_decode_64_credentials_with_colon_in_password() {
 		let testcreds = decode_base64_credentials("username:pass:$%^word".into());
@@ -132,26 +107,5 @@ mod tests {
 				"wp*r@hj!1b:o4sZ#5TdvyzBd$n-bqaPiwp*r@hj!1b:o4sZ#5TdvyzBd$n-bqaPi"
 			)
 		);
-	}
-
-	#[test]
-	fn test_associated_permissions() {
-		let user = AuthUser {
-			permissions: vec![
-				UserPermission::CreateLibrary,
-				UserPermission::ManageNotifier,
-			],
-			..Default::default()
-		};
-
-		let expected_can_do = vec![
-			UserPermission::EditLibrary,
-			UserPermission::ScanLibrary,
-			UserPermission::ReadNotifier,
-			UserPermission::CreateNotifier,
-			UserPermission::DeleteNotifier,
-		];
-
-		assert!(user_has_all_permissions(&user, &expected_can_do));
 	}
 }

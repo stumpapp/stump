@@ -109,23 +109,31 @@ mod tests {
 			.expect("Failed to validate key"));
 	}
 
-	// #[test]
+	#[test]
 	fn test_get_permits_wrong_user() {
-		let key = create_test_key();
+		let (pek, hash) = create_prefixed_key().expect("Failed to create key");
+		let key = api_key::Model {
+			long_token_hash: hash.clone(),
+			..create_test_key()
+		};
 		let user = AuthUser {
 			id: "shadowfax".to_string(),
 			permissions: vec![UserPermission::AccessAPIKeys],
 			..Default::default()
 		};
 		let controller = APIKeyController::new(key);
-		assert!(controller.validate("test").expect("Failed to validate key"));
+		assert!(controller
+			.validate(&pek.to_string())
+			.expect("Failed to validate key"));
 		assert_eq!(controller.resolve_permissions(&user), vec![]);
 	}
 
-	// #[test]
+	#[test]
 	fn test_get_permits_inherit() {
+		let (pek, hash) = create_prefixed_key().expect("Failed to create key");
 		let key = api_key::Model {
 			permissions: APIKeyPermissions::default(),
+			long_token_hash: hash.clone(),
 			..create_test_key()
 		};
 		let user = AuthUser {
@@ -134,17 +142,21 @@ mod tests {
 			..Default::default()
 		};
 		let controller = APIKeyController::new(key);
-		assert!(controller.validate("test").expect("Failed to validate key"));
+		assert!(controller
+			.validate(&pek.to_string())
+			.expect("Failed to validate key"));
 		assert_eq!(
 			controller.resolve_permissions(&user),
 			vec![UserPermission::AccessAPIKeys]
 		);
 	}
 
-	// #[test]
+	#[test]
 	fn test_get_permits_custom() {
+		let (pek, hash) = create_prefixed_key().expect("Failed to create key");
 		let key = api_key::Model {
 			permissions: APIKeyPermissions::Custom(vec![UserPermission::AccessBookClub]),
+			long_token_hash: hash.clone(),
 			..create_test_key()
 		};
 		let user = AuthUser {
@@ -156,7 +168,9 @@ mod tests {
 			..Default::default()
 		};
 		let controller = APIKeyController::new(key);
-		assert!(controller.validate("test").expect("Failed to validate key"));
+		assert!(controller
+			.validate(&pek.to_string())
+			.expect("Failed to validate key"));
 		assert_eq!(
 			controller.resolve_permissions(&user),
 			vec![UserPermission::AccessBookClub]

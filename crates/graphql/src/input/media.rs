@@ -7,7 +7,7 @@ use sea_orm::{prelude::*, ActiveValue::Set, IntoActiveModel};
 
 #[derive(Debug, Clone, OneofObject)]
 pub enum EpubProgressLocatorInput {
-	Readium(ReadiumLocator),
+	Readium(Box<ReadiumLocator>),
 	Epubcfi(String),
 }
 
@@ -15,7 +15,7 @@ impl EpubProgressLocatorInput {
 	pub fn as_tuple(&self) -> (Option<String>, Option<ReadiumLocator>) {
 		match self {
 			EpubProgressLocatorInput::Epubcfi(cfi) => (Some(cfi.clone()), None),
-			EpubProgressLocatorInput::Readium(loc) => (None, Some(loc.clone())),
+			EpubProgressLocatorInput::Readium(loc) => (None, Some((**loc).clone())),
 		}
 	}
 }
@@ -36,7 +36,7 @@ pub struct PagedProgressInput {
 
 #[derive(Debug, Clone, OneofObject)]
 pub enum MediaProgressInput {
-	Epub(EpubProgressInput),
+	Epub(Box<EpubProgressInput>),
 	Paged(PagedProgressInput),
 }
 
@@ -56,7 +56,7 @@ impl BookmarkInput {
 		bookmark::ActiveModel {
 			id: Set(Uuid::new_v4().to_string()),
 			epubcfi: Set(epubcfi),
-			locator: Set(locator),
+			locator: Set(locator.as_deref().cloned()),
 			preview_content: Set(self.preview_content.clone()),
 			media_id: Set(self.media_id.clone()),
 			user_id: Set(user.id.clone()),

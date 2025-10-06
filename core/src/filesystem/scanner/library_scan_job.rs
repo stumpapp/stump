@@ -336,12 +336,12 @@ impl JobExt for LibraryScanJob {
 						);
 
 					ctx.report_progress(JobProgress::subtask_position(
-						(affected_rows > 0)
-							.then(|| {
-								current_subtask_index += 1;
-								current_subtask_index
-							})
-							.unwrap_or(0),
+						if affected_rows > 0 {
+							current_subtask_index += 1;
+							current_subtask_index
+						} else {
+							0
+						},
 						total_subtask_count as i32,
 					));
 				}
@@ -377,12 +377,14 @@ impl JobExt for LibraryScanJob {
 						);
 
 					ctx.report_progress(JobProgress::subtask_position(
-						(affected_rows > 0)
-							.then(|| {
+						if affected_rows > 0 {
+							{
 								current_subtask_index += 1;
 								current_subtask_index
-							})
-							.unwrap_or(0),
+							}
+						} else {
+							0
+						},
 						total_subtask_count as i32,
 					));
 				}

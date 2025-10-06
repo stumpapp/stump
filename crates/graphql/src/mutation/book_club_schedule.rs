@@ -269,10 +269,7 @@ mod tests {
 
 		let now = Utc::now();
 		let duration = end_at.signed_duration_since(now);
-		assert!(is_close_to_interval(
-			duration,
-			interval_days.try_into().unwrap()
-		));
+		assert!(is_close_to_interval(duration, interval_days));
 		assert!(is_close_to_now(start_at.into()));
 	}
 

@@ -22,7 +22,7 @@ impl AuthorSeries {
 	async fn books(&self, ctx: &Context<'_>) -> Result<Vec<Media>> {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 
-		let models = media::ModelWithMetadata::find_for_user(user)
+		let _models = media::ModelWithMetadata::find_for_user(user)
 			.filter(media_metadata::Column::Series.contains(self.title.clone()));
 
 		// Fetch the books associated with the series
@@ -35,7 +35,7 @@ impl Author {
 	async fn books(&self, ctx: &Context<'_>) -> Result<Vec<Media>> {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 
-		let models = media::ModelWithMetadata::find_for_user(user)
+		let _models = media::ModelWithMetadata::find_for_user(user)
 			.filter(media_metadata::Column::Writers.contains(&self.name));
 
 		// Fetch the books associated with the author

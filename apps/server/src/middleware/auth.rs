@@ -215,23 +215,6 @@ pub async fn api_key_middleware(
 	Ok(next.run(req).await)
 }
 
-/// Middleware to check if a user has the required permissions to access a route. If the user does
-/// not have the required permissions, the middleware will reject the request.
-#[tracing::instrument(skip(req, next))]
-pub async fn permission_middleware(
-	State(permissions): State<Vec<UserPermission>>,
-	Extension(ctx): Extension<AuthContext>,
-	req: Request,
-	next: Next,
-) -> Result<Response, Response> {
-	ctx.enforce_permissions(&permissions).map_err(|e| {
-		tracing::error!(error = ?e, "User does not have required permissions");
-		APIError::forbidden_discreet().into_response()
-	})?;
-
-	Ok(next.run(req).await)
-}
-
 /// Middleware to check if a user is the server owner. If the user is not the server owner, the
 /// middleware will reject the request.
 #[tracing::instrument(skip(req, next))]

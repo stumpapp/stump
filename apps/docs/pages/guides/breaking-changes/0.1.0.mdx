@@ -18,7 +18,7 @@ The list of notable database changes are as follows:
 - Convert all Prisma-specific join tables to use more semantic naming conventions
 - Reduce the usage of UUIDs in favor of auto-incrementing integers for primary keys for smaller tables with less user-facing exposure
 - Standardize all enumerations to use `SCREAMING_SNAKE_CASE` instead of a mix of `snake_case` and `PascalCase`
-- Replace `Blob` types with `Json` types for potentially filtering
+- Replace `Blob` types with `Json` types for potentially improved filtering
 
 ### Non-Recoverable Data
 
@@ -28,6 +28,8 @@ Thankfully, the vast majority of data is migratable. However, there are some pie
 - User-assigned permissions
 - Smart lists
 - Scheduled job configurations
+
+To be clear: these pieces of data will be lost during the migration process. Please take extra care to re-assign permisions to users and re-create API keys after the migration is complete.
 
 ## Migration Steps
 

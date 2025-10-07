@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { View } from 'react-native'
 import TurboImage from 'react-native-turbo-image'
 
 import { Button, Dialog, Text } from '~/components/ui'
+
 import AppSettingsRow from '../AppSettingsRow'
 
 export default function CachePolicySelect() {
@@ -35,7 +36,7 @@ export default function CachePolicySelect() {
 						variant="destructive"
 						onPress={async () => {
 							await TurboImage.clearDiskCache()
-							setDialogMessage('Disk cache cleared       ')
+							setDialogMessage('Disk cache cleared')
 						}}
 					>
 						<Text className="text-foreground">Disk</Text>

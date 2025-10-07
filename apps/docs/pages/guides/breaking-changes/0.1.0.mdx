@@ -7,7 +7,7 @@ import { Callout, Steps } from 'nextra/components'
 	context
 </Callout>
 
-Stump has migrated from using Prisma to SeaORM for its database layer and from REST to GraphQL for its API. This was effectively a ground-up rewrite a large portion of the entire codebase, and as such, there are several breaking changes that users should be aware of before upgrading to version 0.1.0 or later.
+Stump has migrated from using Prisma to SeaORM for its database layer and from REST to GraphQL for its API. This was effectively a ground-up rewrite of a large portion of the entire codebase, and as such, there are several breaking changes that users should be aware of before upgrading to version 0.1.0 or later.
 
 ## Incompatible Database
 
@@ -18,6 +18,7 @@ The list of notable database changes are as follows:
 - Convert all Prisma-specific join tables to use more semantic naming conventions
 - Reduce the usage of UUIDs in favor of auto-incrementing integers for primary keys for smaller tables with less user-facing exposure
 - Standardize all enumerations to use `SCREAMING_SNAKE_CASE` instead of a mix of `snake_case` and `PascalCase`
+- Replace `Blob` types with `Json` types for potentially filtering
 
 ### Non-Recoverable Data
 
@@ -53,7 +54,7 @@ The important part here is to ensure you have an upgraded instance running to ge
 
 The updated Stump instance includes a CLI tool to help with the migration process. Before continuing, please ensure the following:
 
-- The new Stump instance has been started at least once, has not been configured, and is fully stopped
+- The new Stump instance has been started at least once, has not been configured, and is fully stopped. There should be a new database created with no data in any of the tables
 - The old Stump instance is fully stopped
 - The old Stump database is accessible (if running Docker, ensure both database files are mounted properly)
 

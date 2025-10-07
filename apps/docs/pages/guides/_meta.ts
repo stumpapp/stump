@@ -14,4 +14,7 @@ export default {
 	cli: 'CLI',
 	desktop: 'Desktop App',
 	mobile: 'Mobile App',
+	'breaking-changes': {
+		display: 'hidden',
+	},
 } satisfies Meta

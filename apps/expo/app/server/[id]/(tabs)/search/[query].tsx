@@ -160,13 +160,13 @@ export default function Screen() {
 			edges={Platform.OS === 'ios' ? ['top', 'left', 'right'] : ['left', 'right']}
 		>
 			<ScrollView
-				className="flex-1 bg-background p-4 tablet:p-7"
+				className="flex-1 bg-background py-4 tablet:py-7"
 				contentInsetAdjustmentBehavior="automatic"
 			>
-				<View className="gap-4">
+				<View className="gap-2 pb-2">
 					{!!bookResults?.media.nodes.length && (
 						<View>
-							<View className="mb-1 flex flex-row items-center justify-between">
+							<View className="mb-1 flex flex-row items-center justify-between px-4 tablet:px-7">
 								<Heading size="default">Books</Heading>
 								{getHasMore(bookResults?.media.pageInfo) && (
 									<Link href={`/server/${serverID}/books/search[q]?q=${query}`}>
@@ -192,13 +192,14 @@ export default function Screen() {
 								}}
 								keyExtractor={(item) => item.map((book) => book.id).join('-')}
 								horizontal
+								contentContainerStyle={{ paddingBottom: 8 }}
 							/>
 						</View>
 					)}
 
 					{!!seriesResults?.series.nodes.length && (
 						<View>
-							<View className="mb-1 flex flex-row items-center justify-between">
+							<View className="mb-1 flex flex-row items-center justify-between px-4 tablet:px-7">
 								<Heading size="default">Series</Heading>
 								{/* {getHasMore(seriesResults?.series.pageInfo) && (
 									<Link href={`/server/${serverID}/books/search[q]?q=${searchQuery}`}>
@@ -224,13 +225,14 @@ export default function Screen() {
 								}}
 								keyExtractor={(item) => item.map((book) => book.id).join('-')}
 								horizontal
+								contentContainerStyle={{ paddingBottom: 8 }}
 							/>
 						</View>
 					)}
 
 					{!!librariesResults?.libraries.nodes.length && (
 						<View className="pb-4">
-							<View className="mb-1 flex flex-row items-center justify-between">
+							<View className="mb-1 flex flex-row items-center justify-between px-4 tablet:px-7">
 								<Heading size="default">Libraries</Heading>
 								{/* {getHasMore(seriesResults?.series.pageInfo) && (
 									<Link href={`/server/${serverID}/books/search[q]?q=${searchQuery}`}>
@@ -256,6 +258,7 @@ export default function Screen() {
 								}}
 								keyExtractor={(item) => item.map((book) => book.id).join('-')}
 								horizontal
+								contentContainerStyle={{ paddingBottom: 8 }}
 							/>
 						</View>
 					)}

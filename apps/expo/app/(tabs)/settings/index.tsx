@@ -12,6 +12,7 @@ import {
 	ReaderSettingsLink,
 	ReduceAnimations,
 	ThumbnailRatio,
+	PerformanceMonitor,
 } from '~/components/appSettings/preferences'
 import AppPrimaryColor from '~/components/appSettings/preferences/AppPrimaryColor'
 import { StumpEnabled } from '~/components/appSettings/stump'
@@ -57,6 +58,7 @@ export default function Screen() {
 				<View>
 					<Text className="mb-3 text-foreground-muted">Debug</Text>
 					<CachePolicySelect />
+					<PerformanceMonitor />
 					<ReduceAnimations />
 					<MaskURLs />
 				</View>

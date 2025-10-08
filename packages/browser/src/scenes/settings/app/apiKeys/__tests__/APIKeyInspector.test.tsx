@@ -1,3 +1,4 @@
+import { UserPermission } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { APIKey, User } from '@stump/sdk'
 import { render, screen } from '@testing-library/react'
@@ -7,6 +8,8 @@ import { useAppContext } from '@/context'
 
 import APIKeyInspector from '../APIKeyInspector'
 
+// TODO(graphql): Fix to use generated types
+
 jest.mock('@/context', () => ({
 	useAppContext: jest.fn(),
 }))
@@ -14,7 +17,7 @@ const useAppContextRet = {
 	user: {
 		id: 'user-id',
 		is_server_owner: false,
-		permissions: ['feature:api_keys'],
+		permissions: [UserPermission.AccessApiKeys],
 	} as User,
 } as any
 
@@ -49,7 +52,11 @@ describe('APIKeyInspector', () => {
 	})
 
 	it('should render a key with explicit permissions properly', () => {
-		render(Subject(createKey({ permissions: ['feature:api_keys', 'bookclub:create'] })))
+		render(
+			Subject(
+				createKey({ permissions: [UserPermission.AccessApiKeys, UserPermission.CreateBookClub] }),
+			),
+		)
 
 		expect(screen.getByTestId('permissions-meta')).toBeInTheDocument()
 		expect(translate).toHaveBeenCalledWith(expect.stringContaining('fields.permissions'))
@@ -59,7 +66,10 @@ describe('APIKeyInspector', () => {
 	it('should render an implicit key properly', () => {
 		jest.mocked(useAppContext).mockReturnValue({
 			...useAppContextRet,
-			user: { ...useAppContextRet.user, permissions: ['feature:api_keys', 'bookclub:create'] },
+			user: {
+				...useAppContextRet.user,
+				permissions: [UserPermission.AccessApiKeys, UserPermission.CreateBookClub],
+			},
 		})
 
 		render(Subject(createKey({ permissions: 'inherit' })))

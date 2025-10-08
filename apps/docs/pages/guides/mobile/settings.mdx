@@ -1,3 +1,5 @@
+import { Callout } from 'nextra/components'
+
 # App Settings
 
 The mobile app provides comprehensive settings to customize your reading experience and app behavior. These settings are stored locally on your device and are not synced across devices.
@@ -6,15 +8,19 @@ The mobile app provides comprehensive settings to customize your reading experie
 
 ### Theme
 
-Switch between **Light** and **Dark** themes to match your reading preference or system appearance.
+A light and dark theme is available by default. The [ebook reader](/guides/mobile/reading/books#visual-themes) has more options available.
 
 ### Accent Color (iOS only)
 
-Customize the app's accent color using a color picker. This affects buttons, highlights, and other interactive elements throughout the app.
+Customize the app's accent color using a color picker. This affects buttons and other interactive elements throughout the app.
 
 ### Language
 
-Configure the app's display language. Currently supports **English** with additional languages planned for future releases.
+<Callout emoji="🚧" type="warning">
+	Currently, only English is supported. Additional languages are planned for future releases.
+</Callout>
+
+Configure the app's display language.
 
 ### Default Server
 
@@ -39,35 +45,36 @@ Access comprehensive reader configuration options. This opens a dedicated settin
 - Navigation controls
 - Per-format reader options
 
-These settings serve as defaults for all books and can be overridden on a per-book basis. See the [reader settings](/guides/mobile/reading/readers) guide for detailed information.
+These settings serve as defaults for all books and can be overridden on a per-book basis.
 
 ## Stump Integration
 
-### Stump Features Toggle
+You do not need a Stump server to use the app. Any OPDS v2-compatible server will work for basic catalog browsing and reading.
 
-Control whether Stump-specific features are enabled in the app:
+When disabled, the app simply hides any Stump-specific features:
 
-- **Enabled**: Full Stump server integration with libraries, collections, and advanced features
-- **Disabled**: OPDS-only mode for basic book browsing and reading
+- Only OPDS servers may be configured
+- Only OPDS servers are shown during server selection
 
-When disabled, the app operates in a simplified mode that only supports OPDS feeds, making it suitable for users who prefer a minimal reading experience or only need basic server connectivity.
+A few important notes when Stump features are disabled:
+
+- Existing Stump servers will still be stored, but hidden from view
+- You won't get progress syncing, since that relies on Stump-specific APIs
+- Your OPDS server **must** support sending a `readingOrder` for publications if you want streaming support
 
 ## Management
 
 ### Data Usage
+
+<Callout emoji="🚧" type="warning">
+	This functionality is not fully implemented yet and may change in future releases
+</Callout>
 
 Monitor and manage the app's storage usage with detailed breakdowns:
 
 - **Total Usage**: Overall storage consumed by the app
 - **Per-Server Data**: Usage categorized by each configured server
 - **Data Categories**: Downloads, cached images, preferences, and temporary files
-
-The data management screen allows you to:
-
-- View storage usage by server
-- Clear cached data selectively
-- Remove server data completely
-- Monitor download sizes
 
 ## Debug & Privacy
 
@@ -88,8 +95,4 @@ Toggle to minimize or disable animations throughout the app. Useful for:
 
 ### Mask URLs
 
-Privacy feature that obscures server URLs in the interface:
-
-- Useful for screenshots or screen recordings
-- Prevents accidental exposure of private server addresses
-- Maintains functionality while hiding sensitive information
+Privacy feature that obscures server URLs in the interface. This was added to help with debugging while ensuring that potentially sensitive information is not inadvertently shared

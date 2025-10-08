@@ -451,7 +451,9 @@ export default function Footer() {
 						className="flex flex-row"
 						style={{
 							...getGalleryItemSize(index),
-							gap: 1,
+							borderCurve: 'continuous',
+							overflow: 'hidden',
+							borderRadius: 6,
 						}}
 					>
 						{directionRespectingItem.map((pageIdx, i) => {
@@ -465,14 +467,7 @@ export default function Footer() {
 									resizeMode="stretch"
 									// we downscale (resize) by width, so when we resize an individual image, the gallery size is halved when the item length is 2.
 									resize={(getGalleryItemSize(index).width / item.length) * 1.5}
-									style={{
-										width: item.length === 1 ? '100%' : '50%',
-										height: '100%',
-										// @ts-expect-error bug in library (to be fixed soon). StyleProp<ImageStyle> should be StyleProp<ViewStyle>
-										borderCurve: 'continuous',
-										overflow: 'hidden',
-										borderRadius: 6,
-									}}
+									style={{ width: item.length === 1 ? '100%' : '50%', height: '100%' }}
 									onSuccess={({ nativeEvent }) => onImageLoaded(pageIdx, nativeEvent)}
 								/>
 							)

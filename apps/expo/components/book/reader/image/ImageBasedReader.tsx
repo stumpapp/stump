@@ -63,7 +63,7 @@ export default function ImageBasedReader({ initialPage, onPastEndReached }: Prop
 		flatListRef,
 	} = useImageBasedReader()
 	const {
-		preferences: { readingMode, incognito, readingDirection },
+		preferences: { readingMode, incognito, readingDirection, doublePageBehavior },
 	} = useBookPreferences({ book })
 	const { height, width } = useWindowDimensions()
 
@@ -72,22 +72,19 @@ export default function ImageBasedReader({ initialPage, onPastEndReached }: Prop
 		[width, height],
 	)
 
-	const previousOrientation = usePrevious(deviceOrientation)
+	const deviceOrientationChanged = usePrevious(deviceOrientation) !== deviceOrientation
+	const doublePageBehaviorChanged = usePrevious(doublePageBehavior) !== doublePageBehavior
 	useEffect(
 		() => {
 			if (!currentPage) return
-			if (deviceOrientation !== previousOrientation) {
+			if (deviceOrientationChanged || doublePageBehaviorChanged) {
 				const scrollTo = pageSets.findIndex((set) => set.includes(currentPage - 1))
 				if (scrollTo === -1) return
-				const timeout = setTimeout(
-					() => flatListRef?.current?.scrollToIndex({ index: scrollTo, animated: false }),
-					100,
-				)
-				return () => clearTimeout(timeout)
+				flatListRef?.current?.scrollToIndex({ index: scrollTo, animated: false })
 			}
 		},
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[deviceOrientation, previousOrientation],
+		[deviceOrientationChanged, doublePageBehaviorChanged],
 	)
 
 	/**

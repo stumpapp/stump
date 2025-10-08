@@ -1,14 +1,13 @@
 import { UserPermission } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
-import { APIKey, User } from '@stump/sdk'
+import { AuthUser } from '@stump/sdk'
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
 
 import { useAppContext } from '@/context'
 
 import APIKeyInspector from '../APIKeyInspector'
-
-// TODO(graphql): Fix to use generated types
+import { APIKey } from '../APIKeyTable'
 
 jest.mock('@/context', () => ({
 	useAppContext: jest.fn(),
@@ -16,9 +15,12 @@ jest.mock('@/context', () => ({
 const useAppContextRet = {
 	user: {
 		id: 'user-id',
-		is_server_owner: false,
-		permissions: [UserPermission.AccessApiKeys],
-	} as User,
+		isServerOwner: false,
+		permissions: {
+			__typename: 'UserPermissionStruct',
+			value: [UserPermission.AccessApiKeys],
+		},
+	} as unknown as AuthUser,
 } as any
 
 jest.mock('@stump/i18n', () => ({
@@ -29,10 +31,13 @@ const translate = jest.fn().mockImplementation((key: string) => key)
 const createKey = (overrides: Partial<APIKey> = {}): APIKey => ({
 	id: 1,
 	name: 'key-name',
-	permissions: [],
-	created_at: '2021-01-01',
-	expires_at: null,
-	last_used_at: null,
+	permissions: {
+		__typename: 'UserPermissionStruct',
+		value: [],
+	},
+	createdAt: '2021-01-01',
+	expiresAt: null,
+	lastUsedAt: null,
 	...overrides,
 })
 
@@ -54,7 +59,12 @@ describe('APIKeyInspector', () => {
 	it('should render a key with explicit permissions properly', () => {
 		render(
 			Subject(
-				createKey({ permissions: [UserPermission.AccessApiKeys, UserPermission.CreateBookClub] }),
+				createKey({
+					permissions: {
+						__typename: 'UserPermissionStruct',
+						value: [UserPermission.AccessApiKeys, UserPermission.CreateBookClub],
+					},
+				}),
 			),
 		)
 
@@ -72,7 +82,15 @@ describe('APIKeyInspector', () => {
 			},
 		})
 
-		render(Subject(createKey({ permissions: 'inherit' })))
+		render(
+			Subject(
+				createKey({
+					permissions: {
+						__typename: 'InheritPermissionStruct',
+					},
+				}),
+			),
+		)
 
 		expect(screen.getByTestId('permissions-meta')).toBeInTheDocument()
 		expect(translate).toHaveBeenCalledWith(expect.stringContaining('fields.permissions'))
@@ -84,7 +102,7 @@ describe('APIKeyInspector', () => {
 			...useAppContextRet,
 			user: { ...useAppContextRet.user, is_server_owner: true },
 		})
-		render(Subject(createKey({ permissions: 'inherit' })))
+		render(Subject(createKey({ permissions: { __typename: 'InheritPermissionStruct' } })))
 
 		expect(screen.getByTestId('unrestricted-meta')).toBeInTheDocument()
 		expect(translate).toHaveBeenCalledWith(expect.stringContaining('unrestrictedKey.heading'))

@@ -94,8 +94,7 @@ export default function FilterSheet({ label, children, isActive, snapPoints, ico
 					16 // bottom padding
 				}
 				backgroundStyle={{
-					borderTopLeftRadius: 24,
-					borderTopRightRadius: 24,
+					borderRadius: 24,
 					borderCurve: 'continuous',
 					overflow: 'hidden',
 					borderWidth: 1,

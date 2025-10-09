@@ -24,6 +24,7 @@ pub struct DiscoveredMissingLibrary {
 pub struct CreatedMedia {
 	pub id: String,
 	pub series_id: String,
+	pub library_id: String,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, SimpleObject)]
@@ -38,6 +39,7 @@ pub struct CreatedManySeries {
 pub struct CreatedOrUpdatedManyMedia {
 	pub count: u64,
 	pub series_id: String,
+	pub library_id: String,
 }
 
 /// An event that is emitted by the core and consumed by a client

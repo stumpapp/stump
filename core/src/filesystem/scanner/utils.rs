@@ -620,6 +620,15 @@ pub(crate) async fn safely_build_and_insert_media(
 
 	let mut output = MediaOperationOutput::default();
 
+	let Some(library_id) = library_config.library_id.clone() else {
+		tracing::error!(?library_config, "Library config has no library ID?");
+		output.logs.push(JobExecuteLog::error(format!(
+			"Library config has no library ID: {:?}",
+			library_config.id
+		)));
+		return Ok(output);
+	};
+
 	let chunk_size = max_concurrency;
 	let book_count = paths.len();
 	tracing::debug!(book_count, chunk_size, "Processing media");
@@ -722,6 +731,7 @@ pub(crate) async fn safely_build_and_insert_media(
 					CoreEvent::CreatedMedia(CreatedMedia {
 						id: created_media.id,
 						series_id: series_id.clone(),
+						library_id: library_id.clone(),
 					})
 					.into_worker_send(),
 				]);

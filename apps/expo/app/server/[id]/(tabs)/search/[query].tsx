@@ -3,7 +3,7 @@ import { graphql, PaginationInfo } from '@stump/graphql'
 import { useQueries, useQueryClient } from '@tanstack/react-query'
 import { Link, useLocalSearchParams } from 'expo-router'
 import { useCallback } from 'react'
-import { FlatList, Platform, View } from 'react-native'
+import { FlatList, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useActiveServer } from '~/components/activeServer'
@@ -155,10 +155,7 @@ export default function Screen() {
 	}
 
 	return (
-		<SafeAreaView
-			style={{ flex: 1 }}
-			edges={Platform.OS === 'ios' ? ['top', 'left', 'right'] : ['left', 'right']}
-		>
+		<SafeAreaView style={{ flex: 1 }} edges={['left', 'right']}>
 			<ScrollView
 				className="flex-1 bg-background py-4 tablet:py-7"
 				contentInsetAdjustmentBehavior="automatic"

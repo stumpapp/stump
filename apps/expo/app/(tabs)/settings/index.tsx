@@ -9,6 +9,7 @@ import {
 	DefaultServer,
 	ImageCacheActions,
 	MaskURLs,
+	PerformanceMonitor,
 	ReaderSettingsLink,
 	ReduceAnimations,
 	ThumbnailRatio,
@@ -57,6 +58,7 @@ export default function Screen() {
 				<View>
 					<Text className="mb-3 text-foreground-muted">Debug</Text>
 					<ImageCacheActions />
+					<PerformanceMonitor />
 					<ReduceAnimations />
 					<MaskURLs />
 				</View>

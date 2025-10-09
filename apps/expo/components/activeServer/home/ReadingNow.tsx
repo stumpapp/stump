@@ -7,8 +7,9 @@ import { Easing, Platform, Pressable, View } from 'react-native'
 import { easeGradient } from 'react-native-easing-gradient'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 import LinearGradient from 'react-native-linear-gradient'
-import { runOnJS, useSharedValue } from 'react-native-reanimated'
+import { useSharedValue } from 'react-native-reanimated'
 import Carousel, { ICarouselInstance, Pagination } from 'react-native-reanimated-carousel'
+import { scheduleOnRN } from 'react-native-worklets'
 import { stripHtml } from 'string-strip-html'
 
 import { BookMetaLink } from '~/components/book'
@@ -65,7 +66,7 @@ export default function ReadingNow({ books }: Props) {
 
 	const onPressPagination = (index: number) => {
 		carouselRef.current?.scrollTo({
-			count: index - progressValue.value,
+			index: index,
 			animated: true,
 		})
 	}
@@ -86,7 +87,7 @@ export default function ReadingNow({ books }: Props) {
 			// only update onPressPagination when the index actually changes (not when same number due to tiny movements)
 			if (activeDotIndex.value !== index) {
 				activeDotIndex.value = index
-				runOnJS(onPressPagination)(index)
+				scheduleOnRN(onPressPagination, index)
 			}
 		})
 		.onEnd(() => {

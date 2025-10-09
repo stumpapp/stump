@@ -54,6 +54,7 @@ export default function AddOrEditServerForm({
 				message: 'Failed to connect to server',
 			})
 		} else {
+			form.clearErrors('url')
 			setDidConnect(true)
 		}
 	}, [url, form])

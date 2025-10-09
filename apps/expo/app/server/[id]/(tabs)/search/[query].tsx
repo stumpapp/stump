@@ -2,17 +2,18 @@ import { useSDK } from '@stump/client'
 import { graphql, PaginationInfo } from '@stump/graphql'
 import { useQueries, useQueryClient } from '@tanstack/react-query'
 import { Link, useLocalSearchParams } from 'expo-router'
+import chunk from 'lodash/chunk'
 import { useCallback } from 'react'
-import { FlatList, Platform, View } from 'react-native'
+import { FlatList, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import { SafeAreaView } from 'react-native-safe-area-context'
+
 import { useActiveServer } from '~/components/activeServer'
-import { Heading, Text } from '~/components/ui'
-import chunk from 'lodash/chunk'
-import { icons } from '~/lib'
 import { BookSearchItem, IBookSearchItemFragment } from '~/components/book'
-import { ISeriesSearchItemFragment, SeriesSearchItem } from '~/components/series'
 import { ILibrarySearchItemFragment, LibrarySearchItem } from '~/components/library'
+import { ISeriesSearchItemFragment, SeriesSearchItem } from '~/components/series'
+import { Heading, Text } from '~/components/ui'
+import { icons } from '~/lib'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
 
 const { Search } = icons
@@ -155,18 +156,15 @@ export default function Screen() {
 	}
 
 	return (
-		<SafeAreaView
-			style={{ flex: 1 }}
-			edges={Platform.OS === 'ios' ? ['top', 'left', 'right'] : ['left', 'right']}
-		>
+		<SafeAreaView style={{ flex: 1 }} edges={['left', 'right']}>
 			<ScrollView
-				className="flex-1 bg-background p-4 tablet:p-7"
+				className="flex-1 bg-background py-4 tablet:py-7"
 				contentInsetAdjustmentBehavior="automatic"
 			>
-				<View className="gap-4">
+				<View className="gap-2 pb-2">
 					{!!bookResults?.media.nodes.length && (
 						<View>
-							<View className="mb-1 flex flex-row items-center justify-between">
+							<View className="mb-1 flex flex-row items-center justify-between px-4 tablet:px-7">
 								<Heading size="default">Books</Heading>
 								{getHasMore(bookResults?.media.pageInfo) && (
 									<Link href={`/server/${serverID}/books/search[q]?q=${query}`}>
@@ -192,13 +190,14 @@ export default function Screen() {
 								}}
 								keyExtractor={(item) => item.map((book) => book.id).join('-')}
 								horizontal
+								contentContainerStyle={{ paddingBottom: 8 }}
 							/>
 						</View>
 					)}
 
 					{!!seriesResults?.series.nodes.length && (
 						<View>
-							<View className="mb-1 flex flex-row items-center justify-between">
+							<View className="mb-1 flex flex-row items-center justify-between px-4 tablet:px-7">
 								<Heading size="default">Series</Heading>
 								{/* {getHasMore(seriesResults?.series.pageInfo) && (
 									<Link href={`/server/${serverID}/books/search[q]?q=${searchQuery}`}>
@@ -224,13 +223,14 @@ export default function Screen() {
 								}}
 								keyExtractor={(item) => item.map((book) => book.id).join('-')}
 								horizontal
+								contentContainerStyle={{ paddingBottom: 8 }}
 							/>
 						</View>
 					)}
 
 					{!!librariesResults?.libraries.nodes.length && (
 						<View className="pb-4">
-							<View className="mb-1 flex flex-row items-center justify-between">
+							<View className="mb-1 flex flex-row items-center justify-between px-4 tablet:px-7">
 								<Heading size="default">Libraries</Heading>
 								{/* {getHasMore(seriesResults?.series.pageInfo) && (
 									<Link href={`/server/${serverID}/books/search[q]?q=${searchQuery}`}>
@@ -256,6 +256,7 @@ export default function Screen() {
 								}}
 								keyExtractor={(item) => item.map((book) => book.id).join('-')}
 								horizontal
+								contentContainerStyle={{ paddingBottom: 8 }}
 							/>
 						</View>
 					)}

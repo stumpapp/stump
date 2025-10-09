@@ -1,7 +1,7 @@
 import { useRouter } from 'expo-router'
 import partition from 'lodash/partition'
 import { useCallback, useEffect, useState } from 'react'
-import { View } from 'react-native'
+import { useWindowDimensions, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 
 import DeleteServerConfirmation from '~/components/savedServer/DeleteServerConfirmation'
@@ -17,6 +17,7 @@ export default function Screen() {
 	const { savedServers, stumpEnabled, updateServer, deleteServer, getServerConfig } =
 		useSavedServers()
 	const router = useRouter()
+	const { width } = useWindowDimensions()
 
 	const [stumpServers, opdsServers] = partition(savedServers, (server) => server.kind === 'stump')
 	const [editingServer, setEditingServer] = useState<SavedServerWithConfig | null>(null)
@@ -81,15 +82,19 @@ export default function Screen() {
 	const onEdit = useCallback(
 		async (server: CreateServer) => {
 			if (editingServer) {
-				await updateServer(editingServer.id, server)
 				setEditingServer(null)
+				await updateServer(editingServer.id, server)
 			}
 		},
 		[setEditingServer, updateServer, editingServer],
 	)
 
 	return (
-		<ScrollView className="flex-1 bg-background" contentInsetAdjustmentBehavior="automatic">
+		<ScrollView
+			key={`${width}-${allOPDSServers.length}-${stumpServers.length}`}
+			className="flex-1 bg-background"
+			contentInsetAdjustmentBehavior="automatic"
+		>
 			<DeleteServerConfirmation
 				deletingServer={deletingServer}
 				onClose={() => setDeletingServer(null)}

@@ -1,5 +1,6 @@
 import { Api, AuthenticationMethod } from '@stump/sdk'
 import { PropsWithChildren, useEffect, useState } from 'react'
+import { match, P } from 'ts-pattern'
 
 import { useClientContext } from '../context'
 import { SDKContext } from './context'
@@ -40,10 +41,17 @@ export function SDKProvider({
 					return
 				}
 
-				const token = await tauriRPC.getApiToken(currentServer)
-				if (token) {
-					instance.token = token
-				}
+				const tokens = await tauriRPC.getTokens(currentServer)
+				match(tokens)
+					.with({ apiKey: P.string }, ({ apiKey }) => {
+						instance.staticToken = apiKey
+					})
+					.with({ jwt: P.any }, ({ jwt }) => {
+						instance.tokens = jwt
+					})
+					.otherwise(() => {
+						console.warn('No tokens found for the current server')
+					})
 			} catch (error) {
 				console.error('Failed to get existing token', error)
 			}

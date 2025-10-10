@@ -280,7 +280,7 @@ mod tests {
 		// Because the updated date is set at build time, we need to dynamically insert it
 		let template_expected_result = normalize_xml(
 			r#"
-			<?xml version="1.0" encoding="utf-8"?>
+			<?xml version="1.0" encoding="UTF-8"?>
 			<feed xmlns="http://www.w3.org/2005/Atom" 
 						xmlns:opds="http://opds-spec.org/2010/catalog" 
 						xmlns:pse="http://vaemendis.net/opds-pse/ns">

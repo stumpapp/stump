@@ -127,6 +127,7 @@ export default function SavedServerEntry({ tauriRPC }: Props) {
 		}
 	}, [])
 
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const handleAuthDialogClose = useCallback(
 		(loginResp?: LoginResponse) => {
 			if (!loginResp || !('forUser' in loginResp) || !activeServer) {

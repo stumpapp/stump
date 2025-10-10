@@ -28,7 +28,7 @@ export default function Home() {
 	const setBaseUrl = useAppStore((store) => store.setBaseUrl)
 	const navigate = useNavigate()
 
-	const [editingServer, setEditingServer] = useState<SavedServer | null>(null)
+	const [, setEditingServer] = useState<SavedServer | null>(null)
 	const [deletingServer, setDeletingServer] = useState<SavedServer | null>(null)
 
 	const statusResults = useQueries({

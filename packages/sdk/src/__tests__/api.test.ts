@@ -16,6 +16,12 @@ const axiosInstance = {
 	},
 } as any
 
+const getJwtPair = (fakeToken: string) => ({
+	accessToken: fakeToken,
+	refreshToken: 'refresh-me',
+	expiresAt: new Date(Date.now() + 1000 * 60 * 60).toISOString(),
+})
+
 describe('Api', () => {
 	beforeEach(() => {
 		jest.clearAllMocks()
@@ -54,13 +60,13 @@ describe('Api', () => {
 
 		it('should get the token', () => {
 			const api = new Api({ baseURL: 'http://localhost:10801', authMethod: 'token' })
-			api.token = 'give-me-access'
+			api.tokens = getJwtPair('give-me-access')
 			expect(api.token).toBe('give-me-access')
 		})
 
 		it('should get a formatted auth header when a token is set', () => {
 			const api = new Api({ baseURL: 'http://localhost:10801', authMethod: 'token' })
-			api.token = 'give-me-access'
+			api.tokens = getJwtPair('give-me-access')
 			expect(api.authorizationHeader).toBe('Bearer give-me-access')
 		})
 	})
@@ -94,7 +100,7 @@ describe('Api', () => {
 			})
 
 			// Set the token
-			api.token = 'give-me-access'
+			api.tokens = getJwtPair('give-me-access')
 			const config = {
 				headers: {
 					concat: jest.fn().mockImplementation((obj: unknown) => obj),

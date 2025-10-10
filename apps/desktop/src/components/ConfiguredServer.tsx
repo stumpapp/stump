@@ -1,6 +1,6 @@
 import { cn, IconButton, Text, ToolTip } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import { BadgeCheck, Power, Settings2, Trash2, WifiOff } from 'lucide-react'
+import { BadgeCheck, Settings2, Trash2, WifiOff } from 'lucide-react'
 
 import { SavedServer } from '../stores/savedServer'
 

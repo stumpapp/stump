@@ -34,8 +34,10 @@ To be clear: these pieces of data will be lost during the migration process. Ple
 ## Migration Steps
 
 <Callout emoji="⚠️">
-	Please report any issues you encounter during the migration process. There are so many different
-	configurations and setups that it's hard to account for all of them.
+	There are **NO** guarantees that this migration will work for everyone. There are so many different configurations and setups that it's hard to account for all of them.
+
+    Please report any issues you encounter during the migration process.
+
 </Callout>
 
 This section outlines the steps needed to migrate your existing Stump instance to version 0.1.0 or later. Please note that these steps only apply if you are upgrading from a version prior to 0.1.0.
@@ -82,7 +84,12 @@ To migrate your database using the CLI tool, run the following:
 ./stump system sea-orm-migration
 ```
 
-The tool will prompt you for the necessary information to pull data from the old database and insert it into the new one. Follow the prompts carefully.
+The tool will prompt you for the necessary information to pull data from the old database and insert it into the new one. Follow the prompts carefully. A loose outline of the prompts is as follows:
+
+- Confirm you want to proceed with the migration
+- Enter the path to the legacy database file (with the data you want to migrate)
+- Confirm the path to the new database file (this should be pre-filled with the correct path)
+- Monitor the migration progress (should be very quick)
 
 </Steps>
 

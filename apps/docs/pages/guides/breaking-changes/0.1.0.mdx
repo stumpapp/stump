@@ -52,6 +52,21 @@ Once you've backed up your data, you'll need to update your Stump instance. I hi
 
 The important part here is to ensure you have an upgraded instance running to get the new database created and migrated, which happens automatically after the first start.
 
+### Download the `backfill.sql` Script
+
+<Callout emoji="">
+	The `backfill.sql` script will be one of the downloadable assets in the release page for `0.1.0`.
+	You may be viewing this guide before the release is published. Until then, the link referenced
+	below will not work. You can find the script in the `develop` or `experimental` branches at
+	`/crates/migrations/backfill.sql`
+</Callout>
+
+Download the `backfill.sql` script from the [release page for 0.1.0](https://github.com/stumpapp/stump/releases/tag/v0.1.0).
+
+If you continue with this guide, you will not need to make **any** edits to this script file. The migration tool will handle executing the sql for you.
+
+If you would prefer to attempt to run the migration manually, please carefully review the script instructions. The important part is that you will need to replace the placeholders at the top of the script with your actual database paths.
+
 ### Migrate Your Database
 
 The updated Stump instance includes a CLI tool to help with the migration process. Before continuing, please ensure the following:

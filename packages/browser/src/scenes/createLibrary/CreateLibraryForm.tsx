@@ -15,7 +15,6 @@ import {
 	BasicLibraryInformation,
 	FileConversionOptions,
 	LibraryPattern as LibraryPatternSection,
-	ScanMode,
 	ScannerOptInFeatures,
 	ThumbnailConfig,
 } from '@/components/library/createOrUpdate/sections'
@@ -23,6 +22,7 @@ import IgnoreRulesConfig from '@/components/library/createOrUpdate/sections/Igno
 import { useSteppedFormContext } from '@/components/steppedForm'
 
 import LibraryReview from './LibraryReview'
+import ScanAfterPersist from './ScanAfterPersist'
 
 type Props = {
 	existingLibraries: CreateLibrarySceneExistingLibrariesQuery['libraries']['nodes']
@@ -149,7 +149,7 @@ export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoadi
 				return (
 					<>
 						<LibraryReview />
-						<ScanMode />
+						<ScanAfterPersist />
 					</>
 				)
 		}

@@ -75,7 +75,7 @@ export default function UserMenu({ variant = 'sidebar' }: Props) {
 
 							<Link
 								className={linkClasses(isSidebar)}
-								to={paths.settings('app/general')}
+								to={paths.settings()}
 								onClick={() => setIsOpen(false)}
 							>
 								<Settings className="mr-1.5 h-4 w-4" />

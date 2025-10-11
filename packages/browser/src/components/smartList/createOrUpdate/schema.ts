@@ -231,7 +231,7 @@ export const intoForm = ({
 	filters,
 	joiner,
 	defaultGrouping,
-}: Omit<SmartListParsed, 'views'>): SmartListFormSchema => {
+}: Omit<SmartListParsed, 'views' | 'creatorId' | 'thumbnail'>): SmartListFormSchema => {
 	return {
 		description: description || undefined,
 		filters: {

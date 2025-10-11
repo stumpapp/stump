@@ -11,7 +11,6 @@ type Props = {
 	isCreating?: boolean
 }
 
-// TODO(graphql): Fix
 export default function AccessSettings({ isCreating }: Props) {
 	const form = useFormContext<SubSchema>()
 	const visibility = form.watch('visibility')
@@ -24,20 +23,22 @@ export default function AccessSettings({ isCreating }: Props) {
 				<Label>{t(getKey('label'))}</Label>
 				<NativeSelect
 					options={[
-						{ label: t(getOptionKey('PUBLIC', 'label')), value: 'PUBLIC' },
-						{ label: t(getOptionKey('SHARED', 'label')), value: 'SHARED' },
-						{ label: t(getOptionKey('PRIVATE', 'label')), value: 'PRIVATE' },
+						{ label: t(getOptionKey(EntityVisibility.Public, 'label')), value: 'PUBLIC' },
+						{ label: t(getOptionKey(EntityVisibility.Shared, 'label')), value: 'SHARED' },
+						{ label: t(getOptionKey(EntityVisibility.Private, 'label')), value: 'PRIVATE' },
 					]}
 					{...form.register('visibility')}
 				/>
 				<Text variant="muted" size="sm">
-					{t(getOptionKey(visibility, 'description'))}
+					{t(getOptionKey(visibility as EntityVisibility, 'description'))}
 				</Text>
 			</div>
 
-			{isCreating && visibility === 'SHARED' && (
+			{isCreating && visibility === EntityVisibility.Shared && (
 				<Alert variant="info" className="-mt-4 max-w-lg">
-					<AlertDescription>{t(getOptionKey(visibility, 'createDisclaimer'))}</AlertDescription>
+					<AlertDescription>
+						{t(getOptionKey(visibility as EntityVisibility, 'createDisclaimer'))}
+					</AlertDescription>
 				</Alert>
 			)}
 		</>

@@ -1,7 +1,6 @@
 import '@/__mocks__/resizeObserver'
 import '@/__mocks__/pointerCapture'
 
-import { Media } from '@stump/sdk'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { DeepPartial } from 'react-hook-form'
 
@@ -34,7 +33,7 @@ const createReaderContext = (
 	overrides: Partial<IImageBaseReaderContext> = {},
 ): IImageBaseReaderContext =>
 	({
-		book: {} as Media,
+		book: {} as any,
 		currentPage: 1,
 		...overrides,
 	}) as IImageBaseReaderContext

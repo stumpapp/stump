@@ -69,7 +69,7 @@ export default function CreateSmartListScene() {
 
 				<SceneContainer>
 					<div className="flex flex-col gap-12">
-						{createError && <Alert level="error">{createError}</Alert>}
+						{createError && <Alert variant="destructive">{createError}</Alert>}
 
 						<Suspense>
 							<CreateSmartListForm onSubmit={handleSubmit} isLoading={isCreating} />

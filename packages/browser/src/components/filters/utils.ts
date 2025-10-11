@@ -3,7 +3,7 @@ import { ColumnOrder } from '@stump/sdk'
 
 import { Ordering, OrderingField } from './context'
 
-export const EXCLUDED_FILTER_KEYS = ['order_by', 'direction', 'page', 'pageSize', 'search']
+export const EXCLUDED_FILTER_KEYS = ['orderBy', 'direction', 'page', 'pageSize', 'search']
 export const EXCLUDED_FILTER_KEYS_FOR_COUNTS = EXCLUDED_FILTER_KEYS.concat(['search'])
 
 export const getActiveFilterCount = (filters: Record<string, unknown>) => {
@@ -30,7 +30,7 @@ export const tableSortToOrdering = (sort: ColumnOrder[]): Ordering => {
 	if (sort[0]) {
 		return {
 			direction: sort[0].desc ? OrderDirection.Desc : OrderDirection.Asc,
-			order_by: sort[0].id as OrderingField,
+			orderBy: sort[0].id as OrderingField,
 		}
 	} else {
 		return {}
@@ -41,11 +41,11 @@ export const tableSortToOrdering = (sort: ColumnOrder[]): Ordering => {
  * Converts the ordering object to a react-table sort object.
  */
 export const orderingToTableSort = (ordering: Ordering): ColumnOrder[] => {
-	if (ordering.order_by) {
+	if (ordering.orderBy) {
 		return [
 			{
 				desc: ordering.direction === OrderDirection.Desc,
-				id: ordering.order_by,
+				id: ordering.orderBy,
 			},
 		]
 	} else {

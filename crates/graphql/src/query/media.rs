@@ -82,6 +82,44 @@ pub fn add_sessions_join_for_filter(
 
 #[Object]
 impl MediaQuery {
+	async fn media_count(&self, ctx: &Context<'_>) -> Result<i64> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let count = media::Entity::find_for_user(user)
+			.filter(media::Column::DeletedAt.is_null())
+			.count(conn)
+			.await?;
+
+		Ok(count as i64)
+	}
+
+	// Note: This could be slightly inaccurate based on permissions, but it's close enough and I'm too lazy
+	// to write a more complex query right now.
+	async fn media_disk_usage(&self, ctx: &Context<'_>) -> Result<i64> {
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let query_result = conn
+			.query_one(Statement::from_sql_and_values(
+				DatabaseBackend::Sqlite,
+				r"
+				SELECT 
+					COALESCE(SUM(size), 0) as total_size
+				FROM 
+					media
+				WHERE deleted_at IS NULL
+				",
+				[],
+			))
+			.await?;
+
+		let total_size = query_result
+			.ok_or_else(|| async_graphql::Error::new("Failed to get disk usage"))?
+			.try_get::<i64>("", "total_size")?;
+
+		Ok(total_size)
+	}
+
 	async fn media(
 		&self,
 		ctx: &Context<'_>,

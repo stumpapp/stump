@@ -4,7 +4,7 @@ import { LogOut } from 'lucide-react'
 import { useAppContext } from '@/context'
 
 type Props = {
-	trigger?: (setOpen: (state: boolean) => void) => JSX.Element
+	trigger?: (setOpen: (state: boolean) => void) => React.ReactElement
 }
 
 export default function Logout({ trigger }: Props) {

@@ -66,7 +66,9 @@ export function useEpubBookmark() {
 		const epubcfi = cfiRange[0] ?? cfiRange[1] ?? ''
 		const preview = await getCfiPreviewText(epubcfi)
 		const payload: BookmarkInput = {
-			epubcfi: epubcfi,
+			locator: {
+				epubcfi,
+			},
 			mediaId: bookId,
 			previewContent: preview,
 		}
@@ -85,7 +87,7 @@ export function useEpubBookmark() {
 			}
 
 			const resolvedPayload = payload ?? (await createPayload())
-			if (resolvedPayload.epubcfi) {
+			if (resolvedPayload.locator.epubcfi) {
 				createMutation({ input: resolvedPayload })
 			}
 		},

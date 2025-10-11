@@ -17,7 +17,7 @@ export type FilterInput = MediaFilterInput | SeriesFilterInput | LibraryFilterIn
 
 export type Ordering = {
 	direction?: OrderDirection
-	order_by?: OrderingField
+	orderBy?: OrderingField
 }
 
 export type IFilterContext = {

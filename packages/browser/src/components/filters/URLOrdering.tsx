@@ -15,7 +15,7 @@ export default function URLOrdering({ entity }: Props) {
 	const [isOpen, setIsOpen] = useState(false)
 	const isMobile = useMediaMatch('(max-width: 768px)')
 	const {
-		ordering: { order_by, direction },
+		ordering: { orderBy, direction },
 		setOrdering,
 	} = useFilterContext()
 
@@ -24,7 +24,7 @@ export default function URLOrdering({ entity }: Props) {
 	 */
 	const handleChangeOrderBy = useCallback(
 		(value: OrderingField) =>
-			setOrdering({ order_by: value, direction: direction ? direction : OrderDirection.Asc }),
+			setOrdering({ orderBy: value, direction: direction ? direction : OrderDirection.Asc }),
 		[setOrdering, direction],
 	)
 
@@ -35,8 +35,8 @@ export default function URLOrdering({ entity }: Props) {
 	 */
 	const handleChangeDirection = useCallback(
 		(value: OrderDirection) =>
-			setOrdering({ order_by: order_by ? order_by : ('NAME' as OrderingField), direction: value }),
-		[setOrdering, order_by],
+			setOrdering({ orderBy: orderBy ? orderBy : ('NAME' as OrderingField), direction: value }),
+		[setOrdering, orderBy],
 	)
 
 	return (
@@ -58,7 +58,7 @@ export default function URLOrdering({ entity }: Props) {
 				className="flex flex-col gap-3 overflow-hidden p-3 shadow-sm"
 				align={isMobile ? 'start' : 'end'}
 			>
-				<OrderBySelect entity={entity} value={order_by || 'name'} onChange={handleChangeOrderBy} />
+				<OrderBySelect entity={entity} value={orderBy || 'name'} onChange={handleChangeOrderBy} />
 				<OrderByDirection value={direction} onChange={handleChangeDirection} />
 			</Popover.Content>
 		</Popover>

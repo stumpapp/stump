@@ -1,4 +1,5 @@
 import { Label, NativeSelect } from '@stump/components'
+import { ReadingDirection as ReadingDirectionGQL } from '@stump/graphql'
 
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
@@ -14,8 +15,8 @@ export default function ReadingDirection() {
 	} = useBookPreferences({ book })
 
 	const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-		if (e.target.value === 'ltr' || e.target.value === 'rtl') {
-			setBookPreferences({ readingDirection: e.target.value })
+		if (e.target.value === 'LTR' || e.target.value === 'RTL') {
+			setBookPreferences({ readingDirection: e.target.value as ReadingDirectionGQL })
 		} else {
 			console.warn(`Invalid reading direction: ${e.target.value}`)
 		}

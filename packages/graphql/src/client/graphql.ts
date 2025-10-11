@@ -2241,6 +2241,8 @@ export type Query = {
   mediaAlphabet: Scalars['JSONObject']['output'];
   mediaById?: Maybe<Media>;
   mediaByPath?: Maybe<Media>;
+  mediaCount: Scalars['Int']['output'];
+  mediaDiskUsage: Scalars['Int']['output'];
   mediaMetadataOverview: MediaMetadataOverview;
   numberOfLibraries: Scalars['Int']['output'];
   numberOfSeries: Scalars['Int']['output'];
@@ -2537,7 +2539,7 @@ export type ReadiumLocator = {
 };
 
 export type ReadiumLocatorInput = {
-  chapterTitle: Scalars['String']['input'];
+  chapterTitle?: Scalars['String']['input'];
   href: Scalars['String']['input'];
   locations?: InputMaybe<ReadiumLocationInput>;
   text?: InputMaybe<ReadiumTextInput>;
@@ -4325,13 +4327,6 @@ export type DeleteApiKeyConfirmModalMutationVariables = Exact<{
 
 export type DeleteApiKeyConfirmModalMutation = { __typename?: 'Mutation', deleteApiKey: { __typename?: 'Apikey', id: number } };
 
-export type UpdateUserLocaleSelectorMutationVariables = Exact<{
-  input: UpdateUserPreferencesInput;
-}>;
-
-
-export type UpdateUserLocaleSelectorMutation = { __typename?: 'Mutation', updateViewerPreferences: { __typename?: 'UserPreferences', locale: string } };
-
 export type UpdateUserProfileFormMutationVariables = Exact<{
   input: UpdateUserInput;
 }>;
@@ -4429,6 +4424,11 @@ export type EmailersListQuery = { __typename?: 'Query', emailers: Array<(
     { __typename?: 'Emailer', id: number }
     & { ' $fragmentRefs'?: { 'EmailerListItemFragment': EmailerListItemFragment } }
   )> };
+
+export type ServerStatsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ServerStatsQuery = { __typename?: 'Query', numberOfLibraries: number, numberOfSeries: number, mediaCount: number, mediaDiskUsage: number };
 
 export type DeleteJobHistoryConfirmationMutationVariables = Exact<{ [key: string]: never; }>;
 
@@ -7230,13 +7230,6 @@ export const DeleteApiKeyConfirmModalDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<DeleteApiKeyConfirmModalMutation, DeleteApiKeyConfirmModalMutationVariables>;
-export const UpdateUserLocaleSelectorDocument = new TypedDocumentString(`
-    mutation UpdateUserLocaleSelector($input: UpdateUserPreferencesInput!) {
-  updateViewerPreferences(input: $input) {
-    locale
-  }
-}
-    `) as unknown as TypedDocumentString<UpdateUserLocaleSelectorMutation, UpdateUserLocaleSelectorMutationVariables>;
 export const UpdateUserProfileFormDocument = new TypedDocumentString(`
     mutation UpdateUserProfileForm($input: UpdateUserInput!) {
   updateViewer(input: $input) {
@@ -7400,6 +7393,14 @@ export const EmailersListDocument = new TypedDocumentString(`
   tlsEnabled
   username
 }`) as unknown as TypedDocumentString<EmailersListQuery, EmailersListQueryVariables>;
+export const ServerStatsDocument = new TypedDocumentString(`
+    query ServerStats {
+  numberOfLibraries
+  numberOfSeries
+  mediaCount
+  mediaDiskUsage
+}
+    `) as unknown as TypedDocumentString<ServerStatsQuery, ServerStatsQueryVariables>;
 export const DeleteJobHistoryConfirmationDocument = new TypedDocumentString(`
     mutation DeleteJobHistoryConfirmation {
   deleteJobHistory {

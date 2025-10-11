@@ -19,6 +19,7 @@ import Spinner from '@/components/Spinner'
 import { useTheme } from '@/hooks'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
+import { EpubContent } from './context'
 import EpubReaderContainer from './EpubReaderContainer'
 import { darkVariantText, toFamilyName } from './themes'
 
@@ -1009,11 +1010,4 @@ interface SpineItem {
 interface SpineItemFindResult {
 	cfi: string
 	excerpt: string
-}
-
-interface EpubContent {
-	label: string
-	content: string
-	children: EpubContent[]
-	play_order: number
 }

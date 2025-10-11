@@ -8,12 +8,12 @@ import { usePreferences } from '../hooks'
 
 type Props = {
 	title: string
-	items: JSX.Element[]
+	items: React.ReactElement[]
 	onFetchMore: () => void
 	emptyState?: React.ReactNode
 }
 
-export default function HorizontalCardList_({ title, items, onFetchMore, emptyState }: Props) {
+export default function HorizontalCardList({ title, items, onFetchMore, emptyState }: Props) {
 	const virtuosoRef = useRef<VirtuosoHandle>(null)
 
 	const isAtLeastSmall = useMediaMatch('(min-width: 640px)')

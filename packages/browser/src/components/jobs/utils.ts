@@ -1,4 +1,4 @@
-import { JobStatus } from '@stump/sdk'
+import { JobStatus } from '@stump/graphql'
 
 export function readableKind(kind: string | null) {
 	if (!kind) {

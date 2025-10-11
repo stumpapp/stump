@@ -26,6 +26,7 @@ export default function ReaderHeader() {
 
 	return (
 		<motion.nav
+			// @ts-expect-error: It does have className?
 			className="fixed left-0 top-0 z-[100] flex h-12 w-full items-center px-4 text-foreground"
 			initial={false}
 			animate={showToolBar ? 'visible' : 'hidden'}

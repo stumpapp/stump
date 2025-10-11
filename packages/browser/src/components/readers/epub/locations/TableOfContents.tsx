@@ -1,8 +1,7 @@
 import { Text } from '@stump/components'
-import { EpubContent } from '@stump/sdk/types'
 import { useCallback } from 'react'
 
-import { useEpubReaderContext } from '../context'
+import { EpubContent, useEpubReaderContext } from '../context'
 
 type Props = {
 	onLocationChanged?: () => void

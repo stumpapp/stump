@@ -1,5 +1,4 @@
-import { useDirectoryListing, useSDK } from '@stump/client'
-import { DirectoryListingFile } from '@stump/graphql'
+import { useDirectoryListing, UseDirectoryListingFile, useSDK } from '@stump/client'
 import { useCallback, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
@@ -40,7 +39,7 @@ export default function FileExplorerProvider({ rootPath, ...ctx }: Props) {
 		initialPath: rootPath,
 	})
 
-	const handleSelect = async (entry: DirectoryListingFile) => {
+	const handleSelect = async (entry: UseDirectoryListingFile) => {
 		if (entry.isDirectory) {
 			setPath(entry.path)
 		} else {

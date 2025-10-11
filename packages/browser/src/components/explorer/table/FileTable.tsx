@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
+import { UseDirectoryListingFile } from '@stump/client'
 import { cn, Text } from '@stump/components'
-import { DirectoryListingFile } from '@stump/sdk'
 import {
 	createColumnHelper,
 	flexRender,
@@ -20,14 +20,14 @@ import { SortIcon } from '@/components/table'
 import { useFileExplorerContext } from '../context'
 import FileThumbnail from '../FileThumbnail'
 
-const columnHelper = createColumnHelper<DirectoryListingFile>()
+const columnHelper = createColumnHelper<UseDirectoryListingFile>()
 const baseColumns = [
 	columnHelper.display({
 		cell: ({
 			row: {
-				original: { path, is_directory },
+				original: { path, isDirectory },
 			},
-		}) => <FileThumbnail path={path} isDirectory={is_directory} />,
+		}) => <FileThumbnail path={path} isDirectory={isDirectory} />,
 		header: () => (
 			<Text size="sm" variant="secondary">
 				Cover

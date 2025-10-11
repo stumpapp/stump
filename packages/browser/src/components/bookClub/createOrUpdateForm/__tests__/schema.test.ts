@@ -1,5 +1,3 @@
-import { BookClub } from '@stump/sdk'
-
 import { FORBIDDEN_ENTITY_NAMES } from '@/utils/form'
 
 import { buildSchema, type CreateOrUpdateBookClubSchema, defaultMemberSpec } from '../schema'
@@ -9,40 +7,40 @@ const translateFn = jest.fn((key: string) => key)
 const existingClubs = [
 	{
 		name: 'existingClubName',
-	} as BookClub,
+	} as any,
 ]
 
 const createClub = (
 	overrides: Partial<CreateOrUpdateBookClubSchema> = {},
 ): CreateOrUpdateBookClubSchema => ({
-	creator_display_name: 'creatorDisplayName',
-	creator_hide_progress: false,
+	creatorDisplayName: 'creatorDisplayName',
+	creatorHideProgress: false,
 	description: 'description',
-	is_private: false,
-	member_role_spec: defaultMemberSpec,
+	isPrivate: false,
+	memberRoleSpec: defaultMemberSpec,
 	name: 'newClubName',
 	...overrides,
 })
 
 describe('createOrUpdateBookClubForm schema', () => {
 	describe('formDefaults', () => {
-		it('should default creator_hide_progress to false when creating', () => {
+		it('should default creatorHideProgress to false when creating', () => {
 			const schema = buildSchema(translateFn, [], true)
-			expect(
-				schema.parse(createClub({ creator_hide_progress: undefined })).creator_hide_progress,
-			).toBe(false)
+			expect(schema.parse(createClub({ creatorHideProgress: undefined })).creatorHideProgress).toBe(
+				false,
+			)
 		})
 
-		it('should default creator_hide_progress to undefined when updating', () => {
+		it('should default creatorHideProgress to undefined when updating', () => {
 			const schema = buildSchema(translateFn, [], false)
-			expect(
-				schema.parse(createClub({ creator_hide_progress: undefined })).creator_hide_progress,
-			).toBe(undefined)
+			expect(schema.parse(createClub({ creatorHideProgress: undefined })).creatorHideProgress).toBe(
+				undefined,
+			)
 		})
 
-		it('should default is_private to false', () => {
+		it('should default isPrivate to false', () => {
 			const schema = buildSchema(translateFn, [], true)
-			expect(schema.parse(createClub({ is_private: undefined })).is_private).toBe(false)
+			expect(schema.parse(createClub({ isPrivate: undefined })).isPrivate).toBe(false)
 		})
 
 		it('should map existing club to form defaults', () => {
@@ -86,10 +84,10 @@ describe('createOrUpdateBookClubForm schema', () => {
 			expect(schema.safeParse(createClub({ description: '' })).success).toBe(true)
 		})
 
-		it('should not require a creator_display_name', () => {
+		it('should not require a creatorDisplayName', () => {
 			const schema = buildSchema(translateFn, [], true)
-			expect(schema.safeParse(createClub({ creator_display_name: undefined })).success).toBe(true)
-			expect(schema.safeParse(createClub({ creator_display_name: '' })).success).toBe(true)
+			expect(schema.safeParse(createClub({ creatorDisplayName: undefined })).success).toBe(true)
+			expect(schema.safeParse(createClub({ creatorDisplayName: '' })).success).toBe(true)
 		})
 	})
 })

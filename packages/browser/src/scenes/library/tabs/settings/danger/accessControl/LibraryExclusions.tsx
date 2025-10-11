@@ -75,6 +75,7 @@ export default function LibraryExclusions() {
 		{
 			document: excludedUsersQuery,
 			queryKey: ['libraryExclusions', library.id],
+			// @ts-expect-error: Need to fix this type error with useSuspenseGraphQLQueries
 			variables: { id: library.id },
 		},
 	])

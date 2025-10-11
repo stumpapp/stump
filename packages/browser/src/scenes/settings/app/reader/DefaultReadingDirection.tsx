@@ -1,4 +1,5 @@
 import { Label, NativeSelect, Text } from '@stump/components'
+import { ReadingDirection } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 
 import { useReaderStore } from '@/stores'
@@ -11,8 +12,8 @@ export default function DefaultReadingDirection() {
 	}))
 
 	const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-		if (e.target.value === 'ltr' || e.target.value === 'rtl') {
-			setSettings({ readingDirection: e.target.value })
+		if (e.target.value === 'LTR' || e.target.value === 'RTL') {
+			setSettings({ readingDirection: e.target.value as ReadingDirection })
 		} else {
 			console.warn(`Invalid reading direction: ${e.target.value}`)
 		}

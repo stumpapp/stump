@@ -1,24 +1,29 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Form } from '@stump/components'
-import { User } from '@stump/sdk'
 import { act, fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useForm } from 'react-hook-form'
 
 import AccountDetails from '../AccountDetails'
-import { buildSchema, CreateOrUpdateUserSchema, formDefaults } from '../schema'
+import { buildSchema, CreateOrUpdateUserSchema, ExistingUser, formDefaults } from '../schema'
 
 const onSubmit = jest.fn()
 
 type SubjectProps = {
 	formState?: Partial<Pick<CreateOrUpdateUserSchema, 'username' | 'password'>>
-	existingUsers?: User[]
+	existingUsers?: ExistingUser[]
 }
 
 const Subject = ({ formState, existingUsers = [] }: SubjectProps) => {
 	const form = useForm<Pick<CreateOrUpdateUserSchema, 'username' | 'password'>>({
-		defaultValues: formDefaults(formState as User | undefined),
-		resolver: zodResolver(buildSchema((t) => t, existingUsers, formState as User | undefined)),
+		defaultValues: formDefaults(formState as ExistingUser | undefined),
+		resolver: zodResolver(
+			buildSchema(
+				(t) => t,
+				existingUsers.map((user) => user.username),
+				formState as ExistingUser | undefined,
+			),
+		),
 	})
 
 	return (

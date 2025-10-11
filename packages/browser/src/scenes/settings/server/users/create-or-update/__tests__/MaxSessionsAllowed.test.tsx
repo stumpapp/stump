@@ -1,6 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Form } from '@stump/components'
-import { User } from '@stump/sdk'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useForm } from 'react-hook-form'
@@ -11,13 +10,13 @@ import { buildSchema, CreateOrUpdateUserSchema, formDefaults } from '../schema'
 const onSubmit = jest.fn()
 
 type SubjectProps = {
-	formState?: Partial<Pick<CreateOrUpdateUserSchema, 'max_sessions_allowed'>>
+	formState?: Partial<Pick<CreateOrUpdateUserSchema, 'maxSessionsAllowed'>>
 }
 
 const Subject = ({ formState }: SubjectProps) => {
-	const form = useForm<Pick<CreateOrUpdateUserSchema, 'max_sessions_allowed'>>({
-		defaultValues: formDefaults(formState as User | undefined),
-		resolver: zodResolver(buildSchema((t) => t, [], formState as User | undefined)),
+	const form = useForm<Pick<CreateOrUpdateUserSchema, 'maxSessionsAllowed'>>({
+		defaultValues: formDefaults(formState as any),
+		resolver: zodResolver(buildSchema((t) => t, [], formState as any)),
 	})
 
 	return (
@@ -51,7 +50,7 @@ describe('MaxSessionsAllowed', () => {
 
 		const user = userEvent.setup()
 
-		await user.type(screen.getByTestId('max_sessions_allowed'), 'abc')
+		await user.type(screen.getByTestId('maxSessionsAllowed'), 'abc')
 		await user.click(screen.getByRole('button', { name: /submit/i }))
 
 		expect(onSubmit).not.toHaveBeenCalled()
@@ -61,15 +60,15 @@ describe('MaxSessionsAllowed', () => {
 		render(
 			<Subject
 				formState={{
-					max_sessions_allowed: 1,
+					maxSessionsAllowed: 1,
 				}}
 			/>,
 		)
 
 		const user = userEvent.setup()
 
-		await user.clear(screen.getByTestId('max_sessions_allowed'))
-		await user.type(screen.getByTestId('max_sessions_allowed'), '-1')
+		await user.clear(screen.getByTestId('maxSessionsAllowed'))
+		await user.type(screen.getByTestId('maxSessionsAllowed'), '-1')
 		await user.click(screen.getByRole('button', { name: /submit/i }))
 
 		expect(onSubmit).not.toHaveBeenCalled()

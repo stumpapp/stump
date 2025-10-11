@@ -5,14 +5,14 @@ import { CreateOrUpdateEmailerSchema, createSchema } from '../schema'
 const translateFn = jest.fn()
 
 const validEmailer: CreateOrUpdateEmailerSchema = {
-	is_primary: false,
+	isPrimary: false,
 	name: 'newName',
 	password: 'password',
-	sender_display_name: 'sender_display_name',
-	sender_email: 'sender_email@gmail.com',
-	smtp_host: 'smtp_host',
-	smtp_port: 123,
-	tls_enabled: false,
+	senderDisplayName: 'senderDisplayName',
+	senderEmail: 'senderEmail@gmail.com',
+	smtpHost: 'smtpHost',
+	smtpPort: 123,
+	tlsEnabled: false,
 	username: 'username',
 }
 
@@ -25,14 +25,14 @@ const createEmailer = (
 
 describe('CreateOrUpdateEmailerSchema', () => {
 	describe('formDefaults', () => {
-		it('should default is_primary to true when no existing emailers', () => {
+		it('should default isPrimary to true when no existing emailers', () => {
 			const schema = createSchema([], translateFn, true)
-			expect(schema.parse(createEmailer({ is_primary: undefined })).is_primary).toBe(true)
+			expect(schema.parse(createEmailer({ isPrimary: undefined })).isPrimary).toBe(true)
 		})
 
-		it('should default is_primary to false when existing emailers', () => {
+		it('should default isPrimary to false when existing emailers', () => {
 			const schema = createSchema(['existingName'], translateFn, true)
-			expect(schema.parse(createEmailer({ is_primary: undefined })).is_primary).toBe(false)
+			expect(schema.parse(createEmailer({ isPrimary: undefined })).isPrimary).toBe(false)
 		})
 
 		it('should build form defaults from an emailer', () => {
@@ -43,12 +43,12 @@ describe('CreateOrUpdateEmailerSchema', () => {
 	})
 
 	describe('validation', () => {
-		it('should allow optional max_attachment_size_bytes', () => {
+		it('should allow optional maxAttachmentSizeBytes', () => {
 			const schema = createSchema([], translateFn, true)
-			expect(
-				schema.safeParse(createEmailer({ max_attachment_size_bytes: undefined })).success,
-			).toBe(true)
-			expect(schema.safeParse(createEmailer({ max_attachment_size_bytes: 123 })).success).toBe(true)
+			expect(schema.safeParse(createEmailer({ maxAttachmentSizeBytes: undefined })).success).toBe(
+				true,
+			)
+			expect(schema.safeParse(createEmailer({ maxAttachmentSizeBytes: 123 })).success).toBe(true)
 		})
 
 		it('should not allow existing names', () => {
@@ -77,39 +77,37 @@ describe('CreateOrUpdateEmailerSchema', () => {
 			expect(schema.safeParse(createEmailer()).success).toBe(true)
 		})
 
-		it('should require a valid email address for sender_email', () => {
+		it('should require a valid email address for senderEmail', () => {
 			const schema = createSchema([], translateFn, true)
-			expect(schema.safeParse(createEmailer({ sender_email: 'invalid' })).success).toBe(false)
-			expect(schema.safeParse(createEmailer({ sender_email: 'valid@gmail.com' })).success).toBe(
-				true,
-			)
+			expect(schema.safeParse(createEmailer({ senderEmail: 'invalid' })).success).toBe(false)
+			expect(schema.safeParse(createEmailer({ senderEmail: 'valid@gmail.com' })).success).toBe(true)
 		})
 
-		it('should require a non-empty string for sender_display_name', () => {
+		it('should require a non-empty string for senderDisplayName', () => {
 			const schema = createSchema([], translateFn, true)
-			expect(schema.safeParse(createEmailer({ sender_display_name: '' })).success).toBe(false)
-			expect(schema.safeParse(createEmailer({ sender_display_name: 'valid' })).success).toBe(true)
+			expect(schema.safeParse(createEmailer({ senderDisplayName: '' })).success).toBe(false)
+			expect(schema.safeParse(createEmailer({ senderDisplayName: 'valid' })).success).toBe(true)
 		})
 
-		it('should require a non-empty string for smtp_host', () => {
+		it('should require a non-empty string for smtpHost', () => {
 			const schema = createSchema([], translateFn, true)
-			expect(schema.safeParse(createEmailer({ smtp_host: '' })).success).toBe(false)
-			expect(schema.safeParse(createEmailer({ smtp_host: 'valid' })).success).toBe(true)
+			expect(schema.safeParse(createEmailer({ smtpHost: '' })).success).toBe(false)
+			expect(schema.safeParse(createEmailer({ smtpHost: 'valid' })).success).toBe(true)
 		})
 
-		it('should require a number for smtp_port', () => {
+		it('should require a number for smtpPort', () => {
 			const schema = createSchema([], translateFn, true)
-			expect(schema.safeParse(createEmailer({ smtp_port: NaN })).success).toBe(false)
-			// @ts-expect-error: smtp_port is a number
-			expect(schema.safeParse(createEmailer({ smtp_port: '3' })).success).toBe(false)
-			expect(schema.safeParse(createEmailer({ smtp_port: 123 })).success).toBe(true)
+			expect(schema.safeParse(createEmailer({ smtpPort: NaN })).success).toBe(false)
+			// @ts-expect-error: smtpPort is a number
+			expect(schema.safeParse(createEmailer({ smtpPort: '3' })).success).toBe(false)
+			expect(schema.safeParse(createEmailer({ smtpPort: 123 })).success).toBe(true)
 		})
 
-		it('should require a boolean for tls_enabled', () => {
+		it('should require a boolean for tlsEnabled', () => {
 			const schema = createSchema([], translateFn, true)
-			// @ts-expect-error: tls_enabled is a boolean
-			expect(schema.safeParse(createEmailer({ tls_enabled: 'true' })).success).toBe(false)
-			expect(schema.safeParse(createEmailer({ tls_enabled: true })).success).toBe(true)
+			// @ts-expect-error: tlsEnabled is a boolean
+			expect(schema.safeParse(createEmailer({ tlsEnabled: 'true' })).success).toBe(false)
+			expect(schema.safeParse(createEmailer({ tlsEnabled: true })).success).toBe(true)
 		})
 
 		it('should require a non-empty string for username', () => {

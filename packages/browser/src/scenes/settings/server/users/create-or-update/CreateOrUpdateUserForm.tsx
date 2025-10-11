@@ -81,7 +81,7 @@ export default function CreateOrUpdateUserForm({ user, existingUsernames }: Prop
 				predicate: ({ queryKey: [baseKey] }) => baseKey === sdk.cacheKeys.users,
 			})
 			form.reset()
-			navigate(paths.settings('server/users'))
+			navigate(paths.settings('users'))
 		},
 	})
 
@@ -96,7 +96,7 @@ export default function CreateOrUpdateUserForm({ user, existingUsernames }: Prop
 				permissions: result.permissions,
 				username: result.username,
 			})
-			navigate(paths.settings('server/users'))
+			navigate(paths.settings('users'))
 		},
 	})
 

@@ -16,30 +16,30 @@ export default function UserRestrictionsForm() {
 
 	const form = useFormContext<CreateOrUpdateUserSchema>()
 
-	const [age_restriction_on_unset, age_restriction] = form.watch([
-		'age_restriction_on_unset',
-		'age_restriction',
+	const [ageRestrictionOnUnset, ageRestriction] = form.watch([
+		'ageRestrictionOnUnset',
+		'ageRestriction',
 	])
 
 	useEffect(() => {
-		const didChange = age_restriction !== form.getValues('age_restriction')
-		if (age_restriction == undefined && didChange) {
-			form.setValue('age_restriction_on_unset', undefined)
-			form.clearErrors('age_restriction')
+		const didChange = ageRestriction !== form.getValues('ageRestriction')
+		if (ageRestriction == undefined && didChange) {
+			form.setValue('ageRestrictionOnUnset', undefined)
+			form.clearErrors('ageRestriction')
 		}
-	}, [form, age_restriction])
+	}, [form, ageRestriction])
 
 	const handleAgeRestrictionChange = useCallback(
 		(e: React.ChangeEvent<HTMLInputElement>) => {
 			const { value } = e.target
 
 			if (value === '' || value == undefined) {
-				form.setValue('age_restriction', undefined)
-				form.setValue('age_restriction_on_unset', undefined)
+				form.setValue('ageRestriction', undefined)
+				form.setValue('ageRestrictionOnUnset', undefined)
 			} else {
 				const parsed = parseInt(value)
 				if (!isNaN(parsed)) {
-					form.setValue('age_restriction', parsed)
+					form.setValue('ageRestriction', parsed)
 				}
 			}
 		},
@@ -72,14 +72,14 @@ export default function UserRestrictionsForm() {
 			<div className="flex flex-col gap-8">
 				<div className="flex flex-col gap-6 md:flex-row md:items-start">
 					<Input
-						id="age_restriction"
+						id="ageRestriction"
 						variant="primary"
 						type="number"
 						label={t(getAgeRestrictionKey('label'))}
 						description={t(getAgeRestrictionKey('description'))}
 						descriptionPosition="top"
-						defaultValue={age_restriction}
-						errorMessage={form.formState.errors.age_restriction?.message}
+						defaultValue={ageRestriction}
+						errorMessage={form.formState.errors.ageRestriction?.message}
 						onChange={handleAgeRestrictionChange}
 					/>
 
@@ -87,9 +87,9 @@ export default function UserRestrictionsForm() {
 						id="age_restriction_enabled"
 						label={t(getAgeRestrictionKey('enforceUnset.label'))}
 						description={t(getAgeRestrictionKey('enforceUnset.description'))}
-						checked={!!age_restriction_on_unset}
-						onClick={() => form.setValue('age_restriction_on_unset', !age_restriction_on_unset)}
-						disabled={!age_restriction || age_restriction < 1}
+						checked={!!ageRestrictionOnUnset}
+						onClick={() => form.setValue('ageRestrictionOnUnset', !ageRestrictionOnUnset)}
+						disabled={!ageRestriction || ageRestriction < 1}
 					/>
 				</div>
 

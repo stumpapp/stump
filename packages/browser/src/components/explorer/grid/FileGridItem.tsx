@@ -1,6 +1,5 @@
-import { useSDK } from '@stump/client'
+import { UseDirectoryListingFile, useSDK } from '@stump/client'
 import { Text, ToolTip } from '@stump/components'
-import { DirectoryListingFile } from '@stump/graphql'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { usePrefetchBook } from '@/components/book'
@@ -10,7 +9,7 @@ import { useFileExplorerContext } from '../context'
 import FileThumbnail, { getBook, MediaAtPath } from '../FileThumbnail'
 
 type Props = {
-	file: DirectoryListingFile
+	file: UseDirectoryListingFile
 }
 
 export default function FileGridItem({ file }: Props) {

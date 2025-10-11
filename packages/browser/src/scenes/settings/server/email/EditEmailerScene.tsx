@@ -63,7 +63,7 @@ export default function EditEmailerScene() {
 			await client.refetchQueries({
 				predicate: ({ queryKey: [baseKey] }) => baseKey === sdk.cacheKeys.emailers,
 			})
-			navigate(paths.settings('server/email'))
+			navigate(paths.settings('email'))
 		},
 		onError: (error) => {
 			console.error(error)

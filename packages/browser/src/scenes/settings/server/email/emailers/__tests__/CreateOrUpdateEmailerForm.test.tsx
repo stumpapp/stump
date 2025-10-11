@@ -1,6 +1,6 @@
 import '@/__mocks__/resizeObserver'
 
-import { SMTPEmailer } from '@stump/sdk'
+import { Emailer } from '@stump/graphql'
 import { act, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ComponentProps } from 'react'
@@ -13,15 +13,15 @@ jest.mock('@stump/i18n', () => ({
 }))
 
 const validEmailer: CreateOrUpdateEmailerSchema = {
-	is_primary: true,
-	max_attachment_size_bytes: null,
+	isPrimary: true,
+	maxAttachmentSizeBytes: null,
 	name: 'newName',
 	password: 'password',
-	sender_display_name: 'sender_display_name',
-	sender_email: 'sender_email@gmail.com',
-	smtp_host: 'smtp_host',
-	smtp_port: 123,
-	tls_enabled: false,
+	senderDisplayName: 'senderDisplayName',
+	senderEmail: 'senderEmail@gmail.com',
+	smtpHost: 'smtpHost',
+	smtpPort: 123,
+	tlsEnabled: false,
 	username: 'username',
 }
 
@@ -34,20 +34,20 @@ const inputEmailer = async (overrides: Partial<CreateOrUpdateEmailerSchema> = {}
 	if (emailer.password) {
 		await user.type(screen.getByTestId('password'), emailer.password)
 	}
-	await user.type(screen.getByTestId('sender_display_name'), emailer.sender_display_name)
-	await user.type(screen.getByTestId('sender_email'), emailer.sender_email)
-	await user.type(screen.getByTestId('smtp_host'), emailer.smtp_host)
-	await user.type(screen.getByTestId('smtp_port'), emailer.smtp_port.toString())
+	await user.type(screen.getByTestId('senderDisplayName'), emailer.senderDisplayName)
+	await user.type(screen.getByTestId('senderEmail'), emailer.senderEmail)
+	await user.type(screen.getByTestId('smtpHost'), emailer.smtpHost)
+	await user.type(screen.getByTestId('smtpPort'), emailer.smtpPort.toString())
 	await user.type(screen.getByTestId('username'), emailer.username)
 
-	if (emailer.tls_enabled) {
-		await user.click(screen.getByTestId('tls_enabled'))
+	if (emailer.tlsEnabled) {
+		await user.click(screen.getByTestId('tlsEnabled'))
 	}
 
-	if (emailer.max_attachment_size_bytes != null) {
+	if (emailer.maxAttachmentSizeBytes != null) {
 		await user.type(
-			screen.getByTestId('max_attachment_size_bytes'),
-			emailer.max_attachment_size_bytes.toString(),
+			screen.getByTestId('maxAttachmentSizeBytes'),
+			emailer.maxAttachmentSizeBytes.toString(),
 		)
 	}
 
@@ -94,15 +94,15 @@ describe('CreateOrUpdateEmailerForm', () => {
 	})
 
 	describe('validation', () => {
-		it('should allow optional max_attachment_size_bytes', async () => {
+		it('should allow optional maxAttachmentSizeBytes', async () => {
 			render(<Subject />)
 
-			const user = await inputEmailer({ max_attachment_size_bytes: undefined })
+			const user = await inputEmailer({ maxAttachmentSizeBytes: undefined })
 
 			await act(() => user.click(screen.getByRole('button', { name: /submit/i })))
 
 			expect(onSubmit).toHaveBeenCalledWith(
-				expect.objectContaining({ max_attachment_size_bytes: null }),
+				expect.objectContaining({ maxAttachmentSizeBytes: null }),
 				expect.any(Object), // Submit event
 			)
 		})
@@ -163,7 +163,7 @@ describe('CreateOrUpdateEmailerForm', () => {
 								...validEmailer,
 							},
 							id: 1,
-						} as unknown as SMTPEmailer
+						} as unknown as Emailer
 					}
 				/>,
 			)
@@ -175,21 +175,21 @@ describe('CreateOrUpdateEmailerForm', () => {
 			expect(onSubmit).not.toHaveBeenCalled()
 		})
 
-		it('should require a valid email address for sender_email', async () => {
+		it('should require a valid email address for senderEmail', async () => {
 			render(<Subject />)
 
-			const user = await inputEmailer({ sender_email: 'invalid' })
+			const user = await inputEmailer({ senderEmail: 'invalid' })
 
 			await act(() => user.click(screen.getByRole('button', { name: /submit/i })))
 
 			expect(onSubmit).not.toHaveBeenCalled()
 		})
 
-		it('should require a number for smtp_port', async () => {
+		it('should require a number for smtpPort', async () => {
 			render(<Subject />)
 
-			// @ts-expect-error: smtp_port is a number
-			const user = await inputEmailer({ smtp_port: 'foo' })
+			// @ts-expect-error: smtpPort is a number
+			const user = await inputEmailer({ smtpPort: 'foo' })
 
 			await act(() => user.click(screen.getByRole('button', { name: /submit/i })))
 

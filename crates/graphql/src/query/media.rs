@@ -7,6 +7,7 @@ use models::{
 	},
 	shared::{
 		alphabet::{AvailableAlphabet, EntityLetter},
+		enums::UserPermission,
 		ordering::OrderBy,
 	},
 };
@@ -20,6 +21,7 @@ use sea_orm::{
 use crate::{
 	data::{AuthContext, CoreContext},
 	filter::{media::MediaFilterInput, IntoFilter},
+	guard::{PermissionGuard, ServerOwnerGuard},
 	object::media::Media,
 	order::MediaOrderBy,
 	pagination::{
@@ -90,6 +92,30 @@ impl MediaQuery {
 			.filter(media::Column::DeletedAt.is_null())
 			.count(conn)
 			.await?;
+
+		Ok(count as i64)
+	}
+
+	// TODO: Add variant to only fetch your own sessions and remove guard
+	#[graphql(
+		guard = "PermissionGuard::one(UserPermission::ReadUsers).or(ServerOwnerGuard)"
+	)]
+	async fn finished_reading_session_count(&self, ctx: &Context<'_>) -> Result<i64> {
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let count = finished_reading_session::Entity::find().count(conn).await?;
+
+		Ok(count as i64)
+	}
+
+	// TODO: Add variant to only fetch your own sessions and remove guard
+	#[graphql(
+		guard = "PermissionGuard::one(UserPermission::ReadUsers).or(ServerOwnerGuard)"
+	)]
+	async fn active_reading_session_count(&self, ctx: &Context<'_>) -> Result<i64> {
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let count = reading_session::Entity::find().count(conn).await?;
 
 		Ok(count as i64)
 	}

@@ -1,12 +1,8 @@
-import { SmartListMeta } from '@stump/sdk'
+import { SmartListMeta } from '@stump/graphql'
 
 import pluralizeStat from '@/utils/pluralize'
 
-export function parseListMeta({ matched_books, matched_series, matched_libraries }: SmartListMeta) {
-	const matchedBooks = Number(matched_books)
-	const matchedSeries = Number(matched_series)
-	const matchedLibraries = Number(matched_libraries)
-
+export function parseListMeta({ matchedBooks, matchedSeries, matchedLibraries }: SmartListMeta) {
 	const figures = [
 		{ label: 'book', value: matchedBooks },
 		{ label: 'series', value: matchedSeries },

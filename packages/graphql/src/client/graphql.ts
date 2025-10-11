@@ -2202,6 +2202,7 @@ export type PaginationInfo = CursorPaginationInfo | OffsetPaginationInfo;
 
 export type Query = {
   __typename?: 'Query';
+  activeReadingSessionCount: Scalars['Int']['output'];
   apiKeyById: Apikey;
   apiKeys: Array<Apikey>;
   bookClubById: BookClub;
@@ -2216,6 +2217,7 @@ export type Query = {
   emailers: Array<Emailer>;
   /** Get a single epub by its media ID */
   epubById: Epub;
+  finishedReadingSessionCount: Scalars['Int']['output'];
   getNotifierById: Notifier;
   getNotifiers: Array<Notifier>;
   jobById?: Maybe<Job>;
@@ -2277,8 +2279,10 @@ export type Query = {
   stumpConfig: StumpConfig;
   /** Returns a list of all tags. */
   tags: Array<Tag>;
+  topReaders: Array<User>;
   uploadConfig: UploadConfig;
   userById: User;
+  userCount: Scalars['Int']['output'];
   users: PaginatedUserResponse;
 };
 
@@ -2449,6 +2453,11 @@ export type QuerySmartListMetaArgs = {
 
 export type QuerySmartListsArgs = {
   input?: SmartListsInput;
+};
+
+
+export type QueryTopReadersArgs = {
+  take?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -3198,6 +3207,7 @@ export type User = {
   continueReading: PaginatedMediaResponse;
   createdAt: Scalars['DateTime']['output'];
   deletedAt?: Maybe<Scalars['DateTime']['output']>;
+  finishedReadingSessionsCount: Scalars['Int']['output'];
   id: Scalars['String']['output'];
   isLocked: Scalars['Boolean']['output'];
   isServerOwner: Scalars['Boolean']['output'];
@@ -4531,6 +4541,11 @@ export type PersistedLogsQueryVariables = Exact<{
 
 export type PersistedLogsQuery = { __typename?: 'Query', logs: { __typename?: 'PaginatedLogResponse', nodes: Array<{ __typename?: 'Log', id: number, timestamp: any, level: LogLevel, message: string, jobId?: string | null, context?: string | null }>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', totalPages: number, currentPage: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
 
+export type UserStatsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type UserStatsQuery = { __typename?: 'Query', userCount: number, activeReadingSessionCount: number, finishedReadingSessionCount: number, topReaders: Array<{ __typename?: 'User', id: string, username: string, finishedReadingSessionsCount: number }> };
+
 export type CreateOrUpdateUserFormUpdateUserMutationVariables = Exact<{
   id: Scalars['ID']['input'];
   input: UpdateUserInput;
@@ -4599,6 +4614,8 @@ export type UserTableQueryVariables = Exact<{
 
 export type UserTableQuery = { __typename?: 'Query', users: { __typename?: 'PaginatedUserResponse', nodes: Array<{ __typename?: 'User', id: string, avatarUrl?: string | null, username: string, isServerOwner: boolean, isLocked: boolean, createdAt: any, lastLogin?: any | null, loginSessionsCount: number }>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', totalPages: number, currentPage: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
 
+export type SmartListCardFragment = { __typename?: 'SmartList', id: string, description?: string | null, filters: string, joiner: SmartListJoiner, name: string } & { ' $fragmentName'?: 'SmartListCardFragment' };
+
 export type CreateSmartListViewMutationVariables = Exact<{
   input: SaveSmartListView;
 }>;
@@ -4619,7 +4636,10 @@ export type SmartListsWithSearchQueryVariables = Exact<{
 }>;
 
 
-export type SmartListsWithSearchQuery = { __typename?: 'Query', smartLists: Array<{ __typename?: 'SmartList', id: string, creatorId: string, description?: string | null, defaultGrouping: SmartListGrouping, filters: string, joiner: SmartListJoiner, name: string, visibility: EntityVisibility }> };
+export type SmartListsWithSearchQuery = { __typename?: 'Query', smartLists: Array<(
+    { __typename?: 'SmartList', id: string, creatorId: string, description?: string | null, defaultGrouping: SmartListGrouping, filters: string, joiner: SmartListJoiner, name: string, visibility: EntityVisibility }
+    & { ' $fragmentRefs'?: { 'SmartListCardFragment': SmartListCardFragment } }
+  )> };
 
 export type SmartListByIdQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -5040,6 +5060,15 @@ export const JobDataInspectorFragmentDoc = new TypedDocumentString(`
   }
 }
     `, {"fragmentName":"JobDataInspector"}) as unknown as TypedDocumentString<JobDataInspectorFragment, unknown>;
+export const SmartListCardFragmentDoc = new TypedDocumentString(`
+    fragment SmartListCard on SmartList {
+  id
+  description
+  filters
+  joiner
+  name
+}
+    `, {"fragmentName":"SmartListCard"}) as unknown as TypedDocumentString<SmartListCardFragment, unknown>;
 export const SearchMediaDocument = new TypedDocumentString(`
     query SearchMedia($filter: MediaFilterInput!) {
   media(filter: $filter, pagination: {cursor: {limit: 10}}) {
@@ -7568,6 +7597,18 @@ export const PersistedLogsDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<PersistedLogsQuery, PersistedLogsQueryVariables>;
+export const UserStatsDocument = new TypedDocumentString(`
+    query UserStats {
+  userCount
+  topReaders(take: 1) {
+    id
+    username
+    finishedReadingSessionsCount
+  }
+  activeReadingSessionCount
+  finishedReadingSessionCount
+}
+    `) as unknown as TypedDocumentString<UserStatsQuery, UserStatsQueryVariables>;
 export const CreateOrUpdateUserFormUpdateUserDocument = new TypedDocumentString(`
     mutation CreateOrUpdateUserFormUpdateUser($id: ID!, $input: UpdateUserInput!) {
   updateUser(id: $id, input: $input) {
@@ -7750,9 +7791,16 @@ export const SmartListsWithSearchDocument = new TypedDocumentString(`
     joiner
     name
     visibility
+    ...SmartListCard
   }
 }
-    `) as unknown as TypedDocumentString<SmartListsWithSearchQuery, SmartListsWithSearchQueryVariables>;
+    fragment SmartListCard on SmartList {
+  id
+  description
+  filters
+  joiner
+  name
+}`) as unknown as TypedDocumentString<SmartListsWithSearchQuery, SmartListsWithSearchQueryVariables>;
 export const SmartListByIdDocument = new TypedDocumentString(`
     query SmartListById($id: ID!) {
   smartListById(id: $id) {

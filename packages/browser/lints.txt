@@ -13,13 +13,6 @@ src/components/navigation/sidebar/sections/bookClub/BookClubEmoji.tsx(2,10): err
 src/components/navigation/sidebar/SideBar.tsx(200,4): error TS2322: Type '{ children: Element; key: string; className: string; animate: string; variants: { hidden: { width: number; x: number; }; visible: { width: number; x: number; }; }; initial: false; transition: { duration: number; ease: "easeInOut"; }; }' is not assignable to type 'IntrinsicAttributes & HTMLAttributesWithoutMotionProps<unknown, unknown> & MotionProps & RefAttributes<unknown>'.
   Property 'className' does not exist on type 'IntrinsicAttributes & HTMLAttributesWithoutMotionProps<unknown, unknown> & MotionProps & RefAttributes<unknown>'.
 
-src/components/savedServer/configuredServers/__tests__/ConfiguredServer.test.tsx(1,10): error TS2305: Module '"@stump/sdk"' has no exported member 'SavedServer'.
-src/components/savedServer/configuredServers/__tests__/ConfiguredServersList.tests.tsx(30,2): error TS2561: Object literal may only specify known properties, but 'active_server' does not exist in type 'Partial<{ addServer: (server: SavedServer) => Promise<SavedServer>; editServer: (originalName: string, server: SavedServer) => Promise<void>; ... 7 more ...; set: (args: Partial<...>) => void; }>'. Did you mean to write 'activeServer'?
-src/components/savedServer/configuredServers/AddServerModal.tsx(3,10): error TS2305: Module '"@stump/sdk"' has no exported member 'SavedServer'.
-src/components/savedServer/configuredServers/ConfiguredServer.tsx(3,10): error TS2305: Module '"@stump/sdk"' has no exported member 'SavedServer'.
-src/components/savedServer/configuredServers/ConfiguredServersList.tsx(45,10): error TS2339: Property 'clearCredentialStore' does not exist on type 'TauriRPC'.
-src/components/savedServer/configuredServers/EditServerModal.tsx(3,10): error TS2305: Module '"@stump/sdk"' has no exported member 'SavedServer'.
-src/components/savedServer/configuredServers/SwitchToServerConfirmation.tsx(3,10): error TS2305: Module '"@stump/sdk"' has no exported member 'SavedServer'.
 src/components/savedServer/createOrUpdate/CreateOrUpdateSavedServerForm.tsx(4,10): error TS2305: Module '"@stump/sdk"' has no exported member 'SavedServer'.
 src/components/savedServer/createOrUpdate/schema.ts(1,10): error TS2305: Module '"@stump/sdk"' has no exported member 'SavedServer'.
 src/components/series/NextInSeriesLink.tsx(1,10): error TS2305: Module '"@stump/client"' has no exported member 'useUpNextInSeries'.

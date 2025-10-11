@@ -1,16 +1,13 @@
 import { ConfirmationModal } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import { SavedServer } from '@stump/sdk'
 
-import {
-	CREATE_OR_UPDATE_SERVER_FORM_ID,
-	CreateOrUpdateSavedServerForm,
-} from '@/components/savedServer'
+import { CreateServer, SavedServer } from '../stores/savedServer'
+import { CREATE_OR_UPDATE_SERVER_FORM_ID, CreateOrUpdateSavedServerForm } from './createOrUpdate'
 
 type Props = {
 	editingServer: SavedServer | null
 	existingServers: SavedServer[]
-	onEditServer: (updates: SavedServer) => void
+	onEditServer: (updates: CreateServer) => void
 	onCancel: () => void
 }
 

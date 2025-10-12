@@ -1,1 +1,0 @@
-src/scenes/library/LibraryOverviewTitleSection.tsx(3,15): error TS2305: Module '"@stump/sdk"' has no exported member 'Library'.

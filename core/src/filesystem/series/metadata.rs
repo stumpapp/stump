@@ -24,7 +24,7 @@ pub struct ProcessedSeriesMetadata {
 	/// The booktype of the series, e.g. Print, OneShot, TPB or GN
 	pub booktype: Option<String>,
 	/// The age rating of the associated series
-	#[serde(deserialize_with = "age_rating_deserializer")]
+	#[serde(default, deserialize_with = "age_rating_deserializer")]
 	pub age_rating: Option<i32>,
 	/// The status of the associated series, e.g. Continuing, Ended
 	pub status: Option<String>,
@@ -35,9 +35,19 @@ impl ProcessedSeriesMetadata {
 		path: &Path,
 	) -> Result<Option<ProcessedSeriesMetadata>, FileError> {
 		let series_json_path = path.join("series.json");
+
 		if series_json_path.exists() {
-			let series_json = SeriesJson::from_file(&series_json_path)?;
-			Ok(Some(series_json.metadata))
+			match SeriesJson::from_file(&series_json_path) {
+				Ok(series_json) => Ok(Some(series_json.metadata)),
+				Err(error) => {
+					tracing::error!(
+						?error,
+						?series_json_path,
+						"Failed to read series.json!"
+					);
+					Ok(None)
+				},
+			}
 		} else {
 			Ok(None)
 		}
@@ -72,5 +82,76 @@ impl SeriesJson {
 		let reader = BufReader::new(file);
 		let series_json: SeriesJson = serde_json::from_reader(reader)?;
 		Ok(series_json)
+	}
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+
+	#[test]
+	fn test_deserialize_empty_metadata() {
+		let json = r#"{"metadata": {}}"#;
+		let result: Result<SeriesJson, _> = serde_json::from_str(json);
+
+		assert!(
+			result.is_ok(),
+			"Should deserialize empty metadata without error"
+		);
+
+		let series_json = result.unwrap();
+		assert!(series_json.metadata.age_rating.is_none());
+		assert!(series_json.metadata.title.is_none());
+		assert!(series_json.metadata.publisher.is_none());
+	}
+
+	#[test]
+	fn test_deserialize_metadata_with_missing_age_rating() {
+		let json =
+			r#"{"metadata": {"title": "Test Series", "publisher": "Test Publisher"}}"#;
+		let result: Result<SeriesJson, _> = serde_json::from_str(json);
+
+		assert!(
+			result.is_ok(),
+			"Should deserialize metadata with missing age_rating field"
+		);
+
+		let series_json = result.unwrap();
+		assert!(series_json.metadata.age_rating.is_none());
+		assert_eq!(series_json.metadata.title, Some("Test Series".to_string()));
+		assert_eq!(
+			series_json.metadata.publisher,
+			Some("Test Publisher".to_string())
+		);
+	}
+
+	#[test]
+	fn test_deserialize_metadata_with_null_age_rating() {
+		let json = r#"{"metadata": {"age_rating": null, "title": "Test Series"}}"#;
+		let result: Result<SeriesJson, _> = serde_json::from_str(json);
+
+		assert!(
+			result.is_ok(),
+			"Should deserialize metadata with null age_rating"
+		);
+
+		let series_json = result.unwrap();
+		assert!(series_json.metadata.age_rating.is_none());
+		assert_eq!(series_json.metadata.title, Some("Test Series".to_string()));
+	}
+
+	#[test]
+	fn test_deserialize_metadata_with_empty_age_rating() {
+		let json = r#"{"metadata": {"age_rating": "", "title": "Test Series"}}"#;
+		let result: Result<SeriesJson, _> = serde_json::from_str(json);
+
+		assert!(
+			result.is_ok(),
+			"Should deserialize metadata with empty age_rating string"
+		);
+
+		let series_json = result.unwrap();
+		assert!(series_json.metadata.age_rating.is_none());
+		assert_eq!(series_json.metadata.title, Some("Test Series".to_string()));
 	}
 }

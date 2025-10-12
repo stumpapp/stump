@@ -23,7 +23,6 @@ pub fn age_rating_deserializer<'de, D>(deserializer: D) -> Result<Option<i32>, D
 where
 	D: Deserializer<'de>,
 {
-	// if exists and is empty, return None
 	let str_sequence = Option::<String>::deserialize(deserializer)?
 		.filter(|s| !s.is_empty())
 		.map(|s| s.trim().to_owned());

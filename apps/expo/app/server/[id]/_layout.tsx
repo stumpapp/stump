@@ -167,9 +167,7 @@ export default function Screen() {
 
 	const handleAuthDialogClose = useCallback(
 		(loginResp?: LoginResponse) => {
-			if (!loginResp || !('forUser' in loginResp) || !activeServer) {
-				router.dismissAll()
-			} else {
+			if (loginResp && 'forUser' in loginResp && activeServer) {
 				const { forUser, ...token } = loginResp
 				const instance = new Api({
 					baseURL: activeServer.url,
@@ -179,11 +177,12 @@ export default function Screen() {
 				setSDK(instance)
 				saveServerToken(activeServer?.id || 'dev', token)
 				setUser(forUser)
-				setIsAuthDialogOpen(false)
-				cacheStore.removeInstanceFromCache(activeServer.id)
+				cacheStore.addInstanceToCache(activeServer.id, instance)
+			} else if (!loginResp && !sdk?.isAuthed) {
+				router.dismissAll()
 			}
 		},
-		[activeServer, router, saveServerToken, cacheStore],
+		[activeServer, router, saveServerToken, cacheStore, sdk],
 	)
 
 	// TODO: attempt reauth automatically when able

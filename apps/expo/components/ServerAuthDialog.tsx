@@ -2,19 +2,21 @@ import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useLoginOrRegister } from '@stump/client'
 import { LoginResponse } from '@stump/sdk'
+import { Eye, EyeOff } from 'lucide-react-native'
 import { useColorScheme } from 'nativewind'
-import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
-import { View } from 'react-native'
+import { Pressable, View } from 'react-native'
 import { useSharedValue } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { z } from 'zod'
 
+import { useColors } from '~/lib/constants'
 import { useUserStore } from '~/stores'
 
 import { Button, Text } from './ui'
 import { BottomSheet } from './ui/bottom-sheet'
-import { useColors } from '~/lib/constants'
+import { Icon } from './ui/icon'
 
 type ServerAuthDialogProps = {
 	isOpen: boolean
@@ -31,6 +33,7 @@ export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogPr
 	const ref = useRef<BottomSheetModal | null>(null)
 	const animatedIndex = useSharedValue<number>(0)
 	const animatedPosition = useSharedValue<number>(0)
+	const [isPasswordVisible, setIsPasswordVisible] = useState(false)
 
 	const { colorScheme } = useColorScheme()
 
@@ -64,6 +67,7 @@ export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogPr
 			try {
 				const result = await loginUser({ password, username })
 				if ('forUser' in result) {
+					ref.current?.dismiss()
 					onClose(result)
 				} else {
 					console.warn('Unexpected login response:', result)
@@ -141,17 +145,34 @@ export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogPr
 							required: true,
 						}}
 						render={({ field: { onChange, onBlur, value } }) => (
-							<BottomSheet.Input
-								label="Password"
-								secureTextEntry
-								autoCorrect={false}
-								autoCapitalize="none"
-								placeholder="Password"
-								onBlur={onBlur}
-								onChangeText={onChange}
-								value={value}
-								errorMessage={errors.password?.message}
-							/>
+							<View className="w-full gap-1.5">
+								<Text className="text-base font-medium text-foreground-muted">Password</Text>
+								<View className="relative flex-row items-center">
+									<BottomSheet.Input
+										secureTextEntry={!isPasswordVisible}
+										autoCorrect={false}
+										autoCapitalize="none"
+										placeholder="Password"
+										onBlur={onBlur}
+										onChangeText={onChange}
+										value={value}
+										className="flex-1 pr-12"
+									/>
+									<Pressable
+										onPress={() => setIsPasswordVisible(!isPasswordVisible)}
+										className="absolute right-3 h-8 w-8 items-center justify-center"
+									>
+										<Icon
+											as={isPasswordVisible ? EyeOff : Eye}
+											size={20}
+											className="text-foreground-muted"
+										/>
+									</Pressable>
+								</View>
+								{errors.password?.message && (
+									<Text className="text-sm text-fill-danger">{errors.password.message}</Text>
+								)}
+							</View>
 						)}
 						name="password"
 					/>

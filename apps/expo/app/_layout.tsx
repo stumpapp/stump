@@ -119,6 +119,7 @@ export default function RootLayout() {
 								name="(tabs)"
 								options={{
 									headerShown: false,
+									title: '',
 									animation: animationEnabled ? 'default' : 'none',
 								}}
 							/>
@@ -126,6 +127,7 @@ export default function RootLayout() {
 								name="server/[id]"
 								options={{
 									headerShown: false,
+									title: '',
 									animation: animationEnabled ? 'default' : 'none',
 									autoHideHomeIndicator: shouldHideStatusBar,
 								}}

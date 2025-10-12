@@ -1,3 +1,4 @@
+import { queryClient } from '@stump/client'
 import { uuid } from 'expo-modules-core'
 import * as SecureStore from 'expo-secure-store'
 import { useCallback } from 'react'
@@ -5,6 +6,7 @@ import { z } from 'zod'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 
+import { useCacheStore } from './cache'
 import { ZustandMMKVStorage } from './store'
 
 type ServerID = string
@@ -117,6 +119,10 @@ export const useSavedServers = () => {
 		setShowStumpServers,
 	} = useSavedServerStore((state) => state)
 
+	const cacheStore = useCacheStore((state) => ({
+		removeInstanceFromCache: state.removeSDK,
+	}))
+
 	const getServerConfig = async (id: ServerID) => {
 		const config = await SecureStore.getItemAsync(formatPrefix('config', id))
 		return config ? serverConfig.parse(JSON.parse(config)) : null
@@ -228,6 +234,8 @@ export const useSavedServers = () => {
 	 */
 	const deleteServerToken = async (id: ServerID) => {
 		await SecureStore.deleteItemAsync(formatPrefix('token', id))
+		cacheStore.removeInstanceFromCache(id)
+		queryClient.removeQueries({ predicate: ({ queryKey }) => queryKey.includes(id) })
 	}
 
 	/**

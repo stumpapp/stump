@@ -3,7 +3,7 @@ import { Pressable, View } from 'react-native'
 import * as ContextMenu from 'zeego/context-menu'
 
 import { usePreferencesStore } from '~/stores'
-import { SavedServer } from '~/stores/savedServer'
+import { SavedServer, useSavedServers } from '~/stores/savedServer'
 
 import { Text } from '../ui'
 
@@ -30,6 +30,8 @@ export default function SavedServerListItem({ server, onEdit, onDelete, forceOPD
 			return maskURLs ? url.replace(/./g, '*') : url
 		}
 	}
+
+	const { deleteServerToken } = useSavedServers()
 
 	const router = useRouter()
 
@@ -68,6 +70,26 @@ export default function SavedServerListItem({ server, onEdit, onDelete, forceOPD
 							}}
 						/>
 					</ContextMenu.Item>
+
+					{server.kind === 'stump' && !forceOPDS && (
+						<ContextMenu.Item
+							key="forget"
+							destructive
+							onSelect={async () => {
+								await deleteServerToken(server.id)
+							}}
+						>
+							<ContextMenu.ItemTitle>Discard Tokens</ContextMenu.ItemTitle>
+							<ContextMenu.ItemSubtitle>Affects login tokens only</ContextMenu.ItemSubtitle>
+
+							<ContextMenu.ItemIcon
+								ios={{
+									name: 'key.fill',
+								}}
+							/>
+						</ContextMenu.Item>
+					)}
+
 					<ContextMenu.Item key="remove" destructive onSelect={onDelete}>
 						<ContextMenu.ItemTitle>Remove</ContextMenu.ItemTitle>
 

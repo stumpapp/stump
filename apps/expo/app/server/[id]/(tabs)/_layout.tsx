@@ -5,6 +5,7 @@ import { Icon, Label, NativeTabs } from 'expo-router/unstable-native-tabs'
 import { useEffect } from 'react'
 import { Platform } from 'react-native'
 
+import ServerErrorBoundary from '~/components/ServerErrorBoundary'
 import { icons } from '~/lib'
 import { useColors } from '~/lib/constants'
 import { cn } from '~/lib/utils'
@@ -32,8 +33,17 @@ export default function TabLayout() {
 	}, [user, setUser])
 
 	useEffect(() => {
-		if (isAxiosError(error) && error.response?.status === 401) {
-			onUnauthenticatedResponse?.()
+		if (isAxiosError(error)) {
+			if (error.response?.status === 401) {
+				onUnauthenticatedResponse?.()
+			} else if (error.response?.status === 405) {
+				// This can happen if the client is "newer" than the server and is trying to use an endpoint that doesn't exist.
+				// We should probably inform the user that they need to update their server.
+				// For now, throw to trigger the error boundary
+				throw new Error('Incompatible server', { cause: error })
+			}
+		} else if (error?.message === 'Malformed response received from server') {
+			throw new Error('Incompatible server', { cause: error })
 		}
 	}, [error, onUnauthenticatedResponse])
 
@@ -113,4 +123,8 @@ export default function TabLayout() {
 			</Tabs>
 		),
 	})
+}
+
+export function ErrorBoundary({ error, retry }: { error: Error; retry: () => Promise<void> }) {
+	return <ServerErrorBoundary error={error} onRetry={() => retry()} />
 }

@@ -1,8 +1,11 @@
 use std::path::PathBuf;
 
 use axum::{
+	body::Body,
 	extract::{Path, Query, State},
+	http::{header, HeaderMap, Request},
 	middleware,
+	response::IntoResponse,
 	routing::get,
 	Extension, Router,
 };
@@ -42,12 +45,13 @@ use stump_core::{
 	},
 	Ctx,
 };
+use tower_http::services::ServeFile;
 
 use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
 	middleware::auth::{api_key_middleware, auth_middleware},
-	utils::http::{ImageResponse, NamedFile, Xml},
+	utils::http::{ImageResponse, Xml},
 };
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
@@ -693,7 +697,8 @@ async fn download_book(
 	}): Path<OPDSURLParams<OPDSFilenameURLParams>>,
 	State(ctx): State<AppState>,
 	Extension(req): Extension<AuthContext>,
-) -> APIResult<NamedFile> {
+	headers: HeaderMap,
+) -> APIResult<impl IntoResponse> {
 	let user = req
 		.user_and_enforce_permissions(&[UserPermission::DownloadFile])
 		.map_err(|_| {
@@ -708,5 +713,31 @@ async fn download_book(
 		.await?
 		.ok_or(APIError::NotFound("Book not found".to_string()))?;
 
-	Ok(NamedFile::open(book.path.clone()).await?)
+	// Note: I am reusing the original headers to support range requests
+	let mut serve_req = Request::new(Body::empty());
+	*serve_req.headers_mut() = headers;
+
+	match ServeFile::new(&book.path).try_call(serve_req).await {
+		Ok(mut response) => {
+			if let Some(filename) = std::path::Path::new(&book.path)
+				.file_name()
+				.and_then(|os_str| os_str.to_str())
+			{
+				response.headers_mut().insert(
+					header::CONTENT_DISPOSITION,
+					format!("attachment; filename=\"{}\"", filename)
+						.parse()
+						.unwrap_or_else(|_| "attachment".parse().unwrap()),
+				);
+			}
+			Ok(response)
+		},
+		Err(e) => {
+			tracing::error!(error = ?e, path = %book.path, "Error serving media file");
+			Err(APIError::InternalServerError(format!(
+				"Failed to serve file: {}",
+				e
+			)))
+		},
+	}
 }

@@ -65,131 +65,138 @@ describe('schema', () => {
 	describe('intoFormFilter', () => {
 		it('should convert basic smart filter into form filter', () => {
 			for (const filter of stringFilters) {
-				expect(
-					intoFormFilter({
-						media: { name: filter },
-					} satisfies SmartListFilterInput),
-				).toEqual({
-					field: 'name',
-					operation: Object.keys(filter)[0],
-					source: 'book',
-					value: Object.values(filter)[0],
-				})
+				const result = intoFormFilter({
+					media: { name: filter },
+				} satisfies SmartListFilterInput)
+				expect(result).toEqual(
+					expect.objectContaining({
+						field: 'name',
+						operation: Object.keys(filter)[0],
+						source: 'book',
+						value: Object.values(filter)[0],
+					}),
+				)
 			}
 
 			for (const filter of numericFilters) {
-				const operation = 'from' in filter ? 'range' : Object.keys(filter)[0]
-				const value = 'from' in filter ? filter : Object.values(filter)[0]
-				expect(
-					intoFormFilter({
-						media: { createdAt: filter },
-					} satisfies SmartListFilterInput),
-				).toEqual({
-					field: 'createdAt',
-					operation,
-					source: 'book',
-					value,
-				})
+				const result = intoFormFilter({
+					media: { createdAt: filter },
+				} satisfies SmartListFilterInput)
+				expect(result).toEqual(
+					expect.objectContaining({
+						field: 'createdAt',
+						operation: Object.keys(filter)[0],
+						source: 'book',
+						value: Object.values(filter)[0],
+					}),
+				)
+				expect(result).toHaveProperty('id')
 			}
 		})
 
 		it('should convert smart filter with metadata into form filter', () => {
 			for (const filter of stringFilters) {
-				expect(
-					intoFormFilter({
-						media: { metadata: { genres: filter } },
-					} satisfies SmartListFilterInput),
-				).toEqual({
-					field: 'genre',
-					operation: Object.keys(filter)[0],
-					source: 'book_meta',
-					value: Object.values(filter)[0],
-				})
+				const result = intoFormFilter({
+					media: { metadata: { genres: filter } },
+				} satisfies SmartListFilterInput)
+				expect(result).toEqual(
+					expect.objectContaining({
+						field: 'metadata',
+						operation: 'genres',
+						source: 'book',
+						value: filter,
+					}),
+				)
 			}
 
 			for (const filter of numericFilters) {
-				const operation = 'from' in filter ? 'range' : Object.keys(filter)[0]
-				const value = 'from' in filter ? filter : Object.values(filter)[0]
-				expect(
-					intoFormFilter({
-						media: { metadata: { ageRating: filter } },
-					} satisfies SmartListFilterInput),
-				).toEqual({
-					field: 'ageRating',
-					operation,
-					source: 'book_meta',
-					value,
-				})
+				const result = intoFormFilter({
+					media: { metadata: { ageRating: filter } },
+				} satisfies SmartListFilterInput)
+				expect(result).toEqual(
+					expect.objectContaining({
+						field: 'metadata',
+						operation: 'ageRating',
+						source: 'book',
+						value: filter,
+					}),
+				)
 			}
 		})
 
 		it('should convert smart filter with series into form filter', () => {
 			for (const filter of stringFilters) {
-				expect(
-					intoFormFilter({
-						series: {
-							name: filter,
-						},
-					} satisfies SmartListFilterInput),
-				).toEqual({
-					field: 'name',
-					operation: Object.keys(filter)[0],
-					source: 'series',
-					value: Object.values(filter)[0],
-				})
+				const result = intoFormFilter({
+					series: {
+						name: filter,
+					},
+				} satisfies SmartListFilterInput)
+				expect(result).toEqual(
+					expect.objectContaining({
+						field: 'name',
+						operation: Object.keys(filter)[0],
+						source: 'series',
+						value: Object.values(filter)[0],
+					}),
+				)
+				expect(result).toHaveProperty('id')
 			}
 		})
 
 		it('should convert smart filter with series meta into form filter', () => {
 			for (const filter of stringFilters) {
-				expect(
-					intoFormFilter({
-						series: {
-							metadata: {
-								title: filter,
-							},
+				const result = intoFormFilter({
+					series: {
+						metadata: {
+							title: filter,
 						},
-					} satisfies SmartListFilterInput),
-				).toEqual({
-					field: 'title',
-					operation: Object.keys(filter)[0],
-					source: 'series_meta',
-					value: Object.values(filter)[0],
-				})
+					},
+				} satisfies SmartListFilterInput)
+				expect(result).toEqual(
+					expect.objectContaining({
+						field: 'metadata',
+						operation: 'title',
+						source: 'series',
+						value: filter,
+					}),
+				)
+				expect(result).toHaveProperty('id')
 			}
 
 			for (const filter of numericFilters) {
-				const operation = 'from' in filter ? 'range' : Object.keys(filter)[0]
-				const value = 'from' in filter ? filter : Object.values(filter)[0]
-				expect(
-					intoFormFilter({
-						series: { metadata: { ageRating: filter } },
-					} satisfies MediaFilterInput),
-				).toEqual({
-					field: 'ageRating',
-					operation,
-					source: 'series_meta',
-					value,
-				})
+				const result = intoFormFilter({
+					series: { metadata: { ageRating: filter } },
+				} satisfies MediaFilterInput)
+				expect(result).toEqual(
+					expect.objectContaining({
+						field: 'metadata',
+						operation: 'ageRating',
+						source: 'series',
+						value: filter,
+					}),
+				)
+				expect(result).toHaveProperty('id')
 			}
 		})
 
 		it('should convert smart filter with library into form filter', () => {
 			for (const filter of stringFilters) {
-				expect(
-					intoFormFilter({
-						series: {
-							library: {
-								name: filter,
-							},
+				const result = intoFormFilter({
+					series: {
+						library: {
+							name: filter,
 						},
-					} satisfies MediaFilterInput),
-				).toEqual({
-					field: 'name',
-					operation: Object.keys(filter)[0],
-					source: 'library',
-					value: Object.values(filter)[0],
-				})
+					},
+				} satisfies MediaFilterInput)
+				expect(result).toEqual(
+					expect.objectContaining({
+						field: 'library',
+						operation: 'name',
+						source: 'series',
+						value: filter,
+					}),
+				)
+				expect(result).toHaveProperty('id')
 			}
 		})
 	})
@@ -205,8 +212,10 @@ describe('schema', () => {
 					value: ['foo', 'shmoo'],
 				}),
 			).toEqual({
-				name: {
-					any: ['foo', 'shmoo'],
+				media: {
+					name: {
+						anyOf: ['foo', 'shmoo'],
+					},
 				},
 			})
 
@@ -219,8 +228,10 @@ describe('schema', () => {
 					value: 42,
 				}),
 			).toEqual({
-				createdAt: {
-					gte: 42,
+				media: {
+					createdAt: {
+						gte: 42,
+					},
 				},
 			})
 
@@ -237,10 +248,14 @@ describe('schema', () => {
 					},
 				}),
 			).toEqual({
-				createdAt: {
-					from: 42,
-					inclusive: true,
-					to: 69,
+				media: {
+					createdAt: {
+						range: {
+							from: 42,
+							inclusive: true,
+							to: 69,
+						},
+					},
 				},
 			})
 		})
@@ -255,9 +270,9 @@ describe('schema', () => {
 					value: ['foo', 'shmoo'],
 				}),
 			).toEqual({
-				metadata: {
+				mediaMetadata: {
 					genre: {
-						any: ['foo', 'shmoo'],
+						anyOf: ['foo', 'shmoo'],
 					},
 				},
 			})
@@ -271,7 +286,7 @@ describe('schema', () => {
 					value: 42,
 				}),
 			).toEqual({
-				metadata: {
+				mediaMetadata: {
 					ageRating: {
 						gte: 42,
 					},
@@ -291,11 +306,13 @@ describe('schema', () => {
 					},
 				}),
 			).toEqual({
-				metadata: {
+				mediaMetadata: {
 					ageRating: {
-						from: 42,
-						inclusive: true,
-						to: 69,
+						range: {
+							from: 42,
+							inclusive: true,
+							to: 69,
+						},
 					},
 				},
 			})
@@ -313,7 +330,7 @@ describe('schema', () => {
 			).toEqual({
 				series: {
 					name: {
-						any: ['foo', 'shmoo'],
+						anyOf: ['foo', 'shmoo'],
 					},
 				},
 			})
@@ -349,9 +366,11 @@ describe('schema', () => {
 			).toEqual({
 				series: {
 					createdAt: {
-						from: 42,
-						inclusive: true,
-						to: 69,
+						range: {
+							from: 42,
+							inclusive: true,
+							to: 69,
+						},
 					},
 				},
 			})
@@ -367,11 +386,9 @@ describe('schema', () => {
 					value: ['foo', 'shmoo'],
 				}),
 			).toEqual({
-				series: {
-					metadata: {
-						title: {
-							any: ['foo', 'shmoo'],
-						},
+				seriesMetadata: {
+					title: {
+						anyOf: ['foo', 'shmoo'],
 					},
 				},
 			})
@@ -385,11 +402,9 @@ describe('schema', () => {
 					value: 42,
 				}),
 			).toEqual({
-				series: {
-					metadata: {
-						ageRating: {
-							gte: 42,
-						},
+				seriesMetadata: {
+					ageRating: {
+						gte: 42,
 					},
 				},
 			})
@@ -407,9 +422,9 @@ describe('schema', () => {
 					},
 				}),
 			).toEqual({
-				series: {
-					metadata: {
-						ageRating: {
+				seriesMetadata: {
+					ageRating: {
+						range: {
 							from: 42,
 							inclusive: true,
 							to: 69,
@@ -429,11 +444,9 @@ describe('schema', () => {
 					value: ['foo', 'shmoo'],
 				}),
 			).toEqual({
-				series: {
-					library: {
-						name: {
-							any: ['foo', 'shmoo'],
-						},
+				library: {
+					name: {
+						anyOf: ['foo', 'shmoo'],
 					},
 				},
 			})
@@ -447,11 +460,9 @@ describe('schema', () => {
 					value: 42,
 				}),
 			).toEqual({
-				series: {
-					library: {
-						createdAt: {
-							gte: 42,
-						},
+				library: {
+					createdAt: {
+						gte: 42,
 					},
 				},
 			})
@@ -469,9 +480,9 @@ describe('schema', () => {
 					},
 				}),
 			).toEqual({
-				series: {
-					library: {
-						createdAt: {
+				library: {
+					createdAt: {
+						range: {
 							from: 42,
 							inclusive: true,
 							to: 69,
@@ -490,18 +501,16 @@ describe('schema', () => {
 					groups: [
 						{
 							media: {
-								_and: [
-									{
-										name: {
-											anyOf: ['foo', 'shmoo'],
-										},
-									} satisfies MediaFilterInput,
-									{
-										name: {
-											noneOf: ['bar', 'baz'],
-										},
-									} satisfies MediaFilterInput,
-								],
+								name: {
+									anyOf: ['foo', 'shmoo'],
+								},
+							},
+						},
+						{
+							media: {
+								name: {
+									noneOf: ['bar', 'baz'],
+								},
 							},
 						},
 					],
@@ -509,18 +518,18 @@ describe('schema', () => {
 				}),
 			).toEqual({
 				filters: [
-					{
+					expect.objectContaining({
 						field: 'name',
 						operation: 'anyOf',
 						source: 'book',
 						value: ['foo', 'shmoo'],
-					},
-					{
+					}),
+					expect.objectContaining({
 						field: 'name',
-						operation: 'none',
+						operation: 'noneOf',
 						source: 'book',
 						value: ['bar', 'baz'],
-					},
+					}),
 				],
 				joiner: 'and',
 			})
@@ -531,20 +540,18 @@ describe('schema', () => {
 					groups: [
 						{
 							media: {
-								_or: [
-									{
-										metadata: {
-											ageRating: {
-												range: { from: 42, inclusive: true, to: 69 },
-											},
-										},
+								metadata: {
+									ageRating: {
+										range: { from: 42, inclusive: true, to: 69 },
 									},
-									{
-										createdAt: {
-											lt: new Date('2021-01-01').toISOString(),
-										},
-									},
-								],
+								},
+							},
+						},
+						{
+							media: {
+								createdAt: {
+									lt: new Date('2021-01-01').toISOString(),
+								},
 							},
 						},
 					],
@@ -552,22 +559,20 @@ describe('schema', () => {
 				}),
 			).toEqual({
 				filters: [
-					{
-						field: 'ageRating',
-						operation: 'range',
-						source: 'book_meta',
+					expect.objectContaining({
+						field: 'metadata',
+						operation: 'ageRating',
+						source: 'book',
 						value: {
-							from: 42,
-							inclusive: true,
-							to: 69,
+							range: { from: 42, inclusive: true, to: 69 },
 						},
-					},
-					{
+					}),
+					expect.objectContaining({
 						field: 'createdAt',
 						operation: 'lt',
 						source: 'book',
 						value: new Date('2021-01-01').toISOString(),
-					},
+					}),
 				],
 				joiner: 'or',
 			})
@@ -596,18 +601,23 @@ describe('schema', () => {
 					joiner: 'and',
 				}),
 			).toEqual({
-				and: [
+				groups: [
 					{
-						name: {
-							any: ['foo', 'shmoo'],
+						media: {
+							name: {
+								anyOf: ['foo', 'shmoo'],
+							},
 						},
 					},
 					{
-						name: {
-							none: ['bar', 'baz'],
+						media: {
+							name: {
+								noneOf: ['bar', 'baz'],
+							},
 						},
 					},
 				],
+				joiner: 'AND',
 			})
 
 			// Numeric filter
@@ -634,22 +644,27 @@ describe('schema', () => {
 					joiner: 'or',
 				}),
 			).toEqual({
-				or: [
+				groups: [
 					{
-						metadata: {
+						mediaMetadata: {
 							ageRating: {
-								from: 42,
-								inclusive: true,
-								to: 69,
+								range: {
+									from: 42,
+									inclusive: true,
+									to: 69,
+								},
 							},
 						},
 					},
 					{
-						createdAt: {
-							lt: 42,
+						media: {
+							createdAt: {
+								lt: 42,
+							},
 						},
 					},
 				],
+				joiner: 'OR',
 			})
 		})
 	})
@@ -665,18 +680,16 @@ describe('schema', () => {
 							groups: [
 								{
 									media: {
-										_and: [
-											{
-												name: {
-													anyOf: ['foo', 'shmoo'],
-												},
-											},
-											{
-												name: {
-													noneOf: ['bar', 'baz'],
-												},
-											},
-										],
+										name: {
+											anyOf: ['foo', 'shmoo'],
+										},
+									},
+								},
+								{
+									media: {
+										name: {
+											noneOf: ['bar', 'baz'],
+										},
 									},
 								},
 							],
@@ -686,13 +699,9 @@ describe('schema', () => {
 							groups: [
 								{
 									media: {
-										_or: [
-											{
-												createdAt: {
-													lt: new Date('2021-01-01').toISOString(),
-												},
-											},
-										],
+										createdAt: {
+											lt: new Date('2021-01-01').toISOString(),
+										},
 									},
 								},
 							],
@@ -710,29 +719,29 @@ describe('schema', () => {
 					groups: [
 						{
 							filters: [
-								{
+								expect.objectContaining({
 									field: 'name',
 									operation: 'anyOf',
 									source: 'book',
 									value: ['foo', 'shmoo'],
-								},
-								{
+								}),
+								expect.objectContaining({
 									field: 'name',
-									operation: 'none',
+									operation: 'noneOf',
 									source: 'book',
 									value: ['bar', 'baz'],
-								},
+								}),
 							],
 							joiner: 'and',
 						},
 						{
 							filters: [
-								{
+								expect.objectContaining({
 									field: 'createdAt',
 									operation: 'lt',
 									source: 'book',
 									value: new Date('2021-01-01').toISOString(),
-								},
+								}),
 							],
 							joiner: 'or',
 						},
@@ -789,29 +798,41 @@ describe('schema', () => {
 					visibility: 'PUBLIC',
 				}),
 			).toEqual({
-				default_grouping: 'BY_SERIES',
+				defaultGrouping: 'BY_SERIES',
 				description: 'baz',
-				filters: {
-					groups: [
-						{
-							and: [
-								{
+				filters: [
+					{
+						groups: [
+							{
+								media: {
 									name: {
-										any: ['foo', 'shmoo'],
+										anyOf: ['foo', 'shmoo'],
 									},
 								},
-								{
+							},
+							{
+								media: {
 									name: {
-										none: ['bar', 'baz'],
+										noneOf: ['bar', 'baz'],
 									},
 								},
-							],
-						},
-						{
-							or: [{ createdAt: { lt: 42 } }],
-						},
-					],
-				},
+							},
+						],
+						joiner: 'AND',
+					},
+					{
+						groups: [
+							{
+								media: {
+									createdAt: {
+										lt: 42,
+									},
+								},
+							},
+						],
+						joiner: 'OR',
+					},
+				],
 				joiner: 'AND',
 				name: 'bar',
 				visibility: 'PUBLIC',

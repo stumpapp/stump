@@ -40,7 +40,7 @@ describe('CreateOrUpdateAPIKeyForm', () => {
 			expect(
 				schema.safeParse({
 					...validBase,
-					expires_at: dayjs().add(1, 'day').toDate(),
+					expiresAt: dayjs().add(1, 'day').toDate(),
 				}).success,
 			).toBe(true)
 		})
@@ -71,13 +71,13 @@ describe('CreateOrUpdateAPIKeyForm', () => {
 			expect(
 				schema.safeParse({
 					...validBase,
-					expires_at: dayjs().subtract(1, 'day').toDate(),
+					expiresAt: dayjs().subtract(1, 'day').toDate(),
 				}).success,
 			).toBe(false)
 			expect(
 				schema.safeParse({
 					...validBase,
-					expires_at: new Date(),
+					expiresAt: new Date(),
 				}).success,
 			).toBe(false)
 		})

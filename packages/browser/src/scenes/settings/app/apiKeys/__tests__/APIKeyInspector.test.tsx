@@ -100,7 +100,7 @@ describe('APIKeyInspector', () => {
 	it('should render an unrestricted key properly', () => {
 		jest.mocked(useAppContext).mockReturnValue({
 			...useAppContextRet,
-			user: { ...useAppContextRet.user, is_server_owner: true },
+			user: { ...useAppContextRet.user, isServerOwner: true },
 		})
 		render(Subject(createKey({ permissions: { __typename: 'InheritPermissionStruct' } })))
 

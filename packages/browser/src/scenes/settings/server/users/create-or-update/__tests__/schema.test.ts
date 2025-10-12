@@ -42,7 +42,7 @@ describe('CreateOrUpdateUserSchema', () => {
 		it('should enforce a non-negative age restriction', () => {
 			const schema = buildSchema(() => '', [], createUser())
 
-			const result = schema.safeParse({ age_restriction: -1 })
+			const result = schema.safeParse({ ageRestriction: -1 })
 			expect(result.success).toBe(false)
 		})
 	})

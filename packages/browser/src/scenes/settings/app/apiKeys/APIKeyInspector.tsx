@@ -47,7 +47,7 @@ export default function APIKeyInspector({ apiKey, onClose }: Props) {
 
 		const permissions =
 			displayedData?.permissions.__typename === 'InheritPermissionStruct'
-				? user.permissions
+				? user.permissions || []
 				: displayedData?.permissions.value || []
 
 		return (

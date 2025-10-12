@@ -1,4 +1,4 @@
-import { useJobStore } from '@stump/client'
+import { useFooterOffsetStore, useJobStore } from '@stump/client'
 import { ProgressBar, Text } from '@stump/components'
 import { JobUpdate } from '@stump/graphql'
 import { AnimatePresence, motion } from 'framer-motion'
@@ -61,15 +61,20 @@ export default function JobOverlay() {
 		[subTaskCounts],
 	)
 
+	const additionalOffset = useFooterOffsetStore((state) => state.footerOffset)
+
 	return (
 		<AnimatePresence>
 			{firstRunningJob && (
 				<motion.div
 					// @ts-expect-error: It does have className actually?
-					className="fixed bottom-[1rem] right-[1rem] flex h-28 w-64 flex-col items-start justify-between rounded-md border border-edge-subtle bg-background-surface p-4 shadow"
+					className="fixed right-[1rem] flex h-28 w-64 flex-col items-start justify-between rounded-md border border-edge-subtle bg-background-surface p-4 shadow"
 					initial={{ opacity: 0, scale: 0.9, y: 100 }}
 					animate={{ opacity: 1, scale: 1, y: 0 }}
 					exit={{ opacity: 0, scale: 0.9, y: 100 }}
+					style={{
+						bottom: 16 + additionalOffset,
+					}}
 				>
 					<Text size="sm" className="line-clamp-2">
 						{firstRunningJob.message ?? 'Job in Progress'}

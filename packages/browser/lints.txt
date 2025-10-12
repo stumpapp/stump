@@ -1,10 +1,1 @@
-src/components/bookClub/schedule/BookClubSchedule.tsx(32,24): error TS2339: Property 'books' does not exist on type '{ __typename?: "BookClubSchedule" | undefined; id: number; defaultIntervalDays?: number | null | undefined; }'.
-src/components/bookClub/schedule/BookClubSchedule.tsx(32,47): error TS7006: Parameter 'a' implicitly has an 'any' type.
-src/components/bookClub/schedule/BookClubSchedule.tsx(32,50): error TS7006: Parameter 'b' implicitly has an 'any' type.
-src/components/bookClub/schedule/BookClubSchedule.tsx(35,23): error TS2339: Property 'books' does not exist on type '{ __typename?: "BookClubSchedule" | undefined; id: number; defaultIntervalDays?: number | null | undefined; }'.
-src/components/bookClub/schedule/BookClubSchedule.tsx(42,26): error TS7006: Parameter 'book' implicitly has an 'any' type.
-src/components/bookClub/schedule/BookClubSchedule.tsx(54,31): error TS7006: Parameter 'book' implicitly has an 'any' type.
-src/components/bookClub/schedule/BookClubSchedule.tsx(68,25): error TS7006: Parameter 'book' implicitly has an 'any' type.
-src/components/bookClub/schedule/BookClubSchedule.tsx(86,24): error TS7006: Parameter 'book' implicitly has an 'any' type.
-src/components/bookClub/schedule/BookClubScheduleItem.tsx(3,10): error TS2305: Module '"@stump/sdk"' has no exported member 'BookClubBook'.
 src/scenes/library/LibraryOverviewTitleSection.tsx(3,15): error TS2305: Module '"@stump/sdk"' has no exported member 'Library'.

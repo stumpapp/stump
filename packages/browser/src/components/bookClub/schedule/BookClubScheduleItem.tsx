@@ -1,6 +1,6 @@
 import { useSDK } from '@stump/client'
 import { AspectRatio, Badge, ButtonOrLink, Card, cx, Heading, Link, Text } from '@stump/components'
-import { BookClubBook } from '@stump/sdk'
+import { BookClubLayoutQuery } from '@stump/graphql'
 import dayjs from 'dayjs'
 import { Book } from 'lucide-react'
 import pluralize from 'pluralize'
@@ -13,29 +13,29 @@ import paths from '@/paths'
 import { useBookClubContext } from '../context'
 
 type Props = {
-	book: BookClubBook
+	book: NonNullable<NonNullable<BookClubLayoutQuery['bookClubBySlug']>['schedule']>['books'][number]
 }
 export default function BookClubScheduleTimelineItem({ book }: Props) {
 	const { sdk } = useSDK()
 	const { bookClub } = useBookClubContext()
 
-	const adjustedEnd = book.discussion_duration_days
-		? dayjs(book.end_at).add(book.discussion_duration_days, 'day')
+	const adjustedEnd = book.discussionDurationDays
+		? dayjs(book.endAt).add(book.discussionDurationDays, 'day')
 		: null
-	const isCurrent = dayjs().isBefore(adjustedEnd) && dayjs().isAfter(dayjs(book.start_at))
-	const isDiscussing = dayjs().isBefore(adjustedEnd) && dayjs().isAfter(dayjs(book.end_at))
-	const isFuture = dayjs().isBefore(dayjs(book.start_at))
+	const isCurrent = dayjs().isBefore(adjustedEnd) && dayjs().isAfter(dayjs(book.startAt))
+	const isDiscussing = dayjs().isBefore(adjustedEnd) && dayjs().isAfter(dayjs(book.endAt))
+	const isFuture = dayjs().isBefore(dayjs(book.startAt))
 
 	const daysInfo = useMemo(() => {
 		let message = ''
-		const start = dayjs(book.start_at)
-		const end = dayjs(book.end_at)
+		const start = dayjs(book.startAt)
+		const end = dayjs(book.endAt)
 
 		if (isDiscussing) {
 			const diff = dayjs(adjustedEnd).diff(dayjs(), 'days') + 1 // add one to include the current day
 			message = `${diff} ${pluralize('day', diff)} left for discussion`
 		} else if (isCurrent) {
-			const diff = dayjs(book.end_at).diff(dayjs(), 'days') + 1 // add one to include the current day
+			const diff = dayjs(book.endAt).diff(dayjs(), 'days') + 1 // add one to include the current day
 			message = `${diff} ${pluralize('day', diff)} left to read`
 		} else if (isFuture) {
 			message = 'Not yet available'
@@ -92,20 +92,21 @@ export default function BookClubScheduleTimelineItem({ book }: Props) {
 	}
 
 	const renderBookInfo = () => {
-		const details = match(book.book)
-			.with({ __type: 'stored' }, ({ id, name, metadata }) => ({
+		const details = match(book.entity)
+			.with({ __typename: 'Media' }, ({ id, resolvedName, metadata }) => ({
 				author: metadata?.writers?.join(', '),
 				imageUrl: sdk.media.thumbnailURL(id),
-				title: metadata?.title || name,
+				title: resolvedName,
 				url: paths.bookOverview(id),
 			}))
-			.with({ __type: 'external' }, ({ image_url, ...ref }) => ({
-				...ref,
-				imageUrl: image_url,
+			.otherwise(() => ({
+				author: book.author,
+				imageUrl: book.imageUrl,
+				title: book.title,
+				url: book.url,
 			}))
-			.otherwise(() => null)
 
-		const ImageComponent = book.book?.__type === 'external' ? 'img' : EntityImage
+		const ImageComponent = !book.entity ? 'img' : EntityImage
 
 		const image = details?.imageUrl ? (
 			<ImageComponent src={details.imageUrl} className="rounded-md object-cover" />
@@ -115,7 +116,7 @@ export default function BookClubScheduleTimelineItem({ book }: Props) {
 			</div>
 		)
 		const link = details?.url
-		const isExternal = book.book?.__type === 'external'
+		const isExternal = !book.entity
 		const heading = details?.title ?? 'Untitled'
 		const author = details?.author
 
@@ -157,14 +158,15 @@ export default function BookClubScheduleTimelineItem({ book }: Props) {
 				</ButtonOrLink>
 			)
 		} else {
-			return (
-				<Link
-					href={paths.bookClubDiscussion(bookClub.id, book.discussion?.id)}
-					className="text-sm text-foreground-muted"
-				>
-					{discussionInfo.message}
-				</Link>
-			)
+			return null
+			// return (
+			// 	<Link
+			// 		href={paths.bookClubDiscussion(bookClub.id, book.discussion?.id)}
+			// 		className="text-sm text-foreground-muted"
+			// 	>
+			// 		{discussionInfo.message}
+			// 	</Link>
+			// )
 		}
 	}
 

@@ -1,11 +1,12 @@
 use super::{book_club_member::BookClubMember, book_club_schedule::BookClubSchedule};
 use crate::data::{AuthContext, CoreContext};
+use crate::object::book_club_book::BookClubBook;
 use crate::object::book_club_invitation::BookClubInvitation;
 use async_graphql::{ComplexObject, Context, Json, Result, SimpleObject};
 use models::entity::{
 	book_club, book_club_book, book_club_invitation, book_club_member, book_club_schedule,
 };
-use models::shared::book_club::{BookClubBook, BookClubMemberRoleSpec};
+use models::shared::book_club::BookClubMemberRoleSpec;
 use sea_orm::prelude::*;
 
 #[derive(Debug, SimpleObject)]

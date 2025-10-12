@@ -150,30 +150,30 @@ export type BookClub = {
   slug: Scalars['String']['output'];
 };
 
-export type BookClubBook = BookClubExternalBook | BookClubInternalBook;
+export type BookClubBook = {
+  __typename?: 'BookClubBook';
+  author?: Maybe<Scalars['String']['output']>;
+  bookClubScheduleId?: Maybe<Scalars['Int']['output']>;
+  bookEntityId?: Maybe<Scalars['String']['output']>;
+  discussionDurationDays?: Maybe<Scalars['Int']['output']>;
+  endAt: Scalars['DateTime']['output'];
+  entity?: Maybe<Media>;
+  id: Scalars['String']['output'];
+  imageUrl?: Maybe<Scalars['String']['output']>;
+  startAt: Scalars['DateTime']['output'];
+  title?: Maybe<Scalars['String']['output']>;
+  url?: Maybe<Scalars['String']['output']>;
+};
 
 export type BookClubBookInput =
   { external: BookClubExternalBookInput; stored?: never; }
   |  { external?: never; stored: BookClubInternalBookInput; };
-
-export type BookClubExternalBook = {
-  __typename?: 'BookClubExternalBook';
-  author: Scalars['String']['output'];
-  imageUrl?: Maybe<Scalars['String']['output']>;
-  title: Scalars['String']['output'];
-  url?: Maybe<Scalars['String']['output']>;
-};
 
 export type BookClubExternalBookInput = {
   author: Scalars['String']['input'];
   imageUrl?: InputMaybe<Scalars['String']['input']>;
   title: Scalars['String']['input'];
   url?: InputMaybe<Scalars['String']['input']>;
-};
-
-export type BookClubInternalBook = {
-  __typename?: 'BookClubInternalBook';
-  id: Scalars['String']['output'];
 };
 
 export type BookClubInternalBookInput = {
@@ -3975,12 +3975,12 @@ export type BookClubLayoutQueryVariables = Exact<{
 }>;
 
 
-export type BookClubLayoutQuery = { __typename?: 'Query', bookClubBySlug?: { __typename?: 'BookClub', id: string, name: string, slug: string, description?: string | null, isPrivate: boolean, roleSpec: any, membersCount: number, createdAt: any, creator: { __typename?: 'BookClubMember', id: string, displayName?: string | null, avatarUrl?: string | null }, membership?: { __typename: 'BookClubMember', role: BookClubMemberRole, isCreator: boolean, avatarUrl?: string | null } | null, schedule?: { __typename?: 'BookClubSchedule', id: number, defaultIntervalDays?: number | null } | null } | null };
+export type BookClubLayoutQuery = { __typename?: 'Query', bookClubBySlug?: { __typename?: 'BookClub', id: string, name: string, slug: string, description?: string | null, isPrivate: boolean, roleSpec: any, membersCount: number, createdAt: any, creator: { __typename?: 'BookClubMember', id: string, displayName?: string | null, avatarUrl?: string | null }, membership?: { __typename: 'BookClubMember', role: BookClubMemberRole, isCreator: boolean, avatarUrl?: string | null } | null, schedule?: { __typename?: 'BookClubSchedule', id: number, defaultIntervalDays?: number | null, books: Array<{ __typename?: 'BookClubBook', id: string, startAt: any, endAt: any, discussionDurationDays?: number | null, imageUrl?: string | null, title?: string | null, author?: string | null, url?: string | null, entity?: { __typename?: 'Media', id: string, resolvedName: string, thumbnail: { __typename?: 'ImageRef', url: string }, metadata?: { __typename?: 'MediaMetadata', writers: Array<string> } | null } | null }> } | null } | null };
 
 export type UserBookClubsSceneQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type UserBookClubsSceneQuery = { __typename?: 'Query', bookClubs: Array<{ __typename?: 'BookClub', id: string, name: string, slug: string, description?: string | null, membersCount: number, schedule?: { __typename?: 'BookClubSchedule', activeBooks: Array<{ __typename: 'BookClubExternalBook' } | { __typename: 'BookClubInternalBook' }> } | null }> };
+export type UserBookClubsSceneQuery = { __typename?: 'Query', bookClubs: Array<{ __typename?: 'BookClub', id: string, name: string, slug: string, description?: string | null, membersCount: number, schedule?: { __typename?: 'BookClubSchedule', activeBooks: Array<{ __typename: 'BookClubBook' }> } | null }> };
 
 export type CreateBookClubFormQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -6479,6 +6479,26 @@ export const BookClubLayoutDocument = new TypedDocumentString(`
     schedule {
       id
       defaultIntervalDays
+      books {
+        id
+        startAt
+        endAt
+        discussionDurationDays
+        imageUrl
+        title
+        author
+        url
+        entity {
+          id
+          resolvedName
+          thumbnail {
+            url
+          }
+          metadata {
+            writers
+          }
+        }
+      }
     }
     createdAt
   }

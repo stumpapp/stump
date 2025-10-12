@@ -1,8 +1,10 @@
+use async_graphql::SimpleObject;
 use sea_orm::{prelude::*, QueryOrder};
 
 use super::book_club_schedule;
 
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
+#[graphql(name = "BookClubBookModel")]
 #[sea_orm(table_name = "book_club_books")]
 pub struct Model {
 	#[sea_orm(primary_key, auto_increment = false, column_type = "Text")]

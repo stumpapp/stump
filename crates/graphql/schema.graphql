@@ -115,18 +115,23 @@ type BookClub {
 	schedule: BookClubSchedule
 }
 
-union BookClubBook = BookClubInternalBook | BookClubExternalBook
+type BookClubBook {
+	id: String!
+	startAt: DateTime!
+	endAt: DateTime!
+	discussionDurationDays: Int
+	title: String
+	author: String
+	url: String
+	imageUrl: String
+	bookEntityId: String
+	bookClubScheduleId: Int
+	entity: Media
+}
 
 input BookClubBookInput @oneOf {
 	stored: BookClubInternalBookInput
 	external: BookClubExternalBookInput
-}
-
-type BookClubExternalBook {
-	title: String!
-	author: String!
-	url: String
-	imageUrl: String
 }
 
 input BookClubExternalBookInput {
@@ -134,10 +139,6 @@ input BookClubExternalBookInput {
 	author: String!
 	url: String
 	imageUrl: String
-}
-
-type BookClubInternalBook {
-	id: String!
 }
 
 input BookClubInternalBookInput {

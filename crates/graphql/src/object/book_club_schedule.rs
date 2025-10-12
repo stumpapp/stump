@@ -1,12 +1,9 @@
 use async_graphql::{ComplexObject, Context, Result, SimpleObject};
 use chrono::Utc;
-use models::{
-	entity::{book_club_book, book_club_schedule},
-	shared::book_club::BookClubBook,
-};
+use models::entity::{book_club_book, book_club_schedule};
 use sea_orm::prelude::*;
 
-use crate::data::CoreContext;
+use crate::{data::CoreContext, object::book_club_book::BookClubBook};
 
 #[derive(Debug, SimpleObject)]
 #[graphql(complex)]

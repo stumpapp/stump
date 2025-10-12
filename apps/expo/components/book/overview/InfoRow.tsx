@@ -13,7 +13,7 @@ type Props = {
 
 export default function InfoRow({ label, value, longValue, numberOfLines, className }: Props) {
 	return (
-		<View className={cn('flex flex-row items-start justify-between p-3', className)}>
+		<View className={cn('flex flex-row items-start justify-between bg-background p-3', className)}>
 			<Text className="shrink-0 text-foreground-muted">{label}</Text>
 			<Text
 				className={cn('max-w-[75%] text-right', {

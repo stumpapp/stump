@@ -112,8 +112,7 @@ export default function BookActionMenu({ book }: Props) {
 			[
 				{
 					items: [
-						...(progression.isUntouched ||
-						(progression.isReading && !progression.isPreviouslyCompleted)
+						...(progression.isUntouched || progression.isReading
 							? [
 									{
 										label: 'Mark as read',

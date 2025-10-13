@@ -1,6 +1,7 @@
 import { Host, Switch as IosSwitch } from '@expo/ui/swift-ui'
 import * as SwitchPrimitives from '@rn-primitives/switch'
 import * as React from 'react'
+import { Platform } from 'react-native'
 import Animated, {
 	interpolateColor,
 	useAnimatedStyle,
@@ -8,7 +9,6 @@ import Animated, {
 	withTiming,
 } from 'react-native-reanimated'
 
-import { IS_IOS_24_PLUS } from '~/lib/constants'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { cn } from '~/lib/utils'
 import { usePreferencesStore } from '~/stores'
@@ -87,7 +87,7 @@ const Switch = React.forwardRef<SwitchPrimitives.RootRef, Props>(
 		}))
 		const resolvedSize = SIZES[size] || SIZES.default
 
-		if (IS_IOS_24_PLUS) {
+		if (Platform.OS === 'ios') {
 			return (
 				<Host matchContents>
 					<IosSwitch
@@ -119,7 +119,7 @@ const Switch = React.forwardRef<SwitchPrimitives.RootRef, Props>(
 					<Animated.View style={animatedThumbStyle}>
 						<SwitchPrimitives.Thumb
 							className={cn(
-								'squircle rounded-full bg-background shadow-md shadow-foreground/25 ring-0',
+								'squircle rounded-full bg-background shadow-md shadow-foreground/25',
 								resolvedSize.thumb,
 								{
 									'bg-white': variant === 'brand',

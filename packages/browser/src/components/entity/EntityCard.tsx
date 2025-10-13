@@ -158,7 +158,7 @@ export default function EntityCard({
 		} else {
 			return (
 				<div className="flex h-full w-full items-center justify-center bg-sidebar">
-					<Book className="h-16 w-16 text-foreground-muted" />
+					<Book className="absolute h-16 w-16 text-foreground-muted" />
 				</div>
 			)
 		}

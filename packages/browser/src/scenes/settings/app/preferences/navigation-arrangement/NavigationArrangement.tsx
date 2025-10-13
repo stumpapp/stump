@@ -231,7 +231,7 @@ export default function NavigationArrangement() {
 				<NavigationArrangementItem
 					key={getSectionId(section)}
 					section={section}
-					onChangeVisibility={() => onChangeVisibility(index, section.visible)}
+					onChangeVisibility={() => onChangeVisibility(index, !section.visible)}
 					onChangeLinks={(links) => onChangeLinks(index, links)}
 				/>
 			)

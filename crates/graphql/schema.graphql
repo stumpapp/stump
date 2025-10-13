@@ -1031,6 +1031,7 @@ type MediaMetadata {
 	id: Int!
 	mediaId: String
 	ageRating: Int
+	format: String
 	day: Int
 	identifierAmazon: String
 	identifierCalibre: String
@@ -1045,6 +1046,9 @@ type MediaMetadata {
 	pageCount: Int
 	publisher: String
 	series: String
+	seriesGroup: String
+	storyArc: String
+	storyArcNumber: Decimal
 	summary: String
 	title: String
 	titleSort: String
@@ -1129,6 +1133,7 @@ enum MediaMetadataModelOrdering {
 	CHARACTERS
 	COLORISTS
 	COVER_ARTISTS
+	FORMAT
 	DAY
 	EDITORS
 	GENRES
@@ -1149,6 +1154,9 @@ enum MediaMetadataModelOrdering {
 	PENCILLERS
 	PUBLISHER
 	SERIES
+	SERIES_GROUP
+	STORY_ARC
+	STORY_ARC_NUMBER
 	SUMMARY
 	TEAMS
 	TITLE
@@ -2244,6 +2252,11 @@ type StumpConfig {
 	enableSwagger: Boolean!
 	"Indicates if the KoReader sync feature should be enabled."
 	enableKoreaderSync: Boolean!
+	"""
+	Indicates if OPDS page access should automatically track reading progression.
+	When disabled, clients loading/preloading pages won't trigger progress updates.
+	"""
+	enableOpdsProgression: Boolean!
 	"Password hash cost"
 	passwordHashCost: Int!
 	"The time in seconds that a login session will be valid for."

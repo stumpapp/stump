@@ -25,6 +25,10 @@ const NAIVE_DATE_FORMATS: [&str; 2] = ["%Y-%m-%d", "%m-%d-%Y"];
 #[skip_serializing_none]
 #[derive(Debug, Clone, Serialize, Deserialize, Default, Merge)]
 pub struct ProcessedMediaMetadata {
+	/// The binding format for scanned physical books or presentation format for digital sources
+	/// See https://anansi-project.github.io/docs/comicinfo/documentation#format
+	#[serde(alias = "Format")]
+	pub format: Option<String>,
 	/// The title of the media.
 	#[serde(alias = "Title")]
 	pub title: Option<String>,
@@ -35,6 +39,18 @@ pub struct ProcessedMediaMetadata {
 	/// series name as it was interpreted by Stump.
 	#[serde(alias = "Series")]
 	pub series: Option<String>,
+	/// The series group which the media belongs to.
+	/// See https://anansi-project.github.io/docs/comicinfo/documentation#seriesgroup
+	#[serde(alias = "SeriesGroup")]
+	pub series_group: Option<String>,
+	/// The story arc which the media belongs to.
+	/// See https://anansi-project.github.io/docs/comicinfo/documentation#storyarc
+	#[serde(alias = "StoryArc")]
+	pub story_arc: Option<String>,
+	/// The number this media is in the story arc.
+	/// See https://anansi-project.github.io/docs/comicinfo/documentation#storyarcnumber
+	#[serde(alias = "StoryArcNumber")]
+	pub story_arc_number: Option<f64>,
 	/// The number this media is in the series. This can be a float, e.g. 20.1,
 	/// which typically represents a one-shot or special issue.
 	#[serde(alias = "Number", alias = "series_index")]
@@ -173,9 +189,15 @@ pub struct ProcessedMediaMetadata {
 impl ProcessedMediaMetadata {
 	pub fn into_active_model(self) -> models::entity::media_metadata::ActiveModel {
 		models::entity::media_metadata::ActiveModel {
+			format: Set(self.format),
 			title: Set(self.title),
 			title_sort: Set(self.title_sort),
 			series: Set(self.series),
+			series_group: Set(self.series_group),
+			story_arc: Set(self.story_arc),
+			story_arc_number: Set(self
+				.story_arc_number
+				.and_then(|n| Decimal::try_from(n).ok())),
 			number: Set(self.number.and_then(|n| Decimal::try_from(n).ok())),
 			volume: Set(self.volume),
 			summary: Set(self.summary),

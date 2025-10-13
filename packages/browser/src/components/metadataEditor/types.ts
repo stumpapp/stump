@@ -28,6 +28,7 @@ export type MediaMetadataArrayField = Extract<
 export type MediaMetadataEditorRow = MetadataEditorRow<MediaMetadataField>
 
 export const MediaMetadataKeys: MediaMetadataField[] = [
+	'format',
 	'title',
 	'titleSort',
 	'summary',
@@ -37,6 +38,9 @@ export const MediaMetadataKeys: MediaMetadataField[] = [
 	'number',
 	'volume',
 	'series',
+	'seriesGroup',
+	'storyArc',
+	'storyArcNumber',
 	'publisher',
 	'ageRating',
 	'editors',

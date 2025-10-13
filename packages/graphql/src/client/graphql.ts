@@ -1101,6 +1101,7 @@ export type MediaMetadata = {
   coverArtists: Array<Scalars['String']['output']>;
   day?: Maybe<Scalars['Int']['output']>;
   editors: Array<Scalars['String']['output']>;
+  format?: Maybe<Scalars['String']['output']>;
   genres: Array<Scalars['String']['output']>;
   id: Scalars['Int']['output'];
   identifierAmazon?: Maybe<Scalars['String']['output']>;
@@ -1121,6 +1122,9 @@ export type MediaMetadata = {
   pencillers: Array<Scalars['String']['output']>;
   publisher?: Maybe<Scalars['String']['output']>;
   series?: Maybe<Scalars['String']['output']>;
+  seriesGroup?: Maybe<Scalars['String']['output']>;
+  storyArc?: Maybe<Scalars['String']['output']>;
+  storyArcNumber?: Maybe<Scalars['Decimal']['output']>;
   summary?: Maybe<Scalars['String']['output']>;
   teams: Array<Scalars['String']['output']>;
   title?: Maybe<Scalars['String']['output']>;
@@ -1196,6 +1200,7 @@ export enum MediaMetadataModelOrdering {
   CoverArtists = 'COVER_ARTISTS',
   Day = 'DAY',
   Editors = 'EDITORS',
+  Format = 'FORMAT',
   Genres = 'GENRES',
   Id = 'ID',
   IdentifierAmazon = 'IDENTIFIER_AMAZON',
@@ -1216,6 +1221,9 @@ export enum MediaMetadataModelOrdering {
   Pencillers = 'PENCILLERS',
   Publisher = 'PUBLISHER',
   Series = 'SERIES',
+  SeriesGroup = 'SERIES_GROUP',
+  StoryArc = 'STORY_ARC',
+  StoryArcNumber = 'STORY_ARC_NUMBER',
   Summary = 'SUMMARY',
   Teams = 'TEAMS',
   Title = 'TITLE',
@@ -3009,6 +3017,11 @@ export type StumpConfig = {
   dbPath?: Maybe<Scalars['String']['output']>;
   /** Indicates if the KoReader sync feature should be enabled. */
   enableKoreaderSync: Scalars['Boolean']['output'];
+  /**
+   * Indicates if OPDS page access should automatically track reading progression.
+   * When disabled, clients loading/preloading pages won't trigger progress updates.
+   */
+  enableOpdsProgression: Scalars['Boolean']['output'];
   /** Indicates if the Swagger UI should be disabled. */
   enableSwagger: Scalars['Boolean']['output'];
   /** Whether or not the server will allow users with the appropriate permissions to upload books and series. */
@@ -3657,7 +3670,7 @@ export type BookSearchOverlayQuery = { __typename?: 'Query', media: { __typename
       & { ' $fragmentRefs'?: { 'BookCardFragment': BookCardFragment } }
     )>, pageInfo: { __typename: 'CursorPaginationInfo', currentCursor?: string | null, nextCursor?: string | null, limit: number } | { __typename: 'OffsetPaginationInfo' } } };
 
-export type MediaMetadataEditorFragment = { __typename?: 'MediaMetadata', ageRating?: number | null, characters: Array<string>, colorists: Array<string>, coverArtists: Array<string>, day?: number | null, editors: Array<string>, identifierAmazon?: string | null, identifierCalibre?: string | null, identifierGoogle?: string | null, identifierIsbn?: string | null, identifierMobiAsin?: string | null, identifierUuid?: string | null, genres: Array<string>, inkers: Array<string>, language?: string | null, letterers: Array<string>, links: Array<string>, month?: number | null, notes?: string | null, number?: any | null, pageCount?: number | null, pencillers: Array<string>, publisher?: string | null, series?: string | null, summary?: string | null, teams: Array<string>, title?: string | null, titleSort?: string | null, volume?: number | null, writers: Array<string>, year?: number | null } & { ' $fragmentName'?: 'MediaMetadataEditorFragment' };
+export type MediaMetadataEditorFragment = { __typename?: 'MediaMetadata', ageRating?: number | null, characters: Array<string>, colorists: Array<string>, coverArtists: Array<string>, day?: number | null, editors: Array<string>, format?: string | null, identifierAmazon?: string | null, identifierCalibre?: string | null, identifierGoogle?: string | null, identifierIsbn?: string | null, identifierMobiAsin?: string | null, identifierUuid?: string | null, genres: Array<string>, inkers: Array<string>, language?: string | null, letterers: Array<string>, links: Array<string>, month?: number | null, notes?: string | null, number?: any | null, pageCount?: number | null, pencillers: Array<string>, publisher?: string | null, series?: string | null, seriesGroup?: string | null, storyArc?: string | null, storyArcNumber?: any | null, summary?: string | null, teams: Array<string>, title?: string | null, titleSort?: string | null, volume?: number | null, writers: Array<string>, year?: number | null } & { ' $fragmentName'?: 'MediaMetadataEditorFragment' };
 
 export type UpdateMediaMetadataMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -4884,6 +4897,7 @@ export const MediaMetadataEditorFragmentDoc = new TypedDocumentString(`
   coverArtists
   day
   editors
+  format
   identifierAmazon
   identifierCalibre
   identifierGoogle
@@ -4902,6 +4916,9 @@ export const MediaMetadataEditorFragmentDoc = new TypedDocumentString(`
   pencillers
   publisher
   series
+  seriesGroup
+  storyArc
+  storyArcNumber
   summary
   teams
   title
@@ -5803,6 +5820,7 @@ export const UpdateMediaMetadataDocument = new TypedDocumentString(`
   coverArtists
   day
   editors
+  format
   identifierAmazon
   identifierCalibre
   identifierGoogle
@@ -5821,6 +5839,9 @@ export const UpdateMediaMetadataDocument = new TypedDocumentString(`
   pencillers
   publisher
   series
+  seriesGroup
+  storyArc
+  storyArcNumber
   summary
   teams
   title
@@ -5875,6 +5896,7 @@ fragment MediaMetadataEditor on MediaMetadata {
   coverArtists
   day
   editors
+  format
   identifierAmazon
   identifierCalibre
   identifierGoogle
@@ -5893,6 +5915,9 @@ fragment MediaMetadataEditor on MediaMetadata {
   pencillers
   publisher
   series
+  seriesGroup
+  storyArc
+  storyArcNumber
   summary
   teams
   title

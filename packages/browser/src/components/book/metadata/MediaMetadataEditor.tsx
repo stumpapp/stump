@@ -37,6 +37,7 @@ const fragment = graphql(`
 		coverArtists
 		day
 		editors
+		format
 		identifierAmazon
 		identifierCalibre
 		identifierGoogle
@@ -55,6 +56,9 @@ const fragment = graphql(`
 		pencillers
 		publisher
 		series
+		seriesGroup
+		storyArc
+		storyArcNumber
 		summary
 		teams
 		title
@@ -180,9 +184,18 @@ export default function MediaMetadataEditor({ mediaId, data }: Props) {
 						.with(P.union('summary', 'notes'), (field) => (
 							<TextCell binding={field} value={metadata?.[field]} isLong />
 						))
-						// TODO: Consider breaking out ageRating
+						// TODO: Consider breaking out ageRating and storyArcNumber?
 						.with(
-							P.union('ageRating', 'day', 'month', 'number', 'pageCount', 'volume', 'year'),
+							P.union(
+								'ageRating',
+								'day',
+								'month',
+								'number',
+								'pageCount',
+								'volume',
+								'year',
+								'storyArcNumber',
+							),
 							(field) => (
 								<NumberCell
 									binding={field}
@@ -220,6 +233,7 @@ export default function MediaMetadataEditor({ mediaId, data }: Props) {
 								/>
 							),
 						)
+						// TODO(metadata): Support queried source options for: 'format', 'seriesGroup', 'series', 'storyArc', and 'storyArcNumber' based on 'storyArc' highest number?
 						.otherwise((field) => (
 							<TextCell
 								binding={field}

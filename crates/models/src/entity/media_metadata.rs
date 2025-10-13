@@ -36,6 +36,8 @@ pub struct Model {
 	#[sea_orm(column_type = "Text", nullable)]
 	#[graphql(skip)]
 	pub cover_artists: Option<String>,
+	#[sea_orm(column_type = "Text", nullable)]
+	pub format: Option<String>,
 	pub day: Option<i32>,
 	#[sea_orm(column_type = "Text", nullable)]
 	#[graphql(skip)]
@@ -79,6 +81,11 @@ pub struct Model {
 	pub publisher: Option<String>,
 	#[sea_orm(column_type = "Text", nullable)]
 	pub series: Option<String>,
+	#[sea_orm(column_type = "Text", nullable)]
+	pub series_group: Option<String>,
+	#[sea_orm(column_type = "Text", nullable)]
+	pub story_arc: Option<String>,
+	pub story_arc_number: Option<Decimal>,
 	#[sea_orm(column_type = "Text", nullable)]
 	pub summary: Option<String>,
 	#[sea_orm(column_type = "Text", nullable)]

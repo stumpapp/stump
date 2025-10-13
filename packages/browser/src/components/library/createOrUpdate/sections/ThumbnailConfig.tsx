@@ -13,7 +13,8 @@ import { SupportedImageFormat } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { Check } from 'lucide-react'
 import { useCallback } from 'react'
-import { useFormContext } from 'react-hook-form'
+import { useFormContext, useFormState } from 'react-hook-form'
+import { match } from 'ts-pattern'
 
 import { useLibraryManagementSafe } from '@/scenes/library/tabs/settings/context'
 
@@ -43,13 +44,17 @@ export default function ThumbnailConfigForm() {
 	])
 	const isCreating = !ctx?.library
 
+	const {
+		errors: { thumbnailConfig: configErrors },
+	} = useFormState({ control: form.control })
+
 	const handleEnabledChange = useCallback(
 		(checked: boolean) => {
 			form.setValue('thumbnailConfig.enabled', checked)
 			if (checked && !resizeMethod) {
+				// @ts-expect-error: I intentionally omit certain values to have the user fill them in
 				form.setValue('thumbnailConfig.resizeMethod', {
 					mode: 'scaleEvenlyByFactor',
-					factor: 0.65,
 				})
 				form.setValue('thumbnailConfig.quality', 75)
 				form.setValue('thumbnailConfig.format', SupportedImageFormat.Webp)
@@ -67,44 +72,49 @@ export default function ThumbnailConfigForm() {
 				form.setValue('thumbnailConfig.resizeMethod', null)
 			} else {
 				const existingConfig = intoFormThumbnailConfig(ctx?.library.config.thumbnailConfig)
-				const newOptions = {
-					...existingConfig?.resizeMethod,
-					mode: value,
-				} as NonNullable<CreateOrUpdateLibrarySchema['thumbnailConfig']>['resizeMethod']
-				form.setValue('thumbnailConfig.resizeMethod', newOptions)
+
+				const newOptions = match(value)
+					.with(
+						'scaleEvenlyByFactor',
+						() =>
+							({
+								mode: 'scaleEvenlyByFactor',
+							}) as const,
+					)
+					.with(
+						'exact',
+						() =>
+							({
+								mode: 'exact',
+							}) as const,
+					)
+					.with(
+						'scaleDimension',
+						() =>
+							({
+								mode: 'scaleDimension',
+								dimension: 'WIDTH',
+							}) as const,
+					)
+					.otherwise(() => null)
+
+				if (newOptions?.mode === existingConfig.resizeMethod?.mode) {
+					// @ts-expect-error: I intentionally omit certain values to have the user fill them in
+					form.setValue('thumbnailConfig.resizeMethod', {
+						...existingConfig.resizeMethod,
+						...newOptions,
+					})
+				} else {
+					// @ts-expect-error: I intentionally omit certain values to have the user fill them in
+					form.setValue('thumbnailConfig.resizeMethod', newOptions)
+				}
+
 				form.setValue('thumbnailConfig.enabled', true)
+				form.clearErrors('thumbnailConfig.resizeMethod')
 			}
 		},
 		[form, resizeMethod?.mode, ctx?.library],
 	)
-
-	// const existingConfig = useMemo(
-	// 	() => intoFormThumbnailConfig(ctx?.library.config.thumbnailConfig),
-	// 	[ctx?.library.config.thumbnailConfig],
-	// )
-	// const formConfig = form.watch('thumbnailConfig')
-
-	// TODO(graphql): Fix this
-	// // FIXME: This very much doesn't work lol
-	// const isDifferent = useMemo(
-	// 	() => !isEqual(formConfig, existingConfig),
-	// 	[formConfig, existingConfig],
-	// )
-	// console.log('isDifferent', isDifferent, {
-	// 	formConfig,
-	// 	existingConfig,
-	// })
-
-	// /**
-	//  * This is an awkward way to get the error message for the resize options. Because of the the
-	//  * intersection types in the zod schema, the error message is nested in a few different places.
-	//  */
-	// const resizeOptionsError = useMemo(
-	// 	() =>
-	// 		errors.thumbnailConfig?.resizeMethod?.message ||
-	// 		errors.thumbnailConfig?.resizeMethod?.root?.message,
-	// 	[errors],
-	// )
 
 	return (
 		<div className="flex flex-grow flex-col gap-6">
@@ -174,7 +184,8 @@ export default function ThumbnailConfigForm() {
 										{...form.register('thumbnailConfig.resizeMethod.factor', {
 											valueAsNumber: true,
 										})}
-										errorMessage={form.formState.errors.thumbnailConfig?.resizeMethod?.message}
+										// @ts-expect-error: This does exist...
+										errorMessage={configErrors?.resizeMethod?.factor?.message}
 									/>
 								</div>
 							</>
@@ -193,7 +204,8 @@ export default function ThumbnailConfigForm() {
 									{...form.register('thumbnailConfig.resizeMethod.width', {
 										valueAsNumber: true,
 									})}
-									// errorMessage={form.formState.errors.thumbnailConfig?.resizeMethod?.width?.message}
+									// @ts-expect-error: This does exist...
+									errorMessage={configErrors?.resizeMethod?.width?.message}
 								/>
 								<Input
 									contrast
@@ -203,9 +215,8 @@ export default function ThumbnailConfigForm() {
 									{...form.register('thumbnailConfig.resizeMethod.height', {
 										valueAsNumber: true,
 									})}
-									// errorMessage={
-									// 	form.formState.errors.thumbnailConfig?.resizeMethod?.height?.message
-									// }
+									// @ts-expect-error: This does exist...
+									errorMessage={configErrors?.resizeMethod?.height?.message}
 								/>
 							</>
 						)}
@@ -242,9 +253,8 @@ export default function ThumbnailConfigForm() {
 									{...form.register('thumbnailConfig.resizeMethod.size', {
 										valueAsNumber: true,
 									})}
-									// errorMessage={
-									// 	form.formState.errors.thumbnailConfig?.resizeMethod?.height?.message
-									// }
+									// @ts-expect-error: This does exist...
+									errorMessage={configErrors?.resizeMethod?.size?.message}
 								/>
 							</>
 						)}

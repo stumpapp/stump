@@ -63,6 +63,7 @@ export default function EmailerListItem({ fragment }: Props) {
 		}
 	}
 
+	// TODO(graphql): Fix
 	const handleDeleteEmailer = useCallback(() => {
 		// if (canEditEmailer) {
 		// 	deleteEmailer(emailer.id)

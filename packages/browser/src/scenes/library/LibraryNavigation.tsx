@@ -38,7 +38,7 @@ export default function LibraryNavigation() {
 	const prefetchBooks = usePrefetchLibraryBooks()
 
 	// const prefetchFiles = usePrefetchFiles()
-	// TODO(sea-orm): Fix me
+	// TODO(graphql): Fix me
 	const handlePrefetchFiles = useCallback(() => {
 		// prefetchFiles({ path, fetchConfig: checkPermission('file:upload') })
 	}, [path, checkPermission])

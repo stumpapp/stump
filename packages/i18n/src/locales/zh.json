@@ -292,7 +292,7 @@
 					}
 				},
 				"sized": {
-					"label": "Explicitly Sized",
+					"label": "Auto Scaled",
 					"description": "Set each dimension of the thumbnail (in pixels)",
 					"width": {
 						"label": "Width"

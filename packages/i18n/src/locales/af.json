@@ -303,7 +303,7 @@
 					}
 				},
 				"scaleDimension": {
-					"label": "Explicitly Sized",
+					"label": "Auto Scaled",
 					"description": "Set either the width or height of the thumbnail and auto-scale the other to keep the original aspect ratio",
 					"dimension": {
 						"label": "Dimension",

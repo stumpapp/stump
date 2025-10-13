@@ -1,4 +1,4 @@
-import { ReadingDirection, ReadingMode } from '@stump/graphql'
+import { ReadingMode } from '@stump/graphql'
 import { generatePageSets, ImageBasedBookPageRef } from '@stump/sdk'
 import { ComponentProps, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { AppState, View } from 'react-native'

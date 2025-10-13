@@ -1,6 +1,6 @@
-import { useJobStore } from '@stump/client'
+import { useFooterOffsetStore, useJobStore } from '@stump/client'
 import { ProgressBar, Text } from '@stump/components'
-import { JobUpdate } from '@stump/sdk'
+import { JobUpdate } from '@stump/graphql'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useMemo } from 'react'
 
@@ -61,14 +61,20 @@ export default function JobOverlay() {
 		[subTaskCounts],
 	)
 
+	const additionalOffset = useFooterOffsetStore((state) => state.footerOffset)
+
 	return (
 		<AnimatePresence>
 			{firstRunningJob && (
 				<motion.div
-					className="fixed bottom-[1rem] right-[1rem] flex h-28 w-64 flex-col items-start justify-between rounded-md border border-edge-subtle bg-background-surface p-4 shadow"
+					// @ts-expect-error: It does have className actually?
+					className="fixed right-[1rem] flex h-28 w-64 flex-col items-start justify-between rounded-md border border-edge-subtle bg-background-surface p-4 shadow"
 					initial={{ opacity: 0, scale: 0.9, y: 100 }}
 					animate={{ opacity: 1, scale: 1, y: 0 }}
 					exit={{ opacity: 0, scale: 0.9, y: 100 }}
+					style={{
+						bottom: 16 + additionalOffset,
+					}}
 				>
 					<Text size="sm" className="line-clamp-2">
 						{firstRunningJob.message ?? 'Job in Progress'}
@@ -93,20 +99,20 @@ export default function JobOverlay() {
 	)
 }
 
-const calcTaskCounts = ({ completed_tasks, remaining_tasks }: JobUpdate) => {
-	if (remaining_tasks == null || !completed_tasks) return null
+const calcTaskCounts = ({ completedTasks, remainingTasks }: JobUpdate) => {
+	if (remainingTasks == null || !completedTasks) return null
 
-	const total = (completed_tasks ?? 0) + (remaining_tasks ?? 0)
+	const total = (completedTasks ?? 0) + (remainingTasks ?? 0)
 	return {
-		completed: completed_tasks ?? 0,
+		completed: completedTasks ?? 0,
 		total,
 	}
 }
 
-const calcSubTaskCounts = ({ completed_subtasks, total_subtasks }: JobUpdate) => {
-	if (total_subtasks == null) return null
+const calcSubTaskCounts = ({ completedSubtasks, totalSubtasks }: JobUpdate) => {
+	if (totalSubtasks == null) return null
 	return {
-		completed: completed_subtasks ?? 0,
-		total: total_subtasks,
+		completed: completedSubtasks ?? 0,
+		total: totalSubtasks,
 	}
 }

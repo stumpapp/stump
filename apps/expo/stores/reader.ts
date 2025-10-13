@@ -130,6 +130,10 @@ export const useReaderStore = create<ReaderStore>()(
 		{
 			name: 'stump-reader-store',
 			storage: createJSONStorage(() => ZustandMMKVStorage),
+			partialize: (state) =>
+				Object.fromEntries(
+					Object.entries(state).filter(([key]) => !['isReading', 'showControls'].includes(key)),
+				),
 			version: 1,
 		},
 	),

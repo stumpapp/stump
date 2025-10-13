@@ -1,34 +1,98 @@
+import { Callout } from 'nextra/components'
+
 # App Settings
 
-The mobile app has a few settings that you can configure to your liking. These settings are stored locally on your device and are not synced across devices.
+The mobile app provides comprehensive settings to customize your reading experience and app behavior. These settings are stored locally on your device and are not synced across devices.
 
 ## Preferences
 
-You may configure basic preferences like the app theme and language. A few non-standard settings are also available:
+### Theme
+
+A light and dark theme is available by default. The [ebook reader](/guides/mobile/reading/books#visual-themes) has more options available.
+
+### Accent Color (iOS only)
+
+Customize the app's accent color using a color picker. This affects buttons and other interactive elements throughout the app.
+
+### Language
+
+<Callout emoji="🚧" type="warning">
+	Currently, only English is supported. Additional languages are planned for future releases.
+</Callout>
+
+Configure the app's display language.
 
 ### Default Server
 
-A quick way to switch the currently configured default server. See the [default server](/guides/mobile/servers#default-server) guide for more information on what that is.
+Quick access to switch between your configured servers. See the [default server](/guides/mobile/servers#default-server) guide for more information about server management.
 
-### Debug Settings
+### Thumbnail Ratio
 
-A few settings are available to help aid in debugging issues or general privacy. These settings include:
+Choose how book covers and thumbnails are displayed:
 
-- **Mask URLs**: When enabled, the app will mask URLs in the UI. This is useful for screenshots or screen recordings where you don't want to expose your server URL
+- **1 : 1.6** - Taller, an uncommon but standard ebook aspect ratio
+- **1 : 1.5** - Default, the standard aspect ratio for western books and American comics
+- **1 : √2** - Shorter, another common aspect ratio for books and the standard aspect ratio for Japanese manga
 
-## Reader Settings
+## Reading
 
-You may configure global settings for all readers, which can be overridden on a per-book basis. See the [readers](/guides/mobile/reading/readers) guide for more information on what these settings are.
+### Reader Settings
 
-## Data Usage
+Access comprehensive reader configuration options. This opens a dedicated settings screen where you can configure:
 
-The app has built-in mechanisms for viewing and managing the data it uses. All data is categorized by server, so you can see how much data each server is using.
+- Global reading preferences
+- Font and display settings
+- Navigation controls
+- Per-format reader options
 
-### Server Data
+These settings serve as defaults for all books and can be overridden on a per-book basis.
 
-Each server generally has the following data categories:
+## Stump Integration
 
-- Downloads (books, images, etc.)
-- Preferences (settings, etc.)
+You do not need a Stump server to use the app. Any OPDS v2-compatible server will work for basic catalog browsing and reading.
 
-You may clear the data for a specific server, or clear all data for all servers
+When disabled, the app simply hides any Stump-specific features:
+
+- Only OPDS servers may be configured
+- Only OPDS servers are shown during server selection
+
+A few important notes when Stump features are disabled:
+
+- Existing Stump servers will still be stored, but hidden from view
+- You won't get progress syncing, since that relies on Stump-specific APIs
+- Your OPDS server **must** support sending a `readingOrder` for publications if you want streaming support
+
+## Management
+
+### Data Usage
+
+<Callout emoji="🚧" type="warning">
+	This functionality is not fully implemented yet and may change in future releases
+</Callout>
+
+Monitor and manage the app's storage usage with detailed breakdowns:
+
+- **Total Usage**: Overall storage consumed by the app
+- **Per-Server Data**: Usage categorized by each configured server
+- **Data Categories**: Downloads, cached images, preferences, and temporary files
+
+## Debug & Privacy
+
+### Image Cache Management
+
+Clear cached images to free up storage space:
+
+- **Memory Cache**: Clear images stored in RAM for current session
+- **Disk Cache**: Clear permanently cached images stored on device
+
+### Reduce Animations
+
+Toggle to minimize or disable animations throughout the app. Useful for:
+
+- Improving performance on older devices
+- Reducing motion for accessibility
+- Conserving battery life
+
+### Mask URLs
+
+Privacy feature that obscures server URLs in the interface. This was added to help with debugging while ensuring that potentially sensitive information is not inadvertently shared

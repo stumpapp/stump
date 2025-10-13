@@ -1,0 +1,106 @@
+import { Callout, Steps } from 'nextra/components'
+
+# 0.1.0 - SeaORM and GraphQL
+
+<Callout emoji="💥">
+	See the [original announcement](https://github.com/stumpapp/stump/discussions/634) for more
+	context
+</Callout>
+
+Stump has migrated from using Prisma to SeaORM for its database layer and from REST to GraphQL for its API. This was effectively a ground-up rewrite of a large portion of the entire codebase, and as such, there are several breaking changes that users should be aware of before upgrading to version 0.1.0 or later.
+
+## Incompatible Database
+
+I tried to minimize the number of breaking changes in the database, but there were some changes that were unavoidable. As a result, the database itself is not compatible with previous versions of Stump.
+
+The list of notable database changes are as follows:
+
+- Convert all Prisma-specific join tables to use more semantic naming conventions
+- Reduce the usage of UUIDs in favor of auto-incrementing integers for primary keys for smaller tables with less user-facing exposure
+- Standardize all enumerations to use `SCREAMING_SNAKE_CASE` instead of a mix of `snake_case` and `PascalCase`
+- Replace `Blob` types with `Json` types for potentially improved filtering
+
+### Non-Recoverable Data
+
+Thankfully, the vast majority of data is migratable. However, there are some pieces that are not recoverable due to the nature of the changes. These include:
+
+- API keys
+- User-assigned permissions
+- Smart lists
+- Scheduled job configurations
+
+To be clear: these pieces of data will be lost during the migration process. Please take extra care to re-assign permisions to users and re-create API keys after the migration is complete.
+
+## Migration Steps
+
+<Callout emoji="⚠️">
+	There are **NO** guarantees that this migration will work for everyone. There are so many different configurations and setups that it's hard to account for all of them.
+
+    Please report any issues you encounter during the migration process.
+
+</Callout>
+
+This section outlines the steps needed to migrate your existing Stump instance to version 0.1.0 or later. Please note that these steps only apply if you are upgrading from a version prior to 0.1.0.
+
+<Steps>
+
+### Backup Your Data
+
+Before proceeding with the migration, ensure you have a complete backup of your Stump database. This is crucial in case anything goes wrong during the migration process.
+
+### Update Stump
+
+Once you've backed up your data, you'll need to update your Stump instance. I highly recommend doing this in total isolation from your existing instance to avoid any potential data loss. We will bring over your existing configs and database in the next steps.
+
+The important part here is to ensure you have an upgraded instance running to get the new database created and migrated, which happens automatically after the first start.
+
+### Download the `backfill.sql` Script
+
+<Callout emoji="">
+	The `backfill.sql` script will be one of the downloadable assets in the release page for `0.1.0`.
+	You may be viewing this guide before the release is published. Until then, the link referenced
+	below will not work. You can find the script in the `develop` or `experimental` branches at
+	`/crates/migrations/backfill.sql`
+</Callout>
+
+Download the `backfill.sql` script from the [release page for 0.1.0](https://github.com/stumpapp/stump/releases/tag/v0.1.0).
+
+If you continue with this guide, you will not need to make **any** edits to this script file. The migration tool will handle executing the sql for you.
+
+If you would prefer to attempt to run the migration manually, please carefully review the script instructions. The important part is that you will need to replace the placeholders at the top of the script with your actual database paths.
+
+### Migrate Your Database
+
+The updated Stump instance includes a CLI tool to help with the migration process. Before continuing, please ensure the following:
+
+- The new Stump instance has been started at least once, has not been configured, and is fully stopped. There should be a new database created with no data in any of the tables
+- The old Stump instance is fully stopped
+- The old Stump database is accessible (if running Docker, ensure both database files are mounted properly)
+
+To migrate your database using the CLI tool, run the following:
+
+```bash
+# If using Docker, exec into the container
+./stump system sea-orm-migration
+```
+
+The tool will prompt you for the necessary information to pull data from the old database and insert it into the new one. Follow the prompts carefully. A loose outline of the prompts is as follows:
+
+- Confirm you want to proceed with the migration
+- Enter the path to the legacy database file (with the data you want to migrate)
+- Confirm the path to the new database file (this should be pre-filled with the correct path)
+- Monitor the migration progress (should be very quick)
+
+</Steps>
+
+## Added Features
+
+There are several new features that were added as part of this release that I think are worth highlighting:
+
+- The alphabet filter ([#709](https://github.com/stumpapp/stump/pull/709))
+- Adjustable cover sizes ([#724](https://github.com/stumpapp/stump/pull/724))
+- Basic metadata editing and calibre tags ([#735](https://github.com/stumpapp/stump/pull/735))
+- An entire, usable mobile application:
+  - Native Kotlin/Swift Readium ebook reader
+  - On deck support
+  - Built-in file browser

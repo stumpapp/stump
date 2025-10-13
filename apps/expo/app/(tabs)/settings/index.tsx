@@ -6,9 +6,10 @@ import { AppDataUsageLink } from '~/components/appSettings/management'
 import {
 	AppLanguage,
 	AppTheme,
-	CachePolicySelect,
 	DefaultServer,
+	ImageCacheActions,
 	MaskURLs,
+	PerformanceMonitor,
 	ReaderSettingsLink,
 	ReduceAnimations,
 	ThumbnailRatio,
@@ -56,7 +57,8 @@ export default function Screen() {
 
 				<View>
 					<Text className="mb-3 text-foreground-muted">Debug</Text>
-					<CachePolicySelect />
+					<ImageCacheActions />
+					<PerformanceMonitor />
 					<ReduceAnimations />
 					<MaskURLs />
 				</View>

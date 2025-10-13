@@ -38,6 +38,7 @@ const query = graphql(`
 			joiner
 			name
 			visibility
+			...SmartListCard
 		}
 	}
 `)
@@ -104,7 +105,7 @@ export default function UserSmartListsScene() {
 			<ScrollArea className="w-full pr-3 md:w-2/3 lg:max-w-xl">
 				<div className="flex-col space-y-2">
 					{smartLists.map((list) => (
-						<SmartListCard key={list.id} list={list} />
+						<SmartListCard key={list.id} data={list} />
 					))}
 				</div>
 			</ScrollArea>

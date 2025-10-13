@@ -87,7 +87,7 @@ export default function MediaFilterForm() {
 			character: (filters?.metadata as MediaMetadataFilterInput)?.characters?.likeAnyOf ?? [],
 			colorist: (filters?.metadata as MediaMetadataFilterInput)?.colorists?.likeAnyOf ?? [],
 			editor: (filters?.metadata as MediaMetadataFilterInput)?.editors?.likeAnyOf ?? [],
-			genre: (filters?.metadata as MediaMetadataFilterInput)?.genre?.likeAnyOf ?? [],
+			genre: (filters?.metadata as MediaMetadataFilterInput)?.genres?.likeAnyOf ?? [],
 			inker: (filters?.metadata as MediaMetadataFilterInput)?.inkers?.likeAnyOf ?? [],
 			letterer: (filters?.metadata as MediaMetadataFilterInput)?.letterers?.likeAnyOf ?? [],
 			penciller: (filters?.metadata as MediaMetadataFilterInput)?.pencillers?.likeAnyOf ?? [],
@@ -161,7 +161,7 @@ export default function MediaFilterForm() {
 			if (values.metadata.genre?.length) {
 				newFilters.metadata = {
 					...newFilters.metadata,
-					genre: { likeAnyOf: values.metadata.genre },
+					genres: { likeAnyOf: values.metadata.genre },
 				}
 			}
 

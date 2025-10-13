@@ -38,3 +38,13 @@ export const createLayoutStore = ({ key, storage }: LayoutStoreParams) =>
 			),
 		),
 	)
+
+type FooterOffsetStore = {
+	footerOffset: number
+	setFooterOffset: (offset: number) => void
+}
+
+export const useFooterOffsetStore = create<FooterOffsetStore>()((set) => ({
+	footerOffset: 0,
+	setFooterOffset: (offset: number) => set({ footerOffset: offset }),
+}))

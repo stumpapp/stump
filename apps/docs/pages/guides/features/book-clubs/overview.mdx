@@ -10,7 +10,7 @@ import { Callout } from 'nextra/components'
 </Callout>
 
 <Callout emoji="🔐">
-	This functionality is gated behind the `bookclub:read` user permission. To learn more about
+	This functionality is gated behind the `ACCESS_BOOK_CLUB` user permission. To learn more about
 	permissions, see the [Permissions](/guides/access-control/permissions) guide.
 </Callout>
 
@@ -33,8 +33,8 @@ Book clubs in Stump are effectively just a group of users that all have access t
 
 There are two relevant user permissions that affect access to the book club feature as a whole:
 
-    1. Any managed account with the `bookclub:read` permission may access the book club feature. This means that they can view and join book clubs
-    2. Any managed account with the `bookclub:create` permission may create book clubs (and therefore inherently has the `bookclub:read` permission)
+    1. Any managed account with the `ACCESS_BOOK_CLUB` permission may access the book club feature. This means that they can view and join book clubs
+    2. Any managed account with the `CREATE_BOOK_CLUB` permission may create book clubs (and therefore inherently has the `bookclub:read` permission)
 
 The server owner can assign these permissions to other users in the user management settings page. For more information about that process, see the [user permissions](/guides/access-control/permissions) guide.
 

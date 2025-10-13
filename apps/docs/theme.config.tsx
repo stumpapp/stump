@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { useRouter } from 'next/router'
 
 import Footer from './components/Footer'
@@ -10,6 +11,14 @@ export const STUMP_REPO = 'https://github.com/stumpapp/stump'
 const DOCS_PAGES_HREF = `${STUMP_REPO}/tree/main/apps/docs/pages`
 
 export default {
+	banner: {
+		key: 'sea-orm-migration',
+		content: (
+			<Link href="/guides/breaking-changes/0.1.0">
+				🎉 Stump is now using SeaORM! Please read about breaking changes 💥
+			</Link>
+		),
+	},
 	chat: {
 		link: 'https://discord.gg/63Ybb7J3as',
 	},

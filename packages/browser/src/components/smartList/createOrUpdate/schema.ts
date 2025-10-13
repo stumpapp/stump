@@ -150,6 +150,12 @@ export const intoFormFilter = (input: SmartListFilterInput): z.infer<typeof filt
 		.exhaustive()
 
 	const field = Object.keys(filterObj)[0] || ''
+
+	// TODO: Add support for this since it is WAY more efficient!
+	if (['_and', '_or', '_not'].includes(field)) {
+		throw new Error('Logical operators are not supported as individual filters')
+	}
+
 	const filterValue = Object.entries(filterObj)[0]?.[1]
 
 	if (!filterValue) {
@@ -231,7 +237,7 @@ export const intoForm = ({
 	filters,
 	joiner,
 	defaultGrouping,
-}: Omit<SmartListParsed, 'views'>): SmartListFormSchema => {
+}: Omit<SmartListParsed, 'views' | 'creatorId' | 'thumbnail'>): SmartListFormSchema => {
 	return {
 		description: description || undefined,
 		filters: {

@@ -115,18 +115,23 @@ type BookClub {
 	schedule: BookClubSchedule
 }
 
-union BookClubBook = BookClubInternalBook | BookClubExternalBook
+type BookClubBook {
+	id: String!
+	startAt: DateTime!
+	endAt: DateTime!
+	discussionDurationDays: Int
+	title: String
+	author: String
+	url: String
+	imageUrl: String
+	bookEntityId: String
+	bookClubScheduleId: Int
+	entity: Media
+}
 
 input BookClubBookInput @oneOf {
 	stored: BookClubInternalBookInput
 	external: BookClubExternalBookInput
-}
-
-type BookClubExternalBook {
-	title: String!
-	author: String!
-	url: String
-	imageUrl: String
 }
 
 input BookClubExternalBookInput {
@@ -134,10 +139,6 @@ input BookClubExternalBookInput {
 	author: String!
 	url: String
 	imageUrl: String
-}
-
-type BookClubInternalBook {
-	id: String!
 }
 
 input BookClubInternalBookInput {
@@ -1649,6 +1650,10 @@ type Query {
 	jobs(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedJobResponse!
 	jobById(id: ID!): Job
 	scheduledJobConfigs: [ScheduledJobConfig!]!
+	mediaCount: Int!
+	finishedReadingSessionCount: Int!
+	activeReadingSessionCount: Int!
+	mediaDiskUsage: Int!
 	media(filter: MediaFilterInput! = {name: null, size: null, extension: null, createdAt: null, updatedAt: null, seriesId: null, status: null, path: null, pages: null, readingStatus: null, metadata: null, series: null, _and: null, _not: null, _or: null}, orderBy: [MediaOrderBy!]! = [{media: {field: NAME, direction: ASC}}], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
 	mediaById(id: ID!): Media
 	mediaByPath(path: String!): Media
@@ -1659,6 +1664,8 @@ type Query {
 	recentlyAddedMedia(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
 	duplicateMedia: [Media!]!
 	me: User!
+	userCount: Int!
+	topReaders(take: Int): [User!]!
 	users(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedUserResponse!
 	userById(id: ID!): User!
 	loginActivity: [UserLoginActivity!]!
@@ -2428,6 +2435,7 @@ type User {
 	preferences: UserPreferences!
 	lastLogin: DateTime
 	loginSessionsCount: Int!
+	finishedReadingSessionsCount: Int!
 }
 
 type UserLoginActivity {

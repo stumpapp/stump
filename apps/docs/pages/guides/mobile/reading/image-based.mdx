@@ -16,58 +16,91 @@ The image-based reader has an overlay that presents when you click the center-po
 
 ## Preferences
 
-The following preferences are available for the image-based reader:
+Each reader has specific settings and preferences that are configurable. These settings may be set globally for all books, and overridden on a per-book basis. If you change a setting for a specific book, it will only apply to that book.
 
-### Flow
+### Reading Flow
 
-The image-based reader has a few flows that you can use to customize your reading experience:
+Controls how pages are displayed and navigated:
 
-- Paged
-- Horizontal scroll
-- Vertical scroll
+- **Paged**: Traditional page-by-page reading
+- **Scroll (Horizontal)**: Continuous horizontal scrolling
+- **Scroll (Vertical)**: Continuous vertical scrolling ⚠️ _Currently disabled_
 
 <Callout emoji="⚠️" type="warning">
 	Image zooming is funky when using the horizontal scroll flow. This is a known issue and will be
 	addressed in a future release
 </Callout>
 
+### Reading Direction
+
+You may set `LTR` (left-to-right) or `RTL` (right-to-left) reading direction.
+
+<Callout emoji="ℹ️" type="info">
+	Reading direction is only available when not using continuous vertical scrolling
+</Callout>
+
 ### Image Options
 
-There are a few options specific to the images rendered you can adjust
+#### Double Page Display
 
-#### Cache Policy
+Controls when to display two pages side-by-side:
 
-You may specify a policy of either `Memory & Disk` (default), `Disk`, `Memory`, or `None`. This is exposed in case you have specific performance needs (or leeway) for your device. While `None` is available, it is not recommended.
+- **Auto**: Automatically determines based on page orientation and device orientation
+- **Always**: Always attempts to display two pages side-by-side
+- **Off**: Never displays two pages side-by-side
 
-#### Double Paged
+#### Separate Second Page
 
-You may specify a double page behavior of:
-
-- `Auto` (default) - The app will attempt to use double pages when possible (i.e. when device is landscape)
-- `Always` - Always use double pages, scaling the images to fit the screen
-- `Off` - Never use double pages
+When double page display is enabled, this option controls whether the second page should be treated as a separate entity for navigation purposes.
 
 #### Image Scaling
 
-You may specify an image scaling behavior of:
+Controls how images are scaled to fit the screen:
 
-- `Fit Width` (default) - The image will be scaled to fit the width of the screen
-- `Fit Height` - The image will be scaled to fit the height of the screen
-- `None` - The image will be displayed at its original size
+- **Fit Height**: Scales images to fit the screen height
+- **Fit Width**: Scales images to fit the screen width ⚠️ _Currently disabled_
+- **None**: No scaling applied ⚠️ _Currently disabled_
 
-<Callout emoji="⚠️" type="warning">
-	This setting is not yet available and subject to change
-</Callout>
+#### Downscaling
 
-### Navigation
+When enabled, allows images to be downscaled for better performance. This can help with memory usage for large images.
+
+#### Panel Downloads
+
+Allows downloading individual panels/pages for offline reading. ⚠️ _Currently disabled/in development_
+
+### Navigation Settings
 
 #### Tap Sides to Navigate
 
-You may enable this setting to navigate to the next or previous page by tapping the left or right side of the screen, abiding by the reading direction.
+When enabled, you can tap the left and right sides of the screen to navigate between pages.
 
 #### Bottom Controls
 
-The app supports two different bottom control layouts:
+Controls the type of navigation controls shown at the bottom of the screen:
 
-1. Slider - A slider that you can drag to navigate through the book. An image preview will be displayed as you drag
-2. Image Gallery - A swipeable gallery of thumbnails that you can tap to navigate to a specific page
+- **Image Gallery**: Shows thumbnail images for navigation
+- **Slider**: Shows a simple slider for navigation
+
+### Progression Tracking
+
+#### Incognito
+
+When enabled, the app will not save your reading progress. This wouldn't affect bookmarks or annotations, just the progress of the book.
+
+#### Reading Timer
+
+When enabled, the app will track the time you spend reading each book in seconds. This will even sync across devices!
+
+<Callout emoji="ℹ️" type="info">
+	The app supports reading timers for all server configurations, but syncing is only available when
+	using a Stump server
+</Callout>
+
+##### Disabling
+
+If you disable the reading timer while reading a book, it is effectively pausing the timer. If you re-enable it, the timer will resume from where it left off. If you disable the timer globally and start reading a book, the timer will not start.
+
+##### Resetting
+
+You may reset the reading timer for a book at any time. This will reset the timer to 0 seconds

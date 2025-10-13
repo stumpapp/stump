@@ -220,8 +220,10 @@ mod tests {
 		assert_eq!(epub.root_base, "/");
 		assert_eq!(epub.root_file, "test.html");
 	}
-	// Test for malformed epub file, non-utf8 path are os dependent so only run on linux
-	#[cfg(target_os = "linux")]
+
+	// Test for malformed epub file, non-utf8 path are os dependent so only run on linux or mac
+	// since windows uses utf-16 for paths
+	#[cfg(any(target_os = "linux", target_os = "macos"))]
 	#[tokio::test]
 	async fn test_epub_try_from_malformed() {
 		use std::ffi::OsString;
@@ -230,7 +232,11 @@ mod tests {
 		let mut epub_doc = EpubDoc::mock().unwrap();
 		epub_doc.resources.insert(
 			"test.css".to_string(),
-			(malformed_path.clone(), "text/css".to_string()),
+			ResourceItem {
+				mime: "text/css".to_string(),
+				path: malformed_path.clone(),
+				properties: None,
+			},
 		);
 		let epub = Epub::try_from_with_epub(
 			MediaIdentSelect {
@@ -246,7 +252,7 @@ mod tests {
 			label: "test".to_string(),
 			content: malformed_path.clone(),
 			children: vec![],
-			play_order: 0,
+			play_order: Some(0),
 		}];
 		let epub = Epub::try_from_with_epub(
 			MediaIdentSelect {

@@ -3,7 +3,6 @@ import { useGraphQLMutation, useSDK } from '@stump/client'
 import { Button, CheckBox, Dialog, Form, Input } from '@stump/components'
 import { EmailDevicesTableQuery, graphql } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
-import { RegisteredEmailDevice } from '@stump/sdk'
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
@@ -27,6 +26,8 @@ const updateMutation = graphql(`
 		}
 	}
 `)
+
+type RegisteredEmailDevice = EmailDevicesTableQuery['emailDevices'][number]
 
 type Props = {
 	isOpen: boolean

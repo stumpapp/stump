@@ -1,6 +1,13 @@
 use async_graphql::{Context, Object, Result, ID};
-use models::{entity::user, entity::user_login_activity, shared::enums::UserPermission};
-use sea_orm::{prelude::*, QueryOrder, QuerySelect};
+use models::{
+	entity::finished_reading_session, entity::user, entity::user_login_activity,
+	shared::enums::UserPermission,
+};
+use sea_orm::{
+	prelude::*,
+	sea_query::{Alias, Expr},
+	QueryOrder, QuerySelect,
+};
 
 use crate::{
 	data::{AuthContext, CoreContext},
@@ -28,6 +35,43 @@ impl UserQuery {
 			.unwrap();
 
 		Ok(User::from(first))
+	}
+
+	#[graphql(
+		guard = "PermissionGuard::one(UserPermission::ReadUsers).or(ServerOwnerGuard)"
+	)]
+	async fn user_count(&self, ctx: &Context<'_>) -> Result<i64> {
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let count = user::Entity::find().count(conn).await?;
+
+		Ok(count as i64)
+	}
+
+	#[graphql(
+		guard = "PermissionGuard::one(UserPermission::ReadUsers).or(ServerOwnerGuard)"
+	)]
+	async fn top_readers(
+		&self,
+		ctx: &Context<'_>,
+		take: Option<i64>,
+	) -> Result<Vec<User>> {
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+		let limit = take.unwrap_or(10).max(1);
+
+		let users_with_counts = user::Entity::find()
+			.left_join(finished_reading_session::Entity)
+			.column_as(
+				finished_reading_session::Column::Id.count(),
+				"session_count",
+			)
+			.group_by(user::Column::Id)
+			.order_by_desc(Expr::col(Alias::new("session_count")))
+			.limit(limit as u64)
+			.all(conn)
+			.await?;
+
+		Ok(users_with_counts.into_iter().map(User::from).collect())
 	}
 
 	#[graphql(

@@ -1,3 +1,4 @@
+import { BookClubLayoutQuery } from '@stump/graphql'
 import { BookClubMemberRoleSpec } from '@stump/sdk'
 import { z } from 'zod'
 
@@ -47,10 +48,12 @@ export const buildSchema = (
 	})
 export type CreateOrUpdateBookClubSchema = z.infer<ReturnType<typeof buildSchema>>
 
-export const formDefaults = (club?: BookClub): CreateOrUpdateBookClubSchema => ({
+export const formDefaults = (
+	club?: NonNullable<BookClubLayoutQuery['bookClubBySlug']>,
+): CreateOrUpdateBookClubSchema => ({
 	creatorDisplayName: club?.name || '',
 	description: '',
 	isPrivate: club?.isPrivate ?? false,
-	memberRoleSpec: club?.memberRoleSpec,
+	memberRoleSpec: club?.roleSpec,
 	name: club?.name || '',
 })

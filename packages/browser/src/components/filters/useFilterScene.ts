@@ -146,7 +146,7 @@ export function useFilterScene(): Return {
 
 	/**
 	 * An object representation of the url params without the excluded keys, such as
-	 * order_by, direction, search, page, and pageSize.
+	 * orderBy, direction, search, page, and pageSize.
 	 */
 	const filters = useMemo(() => {
 		const filtersJsonStr = searchParams.get('filters')
@@ -159,7 +159,7 @@ export function useFilterScene(): Return {
 	 */
 	const ordering = useMemo(
 		() => ({
-			order_by: searchParams.get('order_by') as OrderingField,
+			orderBy: searchParams.get('orderBy') as OrderingField,
 			direction: searchParams.get('direction') as OrderDirection,
 		}),
 		[searchParams],
@@ -266,14 +266,14 @@ export function useFilterScene(): Return {
 export function useMediaURLOrderBy(ordering: Ordering): MediaOrderBy[] {
 	return useMemo(() => {
 		// check for undefined values
-		if (!ordering || !ordering.order_by || !ordering.direction) {
+		if (!ordering || !ordering.orderBy || !ordering.direction) {
 			return DEFAULT_MEDIA_ORDER_BY
 		}
 
 		return [
 			{
 				media: {
-					field: ordering.order_by as MediaModelOrdering,
+					field: ordering.orderBy as MediaModelOrdering,
 					direction: ordering.direction as OrderDirection,
 				},
 			},

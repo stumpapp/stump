@@ -1,4 +1,5 @@
 import { useLocaleContext } from '@stump/i18n'
+import { Suspense } from 'react'
 import { Helmet } from 'react-helmet'
 
 import { ContentContainer } from '@/components/container'
@@ -6,6 +7,7 @@ import { SceneContainer } from '@/components/container'
 
 import LoginActivitySection from './login-activity/LoginActivitySection'
 import UserTableSection from './user-table/UserTableSection'
+import UsersStats from './UsersStats'
 
 // TODO: Super weird scrolling issues here???
 
@@ -24,7 +26,9 @@ export default function UsersScene() {
 			</Helmet>
 
 			<ContentContainer>
-				{/* <UserManagementStats /> */}
+				<Suspense>
+					<UsersStats />
+				</Suspense>
 				<UserTableSection />
 				<LoginActivitySection />
 			</ContentContainer>

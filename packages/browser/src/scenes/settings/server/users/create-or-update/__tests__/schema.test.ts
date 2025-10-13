@@ -1,14 +1,16 @@
-import { User } from '@stump/sdk'
+import { UserPermission } from '@stump/graphql'
 
-import { allPermissions, buildSchema } from '../schema'
+import { buildSchema, ExistingUser } from '../schema'
 
 const validUser = {
 	id: '1',
 	permissions: [],
 	username: 'test',
-} as unknown as User
+} as unknown as ExistingUser
 
-const createUser = (overrides: Partial<User> & { password?: string } = {}): User => ({
+const createUser = (
+	overrides: Partial<ExistingUser> & { password?: string } = {},
+): ExistingUser => ({
 	...validUser,
 	...overrides,
 })
@@ -40,7 +42,7 @@ describe('CreateOrUpdateUserSchema', () => {
 		it('should enforce a non-negative age restriction', () => {
 			const schema = buildSchema(() => '', [], createUser())
 
-			const result = schema.safeParse({ age_restriction: -1 })
+			const result = schema.safeParse({ ageRestriction: -1 })
 			expect(result.success).toBe(false)
 		})
 	})
@@ -49,7 +51,7 @@ describe('CreateOrUpdateUserSchema', () => {
 		it('should allow all valid permissions', () => {
 			const schema = buildSchema(() => '', [], createUser())
 
-			allPermissions.forEach((permission) => {
+			Object.values(UserPermission).forEach((permission) => {
 				const result = schema.safeParse({ permissions: [permission] })
 				expect(result.success).toBe(true)
 			})

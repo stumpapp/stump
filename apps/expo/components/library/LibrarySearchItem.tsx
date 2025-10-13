@@ -52,7 +52,7 @@ export default function LibrarySearchItem({ library }: Props) {
 				width: width * 0.75,
 			}}
 		>
-			<View className="flex-row items-start gap-4 p-4">
+			<View className="flex-row items-start gap-4 px-6 py-2 tablet:px-10">
 				<BorderAndShadow
 					style={{ borderRadius: 4, borderWidth: 0.3, shadowRadius: 1.41, elevation: 2 }}
 				>

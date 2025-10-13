@@ -4,7 +4,7 @@ import { Alert, AlertDescription, Button, cx, Form, Heading, Input } from '@stum
 import { useLocaleContext } from '@stump/i18n'
 import { isAxiosError } from '@stump/sdk'
 import { motion, Variants } from 'framer-motion'
-import { ArrowLeft, ArrowRight, ShieldAlert } from 'lucide-react'
+import { ArrowRight, ShieldAlert } from 'lucide-react'
 import { useCallback, useState } from 'react'
 import { FieldValues, useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router'
@@ -12,7 +12,6 @@ import { useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
-import { ConfiguredServersList } from '@/components/savedServer'
 import { useAppStore, useUserStore } from '@/stores'
 
 // TODO: redirect away if the user is already logged in
@@ -138,6 +137,7 @@ export default function LoginOrClaimScene() {
 	return (
 		<div data-tauri-drag-region className="flex h-screen w-screen items-center bg-background">
 			<motion.div
+				// @ts-expect-error: It's fine
 				className="w-screen shrink-0"
 				animate={showServers ? 'appearOut' : 'appearIn'}
 				variants={variants}
@@ -204,7 +204,7 @@ export default function LoginOrClaimScene() {
 				</div>
 			</motion.div>
 
-			{isDesktop && (
+			{/* {isDesktop && (
 				<motion.div
 					className="w-screen shrink-0"
 					animate={showServers ? 'appearIn' : 'appearOut'}
@@ -225,7 +225,7 @@ export default function LoginOrClaimScene() {
 						</button>
 					</div>
 				</motion.div>
-			)}
+			)} */}
 		</div>
 	)
 }

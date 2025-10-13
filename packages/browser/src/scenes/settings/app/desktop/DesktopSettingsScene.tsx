@@ -4,7 +4,6 @@ import { Helmet } from 'react-helmet'
 import { ContentContainer } from '@/components/container'
 import { SceneContainer } from '@/components/container'
 
-import ConfiguredServersSection from './configuredServers'
 import OptionalFeaturesSection from './features'
 
 export default function DesktopSettingsScene() {
@@ -17,7 +16,6 @@ export default function DesktopSettingsScene() {
 			</Helmet>
 
 			<ContentContainer>
-				<ConfiguredServersSection />
 				<OptionalFeaturesSection />
 			</ContentContainer>
 		</SceneContainer>

@@ -33,14 +33,6 @@ export function AppRouter({ basePath }: AppRouterProps = {}) {
 
 	if (!baseUrl) {
 		throw new Error('Base URL is not set')
-
-		// return (
-		// 	<LocaleProvider locale={(locale as AllowedLocale) || 'en'}>
-		// 		<RouterProvider basePath={basePath}>
-		// 			<OnBoardingRouter />
-		// 		</RouterProvider>
-		// 	</LocaleProvider>
-		// )
 	}
 
 	return (

@@ -48,7 +48,7 @@ export default function OrderBySelect({ entity, value, onChange }: Props) {
 
 	return (
 		<div>
-			<Label htmlFor="order_by" className="mb-1.5">
+			<Label htmlFor="orderBy" className="mb-1.5">
 				Order by
 			</Label>
 			<NativeSelect

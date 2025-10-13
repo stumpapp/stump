@@ -1,7 +1,6 @@
 import { useGraphQLMutation, useSDK } from '@stump/client'
 import { ConfirmationModal } from '@stump/components'
-import { graphql } from '@stump/graphql'
-import { RegisteredEmailDevice } from '@stump/sdk'
+import { EmailDevicesTableQuery, graphql } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback } from 'react'
 import { toast } from 'sonner'
@@ -13,6 +12,8 @@ const mutation = graphql(`
 		}
 	}
 `)
+
+type RegisteredEmailDevice = EmailDevicesTableQuery['emailDevices'][number]
 
 type Props = {
 	device: RegisteredEmailDevice | null

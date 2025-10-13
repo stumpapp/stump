@@ -1,4 +1,5 @@
 import { Button, cx, Popover } from '@stump/components'
+import { OrderDirection } from '@stump/graphql'
 import { SortAsc } from 'lucide-react'
 import { useState } from 'react'
 import { useMediaMatch } from 'rooks'
@@ -18,12 +19,14 @@ export default function OrderBy({ entity }: Props) {
 	const handleChangeOrderBy = (value: string) =>
 		setFilters({
 			...filters,
-			order_by: value,
+			// @ts-expect-error: Complex type too annoying to handle right now
+			orderBy: value,
 		})
 
-	const handleChangeDirection = (value: 'asc' | 'desc') =>
+	const handleChangeDirection = (value: OrderDirection) =>
 		setFilters({
 			...filters,
+			// @ts-expect-error: Complex type too annoying to handle right now
 			direction: value,
 		})
 
@@ -45,7 +48,7 @@ export default function OrderBy({ entity }: Props) {
 				className="flex flex-col gap-3 overflow-hidden border-opacity-50 bg-background shadow-sm"
 				align={isMobile ? 'start' : 'end'}
 			>
-				<OrderBySelect entity={entity} value={ordering.order_by} onChange={handleChangeOrderBy} />
+				<OrderBySelect entity={entity} value={ordering.orderBy} onChange={handleChangeOrderBy} />
 				<OrderByDirection value={ordering.direction} onChange={handleChangeDirection} />
 			</Popover.Content>
 		</Popover>

@@ -1,10 +1,12 @@
 use async_graphql::{CustomValidator, InputObject, InputValueError, Json};
 use models::{
 	entity::{book_club, book_club_member, user::AuthUser},
-	shared::book_club::{BookClubBook, BookClubMemberRole, BookClubMemberRoleSpec},
+	shared::book_club::{BookClubMemberRole, BookClubMemberRoleSpec},
 };
 use sea_orm::{prelude::*, Set};
 use slugify::slugify;
+
+use crate::object::book_club_book::BookClubBookVariant;
 
 #[derive(Debug, InputObject)]
 pub struct CreateBookClubInput {
@@ -145,7 +147,7 @@ impl CustomValidator<BookClubInvitationResponseInput>
 
 #[derive(Debug, InputObject)]
 pub struct CreateBookClubScheduleBook {
-	pub book: BookClubBook,
+	pub book: BookClubBookVariant,
 	pub start_at: Option<DateTimeWithTimeZone>,
 	pub end_at: Option<DateTimeWithTimeZone>,
 	pub discussion_duration_days: Option<i32>,

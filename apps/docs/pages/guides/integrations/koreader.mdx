@@ -3,7 +3,7 @@ import { Callout, Steps } from 'nextra/components'
 # KoReader Sync
 
 <Callout emoji="🔐">
-	This functionality is gated behind the `feature:koreader_sync` and `feature:api_keys` user
+	This functionality is gated behind the `ACCESS_KOREADER_SYNC` and `ACCESS_API_KEYS` user
 	permissions. To learn more about permissions, see the
 	[permissions](/guides/access-control/permissions) guide.
 </Callout>
@@ -49,9 +49,9 @@ To enable this feature, be sure the `KoReader-compatible hashes` setting is enab
 
 ### Generate an API key
 
-<Callout emoji="🔐">This step requires the `feature:api_keys` user permissions.</Callout>
+<Callout emoji="🔐">This step requires the `ACCESS_API_KEYS` user permissions.</Callout>
 
-The API key should have at least the `feature:koreader_sync` permission:
+The API key should have at least the `ACCESS_KOREADER_SYNC` permission:
 
 1. Navigate to the app settings (`/settings/app`)
 2. Click the `API keys` tab (`/settings/app/api-keys`)

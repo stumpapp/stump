@@ -1,4 +1,4 @@
-import { Alert, Button, ConfirmationModal } from '@stump/components'
+import { Button, ConfirmationModal } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { useCallback, useState } from 'react'
 

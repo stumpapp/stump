@@ -1,31 +1,25 @@
 import { WideSwitch } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import { LibraryScanMode } from '@stump/sdk'
 import { useFormContext } from 'react-hook-form'
 
+import { CreateOrUpdateLibrarySchema } from '@/components/library/createOrUpdate'
 import { useLibraryContextSafe } from '@/scenes/library/context'
 
-import { CreateOrUpdateLibrarySchema } from '../schema'
-
-export default function ScanModeForm() {
+export default function ScanAfterPersist() {
 	const form = useFormContext<CreateOrUpdateLibrarySchema>()
 	const ctx = useLibraryContextSafe()
 
 	const { t } = useLocaleContext()
 
-	const scanMode = form.watch('scan_mode')
+	const scanAfterPersist = form.watch('scanAfterPersist')
 	const isCreatingLibrary = !ctx?.library
-
-	const handleChange = (newMode: LibraryScanMode) => {
-		form.setValue('scan_mode', newMode)
-	}
 
 	return (
 		<WideSwitch
 			label={t(getKey(`label.${isCreatingLibrary ? 'create' : 'update'}`))}
 			description={t(getKey('description'))}
-			checked={scanMode !== 'NONE'}
-			onCheckedChange={() => handleChange(scanMode === 'NONE' ? 'DEFAULT' : 'NONE')}
+			checked={scanAfterPersist}
+			onCheckedChange={() => form.setValue('scanAfterPersist', !scanAfterPersist)}
 		/>
 	)
 }

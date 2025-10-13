@@ -306,4 +306,6 @@ export const associatedPermissions: Record<UserPermission, UserPermission[]> = {
 		UserPermission.ReadPersistedLogs,
 		UserPermission.ReadSystemLogs,
 	],
+	[UserPermission.EditMetadata]: [],
+	[UserPermission.WriteBackMetadata]: [UserPermission.EditMetadata],
 }

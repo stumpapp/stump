@@ -1,4 +1,5 @@
 import { cx } from '@stump/components'
+import { ReadingDirection, ReadingMode } from '@stump/graphql'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useCallback } from 'react'
 import { useSwipeable } from 'react-swipeable'
@@ -21,8 +22,8 @@ export default function EpubNavigationControls({ children }: Props) {
 		bookPreferences: { readingDirection, readingMode },
 	} = useBookPreferences({ book })
 
-	const invertControls = readingDirection === 'rtl'
-	const isVerticalScrolling = readingMode === 'continuous:vertical'
+	const invertControls = readingDirection === ReadingDirection.Rtl
+	const isVerticalScrolling = readingMode === ReadingMode.ContinuousVertical
 
 	/**
 	 * A callback to navigate backward in the book, wrt the natural reading
@@ -60,10 +61,11 @@ export default function EpubNavigationControls({ children }: Props) {
 	 * Note that the swipe handler function semantics are inverted wrt the reading direction.
 	 */
 	const swipeHandlers = useSwipeable({
-		onSwipedLeft: readingMode === 'continuous:vertical' ? undefined : onForwardNavigation,
-		onSwipedRight: readingMode === 'continuous:vertical' ? undefined : onBackwardNavigation,
-		onSwipedUp: readingMode === 'continuous:vertical' ? onForwardNavigation : undefined,
-		onSwipedDown: readingMode === 'continuous:vertical' ? onBackwardNavigation : undefined,
+		onSwipedLeft: readingMode === ReadingMode.ContinuousVertical ? undefined : onForwardNavigation,
+		onSwipedRight:
+			readingMode === ReadingMode.ContinuousVertical ? undefined : onBackwardNavigation,
+		onSwipedUp: readingMode === ReadingMode.ContinuousVertical ? onForwardNavigation : undefined,
+		onSwipedDown: readingMode === ReadingMode.ContinuousVertical ? onBackwardNavigation : undefined,
 		preventScrollOnSwipe: true,
 	})
 

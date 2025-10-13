@@ -1,5 +1,5 @@
 import { Badge, BadgeProps, PickSelect } from '@stump/components'
-import type { FileStatus } from '@stump/sdk'
+import { FileStatus } from '@stump/graphql'
 import { useMemo } from 'react'
 
 export default function FileStatusBadge({ status }: { status: FileStatus }) {

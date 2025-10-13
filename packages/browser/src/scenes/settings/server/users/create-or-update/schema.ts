@@ -3,7 +3,7 @@ import { z } from 'zod'
 
 export const userPermissionSchema = z.nativeEnum(UserPermission)
 
-interface ExistingUser extends UpdateUserInput {
+export interface ExistingUser extends UpdateUserInput {
 	id: string
 }
 

@@ -45,7 +45,7 @@ mod tests {
 		let query = Entity::find_for_media_id("123");
 		assert_eq!(
 			select_no_cols_to_string(query),
-			r#"SELECT  FROM "tags" INNER JOIN "_media_to_tag" ON "tags"."id" = "_media_to_tag"."tag_id" WHERE "_media_to_tag"."media_id" = '123'"#
+			r#"SELECT  FROM "tags" INNER JOIN "media_tags" ON "tags"."id" = "media_tags"."tag_id" WHERE "media_tags"."media_id" = '123'"#
 		);
 	}
 }

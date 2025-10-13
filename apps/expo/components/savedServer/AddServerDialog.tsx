@@ -93,8 +93,7 @@ export default function AddServerDialog() {
 				topInset={insets.top}
 				onChange={handleChange}
 				backgroundStyle={{
-					borderTopLeftRadius: 24,
-					borderTopRightRadius: 24,
+					borderRadius: 24,
 					borderCurve: 'continuous',
 					overflow: 'hidden',
 					borderWidth: 1,

@@ -1,10 +1,97 @@
 import { Callout } from 'nextra/components'
 
-# Book Reader
+# EPUB Reader
 
 <Callout emoji="⚠️" type="warning">
-	The ebook reader provides really poor UX. It is recommended to use a different reader until this
-	is improved. It is planned for a future release!
+	The ebook reader is functional but still in active development. Some features may be missing or
+	work differently than expected. Improvements are planned for future releases.
 </Callout>
 
-> Documentation will be added when the reader is improved
+The EPUB reader in Stump's mobile app is powered by Readium, providing a native reading experience for digital books. While still being refined, it offers essential reading functionality with customizable themes and settings.
+
+## Layout and Navigation
+
+The EPUB reader features a clean, minimal interface that focuses on the reading experience:
+
+- **Center Tap**: Tap the center of the screen to show/hide the reader controls
+- **Header Controls**: Exit the reader and access quick settings
+- **Footer Controls**: Progress indicator and navigation tools
+
+## Reader Settings
+
+The EPUB reader provides several customization options accessible through the settings panel:
+
+### Visual Themes
+
+The reader includes several built-in themes for different reading preferences:
+
+- **Light**: Standard light theme with black text on white background
+- **Dark**: Dark theme for low-light reading
+- **Sepia**: Warm sepia tones for reduced eye strain
+- **Custom Themes**: Create and customize your own color schemes
+
+### Font Configuration
+
+#### Font Size
+
+Adjust the text size with a slider control to find the most comfortable reading size for your device and preferences.
+
+#### Font Family
+
+Choose from several default fonts optimized for reading:
+
+- **System**: Use your device's default font
+- **OpenDyslexic**: Designed to improve readability for people with dyslexia
+- **Literata**: A serif font optimized for digital reading
+- **Atkinson Hyperlegible**: Designed for enhanced legibility and accessibility
+- **Charis SIL**: A Unicode-based font family supporting a wide range of languages
+- **Bitter**: A slab serif font designed for comfortable screen reading
+
+#### Line Height
+
+Adjust the spacing between lines of text for improved readability and comfort.
+
+### Display Settings
+
+#### Brightness Control
+
+Fine-tune the screen brightness directly within the reader without affecting your device's global brightness setting.
+
+#### Publisher Styles
+
+Toggle whether to respect the original formatting and styles defined by the book's publisher, or use your custom theme settings throughout.
+
+## Navigation Features
+
+### Table of Contents
+
+Access the book's table of contents to jump to specific chapters or sections. The table of contents preserves the hierarchical structure of the book.
+
+### Book Overview
+
+View book metadata including:
+
+- Cover image
+- Title and author information
+- Publisher details
+- Book summary (when available)
+
+## Progress Tracking
+
+Your reading progress is automatically saved and synced across devices when connected to a Stump server.
+
+Like the image-based reader, the EPUB reader also supports:
+
+- **Incognito Mode**: Read without saving progress or location data
+- **Reading Timer**: Track time spent reading (with sync support for Stump servers)
+
+## Limitations and Known Issues
+
+<Callout emoji="ℹ️" type="info">
+	The EPUB reader is actively being improved. Current limitations include:
+</Callout>
+
+- **Annotations**: Text highlighting and note-taking are not yet supported
+- **Advanced Navigation**: Some navigation features are still in development
+- **Search**: In-book text search is not yet available
+- **Text Selection**: Limited text selection and copying functionality

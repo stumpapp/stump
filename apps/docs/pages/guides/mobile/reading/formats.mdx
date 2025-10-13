@@ -9,12 +9,12 @@ import { Callout } from 'nextra/components'
 
 The mobile app doesn't yet support all the formats that your Stump server supports. The following table provides an overview of formats and their status:
 
-| Format  | Status | Notes                             |
-| ------- | ------ | --------------------------------- |
-| CBZ/ZIP | ✅     |                                   |
-| CBR/RAR | ✅     |                                   |
-| EPUB    | ⚠️     | Poor UX, not yet suitable for use |
-| PDF     | ⚠️     | Some PDF pages are blurry         |
+| Format  | Status | Notes                                    |
+| ------- | ------ | ---------------------------------------- |
+| CBZ/ZIP | ✅     |                                          |
+| CBR/RAR | ✅     |                                          |
+| EPUB    | ⚠️     | Functional but missing features, poor UX |
+| PDF     | ⚠️     | Some PDF pages are blurry                |
 
 ## OPDS Formats
 
@@ -24,36 +24,5 @@ You may download books from your OPDS catalogs and read them offline, however on
 | ------- | --------- | ------------------------- |
 | CBZ/ZIP | ✅        |                           |
 | CBR/RAR | ✅        |                           |
-| EPUB    | ❌        | Support in the future     |
+| EPUB    | ❌        |                           |
 | PDF     | ⚠️        | Some PDF pages are blurry |
-
-## Reader Preferences
-
-Each reader has specific settings and preferences that are configurable. These settings may be set globally for all books, and overridden on a per-book basis. If you change a setting for a specific book, it will only apply to that book.
-
-There are a few settings that are common to all readers:
-
-### Incognito
-
-When enabled, the app will not save your reading progress. This wouldnt affect bookmarks or annotations, just the progress of the book.
-
-### Reading Direction
-
-You may set `LTR` (left-to-right) or `RTL` (right-to-left) reading direction.
-
-### Reading Timer
-
-When enabled, the app will track the time you spend reading each book in seconds. This will even sync across devices!
-
-<Callout emoji="ℹ️" type="info">
-	The app supports reading timers for all server configurations, but syncing is only available when
-	using a Stump server
-</Callout>
-
-#### Disabling
-
-If you disable the reading timer while reading a book, it is effectively pausing the timer. If you re-enable it, the timer will resume from where it left off. If you disable the timer globally and start reading a book, the timer will not start.
-
-#### Resetting
-
-You may reset the reading timer for a book at any time. This will reset the timer to 0 seconds

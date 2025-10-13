@@ -1,8 +1,6 @@
 use std::collections::HashMap;
 
-use crate::entity::book_club_book;
-
-use async_graphql::{Enum, InputObject, OneofObject, SimpleObject, Union};
+use async_graphql::{Enum, InputObject, SimpleObject};
 use sea_orm::{DeriveActiveEnum, EnumIter, FromJsonQueryResult};
 use serde::{Deserialize, Serialize};
 use strum::Display;
@@ -97,27 +95,4 @@ pub struct BookClubExternalBook {
 #[graphql(input_name = "BookClubInternalBookInput")]
 pub struct BookClubInternalBook {
 	pub id: String,
-}
-
-#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, Union, OneofObject)]
-#[graphql(input_name = "BookClubBookInput")]
-pub enum BookClubBook {
-	Stored(BookClubInternalBook),
-	External(BookClubExternalBook),
-}
-
-impl From<book_club_book::Model> for BookClubBook {
-	fn from(book_club_book: book_club_book::Model) -> Self {
-		match book_club_book.book_entity_id {
-			Some(book_entity_id) => {
-				BookClubBook::Stored(BookClubInternalBook { id: book_entity_id })
-			},
-			None => BookClubBook::External(BookClubExternalBook {
-				title: book_club_book.title.unwrap_or_default(),
-				author: book_club_book.author.unwrap_or_default(),
-				url: book_club_book.url,
-				image_url: book_club_book.image_url,
-			}),
-		}
-	}
 }

@@ -176,6 +176,7 @@ export default function IgnoreRulesConfig() {
 			<AnimatePresence>
 				{isEditing && (
 					<motion.div
+						// @ts-expect-error: It does have className actually?
 						className="flex flex-col space-y-4"
 						initial={{ height: 0, opacity: 0 }}
 						animate={{ height: 'auto', opacity: 1 }}

@@ -1,4 +1,4 @@
-import { DirectoryListingInput, graphql } from '@stump/graphql'
+import { DirectoryListingInput, DirectoryListingQuery, graphql } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -39,6 +39,8 @@ const query = graphql(`
 		}
 	}
 `)
+
+export type UseDirectoryListingFile = DirectoryListingQuery['listDirectory']['nodes'][0]['files'][0]
 
 type PrefetchFilesParams = {
 	path: string

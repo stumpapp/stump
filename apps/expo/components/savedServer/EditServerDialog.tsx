@@ -57,8 +57,7 @@ export default function EditServerDialog({ editingServer, onClose, onSubmit }: P
 				onChange={handleChange}
 				open={isOpen}
 				backgroundStyle={{
-					borderTopLeftRadius: 24,
-					borderTopRightRadius: 24,
+					borderRadius: 24,
 					borderCurve: 'continuous',
 					overflow: 'hidden',
 					borderWidth: 1,

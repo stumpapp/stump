@@ -16,7 +16,6 @@ import { DynamicCardGrid, GridSizeSlider } from '@/components/container'
 import {
 	FilterContext,
 	FilterHeader,
-	FilterProvider,
 	URLFilterContainer,
 	URLFilterDrawer,
 	URLOrdering,
@@ -128,26 +127,17 @@ export const usePrefetchLibrarySeries = () => {
 	)
 }
 
-// TODO(graphql): Need FilterProvider?
-export default function LibrarySeriesSceneWrapper() {
-	return (
-		<FilterProvider>
-			<LibrarySeriesScene />
-		</FilterProvider>
-	)
-}
-
 function useSeriesURLOrderBy(ordering: Ordering): SeriesOrderBy[] {
 	return useMemo(() => {
 		// check for undefined values
-		if (!ordering || !ordering.order_by || !ordering.direction) {
+		if (!ordering || !ordering.orderBy || !ordering.direction) {
 			return DEFAULT_SERIES_ORDER_BY
 		}
 
 		return [
 			{
 				series: {
-					field: ordering.order_by as SeriesModelOrdering,
+					field: ordering.orderBy as SeriesModelOrdering,
 					direction: ordering.direction as OrderDirection,
 				},
 			},
@@ -167,7 +157,7 @@ function getQueryKey(
 	return [cacheKey, libraryId, page, pageSize, search, filters, orderBy]
 }
 
-function LibrarySeriesScene() {
+export default function LibrarySeriesScene() {
 	const {
 		library: { id, name },
 	} = useLibraryContext()

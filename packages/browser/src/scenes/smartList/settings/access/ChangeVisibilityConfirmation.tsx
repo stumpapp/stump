@@ -1,6 +1,6 @@
 import { ConfirmationModal } from '@stump/components'
+import { EntityVisibility } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
-import { EntityVisibility } from '@stump/sdk'
 
 type Props = {
 	isOpen: boolean

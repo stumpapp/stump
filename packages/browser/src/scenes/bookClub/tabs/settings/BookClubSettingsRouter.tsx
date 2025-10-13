@@ -1,4 +1,3 @@
-import { UpdateBookClub } from '@stump/sdk'
 import { noop } from 'lodash'
 import { lazy, Suspense, useCallback } from 'react'
 import { Navigate, Route, Routes } from 'react-router'
@@ -11,6 +10,8 @@ const BasicSettingsScene = lazy(() => import('./basics'))
 const MemberManagementScene = lazy(() => import('./members'))
 const DeletionScene = lazy(() => import('./danger'))
 const BookClubSchedulerScene = lazy(() => import('./scheduler'))
+
+// TODO(book-club): Fix types
 
 export default function BookClubSettingsRouter() {
 	const { bookClub } = useBookClubContext()
@@ -25,8 +26,8 @@ export default function BookClubSettingsRouter() {
 	 * with the updates provided.
 	 */
 	const patch = useCallback(
-		(updates: Partial<UpdateBookClub>) => {
-			const payload: UpdateBookClub = {
+		(updates: Partial<unknown>) => {
+			const payload: unknown = {
 				...bookClub,
 				...updates,
 			}

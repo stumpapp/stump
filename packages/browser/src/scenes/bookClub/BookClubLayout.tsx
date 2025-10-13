@@ -40,6 +40,26 @@ const query = graphql(`
 			schedule {
 				id
 				defaultIntervalDays
+				books {
+					id
+					startAt
+					endAt
+					discussionDurationDays
+					imageUrl
+					title
+					author
+					url
+					entity {
+						id
+						resolvedName
+						thumbnail {
+							url
+						}
+						metadata {
+							writers
+						}
+					}
+				}
 			}
 			createdAt
 		}

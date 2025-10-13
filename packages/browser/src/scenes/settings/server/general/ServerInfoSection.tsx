@@ -65,7 +65,7 @@ export default function ServerInfoSection() {
 					<div>
 						<Label>Build date</Label>
 						<Text size="sm" variant="muted">
-							{dayjs(version.compile_time).format('LLL')}
+							{dayjs(version.compileTime).format('LLL')}
 						</Text>
 					</div>
 				</div>

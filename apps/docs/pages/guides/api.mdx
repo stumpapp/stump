@@ -4,68 +4,6 @@ import { Callout } from 'nextra/components'
 
 Stump exposes a GraphQL API that allows you to interact with your Stump server programmatically. The API is backed by a few different [authentication methods](#authentication). The API is constantly being developed, and while it is generally stable at this point it is still subject to change.
 
-{/* TODO(graphql): Rewrite these! */}
-
-## Stump SDK
-
-Stump provides a [TypeScript SDK](https://github.com/stumpapp/stump/tree/main/packages/sdk) that you can use to create your own applications and integrations with Stump. If the demand is high enough, I will prioritize a proper NPM publish workflow. For the time being, you can load the dependency using something like [gitpkg](https://gitpkg.vercel.app/).
-
-```bash copy
-yarn add 'https://gitpkg.now.sh/stumpapp/stump/packages/sdk?main'
-```
-
-Then use the SDK in your application like so:
-
-```ts filename="app.ts" copy
-import { Api } from '@stump/sdk'
-
-const sdk = new Api({
-	baseURL: 'http://localhost:10801',
-	// You may also use 'session' if you configure it properly
-	authMethod: 'token', // or 'session' or 'api-key'
-	// If you have an API key, you can immediately set it here too:
-	// apiKey: '*****'
-})
-
-// A token will be managed for you in-memory, but you can store it yourself
-// using the returned `LoginResponse` object
-await sdk.auth.login({
-	username: 'oromei',
-	password: 'password',
-})
-
-// Example query for a book by name
-const favoriteBook = (
-	await sdk.media.get({
-		name: ['The Cybernetic Tea Shop'],
-		limit: 1,
-	})
-).at(0)
-
-// Example query for a series by ID
-const favoriteSeries = await sdk.series.getByID(favoriteBook.series_id)
-
-// Example query for a library by name
-const ebooksLibrary = (
-	await sdk.library.get({
-		name: ['Ebooks'],
-		limit: 1,
-	})
-).at(0)
-
-// Example scan of a library
-await sdk.library.scan(ebooksLibrary.id)
-```
-
-A full SDK guide will be available in the future to better support these integrations.
-
-<Callout emoji="🚀">
-	Have you created a custom integration with Stump using the SDK? I'd love to hear about your
-	experience! Please share your creations by opening an
-	[issue](https://github.com/stumpapp/stump/issues) or giving me a ping on
-	[Discord](https://discord.gg/63Ybb7J3as)
-</Callout>
-
 ## Authentication
 
 ### Sessions
@@ -88,7 +26,7 @@ Short-lived JWT access tokens are available for API access, aimed at better enab
 ### API Keys
 
 <Callout emoji="🔐">
-	This functionality is gated behind the `feature:api_keys` user permission. To learn more about
+	This functionality is gated behind the `ACCESS_API_KEYS` user permission. To learn more about
 	permissions, see the [permissions](/guides/access-control/permissions) guide.
 </Callout>
 

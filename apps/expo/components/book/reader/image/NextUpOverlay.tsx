@@ -2,17 +2,22 @@ import { useSDK } from '@stump/client'
 import { useRouter } from 'expo-router'
 import { useCallback, useEffect } from 'react'
 import { View } from 'react-native'
-import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
+import Animated, {
+	Easing,
+	useAnimatedStyle,
+	useSharedValue,
+	withTiming,
+} from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { useActiveServer } from '~/components/activeServer'
+import { BorderAndShadow } from '~/components/BorderAndShadow'
 import { TurboImage } from '~/components/Image'
 import { Button, Heading, icons, Label, Text } from '~/components/ui'
 import { COLORS } from '~/lib/constants'
 import { useDisplay } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 import { usePreferencesStore } from '~/stores'
-import { BorderAndShadow } from '~/components/BorderAndShadow'
 
 import { NextInSeriesBookRef } from './context'
 
@@ -31,23 +36,22 @@ export default function NextUpOverlay({ isVisible, book, onClose }: Props) {
 
 	const router = useRouter()
 	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
-	const container = useSharedValue(isVisible ? 1 : 0)
 
 	const { isTablet, width } = useDisplay()
 
-	useEffect(
-		() => {
-			container.value = withTiming(isVisible ? 1 : 0, {
-				duration: 100,
-			})
-		},
+	const animatedOpacity = useSharedValue(isVisible ? 1 : 0)
+	useEffect(() => {
+		animatedOpacity.value = withTiming(isVisible ? 1 : 0, {
+			duration: 250,
+			easing: Easing.out(Easing.quad),
+		})
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[isVisible],
-	)
+	}, [isVisible])
 
 	const containerStyles = useAnimatedStyle(() => {
 		return {
-			display: container.value === 1 ? 'flex' : 'none',
+			opacity: animatedOpacity.value,
+			display: animatedOpacity.value === 0 ? 'none' : 'flex',
 		}
 	})
 

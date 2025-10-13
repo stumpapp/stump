@@ -1,5 +1,5 @@
 import { Card, Spacer, Text } from '@stump/components'
-import { SmartList, SmartListFilterGroupInput } from '@stump/graphql'
+import { FragmentType, graphql, SmartListFilterGroupInput, useFragment } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import pluralize from 'pluralize'
 import { useMemo } from 'react'
@@ -12,11 +12,22 @@ import { DEFAULT_META_CACHE_TIME, usePrefetchSmartList, useSmartListMeta } from 
 const LOCALE_BASE_KEY = 'userSmartListsScene.list.card'
 const withLocaleKey = (key: string) => `${LOCALE_BASE_KEY}.${key}`
 
+const fragment = graphql(`
+	fragment SmartListCard on SmartList {
+		id
+		description
+		filters
+		joiner
+		name
+	}
+`)
+
 type Props = {
-	list: SmartList
+	data: FragmentType<typeof fragment>
 }
 
-export default function SmartListCard({ list: { id, name, filters, description } }: Props) {
+export default function SmartListCard({ data }: Props) {
+	const { id, name, filters, description } = useFragment(fragment, data)
 	const { prefetch } = usePrefetchSmartList()
 	const { t } = useLocaleContext()
 

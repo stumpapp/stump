@@ -42,7 +42,7 @@ The app supports 3 types of authentication:
 
 ### Login-based vs Basic Authentication
 
-On the surface, login-based and basic authentication sound similar, but the difference is that login-based authentication will not store credentials on the device. Rather, you will be prompted to log in each time you try to access the server. This has drawbacks for OPDS configurations since you will be prompted _each_ time you try to access the server. Stump servers will use short-lived JWT tokens when you log in, so you will only be prompted to log in when the token expires.
+On the surface, login-based and basic authentication sound similar, but the difference is that login-based authentication will not store credentials on the device. Rather, you will periodically be prompted to log in when you try to access the server. This has drawbacks for OPDS configurations since you will be prompted _each_ time you try to access the server. Stump servers will use short-lived JWT tokens when you log in, so you will only be prompted to log in when the token expires.
 
 <Callout emoji="ℹ️" type="info">
 	Stump will not use actual [Basic

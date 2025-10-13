@@ -2,7 +2,10 @@ use async_graphql::{ComplexObject, Context, Result, SimpleObject};
 
 use chrono::{DateTime, FixedOffset, Utc};
 use models::{
-	entity::{age_restriction, session, user, user_login_activity, user_preferences},
+	entity::{
+		age_restriction, finished_reading_session, session, user, user_login_activity,
+		user_preferences,
+	},
 	shared::{enums::UserPermission, permission_set::PermissionSet},
 };
 use sea_orm::{prelude::*, QueryOrder};
@@ -108,6 +111,20 @@ impl User {
 			.filter(session::Column::UserId.eq(&self.model.id).and(
 				session::Column::ExpiryTime.gt(DateTimeWithTimeZone::from(Utc::now())),
 			))
+			.count(conn)
+			.await?;
+
+		Ok(count.try_into()?)
+	}
+
+	#[graphql(
+		guard = "SelfGuard::new(&self.model.id).or(PermissionGuard::one(UserPermission::ReadUsers))"
+	)]
+	async fn finished_reading_sessions_count(&self, ctx: &Context<'_>) -> Result<i64> {
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let count = finished_reading_session::Entity::find()
+			.filter(finished_reading_session::Column::UserId.eq(&self.model.id))
 			.count(conn)
 			.await?;
 

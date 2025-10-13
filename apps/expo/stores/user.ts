@@ -16,6 +16,7 @@ type MobilePreferencesStore = {
 	cachePolicy: CachePolicy
 	allowDownscaling: boolean
 	thumbnailRatio: number
+	performanceMonitor: boolean
 	accentColor?: string | undefined
 	/**
 	 * Patch the store with new values.
@@ -39,6 +40,7 @@ export const usePreferencesStore = create<MobilePreferencesStore>()(
 			allowDownscaling: true,
 			thumbnailRatio: 2 / 3,
 			accentColor: undefined,
+			performanceMonitor: false,
 			patch: (data) => set(data),
 		}),
 		{

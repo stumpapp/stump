@@ -17,7 +17,7 @@ export type FilterInput = MediaFilterInput | SeriesFilterInput | LibraryFilterIn
 
 export type Ordering = {
 	direction?: OrderDirection
-	order_by?: OrderingField
+	orderBy?: OrderingField
 }
 
 export type IFilterContext = {
@@ -44,3 +44,12 @@ export const FilterContext = createContext<IFilterContext>({
 	setPage: noop,
 })
 export const useFilterContext = () => useContext(FilterContext)
+
+export const useSeriesFilterContext = () => {
+	const context = useFilterContext()
+	return {
+		...context,
+		filters: context.filters as SeriesFilterInput,
+		setFilters: context.setFilters as (filters: SeriesFilterInput) => void,
+	}
+}

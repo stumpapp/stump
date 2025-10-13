@@ -1,4 +1,4 @@
-import { TagOption, useSDK, useSuspenseGraphQL } from '@stump/client'
+import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { ComboBox } from '@stump/components'
 import { graphql } from '@stump/graphql'
 import { useCallback, useEffect, useState } from 'react'
@@ -11,6 +11,11 @@ const query = graphql(`
 		}
 	}
 `)
+
+export type TagOption = {
+	label: string
+	value: string
+}
 
 type Props = {
 	label?: string

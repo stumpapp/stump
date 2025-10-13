@@ -36,7 +36,7 @@ impl StumpAuthor {
 	/// use xml::EventWriter;
 	///
 	/// let author = StumpAuthor::new("Aaron Leopold".to_string(), None);
-	/// let xml_str = r#"<?xml version="1.0" encoding="utf-8"?><author><name>Aaron Leopold</name></author>"#;
+	/// let xml_str = r#"<?xml version="1.0" encoding="UTF-8"?><author><name>Aaron Leopold</name></author>"#;
 	///
 	/// let mut writer = EventWriter::new(Vec::new());
 	/// author.write(&mut writer).unwrap();
@@ -73,7 +73,7 @@ mod tests {
 		let result = String::from_utf8(writer.into_inner()).unwrap();
 		let expected_result = normalize_xml(
 			r#"
-			<?xml version="1.0" encoding="utf-8"?>
+			<?xml version="1.0" encoding="UTF-8"?>
 			<author>
 				<name>Stump</name>
 			</author>
@@ -96,7 +96,7 @@ mod tests {
 		let result = String::from_utf8(writer.into_inner()).unwrap();
 		let expected_result = normalize_xml(
 			r#"
-			<?xml version="1.0" encoding="utf-8"?>
+			<?xml version="1.0" encoding="UTF-8"?>
 			<author>
 				<name>Stump</name>
 				<uri>https://www.stumpapp.dev/</uri>

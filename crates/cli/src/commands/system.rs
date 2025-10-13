@@ -106,8 +106,8 @@ async fn backfill_prisma_to_seaorm(config: &StumpConfig) -> CliResult<()> {
 		})
 		.interact_text()?;
 
-	let backup_db = Input::new()
-		.with_prompt("Enter the path to the backup database file")
+	let legacy_db = Input::new()
+		.with_prompt("Enter the path to the legacy database file (i.e. the one with the data you want to migrate)")
 		.allow_empty(false)
 		.validate_with(|input: &String| -> Result<(), &str> {
 			let path_buf = PathBuf::from(input);
@@ -156,7 +156,7 @@ async fn backfill_prisma_to_seaorm(config: &StumpConfig) -> CliResult<()> {
 		.map_err(|e| CliError::Unknown(format!("Failed to read backfill script: {}", e)))?
 		.replace(
 			"/replace/with/full/path/to/stump-before-migration.db",
-			&backup_db,
+			&legacy_db,
 		);
 
 	let conn = connect(config).await?;

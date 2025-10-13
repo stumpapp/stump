@@ -1,12 +1,11 @@
 import { queryClient } from '@stump/client'
 import { useLocaleContext } from '@stump/i18n'
 import { motion, Variants } from 'framer-motion'
-import { ArrowLeft, ArrowRight } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Navigate, useLocation } from 'react-router'
 import { toast } from 'sonner'
 
-import { ConfiguredServersList } from '@/components/savedServer'
 import { useAppStore } from '@/stores'
 
 export default function ServerConnectionErrorScene() {
@@ -76,6 +75,7 @@ export default function ServerConnectionErrorScene() {
 	return (
 		<div data-tauri-drag-region className="flex h-screen w-screen items-center bg-background">
 			<motion.div
+				// @ts-expect-error: It's fine
 				className="w-screen shrink-0"
 				animate={showServers ? 'appearOut' : 'appearIn'}
 				variants={variants}
@@ -102,7 +102,7 @@ export default function ServerConnectionErrorScene() {
 				</div>
 			</motion.div>
 
-			{isDesktop && (
+			{/* {isDesktop && (
 				<motion.div
 					className="w-screen shrink-0"
 					animate={showServers ? 'appearIn' : 'appearOut'}
@@ -123,7 +123,7 @@ export default function ServerConnectionErrorScene() {
 						</button>
 					</div>
 				</motion.div>
-			)}
+			)} */}
 		</div>
 	)
 }

@@ -6,7 +6,7 @@ const upperFirst = (str: string) => str.charAt(0).toUpperCase() + str.slice(1)
 
 export default function MemberSpecDisplay() {
 	const {
-		bookClub: { member_role_spec },
+		bookClub: { roleSpec },
 	} = useBookClubContext()
 
 	return (
@@ -35,14 +35,14 @@ export default function MemberSpecDisplay() {
 						</tr>
 					</thead>
 					<tbody className="divide-y dark:divide-gray-800">
-						{Object.entries(member_role_spec).map(([key, value]) => {
+						{Object.entries(roleSpec).map(([key, value]) => {
 							return (
 								<tr key={key}>
 									<td className="py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
 										<Text size="sm">{upperFirst(key.toLowerCase())}</Text>
 									</td>
 									<td className="border-l px-3 py-4 dark:border-l-gray-800">
-										<Text size="sm">{value}</Text>
+										<Text size="sm">{String(value)}</Text>
 									</td>
 								</tr>
 							)

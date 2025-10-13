@@ -93,7 +93,6 @@ export default function PublicationFeed({ feed, onRefresh, isRefreshing }: Props
 	}, [isTablet, isXSmall, width])
 
 	const itemsPerRow = Math.floor(width / itemWidth)
-	const availableSpaceX = width - itemsPerRow * itemWidth
 
 	// TODO: fix on xsmall, looks poopy
 
@@ -109,7 +108,7 @@ export default function PublicationFeed({ feed, onRefresh, isRefreshing }: Props
 				itemDimension={itemWidth}
 				data={publications}
 				fixed
-				spacing={availableSpaceX / itemsPerRow - 8}
+				maxItemsPerRow={itemsPerRow}
 				renderItem={({ item: publication }) => {
 					const thumbnailURL = getPublicationThumbnailURL(publication)
 					const selfURL = publication.links?.find((link) => link.rel === 'self')?.href

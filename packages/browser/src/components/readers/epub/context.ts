@@ -1,5 +1,4 @@
 import { Bookmark } from '@stump/graphql'
-import { EpubContent } from '@stump/sdk'
 import { createContext, useContext } from 'react'
 
 import { ImageReaderBookRef } from '@/components/readers/imageBased/context'
@@ -24,6 +23,13 @@ export type EpubReaderChapterMeta = {
 	 * The visible cfi strings for the first and last visible pages.
 	 */
 	cfiRange: [string | undefined, string | undefined]
+}
+
+export interface EpubContent {
+	label: string
+	content: string
+	children: EpubContent[]
+	play_order: number
 }
 
 export type EpubReaderBookMeta = {

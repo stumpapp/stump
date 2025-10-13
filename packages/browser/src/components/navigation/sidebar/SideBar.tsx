@@ -197,6 +197,7 @@ export default function SideBar({ asChild, hidden }: Props) {
 	return (
 		<motion.aside
 			key="primary-sidebar"
+			// @ts-expect-error: It is there I promise
 			className="hidden min-h-full md:inline-block"
 			animate={hidden ? 'hidden' : 'visible'}
 			variants={variants}

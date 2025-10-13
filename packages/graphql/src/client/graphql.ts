@@ -150,30 +150,30 @@ export type BookClub = {
   slug: Scalars['String']['output'];
 };
 
-export type BookClubBook = BookClubExternalBook | BookClubInternalBook;
+export type BookClubBook = {
+  __typename?: 'BookClubBook';
+  author?: Maybe<Scalars['String']['output']>;
+  bookClubScheduleId?: Maybe<Scalars['Int']['output']>;
+  bookEntityId?: Maybe<Scalars['String']['output']>;
+  discussionDurationDays?: Maybe<Scalars['Int']['output']>;
+  endAt: Scalars['DateTime']['output'];
+  entity?: Maybe<Media>;
+  id: Scalars['String']['output'];
+  imageUrl?: Maybe<Scalars['String']['output']>;
+  startAt: Scalars['DateTime']['output'];
+  title?: Maybe<Scalars['String']['output']>;
+  url?: Maybe<Scalars['String']['output']>;
+};
 
 export type BookClubBookInput =
   { external: BookClubExternalBookInput; stored?: never; }
   |  { external?: never; stored: BookClubInternalBookInput; };
-
-export type BookClubExternalBook = {
-  __typename?: 'BookClubExternalBook';
-  author: Scalars['String']['output'];
-  imageUrl?: Maybe<Scalars['String']['output']>;
-  title: Scalars['String']['output'];
-  url?: Maybe<Scalars['String']['output']>;
-};
 
 export type BookClubExternalBookInput = {
   author: Scalars['String']['input'];
   imageUrl?: InputMaybe<Scalars['String']['input']>;
   title: Scalars['String']['input'];
   url?: InputMaybe<Scalars['String']['input']>;
-};
-
-export type BookClubInternalBook = {
-  __typename?: 'BookClubInternalBook';
-  id: Scalars['String']['output'];
 };
 
 export type BookClubInternalBookInput = {
@@ -2202,6 +2202,7 @@ export type PaginationInfo = CursorPaginationInfo | OffsetPaginationInfo;
 
 export type Query = {
   __typename?: 'Query';
+  activeReadingSessionCount: Scalars['Int']['output'];
   apiKeyById: Apikey;
   apiKeys: Array<Apikey>;
   bookClubById: BookClub;
@@ -2216,6 +2217,7 @@ export type Query = {
   emailers: Array<Emailer>;
   /** Get a single epub by its media ID */
   epubById: Epub;
+  finishedReadingSessionCount: Scalars['Int']['output'];
   getNotifierById: Notifier;
   getNotifiers: Array<Notifier>;
   jobById?: Maybe<Job>;
@@ -2241,6 +2243,8 @@ export type Query = {
   mediaAlphabet: Scalars['JSONObject']['output'];
   mediaById?: Maybe<Media>;
   mediaByPath?: Maybe<Media>;
+  mediaCount: Scalars['Int']['output'];
+  mediaDiskUsage: Scalars['Int']['output'];
   mediaMetadataOverview: MediaMetadataOverview;
   numberOfLibraries: Scalars['Int']['output'];
   numberOfSeries: Scalars['Int']['output'];
@@ -2275,8 +2279,10 @@ export type Query = {
   stumpConfig: StumpConfig;
   /** Returns a list of all tags. */
   tags: Array<Tag>;
+  topReaders: Array<User>;
   uploadConfig: UploadConfig;
   userById: User;
+  userCount: Scalars['Int']['output'];
   users: PaginatedUserResponse;
 };
 
@@ -2450,6 +2456,11 @@ export type QuerySmartListsArgs = {
 };
 
 
+export type QueryTopReadersArgs = {
+  take?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
 export type QueryUserByIdArgs = {
   id: Scalars['ID']['input'];
 };
@@ -2537,7 +2548,7 @@ export type ReadiumLocator = {
 };
 
 export type ReadiumLocatorInput = {
-  chapterTitle: Scalars['String']['input'];
+  chapterTitle?: Scalars['String']['input'];
   href: Scalars['String']['input'];
   locations?: InputMaybe<ReadiumLocationInput>;
   text?: InputMaybe<ReadiumTextInput>;
@@ -3196,6 +3207,7 @@ export type User = {
   continueReading: PaginatedMediaResponse;
   createdAt: Scalars['DateTime']['output'];
   deletedAt?: Maybe<Scalars['DateTime']['output']>;
+  finishedReadingSessionsCount: Scalars['Int']['output'];
   id: Scalars['String']['output'];
   isLocked: Scalars['Boolean']['output'];
   isServerOwner: Scalars['Boolean']['output'];
@@ -3963,12 +3975,12 @@ export type BookClubLayoutQueryVariables = Exact<{
 }>;
 
 
-export type BookClubLayoutQuery = { __typename?: 'Query', bookClubBySlug?: { __typename?: 'BookClub', id: string, name: string, slug: string, description?: string | null, isPrivate: boolean, roleSpec: any, membersCount: number, createdAt: any, creator: { __typename?: 'BookClubMember', id: string, displayName?: string | null, avatarUrl?: string | null }, membership?: { __typename: 'BookClubMember', role: BookClubMemberRole, isCreator: boolean, avatarUrl?: string | null } | null, schedule?: { __typename?: 'BookClubSchedule', id: number, defaultIntervalDays?: number | null } | null } | null };
+export type BookClubLayoutQuery = { __typename?: 'Query', bookClubBySlug?: { __typename?: 'BookClub', id: string, name: string, slug: string, description?: string | null, isPrivate: boolean, roleSpec: any, membersCount: number, createdAt: any, creator: { __typename?: 'BookClubMember', id: string, displayName?: string | null, avatarUrl?: string | null }, membership?: { __typename: 'BookClubMember', role: BookClubMemberRole, isCreator: boolean, avatarUrl?: string | null } | null, schedule?: { __typename?: 'BookClubSchedule', id: number, defaultIntervalDays?: number | null, books: Array<{ __typename?: 'BookClubBook', id: string, startAt: any, endAt: any, discussionDurationDays?: number | null, imageUrl?: string | null, title?: string | null, author?: string | null, url?: string | null, entity?: { __typename?: 'Media', id: string, resolvedName: string, thumbnail: { __typename?: 'ImageRef', url: string }, metadata?: { __typename?: 'MediaMetadata', writers: Array<string> } | null } | null }> } | null } | null };
 
 export type UserBookClubsSceneQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type UserBookClubsSceneQuery = { __typename?: 'Query', bookClubs: Array<{ __typename?: 'BookClub', id: string, name: string, slug: string, description?: string | null, membersCount: number, schedule?: { __typename?: 'BookClubSchedule', activeBooks: Array<{ __typename: 'BookClubExternalBook' } | { __typename: 'BookClubInternalBook' }> } | null }> };
+export type UserBookClubsSceneQuery = { __typename?: 'Query', bookClubs: Array<{ __typename?: 'BookClub', id: string, name: string, slug: string, description?: string | null, membersCount: number, schedule?: { __typename?: 'BookClubSchedule', activeBooks: Array<{ __typename: 'BookClubBook' }> } | null }> };
 
 export type CreateBookClubFormQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -4325,13 +4337,6 @@ export type DeleteApiKeyConfirmModalMutationVariables = Exact<{
 
 export type DeleteApiKeyConfirmModalMutation = { __typename?: 'Mutation', deleteApiKey: { __typename?: 'Apikey', id: number } };
 
-export type UpdateUserLocaleSelectorMutationVariables = Exact<{
-  input: UpdateUserPreferencesInput;
-}>;
-
-
-export type UpdateUserLocaleSelectorMutation = { __typename?: 'Mutation', updateViewerPreferences: { __typename?: 'UserPreferences', locale: string } };
-
 export type UpdateUserProfileFormMutationVariables = Exact<{
   input: UpdateUserInput;
 }>;
@@ -4429,6 +4434,11 @@ export type EmailersListQuery = { __typename?: 'Query', emailers: Array<(
     { __typename?: 'Emailer', id: number }
     & { ' $fragmentRefs'?: { 'EmailerListItemFragment': EmailerListItemFragment } }
   )> };
+
+export type ServerStatsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ServerStatsQuery = { __typename?: 'Query', numberOfLibraries: number, numberOfSeries: number, mediaCount: number, mediaDiskUsage: number };
 
 export type DeleteJobHistoryConfirmationMutationVariables = Exact<{ [key: string]: never; }>;
 
@@ -4531,6 +4541,11 @@ export type PersistedLogsQueryVariables = Exact<{
 
 export type PersistedLogsQuery = { __typename?: 'Query', logs: { __typename?: 'PaginatedLogResponse', nodes: Array<{ __typename?: 'Log', id: number, timestamp: any, level: LogLevel, message: string, jobId?: string | null, context?: string | null }>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', totalPages: number, currentPage: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
 
+export type UserStatsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type UserStatsQuery = { __typename?: 'Query', userCount: number, activeReadingSessionCount: number, finishedReadingSessionCount: number, topReaders: Array<{ __typename?: 'User', id: string, username: string, finishedReadingSessionsCount: number }> };
+
 export type CreateOrUpdateUserFormUpdateUserMutationVariables = Exact<{
   id: Scalars['ID']['input'];
   input: UpdateUserInput;
@@ -4599,6 +4614,8 @@ export type UserTableQueryVariables = Exact<{
 
 export type UserTableQuery = { __typename?: 'Query', users: { __typename?: 'PaginatedUserResponse', nodes: Array<{ __typename?: 'User', id: string, avatarUrl?: string | null, username: string, isServerOwner: boolean, isLocked: boolean, createdAt: any, lastLogin?: any | null, loginSessionsCount: number }>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', totalPages: number, currentPage: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
 
+export type SmartListCardFragment = { __typename?: 'SmartList', id: string, description?: string | null, filters: string, joiner: SmartListJoiner, name: string } & { ' $fragmentName'?: 'SmartListCardFragment' };
+
 export type CreateSmartListViewMutationVariables = Exact<{
   input: SaveSmartListView;
 }>;
@@ -4619,7 +4636,10 @@ export type SmartListsWithSearchQueryVariables = Exact<{
 }>;
 
 
-export type SmartListsWithSearchQuery = { __typename?: 'Query', smartLists: Array<{ __typename?: 'SmartList', id: string, creatorId: string, description?: string | null, defaultGrouping: SmartListGrouping, filters: string, joiner: SmartListJoiner, name: string, visibility: EntityVisibility }> };
+export type SmartListsWithSearchQuery = { __typename?: 'Query', smartLists: Array<(
+    { __typename?: 'SmartList', id: string, creatorId: string, description?: string | null, defaultGrouping: SmartListGrouping, filters: string, joiner: SmartListJoiner, name: string, visibility: EntityVisibility }
+    & { ' $fragmentRefs'?: { 'SmartListCardFragment': SmartListCardFragment } }
+  )> };
 
 export type SmartListByIdQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -5040,6 +5060,15 @@ export const JobDataInspectorFragmentDoc = new TypedDocumentString(`
   }
 }
     `, {"fragmentName":"JobDataInspector"}) as unknown as TypedDocumentString<JobDataInspectorFragment, unknown>;
+export const SmartListCardFragmentDoc = new TypedDocumentString(`
+    fragment SmartListCard on SmartList {
+  id
+  description
+  filters
+  joiner
+  name
+}
+    `, {"fragmentName":"SmartListCard"}) as unknown as TypedDocumentString<SmartListCardFragment, unknown>;
 export const SearchMediaDocument = new TypedDocumentString(`
     query SearchMedia($filter: MediaFilterInput!) {
   media(filter: $filter, pagination: {cursor: {limit: 10}}) {
@@ -6450,6 +6479,26 @@ export const BookClubLayoutDocument = new TypedDocumentString(`
     schedule {
       id
       defaultIntervalDays
+      books {
+        id
+        startAt
+        endAt
+        discussionDurationDays
+        imageUrl
+        title
+        author
+        url
+        entity {
+          id
+          resolvedName
+          thumbnail {
+            url
+          }
+          metadata {
+            writers
+          }
+        }
+      }
     }
     createdAt
   }
@@ -7230,13 +7279,6 @@ export const DeleteApiKeyConfirmModalDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<DeleteApiKeyConfirmModalMutation, DeleteApiKeyConfirmModalMutationVariables>;
-export const UpdateUserLocaleSelectorDocument = new TypedDocumentString(`
-    mutation UpdateUserLocaleSelector($input: UpdateUserPreferencesInput!) {
-  updateViewerPreferences(input: $input) {
-    locale
-  }
-}
-    `) as unknown as TypedDocumentString<UpdateUserLocaleSelectorMutation, UpdateUserLocaleSelectorMutationVariables>;
 export const UpdateUserProfileFormDocument = new TypedDocumentString(`
     mutation UpdateUserProfileForm($input: UpdateUserInput!) {
   updateViewer(input: $input) {
@@ -7400,6 +7442,14 @@ export const EmailersListDocument = new TypedDocumentString(`
   tlsEnabled
   username
 }`) as unknown as TypedDocumentString<EmailersListQuery, EmailersListQueryVariables>;
+export const ServerStatsDocument = new TypedDocumentString(`
+    query ServerStats {
+  numberOfLibraries
+  numberOfSeries
+  mediaCount
+  mediaDiskUsage
+}
+    `) as unknown as TypedDocumentString<ServerStatsQuery, ServerStatsQueryVariables>;
 export const DeleteJobHistoryConfirmationDocument = new TypedDocumentString(`
     mutation DeleteJobHistoryConfirmation {
   deleteJobHistory {
@@ -7567,6 +7617,18 @@ export const PersistedLogsDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<PersistedLogsQuery, PersistedLogsQueryVariables>;
+export const UserStatsDocument = new TypedDocumentString(`
+    query UserStats {
+  userCount
+  topReaders(take: 1) {
+    id
+    username
+    finishedReadingSessionsCount
+  }
+  activeReadingSessionCount
+  finishedReadingSessionCount
+}
+    `) as unknown as TypedDocumentString<UserStatsQuery, UserStatsQueryVariables>;
 export const CreateOrUpdateUserFormUpdateUserDocument = new TypedDocumentString(`
     mutation CreateOrUpdateUserFormUpdateUser($id: ID!, $input: UpdateUserInput!) {
   updateUser(id: $id, input: $input) {
@@ -7749,9 +7811,16 @@ export const SmartListsWithSearchDocument = new TypedDocumentString(`
     joiner
     name
     visibility
+    ...SmartListCard
   }
 }
-    `) as unknown as TypedDocumentString<SmartListsWithSearchQuery, SmartListsWithSearchQueryVariables>;
+    fragment SmartListCard on SmartList {
+  id
+  description
+  filters
+  joiner
+  name
+}`) as unknown as TypedDocumentString<SmartListsWithSearchQuery, SmartListsWithSearchQueryVariables>;
 export const SmartListByIdDocument = new TypedDocumentString(`
     query SmartListById($id: ID!) {
   smartListById(id: $id) {

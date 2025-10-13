@@ -121,6 +121,7 @@ export default function ReaderFooter() {
 			animate={showToolBar ? 'visible' : 'hidden'}
 			variants={transition}
 			transition={{ duration: 0.2, ease: 'easeInOut' }}
+			// @ts-expect-error: It does have className?
 			className="fixed bottom-0 left-0 z-[100] flex w-full flex-col justify-end gap-2 overflow-hidden bg-opacity-75 text-white shadow-lg"
 			style={{
 				height: 215 / HEIGHT_MODIFIER,

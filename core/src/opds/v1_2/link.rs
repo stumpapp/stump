@@ -208,7 +208,7 @@ mod tests {
 		let result = String::from_utf8(writer.into_inner()).unwrap();
 		let expected_result = normalize_xml(
 			r#"
-			<?xml version="1.0" encoding="utf-8"?>
+			<?xml version="1.0" encoding="UTF-8"?>
 			<link type="image/jpeg"
 						rel="http://opds-spec.org/image"
 						href="https://www.example.com/thumbnail/image.jpg"
@@ -235,7 +235,7 @@ mod tests {
 		let result = String::from_utf8(writer.into_inner()).unwrap();
 		let expected_result = normalize_xml(
 			r#"
-			<?xml version="1.0" encoding="utf-8"?>
+			<?xml version="1.0" encoding="UTF-8"?>
 			<link href="/opds/v1.2/books/123/pages/{pageNumber}?zero_based=true"
 						type="image/jpeg"
 						rel="http://vaemendis.net/opds-pse/stream"

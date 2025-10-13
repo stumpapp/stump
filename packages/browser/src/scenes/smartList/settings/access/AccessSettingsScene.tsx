@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Form } from '@stump/components'
+import { EntityVisibility } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { useCallback, useEffect, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
@@ -35,6 +36,7 @@ export default function AccessSettingsScene() {
 	const [showConfirmation, setShowConfirmation] = useState(false)
 
 	const doChangeVisibility = useCallback(() => {
+		// @ts-expect-error: It is satisfying the enum
 		patch({ visibility })
 		setShowConfirmation(false)
 	}, [patch, visibility])
@@ -67,7 +69,7 @@ export default function AccessSettingsScene() {
 				isOpen={showConfirmation}
 				onCancel={onCancel}
 				onConfirm={doChangeVisibility}
-				target={visibility}
+				target={visibility as EntityVisibility}
 			/>
 
 			<div className="flex flex-col gap-12">

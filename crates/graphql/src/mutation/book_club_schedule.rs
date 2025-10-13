@@ -2,7 +2,7 @@ use async_graphql::{Context, Object, Result, ID};
 use chrono::{DateTime, Duration, FixedOffset, Utc};
 use models::{
 	entity::{book_club_book, book_club_schedule},
-	shared::book_club::{BookClubBook, BookClubExternalBook, BookClubInternalBook},
+	shared::book_club::{BookClubExternalBook, BookClubInternalBook},
 };
 use sea_orm::{prelude::*, Set, TransactionTrait};
 
@@ -10,7 +10,7 @@ use crate::{
 	data::{AuthContext, CoreContext},
 	input::book_club::{CreateBookClubScheduleBook, CreateBookClubScheduleInput},
 	mutation::book_club::get_book_club_for_admin,
-	object::book_club::BookClub,
+	object::{book_club::BookClub, book_club_book::BookClubBookVariant},
 };
 
 #[derive(Default)]
@@ -128,7 +128,7 @@ fn create_book_active_model(
 	*last_end_at = Some(end_at);
 
 	match book {
-		BookClubBook::Stored(BookClubInternalBook { id }) => {
+		BookClubBookVariant::Stored(BookClubInternalBook { id }) => {
 			book_club_book::ActiveModel {
 				id: Set(Uuid::new_v4().to_string()),
 				start_at: Set(start_at),
@@ -139,7 +139,7 @@ fn create_book_active_model(
 				..Default::default()
 			}
 		},
-		BookClubBook::External(BookClubExternalBook {
+		BookClubBookVariant::External(BookClubExternalBook {
 			title,
 			author,
 			url,
@@ -206,7 +206,7 @@ mod tests {
 		};
 		let mut last_end_at = None;
 		let input = CreateBookClubScheduleBook {
-			book: BookClubBook::Stored(BookClubInternalBook {
+			book: BookClubBookVariant::Stored(BookClubInternalBook {
 				id: "456".to_string(),
 			}),
 			start_at: None,
@@ -234,7 +234,7 @@ mod tests {
 		};
 		let mut last_end_at = None;
 		let input = CreateBookClubScheduleBook {
-			book: BookClubBook::External(BookClubExternalBook {
+			book: BookClubBookVariant::External(BookClubExternalBook {
 				title: "Lord of the Rings".to_string(),
 				author: "J. R. R. Tolkien".to_string(),
 				url: None,

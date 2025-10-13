@@ -67,10 +67,15 @@ pub(crate) async fn get_media_thumbnail(
 	let generated_thumb =
 		get_thumbnail(config.get_thumbnails_dir(), id, image_format).await?;
 
+	let adjusted_config = StumpConfig {
+		pdf_prerender_range: 0, // Disable PDF prerendering for thumbnails since we only need the first page
+		..config.clone()
+	};
+
 	if let Some((content_type, bytes)) = generated_thumb {
 		Ok((content_type, bytes))
 	} else {
-		Ok(get_page_async(path, 1, config).await?)
+		Ok(get_page_async(path, 1, &adjusted_config).await?)
 	}
 }
 

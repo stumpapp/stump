@@ -1,14 +1,9 @@
 import { Zoomable, ZoomableRef } from '@likashefqet/react-native-image-zoom'
+import { FlashList, useMappingHelper } from '@shopify/flash-list'
 import { ReadingDirection, ReadingMode } from '@stump/graphql'
 import { STUMP_SAVE_BASIC_SESSION_HEADER } from '@stump/sdk/constants'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import {
-	FlatList,
-	NativeScrollEvent,
-	NativeSyntheticEvent,
-	useWindowDimensions,
-	View,
-} from 'react-native'
+import { NativeScrollEvent, NativeSyntheticEvent, useWindowDimensions, View } from 'react-native'
 import {
 	GestureStateChangeEvent,
 	State,
@@ -38,9 +33,6 @@ type ImageDimension = {
 // TODO: Account for the image scaling settings
 // TODO: Support vertical
 
-// TODO(perf): Use a FlashList instead. I encountered LOTS of issues trying to get it to work, but
-// it boasts a lot of performance improvements over the FlatList. Or potentially https://github.com/LegendApp/legend-list ?
-
 type Props = {
 	/**
 	 * The initial page to start the reader on
@@ -59,7 +51,7 @@ export default function ImageBasedReader({ initialPage, onPastEndReached }: Prop
 		onPageChanged,
 		pageSets,
 		currentPage,
-		flatListRef,
+		flashListRef,
 		serverId,
 	} = useImageBasedReader()
 	const {
@@ -80,7 +72,7 @@ export default function ImageBasedReader({ initialPage, onPastEndReached }: Prop
 			if (deviceOrientationChanged || doublePageBehaviorChanged) {
 				const scrollTo = pageSets.findIndex((set) => set.includes(currentPage - 1))
 				if (scrollTo === -1) return
-				flatListRef?.current?.scrollToIndex({ index: scrollTo, animated: false })
+				flashListRef?.current?.scrollToIndex({ index: scrollTo, animated: false })
 			}
 		},
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -115,7 +107,7 @@ export default function ImageBasedReader({ initialPage, onPastEndReached }: Prop
 
 		const targetContentOffset = event.nativeEvent.targetContentOffset || contentOffset
 
-		// inverted prop on FlatList accounts for RTL already
+		// invertion transform accounts for RTL already
 		const isPastEnd = contentOffset.x + layoutMeasurement.width > contentSize.width
 		const isTargetPastEnd = targetContentOffset.x + layoutMeasurement.width > contentSize.width
 
@@ -125,71 +117,58 @@ export default function ImageBasedReader({ initialPage, onPastEndReached }: Prop
 		}
 	}, [])
 
+	const isRtl = readingDirection === ReadingDirection.Rtl
 	return (
-		<FlatList
-			ref={flatListRef}
-			data={pageSets}
-			inverted={
-				readingDirection === ReadingDirection.Rtl && readingMode !== ReadingMode.ContinuousVertical
-			}
-			renderItem={({ item, index }) => (
-				<Page
-					deviceOrientation={deviceOrientation}
-					index={index}
-					indexes={item as [number, number]}
-					sizes={item.map((i: number) => imageSizes[i]).filter(Boolean)}
-					maxWidth={width}
-					maxHeight={height}
-					readingDirection="horizontal"
-					onPastEndReached={onPastEndReached}
-				/>
-			)}
-			keyExtractor={(item) => item.toString()}
-			horizontal={
-				readingMode === ReadingMode.Paged || readingMode === ReadingMode.ContinuousHorizontal
-			}
-			pagingEnabled={readingMode === ReadingMode.Paged}
-			onViewableItemsChanged={({ viewableItems }) => {
-				const firstVisibleItem = viewableItems.filter(({ isViewable }) => isViewable).at(0)
-				if (!firstVisibleItem) return
-
-				const { item } = firstVisibleItem
-				const page = item.at(-1) + 1
-
-				if (firstVisibleItem) {
-					handlePageChanged(page)
+		<View style={isRtl && { transform: [{ scaleX: -1 }] }}>
+			<FlashList
+				style={[isRtl && { transform: [{ scaleX: -1 }] }]}
+				ref={flashListRef}
+				data={pageSets}
+				keyExtractor={(item) => item.toString()}
+				renderItem={({ item, index }) => (
+					<PageSet
+						deviceOrientation={deviceOrientation}
+						index={index}
+						indexes={item as [number, number]}
+						sizes={item.map((i: number) => imageSizes[i]).filter(Boolean)}
+						maxWidth={width}
+						maxHeight={height}
+						readingDirection="horizontal"
+						onPastEndReached={onPastEndReached}
+					/>
+				)}
+				getItemType={(item) => {
+					if (item.length === 2) return 'double'
+					else if ((imageSizes?.[item[0]]?.ratio || 0) >= 1) return 'landscape'
+					else return 'single'
+				}}
+				horizontal={
+					readingMode === ReadingMode.Paged || readingMode === ReadingMode.ContinuousHorizontal
 				}
-			}}
-			initialNumToRender={3}
-			maxToRenderPerBatch={3}
-			windowSize={3}
-			initialScrollIndex={pageSets.findIndex((set) => set.includes(initialPage - 1)) || 0}
-			// https://stackoverflow.com/questions/53059609/flat-list-scrolltoindex-should-be-used-in-conjunction-with-getitemlayout-or-on
-			onScrollToIndexFailed={(info) => {
-				console.error("Couldn't scroll to index", info)
-				const wait = new Promise((resolve) => setTimeout(resolve, 500))
-				wait.then(() => {
-					flatListRef.current?.scrollToIndex({ index: info.index, animated: true })
-				})
-			}}
-			viewabilityConfig={{
-				itemVisiblePercentThreshold: 100,
-			}}
-			// Note: We need to define an explicit layout so the initial scroll index works
-			// TODO: likely won't work for vertical scrolling
-			getItemLayout={(_, index) => ({
-				length: width,
-				offset: width * index,
-				index,
-			})}
-			showsVerticalScrollIndicator={false}
-			showsHorizontalScrollIndicator={false}
-			onScroll={handleScroll}
-		/>
+				pagingEnabled={readingMode === ReadingMode.Paged}
+				drawDistance={width}
+				viewabilityConfig={{ viewAreaCoveragePercentThreshold: 20 }}
+				onViewableItemsChanged={({ viewableItems }) => {
+					const firstVisibleItem = viewableItems.filter(({ isViewable }) => isViewable).at(0)
+					if (!firstVisibleItem) return
+
+					const { item } = firstVisibleItem
+					const page = item[item.length - 1] + 1
+
+					if (firstVisibleItem) {
+						handlePageChanged(page)
+					}
+				}}
+				initialScrollIndex={pageSets.findIndex((set) => set.includes(initialPage - 1)) || 0}
+				showsVerticalScrollIndicator={false}
+				showsHorizontalScrollIndicator={false}
+				onScroll={handleScroll}
+			/>
+		</View>
 	)
 }
 
-type PageProps = {
+type PageSetProps = {
 	deviceOrientation: string
 	index: number
 	indexes: [number, number]
@@ -200,7 +179,7 @@ type PageProps = {
 	onPastEndReached?: () => void
 }
 
-const Page = React.memo(
+const PageSet = React.memo(
 	({
 		// deviceOrientation,
 		index,
@@ -210,13 +189,14 @@ const Page = React.memo(
 		maxHeight,
 		onPastEndReached,
 		// readingDirection,
-	}: PageProps) => {
-		const { book, pageURL, flatListRef, pageSets, setImageSizes, requestHeaders, serverId } =
+	}: PageSetProps) => {
+		const { book, pageURL, flashListRef, pageSets, setImageSizes, requestHeaders, serverId } =
 			useImageBasedReader()
 		const {
 			preferences: { tapSidesToNavigate, readingDirection, allowDownscaling },
 		} = useBookPreferences({ book, serverId })
 		const { isTablet } = useDisplay()
+		const { getMappingKey } = useMappingHelper()
 
 		const scale = useSharedValue(1)
 		const showControls = useReaderStore((state) => state.showControls)
@@ -237,7 +217,7 @@ const Page = React.memo(
 
 				const nextIndex = index + modifier
 				if (nextIndex >= 0 && nextIndex < pageSets.length) {
-					flatListRef.current?.scrollToIndex({ index: nextIndex, animated: true })
+					flashListRef.current?.scrollToIndex({ index: nextIndex, animated: true })
 				}
 
 				if (nextIndex === pageSets.length) onPastEndReached?.()
@@ -247,7 +227,7 @@ const Page = React.memo(
 			[
 				maxWidth,
 				index,
-				flatListRef,
+				flashListRef,
 				tapThresholdRatio,
 				readingDirection,
 				pageSets,
@@ -297,59 +277,61 @@ const Page = React.memo(
 		const [imageRatio, setImageRatio] = useState<number | undefined>(undefined)
 		const roughPageRenderWidth = indexes.length > 1 ? maxWidth / 2 : maxWidth
 
-		const directionRespectingIndexes =
-			readingDirection === ReadingDirection.Rtl ? [...indexes].reverse() : indexes
+		const isRtl = readingDirection === ReadingDirection.Rtl
+		const directionRespectingIndexes = isRtl ? [...indexes].reverse() : indexes
 
 		return (
-			<Zoomable
-				ref={zoomableRef}
-				minScale={1}
-				maxScale={5}
-				scale={scale}
-				doubleTapScale={2.5}
-				isSingleTapEnabled={true}
-				isDoubleTapEnabled={true}
-				onSingleTap={onSingleTap}
-				onDoubleTap={(zoomType) => {
-					if (zoomType === 'ZOOM_OUT') {
-						setTimeout(() => {
-							zoomableRef.current?.reset()
-						}, 0)
-					}
-				}}
-			>
-				<View
-					className={cn('relative flex-row items-center justify-center', {
-						'mx-auto gap-0': indexes.length > 1,
-					})}
-					style={{ height: maxHeight, width: maxWidth }}
+			<View style={isRtl && { transform: [{ scaleX: -1 }] }}>
+				<Zoomable
+					ref={zoomableRef}
+					minScale={1}
+					maxScale={5}
+					scale={scale}
+					doubleTapScale={2.5}
+					isSingleTapEnabled={true}
+					isDoubleTapEnabled={true}
+					onSingleTap={onSingleTap}
+					onDoubleTap={(zoomType) => {
+						if (zoomType === 'ZOOM_OUT') {
+							setTimeout(() => {
+								zoomableRef.current?.reset()
+							}, 0)
+						}
+					}}
 				>
-					{directionRespectingIndexes.map((pageIdx, i) => {
-						return (
-							<TurboImage
-								key={`${pageIdx}-${i}`}
-								source={{
-									uri: pageURL(pageIdx + 1),
-									headers: {
-										...requestHeaders?.(),
-										[STUMP_SAVE_BASIC_SESSION_HEADER]: 'false',
-									},
-								}}
-								style={{
-									height: '100%',
-									maxWidth: indexes.length > 1 ? '50%' : '100%',
-									aspectRatio: imageRatio,
-								}}
-								indicator={{ color: 'transparent' }}
-								resizeMode="contain"
-								resize={allowDownscaling ? roughPageRenderWidth * 1.2 : undefined}
-								onSuccess={(event) => onImageLoaded(event, i)}
-							/>
-						)
-					})}
-				</View>
-			</Zoomable>
+					<View
+						className={cn('relative flex-row items-center justify-center', {
+							'mx-auto gap-0': indexes.length > 1,
+						})}
+						style={{ height: maxHeight, width: maxWidth }}
+					>
+						{directionRespectingIndexes.map((pageIdx, i) => {
+							return (
+								<TurboImage
+									key={getMappingKey(pageIdx, i)}
+									source={{
+										uri: pageURL(pageIdx + 1),
+										headers: {
+											...requestHeaders?.(),
+											[STUMP_SAVE_BASIC_SESSION_HEADER]: 'false',
+										},
+									}}
+									style={{
+										height: '100%',
+										maxWidth: indexes.length > 1 ? '50%' : '100%',
+										aspectRatio: imageRatio,
+									}}
+									indicator={{ color: 'transparent' }}
+									resizeMode="contain"
+									resize={allowDownscaling ? roughPageRenderWidth * 1.2 : undefined}
+									onSuccess={(event) => onImageLoaded(event, i)}
+								/>
+							)
+						})}
+					</View>
+				</Zoomable>
+			</View>
 		)
 	},
 )
-Page.displayName = 'Page'
+PageSet.displayName = 'PageSet'

@@ -1,8 +1,8 @@
+import { FlashListRef } from '@shopify/flash-list'
 import { ReadingMode } from '@stump/graphql'
 import { generatePageSets, ImageBasedBookPageRef } from '@stump/sdk'
 import { ComponentProps, useCallback, useMemo, useRef, useState } from 'react'
 import { View } from 'react-native'
-import { FlatList } from 'react-native-gesture-handler'
 
 import { useDisplay } from '~/lib/hooks'
 import { DEFAULT_BOOK_PREFERENCES, useBookPreferences } from '~/stores/reader'
@@ -14,7 +14,7 @@ import NextUpOverlay from './NextUpOverlay'
 
 type Props = Omit<
 	IImageBasedReaderContext,
-	'currentPage' | 'flatListRef' | 'setImageSizes' | 'pageSets' | 'imageSizes'
+	'currentPage' | 'flashListRef' | 'setImageSizes' | 'pageSets' | 'imageSizes'
 > &
 	ComponentProps<typeof ImageBasedReader> & {
 		nextInSeries?: NextInSeriesBookRef | null
@@ -90,8 +90,7 @@ export default function ImageBasedReaderContainer({
 		[incognito, onPageChanged],
 	)
 
-	const flatListRef = useRef<FlatList>(null)
-	// const flatListRef = useRef<FlashList<number>>(null)
+	const flashListRef = useRef<FlashListRef<number[]>>(null)
 
 	// TODO: prefetch, see https://github.com/candlefinance/faster-image/issues/73
 	// useEffect(
@@ -115,7 +114,7 @@ export default function ImageBasedReaderContainer({
 				imageSizes,
 				setImageSizes,
 				pageSets,
-				flatListRef,
+				flashListRef,
 			}}
 		>
 			<View className="fixed inset-0 flex-1 bg-black">

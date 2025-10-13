@@ -50,7 +50,7 @@ type Props = {
 
 export default function Header({ onShowGlobalSettings }: Props) {
 	const { height } = useDisplay()
-	const { book, currentPage, resetTimer, flatListRef, serverId } = useImageBasedReader()
+	const { book, resetTimer, serverId } = useImageBasedReader()
 	const {
 		preferences: { readingDirection, readingMode, trackElapsedTime },
 		setBookPreferences,
@@ -71,7 +71,7 @@ export default function Header({ onShowGlobalSettings }: Props) {
 
 	const animatedStyles = useAnimatedStyle(() => {
 		return {
-			top: insets.top + (Platform.OS === 'android' ? 12 : 0),
+			top: insets.top || 12,
 			left: insets.left,
 			right: insets.right,
 			transform: [{ translateY: translateY.value }],
@@ -83,8 +83,7 @@ export default function Header({ onShowGlobalSettings }: Props) {
 			readingDirection:
 				readingDirection === ReadingDirection.Ltr ? ReadingDirection.Rtl : ReadingDirection.Ltr,
 		})
-		flatListRef.current?.scrollToIndex({ index: (currentPage || 1) - 1, animated: false })
-	}, [currentPage, readingDirection, setBookPreferences, flatListRef])
+	}, [readingDirection, setBookPreferences])
 
 	const router = useRouter()
 

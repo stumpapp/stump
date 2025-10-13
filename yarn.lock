@@ -10688,11 +10688,6 @@ balanced-match@^1.0.0:
   resolved "https://registry.npmjs.org/balanced-match/-/balanced-match-1.0.2.tgz"
   integrity sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==
 
-base-64@^0.1.0:
-  version "0.1.0"
-  resolved "https://registry.npmjs.org/base-64/-/base-64-0.1.0.tgz"
-  integrity sha512-Y5gU45svrR5tI2Vt/X9GPd3L0HNIKzGu202EjxrXMpuc2V2CiKgemAbUUsqYmZJvPtCXoUKjNZwBJzsNScUbXA==
-
 base64-js@^1.2.3, base64-js@^1.3.1, base64-js@^1.5.1:
   version "1.5.1"
   resolved "https://registry.npmjs.org/base64-js/-/base64-js-1.5.1.tgz"
@@ -19313,7 +19308,7 @@ loose-envify@^1.0.0, loose-envify@^1.4.0:
   dependencies:
     js-tokens "^3.0.0 || ^4.0.0"
 
-lottie-react-native@~7.3.1:
+lottie-react-native@~7.3.4:
   version "7.3.4"
   resolved "https://registry.yarnpkg.com/lottie-react-native/-/lottie-react-native-7.3.4.tgz#774bc028e2b93dd88cd87ab84ac51a1c3e015cad"
   integrity sha512-XUh7eGFb7ID8JRdU6U4N4cYQeYmjtdQRvd8ZXJ6xrdSsn5gZD0c79ITOREPcwJg4YupBFHgyV1GXdAHQP+KYUQ==
@@ -23701,14 +23696,6 @@ react-native-edge-to-edge@^1.7.0:
   resolved "https://registry.yarnpkg.com/react-native-edge-to-edge/-/react-native-edge-to-edge-1.7.0.tgz#6999ee86febe920b9b4e730ec1f0eaf0c28f0003"
   integrity sha512-ERegbsq28yoMndn/Uq49i4h6aAhMvTEjOfkFh50yX9H/dMjjCr/Tix/es/9JcPRvC+q7VzCMWfxWDUb6Jrq1OQ==
 
-react-native-fs@^2.20.0:
-  version "2.20.0"
-  resolved "https://registry.npmjs.org/react-native-fs/-/react-native-fs-2.20.0.tgz"
-  integrity sha512-VkTBzs7fIDUiy/XajOSNk0XazFE9l+QlMAce7lGuebZcag5CnjszB+u4BdqzwaQOdcYb5wsJIsqq4kxInIRpJQ==
-  dependencies:
-    base-64 "^0.1.0"
-    utf8 "^3.0.0"
-
 react-native-gesture-handler@~2.28.0:
   version "2.28.0"
   resolved "https://registry.yarnpkg.com/react-native-gesture-handler/-/react-native-gesture-handler-2.28.0.tgz#07fb4f5eae72f810aac3019b060d26c1835bfd0c"
@@ -23857,10 +23844,10 @@ react-native-webview@13.15.0:
     escape-string-regexp "^4.0.0"
     invariant "2.2.4"
 
-react-native-worklets@^0.6.0:
-  version "0.6.0"
-  resolved "https://registry.yarnpkg.com/react-native-worklets/-/react-native-worklets-0.6.0.tgz#bbbaf65715d15e3746ca32597a69e0e63690c069"
-  integrity sha512-yETMNuCcivdYWteuG4eRqgiAk2DzRCrVAaEBIEWPo4emrf3BNjadFo85L5QvyEusrX9QKE3ZEAx8U5A/nbyFgg==
+react-native-worklets@^0.6.1:
+  version "0.6.1"
+  resolved "https://registry.yarnpkg.com/react-native-worklets/-/react-native-worklets-0.6.1.tgz#daa56dea896c7bdcead064b675ef341ac1f41029"
+  integrity sha512-URca8l7c7Uog7gv4mcg9KILdJlnbvwdS5yfXQYf5TDkD2W1VY1sduEKrD+sA3lUPXH/TG1vmXAvNxCNwPMYgGg==
   dependencies:
     "@babel/plugin-transform-arrow-functions" "^7.0.0-0"
     "@babel/plugin-transform-class-properties" "^7.0.0-0"
@@ -27934,11 +27921,6 @@ use@^3.1.0:
   version "3.1.1"
   resolved "https://registry.npmjs.org/use/-/use-3.1.1.tgz"
   integrity sha512-cwESVXlO3url9YWlFW/TA9cshCEhtu7IKJ/p5soJ/gGpj7vbvFrAY/eIioQ6Dw23KjZhYgiIo8HOs1nQ2vr/oQ==
-
-utf8@^3.0.0:
-  version "3.0.0"
-  resolved "https://registry.npmjs.org/utf8/-/utf8-3.0.0.tgz"
-  integrity sha512-E8VjFIQ/TyQgp+TZfS6l8yp/xWppSAHzidGiRrqe4bK4XP9pTRyKFgGJpO3SN7zdX4DeomTrwaseCHovfpFcqQ==
 
 utif@^2.0.1:
   version "2.0.1"

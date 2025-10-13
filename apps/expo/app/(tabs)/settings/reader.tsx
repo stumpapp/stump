@@ -3,13 +3,8 @@ import { ScrollView } from 'react-native-gesture-handler'
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { ReaderSettings } from '~/components/book/reader/settings'
-import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
 
 export default function Screen() {
-	useDynamicHeader({
-		title: 'Reader Settings',
-	})
-
 	const insets = useSafeAreaInsets()
 
 	return (

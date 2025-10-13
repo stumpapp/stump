@@ -11,22 +11,14 @@ export default function Screen() {
 	return (
 		<Stack
 			screenOptions={{
-				headerShown: false,
+				title: 'Servers',
+				headerShown: Platform.OS === 'ios',
+				headerTransparent: Platform.OS === 'ios',
+				headerLargeTitle: true,
+				headerBlurEffect: IS_IOS_24_PLUS ? undefined : 'regular',
 				animation: animationEnabled ? 'default' : 'none',
+				headerRight: Platform.OS === 'ios' ? () => <AddServerDialog /> : undefined,
 			}}
-		>
-			<Stack.Screen
-				name="index"
-				options={{
-					title: 'Servers',
-					headerShown: Platform.OS === 'ios',
-					headerTransparent: Platform.OS === 'ios',
-					headerLargeTitle: true,
-					headerBlurEffect: IS_IOS_24_PLUS ? undefined : 'regular',
-					animation: animationEnabled ? 'default' : 'none',
-					headerRight: Platform.OS === 'ios' ? () => <AddServerDialog /> : undefined,
-				}}
-			/>
-		</Stack>
+		/>
 	)
 }

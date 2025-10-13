@@ -18,7 +18,7 @@ import darkSplash from '~/assets/splash/dark.json'
 import lightSplash from '~/assets/splash/light.json'
 import { BottomSheet } from '~/components/ui/bottom-sheet'
 import { setAndroidNavigationBar } from '~/lib/android-navigation-bar'
-import { NAV_THEME } from '~/lib/constants'
+import { NAV_THEME, useColors } from '~/lib/constants'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { usePreferencesStore } from '~/stores'
 import { useHideStatusBar } from '~/stores/reader'
@@ -59,6 +59,8 @@ export default function RootLayout() {
 	const animation = React.useRef<LottieView>(null)
 	const shouldHideStatusBar = useHideStatusBar()
 	const hasMounted = React.useRef(false)
+
+	const colors = useColors()
 
 	const animationEnabled = usePreferencesStore((state) => !state.reduceAnimations)
 
@@ -113,6 +115,9 @@ export default function RootLayout() {
 							// }}
 							screenOptions={{
 								animation: animationEnabled ? 'default' : 'none',
+								contentStyle: {
+									backgroundColor: colors.background.DEFAULT,
+								},
 							}}
 						>
 							<Stack.Screen
@@ -130,28 +135,9 @@ export default function RootLayout() {
 									title: '',
 									animation: animationEnabled ? 'default' : 'none',
 									autoHideHomeIndicator: shouldHideStatusBar,
-								}}
-							/>
-							<Stack.Screen
-								name="server/[id]/(tabs)"
-								options={{
-									headerShown: false,
-									animation: animationEnabled ? 'default' : 'none',
-								}}
-							/>
-							<Stack.Screen
-								name="server/[id]/libraries/[id]"
-								options={{
-									headerShown: false,
-									animation: animationEnabled ? 'default' : 'none',
-								}}
-							/>
-
-							<Stack.Screen
-								name="server/[id]/books/[id]"
-								options={{
-									headerShown: false,
-									animation: animationEnabled ? 'default' : 'none',
+									contentStyle: {
+										backgroundColor: colors.background.DEFAULT,
+									},
 								}}
 							/>
 							<Stack.Screen

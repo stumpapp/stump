@@ -105,6 +105,11 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 						usesCleartextTraffic: true,
 						compileSdkVersion: 35,
 						targetSdkVersion: 35,
+						// Note: I've needed this since expo@^54.0.13
+						gradleProperties: {
+							'org.gradle.jvmargs':
+								'-Xmx4096m -XX:MaxMetaspaceSize=1024m -XX:+HeapDumpOnOutOfMemoryError',
+						},
 					},
 				},
 			],

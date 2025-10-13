@@ -7,6 +7,7 @@ import {
 	SeriesModelOrdering,
 	SeriesOrderBy,
 } from '@stump/graphql'
+import clone from 'lodash/cloneDeep'
 import { createContext, useContext } from 'react'
 import { create, useStore } from 'zustand'
 
@@ -22,10 +23,12 @@ export type IFilterStore<F, O> = {
 
 export function createFilterStore<F, O>(defaultFilter: F, defaultSort: O) {
 	return create<IFilterStore<F, O>>((set) => ({
-		filters: defaultFilter,
-		setFilters: (filters) => set({ filters }),
-		resetFilters: () => set({ filters: defaultFilter }),
-		sort: defaultSort,
+		filters: clone(defaultFilter),
+		setFilters: (filters) => set({ filters: clone(filters) }),
+		resetFilters: () => {
+			set({ filters: clone(defaultFilter) })
+		},
+		sort: clone(defaultSort),
 		setSort: (sort) => set({ sort }),
 		secondarySort: null,
 		setSecondarySort: (secondarySort) => set({ secondarySort }),

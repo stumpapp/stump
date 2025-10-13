@@ -1,13 +1,15 @@
 import { useGraphQL } from '@stump/client'
 import { graphql } from '@stump/graphql'
+import clone from 'lodash/cloneDeep'
 import setProperty from 'lodash/set'
-import { Fragment, useCallback, useMemo, useState } from 'react'
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Platform, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { match, P } from 'ts-pattern'
 
-import { FilterSheet } from '~/components/filter'
-import { Checkbox, Heading, Label, Text } from '~/components/ui'
+import { FilterHeaderButton, FilterSheet } from '~/components/filter'
+import { FilterSheetRef } from '~/components/filter/FilterSheet'
+import { Checkbox, Label, Text } from '~/components/ui'
 import { cn } from '~/lib/utils'
 import { useBookFilterStore } from '~/stores/filters'
 
@@ -25,9 +27,11 @@ export default function Series() {
 	const insets = useSafeAreaInsets()
 
 	const { seriesId } = useBookFilterHeaderContext()
-	const { data, isLoading } = useGraphQL(query, ['seriesMetadata', seriesId], { seriesId })
+	const { data, isPending } = useGraphQL(query, ['seriesMetadata', seriesId], { seriesId })
 
 	const seriesList = data?.mediaMetadataOverview?.series ?? []
+
+	const sheetRef = useRef<FilterSheetRef>(null)
 
 	const { filters, setFilters } = useBookFilterStore((store) => ({
 		filters: store.filters,
@@ -47,48 +51,74 @@ export default function Series() {
 			.otherwise(() => ({}) as Record<string, boolean>)
 	})
 
-	const onSelectSeries = useCallback(
-		(series: string, checked: boolean) => {
-			setSelectionState((prev) => ({
-				...prev,
-				[series]: checked,
-			}))
+	const onSelectSeries = useCallback((series: string, checked: boolean) => {
+		setSelectionState((prev) => ({
+			...prev,
+			[series]: checked,
+		}))
+	}, [])
 
-			const adjusted = match(seriesFilter)
-				.with(P.array(P.string), (likeAnyOf) =>
-					checked ? [...(likeAnyOf || []), series] : likeAnyOf.filter((g) => g !== series),
-				)
-				.otherwise(() => (checked ? [series] : ([] as string[])))
+	const onSubmitChanges = useCallback(() => {
+		const selectedSeries = Object.entries(selectionState)
+			.filter(([, isSelected]) => isSelected)
+			.map(([series]) => series)
 
-			if (adjusted.length) {
-				const adjustedFilters = setProperty(filters, `metadata.series.likeAnyOf`, adjusted)
-				setFilters(adjustedFilters)
-			} else {
-				const adjustedFilters = setProperty(filters, `metadata.series`, undefined)
-				setFilters(adjustedFilters)
-			}
-		},
-		[filters, setFilters, seriesFilter],
-	)
+		sheetRef.current?.close()
+
+		if (selectedSeries.length) {
+			const adjustedFilters = setProperty(
+				clone(filters),
+				`metadata.series.likeAnyOf`,
+				selectedSeries,
+			)
+			setFilters(adjustedFilters)
+		} else {
+			const adjustedFilters = setProperty(clone(filters), `metadata.series`, undefined)
+			setFilters(adjustedFilters)
+		}
+	}, [filters, setFilters, selectionState])
 
 	const isActive =
 		!!filters.metadata?.series?.likeAnyOf && filters.metadata.series.likeAnyOf.length > 0
 
-	if (isLoading) return null
+	useEffect(() => {
+		// Sync local selection state with global filters (in case of external changes, e.g. clear filters)
+		const newState = match(seriesFilter)
+			.with(P.array(P.string), (likeAnyOf) =>
+				likeAnyOf.reduce(
+					(acc, series) => ({ ...acc, [series]: true }),
+					{} as Record<string, boolean>,
+				),
+			)
+			.otherwise(() => ({}) as Record<string, boolean>)
+		setSelectionState(newState)
+	}, [seriesFilter])
+
+	if (isPending) return null
 
 	return (
-		<FilterSheet label="Series" isActive={isActive}>
+		<FilterSheet
+			ref={sheetRef}
+			label="Series"
+			isActive={isActive}
+			header={
+				<View className="flex flex-row items-center justify-between">
+					<FilterHeaderButton icon="x" onPress={() => sheetRef.current?.close()} />
+
+					<Text size="lg" className="font-medium tracking-wide text-foreground-subtle">
+						Series
+					</Text>
+
+					<FilterHeaderButton icon="check" variant="prominent" onPress={onSubmitChanges} />
+				</View>
+			}
+		>
 			<View
 				className="gap-8"
 				style={{
 					paddingBottom: Platform.OS === 'android' ? 32 : insets.bottom,
 				}}
 			>
-				<View>
-					<Heading size="xl">Series</Heading>
-					<Text className="text-foreground-muted">Filter by series</Text>
-				</View>
-
 				<View className="gap-3">
 					<Text>Available Series</Text>
 

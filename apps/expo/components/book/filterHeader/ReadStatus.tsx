@@ -1,11 +1,12 @@
 import { ReadingStatus } from '@stump/graphql'
-import { Fragment, useCallback, useMemo, useState } from 'react'
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Platform, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { match, P } from 'ts-pattern'
 
-import { FilterSheet } from '~/components/filter'
-import { Checkbox, Heading, Label, Text } from '~/components/ui'
+import { FilterHeaderButton, FilterSheet } from '~/components/filter'
+import { FilterSheetRef } from '~/components/filter/FilterSheet'
+import { Checkbox, Label, Text } from '~/components/ui'
 import { cn } from '~/lib/utils'
 import { useBookFilterStore } from '~/stores/filters'
 
@@ -19,6 +20,8 @@ const LABELS: Record<(typeof STATUSES)[number], string> = {
 
 export default function ReadStatus() {
 	const insets = useSafeAreaInsets()
+
+	const sheetRef = useRef<FilterSheetRef>(null)
 
 	const { filters, setFilters } = useBookFilterStore((store) => ({
 		filters: store.filters,
@@ -38,49 +41,71 @@ export default function ReadStatus() {
 			.otherwise(() => ({}) as Record<string, boolean>)
 	})
 
-	const onSelectStatus = useCallback(
-		(status: string, checked: boolean) => {
-			setSelectionState((prev) => ({
-				...prev,
-				[status]: checked,
-			}))
+	const onSelectStatus = useCallback((status: string, checked: boolean) => {
+		setSelectionState((prev) => ({
+			...prev,
+			[status]: checked,
+		}))
+	}, [])
 
-			const adjusted = match(statusFilter)
-				.with(P.array(P.string), (isAnyOf) =>
-					checked ? [...(isAnyOf || []), status] : isAnyOf.filter((g) => g !== status),
-				)
-				.otherwise(() => (checked ? [status] : ([] as string[])))
+	const onSubmitChanges = useCallback(() => {
+		const selectedStatuses = Object.entries(selectionState)
+			.filter(([, isSelected]) => isSelected)
+			.map(([status]) => status)
 
-			if (adjusted.length) {
-				setFilters({
-					...filters,
-					readingStatus: { isAnyOf: adjusted as ReadingStatus[] },
-				})
-			} else {
-				setFilters({
-					...filters,
-					readingStatus: undefined,
-				})
-			}
-		},
-		[filters, setFilters, statusFilter],
-	)
+		sheetRef.current?.close()
+
+		if (selectedStatuses.length) {
+			setFilters({
+				...filters,
+				readingStatus: { isAnyOf: selectedStatuses as ReadingStatus[] },
+			})
+		} else {
+			setFilters({
+				...filters,
+				readingStatus: undefined,
+			})
+		}
+	}, [filters, setFilters, selectionState])
 
 	const isActive = !!filters.readingStatus?.isAnyOf && filters.readingStatus.isAnyOf.length > 0
 
+	useEffect(() => {
+		// Sync local selection state with global filters (in case of external changes, e.g. clear filters)
+		const newState = match(statusFilter)
+			.with(P.array(P.string), (isAnyOf) =>
+				isAnyOf.reduce(
+					(acc, status) => ({ ...acc, [status]: true }),
+					{} as Record<string, boolean>,
+				),
+			)
+			.otherwise(() => ({}) as Record<string, boolean>)
+		setSelectionState(newState)
+	}, [statusFilter])
+
 	return (
-		<FilterSheet label="Status" isActive={isActive}>
+		<FilterSheet
+			ref={sheetRef}
+			label="Status"
+			isActive={isActive}
+			header={
+				<View className="flex flex-row items-center justify-between">
+					<FilterHeaderButton icon="x" onPress={() => sheetRef.current?.close()} />
+
+					<Text size="lg" className="font-medium tracking-wide text-foreground-subtle">
+						Read Status
+					</Text>
+
+					<FilterHeaderButton icon="check" variant="prominent" onPress={onSubmitChanges} />
+				</View>
+			}
+		>
 			<View
 				className="gap-8"
 				style={{
 					paddingBottom: Platform.OS === 'android' ? 32 : insets.bottom,
 				}}
 			>
-				<View>
-					<Heading size="xl">Read Status</Heading>
-					<Text className="text-foreground-muted">Filter by read status</Text>
-				</View>
-
 				<View className="gap-3">
 					<Text>Available Read Status</Text>
 

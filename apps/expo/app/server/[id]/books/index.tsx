@@ -8,10 +8,11 @@ import { useStore } from 'zustand'
 
 import { useActiveServer } from '~/components/activeServer'
 import { BookGridItem } from '~/components/book'
-import { IBookGridItemFragment } from '~/components/book/BookGridItem'
 import { BookFilterHeader } from '~/components/book/filterHeader'
 import { useGridItemSize } from '~/components/grid/useGridItemSize'
+import ListEmpty from '~/components/ListEmpty'
 import RefreshControl from '~/components/RefreshControl'
+import { Button, Text } from '~/components/ui'
 import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
 import { BookFilterContext, createBookFilterStore } from '~/stores/filters'
 
@@ -47,9 +48,10 @@ export default function Screen() {
 
 	const store = useRef(createBookFilterStore()).current
 
-	const { filters, sort } = useStore(store, (state) => ({
+	const { filters, sort, resetFilters } = useStore(store, (state) => ({
 		filters: state.filters,
 		sort: state.sort,
+		resetFilters: state.resetFilters,
 	}))
 
 	const { data, hasNextPage, fetchNextPage, refetch, isRefetching } = useInfiniteSuspenseGraphQL(
@@ -64,6 +66,8 @@ export default function Screen() {
 			fetchNextPage()
 		}
 	}, [hasNextPage, fetchNextPage])
+
+	const isFiltered = Object.keys(filters).length > 0
 
 	return (
 		<BookFilterContext.Provider value={store}>
@@ -89,6 +93,23 @@ export default function Screen() {
 					)}
 					ListHeaderComponentStyle={{ paddingBottom: 16, marginHorizontal: -paddingHorizontal }}
 					refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
+					ListEmptyComponent={
+						<ListEmpty
+							message={isFiltered ? 'No books found matching your filters' : 'No books returned'}
+							actions={
+								<>
+									{isFiltered && (
+										<Button variant="secondary" onPress={() => resetFilters()}>
+											<Text>Clear Filters</Text>
+										</Button>
+									)}
+									<Button onPress={() => refetch()}>
+										<Text>Refresh</Text>
+									</Button>
+								</>
+							}
+						/>
+					}
 				/>
 			</SafeAreaView>
 		</BookFilterContext.Provider>

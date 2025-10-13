@@ -13,6 +13,7 @@ import RefreshControl from '~/components/RefreshControl'
 import { SeriesGridItem } from '~/components/series'
 import { SeriesFilterHeader } from '~/components/series/filterHeader'
 import { ISeriesGridItemFragment } from '~/components/series/SeriesGridItem'
+import { Button, Text } from '~/components/ui'
 import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
 import { createSeriesFilterStore, SeriesFilterContext } from '~/stores/filters'
 
@@ -48,9 +49,10 @@ export default function Screen() {
 
 	const store = useRef(createSeriesFilterStore()).current
 
-	const { filters, sort } = useStore(store, (state) => ({
+	const { filters, sort, resetFilters } = useStore(store, (state) => ({
 		filters: state.filters,
 		sort: state.sort,
+		resetFilters: state.resetFilters,
 	}))
 
 	const { data, hasNextPage, fetchNextPage, refetch, isRefetching } = useInfiniteSuspenseGraphQL(
@@ -91,10 +93,18 @@ export default function Screen() {
 					refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
 					ListEmptyComponent={
 						<ListEmpty
-							message={
-								isFiltered
-									? 'No series found matching your filters'
-									: 'No series returned. Have you created a library?'
+							message={isFiltered ? 'No series found matching your filters' : 'No series returned'}
+							actions={
+								<>
+									{isFiltered && (
+										<Button variant="secondary" onPress={() => resetFilters()}>
+											<Text>Clear Filters</Text>
+										</Button>
+									)}
+									<Button onPress={() => refetch()}>
+										<Text>Refresh</Text>
+									</Button>
+								</>
 							}
 						/>
 					}

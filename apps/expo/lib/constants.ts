@@ -84,6 +84,10 @@ const light = {
 		active: '#414347',
 		inactive: '#d3d5d7',
 	},
+	header: {
+		start: 'hsla(0, 0%, 100%, 0.6)',
+		end: 'hsla(0, 0%, 100%, 0)',
+	},
 }
 
 type Theme = typeof light
@@ -155,6 +159,10 @@ const dark: Theme = {
 	dots: {
 		active: '#f5f3ef',
 		inactive: '#898d94',
+	},
+	header: {
+		start: 'hsla(0, 0%, 0%, 0.8)',
+		end: 'hsla(0, 0%, 0%, 0)',
 	},
 }
 

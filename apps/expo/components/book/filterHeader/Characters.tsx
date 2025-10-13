@@ -1,13 +1,15 @@
 import { useGraphQL } from '@stump/client'
 import { graphql } from '@stump/graphql'
+import clone from 'lodash/cloneDeep'
 import setProperty from 'lodash/set'
-import { Fragment, useCallback, useMemo, useState } from 'react'
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Platform, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { match, P } from 'ts-pattern'
 
-import { FilterSheet } from '~/components/filter'
-import { Checkbox, Heading, Label, Text } from '~/components/ui'
+import { FilterHeaderButton, FilterSheet } from '~/components/filter'
+import { FilterSheetRef } from '~/components/filter/FilterSheet'
+import { Checkbox, Label, Text } from '~/components/ui'
 import { cn } from '~/lib/utils'
 import { useBookFilterStore } from '~/stores/filters'
 
@@ -25,18 +27,23 @@ export default function Characters() {
 	const insets = useSafeAreaInsets()
 
 	const { seriesId } = useBookFilterHeaderContext()
-	const { data, isLoading } = useGraphQL(query, ['characters', seriesId], { seriesId })
+	const { data, isPending } = useGraphQL(query, ['characters', seriesId], { seriesId })
 
 	const characters = data?.mediaMetadataOverview?.characters ?? []
+
+	const sheetRef = useRef<FilterSheetRef>(null)
 
 	const { filters, setFilters } = useBookFilterStore((store) => ({
 		filters: store.filters,
 		setFilters: store.setFilters,
 	}))
 
-	const characterFilter = useMemo(() => filters.metadata?.characters?.likeAnyOf, [filters])
+	const characterFilter = useMemo(
+		() => filters.metadata?.characters?.likeAnyOf,
+		[filters.metadata?.characters?.likeAnyOf],
+	)
 
-	const initialSelectionState = useMemo(() => {
+	const [selectionState, setSelectionState] = useState(() => {
 		return match(characterFilter)
 			.with(P.array(P.string), (likeAnyOf) =>
 				likeAnyOf.reduce(
@@ -45,52 +52,76 @@ export default function Characters() {
 				),
 			)
 			.otherwise(() => ({}) as Record<string, boolean>)
-	}, [characterFilter])
+	})
 
-	const [selectionState, setSelectionState] = useState(initialSelectionState)
+	const onSelectCharacter = useCallback((character: string, checked: boolean) => {
+		setSelectionState((prev) => ({
+			...prev,
+			[character]: checked,
+		}))
+	}, [])
 
-	const onSelectCharacter = useCallback(
-		(character: string, checked: boolean) => {
-			setSelectionState((prev) => ({
-				...prev,
-				[character]: checked,
-			}))
+	const onSubmitChanges = useCallback(() => {
+		const selectedCharacters = Object.entries(selectionState)
+			.filter(([, isSelected]) => isSelected)
+			.map(([character]) => character)
 
-			const adjusted = match(characterFilter)
-				.with(P.array(P.string), (likeAnyOf) =>
-					checked ? [...(likeAnyOf || []), character] : likeAnyOf.filter((g) => g !== character),
-				)
-				.otherwise(() => (checked ? [character] : ([] as string[])))
+		sheetRef.current?.close()
 
-			if (adjusted.length) {
-				const adjustedFilters = setProperty(filters, `metadata.characters.likeAnyOf`, adjusted)
-				setFilters(adjustedFilters)
-			} else {
-				const adjustedFilters = setProperty(filters, `metadata.characters`, undefined)
-				setFilters(adjustedFilters)
-			}
-		},
-		[filters, setFilters, characterFilter],
-	)
+		if (selectedCharacters.length) {
+			const adjustedFilters = setProperty(
+				clone(filters),
+				`metadata.characters.likeAnyOf`,
+				selectedCharacters,
+			)
+			setFilters(adjustedFilters)
+		} else {
+			const adjustedFilters = setProperty(clone(filters), `metadata.characters`, undefined)
+			setFilters(adjustedFilters)
+		}
+	}, [filters, setFilters, selectionState])
 
 	const isActive =
 		!!filters.metadata?.characters?.likeAnyOf && filters.metadata.characters.likeAnyOf.length > 0
 
-	if (isLoading) return null
+	useEffect(() => {
+		// Sync local selection state with global filters (in case of external changes, e.g. clear filters)
+		const newState = match(characterFilter)
+			.with(P.array(P.string), (likeAnyOf) =>
+				likeAnyOf.reduce(
+					(acc, character) => ({ ...acc, [character]: true }),
+					{} as Record<string, boolean>,
+				),
+			)
+			.otherwise(() => ({}) as Record<string, boolean>)
+		setSelectionState(newState)
+	}, [characterFilter])
+
+	if (isPending) return null
 
 	return (
-		<FilterSheet label="Characters" isActive={isActive}>
+		<FilterSheet
+			ref={sheetRef}
+			label="Characters"
+			isActive={isActive}
+			header={
+				<View className="flex flex-row items-center justify-between">
+					<FilterHeaderButton icon="x" onPress={() => sheetRef.current?.close()} />
+
+					<Text size="lg" className="font-medium tracking-wide text-foreground-subtle">
+						Characters
+					</Text>
+
+					<FilterHeaderButton icon="check" variant="prominent" onPress={onSubmitChanges} />
+				</View>
+			}
+		>
 			<View
 				className="gap-8"
 				style={{
 					paddingBottom: Platform.OS === 'android' ? 32 : insets.bottom,
 				}}
 			>
-				<View>
-					<Heading size="xl">Characters</Heading>
-					<Text className="text-foreground-muted">Filter by characters</Text>
-				</View>
-
 				<View className="gap-3">
 					<Text>Available Characters</Text>
 

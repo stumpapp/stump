@@ -160,7 +160,6 @@ export default function BookMenu({ data }: Props) {
 								alignItems: 'center',
 							}}
 						>
-							{/* <Ionicons name="filter" size={25} color="label" style={styles.rightIcon} /> */}
 							<Ellipsis size={24} className="text-foreground" />
 						</View>
 					</ContextMenu.Trigger>

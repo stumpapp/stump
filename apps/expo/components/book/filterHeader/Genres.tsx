@@ -1,13 +1,15 @@
 import { useGraphQL } from '@stump/client'
 import { graphql } from '@stump/graphql'
+import clone from 'lodash/cloneDeep'
 import setProperty from 'lodash/set'
-import { Fragment, useCallback, useMemo, useState } from 'react'
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Platform, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { match, P } from 'ts-pattern'
 
-import { FilterSheet } from '~/components/filter'
-import { Checkbox, Heading, Label, Text } from '~/components/ui'
+import { FilterHeaderButton, FilterSheet } from '~/components/filter'
+import { FilterSheetRef } from '~/components/filter/FilterSheet'
+import { Checkbox, Label, Text } from '~/components/ui'
 import { cn } from '~/lib/utils'
 import { useBookFilterStore } from '~/stores/filters'
 
@@ -25,15 +27,11 @@ export default function Genres() {
 	const insets = useSafeAreaInsets()
 
 	const { seriesId } = useBookFilterHeaderContext()
-	const {
-		// data: {
-		// 	mediaMetadataOverview: { genres },
-		// },
-		data,
-		isLoading,
-	} = useGraphQL(query, ['genres', seriesId], { seriesId })
+	const { data, isPending } = useGraphQL(query, ['genres', seriesId], { seriesId })
 
 	const genres = data?.mediaMetadataOverview?.genres ?? []
+
+	const sheetRef = useRef<FilterSheetRef>(null)
 
 	const { filters, setFilters } = useBookFilterStore((store) => ({
 		filters: store.filters,
@@ -53,48 +51,74 @@ export default function Genres() {
 			.otherwise(() => ({}) as Record<string, boolean>)
 	})
 
-	const onSelectGenre = useCallback(
-		(genre: string, checked: boolean) => {
-			setSelectionState((prev) => ({
-				...prev,
-				[genre]: checked,
-			}))
+	const onSelectGenre = useCallback((genre: string, checked: boolean) => {
+		setSelectionState((prev) => ({
+			...prev,
+			[genre]: checked,
+		}))
+	}, [])
 
-			const adjusted = match(genreFilter)
-				.with(P.array(P.string), (likeAnyOf) =>
-					checked ? [...(likeAnyOf || []), genre] : likeAnyOf.filter((g) => g !== genre),
-				)
-				.otherwise(() => (checked ? [genre] : ([] as string[])))
+	const onSubmitChanges = useCallback(() => {
+		const selectedGenres = Object.entries(selectionState)
+			.filter(([, isSelected]) => isSelected)
+			.map(([genre]) => genre)
 
-			if (adjusted.length) {
-				const adjustedFilters = setProperty(filters, `metadata.genres.likeAnyOf`, adjusted)
-				setFilters(adjustedFilters)
-			} else {
-				const adjustedFilters = setProperty(filters, `metadata.genres`, undefined)
-				setFilters(adjustedFilters)
-			}
-		},
-		[filters, setFilters, genreFilter],
-	)
+		sheetRef.current?.close()
+
+		if (selectedGenres.length) {
+			const adjustedFilters = setProperty(
+				clone(filters),
+				`metadata.genres.likeAnyOf`,
+				selectedGenres,
+			)
+			setFilters(adjustedFilters)
+		} else {
+			const adjustedFilters = setProperty(clone(filters), `metadata.genres`, undefined)
+			setFilters(adjustedFilters)
+		}
+	}, [filters, setFilters, selectionState])
 
 	const isActive =
 		!!filters.metadata?.genres?.likeAnyOf && filters.metadata.genres.likeAnyOf.length > 0
 
-	if (isLoading) return null
+	useEffect(() => {
+		// Sync local selection state with global filters (in case of external changes, e.g. clear filters)
+		const newState = match(genreFilter)
+			.with(P.array(P.string), (likeAnyOf) =>
+				likeAnyOf.reduce(
+					(acc, genre) => ({ ...acc, [genre]: true }),
+					{} as Record<string, boolean>,
+				),
+			)
+			.otherwise(() => ({}) as Record<string, boolean>)
+		setSelectionState(newState)
+	}, [genreFilter])
+
+	if (isPending) return null
 
 	return (
-		<FilterSheet label="Genres" isActive={isActive}>
+		<FilterSheet
+			ref={sheetRef}
+			label="Genres"
+			isActive={isActive}
+			header={
+				<View className="flex flex-row items-center justify-between">
+					<FilterHeaderButton icon="x" onPress={() => sheetRef.current?.close()} />
+
+					<Text size="lg" className="font-medium tracking-wide text-foreground-subtle">
+						Genres
+					</Text>
+
+					<FilterHeaderButton icon="check" variant="prominent" onPress={onSubmitChanges} />
+				</View>
+			}
+		>
 			<View
 				className="gap-8"
 				style={{
 					paddingBottom: Platform.OS === 'android' ? 32 : insets.bottom,
 				}}
 			>
-				<View>
-					<Heading size="xl">Genres</Heading>
-					<Text className="text-foreground-muted">Filter by genres</Text>
-				</View>
-
 				<View className="gap-3">
 					<Text>Available Genres</Text>
 

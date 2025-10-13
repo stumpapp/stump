@@ -1,13 +1,15 @@
 import { useGraphQL } from '@stump/client'
 import { graphql } from '@stump/graphql'
+import clone from 'lodash/cloneDeep'
 import setProperty from 'lodash/set'
-import { Fragment, useCallback, useMemo, useState } from 'react'
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Platform, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { match, P } from 'ts-pattern'
 
-import { FilterSheet } from '~/components/filter'
-import { Checkbox, Heading, Label, Text } from '~/components/ui'
+import { FilterHeaderButton, FilterSheet } from '~/components/filter'
+import { FilterSheetRef } from '~/components/filter/FilterSheet'
+import { Checkbox, Label, Text } from '~/components/ui'
 import { cn } from '~/lib/utils'
 import { useBookFilterStore } from '~/stores/filters'
 
@@ -25,9 +27,11 @@ export default function Writers() {
 	const insets = useSafeAreaInsets()
 
 	const { seriesId } = useBookFilterHeaderContext()
-	const { data, isLoading } = useGraphQL(query, ['writers', seriesId], { seriesId })
+	const { data, isPending } = useGraphQL(query, ['writers', seriesId], { seriesId })
 
 	const writers = data?.mediaMetadataOverview?.writers ?? []
+
+	const sheetRef = useRef<FilterSheetRef>(null)
 
 	const { filters, setFilters } = useBookFilterStore((store) => ({
 		filters: store.filters,
@@ -47,48 +51,74 @@ export default function Writers() {
 			.otherwise(() => ({}) as Record<string, boolean>)
 	})
 
-	const onSelectWriter = useCallback(
-		(writer: string, checked: boolean) => {
-			setSelectionState((prev) => ({
-				...prev,
-				[writer]: checked,
-			}))
+	const onSelectWriter = useCallback((writer: string, checked: boolean) => {
+		setSelectionState((prev) => ({
+			...prev,
+			[writer]: checked,
+		}))
+	}, [])
 
-			const adjusted = match(writerFilter)
-				.with(P.array(P.string), (likeAnyOf) =>
-					checked ? [...(likeAnyOf || []), writer] : likeAnyOf.filter((g) => g !== writer),
-				)
-				.otherwise(() => (checked ? [writer] : ([] as string[])))
+	const onSubmitChanges = useCallback(() => {
+		const selectedWriters = Object.entries(selectionState)
+			.filter(([, isSelected]) => isSelected)
+			.map(([writer]) => writer)
 
-			if (adjusted.length) {
-				const adjustedFilters = setProperty(filters, `metadata.writers.likeAnyOf`, adjusted)
-				setFilters(adjustedFilters)
-			} else {
-				const adjustedFilters = setProperty(filters, `metadata.writers`, undefined)
-				setFilters(adjustedFilters)
-			}
-		},
-		[filters, setFilters, writerFilter],
-	)
+		sheetRef.current?.close()
+
+		if (selectedWriters.length) {
+			const adjustedFilters = setProperty(
+				clone(filters),
+				`metadata.writers.likeAnyOf`,
+				selectedWriters,
+			)
+			setFilters(adjustedFilters)
+		} else {
+			const adjustedFilters = setProperty(clone(filters), `metadata.writers`, undefined)
+			setFilters(adjustedFilters)
+		}
+	}, [filters, setFilters, selectionState])
 
 	const isActive =
 		!!filters.metadata?.writers?.likeAnyOf && filters.metadata.writers.likeAnyOf.length > 0
 
-	if (isLoading) return null
+	useEffect(() => {
+		// Sync local selection state with global filters (in case of external changes, e.g. clear filters)
+		const newState = match(writerFilter)
+			.with(P.array(P.string), (likeAnyOf) =>
+				likeAnyOf.reduce(
+					(acc, writer) => ({ ...acc, [writer]: true }),
+					{} as Record<string, boolean>,
+				),
+			)
+			.otherwise(() => ({}) as Record<string, boolean>)
+		setSelectionState(newState)
+	}, [writerFilter])
+
+	if (isPending) return null
 
 	return (
-		<FilterSheet label="Writers" isActive={isActive}>
+		<FilterSheet
+			ref={sheetRef}
+			label="Writers"
+			isActive={isActive}
+			header={
+				<View className="flex flex-row items-center justify-between">
+					<FilterHeaderButton icon="x" onPress={() => sheetRef.current?.close()} />
+
+					<Text size="lg" className="font-medium tracking-wide text-foreground-subtle">
+						Writers
+					</Text>
+
+					<FilterHeaderButton icon="check" variant="prominent" onPress={onSubmitChanges} />
+				</View>
+			}
+		>
 			<View
 				className="gap-8"
 				style={{
 					paddingBottom: Platform.OS === 'android' ? 32 : insets.bottom,
 				}}
 			>
-				<View>
-					<Heading size="xl">Writers</Heading>
-					<Text className="text-foreground-muted">Filter by writers</Text>
-				</View>
-
 				<View className="gap-3">
 					<Text>Available Writers</Text>
 

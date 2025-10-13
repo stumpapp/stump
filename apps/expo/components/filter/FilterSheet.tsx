@@ -1,9 +1,9 @@
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
-import { useHeaderHeight } from '@react-navigation/elements'
 import { LucideIcon } from 'lucide-react-native'
-import { useCallback, useMemo, useRef, useState } from 'react'
-import { Platform, Pressable, View } from 'react-native'
-import { useSharedValue } from 'react-native-reanimated'
+import { forwardRef, useCallback, useImperativeHandle, useMemo, useRef, useState } from 'react'
+import { Pressable, View } from 'react-native'
+import LinearGradient from 'react-native-linear-gradient'
+import Animated, { useSharedValue } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { BottomSheet, icons, Text } from '~/components/ui'
@@ -11,7 +11,15 @@ import { useColors } from '~/lib/constants'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { cn } from '~/lib/utils'
 
+import { useAnimatedHeader, useResolvedHeaderHeight } from '../header/useAnimatedHeader'
+
 const { ListFilter } = icons
+
+export interface FilterSheetRef {
+	open: () => void
+	close: () => void
+	toggle: () => void
+}
 
 type Props = {
 	label: string
@@ -19,12 +27,17 @@ type Props = {
 	isActive?: boolean
 	snapPoints?: string[]
 	icon?: LucideIcon
+	header?: React.ReactNode
 }
 
-export default function FilterSheet({ label, children, isActive, snapPoints, icon }: Props) {
+const FilterSheet = forwardRef<FilterSheetRef, Props>(function FilterSheet(
+	{ label, children, isActive, snapPoints, icon, header },
+	forwardedRef,
+) {
 	const [isOpen, setIsOpen] = useState(false)
 
 	const ref = useRef<BottomSheetModal | null>(null)
+
 	const snaps = useMemo(() => snapPoints ?? ['100%'], [snapPoints])
 	const animatedIndex = useSharedValue<number>(0)
 	const animatedPosition = useSharedValue<number>(0)
@@ -52,14 +65,35 @@ export default function FilterSheet({ label, children, isActive, snapPoints, ico
 		[isOpen],
 	)
 
+	useImperativeHandle(
+		forwardedRef,
+		() => ({
+			open: () => {
+				ref.current?.present()
+				setIsOpen(true)
+			},
+			close: () => {
+				ref.current?.dismiss()
+				setIsOpen(false)
+			},
+			toggle: handlePresentModalPress,
+		}),
+		[handlePresentModalPress],
+	)
+
 	const insets = useSafeAreaInsets()
 	const colors = useColors()
-	const iosHeaderHeight = useHeaderHeight() // this is not getting the correct android height so
-	const androidHeaderHeight = insets.top + 56 // inset + default android header height
-	const headerHeight = Platform.OS === 'ios' ? iosHeaderHeight : androidHeaderHeight
+	const headerHeight = useResolvedHeaderHeight()
+
+	const {
+		scrollHandlerNonWorklet: scrollHandler,
+		headerStyle,
+		gradientColors,
+		gradientLocations,
+	} = useAnimatedHeader()
 
 	return (
-		<View className="flex flex-row">
+		<View className="relative flex flex-row">
 			<Pressable onPress={handlePresentModalPress}>
 				{({ pressed }) => (
 					<View
@@ -112,11 +146,50 @@ export default function FilterSheet({ label, children, isActive, snapPoints, ico
 					/>
 				)}
 			>
-				<BottomSheet.ScrollView className="flex-1 gap-4 p-6">
+				<BottomSheet.ScrollView
+					onScroll={scrollHandler}
+					scrollEventThrottle={16}
+					className="flex-1 p-6 pt-0"
+					stickyHeaderIndices={header ? [0] : undefined}
+				>
+					{header && (
+						<Animated.View
+							style={[headerStyle, { position: 'absolute', top: 0, zIndex: 10, width: '100%' }]}
+						>
+							<LinearGradient
+								colors={gradientColors}
+								locations={gradientLocations}
+								style={{
+									position: 'absolute',
+									width: '100%',
+									top: 0,
+									left: 0,
+									right: 0,
+									height:
+										insets.top * 2 +
+										headerHeight / 2 + // use a smaller header for this one
+										24, // extra 24 to cover padding
+									zIndex: 5,
+								}}
+								pointerEvents="none"
+							/>
+
+							<View
+								className="w-full"
+								style={{
+									zIndex: 10,
+								}}
+							>
+								{header}
+							</View>
+						</Animated.View>
+					)}
+
 					<View
 						className="w-full gap-4"
 						style={{
 							paddingBottom: insets.bottom,
+							marginTop: header ? headerHeight / 2 + 24 : 0,
 						}}
 					>
 						{children}
@@ -125,4 +198,6 @@ export default function FilterSheet({ label, children, isActive, snapPoints, ico
 			</BottomSheet.Modal>
 		</View>
 	)
-}
+})
+
+export default FilterSheet

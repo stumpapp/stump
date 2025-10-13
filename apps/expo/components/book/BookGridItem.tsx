@@ -1,8 +1,8 @@
 import { FragmentType, graphql, useFragment } from '@stump/graphql'
+import { View } from 'react-native'
 
 import { useActiveServer } from '../activeServer'
 import GridImageItem from '../grid/GridImageItem'
-import { View } from 'react-native'
 
 const fragment = graphql(`
 	fragment BookGridItem on Media {

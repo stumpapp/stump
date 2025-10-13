@@ -18,6 +18,8 @@ import Writers from './Writers'
 
 type Props = IBookFilterHeaderContext
 
+// FIXME: There seems to be a flicker when changing filters, might be suspense of parent?
+
 // Note: The FlashList header doesn't seem to like Suspense
 export default function BookFilterHeader(context: Props) {
 	const clear = useBookFilterStore((state) => state.resetFilters)

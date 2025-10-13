@@ -18,6 +18,7 @@ export default function ThemeSelect() {
 			<NativeSelect
 				value={theme}
 				options={[
+					{ label: t(`${localeKey}.options.system`), value: 'system' },
 					{ label: t(`${localeKey}.options.light`), value: 'light' },
 					{ label: t(`${localeKey}.options.dark`), value: 'dark' },
 					{ label: t(`${localeKey}.options.bronze`), value: 'bronze' },
@@ -28,12 +29,6 @@ export default function ThemeSelect() {
 				]}
 				onChange={(e) => changeTheme(e.target.value)}
 			/>
-			{/* <Text variant="muted" size="xs">
-				{t(`${localeKey}.description.0`)}{' '}
-				<Link href="https://stumpapp.dev/guides/configuration/theming">
-					{t(`${localeKey}.description.1`)}
-				</Link>
-			</Text> */}
 		</div>
 	)
 }

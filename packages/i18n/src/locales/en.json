@@ -1256,6 +1256,7 @@
 						"documentation"
 					],
 					"options": {
+						"system": "System",
 						"light": "Light",
 						"dark": "Dark",
 						"bronze": "Bronze light",

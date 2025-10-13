@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { useMediaMatch } from 'rooks'
 
 import { usePreferences } from './usePreferences'
 
@@ -10,16 +11,25 @@ export function useTheme() {
 		preferences: { appTheme, enableGradients },
 		update,
 	} = usePreferences()
+	const prefersDark = useMediaMatch('(prefers-color-scheme: dark)')
 
 	const changeTheme = (theme: string) =>
 		update({
 			appTheme: theme,
 		})
 
+	const darkThemes = useMemo(
+		() => [...DARK_THEMES, ...(prefersDark ? ['system'] : [])],
+		[prefersDark],
+	)
+
 	/**
 	 * Whether the current theme is a dark variant
 	 */
-	const isDarkVariant = useMemo(() => DARK_THEMES.includes(appTheme || 'light'), [appTheme])
+	const isDarkVariant = useMemo(
+		() => darkThemes.includes(appTheme || 'light'),
+		[appTheme, darkThemes],
+	)
 	/**
 	 * Whether the current theme supports gradients
 	 */

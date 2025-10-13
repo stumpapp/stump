@@ -4,10 +4,17 @@
 		<script>
 			try {
 				const zustandState = JSON.parse(
-					localStorage.get('stump-user-store') || '{"state": {}}',
+					localStorage.getItem('stump-user-store') || '{"state": {}}',
 				).state
-				if (zustandState.userPreferences && zustandState.userPreferences.app_theme === 'dark') {
-					document.querySelector('html').classList.add('dark')
+				let appTheme = (zustandState.userPreferences?.appTheme || '').toLowerCase()
+				if (appTheme === 'system') {
+					const prefersDark = window.matchMedia('(prefers-color-scheme: dark)')
+					appTheme = prefersDark.matches ? 'dark' : 'light'
+				}
+				const alreadyHasTheme =
+					!appTheme || document.querySelector('html').classList.contains(appTheme)
+				if (!alreadyHasTheme) {
+					document.querySelector('html').classList.add(appTheme)
 				}
 			} catch {}
 		</script>

@@ -9,7 +9,11 @@
 				const zustandState = JSON.parse(
 					localStorage.getItem('stump-user-store') || '{"state": {}}',
 				).state
-				const appTheme = zustandState.userPreferences?.app_theme || 'dark'
+				let appTheme = (zustandState.userPreferences?.appTheme || '').toLowerCase()
+				if (appTheme === 'system') {
+					const prefersDark = window.matchMedia('(prefers-color-scheme: dark)')
+					appTheme = prefersDark.matches ? 'dark' : 'light'
+				}
 				const alreadyHasTheme =
 					!appTheme || document.querySelector('html').classList.contains(appTheme)
 				if (!alreadyHasTheme) {

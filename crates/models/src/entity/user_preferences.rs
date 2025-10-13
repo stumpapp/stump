@@ -84,7 +84,7 @@ impl ActiveModelBehavior for ActiveModel {
 		if insert && self.id.is_not_set() {
 			self.preferred_layout_mode = ActiveValue::Set(InterfaceLayout::Grid);
 			self.locale = ActiveValue::Set("en".to_string());
-			self.app_theme = ActiveValue::Set("light".to_string());
+			self.app_theme = ActiveValue::Set("system".to_string());
 			self.app_font = ActiveValue::Set(SupportedFont::default());
 			self.primary_navigation_mode = ActiveValue::Set("SIDEBAR".to_string());
 			self.layout_max_width_px = ActiveValue::Set(Some(1280));

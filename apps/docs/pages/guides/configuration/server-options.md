@@ -151,6 +151,14 @@ Whether or not to enable the KoReader sync integration. This is a special integr
 | ------- | ------------- |
 | Boolean | `false`       |
 
+### ENABLE_OPDS_PROGRESSION
+
+Whether or not OPDS page access should automatically track reading progression. When disabled, accessing pages via OPDS won't update reading progress, which prevents inaccurate tracking when clients preload or cache multiple pages at once. This is particularly useful for OPDS clients that load more than one page at a time.
+
+| Type    | Default Value |
+| ------- | ------------- |
+| Boolean | `false`       |
+
 ### ENABLE_UPLOAD
 
 | Type    | Default Value |

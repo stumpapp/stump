@@ -28,6 +28,7 @@ pub mod env_keys {
 	pub const PDFIUM_KEY: &str = "PDFIUM_PATH";
 	pub const ENABLE_SWAGGER_KEY: &str = "ENABLE_SWAGGER_UI";
 	pub const ENABLE_KOREADER_SYNC_KEY: &str = "ENABLE_KOREADER_SYNC";
+	pub const ENABLE_OPDS_PROGRESSION_KEY: &str = "ENABLE_OPDS_PROGRESSION";
 	pub const HASH_COST_KEY: &str = "HASH_COST";
 	pub const SESSION_TTL_KEY: &str = "SESSION_TTL";
 	pub const SESSION_EXPIRY_INTERVAL_KEY: &str = "SESSION_EXPIRY_CLEANUP_INTERVAL";
@@ -149,6 +150,12 @@ pub struct StumpConfig {
 	#[default_value(false)]
 	#[env_key(ENABLE_KOREADER_SYNC_KEY)]
 	pub enable_koreader_sync: bool,
+
+	/// Indicates if OPDS page access should automatically track reading progression.
+	/// When disabled, clients loading/preloading pages won't trigger progress updates.
+	#[default_value(false)]
+	#[env_key(ENABLE_OPDS_PROGRESSION_KEY)]
+	pub enable_opds_progression: bool,
 
 	/// Password hash cost
 	#[default_value(DEFAULT_PASSWORD_HASH_COST)]
@@ -335,6 +342,7 @@ mod tests {
 			db_path: Some("not_a_real_path".to_string()),
 			client_dir: Some("not_a_real_dir".to_string()),
 			custom_templates_dir: None,
+			enable_opds_progression: Some(false),
 			config_dir: None,
 			allowed_origins: Some(vec!["origin1".to_string(), "origin2".to_string()]),
 			pdfium_path: Some("not_a_path_to_pdfium".to_string()),
@@ -378,6 +386,7 @@ mod tests {
 				pdfium_path: Some("not_a_path_to_pdfium".to_string()),
 				enable_swagger: Some(false),
 				enable_koreader_sync: Some(false),
+				enable_opds_progression: Some(false),
 				password_hash_cost: Some(DEFAULT_PASSWORD_HASH_COST),
 				session_ttl: Some(DEFAULT_SESSION_TTL),
 				access_token_ttl: Some(DEFAULT_ACCESS_TOKEN_TTL),
@@ -433,6 +442,7 @@ mod tests {
 						pdfium_path: None,
 						enable_swagger: true,
 						enable_koreader_sync: false,
+						enable_opds_progression: false,
 						password_hash_cost: 1,
 						session_ttl: DEFAULT_SESSION_TTL,
 						access_token_ttl: DEFAULT_ACCESS_TOKEN_TTL,

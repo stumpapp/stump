@@ -20,6 +20,7 @@ use sea_orm::{prelude::*, Condition, Order, QueryOrder, QueryTrait};
 use sea_orm::{PaginatorTrait, QuerySelect};
 use serde::{Deserialize, Serialize};
 use stump_core::{
+	config::StumpConfig,
 	filesystem::media::get_page_async,
 	opds::v2_0::{
 		authentication::{
@@ -1036,26 +1037,6 @@ async fn keep_reading(
 	.await
 }
 
-/// A helper function to fetch a book page for a user. This is not a route handler.
-async fn fetch_book_page_for_user(
-	ctx: &Ctx,
-	user: &AuthUser,
-	book_id: String,
-	page: i32,
-) -> APIResult<ImageResponse> {
-	let book = media::Entity::find_for_user(user)
-		.columns(vec![media::Column::Id, media::Column::Path])
-		.filter(media::Column::Id.eq(book_id))
-		.into_model::<media::MediaIdentSelect>()
-		.one(ctx.conn.as_ref())
-		.await?
-		.ok_or(APIError::NotFound("Book not found".to_string()))?;
-
-	let (content_type, image_buffer) =
-		get_page_async(PathBuf::from(book.path), page, &ctx.config).await?;
-	Ok(ImageResponse::new(content_type, image_buffer))
-}
-
 #[tracing::instrument(skip(ctx))]
 async fn get_book_by_id(
 	Path(id): Path<String>,
@@ -1100,7 +1081,18 @@ async fn get_book_page(
 	State(ctx): State<AppState>,
 	Extension(req): Extension<AuthContext>,
 ) -> APIResult<ImageResponse> {
-	fetch_book_page_for_user(&ctx, &req.user(), id, page).await
+	let book = media::Entity::find_for_user(&req.user())
+		.columns(vec![media::Column::Id, media::Column::Path])
+		.filter(media::Column::Id.eq(id))
+		.into_model::<media::MediaIdentSelect>()
+		.one(ctx.conn.as_ref())
+		.await?
+		.ok_or(APIError::NotFound("Book not found".to_string()))?;
+
+	let (content_type, image_buffer) =
+		get_page_async(PathBuf::from(book.path), page, &ctx.config).await?;
+
+	Ok(ImageResponse::new(content_type, image_buffer))
 }
 
 // // .route("/chapter/{chapter}", get(get_epub_chapter))

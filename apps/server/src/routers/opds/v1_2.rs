@@ -11,7 +11,7 @@ use graphql::{data::AuthContext, pagination::OffsetPagination};
 use models::{
 	entity::{
 		finished_reading_session, library, media, reading_session, series,
-		series_metadata, user::AuthUser,
+		series_metadata,
 	},
 	shared::{
 		enums::UserPermission,
@@ -23,6 +23,7 @@ use sea_orm::{
 };
 use serde::{Deserialize, Serialize};
 use stump_core::{
+	config::StumpConfig,
 	filesystem::{
 		image::{GenericImageProcessor, ImageProcessor},
 		media::get_page_async,
@@ -40,7 +41,6 @@ use stump_core::{
 		},
 		v2_0::entity::OPDSPublicationEntity,
 	},
-	Ctx,
 };
 
 use crate::{
@@ -568,26 +568,6 @@ fn handle_opds_image_response(
 	}
 }
 
-/// A helper function to fetch a book page for a user. This is not a route handler.
-async fn fetch_book_page_for_user(
-	ctx: &Ctx,
-	user: &AuthUser,
-	book_id: String,
-	page: i32,
-) -> APIResult<ImageResponse> {
-	let book = media::Entity::find_for_user(user)
-		.columns(vec![media::Column::Id, media::Column::Path])
-		.filter(media::Column::Id.eq(book_id))
-		.into_model::<media::MediaIdentSelect>()
-		.one(ctx.conn.as_ref())
-		.await?
-		.ok_or(APIError::NotFound("Book not found".to_string()))?;
-
-	let (content_type, image_buffer) =
-		get_page_async(PathBuf::from(book.path), page, &ctx.config).await?;
-	handle_opds_image_response(content_type, image_buffer)
-}
-
 /// A handler for GET /opds/v1.2/books/{id}/thumbnail, returns the thumbnail
 async fn get_book_thumbnail(
 	Path(OPDSURLParams {
@@ -597,7 +577,24 @@ async fn get_book_thumbnail(
 	State(ctx): State<AppState>,
 	Extension(req): Extension<AuthContext>,
 ) -> APIResult<ImageResponse> {
-	fetch_book_page_for_user(&ctx, &req.user(), id, 1).await
+	let user = req.user();
+	let book = media::Entity::find_for_user(&user)
+		.columns(vec![media::Column::Id, media::Column::Path])
+		.filter(media::Column::Id.eq(id))
+		.into_model::<media::MediaIdentSelect>()
+		.one(ctx.conn.as_ref())
+		.await?
+		.ok_or(APIError::NotFound("Book not found".to_string()))?;
+
+	let adjusted_config = StumpConfig {
+		pdf_prerender_range: 0, // Disable PDF prerendering for thumbnails since we only need the first page
+		..ctx.config.as_ref().clone()
+	};
+
+	let (content_type, image_buffer) =
+		get_page_async(PathBuf::from(book.path), 1, &adjusted_config).await?;
+
+	handle_opds_image_response(content_type, image_buffer)
 }
 
 // TODO: Support a config which disables reading session tracking for page access since

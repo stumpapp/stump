@@ -132,7 +132,7 @@ impl FileProcessor for EpubProcessor {
 		options: FileProcessorOptions,
 		_: &StumpConfig,
 	) -> Result<ProcessedFile, FileError> {
-		tracing::debug!(?path, "processing epub");
+		tracing::trace!(?path, "Processing epub");
 
 		let metadata = Self::process_metadata(path);
 
@@ -143,11 +143,13 @@ impl FileProcessor for EpubProcessor {
 		// Get metadata from epub file if process_metadata failed
 		let metadata = match metadata {
 			Ok(Some(m)) => m,
-			_ => {
+			result => {
+				tracing::trace!(?result, "Falling back to epub-rs metadata");
 				let metadata_map = Self::metadata_to_map(epub_file.metadata);
 				ProcessedMediaMetadata::from(metadata_map)
 			},
 		};
+
 		let ProcessedFileHashes {
 			hash,
 			koreader_hash,

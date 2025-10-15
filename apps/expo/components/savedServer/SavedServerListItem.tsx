@@ -50,6 +50,7 @@ export default function SavedServerListItem({ server, onEdit, onDelete, forceOPD
 								},
 							})
 						}
+						onLongPress={() => {}}
 					>
 						<View className="bg-background-muted squircle w-full items-start rounded-2xl border border-edge bg-background-surface p-3">
 							<View className="flex-1 items-start justify-center gap-1">

@@ -67,7 +67,7 @@ export default function ReaderSettings({ forBook, forServer }: Props) {
 			<View>
 				<Text className="mb-3 text-foreground-muted">Mode</Text>
 
-				<Card className="squircle flex rounded-xl border border-edge bg-background-surface">
+				<Card className="squircle flex rounded-2xl border border-edge bg-background-surface">
 					<ReadingModeSelect
 						mode={activeSettings.readingMode}
 						onChange={(mode) => onPreferenceChange({ readingMode: mode })}
@@ -89,9 +89,7 @@ export default function ReaderSettings({ forBook, forServer }: Props) {
 			<View>
 				<Text className="mb-3 text-foreground-muted">Image Options</Text>
 
-				<Card className="squircle flex rounded-xl border border-edge bg-background-surface">
-					<View className="h-px w-full bg-edge" />
-
+				<Card className="squircle flex rounded-2xl border border-edge bg-background-surface">
 					<DoublePageSelect
 						behavior={activeSettings.doublePageBehavior || 'auto'}
 						onChange={(behavior) => onPreferenceChange({ doublePageBehavior: behavior })}
@@ -146,7 +144,7 @@ export default function ReaderSettings({ forBook, forServer }: Props) {
 			<View>
 				<Text className="mb-3 text-foreground-muted">Navigation</Text>
 
-				<Card className="squircle flex rounded-xl border border-edge bg-background-surface">
+				<Card className="squircle flex rounded-2xl border border-edge bg-background-surface">
 					<View className="flex flex-row items-center justify-between border-b border-b-edge p-4">
 						<Text>Tap Sides to Navigate</Text>
 						<Switch

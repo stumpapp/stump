@@ -78,7 +78,7 @@ export default function Screen() {
 						<Heading>Servers</Heading>
 
 						{savedServers.length > 0 && (
-							<Card className="squircle flex rounded-xl border border-edge bg-background-surface">
+							<Card className="squircle flex rounded-2xl border border-edge bg-background-surface">
 								{savedServers.map((server, idx) => (
 									<Pressable
 										key={server.id}

@@ -46,10 +46,7 @@ export default function Screen() {
 	if (isLoading) return null
 
 	return (
-		<SafeAreaView
-			style={{ flex: 1 }}
-			edges={Platform.OS === 'ios' ? ['top', 'left', 'right'] : ['left', 'right']}
-		>
+		<SafeAreaView style={{ flex: 1 }} edges={['left', 'right']}>
 			<ScrollView
 				className="flex-1 bg-background"
 				refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
@@ -78,7 +75,7 @@ export default function Screen() {
 						<Heading>Servers</Heading>
 
 						{savedServers.length > 0 && (
-							<Card className="squircle flex rounded-xl border border-edge bg-background-surface">
+							<Card className="squircle flex rounded-2xl border border-edge bg-background-surface">
 								{savedServers.map((server, idx) => (
 									<Pressable
 										key={server.id}

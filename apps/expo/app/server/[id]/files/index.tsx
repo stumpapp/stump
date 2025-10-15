@@ -43,10 +43,7 @@ export default function Screen() {
 	const router = useRouter()
 
 	return (
-		<SafeAreaView
-			style={{ flex: 1 }}
-			edges={Platform.OS === 'ios' ? ['top', 'left', 'right'] : ['left', 'right']}
-		>
+		<SafeAreaView style={{ flex: 1 }} edges={['left', 'right']}>
 			<FlashList
 				data={libraries}
 				numColumns={cols}

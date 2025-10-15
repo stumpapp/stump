@@ -60,10 +60,7 @@ export default function Screen() {
 	if (isLoading) return null
 
 	return (
-		<SafeAreaView
-			style={{ flex: 1 }}
-			edges={Platform.OS === 'ios' ? ['top', 'left', 'right'] : ['left', 'right']}
-		>
+		<SafeAreaView style={{ flex: 1 }} edges={['left', 'right']}>
 			<ScrollView
 				className="flex-1 bg-background"
 				refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}

@@ -1,14 +1,16 @@
 import { FlashList } from '@shopify/flash-list'
 import { useInfiniteSuspenseGraphQL, useSuspenseGraphQL } from '@stump/client'
-import { graphql } from '@stump/graphql'
+import { graphql, UserPermission } from '@stump/graphql'
 import { useLocalSearchParams } from 'expo-router'
 import { useCallback } from 'react'
 import { Platform } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
+import { useStumpServer } from '~/components/activeServer'
 import { useGridItemSize } from '~/components/grid/useGridItemSize'
+import { LibraryActionMenu } from '~/components/library'
 import RefreshControl from '~/components/RefreshControl'
-import SeriesGridItem, { ISeriesGridItemFragment } from '~/components/series/SeriesGridItem'
+import SeriesGridItem from '~/components/series/SeriesGridItem'
 import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
 
@@ -44,6 +46,7 @@ export default function Screen() {
 	const {
 		data: { libraryById: library },
 	} = useSuspenseGraphQL(query, ['libraryById', id], { id })
+	const { checkPermission } = useStumpServer()
 
 	if (!library) {
 		throw new Error(`Series with ID ${id} not found`)
@@ -51,6 +54,9 @@ export default function Screen() {
 
 	useDynamicHeader({
 		title: library.name,
+		headerRight: checkPermission(UserPermission.ScanLibrary)
+			? () => <LibraryActionMenu libraryId={id} />
+			: undefined,
 	})
 
 	const { data, hasNextPage, fetchNextPage, refetch, isRefetching } = useInfiniteSuspenseGraphQL(

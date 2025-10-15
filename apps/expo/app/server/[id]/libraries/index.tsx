@@ -8,7 +8,6 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { useActiveServer } from '~/components/activeServer'
 import { useGridItemSize } from '~/components/grid/useGridItemSize'
 import { LibraryGridItem } from '~/components/library'
-import { ILibraryGridItemFragment } from '~/components/library/LibraryGridItem'
 import RefreshControl from '~/components/RefreshControl'
 import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
 

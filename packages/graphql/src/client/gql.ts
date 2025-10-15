@@ -48,6 +48,7 @@ type Documents = {
     "\n\tmutation BookMenuComplete($id: ID!, $isComplete: Boolean!, $page: Int) {\n\t\tmarkMediaAsComplete(id: $id, isComplete: $isComplete, page: $page) {\n\t\t\tcompletedAt\n\t\t}\n\t}\n": typeof types.BookMenuCompleteDocument,
     "\n\tmutation BookMenuDeleteSession($id: ID!) {\n\t\tdeleteMediaProgress(id: $id) {\n\t\t\t__typename\n\t\t}\n\t}\n": typeof types.BookMenuDeleteSessionDocument,
     "\n\tmutation BookMenuDeleteHistory($id: ID!) {\n\t\tdeleteMediaReadHistory(id: $id) {\n\t\t\t__typename\n\t\t}\n\t}\n": typeof types.BookMenuDeleteHistoryDocument,
+    "\n\tmutation LibraryActionMenuScanLibrary($id: ID!) {\n\t\tscanLibrary(id: $id)\n\t}\n": typeof types.LibraryActionMenuScanLibraryDocument,
     "\n\tfragment LibraryGridItem on Library {\n\t\tid\n\t\tname\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t}\n": typeof types.LibraryGridItemFragmentDoc,
     "\n\tfragment LibrarySearchItem on Library {\n\t\tid\n\t\tname\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t}\n": typeof types.LibrarySearchItemFragmentDoc,
     "\n\tquery StackedLibraryThumbnails {\n\t\tlibraries(pagination: { none: { unpaginated: true } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tthumbnail {\n\t\t\t\t\turl\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.StackedLibraryThumbnailsDocument,
@@ -245,6 +246,7 @@ const documents: Documents = {
     "\n\tmutation BookMenuComplete($id: ID!, $isComplete: Boolean!, $page: Int) {\n\t\tmarkMediaAsComplete(id: $id, isComplete: $isComplete, page: $page) {\n\t\t\tcompletedAt\n\t\t}\n\t}\n": types.BookMenuCompleteDocument,
     "\n\tmutation BookMenuDeleteSession($id: ID!) {\n\t\tdeleteMediaProgress(id: $id) {\n\t\t\t__typename\n\t\t}\n\t}\n": types.BookMenuDeleteSessionDocument,
     "\n\tmutation BookMenuDeleteHistory($id: ID!) {\n\t\tdeleteMediaReadHistory(id: $id) {\n\t\t\t__typename\n\t\t}\n\t}\n": types.BookMenuDeleteHistoryDocument,
+    "\n\tmutation LibraryActionMenuScanLibrary($id: ID!) {\n\t\tscanLibrary(id: $id)\n\t}\n": types.LibraryActionMenuScanLibraryDocument,
     "\n\tfragment LibraryGridItem on Library {\n\t\tid\n\t\tname\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t}\n": types.LibraryGridItemFragmentDoc,
     "\n\tfragment LibrarySearchItem on Library {\n\t\tid\n\t\tname\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t}\n": types.LibrarySearchItemFragmentDoc,
     "\n\tquery StackedLibraryThumbnails {\n\t\tlibraries(pagination: { none: { unpaginated: true } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tthumbnail {\n\t\t\t\t\turl\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.StackedLibraryThumbnailsDocument,
@@ -541,6 +543,10 @@ export function graphql(source: "\n\tmutation BookMenuDeleteSession($id: ID!) {\
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n\tmutation BookMenuDeleteHistory($id: ID!) {\n\t\tdeleteMediaReadHistory(id: $id) {\n\t\t\t__typename\n\t\t}\n\t}\n"): typeof import('./graphql').BookMenuDeleteHistoryDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tmutation LibraryActionMenuScanLibrary($id: ID!) {\n\t\tscanLibrary(id: $id)\n\t}\n"): typeof import('./graphql').LibraryActionMenuScanLibraryDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

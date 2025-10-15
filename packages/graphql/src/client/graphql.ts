@@ -3609,6 +3609,13 @@ export type BookMenuDeleteHistoryMutationVariables = Exact<{
 
 export type BookMenuDeleteHistoryMutation = { __typename?: 'Mutation', deleteMediaReadHistory: { __typename: 'Media' } };
 
+export type LibraryActionMenuScanLibraryMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type LibraryActionMenuScanLibraryMutation = { __typename?: 'Mutation', scanLibrary: boolean };
+
 export type LibraryGridItemFragment = { __typename?: 'Library', id: string, name: string, thumbnail: { __typename?: 'ImageRef', url: string } } & { ' $fragmentName'?: 'LibraryGridItemFragment' };
 
 export type LibrarySearchItemFragment = { __typename?: 'Library', id: string, name: string, thumbnail: { __typename?: 'ImageRef', url: string } } & { ' $fragmentName'?: 'LibrarySearchItemFragment' };
@@ -5688,6 +5695,11 @@ export const BookMenuDeleteHistoryDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<BookMenuDeleteHistoryMutation, BookMenuDeleteHistoryMutationVariables>;
+export const LibraryActionMenuScanLibraryDocument = new TypedDocumentString(`
+    mutation LibraryActionMenuScanLibrary($id: ID!) {
+  scanLibrary(id: $id)
+}
+    `) as unknown as TypedDocumentString<LibraryActionMenuScanLibraryMutation, LibraryActionMenuScanLibraryMutationVariables>;
 export const StackedLibraryThumbnailsDocument = new TypedDocumentString(`
     query StackedLibraryThumbnails {
   libraries(pagination: {none: {unpaginated: true}}) {

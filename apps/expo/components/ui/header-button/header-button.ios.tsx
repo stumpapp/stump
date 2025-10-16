@@ -13,21 +13,31 @@ export type HeaderButtonProps = {
 export function HeaderButton({ imageProps, buttonProps, style }: HeaderButtonProps) {
 	const colors = useColors()
 
+	const variant = buttonProps?.variant || 'glass'
+	const isGlass = variant === 'glass' || variant === 'glassProminent'
+
 	return (
 		<View style={{ justifyContent: 'center', alignItems: 'center', height: 35, width: 35 }}>
 			<Host matchContents style={[{ height: 35, width: 35 }, style]}>
 				<Button
 					{...buttonProps}
-					variant={buttonProps?.variant || 'glass'}
+					variant={variant}
 					modifiers={[
 						frame({ height: 35, alignment: 'center' }),
-						glassEffect({
-							glass: {
-								variant: 'regular',
-								tint: colors.background.DEFAULT,
-							},
-							shape: 'circle',
-						}),
+						...(isGlass
+							? [
+									glassEffect({
+										glass: {
+											variant: 'regular',
+											tint:
+												variant === 'glassProminent'
+													? colors.fill.brand.DEFAULT
+													: colors.background.DEFAULT,
+										},
+										shape: 'circle',
+									}),
+								]
+							: []),
 					]}
 				>
 					<Image

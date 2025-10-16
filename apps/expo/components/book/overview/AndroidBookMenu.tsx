@@ -1,6 +1,6 @@
 import { BookMenuFragment } from '@stump/graphql'
 import { useRouter } from 'expo-router'
-import { ArrowUpRight, BookCheck, CircleMinus, CopyMinus } from 'lucide-react-native'
+import { ArrowUpRight, BookCheck, CircleMinus, CopyMinus, Trash } from 'lucide-react-native'
 import { Fragment } from 'react'
 import { View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -25,6 +25,8 @@ type Props = {
 	book: BookMenuFragment
 	isFavorite: boolean
 	favoriteBook: () => void
+	isDownloaded: boolean
+	deleteBookDownload: () => void
 	completeBook: () => void
 	deleteCurrentSession: () => void
 	deleteReadHistory: () => void
@@ -34,6 +36,8 @@ export default function AndroidBookMenu({
 	book,
 	isFavorite,
 	favoriteBook,
+	isDownloaded,
+	deleteBookDownload,
 	completeBook,
 	deleteCurrentSession,
 	deleteReadHistory,
@@ -141,6 +145,16 @@ export default function AndroidBookMenu({
 						<Icon as={ArrowUpRight} size={20} className={cn('ml-auto text-foreground-muted')} />
 					</DropdownMenuItem>
 				</DropdownMenuGroup>
+
+				{isDownloaded && (
+					<>
+						<DropdownMenuSeparator variant="group" />
+						<DropdownMenuItem onPress={deleteBookDownload}>
+							<Text className="text-lg text-fill-danger">Delete Download</Text>
+							<Icon as={Trash} size={20} className={cn('ml-auto text-fill-danger')} />
+						</DropdownMenuItem>
+					</>
+				)}
 			</DropdownMenuContent>
 		</DropdownMenu>
 	)

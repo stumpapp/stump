@@ -14,7 +14,8 @@ import { stripHtml } from 'string-strip-html'
 import { useActiveServer } from '~/components/activeServer'
 import { BookMetaLink } from '~/components/book'
 import { BookActionMenu } from '~/components/book/overview'
-import { BookDescription, InfoRow, InfoSection, InfoStat } from '~/components/book/overview'
+import { InfoRow, InfoSection, InfoStat } from '~/components/book/overview'
+import LongValue from '~/components/book/overview/longValue/LongValue'
 import { BorderAndShadow } from '~/components/BorderAndShadow'
 import { TurboImage } from '~/components/Image'
 import RefreshControl from '~/components/RefreshControl'
@@ -397,9 +398,10 @@ export default function Screen() {
 								: []),
 							...(description
 								? [
-										<BookDescription
+										<LongValue
 											key="description"
-											description={stripHtml(description).result}
+											label="Description"
+											value={stripHtml(description).result}
 										/>,
 									]
 								: []),

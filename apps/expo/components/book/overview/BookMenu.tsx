@@ -1,10 +1,10 @@
-import { Button, ContextMenu, Host, Text } from '@expo/ui/swift-ui'
+import { Button, ContextMenu, Divider, Host } from '@expo/ui/swift-ui'
 import { useGraphQLMutation } from '@stump/client'
 import { BookByIdQuery, FragmentType, graphql, useFragment } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'expo-router'
 import { Ellipsis } from 'lucide-react-native'
-import { useCallback, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { Platform, View } from 'react-native'
 import { Pressable } from 'react-native-gesture-handler'
 import * as DropdownMenu from 'zeego/dropdown-menu'
@@ -12,6 +12,7 @@ import * as DropdownMenu from 'zeego/dropdown-menu'
 import { IS_IOS_24_PLUS } from '~/lib/constants'
 import { useFavoriteBook } from '~/lib/hooks/useFavoriteBook'
 import { cn } from '~/lib/utils'
+import { useDownload } from '~/stores/download'
 
 import AndroidBookMenu from './AndroidBookMenu'
 
@@ -67,6 +68,12 @@ type Props = {
 export default function BookMenu({ data }: Props) {
 	const client = useQueryClient()
 	const book = useFragment(fragment, data)
+
+	const { isBookDownloaded, deleteBook: deleteBookRpc } = useDownload()
+
+	const isDownloaded = useMemo(() => isBookDownloaded(book.id), [isBookDownloaded, book.id])
+
+	const deleteBook = useCallback(() => deleteBookRpc(book.id), [deleteBookRpc, book.id])
 
 	const onFavoriteChanged = useCallback(
 		(isFavorite: boolean) => {
@@ -140,12 +147,15 @@ export default function BookMenu({ data }: Props) {
 				isFavorite={isFavorite}
 				favoriteBook={favoriteBook}
 				completeBook={() => completeBook({ id: book.id, isComplete: true })}
+				isDownloaded={isDownloaded}
+				deleteBookDownload={deleteBook}
 				deleteCurrentSession={() => deleteCurrentSession({ id: book.id })}
 				deleteReadHistory={() => deleteReadHistory({ id: book.id })}
 			/>
 		)
 	}
 
+	// TODO: Once I figure out how to do the subtitles with expo/ui, I can remove zeego
 	if (IS_IOS_24_PLUS) {
 		return (
 			<Host matchContents>
@@ -171,6 +181,8 @@ export default function BookMenu({ data }: Props) {
 							{isFavorite ? 'Unfavorite' : 'Favorite'}
 						</Button>
 
+						<Divider />
+
 						{(isUntouched || isReading) && (
 							<Button
 								systemImage="book.closed"
@@ -192,13 +204,14 @@ export default function BookMenu({ data }: Props) {
 						{isPreviouslyCompleted && (
 							<Button
 								systemImage="rectangle.stack.badge.minus"
+								role="destructive"
 								onPress={() => deleteReadHistory({ id: book.id })}
 							>
 								Delete Read History
 							</Button>
 						)}
 
-						<Text>Go to Library</Text>
+						<Divider />
 
 						<Button
 							systemImage="arrow.up.right"
@@ -225,6 +238,16 @@ export default function BookMenu({ data }: Props) {
 							{/* TODO: Expo UI doesn't seem to support anything but strings as children, which means the subtitle is not available :( */}
 							{`Go to Series \n${book.series.resolvedName}`}
 						</Button>
+
+						{isDownloaded && (
+							<>
+								<Divider />
+
+								<Button systemImage="trash" role="destructive" onPress={() => deleteBook()}>
+									Delete Download
+								</Button>
+							</>
+						)}
 					</ContextMenu.Items>
 				</ContextMenu>
 			</Host>
@@ -321,6 +344,14 @@ export default function BookMenu({ data }: Props) {
 						<DropdownMenu.ItemIcon ios={{ name: 'arrow.up.right' }} />
 					</DropdownMenu.Item>
 				</DropdownMenu.Group>
+
+				{isDownloaded && (
+					<DropdownMenu.Item key="deleteDownload" onSelect={() => deleteBook()}>
+						<DropdownMenu.ItemIndicator />
+						<DropdownMenu.ItemTitle>Delete Download</DropdownMenu.ItemTitle>
+						<DropdownMenu.ItemIcon ios={{ name: 'trash' }} />
+					</DropdownMenu.Item>
+				)}
 			</DropdownMenu.Content>
 		</DropdownMenu.Root>
 	)

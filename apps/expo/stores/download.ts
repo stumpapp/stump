@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useSDK } from '@stump/client'
 import { MediaMetadata } from '@stump/graphql'
 import * as FileSystem from 'expo-file-system/legacy'
-import { useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 
@@ -174,7 +174,40 @@ export function useDownload() {
 		[addFile, files, sdk, serverID],
 	)
 
-	return { downloadBook }
+	const deleteBook = useCallback(
+		async (bookID: string) => {
+			const file = files.find((f) => f.id === bookID && f.serverID === serverID)
+			if (!file) {
+				console.warn('File not found in download store')
+				return
+			}
+
+			const fileUri = `${booksDirectory(serverID)}/${file.filename}`
+			try {
+				const info = await FileSystem.getInfoAsync(fileUri)
+				if (info.exists) {
+					await FileSystem.deleteAsync(fileUri)
+				}
+			} catch (e) {
+				console.error('Error deleting file:', e)
+			}
+
+			// Remove the file from the store
+			useDownloadStore.setState({
+				files: useDownloadStore
+					.getState()
+					.files.filter((f) => !(f.id === bookID && f.serverID === serverID)),
+			})
+		},
+		[files, serverID],
+	)
+
+	const isBookDownloaded = useCallback(
+		(bookID: string) => files.some((file) => file.id === bookID && file.serverID === serverID),
+		[files, serverID],
+	)
+
+	return { downloadBook, deleteBook, isBookDownloaded }
 }
 
 type UseServerDownloadsParams = {
@@ -183,4 +216,13 @@ type UseServerDownloadsParams = {
 export const useServerDownloads = ({ id }: UseServerDownloadsParams) => {
 	const { files } = useDownloadStore((store) => ({ files: store.files }))
 	return files.filter((file) => file.serverID === id)
+}
+
+export const useIsBookDownloaded = (bookID: string) => {
+	const { activeServer } = useActiveServer()
+	const { files } = useDownloadStore((store) => ({ files: store.files }))
+	return useMemo(
+		() => files.some((file) => file.id === bookID && file.serverID === activeServer.id),
+		[files, bookID, activeServer.id],
+	)
 }

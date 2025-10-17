@@ -368,6 +368,7 @@ impl MediaMutation {
 			[
 				reading_session::Column::UpdatedAt,
 				reading_session::Column::PercentageCompleted,
+				reading_session::Column::ElapsedSeconds,
 			],
 			[
 				(matches!(input, MediaProgressInput::Epub(_)))

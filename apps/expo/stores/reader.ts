@@ -1,8 +1,6 @@
 import { BookPreferences as IBookPreferences } from '@stump/client'
 import { ReadingDirection, ReadingImageScaleFit, ReadingMode } from '@stump/graphql'
-import dayjs from 'dayjs'
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useStopwatch } from 'react-timer-hook'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 
@@ -209,50 +207,42 @@ export const useBookTimer = (id: string, params: UseBookTimerParams = defaultPar
 		[initial, bookTimer],
 	)
 
-	const { pause, totalSeconds, reset, isRunning } = useStopwatch({
-		autoStart: !!id && !!params.enabled,
-		offsetTimestamp: dayjs()
-			.add(resolvedTimer || 0, 'seconds')
-			.toDate(),
-	})
+	const resolvedTimerRef = useRef(resolvedTimer)
+	const startDateRef = useRef(Date.now())
+	const [isRunning, setIsRunning] = useState(true)
+
+	resolvedTimerRef.current = resolvedTimer
 
 	const pauseTimer = useCallback(() => {
 		if (isRunning) {
-			pause()
-			setBookTimer(id, totalSeconds)
+			const elapsed = Math.trunc((Date.now() - startDateRef.current) / 1000)
+			setBookTimer(id, resolvedTimerRef.current + elapsed)
+			setIsRunning(false)
 		}
-	}, [id, pause, setBookTimer, totalSeconds, isRunning])
+	}, [id, isRunning, setBookTimer])
 
 	const resumeTimer = useCallback(() => {
 		if (!params.enabled) return
-
-		if (!isRunning) {
-			const offset = dayjs().add(totalSeconds, 'seconds').toDate()
-			reset(offset)
-		}
-	}, [totalSeconds, reset, isRunning, params.enabled])
+		startDateRef.current = Date.now()
+		setIsRunning(true)
+	}, [params.enabled])
 
 	const resetTimer = useCallback(() => {
-		reset(undefined, params.enabled)
+		startDateRef.current = Date.now()
 		setBookTimer(id, 0)
-	}, [reset, params.enabled, id, setBookTimer])
+	}, [id, setBookTimer])
 
 	useEffect(() => {
-		reset(
-			dayjs()
-				.add(resolvedTimer || 0, 'seconds')
-				.toDate(),
-		)
-	}, [resolvedTimer, reset])
+		if (!params.enabled) pauseTimer()
+	}, [params.enabled, pauseTimer])
 
-	useEffect(() => {
-		if (!params.enabled) {
-			pause()
-			setBookTimer(id, totalSeconds)
-		}
-	}, [params.enabled, isRunning, pause, setBookTimer, id, totalSeconds])
-
-	return { totalSeconds, pause: pauseTimer, resume: resumeTimer, reset: resetTimer, isRunning }
+	return {
+		totalSeconds: resolvedTimer,
+		pause: pauseTimer,
+		resume: resumeTimer,
+		reset: resetTimer,
+		isRunning: isRunning,
+	}
 }
 
 export const useHideStatusBar = () => {

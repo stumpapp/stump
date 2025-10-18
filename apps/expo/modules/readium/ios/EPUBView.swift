@@ -51,6 +51,86 @@
 
      private var changingResource = false
      private var isInitialized = false
+     
+     // Misc tasks for cleanup
+     private var loadPublicationTask: Task<Void, Never>?
+     private var positionsTask: Task<Void, Never>?
+     private var layoutChangeTask: Task<Void, Never>?
+     private var navigationTasks: [Task<Void, Never>] = []
+     
+     // Background handling
+     private var backgroundObserver: NSObjectProtocol?
+     private var foregroundObserver: NSObjectProtocol?
+     private var isInBackground = false
+     
+     public required init(appContext: AppContext? = nil) {
+         super.init(appContext: appContext)
+         setupBackgroundObservers()
+     }
+     
+     deinit {
+         print("EPUBView: deinit called - cleaning up resources")
+         cancelAllTasks()
+         removeBackgroundObservers()
+         cleanupNavigator()
+     }
+     
+     private func setupBackgroundObservers() {
+         backgroundObserver = NotificationCenter.default.addObserver(
+             forName: UIApplication.didEnterBackgroundNotification,
+             object: nil,
+             queue: .main
+         ) { [weak self] _ in
+             self?.handleAppDidEnterBackground()
+         }
+         
+         foregroundObserver = NotificationCenter.default.addObserver(
+             forName: UIApplication.willEnterForegroundNotification,
+             object: nil,
+             queue: .main
+         ) { [weak self] _ in
+             self?.handleAppWillEnterForeground()
+         }
+     }
+     
+     private func removeBackgroundObservers() {
+         if let observer = backgroundObserver {
+             NotificationCenter.default.removeObserver(observer)
+             backgroundObserver = nil
+         }
+         if let observer = foregroundObserver {
+             NotificationCenter.default.removeObserver(observer)
+             foregroundObserver = nil
+         }
+     }
+     
+     private func handleAppDidEnterBackground() {
+         print("EPUBView: App entered background - suspending operations")
+         isInBackground = true
+
+         positionsTask?.cancel()
+         layoutChangeTask?.cancel()
+     }
+     
+     private func handleAppWillEnterForeground() {
+         print("EPUBView: App entering foreground - resuming operations")
+         isInBackground = false
+     }
+     
+     private func cancelAllTasks() {
+         print("EPUBView: Cancelling all tasks")
+         loadPublicationTask?.cancel()
+         positionsTask?.cancel()
+         layoutChangeTask?.cancel()
+         navigationTasks.forEach { $0.cancel() }
+         navigationTasks.removeAll()
+     }
+     
+     private func cleanupNavigator() {
+         print("EPUBView: Cleaning up navigator")
+         navigator?.view.removeFromSuperview()
+         navigator = nil
+     }
 
      public func finalizeProps() {
          let oldProps = props
@@ -77,8 +157,9 @@
 
          // If this is a new book or first initialization, load the publication
          if props!.bookId != oldProps?.bookId || props!.url != oldProps?.url || !isInitialized {
-             Task {
-                 await loadPublication()
+             loadPublicationTask?.cancel()
+             loadPublicationTask = Task { [weak self] in
+                 await self?.loadPublication()
              }
              return
          }
@@ -110,16 +191,22 @@
                  // Open the publication
                  let publication = try await BookService.instance.openPublication(for: props.bookId, at: publicationUrl)
 
- //                TODO: See warning in Xcode
-                 DispatchQueue.main.async {
-                     self.initializeNavigator(with: publication)
+                 // Check if task was cancelled before proceeding
+                 try Task.checkCancellation()
+                 
+                 await MainActor.run { [weak self] in
+                     self?.initializeNavigator(with: publication)
                  }
              }
          } catch {
+             if error is CancellationError {
+                 print("Publication load cancelled")
+                 return
+             }
+             
              print("Error loading publication: \(error)")
- //            TODO: See warning in Xcode
-             DispatchQueue.main.async {
-                 self.onError([
+             await MainActor.run { [weak self] in
+                 self?.onError([
                      "errorDescription": error.localizedDescription,
                      "failureReason": "Failed to load publication",
                      "recoverySuggestion": "Check the URL and try again",
@@ -251,7 +338,7 @@
                          fontSize: props.fontSize,
                          imageFilter: props.imageFilter,
                          lineHeight: props.lineHeight,
-                         publisherStyles: props.publisherStyles ?? true,
+                         publisherStyles: props.publisherStyles,
                          scroll: false,
                          textAlign: props.textAlign,
                          textColor: props.foreground
@@ -277,15 +364,22 @@
              self.navigator = navigator
              isInitialized = true
 
-             Task {
+             // Cancel any existing positions task and start new one
+             positionsTask?.cancel()
+             positionsTask = Task { [weak self] in
+                 guard let self = self else { return }
+                 
                  let positionsResult = await publication.positions()
                  let totalPages = (try? positionsResult.get().count) ?? 0
                  
-                 await MainActor.run {
-                     onBookLoaded([
+                 // Check if we're cancelled before updating UI
+                 try? Task.checkCancellation()
+                 
+                 await MainActor.run { [weak self] in
+                     self?.onBookLoaded([
                          "success": true,
                          "bookMetadata": [
-                             "title": publication.metadata.title,
+                             "title": publication.metadata.title ?? "",
                              "author": publication.metadata.authors.map { $0.name }.joined(separator: ", "),
                              "publisher": publication.metadata.publishers.map { $0.name }.joined(separator: ", "),
                              "identifier": publication.metadata.identifier ?? "",
@@ -298,9 +392,6 @@
              }
 
              emitCurrentLocator()
-             
-             // Apply preferences after navigator is fully loaded
-//             updatePreferences()
 
          } catch {
              print("Failed to create Navigator instance: \(error)")
@@ -313,9 +404,18 @@
      }
 
      public func destroyNavigator() {
+         print("EPUBView: destroyNavigator called")
+         
+         cancelAllTasks()
+         
          navigator?.view.removeFromSuperview()
          navigator = nil
          isInitialized = false
+         
+         // Remove publication from cache
+         if let bookId = props?.bookId {
+             BookService.instance.closePublication(for: bookId)
+         }
      }
 
      func emitCurrentLocator() {
@@ -340,17 +440,30 @@
              return
          }
 
+         // Don't start new calculations if we're in background
+         guard !isInBackground else {
+             print("EPUBView: Skipping layout change emission (in background)")
+             return
+         }
+
          // Get the publication to access updated metadata
          let publication = navigator.publication
 
-         Task {
+         // Cancel any existing layout change task
+         layoutChangeTask?.cancel()
+         layoutChangeTask = Task { [weak self] in
+             guard let self = self else { return }
+             
              let positionsResult = await publication.positions()
              let totalPages = (try? positionsResult.get().count) ?? 0
              
-             await MainActor.run {
-                 onLayoutChange([
+             // Check if we're cancelled before updating UI
+             try? Task.checkCancellation()
+             
+             await MainActor.run { [weak self] in
+                 self?.onLayoutChange([
                      "bookMetadata": [
-                         "title": publication.metadata.title,
+                         "title": publication.metadata.title ?? "",
                          "author": publication.metadata.authors.map { $0.name }.joined(separator: ", "),
                          "publisher": publication.metadata.publishers.map { $0.name }.joined(separator: ", "),
                          "identifier": publication.metadata.identifier ?? "",
@@ -367,9 +480,12 @@
          if locator.href != navigator?.currentLocation?.href {
              changingResource = true
          }
-         Task {
-             _ = await navigator?.go(to: locator, options: NavigatorGoOptions(animated: true))
+         let task = Task { [weak self] in
+             guard let self = self else { return }
+             _ = await self.navigator?.go(to: locator, options: NavigatorGoOptions(animated: true))
          }
+         navigationTasks.append(task)
+         navigationTasks.removeAll { $0.isCancelled }
      }
 
      func goToLocation(locator: Locator) {
@@ -377,15 +493,21 @@
      }
 
      func goForward() {
-         Task {
-             _ = await navigator?.goForward(options: NavigatorGoOptions(animated: true))
+         let task = Task { [weak self] in
+             guard let self = self else { return }
+             _ = await self.navigator?.goForward(options: NavigatorGoOptions(animated: true))
          }
+         navigationTasks.append(task)
+         navigationTasks.removeAll { $0.isCancelled }
      }
 
      func goBackward() {
-         Task {
-             _ = await navigator?.goBackward(options: NavigatorGoOptions(animated: true))
+         let task = Task { [weak self] in
+             guard let self = self else { return }
+             _ = await self.navigator?.goBackward(options: NavigatorGoOptions(animated: true))
          }
+         navigationTasks.append(task)
+         navigationTasks.removeAll { $0.isCancelled }
      }
 
      func updatePreferences() {
@@ -397,7 +519,7 @@
              fontSize: props.fontSize,
              imageFilter: props.imageFilter,
              lineHeight: props.lineHeight,
-             publisherStyles: props.publisherStyles ?? true,
+             publisherStyles: props.publisherStyles,
              scroll: false,
              textAlign: props.textAlign,
              textColor: props.foreground
@@ -406,7 +528,8 @@
          navigator?.submitPreferences(preferences)
 
          // Emit layout change event after preferences are updated
-         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
+             guard let self = self else { return }
              self.emitLayoutChange()
          }
      }
@@ -438,15 +561,21 @@
          let navigator = navigator as! EPUBNavigatorViewController
 
          if point.x < bounds.maxX * 0.2 {
-             Task {
+             let task = Task { [weak self] in
+                 guard self != nil else { return }
                  _ = await navigator.goBackward(options: NavigatorGoOptions(animated: true))
              }
+             navigationTasks.append(task)
+             navigationTasks.removeAll { $0.isCancelled }
              return
          }
          if point.x > bounds.maxX * 0.8 {
-             Task {
+             let task = Task { [weak self] in
+                 guard self != nil else { return }
                  _ = await navigator.goForward(options: NavigatorGoOptions(animated: true))
              }
+             navigationTasks.append(task)
+             navigationTasks.removeAll { $0.isCancelled }
              return
          }
 

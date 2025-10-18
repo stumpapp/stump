@@ -161,4 +161,5 @@ export type ReadiumViewRef = {
 	goToLocation: (locator: ReadiumLocator) => Promise<void>
 	goForward: () => Promise<void>
 	goBackward: () => Promise<void>
+	destroy: () => Promise<void>
 }

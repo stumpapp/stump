@@ -129,6 +129,8 @@ export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogPr
 								label="Username"
 								autoCorrect={false}
 								autoCapitalize="none"
+								autoComplete="username"
+								textContentType="username"
 								placeholder="Username"
 								onBlur={onBlur}
 								onChangeText={onChange}
@@ -152,6 +154,8 @@ export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogPr
 										secureTextEntry={!isPasswordVisible}
 										autoCorrect={false}
 										autoCapitalize="none"
+										autoComplete="password"
+										textContentType="password"
 										placeholder="Password"
 										onBlur={onBlur}
 										onChangeText={onChange}

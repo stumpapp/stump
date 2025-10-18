@@ -104,7 +104,8 @@ class EPUBView(context: Context, appContext: AppContext) : ExpoView(context, app
         setTextColor(Color.BLACK)
     }
 
-    private val coroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+    private var coroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+    private var locatorCollectionJob: Job? = null
 
     fun finalizeProps() {
         val oldProps = props
@@ -144,7 +145,12 @@ class EPUBView(context: Context, appContext: AppContext) : ExpoView(context, app
             go(props!!.locator!!)
         }
 
-        navigator!!.submitPreferences(
+        val nav = navigator ?: run {
+            Log.w("EPUBView", "Cannot update preferences: navigator is null")
+            return
+        }
+        
+        nav.submitPreferences(
             EpubPreferences(
                 backgroundColor = org.readium.r2.navigator.preferences.Color(props!!.background),
                 fontFamily = props!!.fontFamily,
@@ -184,39 +190,106 @@ class EPUBView(context: Context, appContext: AppContext) : ExpoView(context, app
 
         navigator?.addInputListener(TapInputListener())
 
-        activity?.lifecycleScope?.launch {
-           navigator?.currentLocator?.collect { locator ->
-               locator?.let { onLocatorChanged(it) }
-           }
-            emitCurrentLocator()
+        locatorCollectionJob = coroutineScope.launch {
+            try {
+                navigator?.currentLocator?.collect { locator ->
+                    locator?.let { 
+                        // Only emit if view is still attached to prevent crashes
+                        if (isAttachedToWindow) {
+                            onLocatorChanged(it)
+                        }
+                    }
+                }
+            } catch (e: CancellationException) {
+                Log.d("EPUBView", "Locator collection canceled")
+            } catch (e: Exception) {
+                Log.e("EPUBView", "Error collecting locator", e)
+            }
+        }
+        
+        // Emit initial locator
+        coroutineScope.launch {
+            try {
+                if (isAttachedToWindow) {
+                    emitCurrentLocator()
+                }
+            } catch (e: Exception) {
+                Log.e("EPUBView", "Error emitting initial locator", e)
+            }
         }
     }
 
     fun destroyNavigator() {
-        val navigator = this.navigator ?: return
-        val activity: FragmentActivity? = appContext.currentActivity as FragmentActivity?
-        activity?.supportFragmentManager?.commitNow {
-            setReorderingAllowed(true)
-            remove(navigator)
+        Log.d("EPUBView", "destroyNavigator called")
+        
+        val navigator = this.navigator ?: run {
+            Log.d("EPUBView", "Navigator already destroyed")
+            return
         }
-        removeView(navigator.view)
+        
+        this.navigator = null
+        
+        locatorCollectionJob?.cancel()
+        locatorCollectionJob = null
+        
+        try {
+            removeView(navigator.view)
+        } catch (e: Exception) {
+            Log.e("EPUBView", "Error removing navigator view", e)
+        }
+        
+        val activity: FragmentActivity? = appContext.currentActivity as? FragmentActivity
+        if (activity == null || activity.isDestroyed || activity.isFinishing) {
+            Log.w("EPUBView", "Cannot remove fragment: activity is gone")
+        } else {
+            try {
+                activity.supportFragmentManager.commitNow {
+                    setReorderingAllowed(true)
+                    remove(navigator)
+                }
+            } catch (e: IllegalStateException) {
+                Log.e("EPUBView", "Failed to remove fragment: ${e.message}")
+            }
+        }
+        
+        coroutineScope.cancel()
+        coroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     }
 
     @OptIn(InternalReadiumApi::class)
     private suspend fun emitCurrentLocator() {
-        val currentLocator = navigator!!.currentLocator?.value ?: return
-        val found = navigator!!.firstVisibleElementLocator()
-        if (found == null) {
-            onLocatorChange(currentLocator.toJSON().toMap())
+        if (!isAttachedToWindow) {
+            Log.d("EPUBView", "Skipping emitCurrentLocator: view detached")
             return
         }
+        
+        val nav = navigator ?: run {
+            Log.d("EPUBView", "Skipping emitCurrentLocator: navigator is null")
+            return
+        }
+        
+        val currentLocator = nav.currentLocator?.value ?: return
+        
+        if (!isAttachedToWindow) return
+        
+        val found = nav.firstVisibleElementLocator()
+        if (found == null) {
+            if (isAttachedToWindow) {
+                onLocatorChange(currentLocator.toJSON().toMap())
+            }
+            return
+        }
+        
         val merged = currentLocator.copy(
             locations = currentLocator.locations.copy(
                 fragments = found.locations.fragments,
                 otherLocations = found.locations.otherLocations,
             ),
         )
-        onLocatorChange(merged.toJSON().toMap())
+        
+        if (isAttachedToWindow) {
+            onLocatorChange(merged.toJSON().toMap())
+        }
     }
 
     private suspend fun loadPublication() {
@@ -263,12 +336,17 @@ class EPUBView(context: Context, appContext: AppContext) : ExpoView(context, app
     }
 
     fun go(locator: Locator, animated: Boolean = true) {
-        val currentHref = navigator?.currentLocator?.value?.href?.toString()
+        val nav = navigator ?: run {
+            Log.w("EPUBView", "Cannot navigate: navigator is null")
+            return
+        }
+        
+        val currentHref = nav.currentLocator?.value?.href?.toString()
         val newHref = locator.href.toString()
         if (newHref != currentHref) {
             changingResource = true
         }
-        navigator!!.go(locator, animated)
+        nav.go(locator, animated)
     }
 
 //    TODO: Implement
@@ -282,8 +360,14 @@ class EPUBView(context: Context, appContext: AppContext) : ExpoView(context, app
     }
 
     override fun onDetachedFromWindow() {
+        Log.d("EPUBView", "onDetachedFromWindow called")
+        
+        locatorCollectionJob?.cancel()
+        locatorCollectionJob = null
+        
+        destroyNavigator()
+        
         super.onDetachedFromWindow()
-        coroutineScope.cancel()
     }
 
 //    @JavascriptInterface
@@ -312,8 +396,14 @@ class EPUBView(context: Context, appContext: AppContext) : ExpoView(context, app
     }
 
     private suspend fun onLocatorChanged(locator: Locator) {
+        // Check if view is still attached before processing
+        if (!isAttachedToWindow) {
+            Log.d("EPUBView", "Skipping onLocatorChanged: view detached")
+            return
+        }
+        
         val currentHref = locator.href.toString()
-        val propsHref = props!!.locator?.href.toString()
+        val propsHref = props?.locator?.href?.toString()
         if (currentHref != propsHref || changingResource) {
             changingResource = false
             emitCurrentLocator()

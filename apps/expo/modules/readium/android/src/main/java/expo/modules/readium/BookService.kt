@@ -1,6 +1,7 @@
 package expo.modules.readium
 
 import android.content.Context
+import android.util.Log
 import org.readium.r2.shared.publication.Link
 import org.readium.r2.shared.publication.Locator
 import org.readium.r2.shared.publication.Publication
@@ -162,6 +163,24 @@ class BookService(private val context: Context) {
      */
     fun getPublication(bookId: String): Publication? {
         return publications[bookId]
+    }
+
+    /**
+     * Closes and removes a publication from the cache
+     */
+    fun closePublication(bookId: String) {
+        if (publications.remove(bookId) != null) {
+            Log.d("BookService", "Closed and removed publication for book: $bookId")
+        }
+    }
+
+    /**
+     * Clears all publications from the cache
+     */
+    fun clearCache() {
+        val count = publications.size
+        publications.clear()
+        Log.d("BookService", "Cleared cache ($count publications removed)")
     }
 
     /**

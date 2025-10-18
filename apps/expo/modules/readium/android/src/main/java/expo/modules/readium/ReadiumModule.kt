@@ -112,6 +112,11 @@ class ReadiumModule : Module() {
           view.go(locator, animated = false)
       }
 
+      AsyncFunction("destroy") { view: EPUBView ->
+        Log.d("ReadiumModule", "destroy called - cleaning up EPUBView resources")
+        view.destroyNavigator()
+      }
+
       Prop("locator") { view: EPUBView, prop: Map<String, Any?>? ->
         if (prop == null) {
           Log.d("ReadiumModule", "Received null locator prop")

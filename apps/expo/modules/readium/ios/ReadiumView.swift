@@ -11,11 +11,18 @@
      required init(appContext: AppContext? = nil) {
          super.init(appContext: appContext)
          clipsToBounds = true
-         delegate = WebViewDelegate { url in
-             self.onLoad(["url": url])
+         delegate = WebViewDelegate { [weak self] url in
+             self?.onLoad(["url": url])
          }
          webView.navigationDelegate = delegate
          addSubview(webView)
+     }
+     
+     deinit {
+         print("ReadiumView: deinit - cleaning up WKWebView")
+         webView.stopLoading()
+         webView.navigationDelegate = nil
+         webView.removeFromSuperview()
      }
 
      override func layoutSubviews() {

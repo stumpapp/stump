@@ -78,6 +78,9 @@ export default function ReadiumReader({
 				goBackward: async () => {
 					readerRef.current?.goBackward()
 				},
+				destroy: async () => {
+					readerRef.current?.destroy()
+				},
 			}) satisfies ReadiumViewRef,
 		[],
 	)
@@ -110,6 +113,7 @@ export default function ReadiumReader({
 		() => {
 			return () => {
 				store.cleanup()
+				setLocalUri(null)
 			}
 		},
 		// eslint-disable-next-line react-hooks/exhaustive-deps

@@ -129,6 +129,21 @@ class NullPDFDocumentFactory: PDFDocumentFactory {
      public func getPublication(for bookID: String) -> Publication? {
          return publications[bookID]
      }
+     
+     /// Closes and removes a publication from the cache
+     /// - Parameter bookID: The identifier for the book to close
+     public func closePublication(for bookID: String) {
+         if publications.removeValue(forKey: bookID) != nil {
+             print("BookService: Closed and removed publication for book: \(bookID)")
+         }
+     }
+     
+     /// Clears all publications from the cache
+     public func clearCache() {
+         let count = publications.count
+         publications.removeAll()
+         print("BookService: Cleared cache (\(count) publications removed)")
+     }
 
      /// Gets a resource from a publication
      /// - Parameters:

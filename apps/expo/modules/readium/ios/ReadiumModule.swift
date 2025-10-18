@@ -70,6 +70,10 @@
              AsyncFunction("goBackward") { (view: EPUBView) in
                  view.goBackward()
              }
+             
+             AsyncFunction("destroy") { (view: EPUBView) in
+                 view.destroyNavigator()
+             }
 
              Prop("bookId") { (view: EPUBView, prop: String) in
                  view.pendingProps.bookId = prop

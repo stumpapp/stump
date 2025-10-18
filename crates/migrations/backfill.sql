@@ -144,6 +144,27 @@ JOIN "library_config_id_map" map ON lib."config_id" = map."old_id";
 -- Step 5: Clean up the library config mapping table
 DROP TABLE "library_config_id_map";
 
+-- Step 6: Ensure the configs reference the correct library IDs
+-- See https://github.com/stumpapp/stump/issues/799#issuecomment-3418391958
+DELETE FROM library_configs
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM libraries
+    WHERE libraries.config_id = library_configs.id
+);
+UPDATE library_configs
+SET library_id = (
+    SELECT id
+    FROM libraries
+    WHERE libraries.config_id = library_configs.id
+)
+WHERE EXISTS (
+    SELECT 1
+    FROM libraries
+    WHERE libraries.config_id = library_configs.id
+);
+
+
 -- Backfill the series and series metadata tables:
 
 INSERT INTO "series"(

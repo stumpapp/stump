@@ -6,7 +6,7 @@ import {
 	SeriesThumbnailSelectorUpdateMutation,
 	useFragment,
 } from '@stump/graphql'
-import { useCallback, useEffect, useState } from 'react'
+import { Suspense, useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 import { EntityCard } from '@/components/entity'
@@ -194,7 +194,7 @@ export default function SeriesThumbnailSelector({ fragment }: Props) {
 						<Dialog.Close onClick={() => setIsOpen(false)} />
 					</Dialog.Header>
 
-					{renderContent()}
+					<Suspense>{renderContent()}</Suspense>
 
 					<Dialog.Footer>
 						<Button variant="default" onClick={handleCancel}>

@@ -10,12 +10,13 @@ import StumpLogo from './components/StumpLogo'
 export const STUMP_REPO = 'https://github.com/stumpapp/stump'
 const DOCS_PAGES_HREF = `${STUMP_REPO}/tree/main/apps/docs/pages`
 
+// TODO: Update banner to: 🎉 Stump is now using SeaORM! Please read about breaking changes 💥
 export default {
 	banner: {
 		key: 'sea-orm-migration',
 		content: (
 			<Link href="/guides/breaking-changes/0.1.0">
-				🎉 Stump is now using SeaORM! Please read about breaking changes 💥
+				🚧 Stump will soon have major updates! Please read about upcoming breaking changes 💥
 			</Link>
 		),
 	},

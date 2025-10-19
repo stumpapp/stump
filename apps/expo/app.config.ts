@@ -17,6 +17,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 		ios: {
 			supportsTablet: true,
 			bundleIdentifier: 'com.stumpapp.stump',
+			associatedDomains: ['webcredentials:www.stumpapp.dev'],
 			icon: {
 				light: './assets/images/ios-light.png',
 				dark: './assets/images/ios-dark.png',

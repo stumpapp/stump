@@ -14,6 +14,18 @@ export default withNextra({
 		// FIXME: This is a workaround to prevent the build from failing
 		ignoreBuildErrors: true,
 	},
+	// See https://gist.github.com/amcvitty/42cbe072184fe72485ad17cd7120bb89
+	headers: async () => [
+		{
+			source: '/.well-known/apple-app-site-association',
+			headers: [
+				{
+					key: 'Content-Type',
+					value: 'application/json',
+				},
+			],
+		},
+	],
 	redirects: async () => [
 		{
 			source: '/installation',

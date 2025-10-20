@@ -20,3 +20,5 @@ CHANGELOG.md
 apps/expo/assets/*.json
 
 packages/graphql/src/client/*.ts
+
+apps/expo/drizzle/*

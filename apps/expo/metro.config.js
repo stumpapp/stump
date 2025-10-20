@@ -20,6 +20,8 @@ config.resolver.nodeModulesPaths = [
 // TODO: Needs fix - Although not ideal, this must be set to `false` in order to avoid a dependency collision on uuid
 config.resolver.disableHierarchicalLookup = false
 
+config.resolver.sourceExts.push('sql') // https://orm.drizzle.team/docs/connect-expo-sqlite
+
 module.exports = wrapWithReanimatedMetroConfig(
 	withNativeWind(config, { input: './global.css', projectRoot }),
 )

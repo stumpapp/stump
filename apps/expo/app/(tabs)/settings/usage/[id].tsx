@@ -1,18 +1,20 @@
 import { useQuery } from '@tanstack/react-query'
+import { eq } from 'drizzle-orm'
+import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
 import { Redirect, useLocalSearchParams } from 'expo-router'
 import { useCallback, useMemo } from 'react'
-import { Platform, View } from 'react-native'
+import { View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import RefreshControl from '~/components/RefreshControl'
 import { Button, Heading, Text } from '~/components/ui'
+import { db, downloadedFiles } from '~/db'
 import { icons } from '~/lib'
 import { getServerStoredPreferencesUsage } from '~/lib/filesystem'
 import { formatBytesSeparate, humanizeByteUnit } from '~/lib/format'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
 import { useReaderStore } from '~/stores'
-import { useServerDownloads } from '~/stores/download'
 import { useSavedServerStore } from '~/stores/savedServer'
 
 const { Slash, HardDriveDownload } = icons
@@ -34,14 +36,20 @@ export default function Screen() {
 	const server = useSavedServerStore((state) =>
 		state.servers.find((server) => server.id === serverID),
 	)
-	const downloadedFiles = useServerDownloads({ id: serverID })
+	const { data: files } = useLiveQuery(
+		db.select().from(downloadedFiles).where(eq(downloadedFiles.serverId, serverID)),
+	)
 	const preferences = formatBytesSeparate(preferencesBytes, 1, 'B')
 
 	const downloadedFilesSum = useMemo(
-		() => downloadedFiles.reduce((acc, file) => acc + (file.size || 0), 0),
-		[downloadedFiles],
+		() => files.reduce((acc, file) => acc + (file.size || 0), 0),
+		[files],
 	)
-	const downloadedFilesCount = useMemo(() => downloadedFiles.length, [downloadedFiles])
+	const humanizedUsage = useMemo(
+		() => formatBytesSeparate(downloadedFilesSum),
+		[downloadedFilesSum],
+	)
+	const downloadedFilesCount = useMemo(() => files.length, [files])
 
 	const clearLibrarySettings = useReaderStore((state) => state.clearLibrarySettings)
 	const onClearPreferences = useCallback(() => {
@@ -70,7 +78,7 @@ export default function Screen() {
 					<View className="flex-1 gap-4">
 						<Heading>Downloads</Heading>
 
-						{!downloadedFiles.length && (
+						{!files.length && (
 							<View className="squircle h-24 w-full items-center justify-center gap-2 rounded-lg border border-dashed border-edge p-3">
 								<View className="relative flex justify-center">
 									<View className="squircle flex items-center justify-center rounded-lg bg-background-surface p-2">
@@ -83,7 +91,7 @@ export default function Screen() {
 							</View>
 						)}
 
-						{(downloadedFiles.length > 0 || downloadedFilesSum > 0) && (
+						{(files.length > 0 || downloadedFilesSum > 0) && (
 							<View className="gap-2">
 								<View className="flex-row items-center justify-between">
 									<Text className="text-foreground-muted">Total files</Text>
@@ -92,8 +100,10 @@ export default function Screen() {
 
 								<View className="flex-row items-center justify-between">
 									<Text className="text-foreground-muted">Total size</Text>
-									{downloadedFilesSum > 0 && (
-										<Text>{humanizeByteUnit(downloadedFilesSum, 'B')}</Text>
+									{humanizedUsage && (
+										<Text>
+											{humanizedUsage.value} {humanizedUsage.unit}
+										</Text>
 									)}
 									{/* TODO: Infer from usage */}
 									{downloadedFilesSum === 0 && <Text>Unknown</Text>}

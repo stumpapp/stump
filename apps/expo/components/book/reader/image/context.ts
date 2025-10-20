@@ -3,7 +3,7 @@ import { createContext, useContext } from 'react'
 import { FlatList } from 'react-native'
 
 type QueryData = NonNullable<BookReadScreenQuery['mediaById']>
-export type ImageReaderBookRef = Omit<QueryData, 'extension' | 'libraryConfig'> & {
+export type ImageReaderBookRef = Omit<QueryData, 'libraryConfig'> & {
 	libraryConfig?: QueryData['libraryConfig']
 }
 

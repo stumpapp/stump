@@ -2,17 +2,21 @@ import { Button, ContextMenu, Divider, Host } from '@expo/ui/swift-ui'
 import { useGraphQLMutation } from '@stump/client'
 import { BookByIdQuery, FragmentType, graphql, useFragment } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
+import { and, eq } from 'drizzle-orm'
+import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
 import { useRouter } from 'expo-router'
 import { Ellipsis } from 'lucide-react-native'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { Platform, View } from 'react-native'
 import { Pressable } from 'react-native-gesture-handler'
 import * as DropdownMenu from 'zeego/dropdown-menu'
 
+import { useActiveServer } from '~/components/activeServer'
+import { db, downloadedFiles } from '~/db'
 import { IS_IOS_24_PLUS } from '~/lib/constants'
+import { useDownload } from '~/lib/hooks'
 import { useFavoriteBook } from '~/lib/hooks/useFavoriteBook'
 import { cn } from '~/lib/utils'
-import { useDownload } from '~/stores/download'
 
 import AndroidBookMenu from './AndroidBookMenu'
 
@@ -66,12 +70,24 @@ type Props = {
 }
 
 export default function BookMenu({ data }: Props) {
+	const {
+		activeServer: { id: serverID },
+	} = useActiveServer()
 	const client = useQueryClient()
 	const book = useFragment(fragment, data)
 
-	const { isBookDownloaded, deleteBook: deleteBookRpc } = useDownload()
+	const { deleteBook: deleteBookRpc } = useDownload()
 
-	const isDownloaded = useMemo(() => isBookDownloaded(book.id), [isBookDownloaded, book.id])
+	const {
+		data: [downloadedFile],
+	} = useLiveQuery(
+		db
+			.select({ id: downloadedFiles.id })
+			.from(downloadedFiles)
+			.where(and(eq(downloadedFiles.id, book.id), eq(downloadedFiles.serverId, serverID)))
+			.limit(1),
+	)
+	const isDownloaded = !!downloadedFile as boolean
 
 	const deleteBook = useCallback(() => deleteBookRpc(book.id), [deleteBookRpc, book.id])
 

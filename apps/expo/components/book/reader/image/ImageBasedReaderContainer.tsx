@@ -35,7 +35,6 @@ export default function ImageBasedReaderContainer({
 			incognito,
 			doublePageBehavior = DEFAULT_BOOK_PREFERENCES.doublePageBehavior,
 			readingMode,
-			readingDirection,
 			secondPageSeparate,
 		},
 	} = useBookPreferences({ book: ctx.book })
@@ -83,15 +82,7 @@ export default function ImageBasedReaderContainer({
 		}
 
 		return sets
-	}, [
-		doublePageBehavior,
-		pages,
-		imageSizes,
-		deviceOrientation,
-		readingMode,
-		readingDirection,
-		secondPageSeparate,
-	])
+	}, [doublePageBehavior, pages, imageSizes, deviceOrientation, readingMode, secondPageSeparate])
 
 	const [currentPage, setCurrentPage] = useState(initialPage)
 

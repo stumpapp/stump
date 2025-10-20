@@ -7,6 +7,7 @@ import {
 	AppLanguage,
 	AppTheme,
 	DefaultServer,
+	DeleteDatabase,
 	ImageCacheActions,
 	MaskURLs,
 	PerformanceMonitor,
@@ -58,6 +59,7 @@ export default function Screen() {
 				<View>
 					<Text className="mb-3 text-foreground-muted">Debug</Text>
 					<ImageCacheActions />
+					{__DEV__ && <DeleteDatabase />}
 					<PerformanceMonitor />
 					<ReduceAnimations />
 					<MaskURLs />

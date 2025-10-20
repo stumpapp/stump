@@ -27,16 +27,24 @@ Filesystem structure:
 // FIXME: Need to migrate off of legacy FS methods
 
 export const baseDirectory = `${FileSystem.documentDirectory}`
+export const cacheDirectory = `${FileSystem.cacheDirectory}`
 
 const serverDirectory = (serverID: string) => urlJoin(baseDirectory, serverID)
 
 export const serverPath = (serverID: string, path: string) =>
 	urlJoin(serverDirectory(serverID), path)
 
+export const serverCachePath = (serverID: string, path: string) =>
+	urlJoin(cacheDirectory, serverID, path)
+
 export const booksDirectory = (serverID: string) => serverPath(serverID, 'books')
 
-export const activelyReadingDirectory = (serverID: string) =>
-	serverPath(serverID, 'actively-reading')
+export const thumbnailsDirectory = (serverID: string) => serverPath(serverID, 'thumbnails')
+
+export const unpackedDirectory = (serverID: string) => serverCachePath(serverID, 'unpacked')
+
+export const unpackedBookDirectory = (serverID: string, bookID: string) =>
+	urlJoin(unpackedDirectory(serverID), bookID)
 
 export async function ensureDirectoryExists(path = baseDirectory) {
 	const info = await FileSystem.getInfoAsync(path)

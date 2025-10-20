@@ -18,6 +18,12 @@ export const useActiveServer = () => {
 	return context
 }
 
+/**
+ * Safe variant of useActiveServer that returns undefined if there's no active server
+ * Pretty much just used for features that persist across servers (e.g., downloads)
+ */
+export const useActiveServerSafe = () => useContext(ActiveServerContext)
+
 export type PermissionEnforcerOptions = {
 	onFailure?: () => void
 }

@@ -2,9 +2,11 @@ import '~/global.css'
 
 import { DarkTheme, DefaultTheme, Theme, ThemeProvider } from '@react-navigation/native'
 import { PortalHost } from '@rn-primitives/portal'
+import * as Sentry from '@sentry/react-native'
 import dayjs from 'dayjs'
 import duration from 'dayjs/plugin/duration'
 import relativeTime from 'dayjs/plugin/relativeTime'
+import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator'
 import { Stack } from 'expo-router'
 import * as SplashScreen from 'expo-splash-screen'
 import LottieView from 'lottie-react-native'
@@ -17,6 +19,8 @@ import { KeyboardProvider } from 'react-native-keyboard-controller'
 import darkSplash from '~/assets/splash/dark.json'
 import lightSplash from '~/assets/splash/light.json'
 import { BottomSheet } from '~/components/ui/bottom-sheet'
+import { db } from '~/db'
+import migrations from '~/drizzle/migrations'
 import { setAndroidNavigationBar } from '~/lib/android-navigation-bar'
 import { NAV_THEME, useColors } from '~/lib/constants'
 import { useColorScheme } from '~/lib/useColorScheme'
@@ -56,6 +60,8 @@ export default function RootLayout() {
 	const [isAnimationReady, setIsAnimationReady] = React.useState(false)
 	const [isReady, setIsReady] = React.useState(false)
 
+	const { error } = useMigrations(db, migrations)
+
 	const animation = React.useRef<LottieView>(null)
 	const shouldHideStatusBar = useHideStatusBar()
 	const hasMounted = React.useRef(false)
@@ -76,6 +82,12 @@ export default function RootLayout() {
 			setIsAnimationReady(true)
 		})
 	}, [])
+
+	React.useEffect(() => {
+		if (error) {
+			Sentry.captureException(error)
+		}
+	}, [error])
 
 	if (!isColorSchemeLoaded || !isAnimationReady) {
 		return null

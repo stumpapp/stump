@@ -1,4 +1,9 @@
-import { DirectoryListingInput, DirectoryListingQuery, graphql } from '@stump/graphql'
+import {
+	DirectoryListingInput,
+	DirectoryListingQuery,
+	extractErrorMessage,
+	graphql,
+} from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -298,26 +303,9 @@ export function useDirectoryListing({
 	const errorMessage = useMemo(() => {
 		if (!error) return null
 
-		// TODO(graphql): I need to test the error handling here after swapping to graphql since
-		// we won't be using status codes etc. This just won't work
 		if (!isAxiosError(error)) {
 			console.error('An unknown error occurred', error)
-			return 'An unknown error occurred'
-		}
-
-		if (error?.response?.data) {
-			if (error.response.status === 404) {
-				return 'Directory not found'
-			} else if (error.response.status === 403) {
-				return 'Access to the directory was denied by the OS'
-			} else {
-				console.error('An error occurred while fetching the directory listing:', error)
-				const message =
-					typeof error.response.data === 'string'
-						? error.response.data
-						: 'An error occurred while fetching the directory listing'
-				return message
-			}
+			return extractErrorMessage(error)
 		}
 
 		return null

@@ -3,9 +3,9 @@ import { View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { useActiveServer } from '~/components/activeServer'
+import { useDownload } from '~/lib/hooks'
 import { BookMetadata, ReadiumLocator, ReadiumView, ReadiumViewRef } from '~/modules/readium'
 import { useReaderStore } from '~/stores'
-import { useDownload } from '~/stores/download'
 import { useEpubLocationStore, useEpubTheme } from '~/stores/epub'
 
 import { EbookReaderBookRef } from '../image/context'
@@ -25,8 +25,12 @@ type Props = {
 	 * Whether the reader should be in incognito mode
 	 */
 	incognito?: boolean
-
+	/**
+	 * Callback when the location changes
+	 */
 	onLocationChanged: (locator: ReadiumLocator, percentage: number) => void
+	offlineUri?: string
+	serverId?: string
 }
 
 // TODO: Don't assume loading book. Intake an optional localUri which effectively unlocks offline reading
@@ -35,13 +39,14 @@ export default function ReadiumReader({
 	initialLocator,
 	incognito,
 	onLocationChanged,
+	...offlineProps
 }: Props) {
 	const {
 		activeServer: { id },
 	} = useActiveServer()
 	const { downloadBook } = useDownload()
 
-	const [localUri, setLocalUri] = useState<string | null>(null)
+	const [localUri, setLocalUri] = useState<string | null>(() => offlineProps.offlineUri || null)
 	const [locator, setLocator] = useState<ReadiumLocator | undefined>(() => initialLocator)
 
 	const controlsVisible = useReaderStore((state) => state.showControls)

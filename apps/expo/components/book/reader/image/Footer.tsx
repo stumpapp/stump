@@ -165,15 +165,18 @@ export default function Footer() {
 	}, [footerControls, currentPage, visible, visibilityChanged, pageSets])
 
 	const formatDuration = useCallback(() => {
-		if (elapsedSeconds <= 60) {
-			return `${elapsedSeconds} seconds`
-		} else if (elapsedSeconds <= 3600) {
-			return dayjs.duration(elapsedSeconds, 'seconds').format('m [minutes] s [seconds]')
-		} else {
-			return dayjs
-				.duration(elapsedSeconds, 'seconds')
-				.format(`H [hour${elapsedSeconds >= 7200 ? 's' : ''}] m [minutes]`)
+		const duration = dayjs.duration(elapsedSeconds, 'seconds')
+		const hours = Math.trunc(duration.asHours())
+		const minutes = duration.minutes()
+		const seconds = duration.seconds()
+
+		if (elapsedSeconds <= 59) {
+			return `${seconds} ${seconds === 1 ? 'second' : 'seconds'}`
 		}
+		if (elapsedSeconds <= 3599) {
+			return `${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ${seconds} ${seconds === 1 ? 'second' : 'seconds'}`
+		}
+		return `${hours} ${hours === 1 ? 'hour' : 'hours'} ${minutes} ${minutes === 1 ? 'minute' : 'minutes'}`
 	}, [elapsedSeconds])
 
 	const pageSource = useCallback(

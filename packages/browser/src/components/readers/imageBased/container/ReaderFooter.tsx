@@ -1,8 +1,8 @@
 import { useSDK } from '@stump/client'
 import { cn, ProgressBar, Text } from '@stump/components'
 import { ReadingDirection } from '@stump/graphql'
-import dayjs from 'dayjs'
 import { motion } from 'framer-motion'
+import { Duration } from 'luxon'
 import { forwardRef, useCallback, useEffect, useMemo, useRef } from 'react'
 import { ItemProps, ListProps, ScrollerProps, Virtuoso, VirtuosoHandle } from 'react-virtuoso'
 
@@ -25,7 +25,7 @@ export default function ReaderFooter() {
 	} = useBookPreferences({ book })
 	const elapsedSeconds = useBookReadTime(book.id)
 	const {
-		preferences: { thumbnailRatio },
+		preferences: { thumbnailRatio, locale },
 	} = usePreferences()
 
 	const virtuosoRef = useRef<VirtuosoHandle>(null)
@@ -50,16 +50,18 @@ export default function ReaderFooter() {
 	}, [showToolBar, currentPageSetIdx])
 
 	const formatDuration = useCallback(() => {
-		if (elapsedSeconds <= 60) {
-			return `${elapsedSeconds} seconds`
-		} else if (elapsedSeconds <= 3600) {
-			return dayjs.duration(elapsedSeconds, 'seconds').format('m [minutes] s [seconds]')
-		} else {
-			return dayjs
-				.duration(elapsedSeconds, 'seconds')
-				.format(`H [hour${elapsedSeconds >= 7200 ? 's' : ''}] m [minutes]`)
+		const duration = Duration.fromObject({ seconds: elapsedSeconds }).reconfigure({ locale })
+
+		let formattedDuration
+		if (elapsedSeconds <= 59) formattedDuration = duration.shiftTo('seconds')
+		else if (elapsedSeconds <= 3599) formattedDuration = duration.shiftTo('minutes', 'seconds')
+		else {
+			const hms = duration.shiftTo('hours', 'minutes', 'seconds')
+			formattedDuration = Duration.fromObject({ hours: hms.hours, minutes: hms.minutes })
 		}
-	}, [elapsedSeconds])
+
+		return formattedDuration.toHuman()
+	}, [elapsedSeconds, locale])
 
 	const renderItem = useCallback(
 		(idx: number, indexes: number[]) => {

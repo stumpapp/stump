@@ -2410,6 +2410,7 @@ input UpdateUserPreferencesInput {
 	enableJobOverlay: Boolean!
 	preferAccentColor: Boolean!
 	showThumbnailsInHeaders: Boolean!
+	thumbnailRatio: Float!
 	enableAlphabetSelect: Boolean!
 }
 
@@ -2563,6 +2564,7 @@ type UserPreferences {
 	enableHideScrollbar: Boolean!
 	preferAccentColor: Boolean!
 	showThumbnailsInHeaders: Boolean!
+	thumbnailRatio: Float!
 	enableJobOverlay: Boolean!
 	enableAlphabetSelect: Boolean!
 	userId: String

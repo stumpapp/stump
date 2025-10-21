@@ -4,6 +4,7 @@ import { type ComponentPropsWithoutRef, useState } from 'react'
 import { To } from 'react-router-dom'
 
 import { Link } from '@/context'
+import { usePreferences } from '@/hooks/usePreferences'
 
 import { getDensityTextSize, useGridSizeStore } from '../container/useGridSize'
 import { EntityImage } from './EntityImage'
@@ -62,6 +63,9 @@ export default function EntityCard({
 	...props
 }: Props) {
 	const [isImageFailed, setIsImageFailed] = useState(false)
+	const {
+		preferences: { thumbnailRatio },
+	} = usePreferences()
 
 	const Container = href ? Link : Div
 	const containerProps = {
@@ -178,9 +182,10 @@ export default function EntityCard({
 			)}
 		>
 			<div
-				className={cn('aspect-[2/3] h-full w-full p-0', {
+				className={cn('h-full w-full p-0', {
 					'w-[10rem] sm:w-[10.666rem] md:w-[12rem]': !isFullWidth,
 				})}
+				style={{ aspectRatio: thumbnailRatio }}
 			>
 				{renderImage()}
 			</div>

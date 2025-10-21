@@ -3192,6 +3192,7 @@ export type UpdateUserPreferencesInput = {
   primaryNavigationMode: Scalars['String']['input'];
   showQueryIndicator: Scalars['Boolean']['input'];
   showThumbnailsInHeaders: Scalars['Boolean']['input'];
+  thumbnailRatio: Scalars['Float']['input'];
 };
 
 export type UploadBooksInput = {
@@ -3356,6 +3357,7 @@ export type UserPreferences = {
   primaryNavigationMode: Scalars['String']['output'];
   showQueryIndicator: Scalars['Boolean']['output'];
   showThumbnailsInHeaders: Scalars['Boolean']['output'];
+  thumbnailRatio: Scalars['Float']['output'];
   userId?: Maybe<Scalars['String']['output']>;
 };
 

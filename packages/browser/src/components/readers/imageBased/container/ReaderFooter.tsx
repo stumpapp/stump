@@ -7,13 +7,13 @@ import { forwardRef, useCallback, useEffect, useMemo, useRef } from 'react'
 import { ItemProps, ListProps, ScrollerProps, Virtuoso, VirtuosoHandle } from 'react-virtuoso'
 
 import { EntityImage } from '@/components/entity'
+import { usePreferences } from '@/hooks/usePreferences'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 import { useBookReadTime } from '@/stores/reader'
 
 import { useImageBaseReaderContext } from '../context'
 
-const HEIGHT_MODIFIER = 2 / 3
-const WIDTH_MODIFIER = 2 / 3
+const SIZE_MODIFIER = 1.5
 
 export default function ReaderFooter() {
 	const { sdk } = useSDK()
@@ -24,6 +24,9 @@ export default function ReaderFooter() {
 		bookPreferences: { readingDirection, trackElapsedTime },
 	} = useBookPreferences({ book })
 	const elapsedSeconds = useBookReadTime(book.id)
+	const {
+		preferences: { thumbnailRatio },
+	} = usePreferences()
 
 	const virtuosoRef = useRef<VirtuosoHandle>(null)
 
@@ -40,7 +43,7 @@ export default function ReaderFooter() {
 		if (showToolBar) {
 			virtuosoRef.current?.scrollToIndex({
 				align: 'center',
-				behavior: 'smooth',
+				behavior: 'auto',
 				index: currentPageSetIdx,
 			})
 		}
@@ -65,18 +68,25 @@ export default function ReaderFooter() {
 					{indexes.map((index) => {
 						const url = sdk.media.bookPageURL(book.id, index + 1)
 						const imageSize = imageSizes[index]
-						const isPortraitOrUnknown = !imageSize || imageSize.ratio < 1
+						const isLandscape = (imageSize?.ratio || 0) >= 1
 						const isCurrentSet = currentPageSetIdx === idx
 
 						let containerSize = {
-							width: isPortraitOrUnknown ? 100 : 150,
-							height: isPortraitOrUnknown ? 150 : 100,
+							width: 100,
+							height: 100 / thumbnailRatio,
+						}
+
+						if (isLandscape) {
+							containerSize = {
+								height: containerSize.height,
+								width: containerSize.width * 2,
+							}
 						}
 
 						if (isCurrentSet) {
 							containerSize = {
-								height: containerSize.height / HEIGHT_MODIFIER,
-								width: containerSize.width / WIDTH_MODIFIER,
+								height: containerSize.height * SIZE_MODIFIER,
+								width: containerSize.width * SIZE_MODIFIER,
 							}
 						}
 
@@ -85,9 +95,9 @@ export default function ReaderFooter() {
 								<div
 									onClick={() => setCurrentPage(index + 1)}
 									className={cn(
-										'flex cursor-pointer items-center overflow-hidden rounded-md border-2 border-solid border-transparent shadow-xl transition duration-300 hover:border-edge-brand',
+										'flex cursor-pointer items-center overflow-hidden rounded-lg border-2 border-solid border-transparent shadow-xl transition duration-300 hover:border-edge-brand',
 										{
-											'border-edge-brand': isCurrentSet,
+											'rounded-[10px] border-edge-brand': isCurrentSet,
 										},
 									)}
 									style={{
@@ -97,7 +107,7 @@ export default function ReaderFooter() {
 								>
 									<EntityImage
 										src={url}
-										className="object-contain"
+										className="h-full w-full object-cover"
 										onLoad={({ height, width }) =>
 											setPageSize(index, { height, width, ratio: width / height })
 										}
@@ -112,7 +122,7 @@ export default function ReaderFooter() {
 				</div>
 			)
 		},
-		[imageSizes, sdk, book.id, setCurrentPage, setPageSize, currentPageSetIdx],
+		[imageSizes, sdk, book.id, setCurrentPage, setPageSize, currentPageSetIdx, thumbnailRatio],
 	)
 
 	return (
@@ -123,13 +133,16 @@ export default function ReaderFooter() {
 			transition={{ duration: 0.2, ease: 'easeInOut' }}
 			// @ts-expect-error: It does have className?
 			className="fixed bottom-0 left-0 z-[100] flex w-full flex-col justify-end gap-2 overflow-hidden bg-opacity-75 text-white shadow-lg"
-			style={{
-				height: 215 / HEIGHT_MODIFIER,
-			}}
 		>
 			<Virtuoso
 				ref={virtuosoRef}
-				style={{ height: '100%' }}
+				style={{
+					height:
+						(100 / thumbnailRatio) * SIZE_MODIFIER + // largest item height
+						12 + // scrollbar vertical height
+						10 + // translateY padding (works perfectly up to here if using display: 'flex')
+						26, // estimated weirdness due to Virtuoso using display: 'inline-block' instead of display: 'flex'
+				}}
 				horizontalDirection
 				data={pageSets}
 				components={{
@@ -183,6 +196,8 @@ Scroller.displayName = 'Scroller'
 
 const List = forwardRef<HTMLDivElement, ListProps>(({ children, ...props }, ref) => {
 	return (
+		// note: className="flex" does not actually apply here. style={{ ...style, display: 'flex' }} works, however that breaks the list
+		// length calculations (the last few items do not show up) since it overrides the existing display: 'inline-block' used by Virtuoso.
 		<div className="flex items-center" ref={ref} {...props}>
 			{children}
 		</div>

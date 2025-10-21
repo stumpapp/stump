@@ -8,7 +8,7 @@ use crate::shared::{
 };
 
 #[derive(
-	Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject, Serialize, Deserialize,
+	Clone, Debug, PartialEq, DeriveEntityModel, SimpleObject, Serialize, Deserialize,
 )]
 #[serde(rename_all = "camelCase")]
 #[graphql(name = "UserPreferencesModel")]
@@ -39,6 +39,7 @@ pub struct Model {
 	pub enable_hide_scrollbar: bool,
 	pub prefer_accent_color: bool,
 	pub show_thumbnails_in_headers: bool,
+	pub thumbnail_ratio: f32,
 	pub enable_job_overlay: bool,
 	pub enable_alphabet_select: bool,
 	#[graphql(skip)]
@@ -98,6 +99,7 @@ impl ActiveModelBehavior for ActiveModel {
 			self.enable_hide_scrollbar = ActiveValue::Set(false);
 			self.prefer_accent_color = ActiveValue::Set(false);
 			self.show_thumbnails_in_headers = ActiveValue::Set(false);
+			self.thumbnail_ratio = ActiveValue::Set(1.0 / 1.5);
 			self.enable_job_overlay = ActiveValue::Set(true);
 			self.enable_alphabet_select = ActiveValue::Set(false);
 		}

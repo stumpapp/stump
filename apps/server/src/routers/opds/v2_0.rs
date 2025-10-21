@@ -21,7 +21,6 @@ use sea_orm::{prelude::*, Condition, Order, QueryOrder, QueryTrait};
 use sea_orm::{PaginatorTrait, QuerySelect};
 use serde::{Deserialize, Serialize};
 use stump_core::{
-	config::StumpConfig,
 	filesystem::media::get_page_async,
 	opds::v2_0::{
 		authentication::{

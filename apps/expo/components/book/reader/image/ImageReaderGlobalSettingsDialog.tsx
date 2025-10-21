@@ -2,16 +2,15 @@ import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { View } from 'react-native'
 import { useSharedValue } from 'react-native-reanimated'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { useActiveServer } from '~/components/activeServer'
 import { Heading, Tabs, Text } from '~/components/ui'
 import { BottomSheet } from '~/components/ui/bottom-sheet'
+import { useColors } from '~/lib/constants'
 import { useColorScheme } from '~/lib/useColorScheme'
 
 import { ReaderSettings } from '../settings'
 import { useImageBasedReader } from './context'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { useColors } from '~/lib/constants'
 
 type Props = {
 	isOpen: boolean
@@ -20,10 +19,8 @@ type Props = {
 
 export default function ImageReaderGlobalSettingsDialog({ isOpen, onClose }: Props) {
 	const {
-		activeServer: { id: serverID },
-	} = useActiveServer()
-	const {
 		book: { id: bookID },
+		serverId,
 	} = useImageBasedReader()
 
 	const ref = useRef<BottomSheetModal | null>(null)
@@ -127,7 +124,7 @@ export default function ImageReaderGlobalSettingsDialog({ isOpen, onClose }: Pro
 						{...(modality === 'book'
 							? {
 									forBook: bookID,
-									forServer: serverID,
+									forServer: serverId,
 								}
 							: {})}
 					/>

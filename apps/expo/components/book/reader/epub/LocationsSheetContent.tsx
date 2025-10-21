@@ -1,4 +1,3 @@
-import { useSDK } from '@stump/client'
 import { useRouter } from 'expo-router'
 import { useRef, useState } from 'react'
 import { View } from 'react-native'
@@ -13,8 +12,6 @@ import { cn } from '~/lib/utils'
 import { type TableOfContentsItem, useEpubLocationStore } from '~/stores/epub'
 
 export default function LocationsSheetContent() {
-	const { sdk } = useSDK()
-
 	const [activePage, setActivePage] = useState(0)
 
 	const ref = useRef<PagerView>(null)
@@ -22,6 +19,8 @@ export default function LocationsSheetContent() {
 	const book = useEpubLocationStore((store) => store.book)
 	const toc = useEpubLocationStore((store) => store.toc)
 	const embeddedMetadata = useEpubLocationStore((store) => store.embeddedMetadata)
+
+	const requestHeaders = useEpubLocationStore((store) => store.requestHeaders)
 
 	const colors = useColors()
 
@@ -94,8 +93,7 @@ export default function LocationsSheetContent() {
 									source={{
 										uri: book?.thumbnail.url,
 										headers: {
-											...sdk.customHeaders,
-											Authorization: sdk.authorizationHeader || '',
+											...requestHeaders?.(),
 										},
 									}}
 									resizeMode="stretch"

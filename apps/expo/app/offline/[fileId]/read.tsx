@@ -235,6 +235,7 @@ function Reader({ record }: ReaderProps) {
 				pageURL={pageURL}
 				onPageChanged={onPageChanged}
 				resetTimer={reset}
+				serverId={downloadedFile.serverId}
 			/>
 		)
 	}

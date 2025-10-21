@@ -13,6 +13,7 @@ import * as NavigationBar from 'expo-navigation-bar'
 import { useLocalSearchParams } from 'expo-router'
 import { useCallback, useEffect, useMemo } from 'react'
 
+import { useActiveServer } from '~/components/activeServer'
 import { ImageBasedReader, ReadiumReader, UnsupportedReader } from '~/components/book/reader'
 import { NextInSeriesBookRef } from '~/components/book/reader/image/context'
 import { useAppState } from '~/lib/hooks'
@@ -116,6 +117,9 @@ export default function Screen() {
 	useKeepAwake()
 
 	const { id: bookID } = useLocalSearchParams<Params>()
+	const {
+		activeServer: { id: serverId },
+	} = useActiveServer()
 	const { sdk } = useSDK()
 	const {
 		data: { mediaById: book },
@@ -255,6 +259,14 @@ export default function Screen() {
 		[],
 	)
 
+	const requestHeaders = useCallback(
+		() => ({
+			...sdk.customHeaders,
+			Authorization: sdk.authorizationHeader || '',
+		}),
+		[sdk],
+	)
+
 	const currentProgressPage = useMemo(() => book.readProgress?.page || 1, [book.readProgress?.page])
 
 	if (!book) return null
@@ -267,6 +279,8 @@ export default function Screen() {
 				book={book}
 				initialLocator={initialLocator ? intoReadiumLocator(initialLocator) : undefined}
 				onLocationChanged={onLocationChanged}
+				serverId={serverId}
+				requestHeaders={requestHeaders}
 			/>
 		)
 	} else if (book.extension.match(ARCHIVE_EXTENSION) || book.extension.match(PDF_EXTENSION)) {
@@ -288,6 +302,8 @@ export default function Screen() {
 				onPageChanged={onPageChanged}
 				resetTimer={reset}
 				nextInSeries={nextInSeries}
+				serverId={serverId}
+				requestHeaders={requestHeaders}
 			/>
 		)
 	}

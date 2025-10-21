@@ -1,5 +1,4 @@
 import { Zoomable, ZoomableRef } from '@likashefqet/react-native-image-zoom'
-import { useSDK } from '@stump/client'
 import { ReadingDirection, ReadingMode } from '@stump/graphql'
 import { STUMP_SAVE_BASIC_SESSION_HEADER } from '@stump/sdk/constants'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -211,12 +210,12 @@ const Page = React.memo(
 		onPastEndReached,
 		// readingDirection,
 	}: PageProps) => {
-		const { book, pageURL, flatListRef, pageSets, setImageSizes } = useImageBasedReader()
+		const { book, pageURL, flatListRef, pageSets, setImageSizes, requestHeaders } =
+			useImageBasedReader()
 		const {
 			preferences: { tapSidesToNavigate, readingDirection, allowDownscaling },
 		} = useBookPreferences({ book })
 		const { isTablet } = useDisplay()
-		const { sdk } = useSDK()
 
 		const scale = useSharedValue(1)
 		const showControls = useReaderStore((state) => state.showControls)
@@ -244,7 +243,15 @@ const Page = React.memo(
 
 				return isLeft || isRight
 			},
-			[maxWidth, index, flatListRef, tapThresholdRatio, readingDirection, pageSets],
+			[
+				maxWidth,
+				index,
+				flatListRef,
+				tapThresholdRatio,
+				readingDirection,
+				pageSets,
+				onPastEndReached,
+			],
 		)
 
 		const onSingleTap = useCallback(
@@ -323,8 +330,7 @@ const Page = React.memo(
 								source={{
 									uri: pageURL(pageIdx + 1),
 									headers: {
-										...sdk.customHeaders,
-										Authorization: sdk.authorizationHeader || '',
+										...requestHeaders?.(),
 										[STUMP_SAVE_BASIC_SESSION_HEADER]: 'false',
 									},
 								}}

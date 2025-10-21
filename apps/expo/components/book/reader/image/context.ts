@@ -2,6 +2,8 @@ import { BookReadScreenQuery } from '@stump/graphql'
 import { createContext, useContext } from 'react'
 import { FlatList } from 'react-native'
 
+import { OfflineCompatibleReader } from '../types'
+
 type QueryData = NonNullable<BookReadScreenQuery['mediaById']>
 export type ImageReaderBookRef = Omit<QueryData, 'libraryConfig'> & {
 	libraryConfig?: QueryData['libraryConfig']
@@ -37,7 +39,7 @@ export type IImageBasedReaderContext = {
 	onPageChanged?: (page: number) => void
 	resetTimer?: () => void
 	isOPDS?: boolean
-}
+} & OfflineCompatibleReader
 
 export const ImageBasedReaderContext = createContext<IImageBasedReaderContext | null>(null)
 

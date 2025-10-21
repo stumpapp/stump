@@ -16,6 +16,7 @@ import {
 export type AddDownloadedFileParams = {
 	id: string
 	filename: string
+	uri: string
 	serverId: string
 	size?: number | null
 	metadata?: Partial<MediaMetadata> | null
@@ -80,6 +81,7 @@ export class DownloadRepository {
 			const newFile: NewDownloadedFile = {
 				id: file.id,
 				filename: file.filename,
+				uri: file.uri,
 				serverId: file.serverId,
 				size: file.size,
 				bookName: file.metadata?.title,

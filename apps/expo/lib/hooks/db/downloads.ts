@@ -129,6 +129,7 @@ export function useDownload({ serverId }: UseDownloadParams = {}) {
 				{
 					id: params.id,
 					filename,
+					uri: result.uri,
 					serverId: serverID,
 					size: !isNaN(size) && size > 0 ? size : undefined,
 					metadata: params.metadata,

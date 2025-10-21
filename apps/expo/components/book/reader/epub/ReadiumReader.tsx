@@ -2,13 +2,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { useActiveServerSafe } from '~/components/activeServer'
 import { useDownload } from '~/lib/hooks'
 import { BookMetadata, ReadiumLocator, ReadiumView, ReadiumViewRef } from '~/modules/readium'
 import { useReaderStore } from '~/stores'
 import { useEpubLocationStore, useEpubTheme } from '~/stores/epub'
 
 import { EbookReaderBookRef } from '../image/context'
+import { OfflineCompatibleReader } from '../types'
 import ReadiumFooter, { FOOTER_HEIGHT } from './ReadiumFooter'
 import ReadiumHeader, { HEADER_HEIGHT } from './ReadiumHeader'
 
@@ -29,9 +29,11 @@ type Props = {
 	 * Callback when the location changes
 	 */
 	onLocationChanged: (locator: ReadiumLocator, percentage: number) => void
+	/**
+	 * The URI of the offline book, if available
+	 */
 	offlineUri?: string
-	serverId?: string
-}
+} & OfflineCompatibleReader
 
 // TODO: Don't assume loading book. Intake an optional localUri which effectively unlocks offline reading
 export default function ReadiumReader({
@@ -39,18 +41,11 @@ export default function ReadiumReader({
 	initialLocator,
 	incognito,
 	onLocationChanged,
-	...offlineProps
+	...ctx
 }: Props) {
-	const serverCtx = useActiveServerSafe()
+	const { downloadBook } = useDownload({ serverId: ctx.serverId })
 
-	const serverId = offlineProps.serverId || serverCtx?.activeServer.id
-	if (!serverId) {
-		throw new Error('No active server ID found for ReadiumReader')
-	}
-
-	const { downloadBook } = useDownload({ serverId })
-
-	const [localUri, setLocalUri] = useState<string | null>(() => offlineProps.offlineUri || null)
+	const [localUri, setLocalUri] = useState<string | null>(() => ctx.offlineUri || null)
 	const [locator, setLocator] = useState<ReadiumLocator | undefined>(() => initialLocator)
 
 	const controlsVisible = useReaderStore((state) => state.showControls)
@@ -101,6 +96,7 @@ export default function ReadiumReader({
 		onLocationChange: store.onLocationChange,
 		cleanup: store.onUnload,
 		storeActions: store.storeActions,
+		storeHeaders: store.storeHeaders,
 	}))
 
 	useEffect(() => {
@@ -117,6 +113,10 @@ export default function ReadiumReader({
 
 		download()
 	}, [localUri, book, downloadBook, store])
+
+	useEffect(() => {
+		store.storeHeaders(ctx.requestHeaders)
+	}, [ctx, store])
 
 	useEffect(
 		() => {
@@ -167,19 +167,15 @@ export default function ReadiumReader({
 		[],
 	)
 
-	const headerUrls = useMemo(
-		() =>
-			offlineProps?.serverId
-				? {
-						settingsUrl: `/offline/${book.id}/ebook-settings`,
-						locationsUrl: `/offline/${book.id}/ebook-locations-modal`,
-					}
-				: {
-						settingsUrl: `/server/${serverId}/books/${book.id}/ebook-settings`,
-						locationsUrl: `/server/${serverId}/books/${book.id}/ebook-locations-modal`,
-					},
-		[offlineProps?.serverId, serverId, book.id],
-	)
+	const headerUrls = useMemo(() => {
+		const prefix = ctx.offlineUri
+			? `/offline/${book.id}`
+			: `/server/${ctx.serverId}/books/${book.id}`
+		return {
+			settingsUrl: `${prefix}/ebook-settings`,
+			locationsUrl: `${prefix}/ebook-locations-modal`,
+		}
+	}, [ctx, book.id])
 
 	const insets = useSafeAreaInsets()
 

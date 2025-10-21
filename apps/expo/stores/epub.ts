@@ -46,6 +46,9 @@ export type IEpubLocationStore = {
 	actions?: ReadiumViewRef | null
 	storeActions: (actions: ReadiumViewRef | null) => void
 
+	requestHeaders?: () => Record<string, string>
+	storeHeaders: (callback: (() => Record<string, string>) | undefined) => void
+
 	currentChapter: string
 	position: number
 	totalPages: number
@@ -61,6 +64,9 @@ export type IEpubLocationStore = {
 export const useEpubLocationStore = create<IEpubLocationStore>((set) => ({
 	storeBook: (book) => set({ book }),
 	storeActions: (ref) => set({ actions: ref }),
+
+	requestHeaders: undefined,
+	storeHeaders: (callback) => set({ requestHeaders: callback }),
 
 	currentChapter: '',
 	position: 0,

@@ -8,6 +8,7 @@ import { z } from 'zod'
 export const downloadedFiles = sqliteTable('downloaded_files', {
 	id: text('id').primaryKey(), // Book ID from Stump server
 	filename: text('filename').notNull(), // Local filename (e.g., bookID.epub)
+	uri: text('uri').notNull(), // Local file URI
 	serverId: text('server_id').notNull(), // Server the book was downloaded from
 	size: integer('size'), // File size in bytes
 	downloadedAt: integer('downloaded_at', { mode: 'timestamp' })
@@ -49,6 +50,7 @@ export const libraryRefs = sqliteTable('library_refs', {
 export const unsyncedReadProgress = sqliteTable('unsynced_read_progress', {
 	id: integer('id').primaryKey({ autoIncrement: true }),
 	bookId: text('book_id')
+		.unique()
 		.notNull()
 		.references(() => downloadedFiles.id, { onDelete: 'cascade' }),
 	serverId: text('server_id').notNull(),

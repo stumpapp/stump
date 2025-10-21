@@ -1,6 +1,7 @@
 CREATE TABLE `downloaded_files` (
 	`id` text PRIMARY KEY NOT NULL,
 	`filename` text NOT NULL,
+	`uri` text NOT NULL,
 	`server_id` text NOT NULL,
 	`size` integer,
 	`downloaded_at` integer NOT NULL,
@@ -34,3 +35,5 @@ CREATE TABLE `unsynced_read_progress` (
 	`last_modified` integer NOT NULL,
 	FOREIGN KEY (`book_id`) REFERENCES `downloaded_files`(`id`) ON UPDATE no action ON DELETE cascade
 );
+--> statement-breakpoint
+CREATE UNIQUE INDEX `unsynced_read_progress_book_id_unique` ON `unsynced_read_progress` (`book_id`);

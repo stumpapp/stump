@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "3b54898a-f85b-4897-8dd3-01a63bc77ce2",
+  "id": "87be8215-c532-49c1-861e-bbf1431fd209",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "downloaded_files": {
@@ -16,6 +16,13 @@
         },
         "filename": {
           "name": "filename",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "uri": {
+          "name": "uri",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -206,7 +213,15 @@
           "autoincrement": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "unsynced_read_progress_book_id_unique": {
+          "name": "unsynced_read_progress_book_id_unique",
+          "columns": [
+            "book_id"
+          ],
+          "isUnique": true
+        }
+      },
       "foreignKeys": {
         "unsynced_read_progress_book_id_downloaded_files_id_fk": {
           "name": "unsynced_read_progress_book_id_downloaded_files_id_fk",

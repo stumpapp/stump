@@ -1,5 +1,4 @@
 import { Slider } from '@miblanchard/react-native-slider'
-import { useSDK } from '@stump/client'
 import { ReadingDirection } from '@stump/graphql'
 import { STUMP_SAVE_BASIC_SESSION_HEADER } from '@stump/sdk/constants'
 import dayjs from 'dayjs'
@@ -28,8 +27,7 @@ import { useImageBasedReader } from './context'
 dayjs.extend(duration)
 
 export default function Footer() {
-	const { sdk } = useSDK()
-	const { isTablet, height, width } = useDisplay()
+	const { isTablet, width } = useDisplay()
 	const {
 		book,
 		pageURL,
@@ -40,6 +38,7 @@ export default function Footer() {
 		imageSizes,
 		setImageSizes,
 		isOPDS,
+		requestHeaders,
 	} = useImageBasedReader()
 	const elapsedSeconds = useBookReadTime(book.id)
 	const {
@@ -65,12 +64,16 @@ export default function Footer() {
 
 	const largestHeight = baseSize.height / thumbnailRatio
 	const translateY = useSharedValue(largestHeight * 2)
-	useEffect(() => {
-		translateY.value = withTiming(visible ? 0 : largestHeight * 1.8, {
-			duration: 250,
-			easing: visible ? Easing.out(Easing.quad) : Easing.in(Easing.quad),
-		})
-	}, [visible])
+	useEffect(
+		() => {
+			translateY.value = withTiming(visible ? 0 : largestHeight * 1.8, {
+				duration: 250,
+				easing: visible ? Easing.out(Easing.quad) : Easing.in(Easing.quad),
+			})
+		},
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[visible],
+	)
 
 	const animatedStyles = useAnimatedStyle(() => {
 		return {
@@ -180,11 +183,11 @@ export default function Footer() {
 		(page: number) => ({
 			uri: pageThumbnailURL ? pageThumbnailURL(page) : pageURL(page),
 			headers: {
-				Authorization: sdk.authorizationHeader,
+				...requestHeaders?.(),
 				[STUMP_SAVE_BASIC_SESSION_HEADER]: 'false',
 			},
 		}),
-		[pageURL, pageThumbnailURL, sdk],
+		[pageURL, pageThumbnailURL, requestHeaders],
 	)
 
 	const onImageLoaded = useCallback(
@@ -223,8 +226,7 @@ export default function Footer() {
 				urls.map((url) => ({
 					uri: url,
 					headers: {
-						...sdk.customHeaders,
-						Authorization: sdk.authorizationHeader || '',
+						...requestHeaders?.(),
 						[STUMP_SAVE_BASIC_SESSION_HEADER]: 'false',
 					},
 				})),
@@ -268,7 +270,7 @@ export default function Footer() {
 
 			setSliderValue(value)
 		},
-		[currentPage, pageSets.length, footerControls],
+		[currentPage, footerControls, pageSets, getPageSetIndex],
 	)
 
 	const getSliderImageContainerStyles = useCallback(
@@ -386,6 +388,7 @@ export default function Footer() {
 			pageSets,
 			onImageLoaded,
 			readingDirection,
+			getPageSetIndex,
 		],
 	)
 
@@ -398,7 +401,7 @@ export default function Footer() {
 			const pageSetIdx = getPageSetIndex(value)
 			onChangePage(pageSetIdx)
 		},
-		[onChangePage, pageSets.length, readingDirection, footerControls, pageSets],
+		[onChangePage, footerControls, pageSets.length, getPageSetIndex],
 	)
 
 	const previousReadingDirection = usePrevious(readingDirection)
@@ -421,6 +424,7 @@ export default function Footer() {
 		previousReadingDirection,
 		footerControls,
 		getSliderValue,
+		pageSets,
 	])
 
 	// Note: The minimum and maximum track styles are inverted based on the reading direction, as
@@ -485,16 +489,7 @@ export default function Footer() {
 				</Pressable>
 			)
 		},
-		[
-			onChangePage,
-			currentPage,
-			book.pages,
-			pageSource,
-			getGalleryItemSize,
-			onImageLoaded,
-			isTablet,
-			imageSizes,
-		],
+		[onChangePage, currentPage, pageSource, getGalleryItemSize, onImageLoaded, readingDirection],
 	)
 
 	// TODO: swap to flashlist, does NOT like dynamic height though...

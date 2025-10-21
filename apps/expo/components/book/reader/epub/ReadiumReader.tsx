@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { useActiveServer } from '~/components/activeServer'
+import { useActiveServerSafe } from '~/components/activeServer'
 import { useDownload } from '~/lib/hooks'
 import { BookMetadata, ReadiumLocator, ReadiumView, ReadiumViewRef } from '~/modules/readium'
 import { useReaderStore } from '~/stores'
@@ -41,10 +41,14 @@ export default function ReadiumReader({
 	onLocationChanged,
 	...offlineProps
 }: Props) {
-	const {
-		activeServer: { id },
-	} = useActiveServer()
-	const { downloadBook } = useDownload()
+	const serverCtx = useActiveServerSafe()
+
+	const serverId = offlineProps.serverId || serverCtx?.activeServer.id
+	if (!serverId) {
+		throw new Error('No active server ID found for ReadiumReader')
+	}
+
+	const { downloadBook } = useDownload({ serverId })
 
 	const [localUri, setLocalUri] = useState<string | null>(() => offlineProps.offlineUri || null)
 	const [locator, setLocator] = useState<ReadiumLocator | undefined>(() => initialLocator)
@@ -163,6 +167,20 @@ export default function ReadiumReader({
 		[],
 	)
 
+	const headerUrls = useMemo(
+		() =>
+			offlineProps?.serverId
+				? {
+						settingsUrl: `/offline/${book.id}/ebook-settings`,
+						locationsUrl: `/offline/${book.id}/ebook-locations-modal`,
+					}
+				: {
+						settingsUrl: `/server/${serverId}/books/${book.id}/ebook-settings`,
+						locationsUrl: `/server/${serverId}/books/${book.id}/ebook-locations-modal`,
+					},
+		[offlineProps?.serverId, serverId, book.id],
+	)
+
 	const insets = useSafeAreaInsets()
 
 	if (!localUri) return null
@@ -175,10 +193,7 @@ export default function ReadiumReader({
 				filter: `brightness(${brightness * 100}%)`,
 			}}
 		>
-			<ReadiumHeader
-				settingsUrl={`/server/${id}/books/${book.id}/ebook-settings`}
-				locationsUrl={`/server/${id}/books/${book.id}/ebook-locations-modal`}
-			/>
+			<ReadiumHeader {...headerUrls} />
 
 			<ReadiumView
 				ref={readerRef}

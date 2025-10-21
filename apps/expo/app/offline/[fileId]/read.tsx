@@ -46,7 +46,11 @@ export default function Screen() {
 		throw new Error('Downloaded file not found')
 	}
 
-	return record ? <Reader record={record} /> : null
+	if (!record) {
+		return null
+	}
+
+	return <Reader record={record} />
 }
 
 type ReaderProps = {
@@ -72,7 +76,7 @@ function Reader({ record }: ReaderProps) {
 
 	const {
 		preferences: { trackElapsedTime },
-	} = useBookPreferences({ book })
+	} = useBookPreferences({ book, serverId: downloadedFile.serverId })
 	const { pause, resume, totalSeconds, isRunning, reset } = useBookTimer(book?.id || '', {
 		initial: book?.readProgress?.elapsedSeconds,
 		enabled: trackElapsedTime,
@@ -220,6 +224,7 @@ function Reader({ record }: ReaderProps) {
 				initialLocator={initialLocator ? intoReadiumLocator(initialLocator) : undefined}
 				onLocationChanged={onLocationChanged}
 				offlineUri={`${booksDirectory(downloadedFile.serverId)}/${downloadedFile.filename}`}
+				serverId={downloadedFile.serverId}
 			/>
 		)
 	} else if (extension?.match(ARCHIVE_EXTENSION)) {

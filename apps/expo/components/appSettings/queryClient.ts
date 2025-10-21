@@ -4,8 +4,7 @@ export const settingsQueryClient = new QueryClient({
 	defaultOptions: {
 		queries: {
 			retry: false,
-			suspense: true,
-			useErrorBoundary: false,
+			throwOnError: false,
 		},
 	},
 })

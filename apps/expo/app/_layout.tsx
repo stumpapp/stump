@@ -159,6 +159,18 @@ export default function RootLayout() {
 									animation: animationEnabled ? 'default' : 'none',
 								}}
 							/>
+							<Stack.Screen
+								name="offline"
+								options={{
+									headerShown: false,
+									title: '',
+									animation: animationEnabled ? 'default' : 'none',
+									autoHideHomeIndicator: shouldHideStatusBar,
+									contentStyle: {
+										backgroundColor: colors.background.DEFAULT,
+									},
+								}}
+							/>
 						</Stack>
 						<PortalHost />
 					</KeyboardProvider>

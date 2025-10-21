@@ -1,4 +1,4 @@
-import { useSDK } from '@stump/client'
+import { useSDKSafe } from '@stump/client'
 import { MediaMetadata } from '@stump/graphql'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { and, eq } from 'drizzle-orm'
@@ -79,7 +79,7 @@ export function useDownload({ serverId }: UseDownloadParams = {}) {
 	const activeServerCtx = useActiveServerSafe()
 	const serverID = serverId ?? activeServerCtx?.activeServer.id
 
-	const { sdk } = useSDK()
+	const sdkCtx = useSDKSafe()
 
 	const queryClient = useQueryClient()
 
@@ -95,6 +95,12 @@ export function useDownload({ serverId }: UseDownloadParams = {}) {
 			if (!serverID) {
 				throw new Error('No active server available for downloads')
 			}
+
+			if (!sdkCtx?.sdk) {
+				throw new Error('SDK is not initialized')
+			}
+
+			const { sdk } = sdkCtx
 
 			await ensureDirectoryExists(booksDirectory(serverID))
 

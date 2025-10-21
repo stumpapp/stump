@@ -15,3 +15,5 @@ export const useSDK = () => {
 	}
 	return context
 }
+
+export const useSDKSafe = () => useContext(SDKContext)

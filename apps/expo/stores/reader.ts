@@ -4,8 +4,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 
-import { useActiveServer } from '~/components/activeServer'
-import { ImageBasedBookRef } from '~/components/book/reader/image'
+import { useActiveServerSafe } from '~/components/activeServer'
+import { ImageReaderBookRef } from '~/components/book/reader/image/context'
 
 import { ZustandMMKVStorage } from './store'
 
@@ -138,13 +138,18 @@ export const useReaderStore = create<ReaderStore>()(
 )
 
 type Params = {
-	book: ImageBasedBookRef
+	book: ImageReaderBookRef
+	serverId?: string
 }
 
-export const useBookPreferences = ({ book }: Params) => {
-	const {
-		activeServer: { id: serverID },
-	} = useActiveServer()
+export const useBookPreferences = ({ book, ...params }: Params) => {
+	const serverCtx = useActiveServerSafe()
+
+	const serverID = serverCtx?.activeServer.id || params.serverId
+
+	if (!serverID) {
+		throw new Error('No active server ID found for book preferences')
+	}
 
 	const store = useReaderStore((state) => state)
 

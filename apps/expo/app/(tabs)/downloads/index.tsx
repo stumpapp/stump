@@ -1,7 +1,7 @@
 import { FlashList } from '@shopify/flash-list'
 import { desc, eq } from 'drizzle-orm'
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
-import { Link, useRouter } from 'expo-router'
+import { useRouter } from 'expo-router'
 import { Pressable, View } from 'react-native'
 
 import { Text } from '~/components/ui'
@@ -16,21 +16,21 @@ export default function Screen() {
 			.leftJoin(seriesRefs, eq(downloadedFiles.seriesId, seriesRefs.id))
 			.leftJoin(libraryRefs, eq(seriesRefs.libraryId, libraryRefs.id))
 			.orderBy(
-				desc(downloadedFiles.downloadedAt),
 				desc(unsyncedReadProgress.lastModified),
+				desc(downloadedFiles.downloadedAt),
 				desc(libraryRefs.id),
 			),
 	)
 
 	const router = useRouter()
 
-	console.log('Downloaded files with joins:', data)
+	// console.log('Downloaded files with joins:', data)
 
 	return (
 		<FlashList
 			data={data}
 			renderItem={({ item }) => (
-				<Pressable onPress={() => router.push(`/downloads/${item.downloaded_files.id}/read`)}>
+				<Pressable onPress={() => router.push(`/offline/${item.downloaded_files.id}/read`)}>
 					{({ pressed }) => (
 						<View className="text-foreground" style={{ opacity: pressed ? 0.7 : 1 }}>
 							<Text>{item.downloaded_files.filename}</Text>

@@ -65,6 +65,10 @@ export type BookPreferences = {
 	 * Whether or not the page 2 should be displayed separately. This will have no effect if the book is not image-based
 	 */
 	secondPageSeparate: boolean
+	/**
+	 * Whether the Ctrl key (or also Cmd key on Mac) is required to use panning and zooming.
+	 */
+	panzoomWithoutCtrl?: boolean
 }
 
 /**
@@ -138,6 +142,7 @@ export const DEFAULT_BOOK_PREFERENCES = {
 	},
 	doublePageBehavior: 'off',
 	secondPageSeparate: false,
+	panWithoutCtrl: false,
 	trackElapsedTime: true,
 	tapSidesToNavigate: true,
 } as const

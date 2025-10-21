@@ -92,6 +92,7 @@ const settingsAsBookPreferences = (settings: ReaderSettings): BookPreferences =>
 	doublePageBehavior: settings.doublePageBehavior,
 	fontFamily: settings.fontFamily,
 	secondPageSeparate: settings.secondPageSeparate,
+	panzoomWithoutCtrl: settings.panzoomWithoutCtrl,
 })
 
 const buildPreferences = (

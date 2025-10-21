@@ -154,6 +154,16 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 					</Label>
 
 					<Label className="flex items-center justify-between px-1">
+						<span>Pan and zoom without Ctrl / Cmd</span>
+						<RawSwitch
+							primaryRing
+							variant="primary"
+							checked={activeSettings.panzoomWithoutCtrl}
+							onCheckedChange={(checked) => onPreferenceChange({ panzoomWithoutCtrl: checked })}
+						/>
+					</Label>
+
+					<Label className="flex items-center justify-between px-1">
 						<span>Tap sides to navigate</span>
 						<RawSwitch
 							primaryRing

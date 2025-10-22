@@ -6,7 +6,7 @@ import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
 import { useKeepAwake } from 'expo-keep-awake'
 import * as NavigationBar from 'expo-navigation-bar'
 import { useLocalSearchParams } from 'expo-router'
-import { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { match, P } from 'ts-pattern'
 import urlJoin from 'url-join'
 
@@ -17,6 +17,7 @@ import { booksDirectory, thumbnailsDirectory, unpackedBookDirectory } from '~/li
 import { useAppState } from '~/lib/hooks'
 import { intoReadiumLocator } from '~/modules/readium'
 import { ReadiumLocator } from '~/modules/readium/src/Readium.types'
+import StumpStreamer from '~/modules/streamer'
 import { useBookPreferences, useBookTimer, useReaderStore } from '~/stores/reader'
 
 type Params = {
@@ -59,6 +60,7 @@ type ReaderProps = {
 		unsynced_read_progress: typeof unsyncedReadProgress.$inferSelect | null
 	}
 }
+
 function Reader({ record }: ReaderProps) {
 	const downloadedFile = useMemo(() => record.downloaded_files, [record])
 
@@ -73,6 +75,22 @@ function Reader({ record }: ReaderProps) {
 		() => buildBook(downloadedFile, unsyncedProgress),
 		[downloadedFile, unsyncedProgress],
 	)
+
+	const [isStreamerInitialized, setIsStreamerInitialized] = useState(false)
+	const [isStreamerReady, setIsStreamerReady] = useState(false)
+
+	useEffect(() => {
+		if (isStreamerInitialized) return
+
+		if (book.extension.match(ARCHIVE_EXTENSION)) {
+			setIsStreamerInitialized(true)
+			StumpStreamer.initializeBook({
+				bookId: book.id,
+				filePath: downloadedFile.uri,
+				cacheDir: unpackedBookDirectory(downloadedFile.serverId, book.id),
+			}).then(({ success }) => setIsStreamerReady(success))
+		}
+	}, [book, isStreamerInitialized, downloadedFile])
 
 	const {
 		preferences: { trackElapsedTime },
@@ -169,11 +187,9 @@ function Reader({ record }: ReaderProps) {
 		[book.id, downloadedFile.serverId, updateEbookProgress],
 	)
 
-	// TODO: Obviously wrong
 	const pageURL = useCallback(
-		(page: number) =>
-			urlJoin(unpackedBookDirectory(downloadedFile.serverId, downloadedFile.id), `${page}.jpg`),
-		[downloadedFile.serverId, downloadedFile.id],
+		(page: number) => StumpStreamer.bookPageUrl(downloadedFile.id, page),
+		[downloadedFile.id],
 	)
 
 	const setIsReading = useReaderStore((state) => state.setIsReading)
@@ -228,6 +244,7 @@ function Reader({ record }: ReaderProps) {
 			/>
 		)
 	} else if (extension?.match(ARCHIVE_EXTENSION)) {
+		if (!isStreamerReady) return null
 		return (
 			<ImageBasedReader
 				initialPage={1}

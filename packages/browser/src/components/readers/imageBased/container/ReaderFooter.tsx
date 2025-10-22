@@ -65,66 +65,88 @@ export default function ReaderFooter() {
 
 	const renderItem = useCallback(
 		(idx: number, indexes: number[]) => {
+			const directionRespectingIdx =
+				readingDirection === ReadingDirection.Rtl ? pageSets.length - 1 - idx : idx
+
+			const isDoubleSpread = indexes.length === 2
+			const isLandscape = (imageSizes?.[directionRespectingIdx]?.ratio || 0) >= 1
+			const isCurrentSet = currentPageSetIdx === idx
+
+			let pageSetSize = {
+				width: 100,
+				height: 100 / thumbnailRatio,
+			}
+			let containerSize
+
+			if (isLandscape || isDoubleSpread) {
+				pageSetSize = {
+					height: pageSetSize.height,
+					width: pageSetSize.width * 2,
+				}
+			}
+
+			if (!isCurrentSet) {
+				containerSize = {
+					height: pageSetSize.height * SIZE_MODIFIER + 10, // add space for the translateY(-10px)
+					width: pageSetSize.width,
+				}
+			} else {
+				containerSize = {
+					height: pageSetSize.height * SIZE_MODIFIER + 10, // add space for the translateY(-10px)
+					width: pageSetSize.width * SIZE_MODIFIER,
+				}
+				pageSetSize = {
+					height: pageSetSize.height * SIZE_MODIFIER,
+					width: pageSetSize.width * SIZE_MODIFIER,
+				}
+			}
+
 			return (
-				<div className="flex h-full items-center">
-					{indexes.map((index) => {
-						const url = sdk.media.bookPageURL(book.id, index + 1)
-						const imageSize = imageSizes[index]
-						const isLandscape = (imageSize?.ratio || 0) >= 1
-						const isCurrentSet = currentPageSetIdx === idx
-
-						let containerSize = {
-							width: 100,
-							height: 100 / thumbnailRatio,
-						}
-
-						if (isLandscape) {
-							containerSize = {
-								height: containerSize.height,
-								width: containerSize.width * 2,
-							}
-						}
-
-						if (isCurrentSet) {
-							containerSize = {
-								height: containerSize.height * SIZE_MODIFIER,
-								width: containerSize.width * SIZE_MODIFIER,
-							}
-						}
-
-						return (
-							<div className="flex flex-1 flex-col gap-1" key={index}>
-								<div
-									onClick={() => setCurrentPage(index + 1)}
-									className={cn(
-										'flex cursor-pointer items-center overflow-hidden rounded-lg border-2 border-solid border-transparent shadow-xl transition duration-300 hover:border-edge-brand',
-										{
-											'rounded-[10px] border-edge-brand': isCurrentSet,
-										},
-									)}
-									style={{
-										...containerSize,
-										transform: isCurrentSet ? 'translateY(-10px)' : 'translateY(0px)',
-									}}
-								>
-									<EntityImage
-										src={url}
-										className="h-full w-full object-cover"
-										onLoad={({ height, width }) =>
-											setPageSize(index, { height, width, ratio: width / height })
-										}
-									/>
-								</div>
-								{!isCurrentSet && (
-									<Text className="text-center text-xs text-[#898d94]">{index + 1}</Text>
-								)}
-							</div>
-						)
-					})}
+				<div className="flex flex-col justify-end" style={containerSize}>
+					<div
+						className={cn(
+							'flex cursor-pointer overflow-hidden rounded-lg border-2 border-transparent shadow-xl transition duration-300 hover:border-edge-brand',
+							{ 'rounded-[10px] border-edge-brand': isCurrentSet },
+						)}
+						style={{
+							...pageSetSize,
+							transform: isCurrentSet ? 'translateY(-10px)' : 'translateY(0px)',
+						}}
+					>
+						{indexes.map((index) => (
+							<EntityImage
+								src={sdk.media.bookPageURL(book.id, index + 1)}
+								className="h-full w-full object-cover"
+								key={index}
+								onLoad={({ height, width }) =>
+									setPageSize(index, { height, width, ratio: width / height })
+								}
+								onClick={() => setCurrentPage(index + 1)}
+							/>
+						))}
+					</div>
+					{!isCurrentSet && (
+						<Text size="sm" className="shrink-0 text-center text-[#898d94]">
+							{[...indexes]
+								.sort((a, b) => a - b)
+								.map((i) => i + 1)
+								.join('-')}
+						</Text>
+					)}
 				</div>
 			)
 		},
-		[imageSizes, sdk, book.id, setCurrentPage, setPageSize, currentPageSetIdx, thumbnailRatio],
+		[
+			imageSizes,
+			sdk,
+			book.id,
+			setCurrentPage,
+			setPageSize,
+			currentPageSetIdx,
+			thumbnailRatio,
+			pageSets.length,
+			readingDirection,
+		],
 	)
 
 	return (
@@ -142,8 +164,8 @@ export default function ReaderFooter() {
 					height:
 						(100 / thumbnailRatio) * SIZE_MODIFIER + // largest item height
 						12 + // scrollbar vertical height
-						10 + // translateY padding (works perfectly up to here if using display: 'flex')
-						26, // estimated weirdness due to Virtuoso using display: 'inline-block' instead of display: 'flex'
+						10 + // translateY padding
+						8, // add some vertical padding between the scrollbar and items
 				}}
 				horizontalDirection
 				data={pageSets}
@@ -179,7 +201,12 @@ export default function ReaderFooter() {
 					)}
 
 					<Text className="text-sm text-[#898d94]">
-						{currentSet.map((idx) => idx + 1).join('-')} of {book.pages}
+						{[...currentSet]
+							.map((idx) => idx + 1)
+							.sort((a, b) => a - b)
+							.join('-')}
+						{' of '}
+						{book.pages}
 					</Text>
 				</div>
 			</div>
@@ -200,6 +227,7 @@ const List = forwardRef<HTMLDivElement, ListProps>(({ children, ...props }, ref)
 	return (
 		// note: className="flex" does not actually apply here. style={{ ...style, display: 'flex' }} works, however that breaks the list
 		// length calculations (the last few items do not show up) since it overrides the existing display: 'inline-block' used by Virtuoso.
+		// we do not need to use flex anyways and we don't need this List component anymore either.
 		<div className="flex items-center" ref={ref} {...props}>
 			{children}
 		</div>
@@ -210,12 +238,14 @@ List.displayName = 'List'
 const Item = forwardRef<HTMLDivElement, ItemProps<number[]>>(
 	({ children, style, ...props }, ref) => {
 		return (
+			// note: nor does className="flex" actually apply here.
 			<div
 				className="flex flex-1 select-none items-center px-1"
 				ref={ref}
 				{...props}
 				style={{
 					...style,
+					verticalAlign: 'bottom',
 				}}
 			>
 				{children}

@@ -103,17 +103,23 @@ function Reader({ record }: ReaderProps) {
 		setIsStreamerInitialized(success)
 	}, [book.id, downloadedFile.serverId, downloadedFile.uri])
 
-	useEffect(() => {
-		if (isStreamerInitialized) return
+	useEffect(
+		() => {
+			if (isStreamerInitialized) return
 
-		if (book.extension.match(ARCHIVE_EXTENSION)) {
-			initializeStreamer()
+			if (book.extension.match(ARCHIVE_EXTENSION)) {
+				initializeStreamer()
 
-			return () => {
-				StumpStreamer.cleanupBook(book.id)
+				return () => {
+					if (isStreamerInitialized) {
+						StumpStreamer.cleanupBook(book.id)
+					}
+				}
 			}
-		}
-	}, [book, isStreamerInitialized, initializeStreamer])
+		},
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[isStreamerInitialized],
+	)
 
 	const {
 		preferences: { trackElapsedTime },
@@ -211,8 +217,8 @@ function Reader({ record }: ReaderProps) {
 	)
 
 	const pageURL = useCallback(
-		(page: number) => StumpStreamer.getPageURL(downloadedFile.id, page) || '',
-		[downloadedFile.id],
+		(page: number) => StumpStreamer.getPageURL(book.id, page) || '',
+		[book.id],
 	)
 
 	const setIsReading = useReaderStore((state) => state.setIsReading)

@@ -5,6 +5,8 @@ import { Api } from '@stump/sdk'
 import { Book, Folder } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
+import { usePreferences } from '@/hooks/usePreferences'
+
 import { EntityImage } from '../entity'
 
 type Props = {
@@ -21,6 +23,9 @@ export default function FileThumbnail({
 	containerClassName,
 }: Props) {
 	const { sdk } = useSDK()
+	const {
+		preferences: { thumbnailRatio },
+	} = usePreferences()
 	/**
 	 * A boolean state to keep track of whether or not we should show the fallback icon. This
 	 * will be set to true if the image fails to load
@@ -80,7 +85,7 @@ export default function FileThumbnail({
 
 	const sizeClasses = cn('h-14', { 'h-20': size === 'md' })
 	const className = cn(
-		'flex aspect-[2/3] w-auto items-center justify-center rounded-sm border-[0.5px] border-edge bg-sidebar shadow-sm',
+		'flex w-auto items-center justify-center rounded-sm border-[0.5px] border-edge bg-sidebar shadow-sm',
 		sizeClasses,
 		containerClassName,
 	)
@@ -88,7 +93,7 @@ export default function FileThumbnail({
 
 	if (isDirectory) {
 		return (
-			<div className={className}>
+			<div className={className} style={{ aspectRatio: thumbnailRatio }}>
 				<Folder className={cn('text-foreground-muted', iconSizes)} />
 			</div>
 		)
@@ -96,7 +101,7 @@ export default function FileThumbnail({
 
 	if (showFallback || !book) {
 		return (
-			<div className={className} onClick={attemptReload}>
+			<div className={className} onClick={attemptReload} style={{ aspectRatio: thumbnailRatio }}>
 				<Book className={cn('text-foreground-muted', iconSizes)} />
 			</div>
 		)
@@ -104,7 +109,8 @@ export default function FileThumbnail({
 
 	return (
 		<EntityImage
-			className={cn('aspect-[2/3] w-auto rounded-sm object-cover', sizeClasses)}
+			className={cn('w-auto rounded-sm object-cover', sizeClasses)}
+			style={{ aspectRatio: thumbnailRatio }}
 			src={sdk.media.thumbnailURL(book.id)}
 			onError={() => setShowFallback(true)}
 		/>

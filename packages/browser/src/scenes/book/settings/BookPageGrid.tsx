@@ -6,6 +6,7 @@ import AutoSizer from 'react-virtualized-auto-sizer'
 import { useMediaMatch } from 'rooks'
 
 import { EntityImage } from '@/components/entity'
+import { usePreferences } from '@/hooks/usePreferences'
 
 type Props = {
 	selectedPage?: number
@@ -60,6 +61,9 @@ const List = ({
 	getScrollElement,
 }: ListProps) => {
 	const { sdk } = useSDK()
+	const {
+		preferences: { thumbnailRatio },
+	} = usePreferences()
 	const isAtLeastSmall = useMediaMatch('(min-width: 640px)')
 	const isAtLeastMedium = useMediaMatch('(min-width: 768px)')
 
@@ -75,7 +79,7 @@ const List = ({
 
 	const getWidth = useCallback(() => width / colsPerRow, [colsPerRow, width])
 
-	const getSize = useCallback(() => getWidth() * 1.5, [getWidth])
+	const getSize = useCallback(() => getWidth() / thumbnailRatio, [getWidth, thumbnailRatio])
 
 	const rowVirtualizer = useVirtualizer({
 		count: Math.ceil(pages / Math.floor(width / getWidth())),
@@ -120,13 +124,14 @@ const List = ({
 										key={pageNumber}
 										src={imageUrl}
 										className={cx(
-											'aspect-[2/3] h-auto rounded-lg object-cover transition-colors duration-100',
+											'h-auto rounded-md object-cover transition-colors duration-100',
 											pageNumber === selectedPage
 												? 'ring-2 ring-edge-brand'
 												: 'ring-1 ring-edge hover:ring-edge-brand',
 										)}
 										style={{
 											width: `${getWidth() - 8}px`,
+											aspectRatio: thumbnailRatio,
 										}}
 										onClick={() => onSelectPage(pageNumber)}
 									/>

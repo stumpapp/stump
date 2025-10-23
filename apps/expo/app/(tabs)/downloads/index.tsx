@@ -1,10 +1,9 @@
 import { FlashList } from '@shopify/flash-list'
 import { desc, eq } from 'drizzle-orm'
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
-import { useRouter } from 'expo-router'
-import { Pressable, View } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
-import { Text } from '~/components/ui'
+import { DownloadRowItem, intoDownloadedFile } from '~/components/downloads'
 import { db, downloadedFiles, libraryRefs, seriesRefs, unsyncedReadProgress } from '~/db'
 
 export default function Screen() {
@@ -22,26 +21,20 @@ export default function Screen() {
 			),
 	)
 
-	const router = useRouter()
-
 	// console.log('Downloaded files with joins:', data)
+	// TODO: A reading now section like in server stack
+	// TODO: 1-2 other curated sections? Only if config to disable them bc i can see ppl not wanting it for downloads
+	// TODO: Display as grid option?
 
 	return (
-		<FlashList
-			data={data}
-			renderItem={({ item }) => (
-				<Pressable onPress={() => router.push(`/offline/${item.downloaded_files.id}/read`)}>
-					{({ pressed }) => (
-						<View className="text-foreground" style={{ opacity: pressed ? 0.7 : 1 }}>
-							<Text>
-								{item.downloaded_files.filename} - {item.downloaded_files.pages} pages
-							</Text>
-						</View>
-					)}
-				</Pressable>
-			)}
-			keyExtractor={(item) => item.downloaded_files.id}
-			contentContainerStyle={{ padding: 16 }}
-		/>
+		<SafeAreaView style={{ flex: 1 }} edges={['left', 'right']}>
+			<FlashList
+				data={data}
+				renderItem={({ item }) => <DownloadRowItem downloadedFile={intoDownloadedFile(item)} />}
+				keyExtractor={(item) => item.downloaded_files.id}
+				contentContainerStyle={{ padding: 16 }}
+				contentInsetAdjustmentBehavior="always"
+			/>
+		</SafeAreaView>
 	)
 }

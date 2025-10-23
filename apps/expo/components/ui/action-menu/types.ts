@@ -16,6 +16,7 @@ export type ActionMenuItem = {
 		android: LucideIcon
 	}
 	onPress: () => void
+	role?: 'default' | 'destructive' | 'cancel'
 }
 
 export type ActionMenuProps = {

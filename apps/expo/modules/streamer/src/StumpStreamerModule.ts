@@ -26,6 +26,16 @@ class StumpStreamer {
 	}
 
 	/**
+	 * Generate a thumbnail from the first valid page of an archive
+	 *
+	 * @param archivePath Path to the archive file (can be file:// URI or file system path)
+	 * @param outputDir Directory where thumbnail.jpg will be saved
+	 */
+	async generateThumbnail(archivePath: string, outputDir: string) {
+		await this.nativeModule.generateThumbnail(archivePath, outputDir)
+	}
+
+	/**
 	 * Get the URL for a specific page of a book
 	 *
 	 * @param bookId The ID of the book
@@ -60,6 +70,17 @@ class StumpStreamer {
 	 */
 	async stopServer() {
 		await this.nativeModule.stopServer()
+	}
+
+	/**
+	 * Get the file URI for a thumbnail if it exists
+	 *
+	 * @param bookId The ID of the book
+	 * @param cacheDir Directory where thumbnail.jpg would be located
+	 * @returns File URI to thumbnail.jpg if it exists, null otherwise
+	 */
+	getThumbnailPath(bookId: string, cacheDir: string): string | null {
+		return this.nativeModule.getThumbnailPath(bookId, cacheDir)
 	}
 
 	/**

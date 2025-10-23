@@ -26,7 +26,7 @@ export function ActionMenu({ groups }: ActionMenuProps) {
 				</ContextMenu.Trigger>
 				<ContextMenu.Items>
 					{flattenedItems.map((item, index) => (
-						<Button key={index} systemImage={item.icon.ios} onPress={item.onPress}>
+						<Button key={index} systemImage={item.icon.ios} onPress={item.onPress} role={item.role}>
 							{item.label}
 						</Button>
 					))}

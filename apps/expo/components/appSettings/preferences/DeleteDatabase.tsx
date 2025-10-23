@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-import { Button, Text } from '~/components/ui'
+import { Button, Dialog, Text } from '~/components/ui'
 import { deleteDatabase } from '~/db'
 
 import AppSettingsRow from '../AppSettingsRow'
@@ -17,22 +17,33 @@ export default function DeleteDatabase() {
 	}, [dialogMessage])
 
 	return (
-		<AppSettingsRow icon="ChevronRight" title="Delete Database">
-			<Button
-				size="sm"
-				variant="destructive"
-				onPress={async () => {
-					try {
-						await deleteDatabase(__DEV__)
-						setDialogMessage('Database deleted! Please restart the app.')
-					} catch (error) {
-						console.error('Error deleting database:', error)
-						setDialogMessage('Failed to delete database.')
-					}
-				}}
-			>
-				<Text className="text-foreground">Delete</Text>
-			</Button>
-		</AppSettingsRow>
+		<>
+			<AppSettingsRow icon="ChevronRight" title="Delete Database">
+				<Button
+					size="sm"
+					variant="destructive"
+					onPress={async () => {
+						try {
+							await deleteDatabase(__DEV__)
+							setDialogMessage('Please restart the app.')
+						} catch (error) {
+							console.error('Error deleting database:', error)
+							setDialogMessage('Failed to delete database.')
+						}
+					}}
+				>
+					<Text className="text-foreground">Delete</Text>
+				</Button>
+			</AppSettingsRow>
+
+			<Dialog open={!!dialogMessage} onOpenChange={() => setDialogMessage(null)}>
+				<Dialog.Content>
+					<Dialog.Title>
+						{dialogMessage === 'Please restart the app.' ? 'Database Deleted' : 'Error'}
+					</Dialog.Title>
+					<Dialog.Description>{dialogMessage}</Dialog.Description>
+				</Dialog.Content>
+			</Dialog>
+		</>
 	)
 }

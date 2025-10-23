@@ -4,7 +4,7 @@ import { ReadingDirection } from '@stump/graphql'
 import { motion } from 'framer-motion'
 import { Duration } from 'luxon'
 import { forwardRef, useCallback, useEffect, useMemo, useRef } from 'react'
-import { ItemProps, ListProps, ScrollerProps, Virtuoso, VirtuosoHandle } from 'react-virtuoso'
+import { ItemProps, ScrollerProps, Virtuoso, VirtuosoHandle } from 'react-virtuoso'
 
 import { EntityImage } from '@/components/entity'
 import { usePreferences } from '@/hooks/usePreferences'
@@ -171,7 +171,6 @@ export default function ReaderFooter() {
 				data={pageSets}
 				components={{
 					Item,
-					List,
 					Scroller,
 				}}
 				itemContent={renderItem}
@@ -223,24 +222,11 @@ const Scroller = forwardRef<HTMLDivElement, ScrollerProps>(({ children, ...props
 })
 Scroller.displayName = 'Scroller'
 
-const List = forwardRef<HTMLDivElement, ListProps>(({ children, ...props }, ref) => {
-	return (
-		// note: className="flex" does not actually apply here. style={{ ...style, display: 'flex' }} works, however that breaks the list
-		// length calculations (the last few items do not show up) since it overrides the existing display: 'inline-block' used by Virtuoso.
-		// we do not need to use flex anyways and we don't need this List component anymore either.
-		<div className="flex items-center" ref={ref} {...props}>
-			{children}
-		</div>
-	)
-})
-List.displayName = 'List'
-
 const Item = forwardRef<HTMLDivElement, ItemProps<number[]>>(
 	({ children, style, ...props }, ref) => {
 		return (
-			// note: nor does className="flex" actually apply here.
 			<div
-				className="flex flex-1 select-none items-center px-1"
+				className="select-none px-1"
 				ref={ref}
 				{...props}
 				style={{

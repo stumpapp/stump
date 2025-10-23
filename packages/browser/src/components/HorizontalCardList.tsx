@@ -14,15 +14,22 @@ type Props = {
 }
 
 export default function HorizontalCardList({ title, items, onFetchMore, emptyState }: Props) {
+	const {
+		preferences: { thumbnailRatio },
+	} = usePreferences()
+
 	const virtuosoRef = useRef<VirtuosoHandle>(null)
 
 	const isAtLeastSmall = useMediaMatch('(min-width: 640px)')
 	const isAtLeastMedium = useMediaMatch('(min-width: 768px)')
 
-	const height = useMemo(
-		() => (!isAtLeastSmall ? 330 : !isAtLeastMedium ? 350 : 385),
-		[isAtLeastSmall, isAtLeastMedium],
-	)
+	const height = useMemo(() => {
+		const imageWidth = !isAtLeastSmall ? 160 : !isAtLeastMedium ? 170.656 : 192 // widths from EntityCard
+		const imageHeight = imageWidth / thumbnailRatio
+		const footerHeight = 96 // estimated height of footer
+
+		return imageHeight + footerHeight
+	}, [isAtLeastSmall, isAtLeastMedium, thumbnailRatio])
 
 	const [firstCardRef, firstCardIsInView] = useInViewRef({ threshold: 0.5 })
 	const [lastCardRef, lastCardIsInView] = useInViewRef({ threshold: 0.5 })

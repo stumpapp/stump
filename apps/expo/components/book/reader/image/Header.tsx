@@ -50,12 +50,12 @@ type Props = {
 
 export default function Header({ onShowGlobalSettings }: Props) {
 	const { height } = useDisplay()
-	const { book, currentPage, resetTimer, flatListRef } = useImageBasedReader()
+	const { book, currentPage, resetTimer, flatListRef, serverId } = useImageBasedReader()
 	const {
 		preferences: { readingDirection, readingMode, trackElapsedTime },
 		setBookPreferences,
 		updateGlobalSettings,
-	} = useBookPreferences({ book })
+	} = useBookPreferences({ book, serverId })
 
 	const incognito = useReaderStore((state) => state.globalSettings.incognito)
 	const insets = useSafeAreaInsets()

@@ -37,7 +37,7 @@ export default function ImageBasedReaderContainer({
 			readingMode,
 			secondPageSeparate,
 		},
-	} = useBookPreferences({ book: ctx.book })
+	} = useBookPreferences({ book: ctx.book, serverId: ctx.serverId })
 
 	const inset = useSafeAreaInsets()
 	const performanceMonitor = usePreferencesStore((state) => state.performanceMonitor)

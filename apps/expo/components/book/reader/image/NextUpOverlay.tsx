@@ -10,7 +10,6 @@ import Animated, {
 } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { useActiveServer } from '~/components/activeServer'
 import { BorderAndShadow } from '~/components/BorderAndShadow'
 import { TurboImage } from '~/components/Image'
 import { Button, Heading, icons, Label, Text } from '~/components/ui'
@@ -19,7 +18,7 @@ import { useDisplay } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 import { usePreferencesStore } from '~/stores'
 
-import { NextInSeriesBookRef } from './context'
+import { NextInSeriesBookRef, useImageBasedReader } from './context'
 
 const { X } = icons
 
@@ -30,9 +29,7 @@ type Props = {
 }
 export default function NextUpOverlay({ isVisible, book, onClose }: Props) {
 	const { sdk } = useSDK()
-	const {
-		activeServer: { id: serverID },
-	} = useActiveServer()
+	const { serverId } = useImageBasedReader()
 
 	const router = useRouter()
 	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
@@ -61,13 +58,13 @@ export default function NextUpOverlay({ isVisible, book, onClose }: Props) {
 		router.replace(
 			{
 				// @ts-expect-error: It is fine, expects string literal with [id]
-				pathname: `/server/${serverID}/books/${book.id}`,
+				pathname: `/server/${serverId}/books/${book.id}`,
 			},
 			{
 				withAnchor: true,
 			},
 		)
-	}, [router, serverID, book.id])
+	}, [router, serverId, book.id])
 
 	const insets = useSafeAreaInsets()
 

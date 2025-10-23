@@ -1,20 +1,5 @@
 import ExpoModulesCore
 
-// MARK: - Type-safe Records
-
-/// Configuration for initializing a book for streaming
-struct StreamerConfig: Record {
-  @Field var bookId: String
-  @Field var filePath: String
-  @Field var cacheDir: String
-}
-
-/// Result returned from initializing a book
-struct InitializeBookResult: Record {
-  @Field var port: UInt
-  @Field var success: Bool
-}
-
 public class StumpStreamerModule: Module {
   private let server = StreamerServer.shared
 
@@ -31,32 +16,35 @@ public class StumpStreamerModule: Module {
       self.cleanup()
     }
 
-    AsyncFunction("initializeBook") { (config: StreamerConfig) -> InitializeBookResult in
+    AsyncFunction("initializeBook") { (bookId: String, archivePath: String, cacheDir: String) -> Int in
       let port = try self.server.startServer()
-
-      let bookConfig = BookConfig(
-        bookId: config.bookId,
-        filePath: config.filePath,
-        cacheDir: config.cacheDir
-      )
-      try self.server.registerBook(config: bookConfig)
-
-      return InitializeBookResult(port: port, success: true)
+      
+      let filePath = archivePath.hasPrefix("file://") 
+        ? String(archivePath.dropFirst(7))  
+        : archivePath
+      
+      try self.server.registerBook(bookId: bookId, filePath: filePath, cacheDir: cacheDir)
+      
+      return Int(port)
+     
+    }
+    
+    Function("getPageURL") { (bookId: String, page: Int) -> String? in
+      return self.server.getPageURL(bookId: bookId, page: page)
     }
 
-    AsyncFunction("getPageURL") { (bookId: String, page: Int) -> String? in
-      return self.server.getPageURL(bookId: bookId, page: page)
+    AsyncFunction("getPageCount") { (filePath: String) -> Int in
+      let archivePath = filePath.hasPrefix("file://") 
+          ? String(filePath.dropFirst(7))
+          : filePath
+        
+      let archive = try ZipArchive(path: archivePath)
+      let imageFiles = archive.getImageFiles()
+      return imageFiles.count
     }
 
     AsyncFunction("cleanupBook") { (bookId: String, deleteCache: Bool) in
       self.server.unregisterBook(bookId: bookId, deleteCache: deleteCache)
-    }
-
-    AsyncFunction("prefetchPages") { (bookId: String, startPage: Int, count: Int) in
-      // TODO: Make me aaron
-      // I imagine this would extract pages in the background to speed up the feel. I think I can
-      // just borrow some of the patterns that someone added for PDF stuff
-      print("StumpStreamer: prefetchPages not yet implemented")
     }
 
     Function("isServerRunning") {

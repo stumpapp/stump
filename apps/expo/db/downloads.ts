@@ -1,6 +1,7 @@
 import { MediaMetadata } from '@stump/graphql'
 import { and, eq } from 'drizzle-orm'
 
+import StumpStreamer from '../modules/streamer'
 import { db } from './client'
 import {
 	type DownloadedFile,
@@ -9,6 +10,25 @@ import {
 	type NewDownloadedFile,
 	seriesRefs,
 } from './schema'
+
+// TODO: Support RAR?
+
+/**
+ * Calculate page count for a downloaded file
+ */
+async function calculatePageCount(uri: string, filename: string): Promise<number> {
+	try {
+		const extension = filename.split('.').pop()?.toLowerCase()
+		if (!extension || !['cbz', 'zip'].includes(extension)) {
+			return -1 // Not a comic book archive
+		}
+
+		return await StumpStreamer.getPageCount(uri)
+	} catch (error) {
+		console.warn('Failed to calculate page count:', error)
+		return -1
+	}
+}
 
 /**
  * Parameters for adding a downloaded file
@@ -42,6 +62,8 @@ export class DownloadRepository {
 		file: AddDownloadedFileParams,
 		options?: AddDownloadedFileOptions,
 	): Promise<DownloadedFile> {
+		const pages = await calculatePageCount(file.uri, file.filename)
+
 		return db.transaction(async (tx) => {
 			// Insert or update series reference if provided
 			if (options?.seriesRef) {
@@ -88,6 +110,7 @@ export class DownloadRepository {
 				bookDescription: file.metadata?.summary,
 				bookMetadata: file.metadata as Record<string, unknown>,
 				seriesId: file.seriesId,
+				pages,
 			}
 
 			const result = await tx.insert(downloadedFiles).values(newFile).returning()

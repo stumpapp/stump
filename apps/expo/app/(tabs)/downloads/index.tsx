@@ -33,7 +33,9 @@ export default function Screen() {
 				<Pressable onPress={() => router.push(`/offline/${item.downloaded_files.id}/read`)}>
 					{({ pressed }) => (
 						<View className="text-foreground" style={{ opacity: pressed ? 0.7 : 1 }}>
-							<Text>{item.downloaded_files.filename}</Text>
+							<Text>
+								{item.downloaded_files.filename} - {item.downloaded_files.pages} pages
+							</Text>
 						</View>
 					)}
 				</Pressable>

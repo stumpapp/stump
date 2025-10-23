@@ -19,6 +19,7 @@ export const downloadedFiles = sqliteTable('downloaded_files', {
 	bookDescription: text('book_description'),
 	bookMetadata: text('book_metadata', { mode: 'json' }),
 	seriesId: text('series_id'),
+	pages: integer('pages').default(-1), // Number of pages (for comic books)
 })
 
 /**

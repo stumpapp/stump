@@ -13,7 +13,12 @@ import urlJoin from 'url-join'
 import { ImageBasedReader, ReadiumReader } from '~/components/book/reader'
 import { ImageReaderBookRef } from '~/components/book/reader/image/context'
 import { db, downloadedFiles, epubProgress, unsyncedReadProgress } from '~/db'
-import { booksDirectory, thumbnailsDirectory, unpackedBookDirectory } from '~/lib/filesystem'
+import {
+	booksDirectory,
+	ensureDirectoryExists,
+	thumbnailsDirectory,
+	unpackedBookDirectory,
+} from '~/lib/filesystem'
 import { useAppState } from '~/lib/hooks'
 import { intoReadiumLocator } from '~/modules/readium'
 import { ReadiumLocator } from '~/modules/readium/src/Readium.types'
@@ -79,18 +84,36 @@ function Reader({ record }: ReaderProps) {
 	const [isStreamerInitialized, setIsStreamerInitialized] = useState(false)
 	const [isStreamerReady, setIsStreamerReady] = useState(false)
 
+	const initializeStreamer = useCallback(async () => {
+		const filePath = downloadedFile.uri.startsWith('file://')
+			? decodeURIComponent(downloadedFile.uri.replace('file://', ''))
+			: downloadedFile.uri
+
+		const cacheDir = unpackedBookDirectory(downloadedFile.serverId, book.id)
+		const cacheDirPath = cacheDir.startsWith('file://')
+			? decodeURIComponent(cacheDir.replace('file://', ''))
+			: cacheDir
+
+		await ensureDirectoryExists(cacheDir)
+
+		// TODO: Catch failure
+		const { success } = await StumpStreamer.initializeBook(book.id, filePath, cacheDirPath)
+
+		setIsStreamerReady(success)
+		setIsStreamerInitialized(success)
+	}, [book.id, downloadedFile.serverId, downloadedFile.uri])
+
 	useEffect(() => {
 		if (isStreamerInitialized) return
 
 		if (book.extension.match(ARCHIVE_EXTENSION)) {
-			setIsStreamerInitialized(true)
-			StumpStreamer.initializeBook({
-				bookId: book.id,
-				filePath: downloadedFile.uri,
-				cacheDir: unpackedBookDirectory(downloadedFile.serverId, book.id),
-			}).then(({ success }) => setIsStreamerReady(success))
+			initializeStreamer()
+
+			return () => {
+				StumpStreamer.cleanupBook(book.id)
+			}
 		}
-	}, [book, isStreamerInitialized, downloadedFile])
+	}, [book, isStreamerInitialized, initializeStreamer])
 
 	const {
 		preferences: { trackElapsedTime },
@@ -188,7 +211,7 @@ function Reader({ record }: ReaderProps) {
 	)
 
 	const pageURL = useCallback(
-		(page: number) => StumpStreamer.bookPageUrl(downloadedFile.id, page),
+		(page: number) => StumpStreamer.getPageURL(downloadedFile.id, page) || '',
 		[downloadedFile.id],
 	)
 
@@ -244,6 +267,7 @@ function Reader({ record }: ReaderProps) {
 			/>
 		)
 	} else if (extension?.match(ARCHIVE_EXTENSION)) {
+		// TODO: Spinner or error if failed
 		if (!isStreamerReady) return null
 		return (
 			<ImageBasedReader
@@ -315,8 +339,7 @@ const buildBook = (
 			nodes: [],
 			__typename: 'PaginatedMediaResponse',
 		},
-		// TODO: Fix this
-		pages: -1,
+		pages: downloadedFile.pages ?? 0,
 		thumbnail,
 		// TODO: ebook.bookmarks and ebook.spine
 		metadata: downloadedFile.bookMetadata as ImageReaderBookRef['metadata'] | undefined,

@@ -39,11 +39,12 @@ export default function Footer() {
 		setImageSizes,
 		isOPDS,
 		requestHeaders,
+		serverId,
 	} = useImageBasedReader()
 	const elapsedSeconds = useBookReadTime(book.id)
 	const {
 		preferences: { footerControls = 'slider', trackElapsedTime, readingDirection },
-	} = useBookPreferences({ book })
+	} = useBookPreferences({ book, serverId })
 
 	const galleryRef = useRef<FlatList>(null)
 	const insets = useSafeAreaInsets()

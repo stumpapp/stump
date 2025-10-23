@@ -7,7 +7,6 @@ class ZipArchive {
     private let path: String
 
     // TODO: Should I add more?
-    /// Supported image types
     private static let imageExtensions = Set(["jpg", "jpeg", "png", "gif", "webp", "bmp"])
 
     init(path: String) throws {
@@ -19,8 +18,8 @@ class ZipArchive {
     }
 
     /// Get all image files from the archive, sorted by name
-    func getImageFiles() -> [Archive.Entry] {
-        var imageEntries: [Archive.Entry] = []
+    func getImageFiles() -> [Entry] {
+        var imageEntries: [Entry] = []
 
         for entry in archive {
             let filename = entry.path
@@ -47,7 +46,7 @@ class ZipArchive {
     }
 
     /// Extract an entry's data
-    func extractEntry(_ entry: Archive.Entry) throws -> Data {
+    func extractEntry(_ entry: Entry) throws -> Data {
         var data = Data()
 
         do {

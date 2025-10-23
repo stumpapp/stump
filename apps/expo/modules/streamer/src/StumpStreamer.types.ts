@@ -1,46 +1,13 @@
-/**
- * Configuration for initializing a book for streaming
- */
-export type StreamerConfig = {
-	/**
-	 * Unique identifier for the book, should just be the ID from either:
-	 * - Stump database (for books managed by Stump)
-	 * - UUID from OPDS catalog
-	 */
-	bookId: string
-	/**
-	 * A local absolute path to the book file
-	 */
-	filePath: string
-	/**
-	 * The directory to use for caching extracted pages, should be managed by the
-	 * main expo application
-	 */
-	cacheDir: string
-}
-
-/**
- * Result returned from initializing a book
- */
-export type InitializeBookResult = {
-	/**
-	 * The port number the HTTP server is running on
-	 **/
-	port: number
-	/**
-	 * Whether the initialization was successful
-	 **/
-	success: boolean
-}
-
 export interface StumpStreamerModule {
 	/**
 	 * Initialize streaming for a book. Starts the HTTP server if not already running
 	 * and registers the book for streaming.
-	 * @param config Configuration for the book
-	 * @returns Object containing the server port and success status
+	 * @param bookId The ID of the book
+	 * @param archivePath Path to the archive file
+	 * @param cacheDir Directory to use for caching extracted pages
+	 * @returns The server port number
 	 */
-	initializeBook(config: StreamerConfig): Promise<InitializeBookResult>
+	initializeBook(bookId: string, archivePath: string, cacheDir: string): Promise<number>
 
 	/**
 	 * Get the URL for a specific page of a book
@@ -48,7 +15,7 @@ export interface StumpStreamerModule {
 	 * @param page The page number (1-indexed)
 	 * @returns The URL to access the page, or null if book not found
 	 */
-	getPageURL(bookId: string, page: number): Promise<string | null>
+	getPageURL(bookId: string, page: number): string | null
 
 	/**
 	 * Cleanup a book's resources and optionally delete its cached pages
@@ -75,4 +42,11 @@ export interface StumpStreamerModule {
 	 * Stop the streaming server
 	 */
 	stopServer(): Promise<void>
+
+	/**
+	 * Get the page count for an archive file without initializing the streamer
+	 * @param filePath Path to the archive file
+	 * @returns The number of pages in the archive
+	 */
+	getPageCount(filePath: string): Promise<number>
 }

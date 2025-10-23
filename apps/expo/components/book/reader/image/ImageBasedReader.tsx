@@ -60,10 +60,11 @@ export default function ImageBasedReader({ initialPage, onPastEndReached }: Prop
 		pageSets,
 		currentPage,
 		flatListRef,
+		serverId,
 	} = useImageBasedReader()
 	const {
 		preferences: { readingMode, incognito, readingDirection, doublePageBehavior },
-	} = useBookPreferences({ book })
+	} = useBookPreferences({ book, serverId })
 	const { height, width } = useWindowDimensions()
 
 	const deviceOrientation = useMemo(
@@ -210,11 +211,11 @@ const Page = React.memo(
 		onPastEndReached,
 		// readingDirection,
 	}: PageProps) => {
-		const { book, pageURL, flatListRef, pageSets, setImageSizes, requestHeaders } =
+		const { book, pageURL, flatListRef, pageSets, setImageSizes, requestHeaders, serverId } =
 			useImageBasedReader()
 		const {
 			preferences: { tapSidesToNavigate, readingDirection, allowDownscaling },
-		} = useBookPreferences({ book })
+		} = useBookPreferences({ book, serverId })
 		const { isTablet } = useDisplay()
 
 		const scale = useSharedValue(1)

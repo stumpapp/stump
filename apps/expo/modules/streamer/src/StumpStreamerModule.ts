@@ -7,7 +7,6 @@ const NativeModule = requireNativeModule<NativeStumpStreamerModule>('StumpStream
 
 class StumpStreamer {
 	private nativeModule: NativeStumpStreamerModule
-	private bookPorts: Map<string, number> = new Map()
 
 	constructor(nativeModule: NativeStumpStreamerModule) {
 		this.nativeModule = nativeModule
@@ -16,14 +15,14 @@ class StumpStreamer {
 	/**
 	 * Initialize streaming for a book
 	 *
-	 * @param config Configuration for the book
-	 * @returns Object containing the server port and success status
+	 * @param bookId The ID of the book
+	 * @param archivePath Path to the archive file
+	 * @param cacheDir Directory to use for caching extracted pages
+	 * @returns The server port number
 	 */
-	async initializeBook(config: Parameters<NativeStumpStreamerModule['initializeBook']>[0]) {
-		const result = await this.nativeModule.initializeBook(config)
-		// Cache the port for this book
-		this.bookPorts.set(config.bookId, result.port)
-		return result
+	async initializeBook(bookId: string, archivePath: string, cacheDir: string) {
+		const port = await this.nativeModule.initializeBook(bookId, archivePath, cacheDir)
+		return { port, success: true }
 	}
 
 	/**
@@ -33,24 +32,8 @@ class StumpStreamer {
 	 * @param page The page number (1-indexed)
 	 * @returns The URL to access the page, or null if book not found
 	 */
-	async getPageURL(bookId: string, page: number) {
+	getPageURL(bookId: string, page: number) {
 		return this.nativeModule.getPageURL(bookId, page)
-	}
-
-	/**
-	 * Helper function to get a book page URL (synchronously).
-	 *
-	 * @param bookId The ID of the book
-	 * @param page The page number (1-indexed)
-	 * @returns The URL to access the page
-	 * @throws Error if the book hasn't been initialized
-	 */
-	bookPageUrl(bookId: string, page: number): string {
-		const port = this.bookPorts.get(bookId)
-		if (port === undefined) {
-			throw new Error(`Book "${bookId}" has not been initialized. Call initializeBook() first.`)
-		}
-		return `http://localhost:${port}/books/${bookId}/pages/${page}`
 	}
 
 	/**
@@ -61,18 +44,6 @@ class StumpStreamer {
 	 */
 	async cleanupBook(bookId: string, deleteCache: boolean = false) {
 		await this.nativeModule.cleanupBook(bookId, deleteCache)
-		this.bookPorts.delete(bookId)
-	}
-
-	/**
-	 * Pre-fetch pages in the background to speed up subsequent loads
-	 *
-	 * @param bookId The ID of the book
-	 * @param startPage The starting page number
-	 * @param count Number of pages to prefetch
-	 */
-	async prefetchPages(bookId: string, startPage: number, count: number) {
-		return this.nativeModule.prefetchPages(bookId, startPage, count)
 	}
 
 	/**
@@ -89,7 +60,16 @@ class StumpStreamer {
 	 */
 	async stopServer() {
 		await this.nativeModule.stopServer()
-		this.bookPorts.clear()
+	}
+
+	/**
+	 * Get the page count for an archive file without initializing the streamer
+	 *
+	 * @param filePath Path to the archive file (can be file:// URI or file system path)
+	 * @returns The number of pages in the archive
+	 */
+	async getPageCount(filePath: string): Promise<number> {
+		return this.nativeModule.getPageCount(filePath)
 	}
 }
 

@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "87be8215-c532-49c1-861e-bbf1431fd209",
+  "id": "3c9ac301-5505-4c6f-b794-524cd0d66ff3",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "downloaded_files": {
@@ -76,6 +76,14 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
+        },
+        "pages": {
+          "name": "pages",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": -1
         }
       },
       "indexes": {},

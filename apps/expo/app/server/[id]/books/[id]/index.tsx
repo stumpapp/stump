@@ -1,17 +1,17 @@
 import { useSDK, useSuspenseGraphQL } from '@stump/client'
-import { BookByIdQuery, graphql } from '@stump/graphql'
+import { BookByIdQuery, graphql, UserPermission } from '@stump/graphql'
 import dayjs from 'dayjs'
 import duration from 'dayjs/plugin/duration'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router'
 import { ChevronLeft } from 'lucide-react-native'
-import { useLayoutEffect } from 'react'
+import { useCallback, useLayoutEffect } from 'react'
 import { Platform, Pressable, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { stripHtml } from 'string-strip-html'
 
-import { useActiveServer } from '~/components/activeServer'
+import { useActiveServer, useStumpServer } from '~/components/activeServer'
 import { BookMetaLink } from '~/components/book'
 import { BookActionMenu } from '~/components/book/overview'
 import { InfoRow, InfoSection, InfoStat } from '~/components/book/overview'
@@ -22,6 +22,7 @@ import RefreshControl from '~/components/RefreshControl'
 import { Button, Heading, Text } from '~/components/ui'
 import { Icon } from '~/components/ui/icon'
 import { formatBytes, parseGraphQLDecimal } from '~/lib/format'
+import { useDownload, useIsBookDownloaded } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 import { usePreferencesStore } from '~/stores'
 
@@ -88,8 +89,13 @@ const query = graphql(`
 			}
 			resolvedName
 			series {
+				id
 				resolvedName
 				mediaCount
+			}
+			library {
+				id
+				name
 			}
 			seriesPosition
 			size
@@ -114,6 +120,7 @@ export default function Screen() {
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
+	const { checkPermission } = useStumpServer()
 	const { sdk } = useSDK()
 	const {
 		data: { mediaById: book },
@@ -122,6 +129,23 @@ export default function Screen() {
 	} = useSuspenseGraphQL(query, ['bookById', bookID], {
 		id: bookID,
 	})
+	const { downloadBook } = useDownload({ serverId: serverID })
+
+	const isDownloaded = useIsBookDownloaded(bookID, serverID)
+
+	const onDownloadBook = useCallback(async () => {
+		if (isDownloaded || !book) return
+
+		return await downloadBook({
+			id: book.id,
+			extension: book.extension,
+			libraryId: book.library.id,
+			libraryName: book.library.name,
+			seriesId: book.series.id,
+			seriesName: book.series.resolvedName,
+			metadata: book.metadata || undefined,
+		})
+	}, [isDownloaded, downloadBook, book])
 
 	const router = useRouter()
 	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
@@ -322,9 +346,11 @@ export default function Screen() {
 						>
 							{renderRead()}
 						</Button>
-						<Button variant="secondary" disabled>
-							<Text>Download</Text>
-						</Button>
+						{checkPermission(UserPermission.DownloadFile) && (
+							<Button variant="secondary" disabled={isDownloaded} onPress={onDownloadBook}>
+								<Text>Download</Text>
+							</Button>
+						)}
 					</View>
 
 					{progression && (

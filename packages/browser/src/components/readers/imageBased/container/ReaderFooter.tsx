@@ -40,11 +40,12 @@ export default function ReaderFooter() {
 	)
 
 	const showToolBarChanged = usePreviousIsDifferent(showToolBar)
+	const readingDirectionChanged = usePreviousIsDifferent(readingDirection)
 	useEffect(() => {
 		if (showToolBar) {
 			virtuosoRef.current?.scrollToIndex({
 				align: 'center',
-				behavior: showToolBarChanged ? 'auto' : 'smooth',
+				behavior: showToolBarChanged || readingDirectionChanged ? 'auto' : 'smooth',
 				index: currentPageSetIdx,
 			})
 		}

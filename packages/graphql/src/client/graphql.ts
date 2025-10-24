@@ -3050,6 +3050,18 @@ export type StumpConfig = {
   maxThumbnailConcurrency: Scalars['Int']['output'];
   /** Password hash cost */
   passwordHashCost: Scalars['Int']['output'];
+  /** Whether to enable disk caching for rendered PDF pages. */
+  pdfCachePages: Scalars['Boolean']['output'];
+  /** Whether to enable high-quality rendering with smoothing (slower but better quality). */
+  pdfHighQuality: Scalars['Boolean']['output'];
+  /** The maximum width or height dimension for rendered PDF pages. */
+  pdfMaxDimension: Scalars['Int']['output'];
+  /** Number of pages to pre-render before and after the current page. */
+  pdfPrerenderRange: Scalars['Int']['output'];
+  /** The DPI (dots per inch) to use when rendering PDF pages as images. */
+  pdfRenderDpi: Scalars['Int']['output'];
+  /** The image format to use for rendered PDF pages (webp, png, jpeg). */
+  pdfRenderFormat: Scalars['String']['output'];
   /** Path to the PDFium binary for PDF support. */
   pdfiumPath?: Maybe<Scalars['String']['output']>;
   /** The port from which to serve the application (default: 10801). */

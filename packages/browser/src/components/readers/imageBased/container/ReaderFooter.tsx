@@ -68,11 +68,8 @@ export default function ReaderFooter() {
 
 	const renderItem = useCallback(
 		(idx: number, indexes: number[]) => {
-			const directionRespectingIdx =
-				readingDirection === ReadingDirection.Rtl ? pageSets.length - 1 - idx : idx
-
 			const isDoubleSpread = indexes.length === 2
-			const isLandscape = (imageSizes?.[directionRespectingIdx]?.ratio || 0) >= 1
+			const isLandscape = indexes.some((page) => (imageSizes?.[page]?.ratio || 0) >= 1)
 			const isCurrentSet = currentPageSetIdx === idx
 
 			let pageSetSize = {

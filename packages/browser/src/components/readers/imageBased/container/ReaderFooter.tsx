@@ -1,5 +1,5 @@
 import { useSDK } from '@stump/client'
-import { cn, ProgressBar, Text } from '@stump/components'
+import { cn, ProgressBar, Text, usePreviousIsDifferent } from '@stump/components'
 import { ReadingDirection } from '@stump/graphql'
 import { motion } from 'framer-motion'
 import { Duration } from 'luxon'
@@ -39,14 +39,16 @@ export default function ReaderFooter() {
 		[currentPage, pageSets],
 	)
 
+	const showToolBarChanged = usePreviousIsDifferent(showToolBar)
 	useEffect(() => {
 		if (showToolBar) {
 			virtuosoRef.current?.scrollToIndex({
 				align: 'center',
-				behavior: 'auto',
+				behavior: showToolBarChanged ? 'auto' : 'smooth',
 				index: currentPageSetIdx,
 			})
 		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [showToolBar, currentPageSetIdx])
 
 	const formatDuration = useCallback(() => {

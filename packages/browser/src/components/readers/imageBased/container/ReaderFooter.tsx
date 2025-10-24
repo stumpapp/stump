@@ -136,17 +136,7 @@ export default function ReaderFooter() {
 				</div>
 			)
 		},
-		[
-			imageSizes,
-			sdk,
-			book.id,
-			setCurrentPage,
-			setPageSize,
-			currentPageSetIdx,
-			thumbnailRatio,
-			pageSets.length,
-			readingDirection,
-		],
+		[imageSizes, sdk, book.id, setCurrentPage, setPageSize, currentPageSetIdx, thumbnailRatio],
 	)
 
 	return (
@@ -162,7 +152,7 @@ export default function ReaderFooter() {
 				ref={virtuosoRef}
 				style={{
 					height:
-						(100 / thumbnailRatio) * SIZE_MODIFIER + // largest item height
+						(100 / thumbnailRatio) * SIZE_MODIFIER + // item height (all items have the same fixed height)
 						12 + // scrollbar vertical height
 						10 + // translateY padding
 						8, // add some vertical padding between the scrollbar and items

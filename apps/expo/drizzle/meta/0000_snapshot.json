@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "3c9ac301-5505-4c6f-b794-524cd0d66ff3",
+  "id": "f0204ff6-d804-43ed-9a93-bd43cfacdd46",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "downloaded_files": {
@@ -123,46 +123,8 @@
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
-    "series_refs": {
-      "name": "series_refs",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "server_id": {
-          "name": "server_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "name": {
-          "name": "name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "library_id": {
-          "name": "library_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {}
-    },
-    "unsynced_read_progress": {
-      "name": "unsynced_read_progress",
+    "read_progress": {
+      "name": "read_progress",
       "columns": {
         "id": {
           "name": "id",
@@ -219,11 +181,19 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
+        },
+        "sync_status": {
+          "name": "sync_status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'UNSYNCED'"
         }
       },
       "indexes": {
-        "unsynced_read_progress_book_id_unique": {
-          "name": "unsynced_read_progress_book_id_unique",
+        "read_progress_book_id_unique": {
+          "name": "read_progress_book_id_unique",
           "columns": [
             "book_id"
           ],
@@ -231,9 +201,9 @@
         }
       },
       "foreignKeys": {
-        "unsynced_read_progress_book_id_downloaded_files_id_fk": {
-          "name": "unsynced_read_progress_book_id_downloaded_files_id_fk",
-          "tableFrom": "unsynced_read_progress",
+        "read_progress_book_id_downloaded_files_id_fk": {
+          "name": "read_progress_book_id_downloaded_files_id_fk",
+          "tableFrom": "read_progress",
           "tableTo": "downloaded_files",
           "columnsFrom": [
             "book_id"
@@ -245,6 +215,44 @@
           "onUpdate": "no action"
         }
       },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "series_refs": {
+      "name": "series_refs",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "server_id": {
+          "name": "server_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "library_id": {
+          "name": "library_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "checkConstraints": {}

@@ -1,5 +1,8 @@
+import * as Sentry from '@sentry/react-native'
 import { MediaMetadata } from '@stump/graphql'
 import { and, eq } from 'drizzle-orm'
+
+import { thumbnailsDirectory } from '~/lib/filesystem'
 
 import StumpStreamer from '../modules/streamer'
 import { db } from './client'
@@ -39,6 +42,7 @@ export type AddDownloadedFileParams = {
 	uri: string
 	serverId: string
 	size?: number | null
+	bookName?: string | null
 	metadata?: Partial<MediaMetadata> | null
 	seriesId?: string | null
 }
@@ -63,6 +67,19 @@ export class DownloadRepository {
 		options?: AddDownloadedFileOptions,
 	): Promise<DownloadedFile> {
 		const pages = await calculatePageCount(file.uri, file.filename)
+
+		// TODO: Should this be a background task? Or just don't await the promise?
+		try {
+			await StumpStreamer.generateThumbnail(file.id, file.uri, thumbnailsDirectory(file.serverId))
+		} catch (error) {
+			Sentry.withScope((scope) => {
+				scope.setTag('action', 'generate thumbnail for downloaded file')
+				scope.setExtra('bookID', file.id)
+				scope.setExtra('fileUri', file.uri)
+				Sentry.captureException(error)
+			})
+			console.error('Error generating thumbnail for downloaded file:', error)
+		}
 
 		return db.transaction(async (tx) => {
 			// Insert or update series reference if provided
@@ -106,7 +123,7 @@ export class DownloadRepository {
 				uri: file.uri,
 				serverId: file.serverId,
 				size: file.size,
-				bookName: file.metadata?.title,
+				bookName: file.bookName ?? file.metadata?.title,
 				bookDescription: file.metadata?.summary,
 				bookMetadata: file.metadata as Record<string, unknown>,
 				seriesId: file.seriesId,

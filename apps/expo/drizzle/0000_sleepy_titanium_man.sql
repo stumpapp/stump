@@ -18,14 +18,7 @@ CREATE TABLE `library_refs` (
 	`name` text NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE `series_refs` (
-	`id` text PRIMARY KEY NOT NULL,
-	`server_id` text NOT NULL,
-	`name` text NOT NULL,
-	`library_id` text
-);
---> statement-breakpoint
-CREATE TABLE `unsynced_read_progress` (
+CREATE TABLE `read_progress` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`book_id` text NOT NULL,
 	`server_id` text NOT NULL,
@@ -34,7 +27,14 @@ CREATE TABLE `unsynced_read_progress` (
 	`elapsed_seconds` integer,
 	`percentage` text,
 	`last_modified` integer NOT NULL,
+	`sync_status` text DEFAULT 'UNSYNCED' NOT NULL,
 	FOREIGN KEY (`book_id`) REFERENCES `downloaded_files`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX `unsynced_read_progress_book_id_unique` ON `unsynced_read_progress` (`book_id`);
+CREATE UNIQUE INDEX `read_progress_book_id_unique` ON `read_progress` (`book_id`);--> statement-breakpoint
+CREATE TABLE `series_refs` (
+	`id` text PRIMARY KEY NOT NULL,
+	`server_id` text NOT NULL,
+	`name` text NOT NULL,
+	`library_id` text
+);

@@ -1,11 +1,9 @@
-import { Button, ContextMenu, Host, Image } from '@expo/ui/swift-ui'
+import { Button, ContextMenu, Divider, Host, Image } from '@expo/ui/swift-ui'
 import { View } from 'react-native'
 
 import type { ActionMenuProps } from './types'
 
 export function ActionMenu({ groups }: ActionMenuProps) {
-	const flattenedItems = groups.flatMap((group) => group.items)
-
 	return (
 		<Host matchContents>
 			<ContextMenu>
@@ -25,10 +23,21 @@ export function ActionMenu({ groups }: ActionMenuProps) {
 					</View>
 				</ContextMenu.Trigger>
 				<ContextMenu.Items>
-					{flattenedItems.map((item, index) => (
-						<Button key={index} systemImage={item.icon.ios} onPress={item.onPress} role={item.role}>
-							{item.label}
-						</Button>
+					{groups.map((group, groupIndex) => (
+						<>
+							{group.items.map((item, itemIndex) => (
+								<Button
+									key={`${groupIndex}-${itemIndex}`}
+									systemImage={typeof item.icon === 'string' ? item.icon : item.icon.ios}
+									onPress={item.onPress}
+									role={item.role}
+								>
+									{item.label}
+								</Button>
+							))}
+
+							{groupIndex < groups.length - 1 && <Divider />}
+						</>
 					))}
 				</ContextMenu.Items>
 			</ContextMenu>

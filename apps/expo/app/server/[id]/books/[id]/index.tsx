@@ -4,7 +4,7 @@ import dayjs from 'dayjs'
 import duration from 'dayjs/plugin/duration'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router'
-import { ChevronLeft } from 'lucide-react-native'
+import { ChevronLeft, Loader2 } from 'lucide-react-native'
 import { useCallback, useLayoutEffect } from 'react'
 import { Platform, Pressable, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
@@ -129,12 +129,14 @@ export default function Screen() {
 	} = useSuspenseGraphQL(query, ['bookById', bookID], {
 		id: bookID,
 	})
-	const { downloadBook } = useDownload({ serverId: serverID })
+	const { downloadBook, isDownloading } = useDownload({ serverId: serverID })
 
 	const isDownloaded = useIsBookDownloaded(bookID, serverID)
 
+	const accentColor = usePreferencesStore((state) => state.accentColor)
+
 	const onDownloadBook = useCallback(async () => {
-		if (isDownloaded || !book) return
+		if (isDownloaded || !book || isDownloading) return
 
 		return await downloadBook({
 			id: book.id,
@@ -144,8 +146,9 @@ export default function Screen() {
 			seriesId: book.series.id,
 			seriesName: book.series.resolvedName,
 			metadata: book.metadata || undefined,
+			bookName: book.resolvedName,
 		})
-	}, [isDownloaded, downloadBook, book])
+	}, [isDownloaded, downloadBook, book, isDownloading])
 
 	const router = useRouter()
 	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
@@ -346,8 +349,25 @@ export default function Screen() {
 						>
 							{renderRead()}
 						</Button>
-						{checkPermission(UserPermission.DownloadFile) && (
-							<Button variant="secondary" disabled={isDownloaded} onPress={onDownloadBook}>
+						{checkPermission(UserPermission.DownloadFile) && !isDownloaded && (
+							<Button
+								variant="secondary"
+								disabled={isDownloaded || isDownloading}
+								onPress={onDownloadBook}
+								className="flex-row gap-2"
+							>
+								{isDownloading && (
+									<View className="pointer-events-none animate-spin">
+										<Icon
+											className="h-5 w-5"
+											as={Loader2}
+											style={{
+												// @ts-expect-error: It's fine
+												color: accentColor,
+											}}
+										/>
+									</View>
+								)}
 								<Text>Download</Text>
 							</Button>
 						)}

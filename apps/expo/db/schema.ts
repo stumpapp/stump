@@ -43,12 +43,14 @@ export const libraryRefs = sqliteTable('library_refs', {
 	name: text('name').notNull(),
 })
 
+export const syncStatus = z.enum(['UNSYNCED', 'SYNCING', 'SYNCED', 'ERROR'])
+
 /**
  * Unsynced read progress table
  * Stores reading progress that hasn't been synced to the server yet
  * TODO: Support syncing this when online available
  */
-export const unsyncedReadProgress = sqliteTable('unsynced_read_progress', {
+export const readProgress = sqliteTable('read_progress', {
 	id: integer('id').primaryKey({ autoIncrement: true }),
 	bookId: text('book_id')
 		.unique()
@@ -63,6 +65,7 @@ export const unsyncedReadProgress = sqliteTable('unsynced_read_progress', {
 	lastModified: integer('last_modified', { mode: 'timestamp' })
 		.notNull()
 		.$defaultFn(() => new Date()),
+	syncStatus: text('sync_status').notNull().default(syncStatus.enum.UNSYNCED),
 })
 
 export type DownloadedFile = typeof downloadedFiles.$inferSelect
@@ -74,8 +77,8 @@ export type NewSeriesRef = typeof seriesRefs.$inferInsert
 export type LibraryRef = typeof libraryRefs.$inferSelect
 export type NewLibraryRef = typeof libraryRefs.$inferInsert
 
-export type UnsyncedReadProgress = typeof unsyncedReadProgress.$inferSelect
-export type NewUnsyncedReadProgress = typeof unsyncedReadProgress.$inferInsert
+export type UnsyncedReadProgress = typeof readProgress.$inferSelect
+export type NewUnsyncedReadProgress = typeof readProgress.$inferInsert
 
 export const epubProgress = z.object({
 	chapterTitle: z.string().default(''),

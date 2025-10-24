@@ -18,7 +18,7 @@ export default function DeleteDatabase() {
 
 	return (
 		<>
-			<AppSettingsRow icon="ChevronRight" title="Delete Database">
+			<AppSettingsRow icon="Database" title="Delete Database">
 				<Button
 					size="sm"
 					variant="destructive"

@@ -1,6 +1,6 @@
 import { useSDK } from '@stump/client'
 import { useQuery } from '@tanstack/react-query'
-import { useNavigation, useRouter } from 'expo-router'
+import { useRouter } from 'expo-router'
 import partition from 'lodash/partition'
 import { useCallback, useState } from 'react'
 import { Platform, View } from 'react-native'
@@ -8,6 +8,7 @@ import { ScrollView } from 'react-native-gesture-handler'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { useActiveServer } from '~/components/activeServer'
+import ChevronBackLink from '~/components/ChevronBackLink'
 import {
 	MaybeErrorFeed,
 	OPDSNavigation,
@@ -15,10 +16,7 @@ import {
 	OPDSPublicationGroup,
 } from '~/components/opds'
 import RefreshControl from '~/components/RefreshControl'
-import { icons } from '~/components/ui'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
-
-const { ChevronLeft } = icons
 
 export default function Screen() {
 	const { activeServer } = useActiveServer()
@@ -62,15 +60,13 @@ export default function Screen() {
 
 	const hasSearch = feed?.links.some((link) => link.rel === 'search')
 
-	const navigation = useNavigation()
 	useDynamicHeader({
 		title: activeServer?.name || 'OPDS Feed',
-		headerLeft: () => (
-			<ChevronLeft className="text-foreground" onPress={() => navigation.goBack()} />
-		),
+		headerLeft: () => <ChevronBackLink />,
 		headerSearchBarOptions: hasSearch
 			? {
 					placeholder: 'Search',
+					// @ts-expect-error: NativeSearchBarEvent
 					onChangeText: (e) => setQuery(e.nativeEvent.text),
 					shouldShowHintSearchIcon: true,
 					onSearchButtonPress: () => onSearch(),

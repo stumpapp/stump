@@ -41,6 +41,9 @@ export const booksDirectory = (serverID: string) => serverPath(serverID, 'books'
 
 export const thumbnailsDirectory = (serverID: string) => serverPath(serverID, 'thumbnails')
 
+export const bookThumbnailPath = (serverID: string, bookID: string) =>
+	urlJoin(thumbnailsDirectory(serverID), `${bookID}.jpg`)
+
 export const unpackedDirectory = (serverID: string) => serverCachePath(serverID, 'unpacked')
 
 export const unpackedBookDirectory = (serverID: string, bookID: string) =>

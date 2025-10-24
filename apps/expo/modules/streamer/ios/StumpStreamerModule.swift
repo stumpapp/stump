@@ -33,19 +33,28 @@ public class StumpStreamerModule: Module {
       return self.server.getPageURL(bookId: bookId, page: page)
     }
 
-    AsyncFunction("generateThumbnail") { (archivePath: String, outputDir: String) in
+    AsyncFunction("generateThumbnail") { (bookId: String, archivePath: String, outputDir: String) in
       let filePath = archivePath.hasPrefix("file://") 
           ? String(archivePath.dropFirst(7))
           : archivePath
+      
+      let outputPath = outputDir.hasPrefix("file://")
+          ? String(outputDir.dropFirst(7))
+          : outputDir
         
       try ThumbnailGenerator.shared.generateThumbnail(
+        bookId: bookId,
         archivePath: filePath,
-        outputDir: outputDir
+        outputDir: outputPath
       )
     }
 
     Function("getThumbnailPath") { (bookId: String, cacheDir: String) -> String? in
-      let thumbnailPath = (cacheDir as NSString).appendingPathComponent("thumbnail.jpg")
+      let cachePath = cacheDir.hasPrefix("file://")
+          ? String(cacheDir.dropFirst(7))
+          : cacheDir
+      
+      let thumbnailPath = (cachePath as NSString).appendingPathComponent("\(bookId).jpg")
       
       if FileManager.default.fileExists(atPath: thumbnailPath) {
         return "file://\(thumbnailPath)"

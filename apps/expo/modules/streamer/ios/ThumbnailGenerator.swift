@@ -15,18 +15,20 @@ class ThumbnailGenerator {
     
     /// Generate a thumbnail from the first valid page of an archive
     /// - Parameters:
+    ///   - bookId: The book ID to use for the thumbnail filename
     ///   - archivePath: Path to the archive file
-    ///   - outputDir: Directory where thumbnail.jpg will be saved
+    ///   - outputDir: Directory where {bookId}.jpg will be saved
     /// - Throws: ThumbnailError if generation fails
     func generateThumbnail(
+        bookId: String,
         archivePath: String,
         outputDir: String
     ) throws {
-        logger.info("Generating thumbnail for archive: \(archivePath)")
+        logger.info("Generating thumbnail for book: \(bookId)")
         
         try createOutputDirectoryIfNeeded(at: outputDir)
         
-        let outputPath = (outputDir as NSString).appendingPathComponent("thumbnail.jpg")
+        let outputPath = (outputDir as NSString).appendingPathComponent("\(bookId).jpg")
         
         let archive = try ZipArchive(path: archivePath)
         let imageFiles = archive.getImageFiles()

@@ -12,7 +12,7 @@ import urlJoin from 'url-join'
 
 import { ImageBasedReader, ReadiumReader } from '~/components/book/reader'
 import { ImageReaderBookRef } from '~/components/book/reader/image/context'
-import { db, downloadedFiles, epubProgress, unsyncedReadProgress } from '~/db'
+import { db, downloadedFiles, epubProgress, readProgress, syncStatus } from '~/db'
 import {
 	booksDirectory,
 	ensureDirectoryExists,
@@ -44,7 +44,7 @@ export default function Screen() {
 			.select()
 			.from(downloadedFiles)
 			.where(eq(downloadedFiles.id, fileId))
-			.leftJoin(unsyncedReadProgress, eq(downloadedFiles.id, unsyncedReadProgress.bookId))
+			.leftJoin(readProgress, eq(downloadedFiles.id, readProgress.bookId))
 			.limit(1),
 	)
 
@@ -62,14 +62,14 @@ export default function Screen() {
 type ReaderProps = {
 	record: {
 		downloaded_files: typeof downloadedFiles.$inferSelect
-		unsynced_read_progress: typeof unsyncedReadProgress.$inferSelect | null
+		read_progress: typeof readProgress.$inferSelect | null
 	}
 }
 
 function Reader({ record }: ReaderProps) {
 	const downloadedFile = useMemo(() => record.downloaded_files, [record])
 
-	const unsyncedProgress = useMemo(() => record.unsynced_read_progress, [record])
+	const unsyncedProgress = useMemo(() => record.read_progress, [record])
 
 	const extension = useMemo(
 		() => downloadedFile.filename.split('.').pop()?.toLowerCase(),
@@ -140,7 +140,7 @@ function Reader({ record }: ReaderProps) {
 			...input
 		}: PagedProgressInput & { bookId: string; serverId: string }) => {
 			const result = await db
-				.insert(unsyncedReadProgress)
+				.insert(readProgress)
 				.values({
 					bookId,
 					page: input.page,
@@ -149,11 +149,12 @@ function Reader({ record }: ReaderProps) {
 					serverId,
 				})
 				.onConflictDoUpdate({
-					target: unsyncedReadProgress.bookId,
+					target: readProgress.bookId,
 					set: {
 						page: input.page,
 						elapsedSeconds: totalSeconds,
 						lastModified: new Date(),
+						syncStatus: syncStatus.enum.UNSYNCED,
 					},
 				})
 				.returning()
@@ -181,7 +182,7 @@ function Reader({ record }: ReaderProps) {
 			...epubProgress
 		}: ReadiumLocator & { bookId: string; serverId: string; percentage: number }) => {
 			const result = await db
-				.insert(unsyncedReadProgress)
+				.insert(readProgress)
 				.values({
 					bookId,
 					epubProgress,
@@ -191,7 +192,7 @@ function Reader({ record }: ReaderProps) {
 					serverId,
 				})
 				.onConflictDoUpdate({
-					target: unsyncedReadProgress.bookId,
+					target: readProgress.bookId,
 					set: {
 						epubProgress: epubProgress,
 						elapsedSeconds: totalSeconds,
@@ -292,7 +293,7 @@ function Reader({ record }: ReaderProps) {
 
 const buildBook = (
 	downloadedFile: typeof downloadedFiles.$inferSelect,
-	unsyncedProgress: typeof unsyncedReadProgress.$inferSelect | null,
+	unsyncedProgress: typeof readProgress.$inferSelect | null,
 ): ImageReaderBookRef => {
 	const thumbnail = {
 		// TODO: Don't assume JPG

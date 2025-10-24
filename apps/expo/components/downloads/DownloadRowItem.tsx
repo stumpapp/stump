@@ -26,7 +26,7 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 
 	const readProgress = useMemo(() => downloadedFile.readProgress, [downloadedFile])
 	const isAttemptingSync = useMemo(
-		() => Boolean(readProgress?.syncStatus === syncStatus.enum.UNSYNCED),
+		() => readProgress?.syncStatus === syncStatus.enum.SYNCING,
 		[readProgress],
 	)
 

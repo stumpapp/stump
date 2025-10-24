@@ -5,21 +5,21 @@ import { cn } from '~/lib/utils'
 
 import { SyncIconProps } from './types'
 
-export function SyncIcon({ isAttemptingSync, isSynced }: SyncIconProps) {
+export function SyncIcon({ status }: SyncIconProps) {
+	const isAttemptingSync = status === 'SYNCING'
+
 	return (
 		<View className={cn({ 'animate-spin': isAttemptingSync })}>
 			<Host matchContents>
-				<Image
-					systemName={
-						isAttemptingSync
-							? 'arrow.triangle.2.circlepath'
-							: isSynced
-								? 'checkmark.icloud.fill'
-								: 'wifi.exclamationmark'
-					}
-					size={16}
-				/>
+				<Image systemName={ICONS[status] ?? 'icloud.slash'} size={16} />
 			</Host>
 		</View>
 	)
+}
+
+const ICONS: Record<SyncIconProps['status'], React.ComponentProps<typeof Image>['systemName']> = {
+	ERROR: 'xmark.icloud.fill',
+	SYNCED: 'checkmark.icloud.fill',
+	SYNCING: 'arrow.triangle.2.circlepath',
+	UNSYNCED: 'icloud.slash.fill',
 }

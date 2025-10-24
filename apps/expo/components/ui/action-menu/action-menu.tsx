@@ -29,7 +29,7 @@ export function ActionMenu({ groups, androidProps }: ActionMenuProps) {
 
 	const renderGroup = (group: ActionMenuProps['groups'][number], groupIndex: number) => {
 		return (
-			<Fragment key={groupIndex}>
+			<Fragment key={`action-menu-group-${groupIndex}-items-${group.items.length}`}>
 				{groupIndex > 0 && <DropdownMenuSeparator />}
 				<DropdownMenuGroup>
 					{group.items.map((item, itemIndex) => (
@@ -37,6 +37,7 @@ export function ActionMenu({ groups, androidProps }: ActionMenuProps) {
 							key={itemIndex}
 							onPress={item.onPress}
 							className="flex-row items-center"
+							disabled={item.disabled}
 						>
 							<Icon as={item.icon.android} size={16} className="mr-2 text-foreground" />
 							<Text className="text-lg">{item.label}</Text>

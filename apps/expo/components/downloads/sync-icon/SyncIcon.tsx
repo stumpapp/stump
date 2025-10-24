@@ -1,14 +1,23 @@
-import { CloudCheck, RefreshCw, WifiSync } from 'lucide-react-native'
+import { CloudAlert, CloudCheck, CloudOff, RefreshCw } from 'lucide-react-native'
 
 import { Icon } from '~/components/ui/icon'
 
 import { SyncIconProps } from './types'
 
-export function SyncIcon({ isAttemptingSync, isSynced }: SyncIconProps) {
+export function SyncIcon({ status }: SyncIconProps) {
+	const isAttemptingSync = status === 'SYNCING'
+
 	return (
 		<Icon
 			className={isAttemptingSync ? 'animate-spin' : undefined}
-			as={isAttemptingSync ? RefreshCw : isSynced ? CloudCheck : WifiSync}
+			as={ICONS[status] ?? CloudOff}
 		/>
 	)
+}
+
+const ICONS: Record<SyncIconProps['status'], typeof CloudAlert> = {
+	ERROR: CloudAlert,
+	SYNCED: CloudCheck,
+	SYNCING: RefreshCw,
+	UNSYNCED: CloudOff,
 }

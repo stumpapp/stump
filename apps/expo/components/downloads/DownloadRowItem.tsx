@@ -25,10 +25,7 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 	const thumbnailPath = useMemo(() => getThumbnailPath(downloadedFile), [downloadedFile])
 
 	const readProgress = useMemo(() => downloadedFile.readProgress, [downloadedFile])
-	const isAttemptingSync = useMemo(
-		() => readProgress?.syncStatus === syncStatus.enum.SYNCING,
-		[readProgress],
-	)
+	const status = syncStatus.safeParse(readProgress?.syncStatus).data
 
 	const { width, height } = useListItemSize()
 
@@ -118,9 +115,11 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 								<Text className="text-foreground-muted">{renderSubtitle()}</Text>
 							</View>
 
-							<View className="mt-1">
-								<SyncIcon isAttemptingSync={isAttemptingSync} isSynced={!readProgress} />
-							</View>
+							{status && (
+								<View className="mt-1">
+									<SyncIcon status={status} />
+								</View>
+							)}
 						</View>
 
 						{readProgress && (

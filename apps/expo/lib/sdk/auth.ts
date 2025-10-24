@@ -1,8 +1,9 @@
 import { Api, AuthUser, constants } from '@stump/sdk'
 import { isAxiosError } from 'axios'
+import partition from 'lodash/partition'
 import { match, P } from 'ts-pattern'
 
-import { ManagedToken, ServerConfig, ServerKind } from '~/stores/savedServer'
+import { ManagedToken, SavedServerWithConfig, ServerConfig, ServerKind } from '~/stores/savedServer'
 
 type AuthSDKParams = {
 	config: ServerConfig | null
@@ -127,4 +128,82 @@ export const getOPDSInstance = async ({ config, serverKind, url }: GetOPDSParams
 	}
 
 	return instance
+}
+
+type GetInstancesForServersParams = {
+	getServerToken: (id: string) => Promise<ManagedToken | null>
+	saveToken: (id: string, token: ManagedToken) => Promise<void>
+	getCachedInstance?: (id: string) => Api | undefined
+	onCacheInstance?: (id: string, instance: Api) => void
+}
+
+export const getInstancesForServers = async (
+	servers: SavedServerWithConfig[],
+	{ getServerToken, saveToken, onCacheInstance, getCachedInstance }: GetInstancesForServersParams,
+): Promise<Record<string, Api>> => {
+	const [compatibleServers, incompatibleServers] = partition(
+		servers,
+		(server) =>
+			server.kind === 'stump' &&
+			match(server.config?.auth)
+				.with({ basic: P.shape({ username: P.string, password: P.string }) }, () => true)
+				.with({ bearer: P.string }, () => true)
+				.otherwise(() => false),
+	)
+
+	if (incompatibleServers.length > 0) {
+		console.warn(`Found ${incompatibleServers.length} incompatible servers for progress sync`)
+	}
+
+	if (compatibleServers.length === 0) {
+		console.warn('No compatible servers found for progress sync')
+		return {}
+	}
+
+	const instances: Record<string, Api> = {}
+
+	const getInstanceForServer = async (server: SavedServerWithConfig) => {
+		const storedToken = await getServerToken(server.id)
+		const authMethod = match(server.config?.auth)
+			.with({ bearer: P.string }, () => 'api-key' as const)
+			.otherwise(() => 'token' as const)
+
+		const cachedInstance = onCacheInstance ? getCachedInstance?.(server.id) : undefined
+
+		const instance =
+			cachedInstance ??
+			new Api({
+				baseURL: server.url,
+				authMethod,
+				customHeaders: server.config?.customHeaders,
+			})
+
+		instance.tokens = storedToken || undefined
+		const existingToken = await instance.getOrRefreshTokens()
+
+		try {
+			const authedInstance = await authSDKInstance(instance, {
+				config: server.config,
+				existingToken,
+				saveToken: async (token) => {
+					if (token) {
+						await saveToken(server.id, token)
+					}
+				},
+			})
+
+			if (authedInstance) {
+				onCacheInstance?.(server.id, authedInstance)
+				instances[server.id] = authedInstance
+			} else {
+				console.warn(`Failed to authenticate server ${server.name} for progress sync`)
+			}
+		} catch (error) {
+			console.error(`Failed to authenticate server ${server.name}:`, error)
+		}
+	}
+
+	await Promise.all(compatibleServers.map((server) => getInstanceForServer(server)))
+
+	return instances
 }

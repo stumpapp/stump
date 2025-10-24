@@ -46,6 +46,7 @@ export default function Screen() {
 			.where(eq(downloadedFiles.id, fileId))
 			.leftJoin(readProgress, eq(downloadedFiles.id, readProgress.bookId))
 			.limit(1),
+		[fileId],
 	)
 
 	if (!record && !!updatedAt) {
@@ -278,7 +279,7 @@ function Reader({ record }: ReaderProps) {
 		if (!isStreamerReady) return null
 		return (
 			<ImageBasedReader
-				initialPage={1}
+				initialPage={book.readProgress?.page || 1}
 				book={book}
 				pageURL={pageURL}
 				onPageChanged={onPageChanged}

@@ -17,6 +17,7 @@ export type ActionMenuItem = {
 	}
 	onPress: () => void
 	role?: 'default' | 'destructive' | 'cancel'
+	disabled?: boolean
 }
 
 export type ActionMenuProps = {

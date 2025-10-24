@@ -27,10 +27,11 @@ export function ActionMenu({ groups }: ActionMenuProps) {
 						<>
 							{group.items.map((item, itemIndex) => (
 								<Button
-									key={`${groupIndex}-${itemIndex}`}
+									key={`${groupIndex}-${itemIndex}-${item.label}`}
 									systemImage={typeof item.icon === 'string' ? item.icon : item.icon.ios}
 									onPress={item.onPress}
 									role={item.role}
+									disabled={item.disabled}
 								>
 									{item.label}
 								</Button>

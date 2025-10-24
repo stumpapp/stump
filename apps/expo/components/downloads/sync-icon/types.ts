@@ -1,4 +1,5 @@
+import { syncStatus } from '~/db'
+
 export type SyncIconProps = {
-	isAttemptingSync: boolean
-	isSynced: boolean
+	status: (typeof syncStatus.enum)[keyof typeof syncStatus.enum]
 }

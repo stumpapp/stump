@@ -8,6 +8,7 @@ import { Platform } from 'react-native'
 import ServerErrorBoundary from '~/components/ServerErrorBoundary'
 import { icons } from '~/lib'
 import { useColors } from '~/lib/constants'
+import { useAutoSyncActiveServer } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 import { usePreferencesStore, useUserStore } from '~/stores'
 
@@ -20,6 +21,10 @@ export default function TabLayout() {
 	const accentColor = usePreferencesStore((state) => state.accentColor)
 	const animationEnabled = usePreferencesStore((state) => !state.reduceAnimations)
 	const setUser = useUserStore((state) => state.setUser)
+
+	useAutoSyncActiveServer({
+		enabled: sdk.isAuthed,
+	})
 
 	const { onUnauthenticatedResponse } = useClientContext()
 

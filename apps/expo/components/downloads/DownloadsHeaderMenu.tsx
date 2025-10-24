@@ -2,19 +2,27 @@ import { RefreshCw, Trash } from 'lucide-react-native'
 import { useState } from 'react'
 import Dialog from 'react-native-dialog'
 
-import { useDownload } from '~/lib/hooks'
+import { useDownload, useProgressSync, useProgressToSyncExists } from '~/lib/hooks'
 
 import { ActionMenu } from '../ui/action-menu/action-menu'
+import { useDownloadsFetcherStore } from './store'
 
 export default function DownloadsHeaderMenu() {
 	const [isShowingDeleteConfirm, setIsShowingDeleteConfirm] = useState(false)
+
+	const refetchDownloads = useDownloadsFetcherStore((state) => state.increment)
 
 	const { deleteAllDownloads } = useDownload()
 
 	const onDeleteAllDownloads = async () => {
 		await deleteAllDownloads()
+		refetchDownloads()
 		setIsShowingDeleteConfirm(false)
 	}
+
+	const { syncProgress } = useProgressSync()
+
+	const isUnsyncedProgressExists = useProgressToSyncExists()
 
 	return (
 		<>
@@ -28,9 +36,13 @@ export default function DownloadsHeaderMenu() {
 									android: RefreshCw,
 								},
 								label: 'Attempt Sync',
-								onPress: () => {
-									// TODO: Implement
+								onPress: async () => {
+									if (isUnsyncedProgressExists) {
+										await syncProgress()
+										refetchDownloads()
+									}
 								},
+								disabled: !isUnsyncedProgressExists,
 							},
 						],
 					},

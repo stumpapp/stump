@@ -114,9 +114,13 @@ export default function ReadiumReader({
 		download()
 	}, [localUri, book, downloadBook, store])
 
-	useEffect(() => {
-		store.storeHeaders(ctx.requestHeaders)
-	}, [ctx, store])
+	useEffect(
+		() => {
+			store.storeHeaders(ctx.requestHeaders)
+		},
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[ctx.requestHeaders],
+	)
 
 	useEffect(
 		() => {

@@ -18,6 +18,11 @@ type SyncResult = {
 	syncedCount: number
 }
 
+/**
+ *
+ * @param serverId The ID of the server to attempt syncing progression to
+ * @param api The *authenticated* instance for interacting with that server
+ */
 export const executeSingleServerSync = async (serverId: string, api: Api): Promise<SyncResult> => {
 	const progressRecords = await db
 		.select()
@@ -107,4 +112,20 @@ export const executeSingleServerSync = async (serverId: string, api: Api): Promi
 		failureCount,
 		syncedCount: progressRecords.length - failureCount,
 	}
+}
+
+/**
+ *	Execute progress sync for multiple servers all at once
+ *
+ * @param instances A map of serverId-to-SDK instace
+ */
+export const executeProgressSync = async (
+	instances: Record<string, Api>,
+): Promise<Record<string, SyncResult>> => {
+	const results = Object.entries(instances).map(async ([serverId, api]) => {
+		const result = await executeSingleServerSync(serverId, api)
+		return [serverId, result] as const
+	})
+
+	return Object.fromEntries(await Promise.all(results))
 }

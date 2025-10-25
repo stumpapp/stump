@@ -21,6 +21,10 @@ export type ActionMenuItem = {
 }
 
 export type ActionMenuProps = {
+	icon?: {
+		ios: Pick<ButtonProps, 'systemImage'>['systemImage']
+		android: LucideIcon
+	}
 	groups: {
 		items: ActionMenuItem[]
 	}[]

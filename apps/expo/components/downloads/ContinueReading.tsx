@@ -10,18 +10,18 @@ import { useListItemSize } from '~/lib/hooks'
 import { Heading } from '../ui'
 import DownloadedListItem from './DownloadedListItem'
 import ReadingNow from './ReadingNow'
-import { useDownloadsFetcherStore } from './store'
+import { useDownloadsState } from './store'
 import { intoDownloadedFile } from './types'
 
 export default function ContinueReading() {
 	// Note: This is a workaround for https://github.com/drizzle-team/drizzle-orm/issues/2660
-	const id = useDownloadsFetcherStore((state) => state.fetchCounter)
+	const id = useDownloadsState((state) => state.fetchCounter)
 
 	const { data } = useLiveQuery(
 		db
 			.select()
 			.from(downloadedFiles)
-			.leftJoin(readProgress, eq(downloadedFiles.id, readProgress.bookId))
+			.innerJoin(readProgress, eq(downloadedFiles.id, readProgress.bookId))
 			.leftJoin(seriesRefs, eq(downloadedFiles.seriesId, seriesRefs.id))
 			.leftJoin(libraryRefs, eq(seriesRefs.libraryId, libraryRefs.id))
 			.orderBy(desc(readProgress.lastModified), desc(downloadedFiles.downloadedAt)),

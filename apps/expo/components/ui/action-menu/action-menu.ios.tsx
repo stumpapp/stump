@@ -3,7 +3,7 @@ import { View } from 'react-native'
 
 import type { ActionMenuProps } from './types'
 
-export function ActionMenu({ groups }: ActionMenuProps) {
+export function ActionMenu({ icon, groups }: ActionMenuProps) {
 	return (
 		<Host matchContents>
 			<ContextMenu>
@@ -18,7 +18,7 @@ export function ActionMenu({ groups }: ActionMenuProps) {
 						}}
 					>
 						<Host matchContents>
-							<Image systemName="ellipsis" />
+							<Image systemName={icon?.ios ?? 'ellipsis'} />
 						</Host>
 					</View>
 				</ContextMenu.Trigger>

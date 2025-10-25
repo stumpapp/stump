@@ -2,7 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Stack } from 'expo-router'
 import { Platform } from 'react-native'
 
-import { DownloadsHeaderMenu } from '~/components/downloads'
+import { DownloadsHeaderMenu, DownloadsHeaderSortMenu } from '~/components/downloads'
 import { IS_IOS_24_PLUS } from '~/lib/constants'
 import { usePreferencesStore } from '~/stores'
 
@@ -31,6 +31,7 @@ export default function Screen() {
 					headerLargeTitleStyle: {
 						fontSize: 30,
 					},
+					headerLeft: () => <DownloadsHeaderSortMenu />,
 					headerRight: () => <DownloadsHeaderMenu />,
 				}}
 			/>

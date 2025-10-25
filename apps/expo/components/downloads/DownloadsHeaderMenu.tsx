@@ -6,7 +6,7 @@ import { useDownload, useProgressSync, useProgressToSyncExists } from '~/lib/hoo
 import { usePreferencesStore } from '~/stores'
 
 import { ActionMenu } from '../ui/action-menu/action-menu'
-import { useDownloadsFetcherStore } from './store'
+import { useDownloadsState } from './store'
 
 export default function DownloadsHeaderMenu() {
 	const [isShowingDeleteConfirm, setIsShowingDeleteConfirm] = useState(false)
@@ -18,7 +18,7 @@ export default function DownloadsHeaderMenu() {
 				state.patch({ showCuratedDownloads: value }),
 		}),
 	)
-	const refetchDownloads = useDownloadsFetcherStore((state) => state.increment)
+	const refetchDownloads = useDownloadsState((state) => state.increment)
 
 	const { deleteAllDownloads } = useDownload()
 

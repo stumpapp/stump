@@ -28,6 +28,9 @@ export default function Screen() {
 					headerLargeTitle: true,
 					headerBlurEffect: IS_IOS_24_PLUS ? undefined : 'regular',
 					animation: animationEnabled ? 'default' : 'none',
+					headerLargeTitleStyle: {
+						fontSize: 30,
+					},
 					headerRight: () => <DownloadsHeaderMenu />,
 				}}
 			/>

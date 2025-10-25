@@ -1,8 +1,9 @@
-import { RefreshCw, Trash } from 'lucide-react-native'
+import { RefreshCw, Sparkles, Trash } from 'lucide-react-native'
 import { useState } from 'react'
 import Dialog from 'react-native-dialog'
 
 import { useDownload, useProgressSync, useProgressToSyncExists } from '~/lib/hooks'
+import { usePreferencesStore } from '~/stores'
 
 import { ActionMenu } from '../ui/action-menu/action-menu'
 import { useDownloadsFetcherStore } from './store'
@@ -10,6 +11,13 @@ import { useDownloadsFetcherStore } from './store'
 export default function DownloadsHeaderMenu() {
 	const [isShowingDeleteConfirm, setIsShowingDeleteConfirm] = useState(false)
 
+	const { isCuratedDownloadsEnabled, setIsCuratedDownloadsEnabled } = usePreferencesStore(
+		(state) => ({
+			isCuratedDownloadsEnabled: state.showCuratedDownloads,
+			setIsCuratedDownloadsEnabled: (value: boolean) =>
+				state.patch({ showCuratedDownloads: value }),
+		}),
+	)
 	const refetchDownloads = useDownloadsFetcherStore((state) => state.increment)
 
 	const { deleteAllDownloads } = useDownload()
@@ -30,6 +38,14 @@ export default function DownloadsHeaderMenu() {
 				groups={[
 					{
 						items: [
+							{
+								icon: {
+									ios: 'sparkles.rectangle.stack',
+									android: Sparkles,
+								},
+								label: isCuratedDownloadsEnabled ? 'Hide Curated' : 'Show Curated',
+								onPress: () => setIsCuratedDownloadsEnabled(!isCuratedDownloadsEnabled),
+							},
 							{
 								icon: {
 									ios: 'icloud.and.arrow.up',

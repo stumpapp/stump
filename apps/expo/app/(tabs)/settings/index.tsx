@@ -6,6 +6,7 @@ import { AppDataUsageLink } from '~/components/appSettings/management'
 import {
 	AppLanguage,
 	AppTheme,
+	CuratedDownloads,
 	DefaultServer,
 	DeleteDatabase,
 	ImageCacheActions,
@@ -30,6 +31,7 @@ export default function Screen() {
 					<AppLanguage />
 					<DefaultServer />
 					<ThumbnailRatio />
+					<CuratedDownloads />
 				</View>
 
 				<View>

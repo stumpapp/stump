@@ -6,9 +6,15 @@ import { useCallback } from 'react'
 import { View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
-import { DownloadRowItem, intoDownloadedFile, NoDownloadsOnDevice } from '~/components/downloads'
+import {
+	CuratedDownloadsHeader,
+	DownloadRowItem,
+	intoDownloadedFile,
+	NoDownloadsOnDevice,
+} from '~/components/downloads'
 import { useDownloadsFetcherStore } from '~/components/downloads/store'
 import { db, downloadedFiles, libraryRefs, readProgress, seriesRefs } from '~/db'
+import { usePreferencesStore } from '~/stores'
 
 export default function Screen() {
 	// Note: This is a workaround for https://github.com/drizzle-team/drizzle-orm/issues/2660
@@ -27,6 +33,8 @@ export default function Screen() {
 			.orderBy(desc(readProgress.lastModified), desc(downloadedFiles.downloadedAt)),
 		[id],
 	)
+
+	const showCuratedDownloads = usePreferencesStore((state) => state.showCuratedDownloads)
 
 	useFocusEffect(
 		useCallback(() => {
@@ -62,6 +70,7 @@ export default function Screen() {
 				}}
 				contentInsetAdjustmentBehavior="always"
 				ItemSeparatorComponent={() => <View className="h-6" />}
+				ListHeaderComponent={showCuratedDownloads ? <CuratedDownloadsHeader /> : undefined}
 			/>
 		</SafeAreaView>
 	)

@@ -4,13 +4,14 @@ import { Icon } from '~/components/ui/icon'
 
 import { SyncIconProps } from './types'
 
-export function SyncIcon({ status }: SyncIconProps) {
+export function SyncIcon({ status, size }: SyncIconProps) {
 	const isAttemptingSync = status === 'SYNCING'
 
 	return (
 		<Icon
 			className={isAttemptingSync ? 'animate-spin' : undefined}
 			as={ICONS[status] ?? CloudOff}
+			size={size}
 		/>
 	)
 }

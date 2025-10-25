@@ -5,7 +5,7 @@ import { usePreferencesStore } from '~/stores'
 
 import AppSettingsRow from '../AppSettingsRow'
 
-export default function performanceMonitor() {
+export default function PerformanceMonitor() {
 	const { performanceMonitor, patch } = usePreferencesStore((state) => ({
 		performanceMonitor: state.performanceMonitor,
 		patch: state.patch,

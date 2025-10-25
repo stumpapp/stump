@@ -56,9 +56,11 @@ export default function ReaderFooter() {
 		const duration = Duration.fromObject({ seconds: elapsedSeconds }).reconfigure({ locale })
 
 		let formattedDuration
-		if (elapsedSeconds <= 59) formattedDuration = duration.shiftTo('seconds')
-		else if (elapsedSeconds <= 3599) formattedDuration = duration.shiftTo('minutes', 'seconds')
-		else {
+		if (elapsedSeconds <= 59) {
+			formattedDuration = duration.shiftTo('seconds')
+		} else if (elapsedSeconds <= 3599) {
+			formattedDuration = duration.shiftTo('minutes', 'seconds')
+		} else {
 			const hms = duration.shiftTo('hours', 'minutes', 'seconds')
 			formattedDuration = Duration.fromObject({ hours: hms.hours, minutes: hms.minutes })
 		}

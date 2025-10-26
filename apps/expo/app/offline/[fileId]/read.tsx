@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/react-native'
 import { ARCHIVE_EXTENSION, EBOOK_EXTENSION } from '@stump/client'
 import { PagedProgressInput } from '@stump/graphql'
 import { useMutation } from '@tanstack/react-query'
@@ -12,6 +13,7 @@ import urlJoin from 'url-join'
 
 import { ImageBasedReader, ReadiumReader } from '~/components/book/reader'
 import { ImageReaderBookRef } from '~/components/book/reader/image/context'
+import ServerErrorBoundary from '~/components/ServerErrorBoundary'
 import { db, downloadedFiles, epubProgress, readProgress, syncStatus } from '~/db'
 import {
 	booksDirectory,
@@ -84,6 +86,7 @@ function Reader({ record }: ReaderProps) {
 
 	const [isStreamerInitialized, setIsStreamerInitialized] = useState(false)
 	const [isStreamerReady, setIsStreamerReady] = useState(false)
+	const [streamerError, setStreamerError] = useState<Error | null>(null)
 
 	const initializeStreamer = useCallback(async () => {
 		const filePath = downloadedFile.uri.startsWith('file://')
@@ -97,11 +100,25 @@ function Reader({ record }: ReaderProps) {
 
 		await ensureDirectoryExists(cacheDir)
 
-		// TODO: Catch failure
-		const { success } = await StumpStreamer.initializeBook(book.id, filePath, cacheDirPath)
-
-		setIsStreamerReady(success)
-		setIsStreamerInitialized(success)
+		try {
+			const { success } = await StumpStreamer.initializeBook(book.id, filePath, cacheDirPath)
+			setIsStreamerReady(success)
+			setIsStreamerInitialized(success)
+		} catch (error) {
+			Sentry.withScope((scope) => {
+				scope.setTag('action', 'initialize streamer')
+				scope.setExtra('bookID', book.id)
+				scope.setExtra('filePath', filePath)
+				scope.setExtra('cacheDirPath', cacheDirPath)
+				Sentry.captureException(error)
+			})
+			console.error('Failed to initialize streamer:', error)
+			setStreamerError(
+				error instanceof Error
+					? error
+					: new Error('Failed to initialize streamer. Please reach out for support'),
+			)
+		}
 	}, [book.id, downloadedFile.serverId, downloadedFile.uri])
 
 	useEffect(
@@ -112,6 +129,9 @@ function Reader({ record }: ReaderProps) {
 				initializeStreamer()
 
 				return () => {
+					setIsStreamerReady(false)
+					setIsStreamerInitialized(false)
+					setStreamerError(null)
 					if (isStreamerInitialized) {
 						StumpStreamer.cleanupBook(book.id)
 					}
@@ -275,8 +295,12 @@ function Reader({ record }: ReaderProps) {
 			/>
 		)
 	} else if (extension?.match(ARCHIVE_EXTENSION)) {
-		// TODO: Spinner or error if failed
+		if (!isStreamerReady && streamerError) {
+			return <ServerErrorBoundary error={streamerError} />
+		}
+
 		if (!isStreamerReady) return null
+
 		return (
 			<ImageBasedReader
 				initialPage={book.readProgress?.page || 1}

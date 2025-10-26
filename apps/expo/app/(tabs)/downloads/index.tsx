@@ -1,5 +1,5 @@
 import { FlashList } from '@shopify/flash-list'
-import { asc, desc, eq } from 'drizzle-orm'
+import { asc, desc, eq, inArray } from 'drizzle-orm'
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
 import { useFocusEffect } from 'expo-router'
 import groupBy from 'lodash/groupBy'
@@ -21,7 +21,7 @@ import { usePreferencesStore } from '~/stores'
 import { useSelectionStore } from '~/stores/selection'
 
 export default function Screen() {
-	// Note: This is a workaround for https://github.com/drizzle-team/drizzle-orm/issues/2660
+	// Note: The id is a workaround for https://github.com/drizzle-team/drizzle-orm/issues/2660
 	const { id, increment, sortConfig } = useDownloadsState((state) => ({
 		id: state.fetchCounter,
 		increment: state.increment,
@@ -115,21 +115,31 @@ export default function Screen() {
 		selectionStore.setIsSelectAll(true)
 	}, [data, selectionStore])
 
+	const customSelectionActions = useMemo(
+		() => ({
+			deleteSelection: async (ids: string[]) => {
+				await db.delete(downloadedFiles).where(inArray(downloadedFiles.id, ids)).run()
+				// Trigger re-fetch
+				increment()
+			},
+			// TODO: Support file sharing
+			// shareSelection: async (ids: string[]) => {},
+		}),
+		[increment],
+	)
+
 	useEffect(
 		() => {
 			selectionStore.registerSelectAllCallback(onSelectAll)
+			selectionStore.registerCustomActions(customSelectionActions)
 		},
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[data],
 	)
 
-	// console.log('Downloaded files with joins:', data)
-	// TODO: A reading now section like in server stack
-	// TODO: 1-2 other curated sections? Only if config to disable them bc i can see ppl not wanting it for downloads
 	// TODO: Display as grid option?
 	// TODO: Selection mode to delete multiple at once
 	// TODO: Search downloads
-	// TODO: A few sorting options
 
 	if (!data || data.length === 0) {
 		return (

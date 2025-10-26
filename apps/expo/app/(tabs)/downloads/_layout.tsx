@@ -5,7 +5,7 @@ import { Platform } from 'react-native'
 import { useStore } from 'zustand'
 
 import { DownloadsHeaderMenu, DownloadsHeaderSortMenu } from '~/components/downloads'
-import { SelectionLeftScreenHeader } from '~/components/selection'
+import { SelectionLeftScreenHeader, SelectionRightScreenHeader } from '~/components/selection'
 import { IS_IOS_24_PLUS } from '~/lib/constants'
 import { usePreferencesStore } from '~/stores'
 import { createSelectionStore, SelectionContext } from '~/stores/selection'
@@ -42,7 +42,9 @@ export default function Screen() {
 						},
 						headerLeft: () =>
 							isSelecting ? <SelectionLeftScreenHeader /> : <DownloadsHeaderSortMenu />,
-						headerRight: () => (isSelecting ? undefined : <DownloadsHeaderMenu />),
+						headerRight: () =>
+							isSelecting ? <SelectionRightScreenHeader /> : <DownloadsHeaderMenu />,
+						// TODO: Check in on unstable_headerRightItems once available
 					}}
 				/>
 			</QueryClientProvider>

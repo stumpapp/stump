@@ -1,14 +1,19 @@
+import { Host, Image } from '@expo/ui/swift-ui'
 import { useRouter } from 'expo-router'
-import { useMemo } from 'react'
-import { Pressable, View } from 'react-native'
+import { CheckCircle2 } from 'lucide-react-native'
+import { useCallback, useMemo } from 'react'
+import { Platform, Pressable, View } from 'react-native'
 
 import { syncStatus } from '~/db'
+import { useColors } from '~/lib/constants'
 import { formatBytesSeparate } from '~/lib/format'
 import { useListItemSize } from '~/lib/hooks'
+import { useSelectionStore } from '~/stores/selection'
 
 import { BorderAndShadow } from '../BorderAndShadow'
 import { TurboImage } from '../Image'
 import { Heading, Progress, Text } from '../ui'
+import { Icon } from '../ui/icon'
 import { SyncIcon } from './sync-icon/SyncIcon'
 import { DownloadedFile } from './types'
 import { getThumbnailPath } from './utils'
@@ -27,7 +32,23 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 	const readProgress = useMemo(() => downloadedFile.readProgress, [downloadedFile])
 	const status = syncStatus.safeParse(readProgress?.syncStatus).data
 
+	const colors = useColors()
+
 	const { width, height } = useListItemSize()
+
+	const selectionStore = useSelectionStore((state) => ({
+		isSelectionMode: state.isSelecting,
+		onSelectItem: (id: string) => state.toggleSelection(id),
+		isSelected: state.isSelected(downloadedFile.id),
+	}))
+
+	const onPress = useCallback(
+		() =>
+			selectionStore.isSelectionMode
+				? selectionStore.onSelectItem(downloadedFile.id)
+				: router.navigate(`/offline/${downloadedFile.id}/read`),
+		[router, downloadedFile.id, selectionStore],
+	)
 
 	const renderSubtitle = () => {
 		const parts = []
@@ -64,7 +85,7 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 	}
 
 	return (
-		<Pressable onPress={() => router.push(`/offline/${downloadedFile.id}/read`)}>
+		<Pressable onPress={onPress}>
 			{({ pressed }) => (
 				<View className="white relative flex-row gap-4" style={{ opacity: pressed ? 0.8 : 1 }}>
 					<BorderAndShadow
@@ -116,7 +137,12 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 							</View>
 
 							{status && (
-								<View className="mt-1">
+								<View
+									className="mt-1"
+									style={{
+										opacity: selectionStore.isSelected ? 0.5 : 1,
+									}}
+								>
 									<SyncIcon status={status} />
 								</View>
 							)}
@@ -132,8 +158,29 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 							</>
 						)}
 					</View>
+
+					{selectionStore.isSelected && (
+						<View
+							className="squircle absolute inset-0 z-10 -m-1 rounded-xl border-2"
+							style={{
+								borderColor: colors.foreground.brand,
+								backgroundColor: `${colors.foreground.brand}33`,
+							}}
+						>
+							<View className="flex flex-1 items-center justify-center">{CheckIcon}</View>
+						</View>
+					)}
 				</View>
 			)}
 		</Pressable>
 	)
 }
+
+const CheckIcon = Platform.select({
+	ios: (
+		<Host matchContents>
+			<Image systemName="checkmark.circle.fill" size={32} />
+		</Host>
+	),
+	android: <Icon as={CheckCircle2} size={32} className="shadow" />,
+})

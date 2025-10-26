@@ -3,7 +3,7 @@ import { asc, desc, eq } from 'drizzle-orm'
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
 import { useFocusEffect } from 'expo-router'
 import groupBy from 'lodash/groupBy'
-import { useCallback, useMemo } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import { View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { match } from 'ts-pattern'
@@ -18,6 +18,7 @@ import { useDownloadsState } from '~/components/downloads/store'
 import { Text } from '~/components/ui'
 import { db, downloadedFiles, libraryRefs, readProgress, seriesRefs } from '~/db'
 import { usePreferencesStore } from '~/stores'
+import { useSelectionStore } from '~/stores/selection'
 
 export default function Screen() {
 	// Note: This is a workaround for https://github.com/drizzle-team/drizzle-orm/issues/2660
@@ -35,7 +36,7 @@ export default function Screen() {
 	const dbOrderBy = match(sortConfig.option)
 		.with('NAME', () => orderFn(downloadedFiles.bookName))
 		.with('ADDED_AT', () => orderFn(downloadedFiles.downloadedAt))
-		.with('SERIES', () => orderFn(seriesRefs.name))
+		.with('SERIES', () => [orderFn(seriesRefs.name), asc(downloadedFiles.bookName)])
 		.otherwise(() => orderFn(downloadedFiles.downloadedAt))
 
 	const { data } = useLiveQuery(
@@ -45,17 +46,27 @@ export default function Screen() {
 			.leftJoin(readProgress, eq(downloadedFiles.id, readProgress.bookId))
 			.leftJoin(seriesRefs, eq(downloadedFiles.seriesId, seriesRefs.id))
 			.leftJoin(libraryRefs, eq(seriesRefs.libraryId, libraryRefs.id))
-			.orderBy(dbOrderBy),
+			.orderBy(() => dbOrderBy),
 		[id, sortConfig],
 	)
 
 	const showCuratedDownloads = usePreferencesStore((state) => state.showCuratedDownloads)
+	const isSelecting = useSelectionStore((state) => state.isSelecting)
+	const resetSelection = useSelectionStore((state) => state.resetSelection)
 
 	useFocusEffect(
-		useCallback(() => {
-			// Force re-query on focus
-			increment()
-		}, [increment]),
+		useCallback(
+			() => {
+				// Force re-query on focus
+				increment()
+				return () => {
+					// Reset selection on blur
+					resetSelection()
+				}
+			},
+			// eslint-disable-next-line react-hooks/exhaustive-deps
+			[increment],
+		),
 	)
 
 	const artificiallyGroupedData = useMemo(() => {
@@ -95,6 +106,23 @@ export default function Screen() {
 		return indices
 	}, [sortConfig, artificiallyGroupedData])
 
+	const selectionStore = useSelectionStore((state) => state)
+
+	const onSelectAll = useCallback(() => {
+		const allIds =
+			data?.filter((item) => typeof item !== 'string').map((item) => item.downloaded_files.id) || []
+		selectionStore.setSelection(allIds)
+		selectionStore.setIsSelectAll(true)
+	}, [data, selectionStore])
+
+	useEffect(
+		() => {
+			selectionStore.registerSelectAllCallback(onSelectAll)
+		},
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[data],
+	)
+
 	// console.log('Downloaded files with joins:', data)
 	// TODO: A reading now section like in server stack
 	// TODO: 1-2 other curated sections? Only if config to disable them bc i can see ppl not wanting it for downloads
@@ -122,7 +150,9 @@ export default function Screen() {
 				}}
 				contentInsetAdjustmentBehavior="always"
 				ItemSeparatorComponent={() => <View className="h-6" />}
-				ListHeaderComponent={showCuratedDownloads ? <CuratedDownloadsHeader /> : undefined}
+				ListHeaderComponent={
+					showCuratedDownloads && !isSelecting ? <CuratedDownloadsHeader /> : undefined
+				}
 				stickyHeaderIndices={stickyHeaderIndices}
 				getItemType={(item) => (typeof item === 'string' ? 'sectionHeader' : 'row')}
 			/>

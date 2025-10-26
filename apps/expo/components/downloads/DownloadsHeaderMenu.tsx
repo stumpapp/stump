@@ -1,9 +1,10 @@
-import { RefreshCw, Sparkles, Trash } from 'lucide-react-native'
+import { CheckCircle, RefreshCw, Sparkles, Trash } from 'lucide-react-native'
 import { useState } from 'react'
 import Dialog from 'react-native-dialog'
 
 import { useDownload, useProgressSync, useProgressToSyncExists } from '~/lib/hooks'
 import { usePreferencesStore } from '~/stores'
+import { useSelectionStore } from '~/stores/selection'
 
 import { ActionMenu } from '../ui/action-menu/action-menu'
 import { useDownloadsState } from './store'
@@ -19,6 +20,8 @@ export default function DownloadsHeaderMenu() {
 		}),
 	)
 	const refetchDownloads = useDownloadsState((state) => state.increment)
+
+	const setIsSelecting = useSelectionStore((state) => state.setIsSelecting)
 
 	const { deleteAllDownloads } = useDownload()
 
@@ -59,6 +62,16 @@ export default function DownloadsHeaderMenu() {
 									}
 								},
 								disabled: !isUnsyncedProgressExists,
+							},
+							{
+								icon: {
+									ios: 'checkmark.circle',
+									android: CheckCircle,
+								},
+								onPress: () => {
+									setIsSelecting(true)
+								},
+								label: 'Select',
 							},
 						],
 					},

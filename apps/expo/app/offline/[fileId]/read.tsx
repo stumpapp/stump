@@ -129,9 +129,6 @@ function Reader({ record }: ReaderProps) {
 				initializeStreamer()
 
 				return () => {
-					setIsStreamerReady(false)
-					setIsStreamerInitialized(false)
-					setStreamerError(null)
 					if (isStreamerInitialized) {
 						StumpStreamer.cleanupBook(book.id)
 					}

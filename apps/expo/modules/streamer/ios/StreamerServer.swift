@@ -287,7 +287,6 @@ class StreamerServer {
             guard !ext.isEmpty else { return nil }
             return (config.cacheDir as NSString).appendingPathComponent("\(page).\(ext)")
         } else {
-            // Use cached files to determine extension
             guard page > 0 && page <= config.imageFiles.count else { return nil }
             
             let entry = config.imageFiles[page - 1]

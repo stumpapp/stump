@@ -3,9 +3,9 @@ import {
 	ALargeSmall,
 	ArrowDownLeft,
 	ArrowUpRight,
-	CircleEllipsis,
 	Clock,
 	LibraryBig,
+	ListFilter,
 } from 'lucide-react-native'
 import { useState } from 'react'
 import { Platform, Pressable, View } from 'react-native'
@@ -21,7 +21,7 @@ import {
 	DropdownMenuTrigger,
 	Text,
 } from '~/components/ui'
-import { COLORS } from '~/lib/constants'
+import { useColors } from '~/lib/constants'
 
 import { Icon } from '../ui/icon'
 import { useDownloadsState } from './store'
@@ -33,6 +33,8 @@ export default function DownloadsHeaderSortMenu() {
 	const setSortConfig = useDownloadsState((state) => state.setSort)
 
 	const insets = useSafeAreaInsets()
+
+	const colors = useColors()
 
 	const contentInsets = {
 		top: insets.top,
@@ -139,31 +141,19 @@ export default function DownloadsHeaderSortMenu() {
 			<DropdownMenu>
 				<DropdownMenuTrigger asChild>
 					<Button
-						className="squircle h-[unset] w-[unset] rounded-full border p-1 tablet:p-2"
+						className="squircle ml-2 mr-2 h-8 w-8 rounded-full border border-edge"
 						variant="ghost"
 						size="icon"
-						style={{
-							backgroundColor: COLORS.dark.background.overlay.DEFAULT,
-							borderColor: COLORS.dark.edge.DEFAULT,
-						}}
 					>
 						{({ pressed }) => (
-							<View
-								className="squircle items-center justify-center rounded-full"
-								style={{
-									backgroundColor: COLORS.dark.background.overlay.DEFAULT,
-									borderColor: COLORS.dark.edge.DEFAULT,
-									height: 35,
-									width: 35,
-								}}
-							>
+							<View className="squircle items-center justify-center rounded-full">
 								<Icon
-									as={CircleEllipsis}
-									size={24}
+									as={ListFilter}
+									size={20}
 									style={{
-										opacity: isOpen ? 0.5 : pressed ? 0.85 : 1,
-										// @ts-expect-error: This is fine
-										color: COLORS.dark.foreground.DEFAULT,
+										opacity: isOpen ? 0.5 : pressed ? 0.7 : 1,
+										// @ts-expect-error: It's fine
+										color: colors.foreground.subtle,
 									}}
 								/>
 							</View>

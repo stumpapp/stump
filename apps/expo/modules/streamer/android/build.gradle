@@ -41,3 +41,11 @@ android {
     abortOnError false
   }
 }
+
+dependencies {
+  // NanoHTTPD for HTTP server functionality
+  implementation 'org.nanohttpd:nanohttpd:2.3.1'
+
+  // Kotlin coroutines for async operations
+  implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3'
+}

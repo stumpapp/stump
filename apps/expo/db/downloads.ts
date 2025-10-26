@@ -23,13 +23,13 @@ async function calculatePageCount(uri: string, filename: string): Promise<number
 	try {
 		const extension = filename.split('.').pop()?.toLowerCase()
 		if (!extension || !['cbz', 'zip'].includes(extension)) {
-			return -1 // Not a comic book archive
+			return 0 // Not a comic book archive
 		}
 
 		return await StumpStreamer.getPageCount(uri)
 	} catch (error) {
 		console.warn('Failed to calculate page count:', error)
-		return -1
+		return 0
 	}
 }
 

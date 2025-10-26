@@ -48,7 +48,7 @@ export default function ContinueReading() {
 		>
 			{activeBooks.length > 0 && <ReadingNow books={activeBooks.map(intoDownloadedFile)} />}
 
-			{(leftOffBooks.length > 0 || activeBooks.length === 0) && (
+			{leftOffBooks.length > 0 && (
 				<View className="flex">
 					<Heading size="xl" className="px-4">
 						Continue Reading

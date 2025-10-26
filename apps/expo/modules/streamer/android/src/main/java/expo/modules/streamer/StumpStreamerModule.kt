@@ -2,49 +2,95 @@ package expo.modules.streamer
 
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
-import java.net.URL
 
 class StumpStreamerModule : Module() {
-  // Each module class must implement the definition function. The definition consists of components
-  // that describes the module's functionality and behavior.
-  // See https://docs.expo.dev/modules/module-api for more details about available components.
-  override fun definition() = ModuleDefinition {
-    // Sets the name of the module that JavaScript code will use to refer to the module. Takes a string as an argument.
-    // Can be inferred from module's class name, but it's recommended to set it explicitly for clarity.
-    // The module will be accessible from `requireNativeModule('StumpStreamer')` in JavaScript.
-    Name("StumpStreamer")
+    private val server = StreamerServer.instance
+    
+    private val thumbnailGenerator = ThumbnailGenerator.instance
 
-    // Defines constant property on the module.
-    Constant("PI") {
-      Math.PI
+    override fun definition() = ModuleDefinition {
+        Name("StumpStreamer")
+
+        OnCreate {
+            // TODO: The same kind of observers as I added for iOS
+        }
+
+        OnDestroy {
+            cleanup()
+        }
+
+        AsyncFunction("initializeBook") { bookId: String, archivePath: String, cacheDir: String ->
+            val port = server.startServer()
+
+            val filePath = if (archivePath.startsWith("file://")) {
+                archivePath.substring(7)
+            } else {
+                archivePath
+            }
+
+            val bookConfig = BookConfig(
+                bookId = bookId,
+                filePath = filePath,
+                cacheDir = cacheDir
+            )
+            server.registerBook(bookConfig)
+
+            port
+        }
+
+        Function("getPageURL") { bookId: String, page: Int ->
+            server.getPageURL(bookId, page)
+        }
+
+        AsyncFunction("generateThumbnail") { bookId: String, archivePath: String, outputDir: String ->
+            thumbnailGenerator.generateThumbnail(bookId, archivePath, outputDir)
+        }
+
+        Function("getThumbnailPath") { bookId: String, cacheDir: String ->
+            val cachePath = if (cacheDir.startsWith("file://")) {
+                cacheDir.substring(7)
+            } else {
+                cacheDir
+            }
+            
+            val thumbnailPath = java.io.File(cachePath, "$bookId.jpg").absolutePath
+            
+            if (java.io.File(thumbnailPath).exists()) {
+                "file://$thumbnailPath"
+            } else {
+                null
+            }
+        }
+
+        AsyncFunction("getPageCount") { filePath: String ->
+            val archivePath = if (filePath.startsWith("file://")) {
+                filePath.substring(7)
+            } else {
+                filePath
+            }
+            
+            val archive = ZipArchive(archivePath)
+            val imageFiles = archive.getImageFiles()
+            archive.close()
+            imageFiles.size
+        }
+
+        AsyncFunction("cleanupBook") { bookId: String, deleteCache: Boolean ->
+            server.unregisterBook(bookId, deleteCache)
+        }
+
+        Function("isServerRunning") {
+            server.isRunning
+        }
+
+        AsyncFunction("stopServer") {
+            server.stopServer()
+        }
     }
 
-    // Defines event names that the module can send to JavaScript.
-    Events("onChange")
+    // MARK: - Lifecycle Management
 
-    // Defines a JavaScript synchronous function that runs the native code on the JavaScript thread.
-    Function("hello") {
-      "Hello world! 👋"
+    private fun cleanup() {
+        server.stopServer()
     }
-
-    // Defines a JavaScript function that always returns a Promise and whose native code
-    // is by default dispatched on the different thread than the JavaScript runtime runs on.
-    AsyncFunction("setValueAsync") { value: String ->
-      // Send an event to JavaScript.
-      sendEvent("onChange", mapOf(
-        "value" to value
-      ))
-    }
-
-    // Enables the module to be used as a native view. Definition components that are accepted as part of
-    // the view definition: Prop, Events.
-    View(StumpStreamerView::class) {
-      // Defines a setter for the `url` prop.
-      Prop("url") { view: StumpStreamerView, url: URL ->
-        view.webView.loadUrl(url.toString())
-      }
-      // Defines an event that the view can send to JavaScript.
-      Events("onLoad")
-    }
-  }
 }

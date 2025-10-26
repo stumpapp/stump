@@ -182,5 +182,5 @@ const CheckIcon = Platform.select({
 			<Image systemName="checkmark.circle.fill" size={32} />
 		</Host>
 	),
-	android: <Icon as={CheckCircle2} size={32} className="shadow" />,
+	android: <Icon as={CheckCircle2} size={32} className="text-fill-brand shadow" />,
 })

@@ -33,6 +33,7 @@ export default function SelectionRightScreenHeader() {
 				style={{
 					flexDirection: 'row',
 					gap: 10,
+					alignItems: 'center',
 				}}
 			>
 				<View
@@ -101,5 +102,5 @@ const CheckIcon = Platform.select({
 			<Image systemName="checkmark.circle.fill" size={25} />
 		</Host>
 	),
-	android: <Icon as={CheckCircle2} size={32} className="shadow" />,
+	android: <Icon as={CheckCircle2} size={20} className="shadow" />,
 })

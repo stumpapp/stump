@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { Stack } from 'expo-router'
-import { useRef } from 'react'
-import { Platform } from 'react-native'
+import { Stack, useNavigation } from 'expo-router'
+import { useLayoutEffect, useRef } from 'react'
+import { Platform, View } from 'react-native'
 import { useStore } from 'zustand'
 
 import { DownloadsHeaderMenu, DownloadsHeaderSortMenu } from '~/components/downloads'
@@ -26,6 +26,36 @@ export default function Screen() {
 
 	const isSelecting = useStore(store, (state) => state.isSelecting)
 
+	const navigation = useNavigation()
+	useLayoutEffect(
+		() => {
+			if (Platform.OS === 'android') {
+				const WithProvider = ({ children }: { children: React.ReactNode }) => (
+					<SelectionContext.Provider value={store}>
+						<QueryClientProvider client={offlineQueryClient}>{children}</QueryClientProvider>
+					</SelectionContext.Provider>
+				)
+
+				navigation.setOptions({
+					headerLeft: () => (
+						<WithProvider>
+							{isSelecting ? <SelectionLeftScreenHeader /> : <DownloadsHeaderSortMenu />}
+						</WithProvider>
+					),
+					headerRight: () => (
+						<WithProvider>
+							<View className="mr-2">
+								{isSelecting ? <SelectionRightScreenHeader /> : <DownloadsHeaderMenu />}
+							</View>
+						</WithProvider>
+					),
+				})
+			}
+		},
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[isSelecting, navigation],
+	)
+
 	return (
 		<SelectionContext.Provider value={store}>
 			<QueryClientProvider client={offlineQueryClient}>
@@ -40,10 +70,14 @@ export default function Screen() {
 						headerLargeTitleStyle: {
 							fontSize: 30,
 						},
-						headerLeft: () =>
-							isSelecting ? <SelectionLeftScreenHeader /> : <DownloadsHeaderSortMenu />,
-						headerRight: () =>
-							isSelecting ? <SelectionRightScreenHeader /> : <DownloadsHeaderMenu />,
+						headerLeft:
+							Platform.OS === 'ios'
+								? () => (isSelecting ? <SelectionLeftScreenHeader /> : <DownloadsHeaderSortMenu />)
+								: undefined,
+						headerRight:
+							Platform.OS === 'ios'
+								? () => (isSelecting ? <SelectionRightScreenHeader /> : <DownloadsHeaderMenu />)
+								: undefined,
 						// TODO: Check in on unstable_headerRightItems once available
 					}}
 				/>

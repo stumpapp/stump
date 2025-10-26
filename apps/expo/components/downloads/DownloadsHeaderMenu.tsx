@@ -1,4 +1,4 @@
-import { CheckCircle, RefreshCw, Sparkles, Trash } from 'lucide-react-native'
+import { CheckCircle, Menu, RefreshCw, Sparkles, Trash } from 'lucide-react-native'
 import { useState } from 'react'
 import Dialog from 'react-native-dialog'
 
@@ -38,6 +38,10 @@ export default function DownloadsHeaderMenu() {
 	return (
 		<>
 			<ActionMenu
+				icon={{
+					ios: 'ellipsis',
+					android: Menu,
+				}}
 				groups={[
 					{
 						items: [

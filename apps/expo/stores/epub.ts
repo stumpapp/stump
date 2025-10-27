@@ -38,6 +38,12 @@ export const parseToc = (toc?: string[]): TableOfContentsItem[] => {
 	return parsedToc
 }
 
+export const trimFragmentFromHref = (href: string) => {
+	return href.split('#')[0]
+}
+
+export const parseFragmentFromHref = (href: string) => href.split('#')
+
 export type EmbeddedMetadata = Pick<BookMetadata, 'title' | 'author' | 'language' | 'publisher'>
 
 export type IEpubLocationStore = {

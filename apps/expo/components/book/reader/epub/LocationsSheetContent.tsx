@@ -163,10 +163,18 @@ const TableOfContentsListItem = ({ item }: { item: TableOfContentsItem }) => {
 	const actions = useEpubLocationStore((store) => store.actions)
 
 	const handlePress = async () => {
+		// E.g.: "text/part0010.html#9H5K0-..." -> ["text/part0010.html", "9H5K0-..."]
+		const [hrefWithoutFragment, fragment] = item.content.split('#')
+
 		await actions?.goToLocation({
-			href: item.content,
+			href: hrefWithoutFragment,
 			type: 'application/xhtml+xml',
 			chapterTitle: item.label,
+			locations: fragment
+				? {
+						fragments: [fragment],
+					}
+				: undefined,
 		})
 
 		// This pushes the dismiss to the end of the call stack to try and

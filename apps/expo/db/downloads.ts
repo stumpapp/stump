@@ -130,7 +130,23 @@ export class DownloadRepository {
 				pages,
 			}
 
-			const result = await tx.insert(downloadedFiles).values(newFile).returning()
+			const result = await tx
+				.insert(downloadedFiles)
+				.values(newFile)
+				.onConflictDoUpdate({
+					target: downloadedFiles.id,
+					set: {
+						filename: newFile.filename,
+						uri: newFile.uri,
+						size: newFile.size,
+						bookName: newFile.bookName,
+						bookDescription: newFile.bookDescription,
+						bookMetadata: newFile.bookMetadata,
+						seriesId: newFile.seriesId,
+						pages: newFile.pages,
+					},
+				})
+				.returning()
 			return result[0]
 		})
 	}

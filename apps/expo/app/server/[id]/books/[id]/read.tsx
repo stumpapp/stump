@@ -57,6 +57,14 @@ export const query = graphql(`
 				page
 				elapsedSeconds
 			}
+			series {
+				id
+				resolvedName
+			}
+			library {
+				id
+				name
+			}
 			libraryConfig {
 				defaultReadingImageScaleFit
 				defaultReadingMode

@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDownload } from '~/lib/hooks'
 import { BookMetadata, ReadiumLocator, ReadiumView, ReadiumViewRef } from '~/modules/readium'
 import { useReaderStore } from '~/stores'
-import { useEpubLocationStore, useEpubTheme } from '~/stores/epub'
+import { trimFragmentFromHref, useEpubLocationStore, useEpubTheme } from '~/stores/epub'
 
 import { EbookReaderBookRef } from '../image/context'
 import { OfflineCompatibleReader } from '../types'
@@ -35,7 +35,11 @@ type Props = {
 	offlineUri?: string
 } & OfflineCompatibleReader
 
-// TODO: Don't assume loading book. Intake an optional localUri which effectively unlocks offline reading
+// FIXME: There is a pretty gnarly bug for single-page EPUBs where Readium doesn't do a great job of
+// reporting the location back. It manifests as the chapterTitle always being missing (and a "fix" I added
+// makes it show the _first_ chapter title all the time). Need to investigate further, the only idea I've had
+// is to try and detect single-page EPUBs and handle them differently (e.g., percentage or position-based tracking?)
+
 export default function ReadiumReader({
 	book,
 	initialLocator,
@@ -97,13 +101,21 @@ export default function ReadiumReader({
 		cleanup: store.onUnload,
 		storeActions: store.storeActions,
 		storeHeaders: store.storeHeaders,
+		toc: store.toc,
 	}))
 
 	useEffect(() => {
 		if (localUri) return
 
 		async function download() {
-			const result = await downloadBook(book)
+			const result = await downloadBook({
+				...book,
+				bookName: book.name,
+				libraryId: book.library?.id,
+				libraryName: book.library?.name,
+				seriesId: book.series?.id,
+				seriesName: book.series?.resolvedName,
+			})
 			if (result) {
 				setLocalUri(result)
 			} else {
@@ -145,6 +157,15 @@ export default function ReadiumReader({
 
 	const handleLocationChanged = useCallback(
 		(locator: ReadiumLocator) => {
+			if (!locator.chapterTitle) {
+				const tocItem = store.toc.find(
+					(item) => trimFragmentFromHref(item.content) === locator.href,
+				)
+				if (tocItem) {
+					locator.chapterTitle = tocItem.label
+				}
+			}
+
 			store.onLocationChange(locator)
 			setLocator(locator)
 

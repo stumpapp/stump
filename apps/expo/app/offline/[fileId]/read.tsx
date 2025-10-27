@@ -214,6 +214,8 @@ function Reader({ record }: ReaderProps) {
 					set: {
 						epubProgress: epubProgress,
 						elapsedSeconds: totalSeconds,
+						percentage: percentage.toString(),
+						syncStatus: syncStatus.enum.UNSYNCED,
 						lastModified: new Date(),
 					},
 				})

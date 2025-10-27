@@ -5,15 +5,20 @@ import { FlatList } from 'react-native'
 import { OfflineCompatibleReader } from '../types'
 
 type QueryData = NonNullable<BookReadScreenQuery['mediaById']>
-export type ImageReaderBookRef = Omit<QueryData, 'libraryConfig'> & {
+export type ImageReaderBookRef = Omit<QueryData, 'libraryConfig' | 'series' | 'library'> & {
 	libraryConfig?: QueryData['libraryConfig']
+	series?: QueryData['series']
+	library?: QueryData['library']
 }
 
 export type EbookReaderBookRef = {
 	id: string
 	extension: string
 	name: string
-} & Pick<QueryData, 'ebook' | 'thumbnail' | 'metadata'>
+} & Pick<QueryData, 'ebook' | 'thumbnail' | 'metadata'> & {
+		series?: QueryData['series']
+		library?: QueryData['library']
+	}
 
 export type ImageBasedBookPageRef = {
 	height: number

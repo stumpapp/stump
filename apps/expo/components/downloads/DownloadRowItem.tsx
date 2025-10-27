@@ -78,9 +78,15 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 			return Math.min((currentPage / totalPages) * 100, 100)
 		}
 
-		// const percentage = readProgress.percentage
-		// 	? (readProgress.percentage * 100).toFixed(2)
-		// 	: 0
+		const epubProgress = readProgress.percentage
+
+		if (epubProgress) {
+			const parsed = parseFloat(epubProgress)
+			if (!isNaN(parsed)) {
+				return Math.min(parsed * 100, 100)
+			}
+		}
+
 		return null
 	}
 
@@ -104,41 +110,16 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 						/>
 					</BorderAndShadow>
 
-					{/* <View>
-						<Heading className="mt-2" numberOfLines={2}>
-							{downloadedFile.bookName || 'Untitled'}
-						</Heading>
-
-						<View className="flex-1 gap-4">
-							<Text className="text-foreground-muted">{renderSubtitle()}</Text>
-							{readProgress && (
-								<>
-									<Progress
-										className="mb-4 h-1 bg-background-surface-secondary"
-										value={getProgress()}
-										style={{ height: 6, borderRadius: 3 }}
-									/>
-								</>
-							)}
-						</View>
-					</View>
-
-					<View className="flex-1" />
-
-					<View className="self-center">
-						<SyncIcon isAttemptingSync={isAttemptingSync} isSynced={!readProgress} />
-					</View> */}
-
 					<View className="flex-1 justify-center py-2">
-						<View className="flex flex-1 flex-row justify-between">
-							<View>
+						<View className="flex flex-1 flex-row justify-between gap-2">
+							<View className="flex shrink">
 								<Heading numberOfLines={2}>{downloadedFile.bookName || 'Untitled'}</Heading>
 								<Text className="text-foreground-muted">{renderSubtitle()}</Text>
 							</View>
 
 							{status && (
 								<View
-									className="mt-1"
+									className="mt-1 shrink-0"
 									style={{
 										opacity: selectionStore.isSelected ? 0.5 : 1,
 									}}

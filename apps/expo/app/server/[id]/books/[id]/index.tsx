@@ -76,10 +76,16 @@ const query = graphql(`
 				locator {
 					chapterTitle
 					locations {
+						fragments
 						position
+						progression
 						totalProgression
+						cssSelector
+						partialCfi
 					}
 					href
+					title
+					type
 				}
 				startedAt
 				elapsedSeconds
@@ -147,6 +153,7 @@ export default function Screen() {
 			seriesName: book.series.resolvedName,
 			metadata: book.metadata || undefined,
 			bookName: book.resolvedName,
+			readProgress: book.readProgress,
 		})
 	}, [isDownloaded, downloadBook, book, isDownloading])
 

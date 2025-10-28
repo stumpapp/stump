@@ -44,7 +44,7 @@ export function intoReadiumLocator(locator: StumpReadiumLocator): ReadiumLocator
 	}
 
 	return {
-		...omit(locator, ['__typename']),
+		...omit(locator, ['__typename', 'locations', 'type']),
 		locations: {
 			position: safeNumber(locator.locations?.position),
 			progression: safeNumber(locator.locations?.progression),

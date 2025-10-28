@@ -14,7 +14,7 @@ import urlJoin from 'url-join'
 import { ImageBasedReader, ReadiumReader } from '~/components/book/reader'
 import { ImageReaderBookRef } from '~/components/book/reader/image/context'
 import ServerErrorBoundary from '~/components/ServerErrorBoundary'
-import { db, downloadedFiles, epubProgress, readProgress, syncStatus } from '~/db'
+import { db, downloadedFiles, epubProgress, epubToc, readProgress, syncStatus } from '~/db'
 import {
 	booksDirectory,
 	ensureDirectoryExists,
@@ -372,8 +372,15 @@ const buildBook = (
 		},
 		pages: downloadedFile.pages ?? 0,
 		thumbnail,
-		// TODO: ebook.bookmarks and ebook.spine
+		// TODO: ebook.bookmarks and ebook.spine?
 		metadata: downloadedFile.bookMetadata as ImageReaderBookRef['metadata'] | undefined,
 		readProgress,
+		ebook: extension.match(EBOOK_EXTENSION)
+			? {
+					toc: epubToc.safeParse(downloadedFile.toc).data || [],
+					spine: [],
+					bookmarks: [],
+				}
+			: undefined,
 	}
 }

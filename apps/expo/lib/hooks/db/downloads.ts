@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry/react-native'
 import { useSDKSafe } from '@stump/client'
-import { MediaMetadata } from '@stump/graphql'
+import { MediaMetadata, ReadiumLocator } from '@stump/graphql'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { and, eq } from 'drizzle-orm'
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
@@ -79,6 +79,13 @@ type DownloadBookParams = {
 	libraryName?: string | null
 	bookName?: string | null
 	metadata?: Partial<MediaMetadata> | null
+	toc?: string[] | null
+	readProgress?: {
+		percentageCompleted?: string | null
+		page?: number | null
+		elapsedSeconds?: number | null
+		locator?: ReadiumLocator | null
+	} | null
 }
 
 export type UseDownloadParams = {
@@ -160,6 +167,7 @@ export function useDownload({ serverId }: UseDownloadParams = {}) {
 						params.libraryId && params.libraryName
 							? { id: params.libraryId, name: params.libraryName }
 							: undefined,
+					existingProgression: params.readProgress,
 				},
 			)
 

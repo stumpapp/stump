@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "f0204ff6-d804-43ed-9a93-bd43cfacdd46",
+  "id": "6e94f2bc-64f7-4275-b364-5395e3029b6e",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "downloaded_files": {
@@ -84,6 +84,13 @@
           "notNull": false,
           "autoincrement": false,
           "default": -1
+        },
+        "toc": {
+          "name": "toc",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
         }
       },
       "indexes": {},

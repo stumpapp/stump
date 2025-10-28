@@ -9,7 +9,8 @@ CREATE TABLE `downloaded_files` (
 	`book_description` text,
 	`book_metadata` text,
 	`series_id` text,
-	`pages` integer DEFAULT -1
+	`pages` integer DEFAULT -1,
+	`toc` text
 );
 --> statement-breakpoint
 CREATE TABLE `library_refs` (

@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/react-native'
-import { MediaMetadata } from '@stump/graphql'
+import { MediaMetadata, ReadiumLocator } from '@stump/graphql'
 import { and, eq } from 'drizzle-orm'
 
 import { thumbnailsDirectory } from '~/lib/filesystem'
@@ -9,9 +9,12 @@ import { db } from './client'
 import {
 	type DownloadedFile,
 	downloadedFiles,
+	epubProgress,
 	libraryRefs,
 	type NewDownloadedFile,
+	readProgress,
 	seriesRefs,
+	syncStatus,
 } from './schema'
 
 // TODO: Support RAR?
@@ -45,14 +48,21 @@ export type AddDownloadedFileParams = {
 	bookName?: string | null
 	metadata?: Partial<MediaMetadata> | null
 	seriesId?: string | null
+	toc?: string[] | null
 }
 
 /**
  * Optional metadata references when adding a downloaded file
  */
-export type AddDownloadedFileOptions = {
+export type AddDownloadRelations = {
 	seriesRef?: { id: string; name: string; libraryId?: string | null }
 	libraryRef?: { id: string; name: string }
+	existingProgression?: {
+		percentageCompleted?: string | null
+		page?: number | null
+		elapsedSeconds?: number | null
+		locator?: ReadiumLocator | null
+	} | null
 }
 
 /**
@@ -64,7 +74,7 @@ export class DownloadRepository {
 	 */
 	static async addFile(
 		file: AddDownloadedFileParams,
-		options?: AddDownloadedFileOptions,
+		relations?: AddDownloadRelations,
 	): Promise<DownloadedFile> {
 		const pages = await calculatePageCount(file.uri, file.filename)
 
@@ -83,36 +93,64 @@ export class DownloadRepository {
 
 		return db.transaction(async (tx) => {
 			// Insert or update series reference if provided
-			if (options?.seriesRef) {
+			if (relations?.seriesRef) {
 				await tx
 					.insert(seriesRefs)
 					.values({
-						id: options.seriesRef.id,
+						id: relations.seriesRef.id,
 						serverId: file.serverId,
-						name: options.seriesRef.name,
-						libraryId: options.seriesRef.libraryId,
+						name: relations.seriesRef.name,
+						libraryId: relations.seriesRef.libraryId,
 					})
 					.onConflictDoUpdate({
 						target: seriesRefs.id,
 						set: {
-							name: options.seriesRef.name,
-							libraryId: options.seriesRef.libraryId,
+							name: relations.seriesRef.name,
+							libraryId: relations.seriesRef.libraryId,
 						},
 					})
 			}
 
-			if (options?.libraryRef) {
+			if (relations?.libraryRef) {
 				await tx
 					.insert(libraryRefs)
 					.values({
-						id: options.libraryRef.id,
+						id: relations.libraryRef.id,
 						serverId: file.serverId,
-						name: options.libraryRef.name,
+						name: relations.libraryRef.name,
 					})
 					.onConflictDoUpdate({
 						target: libraryRefs.id,
 						set: {
-							name: options.libraryRef.name,
+							name: relations.libraryRef.name,
+						},
+					})
+			}
+
+			if (relations?.existingProgression) {
+				await tx
+					.insert(readProgress)
+					.values({
+						bookId: file.id,
+						serverId: file.serverId,
+						page: relations.existingProgression.page ?? undefined,
+						percentage: relations.existingProgression.percentageCompleted ?? undefined,
+						elapsedSeconds: relations.existingProgression.elapsedSeconds ?? undefined,
+						epubProgress: relations.existingProgression.locator
+							? epubProgress.safeParse(relations.existingProgression.locator).data
+							: undefined,
+						syncStatus: syncStatus.enum.SYNCED,
+					})
+					.onConflictDoUpdate({
+						target: readProgress.bookId,
+						set: {
+							page: relations.existingProgression.page ?? undefined,
+							percentage: relations.existingProgression.percentageCompleted ?? undefined,
+							elapsedSeconds: relations.existingProgression.elapsedSeconds ?? undefined,
+							epubProgress: relations.existingProgression.locator
+								? epubProgress.safeParse(relations.existingProgression.locator).data
+								: undefined,
+							syncStatus: syncStatus.enum.SYNCED,
 						},
 					})
 			}
@@ -128,6 +166,7 @@ export class DownloadRepository {
 				bookMetadata: file.metadata as Record<string, unknown>,
 				seriesId: file.seriesId,
 				pages,
+				toc: file.toc,
 			}
 
 			const result = await tx

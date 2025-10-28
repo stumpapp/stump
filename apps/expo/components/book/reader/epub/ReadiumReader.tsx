@@ -115,7 +115,10 @@ export default function ReadiumReader({
 				libraryName: book.library?.name,
 				seriesId: book.series?.id,
 				seriesName: book.series?.resolvedName,
+				toc: book.ebook?.toc,
+				readProgress: book.readProgress,
 			})
+
 			if (result) {
 				setLocalUri(result)
 			} else {

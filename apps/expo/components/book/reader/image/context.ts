@@ -18,6 +18,7 @@ export type EbookReaderBookRef = {
 } & Pick<QueryData, 'ebook' | 'thumbnail' | 'metadata'> & {
 		series?: QueryData['series']
 		library?: QueryData['library']
+		readProgress?: QueryData['readProgress']
 	}
 
 export type ImageBasedBookPageRef = {

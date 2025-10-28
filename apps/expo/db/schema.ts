@@ -20,6 +20,7 @@ export const downloadedFiles = sqliteTable('downloaded_files', {
 	bookMetadata: text('book_metadata', { mode: 'json' }),
 	seriesId: text('series_id'),
 	pages: integer('pages').default(-1), // Number of pages (for comic books)
+	toc: text('toc', { mode: 'json' }), // Table of contents for EPUB books
 })
 
 /**
@@ -85,12 +86,22 @@ export const epubProgress = z.object({
 	href: z.string(),
 	locations: z.object({
 		fragments: z.array(z.string()).nullish(),
-		progression: z.number().nullish(),
 		position: z.number().nullish(),
-		totalProgression: z.number().nullish(),
+		// Note: Stored as strings in the DB, so need to preprocess
+		progression: z.preprocess((val) => {
+			if (typeof val === 'string') return parseInt(val, 10)
+			return val
+		}, z.number().nullish()),
+		// Note: Stored as strings in the DB, so need to preprocess
+		totalProgression: z.preprocess((val) => {
+			if (typeof val === 'string') return parseInt(val, 10)
+			return val
+		}, z.number().nullish()),
 		cssSelector: z.string().nullish(),
 		partialCfi: z.string().nullish(),
 	}),
 	title: z.string().nullish(),
 	type: z.string().default('application/xhtml+xml'),
 })
+
+export const epubToc = z.array(z.string())

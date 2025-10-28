@@ -62,6 +62,7 @@ export type AddDownloadRelations = {
 		page?: number | null
 		elapsedSeconds?: number | null
 		locator?: ReadiumLocator | null
+		updatedAt?: Date | null
 	} | null
 }
 
@@ -128,29 +129,26 @@ export class DownloadRepository {
 			}
 
 			if (relations?.existingProgression) {
+				const values = {
+					bookId: file.id,
+					serverId: file.serverId,
+					page: relations.existingProgression.page ?? undefined,
+					percentage: relations.existingProgression.percentageCompleted ?? undefined,
+					elapsedSeconds: relations.existingProgression.elapsedSeconds ?? undefined,
+					epubProgress: relations.existingProgression.locator
+						? epubProgress.safeParse(relations.existingProgression.locator).data
+						: undefined,
+					syncStatus: syncStatus.enum.SYNCED,
+				} satisfies typeof readProgress.$inferInsert
+
 				await tx
 					.insert(readProgress)
-					.values({
-						bookId: file.id,
-						serverId: file.serverId,
-						page: relations.existingProgression.page ?? undefined,
-						percentage: relations.existingProgression.percentageCompleted ?? undefined,
-						elapsedSeconds: relations.existingProgression.elapsedSeconds ?? undefined,
-						epubProgress: relations.existingProgression.locator
-							? epubProgress.safeParse(relations.existingProgression.locator).data
-							: undefined,
-						syncStatus: syncStatus.enum.SYNCED,
-					})
+					.values(values)
 					.onConflictDoUpdate({
 						target: readProgress.bookId,
 						set: {
-							page: relations.existingProgression.page ?? undefined,
-							percentage: relations.existingProgression.percentageCompleted ?? undefined,
-							elapsedSeconds: relations.existingProgression.elapsedSeconds ?? undefined,
-							epubProgress: relations.existingProgression.locator
-								? epubProgress.safeParse(relations.existingProgression.locator).data
-								: undefined,
-							syncStatus: syncStatus.enum.SYNCED,
+							...values,
+							lastModified: new Date(relations.existingProgression.updatedAt ?? new Date()),
 						},
 					})
 			}

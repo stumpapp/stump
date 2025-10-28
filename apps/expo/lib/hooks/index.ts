@@ -7,5 +7,6 @@ export {
 	useAutoSyncActiveServer,
 	useProgressSync,
 	useProgressToSyncExists,
+	useSyncOnlineToOfflineProgress,
 } from './useProgressSync'
 export { useSingleOrDoubleTap } from './useSingleOrDoubleTap'

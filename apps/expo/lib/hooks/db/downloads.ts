@@ -85,6 +85,7 @@ type DownloadBookParams = {
 		page?: number | null
 		elapsedSeconds?: number | null
 		locator?: ReadiumLocator | null
+		updatedAt?: Date | null
 	} | null
 }
 

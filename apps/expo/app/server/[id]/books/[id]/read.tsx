@@ -16,7 +16,7 @@ import { useCallback, useEffect, useMemo } from 'react'
 import { useActiveServer } from '~/components/activeServer'
 import { ImageBasedReader, ReadiumReader, UnsupportedReader } from '~/components/book/reader'
 import { NextInSeriesBookRef } from '~/components/book/reader/image/context'
-import { useAppState } from '~/lib/hooks'
+import { useAppState, useSyncOnlineToOfflineProgress } from '~/lib/hooks'
 import { intoReadiumLocator, ReadiumLocator } from '~/modules/readium'
 import { useReaderStore } from '~/stores'
 import { useBookPreferences, useBookTimer } from '~/stores/reader'
@@ -158,12 +158,16 @@ export default function Screen() {
 		enabled: trackElapsedTime,
 	})
 
+	const { syncProgress } = useSyncOnlineToOfflineProgress({ bookId: book.id, serverId })
+
 	const { mutate: updateProgress } = useGraphQLMutation(mutation, {
 		retry: (attempts) => attempts < 3,
 		throwOnError: false,
 		onError: (error) => {
 			console.error('Failed to update read progress:', error)
 		},
+		// TODO: Consider a preference to disable online-to-offline sync?
+		onSuccess: (_, { input: onlineProgress }) => syncProgress(onlineProgress),
 	})
 
 	const onPageChanged = useCallback(

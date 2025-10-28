@@ -89,6 +89,7 @@ const query = graphql(`
 				}
 				startedAt
 				elapsedSeconds
+				updatedAt
 			}
 			readHistory {
 				completedAt

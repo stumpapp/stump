@@ -41,7 +41,7 @@ export default function SelectionLeftScreenHeader() {
 			</View>
 		),
 		android: (
-			<View className="squircle mx-2 h-8 w-8 items-center justify-center rounded-full border border-edge">
+			<View className="squircle mx-2 h-12 w-12 items-center justify-center rounded-full border border-edge">
 				<Icon as={selectionStore.isSelectAll ? ListMinus : ListPlus} size={20} />
 			</View>
 		),

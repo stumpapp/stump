@@ -141,7 +141,7 @@ export default function DownloadsHeaderSortMenu() {
 			<DropdownMenu>
 				<DropdownMenuTrigger asChild>
 					<Button
-						className="squircle ml-2 mr-2 h-8 w-8 rounded-full border border-edge"
+						className="squircle ml-2 mr-2 h-12 w-12 rounded-full border border-edge"
 						variant="ghost"
 						size="icon"
 					>

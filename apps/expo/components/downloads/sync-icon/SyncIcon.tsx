@@ -4,7 +4,7 @@ import { Icon } from '~/components/ui/icon'
 
 import { SyncIconProps } from './types'
 
-export function SyncIcon({ status, size }: SyncIconProps) {
+export function SyncIcon({ status, size = 20 }: SyncIconProps) {
 	const isAttemptingSync = status === 'SYNCING'
 
 	return (

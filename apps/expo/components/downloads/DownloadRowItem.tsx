@@ -1,8 +1,9 @@
 import { Host, Image } from '@expo/ui/swift-ui'
 import { useRouter } from 'expo-router'
 import { CheckCircle2 } from 'lucide-react-native'
-import { useCallback, useMemo } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import { Platform, Pressable, View } from 'react-native'
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
 
 import { syncStatus } from '~/db'
 import { useColors } from '~/lib/constants'
@@ -22,8 +23,6 @@ type Props = {
 	downloadedFile: DownloadedFile
 }
 
-// TODO: Consider altering useListITemSize to accept size variants (e.g., small, medium, large)
-// Or just diff hook
 export default function DownloadRowItem({ downloadedFile }: Props) {
 	const router = useRouter()
 
@@ -41,6 +40,23 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 		onSelectItem: (id: string) => state.toggleSelection(id),
 		isSelected: state.isSelected(downloadedFile.id),
 	}))
+
+	const iconOpacity = useSharedValue(1)
+	const syncIconStyle = useAnimatedStyle(() => ({
+		opacity: iconOpacity.value,
+	}))
+
+	const overlayOpacity = useSharedValue(0)
+	const overlayStyle = useAnimatedStyle(() => ({
+		backgroundColor: colors.foreground.brand + '33',
+		borderColor: colors.foreground.brand,
+		opacity: overlayOpacity.value,
+	}))
+
+	useEffect(() => {
+		iconOpacity.value = withTiming(selectionStore.isSelected ? 0.6 : 1, { duration: 200 })
+		overlayOpacity.value = withTiming(selectionStore.isSelected ? 1 : 0, { duration: 150 })
+	}, [selectionStore.isSelected, iconOpacity, overlayOpacity])
 
 	const onPress = useCallback(
 		() =>
@@ -93,7 +109,10 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 	return (
 		<Pressable onPress={onPress}>
 			{({ pressed }) => (
-				<View className="white relative flex-row gap-4" style={{ opacity: pressed ? 0.8 : 1 }}>
+				<View
+					className="white relative flex-row gap-4"
+					style={{ opacity: pressed && !selectionStore.isSelectionMode ? 0.8 : 1 }}
+				>
 					<BorderAndShadow
 						style={{ borderRadius: 8, borderWidth: 0.3, shadowRadius: 1.41, elevation: 2 }}
 					>
@@ -118,14 +137,9 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 							</View>
 
 							{status && (
-								<View
-									className="mt-1 shrink-0"
-									style={{
-										opacity: selectionStore.isSelected ? 0.5 : 1,
-									}}
-								>
+								<Animated.View className="mt-1 shrink-0" style={syncIconStyle}>
 									<SyncIcon status={status} />
-								</View>
+								</Animated.View>
 							)}
 						</View>
 
@@ -140,17 +154,12 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 						)}
 					</View>
 
-					{selectionStore.isSelected && (
-						<View
-							className="squircle absolute inset-0 z-10 -m-1 rounded-xl border-2"
-							style={{
-								borderColor: colors.foreground.brand,
-								backgroundColor: `${colors.foreground.brand}33`,
-							}}
-						>
-							<View className="flex flex-1 items-center justify-center">{CheckIcon}</View>
-						</View>
-					)}
+					<Animated.View
+						className="squircle absolute inset-0 z-10 -m-1 rounded-xl border-2"
+						style={overlayStyle}
+					>
+						<View className="flex flex-1 items-center justify-center">{CheckIcon}</View>
+					</Animated.View>
 				</View>
 			)}
 		</Pressable>

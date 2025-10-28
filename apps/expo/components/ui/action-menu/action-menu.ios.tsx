@@ -1,12 +1,13 @@
 import { Button, ContextMenu, Divider, Host, Image } from '@expo/ui/swift-ui'
+import { disabled } from '@expo/ui/swift-ui/modifiers'
 import { View } from 'react-native'
 
 import type { ActionMenuProps } from './types'
 
-export function ActionMenu({ icon, groups }: ActionMenuProps) {
+export function ActionMenu({ icon, groups, disabled: isDisabled }: ActionMenuProps) {
 	return (
 		<Host matchContents>
-			<ContextMenu>
+			<ContextMenu modifiers={[disabled(isDisabled ?? false)]}>
 				<ContextMenu.Trigger>
 					<View
 						accessibilityLabel="options"

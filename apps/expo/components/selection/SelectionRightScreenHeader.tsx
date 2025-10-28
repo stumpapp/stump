@@ -50,6 +50,7 @@ export default function SelectionRightScreenHeader() {
 				</View>
 
 				<ActionMenu
+					disabled={currentSelection.size === 0}
 					groups={[
 						{
 							items: [

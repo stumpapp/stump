@@ -18,7 +18,7 @@ import { Icon } from '../icon'
 import { Text } from '../text'
 import { ActionMenuProps } from './types'
 
-export function ActionMenu({ icon, groups, androidProps }: ActionMenuProps) {
+export function ActionMenu({ icon, groups, androidProps, disabled }: ActionMenuProps) {
 	const insets = useSafeAreaInsets()
 	const TriggerIcon = icon?.android ?? Ellipsis
 	const contentInsets = {
@@ -51,7 +51,7 @@ export function ActionMenu({ icon, groups, androidProps }: ActionMenuProps) {
 
 	return (
 		<DropdownMenu>
-			<DropdownMenuTrigger asChild>
+			<DropdownMenuTrigger asChild disabled={disabled}>
 				<Button className="squircle h-8 w-8 rounded-full p-0" variant="ghost" size="icon">
 					<View>
 						<Icon as={TriggerIcon} size={20} className="text-foreground" />

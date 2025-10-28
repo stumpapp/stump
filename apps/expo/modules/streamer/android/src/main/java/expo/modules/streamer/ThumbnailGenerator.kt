@@ -38,7 +38,8 @@ class ThumbnailGenerator private constructor(private val context: Context) {
 
     companion object {
         private const val TAG = "ThumbnailGenerator"
-        private const val MAX_THUMBNAIL_SIZE = 300
+        // Note: This differs from iOS implementation since Swift automagically handles scaling for us
+        private const val MAX_THUMBNAIL_SIZE_DP = 300
         private const val JPEG_QUALITY = 80
 
         // Note: This took me forever to figure out, I am happy to not be a Kotlin dev lol
@@ -63,6 +64,14 @@ class ThumbnailGenerator private constructor(private val context: Context) {
     }
 
     private val bookService by lazy { BookService(context) }
+    
+    /**
+     * Convert dp to pixels based on the device's density
+     */
+    private val maxThumbnailSizePixels: Int by lazy {
+        val density = context.resources.displayMetrics.density
+        (MAX_THUMBNAIL_SIZE_DP * density).toInt()
+    }
 
     /**
      * Generate a thumbnail for a book
@@ -182,27 +191,41 @@ class ThumbnailGenerator private constructor(private val context: Context) {
         return File(cleanOutputDir, "$bookId.jpg").absolutePath
     }
 
-    
-    // TODO: This looks poop
+    /**
+     * Scale a bitmap to fit within maxThumbnailSizePixels while maintaining aspect ratio
+     */
     private fun scaleBitmap(original: Bitmap): Bitmap {
         val width = original.width
         val height = original.height
 
-        if (width <= MAX_THUMBNAIL_SIZE && height <= MAX_THUMBNAIL_SIZE) {
+        if (width <= maxThumbnailSizePixels && height <= maxThumbnailSizePixels) {
             return original
         }
 
-        val scale = if (width > height) {
-            MAX_THUMBNAIL_SIZE.toFloat() / width.toFloat()
-        } else {
-            MAX_THUMBNAIL_SIZE.toFloat() / height.toFloat()
-        }
+        val scale = minOf(
+            maxThumbnailSizePixels.toFloat() / width.toFloat(),
+            maxThumbnailSizePixels.toFloat() / height.toFloat()
+        )
 
         val newWidth = (width * scale).toInt()
         val newHeight = (height * scale).toInt()
 
         Log.d(TAG, "Scaling bitmap from ${width}x${height} to ${newWidth}x${newHeight}")
 
-        return Bitmap.createScaledBitmap(original, newWidth, newHeight, true)
+        val scaledBitmap = Bitmap.createBitmap(newWidth, newHeight, Bitmap.Config.ARGB_8888)
+        val canvas = android.graphics.Canvas(scaledBitmap)
+        
+        val paint = android.graphics.Paint().apply {
+            isAntiAlias = true
+            isFilterBitmap = true
+            isDither = true
+        }
+        
+        val srcRect = android.graphics.Rect(0, 0, width, height)
+        val dstRect = android.graphics.Rect(0, 0, newWidth, newHeight)
+        
+        canvas.drawBitmap(original, srcRect, dstRect, paint)
+        
+        return scaledBitmap
     }
 }

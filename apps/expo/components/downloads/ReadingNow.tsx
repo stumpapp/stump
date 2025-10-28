@@ -279,7 +279,7 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 
 				{status && (
 					<View className="absolute right-0 z-20 w-full items-end p-3 shadow">
-						<SyncIcon status={status} size={20} />
+						<SyncIcon status={status} size={24} />
 					</View>
 				)}
 

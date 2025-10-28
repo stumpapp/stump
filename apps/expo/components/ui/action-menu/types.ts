@@ -29,4 +29,5 @@ export type ActionMenuProps = {
 		items: ActionMenuItem[]
 	}[]
 	androidProps?: AndroidProps
+	disabled?: boolean
 }

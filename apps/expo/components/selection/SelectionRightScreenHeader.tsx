@@ -1,6 +1,6 @@
 import { Host, Image } from '@expo/ui/swift-ui'
 import { CheckCircle2, Share, Trash } from 'lucide-react-native'
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { Platform, Pressable, View } from 'react-native'
 import Dialog from 'react-native-dialog'
 
@@ -20,12 +20,13 @@ export default function SelectionRightScreenHeader() {
 
 	const [isShowingDeleteConfirm, setIsShowingDeleteConfirm] = useState(false)
 
-	const onDeleteSelection = async () => {
+	const onDeleteSelection = useCallback(async () => {
 		if (deleteAction) {
 			await deleteAction(Array.from(currentSelection))
 			setIsShowingDeleteConfirm(false)
+			onStopSelection()
 		}
-	}
+	}, [currentSelection, deleteAction, onStopSelection])
 
 	return (
 		<>
@@ -71,7 +72,7 @@ export default function SelectionRightScreenHeader() {
 										ios: 'trash',
 										android: Trash,
 									},
-									onPress: () => {},
+									onPress: onDeleteSelection,
 									role: 'destructive',
 									disabled: !deleteAction,
 								},

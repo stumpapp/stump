@@ -6,14 +6,13 @@ import expo.modules.kotlin.modules.ModuleDefinition
 class StumpStreamerModule : Module() {
     private val server = StreamerServer.instance
     
-    private val thumbnailGenerator = ThumbnailGenerator.instance
+    // Note: This took me forever to figure out, I am happy to not be a Kotlin dev lol
+    private val thumbnailGenerator by lazy {
+        ThumbnailGenerator.getInstance(appContext.reactContext!!)
+    }
 
     override fun definition() = ModuleDefinition {
         Name("StumpStreamer")
-
-        OnCreate {
-            // TODO: The same kind of observers as I added for iOS
-        }
 
         OnDestroy {
             cleanup()

@@ -5,6 +5,7 @@ import android.util.Log
 import org.readium.r2.shared.publication.Link
 import org.readium.r2.shared.publication.Locator
 import org.readium.r2.shared.publication.Publication
+import org.readium.r2.shared.publication.services.cover
 import org.readium.r2.shared.publication.services.isRestricted
 import org.readium.r2.shared.publication.services.positions
 import org.readium.r2.shared.publication.services.protectionError
@@ -207,6 +208,39 @@ class BookService(private val context: Context) {
     fun locateLink(bookId: String, link: Link): Locator? {
         val publication = getPublication(bookId) ?: return null
         return publication.locatorFromLink(link)
+    }
+    
+    /**
+     * Extracts the cover image from an EPUB
+     * @param url The URL of the EPUB file
+     * @return The cover image as a Bitmap, or null if no cover is found
+     */
+    suspend fun getCoverImage(url: URL): android.graphics.Bitmap? {
+        val file = File(url.path)
+        if (!file.exists()) {
+            Log.w("BookService", "File does not exist: ${url.path}")
+            return null
+        }
+
+        return try {
+            val asset = assetRetriever.retrieve(file).getOrElse { error ->
+                Log.w("BookService", "Failed to retrieve asset: $error")
+                return null
+            }
+
+            val publication = publicationOpener.open(
+                asset = asset,
+                allowUserInteraction = false
+            ).getOrElse { error ->
+                Log.w("BookService", "Failed to open publication: $error")
+                return null
+            }
+
+            publication.cover()
+        } catch (e: Exception) {
+            Log.e("BookService", "Failed to extract cover", e)
+            null
+        }
     }
 
     /**

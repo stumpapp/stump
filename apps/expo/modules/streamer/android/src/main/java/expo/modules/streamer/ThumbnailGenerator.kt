@@ -1,10 +1,14 @@
 package expo.modules.streamer
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
+import expo.modules.readium.BookService
+import kotlinx.coroutines.runBlocking
 import java.io.File
 import java.io.FileOutputStream
+import java.net.URL
 
 /**
  * Errors that can occur during thumbnail generation
@@ -28,16 +32,26 @@ sealed class ThumbnailError : Exception() {
 }
 
 /**
- * Generates thumbnails from comic book archives
+ * Generates thumbnails from comic book archives and ebooks
  */
-class ThumbnailGenerator private constructor() {
+class ThumbnailGenerator private constructor(private val context: Context) {
 
     companion object {
         private const val TAG = "ThumbnailGenerator"
         private const val MAX_THUMBNAIL_SIZE = 300
         private const val JPEG_QUALITY = 80
 
-        val instance = ThumbnailGenerator()
+        // Note: This took me forever to figure out, I am happy to not be a Kotlin dev lol
+        @Volatile
+        private var INSTANCE: ThumbnailGenerator? = null
+
+        fun getInstance(context: Context): ThumbnailGenerator {
+            return INSTANCE ?: synchronized(this) {
+                INSTANCE ?: ThumbnailGenerator(context.applicationContext).also {
+                    INSTANCE = it
+                }
+            }
+        }
 
         private fun stripFilePrefix(path: String): String {
             return if (path.startsWith("file://")) {
@@ -47,6 +61,8 @@ class ThumbnailGenerator private constructor() {
             }
         }
     }
+
+    private val bookService by lazy { BookService(context) }
 
     /**
      * Generate a thumbnail for a book
@@ -72,8 +88,43 @@ class ThumbnailGenerator private constructor() {
             outputDirectory.mkdirs()
         }
 
+        val fileExtension = File(cleanArchivePath).extension.lowercase()
+        val isEpub = fileExtension == "epub"
+
+        val bitmap = if (isEpub) {
+            extractEpubCover(cleanArchivePath)
+        } else {
+            extractZipCover(cleanArchivePath)
+        }
+
+        val scaledBitmap = scaleBitmap(bitmap)
+        
+        if (bitmap != scaledBitmap) {
+            bitmap.recycle()
+        }
+
+        val thumbnailPath = getThumbnailPath(bookId, cleanOutputDir)
+        try {
+            FileOutputStream(thumbnailPath).use { stream ->
+                scaledBitmap.compress(Bitmap.CompressFormat.JPEG, JPEG_QUALITY, stream)
+            }
+            Log.d(TAG, "Thumbnail saved to: $thumbnailPath")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to save thumbnail", e)
+            throw ThumbnailError.SavingFailed(e)
+        } finally {
+            scaledBitmap.recycle()
+        }
+
+        return thumbnailPath
+    }
+
+    /**
+     * Extract cover from a zip archive (CBZ, ZIP)
+     */
+    private fun extractZipCover(archivePath: String): Bitmap {
         val archive = try {
-            ZipArchive(cleanArchivePath)
+            ZipArchive(archivePath)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to open archive", e)
             throw ThumbnailError.ExtractionFailed(e)
@@ -98,34 +149,32 @@ class ThumbnailGenerator private constructor() {
             archive.close()
         }
 
-        val originalBitmap = try {
+        return try {
             BitmapFactory.decodeByteArray(imageData, 0, imageData.size)
                 ?: throw IllegalStateException("BitmapFactory returned null")
         } catch (e: Exception) {
             Log.e(TAG, "Failed to decode image", e)
             throw ThumbnailError.DecodingFailed(e)
         }
+    }
 
-        val scaledBitmap = scaleBitmap(originalBitmap)
-        
-        if (originalBitmap != scaledBitmap) {
-            originalBitmap.recycle()
-        }
-
-        val thumbnailPath = getThumbnailPath(bookId, cleanOutputDir)
-        try {
-            FileOutputStream(thumbnailPath).use { stream ->
-                scaledBitmap.compress(Bitmap.CompressFormat.JPEG, JPEG_QUALITY, stream)
+    /**
+     * Extract cover from an EPUB
+     */
+    private fun extractEpubCover(archivePath: String): Bitmap {
+        return runBlocking {
+            val fileUrl = URL("file://$archivePath")
+            
+            val coverBitmap = bookService.getCoverImage(fileUrl)
+            
+            if (coverBitmap != null) {
+                Log.d(TAG, "Successfully extracted epub cover")
+                coverBitmap
+            } else {
+                Log.w(TAG, "Failed to extract epub cover, falling back to ZIP extraction")
+                extractZipCover(archivePath)
             }
-            Log.d(TAG, "Thumbnail saved to: $thumbnailPath")
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to save thumbnail", e)
-            throw ThumbnailError.SavingFailed(e)
-        } finally {
-            scaledBitmap.recycle()
         }
-
-        return thumbnailPath
     }
 
     fun getThumbnailPath(bookId: String, outputDir: String): String {

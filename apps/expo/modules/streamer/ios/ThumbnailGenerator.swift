@@ -2,8 +2,9 @@ import Foundation
 import ZIPFoundation
 import UIKit
 import os.log
+import Readium
 
-/// Generates thumbnails from comic book archives
+/// Generates thumbnails from comic book archives and ebooks
 class ThumbnailGenerator {
     static let shared = ThumbnailGenerator()
     
@@ -13,7 +14,7 @@ class ThumbnailGenerator {
     
     private init() {}
     
-    /// Generate a thumbnail from the first valid page of an archive
+    /// Generate a thumbnail from the first valid page of an archive or ebook cover
     /// - Parameters:
     ///   - bookId: The book ID to use for the thumbnail filename
     ///   - archivePath: Path to the archive file
@@ -30,17 +31,16 @@ class ThumbnailGenerator {
         
         let outputPath = (outputDir as NSString).appendingPathComponent("\(bookId).jpg")
         
-        let archive = try ZipArchive(path: archivePath)
-        let imageFiles = archive.getImageFiles()
+        let fileExtension = (archivePath as NSString).pathExtension.lowercased()
+        let isEpub = fileExtension == "epub"
         
-        guard !imageFiles.isEmpty else {
-            throw ThumbnailError.noValidImages
+        let imageData: Data
+        
+        if isEpub {
+            imageData = try extractEpubCover(archivePath: archivePath)
+        } else {
+            imageData = try extractZipCover(archivePath: archivePath)
         }
-        
-        let firstImageEntry = imageFiles[0]
-        logger.debug("Using first image: \(firstImageEntry.path)")
-        
-        let imageData = try archive.extractEntry(firstImageEntry)
         
         guard let originalImage = UIImage(data: imageData) else {
             throw ThumbnailError.invalidImageData
@@ -56,6 +56,46 @@ class ThumbnailGenerator {
         try thumbnailData.write(to: outputURL)
         
         logger.info("Thumbnail generated: \(outputPath)")
+    }
+    
+    /// Extract cover from a standard archive (CBZ, ZIP)
+    private func extractZipCover(archivePath: String) throws -> Data {
+        let archive = try ZipArchive(path: archivePath)
+        let imageFiles = archive.getImageFiles()
+        
+        guard !imageFiles.isEmpty else {
+            throw ThumbnailError.noValidImages
+        }
+        
+        let firstImageEntry = imageFiles[0]
+        logger.debug("Using first image from comic: \(firstImageEntry.path)")
+        
+        return try archive.extractEntry(firstImageEntry)
+    }
+    
+    /// Extract cover from an EPUB, falling back to ZIP extraction if needed
+    private func extractEpubCover(archivePath: String) throws -> Data {
+        let fileURL = URL(fileURLWithPath: archivePath)
+        
+        // TODO: Determine if better to make thumb gen async
+        // Note: I did this to keep things synchronous
+        var extractedData: Data?
+        let semaphore = DispatchSemaphore(value: 0)
+        
+        Task {
+            extractedData = await BookService.instance.getCoverImage(from: fileURL)
+            semaphore.signal()
+        }
+        
+        semaphore.wait()
+        
+        if let data = extractedData {
+            logger.debug("Successfully extracted epub cover: \(data.count) bytes")
+            return data
+        }
+        
+        logger.warning("Failed to extract epub cover, falling back to ZIP extraction")
+        return try extractZipCover(archivePath: archivePath)
     }
     
     private func scaleImage(_ image: UIImage, maxSize: CGFloat) throws -> UIImage {
@@ -98,6 +138,7 @@ enum ThumbnailError: Error {
     case invalidImageData
     case imageEncodingFailed
     case outputDirectoryCreationFailed(Error)
+    case epubCoverExtractionFailed(String)
     
     var localizedDescription: String {
         switch self {
@@ -109,6 +150,8 @@ enum ThumbnailError: Error {
             return "Failed to encode image as JPEG"
         case .outputDirectoryCreationFailed(let error):
             return "Failed to create output directory: \(error.localizedDescription)"
+        case .epubCoverExtractionFailed(let reason):
+            return "Failed to extract EPUB cover: \(reason)"
         }
     }
 }

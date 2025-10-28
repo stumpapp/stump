@@ -13,6 +13,7 @@ Pod::Spec.new do |s|
   s.static_framework = true
 
   s.dependency 'ExpoModulesCore'
+  s.dependency 'Readium'
 
   # Note: I am using Readium's GCDWebServer to avoid conflicts (got a bunch of redeclaration errors otherwise)
   s.dependency 'ReadiumGCDWebServer'

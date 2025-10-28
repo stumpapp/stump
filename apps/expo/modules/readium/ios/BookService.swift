@@ -187,6 +187,43 @@ class NullPDFDocumentFactory: PDFDocumentFactory {
          }
          return await publication.locate(link)
      }
+     
+     /// Extracts the cover image from an EPUB
+     /// - Parameter url: The URL of the EPUB file
+     /// - Returns: The cover image data, or nil if no cover is found
+     public func getCoverImage(from url: URL) async -> Data? {
+         guard let fileURL = FileURL(url: url) else {
+             print("Failed to create FileURL from: \(url)")
+             return nil
+         }
+         
+         let assetResult = await assetRetriever.retrieve(url: fileURL)
+         guard case .success(let asset) = assetResult else {
+             print("Failed to retrieve asset")
+             return nil
+         }
+         
+         let publicationResult = await publicationOpener.open(
+             asset: asset,
+             allowUserInteraction: false,
+             credentials: nil
+         )
+         
+         guard case .success(let publication) = publicationResult else {
+             print("Failed to open publication")
+             return nil
+         }
+         
+         let result = await publication.cover()
+         switch result {
+         case .success(let image):
+             // TODO: Determine ideal compression quality for thumbs
+             return image?.jpegData(compressionQuality: 0.9)
+         case .failure(let error):
+             print("Failed to extract cover: \(error)")
+             return nil
+         }
+     }
 
      /// A helper method to assert that a publication is not restricted.
      /// See https://github.com/readium/swift-toolkit/blob/main/docs/Guides/Readium%20LCP.md#using-the-opened-publication

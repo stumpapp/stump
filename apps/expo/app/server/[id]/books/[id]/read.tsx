@@ -296,7 +296,7 @@ export default function Screen() {
 			/>
 		)
 	} else if (book.extension.match(ARCHIVE_EXTENSION) || book.extension.match(PDF_EXTENSION)) {
-		// const initialPage = restart ? 1 : currentProgressPage
+		// TODO(pdf): Add preference for the readium PDF reader vs streaming image-based reader
 		return (
 			<ImageBasedReader
 				initialPage={currentProgressPage}

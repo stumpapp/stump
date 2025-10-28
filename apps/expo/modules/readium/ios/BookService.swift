@@ -12,22 +12,6 @@
      case assetRetrievalFailed(Error)
  }
 
- /// A minimal PDF document factory that doesn't create PDF documents
- /// Used when PDF support is not needed or not available
-class NullPDFDocumentFactory: PDFDocumentFactory {
-    func open(file: ReadiumShared.FileURL, password: String?) async throws -> any ReadiumShared.PDFDocument {
-        throw NSError(domain: "NullPDFDocumentFactory", code: -1, userInfo: [NSLocalizedDescriptionKey: "PDF support is not available"])
-    }
-    
-    func open<HREF>(resource: any ReadiumShared.Resource, at href: HREF, password: String?) async throws -> any ReadiumShared.PDFDocument where HREF : ReadiumShared.URLConvertible {
-        throw NSError(domain: "NullPDFDocumentFactory", code: -1, userInfo: [NSLocalizedDescriptionKey: "PDF support is not available"])
-    }
-    
-     func open(file: FileURL, password: String?) -> PDFDocument? {
-         return nil
-     }
- }
-
  public final class BookService {
      /// An instance of AssetRetriever for accessing publication assets
      private let assetRetriever: AssetRetriever
@@ -51,8 +35,8 @@ class NullPDFDocumentFactory: PDFDocumentFactory {
          assetRetriever = AssetRetriever(httpClient: httpClient)
          
          // Initialize publication opener with parsers and content protections
-         // Create a minimal PDF factory that doesn't support PDF creation
-         let pdfFactory = NullPDFDocumentFactory()
+         // Use DefaultPDFDocumentFactory for PDF support
+         let pdfFactory = DefaultPDFDocumentFactory()
          
          publicationOpener = PublicationOpener(
              parser: DefaultPublicationParser(

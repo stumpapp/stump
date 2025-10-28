@@ -84,6 +84,7 @@ class StumpStreamer {
 		return this.nativeModule.getThumbnailPath(bookId, cacheDir)
 	}
 
+	// TODO(pdf): Add support for getting page count of PDF files
 	/**
 	 * Get the page count for an archive file without initializing the streamer
 	 *

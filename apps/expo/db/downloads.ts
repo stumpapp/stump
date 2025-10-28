@@ -19,6 +19,7 @@ import {
 
 // TODO: Support RAR?
 
+// TODO(pdf): Add support for getting page count of PDF files
 /**
  * Calculate page count for a downloaded file
  */
@@ -28,7 +29,6 @@ async function calculatePageCount(uri: string, filename: string): Promise<number
 		if (!extension || !['cbz', 'zip'].includes(extension)) {
 			return 0 // Not a comic book archive
 		}
-
 		return await StumpStreamer.getPageCount(uri)
 	} catch (error) {
 		console.warn('Failed to calculate page count:', error)

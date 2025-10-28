@@ -63,6 +63,7 @@ public class StumpStreamerModule: Module {
       return nil
     }
 
+    // TODO(pdf): Support PDF page count retrieval via Readium
     AsyncFunction("getPageCount") { (filePath: String) -> Int in
       let archivePath = filePath.hasPrefix("file://") 
           ? String(filePath.dropFirst(7))

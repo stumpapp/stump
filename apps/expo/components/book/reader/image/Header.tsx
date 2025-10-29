@@ -149,16 +149,6 @@ export default function Header({ onShowGlobalSettings }: Props) {
 								>
 									<NativeDropdownMenu.ItemTitle>Paged</NativeDropdownMenu.ItemTitle>
 								</NativeDropdownMenu.CheckboxItem>
-								<NativeDropdownMenu.CheckboxItem
-									key="vscroll"
-									value={readingMode === ReadingMode.ContinuousVertical}
-									onValueChange={() =>
-										setBookPreferences({ readingMode: ReadingMode.ContinuousVertical })
-									}
-									disabled
-								>
-									<NativeDropdownMenu.ItemTitle>Vertical Scroll</NativeDropdownMenu.ItemTitle>
-								</NativeDropdownMenu.CheckboxItem>
 
 								<NativeDropdownMenu.CheckboxItem
 									key="hscroll"
@@ -168,6 +158,16 @@ export default function Header({ onShowGlobalSettings }: Props) {
 									}
 								>
 									<NativeDropdownMenu.ItemTitle>Horizontal Scroll</NativeDropdownMenu.ItemTitle>
+								</NativeDropdownMenu.CheckboxItem>
+
+								<NativeDropdownMenu.CheckboxItem
+									key="vscroll"
+									value={readingMode === ReadingMode.ContinuousVertical}
+									onValueChange={() =>
+										setBookPreferences({ readingMode: ReadingMode.ContinuousVertical })
+									}
+								>
+									<NativeDropdownMenu.ItemTitle>Vertical Scroll</NativeDropdownMenu.ItemTitle>
 								</NativeDropdownMenu.CheckboxItem>
 							</NativeDropdownMenu.SubContent>
 						</NativeDropdownMenu.Sub>
@@ -296,11 +296,11 @@ export default function Header({ onShowGlobalSettings }: Props) {
 									<DropdownMenuRadioItem value="PAGED" className="text-foreground">
 										<Text className="text-lg">Paged</Text>
 									</DropdownMenuRadioItem>
-									<DropdownMenuRadioItem value="CONTINUOUS_VERTICAL" className="text-foreground">
-										<Text className="text-lg">Vertical Scroll</Text>
-									</DropdownMenuRadioItem>
 									<DropdownMenuRadioItem value="CONTINUOUS_HORIZONTAL" className="text-foreground">
 										<Text className="text-lg">Horizontal Scroll</Text>
+									</DropdownMenuRadioItem>
+									<DropdownMenuRadioItem value="CONTINUOUS_VERTICAL" className="text-foreground">
+										<Text className="text-lg">Vertical Scroll</Text>
 									</DropdownMenuRadioItem>
 								</DropdownMenuRadioGroup>
 							</DropdownMenuSubContent>

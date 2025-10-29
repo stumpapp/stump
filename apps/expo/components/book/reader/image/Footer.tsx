@@ -1,6 +1,6 @@
 import { Slider } from '@miblanchard/react-native-slider'
 import { FlashList, FlashListRef, useMappingHelper } from '@shopify/flash-list'
-import { ReadingDirection } from '@stump/graphql'
+import { ReadingDirection, ReadingMode } from '@stump/graphql'
 import { STUMP_SAVE_BASIC_SESSION_HEADER } from '@stump/sdk/constants'
 import dayjs from 'dayjs'
 import duration from 'dayjs/plugin/duration'
@@ -45,7 +45,7 @@ export default function Footer() {
 	} = useImageBasedReader()
 	const elapsedSeconds = useBookReadTime(book.id)
 	const {
-		preferences: { footerControls = 'slider', trackElapsedTime, readingDirection },
+		preferences: { footerControls = 'slider', trackElapsedTime, readingDirection, readingMode },
 	} = useBookPreferences({ book, serverId })
 
 	const galleryRef = useRef<FlashListRef<number[]>>(null)
@@ -484,7 +484,7 @@ export default function Footer() {
 
 	return (
 		<Animated.View className="absolute z-20 shrink gap-4" style={animatedStyles}>
-			{footerControls === 'images' && (
+			{footerControls === 'images' && readingMode !== ReadingMode.ContinuousVertical && (
 				<View style={isRtl && { transform: [{ scaleX: -1 }] }}>
 					<FlashList
 						ref={galleryRef}
@@ -506,17 +506,20 @@ export default function Footer() {
 			)}
 
 			<View className={cn('gap-2 px-3', { 'pb-1': Platform.OS === 'android' })}>
-				{footerControls === 'images' && (
+				{(footerControls === 'images' || readingMode === ReadingMode.ContinuousVertical) && (
 					<Progress
 						className="h-1 bg-[#898d94]"
 						indicatorClassName="bg-[#f5f3ef]"
 						value={percentage}
-						inverted={readingDirection === ReadingDirection.Rtl}
+						inverted={
+							readingDirection === ReadingDirection.Rtl &&
+							readingMode !== ReadingMode.ContinuousVertical
+						}
 						max={100}
 					/>
 				)}
 
-				{footerControls === 'slider' && (
+				{footerControls === 'slider' && readingMode !== ReadingMode.ContinuousVertical && (
 					<Slider
 						maximumValue={pageSets.length - 1}
 						step={1}

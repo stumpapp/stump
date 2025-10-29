@@ -10,6 +10,7 @@ import {
 	TapGestureHandlerEventPayload,
 } from 'react-native-gesture-handler'
 import { useSharedValue } from 'react-native-reanimated'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Success } from 'react-native-turbo-image'
 
 import { TurboImage } from '~/components/Image'
@@ -29,9 +30,10 @@ type ImageDimension = {
 // TODO: The reading directions don't play well with the pinch and zoom, particularly the continuous
 // scroll modes. I think when it is set to continuous, the zoom might have to be on the list?
 // Not 100% sure, it is REALLY janky right now.
+// When Zoomable is on the list for continuous scrolling, panning is weird because there is the list scroll
+// and the Zoomable pan, but Zoomable pan vertically/horizontally won't scroll the vertical/horizontal list
 // TODO: Account for device orientation AND reading direction
 // TODO: Account for the image scaling settings
-// TODO: Support vertical
 
 type Props = {
 	/**
@@ -58,6 +60,7 @@ export default function ImageBasedReader({ initialPage, onPastEndReached }: Prop
 		preferences: { readingMode, incognito, readingDirection, doublePageBehavior },
 	} = useBookPreferences({ book, serverId })
 	const { height, width } = useWindowDimensions()
+	const insets = useSafeAreaInsets()
 
 	const deviceOrientation = useMemo(
 		() => (width > height ? 'landscape' : 'portrait'),
@@ -118,10 +121,11 @@ export default function ImageBasedReader({ initialPage, onPastEndReached }: Prop
 	}, [])
 
 	const isRtl = readingDirection === ReadingDirection.Rtl
+	const isVertical = readingMode === ReadingMode.ContinuousVertical
 	return (
-		<View style={isRtl && { transform: [{ scaleX: -1 }] }}>
+		<View style={[{ width, height }, isRtl && { transform: [{ scaleX: -1 }] }]}>
 			<FlashList
-				style={[isRtl && { transform: [{ scaleX: -1 }] }]}
+				key={isVertical ? 'vertical' : 'horizontal'}
 				ref={flashListRef}
 				data={pageSets}
 				keyExtractor={(item) => item.toString()}
@@ -142,11 +146,12 @@ export default function ImageBasedReader({ initialPage, onPastEndReached }: Prop
 					else if ((imageSizes?.[item[0]]?.ratio || 0) >= 1) return 'landscape'
 					else return 'single'
 				}}
-				horizontal={
-					readingMode === ReadingMode.Paged || readingMode === ReadingMode.ContinuousHorizontal
+				contentContainerStyle={
+					isVertical && { paddingTop: insets.top, paddingBottom: insets.bottom }
 				}
+				horizontal={!isVertical}
 				pagingEnabled={readingMode === ReadingMode.Paged}
-				drawDistance={width}
+				drawDistance={isVertical ? height : width}
 				viewabilityConfig={{ viewAreaCoveragePercentThreshold: 20 }}
 				onViewableItemsChanged={({ viewableItems }) => {
 					const firstVisibleItem = viewableItems.filter(({ isViewable }) => isViewable).at(0)
@@ -159,8 +164,11 @@ export default function ImageBasedReader({ initialPage, onPastEndReached }: Prop
 						handlePageChanged(page)
 					}
 				}}
-				initialScrollIndex={pageSets.findIndex((set) => set.includes(initialPage - 1)) || 0}
-				showsVerticalScrollIndicator={false}
+				initialScrollIndex={
+					// If we change between 'vertical' and 'horizontal' key, we want the current page instead
+					pageSets.findIndex((set) => set.includes((currentPage ?? initialPage) - 1)) || 0
+				}
+				initialScrollIndexParams={isVertical ? { viewOffset: -insets.top } : undefined}
 				showsHorizontalScrollIndicator={false}
 				onScroll={handleScroll}
 			/>
@@ -193,7 +201,7 @@ const PageSet = React.memo(
 		const { book, pageURL, flashListRef, pageSets, setImageSizes, requestHeaders, serverId } =
 			useImageBasedReader()
 		const {
-			preferences: { tapSidesToNavigate, readingDirection, allowDownscaling },
+			preferences: { tapSidesToNavigate, readingDirection, readingMode, allowDownscaling },
 		} = useBookPreferences({ book, serverId })
 		const { isTablet } = useDisplay()
 		const { getMappingKey } = useMappingHelper()
@@ -208,6 +216,8 @@ const PageSet = React.memo(
 
 		const onCheckForNavigationTaps = useCallback(
 			(x: number) => {
+				if (readingMode === ReadingMode.ContinuousVertical) return
+
 				const isLeft = x < maxWidth / tapThresholdRatio
 				const isRight = x > maxWidth - maxWidth / tapThresholdRatio
 
@@ -232,6 +242,7 @@ const PageSet = React.memo(
 				readingDirection,
 				pageSets,
 				onPastEndReached,
+				readingMode,
 			],
 		)
 
@@ -303,7 +314,15 @@ const PageSet = React.memo(
 						className={cn('relative flex-row items-center justify-center', {
 							'mx-auto gap-0': indexes.length > 1,
 						})}
-						style={{ height: maxHeight, width: maxWidth }}
+						style={{
+							height:
+								// For the paged reader, this container takes the whole height so we can center vertically,
+								// but for the vertical reader we only want it to take the image height
+								imageRatio && readingMode === ReadingMode.ContinuousVertical
+									? maxWidth / imageRatio
+									: maxHeight,
+							width: maxWidth,
+						}}
 					>
 						{directionRespectingIndexes.map((pageIdx, i) => {
 							return (

@@ -45,7 +45,13 @@ export default function Footer() {
 	} = useImageBasedReader()
 	const elapsedSeconds = useBookReadTime(book.id)
 	const {
-		preferences: { footerControls = 'slider', trackElapsedTime, readingDirection, readingMode },
+		preferences: {
+			footerControls = 'slider',
+			trackElapsedTime,
+			readingDirection,
+			readingMode,
+			doublePageBehavior,
+		},
 	} = useBookPreferences({ book, serverId })
 
 	const galleryRef = useRef<FlashListRef<number[]>>(null)
@@ -139,10 +145,11 @@ export default function Footer() {
 	)
 
 	const visibilityChanged = usePrevious(visible) !== visible
+	const doublePageBehaviorChanged = usePrevious(doublePageBehavior) !== doublePageBehavior
 	useEffect(() => {
 		if (footerControls !== 'images') return
 
-		if (visible && visibilityChanged) {
+		if (visible && (visibilityChanged || doublePageBehaviorChanged)) {
 			const idx = pageSets.findIndex((set) => set.includes(currentPage - 1))
 			if (idx === -1) return
 			galleryRef.current?.scrollToIndex({
@@ -152,7 +159,7 @@ export default function Footer() {
 				viewOffset: -3, // account for half of the gap between two adjacent page sets
 			})
 		}
-	}, [footerControls, currentPage, visible, visibilityChanged, pageSets])
+	}, [footerControls, currentPage, visible, visibilityChanged, pageSets, doublePageBehaviorChanged])
 
 	const formatDuration = useCallback(() => {
 		if (elapsedSeconds <= 60) {

@@ -14,6 +14,7 @@ public struct PDFProps {
     var pageSpacing: Double?
     var scrollAxis: Axis?
     var scroll: Bool?
+    var readingProgression: ReadiumNavigator.ReadingProgression?
 }
 
 public struct FinalizedPDFProps {
@@ -24,6 +25,7 @@ public struct FinalizedPDFProps {
     var pageSpacing: Double
     var scrollAxis: Axis
     var scroll: Bool
+    var readingProgression: ReadiumNavigator.ReadingProgression
 }
 
 public class PDFView: ExpoView {
@@ -132,7 +134,9 @@ public class PDFView: ExpoView {
             url: url,
             background: pendingProps.background ?? oldProps?.background ?? Color(hex: "#000000")!,
             pageSpacing: pendingProps.pageSpacing ?? oldProps?.pageSpacing ?? 0.0,
-            scrollAxis: pendingProps.scrollAxis ?? oldProps?.scrollAxis ?? .vertical
+            scrollAxis: pendingProps.scrollAxis ?? oldProps?.scrollAxis ?? .vertical,
+            scroll: pendingProps.scroll ?? oldProps?.scroll ?? true,
+            readingProgression: pendingProps.readingProgression ?? oldProps?.readingProgression ?? .ltr
         )
         
         // If this is a new book or first initialization, load the publication
@@ -159,7 +163,9 @@ public class PDFView: ExpoView {
         guard let oldProps = oldProps, let props = props else { return false }
         return props.background != oldProps.background ||
                props.pageSpacing != oldProps.pageSpacing ||
-               props.scrollAxis != oldProps.scrollAxis
+               props.scrollAxis != oldProps.scrollAxis ||
+               props.scroll != oldProps.scroll ||
+               props.readingProgression != oldProps.readingProgression
     }
     
     private func loadPublication() async {
@@ -219,8 +225,8 @@ public class PDFView: ExpoView {
                     preferences: PDFPreferences(
                         backgroundColor: props.background,
                         pageSpacing: props.pageSpacing,
-                        readingProgression: .ltr, // TODO(pdf): Intake
-                        scroll: props.scrollAxis == .vertical,
+                        readingProgression: props.readingProgression,
+                        scroll: props.scroll,
                         scrollAxis: props.scrollAxis,
                         visibleScrollbar: false
                     )
@@ -368,8 +374,8 @@ public class PDFView: ExpoView {
         let preferences = PDFPreferences(
             backgroundColor: props.background,
             pageSpacing: props.pageSpacing,
-            readingProgression: .ltr,
-            scroll: props.scrollAxis == .vertical,
+            readingProgression: props.readingProgression,
+            scroll: props.scroll,
             scrollAxis: props.scrollAxis
         )
         

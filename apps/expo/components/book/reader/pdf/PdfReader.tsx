@@ -1,4 +1,4 @@
-import { ReadingMode } from '@stump/graphql'
+import { ReadingDirection, ReadingMode } from '@stump/graphql'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { View } from 'react-native'
 
@@ -49,9 +49,12 @@ export default function PdfReader({ book, initialPage, incognito, onPageChanged,
 	const { downloadBook } = useDownload({ serverId: ctx.serverId })
 
 	const [localUri, setLocalUri] = useState<string | null>(() => ctx.offlineUri || null)
-	const [locator, setLocator] = useState<PDFLocator | undefined>(() =>
-		intoPDFReadiumLocator(initialPage || 1),
-	)
+
+	// TODO(readium): I think I'll need to do the same thing for the ebook reader once I enable scrolling
+	// Note: We don't track the locator throughout reading here because when `scroll` is enabled the change
+	// in the prop triggers a snap to the locator which interrupts the scrolling experience. There really isn't
+	// a need for the React side to manage the locator into the native module, it manages that itself
+	const initialLocator = useMemo(() => intoPDFReadiumLocator(initialPage || 1), [initialPage])
 
 	const controlsVisible = useReaderStore((state) => state.showControls)
 	const setControlsVisible = useReaderStore((state) => state.setShowControls)
@@ -71,11 +74,11 @@ export default function PdfReader({ book, initialPage, incognito, onPageChanged,
 				scroll: bookPreferences.readingMode !== ReadingMode.Paged,
 				// TODO(pdf): Implement this preference
 				backgroundColor: '#000000',
+				readingProgression:
+					bookPreferences.readingDirection === ReadingDirection.Rtl ? 'rtl' : 'ltr',
 			}) satisfies PDFPreferences,
 		[bookPreferences],
 	)
-
-	console.log({ config })
 
 	const readerRef = useRef<PDFViewRef>(null)
 
@@ -166,8 +169,6 @@ export default function PdfReader({ book, initialPage, incognito, onPageChanged,
 
 	const handleLocationChanged = useCallback(
 		(locator: PDFLocator) => {
-			setLocator(locator)
-
 			const page = locator.locations?.position ?? 1
 			if (page != null) {
 				store.setCurrentPage(page)
@@ -201,7 +202,7 @@ export default function PdfReader({ book, initialPage, incognito, onPageChanged,
 				ref={readerRef}
 				bookId={book.id}
 				url={localUri}
-				locator={locator}
+				initialLocator={initialLocator}
 				onBookLoaded={({ nativeEvent: loadEvent }) => handleBookLoaded(loadEvent)}
 				onLocatorChange={({ nativeEvent: locator }) => handleLocationChanged(locator)}
 				onMiddleTouch={handleMiddleTouch}

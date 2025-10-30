@@ -7,6 +7,8 @@ export type {
 	PDFLocator,
 	LocatorChangeEvent as PDFLocatorChangeEvent,
 	PageChangeEvent as PDFPageChangeEvent,
+	PDFPreferences,
+	PDFReadingProgression,
 	PDFScrollAxis,
 	PDFViewProps,
 	PDFViewRef,

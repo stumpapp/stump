@@ -12,6 +12,7 @@ import {
 	ImageCacheActions,
 	MaskURLs,
 	PerformanceMonitor,
+	PreferNativePdf,
 	ReaderSettingsLink,
 	ReduceAnimations,
 	ThumbnailRatio,
@@ -36,6 +37,8 @@ export default function Screen() {
 
 				<View>
 					<Text className="mb-3 text-foreground-muted">Reading</Text>
+
+					<PreferNativePdf />
 
 					<ReaderSettingsLink />
 				</View>

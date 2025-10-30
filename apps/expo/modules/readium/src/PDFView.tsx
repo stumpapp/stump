@@ -5,6 +5,7 @@ import type { StyleProp, ViewStyle } from 'react-native'
 import type { ReadiumLocator } from './Readium.types'
 
 export type PDFScrollAxis = 'vertical' | 'horizontal'
+export type PDFReadingProgression = 'ltr' | 'rtl'
 
 export type PDFLocator = Omit<ReadiumLocator, 'chapterTitle'>
 
@@ -13,6 +14,7 @@ export interface PDFPreferences {
 	pageSpacing?: number
 	scrollAxis?: PDFScrollAxis
 	scroll?: boolean
+	readingProgression?: PDFReadingProgression
 }
 
 export interface PDFViewProps {
@@ -23,6 +25,8 @@ export interface PDFViewProps {
 	backgroundColor?: string
 	pageSpacing?: number
 	scrollAxis?: PDFScrollAxis
+	scroll?: boolean
+	readingProgression?: PDFReadingProgression
 	style?: StyleProp<ViewStyle>
 	onLocatorChange?: (event: { nativeEvent: LocatorChangeEvent }) => void
 	onPageChange?: (event: { nativeEvent: PageChangeEvent }) => void
@@ -73,7 +77,9 @@ export const PDFView = React.forwardRef<PDFViewRef, PDFViewProps>((props, ref) =
 		initialLocator,
 		backgroundColor = '#000000',
 		pageSpacing = 0,
-		scrollAxis = 'vertical',
+		scrollAxis = 'horizontal',
+		scroll = false,
+		readingProgression = 'ltr',
 		style,
 		onLocatorChange,
 		onPageChange,
@@ -155,6 +161,8 @@ export const PDFView = React.forwardRef<PDFViewRef, PDFViewProps>((props, ref) =
 			backgroundColor={backgroundColor}
 			pageSpacing={pageSpacing}
 			scrollAxis={scrollAxis}
+			scroll={scroll}
+			readingProgression={readingProgression}
 			style={style}
 			onLocatorChange={handleLocatorChange}
 			onPageChange={handlePageChange}

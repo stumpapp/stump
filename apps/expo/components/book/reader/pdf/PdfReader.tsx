@@ -2,6 +2,7 @@ import { ReadingDirection, ReadingMode } from '@stump/graphql'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { View } from 'react-native'
 
+import { FullScreenLoader } from '~/components/ui'
 import { useDownload } from '~/lib/hooks'
 import {
 	intoPDFReadiumLocator,
@@ -43,12 +44,17 @@ type Props = {
 	 * The URI of the offline book, if available
 	 */
 	offlineUri?: string
+	/**
+	 * A callback to reset the reading timer
+	 */
+	resetTimer?: () => void
 } & OfflineCompatibleReader
 
 export default function PdfReader({ book, initialPage, incognito, onPageChanged, ...ctx }: Props) {
 	const { downloadBook } = useDownload({ serverId: ctx.serverId })
 
 	const [localUri, setLocalUri] = useState<string | null>(() => ctx.offlineUri || null)
+	const [isDownloading, setIsDownloading] = useState(false)
 
 	// TODO(readium): I think I'll need to do the same thing for the ebook reader once I enable scrolling
 	// Note: We don't track the locator throughout reading here because when `scroll` is enabled the change
@@ -116,6 +122,7 @@ export default function PdfReader({ book, initialPage, incognito, onPageChanged,
 		if (localUri) return
 
 		async function download() {
+			setIsDownloading(true)
 			const result = await downloadBook({
 				...book,
 				bookName: book.name,
@@ -133,7 +140,7 @@ export default function PdfReader({ book, initialPage, incognito, onPageChanged,
 			}
 		}
 
-		download()
+		download().finally(() => setIsDownloading(false))
 	}, [localUri, book, downloadBook, store])
 
 	useEffect(
@@ -184,6 +191,8 @@ export default function PdfReader({ book, initialPage, incognito, onPageChanged,
 		() => setControlsVisible(!controlsVisible),
 		[controlsVisible, setControlsVisible],
 	)
+
+	if (isDownloading) return <FullScreenLoader label="Downloading..." />
 
 	if (!localUri) return null
 

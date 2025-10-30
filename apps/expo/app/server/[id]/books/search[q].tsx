@@ -6,12 +6,10 @@ import { QueryClient } from '@tanstack/react-query'
 import { useLocalSearchParams, useNavigation } from 'expo-router'
 import { useCallback, useLayoutEffect, useMemo } from 'react'
 
-import BookGridItem, { IBookGridItemFragment } from '~/components/book/BookGridItem'
+import BookGridItem from '~/components/book/BookGridItem'
+import ChevronBackLink from '~/components/ChevronBackLink'
 import { useGridItemSize } from '~/components/grid/useGridItemSize'
-import { icons } from '~/lib'
 import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
-
-const { ChevronLeft } = icons
 
 const query = graphql(`
 	query BookSearchScreen($filter: MediaFilterInput!, $pagination: Pagination!) {
@@ -57,9 +55,7 @@ export default function Screen() {
 			headerShown: true,
 			headerTitle: 'Search Results',
 			headerBackButtonMenuEnabled: true,
-			headerLeft: () => (
-				<ChevronLeft className="text-foreground" onPress={() => navigation.goBack()} />
-			),
+			headerLeft: () => <ChevronBackLink />,
 		})
 	}, [navigation])
 

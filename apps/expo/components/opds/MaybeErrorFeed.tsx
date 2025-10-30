@@ -1,14 +1,11 @@
 import { useSDK } from '@stump/client'
+import { Rss, Slash } from 'lucide-react-native'
 import { View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { ZodError } from 'zod'
 
-import { icons } from '~/lib'
-
-import { Text } from '../ui'
-
-const { Rss, Slash } = icons
+import { Icon, Text } from '../ui'
 
 type Props = {
 	error?: unknown | null
@@ -54,8 +51,11 @@ export default function MaybeErrorFeed({ error }: Props) {
 				<View className="flex-1 items-center justify-center gap-2">
 					<View className="relative flex justify-center">
 						<View className="squircle flex items-center justify-center rounded-lg bg-background-surface p-2">
-							<Rss className="h-6 w-6 text-foreground-muted" />
-							<Slash className="absolute h-6 w-6 scale-x-[-1] transform text-foreground opacity-80" />
+							<Icon as={Rss} className="h-6 w-6 text-foreground-muted" />
+							<Icon
+								as={Slash}
+								className="absolute h-6 w-6 scale-x-[-1] transform text-foreground opacity-80"
+							/>
 						</View>
 					</View>
 

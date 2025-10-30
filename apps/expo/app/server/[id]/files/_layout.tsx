@@ -1,14 +1,12 @@
-import { Stack, useNavigation } from 'expo-router'
+import { Stack } from 'expo-router'
 import { Platform, View } from 'react-native'
 
-import { icons } from '~/lib'
+import ChevronBackLink from '~/components/ChevronBackLink'
 import { ENABLE_LARGE_HEADER, IS_IOS_24_PLUS } from '~/lib/constants'
 import { usePreferencesStore } from '~/stores'
-const { ChevronLeft } = icons
 
 export default function Screen() {
 	const animationEnabled = usePreferencesStore((state) => !state.reduceAnimations)
-	const navigation = useNavigation()
 
 	return (
 		<Stack
@@ -34,11 +32,7 @@ export default function Screen() {
 											alignItems: 'center',
 										}}
 									>
-										<ChevronLeft
-											className="text-foreground"
-											onPress={() => navigation.goBack()}
-											size={24}
-										/>
+										<ChevronBackLink />
 									</View>
 								),
 					headerTransparent: Platform.OS === 'ios',

@@ -1,16 +1,14 @@
 import { useSDK } from '@stump/client'
 import { useQuery } from '@tanstack/react-query'
-import { useLocalSearchParams, useNavigation } from 'expo-router'
+import { useLocalSearchParams } from 'expo-router'
 import { Platform, ScrollView } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
+import ChevronBackLink from '~/components/ChevronBackLink'
 import { MaybeErrorFeed, OPDSFeed } from '~/components/opds'
 import EmptyFeed from '~/components/opds/EmptyFeed'
 import RefreshControl from '~/components/RefreshControl'
-import { icons } from '~/lib'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
-
-const { ChevronLeft } = icons
 
 export default function Screen() {
 	const { url: feedURL, query } = useLocalSearchParams<{ url: string; query: string }>()
@@ -27,12 +25,9 @@ export default function Screen() {
 		throwOnError: false,
 	})
 
-	const navigation = useNavigation()
 	useDynamicHeader({
 		title: query || 'Search Results',
-		headerLeft: () => (
-			<ChevronLeft className="text-foreground" onPress={() => navigation.goBack()} />
-		),
+		headerLeft: () => <ChevronBackLink />,
 	})
 
 	const emptyFeed =

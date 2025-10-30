@@ -1,3 +1,4 @@
+import { Image } from 'lucide-react-native'
 import { useEffect, useState } from 'react'
 import { View } from 'react-native'
 import TurboImage from 'react-native-turbo-image'
@@ -19,7 +20,7 @@ export default function CachePolicySelect() {
 
 	return (
 		<>
-			<AppSettingsRow icon="Image" title="Clear Cache">
+			<AppSettingsRow icon={Image} title="Clear Cache">
 				<View className="flex-row gap-2">
 					<Button
 						size="sm"

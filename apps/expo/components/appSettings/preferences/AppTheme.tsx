@@ -1,13 +1,12 @@
 import upperFirst from 'lodash/upperFirst'
+import { ChevronsUpDown, Paintbrush } from 'lucide-react-native'
 import { useState } from 'react'
 import { Pressable, View } from 'react-native'
 import * as DropdownMenu from 'zeego/dropdown-menu'
 
-import { icons, Text } from '~/components/ui'
+import { Icon, Text } from '~/components/ui'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { cn } from '~/lib/utils'
-
-const { ChevronsUpDown } = icons
 
 import AppSettingsRow from '../AppSettingsRow'
 
@@ -19,14 +18,14 @@ export default function AppTheme() {
 	const [isOpen, setIsOpen] = useState(false)
 
 	return (
-		<AppSettingsRow icon="Paintbrush" title="Theme">
+		<AppSettingsRow icon={Paintbrush} title="Theme">
 			<DropdownMenu.Root open={isOpen} onOpenChange={setIsOpen}>
 				<DropdownMenu.Trigger>
 					<Pressable onPress={() => setIsOpen((prev) => !prev)}>
 						{({ pressed }) => (
 							<View className={cn('flex flex-row items-center gap-2', pressed && 'opacity-70')}>
 								<Text className="text-foreground-muted">{upperFirst(colorScheme)}</Text>
-								<ChevronsUpDown className="h-5 text-foreground-muted" />
+								<Icon as={ChevronsUpDown} className="h-5 text-foreground-muted" />
 							</View>
 						)}
 					</Pressable>

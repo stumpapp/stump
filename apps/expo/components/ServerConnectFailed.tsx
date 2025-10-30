@@ -1,10 +1,9 @@
 import { useRouter } from 'expo-router'
+import { WifiOff } from 'lucide-react-native'
 import { View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
-import { Button, Heading, icons, Text } from './ui'
-
-const { WifiOff } = icons
+import { Button, Heading, Icon, Text } from './ui'
 
 type Props = {
 	onRetry?: () => void
@@ -22,7 +21,7 @@ export default function ServerConnectFailed({ onRetry }: Props) {
 
 				<View className="relative flex flex-row justify-center">
 					<View className="squircle flex items-center justify-center rounded-lg bg-background-surface p-2">
-						<WifiOff className="h-10 w-10 text-foreground-muted" />
+						<Icon as={WifiOff} className="h-10 w-10 text-foreground-muted" />
 					</View>
 				</View>
 

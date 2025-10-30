@@ -1,14 +1,13 @@
+import { ChevronsUpDown, Ruler } from 'lucide-react-native'
 import { useState } from 'react'
 import { Pressable, View } from 'react-native'
 import * as DropdownMenu from 'zeego/dropdown-menu'
 
-import { icons, Text } from '~/components/ui'
+import { Icon, Text } from '~/components/ui'
 import { cn } from '~/lib/utils'
-
-const { ChevronsUpDown } = icons
+import { usePreferencesStore } from '~/stores'
 
 import AppSettingsRow from '../AppSettingsRow'
-import { usePreferencesStore } from '~/stores'
 
 // TODO(android): Use non-native dropdown
 
@@ -28,14 +27,14 @@ export default function ThumbnailRatio() {
 	const thumbnailRatioName = ratioToStringMap[thumbnailRatio]
 
 	return (
-		<AppSettingsRow icon="Ruler" title="Thumbnail Ratio">
+		<AppSettingsRow icon={Ruler} title="Thumbnail Ratio">
 			<DropdownMenu.Root open={isOpen} onOpenChange={setIsOpen}>
 				<DropdownMenu.Trigger>
 					<Pressable onPress={() => setIsOpen((prev) => !prev)}>
 						{({ pressed }) => (
 							<View className={cn('flex flex-row items-center gap-2', pressed && 'opacity-70')}>
 								<Text className="text-foreground-muted">{thumbnailRatioName}</Text>
-								<ChevronsUpDown className="h-5 text-foreground-muted" />
+								<Icon as={ChevronsUpDown} className="h-5 text-foreground-muted" />
 							</View>
 						)}
 					</Pressable>

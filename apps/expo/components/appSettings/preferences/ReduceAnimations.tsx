@@ -1,3 +1,4 @@
+import { Rabbit } from 'lucide-react-native'
 import { View } from 'react-native'
 
 import { Switch } from '~/components/ui'
@@ -13,7 +14,7 @@ export default function ReduceAnimations() {
 
 	return (
 		<AppSettingsRow
-			icon="Rabbit"
+			icon={Rabbit}
 			title="Reduce Animations"
 			onPress={() => patch({ reduceAnimations: !reduceAnimations })}
 		>

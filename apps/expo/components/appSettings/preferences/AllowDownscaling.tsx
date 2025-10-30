@@ -1,3 +1,4 @@
+import { ImageDown } from 'lucide-react-native'
 import { View } from 'react-native'
 
 import { Switch } from '~/components/ui'
@@ -13,7 +14,7 @@ export default function AllowDownscaling() {
 
 	return (
 		<AppSettingsRow
-			icon="ImageDown"
+			icon={ImageDown}
 			title="Allow Downscaling"
 			onPress={() => patch({ allowDownscaling: !allowDownscaling })}
 		>

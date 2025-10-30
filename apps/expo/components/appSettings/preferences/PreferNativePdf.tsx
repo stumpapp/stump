@@ -1,3 +1,4 @@
+import { FileDown } from 'lucide-react-native'
 import { View } from 'react-native'
 
 import { Switch } from '~/components/ui'
@@ -13,7 +14,7 @@ export default function PreferNativePdf() {
 
 	return (
 		<AppSettingsRow
-			icon="FileDown"
+			icon={FileDown}
 			title="Prefer Native PDF"
 			onPress={() => patch({ preferNativePdf: !preferNativePdf })}
 		>

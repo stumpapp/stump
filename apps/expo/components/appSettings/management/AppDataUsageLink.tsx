@@ -1,15 +1,14 @@
 import { useQuery } from '@tanstack/react-query'
 import { useRouter } from 'expo-router'
+import { ChevronRight, HardDrive } from 'lucide-react-native'
 import { View } from 'react-native'
 
-import { icons, Text } from '~/components/ui'
+import { Icon, Text } from '~/components/ui'
 import { getAppUsage } from '~/lib/filesystem'
 import { formatBytes } from '~/lib/format'
 import { cn } from '~/lib/utils'
 
 import AppSettingsRow from '../AppSettingsRow'
-
-const { ChevronRight } = icons
 
 export default function AppDataUsageLink() {
 	const { data } = useQuery({
@@ -25,7 +24,7 @@ export default function AppDataUsageLink() {
 
 	return (
 		<AppSettingsRow
-			icon="HardDrive"
+			icon={HardDrive}
 			title="Data usage"
 			divide={false}
 			isLink
@@ -37,7 +36,7 @@ export default function AppDataUsageLink() {
 		>
 			<View className={cn('flex flex-row items-center gap-2')}>
 				<Text className="text-foreground-muted">{formattedSize}</Text>
-				<ChevronRight size={20} className="text-foreground-muted" />
+				<Icon as={ChevronRight} size={20} className="text-foreground-muted" />
 			</View>
 		</AppSettingsRow>
 	)

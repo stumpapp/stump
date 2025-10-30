@@ -1,3 +1,4 @@
+import { Database } from 'lucide-react-native'
 import { useEffect, useState } from 'react'
 
 import { Button, Dialog, Text } from '~/components/ui'
@@ -18,7 +19,7 @@ export default function DeleteDatabase() {
 
 	return (
 		<>
-			<AppSettingsRow icon="Database" title="Delete Database">
+			<AppSettingsRow icon={Database} title="Delete Database">
 				<Button
 					size="sm"
 					variant="destructive"

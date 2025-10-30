@@ -12,6 +12,7 @@ import { Pressable } from 'react-native-gesture-handler'
 import * as DropdownMenu from 'zeego/dropdown-menu'
 
 import { useActiveServer } from '~/components/activeServer'
+import { Icon } from '~/components/ui'
 import { db, downloadedFiles } from '~/db'
 import { IS_IOS_24_PLUS } from '~/lib/constants'
 import { useDownload } from '~/lib/hooks'
@@ -186,7 +187,7 @@ export default function BookMenu({ data }: Props) {
 								alignItems: 'center',
 							}}
 						>
-							<Ellipsis size={24} className="text-foreground" />
+							<Icon as={Ellipsis} size={24} className="text-foreground" />
 						</View>
 					</ContextMenu.Trigger>
 					<ContextMenu.Items>

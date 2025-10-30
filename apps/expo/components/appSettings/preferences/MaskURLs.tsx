@@ -1,3 +1,4 @@
+import { Link } from 'lucide-react-native'
 import { View } from 'react-native'
 
 import { Switch } from '~/components/ui'
@@ -12,7 +13,7 @@ export default function MaskURLs() {
 	}))
 
 	return (
-		<AppSettingsRow icon="Link" title="Mask URLs" onPress={() => setMaskURLs(!maskURLs)}>
+		<AppSettingsRow icon={Link} title="Mask URLs" onPress={() => setMaskURLs(!maskURLs)}>
 			<View className="flex flex-row items-center gap-2">
 				<Switch checked={maskURLs} onCheckedChange={setMaskURLs} />
 			</View>

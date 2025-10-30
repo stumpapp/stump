@@ -2,14 +2,13 @@ import { BadgeQuestionMark, LucideIcon } from 'lucide-react-native'
 import { forwardRef, Fragment } from 'react'
 import { Platform, Pressable, View } from 'react-native'
 
-import { icons } from '~/components/ui'
 import { cn } from '~/lib/utils'
 
 import { Text } from '../ui'
 import { Icon } from '../ui/icon'
 
 type Props = {
-	icon: keyof typeof icons
+	icon: LucideIcon
 	title: string
 	onPress?: () => void
 	divide?: boolean
@@ -31,10 +30,7 @@ const AppSettingsRow = forwardRef<View, Props>(
 						>
 							<View className="flex-row items-center gap-4">
 								<View className="squircle flex h-8 w-8 items-center justify-center rounded-xl bg-background-surface">
-									<Icon
-										as={(icons[icon] as LucideIcon) || BadgeQuestionMark}
-										className="h-6 w-6 text-foreground-muted"
-									/>
+									<Icon as={icon || BadgeQuestionMark} className="h-6 w-6 text-foreground-muted" />
 								</View>
 								<Text className="text-lg">{title}</Text>
 							</View>

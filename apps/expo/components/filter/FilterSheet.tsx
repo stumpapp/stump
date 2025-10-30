@@ -1,19 +1,17 @@
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
-import { LucideIcon } from 'lucide-react-native'
+import { ListFilter, LucideIcon } from 'lucide-react-native'
 import { forwardRef, useCallback, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import { Pressable, View } from 'react-native'
 import LinearGradient from 'react-native-linear-gradient'
 import Animated, { useSharedValue } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { BottomSheet, icons, Text } from '~/components/ui'
+import { BottomSheet, Icon, Text } from '~/components/ui'
 import { useColors } from '~/lib/constants'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { cn } from '~/lib/utils'
 
 import { useAnimatedHeader, useResolvedHeaderHeight } from '../header/useAnimatedHeader'
-
-const { ListFilter } = icons
 
 export interface FilterSheetRef {
 	open: () => void
@@ -42,7 +40,7 @@ const FilterSheet = forwardRef<FilterSheetRef, Props>(function FilterSheet(
 	const animatedIndex = useSharedValue<number>(0)
 	const animatedPosition = useSharedValue<number>(0)
 
-	const Icon = icon ?? ListFilter
+	const _Icon = icon ?? ListFilter
 
 	const { colorScheme } = useColorScheme()
 
@@ -111,7 +109,7 @@ const FilterSheet = forwardRef<FilterSheetRef, Props>(function FilterSheet(
 						}}
 					>
 						<Text>{label}</Text>
-						<Icon className="ml-2 h-4 w-4 text-foreground-muted" />
+						<Icon as={_Icon} className="ml-2 h-4 w-4 text-foreground-muted" />
 					</View>
 				)}
 			</Pressable>

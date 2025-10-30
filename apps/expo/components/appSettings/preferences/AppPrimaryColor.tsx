@@ -1,4 +1,5 @@
 import { ColorPicker, Host } from '@expo/ui/swift-ui'
+import { Pipette } from 'lucide-react-native'
 import { Platform } from 'react-native'
 
 import { useColors } from '~/lib/constants'
@@ -23,7 +24,7 @@ export default function AppPrimaryColor() {
 
 	return Platform.select({
 		ios: (
-			<AppSettingsRow icon="Pipette" title="Accent">
+			<AppSettingsRow icon={Pipette} title="Accent">
 				<Host matchContents>
 					<ColorPicker
 						label=""

@@ -1,3 +1,4 @@
+import { LayoutPanelTop } from 'lucide-react-native'
 import { View } from 'react-native'
 
 import { Switch } from '~/components/ui'
@@ -13,7 +14,7 @@ export default function CuratedDownloads() {
 
 	return (
 		<AppSettingsRow
-			icon="LayoutPanelTop"
+			icon={LayoutPanelTop}
 			title="Curated Downloads"
 			onPress={() => patch({ showCuratedDownloads: !showCuratedDownloads })}
 		>

@@ -10,6 +10,8 @@ export type HeaderButtonProps = {
 	style?: StyleProp<ViewStyle>
 }
 
+// TODO: Fix the glass effect, when specified it looks janky
+
 export function HeaderButton({ imageProps, buttonProps, style }: HeaderButtonProps) {
 	const colors = useColors()
 
@@ -24,20 +26,20 @@ export function HeaderButton({ imageProps, buttonProps, style }: HeaderButtonPro
 					variant={variant}
 					modifiers={[
 						frame({ height: 35, alignment: 'center' }),
-						...(isGlass
-							? [
-									glassEffect({
-										glass: {
-											variant: 'regular',
-											tint:
-												variant === 'glassProminent'
-													? colors.fill.brand.DEFAULT
-													: colors.background.DEFAULT,
-										},
-										shape: 'circle',
-									}),
-								]
-							: []),
+						// ...(isGlass
+						// 	? [
+						// 			glassEffect({
+						// 				glass: {
+						// 					variant: 'regular',
+						// 					tint:
+						// 						variant === 'glassProminent'
+						// 							? colors.fill.brand.DEFAULT
+						// 							: colors.background.DEFAULT,
+						// 				},
+						// 				shape: 'circle',
+						// 			}),
+						// 		]
+						// 	: []),
 					]}
 				>
 					<Image

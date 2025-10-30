@@ -144,7 +144,7 @@
          }
          
          View(PDFView.self) {
-             Events("onLocatorChange", "onPageChange", "onBookLoaded", "onError")
+             Events("onLocatorChange", "onPageChange", "onBookLoaded", "onMiddleTouch", "onError")
              
              AsyncFunction("goToLocation") { (view: PDFView, locatorJson: [String: Any]) in
                  guard let locator = try? Locator(json: locatorJson) else {

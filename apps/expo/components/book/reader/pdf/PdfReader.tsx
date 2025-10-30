@@ -1,26 +1,32 @@
+import { ReadingMode } from '@stump/graphql'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { View } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { useDownload } from '~/lib/hooks'
 import {
 	intoPDFReadiumLocator,
 	PDFBookLoadedEvent,
+	PDFLocator,
+	PDFPreferences,
 	PDFView,
 	PDFViewRef,
 	ReadiumLocator,
 } from '~/modules/readium'
 import { useReaderStore } from '~/stores'
-import { useEpubLocationStore } from '~/stores/epub'
+import { usePdfStore } from '~/stores/pdf'
+import { useBookPreferences } from '~/stores/reader'
 
-import { ImageReaderBookRef } from '../image/context'
+import { ReaderBookRef } from '../image/context'
+import { ControlsBackdrop } from '../shared'
 import { OfflineCompatibleReader } from '../types'
+import { PdfReaderFooter } from './PdfReaderFooter'
+import { PdfReaderHeader } from './PdfReaderHeader'
 
 type Props = {
 	/**
 	 * The book which is being read
 	 */
-	book: ImageReaderBookRef
+	book: ReaderBookRef
 	/**
 	 * The initial page
 	 */
@@ -39,17 +45,11 @@ type Props = {
 	offlineUri?: string
 } & OfflineCompatibleReader
 
-export default function ReadiumReader({
-	book,
-	initialPage,
-	incognito,
-	onPageChanged,
-	...ctx
-}: Props) {
+export default function PdfReader({ book, initialPage, incognito, onPageChanged, ...ctx }: Props) {
 	const { downloadBook } = useDownload({ serverId: ctx.serverId })
 
 	const [localUri, setLocalUri] = useState<string | null>(() => ctx.offlineUri || null)
-	const [locator, setLocator] = useState<ReadiumLocator | undefined>(() =>
+	const [locator, setLocator] = useState<PDFLocator | undefined>(() =>
 		intoPDFReadiumLocator(initialPage || 1),
 	)
 
@@ -59,6 +59,23 @@ export default function ReadiumReader({
 	const { brightness } = useReaderStore((state) => ({
 		brightness: state.globalSettings.brightness,
 	}))
+	const { preferences: bookPreferences } = useBookPreferences({ book, serverId: ctx.serverId })
+
+	const config = useMemo(
+		() =>
+			({
+				scrollAxis:
+					bookPreferences.readingMode === ReadingMode.ContinuousVertical
+						? 'vertical'
+						: 'horizontal',
+				scroll: bookPreferences.readingMode !== ReadingMode.Paged,
+				// TODO(pdf): Implement this preference
+				backgroundColor: '#000000',
+			}) satisfies PDFPreferences,
+		[bookPreferences],
+	)
+
+	console.log({ config })
 
 	const readerRef = useRef<PDFViewRef>(null)
 
@@ -84,14 +101,12 @@ export default function ReadiumReader({
 		[],
 	)
 
-	const store = useEpubLocationStore((store) => ({
+	const store = usePdfStore((store) => ({
 		storeBook: store.storeBook,
-		onTocChange: store.onTocChange,
-		onBookLoad: store.onBookLoad,
-		onLocationChange: store.onLocationChange,
-		cleanup: store.onUnload,
+		resetStore: store.resetStore,
 		storeActions: store.storeActions,
-		toc: store.toc,
+		setCurrentPage: store.setCurrentPage,
+		onLoaded: store.onLoaded,
 	}))
 
 	useEffect(() => {
@@ -125,7 +140,7 @@ export default function ReadiumReader({
 			}
 
 			return () => {
-				store.cleanup()
+				store.resetStore()
 				setLocalUri(null)
 			}
 		},
@@ -133,33 +148,41 @@ export default function ReadiumReader({
 		[],
 	)
 
-	const handleBookLoaded = useCallback(
-		(metadata?: PDFBookLoadedEvent['bookMetadata']) => {
-			store.onBookLoad(metadata)
-			// store.onTocChange(book.ebook?.toc ?? [])
+	useEffect(
+		() => {
 			store.storeBook(book)
+		},
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[book.id],
+	)
+
+	const handleBookLoaded = useCallback(
+		(loadEvent: PDFBookLoadedEvent) => {
+			store.onLoaded(loadEvent)
 			store.storeActions(navigator)
 		},
-		[store, book, navigator],
+		[store, navigator],
 	)
 
 	const handleLocationChanged = useCallback(
-		(locator: ReadiumLocator) => {
+		(locator: PDFLocator) => {
 			setLocator(locator)
 
 			const page = locator.locations?.position ?? 1
-			if (!incognito && page != null) {
-				onPageChanged(page)
+			if (page != null) {
+				store.setCurrentPage(page)
+				if (!incognito) {
+					onPageChanged(page)
+				}
 			}
 		},
-		[onPageChanged, incognito],
+		[onPageChanged, incognito, store],
 	)
 
-	const handleMiddleTouch = useCallback(() => {
-		setControlsVisible(!controlsVisible)
-	}, [controlsVisible, setControlsVisible])
-
-	const insets = useSafeAreaInsets()
+	const handleMiddleTouch = useCallback(
+		() => setControlsVisible(!controlsVisible),
+		[controlsVisible, setControlsVisible],
+	)
 
 	if (!localUri) return null
 
@@ -168,28 +191,27 @@ export default function ReadiumReader({
 			style={{
 				flex: 1,
 				filter: `brightness(${brightness * 100}%)`,
-				backgroundColor: '#000000',
+				backgroundColor: config.backgroundColor || '#000000',
 			}}
 		>
-			{/* Header */}
+			<PdfReaderHeader serverId={ctx.serverId} />
 
+			<ControlsBackdrop />
 			<PDFView
 				ref={readerRef}
 				bookId={book.id}
 				url={localUri}
 				locator={locator}
-				onBookLoaded={({ nativeEvent }) => handleBookLoaded(nativeEvent.bookMetadata)}
+				onBookLoaded={({ nativeEvent: loadEvent }) => handleBookLoaded(loadEvent)}
 				onLocatorChange={({ nativeEvent: locator }) => handleLocationChanged(locator)}
-				// onMiddleTouch={handleMiddleTouch}
-				// onSelection={handleSelection}
+				onMiddleTouch={handleMiddleTouch}
 				style={{
 					flex: 1,
-					// marginTop: insets.top + HEADER_HEIGHT,
 				}}
-				scrollAxis="horizontal"
+				{...config}
 			/>
 
-			{/* <ReadiumFooter /> */}
+			<PdfReaderFooter />
 		</View>
 	)
 }

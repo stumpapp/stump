@@ -209,6 +209,38 @@
          }
      }
 
+     /// Gets the number of pages for a given URL. Returns nil if the file is not
+     /// managed via this service (e.g., not an EPUB or PDF) or loading failed
+     public func getPageCount(from url: URL) async -> Int? {
+        guard let fileURL = FileURL(url: url) else {
+            print("Failed to create FileURL from: \(url)")
+            return nil
+        }
+        
+        let assetResult = await assetRetriever.retrieve(url: fileURL)
+        guard case .success(let asset) = assetResult else {
+            print("Failed to retrieve asset")
+            return nil
+        }
+        
+        let publicationResult = await publicationOpener.open(
+            asset: asset,
+            allowUserInteraction: false,
+            credentials: nil
+        )
+        
+        guard case .success(let publication) = publicationResult else {
+            print("Failed to open publication")
+            return nil
+        }
+        
+        guard case .success(let positions) = await publication.positions() else {
+            return publication.pageList.count
+        }
+         
+        return positions.count
+     }
+
      /// A helper method to assert that a publication is not restricted.
      /// See https://github.com/readium/swift-toolkit/blob/main/docs/Guides/Readium%20LCP.md#using-the-opened-publication
      private func validatePublication(publication: Publication) throws {

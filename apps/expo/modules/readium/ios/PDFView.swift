@@ -13,6 +13,7 @@ public struct PDFProps {
     var background: Color?
     var pageSpacing: Double?
     var scrollAxis: Axis?
+    var scroll: Bool?
 }
 
 public struct FinalizedPDFProps {
@@ -22,12 +23,14 @@ public struct FinalizedPDFProps {
     var background: Color
     var pageSpacing: Double
     var scrollAxis: Axis
+    var scroll: Bool
 }
 
 public class PDFView: ExpoView {
     let onLocatorChange = EventDispatcher()
     let onPageChange = EventDispatcher()
     let onBookLoaded = EventDispatcher()
+    let onMiddleTouch = EventDispatcher()
     let onError = EventDispatcher()
     
     public var navigator: PDFNavigatorViewController?
@@ -393,5 +396,30 @@ extension PDFView: PDFNavigatorDelegate {
             "failureReason": "Navigation failed",
             "recoverySuggestion": "Try again",
         ])
+    }
+    
+    public func navigator(_ navigator: VisualNavigator, didTapAt point: CGPoint) {
+        let navigator = navigator as! PDFNavigatorViewController
+        
+        if point.x < bounds.maxX * 0.2 {
+            let task = Task { [weak self] in
+                guard self != nil else { return }
+                _ = await navigator.goBackward(options: NavigatorGoOptions(animated: true))
+            }
+            navigationTasks.append(task)
+            navigationTasks.removeAll { $0.isCancelled }
+            return
+        }
+        if point.x > bounds.maxX * 0.8 {
+            let task = Task { [weak self] in
+                guard self != nil else { return }
+                _ = await navigator.goForward(options: NavigatorGoOptions(animated: true))
+            }
+            navigationTasks.append(task)
+            navigationTasks.removeAll { $0.isCancelled }
+            return
+        }
+        
+        onMiddleTouch()
     }
 }

@@ -1,7 +1,7 @@
 import { ReadiumLocator as StumpReadiumLocator } from '@stump/graphql'
 import omit from 'lodash/omit'
 
-import { ReadiumLink, ReadiumLocator } from './src'
+import { PDFLocator, ReadiumLink, ReadiumLocator } from './src'
 import ReadiumModule from './src/ReadiumModule'
 
 export { BookLoadedEvent as PDFBookLoadedEvent, PDFView, PDFViewRef } from './src/PDFView'
@@ -55,7 +55,7 @@ export function intoReadiumLocator(locator: StumpReadiumLocator): ReadiumLocator
 	}
 }
 
-export function intoPDFReadiumLocator(page: number): ReadiumLocator {
+export function intoPDFReadiumLocator(page: number): PDFLocator {
 	return {
 		locations: {
 			position: page,
@@ -63,5 +63,5 @@ export function intoPDFReadiumLocator(page: number): ReadiumLocator {
 		},
 		href: 'publication.pdf',
 		type: 'application/pdf',
-	} as ReadiumLocator
+	}
 }

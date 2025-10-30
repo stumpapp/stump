@@ -1,4 +1,5 @@
 import ExpoModulesCore
+import Readium
 
 public class StumpStreamerModule: Module {
   private let server = StreamerServer.shared
@@ -63,11 +64,18 @@ public class StumpStreamerModule: Module {
       return nil
     }
 
-    // TODO(pdf): Support PDF page count retrieval via Readium
     AsyncFunction("getPageCount") { (filePath: String) -> Int in
       let archivePath = filePath.hasPrefix("file://") 
           ? String(filePath.dropFirst(7))
           : filePath
+
+      let fileExtension = (archivePath as NSString).pathExtension.lowercased()
+      if fileExtension == "epub" || fileExtension == "pdf" {
+        if let url = URL(string: "file://\(archivePath)"),
+           let pageCount = await BookService.instance.getPageCount(from: url) {
+          return pageCount
+        }
+      }
         
       let archive = try ZipArchive(path: archivePath)
       let imageFiles = archive.getImageFiles()

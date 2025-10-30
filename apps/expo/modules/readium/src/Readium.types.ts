@@ -1,5 +1,17 @@
 import type { StyleProp, ViewStyle } from 'react-native'
 
+export type {
+	BookLoadedEvent as PDFBookLoadedEvent,
+	PDFErrorEvent,
+	PDFLocator,
+	LocatorChangeEvent as PDFLocatorChangeEvent,
+	PageChangeEvent as PDFPageChangeEvent,
+	PDFPreferences,
+	PDFScrollAxis,
+	PDFViewProps,
+	PDFViewRef,
+} from './PDFView'
+
 export type ReadingDirection = 'ltr' | 'rtl'
 export type ReadingMode = 'paged' | 'scrolled'
 

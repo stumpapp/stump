@@ -4,6 +4,7 @@ export { ReadiumView }
 export type {
 	BookLoadedEvent as PDFBookLoadedEvent,
 	PDFErrorEvent,
+	PDFLocator,
 	LocatorChangeEvent as PDFLocatorChangeEvent,
 	PageChangeEvent as PDFPageChangeEvent,
 	PDFScrollAxis,

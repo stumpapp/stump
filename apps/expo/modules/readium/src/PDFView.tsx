@@ -6,11 +6,20 @@ import type { ReadiumLocator } from './Readium.types'
 
 export type PDFScrollAxis = 'vertical' | 'horizontal'
 
+export type PDFLocator = Omit<ReadiumLocator, 'chapterTitle'>
+
+export interface PDFPreferences {
+	backgroundColor?: string
+	pageSpacing?: number
+	scrollAxis?: PDFScrollAxis
+	scroll?: boolean
+}
+
 export interface PDFViewProps {
 	bookId: string
 	url: string
-	locator?: ReadiumLocator
-	initialLocator?: ReadiumLocator
+	locator?: PDFLocator
+	initialLocator?: PDFLocator
 	backgroundColor?: string
 	pageSpacing?: number
 	scrollAxis?: PDFScrollAxis
@@ -18,16 +27,11 @@ export interface PDFViewProps {
 	onLocatorChange?: (event: { nativeEvent: LocatorChangeEvent }) => void
 	onPageChange?: (event: { nativeEvent: PageChangeEvent }) => void
 	onBookLoaded?: (event: { nativeEvent: BookLoadedEvent }) => void
+	onMiddleTouch?: () => void
 	onError?: (event: { nativeEvent: PDFErrorEvent }) => void
 }
 
-export interface LocatorChangeEvent {
-	href: string
-	title?: string
-	locations?: Record<string, unknown>
-	text?: Record<string, unknown>
-	type?: string
-}
+export type LocatorChangeEvent = PDFLocator
 
 export interface PageChangeEvent {
 	currentPage: number
@@ -74,6 +78,7 @@ export const PDFView = React.forwardRef<PDFViewRef, PDFViewProps>((props, ref) =
 		onLocatorChange,
 		onPageChange,
 		onBookLoaded,
+		onMiddleTouch,
 		onError,
 	} = props
 
@@ -129,6 +134,10 @@ export const PDFView = React.forwardRef<PDFViewRef, PDFViewProps>((props, ref) =
 		[onBookLoaded],
 	)
 
+	const handleMiddleTouch = useCallback(() => {
+		onMiddleTouch?.()
+	}, [onMiddleTouch])
+
 	const handleError = useCallback(
 		(event: { nativeEvent: PDFErrorEvent }) => {
 			onError?.(event)
@@ -150,6 +159,7 @@ export const PDFView = React.forwardRef<PDFViewRef, PDFViewProps>((props, ref) =
 			onLocatorChange={handleLocatorChange}
 			onPageChange={handlePageChange}
 			onBookLoaded={handleBookLoaded}
+			onMiddleTouch={handleMiddleTouch}
 			onError={handleError}
 		/>
 	)

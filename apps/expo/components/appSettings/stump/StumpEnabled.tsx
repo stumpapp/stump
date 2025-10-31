@@ -1,3 +1,4 @@
+import { Box } from 'lucide-react-native'
 import { View } from 'react-native'
 
 import { Switch } from '~/components/ui'
@@ -10,7 +11,7 @@ export default function StumpEnabled() {
 
 	return (
 		<AppSettingsRow
-			icon="Box"
+			icon={Box}
 			title="Enabled"
 			onPress={() => setStumpEnabled(!stumpEnabled)}
 			divide={false}

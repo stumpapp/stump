@@ -1,3 +1,4 @@
+import { Gauge } from 'lucide-react-native'
 import { View } from 'react-native'
 
 import { Switch } from '~/components/ui'
@@ -13,7 +14,7 @@ export default function PerformanceMonitor() {
 
 	return (
 		<AppSettingsRow
-			icon="Gauge"
+			icon={Gauge}
 			title="Performance Monitor"
 			onPress={() => patch({ performanceMonitor: !performanceMonitor })}
 		>

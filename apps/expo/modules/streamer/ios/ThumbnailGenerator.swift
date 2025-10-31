@@ -32,12 +32,12 @@ class ThumbnailGenerator {
         let outputPath = (outputDir as NSString).appendingPathComponent("\(bookId).jpg")
         
         let fileExtension = (archivePath as NSString).pathExtension.lowercased()
-        let isEpub = fileExtension == "epub"
+        let isReadiumRequired = fileExtension == "epub" || fileExtension == "pdf"
         
         let imageData: Data
         
-        if isEpub {
-            imageData = try extractEpubCover(archivePath: archivePath)
+        if isReadiumRequired {
+            imageData = try extractReadiumCover(archivePath: archivePath)
         } else {
             imageData = try extractZipCover(archivePath: archivePath)
         }
@@ -73,8 +73,8 @@ class ThumbnailGenerator {
         return try archive.extractEntry(firstImageEntry)
     }
     
-    /// Extract cover from an EPUB, falling back to ZIP extraction if needed
-    private func extractEpubCover(archivePath: String) throws -> Data {
+    /// Extract cover from an EPUB/PDF, falling back to ZIP extraction if needed
+    private func extractReadiumCover(archivePath: String) throws -> Data {
         let fileURL = URL(fileURLWithPath: archivePath)
         
         // TODO: Determine if better to make thumb gen async
@@ -90,11 +90,14 @@ class ThumbnailGenerator {
         semaphore.wait()
         
         if let data = extractedData {
-            logger.debug("Successfully extracted epub cover: \(data.count) bytes")
+            logger.debug("Successfully extracted cover: \(data.count) bytes")
             return data
         }
         
-        logger.warning("Failed to extract epub cover, falling back to ZIP extraction")
+        logger.warning("Failed to extract cover, falling back to ZIP extraction")
+        if archivePath.lowercased().hasSuffix(".pdf") {
+            throw ThumbnailError.pdfCoverExtractionFailed
+        }
         return try extractZipCover(archivePath: archivePath)
     }
     
@@ -139,6 +142,7 @@ enum ThumbnailError: Error {
     case imageEncodingFailed
     case outputDirectoryCreationFailed(Error)
     case epubCoverExtractionFailed(String)
+    case pdfCoverExtractionFailed
     
     var localizedDescription: String {
         switch self {
@@ -152,6 +156,8 @@ enum ThumbnailError: Error {
             return "Failed to create output directory: \(error.localizedDescription)"
         case .epubCoverExtractionFailed(let reason):
             return "Failed to extract EPUB cover: \(reason)"
+        case .pdfCoverExtractionFailed:
+            return "Failed to extract PDF cover"
         }
     }
 }

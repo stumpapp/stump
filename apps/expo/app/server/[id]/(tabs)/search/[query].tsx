@@ -3,6 +3,7 @@ import { graphql, PaginationInfo } from '@stump/graphql'
 import { useQueries, useQueryClient } from '@tanstack/react-query'
 import { Link, useLocalSearchParams } from 'expo-router'
 import chunk from 'lodash/chunk'
+import { Search } from 'lucide-react-native'
 import { useCallback } from 'react'
 import { FlatList, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
@@ -12,11 +13,8 @@ import { useActiveServer } from '~/components/activeServer'
 import { BookSearchItem, IBookSearchItemFragment } from '~/components/book'
 import { ILibrarySearchItemFragment, LibrarySearchItem } from '~/components/library'
 import { ISeriesSearchItemFragment, SeriesSearchItem } from '~/components/series'
-import { Heading, Text } from '~/components/ui'
-import { icons } from '~/lib'
+import { Heading, Icon, Text } from '~/components/ui'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
-
-const { Search } = icons
 
 const mediaQuery = graphql(`
 	query SearchMedia($filter: MediaFilterInput!) {
@@ -146,10 +144,10 @@ export default function Screen() {
 	if (noResults) {
 		return (
 			<View className="flex-1 items-center justify-center gap-4 bg-background p-4 tablet:p-7">
-				<Search className="h-8 w-8 text-foreground-muted" />
+				<Icon as={Search} className="h-8 w-8 text-foreground-muted" />
 
 				<View>
-					<Text className="text-foreground-muted">No results found for "{query}"</Text>
+					<Text className="text-foreground-muted">No results found for &quot;{query}&quot;</Text>
 				</View>
 			</View>
 		)

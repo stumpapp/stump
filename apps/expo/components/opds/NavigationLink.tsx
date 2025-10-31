@@ -1,15 +1,14 @@
 import { OPDSNavigationLink } from '@stump/sdk'
 import { useRouter } from 'expo-router'
+import { ChevronRight } from 'lucide-react-native'
 import { ComponentPropsWithoutRef } from 'react'
 import { Pressable, View } from 'react-native'
 
 import { cn } from '~/lib/utils'
 
 import { useActiveServer } from '../activeServer'
-import { icons, Text } from '../ui'
+import { Text } from '../ui'
 import { Icon } from '../ui/icon'
-
-const { ChevronRight } = icons
 
 type Props = {
 	link: OPDSNavigationLink

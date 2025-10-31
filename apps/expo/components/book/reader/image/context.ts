@@ -5,6 +5,14 @@ import { createContext, useContext } from 'react'
 import { OfflineCompatibleReader } from '../types'
 
 type QueryData = NonNullable<BookReadScreenQuery['mediaById']>
+
+// TODO: Just use ReaderBookRef instead of juggling ImageReaderBookRef and EbookReaderBookRef
+export type ReaderBookRef = Omit<QueryData, 'libraryConfig' | 'series' | 'library'> & {
+	libraryConfig?: QueryData['libraryConfig']
+	series?: QueryData['series']
+	library?: QueryData['library']
+}
+
 export type ImageReaderBookRef = Omit<QueryData, 'libraryConfig' | 'series' | 'library'> & {
 	libraryConfig?: QueryData['libraryConfig']
 	series?: QueryData['series']

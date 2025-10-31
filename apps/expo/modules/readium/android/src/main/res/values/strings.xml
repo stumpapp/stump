@@ -2,4 +2,5 @@
 <resources>
     <string name="readium_epub_navigator_tag">readium_epub_navigator</string>
     <string name="epub_fragment_tag">epub_fragment</string>
+    <string name="pdf_fragment_tag">pdf_fragment</string>
 </resources>

@@ -1,14 +1,13 @@
+import { ChevronsUpDown, Server } from 'lucide-react-native'
 import { useState } from 'react'
 import { View } from 'react-native'
 import * as DropdownMenu from 'zeego/dropdown-menu'
 
-import { icons, Text } from '~/components/ui'
+import { Icon, Text } from '~/components/ui'
 import { cn } from '~/lib/utils'
 import { useSavedServers } from '~/stores'
 
 import AppSettingsRow from '../AppSettingsRow'
-
-const { ChevronsUpDown } = icons
 
 // TODO(android): Use non-native dropdown
 
@@ -20,14 +19,14 @@ export default function DefaultServer() {
 	const defaultServer = savedServers.find((server) => server.defaultServer)
 
 	return (
-		<AppSettingsRow icon="Server" title="Default server">
+		<AppSettingsRow icon={Server} title="Default server">
 			<DropdownMenu.Root onOpenChange={setIsOpen}>
 				<DropdownMenu.Trigger>
 					<View className={cn('flex-row items-center gap-1.5', { 'opacity-80': isOpen })}>
 						<Text className="text-foreground-muted">
 							{defaultServer ? defaultServer.name : 'None'}
 						</Text>
-						<ChevronsUpDown className="h-5 text-foreground-muted" />
+						<Icon as={ChevronsUpDown} className="h-5 text-foreground-muted" />
 					</View>
 				</DropdownMenu.Trigger>
 

@@ -1,12 +1,11 @@
+import { ChevronsUpDown } from 'lucide-react-native'
 import { useState } from 'react'
 import { View } from 'react-native'
 import * as DropdownMenu from 'zeego/dropdown-menu'
 
-import { icons, Text } from '~/components/ui'
+import { Icon, Text } from '~/components/ui'
 import { cn } from '~/lib/utils'
 import { DoublePageBehavior } from '~/stores/reader'
-
-const { ChevronsUpDown } = icons
 
 type Props = {
 	behavior: DoublePageBehavior
@@ -24,7 +23,7 @@ export default function DoublePageSelect({ behavior, onChange }: Props) {
 				<DropdownMenu.Trigger>
 					<View className={cn('flex-row items-center gap-1.5', { 'opacity-80': isOpen })}>
 						<Text>{BEHAVIOR_TEXT[behavior]}</Text>
-						<ChevronsUpDown className="h-5 text-foreground-muted" />
+						<Icon as={ChevronsUpDown} className="h-5 text-foreground-muted" />
 					</View>
 				</DropdownMenu.Trigger>
 

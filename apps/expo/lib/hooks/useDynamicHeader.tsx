@@ -1,11 +1,11 @@
 import { useNavigation, useRouter } from 'expo-router'
+import { ChevronLeft } from 'lucide-react-native'
 import { useLayoutEffect, useMemo, useState } from 'react'
 import { NativeSyntheticEvent, Platform, TextInputChangeEvent, View } from 'react-native'
 
-import { icons } from '..'
-import { IS_IOS_24_PLUS } from '../constants'
+import { Icon } from '~/components/ui'
 
-const { ChevronLeft } = icons
+import { IS_IOS_24_PLUS } from '../constants'
 
 type Params = {
 	title: string
@@ -38,7 +38,12 @@ export function useDynamicHeader({
 			(showBackButton
 				? () => (
 						<View style={{ width: 35, height: 35, justifyContent: 'center', alignItems: 'center' }}>
-							<ChevronLeft className="text-foreground" onPress={() => router.back()} size={24} />
+							<Icon
+								as={ChevronLeft}
+								className="text-foreground"
+								onPress={() => router.back()}
+								size={24}
+							/>
 						</View>
 					)
 				: undefined),

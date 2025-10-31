@@ -1,5 +1,6 @@
 import { useSDK } from '@stump/client'
 import { useRouter } from 'expo-router'
+import { BookCopy, Info, Slash } from 'lucide-react-native'
 import { Platform, Pressable, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -7,6 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { useActiveServer } from '~/components/activeServer'
 import { InfoRow, InfoSection } from '~/components/book/overview'
 import { BorderAndShadow } from '~/components/BorderAndShadow'
+import ChevronBackLink from '~/components/ChevronBackLink'
 import { TurboImage } from '~/components/Image'
 import {
 	getDateField,
@@ -14,14 +16,12 @@ import {
 	getPublicationThumbnailURL,
 	getStringField,
 } from '~/components/opds/utils'
-import { Button, icons, Text } from '~/components/ui'
+import { Button, Icon, Text } from '~/components/ui'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
 import { cn } from '~/lib/utils'
 import { usePreferencesStore } from '~/stores'
 
 import { usePublicationContext } from './context'
-
-const { Info, Slash, BookCopy, ChevronLeft } = icons
 
 export default function Screen() {
 	const { sdk } = useSDK()
@@ -39,10 +39,7 @@ export default function Screen() {
 
 	useDynamicHeader({
 		title: title || 'Publication',
-		headerLeft:
-			Platform.OS === 'ios'
-				? () => <ChevronLeft className="text-foreground" onPress={() => router.back()} />
-				: undefined,
+		headerLeft: Platform.OS === 'ios' ? () => <ChevronBackLink /> : undefined,
 	})
 
 	// TODO: once I sort out progress sync, prefetch the current page
@@ -179,8 +176,11 @@ export default function Screen() {
 										>
 											<View className="relative flex justify-center">
 												<View className="squircle flex items-center justify-center rounded-lg bg-background-surface p-2">
-													<Info className="h-6 w-6 text-foreground-muted" />
-													<Slash className="absolute h-6 w-6 scale-x-[-1] transform text-foreground opacity-80" />
+													<Icon as={Info} className="h-6 w-6 text-foreground-muted" />
+													<Icon
+														as={Slash}
+														className="absolute h-6 w-6 scale-x-[-1] transform text-foreground opacity-80"
+													/>
 												</View>
 											</View>
 
@@ -202,8 +202,11 @@ export default function Screen() {
 										>
 											<View className="relative flex justify-center">
 												<View className="squircle flex items-center justify-center rounded-lg bg-background-surface p-2">
-													<BookCopy className="h-6 w-6 text-foreground-muted" />
-													<Slash className="absolute h-6 w-6 scale-x-[-1] transform text-foreground opacity-80" />
+													<Icon as={BookCopy} className="h-6 w-6 text-foreground-muted" />
+													<Icon
+														as={Slash}
+														className="absolute h-6 w-6 scale-x-[-1] transform text-foreground opacity-80"
+													/>
 												</View>
 											</View>
 

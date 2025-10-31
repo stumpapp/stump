@@ -12,22 +12,6 @@
      case assetRetrievalFailed(Error)
  }
 
- /// A minimal PDF document factory that doesn't create PDF documents
- /// Used when PDF support is not needed or not available
-class NullPDFDocumentFactory: PDFDocumentFactory {
-    func open(file: ReadiumShared.FileURL, password: String?) async throws -> any ReadiumShared.PDFDocument {
-        throw NSError(domain: "NullPDFDocumentFactory", code: -1, userInfo: [NSLocalizedDescriptionKey: "PDF support is not available"])
-    }
-    
-    func open<HREF>(resource: any ReadiumShared.Resource, at href: HREF, password: String?) async throws -> any ReadiumShared.PDFDocument where HREF : ReadiumShared.URLConvertible {
-        throw NSError(domain: "NullPDFDocumentFactory", code: -1, userInfo: [NSLocalizedDescriptionKey: "PDF support is not available"])
-    }
-    
-     func open(file: FileURL, password: String?) -> PDFDocument? {
-         return nil
-     }
- }
-
  public final class BookService {
      /// An instance of AssetRetriever for accessing publication assets
      private let assetRetriever: AssetRetriever
@@ -51,8 +35,8 @@ class NullPDFDocumentFactory: PDFDocumentFactory {
          assetRetriever = AssetRetriever(httpClient: httpClient)
          
          // Initialize publication opener with parsers and content protections
-         // Create a minimal PDF factory that doesn't support PDF creation
-         let pdfFactory = NullPDFDocumentFactory()
+         // Use DefaultPDFDocumentFactory for PDF support
+         let pdfFactory = DefaultPDFDocumentFactory()
          
          publicationOpener = PublicationOpener(
              parser: DefaultPublicationParser(
@@ -223,6 +207,38 @@ class NullPDFDocumentFactory: PDFDocumentFactory {
              print("Failed to extract cover: \(error)")
              return nil
          }
+     }
+
+     /// Gets the number of pages for a given URL. Returns nil if the file is not
+     /// managed via this service (e.g., not an EPUB or PDF) or loading failed
+     public func getPageCount(from url: URL) async -> Int? {
+        guard let fileURL = FileURL(url: url) else {
+            print("Failed to create FileURL from: \(url)")
+            return nil
+        }
+        
+        let assetResult = await assetRetriever.retrieve(url: fileURL)
+        guard case .success(let asset) = assetResult else {
+            print("Failed to retrieve asset")
+            return nil
+        }
+        
+        let publicationResult = await publicationOpener.open(
+            asset: asset,
+            allowUserInteraction: false,
+            credentials: nil
+        )
+        
+        guard case .success(let publication) = publicationResult else {
+            print("Failed to open publication")
+            return nil
+        }
+        
+        guard case .success(let positions) = await publication.positions() else {
+            return publication.pageList.count
+        }
+         
+        return positions.count
      }
 
      /// A helper method to assert that a publication is not restricted.

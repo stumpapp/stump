@@ -1,6 +1,14 @@
 import { BookMenuFragment } from '@stump/graphql'
 import { useRouter } from 'expo-router'
-import { ArrowUpRight, BookCheck, CircleMinus, CopyMinus, Trash } from 'lucide-react-native'
+import {
+	ArrowUpRight,
+	BookCheck,
+	CircleMinus,
+	CopyMinus,
+	Ellipsis,
+	Heart,
+	Trash,
+} from 'lucide-react-native'
 import { Fragment } from 'react'
 import { View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -13,13 +21,10 @@ import {
 	DropdownMenuItem,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
-	icons,
+	Icon,
 	Text,
 } from '~/components/ui'
-import { Icon } from '~/components/ui/icon'
 import { cn } from '~/lib/utils'
-
-const { Ellipsis, Heart } = icons
 
 type Props = {
 	book: BookMenuFragment
@@ -60,7 +65,7 @@ export default function AndroidBookMenu({
 			<DropdownMenuTrigger asChild>
 				<Button className="squircle h-8 w-8 rounded-full p-0" variant="ghost" size="icon">
 					<View>
-						<Ellipsis size={20} className="text-foreground" />
+						<Icon as={Ellipsis} size={20} className="text-foreground" />
 					</View>
 				</Button>
 			</DropdownMenuTrigger>
@@ -73,7 +78,8 @@ export default function AndroidBookMenu({
 			>
 				<DropdownMenuItem onPress={favoriteBook}>
 					<Text className="text-lg">{isFavorite ? 'Unfavorite' : 'Favorite'}</Text>
-					<Heart
+					<Icon
+						as={Heart}
 						size={20}
 						className={cn('ml-auto text-foreground-muted', {
 							'fill-fill-danger text-fill-danger-secondary': isFavorite,

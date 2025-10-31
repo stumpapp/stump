@@ -1,26 +1,28 @@
-import { Button, ButtonProps, Host, Image, ImageProps } from '@expo/ui/swift-ui'
+import { Button, Host, Image } from '@expo/ui/swift-ui'
 import { frame, glassEffect } from '@expo/ui/swift-ui/modifiers'
-import { StyleProp, View, ViewStyle } from 'react-native'
+import { View } from 'react-native'
 
 import { useColors } from '~/lib/constants'
 
-export type HeaderButtonProps = {
-	imageProps?: ImageProps
-	buttonProps?: ButtonProps
-	style?: StyleProp<ViewStyle>
-}
+import { HeaderButtonProps } from './types'
 
-export function HeaderButton({ imageProps, buttonProps, style }: HeaderButtonProps) {
+export function HeaderButton({
+	icon = { ios: 'xmark' },
+	ios: { variant } = {},
+	role,
+	onPress,
+	style,
+}: HeaderButtonProps) {
 	const colors = useColors()
 
-	const variant = buttonProps?.variant || 'glass'
 	const isGlass = variant === 'glass' || variant === 'glassProminent'
 
 	return (
 		<View style={{ justifyContent: 'center', alignItems: 'center', height: 35, width: 35 }}>
 			<Host matchContents style={[{ height: 35, width: 35 }, style]}>
 				<Button
-					{...buttonProps}
+					role={role}
+					onPress={onPress}
 					variant={variant}
 					modifiers={[
 						frame({ height: 35, alignment: 'center' }),
@@ -41,11 +43,10 @@ export function HeaderButton({ imageProps, buttonProps, style }: HeaderButtonPro
 					]}
 				>
 					<Image
-						{...imageProps}
-						systemName={imageProps?.systemName || 'xmark'}
-						color={imageProps?.color || 'primary'}
-						size={imageProps?.size || 24}
-						modifiers={[frame({ height: 35 }), ...(imageProps?.modifiers || [])]}
+						systemName={icon?.ios || 'xmark'}
+						color={icon?.color || 'primary'}
+						size={icon?.size || 24}
+						modifiers={[frame({ height: 35 })]}
 					/>
 				</Button>
 			</Host>

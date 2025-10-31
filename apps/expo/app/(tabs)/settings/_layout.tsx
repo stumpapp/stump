@@ -46,11 +46,7 @@ export default function Layout() {
 						headerBackButtonDisplayMode: 'minimal',
 						headerLeft: () =>
 							Platform.select({
-								ios: (
-									<HeaderButton
-										buttonProps={{ onPress: () => router.dismiss(), variant: 'plain' }}
-									/>
-								),
+								ios: <HeaderButton onPress={() => router.dismiss()} ios={{ variant: 'plain' }} />,
 								default: undefined,
 							}),
 					}}

@@ -14,11 +14,16 @@ import { useLocalSearchParams } from 'expo-router'
 import { useCallback, useEffect, useMemo } from 'react'
 
 import { useActiveServer } from '~/components/activeServer'
-import { ImageBasedReader, ReadiumReader, UnsupportedReader } from '~/components/book/reader'
+import {
+	ImageBasedReader,
+	PdfReader,
+	ReadiumReader,
+	UnsupportedReader,
+} from '~/components/book/reader'
 import { NextInSeriesBookRef } from '~/components/book/reader/image/context'
 import { useAppState, useSyncOnlineToOfflineProgress } from '~/lib/hooks'
 import { intoReadiumLocator, ReadiumLocator } from '~/modules/readium'
-import { useReaderStore } from '~/stores'
+import { usePreferencesStore, useReaderStore } from '~/stores'
 import { useBookPreferences, useBookTimer } from '~/stores/reader'
 
 export const query = graphql(`
@@ -135,6 +140,8 @@ export default function Screen() {
 		id: bookID,
 	})
 	const queryClient = useQueryClient()
+
+	const preferNativePdfReader = usePreferencesStore((store) => Boolean(store.preferNativePdf))
 
 	if (!book) {
 		throw new Error('Book not found')
@@ -295,13 +302,24 @@ export default function Screen() {
 				requestHeaders={requestHeaders}
 			/>
 		)
+	} else if (book.extension.match(PDF_EXTENSION) && preferNativePdfReader) {
+		return (
+			<PdfReader
+				book={book}
+				initialPage={currentProgressPage}
+				onPageChanged={onPageChanged}
+				serverId={serverId}
+				// incognito
+				resetTimer={reset}
+			/>
+		)
 	} else if (book.extension.match(ARCHIVE_EXTENSION) || book.extension.match(PDF_EXTENSION)) {
-		// const initialPage = restart ? 1 : currentProgressPage
 		return (
 			<ImageBasedReader
 				initialPage={currentProgressPage}
 				book={book}
 				pageURL={(page: number) => sdk.media.bookPageURL(book.id, page)}
+				// TODO: I added this on a whim, decide if I want to support it
 				pageThumbnailURL={
 					preferSmallImages
 						? (page: number) =>

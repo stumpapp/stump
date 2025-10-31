@@ -1,5 +1,6 @@
 import { useSDK } from '@stump/client'
 import { useRouter } from 'expo-router'
+import { X } from 'lucide-react-native'
 import { useCallback, useEffect } from 'react'
 import { View } from 'react-native'
 import Animated, {
@@ -12,7 +13,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { BorderAndShadow } from '~/components/BorderAndShadow'
 import { TurboImage } from '~/components/Image'
-import { Button, Heading, icons, Label, Text } from '~/components/ui'
+import { Button, Heading, Icon, Label, Text } from '~/components/ui'
 import { COLORS } from '~/lib/constants'
 import { useDisplay } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
@@ -20,13 +21,12 @@ import { usePreferencesStore } from '~/stores'
 
 import { NextInSeriesBookRef, useImageBasedReader } from './context'
 
-const { X } = icons
-
 type Props = {
 	isVisible: boolean
 	book: NextInSeriesBookRef
 	onClose: () => void
 }
+
 export default function NextUpOverlay({ isVisible, book, onClose }: Props) {
 	const { sdk } = useSDK()
 	const { serverId } = useImageBasedReader()
@@ -89,7 +89,8 @@ export default function NextUpOverlay({ isVisible, book, onClose }: Props) {
 						onPress={() => onClose()}
 					>
 						{({ pressed }) => (
-							<X
+							<Icon
+								as={X}
 								style={{
 									opacity: pressed ? 0.85 : 1,
 									// @ts-expect-error: This is fine

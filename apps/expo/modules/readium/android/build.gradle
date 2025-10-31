@@ -15,7 +15,7 @@ buildscript {
     rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
   }
 
-  ext.readium_version = '3.1.0'
+  ext.readium_version = '3.1.1'
 }
 
 project.android {
@@ -49,6 +49,8 @@ dependencies {
   implementation "org.readium.kotlin-toolkit:readium-navigator:$readium_version"
   implementation "org.readium.kotlin-toolkit:readium-opds:$readium_version"
   implementation "org.readium.kotlin-toolkit:readium-lcp:$readium_version"
+  implementation "org.readium.kotlin-toolkit:readium-adapter-pdfium-document:$readium_version"
+  implementation "org.readium.kotlin-toolkit:readium-adapter-pdfium-navigator:$readium_version"
   implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3'
   implementation 'androidx.fragment:fragment-ktx:1.8.5'
   implementation 'androidx.compose.ui:ui-android:1.7.6'

@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/react-native'
-import { ARCHIVE_EXTENSION, EBOOK_EXTENSION } from '@stump/client'
+import { ARCHIVE_EXTENSION, EBOOK_EXTENSION, PDF_EXTENSION } from '@stump/client'
 import { PagedProgressInput } from '@stump/graphql'
 import { useMutation } from '@tanstack/react-query'
 import { eq } from 'drizzle-orm'
@@ -11,7 +11,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { match, P } from 'ts-pattern'
 import urlJoin from 'url-join'
 
-import { ImageBasedReader, ReadiumReader } from '~/components/book/reader'
+import { ImageBasedReader, PdfReader, ReadiumReader } from '~/components/book/reader'
 import { ImageReaderBookRef } from '~/components/book/reader/image/context'
 import ServerErrorBoundary from '~/components/ServerErrorBoundary'
 import { db, downloadedFiles, epubProgress, epubToc, readProgress, syncStatus } from '~/db'
@@ -308,6 +308,16 @@ function Reader({ record }: ReaderProps) {
 				onPageChanged={onPageChanged}
 				resetTimer={reset}
 				serverId={downloadedFile.serverId}
+			/>
+		)
+	} else if (extension?.match(PDF_EXTENSION)) {
+		return (
+			<PdfReader
+				book={book}
+				onPageChanged={onPageChanged}
+				serverId={downloadedFile.serverId}
+				offlineUri={`${booksDirectory(downloadedFile.serverId)}/${downloadedFile.filename}`}
+				initialPage={book.readProgress?.page || 1}
 			/>
 		)
 	}

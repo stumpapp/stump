@@ -142,5 +142,70 @@
                  view.finalizeProps()
              }
          }
+         
+         View(PDFView.self) {
+             Events("onLocatorChange", "onPageChange", "onBookLoaded", "onMiddleTouch", "onError")
+             
+             AsyncFunction("goToLocation") { (view: PDFView, locatorJson: [String: Any]) in
+                 guard let locator = try? Locator(json: locatorJson) else {
+                     throw NSError(domain: "ReadiumError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid locator format"])
+                 }
+                 view.goToLocation(locator: locator)
+             }
+             
+             AsyncFunction("goToPage") { (view: PDFView, page: Int) in
+                 view.goToPage(page: page)
+             }
+             
+             AsyncFunction("goForward") { (view: PDFView) in
+                 view.goForward()
+             }
+             
+             AsyncFunction("goBackward") { (view: PDFView) in
+                 view.goBackward()
+             }
+             
+             AsyncFunction("destroy") { (view: PDFView) in
+                 view.destroyNavigator()
+             }
+             
+             Prop("bookId") { (view: PDFView, prop: String) in
+                 view.pendingProps.bookId = prop
+             }
+             
+             Prop("locator") { (view: PDFView, prop: [String: Any]) in
+                 guard let locator = try? Locator(json: prop) else {
+                     return
+                 }
+                 view.pendingProps.locator = locator
+             }
+             
+             Prop("initialLocator") { (view: PDFView, prop: [String: Any]) in
+                 guard let locator = try? Locator(json: prop) else {
+                     return
+                 }
+                 view.pendingProps.initialLocator = locator
+             }
+             
+             Prop("url") { (view: PDFView, prop: String) in
+                 view.pendingProps.url = prop
+             }
+             
+             Prop("backgroundColor") { (view: PDFView, prop: String) in
+                 view.pendingProps.background = Color(hex: prop)
+             }
+             
+             Prop("pageSpacing") { (view: PDFView, prop: Double) in
+                 view.pendingProps.pageSpacing = prop
+             }
+             
+             Prop("scrollAxis") { (view: PDFView, prop: String) in
+                 view.pendingProps.scrollAxis = prop == "horizontal" ? .horizontal : .vertical
+             }
+             
+             OnViewDidUpdateProps { (view: PDFView) in
+                 view.finalizeProps()
+             }
+         }
      }
  }

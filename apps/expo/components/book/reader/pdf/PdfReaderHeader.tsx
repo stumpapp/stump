@@ -53,12 +53,7 @@ export function PdfReaderHeader({ serverId }: Props) {
 	return (
 		<Animated.View key={book?.id} className="absolute z-20 gap-4 px-4" style={animatedStyles}>
 			<View className="flex-row items-center justify-between">
-				<HeaderButton
-					imageProps={{
-						systemName: 'xmark',
-						onPress: () => router.back(),
-					}}
-				/>
+				<HeaderButton onPress={() => router.back()} />
 
 				{book && <PagedActionMenu book={book} serverId={serverId} />}
 			</View>

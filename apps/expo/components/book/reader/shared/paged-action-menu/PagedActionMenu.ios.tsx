@@ -1,4 +1,5 @@
 import { ReadingDirection, ReadingMode } from '@stump/graphql'
+import { Ellipsis } from 'lucide-react-native'
 import { useCallback, useState } from 'react'
 import * as NativeDropdownMenu from 'zeego/dropdown-menu'
 
@@ -35,11 +36,7 @@ export function PagedActionMenu({
 	return (
 		<NativeDropdownMenu.Root open={isOpen} onOpenChange={setIsOpen}>
 			<NativeDropdownMenu.Trigger>
-				<HeaderButton
-					imageProps={{
-						systemName: 'ellipsis',
-					}}
-				/>
+				<HeaderButton icon={{ ios: 'ellipsis', android: Ellipsis }} />
 			</NativeDropdownMenu.Trigger>
 
 			<NativeDropdownMenu.Content>

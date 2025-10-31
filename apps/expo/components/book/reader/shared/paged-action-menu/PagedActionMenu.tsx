@@ -91,7 +91,7 @@ export function PagedActionMenu({
 								as={CircleEllipsis}
 								size={24}
 								style={{
-									opacity: isOpen ? 0.5 : pressed ? 0.85 : 1,
+									opacity: isOpen ? 0.8 : pressed ? 0.85 : 1,
 									// @ts-expect-error: This is fine
 									color: COLORS.dark.foreground.DEFAULT,
 								}}
@@ -122,11 +122,11 @@ export function PagedActionMenu({
 								<DropdownMenuRadioItem value="PAGED" className="text-foreground">
 									<Text className="text-lg">Paged</Text>
 								</DropdownMenuRadioItem>
-								<DropdownMenuRadioItem value="CONTINUOUS_VERTICAL" className="text-foreground">
-									<Text className="text-lg">Vertical Scroll</Text>
-								</DropdownMenuRadioItem>
 								<DropdownMenuRadioItem value="CONTINUOUS_HORIZONTAL" className="text-foreground">
 									<Text className="text-lg">Horizontal Scroll</Text>
+								</DropdownMenuRadioItem>
+								<DropdownMenuRadioItem value="CONTINUOUS_VERTICAL" className="text-foreground">
+									<Text className="text-lg">Vertical Scroll</Text>
 								</DropdownMenuRadioItem>
 							</DropdownMenuRadioGroup>
 						</DropdownMenuSubContent>
@@ -172,13 +172,16 @@ export function PagedActionMenu({
 								/>
 							</View>
 						</DropdownMenuItem>
-						<DropdownMenuItem
-							className="text-foreground"
-							disabled={!trackElapsedTime || !onResetTimer}
-							onPress={onResetTimer}
-						>
-							<Text className="text-lg">Reset Timer</Text>
-						</DropdownMenuItem>
+
+						{onResetTimer && (
+							<DropdownMenuItem
+								className="text-foreground"
+								disabled={!trackElapsedTime || !onResetTimer}
+								onPress={onResetTimer}
+							>
+								<Text className="text-lg">Reset Timer</Text>
+							</DropdownMenuItem>
+						)}
 					</DropdownMenuSubContent>
 				</DropdownMenuSub>
 

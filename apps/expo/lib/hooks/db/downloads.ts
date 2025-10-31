@@ -312,6 +312,16 @@ export function useDownload({ serverId }: UseDownloadParams = {}) {
 		},
 	})
 
+	const { data: downloadsCount } = useQuery({
+		queryKey: ['downloads-for-server-count'],
+		queryFn: async () => {
+			if (!serverID) return 0
+			const downloads = await DownloadRepository.getFilesByServer(serverID)
+			return downloads.length
+		},
+		enabled: !!serverID,
+	})
+
 	return {
 		downloadBook: downloadMutation.mutateAsync,
 		deleteBook: (bookId: string, serverId?: string) =>
@@ -323,5 +333,6 @@ export function useDownload({ serverId }: UseDownloadParams = {}) {
 		isDeleting: deleteMutation.isPending,
 		downloadError: downloadMutation.error,
 		deleteError: deleteMutation.error,
+		downloadsCount: downloadsCount ?? 0,
 	}
 }

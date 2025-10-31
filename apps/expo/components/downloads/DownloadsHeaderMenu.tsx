@@ -23,7 +23,7 @@ export default function DownloadsHeaderMenu() {
 
 	const setIsSelecting = useSelectionStore((state) => state.setIsSelecting)
 
-	const { deleteAllDownloads } = useDownload()
+	const { deleteAllDownloads, downloadsCount } = useDownload()
 
 	const onDeleteAllDownloads = async () => {
 		await deleteAllDownloads()
@@ -76,6 +76,7 @@ export default function DownloadsHeaderMenu() {
 									setIsSelecting(true)
 								},
 								label: 'Select',
+								disabled: downloadsCount === 0,
 							},
 						],
 					},
@@ -89,6 +90,7 @@ export default function DownloadsHeaderMenu() {
 								label: 'Delete Downloads',
 								onPress: () => setIsShowingDeleteConfirm(true),
 								role: 'destructive',
+								disabled: downloadsCount === 0,
 							},
 						],
 					},

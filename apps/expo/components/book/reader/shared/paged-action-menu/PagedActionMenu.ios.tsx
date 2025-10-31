@@ -36,7 +36,12 @@ export function PagedActionMenu({
 	return (
 		<NativeDropdownMenu.Root open={isOpen} onOpenChange={setIsOpen}>
 			<NativeDropdownMenu.Trigger>
-				<HeaderButton icon={{ ios: 'ellipsis', android: Ellipsis }} />
+				<HeaderButton
+					icon={{ ios: 'ellipsis', android: Ellipsis }}
+					ios={{
+						variant: 'glass',
+					}}
+				/>
 			</NativeDropdownMenu.Trigger>
 
 			<NativeDropdownMenu.Content>
@@ -55,16 +60,6 @@ export function PagedActionMenu({
 							>
 								<NativeDropdownMenu.ItemTitle>Paged</NativeDropdownMenu.ItemTitle>
 							</NativeDropdownMenu.CheckboxItem>
-							<NativeDropdownMenu.CheckboxItem
-								key="vscroll"
-								value={readingMode === ReadingMode.ContinuousVertical}
-								onValueChange={() =>
-									setBookPreferences({ readingMode: ReadingMode.ContinuousVertical })
-								}
-								disabled
-							>
-								<NativeDropdownMenu.ItemTitle>Vertical Scroll</NativeDropdownMenu.ItemTitle>
-							</NativeDropdownMenu.CheckboxItem>
 
 							<NativeDropdownMenu.CheckboxItem
 								key="hscroll"
@@ -74,6 +69,17 @@ export function PagedActionMenu({
 								}
 							>
 								<NativeDropdownMenu.ItemTitle>Horizontal Scroll</NativeDropdownMenu.ItemTitle>
+							</NativeDropdownMenu.CheckboxItem>
+
+							<NativeDropdownMenu.CheckboxItem
+								key="vscroll"
+								value={readingMode === ReadingMode.ContinuousVertical}
+								onValueChange={() =>
+									setBookPreferences({ readingMode: ReadingMode.ContinuousVertical })
+								}
+								disabled
+							>
+								<NativeDropdownMenu.ItemTitle>Vertical Scroll</NativeDropdownMenu.ItemTitle>
 							</NativeDropdownMenu.CheckboxItem>
 						</NativeDropdownMenu.SubContent>
 					</NativeDropdownMenu.Sub>
@@ -102,34 +108,36 @@ export function PagedActionMenu({
 						/>
 					</NativeDropdownMenu.Item>
 
-					<NativeDropdownMenu.Sub>
-						<NativeDropdownMenu.SubTrigger key="preset">
-							<NativeDropdownMenu.ItemTitle>Reading Timer</NativeDropdownMenu.ItemTitle>
-							<NativeDropdownMenu.ItemIcon
-								ios={{
-									name: 'timer',
-								}}
-							/>
-						</NativeDropdownMenu.SubTrigger>
+					{onResetTimer && (
+						<NativeDropdownMenu.Sub>
+							<NativeDropdownMenu.SubTrigger key="preset">
+								<NativeDropdownMenu.ItemTitle>Reading Timer</NativeDropdownMenu.ItemTitle>
+								<NativeDropdownMenu.ItemIcon
+									ios={{
+										name: 'timer',
+									}}
+								/>
+							</NativeDropdownMenu.SubTrigger>
 
-						<NativeDropdownMenu.SubContent>
-							<NativeDropdownMenu.CheckboxItem
-								key="enabled"
-								value={!!trackElapsedTime}
-								onValueChange={() => setBookPreferences({ trackElapsedTime: !trackElapsedTime })}
-							>
-								<NativeDropdownMenu.ItemTitle>Enabled</NativeDropdownMenu.ItemTitle>
-							</NativeDropdownMenu.CheckboxItem>
-							<NativeDropdownMenu.Item
-								key="reset"
-								destructive
-								disabled={!trackElapsedTime || !onResetTimer}
-								onSelect={onResetTimer}
-							>
-								<NativeDropdownMenu.ItemTitle>Reset Timer</NativeDropdownMenu.ItemTitle>
-							</NativeDropdownMenu.Item>
-						</NativeDropdownMenu.SubContent>
-					</NativeDropdownMenu.Sub>
+							<NativeDropdownMenu.SubContent>
+								<NativeDropdownMenu.CheckboxItem
+									key="enabled"
+									value={!!trackElapsedTime}
+									onValueChange={() => setBookPreferences({ trackElapsedTime: !trackElapsedTime })}
+								>
+									<NativeDropdownMenu.ItemTitle>Enabled</NativeDropdownMenu.ItemTitle>
+								</NativeDropdownMenu.CheckboxItem>
+								<NativeDropdownMenu.Item
+									key="reset"
+									destructive
+									disabled={!trackElapsedTime || !onResetTimer}
+									onSelect={onResetTimer}
+								>
+									<NativeDropdownMenu.ItemTitle>Reset Timer</NativeDropdownMenu.ItemTitle>
+								</NativeDropdownMenu.Item>
+							</NativeDropdownMenu.SubContent>
+						</NativeDropdownMenu.Sub>
+					)}
 				</NativeDropdownMenu.Group>
 
 				{onShowSettings && (

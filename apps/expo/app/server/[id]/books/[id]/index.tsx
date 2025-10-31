@@ -5,7 +5,7 @@ import duration from 'dayjs/plugin/duration'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router'
 import { ChevronLeft, Loader2 } from 'lucide-react-native'
-import { useCallback, useLayoutEffect } from 'react'
+import { useCallback, useLayoutEffect, useState } from 'react'
 import { Platform, Pressable, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -131,12 +131,22 @@ export default function Screen() {
 	const { sdk } = useSDK()
 	const {
 		data: { mediaById: book },
-		isRefetching,
 		refetch,
 	} = useSuspenseGraphQL(query, ['bookById', bookID], {
 		id: bookID,
 	})
 	const { downloadBook, isDownloading } = useDownload({ serverId: serverID })
+
+	const [isRefetching, setIsRefetching] = useState(false)
+
+	// Note: I am not binding the refresh control to the isRefetching state from useSuspenseGraphQL because
+	// I don't want background refetches to trigger the refresh control spinner
+	const onRefresh = () => {
+		setIsRefetching(true)
+		refetch().finally(() => {
+			setIsRefetching(false)
+		})
+	}
 
 	const isDownloaded = useIsBookDownloaded(bookID, serverID)
 
@@ -294,7 +304,7 @@ export default function Screen() {
 		>
 			<ScrollView
 				className="flex-1 bg-background px-6"
-				refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
+				refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={onRefresh} />}
 				contentInsetAdjustmentBehavior="automatic"
 			>
 				<View

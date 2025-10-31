@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry/react-native'
 import { MediaMetadata, ReadiumLocator } from '@stump/graphql'
-import { and, eq } from 'drizzle-orm'
+import { and, count, eq } from 'drizzle-orm'
 
 import { thumbnailsDirectory } from '~/lib/filesystem'
 
@@ -192,6 +192,11 @@ export class DownloadRepository {
 	 */
 	static async getFilesByServer(serverId: string): Promise<DownloadedFile[]> {
 		return db.select().from(downloadedFiles).where(eq(downloadedFiles.serverId, serverId)).all()
+	}
+
+	static async getCount(): Promise<number> {
+		const result = await db.select({ count: count() }).from(downloadedFiles)
+		return result[0]?.count || 0
 	}
 
 	/**

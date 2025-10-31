@@ -2,12 +2,13 @@ import * as Sentry from '@sentry/react-native'
 import { useSDKSafe } from '@stump/client'
 import { MediaMetadata, ReadiumLocator } from '@stump/graphql'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { and, eq } from 'drizzle-orm'
+import { and, count, eq } from 'drizzle-orm'
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
 import * as FileSystem from 'expo-file-system/legacy'
 import { useEffect } from 'react'
 
 import { useActiveServerSafe } from '~/components/activeServer'
+import { useDownloadsState } from '~/components/downloads/store'
 import { db, downloadedFiles, DownloadRepository } from '~/db'
 import { booksDirectory, bookThumbnailPath, ensureDirectoryExists } from '~/lib/filesystem'
 import { useSavedServerStore } from '~/stores/savedServer'
@@ -312,16 +313,6 @@ export function useDownload({ serverId }: UseDownloadParams = {}) {
 		},
 	})
 
-	const { data: downloadsCount } = useQuery({
-		queryKey: ['downloads-for-server-count'],
-		queryFn: async () => {
-			if (!serverID) return 0
-			const downloads = await DownloadRepository.getFilesByServer(serverID)
-			return downloads.length
-		},
-		enabled: !!serverID,
-	})
-
 	return {
 		downloadBook: downloadMutation.mutateAsync,
 		deleteBook: (bookId: string, serverId?: string) =>
@@ -333,6 +324,16 @@ export function useDownload({ serverId }: UseDownloadParams = {}) {
 		isDeleting: deleteMutation.isPending,
 		downloadError: downloadMutation.error,
 		deleteError: deleteMutation.error,
-		downloadsCount: downloadsCount ?? 0,
 	}
+}
+
+export function useDownloadsCount() {
+	const fetchCounter = useDownloadsState((state) => state.fetchCounter)
+	const {
+		data: [result],
+	} = useLiveQuery(db.select({ count: count() }).from(downloadedFiles), [
+		'downloads-count',
+		fetchCounter,
+	])
+	return result?.count || 0
 }

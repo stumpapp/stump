@@ -2,7 +2,12 @@ import { CheckCircle, Menu, RefreshCw, Sparkles, Trash } from 'lucide-react-nati
 import { useState } from 'react'
 import Dialog from 'react-native-dialog'
 
-import { useDownload, useProgressSync, useProgressToSyncExists } from '~/lib/hooks'
+import {
+	useDownload,
+	useDownloadsCount,
+	useProgressSync,
+	useProgressToSyncExists,
+} from '~/lib/hooks'
 import { usePreferencesStore } from '~/stores'
 import { useSelectionStore } from '~/stores/selection'
 
@@ -23,13 +28,15 @@ export default function DownloadsHeaderMenu() {
 
 	const setIsSelecting = useSelectionStore((state) => state.setIsSelecting)
 
-	const { deleteAllDownloads, downloadsCount } = useDownload()
+	const { deleteAllDownloads } = useDownload()
 
 	const onDeleteAllDownloads = async () => {
 		await deleteAllDownloads()
 		refetchDownloads()
 		setIsShowingDeleteConfirm(false)
 	}
+
+	const downloadsCount = useDownloadsCount()
 
 	const { syncProgress } = useProgressSync()
 

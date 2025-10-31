@@ -65,6 +65,9 @@ export type AddDownloadRelations = {
 	} | null
 }
 
+// TODO: Consider organizing repos into subdirs if I add any additional ones
+// E.g., repositories/{downloads, etc}
+
 /**
  * Repository for managing downloaded files in SQLite
  */
@@ -92,7 +95,6 @@ export class DownloadRepository {
 		}
 
 		return db.transaction(async (tx) => {
-			// Insert or update series reference if provided
 			if (relations?.seriesRef) {
 				await tx
 					.insert(seriesRefs)

@@ -20,6 +20,7 @@ export const downloadedFiles = sqliteTable('downloaded_files', {
 	bookMetadata: text('book_metadata', { mode: 'json' }),
 	seriesId: text('series_id'),
 	pages: integer('pages').default(-1), // Number of pages (for comic books)
+	// TODO: Store for PDF, too?
 	toc: text('toc', { mode: 'json' }), // Table of contents for EPUB books
 })
 
@@ -49,7 +50,6 @@ export const syncStatus = z.enum(['UNSYNCED', 'SYNCING', 'SYNCED', 'ERROR'])
 /**
  * Unsynced read progress table
  * Stores reading progress that hasn't been synced to the server yet
- * TODO: Support syncing this when online available
  */
 export const readProgress = sqliteTable('read_progress', {
 	id: integer('id').primaryKey({ autoIncrement: true }),

@@ -313,6 +313,14 @@ export function useDownload({ serverId }: UseDownloadParams = {}) {
 		},
 	})
 
+	const deleteServerDownloadsMutation = useMutation({
+		mutationFn: async (serverId: string) => {
+			const downloads = await DownloadRepository.getFilesByServer(serverId)
+			const bookIDs = downloads.map((download) => download.id)
+			return deleteManyMutation.mutateAsync({ bookIds: bookIDs, serverId })
+		},
+	})
+
 	return {
 		downloadBook: downloadMutation.mutateAsync,
 		deleteBook: (bookId: string, serverId?: string) =>
@@ -320,6 +328,7 @@ export function useDownload({ serverId }: UseDownloadParams = {}) {
 		deleteManyBooks: (bookIds: string[], serverId?: string) =>
 			deleteManyMutation.mutateAsync({ bookIds, serverId }),
 		deleteAllDownloads: deleteAllDownloadsMutation.mutateAsync,
+		deleteServerDownloads: deleteServerDownloadsMutation.mutateAsync,
 		isDownloading: downloadMutation.isPending,
 		isDeleting: deleteMutation.isPending,
 		downloadError: downloadMutation.error,

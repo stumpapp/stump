@@ -3,8 +3,9 @@ import { eq } from 'drizzle-orm'
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
 import { Redirect, useLocalSearchParams } from 'expo-router'
 import { HardDriveDownload, Slash } from 'lucide-react-native'
-import { useCallback, useMemo } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { View } from 'react-native'
+import Dialog from 'react-native-dialog'
 import { ScrollView } from 'react-native-gesture-handler'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
@@ -13,6 +14,7 @@ import { Button, Heading, Icon, Text } from '~/components/ui'
 import { db, downloadedFiles } from '~/db'
 import { getServerStoredPreferencesUsage } from '~/lib/filesystem'
 import { formatBytesSeparate, humanizeByteUnit } from '~/lib/format'
+import { useDownload } from '~/lib/hooks'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
 import { useReaderStore } from '~/stores'
 import { useSavedServerStore } from '~/stores/savedServer'
@@ -55,6 +57,18 @@ export default function Screen() {
 		refetch()
 	}, [serverID, clearLibrarySettings, refetch])
 
+	const [isShowingDeleteConfirm, setIsShowingDeleteConfirm] = useState(false)
+
+	const { deleteServerDownloads } = useDownload()
+	const onDeleteDownloads = useCallback(async () => {
+		try {
+			await deleteServerDownloads(serverID)
+			refetch()
+		} finally {
+			setIsShowingDeleteConfirm(false)
+		}
+	}, [deleteServerDownloads, serverID, refetch])
+
 	useDynamicHeader({
 		title: server?.name || '',
 	})
@@ -93,7 +107,7 @@ export default function Screen() {
 						)}
 
 						{(files.length > 0 || downloadedFilesSum > 0) && (
-							<View className="gap-2">
+							<View className="gap-4">
 								<View className="flex-row items-center justify-between">
 									<Text className="text-foreground-muted">Total files</Text>
 									<Text>{downloadedFilesCount}</Text>
@@ -110,12 +124,14 @@ export default function Screen() {
 									{downloadedFilesSum === 0 && <Text>Unknown</Text>}
 								</View>
 
-								<View className="squircle mt-2 rounded-xl bg-fill-info-secondary p-4 tablet:p-5">
-									<Text className="text-fill-info">
-										Removing downloads is not currently supported, but you may clear them by
-										clearing app data if possible on your device
-									</Text>
-								</View>
+								<Button
+									variant="destructive"
+									onPress={() => setIsShowingDeleteConfirm(true)}
+									size="md"
+									disabled={downloadedFilesSum === 0}
+								>
+									<Text>Delete Downloads</Text>
+								</Button>
 							</View>
 						)}
 					</View>
@@ -148,6 +164,17 @@ export default function Screen() {
 					</View>
 				</View>
 			</ScrollView>
+
+			<Dialog.Container visible={isShowingDeleteConfirm}>
+				<Dialog.Title>
+					Are you sure you want to delete all downloads from {server?.name || 'this server'}?
+				</Dialog.Title>
+
+				<Dialog.Description>This action cannot be undone.</Dialog.Description>
+
+				<Dialog.Button label="Cancel" onPress={() => setIsShowingDeleteConfirm(false)} />
+				<Dialog.Button label="Delete" onPress={onDeleteDownloads} color="red" />
+			</Dialog.Container>
 		</SafeAreaView>
 	)
 }

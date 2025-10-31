@@ -1,7 +1,9 @@
 package expo.modules.streamer
 
+import expo.modules.kotlin.functions.Coroutine
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
+import expo.modules.readium.BookService
 
 class StumpStreamerModule : Module() {
     private val server = StreamerServer.instance
@@ -9,6 +11,10 @@ class StumpStreamerModule : Module() {
     // Note: This took me forever to figure out, I am happy to not be a Kotlin dev lol
     private val thumbnailGenerator by lazy {
         ThumbnailGenerator.getInstance(appContext.reactContext!!)
+    }
+    
+    private val bookService by lazy {
+        BookService(appContext.reactContext!!)
     }
 
     override fun definition() = ModuleDefinition {
@@ -61,11 +67,20 @@ class StumpStreamerModule : Module() {
             }
         }
 
-        AsyncFunction("getPageCount") { filePath: String ->
+        AsyncFunction("getPageCount") Coroutine { filePath: String ->
             val archivePath = if (filePath.startsWith("file://")) {
                 filePath.substring(7)
             } else {
                 filePath
+            }
+            
+            val fileExtension = archivePath.substringAfterLast('.', "").lowercase()
+            if (fileExtension == "epub" || fileExtension == "pdf") {
+                val url = java.net.URL("file://$archivePath")
+                val pageCount = bookService.getPageCount(url)
+                if (pageCount != null) {
+                    return@Coroutine pageCount
+                }
             }
             
             val archive = ZipArchive(archivePath)

@@ -207,6 +207,7 @@ export default function PdfReader({ book, initialPage, incognito, onPageChanged,
 			<PdfReaderHeader serverId={ctx.serverId} />
 
 			<ControlsBackdrop />
+
 			<PDFView
 				ref={readerRef}
 				bookId={book.id}

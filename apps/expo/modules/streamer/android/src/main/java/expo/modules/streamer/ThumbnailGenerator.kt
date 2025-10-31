@@ -98,10 +98,10 @@ class ThumbnailGenerator private constructor(private val context: Context) {
         }
 
         val fileExtension = File(cleanArchivePath).extension.lowercase()
-        val isEpub = fileExtension == "epub"
+        val isReadiumRequired = fileExtension == "epub" || fileExtension == "pdf"
 
-        val bitmap = if (isEpub) {
-            extractEpubCover(cleanArchivePath)
+        val bitmap = if (isReadiumRequired) {
+            extractReadiumCover(cleanArchivePath)
         } else {
             extractZipCover(cleanArchivePath)
         }
@@ -168,19 +168,24 @@ class ThumbnailGenerator private constructor(private val context: Context) {
     }
 
     /**
-     * Extract cover from an EPUB
+     * Extract cover from an EPUB/PDF, falling back to ZIP extraction if needed
      */
-    private fun extractEpubCover(archivePath: String): Bitmap {
+    private fun extractReadiumCover(archivePath: String): Bitmap {
         return runBlocking {
             val fileUrl = URL("file://$archivePath")
             
             val coverBitmap = bookService.getCoverImage(fileUrl)
             
             if (coverBitmap != null) {
-                Log.d(TAG, "Successfully extracted epub cover")
+                Log.d(TAG, "Successfully extracted cover: ${coverBitmap.width}x${coverBitmap.height}")
                 coverBitmap
             } else {
-                Log.w(TAG, "Failed to extract epub cover, falling back to ZIP extraction")
+                if (archivePath.lowercase().endsWith(".pdf")) {
+                    throw ThumbnailError.ExtractionFailed(
+                        IllegalStateException("PDF cover extraction failed")
+                    )
+                }
+                Log.w(TAG, "Failed to extract cover, falling back to ZIP extraction")
                 extractZipCover(archivePath)
             }
         }

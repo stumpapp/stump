@@ -12,8 +12,6 @@ type Props = {
 	onChange: (mode: ReadingMode) => void
 }
 
-// TODO: Remove hardcoded disabled values and support vertical continuous scrolling
-
 export default function ReadingModeSelect({ mode, onChange }: Props) {
 	const [isOpen, setIsOpen] = useState(false)
 
@@ -50,7 +48,6 @@ export default function ReadingModeSelect({ mode, onChange }: Props) {
 						key="continuous:vertical"
 						value={mode === ReadingMode.ContinuousVertical}
 						onValueChange={() => onChange(ReadingMode.ContinuousVertical)}
-						disabled
 					>
 						<DropdownMenu.ItemTitle>Scroll (Vertical)</DropdownMenu.ItemTitle>
 					</DropdownMenu.CheckboxItem>

@@ -50,7 +50,7 @@ type Props = {
 
 export default function Header({ onShowGlobalSettings }: Props) {
 	const { height } = useDisplay()
-	const { book, currentPage, resetTimer, flatListRef, serverId } = useImageBasedReader()
+	const { book, resetTimer, serverId } = useImageBasedReader()
 	const {
 		preferences: { readingDirection, readingMode, trackElapsedTime },
 		setBookPreferences,
@@ -71,7 +71,7 @@ export default function Header({ onShowGlobalSettings }: Props) {
 
 	const animatedStyles = useAnimatedStyle(() => {
 		return {
-			top: insets.top + (Platform.OS === 'android' ? 12 : 0),
+			top: insets.top || 12,
 			left: insets.left,
 			right: insets.right,
 			transform: [{ translateY: translateY.value }],
@@ -83,8 +83,7 @@ export default function Header({ onShowGlobalSettings }: Props) {
 			readingDirection:
 				readingDirection === ReadingDirection.Ltr ? ReadingDirection.Rtl : ReadingDirection.Ltr,
 		})
-		flatListRef.current?.scrollToIndex({ index: (currentPage || 1) - 1, animated: false })
-	}, [currentPage, readingDirection, setBookPreferences, flatListRef])
+	}, [readingDirection, setBookPreferences])
 
 	const router = useRouter()
 
@@ -150,16 +149,6 @@ export default function Header({ onShowGlobalSettings }: Props) {
 								>
 									<NativeDropdownMenu.ItemTitle>Paged</NativeDropdownMenu.ItemTitle>
 								</NativeDropdownMenu.CheckboxItem>
-								<NativeDropdownMenu.CheckboxItem
-									key="vscroll"
-									value={readingMode === ReadingMode.ContinuousVertical}
-									onValueChange={() =>
-										setBookPreferences({ readingMode: ReadingMode.ContinuousVertical })
-									}
-									disabled
-								>
-									<NativeDropdownMenu.ItemTitle>Vertical Scroll</NativeDropdownMenu.ItemTitle>
-								</NativeDropdownMenu.CheckboxItem>
 
 								<NativeDropdownMenu.CheckboxItem
 									key="hscroll"
@@ -169,6 +158,16 @@ export default function Header({ onShowGlobalSettings }: Props) {
 									}
 								>
 									<NativeDropdownMenu.ItemTitle>Horizontal Scroll</NativeDropdownMenu.ItemTitle>
+								</NativeDropdownMenu.CheckboxItem>
+
+								<NativeDropdownMenu.CheckboxItem
+									key="vscroll"
+									value={readingMode === ReadingMode.ContinuousVertical}
+									onValueChange={() =>
+										setBookPreferences({ readingMode: ReadingMode.ContinuousVertical })
+									}
+								>
+									<NativeDropdownMenu.ItemTitle>Vertical Scroll</NativeDropdownMenu.ItemTitle>
 								</NativeDropdownMenu.CheckboxItem>
 							</NativeDropdownMenu.SubContent>
 						</NativeDropdownMenu.Sub>
@@ -297,11 +296,11 @@ export default function Header({ onShowGlobalSettings }: Props) {
 									<DropdownMenuRadioItem value="PAGED" className="text-foreground">
 										<Text className="text-lg">Paged</Text>
 									</DropdownMenuRadioItem>
-									<DropdownMenuRadioItem value="CONTINUOUS_VERTICAL" className="text-foreground">
-										<Text className="text-lg">Vertical Scroll</Text>
-									</DropdownMenuRadioItem>
 									<DropdownMenuRadioItem value="CONTINUOUS_HORIZONTAL" className="text-foreground">
 										<Text className="text-lg">Horizontal Scroll</Text>
+									</DropdownMenuRadioItem>
+									<DropdownMenuRadioItem value="CONTINUOUS_VERTICAL" className="text-foreground">
+										<Text className="text-lg">Vertical Scroll</Text>
 									</DropdownMenuRadioItem>
 								</DropdownMenuRadioGroup>
 							</DropdownMenuSubContent>

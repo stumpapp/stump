@@ -15,9 +15,11 @@ import { Platform, View } from 'react-native'
 import { SystemBars } from 'react-native-edge-to-edge'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { KeyboardProvider } from 'react-native-keyboard-controller'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import darkSplash from '~/assets/splash/dark.json'
 import lightSplash from '~/assets/splash/light.json'
+import { PerformanceMonitor } from '~/components/PerformanceMonitor'
 import { BottomSheet } from '~/components/ui/bottom-sheet'
 import { db } from '~/db'
 import migrations from '~/drizzle/migrations'
@@ -67,8 +69,12 @@ export default function RootLayout() {
 	const hasMounted = React.useRef(false)
 
 	const colors = useColors()
+	const insets = useSafeAreaInsets()
 
-	const animationEnabled = usePreferencesStore((state) => !state.reduceAnimations)
+	const { performanceMonitor, animationEnabled } = usePreferencesStore((state) => ({
+		animationEnabled: !state.reduceAnimations,
+		performanceMonitor: state.performanceMonitor,
+	}))
 
 	useIsomorphicLayoutEffect(() => {
 		if (hasMounted.current) {
@@ -117,6 +123,7 @@ export default function RootLayout() {
 	return (
 		<GestureHandlerRootView style={{ flex: 1 }}>
 			<ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
+				{performanceMonitor && <PerformanceMonitor withCPU style={{ top: insets.top || 12 }} />}
 				<BottomSheet.Provider>
 					<KeyboardProvider>
 						<SystemBars style={isDarkColorScheme ? 'light' : 'dark'} hidden={shouldHideStatusBar} />

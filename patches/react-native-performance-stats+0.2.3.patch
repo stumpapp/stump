@@ -1,0 +1,297 @@
+diff --git a/node_modules/react-native-performance-stats/android/src/main/java/nl/skillnation/perfstats/PerformanceStatsImpl.java b/node_modules/react-native-performance-stats/android/src/main/java/nl/skillnation/perfstats/PerformanceStatsImpl.java
+index 621ef85..ad17601 100644
+--- a/node_modules/react-native-performance-stats/android/src/main/java/nl/skillnation/perfstats/PerformanceStatsImpl.java
++++ b/node_modules/react-native-performance-stats/android/src/main/java/nl/skillnation/perfstats/PerformanceStatsImpl.java
+@@ -3,6 +3,7 @@ package nl.skillnation.perfstats;
+ 
+ import android.os.Debug;
+ import android.os.Handler;
++import android.os.SystemClock;
+ 
+ import androidx.annotation.Nullable;
+ 
+@@ -13,6 +14,7 @@ import com.facebook.react.modules.core.DeviceEventManagerModule;
+ import com.facebook.react.modules.debug.FpsDebugFrameCallback;
+ 
+ import java.io.BufferedReader;
++import java.io.FileInputStream;
+ import java.io.IOException;
+ import java.io.InputStreamReader;
+ 
+@@ -20,7 +22,7 @@ import java.io.InputStreamReader;
+ public class PerformanceStatsImpl {
+     public static final String NAME = "PerformanceStats";
+ 
+-    private static final int UPDATE_INTERVAL_MS = 500;
++    private static final int UPDATE_INTERVAL_MS = 1000;
+ 
+     private final FpsDebugFrameCallback mFrameCallback;
+     private final StatsMonitorRunnable mStatsMonitorRunnable;
+@@ -52,12 +54,12 @@ public class PerformanceStatsImpl {
+         mStatsMonitorRunnable.stop();
+     }
+ 
+-    private void setCurrentStats(double uiFPS, double jsFPS, int framesDropped, int shutters, double usedRam, double usedCpu) {
++    private void setCurrentStats(double uiFPS, double jsFPS, /*int framesDropped, int shutters,*/ double usedRam, double usedCpu) {
+         WritableMap state = Arguments.createMap();
+         state.putDouble("uiFps", uiFPS);
+         state.putDouble("jsFps", jsFPS);
+-        state.putInt("framesDropped", framesDropped);
+-        state.putInt("shutters", shutters);
++        // state.putInt("framesDropped", framesDropped);
++        // state.putInt("shutters", shutters);
+         state.putDouble("usedRam", usedRam);
+         state.putDouble("usedCpu", usedCpu);
+ 
+@@ -80,8 +82,12 @@ public class PerformanceStatsImpl {
+     private class StatsMonitorRunnable implements Runnable {
+ 
+         private boolean mShouldStop = false;
+-        private int mTotalFramesDropped = 0;
+-        private int mTotal4PlusFrameStutters = 0;
++        // private int mTotalFramesDropped = 0;
++        // private int mTotal4PlusFrameStutters = 0;
++
++        private long lastCpuTime = 0;
++        private long lastWallTime = 0;
++        private static final long CLK_TCK = 100L; // Clock ticks per second (jiffies), 100 on Android.
+ 
+         @Override
+         public void run() {
+@@ -89,17 +95,31 @@ public class PerformanceStatsImpl {
+                 return;
+             }
+             // Collect FPS info
+-            mTotalFramesDropped += mFrameCallback.getExpectedNumFrames() - mFrameCallback.getNumFrames();
+-            mTotal4PlusFrameStutters += mFrameCallback.get4PlusFrameStutters();
+-            double fps = mFrameCallback.getFPS();
+-            double jsFps = mFrameCallback.getJSFPS();
++            // mTotalFramesDropped += mFrameCallback.getExpectedNumFrames() - mFrameCallback.getNumFrames();
++            // mTotal4PlusFrameStutters += mFrameCallback.get4PlusFrameStutters();
++            double fps = mFrameCallback.getFps();
++            double jsFps = mFrameCallback.getJsFPS();
+ 
+             // Collect system resource usage
+             double cpuUsage = 0;
+             if (withCPU) {
+                 try {
+-                    cpuUsage = getUsedCPU();
++                    long currentWallTime = SystemClock.elapsedRealtime();
++                    long currentCpuTime = getCpuTime();
++
++                    if (lastCpuTime > 0) {
++                        long wallDeltaMs = currentWallTime - lastWallTime;
++                        
++                        if (wallDeltaMs > 0) {
++                            long cpuDeltaJiffies = currentCpuTime - lastCpuTime;
++                            long cpuDeltaMs = (cpuDeltaJiffies * 1000) / CLK_TCK;
++                            cpuUsage = ((double) cpuDeltaMs / wallDeltaMs) * 100.0;
++                        }
++                    }
++                    lastCpuTime = currentCpuTime;
++                    lastWallTime = currentWallTime;
+                 } catch (Exception e) {
++                    cpuUsage = -1;
+                 }
+             }
+             double usedRam = getUsedRam();
+@@ -107,8 +127,8 @@ public class PerformanceStatsImpl {
+             setCurrentStats(
+                     fps,
+                     jsFps,
+-                    mTotalFramesDropped,
+-                    mTotal4PlusFrameStutters,
++                    // mTotalFramesDropped,
++                    // mTotal4PlusFrameStutters,
+                     usedRam,
+                     cpuUsage
+             );
+@@ -120,6 +140,8 @@ public class PerformanceStatsImpl {
+ 
+         public void start() {
+             mShouldStop = false;
++            lastCpuTime = 0;
++            lastWallTime = 0;
+             handler.post(this);
+         }
+ 
+@@ -136,21 +158,17 @@ public class PerformanceStatsImpl {
+             return memoryInfo.getTotalPss() / 1000D;
+         }
+ 
+-        private double getUsedCPU() throws IOException {
+-            String[] commands = { "top", "-n", "1", "-q", "-oCMDLINE,%CPU", "-s2", "-b" };
++        private long getCpuTime() throws IOException {
+             BufferedReader reader = new BufferedReader(
+-                    new InputStreamReader(Runtime.getRuntime().exec(commands).getInputStream())
++                    new InputStreamReader(new FileInputStream("/proc/self/stat"))
+             );
+-            String line;
+-            double cpuUsage = 0;
+-            while ((line = reader.readLine()) != null) {
+-                if (!line.contains(packageName)) continue;
+-                line = line.replace(packageName, "").replaceAll(" ", "");
+-                cpuUsage = Double.parseDouble(line);
+-                break;
+-            }
++            String line = reader.readLine();
++            String[] fields = line.split(" ");
++            long utime = Long.parseLong(fields[13]);
++            long stime = Long.parseLong(fields[14]);
++
+             reader.close();
+-            return cpuUsage;
++            return utime + stime;
+         }
+     }
+ }
+diff --git a/node_modules/react-native-performance-stats/ios/PerformanceStats/PerformanceStats.mm b/node_modules/react-native-performance-stats/ios/PerformanceStats/PerformanceStats.mm
+index c574f23..27d8fd9 100644
+--- a/node_modules/react-native-performance-stats/ios/PerformanceStats/PerformanceStats.mm
++++ b/node_modules/react-native-performance-stats/ios/PerformanceStats/PerformanceStats.mm
+@@ -98,10 +98,52 @@ @implementation PerformanceStats {
+     
+     CADisplayLink *_uiDisplayLink;
+     CADisplayLink *_jsDisplayLink;
++
++    BOOL cpuConfigForUpdateStats;
++    NSTimer* timerForMonitor;
+ }
+ 
+ RCT_EXPORT_MODULE(PerformanceStats)
+ 
++- (instancetype)init
++{
++    self = [super init];
++    if (self) {
++        [self addObservers];
++    }
++    return self;
++}
++
++- (void)dealloc
++{
++    [self removeObservers];
++    [_uiDisplayLink invalidate];
++    [_jsDisplayLink invalidate];
++
++    if ([self->timerForMonitor isValid]) {
++        [self->timerForMonitor invalidate];
++    }
++}
++
++- (void)addObservers
++{
++    NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
++    [notificationCenter addObserver:self selector:@selector(reactNativeWillReload) name:RCTBridgeWillReloadNotification object:nil];
++}
++
++- (void)removeObservers
++{
++    NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
++    [notificationCenter removeObserver:self name:RCTBridgeWillReloadNotification object:nil];
++}
++
++- (void)reactNativeWillReload
++{
++    if ([self->timerForMonitor isValid]) {
++        [self->timerForMonitor invalidate];
++    }
++}
++
+ + (BOOL)requiresMainQueueSetup
+ {
+   return YES;
+@@ -117,22 +159,22 @@ - (dispatch_queue_t)methodQueue
+   return @[ @"performanceStatsUpdate" ];
+ }
+ 
+-- (void)updateStats:(bool)withCPU
++- (void)updateStats
+ {
+     // View count
+-    NSDictionary<NSNumber *, UIView *> *views = [self.bridge.uiManager valueForKey:@"viewRegistry"];
+-    NSUInteger viewCount = views.count;
+-    NSUInteger visibleViewCount = 0;
+-    for (UIView *view in views.allValues) {
+-      if (view.window || view.superview.window) {
+-        visibleViewCount++;
+-      }
+-    }
++    // NSDictionary<NSNumber *, UIView *> *views = [self.bridge.uiManager valueForKey:@"viewRegistry"];
++    // NSUInteger viewCount = views.count;
++    // NSUInteger visibleViewCount = 0;
++    // for (UIView *view in views.allValues) {
++    //   if (view.window || view.superview.window) {
++    //     visibleViewCount++;
++    //   }
++    // }
+     
+     // Memory
+     double mem = (double)RCTGetResidentMemorySize() / 1024 / 1024;
+     float cpu = 0;
+-    if (withCPU) {
++    if (self->cpuConfigForUpdateStats) {
+         cpu = cpu_usage();
+     }
+     
+@@ -141,15 +183,15 @@ - (void)updateStats:(bool)withCPU
+         @"uiFps": [NSNumber numberWithUnsignedInteger:_uiFPSTracker.FPS],
+         @"usedCpu": [NSNumber numberWithFloat:cpu],
+         @"usedRam": [NSNumber numberWithDouble:mem],
+-        @"viewCount": [NSNumber numberWithUnsignedInteger:viewCount],
+-        @"visibleViewCount": [NSNumber numberWithUnsignedInteger:visibleViewCount]
++        // @"viewCount": [NSNumber numberWithUnsignedInteger:viewCount],
++        // @"visibleViewCount": [NSNumber numberWithUnsignedInteger:visibleViewCount]
+     }];
+     
+     __weak __typeof__(self) weakSelf = self;
+     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+       __strong __typeof__(weakSelf) strongSelf = weakSelf;
+       if (strongSelf && strongSelf->_isRunning) {
+-        [strongSelf updateStats:withCPU];
++        [strongSelf updateStats];
+       }
+     });
+ }
+@@ -160,13 +202,14 @@ - (void)threadUpdate:(CADisplayLink *)displayLink
+   [tracker onTick:displayLink.timestamp];
+ }
+ 
+-RCT_REMAP_METHOD(start, withCpu:(NSInteger*)withCpu)
++RCT_REMAP_METHOD(start, withCpu:(BOOL)withCpu)
+ {
+     _isRunning = true;
+     _uiFPSTracker= [[FPSTracker alloc] init];
+     _jsFPSTracker= [[FPSTracker alloc] init];
+     
+-    [self updateStats:withCpu];
++    self->cpuConfigForUpdateStats = withCpu;
++    [self updateStats];
+     
+     // Get FPS for UI Thread
+     _uiDisplayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(threadUpdate:)];
+diff --git a/node_modules/react-native-performance-stats/react-native-performance-stats.podspec b/node_modules/react-native-performance-stats/react-native-performance-stats.podspec
+index 82dd7fe..818423b 100644
+--- a/node_modules/react-native-performance-stats/react-native-performance-stats.podspec
++++ b/node_modules/react-native-performance-stats/react-native-performance-stats.podspec
+@@ -2,7 +2,6 @@ require "json"
+ 
+ package = JSON.parse(File.read(File.join(__dir__, "package.json")))
+ 
+-folly_version = '2021.06.28.00-v2'
+ folly_compiler_flags = '-DFOLLY_NO_CONFIG -DFOLLY_MOBILE=1 -DFOLLY_USE_LIBCPP=1 -Wno-comma -Wno-shorten-64-to-32'
+ 
+ Pod::Spec.new do |s|
+@@ -28,10 +27,6 @@ Pod::Spec.new do |s|
+             "CLANG_CXX_LANGUAGE_STANDARD" => "c++17"
+         }
+ 
+-        s.dependency "React-Codegen"
+-        s.dependency "RCT-Folly", folly_version
+-        s.dependency "RCTRequired"
+-        s.dependency "RCTTypeSafety"
+-        s.dependency "ReactCommon/turbomodule/core"
++        install_modules_dependencies(s)
+     end
+ end

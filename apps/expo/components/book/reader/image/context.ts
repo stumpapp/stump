@@ -1,6 +1,6 @@
+import { FlashListRef } from '@shopify/flash-list'
 import { BookReadScreenQuery } from '@stump/graphql'
 import { createContext, useContext } from 'react'
-import { FlatList } from 'react-native'
 
 import { OfflineCompatibleReader } from '../types'
 
@@ -42,7 +42,7 @@ export type NextInSeriesBookRef = {
 }
 
 export type IImageBasedReaderContext = {
-	flatListRef: React.RefObject<FlatList | null>
+	flashListRef: React.RefObject<FlashListRef<number[]> | null>
 	book: ImageReaderBookRef
 	imageSizes?: Record<number, ImageBasedBookPageRef>
 	setImageSizes: React.Dispatch<React.SetStateAction<Record<number, ImageBasedBookPageRef>>>

@@ -1,13 +1,10 @@
+import { FlashListRef } from '@shopify/flash-list'
 import { ReadingMode } from '@stump/graphql'
 import { generatePageSets, ImageBasedBookPageRef } from '@stump/sdk'
-import { ComponentProps, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { AppState, View } from 'react-native'
-import { FlatList } from 'react-native-gesture-handler'
-import { PerformanceMonitor } from 'react-native-reanimated'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { ComponentProps, useCallback, useMemo, useRef, useState } from 'react'
+import { View } from 'react-native'
 
 import { useDisplay } from '~/lib/hooks'
-import { usePreferencesStore } from '~/stores'
 import { DEFAULT_BOOK_PREFERENCES, useBookPreferences } from '~/stores/reader'
 
 import { IImageBasedReaderContext, ImageBasedReaderContext, NextInSeriesBookRef } from './context'
@@ -17,7 +14,7 @@ import NextUpOverlay from './NextUpOverlay'
 
 type Props = Omit<
 	IImageBasedReaderContext,
-	'currentPage' | 'flatListRef' | 'setImageSizes' | 'pageSets' | 'imageSizes'
+	'currentPage' | 'flashListRef' | 'setImageSizes' | 'pageSets' | 'imageSizes'
 > &
 	ComponentProps<typeof ImageBasedReader> & {
 		nextInSeries?: NextInSeriesBookRef | null
@@ -38,9 +35,6 @@ export default function ImageBasedReaderContainer({
 			secondPageSeparate,
 		},
 	} = useBookPreferences({ book: ctx.book, serverId: ctx.serverId })
-
-	const inset = useSafeAreaInsets()
-	const performanceMonitor = usePreferencesStore((state) => state.performanceMonitor)
 
 	const [imageSizes, setImageSizes] = useState<Record<number, ImageBasedBookPageRef>>(
 		() =>
@@ -96,8 +90,7 @@ export default function ImageBasedReaderContainer({
 		[incognito, onPageChanged],
 	)
 
-	const flatListRef = useRef<FlatList>(null)
-	// const flatListRef = useRef<FlashList<number>>(null)
+	const flashListRef = useRef<FlashListRef<number[]>>(null)
 
 	// TODO: prefetch, see https://github.com/candlefinance/faster-image/issues/73
 	// useEffect(
@@ -112,20 +105,6 @@ export default function ImageBasedReaderContainer({
 	// 	[initialPage],
 	// )
 
-	// Note: we must not render the PerformanceMonitor when the app is not active:
-	// e.g. when you open the iOS Control Center or Notification Center
-	// or else the app will freeze
-	const [isAppFocused, setIsAppFocused] = useState(true)
-	useEffect(() => {
-		if (!performanceMonitor) return
-		const subscription = AppState.addEventListener('change', (nextAppState) =>
-			setIsAppFocused(nextAppState === 'active'),
-		)
-		return () => {
-			subscription.remove()
-		}
-	}, [performanceMonitor])
-
 	return (
 		<ImageBasedReaderContext.Provider
 			value={{
@@ -135,14 +114,9 @@ export default function ImageBasedReaderContainer({
 				imageSizes,
 				setImageSizes,
 				pageSets,
-				flatListRef,
+				flashListRef,
 			}}
 		>
-			{performanceMonitor && isAppFocused && (
-				<View className="absolute inset-0 items-center" style={{ top: inset.top }}>
-					<PerformanceMonitor />
-				</View>
-			)}
 			<View className="fixed inset-0 flex-1 bg-black">
 				<ControlsOverlay />
 

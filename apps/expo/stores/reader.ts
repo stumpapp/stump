@@ -219,18 +219,17 @@ export const useBookTimer = (id: string, params: UseBookTimerParams = defaultPar
 	resolvedTimerRef.current = resolvedTimer
 
 	const pauseTimer = useCallback(() => {
-		if (isRunning) {
-			const elapsed = Math.trunc((Date.now() - startDateRef.current) / 1000)
-			setBookTimer(id, resolvedTimerRef.current + elapsed)
-			setIsRunning(false)
-		}
+		if (!isRunning) return
+		const elapsed = Math.trunc((Date.now() - startDateRef.current) / 1000)
+		setBookTimer(id, resolvedTimerRef.current + elapsed)
+		setIsRunning(false)
 	}, [id, isRunning, setBookTimer])
 
 	const resumeTimer = useCallback(() => {
-		if (!params.enabled) return
+		if (!params.enabled || isRunning) return
 		startDateRef.current = Date.now()
 		setIsRunning(true)
-	}, [params.enabled])
+	}, [params.enabled, isRunning])
 
 	const resetTimer = useCallback(() => {
 		startDateRef.current = Date.now()

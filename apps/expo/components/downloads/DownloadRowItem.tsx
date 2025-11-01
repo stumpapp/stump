@@ -114,7 +114,7 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 					style={{ opacity: pressed && !selectionStore.isSelectionMode ? 0.8 : 1 }}
 				>
 					<BorderAndShadow
-						style={{ borderRadius: 8, borderWidth: 0.3, shadowRadius: 1.41, elevation: 2 }}
+						style={{ borderRadius: 4, borderWidth: 0.3, shadowRadius: 1.41, elevation: 2 }}
 					>
 						{/* TODO: Use file icons when no thumbnail is available */}
 						<TurboImage

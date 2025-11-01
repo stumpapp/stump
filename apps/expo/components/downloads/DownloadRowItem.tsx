@@ -124,7 +124,7 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 								uri: thumbnailPath,
 							}}
 							resizeMode="stretch"
-							resize={width * 1.5}
+							resize={(width / 2) * 1.5}
 							style={{ height: height / 2, width: width / 2 }}
 						/>
 					</BorderAndShadow>

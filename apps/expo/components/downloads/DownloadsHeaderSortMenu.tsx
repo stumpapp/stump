@@ -85,7 +85,6 @@ export default function DownloadsHeaderSortMenu() {
 							<NativeDropdownMenu.ItemIcon ios={{ name: 'character' }} />
 						</NativeDropdownMenu.CheckboxItem>
 
-						{/* Recent */}
 						<NativeDropdownMenu.CheckboxItem
 							value={sortConfig.option === 'ADDED_AT'}
 							key="sortByRecent"
@@ -93,7 +92,7 @@ export default function DownloadsHeaderSortMenu() {
 								setSortConfig({ option: 'ADDED_AT', direction: sortConfig.direction })
 							}}
 						>
-							<NativeDropdownMenu.ItemTitle>Recent</NativeDropdownMenu.ItemTitle>
+							<NativeDropdownMenu.ItemTitle>Date Downloaded</NativeDropdownMenu.ItemTitle>
 							<NativeDropdownMenu.ItemIcon ios={{ name: 'clock' }} />
 						</NativeDropdownMenu.CheckboxItem>
 
@@ -187,7 +186,7 @@ export default function DownloadsHeaderSortMenu() {
 						className="text-foreground"
 						closeOnPress={false}
 					>
-						<Text className="text-lg">Recent</Text>
+						<Text className="text-lg">Date Downloaded</Text>
 						<Icon as={Clock} size={20} className="ml-auto text-foreground-muted" />
 					</DropdownMenuCheckboxItem>
 

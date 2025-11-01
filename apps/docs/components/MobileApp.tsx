@@ -7,7 +7,7 @@ export default function MobileApp() {
 			<div className="mx-auto flex min-h-screen max-w-7xl flex-col items-center gap-16 px-6 py-10 lg:gap-20 lg:px-8 lg:py-24">
 				<div className="mx-auto max-w-2xl flex-shrink-0 md:text-center lg:mx-0 lg:max-w-xl lg:pt-8">
 					<h2 className="text-2xl font-bold tracking-tight text-black sm:text-4xl dark:text-neutral-100">
-						Mobile app coming soon
+						Mobile app in alpha
 					</h2>
 
 					<p className="text-neutral-650 mx-auto mt-5 max-w-md text-base sm:text-lg md:max-w-3xl md:text-xl dark:text-neutral-400">

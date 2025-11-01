@@ -110,7 +110,7 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 		<Pressable onPress={onPress}>
 			{({ pressed }) => (
 				<View
-					className="white relative flex-row gap-4"
+					className="white relative flex-row gap-4 px-4"
 					style={{ opacity: pressed && !selectionStore.isSelectionMode ? 0.8 : 1 }}
 				>
 					<BorderAndShadow

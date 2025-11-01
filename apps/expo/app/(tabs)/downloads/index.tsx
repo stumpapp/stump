@@ -84,7 +84,7 @@ export default function Screen() {
 
 	const renderItem = useCallback(({ item }: { item: (typeof data)[0] | string }) => {
 		if (typeof item === 'string') {
-			return <Text className="text-lg font-medium">{item}</Text>
+			return <Text className="px-4 text-lg font-medium">{item}</Text>
 		}
 
 		return <DownloadRowItem downloadedFile={intoDownloadedFile(item as (typeof data)[0])} />
@@ -150,22 +150,20 @@ export default function Screen() {
 	}
 
 	return (
-		<SafeAreaView style={{ flex: 1 }} edges={['left', 'right']}>
-			<FlashList
-				data={artificiallyGroupedData}
-				renderItem={renderItem}
-				keyExtractor={(item) => (typeof item === 'string' ? item : item.downloaded_files.id)}
-				contentContainerStyle={{
-					padding: 16,
-				}}
-				contentInsetAdjustmentBehavior="always"
-				ItemSeparatorComponent={() => <View className="h-6" />}
-				ListHeaderComponent={
-					showCuratedDownloads && !isSelecting ? <CuratedDownloadsHeader /> : undefined
-				}
-				stickyHeaderIndices={stickyHeaderIndices}
-				getItemType={(item) => (typeof item === 'string' ? 'sectionHeader' : 'row')}
-			/>
-		</SafeAreaView>
+		<FlashList
+			data={artificiallyGroupedData}
+			renderItem={renderItem}
+			keyExtractor={(item) => (typeof item === 'string' ? item : item.downloaded_files.id)}
+			contentContainerStyle={{
+				paddingVertical: 16,
+			}}
+			contentInsetAdjustmentBehavior="always"
+			ItemSeparatorComponent={() => <View className="h-6" />}
+			ListHeaderComponent={
+				showCuratedDownloads && !isSelecting ? <CuratedDownloadsHeader /> : undefined
+			}
+			stickyHeaderIndices={stickyHeaderIndices}
+			getItemType={(item) => (typeof item === 'string' ? 'sectionHeader' : 'row')}
+		/>
 	)
 }

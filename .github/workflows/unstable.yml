@@ -3,10 +3,10 @@ name: 'Stump Unstable CI'
 on:
   pull_request:
     branches:
-      - breaking/sea-orm
+      - unstable
   push:
     branches:
-      - breaking/sea-orm
+      - unstable
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -26,7 +26,7 @@ jobs:
       - uses: dorny/paths-filter@v2
         id: filter
         with:
-          base: 'breaking/sea-orm'
+          base: 'unstable'
           filters: |
             apps: ./apps/**
             core: ./core/**

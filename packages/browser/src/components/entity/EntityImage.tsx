@@ -13,8 +13,8 @@ const EntityImage = forwardRef<HTMLImageElement, Props>(({ src, onLoad, ...props
 	const handleImageLoad = useCallback(
 		(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
 			const img = e.target as HTMLImageElement
-			if (img.height && img.width) {
-				onLoad?.({ height: img.height, width: img.width })
+			if (img.naturalHeight && img.naturalWidth) {
+				onLoad?.({ height: img.naturalHeight, width: img.naturalWidth })
 			}
 		},
 		[onLoad],

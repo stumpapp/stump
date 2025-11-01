@@ -2287,6 +2287,18 @@ type StumpConfig {
 	enableUpload: Boolean!
 	"The maximum size, in bytes, of files that can be uploaded to be included in libraries."
 	maxFileUploadSize: Int!
+	"The DPI (dots per inch) to use when rendering PDF pages as images."
+	pdfRenderDpi: Int!
+	"The maximum width or height dimension for rendered PDF pages."
+	pdfMaxDimension: Int!
+	"The image format to use for rendered PDF pages (webp, png, jpeg)."
+	pdfRenderFormat: String!
+	"Whether to enable disk caching for rendered PDF pages."
+	pdfCachePages: Boolean!
+	"Number of pages to pre-render before and after the current page."
+	pdfPrerenderRange: Int!
+	"Whether to enable high-quality rendering with smoothing (slower but better quality)."
+	pdfHighQuality: Boolean!
 }
 
 type Subscription {
@@ -2410,6 +2422,7 @@ input UpdateUserPreferencesInput {
 	enableJobOverlay: Boolean!
 	preferAccentColor: Boolean!
 	showThumbnailsInHeaders: Boolean!
+	thumbnailRatio: Float!
 	enableAlphabetSelect: Boolean!
 }
 
@@ -2563,6 +2576,7 @@ type UserPreferences {
 	enableHideScrollbar: Boolean!
 	preferAccentColor: Boolean!
 	showThumbnailsInHeaders: Boolean!
+	thumbnailRatio: Float!
 	enableJobOverlay: Boolean!
 	enableAlphabetSelect: Boolean!
 	userId: String

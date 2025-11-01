@@ -6,6 +6,7 @@ import AutoSizer from 'react-virtualized-auto-sizer'
 import { useMediaMatch } from 'rooks'
 
 import { EntityImage } from '@/components/entity'
+import { usePreferences } from '@/hooks/usePreferences'
 
 const query = graphql(`
 	query SeriesBookGrid($id: String!, $pagination: Pagination) {
@@ -93,6 +94,10 @@ type ListProps = {
 } & Pick<Props, 'onSelectBook'>
 
 const List = ({ data, width, onSelectBook, getScrollElement }: ListProps) => {
+	const {
+		preferences: { thumbnailRatio },
+	} = usePreferences()
+
 	const isAtLeastSmall = useMediaMatch('(min-width: 640px)')
 	const isAtLeastMedium = useMediaMatch('(min-width: 768px)')
 
@@ -108,7 +113,7 @@ const List = ({ data, width, onSelectBook, getScrollElement }: ListProps) => {
 
 	const getWidth = useCallback(() => width / colsPerRow, [colsPerRow, width])
 
-	const getSize = useCallback(() => getWidth() * 1.5, [getWidth])
+	const getSize = useCallback(() => getWidth() / thumbnailRatio, [getWidth, thumbnailRatio])
 
 	const rowVirtualizer = useVirtualizer({
 		count: Math.ceil(data.length / Math.floor(width / getWidth())),
@@ -149,9 +154,10 @@ const List = ({ data, width, onSelectBook, getScrollElement }: ListProps) => {
 									<EntityImage
 										key={book.id}
 										src={imageUrl}
-										className="aspect-[2/3] h-auto rounded-lg object-cover"
+										className="h-auto rounded-lg object-cover"
 										style={{
 											width: `${getWidth() - 8}px`,
+											aspectRatio: thumbnailRatio,
 										}}
 										onClick={() => onSelectBook(book)}
 									/>

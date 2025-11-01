@@ -1,19 +1,19 @@
 import { useSDK } from '@stump/client'
-import { cn, ProgressBar, Text } from '@stump/components'
+import { cn, ProgressBar, Text, usePreviousIsDifferent } from '@stump/components'
 import { ReadingDirection } from '@stump/graphql'
-import dayjs from 'dayjs'
 import { motion } from 'framer-motion'
+import { Duration } from 'luxon'
 import { forwardRef, useCallback, useEffect, useMemo, useRef } from 'react'
-import { ItemProps, ListProps, ScrollerProps, Virtuoso, VirtuosoHandle } from 'react-virtuoso'
+import { ItemProps, ScrollerProps, Virtuoso, VirtuosoHandle } from 'react-virtuoso'
 
 import { EntityImage } from '@/components/entity'
+import { usePreferences } from '@/hooks/usePreferences'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 import { useBookReadTime } from '@/stores/reader'
 
 import { useImageBaseReaderContext } from '../context'
 
-const HEIGHT_MODIFIER = 2 / 3
-const WIDTH_MODIFIER = 2 / 3
+const SIZE_MODIFIER = 1.5
 
 export default function ReaderFooter() {
 	const { sdk } = useSDK()
@@ -24,6 +24,9 @@ export default function ReaderFooter() {
 		bookPreferences: { readingDirection, trackElapsedTime },
 	} = useBookPreferences({ book })
 	const elapsedSeconds = useBookReadTime(book.id)
+	const {
+		preferences: { thumbnailRatio, locale },
+	} = usePreferences()
 
 	const virtuosoRef = useRef<VirtuosoHandle>(null)
 
@@ -36,83 +39,106 @@ export default function ReaderFooter() {
 		[currentPage, pageSets],
 	)
 
+	const showToolBarChanged = usePreviousIsDifferent(showToolBar)
+	const readingDirectionChanged = usePreviousIsDifferent(readingDirection)
 	useEffect(() => {
 		if (showToolBar) {
 			virtuosoRef.current?.scrollToIndex({
 				align: 'center',
-				behavior: 'smooth',
+				behavior: showToolBarChanged || readingDirectionChanged ? 'auto' : 'smooth',
 				index: currentPageSetIdx,
 			})
 		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [showToolBar, currentPageSetIdx])
 
 	const formatDuration = useCallback(() => {
-		if (elapsedSeconds <= 60) {
-			return `${elapsedSeconds} seconds`
-		} else if (elapsedSeconds <= 3600) {
-			return dayjs.duration(elapsedSeconds, 'seconds').format('m [minutes] s [seconds]')
+		const duration = Duration.fromObject({ seconds: elapsedSeconds }).reconfigure({ locale })
+
+		let formattedDuration
+		if (elapsedSeconds <= 59) {
+			formattedDuration = duration.shiftTo('seconds')
+		} else if (elapsedSeconds <= 3599) {
+			formattedDuration = duration.shiftTo('minutes', 'seconds')
 		} else {
-			return dayjs
-				.duration(elapsedSeconds, 'seconds')
-				.format(`H [hour${elapsedSeconds >= 7200 ? 's' : ''}] m [minutes]`)
+			const hms = duration.shiftTo('hours', 'minutes', 'seconds')
+			formattedDuration = Duration.fromObject({ hours: hms.hours, minutes: hms.minutes })
 		}
-	}, [elapsedSeconds])
+
+		return formattedDuration.toHuman()
+	}, [elapsedSeconds, locale])
 
 	const renderItem = useCallback(
 		(idx: number, indexes: number[]) => {
+			const isDoubleSpread = indexes.length === 2
+			const isLandscape = indexes.some((page) => (imageSizes?.[page]?.ratio || 0) >= 1)
+			const isCurrentSet = currentPageSetIdx === idx
+
+			let pageSetSize = {
+				width: 100,
+				height: 100 / thumbnailRatio,
+			}
+			let containerSize
+
+			if (isLandscape || isDoubleSpread) {
+				pageSetSize = {
+					height: pageSetSize.height,
+					width: pageSetSize.width * 2,
+				}
+			}
+
+			if (!isCurrentSet) {
+				containerSize = {
+					height: pageSetSize.height * SIZE_MODIFIER + 10, // add space for the translateY(-10px)
+					width: pageSetSize.width,
+				}
+			} else {
+				containerSize = {
+					height: pageSetSize.height * SIZE_MODIFIER + 10, // add space for the translateY(-10px)
+					width: pageSetSize.width * SIZE_MODIFIER,
+				}
+				pageSetSize = {
+					height: pageSetSize.height * SIZE_MODIFIER,
+					width: pageSetSize.width * SIZE_MODIFIER,
+				}
+			}
+
 			return (
-				<div className="flex h-full items-center">
-					{indexes.map((index) => {
-						const url = sdk.media.bookPageURL(book.id, index + 1)
-						const imageSize = imageSizes[index]
-						const isPortraitOrUnknown = !imageSize || imageSize.ratio < 1
-						const isCurrentSet = currentPageSetIdx === idx
-
-						let containerSize = {
-							width: isPortraitOrUnknown ? 100 : 150,
-							height: isPortraitOrUnknown ? 150 : 100,
-						}
-
-						if (isCurrentSet) {
-							containerSize = {
-								height: containerSize.height / HEIGHT_MODIFIER,
-								width: containerSize.width / WIDTH_MODIFIER,
-							}
-						}
-
-						return (
-							<div className="flex flex-1 flex-col gap-1" key={index}>
-								<div
-									onClick={() => setCurrentPage(index + 1)}
-									className={cn(
-										'flex cursor-pointer items-center overflow-hidden rounded-md border-2 border-solid border-transparent shadow-xl transition duration-300 hover:border-edge-brand',
-										{
-											'border-edge-brand': isCurrentSet,
-										},
-									)}
-									style={{
-										...containerSize,
-										transform: isCurrentSet ? 'translateY(-10px)' : 'translateY(0px)',
-									}}
-								>
-									<EntityImage
-										src={url}
-										className="object-contain"
-										onLoad={({ height, width }) =>
-											setPageSize(index, { height, width, ratio: width / height })
-										}
-									/>
-								</div>
-								{!isCurrentSet && (
-									<Text className="text-center text-xs text-[#898d94]">{index + 1}</Text>
-								)}
-							</div>
-						)
-					})}
+				<div className="flex flex-col justify-end" style={containerSize}>
+					<div
+						className={cn(
+							'flex cursor-pointer overflow-hidden rounded-lg border-2 border-transparent shadow-xl transition duration-300 hover:border-edge-brand',
+							{ 'rounded-[10px] border-edge-brand': isCurrentSet },
+						)}
+						style={{
+							...pageSetSize,
+							transform: isCurrentSet ? 'translateY(-10px)' : 'translateY(0px)',
+						}}
+					>
+						{indexes.map((index) => (
+							<EntityImage
+								src={sdk.media.bookPageURL(book.id, index + 1)}
+								className="h-full w-full object-cover"
+								key={index}
+								onLoad={({ height, width }) =>
+									setPageSize(index, { height, width, ratio: width / height })
+								}
+								onClick={() => setCurrentPage(index + 1)}
+							/>
+						))}
+					</div>
+					{!isCurrentSet && (
+						<Text size="sm" className="shrink-0 text-center text-[#898d94]">
+							{[...indexes]
+								.sort((a, b) => a - b)
+								.map((i) => i + 1)
+								.join('-')}
+						</Text>
+					)}
 				</div>
 			)
 		},
-		[imageSizes, sdk, book.id, setCurrentPage, setPageSize, currentPageSetIdx],
+		[imageSizes, sdk, book.id, setCurrentPage, setPageSize, currentPageSetIdx, thumbnailRatio],
 	)
 
 	return (
@@ -123,18 +149,20 @@ export default function ReaderFooter() {
 			transition={{ duration: 0.2, ease: 'easeInOut' }}
 			// @ts-expect-error: It does have className?
 			className="fixed bottom-0 left-0 z-[100] flex w-full flex-col justify-end gap-2 overflow-hidden bg-opacity-75 text-white shadow-lg"
-			style={{
-				height: 215 / HEIGHT_MODIFIER,
-			}}
 		>
 			<Virtuoso
 				ref={virtuosoRef}
-				style={{ height: '100%' }}
+				style={{
+					height:
+						(100 / thumbnailRatio) * SIZE_MODIFIER + // item height (all items have the same fixed height)
+						12 + // scrollbar vertical height
+						10 + // translateY padding
+						8, // add some vertical padding between the scrollbar and items
+				}}
 				horizontalDirection
 				data={pageSets}
 				components={{
 					Item,
-					List,
 					Scroller,
 				}}
 				itemContent={renderItem}
@@ -164,7 +192,12 @@ export default function ReaderFooter() {
 					)}
 
 					<Text className="text-sm text-[#898d94]">
-						{currentSet.map((idx) => idx + 1).join('-')} of {book.pages}
+						{[...currentSet]
+							.map((idx) => idx + 1)
+							.sort((a, b) => a - b)
+							.join('-')}
+						{' of '}
+						{book.pages}
 					</Text>
 				</div>
 			</div>
@@ -181,24 +214,16 @@ const Scroller = forwardRef<HTMLDivElement, ScrollerProps>(({ children, ...props
 })
 Scroller.displayName = 'Scroller'
 
-const List = forwardRef<HTMLDivElement, ListProps>(({ children, ...props }, ref) => {
-	return (
-		<div className="flex items-center" ref={ref} {...props}>
-			{children}
-		</div>
-	)
-})
-List.displayName = 'List'
-
 const Item = forwardRef<HTMLDivElement, ItemProps<number[]>>(
 	({ children, style, ...props }, ref) => {
 		return (
 			<div
-				className="flex flex-1 select-none items-center px-1"
+				className="select-none px-1"
 				ref={ref}
 				{...props}
 				style={{
 					...style,
+					verticalAlign: 'bottom',
 				}}
 			>
 				{children}

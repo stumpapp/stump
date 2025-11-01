@@ -125,38 +125,6 @@ impl Ctx {
 	}
 
 	/// Emits a [`CoreEvent`] to the client event channel.
-	///
-	/// ## Example
-	/// ```no_run
-	/// use stump_core::{Ctx, config::StumpConfig, CoreEvent};
-	///
-	/// #[tokio::main]
-	/// async fn main() {
-	///    let config = StumpConfig::debug();
-	///    let ctx = Ctx::new(config).await;
-	///
-	///    let event = CoreEvent::CreatedMedia {
-	///        id: "id_for_the_media".to_string(),
-	///        series_id: "id_for_its_series".to_string(),
-	///    };
-	///
-	///    let ctx_cpy = ctx.clone();
-	///    tokio::spawn(async move {
-	///        let mut receiver = ctx_cpy.get_client_receiver();
-	///        let received_event = receiver.recv().await;
-	///        assert_eq!(received_event.is_ok(), true);
-	///        match received_event.unwrap() {
-	///            CoreEvent::CreatedMedia { id, series_id } => {
-	///                assert_eq!(id, "id_for_the_media");
-	///                assert_eq!(series_id, "id_for_its_series");
-	///            }
-	///            _ => unreachable!("Wrong event type received"),
-	///        }
-	///    });
-	///
-	///    ctx.emit_event(event.clone());
-	/// }
-	/// ```
 	pub fn emit_event(&self, event: CoreEvent) {
 		let _ = self.event_channel.0.send(event);
 	}
@@ -186,6 +154,7 @@ impl Ctx {
 		}
 	}
 
+	/// Retrieves the encryption key from the server configuration
 	pub async fn get_encryption_key(&self) -> CoreResult<String> {
 		let record = server_config::Entity::find()
 			.select_column(server_config::Column::EncryptionKey)

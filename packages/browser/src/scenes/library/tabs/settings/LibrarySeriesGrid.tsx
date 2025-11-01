@@ -5,6 +5,8 @@ import { Fragment, useCallback, useEffect, useRef } from 'react'
 import AutoSizer from 'react-virtualized-auto-sizer'
 import { useMediaMatch } from 'rooks'
 
+import { usePreferences } from '@/hooks/usePreferences'
+
 const query = graphql(`
 	query LibrarySeriesGrid($id: String!, $pagination: Pagination) {
 		series(filter: { libraryId: { eq: $id } }, pagination: $pagination) {
@@ -45,6 +47,10 @@ export default function LibrarySeriesGrid({ libraryId, onSelectSeries }: Props) 
 	)
 	const nodes = data.pages.flatMap((page) => page.series.nodes)
 
+	const {
+		preferences: { thumbnailRatio },
+	} = usePreferences()
+
 	const parentRef = useRef<HTMLDivElement>(null)
 
 	const isAtLeastSmall = useMediaMatch('(min-width: 640px)')
@@ -63,8 +69,11 @@ export default function LibrarySeriesGrid({ libraryId, onSelectSeries }: Props) 
 	const rowCount = nodes.length > 4 ? nodes.length / 4 : 1
 	const rowVirtualizer = useVirtualizer({
 		count: rowCount,
-		// ratio is 2:3, so we take the result of estimateWidth and multiply by 3/2
-		estimateSize: useCallback(() => estimateWidth() * 1.5, [estimateWidth]),
+		// for thumbnailRatio e.g. 2:3 (thumbnailRatio = 2/3), we take the result of estimateWidth and multiply by 3/2
+		estimateSize: useCallback(
+			() => estimateWidth() / thumbnailRatio,
+			[estimateWidth, thumbnailRatio],
+		),
 		getScrollElement: () => parentRef.current,
 		overscan: 5,
 	})
@@ -143,9 +152,10 @@ export default function LibrarySeriesGrid({ libraryId, onSelectSeries }: Props) 
 													onClick={() => onSelectSeries(thisSeries)}
 												>
 													<div
-														className="relative aspect-[2/3] bg-cover bg-center p-0"
+														className="relative bg-cover bg-center p-0"
 														style={{
 															backgroundImage: `url('${imageUrl}')`,
+															aspectRatio: thumbnailRatio,
 														}}
 													/>
 												</div>

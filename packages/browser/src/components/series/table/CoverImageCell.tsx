@@ -3,6 +3,7 @@ import { Book } from 'lucide-react'
 import { useState } from 'react'
 
 import { EntityImage } from '@/components/entity'
+import { usePreferences } from '@/hooks/usePreferences'
 
 type Props = {
 	/**
@@ -17,6 +18,9 @@ type Props = {
 
 export default function CoverImageCell({ id, title }: Props) {
 	const { sdk } = useSDK()
+	const {
+		preferences: { thumbnailRatio },
+	} = usePreferences()
 	const [showFallback, setShowFallback] = useState(false)
 
 	const loadImage = () => {
@@ -44,7 +48,8 @@ export default function CoverImageCell({ id, title }: Props) {
 		return (
 			<div
 				title={`${title} (Image failed to load)`}
-				className="flex aspect-[2/3] h-14 w-auto items-center justify-center rounded-sm border-[0.5px] border-edge bg-sidebar shadow-sm"
+				className="flex h-14 w-auto items-center justify-center rounded-sm border-[0.5px] border-edge bg-sidebar shadow-sm"
+				style={{ aspectRatio: thumbnailRatio }}
 				onClick={attemptReload}
 			>
 				<Book className="h-8 w-8 text-foreground-muted" />
@@ -55,7 +60,8 @@ export default function CoverImageCell({ id, title }: Props) {
 	return (
 		<EntityImage
 			title={title}
-			className="aspect-[2/3] h-14 w-auto rounded-sm object-cover"
+			className="h-14 w-auto rounded-sm object-cover"
+			style={{ aspectRatio: thumbnailRatio }}
 			src={sdk.series.thumbnailURL(id)}
 			onError={() => setShowFallback(true)}
 		/>

@@ -70,11 +70,11 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 						"pod 'ReadiumAdapterGCDWebServer', podspec: 'https://raw.githubusercontent.com/readium/swift-toolkit/3.4.0/Support/CocoaPods/ReadiumAdapterGCDWebServer.podspec'",
 						"pod 'ReadiumOPDS', podspec: 'https://raw.githubusercontent.com/readium/swift-toolkit/3.4.0/Support/CocoaPods/ReadiumOPDS.podspec'",
 						"pod 'ReadiumInternal', podspec: 'https://raw.githubusercontent.com/readium/swift-toolkit/3.4.0/Support/CocoaPods/ReadiumInternal.podspec'",
-						"pod 'Fuzi', podspec: 'https://raw.githubusercontent.com/readium/Fuzi/refs/heads/master/Fuzi.podspec'",
 						"pod 'ReadiumGCDWebServer', podspec: 'https://raw.githubusercontent.com/readium/GCDWebServer/4.0.0/GCDWebServer.podspec', modular_headers: true",
 					],
 				},
 			],
+			['./plugins/withPodsPostInstall.ts'],
 			[
 				'expo-font',
 				{

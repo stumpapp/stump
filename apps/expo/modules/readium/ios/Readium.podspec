@@ -15,17 +15,12 @@ Pod::Spec.new do |s|
   s.dependency 'ExpoModulesCore'
   
   s.dependency 'ExpoModulesCore'
-  # s.dependency 'R2Shared'
-  # s.dependency 'R2Streamer'
-  # s.dependency 'R2Navigator'
   s.dependency 'ReadiumShared'
   s.dependency 'ReadiumStreamer'
   s.dependency 'ReadiumNavigator'
   s.dependency 'ReadiumOPDS'
   s.dependency 'ReadiumInternal'
   s.dependency 'ReadiumAdapterGCDWebServer'
-  # s.dependency 'ZIPFoundation'
-  # s.dependency 'ReadiumZIPFoundation'
   s.dependency 'OrderedCollections'
 
   # Swift/Objective-C compatibility

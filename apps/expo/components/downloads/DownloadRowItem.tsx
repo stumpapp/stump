@@ -73,7 +73,7 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 		const parts = []
 
 		if (downloadedFile.size != null) {
-			const size = formatBytesSeparate(downloadedFile.size)
+			const size = formatBytesSeparate(downloadedFile.size, 1)
 			if (size) {
 				parts.push(`${size.value} ${size.unit}`)
 			}

@@ -65,14 +65,6 @@ export default function DownloadsHeaderMenu() {
 							},
 							{
 								icon: {
-									ios: 'sparkles.rectangle.stack',
-									android: Sparkles,
-								},
-								label: isCuratedDownloadsEnabled ? 'Hide Curated' : 'Show Curated',
-								onPress: () => setIsCuratedDownloadsEnabled(!isCuratedDownloadsEnabled),
-							},
-							{
-								icon: {
 									ios: 'icloud.and.arrow.up',
 									android: RefreshCw,
 								},
@@ -84,6 +76,14 @@ export default function DownloadsHeaderMenu() {
 									}
 								},
 								disabled: !isUnsyncedProgressExists,
+							},
+							{
+								icon: {
+									ios: 'sparkles.rectangle.stack',
+									android: Sparkles,
+								},
+								label: isCuratedDownloadsEnabled ? 'Hide Curated' : 'Show Curated',
+								onPress: () => setIsCuratedDownloadsEnabled(!isCuratedDownloadsEnabled),
 							},
 						],
 					},

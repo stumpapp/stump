@@ -7,7 +7,7 @@ import {
 	LibraryBig,
 	ListFilter,
 } from 'lucide-react-native'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { Platform, Pressable, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import * as NativeDropdownMenu from 'zeego/dropdown-menu'
@@ -24,7 +24,7 @@ import {
 import { useColors } from '~/lib/constants'
 
 import { Icon } from '../ui/icon'
-import { useDownloadsState } from './store'
+import { DownloadSortOption, useDownloadsState } from './store'
 
 export default function DownloadsHeaderSortMenu() {
 	const [isOpen, setIsOpen] = useState(false)
@@ -43,6 +43,53 @@ export default function DownloadsHeaderSortMenu() {
 		right: 4,
 	}
 
+	const renderSubtitle = useCallback(
+		(option: DownloadSortOption) => {
+			if (sortConfig.option !== option) return null
+
+			let content = sortConfig.direction === 'ASC' ? 'A → Z' : 'Z → A'
+			if (option === 'ADDED_AT') {
+				content = sortConfig.direction === 'ASC' ? 'Oldest First' : 'Newest First'
+			}
+
+			// TODO: Refactor based on how I refactor for Android
+			return Platform.select({
+				ios: <NativeDropdownMenu.ItemSubtitle>{content}</NativeDropdownMenu.ItemSubtitle>,
+				android: <Text className="ml-2 text-sm text-foreground-muted">{content}</Text>,
+			})
+		},
+		[sortConfig],
+	)
+
+	const handleSelection = useCallback(
+		(option: DownloadSortOption) => {
+			// If clicking the currently active sort option, toggle direction
+			if (sortConfig.option === option) {
+				setSortConfig({
+					option,
+					direction: sortConfig.direction === 'ASC' ? 'DESC' : 'ASC',
+				})
+			} else {
+				// When switching to a different option, always use sensible defaults
+				// ADDED_AT should always default to DESC (newest first)
+				const sensibleDefaultDirection = option === 'ADDED_AT' ? 'DESC' : 'ASC'
+				setSortConfig({ option, direction: sensibleDefaultDirection })
+			}
+		},
+		[setSortConfig, sortConfig],
+	)
+
+	const setDirection = useCallback(
+		(direction: 'ASC' | 'DESC') => {
+			setSortConfig({
+				option: sortConfig.option,
+				direction,
+			})
+		},
+		[setSortConfig, sortConfig],
+	)
+
+	// TODO: Refactor to make Android align with iOS subtitle design, I am too lazy right now
 	const Component = Platform.select({
 		ios: (
 			<NativeDropdownMenu.Root open={isOpen} onOpenChange={setIsOpen}>
@@ -77,60 +124,31 @@ export default function DownloadsHeaderSortMenu() {
 						<NativeDropdownMenu.CheckboxItem
 							value={sortConfig.option === 'NAME'}
 							key="sortByName"
-							onSelect={() => {
-								setSortConfig({ option: 'NAME', direction: sortConfig.direction })
-							}}
+							onSelect={() => handleSelection('NAME')}
 						>
 							<NativeDropdownMenu.ItemTitle>Name</NativeDropdownMenu.ItemTitle>
 							<NativeDropdownMenu.ItemIcon ios={{ name: 'character' }} />
+							{renderSubtitle('NAME')}
 						</NativeDropdownMenu.CheckboxItem>
 
 						<NativeDropdownMenu.CheckboxItem
 							value={sortConfig.option === 'ADDED_AT'}
 							key="sortByRecent"
-							onSelect={() => {
-								setSortConfig({ option: 'ADDED_AT', direction: sortConfig.direction })
-							}}
+							onSelect={() => handleSelection('ADDED_AT')}
 						>
 							<NativeDropdownMenu.ItemTitle>Date Downloaded</NativeDropdownMenu.ItemTitle>
 							<NativeDropdownMenu.ItemIcon ios={{ name: 'clock' }} />
+							{renderSubtitle('ADDED_AT')}
 						</NativeDropdownMenu.CheckboxItem>
 
 						<NativeDropdownMenu.CheckboxItem
 							value={sortConfig.option === 'SERIES'}
 							key="sortBySeries"
-							onSelect={() => {
-								setSortConfig({ option: 'SERIES', direction: sortConfig.direction })
-							}}
+							onSelect={() => handleSelection('SERIES')}
 						>
 							<NativeDropdownMenu.ItemTitle>Series</NativeDropdownMenu.ItemTitle>
 							<NativeDropdownMenu.ItemIcon ios={{ name: 'books.vertical.fill' }} />
-						</NativeDropdownMenu.CheckboxItem>
-					</NativeDropdownMenu.Group>
-
-					<NativeDropdownMenu.Separator />
-
-					<NativeDropdownMenu.Group>
-						<NativeDropdownMenu.CheckboxItem
-							value={sortConfig.direction === 'ASC'}
-							key="sortAscending"
-							onSelect={() => {
-								setSortConfig({ option: sortConfig.option, direction: 'ASC' })
-							}}
-						>
-							<NativeDropdownMenu.ItemTitle>Ascending</NativeDropdownMenu.ItemTitle>
-							<NativeDropdownMenu.ItemIcon ios={{ name: 'arrow.up.right' }} />
-						</NativeDropdownMenu.CheckboxItem>
-
-						<NativeDropdownMenu.CheckboxItem
-							value={sortConfig.direction === 'DESC'}
-							key="sortDescending"
-							onSelect={() => {
-								setSortConfig({ option: sortConfig.option, direction: 'DESC' })
-							}}
-						>
-							<NativeDropdownMenu.ItemTitle>Descending</NativeDropdownMenu.ItemTitle>
-							<NativeDropdownMenu.ItemIcon ios={{ name: 'arrow.down.left' }} />
+							{renderSubtitle('SERIES')}
 						</NativeDropdownMenu.CheckboxItem>
 					</NativeDropdownMenu.Group>
 				</NativeDropdownMenu.Content>
@@ -168,9 +186,7 @@ export default function DownloadsHeaderSortMenu() {
 				>
 					<DropdownMenuCheckboxItem
 						checked={sortConfig.option === 'NAME'}
-						onCheckedChange={() => {
-							setSortConfig({ option: 'NAME', direction: sortConfig.direction })
-						}}
+						onCheckedChange={() => handleSelection('NAME')}
 						className="text-foreground"
 						closeOnPress={false}
 					>
@@ -180,9 +196,7 @@ export default function DownloadsHeaderSortMenu() {
 
 					<DropdownMenuCheckboxItem
 						checked={sortConfig.option === 'ADDED_AT'}
-						onCheckedChange={() => {
-							setSortConfig({ option: 'ADDED_AT', direction: sortConfig.direction })
-						}}
+						onCheckedChange={() => handleSelection('ADDED_AT')}
 						className="text-foreground"
 						closeOnPress={false}
 					>
@@ -192,9 +206,7 @@ export default function DownloadsHeaderSortMenu() {
 
 					<DropdownMenuCheckboxItem
 						checked={sortConfig.option === 'SERIES'}
-						onCheckedChange={() => {
-							setSortConfig({ option: 'SERIES', direction: sortConfig.direction })
-						}}
+						onCheckedChange={() => handleSelection('SERIES')}
 						className="text-foreground"
 						closeOnPress={false}
 					>
@@ -205,9 +217,12 @@ export default function DownloadsHeaderSortMenu() {
 					<DropdownMenuSeparator variant="group" />
 
 					<DropdownMenuCheckboxItem
+						// Note: The key here is a bit annoying but it forces a re-render when switching to avoid the
+						// onCheckedChange overriding the reasonable default direction when switching sort options
+						key={sortConfig.option}
 						checked={sortConfig.direction === 'ASC'}
 						onCheckedChange={() => {
-							setSortConfig({ option: sortConfig.option, direction: 'ASC' })
+							setDirection('ASC')
 						}}
 						className="text-foreground"
 						closeOnPress={false}
@@ -217,10 +232,11 @@ export default function DownloadsHeaderSortMenu() {
 					</DropdownMenuCheckboxItem>
 
 					<DropdownMenuCheckboxItem
+						// Note: The key here is a bit annoying but it forces a re-render when switching to avoid the
+						// onCheckedChange overriding the reasonable default direction when switching sort options
+						key={sortConfig.option}
 						checked={sortConfig.direction === 'DESC'}
-						onCheckedChange={() => {
-							setSortConfig({ option: sortConfig.option, direction: 'DESC' })
-						}}
+						onCheckedChange={() => setDirection('DESC')}
 						className="text-foreground"
 						closeOnPress={false}
 					>

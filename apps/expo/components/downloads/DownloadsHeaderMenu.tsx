@@ -54,6 +54,17 @@ export default function DownloadsHeaderMenu() {
 						items: [
 							{
 								icon: {
+									ios: 'checkmark.circle',
+									android: CheckCircle,
+								},
+								onPress: () => {
+									setIsSelecting(true)
+								},
+								label: 'Select',
+								disabled: downloadsCount === 0,
+							},
+							{
+								icon: {
 									ios: 'sparkles.rectangle.stack',
 									android: Sparkles,
 								},
@@ -73,17 +84,6 @@ export default function DownloadsHeaderMenu() {
 									}
 								},
 								disabled: !isUnsyncedProgressExists,
-							},
-							{
-								icon: {
-									ios: 'checkmark.circle',
-									android: CheckCircle,
-								},
-								onPress: () => {
-									setIsSelecting(true)
-								},
-								label: 'Select',
-								disabled: downloadsCount === 0,
 							},
 						],
 					},

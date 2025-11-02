@@ -66,6 +66,9 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 		[router, downloadedFile.id, selectionStore],
 	)
 
+	// Note: I went back and forth on which order to show these pieces of info in the subtitle.
+	// The big thing in my mind was that I see page/progression more "important" than size but wasn't
+	// sure if being towards the inside vs outside made it more prominent or noticeable.
 	const renderSubtitle = () => {
 		const parts = []
 
@@ -77,8 +80,19 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 		}
 
 		if (downloadedFile.pages != null && downloadedFile.pages > 0) {
-			parts.push(`${downloadedFile.pages} pages`)
+			if (readProgress?.page) {
+				parts.push(`Page ${readProgress.page} of ${downloadedFile.pages}`)
+			} else {
+				parts.push(`${downloadedFile.pages} pages`)
+			}
 		}
+
+		// TODO: Re-add chapter title when it is more reliably something meaningful. I find that for some books
+		// it is showing the resource name instead of the actual chapter which I don't want to show
+		// const readiumProgress = epubProgress.safeParse(readProgress?.percentage).data
+		// if (readiumProgress?.chapterTitle) {
+		// 	parts.push(readiumProgress.chapterTitle)
+		// }
 
 		return parts.join(' • ')
 	}
@@ -116,7 +130,7 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 					<BorderAndShadow
 						style={{ borderRadius: 4, borderWidth: 0.3, shadowRadius: 1.41, elevation: 2 }}
 					>
-						{/* TODO: Use file icons when no thumbnail is available */}
+						{/* TODO: Use file icons when no thumbnail is available? */}
 						<TurboImage
 							source={{
 								// @ts-expect-error: URI doesn't like undefined but it shows a placeholder when
@@ -131,7 +145,7 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 
 					<View className="flex-1 justify-center py-2">
 						<View className="flex flex-1 flex-row justify-between gap-2">
-							<View className="flex shrink">
+							<View className="flex shrink gap-1">
 								<Heading numberOfLines={2}>{downloadedFile.bookName || 'Untitled'}</Heading>
 								<Text className="text-foreground-muted">{renderSubtitle()}</Text>
 							</View>
@@ -144,13 +158,17 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 						</View>
 
 						{readProgress && (
-							<>
+							<View className="flex-row items-center gap-4">
 								<Progress
-									className="h-1 bg-background-surface-secondary"
+									className="h-1 shrink bg-background-surface-secondary"
 									value={getProgress()}
 									style={{ height: 6, borderRadius: 3 }}
 								/>
-							</>
+
+								<Text className="shrink-0 text-foreground-muted">
+									{(getProgress() || 0).toFixed(0)}%
+								</Text>
+							</View>
 						)}
 					</View>
 

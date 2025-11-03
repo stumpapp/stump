@@ -108,13 +108,6 @@ export default function Screen() {
 
 	const selectionStore = useSelectionStore((state) => state)
 
-	const onSelectAll = useCallback(() => {
-		const allIds =
-			data?.filter((item) => typeof item !== 'string').map((item) => item.downloaded_files.id) || []
-		selectionStore.setSelection(allIds)
-		selectionStore.setIsSelectAll(true)
-	}, [data, selectionStore])
-
 	const customSelectionActions = useMemo(
 		() => ({
 			deleteSelection: async (ids: string[]) => {
@@ -130,7 +123,10 @@ export default function Screen() {
 
 	useEffect(
 		() => {
-			selectionStore.registerSelectAllCallback(onSelectAll)
+			const allIds =
+				data?.filter((item) => typeof item !== 'string').map((item) => item.downloaded_files.id) ||
+				[]
+			selectionStore.setItemIdents(allIds)
 			selectionStore.registerCustomActions(customSelectionActions)
 		},
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -164,6 +160,7 @@ export default function Screen() {
 			}
 			stickyHeaderIndices={stickyHeaderIndices}
 			getItemType={(item) => (typeof item === 'string' ? 'sectionHeader' : 'row')}
+			maintainVisibleContentPosition={{ disabled: true }}
 		/>
 	)
 }

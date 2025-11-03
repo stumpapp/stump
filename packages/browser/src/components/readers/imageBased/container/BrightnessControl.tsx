@@ -15,6 +15,10 @@ export default function BrightnessControl() {
 	const handleChange = useCallback(
 		(value?: number) => {
 			if (value === undefined || isNaN(value)) return
+			// Do not allow effectively 0 brightness
+			if (value < 0.1) {
+				value = 0.1
+			}
 			setBookPreferences({ brightness: value })
 		},
 		[setBookPreferences],

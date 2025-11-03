@@ -4,16 +4,18 @@ import { create, useStore } from 'zustand'
 export type ISelectionStore = {
 	isSelecting: boolean
 	setIsSelecting: (selecting: boolean) => void
-	isSelectAll: boolean
-	setIsSelectAll: (selectAll: boolean) => void
 	selectionState: Set<string>
 	toggleSelection: (id: string) => void
 	setSelection: (ids: string[]) => void
 	clearSelection: () => void
 	resetSelection: () => void
 	isSelected: (id: string) => boolean
-	selectAll?: () => void
-	registerSelectAllCallback: (callback: () => void) => void
+
+	selectAll: () => void
+	isSelectAll: () => boolean
+
+	itemIdents: string[]
+	setItemIdents: (idents: string[]) => void
 
 	customActions: Record<string, (ids: string[]) => Promise<void>>
 	registerCustomActions: (actions: Record<string, (ids: string[]) => Promise<void>>) => void
@@ -21,11 +23,21 @@ export type ISelectionStore = {
 
 export const createSelectionStore = () =>
 	create<ISelectionStore>((set, get) => ({
+		itemIdents: [],
+		setItemIdents: (idents: string[]) => set({ itemIdents: idents }),
 		isSelecting: false,
 		setIsSelecting: (selecting: boolean) => set({ isSelecting: selecting }),
-		isSelectAll: false,
-		setIsSelectAll: (selectAll: boolean) => set({ isSelectAll: selectAll }),
 		selectionState: new Set<string>(),
+		selectAll: () => {
+			const allIds = get().itemIdents
+			set(() => ({
+				selectionState: new Set(allIds),
+			}))
+		},
+		isSelectAll: () => {
+			// Note: If > technically a bug, but shouldn't happen in practice
+			return get().selectionState.size >= get().itemIdents.length
+		},
 		toggleSelection: (id: string) =>
 			set((state) => {
 				const newSelection = new Set(state.selectionState)
@@ -39,22 +51,15 @@ export const createSelectionStore = () =>
 		setSelection: (ids: string[]) =>
 			set(() => ({
 				selectionState: new Set(ids),
-				isSelectAll: false,
 			})),
 		clearSelection: () =>
 			set(() => ({
 				selectionState: new Set<string>(),
-				isSelectAll: false,
 			})),
 		isSelected: (id: string) => get().selectionState.has(id),
-		registerSelectAllCallback: (callback: () => void) =>
-			set(() => ({
-				selectAll: callback,
-			})),
 		resetSelection: () =>
 			set(() => ({
 				selectionState: new Set<string>(),
-				isSelectAll: false,
 				isSelecting: false,
 			})),
 		customActions: {},

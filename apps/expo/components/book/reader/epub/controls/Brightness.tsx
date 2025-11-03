@@ -1,6 +1,7 @@
 import Slider from '@react-native-community/slider'
 import * as Haptics from 'expo-haptics'
 import { Sun, SunDim } from 'lucide-react-native'
+import { useCallback } from 'react'
 import { View } from 'react-native'
 
 import { Icon } from '~/components/ui/icon'
@@ -16,9 +17,15 @@ export default function Brightness() {
 		setSettings: state.setGlobalSettings,
 	}))
 
-	const onValueChange = (value: number) => {
-		store.setSettings({ brightness: value })
-	}
+	const onValueChange = useCallback(
+		(value: number) => {
+			if (value === store.brightness) return
+			if (value < 0.1) return
+			store.setSettings({ brightness: value })
+		},
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[store.brightness],
+	)
 
 	return (
 		<View className="max-w-full flex-row items-center gap-3 px-6">

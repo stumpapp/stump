@@ -124,7 +124,8 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 		<Pressable onPress={onPress}>
 			{({ pressed }) => (
 				<View
-					className="white relative flex-row gap-4 px-4"
+					// Note: Using margin here so the overlay isn't cut off by edges of device
+					className="white relative mx-4 flex-row gap-4"
 					style={{ opacity: pressed && !selectionStore.isSelectionMode ? 0.8 : 1 }}
 				>
 					<BorderAndShadow
@@ -173,7 +174,7 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 					</View>
 
 					<Animated.View
-						className="squircle absolute inset-0 z-10 -m-1 rounded-xl border-2"
+						className="squircle absolute inset-0 z-10 -m-1 rounded-lg border-2"
 						style={overlayStyle}
 					>
 						<View className="flex flex-1 items-center justify-center">{CheckIcon}</View>

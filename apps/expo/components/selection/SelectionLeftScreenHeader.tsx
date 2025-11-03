@@ -9,8 +9,10 @@ import { Icon } from '../ui/icon'
 export default function SelectionLeftScreenHeader() {
 	const selectionStore = useSelectionStore((state) => state)
 
+	const isSelectAll = selectionStore.isSelectAll()
+
 	const onSelect = () => {
-		if (selectionStore.isSelectAll) {
+		if (isSelectAll) {
 			selectionStore.clearSelection()
 		} else if (selectionStore.selectAll) {
 			selectionStore.selectAll()
@@ -30,11 +32,7 @@ export default function SelectionLeftScreenHeader() {
 			>
 				<Host matchContents>
 					<Image
-						systemName={
-							selectionStore.isSelectAll
-								? 'rectangle.stack.badge.minus'
-								: 'rectangle.stack.badge.plus'
-						}
+						systemName={isSelectAll ? 'rectangle.stack.badge.minus' : 'rectangle.stack.badge.plus'}
 						size={20}
 					/>
 				</Host>
@@ -42,7 +40,7 @@ export default function SelectionLeftScreenHeader() {
 		),
 		android: (
 			<View className="squircle mx-2 h-12 w-12 items-center justify-center rounded-full border border-edge">
-				<Icon as={selectionStore.isSelectAll ? ListMinus : ListPlus} size={20} />
+				<Icon as={isSelectAll ? ListMinus : ListPlus} size={20} />
 			</View>
 		),
 	})

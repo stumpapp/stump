@@ -33,6 +33,7 @@ export default function Header({ onShowGlobalSettings }: Props) {
 		setBookPreferences,
 	} = useBookPreferences({ book, serverId })
 
+	// TODO: I think global incognito makes sense but isn't exposed very well right now
 	const incognito = useReaderStore((state) => state.globalSettings.incognito)
 	const insets = useSafeAreaInsets()
 	const visible = useReaderStore((state) => state.showControls)

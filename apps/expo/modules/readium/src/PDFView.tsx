@@ -6,6 +6,7 @@ import type { ReadiumLocator } from './Readium.types'
 
 export type PDFScrollAxis = 'vertical' | 'horizontal'
 export type PDFReadingProgression = 'ltr' | 'rtl'
+export type PDFSpread = 'auto' | 'never' | 'always'
 
 export type PDFLocator = Omit<ReadiumLocator, 'chapterTitle'>
 
@@ -15,6 +16,7 @@ export interface PDFPreferences {
 	scrollAxis?: PDFScrollAxis
 	scroll?: boolean
 	readingProgression?: PDFReadingProgression
+	spread?: PDFSpread
 }
 
 export interface PDFViewProps {

@@ -315,9 +315,10 @@ function Reader({ record }: ReaderProps) {
 			<PdfReader
 				book={book}
 				onPageChanged={onPageChanged}
-				serverId={downloadedFile.serverId}
 				offlineUri={`${booksDirectory(downloadedFile.serverId)}/${downloadedFile.filename}`}
 				initialPage={book.readProgress?.page || 1}
+				resetTimer={reset}
+				serverId={downloadedFile.serverId}
 			/>
 		)
 	}

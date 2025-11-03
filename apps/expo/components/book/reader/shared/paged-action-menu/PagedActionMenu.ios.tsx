@@ -77,7 +77,6 @@ export function PagedActionMenu({
 								onValueChange={() =>
 									setBookPreferences({ readingMode: ReadingMode.ContinuousVertical })
 								}
-								disabled
 							>
 								<NativeDropdownMenu.ItemTitle>Vertical Scroll</NativeDropdownMenu.ItemTitle>
 							</NativeDropdownMenu.CheckboxItem>

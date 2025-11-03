@@ -17,14 +17,11 @@ import { useReaderStore } from '~/stores'
 import { usePdfStore } from '~/stores/pdf'
 
 import { PagedActionMenu } from '../shared/paged-action-menu/PagedActionMenu'
+import { usePdfReaderContext } from './context'
 
-// TODO: Don't pass
-type Props = {
-	serverId: string
-}
-
-export function PdfReaderHeader({ serverId }: Props) {
+export function PdfReaderHeader() {
 	const { height } = useDisplay()
+	const { serverId, resetTimer } = usePdfReaderContext()
 
 	const visible = useReaderStore((state) => state.showControls)
 	const book = usePdfStore((state) => state.book)
@@ -62,9 +59,9 @@ export function PdfReaderHeader({ serverId }: Props) {
 	return (
 		<Animated.View key={book?.id} className="absolute z-20 gap-4 px-4" style={animatedStyles}>
 			<View className="flex-row items-center justify-between">
-				<HeaderButton onPress={() => router.back()} />
+				<HeaderButton onPress={() => router.back()} ios={{ variant: 'glass' }} />
 
-				{book && <PagedActionMenu book={book} serverId={serverId} />}
+				{book && <PagedActionMenu book={book} serverId={serverId} onResetTimer={resetTimer} />}
 			</View>
 
 			<Heading

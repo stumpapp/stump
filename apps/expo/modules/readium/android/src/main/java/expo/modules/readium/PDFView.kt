@@ -40,7 +40,8 @@ data class PDFProps(
     var pageSpacing: Double? = null,
     var scrollAxis: String? = null,
     var scroll: Boolean? = null,
-    var readingProgression: ReadingProgression? = null
+    var readingProgression: ReadingProgression? = null,
+    var spread: org.readium.r2.navigator.preferences.Spread? = null
 )
 
 data class FinalizedPDFProps(
@@ -51,7 +52,8 @@ data class FinalizedPDFProps(
     val pageSpacing: Double,
     val scrollAxis: String,
     val scroll: Boolean,
-    val readingProgression: ReadingProgression
+    val readingProgression: ReadingProgression,
+    val spread: org.readium.r2.navigator.preferences.Spread
 )
 
 @SuppressLint("ViewConstructor", "ResourceType")
@@ -117,7 +119,9 @@ class PDFView(context: Context, appContext: AppContext) : ExpoView(context, appC
             scrollAxis = pendingProps.scrollAxis ?: oldProps?.scrollAxis ?: "vertical",
             scroll = pendingProps.scroll ?: oldProps?.scroll ?: true,
             readingProgression = pendingProps.readingProgression 
-                ?: oldProps?.readingProgression ?: ReadingProgression.LTR
+                ?: oldProps?.readingProgression ?: ReadingProgression.LTR,
+            spread = pendingProps.spread 
+                ?: oldProps?.spread ?: org.readium.r2.navigator.preferences.Spread.AUTO
         )
 
         // If book ID or URL changed, reload the publication
@@ -135,7 +139,8 @@ class PDFView(context: Context, appContext: AppContext) : ExpoView(context, appC
             props!!.pageSpacing != oldProps.pageSpacing ||
             props!!.scrollAxis != oldProps.scrollAxis ||
             props!!.scroll != oldProps.scroll ||
-            props!!.readingProgression != oldProps.readingProgression
+            props!!.readingProgression != oldProps.readingProgression ||
+            props!!.spread != oldProps.spread
         )
 
         if (prefsChanged) {

@@ -184,22 +184,18 @@ class ReadiumModule : Module() {
 
       Prop("locator") { view: PDFView, prop: Map<String, Any?>? ->
         if (prop == null) {
-          Log.d("ReadiumModule", "Received null locator prop for PDF")
           view.pendingProps.locator = null
           return@Prop
         }
-        Log.d("ReadiumModule", "Received locator prop for PDF: $prop")
         val locator = Locator.fromJSON(JSONObject(prop)) ?: return@Prop
         view.pendingProps.locator = locator
       }
 
       Prop("initialLocator") { view: PDFView, prop: Map<String, Any?>? ->
         if (prop == null) {
-          Log.d("ReadiumModule", "Received null initialLocator prop for PDF")
           view.pendingProps.initialLocator = null
           return@Prop
         }
-        Log.d("ReadiumModule", "Received initialLocator prop for PDF: $prop")
         val locator = Locator.fromJSON(JSONObject(prop)) ?: return@Prop
         view.pendingProps.initialLocator = locator
       }
@@ -230,30 +226,31 @@ class ReadiumModule : Module() {
           else -> org.readium.r2.shared.publication.ReadingProgression.LTR
         }
       }
+      
+      Prop("spread") { view: PDFView, prop: String ->
+        view.pendingProps.spread = when (prop) {
+          "never" -> org.readium.r2.navigator.preferences.Spread.NEVER
+          "always" -> org.readium.r2.navigator.preferences.Spread.ALWAYS
+          else -> org.readium.r2.navigator.preferences.Spread.AUTO
+        }
+      }
 
       AsyncFunction("goToLocation") { view: PDFView, locatorMap: Map<String, Any> ->
-        Log.d("ReadiumModule", "PDF goToLocation called with locatorMap: $locatorMap")
         val navigator = view.navigator ?: return@AsyncFunction
-        Log.d("ReadiumModule", "PDF Navigator found: $navigator")
         val jsonLocator = JSONObject(locatorMap)
-        Log.d("ReadiumModule", "PDF JSON Locator: $jsonLocator")
         val locator = Locator.fromJSON(jsonLocator) ?: throw Exception("Failed to parse locator from JSON")
-        Log.d("ReadiumModule", "PDF Parsed Locator: $locator")
         view.goToLocation(locator)
       }
 
       AsyncFunction("goToPage") { view: PDFView, page: Int ->
-        Log.d("ReadiumModule", "PDF goToPage called with page: $page")
         view.goToPage(page)
       }
 
       AsyncFunction("goForward") { view: PDFView ->
-        Log.d("ReadiumModule", "PDF goForward called")
         view.goForward()
       }
 
       AsyncFunction("goBackward") { view: PDFView ->
-        Log.d("ReadiumModule", "PDF goBackward called")
         view.goBackward()
       }
 

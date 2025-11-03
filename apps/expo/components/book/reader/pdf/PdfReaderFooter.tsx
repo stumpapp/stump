@@ -10,6 +10,9 @@ import { usePdfStore } from '~/stores/pdf'
 
 export const FOOTER_HEIGHT = 48
 
+// TODO: Determine where to display read time:
+// const elapsedSeconds = useBookReadTime(book.id)
+
 export function PdfReaderFooter() {
 	const { height } = useDisplay()
 

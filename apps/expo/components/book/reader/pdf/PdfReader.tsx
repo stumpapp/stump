@@ -20,6 +20,7 @@ import { useBookPreferences } from '~/stores/reader'
 import { ReaderBookRef } from '../image/context'
 import { ControlsBackdrop } from '../shared'
 import { OfflineCompatibleReader } from '../types'
+import { PdfReaderContext } from './context'
 import { PdfReaderFooter } from './PdfReaderFooter'
 import { PdfReaderHeader } from './PdfReaderHeader'
 
@@ -32,10 +33,6 @@ type Props = {
 	 * The initial page
 	 */
 	initialPage?: number
-	/**
-	 * Whether the reader should be in incognito mode
-	 */
-	incognito?: boolean
 	/**
 	 * Callback when the page changes
 	 */
@@ -50,11 +47,21 @@ type Props = {
 	resetTimer?: () => void
 } & OfflineCompatibleReader
 
-export default function PdfReader({ book, initialPage, incognito, onPageChanged, ...ctx }: Props) {
+// TODO(expo-pdf): Long term, consider just using a library like https://github.com/wonday/react-native-pdf
+// This was mostly an experiment for me to continue practicing swift/kotlin interop with expo. There are some
+// benefits to using readium (e.g., potential audiobook overaly support, consistent locator format, etc) but
+// it does just mean another native module to maintain.
+
+// TODO(expo-pdf): In the meantime re: ^, I should at least add:
+// - settings sheet, a chunk of existing settings do not apply to PDF
+
+export default function PdfReader({ book, initialPage, onPageChanged, ...ctx }: Props) {
 	const { downloadBook } = useDownload({ serverId: ctx.serverId })
 
 	const [localUri, setLocalUri] = useState<string | null>(() => ctx.offlineUri || null)
 	const [isDownloading, setIsDownloading] = useState(false)
+
+	const incognito = useReaderStore((state) => state.globalSettings.incognito)
 
 	// TODO(readium): I think I'll need to do the same thing for the ebook reader once I enable scrolling
 	// Note: We don't track the locator throughout reading here because when `scroll` is enabled the change
@@ -70,6 +77,10 @@ export default function PdfReader({ book, initialPage, incognito, onPageChanged,
 	}))
 	const { preferences: bookPreferences } = useBookPreferences({ book, serverId: ctx.serverId })
 
+	// TODO(expo-pdf): Additional PDFPreferences to consider exposing:
+	// - offsetFirstPage - Stump has secondPageSeparate but not first page. Might be nice to see if readium would accept something like offsetLeadingPages: Int? and offsetTrailingPages: Int?
+	// - pageSpacing - "Spacing between pages in points."
+	// - visibleScrollbar - Currently I just hardcode to false
 	const config = useMemo(
 		() =>
 			({
@@ -82,6 +93,10 @@ export default function PdfReader({ book, initialPage, incognito, onPageChanged,
 				backgroundColor: '#000000',
 				readingProgression:
 					bookPreferences.readingDirection === ReadingDirection.Rtl ? 'rtl' : 'ltr',
+				spread:
+					bookPreferences.doublePageBehavior === 'off'
+						? 'never' // Stump uses 'off' readium uses 'never' but same otherwsie
+						: bookPreferences.doublePageBehavior,
 			}) satisfies PDFPreferences,
 		[bookPreferences],
 	)
@@ -197,32 +212,34 @@ export default function PdfReader({ book, initialPage, incognito, onPageChanged,
 	if (!localUri) return null
 
 	return (
-		<View
-			style={{
-				flex: 1,
-				filter: `brightness(${brightness * 100}%)`,
-				backgroundColor: config.backgroundColor || '#000000',
-			}}
-		>
-			<PdfReaderHeader serverId={ctx.serverId} />
-
-			<ControlsBackdrop />
-
-			<PDFView
-				ref={readerRef}
-				bookId={book.id}
-				url={localUri}
-				initialLocator={initialLocator}
-				onBookLoaded={({ nativeEvent: loadEvent }) => handleBookLoaded(loadEvent)}
-				onLocatorChange={({ nativeEvent: locator }) => handleLocationChanged(locator)}
-				onMiddleTouch={handleMiddleTouch}
+		<PdfReaderContext.Provider value={ctx}>
+			<View
 				style={{
 					flex: 1,
+					filter: `brightness(${brightness * 100}%)`,
+					backgroundColor: config.backgroundColor || '#000000',
 				}}
-				{...config}
-			/>
+			>
+				<PdfReaderHeader />
 
-			<PdfReaderFooter />
-		</View>
+				<ControlsBackdrop />
+
+				<PDFView
+					ref={readerRef}
+					bookId={book.id}
+					url={localUri}
+					initialLocator={initialLocator}
+					onBookLoaded={({ nativeEvent: loadEvent }) => handleBookLoaded(loadEvent)}
+					onLocatorChange={({ nativeEvent: locator }) => handleLocationChanged(locator)}
+					onMiddleTouch={handleMiddleTouch}
+					style={{
+						flex: 1,
+					}}
+					{...config}
+				/>
+
+				<PdfReaderFooter />
+			</View>
+		</PdfReaderContext.Provider>
 	)
 }

@@ -199,13 +199,32 @@
                  view.pendingProps.pageSpacing = prop
              }
              
-             Prop("scrollAxis") { (view: PDFView, prop: String) in
-                 view.pendingProps.scrollAxis = prop == "horizontal" ? .horizontal : .vertical
-             }
-             
-             OnViewDidUpdateProps { (view: PDFView) in
-                 view.finalizeProps()
-             }
+            Prop("scrollAxis") { (view: PDFView, prop: String) in
+                view.pendingProps.scrollAxis = prop == "horizontal" ? .horizontal : .vertical
+            }
+            
+            Prop("scroll") { (view: PDFView, prop: Bool) in
+                view.pendingProps.scroll = prop
+            }
+            
+            Prop("readingProgression") { (view: PDFView, prop: String) in
+                view.pendingProps.readingProgression = prop == "rtl" ? .rtl : .ltr
+            }
+            
+            Prop("spread") { (view: PDFView, prop: String) in
+                switch prop {
+                case "never":
+                    view.pendingProps.spread = .never
+                case "always":
+                    view.pendingProps.spread = .always
+                default:
+                    view.pendingProps.spread = .auto
+                }
+            }
+            
+            OnViewDidUpdateProps { (view: PDFView) in
+                view.finalizeProps()
+            }
          }
      }
  }

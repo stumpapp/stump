@@ -7,9 +7,4 @@ export type PagedActionMenuProps = {
 	onResetTimer?: () => void
 	onChangeReadingDirection?: () => void
 	onShowSettings?: () => void
-	isFeatureSupported?: {
-		paginated: boolean
-		verticalScroll: boolean
-		horizontalScroll: boolean
-	}
 }

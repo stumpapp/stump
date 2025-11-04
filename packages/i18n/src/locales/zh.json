@@ -106,19 +106,19 @@
 					"description": ""
 				},
 				"creator": {
-					"label": "Creator",
-					"placeholder": "Creator",
-					"description": "The name of the creator role for your book club. This is you!"
+					"label": "创建者",
+					"placeholder": "创建者",
+					"description": "你的读书俱乐部的创建者角色名称。这就是你！"
 				}
 			},
 			"membershipOptions": {
 				"displayName": {
 					"label": "显示名",
 					"placeholder": "oromei",
-					"description": "An optional display name for your membership in the book club. If set, this takes precedence over your username"
+					"description": "你在读书俱乐部中的可选显示名称。如果设置，它将优先于你的用户名"
 				},
 				"hideProgress": {
-					"label": "Hide Progress",
+					"label": "隐藏阅读进度",
 					"description": "如果启用，您的阅读进度将对读书俱乐部的其他成员隐藏"
 				}
 			}
@@ -137,12 +137,12 @@
 				{
 					"label": "基本",
 					"heading": "基本信息",
-					"description": "The details of the club, including its name and description"
+					"description": "俱乐部的详细信息，包括名称和描述"
 				},
 				{
 					"label": "角色",
 					"heading": "角色",
-					"description": "Customize the roles in your book club"
+					"description": "自定义你的读书俱乐部中的角色"
 				},
 				{
 					"label": "成员",
@@ -156,12 +156,12 @@
 				}
 			],
 			"review": {
-				"yes": "Yes",
-				"no": "No",
-				"none": "None",
+				"yes": "是",
+				"no": "否",
+				"none": "无",
 				"labels": {
-					"name": "Name",
-					"description": "Description"
+					"name": "名称",
+					"description": "描述"
 				}
 			},
 			"submit": "创建读书俱乐部"
@@ -169,63 +169,63 @@
 	},
 	"bookClubSettingsScene": {
 		"sidebar": {
-			"basics": "Basics",
+			"basics": "基础",
 			"members": {
-				"members": "Members",
-				"roles": "Roles",
-				"label": "Membership"
+				"members": "成员",
+				"roles": "角色",
+				"label": "成员"
 			},
 			"scheduling": {
-				"scheduler": "Scheduler",
-				"options": "Options",
-				"label": "Scheduling"
+				"scheduler": "计划",
+				"options": "选项",
+				"label": "计划"
 			},
 			"danger-zone": {
-				"delete": "Deletion",
-				"label": "Danger Zone"
+				"delete": "删除",
+				"label": "危险操作"
 			}
 		},
 		"basics": {
-			"title": "Basic Information",
-			"description": "The details of this book club, including its name and description",
+			"title": "基础信息",
+			"description": "此读书俱乐部的详细信息，包括名称和描述",
 			"form": {
-				"submit": "Update club"
+				"submit": "更新俱乐部"
 			}
 		},
 		"members": {
-			"title": "Members",
-			"description": "Manage the members of this book club",
+			"title": "成员",
+			"description": "管理此读书俱乐部的成员",
 			"sections": {}
 		},
 		"roles": {
-			"title": "Roles",
-			"description": "Customize the roles in this book club",
+			"title": "角色",
+			"description": "自定义此读书俱乐部中的角色",
 			"sections": {
 				"roleMappings": {
-					"heading": "Existing role mappings",
-					"description": "The current role mappings for this book club"
+					"heading": "现有角色映射",
+					"description": "此读书俱乐部的当前角色映射"
 				}
 			}
 		},
 		"scheduling/scheduler": {
-			"title": "Scheduler",
-			"description": "Create and manage the schedule readings for this book club"
+			"title": "计划",
+			"description": "为此读书俱乐部创建和管理计划阅读"
 		},
 		"scheduling/options": {
-			"title": "Options",
-			"description": "Additional options for this book club's scheduling"
+			"title": "选项",
+			"description": "此读书俱乐部的计划额外选项"
 		},
 		"danger-zone/delete": {
-			"title": "Deletion Actions",
-			"description": "Permanently delete this book club and all of its contents or certain resources",
+			"title": "删除操作",
+			"description": "永久删除此读书俱乐部及其全部内容或特定资源",
 			"sections": {
 				"deleteClub": {
-					"heading": "Delete club",
+					"heading": "删除俱乐部",
 					"description": [
-						"Permanently delete this book club and all its contents.",
-						"This action cannot be undone"
+						"永久删除此读书俱乐部及其全部内容。",
+						"此操作不可撤销"
 					],
-					"trigger": "Delete club"
+					"trigger": "删除俱乐部"
 				}
 			}
 		}
@@ -233,22 +233,22 @@
 	"createOrUpdateLibraryForm": {
 		"fields": {
 			"name": {
-				"label": "Name",
-				"description": "A friendly name for your library",
-				"placeholder": "My Library"
+				"label": "名称",
+				"description": "你的书库的友好名称",
+				"placeholder": "我的书库"
 			},
 			"path": {
-				"label": "Path",
-				"description": "The path to the library as it exists on your server",
+				"label": "路径",
+				"description": "书库在服务器上的路径",
 				"placeholder": "/path/to/library"
 			},
 			"description": {
-				"label": "Description",
-				"description": "A short description of your library",
-				"placeholder": "A library of all my favorite books"
+				"label": "描述",
+				"description": "你的书库的简短描述",
+				"placeholder": "我所有喜爱书籍的书库"
 			},
 			"tags": {
-				"label": "Tags",
+				"label": "标签",
 				"description": "Used to categorize your library or enforce access rules"
 			},
 			"readingSettings": {
@@ -352,64 +352,64 @@
 				},
 				"deleteRarAfter": {
 					"label": "Delete RAR after conversion",
-					"description": "Delete the original RAR/CBR file after conversion. This is irreversible"
+					"description": "转换后删除原始 RAR/CBR 文件。此操作不可撤销"
 				}
 			},
 			"scannerFeatures": {
 				"section": {
-					"heading": "Optional processing",
-					"description": "Opt-in processing features for the scanner",
-					"disclaimer": "These features involve additional file reads which may slow down the scan process"
+					"heading": "可选处理",
+					"description": "扫描器的可选处理功能",
+					"disclaimer": "这些功能涉及额外的文件读取，可能会减慢扫描过程"
 				},
 				"processMetadata": {
-					"label": "Process metadata",
-					"description": "Extract any metadata from library files and store the results in the database"
+					"label": "处理元数据",
+					"description": "从书库文件中提取任何元数据并将结果存储到数据库中"
 				},
 				"watch": {
-					"label": "Watch",
-					"description": "Watch the library directory for changes and update the database accordingly"
+					"label": "监视",
+					"description": "监视书库目录的变化并相应更新数据库"
 				},
 				"generateFileHashes": {
-					"label": "Generate file hashes",
-					"description": "Generate a hash for each file in the library to detect duplicates"
+					"label": "生成文件哈希值",
+					"description": "为书库中的每个文件生成哈希值以检测重复"
 				},
 				"koreaderHashes": {
-					"label": "KoReader-compatible hashes",
-					"description": "If using KoReader, generate additional hashes in the format it expects"
+					"label": "KoReader 兼容哈希",
+					"description": "如果使用 KoReader，生成它所期望格式的额外哈希值"
 				}
 			},
 			"libraryPattern": {
 				"section": {
-					"heading": "Organization",
-					"description": "Identify which pattern most closely matches the organization of your library",
+					"heading": "组织",
+					"description": "确定哪种模式最符合你的书库的组织方式",
 					"docs": [
-						"Not sure which to choose? Click",
-						"here",
-						"for more information.",
-						"You cannot change this setting later"
+						"不确定选择哪一个？点击",
+						"这里",
+						"了解更多信息。",
+						"你稍后无法更改此设置"
 					],
-					"disabled": "You cannot change this setting"
+					"disabled": "你无法更改此设置"
 				},
 				"options": {
-					"label": "Library pattern",
-					"description": "The setting which determines how Stump will organize your library",
+					"label": "书库模式",
+					"description": "决定 Stump 如何组织你的书库的设置",
 					"collectionPriority": {
-						"label": "Collection priority",
-						"description": "Each folder at the top-most level of the library root is a single series"
+						"label": "集合优先",
+						"description": "书库根目录最顶层的每个文件夹视为一个系列"
 					},
 					"seriesPriority": {
-						"label": "Series priority",
-						"description": "Each folder at any level recursively is a single series"
+						"label": "系列优先",
+						"description": "递归任意层级的每个文件夹视为一个系列"
 					}
 				}
 			}
 		},
 		"scan": {
 			"label": {
-				"create": "Scan after creation",
-				"update": "Scan after updates"
+				"create": "创建后扫描",
+				"update": "更新后扫描"
 			},
-			"description": "Index the library files to populate your database"
+			"description": "索引书库文件以填充你的数据库"
 		}
 	},
 	"createLibraryScene": {
@@ -417,33 +417,33 @@
 		"subtitle": "书库用来分组书籍。如果你想要刷新它或了解它如何运作，请查看",
 		"subtitleLink": "相关文档",
 		"form": {
-			"stepLabel": "Step",
+			"stepLabel": "步骤",
 			"steps": [
 				{
-					"label": "Basics",
-					"heading": "Basic Information",
-					"description": "The details of this library, including its name, path, and description"
+					"label": "基础",
+					"heading": "基础信息",
+					"description": "该书库的详细信息，包括名称、路径和描述"
 				},
 				{
-					"label": "Scanning",
-					"heading": "Scanning",
-					"description": "Settings related to how Stump scans this library"
+					"label": "扫描",
+					"heading": "扫描",
+					"description": "与 Stump 如何扫描该书库相关的设置"
 				},
 				{
-					"label": "Thumbnails",
-					"heading": "Thumbnails",
-					"description": "The options for if and how Stump generates thumbnails for this library"
+					"label": "缩略图",
+					"heading": "缩略图",
+					"description": "Stump 是否以及如何为该书库生成缩略图的选项"
 				},
 				{
-					"label": "Review",
-					"heading": "Review",
-					"description": "Review your library settings before creating it"
+					"label": "确认",
+					"heading": "确认",
+					"description": "在创建前检查你的书库设置"
 				}
 			],
 			"review": {
-				"yes": "Yes",
-				"no": "No",
-				"none": "None",
+				"yes": "是",
+				"no": "否",
+				"none": "无",
 				"labels": {
 					"generateThumbnails": "Generate thumbnails",
 					"mode": "Mode",

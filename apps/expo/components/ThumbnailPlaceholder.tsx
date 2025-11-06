@@ -1,0 +1,50 @@
+import { MeshGradientView } from 'expo-mesh-gradient'
+import { StyleSheet, View } from 'react-native'
+
+import { useColors } from '~/lib/constants'
+import { usePreferencesStore } from '~/stores'
+
+// const ca = '#e7e7e7' // white or black unused
+const c1 = '#5eb0ce'
+const c2 = '#0462b0'
+const c3 = '#e84f3f'
+
+// prettier-ignore
+const colors1 = [
+	c3, c3, c3,
+	c2, c2, c2,
+	c1, c1, c1,
+]
+// prettier-ignore
+const points1 = [
+	[0.00, 0.00], [0.50, 0.00], [1.00, 0.00],
+	[0.00, 0.80], [0.90, 0.30], [1.00, 0.50],
+	[0.00, 1.00], [0.50, 1.00], [1.00, 1.00],
+]
+
+export function ThumbnailPlaceholder() {
+	const thumbnailPlaceholder = usePreferencesStore((state) => state.thumbnailPlaceholder)
+	const { placeholder } = useColors()
+	const colors = colors1
+	const points = points1
+
+	if (thumbnailPlaceholder === 'grayscale') {
+		return <View style={[StyleSheet.absoluteFill, { backgroundColor: placeholder }]} />
+	}
+
+	if (thumbnailPlaceholder === 'monochrome') {
+		return <View style={[StyleSheet.absoluteFill, { backgroundColor: '#8292a4' }]} />
+	}
+
+	if (thumbnailPlaceholder === 'colorful') {
+		return (
+			<MeshGradientView
+				style={StyleSheet.absoluteFill}
+				columns={3}
+				rows={3}
+				colors={colors}
+				points={points}
+			/>
+		)
+	}
+}

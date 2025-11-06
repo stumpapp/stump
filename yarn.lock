@@ -14820,6 +14820,11 @@ expo-linking@~8.0.8:
     expo-constants "~18.0.8"
     invariant "^2.2.4"
 
+expo-mesh-gradient@^0.4.7:
+  version "0.4.7"
+  resolved "https://registry.yarnpkg.com/expo-mesh-gradient/-/expo-mesh-gradient-0.4.7.tgz#f278fedc6992ab3d15c66f7f260a9876e9e9d900"
+  integrity sha512-pVP7LsYfNr1PePfMcCXsr88zUSw177ToFrMTE2Nz8Uu2CswkT7UN+qKEnw/eiP6IbdkzQR43rirEAhRntR0o/w==
+
 expo-modules-autolinking@3.0.13:
   version "3.0.13"
   resolved "https://registry.yarnpkg.com/expo-modules-autolinking/-/expo-modules-autolinking-3.0.13.tgz#03d18b8d589f5e29742e7299c660d617be94093c"

@@ -16,6 +16,7 @@ type MobilePreferencesStore = {
 	cachePolicy: CachePolicy
 	allowDownscaling: boolean
 	thumbnailRatio: number
+	thumbnailPlaceholder: 'grayscale' | 'monochrome' | 'colorful'
 	performanceMonitor: boolean
 	accentColor?: string | undefined
 	showCuratedDownloads?: boolean | undefined
@@ -41,6 +42,7 @@ export const usePreferencesStore = create<MobilePreferencesStore>()(
 			cachePolicy: 'memory-disk',
 			allowDownscaling: true,
 			thumbnailRatio: 2 / 3,
+			thumbnailPlaceholder: 'grayscale',
 			accentColor: undefined,
 			performanceMonitor: false,
 			showCuratedDownloads: true,

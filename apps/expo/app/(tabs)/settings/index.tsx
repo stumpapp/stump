@@ -14,6 +14,7 @@ import {
 	PreferNativePdf,
 	ReaderSettingsLink,
 	ReduceAnimations,
+	ThumbnailPlaceholder,
 	ThumbnailRatio,
 } from '~/components/appSettings/preferences'
 import AppPrimaryColor from '~/components/appSettings/preferences/AppPrimaryColor'
@@ -31,6 +32,7 @@ export default function Screen() {
 					<AppLanguage />
 					<DefaultServer />
 					<ThumbnailRatio />
+					<ThumbnailPlaceholder />
 				</View>
 
 				<View>

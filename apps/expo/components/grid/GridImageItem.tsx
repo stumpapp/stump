@@ -7,6 +7,7 @@ import { usePreferencesStore } from '~/stores'
 
 import { BorderAndShadow } from '../BorderAndShadow'
 import { TurboImage } from '../Image'
+import { ThumbnailPlaceholder } from '../ThumbnailPlaceholder'
 import { Text } from '../ui'
 import { useGridItemSize } from './useGridItemSize'
 
@@ -30,15 +31,18 @@ export default function GridImageItem({ uri, title, href }: Props) {
 					<BorderAndShadow
 						style={{ borderRadius: 8, borderWidth: 0.3, shadowRadius: 1.41, elevation: 2 }}
 					>
+						<ThumbnailPlaceholder />
 						<TurboImage
 							source={{
-								uri: uri,
+								uri: '',
 								headers: {
 									...sdk.customHeaders,
 									Authorization: sdk.authorizationHeader || '',
 								},
 							}}
 							resizeMode="stretch"
+							fadeDuration={800}
+							indicator={{ color: 'transparent' }}
 							resize={itemDimension * 1.5}
 							style={{ height: itemDimension / thumbnailRatio, width: itemDimension }}
 						/>

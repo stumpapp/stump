@@ -88,6 +88,7 @@ const light = {
 		start: 'hsla(0, 0%, 100%, 0.6)',
 		end: 'hsla(0, 0%, 100%, 0)',
 	},
+	placeholder: '#F2F2F2',
 }
 
 type Theme = typeof light
@@ -164,6 +165,7 @@ const dark: Theme = {
 		start: 'hsla(0, 0%, 0%, 0.8)',
 		end: 'hsla(0, 0%, 0%, 0)',
 	},
+	placeholder: '#1C1C1C',
 }
 
 export const COLORS = {

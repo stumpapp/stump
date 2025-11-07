@@ -64,17 +64,16 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 						"source 'https://cdn.cocoapods.org/'",
 
 						"pod 'Minizip', modular_headers: true",
-						"pod 'ReadiumShared', podspec: 'https://raw.githubusercontent.com/readium/swift-toolkit/3.4.0/Support/CocoaPods/ReadiumShared.podspec'",
-						"pod 'ReadiumStreamer', podspec: 'https://raw.githubusercontent.com/readium/swift-toolkit/3.4.0/Support/CocoaPods/ReadiumStreamer.podspec'",
-						"pod 'ReadiumNavigator', podspec: 'https://raw.githubusercontent.com/readium/swift-toolkit/3.4.0/Support/CocoaPods/ReadiumNavigator.podspec'",
-						"pod 'ReadiumAdapterGCDWebServer', podspec: 'https://raw.githubusercontent.com/readium/swift-toolkit/3.4.0/Support/CocoaPods/ReadiumAdapterGCDWebServer.podspec'",
-						"pod 'ReadiumOPDS', podspec: 'https://raw.githubusercontent.com/readium/swift-toolkit/3.4.0/Support/CocoaPods/ReadiumOPDS.podspec'",
-						"pod 'ReadiumInternal', podspec: 'https://raw.githubusercontent.com/readium/swift-toolkit/3.4.0/Support/CocoaPods/ReadiumInternal.podspec'",
+						"pod 'ReadiumShared', podspec: 'https://raw.githubusercontent.com/readium/swift-toolkit/3.5.0/Support/CocoaPods/ReadiumShared.podspec'",
+						"pod 'ReadiumStreamer', podspec: 'https://raw.githubusercontent.com/readium/swift-toolkit/3.5.0/Support/CocoaPods/ReadiumStreamer.podspec'",
+						"pod 'ReadiumNavigator', podspec: 'https://raw.githubusercontent.com/readium/swift-toolkit/3.5.0/Support/CocoaPods/ReadiumNavigator.podspec'",
+						"pod 'ReadiumAdapterGCDWebServer', podspec: 'https://raw.githubusercontent.com/readium/swift-toolkit/3.5.0/Support/CocoaPods/ReadiumAdapterGCDWebServer.podspec'",
+						"pod 'ReadiumOPDS', podspec: 'https://raw.githubusercontent.com/readium/swift-toolkit/3.5.0/Support/CocoaPods/ReadiumOPDS.podspec'",
+						"pod 'ReadiumInternal', podspec: 'https://raw.githubusercontent.com/readium/swift-toolkit/3.5.0/Support/CocoaPods/ReadiumInternal.podspec'",
 						"pod 'ReadiumGCDWebServer', podspec: 'https://raw.githubusercontent.com/readium/GCDWebServer/4.0.0/GCDWebServer.podspec', modular_headers: true",
 					],
 				},
 			],
-			['./plugins/withPodsPostInstall.ts'],
 			[
 				'expo-font',
 				{

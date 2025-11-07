@@ -149,5 +149,15 @@ pub async fn generate_book_thumbnail(
 	let (thumbnail, thumbnail_path, did_generate) = generate_result;
 	fs::write(&thumbnail_path, &thumbnail).await?;
 
+	// Use 7 to get the three mesh colours, 1 for the average colour
+	if let Ok(colors) = super::placeholder::process_image_colors(&thumbnail_path, 7) {
+		let txt_path = thumbnail_path.with_extension("txt");
+		let content = colors.join("\n");
+
+		if let Err(e) = std::fs::write(&txt_path, content.as_bytes()) {
+			tracing::error!(error = ?e, "Failed to create txt");
+		}
+	}
+
 	Ok((thumbnail, thumbnail_path, did_generate))
 }

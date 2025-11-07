@@ -459,7 +459,7 @@ pub(crate) async fn safely_insert_series(
 		// metadata entry vs killing the entire series creation process over a single bad entry
 		if let Some(mut meta) = metadata {
 			meta.series_id = Set(created_series.id.clone());
-			if let Err(error) = meta.insert(conn).await {
+			if let Err(error) = meta.insert(&txn).await {
 				tracing::error!(?error, "Failed to insert series metadata");
 			}
 		}

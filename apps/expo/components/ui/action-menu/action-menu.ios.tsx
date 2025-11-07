@@ -1,5 +1,6 @@
 import { Button, ContextMenu, Divider, Host, Image } from '@expo/ui/swift-ui'
 import { disabled } from '@expo/ui/swift-ui/modifiers'
+import { Fragment } from 'react'
 import { View } from 'react-native'
 
 import type { ActionMenuProps } from './types'
@@ -25,7 +26,9 @@ export function ActionMenu({ icon, groups, disabled: isDisabled }: ActionMenuPro
 				</ContextMenu.Trigger>
 				<ContextMenu.Items>
 					{groups.map((group, groupIndex) => (
-						<>
+						<Fragment
+							key={`group-${groupIndex}-${group.items.map((item) => item.label).join('-')}`}
+						>
 							{group.items.map((item, itemIndex) => (
 								<Button
 									key={`${groupIndex}-${itemIndex}-${item.label}`}
@@ -39,7 +42,7 @@ export function ActionMenu({ icon, groups, disabled: isDisabled }: ActionMenuPro
 							))}
 
 							{groupIndex < groups.length - 1 && <Divider />}
-						</>
+						</Fragment>
 					))}
 				</ContextMenu.Items>
 			</ContextMenu>

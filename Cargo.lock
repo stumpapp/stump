@@ -3571,7 +3571,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4b0f83760fb341a774ed326568e19f5a863af4a952def8c39f9ab92fd95b88e5"
 dependencies = [
  "equivalent",
- "hashbrown 0.15.2",
+ "hashbrown 0.16.0",
  "serde",
  "serde_core",
 ]
@@ -7881,6 +7881,7 @@ dependencies = [
  "async-channel",
  "async-graphql",
  "async-trait",
+ "base64 0.22.1",
  "chrono",
  "criterion",
  "data-encoding",
@@ -7921,6 +7922,7 @@ dependencies = [
  "temp-env",
  "tempfile",
  "thiserror 2.0.17",
+ "thumbhash",
  "tokio",
  "toml 0.9.7",
  "tracing",
@@ -8566,6 +8568,12 @@ checksum = "d050e60b33d41c19108b32cea32164033a9013fe3b46cbd4457559bfbf77afaa"
 dependencies = [
  "num_cpus",
 ]
+
+[[package]]
+name = "thumbhash"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8b7726e0245a7331bd0c9a1fb4fd99fd695bcd478ca569f0eda2ff2cb14e7a00"
 
 [[package]]
 name = "tiff"

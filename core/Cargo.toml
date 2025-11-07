@@ -58,6 +58,8 @@ quick-xml = "0.38.3"
 merge = "0.1.0"
 kmeans_colors = "0.7.1"
 palette = "0.7.6"
+thumbhash = "0.1.0"
+base64.workspace = true
 
 [dev-dependencies]
 temp-env = "0.3.6"

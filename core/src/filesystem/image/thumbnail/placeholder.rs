@@ -1,3 +1,4 @@
+use base64::prelude::*;
 use image;
 use kmeans_colors::{get_kmeans, Kmeans, Sort};
 use palette::{
@@ -5,6 +6,7 @@ use palette::{
 	Lab, Srgb,
 };
 use std::path::Path;
+use thumbhash::rgba_to_thumb_hash;
 
 #[derive(Debug)]
 struct ColorData {
@@ -130,4 +132,24 @@ pub fn process_image_colors(
 		.collect();
 
 	Ok(hex)
+}
+
+/// Processes an image to extract a thumbhash.
+/// * `path` - The path to the image.
+///
+/// Returns the thumbhash as a base64 string, or an error.
+pub fn process_image_thumbhash(
+	path: &Path,
+) -> Result<String, Box<dyn std::error::Error>> {
+	let dyn_img = image::open(path)?;
+
+	// image must be ≤ 100px
+	let img = dyn_img.thumbnail(100, 100).into_rgba8();
+	let (w, h) = img.dimensions();
+
+	let img_vec: &[u8] = img.as_raw();
+	let thumbhash_binary = rgba_to_thumb_hash(w as usize, h as usize, img_vec);
+	let thumbhash_base64 = BASE64_STANDARD.encode(thumbhash_binary);
+
+	Ok(thumbhash_base64)
 }

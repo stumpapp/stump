@@ -1,8 +1,11 @@
 import { MeshGradientView } from 'expo-mesh-gradient'
 import { StyleSheet, View } from 'react-native'
+import { thumbHashToDataURL } from 'thumbhash'
 
 import { useColors } from '~/lib/constants'
 import { usePreferencesStore } from '~/stores'
+
+import { TurboImage } from './Image'
 
 // const ca = '#e7e7e7' // white or black unused
 const c1 = '#5eb0ce'
@@ -45,6 +48,15 @@ export function ThumbnailPlaceholder() {
 				colors={colors}
 				points={points}
 			/>
+		)
+	}
+
+	if (thumbnailPlaceholder === 'thumbhash') {
+		const thumbHashBase64 = 'JNcNLQqHhV+H2Ip4eXZ5eHmJv3b4'
+		const thumbHashBinary = Uint8Array.from(atob(thumbHashBase64), (c) => c.charCodeAt(0))
+		const dataUrl = thumbHashToDataURL(thumbHashBinary)
+		return (
+			<TurboImage source={{ uri: dataUrl }} style={StyleSheet.absoluteFill} resizeMode="stretch" />
 		)
 	}
 }

@@ -56,6 +56,13 @@ export default function ThumbnailRatio() {
 					>
 						Colorful
 					</DropdownMenu.CheckboxItem>
+					<DropdownMenu.CheckboxItem
+						value={thumbnailPlaceholder === 'thumbhash'}
+						key="thumbhash"
+						onSelect={() => patch({ thumbnailPlaceholder: 'thumbhash' })}
+					>
+						Thumbhash
+					</DropdownMenu.CheckboxItem>
 				</DropdownMenu.Content>
 			</DropdownMenu.Root>
 		</AppSettingsRow>

@@ -42,9 +42,8 @@ export default function GridImageItem({ uri, title, href }: Props) {
 							}}
 							resizeMode="stretch"
 							fadeDuration={800}
-							indicator={{ color: 'transparent' }}
 							resize={itemDimension * 1.5}
-							style={{ height: itemDimension / thumbnailRatio, width: itemDimension }}
+							style={{ height: itemDimension / thumbnailRatio, width: itemDimension, zIndex: 15 }}
 						/>
 					</BorderAndShadow>
 

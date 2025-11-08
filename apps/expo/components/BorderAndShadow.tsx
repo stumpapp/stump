@@ -1,5 +1,5 @@
 import React from 'react'
-import { View, StyleProp, ViewStyle } from 'react-native'
+import { Platform, StyleProp, View, ViewStyle } from 'react-native'
 
 import { useColors } from '~/lib/constants'
 
@@ -29,14 +29,21 @@ export const BorderAndShadow = ({
 }: BorderAndShadowProps) => {
 	const colors = useColors()
 
-	const shadowStyle: ViewStyle = {
-		shadowColor: '#000',
-		shadowOffset: { width: 0, height: 1 },
-		shadowOpacity: 0.2,
-		shadowRadius: style.shadowRadius,
-		elevation: style.elevation, // for android
-		borderRadius: style.borderRadius, // for android
-	}
+	const shadowStyle: ViewStyle | undefined = Platform.select({
+		// while boxShadow can be used on ios, it does not respect borderCurve: 'continuous', so we don't.
+		android: {
+			borderRadius: style.borderRadius,
+			boxShadow: [
+				{ offsetX: 0, offsetY: 1, blurRadius: style.shadowRadius, color: 'rgba(0,0,0,0.2)' },
+			],
+		},
+		ios: {
+			shadowColor: '#000',
+			shadowOffset: { width: 0, height: 1 },
+			shadowOpacity: 0.2,
+			shadowRadius: style.shadowRadius,
+		},
+	})
 
 	const borderStyle: ViewStyle = {
 		borderRadius: style.borderRadius,

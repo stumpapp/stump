@@ -338,9 +338,8 @@ export default function Screen() {
 								}}
 								resizeMode="stretch"
 								fadeDuration={800}
-								indicator={{ color: 'transparent' }}
 								resize={235 * 1.5}
-								style={{ height: 235 / thumbnailRatio, width: 235 }}
+								style={{ height: 235 / thumbnailRatio, width: 235, zIndex: 15 }}
 							/>
 						</BorderAndShadow>
 					</View>

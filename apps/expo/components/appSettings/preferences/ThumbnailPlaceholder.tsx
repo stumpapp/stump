@@ -12,7 +12,7 @@ import AppSettingsRow from '../AppSettingsRow'
 
 // TODO(android): Use non-native dropdown
 
-export default function ThumbnailRatio() {
+export default function ThumbnailPlaceholder() {
 	const { thumbnailPlaceholder, patch } = usePreferencesStore((state) => ({
 		thumbnailPlaceholder: state.thumbnailPlaceholder,
 		patch: state.patch,

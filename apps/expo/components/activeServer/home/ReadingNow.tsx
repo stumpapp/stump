@@ -3,18 +3,16 @@ import { FragmentType, graphql, useFragment } from '@stump/graphql'
 import dayjs from 'dayjs'
 import { useRouter } from 'expo-router'
 import { useCallback, useRef } from 'react'
-import { Easing, Platform, Pressable, View } from 'react-native'
+import { Easing, Pressable, View } from 'react-native'
 import { easeGradient } from 'react-native-easing-gradient'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
-import LinearGradient from 'react-native-linear-gradient'
 import { useSharedValue } from 'react-native-reanimated'
 import Carousel, { ICarouselInstance, Pagination } from 'react-native-reanimated-carousel'
 import { scheduleOnRN } from 'react-native-worklets'
 import { stripHtml } from 'string-strip-html'
 
 import { BookMetaLink } from '~/components/book'
-import { BorderAndShadow } from '~/components/BorderAndShadow'
-import { TurboImage } from '~/components/Image'
+import { ThumbnailImage } from '~/components/Image'
 import { Heading, Progress, Text } from '~/components/ui'
 import { COLORS, useColors } from '~/lib/constants'
 import { parseGraphQLDecimal } from '~/lib/format'
@@ -255,47 +253,21 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 		easing: Easing.bezier(0.42, 0, 1, 1), // https://cubic-bezier.com/#.42,0,1,1
 	})
 
-	const Gradient = () => (
-		<LinearGradient
-			colors={gradientColors}
-			style={{
-				position: 'absolute',
-				inset: 0,
-				zIndex: 10,
-				borderRadius: Platform.OS === 'android' ? 12 : undefined,
-			}}
-			locations={gradientLocations}
-		/>
-	)
-
 	return (
 		<View className="flex flex-row gap-4">
 			<Pressable onPress={() => router.navigate(`/server/${serverID}/books/${data.id}`)}>
-				{
-					// Not ideal but stops carousel flickering on android.
-					// Causes border to be covered by the gradient.
-					Platform.OS === 'android' && <Gradient />
-				}
-				<BorderAndShadow
-					style={{ borderRadius: 12, borderWidth: 0.5, shadowRadius: 1.41, elevation: 2 }}
-				>
-					{Platform.OS !== 'android' && <Gradient />}
-					<TurboImage
-						source={{
-							uri: data.thumbnail.url,
-							headers: {
-								...sdk.customHeaders,
-								Authorization: sdk.authorizationHeader || '',
-							},
-						}}
-						resizeMode="stretch"
-						resize={IMAGE_WIDTH * 1.5}
-						style={{
-							height: imageHeight,
-							width: IMAGE_WIDTH,
-						}}
-					/>
-				</BorderAndShadow>
+				<ThumbnailImage
+					source={{
+						uri: data.thumbnail.url,
+						headers: {
+							...sdk.customHeaders,
+							Authorization: sdk.authorizationHeader || '',
+						},
+					}}
+					resizeMode="stretch"
+					size={{ height: imageHeight, width: IMAGE_WIDTH }}
+					gradient={{ colors: gradientColors, locations: gradientLocations }}
+				/>
 
 				<View className="absolute bottom-0 z-20 w-full gap-2 p-3">
 					{!isTablet && (

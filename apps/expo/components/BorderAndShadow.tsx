@@ -1,32 +1,27 @@
 import React from 'react'
-import { Platform, StyleProp, View, ViewStyle } from 'react-native'
+import { Platform, View, ViewStyle } from 'react-native'
 
 import { useColors } from '~/lib/constants'
 
-type BorderAndShadowStyle = {
+// TODO: remove optional shadowColor and shadowOffset once we remove all <BorderAndShadow /> components.
+export type BorderAndShadowStyle = {
 	borderRadius: number
 	borderWidth: number
 	shadowRadius: number
-	elevation: number
+	shadowColor?: string
+	shadowOffset?: { width: number; height: number }
 }
 
 type BorderAndShadowProps = {
 	children: React.ReactNode
 	style: BorderAndShadowStyle
-	outerStyle?: StyleProp<ViewStyle>
-	innerStyle?: StyleProp<ViewStyle>
 }
 
 /**
  * A reusable container that provides a shadow and a border.
- * The outer View handles the shadow, and the inner View handles the border and clipping.
+ * The outer View handles the shadow, the inner View handles the clipping, and the we overlay a border on top.
  */
-export const BorderAndShadow = ({
-	children,
-	style,
-	outerStyle,
-	innerStyle,
-}: BorderAndShadowProps) => {
+export const BorderAndShadow = ({ children, style }: BorderAndShadowProps) => {
 	const colors = useColors()
 
 	const shadowStyle: ViewStyle | undefined = Platform.select({
@@ -34,28 +29,43 @@ export const BorderAndShadow = ({
 		android: {
 			borderRadius: style.borderRadius,
 			boxShadow: [
-				{ offsetX: 0, offsetY: 1, blurRadius: style.shadowRadius, color: 'rgba(0,0,0,0.2)' },
+				{
+					offsetX: style.shadowOffset?.width ?? 0,
+					offsetY: style.shadowOffset?.height ?? 1,
+					blurRadius: style.shadowRadius,
+					color: style.shadowColor ?? 'rgba(0,0,0,0.2)',
+				},
 			],
 		},
 		ios: {
-			shadowColor: '#000',
-			shadowOffset: { width: 0, height: 1 },
-			shadowOpacity: 0.2,
+			shadowColor: style.shadowColor ?? 'rgba(0,0,0,0.2)',
+			shadowOffset: style.shadowOffset ?? { width: 0, height: 1 },
+			shadowOpacity: 1, // need to use 1 but the actual used opacity is set in shadowColor
 			shadowRadius: style.shadowRadius,
 		},
 	})
 
-	const borderStyle: ViewStyle = {
+	const clippingStyle: ViewStyle = {
 		borderRadius: style.borderRadius,
-		borderWidth: style.borderWidth,
-		borderColor: colors.edge.DEFAULT,
 		borderCurve: 'continuous',
 		overflow: 'hidden',
 	}
 
+	const borderStyle: ViewStyle = {
+		position: 'absolute',
+		inset: 0,
+		borderRadius: style.borderRadius,
+		borderWidth: style.borderWidth,
+		borderColor: colors.thumbnail.border,
+		borderCurve: 'continuous',
+		overflow: 'hidden',
+		zIndex: 25,
+	}
+
 	return (
-		<View style={[shadowStyle, outerStyle]}>
-			<View style={[borderStyle, innerStyle]}>{children}</View>
+		<View style={shadowStyle}>
+			<View style={clippingStyle}>{children}</View>
+			<View style={borderStyle} />
 		</View>
 	)
 }

@@ -1544,6 +1544,13 @@
 							"commitHash": "Exact commit",
 							"date": "Build date"
 						}
+					},
+					"nonStableChannel": {
+						"title": "You are running a non-stable build of Stump",
+						"description": [
+							"It looks like you are running the", 
+							"build channel"
+						]
 					}
 				},
 				"serverPublicUrl": {

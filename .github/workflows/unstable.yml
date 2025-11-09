@@ -52,6 +52,7 @@ jobs:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_PASSWORD }}
           tags: 'unstable'
+          build-channel: 'unstable'
           load: ${{ github.event_name == 'pull_request' }}
           push: ${{ github.event_name == 'push' }}
           archs: 'amd64'

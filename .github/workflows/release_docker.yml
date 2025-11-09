@@ -82,6 +82,7 @@ jobs:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_PASSWORD }}
           tags: ${{ needs.parse-semver.outputs.tags }}
+          build-channel: stable
           load: ${{ needs.push-or-load.outputs.load }}
           push: ${{ needs.push-or-load.outputs.push }}
           archs: ${{ needs.push-or-load.outputs.archs }}

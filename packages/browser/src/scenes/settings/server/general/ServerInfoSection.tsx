@@ -35,7 +35,7 @@ export default function ServerInfoSection() {
 	)
 
 	const buildChannel = useMemo(
-		() => (version?.buildChannel || IS_DEV ? 'local' : undefined),
+		() => version?.buildChannel ?? (IS_DEV ? 'local' : undefined),
 		[version],
 	)
 
@@ -48,7 +48,7 @@ export default function ServerInfoSection() {
 				</Text>
 			</div>
 
-			{buildChannel && (
+			{buildChannel && buildChannel !== 'stable' && (
 				<Alert variant="info">
 					<Info className="h-4 w-4" />
 					<AlertTitle>

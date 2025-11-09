@@ -50,7 +50,6 @@ export default function ReadiumReader({
 	const { downloadBook } = useDownload({ serverId: ctx.serverId })
 
 	const [localUri, setLocalUri] = useState<string | null>(() => ctx.offlineUri || null)
-	const [locator, setLocator] = useState<ReadiumLocator | undefined>(() => initialLocator)
 
 	const controlsVisible = useReaderStore((state) => state.showControls)
 	const setControlsVisible = useReaderStore((state) => state.setShowControls)
@@ -170,7 +169,6 @@ export default function ReadiumReader({
 			}
 
 			store.onLocationChange(locator)
-			setLocator(locator)
 
 			const totalProgression = locator.locations?.totalProgression
 
@@ -223,7 +221,7 @@ export default function ReadiumReader({
 				ref={readerRef}
 				bookId={book.id}
 				url={localUri}
-				locator={locator}
+				initialLocator={initialLocator}
 				onBookLoaded={({ nativeEvent }) => handleBookLoaded(nativeEvent.bookMetadata)}
 				onLocatorChange={({ nativeEvent: locator }) => handleLocationChanged(locator)}
 				onMiddleTouch={handleMiddleTouch}

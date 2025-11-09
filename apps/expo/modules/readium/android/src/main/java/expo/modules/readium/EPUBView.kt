@@ -37,6 +37,7 @@ import java.net.URL
 data class Props(
     var bookId: String? = null,
     var locator: Locator? = null,
+    var initialLocator: Locator? = null,
     var url: String? = null,
     @ColorInt var foreground: Int? = null,
     @ColorInt var background: Int? = null,
@@ -117,7 +118,7 @@ class EPUBView(context: Context, appContext: AppContext) : ExpoView(context, app
 
         props = FinalizedProps(
             bookId = bookId,
-            locator = pendingProps.locator ?: oldProps?.locator,
+            locator = pendingProps.locator ?: pendingProps.initialLocator ?: oldProps?.locator,
             url = url,
             foreground = pendingProps.foreground
                 ?: oldProps?.foreground ?: Color.parseColor("#111111"),

@@ -1166,6 +1166,7 @@ export type MediaMetadataInput = {
   coverArtists?: InputMaybe<Array<Scalars['String']['input']>>;
   day?: InputMaybe<Scalars['Int']['input']>;
   editors?: InputMaybe<Array<Scalars['String']['input']>>;
+  format?: InputMaybe<Scalars['String']['input']>;
   genres?: InputMaybe<Array<Scalars['String']['input']>>;
   identifierAmazon?: InputMaybe<Scalars['String']['input']>;
   identifierCalibre?: InputMaybe<Scalars['String']['input']>;
@@ -1184,6 +1185,9 @@ export type MediaMetadataInput = {
   pencillers?: InputMaybe<Array<Scalars['String']['input']>>;
   publisher?: InputMaybe<Scalars['String']['input']>;
   series?: InputMaybe<Scalars['String']['input']>;
+  seriesGroup?: InputMaybe<Scalars['String']['input']>;
+  storyArc?: InputMaybe<Scalars['String']['input']>;
+  storyArcNumber?: InputMaybe<Scalars['Decimal']['input']>;
   summary?: InputMaybe<Scalars['String']['input']>;
   teams?: InputMaybe<Array<Scalars['String']['input']>>;
   title?: InputMaybe<Scalars['String']['input']>;

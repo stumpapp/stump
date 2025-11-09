@@ -1,4 +1,4 @@
-import { useGraphQLMutation } from '@stump/client'
+import { useGraphQLUploadMutation } from '@stump/client'
 import {
 	Accordion,
 	Button,
@@ -59,14 +59,14 @@ export default function UploadModal() {
 		[],
 	)
 
-	const { mutateAsync: uploadBooks, isPending: isUploadingBooks } = useGraphQLMutation(
+	const { mutateAsync: uploadBooks, isPending: isUploadingBooks } = useGraphQLUploadMutation(
 		uploadBooksMutation,
 		{
 			onSuccess: () => refetch(),
 			config,
 		},
 	)
-	const { mutateAsync: uploadSeries, isPending: isUploadingSeries } = useGraphQLMutation(
+	const { mutateAsync: uploadSeries, isPending: isUploadingSeries } = useGraphQLUploadMutation(
 		uploadSeriesMutation,
 		{
 			onSuccess: () => refetch(),

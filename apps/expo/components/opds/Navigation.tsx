@@ -9,6 +9,7 @@ import { cn } from '~/lib/utils'
 import { useActiveServer } from '../activeServer'
 import { Text } from '../ui'
 import { Icon } from '../ui/icon'
+import { LinkDivider } from './LinkDivider'
 import { FeedComponentOptions } from './types'
 
 type Props = {
@@ -23,7 +24,7 @@ export default function Navigation({ navigation, renderEmpty }: Props) {
 
 	return (
 		<View>
-			<Text size="xl" className="font-medium leading-6 tracking-wide">
+			<Text size="xl" className="px-4 font-medium leading-6 tracking-wide">
 				Browse
 			</Text>
 
@@ -42,7 +43,7 @@ export default function Navigation({ navigation, renderEmpty }: Props) {
 					>
 						{({ pressed }) => (
 							<View
-								className={cn('flex-row items-center justify-between py-4', {
+								className={cn('flex-row items-center justify-between p-4', {
 									'opacity-60': pressed,
 								})}
 							>
@@ -52,7 +53,7 @@ export default function Navigation({ navigation, renderEmpty }: Props) {
 						)}
 					</Pressable>
 
-					<Divider />
+					<LinkDivider />
 				</Fragment>
 			))}
 
@@ -74,5 +75,3 @@ export default function Navigation({ navigation, renderEmpty }: Props) {
 		</View>
 	)
 }
-
-const Divider = () => <View className="h-px w-full bg-edge" />

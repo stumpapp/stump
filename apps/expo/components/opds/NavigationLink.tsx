@@ -32,7 +32,7 @@ export default function NavigationLink({ link }: Props) {
 		>
 			{({ pressed }) => (
 				<View
-					className={cn('flex-row items-center justify-between py-4', {
+					className={cn('flex-row items-center justify-between p-4', {
 						'opacity-60': pressed,
 					})}
 				>

@@ -3,9 +3,9 @@ import { useQuery } from '@tanstack/react-query'
 import { useRouter } from 'expo-router'
 import partition from 'lodash/partition'
 import { useCallback, useState } from 'react'
-import { Platform, View } from 'react-native'
+import { View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { useActiveServer } from '~/components/activeServer'
 import ChevronBackLink from '~/components/ChevronBackLink'
@@ -24,7 +24,6 @@ export default function Screen() {
 	const {
 		data: feed,
 		refetch,
-		isRefetching,
 		error,
 	} = useQuery({
 		queryKey: [sdk.opds.keys.catalog, activeServer?.id],
@@ -37,6 +36,16 @@ export default function Screen() {
 		},
 		throwOnError: false,
 	})
+	const [isRefetching, setIsRefetching] = useState(false)
+
+	const onRefetch = useCallback(async () => {
+		setIsRefetching(true)
+		try {
+			await refetch()
+		} finally {
+			setIsRefetching(false)
+		}
+	}, [refetch])
 
 	const searchURL = feed?.links.find((link) => link.rel === 'search' && link.templated)?.href
 
@@ -74,6 +83,8 @@ export default function Screen() {
 			: undefined,
 	})
 
+	const insets = useSafeAreaInsets()
+
 	if (!feed) return <MaybeErrorFeed error={error} />
 
 	const [navGroups, publicationGroups] = partition(
@@ -82,27 +93,25 @@ export default function Screen() {
 	)
 
 	return (
-		<SafeAreaView
-			style={{ flex: 1 }}
-			edges={Platform.OS === 'ios' ? ['top', 'left', 'right', 'bottom'] : ['left', 'right']}
+		<ScrollView
+			className="flex-1 bg-background"
+			refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={onRefetch} />}
+			contentInsetAdjustmentBehavior="automatic"
+			contentContainerStyle={{
+				paddingBottom: insets.bottom,
+			}}
 		>
-			<ScrollView
-				className="flex-1 bg-background px-4"
-				refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
-				contentInsetAdjustmentBehavior="automatic"
-			>
-				<View className="mt-6 flex-1 gap-6 tablet:gap-8">
-					<OPDSNavigation navigation={feed.navigation} renderEmpty />
+			<View className="mt-6 flex-1 gap-6 tablet:gap-8">
+				<OPDSNavigation navigation={feed.navigation} renderEmpty />
 
-					{navGroups.map((group) => (
-						<OPDSNavigationGroup key={group.metadata.title} group={group} renderEmpty />
-					))}
+				{navGroups.map((group) => (
+					<OPDSNavigationGroup key={group.metadata.title} group={group} renderEmpty />
+				))}
 
-					{publicationGroups.map((group) => (
-						<OPDSPublicationGroup key={group.metadata.title} group={group} renderEmpty />
-					))}
-				</View>
-			</ScrollView>
-		</SafeAreaView>
+				{publicationGroups.map((group) => (
+					<OPDSPublicationGroup key={group.metadata.title} group={group} renderEmpty />
+				))}
+			</View>
+		</ScrollView>
 	)
 }

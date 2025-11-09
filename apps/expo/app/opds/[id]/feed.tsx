@@ -2,7 +2,7 @@ import { useSDK } from '@stump/client'
 import { useQuery } from '@tanstack/react-query'
 import { useLocalSearchParams } from 'expo-router'
 import { ScrollView } from 'react-native-gesture-handler'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { MaybeErrorFeed, OPDSFeed, OPDSPublicationFeed } from '~/components/opds'
 import RefreshControl from '~/components/RefreshControl'
@@ -22,26 +22,28 @@ export default function Screen() {
 		throwOnError: false,
 	})
 
+	const insets = useSafeAreaInsets()
+
 	if (isLoading) return null
 
 	if (!feed) return <MaybeErrorFeed error={error} />
 
 	const isPublicationFeed = feed.publications.length > 0
 
-	const renderContent = () => {
-		if (isPublicationFeed) {
-			return <OPDSPublicationFeed feed={feed} onRefresh={refetch} isRefreshing={isRefetching} />
-		} else {
-			return (
-				<ScrollView
-					className="flex-1 gap-5 bg-background px-6"
-					refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
-				>
-					<OPDSFeed feed={feed} />
-				</ScrollView>
-			)
-		}
+	if (isPublicationFeed) {
+		return <OPDSPublicationFeed feed={feed} onRefresh={refetch} isRefreshing={isRefetching} />
+	} else {
+		return (
+			<ScrollView
+				className="flex-1 bg-background"
+				refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
+				contentInsetAdjustmentBehavior="automatic"
+				contentContainerStyle={{
+					paddingBottom: insets.bottom,
+				}}
+			>
+				<OPDSFeed feed={feed} />
+			</ScrollView>
+		)
 	}
-
-	return <SafeAreaView className="flex-1 bg-background">{renderContent()}</SafeAreaView>
 }

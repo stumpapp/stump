@@ -35,14 +35,14 @@ export default function PublicationGroup({
 	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
 
 	const itemWidth = useMemo(() => (isTablet ? 150 : 100), [isTablet])
-	const itemHeight = useMemo(() => itemWidth / thumbnailRatio, [itemWidth])
+	const itemHeight = useMemo(() => itemWidth / thumbnailRatio, [itemWidth, thumbnailRatio])
 
 	if (!publications.length && !renderEmpty) return null
 
 	return (
 		<View key={metadata.title}>
-			<View className="flex flex-row items-center justify-between pb-2">
-				<Text className="text-xl font-medium leading-6 tracking-wide text-foreground">
+			<View className="flex flex-row items-center justify-between pb-3">
+				<Text className="px-4 text-xl font-medium leading-6 tracking-wide text-foreground">
 					{metadata.title || 'Publications'}
 				</Text>
 
@@ -132,6 +132,7 @@ export default function PublicationGroup({
 				}}
 				horizontal
 				showsHorizontalScrollIndicator={false}
+				contentContainerStyle={{ paddingHorizontal: 16 }}
 			/>
 
 			{!publications.length && <EmptyFeed message="No publications in group" />}

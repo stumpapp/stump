@@ -162,13 +162,21 @@ export const useSavedServers = () => {
 		async (id: ServerID, { config, ...server }: CreateServer) => {
 			const serverMeta = { ...server, id }
 			editServer(id, serverMeta)
+
 			if (server.defaultServer) {
 				// Ensure only one default server
 				setDefaultServer(serverMeta.id)
 			}
+
 			if (config) {
 				await createServerConfig(id, config)
+			} else {
+				// If no config is provided, remove any existing config
+				await SecureStore.deleteItemAsync(formatPrefix('config', id)).catch(() => {
+					// Ignore errors
+				})
 			}
+
 			return serverMeta
 		},
 		[setDefaultServer, editServer, createServerConfig],

@@ -3,6 +3,7 @@ import partition from 'lodash/partition'
 import { View } from 'react-native'
 
 import FeedTitle from './FeedTitle'
+import MaybeErrorFeed from './MaybeErrorFeed'
 import Navigation from './Navigation'
 import NavigationGroup from './NavigationGroup'
 import PublicationFeed from './PublicationFeed'
@@ -18,6 +19,10 @@ export default function Feed({ feed, ...options }: Props) {
 		feed.groups.filter((group) => group.navigation.length || group.publications.length),
 		(group) => group.publications.length === 0,
 	)
+
+	if (!navGroups.length && !publicationGroups.length && !feed.navigation.length) {
+		return <MaybeErrorFeed />
+	}
 
 	return (
 		<View className="flex-1 gap-8">

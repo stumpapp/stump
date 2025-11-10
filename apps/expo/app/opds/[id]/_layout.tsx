@@ -1,9 +1,13 @@
 import { SDKContext, StumpClientContextProvider } from '@stump/client'
 import { Api, authDocument } from '@stump/sdk'
 import { Redirect, Stack, useLocalSearchParams, useRouter } from 'expo-router'
+import { X } from 'lucide-react-native'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Platform } from 'react-native'
 
 import { ActiveServerContext } from '~/components/activeServer'
+import ChevronBackLink from '~/components/ChevronBackLink'
+import { IS_IOS_24_PLUS } from '~/lib/constants'
 import { getOPDSInstance } from '~/lib/sdk/auth'
 import { usePreferencesStore, useSavedServers } from '~/stores'
 
@@ -75,6 +79,7 @@ export default function Screen() {
 	)
 
 	if (!activeServer) {
+		// @ts-expect-error: Redirect works
 		return <Redirect href="/" />
 	}
 
@@ -92,7 +97,29 @@ export default function Screen() {
 				<SDKContext.Provider value={{ sdk, setSDK }}>
 					<Stack
 						screenOptions={{ headerShown: false, animation: animationEnabled ? 'default' : 'none' }}
-					/>
+					>
+						<Stack.Screen
+							name="auth"
+							options={{
+								title: 'Login',
+								headerShown: true,
+								headerTransparent: Platform.OS === 'ios',
+								headerBlurEffect: IS_IOS_24_PLUS ? undefined : 'regular',
+								animation: animationEnabled ? 'default' : 'none',
+								presentation: IS_IOS_24_PLUS ? 'formSheet' : 'modal',
+								sheetGrabberVisible: true,
+								sheetAllowedDetents: [0.95],
+								sheetInitialDetentIndex: 0,
+								headerBackVisible: true,
+								headerBackButtonDisplayMode: 'minimal',
+								headerLeft: () =>
+									Platform.select({
+										ios: <ChevronBackLink icon={X} />,
+										default: undefined,
+									}),
+							}}
+						/>
+					</Stack>
 				</SDKContext.Provider>
 			</StumpClientContextProvider>
 		</ActiveServerContext.Provider>

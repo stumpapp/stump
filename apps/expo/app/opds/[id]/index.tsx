@@ -16,6 +16,7 @@ import {
 	OPDSPublicationGroup,
 } from '~/components/opds'
 import RefreshControl from '~/components/RefreshControl'
+import { FullScreenLoader } from '~/components/ui'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
 
 export default function Screen() {
@@ -23,6 +24,7 @@ export default function Screen() {
 	const { sdk } = useSDK()
 	const {
 		data: feed,
+		isLoading,
 		refetch,
 		error,
 	} = useQuery({
@@ -85,12 +87,18 @@ export default function Screen() {
 
 	const insets = useSafeAreaInsets()
 
-	if (!feed) return <MaybeErrorFeed error={error} />
+	if (isLoading) return <FullScreenLoader label="Loading..." />
+
+	if (!feed || !!error) return <MaybeErrorFeed error={error} />
 
 	const [navGroups, publicationGroups] = partition(
 		feed.groups.filter((group) => group.navigation.length || group.publications.length),
 		(group) => group.publications.length === 0,
 	)
+
+	if (!navGroups.length && !publicationGroups.length && !feed.navigation.length) {
+		return <MaybeErrorFeed />
+	}
 
 	return (
 		<ScrollView

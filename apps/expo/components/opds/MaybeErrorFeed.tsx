@@ -1,5 +1,7 @@
-import { useSDK } from '@stump/client'
+import { useClientContext, useSDK } from '@stump/client'
+import { isAxiosError } from 'axios'
 import { Rss, Slash } from 'lucide-react-native'
+import { useEffect } from 'react'
 import { View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -12,6 +14,19 @@ type Props = {
 }
 export default function MaybeErrorFeed({ error }: Props) {
 	const { sdk } = useSDK()
+	const { onUnauthenticatedResponse, onConnectionWithServerChanged } = useClientContext()
+
+	useEffect(() => {
+		if (!error || !sdk) return
+		const axiosError = isAxiosError(error)
+		const isNetworkError = axiosError && error?.code === 'ERR_NETWORK'
+		const isAuthError = axiosError && error.response?.status === 401
+		if (isAuthError) {
+			onUnauthenticatedResponse?.(undefined, error.response?.data)
+		} else if (isNetworkError) {
+			onConnectionWithServerChanged?.(false)
+		}
+	}, [error, sdk, onUnauthenticatedResponse, onConnectionWithServerChanged])
 
 	// If we aren't authed the lifecycles outside this component will handle it
 	// If there is no error, we don't need to render anything

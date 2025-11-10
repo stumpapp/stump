@@ -90,7 +90,7 @@ export default function PublicationFeed({ feed, onRefresh, isRefreshing }: Props
 		if (isTablet) return 135 / thumbnailRatio
 		else if (isXSmall) return width / 2 / thumbnailRatio
 		else return 100 / thumbnailRatio
-	}, [isTablet, isXSmall, width])
+	}, [isTablet, isXSmall, width, thumbnailRatio])
 
 	const itemsPerRow = Math.floor(width / itemWidth)
 

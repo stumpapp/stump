@@ -26,7 +26,7 @@ export default function Screen() {
 
 	if (isLoading) return null
 
-	if (!feed) return <MaybeErrorFeed error={error} />
+	if (!feed || !!error) return <MaybeErrorFeed error={error} />
 
 	const isPublicationFeed = feed.publications.length > 0
 

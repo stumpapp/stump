@@ -36,7 +36,7 @@ export default function Screen() {
 	const render = () => {
 		if (emptyFeed) {
 			return <EmptyFeed message="No results for this search" />
-		} else if (feed) {
+		} else if (feed && !error) {
 			return <OPDSFeed feed={feed} />
 		} else {
 			return <MaybeErrorFeed error={error} />

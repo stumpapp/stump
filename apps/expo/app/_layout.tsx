@@ -166,6 +166,7 @@ export default function RootLayout() {
 									animation: animationEnabled ? 'default' : 'none',
 								}}
 							/>
+
 							<Stack.Screen
 								name="offline"
 								options={{

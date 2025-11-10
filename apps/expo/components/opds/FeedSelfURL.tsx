@@ -22,7 +22,7 @@ export default function FeedSelfURL({ label = 'View all', url }: Props) {
 		<Pressable
 			onPress={() =>
 				router.push({
-					pathname: '/opds/[id]/feed',
+					pathname: '/opds/[id]/feed/[url]',
 					params: {
 						id: serverID,
 						url,

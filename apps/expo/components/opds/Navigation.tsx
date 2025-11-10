@@ -33,7 +33,7 @@ export default function Navigation({ navigation, renderEmpty }: Props) {
 					<Pressable
 						onPress={() =>
 							router.push({
-								pathname: '/opds/[id]/feed',
+								pathname: '/opds/[id]/feed/[url]',
 								params: {
 									id: activeServer.id,
 									url: link.href,

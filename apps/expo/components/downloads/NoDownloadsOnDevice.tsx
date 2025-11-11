@@ -1,19 +1,21 @@
-import { ListX } from 'lucide-react-native'
 import { View } from 'react-native'
 
-import { Text } from '../ui'
-import { Icon } from '../ui/icon'
+import Owl from '../Owl'
+import { Heading, Text } from '../ui'
 
 export default function NoDownloadsOnDevice() {
 	return (
 		<View className="h-full flex-1 items-center justify-center gap-6 p-4">
-			{/*TODO: Image or something */}
+			<Owl owl="empty" />
 
-			<Icon as={ListX} size={32} className="text-muted-foreground" />
-
-			<Text className="text-center text-lg">
-				When you download books for offline reading, come back here to access them
-			</Text>
+			<View className="gap-2 px-4 tablet:max-w-lg">
+				<Heading size="lg" className="text-center font-semibold leading-tight">
+					Nothing to read yet
+				</Heading>
+				<Text className="text-center text-lg">
+					Once you download books for offline reading, they will appear here
+				</Text>
+			</View>
 		</View>
 	)
 }

@@ -1,4 +1,4 @@
-import { useSDK } from '@stump/client'
+import { useRefetch, useSDK } from '@stump/client'
 import { useQuery } from '@tanstack/react-query'
 import { useRouter } from 'expo-router'
 import partition from 'lodash/partition'
@@ -38,16 +38,7 @@ export default function Screen() {
 		},
 		throwOnError: false,
 	})
-	const [isRefetching, setIsRefetching] = useState(false)
-
-	const onRefetch = useCallback(async () => {
-		setIsRefetching(true)
-		try {
-			await refetch()
-		} finally {
-			setIsRefetching(false)
-		}
-	}, [refetch])
+	const [isRefetching, onRefetch] = useRefetch(refetch)
 
 	const searchURL = feed?.links.find((link) => link.rel === 'search' && link.templated)?.href
 
@@ -89,7 +80,7 @@ export default function Screen() {
 
 	if (isLoading) return <FullScreenLoader label="Loading..." />
 
-	if (!feed || !!error) return <MaybeErrorFeed error={error} />
+	if (!feed || !!error) return <MaybeErrorFeed error={error} onRetry={onRefetch} />
 
 	const [navGroups, publicationGroups] = partition(
 		feed.groups.filter((group) => group.navigation.length || group.publications.length),
@@ -97,7 +88,7 @@ export default function Screen() {
 	)
 
 	if (!navGroups.length && !publicationGroups.length && !feed.navigation.length) {
-		return <MaybeErrorFeed />
+		return <MaybeErrorFeed onRetry={onRefetch} />
 	}
 
 	return (

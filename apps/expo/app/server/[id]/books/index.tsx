@@ -99,11 +99,11 @@ export default function Screen() {
 							actions={
 								<>
 									{isFiltered && (
-										<Button variant="secondary" onPress={() => resetFilters()}>
+										<Button roundness="full" variant="secondary" onPress={() => resetFilters()}>
 											<Text>Clear Filters</Text>
 										</Button>
 									)}
-									<Button onPress={() => refetch()}>
+									<Button roundness="full" onPress={() => refetch()}>
 										<Text>Refresh</Text>
 									</Button>
 								</>

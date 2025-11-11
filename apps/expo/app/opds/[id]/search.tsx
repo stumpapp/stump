@@ -1,4 +1,4 @@
-import { useSDK } from '@stump/client'
+import { useRefetch, useSDK } from '@stump/client'
 import { useQuery } from '@tanstack/react-query'
 import { useLocalSearchParams } from 'expo-router'
 import { Platform, ScrollView } from 'react-native'
@@ -17,13 +17,14 @@ export default function Screen() {
 		data: feed,
 		isLoading,
 		refetch,
-		isRefetching,
 		error,
 	} = useQuery({
 		queryKey: [sdk.opds.keys.feed, feedURL],
 		queryFn: () => sdk.opds.feed(feedURL),
 		throwOnError: false,
 	})
+
+	const [isRefetching, onRefetch] = useRefetch(refetch)
 
 	useDynamicHeader({
 		title: query || 'Search Results',
@@ -39,7 +40,7 @@ export default function Screen() {
 		} else if (feed && !error) {
 			return <OPDSFeed feed={feed} />
 		} else {
-			return <MaybeErrorFeed error={error} />
+			return <MaybeErrorFeed error={error} onRetry={onRefetch} />
 		}
 	}
 
@@ -52,7 +53,7 @@ export default function Screen() {
 		>
 			<ScrollView
 				className="flex-1 gap-5 bg-background px-6"
-				refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
+				refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={onRefetch} />}
 				contentInsetAdjustmentBehavior="automatic"
 			>
 				{render()}

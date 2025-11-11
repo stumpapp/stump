@@ -1,4 +1,4 @@
-import { useSDK } from '@stump/client'
+import { useRefetch, useSDK } from '@stump/client'
 import { useQuery } from '@tanstack/react-query'
 import { useLocalSearchParams } from 'expo-router'
 import { ScrollView } from 'react-native-gesture-handler'
@@ -13,7 +13,6 @@ export default function Screen() {
 	const {
 		data: feed,
 		refetch,
-		isRefetching,
 		isLoading,
 		error,
 	} = useQuery({
@@ -24,9 +23,11 @@ export default function Screen() {
 
 	const insets = useSafeAreaInsets()
 
+	const [isRefetching, onRefetch] = useRefetch(refetch)
+
 	if (isLoading) return null
 
-	if (!feed || !!error) return <MaybeErrorFeed error={error} />
+	if (!feed || !!error) return <MaybeErrorFeed error={error} onRetry={onRefetch} />
 
 	const isPublicationFeed = feed.publications.length > 0
 
@@ -36,7 +37,7 @@ export default function Screen() {
 		return (
 			<ScrollView
 				className="flex-1 bg-background"
-				refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
+				refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={onRefetch} />}
 				contentInsetAdjustmentBehavior="automatic"
 				contentContainerStyle={{
 					paddingBottom: insets.bottom,

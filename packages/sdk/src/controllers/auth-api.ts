@@ -22,6 +22,17 @@ export type PasswordUserInput = {
 	password: string
 }
 
+export type OidcConfig = {
+	enabled: boolean
+	allowRegistration: boolean
+	disableLocalAuth: boolean
+}
+
+export type OidcCallbackQuery = {
+	code: string
+	state: string
+}
+
 /**
  * The root route for the auth API
  */
@@ -110,6 +121,21 @@ export class AuthAPI extends APIBase {
 	}
 
 	/**
+	 * Get OIDC configuration status
+	 */
+	async getOidcConfig(): Promise<OidcConfig> {
+		const { data } = await this.api.axios.get<OidcConfig>(authURL('/oidc/config'))
+		return data
+	}
+
+	/**
+	 * Get the OIDC authorization URL, which is just the backend OIDC authorize endpoint
+	 */
+	getOidcAuthorizeUrl(): string {
+		return this.withServiceURL(authURL('/oidc/authorize'))
+	}
+
+	/**
 	 * The query keys for the auth API, used for query caching on a client (e.g. react-query)
 	 */
 	get keys(): ClassQueryKeys<InstanceType<typeof AuthAPI>> {
@@ -119,6 +145,8 @@ export class AuthAPI extends APIBase {
 			me: 'auth.me',
 			register: 'auth.register',
 			refreshToken: 'auth.refreshToken',
+			getOidcConfig: 'auth.getOidcConfig',
+			getOidcAuthorizeUrl: 'auth.getOidcAuthorizeUrl',
 		}
 	}
 }

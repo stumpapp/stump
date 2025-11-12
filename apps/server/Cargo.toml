@@ -31,6 +31,7 @@ jsonwebtoken = "9.3.0"
 linemux = { git = "https://github.com/jmagnuson/linemux.git", rev = "acaafc602afac5d7a9cd3e087dafc937cac1e364" }
 local-ip-address = "0.6.2"
 once_cell.workspace = true
+openidconnect = "4.0"
 prefixed-api-key = { workspace = true}
 rand = { workspace = true }
 reqwest.workspace = true
@@ -40,6 +41,7 @@ serde_json.workspace = true
 serde_qs = { version = "0.14.0", features = ["axum"] }
 serde-untagged = "0.1.2"
 serde_with.workspace = true
+sha2 = "0.10"
 stump_core = { path = "../../core" }
 tempfile = "3.13.0"
 tower-http = { version = "0.5.2", features = [
@@ -56,6 +58,7 @@ tower = "0.4.13"
 tower-sessions = "0.14.0"
 tracing.workspace = true
 urlencoding.workspace = true
+uuid.workspace = true
 zip.workspace = true
 
 [dev-dependencies]

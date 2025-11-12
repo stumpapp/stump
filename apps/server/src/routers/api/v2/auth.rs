@@ -229,6 +229,22 @@ async fn login(
 	// TODO: make this configurable via environment variable so knowledgeable attackers can't bypass this
 	let twenty_four_hours_ago = today - Duration::hours(24);
 
+	// TODO: Do I allow OIDC users to login with password if they are set?
+
+	// Check if this is an OIDC-only user (no password set)
+	if user.hashed_password.is_empty() && user.oidc_issuer_id.is_some() {
+		return Err(APIError::BadRequest(
+			"This account uses OIDC authentication. Please log in with your identity provider."
+				.to_string(),
+		));
+	} else if user.hashed_password.is_empty() {
+		tracing::warn!(
+			"user {} has no password set and is not an OIDC user",
+			user.username
+		);
+		return Err(APIError::Unauthorized);
+	}
+
 	let provided_valid_credentials = verify_password(&user.hashed_password, &password)?;
 
 	if user.is_locked && provided_valid_credentials {

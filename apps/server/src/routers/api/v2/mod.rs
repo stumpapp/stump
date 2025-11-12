@@ -1,7 +1,8 @@
 pub(crate) mod auth;
-pub(crate) mod library;
+mod library;
 pub(crate) mod media;
-pub(crate) mod series;
+mod oidc;
+mod series;
 
 use axum::{
 	extract::State,
@@ -21,6 +22,7 @@ use crate::{
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
 		.merge(auth::mount(app_state.clone()))
+		.merge(oidc::mount(app_state.clone()))
 		.merge(media::mount(app_state.clone()))
 		.merge(series::mount(app_state.clone()))
 		.merge(library::mount(app_state))

@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { queryClient, useLoginOrRegister, useSDK } from '@stump/client'
+import { queryClient, useLoginOrRegister, useOidcConfig, useSDK } from '@stump/client'
 import { Alert, AlertDescription, Button, cx, Form, Heading, Input } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { isAxiosError } from '@stump/sdk'
@@ -51,6 +51,7 @@ export default function LoginOrClaimScene() {
 		},
 		refetchClaimed: !showServers,
 	})
+	const oidcConfig = useOidcConfig()
 
 	const schema = z.object({
 		password: z.string().min(1, { message: t('authScene.form.validation.missingPassword') }),
@@ -89,6 +90,11 @@ export default function LoginOrClaimScene() {
 		},
 		[isClaimed, login, registerUser, t],
 	)
+
+	const handleOidcLogin = useCallback(() => {
+		const authorizeUrl = sdk.auth.getOidcAuthorizeUrl()
+		window.location.href = authorizeUrl
+	}, [sdk.auth])
 
 	const renderHeader = () => {
 		if (isClaimed) {
@@ -187,6 +193,31 @@ export default function LoginOrClaimScene() {
 								: t('authScene.form.buttons.createAccount')}
 						</Button>
 
+						{oidcConfig?.enabled && (
+							<>
+								<div className="relative my-4">
+									<div className="absolute inset-0 flex items-center">
+										<div className="w-full border-t border-edge" />
+									</div>
+									<div className="relative flex justify-center text-xs uppercase">
+										<span className="bg-background px-2 text-foreground-muted">Or</span>
+									</div>
+								</div>
+
+								<Button
+									size="md"
+									type="button"
+									variant="outline"
+									onClick={handleOidcLogin}
+									className="w-full"
+								>
+									{isClaimed
+										? t('authScene.form.buttons.loginWithOidc')
+										: t('authScene.form.buttons.createAccountWithOidc')}
+								</Button>
+							</>
+						)}
+
 						{isDesktop && (
 							<button
 								className="group flex w-full items-center justify-between border-l border-edge p-4 transition-colors duration-100 hover:border-edge-strong hover:border-opacity-70 hover:bg-background-surface/50"
@@ -203,29 +234,6 @@ export default function LoginOrClaimScene() {
 					</Form>
 				</div>
 			</motion.div>
-
-			{/* {isDesktop && (
-				<motion.div
-					className="w-screen shrink-0"
-					animate={showServers ? 'appearIn' : 'appearOut'}
-					variants={variants}
-				>
-					<div className="mx-auto flex h-full w-full max-w-sm flex-col justify-start gap-6 sm:max-w-md md:max-w-xl">
-						<ConfiguredServersList />
-						<button
-							className="group flex w-full items-center space-x-4 border-l border-edge p-4 transition-colors duration-100 hover:border-edge-strong hover:border-opacity-70 hover:bg-background-surface/50"
-							type="button"
-							onClick={() => setShowServers(false)}
-						>
-							<ArrowLeft className="h-5 w-5 text-foreground-muted group-hover:text-foreground-subtle" />
-
-							<span className="text-sm font-semibold text-foreground-muted transition-colors duration-100 group-hover:text-foreground-subtle">
-								{t('common.logIn')}
-							</span>
-						</button>
-					</div>
-				</motion.div>
-			)} */}
 		</div>
 	)
 }

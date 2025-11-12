@@ -4,6 +4,7 @@ pub use sea_orm_migration::*;
 mod m20250807_202824_init;
 mod m20251013_233701_add_media_metadata_fields;
 mod m20251020_145410_add_thumbnail_ratio;
+mod m20251112_000000_add_oidc_to_users;
 
 pub struct Migrator;
 
@@ -14,6 +15,7 @@ impl MigratorTrait for Migrator {
 			Box::new(m20250807_202824_init::Migration),
 			Box::new(m20251013_233701_add_media_metadata_fields::Migration),
 			Box::new(m20251020_145410_add_thumbnail_ratio::Migration),
+			Box::new(m20251112_000000_add_oidc_to_users::Migration),
 		]
 	}
 }

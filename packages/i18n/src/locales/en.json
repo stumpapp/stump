@@ -20,7 +20,9 @@
 			},
 			"buttons": {
 				"createAccount": "Create Account",
-				"login": "Log in"
+				"login": "Log in",
+				"loginWithOidc": "Log in with OIDC",
+				"createAccountWithOidc": "Create Account with OIDC"
 			}
 		},
 		"toasts": {

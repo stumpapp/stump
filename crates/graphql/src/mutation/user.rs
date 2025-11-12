@@ -590,6 +590,8 @@ mod tests {
 					created_at: chrono::Utc::now().into(),
 					deleted_at: None,
 					user_preferences_id: None,
+					oidc_issuer_id: None,
+					oidc_email: None,
 				},
 			]])
 			.into_connection();

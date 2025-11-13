@@ -1,3 +1,5 @@
+import 'expo-asset'
+
 import { Buffer } from 'buffer'
 import { registerRootComponent } from 'expo'
 import { ExpoRoot } from 'expo-router'

@@ -51,8 +51,8 @@ SplashScreen.preventAutoHideAsync().catch(() => {
 	/* reloading the app might trigger some race conditions, ignore them */
 })
 
-// TODO: hide status bar when reading
 const IS_DEVELOPMENT = process.env.NODE_ENV === 'development'
+// const IS_DEVELOPMENT = false
 
 export default function RootLayout() {
 	const { colorScheme, isDarkColorScheme } = useColorScheme()
@@ -96,14 +96,17 @@ export default function RootLayout() {
 	}, [error])
 
 	if (!isColorSchemeLoaded || !isAnimationReady) {
-		return null
+		return <View className="flex-1 bg-background" />
 	}
 
+	// Note: To avoid the animation playing on every reload during development, we skip it entirely in dev mode.
+	// If you need to see the animation in dev mode, set IS_DEVELOPMENT to false above.
 	if (!isReady && !IS_DEVELOPMENT) {
 		return (
 			<View
 				style={{
 					flex: 1,
+					backgroundColor: isDarkColorScheme ? '#000000' : '#F4E8E0',
 				}}
 			>
 				<LottieView

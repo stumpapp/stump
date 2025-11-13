@@ -8,6 +8,8 @@ import {
 } from '@stump/client'
 import { Dimension, graphql } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
+import { eq } from 'drizzle-orm'
+import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
 import { useKeepAwake } from 'expo-keep-awake'
 import * as NavigationBar from 'expo-navigation-bar'
 import { useLocalSearchParams } from 'expo-router'
@@ -21,6 +23,8 @@ import {
 	UnsupportedReader,
 } from '~/components/book/reader'
 import { NextInSeriesBookRef } from '~/components/book/reader/image/context'
+import { db, downloadedFiles } from '~/db'
+import { booksDirectory } from '~/lib/filesystem'
 import { useAppState, useSyncOnlineToOfflineProgress } from '~/lib/hooks'
 import { intoReadiumLocator, ReadiumLocator } from '~/modules/readium'
 import { usePreferencesStore, useReaderStore } from '~/stores'
@@ -146,6 +150,16 @@ export default function Screen() {
 	if (!book) {
 		throw new Error('Book not found')
 	}
+
+	// TODO: Swap to suspense when available
+	const {
+		data: [record],
+		updatedAt,
+	} = useLiveQuery(
+		db.select().from(downloadedFiles).where(eq(downloadedFiles.id, book.id)).limit(1),
+		[book.id],
+	)
+	const isLoadingRecord = updatedAt == null
 
 	const nextInSeries = useMemo(() => {
 		const next = book.nextInSeries.nodes.at(0)
@@ -287,8 +301,12 @@ export default function Screen() {
 	)
 
 	const currentProgressPage = useMemo(() => book.readProgress?.page || 1, [book.readProgress?.page])
+	const offlineUri = useMemo(
+		() => (record ? `${booksDirectory(serverId)}/${record.filename}` : undefined),
+		[record, serverId],
+	)
 
-	if (!book) return null
+	if (!book || isLoadingRecord) return null
 
 	if (book.extension.match(EBOOK_EXTENSION)) {
 		const initialLocator = book.readProgress?.locator || undefined
@@ -298,6 +316,7 @@ export default function Screen() {
 				book={book}
 				initialLocator={initialLocator ? intoReadiumLocator(initialLocator) : undefined}
 				onLocationChanged={onLocationChanged}
+				offlineUri={offlineUri}
 				serverId={serverId}
 				requestHeaders={requestHeaders}
 			/>

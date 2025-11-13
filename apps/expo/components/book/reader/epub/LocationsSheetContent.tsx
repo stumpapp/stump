@@ -161,6 +161,7 @@ export default function LocationsSheetContent() {
 const TableOfContentsListItem = ({ item }: { item: TableOfContentsItem }) => {
 	const router = useRouter()
 	const actions = useEpubLocationStore((store) => store.actions)
+	const currentChapter = useEpubLocationStore((store) => store.currentChapter)
 
 	const handlePress = async () => {
 		// E.g.: "text/part0010.html#9H5K0-..." -> ["text/part0010.html", "9H5K0-..."]
@@ -189,7 +190,12 @@ const TableOfContentsListItem = ({ item }: { item: TableOfContentsItem }) => {
 		<View>
 			<Pressable onPress={handlePress}>
 				{({ pressed }) => (
-					<View className="w-full px-4" style={{ opacity: pressed ? 0.7 : 1 }}>
+					<View
+						className={cn('w-full px-4', {
+							'bg-background-surface': currentChapter === item.label,
+						})}
+						style={{ opacity: pressed ? 0.7 : 1 }}
+					>
 						<Text className="py-4 text-base">{item.label}</Text>
 					</View>
 				)}

@@ -3,6 +3,7 @@ import { Pressable, View } from 'react-native'
 import * as ContextMenu from 'zeego/context-menu'
 
 import { usePreferencesStore } from '~/stores'
+import { useCacheStore } from '~/stores/cache'
 import { SavedServer, useSavedServers } from '~/stores/savedServer'
 
 import { Text } from '../ui'
@@ -32,6 +33,8 @@ export default function SavedServerListItem({ server, onEdit, onDelete, forceOPD
 	}
 
 	const { deleteServerToken } = useSavedServers()
+
+	const deleteCachedSdk = useCacheStore((state) => state.removeSDK)
 
 	const router = useRouter()
 
@@ -78,6 +81,8 @@ export default function SavedServerListItem({ server, onEdit, onDelete, forceOPD
 							destructive
 							onSelect={async () => {
 								await deleteServerToken(server.id)
+								const idsToDelete = [server.id, ...(server.stumpOPDS ? [`${server.id}-opds`] : [])]
+								idsToDelete.forEach((id) => deleteCachedSdk(id))
 							}}
 						>
 							<ContextMenu.ItemTitle>Discard Tokens</ContextMenu.ItemTitle>

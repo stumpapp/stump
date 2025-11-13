@@ -83,6 +83,9 @@ pub struct AuthorizeQuery {
 	/// If true, the callback will return JWT tokens instead of creating a session
 	#[serde(default)]
 	pub generate_token: bool,
+	/// Optional redirect URL for the mobile app (e.g., "stump://auth/callback")
+	/// If provided with generate_token=true, redirects to this URL with tokens as query params
+	pub redirect_uri: Option<String>,
 }
 
 /// Initiate OIDC authorization
@@ -210,6 +213,7 @@ async fn callback(
 
 	let (user_model, is_new_user) = if let Some(user) = existing_user {
 		tracing::debug!(user_id = %user.id, "Existing OIDC user logging in");
+		// TODO: Update avatar_url if it changed from the provider? Idk if that would be desired behavior
 		(user, false)
 	} else {
 		let allow_registration = config
@@ -294,7 +298,22 @@ async fn callback(
 	if generate_token {
 		let token = create_jwt_auth(&user_model.id, &ctx.conn, &ctx.config).await?;
 		tracing::debug!(user_id = %user_model.id, "Generated JWT tokens for OIDC user");
-		Ok(OidcCallbackResponse::Token(token))
+
+		if let Some(redirect_uri) = authorize_query.redirect_uri {
+			let redirect_url = format!(
+				"{}?access_token={}&refresh_token={}&expires_at={}",
+				redirect_uri,
+				urlencoding::encode(&token.access_token),
+				urlencoding::encode(&token.refresh_token.unwrap_or_default()),
+				token.expires_at
+			);
+			tracing::debug!(user_id = %user_model.id, "Redirecting mobile app with tokens");
+			Ok(OidcCallbackResponse::Redirect(Redirect::temporary(
+				&redirect_url,
+			)))
+		} else {
+			Ok(OidcCallbackResponse::Token(token))
+		}
 	} else {
 		session
 			.insert(SESSION_USER_KEY, user_model.id.clone())

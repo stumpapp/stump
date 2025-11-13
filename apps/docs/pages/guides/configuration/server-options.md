@@ -38,6 +38,72 @@ The path to the PDFium binary. This is only required if you want PDF support and
 | ------ | ----------------------------- |
 | String | `/lib/libpdfium.so` in Docker |
 
+### STUMP_OIDC_ENABLED
+
+Whether or not to enable OpenID Connect (OIDC) authentication. When enabled, users can sign in using an external identity provider. See the [OIDC](/guides/access-control/oidc) guide for more information.
+
+| Type    | Default Value |
+| ------- | ------------- |
+| Boolean | `false`       |
+
+### STUMP_OIDC_ISSUER_URL
+
+The base URL of your OIDC provider. This should be the URL where the provider's `.well-known/openid-configuration` endpoint can be found.
+
+**Required when `STUMP_OIDC_ENABLED` is `true`.**
+
+| Type   | Default Value |
+| ------ | ------------- |
+| String | N/A           |
+
+**Example:** `https://pocketid.stump.mycloud`
+
+### STUMP_OIDC_CLIENT_ID
+
+The client ID provided by your OIDC provider for the Stump application
+
+**Required when `STUMP_OIDC_ENABLED` is `true`.**
+
+| Type   | Default Value |
+| ------ | ------------- |
+| String | N/A           |
+
+### STUMP_OIDC_CLIENT_SECRET
+
+The client secret provided by your OIDC provider for the Stump application
+
+**Required when `STUMP_OIDC_ENABLED` is `true`.**
+
+| Type   | Default Value |
+| ------ | ------------- |
+| String | N/A           |
+
+### STUMP_OIDC_SCOPES
+
+A **comma-separated** list of additional scopes to request from the OIDC provider
+
+| Type   | Default Value          |
+| ------ | ---------------------- |
+| String | `openid,email,profile` |
+
+### STUMP_OIDC_ALLOW_REGISTRATION
+
+Whether or not to allow automatic user registration via OIDC on first login. When enabled, users who sign in with OIDC for the first time will have an account automatically created for them.
+
+| Type    | Default Value |
+| ------- | ------------- |
+| Boolean | `true`        |
+
+### STUMP_OIDC_DISABLE_LOCAL_AUTH
+
+Whether or not to disable local username/password authentication when OIDC is enabled. When set to `true`, the username/password login form will be hidden and only OIDC authentication will be available.
+
+**Note:** Some features, such as OPDS feeds, still require username/password authentication even when this is enabled.
+
+| Type    | Default Value |
+| ------- | ------------- |
+| Boolean | `false`       |
+
 #### SESSION_EXPIRY_CLEANUP_INTERVAL
 
 The time (_in seconds_) between each session expiry cleanup check. The check will remove any expired sessions from the database.

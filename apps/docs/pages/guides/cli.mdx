@@ -57,3 +57,24 @@ You will be prompted to enter a new password, with a confirmation prompt to ensu
 	commands or features, please create a [feature
 	request](https://github.com/stumpapp/stump/issues/new/choose) on GitHub
 </Callout>
+
+### OIDC User Migration
+
+To migrate an existing local user account to an OIDC account, run:
+
+```bash copy
+./stump account migrate-oidc --username <local-username> --oidc-email <oidc-email>
+```
+
+This will do the following, assuming both accounts exist:
+
+- Relink all data (read history, preferences, etc.) from the local account to the OIDC account
+- Update the OIDC account to have the permissions of the local account
+- Delete the local account
+- Reassign the local account's username to the OIDC account
+
+<Callout emoji="🔒" type="warning">
+	Both the local account and the OIDC account must already exist. The OIDC account should not have
+	any existing data, as it will be overwritten. Use this command with caution, as it cannot be
+	undone
+</Callout>

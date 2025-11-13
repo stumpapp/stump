@@ -1,0 +1,77 @@
+import { Callout, Steps, Tabs } from 'nextra/components'
+
+# OpenID Connect (OIDC)
+
+Stump supports OpenID Connect (OIDC) authentication, allowing users to sign in using external identity providers like Authentik, Keycloak, PocketID, and others.
+
+## Configuration
+
+OIDC is configured in the same manner as other Stump settings, through environment variables or the toml configuration file. See [server configuration](/guides/configuration/server-options) for more details.
+
+### Required Settings
+
+| Variable                   | Description                                      | Example                                         |
+| -------------------------- | ------------------------------------------------ | ----------------------------------------------- |
+| `STUMP_OIDC_ENABLED`       | Enable OIDC authentication                       | `true`                                          |
+| `STUMP_OIDC_ISSUER_URL`    | The base URL of your OIDC provider               | `https://auth.example.com/application/o/stump/` |
+| `STUMP_OIDC_CLIENT_ID`     | The client ID provided by your OIDC provider     | `stump-client-id`                               |
+| `STUMP_OIDC_CLIENT_SECRET` | The client secret provided by your OIDC provider | `super-secret-value`                            |
+
+### Optional Settings
+
+| Variable                        | Default                | Description                                                         |
+| ------------------------------- | ---------------------- | ------------------------------------------------------------------- |
+| `STUMP_OIDC_SCOPES`             | `openid,email,profile` | Additional scopes to request from the provider (comma-separated)    |
+| `STUMP_OIDC_ALLOW_REGISTRATION` | `true`                 | Allow automatic user registration via OIDC on first login           |
+| `STUMP_OIDC_DISABLE_LOCAL_AUTH` | `false`                | Disable local username/password authentication when OIDC is enabled |
+
+### Docker Compose Example
+
+```yaml
+services:
+  stump:
+    image: aaronleopold/stump:latest
+    environment:
+      STUMP_OIDC_ENABLED: 'true'
+      STUMP_OIDC_ISSUER_URL: 'https://auth.example.com/application/o/stump/'
+      STUMP_OIDC_CLIENT_ID: 'stump-client-id'
+      STUMP_OIDC_CLIENT_SECRET: 'super-secret-value'
+      # Optional settings
+      # STUMP_OIDC_SCOPES: 'openid,email,profile'
+      # STUMP_OIDC_ALLOW_REGISTRATION: 'true'
+      # STUMP_OIDC_DISABLE_LOCAL_AUTH: 'false'
+    ports:
+      - '10801:10801'
+```
+
+## User Management
+
+### Setting Passwords for OIDC Users
+
+OIDC users may optionally set a local password in Stump. This can be useful for accessing features that require password-based authentication (such as OPDS feeds). Users with the appropriate permissions can set their own passwords through the Stump interface.
+
+<Callout type="info">
+	For information about user permissions and managing who can set passwords, see the [User
+	Permissions](/guides/access-control/permissions) guide
+</Callout>
+
+### Disabling Local Authentication
+
+You can disable local username/password authentication globally by setting `STUMP_OIDC_DISABLE_LOCAL_AUTH=true` in your configuration. When enabled:
+
+- The username/password login form will be hidden
+- Only OIDC authentication will be available on the login page
+- Existing local users will be unable to log in via username/password
+
+<Callout type="warning">
+	Some features, such as OPDS feeds, still require username/password authentication. Users will need
+	to set a password (as described above) even when local authentication is disabled globally
+</Callout>
+
+### Account Migration
+
+Stump does not support automatic linking of existing local accounts to OIDC accounts. If you have existing users with read history, preferences, or other data that you want to migrate to OIDC accounts, you can use the Stump CLI migration tool.
+
+<Callout type="info">
+	For instructions on migrating existing accounts to OIDC, see the [CLI](/guides/cli) guide
+</Callout>

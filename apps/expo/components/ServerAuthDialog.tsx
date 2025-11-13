@@ -1,6 +1,6 @@
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useLoginOrRegister } from '@stump/client'
+import { useLoginOrRegister, useOidcConfig } from '@stump/client'
 import { LoginResponse } from '@stump/sdk'
 import { Eye, EyeOff } from 'lucide-react-native'
 import { useColorScheme } from 'nativewind'
@@ -12,8 +12,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { z } from 'zod'
 
 import { useColors } from '~/lib/constants'
+import { startOidcLogin } from '~/lib/sdk/auth'
 import { useUserStore } from '~/stores'
 
+import { useActiveServer } from './activeServer'
 import { Button, Text } from './ui'
 import { BottomSheet } from './ui/bottom-sheet'
 import { Icon } from './ui/icon'
@@ -25,6 +27,8 @@ type ServerAuthDialogProps = {
 
 export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogProps) {
 	const setUser = useUserStore((state) => state.setUser)
+	const { activeServer } = useActiveServer()
+	const oidcConfig = useOidcConfig()
 	const { isClaimed, isCheckingClaimed, loginUser, isLoggingIn } = useLoginOrRegister({
 		onSuccess: setUser,
 		onError: console.error,
@@ -33,7 +37,10 @@ export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogPr
 	const ref = useRef<BottomSheetModal | null>(null)
 	const animatedIndex = useSharedValue<number>(0)
 	const animatedPosition = useSharedValue<number>(0)
+
 	const [isPasswordVisible, setIsPasswordVisible] = useState(false)
+	const [isOidcLoading, setIsOidcLoading] = useState(false)
+	const hasAuthSucceeded = useRef(false)
 
 	const { colorScheme } = useColorScheme()
 
@@ -47,6 +54,7 @@ export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogPr
 
 	useEffect(() => {
 		if (isOpen) {
+			hasAuthSucceeded.current = false
 			ref.current?.present()
 		} else {
 			ref.current?.dismiss()
@@ -55,7 +63,7 @@ export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogPr
 
 	const handleChange = useCallback(
 		(index: number) => {
-			if (index === -1 && isOpen) {
+			if (index === -1 && isOpen && !hasAuthSucceeded.current) {
 				onClose()
 			}
 		},
@@ -67,6 +75,7 @@ export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogPr
 			try {
 				const result = await loginUser({ password, username })
 				if ('forUser' in result) {
+					hasAuthSucceeded.current = true
 					ref.current?.dismiss()
 					onClose(result)
 				} else {
@@ -78,6 +87,27 @@ export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogPr
 		},
 		[loginUser, onClose],
 	)
+
+	const handleOidcLogin = useCallback(async () => {
+		setIsOidcLoading(true)
+		try {
+			const result = await startOidcLogin({
+				serverUrl: activeServer.url,
+				saveToken: () => Promise.resolve(),
+			})
+
+			if (result) {
+				setUser(result.forUser)
+				hasAuthSucceeded.current = true
+				ref.current?.dismiss()
+				onClose(result)
+			}
+		} catch (error) {
+			console.error('OIDC login error:', error)
+		} finally {
+			setIsOidcLoading(false)
+		}
+	}, [activeServer.url, setUser, onClose])
 
 	if (!isClaimed && !isCheckingClaimed) {
 		throw new Error('Not supported yet')
@@ -185,10 +215,29 @@ export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogPr
 						onPress={handleSubmit(onSubmit)}
 						className="mt-4 w-full"
 						disabled={isLoggingIn}
-						variant="secondary"
+						variant="brand"
 					>
 						<Text>Login</Text>
 					</Button>
+
+					{oidcConfig?.enabled && (
+						<View className="w-full pb-4">
+							<View className="my-3 flex-row items-center">
+								<View className="flex-1 border-t border-edge" />
+								<Text className="mx-2 text-sm text-foreground-muted">Or</Text>
+								<View className="flex-1 border-t border-edge" />
+							</View>
+
+							<Button
+								onPress={handleOidcLogin}
+								className="mt-4 w-full"
+								disabled={isOidcLoading || isLoggingIn}
+								variant="secondary"
+							>
+								<Text>Login with OIDC</Text>
+							</Button>
+						</View>
+					)}
 				</BottomSheet.View>
 			</BottomSheet.Modal>
 		</View>

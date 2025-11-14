@@ -1,6 +1,6 @@
 import { cva, type VariantProps } from 'class-variance-authority'
 import * as React from 'react'
-import { Pressable } from 'react-native'
+import { ActivityIndicator, Pressable } from 'react-native'
 
 import { TextClassContext } from '~/components/ui/text'
 import { cn } from '~/lib/utils'
@@ -25,10 +25,15 @@ const buttonVariants = cva('group flex items-center justify-center squircle roun
 			lg: 'h-11 squircle rounded-lg px-8 native:h-14',
 			icon: 'h-10 w-10',
 		},
+		roundness: {
+			default: 'rounded-lg',
+			full: 'rounded-full',
+		},
 	},
 	defaultVariants: {
 		variant: 'default',
 		size: 'default',
+		roundness: 'default',
 	},
 })
 
@@ -60,7 +65,7 @@ type ButtonProps = React.ComponentPropsWithoutRef<typeof Pressable> &
 	VariantProps<typeof buttonVariants>
 
 const Button = React.forwardRef<React.ElementRef<typeof Pressable>, ButtonProps>(
-	({ className, variant, size, style, ...props }, ref) => {
+	({ className, variant, size, style, roundness, ...props }, ref) => {
 		const accentColor = usePreferencesStore((state) => state.accentColor)
 		const isBrand = variant === 'brand' || !variant
 
@@ -74,7 +79,7 @@ const Button = React.forwardRef<React.ElementRef<typeof Pressable>, ButtonProps>
 				<Pressable
 					className={cn(
 						props.disabled && 'web:pointer-events-none opacity-50',
-						buttonVariants({ variant, size, className }),
+						buttonVariants({ variant, size, roundness, className }),
 					)}
 					ref={ref}
 					role="button"
@@ -90,5 +95,34 @@ const Button = React.forwardRef<React.ElementRef<typeof Pressable>, ButtonProps>
 )
 Button.displayName = 'Button'
 
-export { Button, buttonTextVariants, buttonVariants }
+type RefreshButtonProps = {
+	isRefreshing: boolean
+} & ButtonProps
+
+const RefreshButton = React.forwardRef<React.ElementRef<typeof Pressable>, RefreshButtonProps>(
+	({ isRefreshing, children, ...props }, ref) => {
+		return (
+			<Button ref={ref} variant="brand" {...props}>
+				{(args) => (
+					<>
+						{typeof children === 'function' ? children(args) : children}
+						{isRefreshing && (
+							<ActivityIndicator
+								size="small"
+								color="currentColor"
+								style={{
+									position: 'absolute',
+									right: 10,
+								}}
+							/>
+						)}
+					</>
+				)}
+			</Button>
+		)
+	},
+)
+RefreshButton.displayName = 'RefreshButton'
+
+export { Button, buttonTextVariants, buttonVariants, RefreshButton }
 export type { ButtonProps }

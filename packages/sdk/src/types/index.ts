@@ -38,6 +38,7 @@ export type StumpVersion = {
 	semver: string
 	rev: string
 	compileTime: string
+	buildChannel: string | null
 }
 
 export type ColumnSort = {

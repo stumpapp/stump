@@ -65,6 +65,7 @@ jobs:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_PASSWORD }}
           tags: 'nightly'
+          build-channel: 'nightly'
           load: ${{ env.LOAD }}
           push: ${{ env.PUSH }}
           archs: ${{ env.ARCHS }}

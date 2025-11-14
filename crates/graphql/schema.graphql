@@ -1096,11 +1096,15 @@ input MediaMetadataInput {
 	title: String
 	titleSort: String
 	series: String
+	seriesGroup: String
+	storyArc: String
+	storyArcNumber: Decimal
 	number: Decimal
 	volume: Int
 	summary: String
 	notes: String
 	genres: [String!]
+	format: String
 	year: Int
 	month: Int
 	day: Int

@@ -1,10 +1,23 @@
 import { useStumpVersion } from '@stump/client'
-import { cn, Heading, Label, Link, Text, TEXT_VARIANTS } from '@stump/components'
+import {
+	Alert,
+	AlertDescription,
+	AlertTitle,
+	cn,
+	Heading,
+	Label,
+	Link,
+	Text,
+	TEXT_VARIANTS,
+} from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import dayjs from 'dayjs'
+import toUpper from 'lodash/toUpper'
+import { Info } from 'lucide-react'
 import { useMemo } from 'react'
 
 const REPO_URL = 'https://github.com/stumpapp/stump'
+const IS_DEV = import.meta.env.DEV
 
 export default function ServerInfoSection() {
 	const version = useStumpVersion()
@@ -21,6 +34,11 @@ export default function ServerInfoSection() {
 		[version],
 	)
 
+	const buildChannel = useMemo(
+		() => version?.buildChannel ?? (IS_DEV ? 'local' : undefined),
+		[version],
+	)
+
 	return (
 		<div className="flex flex-col gap-4">
 			<div>
@@ -29,6 +47,22 @@ export default function ServerInfoSection() {
 					{t('settingsScene.server/general.sections.serverInfo.description')}
 				</Text>
 			</div>
+
+			{buildChannel && buildChannel !== 'stable' && (
+				<Alert variant="info">
+					<Info className="h-4 w-4" />
+					<AlertTitle>
+						{t('settingsScene.server/general.sections.serverInfo.nonStableChannel.title')}
+					</AlertTitle>
+					<AlertDescription className="flex">
+						{t('settingsScene.server/general.sections.serverInfo.nonStableChannel.description.0')}{' '}
+						<span className="font-semibold">
+							{toUpper(buildChannel.charAt(0)) + buildChannel.slice(1)}
+						</span>{' '}
+						{t('settingsScene.server/general.sections.serverInfo.nonStableChannel.description.1')}
+					</AlertDescription>
+				</Alert>
+			)}
 
 			{version && (
 				<div className="flex flex-col gap-8 md:flex-row">
@@ -47,6 +81,16 @@ export default function ServerInfoSection() {
 							<span>v{version.semver}</span>
 						</Link>
 					</div>
+
+					{buildChannel && (
+						<div>
+							<Label>Build channel</Label>
+							<Text size="sm" variant="muted">
+								{toUpper(buildChannel.charAt(0)) + buildChannel.slice(1)}
+							</Text>
+						</div>
+					)}
+
 					<div>
 						<Label>Exact commit</Label>
 						<Link

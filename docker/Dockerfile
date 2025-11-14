@@ -62,9 +62,11 @@ RUN --mount=type=cache,target=/usr/local/yarn/.cache,id=${TARGETARCH} \
 FROM rust:1.86-bookworm AS builder
 
 ARG GIT_REV
+ARG BUILD_CHANNEL
 ARG TARGETARCH
 
 ENV GIT_REV=${GIT_REV}
+ENV BUILD_CHANNEL=${BUILD_CHANNEL}
 
 RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/apt \
     apt-get update && apt-get install -y \

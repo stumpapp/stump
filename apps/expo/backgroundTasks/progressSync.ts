@@ -5,6 +5,14 @@ import { match } from 'ts-pattern'
 
 import { db, epubProgress, readProgress, syncStatus } from '~/db'
 
+// TODO: There needs to be a separate mutation for this like resolveMediaProgress which handles conflict
+// resultion by timestamp. E.g., if I have two devices with the same downloaded book, and I don't sync progress,
+// I could get in a scenario where:
+// 1. Device A progresses to 10% and syncs
+// 2. Device B doesn't sync first, progresses to 5%, then syncs <- overwriting Device A's progress
+// The progress should be sent with a timestamp so the server can either accept or reject based on which is newer,
+// then return the full node so the client can update its local record accordingly.
+
 const mutation = graphql(`
 	mutation UpdateReadProgressionBackgroundTask($id: ID!, $input: MediaProgressInput!) {
 		updateMediaProgress(id: $id, input: $input) {

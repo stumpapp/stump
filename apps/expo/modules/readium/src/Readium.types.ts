@@ -35,6 +35,7 @@ export type ReadiumLocator = {
 		highlight?: string | null
 	} | null
 	type?: string | null
+	target?: number | null
 }
 
 export type ReadiumLink = {

@@ -290,7 +290,6 @@ export class Api {
 	async execute<TResult, TVariables>(
 		query: TypedDocumentString<TResult, TVariables>,
 		variables?: TVariables extends Record<string, never> ? never : TVariables,
-		config?: Pick<AxiosRequestConfig, 'onUploadProgress'>,
 	): Promise<TResult> {
 		const response = await this.axiosInstance.post<GraphQLResponse<TResult>>(
 			'/api/graphql',
@@ -301,6 +300,59 @@ export class Api {
 			{
 				headers: {
 					...this.headers,
+				},
+				baseURL: this.rootURL,
+			},
+		)
+
+		const { data, errors } = response.data
+
+		if (errors) {
+			const firstExtensionError = errors.find((error) => error.extensions?.error)?.extensions?.error
+			if (firstExtensionError && typeof firstExtensionError === 'string') {
+				throw new Error(firstExtensionError)
+			}
+			throw new Error(errors.map((error) => error.message).join(', '))
+		}
+
+		return data
+	}
+
+	/**
+	 * Execute a GraphQL mutation with file uploads using the multipart request spec
+	 */
+	async executeUpload<TResult, TVariables>(
+		query: TypedDocumentString<TResult, TVariables>,
+		variables?: TVariables extends Record<string, never> ? never : TVariables,
+		config?: Pick<AxiosRequestConfig, 'onUploadProgress'>,
+	): Promise<TResult> {
+		const formData = new FormData()
+
+		if (!variables) {
+			throw new Error('Variables are required for file uploads')
+		}
+
+		const operations = { query: query.toString(), variables: {} as Record<string, unknown> }
+		const map: Record<string, string[]> = {}
+		const files: File[] = []
+
+		const processedVariables = this.extractFiles(variables, files, map)
+		operations.variables = processedVariables as Record<string, unknown>
+
+		formData.append('operations', JSON.stringify(operations))
+		formData.append('map', JSON.stringify(map))
+
+		files.forEach((file, index) => {
+			formData.append(index.toString(), file)
+		})
+
+		const response = await this.axiosInstance.post<GraphQLResponse<TResult>>(
+			'/api/graphql',
+			formData,
+			{
+				headers: {
+					...this.headers,
+					'Content-Type': 'multipart/form-data',
 				},
 				baseURL: this.rootURL,
 				...config,
@@ -318,6 +370,36 @@ export class Api {
 		}
 
 		return data
+	}
+
+	// Note: This feels fragile but does work for basic uploads. If it breaks down probably best to see what is
+	// out there instead of reinventing the wheel
+	private extractFiles(
+		obj: unknown,
+		files: File[],
+		map: Record<string, string[]>,
+		path: string = 'variables',
+	): unknown {
+		if (obj instanceof File) {
+			const index = files.length
+			files.push(obj)
+			map[index.toString()] = [path]
+			return null
+		}
+
+		if (Array.isArray(obj)) {
+			return obj.map((item, index) => this.extractFiles(item, files, map, `${path}.${index}`))
+		}
+
+		if (obj && typeof obj === 'object') {
+			const result: Record<string, unknown> = {}
+			for (const [key, value] of Object.entries(obj)) {
+				result[key] = this.extractFiles(value, files, map, `${path}.${key}`)
+			}
+			return result
+		}
+
+		return obj
 	}
 
 	async executeRaw<TResult = unknown, TVariables = Record<string, unknown> | never>(

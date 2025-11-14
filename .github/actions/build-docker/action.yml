@@ -17,6 +17,10 @@ inputs:
   tags:
     description: 'List of tags to assigned to the image'
     default: 'nightly'
+  build-channel:
+    description: 'Build channel identifier (e.g., nightly, unstable, experimental)'
+    required: false
+    default: ''
   archs:
     description: 'List of platforms to build'
     required: true
@@ -91,6 +95,7 @@ runs:
         archs: ${{ inputs.archs }}
         build-args: |
           GIT_REV=${{ env.GIT_REV }}
+          BUILD_CHANNEL=${{ inputs.build-channel }}
         containerfiles: |
           ./docker/Dockerfile
 

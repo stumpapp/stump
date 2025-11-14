@@ -36,8 +36,8 @@ jobs:
       - name: Configure docker tags
         id: docker-tags
         run: |
-          echo "tags=latest,nightly,${{ steps.tag.outputs.version }}" >> $GITHUB_OUTPUT
-          echo "Docker tags are latest, nightly, and ${{ steps.tag.outputs.version }}"
+          echo "tags=latest,${{ steps.tag.outputs.version }}" >> $GITHUB_OUTPUT
+          echo "Docker tags are latest, and ${{ steps.tag.outputs.version }}"
 
   push-or-load:
     if: contains(github.event.pull_request.head.ref, 'release/v')
@@ -82,6 +82,7 @@ jobs:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_PASSWORD }}
           tags: ${{ needs.parse-semver.outputs.tags }}
+          build-channel: stable
           load: ${{ needs.push-or-load.outputs.load }}
           push: ${{ needs.push-or-load.outputs.push }}
           archs: ${{ needs.push-or-load.outputs.archs }}

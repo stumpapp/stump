@@ -118,14 +118,11 @@ type UseGraphQLMutationOptions<TResult, TVariables> = Omit<
 		unknown
 	>,
 	'mutationFn'
-> & {
-	config?: Pick<AxiosRequestConfig, 'onUploadProgress'>
-}
+>
 
 export function useGraphQLMutation<TResult, TVariables>(
 	document: TypedDocumentString<TResult, TVariables>,
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	{ config, ...options }: UseGraphQLMutationOptions<TResult, TVariables> = {},
+	options: UseGraphQLMutationOptions<TResult, TVariables> = {},
 ) {
 	const { sdk } = useSDK()
 	const { onUnauthenticatedResponse, onConnectionWithServerChanged } = useClientContext()
@@ -134,6 +131,52 @@ export function useGraphQLMutation<TResult, TVariables>(
 		async (variables?: TVariables extends Record<string, never> ? never : TVariables) =>
 			sdk.execute(document, variables),
 		[sdk, document],
+	)
+	const { error, ...rest } = useMutation({
+		...options,
+		mutationFn,
+		onError: (error, variables, context) => {
+			handleError({
+				sdk,
+				error,
+				onUnauthenticatedResponse,
+				onConnectionWithServerChanged,
+			})
+			options?.onError?.(error, variables, context)
+		},
+	})
+
+	return { error, ...rest } as UseMutationResult<
+		TResult,
+		unknown,
+		TVariables extends Record<string, never> ? never : TVariables,
+		unknown
+	>
+}
+
+type UseGraphQLUploadMutationOptions<TResult, TVariables> = Omit<
+	UseMutationOptions<
+		TResult,
+		unknown,
+		TVariables extends Record<string, never> ? never : TVariables,
+		unknown
+	>,
+	'mutationFn'
+> & {
+	config?: Pick<AxiosRequestConfig, 'onUploadProgress'>
+}
+
+export function useGraphQLUploadMutation<TResult, TVariables>(
+	document: TypedDocumentString<TResult, TVariables>,
+	{ config, ...options }: UseGraphQLUploadMutationOptions<TResult, TVariables> = {},
+) {
+	const { sdk } = useSDK()
+	const { onUnauthenticatedResponse, onConnectionWithServerChanged } = useClientContext()
+
+	const mutationFn = useCallback(
+		async (variables?: TVariables extends Record<string, never> ? never : TVariables) =>
+			sdk.executeUpload(document, variables, config),
+		[sdk, document, config],
 	)
 	const { error, ...rest } = useMutation({
 		...options,

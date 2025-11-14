@@ -21,4 +21,8 @@ fn main() {
 	};
 
 	println!("cargo:rustc-env=GIT_REV={}", rev);
+
+	if let Ok(build_channel) = std::env::var("BUILD_CHANNEL") {
+		println!("cargo:rustc-env=BUILD_CHANNEL={}", build_channel);
+	}
 }

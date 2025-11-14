@@ -128,6 +128,15 @@ class ReadiumModule : Module() {
         view.pendingProps.locator = locator
       }
 
+      Prop("initialLocator") { view: EPUBView, prop: Map<String, Any?>? ->
+        if (prop == null) {
+          view.pendingProps.initialLocator = null
+          return@Prop
+        }
+        val locator = Locator.fromJSON(JSONObject(prop)) ?: return@Prop
+        view.pendingProps.initialLocator = locator
+      }
+
       Prop("url") { view: EPUBView, prop: String ->
         view.pendingProps.url = prop
       }

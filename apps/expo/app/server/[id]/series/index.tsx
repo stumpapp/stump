@@ -1,6 +1,6 @@
 import { useScrollToTop } from '@react-navigation/native'
 import { FlashList, FlashListRef } from '@shopify/flash-list'
-import { useInfiniteSuspenseGraphQL } from '@stump/client'
+import { useInfiniteSuspenseGraphQL, useRefetch } from '@stump/client'
 import { graphql } from '@stump/graphql'
 import { useCallback, useRef } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -13,7 +13,7 @@ import RefreshControl from '~/components/RefreshControl'
 import { SeriesGridItem } from '~/components/series'
 import { SeriesFilterHeader } from '~/components/series/filterHeader'
 import { ISeriesGridItemFragment } from '~/components/series/SeriesGridItem'
-import { Button, Text } from '~/components/ui'
+import { Button, RefreshButton, Text } from '~/components/ui'
 import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
 import { createSeriesFilterStore, SeriesFilterContext } from '~/stores/filters'
 
@@ -55,12 +55,16 @@ export default function Screen() {
 		resetFilters: state.resetFilters,
 	}))
 
-	const { data, hasNextPage, fetchNextPage, refetch, isRefetching } = useInfiniteSuspenseGraphQL(
+	const { data, hasNextPage, fetchNextPage, refetch } = useInfiniteSuspenseGraphQL(
 		query,
 		['series', serverID, filters, sort],
 		{ filters, orderBy: [sort], pagination: { offset: { page: 1 } } },
 	)
 	const { numColumns, paddingHorizontal } = useGridItemSize()
+
+	const nodes = data?.pages.flatMap((page) => page.series.nodes) || []
+
+	const [isRefetching, handleRefetch] = useRefetch(refetch)
 
 	const onEndReached = useCallback(() => {
 		if (hasNextPage) {
@@ -78,7 +82,7 @@ export default function Screen() {
 			<SafeAreaView style={{ flex: 1 }} edges={['left', 'right']}>
 				<FlashList
 					ref={listRef}
-					data={data?.pages.flatMap((page) => page.series.nodes) || []}
+					data={nodes}
 					renderItem={({ item }) => <SeriesGridItem series={item} />}
 					contentContainerStyle={{
 						paddingVertical: 16,
@@ -90,20 +94,36 @@ export default function Screen() {
 					contentInsetAdjustmentBehavior="always"
 					ListHeaderComponent={<SeriesFilterHeader />}
 					ListHeaderComponentStyle={{ paddingBottom: 16, marginHorizontal: -paddingHorizontal }}
-					refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
+					refreshControl={
+						nodes.length > 0 ? (
+							<RefreshControl refreshing={isRefetching} onRefresh={handleRefetch} />
+						) : undefined
+					}
 					ListEmptyComponent={
 						<ListEmpty
 							message={isFiltered ? 'No series found matching your filters' : 'No series returned'}
 							actions={
 								<>
 									{isFiltered && (
-										<Button variant="secondary" onPress={() => resetFilters()}>
+										<Button
+											roundness="full"
+											variant="secondary"
+											size="lg"
+											onPress={() => resetFilters()}
+										>
 											<Text>Clear Filters</Text>
 										</Button>
 									)}
-									<Button onPress={() => refetch()}>
+
+									<RefreshButton
+										className="flex-row items-center"
+										roundness="full"
+										size="lg"
+										onPress={() => handleRefetch()}
+										isRefreshing={isRefetching}
+									>
 										<Text>Refresh</Text>
-									</Button>
+									</RefreshButton>
 								</>
 							}
 						/>

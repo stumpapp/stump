@@ -1,9 +1,8 @@
 import { useSDK } from '@stump/client'
 import { graphql, PaginationInfo } from '@stump/graphql'
-import { useQueries, useQueryClient } from '@tanstack/react-query'
+import { useQueries } from '@tanstack/react-query'
 import { Link, useLocalSearchParams } from 'expo-router'
 import chunk from 'lodash/chunk'
-import { Search } from 'lucide-react-native'
 import { useCallback } from 'react'
 import { FlatList, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
@@ -11,9 +10,10 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { useActiveServer } from '~/components/activeServer'
 import { BookSearchItem, IBookSearchItemFragment } from '~/components/book'
+import EmptyState from '~/components/EmptyState'
 import { ILibrarySearchItemFragment, LibrarySearchItem } from '~/components/library'
 import { ISeriesSearchItemFragment, SeriesSearchItem } from '~/components/series'
-import { Heading, Icon, Text } from '~/components/ui'
+import { Heading, Text } from '~/components/ui'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
 
 const mediaQuery = graphql(`
@@ -74,8 +74,6 @@ export default function Screen() {
 	} = useActiveServer()
 	const { sdk } = useSDK()
 
-	const client = useQueryClient()
-
 	useDynamicHeader({
 		title: `"${query}"`,
 	})
@@ -86,7 +84,7 @@ export default function Screen() {
 				_or: [{ name: { contains: query } }, { metadata: { title: { contains: query } } }],
 			},
 		})
-	}, [sdk, query, client])
+	}, [sdk, query])
 
 	const getSeries = useCallback(
 		() =>
@@ -143,13 +141,10 @@ export default function Screen() {
 
 	if (noResults) {
 		return (
-			<View className="flex-1 items-center justify-center gap-4 bg-background p-4 tablet:p-7">
-				<Icon as={Search} className="h-8 w-8 text-foreground-muted" />
-
-				<View>
-					<Text className="text-foreground-muted">No results found for &quot;{query}&quot;</Text>
-				</View>
-			</View>
+			<EmptyState
+				title="Nothing was returned"
+				message={`There was nothing matching "${query}" in your library`}
+			/>
 		)
 	}
 

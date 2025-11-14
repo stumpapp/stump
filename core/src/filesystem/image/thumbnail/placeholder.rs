@@ -5,7 +5,7 @@ use palette::{
 	cast::from_component_slice, color_difference::Ciede2000, FromColor, Hsl, IntoColor,
 	Lab, Srgb,
 };
-use std::path::Path;
+use std::{cmp::Ordering, path::Path};
 use thumbhash::rgba_to_thumb_hash;
 
 #[derive(Debug)]
@@ -78,7 +78,10 @@ pub fn process_image_colors(
 
 	// Sort by saturation (highest to lowest)
 	candidates.sort_unstable_by(|a, b| {
-		b.hsl.saturation.partial_cmp(&a.hsl.saturation).unwrap()
+		b.hsl
+			.saturation
+			.partial_cmp(&a.hsl.saturation)
+			.unwrap_or(Ordering::Equal)
 	});
 
 	// We want to return 1 or 3 colours
@@ -115,8 +118,11 @@ pub fn process_image_colors(
 
 	// Sort by percentage (highest to lowest)
 	// This is to set the order of colours for the mesh gradient. There may be a better looking way to explore later.
-	final_palette
-		.sort_unstable_by(|a, b| b.percentage.partial_cmp(&a.percentage).unwrap());
+	final_palette.sort_unstable_by(|a, b| {
+		b.percentage
+			.partial_cmp(&a.percentage)
+			.unwrap_or(Ordering::Equal)
+	});
 
 	// Convert the colours to HEX strings
 	let hex: Vec<String> = final_palette

@@ -426,7 +426,7 @@
 				},
 				{
 					"label": "Wird gescannt",
-					"heading": "Scanning",
+					"heading": "Scanne",
 					"description": "Einstellungen in Bezug darauf, wie Stumpf diese Bibliothek scannt"
 				},
 				{
@@ -457,7 +457,7 @@
 					"ignoreRules": "Dateien ignorieren",
 					"convertRar": "Konvertiere RAR/CBR",
 					"deleteConversions": "Konvertierte Dateien löschen",
-					"watch": "Watch directory for changes",
+					"watch": "Überwache Ordner nach Änderungen",
 					"processMetadata": "Metadaten verarbeiten",
 					"generateFileHashes": "Datei-Hashes generieren"
 				}

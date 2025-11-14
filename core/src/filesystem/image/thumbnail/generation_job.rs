@@ -195,6 +195,7 @@ impl JobExt for ThumbnailGenerationJob {
 					..
 				} = safely_generate_batch(
 					media,
+					ctx,
 					GenerateThumbnailOptions {
 						image_options: self.options.clone(),
 						core_config: ctx.config.as_ref().clone(),
@@ -225,6 +226,7 @@ impl JobExt for ThumbnailGenerationJob {
 #[tracing::instrument(skip_all)]
 pub async fn safely_generate_batch(
 	books: Vec<media::MediaIdentSelect>,
+	ctx: &WorkerCtx,
 	options: GenerateThumbnailOptions,
 	reporter: impl Fn(usize),
 ) -> JobTaskOutput<ThumbnailGenerationJob> {
@@ -247,11 +249,6 @@ pub async fn safely_generate_batch(
 			"Processing thumbnail generation batch"
 		);
 
-		// Note: This originally spawned a bunch of futures all at once and then just
-		// kept them waiting until the semaphore was available. I've refactored this
-		// to use chunking as a potential solve for https://github.com/stumpapp/stump/issues/671.
-		// TODO: Port this to the develop branch and ask for feedback on whether it improves the situation.
-		// TODO: ^ Depending on outcome, definitely need to revisit ALL of the scanner logic since it also had that pattern
 		for (book_index, book) in chunk.iter().enumerate() {
 			let options = options.clone();
 			let path = book.path.clone();
@@ -259,7 +256,7 @@ pub async fn safely_generate_batch(
 			let future = async move {
 				tracing::trace!(?path, "(Chunk {chunk_index}, Book {book_index}) Starting thumbnail generation");
 
-				let result = generate_book_thumbnail(book, options)
+				let result = generate_book_thumbnail(book, ctx.conn.as_ref(), options)
 					.await
 					.map(|(_, path, did_generate)| (path, did_generate));
 

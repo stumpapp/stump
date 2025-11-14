@@ -275,6 +275,8 @@ impl Library {
 		Ok(models.into_iter().map(Tag::from).collect())
 	}
 
+	// TODO(thumb-placeholders): We need to refactor how non-book thumbs are handled so we can pull
+	// dimensions/metadata here.
 	/// A reference to the thumbnail image for the thumbnail. This will be a fully
 	/// qualified URL to the image.
 	async fn thumbnail(&self, ctx: &Context<'_>) -> Result<ImageRef> {

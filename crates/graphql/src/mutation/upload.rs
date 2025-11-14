@@ -166,6 +166,7 @@ impl UploadMutation {
 	// TODO(graphql): There is a LOT of duplication here, and only subtle differences wrt the queries.
 	// I think we can refactor this into some utility function(s) that take the model type and the ID as parameters
 
+	// TODO(thumb-placeholders): Uploaded images should have their metadata generated and stored
 	#[graphql(
 		guard = "OptionalFeatureGuard::new(OptionalFeature::Upload).and(PermissionGuard::new(&[UserPermission::UploadFile, UserPermission::EditLibrary]))"
 	)]
@@ -220,6 +221,7 @@ impl UploadMutation {
 		Ok(library.into())
 	}
 
+	// TODO(thumb-placeholders): Uploaded images should have their metadata generated and stored
 	#[graphql(
 		guard = "OptionalFeatureGuard::new(OptionalFeature::Upload).and(PermissionGuard::new(&[UserPermission::UploadFile, UserPermission::EditLibrary]))"
 	)]
@@ -278,6 +280,7 @@ impl UploadMutation {
 		Ok(series.into())
 	}
 
+	// TODO(thumb-placeholders): Uploaded images should have their metadata generated and stored
 	#[graphql(
 		guard = "OptionalFeatureGuard::new(OptionalFeature::Upload).and(PermissionGuard::new(&[UserPermission::UploadFile, UserPermission::EditLibrary]))"
 	)]

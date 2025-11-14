@@ -304,6 +304,8 @@ mod tests {
 				pages: 3,
 				modified_at: None,
 				size: 2000,
+				thumbnail_meta: None,
+				thumbnail_path: None,
 			},
 			metadata: Some(media_metadata::Model {
 				media_id: Some("1".to_string()),

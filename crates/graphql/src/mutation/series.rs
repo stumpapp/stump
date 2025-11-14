@@ -150,6 +150,7 @@ impl SeriesMutation {
 
 		let (_, path_buf, _) = generate_book_thumbnail(
 			&book.clone().into(),
+			core.conn.as_ref(),
 			GenerateThumbnailOptions {
 				image_options,
 				core_config: core.config.as_ref().clone(),

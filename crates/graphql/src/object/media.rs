@@ -208,6 +208,7 @@ impl Media {
 			url: service.format_url(format!("/api/v2/media/{}/thumbnail", self.model.id)),
 			height: page_dimension.as_ref().map(|dim| dim.height),
 			width: page_dimension.as_ref().map(|dim| dim.width),
+			metadata: self.model.thumbnail_meta.clone(),
 		})
 	}
 

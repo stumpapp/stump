@@ -4,12 +4,16 @@ use models::{
 	entity::media,
 	shared::image_processor_options::{ImageProcessorOptions, SupportedImageFormat},
 };
+use sea_orm::{prelude::*, EntityTrait, QueryFilter};
 use tokio::{fs, sync::oneshot, task::spawn_blocking};
 
 use crate::{
 	config::StumpConfig,
 	filesystem::{
-		image::{GenericImageProcessor, ImageProcessor, ProcessorError, WebpProcessor},
+		image::{
+			thumbnail::placeholder::generate_image_metadata, GenericImageProcessor,
+			ImageProcessor, ProcessorError, WebpProcessor,
+		},
 		media::get_page,
 	},
 };
@@ -23,6 +27,8 @@ pub enum ThumbnailGenerateError {
 	ProcessorError(#[from] ProcessorError),
 	#[error("Did not receive thumbnail generation result")]
 	ResultNeverReceived,
+	#[error("Failed to update media entity")]
+	UpdateFailed,
 	#[error("Something unexpected went wrong: {0}")]
 	Unknown(String),
 }
@@ -75,6 +81,7 @@ fn do_generate_book_thumbnail(
 #[tracing::instrument(skip_all)]
 pub async fn generate_book_thumbnail(
 	book: &media::MediaIdentSelect,
+	conn: &DatabaseConnection,
 	GenerateThumbnailOptions {
 		image_options,
 		core_config,
@@ -145,27 +152,36 @@ pub async fn generate_book_thumbnail(
 		},
 	};
 
-	// Write the thumbnail to the filesystem
 	let (thumbnail, thumbnail_path, did_generate) = generate_result;
 	fs::write(&thumbnail_path, &thumbnail).await?;
 
-	// Use 7 to get the three mesh colours, 1 for the average colour
-	if let Ok(colors) = super::placeholder::process_image_colors(&thumbnail_path, 7) {
-		let txt_path = thumbnail_path.with_extension("colors.txt");
-		let content = colors.join("\n");
+	let thumbnail_metadata = match generate_image_metadata(&thumbnail_path).await {
+		Ok(metadata) => Some(metadata),
+		Err(e) => {
+			tracing::error!(error = ?e, "Failed to generate thumbnail metadata");
+			None
+		},
+	};
 
-		if let Err(e) = std::fs::write(&txt_path, content.as_bytes()) {
-			tracing::error!(error = ?e, "Failed to create txt");
-		}
+	let update_result = media::Entity::update_many()
+		.filter(media::Column::Id.eq(book.id.clone()))
+		.col_expr(
+			media::Column::ThumbnailPath,
+			Expr::value(Some(thumbnail_path.to_string_lossy().to_string())),
+		)
+		.col_expr(
+			media::Column::ThumbnailMeta,
+			Expr::value(thumbnail_metadata),
+		)
+		.exec(conn)
+		.await;
+
+	// TODO: I think this should hard err?
+	match update_result {
+		Ok(_) => Ok((thumbnail, thumbnail_path, did_generate)),
+		Err(e) => {
+			tracing::error!(error = ?e, "Failed to update media entity with thumbnail info");
+			Err(ThumbnailGenerateError::UpdateFailed)
+		},
 	}
-
-	if let Ok(thumbhash) = super::placeholder::process_image_thumbhash(&thumbnail_path) {
-		let txt_path = thumbnail_path.with_extension("thumbhash.txt");
-
-		if let Err(e) = std::fs::write(&txt_path, thumbhash.as_bytes()) {
-			tracing::error!(error = ?e, "Failed to create txt");
-		}
-	}
-
-	Ok((thumbnail, thumbnail_path, did_generate))
 }

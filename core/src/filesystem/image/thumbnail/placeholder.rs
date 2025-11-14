@@ -1,12 +1,63 @@
 use base64::prelude::*;
 use image;
 use kmeans_colors::{get_kmeans, Kmeans, Sort};
+use models::shared::image::ImageMetadata;
 use palette::{
 	cast::from_component_slice, color_difference::Ciede2000, FromColor, Hsl, IntoColor,
 	Lab, Srgb,
 };
 use std::{cmp::Ordering, path::Path};
 use thumbhash::rgba_to_thumb_hash;
+use tokio::{sync::oneshot, task::spawn_blocking};
+
+use crate::filesystem::image::ProcessorError;
+
+pub async fn generate_image_metadata(
+	path: &Path,
+) -> Result<ImageMetadata, ProcessorError> {
+	let (tx, rx) = oneshot::channel();
+
+	let handle = spawn_blocking({
+		let path = path.to_path_buf();
+		move || {
+			let result = _generate_image_metadata(&path);
+			let send_result = tx.send(result);
+			tracing::trace!(
+				is_err = send_result.is_err(),
+				"Sending generate result to channel"
+			);
+		}
+	});
+
+	match rx.await {
+		Ok(result) => result,
+		Err(e) => {
+			// Note: `abort` has no affect on blocking threads which have already been spawned,
+			// so we just have to wait for the thread to finish.
+			// See: https://docs.rs/tokio/latest/tokio/task/fn.spawn_blocking.html
+			handle
+				.await
+				.map_err(|e| ProcessorError::UnknownError(e.to_string()))?;
+			// If we reach this point, it means the thread finished but we never got a result
+			Err(ProcessorError::UnknownError(format!(
+				"Result never received: {}",
+				e
+			)))
+		},
+	}
+}
+
+fn _generate_image_metadata(path: &Path) -> Result<ImageMetadata, ProcessorError> {
+	let mesh_colors = process_image_colors(path, 7)?;
+	let average_color = process_image_colors(path, 1)?;
+	let thumbhash = process_image_thumbhash(path)?;
+
+	Ok(ImageMetadata {
+		average_color: average_color.first().cloned(),
+		mesh_colors,
+		thumbhash: Some(thumbhash),
+	})
+}
 
 #[derive(Debug)]
 struct ColorData {
@@ -23,7 +74,7 @@ struct ColorData {
 pub fn process_image_colors(
 	path: &Path,
 	k: usize,
-) -> Result<Vec<String>, Box<dyn std::error::Error>> {
+) -> Result<Vec<String>, ProcessorError> {
 	// Load image
 	let dyn_img = image::open(path)?;
 
@@ -144,9 +195,7 @@ pub fn process_image_colors(
 /// * `path` - The path to the image.
 ///
 /// Returns the thumbhash as a base64 string, or an error.
-pub fn process_image_thumbhash(
-	path: &Path,
-) -> Result<String, Box<dyn std::error::Error>> {
+pub fn process_image_thumbhash(path: &Path) -> Result<String, ProcessorError> {
 	let dyn_img = image::open(path)?;
 
 	// image must be ≤ 100px

@@ -1,4 +1,4 @@
-use crate::entity::age_restriction;
+use crate::{entity::age_restriction, shared::image::ImageMetadata};
 use async_graphql::SimpleObject;
 use async_trait::async_trait;
 use chrono::Utc;
@@ -60,6 +60,12 @@ pub struct Model {
 	/// if it is available on disk)
 	#[sea_orm(column_type = "Text")]
 	pub status: FileStatus,
+	/// The metadata for the thumbnail image of the media
+	#[sea_orm(column_type = "Json", nullable)]
+	pub thumbnail_meta: Option<ImageMetadata>,
+	/// The path to the thumbnail image of the media on disk
+	#[sea_orm(column_type = "Text", nullable)]
+	pub thumbnail_path: Option<String>,
 	/// The unique identifier of the series that the media belongs to. While this is nullable, it is
 	/// expected that all media will belong to a series
 	#[sea_orm(column_type = "Text", nullable)]

@@ -30,6 +30,8 @@ impl SmartList {
 		Ok(serde_json::to_string(&filters)?)
 	}
 
+	// TODO(thumb-placeholders): We need to refactor how non-book thumbs are handled so we can pull
+	// dimensions/metadata here.
 	async fn thumbnail(&self, ctx: &Context<'_>) -> Result<ImageRef> {
 		let service = ctx.data::<ServiceContext>()?;
 		Ok(ImageRef {

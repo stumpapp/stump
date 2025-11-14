@@ -617,6 +617,7 @@ impl LibraryMutation {
 
 		let (_, path_buf, _) = generate_book_thumbnail(
 			&book.into(),
+			core.conn.as_ref(),
 			GenerateThumbnailOptions {
 				image_options,
 				core_config: core.config.as_ref().clone(),

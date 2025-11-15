@@ -5,9 +5,7 @@ import { Pressable, View } from 'react-native'
 import { cn } from '~/lib/utils'
 import { usePreferencesStore } from '~/stores'
 
-import { BorderAndShadow } from '../BorderAndShadow'
-import { TurboImage } from '../Image'
-import { ThumbnailPlaceholder } from '../ThumbnailPlaceholder'
+import { ThumbnailImage } from '../Image'
 import { Text } from '../ui'
 import { useGridItemSize } from './useGridItemSize'
 
@@ -28,24 +26,17 @@ export default function GridImageItem({ uri, title, href }: Props) {
 		<Pressable onPress={() => router.navigate(href)}>
 			{({ pressed }) => (
 				<View className={cn('flex-1 gap-2 pb-4', { 'opacity-80': pressed })}>
-					<BorderAndShadow
-						style={{ borderRadius: 8, borderWidth: 0.3, shadowRadius: 1.41, elevation: 2 }}
-					>
-						<ThumbnailPlaceholder />
-						<TurboImage
-							source={{
-								uri: '',
-								headers: {
-									...sdk.customHeaders,
-									Authorization: sdk.authorizationHeader || '',
-								},
-							}}
-							resizeMode="stretch"
-							fadeDuration={800}
-							resize={itemDimension * 1.5}
-							style={{ height: itemDimension / thumbnailRatio, width: itemDimension, zIndex: 15 }}
-						/>
-					</BorderAndShadow>
+					<ThumbnailImage
+						source={{
+							uri: uri,
+							headers: {
+								...sdk.customHeaders,
+								Authorization: sdk.authorizationHeader || '',
+							},
+						}}
+						resizeMode="stretch"
+						size={{ height: itemDimension / thumbnailRatio, width: itemDimension }}
+					/>
 
 					<Text
 						size="xl"

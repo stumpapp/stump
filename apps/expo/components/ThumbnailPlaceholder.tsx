@@ -25,12 +25,12 @@ const points1 = [
 
 export function ThumbnailPlaceholder() {
 	const thumbnailPlaceholder = usePreferencesStore((state) => state.thumbnailPlaceholder)
-	const { placeholder } = useColors()
+	const { thumbnail } = useColors()
 	const colors = colors1
 	const points = points1
 
 	if (thumbnailPlaceholder === 'grayscale') {
-		return <View style={[styles.placeholder, { backgroundColor: placeholder }]} />
+		return <View style={[styles.placeholder, { backgroundColor: thumbnail.placeholder }]} />
 	}
 
 	if (thumbnailPlaceholder === 'monochrome') {
@@ -58,5 +58,5 @@ export function ThumbnailPlaceholder() {
 }
 
 const styles = StyleSheet.create({
-	placeholder: { position: 'absolute', inset: 0, zIndex: 10 },
+	placeholder: { position: 'absolute', inset: 0, zIndex: 10, overflow: 'hidden' },
 })

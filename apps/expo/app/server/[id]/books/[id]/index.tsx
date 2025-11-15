@@ -16,10 +16,8 @@ import { BookMetaLink } from '~/components/book'
 import { BookActionMenu } from '~/components/book/overview'
 import { InfoRow, InfoSection, InfoStat } from '~/components/book/overview'
 import LongValue from '~/components/book/overview/longValue/LongValue'
-import { BorderAndShadow } from '~/components/BorderAndShadow'
-import { TurboImage } from '~/components/Image'
+import { ThumbnailImage } from '~/components/Image'
 import RefreshControl from '~/components/RefreshControl'
-import { ThumbnailPlaceholder } from '~/components/ThumbnailPlaceholder'
 import { Button, Heading, Text } from '~/components/ui'
 import { Icon } from '~/components/ui/icon'
 import { formatBytes, parseGraphQLDecimal } from '~/lib/format'
@@ -324,24 +322,17 @@ export default function Screen() {
 					)}
 
 					<View className="flex items-center gap-4">
-						<BorderAndShadow
-							style={{ borderRadius: 10, borderWidth: 0.4, shadowRadius: 5, elevation: 8 }}
-						>
-							<ThumbnailPlaceholder />
-							<TurboImage
-								source={{
-									uri: book.thumbnail.url,
-									headers: {
-										...sdk.customHeaders,
-										Authorization: sdk.authorizationHeader || '',
-									},
-								}}
-								resizeMode="stretch"
-								fadeDuration={800}
-								resize={235 * 1.5}
-								style={{ height: 235 / thumbnailRatio, width: 235, zIndex: 15 }}
-							/>
-						</BorderAndShadow>
+						<ThumbnailImage
+							source={{
+								uri: book.thumbnail.url,
+								headers: {
+									...sdk.customHeaders,
+									Authorization: sdk.authorizationHeader || '',
+								},
+							}}
+							resizeMode="stretch"
+							size={{ height: 235 / thumbnailRatio, width: 235 }}
+						/>
 					</View>
 
 					<View className="gap-2">

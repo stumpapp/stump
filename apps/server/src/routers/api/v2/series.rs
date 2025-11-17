@@ -12,7 +12,7 @@ use models::{
 use sea_orm::{prelude::*, sea_query::Query, QueryOrder};
 use stump_core::{
 	config::StumpConfig,
-	filesystem::{get_thumbnail, ContentType},
+	filesystem::{get_saved_thumbnail, get_thumbnail, ContentType},
 };
 
 use crate::{
@@ -33,6 +33,8 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		.layer(middleware::from_fn_with_state(app_state, auth_middleware))
 }
 
+// TODO(thumb-placeholders): I think I want to refactor to intake the entire series node,
+// that way the logic is more encapsulated. Tomorrow, maybe, lazy rn
 pub(crate) async fn get_series_thumbnail(
 	id: &str,
 	first_book: Option<media::MediaThumbSelect>,
@@ -61,16 +63,30 @@ async fn get_series_thumbnail_handler(
 	let user = req.user();
 	let series = series::Entity::find_for_user(&user)
 		.filter(series::Column::Id.eq(id.clone()))
-		.into_model::<series::SeriesIdentSelect>()
+		.into_model::<series::SeriesThumbSelect>()
 		.one(ctx.conn.as_ref())
 		.await?
-		.ok_or(APIError::NotFound("Book not found".to_string()))?;
+		.ok_or(APIError::NotFound("Series not found".to_string()))?;
+
+	// TODO: Remove the safeguard once refactored thumbnailing system is more tested
+	if let Some(path) = &series.thumbnail_path {
+		// Note: I figure it might be OK to not hard-fail here until the updated thumbnailing system
+		// is in place, and the "fallback" basically just tries to find it if not set.
+		match get_saved_thumbnail(std::path::Path::new(path)).await {
+			Ok(result) => return Ok(result.into()),
+			Err(_) => {
+				tracing::warn!(path = ?path, "Failed to get saved thumbnail");
+			},
+		}
+	}
+
 	let first_book = media::Entity::find_for_user(&user)
 		.filter(media::Column::SeriesId.eq(series.id.clone()))
 		.order_by_asc(media::Column::Name)
 		.into_model::<media::MediaThumbSelect>()
 		.one(ctx.conn.as_ref())
 		.await?;
+
 	let library_config = library_config::Entity::find()
 		.filter(
 			library_config::Column::LibraryId.in_subquery(
@@ -88,5 +104,6 @@ async fn get_series_thumbnail_handler(
 	let (content_type, bytes) =
 		get_series_thumbnail(id.as_str(), first_book, image_format, ctx.config.as_ref())
 			.await?;
+
 	Ok(ImageResponse::new(content_type, bytes))
 }

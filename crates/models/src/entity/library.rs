@@ -8,6 +8,7 @@ use sea_orm::{
 
 use crate::shared::{
 	enums::FileStatus,
+	image::ImageMetadata,
 	ordering::{OrderBy, OrderDirection},
 };
 
@@ -27,6 +28,10 @@ pub struct Model {
 	pub path: String,
 	#[sea_orm(column_type = "Text")]
 	pub status: FileStatus,
+	#[sea_orm(column_type = "Json", nullable)]
+	pub thumbnail_meta: Option<ImageMetadata>,
+	#[sea_orm(column_type = "Text", nullable)]
+	pub thumbnail_path: Option<String>,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
 	pub created_at: DateTimeWithTimeZone,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
@@ -55,9 +60,28 @@ pub struct LibraryIdentSelect {
 }
 
 impl LibraryIdentSelect {
-	// TODO: make a trait
 	pub fn columns() -> Vec<Column> {
 		vec![Column::Id, Column::Name, Column::Path]
+	}
+}
+
+#[derive(Clone, Debug, DerivePartialModel, FromQueryResult)]
+#[sea_orm(entity = "<Model as ModelTrait>::Entity")]
+pub struct LibraryThumbSelect {
+	pub id: String,
+	pub name: String,
+	pub path: String,
+	pub thumbnail_path: Option<String>,
+}
+
+impl LibraryThumbSelect {
+	pub fn columns() -> Vec<Column> {
+		vec![
+			Column::Id,
+			Column::Name,
+			Column::Path,
+			Column::ThumbnailPath,
+		]
 	}
 }
 

@@ -14,6 +14,15 @@ use super::{media::is_accepted_cover_name, ContentType};
 pub const ACCEPTED_IMAGE_EXTENSIONS: [&str; 8] =
 	["jpg", "png", "jpeg", "jxl", "webp", "gif", "avif", "heif"];
 
+/// Reads a saved thumbnail from disk. I assume the path exists, and want it to error if not since
+/// this isn't a "find" operation like `get_thumbnail`.
+pub async fn get_saved_thumbnail(path: &Path) -> io::Result<(ContentType, Vec<u8>)> {
+	let FileParts { extension, .. } = path.file_parts();
+	let content_type = ContentType::from_extension(&extension);
+	let bytes = fs::read(path).await?;
+	Ok((content_type, bytes))
+}
+
 pub async fn get_thumbnail(
 	parent: impl AsRef<Path>,
 	name: &str,

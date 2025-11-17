@@ -3,28 +3,30 @@ use futures::{stream::FuturesUnordered, StreamExt};
 use serde::{Deserialize, Serialize};
 
 use models::{
-	entity::{media, series},
+	entity::{library, media, series},
 	shared::image_processor_options::ImageProcessorOptions,
 };
 use sea_orm::{prelude::*, QuerySelect};
 
-use crate::job::{
-	error::JobError, JobExecuteLog, JobExt, JobOutputExt, JobProgress, JobTaskOutput,
-	WorkerCtx, WorkingState, WrappedJob,
+use crate::{
+	job::{
+		error::JobError, JobExecuteLog, JobExt, JobOutputExt, JobProgress, JobTaskOutput,
+		WorkerCtx, WorkingState, WrappedJob,
+	},
+	utils::chain_optional_iter,
 };
 
 use super::generate::{generate_book_thumbnail, GenerateThumbnailOptions};
 
 // Note: I am type aliasing for the sake of clarity in what the provided Strings represent
 type Id = String;
-type MediaIds = Vec<Id>;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "type")]
 pub enum ThumbnailGenerationJobVariant {
 	SingleLibrary(Id),
 	SingleSeries(Id),
-	MediaGroup(MediaIds),
+	MediaGroup(Vec<Id>),
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -57,8 +59,17 @@ impl ThumbnailGenerationJobParams {
 }
 
 #[derive(Serialize, Deserialize)]
+pub struct ThumbnailGenerationInit {
+	pub media_ids: Vec<Id>,
+	pub series_ids: Vec<Id>,
+	pub library_ids: Vec<Id>,
+}
+
+#[derive(Serialize, Deserialize)]
 pub enum ThumbnailGenerationTask {
-	GenerateBatch(MediaIds),
+	Media(Vec<Id>),
+	Series(Vec<Id>),
+	Library(Vec<Id>),
 }
 
 #[derive(Clone, Serialize, Deserialize, Default, Debug, SimpleObject)]
@@ -127,19 +138,46 @@ impl JobExt for ThumbnailGenerationJob {
 		&mut self,
 		ctx: &WorkerCtx,
 	) -> Result<WorkingState<Self::Output, Self::Task>, JobError> {
-		let media_ids = match &self.params.variant {
+		let init_params = match &self.params.variant {
 			ThumbnailGenerationJobVariant::SingleLibrary(id) => {
 				let books = media::Entity::find()
 					.select_only()
 					.columns(vec![media::Column::Id, media::Column::Path])
 					.inner_join(series::Entity)
 					.filter(series::Column::LibraryId.eq(id))
-					.into_model::<media::MediaIdentSelect>()
+					.into_model::<media::MediaThumbSelect>()
+					.all(ctx.conn.as_ref())
+					.await
+					.map_err(|e| JobError::InitFailed(e.to_string()))?;
+				let media_ids = books.iter().map(|m| m.id.clone()).collect::<Vec<_>>();
+
+				let series_ids = books
+					.iter()
+					.map(|m| m.series_id.clone())
+					.collect::<std::collections::HashSet<_>>() // Unique
+					.into_iter()
+					.collect::<Vec<_>>();
+
+				let series = series::Entity::find()
+					.select_only()
+					.columns(series::SeriesThumbSelect::columns())
+					.into_model::<series::SeriesThumbSelect>()
 					.all(ctx.conn.as_ref())
 					.await
 					.map_err(|e| JobError::InitFailed(e.to_string()))?;
 
-				books.into_iter().map(|m| m.id).collect::<Vec<_>>()
+				let library_ids = series
+					.iter()
+					.filter_map(|s| s.library_id.clone())
+					.collect::<std::collections::HashSet<_>>() // Unique
+					.into_iter()
+					.collect::<Vec<_>>();
+
+				ThumbnailGenerationInit {
+					media_ids,
+					series_ids,
+					library_ids,
+				}
 			},
 			ThumbnailGenerationJobVariant::SingleSeries(id) => {
 				let books = media::Entity::find()
@@ -151,14 +189,39 @@ impl JobExt for ThumbnailGenerationJob {
 					.await
 					.map_err(|e| JobError::InitFailed(e.to_string()))?;
 
-				books.into_iter().map(|m| m.id).collect::<Vec<_>>()
+				let media_ids = books.into_iter().map(|m| m.id).collect::<Vec<_>>();
+
+				ThumbnailGenerationInit {
+					media_ids,
+					series_ids: vec![id.clone()],
+					library_ids: vec![],
+				}
 			},
-			ThumbnailGenerationJobVariant::MediaGroup(media_ids) => media_ids.clone(),
+			ThumbnailGenerationJobVariant::MediaGroup(media_ids) => {
+				ThumbnailGenerationInit {
+					media_ids: media_ids.clone(),
+					series_ids: vec![],
+					library_ids: vec![],
+				}
+			},
 		};
+
+		let tasks = chain_optional_iter(
+			[],
+			[
+				(!init_params.media_ids.is_empty()).then_some(
+					ThumbnailGenerationTask::Media(init_params.media_ids.clone()),
+				),
+				(!init_params.series_ids.is_empty())
+					.then_some(ThumbnailGenerationTask::Series(init_params.series_ids)),
+				(!init_params.library_ids.is_empty())
+					.then_some(ThumbnailGenerationTask::Library(init_params.library_ids)),
+			],
+		);
 
 		Ok(WorkingState {
 			output: Some(Self::Output::default()),
-			tasks: vec![ThumbnailGenerationTask::GenerateBatch(media_ids)].into(),
+			tasks: tasks.into(),
 			completed_tasks: 0,
 			logs: vec![],
 		})
@@ -173,7 +236,7 @@ impl JobExt for ThumbnailGenerationJob {
 		let mut logs = vec![];
 
 		match task {
-			ThumbnailGenerationTask::GenerateBatch(media_ids) => {
+			ThumbnailGenerationTask::Media(media_ids) => {
 				let media = media::Entity::find()
 					.select_only()
 					.columns(vec![media::Column::Id, media::Column::Path])
@@ -185,7 +248,7 @@ impl JobExt for ThumbnailGenerationJob {
 
 				let task_count = media.len() as i32;
 				ctx.report_progress(JobProgress::subtask_position_msg(
-					"Generating thumbnails",
+					"Generating book thumbnails",
 					1,
 					task_count,
 				));
@@ -213,6 +276,44 @@ impl JobExt for ThumbnailGenerationJob {
 				output.update(sub_output);
 				logs.extend(sub_logs);
 			},
+			ThumbnailGenerationTask::Series(series_ids) => {
+				let series = series::Entity::find()
+					.select_only()
+					.columns(series::SeriesIdentSelect::columns())
+					.filter(series::Column::Id.is_in(series_ids))
+					.into_model::<series::SeriesIdentSelect>()
+					.all(ctx.conn.as_ref())
+					.await
+					.map_err(|e| JobError::TaskFailed(e.to_string()))?;
+
+				let task_count = series.len() as i32;
+				ctx.report_progress(JobProgress::subtask_position_msg(
+					"Generating series thumbnails",
+					1,
+					task_count,
+				));
+
+				todo!("Series thumbnail generation not yet implemented");
+			},
+			ThumbnailGenerationTask::Library(library_ids) => {
+				let libraries = library::Entity::find()
+					.select_only()
+					.columns(library::LibraryIdentSelect::columns())
+					.filter(library::Column::Id.is_in(library_ids))
+					.into_model::<library::LibraryIdentSelect>()
+					.all(ctx.conn.as_ref())
+					.await
+					.map_err(|e| JobError::TaskFailed(e.to_string()))?;
+
+				let task_count = libraries.len() as i32;
+				ctx.report_progress(JobProgress::subtask_position_msg(
+					"Generating library thumbnails",
+					1,
+					task_count,
+				));
+
+				tracing::warn!("Library thumbnail generation not yet implemented");
+			},
 		}
 
 		Ok(JobTaskOutput {
@@ -223,6 +324,13 @@ impl JobExt for ThumbnailGenerationJob {
 	}
 }
 
+// TODO(thumb-placeholders): Make intake an enum of either (Media/Series/Library)IdentSelect and match for the inner
+// futures. I don't think we need to clone the whole safely_generate_batch function for each type, just things like
+// generate_book_thumbnail vs generate_series_thumbnail, etc.
+// What I imagine for each at a high level is something like:
+// generate_{series/library}_thumbnail -> get "default" thumbnail from first book -> check if exists -> generate thumbnail -> save to series record
+// The thing to note is that there is an implied ordering for this job in that books always get run first, so we should be able to safely assume if force_regen was
+// true it would have been handled in the book thumbnail generation step. So we don't need to regen, just check if it exists and update the mapping in the database
 #[tracing::instrument(skip_all)]
 pub async fn safely_generate_batch(
 	books: Vec<media::MediaIdentSelect>,

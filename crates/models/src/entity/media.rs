@@ -269,11 +269,17 @@ pub struct MediaThumbSelect {
 	pub id: String,
 	pub path: String,
 	pub series_id: String,
+	pub thumbnail_path: Option<String>,
 }
 
 impl MediaThumbSelect {
 	pub fn columns() -> Vec<Column> {
-		vec![Column::Id, Column::Path, Column::SeriesId]
+		vec![
+			Column::Id,
+			Column::Path,
+			Column::SeriesId,
+			Column::ThumbnailPath,
+		]
 	}
 }
 

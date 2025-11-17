@@ -15,7 +15,9 @@ use models::{
 use sea_orm::{prelude::*, sea_query::Query, QuerySelect};
 use stump_core::{
 	config::StumpConfig,
-	filesystem::{get_thumbnail, media::get_page_async, ContentType, FileError},
+	filesystem::{
+		get_saved_thumbnail, get_thumbnail, media::get_page_async, ContentType, FileError,
+	},
 	Ctx,
 };
 use tower_http::services::ServeFile;
@@ -116,16 +118,25 @@ pub(crate) async fn get_media_thumbnail_by_id(
 	book_id: String,
 ) -> APIResult<(ContentType, Vec<u8>)> {
 	let book = media::Entity::find_for_user(user)
-		.columns(vec![
-			media::Column::Id,
-			media::Column::Path,
-			media::Column::SeriesId,
-		])
+		.columns(media::MediaThumbSelect::columns())
 		.filter(media::Column::Id.eq(book_id))
 		.into_model::<media::MediaThumbSelect>()
 		.one(ctx.conn.as_ref())
 		.await?
 		.ok_or(APIError::NotFound("Book not found".to_string()))?;
+
+	// TODO: Remove the safeguard once refactored thumbnailing system is more tested
+	if let Some(path) = &book.thumbnail_path {
+		// Note: I figure it might be OK to not hard-fail here until the updated thumbnailing system
+		// is in place, and the "fallback" basically just tries to find it if not set.
+		match get_saved_thumbnail(std::path::Path::new(path)).await {
+			Ok(result) => return Ok(result),
+			Err(_) => {
+				tracing::warn!(path = ?path, "Failed to get saved thumbnail");
+			},
+		}
+	}
+
 	let library_config = library_config::Entity::find()
 		.filter(
 			library_config::Column::LibraryId.in_subquery(
@@ -147,6 +158,7 @@ pub(crate) async fn get_media_thumbnail_by_id(
 		.one(ctx.conn.as_ref())
 		.await?;
 	let image_format = library_config.and_then(|o| o.thumbnail_config.map(|c| c.format));
+
 	get_media_thumbnail(&book.id, &book.path, image_format, ctx.config.as_ref()).await
 }
 

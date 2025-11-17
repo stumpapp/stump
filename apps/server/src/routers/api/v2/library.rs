@@ -21,7 +21,7 @@ use models::{
 use sea_orm::{prelude::*, QueryOrder};
 use stump_core::{
 	config::StumpConfig,
-	filesystem::{get_thumbnail, ContentType},
+	filesystem::{get_saved_thumbnail, get_thumbnail, ContentType},
 };
 
 use super::series::get_series_thumbnail;
@@ -46,6 +46,8 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		.layer(middleware::from_fn_with_state(app_state, auth_middleware))
 }
 
+// TODO(thumb-placeholders): I think I want to refactor to intake the entire library node,
+// that way the logic is more encapsulated. Tomorrow, maybe, lazy rn
 pub(crate) async fn get_library_thumbnail(
 	id: &str,
 	first_series: Option<SeriesIdentSelect>,
@@ -76,16 +78,30 @@ async fn get_library_thumbnail_handler(
 	let (library, library_config) = library::Entity::find_for_user(&user)
 		.filter(library::Column::Id.eq(id.clone()))
         .find_also_related(library_config::Entity)
-		.into_model::<library::LibraryIdentSelect, library_config::LibraryConfigThumbnailConfig>()
+		.into_model::<library::LibraryThumbSelect, library_config::LibraryConfigThumbnailConfig>()
 		.one(ctx.conn.as_ref())
 		.await?
 		.ok_or(APIError::NotFound("Library not found".to_string()))?;
+
+	// TODO: Remove the safeguard once refactored thumbnailing system is more tested
+	if let Some(path) = &library.thumbnail_path {
+		// Note: I figure it might be OK to not hard-fail here until the updated thumbnailing system
+		// is in place, and the "fallback" basically just tries to find it if not set.
+		match get_saved_thumbnail(std::path::Path::new(path)).await {
+			Ok(result) => return Ok(result.into()),
+			Err(_) => {
+				tracing::warn!(path = ?path, "Failed to get saved thumbnail");
+			},
+		}
+	}
+
 	let first_series = series::Entity::find_for_user(&user)
 		.filter(series::Column::LibraryId.eq(library.id.clone()))
 		.order_by_asc(series::Column::Name)
 		.into_model::<series::SeriesIdentSelect>()
 		.one(ctx.conn.as_ref())
 		.await?;
+
 	let first_book = if let Some(ref series) = first_series {
 		media::Entity::find_for_user(&user)
 			.filter(media::Column::SeriesId.eq(series.id.clone()))
@@ -106,5 +122,6 @@ async fn get_library_thumbnail_handler(
 		ctx.config.as_ref(),
 	)
 	.await?;
+
 	Ok(ImageResponse::new(content_type, bytes))
 }

@@ -275,21 +275,20 @@ impl Library {
 		Ok(models.into_iter().map(Tag::from).collect())
 	}
 
-	// TODO(thumb-placeholders): We need to refactor how non-book thumbs are handled so we can pull
-	// dimensions/metadata here.
 	/// A reference to the thumbnail image for the thumbnail. This will be a fully
 	/// qualified URL to the image.
 	async fn thumbnail(&self, ctx: &Context<'_>) -> Result<ImageRef> {
 		let service = ctx.data::<ServiceContext>()?;
 
 		// TODO: Spawn a blocking task to get the image dimensions
-		// Use a cache as to not read the file system every time
+		// Use a cache as to not read the file system every time?
 
 		Ok(ImageRef {
 			url: service
 				.format_url(format!("/api/v2/library/{}/thumbnail", self.model.id)),
 			// height: page_dimension.as_ref().map(|dim| dim.height),
 			// width: page_dimension.as_ref().map(|dim| dim.width),
+			metadata: self.model.thumbnail_meta.clone(),
 			..Default::default()
 		})
 	}

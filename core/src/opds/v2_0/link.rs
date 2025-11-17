@@ -463,6 +463,8 @@ mod tests {
 			config_id: 1,
 			path: String::default(),
 			status: FileStatus::Ready,
+			thumbnail_meta: None,
+			thumbnail_path: None,
 		};
 
 		let link: OPDSNavigationLink = library.into();

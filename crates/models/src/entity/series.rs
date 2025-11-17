@@ -10,6 +10,7 @@ use crate::{
 	prefixer::{parse_query_to_model, parse_query_to_model_optional, Prefixer},
 	shared::{
 		enums::FileStatus,
+		image::ImageMetadata,
 		ordering::{OrderBy, OrderDirection},
 	},
 };
@@ -38,6 +39,10 @@ pub struct Model {
 	pub path: String,
 	#[sea_orm(column_type = "Text")]
 	pub status: FileStatus,
+	#[sea_orm(column_type = "Json", nullable)]
+	pub thumbnail_meta: Option<ImageMetadata>,
+	#[sea_orm(column_type = "Text", nullable)]
+	pub thumbnail_path: Option<String>,
 	#[sea_orm(column_type = "Text", nullable)]
 	pub library_id: Option<String>,
 }
@@ -96,6 +101,25 @@ pub struct SeriesIdentSelect {
 impl SeriesIdentSelect {
 	pub fn columns() -> Vec<Column> {
 		vec![Column::Id, Column::Path]
+	}
+}
+
+#[derive(Debug, FromQueryResult)]
+pub struct SeriesThumbSelect {
+	pub id: String,
+	pub path: String,
+	pub thumbnail_path: Option<String>,
+	pub library_id: Option<String>,
+}
+
+impl SeriesThumbSelect {
+	pub fn columns() -> Vec<Column> {
+		vec![
+			Column::Id,
+			Column::Path,
+			Column::ThumbnailPath,
+			Column::LibraryId,
+		]
 	}
 }
 

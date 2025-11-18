@@ -2,14 +2,12 @@ import { useSDK } from '@stump/client'
 import { FragmentType, graphql, useFragment } from '@stump/graphql'
 import { useRouter } from 'expo-router'
 import { Pressable, View } from 'react-native'
-import LinearGradient from 'react-native-linear-gradient'
 
 import { COLORS } from '~/lib/constants'
 import { cn } from '~/lib/utils'
 import { usePreferencesStore } from '~/stores'
 
 import { useActiveServer } from '../activeServer'
-import { BorderAndShadow } from '../BorderAndShadow'
 import { useGridItemSize } from '../grid/useGridItemSize'
 import { ThumbnailImage } from '../Image'
 import { Text } from '../ui'
@@ -52,46 +50,38 @@ export default function LibraryGridItem({ library }: Props) {
 			<Pressable onPress={() => router.navigate(href)}>
 				{({ pressed }) => (
 					<View className={cn('relative', { 'opacity-80': pressed })}>
-						<BorderAndShadow
-							style={{ borderRadius: 8, borderWidth: 0.3, shadowRadius: 1.41, elevation: 2 }}
-						>
-							<LinearGradient
-								colors={['transparent', 'rgba(0, 0, 0, 0.50)', 'rgba(0, 0, 0, 0.85)']}
-								style={{ position: 'absolute', inset: 0, zIndex: 10 }}
-							/>
+						<ThumbnailImage
+							source={{
+								uri: uri,
+								headers: {
+									...sdk.customHeaders,
+									Authorization: sdk.authorizationHeader || '',
+								},
+							}}
+							resizeMode="stretch"
+							size={{ height: itemDimension / thumbnailRatio, width: itemDimension }}
+							placeholderData={placeholderData}
+							gradient={{ colors: ['transparent', 'rgba(0, 0, 0, 0.50)', 'rgba(0, 0, 0, 0.85)'] }}
+						/>
 
-							<ThumbnailImage
-								source={{
-									uri: uri,
-									headers: {
-										...sdk.customHeaders,
-										Authorization: sdk.authorizationHeader || '',
-									},
+						<View className="absolute inset-0 z-20 w-full items-center justify-center">
+							<Text
+								size="2xl"
+								className="font-bold leading-8 tracking-wide"
+								numberOfLines={2}
+								ellipsizeMode="tail"
+								style={{
+									maxWidth: itemDimension - 4,
+									textShadowOffset: { width: 2, height: 1 },
+									textShadowRadius: 2,
+									textShadowColor: 'rgba(0, 0, 0, 0.5)',
+									zIndex: 20,
+									color: COLORS.dark.foreground.DEFAULT,
 								}}
-								resizeMode="stretch"
-								size={{ height: itemDimension / thumbnailRatio, width: itemDimension }}
-								placeholderData={placeholderData}
-							/>
-
-							<View className="absolute inset-0 z-20 w-full items-center justify-center">
-								<Text
-									size="2xl"
-									className="font-bold leading-8 tracking-wide"
-									numberOfLines={2}
-									ellipsizeMode="tail"
-									style={{
-										maxWidth: itemDimension - 4,
-										textShadowOffset: { width: 2, height: 1 },
-										textShadowRadius: 2,
-										textShadowColor: 'rgba(0, 0, 0, 0.5)',
-										zIndex: 20,
-										color: COLORS.dark.foreground.DEFAULT,
-									}}
-								>
-									{title}
-								</Text>
-							</View>
-						</BorderAndShadow>
+							>
+								{title}
+							</Text>
+						</View>
 					</View>
 				)}
 			</Pressable>

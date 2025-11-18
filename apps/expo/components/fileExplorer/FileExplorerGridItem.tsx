@@ -8,8 +8,7 @@ import { useColorScheme } from '~/lib/useColorScheme'
 import { usePreferencesStore } from '~/stores'
 
 import { useActiveServer } from '../activeServer'
-import { BorderAndShadow } from '../BorderAndShadow'
-import { TurboImage } from '../Image'
+import { ThumbnailImage, TurboImage } from '../Image'
 import { Text } from '../ui'
 import { useFileExplorerAssets } from './FileExplorerAssetsContext'
 
@@ -72,22 +71,17 @@ export default function FileExplorerGridItem({ file }: Props) {
 							),
 						})}
 					{!!file.media?.thumbnail.url && (
-						<BorderAndShadow
-							style={{ borderRadius: 4, borderWidth: 0.3, shadowRadius: 1.41, elevation: 2 }}
-						>
-							<TurboImage
-								source={{
-									uri: file.media.thumbnail.url,
-									headers: {
-										...sdk.customHeaders,
-										Authorization: sdk.authorizationHeader || '',
-									},
-								}}
-								resizeMode="stretch"
-								resize={70 * 1.5}
-								style={{ height: 70 / thumbnailRatio, width: 70 }}
-							/>
-						</BorderAndShadow>
+						<ThumbnailImage
+							source={{
+								uri: file.media.thumbnail.url,
+								headers: {
+									...sdk.customHeaders,
+									Authorization: sdk.authorizationHeader || '',
+								},
+							}}
+							resizeMode="stretch"
+							size={{ height: 70 / thumbnailRatio, width: 70 }}
+						/>
 					)}
 
 					<View>

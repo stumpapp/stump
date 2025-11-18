@@ -7,7 +7,6 @@ import { useDisplay } from '~/lib/hooks'
 import { usePreferencesStore } from '~/stores'
 
 import { useActiveServer } from '../activeServer'
-import { BorderAndShadow } from '../BorderAndShadow'
 import { ThumbnailImage } from '../Image'
 import { Text } from '../ui'
 
@@ -56,22 +55,18 @@ export default function LibrarySearchItem({ library }: Props) {
 			}}
 		>
 			<View className="flex-row items-start gap-4 px-6 py-2 tablet:px-10">
-				<BorderAndShadow
-					style={{ borderRadius: 4, borderWidth: 0.3, shadowRadius: 1.41, elevation: 2 }}
-				>
-					<ThumbnailImage
-						source={{
-							uri,
-							headers: {
-								...sdk.customHeaders,
-								Authorization: sdk.authorizationHeader || '',
-							},
-						}}
-						resizeMode="stretch"
-						size={{ height: 75 / thumbnailRatio, width: 75 }}
-						placeholderData={placeholderData}
-					/>
-				</BorderAndShadow>
+				<ThumbnailImage
+					source={{
+						uri,
+						headers: {
+							...sdk.customHeaders,
+							Authorization: sdk.authorizationHeader || '',
+						},
+					}}
+					resizeMode="stretch"
+					size={{ height: 75 / thumbnailRatio, width: 75 }}
+					placeholderData={placeholderData}
+				/>
 
 				<View className="flex-1">
 					<Text>{data.name}</Text>

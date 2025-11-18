@@ -7,7 +7,6 @@ import { Pressable, View } from 'react-native'
 import { useListItemSize } from '~/lib/hooks'
 
 import { useActiveServer } from '../activeServer'
-import { BorderAndShadow } from '../BorderAndShadow'
 import { ThumbnailImage } from '../Image'
 import { Text } from '../ui'
 
@@ -45,22 +44,18 @@ function BookListItem({ book }: Props) {
 		<Pressable onPress={() => router.navigate(`/server/${serverID}/books/${data.id}`)}>
 			{({ pressed }) => (
 				<View className="relative" style={{ opacity: pressed ? 0.8 : 1 }}>
-					<BorderAndShadow
-						style={{ borderRadius: 8, borderWidth: 0.3, shadowRadius: 1.41, elevation: 2 }}
-					>
-						<ThumbnailImage
-							source={{
-								uri,
-								headers: {
-									...sdk.customHeaders,
-									Authorization: sdk.authorizationHeader || '',
-								},
-							}}
-							resizeMode="stretch"
-							size={{ height, width }}
-							placeholderData={placeholderData}
-						/>
-					</BorderAndShadow>
+					<ThumbnailImage
+						source={{
+							uri,
+							headers: {
+								...sdk.customHeaders,
+								Authorization: sdk.authorizationHeader || '',
+							},
+						}}
+						resizeMode="stretch"
+						size={{ height, width }}
+						placeholderData={placeholderData}
+					/>
 
 					<View>
 						<Text className="mt-2" style={{ maxWidth: width - 4 }} numberOfLines={2}>

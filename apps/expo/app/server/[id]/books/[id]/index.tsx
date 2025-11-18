@@ -193,7 +193,7 @@ export default function Screen() {
 
 	if (!book) return null
 
-	const { url: thumbnailUrl, ...placeholderData } = book.thumbnail
+	const { url: uri, ...placeholderData } = book.thumbnail
 
 	const progression = book.readProgress || null
 	const lastCompletion = book.readHistory?.at(0) || null
@@ -327,7 +327,7 @@ export default function Screen() {
 					<View className="flex items-center gap-4">
 						<ThumbnailImage
 							source={{
-								uri: book.thumbnail.url,
+								uri,
 								headers: {
 									...sdk.customHeaders,
 									Authorization: sdk.authorizationHeader || '',
@@ -336,6 +336,7 @@ export default function Screen() {
 							resizeMode="stretch"
 							size={{ height: 235 / thumbnailRatio, width: 235 }}
 							placeholderData={placeholderData}
+							borderAndShadowStyle={{ shadowRadius: 5 }}
 						/>
 					</View>
 

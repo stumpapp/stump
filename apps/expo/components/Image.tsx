@@ -13,7 +13,10 @@ type ThumbnailImageProps = {
 	size: { height: number; width: number }
 	gradient?: { colors: (string | number)[]; locations?: number[] }
 	style?: StyleProp<Omit<ViewStyle, 'width' | 'height'>>
-	borderAndShadowStyle?: BorderAndShadowStyle
+	/**
+	 * Override the default border and shadow style.
+	 */
+	borderAndShadowStyle?: Partial<BorderAndShadowStyle>
 	placeholderData?: ThumbnailPlaceholderProps
 } & Omit<TurboImageProps, 'style' | 'resize'>
 

@@ -59,12 +59,12 @@ export const ThumbnailImage = ({
 
 				<TImage
 					// TODO(thumb-placeholders): Uncomment to make function as normal, commented out for testing
-					// source={source}
+					source={source}
 					cachePolicy="dataCache"
 					// @ts-expect-error: bug in library ImageStyle should be ViewStyle
 					style={[size, { zIndex: 15 }, style]}
 					resize={size.width * 1.5}
-					fadeDuration={800}
+					fadeDuration={600}
 					// This is a weird workaround:
 					// Using the indicator prop hides the built in grey placeholder on ios (what we want)
 					// but will force show a circular loading indicator on all platforms, so we make it transparent.

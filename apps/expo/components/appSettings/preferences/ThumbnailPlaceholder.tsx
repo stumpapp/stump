@@ -1,4 +1,3 @@
-import { upperFirst } from 'lodash'
 import { ChevronsUpDown, Palette } from 'lucide-react-native'
 import { useState } from 'react'
 import { Pressable, View } from 'react-native'
@@ -27,7 +26,7 @@ export default function ThumbnailPlaceholder() {
 					<Pressable onPress={() => setIsOpen((prev) => !prev)}>
 						{({ pressed }) => (
 							<View className={cn('flex flex-row items-center gap-2', pressed && 'opacity-70')}>
-								<Text className="text-foreground-muted">{upperFirst(thumbnailPlaceholder)}</Text>
+								<Text className="text-foreground-muted">{getLabel(thumbnailPlaceholder)}</Text>
 								<Icon as={ChevronsUpDown} className="h-5 text-foreground-muted" />
 							</View>
 						)}
@@ -43,11 +42,11 @@ export default function ThumbnailPlaceholder() {
 						Grayscale
 					</DropdownMenu.CheckboxItem>
 					<DropdownMenu.CheckboxItem
-						value={thumbnailPlaceholder === 'monochrome'}
-						key="monochrome"
-						onSelect={() => patch({ thumbnailPlaceholder: 'monochrome' })}
+						value={thumbnailPlaceholder === 'averageColor'}
+						key="averageColor"
+						onSelect={() => patch({ thumbnailPlaceholder: 'averageColor' })}
 					>
-						Monochrome
+						Average Color
 					</DropdownMenu.CheckboxItem>
 					<DropdownMenu.CheckboxItem
 						value={thumbnailPlaceholder === 'colorful'}
@@ -67,4 +66,15 @@ export default function ThumbnailPlaceholder() {
 			</DropdownMenu.Root>
 		</AppSettingsRow>
 	)
+}
+
+const LABELS = {
+	grayscale: 'Grayscale',
+	averageColor: 'Average Color',
+	colorful: 'Colorful',
+	thumbhash: 'Thumbhash',
+}
+
+const getLabel = (key: keyof typeof LABELS) => {
+	return LABELS[key] || 'Grayscale'
 }

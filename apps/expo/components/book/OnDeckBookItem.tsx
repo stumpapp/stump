@@ -11,7 +11,7 @@ import { useListItemSize } from '~/lib/hooks'
 
 import { useActiveServer } from '../activeServer'
 import { BorderAndShadow } from '../BorderAndShadow'
-import { TurboImage } from '../Image'
+import { ThumbnailImage } from '../Image'
 import { Text } from '../ui'
 
 const fragment = graphql(`
@@ -20,6 +20,7 @@ const fragment = graphql(`
 		resolvedName
 		thumbnail {
 			url
+			...ThumbnailPlaceholder
 		}
 		seriesPosition
 		series {
@@ -68,7 +69,7 @@ function OnDeckBookItem({ book }: Props) {
 							locations={gradientLocations}
 						/>
 
-						<TurboImage
+						<ThumbnailImage
 							source={{
 								uri: data.thumbnail.url,
 								headers: {
@@ -77,8 +78,7 @@ function OnDeckBookItem({ book }: Props) {
 								},
 							}}
 							resizeMode="stretch"
-							resize={width * 1.5}
-							style={{ width, height }}
+							size={{ width, height }}
 						/>
 
 						<View className="absolute bottom-0 z-20 w-full gap-1 p-2">

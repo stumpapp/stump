@@ -11,7 +11,7 @@ import { usePreferencesStore } from '~/stores'
 import { useActiveServer } from '../activeServer'
 import { BorderAndShadow } from '../BorderAndShadow'
 import { useGridItemSize } from '../grid/useGridItemSize'
-import { TurboImage } from '../Image'
+import { ThumbnailImage } from '../Image'
 import { Text } from '../ui'
 
 const fragment = graphql(`
@@ -20,6 +20,7 @@ const fragment = graphql(`
 		name
 		thumbnail {
 			url
+			...ThumbnailPlaceholder
 		}
 	}
 `)
@@ -40,9 +41,10 @@ export default function LibraryGridItem({ library }: Props) {
 	const data = useFragment(fragment, library)
 	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
 
-	const uri = data.thumbnail?.url ?? undefined
 	const title = data.name
 	const href = `/server/${serverID}/libraries/${data.id}`
+
+	const { url: uri, ...placeholderData } = data.thumbnail
 
 	return (
 		<View className="w-full items-center">
@@ -58,7 +60,7 @@ export default function LibraryGridItem({ library }: Props) {
 								style={{ position: 'absolute', inset: 0, zIndex: 10 }}
 							/>
 
-							<TurboImage
+							<ThumbnailImage
 								source={{
 									uri: uri,
 									headers: {
@@ -67,8 +69,8 @@ export default function LibraryGridItem({ library }: Props) {
 									},
 								}}
 								resizeMode="stretch"
-								resize={itemDimension * 1.5}
-								style={{ height: itemDimension / thumbnailRatio, width: itemDimension }}
+								size={{ height: itemDimension / thumbnailRatio, width: itemDimension }}
+								placeholderData={placeholderData}
 							/>
 
 							<View className="absolute inset-0 z-20 w-full items-center justify-center">

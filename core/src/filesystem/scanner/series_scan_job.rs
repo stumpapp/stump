@@ -224,7 +224,7 @@ impl JobExt for SeriesScanJob {
 				tracing::trace!("Thumbnail generation job should be enqueued");
 				Ok(Some(WrappedJob::new(ThumbnailGenerationJob {
 					options,
-					params: ThumbnailGenerationJobParams::single_series(
+					params: ThumbnailGenerationJobParams::books_in_series(
 						self.id.clone(),
 						false,
 					),

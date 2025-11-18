@@ -3,7 +3,7 @@ import LinearGradient from 'react-native-linear-gradient'
 import TImage, { type TurboImageProps } from 'react-native-turbo-image'
 
 import { BorderAndShadow, BorderAndShadowStyle } from './BorderAndShadow'
-import { ThumbnailPlaceholder } from './ThumbnailPlaceholder'
+import { ThumbnailPlaceholder, ThumbnailPlaceholderProps } from './ThumbnailPlaceholder'
 
 export const TurboImage = ({ source, style, ...props }: TurboImageProps) => {
 	return <TImage source={source} cachePolicy="dataCache" style={style} {...props} />
@@ -14,6 +14,7 @@ type ThumbnailImageProps = {
 	gradient?: { colors: (string | number)[]; locations?: number[] }
 	style?: StyleProp<Omit<ViewStyle, 'width' | 'height'>>
 	borderAndShadowStyle?: BorderAndShadowStyle
+	placeholderData?: ThumbnailPlaceholderProps
 } & Omit<TurboImageProps, 'style' | 'resize'>
 
 export const ThumbnailImage = ({
@@ -22,6 +23,7 @@ export const ThumbnailImage = ({
 	size,
 	gradient,
 	borderAndShadowStyle,
+	placeholderData,
 	...props
 }: ThumbnailImageProps) => {
 	const borderRadius = borderAndShadowStyle?.borderRadius ?? size.width / 20
@@ -53,9 +55,11 @@ export const ThumbnailImage = ({
 			>
 				{Platform.OS === 'ios' && gradientElement}
 
-				<ThumbnailPlaceholder />
+				<ThumbnailPlaceholder {...placeholderData} />
+
 				<TImage
-					source={source}
+					// TODO(thumb-placeholders): Uncomment to make function as normal, commented out for testing
+					// source={source}
 					cachePolicy="dataCache"
 					// @ts-expect-error: bug in library ImageStyle should be ViewStyle
 					style={[size, { zIndex: 15 }, style]}

@@ -1,10 +1,14 @@
 use std::path::PathBuf;
 
+use futures::{stream::FuturesUnordered, StreamExt};
 use models::{
-	entity::media,
-	shared::image_processor_options::{ImageProcessorOptions, SupportedImageFormat},
+	entity::{library, media, series},
+	shared::{
+		image::ImageMetadata,
+		image_processor_options::{ImageProcessorOptions, SupportedImageFormat},
+	},
 };
-use sea_orm::{prelude::*, EntityTrait, QueryFilter};
+use sea_orm::{prelude::*, EntityTrait, QueryFilter, QueryOrder, QuerySelect};
 use tokio::{fs, sync::oneshot, task::spawn_blocking};
 
 use crate::{
@@ -12,10 +16,12 @@ use crate::{
 	filesystem::{
 		image::{
 			thumbnail::placeholder::generate_image_metadata, GenericImageProcessor,
-			ImageProcessor, ProcessorError, WebpProcessor,
+			ImageProcessor, ProcessorError, ThumbnailGenerationJob,
+			ThumbnailGenerationOutput, WebpProcessor,
 		},
 		media::get_page,
 	},
+	job::{JobExecuteLog, JobTaskOutput, WorkerCtx},
 };
 
 /// An error enum for thumbnail generation errors
@@ -29,6 +35,12 @@ pub enum ThumbnailGenerateError {
 	ResultNeverReceived,
 	#[error("Failed to update media entity")]
 	UpdateFailed,
+	#[error("A candidate source for thumbnail generation could not be found")]
+	NothingToGenerate,
+	#[error("Source thumbnail is missing an extension")]
+	SourceMissingExtension,
+	#[error("Database error: {0}")]
+	DbError(#[from] sea_orm::DbErr),
 	#[error("Something unexpected went wrong: {0}")]
 	Unknown(String),
 }
@@ -80,7 +92,7 @@ fn do_generate_book_thumbnail(
 /// exists and `force_regen` is false, the function will return the existing thumbnail data.
 #[tracing::instrument(skip_all)]
 pub async fn generate_book_thumbnail(
-	book: &media::MediaIdentSelect,
+	book: &media::MediaThumbSelect,
 	conn: &DatabaseConnection,
 	GenerateThumbnailOptions {
 		image_options,
@@ -92,11 +104,15 @@ pub async fn generate_book_thumbnail(
 	let book_path = book.path.clone();
 	let file_name = filename.unwrap_or_else(|| book.id.clone());
 
-	let file_path = core_config.get_thumbnails_dir().join(format!(
-		"{}.{}",
-		&file_name,
-		image_options.format.extension()
-	));
+	let file_path = if let Some(stored_path) = &book.thumbnail_path {
+		PathBuf::from(stored_path.clone())
+	} else {
+		core_config.get_thumbnails_dir().join(format!(
+			"{}.{}",
+			&file_name,
+			image_options.format.extension()
+		))
+	};
 
 	if let Err(e) = fs::metadata(&file_path).await {
 		// A `NotFound` error is expected here, but anything else is unexpected
@@ -176,12 +192,327 @@ pub async fn generate_book_thumbnail(
 		.exec(conn)
 		.await;
 
-	// TODO: I think this should hard err?
 	match update_result {
 		Ok(_) => Ok((thumbnail, thumbnail_path, did_generate)),
 		Err(e) => {
 			tracing::error!(error = ?e, "Failed to update media entity with thumbnail info");
 			Err(ThumbnailGenerateError::UpdateFailed)
 		},
+	}
+}
+
+/// Copy a book's thumbnail to a target entity (series or library) and update the database.
+/// The happy path is assumed to be that the book already has a thumbnail generated, which should
+/// be the case from the ordering of operations in the thumbnail generation job, however if not it
+/// will attempt to generate the thumbnail from the book as a fallback.
+#[tracing::instrument(skip(ctx, update_fn, first_book))]
+async fn copy_thumbnail_to_entity<E>(
+	entity_id: &str,
+	first_book: media::MediaThumbSelect,
+	ctx: &WorkerCtx,
+	options: GenerateThumbnailOptions,
+	update_fn: impl FnOnce(String, Option<ImageMetadata>) -> sea_orm::UpdateMany<E>,
+) -> Result<GenerateOutput, ThumbnailGenerateError>
+where
+	E: sea_orm::EntityTrait,
+{
+	let mut did_regenerate = false;
+	let (source_path, thumbnail_data) = match &first_book.thumbnail_path {
+		// Note: We don't currently use the data, so might be worth optimizing out in the future.
+		Some(path) => (path.clone(), fs::read(path).await.unwrap_or_default()),
+		None => {
+			// Note that this shouldn't really happen but figured better to handle instead
+			let (data, path, _) =
+				generate_book_thumbnail(&first_book, ctx.conn.as_ref(), options.clone())
+					.await?;
+			did_regenerate = true;
+			(path.to_string_lossy().to_string(), data)
+		},
+	};
+
+	let source_path = std::path::PathBuf::from(&source_path);
+	match fs::metadata(&source_path).await {
+		Ok(_) => {},
+		Err(error) => {
+			tracing::warn!(
+				?error,
+				book_id = %first_book.id,
+				?source_path,
+				"Source thumbnail file does not exist or is inaccessible"
+			);
+			return Err(ThumbnailGenerateError::NothingToGenerate);
+		},
+	}
+
+	let ext = source_path
+		.extension()
+		.and_then(|e| e.to_str())
+		.ok_or(ThumbnailGenerateError::SourceMissingExtension)?;
+
+	let dest_path = ctx
+		.config
+		.get_thumbnails_dir()
+		.join(format!("{}.{}", entity_id, ext));
+
+	fs::copy(&source_path, &dest_path).await?;
+	tracing::debug!(
+		entity_id,
+		?source_path,
+		?dest_path,
+		"Copied book thumbnail to destination"
+	);
+
+	let thumbnail_metadata = match (
+		did_regenerate || options.force_regen,
+		first_book.thumbnail_meta,
+	) {
+		(true, _) | (false, None) => match generate_image_metadata(&dest_path).await {
+			Ok(metadata) => Some(metadata),
+			Err(e) => {
+				tracing::error!(error = ?e, "Failed to generate thumbnail metadata");
+				None
+			},
+		},
+		(false, Some(meta)) => Some(meta),
+	};
+
+	update_fn(dest_path.to_string_lossy().to_string(), thumbnail_metadata)
+		.exec(ctx.conn.as_ref())
+		.await?;
+
+	Ok((thumbnail_data, dest_path, true))
+}
+
+#[tracing::instrument(skip_all)]
+async fn generate_series_thumbnail(
+	series: &series::SeriesThumbSelect,
+	ctx: &WorkerCtx,
+	options: GenerateThumbnailOptions,
+) -> Result<GenerateOutput, ThumbnailGenerateError> {
+	if let (false, Some(thumbnail_path)) = (options.force_regen, &series.thumbnail_path) {
+		match fs::metadata(thumbnail_path).await {
+			Ok(_) => {
+				tracing::debug!(
+					series_id = %series.id,
+					?thumbnail_path,
+					"Thumbnail already exists, skipping generation"
+				);
+				let thumbnail_data = fs::read(thumbnail_path).await?;
+				return Ok((thumbnail_data, PathBuf::from(thumbnail_path), false));
+			},
+			Err(error) => {
+				tracing::debug!(
+					?error,
+					series_id = %series.id,
+					?thumbnail_path,
+					"Thumbnail path exists in DB but file may be missing, regenerating"
+				);
+			},
+		}
+	}
+
+	let first_book = media::Entity::find()
+		.select_only()
+		.columns(media::MediaThumbSelect::columns())
+		.filter(media::Column::SeriesId.eq(&series.id))
+		.order_by_asc(media::Column::Name)
+		.into_model::<media::MediaThumbSelect>()
+		.one(ctx.conn.as_ref())
+		.await?;
+
+	let Some(first_book) = first_book else {
+		tracing::warn!(series_id = %series.id, "No books found in series");
+		return Err(ThumbnailGenerateError::NothingToGenerate);
+	};
+
+	copy_thumbnail_to_entity(
+		&series.id,
+		first_book,
+		ctx,
+		options,
+		|thumbnail_path, thumbnail_metadata| {
+			series::Entity::update_many()
+				.filter(series::Column::Id.eq(&series.id))
+				.col_expr(
+					series::Column::ThumbnailPath,
+					Expr::value(Some(thumbnail_path)),
+				)
+				.col_expr(
+					series::Column::ThumbnailMeta,
+					Expr::value(thumbnail_metadata),
+				)
+		},
+	)
+	.await
+}
+
+#[tracing::instrument(skip_all)]
+async fn generate_library_thumbnail(
+	library: &library::LibraryThumbSelect,
+	ctx: &WorkerCtx,
+	options: GenerateThumbnailOptions,
+) -> Result<GenerateOutput, ThumbnailGenerateError> {
+	if let (false, Some(thumbnail_path)) = (options.force_regen, &library.thumbnail_path)
+	{
+		match fs::metadata(thumbnail_path).await {
+			Ok(_) => {
+				tracing::debug!(
+					library_id = %library.id,
+					?thumbnail_path,
+					"Thumbnail already exists, skipping generation"
+				);
+				let thumbnail_data = fs::read(thumbnail_path).await?;
+				return Ok((thumbnail_data, PathBuf::from(thumbnail_path), false));
+			},
+			Err(error) => {
+				tracing::debug!(
+					?error,
+					library_id = %library.id,
+					?thumbnail_path,
+					"Thumbnail path exists in DB but file may be missing, regenerating"
+				);
+			},
+		}
+	}
+
+	let first_book = media::Entity::find()
+		.select_only()
+		.columns(media::MediaThumbSelect::columns())
+		.inner_join(series::Entity)
+		.filter(series::Column::LibraryId.eq(&library.id))
+		.order_by_asc(series::Column::Name)
+		.order_by_asc(media::Column::Name)
+		.into_model::<media::MediaThumbSelect>()
+		.one(ctx.conn.as_ref())
+		.await?;
+
+	let Some(first_book) = first_book else {
+		tracing::warn!(library_id = %library.id, "No books found in library");
+		return Err(ThumbnailGenerateError::NothingToGenerate);
+	};
+
+	copy_thumbnail_to_entity(
+		&library.id,
+		first_book,
+		ctx,
+		options,
+		|thumbnail_path, thumbnail_metadata| {
+			library::Entity::update_many()
+				.filter(library::Column::Id.eq(&library.id))
+				.col_expr(
+					library::Column::ThumbnailPath,
+					Expr::value(Some(thumbnail_path)),
+				)
+				.col_expr(
+					library::Column::ThumbnailMeta,
+					Expr::value(thumbnail_metadata),
+				)
+		},
+	)
+	.await
+}
+
+pub enum GenerateImageSource {
+	Book(media::MediaThumbSelect),
+	Series(series::SeriesThumbSelect),
+	Library(library::LibraryThumbSelect),
+}
+
+#[tracing::instrument(skip_all)]
+pub async fn safely_generate_batch(
+	sources: Vec<GenerateImageSource>,
+	ctx: &WorkerCtx,
+	options: GenerateThumbnailOptions,
+	reporter: impl Fn(usize),
+) -> JobTaskOutput<ThumbnailGenerationJob> {
+	let mut output = ThumbnailGenerationOutput::default();
+	let mut logs = vec![];
+
+	let max_concurrency = options.core_config.max_thumbnail_concurrency;
+	let batch_size = max_concurrency;
+	let total_sources = sources.len();
+	tracing::debug!(
+		batch_size,
+		total_sources,
+		"Processing thumbnails in batches"
+	);
+
+	let mut processed_count = 0;
+
+	for (chunk_index, chunk) in sources.chunks(batch_size).enumerate() {
+		let mut chunk_futures = FuturesUnordered::new();
+
+		tracing::trace!(
+			chunk_index,
+			chunk_size = chunk.len(),
+			"Processing thumbnail generation batch"
+		);
+
+		for (source_index, source) in chunk.iter().enumerate() {
+			let options = options.clone();
+			let path = match source {
+				GenerateImageSource::Book(book) => book.path.clone(),
+				GenerateImageSource::Series(series) => series.path.clone(),
+				GenerateImageSource::Library(library) => library.path.clone(),
+			};
+
+			let future = async move {
+				tracing::trace!(?path, "(Chunk {chunk_index}, Item {source_index}) Starting thumbnail generation");
+
+				let result = match source {
+					GenerateImageSource::Book(book) => {
+						generate_book_thumbnail(book, ctx.conn.as_ref(), options).await
+					},
+					GenerateImageSource::Series(series) => {
+						generate_series_thumbnail(series, ctx, options).await
+					},
+					GenerateImageSource::Library(library) => {
+						generate_library_thumbnail(library, ctx, options).await
+					},
+				}
+				.map(|(_, path, did_generate)| (path, did_generate));
+
+				result.map_err(|e| (e, path))
+			};
+
+			chunk_futures.push(future);
+		}
+
+		while let Some(gen_output) = chunk_futures.next().await {
+			match gen_output {
+				Ok((_, did_generate)) => {
+					if did_generate {
+						output.generated_thumbnails += 1;
+					} else {
+						output.skipped_files += 1;
+					}
+				},
+				Err((error, path)) => {
+					logs.push(
+						JobExecuteLog::error(format!(
+							"Failed to generate thumbnail: {:?}",
+							error.to_string()
+						))
+						.with_ctx(format!("Media path: {path}")),
+					);
+				},
+			}
+
+			output.visited_files += 1;
+			processed_count += 1;
+			reporter(processed_count);
+		}
+
+		// TODO: Read up more on this, I added as an attempt to force garbage collection
+		// between batches to help with memory usage, but it may not be necessary.
+		if processed_count < total_sources {
+			tokio::task::yield_now().await;
+		}
+	}
+
+	JobTaskOutput {
+		output,
+		logs,
+		subtasks: vec![],
 	}
 }

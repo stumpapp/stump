@@ -32,6 +32,7 @@ const fragment = graphql(`
 		}
 		thumbnail {
 			url
+			...ThumbnailPlaceholder
 		}
 		pages
 		readProgress {
@@ -253,12 +254,14 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 		easing: Easing.bezier(0.42, 0, 1, 1), // https://cubic-bezier.com/#.42,0,1,1
 	})
 
+	const { url: uri, ...placeholderData } = data.thumbnail
+
 	return (
 		<View className="flex flex-row gap-4">
 			<Pressable onPress={() => router.navigate(`/server/${serverID}/books/${data.id}`)}>
 				<ThumbnailImage
 					source={{
-						uri: data.thumbnail.url,
+						uri,
 						headers: {
 							...sdk.customHeaders,
 							Authorization: sdk.authorizationHeader || '',
@@ -267,6 +270,7 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 					resizeMode="stretch"
 					size={{ height: imageHeight, width: IMAGE_WIDTH }}
 					gradient={{ colors: gradientColors, locations: gradientLocations }}
+					placeholderData={placeholderData}
 				/>
 
 				<View className="absolute bottom-0 z-20 w-full gap-2 p-3">

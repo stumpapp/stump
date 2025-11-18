@@ -107,6 +107,7 @@ const query = graphql(`
 			size
 			thumbnail {
 				url
+				...ThumbnailPlaceholder
 			}
 		}
 	}
@@ -191,6 +192,8 @@ export default function Screen() {
 	}, [navigation, book, bookID])
 
 	if (!book) return null
+
+	const { url: thumbnailUrl, ...placeholderData } = book.thumbnail
 
 	const progression = book.readProgress || null
 	const lastCompletion = book.readHistory?.at(0) || null
@@ -332,6 +335,7 @@ export default function Screen() {
 							}}
 							resizeMode="stretch"
 							size={{ height: 235 / thumbnailRatio, width: 235 }}
+							placeholderData={placeholderData}
 						/>
 					</View>
 

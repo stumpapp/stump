@@ -11,7 +11,7 @@ import { usePreferencesStore } from '~/stores'
 
 import { useActiveServer } from '../activeServer'
 import { BorderAndShadow } from '../BorderAndShadow'
-import { TurboImage } from '../Image'
+import { ThumbnailImage } from '../Image'
 import { Text } from '../ui'
 
 const fragment = graphql(`
@@ -20,6 +20,7 @@ const fragment = graphql(`
 		resolvedName
 		thumbnail {
 			url
+			...ThumbnailPlaceholder
 		}
 		readCount
 		mediaCount
@@ -69,7 +70,7 @@ export default function RecentlyAddedSeriesItem({ series }: Props) {
 							locations={gradientLocations}
 						/>
 
-						<TurboImage
+						<ThumbnailImage
 							source={{
 								uri: data.thumbnail.url,
 								headers: {
@@ -78,8 +79,7 @@ export default function RecentlyAddedSeriesItem({ series }: Props) {
 								},
 							}}
 							resizeMode="stretch"
-							resize={160 * 1.5}
-							style={{ height: 160 / thumbnailRatio, width: 160 }}
+							size={{ height: 160 / thumbnailRatio, width: 160 }}
 						/>
 
 						<View className="absolute bottom-0 z-20 w-full p-2">
@@ -115,35 +115,4 @@ export default function RecentlyAddedSeriesItem({ series }: Props) {
 			)}
 		</Pressable>
 	)
-
-	// return (
-	// 	<Pressable
-	// 		onPress={() => router.navigate(`/server/${serverID}/series/${data.id}`)}
-	// 		style={{
-	// 			width: width * 0.75,
-	// 		}}
-	// 	>
-	// 		<View className="flex-row items-start gap-4 py-4">
-	// 			<FasterImage
-	// 				source={{
-	// 					url: data.thumbnail.url,
-	// 					headers: {
-	// 						Authorization: sdk.authorizationHeader || '',
-	// 					},
-	// 					resizeMode: 'fill',
-	// 					borderRadius: 8,
-	// 				}}
-	// 				style={{ width: 75, height: 75 / (2 / 3) }}
-	// 			/>
-
-	// 			<View className="flex flex-1 flex-col gap-1">
-	// 				<Text>{data.resolvedName}</Text>
-
-	// 				<Text className="text-foreground-muted">
-	// 					{data.readCount}/{data.mediaCount} books • {dayjs(data.createdAt).fromNow()}
-	// 				</Text>
-	// 			</View>
-	// 		</View>
-	// 	</Pressable>
-	// )
 }

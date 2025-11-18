@@ -10,6 +10,7 @@ export type BorderAndShadowStyle = {
 	shadowRadius: number
 	shadowColor?: string
 	shadowOffset?: { width: number; height: number }
+	elevation?: number
 }
 
 type BorderAndShadowProps = {

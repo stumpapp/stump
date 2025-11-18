@@ -16,7 +16,7 @@ type MobilePreferencesStore = {
 	cachePolicy: CachePolicy
 	allowDownscaling: boolean
 	thumbnailRatio: number
-	thumbnailPlaceholder: 'grayscale' | 'monochrome' | 'colorful' | 'thumbhash'
+	thumbnailPlaceholder: 'grayscale' | 'averageColor' | 'colorful' | 'thumbhash'
 	performanceMonitor: boolean
 	accentColor?: string | undefined
 	showCuratedDownloads?: boolean | undefined

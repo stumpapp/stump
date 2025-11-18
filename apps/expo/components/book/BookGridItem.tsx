@@ -10,6 +10,7 @@ const fragment = graphql(`
 		resolvedName
 		thumbnail {
 			url
+			...ThumbnailPlaceholder
 		}
 	}
 `)
@@ -33,6 +34,7 @@ export default function BookGridItem({ book }: Props) {
 				uri={data.thumbnail.url}
 				title={data.resolvedName}
 				href={`/server/${serverID}/books/${data.id}`}
+				placeholderData={data.thumbnail}
 			/>
 		</View>
 	)

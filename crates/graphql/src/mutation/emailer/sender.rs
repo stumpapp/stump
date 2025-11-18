@@ -402,6 +402,8 @@ mod tests {
 			status: FileStatus::Ready,
 			series_id: None,
 			deleted_at: None,
+			thumbnail_meta: None,
+			thumbnail_path: None,
 		}
 	}
 

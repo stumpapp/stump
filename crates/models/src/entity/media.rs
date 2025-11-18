@@ -270,6 +270,7 @@ pub struct MediaThumbSelect {
 	pub path: String,
 	pub series_id: String,
 	pub thumbnail_path: Option<String>,
+	pub thumbnail_meta: Option<ImageMetadata>,
 }
 
 impl MediaThumbSelect {
@@ -279,7 +280,20 @@ impl MediaThumbSelect {
 			Column::Path,
 			Column::SeriesId,
 			Column::ThumbnailPath,
+			Column::ThumbnailMeta,
 		]
+	}
+}
+
+impl From<Model> for MediaThumbSelect {
+	fn from(model: Model) -> Self {
+		Self {
+			id: model.id,
+			path: model.path,
+			series_id: model.series_id.unwrap_or_default(),
+			thumbnail_path: model.thumbnail_path,
+			thumbnail_meta: model.thumbnail_meta,
+		}
 	}
 }
 

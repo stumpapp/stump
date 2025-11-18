@@ -6,6 +6,7 @@ import { cn } from '~/lib/utils'
 import { usePreferencesStore } from '~/stores'
 
 import { ThumbnailImage } from '../Image'
+import { ThumbnailPlaceholderProps } from '../ThumbnailPlaceholder'
 import { Text } from '../ui'
 import { useGridItemSize } from './useGridItemSize'
 
@@ -13,9 +14,10 @@ type Props = {
 	uri: string
 	title: string
 	href: Href
+	placeholderData?: ThumbnailPlaceholderProps
 }
 
-export default function GridImageItem({ uri, title, href }: Props) {
+export default function GridImageItem({ uri, title, href, ...thumbnailProps }: Props) {
 	const { sdk } = useSDK()
 	const { itemDimension } = useGridItemSize()
 
@@ -36,6 +38,7 @@ export default function GridImageItem({ uri, title, href }: Props) {
 						}}
 						resizeMode="stretch"
 						size={{ height: itemDimension / thumbnailRatio, width: itemDimension }}
+						{...thumbnailProps}
 					/>
 
 					<Text

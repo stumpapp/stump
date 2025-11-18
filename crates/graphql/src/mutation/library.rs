@@ -794,7 +794,7 @@ impl LibraryMutation {
 		let config = config.ok_or("Library config not found")?;
 
 		let job_config =
-			ThumbnailGenerationJobParams::single_library(library.id, force_regenerate);
+			ThumbnailGenerationJobParams::books_in_library(library.id, force_regenerate);
 		core.enqueue_job(ThumbnailGenerationJob::new(
 			config.thumbnail_config.unwrap_or_default(),
 			job_config,

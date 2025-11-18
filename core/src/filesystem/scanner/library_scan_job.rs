@@ -260,7 +260,7 @@ impl JobExt for LibraryScanJob {
 				tracing::trace!("Thumbnail generation job should be enqueued");
 				Ok(Some(WrappedJob::new(ThumbnailGenerationJob {
 					options,
-					params: ThumbnailGenerationJobParams::single_library(
+					params: ThumbnailGenerationJobParams::books_in_library(
 						self.id.clone(),
 						false,
 					),

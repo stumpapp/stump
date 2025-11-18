@@ -8,7 +8,7 @@ import { useListItemSize } from '~/lib/hooks'
 
 import { useActiveServer } from '../activeServer'
 import { BorderAndShadow } from '../BorderAndShadow'
-import { TurboImage } from '../Image'
+import { ThumbnailImage } from '../Image'
 import { Text } from '../ui'
 
 const fragment = graphql(`
@@ -17,6 +17,7 @@ const fragment = graphql(`
 		resolvedName
 		thumbnail {
 			url
+			...ThumbnailPlaceholder
 		}
 	}
 `)
@@ -38,6 +39,7 @@ function BookListItem({ book }: Props) {
 	const router = useRouter()
 
 	const { width, height } = useListItemSize()
+	const { url: uri, ...placeholderData } = data.thumbnail
 
 	return (
 		<Pressable onPress={() => router.navigate(`/server/${serverID}/books/${data.id}`)}>
@@ -46,17 +48,17 @@ function BookListItem({ book }: Props) {
 					<BorderAndShadow
 						style={{ borderRadius: 8, borderWidth: 0.3, shadowRadius: 1.41, elevation: 2 }}
 					>
-						<TurboImage
+						<ThumbnailImage
 							source={{
-								uri: data.thumbnail.url,
+								uri,
 								headers: {
 									...sdk.customHeaders,
 									Authorization: sdk.authorizationHeader || '',
 								},
 							}}
 							resizeMode="stretch"
-							resize={width * 1.5}
-							style={{ height, width }}
+							size={{ height, width }}
+							placeholderData={placeholderData}
 						/>
 					</BorderAndShadow>
 

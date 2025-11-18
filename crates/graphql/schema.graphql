@@ -600,6 +600,12 @@ type FinishedReadingSessionModel {
 	elapsedSeconds: Int
 }
 
+type ImageMetadata {
+	averageColor: String
+	meshColors: [String!]!
+	thumbhash: String
+}
+
 "Options for processing images throughout Stump."
 type ImageProcessorOptions {
 	"The size factor to use when generating an image. See [`ImageResizeOptions`]"
@@ -636,6 +642,7 @@ type ImageRef {
 	url: String!
 	height: Int
 	width: Int
+	metadata: ImageMetadata
 }
 
 "The resize options to use when generating an image"
@@ -739,6 +746,8 @@ type Library {
 	description: String
 	path: String!
 	status: FileStatus!
+	thumbnailMeta: ImageMetadata
+	thumbnailPath: String
 	createdAt: DateTime!
 	updatedAt: DateTime
 	emoji: String
@@ -815,6 +824,8 @@ enum LibraryModelOrdering {
 	DESCRIPTION
 	PATH
 	STATUS
+	THUMBNAIL_META
+	THUMBNAIL_PATH
 	CREATED_AT
 	UPDATED_AT
 	EMOJI
@@ -954,6 +965,10 @@ type Media {
 	if it is available on disk)
 	"""
 	status: FileStatus!
+	"The metadata for the thumbnail image of the media"
+	thumbnailMeta: ImageMetadata
+	"The path to the thumbnail image of the media on disk"
+	thumbnailPath: String
 	"""
 	The unique identifier of the series that the media belongs to. While this is nullable, it is
 	expected that all media will belong to a series
@@ -1202,6 +1217,8 @@ enum MediaModelOrdering {
 	KOREADER_HASH
 	PATH
 	STATUS
+	THUMBNAIL_META
+	THUMBNAIL_PATH
 	SERIES_ID
 	DELETED_AT
 }
@@ -1944,6 +1961,8 @@ type Series {
 	deletedAt: DateTime
 	path: String!
 	status: FileStatus!
+	thumbnailMeta: ImageMetadata
+	thumbnailPath: String
 	libraryId: String
 	metadata: SeriesMetadata
 	isFavorite: Boolean!
@@ -2060,6 +2079,8 @@ enum SeriesModelOrdering {
 	DELETED_AT
 	PATH
 	STATUS
+	THUMBNAIL_META
+	THUMBNAIL_PATH
 	LIBRARY_ID
 }
 

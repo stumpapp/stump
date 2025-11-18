@@ -1069,9 +1069,7 @@ async fn get_book_thumbnail(
 	State(ctx): State<AppState>,
 	Extension(req): Extension<AuthContext>,
 ) -> APIResult<ImageResponse> {
-	let (content_type, image_buffer) =
-		get_media_thumbnail_by_id(&ctx, &req.user(), id).await?;
-	Ok(ImageResponse::new(content_type, image_buffer))
+	get_media_thumbnail_by_id(&ctx, &req.user(), id).await
 }
 
 /// A route handler which returns a single page of a book for a user as a valid image

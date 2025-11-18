@@ -92,13 +92,23 @@ pub(crate) async fn get_media_file(
 }
 
 pub(crate) async fn get_media_thumbnail(
-	id: &str,
-	path: &str,
+	book: &media::MediaThumbSelect,
 	image_format: Option<SupportedImageFormat>,
 	config: &StumpConfig,
 ) -> APIResult<(ContentType, Vec<u8>)> {
+	// Note: This doesn't hard-fail because if the saved thumbnail is missing or corrupt, we want
+	// to just pull something else instead of erroring out entirely.
+	if let Some(path) = &book.thumbnail_path {
+		match get_saved_thumbnail(std::path::Path::new(path)).await {
+			Ok(result) => return Ok(result),
+			Err(_) => {
+				tracing::warn!(path = ?path, "Failed to get saved thumbnail");
+			},
+		}
+	}
+
 	let generated_thumb =
-		get_thumbnail(config.get_thumbnails_dir(), id, image_format).await?;
+		get_thumbnail(config.get_thumbnails_dir(), &book.id, image_format).await?;
 
 	let adjusted_config = StumpConfig {
 		pdf_prerender_range: 0, // Disable PDF prerendering for thumbnails since we only need the first page
@@ -108,7 +118,7 @@ pub(crate) async fn get_media_thumbnail(
 	if let Some((content_type, bytes)) = generated_thumb {
 		Ok((content_type, bytes))
 	} else {
-		Ok(get_page_async(path, 1, &adjusted_config).await?)
+		Ok(get_page_async(&book.path, 1, &adjusted_config).await?)
 	}
 }
 
@@ -116,7 +126,7 @@ pub(crate) async fn get_media_thumbnail_by_id(
 	ctx: &Ctx,
 	user: &AuthUser,
 	book_id: String,
-) -> APIResult<(ContentType, Vec<u8>)> {
+) -> APIResult<ImageResponse> {
 	let book = media::Entity::find_for_user(user)
 		.columns(media::MediaThumbSelect::columns())
 		.filter(media::Column::Id.eq(book_id))
@@ -125,12 +135,11 @@ pub(crate) async fn get_media_thumbnail_by_id(
 		.await?
 		.ok_or(APIError::NotFound("Book not found".to_string()))?;
 
-	// TODO: Remove the safeguard once refactored thumbnailing system is more tested
+	// Note: This doesn't hard-fail because if the saved thumbnail is missing or corrupt, we want
+	// to just pull something else instead of erroring out entirely.
 	if let Some(path) = &book.thumbnail_path {
-		// Note: I figure it might be OK to not hard-fail here until the updated thumbnailing system
-		// is in place, and the "fallback" basically just tries to find it if not set.
 		match get_saved_thumbnail(std::path::Path::new(path)).await {
-			Ok(result) => return Ok(result),
+			Ok(result) => return Ok(result.into()),
 			Err(_) => {
 				tracing::warn!(path = ?path, "Failed to get saved thumbnail");
 			},
@@ -148,7 +157,7 @@ pub(crate) async fn get_media_thumbnail_by_id(
 							Query::select()
 								.column(series::Column::LibraryId)
 								.from(series::Entity)
-								.and_where(series::Column::Id.eq(book.series_id))
+								.and_where(series::Column::Id.eq(book.series_id.clone()))
 								.to_owned(),
 						),
 					)
@@ -159,7 +168,9 @@ pub(crate) async fn get_media_thumbnail_by_id(
 		.await?;
 	let image_format = library_config.and_then(|o| o.thumbnail_config.map(|c| c.format));
 
-	get_media_thumbnail(&book.id, &book.path, image_format, ctx.config.as_ref()).await
+	get_media_thumbnail(&book, image_format, ctx.config.as_ref())
+		.await
+		.map(ImageResponse::from)
 }
 
 pub(crate) async fn get_media_thumbnail_handler(
@@ -167,9 +178,7 @@ pub(crate) async fn get_media_thumbnail_handler(
 	State(ctx): State<AppState>,
 	Extension(req): Extension<AuthContext>,
 ) -> APIResult<ImageResponse> {
-	get_media_thumbnail_by_id(&ctx, &req.user(), id)
-		.await
-		.map(ImageResponse::from)
+	get_media_thumbnail_by_id(&ctx, &req.user(), id).await
 }
 
 async fn get_media_page(

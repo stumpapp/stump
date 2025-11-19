@@ -11,8 +11,7 @@ import { formatBytesSeparate } from '~/lib/format'
 import { useListItemSize } from '~/lib/hooks'
 import { useSelectionStore } from '~/stores/selection'
 
-import { BorderAndShadow } from '../BorderAndShadow'
-import { TurboImage } from '../Image'
+import { ThumbnailImage } from '../Image'
 import { Heading, Progress, Text } from '../ui'
 import { Icon } from '../ui/icon'
 import { SyncIcon } from './sync-icon/SyncIcon'
@@ -128,21 +127,16 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 					className="white relative mx-4 flex-row gap-4"
 					style={{ opacity: pressed && !selectionStore.isSelectionMode ? 0.8 : 1 }}
 				>
-					<BorderAndShadow
-						style={{ borderRadius: 4, borderWidth: 0.3, shadowRadius: 1.41, elevation: 2 }}
-					>
-						{/* TODO: Use file icons when no thumbnail is available? */}
-						<TurboImage
-							source={{
-								// @ts-expect-error: URI doesn't like undefined but it shows a placeholder when
-								// undefined so it's fine
-								uri: thumbnailPath,
-							}}
-							resizeMode="stretch"
-							resize={(width / 2) * 1.5}
-							style={{ height: height / 2, width: width / 2 }}
-						/>
-					</BorderAndShadow>
+					{/* TODO: Use file icons when no thumbnail is available? */}
+					<ThumbnailImage
+						source={{
+							// @ts-expect-error: URI doesn't like undefined but it shows a placeholder when
+							// undefined so it's fine
+							uri: thumbnailPath,
+						}}
+						resizeMode="stretch"
+						size={{ height: height / 2, width: width / 2 }}
+					/>
 
 					<View className="flex-1 justify-center py-2">
 						<View className="flex flex-1 flex-row justify-between gap-2">

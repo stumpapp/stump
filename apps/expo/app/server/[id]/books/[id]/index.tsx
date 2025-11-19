@@ -340,6 +340,7 @@ export default function Screen() {
 							resizeMode="stretch"
 							size={{ height: 235 / thumbnailRatio, width: 235 }}
 							placeholderData={placeholderData}
+							borderAndShadowStyle={{ shadowRadius: 5 }}
 						/>
 					</View>
 

@@ -5,10 +5,10 @@ import { Pressable, ScrollView } from 'react-native-gesture-handler'
 import PagerView from 'react-native-pager-view'
 import { stripHtml } from 'string-strip-html'
 
-import { TurboImage } from '~/components/Image'
+import { ThumbnailImage } from '~/components/Image'
 import { Heading, Text } from '~/components/ui'
-import { useColors } from '~/lib/constants'
 import { cn } from '~/lib/utils'
+import { usePreferencesStore } from '~/stores'
 import { type TableOfContentsItem, useEpubLocationStore } from '~/stores/epub'
 
 export default function LocationsSheetContent() {
@@ -22,7 +22,7 @@ export default function LocationsSheetContent() {
 
 	const requestHeaders = useEpubLocationStore((store) => store.requestHeaders)
 
-	const colors = useColors()
+	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
 
 	const bookTitle = book?.name || embeddedMetadata?.title
 	const bookAuthor = book?.metadata?.writers?.join(', ') || embeddedMetadata?.author
@@ -86,31 +86,19 @@ export default function LocationsSheetContent() {
 					}}
 					key="1"
 				>
-					<ScrollView contentContainerStyle={{ paddingBottom: 16 }}>
+					<ScrollView contentContainerStyle={{ paddingBottom: 16, paddingTop: 12 }}>
 						<View className="flex items-center gap-4">
-							<View className="aspect-[2/3] self-center">
-								<TurboImage
-									source={{
-										uri: book?.thumbnail.url,
-										headers: {
-											...requestHeaders?.(),
-										},
-									}}
-									resizeMode="stretch"
-									resize={(700 / 3) * 1.5}
-									style={{
-										height: 350,
-										width: 'auto',
-										shadowColor: '#000',
-										shadowOffset: { width: 0, height: 1 },
-										shadowOpacity: 0.2,
-										shadowRadius: 5,
-										borderRadius: 12,
-										borderWidth: 0.2,
-										borderColor: colors.edge.DEFAULT,
-									}}
-								/>
-							</View>
+							<ThumbnailImage
+								source={{
+									uri: book?.thumbnail.url,
+									headers: {
+										...requestHeaders?.(),
+									},
+								}}
+								resizeMode="stretch"
+								size={{ height: 235 / thumbnailRatio, width: 235 }}
+								borderAndShadowStyle={{ shadowRadius: 5 }}
+							/>
 
 							<View className="gap-2">
 								<Heading size="lg" className="text-center" numberOfLines={3}>

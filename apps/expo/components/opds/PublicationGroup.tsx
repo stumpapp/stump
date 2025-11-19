@@ -11,8 +11,7 @@ import { cn } from '~/lib/utils'
 import { usePreferencesStore } from '~/stores'
 
 import { useActiveServer } from '../activeServer'
-import { BorderAndShadow } from '../BorderAndShadow'
-import { TurboImage } from '../Image'
+import { ThumbnailImage } from '../Image'
 import { Text } from '../ui'
 import EmptyFeed from './EmptyFeed'
 import { FeedComponentOptions } from './types'
@@ -100,25 +99,18 @@ export default function PublicationGroup({
 										'opacity-80': pressed,
 									})}
 								>
-									<BorderAndShadow
-										style={{ borderRadius: 6, borderWidth: 0.3, shadowRadius: 1.41, elevation: 2 }}
-									>
-										<View style={{ height: itemHeight, width: itemWidth }}>
-											<TurboImage
-												source={{
-													uri: thumbnailURL || '',
-													headers: {
-														...sdk.customHeaders,
-														Authorization: sdk.authorizationHeader || '',
-														[STUMP_SAVE_BASIC_SESSION_HEADER]: 'false',
-													},
-												}}
-												resizeMode="stretch"
-												resize={itemWidth * 1.5}
-												style={{ height: '100%', width: '100%' }}
-											/>
-										</View>
-									</BorderAndShadow>
+									<ThumbnailImage
+										source={{
+											uri: thumbnailURL || '',
+											headers: {
+												...sdk.customHeaders,
+												Authorization: sdk.authorizationHeader || '',
+												[STUMP_SAVE_BASIC_SESSION_HEADER]: 'false',
+											},
+										}}
+										resizeMode="stretch"
+										size={{ height: itemHeight, width: itemWidth }}
+									/>
 
 									<View>
 										<Text className="mt-2" style={{ maxWidth: itemWidth - 4 }} numberOfLines={2}>

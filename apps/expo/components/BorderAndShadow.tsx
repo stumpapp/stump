@@ -3,14 +3,12 @@ import { Platform, View, ViewStyle } from 'react-native'
 
 import { useColors } from '~/lib/constants'
 
-// TODO: remove optional shadowColor and shadowOffset once we remove all <BorderAndShadow /> components.
 export type BorderAndShadowStyle = {
 	borderRadius: number
 	borderWidth: number
 	shadowRadius: number
-	shadowColor?: string
-	shadowOffset?: { width: number; height: number }
-	elevation?: number
+	shadowColor: string
+	shadowOffset: { width: number; height: number }
 }
 
 type BorderAndShadowProps = {
@@ -31,16 +29,16 @@ export const BorderAndShadow = ({ children, style }: BorderAndShadowProps) => {
 			borderRadius: style.borderRadius,
 			boxShadow: [
 				{
-					offsetX: style.shadowOffset?.width ?? 0,
-					offsetY: style.shadowOffset?.height ?? 1,
+					offsetX: style.shadowOffset.width,
+					offsetY: style.shadowOffset.height,
 					blurRadius: style.shadowRadius,
-					color: style.shadowColor ?? 'rgba(0,0,0,0.2)',
+					color: style.shadowColor,
 				},
 			],
 		},
 		ios: {
-			shadowColor: style.shadowColor ?? 'rgba(0,0,0,0.2)',
-			shadowOffset: style.shadowOffset ?? { width: 0, height: 1 },
+			shadowColor: style.shadowColor,
+			shadowOffset: style.shadowOffset,
 			shadowOpacity: 1, // need to use 1 but the actual used opacity is set in shadowColor
 			shadowRadius: style.shadowRadius,
 		},

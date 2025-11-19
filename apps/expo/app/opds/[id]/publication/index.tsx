@@ -7,9 +7,8 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { useActiveServer } from '~/components/activeServer'
 import { InfoRow, InfoSection } from '~/components/book/overview'
-import { BorderAndShadow } from '~/components/BorderAndShadow'
 import ChevronBackLink from '~/components/ChevronBackLink'
-import { TurboImage } from '~/components/Image'
+import { ThumbnailImage } from '~/components/Image'
 import {
 	getDateField,
 	getNumberField,
@@ -88,22 +87,17 @@ export default function Screen() {
 			>
 				<View className="flex-1 gap-8 py-4">
 					<View className="flex items-center gap-4">
-						<BorderAndShadow
-							style={{ borderRadius: 10, borderWidth: 0.4, shadowRadius: 5, elevation: 8 }}
-						>
-							<TurboImage
-								source={{
-									uri: thumbnailURL || '',
-									headers: {
-										...sdk.customHeaders,
-										Authorization: sdk.authorizationHeader || '',
-									},
-								}}
-								resizeMode="stretch"
-								resize={235 * 1.5}
-								style={{ height: 235 / thumbnailRatio, width: 235 }}
-							/>
-						</BorderAndShadow>
+						<ThumbnailImage
+							source={{
+								uri: thumbnailURL || '',
+								headers: {
+									...sdk.customHeaders,
+									Authorization: sdk.authorizationHeader || '',
+								},
+							}}
+							resizeMode="stretch"
+							size={{ height: 235 / thumbnailRatio, width: 235 }}
+						/>
 					</View>
 
 					<View className="flex w-full flex-row items-center gap-2 tablet:max-w-sm tablet:self-center">

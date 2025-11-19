@@ -11,8 +11,7 @@ import Animated, {
 } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { BorderAndShadow } from '~/components/BorderAndShadow'
-import { TurboImage } from '~/components/Image'
+import { ThumbnailImage } from '~/components/Image'
 import { Button, Heading, Icon, Label, Text } from '~/components/ui'
 import { COLORS } from '~/lib/constants'
 import { useDisplay } from '~/lib/hooks'
@@ -111,26 +110,19 @@ export default function NextUpOverlay({ isVisible, book, onClose }: Props) {
 						{book.name}
 					</Heading>
 				</View>
-				<BorderAndShadow
-					style={{ borderRadius: 12, borderWidth: 0.8, shadowRadius: 5, elevation: 8 }}
-					outerStyle={{ shadowColor: 'white' }}
-				>
-					<TurboImage
-						source={{
-							uri: book.thumbnailUrl,
-							headers: {
-								...sdk.customHeaders,
-								Authorization: sdk.authorizationHeader || '',
-							},
-						}}
-						resizeMode="stretch"
-						resize={size * 1.5}
-						style={{
-							width: size,
-							height: size / thumbnailRatio,
-						}}
-					/>
-				</BorderAndShadow>
+
+				<ThumbnailImage
+					source={{
+						uri: book.thumbnailUrl,
+						headers: {
+							...sdk.customHeaders,
+							Authorization: sdk.authorizationHeader || '',
+						},
+					}}
+					resizeMode="stretch"
+					size={{ width: size, height: size / thumbnailRatio }}
+					borderAndShadowStyle={{ shadowRadius: 5, shadowColor: 'rgba(255,255,255,0.3)' }}
+				/>
 
 				<View
 					className="flex flex-row items-center tablet:max-w-sm tablet:self-center"

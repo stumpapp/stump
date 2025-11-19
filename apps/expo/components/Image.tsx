@@ -35,6 +35,7 @@ export const ThumbnailImage = ({
 	const shadowColor = borderAndShadowStyle?.shadowColor ?? 'rgba(0,0,0,0.2)'
 	const shadowOffset = borderAndShadowStyle?.shadowOffset ?? { width: 0, height: 1 }
 
+	// TODO(thumb-placeholders): Actually use this, test more on Android
 	// Using overflow: 'hidden' on android cuts off a tiny bit more than necessary from the edges of
 	// <LinearGradient />, which also causes flickering on the carousel.
 	// So we must not make it a child of BorderAndShadow, and must use inset: -0.1 and manually round the corners

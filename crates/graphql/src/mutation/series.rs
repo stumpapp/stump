@@ -12,7 +12,7 @@ use sea_orm::{
 };
 use stump_core::filesystem::{
 	image::{generate_book_thumbnail, GenerateThumbnailOptions},
-	media::analyze_media_job::AnalyzeMediaJob,
+	media::analysis::{AnalysisJobConfig, AnalyzeMediaJob, MediaAnalysisJobScope},
 	scanner::SeriesScanJob,
 };
 
@@ -29,7 +29,12 @@ pub struct SeriesMutation;
 #[Object]
 impl SeriesMutation {
 	#[graphql(guard = "PermissionGuard::one(UserPermission::ManageLibrary)")]
-	async fn analyze_series(&self, ctx: &Context<'_>, id: ID) -> Result<bool> {
+	async fn analyze_series(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+		#[graphql(default = false)] force_reanalysis: bool,
+	) -> Result<bool> {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let core = ctx.data::<CoreContext>()?;
 		let conn = core.conn.as_ref();
@@ -41,7 +46,13 @@ impl SeriesMutation {
 				.await?
 				.ok_or("Series not found")?;
 
-		core.enqueue_job(AnalyzeMediaJob::analyze_series(model.id))?;
+		core.enqueue_job(
+			AnalyzeMediaJob::new(AnalysisJobConfig {
+				force_reanalysis,
+				scope: MediaAnalysisJobScope::Series(model.id),
+			})
+			.wrapped(),
+		)?;
 
 		Ok(true)
 	}

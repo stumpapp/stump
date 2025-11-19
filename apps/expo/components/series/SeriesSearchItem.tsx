@@ -17,7 +17,11 @@ const fragment = graphql(`
 		resolvedName
 		thumbnail {
 			url
-			...ThumbnailPlaceholder
+			metadata {
+				averageColor
+				meshColors
+				thumbhash
+			}
 		}
 		readCount
 		mediaCount
@@ -50,7 +54,7 @@ export default function SeriesSearchItem({ series }: Props) {
 	const router = useRouter()
 	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
 
-	const { url: uri, ...placeholderData } = data.thumbnail
+	const { url: uri, metadata: placeholderData } = data.thumbnail
 
 	return (
 		<Pressable

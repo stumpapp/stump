@@ -32,7 +32,11 @@ const fragment = graphql(`
 		}
 		thumbnail {
 			url
-			...ThumbnailPlaceholder
+			metadata {
+				averageColor
+				meshColors
+				thumbhash
+			}
 		}
 		pages
 		readProgress {
@@ -254,7 +258,7 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 		easing: Easing.bezier(0.42, 0, 1, 1), // https://cubic-bezier.com/#.42,0,1,1
 	})
 
-	const { url: uri, ...placeholderData } = data.thumbnail
+	const { url: uri, metadata: placeholderData } = data.thumbnail
 
 	return (
 		<View className="flex flex-row gap-4">

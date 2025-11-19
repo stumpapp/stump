@@ -20,7 +20,11 @@ const fragment = graphql(`
 		resolvedName
 		thumbnail {
 			url
-			...ThumbnailPlaceholder
+			metadata {
+				averageColor
+				meshColors
+				thumbhash
+			}
 		}
 		seriesPosition
 		series {
@@ -79,6 +83,7 @@ function OnDeckBookItem({ book }: Props) {
 							}}
 							resizeMode="stretch"
 							size={{ width, height }}
+							placeholderData={data.thumbnail.metadata}
 						/>
 
 						<View className="absolute bottom-0 z-20 w-full gap-1 p-2">

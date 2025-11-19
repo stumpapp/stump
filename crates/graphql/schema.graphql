@@ -988,7 +988,7 @@ type Media {
 	libraryId: String!
 	library: Library!
 	libraryConfig: LibraryConfig!
-	pageAnalysis: PageAnalysis
+	analysisData: MediaAnalysisData
 	"""
 	A reference to the thumbnail image for the media. This will be a fully
 	qualified URL to the image.
@@ -1010,6 +1010,12 @@ type Media {
 	on a mobile device.
 	"""
 	relativeLibraryPath: String!
+}
+
+type MediaAnalysisData {
+	dimensions: [PageDimension!]!
+	contentTypes: [String!]!
+	imageMetadatas: [ImageMetadata!]!
 }
 
 type MediaAnnotationsModel {
@@ -1299,7 +1305,7 @@ type Mutation {
 	createOrUpdateBookmark(input: BookmarkInput!): Bookmark!
 	"Delete a bookmark by epubcfi. The user must be the owner of the bookmark."
 	deleteBookmark(epubcfi: String!): Bookmark!
-	analyzeMedia(id: ID!): Boolean!
+	analyzeMedia(id: ID!, forceReanalysis: Boolean! = false): Boolean!
 	convertMedia(id: ID!): Boolean!
 	deleteMedia(id: ID!): Media!
 	favoriteMedia(id: ID!, isFavorite: Boolean!): Media!
@@ -1318,7 +1324,7 @@ type Mutation {
 	deleteMediaReadHistory(id: ID!): Media!
 	updateMediaProgress(id: ID!, input: MediaProgressInput!): ReadingProgressOutput!
 	markMediaAsComplete(id: ID!, isComplete: Boolean!, page: Int): FinishedReadingSessionModel
-	analyzeLibrary(id: ID!): Boolean!
+	analyzeLibrary(id: ID!, forceReanalysis: Boolean! = false): Boolean!
 	"""
 	Delete media and series from a library that match one of the following conditions:
 	
@@ -1403,7 +1409,7 @@ type Mutation {
 	A result containing the deleted reading list, or an error if deletion failed.
 	"""
 	deleteReadingList(id: String!): ReadingList!
-	analyzeSeries(id: ID!): Boolean!
+	analyzeSeries(id: ID!, forceReanalysis: Boolean! = false): Boolean!
 	favoriteSeries(id: ID!, isFavorite: Boolean!): Series!
 	"""
 	Update the thumbnail for a series. This will replace the existing thumbnail with the the one
@@ -1565,11 +1571,6 @@ type OffsetPaginationInfo {
 enum OrderDirection {
 	ASC
 	DESC
-}
-
-"A struct containing the various analyses of a book in Stump, e.g., page dimensions."
-type PageAnalysis {
-	dimensions: [PageDimension!]!
 }
 
 input PageBasedThumbnailInput {

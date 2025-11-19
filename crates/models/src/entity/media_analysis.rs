@@ -1,14 +1,16 @@
 use sea_orm::entity::prelude::*;
 
-use crate::shared::page_dimension::PageAnalysis;
+use crate::shared::analysis::MediaAnalysisData;
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
-#[sea_orm(table_name = "page_analysis")]
+#[sea_orm(table_name = "media_analysis")]
 pub struct Model {
 	#[sea_orm(primary_key, auto_increment = true)]
 	pub id: i32,
+
 	#[sea_orm(column_type = "Json")]
-	pub data: PageAnalysis,
+	pub data: MediaAnalysisData,
+
 	#[sea_orm(unique, column_type = "Text")]
 	pub media_id: String,
 }

@@ -1,7 +1,7 @@
 //! This module defines structures for storing and retrieving page dimensions data. The
 //! two primary structures defined here are [`PageDimension`], which represents a pair of
 //! page dimensions (height, width), and [`PageDimensionsEntity`], which is the rust
-//! representation of a database row in the `page_dimensions` table.
+//! representation of a database row in the `media_analysis` table.
 //!
 //! In addition to defining data structures, this module includes a simple compression
 //! algorithm for storing and retrieving [Vec]<[`PageDimension`]s. The [`dimension_vec_to_string`]
@@ -10,30 +10,76 @@
 
 use async_graphql::SimpleObject;
 use sea_orm::FromJsonQueryResult;
-use serde::{Deserialize, Serialize};
 
+use serde::{ser::SerializeStruct, Deserialize, Serialize};
 use std::fmt;
 use std::str::FromStr;
 use std::string::ToString;
 
+use crate::shared::image::ImageMetadata;
+
+#[derive(Debug, Default, Clone, PartialEq, Eq, SimpleObject, FromJsonQueryResult)]
+pub struct MediaAnalysisData {
+	pub dimensions: Vec<PageDimension>,
+	pub content_types: Vec<String>,
+	pub image_metadatas: Vec<ImageMetadata>,
+}
+
+impl Serialize for MediaAnalysisData {
+	fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+	where
+		S: serde::Serializer,
+	{
+		let mut state = serializer.serialize_struct("MediaAnalysisData", 3)?;
+		state.serialize_field(
+			"dimensions",
+			&dimension_vec_to_string(self.dimensions.clone()),
+		)?;
+		state.serialize_field(
+			"page_content_types",
+			&content_type_vec_to_string(self.content_types.clone()),
+		)?;
+		// Every image is different, so we won't bother trying to compress it
+		state.serialize_field("image_metadatas", &self.image_metadatas)?;
+		state.end()
+	}
+}
+
+impl<'de> Deserialize<'de> for MediaAnalysisData {
+	fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+	where
+		D: serde::Deserializer<'de>,
+	{
+		#[derive(Deserialize)]
+		struct MediaAnalysisDataHelper {
+			dimensions: String,
+			page_content_types: String,
+			image_metadatas: Vec<ImageMetadata>,
+		}
+
+		let helper = MediaAnalysisDataHelper::deserialize(deserializer)?;
+
+		let dimensions = dimension_vec_from_str(&helper.dimensions)
+			.map_err(serde::de::Error::custom)?;
+		let content_types = content_type_vec_from_str(&helper.page_content_types)
+			.map_err(serde::de::Error::custom)?;
+
+		Ok(MediaAnalysisData {
+			dimensions,
+			content_types,
+			image_metadatas: helper.image_metadatas,
+		})
+	}
+}
+
 #[derive(thiserror::Error, Debug)]
-pub enum PageDimensionParserError {
+pub enum RunLengthParserError {
 	#[error("Error parsing {0}, expected height and width")]
 	ExpectedHeightWidth(String),
 	#[error("Error parsing {0}, malformed run syntax")]
 	MalformedRunSyntax(String),
 	#[error("Failed to parse number: {0}")]
 	ErrorParsingInt(#[from] std::num::ParseIntError),
-}
-
-/// A struct containing the various analyses of a book in Stump, e.g., page dimensions.
-#[derive(
-	Serialize, Deserialize, Debug, Clone, PartialEq, Eq, FromJsonQueryResult, SimpleObject,
-)]
-
-pub struct PageAnalysis {
-	pub dimensions: Vec<PageDimension>,
-	// pub content_types: Vec<ContentType>, // or Vec<String>?
 }
 
 /// Represents a page dimension for a page of a Stump media item. It consists of a
@@ -59,7 +105,7 @@ impl fmt::Display for PageDimension {
 }
 
 impl FromStr for PageDimension {
-	type Err = PageDimensionParserError;
+	type Err = RunLengthParserError;
 
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
 		// Trim leading/trailing whitespace
@@ -68,7 +114,7 @@ impl FromStr for PageDimension {
 		// Check for correct layout
 		let dims = s.split(',').collect::<Vec<_>>();
 		if dims.len() != 2 {
-			return Err(PageDimensionParserError::ExpectedHeightWidth(s.to_string()));
+			return Err(RunLengthParserError::ExpectedHeightWidth(s.to_string()));
 		}
 
 		// Parse values
@@ -124,6 +170,98 @@ pub fn dimension_vec_to_string(list: Vec<PageDimension>) -> String {
 	encoded_strings.join(";")
 }
 
+/// Serializes a [Vec]<[String]> (content types) as a [String].
+///
+/// The serialization uses semicolon-separation for each content type string.
+/// Additionally, it uses a form of deduplication that encodes a run of n > 1
+/// identical content types as `"n>content_type"`. An empty vector serializes to `""`.
+pub fn content_type_vec_to_string(list: Vec<String>) -> String {
+	let mut encoded_strings = Vec::new();
+	let mut run_count = 0;
+	let mut run_content_type: Option<String> = None;
+
+	// Loop over each of the items in the list to be encoded
+	for next_content_type in list {
+		match run_content_type {
+			// If there's already a run going and it matches the next, increment the counter
+			Some(ref run_ct) if *run_ct == next_content_type => run_count += 1,
+			// If there's either a run going and it doesn't match, or no run...
+			_ => {
+				// This branch handles write-out if a run is going and it didn't match
+				if let Some(run_ct) = run_content_type {
+					if run_count > 1 {
+						encoded_strings.push(format!("{run_count}>{run_ct}"));
+					} else {
+						encoded_strings.push(run_ct);
+					}
+				}
+
+				// In either case, we need to set the run and reset the count
+				run_content_type = Some(next_content_type);
+				run_count = 1;
+			},
+		}
+	}
+
+	// This handles write-out for the final item
+	if let Some(run_ct) = run_content_type {
+		if run_count > 1 {
+			encoded_strings.push(format!("{run_count}>{run_ct}"));
+		} else {
+			encoded_strings.push(run_ct);
+		}
+	}
+
+	encoded_strings.join(";")
+}
+
+/// Deserializes a [Vec]<[String]> (content types) from a [String] containing its serialized form.
+///
+/// The serialization uses semicolon-separation for each content type string.
+/// Additionally, it uses a form of deduplication that encodes a run of n > 1
+/// identical content types as `"n>content_type"`. An empty vector serializes to `""`.
+pub fn content_type_vec_from_str(s: &str) -> Result<Vec<String>, RunLengthParserError> {
+	// Early return for an empty string
+	if s.is_empty() {
+		return Ok(Vec::new());
+	}
+
+	// Trim leading/trailing whitespace
+	let s = s.trim();
+
+	let chunks = s.split(';').collect::<Vec<_>>();
+	// This will be under-capacity unless every content type differs, but that's fine
+	let mut out_list = Vec::with_capacity(chunks.len());
+
+	// Loop over each encoded chunk
+	for encoded_str in chunks {
+		match encoded_str.find('>') {
+			// Handle case where there's multiple of something
+			Some(_) => {
+				// Split out the number and the encoded item
+				let items = encoded_str.split('>').collect::<Vec<_>>();
+
+				// Sanity check
+				if items.len() != 2 {
+					return Err(RunLengthParserError::MalformedRunSyntax(
+						encoded_str.to_string(),
+					));
+				}
+
+				// Parse number
+				let num_repeated: usize = items.first().unwrap().parse()?;
+				// Get content type string
+				let content_type = items.get(1).unwrap().to_string();
+				// Push as many as we need
+				out_list.extend(vec![content_type; num_repeated]);
+			},
+			None => out_list.push(encoded_str.to_string()),
+		}
+	}
+
+	Ok(out_list)
+}
+
 /// Deserializes a [Vec]<[`PageDimension`]> from a [String] containing its serialized form.
 ///
 /// The serialization uses comma-separation for height and width in [`PageDimension`], and semicolon-separation
@@ -131,7 +269,7 @@ pub fn dimension_vec_to_string(list: Vec<PageDimension>) -> String {
 /// [`PageDimension`]s as `"n>height,width"`. An empty vector serializes to `""`.
 pub fn dimension_vec_from_str(
 	s: &str,
-) -> Result<Vec<PageDimension>, PageDimensionParserError> {
+) -> Result<Vec<PageDimension>, RunLengthParserError> {
 	// Early return for an empty string
 	if s.is_empty() {
 		return Ok(Vec::new());
@@ -154,7 +292,7 @@ pub fn dimension_vec_from_str(
 
 				// Sanity check
 				if items.len() != 2 {
-					return Err(PageDimensionParserError::MalformedRunSyntax(
+					return Err(RunLengthParserError::MalformedRunSyntax(
 						encoded_str.to_string(),
 					));
 				}
@@ -243,5 +381,62 @@ mod tests {
 		// Deserializing an empty string.
 		let deserialized_dimensions = dimension_vec_from_str("").unwrap();
 		assert_eq!(deserialized_dimensions, vec![]);
+	}
+
+	#[test]
+	fn test_content_type_vec_to_string() {
+		// Semicolon-separated serialization of content types.
+		let list = vec![
+			"image/jpeg".to_string(),
+			"image/png".to_string(),
+			"image/jpeg".to_string(),
+		];
+		let serialized_list = content_type_vec_to_string(list);
+		assert_eq!(serialized_list, "image/jpeg;image/png;image/jpeg");
+
+		// Repeated values are compressed with shorthand.
+		let list = vec![
+			"image/jpeg".to_string(),
+			"image/jpeg".to_string(),
+			"image/jpeg".to_string(),
+		];
+		let serialized_list = content_type_vec_to_string(list);
+		assert_eq!(serialized_list, "3>image/jpeg");
+
+		// Empty vectors are serialized to an empty String.
+		let list = vec![];
+		let serialized_list = content_type_vec_to_string(list);
+		assert_eq!(serialized_list, "");
+	}
+
+	#[test]
+	fn test_content_type_vec_from_str() {
+		// Deserializing an alternating string.
+		let deserialized_content_types =
+			content_type_vec_from_str("image/jpeg;image/png;image/jpeg").unwrap();
+		assert_eq!(
+			deserialized_content_types,
+			vec![
+				"image/jpeg".to_string(),
+				"image/png".to_string(),
+				"image/jpeg".to_string()
+			]
+		);
+
+		// Deserializing a string with repeated content type shorthand.
+		let deserialized_content_types =
+			content_type_vec_from_str("3>image/jpeg").unwrap();
+		assert_eq!(
+			deserialized_content_types,
+			vec![
+				"image/jpeg".to_string(),
+				"image/jpeg".to_string(),
+				"image/jpeg".to_string()
+			]
+		);
+
+		// Deserializing an empty string.
+		let deserialized_content_types = content_type_vec_from_str("").unwrap();
+		assert_eq!(deserialized_content_types, Vec::<String>::new());
 	}
 }

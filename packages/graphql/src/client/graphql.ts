@@ -990,6 +990,7 @@ export enum LogModelOrdering {
 
 export type Media = {
   __typename?: 'Media';
+  analysisData?: Maybe<MediaAnalysisData>;
   /** The timestamp of the creation of the media */
   createdAt: Scalars['DateTime']['output'];
   /** The timestamp of when the media was **soft** deleted. This will act like a trash bin. */
@@ -1025,7 +1026,6 @@ export type Media = {
   name: Scalars['String']['output'];
   /** The next media in the series, ordered by name */
   nextInSeries: PaginatedMediaResponse;
-  pageAnalysis?: Maybe<PageAnalysis>;
   /** The number of pages in the media, if applicable. Will be -1 for certain media types */
   pages: Scalars['Int']['output'];
   /** The path of the underlying media file on disk */
@@ -1076,6 +1076,13 @@ export type Media = {
 
 export type MediaNextInSeriesArgs = {
   pagination?: Pagination;
+};
+
+export type MediaAnalysisData = {
+  __typename?: 'MediaAnalysisData';
+  contentTypes: Array<Scalars['String']['output']>;
+  dimensions: Array<PageDimension>;
+  imageMetadatas: Array<ImageMetadata>;
 };
 
 export type MediaAnnotationsModel = {
@@ -1536,16 +1543,19 @@ export type MutationAddBooksToBookClubScheduleArgs = {
 
 
 export type MutationAnalyzeLibraryArgs = {
+  forceReanalysis?: Scalars['Boolean']['input'];
   id: Scalars['ID']['input'];
 };
 
 
 export type MutationAnalyzeMediaArgs = {
+  forceReanalysis?: Scalars['Boolean']['input'];
   id: Scalars['ID']['input'];
 };
 
 
 export type MutationAnalyzeSeriesArgs = {
+  forceReanalysis?: Scalars['Boolean']['input'];
   id: Scalars['ID']['input'];
 };
 
@@ -2122,12 +2132,6 @@ export enum OrderDirection {
   Asc = 'ASC',
   Desc = 'DESC'
 }
-
-/** A struct containing the various analyses of a book in Stump, e.g., page dimensions. */
-export type PageAnalysis = {
-  __typename?: 'PageAnalysis';
-  dimensions: Array<PageDimension>;
-};
 
 export type PageBasedThumbnailInput = {
   /** A flag indicating whether the page is zero based (i.e. 0 is the first page) */
@@ -3435,10 +3439,7 @@ export type BookByIdQueryVariables = Exact<{
 
 
 export type BookByIdQuery = { __typename?: 'Query', mediaById?: (
-    { __typename?: 'Media', id: string, extension: string, pages: number, resolvedName: string, seriesPosition?: number | null, size: number, metadata?: { __typename?: 'MediaMetadata', ageRating?: number | null, characters: Array<string>, colorists: Array<string>, coverArtists: Array<string>, day?: number | null, editors: Array<string>, identifierAmazon?: string | null, identifierCalibre?: string | null, identifierGoogle?: string | null, identifierIsbn?: string | null, identifierMobiAsin?: string | null, identifierUuid?: string | null, genres: Array<string>, inkers: Array<string>, language?: string | null, letterers: Array<string>, links: Array<string>, month?: number | null, notes?: string | null, number?: any | null, pageCount?: number | null, pencillers: Array<string>, publisher?: string | null, series?: string | null, summary?: string | null, teams: Array<string>, title?: string | null, titleSort?: string | null, volume?: number | null, writers: Array<string>, year?: number | null } | null, readProgress?: { __typename?: 'ActiveReadingSession', page?: number | null, percentageCompleted?: any | null, epubcfi?: string | null, startedAt: any, elapsedSeconds?: number | null, updatedAt?: any | null, locator?: { __typename?: 'ReadiumLocator', chapterTitle: string, href: string, title?: string | null, type: string, locations?: { __typename?: 'ReadiumLocation', fragments?: Array<string> | null, position?: number | null, progression?: any | null, totalProgression?: any | null, cssSelector?: string | null, partialCfi?: string | null } | null } | null } | null, readHistory: Array<{ __typename?: 'FinishedReadingSession', completedAt: any }>, series: { __typename?: 'Series', id: string, resolvedName: string, mediaCount: number }, library: { __typename?: 'Library', id: string, name: string }, thumbnail: (
-      { __typename?: 'ImageRef', url: string }
-      & { ' $fragmentRefs'?: { 'ThumbnailPlaceholderFragment': ThumbnailPlaceholderFragment } }
-    ) }
+    { __typename?: 'Media', id: string, extension: string, pages: number, resolvedName: string, seriesPosition?: number | null, size: number, metadata?: { __typename?: 'MediaMetadata', ageRating?: number | null, characters: Array<string>, colorists: Array<string>, coverArtists: Array<string>, day?: number | null, editors: Array<string>, identifierAmazon?: string | null, identifierCalibre?: string | null, identifierGoogle?: string | null, identifierIsbn?: string | null, identifierMobiAsin?: string | null, identifierUuid?: string | null, genres: Array<string>, inkers: Array<string>, language?: string | null, letterers: Array<string>, links: Array<string>, month?: number | null, notes?: string | null, number?: any | null, pageCount?: number | null, pencillers: Array<string>, publisher?: string | null, series?: string | null, summary?: string | null, teams: Array<string>, title?: string | null, titleSort?: string | null, volume?: number | null, writers: Array<string>, year?: number | null } | null, readProgress?: { __typename?: 'ActiveReadingSession', page?: number | null, percentageCompleted?: any | null, epubcfi?: string | null, startedAt: any, elapsedSeconds?: number | null, updatedAt?: any | null, locator?: { __typename?: 'ReadiumLocator', chapterTitle: string, href: string, title?: string | null, type: string, locations?: { __typename?: 'ReadiumLocation', fragments?: Array<string> | null, position?: number | null, progression?: any | null, totalProgression?: any | null, cssSelector?: string | null, partialCfi?: string | null } | null } | null } | null, readHistory: Array<{ __typename?: 'FinishedReadingSession', completedAt: any }>, series: { __typename?: 'Series', id: string, resolvedName: string, mediaCount: number }, library: { __typename?: 'Library', id: string, name: string }, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, meshColors: Array<string>, thumbhash?: string | null } | null } }
     & { ' $fragmentRefs'?: { 'BookMenuFragment': BookMenuFragment } }
   ) | null };
 
@@ -3447,7 +3448,7 @@ export type BookReadScreenQueryVariables = Exact<{
 }>;
 
 
-export type BookReadScreenQuery = { __typename?: 'Query', mediaById?: { __typename?: 'Media', id: string, pages: number, extension: string, name: string, thumbnail: { __typename?: 'ImageRef', url: string }, readProgress?: { __typename?: 'ActiveReadingSession', percentageCompleted?: any | null, epubcfi?: string | null, page?: number | null, elapsedSeconds?: number | null, locator?: { __typename?: 'ReadiumLocator', chapterTitle: string, href: string, title?: string | null, type: string, locations?: { __typename?: 'ReadiumLocation', fragments?: Array<string> | null, progression?: any | null, position?: number | null, totalProgression?: any | null, cssSelector?: string | null, partialCfi?: string | null } | null } | null } | null, series: { __typename?: 'Series', id: string, resolvedName: string }, library: { __typename?: 'Library', id: string, name: string }, libraryConfig: { __typename?: 'LibraryConfig', defaultReadingImageScaleFit: ReadingImageScaleFit, defaultReadingMode: ReadingMode, defaultReadingDir: ReadingDirection }, metadata?: { __typename?: 'MediaMetadata', writers: Array<string>, publisher?: string | null, summary?: string | null } | null, pageAnalysis?: { __typename?: 'PageAnalysis', dimensions: Array<{ __typename?: 'PageDimension', height: number, width: number }> } | null, nextInSeries: { __typename?: 'PaginatedMediaResponse', nodes: Array<{ __typename?: 'Media', id: string, name: string, thumbnail: { __typename?: 'ImageRef', url: string } }> }, ebook?: { __typename?: 'Epub', toc: Array<string>, bookmarks: Array<{ __typename?: 'Bookmark', id: string, userId: string, epubcfi?: string | null, mediaId: string }>, spine: Array<{ __typename?: 'SpineItem', id?: string | null, idref: string, properties?: string | null, linear: boolean }> } | null } | null };
+export type BookReadScreenQuery = { __typename?: 'Query', mediaById?: { __typename?: 'Media', id: string, pages: number, extension: string, name: string, thumbnail: { __typename?: 'ImageRef', url: string }, readProgress?: { __typename?: 'ActiveReadingSession', percentageCompleted?: any | null, epubcfi?: string | null, page?: number | null, elapsedSeconds?: number | null, locator?: { __typename?: 'ReadiumLocator', chapterTitle: string, href: string, title?: string | null, type: string, locations?: { __typename?: 'ReadiumLocation', fragments?: Array<string> | null, progression?: any | null, position?: number | null, totalProgression?: any | null, cssSelector?: string | null, partialCfi?: string | null } | null } | null } | null, series: { __typename?: 'Series', id: string, resolvedName: string }, library: { __typename?: 'Library', id: string, name: string }, libraryConfig: { __typename?: 'LibraryConfig', defaultReadingImageScaleFit: ReadingImageScaleFit, defaultReadingMode: ReadingMode, defaultReadingDir: ReadingDirection }, metadata?: { __typename?: 'MediaMetadata', writers: Array<string>, publisher?: string | null, summary?: string | null } | null, analysisData?: { __typename?: 'MediaAnalysisData', dimensions: Array<{ __typename?: 'PageDimension', height: number, width: number }>, imageMetadatas: Array<{ __typename?: 'ImageMetadata', averageColor?: string | null, meshColors: Array<string>, thumbhash?: string | null }> } | null, nextInSeries: { __typename?: 'PaginatedMediaResponse', nodes: Array<{ __typename?: 'Media', id: string, name: string, thumbnail: { __typename?: 'ImageRef', url: string } }> }, ebook?: { __typename?: 'Epub', toc: Array<string>, bookmarks: Array<{ __typename?: 'Bookmark', id: string, userId: string, epubcfi?: string | null, mediaId: string }>, spine: Array<{ __typename?: 'SpineItem', id?: string | null, idref: string, properties?: string | null, linear: boolean }> } | null } | null };
 
 export type UpdateReadProgressionMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -3552,8 +3553,6 @@ export type UpdateReadProgressionBackgroundTaskMutationVariables = Exact<{
 
 export type UpdateReadProgressionBackgroundTaskMutation = { __typename?: 'Mutation', updateMediaProgress: { __typename: 'ActiveReadingSession' } | { __typename: 'FinishedReadingSession' } };
 
-export type ThumbnailPlaceholderFragment = { __typename?: 'ImageRef', metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, meshColors: Array<string>, thumbhash?: string | null } | null } & { ' $fragmentName'?: 'ThumbnailPlaceholderFragment' };
-
 export type ContinueReadingQueryVariables = Exact<{
   pagination?: InputMaybe<Pagination>;
 }>;
@@ -3574,10 +3573,7 @@ export type OnDeckBooksQuery = { __typename?: 'Query', onDeck: { __typename?: 'P
       & { ' $fragmentRefs'?: { 'OnDeckBookItemFragment': OnDeckBookItemFragment } }
     )>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', totalPages: number, currentPage: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
 
-export type ReadingNowFragment = { __typename?: 'Media', id: string, resolvedName: string, pages: number, metadata?: { __typename?: 'MediaMetadata', summary?: string | null, genres: Array<string>, links: Array<string> } | null, thumbnail: (
-    { __typename?: 'ImageRef', url: string }
-    & { ' $fragmentRefs'?: { 'ThumbnailPlaceholderFragment': ThumbnailPlaceholderFragment } }
-  ), readProgress?: { __typename?: 'ActiveReadingSession', epubcfi?: string | null, page?: number | null, percentageCompleted?: any | null, updatedAt?: any | null } | null } & { ' $fragmentName'?: 'ReadingNowFragment' };
+export type ReadingNowFragment = { __typename?: 'Media', id: string, resolvedName: string, pages: number, metadata?: { __typename?: 'MediaMetadata', summary?: string | null, genres: Array<string>, links: Array<string> } | null, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, meshColors: Array<string>, thumbhash?: string | null } | null }, readProgress?: { __typename?: 'ActiveReadingSession', epubcfi?: string | null, page?: number | null, percentageCompleted?: any | null, updatedAt?: any | null } | null } & { ' $fragmentName'?: 'ReadingNowFragment' };
 
 export type RecentlyAddedBooksQueryVariables = Exact<{
   pagination?: InputMaybe<Pagination>;
@@ -3599,25 +3595,13 @@ export type RecentlyAddedSeriesHorizontalQuery = { __typename?: 'Query', recentl
       & { ' $fragmentRefs'?: { 'RecentlyAddedSeriesItemFragment': RecentlyAddedSeriesItemFragment } }
     )>, pageInfo: { __typename: 'CursorPaginationInfo', currentCursor?: string | null, nextCursor?: string | null, limit: number } | { __typename: 'OffsetPaginationInfo' } } };
 
-export type BookGridItemFragment = { __typename?: 'Media', id: string, resolvedName: string, thumbnail: (
-    { __typename?: 'ImageRef', url: string }
-    & { ' $fragmentRefs'?: { 'ThumbnailPlaceholderFragment': ThumbnailPlaceholderFragment } }
-  ) } & { ' $fragmentName'?: 'BookGridItemFragment' };
+export type BookGridItemFragment = { __typename?: 'Media', id: string, resolvedName: string, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, meshColors: Array<string>, thumbhash?: string | null } | null } } & { ' $fragmentName'?: 'BookGridItemFragment' };
 
-export type BookListItemFragment = { __typename?: 'Media', id: string, resolvedName: string, thumbnail: (
-    { __typename?: 'ImageRef', url: string }
-    & { ' $fragmentRefs'?: { 'ThumbnailPlaceholderFragment': ThumbnailPlaceholderFragment } }
-  ) } & { ' $fragmentName'?: 'BookListItemFragment' };
+export type BookListItemFragment = { __typename?: 'Media', id: string, resolvedName: string, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, meshColors: Array<string>, thumbhash?: string | null } | null } } & { ' $fragmentName'?: 'BookListItemFragment' };
 
-export type BookSearchItemFragment = { __typename?: 'Media', id: string, resolvedName: string, size: number, pages: number, thumbnail: (
-    { __typename?: 'ImageRef', url: string }
-    & { ' $fragmentRefs'?: { 'ThumbnailPlaceholderFragment': ThumbnailPlaceholderFragment } }
-  ) } & { ' $fragmentName'?: 'BookSearchItemFragment' };
+export type BookSearchItemFragment = { __typename?: 'Media', id: string, resolvedName: string, size: number, pages: number, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, meshColors: Array<string>, thumbhash?: string | null } | null } } & { ' $fragmentName'?: 'BookSearchItemFragment' };
 
-export type OnDeckBookItemFragment = { __typename?: 'Media', id: string, resolvedName: string, seriesPosition?: number | null, thumbnail: (
-    { __typename?: 'ImageRef', url: string }
-    & { ' $fragmentRefs'?: { 'ThumbnailPlaceholderFragment': ThumbnailPlaceholderFragment } }
-  ), series: { __typename?: 'Series', mediaCount: number } } & { ' $fragmentName'?: 'OnDeckBookItemFragment' };
+export type OnDeckBookItemFragment = { __typename?: 'Media', id: string, resolvedName: string, seriesPosition?: number | null, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, meshColors: Array<string>, thumbhash?: string | null } | null }, series: { __typename?: 'Series', mediaCount: number } } & { ' $fragmentName'?: 'OnDeckBookItemFragment' };
 
 export type CharactersQueryVariables = Exact<{
   seriesId?: InputMaybe<Scalars['ID']['input']>;
@@ -3679,15 +3663,9 @@ export type LibraryActionMenuScanLibraryMutationVariables = Exact<{
 
 export type LibraryActionMenuScanLibraryMutation = { __typename?: 'Mutation', scanLibrary: boolean };
 
-export type LibraryGridItemFragment = { __typename?: 'Library', id: string, name: string, thumbnail: (
-    { __typename?: 'ImageRef', url: string }
-    & { ' $fragmentRefs'?: { 'ThumbnailPlaceholderFragment': ThumbnailPlaceholderFragment } }
-  ) } & { ' $fragmentName'?: 'LibraryGridItemFragment' };
+export type LibraryGridItemFragment = { __typename?: 'Library', id: string, name: string, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, meshColors: Array<string>, thumbhash?: string | null } | null } } & { ' $fragmentName'?: 'LibraryGridItemFragment' };
 
-export type LibrarySearchItemFragment = { __typename?: 'Library', id: string, name: string, thumbnail: (
-    { __typename?: 'ImageRef', url: string }
-    & { ' $fragmentRefs'?: { 'ThumbnailPlaceholderFragment': ThumbnailPlaceholderFragment } }
-  ) } & { ' $fragmentName'?: 'LibrarySearchItemFragment' };
+export type LibrarySearchItemFragment = { __typename?: 'Library', id: string, name: string, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, meshColors: Array<string>, thumbhash?: string | null } | null } } & { ' $fragmentName'?: 'LibrarySearchItemFragment' };
 
 export type RecentlyAddedSeriesGridQueryVariables = Exact<{
   pagination?: InputMaybe<Pagination>;
@@ -3699,20 +3677,11 @@ export type RecentlyAddedSeriesGridQuery = { __typename?: 'Query', series: { __t
       & { ' $fragmentRefs'?: { 'SeriesGridItemFragment': SeriesGridItemFragment } }
     )>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', totalPages: number, currentPage: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
 
-export type RecentlyAddedSeriesItemFragment = { __typename?: 'Series', id: string, resolvedName: string, readCount: number, mediaCount: number, createdAt: any, thumbnail: (
-    { __typename?: 'ImageRef', url: string }
-    & { ' $fragmentRefs'?: { 'ThumbnailPlaceholderFragment': ThumbnailPlaceholderFragment } }
-  ) } & { ' $fragmentName'?: 'RecentlyAddedSeriesItemFragment' };
+export type RecentlyAddedSeriesItemFragment = { __typename?: 'Series', id: string, resolvedName: string, readCount: number, mediaCount: number, createdAt: any, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, meshColors: Array<string>, thumbhash?: string | null } | null } } & { ' $fragmentName'?: 'RecentlyAddedSeriesItemFragment' };
 
-export type SeriesGridItemFragment = { __typename?: 'Series', id: string, resolvedName: string, thumbnail: (
-    { __typename?: 'ImageRef', url: string }
-    & { ' $fragmentRefs'?: { 'ThumbnailPlaceholderFragment': ThumbnailPlaceholderFragment } }
-  ) } & { ' $fragmentName'?: 'SeriesGridItemFragment' };
+export type SeriesGridItemFragment = { __typename?: 'Series', id: string, resolvedName: string, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, meshColors: Array<string>, thumbhash?: string | null } | null } } & { ' $fragmentName'?: 'SeriesGridItemFragment' };
 
-export type SeriesSearchItemFragment = { __typename?: 'Series', id: string, resolvedName: string, readCount: number, mediaCount: number, percentageCompleted: number, thumbnail: (
-    { __typename?: 'ImageRef', url: string }
-    & { ' $fragmentRefs'?: { 'ThumbnailPlaceholderFragment': ThumbnailPlaceholderFragment } }
-  ) } & { ' $fragmentName'?: 'SeriesSearchItemFragment' };
+export type SeriesSearchItemFragment = { __typename?: 'Series', id: string, resolvedName: string, readCount: number, mediaCount: number, percentageCompleted: number, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, meshColors: Array<string>, thumbhash?: string | null } | null } } & { ' $fragmentName'?: 'SeriesSearchItemFragment' };
 
 export type UseFavoriteBookMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -4008,7 +3977,7 @@ export type BookReaderSceneQueryVariables = Exact<{
 }>;
 
 
-export type BookReaderSceneQuery = { __typename?: 'Query', mediaById?: { __typename?: 'Media', id: string, resolvedName: string, pages: number, extension: string, readProgress?: { __typename?: 'ActiveReadingSession', percentageCompleted?: any | null, epubcfi?: string | null, page?: number | null, elapsedSeconds?: number | null } | null, libraryConfig: { __typename?: 'LibraryConfig', defaultReadingImageScaleFit: ReadingImageScaleFit, defaultReadingMode: ReadingMode, defaultReadingDir: ReadingDirection }, pageAnalysis?: { __typename?: 'PageAnalysis', dimensions: Array<{ __typename?: 'PageDimension', height: number, width: number }> } | null, nextInSeries: { __typename?: 'PaginatedMediaResponse', nodes: Array<{ __typename?: 'Media', id: string, name: string, thumbnail: { __typename?: 'ImageRef', url: string } }> } } | null };
+export type BookReaderSceneQuery = { __typename?: 'Query', mediaById?: { __typename?: 'Media', id: string, resolvedName: string, pages: number, extension: string, readProgress?: { __typename?: 'ActiveReadingSession', percentageCompleted?: any | null, epubcfi?: string | null, page?: number | null, elapsedSeconds?: number | null } | null, libraryConfig: { __typename?: 'LibraryConfig', defaultReadingImageScaleFit: ReadingImageScaleFit, defaultReadingMode: ReadingMode, defaultReadingDir: ReadingDirection }, analysisData?: { __typename?: 'MediaAnalysisData', dimensions: Array<{ __typename?: 'PageDimension', height: number, width: number }> } | null, nextInSeries: { __typename?: 'PaginatedMediaResponse', nodes: Array<{ __typename?: 'Media', id: string, name: string, thumbnail: { __typename?: 'ImageRef', url: string } }> } } | null };
 
 export type UpdateReadProgressMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -4802,15 +4771,6 @@ export class TypedDocumentString<TResult, TVariables>
     return this.value;
   }
 }
-export const ThumbnailPlaceholderFragmentDoc = new TypedDocumentString(`
-    fragment ThumbnailPlaceholder on ImageRef {
-  metadata {
-    averageColor
-    meshColors
-    thumbhash
-  }
-}
-    `, {"fragmentName":"ThumbnailPlaceholder"}) as unknown as TypedDocumentString<ThumbnailPlaceholderFragment, unknown>;
 export const ReadingNowFragmentDoc = new TypedDocumentString(`
     fragment ReadingNow on Media {
   id
@@ -4822,7 +4782,11 @@ export const ReadingNowFragmentDoc = new TypedDocumentString(`
   }
   thumbnail {
     url
-    ...ThumbnailPlaceholder
+    metadata {
+      averageColor
+      meshColors
+      thumbhash
+    }
   }
   pages
   readProgress {
@@ -4832,83 +4796,69 @@ export const ReadingNowFragmentDoc = new TypedDocumentString(`
     updatedAt
   }
 }
-    fragment ThumbnailPlaceholder on ImageRef {
-  metadata {
-    averageColor
-    meshColors
-    thumbhash
-  }
-}`, {"fragmentName":"ReadingNow"}) as unknown as TypedDocumentString<ReadingNowFragment, unknown>;
+    `, {"fragmentName":"ReadingNow"}) as unknown as TypedDocumentString<ReadingNowFragment, unknown>;
 export const BookGridItemFragmentDoc = new TypedDocumentString(`
     fragment BookGridItem on Media {
   id
   resolvedName
   thumbnail {
     url
-    ...ThumbnailPlaceholder
+    metadata {
+      averageColor
+      meshColors
+      thumbhash
+    }
   }
 }
-    fragment ThumbnailPlaceholder on ImageRef {
-  metadata {
-    averageColor
-    meshColors
-    thumbhash
-  }
-}`, {"fragmentName":"BookGridItem"}) as unknown as TypedDocumentString<BookGridItemFragment, unknown>;
+    `, {"fragmentName":"BookGridItem"}) as unknown as TypedDocumentString<BookGridItemFragment, unknown>;
 export const BookListItemFragmentDoc = new TypedDocumentString(`
     fragment BookListItem on Media {
   id
   resolvedName
   thumbnail {
     url
-    ...ThumbnailPlaceholder
+    metadata {
+      averageColor
+      meshColors
+      thumbhash
+    }
   }
 }
-    fragment ThumbnailPlaceholder on ImageRef {
-  metadata {
-    averageColor
-    meshColors
-    thumbhash
-  }
-}`, {"fragmentName":"BookListItem"}) as unknown as TypedDocumentString<BookListItemFragment, unknown>;
+    `, {"fragmentName":"BookListItem"}) as unknown as TypedDocumentString<BookListItemFragment, unknown>;
 export const BookSearchItemFragmentDoc = new TypedDocumentString(`
     fragment BookSearchItem on Media {
   id
   resolvedName
   thumbnail {
     url
-    ...ThumbnailPlaceholder
+    metadata {
+      averageColor
+      meshColors
+      thumbhash
+    }
   }
   size
   pages
 }
-    fragment ThumbnailPlaceholder on ImageRef {
-  metadata {
-    averageColor
-    meshColors
-    thumbhash
-  }
-}`, {"fragmentName":"BookSearchItem"}) as unknown as TypedDocumentString<BookSearchItemFragment, unknown>;
+    `, {"fragmentName":"BookSearchItem"}) as unknown as TypedDocumentString<BookSearchItemFragment, unknown>;
 export const OnDeckBookItemFragmentDoc = new TypedDocumentString(`
     fragment OnDeckBookItem on Media {
   id
   resolvedName
   thumbnail {
     url
-    ...ThumbnailPlaceholder
+    metadata {
+      averageColor
+      meshColors
+      thumbhash
+    }
   }
   seriesPosition
   series {
     mediaCount
   }
 }
-    fragment ThumbnailPlaceholder on ImageRef {
-  metadata {
-    averageColor
-    meshColors
-    thumbhash
-  }
-}`, {"fragmentName":"OnDeckBookItem"}) as unknown as TypedDocumentString<OnDeckBookItemFragment, unknown>;
+    `, {"fragmentName":"OnDeckBookItem"}) as unknown as TypedDocumentString<OnDeckBookItemFragment, unknown>;
 export const BookMenuFragmentDoc = new TypedDocumentString(`
     fragment BookMenu on Media {
   id
@@ -4935,86 +4885,76 @@ export const LibraryGridItemFragmentDoc = new TypedDocumentString(`
   name
   thumbnail {
     url
-    ...ThumbnailPlaceholder
+    metadata {
+      averageColor
+      meshColors
+      thumbhash
+    }
   }
 }
-    fragment ThumbnailPlaceholder on ImageRef {
-  metadata {
-    averageColor
-    meshColors
-    thumbhash
-  }
-}`, {"fragmentName":"LibraryGridItem"}) as unknown as TypedDocumentString<LibraryGridItemFragment, unknown>;
+    `, {"fragmentName":"LibraryGridItem"}) as unknown as TypedDocumentString<LibraryGridItemFragment, unknown>;
 export const LibrarySearchItemFragmentDoc = new TypedDocumentString(`
     fragment LibrarySearchItem on Library {
   id
   name
   thumbnail {
     url
-    ...ThumbnailPlaceholder
+    metadata {
+      averageColor
+      meshColors
+      thumbhash
+    }
   }
 }
-    fragment ThumbnailPlaceholder on ImageRef {
-  metadata {
-    averageColor
-    meshColors
-    thumbhash
-  }
-}`, {"fragmentName":"LibrarySearchItem"}) as unknown as TypedDocumentString<LibrarySearchItemFragment, unknown>;
+    `, {"fragmentName":"LibrarySearchItem"}) as unknown as TypedDocumentString<LibrarySearchItemFragment, unknown>;
 export const RecentlyAddedSeriesItemFragmentDoc = new TypedDocumentString(`
     fragment RecentlyAddedSeriesItem on Series {
   id
   resolvedName
   thumbnail {
     url
-    ...ThumbnailPlaceholder
+    metadata {
+      averageColor
+      meshColors
+      thumbhash
+    }
   }
   readCount
   mediaCount
   createdAt
 }
-    fragment ThumbnailPlaceholder on ImageRef {
-  metadata {
-    averageColor
-    meshColors
-    thumbhash
-  }
-}`, {"fragmentName":"RecentlyAddedSeriesItem"}) as unknown as TypedDocumentString<RecentlyAddedSeriesItemFragment, unknown>;
+    `, {"fragmentName":"RecentlyAddedSeriesItem"}) as unknown as TypedDocumentString<RecentlyAddedSeriesItemFragment, unknown>;
 export const SeriesGridItemFragmentDoc = new TypedDocumentString(`
     fragment SeriesGridItem on Series {
   id
   resolvedName
   thumbnail {
     url
-    ...ThumbnailPlaceholder
+    metadata {
+      averageColor
+      meshColors
+      thumbhash
+    }
   }
 }
-    fragment ThumbnailPlaceholder on ImageRef {
-  metadata {
-    averageColor
-    meshColors
-    thumbhash
-  }
-}`, {"fragmentName":"SeriesGridItem"}) as unknown as TypedDocumentString<SeriesGridItemFragment, unknown>;
+    `, {"fragmentName":"SeriesGridItem"}) as unknown as TypedDocumentString<SeriesGridItemFragment, unknown>;
 export const SeriesSearchItemFragmentDoc = new TypedDocumentString(`
     fragment SeriesSearchItem on Series {
   id
   resolvedName
   thumbnail {
     url
-    ...ThumbnailPlaceholder
+    metadata {
+      averageColor
+      meshColors
+      thumbhash
+    }
   }
   readCount
   mediaCount
   percentageCompleted
 }
-    fragment ThumbnailPlaceholder on ImageRef {
-  metadata {
-    averageColor
-    meshColors
-    thumbhash
-  }
-}`, {"fragmentName":"SeriesSearchItem"}) as unknown as TypedDocumentString<SeriesSearchItemFragment, unknown>;
+    `, {"fragmentName":"SeriesSearchItem"}) as unknown as TypedDocumentString<SeriesSearchItemFragment, unknown>;
 export const BookCardFragmentDoc = new TypedDocumentString(`
     fragment BookCard on Media {
   id
@@ -5250,19 +5190,16 @@ export const SearchMediaDocument = new TypedDocumentString(`
     }
   }
 }
-    fragment ThumbnailPlaceholder on ImageRef {
-  metadata {
-    averageColor
-    meshColors
-    thumbhash
-  }
-}
-fragment BookSearchItem on Media {
+    fragment BookSearchItem on Media {
   id
   resolvedName
   thumbnail {
     url
-    ...ThumbnailPlaceholder
+    metadata {
+      averageColor
+      meshColors
+      thumbhash
+    }
   }
   size
   pages
@@ -5282,19 +5219,16 @@ export const SearchSeriesDocument = new TypedDocumentString(`
     }
   }
 }
-    fragment ThumbnailPlaceholder on ImageRef {
-  metadata {
-    averageColor
-    meshColors
-    thumbhash
-  }
-}
-fragment SeriesSearchItem on Series {
+    fragment SeriesSearchItem on Series {
   id
   resolvedName
   thumbnail {
     url
-    ...ThumbnailPlaceholder
+    metadata {
+      averageColor
+      meshColors
+      thumbhash
+    }
   }
   readCount
   mediaCount
@@ -5315,19 +5249,16 @@ export const SearchLibraryDocument = new TypedDocumentString(`
     }
   }
 }
-    fragment ThumbnailPlaceholder on ImageRef {
-  metadata {
-    averageColor
-    meshColors
-    thumbhash
-  }
-}
-fragment LibrarySearchItem on Library {
+    fragment LibrarySearchItem on Library {
   id
   name
   thumbnail {
     url
-    ...ThumbnailPlaceholder
+    metadata {
+      averageColor
+      meshColors
+      thumbhash
+    }
   }
 }`) as unknown as TypedDocumentString<SearchLibraryQuery, SearchLibraryQueryVariables>;
 export const BookByIdDocument = new TypedDocumentString(`
@@ -5409,18 +5340,15 @@ export const BookByIdDocument = new TypedDocumentString(`
     size
     thumbnail {
       url
-      ...ThumbnailPlaceholder
+      metadata {
+        averageColor
+        meshColors
+        thumbhash
+      }
     }
   }
 }
-    fragment ThumbnailPlaceholder on ImageRef {
-  metadata {
-    averageColor
-    meshColors
-    thumbhash
-  }
-}
-fragment BookMenu on Media {
+    fragment BookMenu on Media {
   id
   isFavorite
   library {
@@ -5486,10 +5414,15 @@ export const BookReadScreenDocument = new TypedDocumentString(`
       publisher
       summary
     }
-    pageAnalysis {
+    analysisData {
       dimensions {
         height
         width
+      }
+      imageMetadatas {
+        averageColor
+        meshColors
+        thumbhash
       }
     }
     nextInSeries(pagination: {cursor: {limit: 1}}) {
@@ -5545,19 +5478,16 @@ export const BooksScreenDocument = new TypedDocumentString(`
     }
   }
 }
-    fragment ThumbnailPlaceholder on ImageRef {
-  metadata {
-    averageColor
-    meshColors
-    thumbhash
-  }
-}
-fragment BookGridItem on Media {
+    fragment BookGridItem on Media {
   id
   resolvedName
   thumbnail {
     url
-    ...ThumbnailPlaceholder
+    metadata {
+      averageColor
+      meshColors
+      thumbhash
+    }
   }
 }`) as unknown as TypedDocumentString<BooksScreenQuery, BooksScreenQueryVariables>;
 export const BookSearchScreenDocument = new TypedDocumentString(`
@@ -5577,19 +5507,16 @@ export const BookSearchScreenDocument = new TypedDocumentString(`
     }
   }
 }
-    fragment ThumbnailPlaceholder on ImageRef {
-  metadata {
-    averageColor
-    meshColors
-    thumbhash
-  }
-}
-fragment BookGridItem on Media {
+    fragment BookGridItem on Media {
   id
   resolvedName
   thumbnail {
     url
-    ...ThumbnailPlaceholder
+    metadata {
+      averageColor
+      meshColors
+      thumbhash
+    }
   }
 }`) as unknown as TypedDocumentString<BookSearchScreenQuery, BookSearchScreenQueryVariables>;
 export const LibraryPathsDocument = new TypedDocumentString(`
@@ -5627,19 +5554,16 @@ export const LibrarySeriesScreenDocument = new TypedDocumentString(`
     }
   }
 }
-    fragment ThumbnailPlaceholder on ImageRef {
-  metadata {
-    averageColor
-    meshColors
-    thumbhash
-  }
-}
-fragment SeriesGridItem on Series {
+    fragment SeriesGridItem on Series {
   id
   resolvedName
   thumbnail {
     url
-    ...ThumbnailPlaceholder
+    metadata {
+      averageColor
+      meshColors
+      thumbhash
+    }
   }
 }`) as unknown as TypedDocumentString<LibrarySeriesScreenQuery, LibrarySeriesScreenQueryVariables>;
 export const LibrariesScreenDocument = new TypedDocumentString(`
@@ -5659,19 +5583,16 @@ export const LibrariesScreenDocument = new TypedDocumentString(`
     }
   }
 }
-    fragment ThumbnailPlaceholder on ImageRef {
-  metadata {
-    averageColor
-    meshColors
-    thumbhash
-  }
-}
-fragment LibraryGridItem on Library {
+    fragment LibraryGridItem on Library {
   id
   name
   thumbnail {
     url
-    ...ThumbnailPlaceholder
+    metadata {
+      averageColor
+      meshColors
+      thumbhash
+    }
   }
 }`) as unknown as TypedDocumentString<LibrariesScreenQuery, LibrariesScreenQueryVariables>;
 export const SeriesBooksSceneSeriesNameDocument = new TypedDocumentString(`
@@ -5700,19 +5621,16 @@ export const SeriesBooksScreenDocument = new TypedDocumentString(`
     }
   }
 }
-    fragment ThumbnailPlaceholder on ImageRef {
-  metadata {
-    averageColor
-    meshColors
-    thumbhash
-  }
-}
-fragment BookGridItem on Media {
+    fragment BookGridItem on Media {
   id
   resolvedName
   thumbnail {
     url
-    ...ThumbnailPlaceholder
+    metadata {
+      averageColor
+      meshColors
+      thumbhash
+    }
   }
 }`) as unknown as TypedDocumentString<SeriesBooksScreenQuery, SeriesBooksScreenQueryVariables>;
 export const SeriesScreenDocument = new TypedDocumentString(`
@@ -5734,19 +5652,16 @@ export const SeriesScreenDocument = new TypedDocumentString(`
     }
   }
 }
-    fragment ThumbnailPlaceholder on ImageRef {
-  metadata {
-    averageColor
-    meshColors
-    thumbhash
-  }
-}
-fragment SeriesGridItem on Series {
+    fragment SeriesGridItem on Series {
   id
   resolvedName
   thumbnail {
     url
-    ...ThumbnailPlaceholder
+    metadata {
+      averageColor
+      meshColors
+      thumbhash
+    }
   }
 }`) as unknown as TypedDocumentString<SeriesScreenQuery, SeriesScreenQueryVariables>;
 export const UpdateReadProgressionBackgroundTaskDocument = new TypedDocumentString(`
@@ -5776,14 +5691,7 @@ export const ContinueReadingDocument = new TypedDocumentString(`
     }
   }
 }
-    fragment ThumbnailPlaceholder on ImageRef {
-  metadata {
-    averageColor
-    meshColors
-    thumbhash
-  }
-}
-fragment ReadingNow on Media {
+    fragment ReadingNow on Media {
   id
   resolvedName
   metadata {
@@ -5793,7 +5701,11 @@ fragment ReadingNow on Media {
   }
   thumbnail {
     url
-    ...ThumbnailPlaceholder
+    metadata {
+      averageColor
+      meshColors
+      thumbhash
+    }
   }
   pages
   readProgress {
@@ -5808,7 +5720,11 @@ fragment BookListItem on Media {
   resolvedName
   thumbnail {
     url
-    ...ThumbnailPlaceholder
+    metadata {
+      averageColor
+      meshColors
+      thumbhash
+    }
   }
 }`) as unknown as TypedDocumentString<ContinueReadingQuery, ContinueReadingQueryVariables>;
 export const OnDeckBooksDocument = new TypedDocumentString(`
@@ -5830,19 +5746,16 @@ export const OnDeckBooksDocument = new TypedDocumentString(`
     }
   }
 }
-    fragment ThumbnailPlaceholder on ImageRef {
-  metadata {
-    averageColor
-    meshColors
-    thumbhash
-  }
-}
-fragment OnDeckBookItem on Media {
+    fragment OnDeckBookItem on Media {
   id
   resolvedName
   thumbnail {
     url
-    ...ThumbnailPlaceholder
+    metadata {
+      averageColor
+      meshColors
+      thumbhash
+    }
   }
   seriesPosition
   series {
@@ -5866,19 +5779,16 @@ export const RecentlyAddedBooksDocument = new TypedDocumentString(`
     }
   }
 }
-    fragment ThumbnailPlaceholder on ImageRef {
-  metadata {
-    averageColor
-    meshColors
-    thumbhash
-  }
-}
-fragment BookListItem on Media {
+    fragment BookListItem on Media {
   id
   resolvedName
   thumbnail {
     url
-    ...ThumbnailPlaceholder
+    metadata {
+      averageColor
+      meshColors
+      thumbhash
+    }
   }
 }`) as unknown as TypedDocumentString<RecentlyAddedBooksQuery, RecentlyAddedBooksQueryVariables>;
 export const RecentlyAddedSeriesHorizontalDocument = new TypedDocumentString(`
@@ -5898,19 +5808,16 @@ export const RecentlyAddedSeriesHorizontalDocument = new TypedDocumentString(`
     }
   }
 }
-    fragment ThumbnailPlaceholder on ImageRef {
-  metadata {
-    averageColor
-    meshColors
-    thumbhash
-  }
-}
-fragment RecentlyAddedSeriesItem on Series {
+    fragment RecentlyAddedSeriesItem on Series {
   id
   resolvedName
   thumbnail {
     url
-    ...ThumbnailPlaceholder
+    metadata {
+      averageColor
+      meshColors
+      thumbhash
+    }
   }
   readCount
   mediaCount
@@ -5992,19 +5899,16 @@ export const RecentlyAddedSeriesGridDocument = new TypedDocumentString(`
     }
   }
 }
-    fragment ThumbnailPlaceholder on ImageRef {
-  metadata {
-    averageColor
-    meshColors
-    thumbhash
-  }
-}
-fragment SeriesGridItem on Series {
+    fragment SeriesGridItem on Series {
   id
   resolvedName
   thumbnail {
     url
-    ...ThumbnailPlaceholder
+    metadata {
+      averageColor
+      meshColors
+      thumbhash
+    }
   }
 }`) as unknown as TypedDocumentString<RecentlyAddedSeriesGridQuery, RecentlyAddedSeriesGridQueryVariables>;
 export const UseFavoriteBookDocument = new TypedDocumentString(`
@@ -6663,7 +6567,7 @@ export const BookReaderSceneDocument = new TypedDocumentString(`
       defaultReadingMode
       defaultReadingDir
     }
-    pageAnalysis {
+    analysisData {
       dimensions {
         height
         width

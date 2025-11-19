@@ -20,7 +20,11 @@ const fragment = graphql(`
 		resolvedName
 		thumbnail {
 			url
-			...ThumbnailPlaceholder
+			metadata {
+				averageColor
+				meshColors
+				thumbhash
+			}
 		}
 		readCount
 		mediaCount
@@ -80,6 +84,7 @@ export default function RecentlyAddedSeriesItem({ series }: Props) {
 							}}
 							resizeMode="stretch"
 							size={{ height: 160 / thumbnailRatio, width: 160 }}
+							placeholderData={data.thumbnail.metadata}
 						/>
 
 						<View className="absolute bottom-0 z-20 w-full p-2">

@@ -10,7 +10,11 @@ const fragment = graphql(`
 		resolvedName
 		thumbnail {
 			url
-			...ThumbnailPlaceholder
+			metadata {
+				averageColor
+				meshColors
+				thumbhash
+			}
 		}
 	}
 `)
@@ -33,7 +37,7 @@ export default function SeriesGridItem({ series }: Props) {
 				uri={data.thumbnail.url}
 				title={data.resolvedName}
 				href={`/server/${serverID}/series/${data.id}`}
-				placeholderData={data.thumbnail}
+				placeholderData={data.thumbnail.metadata}
 			/>
 		</View>
 	)

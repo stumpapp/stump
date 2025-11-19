@@ -344,6 +344,8 @@ pub enum Relation {
 		on_delete = "Cascade"
 	)]
 	Series,
+	#[sea_orm(has_many = "super::media_analysis::Entity")]
+	Analysis,
 }
 
 impl Related<super::book_club_book_suggestion::Entity> for Entity {
@@ -415,6 +417,12 @@ impl Related<super::review::Entity> for Entity {
 impl Related<super::series::Entity> for Entity {
 	fn to() -> RelationDef {
 		Relation::Series.def()
+	}
+}
+
+impl Related<super::media_analysis::Entity> for Entity {
+	fn to() -> RelationDef {
+		Relation::Analysis.def()
 	}
 }
 

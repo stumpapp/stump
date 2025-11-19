@@ -15,7 +15,7 @@ use sea_orm::{
 use stump_core::{
 	filesystem::{
 		image::{generate_book_thumbnail, GenerateThumbnailOptions},
-		media::analyze_media_job::AnalyzeMediaJob,
+		media::analysis::{AnalysisJobConfig, AnalyzeMediaJob, MediaAnalysisJobScope},
 	},
 	utils::chain_optional_iter,
 };
@@ -44,7 +44,12 @@ pub struct MediaMutation;
 
 #[Object]
 impl MediaMutation {
-	async fn analyze_media(&self, ctx: &Context<'_>, id: ID) -> Result<bool> {
+	async fn analyze_media(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+		#[graphql(default = false)] force_reanalysis: bool,
+	) -> Result<bool> {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let core = ctx.data::<CoreContext>()?;
 		let conn = core.conn.as_ref();
@@ -58,7 +63,13 @@ impl MediaMutation {
 			.await?
 			.ok_or("Media not found")?;
 
-		core.enqueue_job(AnalyzeMediaJob::analyze_media_item(model.id))?;
+		core.enqueue_job(
+			AnalyzeMediaJob::new(AnalysisJobConfig {
+				force_reanalysis,
+				scope: MediaAnalysisJobScope::Book(model.id),
+			})
+			.wrapped(),
+		)?;
 
 		Ok(true)
 	}

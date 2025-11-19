@@ -38,7 +38,7 @@ export default function ImageBasedReaderContainer({
 
 	const [imageSizes, setImageSizes] = useState<Record<number, ImageBasedBookPageRef>>(
 		() =>
-			ctx.book?.pageAnalysis?.dimensions
+			ctx.book?.analysisData?.dimensions
 				?.map(({ height, width }) => ({
 					height,
 					width,

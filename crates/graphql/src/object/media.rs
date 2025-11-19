@@ -3,8 +3,8 @@ use async_graphql::{
 };
 
 use models::{
-	entity::{library, library_config, media, page_analysis, series, tag},
-	shared::{image::ImageRef, page_dimension::PageAnalysis},
+	entity::{library, library_config, media, media_analysis, series, tag},
+	shared::{analysis::MediaAnalysisData, image::ImageRef},
 };
 use num_traits::cast::ToPrimitive;
 use sea_orm::{
@@ -181,11 +181,14 @@ impl Media {
 		Ok(LibraryConfig::from(model))
 	}
 
-	async fn page_analysis(&self, ctx: &Context<'_>) -> Result<Option<PageAnalysis>> {
+	async fn analysis_data(
+		&self,
+		ctx: &Context<'_>,
+	) -> Result<Option<MediaAnalysisData>> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let model = page_analysis::Entity::find()
-			.filter(page_analysis::Column::MediaId.eq(self.model.id.clone()))
+		let model = media_analysis::Entity::find()
+			.filter(media_analysis::Column::MediaId.eq(self.model.id.clone()))
 			.one(conn)
 			.await?;
 
@@ -196,11 +199,12 @@ impl Media {
 	/// qualified URL to the image.
 	async fn thumbnail(&self, ctx: &Context<'_>) -> Result<ImageRef> {
 		let service = ctx.data::<ServiceContext>()?;
+		let core = ctx.data::<CoreContext>()?;
 
 		// TODO: DEFINITELY behind a dataloader here
-		let page_dimension = page_analysis::Entity::find()
-			.filter(page_analysis::Column::MediaId.eq(self.model.id.clone()))
-			.one(ctx.data::<CoreContext>()?.conn.as_ref())
+		let page_dimension = media_analysis::Entity::find()
+			.filter(media_analysis::Column::MediaId.eq(self.model.id.clone()))
+			.one(core.conn.as_ref())
 			.await?
 			.and_then(|pa| pa.data.dimensions.first().cloned());
 

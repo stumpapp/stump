@@ -6,7 +6,7 @@ import { cn } from '~/lib/utils'
 import { usePreferencesStore } from '~/stores'
 
 import { ThumbnailImage } from '../Image'
-import { ThumbnailPlaceholderProps } from '../ThumbnailPlaceholder'
+import { ThumbnailPlaceholderData } from '../ThumbnailPlaceholder'
 import { Text } from '../ui'
 import { useGridItemSize } from './useGridItemSize'
 
@@ -14,7 +14,7 @@ type Props = {
 	uri: string
 	title: string
 	href: Href
-	placeholderData?: ThumbnailPlaceholderProps
+	placeholderData?: ThumbnailPlaceholderData | null
 }
 
 export default function GridImageItem({ uri, title, href, ...thumbnailProps }: Props) {

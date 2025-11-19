@@ -4,7 +4,7 @@
 use std::collections::HashMap;
 
 use derive_builder::Builder;
-use models::entity::{media_metadata, page_analysis};
+use models::entity::{media_analysis, media_metadata};
 use sea_orm::{prelude::*, DatabaseConnection, EntityTrait, QueryFilter};
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
@@ -153,8 +153,22 @@ impl OPDSPublication {
 		let title = metadata.title.clone().unwrap_or(book.media.name);
 		let description = metadata.summary.clone();
 
-		let page_dimensions = page_analysis::Entity::find()
-			.filter(page_analysis::Column::MediaId.eq(book.media.id.clone()))
+		let analysis_data = media_analysis::Entity::find()
+			.filter(media_analysis::Column::MediaId.eq(book.media.id.clone()))
+			.one(conn)
+			.await?;
+
+		let dimensions = analysis_data
+			.as_ref()
+			.map(|a| a.data.dimensions.clone())
+			.unwrap_or_default();
+		let content_types = analysis_data
+			.as_ref()
+			.map(|a| a.data.content_types.clone())
+			.unwrap_or_default();
+
+		let page_dimensions = media_analysis::Entity::find()
+			.filter(media_analysis::Column::MediaId.eq(book.media.id.clone()))
 			.one(conn)
 			.await?
 			.map(|pd| pd.data.dimensions)
@@ -163,13 +177,19 @@ impl OPDSPublication {
 		let mut reading_order = vec![];
 
 		for (idx, dim) in page_dimensions.into_iter().enumerate() {
+			let content_type = content_types
+				.get(idx)
+				.cloned()
+				.map(|s| ContentType::from(s.as_str()))
+				.map(OPDSLinkType::from)
+				.unwrap_or(OPDSLinkType::ImageJpeg);
+
 			let base_link = OPDSBaseLinkBuilder::default()
 				.href(finalizer.format_link(format!(
 					"/opds/v2.0/books/{}/pages/{}",
 					book.media.id,
 					idx + 1
 				)))
-				// FIXME(311): Don't make this assumption
 				._type(OPDSLinkType::ImageJpeg)
 				.build()?;
 			let image_link = OPDSImageLinkBuilder::default()
@@ -272,10 +292,10 @@ mod tests {
 
 	use chrono::Utc;
 	use models::{
-		entity::{media, media_metadata, page_analysis},
+		entity::{media, media_analysis, media_metadata},
 		shared::{
+			analysis::{MediaAnalysisData, PageDimension},
 			enums::FileStatus,
-			page_dimension::{PageAnalysis, PageDimension},
 		},
 	};
 	use sea_orm::{DatabaseBackend::Sqlite, IntoMockRow, MockDatabase, Value};
@@ -416,10 +436,10 @@ mod tests {
 		.into_mock_row()];
 
 		// Mock the page analysis query result
-		let page_analysis_results = vec![page_analysis::Model {
+		let page_analysis_results = vec![media_analysis::Model {
 			id: 1,
 			media_id: "1".to_string(),
-			data: PageAnalysis {
+			data: MediaAnalysisData {
 				dimensions: vec![
 					PageDimension {
 						width: 1920,
@@ -434,6 +454,12 @@ mod tests {
 						height: 1080,
 					},
 				],
+				content_types: vec![
+					"image/jpeg".to_string(),
+					"image/png".to_string(),
+					"image/jpeg".to_string(),
+				],
+				..Default::default()
 			},
 		}];
 

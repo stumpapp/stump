@@ -17,7 +17,11 @@ const fragment = graphql(`
 		resolvedName
 		thumbnail {
 			url
-			...ThumbnailPlaceholder
+			metadata {
+				averageColor
+				meshColors
+				thumbhash
+			}
 		}
 	}
 `)
@@ -39,7 +43,7 @@ function BookListItem({ book }: Props) {
 	const router = useRouter()
 
 	const { width, height } = useListItemSize()
-	const { url: uri, ...placeholderData } = data.thumbnail
+	const { url: uri, metadata: placeholderData } = data.thumbnail
 
 	return (
 		<Pressable onPress={() => router.navigate(`/server/${serverID}/books/${data.id}`)}>

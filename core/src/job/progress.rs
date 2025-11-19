@@ -92,9 +92,14 @@ impl JobProgress {
 		Self::task_position_msg("Job state restored from database", index, size)
 	}
 
-	pub fn subtask_position(index: i32, size: i32) -> Self {
+	/// Constructs a new [`JobProgress`] with the given subtask position and size
+	///
+	/// # Arguments
+	/// * `pos` - The current subtask position
+	/// * `size` - The total number of subtasks
+	pub fn subtask_position(pos: i32, size: i32) -> Self {
 		Self {
-			completed_subtasks: Some(index),
+			completed_subtasks: Some(pos),
 			total_subtasks: Some(size),
 			..Default::default()
 		}

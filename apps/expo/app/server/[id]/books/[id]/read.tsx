@@ -84,10 +84,15 @@ export const query = graphql(`
 				publisher
 				summary
 			}
-			pageAnalysis {
+			analysisData {
 				dimensions {
 					height
 					width
+				}
+				imageMetadatas {
+					averageColor
+					meshColors
+					thumbhash
 				}
 			}
 			nextInSeries(pagination: { cursor: { limit: 1 } }) {

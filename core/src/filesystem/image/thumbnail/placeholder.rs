@@ -1,5 +1,5 @@
 use base64::prelude::*;
-use image;
+use image::{self, DynamicImage};
 use kmeans_colors::{get_kmeans, Kmeans, Sort};
 use models::shared::image::ImageMetadata;
 use palette::{
@@ -20,7 +20,7 @@ pub async fn generate_image_metadata(
 	let handle = spawn_blocking({
 		let path = path.to_path_buf();
 		move || {
-			let result = _generate_image_metadata(&path);
+			let result = _generate_image_metadata_from_path(&path);
 			let send_result = tx.send(result);
 			tracing::trace!(
 				is_err = send_result.is_err(),
@@ -47,10 +47,54 @@ pub async fn generate_image_metadata(
 	}
 }
 
-fn _generate_image_metadata(path: &Path) -> Result<ImageMetadata, ProcessorError> {
-	let mesh_colors = process_image_colors(path, 7)?;
-	let average_color = process_image_colors(path, 1)?;
-	let thumbhash = process_image_thumbhash(path)?;
+pub async fn generate_image_metadata_from_bytes(
+	bytes: Vec<u8>,
+) -> Result<ImageMetadata, ProcessorError> {
+	let (tx, rx) = oneshot::channel();
+
+	let handle = spawn_blocking(move || {
+		let result = _generate_image_metadata_from_bytes(&bytes);
+		let send_result = tx.send(result);
+		tracing::trace!(
+			is_err = send_result.is_err(),
+			"Sending generate result to channel"
+		);
+	});
+
+	match rx.await {
+		Ok(result) => result,
+		Err(e) => {
+			handle
+				.await
+				.map_err(|e| ProcessorError::UnknownError(e.to_string()))?;
+			Err(ProcessorError::UnknownError(format!(
+				"Result never received: {}",
+				e
+			)))
+		},
+	}
+}
+
+fn _generate_image_metadata_from_path(
+	path: &Path,
+) -> Result<ImageMetadata, ProcessorError> {
+	let img = image::open(path)?;
+	_generate_image_metadata_from_image(img)
+}
+
+fn _generate_image_metadata_from_bytes(
+	bytes: &[u8],
+) -> Result<ImageMetadata, ProcessorError> {
+	let img = image::load_from_memory(bytes)?;
+	_generate_image_metadata_from_image(img)
+}
+
+fn _generate_image_metadata_from_image(
+	img: DynamicImage,
+) -> Result<ImageMetadata, ProcessorError> {
+	let mesh_colors = process_image_colors_from_image(&img, 7)?;
+	let average_color = process_image_colors_from_image(&img, 1)?;
+	let thumbhash = process_image_thumbhash_from_image(&img)?;
 
 	Ok(ImageMetadata {
 		average_color: average_color.first().cloned(),
@@ -75,9 +119,32 @@ pub fn process_image_colors(
 	path: &Path,
 	k: usize,
 ) -> Result<Vec<String>, ProcessorError> {
-	// Load image
 	let dyn_img = image::open(path)?;
+	process_image_colors_from_image(&dyn_img, k)
+}
 
+/// Processes an image from bytes to extract a colour palette.
+/// * `bytes` - The image data as bytes.
+/// * `k` - The number of initial candidate colours to find (we always use 1 or 7)
+///
+/// Returns a vector of either 1 or 3 "best" colours as HEX strings, or an error. "Best" is defined as high saturation, distinct and large coverage.
+pub fn process_image_colors_from_bytes(
+	bytes: &[u8],
+	k: usize,
+) -> Result<Vec<String>, ProcessorError> {
+	let dyn_img = image::load_from_memory(bytes)?;
+	process_image_colors_from_image(&dyn_img, k)
+}
+
+/// Core logic for processing an image to extract a colour palette.
+/// * `dyn_img` - The loaded image.
+/// * `k` - The number of initial candidate colours to find (we always use 1 or 7)
+///
+/// Returns a vector of either 1 or 3 "best" colours as HEX strings, or an error.
+fn process_image_colors_from_image(
+	dyn_img: &DynamicImage,
+	k: usize,
+) -> Result<Vec<String>, ProcessorError> {
 	// Downscale image (lower res = faster, shouldn't be an issue since we want colours)
 	let nwidth = if k == 1 { 1 } else { 200 };
 	let nheight = (nwidth as f32 * 1.5).floor() as u32;
@@ -197,7 +264,27 @@ pub fn process_image_colors(
 /// Returns the thumbhash as a base64 string, or an error.
 pub fn process_image_thumbhash(path: &Path) -> Result<String, ProcessorError> {
 	let dyn_img = image::open(path)?;
+	process_image_thumbhash_from_image(&dyn_img)
+}
 
+/// Processes an image from bytes to extract a thumbhash.
+/// * `bytes` - The image data as bytes.
+///
+/// Returns the thumbhash as a base64 string, or an error.
+pub fn process_image_thumbhash_from_bytes(
+	bytes: &[u8],
+) -> Result<String, ProcessorError> {
+	let dyn_img = image::load_from_memory(bytes)?;
+	process_image_thumbhash_from_image(&dyn_img)
+}
+
+/// Core logic for processing an image to extract a thumbhash.
+/// * `dyn_img` - The loaded image.
+///
+/// Returns the thumbhash as a base64 string, or an error.
+fn process_image_thumbhash_from_image(
+	dyn_img: &DynamicImage,
+) -> Result<String, ProcessorError> {
 	// image must be ≤ 100px
 	let img = dyn_img.thumbnail(100, 100).into_rgba8();
 	let (w, h) = img.dimensions();

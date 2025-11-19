@@ -2,6 +2,7 @@ import { useKeepAwake } from 'expo-keep-awake'
 import * as NavigationBar from 'expo-navigation-bar'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
+import { useActiveServer } from '~/components/activeServer'
 import { ImageBasedReader } from '~/components/book/reader'
 import { ImageReaderBookRef } from '~/components/book/reader/image/context'
 import { useAppState } from '~/lib/hooks'
@@ -21,6 +22,9 @@ export default function Screen() {
 		url,
 		progression,
 	} = usePublicationContext()
+	const {
+		activeServer: { id: serverId },
+	} = useActiveServer()
 
 	const [id] = useState(() => identifier || hashFromURL(url))
 
@@ -32,14 +36,15 @@ export default function Screen() {
 				pages: readingOrder?.length || 0,
 				...(readingOrder?.length
 					? {
-							pageAnalysis: {
-								__typename: 'PageAnalysis',
+							analysisData: {
+								__typename: 'MediaAnalysisData',
 								dimensions: readingOrder
 									.filter(({ height, width }) => height != null && width != null)
 									.map(({ height, width }) => ({
 										height: height as number,
 										width: width as number,
 									})),
+								imageMetadatas: [],
 							},
 						}
 					: {}),
@@ -48,6 +53,7 @@ export default function Screen() {
 					// TODO: Try pull from json instead, too tired now
 					url: readingOrder?.[0]?.href || '',
 				},
+				extension: 'unknown',
 			}) satisfies ImageReaderBookRef,
 		[id, title, readingOrder],
 	)
@@ -120,6 +126,7 @@ export default function Screen() {
 
 	return (
 		<ImageBasedReader
+			serverId={serverId}
 			initialPage={currentPage}
 			book={book}
 			pageURL={(page: number) => readingOrder![page - 1]?.href}

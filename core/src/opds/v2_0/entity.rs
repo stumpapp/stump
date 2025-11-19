@@ -2,12 +2,12 @@ use models::{
 	entity::{
 		library_exclusion,
 		media::{self, get_age_restriction_filter},
-		media_metadata, page_analysis, reading_session, registered_reading_device,
+		media_analysis, media_metadata, reading_session, registered_reading_device,
 		series, series_metadata,
 		user::AuthUser,
 	},
 	prefixer::{parse_query_to_model, parse_query_to_model_optional, Prefixer},
-	shared::page_dimension::PageAnalysis,
+	shared::analysis::MediaAnalysisData,
 };
 use sea_orm::{entity::prelude::*, Condition, FromQueryResult, JoinType, QuerySelect};
 
@@ -126,7 +126,7 @@ pub struct OPDSProgressionBookRef {
 	pub id: String,
 	pub extension: String,
 	pub pages: i32,
-	pub analysis: Option<PageAnalysis>,
+	pub analysis: Option<MediaAnalysisData>,
 }
 
 pub struct OPDSProgressionEntity {
@@ -148,14 +148,14 @@ impl OPDSProgressionEntity {
 				],
 				"bookref",
 			)
-			.add_named_columns(&[page_analysis::Column::Data], "bookref")
+			.add_named_columns(&[media_analysis::Column::Data], "bookref")
 			.selector
 			.left_join(registered_reading_device::Entity)
 			.inner_join(media::Entity)
 			.join_rev(
 				JoinType::LeftJoin,
-				page_analysis::Entity::belongs_to(media::Entity)
-					.from(page_analysis::Column::MediaId)
+				media_analysis::Entity::belongs_to(media::Entity)
+					.from(media_analysis::Column::MediaId)
 					.to(media::Column::Id)
 					.into(),
 			)

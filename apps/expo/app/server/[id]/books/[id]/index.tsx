@@ -107,7 +107,11 @@ const query = graphql(`
 			size
 			thumbnail {
 				url
-				...ThumbnailPlaceholder
+				metadata {
+					averageColor
+					meshColors
+					thumbhash
+				}
 			}
 		}
 	}
@@ -193,7 +197,7 @@ export default function Screen() {
 
 	if (!book) return null
 
-	const { url: thumbnailUrl, ...placeholderData } = book.thumbnail
+	const { url: uri, metadata: placeholderData } = book.thumbnail
 
 	const progression = book.readProgress || null
 	const lastCompletion = book.readHistory?.at(0) || null
@@ -327,7 +331,7 @@ export default function Screen() {
 					<View className="flex items-center gap-4">
 						<ThumbnailImage
 							source={{
-								uri: book.thumbnail.url,
+								uri,
 								headers: {
 									...sdk.customHeaders,
 									Authorization: sdk.authorizationHeader || '',

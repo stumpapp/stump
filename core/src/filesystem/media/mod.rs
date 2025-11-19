@@ -1,4 +1,4 @@
-pub mod analyze_media_job;
+pub mod analysis;
 mod builder;
 mod format;
 mod metadata;

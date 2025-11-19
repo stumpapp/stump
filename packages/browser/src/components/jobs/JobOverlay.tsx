@@ -90,7 +90,7 @@ export default function JobOverlay() {
 							value={progressValue}
 							size="sm"
 							variant="primary"
-							isIndeterminate={!subTaskCounts}
+							isIndeterminate={!subTaskCounts || subTaskCounts.total === 0}
 						/>
 					</div>
 				</motion.div>

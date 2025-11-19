@@ -20,7 +20,7 @@ use stump_core::filesystem::{
 		generate_book_thumbnail, remove_thumbnails, GenerateThumbnailOptions,
 		ImageProcessorOptionsExt, ThumbnailGenerationJob, ThumbnailGenerationJobParams,
 	},
-	media::analyze_media_job::AnalyzeMediaJob,
+	media::analysis::{AnalysisJobConfig, AnalyzeMediaJob, MediaAnalysisJobScope},
 	scanner::{LibraryScanJob, ScanOptions},
 };
 use tokio::fs;
@@ -46,7 +46,12 @@ pub struct LibraryMutation;
 #[Object]
 impl LibraryMutation {
 	#[graphql(guard = "PermissionGuard::one(UserPermission::ManageLibrary)")]
-	async fn analyze_library(&self, ctx: &Context<'_>, id: ID) -> Result<bool> {
+	async fn analyze_library(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+		#[graphql(default = false)] force_reanalysis: bool,
+	) -> Result<bool> {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let core = ctx.data::<CoreContext>()?;
 		let conn = core.conn.as_ref();
@@ -58,7 +63,13 @@ impl LibraryMutation {
 			.await?
 			.ok_or("Library not found")?;
 
-		core.enqueue_job(AnalyzeMediaJob::analyze_library(model.id))?;
+		core.enqueue_job(
+			AnalyzeMediaJob::new(AnalysisJobConfig {
+				force_reanalysis,
+				scope: MediaAnalysisJobScope::Library(model.id),
+			})
+			.wrapped(),
+		)?;
 
 		Ok(true)
 	}

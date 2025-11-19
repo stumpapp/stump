@@ -1,4 +1,3 @@
-import { FragmentType, graphql, useFragment } from '@stump/graphql'
 import { MeshGradientView } from 'expo-mesh-gradient'
 import { useCallback, useMemo } from 'react'
 import { Image, StyleSheet, View } from 'react-native'
@@ -14,30 +13,22 @@ const POINTS = [
 	[0.00, 1.00], [0.50, 1.00], [1.00, 1.00],
 ]
 
-const fragment = graphql(`
-	fragment ThumbnailPlaceholder on ImageRef {
-		metadata {
-			averageColor
-			meshColors
-			thumbhash
-		}
-	}
-`)
+export interface ThumbnailPlaceholderData {
+	averageColor?: string | null
+	meshColors?: string[] | null
+	thumbhash?: string | null
+}
 
-export type ThumbnailPlaceholderProps = FragmentType<typeof fragment>
-
-export function ThumbnailPlaceholder(props?: ThumbnailPlaceholderProps) {
-	const data = useFragment(fragment, props)
-
+export function ThumbnailPlaceholder(props?: ThumbnailPlaceholderData) {
 	const thumbnailPlaceholder = usePreferencesStore((state) => state.thumbnailPlaceholder)
 	const { thumbnail } = useColors()
 
 	const meshColors = useMemo(() => {
-		if (!data?.metadata?.meshColors || data?.metadata.meshColors.length < 3) {
+		if (!props?.meshColors || props.meshColors.length < 3) {
 			return null
 		}
-		return data.metadata.meshColors
-	}, [data])
+		return props.meshColors
+	}, [props?.meshColors])
 
 	const colorPoints = useMemo(() => {
 		if (!meshColors) {
@@ -51,9 +42,9 @@ export function ThumbnailPlaceholder(props?: ThumbnailPlaceholderProps) {
 		]
 	}, [meshColors])
 
-	const averageColor = useMemo(() => data?.metadata?.averageColor || null, [data])
+	const averageColor = useMemo(() => props?.averageColor || null, [props?.averageColor])
 
-	const thumbHash = useMemo(() => data?.metadata?.thumbhash || null, [data])
+	const thumbHash = useMemo(() => props?.thumbhash || null, [props?.thumbhash])
 
 	const GrayScalePlaceholder = useCallback(
 		() => <View style={[styles.placeholder, { backgroundColor: thumbnail.placeholder }]} />,
@@ -98,22 +89,3 @@ export function ThumbnailPlaceholder(props?: ThumbnailPlaceholderProps) {
 const styles = StyleSheet.create({
 	placeholder: { position: 'absolute', inset: 0, zIndex: 10, overflow: 'hidden' },
 })
-
-// TODO(thumb-placeholder): Maybe just don't use a fragement here lol
-export const intoPlaceholderFragment = (
-	data?: { averageColor?: string; meshColors?: string[]; thumbhash?: string } | null,
-) => {
-	return {
-		' $fragmentRefs': {
-			ThumbnailPlaceholderFragment: {
-				metadata: data
-					? {
-							averageColor: data.averageColor,
-							meshColors: data.meshColors ?? [],
-							thumbhash: data.thumbhash,
-						}
-					: undefined,
-			},
-		},
-	} satisfies FragmentType<typeof fragment>
-}

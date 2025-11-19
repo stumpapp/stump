@@ -17,7 +17,11 @@ const fragment = graphql(`
 		name
 		thumbnail {
 			url
-			...ThumbnailPlaceholder
+			metadata {
+				averageColor
+				meshColors
+				thumbhash
+			}
 		}
 	}
 `)
@@ -46,7 +50,7 @@ export default function LibrarySearchItem({ library }: Props) {
 	const router = useRouter()
 	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
 
-	const { url: uri, ...placeholderData } = data.thumbnail
+	const { url: uri, metadata: placeholderData } = data.thumbnail
 
 	return (
 		<Pressable

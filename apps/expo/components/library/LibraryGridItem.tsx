@@ -20,7 +20,11 @@ const fragment = graphql(`
 		name
 		thumbnail {
 			url
-			...ThumbnailPlaceholder
+			metadata {
+				averageColor
+				meshColors
+				thumbhash
+			}
 		}
 	}
 `)
@@ -44,7 +48,7 @@ export default function LibraryGridItem({ library }: Props) {
 	const title = data.name
 	const href = `/server/${serverID}/libraries/${data.id}`
 
-	const { url: uri, ...placeholderData } = data.thumbnail
+	const { url: uri, metadata: placeholderData } = data.thumbnail
 
 	return (
 		<View className="w-full items-center">

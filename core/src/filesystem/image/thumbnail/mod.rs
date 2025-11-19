@@ -10,4 +10,5 @@ pub use generation_job::{
 	ThumbnailGenerationJob, ThumbnailGenerationJobParams, ThumbnailGenerationJobVariant,
 	ThumbnailGenerationOutput,
 };
+pub use placeholder::*;
 pub use utils::*;

@@ -22,9 +22,8 @@ export const downloadedFiles = sqliteTable('downloaded_files', {
 	pages: integer('pages').default(-1), // Number of pages (for comic books)
 	// TODO: Store for PDF, too?
 	toc: text('toc', { mode: 'json' }), // Table of contents for EPUB books
-	// TODO(thumb-placeholder): Store the following:
-	// - thumbnailPath: text('thumbnail_path'),
-	// - thumbnailMeta: text('thumbnail_meta', { mode: 'json' }),
+	thumbnailPath: text('thumbnail_path'),
+	thumbnailMeta: text('thumbnail_meta', { mode: 'json' }),
 })
 
 /**
@@ -108,3 +107,9 @@ export const epubProgress = z.object({
 })
 
 export const epubToc = z.array(z.string())
+
+export const imageMeta = z.object({
+	averageColor: z.string().nullish(),
+	meshColors: z.array(z.string()),
+	thumbhash: z.string().nullish(),
+})

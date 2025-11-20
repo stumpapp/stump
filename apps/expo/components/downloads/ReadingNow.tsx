@@ -12,7 +12,7 @@ import { stripHtml } from 'string-strip-html'
 
 import { ThumbnailImage } from '~/components/Image'
 import { Heading, Progress, Text } from '~/components/ui'
-import { syncStatus } from '~/db'
+import { imageMeta, syncStatus } from '~/db'
 import { COLORS, useColors } from '~/lib/constants'
 import { parseGraphQLDecimal } from '~/lib/format'
 import { useDisplay } from '~/lib/hooks'
@@ -213,8 +213,12 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 		)
 	}, [isTablet, width, book])
 
-	const thumbnailPath = useMemo(() => getThumbnailPath(book), [book])
 	const status = useMemo(() => syncStatus.safeParse(book.readProgress?.syncStatus).data, [book])
+	const thumbnailData = useMemo(
+		() => imageMeta.safeParse(book.thumbnailMeta).data,
+		[book.thumbnailMeta],
+	)
+	const thumbnailPath = useMemo(() => getThumbnailPath(book), [book])
 
 	const router = useRouter()
 	const isEbookProgress = !!book.readProgress?.epubProgress
@@ -241,6 +245,7 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 					resizeMode="stretch"
 					size={{ height: imageHeight, width: IMAGE_WIDTH }}
 					gradient={{ colors: gradientColors, locations: gradientLocations }}
+					placeholderData={thumbnailData}
 				/>
 
 				{status && (

@@ -19,12 +19,13 @@ class ThumbnailGenerator {
     ///   - bookId: The book ID to use for the thumbnail filename
     ///   - archivePath: Path to the archive file
     ///   - outputDir: Directory where {bookId}.jpg will be saved
+    /// - Returns: The absolute path to the generated thumbnail
     /// - Throws: ThumbnailError if generation fails
     func generateThumbnail(
         bookId: String,
         archivePath: String,
         outputDir: String
-    ) throws {
+    ) throws -> String {
         logger.info("Generating thumbnail for book: \(bookId)")
         
         try createOutputDirectoryIfNeeded(at: outputDir)
@@ -56,6 +57,8 @@ class ThumbnailGenerator {
         try thumbnailData.write(to: outputURL)
         
         logger.info("Thumbnail generated: \(outputPath)")
+        
+        return outputPath
     }
     
     /// Extract cover from a standard archive (CBZ, ZIP)

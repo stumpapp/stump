@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo } from 'react'
 import { Platform, Pressable, View } from 'react-native'
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
 
-import { syncStatus } from '~/db'
+import { imageMeta, syncStatus } from '~/db'
 import { useColors } from '~/lib/constants'
 import { formatBytesSeparate } from '~/lib/format'
 import { useListItemSize } from '~/lib/hooks'
@@ -25,10 +25,12 @@ type Props = {
 export default function DownloadRowItem({ downloadedFile }: Props) {
 	const router = useRouter()
 
-	const thumbnailPath = useMemo(() => getThumbnailPath(downloadedFile), [downloadedFile])
-
 	const readProgress = useMemo(() => downloadedFile.readProgress, [downloadedFile])
 	const status = syncStatus.safeParse(readProgress?.syncStatus).data
+	const thumbnailData = useMemo(
+		() => imageMeta.safeParse(downloadedFile.thumbnailMeta).data,
+		[downloadedFile.thumbnailMeta],
+	)
 
 	const colors = useColors()
 
@@ -132,10 +134,11 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 						source={{
 							// @ts-expect-error: URI doesn't like undefined but it shows a placeholder when
 							// undefined so it's fine
-							uri: thumbnailPath,
+							uri: getThumbnailPath(downloadedFile),
 						}}
 						resizeMode="stretch"
 						size={{ height: height / 2, width: width / 2 }}
+						placeholderData={thumbnailData}
 					/>
 
 					<View className="flex-1 justify-center py-2">

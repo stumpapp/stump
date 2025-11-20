@@ -31,9 +31,10 @@ class StumpStreamer {
 	 * @param bookId The ID of the book (used for thumbnail filename)
 	 * @param archivePath Path to the archive file (can be file:// URI or file system path)
 	 * @param outputDir Directory where {bookId}.jpg will be saved
+	 * @returns The absolute path to the generated thumbnail
 	 */
-	async generateThumbnail(bookId: string, archivePath: string, outputDir: string) {
-		await this.nativeModule.generateThumbnail(bookId, archivePath, outputDir)
+	async generateThumbnail(bookId: string, archivePath: string, outputDir: string): Promise<string> {
+		return await this.nativeModule.generateThumbnail(bookId, archivePath, outputDir)
 	}
 
 	/**

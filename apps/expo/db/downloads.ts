@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/react-native'
-import { MediaMetadata, ReadiumLocator } from '@stump/graphql'
+import { ImageMetadata, MediaMetadata, ReadiumLocator } from '@stump/graphql'
 import { and, count, eq } from 'drizzle-orm'
 
 import { thumbnailsDirectory } from '~/lib/filesystem'
@@ -48,6 +48,10 @@ export type AddDownloadedFileParams = {
 	metadata?: Partial<MediaMetadata> | null
 	seriesId?: string | null
 	toc?: string[] | null
+	// TODO: This technically would be different if the user uploaded a custom thumbnail for the book,
+	// since the mobile app generates its own thumbnail. I think this is acceptable for now, but something
+	// worth noting to consider later.
+	imageMetadata?: ImageMetadata | null
 }
 
 /**
@@ -81,9 +85,13 @@ export class DownloadRepository {
 	): Promise<DownloadedFile> {
 		const pages = await calculatePageCount(file.uri, file.filename)
 
-		// TODO: Should this be a background task? Or just don't await the promise?
+		let thumbnailPath: string | null = null
 		try {
-			await StumpStreamer.generateThumbnail(file.id, file.uri, thumbnailsDirectory(file.serverId))
+			thumbnailPath = await StumpStreamer.generateThumbnail(
+				file.id,
+				file.uri,
+				thumbnailsDirectory(file.serverId),
+			)
 		} catch (error) {
 			Sentry.withScope((scope) => {
 				scope.setTag('action', 'generate thumbnail for downloaded file')
@@ -162,10 +170,12 @@ export class DownloadRepository {
 				size: file.size,
 				bookName: file.bookName ?? file.metadata?.title,
 				bookDescription: file.metadata?.summary,
-				bookMetadata: file.metadata as Record<string, unknown>,
+				bookMetadata: file.metadata,
 				seriesId: file.seriesId,
 				pages,
 				toc: file.toc,
+				thumbnailMeta: file.imageMetadata,
+				thumbnailPath,
 			}
 
 			const result = await tx

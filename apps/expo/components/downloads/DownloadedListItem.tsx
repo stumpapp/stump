@@ -1,7 +1,8 @@
 import { useRouter } from 'expo-router'
+import { useMemo } from 'react'
 import { Pressable, View } from 'react-native'
 
-import { DownloadedFile } from '~/db'
+import { DownloadedFile, imageMeta } from '~/db'
 import { useListItemSize } from '~/lib/hooks'
 
 import { ThumbnailImage } from '../Image'
@@ -15,7 +16,10 @@ type Props = {
 export default function DownloadedListItem({ book }: Props) {
 	const router = useRouter()
 
-	const thumbnailPath = getThumbnailPath(book)
+	const thumbnailData = useMemo(
+		() => imageMeta.safeParse(book.thumbnailMeta).data,
+		[book.thumbnailMeta],
+	)
 
 	const { width, height } = useListItemSize()
 
@@ -27,10 +31,11 @@ export default function DownloadedListItem({ book }: Props) {
 						source={{
 							// @ts-expect-error: URI doesn't like undefined but it shows a placeholder when
 							// undefined so it's fine
-							uri: thumbnailPath,
+							uri: getThumbnailPath(book),
 						}}
 						resizeMode="stretch"
 						size={{ height, width }}
+						placeholderData={thumbnailData}
 					/>
 
 					<View>

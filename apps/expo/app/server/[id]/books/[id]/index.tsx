@@ -169,6 +169,7 @@ export default function Screen() {
 			metadata: book.metadata || undefined,
 			bookName: book.resolvedName,
 			readProgress: book.readProgress,
+			thumbnailMeta: book.thumbnail.metadata || undefined,
 		})
 	}, [isDownloaded, downloadBook, book, isDownloading])
 

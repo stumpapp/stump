@@ -146,6 +146,7 @@ export default function PdfReader({ book, initialPage, onPageChanged, ...ctx }: 
 				seriesId: book.series?.id,
 				seriesName: book.series?.resolvedName,
 				readProgress: book.readProgress,
+				thumbnailMeta: book.thumbnail.metadata || undefined,
 			})
 
 			if (result) {

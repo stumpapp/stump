@@ -1,6 +1,6 @@
 export interface StumpStreamerModule {
 	initializeBook(bookId: string, archivePath: string, cacheDir: string): Promise<number>
-	generateThumbnail(bookId: string, archivePath: string, outputDir: string): Promise<void>
+	generateThumbnail(bookId: string, archivePath: string, outputDir: string): Promise<string>
 	getPageURL(bookId: string, page: number): string | null
 	cleanupBook(bookId: string, deleteCache: boolean): Promise<void>
 	prefetchPages(bookId: string, startPage: number, count: number): Promise<void>

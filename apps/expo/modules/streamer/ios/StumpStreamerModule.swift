@@ -34,7 +34,7 @@ public class StumpStreamerModule: Module {
       return self.server.getPageURL(bookId: bookId, page: page)
     }
 
-    AsyncFunction("generateThumbnail") { (bookId: String, archivePath: String, outputDir: String) in
+    AsyncFunction("generateThumbnail") { (bookId: String, archivePath: String, outputDir: String) -> String in
       let filePath = archivePath.hasPrefix("file://") 
           ? String(archivePath.dropFirst(7))
           : archivePath
@@ -43,7 +43,7 @@ public class StumpStreamerModule: Module {
           ? String(outputDir.dropFirst(7))
           : outputDir
         
-      try ThumbnailGenerator.shared.generateThumbnail(
+      return try ThumbnailGenerator.shared.generateThumbnail(
         bookId: bookId,
         archivePath: filePath,
         outputDir: outputPath

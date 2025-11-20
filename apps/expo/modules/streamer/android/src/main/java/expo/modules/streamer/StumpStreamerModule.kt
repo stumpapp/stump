@@ -48,7 +48,8 @@ class StumpStreamerModule : Module() {
         }
 
         AsyncFunction("generateThumbnail") { bookId: String, archivePath: String, outputDir: String ->
-            thumbnailGenerator.generateThumbnail(bookId, archivePath, outputDir)
+            val thumbnailPath = thumbnailGenerator.generateThumbnail(bookId, archivePath, outputDir)
+            thumbnailPath
         }
 
         Function("getThumbnailPath") { bookId: String, cacheDir: String ->

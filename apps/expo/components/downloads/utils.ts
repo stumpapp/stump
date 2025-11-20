@@ -3,9 +3,11 @@ import StumpStreamer from '~/modules/streamer'
 
 import { DownloadedFile } from './types'
 
-export const getThumbnailPath = (downloadedFileId: DownloadedFile): string | null => {
-	return StumpStreamer.getThumbnailPath(
-		downloadedFileId.id,
-		thumbnailsDirectory(downloadedFileId.serverId),
-	)
+export const getThumbnailPath = (downloadedFile: DownloadedFile): string | null => {
+	return downloadedFile.thumbnailPath
+		? `file://${downloadedFile.thumbnailPath.replace('file://', '')}`
+		: StumpStreamer.getThumbnailPath(
+				downloadedFile.id,
+				thumbnailsDirectory(downloadedFile.serverId),
+			)
 }

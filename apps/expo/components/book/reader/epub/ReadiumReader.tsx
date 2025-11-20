@@ -120,6 +120,7 @@ export default function ReadiumReader({
 				seriesName: book.series?.resolvedName,
 				toc: book.ebook?.toc,
 				readProgress: book.readProgress,
+				thumbnailMeta: book.thumbnail.metadata || undefined,
 			})
 
 			if (result) {

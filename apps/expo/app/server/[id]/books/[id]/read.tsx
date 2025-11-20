@@ -39,6 +39,11 @@ export const query = graphql(`
 			extension
 			thumbnail {
 				url
+				metadata {
+					averageColor
+					thumbhash
+					meshColors
+				}
 			}
 			readProgress {
 				percentageCompleted

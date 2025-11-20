@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry/react-native'
 import { useSDKSafe } from '@stump/client'
-import { MediaMetadata, ReadiumLocator } from '@stump/graphql'
+import { ImageMetadata, MediaMetadata, ReadiumLocator } from '@stump/graphql'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { and, count, eq } from 'drizzle-orm'
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
@@ -88,6 +88,7 @@ type DownloadBookParams = {
 		locator?: ReadiumLocator | null
 		updatedAt?: Date | null
 	} | null
+	thumbnailMeta?: ImageMetadata | null
 }
 
 export type UseDownloadParams = {
@@ -159,6 +160,8 @@ export function useDownload({ serverId }: UseDownloadParams = {}) {
 					metadata: params.metadata,
 					seriesId: params.seriesId,
 					bookName: params.bookName,
+					imageMetadata: params.thumbnailMeta,
+					toc: params.toc,
 				},
 				{
 					seriesRef:

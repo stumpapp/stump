@@ -1,7 +1,10 @@
+import { useQuery } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
+import { FullScreenLoader } from '~/components/ui'
+import { verifyFileReadable } from '~/lib/filesystem'
 import { useDownload } from '~/lib/hooks'
 import { BookMetadata, ReadiumLocator, ReadiumView, ReadiumViewRef } from '~/modules/readium'
 import { useReaderStore } from '~/stores'
@@ -50,6 +53,7 @@ export default function ReadiumReader({
 	const { downloadBook } = useDownload({ serverId: ctx.serverId })
 
 	const [localUri, setLocalUri] = useState<string | null>(() => ctx.offlineUri || null)
+	// const [isDownloading, setIsDownloading] = useState(false)
 
 	const controlsVisible = useReaderStore((state) => state.showControls)
 	const setControlsVisible = useReaderStore((state) => state.setShowControls)
@@ -103,10 +107,10 @@ export default function ReadiumReader({
 		toc: store.toc,
 	}))
 
-	useEffect(() => {
-		if (localUri) return
-
-		async function download() {
+	const { isLoading: isDownloading } = useQuery({
+		queryKey: ['readium-reader-offline-uri', book.id, ctx.serverId],
+		enabled: !localUri,
+		queryFn: async () => {
 			const result = await downloadBook({
 				...book,
 				bookName: book.name,
@@ -119,14 +123,15 @@ export default function ReadiumReader({
 			})
 
 			if (result) {
+				await verifyFileReadable(result)
 				setLocalUri(result)
+				return result
 			} else {
 				console.error('Failed to download book')
+				return null
 			}
-		}
-
-		download()
-	}, [localUri, book, downloadBook, store])
+		},
+	})
 
 	useEffect(
 		() => {
@@ -204,6 +209,8 @@ export default function ReadiumReader({
 	}, [ctx, book.id])
 
 	const insets = useSafeAreaInsets()
+
+	if (isDownloading) return <FullScreenLoader label="Downloading..." />
 
 	if (!localUri) return null
 

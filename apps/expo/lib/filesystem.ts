@@ -56,6 +56,44 @@ export async function ensureDirectoryExists(path = baseDirectory) {
 	}
 }
 
+/**
+ * Verifies that a downloaded file is fully written and readable.
+ * This prevents a race condition on Android where the file system
+ * may not have fully flushed the file before Readium tries to access it
+ */
+export async function verifyFileReadable(
+	uri: string,
+	maxAttempts: number = 5,
+	delayMs: number = 200,
+): Promise<void> {
+	for (let attempt = 0; attempt < maxAttempts; attempt++) {
+		try {
+			const fileInfo = await FileSystem.getInfoAsync(uri)
+
+			if (fileInfo.exists && fileInfo.size && fileInfo.size > 0) {
+				if (attempt === 0) {
+					await new Promise((resolve) => setTimeout(resolve, delayMs))
+				}
+				return
+			}
+
+			// File doesn't exist or has zero size, wait and retry
+			if (attempt < maxAttempts - 1) {
+				await new Promise((resolve) => setTimeout(resolve, delayMs))
+			}
+		} catch (error) {
+			console.warn(`File verification attempt ${attempt + 1} failed:`, error)
+			if (attempt < maxAttempts - 1) {
+				await new Promise((resolve) => setTimeout(resolve, delayMs))
+			}
+		}
+	}
+
+	throw new Error('Failed to verify file exists', {
+		cause: `File not found or inaccessible: ${uri}`,
+	})
+}
+
 const getFileSize = async (path: string): Promise<number> => {
 	const { exists, isDirectory, ...info } = await FileSystem.getInfoAsync(path)
 

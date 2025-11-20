@@ -24084,10 +24084,10 @@ react-native-svg@15.13.0:
     css-tree "^1.1.3"
     warn-once "0.1.1"
 
-react-native-turbo-image@^1.23.0:
-  version "1.23.0"
-  resolved "https://registry.yarnpkg.com/react-native-turbo-image/-/react-native-turbo-image-1.23.0.tgz#5c4c68295c0e2e4e97900bbad90dd839f661c02a"
-  integrity sha512-3J2isP+pF731aKLoNhaU15aen6U2uAz8w/DOL8TsGi1/CmHAd5ZHEZ0kUW06Ow/KDm8h68t9w9o7YWJC2N47Uw==
+react-native-turbo-image@^1.23.1:
+  version "1.23.1"
+  resolved "https://registry.yarnpkg.com/react-native-turbo-image/-/react-native-turbo-image-1.23.1.tgz#ef56b4aa6efe169793795dfbd01a0b57f70762c1"
+  integrity sha512-PXJO5x2mzrtfcyWaYrSFSMluYjYKKK+u6kPiw9Qk47JTOT/evNyBlMsTjbIWHlHYnb5eGTPhvoFy91csplyUkw==
 
 react-native-web@^0.21.0:
   version "0.21.1"

@@ -55,6 +55,7 @@ export type IEpubLocationStore = {
 	requestHeaders?: () => Record<string, string>
 	storeHeaders: (callback: (() => Record<string, string>) | undefined) => void
 
+	locator?: ReadiumLocator
 	currentChapter: string
 	position: number
 	totalPages: number
@@ -96,7 +97,11 @@ export const useEpubLocationStore = create<IEpubLocationStore>((set) => ({
 			embeddedMetadata: metadata,
 		}),
 	onLocationChange: (locator) =>
-		set({ currentChapter: locator.chapterTitle, position: locator.locations?.position ?? 0 }),
+		set({
+			currentChapter: locator.chapterTitle,
+			position: locator.locations?.position ?? 0,
+			locator,
+		}),
 
 	onUnload: () =>
 		set({

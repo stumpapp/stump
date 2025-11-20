@@ -1015,7 +1015,6 @@ type Media {
 type MediaAnalysisData {
 	dimensions: [PageDimension!]!
 	contentTypes: [String!]!
-	imageMetadatas: [ImageMetadata!]!
 }
 
 type MediaAnnotationsModel {

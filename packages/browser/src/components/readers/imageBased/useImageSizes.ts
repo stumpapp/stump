@@ -6,9 +6,6 @@ import { IImageBaseReaderContext, ImagePageDimensionRef } from './context'
 
 type Params = Pick<IImageBaseReaderContext, 'book'>
 
-// TODO(thumb-placeholders): Integrate with existing page analysis to add optional flag
-// which enables pulling colors for every page for use as placeholders in the footer
-
 export function useImageSizes({ book: { id, analysisData } }: Params) {
 	const cachedSizes = useSizeStore((state) => state.cache[id]?.imageSizes || {})
 	const storeSize = useSizeStore((state) => state.storeSize)

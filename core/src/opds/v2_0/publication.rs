@@ -167,16 +167,9 @@ impl OPDSPublication {
 			.map(|a| a.data.content_types.clone())
 			.unwrap_or_default();
 
-		let page_dimensions = media_analysis::Entity::find()
-			.filter(media_analysis::Column::MediaId.eq(book.media.id.clone()))
-			.one(conn)
-			.await?
-			.map(|pd| pd.data.dimensions)
-			.unwrap_or_default();
-
 		let mut reading_order = vec![];
 
-		for (idx, dim) in page_dimensions.into_iter().enumerate() {
+		for (idx, dim) in dimensions.into_iter().enumerate() {
 			let content_type = content_types
 				.get(idx)
 				.cloned()
@@ -190,13 +183,14 @@ impl OPDSPublication {
 					book.media.id,
 					idx + 1
 				)))
-				._type(OPDSLinkType::ImageJpeg)
+				._type(content_type)
 				.build()?;
 			let image_link = OPDSImageLinkBuilder::default()
 				.height(dim.height)
 				.width(dim.width)
 				.base_link(base_link)
 				.build()?;
+
 			reading_order.push(OPDSLink::Image(image_link));
 		}
 
@@ -459,7 +453,6 @@ mod tests {
 					"image/png".to_string(),
 					"image/jpeg".to_string(),
 				],
-				..Default::default()
 			},
 		}];
 

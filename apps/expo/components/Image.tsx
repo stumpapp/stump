@@ -35,7 +35,7 @@ export const ThumbnailImage = ({
 	const shadowColor = borderAndShadowStyle?.shadowColor ?? 'rgba(0,0,0,0.2)'
 	const shadowOffset = borderAndShadowStyle?.shadowOffset ?? { width: 0, height: 1 }
 
-	// TODO(thumb-placeholders): Actually use this, test more on Android
+	// TODO(thumb-placeholders): Test more on Android
 	// Using overflow: 'hidden' on android cuts off a tiny bit more than necessary from the edges of
 	// <LinearGradient />, which also causes flickering on the carousel.
 	// So we must not make it a child of BorderAndShadow, and must use inset: -0.1 and manually round the corners
@@ -67,7 +67,7 @@ export const ThumbnailImage = ({
 					// @ts-expect-error: bug in library ImageStyle should be ViewStyle
 					style={[size, { zIndex: 15 }, style]}
 					resize={size.width * 1.5}
-					fadeDuration={600}
+					fadeDuration={800}
 					// This is a weird workaround:
 					// Using the indicator prop hides the built in grey placeholder on ios (what we want)
 					// but will force show a circular loading indicator on all platforms, so we make it transparent.

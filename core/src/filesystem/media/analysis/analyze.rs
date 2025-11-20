@@ -1,10 +1,7 @@
 use crate::{
-	filesystem::{
-		image::generate_image_metadata_from_bytes,
-		media::{
-			analysis::job::{AnalyzeMediaJob, AnalyzeMediaOutput},
-			get_page,
-		},
+	filesystem::media::{
+		analysis::job::{AnalyzeMediaJob, AnalyzeMediaOutput},
+		get_page,
 	},
 	job::{error::JobError, JobExecuteLog, JobProgress, JobTaskOutput, WorkerCtx},
 };
@@ -18,10 +15,7 @@ use futures::{stream, StreamExt};
 use image::GenericImageView;
 use models::{
 	entity::media_analysis,
-	shared::{
-		analysis::{MediaAnalysisData, PageDimension},
-		image::ImageMetadata,
-	},
+	shared::analysis::{MediaAnalysisData, PageDimension},
 };
 use sea_orm::{sea_query::OnConflict, ActiveValue::Set, EntityTrait, FromQueryResult};
 
@@ -36,13 +30,11 @@ pub struct MediaForProcessing {
 struct BookPageAnalysisOutput {
 	dimensions: PageDimension,
 	content_type: String,
-	image_metadata: ImageMetadata,
 }
 
 struct ExistingPageAnalysis {
 	dimensions: Option<PageDimension>,
 	content_type: Option<String>,
-	image_metadata: Option<ImageMetadata>,
 }
 
 impl ExistingPageAnalysis {
@@ -50,7 +42,6 @@ impl ExistingPageAnalysis {
 		let mut this = ExistingPageAnalysis {
 			dimensions: None,
 			content_type: None,
-			image_metadata: None,
 		};
 
 		if let Some(analysis) = existing_analysis {
@@ -60,17 +51,12 @@ impl ExistingPageAnalysis {
 			if let Some(content_type) = analysis.content_types.get(page) {
 				this.content_type = Some(content_type.clone());
 			}
-			if let Some(image_metadata) = analysis.image_metadatas.get(page) {
-				this.image_metadata = Some(image_metadata.clone());
-			}
 		}
 		this
 	}
 
 	fn has_all(&self) -> bool {
-		self.dimensions.is_some()
-			&& self.content_type.is_some()
-			&& self.image_metadata.is_some()
+		self.dimensions.is_some() && self.content_type.is_some()
 	}
 }
 
@@ -86,7 +72,6 @@ async fn analyze_book_page(
 		return Ok(BookPageAnalysisOutput {
 			dimensions: existing_analysis.dimensions.unwrap(),
 			content_type: existing_analysis.content_type.unwrap(),
-			image_metadata: existing_analysis.image_metadata.unwrap(),
 		});
 	}
 
@@ -98,23 +83,11 @@ async fn analyze_book_page(
 		.dimensions();
 	let dimensions = PageDimension { height, width };
 
-	let image_metadata = match generate_image_metadata_from_bytes(page_data).await {
-		Ok(metadata) => metadata,
-		Err(e) => {
-			tracing::error!(?e, "Failed to generate image metadata");
-			return Err(JobError::TaskFailed(format!(
-				"Failed to generate image metadata: {}",
-				e
-			)));
-		},
-	};
-
 	// TODO: Re-add page counting
 
 	Ok(BookPageAnalysisOutput {
 		dimensions,
 		content_type: content_type.mime_type(),
-		image_metadata,
 	})
 }
 
@@ -132,7 +105,6 @@ pub async fn safely_analyze_book(
 	let mut image_dimensions: Vec<PageDimension> =
 		Vec::with_capacity(page_count as usize);
 	let mut content_types: Vec<String> = Vec::with_capacity(page_count as usize);
-	let mut image_metadata: Vec<ImageMetadata> = Vec::with_capacity(page_count as usize);
 
 	// TODO: Make this configurable
 	let concurrency = 10;
@@ -172,7 +144,6 @@ pub async fn safely_analyze_book(
 			Ok(result) => {
 				image_dimensions.push(result.dimensions);
 				content_types.push(result.content_type);
-				image_metadata.push(result.image_metadata);
 				output.pages_analyzed += 1;
 			},
 			Err(err) => {
@@ -203,7 +174,6 @@ pub async fn safely_analyze_book(
 	let constructed_analysis = MediaAnalysisData {
 		dimensions: image_dimensions,
 		content_types,
-		image_metadatas: image_metadata,
 	};
 
 	match &existing_analysis {

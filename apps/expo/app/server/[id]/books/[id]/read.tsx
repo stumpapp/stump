@@ -89,11 +89,6 @@ export const query = graphql(`
 					height
 					width
 				}
-				imageMetadatas {
-					averageColor
-					meshColors
-					thumbhash
-				}
 			}
 			nextInSeries(pagination: { cursor: { limit: 1 } }) {
 				nodes {

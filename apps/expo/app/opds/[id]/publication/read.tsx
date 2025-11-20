@@ -44,7 +44,6 @@ export default function Screen() {
 										height: height as number,
 										width: width as number,
 									})),
-								imageMetadatas: [],
 							},
 						}
 					: {}),

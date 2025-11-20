@@ -16,13 +16,10 @@ use std::fmt;
 use std::str::FromStr;
 use std::string::ToString;
 
-use crate::shared::image::ImageMetadata;
-
 #[derive(Debug, Default, Clone, PartialEq, Eq, SimpleObject, FromJsonQueryResult)]
 pub struct MediaAnalysisData {
 	pub dimensions: Vec<PageDimension>,
 	pub content_types: Vec<String>,
-	pub image_metadatas: Vec<ImageMetadata>,
 }
 
 impl Serialize for MediaAnalysisData {
@@ -39,8 +36,6 @@ impl Serialize for MediaAnalysisData {
 			"page_content_types",
 			&content_type_vec_to_string(self.content_types.clone()),
 		)?;
-		// Every image is different, so we won't bother trying to compress it
-		state.serialize_field("image_metadatas", &self.image_metadatas)?;
 		state.end()
 	}
 }
@@ -54,7 +49,6 @@ impl<'de> Deserialize<'de> for MediaAnalysisData {
 		struct MediaAnalysisDataHelper {
 			dimensions: String,
 			page_content_types: String,
-			image_metadatas: Vec<ImageMetadata>,
 		}
 
 		let helper = MediaAnalysisDataHelper::deserialize(deserializer)?;
@@ -67,7 +61,6 @@ impl<'de> Deserialize<'de> for MediaAnalysisData {
 		Ok(MediaAnalysisData {
 			dimensions,
 			content_types,
-			image_metadatas: helper.image_metadatas,
 		})
 	}
 }

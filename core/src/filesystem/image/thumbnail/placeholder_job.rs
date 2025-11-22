@@ -2,7 +2,9 @@ use async_graphql::SimpleObject;
 use serde::{Deserialize, Serialize};
 
 use models::entity::{library, media, series};
-use sea_orm::{prelude::*, ColumnTrait, EntityTrait, QueryFilter, QuerySelect};
+use sea_orm::{
+	prelude::*, ColumnTrait, EntityTrait, QueryFilter, QuerySelect, QueryTrait,
+};
 
 use crate::{
 	filesystem::image::thumbnail::generate::{
@@ -223,6 +225,12 @@ impl JobExt for PlaceholderGenerationJob {
 					.select_only()
 					.columns(media::MediaThumbSelect::columns())
 					.filter(media::Column::Id.is_in(media_ids))
+					// If not force regenerating, then we don't care about media already having thumb meta
+					.apply_if(
+						(!self.config.force_regenerate)
+							.then(|| media::Column::ThumbnailMeta.is_null()),
+						|query, f| query.filter(f),
+					)
 					.into_model::<media::MediaThumbSelect>()
 					.all(ctx.conn.as_ref())
 					.await

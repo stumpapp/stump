@@ -1457,6 +1457,7 @@ export type Mutation = {
   markMediaAsComplete?: Maybe<FinishedReadingSessionModel>;
   markSeriesAsComplete: Series;
   patchEmailDevice: Scalars['Int']['output'];
+  processLibraryThumbnails: Scalars['Boolean']['output'];
   /** Removes a member from the book club */
   removeBookClubMember: BookClubMember;
   resetLibraryMetadata: Library;
@@ -1819,6 +1820,12 @@ export type MutationMarkSeriesAsCompleteArgs = {
 export type MutationPatchEmailDeviceArgs = {
   id: Scalars['Int']['input'];
   input: EmailDeviceInput;
+};
+
+
+export type MutationProcessLibraryThumbnailsArgs = {
+  forceRegenerate?: Scalars['Boolean']['input'];
+  id: Scalars['ID']['input'];
 };
 
 
@@ -4286,6 +4293,14 @@ export type LibraryThumbnailSelectorUploadMutationVariables = Exact<{
 
 
 export type LibraryThumbnailSelectorUploadMutation = { __typename?: 'Mutation', uploadLibraryThumbnail: { __typename?: 'Library', id: string, thumbnail: { __typename?: 'ImageRef', url: string } } };
+
+export type ProcessLibraryThumbnailsMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  forceRegenerate: Scalars['Boolean']['input'];
+}>;
+
+
+export type ProcessLibraryThumbnailsMutation = { __typename?: 'Mutation', processLibraryThumbnails: boolean };
 
 export type RegenerateThumbnailsMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -7341,6 +7356,11 @@ export const LibraryThumbnailSelectorUploadDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<LibraryThumbnailSelectorUploadMutation, LibraryThumbnailSelectorUploadMutationVariables>;
+export const ProcessLibraryThumbnailsDocument = new TypedDocumentString(`
+    mutation ProcessLibraryThumbnails($id: ID!, $forceRegenerate: Boolean!) {
+  processLibraryThumbnails(id: $id, forceRegenerate: $forceRegenerate)
+}
+    `) as unknown as TypedDocumentString<ProcessLibraryThumbnailsMutation, ProcessLibraryThumbnailsMutationVariables>;
 export const RegenerateThumbnailsDocument = new TypedDocumentString(`
     mutation RegenerateThumbnails($id: ID!, $forceRegenerate: Boolean!) {
   generateLibraryThumbnails(id: $id, forceRegenerate: $forceRegenerate)

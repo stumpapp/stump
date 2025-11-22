@@ -72,6 +72,7 @@ pub struct LibraryThumbSelect {
 	pub name: String,
 	pub path: String,
 	pub thumbnail_path: Option<String>,
+	pub thumbnail_meta: Option<crate::shared::image::ImageMetadata>,
 }
 
 impl LibraryThumbSelect {
@@ -81,6 +82,7 @@ impl LibraryThumbSelect {
 			Column::Name,
 			Column::Path,
 			Column::ThumbnailPath,
+			Column::ThumbnailMeta,
 		]
 	}
 }

@@ -18,7 +18,9 @@ use sea_orm::{
 use stump_core::filesystem::{
 	image::{
 		generate_book_thumbnail, remove_thumbnails, GenerateThumbnailOptions,
-		ImageProcessorOptionsExt, ThumbnailGenerationJob, ThumbnailGenerationJobParams,
+		ImageProcessorOptionsExt, PlaceholderGenerationJob,
+		PlaceholderGenerationJobConfig, PlaceholderGenerationJobScope,
+		ThumbnailGenerationJob, ThumbnailGenerationJobParams,
 	},
 	media::analysis::{AnalysisJobConfig, AnalyzeMediaJob, MediaAnalysisJobScope},
 	scanner::{LibraryScanJob, ScanOptions},
@@ -804,16 +806,45 @@ impl LibraryMutation {
 			.ok_or("Library not found")?;
 		let config = config.ok_or("Library config not found")?;
 
-		let job_config =
-			ThumbnailGenerationJobParams::books_in_library(library.id, force_regenerate);
-		core.enqueue_job(ThumbnailGenerationJob::new(
+		let job_config = ThumbnailGenerationJob::new(
 			config.thumbnail_config.unwrap_or_default(),
-			job_config,
-		))
-		.map_err(|error| {
+			ThumbnailGenerationJobParams::books_in_library(library.id, force_regenerate),
+		);
+
+		if let Err(error) = core.enqueue_job(job_config) {
 			tracing::error!(?error, "Failed to enqueue thumbnail generation job");
-			error
-		})?;
+			return Err(error.into());
+		}
+
+		Ok(true)
+	}
+
+	#[graphql(guard = "PermissionGuard::one(UserPermission::ManageLibrary)")]
+	async fn process_library_thumbnails(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+		#[graphql(default = false)] force_regenerate: bool,
+	) -> Result<bool> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let core = ctx.data::<CoreContext>()?;
+
+		let library = library::Entity::find_for_user(user)
+			.filter(library::Column::Id.eq(id.to_string()))
+			.one(core.conn.as_ref())
+			.await?
+			.ok_or("Library not found")?;
+
+		let jobs_config = PlaceholderGenerationJob::new(PlaceholderGenerationJobConfig {
+			scope: PlaceholderGenerationJobScope::BooksInLibrary(library.id.clone()),
+			force_regenerate,
+		})
+		.wrapped();
+
+		if let Err(error) = core.enqueue_job(jobs_config) {
+			tracing::error!(?error, "Failed to enqueue placeholder generation job");
+			return Err(error.into());
+		}
 
 		Ok(true)
 	}

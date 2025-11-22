@@ -1376,6 +1376,7 @@ type Mutation {
 	"""
 	deleteLibrary(id: ID!): Library!
 	generateLibraryThumbnails(id: ID!, forceRegenerate: Boolean! = false): Boolean!
+	processLibraryThumbnails(id: ID!, forceRegenerate: Boolean! = false): Boolean!
 	deleteLibraryThumbnails(id: ID!): Boolean!
 	"""
 	Enqueue a scan job for a library. This will index the filesystem from the library's root path

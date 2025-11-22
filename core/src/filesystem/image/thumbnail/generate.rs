@@ -16,8 +16,9 @@ use crate::{
 	filesystem::{
 		image::{
 			thumbnail::placeholder::generate_image_metadata, GenericImageProcessor,
-			ImageProcessor, ProcessorError, ThumbnailGenerationJob,
-			ThumbnailGenerationOutput, WebpProcessor,
+			ImageProcessor, PlaceholderGenerationJob, PlaceholderGenerationOutput,
+			ProcessorError, ThumbnailGenerationJob, ThumbnailGenerationOutput,
+			WebpProcessor,
 		},
 		media::get_page,
 	},
@@ -505,6 +506,237 @@ pub async fn safely_generate_batch(
 
 		// TODO: Read up more on this, I added as an attempt to force garbage collection
 		// between batches to help with memory usage, but it may not be necessary.
+		if processed_count < total_sources {
+			tokio::task::yield_now().await;
+		}
+	}
+
+	JobTaskOutput {
+		output,
+		logs,
+		subtasks: vec![],
+	}
+}
+
+/// Generate placeholder metadata (ImageMetadata) for a book's existing thumbnail
+#[tracing::instrument(skip_all)]
+pub async fn generate_book_placeholder(
+	book: &media::MediaThumbSelect,
+	conn: &DatabaseConnection,
+	force_regen: bool,
+) -> Result<(), ThumbnailGenerateError> {
+	// Skip if metadata exists and not forcing regeneration
+	if !force_regen && book.thumbnail_meta.is_some() {
+		return Ok(());
+	}
+
+	// Unlike the thumb generation job, we will not generate a thumbnail if one does not exist
+	let Some(thumbnail_path) = &book.thumbnail_path else {
+		return Err(ThumbnailGenerateError::NothingToGenerate);
+	};
+
+	let path = PathBuf::from(thumbnail_path);
+	if fs::metadata(&path).await.is_err() {
+		return Err(ThumbnailGenerateError::NothingToGenerate);
+	}
+
+	let thumbnail_metadata = match generate_image_metadata(&path).await {
+		Ok(metadata) => Some(metadata),
+		Err(e) => {
+			tracing::error!(error = ?e, "Failed to generate thumbnail metadata");
+			None
+		},
+	};
+
+	media::Entity::update_many()
+		.filter(media::Column::Id.eq(&book.id))
+		.col_expr(
+			media::Column::ThumbnailMeta,
+			Expr::value(thumbnail_metadata),
+		)
+		.exec(conn)
+		.await?;
+
+	Ok(())
+}
+
+/// Generate placeholder metadata for a series's existing thumbnail
+#[tracing::instrument(skip_all)]
+async fn generate_series_placeholder(
+	series: &series::SeriesThumbSelect,
+	conn: &DatabaseConnection,
+	force_regen: bool,
+) -> Result<(), ThumbnailGenerateError> {
+	// Skip if metadata exists and not forcing regeneration
+	if !force_regen && series.thumbnail_meta.is_some() {
+		return Ok(());
+	}
+
+	// Unlike the thumb generation job, we will not generate a thumbnail if one does not exist
+	let Some(thumbnail_path) = &series.thumbnail_path else {
+		return Err(ThumbnailGenerateError::NothingToGenerate);
+	};
+
+	let path = PathBuf::from(thumbnail_path);
+	if !fs::metadata(&path).await.is_ok() {
+		return Err(ThumbnailGenerateError::NothingToGenerate);
+	}
+
+	let thumbnail_metadata = match generate_image_metadata(&path).await {
+		Ok(metadata) => Some(metadata),
+		Err(e) => {
+			tracing::error!(error = ?e, "Failed to generate thumbnail metadata");
+			None
+		},
+	};
+
+	series::Entity::update_many()
+		.filter(series::Column::Id.eq(&series.id))
+		.col_expr(
+			series::Column::ThumbnailMeta,
+			Expr::value(thumbnail_metadata),
+		)
+		.exec(conn)
+		.await?;
+
+	Ok(())
+}
+
+/// Generate placeholder metadata for a library's existing thumbnail
+#[tracing::instrument(skip_all)]
+async fn generate_library_placeholder(
+	library: &library::LibraryThumbSelect,
+	conn: &DatabaseConnection,
+	force_regen: bool,
+) -> Result<(), ThumbnailGenerateError> {
+	// Skip if metadata exists and not forcing regeneration
+	if !force_regen && library.thumbnail_meta.is_some() {
+		return Ok(());
+	}
+
+	// Unlike the thumb generation job, we will not generate a thumbnail if one does not exist
+	let Some(thumbnail_path) = &library.thumbnail_path else {
+		return Err(ThumbnailGenerateError::NothingToGenerate);
+	};
+
+	let path = PathBuf::from(thumbnail_path);
+	if !fs::metadata(&path).await.is_ok() {
+		return Err(ThumbnailGenerateError::NothingToGenerate);
+	}
+
+	let thumbnail_metadata = match generate_image_metadata(&path).await {
+		Ok(metadata) => Some(metadata),
+		Err(e) => {
+			tracing::error!(error = ?e, "Failed to generate thumbnail metadata");
+			None
+		},
+	};
+
+	library::Entity::update_many()
+		.filter(library::Column::Id.eq(&library.id))
+		.col_expr(
+			library::Column::ThumbnailMeta,
+			Expr::value(thumbnail_metadata),
+		)
+		.exec(conn)
+		.await?;
+
+	Ok(())
+}
+
+/// Batch generate placeholder metadata for multiple sources with concurrency control
+#[tracing::instrument(skip_all)]
+pub async fn safely_generate_placeholder_batch(
+	sources: Vec<GenerateImageSource>,
+	ctx: &WorkerCtx,
+	force_regen: bool,
+	reporter: impl Fn(usize),
+) -> JobTaskOutput<PlaceholderGenerationJob> {
+	let mut output = PlaceholderGenerationOutput::default();
+	let mut logs = vec![];
+
+	let max_concurrency = ctx.config.max_thumbnail_concurrency;
+	let batch_size = max_concurrency;
+	let total_sources = sources.len();
+	tracing::debug!(
+		batch_size,
+		total_sources,
+		"Processing placeholder metadata in batches"
+	);
+
+	let mut processed_count = 0;
+
+	for (chunk_index, chunk) in sources.chunks(batch_size).enumerate() {
+		let mut chunk_futures = FuturesUnordered::new();
+
+		for (source_index, source) in chunk.iter().enumerate() {
+			let force_regen = force_regen;
+			let path = match source {
+				GenerateImageSource::Book(book) => book.path.clone(),
+				GenerateImageSource::Series(series) => series.path.clone(),
+				GenerateImageSource::Library(library) => library.path.clone(),
+			};
+
+			let future = async move {
+				tracing::trace!(?path, "(Chunk {chunk_index}, Item {source_index}) Starting placeholder generation");
+
+				let result = match source {
+					GenerateImageSource::Book(book) => {
+						generate_book_placeholder(book, ctx.conn.as_ref(), force_regen)
+							.await
+					},
+					GenerateImageSource::Series(series) => {
+						generate_series_placeholder(
+							series,
+							ctx.conn.as_ref(),
+							force_regen,
+						)
+						.await
+					},
+					GenerateImageSource::Library(library) => {
+						generate_library_placeholder(
+							library,
+							ctx.conn.as_ref(),
+							force_regen,
+						)
+						.await
+					},
+				};
+
+				result.map_err(|e| (e, path))
+			};
+
+			chunk_futures.push(future);
+		}
+
+		while let Some(gen_output) = chunk_futures.next().await {
+			match gen_output {
+				Ok(_) => {
+					output.generated_metadata += 1;
+				},
+				Err((error, path)) => match error {
+					ThumbnailGenerateError::NothingToGenerate => {
+						output.skipped_entities += 1;
+					},
+					_ => {
+						logs.push(
+							JobExecuteLog::error(format!(
+								"Failed to generate placeholder metadata: {:?}",
+								error.to_string()
+							))
+							.with_ctx(format!("Media path: {path}")),
+						);
+						output.skipped_entities += 1;
+					},
+				},
+			}
+
+			output.visited_entities += 1;
+			processed_count += 1;
+			reporter(processed_count);
+		}
+
+		// Force garbage collection between batches
 		if processed_count < total_sources {
 			tokio::task::yield_now().await;
 		}

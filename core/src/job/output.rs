@@ -4,7 +4,7 @@ use async_graphql::{SimpleObject, Union};
 use serde::{de, Deserialize, Serialize};
 
 use crate::filesystem::{
-	image::ThumbnailGenerationOutput,
+	image::{PlaceholderGenerationOutput, ThumbnailGenerationOutput},
 	scanner::{LibraryScanOutput, SeriesScanOutput},
 };
 
@@ -22,6 +22,7 @@ pub enum CoreJobOutput {
 	LibraryScan(LibraryScanOutput),
 	SeriesScan(SeriesScanOutput),
 	ThumbnailGeneration(ThumbnailGenerationOutput),
+	PlaceholderGeneration(PlaceholderGenerationOutput),
 	External(ExternalJobOutput),
 }
 

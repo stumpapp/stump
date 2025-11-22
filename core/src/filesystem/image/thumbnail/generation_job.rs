@@ -23,7 +23,7 @@ type Id = String;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "type")]
-pub enum ThumbnailGenerationJobVariant {
+pub enum ThumbnailGenerationJobScope {
 	BooksInLibrary(Id),
 	BooksInSeries(Id),
 	Books(Vec<Id>),
@@ -31,48 +31,47 @@ pub enum ThumbnailGenerationJobVariant {
 	Series(Vec<Id>),
 }
 
-// TODO(thumb-placeholders): Add flag for generating placeholder data only (if missing)
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ThumbnailGenerationJobParams {
-	variant: ThumbnailGenerationJobVariant,
+	scope: ThumbnailGenerationJobScope,
 	force_regenerate: bool,
 }
 
 impl ThumbnailGenerationJobParams {
-	pub fn new(variant: ThumbnailGenerationJobVariant, force_regenerate: bool) -> Self {
+	pub fn new(scope: ThumbnailGenerationJobScope, force_regenerate: bool) -> Self {
 		Self {
-			variant,
+			scope,
 			force_regenerate,
 		}
 	}
 
 	pub fn books(ids: Vec<Id>, force_regenerate: bool) -> Self {
-		Self::new(ThumbnailGenerationJobVariant::Books(ids), force_regenerate)
+		Self::new(ThumbnailGenerationJobScope::Books(ids), force_regenerate)
 	}
 
 	pub fn books_in_library(library_id: Id, force_regenerate: bool) -> Self {
 		Self::new(
-			ThumbnailGenerationJobVariant::BooksInLibrary(library_id),
+			ThumbnailGenerationJobScope::BooksInLibrary(library_id),
 			force_regenerate,
 		)
 	}
 
 	pub fn books_in_series(series_id: Id, force_regenerate: bool) -> Self {
 		Self::new(
-			ThumbnailGenerationJobVariant::BooksInSeries(series_id),
+			ThumbnailGenerationJobScope::BooksInSeries(series_id),
 			force_regenerate,
 		)
 	}
 
 	pub fn library(id: Id, force_regenerate: bool) -> Self {
 		Self::new(
-			ThumbnailGenerationJobVariant::Libraries(vec![id]),
+			ThumbnailGenerationJobScope::Libraries(vec![id]),
 			force_regenerate,
 		)
 	}
 
 	pub fn series(ids: Vec<Id>, force_regenerate: bool) -> Self {
-		Self::new(ThumbnailGenerationJobVariant::Series(ids), force_regenerate)
+		Self::new(ThumbnailGenerationJobScope::Series(ids), force_regenerate)
 	}
 }
 
@@ -137,24 +136,24 @@ impl JobExt for ThumbnailGenerationJob {
 
 	// TODO: Improve this description
 	fn description(&self) -> Option<String> {
-		match self.params.variant.clone() {
-			ThumbnailGenerationJobVariant::BooksInLibrary(id) => Some(format!(
+		match self.params.scope.clone() {
+			ThumbnailGenerationJobScope::BooksInLibrary(id) => Some(format!(
 				"Thumbnail generation job, BooksInLibrary({}), force_regenerate: {}",
 				id, self.params.force_regenerate
 			)),
-			ThumbnailGenerationJobVariant::BooksInSeries(id) => Some(format!(
+			ThumbnailGenerationJobScope::BooksInSeries(id) => Some(format!(
 				"Thumbnail generation job, BooksInSeries({}), force_regenerate: {}",
 				id, self.params.force_regenerate
 			)),
-			ThumbnailGenerationJobVariant::Books(id) => Some(format!(
+			ThumbnailGenerationJobScope::Books(id) => Some(format!(
 				"Thumbnail generation job, Books({:?}), force_regenerate: {}",
 				id, self.params.force_regenerate
 			)),
-			ThumbnailGenerationJobVariant::Libraries(ids) => Some(format!(
+			ThumbnailGenerationJobScope::Libraries(ids) => Some(format!(
 				"Thumbnail generation job, Libraries({:?}), force_regenerate: {}",
 				ids, self.params.force_regenerate
 			)),
-			ThumbnailGenerationJobVariant::Series(ids) => Some(format!(
+			ThumbnailGenerationJobScope::Series(ids) => Some(format!(
 				"Thumbnail generation job, Series({:?}), force_regenerate: {}",
 				ids, self.params.force_regenerate
 			)),
@@ -165,8 +164,8 @@ impl JobExt for ThumbnailGenerationJob {
 		&mut self,
 		ctx: &WorkerCtx,
 	) -> Result<WorkingState<Self::Output, Self::Task>, JobError> {
-		let init_params = match &self.params.variant {
-			ThumbnailGenerationJobVariant::BooksInLibrary(id) => {
+		let init_params = match &self.params.scope {
+			ThumbnailGenerationJobScope::BooksInLibrary(id) => {
 				let books = media::Entity::find()
 					.select_only()
 					.columns(media::MediaThumbSelect::columns())
@@ -206,7 +205,7 @@ impl JobExt for ThumbnailGenerationJob {
 					library_ids,
 				}
 			},
-			ThumbnailGenerationJobVariant::BooksInSeries(id) => {
+			ThumbnailGenerationJobScope::BooksInSeries(id) => {
 				let books = media::Entity::find()
 					.select_only()
 					.columns(media::MediaThumbSelect::columns())
@@ -224,24 +223,22 @@ impl JobExt for ThumbnailGenerationJob {
 					library_ids: vec![],
 				}
 			},
-			ThumbnailGenerationJobVariant::Books(media_ids) => ThumbnailGenerationInit {
+			ThumbnailGenerationJobScope::Books(media_ids) => ThumbnailGenerationInit {
 				media_ids: media_ids.clone(),
 				series_ids: vec![],
 				library_ids: vec![],
 			},
-			ThumbnailGenerationJobVariant::Libraries(library_ids) => {
+			ThumbnailGenerationJobScope::Libraries(library_ids) => {
 				ThumbnailGenerationInit {
 					media_ids: vec![],
 					series_ids: vec![],
 					library_ids: library_ids.clone(),
 				}
 			},
-			ThumbnailGenerationJobVariant::Series(series_ids) => {
-				ThumbnailGenerationInit {
-					media_ids: vec![],
-					series_ids: series_ids.clone(),
-					library_ids: vec![],
-				}
+			ThumbnailGenerationJobScope::Series(series_ids) => ThumbnailGenerationInit {
+				media_ids: vec![],
+				series_ids: series_ids.clone(),
+				library_ids: vec![],
 			},
 		};
 

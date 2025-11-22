@@ -109,6 +109,7 @@ pub struct SeriesThumbSelect {
 	pub id: String,
 	pub path: String,
 	pub thumbnail_path: Option<String>,
+	pub thumbnail_meta: Option<crate::shared::image::ImageMetadata>,
 	pub library_id: Option<String>,
 }
 
@@ -118,6 +119,7 @@ impl SeriesThumbSelect {
 			Column::Id,
 			Column::Path,
 			Column::ThumbnailPath,
+			Column::ThumbnailMeta,
 			Column::LibraryId,
 		]
 	}

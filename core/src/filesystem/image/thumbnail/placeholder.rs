@@ -1,11 +1,12 @@
 use base64::prelude::*;
 use image::{self, DynamicImage};
 use kmeans_colors::{get_kmeans, Kmeans, Sort};
-use models::shared::image::ImageMetadata;
+use models::shared::image::{ImageColor, ImageMetadata};
 use palette::{
 	cast::from_component_slice, color_difference::Ciede2000, FromColor, Hsl, IntoColor,
 	Lab, Srgb,
 };
+use rust_decimal::Decimal;
 use std::{cmp::Ordering, path::Path};
 use thumbhash::rgba_to_thumb_hash;
 use tokio::{sync::oneshot, task::spawn_blocking};
@@ -92,13 +93,13 @@ fn _generate_image_metadata_from_bytes(
 fn _generate_image_metadata_from_image(
 	img: DynamicImage,
 ) -> Result<ImageMetadata, ProcessorError> {
-	let mesh_colors = process_image_colors_from_image(&img, 7)?;
-	let average_color = process_image_colors_from_image(&img, 1)?;
+	let colors = process_image_colors_from_image(&img, 7)?;
+	let average_color_vec = process_image_colors_from_image(&img, 1)?;
 	let thumbhash = process_image_thumbhash_from_image(&img)?;
 
 	Ok(ImageMetadata {
-		average_color: average_color.first().cloned(),
-		mesh_colors,
+		average_color: average_color_vec.first().map(|c| c.color.clone()),
+		colors,
 		thumbhash: Some(thumbhash),
 	})
 }
@@ -114,11 +115,11 @@ struct ColorData {
 /// * `path` - The path to the image.
 /// * `k` - The number of initial candidate colours to find (we always use 1 or 7)
 ///
-/// Returns a vector of either 1 or 3 "best" colours as HEX strings, or an error. "Best" is defined as high saturation, distinct and large coverage.
+/// Returns a vector of either 1 or 3 "best" colours with percentages, or an error. "Best" is defined as high saturation, distinct and large coverage.
 pub fn process_image_colors(
 	path: &Path,
 	k: usize,
-) -> Result<Vec<String>, ProcessorError> {
+) -> Result<Vec<ImageColor>, ProcessorError> {
 	let dyn_img = image::open(path)?;
 	process_image_colors_from_image(&dyn_img, k)
 }
@@ -127,11 +128,11 @@ pub fn process_image_colors(
 /// * `bytes` - The image data as bytes.
 /// * `k` - The number of initial candidate colours to find (we always use 1 or 7)
 ///
-/// Returns a vector of either 1 or 3 "best" colours as HEX strings, or an error. "Best" is defined as high saturation, distinct and large coverage.
+/// Returns a vector of either 1 or 3 "best" colours with percentages, or an error. "Best" is defined as high saturation, distinct and large coverage.
 pub fn process_image_colors_from_bytes(
 	bytes: &[u8],
 	k: usize,
-) -> Result<Vec<String>, ProcessorError> {
+) -> Result<Vec<ImageColor>, ProcessorError> {
 	let dyn_img = image::load_from_memory(bytes)?;
 	process_image_colors_from_image(&dyn_img, k)
 }
@@ -140,11 +141,11 @@ pub fn process_image_colors_from_bytes(
 /// * `dyn_img` - The loaded image.
 /// * `k` - The number of initial candidate colours to find (we always use 1 or 7)
 ///
-/// Returns a vector of either 1 or 3 "best" colours as HEX strings, or an error.
+/// Returns a vector of either 1 or 3 "best" colours with percentages, or an error.
 fn process_image_colors_from_image(
 	dyn_img: &DynamicImage,
 	k: usize,
-) -> Result<Vec<String>, ProcessorError> {
+) -> Result<Vec<ImageColor>, ProcessorError> {
 	// Downscale image (lower res = faster, shouldn't be an issue since we want colours)
 	let nwidth = if k == 1 { 1 } else { 200 };
 	let nheight = (nwidth as f32 * 1.5).floor() as u32;
@@ -242,8 +243,8 @@ fn process_image_colors_from_image(
 			.unwrap_or(Ordering::Equal)
 	});
 
-	// Convert the colours to HEX strings
-	let hex: Vec<String> = final_palette
+	// Convert the colours to ImageColor structs with HEX strings and percentages
+	let colors: Vec<ImageColor> = final_palette
 		.into_iter()
 		.map(|data| {
 			// LAB -> RGB
@@ -251,11 +252,22 @@ fn process_image_colors_from_image(
 			// Floating point (0.0-1.0) to integers (0-255)
 			let rgb_u8: Srgb<u8> = rgb_f32.into_format();
 			// RGB -> HEX
-			format!("#{:02x}{:02x}{:02x}", rgb_u8.red, rgb_u8.green, rgb_u8.blue)
+			let color =
+				format!("#{:02x}{:02x}{:02x}", rgb_u8.red, rgb_u8.green, rgb_u8.blue);
+			let percentage =
+				Decimal::from_f32_retain(data.percentage).unwrap_or_else(|| {
+					tracing::warn!(
+						value = data.percentage,
+						"Failed to convert color percentage to Decimal"
+					);
+					Decimal::from(0)
+				});
+
+			ImageColor { color, percentage }
 		})
 		.collect();
 
-	Ok(hex)
+	Ok(colors)
 }
 
 /// Processes an image to extract a thumbhash.

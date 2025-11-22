@@ -20,7 +20,10 @@ const fragment = graphql(`
 			url
 			metadata {
 				averageColor
-				meshColors
+				colors {
+					color
+					percentage
+				}
 				thumbhash
 			}
 		}

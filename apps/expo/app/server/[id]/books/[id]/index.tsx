@@ -109,7 +109,10 @@ const query = graphql(`
 				url
 				metadata {
 					averageColor
-					meshColors
+					colors {
+						color
+						percentage
+					}
 					thumbhash
 				}
 			}

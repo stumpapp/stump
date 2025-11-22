@@ -110,6 +110,6 @@ export const epubToc = z.array(z.string())
 
 export const imageMeta = z.object({
 	averageColor: z.string().nullish(),
-	meshColors: z.array(z.string()),
+	colors: z.array(z.string()),
 	thumbhash: z.string().nullish(),
 })

@@ -42,7 +42,10 @@ export const query = graphql(`
 				metadata {
 					averageColor
 					thumbhash
-					meshColors
+					colors {
+						color
+						percentage
+					}
 				}
 			}
 			readProgress {

@@ -1,3 +1,4 @@
+import { ImageColor } from '@stump/graphql'
 import { MeshGradientView } from 'expo-mesh-gradient'
 import { useCallback, useMemo } from 'react'
 import { Image, StyleSheet, View } from 'react-native'
@@ -13,9 +14,9 @@ const POINTS = [
 	[0.00, 1.00], [0.50, 1.00], [1.00, 1.00],
 ]
 
-export interface ThumbnailPlaceholderData {
+export type ThumbnailPlaceholderData = {
 	averageColor?: string | null
-	meshColors?: string[] | null
+	colors?: ImageColor[] | null
 	thumbhash?: string | null
 }
 
@@ -23,12 +24,15 @@ export function ThumbnailPlaceholder(props?: ThumbnailPlaceholderData) {
 	const thumbnailPlaceholder = usePreferencesStore((state) => state.thumbnailPlaceholder)
 	const { thumbnail } = useColors()
 
+	// TODO(thumb-placeholder): Consider using percentages
+	const colors = useMemo(() => props?.colors?.map(({ color }) => color) || null, [props?.colors])
+
 	const meshColors = useMemo(() => {
-		if (!props?.meshColors || props.meshColors.length < 3) {
+		if (!colors || colors.length < 3) {
 			return null
 		}
-		return props.meshColors
-	}, [props?.meshColors])
+		return colors
+	}, [colors])
 
 	const colorPoints = useMemo(() => {
 		if (!meshColors) {

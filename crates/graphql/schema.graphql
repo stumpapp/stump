@@ -600,9 +600,14 @@ type FinishedReadingSessionModel {
 	elapsedSeconds: Int
 }
 
+type ImageColor {
+	color: String!
+	percentage: Decimal!
+}
+
 type ImageMetadata {
 	averageColor: String
-	meshColors: [String!]!
+	colors: [ImageColor!]!
 	thumbhash: String
 }
 

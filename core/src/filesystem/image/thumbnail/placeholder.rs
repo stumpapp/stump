@@ -254,14 +254,17 @@ fn process_image_colors_from_image(
 			// RGB -> HEX
 			let color =
 				format!("#{:02x}{:02x}{:02x}", rgb_u8.red, rgb_u8.green, rgb_u8.blue);
-			let percentage =
-				Decimal::from_f32_retain(data.percentage).unwrap_or_else(|| {
+
+			let percentage = Decimal::from_f32_retain(data.percentage)
+				.unwrap_or_else(|| {
 					tracing::warn!(
 						value = data.percentage,
 						"Failed to convert color percentage to Decimal"
 					);
 					Decimal::from(0)
-				});
+				})
+				// We only need 3 decimal places for the stored percentages
+				.round_dp(3);
 
 			ImageColor { color, percentage }
 		})

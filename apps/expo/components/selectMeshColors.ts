@@ -25,7 +25,7 @@ const calculateScore = (candidate: ColorData, minDifference: number) => {
 	const nDifference = minDifference / 128.0
 
 	const chromaPenalty = candidate.chroma < 5.0 ? 0.75 : 1.0
-	const visualInterest = chromaPenalty * Math.max(nChroma, nDifference)
+	const visualInterest = chromaPenalty * Math.max(nChroma, nPercentage)
 
 	const score =
 		W_CHROMA * Math.pow(nChroma, 2) +

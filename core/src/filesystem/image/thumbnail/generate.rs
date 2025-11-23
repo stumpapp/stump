@@ -538,14 +538,11 @@ pub async fn generate_book_placeholder(
 	// from the book. This way we don't require people to generate thumbnails in order to have good
 	// placeholder metadata
 	let image_data = match &book.thumbnail_path {
-		Some(thumbnail_path) => {
+		Some(thumbnail_path) if fs::metadata(&thumbnail_path).await.is_ok() => {
 			let path = PathBuf::from(thumbnail_path);
-			if !fs::metadata(&path).await.is_ok() {
-				return Err(ThumbnailGenerateError::NothingToGenerate);
-			}
 			fs::read(&path).await?
 		},
-		None => {
+		_ => {
 			let (_, data) = get_page_async(&book.path, 1, &ctx.config).await?;
 			data
 		},

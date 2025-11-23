@@ -7,6 +7,8 @@ import { thumbHashToDataURL } from 'thumbhash'
 import { useColors } from '~/lib/constants'
 import { usePreferencesStore } from '~/stores'
 
+import { selectMeshColors } from './selectMeshColors'
+
 // prettier-ignore
 const POINTS = [
 	[0.00, 0.00], [0.50, 0.00], [1.00, 0.00],
@@ -24,15 +26,12 @@ export function ThumbnailPlaceholder(props?: ThumbnailPlaceholderData) {
 	const thumbnailPlaceholder = usePreferencesStore((state) => state.thumbnailPlaceholder)
 	const { thumbnail } = useColors()
 
-	// TODO(thumb-placeholder): Consider using percentages
-	const colors = useMemo(() => props?.colors?.map(({ color }) => color) || null, [props?.colors])
-
 	const meshColors = useMemo(() => {
-		if (!colors || colors.length < 3) {
+		if (!props?.colors) {
 			return null
 		}
-		return colors
-	}, [colors])
+		return selectMeshColors(props?.colors)
+	}, [props?.colors])
 
 	const colorPoints = useMemo(() => {
 		if (!meshColors) {

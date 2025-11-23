@@ -15,12 +15,14 @@ use crate::{
 	config::StumpConfig,
 	filesystem::{
 		image::{
+			generate_image_metadata_from_bytes,
 			thumbnail::placeholder::generate_image_metadata, GenericImageProcessor,
 			ImageProcessor, PlaceholderGenerationJob, PlaceholderGenerationOutput,
 			ProcessorError, ThumbnailGenerationJob, ThumbnailGenerationOutput,
 			WebpProcessor,
 		},
-		media::get_page,
+		media::{get_page, get_page_async},
+		FileError,
 	},
 	job::{JobExecuteLog, JobTaskOutput, WorkerCtx},
 };
@@ -42,6 +44,8 @@ pub enum ThumbnailGenerateError {
 	SourceMissingExtension,
 	#[error("Database error: {0}")]
 	DbError(#[from] sea_orm::DbErr),
+	#[error("Failed to pull image from file: {0}")]
+	ImagePullFailed(#[from] FileError),
 	#[error("Something unexpected went wrong: {0}")]
 	Unknown(String),
 }
@@ -522,7 +526,7 @@ pub async fn safely_generate_batch(
 #[tracing::instrument(skip_all)]
 pub async fn generate_book_placeholder(
 	book: &media::MediaThumbSelect,
-	conn: &DatabaseConnection,
+	ctx: &WorkerCtx,
 	force_regen: bool,
 ) -> Result<(), ThumbnailGenerateError> {
 	// Skip if metadata exists and not forcing regeneration
@@ -530,17 +534,24 @@ pub async fn generate_book_placeholder(
 		return Ok(());
 	}
 
-	// Unlike the thumb generation job, we will not generate a thumbnail if one does not exist
-	let Some(thumbnail_path) = &book.thumbnail_path else {
-		return Err(ThumbnailGenerateError::NothingToGenerate);
+	// Pull the image data from either the existing thumb on disk or try to pull the full-res image
+	// from the book. This way we don't require people to generate thumbnails in order to have good
+	// placeholder metadata
+	let image_data = match &book.thumbnail_path {
+		Some(thumbnail_path) => {
+			let path = PathBuf::from(thumbnail_path);
+			if !fs::metadata(&path).await.is_ok() {
+				return Err(ThumbnailGenerateError::NothingToGenerate);
+			}
+			fs::read(&path).await?
+		},
+		None => {
+			let (_, data) = get_page_async(&book.path, 1, &ctx.config).await?;
+			data
+		},
 	};
 
-	let path = PathBuf::from(thumbnail_path);
-	if fs::metadata(&path).await.is_err() {
-		return Err(ThumbnailGenerateError::NothingToGenerate);
-	}
-
-	let thumbnail_metadata = match generate_image_metadata(&path).await {
+	let thumbnail_metadata = match generate_image_metadata_from_bytes(image_data).await {
 		Ok(metadata) => Some(metadata),
 		Err(e) => {
 			tracing::error!(error = ?e, "Failed to generate thumbnail metadata");
@@ -554,7 +565,7 @@ pub async fn generate_book_placeholder(
 			media::Column::ThumbnailMeta,
 			Expr::value(thumbnail_metadata),
 		)
-		.exec(conn)
+		.exec(ctx.conn.as_ref())
 		.await?;
 
 	Ok(())
@@ -572,7 +583,9 @@ async fn generate_series_placeholder(
 		return Ok(());
 	}
 
-	// Unlike the thumb generation job, we will not generate a thumbnail if one does not exist
+	// TODO(thumb-placeholders): The fallback logic for series/library will need to be more robust than books,
+	// we'll have to pull from the first book's thumbnail if it exists, etc. I'll likely need to port the logic from
+	// the server into core for this, e.g. load library > first series > first book > pull page
 	let Some(thumbnail_path) = &series.thumbnail_path else {
 		return Err(ThumbnailGenerateError::NothingToGenerate);
 	};
@@ -614,7 +627,9 @@ async fn generate_library_placeholder(
 		return Ok(());
 	}
 
-	// Unlike the thumb generation job, we will not generate a thumbnail if one does not exist
+	// TODO(thumb-placeholders): The fallback logic for series/library will need to be more robust than books,
+	// we'll have to pull from the first book's thumbnail if it exists, etc. I'll likely need to port the logic from
+	// the server into core for this, e.g. load library > first series > first book > pull page
 	let Some(thumbnail_path) = &library.thumbnail_path else {
 		return Err(ThumbnailGenerateError::NothingToGenerate);
 	};
@@ -682,8 +697,7 @@ pub async fn safely_generate_placeholder_batch(
 
 				let result = match source {
 					GenerateImageSource::Book(book) => {
-						generate_book_placeholder(book, ctx.conn.as_ref(), force_regen)
-							.await
+						generate_book_placeholder(book, ctx, force_regen).await
 					},
 					GenerateImageSource::Series(series) => {
 						generate_series_placeholder(

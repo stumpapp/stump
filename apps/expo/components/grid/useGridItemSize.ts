@@ -38,12 +38,11 @@ export function useGridItemSize(params: Params = {}) {
 	// and paddingH refers to the horizontal padding we will use in the flashlist for grids, so that the real horizontal padding equals 16px.
 	//
 	// paddingH + gap = 16
-	// gap = (width - paddingH * 2 - thumbnailWidth * numColumns) / (2 * numColumns)
+	// gap = (width - paddingH * 2 - itemDimension * numColumns) / (2 * numColumns)
 	//
 	// hence
-	const thumbnailWidth = itemDimension + 0.5 * 2 // add the border width on each side of a GridImageItem (should be 0.3, but 0.5 is what seems to actually work...)
 	const paddingHorizontal =
-		(width - thumbnailWidth * numColumns - 32 * numColumns) / (2 * (1 - numColumns))
+		(width - itemDimension * numColumns - 32 * numColumns) / (2 * (1 - numColumns))
 
 	return {
 		itemDimension,

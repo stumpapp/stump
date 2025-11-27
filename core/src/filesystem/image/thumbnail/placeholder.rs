@@ -138,9 +138,7 @@ fn process_image_colors_from_image(
 	palette_size: usize,
 ) -> Result<Vec<ImageColor>, ProcessorError> {
 	// Downscale image (lower res = faster, shouldn't be an issue since we want colours)
-	let nwidth = if palette_size == 1 { 1 } else { 200 };
-	let nheight = (nwidth as f32 * 1.5).floor() as u32;
-	let img = dyn_img.thumbnail(nwidth, nheight).into_rgb8();
+	let img = dyn_img.thumbnail(200, 320).into_rgb8();
 
 	// Convert to usable format (can use LAB or RGB: LAB is more accurate, RGB may be slightly faster)
 	let img_vec: &[u8] = img.as_raw();

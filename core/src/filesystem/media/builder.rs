@@ -265,6 +265,7 @@ mod tests {
 			library_pattern: LibraryPattern::SeriesBased,
 			process_metadata: true,
 			thumbnail_config: None,
+			process_thumbnail_colors_even_without_config: false,
 			watch: false,
 		}
 	}

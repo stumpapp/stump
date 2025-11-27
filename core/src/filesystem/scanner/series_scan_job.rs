@@ -10,7 +10,11 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
 	event,
-	filesystem::image::{ThumbnailGenerationJob, ThumbnailGenerationJobParams},
+	filesystem::image::{
+		PlaceholderGenerationJob, PlaceholderGenerationJobConfig,
+		PlaceholderGenerationJobScope, ThumbnailGenerationJob,
+		ThumbnailGenerationJobParams,
+	},
 	job::{
 		error::JobError, CoreJobOutput, Executor, JobExt, JobOutputExt, JobProgress,
 		JobTaskOutput, WorkerCtx, WorkerSendExt, WorkingState, WrappedJob,
@@ -219,22 +223,42 @@ impl JobExt for SeriesScanJob {
 			.as_ref()
 			.and_then(|o| o.thumbnail_config.clone());
 
+		let mut jobs: Vec<Box<dyn Executor>> = vec![];
+
 		match image_options {
 			Some(options) if did_create | did_update => {
 				tracing::trace!("Thumbnail generation job should be enqueued");
-				Ok(Some(vec![WrappedJob::new(ThumbnailGenerationJob {
+				jobs.push(WrappedJob::new(ThumbnailGenerationJob {
 					options,
 					params: ThumbnailGenerationJobParams::books_in_series(
 						self.id.clone(),
 						false,
 					),
-				})]))
+				}));
 			},
 			_ => {
 				tracing::trace!("No cleanup required for series scan job");
-				Ok(None)
 			},
 		}
+
+		let process_even_without_config = self
+			.config
+			.as_ref()
+			.map(|c| c.process_thumbnail_colors_even_without_config)
+			.unwrap_or(false);
+
+		if process_even_without_config {
+			tracing::trace!("Thumbnail color processing job should be enqueued");
+			jobs.push(
+				PlaceholderGenerationJob::new(PlaceholderGenerationJobConfig::new(
+					PlaceholderGenerationJobScope::BooksInLibrary(self.id.clone()),
+					false,
+				))
+				.wrapped(),
+			);
+		}
+
+		Ok((!jobs.is_empty()).then_some(jobs))
 	}
 
 	async fn execute_task(

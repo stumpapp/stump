@@ -302,6 +302,8 @@ export default function ThumbnailConfigForm() {
 					</>
 				)}
 
+				{/*TODO(thumb-placeholder): Add switch*/}
+
 				{!!ctx?.library && (
 					<div className="mt-4">
 						<Button

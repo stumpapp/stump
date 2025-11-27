@@ -234,7 +234,7 @@ input ComputedFilterReadingStatus @oneOf {
 "An event that is emitted by the core and consumed by a client"
 union CoreEvent = JobStarted | JobUpdate | JobOutput | DiscoveredMissingLibrary | CreatedMedia | CreatedManySeries | CreatedOrUpdatedManyMedia
 
-union CoreJobOutput = LibraryScanOutput | SeriesScanOutput | ThumbnailGenerationOutput | ExternalJobOutput
+union CoreJobOutput = LibraryScanOutput | SeriesScanOutput | ThumbnailGenerationOutput | PlaceholderGenerationOutput | ExternalJobOutput
 
 input CreateBookClubInput {
 	name: String!
@@ -789,6 +789,7 @@ type LibraryConfig {
 	processMetadata: Boolean!
 	watch: Boolean!
 	libraryPattern: LibraryPattern!
+	processThumbnailColorsEvenWithoutConfig: Boolean!
 	libraryId: String
 	thumbnailConfig: ImageProcessorOptions
 	ignoreRules: [String!]
@@ -803,6 +804,7 @@ input LibraryConfigInput {
 	watch: Boolean!
 	libraryPattern: LibraryPattern!
 	thumbnailConfig: ImageProcessorOptionsInput
+	processThumbnailColorsEvenWithoutConfig: Boolean!
 	defaultReadingDir: ReadingDirection!
 	defaultReadingMode: ReadingMode!
 	defaultReadingImageScaleFit: ReadingImageScaleFit!
@@ -1670,6 +1672,15 @@ input Pagination @oneOf {
 }
 
 union PaginationInfo = CursorPaginationInfo | OffsetPaginationInfo
+
+type PlaceholderGenerationOutput {
+	"The total number of entities that were visited"
+	visitedEntities: Int!
+	"The number of entities that were skipped (already had metadata or no thumbnail file)"
+	skippedEntities: Int!
+	"The number of placeholder metadata entries that were generated"
+	generatedMetadata: Int!
+}
 
 type Query {
 	apiKeys: [Apikey!]!

@@ -30,6 +30,8 @@ pub struct Model {
 	#[graphql(skip)]
 	#[sea_orm(column_type = "Json", nullable)]
 	pub thumbnail_config: Option<ImageProcessorOptions>,
+	#[sea_orm(default_value = "false")]
+	pub process_thumbnail_colors_even_without_config: bool,
 	#[sea_orm(column_type = "Json", nullable)]
 	#[graphql(skip)]
 	pub ignore_rules: Option<IgnoreRules>,

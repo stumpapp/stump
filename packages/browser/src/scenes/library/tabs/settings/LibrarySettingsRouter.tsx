@@ -55,6 +55,7 @@ export const LibrarySettingsConfig = graphql(`
 				quality
 				page
 			}
+			processThumbnailColorsEvenWithoutConfig
 			ignoreRules
 		}
 	}

@@ -6,6 +6,23 @@ pub struct Migration;
 #[async_trait::async_trait]
 impl MigrationTrait for Migration {
 	async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
+		// Add the preference for generating thumbnails even if no thumbnail config is set
+		manager
+			.alter_table(
+				Table::alter()
+					.table(Media::Table)
+					.add_column_if_not_exists(
+						ColumnDef::new(
+							LibraryConfig::ProcessThumbnailColorsEvenWithoutConfig,
+						)
+						.boolean()
+						.default(false)
+						.not_null(),
+					)
+					.to_owned(),
+			)
+			.await?;
+
 		manager
 			.alter_table(
 				Table::alter()
@@ -79,6 +96,15 @@ impl MigrationTrait for Migration {
 		manager
 			.alter_table(
 				Table::alter()
+					.table(LibraryConfig::Table)
+					.drop_column(LibraryConfig::ProcessThumbnailColorsEvenWithoutConfig)
+					.to_owned(),
+			)
+			.await?;
+
+		manager
+			.alter_table(
+				Table::alter()
 					.table(Media::Table)
 					.drop_column(Media::ThumbnailPath)
 					.drop_column(Media::ThumbnailMeta)
@@ -108,6 +134,13 @@ impl MigrationTrait for Migration {
 
 		Ok(())
 	}
+}
+
+#[derive(DeriveIden)]
+enum LibraryConfig {
+	#[sea_orm(iden = "library_configs")]
+	Table,
+	ProcessThumbnailColorsEvenWithoutConfig,
 }
 
 #[derive(DeriveIden)]

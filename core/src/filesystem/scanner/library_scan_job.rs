@@ -16,7 +16,11 @@ use serde::{Deserialize, Serialize};
 use crate::{
 	event,
 	filesystem::{
-		image::{ThumbnailGenerationJob, ThumbnailGenerationJobParams},
+		image::{
+			PlaceholderGenerationJob, PlaceholderGenerationJobConfig,
+			PlaceholderGenerationJobScope, ThumbnailGenerationJob,
+			ThumbnailGenerationJobParams,
+		},
 		scanner::utils::safely_insert_series,
 	},
 	job::{
@@ -257,8 +261,6 @@ impl JobExt for LibraryScanJob {
 
 		let mut jobs: Vec<Box<dyn Executor>> = vec![];
 
-		// TODO(thumb-placeholder): Add placeholder generation job here as well if config on
-
 		match image_options {
 			Some(options) if did_create | did_update => {
 				tracing::trace!("Thumbnail generation job should be enqueued");
@@ -273,6 +275,23 @@ impl JobExt for LibraryScanJob {
 			_ => {
 				tracing::debug!("No cleanup required for library scan job");
 			},
+		}
+
+		let process_even_without_config = self
+			.config
+			.as_ref()
+			.map(|c| c.process_thumbnail_colors_even_without_config)
+			.unwrap_or(false);
+
+		if process_even_without_config {
+			tracing::trace!("Thumbnail color processing job should be enqueued");
+			jobs.push(
+				PlaceholderGenerationJob::new(PlaceholderGenerationJobConfig::new(
+					PlaceholderGenerationJobScope::BooksInLibrary(self.id.clone()),
+					false,
+				))
+				.wrapped(),
+			);
 		}
 
 		Ok((!jobs.is_empty()).then_some(jobs))

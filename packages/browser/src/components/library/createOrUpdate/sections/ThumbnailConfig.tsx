@@ -19,6 +19,7 @@ import { match } from 'ts-pattern'
 import { useLibraryManagementSafe } from '@/scenes/library/tabs/settings/context'
 
 import { CreateOrUpdateLibrarySchema, intoFormThumbnailConfig } from '../schema'
+import GenerateThumbnailColorsSwitch from './GenerateThumbnailColorsSwitch'
 
 type Option =
 	| NonNullable<CreateOrUpdateLibrarySchema['thumbnailConfig']['resizeMethod']>['mode']
@@ -302,7 +303,7 @@ export default function ThumbnailConfigForm() {
 					</>
 				)}
 
-				{/*TODO(thumb-placeholder): Add switch*/}
+				<GenerateThumbnailColorsSwitch />
 
 				{!!ctx?.library && (
 					<div className="mt-4">

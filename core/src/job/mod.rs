@@ -258,7 +258,7 @@ pub trait JobExt: Send + Sync + Sized + Clone + 'static {
 		&self,
 		_: &WorkerCtx,
 		_: &Self::Output,
-	) -> Result<Option<Box<dyn Executor>>, JobError> {
+	) -> Result<Option<Vec<Box<dyn Executor>>>, JobError> {
 		Ok(None)
 	}
 
@@ -326,7 +326,7 @@ impl<J: JobExt> WrappedJob<J> {
 pub struct ExecutorOutput {
 	pub output: Option<serde_json::Value>,
 	pub logs: Vec<JobExecuteLog>,
-	pub next_job: Option<Box<dyn Executor>>,
+	pub next_jobs: Option<Vec<Box<dyn Executor>>>,
 }
 
 impl Debug for ExecutorOutput {
@@ -334,7 +334,12 @@ impl Debug for ExecutorOutput {
 		f.debug_struct("ExecutorOutput")
 			.field("output", &self.output)
 			.field("logs", &self.logs)
-			.field("next_job", &self.next_job.as_ref().map(|j| j.name()))
+			.field(
+				"next_jobs",
+				&self.next_jobs.as_ref().map(|jobs| {
+					jobs.iter().map(|j| j.name()).collect::<Vec<&'static str>>()
+				}),
+			)
 			.finish()
 	}
 }
@@ -603,10 +608,11 @@ impl<J: JobExt> Executor for WrappedJob<J> {
 					return Ok(ExecutorOutput {
 						output: working_output.into_json(),
 						logs,
-						next_job: None,
+						next_jobs: None,
 					});
 				},
 			};
+
 			let JobTaskOutput {
 				output: task_output,
 				logs: task_logs,
@@ -657,8 +663,8 @@ impl<J: JobExt> Executor for WrappedJob<J> {
 
 		let logs_count = logs.len();
 		tracing::debug!(?logs_count, "All tasks completed");
-		let next_job = match job.cleanup(&ctx, &working_output).await {
-			Ok(next_job) => next_job,
+		let next_jobs = match job.cleanup(&ctx, &working_output).await {
+			Ok(jobs) => jobs,
 			Err(e) => {
 				tracing::error!(?e, "Cleanup failed");
 				logs.push(JobExecuteLog::error(format!(
@@ -680,7 +686,7 @@ impl<J: JobExt> Executor for WrappedJob<J> {
 		Ok(ExecutorOutput {
 			output: working_output.into_json(),
 			logs,
-			next_job,
+			next_jobs,
 		})
 	}
 }

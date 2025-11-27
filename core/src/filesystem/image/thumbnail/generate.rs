@@ -588,7 +588,7 @@ async fn generate_series_placeholder(
 	};
 
 	let path = PathBuf::from(thumbnail_path);
-	if !fs::metadata(&path).await.is_ok() {
+	if fs::metadata(&path).await.is_err() {
 		return Err(ThumbnailGenerateError::NothingToGenerate);
 	}
 
@@ -632,7 +632,7 @@ async fn generate_library_placeholder(
 	};
 
 	let path = PathBuf::from(thumbnail_path);
-	if !fs::metadata(&path).await.is_ok() {
+	if fs::metadata(&path).await.is_err() {
 		return Err(ThumbnailGenerateError::NothingToGenerate);
 	}
 

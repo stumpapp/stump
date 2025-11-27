@@ -238,7 +238,7 @@ impl JobExt for LibraryScanJob {
 		&self,
 		ctx: &WorkerCtx,
 		output: &Self::Output,
-	) -> Result<Option<Box<dyn Executor>>, JobError> {
+	) -> Result<Option<Vec<Box<dyn Executor>>>, JobError> {
 		ctx.send_core_event(CoreEvent::JobOutput(event::JobOutput {
 			id: ctx.job_id.clone(),
 			output: CoreJobOutput::LibraryScan(output.clone()),
@@ -255,22 +255,27 @@ impl JobExt for LibraryScanJob {
 			tracing::error!(error = ?error, "Failed to handle scan completion");
 		}
 
+		let mut jobs: Vec<Box<dyn Executor>> = vec![];
+
+		// TODO(thumb-placeholder): Add placeholder generation job here as well if config on
+
 		match image_options {
 			Some(options) if did_create | did_update => {
 				tracing::trace!("Thumbnail generation job should be enqueued");
-				Ok(Some(WrappedJob::new(ThumbnailGenerationJob {
+				jobs.push(WrappedJob::new(ThumbnailGenerationJob {
 					options,
 					params: ThumbnailGenerationJobParams::books_in_library(
 						self.id.clone(),
 						false,
 					),
-				})))
+				}));
 			},
 			_ => {
 				tracing::debug!("No cleanup required for library scan job");
-				Ok(None)
 			},
 		}
+
+		Ok((!jobs.is_empty()).then_some(jobs))
 	}
 
 	async fn execute_task(

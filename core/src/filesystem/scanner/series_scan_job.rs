@@ -207,7 +207,7 @@ impl JobExt for SeriesScanJob {
 		&self,
 		ctx: &WorkerCtx,
 		output: &Self::Output,
-	) -> Result<Option<Box<dyn Executor>>, JobError> {
+	) -> Result<Option<Vec<Box<dyn Executor>>>, JobError> {
 		ctx.send_core_event(CoreEvent::JobOutput(event::JobOutput {
 			id: ctx.job_id.clone(),
 			output: CoreJobOutput::SeriesScan(output.clone()),
@@ -222,13 +222,13 @@ impl JobExt for SeriesScanJob {
 		match image_options {
 			Some(options) if did_create | did_update => {
 				tracing::trace!("Thumbnail generation job should be enqueued");
-				Ok(Some(WrappedJob::new(ThumbnailGenerationJob {
+				Ok(Some(vec![WrappedJob::new(ThumbnailGenerationJob {
 					options,
 					params: ThumbnailGenerationJobParams::books_in_series(
 						self.id.clone(),
 						false,
 					),
-				})))
+				})]))
 			},
 			_ => {
 				tracing::trace!("No cleanup required for series scan job");

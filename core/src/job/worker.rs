@@ -412,13 +412,15 @@ impl WorkerManager {
 								Ok(mut output) => {
 									tracing::info!("Job completed successfully!");
 									finalizer_ctx.report_progress(JobProgress::finished());
-									let next_job = output.next_job.take();
+									let next_jobs = output.next_jobs.take();
 									let result = returned_executor
 											.persist_output(finalizer_ctx.clone(), output, elapsed)
 											.await;
 									tracing::trace!(?result, "Output persisted?");
-									if let Some(next_job) = next_job {
-										finalizer_ctx.send_manager_command(JobControllerCommand::EnqueueJob(next_job));
+									if let Some(jobs) = next_jobs {
+										for next_job in jobs.into_iter() {
+											finalizer_ctx.send_manager_command(JobControllerCommand::EnqueueJob(next_job));
+										}
 									}
 								},
 								Err(error) => {

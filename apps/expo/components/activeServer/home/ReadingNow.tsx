@@ -12,7 +12,7 @@ import { scheduleOnRN } from 'react-native-worklets'
 import { stripHtml } from 'string-strip-html'
 
 import { BookMetaLink } from '~/components/book'
-import { ThumbnailImage } from '~/components/Image'
+import { ThumbnailImage } from '~/components/image'
 import { Heading, Progress, Text } from '~/components/ui'
 import { COLORS, useColors } from '~/lib/constants'
 import { parseGraphQLDecimal } from '~/lib/format'

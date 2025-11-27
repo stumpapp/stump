@@ -2,12 +2,8 @@ import { Platform, StyleProp, ViewStyle } from 'react-native'
 import LinearGradient from 'react-native-linear-gradient'
 import TImage, { type TurboImageProps } from 'react-native-turbo-image'
 
-import { BorderAndShadow, BorderAndShadowStyle } from './BorderAndShadow'
+import { BorderAndShadow, BorderAndShadowStyle } from '../BorderAndShadow'
 import { ThumbnailPlaceholder, ThumbnailPlaceholderData } from './ThumbnailPlaceholder'
-
-export const TurboImage = ({ source, style, ...props }: TurboImageProps) => {
-	return <TImage source={source} cachePolicy="dataCache" style={style} {...props} />
-}
 
 type ThumbnailImageProps = {
 	size: { height: number; width: number }

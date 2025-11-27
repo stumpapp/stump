@@ -11,7 +11,7 @@ import { formatBytesSeparate } from '~/lib/format'
 import { useListItemSize } from '~/lib/hooks'
 import { useSelectionStore } from '~/stores/selection'
 
-import { ThumbnailImage } from '../Image'
+import { ThumbnailImage } from '../image'
 import { Heading, Progress, Text } from '../ui'
 import { Icon } from '../ui/icon'
 import { SyncIcon } from './sync-icon/SyncIcon'

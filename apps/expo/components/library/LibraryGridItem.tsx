@@ -9,7 +9,7 @@ import { usePreferencesStore } from '~/stores'
 
 import { useActiveServer } from '../activeServer'
 import { useGridItemSize } from '../grid/useGridItemSize'
-import { ThumbnailImage } from '../Image'
+import { ThumbnailImage } from '../image'
 import { Text } from '../ui'
 
 const fragment = graphql(`

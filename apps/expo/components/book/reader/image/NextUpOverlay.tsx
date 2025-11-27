@@ -11,7 +11,7 @@ import Animated, {
 } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { ThumbnailImage } from '~/components/Image'
+import { ThumbnailImage } from '~/components/image'
 import { Button, Heading, Icon, Label, Text } from '~/components/ui'
 import { COLORS } from '~/lib/constants'
 import { useDisplay } from '~/lib/hooks'

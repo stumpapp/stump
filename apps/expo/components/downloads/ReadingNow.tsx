@@ -10,7 +10,7 @@ import Carousel, { ICarouselInstance, Pagination } from 'react-native-reanimated
 import { scheduleOnRN } from 'react-native-worklets'
 import { stripHtml } from 'string-strip-html'
 
-import { ThumbnailImage } from '~/components/Image'
+import { ThumbnailImage } from '~/components/image'
 import { Heading, Progress, Text } from '~/components/ui'
 import { imageMeta, syncStatus } from '~/db'
 import { COLORS, useColors } from '~/lib/constants'

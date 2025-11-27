@@ -13,7 +13,7 @@ import { useSharedValue } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Success } from 'react-native-turbo-image'
 
-import { TurboImage } from '~/components/Image'
+import { TurboImage } from '~/components/image'
 import { useDisplay, usePrevious } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 import { useReaderStore } from '~/stores'

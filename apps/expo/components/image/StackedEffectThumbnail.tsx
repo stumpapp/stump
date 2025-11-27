@@ -9,8 +9,8 @@ import { match } from 'ts-pattern'
 import { useDisplay } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 
-import { TurboImage } from './Image'
-import { Text } from './ui'
+import { Text } from '../ui'
+import { TurboImage } from './TurboImage'
 
 type Props = {
 	label?: string

@@ -15,7 +15,7 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import TImage from 'react-native-turbo-image'
 
-import { TurboImage } from '~/components/Image'
+import { TurboImage } from '~/components/image'
 import { Progress, Text } from '~/components/ui'
 import { useDisplay, usePrevious } from '~/lib/hooks'
 import { cn } from '~/lib/utils'

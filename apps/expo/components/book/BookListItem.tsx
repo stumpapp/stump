@@ -7,7 +7,7 @@ import { Pressable, View } from 'react-native'
 import { useListItemSize } from '~/lib/hooks'
 
 import { useActiveServer } from '../activeServer'
-import { ThumbnailImage } from '../Image'
+import { ThumbnailImage } from '../image'
 import { Text } from '../ui'
 
 const fragment = graphql(`

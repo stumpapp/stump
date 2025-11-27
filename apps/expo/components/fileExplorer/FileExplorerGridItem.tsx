@@ -8,7 +8,7 @@ import { useColorScheme } from '~/lib/useColorScheme'
 import { usePreferencesStore } from '~/stores'
 
 import { useActiveServer } from '../activeServer'
-import { ThumbnailImage, TurboImage } from '../Image'
+import { ThumbnailImage, TurboImage } from '../image'
 import { Text } from '../ui'
 import { useFileExplorerAssets } from './FileExplorerAssetsContext'
 

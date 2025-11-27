@@ -11,7 +11,7 @@ import { cn } from '~/lib/utils'
 import { usePreferencesStore } from '~/stores'
 
 import { useActiveServer } from '../activeServer'
-import { ThumbnailImage } from '../Image'
+import { ThumbnailImage } from '../image'
 import { Text } from '../ui'
 import EmptyFeed from './EmptyFeed'
 import { FeedComponentOptions } from './types'

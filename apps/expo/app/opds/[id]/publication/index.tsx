@@ -8,7 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { useActiveServer } from '~/components/activeServer'
 import { InfoRow, InfoSection } from '~/components/book/overview'
 import ChevronBackLink from '~/components/ChevronBackLink'
-import { ThumbnailImage } from '~/components/Image'
+import { ThumbnailImage } from '~/components/image'
 import {
 	getDateField,
 	getNumberField,

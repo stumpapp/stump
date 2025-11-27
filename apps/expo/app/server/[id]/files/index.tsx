@@ -7,7 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { useActiveServer } from '~/components/activeServer'
 import { useFileExplorerAssets } from '~/components/fileExplorer/FileExplorerAssetsContext'
-import { TurboImage } from '~/components/Image'
+import { TurboImage } from '~/components/image'
 import { Text } from '~/components/ui'
 import { useDisplay } from '~/lib/hooks'
 import { useColorScheme } from '~/lib/useColorScheme'

@@ -5,7 +5,7 @@ import { Pressable, View } from 'react-native'
 import { DownloadedFile, imageMeta } from '~/db'
 import { useListItemSize } from '~/lib/hooks'
 
-import { ThumbnailImage } from '../Image'
+import { ThumbnailImage } from '../image'
 import { Text } from '../ui'
 import { getThumbnailPath } from './utils'
 

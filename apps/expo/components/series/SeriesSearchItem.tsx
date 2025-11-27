@@ -7,7 +7,7 @@ import { useDisplay } from '~/lib/hooks'
 import { usePreferencesStore } from '~/stores'
 
 import { useActiveServer } from '../activeServer'
-import { ThumbnailImage } from '../Image'
+import { ThumbnailImage } from '../image'
 import { Text } from '../ui'
 
 const fragment = graphql(`

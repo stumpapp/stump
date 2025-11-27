@@ -5,7 +5,7 @@ import { Pressable, ScrollView } from 'react-native-gesture-handler'
 import PagerView from 'react-native-pager-view'
 import { stripHtml } from 'string-strip-html'
 
-import { ThumbnailImage } from '~/components/Image'
+import { ThumbnailImage } from '~/components/image'
 import { Heading, Text } from '~/components/ui'
 import { cn } from '~/lib/utils'
 import { usePreferencesStore } from '~/stores'

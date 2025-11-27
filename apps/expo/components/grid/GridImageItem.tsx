@@ -5,7 +5,7 @@ import { Pressable, View } from 'react-native'
 import { cn } from '~/lib/utils'
 import { usePreferencesStore } from '~/stores'
 
-import { ThumbnailImage } from '../Image'
+import { ThumbnailImage } from '../image'
 import { ThumbnailPlaceholderData } from '../ThumbnailPlaceholder'
 import { Text } from '../ui'
 import { useGridItemSize } from './useGridItemSize'

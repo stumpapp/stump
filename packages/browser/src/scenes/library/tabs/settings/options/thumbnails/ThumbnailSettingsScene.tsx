@@ -25,11 +25,18 @@ export default function ThumbnailSettingsScene() {
 	})
 
 	const handleSubmit = useCallback(
-		({ thumbnailConfig }: Pick<CreateOrUpdateLibrarySchema, 'thumbnailConfig'>) => {
+		({
+			thumbnailConfig,
+			processThumbnailColorsEvenWithoutConfig,
+		}: Pick<
+			CreateOrUpdateLibrarySchema,
+			'thumbnailConfig' | 'processThumbnailColorsEvenWithoutConfig'
+		>) => {
 			patch({
 				config: {
 					...library.config,
 					thumbnailConfig: intoThumbnailConfig(thumbnailConfig),
+					processThumbnailColorsEvenWithoutConfig,
 				},
 				scanAfterPersist: false,
 			})

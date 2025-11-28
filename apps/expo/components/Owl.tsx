@@ -7,7 +7,7 @@ import { Image, Platform, useWindowDimensions } from 'react-native'
 
 import { useColorScheme } from '~/lib/useColorScheme'
 
-import { TurboImage } from './Image'
+import { TurboImage } from './image'
 
 type Props = {
 	owl: OwlType

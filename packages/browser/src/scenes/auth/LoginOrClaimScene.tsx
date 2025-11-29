@@ -14,6 +14,8 @@ import { z } from 'zod'
 
 import { useAppStore, useUserStore } from '@/stores'
 
+// TODO(oidc): Disable password auth form if OIDC config disables it via STUMP_OIDC_DISABLE_LOCAL_AUTH
+
 // TODO: redirect away if the user is already logged in
 export default function LoginOrClaimScene() {
 	const navigate = useNavigate()

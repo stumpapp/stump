@@ -213,7 +213,7 @@ async fn callback(
 
 	let (user_model, is_new_user) = if let Some(user) = existing_user {
 		tracing::debug!(user_id = %user.id, "Existing OIDC user logging in");
-		// TODO: Update avatar_url if it changed from the provider? Idk if that would be desired behavior
+		// TODO(oidc): Update avatar_url if it changed from the provider? Idk if that would be desired behavior
 		(user, false)
 	} else {
 		let allow_registration = config
@@ -332,7 +332,7 @@ async fn link_account(
 	State(_ctx): State<AppState>,
 	Json(_payload): Json<()>,
 ) -> APIResult<Json<AuthUser>> {
-	// TODO: Would this be desirable?
+	// TODO(oidc): Would this be desirable?
 	Err(APIError::NotImplemented)
 }
 

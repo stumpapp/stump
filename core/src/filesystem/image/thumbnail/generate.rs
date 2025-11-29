@@ -8,7 +8,10 @@ use models::{
 		image_processor_options::{ImageProcessorOptions, SupportedImageFormat},
 	},
 };
-use sea_orm::{prelude::*, EntityTrait, QueryFilter, QueryOrder, QuerySelect};
+use sea_orm::{
+	prelude::*, sea_query::Query, EntityTrait, Order, QueryFilter, QueryOrder,
+	QuerySelect,
+};
 use tokio::{fs, sync::oneshot, task::spawn_blocking};
 
 use crate::{
@@ -568,11 +571,40 @@ pub async fn generate_book_placeholder(
 	Ok(())
 }
 
+async fn get_series_thumbnail_candidate(
+	series: &series::SeriesThumbSelect,
+	ctx: &WorkerCtx,
+) -> Result<Option<Vec<u8>>, ThumbnailGenerateError> {
+	let Some(first_book) = media::Entity::find()
+		.filter(media::Column::SeriesId.eq(series.id.clone()))
+		.order_by_asc(media::Column::Name)
+		.into_model::<media::MediaThumbSelect>()
+		.one(ctx.conn.as_ref())
+		.await?
+	else {
+		tracing::warn!(series_id = %series.id, "No books found in series");
+		return Err(ThumbnailGenerateError::NothingToGenerate);
+	};
+
+	let image_data = match &first_book.thumbnail_path {
+		Some(thumbnail_path) if fs::metadata(&thumbnail_path).await.is_ok() => {
+			let path = PathBuf::from(thumbnail_path);
+			fs::read(&path).await?
+		},
+		_ => {
+			let (_, data) = get_page_async(&first_book.path, 1, &ctx.config).await?;
+			data
+		},
+	};
+
+	Ok(Some(image_data))
+}
+
 /// Generate placeholder metadata for a series's existing thumbnail
 #[tracing::instrument(skip_all)]
 async fn generate_series_placeholder(
 	series: &series::SeriesThumbSelect,
-	conn: &DatabaseConnection,
+	ctx: &WorkerCtx,
 	force_regen: bool,
 ) -> Result<(), ThumbnailGenerateError> {
 	// Skip if metadata exists and not forcing regeneration
@@ -580,19 +612,21 @@ async fn generate_series_placeholder(
 		return Ok(());
 	}
 
-	// TODO(thumb-placeholders): The fallback logic for series/library will need to be more robust than books,
-	// we'll have to pull from the first book's thumbnail if it exists, etc. I'll likely need to port the logic from
-	// the server into core for this, e.g. load library > first series > first book > pull page
-	let Some(thumbnail_path) = &series.thumbnail_path else {
-		return Err(ThumbnailGenerateError::NothingToGenerate);
+	let image_data = match &series.thumbnail_path {
+		Some(thumbnail_path) if fs::metadata(&thumbnail_path).await.is_ok() => {
+			let path = PathBuf::from(thumbnail_path);
+			fs::read(&path).await?
+		},
+		_ => {
+			tracing::debug!(series_id = %series.id, "Pulling thumbnail candidate from first book in series");
+			let Some(data) = get_series_thumbnail_candidate(series, ctx).await? else {
+				return Err(ThumbnailGenerateError::NothingToGenerate);
+			};
+			data
+		},
 	};
 
-	let path = PathBuf::from(thumbnail_path);
-	if fs::metadata(&path).await.is_err() {
-		return Err(ThumbnailGenerateError::NothingToGenerate);
-	}
-
-	let thumbnail_metadata = match generate_image_metadata(&path).await {
+	let thumbnail_metadata = match generate_image_metadata_from_bytes(image_data).await {
 		Ok(metadata) => Some(metadata),
 		Err(e) => {
 			tracing::error!(error = ?e, "Failed to generate thumbnail metadata");
@@ -606,17 +640,59 @@ async fn generate_series_placeholder(
 			series::Column::ThumbnailMeta,
 			Expr::value(thumbnail_metadata),
 		)
-		.exec(conn)
+		.exec(ctx.conn.as_ref())
 		.await?;
 
 	Ok(())
+}
+
+async fn get_library_thumbnail_candidate(
+	library: &library::LibraryThumbSelect,
+	ctx: &WorkerCtx,
+) -> Result<Option<Vec<u8>>, ThumbnailGenerateError> {
+	let first_book = media::Entity::find()
+		.filter(
+			media::Column::SeriesId.in_subquery(
+				Query::select()
+					.column(series::Column::Id)
+					.from(series::Entity)
+					.and_where(
+						Expr::col(series::Column::LibraryId).eq(library.id.clone()),
+					)
+					.order_by(series::Column::Name, Order::Asc)
+					.limit(1)
+					.to_owned(),
+			),
+		)
+		.order_by_asc(media::Column::Name)
+		.into_model::<media::MediaThumbSelect>()
+		.one(ctx.conn.as_ref())
+		.await?;
+
+	let Some(book) = first_book else {
+		tracing::warn!(library_id = %library.id, "No books found in library");
+		return Err(ThumbnailGenerateError::NothingToGenerate);
+	};
+
+	let image_data = match &book.thumbnail_path {
+		Some(thumbnail_path) if fs::metadata(&thumbnail_path).await.is_ok() => {
+			let path = PathBuf::from(thumbnail_path);
+			fs::read(&path).await?
+		},
+		_ => {
+			let (_, data) = get_page_async(&book.path, 1, &ctx.config).await?;
+			data
+		},
+	};
+
+	Ok(Some(image_data))
 }
 
 /// Generate placeholder metadata for a library's existing thumbnail
 #[tracing::instrument(skip_all)]
 async fn generate_library_placeholder(
 	library: &library::LibraryThumbSelect,
-	conn: &DatabaseConnection,
+	ctx: &WorkerCtx,
 	force_regen: bool,
 ) -> Result<(), ThumbnailGenerateError> {
 	// Skip if metadata exists and not forcing regeneration
@@ -624,19 +700,21 @@ async fn generate_library_placeholder(
 		return Ok(());
 	}
 
-	// TODO(thumb-placeholders): The fallback logic for series/library will need to be more robust than books,
-	// we'll have to pull from the first book's thumbnail if it exists, etc. I'll likely need to port the logic from
-	// the server into core for this, e.g. load library > first series > first book > pull page
-	let Some(thumbnail_path) = &library.thumbnail_path else {
-		return Err(ThumbnailGenerateError::NothingToGenerate);
+	let image_data = match &library.thumbnail_path {
+		Some(thumbnail_path) if fs::metadata(&thumbnail_path).await.is_ok() => {
+			let path = PathBuf::from(thumbnail_path);
+			fs::read(&path).await?
+		},
+		_ => {
+			tracing::debug!(library_id = %library.id, "Pulling thumbnail candidate from first book in library");
+			let Some(data) = get_library_thumbnail_candidate(library, ctx).await? else {
+				return Err(ThumbnailGenerateError::NothingToGenerate);
+			};
+			data
+		},
 	};
 
-	let path = PathBuf::from(thumbnail_path);
-	if fs::metadata(&path).await.is_err() {
-		return Err(ThumbnailGenerateError::NothingToGenerate);
-	}
-
-	let thumbnail_metadata = match generate_image_metadata(&path).await {
+	let thumbnail_metadata = match generate_image_metadata_from_bytes(image_data).await {
 		Ok(metadata) => Some(metadata),
 		Err(e) => {
 			tracing::error!(error = ?e, "Failed to generate thumbnail metadata");
@@ -650,7 +728,7 @@ async fn generate_library_placeholder(
 			library::Column::ThumbnailMeta,
 			Expr::value(thumbnail_metadata),
 		)
-		.exec(conn)
+		.exec(ctx.conn.as_ref())
 		.await?;
 
 	Ok(())
@@ -697,20 +775,10 @@ pub async fn safely_generate_placeholder_batch(
 						generate_book_placeholder(book, ctx, force_regen).await
 					},
 					GenerateImageSource::Series(series) => {
-						generate_series_placeholder(
-							series,
-							ctx.conn.as_ref(),
-							force_regen,
-						)
-						.await
+						generate_series_placeholder(series, ctx, force_regen).await
 					},
 					GenerateImageSource::Library(library) => {
-						generate_library_placeholder(
-							library,
-							ctx.conn.as_ref(),
-							force_regen,
-						)
-						.await
+						generate_library_placeholder(library, ctx, force_regen).await
 					},
 				};
 

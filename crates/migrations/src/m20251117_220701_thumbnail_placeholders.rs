@@ -10,7 +10,7 @@ impl MigrationTrait for Migration {
 		manager
 			.alter_table(
 				Table::alter()
-					.table(Media::Table)
+					.table(LibraryConfig::Table)
 					.add_column_if_not_exists(
 						ColumnDef::new(
 							LibraryConfig::ProcessThumbnailColorsEvenWithoutConfig,

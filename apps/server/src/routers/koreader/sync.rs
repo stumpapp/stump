@@ -294,6 +294,10 @@ async fn put_progress(
 			device_id: Set(Some(device_id.clone())),
 			percentage_completed: Set(Decimal::try_from(percentage).ok()),
 			koreader_progress: Set(Some(progress.clone())),
+			started_at: Set(existing_active_session
+				.as_ref()
+				.map(|s| s.started_at)
+				.unwrap_or_else(|| chrono::Utc::now().into())),
 			..Default::default()
 		};
 

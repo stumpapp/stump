@@ -187,6 +187,7 @@ impl JobExt for ThumbnailGenerationJob {
 				let series = series::Entity::find()
 					.select_only()
 					.columns(series::SeriesThumbSelect::columns())
+					.filter(series::Column::Id.is_in(series_ids.clone()))
 					.into_model::<series::SeriesThumbSelect>()
 					.all(ctx.conn.as_ref())
 					.await

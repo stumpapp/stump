@@ -45,7 +45,7 @@ impl PlaceholderGenerationJobConfig {
 	}
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct PlaceholderGenerationInit {
 	pub media_ids: Vec<Id>,
 	pub series_ids: Vec<Id>,
@@ -134,6 +134,7 @@ impl JobExt for PlaceholderGenerationJob {
 				let series = series::Entity::find()
 					.select_only()
 					.columns(series::SeriesThumbSelect::columns())
+					.filter(series::Column::Id.is_in(series_ids.clone()))
 					.into_model::<series::SeriesThumbSelect>()
 					.all(ctx.conn.as_ref())
 					.await
@@ -192,6 +193,8 @@ impl JobExt for PlaceholderGenerationJob {
 				}
 			},
 		};
+
+		tracing::trace!(?init_config, scope = ?self.config.scope, "Determined initial config");
 
 		let tasks = chain_optional_iter(
 			[],

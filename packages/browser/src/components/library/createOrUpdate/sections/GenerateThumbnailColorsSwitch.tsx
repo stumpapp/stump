@@ -21,7 +21,7 @@ export default function GenerateThumbnailColorsSwitch() {
 	return (
 		<div className="py-4">
 			<WideSwitch
-				label="Thumbnail color processing"
+				label="Thumbnail placeholder colors"
 				description="Extract dominant colors for thumbnails even if no thumbnail configuration is set"
 				checked={enabled}
 				disabled={thumbnailsEnabled}

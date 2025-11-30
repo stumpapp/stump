@@ -238,7 +238,7 @@ impl JobExt for PlaceholderGenerationJob {
 
 				let task_count = media.len() as i32;
 				ctx.report_progress(JobProgress::subtask_position_msg(
-					"Generating book placeholder metadata",
+					"Extracting thumbnail placeholder colors",
 					1,
 					task_count,
 				));

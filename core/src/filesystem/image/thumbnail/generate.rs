@@ -751,7 +751,7 @@ pub async fn safely_generate_placeholder_batch(
 	tracing::debug!(
 		batch_size,
 		total_sources,
-		"Processing placeholder metadata in batches"
+		"Processing placeholder colors in batches"
 	);
 
 	let mut processed_count = 0;

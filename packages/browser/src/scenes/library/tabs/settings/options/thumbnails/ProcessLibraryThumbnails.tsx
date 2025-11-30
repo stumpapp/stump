@@ -27,10 +27,10 @@ export default function ProcessLibraryThumbnails() {
 	return (
 		<div className="flex flex-col gap-4">
 			<div>
-				<Label>Process thumbnails</Label>
+				<Label>Process thumbnail colors</Label>
 				<Text size="sm" variant="muted">
-					Either process missing thumbnails or force the reprocessing of all thumbnails. This
-					extracts the color data used for image placeholders
+					Extract missing thumbnail color metadata or force the regeneration of it for all
+					thumbnails. This extracts the color data used for image placeholders
 				</Text>
 			</div>
 
@@ -38,7 +38,7 @@ export default function ProcessLibraryThumbnails() {
 				<DropdownMenu
 					trigger={
 						<Button size="md" variant="outline">
-							Process thumbnails
+							Extract colors
 							<ChevronDown className="ml-2 h-4 w-4" />
 						</Button>
 					}

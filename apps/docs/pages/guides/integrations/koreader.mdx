@@ -67,8 +67,27 @@ The API key should have at least the `ACCESS_KOREADER_SYNC` permission:
    ```bash
    http(s)://your-server({port})(/{baseUrl})/koreader/{api_key}
    ```
+   
+### Register / Login
+
+KoReader requires you to login before it can sync progress. This is a bit unintuitive since you are using an API key, but the login step is necessary. You just need to enter any username and password (they are not validated).
+
+<Callout emoji="ℹ️">
+Stump does not currently support anything other than the API key authentication method. If you would like to see support for the username/password method, please open a feature request
+</Callout>
+
+   
+### Ensure binary hash is enabled in KoReader
+
+KoReader might default to using a filename-based matching strategy for identifying books with the server. Stump only supports the binary hash method, so you need to ensure that KoReader is set to use this method:
+
+1. Navigate to `Progress sync` > `Document matching method`
+2. Select `Binary`
+3. Attempt to push progress again (if needed) to verify
 
 </Steps>
+
+
 
 ## Troubleshooting
 

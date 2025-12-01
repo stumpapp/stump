@@ -233,6 +233,7 @@ async fn put_progress(
 		);
 		return Err(APIError::BadRequest("Invalid percentage".to_string()));
 	}
+	tracing::debug!(?percentage, book_hash = ?document, "Got PUT KoReader payload");
 
 	let book = media::Entity::find()
 		.filter(media::Column::KoreaderHash.eq(document.clone()))
@@ -240,7 +241,7 @@ async fn put_progress(
 		.await?
 		.ok_or_else(|| APIError::NotFound("Book not found".to_string()))?;
 
-	let is_completed = percentage == 1.0;
+	let is_completed = percentage >= 1.0;
 	let document_cpy = document.clone();
 
 	let tx = ctx.conn.as_ref().begin().await?;
@@ -294,6 +295,11 @@ async fn put_progress(
 			device_id: Set(Some(device_id.clone())),
 			percentage_completed: Set(Decimal::try_from(percentage).ok()),
 			koreader_progress: Set(Some(progress.clone())),
+			started_at: Set(existing_active_session
+				.as_ref()
+				.map(|s| s.started_at)
+				.unwrap_or_else(|| chrono::Utc::now().into())),
+			updated_at: Set(Some(chrono::Utc::now().into())),
 			..Default::default()
 		};
 
@@ -321,6 +327,9 @@ async fn put_progress(
 							reading_session::Column::Page
 								| reading_session::Column::Epubcfi
 								| reading_session::Column::DeviceId
+								| reading_session::Column::PercentageCompleted
+								| reading_session::Column::KoreaderProgress
+								| reading_session::Column::UpdatedAt
 						)
 					}))
 					.to_owned(),

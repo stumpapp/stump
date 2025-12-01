@@ -22,7 +22,7 @@ use crate::{
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
 		.merge(auth::mount(app_state.clone()))
-		.merge(oidc::mount(app_state.clone()))
+		.merge(oidc::mount())
 		.merge(media::mount(app_state.clone()))
 		.merge(series::mount(app_state.clone()))
 		.merge(library::mount(app_state))
@@ -48,7 +48,6 @@ async fn ping() -> APIResult<String> {
 	Ok("pong".to_string())
 }
 
-// TODO: Add docker-specific version info (e.g. tag) to this struct
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct StumpVersion {

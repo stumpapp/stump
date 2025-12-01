@@ -5,6 +5,8 @@ use serde::{Deserialize, Serialize};
 
 use super::env_keys::*;
 
+const REQUIRED_SCOPES: &str = "openid,email";
+
 /// Configuration for OpenID Connect (OIDC) authentication
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, SimpleObject)]
 #[graphql(name = "OidcConfig")]
@@ -80,6 +82,20 @@ impl OidcConfig {
 		}
 
 		let scopes = env::var(OIDC_SCOPES_KEY).unwrap_or_else(|_| default_oidc_scopes());
+
+		let mut scopes_set: Vec<String> = scopes
+			.split(',')
+			.map(|s| s.trim().to_string())
+			.filter(|s| !s.is_empty())
+			.collect();
+		// Ensure required scopes are included
+		for required_scope in REQUIRED_SCOPES.split(',') {
+			if !scopes_set.contains(&required_scope.to_string()) {
+				scopes_set.push(required_scope.to_string());
+			}
+		}
+		let scopes = scopes_set.join(",");
+
 		let allow_registration = env::var(OIDC_ALLOW_REGISTRATION_KEY)
 			.ok()
 			.and_then(|v| v.parse::<bool>().ok())

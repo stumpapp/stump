@@ -4,7 +4,91 @@ import { Callout, Steps, Tabs } from 'nextra/components'
 
 Stump supports OpenID Connect (OIDC) authentication, allowing users to sign in using external identity providers like Authentik, Keycloak, PocketID, and others.
 
-## Configuration
+## Provider Configuration
+
+This section provides general guidance for configuring popular OIDC providers to work with Stump. I cannot feasibly cover every provider, however the below examples should give you a good starting point.
+
+### Callback URL
+
+When configuring your OIDC provider, you will need to set the callback (redirect) URL to point to your Stump instance. The format is:
+
+`https://<your-stump-domain>/auth/oidc/callback`
+
+If needed, you may also specify the logout URL as:
+
+`https://<your-stump-domain>/api/v2/auth/logout`
+
+### Authentik
+
+1. In the Authentik admin interface, navigate to "Applications" and create a new application
+2. Set the "Redirect URIs" to the callback URL according to [above](#callback-url)
+3. Configure the scopes (required `openid` and `email`, optionally `profile`)
+4. Save the application and copy the client ID and secret for use in the [Stump configuration](#required-settings)
+
+#### Authentik YAML
+
+An example YAML configuration for Authentik is shown below (thanks to [@wolsen9](https://github.com/stumpapp/stump/issues/246#issuecomment-3597935738)):
+
+```yaml filename="authentik_oidc.yaml"
+identity_providers:
+  oidc:
+    # --------------------------------------------------------------------------
+    # Security Configuration
+    # --------------------------------------------------------------------------
+    # HMAC secret used for signing tokens (store as plain text, not hashed)
+    # Recommended to not store directly in YAML, this is just for example purposes
+    hmac_secret: 'supersecret1'
+    # --------------------------------------------------------------------------
+    # JSON Web Key Set (JWKS) Configuration
+    # --------------------------------------------------------------------------
+    jwks:
+      - algorithm: 'RS256'
+        use: 'sig'
+        # Private key in PEM DER format (store as plain text, not hashed)
+        # Replace with your actual RSA private key
+        # Recommended to not store directly in YAML, this is just for example purposes
+        key: '-----BEGIN RSA PRIVATE KEY-----'
+    # --------------------------------------------------------------------------
+    # Claims Policies
+    # --------------------------------------------------------------------------
+    # Describes how claims are mapped from the identity provider to Stump
+    claims_policies:
+      stump_policy:
+        id_token:
+          - 'email'
+          - 'name'
+    # --------------------------------------------------------------------------
+    # Token Lifespans
+    # --------------------------------------------------------------------------
+    lifespans:
+      access_token: '1 hour'
+      authorize_code: '1 minute'
+      id_token: '1 hour'
+      refresh_token: '90 minutes'
+    # --------------------------------------------------------------------------
+    # OAuth/OIDC Clients
+    # --------------------------------------------------------------------------
+    clients:
+      - client_id: 'Stump_OIDC' # Corresponds to STUMP_OIDC_CLIENT_ID
+        client_name: 'Stump'
+        # Client secret (stored hashed in the system)
+        # Recommended to not store directly in YAML, this is just for example purposes
+        client_secret: 'supersecret2' # Corresponds to STUMP_OIDC_CLIENT_SECRET
+        redirect_uris:
+          - 'https://stump.example.com/api/v2/auth/oidc/callback'
+        claims_policy: 'stump_policy'
+        consent_mode: 'implicit'
+```
+
+### PocketID
+
+1. In Pocket-ID create a new OIDC Client, name it, for example `Stump`
+2. Set the launch URL if you would like to route to Stump from your PocketID dashboard
+3. Set a logo for this OIDC Client if you would like to
+4. Set the callback URLs according to [above](#callback-url)
+5. Copy the Client ID and Client Secret for use in the [Stump configuration](#required-settings)
+
+## Stump Configuration
 
 OIDC is configured in the same manner as other Stump settings, through environment variables or the toml configuration file. See [server configuration](/guides/configuration/server-options) for more details.
 
@@ -36,7 +120,7 @@ services:
       STUMP_OIDC_ISSUER_URL: 'https://auth.example.com/application/o/stump/'
       STUMP_OIDC_CLIENT_ID: 'stump-client-id'
       STUMP_OIDC_CLIENT_SECRET: 'super-secret-value'
-      # Optional settings
+      # Optional settings (and their defaults)
       # STUMP_OIDC_SCOPES: 'openid,email,profile'
       # STUMP_OIDC_ALLOW_REGISTRATION: 'true'
       # STUMP_OIDC_DISABLE_LOCAL_AUTH: 'false'

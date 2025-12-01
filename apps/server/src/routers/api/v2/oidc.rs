@@ -1,15 +1,10 @@
 use axum::{
 	extract::{Query, State},
-	middleware,
 	response::Redirect,
-	routing::{get, post},
+	routing::get,
 	Json, Router,
 };
-use models::entity::{
-	server_config,
-	user::{self, AuthUser},
-	user_preferences,
-};
+use models::entity::{server_config, user, user_preferences};
 use sea_orm::{
 	ActiveModelTrait, ColumnTrait, EntityTrait, IntoActiveModel, PaginatorTrait,
 	QueryFilter, Set, TransactionTrait,
@@ -25,25 +20,17 @@ use crate::{
 		state::AppState,
 	},
 	errors::{APIError, APIResult},
-	middleware::{
-		auth::auth_middleware,
-		host::{HostDetails, HostExtractor},
-	},
+	middleware::host::{HostDetails, HostExtractor},
 	routers::enforce_max_sessions,
 };
 
-pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
+pub(crate) fn mount() -> Router<AppState> {
 	Router::new().nest(
 		"/auth/oidc",
 		Router::new()
 			.route("/config", get(get_oidc_config))
 			.route("/authorize", get(authorize))
-			.route("/callback", get(callback))
-			.route(
-				"/link",
-				post(link_account)
-					.layer(middleware::from_fn_with_state(app_state, auth_middleware)),
-			),
+			.route("/callback", get(callback)),
 	)
 }
 
@@ -213,7 +200,8 @@ async fn callback(
 
 	let (user_model, is_new_user) = if let Some(user) = existing_user {
 		tracing::debug!(user_id = %user.id, "Existing OIDC user logging in");
-		// TODO(oidc): Update avatar_url if it changed from the provider? Idk if that would be desired behavior
+		// TODO(oidc): Update avatar_url if it changed from the provider? Idk if that would be desired behavior. The problem
+		// could be if I update my avatar in Stump then it gets overwritten by the provider on next login. I would want to avoid that.
 		(user, false)
 	} else {
 		let allow_registration = config
@@ -325,15 +313,6 @@ async fn callback(
 		tracing::debug!(user_id = %user_model.id, "Created session for OIDC user");
 		Ok(OidcCallbackResponse::Redirect(Redirect::temporary("/")))
 	}
-}
-
-/// Link OIDC identity to existing logged-in user
-async fn link_account(
-	State(_ctx): State<AppState>,
-	Json(_payload): Json<()>,
-) -> APIResult<Json<AuthUser>> {
-	// TODO(oidc): Would this be desirable?
-	Err(APIError::NotImplemented)
 }
 
 /// Ensure username is unique by adding a suffix as needed

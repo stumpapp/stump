@@ -14,8 +14,6 @@ import { z } from 'zod'
 
 import { useAppStore, useUserStore } from '@/stores'
 
-// TODO(oidc): Disable password auth form if OIDC config disables it via STUMP_OIDC_DISABLE_LOCAL_AUTH
-
 // TODO: redirect away if the user is already logged in
 export default function LoginOrClaimScene() {
 	const navigate = useNavigate()
@@ -162,49 +160,55 @@ export default function LoginOrClaimScene() {
 							{ 'min-w-[20rem]': isClaimed },
 						)}
 					>
-						<Input
-							id="username"
-							label={t('authScene.form.labels.username')}
-							variant="primary"
-							autoComplete="username"
-							autoCapitalize="off"
-							autoFocus
-							fullWidth
-							{...form.register('username')}
-						/>
-
-						<Input
-							id="password"
-							label={t('authScene.form.labels.password')}
-							variant="primary"
-							type="password"
-							autoComplete="current-password"
-							fullWidth
-							{...form.register('password')}
-						/>
-
-						<Button
-							size="md"
-							type="submit"
-							variant={isClaimed ? 'primary' : 'secondary'}
-							isLoading={isLoggingIn || isRegistering}
-							className="mt-2"
-						>
-							{isClaimed
-								? t('authScene.form.buttons.login')
-								: t('authScene.form.buttons.createAccount')}
-						</Button>
-
-						{oidcConfig?.enabled && (
+						{!oidcConfig.disableLocalAuth && (
 							<>
-								<div className="relative my-4">
-									<div className="absolute inset-0 flex items-center">
-										<div className="w-full border-t border-edge" />
+								<Input
+									id="username"
+									label={t('authScene.form.labels.username')}
+									variant="primary"
+									autoComplete="username"
+									autoCapitalize="off"
+									autoFocus
+									fullWidth
+									{...form.register('username')}
+								/>
+
+								<Input
+									id="password"
+									label={t('authScene.form.labels.password')}
+									variant="primary"
+									type="password"
+									autoComplete="current-password"
+									fullWidth
+									{...form.register('password')}
+								/>
+
+								<Button
+									size="md"
+									type="submit"
+									variant={isClaimed ? 'primary' : 'secondary'}
+									isLoading={isLoggingIn || isRegistering}
+									className="mt-2"
+								>
+									{isClaimed
+										? t('authScene.form.buttons.login')
+										: t('authScene.form.buttons.createAccount')}
+								</Button>
+							</>
+						)}
+
+						{oidcConfig.enabled && (
+							<>
+								{!oidcConfig.disableLocalAuth && (
+									<div className="relative my-4">
+										<div className="absolute inset-0 flex items-center">
+											<div className="w-full border-t border-edge" />
+										</div>
+										<div className="relative flex justify-center text-xs uppercase">
+											<span className="bg-background px-2 text-foreground-muted">Or</span>
+										</div>
 									</div>
-									<div className="relative flex justify-center text-xs uppercase">
-										<span className="bg-background px-2 text-foreground-muted">Or</span>
-									</div>
-								</div>
+								)}
 
 								<Button
 									size="md"

@@ -6,6 +6,7 @@ import { Linking, useWindowDimensions, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 
 import EmptyState from '~/components/EmptyState'
+import { useOwlHeaderOffset } from '~/components/Owl'
 import DeleteServerConfirmation from '~/components/savedServer/DeleteServerConfirmation'
 import EditServerDialog from '~/components/savedServer/EditServerDialog'
 import SavedServerListItem from '~/components/savedServer/SavedServerListItem'
@@ -90,6 +91,7 @@ export default function Screen() {
 	)
 
 	const isCleanSlate = stumpServers.length === 0 && opdsServers.length === 0
+	const emptyContainerStyle = useOwlHeaderOffset()
 
 	return (
 		<Fragment>
@@ -128,6 +130,7 @@ export default function Screen() {
 							</Button>
 						</>
 					}
+					containerStyle={emptyContainerStyle}
 				/>
 			)}
 

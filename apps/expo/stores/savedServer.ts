@@ -278,3 +278,8 @@ export const useSavedServers = () => {
 		setDefaultServer,
 	}
 }
+
+export const useIsOboardingState = () => {
+	const savedServers = useSavedServerStore((state) => state.servers)
+	return savedServers.length === 0
+}

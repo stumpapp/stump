@@ -1,11 +1,15 @@
 import { View } from 'react-native'
 
-import Owl from '../Owl'
+import Owl, { useOwlHeaderOffset } from '../Owl'
 import { Heading, Text } from '../ui'
 
 export default function NoDownloadsOnDevice() {
+	const emptyContainerStyle = useOwlHeaderOffset()
 	return (
-		<View className="h-full flex-1 items-center justify-center gap-6 p-4">
+		<View
+			className="h-full flex-1 items-center justify-center gap-6 p-4"
+			style={emptyContainerStyle}
+		>
 			<Owl owl="empty" />
 
 			<View className="gap-2 px-4 tablet:max-w-lg">

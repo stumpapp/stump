@@ -10,11 +10,18 @@ type Props = {
 	message: string
 	actions?: React.ReactNode
 	extraActionGap?: boolean
+	containerStyle?: React.ComponentProps<typeof View>['style']
 }
 
-export default function EmptyState({ title, message, actions, extraActionGap }: Props) {
+export default function EmptyState({
+	title,
+	message,
+	actions,
+	extraActionGap,
+	containerStyle,
+}: Props) {
 	return (
-		<View className="h-full flex-1 items-center justify-between gap-6 p-4">
+		<View className="h-full flex-1 items-center justify-between gap-6 p-4" style={containerStyle}>
 			<View className="flex-1 items-center justify-center gap-6">
 				<Owl owl="empty" />
 

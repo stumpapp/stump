@@ -1,10 +1,12 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 
+import { useHeaderHeight } from '@react-navigation/elements'
 import * as Sentry from '@sentry/react-native'
 import { Asset, useAssets } from 'expo-asset'
 import { useEffect, useMemo } from 'react'
 import { Image, Platform, useWindowDimensions } from 'react-native'
 
+import { useDisplay } from '~/lib/hooks'
 import { useColorScheme } from '~/lib/useColorScheme'
 
 import { TurboImage } from './image'
@@ -16,7 +18,7 @@ type Props = {
 }
 
 export default function Owl({ owl, ...size }: Props) {
-	const { width } = useWindowDimensions()
+	const { width, height } = useWindowDimensions()
 	const { isDarkColorScheme } = useColorScheme()
 
 	const [assets, error] = useAssets(OWL_REQUIRES)
@@ -32,6 +34,8 @@ export default function Owl({ owl, ...size }: Props) {
 		}
 	}, [error])
 
+	const defaultStyle = useMemo(() => defaultSize(width, height), [width, height])
+
 	if (!assets) {
 		return null
 	}
@@ -40,7 +44,7 @@ export default function Owl({ owl, ...size }: Props) {
 	if (Platform.OS === 'android') {
 		return (
 			// @ts-expect-error: It's fine
-			<Image source={resolvedOwl} resizeMode="contain" style={{ ...defaultSize(width), ...size }} />
+			<Image source={resolvedOwl} resizeMode="contain" style={{ ...defaultStyle, ...size }} />
 		)
 	}
 
@@ -49,7 +53,7 @@ export default function Owl({ owl, ...size }: Props) {
 			// @ts-expect-error: It should be fine
 			source={{ uri: resolvedOwl?.localUri || resolvedOwl?.uri }}
 			style={{
-				...defaultSize(width),
+				...defaultStyle,
 				...size,
 			}}
 		/>
@@ -57,11 +61,22 @@ export default function Owl({ owl, ...size }: Props) {
 }
 
 // Each is 2125px wide by 2747px tall -> approximately 4:3 ratio
-const CONSTRAINT_PERCENTAGE = 0.98
-const defaultSize = (width: number) => ({
-	width: width * CONSTRAINT_PERCENTAGE,
-	height: (width * CONSTRAINT_PERCENTAGE * 3) / 4,
-})
+const CONSTRAINT_PERCENTAGE_PORTRAIT = 0.98
+const CONSTRAINT_PERCENTAGE_LANDSCAPE = 0.45
+
+const defaultSize = (width: number, height: number) => {
+	const isLandscape = width > height
+	if (isLandscape) {
+		return {
+			height: height * CONSTRAINT_PERCENTAGE_LANDSCAPE,
+			width: (height * CONSTRAINT_PERCENTAGE_LANDSCAPE * 4) / 3,
+		}
+	}
+	return {
+		width: width * CONSTRAINT_PERCENTAGE_PORTRAIT,
+		height: (width * CONSTRAINT_PERCENTAGE_PORTRAIT * 3) / 4,
+	}
+}
 
 // TODO: Commission more owls:
 // - Onboarding states
@@ -86,4 +101,12 @@ const getOwl = (owl: OwlType, assets: Array<Asset>, isDark: boolean): Asset | un
 		case 'error':
 			return isDark ? assets[2] : assets[3]
 	}
+}
+
+// Hook to get style object for applying header offset in landscape on iOS, since transparent
+// headers overlap content there.
+export const useOwlHeaderOffset = () => {
+	const { isLandscape } = useDisplay()
+	const headerHeight = useHeaderHeight()
+	return isLandscape && Platform.OS === 'ios' ? { paddingTop: headerHeight } : undefined
 }

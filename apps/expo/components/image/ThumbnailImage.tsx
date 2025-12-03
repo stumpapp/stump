@@ -1,4 +1,4 @@
-import { Platform, StyleProp, ViewStyle } from 'react-native'
+import { Platform, StyleProp, View, ViewStyle } from 'react-native'
 import LinearGradient from 'react-native-linear-gradient'
 import TImage, { type TurboImageProps } from 'react-native-turbo-image'
 
@@ -49,7 +49,7 @@ export const ThumbnailImage = ({
 	)
 
 	return (
-		<>
+		<View>
 			<BorderAndShadow
 				style={{ borderRadius, borderWidth, shadowRadius, shadowColor, shadowOffset }}
 			>
@@ -74,6 +74,6 @@ export const ThumbnailImage = ({
 			</BorderAndShadow>
 
 			{Platform.OS === 'android' && gradientElement}
-		</>
+		</View>
 	)
 }

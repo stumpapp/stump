@@ -17,12 +17,21 @@ export default function LibraryReview() {
 	const renderThumbnailSettings = () => {
 		if (!state.thumbnailConfig.enabled || !state.thumbnailConfig.resizeMethod) {
 			return (
-				<div>
-					<Label>{t(getLabelKey('generateThumbnails'))}</Label>
-					<Text variant="muted" size="sm">
-						{t(getKey('no'))}
-					</Text>
-				</div>
+				<>
+					<div>
+						<Label>{t(getLabelKey('generateThumbnails'))}</Label>
+						<Text variant="muted" size="sm">
+							{t(getKey('no'))}
+						</Text>
+					</div>
+
+					<div>
+						<Label>{t(getLabelKey('processThumbnailColors'))}</Label>
+						<Text variant="muted" size="sm">
+							{state.processThumbnailColorsEvenWithoutConfig ? t(getKey('yes')) : t(getKey('no'))}
+						</Text>
+					</div>
+				</>
 			)
 		} else {
 			const dimensionUnit =
@@ -68,6 +77,13 @@ export default function LibraryReview() {
 						<Label>{t(getLabelKey('quality'))}</Label>
 						<Text variant="muted" size="sm">
 							{state.thumbnailConfig.quality || 'Default'}
+						</Text>
+					</div>
+
+					<div>
+						<Label>{t(getLabelKey('processThumbnailColors'))}</Label>
+						<Text variant="muted" size="sm">
+							{t(getKey('yes'))}
 						</Text>
 					</div>
 				</>

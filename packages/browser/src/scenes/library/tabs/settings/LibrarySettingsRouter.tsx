@@ -11,6 +11,7 @@ import { useAppContext } from '@/context'
 import { useLibraryContext } from '../../context'
 import { LibraryManagementContext, LibraryPatchParams } from './context'
 import { ScanOptions } from './options/scanner/history/ScanHistoryTable'
+import { toast } from 'sonner'
 
 const BasicSettingsScene = lazy(() => import('./basics/BasicSettingsScene'))
 const ThumbnailSettingsScene = lazy(() => import('./options/thumbnails/ThumbnailSettingsScene'))
@@ -100,7 +101,14 @@ export default function LibrarySettingsRouter() {
 		},
 	})
 
-	const { mutate: scan } = useGraphQLMutation(scanMutation)
+	const { mutate: scan } = useGraphQLMutation(scanMutation, {
+		onError: (error) => {
+			console.error('Failed to scan library', error)
+			toast.error('Failed to scan library', {
+				description: 'Please check the logs for more details',
+			})
+		},
+	})
 
 	const scanLibrary = useCallback(
 		(options?: ScanOptions) => scan({ id: library.id, options }),

@@ -495,9 +495,13 @@ impl LibraryMutation {
 					"Creating and linking tags to library",
 				);
 
-				let created_tags = tag::Entity::insert_many(tags_to_create)
-					.exec_with_returning_many(&txn)
-					.await?;
+				let created_tags = if !tags_to_create.is_empty() {
+					tag::Entity::insert_many(tags_to_create)
+						.exec_with_returning_many(&txn)
+						.await?
+				} else {
+					vec![]
+				};
 
 				let tags_to_connect = tags_to_add_which_already_exist
 					.iter()

@@ -16,7 +16,7 @@ export default function LandingPage() {
 	}
 
 	return (
-		<div className="flex h-full w-full flex-col items-center space-y-12 overflow-x-hidden py-12">
+		<div className="flex h-full w-full flex-col items-center gap-y-12 overflow-x-hidden">
 			<Hero />
 			<MobileApp />
 			<Feedback />

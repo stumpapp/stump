@@ -3,23 +3,32 @@ import { Callout } from 'nextra/components'
 # Mobile App
 
 <Callout emoji="🚧">
-	A mobile app is currently an early **alpha** release. Please be aware that these sections of the
+	The mobile app is currently an early **alpha** release. Please be aware that these sections of the
 	documentation subject to change or might not be fully implemented yet
 </Callout>
 
-The mobile app is being developed using [React Native](https://reactnative.dev/), which enables support for both iOS and Android with a single codebase. This is mostly to reduce the overhead of maintaining two separate codebases.
+The Stump mobile app is a cross-platform application built using [React Native](https://reactnative.dev/) and [Expo](https://expo.dev/).
+
+## Core Features
+
+The mobile app is a bit more trimmed down in scope compared to the built-in web app, at least with respect to management features. The app aims to provide a more focused experience, being tailored for on-the-go, mobile use cases. Here are some highlighted features available today:
+
+- Multi-server configurations, so you can connect to multiple Stump instances
+- OPDS support, so you can use the app with other OPDS-compatible services
+- Basic readers for all supported book formats (e.g., CBZ/CBR, EPUB, PDF, etc.)
+- A built-in file browser similar to the web app
+- Downloads and offline reading, so you don't need an active internet connection, with online syncing when you reconnect
+- A "Stump-free" experience that only shows OPDS catalogs if you prefer to not use a Stump server
 
 ## Planned Features
 
-The mobile app will be a bit more trimmed down in scope compared to the built in web app, but will aim to provide a more focused experience tailored to on-the-go, mobile use cases. Here are some of the planned features:
+There are many features planned for the mobile app, including but not limited to:
 
-<br />
+- More rich reader features, such as bookmarks, notes, and highlights
+- Custom reader themes and appearance settings
+- iOS/Android widget support
 
-- [x] Multi-server configurations
-- [x] OPDS support, so you can use the app with other OPDS-compatible services
-- [x] Readers for the supported book formats (e.g., CBZ/CBR, EPUB, PDF, etc.)
-- [x] A built-in file browser
-- [x] Offline reading so you don't need an active internet connection
+The app will also follow the server as certain large-scale features are added, such as [book clubs](https://github.com/stumpapp/stump/issues/120).
 
 <Callout emoji="🚀">
 	Want to see a feature added? Feel free to suggest it on
@@ -27,17 +36,20 @@ The mobile app will be a bit more trimmed down in scope compared to the built in
 	[Discord](https://discord.gg/63Ybb7J3as)!
 </Callout>
 
-## Alpha Testing
+## Getting the App
 
-The app is currently available for alpha testing on both iOS and Android. Apple users can test via [TestFlight](https://testflight.apple.com/join/a4srR634). I only have access to a closed beta on Google Play, so if you're interested in testing on Android, please reach out on [Discord](https://discord.gg/63Ybb7J3as)!
+The app is currently available for alpha testing on both iOS and Android. 
+
+If you're using an iOS device, you can join the [TestFlight](https://testflight.apple.com/join/a4srR634) to download the app. While you may be able to download the app for macOS (it seems to run the iPadOS version), please note that it is not officially tested at this time.
+
+If you're using an Android device, please either reach out to me on [Discord](https://discord.gg/63Ybb7J3as) or [email](mailto:oromei@proton.me) and send me your Play Store email, or check back here for updates on public availability. I unfortunately only have access to a closed beta on Google Play at the moment.
 
 <Callout emoji="ℹ️" type="info">
-	Please remember that the app is early on in its development, so there will be bugs and missing
-	features. Your feedback is greatly appreciated!
+	Please remember that the app is early on in its development, so there will be bugs and missing features. Your feedback is greatly appreciated!
 </Callout>
 
 ## Contributing
 
-If you are a mobile developer and would like to help out, please feel free to reach out on [Discord](https://discord.gg/63Ybb7J3as)! There is no official project or roadmap yet, but I'm happy to discuss the current state of the app and what needs to be done.
+There is no official project or roadmap yet, but I'm happy to discuss the current state of the app and what needs to be done. Feel free to reach out on [Discord](https://discord.gg/63Ybb7J3as) or open an issue/discussion on [GitHub](https://github.com/stumpapp/stump).
 
-To see actual developer guides, refer to the app repository on [GitHub](https://github.com/stumpapp/stump/blob/experimental/apps/expo/README.md).
+To see actual developer guides, refer to the app [README](https://github.com/stumpapp/stump/blob/experimental/apps/expo/README.md).

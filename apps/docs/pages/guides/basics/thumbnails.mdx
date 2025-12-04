@@ -15,6 +15,8 @@ The generation of thumbnails is controlled by the configuration options for a li
 
 Thumbnail generation is optional, and you can disable it entirely if you prefer to use the default image as a thumbnail.
 
+Please note that when thumbnail generation is enabled, you may not opt out of [placeholder color processing](#thumbnail-placeholder-colors), as the two features are somewhat intertwined.
+
 <Callout emoji="🛜" type="info">
 	The advantage of configuring thumbnail generation is that it allows you to minimize the size of
 	thumbnails being sent to the client, which greatly improves performance. Otherwise, the full-size
@@ -46,6 +48,22 @@ Stump supports the following formats for displaying thumbnails, in addition to t
 - [GIF](https://caniuse.com/gif)
 
 The reason for this separation is that while Stump supports rendering these on the UI, there is no process to convert them.
+
+## Thumbnail Placeholder Colors
+
+The mobile app supports progressive loading of thumbnails by first displaying a placeholder based on the dominant colors of a thumbnail image. This is totally optional if you aren't opting into generating thumbnails, but can visually improve the look and feel of the app.
+
+If you choose to enable this feature, Stump will compute the dominant colors of each thumbnail image during generation and store them in the database. While the thumbnail is being loaded on the client, a placeholder will be displayed using these colors and presented in one of three supported styles:
+
+- Average Color: A single color placeholder based on the average color of the thumbnail image
+- Colorful: A tvOS-like placeholder using multiple dominant colors from the thumbnail image
+- Thumbhash: A low-resolution placeholder generated using the [Thumbhash](https://evanw.github.io/thumbhash/) algorithm
+
+If you choose to disable this feature, a default gray placeholder will be used instead.
+
+<Callout emoji="📱" type="info">
+	These placeholders are currently only supported by the mobile app. The web app does not yet support them. If you would like to see this feature added to the web app, please let me know and I can try to prioritize it
+</Callout>
 
 ## Management
 

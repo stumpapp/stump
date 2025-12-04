@@ -9,8 +9,41 @@ import {
 import clsx from 'clsx'
 import { motion } from 'framer-motion'
 
-const BASE_DELAY = 1.5
-const getDelay = (idx: number) => BASE_DELAY + (idx + 1) * 0.25
+// Base delay to start after hero animations
+const BASE_DELAY = 1.4
+
+const linkVariants = {
+	hidden: {
+		opacity: 0,
+		y: 8,
+		filter: 'blur(8px)',
+		scale: 0.95,
+	},
+	visible: (index: number) => ({
+		opacity: 1,
+		y: 0,
+		filter: 'blur(0px)',
+		scale: 1,
+		transition: {
+			duration: 0.6,
+			delay: BASE_DELAY + index * 0.08,
+			ease: [0.33, 1, 0.68, 1],
+		},
+	}),
+}
+
+const hoverVariants = {
+	hover: {
+		scale: 1.05,
+		transition: {
+			duration: 0.3,
+			ease: [0.33, 1, 0.68, 1],
+		},
+	},
+	tap: {
+		scale: 0.95,
+	},
+}
 
 export default function DownloadLinks() {
 	return (
@@ -18,9 +51,13 @@ export default function DownloadLinks() {
 			{links.map((link, idx) => (
 				<motion.div
 					key={idx}
-					initial={{ opacity: 0, y: 20 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ delay: getDelay(idx), duration: 0.25 }}
+					custom={idx}
+					initial="hidden"
+					animate="visible"
+					variants={linkVariants}
+					whileHover={!link.disabled ? 'hover' : undefined}
+					whileTap={!link.disabled ? 'tap' : undefined}
+					{...(link.disabled ? {} : hoverVariants)}
 				>
 					<a
 						className={clsx(
@@ -34,8 +71,8 @@ export default function DownloadLinks() {
 						href={link.disabled ? undefined : link.href}
 						target="_blank"
 						rel="noreferrer"
+						aria-label={link.title}
 					>
-						{/* @ts-expect-error: Its fine */}
 						<link.icon className="h-5 w-5" />
 					</a>
 				</motion.div>
@@ -44,7 +81,14 @@ export default function DownloadLinks() {
 	)
 }
 
-const links = [
+type Link = {
+	href: string
+	icon: React.ComponentType<React.SVGProps<SVGSVGElement>>
+	title: string
+	disabled?: boolean
+}
+
+const links: Link[] = [
 	{
 		href: 'https://github.com/stumpapp/stump/releases/latest',
 		icon: SiLinux,
@@ -66,14 +110,12 @@ const links = [
 		title: 'Docker',
 	},
 	{
-		disabled: true,
-		href: '#',
+		href: '/guides/mobile/app#getting-the-app',
 		icon: SiAndroid,
 		title: 'Android',
 	},
 	{
-		disabled: true,
-		href: '#',
+		href: 'https://testflight.apple.com/join/a4srR634',
 		icon: SiIos,
 		title: 'iOS',
 	},

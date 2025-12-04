@@ -7,7 +7,7 @@ export default function MobileApp() {
 			<div className="mx-auto flex min-h-screen max-w-7xl flex-col items-center gap-16 px-6 py-10 lg:gap-20 lg:px-8 lg:py-24">
 				<div className="mx-auto max-w-2xl flex-shrink-0 md:text-center lg:mx-0 lg:max-w-xl lg:pt-8">
 					<h2 className="text-2xl font-bold tracking-tight text-black sm:text-4xl dark:text-neutral-100">
-						Mobile app in alpha
+						Mobile app in early alpha
 					</h2>
 
 					<p className="text-neutral-650 mx-auto mt-5 max-w-md text-base sm:text-lg md:max-w-3xl md:text-xl dark:text-neutral-400">
@@ -26,7 +26,7 @@ export default function MobileApp() {
 						{/* https://play.google.com/store/apps/details?id=com.stumpapp.stump */}
 						<Link
 							className="dark:active:border-neutral-650 dark:active:bg-neutral-650 flex cursor-pointer items-center space-x-2 rounded-md border border-transparent bg-transparent px-3 py-1.5 text-sm font-medium text-neutral-700 transition-all duration-300 hover:border-neutral-200 hover:bg-neutral-50 hover:text-neutral-900 focus:outline-none active:border-neutral-200 active:bg-neutral-50 active:text-neutral-600 dark:bg-opacity-90 dark:text-neutral-200 dark:shadow-sm dark:hover:border-neutral-500 dark:hover:bg-neutral-700 dark:hover:bg-opacity-100 dark:hover:text-white dark:active:text-white dark:active:opacity-90"
-							href="/guides/mobile/app#alpha-testing"
+							href="/guides/mobile/app#getting-the-app"
 						>
 							<span>Google Beta</span>
 						</Link>

@@ -1,5 +1,11 @@
 import { useGraphQLMutation } from '@stump/client'
-import { CreateOrUpdateLibraryInput, graphql, useFragment, UserPermission } from '@stump/graphql'
+import {
+	CreateOrUpdateLibraryInput,
+	Dimension,
+	graphql,
+	useFragment,
+	UserPermission,
+} from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
 import omit from 'lodash/omit'
 import pick from 'lodash/pick'
@@ -75,6 +81,84 @@ const scanMutation = graphql(`
 	}
 `)
 
+/**
+ * Transform the library config to match the GraphQL input schema by:
+ * 1. Removing __typename fields (only for queries, not mutations)
+ * 2. Restructuring resizeMethod to match the @oneOf input type
+ */
+function transformConfigForMutation(
+	config: CreateOrUpdateLibraryInput['config'],
+): CreateOrUpdateLibraryInput['config'] {
+	if (!config) return config
+
+	const { thumbnailConfig, ...rest } = config
+
+	if (!thumbnailConfig) return config
+
+	const { resizeMethod, ...thumbnailRest } = thumbnailConfig
+
+	if (!resizeMethod || !('__typename' in resizeMethod)) {
+		return {
+			...rest,
+			thumbnailConfig: { ...thumbnailRest, resizeMethod },
+		}
+	}
+
+	// Transform based on the __typename to match the input schema
+	if (resizeMethod.__typename === 'ScaleEvenlyByFactor' && 'factor' in resizeMethod) {
+		return {
+			...rest,
+			thumbnailConfig: {
+				...thumbnailRest,
+				resizeMethod: {
+					scaleEvenlyByFactor: { factor: resizeMethod.factor as string },
+				},
+			},
+		}
+	}
+
+	if (
+		resizeMethod.__typename === 'ExactDimensionResize' &&
+		'width' in resizeMethod &&
+		'height' in resizeMethod
+	) {
+		return {
+			...rest,
+			thumbnailConfig: {
+				...thumbnailRest,
+				resizeMethod: {
+					exact: { width: resizeMethod.width as number, height: resizeMethod.height as number },
+				},
+			},
+		}
+	}
+
+	if (
+		resizeMethod.__typename === 'ScaledDimensionResize' &&
+		'dimension' in resizeMethod &&
+		'size' in resizeMethod
+	) {
+		return {
+			...rest,
+			thumbnailConfig: {
+				...thumbnailRest,
+				resizeMethod: {
+					scaleDimension: {
+						dimension: resizeMethod.dimension as Dimension,
+						size: resizeMethod.size as number,
+					},
+				},
+			},
+		}
+	}
+
+	// If we can't match the type, return without resizeMethod
+	return {
+		...rest,
+		thumbnailConfig: thumbnailRest,
+	}
+}
+
 // Note: library:manage permission is enforced in the parent router
 export default function LibrarySettingsRouter() {
 	const { checkPermission } = useAppContext()
@@ -122,11 +206,12 @@ export default function LibrarySettingsRouter() {
 				updates.config ? { ...config, ...updates.config } : config,
 				'id',
 			) as CreateOrUpdateLibraryInput['config']
+			const adjustedConfig = transformConfigForMutation(configWithoutId)
 			const payload = {
 				// Note: pick returns a deep partial for whatever reason, so we cast it. This should be safe
 				...(pick(library, ['name', 'description', 'emoji', 'path']) as typeof library),
 				...updates,
-				config: configWithoutId,
+				config: adjustedConfig,
 				tags: updates.tags ? updates.tags : library?.tags?.map(({ name }) => name),
 			} satisfies CreateOrUpdateLibraryInput
 			editLibrary({ id: library.id, input: payload })

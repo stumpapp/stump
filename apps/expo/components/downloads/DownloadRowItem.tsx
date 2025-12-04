@@ -8,7 +8,6 @@ import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-na
 import { imageMeta, syncStatus } from '~/db'
 import { useColors } from '~/lib/constants'
 import { formatBytesSeparate } from '~/lib/format'
-import { useListItemSize } from '~/lib/hooks'
 import { useSelectionStore } from '~/stores/selection'
 
 import { ThumbnailImage } from '../image'
@@ -16,6 +15,7 @@ import { Heading, Progress, Text } from '../ui'
 import { Icon } from '../ui/icon'
 import { SyncIcon } from './sync-icon/SyncIcon'
 import { DownloadedFile } from './types'
+import { useDownloadRowItemSize } from './useDownloadRowItemSize'
 import { getThumbnailPath } from './utils'
 
 type Props = {
@@ -34,7 +34,7 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 
 	const colors = useColors()
 
-	const { width, height } = useListItemSize()
+	const { width, height } = useDownloadRowItemSize()
 
 	const selectionStore = useSelectionStore((state) => ({
 		isSelectionMode: state.isSelecting,
@@ -137,13 +137,13 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 							uri: getThumbnailPath(downloadedFile),
 						}}
 						resizeMode="stretch"
-						size={{ height: height / 2, width: width / 2 }}
+						size={{ height, width }}
 						placeholderData={thumbnailData}
 					/>
 
-					<View className="flex-1 justify-center py-2">
+					<View className="flex-1 justify-center py-1.5">
 						<View className="flex flex-1 flex-row justify-between gap-2">
-							<View className="flex shrink gap-1">
+							<View className="flex shrink gap-0.5">
 								<Heading numberOfLines={2}>{downloadedFile.bookName || 'Untitled'}</Heading>
 								<Text className="text-foreground-muted">{renderSubtitle()}</Text>
 							</View>

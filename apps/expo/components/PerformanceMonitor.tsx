@@ -1,66 +1,33 @@
-import { useEffect, useState } from 'react'
-import { Platform, StyleSheet, Text, View } from 'react-native'
-import PerformanceStats from 'react-native-performance-stats'
+import { Platform, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native'
+import { useCpuUsage, useFpsJs, useFpsUi, useMemoryUsage } from 'react-native-performance-toolkit'
 
-interface PerformanceMonitorProps {
-	/**
-	 * Track CPU usage (has small performance penalty apparently)
-	 * @default false
-	 */
-	withCPU?: boolean
-	/**
-	 * Style for the container
-	 */
-	style?: object
-}
-
-export const PerformanceMonitor = ({ withCPU = false, style }: PerformanceMonitorProps) => {
-	const [uiFps, setUiFps] = useState(0)
-	const [jsFps, setJsFps] = useState(0)
-	const [ram, setRam] = useState(0)
-	const [cpu, setCpu] = useState(0)
-
-	useEffect(() => {
-		const listener = PerformanceStats.addListener((stats) => {
-			setUiFps(stats.uiFps)
-			setJsFps(stats.jsFps)
-			setRam(stats.usedRam)
-			if (withCPU) {
-				setCpu(stats.usedCpu)
-			}
-		})
-
-		PerformanceStats.start(withCPU)
-
-		return () => {
-			PerformanceStats.stop()
-			listener.remove()
-		}
-	}, [withCPU])
+export function PerformanceMonitor({ style }: { style: StyleProp<ViewStyle> }) {
+	const uiFps = useFpsUi()
+	const jsFps = useFpsJs()
+	const memory = useMemoryUsage()
+	const cpu = useCpuUsage()
 
 	return (
 		<View style={[styles.container, style]}>
-			<View style={[styles.statColumn, { minWidth: 40 }]}>
+			<View style={styles.statColumn}>
 				<Text style={styles.label}>UI</Text>
-				<Text style={styles.value}>{uiFps.toFixed(0)}</Text>
+				<Text style={styles.value}>{uiFps}</Text>
 			</View>
 
-			<View style={[styles.statColumn, { minWidth: 40 }]}>
+			<View style={styles.statColumn}>
 				<Text style={styles.label}>JS</Text>
-				<Text style={styles.value}>{jsFps.toFixed(0)}</Text>
+				<Text style={styles.value}>{jsFps}</Text>
 			</View>
 
 			<View style={styles.statColumn}>
 				<Text style={styles.label}>MB</Text>
-				<Text style={styles.value}>{ram.toFixed(1)}</Text>
+				<Text style={styles.value}>{memory}</Text>
 			</View>
 
-			{withCPU && (
-				<View style={styles.statColumn}>
-					<Text style={styles.label}>CPU</Text>
-					<Text style={styles.value}>{cpu.toFixed(1)}%</Text>
-				</View>
-			)}
+			<View style={styles.statColumn}>
+				<Text style={styles.label}>CPU</Text>
+				<Text style={styles.value}>{cpu}%</Text>
+			</View>
 		</View>
 	)
 }
@@ -80,7 +47,7 @@ const styles = StyleSheet.create({
 	},
 	statColumn: {
 		alignItems: 'center',
-		minWidth: 60, // override this for some cols for a nicer look
+		minWidth: 40,
 		gap: 2,
 	},
 	label: {

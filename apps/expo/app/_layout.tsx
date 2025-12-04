@@ -126,7 +126,7 @@ export default function RootLayout() {
 	return (
 		<GestureHandlerRootView style={{ flex: 1 }}>
 			<ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
-				{performanceMonitor && <PerformanceMonitor withCPU style={{ top: insets.top || 12 }} />}
+				{performanceMonitor && <PerformanceMonitor style={{ top: insets.top || 12 }} />}
 				<BottomSheet.Provider>
 					<KeyboardProvider>
 						<SystemBars style={isDarkColorScheme ? 'light' : 'dark'} hidden={shouldHideStatusBar} />

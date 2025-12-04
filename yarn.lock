@@ -23987,15 +23987,20 @@ react-native-mmkv@^3.3.3:
   resolved "https://registry.yarnpkg.com/react-native-mmkv/-/react-native-mmkv-3.3.3.tgz#1f0326f6314e23725af8145964343224d074e6cd"
   integrity sha512-GMsfOmNzx0p5+CtrCFRVtpOOMYNJXuksBVARSQrCFaZwjUyHJdQzcN900GGaFFNTxw2fs8s5Xje//RDKj9+PZA==
 
+react-native-nitro-modules@^0.31.10:
+  version "0.31.10"
+  resolved "https://registry.yarnpkg.com/react-native-nitro-modules/-/react-native-nitro-modules-0.31.10.tgz#d21907327200d5761ba6cf328dec36b1516bc270"
+  integrity sha512-hcvjTu9YJE9fMmnAUvhG8CxvYLpOuMQ/2eyi/S6GyrecezF6Rmk/uRQEL6v09BRFWA/xRVZNQVulQPS+2HS3mQ==
+
 react-native-pager-view@^6.9.1:
   version "6.9.1"
   resolved "https://registry.yarnpkg.com/react-native-pager-view/-/react-native-pager-view-6.9.1.tgz#a9e6d9323935cc2ae1d46d7816b66f76dc3eff8e"
   integrity sha512-uUT0MMMbNtoSbxe9pRvdJJKEi9snjuJ3fXlZhG8F2vVMOBJVt/AFtqMPUHu9yMflmqOr08PewKzj9EPl/Yj+Gw==
 
-react-native-performance-stats@^0.2.3:
-  version "0.2.3"
-  resolved "https://registry.yarnpkg.com/react-native-performance-stats/-/react-native-performance-stats-0.2.3.tgz#2cbf49a71b1bb28a8472fec75cbfebcc6a354f2b"
-  integrity sha512-PnnxuLcm2yU3TFiiFSltfgP+Hun9z6e6IqbIx/sqFgpHJqc70BLpzmCnfPsOpqTbpg2daFrs42siIstGVGk9Jw==
+react-native-performance-toolkit@^0.2.1:
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/react-native-performance-toolkit/-/react-native-performance-toolkit-0.2.1.tgz#ba7b88c4e638e3660d40e53a8733eefa2138e556"
+  integrity sha512-8KdDnukJ1LF0GFN8zEWPlLyhn1zH7Ff5QQTjvKmBSmXw8eNnljrlO8iZTUfDRUex1DGOYZcuLkQoEqZHGLrXHA==
 
 react-native-quick-base64@^2.0.5:
   version "2.1.2"

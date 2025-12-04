@@ -1,5 +1,6 @@
 import { graphql } from '@stump/graphql'
 
+// TODO(graphql): Move this, it doesn't feel right here
 export const BookFileInformationFragment = graphql(`
 	fragment BookMetadata on Media {
 		metadata {
@@ -17,6 +18,8 @@ export const BookFileInformationFragment = graphql(`
 			teams
 			writers
 			year
+			month
+			day
 		}
 	}
 `)

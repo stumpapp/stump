@@ -5,13 +5,13 @@ import omit from 'lodash/omit'
 import pick from 'lodash/pick'
 import { lazy, Suspense, useCallback } from 'react'
 import { Navigate, Route, Routes } from 'react-router'
+import { toast } from 'sonner'
 
 import { useAppContext } from '@/context'
 
 import { useLibraryContext } from '../../context'
 import { LibraryManagementContext, LibraryPatchParams } from './context'
 import { ScanOptions } from './options/scanner/history/ScanHistoryTable'
-import { toast } from 'sonner'
 
 const BasicSettingsScene = lazy(() => import('./basics/BasicSettingsScene'))
 const ThumbnailSettingsScene = lazy(() => import('./options/thumbnails/ThumbnailSettingsScene'))

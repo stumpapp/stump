@@ -46,7 +46,7 @@ export default function FiltersSettingsScene() {
 						filters,
 						grouping,
 					}),
-					['filters', 'grouping', 'joiner'],
+					['filters', 'defaultGrouping', 'joiner'],
 				),
 			)
 		},

@@ -2274,7 +2274,7 @@ type StumpConfig {
 	profile: String!
 	"The port from which to serve the application (default: 10801)."
 	port: Int!
-	"The verbosity with which to log errors (default: 0)."
+	"The verbosity with which system logs are visible (default: 1)."
 	verbosity: Int!
 	"Whether or not to pretty print logs."
 	prettyLogs: Boolean!

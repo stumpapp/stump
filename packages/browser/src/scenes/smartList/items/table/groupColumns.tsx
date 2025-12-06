@@ -28,9 +28,12 @@ const buildNameColumn = (isGroupedBySeries: boolean) =>
 					disabled={!getCanExpand()}
 				>
 					<ChevronDown
-						className={cn('h-4 w-4 text-foreground-muted transition-transform duration-200', {
-							'rotate-180': isExpanded,
-						})}
+						className={cn(
+							'h-4 w-4 shrink-0 text-foreground-muted transition-transform duration-200',
+							{
+								'rotate-180': isExpanded,
+							},
+						)}
 					/>
 					<Text className="line-clamp-1 text-left text-sm md:text-base">{name}</Text>
 				</button>

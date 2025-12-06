@@ -20,7 +20,7 @@ const coverColumn = columnHelper.display({
 		</Text>
 	),
 	id: 'cover',
-	size: 60,
+	size: 80,
 })
 
 const nameColumn = columnHelper.accessor(({ resolvedName }) => resolvedName, {
@@ -62,7 +62,7 @@ const pagesColumn = columnHelper.accessor('pages', {
 		</Text>
 	),
 	id: 'pages',
-	size: 60,
+	size: 100,
 })
 
 const publishedColumn = columnHelper.accessor(

@@ -17,8 +17,10 @@ export function useCurrentOrPrevious<T>(
 	}, [value])
 
 	if (method === 'falsy') {
+		// eslint-disable-next-line react-hooks/refs
 		return value || previousValue.current
 	} else {
+		// eslint-disable-next-line react-hooks/refs
 		return value ?? previousValue.current
 	}
 }

@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Button, cn, Form } from '@stump/components'
 import { CreateLibrarySceneExistingLibrariesQuery } from '@stump/graphql'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 
 import { ContentContainer } from '@/components/container'
 import DirectoryPickerModal from '@/components/DirectoryPickerModal'
@@ -52,7 +52,7 @@ export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoadi
 	/**
 	 * The current path value from the form
 	 */
-	const [formPath] = form.watch(['path'])
+	const [formPath] = useWatch({ control: form.control, name: ['path'] })
 
 	/**
 	 * A callback to handle changing the form step. This will validate the current step

@@ -37,6 +37,7 @@ export default [
 				},
 			],
 			...pluginReactHooks.configs.recommended.rules,
+			'react-hooks/set-state-in-effect': 'off',
 		},
 	},
 	{ languageOptions: { globals: globals.node } },

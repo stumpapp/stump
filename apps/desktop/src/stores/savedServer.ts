@@ -208,12 +208,9 @@ export const useSavedServers = () => {
 	 * @param id The ID of the server to save the token for
 	 * @param token The token to save
 	 */
-	const saveServerToken = useCallback(
-		async (id: string, token: StoredTokens) => {
-			await rpc.setTokens(id, token)
-		},
-		[rpc],
-	)
+	const saveServerToken = async (id: string, token: StoredTokens) => {
+		await rpc.setTokens(id, token)
+	}
 
 	/**
 	 * Delete a saved JWT for a server. This will be called whenever an expired token is

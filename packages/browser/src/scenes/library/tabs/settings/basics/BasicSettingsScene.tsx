@@ -3,7 +3,7 @@ import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Button, Form } from '@stump/components'
 import { graphql } from '@stump/graphql'
 import { useCallback, useMemo, useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 
 import DirectoryPickerModal from '@/components/DirectoryPickerModal'
 import {
@@ -46,7 +46,10 @@ export default function BasicSettingsScene() {
 	})
 
 	const [showDirectoryPicker, setShowDirectoryPicker] = useState(false)
-	const [path, name, description, tags] = form.watch(['path', 'name', 'description', 'tags'])
+	const [path, name, description, tags] = useWatch({
+		control: form.control,
+		name: ['path', 'name', 'description', 'tags'],
+	})
 
 	const hasChanges = useMemo(() => {
 		const currentTagSet = new Set(tags?.map(({ label }) => label) || [])

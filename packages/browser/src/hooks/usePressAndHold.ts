@@ -14,14 +14,14 @@ export function usePressAndHold({ intervalMs = 100 }: Params = {}) {
 	/**
 	 * Stop the press and hold event. This will clear the interval.
 	 */
-	const stop = useCallback(() => {
+	const stop = useCallback(function stopFn() {
 		if (intervalRef.current) {
 			clearTimeout(intervalRef.current)
 			intervalRef.current = null
 		}
 		setIsHolding(false)
-		window.removeEventListener('pointerup', stop)
-		window.removeEventListener('pointercancel', stop)
+		window.removeEventListener('pointerup', stopFn)
+		window.removeEventListener('pointercancel', stopFn)
 	}, [])
 
 	/**

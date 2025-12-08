@@ -44,6 +44,7 @@ export default function LoginOrClaimScene() {
 				exact: false,
 			})
 			if (redirect.includes('/swagger') || redirect.includes('/api')) {
+				// eslint-disable-next-line react-compiler/react-compiler
 				window.location.href = redirect
 			} else {
 				navigate(redirect, { replace: true })

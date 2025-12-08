@@ -24,7 +24,7 @@ export default function LibraryNavigation() {
 		preferences: { primaryNavigationMode, layoutMaxWidthPx },
 	} = usePreferences()
 	const {
-		library: { id, path },
+		library: { id },
 	} = useLibraryContext()
 	const { checkPermission } = useAppContext()
 	// const { prefetch: prefetchBooks } = usePrefetchLibraryBooks({ id })
@@ -41,7 +41,7 @@ export default function LibraryNavigation() {
 	// TODO(graphql): Fix me
 	const handlePrefetchFiles = useCallback(() => {
 		// prefetchFiles({ path, fetchConfig: checkPermission('file:upload') })
-	}, [path, checkPermission])
+	}, [])
 
 	const { ref, isSticky } = useSticky<HTMLDivElement>({
 		extraOffset: isMobile || primaryNavigationMode === 'TOPBAR' ? 56 : 0,

@@ -19,7 +19,11 @@ export default defineConfig({
 		pkgJson: { name, version },
 	},
 	plugins: [
-		react(),
+		react({
+			babel: {
+				plugins: [['babel-plugin-react-compiler', {}]],
+			},
+		}),
 		tsconfigPaths(),
 		VitePWA({
 			registerType: 'autoUpdate',

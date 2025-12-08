@@ -1,7 +1,6 @@
 import { Badge, Card, Text, ToolTip } from '@stump/components'
 import { FragmentType, graphql, useFragment } from '@stump/graphql'
 import dayjs from 'dayjs'
-import { noop } from 'lodash'
 import { Sparkles } from 'lucide-react'
 import { Suspense, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router'
@@ -43,7 +42,7 @@ export default function EmailerListItem({ fragment }: Props) {
 
 	// const { deleteEmailer } = useDeleteEmailer()
 	// TODO(graphql): Fix
-	const deleteEmailer = noop
+	// const deleteEmailer = noop
 
 	const displayedHost = useMemo(
 		() =>
@@ -68,7 +67,7 @@ export default function EmailerListItem({ fragment }: Props) {
 		// if (canEditEmailer) {
 		// 	deleteEmailer(emailer.id)
 		// }
-	}, [canEditEmailer, deleteEmailer, emailer.id])
+	}, [])
 
 	return (
 		<Card

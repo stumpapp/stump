@@ -23,7 +23,14 @@ export default defineConfig({
 	define: {
 		pkgJson: { name, version },
 	},
-	plugins: [react(), tsconfigPaths()],
+	plugins: [
+		react({
+			babel: {
+				plugins: [['babel-plugin-react-compiler', {}]],
+			},
+		}),
+		tsconfigPaths(),
+	],
 	publicDir: '../../../packages/browser/public',
 	root: 'src',
 	server: {

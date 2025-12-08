@@ -14,7 +14,9 @@ export function useSticky<T extends HTMLElement>({
 
 	const [sticky, setSticky] = useState(false)
 
+	// eslint-disable-next-line react-hooks/refs
 	const isStickyRefSet = !!stickyRef.current
+	// eslint-disable-next-line react-hooks/refs
 	const isScrollRefSet = !!scrollRef.current
 	useEffect(() => {
 		const doObserve = () => {

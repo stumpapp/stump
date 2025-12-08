@@ -275,19 +275,15 @@ export default function LibrarySeriesScene() {
 
 	const previousPage = usePrevious(pageInfo.currentPage)
 	const shouldScroll = !!previousPage && previousPage !== pageInfo.currentPage
-	useEffect(
-		() => {
-			if (!isInView && shouldScroll) {
-				containerRef.current?.scrollIntoView({
-					behavior: 'smooth',
-					block: 'nearest',
-					inline: 'start',
-				})
-			}
-		},
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[shouldScroll, isInView],
-	)
+	useEffect(() => {
+		if (!isInView && shouldScroll) {
+			containerRef.current?.scrollIntoView({
+				behavior: 'smooth',
+				block: 'nearest',
+				inline: 'start',
+			})
+		}
+	}, [shouldScroll, isInView, containerRef])
 
 	const renderContent = () => {
 		if (layoutMode === InterfaceLayout.Grid) {

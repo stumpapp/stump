@@ -10,5 +10,6 @@
 			}
 		],
 		"@babel/preset-typescript"
-	]
+	],
+	"plugins": [["babel-plugin-react-compiler", {}]]
 }

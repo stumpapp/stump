@@ -144,8 +144,7 @@ export default function ImageBasedReader({ media, isIncognito, initialPage, onPr
 	 */
 	const getPageUrl = useCallback(
 		(pageNumber: number) => sdk.media.bookPageURL(media.id, pageNumber),
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[media.id],
+		[media.id, sdk.media],
 	)
 
 	const lastPage = useMemo(() => media.pages, [media.pages])
@@ -186,19 +185,15 @@ export default function ImageBasedReader({ media, isIncognito, initialPage, onPr
 	 *    when the user navigates away from the reader, the in-progress media is accurately reflected with
 	 *    the latest reading session.
 	 */
-	useEffect(
-		() => {
-			return () => {
-				setSettings({
-					showToolBar: false,
-				})
-				client.invalidateQueries({ exact: false, queryKey: ['keepReading'] })
-				client.invalidateQueries({ queryKey: ['bookOverview', media.id], exact: false })
-			}
-		},
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[],
-	)
+	useEffect(() => {
+		return () => {
+			setSettings({
+				showToolBar: false,
+			})
+			client.invalidateQueries({ exact: false, queryKey: ['keepReading'] })
+			client.invalidateQueries({ queryKey: ['bookOverview', media.id], exact: false })
+		}
+	}, [client, media.id, setSettings])
 
 	const renderReader = () => {
 		if (readingMode.startsWith('CONTINUOUS')) {

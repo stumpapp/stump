@@ -1,3 +1,4 @@
+/* eslint-disable react-compiler/react-compiler */
 import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 

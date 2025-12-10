@@ -89,14 +89,14 @@ export default function VirtualSmartListTable({ books }: Props) {
 				style={{ height: HEADER_HEIGHT }}
 			>
 				{table.getHeaderGroups().map((headerGroup) => (
-					<div key={headerGroup.id} className="flex w-full">
+					<div key={headerGroup.id} className="flex w-full bg-background-surface">
 						{headerGroup.headers.map((header) => {
 							const isSortable = header.column.getCanSort()
 							return (
 								<div
 									key={header.id}
 									className={cn(
-										'flex items-center overflow-hidden px-4 py-2 text-sm font-medium text-foreground-subtle',
+										'flex items-center overflow-hidden bg-background-surface px-4 py-2 text-sm font-medium text-foreground-subtle',
 										{
 											'cursor-pointer select-none gap-x-2': isSortable,
 										},

@@ -25,7 +25,7 @@ export default function TableHeaderActions() {
 	)
 
 	return (
-		<header className="flex w-full items-center gap-x-2 bg-background px-4">
+		<header className="-mt-2 mb-2 flex w-full items-center gap-x-2 bg-background px-4">
 			<SavedViewSelector />
 			<FilterBottomDrawer />
 			<TableColumnsBottomDrawer />

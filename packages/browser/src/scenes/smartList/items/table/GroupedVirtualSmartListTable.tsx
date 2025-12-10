@@ -261,7 +261,7 @@ export default function GroupedVirtualSmartListTable({ items }: Props) {
 			<TableHeaderActions />
 
 			<div
-				className="sticky top-0 z-30 flex w-full border-b border-edge bg-background"
+				className="sticky top-0 z-30 flex w-full border-b border-edge bg-background-surface"
 				style={{ height: HEADER_HEIGHT }}
 			>
 				{groupTable.getHeaderGroups().map((headerGroup) => (
@@ -273,7 +273,7 @@ export default function GroupedVirtualSmartListTable({ items }: Props) {
 									key={header.id}
 									// TODO: Fix the hitbox for sorting, not the entire header just the content
 									className={cn(
-										'flex w-full items-center px-4 py-2 text-sm font-medium text-foreground-subtle last:justify-end',
+										'flex w-full items-center bg-background-surface px-4 py-2 text-sm font-medium text-foreground-subtle last:justify-end',
 										{
 											'cursor-pointer select-none gap-x-2': isSortable,
 										},
@@ -361,7 +361,7 @@ export default function GroupedVirtualSmartListTable({ items }: Props) {
 				</div>
 			)}
 
-			<div ref={listRef} className="relative w-full" style={{ height: totalSize }}>
+			<div ref={listRef} className="relative w-full bg-background" style={{ height: totalSize }}>
 				{/* Spacer to push items down to their virtual position */}
 				{virtualItems.length > 0 && virtualItems[0] && (
 					<div style={{ height: virtualItems[0].start }} />

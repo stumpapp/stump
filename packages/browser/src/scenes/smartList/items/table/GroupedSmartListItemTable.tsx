@@ -15,7 +15,8 @@ import { Fragment, useCallback, useMemo, useState } from 'react'
 
 import { SortIcon } from '@/components/table'
 
-import { useSafeWorkingView, useSmartListContext } from '../../context'
+import { useSafeWorkingView } from '../../context'
+import { useSmartListViewStore } from '../../store'
 import { buildColumns, buildDefaultColumns } from './groupColumns'
 import { bookFuzzySearch } from './mediaColumns'
 import SmartListBookTable from './SmartListBookTable'
@@ -29,7 +30,8 @@ type Props = {
 // TODO: see if https://virtuoso.dev/grouped-numbers/ would work.
 
 export default function GroupedSmartListItemTable({ items }: Props) {
-	const { workingView, updateWorkingView } = useSmartListContext()
+	const workingView = useSmartListViewStore((state) => state.workingView)
+	const updateWorkingView = useSmartListViewStore((state) => state.updateWorkingView)
 	const {
 		workingView: { search },
 	} = useSafeWorkingView()

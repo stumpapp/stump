@@ -117,7 +117,7 @@ export default function TableColumnsBottomDrawer() {
 			.filter(([, isSelected]) => isSelected)
 			.map(([id], idx) => ({ id, position: idx }))
 
-		if (!bookColumns.length || !groupColumns.length) {
+		if (!bookColumns.length || (isGrouped && !groupColumns.length)) {
 			toast.error('You must select at least one column')
 			return
 		}

@@ -1139,7 +1139,8 @@
 					"placeholder": "Quick filter"
 				},
 				"viewManager": {
-					"updateSelected": "Update selected",
+					"updateSelected": "Update view",
+					"deleteSelected": "Delete view",
 					"create": "Create new view",
 					"modal": {
 						"heading": {
@@ -1164,6 +1165,10 @@
 								"description": "The updated name for this view, if desired"
 							}
 						}
+					},
+					"deleteModal": {
+						"title": "Delete view",
+						"description": "Are you sure you want to delete this view?"
 					}
 				}
 			}
@@ -2073,6 +2078,7 @@
 		"add": "Add",
 		"cancel": "Cancel",
 		"confirm": "Confirm",
+		"delete": "Delete",
 		"enter": "Enter",
 		"save": "Save",
 		"send": "Send",

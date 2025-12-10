@@ -7,6 +7,8 @@ import { toast } from 'sonner'
 import { z } from 'zod'
 
 import { useSmartListContext } from '../../context'
+import { useSaveSelectedStoredView, useSaveWorkingView } from '../../hooks'
+import { useSmartListViewStore } from '../../store'
 
 const LOCALE_BASE_KEY = 'userSmartListScene.itemsScene.actionHeader.viewManager.modal'
 const withLocaleKey = (key: string) => `${LOCALE_BASE_KEY}.${key}`
@@ -20,10 +22,10 @@ export default function CreateOrUpdateTableView({ isCreating, isOpen, onClose }:
 	const { t } = useLocaleContext()
 	const {
 		list: { views },
-		selectedView,
-		saveWorkingView,
-		saveSelectedStoredView,
 	} = useSmartListContext()
+	const selectedView = useSmartListViewStore((state) => state.selectedView)
+	const { saveWorkingView } = useSaveWorkingView()
+	const { saveSelectedStoredView } = useSaveSelectedStoredView()
 
 	const form = useForm({
 		defaultValues: {
@@ -115,7 +117,7 @@ export default function CreateOrUpdateTableView({ isCreating, isOpen, onClose }:
 
 				<Dialog.Footer>
 					<Button onClick={onClose}>Cancel</Button>
-					<Button form="create-or-update-view">
+					<Button type="submit" form="create-or-update-view">
 						{isCreating ? t('common.create') : t('common.saveChanges')}
 					</Button>
 				</Dialog.Footer>

@@ -15,7 +15,8 @@ import AutoSizer from 'react-virtualized-auto-sizer'
 import { SortIcon } from '@/components/table'
 import { usePreferences } from '@/hooks'
 
-import { useSafeWorkingView, useSmartListContext } from '../../context'
+import { useSafeWorkingView } from '../../context'
+import { useSmartListViewStore } from '../../store'
 import { buildColumns, defaultColumns } from './mediaColumns'
 import TableHeaderActions from './TableHeaderActions'
 
@@ -29,7 +30,8 @@ export default function SmartListBookTable({ books, isIsolatedTable = true }: Pr
 	const {
 		preferences: { enableHideScrollbar },
 	} = usePreferences()
-	const { workingView, updateWorkingView } = useSmartListContext()
+	const workingView = useSmartListViewStore((state) => state.workingView)
+	const updateWorkingView = useSmartListViewStore((state) => state.updateWorkingView)
 	const {
 		workingView: { search, enableMultiSort },
 	} = useSafeWorkingView()

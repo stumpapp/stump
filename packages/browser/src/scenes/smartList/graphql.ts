@@ -52,6 +52,7 @@ const listByIdQuery = graphql(`
 					id
 					desc
 				}
+				search
 			}
 		}
 	}

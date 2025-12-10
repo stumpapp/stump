@@ -30,7 +30,7 @@ export default function ProcessLibraryThumbnails() {
 				<Label>Process thumbnail colors</Label>
 				<Text size="sm" variant="muted">
 					Extract missing thumbnail color metadata or force the regeneration of it for all
-					thumbnails. This extracts the color data used for image placeholders
+					thumbnails
 				</Text>
 			</div>
 

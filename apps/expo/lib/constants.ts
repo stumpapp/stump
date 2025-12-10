@@ -91,6 +91,7 @@ const light = {
 	thumbnail: {
 		border: 'rgba(31, 33, 35, 0.10)',
 		placeholder: '#F2F2F2',
+		stack: 'rgb(216 188 170)',
 	},
 }
 
@@ -171,6 +172,7 @@ const dark: Theme = {
 	thumbnail: {
 		border: 'rgba(233, 234, 235, 0.10)',
 		placeholder: '#1C1C1C',
+		stack: 'rgb(80 59 48)',
 	},
 }
 

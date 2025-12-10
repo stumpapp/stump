@@ -3127,7 +3127,7 @@ export type StumpConfig = {
   refreshTokenTtl: Scalars['Int']['output'];
   /** The time in seconds that a login session will be valid for. */
   sessionTtl: Scalars['Int']['output'];
-  /** The verbosity with which to log errors (default: 0). */
+  /** The verbosity with which system logs are visible (default: 1). */
   verbosity: Scalars['Int']['output'];
 };
 
@@ -3701,7 +3701,7 @@ export type RecentlyAddedSeriesGridQuery = { __typename?: 'Query', series: { __t
       & { ' $fragmentRefs'?: { 'SeriesGridItemFragment': SeriesGridItemFragment } }
     )>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', totalPages: number, currentPage: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
 
-export type RecentlyAddedSeriesItemFragment = { __typename?: 'Series', id: string, resolvedName: string, readCount: number, mediaCount: number, createdAt: any, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } & { ' $fragmentName'?: 'RecentlyAddedSeriesItemFragment' };
+export type RecentlyAddedSeriesItemFragment = { __typename?: 'Series', id: string, resolvedName: string, readCount: number, mediaCount: number, createdAt: any, media: Array<{ __typename?: 'Media', resolvedName: string, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } }> } & { ' $fragmentName'?: 'RecentlyAddedSeriesItemFragment' };
 
 export type SeriesGridItemFragment = { __typename?: 'Series', id: string, resolvedName: string, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } & { ' $fragmentName'?: 'SeriesGridItemFragment' };
 
@@ -4971,15 +4971,18 @@ export const RecentlyAddedSeriesItemFragmentDoc = new TypedDocumentString(`
     fragment RecentlyAddedSeriesItem on Series {
   id
   resolvedName
-  thumbnail {
-    url
-    metadata {
-      averageColor
-      colors {
-        color
-        percentage
+  media {
+    resolvedName
+    thumbnail {
+      url
+      metadata {
+        averageColor
+        colors {
+          color
+          percentage
+        }
+        thumbhash
       }
-      thumbhash
     }
   }
   readCount
@@ -5968,15 +5971,18 @@ export const RecentlyAddedSeriesHorizontalDocument = new TypedDocumentString(`
     fragment RecentlyAddedSeriesItem on Series {
   id
   resolvedName
-  thumbnail {
-    url
-    metadata {
-      averageColor
-      colors {
-        color
-        percentage
+  media {
+    resolvedName
+    thumbnail {
+      url
+      metadata {
+        averageColor
+        colors {
+          color
+          percentage
+        }
+        thumbhash
       }
-      thumbhash
     }
   }
   readCount

@@ -806,11 +806,14 @@ export type Library = {
   /** Get the details of the last scan job for this library, if any exists. */
   lastScan?: Maybe<LibraryScanRecord>;
   lastScannedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** Get media in this library */
+  media: Array<Media>;
   mediaAlphabet: Scalars['JSONObject']['output'];
   name: Scalars['String']['output'];
   path: Scalars['String']['output'];
   /** Get the full history of scan jobs for this library. */
   scanHistory: Array<LibraryScanRecord>;
+  /** Get series in this library */
   series: Array<Series>;
   seriesAlphabet: Scalars['JSONObject']['output'];
   stats: LibraryStats;
@@ -824,6 +827,16 @@ export type Library = {
   thumbnailMeta?: Maybe<ImageMetadata>;
   thumbnailPath?: Maybe<Scalars['String']['output']>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+
+export type LibraryMediaArgs = {
+  take?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type LibrarySeriesArgs = {
+  take?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -2750,6 +2763,7 @@ export type Series = {
   isFavorite: Scalars['Boolean']['output'];
   library: Library;
   libraryId?: Maybe<Scalars['String']['output']>;
+  /** Get media in this series */
   media: Array<Media>;
   mediaAlphabet: Scalars['JSONObject']['output'];
   mediaCount: Scalars['Int']['output'];
@@ -2772,6 +2786,11 @@ export type Series = {
   unreadCount: Scalars['Int']['output'];
   upNext: Array<Media>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+
+export type SeriesMediaArgs = {
+  take?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -4971,7 +4990,7 @@ export const RecentlyAddedSeriesItemFragmentDoc = new TypedDocumentString(`
     fragment RecentlyAddedSeriesItem on Series {
   id
   resolvedName
-  media {
+  media(take: 3) {
     resolvedName
     thumbnail {
       url
@@ -5971,7 +5990,7 @@ export const RecentlyAddedSeriesHorizontalDocument = new TypedDocumentString(`
     fragment RecentlyAddedSeriesItem on Series {
   id
   resolvedName
-  media {
+  media(take: 3) {
     resolvedName
     thumbnail {
       url

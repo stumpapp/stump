@@ -7,7 +7,7 @@ use async_graphql::{
 use models::{
 	entity::{
 		library, library_config, library_exclusion, library_scan_record, library_tag,
-		series, tag, user,
+		media, series, tag, user,
 	},
 	shared::{
 		alphabet::{AvailableAlphabet, EntityLetter},
@@ -16,14 +16,16 @@ use models::{
 	},
 };
 use sea_orm::{
-	prelude::*, sea_query::Query, DatabaseBackend, FromQueryResult, QueryOrder, Statement,
+	prelude::*,
+	sea_query::{Alias, Func, Query, SimpleExpr},
+	DatabaseBackend, FromQueryResult, QueryOrder, QuerySelect, QueryTrait, Statement,
 };
 
 use crate::{
 	data::{AuthContext, CoreContext, ServiceContext},
 	guard::PermissionGuard,
 	loader::favorite::{FavoriteLibraryLoaderKey, FavoritesLoader},
-	object::library_scan_record::LibraryScanRecord,
+	object::{library_scan_record::LibraryScanRecord, media::Media},
 };
 
 use super::{library_config::LibraryConfig, series::Series, tag::Tag, user::User};
@@ -107,6 +109,40 @@ impl Library {
 		Ok(record.map(LibraryScanRecord::from))
 	}
 
+	// TODO(perf): We probably could put this behind a dataloader if used frequently
+	/// Get media in this library
+	async fn media(
+		&self,
+		ctx: &Context<'_>,
+		#[graphql(default, validator(minimum = 1))] take: Option<u64>,
+	) -> Result<Vec<Media>> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let models = media::ModelWithMetadata::find_for_user(user)
+			.filter(
+				media::Column::SeriesId.in_subquery(
+					Query::select()
+						.column(series::Column::Id)
+						.from(series::Entity)
+						.and_where(series::Column::LibraryId.eq(self.model.id.clone()))
+						.to_owned(),
+				),
+			)
+			// TODO: Consider allowing custom ordering? This is basically the resolvedName ordering
+			// just at the DB level I guess
+			.order_by_asc(SimpleExpr::FunctionCall(Func::coalesce([
+				Expr::col((Alias::new("media_metadata"), Alias::new("title"))).into(),
+				Expr::col((media::Entity, media::Column::Name)).into(),
+			])))
+			.apply_if(take, |query, take| query.limit(take))
+			.into_model::<media::ModelWithMetadata>()
+			.all(conn)
+			.await?;
+
+		Ok(models.into_iter().map(Media::from).collect())
+	}
+
 	async fn media_alphabet(&self, ctx: &Context<'_>) -> Result<HashMap<String, i64>> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
@@ -158,12 +194,24 @@ impl Library {
 		Ok(records.into_iter().map(LibraryScanRecord::from).collect())
 	}
 
-	// TODO(graphql): Pagination
-	async fn series(&self, ctx: &Context<'_>) -> Result<Vec<Series>> {
+	// TODO(perf): We probably could put this behind a dataloader if used frequently
+	/// Get series in this library
+	async fn series(
+		&self,
+		ctx: &Context<'_>,
+		#[graphql(default, validator(minimum = 1))] take: Option<u64>,
+	) -> Result<Vec<Series>> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let models = series::ModelWithMetadata::find()
 			.filter(series::Column::LibraryId.eq(Some(self.model.id.clone())))
+			// TODO: Consider allowing custom ordering? This is basically the resolvedName ordering
+			// just at the DB level I guess
+			.order_by_asc(SimpleExpr::FunctionCall(Func::coalesce([
+				Expr::col((Alias::new("series_metadata"), Alias::new("title"))).into(),
+				Expr::col((series::Entity, series::Column::Name)).into(),
+			])))
+			.apply_if(take, |query, take| query.limit(take))
 			.into_model::<series::ModelWithMetadata>()
 			.all(conn)
 			.await?;

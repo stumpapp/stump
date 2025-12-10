@@ -763,10 +763,13 @@ type Library {
 	isFavorite: Boolean!
 	"Get the details of the last scan job for this library, if any exists."
 	lastScan: LibraryScanRecord
+	"Get media in this library"
+	media(take: Int = null): [Media!]!
 	mediaAlphabet: JSONObject!
 	"Get the full history of scan jobs for this library."
 	scanHistory: [LibraryScanRecord!]!
-	series: [Series!]!
+	"Get series in this library"
+	series(take: Int = null): [Series!]!
 	seriesAlphabet: JSONObject!
 	stats(allUsers: Boolean): LibraryStats!
 	tags: [Tag!]!
@@ -1986,7 +1989,8 @@ type Series {
 	resolvedName: String!
 	resolvedDescription: String
 	library: Library!
-	media: [Media!]!
+	"Get media in this series"
+	media(take: Int = null): [Media!]!
 	mediaCount: Int!
 	mediaAlphabet: JSONObject!
 	upNext(take: Int! = 1, cursor: String): [Media!]!

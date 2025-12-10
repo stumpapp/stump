@@ -13,7 +13,7 @@ const fragment = graphql(`
 	fragment RecentlyAddedSeriesItem on Series {
 		id
 		resolvedName
-		media {
+		media(take: 3) {
 			resolvedName
 			thumbnail {
 				url
@@ -50,11 +50,7 @@ export default function RecentlyAddedSeriesItem({ series }: Props) {
 	const data = useFragment(fragment, series)
 	const router = useRouter()
 
-	// TODO: request the first 3 books' thumbs instead
-	const thumbnailData = data.media
-		.sort((a, b) => a.resolvedName.localeCompare(b.resolvedName))
-		.slice(0, 3)
-		.map((m) => m.thumbnail)
+	const thumbnailData = data.media.map((m) => m.thumbnail)
 
 	return (
 		<Pressable onPress={() => router.push(`/server/${serverID}/series/${data.id}`)}>

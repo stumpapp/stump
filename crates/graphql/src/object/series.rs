@@ -15,10 +15,8 @@ use models::{
 	},
 };
 use sea_orm::{
-	prelude::*,
-	sea_query::{Alias, Func, Query, SimpleExpr},
-	Condition, DatabaseBackend, FromQueryResult, JoinType, QueryOrder, QuerySelect,
-	QueryTrait, Statement,
+	prelude::*, sea_query::Query, Condition, DatabaseBackend, FromQueryResult, JoinType,
+	QueryOrder, QuerySelect, QueryTrait, Statement,
 };
 
 use crate::{
@@ -105,12 +103,8 @@ impl Series {
 
 		let models = media::ModelWithMetadata::find_for_user(user)
 			.filter(media::Column::SeriesId.eq(self.model.id.clone()))
-			// TODO: Consider allowing custom ordering? This is basically the resolvedName ordering
-			// just at the DB level I guess
-			.order_by_asc(SimpleExpr::FunctionCall(Func::coalesce([
-				Expr::col((Alias::new("media_metadata"), Alias::new("title"))).into(),
-				Expr::col((media::Entity, media::Column::Name)).into(),
-			])))
+			// TODO: Consider allowing custom ordering?
+			.order_by_asc(media::Column::Name)
 			.apply_if(take, |query, take| query.limit(take))
 			.into_model::<media::ModelWithMetadata>()
 			.all(conn)

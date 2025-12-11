@@ -190,7 +190,11 @@ export const useColors = () => {
 		setProperty(resolvedTheme, 'foreground.brand', accentColor)
 		setProperty(resolvedTheme, 'fill.brand.DEFAULT', accentColor)
 		setProperty(resolvedTheme, 'fill.brand.hover', accentColor)
-		setProperty(resolvedTheme, 'fill.brand.secondary', `${accentColor}36`)
+		setProperty(
+			resolvedTheme,
+			'fill.brand.secondary',
+			isDarkColorScheme ? `${accentColor}36` : `${accentColor}26`,
+		)
 	}
 
 	return resolvedTheme

@@ -1,4 +1,3 @@
-import { useTheme } from '@react-navigation/native'
 import { useSDK } from '@stump/client'
 import { ImageRef } from '@stump/graphql'
 import { ColorSpace, darken, OKLCH, parse, serialize, sRGB } from 'colorjs.io/fn'
@@ -7,6 +6,7 @@ import { easeGradient } from 'react-native-easing-gradient'
 import LinearGradient from 'react-native-linear-gradient'
 
 import { useColors } from '~/lib/constants'
+import { useColorScheme } from '~/lib/useColorScheme'
 import { usePreferencesStore } from '~/stores'
 
 import { BorderAndShadow } from '../BorderAndShadow'
@@ -21,8 +21,8 @@ ColorSpace.register(OKLCH)
 
 export default function SeriesStackedThumbnails({ thumbnailData }: Props) {
 	const { sdk } = useSDK()
+	const { isDarkColorScheme } = useColorScheme()
 	const colors = useColors()
-	const { dark } = useTheme()
 	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
 
 	const { colors: gradientColors, locations: gradientLocations } = easeGradient({
@@ -167,7 +167,7 @@ export default function SeriesStackedThumbnails({ thumbnailData }: Props) {
 	let backgroundColor = colors.thumbnail.stack
 	if (thumbnailAverageColor) {
 		const color = parse(thumbnailAverageColor)
-		const darkerColor = darken(color, dark ? 0.33 : 0.1)
+		const darkerColor = darken(color, isDarkColorScheme ? 0.33 : 0.1)
 		backgroundColor = serialize(darkerColor, { format: 'hex' })
 	}
 
@@ -191,7 +191,7 @@ export default function SeriesStackedThumbnails({ thumbnailData }: Props) {
 				className="items-center justify-end"
 				style={{
 					...containerSize,
-					backgroundColor: backgroundColor,
+					backgroundColor,
 				}}
 			>
 				{renderThumbnails()}

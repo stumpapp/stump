@@ -62,7 +62,7 @@ export const BorderAndShadow = ({ children, style }: BorderAndShadowProps) => {
 	}
 
 	return (
-		<View style={shadowStyle}>
+		<View style={shadowStyle} shouldRasterizeIOS renderToHardwareTextureAndroid>
 			<View style={clippingStyle}>{children}</View>
 			<View style={borderStyle} />
 		</View>

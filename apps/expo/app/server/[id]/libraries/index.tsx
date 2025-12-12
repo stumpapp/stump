@@ -1,13 +1,13 @@
 import { FlashList } from '@shopify/flash-list'
 import { useInfiniteSuspenseGraphQL, useRefetch } from '@stump/client'
 import { graphql } from '@stump/graphql'
-import { useCallback } from 'react'
+import { useCallback, useRef } from 'react'
 import { Platform, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { useActiveServer } from '~/components/activeServer'
-import { useGridItemSize } from '~/components/grid/useGridItemSize'
 import { LibraryGridItem } from '~/components/library'
+import { useLibraryItemSize } from '~/components/library/useLibraryItemSize'
 import ListEmpty from '~/components/ListEmpty'
 import RefreshControl from '~/components/RefreshControl'
 import { RefreshButton, Text } from '~/components/ui'
@@ -41,7 +41,7 @@ export default function Screen() {
 		'libraries',
 		serverID,
 	])
-	const { numColumns, gap, paddingHorizontal } = useGridItemSize()
+	const { numColumns, verticalGap, paddingHorizontal } = useLibraryItemSize()
 
 	const nodes = data?.pages.flatMap((page) => page.libraries.nodes) || []
 
@@ -53,6 +53,35 @@ export default function Screen() {
 		}
 	}, [hasNextPage, fetchNextPage])
 
+	// This makes sure we do not repeat layout variants if possible:
+	//
+	// For example, there are only two layouts for libraries with 3 series,
+	// and if only the 1st and 3rd libraries have 3 series, then if we used
+	// FlashList index they would have both used the same layout variant
+	const layoutRegistry = useRef({
+		// The layout variant number (non-modulo) assigned to a library ID
+		assignments: new Map<string, number>(),
+		// Record the smallest unused layout variant number (non-modulo) for each catagory
+		counters: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
+	})
+
+	const getLayoutNumber = useCallback((libraryId: string, itemCount: number) => {
+		if (itemCount < 1 || itemCount > 5) return undefined
+
+		const { assignments, counters } = layoutRegistry.current
+
+		if (assignments.has(libraryId)) {
+			return assignments.get(libraryId)!
+		}
+
+		const category = itemCount as 1 | 2 | 3 | 4 | 5
+		const layoutNumber = counters[category]
+		assignments.set(libraryId, layoutNumber)
+		counters[category]++
+
+		return layoutNumber
+	}, [])
+
 	return (
 		<SafeAreaView
 			style={{ flex: 1 }}
@@ -60,7 +89,9 @@ export default function Screen() {
 		>
 			<FlashList
 				data={nodes}
-				renderItem={({ item }) => <LibraryGridItem library={item} />}
+				renderItem={({ item }) => (
+					<LibraryGridItem library={item} getLayoutNumber={getLayoutNumber} />
+				)}
 				contentContainerStyle={{
 					paddingHorizontal: paddingHorizontal,
 					paddingVertical: 16,
@@ -68,7 +99,7 @@ export default function Screen() {
 				numColumns={numColumns}
 				onEndReachedThreshold={ON_END_REACHED_THRESHOLD}
 				onEndReached={onEndReached}
-				ItemSeparatorComponent={() => <View style={{ height: gap * 2 }} />}
+				ItemSeparatorComponent={() => <View style={{ height: verticalGap }} />}
 				contentInsetAdjustmentBehavior="automatic"
 				refreshControl={
 					nodes.length > 0 ? (

@@ -73,7 +73,7 @@ export default function RecentlyAddedSeriesItem({ series }: Props) {
 							{data.resolvedName}
 						</Text>
 						<Text
-							className="flex-1 flex-wrap font-medium"
+							className="flex-1 flex-wrap font-medium tablet:text-base"
 							style={{
 								textShadowOffset: { width: 2, height: 1 },
 								textShadowRadius: 2,

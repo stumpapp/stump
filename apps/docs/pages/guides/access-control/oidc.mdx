@@ -2,7 +2,7 @@ import { Callout, Steps, Tabs } from 'nextra/components'
 
 # OpenID Connect (OIDC)
 
-Stump supports OpenID Connect (OIDC) authentication, allowing users to sign in using external identity providers like Authentik, Keycloak, PocketID, and others.
+Stump supports OpenID Connect (OIDC) authentication, allowing users to sign in using external identity providers like Authelia, Keycloak, PocketID, and others.
 
 ## Provider Configuration
 
@@ -18,18 +18,18 @@ If needed, you may also specify the logout URL as:
 
 `https://<your-stump-domain>/api/v2/auth/logout`
 
-### Authentik
+### Authelia
 
-1. In the Authentik admin interface, navigate to "Applications" and create a new application
+1. In the Authelia admin interface, navigate to "Applications" and create a new application
 2. Set the "Redirect URIs" to the callback URL according to [above](#callback-url)
 3. Configure the scopes (required `openid` and `email`, optionally `profile`)
 4. Save the application and copy the client ID and secret for use in the [Stump configuration](#required-settings)
 
-#### Authentik YAML
+#### Authelia YAML
 
-An example YAML configuration for Authentik is shown below (thanks to [@wolsen9](https://github.com/stumpapp/stump/issues/246#issuecomment-3597935738)):
+An example YAML configuration for Authelia is shown below (thanks to [@wolsen9](https://github.com/stumpapp/stump/issues/246#issuecomment-3597935738)):
 
-```yaml filename="authentik_oidc.yaml"
+```yaml filename="authelia_oidc.yaml"
 identity_providers:
   oidc:
     # --------------------------------------------------------------------------

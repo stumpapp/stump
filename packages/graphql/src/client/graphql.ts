@@ -806,11 +806,14 @@ export type Library = {
   /** Get the details of the last scan job for this library, if any exists. */
   lastScan?: Maybe<LibraryScanRecord>;
   lastScannedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** Get media in this library */
+  media: Array<Media>;
   mediaAlphabet: Scalars['JSONObject']['output'];
   name: Scalars['String']['output'];
   path: Scalars['String']['output'];
   /** Get the full history of scan jobs for this library. */
   scanHistory: Array<LibraryScanRecord>;
+  /** Get series in this library */
   series: Array<Series>;
   seriesAlphabet: Scalars['JSONObject']['output'];
   stats: LibraryStats;
@@ -824,6 +827,16 @@ export type Library = {
   thumbnailMeta?: Maybe<ImageMetadata>;
   thumbnailPath?: Maybe<Scalars['String']['output']>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+
+export type LibraryMediaArgs = {
+  take?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type LibrarySeriesArgs = {
+  take?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -2750,6 +2763,7 @@ export type Series = {
   isFavorite: Scalars['Boolean']['output'];
   library: Library;
   libraryId?: Maybe<Scalars['String']['output']>;
+  /** Get media in this series */
   media: Array<Media>;
   mediaAlphabet: Scalars['JSONObject']['output'];
   mediaCount: Scalars['Int']['output'];
@@ -2772,6 +2786,11 @@ export type Series = {
   unreadCount: Scalars['Int']['output'];
   upNext: Array<Media>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+
+export type SeriesMediaArgs = {
+  take?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -3127,7 +3146,7 @@ export type StumpConfig = {
   refreshTokenTtl: Scalars['Int']['output'];
   /** The time in seconds that a login session will be valid for. */
   sessionTtl: Scalars['Int']['output'];
-  /** The verbosity with which to log errors (default: 0). */
+  /** The verbosity with which system logs are visible (default: 1). */
   verbosity: Scalars['Int']['output'];
 };
 
@@ -3701,7 +3720,7 @@ export type RecentlyAddedSeriesGridQuery = { __typename?: 'Query', series: { __t
       & { ' $fragmentRefs'?: { 'SeriesGridItemFragment': SeriesGridItemFragment } }
     )>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', totalPages: number, currentPage: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
 
-export type RecentlyAddedSeriesItemFragment = { __typename?: 'Series', id: string, resolvedName: string, readCount: number, mediaCount: number, createdAt: any, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } & { ' $fragmentName'?: 'RecentlyAddedSeriesItemFragment' };
+export type RecentlyAddedSeriesItemFragment = { __typename?: 'Series', id: string, resolvedName: string, readCount: number, mediaCount: number, createdAt: any, media: Array<{ __typename?: 'Media', resolvedName: string, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } }> } & { ' $fragmentName'?: 'RecentlyAddedSeriesItemFragment' };
 
 export type SeriesGridItemFragment = { __typename?: 'Series', id: string, resolvedName: string, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } & { ' $fragmentName'?: 'SeriesGridItemFragment' };
 
@@ -3958,7 +3977,7 @@ export type BookLibrarySeriesLinksQueryVariables = Exact<{
 
 export type BookLibrarySeriesLinksQuery = { __typename?: 'Query', seriesById?: { __typename?: 'Series', id: string, name: string, libraryId?: string | null } | null };
 
-export type BookMetadataFragment = { __typename?: 'Media', metadata?: { __typename?: 'MediaMetadata', ageRating?: number | null, characters: Array<string>, colorists: Array<string>, coverArtists: Array<string>, editors: Array<string>, genres: Array<string>, inkers: Array<string>, letterers: Array<string>, links: Array<string>, pencillers: Array<string>, publisher?: string | null, teams: Array<string>, writers: Array<string>, year?: number | null } | null } & { ' $fragmentName'?: 'BookMetadataFragment' };
+export type BookMetadataFragment = { __typename?: 'Media', metadata?: { __typename?: 'MediaMetadata', ageRating?: number | null, characters: Array<string>, colorists: Array<string>, coverArtists: Array<string>, editors: Array<string>, genres: Array<string>, inkers: Array<string>, letterers: Array<string>, links: Array<string>, pencillers: Array<string>, publisher?: string | null, teams: Array<string>, writers: Array<string>, year?: number | null, month?: number | null, day?: number | null } | null } & { ' $fragmentName'?: 'BookMetadataFragment' };
 
 export type BookOverviewHeaderQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -4747,8 +4766,10 @@ export type SmartListItemsQuery = { __typename?: 'Query', smartListItems: { __ty
         & { ' $fragmentRefs'?: { 'BookCardFragment': BookCardFragment;'BookMetadataFragment': BookMetadataFragment } }
       )> }> } | { __typename: 'SmartListUngrouped', books: Array<(
       { __typename?: 'Media' }
-      & { ' $fragmentRefs'?: { 'BookCardFragment': BookCardFragment;'BookMetadataFragment': BookMetadataFragment } }
+      & { ' $fragmentRefs'?: { 'BookCardFragment': BookCardFragment;'SmartListItemBookMetadataFragment': SmartListItemBookMetadataFragment } }
     )> } };
+
+export type SmartListItemBookMetadataFragment = { __typename?: 'Media', metadata?: { __typename?: 'MediaMetadata', ageRating?: number | null, characters: Array<string>, colorists: Array<string>, coverArtists: Array<string>, editors: Array<string>, genres: Array<string>, inkers: Array<string>, letterers: Array<string>, links: Array<string>, pencillers: Array<string>, publisher?: string | null, teams: Array<string>, writers: Array<string>, year?: number | null, month?: number | null, day?: number | null, format?: string | null, identifierAmazon?: string | null, identifierCalibre?: string | null, identifierGoogle?: string | null, identifierIsbn?: string | null, identifierMobiAsin?: string | null, identifierUuid?: string | null, language?: string | null, notes?: string | null, number?: any | null, pageCount?: number | null, series?: string | null, seriesGroup?: string | null, storyArc?: string | null, storyArcNumber?: any | null, title?: string | null, titleSort?: string | null, volume?: number | null } | null } & { ' $fragmentName'?: 'SmartListItemBookMetadataFragment' };
 
 export type CreateSmartListViewMutationVariables = Exact<{
   input: SaveSmartListView;
@@ -4977,15 +4998,18 @@ export const RecentlyAddedSeriesItemFragmentDoc = new TypedDocumentString(`
     fragment RecentlyAddedSeriesItem on Series {
   id
   resolvedName
-  thumbnail {
-    url
-    metadata {
-      averageColor
-      colors {
-        color
-        percentage
+  media(take: 3) {
+    resolvedName
+    thumbnail {
+      url
+      metadata {
+        averageColor
+        colors {
+          color
+          percentage
+        }
+        thumbhash
       }
-      thumbhash
     }
   }
   readCount
@@ -5136,6 +5160,8 @@ export const BookMetadataFragmentDoc = new TypedDocumentString(`
     teams
     writers
     year
+    month
+    day
   }
 }
     `, {"fragmentName":"BookMetadata"}) as unknown as TypedDocumentString<BookMetadataFragment, unknown>;
@@ -5251,6 +5277,46 @@ export const SmartListCardFragmentDoc = new TypedDocumentString(`
   name
 }
     `, {"fragmentName":"SmartListCard"}) as unknown as TypedDocumentString<SmartListCardFragment, unknown>;
+export const SmartListItemBookMetadataFragmentDoc = new TypedDocumentString(`
+    fragment SmartListItemBookMetadata on Media {
+  metadata {
+    ageRating
+    characters
+    colorists
+    coverArtists
+    editors
+    genres
+    inkers
+    letterers
+    links
+    pencillers
+    publisher
+    teams
+    writers
+    year
+    month
+    day
+    format
+    identifierAmazon
+    identifierCalibre
+    identifierGoogle
+    identifierIsbn
+    identifierMobiAsin
+    identifierUuid
+    language
+    notes
+    number
+    pageCount
+    series
+    seriesGroup
+    storyArc
+    storyArcNumber
+    title
+    titleSort
+    volume
+  }
+}
+    `, {"fragmentName":"SmartListItemBookMetadata"}) as unknown as TypedDocumentString<SmartListItemBookMetadataFragment, unknown>;
 export const SearchMediaDocument = new TypedDocumentString(`
     query SearchMedia($filter: MediaFilterInput!) {
   media(filter: $filter, pagination: {cursor: {limit: 10}}) {
@@ -5932,15 +5998,18 @@ export const RecentlyAddedSeriesHorizontalDocument = new TypedDocumentString(`
     fragment RecentlyAddedSeriesItem on Series {
   id
   resolvedName
-  thumbnail {
-    url
-    metadata {
-      averageColor
-      colors {
-        color
-        percentage
+  media(take: 3) {
+    resolvedName
+    thumbnail {
+      url
+      metadata {
+        averageColor
+        colors {
+          color
+          percentage
+        }
+        thumbhash
       }
-      thumbhash
     }
   }
   readCount
@@ -6936,6 +7005,8 @@ fragment BookMetadata on Media {
     teams
     writers
     year
+    month
+    day
   }
 }`) as unknown as TypedDocumentString<BookSearchSceneQuery, BookSearchSceneQueryVariables>;
 export const CreateLibrarySceneExistingLibrariesDocument = new TypedDocumentString(`
@@ -7203,6 +7274,8 @@ fragment BookMetadata on Media {
     teams
     writers
     year
+    month
+    day
   }
 }`) as unknown as TypedDocumentString<LibraryBooksSceneQuery, LibraryBooksSceneQueryVariables>;
 export const LibrarySeriesDocument = new TypedDocumentString(`
@@ -7476,6 +7549,8 @@ fragment BookMetadata on Media {
     teams
     writers
     year
+    month
+    day
   }
 }`) as unknown as TypedDocumentString<SeriesBooksSceneQuery, SeriesBooksSceneQueryVariables>;
 export const SeriesBookGridDocument = new TypedDocumentString(`
@@ -8167,7 +8242,7 @@ export const SmartListItemsDocument = new TypedDocumentString(`
     ... on SmartListUngrouped {
       books {
         ...BookCard
-        ...BookMetadata
+        ...SmartListItemBookMetadata
       }
     }
   }
@@ -8209,6 +8284,46 @@ fragment BookMetadata on Media {
     teams
     writers
     year
+    month
+    day
+  }
+}
+fragment SmartListItemBookMetadata on Media {
+  metadata {
+    ageRating
+    characters
+    colorists
+    coverArtists
+    editors
+    genres
+    inkers
+    letterers
+    links
+    pencillers
+    publisher
+    teams
+    writers
+    year
+    month
+    day
+    format
+    identifierAmazon
+    identifierCalibre
+    identifierGoogle
+    identifierIsbn
+    identifierMobiAsin
+    identifierUuid
+    language
+    notes
+    number
+    pageCount
+    series
+    seriesGroup
+    storyArc
+    storyArcNumber
+    title
+    titleSort
+    volume
   }
 }`) as unknown as TypedDocumentString<SmartListItemsQuery, SmartListItemsQueryVariables>;
 export const CreateSmartListViewDocument = new TypedDocumentString(`

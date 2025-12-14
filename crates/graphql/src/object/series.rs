@@ -16,7 +16,7 @@ use models::{
 };
 use sea_orm::{
 	prelude::*, sea_query::Query, Condition, DatabaseBackend, FromQueryResult, JoinType,
-	QueryOrder, QuerySelect, Statement,
+	QueryOrder, QuerySelect, QueryTrait, Statement,
 };
 
 use crate::{
@@ -91,12 +91,21 @@ impl Series {
 		Ok(Library::from(model))
 	}
 
-	async fn media(&self, ctx: &Context<'_>) -> Result<Vec<Media>> {
+	// TODO(perf): We probably could put this behind a dataloader if used frequently
+	/// Get media in this series
+	async fn media(
+		&self,
+		ctx: &Context<'_>,
+		#[graphql(default, validator(minimum = 1))] take: Option<u64>,
+	) -> Result<Vec<Media>> {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let models = media::ModelWithMetadata::find_for_user(user)
 			.filter(media::Column::SeriesId.eq(self.model.id.clone()))
+			// TODO: Consider allowing custom ordering?
+			.order_by_asc(media::Column::Name)
+			.apply_if(take, |query, take| query.limit(take))
 			.into_model::<media::ModelWithMetadata>()
 			.all(conn)
 			.await?;

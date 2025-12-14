@@ -110,8 +110,8 @@ pub struct StumpConfig {
 	#[env_key(PORT_KEY)]
 	pub port: u16,
 
-	/// The verbosity with which to log errors (default: 0).
-	#[default_value(0)]
+	/// The verbosity with which system logs are visible (default: 1).
+	#[default_value(1)]
 	#[env_key(VERBOSITY_KEY)]
 	pub verbosity: u64,
 

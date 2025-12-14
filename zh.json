@@ -1,0 +1,1978 @@
+{
+	"underConstruction": {
+		"heading": "这有点尴尬",
+		"message": "您访问的页面还在开发中。我很想展示给您，但它还没准备好呢。",
+		"homeLink": "返回首页",
+		"githubLink": "查看GitHub issue"
+	},
+	"authScene": {
+		"claimHeading": "初始化您的服务器",
+		"claimText": "此Stump服务器尚未初始化。请使用下方表单创建账户。创建后，您将拥有服务器所有功能的完整访问权限。",
+		"form": {
+			"validation": {
+				"missingUsername": "用户名为必填项",
+				"missingPassword": "密码为必填项",
+				"usernameAlreadyExists": "用户名已存在"
+			},
+			"labels": {
+				"username": "用户名",
+				"password": "密码"
+			},
+			"buttons": {
+				"createAccount": "创建帐户",
+				"login": "登录"
+			}
+		},
+		"toasts": {
+			"loggingIn": "登录中……",
+			"loggedIn": "欢迎回来！",
+			"loggedInFirstTime": "欢迎加入！",
+			"registering": "注册中...",
+			"registered": "注册成功！",
+			"loginFailed": "登录失败，请重新尝试",
+			"registrationFailed": "注册失败，请重试。"
+		}
+	},
+	"adminLibrarySidebar": {
+		"libraryConfiguration": {
+			"heading": "图书馆设置",
+			"subtitleCreating": "您的新图书馆预览将在下方显示",
+			"subtitleEditing": "您编辑的图书馆预览将在下方显示"
+		}
+	},
+	"bookOverviewScene": {
+		"fileInformation": {
+			"heading": "文件信息",
+			"labels": {
+				"fileSize": "文件大小",
+				"fileType": "文件类型",
+				"fileLocation": "文件位置",
+				"fileChecksum": "校验和"
+			}
+		},
+		"emailBook": {
+			"heading": "通过邮件发送书籍",
+			"description": "将此书发送到设备或邮箱地址",
+			"form": {
+				"email": {
+					"label": "邮箱",
+					"placeholder": "邮箱地址",
+					"description": "接收书籍的邮箱地址。点击添加完成每个输入"
+				},
+				"devices": {
+					"label": "设备",
+					"placeholder": "选择设备",
+					"noFilterMatch": "没有符合筛选条件的设备"
+				}
+			}
+		},
+		"nextInSeries": "系列中的下一本"
+	},
+	"createOrUpdateBookClubForm": {
+		"fields": {
+			"name": {
+				"label": "名称",
+				"placeholder": "我的读书俱乐部",
+				"description": "您的读书俱乐部名称"
+			},
+			"description": {
+				"label": "描述",
+				"placeholder": "《海盗旗升起》粉丝俱乐部。我们尽情阅读海盗小说",
+				"description": "可选的俱乐部简短描述"
+			},
+			"is_private": {
+				"label": "私人俱乐部",
+				"description": "若启用，只有您邀请的用户才能加入俱乐部"
+			},
+			"member_role_spec": {
+				"heading": "自定义角色映射",
+				"subtitle": [
+					"您可以为俱乐部中的角色创建自定义名称。更多信息请参考",
+					"文档"
+				],
+				"member": {
+					"label": "成员",
+					"placeholder": "成员",
+					"description": "俱乐部默认角色名称"
+				},
+				"moderator": {
+					"label": "版主",
+					"placeholder": "版主",
+					"description": "俱乐部版主角色名称"
+				},
+				"admin": {
+					"label": "管理员",
+					"placeholder": "管理员",
+					"description": "俱乐部管理员角色名称"
+				},
+				"creator": {
+					"label": "创建者",
+					"placeholder": "创建者",
+					"description": "俱乐部创建者角色名称。就是您！"
+				}
+			},
+			"membershipOptions": {
+				"displayName": {
+					"label": "显示名称",
+					"placeholder": "oromei",
+					"description": "您在俱乐部中的可选显示名称。设置后将优先于用户名显示"
+				},
+				"hideProgress": {
+					"label": "隐藏阅读进度",
+					"description": "若启用，您的阅读进度将对俱乐部其他成员隐藏"
+				}
+			}
+		},
+		"validation": {
+			"missingName": "名称为必填项",
+			"alreadyTaken": "已被占用"
+		}
+	},
+	"createBookClubScene": {
+		"heading": "创建新的读书俱乐部",
+		"subtitle": "您可以创建私人读书俱乐部，也可以创建公开的供任何人加入",
+		"form": {
+			"stepLabel": "步骤",
+			"steps": [
+				{
+					"label": "基础信息",
+					"heading": "基本信息",
+					"description": "俱乐部详情，包括名称和描述"
+				},
+				{
+					"label": "角色",
+					"heading": "角色设置",
+					"description": "自定义俱乐部中的角色"
+				},
+				{
+					"label": "成员",
+					"heading": "成员偏好设置",
+					"description": "俱乐部的其他选项"
+				},
+				{
+					"label": "确认",
+					"heading": "确认信息",
+					"description": "创建前请确认俱乐部设置"
+				}
+			],
+			"review": {
+				"yes": "是",
+				"no": "否",
+				"none": "无",
+				"labels": {
+					"name": "名称",
+					"description": "描述"
+				}
+			},
+			"submit": "创建读书俱乐部"
+		}
+	},
+	"bookClubSettingsScene": {
+		"sidebar": {
+			"basics": "基本信息",
+			"members": {
+				"members": "成员",
+				"roles": "角色",
+				"label": "成员管理"
+			},
+			"scheduling": {
+				"scheduler": "阅读计划",
+				"options": "计划选项",
+				"label": "阅读安排"
+			},
+			"danger-zone": {
+				"delete": "删除",
+				"label": "危险操作区"
+			}
+		},
+		"basics": {
+			"title": "基本信息",
+			"description": "此读书俱乐部的详情，包括名称和描述",
+			"form": {
+				"submit": "更新俱乐部"
+			}
+		},
+		"members": {
+			"title": "成员管理",
+			"description": "管理此读书俱乐部的成员",
+			"sections": {}
+		},
+		"roles": {
+			"title": "角色设置",
+			"description": "自定义此读书俱乐部的角色",
+			"sections": {
+				"roleMappings": {
+					"heading": "现有角色映射",
+					"description": "此读书俱乐部当前的角色映射"
+				}
+			}
+		},
+		"scheduling/scheduler": {
+			"title": "阅读计划",
+			"description": "创建和管理此读书俱乐部的阅读计划"
+		},
+		"scheduling/options": {
+			"title": "计划选项",
+			"description": "此读书俱乐部阅读安排的附加选项"
+		},
+		"danger-zone/delete": {
+			"title": "删除操作",
+			"description": "永久删除此读书俱乐部及其所有内容或特定资源",
+			"sections": {
+				"deleteClub": {
+					"heading": "删除俱乐部",
+					"description": [
+						"永久删除此读书俱乐部及其所有内容。",
+						"此操作无法撤销"
+					],
+					"trigger": "删除俱乐部"
+				}
+			}
+		}
+	},
+	"createOrUpdateLibraryForm": {
+		"fields": {
+			"name": {
+				"label": "名称",
+				"description": "图书馆的友好名称",
+				"placeholder": "我的图书馆"
+			},
+			"path": {
+				"label": "路径",
+				"description": "图书馆在服务器上的存储路径",
+				"placeholder": "/path/to/library"
+			},
+			"description": {
+				"label": "描述",
+				"description": "图书馆的简短描述",
+				"placeholder": "我最爱的书籍收藏库"
+			},
+			"tags": {
+				"label": "标签",
+				"description": "用于对图书馆进行分类或设置访问规则"
+			},
+			"readingSettings": {
+				"section": {
+					"heading": "阅读设置",
+					"description": "书籍默认阅读器设置"
+				},
+				"imageScaling": {
+					"label": "图片缩放",
+					"description": "图片类阅读器如何将图片缩放至页面大小"
+				},
+				"readingMode": {
+					"label": "默认阅读器",
+					"description": "图片类书籍使用的默认阅读器"
+				},
+				"readingDirection": {
+					"label": "阅读方向",
+					"description": "阅读器翻页的方向"
+				}
+			},
+			"thumbnailConfig": {
+				"section": {
+					"heading": {
+						"create": "缩略图配置",
+						"update": "生成设置"
+					},
+					"description": "生成书籍缩略图，提升浏览图书馆时的加载速度"
+				},
+				"enableSwitch": {
+					"label": "启用",
+					"description": "为此图书馆生成缩略图"
+				},
+				"scaled": {
+					"label": "按比例缩放",
+					"description": "按自定义比例缩放图片的每个维度",
+					"width": {
+						"label": "宽度比例"
+					},
+					"height": {
+						"label": "高度比例"
+					}
+				},
+				"sized": {
+					"label": "固定尺寸",
+					"description": "设置缩略图的每个维度（像素）",
+					"width": {
+						"label": "宽度"
+					},
+					"height": {
+						"label": "高度"
+					}
+				},
+				"format": {
+					"label": "图片格式",
+					"description": "生成的缩略图图片格式"
+				},
+				"quality": {
+					"label": "质量",
+					"description": "生成的缩略图质量，范围0到1.0"
+				}
+			},
+			"ignoreRules": {
+				"section": {
+					"heading": "忽略规则",
+					"description": "定义扫描时忽略特定文件或目录的 glob 模式"
+				},
+				"noRules": "尚未配置忽略规则",
+				"save": "保存更改",
+				"addRule": {
+					"label": "新规则",
+					"description": "用于忽略文件或目录的 glob 模式",
+					"addButton": "添加规则",
+					"ignoreParents": {
+						"title": "忽略所有父目录",
+						"label": "忽略父目录"
+					},
+					"ignoreSubdirs": {
+						"title": "忽略所有子目录",
+						"label": "忽略子目录"
+					}
+				},
+				"invalidGlob": "无效的 glob 模式",
+				"lockConfig": {
+					"lock": "锁定配置",
+					"unlock": "解锁配置"
+				},
+				"editRule": "编辑规则",
+				"deleteRule": "删除规则",
+				"cancelEdit": "取消编辑",
+				"confirmEdit": "确认编辑"
+			},
+			"convertOptions": {
+				"section": {
+					"heading": "文件转换",
+					"description": "Stump 能够将某些文件格式转换为更兼容的格式"
+				},
+				"rarToZip": {
+					"label": "将 RAR 转换为 ZIP",
+					"description": "扫描时将 RAR/CBR 文件转换为 ZIP/CBZ 文件"
+				},
+				"deleteRarAfter": {
+					"label": "转换后删除 RAR",
+					"description": "转换后删除原始 RAR/CBR 文件。此操作不可逆"
+				}
+			},
+			"scannerFeatures": {
+				"section": {
+					"heading": "可选处理",
+					"description": "扫描器的可选处理功能",
+					"disclaimer": "这些功能涉及额外的文件读取，可能会减慢扫描过程"
+				},
+				"processMetadata": {
+					"label": "处理元数据",
+					"description": "从库文件中提取元数据并将结果存储到数据库"
+				},
+				"watch": {
+					"label": "实时监控",
+					"description": "监控图书馆目录的变化并相应地更新数据库"
+				},
+				"generateFileHashes": {
+					"label": "生成文件哈希",
+					"description": "为库中的每个文件生成哈希以检测重复文件"
+				},
+				"koreaderHashes": {
+					"label": "KoReader 兼容哈希",
+					"description": "如果使用 KoReader，生成其所需格式的额外哈希"
+				}
+			},
+			"libraryPattern": {
+				"section": {
+					"heading": "组织方式",
+					"description": "选择与您的图书馆组织方式最匹配的模式",
+					"docs": [
+						"不确定选择哪个？点击",
+						"这里",
+						"了解更多信息。",
+						"此设置后续无法更改"
+					],
+					"disabled": "此设置无法更改"
+				},
+				"options": {
+					"label": "图书馆模式",
+					"description": "决定 Stump 如何组织您的图书馆的设置",
+					"collectionPriority": {
+						"label": "集合优先",
+						"description": "图书馆根目录下的每个顶级文件夹为一个系列"
+					},
+					"seriesPriority": {
+						"label": "系列优先",
+						"description": "任何层级的每个文件夹均为一个系列（递归）"
+					}
+				}
+			}
+		},
+		"scan": {
+			"label": {
+				"create": "创建后扫描",
+				"update": "更新后扫描"
+			},
+			"description": "索引图书馆文件以填充数据库"
+		}
+	},
+	"createLibraryScene": {
+		"heading": "新建书库",
+		"subtitle": "书库用于对您的书籍进行分组。如需了解书库及其工作原理，请查看",
+		"subtitleLink": "相关文档",
+		"form": {
+			"stepLabel": "步骤",
+			"steps": [
+				{
+					"label": "基础信息",
+					"heading": "基本信息",
+					"description": "书库详情，包括名称、路径和描述"
+				},
+				{
+					"label": "扫描设置",
+					"heading": "扫描配置",
+					"description": "与 Stump 扫描此书库相关的设置"
+				},
+				{
+					"label": "缩略图",
+					"heading": "缩略图设置",
+					"description": "Stump 是否及如何为此书库生成缩略图的选项"
+				},
+				{
+					"label": "确认",
+					"heading": "确认信息",
+					"description": "创建前请确认书库设置"
+				}
+			],
+			"review": {
+				"yes": "是",
+				"no": "否",
+				"none": "无",
+				"labels": {
+					"generateThumbnails": "生成缩略图",
+					"mode": "模式",
+					"format": "格式",
+					"quality": "质量",
+					"name": "名称",
+					"path": "路径",
+					"description": "描述",
+					"tags": "标签",
+					"pattern": "模式",
+					"ignoreRules": "忽略规则",
+					"convertRar": "转换 RAR/CBR",
+					"deleteConversions": "删除转换文件",
+					"watch": "监控目录变化",
+					"processMetadata": "处理元数据",
+					"generateFileHashes": "生成文件哈希"
+				}
+			},
+			"buttons": {
+				"confirm": "新建书库"
+			}
+		}
+	},
+	"fileExplorer": {
+		"uploadModal": {
+			"title": {
+				"books": "上传书籍",
+				"series": "上传系列"
+			},
+			"description": {
+				"books": "直接向文件浏览器的当前路径添加书籍",
+				"series": "直接向文件浏览器的当前路径添加系列"
+			},
+			"seriesDisclaimer": [
+				"必须是",
+				"压缩文件",
+				"，包含作为系列的文件夹，且所有书籍在该文件夹内"
+			],
+			"dropzone": {
+				"books": "将书籍拖放至此处",
+				"series": "将压缩文件拖放至此处",
+				"alt": "或点击浏览计算机选择要上传的书籍"
+			},
+			"addedFiles": "已添加文件"
+		}
+	},
+	"librarySettingsScene": {
+		"heading": "管理书库",
+		"subtitle": "更新书库的详细信息或配置，更改访问控制规则，或扫描文件。如需了解书库及其工作原理，请查看",
+		"subtitleLink": "相关文档",
+		"sidebar": {
+			"basics": "基本信息",
+			"options": {
+				"general": "通用",
+				"reading": "阅读",
+				"scanning": "扫描",
+				"thumbnails": "缩略图",
+				"ignore-rules": "忽略规则",
+				"analysis": "分析",
+				"label": "选项"
+			},
+			"danger-zone": {
+				"access-control": "访问控制",
+				"delete": "删除",
+				"label": "危险操作区"
+			}
+		},
+		"basics": {
+			"title": "基本信息",
+			"description": "此书库的详情，包括名称、路径和描述",
+			"form": {
+				"submit": "更新书库"
+			}
+		},
+		"options/reading": {
+			"title": "阅读设置",
+			"description": "此书库中书籍使用的默认阅读器设置。任何书籍都可覆盖这些设置"
+		},
+		"options/scanning": {
+			"title": "扫描设置",
+			"description": "与 Stump 扫描此书库相关的设置",
+			"sections": {
+				"configureScan": {
+					"heading": "配置扫描",
+					"description": "具有额外选项的扫描，可实现更精细的控制",
+					"form": {
+						"alert": "这些将覆盖相应的书库全局设置",
+						"options": {
+							"forceRebuild": {
+								"label": "强制重建",
+								"description": "重新构建磁盘上书库中的每本书",
+								"alert": "这将从头开始重建书库中的每本书，包括元数据和哈希"
+							},
+							"custom": {
+								"label": "自定义",
+								"description": "自定义扫描配置",
+								"validation": {
+									"noSelection": "至少需启用一个选项"
+								}
+							},
+							"rebuildMeta": {
+								"label": "重建元数据",
+								"description": "重建书库中书籍的元数据"
+							},
+							"regenHashes": {
+								"label": "重新生成哈希",
+								"description": "重新创建书库中书籍的哈希"
+							}
+						}
+					}
+				},
+				"defaultScan": {
+					"heading": "默认扫描",
+					"description": "用于索引书库新内容的标准扫描"
+				},
+				"history": {
+					"heading": "扫描历史",
+					"description": "此书库的所有扫描记录历史",
+					"empty": "此书库暂无扫描记录",
+					"runScan": "运行扫描",
+					"inspect": "查看详情",
+					"inspector": {
+						"title": "扫描记录",
+						"description": "此扫描记录的详细视图",
+						"fields": {
+							"library": "书库",
+							"date": "日期",
+							"config": "配置",
+							"jobOutput": "任务输出",
+							"logs": "日志"
+						},
+						"logsPresent": "此任务已保存日志",
+						"seeLogs": "查看日志"
+					},
+					"table": {
+						"columns": {
+							"timestamp": "扫描时间",
+							"config": "配置"
+						},
+						"default": "默认",
+						"custom": "自定义"
+					},
+					"clearHistory": "删除扫描历史"
+				}
+			}
+		},
+		"options/thumbnails": {
+			"title": "缩略图设置",
+			"description": "此书库缩略图的设置和管理选项",
+			"sections": {
+				"management": {
+					"heading": "管理",
+					"description": "管理此书库的现有缩略图",
+					"thumbnailSelector": {},
+					"deleteThumbnails": {}
+				}
+			}
+		},
+		"options/analysis": {
+			"title": "分析",
+			"description": "分析此书库内容，识别潜在问题或可改进之处",
+			"sections": {
+				"analyzeBooks": {
+					"heading": "分析书籍",
+					"description": "分析书库中的书籍，在数据库中附加额外元数据，例如图片类书籍的页面尺寸",
+					"disclaimer": "此过程消耗资源较多，可能需要一段时间完成。未来将提供更多配置选项",
+					"analyzeButton": "分析书籍"
+				},
+				"missingFiles": {
+					"heading": "缺失文件",
+					"description": "数据库中引用但磁盘上无法找到的文件",
+					"noMissingFiles": "此书库中没有缺失文件"
+				},
+				"duplicateFiles": {
+					"heading": "重复文件",
+					"description": "磁盘上可能重复的文件",
+					"noDuplicateFiles": "此书库中未检测到重复文件"
+				}
+			}
+		},
+		"danger-zone/access-control": {
+			"title": "访问控制",
+			"description": "控制谁可以访问此书库的内容",
+			"sections": {
+				"libraryExclusions": {
+					"heading": "排除用户",
+					"description": "阻止特定用户访问此书库及其内容",
+					"noUsers": "没有其他注册用户可被排除在此书库之外",
+					"updated": "排除列表已更新",
+					"failure": "更新排除列表失败"
+				}
+			}
+		},
+		"danger-zone/delete": {
+			"title": "删除操作",
+			"description": "永久删除此书库及其所有内容或特定资源",
+			"sections": {
+				"cleanLibrary": {
+					"heading": "清理书库",
+					"description": "移除所有无法在磁盘上找到的媒体和系列",
+					"disclaimer": "此操作不会删除任何文件，但会永久删除所有与状态为缺失的媒体和系列相关的记录",
+					"confirmation": {
+						"label": "清理书库",
+						"text": "确定要清理此书库吗？"
+					}
+				},
+				"deleteLibrary": {
+					"heading": "删除书库",
+					"description": [
+						"永久删除此书库及其所有内容。",
+						"此操作无法撤销"
+					]
+				}
+			}
+		}
+	},
+	"errorScene": {
+		"heading": "哎呀，出错了",
+		"message": "发生错误：",
+		"buttons": {
+			"report": "反馈Bug",
+			"copy": "复制错误详情",
+			"goHome": "返回首页"
+		}
+	},
+	"homeScene": {
+		"continueReading": {
+			"title": "继续阅读",
+			"emptyState": {
+				"heading": "暂无内容",
+				"message": "您开始阅读的所有未完成书籍将显示在这里"
+			}
+		},
+		"recentlyAddedSeries": {
+			"title": "最近添加的系列",
+			"emptyState": {
+				"heading": "没有要显示的系列",
+				"message": "您添加到书库中的任何系列都会在此处显示"
+			}
+		},
+		"recentlyAddedBooks": {
+			"title": "最近添加的书籍",
+			"emptyState": {
+				"heading": "暂无内容",
+				"message": "您添加的所有近期书籍将显示在这里"
+			}
+		}
+	},
+	"seriesOverviewScene": {
+		"buttons": {
+			"continueReading": "继续阅读",
+			"downloadSeries": "下载系列文件"
+		}
+	},
+	"createOrUpdateSmartListForm": {
+		"validation": {
+			"nameTooShort": "名称长度至少为2个字符",
+			"nameTaken": "此名称不可用"
+		},
+		"fields": {
+			"name": {
+				"label": "名称",
+				"placeholder": "我的智能列表",
+				"description": "名称必须唯一，但可后续修改"
+			},
+			"description": {
+				"label": "描述",
+				"placeholder": "一个非常智能的列表",
+				"description": "智能列表的可选描述"
+			},
+			"visibility": {
+				"label": "可见性",
+				"options": {
+					"public": {
+						"label": "公开",
+						"description": "服务器上所有用户均可访问"
+					},
+					"shared": {
+						"label": "共享",
+						"description": "特定用户可访问此智能列表",
+						"createDisclaimer": "创建后您可以选择与此列表共享的用户"
+					},
+					"private": {
+						"label": "私人",
+						"description": "仅您可访问此智能列表"
+					}
+				}
+			},
+			"queryBuilder": {
+				"uiPerformance": "此功能在UI上缺少性能优化，对于产生大量结果集的筛选器可能会变慢。未来将改进此问题",
+				"rootJoiner": {
+					"and": {
+						"label": "并且",
+						"description": "所有筛选组都必须为真才能匹配书籍"
+					},
+					"or": {
+						"label": "或者",
+						"description": "至少一个筛选组为真即可匹配书籍"
+					}
+				},
+				"groupJoiner": {
+					"and": {
+						"label": "并且",
+						"description": "所有条件都必须为真"
+					},
+					"or": {
+						"label": "或者",
+						"description": "至少一个条件为真"
+					},
+					"not": {
+						"label": "非",
+						"description": "所有条件都不能为真"
+					}
+				},
+				"grouping": {
+					"label": "分组方式",
+					"description": "此智能列表中的书籍应如何分组",
+					"options": {
+						"by_books": {
+							"label": "不分组"
+						},
+						"by_series": {
+							"label": "按系列"
+						},
+						"by_library": {
+							"label": "按书库"
+						}
+					}
+				},
+				"filters": {
+					"emptyState": "添加一个组开始设置",
+					"actions": {
+						"addFilter": "添加筛选条件",
+						"addGroup": "添加筛选组",
+						"deleteFilter": "删除筛选条件",
+						"deleteGroup": "删除筛选组"
+					},
+					"is": "是",
+					"fieldSelect": {
+						"placeholder": "属性",
+						"source": {
+							"label": "来源",
+							"back": "返回",
+							"book": {
+								"label": "书籍",
+								"attributes": {
+									"name": "文件名",
+									"size": "大小",
+									"extension": "扩展名",
+									"created_at": "创建时间",
+									"updated_at": "更新时间",
+									"status": "状态",
+									"path": "路径",
+									"pages": "页数",
+									"tags": "标签"
+								}
+							},
+							"book_meta": {
+								"label": "书籍元数据",
+								"attributes": {
+									"title": "标题",
+									"summary": "摘要",
+									"notes": "备注",
+									"genre": "类型",
+									"writers": "作者",
+									"pencillers": "铅笔稿师",
+									"inkers": "墨线师",
+									"letterers": "文字编排师",
+									"editors": "编辑",
+									"publisher": "出版商",
+									"colorists": "上色师",
+									"cover_artists": "封面艺术家",
+									"links": "链接",
+									"characters": "角色",
+									"teams": "团队"
+								}
+							},
+							"series": {
+								"label": "系列",
+								"attributes": {
+									"name": "名称",
+									"path": "路径"
+								}
+							},
+							"series_meta": {
+								"label": "系列元数据",
+								"attributes": {
+									"age_rating": "年龄分级",
+									"title": "标题",
+									"summary": "摘要",
+									"meta_type": "类型",
+									"publisher": "出版商",
+									"imprint": "出版社",
+									"comicid": "漫画ID",
+									"booktype": "书籍类型",
+									"status": "状态",
+									"volume": "卷数"
+								}
+							},
+							"library": {
+								"label": "书库",
+								"attributes": {
+									"name": "名称",
+									"path": "路径"
+								}
+							}
+						}
+					},
+					"basicValue": {
+						"placeholder": "值",
+						"date": "日期"
+					},
+					"rangeValue": {
+						"from": {
+							"date": "起始日期",
+							"number": "从"
+						},
+						"to": {
+							"date": "结束日期",
+							"number": "到"
+						},
+						"inclusive": "包含边界"
+					},
+					"listValue": {
+						"placeholder": "添加值",
+						"emptyState": "无值可显示"
+					}
+				}
+			}
+		}
+	},
+	"createSmartListScene": {
+		"heading": "创建智能列表",
+		"subtitle": "基于一组筛选条件动态创建列表",
+		"form": {
+			"stepLabel": "步骤",
+			"steps": [
+				{
+					"label": "基础信息",
+					"heading": "基本信息",
+					"description": "智能列表详情，包括名称、描述和可见性"
+				},
+				{
+					"label": "筛选条件",
+					"heading": "筛选设置",
+					"description": "应用于此智能列表的筛选条件"
+				},
+				{
+					"label": "确认",
+					"heading": "确认信息",
+					"description": "创建前请确认智能列表设置"
+				}
+			],
+			"review": {
+				"yes": "是",
+				"no": "否",
+				"none": "无",
+				"labels": {
+					"name": "名称",
+					"description": "描述",
+					"visibility": "可见性",
+					"grouping": "分组方式"
+				}
+			},
+			"buttons": {
+				"confirm": "创建列表"
+			}
+		}
+	},
+	"createOrUpdateApiKey": {
+		"validation": {
+			"futureDate": "过期日期必须在未来"
+		},
+		"fields": {
+			"name": {
+				"label": "名称",
+				"placeholder": "Koreader 同步"
+			},
+			"expiration": {
+				"label": "过期时间",
+				"placeholder": "永不"
+			},
+			"expires_at": {
+				"label": "过期时间",
+				"placeholder": "永不"
+			},
+			"permissions": {
+				"inherit": {
+					"label": "继承权限",
+					"description": "与您的账户权限相同"
+				},
+				"explicit": {
+					"label": "明确权限",
+					"description": "选择此密钥应拥有的权限"
+				}
+			}
+		},
+		"inheritDisclaimer": "此API密钥将继承您的全部权限，这意味着它可以执行您能执行的任何操作。请谨慎使用此设置"
+	},
+	"userSmartListsScene": {
+		"heading": "智能列表",
+		"subtitle": "您喜爱的搜索和筛选条件已保存，方便随时访问",
+		"searchPlaceholder": "筛选智能列表",
+		"buttons": {
+			"createSmartList": "创建智能列表"
+		},
+		"list": {
+			"emptyState": {
+				"heading": "无智能列表可显示",
+				"noListsMessage": "创建一个智能列表开始使用",
+				"noMatchesMessage": "尝试更改搜索关键词"
+			},
+			"card": {
+				"meta": {
+					"figures": {
+						"books": "书籍",
+						"series": "系列",
+						"library": "书库"
+					},
+					"matches": "匹配项"
+				}
+			}
+		}
+	},
+	"smartListSettingsScene": {
+		"sidebar": {
+			"basics": "基本信息",
+			"configuration": {
+				"label": "配置",
+				"access": "访问权限",
+				"filters": "筛选条件"
+			},
+			"danger-zone": {
+				"delete": "删除",
+				"label": "危险操作区"
+			}
+		},
+		"basics": {
+			"title": "基本信息",
+			"description": "此智能列表的详情，包括名称和描述"
+		},
+		"access": {
+			"title": "访问权限",
+			"description": "控制谁可以访问此智能列表",
+			"sections": {
+				"visibility": {
+					"confirmation": {
+						"public": "这将使列表对所有人可见",
+						"private": "这将使列表变为私人，任何之前有权限的人都将无法查看",
+						"shared": "您需要与特定用户共享列表以授予他们访问权限",
+						"fallback": "确定要更改此列表的可见性吗？"
+					}
+				},
+				"accessManager": {
+					"disclaimer": "共享功能尚未准备就绪。请稍后再试！"
+				}
+			}
+		},
+		"filters": {
+			"title": "筛选器构建器",
+			"description": "管理构建此智能列表的筛选条件"
+		},
+		"danger-zone/delete": {
+			"title": "删除操作",
+			"description": "永久删除此智能列表及其所有内容或特定资源",
+			"sections": {
+				"deleteList": {
+					"heading": "删除列表",
+					"description": [
+						"永久删除此智能列表及其所有内容。",
+						"此操作无法撤销"
+					],
+					"confirmation": {
+						"title": "删除列表",
+						"description": "确定要删除此智能列表吗？",
+						"confirm": "删除列表"
+					}
+				}
+			}
+		}
+	},
+	"userSmartListScene": {
+		"navigation": {
+			"items": "项目",
+			"settings": "设置"
+		},
+		"layout": {
+			"missingIdError": "此页面需要URL中包含ID",
+			"smartListNotFound": "未找到智能列表",
+			"viewCreateError": "创建视图失败",
+			"viewSaveError": "保存视图失败"
+		},
+		"header": {
+			"backLink": "列表"
+		},
+		"itemsScene": {
+			"smartListNotFound": "未找到智能列表",
+			"actionHeader": {
+				"viewSelector": {
+					"customView": "自定义视图",
+					"defaultView": "默认视图",
+					"noViewsSaved": "无已保存视图",
+					"selectView": "选择已保存的视图"
+				},
+				"filterDrawer": {
+					"heading": "智能列表筛选器",
+					"description": "更改此会话的筛选条件",
+					"rawData": {
+						"heading": "原始筛选数据",
+						"description": "Stump 将以此方式处理筛选条件"
+					},
+					"buttons": {
+						"save": "保存",
+						"cancel": "取消"
+					}
+				},
+				"search": {
+					"placeholder": "快速筛选"
+				},
+				"viewManager": {
+					"updateSelected": "更新所选",
+					"create": "创建新视图",
+					"modal": {
+						"heading": {
+							"create": "创建视图",
+							"update": "更新视图"
+						},
+						"description": {
+							"create": "为此智能列表创建新视图",
+							"update": "更新视图"
+						},
+						"createForm": {
+							"name": {
+								"label": "名称",
+								"placeholder": "我的视图",
+								"description": "用于唯一标识此视图的友好名称"
+							}
+						},
+						"updateForm": {
+							"name": {
+								"label": "名称",
+								"placeholder": "我的视图",
+								"description": "如需要，可为视图更新名称"
+							}
+						}
+					}
+				}
+			}
+		}
+	},
+	"settingsScene": {
+		"navigation": {
+			"general": "通用",
+			"logs": "日志",
+			"server": "服务器",
+			"jobs": "任务和配置",
+			"users": "用户管理",
+			"desktop": "桌面版"
+		},
+		"sidebar": {
+			"application": {
+				"account": "账户",
+				"appearance": "外观",
+				"api keys": "API 密钥",
+				"reader": "阅读器",
+				"desktop": "桌面版",
+				"label": "应用"
+			},
+			"server": {
+				"general": "通用",
+				"logs": "日志",
+				"users": "用户",
+				"jobs": "任务",
+				"access": "访问",
+				"email": "邮件",
+				"notifications": "通知",
+				"label": "服务器"
+			}
+		},
+		"app/account": {
+			"helmet": "账户设置",
+			"title": "账户设置",
+			"description": "与您的账户相关的设置",
+			"sections": {
+				"account": {
+					"validation": {
+						"invalidUrl": "请输入有效的URL",
+						"missingUsername": "用户名为必填项"
+					},
+					"labels": {
+						"username": "用户名",
+						"password": "密码",
+						"activeChangesPrompt": "您有未保存的更改"
+					},
+					"errors": {
+						"updateFailed": "更新个人资料时发生服务器错误。请重试。"
+					},
+					"avatarPicker": {
+						"heading": "设置您的头像",
+						"subtitle": "Stump 支持自定义头像，可通过提供图片URL设置。为减少服务器存储数据量，暂不支持图片上传。",
+						"preview": "输入URL后，预览将显示在此处。",
+						"labels": {
+							"imageUrl": "图片URL",
+							"customAvatar": "自定义头像"
+						},
+						"buttons": {
+							"confirm": "确认图片",
+							"cancel": "取消",
+							"edit": "编辑",
+							"changeImage": "更换图片",
+							"removeImage": "移除图片"
+						}
+					},
+					"buttons": {
+						"confirm": "保存更改"
+					}
+				},
+				"locale": {
+					"localeSelector": {
+						"label": "语言"
+					},
+					"heading": "语言和区域",
+					"subtitle": [
+						"Stump 支持多种语言和区域，可在下方设置您的偏好。如果可以，欢迎帮助改进",
+						"Stump 的翻译质量",
+						"若你有能力做到!"
+					]
+				}
+			}
+		},
+		"app/appearance": {
+			"helmet": "外观设置",
+			"title": "外观设置",
+			"description": "自定义应用的外观和风格",
+			"sections": {
+				"themeSelect": {
+					"label": "主题",
+					"description": [
+						"如果您有兴趣创建自己的自定义主题，请查看",
+						"文档"
+					],
+					"options": {
+						"light": "浅色",
+						"dark": "深色",
+						"bronze": "青铜浅色调",
+						"ocean": "海洋蓝",
+						"autumn": "秋色系",
+						"cosmic": "宇宙风",
+						"pumpkin": "南瓜橙",
+						"matrix": "矩阵风"
+					}
+				},
+				"fontSelect": {
+					"label": "字体",
+					"description": "自定义应用中使用的字体"
+				},
+				"navigationArrangement": {
+					"label": "导航布局",
+					"description": {
+						"sidebar": "在侧边栏中排列和自定义导航项",
+						"topbar": "在顶部栏中排列和自定义导航项"
+					},
+					"isLocked": "布局已锁定",
+					"lock": "锁定布局",
+					"unlock": "解锁布局",
+					"options": {
+						"Home": "首页",
+						"Explore": "探索",
+						"Libraries": "书库",
+						"BookClubs": "读书俱乐部",
+						"SmartLists": "智能列表"
+					},
+					"entityOptions": {
+						"createAction": {
+							"label": "显示创建按钮",
+							"help": "在导航中显示创建操作按钮"
+						},
+						"linkToAll": {
+							"label": "查看全部链接",
+							"help": "指向专门用于查看此类所有项目的页面链接"
+						}
+					}
+				}
+			}
+		},
+		"app/apiKeys": {
+			"helmet": "API 密钥",
+			"title": "API 密钥",
+			"description": "管理您生成的 Stump API 密钥",
+			"shared": {
+				"fields": {
+					"name": "名称",
+					"expiration": "过期时间",
+					"last_used": "最后使用时间",
+					"created": "创建时间",
+					"permissions": "权限",
+					"inherited": "继承",
+					"explicit": "明确"
+				}
+			},
+			"sections": {
+				"inspector": {
+					"heading": "API 密钥",
+					"description": "此密钥的详细视图",
+					"unrestrictedKey": {
+						"heading": "无限制密钥",
+						"description": "由于您是服务器所有者，此密钥在配置为继承权限时拥有无限制访问权限。请务必谨慎。"
+					}
+				},
+				"createKey": {
+					"modal": {
+						"trigger": "创建 API 密钥",
+						"heading": {
+							"creating": "创建 API 密钥",
+							"created": "已创建密钥"
+						},
+						"description": {
+							"creating": "API 密钥是可用于 API 身份验证的长期凭据",
+							"created": "您的新 API 密钥已创建。请将密钥安全保存，它不会再次显示"
+						},
+						"inheritDisclaimer": "此 API 密钥将继承您的全部权限，这意味着它可以执行您能执行的任何操作。请谨慎使用此设置",
+						"createdKey": "已创建密钥",
+						"savedConfirm": "我已保存密钥",
+						"submit": "创建密钥"
+					}
+				},
+				"table": {
+					"title": "您的密钥",
+					"description": "这些是您已创建的 API 密钥",
+					"actionMenu": {
+						"inspect": "查看详情",
+						"delete": "删除"
+					},
+					"empty": {
+						"title": "您尚未创建任何密钥",
+						"action": "创建一个 API 密钥开始使用"
+					},
+					"noExpiration": "未设置过期时间"
+				}
+			}
+		},
+		"app/reader": {
+			"helmet": "阅读器设置",
+			"title": "阅读器设置",
+			"description": "Stump 阅读器的默认选项。这些仅适用于您当前的设备",
+			"sections": {
+				"universal": {
+		            "sections": {
+						"readingDirection": {
+							"label": "阅读方向",
+							"description": "阅读器翻页的方向"
+						}
+					}
+				},
+				"imageBasedBooks": {
+					"label": "基于图像的书籍",
+					"description": "漫画、manga和其他基于图像的书籍",
+					"sections": {
+						"preloadAheadCount": {
+							"label": "预加载前方页数",
+							"description": "当前页前方预加载的页数"
+						},
+						"preloadBehindCount": {
+							"label": "预加载后方页数",
+							"description": "当前页后方预加载的页数"
+						}
+					}
+				},
+				"textBasedBooks": {
+					"label": "电子书阅读器",
+					"description": "基于文本的书籍的默认设置",
+					"sections": {
+						"fontSize": {
+							"label": "字体大小",
+							"description": "阅读器中使用的字体大小"
+						},
+						"fontFamily": {
+							"label": "字体家族",
+							"description": "阅读器中使用的字体"
+						},
+						"lineHeight": {
+							"label": "行高",
+							"description": "阅读器中的行高"
+						}
+					}
+				},
+				"data": {
+					"sections": {
+						"clearStore": {
+							"label": "清除偏好设置",
+							"description": "重置所有覆盖默认设置的个人书籍设置",
+							"button": "清除偏好设置"
+						}
+					}
+				}
+			}
+		},
+		"app/desktop": {
+			"helmet": "桌面设置",
+			"title": "桌面设置",
+			"description": "与Stump桌面应用相关的设置",
+			"sections": {
+				"configuredServers": {
+					"label": "已配置的服务器",
+					"description": "您可以连接的Stump服务器列表",
+					"getStarted": "添加服务器开始使用",
+					"unreachableServer": {
+						"tooltip": "服务器不可达"
+					},
+					"activeServer": {
+						"tooltip": "当前服务器"
+					},
+					"addOrEditServer": {
+						"validation": {
+							"nameExists": "具有此名称的服务器已存在",
+							"nameForbidden": "此名称为保留名",
+							"urlExists": "具有此URL的服务器已存在"
+						},
+						"fields": {
+							"name": {
+								"label": "名称",
+								"description": "用于标识此服务器的友好名称",
+								"placeholder": "我的服务器"
+							},
+							"uri": {
+								"label": "URI",
+								"description": "Stump服务器的URL",
+								"placeholder": "https://stump.example.com"
+							}
+						}
+					},
+					"addServer": {
+						"trigger": "添加服务器",
+						"title": "添加新服务器",
+						"description": "向桌面应用添加新的Stump服务器",
+						"confirm": "添加服务器"
+					},
+					"editServer": {
+						"tooltip": "编辑服务器",
+						"title": "编辑服务器",
+						"description": "编辑此服务器的详细信息",
+						"confirm": "保存更改"
+					},
+					"deleteServer": {
+						"tooltip": "删除服务器",
+						"confirmation": {
+							"title": "删除此服务器",
+							"description": "这将从桌面应用中移除该服务器",
+							"disclaimerActiveServer": "此服务器当前处于活跃状态。您将被登出",
+							"disclaimerLastServer": "这是最后一个已配置的服务器。您将被登出，并且需要在初始化过程中重新配置所有服务器",
+							"confirm": "删除服务器"
+						}
+					},
+					"switchToServer": {
+						"tooltip": "切换到服务器",
+						"confirmation": {
+							"title": "切换到此服务器",
+							"description": "这将使您从当前服务器登出",
+							"confirm": "切换到服务器",
+							"server": "服务器",
+							"uri": "URL"
+						}
+					},
+					"resetConfiguration": {
+						"label": "删除所有服务器",
+						"description": [
+							"从桌面应用中删除所有已配置的服务器",
+							"此操作无法撤销"
+						],
+						"confirmation": {
+							"trigger": "删除所有服务器",
+							"title": "删除所有服务器",
+							"description": "这将从桌面应用中移除所有服务器",
+							"disclaimer": "您将被登出，并且需要在初始化过程中重新配置所有服务器",
+							"confirm": "删除所有服务器"
+						}
+					},
+					"resetTokens": {
+						"label": "清除身份验证",
+						"description": [
+							"删除所有为您的服务器安全存储的访问令牌",
+							"您将需要重新向每个服务器进行身份验证"
+						],
+						"confirmation": {
+							"trigger": "清除身份验证",
+							"title": "清除身份验证",
+							"description": "这将删除所有为您的服务器安全存储的访问令牌",
+							"confirm": "清除身份验证"
+						}
+					}
+				},
+				"optionalFeatures": {
+					"label": "可选功能",
+					"description": "管理桌面应用独有的可选功能",
+					"bundledServer": {
+						"label": "内置服务器",
+						"description": "在桌面应用运行时在后台运行内置服务器（需要重启）"
+					},
+					"discordPresence": {
+						"label": "Discord状态",
+						"description": "使用Discord Rich Presence在Discord中显示您的Stump活动",
+						"reconnect": "重新连接到Discord"
+					}
+				}
+			}
+		},
+		"server/general": {
+			"helmet": "服务器通用设置",
+			"title": "通用设置",
+			"description": "与您的Stump服务器实例相关的通用设置",
+			"sections": {
+				"updateAvailable": {
+					"message": "您的服务器不是最新版本。请更新到最新版本！"
+				},
+				"serverInfo": {
+					"title": "服务器信息",
+					"description": "关于您的Stump服务器实例的基本详情",
+					"build": {
+						"label": "构建信息",
+						"description": "关于版本和构建的详情",
+						"version": {
+							"semver": "版本号",
+							"commitHash": "精确提交哈希",
+							"date": "构建日期"
+						}
+					}
+				},
+				"serverPublicUrl": {
+					"label": "公共URL",
+					"description": "您的服务器可从网络外部访问的URL（如适用）。这将启用邀请链接和其他功能"
+				}
+			}
+		},
+		"server/logs": {
+			"helmet": "日志",
+			"title": "日志",
+			"description": "您的Stump服务器实例生成的日志",
+			"sections": {
+				"persistedLogs": {
+					"title": "持久化日志",
+					"description": "这些日志已手动持久化到数据库，通常与特定作业或事件相关联",
+					"table": {
+						"columns": {
+							"level": "级别",
+							"message": "消息",
+							"timestamp": "时间戳"
+						},
+						"emptyHeading": "无日志可显示",
+						"emptySubtitle": "您的服务器要么非常健康，要么非常不健康"
+					},
+					"deleteLogs": {
+						"title": "删除日志",
+						"description": "从数据库中永久删除所有持久化日志",
+						"disclaimer": "此操作无法撤销",
+						"confirm": "删除日志"
+					}
+				},
+				"liveLogs": {
+					"title": "实时日志流",
+					"description": "直接从您的Stump服务器实例实时流式传输"
+				}
+			}
+		},
+		"server/jobs": {
+			"helmet": "作业",
+			"title": "作业",
+			"description": "在您的Stump服务器实例上运行的后台作业",
+			"sections": {
+				"scheduling": {
+					"title": "调度",
+					"description": "某些作业可以配置为按计划运行。对此配置的更改将在服务器重启后生效"
+				},
+				"history": {
+					"title": "历史记录",
+					"description": "在您的Stump服务器实例上运行过的作业记录",
+					"table": {
+						"columns": {
+							"name": "类型",
+							"description": "描述",
+							"status": "状态",
+							"createdAt": "开始时间",
+							"elapsed": "耗时",
+							"tasks": "任务数"
+						},
+						"emptyHeading": "无作业可显示",
+						"emptySubtitle": "没有作业就没有工作呀",
+						"deleteAllMessage": "作业历史和统计信息可能随时从数据库中删除。此操作无法撤销",
+						"deleteAllConfirmButton": "清除历史记录",
+						"deleteAllConfirmButtonTitle": "清除所有作业历史",
+						"deleteAllConfirmButtonTitleNoJobs": "无作业可清除"
+					}
+				}
+			}
+		},
+		"server/users": {
+			"helmet": "用户管理",
+			"title": "用户",
+			"description": "管理此服务器上的用户",
+			"createUser": {
+				"helmet": "创建用户",
+				"title": "创建用户",
+				"description": "在此服务器上创建新用户"
+			},
+			"updateUser": {
+				"helmet": "更新用户",
+				"title": "更新用户",
+				"description": "更新此用户的详细信息"
+			},
+			"createOrUpdateForm": {
+				"accessControl": {
+					"heading": "访问控制和限制",
+					"subtitle": [
+						"配置您想要应用于此用户的任何限制。有关访问控制的更多信息，请参阅",
+						"文档"
+					],
+					"ageRestriction": {
+						"label": "年龄限制",
+						"description": "限制用户访问超过设定年龄评级阈值的内容",
+						"placeholder": "13",
+						"enforceUnset": {
+							"label": "对未设置项强制执行",
+							"description": "如果启用，用户将被限制访问没有可用年龄评级的内容"
+						}
+					},
+					"tagRestriction": {
+						"label": "标签限制",
+						"description": "限制用户访问带有选定标签的内容",
+						"placeholder": "成人，血腥"
+					}
+				},
+				"permissions": {
+					"heading": "权限",
+					"subtitle": [
+						"选择您想要授予此用户的权限。有关每个权限的作用的更多信息，请参阅",
+						"文档"
+					],
+					"bookclub": {
+						"label": "读书俱乐部",
+						"read": {
+							"label": "访问读书俱乐部功能",
+							"description": "允许用户访问读书俱乐部功能，包括查看和加入读书俱乐部"
+						},
+						"create": {
+							"label": "创建读书俱乐部",
+							"description": "允许用户创建新的读书俱乐部"
+						}
+					},
+					"feature": {
+						"label": "功能_opt-in",
+						"api_keys": {
+							"label": "API密钥",
+							"description": "允许用户管理自己的API密钥"
+						},
+						"koreader_sync": {
+							"label": "KoReader同步",
+							"description": "允许用户访问KoReader同步集成"
+						}
+					},
+					"file": {
+						"label": "文件管理",
+						"explorer": {
+							"label": "文件浏览器",
+							"description": "允许用户访问书库文件浏览器。授予此功能时不支持内容限制"
+						},
+						"download": {
+							"label": "下载文件",
+							"description": "允许用户从服务器下载文件"
+						},
+						"upload": {
+							"label": "上传文件",
+							"description": "允许用户向服务器上传文件"
+						}
+					},
+					"emailer": {
+						"label": "邮件发送器",
+						"read": {
+							"label": "访问邮件发送器",
+							"description": "允许用户查看已配置的邮件发送器"
+						},
+						"create": {
+							"label": "创建邮件发送器",
+							"description": "允许用户创建新的邮件发送器"
+						},
+						"manage": {
+							"label": "管理邮件发送器",
+							"description": "允许用户管理现有的邮件发送器"
+						}
+					},
+					"email": {
+						"label": "邮件发送",
+						"send": {
+							"label": "发送邮件",
+							"description": "允许用户从服务器向任何已配置的别名发送邮件"
+						},
+						"arbitrary_send": {
+							"label": "发送任意邮件",
+							"description": "允许用户从服务器向任何电子邮件地址发送邮件"
+						}
+					},
+					"library": {
+						"label": "书库管理",
+						"create": {
+							"label": "创建书库",
+							"description": "允许用户创建新书库。包括编辑和扫描权限"
+						},
+						"scan": {
+							"label": "扫描书库",
+							"description": "允许用户为现有书库启动扫描"
+						},
+						"edit": {
+							"label": "编辑书库",
+							"description": "允许用户编辑现有书库的基本详情"
+						},
+						"manage": {
+							"label": "管理书库",
+							"description": "允许用户管理现有书库的高级设置。包括编辑和扫描权限"
+						},
+						"delete": {
+							"label": "删除书库",
+							"description": "允许用户删除现有书库。包括编辑、管理和扫描权限"
+						}
+					},
+					"server": {
+						"label": "服务器管理",
+						"manage": {
+							"label": "管理服务器",
+							"description": "允许用户管理服务器。包括许多其他权限"
+						}
+					},
+					"user": {
+						"label": "用户管理",
+						"read": {
+							"label": "查看用户",
+							"description": "允许用户查询服务器上的其他用户。这是某些其他功能所必需的，例如排除用户访问书库"
+						},
+						"manage": {
+							"label": "管理用户",
+							"description": "允许用户管理服务器上的其他用户。包括创建和更新权限"
+						}
+					},
+					"smartlist": {
+						"label": "智能列表",
+						"read": {
+							"label": "访问智能列表功能",
+							"description": "允许用户访问智能列表功能"
+						}
+					}
+				},
+				"validation": {
+					"ageRestrictionTooLow": "年龄限制不能小于0",
+					"missingUsername": "用户名为必填项",
+					"missingPassword": "密码为必填项",
+					"usernameAlreadyExists": "用户名已存在"
+				},
+				"createSubmitButton": "创建用户",
+				"updateSubmitButton": "更新用户"
+			}
+		},
+		"server/email": {
+			"helmet": "邮件设置",
+			"title": "邮件",
+			"description": "与为您的Stump服务器实例配置SMTP邮件发送器相关的设置",
+			"sections": {
+				"emailers": {
+					"title": "SMTP邮件发送器",
+					"description": "您已配置的用于从Stump服务器实例发送邮件的客户端",
+					"singleInstanceDisclaimer": "虽然Stump在后端支持多个SMTP配置，但在UI上只能配置一个。这将在未来改进",
+					"list": {
+						"emptyHeading": "未配置SMTP邮件发送器",
+						"primaryEmailer": "主要邮件发送器",
+						"sendHistory": {
+							"heading": "发送历史",
+							"description": "从此邮件发送器发送的邮件记录",
+							"table": {
+								"columns": {
+									"to": "收件人",
+									"subject": "主题",
+									"status": "状态",
+									"createdAt": "发送时间"
+								}
+							},
+							"emptyHeading": "无历史记录",
+							"emptySubtitle": "此邮件发送器的历史记录为空。它要么未被使用，要么历史记录已被清除"
+						}
+					}
+				},
+				"devices": {
+					"title": "邮件设备",
+					"description": "您已配置的用于接收来自Stump服务器实例的邮件的设备别名",
+					"addDevice": "添加设备别名",
+					"addOrUpdateDevice": {
+						"title": {
+							"create": "创建设备别名",
+							"update": "更新设备别名"
+						},
+						"name": {
+							"label": "名称",
+							"description": "用于唯一标识此设备别名的友好名称"
+						},
+						"email": {
+							"label": "电子邮件",
+							"description": "与此别名关联的电子邮件地址"
+						},
+						"forbidden": {
+							"label": "禁止",
+							"description": "启用后，任何用户都不能向与此别名关联的地址发送邮件"
+						},
+						"submit": {
+							"create": "创建设备别名",
+							"update": "更新设备别名"
+						}
+					},
+					"table": {
+						"emptyHeading": "未注册设备",
+						"emptySubtitle": "创建新的设备别名供将来使用"
+					}
+				}
+			},
+			"createOrUpdateForm": {
+				"name": {
+					"label": "名称",
+					"description": "用于唯一标识此邮件发送器的友好名称"
+				},
+				"smtpSettings": {
+					"heading": "SMTP设置",
+					"description": "此邮件发送器的SMTP特定设置"
+				},
+				"smtpProvider": {
+					"label": "SMTP提供商预设",
+					"description": "SMTP服务器的提供商。这用于预填充一些常见设置，但不包含所有提供商"
+				},
+				"smtpHost": {
+					"label": "SMTP主机",
+					"description": "SMTP服务器的主机名"
+				},
+				"smtpPort": {
+					"label": "SMTP端口",
+					"description": "SMTP服务器的端口"
+				},
+				"tlsEnabled": {
+					"label": "启用TLS",
+					"description": "如果启用，与SMTP服务器的连接将被加密"
+				},
+				"username": {
+					"label": "用户名",
+					"description": "用于向SMTP服务器进行身份验证的用户名。通常是电子邮件地址"
+				},
+				"password": {
+					"label": "密码",
+					"description": "用于向SMTP服务器进行身份验证的密码。如果您使用Gmail，可能需要生成应用专用密码"
+				},
+				"senderSettings": {
+					"heading": "发件人设置",
+					"description": "邮件发件人的设置"
+				},
+				"senderDisplayName": {
+					"label": "发件人显示名称",
+					"description": "将向收件人显示的名称"
+				},
+				"senderEmail": {
+					"label": "发件人电子邮件地址",
+					"description": "将向收件人显示的电子邮件地址"
+				},
+				"additionalSettings": {
+					"heading": "附加设置",
+					"description": "邮件发送器的附加设置"
+				},
+				"maxAttachmentSize": {
+					"label": "最大附件大小",
+					"description": "附件的最大大小（以字节为单位）"
+				},
+				"submit": {
+					"create": "创建邮件发送器",
+					"update": "更新邮件发送器"
+				}
+			},
+			"createEmailer": {
+				"helmet": "创建邮件发送器",
+				"title": "创建邮件发送器",
+				"description": "为您的Stump服务器实例创建新的SMTP邮件发送器"
+			},
+			"updateEmailer": {
+				"helmet": "更新邮件发送器",
+				"title": "更新邮件发送器",
+				"description": "更新此SMTP邮件发送器的详细信息"
+			}
+		}
+	},
+	"jobOverlay": {
+		"backupHeading": "正在执行的任务"
+	},
+	"libraryStats": {
+		"seriesCount": "总系列",
+		"bookCount": "书籍总数",
+		"diskUsage": "磁盘使用量"
+	},
+	"noLibraries": {
+		"heading": "此处无内容",
+		"messagePrefix": "没有的东西是看不见的",
+		"message": {
+			"create": "创建一个书库开始使用",
+			"wait": "书库创建后，将在此处显示"
+		},
+		"links": {
+			"create": "创建书库",
+			"settings": "前往设置"
+		}
+	},
+	"pagination": {
+		"buttons": {
+			"next": "下一页",
+			"previous": "上一页"
+		},
+		"popover": {
+			"heading": "跳转到",
+			"buttons": {
+				"confirm": "跳转",
+				"cancel": "取消"
+			}
+		}
+	},
+	"signOutModal": {
+		"title": "退出登录",
+		"message": "您确定要退出登录吗？",
+		"buttons": {
+			"cancel": "取消",
+			"signOut": "退出登录"
+		}
+	},
+	"sidebar": {
+		"buttons": {
+			"home": "首页",
+			"libraries": "书库",
+			"books": "探索",
+			"bookClubs": "读书俱乐部",
+			"createLibrary": "新建书库",
+			"noLibraries": "无书库",
+			"createBookClub": "创建读书俱乐部",
+			"noBookClubs": "无读书俱乐部",
+			"settings": "设置",
+			"themeToggle": "切换主题",
+			"goForward": "前进",
+			"goBack": "返回",
+			"smartlists": "智能列表",
+			"noSmartlists": "无智能列表",
+			"createSmartlist": "创建智能列表",
+			"seeAll": "查看全部"
+		},
+		"libraryOptions": {
+			"scanLibrary": "扫描",
+			"fileExplorer": "文件",
+			"manageLibrary": "管理",
+			"deleteLibrary": "删除"
+		},
+		"versionInformation": {
+			"heading": "版本信息",
+			"semVer": "语义化版本",
+			"commitHash": "提交哈希",
+			"buildDate": "构建日期"
+		}
+	},
+	"search": {
+		"placeholder": "搜索"
+	},
+	"serverSOS": {
+		"heading": "服务器不可用",
+		"desktop": {
+			"message": "出现网络错误，表示您的Stump服务器目前不可用。请确保它正在运行并且可以在此设备上访问。如果您的服务器URL已经更改，您可以使用下面的表单更新它"
+		},
+		"web": {
+			"message": "网络错误，您的Stump服务器目前不可用。请确保它正在运行并且可以从此设备访问"
+		},
+		"reconnected": "重新连接到服务器！正在重定向...",
+		"reconnectionFailed": "发生未知错误。"
+	},
+	"serverStatusOverlay": {
+		"heading": "服务器未连接",
+		"message": [
+			"请检查您的网络连接",
+			"点击此处",
+			"更改您的服务器URL"
+		]
+	},
+	"slidingList": {
+		"empty": "暂无数据",
+		"buttons": {
+			"next": "正在查找",
+			"previous": "向后检索"
+		}
+	},
+	"tagSelect": {
+		"placeholder": "选择或创建标签",
+		"placeholderNoTags": "没有可用的标签"
+	},
+	"thumbnailDropdown": {
+		"label": "编辑缩略图",
+		"options": {
+			"selectFromBooks": "从书籍中选择",
+			"uploadImage": "上传图片"
+		},
+		"uploadImage": {
+			"emptyState": "您的图片预览将显示在此处",
+			"prompt": "拖放图片到此处或点击选择",
+			"remove": "移除图片"
+		}
+	},
+	"common": {
+		"add": "添加",
+		"cancel": "取消",
+		"confirm": "确认",
+		"save": "保存",
+		"send": "发送",
+		"saveChanges": "保存更改",
+		"noChanges": "无更改",
+		"create": "创建",
+		"edit": "编辑",
+		"update": "更新",
+		"upload": "上传",
+		"uploading": "上传中",
+		"unimplemented": "此功能尚未实现！敬请期待",
+		"limitedFunctionality": "此功能尚未完全实现，缺少一些特性。敬请期待",
+		"logIn": "登录",
+		"login": "登录",
+		"seeError": "查看错误",
+		"remove": "移除",
+		"goBack": "返回",
+		"goToServers": "前往服务器",
+		"notReady": "此功能尚未准备好",
+		"notUsedYet": "尚未使用",
+		"never": "从不",
+		"scan": "扫描"
+	}
+}

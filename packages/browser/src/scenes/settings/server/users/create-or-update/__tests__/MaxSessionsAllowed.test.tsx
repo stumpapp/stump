@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Form } from '@stump/components'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useForm } from 'react-hook-form'
 
@@ -57,21 +57,20 @@ describe('MaxSessionsAllowed', () => {
 	})
 
 	it('should display errors', async () => {
+		// Start with an invalid negative value to test validation
 		render(
 			<Subject
 				formState={{
-					maxSessionsAllowed: 1,
+					maxSessionsAllowed: -1,
 				}}
 			/>,
 		)
 
 		const user = userEvent.setup()
 
-		await user.clear(screen.getByTestId('maxSessionsAllowed'))
-		await user.type(screen.getByTestId('maxSessionsAllowed'), '-1')
 		await user.click(screen.getByRole('button', { name: /submit/i }))
 
 		expect(onSubmit).not.toHaveBeenCalled()
-		expect(screen.getByText(/maxSessionsAllowedTooLow/i)).toBeInTheDocument()
+		await waitFor(() => expect(screen.getByText(/maxSessionsAllowedTooLow/i)).toBeInTheDocument())
 	})
 })

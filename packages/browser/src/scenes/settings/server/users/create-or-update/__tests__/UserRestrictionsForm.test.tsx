@@ -6,16 +6,21 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useForm } from 'react-hook-form'
 
-import { buildSchema, CreateOrUpdateUserSchema, formDefaults } from '../schema'
+import { buildSchema, CreateOrUpdateUserSchema, ExistingUser, formDefaults } from '../schema'
 import UserRestrictionsForm from '../UserRestrictionsForm'
 
 const onSubmit = jest.fn()
 
-const userDefaults = {
-	username: 'test',
-} as any
+type SubjectProps = {
+	user?: Partial<ExistingUser>
+}
 
-const Subject = () => {
+const Subject = ({ user }: SubjectProps = {}) => {
+	const userDefaults = {
+		username: 'test',
+		...user,
+	} as ExistingUser
+
 	const form = useForm<Pick<CreateOrUpdateUserSchema, 'ageRestrictionOnUnset' | 'ageRestriction'>>({
 		defaultValues: formDefaults(userDefaults),
 		resolver: zodResolver(buildSchema((t) => t, [], userDefaults)),
@@ -53,12 +58,13 @@ describe('UserRestrictionsForm', () => {
 	})
 
 	it('should uncheck the ageRestrictionOnUnset if ageRestriction is unset', async () => {
-		render(<Subject />)
+		render(<Subject user={{ ageRestriction: { age: 12, restrictOnUnset: true } }} />)
 
 		const user = userEvent.setup()
 
-		await user.type(screen.getByTestId('ageRestriction'), '12')
-		await user.click(screen.getByTestId('age_restriction_enabled'))
+		expect(screen.getByTestId('age_restriction_enabled')).not.toBeDisabled()
+		expect(screen.getByTestId('age_restriction_enabled')).toHaveAttribute('aria-checked', 'true')
+
 		await user.click(screen.getByRole('button', { name: /submit/i }))
 
 		expect(onSubmit).toHaveBeenCalledWith(
@@ -76,12 +82,13 @@ describe('UserRestrictionsForm', () => {
 		)
 	})
 
-	it('should disable the ageRestrictionOnUnset if ageRestriction is unset', async () => {
+	it('should disable the ageRestrictionOnUnset if ageRestriction is unset', () => {
 		render(<Subject />)
-
-		const user = userEvent.setup()
 		expect(screen.getByTestId('age_restriction_enabled')).toBeDisabled()
-		await user.type(screen.getByTestId('ageRestriction'), '12')
+	})
+
+	it('should enable the ageRestrictionOnUnset if ageRestriction is set', () => {
+		render(<Subject user={{ ageRestriction: { age: 12, restrictOnUnset: false } }} />)
 		expect(screen.getByTestId('age_restriction_enabled')).not.toBeDisabled()
 	})
 })

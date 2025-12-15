@@ -5,7 +5,7 @@ use models::{
 	entity::{library, media, series},
 	shared::image_processor_options::ImageProcessorOptions,
 };
-use sea_orm::{prelude::*, QuerySelect};
+use sea_orm::{prelude::*, QuerySelect, QueryTrait};
 
 use crate::{
 	filesystem::image::thumbnail::generate::{
@@ -164,6 +164,11 @@ impl JobExt for ThumbnailGenerationJob {
 		&mut self,
 		ctx: &WorkerCtx,
 	) -> Result<WorkingState<Self::Output, Self::Task>, JobError> {
+		// If we aren't force regenerating thumbnails, we don't need to process books
+		// that already have their thumbnails set in the database
+		let truthy_thumb_filter = (!self.params.force_regenerate)
+			.then_some(media::Column::ThumbnailPath.is_null());
+
 		let init_params = match &self.params.scope {
 			ThumbnailGenerationJobScope::BooksInLibrary(id) => {
 				let books = media::Entity::find()
@@ -171,6 +176,7 @@ impl JobExt for ThumbnailGenerationJob {
 					.columns(media::MediaThumbSelect::columns())
 					.inner_join(series::Entity)
 					.filter(series::Column::LibraryId.eq(id))
+					.apply_if(truthy_thumb_filter, |query, f| query.filter(f))
 					.into_model::<media::MediaThumbSelect>()
 					.all(ctx.conn.as_ref())
 					.await
@@ -211,6 +217,7 @@ impl JobExt for ThumbnailGenerationJob {
 					.select_only()
 					.columns(media::MediaThumbSelect::columns())
 					.filter(media::Column::SeriesId.eq(id))
+					.apply_if(truthy_thumb_filter, |query, f| query.filter(f))
 					.into_model::<media::MediaIdentSelect>()
 					.all(ctx.conn.as_ref())
 					.await

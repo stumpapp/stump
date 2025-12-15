@@ -1,4 +1,5 @@
 pub(crate) mod auth;
+pub(crate) mod epub;
 pub(crate) mod library;
 pub(crate) mod media;
 pub(crate) mod series;
@@ -22,6 +23,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
 		.merge(auth::mount(app_state.clone()))
 		.merge(media::mount(app_state.clone()))
+		.merge(epub::mount(app_state.clone()))
 		.merge(series::mount(app_state.clone()))
 		.merge(library::mount(app_state))
 		.route("/claim", get(claim))

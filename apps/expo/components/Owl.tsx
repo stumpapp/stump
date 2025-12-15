@@ -60,21 +60,22 @@ export default function Owl({ owl, ...size }: Props) {
 	)
 }
 
-// Each is 2125px wide by 2747px tall -> approximately 4:3 ratio
-const CONSTRAINT_PERCENTAGE_PORTRAIT = 0.98
-const CONSTRAINT_PERCENTAGE_LANDSCAPE = 0.45
+// Each is approx 2645 × 2757 pixels -> approximately 1:1 (slightly taller than wide)
+const CONSTRAINT_PERCENTAGE_PORTRAIT = 0.8
+const CONSTRAINT_PERCENTAGE_LANDSCAPE = 0.5
+const ASPECT_RATIO = 2645 / 2757 // ~0.959
 
 const defaultSize = (width: number, height: number) => {
 	const isLandscape = width > height
 	if (isLandscape) {
 		return {
 			height: height * CONSTRAINT_PERCENTAGE_LANDSCAPE,
-			width: (height * CONSTRAINT_PERCENTAGE_LANDSCAPE * 4) / 3,
+			width: height * CONSTRAINT_PERCENTAGE_LANDSCAPE * ASPECT_RATIO,
 		}
 	}
 	return {
 		width: width * CONSTRAINT_PERCENTAGE_PORTRAIT,
-		height: (width * CONSTRAINT_PERCENTAGE_PORTRAIT * 3) / 4,
+		height: (width * CONSTRAINT_PERCENTAGE_PORTRAIT) / ASPECT_RATIO,
 	}
 }
 

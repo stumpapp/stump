@@ -11,7 +11,6 @@ type Props = {
 
 export default function BookClubEmoji({ emoji, placeholder, disabled }: Props) {
 	// const { updateBookClub } = useUpdateBookClub({ id: bookClub.id })
-	// TODO(graphql): Fix
 
 	const handleEmojiSelect = async () => {
 		if (disabled) {

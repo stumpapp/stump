@@ -1,9 +1,4 @@
-// import {
-// 	usePrefetchFiles,
-// 	usePrefetchLibraryBooks,
-// 	usePrefetchLibraryFiles,
-// 	usePrefetchLibrarySeries,
-// } from '@stump/client'
+import { usePrefetchFiles } from '@stump/client'
 import { cn, Link, useSticky } from '@stump/components'
 import { UserPermission } from '@stump/graphql'
 import { useCallback, useMemo } from 'react'
@@ -27,21 +22,14 @@ export default function LibraryNavigation() {
 		library: { id, path },
 	} = useLibraryContext()
 	const { checkPermission } = useAppContext()
-	// const { prefetch: prefetchBooks } = usePrefetchLibraryBooks({ id })
-	// const { prefetch: prefetchFiles } = usePrefetchLibraryFiles({
-	// 	path,
-	// 	fetchConfig: checkPermission('file:upload'),
-	// })
-	// const { prefetch: prefetchSeries } = usePrefetchLibrarySeries({ id })
 
 	const prefetchSeries = usePrefetchLibrarySeries()
 	const prefetchBooks = usePrefetchLibraryBooks()
 
-	// const prefetchFiles = usePrefetchFiles()
-	// TODO(graphql): Fix me
+	const prefetchFiles = usePrefetchFiles()
 	const handlePrefetchFiles = useCallback(() => {
-		// prefetchFiles({ path, fetchConfig: checkPermission('file:upload') })
-	}, [path, checkPermission])
+		prefetchFiles({ path, fetchConfig: checkPermission(UserPermission.UploadFile) })
+	}, [path, checkPermission, prefetchFiles])
 
 	const { ref, isSticky } = useSticky<HTMLDivElement>({
 		extraOffset: isMobile || primaryNavigationMode === 'TOPBAR' ? 56 : 0,

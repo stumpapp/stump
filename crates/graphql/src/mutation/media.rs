@@ -74,7 +74,7 @@ impl MediaMutation {
 		Ok(true)
 	}
 
-	// TODO(graphql): Implement convert_media in core then here
+	// TODO: Support converting other formats in the future
 	async fn convert_media(&self, ctx: &Context<'_>, id: ID) -> Result<bool> {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let core = ctx.data::<CoreContext>()?;

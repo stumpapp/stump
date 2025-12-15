@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button, cn, Form } from '@stump/components'
-import { CreateLibrarySceneExistingLibrariesQuery } from '@stump/graphql'
+import { CreateLibrarySceneExistingLibrariesQuery, UserPermission } from '@stump/graphql'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
@@ -20,6 +20,7 @@ import {
 } from '@/components/library/createOrUpdate/sections'
 import IgnoreRulesConfig from '@/components/library/createOrUpdate/sections/IgnoreRulesConfig'
 import { useSteppedFormContext } from '@/components/steppedForm'
+import { useAppContext } from '@/context'
 
 import LibraryReview from './LibraryReview'
 import ScanAfterPersist from './ScanAfterPersist'
@@ -32,6 +33,7 @@ type Props = {
 
 export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoading }: Props) {
 	const { currentStep, setStep } = useSteppedFormContext()
+	const { checkPermission } = useAppContext()
 
 	const [showDirectoryPicker, setShowDirectoryPicker] = useState(false)
 
@@ -159,16 +161,18 @@ export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoadi
 	// causes the form to trigger a submit event. FYI
 	return (
 		<>
-			<DirectoryPickerModal
-				isOpen={showDirectoryPicker}
-				onClose={() => setShowDirectoryPicker(false)}
-				startingPath={formPath}
-				onPathChange={(path) => {
-					if (path) {
-						form.setValue('path', path)
-					}
-				}}
-			/>
+			{checkPermission(UserPermission.FileExplorer) && (
+				<DirectoryPickerModal
+					isOpen={showDirectoryPicker}
+					onClose={() => setShowDirectoryPicker(false)}
+					startingPath={formPath}
+					onPathChange={(path) => {
+						if (path) {
+							form.setValue('path', path)
+						}
+					}}
+				/>
+			)}
 			<Form form={form} onSubmit={onSubmit} id="createLibraryForm">
 				<ContentContainer className="mt-0">
 					{renderStep()}

@@ -255,7 +255,6 @@ export function useSmartListById({ id }: UseSmartListByIdParams): UseSmartListBy
 		},
 	)
 
-	// TODO(graphql): wrap in try/catch to handle parse errors
 	const list = useMemo(() => {
 		if (listUnparsed) {
 			const filtersFromJson = JSON.parse(listUnparsed.filters) as Array<SmartListFilterGroupInput>

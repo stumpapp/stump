@@ -911,9 +911,6 @@ impl LibraryMutation {
 		&self,
 		ctx: &Context<'_>,
 		id: ID,
-		// TODO(graphql): Investigate not using a JSON wrapper for this. async_graphql doesn't support
-		// non-unit enums, so it might just be a limitation. It does degrate the DX a bit missing
-		// out on the types.
 		options: Option<Json<ScanOptions>>,
 	) -> Result<bool> {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;

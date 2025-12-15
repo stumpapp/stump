@@ -8,13 +8,15 @@ type Props = {
 	isDisabled?: boolean
 	isActive?: boolean
 	className?: string
-}
+} & React.ComponentPropsWithoutRef<'a'>
+
 export default function TopBarLinkListItem({
 	to,
 	isDisabled,
 	isActive,
 	children,
 	className,
+	...props
 }: PropsWithChildren<Props>) {
 	return (
 		<NavigationMenu.Link asChild>
@@ -26,6 +28,7 @@ export default function TopBarLinkListItem({
 					{ 'bg-sidebar-surface': isActive },
 					className,
 				)}
+				{...props}
 			>
 				{children}
 			</Link>

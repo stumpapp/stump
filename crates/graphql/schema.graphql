@@ -876,10 +876,10 @@ type LibraryScanOutput {
 
 type LibraryScanRecord {
 	id: Int!
-	options: JSON
 	timestamp: DateTime!
 	libraryId: String!
 	jobId: String
+	options: JSON
 }
 
 type LibraryStats {
@@ -1429,7 +1429,13 @@ type Mutation {
 	updateSeriesThumbnail(id: ID!, input: UpdateThumbnailInput!): Series!
 	updateSeriesMetadata(id: ID!, input: SeriesMetadataInput!): Series!
 	resetSeriesMetadata(id: ID!, impact: MetadataResetImpact!): Series!
-	markSeriesAsComplete(id: ID!): Series!
+	"""
+	Toggle the completion status of a series. If the series is marked as completed, all books
+	in the series will also be marked as completed, and vice versa for marking as not completed.
+	This is considered a dangerous operation since it can modify all your read progression related
+	to a single series all at once. Please use with caution.
+	"""
+	toggleSeriesCompletion(id: ID!, isCompleted: Boolean!): Series!
 	scanSeries(id: ID!): Boolean!
 	"""
 	Returns a list containing the newly created tags, or an error if creation failed.

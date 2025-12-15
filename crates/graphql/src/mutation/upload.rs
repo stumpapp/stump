@@ -46,8 +46,6 @@ struct UploadSeriesInput {
 	upload: Upload,
 }
 
-// TODO(graphql): Enforce upload limits, e.g. max file size at router
-
 #[Object]
 impl UploadMutation {
 	#[graphql(

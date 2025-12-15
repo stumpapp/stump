@@ -1,14 +1,17 @@
 use async_graphql::{Context, Object, Result, ID};
 use chrono::Utc;
 use models::{
-	entity::{favorite_series, library, library_config, media, media_metadata, series},
+	entity::{
+		favorite_series, finished_reading_session, library, library_config, media,
+		media_metadata, reading_session, series, user::AuthUser,
+	},
 	shared::enums::{MetadataResetImpact, UserPermission},
 };
 use sea_orm::{
 	prelude::*,
 	sea_query::{OnConflict, Query},
 	ActiveValue::Set,
-	IntoActiveModel, TransactionTrait,
+	IntoActiveModel, QuerySelect, TransactionTrait,
 };
 use stump_core::filesystem::{
 	image::{generate_book_thumbnail, GenerateThumbnailOptions},
@@ -275,13 +278,33 @@ impl SeriesMutation {
 		Ok(model.into())
 	}
 
-	// TODO(graphql): Implement mark_series_as_complete
-	async fn mark_series_as_complete(
+	/// Toggle the completion status of a series. If the series is marked as completed, all books
+	/// in the series will also be marked as completed, and vice versa for marking as not completed.
+	/// This is considered a dangerous operation since it can modify all your read progression related
+	/// to a single series all at once. Please use with caution.
+	async fn toggle_series_completion(
 		&self,
-		_ctx: &Context<'_>,
-		_id: ID,
+		ctx: &Context<'_>,
+		id: ID,
+		is_completed: bool,
 	) -> Result<Series> {
-		unimplemented!()
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let core = ctx.data::<CoreContext>()?;
+
+		let series = series::ModelWithMetadata::find_for_user(user)
+			.filter(series::Column::Id.eq(id.to_string()))
+			.into_model::<series::ModelWithMetadata>()
+			.one(core.conn.as_ref())
+			.await?
+			.ok_or("Series not found")?;
+
+		if is_completed {
+			set_series_completed(core, user, &series).await?;
+		} else {
+			unset_series_completed(core, user, &series).await?;
+		}
+
+		Ok(series.into())
 	}
 
 	#[graphql(guard = "PermissionGuard::one(UserPermission::ScanLibrary)")]
@@ -301,4 +324,118 @@ impl SeriesMutation {
 
 		Ok(true)
 	}
+}
+
+async fn set_series_completed(
+	core: &CoreContext,
+	user: &AuthUser,
+	series: &series::ModelWithMetadata,
+) -> Result<()> {
+	let tx = core.conn.begin().await?;
+
+	let book_ids_without_completion = media::Entity::find_for_user(user)
+		.select_only()
+		.column(media::Column::Id)
+		.filter(
+			media::Column::SeriesId.eq(series.series.id.clone()).and(
+				media::Column::Id.in_subquery(
+					Query::select()
+						.column(finished_reading_session::Column::MediaId)
+						.from(finished_reading_session::Entity)
+						.and_where(
+							finished_reading_session::Column::UserId.eq(user.id.clone()),
+						)
+						.to_owned(),
+				),
+			),
+		)
+		.all(&tx)
+		.await?
+		.into_iter()
+		.map(|m| m.id)
+		.collect::<Vec<String>>();
+	tracing::debug!(
+		count = book_ids_without_completion.len(),
+		"Fetched unread/incomplete books for series"
+	);
+
+	// Delete any active sessions for books in this series
+	let affected_rows = reading_session::Entity::delete_many()
+		.filter(
+			reading_session::Column::UserId.eq(user.id.clone()).and(
+				reading_session::Column::MediaId.in_subquery(
+					Query::select()
+						.column(media::Column::Id)
+						.from(media::Entity)
+						.and_where(media::Column::SeriesId.eq(series.series.id.clone()))
+						.to_owned(),
+				),
+			),
+		)
+		.exec(&tx)
+		.await?
+		.rows_affected;
+	tracing::debug!(?affected_rows, "Deleted active reading sessions for series");
+
+	let finished_sessions = book_ids_without_completion
+		.into_iter()
+		.map(|media_id| finished_reading_session::ActiveModel {
+			user_id: Set(user.id.clone()),
+			media_id: Set(media_id),
+			completed_at: Set(DateTimeWithTimeZone::from(Utc::now())),
+			..Default::default()
+		})
+		.collect::<Vec<finished_reading_session::ActiveModel>>();
+
+	// Create finished reading sessions for all books in the series that are not yet completed
+	if !finished_sessions.is_empty() {
+		let count = finished_sessions.len();
+		let _ = finished_reading_session::Entity::insert_many(finished_sessions)
+			.exec(&tx)
+			.await?;
+		tracing::debug!(count, "Inserted finished reading sessions for series");
+	} else {
+		tracing::debug!("No books to mark as finished in series");
+	}
+
+	tx.commit().await?;
+
+	Ok(())
+}
+
+async fn unset_series_completed(
+	core: &CoreContext,
+	user: &AuthUser,
+	series: &series::ModelWithMetadata,
+) -> Result<()> {
+	let tx = core.conn.begin().await?;
+
+	let affected_rows = finished_reading_session::Entity::delete_many()
+		.filter(
+			finished_reading_session::Column::UserId
+				.eq(user.id.clone())
+				.and(
+					finished_reading_session::Column::MediaId.in_subquery(
+						Query::select()
+							.column(media::Column::Id)
+							.from(media::Entity)
+							.and_where(
+								media::Column::SeriesId.eq(series.series.id.clone()),
+							)
+							.to_owned(),
+					),
+				),
+		)
+		.exec(&tx)
+		.await?
+		.rows_affected;
+
+	tracing::debug!(
+		?affected_rows,
+		"Removed finished reading sessions for series"
+	);
+
+	tx.commit().await?;
+
+	Ok(())
 }

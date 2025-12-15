@@ -233,7 +233,6 @@ export function useSuspenseGraphQL<TResult, TVariables>(
 	return { error, ...rest } as UseSuspenseQueryResult<TResult>
 }
 
-// TODO(graphql): Fix the type inference for query variables
 /**
  * Executes multiple GraphQL queries in parallel using tanstack's useQueries
  *

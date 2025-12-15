@@ -6,6 +6,7 @@ import { useLocation } from 'react-router'
 import { useBookClubContext } from '@/components/bookClub'
 import { usePreferences } from '@/hooks'
 
+// TODO(book-clubs): Implement
 // TODO: when viewing a thread, only show something like "<-- Return to chat board"
 export default function BookClubNavigation() {
 	const location = useLocation()
@@ -14,7 +15,6 @@ export default function BookClubNavigation() {
 	} = usePreferences()
 	const { viewerIsMember } = useBookClubContext()
 	// const { prefetch } = usePrefetchClubChat({ id })
-	// TODO(graphql): Fix
 	const prefetch = noop
 
 	const tabs = useMemo(() => {

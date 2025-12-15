@@ -1470,8 +1470,7 @@ export type Mutation = {
   /** Deletes the membership of the caller to the target book club */
   leaveBookClub: BookClubMember;
   markMediaAsComplete?: Maybe<FinishedReadingSessionModel>;
-  markSeriesAsComplete: Series;
-  patchEmailDevice: Scalars['Int']['output'];
+  patchEmailDevice: RegisteredEmailDevice;
   processLibraryThumbnails: Scalars['Boolean']['output'];
   /** Removes a member from the book club */
   removeBookClubMember: BookClubMember;
@@ -1485,6 +1484,13 @@ export type Mutation = {
   scanLibrary: Scalars['Boolean']['output'];
   scanSeries: Scalars['Boolean']['output'];
   sendAttachmentEmail: SendAttachmentEmailOutput;
+  /**
+   * Toggle the completion status of a series. If the series is marked as completed, all books
+   * in the series will also be marked as completed, and vice versa for marking as not completed.
+   * This is considered a dangerous operation since it can modify all your read progression related
+   * to a single series all at once. Please use with caution.
+   */
+  toggleSeriesCompletion: Series;
   updateApiKey: Apikey;
   updateBookClub: BookClub;
   updateEmailDevice: RegisteredEmailDevice;
@@ -1827,14 +1833,9 @@ export type MutationMarkMediaAsCompleteArgs = {
 };
 
 
-export type MutationMarkSeriesAsCompleteArgs = {
-  id: Scalars['ID']['input'];
-};
-
-
 export type MutationPatchEmailDeviceArgs = {
   id: Scalars['Int']['input'];
-  input: EmailDeviceInput;
+  input: PatchEmailDeviceInput;
 };
 
 
@@ -1881,6 +1882,12 @@ export type MutationScanSeriesArgs = {
 
 export type MutationSendAttachmentEmailArgs = {
   input: SendAttachmentEmailsInput;
+};
+
+
+export type MutationToggleSeriesCompletionArgs = {
+  id: Scalars['ID']['input'];
+  isCompleted: Scalars['Boolean']['input'];
 };
 
 
@@ -2260,6 +2267,12 @@ export type Pagination =
   |  { cursor?: never; none?: never; offset: OffsetPagination; };
 
 export type PaginationInfo = CursorPaginationInfo | OffsetPaginationInfo;
+
+export type PatchEmailDeviceInput = {
+  email?: InputMaybe<Scalars['String']['input']>;
+  forbidden?: InputMaybe<Scalars['Boolean']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+};
 
 export type PlaceholderGenerationOutput = {
   __typename?: 'PlaceholderGenerationOutput';
@@ -3879,10 +3892,20 @@ export type TopNavigationQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type TopNavigationQuery = { __typename?: 'Query', me: { __typename?: 'User', id: string, preferences: { __typename?: 'UserPreferences', navigationArrangement: { __typename?: 'Arrangement', locked: boolean, sections: Array<{ __typename?: 'ArrangementSection', visible: boolean, config: { __typename: 'CustomArrangementConfig' } | { __typename: 'InProgressBooks' } | { __typename: 'RecentlyAdded' } | { __typename: 'SystemArrangementConfig', variant: SystemArrangement, links: Array<FilterableArrangementEntityLink> } }> } } } };
 
+export type BookClubNavigationItemQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type BookClubNavigationItemQuery = { __typename?: 'Query', bookClubs: Array<{ __typename?: 'BookClub', id: string, name: string, slug: string, emoji?: string | null }> };
+
 export type LibraryNavigationItemQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type LibraryNavigationItemQuery = { __typename?: 'Query', libraries: { __typename?: 'PaginatedLibraryResponse', nodes: Array<{ __typename?: 'Library', id: string, name: string, emoji?: string | null }> } };
+
+export type SmartListNavigationItemQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type SmartListNavigationItemQuery = { __typename?: 'Query', smartLists: Array<{ __typename?: 'SmartList', id: string, name: string }> };
 
 export type EpubJsReaderQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -4521,6 +4544,13 @@ export type EmailDevicesTableQueryVariables = Exact<{ [key: string]: never; }>;
 export type EmailDevicesTableQuery = { __typename?: 'Query', emailDevices: Array<{ __typename?: 'RegisteredEmailDevice', id: number, name: string, email: string, forbidden: boolean }> };
 
 export type EmailerListItemFragment = { __typename?: 'Emailer', id: number, name: string, isPrimary: boolean, smtpHost: string, smtpPort: number, lastUsedAt?: any | null, maxAttachmentSizeBytes?: number | null, senderDisplayName: string, senderEmail: string, tlsEnabled: boolean, username: string } & { ' $fragmentName'?: 'EmailerListItemFragment' };
+
+export type DeleteEmailerMutationVariables = Exact<{
+  emailerId: Scalars['Int']['input'];
+}>;
+
+
+export type DeleteEmailerMutation = { __typename?: 'Mutation', deleteEmailer: { __typename?: 'Emailer', id: number } };
 
 export type EmailerSendHistoryQueryVariables = Exact<{
   id: Scalars['Int']['input'];
@@ -6454,6 +6484,16 @@ export const TopNavigationDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<TopNavigationQuery, TopNavigationQueryVariables>;
+export const BookClubNavigationItemDocument = new TypedDocumentString(`
+    query BookClubNavigationItem {
+  bookClubs {
+    id
+    name
+    slug
+    emoji
+  }
+}
+    `) as unknown as TypedDocumentString<BookClubNavigationItemQuery, BookClubNavigationItemQueryVariables>;
 export const LibraryNavigationItemDocument = new TypedDocumentString(`
     query LibraryNavigationItem {
   libraries(pagination: {none: {unpaginated: true}}) {
@@ -6465,6 +6505,14 @@ export const LibraryNavigationItemDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<LibraryNavigationItemQuery, LibraryNavigationItemQueryVariables>;
+export const SmartListNavigationItemDocument = new TypedDocumentString(`
+    query SmartListNavigationItem {
+  smartLists {
+    id
+    name
+  }
+}
+    `) as unknown as TypedDocumentString<SmartListNavigationItemQuery, SmartListNavigationItemQueryVariables>;
 export const EpubJsReaderDocument = new TypedDocumentString(`
     query EpubJsReader($id: ID!) {
   epubById(id: $id) {
@@ -7792,6 +7840,13 @@ export const EmailDevicesTableDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<EmailDevicesTableQuery, EmailDevicesTableQueryVariables>;
+export const DeleteEmailerDocument = new TypedDocumentString(`
+    mutation DeleteEmailer($emailerId: Int!) {
+  deleteEmailer(id: $emailerId) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<DeleteEmailerMutation, DeleteEmailerMutationVariables>;
 export const EmailerSendHistoryDocument = new TypedDocumentString(`
     query EmailerSendHistory($id: Int!, $fetchUser: Boolean!) {
   emailerById(id: $id) {

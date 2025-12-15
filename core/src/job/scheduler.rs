@@ -8,8 +8,6 @@ use sea_orm::prelude::*;
 
 // TODO(scheduler): Support multiple scheduled job configs
 // TODO(scheduler): Last run timestamp, so on boot we don't immediately trigger the scheduled tasks
-// TODO(graphql): Be sure to add note in release notes about the inverted logic of the scheduler, where
-// libraries are opt-in rather than opt-out. This is a "breaking" change for the scheduler config
 
 pub struct JobScheduler {
 	pub scheduler_handle: Option<tokio::task::JoinHandle<()>>,

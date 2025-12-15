@@ -36,11 +36,9 @@ const query = graphql(`
 	}
 `)
 
-// TODO: Remove these types once I figure out how to best represent this in GraphQL
+export type CustomVisit = { regenMeta: boolean; regenHashes: boolean }
 
-export type CustomVisit = { regen_meta: boolean; regen_hashes: boolean }
-
-export type ScanConfig = null | { force_rebuild: boolean } | CustomVisit
+export type ScanConfig = null | { forceRebuild: boolean } | CustomVisit
 
 /**
  * The override options for a scan job. These options are used to override the default behavior, which generally

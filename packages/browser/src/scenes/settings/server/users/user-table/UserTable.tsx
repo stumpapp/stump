@@ -1,6 +1,8 @@
 import { useGraphQL, useSDK } from '@stump/client'
 import { Badge, Card, Text, ToolTip } from '@stump/components'
 import { graphql, UserTableQuery } from '@stump/graphql'
+import { Api } from '@stump/sdk'
+import { QueryClient } from '@tanstack/react-query'
 import { ColumnDef, createColumnHelper, PaginationState } from '@tanstack/react-table'
 import dayjs from 'dayjs'
 import { HelpCircle } from 'lucide-react'
@@ -45,6 +47,22 @@ const query = graphql(`
 		}
 	}
 `)
+
+export const prefetchUsersTable = async (sdk: Api, client: QueryClient) =>
+	client.prefetchQuery({
+		queryKey: sdk.cacheKey('users', [{ pageIndex: 0, pageSize: 10 }]),
+		queryFn: async () => {
+			const data = await sdk.execute(query, {
+				pagination: {
+					offset: {
+						page: 1,
+						pageSize: 10,
+					},
+				},
+			})
+			return data
+		},
+	})
 
 export type User = NonNullable<NonNullable<UserTableQuery>['users']>['nodes'][number]
 

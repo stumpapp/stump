@@ -17,11 +17,12 @@ type Route = {
 	icon: LucideIcon
 	label: string
 	localeKey: string
-	permission?: UserPermission
+	permissions?: UserPermission[]
 	customPermission?: () => boolean
 	to: string
 	subItems?: SubItem[]
 	disabled?: boolean
+	prefetch?: () => void
 }
 
 export type RouteGroup = {
@@ -49,7 +50,8 @@ export function useRouteGroups({ routeGroups }: UseRouteGroupsParams) {
 					// Filter out items that the user doesn't have access to. If an item has no
 					// permissions requirement, then it will be included.
 					const filteredItems = group.items.filter(
-						({ permission }) => !permission || checkPermission(permission as UserPermission),
+						({ permissions }) =>
+							!permissions || permissions.every((permission) => checkPermission(permission)),
 					)
 
 					if (filteredItems.length === 0) {

@@ -1,6 +1,8 @@
 import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Badge, Card, Text } from '@stump/components'
 import { graphql, LoginActivityTableQuery } from '@stump/graphql'
+import { Api } from '@stump/sdk'
+import { QueryClient } from '@tanstack/react-query'
 import {
 	ColumnDef,
 	createColumnHelper,
@@ -33,6 +35,15 @@ const query = graphql(`
 `)
 
 export type LoginActivity = LoginActivityTableQuery['loginActivity'][number]
+
+export const prefetchLoginActivity = async (sdk: Api, client: QueryClient) =>
+	client.prefetchQuery({
+		queryKey: sdk.cacheKey('loginActivity'),
+		queryFn: async () => {
+			const data = await sdk.execute(query)
+			return data
+		},
+	})
 
 export default function LoginActivityTable() {
 	const { sdk } = useSDK()

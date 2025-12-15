@@ -1466,7 +1466,7 @@ type Mutation {
 	sendAttachmentEmail(input: SendAttachmentEmailsInput!): SendAttachmentEmailOutput!
 	createEmailDevice(input: EmailDeviceInput!): RegisteredEmailDevice!
 	updateEmailDevice(id: Int!, input: EmailDeviceInput!): RegisteredEmailDevice!
-	patchEmailDevice(id: Int!, input: EmailDeviceInput!): Int!
+	patchEmailDevice(id: Int!, input: PatchEmailDeviceInput!): RegisteredEmailDevice!
 	deleteEmailDevice(id: Int!): RegisteredEmailDevice!
 	createSmartListView(input: SaveSmartListView!): SmartListView!
 	updateSmartListView(originalName: String!, input: SaveSmartListView!): SmartListView!
@@ -1675,6 +1675,12 @@ input Pagination @oneOf {
 }
 
 union PaginationInfo = CursorPaginationInfo | OffsetPaginationInfo
+
+input PatchEmailDeviceInput {
+	name: String
+	email: String
+	forbidden: Boolean
+}
 
 type PlaceholderGenerationOutput {
 	"The total number of entities that were visited"

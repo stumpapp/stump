@@ -24,3 +24,33 @@ impl EmailDeviceInput {
 		}
 	}
 }
+
+#[derive(InputObject)]
+pub struct PatchEmailDeviceInput {
+	pub name: Option<String>,
+	pub email: Option<String>,
+	pub forbidden: Option<bool>,
+}
+
+impl PatchEmailDeviceInput {
+	pub fn apply(
+		self,
+		existing: registered_email_device::Model,
+	) -> registered_email_device::ActiveModel {
+		registered_email_device::ActiveModel {
+			id: Set(existing.id),
+			name: match self.name {
+				Some(name) => Set(name),
+				None => Set(existing.name),
+			},
+			email: match self.email {
+				Some(email) => Set(email),
+				None => Set(existing.email),
+			},
+			forbidden: match self.forbidden {
+				Some(forbidden) => Set(forbidden),
+				None => Set(existing.forbidden),
+			},
+		}
+	}
+}

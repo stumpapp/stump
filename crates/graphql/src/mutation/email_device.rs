@@ -1,5 +1,7 @@
 use crate::{
-	data::CoreContext, guard::PermissionGuard, input::email_device::EmailDeviceInput,
+	data::CoreContext,
+	guard::PermissionGuard,
+	input::email_device::{EmailDeviceInput, PatchEmailDeviceInput},
 	object::email_device::RegisteredEmailDevice,
 };
 use async_graphql::{Context, Object, Result};
@@ -46,12 +48,20 @@ impl EmailDeviceMutation {
 	#[graphql(guard = "PermissionGuard::one(UserPermission::EmailerManage)")]
 	async fn patch_email_device(
 		&self,
-		_ctx: &Context<'_>,
-		_id: i32,
-		_input: EmailDeviceInput,
-	) -> Result<u64> {
-		// TODO(graphql): implement
-		unimplemented!("patch_email_device");
+		ctx: &Context<'_>,
+		id: i32,
+		input: PatchEmailDeviceInput,
+	) -> Result<RegisteredEmailDevice> {
+		let core_ctx = ctx.data::<CoreContext>()?;
+
+		let device = registered_email_device::Entity::find_by_id(id)
+			.one(core_ctx.conn.as_ref())
+			.await?
+			.ok_or("Email device not found")?;
+
+		let patched_device = input.apply(device).update(core_ctx.conn.as_ref()).await?;
+
+		Ok(RegisteredEmailDevice::from(patched_device))
 	}
 
 	#[graphql(guard = "PermissionGuard::one(UserPermission::EmailerManage)")]

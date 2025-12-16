@@ -56,7 +56,7 @@ export default function RecentlyAddedSeriesItem({ series }: Props) {
 		<Pressable onPress={() => router.push(`/server/${serverID}/series/${data.id}`)}>
 			{({ pressed }) => (
 				<View className="relative" style={{ opacity: pressed ? 0.8 : 1 }}>
-					<SeriesStackedThumbnails thumbnailData={thumbnailData} />
+					<SeriesStackedThumbnails width={160} thumbnailData={thumbnailData} />
 
 					<View className="absolute top-0 z-20 w-full px-2.5 py-2">
 						<Text

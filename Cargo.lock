@@ -8040,6 +8040,7 @@ dependencies = [
  "futures",
  "globset",
  "image",
+ "indexmap 2.2.6",
  "infer",
  "itertools 0.13.0",
  "libc",

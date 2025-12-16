@@ -18,6 +18,7 @@ epub = { git = "https://github.com/stumpapp/epub-rs", rev = "38e091abe9687595255
 futures = { workspace = true }
 globset = "0.4.14"
 image = { version = "0.25.2" }
+indexmap = "2.0"
 infer = { workspace = true }
 itertools = { workspace = true }
 md5 = { workspace = true }

@@ -1,7 +1,7 @@
 //! A module for representing OPDS 2.0 publications, as defined by the OPDS 2.0 spec at
 //! https://drafts.opds.io/opds-2.0#51-opds-publication
 
-use std::collections::HashMap;
+use indexmap::IndexMap;
 
 use derive_builder::Builder;
 use serde::{Deserialize, Serialize};
@@ -64,15 +64,13 @@ impl OPDSPublication {
 		"https://readium.org/webpub-manifest/context.jsonld".to_string()
 	}
 
-	// FIXME: This fucks with the ordering of the publications in the feed. Figure something
-	// else out...
 	pub async fn vec_from_books(
 		client: &PrismaClient,
 		finalizer: OPDSLinkFinalizer,
 		books: Vec<books_as_publications::Data>,
 	) -> CoreResult<Vec<Self>> {
-		let mut series_to_books_map = HashMap::new();
-		let mut series_id_to_series_map = HashMap::new();
+		let mut series_to_books_map = IndexMap::new();
+		let mut series_id_to_series_map = IndexMap::new();
 
 		for book in books {
 			if let Some(series) = &book.series {
@@ -126,7 +124,7 @@ impl OPDSPublication {
 
 				let metadata = OPDSMetadataBuilder::default()
 					.title(title)
-					.modified(OPDSMetadata::generate_modified())
+					.modified(book.updated_at.to_rfc3339())
 					.description(description)
 					.belongs_to(OPDSEntryBelongsTo::from((series.clone(), position)))
 					.dynamic_metadata(OPDSDynamicMetadata(serde_json::to_value(
@@ -211,7 +209,7 @@ impl OPDSPublication {
 		let metadata = OPDSMetadataBuilder::default()
 			.title(title)
 			.identifier(book.id.clone())
-			.modified(OPDSMetadata::generate_modified())
+			.modified(book.updated_at.to_rfc3339())
 			.description(description)
 			.belongs_to(OPDSEntryBelongsTo::from((series.clone(), position)))
 			.dynamic_metadata(OPDSDynamicMetadata(serde_json::to_value(media_metadata)?))
@@ -291,7 +289,7 @@ impl OPDSPublication {
 
 #[cfg(test)]
 mod tests {
-	use prisma_client_rust::chrono::Utc;
+	use prisma_client_rust::chrono::{Duration, Utc};
 
 	use crate::{
 		db::FileStatus,
@@ -444,5 +442,195 @@ mod tests {
 		.expect("Failed to generate publication");
 
 		assert!(publication.reading_order.is_some());
+	}
+
+	#[tokio::test]
+	async fn test_vec_from_books_ordering_consistency() {
+		// Verify that the order of results is always the same when called multiple times with the same input
+		let base_time = Utc::now();
+		let books = vec![
+			books_as_publications::Data {
+				id: "1".to_string(),
+				name: "Book 1".to_string(),
+				created_at: (base_time - Duration::days(3)).into(),
+				updated_at: (base_time - Duration::days(3)).into(),
+				..mock_book()
+			},
+			books_as_publications::Data {
+				id: "2".to_string(),
+				name: "Book 2".to_string(),
+				created_at: (base_time - Duration::days(2)).into(),
+				updated_at: (base_time - Duration::days(2)).into(),
+				..mock_book()
+			},
+			books_as_publications::Data {
+				id: "3".to_string(),
+				name: "Book 3".to_string(),
+				created_at: (base_time - Duration::days(1)).into(),
+				updated_at: (base_time - Duration::days(1)).into(),
+				..mock_book()
+			},
+		];
+
+		let (client, mock) = PrismaClient::_mock();
+
+		mock.expect(
+			client._query_raw(book_positions_in_series_raw_query(
+				&["1".to_string(), "2".to_string(), "3".to_string()],
+				"1".to_string(),
+			)),
+			vec![
+				EntityPosition {
+					id: "1".to_string(),
+					position: 1,
+				},
+				EntityPosition {
+					id: "2".to_string(),
+					position: 2,
+				},
+				EntityPosition {
+					id: "3".to_string(),
+					position: 3,
+				},
+			],
+		)
+		.await;
+
+		let finalizer =
+			OPDSLinkFinalizer::new("https://my-stump-instance.cloud".to_string());
+
+		// Call twice to verify that the order is consistent
+		let publications1 =
+			OPDSPublication::vec_from_books(&client, finalizer.clone(), books.clone())
+				.await
+				.expect("Failed to generate publications");
+
+		let publications2 =
+			OPDSPublication::vec_from_books(&client, finalizer.clone(), books.clone())
+				.await
+				.expect("Failed to generate publications");
+
+		// Verify that all results have the same order
+		assert_eq!(publications1.len(), publications2.len());
+
+		// Verify ordering consistency by serializing and comparing
+		let json1: Vec<String> = publications1
+			.iter()
+			.map(|p| serde_json::to_string(&p.metadata).unwrap())
+			.collect();
+		let json2: Vec<String> = publications2
+			.iter()
+			.map(|p| serde_json::to_string(&p.metadata).unwrap())
+			.collect();
+
+		for i in 0..publications1.len() {
+			assert_eq!(
+				json1[i], json2[i],
+				"Order should be consistent across multiple calls"
+			);
+		}
+	}
+
+	#[tokio::test]
+	async fn test_modified_timestamp_uses_db_value() {
+		// Verify that the modified timestamp uses the actual DB updated_at value, not Utc::now()
+		let fixed_timestamp = Utc::now() - Duration::days(1);
+		let book = books_as_publications::Data {
+			id: "1".to_string(),
+			name: "Book 1".to_string(),
+			created_at: fixed_timestamp.into(),
+			updated_at: fixed_timestamp.into(),
+			..mock_book()
+		};
+
+		let (client, mock) = PrismaClient::_mock();
+
+		mock.expect(
+			client._query_raw(book_positions_in_series_raw_query(
+				&["1".to_string()],
+				"1".to_string(),
+			)),
+			vec![EntityPosition {
+				id: "1".to_string(),
+				position: 1,
+			}],
+		)
+		.await;
+
+		mock.expect(
+			client
+				.page_dimensions()
+				.find_first(vec![page_dimensions::metadata_id::equals(String::new())]),
+			Some(page_dimensions::Data {
+				id: "1".to_string(),
+				metadata_id: "1".to_string(),
+				dimensions: "1920,1080;800,600;1920,1080".to_string(),
+				metadata: None,
+			}),
+		)
+		.await;
+
+		let publication = OPDSPublication::from_book(
+			&client,
+			OPDSLinkFinalizer::new("https://my-stump-instance.cloud".to_string()),
+			book,
+		)
+		.await
+		.expect("Failed to generate publication");
+
+		// Verify that the modified field matches the fixed timestamp
+		let expected_modified = fixed_timestamp.to_rfc3339();
+		let metadata_json = serde_json::to_value(&publication.metadata).unwrap();
+		let actual_modified = metadata_json.get("modified").and_then(|v| v.as_str());
+		assert_eq!(
+			actual_modified,
+			Some(expected_modified.as_str()),
+			"modified should use the book's updated_at value, not Utc::now()"
+		);
+	}
+
+	#[tokio::test]
+	async fn test_vec_from_books_modified_timestamp_uses_db_value() {
+		// Verify that vec_from_books also uses the DB value for the modified timestamp
+		let fixed_timestamp = Utc::now() - Duration::days(1);
+		let books = vec![books_as_publications::Data {
+			id: "1".to_string(),
+			name: "Book 1".to_string(),
+			created_at: fixed_timestamp.into(),
+			updated_at: fixed_timestamp.into(),
+			..mock_book()
+		}];
+
+		let (client, mock) = PrismaClient::_mock();
+
+		mock.expect(
+			client._query_raw(book_positions_in_series_raw_query(
+				&["1".to_string()],
+				"1".to_string(),
+			)),
+			vec![EntityPosition {
+				id: "1".to_string(),
+				position: 1,
+			}],
+		)
+		.await;
+
+		let publications = OPDSPublication::vec_from_books(
+			&client,
+			OPDSLinkFinalizer::new("https://my-stump-instance.cloud".to_string()),
+			books,
+		)
+		.await
+		.expect("Failed to generate publications");
+
+		assert_eq!(publications.len(), 1);
+		let expected_modified = fixed_timestamp.to_rfc3339();
+		let metadata_json = serde_json::to_value(&publications[0].metadata).unwrap();
+		let actual_modified = metadata_json.get("modified").and_then(|v| v.as_str());
+		assert_eq!(
+			actual_modified,
+			Some(expected_modified.as_str()),
+			"modified should use the book's updated_at value, not Utc::now()"
+		);
 	}
 }

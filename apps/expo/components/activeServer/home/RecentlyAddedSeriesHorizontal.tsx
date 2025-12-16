@@ -52,7 +52,7 @@ function RecentlyAddedSeriesHorizontal() {
 		}
 	}, [hasNextPage, fetchNextPage])
 
-	const { gap } = useListItemSize()
+	const { horizontalGap } = useListItemSize()
 
 	const renderItem = useCallback(
 		({ item }: { item: IRecentlyAddedSeriesItemFragment }) => (
@@ -72,7 +72,7 @@ function RecentlyAddedSeriesHorizontal() {
 				keyExtractor={({ id }) => id}
 				renderItem={renderItem}
 				horizontal
-				ItemSeparatorComponent={() => <View style={{ width: gap * 2 }} />}
+				ItemSeparatorComponent={() => <View style={{ width: horizontalGap }} />}
 				contentContainerStyle={{ padding: 16 }}
 				onEndReached={onEndReached}
 				onEndReachedThreshold={0.85}

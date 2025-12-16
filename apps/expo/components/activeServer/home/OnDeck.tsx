@@ -56,7 +56,7 @@ function OnDeck() {
 		[],
 	)
 
-	const { gap } = useListItemSize()
+	const { horizontalGap } = useListItemSize()
 
 	return (
 		<View className="flex">
@@ -74,7 +74,7 @@ function OnDeck() {
 				onEndReached={onEndReached}
 				onEndReachedThreshold={0.85}
 				showsHorizontalScrollIndicator={false}
-				ItemSeparatorComponent={() => <View style={{ width: gap * 2 }} />}
+				ItemSeparatorComponent={() => <View style={{ width: horizontalGap }} />}
 				ListEmptyComponent={<Text className="text-foreground-muted">No books on deck</Text>}
 			/>
 		</View>

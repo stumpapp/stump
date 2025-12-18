@@ -3,13 +3,30 @@
  import ReadiumStreamer
  import ReadiumZIPFoundation
 
- enum BookServiceError: Error {
+ enum BookServiceError: LocalizedError {
      case openFailed(Error)
      case publicationNotFound
      case restrictedPublication(Error)
      case extractFailed(URL, String)
      case locatorNotInReadingOrder(String, String)
      case assetRetrievalFailed(Error)
+
+     var errorDescription: String? {
+         switch self {
+         case .openFailed(let error):
+             return "Failed to open publication: \(error.localizedDescription)"
+         case .publicationNotFound:
+             return "Publication not found. The book may have been removed or is no longer available."
+         case .restrictedPublication(let error):
+             return "Publication is restricted: \(error.localizedDescription)"
+         case .extractFailed(let url, let reason):
+             return "Failed to extract content from \(url.lastPathComponent): \(reason)"
+         case .locatorNotInReadingOrder(let bookId, let href):
+             return "Could not locate position in book (\(bookId)): \(href)"
+         case .assetRetrievalFailed(let error):
+             return "Failed to retrieve book asset: \(error.localizedDescription)"
+         }
+     }
  }
 
  public final class BookService {

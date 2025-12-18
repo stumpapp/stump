@@ -11,10 +11,11 @@ class ZipArchive {
 
     init(path: String) throws {
         self.path = path
-        guard let archive = Archive(url: URL(fileURLWithPath: path), accessMode: .read) else {
-            throw StreamerError.archiveOpenFailed(path, NSError(domain: "ZipArchive", code: -1, userInfo: [NSLocalizedDescriptionKey: "Could not open archive"]))
+        do {
+            self.archive = try Archive(url: URL(fileURLWithPath: path), accessMode: .read)
+        } catch {
+            throw StreamerError.archiveOpenFailed(path, error as NSError)
         }
-        self.archive = archive
     }
 
     /// Get all image files from the archive, sorted by name

@@ -98,7 +98,7 @@ function OnDeckBookItem({ book }: Props) {
 
 						{data.seriesPosition != null && (
 							<Text
-								className="flex-1 flex-wrap text-sm font-medium"
+								className="flex-1 flex-wrap text-sm font-medium tablet:text-base"
 								style={{
 									textShadowOffset: { width: 2, height: 1 },
 									textShadowRadius: 2,

@@ -56,7 +56,7 @@ export default function RecentlyAddedSeriesItem({ series }: Props) {
 		<Pressable onPress={() => router.push(`/server/${serverID}/series/${data.id}`)}>
 			{({ pressed }) => (
 				<View className="relative" style={{ opacity: pressed ? 0.8 : 1 }}>
-					<SeriesStackedThumbnails thumbnailData={thumbnailData} />
+					<SeriesStackedThumbnails width={160} thumbnailData={thumbnailData} />
 
 					<View className="absolute top-0 z-20 w-full px-2.5 py-2">
 						<Text
@@ -73,7 +73,7 @@ export default function RecentlyAddedSeriesItem({ series }: Props) {
 							{data.resolvedName}
 						</Text>
 						<Text
-							className="flex-1 flex-wrap font-medium"
+							className="flex-1 flex-wrap font-medium tablet:text-base"
 							style={{
 								textShadowOffset: { width: 2, height: 1 },
 								textShadowRadius: 2,

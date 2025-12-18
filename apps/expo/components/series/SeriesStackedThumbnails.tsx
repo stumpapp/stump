@@ -1,6 +1,6 @@
 import { useSDK } from '@stump/client'
 import { ImageRef } from '@stump/graphql'
-import { ColorSpace, darken, OKLCH, parse, serialize, set, sRGB, to } from 'colorjs.io/fn'
+import { ColorSpace, darken, getColor, OKLCH, serialize, set, sRGB } from 'colorjs.io/fn'
 import { Easing, View } from 'react-native'
 import { easeGradient } from 'react-native-easing-gradient'
 import LinearGradient from 'react-native-linear-gradient'
@@ -14,17 +14,42 @@ import { ThumbnailImage } from '../image'
 
 type Props = {
 	thumbnailData: ImageRef[]
+	width: number
 }
 
 ColorSpace.register(sRGB)
 ColorSpace.register(OKLCH)
 
-export default function SeriesStackedThumbnails({ thumbnailData }: Props) {
+type ThumbnailConfig = {
+	x: number // fractional horizontal position of the center of the thumbnail within the series card
+	y: number // fraction of the thumbnail that is hidden
+	scale: number
+	zIndex: number
+}
+
+const THREE_BOOK_LAYOUT: ThumbnailConfig[] = [
+	{ x: 0.5, y: 0.081, scale: 1.081, zIndex: 40 },
+	{ x: 0.373, y: 0.086, scale: 0.973, zIndex: 30 },
+	{ x: 0.648, y: 0.081, scale: 0.908, zIndex: 20 },
+]
+
+const TWO_BOOK_LAYOUT: ThumbnailConfig[] = [
+	{ x: 0.436, y: 0.081, scale: 1.081, zIndex: 30 },
+	{ x: 0.606, y: 0.097, scale: 0.973, zIndex: 20 },
+]
+
+const ONE_BOOK_LAYOUT: ThumbnailConfig[] = [{ x: 0.5, y: 0.081, scale: 1.081, zIndex: 20 }]
+
+export default function SeriesStackedThumbnails({ thumbnailData, width: cardWidth }: Props) {
 	const { sdk } = useSDK()
 	const { isDarkColorScheme } = useColorScheme()
 	const colors = useColors()
 	const accentColor = usePreferencesStore((state) => state.accentColor)
 	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
+
+	const baseThumbnailWidth = cardWidth * 0.7
+	const baseThumbnailHeight = baseThumbnailWidth / thumbnailRatio
+	const cardHeight = baseThumbnailHeight + 82.5
 
 	const { colors: gradientColors, locations: gradientLocations } = easeGradient({
 		colorStops: {
@@ -35,154 +60,69 @@ export default function SeriesStackedThumbnails({ thumbnailData }: Props) {
 		easing: Easing.bezier(0, 0, 0.9, 0.9),
 	})
 
-	const mainSize = {
-		height: 125 / thumbnailRatio,
-		width: 125,
-	}
-	const smallSize = {
-		height: mainSize.height * 0.9,
-		width: mainSize.width * 0.9,
-	}
-	const containerSize = {
-		// height = main thumbnail height - its translate downwards amount (1.25rem) + add space for text
-		height: mainSize.height - 17.5 + 82.5,
-		width: 165,
-	}
-
 	const renderThumbnails = () => {
-		if (thumbnailData.length > 2) {
-			return (
-				<>
-					{/* Left Image */}
-					<View className="absolute z-30 -translate-x-6 translate-y-5">
-						<ThumbnailImage
-							source={{
-								uri: thumbnailData[1].url,
-								headers: {
-									...sdk.customHeaders,
-									Authorization: sdk.authorizationHeader || '',
-								},
-							}}
-							resizeMode="stretch"
-							size={smallSize}
-							borderAndShadowStyle={{ shadowColor: 'rgba(0,0,0,0.3)', shadowRadius: 2 }}
-							placeholderData={thumbnailData[1].metadata}
-						/>
-					</View>
+		let layoutConfig: ThumbnailConfig[] = []
+		if (thumbnailData.length >= 3) layoutConfig = THREE_BOOK_LAYOUT
+		else if (thumbnailData.length === 2) layoutConfig = TWO_BOOK_LAYOUT
+		else if (thumbnailData.length === 1) layoutConfig = ONE_BOOK_LAYOUT
+		else return null
 
-					{/* Center Image */}
-					<View className="z-40 translate-y-5">
-						<ThumbnailImage
-							source={{
-								uri: thumbnailData[0].url,
-								headers: {
-									...sdk.customHeaders,
-									Authorization: sdk.authorizationHeader || '',
-								},
-							}}
-							resizeMode="stretch"
-							size={mainSize}
-							borderAndShadowStyle={{ shadowColor: 'rgba(0,0,0,0.5)', shadowRadius: 3 }}
-							placeholderData={thumbnailData[0].metadata}
-						/>
-					</View>
+		return layoutConfig.map((config, index) => {
+			const currentThumbnailData = thumbnailData[index]
 
-					{/* Right Image */}
-					<View className="absolute z-20 translate-x-6 translate-y-9">
-						<ThumbnailImage
-							source={{
-								uri: thumbnailData[2].url,
-								headers: {
-									...sdk.customHeaders,
-									Authorization: sdk.authorizationHeader || '',
-								},
-							}}
-							resizeMode="stretch"
-							size={smallSize}
-							borderAndShadowStyle={{ shadowColor: 'rgba(0,0,0,0.2)', shadowRadius: 2 }}
-							placeholderData={thumbnailData[2].metadata}
-						/>
-					</View>
-				</>
-			)
-		} else if (thumbnailData.length === 2) {
-			return (
-				<>
-					{/* Left Image */}
-					<View className="z-30 -translate-x-3 translate-y-5">
-						<ThumbnailImage
-							source={{
-								uri: thumbnailData[0].url,
-								headers: {
-									...sdk.customHeaders,
-									Authorization: sdk.authorizationHeader || '',
-								},
-							}}
-							resizeMode="stretch"
-							size={mainSize}
-							borderAndShadowStyle={{ shadowColor: 'rgba(0,0,0,0.5)', shadowRadius: 3 }}
-							placeholderData={thumbnailData[0].metadata}
-						/>
-					</View>
+			const currentThumbnailSize = {
+				width: baseThumbnailWidth * config.scale,
+				height: baseThumbnailHeight * config.scale,
+			}
 
-					{/* Right Image */}
-					<View className="absolute z-20 translate-x-5 translate-y-6">
-						<ThumbnailImage
-							source={{
-								uri: thumbnailData[1].url,
-								headers: {
-									...sdk.customHeaders,
-									Authorization: sdk.authorizationHeader || '',
-								},
-							}}
-							resizeMode="stretch"
-							size={smallSize}
-							borderAndShadowStyle={{ shadowColor: 'rgba(0,0,0,0.3)', shadowRadius: 2 }}
-							placeholderData={thumbnailData[1].metadata}
-						/>
-					</View>
-				</>
-			)
-		} else {
+			const leftOffset = cardWidth * config.x - currentThumbnailSize.width / 2
+			const translateY = baseThumbnailHeight * config.y
+
 			return (
-				<View className="z-20 translate-y-5">
+				<View
+					key={index}
+					className="absolute bottom-0"
+					style={{
+						zIndex: config.zIndex,
+						left: leftOffset,
+						transform: [{ translateY: translateY }],
+					}}
+				>
 					<ThumbnailImage
 						source={{
-							uri: thumbnailData[0].url,
+							uri: currentThumbnailData.url,
 							headers: {
 								...sdk.customHeaders,
 								Authorization: sdk.authorizationHeader || '',
 							},
 						}}
 						resizeMode="stretch"
-						size={mainSize}
-						borderAndShadowStyle={{ shadowColor: 'rgba(0,0,0,0.3)', shadowRadius: 3 }}
-						placeholderData={thumbnailData[0].metadata}
+						size={currentThumbnailSize}
+						borderAndShadowStyle={{ shadowColor: 'rgba(0 0 0 / 0.4)', shadowRadius: 3 }}
+						placeholderData={currentThumbnailData.metadata}
 					/>
 				</View>
 			)
-		}
+		})
 	}
 
 	const mainThumbnailAverageColor = thumbnailData[0].metadata?.averageColor
 
 	let backgroundColor
 	if (mainThumbnailAverageColor) {
-		const color = parse(mainThumbnailAverageColor)
+		const color = getColor(mainThumbnailAverageColor)
 		const darkerColor = darken(color, isDarkColorScheme ? 0.33 : 0.1)
 		backgroundColor = serialize(darkerColor, { format: 'hex' })
 	} else if (accentColor) {
-		// Take the hue of the accentColor and give it the same chroma and lightness as colors.thumbnail.stack
-		const color = parse(accentColor)
-		const oklch = to(color, OKLCH)
-		const modifiedColor = set(oklch, {
+		// Take the hue of the accentColor and give it the same chroma and lightness as colors.thumbnail.stack.series
+		const color = getColor(accentColor)
+		const modifiedColor = set(color, {
 			'oklch.l': isDarkColorScheme ? 0.38 : 0.8,
 			'oklch.c': 0.04,
 		})
-		const srgb = to(modifiedColor, sRGB)
-		backgroundColor = serialize(srgb, { format: 'hex' })
+		backgroundColor = serialize(modifiedColor, { format: 'hex' })
 	} else {
-		backgroundColor = colors.thumbnail.stack
+		backgroundColor = colors.thumbnail.stack.series
 	}
 
 	return (
@@ -202,9 +142,9 @@ export default function SeriesStackedThumbnails({ thumbnailData }: Props) {
 			/>
 
 			<View
-				className="items-center justify-end"
 				style={{
-					...containerSize,
+					width: cardWidth,
+					height: cardHeight,
 					backgroundColor,
 				}}
 			>

@@ -67,7 +67,7 @@ function ContinueReading() {
 		[],
 	)
 
-	const { gap } = useListItemSize()
+	const { horizontalGap } = useListItemSize()
 
 	return (
 		<Fragment
@@ -90,7 +90,7 @@ function ContinueReading() {
 						onEndReached={onEndReached}
 						onEndReachedThreshold={0.85}
 						showsHorizontalScrollIndicator={false}
-						ItemSeparatorComponent={() => <View style={{ width: gap * 2 }} />}
+						ItemSeparatorComponent={() => <View style={{ width: horizontalGap }} />}
 						ListEmptyComponent={
 							<Text className="px-4 text-foreground-muted">No books in progress</Text>
 						}

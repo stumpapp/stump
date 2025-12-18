@@ -1,8 +1,11 @@
 import { ImageColor } from '@stump/graphql'
-import Color from 'colorjs.io'
+import { ColorSpace, deltaE2000, getColor, LCH, PlainColorObject, sRGB, to } from 'colorjs.io/fn'
+
+ColorSpace.register(LCH)
+ColorSpace.register(sRGB)
 
 type ColorData = {
-	color: Color
+	color: PlainColorObject
 	hex: string
 	chroma: number
 	percentage: number
@@ -39,11 +42,12 @@ export function selectMeshColors(colorPalette: ImageColor[]) {
 	if (colorPalette.length < 3) return null
 
 	const candidates: ColorData[] = colorPalette.map((colorData) => {
-		const color = new Color(colorData.color)
+		const color = getColor(colorData.color)
+		const lch = to(color, LCH)
 		return {
-			color: color,
+			color: lch,
 			hex: colorData.color,
-			chroma: color.lch.c,
+			chroma: lch.coords[1],
 			percentage: colorData.percentage,
 		}
 	})
@@ -67,7 +71,7 @@ export function selectMeshColors(colorPalette: ImageColor[]) {
 		candidates.forEach((candidateData, index) => {
 			let minDiff = Infinity
 			for (const colorData of finalPalette) {
-				const diff = colorData.color.deltaE(candidateData.color, '2000')
+				const diff = deltaE2000(colorData.color, candidateData.color)
 				if (diff < minDiff) {
 					minDiff = diff
 				}

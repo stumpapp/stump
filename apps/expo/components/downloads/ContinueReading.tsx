@@ -40,7 +40,7 @@ export default function ContinueReading() {
 		[data, activeBooks],
 	)
 
-	const { gap } = useListItemSize()
+	const { horizontalGap } = useListItemSize()
 
 	return (
 		<Fragment
@@ -62,7 +62,7 @@ export default function ContinueReading() {
 						contentContainerStyle={{ padding: 16 }}
 						onEndReachedThreshold={0.85}
 						showsHorizontalScrollIndicator={false}
-						ItemSeparatorComponent={() => <View style={{ width: gap * 2 }} />}
+						ItemSeparatorComponent={() => <View style={{ width: horizontalGap }} />}
 					/>
 				</View>
 			)}

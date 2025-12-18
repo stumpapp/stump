@@ -6,7 +6,7 @@ import { cn } from '~/lib/utils'
 import { usePreferencesStore } from '~/stores'
 
 import { ThumbnailImage } from '../image'
-import { ThumbnailPlaceholderData } from '../ThumbnailPlaceholder'
+import { ThumbnailPlaceholderData } from '../image/ThumbnailPlaceholder'
 import { Text } from '../ui'
 import { useGridItemSize } from './useGridItemSize'
 
@@ -19,7 +19,7 @@ type Props = {
 
 export default function GridImageItem({ uri, title, href, ...thumbnailProps }: Props) {
 	const { sdk } = useSDK()
-	const { itemDimension } = useGridItemSize()
+	const { itemWidth } = useGridItemSize()
 
 	const router = useRouter()
 	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
@@ -37,7 +37,7 @@ export default function GridImageItem({ uri, title, href, ...thumbnailProps }: P
 							},
 						}}
 						resizeMode="stretch"
-						size={{ height: itemDimension / thumbnailRatio, width: itemDimension }}
+						size={{ height: itemWidth / thumbnailRatio, width: itemWidth }}
 						{...thumbnailProps}
 					/>
 
@@ -47,7 +47,7 @@ export default function GridImageItem({ uri, title, href, ...thumbnailProps }: P
 						numberOfLines={2}
 						ellipsizeMode="tail"
 						style={{
-							maxWidth: itemDimension - 4,
+							maxWidth: itemWidth - 4,
 						}}
 					>
 						{title}

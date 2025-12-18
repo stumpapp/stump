@@ -7,7 +7,7 @@
 	},
 	"authScene": {
 		"claimHeading": "初始化您的服务器",
-		"claimText": "Stump服务器尚未初始化。请使用下面的表单创建您的帐户。之后就能够完全访问服务器所有功能。",
+		"claimText": "此 Stump 服务器尚未初始化。请使用下面的表单创建您的帐户。之后就能够完全访问服务器所有功能。",
 		"form": {
 			"validation": {
 				"missingUsername": "用户名为必填项",

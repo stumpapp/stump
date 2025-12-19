@@ -3998,7 +3998,7 @@ export type BookLibrarySeriesLinksQueryVariables = Exact<{
 }>;
 
 
-export type BookLibrarySeriesLinksQuery = { __typename?: 'Query', seriesById?: { __typename?: 'Series', id: string, name: string, libraryId?: string | null } | null };
+export type BookLibrarySeriesLinksQuery = { __typename?: 'Query', seriesById?: { __typename?: 'Series', id: string, resolvedName: string, libraryId?: string | null } | null };
 
 export type BookMetadataFragment = { __typename?: 'Media', metadata?: { __typename?: 'MediaMetadata', ageRating?: number | null, characters: Array<string>, colorists: Array<string>, coverArtists: Array<string>, editors: Array<string>, genres: Array<string>, inkers: Array<string>, letterers: Array<string>, links: Array<string>, pencillers: Array<string>, publisher?: string | null, teams: Array<string>, writers: Array<string>, year?: number | null, month?: number | null, day?: number | null } | null } & { ' $fragmentName'?: 'BookMetadataFragment' };
 
@@ -6709,7 +6709,7 @@ export const BookLibrarySeriesLinksDocument = new TypedDocumentString(`
     query BookLibrarySeriesLinks($id: ID!) {
   seriesById(id: $id) {
     id
-    name
+    resolvedName
     libraryId
   }
 }

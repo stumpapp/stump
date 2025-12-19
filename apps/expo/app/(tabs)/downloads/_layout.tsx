@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Stack, useNavigation } from 'expo-router'
-import { useLayoutEffect, useRef } from 'react'
+import { useLayoutEffect, useMemo, useRef } from 'react'
 import { Platform, View } from 'react-native'
 import { useStore } from 'zustand'
 
@@ -8,7 +8,7 @@ import { DownloadsHeaderMenu, DownloadsHeaderSortMenu } from '~/components/downl
 import { SelectionLeftScreenHeader, SelectionRightScreenHeader } from '~/components/selection'
 import { IS_IOS_24_PLUS } from '~/lib/constants'
 import { usePreferencesStore } from '~/stores'
-import { createSelectionStore, SelectionContext } from '~/stores/selection'
+import { createSelectionStore, SelectionContext, SelectionStore } from '~/stores/selection'
 
 const offlineQueryClient = new QueryClient({
 	defaultOptions: {
@@ -19,6 +19,17 @@ const offlineQueryClient = new QueryClient({
 	},
 })
 
+function AndroidHeaderWrapper({
+	children,
+	store,
+}: React.PropsWithChildren<{ store: SelectionStore }>) {
+	return (
+		<SelectionContext.Provider value={store}>
+			<QueryClientProvider client={offlineQueryClient}>{children}</QueryClientProvider>
+		</SelectionContext.Provider>
+	)
+}
+
 export default function Screen() {
 	const animationEnabled = usePreferencesStore((state) => !state.reduceAnimations)
 
@@ -26,35 +37,43 @@ export default function Screen() {
 
 	const isSelecting = useStore(store, (state) => state.isSelecting)
 
-	const navigation = useNavigation()
-	useLayoutEffect(
-		() => {
-			if (Platform.OS === 'android') {
-				const WithProvider = ({ children }: { children: React.ReactNode }) => (
-					<SelectionContext.Provider value={store}>
-						<QueryClientProvider client={offlineQueryClient}>{children}</QueryClientProvider>
-					</SelectionContext.Provider>
-				)
-
-				navigation.setOptions({
-					headerLeft: () => (
-						<WithProvider>
-							{isSelecting ? <SelectionLeftScreenHeader /> : <DownloadsHeaderSortMenu />}
-						</WithProvider>
-					),
-					headerRight: () => (
-						<WithProvider>
-							<View className="mr-2">
-								{isSelecting ? <SelectionRightScreenHeader /> : <DownloadsHeaderMenu />}
-							</View>
-						</WithProvider>
-					),
-				})
-			}
-		},
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[isSelecting, navigation],
+	const androidHeaderLeft = useMemo(
+		() => (
+			<AndroidHeaderWrapper store={store}>
+				{isSelecting ? (
+					<SelectionLeftScreenHeader key="selection-left" />
+				) : (
+					<DownloadsHeaderSortMenu key="sort-menu" />
+				)}
+			</AndroidHeaderWrapper>
+		),
+		[isSelecting, store],
 	)
+
+	const androidHeaderRight = useMemo(
+		() => (
+			<AndroidHeaderWrapper store={store}>
+				<View className="mr-2">
+					{isSelecting ? (
+						<SelectionRightScreenHeader key="selection-right" />
+					) : (
+						<DownloadsHeaderMenu key="header-menu" />
+					)}
+				</View>
+			</AndroidHeaderWrapper>
+		),
+		[isSelecting, store],
+	)
+
+	const navigation = useNavigation()
+	useLayoutEffect(() => {
+		if (Platform.OS === 'android') {
+			navigation.setOptions({
+				headerLeft: () => androidHeaderLeft,
+				headerRight: () => androidHeaderRight,
+			})
+		}
+	}, [navigation, androidHeaderLeft, androidHeaderRight])
 
 	return (
 		<SelectionContext.Provider value={store}>

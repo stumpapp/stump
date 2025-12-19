@@ -2219,6 +2219,14 @@
 		"MANAGE_JOBS": {
 			"label": "Manage jobs",
 			"description": "Allows the user to manage any queued jobs"
+		},
+		"EDIT_METADATA": {
+			"label": "Edit metadata",
+			"description": "Allows the user to edit metadata for books and series"
+		},
+		"WRITE_BACK_METADATA": {
+			"label": "Write back metadata",
+			"description": "Allows the user to write metadata changes back to the source files"
 		}
 	}
 }

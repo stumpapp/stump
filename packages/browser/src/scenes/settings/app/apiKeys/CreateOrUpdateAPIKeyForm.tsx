@@ -150,6 +150,12 @@ export default function CreateOrUpdateAPIKeyForm({
 									onChange={handlePermissionsChange}
 									isMultiSelect
 									disabled={inherit}
+									formatValue={(value) => {
+										if (Array.isArray(value) && value.length) {
+											return `${value.length} permission${value.length > 1 ? 's' : ''}`
+										}
+										return ''
+									}}
 								/>
 							</div>
 						)}

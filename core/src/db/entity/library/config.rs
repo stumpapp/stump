@@ -37,6 +37,8 @@ pub struct LibraryConfig {
 	pub ignore_rules: IgnoreRules,
 	#[serde(default)]
 	pub default_library_view_mode: LibraryViewMode,
+	#[serde(default)]
+	pub hide_series_view: bool,
 	// TODO(prisma-nested-create): Refactor once nested create is supported
 	// https://github.com/Brendonovich/prisma-client-rust/issues/44
 	#[specta(optional)]
@@ -101,6 +103,7 @@ impl From<library_config::Data> for LibraryConfig {
 				data.default_library_view_mode.as_str(),
 			)
 			.unwrap_or_default(),
+			hide_series_view: data.hide_series_view,
 			library_id: data.library_id,
 		}
 	}

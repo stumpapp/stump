@@ -144,6 +144,7 @@ model LibraryConfig {
   library_pattern                 String  @default("SERIES_BASED") // SERIES_BASED or COLLECTION_BASED
   watch                           Boolean @default(true)
   default_library_view_mode       String  @default("SERIES") // SERIES or BOOKS
+  hide_series_view                Boolean @default(false)
 
   thumbnail_config Bytes? // { size_factor: "...", format: "...", quality: ... }
   ignore_rules     Bytes? // ["glob1", "glob2", ...]

@@ -93,6 +93,7 @@ export const buildSchema = (existingLibraries: Library[], library?: Library) =>
 			.default([]),
 		library_pattern: z.string().refine(isLibraryPattern).default('SERIES_BASED'),
 		default_library_view_mode: z.string().refine(isLibraryViewMode).default('SERIES'),
+		hide_series_view: z.boolean().default(false),
 		name: z
 			.string()
 			.min(1, { message: 'Library name is required' })
@@ -160,6 +161,7 @@ export const formDefaults = (library?: Library): CreateOrUpdateLibrarySchema => 
 	ignore_rules: toFormIgnoreRules(library?.config.ignore_rules),
 	library_pattern: library?.config.library_pattern || 'SERIES_BASED',
 	default_library_view_mode: library?.config.default_library_view_mode || 'SERIES',
+	hide_series_view: library?.config.hide_series_view ?? false,
 	name: library?.name || '',
 	path: library?.path || '',
 	process_metadata: library?.config.process_metadata ?? true,

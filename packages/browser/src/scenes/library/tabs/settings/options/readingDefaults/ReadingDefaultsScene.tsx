@@ -21,6 +21,7 @@ type PatchParams = Partial<
 		| 'default_reading_image_scale_fit'
 		| 'default_reading_mode'
 		| 'default_library_view_mode'
+		| 'hide_series_view'
 	>
 >
 
@@ -50,15 +51,17 @@ export default function ReadingDefaultsScene() {
 		'default_reading_image_scale_fit',
 		'default_reading_mode',
 		'default_library_view_mode',
+		'hide_series_view',
 	])
 	const didChange = useMemo(() => {
 		const config = library.config
-		const [dir, scale, mode, viewMode] = formValues
+		const [dir, scale, mode, viewMode, hideSeriesView] = formValues
 		return (
 			config.default_reading_dir !== dir ||
 			config.default_reading_image_scale_fit !== scale ||
 			config.default_reading_mode !== mode ||
-			config.default_library_view_mode !== viewMode
+			config.default_library_view_mode !== viewMode ||
+			config.hide_series_view !== hideSeriesView
 		)
 	}, [formValues, library])
 	const [debouncedDidChange] = useDebouncedValue(didChange, 500)

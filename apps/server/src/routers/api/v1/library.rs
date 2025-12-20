@@ -1416,6 +1416,9 @@ async fn create_library(
 					library_config::default_library_view_mode::set(
 						library_config.default_library_view_mode.to_string(),
 					),
+					library_config::hide_series_view::set(
+						library_config.hide_series_view,
+					),
 					library_config::thumbnail_config::set(thumbnail_config),
 					library_config::ignore_rules::set(ignore_rules),
 					library_config::watch::set(library_config.watch),
@@ -1649,6 +1652,9 @@ async fn update_library(
 						),
 						library_config::default_library_view_mode::set(
 							library_config.default_library_view_mode.to_string(),
+						),
+						library_config::hide_series_view::set(
+							library_config.hide_series_view,
 						),
 						library_config::ignore_rules::set(ignore_rules),
 						library_config::watch::set(library_config.watch),

@@ -415,6 +415,10 @@
 						"label": "Books",
 						"description": "Show the books tab by default"
 					}
+				},
+				"hideSeriesView": {
+					"label": "Hide series tab",
+					"description": "When enabled, the series tab will be hidden from the library navigation"
 				}
 			}
 		},

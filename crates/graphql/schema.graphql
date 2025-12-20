@@ -787,6 +787,8 @@ type LibraryConfig {
 	defaultReadingDir: ReadingDirection!
 	defaultReadingMode: ReadingMode!
 	defaultReadingImageScaleFit: ReadingImageScaleFit!
+	defaultLibraryViewMode: LibraryViewMode!
+	hideSeriesView: Boolean!
 	generateFileHashes: Boolean!
 	generateKoreaderHashes: Boolean!
 	processMetadata: Boolean!
@@ -811,6 +813,8 @@ input LibraryConfigInput {
 	defaultReadingDir: ReadingDirection!
 	defaultReadingMode: ReadingMode!
 	defaultReadingImageScaleFit: ReadingImageScaleFit!
+	defaultLibraryViewMode: LibraryViewMode!
+	hideSeriesView: Boolean!
 	ignoreRules: [String!]
 }
 
@@ -847,6 +851,12 @@ enum LibraryModelOrdering {
 enum LibraryPattern {
 	SERIES_BASED
 	COLLECTION_BASED
+}
+
+"The default view mode for a library, controlling which tab is shown when navigating to a library"
+enum LibraryViewMode {
+	SERIES
+	BOOKS
 }
 
 "The data that is collected and updated during the execution of a library scan job"

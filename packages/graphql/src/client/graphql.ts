@@ -847,12 +847,14 @@ export type LibraryStatsArgs = {
 export type LibraryConfig = {
   __typename?: 'LibraryConfig';
   convertRarToZip: Scalars['Boolean']['output'];
+  defaultLibraryViewMode: LibraryViewMode;
   defaultReadingDir: ReadingDirection;
   defaultReadingImageScaleFit: ReadingImageScaleFit;
   defaultReadingMode: ReadingMode;
   generateFileHashes: Scalars['Boolean']['output'];
   generateKoreaderHashes: Scalars['Boolean']['output'];
   hardDeleteConversions: Scalars['Boolean']['output'];
+  hideSeriesView: Scalars['Boolean']['output'];
   id: Scalars['Int']['output'];
   ignoreRules?: Maybe<Array<Scalars['String']['output']>>;
   libraryId?: Maybe<Scalars['String']['output']>;
@@ -865,12 +867,14 @@ export type LibraryConfig = {
 
 export type LibraryConfigInput = {
   convertRarToZip: Scalars['Boolean']['input'];
+  defaultLibraryViewMode: LibraryViewMode;
   defaultReadingDir: ReadingDirection;
   defaultReadingImageScaleFit: ReadingImageScaleFit;
   defaultReadingMode: ReadingMode;
   generateFileHashes: Scalars['Boolean']['input'];
   generateKoreaderHashes: Scalars['Boolean']['input'];
   hardDeleteConversions: Scalars['Boolean']['input'];
+  hideSeriesView: Scalars['Boolean']['input'];
   ignoreRules?: InputMaybe<Array<Scalars['String']['input']>>;
   libraryPattern: LibraryPattern;
   processMetadata: Scalars['Boolean']['input'];
@@ -957,6 +961,12 @@ export type LibraryStats = {
   seriesCount: Scalars['Int']['output'];
   totalBytes: Scalars['Int']['output'];
 };
+
+/** The default view mode for a library, controlling which tab is shown when navigating to a library */
+export enum LibraryViewMode {
+  Books = 'BOOKS',
+  Series = 'SERIES'
+}
 
 export type Log = {
   __typename?: 'Log';
@@ -4183,7 +4193,7 @@ export type LibraryLayoutQueryVariables = Exact<{
 
 
 export type LibraryLayoutQuery = { __typename?: 'Query', libraryById?: (
-    { __typename?: 'Library', id: string, name: string, description?: string | null, path: string, stats: { __typename?: 'LibraryStats', bookCount: number, completedBooks: number, inProgressBooks: number }, tags: Array<{ __typename?: 'Tag', id: number, name: string }>, thumbnail: { __typename?: 'ImageRef', url: string } }
+    { __typename?: 'Library', id: string, name: string, description?: string | null, path: string, stats: { __typename?: 'LibraryStats', bookCount: number, completedBooks: number, inProgressBooks: number }, tags: Array<{ __typename?: 'Tag', id: number, name: string }>, thumbnail: { __typename?: 'ImageRef', url: string }, config: { __typename?: 'LibraryConfig', defaultLibraryViewMode: LibraryViewMode, hideSeriesView: boolean } }
     & { ' $fragmentRefs'?: { 'LibrarySettingsConfigFragment': LibrarySettingsConfigFragment } }
   ) | null };
 
@@ -4223,7 +4233,7 @@ export type LibrarySeriesGridQueryVariables = Exact<{
 
 export type LibrarySeriesGridQuery = { __typename?: 'Query', series: { __typename?: 'PaginatedSeriesResponse', nodes: Array<{ __typename?: 'Series', id: string, thumbnail: { __typename?: 'ImageRef', url: string } }>, pageInfo: { __typename: 'CursorPaginationInfo', currentCursor?: string | null, nextCursor?: string | null, limit: number } | { __typename: 'OffsetPaginationInfo' } } };
 
-export type LibrarySettingsConfigFragment = { __typename?: 'Library', config: { __typename?: 'LibraryConfig', id: number, convertRarToZip: boolean, hardDeleteConversions: boolean, defaultReadingDir: ReadingDirection, defaultReadingMode: ReadingMode, defaultReadingImageScaleFit: ReadingImageScaleFit, generateFileHashes: boolean, generateKoreaderHashes: boolean, processMetadata: boolean, watch: boolean, libraryPattern: LibraryPattern, processThumbnailColorsEvenWithoutConfig: boolean, ignoreRules?: Array<string> | null, thumbnailConfig?: { __typename: 'ImageProcessorOptions', format: SupportedImageFormat, quality?: number | null, page?: number | null, resizeMethod?: { __typename: 'ExactDimensionResize', width: number, height: number } | { __typename: 'ScaleEvenlyByFactor', factor: any } | { __typename: 'ScaledDimensionResize', dimension: Dimension, size: number } | null } | null } } & { ' $fragmentName'?: 'LibrarySettingsConfigFragment' };
+export type LibrarySettingsConfigFragment = { __typename?: 'Library', config: { __typename?: 'LibraryConfig', id: number, convertRarToZip: boolean, hardDeleteConversions: boolean, defaultReadingDir: ReadingDirection, defaultReadingMode: ReadingMode, defaultReadingImageScaleFit: ReadingImageScaleFit, defaultLibraryViewMode: LibraryViewMode, hideSeriesView: boolean, generateFileHashes: boolean, generateKoreaderHashes: boolean, processMetadata: boolean, watch: boolean, libraryPattern: LibraryPattern, processThumbnailColorsEvenWithoutConfig: boolean, ignoreRules?: Array<string> | null, thumbnailConfig?: { __typename: 'ImageProcessorOptions', format: SupportedImageFormat, quality?: number | null, page?: number | null, resizeMethod?: { __typename: 'ExactDimensionResize', width: number, height: number } | { __typename: 'ScaleEvenlyByFactor', factor: any } | { __typename: 'ScaledDimensionResize', dimension: Dimension, size: number } | null } | null } } & { ' $fragmentName'?: 'LibrarySettingsConfigFragment' };
 
 export type LibrarySettingsRouterEditLibraryMutationMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -5185,6 +5195,8 @@ export const LibrarySettingsConfigFragmentDoc = new TypedDocumentString(`
     defaultReadingDir
     defaultReadingMode
     defaultReadingImageScaleFit
+    defaultLibraryViewMode
+    hideSeriesView
     generateFileHashes
     generateKoreaderHashes
     processMetadata
@@ -7174,6 +7186,10 @@ export const LibraryLayoutDocument = new TypedDocumentString(`
     thumbnail {
       url
     }
+    config {
+      defaultLibraryViewMode
+      hideSeriesView
+    }
     ...LibrarySettingsConfig
   }
 }
@@ -7185,6 +7201,8 @@ export const LibraryLayoutDocument = new TypedDocumentString(`
     defaultReadingDir
     defaultReadingMode
     defaultReadingImageScaleFit
+    defaultLibraryViewMode
+    hideSeriesView
     generateFileHashes
     generateKoreaderHashes
     processMetadata

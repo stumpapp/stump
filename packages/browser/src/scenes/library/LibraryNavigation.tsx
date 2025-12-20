@@ -23,9 +23,8 @@ export default function LibraryNavigation() {
 	const {
 		preferences: { primaryNavigationMode, layoutMaxWidthPx },
 	} = usePreferences()
-	const {
-		library: { id, path },
-	} = useLibraryContext()
+	const { library } = useLibraryContext()
+	const { id, path } = library
 	const { checkPermission } = useAppContext()
 	// const { prefetch: prefetchBooks } = usePrefetchLibraryBooks({ id })
 	// const { prefetch: prefetchFiles } = usePrefetchLibraryFiles({
@@ -48,14 +47,20 @@ export default function LibraryNavigation() {
 	})
 
 	const canAccessFiles = checkPermission(UserPermission.FileExplorer)
+	const hideSeriesView = library.config?.hideSeriesView ?? false
+
 	const tabs = useMemo(
 		() => [
-			{
-				isActive: location.pathname.match(/\/libraries\/[^/]+\/?(series)?$/),
-				label: 'Series',
-				onHover: () => prefetchSeries(id),
-				to: 'series',
-			},
+			...(!hideSeriesView
+				? [
+						{
+							isActive: location.pathname.match(/\/libraries\/[^/]+\/?(series)?$/),
+							label: 'Series',
+							onHover: () => prefetchSeries(id),
+							to: 'series',
+						},
+					]
+				: []),
 			{
 				isActive: location.pathname.match(/\/libraries\/[^/]+\/books(\/.*)?$/),
 				label: 'Books',
@@ -78,7 +83,15 @@ export default function LibraryNavigation() {
 				to: 'settings',
 			},
 		],
-		[location, canAccessFiles, prefetchSeries, prefetchBooks, handlePrefetchFiles, id],
+		[
+			location,
+			canAccessFiles,
+			hideSeriesView,
+			prefetchSeries,
+			prefetchBooks,
+			handlePrefetchFiles,
+			id,
+		],
 	)
 
 	const preferTopBar = primaryNavigationMode === 'TOPBAR'

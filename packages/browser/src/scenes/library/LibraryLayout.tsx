@@ -33,6 +33,10 @@ const query = graphql(`
 			thumbnail {
 				url
 			}
+			config {
+				defaultLibraryViewMode
+				hideSeriesView
+			}
 			...LibrarySettingsConfig
 		}
 	}

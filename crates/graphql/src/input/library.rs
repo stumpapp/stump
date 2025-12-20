@@ -2,7 +2,10 @@ use async_graphql::InputObject;
 use models::{
 	entity::{library, library_config},
 	shared::{
-		enums::{LibraryPattern, ReadingDirection, ReadingImageScaleFit, ReadingMode},
+		enums::{
+			LibraryPattern, LibraryViewMode, ReadingDirection, ReadingImageScaleFit,
+			ReadingMode,
+		},
 		ignore_rules::IgnoreRules,
 		image_processor_options::ImageProcessorOptions,
 	},
@@ -62,6 +65,8 @@ pub struct LibraryConfigInput {
 	pub process_metadata: bool,
 	pub watch: bool,
 	pub library_pattern: LibraryPattern,
+	pub default_library_view_mode: LibraryViewMode,
+	pub hide_series_view: bool,
 	pub thumbnail_config: Option<ImageProcessorOptions>,
 	pub process_thumbnail_colors_even_without_config: bool,
 	pub default_reading_dir: ReadingDirection,
@@ -80,6 +85,8 @@ impl LibraryConfigInput {
 			process_metadata,
 			watch,
 			library_pattern,
+			default_library_view_mode,
+			hide_series_view,
 			thumbnail_config,
 			process_thumbnail_colors_even_without_config,
 			default_reading_dir,
@@ -101,6 +108,8 @@ impl LibraryConfigInput {
 			process_metadata: Set(process_metadata),
 			watch: Set(watch),
 			library_pattern: Set(library_pattern),
+			default_library_view_mode: Set(default_library_view_mode),
+			hide_series_view: Set(hide_series_view),
 			thumbnail_config: Set(thumbnail_config),
 			process_thumbnail_colors_even_without_config: Set(
 				process_thumbnail_colors_even_without_config,

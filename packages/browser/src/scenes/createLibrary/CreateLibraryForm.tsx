@@ -13,6 +13,7 @@ import {
 } from '@/components/library/createOrUpdate/schema'
 import {
 	BasicLibraryInformation,
+	DefaultLibraryView,
 	FileConversionOptions,
 	LibraryPattern as LibraryPatternSection,
 	ScannerOptInFeatures,
@@ -115,6 +116,7 @@ export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoadi
 				return (
 					<>
 						<LibraryPatternSection />
+						<DefaultLibraryView />
 						<ScannerOptInFeatures />
 						<FileConversionOptions />
 						<IgnoreRulesConfig />

@@ -251,6 +251,24 @@
 				"label": "Tags",
 				"description": "Used to categorize your library or enforce access rules"
 			},
+			"defaultLibraryView": {
+				"label": "Default library view",
+				"description": "Configure which tab is shown by default when opening this library",
+				"hideSeriesView": {
+					"label": "Hide series tab",
+					"description": "Hide the series tab from the library navigation"
+				},
+				"options": {
+					"series": {
+						"label": "Series",
+						"description": "Show the series tab by default"
+					},
+					"books": {
+						"label": "Books",
+						"description": "Show the books tab by default"
+					}
+				}
+			},
 			"readingSettings": {
 				"section": {
 					"heading": "Reading settings",

@@ -7,6 +7,7 @@ import { useDebouncedValue } from 'rooks'
 import {
 	buildSchema,
 	CreateOrUpdateLibrarySchema,
+	DefaultLibraryView,
 	DefaultReadingSettings,
 	formDefaults,
 } from '@/components/library/createOrUpdate'
@@ -16,7 +17,10 @@ import { useLibraryManagement } from '../../context'
 type PatchParams = Partial<
 	Pick<
 		CreateOrUpdateLibrarySchema,
-		'default_reading_dir' | 'default_reading_image_scale_fit' | 'default_reading_mode'
+		| 'default_reading_dir'
+		| 'default_reading_image_scale_fit'
+		| 'default_reading_mode'
+		| 'default_library_view_mode'
 	>
 >
 
@@ -45,14 +49,16 @@ export default function ReadingDefaultsScene() {
 		'default_reading_dir',
 		'default_reading_image_scale_fit',
 		'default_reading_mode',
+		'default_library_view_mode',
 	])
 	const didChange = useMemo(() => {
 		const config = library.config
-		const [dir, scale, mode] = formValues
+		const [dir, scale, mode, viewMode] = formValues
 		return (
 			config.default_reading_dir !== dir ||
 			config.default_reading_image_scale_fit !== scale ||
-			config.default_reading_mode !== mode
+			config.default_reading_mode !== mode ||
+			config.default_library_view_mode !== viewMode
 		)
 	}, [formValues, library])
 	const [debouncedDidChange] = useDebouncedValue(didChange, 500)
@@ -73,6 +79,7 @@ export default function ReadingDefaultsScene() {
 			form={form}
 			onSubmit={handleSubmit}
 		>
+			<DefaultLibraryView />
 			<DefaultReadingSettings />
 
 			<div className="invisible hidden">

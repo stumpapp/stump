@@ -1,5 +1,5 @@
 import { PickSelect } from '@stump/components'
-import { IgnoreRules, Library, LibraryPattern, LibraryScanMode } from '@stump/sdk'
+import { IgnoreRules, Library, LibraryPattern, LibraryScanMode, LibraryViewMode } from '@stump/sdk'
 import isValidGlob from 'is-valid-glob'
 import { z } from 'zod'
 
@@ -15,6 +15,13 @@ const isLibraryScanMode = (input: string): input is LibraryScanMode => {
  */
 const isLibraryPattern = (input: string): input is LibraryPattern => {
 	return input === 'SERIES_BASED' || input === 'COLLECTION_BASED' || !input
+}
+
+/**
+ * A type guard to check if the input is a valid {@link LibraryViewMode}
+ */
+const isLibraryViewMode = (input: string): input is LibraryViewMode => {
+	return input === 'SERIES' || input === 'BOOKS' || !input
 }
 /**
  * A helper function to convert persisted ignore rules to the form format
@@ -85,6 +92,7 @@ export const buildSchema = (existingLibraries: Library[], library?: Library) =>
 			)
 			.default([]),
 		library_pattern: z.string().refine(isLibraryPattern).default('SERIES_BASED'),
+		default_library_view_mode: z.string().refine(isLibraryViewMode).default('SERIES'),
 		name: z
 			.string()
 			.min(1, { message: 'Library name is required' })
@@ -151,6 +159,7 @@ export const formDefaults = (library?: Library): CreateOrUpdateLibrarySchema => 
 	watch: library?.config.watch ?? true,
 	ignore_rules: toFormIgnoreRules(library?.config.ignore_rules),
 	library_pattern: library?.config.library_pattern || 'SERIES_BASED',
+	default_library_view_mode: library?.config.default_library_view_mode || 'SERIES',
 	name: library?.name || '',
 	path: library?.path || '',
 	process_metadata: library?.config.process_metadata ?? true,

@@ -121,6 +121,52 @@ impl Default for LibraryScanMode {
 	}
 }
 
+/// The default view mode for a library, controlling which tab is shown when navigating to a library.
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, Type, ToSchema)]
+pub enum LibraryViewMode {
+	#[serde(rename = "SERIES")]
+	Series,
+
+	#[serde(rename = "BOOKS")]
+	Books,
+}
+
+impl FromStr for LibraryViewMode {
+	type Err = String;
+
+	fn from_str(s: &str) -> Result<Self, Self::Err> {
+		let uppercase = s.to_uppercase();
+
+		match uppercase.as_str() {
+			"SERIES" => Ok(LibraryViewMode::Series),
+			"BOOKS" => Ok(LibraryViewMode::Books),
+			"" => Ok(LibraryViewMode::default()),
+			_ => Err(format!("Invalid library view mode: {s}")),
+		}
+	}
+}
+
+impl Default for LibraryViewMode {
+	fn default() -> Self {
+		Self::Series
+	}
+}
+
+impl From<String> for LibraryViewMode {
+	fn from(s: String) -> Self {
+		LibraryViewMode::from_str(&s).unwrap_or_default()
+	}
+}
+
+impl fmt::Display for LibraryViewMode {
+	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+		match self {
+			LibraryViewMode::Series => write!(f, "SERIES"),
+			LibraryViewMode::Books => write!(f, "BOOKS"),
+		}
+	}
+}
+
 #[derive(Deserialize, Serialize, Type, ToSchema)]
 pub struct LibraryStats {
 	series_count: u64,

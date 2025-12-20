@@ -402,6 +402,20 @@
 						"description": "Each folder at any level recursively is a single series"
 					}
 				}
+			},
+			"defaultLibraryView": {
+				"label": "Library view settings",
+				"description": "Configure how the library tabs are displayed",
+				"options": {
+					"series": {
+						"label": "Series",
+						"description": "Show the series tab by default"
+					},
+					"books": {
+						"label": "Books",
+						"description": "Show the books tab by default"
+					}
+				}
 			}
 		},
 		"scan": {

@@ -13,6 +13,7 @@ import {
 } from '@/components/library/createOrUpdate/schema'
 import {
 	BasicLibraryInformation,
+	DefaultLibraryView,
 	FileConversionOptions,
 	LibraryPattern as LibraryPatternSection,
 	ScanMode,
@@ -40,6 +41,7 @@ export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoadi
 		defaultValues: formDefaults(),
 		reValidateMode: 'onChange',
 		resolver: zodResolver(schema),
+		shouldUnregister: false,
 	})
 
 	const { reset } = form
@@ -114,6 +116,7 @@ export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoadi
 				return (
 					<>
 						<LibraryPatternSection />
+						<DefaultLibraryView />
 						<ScannerOptInFeatures />
 						<FileConversionOptions />
 						<IgnoreRulesConfig />

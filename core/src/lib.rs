@@ -363,6 +363,7 @@ mod tests {
 		file.write_all(format!("{}\n\n", ts_export::<FileStatus>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<Library>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<LibraryPattern>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<LibraryViewMode>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<LibraryScanMode>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<CustomVisit>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<ScanConfig>()?).as_bytes())?;

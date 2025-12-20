@@ -13,7 +13,7 @@ use crate::{
 	prisma::library_config,
 };
 
-use super::{IgnoreRules, LibraryPattern};
+use super::{IgnoreRules, LibraryPattern, LibraryViewMode};
 
 #[derive(Debug, Clone, Deserialize, Serialize, Type, ToSchema, Default)]
 pub struct LibraryConfig {
@@ -35,6 +35,8 @@ pub struct LibraryConfig {
 	pub default_reading_image_scale_fit: ReadingImageScaleFit,
 	#[serde(default)]
 	pub ignore_rules: IgnoreRules,
+	#[serde(default)]
+	pub default_library_view_mode: LibraryViewMode,
 	// TODO(prisma-nested-create): Refactor once nested create is supported
 	// https://github.com/Brendonovich/prisma-client-rust/issues/44
 	#[specta(optional)]
@@ -95,6 +97,10 @@ impl From<library_config::Data> for LibraryConfig {
 				.map_or_else(IgnoreRules::default, |rules| {
 					IgnoreRules::try_from(rules).unwrap_or_default()
 				}),
+			default_library_view_mode: LibraryViewMode::from_str(
+				data.default_library_view_mode.as_str(),
+			)
+			.unwrap_or_default(),
 			library_id: data.library_id,
 		}
 	}

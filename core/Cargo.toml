@@ -54,7 +54,7 @@ walkdir = "2.5.0"
 webp = "0.3.0"
 xml-rs = "1.0.0" # XML reader/writer
 zip.workspace = true
-quick-xml = "0.38.3"
+quick-xml = { version = "0.38.3", features = ["serialize"] }
 merge = "0.1.0"
 kmeans_colors = "0.7.1"
 palette = "0.7.6"

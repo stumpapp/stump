@@ -1,3 +1,4 @@
+use quick_xml::de::from_str as xml_from_str;
 use tracing::error;
 
 use super::ProcessedMediaMetadata;
@@ -17,7 +18,7 @@ pub(crate) fn metadata_from_buf(contents: &str) -> Option<ProcessedMediaMetadata
 		return None;
 	}
 
-	match serde_xml_rs::from_str(adjusted) {
+	match xml_from_str(adjusted) {
 		Ok(meta) => Some(meta),
 		Err(err) => {
 			println!("Failed to parse metadata from buf: {err}");
@@ -91,5 +92,48 @@ mod tests {
 		let contents = "metadata: { contents: oops }";
 		let metadata = metadata_from_buf(contents);
 		assert!(metadata.is_none());
+	}
+
+	// Asserts a fix for an issue reported wrt empty tags in ComicInfo.xml, e.g. <Number></Number> or <Number/>
+	#[test]
+	fn test_should_parse_metadata_with_empty_tags() {
+		let contents = r#"<?xml version="1.0"?>
+<ComicInfo xmlns:xsi="http://www.idk.bizbaz" xmlns:xsd="http://www.idk.bizbaz">
+  <Title>Test Comic</Title>
+  <Series>Test Series</Series>
+  <Number></Number>
+  <Volume></Volume>
+  <Summary>A test summary</Summary>
+</ComicInfo>"#;
+		let metadata = metadata_from_buf(contents);
+		assert!(metadata.is_some(), "Should parse XML with empty tags");
+		let metadata = metadata.unwrap();
+		assert_eq!(metadata.title, Some("Test Comic".to_string()));
+		assert_eq!(metadata.series, Some("Test Series".to_string()));
+		assert_eq!(metadata.number, None);
+		assert_eq!(metadata.volume, None);
+	}
+
+	// Asserts a fix for an issue reported wrt empty tags in ComicInfo.xml, e.g. <Number></Number> or <Number/>
+	#[test]
+	fn test_should_parse_metadata_with_self_closing_tags() {
+		let contents = r#"<?xml version="1.0"?>
+<ComicInfo xmlns:xsi="http://www.idk.bizbaz" xmlns:xsd="http://www.idk.bizbaz">
+  <Title>Test Comic</Title>
+  <Series>Test Series</Series>
+  <Number/>
+  <Volume/>
+  <Summary>A test summary</Summary>
+</ComicInfo>"#;
+		let metadata = metadata_from_buf(contents);
+		assert!(
+			metadata.is_some(),
+			"Should parse XML with self-closing tags"
+		);
+		let metadata = metadata.unwrap();
+		assert_eq!(metadata.title, Some("Test Comic".to_string()));
+		assert_eq!(metadata.series, Some("Test Series".to_string()));
+		assert_eq!(metadata.number, None);
+		assert_eq!(metadata.volume, None);
 	}
 }

@@ -11,7 +11,8 @@ use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
 use crate::utils::serde::{
-	age_rating_deserializer, parse_age_restriction, string_list_deserializer,
+	age_rating_deserializer, optional_f64_deserializer, optional_i32_deserializer,
+	parse_age_restriction, string_list_deserializer,
 };
 
 const NAIVE_DATE_FORMATS: [&str; 2] = ["%Y-%m-%d", "%m-%d-%Y"];
@@ -49,13 +50,26 @@ pub struct ProcessedMediaMetadata {
 	pub story_arc: Option<String>,
 	/// The number this media is in the story arc.
 	/// See https://anansi-project.github.io/docs/comicinfo/documentation#storyarcnumber
-	#[serde(alias = "StoryArcNumber")]
+	#[serde(
+		default,
+		alias = "StoryArcNumber",
+		deserialize_with = "optional_f64_deserializer"
+	)]
 	pub story_arc_number: Option<f64>,
 	/// The number this media is in the series. This can be a float, e.g. 20.1,
 	/// which typically represents a one-shot or special issue.
-	#[serde(alias = "Number", alias = "series_index")]
+	#[serde(
+		default,
+		alias = "Number",
+		alias = "series_index",
+		deserialize_with = "optional_f64_deserializer"
+	)]
 	pub number: Option<f64>,
-	#[serde(alias = "Volume")]
+	#[serde(
+		default,
+		alias = "Volume",
+		deserialize_with = "optional_i32_deserializer"
+	)]
 	pub volume: Option<i32>,
 	/// The summary of the media.
 	#[serde(alias = "Summary")]
@@ -83,13 +97,21 @@ pub struct ProcessedMediaMetadata {
 	pub language: Option<String>,
 
 	/// The year the media was published.
-	#[serde(alias = "Year")]
+	#[serde(
+		default,
+		alias = "Year",
+		deserialize_with = "optional_i32_deserializer"
+	)]
 	pub year: Option<i32>,
 	/// The month the media was published (1-12)
-	#[serde(alias = "Month")]
+	#[serde(
+		default,
+		alias = "Month",
+		deserialize_with = "optional_i32_deserializer"
+	)]
 	pub month: Option<i32>,
 	/// The day the media was published (1-31). The day is not validated against the month.
-	#[serde(alias = "Day")]
+	#[serde(default, alias = "Day", deserialize_with = "optional_i32_deserializer")]
 	pub day: Option<i32>,
 
 	// Note: We don't really need the PascalCase aliases for ebook-specific data
@@ -182,7 +204,11 @@ pub struct ProcessedMediaMetadata {
 	pub teams: Option<Vec<String>>,
 	/// The number of pages in the associated media. This does *not* take priority over
 	/// the number of pages detected by the file processor.
-	#[serde(alias = "PageCount")]
+	#[serde(
+		default,
+		alias = "PageCount",
+		deserialize_with = "optional_i32_deserializer"
+	)]
 	pub page_count: Option<i32>,
 }
 

@@ -30,14 +30,14 @@ export default function SettingsNavigation() {
 	)
 
 	const selectOptions = useMemo(() => {
-		const allOptions =
-			activeRouteGroup?.items.map((item) => ({
-				disabled: item.disabled,
-				label: t(
-					`settingsScene.sidebar.${activeRouteGroup.label.toLowerCase()}.${item.label.toLowerCase()}`,
-				),
-				value: item.to,
-			})) ?? []
+		const groupLabel = activeRouteGroup?.label
+		if (!groupLabel) return []
+
+		const allOptions = activeRouteGroup.items.map((item) => ({
+			disabled: item.disabled,
+			label: t(`settingsScene.sidebar.${groupLabel.toLowerCase()}.${item.label.toLowerCase()}`),
+			value: item.to,
+		}))
 
 		if (platform === 'browser') {
 			// find the option with desktop and mark it as disabled
@@ -57,13 +57,23 @@ export default function SettingsNavigation() {
 			{renderTabs && (
 				<Tabs value={activeRouteGroup?.label} variant="primary" activeOnHover>
 					<Tabs.List>
-						{groups.map((group) => (
-							<Tabs.Trigger key={group.label} value={group.label} asChild>
-								<Link className="truncate" to={`${basePath}${group.defaultRoute}`}>
-									{t(`settingsScene.sidebar.${group.label.toLowerCase()}.label`)}
-								</Link>
-							</Tabs.Trigger>
-						))}
+						{groups.map((group) => {
+							const groupLabel = group.label
+								? t(`settingsScene.sidebar.${group.label.toLowerCase()}.label`)
+								: undefined
+
+							return (
+								<Tabs.Trigger
+									key={group.label ?? group.defaultRoute}
+									value={group.label ?? group.defaultRoute}
+									asChild
+								>
+									<Link className="truncate" to={`${basePath}${group.defaultRoute}`}>
+										{groupLabel}
+									</Link>
+								</Tabs.Trigger>
+							)
+						})}
 					</Tabs.List>
 				</Tabs>
 			)}

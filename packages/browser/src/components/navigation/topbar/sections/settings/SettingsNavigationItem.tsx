@@ -45,9 +45,13 @@ export default function SettingsNavigationItem() {
 
 	const renderRouteGroups = () => {
 		return groups.map(({ label, items }) => {
-			const groupLabel = t(`settingsScene.sidebar.${label.toLowerCase()}.label`)
+			// TODO: refactor the group shit
+			const groupLabel = label ? t(`settingsScene.sidebar.${label.toLowerCase()}.label`) : ''
 
-			const withGroup = (key: string) => `settingsScene.sidebar.${label.toLowerCase()}.${key}`
+			const withGroup = (key: string) =>
+				label
+					? t(`settingsScene.sidebar.${label.toLowerCase()}.${key}`)
+					: t(`settingsScene.sidebar.${key}`)
 
 			return (
 				<div key={groupLabel}>

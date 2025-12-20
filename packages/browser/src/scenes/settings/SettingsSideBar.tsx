@@ -43,13 +43,16 @@ export default function SettingsSideBar() {
 			<div className="flex h-full flex-grow flex-col gap-4">
 				{groups
 					.map(({ label, items }) => {
-						const groupLabel = t(`settingsScene.sidebar.${label.toLowerCase()}.label`)
+						const groupLabel = label
+							? t(`settingsScene.sidebar.${label.toLowerCase()}.label`)
+							: undefined
 
-						const withGroup = (key: string) => `settingsScene.sidebar.${label.toLowerCase()}.${key}`
+						const withGroup = (key: string) =>
+							`settingsScene.sidebar.${label?.toLowerCase()}.${key}`
 
 						return (
 							<div key={groupLabel}>
-								<Label>{groupLabel}</Label>
+								{groupLabel && <Label>{groupLabel}</Label>}
 
 								<ul className="flex flex-col gap-y-0.5 pt-2 text-sm">
 									{items.map(({ to, icon, label, disabled, prefetch }) => {

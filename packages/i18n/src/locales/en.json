@@ -698,6 +698,13 @@
 		}
 	},
 	"homeScene": {
+		"onDeck": {
+			"title": "Your next read",
+			"emptyState": {
+				"heading": "No books on deck",
+				"message": "Your next recommended books will show up here"
+			}
+		},
 		"continueReading": {
 			"title": "Continue reading",
 			"emptyState": {

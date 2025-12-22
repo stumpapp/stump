@@ -6,6 +6,7 @@ import { SceneContainer } from '@/components/container'
 
 import ContinueReadingMedia, { usePrefetchContinueReading } from './ContinueReading'
 import NoLibraries from './NoLibraries'
+import OnDeck, { usePrefetchOnDeck } from './OnDeck'
 import RecentlyAddedMedia, { usePrefetchRecentlyAddedMedia } from './RecentlyAddedMedia'
 import RecentlyAddedSeries, { usePrefetchRecentlyAddedSeries } from './RecentlyAddedSeries'
 
@@ -19,9 +20,15 @@ export const usePrefetchHomeScene = () => {
 	const prefetchRecentMedia = usePrefetchRecentlyAddedMedia()
 	const prefetchContinueReading = usePrefetchContinueReading()
 	const prefetchRecentSeries = usePrefetchRecentlyAddedSeries()
+	const prefetchOnDeck = usePrefetchOnDeck()
 
 	return () =>
-		Promise.all([prefetchRecentMedia(), prefetchContinueReading(), prefetchRecentSeries()])
+		Promise.all([
+			prefetchRecentMedia(),
+			prefetchContinueReading(),
+			prefetchRecentSeries(),
+			prefetchOnDeck(),
+		])
 }
 
 // TODO: account for new accounts, i.e. no media at all
@@ -56,8 +63,9 @@ export default function HomeScene() {
 			{helmet}
 
 			<ContinueReadingMedia />
-			<RecentlyAddedMedia />
+			<OnDeck />
 			<RecentlyAddedSeries />
+			<RecentlyAddedMedia />
 			<div className="pb-5 sm:pb-0" />
 		</SceneContainer>
 	)

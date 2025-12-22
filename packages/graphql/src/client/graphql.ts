@@ -4183,6 +4183,16 @@ export type HomeSceneQueryQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type HomeSceneQueryQuery = { __typename?: 'Query', numberOfLibraries: number };
 
+export type OnDeckBooksWebQueryVariables = Exact<{
+  pagination: Pagination;
+}>;
+
+
+export type OnDeckBooksWebQuery = { __typename?: 'Query', onDeck: { __typename?: 'PaginatedMediaResponse', nodes: Array<(
+      { __typename?: 'Media', id: string }
+      & { ' $fragmentRefs'?: { 'BookCardFragment': BookCardFragment } }
+    )>, pageInfo: { __typename: 'CursorPaginationInfo', currentCursor?: string | null, nextCursor?: string | null, limit: number } | { __typename: 'OffsetPaginationInfo', currentPage: number, totalPages: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
+
 export type RecentlyAddedMediaQueryQueryVariables = Exact<{
   pagination: Pagination;
 }>;
@@ -7144,6 +7154,51 @@ export const HomeSceneQueryDocument = new TypedDocumentString(`
   numberOfLibraries
 }
     `) as unknown as TypedDocumentString<HomeSceneQueryQuery, HomeSceneQueryQueryVariables>;
+export const OnDeckBooksWebDocument = new TypedDocumentString(`
+    query OnDeckBooksWeb($pagination: Pagination!) {
+  onDeck(pagination: $pagination) {
+    nodes {
+      id
+      ...BookCard
+    }
+    pageInfo {
+      __typename
+      ... on CursorPaginationInfo {
+        currentCursor
+        nextCursor
+        limit
+      }
+      ... on OffsetPaginationInfo {
+        currentPage
+        totalPages
+        pageSize
+        pageOffset
+        zeroBased
+      }
+    }
+  }
+}
+    fragment BookCard on Media {
+  id
+  resolvedName
+  extension
+  pages
+  size
+  status
+  thumbnail {
+    url
+  }
+  readProgress {
+    percentageCompleted
+    epubcfi
+    page
+    updatedAt
+  }
+  readHistory {
+    __typename
+    completedAt
+  }
+}`) as unknown as TypedDocumentString<OnDeckBooksWebQuery, OnDeckBooksWebQueryVariables>;
 export const RecentlyAddedMediaQueryDocument = new TypedDocumentString(`
     query RecentlyAddedMediaQuery($pagination: Pagination!) {
   recentlyAddedMedia(pagination: $pagination) {

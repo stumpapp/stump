@@ -84,11 +84,7 @@ impl OffsetPagination {
 	}
 
 	pub fn next_page(&self) -> u64 {
-		if self.zero_based.unwrap_or(false) {
-			self.page + 1
-		} else {
-			self.page
-		}
+		self.page + 1
 	}
 
 	pub fn previous_page(&self) -> Option<u64> {
@@ -401,5 +397,54 @@ pub async fn get_paginated_results<
 		},
 		Pagination::Offset(info) => get_paginated_offset_results(query, conn, info).await,
 		Pagination::None(_) => get_paginated_none_results(query, conn).await,
+	}
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+
+	mod offset_pagination {
+		use super::*;
+
+		#[test]
+		fn next_page_returns_current_page_plus_one_when_one_based() {
+			let pagination = OffsetPagination {
+				page: 1,
+				page_size: Some(20),
+				zero_based: Some(false),
+			};
+			assert_eq!(pagination.next_page(), 2);
+		}
+
+		#[test]
+		fn next_page_returns_current_page_plus_one_when_zero_based() {
+			let pagination = OffsetPagination {
+				page: 0,
+				page_size: Some(20),
+				zero_based: Some(true),
+			};
+			assert_eq!(pagination.next_page(), 1);
+		}
+
+		#[test]
+		fn next_page_works_for_page_5_one_based() {
+			let pagination = OffsetPagination {
+				page: 5,
+				page_size: Some(20),
+				zero_based: Some(false),
+			};
+			assert_eq!(pagination.next_page(), 6);
+		}
+
+		#[test]
+		fn next_page_works_for_page_5_zero_based() {
+			let pagination = OffsetPagination {
+				page: 5,
+				page_size: Some(20),
+				zero_based: Some(true),
+			};
+			assert_eq!(pagination.next_page(), 6);
+		}
 	}
 }

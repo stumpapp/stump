@@ -18,9 +18,6 @@ impl From<library_scan_record::Model> for LibraryScanRecord {
 
 #[ComplexObject]
 impl LibraryScanRecord {
-	// TODO(graphql): Investigate not using a JSON wrapper for this. async_graphql doesn't support
-	// non-unit enums, so it might just be a limitation. It does degrate the DX a bit missing
-	// out on the types.
 	async fn options(&self) -> Option<Json<ScanOptions>> {
 		match &self.model.options {
 			Some(options) => {

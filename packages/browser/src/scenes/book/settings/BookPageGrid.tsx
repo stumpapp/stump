@@ -1,7 +1,7 @@
 import { useSDK } from '@stump/client'
 import { cx } from '@stump/components'
 import { useVirtualizer } from '@tanstack/react-virtual'
-import { useCallback, useMemo, useRef } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import AutoSizer from 'react-virtualized-auto-sizer'
 import { useMediaMatch } from 'rooks'
 
@@ -16,28 +16,30 @@ type Props = {
 }
 
 export default function BookPageGrid({ bookId, pages, selectedPage, onSelectPage }: Props) {
-	const parentRef = useRef<HTMLDivElement>(null)
+	const [scrollElement, setScrollElement] = useState<HTMLDivElement | null>(null)
 
 	return (
 		<div className="h-96 w-full flex-1">
 			<AutoSizer>
 				{({ height, width }) => (
 					<div
-						ref={parentRef}
+						ref={setScrollElement}
 						className="overflow-y-auto overflow-x-hidden"
 						style={{
 							height,
 							width,
 						}}
 					>
-						<List
-							bookId={bookId}
-							pages={pages}
-							width={width - 16}
-							selectedPage={selectedPage}
-							onSelectPage={onSelectPage}
-							getScrollElement={() => parentRef.current}
-						/>
+						{scrollElement && (
+							<List
+								bookId={bookId}
+								pages={pages}
+								width={width - 16}
+								selectedPage={selectedPage}
+								onSelectPage={onSelectPage}
+								scrollElement={scrollElement}
+							/>
+						)}
 					</div>
 				)}
 			</AutoSizer>
@@ -49,17 +51,10 @@ type ListProps = {
 	bookId: string
 	pages: number
 	width: number
-	getScrollElement: () => HTMLDivElement | null
+	scrollElement: HTMLDivElement
 } & Pick<Props, 'selectedPage' | 'onSelectPage'>
 
-const List = ({
-	bookId,
-	pages,
-	width,
-	selectedPage,
-	onSelectPage,
-	getScrollElement,
-}: ListProps) => {
+const List = ({ bookId, pages, width, selectedPage, onSelectPage, scrollElement }: ListProps) => {
 	const { sdk } = useSDK()
 	const {
 		preferences: { thumbnailRatio },
@@ -84,7 +79,7 @@ const List = ({
 	const rowVirtualizer = useVirtualizer({
 		count: Math.ceil(pages / Math.floor(width / getWidth())),
 		estimateSize: getSize,
-		getScrollElement,
+		getScrollElement: () => scrollElement,
 		overscan: 5,
 	})
 

@@ -139,15 +139,15 @@ class ThumbnailGenerator {
     }
 }
 
-enum ThumbnailError: Error {
+enum ThumbnailError: LocalizedError {
     case noValidImages
     case invalidImageData
     case imageEncodingFailed
     case outputDirectoryCreationFailed(Error)
     case epubCoverExtractionFailed(String)
     case pdfCoverExtractionFailed
-    
-    var localizedDescription: String {
+
+    var errorDescription: String? {
         switch self {
         case .noValidImages:
             return "No valid images found in archive"

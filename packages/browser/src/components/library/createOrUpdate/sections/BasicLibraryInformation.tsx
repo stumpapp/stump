@@ -1,10 +1,12 @@
 import { Button, Input, TextArea } from '@stump/components'
+import { UserPermission } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { Folder } from 'lucide-react'
 import { Suspense } from 'react'
 import { useFormContext, useFormState } from 'react-hook-form'
 
 import TagSelect from '@/components/TagSelect'
+import { useAppContext } from '@/context'
 import { useLibraryContextSafe } from '@/scenes/library/context'
 
 import { CreateOrUpdateLibrarySchema } from '../schema'
@@ -19,6 +21,7 @@ type Props = {
 export default function BasicLibraryInformation({ onSetShowDirectoryPicker }: Props) {
 	const form = useFormContext<CreateOrUpdateLibrarySchema>()
 	const ctx = useLibraryContextSafe()
+	const { checkPermission } = useAppContext()
 
 	const isCreatingLibrary = !ctx?.library
 	const tags = form.watch('tags')
@@ -50,9 +53,11 @@ export default function BasicLibraryInformation({ onSetShowDirectoryPicker }: Pr
 					placeholder={t(getKey('path.placeholder'))}
 					containerClassName="max-w-full md:max-w-sm"
 					rightDecoration={
-						<Button size="icon" type="button" onClick={() => onSetShowDirectoryPicker(true)}>
-							<Folder className="h-4 w-4 text-foreground-muted" />
-						</Button>
+						checkPermission(UserPermission.FileExplorer) && (
+							<Button size="icon" type="button" onClick={() => onSetShowDirectoryPicker(true)}>
+								<Folder className="h-4 w-4 text-foreground-muted" />
+							</Button>
+						)
 					}
 					required={isCreatingLibrary}
 					errorMessage={errors.path?.message}

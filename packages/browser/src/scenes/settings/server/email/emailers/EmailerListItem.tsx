@@ -1,7 +1,8 @@
+import { useGraphQLMutation, useSDK } from '@stump/client'
 import { Badge, Card, Text, ToolTip } from '@stump/components'
 import { FragmentType, graphql, useFragment } from '@stump/graphql'
+import { useQueryClient } from '@tanstack/react-query'
 import dayjs from 'dayjs'
-import { noop } from 'lodash'
 import { Sparkles } from 'lucide-react'
 import { Suspense, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router'
@@ -10,7 +11,7 @@ import paths from '@/paths'
 
 import { useEmailerSettingsContext } from '../context'
 import EmailerActionMenu from './EmailerActionMenu'
-import EmailerSendHistory from './EmailerSendHistory'
+import EmailerSendHistory, { usePrefetchEmailerSendHistory } from './EmailerSendHistory'
 import { getCommonHost } from './utils'
 
 const EmailerListItemFragment = graphql(`
@@ -29,6 +30,14 @@ const EmailerListItemFragment = graphql(`
 	}
 `)
 
+const deleteMutation = graphql(`
+	mutation DeleteEmailer($emailerId: Int!) {
+		deleteEmailer(id: $emailerId) {
+			id
+		}
+	}
+`)
+
 type Props = {
 	fragment: FragmentType<typeof EmailerListItemFragment>
 }
@@ -37,13 +46,16 @@ export default function EmailerListItem({ fragment }: Props) {
 	const navigate = useNavigate()
 	const emailer = useFragment(EmailerListItemFragment, fragment)
 
-	const { canEditEmailer } = useEmailerSettingsContext()
+	const { canEditEmailer, canDeleteEmailer } = useEmailerSettingsContext()
 
-	// const { prefetch } = usePrefetchEmailerSendHistory({ emailerId: emailer.id })
+	const client = useQueryClient()
+	const { sdk } = useSDK()
 
-	// const { deleteEmailer } = useDeleteEmailer()
-	// TODO(graphql): Fix
-	const deleteEmailer = noop
+	const prefetchHistory = usePrefetchEmailerSendHistory({ emailerId: emailer.id })
+
+	const { mutate: deleteEmailer } = useGraphQLMutation(deleteMutation, {
+		onSuccess: () => client.refetchQueries({ queryKey: [sdk.cacheKey('emailers')], exact: true }),
+	})
 
 	const displayedHost = useMemo(
 		() =>
@@ -63,18 +75,14 @@ export default function EmailerListItem({ fragment }: Props) {
 		}
 	}
 
-	// TODO(graphql): Fix
 	const handleDeleteEmailer = useCallback(() => {
-		// if (canEditEmailer) {
-		// 	deleteEmailer(emailer.id)
-		// }
-	}, [canEditEmailer, deleteEmailer, emailer.id])
+		if (canDeleteEmailer) {
+			deleteEmailer({ emailerId: emailer.id })
+		}
+	}, [canDeleteEmailer, deleteEmailer, emailer.id])
 
 	return (
-		<Card
-			className="flex flex-col space-y-2 p-4"
-			// onMouseEnter={() => prefetch({ include_sent_by: true })}
-		>
+		<Card className="flex flex-col space-y-2 p-4" onMouseEnter={() => prefetchHistory()}>
 			<div className="flex items-center justify-between">
 				<Text size="md" className="font-medium">
 					{emailer.name}

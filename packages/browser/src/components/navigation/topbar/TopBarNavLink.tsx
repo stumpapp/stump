@@ -7,6 +7,7 @@ type Props = {
 	to: string | To
 	isActive?: boolean
 	className?: string
+	onMouseEnter?: () => void
 }
 
 export default function TopBarNavLink({
@@ -14,10 +15,11 @@ export default function TopBarNavLink({
 	isActive,
 	children,
 	className,
+	onMouseEnter,
 }: PropsWithChildren<Props>) {
 	return (
 		<NavigationMenu.Item>
-			<Link to={to}>
+			<Link to={to} onMouseEnter={onMouseEnter}>
 				<NavigationMenu.Link
 					className={cn(
 						navigationMenuTriggerStyle({

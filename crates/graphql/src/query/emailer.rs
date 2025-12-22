@@ -20,7 +20,6 @@ impl EmailerQuery {
 			.collect())
 	}
 
-	// TODO(graphql): Determine best practice for return (error vs Option)
 	#[graphql(guard = "PermissionGuard::one(UserPermission::EmailerRead)")]
 	async fn emailer_by_id(&self, ctx: &Context<'_>, id: i32) -> Result<Option<Emailer>> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();

@@ -79,7 +79,7 @@ const mutation = graphql(`
 	}
 `)
 
-// TODO(graphql): Add this
+// TODO(metadata): Support some kind of metadata reset
 // const resetMetadataMutation = graphql(`
 // 	mutation MediaMetadataEditorResetMetadata($id: ID!) {
 // 		resetMediaMetadata(id: $id) {

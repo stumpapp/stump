@@ -125,8 +125,6 @@ impl UserMutation {
 		let updated_user =
 			update_user(user, user.id.clone(), conn, config, &input).await?;
 
-		// TODO(graphql): Insert user session
-
 		Ok(updated_user)
 	}
 
@@ -194,8 +192,6 @@ impl UserMutation {
 			// When a server owner updates another user, we need to delete all sessions for that user
 			// because the user's permissions may have changed. This is a bit lazy but it works.
 			remove_all_session_for_user(id.to_string(), conn).await?;
-		} else {
-			// TODO(graphql): Insert user session
 		}
 
 		Ok(updated_user)

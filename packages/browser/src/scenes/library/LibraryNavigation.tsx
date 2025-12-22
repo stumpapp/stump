@@ -1,9 +1,4 @@
-// import {
-// 	usePrefetchFiles,
-// 	usePrefetchLibraryBooks,
-// 	usePrefetchLibraryFiles,
-// 	usePrefetchLibrarySeries,
-// } from '@stump/client'
+import { usePrefetchFiles } from '@stump/client'
 import { cn, Link, useSticky } from '@stump/components'
 import { UserPermission } from '@stump/graphql'
 import { useCallback, useMemo } from 'react'
@@ -23,39 +18,37 @@ export default function LibraryNavigation() {
 	const {
 		preferences: { primaryNavigationMode, layoutMaxWidthPx },
 	} = usePreferences()
-	const {
-		library: { id, path },
-	} = useLibraryContext()
+	const { library } = useLibraryContext()
+	const { id, path } = library
 	const { checkPermission } = useAppContext()
-	// const { prefetch: prefetchBooks } = usePrefetchLibraryBooks({ id })
-	// const { prefetch: prefetchFiles } = usePrefetchLibraryFiles({
-	// 	path,
-	// 	fetchConfig: checkPermission('file:upload'),
-	// })
-	// const { prefetch: prefetchSeries } = usePrefetchLibrarySeries({ id })
 
 	const prefetchSeries = usePrefetchLibrarySeries()
 	const prefetchBooks = usePrefetchLibraryBooks()
 
-	// const prefetchFiles = usePrefetchFiles()
-	// TODO(graphql): Fix me
+	const prefetchFiles = usePrefetchFiles()
 	const handlePrefetchFiles = useCallback(() => {
-		// prefetchFiles({ path, fetchConfig: checkPermission('file:upload') })
-	}, [path, checkPermission])
+		prefetchFiles({ path, fetchConfig: checkPermission(UserPermission.UploadFile) })
+	}, [path, checkPermission, prefetchFiles])
 
 	const { ref, isSticky } = useSticky<HTMLDivElement>({
 		extraOffset: isMobile || primaryNavigationMode === 'TOPBAR' ? 56 : 0,
 	})
 
 	const canAccessFiles = checkPermission(UserPermission.FileExplorer)
+	const hideSeriesView = library.config?.hideSeriesView ?? false
+
 	const tabs = useMemo(
 		() => [
-			{
-				isActive: location.pathname.match(/\/libraries\/[^/]+\/?(series)?$/),
-				label: 'Series',
-				onHover: () => prefetchSeries(id),
-				to: 'series',
-			},
+			...(!hideSeriesView
+				? [
+						{
+							isActive: location.pathname.match(/\/libraries\/[^/]+\/?(series)?$/),
+							label: 'Series',
+							onHover: () => prefetchSeries(id),
+							to: 'series',
+						},
+					]
+				: []),
 			{
 				isActive: location.pathname.match(/\/libraries\/[^/]+\/books(\/.*)?$/),
 				label: 'Books',
@@ -78,7 +71,15 @@ export default function LibraryNavigation() {
 				to: 'settings',
 			},
 		],
-		[location, canAccessFiles, prefetchSeries, prefetchBooks, handlePrefetchFiles, id],
+		[
+			location,
+			canAccessFiles,
+			hideSeriesView,
+			prefetchSeries,
+			prefetchBooks,
+			handlePrefetchFiles,
+			id,
+		],
 	)
 
 	const preferTopBar = primaryNavigationMode === 'TOPBAR'

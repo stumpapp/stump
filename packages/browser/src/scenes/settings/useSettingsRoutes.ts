@@ -26,7 +26,8 @@ export function useSettingsRoutes() {
 					// Filter out items that the user doesn't have access to. If an item has no
 					// permissions requirement, then it will be included.
 					const filteredItems = group.items.filter(
-						({ permission }) => !permission || checkPermission(permission),
+						({ permissions }) =>
+							!permissions || permissions.every((permission) => checkPermission(permission)),
 					)
 
 					if (filteredItems.length === 0) {

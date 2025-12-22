@@ -8,7 +8,7 @@ import {
 } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { Book, Home } from 'lucide-react'
-import { useCallback, useMemo } from 'react'
+import { Suspense, useCallback, useMemo } from 'react'
 import { useLocation } from 'react-router'
 import { useDimensionsRef } from 'rooks'
 import { match } from 'ts-pattern'
@@ -16,8 +16,14 @@ import { match } from 'ts-pattern'
 import { useAppContext } from '@/context'
 import { usePreferences } from '@/hooks'
 import paths from '@/paths'
+import { usePrefetchHomeScene } from '@/scenes/home'
 
-import { LibraryNavigationItem, SettingsNavigationItem } from './sections'
+import {
+	BookClubNavigationItem,
+	LibraryNavigationItem,
+	SettingsNavigationItem,
+	SmartListNavigationItem,
+} from './sections'
 import UserMenu from './sections/UserMenu'
 import TopBarNavLink from './TopBarNavLink'
 
@@ -56,7 +62,7 @@ export default function TopNavigation() {
 				preferences: { navigationArrangement },
 			},
 		},
-	} = useSuspenseGraphQL(query, sdk.cacheKey('sidebar')) // TODO(graphql): See if I need a diff cache
+	} = useSuspenseGraphQL(query, sdk.cacheKey('sidebar'))
 
 	const { checkPermission } = useAppContext()
 	const {
@@ -79,10 +85,8 @@ export default function TopNavigation() {
 	// TODO: Might need to pass a position prop to some of the menus in order to adjust
 	// their sizing accordingly
 
-	// TODO(graphql): Re-introduce support for other sections:
-	// - Smart Lists
-	// - Book Clubs
-	// TODO(graphql): Re-introduce the prefetching
+	const prefetchHome = usePrefetchHomeScene()
+
 	const renderSystemSection = useCallback(
 		(config: { variant: SystemArrangement; links: Array<FilterableArrangementEntityLink> }) =>
 			match(config.variant)
@@ -91,7 +95,7 @@ export default function TopNavigation() {
 						key="home-topbar-navlink"
 						to={paths.home()}
 						isActive={location.pathname === '/'}
-						// onMouseEnter={() => prefetchHome()}
+						onMouseEnter={() => prefetchHome()}
 					>
 						<Home className="mr-2 h-4 w-4 shrink-0" />
 						{t('sidebar.buttons.home')}
@@ -114,8 +118,18 @@ export default function TopNavigation() {
 						width={size?.width}
 					/>
 				))
+				.with(SystemArrangement.SmartLists, () => (
+					<Suspense key="smartlists-topbar-navlink">
+						<SmartListNavigationItem links={config.links} width={size?.width} />
+					</Suspense>
+				))
+				.with(SystemArrangement.BookClubs, () => (
+					<Suspense key="book-clubs-topbar-navlink">
+						<BookClubNavigationItem links={config.links} width={size?.width} />
+					</Suspense>
+				))
 				.otherwise(() => null),
-		[t, location.pathname, size],
+		[t, location.pathname, size, prefetchHome],
 	)
 
 	const sections = useMemo(

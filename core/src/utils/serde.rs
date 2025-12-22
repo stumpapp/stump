@@ -1,5 +1,6 @@
 use regex::Regex;
 use serde::{Deserialize, Deserializer};
+use std::str::FromStr;
 
 pub fn string_list_deserializer<'de, D>(
 	deserializer: D,
@@ -7,13 +8,42 @@ pub fn string_list_deserializer<'de, D>(
 where
 	D: Deserializer<'de>,
 {
-	let str_sequence = String::deserialize(deserializer)?;
-	Ok(Some(
-		str_sequence
-			.split(',')
-			.map(|item| item.trim().to_owned())
-			.collect(),
-	))
+	let str_sequence =
+		Option::<String>::deserialize(deserializer)?.filter(|s| !s.is_empty());
+
+	match str_sequence {
+		Some(s) => Ok(Some(
+			s.split(',').map(|item| item.trim().to_owned()).collect(),
+		)),
+		None => Ok(None),
+	}
+}
+
+fn empty_string_as_none<'de, D, T>(deserializer: D) -> Result<Option<T>, D::Error>
+where
+	D: Deserializer<'de>,
+	T: FromStr,
+{
+	let opt = Option::<String>::deserialize(deserializer)?;
+	match opt {
+		Some(s) if s.trim().is_empty() => Ok(None),
+		Some(s) => Ok(s.trim().parse().ok()),
+		None => Ok(None),
+	}
+}
+
+pub fn optional_f64_deserializer<'de, D>(deserializer: D) -> Result<Option<f64>, D::Error>
+where
+	D: Deserializer<'de>,
+{
+	empty_string_as_none(deserializer)
+}
+
+pub fn optional_i32_deserializer<'de, D>(deserializer: D) -> Result<Option<i32>, D::Error>
+where
+	D: Deserializer<'de>,
+{
+	empty_string_as_none(deserializer)
 }
 
 // https://anansi-project.github.io/docs/comicinfo/schemas/v2.1

@@ -38,8 +38,6 @@ const query = graphql(`
  *  a filter slide over. Must be used within a `FilterProvider`.
  */
 export default function BookSearch({ onBookSelect }: Props) {
-	// TODO(graphql): Fixme
-
 	const [search, setSearch] = useState('')
 	const [debouncedValue] = useDebouncedValue(search, 500)
 

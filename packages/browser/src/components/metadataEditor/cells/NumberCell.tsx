@@ -22,13 +22,15 @@ export default function NumberCell<Field extends string>({
 
 	const rules = useMemo(() => validationRules[binding as keyof typeof validationRules], [binding])
 
+	const formValue = form.watch(binding)
+
 	if (isEditing) {
 		return (
 			<div className="group flex items-center gap-2">
 				<Input
 					type="number"
 					step={isDecimal ? 'any' : 1}
-					defaultValue={value ?? ''}
+					value={formValue ?? ''}
 					className="font-mono text-sm"
 					containerClassName="md:w-[unset]"
 					size="sm"

@@ -1,11 +1,12 @@
-import { useSDK, useSuspenseGraphQL } from '@stump/client'
+import { PREFETCH_STALE_TIME, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Drawer, Text, ToolTip } from '@stump/components'
 import { graphql, UserPermission } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
+import { useQueryClient } from '@tanstack/react-query'
 import dayjs from 'dayjs'
 import localizedFormat from 'dayjs/plugin/localizedFormat'
 import relativeTime from 'dayjs/plugin/relativeTime'
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 
 import GenericEmptyState from '@/components/GenericEmptyState'
 import { useCheckPermission } from '@/context'
@@ -38,6 +39,28 @@ const query = graphql(`
 		}
 	}
 `)
+
+export const usePrefetchEmailerSendHistory = ({ emailerId }: { emailerId: number }) => {
+	const { sdk } = useSDK()
+	const client = useQueryClient()
+	const fetchUser = useCheckPermission(UserPermission.ReadUsers)
+
+	return useCallback(
+		async () =>
+			client.prefetchQuery({
+				queryKey: sdk.cacheKey('emailDevices', [emailerId, fetchUser]),
+				queryFn: async () => {
+					const data = await sdk.execute(query, {
+						id: emailerId,
+						fetchUser,
+					})
+					return data
+				},
+				staleTime: PREFETCH_STALE_TIME,
+			}),
+		[client, sdk, emailerId, fetchUser],
+	)
+}
 
 type Props = {
 	emailerId: number

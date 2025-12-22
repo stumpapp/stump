@@ -847,12 +847,14 @@ export type LibraryStatsArgs = {
 export type LibraryConfig = {
   __typename?: 'LibraryConfig';
   convertRarToZip: Scalars['Boolean']['output'];
+  defaultLibraryViewMode: LibraryViewMode;
   defaultReadingDir: ReadingDirection;
   defaultReadingImageScaleFit: ReadingImageScaleFit;
   defaultReadingMode: ReadingMode;
   generateFileHashes: Scalars['Boolean']['output'];
   generateKoreaderHashes: Scalars['Boolean']['output'];
   hardDeleteConversions: Scalars['Boolean']['output'];
+  hideSeriesView: Scalars['Boolean']['output'];
   id: Scalars['Int']['output'];
   ignoreRules?: Maybe<Array<Scalars['String']['output']>>;
   libraryId?: Maybe<Scalars['String']['output']>;
@@ -865,12 +867,14 @@ export type LibraryConfig = {
 
 export type LibraryConfigInput = {
   convertRarToZip: Scalars['Boolean']['input'];
+  defaultLibraryViewMode: LibraryViewMode;
   defaultReadingDir: ReadingDirection;
   defaultReadingImageScaleFit: ReadingImageScaleFit;
   defaultReadingMode: ReadingMode;
   generateFileHashes: Scalars['Boolean']['input'];
   generateKoreaderHashes: Scalars['Boolean']['input'];
   hardDeleteConversions: Scalars['Boolean']['input'];
+  hideSeriesView: Scalars['Boolean']['input'];
   ignoreRules?: InputMaybe<Array<Scalars['String']['input']>>;
   libraryPattern: LibraryPattern;
   processMetadata: Scalars['Boolean']['input'];
@@ -957,6 +961,11 @@ export type LibraryStats = {
   seriesCount: Scalars['Int']['output'];
   totalBytes: Scalars['Int']['output'];
 };
+
+export enum LibraryViewMode {
+  Books = 'BOOKS',
+  Series = 'SERIES'
+}
 
 export type Log = {
   __typename?: 'Log';
@@ -1470,8 +1479,7 @@ export type Mutation = {
   /** Deletes the membership of the caller to the target book club */
   leaveBookClub: BookClubMember;
   markMediaAsComplete?: Maybe<FinishedReadingSessionModel>;
-  markSeriesAsComplete: Series;
-  patchEmailDevice: Scalars['Int']['output'];
+  patchEmailDevice: RegisteredEmailDevice;
   processLibraryThumbnails: Scalars['Boolean']['output'];
   /** Removes a member from the book club */
   removeBookClubMember: BookClubMember;
@@ -1485,6 +1493,13 @@ export type Mutation = {
   scanLibrary: Scalars['Boolean']['output'];
   scanSeries: Scalars['Boolean']['output'];
   sendAttachmentEmail: SendAttachmentEmailOutput;
+  /**
+   * Toggle the completion status of a series. If the series is marked as completed, all books
+   * in the series will also be marked as completed, and vice versa for marking as not completed.
+   * This is considered a dangerous operation since it can modify all your read progression related
+   * to a single series all at once. Please use with caution.
+   */
+  toggleSeriesCompletion: Series;
   updateApiKey: Apikey;
   updateBookClub: BookClub;
   updateEmailDevice: RegisteredEmailDevice;
@@ -1827,14 +1842,9 @@ export type MutationMarkMediaAsCompleteArgs = {
 };
 
 
-export type MutationMarkSeriesAsCompleteArgs = {
-  id: Scalars['ID']['input'];
-};
-
-
 export type MutationPatchEmailDeviceArgs = {
   id: Scalars['Int']['input'];
-  input: EmailDeviceInput;
+  input: PatchEmailDeviceInput;
 };
 
 
@@ -1881,6 +1891,12 @@ export type MutationScanSeriesArgs = {
 
 export type MutationSendAttachmentEmailArgs = {
   input: SendAttachmentEmailsInput;
+};
+
+
+export type MutationToggleSeriesCompletionArgs = {
+  id: Scalars['ID']['input'];
+  isCompleted: Scalars['Boolean']['input'];
 };
 
 
@@ -2260,6 +2276,12 @@ export type Pagination =
   |  { cursor?: never; none?: never; offset: OffsetPagination; };
 
 export type PaginationInfo = CursorPaginationInfo | OffsetPaginationInfo;
+
+export type PatchEmailDeviceInput = {
+  email?: InputMaybe<Scalars['String']['input']>;
+  forbidden?: InputMaybe<Scalars['Boolean']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+};
 
 export type PlaceholderGenerationOutput = {
   __typename?: 'PlaceholderGenerationOutput';
@@ -3785,8 +3807,6 @@ export type DeleteBookClubConfirmationMutationVariables = Exact<{
 
 export type DeleteBookClubConfirmationMutation = { __typename?: 'Mutation', deleteBookClub: { __typename?: 'BookClub', id: string } };
 
-export type ReadingNowBookFragment = { __typename?: 'Media', id: string, resolvedName: string, pages: number, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null }, readProgress?: { __typename?: 'ActiveReadingSession', percentageCompleted?: any | null, epubcfi?: string | null, page?: number | null, updatedAt?: any | null } | null } & { ' $fragmentName'?: 'ReadingNowBookFragment' };
-
 export type MediaAtPathQueryVariables = Exact<{
   path: Scalars['String']['input'];
 }>;
@@ -3881,10 +3901,20 @@ export type TopNavigationQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type TopNavigationQuery = { __typename?: 'Query', me: { __typename?: 'User', id: string, preferences: { __typename?: 'UserPreferences', navigationArrangement: { __typename?: 'Arrangement', locked: boolean, sections: Array<{ __typename?: 'ArrangementSection', visible: boolean, config: { __typename: 'CustomArrangementConfig' } | { __typename: 'InProgressBooks' } | { __typename: 'RecentlyAdded' } | { __typename: 'SystemArrangementConfig', variant: SystemArrangement, links: Array<FilterableArrangementEntityLink> } }> } } } };
 
+export type BookClubNavigationItemQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type BookClubNavigationItemQuery = { __typename?: 'Query', bookClubs: Array<{ __typename?: 'BookClub', id: string, name: string, slug: string, emoji?: string | null }> };
+
 export type LibraryNavigationItemQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type LibraryNavigationItemQuery = { __typename?: 'Query', libraries: { __typename?: 'PaginatedLibraryResponse', nodes: Array<{ __typename?: 'Library', id: string, name: string, emoji?: string | null }> } };
+
+export type SmartListNavigationItemQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type SmartListNavigationItemQuery = { __typename?: 'Query', smartLists: Array<{ __typename?: 'SmartList', id: string, name: string }> };
 
 export type EpubJsReaderQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -3977,7 +4007,7 @@ export type BookLibrarySeriesLinksQueryVariables = Exact<{
 }>;
 
 
-export type BookLibrarySeriesLinksQuery = { __typename?: 'Query', seriesById?: { __typename?: 'Series', id: string, name: string, libraryId?: string | null } | null };
+export type BookLibrarySeriesLinksQuery = { __typename?: 'Query', seriesById?: { __typename?: 'Series', id: string, resolvedName: string, libraryId?: string | null } | null };
 
 export type BookMetadataFragment = { __typename?: 'Media', metadata?: { __typename?: 'MediaMetadata', ageRating?: number | null, characters: Array<string>, colorists: Array<string>, coverArtists: Array<string>, editors: Array<string>, genres: Array<string>, inkers: Array<string>, letterers: Array<string>, links: Array<string>, pencillers: Array<string>, publisher?: string | null, teams: Array<string>, writers: Array<string>, year?: number | null, month?: number | null, day?: number | null } | null } & { ' $fragmentName'?: 'BookMetadataFragment' };
 
@@ -4174,6 +4204,16 @@ export type HomeSceneQueryQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type HomeSceneQueryQuery = { __typename?: 'Query', numberOfLibraries: number };
 
+export type OnDeckBooksWebQueryVariables = Exact<{
+  pagination: Pagination;
+}>;
+
+
+export type OnDeckBooksWebQuery = { __typename?: 'Query', onDeck: { __typename?: 'PaginatedMediaResponse', nodes: Array<(
+      { __typename?: 'Media', id: string }
+      & { ' $fragmentRefs'?: { 'BookCardFragment': BookCardFragment } }
+    )>, pageInfo: { __typename: 'CursorPaginationInfo', currentCursor?: string | null, nextCursor?: string | null, limit: number } | { __typename: 'OffsetPaginationInfo', currentPage: number, totalPages: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
+
 export type RecentlyAddedMediaQueryQueryVariables = Exact<{
   pagination: Pagination;
 }>;
@@ -4216,7 +4256,7 @@ export type LibraryLayoutQueryVariables = Exact<{
 
 
 export type LibraryLayoutQuery = { __typename?: 'Query', libraryById?: (
-    { __typename?: 'Library', id: string, name: string, description?: string | null, path: string, stats: { __typename?: 'LibraryStats', bookCount: number, completedBooks: number, inProgressBooks: number }, tags: Array<{ __typename?: 'Tag', id: number, name: string }>, thumbnail: { __typename?: 'ImageRef', url: string } }
+    { __typename?: 'Library', id: string, name: string, description?: string | null, path: string, stats: { __typename?: 'LibraryStats', bookCount: number, completedBooks: number, inProgressBooks: number }, tags: Array<{ __typename?: 'Tag', id: number, name: string }>, thumbnail: { __typename?: 'ImageRef', url: string }, config: { __typename?: 'LibraryConfig', defaultLibraryViewMode: LibraryViewMode, hideSeriesView: boolean } }
     & { ' $fragmentRefs'?: { 'LibrarySettingsConfigFragment': LibrarySettingsConfigFragment } }
   ) | null };
 
@@ -4256,7 +4296,7 @@ export type LibrarySeriesGridQueryVariables = Exact<{
 
 export type LibrarySeriesGridQuery = { __typename?: 'Query', series: { __typename?: 'PaginatedSeriesResponse', nodes: Array<{ __typename?: 'Series', id: string, thumbnail: { __typename?: 'ImageRef', url: string } }>, pageInfo: { __typename: 'CursorPaginationInfo', currentCursor?: string | null, nextCursor?: string | null, limit: number } | { __typename: 'OffsetPaginationInfo' } } };
 
-export type LibrarySettingsConfigFragment = { __typename?: 'Library', config: { __typename?: 'LibraryConfig', id: number, convertRarToZip: boolean, hardDeleteConversions: boolean, defaultReadingDir: ReadingDirection, defaultReadingMode: ReadingMode, defaultReadingImageScaleFit: ReadingImageScaleFit, generateFileHashes: boolean, generateKoreaderHashes: boolean, processMetadata: boolean, watch: boolean, libraryPattern: LibraryPattern, processThumbnailColorsEvenWithoutConfig: boolean, ignoreRules?: Array<string> | null, thumbnailConfig?: { __typename: 'ImageProcessorOptions', format: SupportedImageFormat, quality?: number | null, page?: number | null, resizeMethod?: { __typename: 'ExactDimensionResize', width: number, height: number } | { __typename: 'ScaleEvenlyByFactor', factor: any } | { __typename: 'ScaledDimensionResize', dimension: Dimension, size: number } | null } | null } } & { ' $fragmentName'?: 'LibrarySettingsConfigFragment' };
+export type LibrarySettingsConfigFragment = { __typename?: 'Library', config: { __typename?: 'LibraryConfig', id: number, convertRarToZip: boolean, hardDeleteConversions: boolean, defaultReadingDir: ReadingDirection, defaultReadingMode: ReadingMode, defaultReadingImageScaleFit: ReadingImageScaleFit, defaultLibraryViewMode: LibraryViewMode, hideSeriesView: boolean, generateFileHashes: boolean, generateKoreaderHashes: boolean, processMetadata: boolean, watch: boolean, libraryPattern: LibraryPattern, processThumbnailColorsEvenWithoutConfig: boolean, ignoreRules?: Array<string> | null, thumbnailConfig?: { __typename: 'ImageProcessorOptions', format: SupportedImageFormat, quality?: number | null, page?: number | null, resizeMethod?: { __typename: 'ExactDimensionResize', width: number, height: number } | { __typename: 'ScaleEvenlyByFactor', factor: any } | { __typename: 'ScaledDimensionResize', dimension: Dimension, size: number } | null } | null } } & { ' $fragmentName'?: 'LibrarySettingsConfigFragment' };
 
 export type LibrarySettingsRouterEditLibraryMutationMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -4554,6 +4594,13 @@ export type EmailDevicesTableQueryVariables = Exact<{ [key: string]: never; }>;
 export type EmailDevicesTableQuery = { __typename?: 'Query', emailDevices: Array<{ __typename?: 'RegisteredEmailDevice', id: number, name: string, email: string, forbidden: boolean }> };
 
 export type EmailerListItemFragment = { __typename?: 'Emailer', id: number, name: string, isPrimary: boolean, smtpHost: string, smtpPort: number, lastUsedAt?: any | null, maxAttachmentSizeBytes?: number | null, senderDisplayName: string, senderEmail: string, tlsEnabled: boolean, username: string } & { ' $fragmentName'?: 'EmailerListItemFragment' };
+
+export type DeleteEmailerMutationVariables = Exact<{
+  emailerId: Scalars['Int']['input'];
+}>;
+
+
+export type DeleteEmailerMutation = { __typename?: 'Mutation', deleteEmailer: { __typename?: 'Emailer', id: number } };
 
 export type EmailerSendHistoryQueryVariables = Exact<{
   id: Scalars['Int']['input'];
@@ -5151,30 +5198,6 @@ export const MediaMetadataEditorFragmentDoc = new TypedDocumentString(`
   year
 }
     `, {"fragmentName":"MediaMetadataEditor"}) as unknown as TypedDocumentString<MediaMetadataEditorFragment, unknown>;
-export const ReadingNowBookFragmentDoc = new TypedDocumentString(`
-    fragment ReadingNowBook on Media {
-  id
-  resolvedName
-  pages
-  thumbnail {
-    url
-    metadata {
-      averageColor
-      colors {
-        color
-        percentage
-      }
-      thumbhash
-    }
-  }
-  readProgress {
-    percentageCompleted
-    epubcfi
-    page
-    updatedAt
-  }
-}
-    `, {"fragmentName":"ReadingNowBook"}) as unknown as TypedDocumentString<ReadingNowBookFragment, unknown>;
 export const SeriesMetadataEditorFragmentDoc = new TypedDocumentString(`
     fragment SeriesMetadataEditor on SeriesMetadata {
   ageRating
@@ -5284,6 +5307,8 @@ export const LibrarySettingsConfigFragmentDoc = new TypedDocumentString(`
     defaultReadingDir
     defaultReadingMode
     defaultReadingImageScaleFit
+    defaultLibraryViewMode
+    hideSeriesView
     generateFileHashes
     generateKoreaderHashes
     processMetadata
@@ -6557,6 +6582,16 @@ export const TopNavigationDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<TopNavigationQuery, TopNavigationQueryVariables>;
+export const BookClubNavigationItemDocument = new TypedDocumentString(`
+    query BookClubNavigationItem {
+  bookClubs {
+    id
+    name
+    slug
+    emoji
+  }
+}
+    `) as unknown as TypedDocumentString<BookClubNavigationItemQuery, BookClubNavigationItemQueryVariables>;
 export const LibraryNavigationItemDocument = new TypedDocumentString(`
     query LibraryNavigationItem {
   libraries(pagination: {none: {unpaginated: true}}) {
@@ -6568,6 +6603,14 @@ export const LibraryNavigationItemDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<LibraryNavigationItemQuery, LibraryNavigationItemQueryVariables>;
+export const SmartListNavigationItemDocument = new TypedDocumentString(`
+    query SmartListNavigationItem {
+  smartLists {
+    id
+    name
+  }
+}
+    `) as unknown as TypedDocumentString<SmartListNavigationItemQuery, SmartListNavigationItemQueryVariables>;
 export const EpubJsReaderDocument = new TypedDocumentString(`
     query EpubJsReader($id: ID!) {
   epubById(id: $id) {
@@ -6760,7 +6803,7 @@ export const BookLibrarySeriesLinksDocument = new TypedDocumentString(`
     query BookLibrarySeriesLinks($id: ID!) {
   seriesById(id: $id) {
     id
-    name
+    resolvedName
     libraryId
   }
 }
@@ -7241,6 +7284,51 @@ export const HomeSceneQueryDocument = new TypedDocumentString(`
   numberOfLibraries
 }
     `) as unknown as TypedDocumentString<HomeSceneQueryQuery, HomeSceneQueryQueryVariables>;
+export const OnDeckBooksWebDocument = new TypedDocumentString(`
+    query OnDeckBooksWeb($pagination: Pagination!) {
+  onDeck(pagination: $pagination) {
+    nodes {
+      id
+      ...BookCard
+    }
+    pageInfo {
+      __typename
+      ... on CursorPaginationInfo {
+        currentCursor
+        nextCursor
+        limit
+      }
+      ... on OffsetPaginationInfo {
+        currentPage
+        totalPages
+        pageSize
+        pageOffset
+        zeroBased
+      }
+    }
+  }
+}
+    fragment BookCard on Media {
+  id
+  resolvedName
+  extension
+  pages
+  size
+  status
+  thumbnail {
+    url
+  }
+  readProgress {
+    percentageCompleted
+    epubcfi
+    page
+    updatedAt
+  }
+  readHistory {
+    __typename
+    completedAt
+  }
+}`) as unknown as TypedDocumentString<OnDeckBooksWebQuery, OnDeckBooksWebQueryVariables>;
 export const RecentlyAddedMediaQueryDocument = new TypedDocumentString(`
     query RecentlyAddedMediaQuery($pagination: Pagination!) {
   recentlyAddedMedia(pagination: $pagination) {
@@ -7389,6 +7477,10 @@ export const LibraryLayoutDocument = new TypedDocumentString(`
     thumbnail {
       url
     }
+    config {
+      defaultLibraryViewMode
+      hideSeriesView
+    }
     ...LibrarySettingsConfig
   }
 }
@@ -7400,6 +7492,8 @@ export const LibraryLayoutDocument = new TypedDocumentString(`
     defaultReadingDir
     defaultReadingMode
     defaultReadingImageScaleFit
+    defaultLibraryViewMode
+    hideSeriesView
     generateFileHashes
     generateKoreaderHashes
     processMetadata
@@ -8011,6 +8105,13 @@ export const EmailDevicesTableDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<EmailDevicesTableQuery, EmailDevicesTableQueryVariables>;
+export const DeleteEmailerDocument = new TypedDocumentString(`
+    mutation DeleteEmailer($emailerId: Int!) {
+  deleteEmailer(id: $emailerId) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<DeleteEmailerMutation, DeleteEmailerMutationVariables>;
 export const EmailerSendHistoryDocument = new TypedDocumentString(`
     query EmailerSendHistory($id: Int!, $fetchUser: Boolean!) {
   emailerById(id: $id) {

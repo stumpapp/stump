@@ -11,13 +11,12 @@ const MemberManagementScene = lazy(() => import('./members'))
 const DeletionScene = lazy(() => import('./danger'))
 const BookClubSchedulerScene = lazy(() => import('./scheduler'))
 
-// TODO(book-club): Fix types
+// TODO(book-club): Implement
 
 export default function BookClubSettingsRouter() {
 	const { bookClub } = useBookClubContext()
 
 	// const { mutate: editClub } = useUpdateBookClub({ id: bookClub.id })
-	// TODO(graphql): Fix
 	const editClub = noop
 
 	// TODO: implement a proper patch on backend

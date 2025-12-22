@@ -59,6 +59,7 @@ export type ComboBoxProps = {
 	filterable?: boolean
 	filterPlaceholder?: string
 	filterEmptyMessage?: string
+	formatValue?: (value: string | string[] | undefined, options: ComboBoxOption[]) => string
 } & (SingleSelectComboBoxProps | MultiSelectComboBoxProps)
 
 type MutableRefList<T> = Array<RefCallback<T> | MutableRefObject<T> | undefined | null>
@@ -89,6 +90,7 @@ export function ComboBox({
 	disabled,
 	onChange,
 	onAddOption,
+	formatValue,
 	size = 'default',
 	triggerClassName,
 	triggerRef: triggerRefProps,
@@ -106,27 +108,40 @@ export function ComboBox({
 
 	const handleChange = useCallback(
 		(selected: string) => {
+			// Note: cmdk lowercases the value passed to onSelect
+			const originalOption = options.find(
+				(option) => option.value.toLowerCase() === selected.toLowerCase(),
+			)
+			const originalValue = originalOption?.value ?? selected
+
 			if (isMultiSelect) {
-				if (value?.includes(selected)) {
-					onChange?.(value.filter((item) => item !== selected))
+				const existingIndex = value?.findIndex(
+					(item) => item.toLowerCase() === selected.toLowerCase(),
+				)
+				if (existingIndex !== undefined && existingIndex >= 0) {
+					onChange?.(value!.filter((_, index) => index !== existingIndex))
 				} else if (value) {
-					onChange?.([...value, selected])
+					onChange?.([...value, originalValue])
 				} else {
-					onChange?.([selected])
+					onChange?.([originalValue])
 				}
 				// FIXME: I don't know why I have to do this, something is triggering the popover to close...
 				setTimeout(() => setOpen(true))
 			} else {
-				onChange?.(selected)
+				onChange?.(originalValue)
 				setOpen(false)
 			}
 		},
-		[isMultiSelect, value, onChange],
+		[isMultiSelect, value, onChange, options],
 	)
 
 	const renderSelected = () => {
-		if (!value) {
+		if (!value || (Array.isArray(value) && value.length === 0)) {
 			return placeholder
+		}
+
+		if (formatValue) {
+			return formatValue(value, options)
 		}
 
 		if (isMultiSelect) {

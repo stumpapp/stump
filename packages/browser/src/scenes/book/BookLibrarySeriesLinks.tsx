@@ -10,7 +10,7 @@ const query = graphql(`
 	query BookLibrarySeriesLinks($id: ID!) {
 		seriesById(id: $id) {
 			id
-			name
+			resolvedName
 			libraryId
 		}
 	}
@@ -41,7 +41,7 @@ export default function BookLibrarySeriesLinks({ seriesId, linkSegments }: Props
 			<>
 				<span className="mx-2 text-foreground-muted">/</span>
 				<Link to={paths.seriesOverview(series.id)} className="line-clamp-1">
-					{series.name}
+					{series.resolvedName}
 				</Link>
 			</>
 		)

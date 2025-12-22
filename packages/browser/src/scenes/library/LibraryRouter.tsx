@@ -4,6 +4,7 @@ import { Navigate, Route, Routes } from 'react-router'
 
 import { useAppContext } from '@/context'
 
+import LibraryDefaultRedirect from './LibraryDefaultRedirect.tsx'
 import LibraryLayout from './LibraryLayout.tsx'
 import LibraryAdminLayout from './tabs/settings/LibraryAdminLayout.tsx'
 
@@ -26,7 +27,7 @@ export default function LibraryRouter() {
 		<Routes>
 			<Route path="" element={<LibrarySearchScene />} />
 			<Route path=":id/*" element={<LibraryLayout />}>
-				<Route path="" element={<Navigate to="series" replace />} />
+				<Route path="" element={<LibraryDefaultRedirect />} />
 				<Route path="series" element={<LibrarySeriesScene />} />
 				<Route path="books" element={<LibraryBooksScene />} />
 				{canAccessExplorer && <Route path="files" element={<LibraryExplorerScene />} />}

@@ -7,7 +7,6 @@ import {
 	BookOpen,
 	Brush,
 	KeyRound,
-	LucideIcon,
 	Mail,
 	PcCase,
 	ScrollText,
@@ -16,34 +15,11 @@ import {
 	Users,
 } from 'lucide-react'
 
+import { RouteGroup } from '@/hooks/useRouteGroups'
+
 import { prefetchScheduler } from './server/jobs/JobScheduler'
 import { prefetchJobs } from './server/jobs/JobTable'
-
-type SubItem = {
-	localeKey: string
-	matcher: (path: string) => boolean
-	backlink?: {
-		localeKey: string
-		to: string
-	}
-}
-
-type Route = {
-	icon: LucideIcon
-	label: string
-	localeKey: string
-	permission?: UserPermission
-	to: string
-	subItems?: SubItem[]
-	disabled?: boolean
-	prefetch?: () => void
-}
-
-type RouteGroup = {
-	defaultRoute: string
-	items: Route[]
-	label: string
-}
+import { prefetchLoginActivity, prefetchUsersTable, prefetchUserStats } from './server/users'
 
 export const createRouteGroups = (client: QueryClient, api: Api): RouteGroup[] => [
 	{
@@ -71,7 +47,7 @@ export const createRouteGroups = (client: QueryClient, api: Api): RouteGroup[] =
 				icon: KeyRound,
 				label: 'API keys',
 				localeKey: 'app/apiKeys',
-				permission: UserPermission.AccessApiKeys,
+				permissions: [UserPermission.AccessApiKeys],
 				to: '/settings/api-keys',
 			},
 			{
@@ -90,21 +66,21 @@ export const createRouteGroups = (client: QueryClient, api: Api): RouteGroup[] =
 				icon: Server,
 				label: 'General',
 				localeKey: 'server/general',
-				permission: UserPermission.ManageServer,
+				permissions: [UserPermission.ManageServer],
 				to: '/settings/server',
 			},
 			{
 				icon: ScrollText,
 				label: 'Logs',
 				localeKey: 'server/logs',
-				permission: UserPermission.ManageServer,
+				permissions: [UserPermission.ManageServer],
 				to: '/settings/logs',
 			},
 			{
 				icon: AlarmClock,
 				label: 'Jobs',
 				localeKey: 'server/jobs',
-				permission: UserPermission.ReadJobs,
+				permissions: [UserPermission.ReadJobs],
 				to: '/settings/jobs',
 				prefetch: () => Promise.all([prefetchJobs(client, api), prefetchScheduler(client, api)]),
 			},
@@ -112,7 +88,7 @@ export const createRouteGroups = (client: QueryClient, api: Api): RouteGroup[] =
 				icon: Users,
 				label: 'Users',
 				localeKey: 'server/users',
-				permission: UserPermission.ManageUsers,
+				permissions: [UserPermission.ManageUsers],
 				subItems: [
 					{
 						backlink: {
@@ -135,20 +111,19 @@ export const createRouteGroups = (client: QueryClient, api: Api): RouteGroup[] =
 					},
 				],
 				to: '/settings/users',
+				prefetch: async () => {
+					await Promise.all([
+						prefetchUserStats(api, client),
+						prefetchUsersTable(api, client),
+						prefetchLoginActivity(api, client),
+					])
+				},
 			},
-			// {
-			// 	disabled: true,
-			// 	icon: ShieldCheck,
-			// 	label: 'Access',
-			// 	localeKey: 'server/access',
-			// 	permission: 'server:manage',
-			// 	to: '/settings/server/access',
-			// },
 			{
 				icon: Mail,
 				label: 'Email',
 				localeKey: 'server/email',
-				permission: UserPermission.EmailerRead,
+				permissions: [UserPermission.EmailerRead],
 				subItems: [
 					{
 						backlink: {
@@ -177,7 +152,7 @@ export const createRouteGroups = (client: QueryClient, api: Api): RouteGroup[] =
 				icon: Bell,
 				label: 'Notifications',
 				localeKey: 'server/notifications',
-				permission: UserPermission.ReadNotifier,
+				permissions: [UserPermission.ReadNotifier],
 				to: '/settings/notifications',
 			},
 		],

@@ -2,8 +2,6 @@ use async_graphql::{Enum, InputObject, OneofObject, SimpleObject, Union};
 use sea_orm::{prelude::Decimal, FromJsonQueryResult};
 use serde::{Deserialize, Serialize};
 
-// TODO(graphql): Evaluate serde usage and see if still needed
-
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Enum)]
 pub enum Dimension {
 	Height,
@@ -69,7 +67,7 @@ pub enum ImageResizeMethod {
 	ScaleDimension(ScaledDimensionResize),
 }
 
-// TODO(339): Support JpegXl and Avif
+// TODO(images): Support JpegXl and Avif
 
 /// Supported image formats for processing images throughout Stump
 #[derive(Default, Copy, Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Enum)]
@@ -130,88 +128,98 @@ impl ImageProcessorOptions {
 	}
 }
 
-// #[cfg(test)]
-// mod tests {
-// 	use super::*;
+#[cfg(test)]
+mod tests {
+	use std::str::FromStr;
 
-// 	#[test]
-// 	fn test_serialize_image_processor_options_exact_dimension() {
-// 		let options = ImageProcessorOptions {
-// 			resize_method: ImageResizeMethod::Exact(ExactDimensionResize {
-// 				width: 800,
-// 				height: 600,
-// 			}),
-// 			format: SupportedImageFormat::Webp,
-// 			quality: Some(90),
-// 			page: Some(1),
-// 		};
+	use super::*;
 
-// 		let serialized = serde_json::to_string(&options).unwrap();
-// 		assert_eq!(
-// 			serialized,
-// 			r#"{"resizeMethod":{"exact":{"width":800,"height":600}},"format":"Webp","quality":90,"page":1}"#
-// 		);
-// 	}
+	#[test]
+	fn test_serialize_image_processor_options_exact_dimension() {
+		let options = ImageProcessorOptions {
+			resize_method: Some(ImageResizeMethod::Exact(ExactDimensionResize {
+				width: 800,
+				height: 600,
+			})),
+			format: SupportedImageFormat::Webp,
+			quality: Some(90),
+			page: Some(1),
+		};
 
-// 	#[test]
-// 	fn test_serialize_image_processor_options_scale_evenly() {
-// 		let options = ImageProcessorOptions {
-// 			resize_method: ImageResizeMethod::ScaleEvenlyByFactor(ScaleEvenlyByFactor {
-// 				factor: 0.65,
-// 			}),
-// 			format: SupportedImageFormat::Webp,
-// 			quality: Some(90),
-// 			page: Some(1),
-// 		};
+		let serialized = serde_json::to_string(&options).unwrap();
+		assert_eq!(
+			serialized,
+			r#"{"resizeMethod":{"exact":{"width":800,"height":600}},"format":"Webp","quality":90,"page":1}"#
+		);
+	}
 
-// 		let serialized = serde_json::to_string(&options).unwrap();
-// 		assert_eq!(
-// 			serialized,
-// 			r#"{"resizeMethod":{"scaleEvenlyByFactor":{"factor":0.65}},"format":"Webp","quality":90,"page":1}"#
-// 		);
-// 	}
+	#[test]
+	fn test_serialize_image_processor_options_scale_evenly() {
+		let options = ImageProcessorOptions {
+			resize_method: Some(ImageResizeMethod::ScaleEvenlyByFactor(
+				ScaleEvenlyByFactor {
+					factor: Decimal::from_str("0.65").unwrap(),
+				},
+			)),
+			format: SupportedImageFormat::Webp,
+			quality: Some(90),
+			page: Some(1),
+		};
 
-// 	#[test]
-// 	fn test_serialize_image_processor_options_scaled_dimension() {
-// 		let options = ImageProcessorOptions {
-// 			resize_method: ImageResizeMethod::ScaleDimension(
-// 				ScaledDimensionResize::Height(600),
-// 			),
-// 			format: SupportedImageFormat::Webp,
-// 			quality: Some(90),
-// 			page: Some(1),
-// 		};
-// 		let serialized = serde_json::to_string(&options).unwrap();
-// 		assert_eq!(
-// 			serialized,
-// 			r#"{"resizeMethod":{"scaleDimension":{"height":600}},"format":"Webp","quality":90,"page":1}"#
-// 		);
+		let serialized = serde_json::to_string(&options).unwrap();
+		assert_eq!(
+			serialized,
+			r#"{"resizeMethod":{"scaleEvenlyByFactor":{"factor":"0.65"}},"format":"Webp","quality":90,"page":1}"#
+		);
+	}
 
-// 		let options = ImageProcessorOptions {
-// 			resize_method: ImageResizeMethod::ScaleDimension(
-// 				ScaledDimensionResize::Width(800),
-// 			),
-// 			..options
-// 		};
-// 		let serialized = serde_json::to_string(&options).unwrap();
-// 		assert_eq!(
-// 			serialized,
-// 			r#"{"resizeMethod":{"scaleDimension":{"width":800}},"format":"Webp","quality":90,"page":1}"#
-// 		);
-// 	}
+	#[test]
+	fn test_serialize_image_processor_options_scaled_dimension() {
+		let options = ImageProcessorOptions {
+			resize_method: Some(ImageResizeMethod::ScaleDimension(
+				ScaledDimensionResize {
+					dimension: Dimension::Height,
+					size: 600,
+				},
+			)),
+			format: SupportedImageFormat::Webp,
+			quality: Some(90),
+			page: Some(1),
+		};
+		let serialized = serde_json::to_string(&options).unwrap();
+		assert_eq!(
+			serialized,
+			r#"{"resizeMethod":{"scaleDimension":{"dimension":"Height","size":600}},"format":"Webp","quality":90,"page":1}"#
+		);
 
-// 	#[test]
-// 	fn test_serialize_image_processor_options_none() {
-// 		let options = ImageProcessorOptions {
-// 			resize_method: ImageResizeMethod::None,
-// 			format: SupportedImageFormat::Webp,
-// 			quality: Some(90),
-// 			page: Some(1),
-// 		};
-// 		let serialized = serde_json::to_string(&options).unwrap();
-// 		assert_eq!(
-// 			serialized,
-// 			r#"{"resizeMethod":"none","format":"Webp","quality":90,"page":1}"#
-// 		);
-// 	}
-// }
+		let options = ImageProcessorOptions {
+			resize_method: Some(ImageResizeMethod::ScaleDimension(
+				ScaledDimensionResize {
+					dimension: Dimension::Width,
+					size: 800,
+				},
+			)),
+			..options
+		};
+		let serialized = serde_json::to_string(&options).unwrap();
+		assert_eq!(
+			serialized,
+			r#"{"resizeMethod":{"scaleDimension":{"dimension":"Width","size":800}},"format":"Webp","quality":90,"page":1}"#
+		);
+	}
+
+	#[test]
+	fn test_serialize_image_processor_options_none() {
+		let options = ImageProcessorOptions {
+			resize_method: None,
+			format: SupportedImageFormat::Webp,
+			quality: Some(90),
+			page: Some(1),
+		};
+		let serialized = serde_json::to_string(&options).unwrap();
+		assert_eq!(
+			serialized,
+			r#"{"resizeMethod":null,"format":"Webp","quality":90,"page":1}"#
+		);
+	}
+}

@@ -4,7 +4,7 @@ import ZIPFoundation
 import os.log
 
 /// Errors that can occur during streaming operations
-enum StreamerError: Error {
+enum StreamerError: LocalizedError {
     case serverStartFailed(String)
     case archiveNotFound(String)
     case archiveOpenFailed(String, Error)
@@ -12,6 +12,25 @@ enum StreamerError: Error {
     case pageExtractionFailed(Int, Error)
     case invalidArchiveFormat(String)
     case cacheDirectoryCreationFailed(Error)
+
+    var errorDescription: String? {
+        switch self {
+        case .serverStartFailed(let reason):
+            return "Failed to start streaming server: \(reason)"
+        case .archiveNotFound(let path):
+            return "Archive not found at path: \(path)"
+        case .archiveOpenFailed(let path, let error):
+            return "Failed to open archive at \(path): \(error.localizedDescription)"
+        case .pageNotFound(let pageNumber):
+            return "Page \(pageNumber) not found in archive"
+        case .pageExtractionFailed(let pageNumber, let error):
+            return "Failed to extract page \(pageNumber): \(error.localizedDescription)"
+        case .invalidArchiveFormat(let path):
+            return "Invalid archive format: \(path)"
+        case .cacheDirectoryCreationFailed(let error):
+            return "Failed to create cache directory: \(error.localizedDescription)"
+        }
+    }
 }
 
 /// Configuration for a book being streamed

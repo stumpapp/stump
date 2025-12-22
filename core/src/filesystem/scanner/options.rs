@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use crate::filesystem::media::{BuiltMedia, ProcessedFileHashes, ProcessedMediaMetadata};
 
 #[derive(Debug, Default, Clone, Copy, Deserialize, Serialize, PartialEq)]
-#[serde(default)]
+#[serde(default, rename_all = "camelCase")]
 pub struct CustomVisit {
 	pub regen_meta: bool,
 	pub regen_hashes: bool,
@@ -72,6 +72,7 @@ pub enum ScanConfig {
 	#[default]
 	BuildChanged,
 	ForceRebuild {
+		#[serde(rename = "forceRebuild")]
 		force_rebuild: bool,
 	},
 	Custom(CustomVisit),
@@ -189,7 +190,7 @@ mod tests {
 				}
 			})
 			.unwrap(),
-			r#"{"config":{"force_rebuild":true}}"#
+			r#"{"config":{"forceRebuild":true}}"#
 		);
 
 		assert_eq!(
@@ -199,7 +200,7 @@ mod tests {
 				}
 			})
 			.unwrap(),
-			r#"{"config":{"force_rebuild":false}}"#
+			r#"{"config":{"forceRebuild":false}}"#
 		);
 
 		assert_eq!(
@@ -210,7 +211,7 @@ mod tests {
 				})
 			})
 			.unwrap(),
-			r#"{"config":{"regen_meta":true,"regen_hashes":false}}"#
+			r#"{"config":{"regenMeta":true,"regenHashes":false}}"#
 		);
 
 		assert_eq!(
@@ -221,7 +222,7 @@ mod tests {
 				})
 			})
 			.unwrap(),
-			r#"{"config":{"regen_meta":false,"regen_hashes":true}}"#
+			r#"{"config":{"regenMeta":false,"regenHashes":true}}"#
 		);
 
 		assert_eq!(
@@ -232,14 +233,14 @@ mod tests {
 				})
 			})
 			.unwrap(),
-			r#"{"config":{"regen_meta":true,"regen_hashes":true}}"#
+			r#"{"config":{"regenMeta":true,"regenHashes":true}}"#
 		);
 	}
 
 	#[test]
 	fn test_deserialize_scan_options() {
 		assert!(matches!(
-			serde_json::from_str::<ScanOptions>(r#"{"config":{"force_rebuild":true}}"#)
+			serde_json::from_str::<ScanOptions>(r#"{"config":{"forceRebuild":true}}"#)
 				.unwrap()
 				.config,
 			ScanConfig::ForceRebuild {
@@ -248,7 +249,7 @@ mod tests {
 		));
 
 		assert!(matches!(
-			serde_json::from_str::<ScanOptions>(r#"{"config":{"force_rebuild":false}}"#)
+			serde_json::from_str::<ScanOptions>(r#"{"config":{"forceRebuild":false}}"#)
 				.unwrap()
 				.config,
 			ScanConfig::ForceRebuild {
@@ -257,7 +258,7 @@ mod tests {
 		));
 
 		assert!(matches!(
-			serde_json::from_str::<ScanOptions>(r#"{"config":{"regen_meta":true}}"#)
+			serde_json::from_str::<ScanOptions>(r#"{"config":{"regenMeta":true}}"#)
 				.unwrap()
 				.config,
 			ScanConfig::Custom(CustomVisit {
@@ -267,7 +268,7 @@ mod tests {
 		));
 
 		assert!(matches!(
-			serde_json::from_str::<ScanOptions>(r#"{"config":{"regen_hashes":true}}"#)
+			serde_json::from_str::<ScanOptions>(r#"{"config":{"regenHashes":true}}"#)
 				.unwrap()
 				.config,
 			ScanConfig::Custom(CustomVisit {
@@ -278,7 +279,7 @@ mod tests {
 
 		assert!(matches!(
 			serde_json::from_str::<ScanOptions>(
-				r#"{"config":{"regen_meta":true,"regen_hashes":true}}"#
+				r#"{"config":{"regenMeta":true,"regenHashes":true}}"#
 			)
 			.unwrap()
 			.config,

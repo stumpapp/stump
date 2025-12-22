@@ -251,6 +251,24 @@
 				"label": "Tags",
 				"description": "Used to categorize your library or enforce access rules"
 			},
+			"defaultLibraryView": {
+				"label": "Default library view",
+				"description": "Configure which tab is shown by default when opening this library",
+				"hideSeriesView": {
+					"label": "Hide series tab",
+					"description": "Hide the series tab from the library navigation"
+				},
+				"options": {
+					"series": {
+						"label": "Series",
+						"description": "Show the series tab by default"
+					},
+					"books": {
+						"label": "Books",
+						"description": "Show the books tab by default"
+					}
+				}
+			},
 			"readingSettings": {
 				"section": {
 					"heading": "Reading settings",
@@ -698,6 +716,13 @@
 		}
 	},
 	"homeScene": {
+		"onDeck": {
+			"title": "Your next read",
+			"emptyState": {
+				"heading": "No books on deck",
+				"message": "Your next recommended books will show up here"
+			}
+		},
 		"continueReading": {
 			"title": "Continue reading",
 			"emptyState": {
@@ -2219,6 +2244,14 @@
 		"MANAGE_JOBS": {
 			"label": "Manage jobs",
 			"description": "Allows the user to manage any queued jobs"
+		},
+		"EDIT_METADATA": {
+			"label": "Edit metadata",
+			"description": "Allows the user to edit metadata for books and series"
+		},
+		"WRITE_BACK_METADATA": {
+			"label": "Write back metadata",
+			"description": "Allows the user to write metadata changes back to the source files"
 		}
 	}
 }

@@ -7,6 +7,7 @@ use sea_orm::entity::prelude::*;
 pub struct Model {
 	#[sea_orm(primary_key)]
 	pub id: i32,
+	#[graphql(skip)]
 	#[sea_orm(column_type = "Blob", nullable)]
 	pub options: Option<Vec<u8>>,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]

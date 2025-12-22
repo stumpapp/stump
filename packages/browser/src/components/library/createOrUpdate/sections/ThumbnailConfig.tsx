@@ -31,8 +31,6 @@ const formatOptions = [
 	{ label: 'PNG', value: 'PNG' },
 ]
 
-// TODO(graphql): Add appropriate error reporting
-
 export default function ThumbnailConfigForm() {
 	const form = useFormContext<CreateOrUpdateLibrarySchema>()
 	const ctx = useLibraryManagementSafe()

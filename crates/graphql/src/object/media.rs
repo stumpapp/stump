@@ -226,7 +226,7 @@ impl Media {
 			.to_string()
 	}
 
-	// TODO(graphql): Create object to query for device
+	// TODO(graphql): Create object to query for device used (e.g., KoReader device ID)
 	async fn read_progress(
 		&self,
 		ctx: &Context<'_>,
@@ -244,7 +244,7 @@ impl Media {
 		Ok(progress)
 	}
 
-	// TODO(graphql): Create object to query for device
+	// TODO(graphql): Create object to query for device used (e.g., KoReader device ID)
 	async fn read_history(
 		&self,
 		ctx: &Context<'_>,

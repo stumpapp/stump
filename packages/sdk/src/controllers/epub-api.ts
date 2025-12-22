@@ -22,7 +22,6 @@ export class EpubAPI extends APIBase {
 		return epubURL(`/${id}`)
 	}
 
-	// TODO(graphql): I think we need to port this to v2
 	/**
 	 * Fetch a resource from an epub by its ID and resource ID
 	 */

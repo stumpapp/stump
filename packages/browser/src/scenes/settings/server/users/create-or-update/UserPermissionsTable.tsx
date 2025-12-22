@@ -232,6 +232,8 @@ const groups = [
 			UserPermission.ScanLibrary,
 			UserPermission.ManageLibrary,
 			UserPermission.DeleteLibrary,
+			UserPermission.EditMetadata,
+			UserPermission.WriteBackMetadata,
 		],
 	},
 	{

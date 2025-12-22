@@ -204,21 +204,14 @@ const ContinueReadingCard = memo(function ContinueReadingCard({
 	const progressPercent = progress ?? 0
 
 	const gradient = {
-		colors: [
-			'rgba(0, 0, 0, 0.7)',
-			'rgba(0, 0, 0, 0.3)',
-			'transparent',
-			'transparent',
-			'rgba(0, 0, 0, 0.6)',
-			'rgba(0, 0, 0, 0.85)',
-		],
+		colors: ['transparent', 'transparent', 'rgba(0, 0, 0, 0.4)', 'rgba(0, 0, 0, 0.85)'],
 		direction: 'to bottom',
 	}
 
 	return (
 		<Link
 			to={paths.bookOverview(data.id)}
-			className="group relative block flex-shrink-0 overflow-hidden rounded-xl"
+			className="group relative block flex-shrink-0 overflow-hidden rounded-xl transition-opacity hover:opacity-90"
 			style={{ width }}
 		>
 			<ThumbnailImage

@@ -167,21 +167,14 @@ const RecentlyAddedBookCard = memo(function RecentlyAddedBookCard({
 	}, [data.thumbnail.metadata])
 
 	const gradient = {
-		colors: [
-			'rgba(0, 0, 0, 0.8)',
-			'rgba(0, 0, 0, 0.4)',
-			'transparent',
-			'transparent',
-			'rgba(0, 0, 0, 0.5)',
-			'rgba(0, 0, 0, 0.85)',
-		],
+		colors: ['transparent', 'transparent', 'rgba(0, 0, 0, 0.4)', 'rgba(0, 0, 0, 0.85)'],
 		direction: 'to bottom',
 	}
 
 	return (
 		<Link
 			to={paths.bookOverview(data.id)}
-			className="group relative block flex-shrink-0 overflow-hidden rounded-lg"
+			className="group relative block flex-shrink-0 overflow-hidden rounded-lg transition-opacity hover:opacity-90"
 			style={{ width: cardWidth }}
 		>
 			<ThumbnailImage
@@ -198,7 +191,7 @@ const RecentlyAddedBookCard = memo(function RecentlyAddedBookCard({
 				}}
 			/>
 
-			<div className="pointer-events-none absolute left-0 right-0 top-0 z-30 p-2">
+			<div className="pointer-events-none absolute bottom-0 left-0 right-0 z-30 p-2">
 				<Text
 					className="line-clamp-2 !text-wrap text-sm font-semibold leading-tight text-white"
 					style={{
@@ -207,11 +200,8 @@ const RecentlyAddedBookCard = memo(function RecentlyAddedBookCard({
 				>
 					{data.resolvedName}
 				</Text>
-			</div>
-
-			<div className="pointer-events-none absolute bottom-0 left-0 right-0 z-30 p-2">
 				<Text
-					className="text-xs text-gray-200"
+					className="mt-0.5 text-xs text-gray-200"
 					style={{
 						textShadow: '1px 1px 2px rgba(0, 0, 0, 0.5)',
 					}}

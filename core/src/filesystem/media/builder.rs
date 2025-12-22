@@ -170,7 +170,8 @@ impl MediaBuilder {
 #[cfg(test)]
 mod tests {
 	use models::shared::enums::{
-		LibraryPattern, ReadingDirection, ReadingImageScaleFit, ReadingMode,
+		LibraryPattern, LibraryViewMode, ReadingDirection, ReadingImageScaleFit,
+		ReadingMode,
 	};
 	use sea_orm::ActiveValue;
 
@@ -267,6 +268,8 @@ mod tests {
 			thumbnail_config: None,
 			process_thumbnail_colors_even_without_config: false,
 			watch: false,
+			default_library_view_mode: LibraryViewMode::Series,
+			hide_series_view: false,
 		}
 	}
 }

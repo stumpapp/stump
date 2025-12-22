@@ -127,6 +127,14 @@ type Scrollbar = {
 	thumb: DefaultVariant & HoverVariant
 } & DefaultVariant
 
+// TODO: Consider each theme more carefully. I did very minimal effort for each one
+/**
+ * A type for the thumbnail-specific colors
+ */
+type Thumbnail = {
+	border: string
+}
+
 /**
  * The primary type which represents the color tokens for the Stump UI. These are translated for use as
  * tailwind classes via tw-colors
@@ -138,4 +146,5 @@ export type StumpTheme = {
 	edge: Border
 	fill: Color
 	scrollbar: Scrollbar
+	thumbnail: Thumbnail
 }

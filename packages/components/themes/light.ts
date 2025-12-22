@@ -89,4 +89,7 @@ export const light = {
 			hover: 'hsla(0, 0%, 0%, 0.5)',
 		},
 	},
+	thumbnail: {
+		border: 'rgba(31, 33, 35, 0.10)',
+	},
 } satisfies StumpTheme

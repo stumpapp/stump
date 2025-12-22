@@ -96,4 +96,7 @@ export const cosmic = {
 			hover: 'hsla(0, 0%, 100%, 0.3)',
 		},
 	},
+	thumbnail: {
+		border: 'rgba(233, 234, 235, 0.10)',
+	},
 } satisfies StumpTheme

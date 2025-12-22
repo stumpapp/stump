@@ -1,44 +1,57 @@
 import { Button, cn, Heading, Text, ToolTip } from '@stump/components'
 import { ChevronLeft, ChevronRight, CircleSlash2 } from 'lucide-react'
-import { forwardRef, useCallback, useMemo, useRef, useState } from 'react'
+import { forwardRef, ReactNode, useCallback, useMemo, useRef, useState } from 'react'
 import { ScrollerProps, Virtuoso, VirtuosoHandle } from 'react-virtuoso'
 import { useInViewRef, useMediaMatch } from 'rooks'
 
 import { usePreferences } from '../hooks'
 
-type Props = {
+type Props<T> = {
 	title: string
-	items: React.ReactElement[]
-	onFetchMore: () => void
-	emptyState?: React.ReactNode
-	height?: number
+	items: T[]
+	renderItem: (item: T) => ReactNode
+	keyExtractor: (item: T) => string
+	onFetchMore?: () => void
+	emptyState?: ReactNode
+	cardHeight: number // Not including gaps/padding, component will calculate total height
+	rowCount?: number | 'responsive'
+	skipAmount?: number
 }
 
-export default function HorizontalCardList({
+export default function MultiRowHorizontalCardList<T>({
 	title,
 	items,
+	renderItem,
+	keyExtractor,
 	onFetchMore,
 	emptyState,
-	height: heightProp,
-}: Props) {
+	cardHeight,
+	rowCount: rowCountProp = 'responsive',
+	skipAmount = 5,
+}: Props<T>) {
 	const {
-		preferences: { thumbnailRatio },
+		preferences: { enableHideScrollbar },
 	} = usePreferences()
 
 	const virtuosoRef = useRef<VirtuosoHandle>(null)
+	const isAtLeastLarge = useMediaMatch('(min-width: 1024px)')
 
-	const isAtLeastSmall = useMediaMatch('(min-width: 640px)')
-	const isAtLeastMedium = useMediaMatch('(min-width: 768px)')
+	const rowCount = rowCountProp === 'responsive' ? (isAtLeastLarge ? 2 : 1) : rowCountProp
 
-	const calculatedHeight = useMemo(() => {
-		const imageWidth = !isAtLeastSmall ? 160 : !isAtLeastMedium ? 170.656 : 192 // widths from EntityCard
-		const imageHeight = imageWidth / thumbnailRatio
-		const footerHeight = 96 // estimated height of footer
+	const columns = useMemo(() => {
+		const cols: T[][] = []
+		for (let i = 0; i < items.length; i += rowCount) {
+			cols.push(items.slice(i, i + rowCount))
+		}
+		return cols
+	}, [items, rowCount])
 
-		return imageHeight + footerHeight
-	}, [isAtLeastSmall, isAtLeastMedium, thumbnailRatio])
-
-	const height = heightProp ?? calculatedHeight
+	const containerHeight = useMemo(() => {
+		const gap = 12
+		const columnPaddingBottom = 4
+		const scrollbarHeight = enableHideScrollbar ? 0 : 17
+		return cardHeight * rowCount + gap * (rowCount - 1) + columnPaddingBottom + scrollbarHeight
+	}, [cardHeight, rowCount, enableHideScrollbar])
 
 	const [firstCardRef, firstCardIsInView] = useInViewRef({ threshold: 0.5 })
 	const [lastCardRef, lastCardIsInView] = useInViewRef({ threshold: 0.5 })
@@ -50,22 +63,22 @@ export default function HorizontalCardList({
 	const { startIndex: lowerBound, endIndex: upperBound } = visibleRange
 
 	const canSkipBackward = upperBound > 0 && !firstCardIsInView
-	const canSkipForward = items.length && !lastCardIsInView
+	const canSkipForward = columns.length > 0 && !lastCardIsInView
 
 	const handleSkipAhead = useCallback(
-		(skip = 5) => {
-			const nextIndex = Math.min(upperBound + skip, items.length - 1)
+		(skip = skipAmount) => {
+			const nextIndex = Math.min(upperBound + skip, columns.length - 1)
 			virtuosoRef.current?.scrollIntoView({
 				index: nextIndex,
 				behavior: 'smooth',
 				align: 'start',
 			})
 		},
-		[upperBound, items.length],
+		[upperBound, columns.length, skipAmount],
 	)
 
 	const handleSkipBackward = useCallback(
-		(skip = 5) => {
+		(skip = skipAmount) => {
 			const nextIndex = Math.max(lowerBound - skip, 0)
 			virtuosoRef.current?.scrollIntoView({
 				index: nextIndex,
@@ -73,7 +86,7 @@ export default function HorizontalCardList({
 				align: 'start',
 			})
 		},
-		[lowerBound],
+		[lowerBound, skipAmount],
 	)
 
 	const renderContent = () => {
@@ -88,42 +101,44 @@ export default function HorizontalCardList({
 							<div>
 								<Text>Nothing to show</Text>
 								<Text size="sm" variant="muted">
-									No results present to display
+									No results were returned
 								</Text>
 							</div>
 						</div>
 					)}
 				</div>
 			)
-		} else {
-			return (
-				<Virtuoso
-					ref={virtuosoRef}
-					style={{ height }}
-					horizontalDirection
-					data={items}
-					components={{
-						Scroller: HorizontalScroller,
-					}}
-					itemContent={(idx, card) => (
-						<div
-							{...(idx === 0
-								? { ref: firstCardRef }
-								: idx === items.length - 1
-									? { ref: lastCardRef }
-									: {})}
-							className="px-1.5"
-						>
-							{card}
-						</div>
-					)}
-					endReached={onFetchMore}
-					increaseViewportBy={5 * (height / 3)}
-					rangeChanged={setVisibleRange}
-					overscan={{ main: 3, reverse: 3 }}
-				/>
-			)
 		}
+
+		return (
+			<Virtuoso
+				ref={virtuosoRef}
+				style={{ height: containerHeight }}
+				horizontalDirection
+				data={columns}
+				components={{
+					Scroller: HorizontalScroller,
+				}}
+				itemContent={(colIdx, column) => (
+					<div
+						{...(colIdx === 0
+							? { ref: firstCardRef }
+							: colIdx === columns.length - 1
+								? { ref: lastCardRef }
+								: {})}
+						className="flex flex-col gap-3 px-1.5 pb-1"
+					>
+						{column.map((item) => (
+							<div key={keyExtractor(item)}>{renderItem(item)}</div>
+						))}
+					</div>
+				)}
+				endReached={onFetchMore}
+				increaseViewportBy={5 * cardHeight}
+				rangeChanged={setVisibleRange}
+				overscan={{ main: 3, reverse: 3 }}
+			/>
+		)
 	}
 
 	return (
@@ -138,7 +153,7 @@ export default function HorizontalCardList({
 								size="icon"
 								disabled={!canSkipBackward}
 								onClick={() => handleSkipBackward()}
-								onDoubleClick={() => handleSkipBackward(20)}
+								onDoubleClick={() => handleSkipBackward(skipAmount * 3)}
 							>
 								<ChevronLeft className="h-4 w-4" />
 							</Button>
@@ -149,7 +164,7 @@ export default function HorizontalCardList({
 								size="icon"
 								disabled={!canSkipForward}
 								onClick={() => handleSkipAhead()}
-								onDoubleClick={() => handleSkipAhead(20)}
+								onDoubleClick={() => handleSkipAhead(skipAmount * 3)}
 							>
 								<ChevronRight className="h-4 w-4" />
 							</Button>
@@ -173,6 +188,7 @@ const HorizontalScroller = forwardRef<HTMLDivElement, ScrollerProps>(
 			<div
 				className={cn('flex overflow-y-hidden', {
 					'scrollbar-hide': enableHideScrollbar,
+					'pb-[17px]': !enableHideScrollbar,
 				})}
 				ref={ref}
 				{...props}

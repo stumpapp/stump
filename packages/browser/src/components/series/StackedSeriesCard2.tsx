@@ -57,7 +57,8 @@ const StackedSeriesCard2 = memo(function StackedSeriesCard2({ data }: Props) {
 		})
 
 		observer.observe(containerRef.current)
-		setWidth(containerRef.current.offsetWidth)
+		const padding = 8 // p-1
+		setWidth(containerRef.current.clientWidth - padding)
 
 		return () => observer.disconnect()
 	}, [])

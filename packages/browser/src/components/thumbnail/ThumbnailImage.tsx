@@ -1,5 +1,6 @@
 import { useSDK } from '@stump/client'
 import { cn } from '@stump/components'
+import { AnimatePresence, motion } from 'framer-motion'
 import { forwardRef, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 
 import { AuthImage } from '../entity/AuthImage'
@@ -154,11 +155,7 @@ export const ThumbnailImage = forwardRef<HTMLDivElement, ThumbnailImageProps>(
 			onError?.()
 		}
 
-		const imageClasses = cn(
-			'absolute inset-0 z-[15] h-full w-full object-cover transition-opacity duration-700',
-			isLoaded ? 'opacity-100' : 'opacity-0',
-			imageClassName,
-		)
+		const imageClasses = cn('absolute inset-0 z-[15] h-full w-full object-cover', imageClassName)
 
 		const imageStyle = { borderRadius: computedStyles.borderRadius }
 
@@ -198,24 +195,33 @@ export const ThumbnailImage = forwardRef<HTMLDivElement, ThumbnailImageProps>(
 			)
 		}
 
-		const showPlaceholder = !isLoaded || hasError
-
 		return (
 			<div ref={ref} className={cn('relative overflow-hidden', className)} style={containerStyle}>
-				{showPlaceholder && (
-					<ThumbnailPlaceholder
-						{...placeholderData}
-						variant={placeholderVariant}
-						className="rounded-[inherit]"
-					/>
-				)}
+				<ThumbnailPlaceholder
+					{...placeholderData}
+					variant={placeholderVariant}
+					className="rounded-[inherit]"
+				/>
 
-				{!hasError && renderImage()}
+				<AnimatePresence>
+					{!hasError && (
+						<motion.div
+							key={src}
+							initial={{ opacity: 0 }}
+							animate={{ opacity: isLoaded ? 1 : 0 }}
+							transition={{ duration: 0.3, ease: 'easeOut' }}
+							// @ts-expect-error: It has className
+							className="absolute inset-0 z-[15]"
+						>
+							{renderImage()}
+						</motion.div>
+					)}
+				</AnimatePresence>
 
 				{gradientStyle && <div className="absolute inset-0 z-20" style={gradientStyle} />}
 
 				<div
-					className="border-thumbnail-border pointer-events-none absolute inset-0 z-[25]"
+					className="pointer-events-none absolute inset-0 z-[25] border-thumbnail-border"
 					style={{
 						...borderStyle,
 						borderStyle: 'solid',

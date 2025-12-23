@@ -3763,6 +3763,8 @@ export type TagSelectQueryQuery = { __typename?: 'Query', tags: Array<{ __typena
 
 export type BookCardFragment = { __typename?: 'Media', id: string, resolvedName: string, extension: string, pages: number, size: number, status: FileStatus, thumbnail: { __typename?: 'ImageRef', url: string }, readProgress?: { __typename?: 'ActiveReadingSession', percentageCompleted?: any | null, epubcfi?: string | null, page?: number | null, updatedAt?: any | null } | null, readHistory: Array<{ __typename: 'FinishedReadingSession', completedAt: any }> } & { ' $fragmentName'?: 'BookCardFragment' };
 
+export type BookCard2Fragment = { __typename?: 'Media', id: string, resolvedName: string, extension: string, pages: number, size: number, status: FileStatus, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null }, readProgress?: { __typename?: 'ActiveReadingSession', percentageCompleted?: any | null, epubcfi?: string | null, page?: number | null, updatedAt?: any | null } | null, readHistory: Array<{ __typename: 'FinishedReadingSession', completedAt: any }> } & { ' $fragmentName'?: 'BookCard2Fragment' };
+
 export type BookSearchOverlayQueryVariables = Exact<{
   pagination?: InputMaybe<Pagination>;
   filter: MediaFilterInput;
@@ -4278,7 +4280,7 @@ export type LibraryBooksSceneQueryVariables = Exact<{
 
 export type LibraryBooksSceneQuery = { __typename?: 'Query', media: { __typename?: 'PaginatedMediaResponse', nodes: Array<(
       { __typename?: 'Media', id: string }
-      & { ' $fragmentRefs'?: { 'BookCardFragment': BookCardFragment;'BookMetadataFragment': BookMetadataFragment } }
+      & { ' $fragmentRefs'?: { 'BookCard2Fragment': BookCard2Fragment;'BookMetadataFragment': BookMetadataFragment } }
     )>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', currentPage: number, totalPages: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
 
 export type LibrarySeriesQueryVariables = Exact<{
@@ -5164,6 +5166,37 @@ export const BookCardFragmentDoc = new TypedDocumentString(`
   }
 }
     `, {"fragmentName":"BookCard"}) as unknown as TypedDocumentString<BookCardFragment, unknown>;
+export const BookCard2FragmentDoc = new TypedDocumentString(`
+    fragment BookCard2 on Media {
+  id
+  resolvedName
+  extension
+  pages
+  size
+  status
+  thumbnail {
+    url
+    metadata {
+      averageColor
+      colors {
+        color
+        percentage
+      }
+      thumbhash
+    }
+  }
+  readProgress {
+    percentageCompleted
+    epubcfi
+    page
+    updatedAt
+  }
+  readHistory {
+    __typename
+    completedAt
+  }
+}
+    `, {"fragmentName":"BookCard2"}) as unknown as TypedDocumentString<BookCard2Fragment, unknown>;
 export const MediaMetadataEditorFragmentDoc = new TypedDocumentString(`
     fragment MediaMetadataEditor on MediaMetadata {
   ageRating
@@ -7563,7 +7596,7 @@ export const LibraryBooksSceneDocument = new TypedDocumentString(`
   media(filter: $filter, orderBy: $orderBy, pagination: $pagination) {
     nodes {
       id
-      ...BookCard
+      ...BookCard2
       ...BookMetadata
     }
     pageInfo {
@@ -7578,7 +7611,7 @@ export const LibraryBooksSceneDocument = new TypedDocumentString(`
     }
   }
 }
-    fragment BookCard on Media {
+    fragment BookCard2 on Media {
   id
   resolvedName
   extension
@@ -7587,6 +7620,14 @@ export const LibraryBooksSceneDocument = new TypedDocumentString(`
   status
   thumbnail {
     url
+    metadata {
+      averageColor
+      colors {
+        color
+        percentage
+      }
+      thumbhash
+    }
   }
   readProgress {
     percentageCompleted

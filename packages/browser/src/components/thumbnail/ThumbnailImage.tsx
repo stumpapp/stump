@@ -1,6 +1,6 @@
 import { useSDK } from '@stump/client'
 import { cn } from '@stump/components'
-import { forwardRef, useEffect, useMemo, useRef, useState } from 'react'
+import { forwardRef, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 
 import { AuthImage } from '../entity/AuthImage'
 import {
@@ -77,6 +77,15 @@ export const ThumbnailImage = forwardRef<HTMLDivElement, ThumbnailImageProps>(
 		const [hasError, setHasError] = useState(false)
 
 		const imageRef = useRef<HTMLImageElement | null>(null)
+
+		// Note: I added this because the placeholder was ALWAYS flashing on initial load,
+		// so this should help prevent that
+		useLayoutEffect(() => {
+			if (imageRef.current?.complete && imageRef.current.naturalWidth > 0) {
+				// eslint-disable-next-line react-hooks/set-state-in-effect
+				setIsLoaded(true)
+			}
+		}, [src])
 
 		// https://developer.mozilla.org/en-US/docs/Web/API/Document/visibilitychange_event
 		useEffect(() => {
@@ -206,7 +215,7 @@ export const ThumbnailImage = forwardRef<HTMLDivElement, ThumbnailImageProps>(
 				{gradientStyle && <div className="absolute inset-0 z-20" style={gradientStyle} />}
 
 				<div
-					className="pointer-events-none absolute inset-0 z-[25] border-thumbnail-border"
+					className="border-thumbnail-border pointer-events-none absolute inset-0 z-[25]"
 					style={{
 						...borderStyle,
 						borderStyle: 'solid',

@@ -81,7 +81,7 @@ const URLFilterContainer = forwardRef<HTMLDivElement, Props>(
 				{children}
 
 				<div
-					className="fixed bottom-0 flex h-12 items-center justify-between border-t border-edge bg-background px-4 md:h-10"
+					className="fixed bottom-0 z-50 flex h-12 items-center justify-between border-t border-edge bg-background px-4 md:h-10"
 					data-testid="urlFilterFooter"
 					style={{
 						right: scrollbarWidth,

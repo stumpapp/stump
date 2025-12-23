@@ -4288,7 +4288,7 @@ export type LibrarySeriesQueryVariables = Exact<{
 }>;
 
 
-export type LibrarySeriesQuery = { __typename?: 'Query', series: { __typename?: 'PaginatedSeriesResponse', nodes: Array<{ __typename?: 'Series', id: string, resolvedName: string, mediaCount: number, percentageCompleted: number, status: FileStatus }>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', totalPages: number, currentPage: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
+export type LibrarySeriesQuery = { __typename?: 'Query', series: { __typename?: 'PaginatedSeriesResponse', nodes: Array<{ __typename?: 'Series', id: string, resolvedName: string, mediaCount: number, percentageCompleted: number, status: FileStatus, media: Array<{ __typename?: 'Media', id: string, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } }> }>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', totalPages: number, currentPage: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
 
 export type LibrarySeriesGridQueryVariables = Exact<{
   id: Scalars['String']['input'];
@@ -7628,6 +7628,20 @@ export const LibrarySeriesDocument = new TypedDocumentString(`
       mediaCount
       percentageCompleted
       status
+      media(take: 3) {
+        id
+        thumbnail {
+          url
+          metadata {
+            averageColor
+            colors {
+              color
+              percentage
+            }
+            thumbhash
+          }
+        }
+      }
     }
     pageInfo {
       __typename

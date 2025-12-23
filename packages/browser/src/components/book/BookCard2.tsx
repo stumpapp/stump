@@ -1,10 +1,12 @@
 import { cn, ProgressBar, Text } from '@stump/components'
 import { FragmentType, graphql, useFragment } from '@stump/graphql'
+import { getColor, serialize, set } from 'colorjs.io/fn'
 import pluralize from 'pluralize'
 import { memo, useCallback, useMemo } from 'react'
 
 import { Link } from '@/context'
 import { usePreferences } from '@/hooks/usePreferences'
+import { useTheme } from '@/hooks/useTheme'
 import { usePaths } from '@/paths'
 import { usePrefetchBooksAfterCursor } from '@/scenes/book/BooksAfterCursor'
 import { formatBytes } from '@/utils/format'
@@ -57,6 +59,7 @@ const BookCard2 = memo(function BookCard2({ fragment, readingLink, onSelect }: P
 	const {
 		preferences: { thumbnailRatio },
 	} = usePreferences()
+	const { isDarkVariant } = useTheme()
 
 	const prefetchBook = usePrefetchBook()
 	const prefetchBooksAfterCursor = usePrefetchBooksAfterCursor()
@@ -154,6 +157,20 @@ const BookCard2 = memo(function BookCard2({ fragment, readingLink, onSelect }: P
 	const Comp = href ? Link : 'div'
 	const props = href ? { to: href } : {}
 
+	const thumbnailAverageColor = placeholderData?.averageColor
+	const backgroundColor = useMemo(() => {
+		if (thumbnailAverageColor) {
+			const color = getColor(thumbnailAverageColor)
+			set(color, {
+				'oklch.l': isDarkVariant ? 0.35 : 0.9,
+				'oklch.c': 0.04,
+			})
+			return serialize(color, { format: 'hex' })
+		}
+		// TODO(thumbs): Replace with theme colors like expo thumbnail.stack.series
+		return isDarkVariant ? 'oklch(0.35 0.01 52.14)' : 'oklch(0.9 0.01 52.14)'
+	}, [thumbnailAverageColor, isDarkVariant])
+
 	return (
 		// @ts-expect-error: It's okay
 		<Comp
@@ -161,11 +178,21 @@ const BookCard2 = memo(function BookCard2({ fragment, readingLink, onSelect }: P
 			onClick={handleClick}
 			onMouseEnter={prefetch}
 			className={cn(
-				'group flex w-full flex-col gap-1',
+				'group relative flex w-full flex-col gap-1',
 				'rounded-lg border border-transparent p-1 transition-colors duration-100',
-				'hover:border-edge-brand focus-visible:border-edge-brand focus-visible:outline-none',
+				'focus-visible:outline-none',
 			)}
 		>
+			<div
+				className={cn(
+					'absolute -inset-0.5 -z-10 rounded-lg',
+					'scale-95 opacity-0 duration-100',
+					'group-hover:scale-100 group-hover:opacity-100',
+					'group-focus-visible:scale-100 group-focus-visible:opacity-100',
+				)}
+				style={{ backgroundColor: backgroundColor }}
+			/>
+
 			<div className="relative w-full" style={{ aspectRatio: thumbnailRatio }}>
 				<ThumbnailImage
 					src={data.thumbnail.url}

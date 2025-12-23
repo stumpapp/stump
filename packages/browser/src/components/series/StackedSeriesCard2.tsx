@@ -156,7 +156,7 @@ const StackedSeriesCard2 = memo(function StackedSeriesCard2({ data }: Props) {
 				{renderThumbnails()}
 			</div>
 
-			<div className="flex flex-col gap-0.5 px-0.5">
+			<div className="flex h-[52px] flex-col gap-0.5 px-0.5">
 				<Text size="sm" className="line-clamp-2 font-medium leading-tight">
 					{data.resolvedName}
 				</Text>

@@ -6,9 +6,20 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { FullScreenLoader } from '~/components/ui'
 import { verifyFileReadable } from '~/lib/filesystem'
 import { useDownload } from '~/lib/hooks'
-import { BookMetadata, ReadiumLocator, ReadiumView, ReadiumViewRef } from '~/modules/readium'
+import {
+	BookMetadata,
+	intoBookmarkRef,
+	ReadiumLocator,
+	ReadiumView,
+	ReadiumViewRef,
+} from '~/modules/readium'
 import { useReaderStore } from '~/stores'
-import { trimFragmentFromHref, useEpubLocationStore, useEpubTheme } from '~/stores/epub'
+import {
+	OnBookmarkCallback,
+	trimFragmentFromHref,
+	useEpubLocationStore,
+	useEpubTheme,
+} from '~/stores/epub'
 
 import { EbookReaderBookRef } from '../image/context'
 import { OfflineCompatibleReader } from '../types'
@@ -36,6 +47,14 @@ type Props = {
 	 * The URI of the offline book, if available
 	 */
 	offlineUri?: string
+	/**
+	 * Callback to create a bookmark at the given locator
+	 */
+	onBookmark?: OnBookmarkCallback
+	/**
+	 * Callback to delete a bookmark by ID
+	 */
+	onDeleteBookmark?: (bookmarkId: string) => Promise<void>
 } & OfflineCompatibleReader
 
 // FIXME: There is a pretty gnarly bug for single-page EPUBs where Readium doesn't do a great job of
@@ -48,6 +67,8 @@ export default function ReadiumReader({
 	initialLocator,
 	incognito,
 	onLocationChanged,
+	onBookmark,
+	onDeleteBookmark,
 	...ctx
 }: Props) {
 	const { downloadBook } = useDownload({ serverId: ctx.serverId })
@@ -105,6 +126,9 @@ export default function ReadiumReader({
 		storeActions: store.storeActions,
 		storeHeaders: store.storeHeaders,
 		toc: store.toc,
+		storeBookmarks: store.storeBookmarks,
+		storeOnBookmark: store.storeOnBookmark,
+		storeOnDeleteBookmark: store.storeOnDeleteBookmark,
 	}))
 
 	const { isLoading: isDownloading } = useQuery({
@@ -140,6 +164,26 @@ export default function ReadiumReader({
 		},
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[ctx.requestHeaders],
+	)
+
+	useEffect(
+		() => {
+			store.storeOnBookmark(onBookmark)
+			store.storeOnDeleteBookmark(onDeleteBookmark)
+		},
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[onBookmark, onDeleteBookmark],
+	)
+
+	useEffect(
+		() => {
+			const bookmarks = book.ebook?.bookmarks
+			if (bookmarks) {
+				store.storeBookmarks(bookmarks.map(intoBookmarkRef))
+			}
+		},
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[book.ebook?.bookmarks],
 	)
 
 	useEffect(

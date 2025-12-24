@@ -11,6 +11,8 @@ import { cn } from '~/lib/utils'
 import { usePreferencesStore } from '~/stores'
 import { type TableOfContentsItem, useEpubLocationStore } from '~/stores/epub'
 
+import BookmarkListItem from './BookmarkListItem'
+
 export default function LocationsSheetContent() {
 	const [activePage, setActivePage] = useState(0)
 
@@ -19,6 +21,7 @@ export default function LocationsSheetContent() {
 	const book = useEpubLocationStore((store) => store.book)
 	const toc = useEpubLocationStore((store) => store.toc)
 	const embeddedMetadata = useEpubLocationStore((store) => store.embeddedMetadata)
+	const bookmarks = useEpubLocationStore((store) => store.bookmarks)
 
 	const requestHeaders = useEpubLocationStore((store) => store.requestHeaders)
 
@@ -59,6 +62,7 @@ export default function LocationsSheetContent() {
 					)}
 				</Pressable>
 
+				{/* TODO: Should bookmarks and annotations be shown together? */}
 				<Pressable onPress={() => ref.current?.setPage(2)}>
 					{({ pressed }) => (
 						<Text
@@ -67,7 +71,7 @@ export default function LocationsSheetContent() {
 							})}
 							style={{ opacity: pressed && activePage !== 2 ? 0.7 : 1 }}
 						>
-							Annotations
+							Bookmarks
 						</Text>
 					)}
 				</Pressable>
@@ -138,7 +142,20 @@ export default function LocationsSheetContent() {
 					}}
 					key="3"
 				>
-					<Text>Annotations not supported yet</Text>
+					{bookmarks.length === 0 ? (
+						<View className="flex-1 items-center justify-center p-4">
+							<Text className="text-center text-foreground-muted">No bookmarks yet</Text>
+						</View>
+					) : (
+						<ScrollView className="w-full" contentContainerStyle={{ paddingBottom: 16 }}>
+							{bookmarks.map((bookmark) => (
+								<View key={bookmark.id}>
+									<BookmarkListItem bookmark={bookmark} />
+									<Divider />
+								</View>
+							))}
+						</ScrollView>
+					)}
 				</View>
 			</PagerView>
 		</View>

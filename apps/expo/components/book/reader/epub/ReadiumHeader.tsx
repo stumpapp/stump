@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router'
-import { ALargeSmall, Ellipsis, TableOfContents } from 'lucide-react-native'
+import { ALargeSmall, TableOfContents } from 'lucide-react-native'
 import { useEffect } from 'react'
 import { Platform, Pressable, View } from 'react-native'
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
@@ -12,12 +12,17 @@ import { useDisplay } from '~/lib/hooks'
 import { useReaderStore } from '~/stores'
 import { useEpubLocationStore, useEpubTheme } from '~/stores/epub'
 
+import BookmarkButton from './BookmarkButton'
+
 export const HEADER_HEIGHT = 48
 
 type Props = {
 	settingsUrl: string
 	locationsUrl?: string
 }
+
+// TODO: Figure out ideal UI for reader, I have largely been influenced by Yomu but
+// think I want to deviate a bit moving forward
 
 export default function ReadiumHeader({ settingsUrl, locationsUrl }: Props) {
 	const { height } = useDisplay()
@@ -82,6 +87,8 @@ export default function ReadiumHeader({ settingsUrl, locationsUrl }: Props) {
 			</View>
 
 			<View className="flex-1 flex-row items-center justify-end gap-4">
+				<BookmarkButton color={colors?.foreground} />
+
 				<Pressable
 					onPress={() =>
 						// @ts-expect-error: String path
@@ -98,7 +105,7 @@ export default function ReadiumHeader({ settingsUrl, locationsUrl }: Props) {
 					)}
 				</Pressable>
 
-				<Pressable>
+				{/* <Pressable>
 					{({ pressed }) => (
 						<Icon
 							as={Ellipsis}
@@ -107,7 +114,7 @@ export default function ReadiumHeader({ settingsUrl, locationsUrl }: Props) {
 							style={{ opacity: pressed ? 0.7 : 0.9, color: colors?.foreground }}
 						/>
 					)}
-				</Pressable>
+				</Pressable> */}
 			</View>
 		</Animated.View>
 	)

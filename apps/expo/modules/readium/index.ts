@@ -1,6 +1,8 @@
 import { ReadiumLocator as StumpReadiumLocator } from '@stump/graphql'
 import omit from 'lodash/omit'
 
+import { BookmarkRef } from '~/components/book/reader/image/context'
+
 import { PDFLocator, ReadiumLink, ReadiumLocator } from './src'
 import ReadiumModule from './src/ReadiumModule'
 
@@ -8,6 +10,52 @@ export { BookLoadedEvent as PDFBookLoadedEvent, PDFView, PDFViewRef } from './sr
 export * from './src/Readium.types'
 export { default } from './src/ReadiumModule'
 export { default as ReadiumView } from './src/ReadiumView'
+
+type GraphQLBookmark = {
+	id: string
+	epubcfi?: string | null
+	mediaId: string
+	previewContent?: string | null
+	locator?: {
+		chapterTitle?: string | null
+		href: string
+		locations?: {
+			fragments?: string[] | null
+			position?: number | null
+			progression?: string | number | null
+			totalProgression?: string | number | null
+			cssSelector?: string | null
+			partialCfi?: string | null
+		} | null
+	} | null
+}
+
+const safeNumber = (value: unknown): number | null => {
+	if (value == null) return null
+	const num = Number(value)
+	return Number.isNaN(num) ? null : num
+}
+
+export function intoBookmarkRef(bookmark: GraphQLBookmark): BookmarkRef {
+	return {
+		id: bookmark.id,
+		epubcfi: bookmark.epubcfi,
+		href: bookmark.locator?.href ?? '',
+		chapterTitle: bookmark.locator?.chapterTitle ?? '',
+		locations: bookmark.locator?.locations
+			? {
+					fragments: bookmark.locator.locations.fragments,
+					position: bookmark.locator.locations.position,
+					progression: safeNumber(bookmark.locator.locations.progression),
+					totalProgression: safeNumber(bookmark.locator.locations.totalProgression),
+					cssSelector: bookmark.locator.locations.cssSelector,
+					partialCfi: bookmark.locator.locations.partialCfi,
+				}
+			: null,
+		previewContent: bookmark.previewContent,
+		mediaId: bookmark.mediaId,
+	}
+}
 
 export async function locateLink(
 	bookId: string,

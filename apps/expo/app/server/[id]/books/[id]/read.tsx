@@ -110,9 +110,21 @@ export const query = graphql(`
 			ebook {
 				bookmarks {
 					id
-					userId
 					epubcfi
 					mediaId
+					previewContent
+					locator {
+						chapterTitle
+						href
+						locations {
+							fragments
+							progression
+							position
+							totalProgression
+							cssSelector
+							partialCfi
+						}
+					}
 				}
 				spine {
 					id
@@ -130,6 +142,37 @@ const mutation = graphql(`
 	mutation UpdateReadProgression($id: ID!, $input: MediaProgressInput!) {
 		updateMediaProgress(id: $id, input: $input) {
 			__typename
+		}
+	}
+`)
+
+const createBookmarkMutation = graphql(`
+	mutation CreateBookmarkMobile($input: BookmarkInput!) {
+		createBookmark(input: $input) {
+			id
+			epubcfi
+			previewContent
+			mediaId
+			locator {
+				chapterTitle
+				href
+				locations {
+					fragments
+					progression
+					position
+					totalProgression
+					cssSelector
+					partialCfi
+				}
+			}
+		}
+	}
+`)
+
+const deleteBookmarkMutation = graphql(`
+	mutation DeleteBookmarkMobile($id: String!) {
+		deleteBookmark(id: $id) {
+			id
 		}
 	}
 `)
@@ -239,6 +282,54 @@ export default function Screen() {
 		[book.id, totalSeconds, updateProgress],
 	)
 
+	const { mutateAsync: createBookmark } = useGraphQLMutation(createBookmarkMutation, {
+		onError: (error) => {
+			console.error('Failed to create bookmark:', error)
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ['readBook', book.id] })
+		},
+	})
+
+	const { mutateAsync: deleteBookmark } = useGraphQLMutation(deleteBookmarkMutation, {
+		onError: (error) => {
+			console.error('Failed to delete bookmark:', error)
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ['readBook', book.id] })
+		},
+	})
+
+	const onBookmark = useCallback(
+		async (locator: ReadiumLocator, previewContent?: string) => {
+			const result = await createBookmark({
+				input: {
+					mediaId: book.id,
+					locator: {
+						readium: {
+							chapterTitle: locator.chapterTitle,
+							href: locator.href,
+							locations: locator.locations,
+							text: locator.text,
+							title: locator.title,
+							type: locator.type || 'application/xhtml+xml',
+						},
+					},
+					previewContent,
+				},
+			})
+			return { id: result.createBookmark.id }
+		},
+		[book.id, createBookmark],
+	)
+
+	const onDeleteBookmark = useCallback(
+		async (bookmarkId: string) => {
+			await deleteBookmark({ id: bookmarkId })
+		},
+		[deleteBookmark],
+	)
+
 	const setIsReading = useReaderStore((state) => state.setIsReading)
 	useEffect(() => {
 		setIsReading(true)
@@ -324,6 +415,8 @@ export default function Screen() {
 				book={book}
 				initialLocator={initialLocator ? intoReadiumLocator(initialLocator) : undefined}
 				onLocationChanged={onLocationChanged}
+				onBookmark={onBookmark}
+				onDeleteBookmark={onDeleteBookmark}
 				offlineUri={offlineUri}
 				serverId={serverId}
 				requestHeaders={requestHeaders}

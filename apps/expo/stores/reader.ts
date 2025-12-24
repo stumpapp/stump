@@ -6,6 +6,7 @@ import { createJSONStorage, persist } from 'zustand/middleware'
 
 import { useActiveServerSafe } from '~/components/activeServer'
 import { ImageReaderBookRef } from '~/components/book/reader/image/context'
+import { ColumnCount, ImageFilter, TextAlignment } from '~/modules/readium'
 
 import { ZustandMMKVStorage } from './store'
 
@@ -27,7 +28,19 @@ export type BookPreferences = IBookPreferences & {
 	tapSidesToNavigate: boolean
 	footerControls: FooterControls
 	trackElapsedTime: boolean
+	// Everything below here is epub-specific
 	allowPublisherStyles?: boolean
+	pageMargins?: number
+	columnCount?: ColumnCount
+	imageFilter?: ImageFilter
+	textAlign?: TextAlignment
+	typeScale?: number
+	paragraphIndent?: number
+	paragraphSpacing?: number
+	wordSpacing?: number
+	letterSpacing?: number
+	hyphens?: boolean
+	ligatures?: boolean
 }
 export type GlobalSettings = Omit<BookPreferences, 'serverID'>
 
@@ -79,6 +92,10 @@ export const DEFAULT_BOOK_PREFERENCES = {
 	cachePolicy: 'memory-disk',
 	footerControls: 'images',
 	allowPublisherStyles: true,
+	pageMargins: 1.0,
+	columnCount: 'auto',
+	textAlign: 'justify',
+	typeScale: 1.0,
 } satisfies GlobalSettings
 
 export const useReaderStore = create<ReaderStore>()(

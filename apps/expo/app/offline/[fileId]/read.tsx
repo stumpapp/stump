@@ -5,6 +5,7 @@ import { useMutation } from '@tanstack/react-query'
 import { eq } from 'drizzle-orm'
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
 import { useKeepAwake } from 'expo-keep-awake'
+import { uuid } from 'expo-modules-core'
 import * as NavigationBar from 'expo-navigation-bar'
 import { useLocalSearchParams } from 'expo-router'
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -14,7 +15,16 @@ import urlJoin from 'url-join'
 import { ImageBasedReader, PdfReader, ReadiumReader } from '~/components/book/reader'
 import { ImageReaderBookRef } from '~/components/book/reader/image/context'
 import ServerErrorBoundary from '~/components/ServerErrorBoundary'
-import { db, downloadedFiles, epubProgress, epubToc, readProgress, syncStatus } from '~/db'
+import {
+	bookmarkLocations,
+	bookmarks as bookmarksTable,
+	db,
+	downloadedFiles,
+	epubProgress,
+	epubToc,
+	readProgress,
+	syncStatus,
+} from '~/db'
 import {
 	booksDirectory,
 	ensureDirectoryExists,
@@ -51,6 +61,11 @@ export default function Screen() {
 		[fileId],
 	)
 
+	const { data: bookmarkRecords } = useLiveQuery(
+		db.select().from(bookmarksTable).where(eq(bookmarksTable.bookId, fileId)),
+		[fileId],
+	)
+
 	if (!record && !!updatedAt) {
 		throw new Error('Downloaded file not found')
 	}
@@ -59,7 +74,7 @@ export default function Screen() {
 		return null
 	}
 
-	return <Reader record={record} />
+	return <Reader record={record} bookmarks={bookmarkRecords || []} />
 }
 
 type ReaderProps = {
@@ -67,9 +82,10 @@ type ReaderProps = {
 		downloaded_files: typeof downloadedFiles.$inferSelect
 		read_progress: typeof readProgress.$inferSelect | null
 	}
+	bookmarks: (typeof bookmarksTable.$inferSelect)[]
 }
 
-function Reader({ record }: ReaderProps) {
+function Reader({ record, bookmarks }: ReaderProps) {
 	const downloadedFile = useMemo(() => record.downloaded_files, [record])
 
 	const unsyncedProgress = useMemo(() => record.read_progress, [record])
@@ -80,8 +96,8 @@ function Reader({ record }: ReaderProps) {
 	)
 
 	const book = useMemo(
-		() => buildBook(downloadedFile, unsyncedProgress),
-		[downloadedFile, unsyncedProgress],
+		() => buildBook(downloadedFile, unsyncedProgress, bookmarks),
+		[downloadedFile, unsyncedProgress, bookmarks],
 	)
 
 	const [isStreamerInitialized, setIsStreamerInitialized] = useState(false)
@@ -237,6 +253,56 @@ function Reader({ record }: ReaderProps) {
 		[book.id, downloadedFile.serverId, updateEbookProgress],
 	)
 
+	const { mutateAsync: createBookmark } = useMutation({
+		mutationFn: async ({
+			locator,
+			previewContent,
+		}: {
+			locator: ReadiumLocator
+			previewContent?: string
+		}) => {
+			const id = uuid.v4()
+			await db.insert(bookmarksTable).values({
+				id,
+				bookId: book.id,
+				serverId: downloadedFile.serverId,
+				href: locator.href,
+				chapterTitle: locator.chapterTitle,
+				epubcfi: locator.locations?.partialCfi,
+				locations: locator.locations,
+				previewContent,
+				syncStatus: syncStatus.enum.UNSYNCED,
+			})
+			return { id }
+		},
+		onError: (error) => {
+			console.error('Failed to create offline bookmark:', error)
+		},
+	})
+
+	const { mutateAsync: deleteOfflineBookmark } = useMutation({
+		mutationFn: async (bookmarkId: string) => {
+			await db.delete(bookmarksTable).where(eq(bookmarksTable.id, bookmarkId))
+		},
+		onError: (error) => {
+			console.error('Failed to delete offline bookmark:', error)
+		},
+	})
+
+	const onBookmark = useCallback(
+		async (locator: ReadiumLocator, previewContent?: string) => {
+			return createBookmark({ locator, previewContent })
+		},
+		[createBookmark],
+	)
+
+	const onDeleteBookmark = useCallback(
+		async (bookmarkId: string) => {
+			await deleteOfflineBookmark(bookmarkId)
+		},
+		[deleteOfflineBookmark],
+	)
+
 	const pageURL = useCallback(
 		(page: number) => StumpStreamer.getPageURL(book.id, page) || '',
 		[book.id],
@@ -289,6 +355,8 @@ function Reader({ record }: ReaderProps) {
 				book={book}
 				initialLocator={initialLocator ? intoReadiumLocator(initialLocator) : undefined}
 				onLocationChanged={onLocationChanged}
+				onBookmark={onBookmark}
+				onDeleteBookmark={onDeleteBookmark}
 				offlineUri={`${booksDirectory(downloadedFile.serverId)}/${downloadedFile.filename}`}
 				serverId={downloadedFile.serverId}
 			/>
@@ -329,6 +397,7 @@ function Reader({ record }: ReaderProps) {
 const buildBook = (
 	downloadedFile: typeof downloadedFiles.$inferSelect,
 	unsyncedProgress: typeof readProgress.$inferSelect | null,
+	bookmarkRecords: (typeof bookmarksTable.$inferSelect)[] = [],
 ): ImageReaderBookRef => {
 	const thumbnail = {
 		// TODO: Don't assume JPG
@@ -372,6 +441,13 @@ const buildBook = (
 		)
 		.otherwise(() => undefined)
 
+	const bookmarks = bookmarkRecords.map((b) => ({
+		...b,
+		chapterTitle: b.chapterTitle ?? '',
+		locations: bookmarkLocations.safeParse(b.locations).data,
+		mediaId: b.bookId,
+	}))
+
 	return {
 		__typename: 'Media',
 		id: downloadedFile.id,
@@ -383,14 +459,13 @@ const buildBook = (
 		},
 		pages: downloadedFile.pages ?? 0,
 		thumbnail,
-		// TODO: ebook.bookmarks and ebook.spine?
 		metadata: downloadedFile.bookMetadata as ImageReaderBookRef['metadata'] | undefined,
 		readProgress,
 		ebook: extension.match(EBOOK_EXTENSION)
 			? {
 					toc: epubToc.safeParse(downloadedFile.toc).data || [],
 					spine: [],
-					bookmarks: [],
+					bookmarks,
 				}
 			: undefined,
 	}

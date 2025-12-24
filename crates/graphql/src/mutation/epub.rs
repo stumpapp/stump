@@ -5,7 +5,7 @@ use crate::{
 };
 use async_graphql::{Context, Object, Result};
 use models::entity::bookmark;
-use sea_orm::{prelude::*, sea_query::OnConflict};
+use sea_orm::prelude::*;
 
 #[derive(Default)]
 pub struct EpubMutation;
@@ -15,9 +15,8 @@ pub struct EpubMutation;
 
 #[Object]
 impl EpubMutation {
-	/// Create or update a bookmark for a user. If a bookmark already exists for the given media
-	/// and epubcfi, the preview content is updated.
-	async fn create_or_update_bookmark(
+	/// Create a bookmark for a user
+	async fn create_bookmark(
 		&self,
 		ctx: &Context<'_>,
 		input: BookmarkInput,
@@ -26,27 +25,33 @@ impl EpubMutation {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let bookmark = input.into_active_model(user);
-		let upserted_bookmark = bookmark::Entity::insert(bookmark)
-			.on_conflict(
-				OnConflict::columns(vec![
-					bookmark::Column::UserId,
-					bookmark::Column::MediaId,
-					bookmark::Column::Epubcfi,
-					bookmark::Column::Page,
-				])
-				.update_column(bookmark::Column::PreviewContent)
-				.to_owned(),
-			)
+		let created_bookmark = bookmark::Entity::insert(bookmark)
 			.exec_with_returning(conn)
 			.await?;
 
 		Ok(Bookmark {
-			model: upserted_bookmark,
+			model: created_bookmark,
 		})
 	}
 
-	/// Delete a bookmark by epubcfi. The user must be the owner of the bookmark.
-	async fn delete_bookmark(
+	/// Delete a bookmark by ID, only if the user created it
+	async fn delete_bookmark(&self, ctx: &Context<'_>, id: String) -> Result<Bookmark> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let bookmark = bookmark::Entity::find_for_user(user)
+			.filter(bookmark::Column::Id.eq(id))
+			.one(conn)
+			.await?
+			.ok_or("Bookmark not found")?;
+
+		let _ = bookmark.clone().delete(conn).await?;
+		Ok(Bookmark { model: bookmark })
+	}
+
+	// TODO: This will be removed once the web client migrates to Readium
+	/// Delete a bookmark by epubcfi
+	async fn delete_bookmark_by_epubcfi(
 		&self,
 		ctx: &Context<'_>,
 		epubcfi: String,

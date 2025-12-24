@@ -122,3 +122,37 @@ export const imageMeta = z.object({
 	),
 	thumbhash: z.string().nullish(),
 })
+
+/**
+ * Bookmarks table for offline reading
+ * Stores bookmarks that haven't been synced to the server yet
+ */
+export const bookmarks = sqliteTable('bookmarks', {
+	id: text('id').primaryKey(), // UUID
+	bookId: text('book_id')
+		.notNull()
+		.references(() => downloadedFiles.id, { onDelete: 'cascade' }),
+	serverId: text('server_id').notNull(),
+	epubcfi: text('epubcfi'),
+	href: text('href').notNull(),
+	chapterTitle: text('chapter_title'),
+	locations: text('locations', { mode: 'json' }),
+	previewContent: text('preview_content'),
+	createdAt: integer('created_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date()),
+	syncStatus: text('sync_status').notNull().default(syncStatus.enum.UNSYNCED),
+	serverBookmarkId: text('server_bookmark_id'),
+})
+
+export type Bookmark = typeof bookmarks.$inferSelect
+export type NewBookmark = typeof bookmarks.$inferInsert
+
+export const bookmarkLocations = z.object({
+	fragments: z.array(z.string()).nullish(),
+	position: z.number().nullish(),
+	progression: z.number().nullish(),
+	totalProgression: z.number().nullish(),
+	cssSelector: z.string().nullish(),
+	partialCfi: z.string().nullish(),
+})

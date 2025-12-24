@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 
-import { EbookReaderBookRef } from '~/components/book/reader/image/context'
+import { BookmarkRef, EbookReaderBookRef } from '~/components/book/reader/image/context'
 import { COLORS } from '~/lib/constants'
 import { useColorScheme } from '~/lib/useColorScheme'
 import {
@@ -13,6 +13,12 @@ import {
 } from '~/modules/readium'
 
 import { ZustandMMKVStorage } from './store'
+
+export { BookmarkRef } from '~/components/book/reader/image/context'
+
+export const trimFragmentFromHref = (href: string) => {
+	return href.split('#')[0]
+}
 
 export type TableOfContentsItem = {
 	label: string
@@ -38,13 +44,12 @@ export const parseToc = (toc?: string[]): TableOfContentsItem[] => {
 	return parsedToc
 }
 
-export const trimFragmentFromHref = (href: string) => {
-	return href.split('#')[0]
-}
-
-export const parseFragmentFromHref = (href: string) => href.split('#')
-
 export type EmbeddedMetadata = Pick<BookMetadata, 'title' | 'author' | 'language' | 'publisher'>
+
+export type OnBookmarkCallback = (
+	locator: ReadiumLocator,
+	previewContent?: string,
+) => Promise<{ id: string } | void>
 
 export type IEpubLocationStore = {
 	book?: EbookReaderBookRef
@@ -66,9 +71,21 @@ export type IEpubLocationStore = {
 	onBookLoad: (metadata?: BookMetadata) => void
 	onLocationChange: (locator: ReadiumLocator) => void
 	onUnload: () => void
+
+	bookmarks: BookmarkRef[]
+	storeBookmarks: (bookmarks: BookmarkRef[]) => void
+	addBookmark: (bookmark: BookmarkRef) => void
+	removeBookmark: (bookmarkId: string) => void
+	isCurrentLocationBookmarked: () => boolean
+	getCurrentLocationBookmark: () => BookmarkRef | undefined
+
+	onBookmark?: OnBookmarkCallback
+	storeOnBookmark: (callback: OnBookmarkCallback | undefined) => void
+	onDeleteBookmark?: (bookmarkId: string) => Promise<void>
+	storeOnDeleteBookmark: (callback: ((bookmarkId: string) => Promise<void>) | undefined) => void
 }
 
-export const useEpubLocationStore = create<IEpubLocationStore>((set) => ({
+export const useEpubLocationStore = create<IEpubLocationStore>((set, get) => ({
 	storeBook: (book) => set({ book }),
 	storeActions: (ref) => set({ actions: ref }),
 
@@ -103,6 +120,40 @@ export const useEpubLocationStore = create<IEpubLocationStore>((set) => ({
 			locator,
 		}),
 
+	bookmarks: [],
+	storeBookmarks: (bookmarks) => set({ bookmarks }),
+	addBookmark: (bookmark) =>
+		set((state) => ({
+			bookmarks: [...state.bookmarks, bookmark],
+		})),
+	removeBookmark: (bookmarkId) =>
+		set((state) => ({
+			bookmarks: state.bookmarks.filter((b) => b.id !== bookmarkId),
+		})),
+	isCurrentLocationBookmarked: () => {
+		const state = get()
+		if (!state.locator) return false
+		return state.bookmarks.some(
+			(b) =>
+				trimFragmentFromHref(b.href) === trimFragmentFromHref(state.locator!.href) &&
+				b.locations?.progression === state.locator!.locations?.progression,
+		)
+	},
+	getCurrentLocationBookmark: () => {
+		const state = get()
+		if (!state.locator) return undefined
+		return state.bookmarks.find(
+			(b) =>
+				trimFragmentFromHref(b.href) === trimFragmentFromHref(state.locator!.href) &&
+				b.locations?.progression === state.locator!.locations?.progression,
+		)
+	},
+
+	onBookmark: undefined,
+	storeOnBookmark: (callback) => set({ onBookmark: callback }),
+	onDeleteBookmark: undefined,
+	storeOnDeleteBookmark: (callback) => set({ onDeleteBookmark: callback }),
+
 	onUnload: () =>
 		set({
 			currentChapter: '',
@@ -112,6 +163,9 @@ export const useEpubLocationStore = create<IEpubLocationStore>((set) => ({
 			book: undefined,
 			embeddedMetadata: undefined,
 			actions: null,
+			bookmarks: [],
+			onBookmark: undefined,
+			onDeleteBookmark: undefined,
 		}),
 }))
 

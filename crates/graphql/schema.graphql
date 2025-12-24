@@ -1316,13 +1316,12 @@ type Mutation {
 	createNotifier(input: NotifierInput!): Notifier!
 	updateNotifier(id: Int!, input: NotifierInput!): Notifier!
 	deleteNotifier(id: Int!): Notifier!
-	"""
-	Create or update a bookmark for a user. If a bookmark already exists for the given media
-	and epubcfi, the preview content is updated.
-	"""
-	createOrUpdateBookmark(input: BookmarkInput!): Bookmark!
-	"Delete a bookmark by epubcfi. The user must be the owner of the bookmark."
-	deleteBookmark(epubcfi: String!): Bookmark!
+	"Create a bookmark for a user"
+	createBookmark(input: BookmarkInput!): Bookmark!
+	"Delete a bookmark by ID, only if the user created it"
+	deleteBookmark(id: String!): Bookmark!
+	"Delete a bookmark by epubcfi"
+	deleteBookmarkByEpubcfi(epubcfi: String!): Bookmark!
 	analyzeMedia(id: ID!, forceReanalysis: Boolean! = false): Boolean!
 	convertMedia(id: ID!): Boolean!
 	deleteMedia(id: ID!): Media!

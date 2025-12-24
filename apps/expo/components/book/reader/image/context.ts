@@ -1,5 +1,5 @@
 import { FlashListRef } from '@shopify/flash-list'
-import { BookReadScreenQuery } from '@stump/graphql'
+import { BookReadScreenQuery, ReadiumLocation, ReadiumLocator } from '@stump/graphql'
 import { createContext, useContext } from 'react'
 
 import { OfflineCompatibleReader } from '../types'
@@ -40,6 +40,12 @@ export type NextInSeriesBookRef = {
 	name: string
 	thumbnailUrl: string
 }
+
+export type BookmarkRef = NonNullable<EbookReaderBookRef['ebook']>['bookmarks'][number] &
+	Pick<ReadiumLocator, 'href' | 'chapterTitle'> & {
+		locations?: ReadiumLocation | null
+		createdAt?: Date
+	}
 
 export type IImageBasedReaderContext = {
 	flashListRef: React.RefObject<FlashListRef<number[]> | null>

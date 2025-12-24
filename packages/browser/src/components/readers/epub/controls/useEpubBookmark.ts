@@ -5,16 +5,16 @@ import { useCallback, useMemo } from 'react'
 import { useEpubReaderContext } from '../context'
 
 const _createMutation = graphql(`
-	mutation CreateOrUpdateBookmark($input: BookmarkInput!) {
-		createOrUpdateBookmark(input: $input) {
+	mutation CreateBookmark($input: BookmarkInput!) {
+		createBookmark(input: $input) {
 			__typename
 		}
 	}
 `)
 
 const _deleteMutation = graphql(`
-	mutation DeleteBookmark($epubcfi: String!) {
-		deleteBookmark(epubcfi: $epubcfi) {
+	mutation DeleteBookmarkByEpubcfi($epubcfi: String!) {
+		deleteBookmarkByEpubcfi(epubcfi: $epubcfi) {
 			__typename
 		}
 	}

@@ -1,6 +1,6 @@
 import { cn } from '@stump/components'
 import { ImageRef } from '@stump/graphql'
-import { ColorSpace, darken, getColor, OKLCH, serialize, sRGB } from 'colorjs.io/fn'
+import { ColorSpace, getColor, OKLCH, serialize, set, sRGB } from 'colorjs.io/fn'
 import { useMemo } from 'react'
 
 import { usePreferences } from '@/hooks/usePreferences'
@@ -69,8 +69,11 @@ export function SeriesStackedThumbnails({ thumbnailData, width: cardWidth, class
 	const backgroundColor = useMemo(() => {
 		if (mainThumbnailAverageColor) {
 			const color = getColor(mainThumbnailAverageColor)
-			const darkerColor = darken(color, isDarkVariant ? 0.33 : 0.1)
-			return serialize(darkerColor, { format: 'hex' })
+			set(color, {
+				'oklch.l': isDarkVariant ? 0.3 : 0.9,
+				'oklch.c': (c) => (c + 0.05) / 2,
+			})
+			return serialize(color, { format: 'hex' })
 		}
 		// TODO(thumbs): Replace with theme colors like expo thumbnail.stack.series
 		return isDarkVariant ? '#2a2a2e' : '#e5e5e7'

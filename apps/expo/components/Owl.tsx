@@ -81,26 +81,49 @@ const defaultSize = (width: number, height: number) => {
 
 // TODO: Commission more owls:
 // - Onboarding states
-// - Under construction
-// - Awaiting input (e.g., search)
-// - Network error
-// - No content empty state? (More specific than the generic empty owl)
 
-type OwlType = 'empty' | 'error'
+type OwlType =
+	| 'search'
+	| 'construction'
+	| 'developing'
+	| 'shrug'
+	| 'empty'
+	| 'error'
+	| 'network-error'
 
 const OWL_REQUIRES = [
-	require('../assets/images/owls/owl-basic-empty-dark.png'),
-	require('../assets/images/owls/owl-basic-empty-light.png'),
+	require('../assets/images/owls/owl-construction-dark.png'),
+	require('../assets/images/owls/owl-construction-light.png'),
+	require('../assets/images/owls/owl-developing-dark.png'),
+	require('../assets/images/owls/owl-developing-light.png'),
+	require('../assets/images/owls/owl-empty-bookcase-dark.png'),
+	require('../assets/images/owls/owl-empty-bookcase-light.png'),
 	require('../assets/images/owls/owl-error-dark.png'),
 	require('../assets/images/owls/owl-error-light.png'),
+	require('../assets/images/owls/owl-search-dark.png'),
+	require('../assets/images/owls/owl-search-light.png'),
+	require('../assets/images/owls/owl-shrug-dark.png'),
+	require('../assets/images/owls/owl-shrug-light.png'),
+	require('../assets/images/owls/owl-network-error-dark.png'),
+	require('../assets/images/owls/owl-network-error-light.png'),
 ]
 
 const getOwl = (owl: OwlType, assets: Array<Asset>, isDark: boolean): Asset | undefined => {
 	switch (owl) {
-		case 'empty':
+		case 'search':
+			return isDark ? assets[8] : assets[9]
+		case 'construction':
 			return isDark ? assets[0] : assets[1]
-		case 'error':
+		case 'developing':
 			return isDark ? assets[2] : assets[3]
+		case 'shrug':
+			return isDark ? assets[10] : assets[11]
+		case 'empty':
+			return isDark ? assets[4] : assets[5]
+		case 'error':
+			return isDark ? assets[6] : assets[7]
+		case 'network-error':
+			return isDark ? assets[12] : assets[13]
 	}
 }
 

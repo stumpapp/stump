@@ -57,7 +57,7 @@ const StackedSeriesCard = memo(function StackedSeriesCard({ data }: Props) {
 		<Link
 			ref={containerRef}
 			to={paths.seriesOverview(data.id)}
-			className="group relative block w-full transition-opacity hover:opacity-90"
+			className="group relative block w-full"
 			onMouseEnter={prefetch}
 		>
 			{width != null && <SeriesStackedThumbnails width={width} thumbnailData={thumbnailData} />}

@@ -81,10 +81,6 @@ const defaultSize = (width: number, height: number) => {
 
 // TODO: Commission more owls:
 // - Onboarding states
-// - Under construction
-// - Awaiting input (e.g., search)
-// - Network error
-// - No content empty state? (More specific than the generic empty owl)
 
 type OwlType =
 	| 'search'
@@ -108,6 +104,8 @@ const OWL_REQUIRES = [
 	require('../assets/images/owls/owl-search-light.png'),
 	require('../assets/images/owls/owl-shrug-dark.png'),
 	require('../assets/images/owls/owl-shrug-light.png'),
+	require('../assets/images/owls/owl-network-error-dark.png'),
+	require('../assets/images/owls/owl-network-error-light.png'),
 ]
 
 const getOwl = (owl: OwlType, assets: Array<Asset>, isDark: boolean): Asset | undefined => {
@@ -125,7 +123,7 @@ const getOwl = (owl: OwlType, assets: Array<Asset>, isDark: boolean): Asset | un
 		case 'error':
 			return isDark ? assets[6] : assets[7]
 		case 'network-error':
-			return isDark ? assets[6] : assets[7] // TODO: Replace with network error once completed
+			return isDark ? assets[12] : assets[13]
 	}
 }
 

@@ -62,6 +62,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 				},
 			],
 			['./plugins/withGradle.ts'],
+			['./plugins/withNetworkSecurityConfig.ts'],
 			[
 				'./plugins/withPods.ts',
 				{

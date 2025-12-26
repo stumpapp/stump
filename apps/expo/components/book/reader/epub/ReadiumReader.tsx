@@ -85,6 +85,17 @@ export default function ReadiumReader({
 		lineHeight: state.globalSettings.lineHeight,
 		brightness: state.globalSettings.brightness,
 		publisherStyles: state.globalSettings.allowPublisherStyles,
+		pageMargins: state.globalSettings.pageMargins,
+		columnCount: state.globalSettings.columnCount,
+		imageFilter: state.globalSettings.imageFilter,
+		textAlign: state.globalSettings.textAlign,
+		typeScale: state.globalSettings.typeScale,
+		paragraphIndent: state.globalSettings.paragraphIndent,
+		paragraphSpacing: state.globalSettings.paragraphSpacing,
+		wordSpacing: state.globalSettings.wordSpacing,
+		letterSpacing: state.globalSettings.letterSpacing,
+		hyphens: state.globalSettings.hyphens,
+		ligatures: state.globalSettings.ligatures,
 	}))
 	const { colors } = useEpubTheme()
 

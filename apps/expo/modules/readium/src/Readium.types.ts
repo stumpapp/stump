@@ -14,6 +14,9 @@ export type {
 
 export type ReadingDirection = 'ltr' | 'rtl'
 export type ReadingMode = 'paged' | 'scrolled'
+export type ColumnCount = 'auto' | 1 | 2
+export type ImageFilter = 'darken' | 'invert'
+export type TextAlignment = 'start' | 'left' | 'right' | 'center' | 'justify'
 
 export type ReadiumLocation = {
 	fragments?: string[] | null
@@ -122,10 +125,34 @@ export type EPUBReaderThemeConfig = {
 	}
 }
 
+/**
+ * All available EPUB reader preferences that Readium supports.
+ * Many of these require `publisherStyles` to be disabled to work
+ */
+export type EPUBReaderPreferences = {
+	pageMargins?: number
+	columnCount?: ColumnCount
+	imageFilter?: ImageFilter
+	// All below require publisherStyles to be disabled
+	textAlign?: TextAlignment
+	typeScale?: number
+	paragraphIndent?: number
+	paragraphSpacing?: number
+	wordSpacing?: number
+	letterSpacing?: number
+	hyphens?: boolean
+	ligatures?: boolean
+	/**
+	 * Whether publisher styles should be observed
+	 */
+	publisherStyles?: boolean
+}
+
 export type EPUBReaderConfig = {
 	readingMode?: ReadingMode
 	readingDirection?: ReadingDirection
-} & EPUBReaderThemeConfig
+} & EPUBReaderThemeConfig &
+	EPUBReaderPreferences
 
 export type ReadiumViewProps = {
 	bookId: string

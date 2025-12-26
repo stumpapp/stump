@@ -1,4 +1,4 @@
-import { Cog } from 'lucide-react-native'
+import { Cog, Plus } from 'lucide-react-native'
 import { useMemo } from 'react'
 import { View } from 'react-native'
 import { Pressable, ScrollView } from 'react-native-gesture-handler'
@@ -12,9 +12,10 @@ import { resolveThemeName, useEpubThemesStore } from '~/stores/epub'
 
 type Props = {
 	onCustomizePress?: () => void
+	onNewThemePress?: () => void
 }
 
-export default function ThemeSelect({ onCustomizePress }: Props) {
+export default function ThemeSelect({ onCustomizePress, onNewThemePress }: Props) {
 	const { colorScheme } = useColorScheme()
 	const { themes, selectedTheme } = useEpubThemesStore((store) => ({
 		themes: store.themes,
@@ -45,6 +46,11 @@ export default function ThemeSelect({ onCustomizePress }: Props) {
 			</ScrollView>
 
 			<View className="flex-row justify-center gap-4 px-4">
+				<Button size="sm" className="flex-row" onPress={onNewThemePress}>
+					<Icon as={Plus} className="mr-2 h-4 w-4" />
+					<Text>New Theme</Text>
+				</Button>
+
 				<Button size="sm" className="flex-row" onPress={onCustomizePress}>
 					<Icon as={Cog} className="mr-2 h-4 w-4" />
 					<Text>Customize</Text>

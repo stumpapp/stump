@@ -1,15 +1,37 @@
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import { ScrollView, View } from 'react-native'
 import PagerView from 'react-native-pager-view'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { Brightness, FontConfig, PublisherStyles, ThemeSelect } from './controls'
+import { useReaderStore } from '~/stores'
+
+import {
+	Brightness,
+	ColumnCount,
+	FontConfig,
+	ImageFilter,
+	PageMargins,
+	PublisherStyles,
+	ThemeSelect,
+	TypographySettings,
+} from './controls'
 import { CustomizeTheme, ThemeHeaderPreview } from './controls/customTheme'
 
 export default function ThemeSheetContent() {
 	const pagerRef = useRef<PagerView>(null)
-
 	const insets = useSafeAreaInsets()
+
+	const publisherStyles = useReaderStore((state) => state.globalSettings.allowPublisherStyles)
+	const [themeMode, setThemeMode] = useState<'edit' | 'create'>('edit')
+
+	const openCustomizeTheme = (mode: 'edit' | 'create') => {
+		setThemeMode(mode)
+		pagerRef.current?.setPage(1)
+	}
+
+	const closeCustomizeTheme = () => {
+		pagerRef.current?.setPage(0)
+	}
 
 	return (
 		<PagerView ref={pagerRef} initialPage={0} style={{ flex: 1 }} scrollEnabled={false}>
@@ -26,16 +48,27 @@ export default function ThemeSheetContent() {
 				>
 					<Brightness />
 
-					<ThemeSelect onCustomizePress={() => pagerRef.current?.setPage(1)} />
+					<ThemeSelect
+						onCustomizePress={() => openCustomizeTheme('edit')}
+						onNewThemePress={() => openCustomizeTheme('create')}
+					/>
 
 					<FontConfig />
 
 					<PublisherStyles />
+
+					<PageMargins />
+
+					<ColumnCount />
+
+					<ImageFilter />
+
+					{!publisherStyles && <TypographySettings />}
 				</ScrollView>
 			</View>
 
 			<View className="flex-1 gap-8" key="1">
-				<CustomizeTheme onCancel={() => pagerRef.current?.setPage(0)} />
+				<CustomizeTheme onCancel={closeCustomizeTheme} mode={themeMode} />
 			</View>
 		</PagerView>
 	)

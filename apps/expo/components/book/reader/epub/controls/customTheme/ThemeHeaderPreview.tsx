@@ -5,16 +5,23 @@ import { Text } from '~/components/ui'
 import { IS_IOS_24_PLUS } from '~/lib/constants'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { useReaderStore } from '~/stores'
-import { getFontPath, resolveTheme, SupportedMobileFont, useEpubThemesStore } from '~/stores/epub'
+import {
+	getFontPath,
+	resolveTheme,
+	StoredConfig,
+	SupportedMobileFont,
+	useEpubThemesStore,
+} from '~/stores/epub'
 
 const HEIGHT = 228
 
 type Props = {
+	customTheme?: StoredConfig
 	onCancel?: () => void
 	onSaved?: () => void
 }
 
-export const ThemeHeaderPreview = ({ onCancel, onSaved }: Props) => {
+export const ThemeHeaderPreview = ({ customTheme: customThemeProp, onCancel, onSaved }: Props) => {
 	const { colorScheme } = useColorScheme()
 	const { themes, selectedTheme } = useEpubThemesStore((store) => ({
 		themes: store.themes,
@@ -25,22 +32,24 @@ export const ThemeHeaderPreview = ({ onCancel, onSaved }: Props) => {
 		fontFamily: state.globalSettings.fontFamily,
 	}))
 
-	const [customTheme, setCustomTheme] = useState(() =>
+	const [localTheme, setLocalTheme] = useState(() =>
 		resolveTheme(themes, selectedTheme || '', colorScheme),
 	)
 
 	useEffect(
 		() => {
-			setCustomTheme(resolveTheme(themes, selectedTheme || '', colorScheme))
+			setLocalTheme(resolveTheme(themes, selectedTheme || '', colorScheme))
 		},
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[selectedTheme],
 	)
 
+	const displayTheme = customThemeProp ?? localTheme
+
 	const handleCancel = useCallback(() => {
 		if (onCancel) {
-			onCancel?.()
-			setCustomTheme(resolveTheme(themes, selectedTheme || '', colorScheme))
+			onCancel()
+			setLocalTheme(resolveTheme(themes, selectedTheme || '', colorScheme))
 		}
 	}, [onCancel, themes, selectedTheme, colorScheme])
 
@@ -48,7 +57,7 @@ export const ThemeHeaderPreview = ({ onCancel, onSaved }: Props) => {
 		<View
 			style={{
 				height: HEIGHT,
-				backgroundColor: customTheme.colors?.background,
+				backgroundColor: displayTheme.colors?.background,
 				paddingTop: IS_IOS_24_PLUS ? 16 : 0,
 			}}
 		>
@@ -58,18 +67,18 @@ export const ThemeHeaderPreview = ({ onCancel, onSaved }: Props) => {
 						{({ pressed }) => (
 							<Text
 								className="text-lg"
-								style={{ color: customTheme.colors?.foreground, opacity: pressed ? 0.6 : 1 }}
+								style={{ color: displayTheme.colors?.foreground, opacity: pressed ? 0.6 : 1 }}
 							>
 								Cancel
 							</Text>
 						)}
 					</Pressable>
 
-					<Pressable>
+					<Pressable onPress={onSaved}>
 						{({ pressed }) => (
 							<Text
 								className="text-lg font-medium"
-								style={{ color: customTheme.colors?.foreground, opacity: pressed ? 0.6 : 1 }}
+								style={{ color: displayTheme.colors?.foreground, opacity: pressed ? 0.6 : 1 }}
 							>
 								Done
 							</Text>
@@ -81,7 +90,7 @@ export const ThemeHeaderPreview = ({ onCancel, onSaved }: Props) => {
 			<View className="gap-2 px-6 py-4">
 				<Text
 					style={{
-						color: customTheme.colors?.foreground,
+						color: displayTheme.colors?.foreground,
 						fontSize: fontSize ? fontSize + 6 : 32,
 						lineHeight: fontSize ? (fontSize + 6) * 1.5 : 32,
 						fontFamily: fontFamily ? getFontPath(fontFamily as SupportedMobileFont) : undefined,
@@ -92,7 +101,7 @@ export const ThemeHeaderPreview = ({ onCancel, onSaved }: Props) => {
 
 				<Text
 					style={{
-						color: customTheme.colors?.foreground,
+						color: displayTheme.colors?.foreground,
 						fontSize,
 						lineHeight: fontSize ? fontSize * 1.5 : 32,
 						fontFamily: fontFamily ? getFontPath(fontFamily as SupportedMobileFont) : undefined,

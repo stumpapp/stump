@@ -19,8 +19,10 @@ import expo.modules.kotlin.viewevent.EventDispatcher
 import expo.modules.kotlin.views.ExpoView
 import kotlinx.coroutines.*
 import org.readium.r2.navigator.DecorableNavigator
+import org.readium.r2.navigator.preferences.ColumnCount
 import org.readium.r2.navigator.preferences.FontFamily
 import org.readium.r2.navigator.preferences.ImageFilter
+import org.readium.r2.navigator.preferences.TextAlign
 import org.readium.r2.navigator.epub.EpubNavigatorFragment
 import org.readium.r2.navigator.epub.EpubPreferences
 import org.readium.r2.shared.ExperimentalReadiumApi
@@ -46,7 +48,17 @@ data class Props(
     var fontSize: Double? = null,
     var readingDirection: String? = null,
     var publisherStyles: Boolean? = null,
-    var imageFilter: ImageFilter? = null
+    var imageFilter: ImageFilter? = null,
+    var pageMargins: Double? = null,
+    var columnCount: ColumnCount? = null,
+    var textAlign: TextAlign? = null,
+    var typeScale: Double? = null,
+    var paragraphIndent: Double? = null,
+    var paragraphSpacing: Double? = null,
+    var wordSpacing: Double? = null,
+    var letterSpacing: Double? = null,
+    var hyphens: Boolean? = null,
+    var ligatures: Boolean? = null
 )
 
 data class FinalizedProps(
@@ -60,7 +72,17 @@ data class FinalizedProps(
     val fontSize: Double,
     val readingDirection: String,
     val publisherStyles: Boolean,
-    val imageFilter: ImageFilter?
+    val imageFilter: ImageFilter?,
+    val pageMargins: Double?,
+    val columnCount: ColumnCount?,
+    val textAlign: TextAlign?,
+    val typeScale: Double?,
+    val paragraphIndent: Double?,
+    val paragraphSpacing: Double?,
+    val wordSpacing: Double?,
+    val letterSpacing: Double?,
+    val hyphens: Boolean?,
+    val ligatures: Boolean?
 )
 
 @SuppressLint("ViewConstructor", "ResourceType")
@@ -130,7 +152,17 @@ class EPUBView(context: Context, appContext: AppContext) : ExpoView(context, app
             fontSize = pendingProps.fontSize ?: oldProps?.fontSize ?: 1.0,
             readingDirection = pendingProps.readingDirection ?: oldProps?.readingDirection ?: "ltr",
             publisherStyles = pendingProps.publisherStyles ?: oldProps?.publisherStyles ?: true,
-            imageFilter = pendingProps.imageFilter ?: oldProps?.imageFilter
+            imageFilter = pendingProps.imageFilter ?: oldProps?.imageFilter,
+            pageMargins = pendingProps.pageMargins ?: oldProps?.pageMargins,
+            columnCount = pendingProps.columnCount ?: oldProps?.columnCount,
+            textAlign = pendingProps.textAlign ?: oldProps?.textAlign,
+            typeScale = pendingProps.typeScale ?: oldProps?.typeScale,
+            paragraphIndent = pendingProps.paragraphIndent ?: oldProps?.paragraphIndent,
+            paragraphSpacing = pendingProps.paragraphSpacing ?: oldProps?.paragraphSpacing,
+            wordSpacing = pendingProps.wordSpacing ?: oldProps?.wordSpacing,
+            letterSpacing = pendingProps.letterSpacing ?: oldProps?.letterSpacing,
+            hyphens = pendingProps.hyphens ?: oldProps?.hyphens,
+            ligatures = pendingProps.ligatures ?: oldProps?.ligatures
         )
 
         if (props!!.bookId != oldProps?.bookId || props!!.url != oldProps?.url) {
@@ -154,14 +186,22 @@ class EPUBView(context: Context, appContext: AppContext) : ExpoView(context, app
         nav.submitPreferences(
             EpubPreferences(
                 backgroundColor = org.readium.r2.navigator.preferences.Color(props!!.background),
+                columnCount = props!!.columnCount,
                 fontFamily = props!!.fontFamily,
                 fontSize = props!!.fontSize,
+                hyphens = props!!.hyphens,
                 imageFilter = props!!.imageFilter,
+                letterSpacing = props!!.letterSpacing,
+                ligatures = props!!.ligatures,
                 lineHeight = props!!.lineHeight,
+                pageMargins = props!!.pageMargins,
+                paragraphIndent = props!!.paragraphIndent,
+                paragraphSpacing = props!!.paragraphSpacing,
                 publisherStyles = props!!.publisherStyles,
-//                paragraphSpacing = props!!.paragraphSpacing,
-//                textAlign = props!!.textAlign,
+                textAlign = props!!.textAlign,
                 textColor = org.readium.r2.navigator.preferences.Color(props!!.foreground),
+                typeScale = props!!.typeScale,
+                wordSpacing = props!!.wordSpacing,
             )
         )
     }

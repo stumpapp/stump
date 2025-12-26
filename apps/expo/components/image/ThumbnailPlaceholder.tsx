@@ -1,6 +1,6 @@
 import { ImageColor } from '@stump/graphql'
 import { MeshGradientView } from 'expo-mesh-gradient'
-import { useCallback, useMemo } from 'react'
+import { useMemo } from 'react'
 import { Image, StyleSheet, View } from 'react-native'
 import { thumbHashToDataURL } from 'thumbhash'
 
@@ -46,16 +46,14 @@ export function ThumbnailPlaceholder(props?: ThumbnailPlaceholderData) {
 	}, [meshColors])
 
 	const averageColor = useMemo(() => props?.averageColor || null, [props?.averageColor])
-
 	const thumbHash = useMemo(() => props?.thumbhash || null, [props?.thumbhash])
-
-	const GrayScalePlaceholder = useCallback(
-		() => <View style={[styles.placeholder, { backgroundColor: thumbnail.placeholder }]} />,
+	const grayscaleStyle = useMemo(
+		() => [styles.placeholder, { backgroundColor: thumbnail.placeholder }],
 		[thumbnail],
 	)
 
 	if (thumbnailPlaceholder === 'grayscale') {
-		return <GrayScalePlaceholder />
+		return <View style={grayscaleStyle} />
 	}
 
 	if (thumbnailPlaceholder === 'averageColor') {
@@ -76,7 +74,7 @@ export function ThumbnailPlaceholder(props?: ThumbnailPlaceholderData) {
 				points={POINTS}
 			/>
 		) : (
-			<GrayScalePlaceholder />
+			<View style={grayscaleStyle} />
 		)
 	}
 
@@ -86,7 +84,7 @@ export function ThumbnailPlaceholder(props?: ThumbnailPlaceholderData) {
 		return <Image source={{ uri: dataUrl }} style={styles.placeholder} resizeMode="stretch" />
 	}
 
-	return <GrayScalePlaceholder />
+	return <View style={grayscaleStyle} />
 }
 
 const styles = StyleSheet.create({

@@ -6,7 +6,7 @@ import { createJSONStorage, persist } from 'zustand/middleware'
 
 import { useActiveServerSafe } from '~/components/activeServer'
 import { ImageReaderBookRef } from '~/components/book/reader/image/context'
-import { ColumnCount, ImageFilter, TextAlignment } from '~/modules/readium'
+import { ColumnCount, ImageFilter, Spread, TextAlignment } from '~/modules/readium'
 
 import { ZustandMMKVStorage } from './store'
 
@@ -33,14 +33,18 @@ export type BookPreferences = IBookPreferences & {
 	pageMargins?: number
 	columnCount?: ColumnCount
 	imageFilter?: ImageFilter
+	spread?: Spread
+	verticalText?: boolean
 	textAlign?: TextAlignment
 	typeScale?: number
+	fontWeight?: number
 	paragraphIndent?: number
 	paragraphSpacing?: number
 	wordSpacing?: number
 	letterSpacing?: number
 	hyphens?: boolean
 	ligatures?: boolean
+	textNormalization?: boolean
 }
 export type GlobalSettings = Omit<BookPreferences, 'serverID'>
 
@@ -230,6 +234,7 @@ export const useBookTimer = (id: string, params: UseBookTimerParams = defaultPar
 	)
 
 	const resolvedTimerRef = useRef(resolvedTimer)
+	// eslint-disable-next-line react-hooks/purity
 	const startDateRef = useRef(Date.now())
 	const [isRunning, setIsRunning] = useState(true)
 

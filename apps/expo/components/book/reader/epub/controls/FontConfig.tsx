@@ -1,119 +1,113 @@
 import { View } from 'react-native'
 
-import {
-	Accordion,
-	AccordionContent,
-	AccordionItem,
-	AccordionTrigger,
-	Heading,
-	Label,
-	RadioGroup,
-	RadioGroupItem,
-	Text,
-} from '~/components/ui'
+import { Stepper, Switch, Text } from '~/components/ui'
+import { Picker } from '~/components/ui/picker/picker'
+import type { PickerOption } from '~/components/ui/picker/types'
 import { useReaderStore } from '~/stores'
 
-import FontSizeSlider from './FontSizeSlider'
-
-export default function FontConfig() {
-	const store = useReaderStore((state) => ({
-		fontFamily: state.globalSettings.fontFamily,
-		save: state.setGlobalSettings,
-	}))
-
-	return (
-		<View className="gap-2">
-			<Heading className="pl-4">Font</Heading>
-
-			<View className="flex-row px-6 py-2">
-				<FontSizeSlider />
-			</View>
-
-			<View className="flex-row justify-between px-6 py-2">
-				<View className="flex-1">
-					<Text className="text-lg text-foreground">Font family</Text>
-					<Accordion type="single" collapsible className="w-full">
-						<AccordionItem value="item-1" className="border-0">
-							<AccordionTrigger>
-								<Text
-									className="text-lg font-normal"
-									style={{
-										fontFamily: store.fontFamily
-											? getPath(store.fontFamily as SupportedMobileFont)
-											: undefined,
-									}}
-								>
-									{store.fontFamily &&
-										store.fontFamily.charAt(0).toUpperCase() + store.fontFamily.slice(1)}
-									{!store.fontFamily && 'System'}
-								</Text>
-							</AccordionTrigger>
-							<AccordionContent>
-								<RadioGroup
-									value={store.fontFamily || ''}
-									onValueChange={(value) => store.save({ fontFamily: value || undefined })}
-								>
-									<View className="flex flex-row items-center gap-4">
-										<RadioGroupItem
-											value={''}
-											className="hover:bg-accent flex flex-row items-center rounded-md px-2 py-1"
-										/>
-										<Label className="text-lg font-normal" htmlFor={''}>
-											System
-										</Label>
-									</View>
-
-									{Fonts.map((font) => (
-										<View key={font.value} className="flex flex-row items-center gap-4">
-											<RadioGroupItem
-												value={font.value}
-												className="hover:bg-accent flex flex-row items-center rounded-md px-2 py-1"
-											/>
-											<Label
-												className="text-lg font-normal"
-												style={{ fontFamily: getPath(font.value) }}
-												htmlFor={font.value}
-											>
-												{font.label}
-											</Label>
-										</View>
-									))}
-								</RadioGroup>
-							</AccordionContent>
-						</AccordionItem>
-					</Accordion>
-				</View>
-			</View>
-		</View>
-	)
-}
-
-type SupportedMobileFont =
-	| 'OpenDyslexic'
-	| 'Literata'
-	| 'Atkinson-Hyperlegible'
-	| 'CharisSIL'
-	| 'Bitter'
-
-const Fonts = [
+const FONT_OPTIONS: PickerOption[] = [
+	{ label: 'System', value: '' },
 	{ label: 'OpenDyslexic', value: 'OpenDyslexic' },
 	{ label: 'Literata', value: 'Literata' },
 	{ label: 'Atkinson Hyperlegible', value: 'Atkinson-Hyperlegible' },
 	{ label: 'Charis SIL', value: 'CharisSIL' },
 	{ label: 'Bitter', value: 'Bitter' },
-] satisfies { label: string; value: SupportedMobileFont }[]
+]
 
-const getPath = (font: SupportedMobileFont) => {
-	switch (font) {
-		case 'OpenDyslexic':
-			return 'OpenDyslexic-Regular'
-		case 'Literata':
-			return 'Literata'
-		case 'Atkinson-Hyperlegible':
-			return 'Atkinson Hyperlegible'
-		case 'CharisSIL':
-			return 'CharisSIL'
-		case 'Bitter':
-			return 'Bitter'
+const FONT_WEIGHT_OPTIONS: PickerOption[] = [
+	{ label: 'Light', value: '300' },
+	{ label: 'Normal', value: '400' },
+	{ label: 'Medium', value: '500' },
+	{ label: 'Bold', value: '700' },
+]
+
+export default function FontConfig() {
+	const store = useReaderStore((state) => ({
+		fontFamily: state.globalSettings.fontFamily ?? '',
+		fontSize: state.globalSettings.fontSize ?? 16,
+		fontWeight: state.globalSettings.fontWeight ?? 400,
+		textNormalization: state.globalSettings.textNormalization ?? false,
+		verticalText: state.globalSettings.verticalText ?? false,
+		setSettings: state.setGlobalSettings,
+	}))
+
+	const ensureNumber = (value: string, cb: (num: number) => void) => {
+		const parsed = parseInt(value, 10)
+		if (!isNaN(parsed)) {
+			cb(parsed)
+		}
 	}
+
+	return (
+		<View>
+			<View className="flex-row items-center justify-between px-6 py-3">
+				<Text className="text-lg">Typeface</Text>
+				<Picker
+					value={store.fontFamily}
+					options={FONT_OPTIONS}
+					onValueChange={(value) => store.setSettings({ fontFamily: value || undefined })}
+				/>
+			</View>
+
+			<View className="h-px w-full bg-edge" />
+
+			<View className="flex-row items-center justify-between px-6 py-3">
+				<Text className="text-lg">Font Size</Text>
+				<Stepper
+					value={store.fontSize}
+					onChange={(val) => store.setSettings({ fontSize: Math.round(val) })}
+					min={8}
+					max={32}
+					step={1}
+					formatValue={(val) => val.toString()}
+					accessibilityLabel="Font Size"
+				/>
+			</View>
+
+			<View className="h-px w-full bg-edge" />
+
+			<View className="flex-row items-center justify-between px-6 py-3">
+				<Text className="text-lg">Font Weight</Text>
+				<Picker
+					value={String(store.fontWeight)}
+					options={FONT_WEIGHT_OPTIONS}
+					onValueChange={(value) =>
+						ensureNumber(value, (num) => store.setSettings({ fontWeight: num }))
+					}
+				/>
+			</View>
+
+			<View className="h-px w-full bg-edge" />
+
+			<View className="flex-row items-center justify-between px-6 py-3">
+				<Text
+					className="text-lg"
+					onPress={() => store.setSettings({ textNormalization: !store.textNormalization })}
+				>
+					Text Normalization
+				</Text>
+				<Switch
+					checked={store.textNormalization}
+					onCheckedChange={(checked) => store.setSettings({ textNormalization: checked })}
+					accessibilityLabel="Toggle Text Normalization"
+				/>
+			</View>
+
+			<View className="h-px w-full bg-edge" />
+
+			<View className="flex-row items-center justify-between px-6 py-3">
+				<Text
+					className="text-lg"
+					onPress={() => store.setSettings({ textNormalization: !store.textNormalization })}
+				>
+					Vertical Text
+				</Text>
+				<Switch
+					checked={store.verticalText}
+					onCheckedChange={(checked) => store.setSettings({ verticalText: checked })}
+					accessibilityLabel="Toggle Vertical Text"
+				/>
+			</View>
+		</View>
+	)
 }

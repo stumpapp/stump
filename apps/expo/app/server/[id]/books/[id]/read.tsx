@@ -372,24 +372,20 @@ export default function Screen() {
 	 * Invalidate the book query when a reader is unmounted so that the book overview
 	 * is updated with the latest read progress
 	 */
-	useEffect(
-		() => {
-			NavigationBar.setVisibilityAsync('hidden')
-			return () => {
-				NavigationBar.setVisibilityAsync('visible')
-				Promise.all([
-					queryClient.refetchQueries({ queryKey: ['bookById', bookID], exact: false }),
-					queryClient.refetchQueries({ queryKey: ['readBook', bookID], exact: false }),
-					queryClient.refetchQueries({ queryKey: ['continueReading'], exact: false }),
-					queryClient.refetchQueries({ queryKey: ['onDeck'], exact: false }),
-					queryClient.refetchQueries({ queryKey: ['recentlyAddedBooks'], exact: false }),
-					queryClient.refetchQueries({ queryKey: ['recentlyAddedSeries'], exact: false }),
-				])
-			}
-		},
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[],
-	)
+	useEffect(() => {
+		NavigationBar.setVisibilityAsync('hidden')
+		return () => {
+			NavigationBar.setVisibilityAsync('visible')
+			Promise.all([
+				queryClient.refetchQueries({ queryKey: ['bookById', bookID], exact: false }),
+				queryClient.refetchQueries({ queryKey: ['readBook', bookID], exact: false }),
+				queryClient.refetchQueries({ queryKey: ['continueReading'], exact: false }),
+				queryClient.refetchQueries({ queryKey: ['onDeck'], exact: false }),
+				queryClient.refetchQueries({ queryKey: ['recentlyAddedBooks'], exact: false }),
+				queryClient.refetchQueries({ queryKey: ['recentlyAddedSeries'], exact: false }),
+			])
+		}
+	}, [queryClient, bookID])
 
 	const requestHeaders = useCallback(
 		() => ({

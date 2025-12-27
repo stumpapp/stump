@@ -1,4 +1,5 @@
 import { Host, Switch as IosSwitch } from '@expo/ui/swift-ui'
+import { disabled, fixedSize } from '@expo/ui/swift-ui/modifiers'
 import * as SwitchPrimitives from '@rn-primitives/switch'
 import * as React from 'react'
 import { Platform } from 'react-native'
@@ -97,6 +98,7 @@ const Switch = React.forwardRef<SwitchPrimitives.RootRef, Props>(
 						}}
 						color={colors.primary}
 						variant="switch"
+						modifiers={[disabled(props.disabled), fixedSize({ horizontal: true, vertical: true })]}
 					/>
 				</Host>
 			)

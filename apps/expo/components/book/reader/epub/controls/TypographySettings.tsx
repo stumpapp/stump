@@ -1,101 +1,19 @@
-import Slider from '@react-native-community/slider'
-import * as Haptics from 'expo-haptics'
-import { useCallback, useState } from 'react'
 import { View } from 'react-native'
 
-import { Heading, Label, RadioGroup, RadioGroupItem, Switch, Text } from '~/components/ui'
-import { useColors } from '~/lib/constants'
+import { Label, Stepper, Switch, Text } from '~/components/ui'
+import { Picker } from '~/components/ui/picker/picker'
+import type { PickerOption } from '~/components/ui/picker/types'
+import { cn } from '~/lib/utils'
 import { TextAlignment } from '~/modules/readium'
 import { useReaderStore } from '~/stores'
 
-const TEXT_ALIGN_OPTIONS: { label: string; value: TextAlignment }[] = [
+const TEXT_ALIGN_OPTIONS: PickerOption<TextAlignment>[] = [
 	{ label: 'Start', value: 'start' },
 	{ label: 'Left', value: 'left' },
 	{ label: 'Center', value: 'center' },
 	{ label: 'Right', value: 'right' },
 	{ label: 'Justify', value: 'justify' },
 ]
-
-type SliderSettingProps = {
-	label: string
-	value: number
-	defaultValue: number
-	min: number
-	max: number
-	step: number
-	unit?: string
-	onChange: (value: number | undefined) => void
-}
-
-function SliderSetting({
-	label,
-	value,
-	defaultValue,
-	min,
-	max,
-	step,
-	unit = '',
-	onChange,
-}: SliderSettingProps) {
-	const colors = useColors()
-	const [localValue, setLocalValue] = useState(value)
-
-	const handleComplete = useCallback(
-		(val: number) => {
-			setLocalValue(val)
-			// If value is at default, set to undefined to use system default
-			onChange(val === defaultValue ? undefined : val)
-		},
-		[onChange, defaultValue],
-	)
-
-	const displayValue = unit === '%' ? Math.round(localValue * 100) : localValue.toFixed(1)
-
-	return (
-		<View className="flex-row items-center gap-2">
-			<Text className="w-24 text-foreground">{label}</Text>
-			<Text className="w-14 text-right text-foreground-muted">
-				{displayValue}
-				{unit}
-			</Text>
-			<View className="flex-1">
-				<Slider
-					style={{ width: '100%', height: 40 }}
-					minimumValue={min}
-					maximumValue={max}
-					value={localValue}
-					minimumTrackTintColor={colors.edge.DEFAULT}
-					maximumTrackTintColor={colors.edge.DEFAULT}
-					step={step}
-					onValueChange={(val) => {
-						setLocalValue(val)
-						Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
-					}}
-					onSlidingComplete={handleComplete}
-				/>
-			</View>
-		</View>
-	)
-}
-
-type ToggleSettingProps = {
-	label: string
-	value: boolean | undefined
-	onChange: (value: boolean | undefined) => void
-}
-
-function ToggleSetting({ label, value, onChange }: ToggleSettingProps) {
-	return (
-		<View className="flex-row items-center justify-between py-2">
-			<Label onPress={() => onChange(value === undefined ? true : !value)}>{label}</Label>
-			<Switch
-				checked={value ?? false}
-				onCheckedChange={(checked) => onChange(checked ? true : undefined)}
-				accessibilityLabel={`Toggle ${label}`}
-			/>
-		</View>
-	)
-}
 
 export default function TypographySettings() {
 	const store = useReaderStore((state) => ({
@@ -112,107 +30,176 @@ export default function TypographySettings() {
 		setSettings: state.setGlobalSettings,
 	}))
 
-	// If publisher styles are enabled, don't show typography settings
-	if (store.allowPublisherStyles) {
-		return null
-	}
+	const isDisabled = store.allowPublisherStyles
 
 	return (
-		<View className="gap-4">
-			<Heading className="pl-4">Typography</Heading>
-
-			{/* Text Alignment */}
-			<View className="gap-2 px-6">
-				<Text className="text-foreground">Text Alignment</Text>
-				<RadioGroup
+		<View>
+			<View className="flex-row items-center justify-between px-6 py-3">
+				<Text className={cn('text-lg text-foreground', isDisabled && 'opacity-40')}>
+					Text Alignment
+				</Text>
+				<Picker
 					value={store.textAlign}
-					onValueChange={(value) => store.setSettings({ textAlign: value as TextAlignment })}
-					className="flex-row flex-wrap gap-4"
-				>
-					{TEXT_ALIGN_OPTIONS.map((option) => (
-						<View key={option.value} className="flex-row items-center gap-2">
-							<RadioGroupItem value={option.value} />
-							<Label htmlFor={option.value}>{option.label}</Label>
-						</View>
-					))}
-				</RadioGroup>
+					options={TEXT_ALIGN_OPTIONS}
+					onValueChange={(value) => store.setSettings({ textAlign: value })}
+					disabled={isDisabled}
+				/>
 			</View>
 
-			{/* Sliders */}
-			<View className="gap-1 px-6">
-				<SliderSetting
-					label="Type Scale"
+			<View className="h-px w-full bg-edge" />
+
+			<View className="flex-row items-center justify-between px-6 py-3">
+				<Text className={cn('text-lg text-foreground', isDisabled && 'opacity-40')}>
+					Type Scale
+				</Text>
+				<Stepper
 					value={store.typeScale}
-					defaultValue={1.0}
+					onChange={(val) => store.setSettings({ typeScale: val === 1.0 ? undefined : val })}
 					min={0.5}
 					max={2.0}
 					step={0.1}
-					onChange={(value) => store.setSettings({ typeScale: value })}
-				/>
-
-				<SliderSetting
-					label="Line Height"
-					value={store.lineHeight}
-					defaultValue={1.5}
-					min={1.0}
-					max={3.0}
-					step={0.1}
-					onChange={(value) => store.setSettings({ lineHeight: value })}
-				/>
-
-				<SliderSetting
-					label="Para. Indent"
-					value={store.paragraphIndent ?? 0}
-					defaultValue={0}
-					min={0}
-					max={3.0}
-					step={0.25}
-					onChange={(value) => store.setSettings({ paragraphIndent: value })}
-				/>
-
-				<SliderSetting
-					label="Para. Spacing"
-					value={store.paragraphSpacing ?? 0}
-					defaultValue={0}
-					min={0}
-					max={3.0}
-					step={0.25}
-					onChange={(value) => store.setSettings({ paragraphSpacing: value })}
-				/>
-
-				<SliderSetting
-					label="Word Spacing"
-					value={store.wordSpacing ?? 0}
-					defaultValue={0}
-					min={0}
-					max={1.0}
-					step={0.05}
-					onChange={(value) => store.setSettings({ wordSpacing: value })}
-				/>
-
-				<SliderSetting
-					label="Letter Spacing"
-					value={store.letterSpacing ?? 0}
-					defaultValue={0}
-					min={0}
-					max={0.5}
-					step={0.025}
-					onChange={(value) => store.setSettings({ letterSpacing: value })}
+					disabled={isDisabled}
+					formatValue={(val) => val.toFixed(1)}
+					accessibilityLabel="Type Scale"
 				/>
 			</View>
 
-			{/* Toggles */}
-			<View className="px-6">
-				<ToggleSetting
-					label="Hyphens"
-					value={store.hyphens}
-					onChange={(value) => store.setSettings({ hyphens: value })}
-				/>
+			<View className="h-px w-full bg-edge" />
 
-				<ToggleSetting
-					label="Ligatures"
-					value={store.ligatures}
-					onChange={(value) => store.setSettings({ ligatures: value })}
+			<View className="flex-row items-center justify-between px-6 py-3">
+				<Text className={cn('text-lg text-foreground', isDisabled && 'opacity-40')}>
+					Line Height
+				</Text>
+				<Stepper
+					value={store.lineHeight}
+					onChange={(val) => store.setSettings({ lineHeight: val === 1.5 ? undefined : val })}
+					min={1.0}
+					max={3.0}
+					step={0.1}
+					disabled={isDisabled}
+					formatValue={(val) => val.toFixed(1)}
+					accessibilityLabel="Line Height"
+				/>
+			</View>
+
+			<View className="h-px w-full bg-edge" />
+
+			<View className="flex-row items-center justify-between px-6 py-3">
+				<Text className={cn('text-lg text-foreground', isDisabled && 'opacity-40')}>
+					Paragraph Indent
+				</Text>
+				<Stepper
+					value={store.paragraphIndent ?? 0}
+					onChange={(val) => store.setSettings({ paragraphIndent: val === 0 ? undefined : val })}
+					min={0}
+					max={3.0}
+					step={0.25}
+					disabled={isDisabled}
+					unit="%"
+					formatValue={(val) => Math.round(val * 100).toString()}
+					accessibilityLabel="Paragraph Indent"
+				/>
+			</View>
+
+			<View className="h-px w-full bg-edge" />
+
+			<View className="flex-row items-center justify-between px-6 py-3">
+				<Text className={cn('text-lg text-foreground', isDisabled && 'opacity-40')}>
+					Paragraph Spacing
+				</Text>
+				<Stepper
+					value={store.paragraphSpacing ?? 0}
+					onChange={(val) => store.setSettings({ paragraphSpacing: val === 0 ? undefined : val })}
+					min={0}
+					max={3.0}
+					step={0.25}
+					disabled={isDisabled}
+					unit="%"
+					formatValue={(val) => Math.round(val * 100).toString()}
+					accessibilityLabel="Paragraph Spacing"
+				/>
+			</View>
+
+			<View className="h-px w-full bg-edge" />
+
+			<View className="flex-row items-center justify-between px-6 py-3">
+				<Text className={cn('text-lg text-foreground', isDisabled && 'opacity-40')}>
+					Word Spacing
+				</Text>
+				<Stepper
+					value={store.wordSpacing ?? 0}
+					onChange={(val) => store.setSettings({ wordSpacing: val === 0 ? undefined : val })}
+					min={0}
+					max={1.0}
+					step={0.05}
+					disabled={isDisabled}
+					unit="%"
+					formatValue={(val) => Math.round(val * 100).toString()}
+					accessibilityLabel="Word Spacing"
+				/>
+			</View>
+
+			<View className="h-px w-full bg-edge" />
+
+			<View className="flex-row items-center justify-between px-6 py-3">
+				<Text className={cn('text-lg text-foreground', isDisabled && 'opacity-40')}>
+					Letter Spacing
+				</Text>
+				<Stepper
+					value={store.letterSpacing ?? 0}
+					onChange={(val) => store.setSettings({ letterSpacing: val === 0 ? undefined : val })}
+					min={0}
+					max={0.5}
+					step={0.025}
+					disabled={isDisabled}
+					unit="%"
+					formatValue={(val) => Math.round(val * 100).toString()}
+					accessibilityLabel="Letter Spacing"
+				/>
+			</View>
+
+			<View className="h-px w-full bg-edge" />
+
+			<View className="flex-row items-center justify-between px-6 py-3">
+				<Label
+					className={cn(isDisabled && 'opacity-40', 'text-lg')}
+					onPress={() =>
+						!isDisabled &&
+						store.setSettings({ hyphens: store.hyphens === undefined ? true : !store.hyphens })
+					}
+				>
+					Hyphens
+				</Label>
+				<Switch
+					checked={store.hyphens ?? false}
+					onCheckedChange={(checked) => store.setSettings({ hyphens: checked ? true : undefined })}
+					accessibilityLabel="Toggle Hyphens"
+					disabled={isDisabled}
+				/>
+			</View>
+
+			<View className="h-px w-full bg-edge" />
+
+			<View className="flex-row items-center justify-between px-6 py-3">
+				<Text
+					className={cn(isDisabled && 'opacity-40', 'text-lg')}
+					onPress={() =>
+						!isDisabled &&
+						store.setSettings({
+							ligatures: store.ligatures === undefined ? true : !store.ligatures,
+						})
+					}
+				>
+					Ligatures
+				</Text>
+
+				<Switch
+					checked={store.ligatures ?? false}
+					onCheckedChange={(checked) =>
+						store.setSettings({ ligatures: checked ? true : undefined })
+					}
+					accessibilityLabel="Toggle Ligatures"
+					disabled={isDisabled}
 				/>
 			</View>
 		</View>

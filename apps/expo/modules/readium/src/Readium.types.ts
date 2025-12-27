@@ -17,6 +17,7 @@ export type ReadingMode = 'paged' | 'scrolled'
 export type ColumnCount = 'auto' | 1 | 2
 export type ImageFilter = 'darken' | 'invert'
 export type TextAlignment = 'start' | 'left' | 'right' | 'center' | 'justify'
+export type Spread = 'auto' | 'never' | 'always'
 
 export type ReadiumLocation = {
 	fragments?: string[] | null
@@ -133,15 +134,19 @@ export type EPUBReaderPreferences = {
 	pageMargins?: number
 	columnCount?: ColumnCount
 	imageFilter?: ImageFilter
+	spread?: Spread
+	verticalText?: boolean
 	// All below require publisherStyles to be disabled
 	textAlign?: TextAlignment
 	typeScale?: number
+	fontWeight?: number
 	paragraphIndent?: number
 	paragraphSpacing?: number
 	wordSpacing?: number
 	letterSpacing?: number
 	hyphens?: boolean
 	ligatures?: boolean
+	textNormalization?: boolean
 	/**
 	 * Whether publisher styles should be observed
 	 */

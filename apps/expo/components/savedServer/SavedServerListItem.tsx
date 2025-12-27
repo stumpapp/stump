@@ -1,3 +1,5 @@
+import { queryClient } from '@stump/client'
+import { Api } from '@stump/sdk'
 import { useRouter } from 'expo-router'
 import { Pressable, View } from 'react-native'
 import * as ContextMenu from 'zeego/context-menu'
@@ -35,6 +37,17 @@ export default function SavedServerListItem({ server, onEdit, onDelete, forceOPD
 	const { deleteServerToken } = useSavedServers()
 
 	const deleteCachedSdk = useCacheStore((state) => state.removeSDK)
+	const cachedServerSdk = useCacheStore((state) => state.sdks[server.id] as Api | undefined)
+
+	const onClearCache = () => {
+		// We can assume no SDK means no cache
+		if (cachedServerSdk) {
+			queryClient.removeQueries({
+				exact: false,
+				predicate: ({ queryKey }) => queryKey.includes(server.id),
+			})
+		}
+	}
 
 	const router = useRouter()
 
@@ -71,6 +84,16 @@ export default function SavedServerListItem({ server, onEdit, onDelete, forceOPD
 						<ContextMenu.ItemIcon
 							ios={{
 								name: 'slider.horizontal.2.square.on.square',
+							}}
+						/>
+					</ContextMenu.Item>
+
+					<ContextMenu.Item key="clearCache" disabled={!cachedServerSdk} onSelect={onClearCache}>
+						<ContextMenu.ItemTitle>Clear Cache</ContextMenu.ItemTitle>
+						<ContextMenu.ItemSubtitle>Reset query data</ContextMenu.ItemSubtitle>
+						<ContextMenu.ItemIcon
+							ios={{
+								name: 'trash',
 							}}
 						/>
 					</ContextMenu.Item>

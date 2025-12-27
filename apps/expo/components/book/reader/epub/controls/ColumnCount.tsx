@@ -1,13 +1,14 @@
 import { View } from 'react-native'
 
-import { Heading, Label, RadioGroup, RadioGroupItem } from '~/components/ui'
-import { ColumnCount as ColumnCountType } from '~/modules/readium'
+import { Text } from '~/components/ui'
+import { Picker } from '~/components/ui/picker/picker'
+import type { PickerOption } from '~/components/ui/picker/types'
 import { useReaderStore } from '~/stores'
 
-const COLUMN_OPTIONS: { label: string; value: ColumnCountType }[] = [
+const COLUMN_OPTIONS: PickerOption[] = [
 	{ label: 'Auto', value: 'auto' },
-	{ label: 'Single', value: 1 },
-	{ label: 'Double', value: 2 },
+	{ label: 'Single', value: '1' },
+	{ label: 'Double', value: '2' },
 ]
 
 export default function ColumnCount() {
@@ -22,23 +23,13 @@ export default function ColumnCount() {
 	}
 
 	return (
-		<View className="gap-2">
-			<Heading className="pl-4">Columns</Heading>
-
-			<View className="px-6">
-				<RadioGroup
-					value={String(store.columnCount)}
-					onValueChange={handleChange}
-					className="flex-row gap-6"
-				>
-					{COLUMN_OPTIONS.map((option) => (
-						<View key={String(option.value)} className="flex-row items-center gap-2">
-							<RadioGroupItem value={String(option.value)} />
-							<Label htmlFor={String(option.value)}>{option.label}</Label>
-						</View>
-					))}
-				</RadioGroup>
-			</View>
+		<View className="flex-row items-center justify-between px-6 py-3">
+			<Text className="text-lg text-foreground">Columns</Text>
+			<Picker
+				value={String(store.columnCount)}
+				options={COLUMN_OPTIONS}
+				onValueChange={handleChange}
+			/>
 		</View>
 	)
 }

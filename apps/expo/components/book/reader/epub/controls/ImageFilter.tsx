@@ -1,10 +1,12 @@
 import { View } from 'react-native'
 
-import { Heading, Label, RadioGroup, RadioGroupItem } from '~/components/ui'
+import { Text } from '~/components/ui'
+import { Picker } from '~/components/ui/picker/picker'
+import type { PickerOption } from '~/components/ui/picker/types'
 import { ImageFilter as ImageFilterType } from '~/modules/readium'
 import { useReaderStore } from '~/stores'
 
-const IMAGE_FILTER_OPTIONS: { label: string; value: ImageFilterType | 'none' }[] = [
+const IMAGE_FILTER_OPTIONS: PickerOption[] = [
 	{ label: 'None', value: 'none' },
 	{ label: 'Darken', value: 'darken' },
 	{ label: 'Invert', value: 'invert' },
@@ -22,23 +24,13 @@ export default function ImageFilter() {
 	}
 
 	return (
-		<View className="gap-2">
-			<Heading className="pl-4">Image Filter</Heading>
-
-			<View className="px-6">
-				<RadioGroup
-					value={store.imageFilter ?? 'none'}
-					onValueChange={handleChange}
-					className="flex-row gap-6"
-				>
-					{IMAGE_FILTER_OPTIONS.map((option) => (
-						<View key={option.value} className="flex-row items-center gap-2">
-							<RadioGroupItem value={option.value} />
-							<Label htmlFor={option.value}>{option.label}</Label>
-						</View>
-					))}
-				</RadioGroup>
-			</View>
+		<View className="flex-row items-center justify-between px-6 py-3">
+			<Text className="text-lg text-foreground">Image Filter</Text>
+			<Picker
+				value={store.imageFilter ?? 'none'}
+				options={IMAGE_FILTER_OPTIONS}
+				onValueChange={handleChange}
+			/>
 		</View>
 	)
 }

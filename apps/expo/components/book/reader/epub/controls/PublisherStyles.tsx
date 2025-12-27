@@ -1,6 +1,6 @@
 import { View } from 'react-native'
 
-import { Label, Switch } from '~/components/ui'
+import { Switch, Text } from '~/components/ui'
 import { useReaderStore } from '~/stores'
 
 export default function PublisherStyles() {
@@ -10,24 +10,27 @@ export default function PublisherStyles() {
 	}))
 
 	return (
-		<View className="w-full flex-row items-center justify-between px-6">
-			<Label
+		<View className="w-full flex-row items-center justify-between px-6 py-4">
+			<Text
 				nativeID="defaultServer"
 				onPress={() => {
 					store.setAllowPublisherStyles({ allowPublisherStyles: !store.allowPublisherStyles })
 				}}
+				className="text-lg"
 			>
 				Publisher styles
-			</Label>
+			</Text>
 
-			<Switch
-				checked={Boolean(store.allowPublisherStyles ?? true)}
-				onCheckedChange={() => {
-					store.setAllowPublisherStyles({ allowPublisherStyles: !store.allowPublisherStyles })
-				}}
-				accessibilityLabel="Toggle publisher styles"
-				accessibilityState={{ checked: store.allowPublisherStyles }}
-			/>
+			<View>
+				<Switch
+					checked={Boolean(store.allowPublisherStyles ?? true)}
+					onCheckedChange={() => {
+						store.setAllowPublisherStyles({ allowPublisherStyles: !store.allowPublisherStyles })
+					}}
+					accessibilityLabel="Toggle publisher styles"
+					accessibilityState={{ checked: store.allowPublisherStyles }}
+				/>
+			</View>
 		</View>
 	)
 }

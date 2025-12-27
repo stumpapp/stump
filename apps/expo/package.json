@@ -22,6 +22,7 @@
 		"@expo/ui": "~0.2.0-beta.7",
 		"@gorhom/bottom-sheet": "^5.2.6",
 		"@likashefqet/react-native-image-zoom": "^4.3.0",
+		"@lodev09/react-native-true-sheet": "^3.6.5",
 		"@miblanchard/react-native-slider": "^2.6.0",
 		"@react-native-async-storage/async-storage": "2.2.0",
 		"@react-native-community/slider": "5.0.1",

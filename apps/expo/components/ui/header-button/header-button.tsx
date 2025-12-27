@@ -7,13 +7,18 @@ import { Button } from '../button'
 import { Icon } from '../icon'
 import { HeaderButtonProps } from './types'
 
-export function HeaderButton({ icon = { android: X }, onPress, style }: HeaderButtonProps) {
+export function HeaderButton({
+	icon = { android: X },
+	onPress,
+	style,
+	android = { variant: 'default' },
+}: HeaderButtonProps) {
 	const colors = useColors()
 
 	return (
 		<Button
 			className="squircle h-[unset] w-[unset] rounded-full border p-1 tablet:p-2"
-			variant="ghost"
+			variant={android.variant === 'prominent' ? 'brand' : 'outline'}
 			size="icon"
 			style={style}
 			onPress={onPress}

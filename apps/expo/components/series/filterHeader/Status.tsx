@@ -1,14 +1,13 @@
 import clone from 'lodash/cloneDeep'
 import setProperty from 'lodash/set'
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Platform, View } from 'react-native'
+import { View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { match, P } from 'ts-pattern'
 
 import { FilterHeaderButton, FilterSheet } from '~/components/filter'
 import { FilterSheetRef } from '~/components/filter/FilterSheet'
 import { Checkbox, Label, Text } from '~/components/ui'
-import { cn } from '~/lib/utils'
 import { useSeriesFilterStore } from '~/stores/filters'
 
 export const STATUSES = ['Abandoned', 'Ongoing', 'Completed', 'Cancelled', 'Hiatus'] as const
@@ -25,10 +24,8 @@ export default function Status() {
 
 	const sheetRef = useRef<FilterSheetRef>(null)
 
-	const { filters, setFilters } = useSeriesFilterStore((store) => ({
-		filters: store.filters,
-		setFilters: store.setFilters,
-	}))
+	const filters = useSeriesFilterStore((store) => store.filters)
+	const setFilters = useSeriesFilterStore((store) => store.setFilters)
 
 	const statusFilter = useMemo(
 		() => filters.metadata?.status?.likeAnyOf,
@@ -107,29 +104,26 @@ export default function Status() {
 			}
 		>
 			<View
-				className="gap-8"
+				className="pt-2"
 				style={{
-					paddingBottom: Platform.OS === 'android' ? 32 : insets.bottom,
+					paddingBottom: insets.bottom + 24,
 				}}
 			>
-				<View className="squircle gap-0 rounded-lg border border-edge bg-background-surface">
-					{STATUSES.map((status, idx) => (
-						<Fragment key={status}>
-							<View className="flex flex-row items-center gap-3 p-3">
-								<Checkbox
-									checked={selectionState[status]}
-									onCheckedChange={(checked) => onSelectStatus(status, checked)}
-								/>
-								<Label htmlFor={status}>{LABELS[status]}</Label>
-							</View>
+				{STATUSES.map((status, idx) => (
+					<Fragment key={status}>
+						<View className="flex flex-row items-center gap-3 px-7 py-3">
+							<Checkbox
+								id={status}
+								checked={selectionState[status]}
+								onCheckedChange={(checked) => onSelectStatus(status, !!checked)}
+							/>
+							<Label htmlFor={status}>{LABELS[status]}</Label>
+						</View>
 
-							{idx < STATUSES.length - 1 && <Divider />}
-						</Fragment>
-					))}
-				</View>
+						{idx < STATUSES.length - 1 && <View className="h-px bg-edge" />}
+					</Fragment>
+				))}
 			</View>
 		</FilterSheet>
 	)
 }
-
-const Divider = () => <View className={cn('h-px w-full bg-edge')} />

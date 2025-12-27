@@ -1,11 +1,12 @@
 import { SeriesMetadataModelOrdering, SeriesModelOrdering, SeriesOrderBy } from '@stump/graphql'
+import { ArrowUpDown } from 'lucide-react-native'
 import { useCallback } from 'react'
 import { Platform, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { match, P } from 'ts-pattern'
 
 import { FilterSheet } from '~/components/filter'
-import { Heading, icons, Label, RadioGroup, RadioGroupItem, Text } from '~/components/ui'
+import { Heading, Label, RadioGroup, RadioGroupItem, Text } from '~/components/ui'
 import { cn } from '~/lib/utils'
 import { useSeriesFilterStore } from '~/stores/filters'
 
@@ -14,10 +15,8 @@ import { useSeriesFilterStore } from '~/stores/filters'
 export default function Sort() {
 	const insets = useSafeAreaInsets()
 
-	const { sort, setSort } = useSeriesFilterStore((state) => ({
-		sort: state.sort,
-		setSort: state.setSort,
-	}))
+	const sort = useSeriesFilterStore((state) => state.sort)
+	const setSort = useSeriesFilterStore((state) => state.setSort)
 
 	const { field, direction } = match(sort)
 		.with({ series: P.not(P.nullish) }, ({ series: { field, direction } }) => ({
@@ -69,7 +68,7 @@ export default function Sort() {
 	)
 
 	return (
-		<FilterSheet label="Sort" icon={icons.ArrowDownUp} isActive>
+		<FilterSheet label="Sort" icon={ArrowUpDown} isActive>
 			<View
 				className="gap-8"
 				style={{

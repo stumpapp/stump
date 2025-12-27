@@ -30,10 +30,8 @@ export default function Screen() {
 	)
 
 	const cachedInstance = useRef(useCacheStore((state) => state.sdks[serverID || '']))
-	const cacheStore = useCacheStore((state) => ({
-		addInstanceToCache: state.addSDK,
-		removeInstanceFromCache: state.removeSDK,
-	}))
+	const addInstanceToCache = useCacheStore((state) => state.addSDK)
+	const removeInstanceFromCache = useCacheStore((state) => state.removeSDK)
 
 	const [sdk, setSDK] = useState<Api | null>(() => cachedInstance.current || null)
 	const [isInitiallyConnecting, setIsInitiallyConnecting] = useState(() => !cachedInstance.current)
@@ -87,7 +85,7 @@ export default function Screen() {
 
 				setSDK(authedInstance || instance)
 				if (authedInstance) {
-					cacheStore.addInstanceToCache(activeServer.id, authedInstance)
+					addInstanceToCache(activeServer.id, authedInstance)
 				}
 			} catch (error) {
 				const axiosError = isAxiosError(error) ? error : null
@@ -112,7 +110,7 @@ export default function Screen() {
 		isAuthDialogOpen,
 		getServerConfig,
 		saveServerToken,
-		cacheStore,
+		addInstanceToCache,
 		isAutoAuthenticating,
 	])
 
@@ -127,7 +125,7 @@ export default function Screen() {
 				} catch (error) {
 					if (isNetworkError(error)) {
 						isServerAccessible.current = false
-						cacheStore.removeInstanceFromCache(activeServer?.id || 'unknown')
+						removeInstanceFromCache(activeServer?.id || 'unknown')
 					}
 				}
 			}
@@ -177,12 +175,12 @@ export default function Screen() {
 				setSDK(instance)
 				saveServerToken(activeServer?.id || 'dev', token)
 				setUser(forUser)
-				cacheStore.addInstanceToCache(activeServer.id, instance)
+				addInstanceToCache(activeServer.id, instance)
 			} else if (!loginResp && !sdk?.isAuthed) {
 				router.dismissAll()
 			}
 		},
-		[activeServer, router, saveServerToken, cacheStore, sdk],
+		[activeServer, router, saveServerToken, addInstanceToCache, sdk],
 	)
 
 	// TODO: attempt reauth automatically when able

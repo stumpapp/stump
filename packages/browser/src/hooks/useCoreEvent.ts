@@ -98,15 +98,11 @@ export function useCoreEvent({ liveRefetch, onConnectionWithServerChanged }: Par
 		},
 	})
 
-	useEffect(
-		() => {
-			return () => {
-				dispose()
-			}
-		},
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[],
-	)
+	useEffect(() => {
+		return () => {
+			dispose()
+		}
+	}, [dispose])
 }
 
 type EventHandlerParams = {

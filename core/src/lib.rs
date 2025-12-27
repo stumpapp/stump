@@ -86,11 +86,16 @@ impl StumpCore {
 	///
 	/// Returns the configuration variables in a `StumpConfig` struct.
 	pub fn init_config(config_dir: String) -> CoreResult<StumpConfig> {
-		let config = StumpConfig::new(config_dir)
+		let mut config = StumpConfig::new(config_dir)
 			// Load config file (if any)
 			.with_config_file()?
 			// Overlay environment variables
 			.with_environment()?;
+
+		// TODO: I couldn't get this fully working inside the macro but would like to revisit
+		if let Some(env_oidc) = config::OidcConfig::from_env() {
+			config.oidc = Some(env_oidc);
+		}
 
 		// Write ensure that config directory exists and write Stump.toml
 		config.write_config_dir()?;

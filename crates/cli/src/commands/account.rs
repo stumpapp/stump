@@ -2,8 +2,12 @@ use std::{thread, time::Duration};
 
 use clap::Subcommand;
 use dialoguer::{theme::ColorfulTheme, Confirm, Input, Password};
-use models::entity::{session, user};
-use sea_orm::{prelude::*, ActiveValue::Set, IntoActiveModel, QueryTrait};
+use models::entity::{
+	bookmark, finished_reading_session, reading_session, session, user,
+};
+use sea_orm::{
+	prelude::*, ActiveValue::Set, IntoActiveModel, QueryTrait, TransactionTrait,
+};
 use stump_core::{config::StumpConfig, database::connect};
 
 use crate::{error::CliResult, CliError};
@@ -39,6 +43,15 @@ pub enum Account {
 	},
 	/// Enter a flow to change the server owner to another account
 	ResetOwner,
+	/// Migrate a local user account to an OIDC account
+	MigrateOidc {
+		/// The username of the local account to migrate
+		#[clap(long)]
+		username: String,
+		/// The email of the OIDC account to migrate to
+		#[clap(long)]
+		oidc_email: String,
+	},
 }
 
 pub async fn handle_account_command(
@@ -57,9 +70,12 @@ pub async fn handle_account_command(
 			reset_account_password(username, config.password_hash_cost, config).await
 		},
 		Account::ResetOwner => change_server_owner(config).await,
+		Account::MigrateOidc {
+			username,
+			oidc_email,
+		} => migrate_oidc_account(config, username, oidc_email).await,
 	}
 }
-
 async fn set_account_lock_status(
 	username: String,
 	lock: bool,
@@ -251,6 +267,129 @@ async fn change_server_owner(config: &StumpConfig) -> CliResult<()> {
 		.exec(&conn)
 		.await?;
 	progress.finish_with_message("Successfully changed the server owner!");
+
+	Ok(())
+}
+
+async fn migrate_oidc_account(
+	config: &StumpConfig,
+	username: String,
+	oidc_email: String,
+) -> CliResult<()> {
+	let conn = connect(config).await?;
+
+	let progress = default_progress_spinner();
+	progress.set_message("Finding accounts...");
+
+	// Find the local user (must not have oidc_issuer_id)
+	let local_user = user::Entity::find()
+		.filter(user::Column::Username.eq(username.clone()))
+		.filter(user::Column::OidcIssuerId.is_null())
+		.one(&conn)
+		.await?
+		.ok_or_else(|| {
+			CliError::OperationFailed(format!(
+				"No local account found with username '{}' (or account is already an OIDC account)",
+				username
+			))
+		})?;
+
+	// Find the OIDC user (must have oidc_issuer_id)
+	let oidc_user = user::Entity::find()
+		.filter(user::Column::OidcEmail.eq(oidc_email.clone()))
+		.filter(user::Column::OidcIssuerId.is_not_null())
+		.one(&conn)
+		.await?
+		.ok_or_else(|| {
+			CliError::OperationFailed(format!(
+				"No OIDC account found with email '{}' (or account is not an OIDC account)",
+				oidc_email
+			))
+		})?;
+
+	progress.finish_and_clear();
+
+	println!("\nMigration Summary:");
+	println!(
+		"  Local account: {} (ID: {})",
+		local_user.username, local_user.id
+	);
+	println!(
+		"  OIDC account:  {} (ID: {})",
+		oidc_user.username, oidc_user.id
+	);
+	println!("\nThis will:");
+	println!("  1. Transfer all reading sessions and history");
+	println!("  2. Transfer bookmarks");
+	println!("  3. Transfer user preferences");
+	println!("  4. Transfer permissions");
+	println!(
+		"  5. Reassign username '{}' to OIDC account",
+		local_user.username
+	);
+	println!("  6. Delete local account '{}'", local_user.username);
+
+	let confirmation = Confirm::new()
+		.with_prompt("\nAre you sure you want to continue?")
+		.default(false)
+		.interact()?;
+
+	if !confirmation {
+		println!("Migration cancelled.");
+		return Ok(());
+	}
+
+	let progress = default_progress_spinner();
+
+	let txn = conn.begin().await?;
+
+	progress.set_message("Transferring reading sessions...");
+	reading_session::Entity::update_many()
+		.col_expr(
+			reading_session::Column::UserId,
+			sea_orm::sea_query::Expr::value(oidc_user.id.clone()),
+		)
+		.filter(reading_session::Column::UserId.eq(local_user.id.clone()))
+		.exec(&txn)
+		.await?;
+
+	progress.set_message("Transferring finished reading sessions...");
+	finished_reading_session::Entity::update_many()
+		.col_expr(
+			finished_reading_session::Column::UserId,
+			sea_orm::sea_query::Expr::value(oidc_user.id.clone()),
+		)
+		.filter(finished_reading_session::Column::UserId.eq(local_user.id.clone()))
+		.exec(&txn)
+		.await?;
+
+	progress.set_message("Transferring bookmarks...");
+	bookmark::Entity::update_many()
+		.col_expr(
+			bookmark::Column::UserId,
+			sea_orm::sea_query::Expr::value(oidc_user.id.clone()),
+		)
+		.filter(bookmark::Column::UserId.eq(local_user.id.clone()))
+		.exec(&txn)
+		.await?;
+
+	progress.set_message("Transferring user preferences and permissions...");
+	let mut oidc_active = oidc_user.clone().into_active_model();
+	oidc_active.user_preferences_id = Set(local_user.user_preferences_id);
+	oidc_active.permissions = Set(local_user.permissions);
+	oidc_active.username = Set(local_user.username.clone());
+	oidc_active.update(&txn).await?;
+
+	progress.set_message("Deleting local account...");
+	user::Entity::delete_by_id(local_user.id).exec(&txn).await?;
+
+	progress.set_message("Committing changes...");
+	txn.commit().await?;
+
+	progress.finish_with_message(format!(
+		"Successfully migrated local account '{}' to OIDC account!",
+		username
+	));
 
 	Ok(())
 }

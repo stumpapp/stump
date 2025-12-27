@@ -18,15 +18,11 @@ export default function LiveLogsFeed() {
 	const scrollRef = useRef<HTMLDivElement>(null)
 	const logContainerRef = useRef<HTMLDivElement>(null)
 
-	useEffect(
-		() => {
-			return () => {
-				dispose()
-			}
-		},
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[],
-	)
+	useEffect(() => {
+		return () => {
+			dispose()
+		}
+	}, [dispose])
 
 	// whenever a new log is added to the buffer, we want to scroll to the bottom of the logs
 	useEffect(() => {

@@ -132,6 +132,20 @@ pub enum APIError {
 	SessionFetchError(#[from] SessionError),
 	#[error("{0}")]
 	DbError(#[from] sea_orm::error::DbErr),
+	#[error("OIDC is not enabled")]
+	OIDCNotEnabled,
+	#[error("The provided OIDC configuration is invalid or missing required fields")]
+	OIDCConfigurationInvalid,
+	#[error("{0}")]
+	OIDCConfigurationError(#[from] openidconnect::ConfigurationError),
+	#[error("Failed to exchange OIDC token: {0}")]
+	OIDCTokenExchangeFailed(String),
+	#[error("The OIDC token is missing from the response")]
+	OIDCMissingToken,
+	#[error("Failed to verify OIDC claims: {0}")]
+	OIDCClaimsVerificationFailed(#[from] openidconnect::ClaimsVerificationError),
+	#[error("The OIDC token is missing an email claim")]
+	OIDCMissingEmail,
 }
 
 impl APIError {
@@ -152,6 +166,8 @@ impl APIError {
 			},
 			APIError::DbError(_) => StatusCode::INTERNAL_SERVER_ERROR,
 			APIError::Redirect(_) => StatusCode::TEMPORARY_REDIRECT,
+			APIError::OIDCConfigurationInvalid => StatusCode::BAD_REQUEST,
+			APIError::OIDCNotEnabled => StatusCode::FORBIDDEN,
 			_ => StatusCode::INTERNAL_SERVER_ERROR,
 		}
 	}

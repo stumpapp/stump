@@ -2,9 +2,8 @@ import { Check, X } from 'lucide-react-native'
 import { View } from 'react-native'
 
 import { Button } from '../ui'
+import { HeaderButton } from '../ui/header-button/header-button'
 import { Icon as LucideIcon } from '../ui/icon'
-
-// TODO: Return native buttons for iOS
 
 type SupportedIcon = 'x' | 'check'
 
@@ -15,6 +14,18 @@ type Props = {
 }
 
 export default function FilterHeaderButton({ icon, onPress, variant }: Props) {
+	const iosExplicitVariant = variant && variant === 'prominent' ? 'glassProminent' : undefined
+	return (
+		<HeaderButton
+			onPress={onPress}
+			ios={{
+				variant: iosExplicitVariant ?? (icon === 'x' ? 'glass' : 'glassProminent'),
+			}}
+			android={{ variant }}
+			icon={{ android: LUCIDE_ICONS[icon], ios: icon === 'x' ? 'xmark' : 'checkmark' }}
+		/>
+	)
+
 	return (
 		<Button
 			className="squircle h-[unset] w-[unset] rounded-full border p-1 tablet:p-2"

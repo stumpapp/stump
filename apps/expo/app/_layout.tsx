@@ -7,11 +7,11 @@ import dayjs from 'dayjs'
 import duration from 'dayjs/plugin/duration'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator'
-import { Stack } from 'expo-router'
+import { Stack, useNavigationContainerRef } from 'expo-router'
 import * as SplashScreen from 'expo-splash-screen'
 import LottieView from 'lottie-react-native'
 import * as React from 'react'
-import { Platform, View } from 'react-native'
+import { AppState, Platform, View } from 'react-native'
 import { SystemBars } from 'react-native-edge-to-edge'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { KeyboardProvider } from 'react-native-keyboard-controller'
@@ -23,6 +23,7 @@ import { PerformanceMonitor } from '~/components/PerformanceMonitor'
 import { BottomSheet } from '~/components/ui/bottom-sheet'
 import { db } from '~/db'
 import migrations from '~/drizzle/migrations'
+import { reactNavigationIntegration } from '~/index'
 import { setAndroidNavigationBar } from '~/lib/android-navigation-bar'
 import { NAV_THEME, useColors } from '~/lib/constants'
 import { useColorScheme } from '~/lib/useColorScheme'
@@ -52,9 +53,10 @@ SplashScreen.preventAutoHideAsync().catch(() => {
 })
 
 const IS_DEVELOPMENT = process.env.NODE_ENV === 'development'
-// const IS_DEVELOPMENT = false
 
 export default function RootLayout() {
+	const navigationRef = useNavigationContainerRef()
+
 	const { colorScheme, isDarkColorScheme } = useColorScheme()
 
 	const [isColorSchemeLoaded, setIsColorSchemeLoaded] = React.useState(false)
@@ -90,10 +92,30 @@ export default function RootLayout() {
 	}, [])
 
 	React.useEffect(() => {
+		if (navigationRef) {
+			reactNavigationIntegration.registerNavigationContainer(navigationRef)
+		}
+	}, [navigationRef])
+
+	React.useEffect(() => {
 		if (error) {
 			Sentry.captureException(error)
 		}
 	}, [error])
+
+	React.useEffect(() => {
+		const subscription = AppState.addEventListener('memoryWarning', (status) => {
+			Sentry.addBreadcrumb({
+				category: 'system',
+				message: 'Memory warning received',
+				level: 'warning',
+				data: {
+					appStateStatus: status,
+				},
+			})
+		})
+		return () => subscription.remove()
+	}, [])
 
 	if (!isColorSchemeLoaded || !isAnimationReady) {
 		return <View className="flex-1 bg-background" />

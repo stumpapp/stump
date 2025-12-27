@@ -40,6 +40,11 @@ pub struct Model {
 	#[graphql(skip)]
 	#[sea_orm(nullable, unique)]
 	pub user_preferences_id: Option<i32>,
+	#[graphql(skip)]
+	#[sea_orm(column_type = "Text", nullable, unique)]
+	pub oidc_issuer_id: Option<String>,
+	#[sea_orm(column_type = "Text", nullable)]
+	pub oidc_email: Option<String>,
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
@@ -118,6 +123,8 @@ pub struct LoginUser {
 	pub permissions: Vec<UserPermission>,
 	pub age_restriction: Option<super::age_restriction::Model>,
 	pub preferences: Option<user_preferences::Model>,
+	pub oidc_issuer_id: Option<String>,
+	pub oidc_email: Option<String>,
 }
 
 impl LoginUser {
@@ -169,6 +176,8 @@ impl FromQueryResult for LoginUser {
 				.resolve_into_vec(),
 			age_restriction,
 			preferences,
+			oidc_issuer_id: user.oidc_issuer_id,
+			oidc_email: user.oidc_email,
 		})
 	}
 }

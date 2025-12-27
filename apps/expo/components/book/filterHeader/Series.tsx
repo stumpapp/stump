@@ -2,18 +2,36 @@ import { useGraphQL } from '@stump/client'
 import { graphql } from '@stump/graphql'
 import clone from 'lodash/cloneDeep'
 import setProperty from 'lodash/set'
-import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Platform, View } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { FlatList, View } from 'react-native'
 import { match, P } from 'ts-pattern'
 
-import { FilterHeaderButton, FilterSheet } from '~/components/filter'
+import {
+	FilterHeaderButton,
+	FilterSheet,
+	FilterSheetSearchHeader,
+	useFilterListProps,
+} from '~/components/filter'
 import { FilterSheetRef } from '~/components/filter/FilterSheet'
 import { Checkbox, Label, Text } from '~/components/ui'
-import { cn } from '~/lib/utils'
 import { useBookFilterStore } from '~/stores/filters'
 
 import { useBookFilterHeaderContext } from './context'
+
+type SeriesItemProps = {
+	item: string
+	checked: boolean
+	onSelect: (series: string, checked: boolean) => void
+}
+
+const SeriesItem = memo(function SeriesItem({ item, checked, onSelect }: SeriesItemProps) {
+	return (
+		<View className="flex flex-row items-center gap-3 px-7 py-3">
+			<Checkbox id={item} checked={checked} onCheckedChange={(c) => onSelect(item, !!c)} />
+			<Label htmlFor={item}>{item}</Label>
+		</View>
+	)
+})
 
 const query = graphql(`
 	query SeriesMetadata($seriesId: ID) {
@@ -24,21 +42,24 @@ const query = graphql(`
 `)
 
 export default function Series() {
-	const insets = useSafeAreaInsets()
-
 	const { seriesId } = useBookFilterHeaderContext()
 	const { data, isPending } = useGraphQL(query, ['seriesMetadata', seriesId], { seriesId })
 
-	const seriesList = data?.mediaMetadataOverview?.series ?? []
+	const seriesList = useMemo(
+		() => data?.mediaMetadataOverview?.series ?? [],
+		[data?.mediaMetadataOverview?.series],
+	)
 
 	const sheetRef = useRef<FilterSheetRef>(null)
+	const [searchQuery, setSearchQuery] = useState('')
 
-	const { filters, setFilters } = useBookFilterStore((store) => ({
-		filters: store.filters,
-		setFilters: store.setFilters,
-	}))
+	const filters = useBookFilterStore((store) => store.filters)
+	const setFilters = useBookFilterStore((store) => store.setFilters)
 
-	const seriesFilter = useMemo(() => filters.metadata?.series?.likeAnyOf, [filters])
+	const seriesFilter = useMemo(
+		() => filters.metadata?.series?.likeAnyOf,
+		[filters.metadata?.series?.likeAnyOf],
+	)
 
 	const [selectionState, setSelectionState] = useState(() => {
 		return match(seriesFilter)
@@ -81,6 +102,14 @@ export default function Series() {
 	const isActive =
 		!!filters.metadata?.series?.likeAnyOf && filters.metadata.series.likeAnyOf.length > 0
 
+	const filteredSeriesList = useMemo(() => {
+		if (!searchQuery.trim()) return seriesList
+		const query = searchQuery.toLowerCase()
+		return seriesList.filter((series) => series.toLowerCase().includes(query))
+	}, [seriesList, searchQuery])
+
+	const filterListProps = useFilterListProps()
+
 	useEffect(() => {
 		// Sync local selection state with global filters (in case of external changes, e.g. clear filters)
 		const newState = match(seriesFilter)
@@ -93,6 +122,13 @@ export default function Series() {
 			.otherwise(() => ({}) as Record<string, boolean>)
 		setSelectionState(newState)
 	}, [seriesFilter])
+
+	const renderItem = useCallback(
+		({ item }: { item: string }) => (
+			<SeriesItem item={item} checked={selectionState[item] ?? false} onSelect={onSelectSeries} />
+		),
+		[selectionState, onSelectSeries],
+	)
 
 	if (isPending) return null
 
@@ -113,43 +149,26 @@ export default function Series() {
 				</View>
 			}
 		>
-			<View
-				className="gap-8"
-				style={{
-					paddingBottom: Platform.OS === 'android' ? 32 : insets.bottom,
-				}}
-			>
-				<View className="gap-3">
-					<Text>Available Series</Text>
-
-					<View className="squircle gap-0 rounded-lg border border-edge bg-background-surface">
-						{seriesList.map((series, idx) => {
-							const isLast = idx === seriesList.length - 1
-							return (
-								<Fragment key={series}>
-									<View className="flex flex-row items-center gap-3 p-3">
-										<Checkbox
-											checked={selectionState[series]}
-											onCheckedChange={(checked) => onSelectSeries(series, checked)}
-										/>
-										<Label htmlFor={series}>{series}</Label>
-									</View>
-
-									{!isLast && <Divider />}
-								</Fragment>
-							)
-						})}
-
-						{!seriesList.length && (
-							<View className="p-3">
-								<Text className="text-foreground-muted">No series found</Text>
-							</View>
-						)}
-					</View>
-				</View>
-			</View>
+			{filteredSeriesList.length === 0 ? (
+				<Text className="py-8 text-center text-foreground-muted">
+					{seriesList.length === 0 ? 'No series found' : 'No matching series'}
+				</Text>
+			) : (
+				<FlatList
+					{...filterListProps}
+					data={filteredSeriesList}
+					keyExtractor={(item) => item}
+					renderItem={renderItem}
+					stickyHeaderIndices={[0]}
+					ListHeaderComponent={
+						<FilterSheetSearchHeader
+							placeholder="Search series..."
+							value={searchQuery}
+							onChangeText={setSearchQuery}
+						/>
+					}
+				/>
+			)}
 		</FilterSheet>
 	)
 }
-
-const Divider = () => <View className={cn('h-px w-full bg-edge')} />

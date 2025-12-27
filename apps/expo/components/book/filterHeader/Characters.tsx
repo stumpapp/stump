@@ -2,18 +2,36 @@ import { useGraphQL } from '@stump/client'
 import { graphql } from '@stump/graphql'
 import clone from 'lodash/cloneDeep'
 import setProperty from 'lodash/set'
-import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Platform, View } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { FlatList, View } from 'react-native'
 import { match, P } from 'ts-pattern'
 
-import { FilterHeaderButton, FilterSheet } from '~/components/filter'
+import {
+	FilterHeaderButton,
+	FilterSheet,
+	FilterSheetSearchHeader,
+	useFilterListProps,
+} from '~/components/filter'
 import { FilterSheetRef } from '~/components/filter/FilterSheet'
 import { Checkbox, Label, Text } from '~/components/ui'
-import { cn } from '~/lib/utils'
 import { useBookFilterStore } from '~/stores/filters'
 
 import { useBookFilterHeaderContext } from './context'
+
+type CharacterItemProps = {
+	item: string
+	checked: boolean
+	onSelect: (character: string, checked: boolean) => void
+}
+
+const CharacterItem = memo(function CharacterItem({ item, checked, onSelect }: CharacterItemProps) {
+	return (
+		<View className="flex flex-row items-center gap-3 px-7 py-3">
+			<Checkbox id={item} checked={checked} onCheckedChange={(c) => onSelect(item, !!c)} />
+			<Label htmlFor={item}>{item}</Label>
+		</View>
+	)
+})
 
 const query = graphql(`
 	query Characters($seriesId: ID) {
@@ -24,14 +42,16 @@ const query = graphql(`
 `)
 
 export default function Characters() {
-	const insets = useSafeAreaInsets()
-
 	const { seriesId } = useBookFilterHeaderContext()
 	const { data, isPending } = useGraphQL(query, ['characters', seriesId], { seriesId })
 
-	const characters = data?.mediaMetadataOverview?.characters ?? []
+	const characters = useMemo(
+		() => data?.mediaMetadataOverview?.characters ?? [],
+		[data?.mediaMetadataOverview?.characters],
+	)
 
 	const sheetRef = useRef<FilterSheetRef>(null)
+	const [searchQuery, setSearchQuery] = useState('')
 
 	const { filters, setFilters } = useBookFilterStore((store) => ({
 		filters: store.filters,
@@ -84,6 +104,14 @@ export default function Characters() {
 	const isActive =
 		!!filters.metadata?.characters?.likeAnyOf && filters.metadata.characters.likeAnyOf.length > 0
 
+	const filteredCharacters = useMemo(() => {
+		if (!searchQuery.trim()) return characters
+		const query = searchQuery.toLowerCase()
+		return characters.filter((character) => character.toLowerCase().includes(query))
+	}, [characters, searchQuery])
+
+	const filterListProps = useFilterListProps()
+
 	useEffect(() => {
 		// Sync local selection state with global filters (in case of external changes, e.g. clear filters)
 		const newState = match(characterFilter)
@@ -96,6 +124,17 @@ export default function Characters() {
 			.otherwise(() => ({}) as Record<string, boolean>)
 		setSelectionState(newState)
 	}, [characterFilter])
+
+	const renderItem = useCallback(
+		({ item }: { item: string }) => (
+			<CharacterItem
+				item={item}
+				checked={selectionState[item] ?? false}
+				onSelect={onSelectCharacter}
+			/>
+		),
+		[selectionState, onSelectCharacter],
+	)
 
 	if (isPending) return null
 
@@ -116,40 +155,26 @@ export default function Characters() {
 				</View>
 			}
 		>
-			<View
-				className="gap-8"
-				style={{
-					paddingBottom: Platform.OS === 'android' ? 32 : insets.bottom,
-				}}
-			>
-				<View className="gap-3">
-					<Text>Available Characters</Text>
-
-					<View className="squircle gap-0 rounded-lg border border-edge bg-background-surface">
-						{characters.map((character, idx) => (
-							<Fragment key={character}>
-								<View className="flex flex-row items-center gap-3 p-3">
-									<Checkbox
-										checked={selectionState[character]}
-										onCheckedChange={(checked) => onSelectCharacter(character, checked)}
-									/>
-									<Label htmlFor={character}>{character}</Label>
-								</View>
-
-								{idx < characters.length - 1 && <Divider />}
-							</Fragment>
-						))}
-
-						{!characters.length && (
-							<View className="p-3">
-								<Text className="text-foreground-muted">No characters found</Text>
-							</View>
-						)}
-					</View>
-				</View>
-			</View>
+			{filteredCharacters.length === 0 ? (
+				<Text className="py-8 text-center text-foreground-muted">
+					{characters.length === 0 ? 'No characters found' : 'No matching characters'}
+				</Text>
+			) : (
+				<FlatList
+					{...filterListProps}
+					data={filteredCharacters}
+					keyExtractor={(item) => item}
+					renderItem={renderItem}
+					stickyHeaderIndices={[0]}
+					ListHeaderComponent={
+						<FilterSheetSearchHeader
+							placeholder="Search characters..."
+							value={searchQuery}
+							onChangeText={setSearchQuery}
+						/>
+					}
+				/>
+			)}
 		</FilterSheet>
 	)
 }
-
-const Divider = () => <View className={cn('h-px w-full bg-edge')} />

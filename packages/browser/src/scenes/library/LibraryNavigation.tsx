@@ -26,6 +26,7 @@ export default function LibraryNavigation() {
 	const prefetchBooks = usePrefetchLibraryBooks()
 
 	const prefetchFiles = usePrefetchFiles()
+
 	const handlePrefetchFiles = useCallback(() => {
 		prefetchFiles({ path, fetchConfig: checkPermission(UserPermission.UploadFile) })
 	}, [path, checkPermission, prefetchFiles])

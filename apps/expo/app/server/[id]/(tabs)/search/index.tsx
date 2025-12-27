@@ -2,12 +2,12 @@ import { useSDK } from '@stump/client'
 import { useQueryClient } from '@tanstack/react-query'
 import { useNavigation, useRouter } from 'expo-router'
 import debounce from 'lodash/debounce'
-import { Search } from 'lucide-react-native'
 import { useCallback, useLayoutEffect, useState } from 'react'
 import { Platform, TextInputChangeEventData, View } from 'react-native'
 import { NativeSyntheticEvent } from 'react-native'
 
 import { useActiveServer } from '~/components/activeServer'
+import Owl from '~/components/Owl'
 import { Text } from '~/components/ui'
 import { IS_IOS_24_PLUS, useColors } from '~/lib/constants'
 
@@ -72,10 +72,16 @@ export default function Screen() {
 
 	return (
 		<View className="flex-1 items-center justify-center gap-4 bg-background p-4 tablet:p-7">
-			<Search className="h-8 w-8 text-foreground-muted" />
+			<Owl owl="search" />
 
-			<View>
-				<Text className="text-foreground-muted">Enter a search query to get started</Text>
+			<View className="gap-2 px-4 tablet:max-w-lg">
+				<Text size="xl" className="text-center font-semibold leading-tight">
+					Search the server
+				</Text>
+
+				<Text size="lg" className="text-center text-foreground-muted">
+					Enter a search query to find content on this server
+				</Text>
 			</View>
 		</View>
 	)

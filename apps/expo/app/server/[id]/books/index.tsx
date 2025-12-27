@@ -86,11 +86,11 @@ export default function Screen() {
 					onEndReachedThreshold={ON_END_REACHED_THRESHOLD}
 					onEndReached={onEndReached}
 					contentInsetAdjustmentBehavior="automatic"
-					ListHeaderComponent={() => (
+					ListHeaderComponent={
 						<Suspense fallback={null}>
 							<BookFilterHeader />
 						</Suspense>
-					)}
+					}
 					ListHeaderComponentStyle={{ paddingBottom: 16, marginHorizontal: -paddingHorizontal }}
 					refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
 					ListEmptyComponent={

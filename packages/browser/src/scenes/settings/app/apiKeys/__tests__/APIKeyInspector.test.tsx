@@ -41,7 +41,11 @@ const createKey = (overrides: Partial<APIKey> = {}): APIKey => ({
 	...overrides,
 })
 
-const Subject = (apiKey: APIKey | null) => {
+type SubjectProps = {
+	apiKey: APIKey | null
+}
+
+const Subject = ({ apiKey }: SubjectProps) => {
 	return (
 		<MemoryRouter>
 			<APIKeyInspector apiKey={apiKey} onClose={jest.fn()} />
@@ -58,14 +62,14 @@ describe('APIKeyInspector', () => {
 
 	it('should render a key with explicit permissions properly', () => {
 		render(
-			Subject(
-				createKey({
+			<Subject
+				apiKey={createKey({
 					permissions: {
 						__typename: 'UserPermissionStruct',
 						value: [UserPermission.AccessApiKeys, UserPermission.CreateBookClub],
 					},
-				}),
-			),
+				})}
+			/>,
 		)
 
 		expect(screen.getByTestId('permissions-meta')).toBeInTheDocument()
@@ -83,13 +87,13 @@ describe('APIKeyInspector', () => {
 		})
 
 		render(
-			Subject(
-				createKey({
+			<Subject
+				apiKey={createKey({
 					permissions: {
 						__typename: 'InheritPermissionStruct',
 					},
-				}),
-			),
+				})}
+			/>,
 		)
 
 		expect(screen.getByTestId('permissions-meta')).toBeInTheDocument()
@@ -102,7 +106,9 @@ describe('APIKeyInspector', () => {
 			...useAppContextRet,
 			user: { ...useAppContextRet.user, isServerOwner: true },
 		})
-		render(Subject(createKey({ permissions: { __typename: 'InheritPermissionStruct' } })))
+		render(
+			<Subject apiKey={createKey({ permissions: { __typename: 'InheritPermissionStruct' } })} />,
+		)
 
 		expect(screen.getByTestId('unrestricted-meta')).toBeInTheDocument()
 		expect(translate).toHaveBeenCalledWith(expect.stringContaining('unrestrictedKey.heading'))

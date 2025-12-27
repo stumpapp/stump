@@ -109,6 +109,7 @@ export default function BookActionMenu({ book }: Props) {
 
 	const groups = useMemo<DropdownItemGroup[]>(
 		() =>
+			// eslint-disable-next-line react-hooks/refs
 			[
 				{
 					items: [

@@ -3,6 +3,7 @@ import { Api } from '@stump/sdk'
 import { GraphQLWebsocketConnectEventHandlers } from '@stump/sdk/socket'
 import {
 	InfiniteData,
+	noop,
 	QueryKey,
 	useInfiniteQuery,
 	UseInfiniteQueryResult,
@@ -142,7 +143,8 @@ export function useGraphQLMutation<TResult, TVariables>(
 				onUnauthenticatedResponse,
 				onConnectionWithServerChanged,
 			})
-			options?.onError?.(error, variables, context)
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			options?.onError?.(error, variables, noop, context as any)
 		},
 	})
 
@@ -188,7 +190,8 @@ export function useGraphQLUploadMutation<TResult, TVariables>(
 				onUnauthenticatedResponse,
 				onConnectionWithServerChanged,
 			})
-			options?.onError?.(error, variables, context)
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			options?.onError?.(error, variables, noop, context as any)
 		},
 	})
 

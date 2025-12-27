@@ -76,6 +76,7 @@ export default function UserSmartListLayout() {
 	)
 
 	// Create scoped store with default grouping from the list
+	// eslint-disable-next-line react-hooks/refs
 	const store = useRef(
 		createSmartListViewStore({
 			defaultGrouping: list?.defaultGrouping,

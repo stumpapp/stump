@@ -24,6 +24,7 @@ export function HeaderButton({
 					role={role}
 					onPress={onPress}
 					variant={variant}
+					color={variant === 'glassProminent' ? colors.fill.brand.DEFAULT : undefined}
 					modifiers={[
 						...(isGlass
 							? [

@@ -82,6 +82,7 @@ export default function ReadiumReader({
 	const { brightness, ...preferences } = useReaderStore((state) => ({
 		fontSize: state.globalSettings.fontSize,
 		fontFamily: state.globalSettings.fontFamily,
+		fontWeight: state.globalSettings.fontWeight,
 		lineHeight: state.globalSettings.lineHeight,
 		brightness: state.globalSettings.brightness,
 		publisherStyles: state.globalSettings.allowPublisherStyles,
@@ -96,6 +97,8 @@ export default function ReadiumReader({
 		letterSpacing: state.globalSettings.letterSpacing,
 		hyphens: state.globalSettings.hyphens,
 		ligatures: state.globalSettings.ligatures,
+		textNormalization: state.globalSettings.textNormalization,
+		verticalText: state.globalSettings.verticalText,
 	}))
 	const { colors } = useEpubTheme()
 

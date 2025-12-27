@@ -198,6 +198,18 @@
                  view.pendingProps.ligatures = prop
              }
 
+             Prop("fontWeight") { (view: EPUBView, prop: Double?) in
+                 view.pendingProps.fontWeight = prop
+             }
+
+             Prop("textNormalization") { (view: EPUBView, prop: Bool?) in
+                 view.pendingProps.textNormalization = prop
+             }
+
+             Prop("verticalText") { (view: EPUBView, prop: Bool?) in
+                 view.pendingProps.verticalText = prop
+             }
+
              OnViewDidUpdateProps { (view: EPUBView) in
                  view.finalizeProps()
              }

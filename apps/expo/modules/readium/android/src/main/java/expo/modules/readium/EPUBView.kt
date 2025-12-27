@@ -46,6 +46,7 @@ data class Props(
     var fontFamily: FontFamily? = null,
     var lineHeight: Double? = null,
     var fontSize: Double? = null,
+    var fontWeight: Double? = null,
     var readingDirection: String? = null,
     var publisherStyles: Boolean? = null,
     var imageFilter: ImageFilter? = null,
@@ -58,7 +59,9 @@ data class Props(
     var wordSpacing: Double? = null,
     var letterSpacing: Double? = null,
     var hyphens: Boolean? = null,
-    var ligatures: Boolean? = null
+    var ligatures: Boolean? = null,
+    var textNormalization: Boolean? = null,
+    var verticalText: Boolean? = null
 )
 
 data class FinalizedProps(
@@ -70,6 +73,7 @@ data class FinalizedProps(
     val fontFamily: FontFamily,
     val lineHeight: Double,
     val fontSize: Double,
+    val fontWeight: Double?,
     val readingDirection: String,
     val publisherStyles: Boolean,
     val imageFilter: ImageFilter?,
@@ -82,7 +86,9 @@ data class FinalizedProps(
     val wordSpacing: Double?,
     val letterSpacing: Double?,
     val hyphens: Boolean?,
-    val ligatures: Boolean?
+    val ligatures: Boolean?,
+    val textNormalization: Boolean?,
+    val verticalText: Boolean?
 )
 
 @SuppressLint("ViewConstructor", "ResourceType")
@@ -150,6 +156,7 @@ class EPUBView(context: Context, appContext: AppContext) : ExpoView(context, app
                 ?: oldProps?.fontFamily ?: FontFamily("Literata"),
             lineHeight = pendingProps.lineHeight ?: oldProps?.lineHeight ?: 1.4,
             fontSize = pendingProps.fontSize ?: oldProps?.fontSize ?: 1.0,
+            fontWeight = pendingProps.fontWeight ?: oldProps?.fontWeight,
             readingDirection = pendingProps.readingDirection ?: oldProps?.readingDirection ?: "ltr",
             publisherStyles = pendingProps.publisherStyles ?: oldProps?.publisherStyles ?: true,
             imageFilter = pendingProps.imageFilter ?: oldProps?.imageFilter,
@@ -162,7 +169,9 @@ class EPUBView(context: Context, appContext: AppContext) : ExpoView(context, app
             wordSpacing = pendingProps.wordSpacing ?: oldProps?.wordSpacing,
             letterSpacing = pendingProps.letterSpacing ?: oldProps?.letterSpacing,
             hyphens = pendingProps.hyphens ?: oldProps?.hyphens,
-            ligatures = pendingProps.ligatures ?: oldProps?.ligatures
+            ligatures = pendingProps.ligatures ?: oldProps?.ligatures,
+            textNormalization = pendingProps.textNormalization ?: oldProps?.textNormalization,
+            verticalText = pendingProps.verticalText ?: oldProps?.verticalText
         )
 
         if (props!!.bookId != oldProps?.bookId || props!!.url != oldProps?.url) {
@@ -189,6 +198,7 @@ class EPUBView(context: Context, appContext: AppContext) : ExpoView(context, app
                 columnCount = props!!.columnCount,
                 fontFamily = props!!.fontFamily,
                 fontSize = props!!.fontSize,
+                fontWeight = props!!.fontWeight,
                 hyphens = props!!.hyphens,
                 imageFilter = props!!.imageFilter,
                 letterSpacing = props!!.letterSpacing,
@@ -200,7 +210,9 @@ class EPUBView(context: Context, appContext: AppContext) : ExpoView(context, app
                 publisherStyles = props!!.publisherStyles,
                 textAlign = props!!.textAlign,
                 textColor = org.readium.r2.navigator.preferences.Color(props!!.foreground),
+                textNormalization = props!!.textNormalization,
                 typeScale = props!!.typeScale,
+                verticalText = props!!.verticalText,
                 wordSpacing = props!!.wordSpacing,
             )
         )

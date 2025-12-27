@@ -6,7 +6,7 @@ import { createJSONStorage, persist } from 'zustand/middleware'
 
 import { useActiveServerSafe } from '~/components/activeServer'
 import { ImageReaderBookRef } from '~/components/book/reader/image/context'
-import { ColumnCount, ImageFilter, Spread, TextAlignment } from '~/modules/readium'
+import { ColumnCount, ImageFilter, TextAlignment } from '~/modules/readium'
 
 import { ZustandMMKVStorage } from './store'
 
@@ -33,7 +33,6 @@ export type BookPreferences = IBookPreferences & {
 	pageMargins?: number
 	columnCount?: ColumnCount
 	imageFilter?: ImageFilter
-	spread?: Spread
 	verticalText?: boolean
 	textAlign?: TextAlignment
 	typeScale?: number

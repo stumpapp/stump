@@ -15,6 +15,7 @@
      var fontFamily: FontFamily?
      var lineHeight: Double?
      var fontSize: Double?
+     var fontWeight: Double?
      var textAlign: TextAlignment?
      var publisherStyles: Bool?
      var imageFilter: ImageFilter?
@@ -27,6 +28,8 @@
      var letterSpacing: Double?
      var hyphens: Bool?
      var ligatures: Bool?
+     var textNormalization: Bool?
+     var verticalText: Bool?
  }
 
  public struct FinalizedProps {
@@ -38,6 +41,7 @@
      var fontFamily: FontFamily
      var lineHeight: Double
      var fontSize: Double
+     var fontWeight: Double?
      var textAlign: TextAlignment
      var publisherStyles: Bool = true
      var imageFilter: ImageFilter?
@@ -50,6 +54,8 @@
      var letterSpacing: Double?
      var hyphens: Bool?
      var ligatures: Bool?
+     var textNormalization: Bool?
+     var verticalText: Bool?
  }
 
  public class EPUBView: ExpoView {
@@ -169,6 +175,7 @@
              fontFamily: pendingProps.fontFamily ?? oldProps?.fontFamily ?? FontFamily(rawValue: "systemFont"),
              lineHeight: pendingProps.lineHeight ?? oldProps?.lineHeight ?? 1.4,
              fontSize: pendingProps.fontSize ?? oldProps?.fontSize ?? 1.0,
+             fontWeight: pendingProps.fontWeight ?? oldProps?.fontWeight,
              textAlign: pendingProps.textAlign ?? oldProps?.textAlign ?? TextAlignment.justify,
              imageFilter: pendingProps.imageFilter ?? oldProps?.imageFilter,
              pageMargins: pendingProps.pageMargins ?? oldProps?.pageMargins,
@@ -179,7 +186,9 @@
              wordSpacing: pendingProps.wordSpacing ?? oldProps?.wordSpacing,
              letterSpacing: pendingProps.letterSpacing ?? oldProps?.letterSpacing,
              hyphens: pendingProps.hyphens ?? oldProps?.hyphens,
-             ligatures: pendingProps.ligatures ?? oldProps?.ligatures
+             ligatures: pendingProps.ligatures ?? oldProps?.ligatures,
+             textNormalization: pendingProps.textNormalization ?? oldProps?.textNormalization,
+             verticalText: pendingProps.verticalText ?? oldProps?.verticalText
          )
 
          // If this is a new book or first initialization, load the publication
@@ -364,6 +373,7 @@
                          columnCount: props.columnCount,
                          fontFamily: props.fontFamily,
                          fontSize: props.fontSize,
+                         fontWeight: props.fontWeight,
                          hyphens: props.hyphens,
                          imageFilter: props.imageFilter,
                          letterSpacing: props.letterSpacing,
@@ -376,7 +386,9 @@
                          scroll: false,
                          textAlign: props.textAlign,
                          textColor: props.foreground,
+                         textNormalization: props.textNormalization,
                          typeScale: props.typeScale,
+                         verticalText: props.verticalText,
                          wordSpacing: props.wordSpacing
                      ),
                      defaults: EPUBDefaults(
@@ -554,6 +566,7 @@
              columnCount: props.columnCount,
              fontFamily: props.fontFamily,
              fontSize: props.fontSize,
+             fontWeight: props.fontWeight,
              hyphens: props.hyphens,
              imageFilter: props.imageFilter,
              letterSpacing: props.letterSpacing,
@@ -566,7 +579,9 @@
              scroll: false,
              textAlign: props.textAlign,
              textColor: props.foreground,
+             textNormalization: props.textNormalization,
              typeScale: props.typeScale,
+             verticalText: props.verticalText,
              wordSpacing: props.wordSpacing
          )
          

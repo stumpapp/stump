@@ -229,6 +229,18 @@ class ReadiumModule : Module() {
         view.pendingProps.ligatures = prop
       }
 
+      Prop("fontWeight") { view: EPUBView, prop: Double? ->
+        view.pendingProps.fontWeight = prop
+      }
+
+      Prop("textNormalization") { view: EPUBView, prop: Boolean? ->
+        view.pendingProps.textNormalization = prop
+      }
+
+      Prop("verticalText") { view: EPUBView, prop: Boolean? ->
+        view.pendingProps.verticalText = prop
+      }
+
       OnViewDidUpdateProps { view: EPUBView ->
         view.finalizeProps()
       }

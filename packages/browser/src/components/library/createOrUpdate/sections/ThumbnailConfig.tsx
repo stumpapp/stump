@@ -13,7 +13,7 @@ import { SupportedImageFormat } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { Check } from 'lucide-react'
 import { useCallback } from 'react'
-import { useFormContext, useFormState } from 'react-hook-form'
+import { useFormContext, useFormState, useWatch } from 'react-hook-form'
 import { match } from 'ts-pattern'
 
 import { useLibraryManagementSafe } from '@/scenes/library/tabs/settings/context'
@@ -37,10 +37,10 @@ export default function ThumbnailConfigForm() {
 
 	const { t } = useLocaleContext()
 
-	const [resizeMethod, enabled] = form.watch([
-		'thumbnailConfig.resizeMethod',
-		'thumbnailConfig.enabled',
-	])
+	const [resizeMethod, enabled] = useWatch({
+		control: form.control,
+		name: ['thumbnailConfig.resizeMethod', 'thumbnailConfig.enabled'],
+	})
 	const isCreating = !ctx?.library
 
 	const {

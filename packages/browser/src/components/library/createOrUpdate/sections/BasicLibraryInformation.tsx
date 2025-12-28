@@ -3,7 +3,7 @@ import { UserPermission } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { Folder } from 'lucide-react'
 import { Suspense } from 'react'
-import { useFormContext, useFormState } from 'react-hook-form'
+import { useFormContext, useFormState, useWatch } from 'react-hook-form'
 
 import TagSelect from '@/components/TagSelect'
 import { useAppContext } from '@/context'
@@ -24,7 +24,7 @@ export default function BasicLibraryInformation({ onSetShowDirectoryPicker }: Pr
 	const { checkPermission } = useAppContext()
 
 	const isCreatingLibrary = !ctx?.library
-	const tags = form.watch('tags')
+	const tags = useWatch({ control: form.control, name: 'tags' })
 
 	const { t } = useLocaleContext()
 	const { errors } = useFormState({

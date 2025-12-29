@@ -1,20 +1,18 @@
-import { useSDK } from '@stump/client'
-import { AspectRatio, cn, Heading } from '@stump/components'
+import { cn, Heading } from '@stump/components'
 
-import { EntityImage } from '@/components/entity'
 import ReadMore from '@/components/ReadMore'
 import TagList from '@/components/tags/TagList'
+import { ProminentThumbnailImage } from '@/components/thumbnail'
 import { usePreferences } from '@/hooks'
 
 import { useSeriesContext } from './context'
 
 export default function SeriesHeader() {
-	const { sdk } = useSDK()
 	const {
 		preferences: { primaryNavigationMode, layoutMaxWidthPx, showThumbnailsInHeaders },
 	} = usePreferences()
 	const {
-		series: { id, resolvedName, resolvedDescription, tags },
+		series: { resolvedName, resolvedDescription, tags, thumbnail },
 	} = useSeriesContext()
 
 	const preferTopBar = primaryNavigationMode === 'TOPBAR'
@@ -34,13 +32,8 @@ export default function SeriesHeader() {
 			}}
 		>
 			<div className="flex w-full flex-col items-center gap-4 md:mb-2 md:flex-row md:items-start">
-				{/* TODO: preference for showing series thumbnails? */}
 				{showThumbnailsInHeaders && (
-					<div className="w-[200px]">
-						<AspectRatio ratio={2 / 3}>
-							<EntityImage src={sdk.series.thumbnailURL(id)} className="rounded-md object-cover" />
-						</AspectRatio>
-					</div>
+					<ProminentThumbnailImage src={thumbnail.url} placeholderData={thumbnail.metadata} />
 				)}
 
 				<div className="flex h-full w-full flex-col gap-2 md:gap-4">

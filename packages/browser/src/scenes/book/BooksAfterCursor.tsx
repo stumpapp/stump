@@ -73,7 +73,7 @@ function BooksAfterCurrent({ cursor }: Props) {
 
 	const nodes = data.pages.flatMap((page) => page.mediaById?.nextInSeries.nodes || [])
 
-	const cards = nodes.map((node) => <BookCard key={node.id} fragment={node} fullWidth={false} />)
+	const cards = nodes.map((node) => <BookCard key={node.id} fragment={node} />)
 
 	const handleFetchMore = useCallback(() => {
 		if (hasNextPage && !isFetchingNextPage) {
@@ -86,6 +86,7 @@ function BooksAfterCurrent({ cursor }: Props) {
 			title="Next in series"
 			items={cards}
 			onFetchMore={handleFetchMore}
+			height={320}
 			emptyState={
 				<div className="flex items-start justify-start space-x-3 rounded-lg border border-dashed border-edge-subtle px-4 py-4">
 					<span className="rounded-lg border border-edge bg-background-surface p-2">

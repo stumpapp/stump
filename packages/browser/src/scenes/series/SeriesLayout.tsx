@@ -27,6 +27,17 @@ const query = graphql(`
 				id
 				name
 			}
+			thumbnail {
+				url
+				metadata {
+					averageColor
+					thumbhash
+					colors {
+						color
+						percentage
+					}
+				}
+			}
 		}
 	}
 `)

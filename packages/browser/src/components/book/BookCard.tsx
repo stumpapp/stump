@@ -201,7 +201,6 @@ const BookCard = memo(function BookCard({ fragment, readingLink, onSelect }: Pro
 					alt={data.resolvedName}
 					size={{ width: '100%', height: '100%' }}
 					placeholderData={placeholderData}
-					placeholderVariant="colorful"
 					lazy
 					borderAndShadowStyle={{
 						borderRadius: 8,

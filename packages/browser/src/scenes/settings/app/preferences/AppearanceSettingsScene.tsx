@@ -7,6 +7,7 @@ import { Container, ContentContainer } from '@/components/container'
 import DebugSettings from './DebugSettings'
 import DisplaySpacingPreference from './DisplaySpacingPreference'
 import EnableAlphabetFiltering from './EnableAlphabetFiltering'
+import EnableFancyAnimations from './EnableFancyAnimations'
 import EnableJobOverlayToggle from './EnableJobOverlayToggle'
 import FontSelect from './FontSelect'
 import GradientToggle from './GradientToggle'
@@ -80,6 +81,7 @@ export default function AppearanceSettingsScene() {
 					<ShowThumbnailsInHeader />
 					<HideScrollbarToggle />
 					<EnableAlphabetFiltering />
+					<EnableFancyAnimations />
 					<QueryIndicatorToggle />
 					<LiveRefetchToggle />
 					<EnableJobOverlayToggle />

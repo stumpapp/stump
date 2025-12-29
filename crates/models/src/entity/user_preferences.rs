@@ -37,6 +37,7 @@ pub struct Model {
 	pub enable_double_sidebar: bool,
 	pub enable_replace_primary_sidebar: bool,
 	pub enable_hide_scrollbar: bool,
+	pub enable_fancy_animations: bool,
 	pub prefer_accent_color: bool,
 	pub show_thumbnails_in_headers: bool,
 	pub thumbnail_ratio: f32,
@@ -97,6 +98,7 @@ impl ActiveModelBehavior for ActiveModel {
 			self.enable_double_sidebar = ActiveValue::Set(true);
 			self.enable_replace_primary_sidebar = ActiveValue::Set(false);
 			self.enable_hide_scrollbar = ActiveValue::Set(false);
+			self.enable_fancy_animations = ActiveValue::Set(false);
 			self.prefer_accent_color = ActiveValue::Set(false);
 			self.show_thumbnails_in_headers = ActiveValue::Set(false);
 			self.thumbnail_ratio = ActiveValue::Set(1.0 / 1.5);

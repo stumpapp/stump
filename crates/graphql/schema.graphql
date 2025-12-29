@@ -2487,6 +2487,7 @@ input UpdateUserPreferencesInput {
 	enableReplacePrimarySidebar: Boolean!
 	enableHideScrollbar: Boolean!
 	enableJobOverlay: Boolean!
+	enableFancyAnimations: Boolean!
 	preferAccentColor: Boolean!
 	showThumbnailsInHeaders: Boolean!
 	thumbnailRatio: Float!
@@ -2642,6 +2643,7 @@ type UserPreferences {
 	enableDoubleSidebar: Boolean!
 	enableReplacePrimarySidebar: Boolean!
 	enableHideScrollbar: Boolean!
+	enableFancyAnimations: Boolean!
 	preferAccentColor: Boolean!
 	showThumbnailsInHeaders: Boolean!
 	thumbnailRatio: Float!

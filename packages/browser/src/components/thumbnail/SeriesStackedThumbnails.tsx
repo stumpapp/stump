@@ -1,7 +1,8 @@
 import { cn } from '@stump/components'
 import { ImageRef } from '@stump/graphql'
 import { ColorSpace, getColor, OKLCH, serialize, set, sRGB } from 'colorjs.io/fn'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
+import { useMediaMatch } from 'rooks'
 
 import { usePreferences } from '@/hooks/usePreferences'
 import { useTheme } from '@/hooks/useTheme'
@@ -57,8 +58,10 @@ type Props = {
 export function SeriesStackedThumbnails({ thumbnailData, width: cardWidth, className }: Props) {
 	const { isDarkVariant } = useTheme()
 	const {
-		preferences: { thumbnailRatio },
+		preferences: { thumbnailRatio, enableFancyAnimations },
 	} = usePreferences()
+	const [isTouchDevice] = useState(() => !!('ontouchstart' in window))
+	const isDesktop = useMediaMatch('(min-width: 1024px)')
 
 	const baseThumbnailWidth = cardWidth * 0.7
 	const baseThumbnailHeight = baseThumbnailWidth / thumbnailRatio
@@ -103,6 +106,8 @@ export function SeriesStackedThumbnails({ thumbnailData, width: cardWidth, class
 				height: baseThumbnailHeight * config.scale,
 			}
 
+			const shouldAnimate = enableFancyAnimations && !isTouchDevice && isDesktop
+
 			const leftOffset = cardWidth * config.x - currentThumbnailSize.width / 2
 			const translateY = baseThumbnailHeight * config.y
 
@@ -126,20 +131,22 @@ export function SeriesStackedThumbnails({ thumbnailData, width: cardWidth, class
 					key={index}
 					className={cn(
 						'absolute bottom-0 will-change-transform',
-						'transform-gpu duration-300',
 						'translate-x-[var(--x)] translate-y-[var(--y)] rotate-[var(--r)]',
-						'group-hover:translate-x-[var(--x-hover)] group-hover:translate-y-[var(--y-hover)] group-hover:rotate-[var(--r-hover)]',
+						shouldAnimate && [
+							'transform-gpu duration-300',
+							'group-hover:translate-x-[var(--x-hover)] group-hover:translate-y-[var(--y-hover)] group-hover:rotate-[var(--r-hover)]',
+						],
 					)}
 					style={
 						{
 							zIndex: config.zIndex,
 							left: leftOffset,
 							'--x': '0px',
-							'--x-hover': `${hoverTranslateX}px`,
+							'--x-hover': shouldAnimate ? `${hoverTranslateX}px` : '0px',
 							'--y': `${translateY}px`,
-							'--y-hover': `${hoverTranslateY}px`,
+							'--y-hover': shouldAnimate ? `${hoverTranslateY}px` : `${translateY}px`,
 							'--r': '0deg',
-							'--r-hover': `${hoverRotate}deg`,
+							'--r-hover': shouldAnimate ? `${hoverRotate}deg` : '0deg',
 						} as React.CSSProperties
 					}
 				>
@@ -203,7 +210,7 @@ export function SeriesStackedThumbnails({ thumbnailData, width: cardWidth, class
 			}}
 		>
 			<div
-				className="absolute inset-0 -z-10 overflow-hidden rounded-xl border border-edge/50"
+				className="absolute inset-0 overflow-hidden rounded-xl border border-edge/50"
 				style={{
 					backgroundColor,
 					boxShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',

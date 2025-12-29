@@ -5,8 +5,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
 import { Helmet } from 'react-helmet'
 
-import { BookTable } from '@/components/book'
-import BookCard2 from '@/components/book/BookCard2'
+import { BookCard, BookTable } from '@/components/book'
 import { defaultBookColumnSort } from '@/components/book/table'
 import { DynamicCardGrid, GridSizeSlider } from '@/components/container'
 import {
@@ -44,7 +43,7 @@ const query = graphql(`
 		media(filter: $filter, orderBy: $orderBy, pagination: $pagination) {
 			nodes {
 				id
-				...BookCard2
+				...BookCard
 				...BookMetadata
 			}
 			pageInfo {
@@ -300,9 +299,7 @@ function LibraryBooksScene() {
 						{!!nodes.length && (
 							<DynamicCardGrid
 								count={nodes.length}
-								renderItem={(index) => (
-									<BookCard2 key={nodes[index]!.id} fragment={nodes[index]!} />
-								)}
+								renderItem={(index) => <BookCard key={nodes[index]!.id} fragment={nodes[index]!} />}
 							/>
 						)}
 						{!nodes.length && !isLoading && (

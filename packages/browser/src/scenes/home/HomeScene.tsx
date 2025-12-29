@@ -4,11 +4,11 @@ import { Helmet } from 'react-helmet'
 
 import { SceneContainer } from '@/components/container'
 
-import ContinueReadingMedia2, { usePrefetchContinueReading2 } from './ContinueReading2'
+import ContinueReadingMedia, { usePrefetchContinueReading } from './ContinueReading'
 import NoLibraries from './NoLibraries'
 import OnDeck, { usePrefetchOnDeck } from './OnDeck'
-import RecentlyAddedMedia2, { usePrefetchRecentlyAddedMedia2 } from './RecentlyAddedMedia2'
-import RecentlyAddedSeries2, { usePrefetchRecentlyAddedSeries2 } from './RecentlyAddedSeries2'
+import RecentlyAddedMedia, { usePrefetchRecentlyAddedMedia } from './RecentlyAddedMedia'
+import RecentlyAddedSeries, { usePrefetchRecentlyAddedSeries } from './RecentlyAddedSeries'
 
 const query = graphql(`
 	query HomeSceneQuery {
@@ -17,9 +17,9 @@ const query = graphql(`
 `)
 
 export const usePrefetchHomeScene = () => {
-	const prefetchRecentMedia = usePrefetchRecentlyAddedMedia2()
-	const prefetchContinueReading = usePrefetchContinueReading2()
-	const prefetchRecentSeries = usePrefetchRecentlyAddedSeries2()
+	const prefetchRecentMedia = usePrefetchRecentlyAddedMedia()
+	const prefetchContinueReading = usePrefetchContinueReading()
+	const prefetchRecentSeries = usePrefetchRecentlyAddedSeries()
 	const prefetchOnDeck = usePrefetchOnDeck()
 
 	return () =>
@@ -62,10 +62,10 @@ export default function HomeScene() {
 		<SceneContainer className="flex flex-col gap-6">
 			{helmet}
 
-			<ContinueReadingMedia2 />
+			<ContinueReadingMedia />
 			<OnDeck />
-			<RecentlyAddedMedia2 />
-			<RecentlyAddedSeries2 />
+			<RecentlyAddedMedia />
+			<RecentlyAddedSeries />
 			<div className="pb-5 sm:pb-0" />
 		</SceneContainer>
 	)

@@ -91,5 +91,10 @@ export const light = {
 	},
 	thumbnail: {
 		border: 'rgba(31, 33, 35, 0.10)',
+		placeholder: '#F2F2F2',
+		stack: {
+			series: '#d4b7a7',
+			library: ['#ad9282', '#d4b7a7'],
+		},
 	},
 } satisfies StumpTheme

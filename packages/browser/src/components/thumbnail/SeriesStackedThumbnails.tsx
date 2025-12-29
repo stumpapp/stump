@@ -56,7 +56,7 @@ type Props = {
 }
 
 export function SeriesStackedThumbnails({ thumbnailData, width: cardWidth, className }: Props) {
-	const { isDarkVariant } = useTheme()
+	const { isDarkVariant, getColor: getThemeColor } = useTheme()
 	const {
 		preferences: { thumbnailRatio, enableFancyAnimations },
 	} = usePreferences()
@@ -78,9 +78,8 @@ export function SeriesStackedThumbnails({ thumbnailData, width: cardWidth, class
 			})
 			return serialize(color, { format: 'hex' })
 		}
-		// TODO(thumbs): Replace with theme colors like expo thumbnail.stack.series
-		return isDarkVariant ? '#2a2a2e' : '#e5e5e7'
-	}, [mainThumbnailAverageColor, isDarkVariant])
+		return getThemeColor('thumbnail.stack.series') ?? (isDarkVariant ? '#2a2a2e' : '#e5e5e7')
+	}, [mainThumbnailAverageColor, isDarkVariant, getThemeColor])
 
 	const gradientStyle = useMemo(
 		() => ({

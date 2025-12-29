@@ -98,5 +98,10 @@ export const cosmic = {
 	},
 	thumbnail: {
 		border: 'rgba(233, 234, 235, 0.10)',
+		placeholder: '#24135A',
+		stack: {
+			series: '#BB86FC',
+			library: ['#6C567B', '#8E44AD'],
+		},
 	},
 } satisfies StumpTheme

@@ -90,5 +90,10 @@ export const dark = {
 	},
 	thumbnail: {
 		border: 'rgba(233, 234, 235, 0.10)',
+		placeholder: '#1F2123',
+		stack: {
+			series: '#3D3A3A',
+			library: ['#2E2B2B', '#3D3A3A'],
+		},
 	},
 } satisfies StumpTheme

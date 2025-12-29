@@ -397,6 +397,7 @@ async fn update_user_preferences_by_id(
 		prefer_accent_color: Set(user_preferences.prefer_accent_color),
 		show_thumbnails_in_headers: Set(user_preferences.show_thumbnails_in_headers),
 		thumbnail_ratio: Set(user_preferences.thumbnail_ratio),
+		thumbnail_placeholder_style: Set(user_preferences.thumbnail_placeholder_style),
 		enable_alphabet_select: Set(user_preferences.enable_alphabet_select),
 		home_arrangement: NotSet,
 		navigation_arrangement: NotSet,

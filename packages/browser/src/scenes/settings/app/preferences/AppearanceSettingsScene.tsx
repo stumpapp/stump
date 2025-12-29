@@ -20,6 +20,7 @@ import QueryIndicatorToggle from './QueryIndicatorToggle'
 import { DoubleSidebarToggle, ReplacePrimarySidebarToggle } from './settings-sidebar'
 import ShowThumbnailsInHeader from './ShowThumbnailsInHeader'
 import ThemeSelect from './ThemeSelect'
+import ThumbnailPlaceholder from './ThumbnailPlaceholder'
 import ThumbnailRatioSelect from './ThumbnailRatioSelect'
 
 // TODO: The more I look at this the less I kinda like it
@@ -48,6 +49,7 @@ export default function AppearanceSettingsScene() {
 					<GradientToggle />
 					<FontSelect />
 					<ThumbnailRatioSelect />
+					<ThumbnailPlaceholder />
 				</div>
 
 				<div>

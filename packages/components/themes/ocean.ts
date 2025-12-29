@@ -90,5 +90,10 @@ export const ocean = {
 	},
 	thumbnail: {
 		border: 'rgba(233, 234, 235, 0.10)',
+		placeholder: '#165564',
+		stack: {
+			series: '#0A9396',
+			library: ['#125A6D', '#227E95'],
+		},
 	},
 } satisfies StumpTheme

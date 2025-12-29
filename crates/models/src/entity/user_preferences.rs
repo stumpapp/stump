@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::shared::{
 	arrangement::Arrangement,
-	enums::{InterfaceLayout, SupportedFont},
+	enums::{InterfaceLayout, SupportedFont, ThumbnailPlaceholderStyle},
 };
 
 #[derive(
@@ -41,6 +41,8 @@ pub struct Model {
 	pub prefer_accent_color: bool,
 	pub show_thumbnails_in_headers: bool,
 	pub thumbnail_ratio: f32,
+	#[sea_orm(column_type = "Text")]
+	pub thumbnail_placeholder_style: ThumbnailPlaceholderStyle,
 	pub enable_job_overlay: bool,
 	pub enable_alphabet_select: bool,
 	#[graphql(skip)]
@@ -102,6 +104,8 @@ impl ActiveModelBehavior for ActiveModel {
 			self.prefer_accent_color = ActiveValue::Set(false);
 			self.show_thumbnails_in_headers = ActiveValue::Set(false);
 			self.thumbnail_ratio = ActiveValue::Set(1.0 / 1.5);
+			self.thumbnail_placeholder_style =
+				ActiveValue::Set(ThumbnailPlaceholderStyle::default());
 			self.enable_job_overlay = ActiveValue::Set(true);
 			self.enable_alphabet_select = ActiveValue::Set(false);
 		}

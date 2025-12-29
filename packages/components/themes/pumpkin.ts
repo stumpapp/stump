@@ -74,6 +74,11 @@ export const pumpkin: StumpTheme = {
 	},
 	thumbnail: {
 		border: 'rgba(233, 234, 235, 0.10)',
+		placeholder: '#131313',
+		stack: {
+			series: '#FF6600',
+			library: ['#481E14', '#631C03'],
+		},
 	},
 }
 

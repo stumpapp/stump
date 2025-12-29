@@ -1,13 +1,11 @@
 import { selectMeshColors } from '@stump/client'
 import { cn } from '@stump/components'
-import { ImageColor } from '@stump/graphql'
+import { ImageColor, ThumbnailPlaceholderStyle } from '@stump/graphql'
 import { useMemo } from 'react'
 import { thumbHashToDataURL } from 'thumbhash'
 
-// TODO: Support persisting thumbnailPlaceholder preference to a user preferences store,
-// similar to how Expo uses usePreferencesStore. Maybe just put it in the DB too so it
-// syncs across devices/platforms.
-export type ThumbnailPlaceholderVariant = 'grayscale' | 'averageColor' | 'colorful' | 'thumbhash'
+import { usePreferences } from '@/hooks/usePreferences'
+import { getThemeColor } from '@/hooks/useTheme'
 
 export type ThumbnailPlaceholderData = {
 	averageColor?: string | null
@@ -16,8 +14,6 @@ export type ThumbnailPlaceholderData = {
 }
 
 type Props = ThumbnailPlaceholderData & {
-	// TODO: Don't intake variant, see above TODO
-	variant?: ThumbnailPlaceholderVariant
 	className?: string
 }
 
@@ -28,17 +24,20 @@ type GrayscalePlaceholderProps = {
 }
 
 function GrayscalePlaceholder({ className }: GrayscalePlaceholderProps) {
-	// TODO(thumbs): Use thumbnail.placeholder color from theme
-	return <div className={cn(PLACEHOLDER_BASE_CLASSES, 'bg-sidebar', className)} />
+	const placeholderColor = getThemeColor('thumbnail.placeholder')
+	return (
+		<div
+			className={cn(PLACEHOLDER_BASE_CLASSES, className)}
+			style={placeholderColor ? { backgroundColor: placeholderColor } : undefined}
+		/>
+	)
 }
 
-export function ThumbnailPlaceholder({
-	averageColor,
-	colors,
-	thumbhash,
-	variant = 'grayscale',
-	className,
-}: Props) {
+export function ThumbnailPlaceholder({ averageColor, colors, thumbhash, className }: Props) {
+	const {
+		preferences: { thumbnailPlaceholderStyle },
+	} = usePreferences()
+
 	const meshColors = useMemo(() => {
 		if (!colors) {
 			return null
@@ -77,11 +76,11 @@ export function ThumbnailPlaceholder({
 		}
 	}, [thumbhash])
 
-	if (variant === 'grayscale') {
+	if (thumbnailPlaceholderStyle === ThumbnailPlaceholderStyle.Grayscale) {
 		return <GrayscalePlaceholder className={className} />
 	}
 
-	if (variant === 'averageColor' && averageColor) {
+	if (thumbnailPlaceholderStyle === ThumbnailPlaceholderStyle.AverageColor && averageColor) {
 		return (
 			<div
 				className={cn(PLACEHOLDER_BASE_CLASSES, className)}
@@ -90,11 +89,11 @@ export function ThumbnailPlaceholder({
 		)
 	}
 
-	if (variant === 'colorful' && gradientStyle) {
+	if (thumbnailPlaceholderStyle === ThumbnailPlaceholderStyle.Colorful && gradientStyle) {
 		return <div className={cn(PLACEHOLDER_BASE_CLASSES, className)} style={gradientStyle} />
 	}
 
-	if (variant === 'thumbhash' && thumbHashDataUrl) {
+	if (thumbnailPlaceholderStyle === ThumbnailPlaceholderStyle.Thumbhash && thumbHashDataUrl) {
 		return (
 			<img
 				src={thumbHashDataUrl}

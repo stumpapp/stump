@@ -2436,6 +2436,14 @@ type ThumbnailGenerationOutput {
 	removedThumbnails: Int!
 }
 
+"The style of placeholder to use for thumbnails while they are loading"
+enum ThumbnailPlaceholderStyle {
+	GRAYSCALE
+	AVERAGE_COLOR
+	COLORFUL
+	THUMBHASH
+}
+
 """
 A simple pagination input object which does not paginate. An explicit struct is
 required as a limitation of async_graphql's [OneofObject], which doesn't allow
@@ -2491,6 +2499,7 @@ input UpdateUserPreferencesInput {
 	preferAccentColor: Boolean!
 	showThumbnailsInHeaders: Boolean!
 	thumbnailRatio: Float!
+	thumbnailPlaceholderStyle: ThumbnailPlaceholderStyle!
 	enableAlphabetSelect: Boolean!
 }
 
@@ -2647,6 +2656,7 @@ type UserPreferences {
 	preferAccentColor: Boolean!
 	showThumbnailsInHeaders: Boolean!
 	thumbnailRatio: Float!
+	thumbnailPlaceholderStyle: ThumbnailPlaceholderStyle!
 	enableJobOverlay: Boolean!
 	enableAlphabetSelect: Boolean!
 	userId: String

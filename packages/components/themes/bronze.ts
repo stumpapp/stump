@@ -44,5 +44,10 @@ export const bronze = {
 	},
 	thumbnail: {
 		border: 'rgba(31, 33, 35, 0.10)',
+		placeholder: '#EDE8E4',
+		stack: {
+			series: '#D3C4BA',
+			library: ['#C4B5A9', '#D3C4BA'],
+		},
 	},
 } satisfies StumpTheme

@@ -1,7 +1,7 @@
 use async_graphql::InputObject;
 use models::shared::{
 	arrangement::ArrangementSection,
-	enums::{InterfaceLayout, SupportedFont, UserPermission},
+	enums::{InterfaceLayout, SupportedFont, ThumbnailPlaceholderStyle, UserPermission},
 };
 
 #[derive(InputObject)]
@@ -52,6 +52,7 @@ pub struct UpdateUserPreferencesInput {
 	pub prefer_accent_color: bool,
 	pub show_thumbnails_in_headers: bool,
 	pub thumbnail_ratio: f32,
+	pub thumbnail_placeholder_style: ThumbnailPlaceholderStyle,
 	pub enable_alphabet_select: bool,
 }
 

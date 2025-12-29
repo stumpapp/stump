@@ -133,6 +133,11 @@ type Scrollbar = {
  */
 type Thumbnail = {
 	border: string
+	placeholder: string
+	stack: {
+		series: string
+		library: string[]
+	}
 }
 
 /**

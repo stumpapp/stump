@@ -59,7 +59,7 @@ const BookCard = memo(function BookCard({ fragment, readingLink, onSelect }: Pro
 	const {
 		preferences: { thumbnailRatio },
 	} = usePreferences()
-	const { isDarkVariant } = useTheme()
+	const { isDarkVariant, getColor: getThemeColor } = useTheme()
 
 	const prefetchBook = usePrefetchBook()
 	const prefetchBooksAfterCursor = usePrefetchBooksAfterCursor()
@@ -167,9 +167,11 @@ const BookCard = memo(function BookCard({ fragment, readingLink, onSelect }: Pro
 			})
 			return serialize(color, { format: 'hex' })
 		}
-		// TODO(thumbs): Replace with theme colors like expo thumbnail.stack.series
-		return isDarkVariant ? 'oklch(0.35 0.01 52.14)' : 'oklch(0.9 0.01 52.14)'
-	}, [thumbnailAverageColor, isDarkVariant])
+		return (
+			getThemeColor('thumbnail.stack.series') ??
+			(isDarkVariant ? 'oklch(0.35 0.01 52.14)' : 'oklch(0.9 0.01 52.14)')
+		)
+	}, [thumbnailAverageColor, isDarkVariant, getThemeColor])
 
 	return (
 		// @ts-expect-error: It's okay

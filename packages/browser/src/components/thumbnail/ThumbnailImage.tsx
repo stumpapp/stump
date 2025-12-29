@@ -4,11 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { forwardRef, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 
 import { AuthImage } from '../entity/AuthImage'
-import {
-	ThumbnailPlaceholder,
-	ThumbnailPlaceholderData,
-	ThumbnailPlaceholderVariant,
-} from './ThumbnailPlaceholder'
+import { ThumbnailPlaceholder, ThumbnailPlaceholderData } from './ThumbnailPlaceholder'
 
 export type ThumbnailImageSize = {
 	height: number | string
@@ -38,8 +34,6 @@ export type ThumbnailImageProps = {
 	size?: ThumbnailImageSize
 	gradient?: ThumbnailGradient
 	placeholderData?: ThumbnailPlaceholderData | null
-	// TODO: This is pulled from pref store on expo, made prop for now just for testing
-	placeholderVariant?: ThumbnailPlaceholderVariant
 	/**
 	 * Override the default border and shadow style
 	 */
@@ -62,7 +56,6 @@ export const ThumbnailImage = forwardRef<HTMLDivElement, ThumbnailImageProps>(
 			size,
 			gradient,
 			placeholderData,
-			placeholderVariant = 'grayscale',
 			borderAndShadowStyle,
 			className,
 			imageClassName,
@@ -83,7 +76,6 @@ export const ThumbnailImage = forwardRef<HTMLDivElement, ThumbnailImageProps>(
 		// so this should help prevent that
 		useLayoutEffect(() => {
 			if (imageRef.current?.complete && imageRef.current.naturalWidth > 0) {
-				// eslint-disable-next-line react-hooks/set-state-in-effect
 				setIsLoaded(true)
 			}
 		}, [src])
@@ -197,11 +189,7 @@ export const ThumbnailImage = forwardRef<HTMLDivElement, ThumbnailImageProps>(
 
 		return (
 			<div ref={ref} className={cn('relative overflow-hidden', className)} style={containerStyle}>
-				<ThumbnailPlaceholder
-					{...placeholderData}
-					variant={placeholderVariant}
-					className="rounded-[inherit]"
-				/>
+				<ThumbnailPlaceholder {...placeholderData} className="rounded-[inherit]" />
 
 				<AnimatePresence>
 					{!hasError && (

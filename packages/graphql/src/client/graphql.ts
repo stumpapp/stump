@@ -3245,6 +3245,14 @@ export type ThumbnailGenerationOutput = {
   visitedFiles: Scalars['Int']['output'];
 };
 
+/** The style of placeholder to use for thumbnails while they are loading */
+export enum ThumbnailPlaceholderStyle {
+  AverageColor = 'AVERAGE_COLOR',
+  Colorful = 'COLORFUL',
+  Grayscale = 'GRAYSCALE',
+  Thumbhash = 'THUMBHASH'
+}
+
 /**
  * A simple pagination input object which does not paginate. An explicit struct is
  * required as a limitation of async_graphql's [OneofObject], which doesn't allow
@@ -3300,6 +3308,7 @@ export type UpdateUserPreferencesInput = {
   primaryNavigationMode: Scalars['String']['input'];
   showQueryIndicator: Scalars['Boolean']['input'];
   showThumbnailsInHeaders: Scalars['Boolean']['input'];
+  thumbnailPlaceholderStyle: ThumbnailPlaceholderStyle;
   thumbnailRatio: Scalars['Float']['input'];
 };
 
@@ -3467,6 +3476,7 @@ export type UserPreferences = {
   primaryNavigationMode: Scalars['String']['output'];
   showQueryIndicator: Scalars['Boolean']['output'];
   showThumbnailsInHeaders: Scalars['Boolean']['output'];
+  thumbnailPlaceholderStyle: ThumbnailPlaceholderStyle;
   thumbnailRatio: Scalars['Float']['output'];
   userId?: Maybe<Scalars['String']['output']>;
 };

@@ -2,7 +2,7 @@ import { Heading, Link, RadioGroup, Text } from '@stump/components'
 import { LibraryPattern } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { useCallback } from 'react'
-import { useFormContext } from 'react-hook-form'
+import { useFormContext, useWatch } from 'react-hook-form'
 
 import { useLibraryContextSafe } from '@/scenes/library/context'
 
@@ -12,7 +12,7 @@ export default function LibraryPatternRadioGroup() {
 
 	const { t } = useLocaleContext()
 
-	const libraryPattern: LibraryPattern = form.watch('libraryPattern')
+	const libraryPattern = useWatch({ control: form.control, name: 'libraryPattern' })
 	const isCollectionBasedSelected = libraryPattern === LibraryPattern.CollectionBased
 	const isCreating = !ctx?.library
 

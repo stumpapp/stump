@@ -186,6 +186,7 @@ export function ComboBox({
 		...((label || description) && { className: 'flex flex-col gap-2' }),
 	}
 
+	/* eslint-disable react-hooks/refs */
 	const contentStyle = {
 		...(size === 'full'
 			? {
@@ -194,6 +195,7 @@ export function ComboBox({
 			: {}),
 		...(wrapperStyle || {}),
 	}
+	/* eslint-enable react-hooks/refs */
 
 	const topDescription = description && descriptionPosition === 'top'
 	const bottomDescription = description && descriptionPosition === 'bottom'
@@ -248,6 +250,7 @@ export function ComboBox({
 						'z-[1000] mt-1 max-h-96 overflow-y-auto p-0',
 						wrapperClassName,
 					)}
+					// eslint-disable-next-line react-hooks/refs
 					style={contentStyle}
 					portal={false}
 				>

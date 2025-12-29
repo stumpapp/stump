@@ -6,6 +6,9 @@ const withNextra = nextra({
 })
 
 export default withNextra({
+	experimental: {
+		reactCompiler: true,
+	},
 	eslint: {
 		// FIXME: This is a workaround to prevent the build from failing
 		ignoreDuringBuilds: true,

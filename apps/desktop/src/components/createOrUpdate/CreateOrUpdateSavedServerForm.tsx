@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Form, Input, Label, NativeSelect, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { useCallback } from 'react'
-import { useForm, useFormState } from 'react-hook-form'
+import { useForm, useFormState, useWatch } from 'react-hook-form'
 import { match, P } from 'ts-pattern'
 
 import { CreateServer, SavedServer } from '../../stores/savedServer'
@@ -34,7 +34,7 @@ export default function CreateOrUpdateSavedServerForm({
 	})
 	const { errors } = useFormState({ control: form.control })
 
-	const authMode = form.watch('authMode')
+	const authMode = useWatch({ control: form.control, name: 'authMode' })
 
 	const handleSubmit = useCallback(
 		(data: CreateOrUpdateServerSchema) => {

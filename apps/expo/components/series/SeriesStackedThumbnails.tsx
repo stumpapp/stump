@@ -70,6 +70,8 @@ export default function SeriesStackedThumbnails({ thumbnailData, width: cardWidt
 		return layoutConfig.map((config, index) => {
 			const currentThumbnailData = thumbnailData[index]
 
+			if (!currentThumbnailData) return null
+
 			const currentThumbnailSize = {
 				width: baseThumbnailWidth * config.scale,
 				height: baseThumbnailHeight * config.scale,
@@ -106,7 +108,7 @@ export default function SeriesStackedThumbnails({ thumbnailData, width: cardWidt
 		})
 	}
 
-	const mainThumbnailAverageColor = thumbnailData[0].metadata?.averageColor
+	const mainThumbnailAverageColor = thumbnailData[0]?.metadata?.averageColor
 
 	let backgroundColor
 	if (mainThumbnailAverageColor) {

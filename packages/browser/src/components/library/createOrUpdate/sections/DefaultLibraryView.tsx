@@ -2,14 +2,16 @@ import { Heading, RadioGroup, Text, WideSwitch } from '@stump/components'
 import { LibraryViewMode } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { useCallback, useEffect } from 'react'
-import { useFormContext } from 'react-hook-form'
+import { useFormContext, useWatch } from 'react-hook-form'
 
 export default function DefaultLibraryView() {
 	const form = useFormContext()
 	const { t } = useLocaleContext()
 
-	const viewMode: LibraryViewMode = form.watch('defaultLibraryViewMode')
-	const hideSeriesView: boolean = form.watch('hideSeriesView')
+	const [viewMode, hideSeriesView]: [LibraryViewMode, boolean] = useWatch({
+		control: form.control,
+		name: ['defaultLibraryViewMode', 'hideSeriesView'],
+	})
 	const isSeriesSelected = viewMode === LibraryViewMode.Series
 
 	const handleViewModeChange = useCallback(

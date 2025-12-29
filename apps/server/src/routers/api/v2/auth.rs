@@ -196,6 +196,20 @@ async fn login(
 	}): Query<AuthenticationOptions>,
 	Json(PasswordUserInput { username, password }): Json<PasswordUserInput>,
 ) -> APIResult<Json<LoginResponse>> {
+	let config = state.config.clone();
+
+	let is_oidc_only_auth = config
+		.oidc
+		.as_ref()
+		.is_some_and(|oidc_config| oidc_config.disable_local_auth);
+
+	if is_oidc_only_auth {
+		return Err(APIError::BadRequest(
+			"Local authentication is disabled. Please log in with your identity provider."
+				.to_string(),
+		));
+	}
+
 	let user = LoginUser::find()
 		.filter(
 			user::Column::Username
@@ -228,6 +242,20 @@ async fn login(
 	let today: DateTime<FixedOffset> = Utc::now().into();
 	// TODO: make this configurable via environment variable so knowledgeable attackers can't bypass this
 	let twenty_four_hours_ago = today - Duration::hours(24);
+
+	// Check if this is an OIDC-only user (no password set)
+	if user.hashed_password.is_empty() && user.oidc_issuer_id.is_some() {
+		return Err(APIError::BadRequest(
+			"This account uses OIDC authentication. Please log in with your identity provider."
+				.to_string(),
+		));
+	} else if user.hashed_password.is_empty() {
+		tracing::error!(
+			"Broken account! User {} has no password set and is not an OIDC user",
+			user.username
+		);
+		return Err(APIError::Unauthorized);
+	}
 
 	let provided_valid_credentials = verify_password(&user.hashed_password, &password)?;
 
@@ -330,6 +358,20 @@ pub async fn register(
 	State(ctx): State<AppState>,
 	Json(input): Json<PasswordUserInput>,
 ) -> APIResult<Json<AuthUser>> {
+	let config = ctx.config.clone();
+
+	let is_oidc_only_auth = config
+		.oidc
+		.as_ref()
+		.is_some_and(|oidc_config| oidc_config.disable_local_auth);
+
+	if is_oidc_only_auth {
+		return Err(APIError::BadRequest(
+			"Local authentication is disabled. Please register with your identity provider."
+				.to_string()
+		));
+	}
+
 	let conn = ctx.conn.as_ref();
 	let has_users = user::Entity::find()
 		.filter(user::Column::DeletedAt.is_null())

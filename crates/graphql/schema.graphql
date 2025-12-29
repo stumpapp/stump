@@ -2522,6 +2522,7 @@ type User {
 	deletedAt: DateTime
 	isLocked: Boolean!
 	maxSessionsAllowed: Int
+	oidcEmail: String
 	ageRestriction: AgeRestriction
 	continueReading(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
 	permissions: [UserPermission!]!

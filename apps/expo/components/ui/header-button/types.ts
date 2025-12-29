@@ -16,6 +16,9 @@ export type HeaderButtonProps = {
 	ios?: {
 		variant?: IosButtonVariant
 	}
+	android?: {
+		variant?: 'default' | 'prominent'
+	}
 	role?: ButtonRole
 	onPress?: () => void
 	disabled?: boolean

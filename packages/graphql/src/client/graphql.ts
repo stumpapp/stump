@@ -3335,6 +3335,7 @@ export type User = {
   lastLogin?: Maybe<Scalars['DateTime']['output']>;
   loginSessionsCount: Scalars['Int']['output'];
   maxSessionsAllowed?: Maybe<Scalars['Int']['output']>;
+  oidcEmail?: Maybe<Scalars['String']['output']>;
   permissions: Array<UserPermission>;
   preferences: UserPreferences;
   username: Scalars['String']['output'];

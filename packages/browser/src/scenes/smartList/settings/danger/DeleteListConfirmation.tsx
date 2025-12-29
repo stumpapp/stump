@@ -52,7 +52,7 @@ export default function DeleteListConfirmation({ isOpen, id, onClose, trigger }:
 		} catch (err) {
 			setErrorMessage(handleApiError(err))
 		}
-	}, [mutate, id])
+	}, [mutate, id, setErrorMessage])
 
 	return (
 		<ConfirmationModal

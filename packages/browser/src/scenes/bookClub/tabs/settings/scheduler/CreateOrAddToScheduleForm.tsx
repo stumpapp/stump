@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Form, Input } from '@stump/components'
 import { useCallback } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
 
 import AddBookCard from './AddBookCard'
@@ -40,7 +40,7 @@ export default function CreateOrAddToScheduleForm() {
 		resolver: zodResolver(schema),
 	})
 
-	const books = form.watch('books')
+	const books = useWatch({ control: form.control, name: 'books' })
 
 	const handleSubmit = (data: Schema) => {
 		// eslint-disable-next-line no-console

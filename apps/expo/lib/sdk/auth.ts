@@ -1,9 +1,13 @@
 import { Api, AuthUser, constants } from '@stump/sdk'
 import { isAxiosError } from 'axios'
+import * as AuthSession from 'expo-auth-session'
+import * as WebBrowser from 'expo-web-browser'
 import partition from 'lodash/partition'
 import { match, P } from 'ts-pattern'
 
 import { ManagedToken, SavedServerWithConfig, ServerConfig, ServerKind } from '~/stores/savedServer'
+
+WebBrowser.maybeCompleteAuthSession()
 
 type AuthSDKParams = {
 	config: ServerConfig | null
@@ -206,4 +210,52 @@ export const getInstancesForServers = async (
 	await Promise.all(compatibleServers.map((server) => getInstanceForServer(server)))
 
 	return instances
+}
+
+type OidcLoginParams = {
+	serverUrl: string
+	saveToken?: (token: ManagedToken, forUser: AuthUser) => Promise<void>
+}
+
+/**
+ * Start OIDC login flow, which will open the system browser for authentication, then redirects back
+ * to app with tokens
+ */
+export const startOidcLogin = async ({
+	serverUrl,
+	saveToken,
+}: OidcLoginParams): Promise<({ forUser: AuthUser } & ManagedToken) | null> => {
+	const redirectUri = AuthSession.makeRedirectUri({
+		scheme: 'stump',
+	})
+
+	const authorizeUrl = `${serverUrl}/api/v2/auth/oidc/authorize?generate_token=true&redirect_uri=${encodeURIComponent(redirectUri)}`
+
+	const result = await WebBrowser.openAuthSessionAsync(authorizeUrl, redirectUri)
+
+	if (result.type === 'success') {
+		const url = new URL(result.url)
+		const accessToken = url.searchParams.get('access_token')
+		const refreshToken = url.searchParams.get('refresh_token')
+		const expiresAt = url.searchParams.get('expires_at')
+
+		if (!accessToken || !expiresAt) {
+			throw new Error('Missing tokens in OIDC callback')
+		}
+
+		const api = new Api({ baseURL: serverUrl, authMethod: 'token' })
+		api.tokens = {
+			accessToken,
+			refreshToken: refreshToken || undefined,
+			expiresAt,
+		}
+
+		const forUser = await api.auth.me()
+		const tokenPair = { accessToken, refreshToken, expiresAt }
+		await saveToken?.(tokenPair, forUser)
+
+		return { forUser, ...tokenPair }
+	}
+
+	return null
 }

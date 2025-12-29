@@ -1,3 +1,4 @@
+/* eslint-disable react-compiler/react-compiler */
 import { useSDK } from '@stump/client'
 import { cn, ProgressBar, Text, usePreviousIsDifferent } from '@stump/components'
 import { ReadingDirection } from '@stump/graphql'
@@ -41,6 +42,7 @@ export default function ReaderFooter() {
 
 	const showToolBarChanged = usePreviousIsDifferent(showToolBar)
 	const readingDirectionChanged = usePreviousIsDifferent(readingDirection)
+
 	useEffect(() => {
 		if (showToolBar) {
 			virtuosoRef.current?.scrollToIndex({

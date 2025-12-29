@@ -563,15 +563,11 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 	// I'm hopeful this solves: https://github.com/stumpapp/stump/issues/726
 	// Honestly though epub.js is such a migraine that I'm OK just waiting until
 	// I have the time to migrate off of it
-	useEffect(
-		() => {
-			return () => {
-				rendition?.destroy()
-			}
-		},
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[],
-	)
+	useEffect(() => {
+		return () => {
+			rendition?.destroy()
+		}
+	}, [rendition])
 
 	// TODO: this needs to have fullscreen as an effect dependency
 	/**
@@ -619,18 +615,14 @@ export default function EpubJsReader({ id, isIncognito }: EpubJsReaderProps) {
 	 * Invalidate the book query when a reader is unmounted so that the book overview
 	 * is updated with the latest read progress
 	 */
-	useEffect(
-		() => {
-			return () => {
-				Promise.all([
-					queryClient.invalidateQueries({ queryKey: ['bookOverview', id], exact: false }),
-					queryClient.invalidateQueries({ queryKey: ['keepReading'], exact: false }),
-				])
-			}
-		},
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[],
-	)
+	useEffect(() => {
+		return () => {
+			Promise.all([
+				queryClient.invalidateQueries({ queryKey: ['bookOverview', id], exact: false }),
+				queryClient.invalidateQueries({ queryKey: ['keepReading'], exact: false }),
+			])
+		}
+	}, [id])
 
 	/**
 	 * A callback for when the reader should paginate forward. This will only run if the

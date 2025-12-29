@@ -2,18 +2,36 @@ import { useGraphQL } from '@stump/client'
 import { graphql } from '@stump/graphql'
 import clone from 'lodash/cloneDeep'
 import setProperty from 'lodash/set'
-import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Platform, View } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { FlatList, View } from 'react-native'
 import { match, P } from 'ts-pattern'
 
-import { FilterHeaderButton, FilterSheet } from '~/components/filter'
+import {
+	FilterHeaderButton,
+	FilterSheet,
+	FilterSheetSearchHeader,
+	useFilterListProps,
+} from '~/components/filter'
 import { FilterSheetRef } from '~/components/filter/FilterSheet'
 import { Checkbox, Label, Text } from '~/components/ui'
-import { cn } from '~/lib/utils'
 import { useBookFilterStore } from '~/stores/filters'
 
 import { useBookFilterHeaderContext } from './context'
+
+type WriterItemProps = {
+	item: string
+	checked: boolean
+	onSelect: (writer: string, checked: boolean) => void
+}
+
+const WriterItem = memo(function WriterItem({ item, checked, onSelect }: WriterItemProps) {
+	return (
+		<View className="flex flex-row items-center gap-3 px-7 py-3">
+			<Checkbox id={item} checked={checked} onCheckedChange={(c) => onSelect(item, !!c)} />
+			<Label htmlFor={item}>{item}</Label>
+		</View>
+	)
+})
 
 const query = graphql(`
 	query Writers($seriesId: ID) {
@@ -24,21 +42,24 @@ const query = graphql(`
 `)
 
 export default function Writers() {
-	const insets = useSafeAreaInsets()
-
 	const { seriesId } = useBookFilterHeaderContext()
 	const { data, isPending } = useGraphQL(query, ['writers', seriesId], { seriesId })
 
-	const writers = data?.mediaMetadataOverview?.writers ?? []
+	const writers = useMemo(
+		() => data?.mediaMetadataOverview?.writers ?? [],
+		[data?.mediaMetadataOverview?.writers],
+	)
 
 	const sheetRef = useRef<FilterSheetRef>(null)
+	const [searchQuery, setSearchQuery] = useState('')
 
-	const { filters, setFilters } = useBookFilterStore((store) => ({
-		filters: store.filters,
-		setFilters: store.setFilters,
-	}))
+	const filters = useBookFilterStore((store) => store.filters)
+	const setFilters = useBookFilterStore((store) => store.setFilters)
 
-	const writerFilter = useMemo(() => filters.metadata?.writers?.likeAnyOf, [filters])
+	const writerFilter = useMemo(
+		() => filters.metadata?.writers?.likeAnyOf,
+		[filters.metadata?.writers?.likeAnyOf],
+	)
 
 	const [selectionState, setSelectionState] = useState(() => {
 		return match(writerFilter)
@@ -81,6 +102,14 @@ export default function Writers() {
 	const isActive =
 		!!filters.metadata?.writers?.likeAnyOf && filters.metadata.writers.likeAnyOf.length > 0
 
+	const filteredWriters = useMemo(() => {
+		if (!searchQuery.trim()) return writers
+		const query = searchQuery.toLowerCase()
+		return writers.filter((writer) => writer.toLowerCase().includes(query))
+	}, [writers, searchQuery])
+
+	const filterListProps = useFilterListProps()
+
 	useEffect(() => {
 		// Sync local selection state with global filters (in case of external changes, e.g. clear filters)
 		const newState = match(writerFilter)
@@ -93,6 +122,13 @@ export default function Writers() {
 			.otherwise(() => ({}) as Record<string, boolean>)
 		setSelectionState(newState)
 	}, [writerFilter])
+
+	const renderItem = useCallback(
+		({ item }: { item: string }) => (
+			<WriterItem item={item} checked={selectionState[item] ?? false} onSelect={onSelectWriter} />
+		),
+		[selectionState, onSelectWriter],
+	)
 
 	if (isPending) return null
 
@@ -113,40 +149,26 @@ export default function Writers() {
 				</View>
 			}
 		>
-			<View
-				className="gap-8"
-				style={{
-					paddingBottom: Platform.OS === 'android' ? 32 : insets.bottom,
-				}}
-			>
-				<View className="gap-3">
-					<Text>Available Writers</Text>
-
-					<View className="squircle gap-0 rounded-lg border border-edge bg-background-surface">
-						{writers.map((writer, idx) => (
-							<Fragment key={writer}>
-								<View className="flex flex-row items-center gap-3 p-3">
-									<Checkbox
-										checked={selectionState[writer]}
-										onCheckedChange={(checked) => onSelectWriter(writer, checked)}
-									/>
-									<Label htmlFor={writer}>{writer}</Label>
-								</View>
-
-								{idx < writers.length - 1 && <Divider />}
-							</Fragment>
-						))}
-
-						{!writers.length && (
-							<View className="p-3">
-								<Text className="text-foreground-muted">No writers found</Text>
-							</View>
-						)}
-					</View>
-				</View>
-			</View>
+			{filteredWriters.length === 0 ? (
+				<Text className="py-8 text-center text-foreground-muted">
+					{writers.length === 0 ? 'No writers found' : 'No matching writers'}
+				</Text>
+			) : (
+				<FlatList
+					{...filterListProps}
+					data={filteredWriters}
+					keyExtractor={(item) => item}
+					renderItem={renderItem}
+					stickyHeaderIndices={[0]}
+					ListHeaderComponent={
+						<FilterSheetSearchHeader
+							placeholder="Search writers..."
+							value={searchQuery}
+							onChangeText={setSearchQuery}
+						/>
+					}
+				/>
+			)}
 		</FilterSheet>
 	)
 }
-
-const Divider = () => <View className={cn('h-px w-full bg-edge')} />

@@ -16,6 +16,7 @@ use crate::{
 	data::{AuthContext, CoreContext, ServiceContext},
 	loader::{
 		favorite::{FavoriteMediaLoaderKey, FavoritesLoader},
+		media_analysis::{MediaAnalysisLoader, PageDimensionLoaderKey},
 		reading_session::{
 			ActiveReadingSessionLoaderKey, FinishedReadingSessionLoaderKey,
 			ReadingSessionLoader,
@@ -199,14 +200,13 @@ impl Media {
 	/// qualified URL to the image.
 	async fn thumbnail(&self, ctx: &Context<'_>) -> Result<ImageRef> {
 		let service = ctx.data::<ServiceContext>()?;
-		let core = ctx.data::<CoreContext>()?;
+		let loader = ctx.data::<DataLoader<MediaAnalysisLoader>>()?;
 
-		// TODO: DEFINITELY behind a dataloader here
-		let page_dimension = media_analysis::Entity::find()
-			.filter(media_analysis::Column::MediaId.eq(self.model.id.clone()))
-			.one(core.conn.as_ref())
-			.await?
-			.and_then(|pa| pa.data.dimensions.first().cloned());
+		let page_dimension = loader
+			.load_one(PageDimensionLoaderKey {
+				media_id: self.model.id.clone(),
+			})
+			.await?;
 
 		Ok(ImageRef {
 			url: service.format_url(format!("/api/v2/media/{}/thumbnail", self.model.id)),

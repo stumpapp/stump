@@ -2,6 +2,7 @@ pub mod favorite;
 pub mod library;
 pub mod log;
 pub mod media;
+pub mod media_analysis;
 pub mod reading_session;
 pub mod series;
 pub mod series_count;

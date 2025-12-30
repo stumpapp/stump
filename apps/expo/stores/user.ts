@@ -21,6 +21,7 @@ type MobilePreferencesStore = {
 	accentColor?: string | undefined
 	showCuratedDownloads?: boolean | undefined
 	preferNativePdf?: boolean | undefined
+	disableDismissGesture: boolean
 	/**
 	 * Patch the store with new values.
 	 */
@@ -47,6 +48,7 @@ export const usePreferencesStore = create<MobilePreferencesStore>()(
 			performanceMonitor: false,
 			showCuratedDownloads: true,
 			preferNativePdf: false,
+			disableDismissGesture: false,
 			patch: (data) => set(data),
 		}),
 		{

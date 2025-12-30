@@ -1,4 +1,4 @@
-import { View } from 'react-native'
+import { Platform, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 
 import { ContactInformation, SupportInformation } from '~/components/appSettings'
@@ -18,6 +18,7 @@ import {
 	ThumbnailRatio,
 } from '~/components/appSettings/preferences'
 import AppPrimaryColor from '~/components/appSettings/preferences/AppPrimaryColor'
+import DisableDismissGesture from '~/components/appSettings/preferences/DisableDismissGesture'
 import { StumpEnabled } from '~/components/appSettings/stump'
 import { Text } from '~/components/ui/text'
 
@@ -39,6 +40,7 @@ export default function Screen() {
 					<Text className="mb-3 text-foreground-muted">Reading</Text>
 
 					<PreferNativePdf />
+					{Platform.OS === 'ios' && <DisableDismissGesture />}
 
 					<ReaderSettingsLink />
 				</View>

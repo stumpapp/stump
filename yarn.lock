@@ -3587,10 +3587,10 @@
   resolved "https://registry.yarnpkg.com/@likashefqet/react-native-image-zoom/-/react-native-image-zoom-4.3.0.tgz#e9ef102ce3a64798ed73c7cb232466777b43aacc"
   integrity sha512-bRH26+Kq9m7y0rsBIwa0KI6XH/kujf7hZG0wz4gPu1kGsSb6KbLdZaR1ksGvaZm08JkNd2+JIUaHSb68eh4YEg==
 
-"@lodev09/react-native-true-sheet@^3.6.5":
-  version "3.6.5"
-  resolved "https://registry.yarnpkg.com/@lodev09/react-native-true-sheet/-/react-native-true-sheet-3.6.5.tgz#dd668d76a9961d3772a706a52d56bf5a57f450ff"
-  integrity sha512-KR1gZ8+W4e2Hleh/AUXt+gVRlGblfM8SuQjqMgL9vtV3lRIh5Of6gNjtlmlmRGu4hF+OpzH3hB+Y6OR3VTNerw==
+"@lodev09/react-native-true-sheet@^3.6.9":
+  version "3.6.9"
+  resolved "https://registry.yarnpkg.com/@lodev09/react-native-true-sheet/-/react-native-true-sheet-3.6.9.tgz#c25ba1ae62abc568090c7087b2152057c884df85"
+  integrity sha512-r+3ejUz5Px1tIFHX4yTVLKF+G6yj5YGqvbHPIpx58kxQ4K4exx9nq1j7PkEtrOxEJLpSWSj3TwaaxvTGi3+uDg==
 
 "@mdx-js/mdx@^3.0.0":
   version "3.1.1"

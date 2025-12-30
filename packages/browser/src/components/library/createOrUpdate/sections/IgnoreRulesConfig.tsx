@@ -14,7 +14,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import isValidGlob from 'is-valid-glob'
 import { Check, Edit, Lock, Slash, SquareAsterisk, Trash, Unlock, X } from 'lucide-react'
 import { useCallback, useState } from 'react'
-import { useFieldArray, useFormContext } from 'react-hook-form'
+import { useFieldArray, useFormContext, useWatch } from 'react-hook-form'
 
 import { useLibraryManagementSafe } from '@/scenes/library/tabs/settings/context'
 
@@ -165,7 +165,6 @@ export default function IgnoreRulesConfig() {
 							key={`ignore_rule_${ignoreRule.id}`}
 							id={ignoreRule.id}
 							index={index}
-							ignoreRule={ignoreRule}
 							isReadOnly={!isEditing}
 							onRemove={() => remove(index)}
 						/>
@@ -234,19 +233,17 @@ export default function IgnoreRulesConfig() {
 type ConfiguredIgnoreRuleProps = {
 	index: number
 	id: string
-	ignoreRule: CreateOrUpdateLibrarySchema['ignoreRules'][number]
 	isReadOnly?: boolean
 	onRemove: () => void
 }
 
-const ConfiguredIgnoreRule = ({
-	ignoreRule,
-	id,
-	isReadOnly,
-	onRemove,
-	index,
-}: ConfiguredIgnoreRuleProps) => {
+const ConfiguredIgnoreRule = ({ id, isReadOnly, onRemove, index }: ConfiguredIgnoreRuleProps) => {
 	const form = useFormContext<CreateOrUpdateLibrarySchema>()
+
+	const ignoreRule = useWatch({
+		control: form.control,
+		name: `ignoreRules.${index}`,
+	})
 
 	const [isEditing, setIsEditing] = useState(false)
 	const [originalIgnoreRule] = useState(() => ignoreRule)

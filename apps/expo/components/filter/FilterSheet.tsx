@@ -85,7 +85,7 @@ const FilterSheet = forwardRef<FilterSheetRef, Props>(function FilterSheet(
 
 			<TrueSheet
 				ref={sheetRef}
-				detents={['auto', 1]}
+				detents={[1]}
 				cornerRadius={24}
 				grabber
 				scrollable

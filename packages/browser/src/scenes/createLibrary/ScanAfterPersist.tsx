@@ -1,6 +1,6 @@
 import { WideSwitch } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import { useFormContext } from 'react-hook-form'
+import { useFormContext, useWatch } from 'react-hook-form'
 
 import { CreateOrUpdateLibrarySchema } from '@/components/library/createOrUpdate'
 import { useLibraryContextSafe } from '@/scenes/library/context'
@@ -11,7 +11,7 @@ export default function ScanAfterPersist() {
 
 	const { t } = useLocaleContext()
 
-	const scanAfterPersist = form.watch('scanAfterPersist')
+	const scanAfterPersist = useWatch({ control: form.control, name: 'scanAfterPersist' })
 	const isCreatingLibrary = !ctx?.library
 
 	return (

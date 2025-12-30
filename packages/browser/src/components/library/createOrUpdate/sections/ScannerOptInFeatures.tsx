@@ -1,7 +1,7 @@
 import { Alert, AlertDescription, CheckBox, Heading, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { useCallback, useMemo } from 'react'
-import { useFormContext } from 'react-hook-form'
+import { useFormContext, useWatch } from 'react-hook-form'
 
 import { CreateOrUpdateLibrarySchema } from '@/components/library/createOrUpdate'
 import { useLibraryManagementSafe } from '@/scenes/library/tabs/settings/context'
@@ -23,12 +23,10 @@ export default function ScannerOptInFeatures({ onDidChange }: Props) {
 	const ctx = useLibraryManagementSafe()
 	const isCreating = !ctx?.library
 
-	const [processMetadata, watch, generateFileHashes, koreaderHashes] = form.watch([
-		'processMetadata',
-		'watch',
-		'generateFileHashes',
-		'generateKoreaderHashes',
-	])
+	const [processMetadata, watch, generateFileHashes, koreaderHashes] = useWatch({
+		control: form.control,
+		name: ['processMetadata', 'watch', 'generateFileHashes', 'generateKoreaderHashes'],
+	})
 
 	const params = useMemo(
 		() => ({

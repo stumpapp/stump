@@ -1,7 +1,7 @@
 import { CheckBox, Heading, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { useCallback, useEffect } from 'react'
-import { useFormContext } from 'react-hook-form'
+import { useFormContext, useWatch } from 'react-hook-form'
 
 import { CreateOrUpdateLibrarySchema } from '../schema'
 
@@ -17,10 +17,10 @@ type Props = {
 export default function FileConversionOptions({ onDidChange }: Props) {
 	const form = useFormContext<CreateOrUpdateLibrarySchema>()
 
-	const [convertRarToZip, hardDeleteConversions] = form.watch([
-		'convertRarToZip',
-		'hardDeleteConversions',
-	])
+	const [convertRarToZip, hardDeleteConversions] = useWatch({
+		control: form.control,
+		name: ['convertRarToZip', 'hardDeleteConversions'],
+	})
 
 	const { t } = useLocaleContext()
 

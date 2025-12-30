@@ -1,4 +1,3 @@
-import { useRouter } from 'expo-router'
 import { ALargeSmall, TableOfContents } from 'lucide-react-native'
 import { useEffect } from 'react'
 import { Platform, Pressable, View } from 'react-native'
@@ -11,21 +10,19 @@ import { Icon } from '~/components/ui/icon'
 import { useDisplay } from '~/lib/hooks'
 import { useReaderStore } from '~/stores'
 import { useEpubLocationStore, useEpubTheme } from '~/stores/epub'
+import { useEpubSheetStore } from '~/stores/epubSheet'
 
 import BookmarkButton from './BookmarkButton'
 
 export const HEADER_HEIGHT = 48
 
-type Props = {
-	settingsUrl: string
-	locationsUrl?: string
-}
-
 // TODO: Figure out ideal UI for reader, I have largely been influenced by Yomu but
 // think I want to deviate a bit moving forward
 
-export default function ReadiumHeader({ settingsUrl, locationsUrl }: Props) {
+export default function ReadiumHeader() {
 	const { height } = useDisplay()
+
+	const openSheet = useEpubSheetStore((state) => state.openSheet)
 
 	const visible = useReaderStore((state) => state.showControls)
 	const chapterTitle = useEpubLocationStore(
@@ -52,8 +49,6 @@ export default function ReadiumHeader({ settingsUrl, locationsUrl }: Props) {
 		}
 	})
 
-	const router = useRouter()
-
 	return (
 		<Animated.View
 			className="absolute z-20 h-12 flex-row items-center justify-between gap-2 px-2"
@@ -61,23 +56,16 @@ export default function ReadiumHeader({ settingsUrl, locationsUrl }: Props) {
 		>
 			<View className="flex-1 flex-row items-center gap-4">
 				<ChevronBackLink style={{ color: colors?.foreground, opacity: 0.9 }} />
-				{locationsUrl && (
-					<Pressable
-						onPress={() =>
-							// @ts-expect-error: String path
-							router.push(locationsUrl)
-						}
-					>
-						{({ pressed }) => (
-							<Icon
-								as={TableOfContents}
-								className="h-6 w-6"
-								// @ts-expect-error: Color definitely works
-								style={{ opacity: pressed ? 0.7 : 0.9, color: colors?.foreground }}
-							/>
-						)}
-					</Pressable>
-				)}
+				<Pressable onPress={() => openSheet('locations')}>
+					{({ pressed }) => (
+						<Icon
+							as={TableOfContents}
+							className="h-6 w-6"
+							// @ts-expect-error: Color definitely works
+							style={{ opacity: pressed ? 0.7 : 0.9, color: colors?.foreground }}
+						/>
+					)}
+				</Pressable>
 			</View>
 
 			<View className="absolute left-0 right-0 items-center justify-center px-16">
@@ -89,12 +77,7 @@ export default function ReadiumHeader({ settingsUrl, locationsUrl }: Props) {
 			<View className="flex-1 flex-row items-center justify-end gap-4">
 				<BookmarkButton color={colors?.foreground} />
 
-				<Pressable
-					onPress={() =>
-						// @ts-expect-error: String path
-						router.push(settingsUrl)
-					}
-				>
+				<Pressable onPress={() => openSheet('settings')}>
 					{({ pressed }) => (
 						<Icon
 							as={ALargeSmall}
@@ -104,17 +87,6 @@ export default function ReadiumHeader({ settingsUrl, locationsUrl }: Props) {
 						/>
 					)}
 				</Pressable>
-
-				{/* <Pressable>
-					{({ pressed }) => (
-						<Icon
-							as={Ellipsis}
-							className="h-6 w-6"
-							// @ts-expect-error: Color definitely works
-							style={{ opacity: pressed ? 0.7 : 0.9, color: colors?.foreground }}
-						/>
-					)}
-				</Pressable> */}
 			</View>
 		</Animated.View>
 	)

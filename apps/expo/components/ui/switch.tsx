@@ -98,7 +98,11 @@ const Switch = React.forwardRef<SwitchPrimitives.RootRef, Props>(
 						}}
 						color={colors.primary}
 						variant="switch"
-						modifiers={[disabled(props.disabled), fixedSize({ horizontal: true, vertical: true })]}
+						modifiers={[
+							// Note: disabled(false) shows disabled styles lol
+							...(props.disabled ? [disabled(true)] : []),
+							fixedSize({ horizontal: true, vertical: true }),
+						]}
 					/>
 				</Host>
 			)

@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { ScrollView, View } from 'react-native'
+import { ScrollView, useWindowDimensions, View } from 'react-native'
 import PagerView from 'react-native-pager-view'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
@@ -18,10 +18,14 @@ import {
 } from './controls'
 import { CustomizeTheme, ThemeHeaderPreview } from './controls/customTheme'
 
+// TODO: Remove pager, just add inline color pickers with top as preview
 export default function ThemeSheetContent() {
 	const pagerRef = useRef<PagerView>(null)
 	const insets = useSafeAreaInsets()
 	const [themeMode, setThemeMode] = useState<'edit' | 'create'>('edit')
+	const { height: windowHeight } = useWindowDimensions()
+
+	const pagerHeight = windowHeight - 72 // py-6 + text(ish)
 
 	const openCustomizeTheme = (mode: 'edit' | 'create') => {
 		setThemeMode(mode)
@@ -37,7 +41,12 @@ export default function ThemeSheetContent() {
 	// alignment randomly, adding a View container around the native element fixes it (sometimes)
 	// but then breaks other rows. It's killing me. I'm ignoring it for now but AHH
 	return (
-		<PagerView ref={pagerRef} initialPage={0} style={{ flex: 1 }} scrollEnabled={false}>
+		<PagerView
+			ref={pagerRef}
+			initialPage={0}
+			style={{ flex: 1, height: pagerHeight }}
+			scrollEnabled={false}
+		>
 			<View className="flex-1 bg-background" key="0">
 				<ThemeHeaderPreview />
 

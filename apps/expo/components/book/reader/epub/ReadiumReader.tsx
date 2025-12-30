@@ -23,6 +23,8 @@ import {
 
 import { EbookReaderBookRef } from '../image/context'
 import { OfflineCompatibleReader } from '../types'
+import EpubLocationsSheet from './EpubLocationsSheet'
+import EpubSettingsSheet from './EpubSettingsSheet'
 import ReadiumFooter, { FOOTER_HEIGHT } from './ReadiumFooter'
 import ReadiumHeader, { HEADER_HEIGHT } from './ReadiumHeader'
 
@@ -257,16 +259,6 @@ export default function ReadiumReader({
 		[],
 	)
 
-	const headerUrls = useMemo(() => {
-		const prefix = ctx.offlineUri
-			? `/offline/${book.id}`
-			: `/server/${ctx.serverId}/books/${book.id}`
-		return {
-			settingsUrl: `${prefix}/ebook-settings`,
-			locationsUrl: `${prefix}/ebook-locations-modal`,
-		}
-	}, [ctx, book.id])
-
 	const insets = useSafeAreaInsets()
 
 	if (isDownloading) return <FullScreenLoader label="Downloading..." />
@@ -281,7 +273,7 @@ export default function ReadiumReader({
 				filter: `brightness(${brightness * 100}%)`,
 			}}
 		>
-			<ReadiumHeader {...headerUrls} />
+			<ReadiumHeader />
 
 			<ReadiumView
 				ref={readerRef}
@@ -301,6 +293,9 @@ export default function ReadiumReader({
 			/>
 
 			<ReadiumFooter />
+
+			<EpubSettingsSheet />
+			<EpubLocationsSheet />
 		</View>
 	)
 }

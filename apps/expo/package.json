@@ -91,7 +91,7 @@
 		"react-native-linear-gradient": "^2.8.3",
 		"react-native-mmkv": "^3.3.3",
 		"react-native-nitro-modules": "^0.31.10",
-		"react-native-pager-view": "^6.9.1",
+		"react-native-pager-view": "^8.0.0",
 		"react-native-performance-toolkit": "^0.2.1",
 		"react-native-quick-md5": "^3.0.9",
 		"react-native-reanimated": "~4.1.2",

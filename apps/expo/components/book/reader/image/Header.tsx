@@ -47,7 +47,6 @@ export default function Header({ onShowGlobalSettings }: Props) {
 		// })
 		opacity.value = withTiming(visible ? 1 : 0, {
 			duration: 250,
-			easing: visible ? Easing.out(Easing.linear) : Easing.in(Easing.linear),
 		})
 	}, [visible, height, insets.top, opacity])
 

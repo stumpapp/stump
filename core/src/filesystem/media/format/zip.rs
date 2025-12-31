@@ -338,7 +338,7 @@ impl FileProcessor for ZipProcessor {
 
 		let mut images_seen = 0;
 		for name in file_names {
-			let mut file = archive.by_name(name)?;
+			let file = archive.by_name(name)?;
 
 			if file.is_dir() {
 				continue;

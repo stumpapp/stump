@@ -350,10 +350,14 @@ impl FileProcessor for RarProcessor {
 			.sorted_by(|a, b| alphanumeric_sort::compare_path(&a.filename, &b.filename))
 			.collect::<Vec<_>>();
 
+		if sorted_entries.is_empty() {
+			return Err(FileError::NoImageError);
+		}
+
 		let target_entry = sorted_entries
 			.into_iter()
 			.nth((page - 1) as usize)
-			.ok_or(FileError::RarReadError)?;
+			.ok_or(FileError::NoImageError)?;
 
 		let content_type = target_entry.filename.as_path().naive_content_type();
 

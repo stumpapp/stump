@@ -145,7 +145,6 @@ export function ThumbnailEntityCard({
 				src={imageUrl}
 				alt={typeof title === 'string' ? title : undefined}
 				placeholderData={placeholderData}
-				placeholderVariant="colorful"
 				gradient={gradient}
 				borderAndShadowStyle={{
 					borderRadius: 0,

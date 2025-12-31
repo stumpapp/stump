@@ -219,7 +219,6 @@ const ContinueReadingCard = memo(function ContinueReadingCard({
 				alt={data.resolvedName}
 				size={{ width, height: width / thumbnailRatio }}
 				placeholderData={placeholderData}
-				placeholderVariant="colorful"
 				gradient={gradient}
 				borderAndShadowStyle={{
 					borderRadius: 12,

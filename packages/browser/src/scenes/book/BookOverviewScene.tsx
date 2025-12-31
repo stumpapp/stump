@@ -2,7 +2,7 @@ import { ButtonOrLink, Heading, Spacer, Text } from '@stump/components'
 import { useFragment } from '@stump/graphql'
 import dayjs from 'dayjs'
 import sortBy from 'lodash/sortBy'
-import { Suspense } from 'react'
+import { Suspense, useEffect, useRef } from 'react'
 import { Helmet } from 'react-helmet'
 import { useParams } from 'react-router'
 import { useMediaMatch } from 'rooks'
@@ -34,7 +34,7 @@ export default function BookOverviewScene() {
 	const { isServerOwner } = useAppContext()
 
 	const paths = usePaths()
-
+	const topRef = useRef<HTMLDivElement>(null)
 	const isAtLeastTablet = useMediaMatch('(min-width: 640px)')
 
 	if (!media) {
@@ -48,8 +48,12 @@ export default function BookOverviewScene() {
 	).at(-1)?.completedAt
 	const links = media.metadata?.links.filter((l) => !!l) ?? []
 
+	useEffect(() => {
+		topRef.current?.scrollIntoView({ behavior: 'smooth' })
+	}, [id])
+
 	return (
-		<SceneContainer>
+		<SceneContainer ref={topRef}>
 			<Suspense>
 				<Helmet>
 					<title>Stump | {media.resolvedName}</title>

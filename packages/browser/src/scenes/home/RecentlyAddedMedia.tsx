@@ -182,7 +182,6 @@ const RecentlyAddedBookCard = memo(function RecentlyAddedBookCard({
 				alt={data.resolvedName}
 				size={{ width: cardWidth, height: cardWidth / thumbnailRatio }}
 				placeholderData={placeholderData}
-				placeholderVariant="colorful"
 				gradient={gradient}
 				borderAndShadowStyle={{
 					borderRadius: 8,

@@ -153,7 +153,6 @@ export function SeriesStackedThumbnails({ thumbnailData, width: cardWidth, class
 						src={currentThumbnailData.url}
 						size={currentThumbnailSize}
 						placeholderData={placeholderData}
-						placeholderVariant="colorful"
 						lazy={isBackThumbnail}
 						borderAndShadowStyle={{
 							shadowColor: 'rgba(0, 0, 0, 0.4)',

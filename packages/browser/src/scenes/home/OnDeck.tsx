@@ -191,7 +191,6 @@ const OnDeckBookCard = memo(function OnDeckBookCard({ fragment, cardWidth }: OnD
 				alt={data.resolvedName}
 				size={{ width: cardWidth, height: cardWidth / thumbnailRatio }}
 				placeholderData={placeholderData}
-				placeholderVariant="colorful"
 				gradient={gradient}
 				borderAndShadowStyle={{
 					borderRadius: 8,

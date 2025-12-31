@@ -5,7 +5,6 @@ import { Platform, View } from 'react-native'
 import { Pressable } from 'react-native-gesture-handler'
 import * as DropdownMenu from 'zeego/dropdown-menu'
 
-import { IS_IOS_24_PLUS } from '~/lib/constants'
 import { useIsOPDSPublicationDownloaded, useOPDSDownload } from '~/lib/hooks'
 
 import { useActiveServer } from '../activeServer'
@@ -62,43 +61,10 @@ export default function PublicationMenu({ publicationUrl, metadata }: Props) {
 		)
 	}
 
-	if (IS_IOS_24_PLUS) {
-		return (
-			<Host matchContents>
-				<ContextMenu>
-					<ContextMenu.Trigger>
-						<View
-							accessibilityLabel="options"
-							style={{
-								height: 35,
-								width: 35,
-								justifyContent: 'center',
-								alignItems: 'center',
-							}}
-						>
-							<Icon as={Ellipsis} size={24} className="text-foreground" />
-						</View>
-					</ContextMenu.Trigger>
-					<ContextMenu.Items>
-						<Button
-							systemImage="trash"
-							role="destructive"
-							disabled={!isDownloaded || isDeleting}
-							onPress={handleDeleteDownload}
-						>
-							Delete Download
-						</Button>
-					</ContextMenu.Items>
-				</ContextMenu>
-			</Host>
-		)
-	}
-
-	// Fallback for older iOS
 	return (
-		<DropdownMenu.Root>
-			<DropdownMenu.Trigger>
-				<Pressable>
+		<Host matchContents>
+			<ContextMenu>
+				<ContextMenu.Trigger>
 					<View
 						accessibilityLabel="options"
 						style={{
@@ -110,20 +76,18 @@ export default function PublicationMenu({ publicationUrl, metadata }: Props) {
 					>
 						<Icon as={Ellipsis} size={24} className="text-foreground" />
 					</View>
-				</Pressable>
-			</DropdownMenu.Trigger>
-
-			<DropdownMenu.Content>
-				<DropdownMenu.Item
-					key="delete-download"
-					onSelect={handleDeleteDownload}
-					disabled={isDeleting}
-					destructive
-				>
-					<DropdownMenu.ItemTitle>Delete download</DropdownMenu.ItemTitle>
-					<DropdownMenu.ItemIcon ios={{ name: 'trash' }} />
-				</DropdownMenu.Item>
-			</DropdownMenu.Content>
-		</DropdownMenu.Root>
+				</ContextMenu.Trigger>
+				<ContextMenu.Items>
+					<Button
+						systemImage="trash"
+						role="destructive"
+						disabled={!isDownloaded || isDeleting}
+						onPress={handleDeleteDownload}
+					>
+						Delete Download
+					</Button>
+				</ContextMenu.Items>
+			</ContextMenu>
+		</Host>
 	)
 }

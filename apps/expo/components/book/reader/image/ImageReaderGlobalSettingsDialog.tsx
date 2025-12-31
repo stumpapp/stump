@@ -1,11 +1,9 @@
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { View } from 'react-native'
-import { useSharedValue } from 'react-native-reanimated'
+import { TrueSheet } from '@lodev09/react-native-true-sheet'
+import { useEffect, useRef, useState } from 'react'
+import { ScrollView, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Heading, Tabs, Text } from '~/components/ui'
-import { BottomSheet } from '~/components/ui/bottom-sheet'
 import { useColors } from '~/lib/constants'
 import { useColorScheme } from '~/lib/useColorScheme'
 
@@ -23,10 +21,7 @@ export default function ImageReaderGlobalSettingsDialog({ isOpen, onClose }: Pro
 		serverId,
 	} = useImageBasedReader()
 
-	const ref = useRef<BottomSheetModal | null>(null)
-	const snapPoints = useMemo(() => ['100%'], [])
-	const animatedIndex = useSharedValue<number>(0)
-	const animatedPosition = useSharedValue<number>(0)
+	const ref = useRef<TrueSheet | null>(null)
 
 	const { colorScheme } = useColorScheme()
 
@@ -41,15 +36,6 @@ export default function ImageReaderGlobalSettingsDialog({ isOpen, onClose }: Pro
 		}
 	}, [isOpen])
 
-	const handleChange = useCallback(
-		(index: number) => {
-			if (index === -1 && isOpen) {
-				onClose()
-			}
-		},
-		[isOpen, onClose],
-	)
-
 	const renderHelpText = () => {
 		if (modality === 'book') {
 			return 'These settings only apply to this book, overriding any global settings'
@@ -62,34 +48,22 @@ export default function ImageReaderGlobalSettingsDialog({ isOpen, onClose }: Pro
 	const colors = useColors()
 
 	return (
-		<BottomSheet.Modal
+		<TrueSheet
 			ref={ref}
-			index={snapPoints.length - 1}
-			snapPoints={snapPoints}
-			topInset={insets.top}
-			enableDynamicSizing={false}
-			onChange={handleChange}
-			backgroundStyle={{
-				borderRadius: 24,
-				borderCurve: 'continuous',
-				overflow: 'hidden',
-				borderWidth: 1,
-				borderColor: colors.edge.DEFAULT,
-				backgroundColor: colors.background.DEFAULT,
+			detents={[0.65]}
+			cornerRadius={24}
+			grabber
+			scrollable
+			backgroundColor={colors.background.DEFAULT}
+			grabberOptions={{
+				color: colorScheme === 'dark' ? '#333' : '#ccc',
 			}}
-			handleIndicatorStyle={{ backgroundColor: colorScheme === 'dark' ? '#333' : '#ccc' }}
-			handleComponent={(props) => (
-				<BottomSheet.Handle
-					{...props}
-					className="mt-2"
-					animatedIndex={animatedIndex}
-					animatedPosition={animatedPosition}
-				/>
-			)}
+			onDidDismiss={onClose}
 		>
-			<BottomSheet.ScrollView
+			<ScrollView
 				className="flex-1 p-6"
 				contentContainerStyle={{ alignItems: 'flex-start' }}
+				nestedScrollEnabled
 			>
 				<View
 					className="w-full flex-1 gap-8"
@@ -129,7 +103,7 @@ export default function ImageReaderGlobalSettingsDialog({ isOpen, onClose }: Pro
 							: {})}
 					/>
 				</View>
-			</BottomSheet.ScrollView>
-		</BottomSheet.Modal>
+			</ScrollView>
+		</TrueSheet>
 	)
 }

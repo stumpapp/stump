@@ -1,5 +1,5 @@
 import { Platform, StyleProp, View, ViewStyle } from 'react-native'
-import LinearGradient from 'react-native-linear-gradient'
+import LinearGradient, { LinearGradientProps } from 'react-native-linear-gradient'
 import TImage, { type TurboImageProps } from 'react-native-turbo-image'
 
 import { BorderAndShadow, BorderAndShadowStyle } from '../BorderAndShadow'
@@ -7,7 +7,7 @@ import { ThumbnailPlaceholder, ThumbnailPlaceholderData } from './ThumbnailPlace
 
 type ThumbnailImageProps = {
 	size: { height: number; width: number }
-	gradient?: { colors: (string | number)[]; locations?: number[] }
+	gradient?: LinearGradientProps
 	style?: StyleProp<Omit<ViewStyle, 'width' | 'height'>>
 	placeholderData?: ThumbnailPlaceholderData | null
 	/**

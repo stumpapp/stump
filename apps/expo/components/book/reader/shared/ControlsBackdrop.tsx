@@ -2,12 +2,7 @@ import { useEffect, useMemo } from 'react'
 import { Easing, Pressable } from 'react-native'
 import { easeGradient } from 'react-native-easing-gradient'
 import LinearGradient from 'react-native-linear-gradient'
-import Animated, {
-	Easing as RNREasing,
-	useAnimatedStyle,
-	useSharedValue,
-	withTiming,
-} from 'react-native-reanimated'
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
 
 import { cn } from '~/lib/utils'
 import { useReaderStore } from '~/stores'
@@ -22,7 +17,6 @@ export default function ControlsBackdrop() {
 	useEffect(() => {
 		animatedOpacity.value = withTiming(controls.isVisible ? 1 : 0, {
 			duration: 250,
-			easing: RNREasing.out(RNREasing.quad),
 		})
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [controls.isVisible])

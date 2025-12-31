@@ -72,11 +72,14 @@ export default function Footer() {
 		}
 	}, [isTablet, thumbnailRatio])
 
-	const largestHeight = baseSize.height * SIZE_MODIFIER
-	const translateY = useSharedValue(largestHeight * 2)
+	const opacity = useSharedValue(visible ? 1 : 0)
+	const translateY = useSharedValue(visible ? 0 : 50)
 	useEffect(
 		() => {
-			translateY.value = withTiming(visible ? 0 : largestHeight * 1.8, {
+			opacity.value = withTiming(visible ? 1 : 0, {
+				duration: 250,
+			})
+			translateY.value = withTiming(visible ? 0 : 50, {
 				duration: 250,
 				easing: visible ? Easing.out(Easing.quad) : Easing.in(Easing.quad),
 			})
@@ -91,6 +94,7 @@ export default function Footer() {
 			right: insets.right,
 			bottom: insets.bottom,
 			transform: [{ translateY: translateY.value }],
+			opacity: opacity.value,
 		}
 	})
 

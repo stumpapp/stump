@@ -17,7 +17,8 @@ use crate::{
 		image::into_image_format,
 		media::{
 			process::{
-				FileConverter, FileProcessor, FileProcessorOptions, ProcessedFile,
+				AnalyzedPage, FileConverter, FileProcessor, FileProcessorOptions,
+				ProcessedFile,
 			},
 			ProcessedFileHashes, ProcessedMediaMetadata,
 		},
@@ -147,6 +148,26 @@ impl FileProcessor for PdfProcessor {
 			.into_iter()
 			.map(|page| (page, ContentType::WEBP))
 			.collect())
+	}
+
+	fn analyze_page(
+		path: &str,
+		page: i32,
+		config: &StumpConfig,
+	) -> Result<AnalyzedPage, FileError> {
+		// For PDFs, we need to render the page to get dimensions since it isn't an image.
+		// This is very sub-optimal
+		let (content_type, bytes) = Self::get_page(path, page, config)?;
+
+		let size = imagesize::blob_size(&bytes).map_err(|e| {
+			FileError::UnknownError(format!("Failed to read image dimensions: {e}"))
+		})?;
+
+		Ok(AnalyzedPage {
+			width: size.width as u32,
+			height: size.height as u32,
+			content_type,
+		})
 	}
 }
 

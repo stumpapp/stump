@@ -12,7 +12,7 @@ use crate::{
 		error::FileError,
 		hash::{self, generate_koreader_hash},
 		media::{
-			process::{FileProcessor, FileProcessorOptions, ProcessedFile},
+			process::{AnalyzedPage, FileProcessor, FileProcessorOptions, ProcessedFile},
 			ProcessedFileHashes, ProcessedMediaMetadata,
 		},
 	},
@@ -224,6 +224,16 @@ impl FileProcessor for EpubProcessor {
 		}
 
 		Ok(content_types)
+	}
+
+	fn analyze_page(
+		_path: &str,
+		_page: i32,
+		_config: &StumpConfig,
+	) -> Result<AnalyzedPage, FileError> {
+		Err(FileError::UnsupportedFileType(
+			"Epub page analysis is not supported".to_string(),
+		))
 	}
 }
 

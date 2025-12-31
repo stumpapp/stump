@@ -1,6 +1,7 @@
 import { useSDK } from '@stump/client'
 import { useRouter } from 'expo-router'
-import { BookCopy, Info, Slash } from 'lucide-react-native'
+import { BookCopy, Info, Loader2, Slash } from 'lucide-react-native'
+import { useCallback } from 'react'
 import { Platform, Pressable, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -9,13 +10,17 @@ import { useActiveServer } from '~/components/activeServer'
 import { InfoRow, InfoSection } from '~/components/book/overview'
 import ChevronBackLink from '~/components/ChevronBackLink'
 import { ThumbnailImage } from '~/components/image'
+import { PublicationMenu } from '~/components/opds'
 import {
+	extensionFromMime,
+	getAcquisitionLink,
 	getDateField,
 	getNumberField,
 	getPublicationThumbnailURL,
 	getStringField,
 } from '~/components/opds/utils'
 import { Button, Icon, Text } from '~/components/ui'
+import { useIsOPDSPublicationDownloaded, useOPDSDownload } from '~/lib/hooks'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
 import { cn } from '~/lib/utils'
 import { usePreferencesStore } from '~/stores'
@@ -27,18 +32,19 @@ export default function Screen() {
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
-	const {
-		publication: { metadata, images, readingOrder, links, resources },
-		url,
-	} = usePublicationContext()
+	const { publication, url } = usePublicationContext()
+	const { metadata, images, readingOrder, links, resources } = publication
 	const { title, identifier, belongsTo } = metadata || {}
 
 	const router = useRouter()
 	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
 
+	const isDownloaded = useIsOPDSPublicationDownloaded(url, metadata, serverID)
+
 	useDynamicHeader({
 		title: title || 'Publication',
 		headerLeft: Platform.OS === 'ios' ? () => <ChevronBackLink /> : undefined,
+		headerRight: () => <PublicationMenu publicationUrl={url} metadata={metadata} />,
 	})
 
 	// TODO: once I sort out progress sync, prefetch the current page
@@ -53,6 +59,22 @@ export default function Screen() {
 	// 		})
 	// 	}
 	// }, [sdk, firstPageURL])
+
+	const { downloadBook, isDownloading } = useOPDSDownload({ serverId: serverID })
+
+	const acquisitionLink = getAcquisitionLink(links)
+	const downloadURL = acquisitionLink?.href
+	const downloadExtension = extensionFromMime(acquisitionLink?.type)
+	const canDownload = !!downloadURL && !!downloadExtension
+
+	const onDownloadBook = useCallback(async () => {
+		if (isDownloaded || !canDownload || isDownloading) return
+
+		return await downloadBook({
+			publicationUrl: url,
+			publication,
+		})
+	}, [isDownloaded, downloadBook, url, publication, canDownload, isDownloading])
 
 	const thumbnailURL = getPublicationThumbnailURL({
 		images,
@@ -69,9 +91,10 @@ export default function Screen() {
 	const belongsToSeries = Array.isArray(belongsTo?.series) ? belongsTo.series[0] : belongsTo?.series
 	const seriesURL = belongsToSeries?.links?.find((link) => link.rel === 'self')?.href
 
-	const downloadURL = links?.find((link) => link.rel === 'http://opds-spec.org/acquisition')?.href
 	const canStream = !!readingOrder && readingOrder.length > 0
 	const isSupportedStream = readingOrder?.every((link) => link.type?.startsWith('image/'))
+
+	const accentColor = usePreferencesStore((state) => state.accentColor)
 
 	// TODO: dump the rest of the metadata? Or enforce servers to conform to a standard?
 	// const restMeta = omit(rest, ['numberOfPages', 'modified'])
@@ -113,10 +136,39 @@ export default function Screen() {
 						>
 							<Text>Stream</Text>
 						</Button>
-						<Button variant="secondary" disabled={!downloadURL}>
-							<Text>Download</Text>
-						</Button>
+						{!isDownloaded && (
+							<Button
+								variant="secondary"
+								disabled={!canDownload || isDownloading}
+								onPress={onDownloadBook}
+								className="flex-row gap-2"
+							>
+								{isDownloading && (
+									<View className="pointer-events-none animate-spin">
+										<Icon
+											className="h-5 w-5"
+											as={Loader2}
+											style={{
+												// @ts-expect-error: It's fine
+												color: accentColor,
+											}}
+										/>
+									</View>
+								)}
+								<Text>Download</Text>
+							</Button>
+						)}
 					</View>
+
+					{!canDownload && !isDownloaded && (
+						<View className="squircle rounded-lg bg-fill-warning-secondary p-3">
+							<Text>
+								{!downloadURL
+									? 'No download link available for this publication'
+									: `Unsupported file format: ${acquisitionLink?.type || 'unknown'}`}
+							</Text>
+						</View>
+					)}
 
 					{!canStream && (
 						<View className="squircle rounded-lg bg-fill-info-secondary p-3">

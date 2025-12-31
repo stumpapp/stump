@@ -346,16 +346,6 @@ export default function Screen() {
 				initialPage={currentProgressPage}
 				book={book}
 				pageURL={(page: number) => sdk.media.bookPageURL(book.id, page)}
-				// TODO: I added this on a whim, decide if I want to support it
-				pageThumbnailURL={
-					preferSmallImages
-						? (page: number) =>
-								sdk.media.bookPageURL(book.id, page, {
-									dimension: Dimension.Height,
-									size: 600,
-								})
-						: undefined
-				}
 				onPageChanged={onPageChanged}
 				resetTimer={reset}
 				nextInSeries={nextInSeries}

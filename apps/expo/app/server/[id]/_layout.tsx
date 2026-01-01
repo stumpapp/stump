@@ -38,6 +38,7 @@ export default function Screen() {
 	const [isAutoAuthenticating, setIsAutoAuthenticating] = useState(false)
 	const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false)
 	const [user, setUser] = useState<AuthUser | null>(null)
+	const [fatalError, setFatalError] = useState<Error | null>(null)
 
 	const isServerAccessible = useRef(true)
 
@@ -186,15 +187,28 @@ export default function Screen() {
 	// TODO: attempt reauth automatically when able
 
 	const onAuthError = useCallback(async () => {
-		// Get rid of the token
+		// If the active server is using an API key, we can't re-auth automatically and
+		// so we should set an error state to bubble up to the boundary during render
 		if (activeServer) {
-			await deleteServerToken(activeServer.id)
+			const serverConfig = await getServerConfig(activeServer.id)
+			if (serverConfig?.auth && 'bearer' in serverConfig.auth) {
+				setFatalError(
+					new Error(
+						'An auth-related error was encountered while using an API key. Please check that your key is still valid',
+					),
+				)
+				return
+			} else {
+				// Otherwise, just get rid of the token
+				await deleteServerToken(activeServer.id)
+			}
 		}
+
 		// We need to retrigger the auth dialog, so we'll let the effect handle it
 		setIsAuthDialogOpen(false)
 		setSDK(null)
 		setUser(null)
-	}, [activeServer, deleteServerToken])
+	}, [activeServer, deleteServerToken, getServerConfig])
 
 	const onServerConnectionError = useCallback(
 		(connected: boolean) => {
@@ -227,6 +241,10 @@ export default function Screen() {
 	if (!activeServer) {
 		// @ts-expect-error: It's fine
 		return <Redirect href="/" />
+	}
+
+	if (fatalError) {
+		throw fatalError
 	}
 
 	if (!isServerAccessible.current) {

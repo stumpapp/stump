@@ -62,6 +62,13 @@ When you choose a login-based authentication type for a Stump server that has OI
 	and fetch a token from the server for native API operations
 </Callout>
 
+<Callout emoji="⚡" type="warning">
+	**Performance Note:** Basic Auth for OPDS requires the server to verify your password on every
+	request. This involves computationally expensive password hashing, which impacts image loading. If
+	you are a heavy OPDS user, consider using [Token-based
+	Authentication](#token-based-authentication) with a scoped API key for much faster performance
+</Callout>
+
 ### Token-based Authentication
 
 Token-based authentication will embed a provided token in the `Authorization` header of each request. While this should be an API key for Stump servers, it can be any valid token which the server will accept.

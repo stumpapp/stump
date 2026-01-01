@@ -8,7 +8,7 @@ use crate::{
 		error::FileError,
 		hash,
 		media::{
-			process::{FileProcessor, FileProcessorOptions, ProcessedFile},
+			process::{AnalyzedPage, FileProcessor, FileProcessorOptions, ProcessedFile},
 			utils::{metadata_from_buf, sort_file_names},
 			ProcessedFileHashes, ProcessedMediaMetadata,
 		},
@@ -317,6 +317,80 @@ impl FileProcessor for ZipProcessor {
 
 		Ok(content_types)
 	}
+
+	fn analyze_page(
+		path: &str,
+		page: i32,
+		_: &StumpConfig,
+	) -> Result<AnalyzedPage, FileError> {
+		let zip_file = File::open(path)?;
+
+		let mut archive = zip::ZipArchive::new(&zip_file)?;
+		let file_names_archive = archive.clone();
+
+		if archive.is_empty() {
+			error!(path, "Empty zip file");
+			return Err(FileError::ArchiveEmptyError);
+		}
+
+		let mut file_names = file_names_archive.file_names().collect::<Vec<_>>();
+		sort_file_names(&mut file_names);
+
+		let mut images_seen = 0;
+		for name in file_names {
+			let file = archive.by_name(name)?;
+
+			if file.is_dir() {
+				continue;
+			}
+
+			let path_buf = file.enclosed_name().unwrap_or_else(|| {
+				tracing::warn!("Failed to get enclosed name for zip entry");
+				PathBuf::from(name)
+			});
+			let entry_path = path_buf.as_path();
+
+			if entry_path.is_hidden_file() {
+				tracing::trace!(path = ?path_buf, "Skipping hidden file");
+				continue;
+			}
+
+			let content_type = entry_path.naive_content_type();
+
+			if images_seen + 1 == page && content_type.is_image() {
+				trace!(
+					?name,
+					page,
+					?content_type,
+					"Found targeted zip entry for analysis"
+				);
+
+				// imagesize only needs the first few KB to read dimensions from headers, taking
+				// extra as a precaution. 64kb should be plenty.
+				const MAX_HEADER_BYTES: usize = 64 * 1024;
+				let mut buf = Vec::with_capacity(MAX_HEADER_BYTES);
+				file.take(MAX_HEADER_BYTES as u64).read_to_end(&mut buf)?;
+
+				let size = imagesize::blob_size(&buf).map_err(|e| {
+					FileError::UnknownError(format!(
+						"Failed to read image dimensions: {e}"
+					))
+				})?;
+
+				return Ok(AnalyzedPage {
+					width: size.width as u32,
+					height: size.height as u32,
+					content_type,
+				});
+			} else if content_type.is_image() {
+				images_seen += 1;
+			}
+		}
+
+		error!(page, path, "Failed to find valid image in zip file");
+
+		Err(FileError::NoImageError)
+	}
 }
 
 #[cfg(test)]
@@ -446,5 +520,17 @@ mod tests {
 
 		// See https://github.com/stumpapp/stump/issues/641
 		assert!(processed_file.metadata.is_some());
+	}
+
+	#[test]
+	fn test_analyze_page() {
+		let path = get_test_cbz_path();
+		let config = StumpConfig::debug();
+
+		let analyzed_page = ZipProcessor::analyze_page(&path, 1, &config)
+			.expect("Failed to analyze page");
+		assert_eq!(analyzed_page.width, 480);
+		assert_eq!(analyzed_page.height, 726);
+		assert_eq!(analyzed_page.content_type.mime_type(), "image/jpeg");
 	}
 }

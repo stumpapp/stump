@@ -92,19 +92,6 @@ export default function ImageBasedReaderContainer({
 
 	const flashListRef = useRef<FlashListRef<number[]>>(null)
 
-	// TODO: prefetch, see https://github.com/candlefinance/faster-image/issues/73
-	// useEffect(
-	// 	() => {
-	// 		Image.prefetch([ctx.pageURL(currentPage)], {
-	// 			headers: {
-	// 				Authorization: sdk.authorizationHeader || '',
-	// 			},
-	// 		})
-	// 	},
-	// 	// eslint-disable-next-line react-hooks/exhaustive-deps
-	// 	[initialPage],
-	// )
-
 	return (
 		<ImageBasedReaderContext.Provider
 			value={{

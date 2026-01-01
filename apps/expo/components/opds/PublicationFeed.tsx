@@ -76,34 +76,39 @@ export default function PublicationFeed({ feed, onRefresh, isRefreshing }: Props
 
 	const publications = data?.pages.flatMap((page) => page.publications) || feed.publications
 
+	const renderItem = useCallback(
+		({ item: publication }: { item: (typeof publications)[number] }) => {
+			const thumbnailURL = getPublicationThumbnailURL(publication)
+			const selfURL = publication.links?.find((link) => link.rel === 'self')?.href
+
+			if (!thumbnailURL) return null
+
+			return (
+				<View className="w-full items-center">
+					<GridImageItem
+						uri={thumbnailURL}
+						title={publication.metadata.title}
+						href={{
+							pathname: '/opds/[id]/publication',
+							params: {
+								id: serverID,
+								url: selfURL,
+							},
+						}}
+					/>
+				</View>
+			)
+		},
+		[serverID],
+	)
+
 	if (!publications.length) return null
 
 	return (
 		<SafeAreaView style={{ flex: 1 }} edges={['left', 'right']}>
 			<FlashList
 				data={publications}
-				renderItem={({ item: publication }) => {
-					const thumbnailURL = getPublicationThumbnailURL(publication)
-					const selfURL = publication.links?.find((link) => link.rel === 'self')?.href
-
-					if (!thumbnailURL) return null
-
-					return (
-						<View className="w-full items-center">
-							<GridImageItem
-								uri={thumbnailURL}
-								title={publication.metadata.title}
-								href={{
-									pathname: '/opds/[id]/publication',
-									params: {
-										id: serverID,
-										url: selfURL,
-									},
-								}}
-							/>
-						</View>
-					)
-				}}
+				renderItem={renderItem}
 				contentContainerStyle={{
 					paddingVertical: 16,
 					paddingHorizontal: paddingHorizontal,

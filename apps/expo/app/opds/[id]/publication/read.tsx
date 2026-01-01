@@ -1,3 +1,4 @@
+import { useSDK } from '@stump/client'
 import { useKeepAwake } from 'expo-keep-awake'
 import * as NavigationBar from 'expo-navigation-bar'
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -22,6 +23,7 @@ export default function Screen() {
 		url,
 		progression,
 	} = usePublicationContext()
+	const { sdk } = useSDK()
 	const {
 		activeServer: { id: serverId },
 	} = useActiveServer()
@@ -60,7 +62,7 @@ export default function Screen() {
 	const {
 		preferences: { trackElapsedTime },
 	} = useBookPreferences({ book })
-	const { pause, resume, isRunning } = useBookTimer(id, {
+	const { pause, resume, isRunning, reset } = useBookTimer(id, {
 		enabled: trackElapsedTime,
 	})
 
@@ -116,6 +118,14 @@ export default function Screen() {
 		}
 	}, [setShowControls])
 
+	const requestHeaders = useCallback(
+		() => ({
+			...sdk.customHeaders,
+			Authorization: sdk.authorizationHeader || '',
+		}),
+		[sdk],
+	)
+
 	useEffect(() => {
 		NavigationBar.setVisibilityAsync('hidden')
 		return () => {
@@ -128,7 +138,9 @@ export default function Screen() {
 			serverId={serverId}
 			initialPage={currentPage}
 			book={book}
-			pageURL={(page: number) => readingOrder![page - 1]?.href}
+			pageURL={(page: number) => readingOrder![page - 1]?.href || ''}
+			requestHeaders={requestHeaders}
+			resetTimer={reset}
 			isOPDS
 		/>
 	)

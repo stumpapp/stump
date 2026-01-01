@@ -2,7 +2,7 @@ import { ReadingMode } from '@stump/graphql'
 import { Fragment, useCallback, useMemo } from 'react'
 import { View } from 'react-native'
 
-import { Card, Switch, Text } from '~/components/ui'
+import { Card, CardDivider, Switch, Text } from '~/components/ui'
 import { cn } from '~/lib/utils'
 import { BookPreferences, GlobalSettings, useReaderStore } from '~/stores/reader'
 
@@ -67,7 +67,7 @@ export default function ReaderSettings({ forBook, forServer }: Props) {
 			<View>
 				<Text className="mb-3 text-foreground-muted">Mode</Text>
 
-				<Card className="squircle flex rounded-2xl border border-edge bg-background-surface">
+				<Card>
 					<ReadingModeSelect
 						mode={activeSettings.readingMode}
 						onChange={(mode) => onPreferenceChange({ readingMode: mode })}
@@ -75,7 +75,7 @@ export default function ReaderSettings({ forBook, forServer }: Props) {
 
 					{activeSettings.readingMode !== ReadingMode.ContinuousVertical && (
 						<Fragment>
-							<View className="h-px w-full bg-edge" />
+							<CardDivider />
 
 							<ReadingDirectionSelect
 								direction={activeSettings.readingDirection}
@@ -89,13 +89,13 @@ export default function ReaderSettings({ forBook, forServer }: Props) {
 			<View>
 				<Text className="mb-3 text-foreground-muted">Image Options</Text>
 
-				<Card className="squircle flex rounded-2xl border border-edge bg-background-surface">
+				<Card>
 					<DoublePageSelect
 						behavior={activeSettings.doublePageBehavior || 'auto'}
 						onChange={(behavior) => onPreferenceChange({ doublePageBehavior: behavior })}
 					/>
 
-					<View className="h-px w-full bg-edge" />
+					<CardDivider />
 
 					<View
 						className={cn('flex flex-row items-center justify-between p-4', {
@@ -112,14 +112,14 @@ export default function ReaderSettings({ forBook, forServer }: Props) {
 						/>
 					</View>
 
-					<View className="h-px w-full bg-edge" />
+					<CardDivider />
 
 					<ImageScalingSelect
 						behavior={activeSettings.imageScaling.scaleToFit}
 						onChange={(fit) => onPreferenceChange({ imageScaling: { scaleToFit: fit } })}
 					/>
 
-					<View className="h-px w-full bg-edge" />
+					<CardDivider />
 
 					<View className="flex flex-row items-center justify-between p-4">
 						<Text>Downscaling</Text>
@@ -130,7 +130,7 @@ export default function ReaderSettings({ forBook, forServer }: Props) {
 						/>
 					</View>
 
-					<View className="h-px w-full bg-edge" />
+					<CardDivider />
 
 					{/* TODO: https://docs.expo.dev/versions/latest/sdk/media-library/ */}
 					<View className="flex flex-row items-center justify-between p-4 opacity-50">
@@ -144,8 +144,8 @@ export default function ReaderSettings({ forBook, forServer }: Props) {
 			<View>
 				<Text className="mb-3 text-foreground-muted">Navigation</Text>
 
-				<Card className="squircle flex rounded-2xl border border-edge bg-background-surface">
-					<View className="flex flex-row items-center justify-between border-b border-b-edge p-4">
+				<Card>
+					<View className="flex flex-row items-center justify-between p-4">
 						<Text>Tap Sides to Navigate</Text>
 						<Switch
 							variant="brand"
@@ -153,6 +153,8 @@ export default function ReaderSettings({ forBook, forServer }: Props) {
 							onCheckedChange={(checked) => onPreferenceChange({ tapSidesToNavigate: checked })}
 						/>
 					</View>
+
+					<CardDivider />
 
 					<FooterControlsSelect
 						variant={activeSettings.footerControls || 'images'}

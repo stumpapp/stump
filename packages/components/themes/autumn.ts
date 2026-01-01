@@ -93,7 +93,10 @@ export const autumn = {
 		placeholder: '#422F25',
 		stack: {
 			series: '#D0802D',
-			library: ['#5A3F33', '#D08732'],
+			library: {
+				start: '#5A3F33',
+				end: '#D08732',
+			},
 		},
 	},
 } satisfies StumpTheme

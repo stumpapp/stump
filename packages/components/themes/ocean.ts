@@ -93,7 +93,10 @@ export const ocean = {
 		placeholder: '#165564',
 		stack: {
 			series: '#0A9396',
-			library: ['#125A6D', '#227E95'],
+			library: {
+				start: '#125A6D',
+				end: '#227E95',
+			},
 		},
 	},
 } satisfies StumpTheme

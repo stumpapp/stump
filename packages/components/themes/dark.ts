@@ -93,7 +93,10 @@ export const dark = {
 		placeholder: '#1F2123',
 		stack: {
 			series: '#3D3A3A',
-			library: ['#2E2B2B', '#3D3A3A'],
+			library: {
+				start: '#2E2B2B',
+				end: '#3D3A3A',
+			},
 		},
 	},
 } satisfies StumpTheme

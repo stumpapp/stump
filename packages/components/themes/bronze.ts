@@ -47,7 +47,10 @@ export const bronze = {
 		placeholder: '#EDE8E4',
 		stack: {
 			series: '#D3C4BA',
-			library: ['#C4B5A9', '#D3C4BA'],
+			library: {
+				start: '#C4B5A9',
+				end: '#D3C4BA',
+			},
 		},
 	},
 } satisfies StumpTheme

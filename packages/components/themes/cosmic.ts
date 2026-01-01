@@ -101,7 +101,10 @@ export const cosmic = {
 		placeholder: '#24135A',
 		stack: {
 			series: '#BB86FC',
-			library: ['#6C567B', '#8E44AD'],
+			library: {
+				start: '#6C567B',
+				end: '#8E44AD',
+			},
 		},
 	},
 } satisfies StumpTheme

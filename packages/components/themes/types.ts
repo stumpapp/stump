@@ -136,7 +136,13 @@ type Thumbnail = {
 	placeholder: string
 	stack: {
 		series: string
-		library: string[]
+		// Note: Not an array like expo because tw-colors doesn't like it.
+		// This will be irrelevant once I upgrade to v4 tailwind since tw-colors
+		// isn't needed anymore. Also, it isn't even used on web yet so
+		library: {
+			start: string
+			end: string
+		}
 	}
 }
 

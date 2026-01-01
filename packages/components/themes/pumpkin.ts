@@ -77,7 +77,10 @@ export const pumpkin: StumpTheme = {
 		placeholder: '#131313',
 		stack: {
 			series: '#FF6600',
-			library: ['#481E14', '#631C03'],
+			library: {
+				start: '#481E14',
+				end: '#631C03',
+			},
 		},
 	},
 }

@@ -94,7 +94,10 @@ export const light = {
 		placeholder: '#F2F2F2',
 		stack: {
 			series: '#d4b7a7',
-			library: ['#ad9282', '#d4b7a7'],
+			library: {
+				start: '#ad9282',
+				end: '#d4b7a7',
+			},
 		},
 	},
 } satisfies StumpTheme

@@ -69,7 +69,7 @@ export const DEFAULT_BOOK_PREFERENCES = {
 	readingMode: ReadingMode.Paged,
 	readingDirection: ReadingDirection.Ltr,
 	imageScaling: {
-		scaleToFit: ReadingImageScaleFit.Height,
+		scaleToFit: ReadingImageScaleFit.Auto,
 	},
 	doublePageBehavior: 'off',
 	secondPageSeparate: false,

@@ -12,8 +12,6 @@ type Props = {
 	onChange: (behavior: ReadingImageScaleFit) => void
 }
 
-// TODO: What to do with Auto here?
-
 export default function ImageScalingSelect({ behavior, onChange }: Props) {
 	const [isOpen, setIsOpen] = useState(false)
 
@@ -31,12 +29,11 @@ export default function ImageScalingSelect({ behavior, onChange }: Props) {
 
 				<DropdownMenu.Content>
 					<DropdownMenu.CheckboxItem
-						key="width"
-						value={behavior === ReadingImageScaleFit.Width}
-						onValueChange={() => onChange(ReadingImageScaleFit.Width)}
-						disabled
+						key="auto"
+						value={behavior === ReadingImageScaleFit.Auto}
+						onValueChange={() => onChange(ReadingImageScaleFit.Auto)}
 					>
-						<DropdownMenu.ItemTitle>Fit Width</DropdownMenu.ItemTitle>
+						<DropdownMenu.ItemTitle>Auto</DropdownMenu.ItemTitle>
 					</DropdownMenu.CheckboxItem>
 
 					<DropdownMenu.CheckboxItem
@@ -46,6 +43,15 @@ export default function ImageScalingSelect({ behavior, onChange }: Props) {
 						disabled
 					>
 						<DropdownMenu.ItemTitle>Fit Height</DropdownMenu.ItemTitle>
+					</DropdownMenu.CheckboxItem>
+
+					<DropdownMenu.CheckboxItem
+						key="width"
+						value={behavior === ReadingImageScaleFit.Width}
+						onValueChange={() => onChange(ReadingImageScaleFit.Width)}
+						disabled
+					>
+						<DropdownMenu.ItemTitle>Fit Width</DropdownMenu.ItemTitle>
 					</DropdownMenu.CheckboxItem>
 
 					<DropdownMenu.CheckboxItem

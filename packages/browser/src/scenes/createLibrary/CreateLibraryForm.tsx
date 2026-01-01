@@ -159,6 +159,15 @@ export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoadi
 		}
 	}
 
+	/**
+	 * Prevent a submit event triggering when the enter key is pressed on an input
+	 */
+	const handleKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
+		if (e.key === 'Enter' && e.target instanceof HTMLInputElement) {
+			e.preventDefault()
+		}
+	}
+
 	// Note: The submit button is always rendered because I noticed that conditional rendering
 	// causes the form to trigger a submit event. FYI
 	return (
@@ -175,7 +184,7 @@ export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoadi
 					}}
 				/>
 			)}
-			<Form form={form} onSubmit={onSubmit} id="createLibraryForm">
+			<Form form={form} onSubmit={onSubmit} id="createLibraryForm" onKeyDown={handleKeyDown}>
 				<ContentContainer className="mt-0">
 					{renderStep()}
 

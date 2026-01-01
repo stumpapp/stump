@@ -1,5 +1,4 @@
 import dayjs from 'dayjs'
-import { useRouter } from 'expo-router'
 import { Trash2 } from 'lucide-react-native'
 import { useCallback, useState } from 'react'
 import { Pressable, View } from 'react-native'
@@ -8,6 +7,7 @@ import { Text } from '~/components/ui'
 import { Icon } from '~/components/ui/icon'
 import { cn } from '~/lib/utils'
 import { BookmarkRef, useEpubLocationStore } from '~/stores/epub'
+import { useEpubSheetStore } from '~/stores/epubSheet'
 
 type Props = {
 	bookmark: BookmarkRef
@@ -16,12 +16,12 @@ type Props = {
 // TODO: This is not the final design I would like to land on, just kinda getting something basic down for now
 
 export default function BookmarkListItem({ bookmark }: Props) {
-	const router = useRouter()
 	const [isDeleting, setIsDeleting] = useState(false)
 
 	const actions = useEpubLocationStore((state) => state.actions)
 	const removeBookmark = useEpubLocationStore((state) => state.removeBookmark)
 	const onDeleteBookmark = useEpubLocationStore((state) => state.onDeleteBookmark)
+	const closeSheet = useEpubSheetStore((state) => state.closeSheet)
 
 	const handleNavigate = useCallback(async () => {
 		if (!actions) return
@@ -33,11 +33,8 @@ export default function BookmarkListItem({ bookmark }: Props) {
 			type: 'application/xhtml+xml',
 		})
 
-		// Push the dismiss to end of js loop to avoid potential crashes on Android
-		setTimeout(() => {
-			router.dismiss()
-		})
-	}, [actions, bookmark, router])
+		closeSheet('locations')
+	}, [actions, bookmark, closeSheet])
 
 	const handleDelete = useCallback(async () => {
 		if (isDeleting || !onDeleteBookmark) return

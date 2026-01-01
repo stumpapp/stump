@@ -17,8 +17,8 @@ use crate::{
 		hash::{self, HASH_SAMPLE_COUNT, HASH_SAMPLE_SIZE},
 		media::{
 			process::{
-				FileConverter, FileProcessor, FileProcessorOptions, ProcessedFile,
-				ProcessedFileHashes,
+				AnalyzedPage, FileConverter, FileProcessor, FileProcessorOptions,
+				ProcessedFile, ProcessedFileHashes,
 			},
 			utils::metadata_from_buf,
 			zip::ZipProcessor,
@@ -334,6 +334,59 @@ impl FileProcessor for RarProcessor {
 		}
 
 		Ok(content_types)
+	}
+
+	fn analyze_page(
+		path: &str,
+		page: i32,
+		_: &StumpConfig,
+	) -> Result<AnalyzedPage, FileError> {
+		let archive = RarProcessor::open_for_listing(path)?;
+
+		let sorted_entries = archive
+			.into_iter()
+			.filter_map(Result::ok)
+			.filter(|entry| entry.filename.is_img() && !entry.filename.is_hidden_file())
+			.sorted_by(|a, b| alphanumeric_sort::compare_path(&a.filename, &b.filename))
+			.collect::<Vec<_>>();
+
+		if sorted_entries.is_empty() {
+			return Err(FileError::NoImageError);
+		}
+
+		let target_entry = sorted_entries
+			.into_iter()
+			.nth((page - 1) as usize)
+			.ok_or(FileError::NoImageError)?;
+
+		let content_type = target_entry.filename.as_path().naive_content_type();
+
+		let mut bytes = None;
+		let mut archive = RarProcessor::open_for_processing(path)?;
+		while let Ok(Some(header)) = archive.read_header() {
+			let is_target = header.entry().filename == target_entry.filename;
+			if is_target {
+				let (data, _) = header.read()?;
+				bytes = Some(data);
+				break;
+			}
+
+			archive = header.skip()?;
+		}
+
+		let Some(bytes) = bytes else {
+			return Err(FileError::NoImageError);
+		};
+
+		let size = imagesize::blob_size(&bytes).map_err(|e| {
+			FileError::UnknownError(format!("Failed to read image dimensions: {e}"))
+		})?;
+
+		Ok(AnalyzedPage {
+			width: size.width as u32,
+			height: size.height as u32,
+			content_type,
+		})
 	}
 }
 

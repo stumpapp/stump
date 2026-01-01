@@ -23,6 +23,39 @@ export const getDateField = (meta: OPDSMetadata, key: string) => {
 // without dealing with common URL issues for file names
 export const hashFromURL = (url: string) => stringMd5(url)
 
+export const extensionFromMime = (mime: string | null | undefined): string | null => {
+	if (!mime) return null
+	switch (mime) {
+		case 'application/epub+zip':
+			return 'epub'
+		case 'application/pdf':
+			return 'pdf'
+		case 'application/zip':
+		case 'application/vnd.comicbook+zip':
+		case 'application/x-cbz':
+			return 'cbz'
+		case 'application/x-cbr':
+		case 'application/vnd.comicbook-rar':
+			return 'cbr'
+		case 'application/x-rar-compressed':
+			return 'rar'
+		default:
+			return null
+	}
+}
+
+export const getAcquisitionLink = (links: OPDSPublication['links']) => {
+	return links?.find((link) => link.rel === 'http://opds-spec.org/acquisition')
+}
+
+export const getPublicationId = (
+	url: string,
+	metadata: OPDSMetadata | null | undefined,
+): string => {
+	const identifier = metadata?.identifier
+	return identifier || hashFromURL(url)
+}
+
 export const getPublicationThumbnailURL = ({
 	images,
 	resources,

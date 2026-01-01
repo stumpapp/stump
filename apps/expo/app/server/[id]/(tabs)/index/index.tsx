@@ -27,13 +27,9 @@ export default function Screen() {
 
 	// Always refresh when we come back to this screen
 	useFocusEffect(
-		useCallback(
-			() => {
-				onRefresh(true)
-			},
-			// eslint-disable-next-line react-hooks/exhaustive-deps
-			[],
-		),
+		useCallback(() => {
+			onRefresh(true)
+		}, [onRefresh]),
 	)
 
 	return (

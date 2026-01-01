@@ -1,7 +1,7 @@
 use crate::{
 	filesystem::media::{
 		analysis::job::{AnalyzeMediaJob, AnalyzeMediaOutput},
-		get_page,
+		analyze_page, AnalyzedPage,
 	},
 	job::{error::JobError, JobExecuteLog, JobProgress, JobTaskOutput, WorkerCtx},
 };
@@ -12,7 +12,6 @@ use std::sync::{
 };
 
 use futures::{stream, StreamExt};
-use image::GenericImageView;
 use models::{
 	entity::media_analysis,
 	shared::analysis::{MediaAnalysisData, PageDimension},
@@ -75,15 +74,13 @@ async fn analyze_book_page(
 		});
 	}
 
-	let (content_type, page_data) = get_page(&path, page, &ctx.config)?;
-	let image_format = content_type.try_into()?;
+	let AnalyzedPage {
+		content_type,
+		height,
+		width,
+	} = analyze_page(&path, page, &ctx.config)?;
 
-	let (width, height) = image::load_from_memory_with_format(&page_data, image_format)
-		.map_err(|e| JobError::TaskFailed(format!("Error loading image data: {e}")))?
-		.dimensions();
 	let dimensions = PageDimension { height, width };
-
-	// TODO: Re-add page counting
 
 	Ok(BookPageAnalysisOutput {
 		dimensions,

@@ -112,6 +112,22 @@ pub trait FileProcessor {
 		path: &str,
 		pages: Vec<i32>,
 	) -> Result<HashMap<i32, ContentType>, FileError>;
+
+	/// Analyze a page to get its dimensions and content type. This is optimized to read
+	/// only the minimum bytes necessary to determine the image dimensions
+	fn analyze_page(
+		path: &str,
+		page: i32,
+		config: &StumpConfig,
+	) -> Result<AnalyzedPage, FileError>;
+}
+
+/// The result of analyzing a page
+#[derive(Debug, Clone)]
+pub struct AnalyzedPage {
+	pub width: u32,
+	pub height: u32,
+	pub content_type: ContentType,
 }
 
 /// Trait defining a standard API for converting files throughout Stump.
@@ -378,6 +394,15 @@ pub async fn get_page_async(
 /// implementation based on the file's mime type, or return an error if the file type is not supported.
 pub fn get_page_count(path: &str, config: &StumpConfig) -> Result<i32, FileError> {
 	dispatch_processor!(Path::new(path), get_page_count, path, config)
+}
+
+/// Analyze a page to get its dimensions and content type
+pub fn analyze_page(
+	path: &str,
+	page: i32,
+	config: &StumpConfig,
+) -> Result<AnalyzedPage, FileError> {
+	dispatch_processor!(Path::new(path), analyze_page, path, page, config)
 }
 
 /// Get the number of pages in a file in the context of a spawned, blocking task. This will call the

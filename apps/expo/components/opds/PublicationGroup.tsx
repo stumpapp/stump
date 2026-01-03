@@ -3,6 +3,7 @@ import { useSDK } from '@stump/client'
 import { OPDSFeedGroup, OPDSPublication } from '@stump/sdk'
 import { STUMP_SAVE_BASIC_SESSION_HEADER } from '@stump/sdk/constants'
 import { useRouter } from 'expo-router'
+import { Rss } from 'lucide-react-native'
 import { useCallback, useMemo } from 'react'
 import { Pressable, View } from 'react-native'
 
@@ -12,8 +13,7 @@ import { usePreferencesStore } from '~/stores'
 
 import { useActiveServer } from '../activeServer'
 import { ThumbnailImage } from '../image'
-import { Text } from '../ui'
-import EmptyFeed from './EmptyFeed'
+import { ListEmptyMessage, Text } from '../ui'
 import { FeedComponentOptions } from './types'
 
 type Props = {
@@ -132,7 +132,7 @@ export default function PublicationGroup({
 				contentContainerStyle={{ paddingHorizontal: 16 }}
 			/>
 
-			{!publications.length && <EmptyFeed message="No publications in group" />}
+			{!publications.length && <ListEmptyMessage icon={Rss} message="No publications in group" />}
 		</View>
 	)
 }

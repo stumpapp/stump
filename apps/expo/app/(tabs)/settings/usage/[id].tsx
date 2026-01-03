@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { eq } from 'drizzle-orm'
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
 import { Redirect, useLocalSearchParams } from 'expo-router'
-import { HardDriveDownload, Slash } from 'lucide-react-native'
+import { HardDriveDownload } from 'lucide-react-native'
 import { useCallback, useMemo, useState } from 'react'
 import { View } from 'react-native'
 import Dialog from 'react-native-dialog'
@@ -10,7 +10,7 @@ import { ScrollView } from 'react-native-gesture-handler'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import RefreshControl from '~/components/RefreshControl'
-import { Button, Heading, Icon, Text } from '~/components/ui'
+import { Button, Heading, ListEmptyMessage, Text } from '~/components/ui'
 import { db, downloadedFiles } from '~/db'
 import { getServerStoredPreferencesUsage } from '~/lib/filesystem'
 import { formatBytesSeparate, humanizeByteUnit } from '~/lib/format'
@@ -91,19 +91,10 @@ export default function Screen() {
 						<Heading>Downloads</Heading>
 
 						{!files.length && (
-							<View className="squircle h-24 w-full items-center justify-center gap-2 rounded-lg border border-dashed border-edge p-3">
-								<View className="relative flex justify-center">
-									<View className="squircle flex items-center justify-center rounded-lg bg-background-surface p-2">
-										<Icon as={HardDriveDownload} className="h-6 w-6 text-foreground-muted" />
-										<Icon
-											as={Slash}
-											className="absolute h-6 w-6 scale-x-[-1] transform text-foreground opacity-80"
-										/>
-									</View>
-								</View>
-
-								<Text>No downloaded files for this server</Text>
-							</View>
+							<ListEmptyMessage
+								icon={HardDriveDownload}
+								message="No downloaded files for this server"
+							/>
 						)}
 
 						{(files.length > 0 || downloadedFilesSum > 0) && (

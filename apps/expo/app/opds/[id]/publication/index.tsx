@@ -1,13 +1,13 @@
 import { useSDK } from '@stump/client'
 import { useRouter } from 'expo-router'
-import { BookCopy, Info, Loader2, Slash } from 'lucide-react-native'
+import { BookCopy, Info, Loader2 } from 'lucide-react-native'
 import { useCallback } from 'react'
 import { Platform, Pressable, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { useActiveServer } from '~/components/activeServer'
-import { InfoRow, InfoSection } from '~/components/book/overview'
+import { InfoRow } from '~/components/book/overview'
 import ChevronBackLink from '~/components/ChevronBackLink'
 import { ThumbnailImage } from '~/components/image'
 import { PublicationMenu } from '~/components/opds'
@@ -19,7 +19,7 @@ import {
 	getPublicationThumbnailURL,
 	getStringField,
 } from '~/components/opds/utils'
-import { Button, Icon, Text } from '~/components/ui'
+import { Button, CardList, Icon, Text } from '~/components/ui'
 import { useIsOPDSPublicationDownloaded, useOPDSDownload } from '~/lib/hooks'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
 import { cn } from '~/lib/utils'
@@ -85,8 +85,6 @@ export default function Screen() {
 	const numberOfPages = getNumberField(metadata, 'numberOfPages') ?? readingOrder?.length
 	const modified = getDateField(metadata, 'modified')
 	const description = getStringField(metadata, 'description')
-
-	const hasInformation = !!numberOfPages || !!modified
 
 	const belongsToSeries = Array.isArray(belongsTo?.series) ? belongsTo.series[0] : belongsTo?.series
 	const seriesURL = belongsToSeries?.links?.find((link) => link.rel === 'self')?.href
@@ -184,127 +182,57 @@ export default function Screen() {
 						</View>
 					)}
 
-					<InfoSection
+					<CardList
 						label="Information"
-						rows={[
-							...(identifier
-								? [<InfoRow key="identifier" label="Identifier" value={identifier} longValue />]
-								: []),
-							<InfoRow key="title" label="Title" value={title} longValue />,
-							...(description
-								? [<InfoRow key="description" label="Description" value={description} longValue />]
-								: []),
-							...(modified
-								? [
-										<InfoRow
-											key="modified"
-											label="Modified"
-											value={modified.format('MMMM DD, YYYY')}
-											longValue
-										/>,
-									]
-								: []),
-							...(numberOfPages
-								? [
-										<InfoRow
-											key="numberOfPages"
-											label="Number of pages"
-											value={numberOfPages.toString()}
-											longValue
-										/>,
-									]
-								: []),
-							...(!hasInformation
-								? [
-										<View
-											key="noInformation"
-											className="squircle h-24 w-full items-center justify-center gap-2 rounded-lg border border-dashed border-edge p-3"
-										>
-											<View className="relative flex justify-center">
-												<View className="squircle flex items-center justify-center rounded-lg bg-background-surface p-2">
-													<Icon as={Info} className="h-6 w-6 text-foreground-muted" />
-													<Icon
-														as={Slash}
-														className="absolute h-6 w-6 scale-x-[-1] transform text-foreground opacity-80"
-													/>
-												</View>
-											</View>
+						listEmptyStyle={{ icon: Info, message: 'No information available' }}
+					>
+						{identifier && <InfoRow label="Identifier" value={identifier} longValue />}
+						<InfoRow label="Title" value={title} longValue />
+						{description && <InfoRow label="Description" value={description} longValue />}
+						{modified && (
+							<InfoRow label="Modified" value={modified.format('MMMM DD, YYYY')} longValue />
+						)}
+						{!!numberOfPages && (
+							<InfoRow label="Number of pages" value={numberOfPages.toString()} longValue />
+						)}
+					</CardList>
 
-											<Text>No information available</Text>
-										</View>,
-									]
-								: []),
-						]}
-					/>
-
-					<InfoSection
+					<CardList
 						label="Series"
-						rows={[
-							...(!belongsTo?.series
-								? [
-										<View
-											key="noSeries"
-											className="squircle h-24 w-full items-center justify-center gap-2 rounded-lg border border-dashed border-edge p-3"
-										>
-											<View className="relative flex justify-center">
-												<View className="squircle flex items-center justify-center rounded-lg bg-background-surface p-2">
-													<Icon as={BookCopy} className="h-6 w-6 text-foreground-muted" />
-													<Icon
-														as={Slash}
-														className="absolute h-6 w-6 scale-x-[-1] transform text-foreground opacity-80"
-													/>
-												</View>
-											</View>
+						listEmptyStyle={{ icon: BookCopy, message: 'No series information' }}
+					>
+						{belongsToSeries?.name && <InfoRow label="Name" value={belongsToSeries.name} />}
+						{belongsToSeries?.position && (
+							<InfoRow label="Position" value={belongsToSeries.position.toString()} />
+						)}
 
-											<Text>No series information</Text>
-										</View>,
-									]
-								: []),
-							...(belongsToSeries?.name
-								? [<InfoRow key="seriesName" label="Name" value={belongsToSeries.name} />]
-								: []),
-							...(belongsToSeries?.position
-								? [
-										<InfoRow
-											key="seriesPosition"
-											label="Position"
-											value={belongsToSeries.position.toString()}
-										/>,
-									]
-								: []),
-							...(seriesURL
-								? [
+						{seriesURL && (
+							<View className="flex flex-row items-center justify-between py-1">
+								<Text className="shrink-0 text-foreground-subtle">Feed URL</Text>
+								<Pressable
+									onPress={() =>
+										router.push({
+											pathname: '/opds/[id]/feed/[url]',
+											params: { url: seriesURL, id: serverID },
+										})
+									}
+								>
+									{({ pressed }) => (
 										<View
-											key="seriesURL"
-											className="flex flex-row items-center justify-between py-1"
+											className={cn(
+												'squircle rounded-lg border border-edge bg-background-surface-secondary p-1 px-3 text-center',
+												{
+													'opacity-80': pressed,
+												},
+											)}
 										>
-											<Text className="shrink-0 text-foreground-subtle">Feed URL</Text>
-											<Pressable
-												onPress={() =>
-													router.push({
-														pathname: '/opds/[id]/feed/[url]',
-														params: { url: seriesURL, id: serverID },
-													})
-												}
-											>
-												{({ pressed }) => (
-													<View
-														className={cn(
-															'squircle rounded-lg border border-edge bg-background-surface-secondary p-1 text-center',
-															{
-																'opacity-80': pressed,
-															},
-														)}
-													>
-														<Text>Go to feed</Text>
-													</View>
-												)}
-											</Pressable>
-										</View>,
-									]
-								: []),
-						]}
-					/>
+											<Text>Go to feed</Text>
+										</View>
+									)}
+								</Pressable>
+							</View>
+						)}
+					</CardList>
 				</View>
 			</ScrollView>
 		</SafeAreaView>

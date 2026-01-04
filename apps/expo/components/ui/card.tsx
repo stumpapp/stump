@@ -14,7 +14,7 @@ type CardListProps = ViewProps & {
 	/**
 	 * Customise the icon and text to display when the list is empty
 	 */
-	listEmptyStyle?: ListEmptyComponentProps
+	listEmptyStyle?: ListEmptyMessageProps
 }
 
 export function CardList({ label, listEmptyStyle, children, className, ...props }: CardListProps) {
@@ -24,7 +24,7 @@ export function CardList({ label, listEmptyStyle, children, className, ...props 
 		<View className={cn('gap-1', className)} {...props}>
 			{label && <Text className="px-2 text-lg font-semibold text-foreground-muted">{label}</Text>}
 			{items.length === 0 ? (
-				<ListEmptyComponent {...listEmptyStyle} />
+				<ListEmptyMessage {...listEmptyStyle} />
 			) : (
 				<Card>
 					{items.map((child, index) => (
@@ -67,12 +67,12 @@ const CardDivider = ({ className, ...props }: ViewProps) => {
 	)
 }
 
-type ListEmptyComponentProps = {
+type ListEmptyMessageProps = {
 	icon?: LucideIcon
 	message?: string
 }
 
-export const ListEmptyComponent = ({ icon, message }: ListEmptyComponentProps) => (
+export const ListEmptyMessage = ({ icon, message }: ListEmptyMessageProps) => (
 	<View
 		className={cn(
 			'squircle h-24 w-full items-center justify-center gap-2 rounded-3xl border border-dashed border-edge p-3',

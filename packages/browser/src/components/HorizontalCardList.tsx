@@ -1,71 +1,46 @@
 import { Button, cn, Heading, Text, ToolTip } from '@stump/components'
 import { ChevronLeft, ChevronRight, CircleSlash2 } from 'lucide-react'
-import { forwardRef, useCallback, useMemo, useRef, useState } from 'react'
-import { ScrollerProps, Virtuoso, VirtuosoHandle } from 'react-virtuoso'
-import { useInViewRef, useMediaMatch } from 'rooks'
+import { forwardRef, useMemo } from 'react'
+import { ScrollerProps, Virtuoso } from 'react-virtuoso'
+import { useMediaMatch } from 'rooks'
 
-import { usePreferences } from '../hooks'
+import { useHorizontalScroll, usePreferences } from '../hooks'
 
 type Props = {
 	title: string
 	items: React.ReactElement[]
 	onFetchMore: () => void
 	emptyState?: React.ReactNode
+	height?: number
+	footerHeight?: number
 }
 
-export default function HorizontalCardList({ title, items, onFetchMore, emptyState }: Props) {
+export default function HorizontalCardList({
+	title,
+	items,
+	onFetchMore,
+	emptyState,
+	height: heightProp,
+	footerHeight = 96,
+}: Props) {
 	const {
 		preferences: { thumbnailRatio },
 	} = usePreferences()
 
-	const virtuosoRef = useRef<VirtuosoHandle>(null)
+	const { scrollerRef, canSkipBackward, canSkipForward, handleSkipBackward, handleSkipAhead } =
+		useHorizontalScroll()
 
 	const isAtLeastSmall = useMediaMatch('(min-width: 640px)')
 	const isAtLeastMedium = useMediaMatch('(min-width: 768px)')
 
-	const height = useMemo(() => {
+	const calculatedHeight = useMemo(() => {
 		const imageWidth = !isAtLeastSmall ? 160 : !isAtLeastMedium ? 170.656 : 192 // widths from EntityCard
 		const imageHeight = imageWidth / thumbnailRatio
-		const footerHeight = 96 // estimated height of footer
 
 		return imageHeight + footerHeight
-	}, [isAtLeastSmall, isAtLeastMedium, thumbnailRatio])
+	}, [isAtLeastSmall, isAtLeastMedium, thumbnailRatio, footerHeight])
 
-	const [firstCardRef, firstCardIsInView] = useInViewRef({ threshold: 0.5 })
-	const [lastCardRef, lastCardIsInView] = useInViewRef({ threshold: 0.5 })
-	const [visibleRange, setVisibleRange] = useState({
-		endIndex: 0,
-		startIndex: 0,
-	})
-
-	const { startIndex: lowerBound, endIndex: upperBound } = visibleRange
-
-	const canSkipBackward = upperBound > 0 && !firstCardIsInView
-	const canSkipForward = items.length && !lastCardIsInView
-
-	const handleSkipAhead = useCallback(
-		(skip = 5) => {
-			const nextIndex = Math.min(upperBound + skip, items.length - 1)
-			virtuosoRef.current?.scrollIntoView({
-				index: nextIndex,
-				behavior: 'smooth',
-				align: 'start',
-			})
-		},
-		[upperBound, items.length],
-	)
-
-	const handleSkipBackward = useCallback(
-		(skip = 5) => {
-			const nextIndex = Math.max(lowerBound - skip, 0)
-			virtuosoRef.current?.scrollIntoView({
-				index: nextIndex,
-				behavior: 'smooth',
-				align: 'start',
-			})
-		},
-		[lowerBound],
-	)
+	const height = heightProp ?? calculatedHeight
 
 	const renderContent = () => {
 		if (!items.length) {
@@ -89,28 +64,16 @@ export default function HorizontalCardList({ title, items, onFetchMore, emptySta
 		} else {
 			return (
 				<Virtuoso
-					ref={virtuosoRef}
+					scrollerRef={scrollerRef}
 					style={{ height }}
 					horizontalDirection
 					data={items}
 					components={{
 						Scroller: HorizontalScroller,
 					}}
-					itemContent={(idx, card) => (
-						<div
-							{...(idx === 0
-								? { ref: firstCardRef }
-								: idx === items.length - 1
-									? { ref: lastCardRef }
-									: {})}
-							className="px-1"
-						>
-							{card}
-						</div>
-					)}
+					itemContent={(_, card) => <div className="px-1.5">{card}</div>}
 					endReached={onFetchMore}
 					increaseViewportBy={5 * (height / 3)}
-					rangeChanged={setVisibleRange}
 					overscan={{ main: 3, reverse: 3 }}
 				/>
 			)
@@ -128,8 +91,7 @@ export default function HorizontalCardList({ title, items, onFetchMore, emptySta
 								variant="ghost"
 								size="icon"
 								disabled={!canSkipBackward}
-								onClick={() => handleSkipBackward()}
-								onDoubleClick={() => handleSkipBackward(20)}
+								onClick={handleSkipBackward}
 							>
 								<ChevronLeft className="h-4 w-4" />
 							</Button>
@@ -139,8 +101,7 @@ export default function HorizontalCardList({ title, items, onFetchMore, emptySta
 								variant="ghost"
 								size="icon"
 								disabled={!canSkipForward}
-								onClick={() => handleSkipAhead()}
-								onDoubleClick={() => handleSkipAhead(20)}
+								onClick={handleSkipAhead}
 							>
 								<ChevronRight className="h-4 w-4" />
 							</Button>

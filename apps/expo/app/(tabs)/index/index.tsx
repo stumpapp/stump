@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router'
 import partition from 'lodash/partition'
-import { ExternalLink, Rss, Server, Slash } from 'lucide-react-native'
+import { ExternalLink, Rss, Server } from 'lucide-react-native'
 import { Fragment, useCallback, useEffect, useState } from 'react'
 import { Linking, useWindowDimensions, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
@@ -10,7 +10,7 @@ import { useOwlHeaderOffset } from '~/components/Owl'
 import DeleteServerConfirmation from '~/components/savedServer/DeleteServerConfirmation'
 import EditServerDialog from '~/components/savedServer/EditServerDialog'
 import SavedServerListItem from '~/components/savedServer/SavedServerListItem'
-import { Button, Icon, Text } from '~/components/ui'
+import { Button, Icon, ListEmptyMessage, Text } from '~/components/ui'
 import { useSavedServers } from '~/stores'
 import { CreateServer, SavedServer, SavedServerWithConfig } from '~/stores/savedServer'
 
@@ -146,19 +146,7 @@ export default function Screen() {
 								<Text className="text-foreground-muted">Stump</Text>
 
 								{!stumpServers.length && (
-									<View className="squircle h-24 w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-edge p-3">
-										<View className="relative flex justify-center">
-											<View className="squircle flex items-center justify-center rounded-lg bg-background-surface p-2">
-												<Icon as={Server} className="h-6 w-6 text-foreground-muted" />
-												<Icon
-													as={Slash}
-													className="absolute h-6 w-6 scale-x-[-1] transform text-foreground opacity-80"
-												/>
-											</View>
-										</View>
-
-										<Text>No Stump servers added</Text>
-									</View>
+									<ListEmptyMessage icon={Server} message="No Stump servers added" />
 								)}
 
 								{stumpServers.map((server) => (
@@ -176,19 +164,7 @@ export default function Screen() {
 							<Text className="text-foreground-muted">OPDS</Text>
 
 							{!allOPDSServers.length && (
-								<View className="squircle h-24 w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-edge p-3">
-									<View className="relative flex justify-center">
-										<View className="squircle flex items-center justify-center rounded-lg bg-background-surface p-2">
-											<Icon as={Rss} className="h-6 w-6 text-foreground-muted" />
-											<Icon
-												as={Slash}
-												className="absolute h-6 w-6 scale-x-[-1] transform text-foreground opacity-80"
-											/>
-										</View>
-									</View>
-
-									<Text>No OPDS feeds added</Text>
-								</View>
+								<ListEmptyMessage icon={Rss} message="No OPDS feeds added" />
 							)}
 
 							{allOPDSServers.map((server) => (

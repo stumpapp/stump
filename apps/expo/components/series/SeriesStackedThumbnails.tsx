@@ -1,6 +1,6 @@
 import { useSDK } from '@stump/client'
 import { ImageRef } from '@stump/graphql'
-import { ColorSpace, darken, getColor, OKLCH, serialize, set, sRGB } from 'colorjs.io/fn'
+import { ColorSpace, getColor, OKLCH, serialize, set, sRGB } from 'colorjs.io/fn'
 import { Easing, View } from 'react-native'
 import { easeGradient } from 'react-native-easing-gradient'
 import LinearGradient from 'react-native-linear-gradient'
@@ -113,8 +113,11 @@ export default function SeriesStackedThumbnails({ thumbnailData, width: cardWidt
 	let backgroundColor
 	if (mainThumbnailAverageColor) {
 		const color = getColor(mainThumbnailAverageColor)
-		const darkerColor = darken(color, isDarkColorScheme ? 0.33 : 0.1)
-		backgroundColor = serialize(darkerColor, { format: 'hex' })
+		set(color, {
+			'oklch.l': isDarkColorScheme ? 0.3 : 0.9,
+			'oklch.c': (c) => (c + 0.05) / 2,
+		})
+		backgroundColor = serialize(color, { format: 'hex' })
 	} else if (accentColor) {
 		// Take the hue of the accentColor and give it the same chroma and lightness as colors.thumbnail.stack.series
 		const color = getColor(accentColor)

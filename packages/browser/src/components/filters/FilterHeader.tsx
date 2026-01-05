@@ -79,7 +79,7 @@ export default function FilterHeader({
 		<header
 			ref={ref}
 			className={cn(
-				'sticky z-10 flex h-12 w-full shrink-0 justify-between gap-2 border-b border-edge px-4 md:top-0',
+				'sticky z-50 flex h-12 w-full shrink-0 justify-between gap-2 border-b border-edge px-4 md:top-0',
 				{
 					'bg-background': isSticky || !isMobile,
 				},

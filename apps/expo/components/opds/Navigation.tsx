@@ -7,7 +7,7 @@ import { Pressable, View } from 'react-native'
 import { cn } from '~/lib/utils'
 
 import { useActiveServer } from '../activeServer'
-import { Text } from '../ui'
+import { ListEmptyMessage, Text } from '../ui'
 import { Icon } from '../ui/icon'
 import { LinkDivider } from './LinkDivider'
 import { FeedComponentOptions } from './types'
@@ -57,21 +57,7 @@ export default function Navigation({ navigation, renderEmpty }: Props) {
 				</Fragment>
 			))}
 
-			{!navigation.length && (
-				<View className="squircle h-24 w-full items-center justify-center gap-2 rounded-lg border border-dashed border-edge p-3">
-					<View className="relative flex justify-center">
-						<View className="squircle flex items-center justify-center rounded-lg bg-background-surface p-2">
-							<Icon as={Rss} className="h-6 w-6 text-foreground-muted" />
-							<Icon
-								as={Slash}
-								className="absolute h-6 w-6 scale-x-[-1] transform text-foreground opacity-80"
-							/>
-						</View>
-					</View>
-
-					<Text>No navigation links in feed</Text>
-				</View>
-			)}
+			{!navigation.length && <ListEmptyMessage icon={Rss} message="No navigation links in feed" />}
 		</View>
 	)
 }

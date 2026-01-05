@@ -1,13 +1,14 @@
 import { useRefetch, useSDK } from '@stump/client'
 import { useQuery } from '@tanstack/react-query'
 import { useLocalSearchParams } from 'expo-router'
+import { Rss } from 'lucide-react-native'
 import { Platform, ScrollView } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import ChevronBackLink from '~/components/ChevronBackLink'
 import { MaybeErrorFeed, OPDSFeed } from '~/components/opds'
-import EmptyFeed from '~/components/opds/EmptyFeed'
 import RefreshControl from '~/components/RefreshControl'
+import { ListEmptyMessage } from '~/components/ui'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
 
 export default function Screen() {
@@ -36,7 +37,7 @@ export default function Screen() {
 
 	const render = () => {
 		if (emptyFeed) {
-			return <EmptyFeed message="No results for this search" />
+			return <ListEmptyMessage icon={Rss} message="No results for this search" />
 		} else if (feed && !error) {
 			return <OPDSFeed feed={feed} />
 		} else {

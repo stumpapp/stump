@@ -127,6 +127,25 @@ type Scrollbar = {
 	thumb: DefaultVariant & HoverVariant
 } & DefaultVariant
 
+// TODO: Consider each theme more carefully. I did very minimal effort for each one
+/**
+ * A type for the thumbnail-specific colors
+ */
+type Thumbnail = {
+	border: string
+	placeholder: string
+	stack: {
+		series: string
+		// Note: Not an array like expo because tw-colors doesn't like it.
+		// This will be irrelevant once I upgrade to v4 tailwind since tw-colors
+		// isn't needed anymore. Also, it isn't even used on web yet so
+		library: {
+			start: string
+			end: string
+		}
+	}
+}
+
 /**
  * The primary type which represents the color tokens for the Stump UI. These are translated for use as
  * tailwind classes via tw-colors
@@ -138,4 +157,5 @@ export type StumpTheme = {
 	edge: Border
 	fill: Color
 	scrollbar: Scrollbar
+	thumbnail: Thumbnail
 }

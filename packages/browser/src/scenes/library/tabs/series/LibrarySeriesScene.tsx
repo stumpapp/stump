@@ -31,7 +31,7 @@ import {
 import GenericEmptyState from '@/components/GenericEmptyState'
 import { LibrarySeriesAlphabet, usePrefetchLibrarySeriesAlphabet } from '@/components/library'
 import { SeriesTable } from '@/components/series'
-import SeriesCard from '@/components/series/SeriesCard'
+import StackedSeriesCard from '@/components/series/StackedSeriesCard'
 import { defaultSeriesColumnSort } from '@/components/series/table'
 import { EntityTableColumnConfiguration } from '@/components/table'
 import TableOrGridLayout from '@/components/TableOrGridLayout'
@@ -54,6 +54,20 @@ const query = graphql(`
 				mediaCount
 				percentageCompleted
 				status
+				media(take: 3) {
+					id
+					thumbnail {
+						url
+						metadata {
+							averageColor
+							colors {
+								color
+								percentage
+							}
+							thumbhash
+						}
+					}
+				}
 			}
 			pageInfo {
 				__typename
@@ -307,7 +321,9 @@ export default function LibrarySeriesScene() {
 						{!!nodes.length && (
 							<DynamicCardGrid
 								count={nodes.length}
-								renderItem={(index) => <SeriesCard key={nodes[index]!.id} data={nodes[index]!} />}
+								renderItem={(index) => (
+									<StackedSeriesCard key={nodes[index]!.id} data={nodes[index]!} />
+								)}
 							/>
 						)}
 						{!nodes.length && !isLoading && (

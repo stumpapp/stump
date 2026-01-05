@@ -88,4 +88,15 @@ export const autumn = {
 			hover: 'hsla(0, 0%, 100%, 0.3)',
 		},
 	},
+	thumbnail: {
+		border: 'rgba(233, 234, 235, 0.10)',
+		placeholder: '#422F25',
+		stack: {
+			series: '#D0802D',
+			library: {
+				start: '#5A3F33',
+				end: '#D08732',
+			},
+		},
+	},
 } satisfies StumpTheme

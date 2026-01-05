@@ -89,7 +89,7 @@ export default function LibraryNavigation() {
 		<div
 			ref={ref}
 			className={cn(
-				'sticky top-0 z-10 h-12 w-full border-b border-edge bg-transparent md:relative md:top-[unset] md:z-[unset]',
+				'sticky top-0 z-50 h-12 w-full border-b border-edge bg-transparent md:relative md:top-[unset] md:z-[unset]',
 				{ 'bg-background': isSticky },
 			)}
 		>

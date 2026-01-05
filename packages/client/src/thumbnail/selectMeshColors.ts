@@ -38,7 +38,7 @@ const calculateScore = (candidate: ColorData, minDifference: number) => {
 	return score
 }
 
-export function selectMeshColors(colorPalette: ImageColor[]) {
+export function selectMeshColors(colorPalette: ImageColor[]): string[] | null {
 	if (colorPalette.length < 3) return null
 
 	const candidates: ColorData[] = colorPalette.map((colorData) => {
@@ -53,15 +53,16 @@ export function selectMeshColors(colorPalette: ImageColor[]) {
 	})
 
 	// This is an initial seed colour score that only evaluates chroma and percentage
-	// We don't actually need to sort it though
 	candidates.sort((a, b) => {
 		const scoreA = a.chroma * Math.sqrt(a.percentage)
 		const scoreB = b.chroma * Math.sqrt(b.percentage)
 		return scoreB - scoreA
 	})
 
-	const finalPalette: ColorData[] = []
-	finalPalette.push(candidates[0])
+	const firstCandidate = candidates[0]
+	if (!firstCandidate) return null
+
+	const finalPalette: ColorData[] = [firstCandidate]
 	candidates.splice(0, 1)
 
 	while (finalPalette.length < 3) {
@@ -85,8 +86,9 @@ export function selectMeshColors(colorPalette: ImageColor[]) {
 			}
 		})
 
-		if (bestCandidateIndex !== -1) {
-			finalPalette.push(candidates[bestCandidateIndex])
+		const bestCandidate = candidates[bestCandidateIndex]
+		if (bestCandidateIndex !== -1 && bestCandidate) {
+			finalPalette.push(bestCandidate)
 			candidates.splice(bestCandidateIndex, 1)
 		} else {
 			return null

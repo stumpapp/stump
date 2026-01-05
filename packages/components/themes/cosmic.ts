@@ -96,4 +96,15 @@ export const cosmic = {
 			hover: 'hsla(0, 0%, 100%, 0.3)',
 		},
 	},
+	thumbnail: {
+		border: 'rgba(233, 234, 235, 0.10)',
+		placeholder: '#24135A',
+		stack: {
+			series: '#BB86FC',
+			library: {
+				start: '#6C567B',
+				end: '#8E44AD',
+			},
+		},
+	},
 } satisfies StumpTheme

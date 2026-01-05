@@ -15,6 +15,9 @@ import { Text } from '../ui'
 const fragment = graphql(`
 	fragment OnDeckBookItem on Media {
 		id
+		metadata {
+			number
+		}
 		resolvedName
 		thumbnail {
 			url
@@ -63,6 +66,13 @@ function OnDeckBookItem({ book }: Props) {
 
 	const { url: uri, metadata: placeholderData } = data.thumbnail
 
+	const seriesPosition = Number(data.metadata?.number) || data.seriesPosition
+	// If seriesPosition is fractional, we show "Book X in series"
+	// If it's an integer, we show "Book X of Y"
+	// If the integer is more than the total mediaCount, we fallback to "Book X in series"
+	const isFractional = !Number.isInteger(seriesPosition)
+	const showOfY = !!seriesPosition && !isFractional && seriesPosition <= data.series.mediaCount
+
 	return (
 		<Pressable onPress={() => router.navigate(`/server/${serverID}/books/${data.id}`)}>
 			{({ pressed }) => (
@@ -96,7 +106,7 @@ function OnDeckBookItem({ book }: Props) {
 							{data.resolvedName}
 						</Text>
 
-						{data.seriesPosition != null && (
+						{seriesPosition != null && (
 							<Text
 								className="flex-1 flex-wrap text-sm font-medium tablet:text-base"
 								style={{
@@ -108,7 +118,9 @@ function OnDeckBookItem({ book }: Props) {
 								}}
 								numberOfLines={0}
 							>
-								Book {data.seriesPosition} of {data.series?.mediaCount ?? '?'}
+								{showOfY
+									? `Book ${seriesPosition} of ${data.series.mediaCount}`
+									: `Book ${seriesPosition} in series`}
 							</Text>
 						)}
 					</View>

@@ -88,4 +88,15 @@ export const ocean = {
 			hover: 'hsla(0, 0%, 100%, 0.3)',
 		},
 	},
+	thumbnail: {
+		border: 'rgba(233, 234, 235, 0.10)',
+		placeholder: '#165564',
+		stack: {
+			series: '#0A9396',
+			library: {
+				start: '#125A6D',
+				end: '#227E95',
+			},
+		},
+	},
 } satisfies StumpTheme

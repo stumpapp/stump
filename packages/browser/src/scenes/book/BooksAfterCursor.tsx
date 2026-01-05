@@ -86,6 +86,7 @@ function BooksAfterCurrent({ cursor }: Props) {
 			title="Next in series"
 			items={cards}
 			onFetchMore={handleFetchMore}
+			footerHeight={64 + 17}
 			emptyState={
 				<div className="flex items-start justify-start space-x-3 rounded-lg border border-dashed border-edge-subtle px-4 py-4">
 					<span className="rounded-lg border border-edge bg-background-surface p-2">

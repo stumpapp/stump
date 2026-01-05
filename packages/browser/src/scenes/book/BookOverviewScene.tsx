@@ -2,17 +2,18 @@ import { ButtonOrLink, Heading, Spacer, Text } from '@stump/components'
 import { useFragment } from '@stump/graphql'
 import dayjs from 'dayjs'
 import sortBy from 'lodash/sortBy'
-import { Suspense } from 'react'
+import { Suspense, useEffect, useRef } from 'react'
 import { Helmet } from 'react-helmet'
 import { useParams } from 'react-router'
 import { useMediaMatch } from 'rooks'
 
 import { useBookOverview } from '@/components/book'
-import BookCard, { BookCardFragment } from '@/components/book/BookCard'
+import { BookCardFragment } from '@/components/book/BookCard'
 import { MediaMetadataEditor } from '@/components/book/metadata'
 import { SceneContainer } from '@/components/container'
 import LinkBadge from '@/components/LinkBadge'
 import ReadMore from '@/components/ReadMore'
+import { ProminentThumbnailImage } from '@/components/thumbnail'
 import { useAppContext } from '@/context'
 import { usePaths } from '@/paths'
 import { PDF_EXTENSION } from '@/utils/patterns'
@@ -33,7 +34,7 @@ export default function BookOverviewScene() {
 	const { isServerOwner } = useAppContext()
 
 	const paths = usePaths()
-
+	const topRef = useRef<HTMLDivElement>(null)
 	const isAtLeastTablet = useMediaMatch('(min-width: 640px)')
 
 	if (!media) {
@@ -47,8 +48,12 @@ export default function BookOverviewScene() {
 	).at(-1)?.completedAt
 	const links = media.metadata?.links.filter((l) => !!l) ?? []
 
+	useEffect(() => {
+		topRef.current?.scrollIntoView({ behavior: 'smooth' })
+	}, [id])
+
 	return (
-		<SceneContainer>
+		<SceneContainer ref={topRef}>
 			<Suspense>
 				<Helmet>
 					<title>Stump | {media.resolvedName}</title>
@@ -56,7 +61,11 @@ export default function BookOverviewScene() {
 
 				<div className="flex h-full w-full flex-col gap-4">
 					<div className="flex flex-col items-center gap-3 tablet:mb-2 tablet:flex-row tablet:items-start">
-						<BookCard key={media.id} fragment={media} readingLink variant="cover" />
+						<ProminentThumbnailImage
+							src={fragmentData.thumbnail.url}
+							alt={media.resolvedName}
+							placeholderData={fragmentData.thumbnail.metadata}
+						/>
 						<div className="flex h-full w-full flex-col gap-2 tablet:gap-4">
 							<Suspense>
 								<BookOverviewSceneHeader id={media.id} />

@@ -1,9 +1,9 @@
 import { OPDSFeedGroup } from '@stump/sdk'
+import { Rss } from 'lucide-react-native'
 import { Fragment } from 'react'
 import { View } from 'react-native'
 
-import { Text } from '../ui'
-import EmptyFeed from './EmptyFeed'
+import { ListEmptyMessage, Text } from '../ui'
 import FeedSelfURL from './FeedSelfURL'
 import { LinkDivider } from './LinkDivider'
 import NavigationLink from './NavigationLink'
@@ -38,7 +38,7 @@ export default function NavigationGroup({
 				</Fragment>
 			))}
 
-			{!navigation.length && <EmptyFeed message="No navigation links in group" />}
+			{!navigation.length && <ListEmptyMessage icon={Rss} message="No navigation links in group" />}
 		</View>
 	)
 }

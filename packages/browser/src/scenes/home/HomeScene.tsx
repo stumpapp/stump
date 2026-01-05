@@ -59,13 +59,13 @@ export default function HomeScene() {
 	}
 
 	return (
-		<SceneContainer className="flex flex-col gap-4">
+		<SceneContainer className="flex flex-col gap-6">
 			{helmet}
 
 			<ContinueReadingMedia />
 			<OnDeck />
-			<RecentlyAddedSeries />
 			<RecentlyAddedMedia />
+			<RecentlyAddedSeries />
 			<div className="pb-5 sm:pb-0" />
 		</SceneContainer>
 	)

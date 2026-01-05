@@ -8,6 +8,8 @@ mod m20251112_000000_add_oidc_to_users;
 mod m20251117_220701_thumbnail_placeholders;
 mod m20251118_183043_media_analysis;
 mod m20251220_000000_library_view_mode;
+mod m20251229_185620_fancy_animations_pref;
+mod m20251229_200000_thumbnail_placeholder_style_pref;
 
 pub struct Migrator;
 
@@ -22,6 +24,8 @@ impl MigratorTrait for Migrator {
 			Box::new(m20251117_220701_thumbnail_placeholders::Migration),
 			Box::new(m20251118_183043_media_analysis::Migration),
 			Box::new(m20251220_000000_library_view_mode::Migration),
+			Box::new(m20251229_185620_fancy_animations_pref::Migration),
+			Box::new(m20251229_200000_thumbnail_placeholder_style_pref::Migration),
 		]
 	}
 }

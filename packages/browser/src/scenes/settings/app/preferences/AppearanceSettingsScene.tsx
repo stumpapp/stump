@@ -7,6 +7,7 @@ import { Container, ContentContainer } from '@/components/container'
 import DebugSettings from './DebugSettings'
 import DisplaySpacingPreference from './DisplaySpacingPreference'
 import EnableAlphabetFiltering from './EnableAlphabetFiltering'
+import EnableFancyAnimations from './EnableFancyAnimations'
 import EnableJobOverlayToggle from './EnableJobOverlayToggle'
 import FontSelect from './FontSelect'
 import GradientToggle from './GradientToggle'
@@ -19,6 +20,7 @@ import QueryIndicatorToggle from './QueryIndicatorToggle'
 import { DoubleSidebarToggle, ReplacePrimarySidebarToggle } from './settings-sidebar'
 import ShowThumbnailsInHeader from './ShowThumbnailsInHeader'
 import ThemeSelect from './ThemeSelect'
+import ThumbnailPlaceholder from './ThumbnailPlaceholder'
 import ThumbnailRatioSelect from './ThumbnailRatioSelect'
 
 // TODO: The more I look at this the less I kinda like it
@@ -47,6 +49,7 @@ export default function AppearanceSettingsScene() {
 					<GradientToggle />
 					<FontSelect />
 					<ThumbnailRatioSelect />
+					<ThumbnailPlaceholder />
 				</div>
 
 				<div>
@@ -80,6 +83,7 @@ export default function AppearanceSettingsScene() {
 					<ShowThumbnailsInHeader />
 					<HideScrollbarToggle />
 					<EnableAlphabetFiltering />
+					<EnableFancyAnimations />
 					<QueryIndicatorToggle />
 					<LiveRefetchToggle />
 					<EnableJobOverlayToggle />

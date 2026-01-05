@@ -1,3 +1,4 @@
+import { selectMeshColors } from '@stump/client'
 import { ImageColor } from '@stump/graphql'
 import { MeshGradientView } from 'expo-mesh-gradient'
 import { useMemo } from 'react'
@@ -6,8 +7,6 @@ import { thumbHashToDataURL } from 'thumbhash'
 
 import { useColors } from '~/lib/constants'
 import { usePreferencesStore } from '~/stores'
-
-import { selectMeshColors } from './selectMeshColors'
 
 // prettier-ignore
 const POINTS = [
@@ -21,6 +20,8 @@ export type ThumbnailPlaceholderData = {
 	colors?: ImageColor[] | null
 	thumbhash?: string | null
 }
+
+// TODO(aaron): Come back and fix lints later
 
 export function ThumbnailPlaceholder(props?: ThumbnailPlaceholderData) {
 	const thumbnailPlaceholder = usePreferencesStore((state) => state.thumbnailPlaceholder)

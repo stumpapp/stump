@@ -1,8 +1,8 @@
-import { AspectRatio, cn, Heading, Text } from '@stump/components'
+import { cn, Heading, Text } from '@stump/components'
 
-import { EntityImage } from '@/components/entity'
 import ReadMore from '@/components/ReadMore'
 import TagList from '@/components/tags/TagList'
+import { ProminentThumbnailImage } from '@/components/thumbnail'
 import { usePreferences } from '@/hooks'
 
 import { useLibraryContext } from './context'
@@ -54,11 +54,7 @@ export default function LibraryHeader() {
 		>
 			<div className="flex w-full flex-col items-center gap-4 md:mb-2 md:flex-row md:items-start">
 				{showThumbnailsInHeaders && (
-					<div className="w-[200px]">
-						<AspectRatio ratio={2 / 3}>
-							<EntityImage src={thumbnail.url} className="rounded-md object-cover" />
-						</AspectRatio>
-					</div>
+					<ProminentThumbnailImage src={thumbnail.url} placeholderData={thumbnail.metadata} />
 				)}
 
 				<div className="flex h-full w-full flex-col gap-2 md:gap-4">

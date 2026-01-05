@@ -32,6 +32,14 @@ const query = graphql(`
 			}
 			thumbnail {
 				url
+				metadata {
+					averageColor
+					thumbhash
+					colors {
+						color
+						percentage
+					}
+				}
 			}
 			config {
 				defaultLibraryViewMode

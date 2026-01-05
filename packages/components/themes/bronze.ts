@@ -42,4 +42,15 @@ export const bronze = {
 			hover: 'hsla(0, 0%, 0%, 0.5)',
 		},
 	},
+	thumbnail: {
+		border: 'rgba(31, 33, 35, 0.10)',
+		placeholder: '#EDE8E4',
+		stack: {
+			series: '#D3C4BA',
+			library: {
+				start: '#C4B5A9',
+				end: '#D3C4BA',
+			},
+		},
+	},
 } satisfies StumpTheme

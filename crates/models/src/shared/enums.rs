@@ -162,6 +162,35 @@ pub enum InterfaceLayout {
 	Table,
 }
 
+/// The style of placeholder to use for thumbnails while they are loading
+#[derive(
+	Eq,
+	Copy,
+	Hash,
+	Debug,
+	Default,
+	Clone,
+	EnumIter,
+	Enum,
+	PartialEq,
+	Serialize,
+	Deserialize,
+	DeriveActiveEnum,
+)]
+#[sea_orm(
+	rs_type = "String",
+	rename_all = "SCREAMING_SNAKE_CASE",
+	db_type = "String(StringLen::None)"
+)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum ThumbnailPlaceholderStyle {
+	#[default]
+	Grayscale,
+	AverageColor,
+	Colorful,
+	Thumbhash,
+}
+
 #[derive(
 	Eq,
 	Copy,

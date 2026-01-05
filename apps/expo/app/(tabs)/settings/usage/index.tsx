@@ -1,17 +1,16 @@
 import { useQuery } from '@tanstack/react-query'
 import { useRouter } from 'expo-router'
-import { ChevronRight, Server, Slash } from 'lucide-react-native'
+import { ChevronRight, Server } from 'lucide-react-native'
 import { useMemo } from 'react'
 import { View } from 'react-native'
 import { Pressable, ScrollView } from 'react-native-gesture-handler'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import RefreshControl from '~/components/RefreshControl'
-import { Card, Heading, Icon, Text } from '~/components/ui'
+import { CardList, Heading, Icon, ListEmptyMessage, Text } from '~/components/ui'
 import { getAppUsage } from '~/lib/filesystem'
 import { formatBytes } from '~/lib/format'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
-import { cn } from '~/lib/utils'
 import { useSavedServers } from '~/stores'
 
 export default function Screen() {
@@ -74,8 +73,8 @@ export default function Screen() {
 						<Heading>Servers</Heading>
 
 						{savedServers.length > 0 && (
-							<Card className="squircle flex rounded-2xl border border-edge bg-background-surface">
-								{savedServers.map((server, idx) => (
+							<CardList>
+								{savedServers.map((server) => (
 									<Pressable
 										key={server.id}
 										onPress={() =>
@@ -85,14 +84,7 @@ export default function Screen() {
 											})
 										}
 									>
-										<View
-											className={cn(
-												'flex flex-row items-center justify-between border-b border-b-edge p-4',
-												{
-													'border-b-transparent': idx === savedServers.length - 1,
-												},
-											)}
-										>
+										<View className={'flex flex-row items-center justify-between p-4'}>
 											<Text>{server.name}</Text>
 
 											<View className="flex flex-row items-center gap-2">
@@ -102,23 +94,11 @@ export default function Screen() {
 										</View>
 									</Pressable>
 								))}
-							</Card>
+							</CardList>
 						)}
 
 						{savedServers.length === 0 && (
-							<View className="squircle h-24 w-full items-center justify-center gap-2 rounded-lg border border-dashed border-edge p-3">
-								<View className="relative flex justify-center">
-									<View className="squircle flex items-center justify-center rounded-lg bg-background-surface p-2">
-										<Icon as={Server} className="h-6 w-6 text-foreground-muted" />
-										<Icon
-											as={Slash}
-											className="absolute h-6 w-6 scale-x-[-1] transform text-foreground opacity-80"
-										/>
-									</View>
-								</View>
-
-								<Text>No servers added</Text>
-							</View>
+							<ListEmptyMessage icon={Server} message="No servers added" />
 						)}
 					</View>
 				</View>

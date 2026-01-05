@@ -7,7 +7,7 @@ import { Pressable, ScrollView } from 'react-native-gesture-handler'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import RefreshControl from '~/components/RefreshControl'
-import { CardList, Heading, Icon, ListEmptyMessage, Text } from '~/components/ui'
+import { CardList, CardRow, Heading, Icon, ListEmptyMessage, Text } from '~/components/ui'
 import { getAppUsage } from '~/lib/filesystem'
 import { formatBytes } from '~/lib/format'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
@@ -84,14 +84,12 @@ export default function Screen() {
 											})
 										}
 									>
-										<View className={'flex flex-row items-center justify-between p-4'}>
-											<Text>{server.name}</Text>
-
+										<CardRow label={server.name}>
 											<View className="flex flex-row items-center gap-2">
 												<Text>{formatBytes(serverToUsage[server.id], 0, 'MB')}</Text>
 												<Icon as={ChevronRight} className="h-5 w-5 text-foreground-muted" />
 											</View>
-										</View>
+										</CardRow>
 									</Pressable>
 								))}
 							</CardList>

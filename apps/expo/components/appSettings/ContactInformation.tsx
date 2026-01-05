@@ -1,16 +1,14 @@
 import { ArrowUpRight, Github, Mail } from 'lucide-react-native'
-import { Linking, View } from 'react-native'
+import { Linking } from 'react-native'
 
-import { Icon, icons, Text } from '../ui'
+import { CardList, Icon, icons } from '../ui'
 import AppSettingsRow from './AppSettingsRow'
 
 const { Discord } = icons
 
 export default function ContactInformation() {
 	return (
-		<View>
-			<Text className="mb-3 text-foreground-muted">Contact</Text>
-
+		<CardList label="Contact">
 			<AppSettingsRow
 				icon={Mail}
 				title="Email"
@@ -27,7 +25,7 @@ export default function ContactInformation() {
 				isLink
 				onPress={() => Linking.openURL('https://discord.gg/63Ybb7J3as')}
 			>
-				<ArrowUpRight size={20} className="text-foreground-muted" />
+				<Icon as={ArrowUpRight} size={20} className="text-foreground-muted" />
 			</AppSettingsRow>
 
 			<AppSettingsRow
@@ -36,8 +34,8 @@ export default function ContactInformation() {
 				isLink
 				onPress={() => Linking.openURL('https://github.com/stumpapp/stump/issues/new/choose')}
 			>
-				<ArrowUpRight size={20} className="text-foreground-muted" />
+				<Icon as={ArrowUpRight} size={20} className="text-foreground-muted" />
 			</AppSettingsRow>
-		</View>
+		</CardList>
 	)
 }

@@ -17,6 +17,7 @@ import { useStumpServer } from '~/components/activeServer'
 import { RecentlyAddedSeries } from '~/components/series'
 import { Heading, Text } from '~/components/ui'
 import { Icon } from '~/components/ui/icon'
+import { IS_IOS_24_PLUS } from '~/lib/constants'
 import { cn } from '~/lib/utils'
 
 const ITEMS = [
@@ -127,11 +128,7 @@ export default function Screen() {
 }
 
 const Divider = () => (
-	<View
-		className={cn('h-px w-full bg-edge')}
-		style={{
-			// px-4 is 16, icon is 24, so 16 + 24 = 40 to edge of icon, then add 8px padding
-			marginLeft: Platform.OS === 'android' ? 0 : 48,
-		}}
-	/>
+	// ios: left padding (px-4) + icon width (w-6) + gap between icon and text (gap-4) = ml-14
+	// give ios 26+ right margin too = mr-4
+	<View className={cn('ios:ml-14 h-px bg-edge', IS_IOS_24_PLUS && 'mr-4')} />
 )

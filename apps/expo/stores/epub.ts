@@ -239,7 +239,7 @@ export const resolveTheme = (
 	colorScheme: 'light' | 'dark',
 ): StoredConfig => {
 	const theme = themes[themeName]
-	return theme ?? (colorScheme === 'dark' ? themes.Dark : themes.Light)
+	return theme ?? ((colorScheme === 'dark' ? themes.Dark : themes.Light) as StoredConfig)
 }
 
 export const resolveThemeName = (

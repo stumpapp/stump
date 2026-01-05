@@ -1,3 +1,13 @@
+import {
+	clone as cloneColor,
+	ColorSpace,
+	getColor,
+	OKLCH,
+	serialize,
+	set as setColor,
+	sRGB,
+	to,
+} from 'colorjs.io/fn'
 import clone from 'lodash/cloneDeep'
 import setProperty from 'lodash/set'
 import { Platform } from 'react-native'
@@ -5,6 +15,9 @@ import { Platform } from 'react-native'
 import { usePreferencesStore } from '~/stores'
 
 import { useColorScheme } from './useColorScheme'
+
+ColorSpace.register(sRGB)
+ColorSpace.register(OKLCH)
 
 export const ENABLE_LARGE_HEADER = Platform.select({
 	// iOS 26+ has a bug that causes freezes when using large headers
@@ -96,6 +109,10 @@ const light = {
 			library: ['#ad9282', '#d4b7a7'],
 		},
 	},
+	slider: {
+		minimumTrack: '#c48259',
+		maximumTrack: '#d3d5d7',
+	},
 }
 
 type Theme = typeof light
@@ -180,6 +197,10 @@ const dark: Theme = {
 			library: ['#331e11', '#543c2f'],
 		},
 	},
+	slider: {
+		minimumTrack: '#cf9977',
+		maximumTrack: '#292c30',
+	},
 }
 
 export const COLORS = {
@@ -193,14 +214,25 @@ export const useColors = () => {
 	const resolvedTheme = clone(isDarkColorScheme ? dark : light)
 
 	if (accentColor) {
+		const color = getColor(accentColor)
+
 		setProperty(resolvedTheme, 'foreground.brand', accentColor)
 		setProperty(resolvedTheme, 'fill.brand.DEFAULT', accentColor)
-		setProperty(resolvedTheme, 'fill.brand.hover', accentColor)
-		setProperty(
-			resolvedTheme,
-			'fill.brand.secondary',
-			isDarkColorScheme ? `${accentColor}36` : `${accentColor}26`,
-		)
+		setProperty(resolvedTheme, 'slider.minimumTrack', accentColor)
+
+		const hoverColor = cloneColor(color)
+		setColor(hoverColor, { 'oklch.l': (l) => l + (isDarkColorScheme ? 0.08 : -0.08) })
+		setProperty(resolvedTheme, 'fill.brand.hover', serialize(hoverColor, { format: 'hex' }))
+
+		const secondaryColor = cloneColor(color)
+		secondaryColor.alpha = isDarkColorScheme ? 0.21 : 0.15
+		setProperty(resolvedTheme, 'fill.brand.secondary', serialize(secondaryColor))
+
+		const oklchColor = to(color, OKLCH)
+		const lightness = oklchColor.coords[0]
+
+		const contrastColor = lightness > 0.6 ? '#161719' : '#ffffff'
+		setProperty(resolvedTheme, 'foreground.on.fill', contrastColor)
 	}
 
 	return resolvedTheme

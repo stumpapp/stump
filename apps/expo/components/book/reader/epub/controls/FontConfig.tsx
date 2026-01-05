@@ -1,6 +1,6 @@
 import { View } from 'react-native'
 
-import { Stepper, Switch, Text } from '~/components/ui'
+import { CardList, Stepper, Switch, Text } from '~/components/ui'
 import { Picker } from '~/components/ui/picker/picker'
 import type { PickerOption } from '~/components/ui/picker/types'
 import { useReaderStore } from '~/stores'
@@ -39,7 +39,7 @@ export default function FontConfig() {
 	}
 
 	return (
-		<View>
+		<CardList>
 			<View className="flex-row items-center justify-between px-6 py-3">
 				<Text className="text-lg">Typeface</Text>
 				<Picker
@@ -48,8 +48,6 @@ export default function FontConfig() {
 					onValueChange={(value) => store.setSettings({ fontFamily: value || undefined })}
 				/>
 			</View>
-
-			<View className="h-px w-full bg-edge" />
 
 			<View className="flex-row items-center justify-between px-6 py-3">
 				<Text className="text-lg">Font Size</Text>
@@ -64,8 +62,6 @@ export default function FontConfig() {
 				/>
 			</View>
 
-			<View className="h-px w-full bg-edge" />
-
 			<View className="flex-row items-center justify-between px-6 py-3">
 				<Text className="text-lg">Font Weight</Text>
 				<Picker
@@ -76,8 +72,6 @@ export default function FontConfig() {
 					}
 				/>
 			</View>
-
-			<View className="h-px w-full bg-edge" />
 
 			<View className="flex-row items-center justify-between px-6 py-3">
 				<Text
@@ -93,8 +87,6 @@ export default function FontConfig() {
 				/>
 			</View>
 
-			<View className="h-px w-full bg-edge" />
-
 			<View className="flex-row items-center justify-between px-6 py-3">
 				<Text
 					className="text-lg"
@@ -108,6 +100,6 @@ export default function FontConfig() {
 					accessibilityLabel="Toggle Vertical Text"
 				/>
 			</View>
-		</View>
+		</CardList>
 	)
 }

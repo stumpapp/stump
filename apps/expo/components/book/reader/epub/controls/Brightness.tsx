@@ -36,8 +36,8 @@ export default function Brightness() {
 					minimumValue={0}
 					maximumValue={1}
 					value={store.brightness}
-					minimumTrackTintColor={colors.edge.DEFAULT}
-					maximumTrackTintColor={colors.edge.DEFAULT}
+					minimumTrackTintColor={colors.slider.minimumTrack}
+					maximumTrackTintColor={colors.slider.maximumTrack}
 					step={0.1}
 					onValueChange={(value) => {
 						onValueChange(value)

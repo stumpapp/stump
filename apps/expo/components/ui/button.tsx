@@ -40,7 +40,7 @@ const buttonVariants = cva('group flex items-center justify-center squircle roun
 const buttonTextVariants = cva('text-base font-medium text-foreground', {
 	variants: {
 		variant: {
-			brand: 'text-foreground',
+			brand: 'text-foreground-on-fill',
 			default: 'text-foreground',
 			destructive: 'text-white',
 			outline: '',
@@ -73,7 +73,10 @@ const Button = React.forwardRef<React.ElementRef<typeof Pressable>, ButtonProps>
 			<TextClassContext.Provider
 				value={cn(
 					props.disabled && 'web:pointer-events-none',
-					buttonTextVariants({ variant, size }),
+					buttonTextVariants({
+						variant,
+						size,
+					}),
 				)}
 			>
 				<Pressable

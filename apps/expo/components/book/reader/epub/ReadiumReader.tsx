@@ -8,6 +8,7 @@ import { verifyFileReadable } from '~/lib/filesystem'
 import { useDownload } from '~/lib/hooks'
 import {
 	BookMetadata,
+	ColumnCount,
 	intoBookmarkRef,
 	ReadiumLocator,
 	ReadiumView,
@@ -20,9 +21,11 @@ import {
 	useEpubLocationStore,
 	useEpubTheme,
 } from '~/stores/epub'
+import { useEpubSheetStore } from '~/stores/epubSheet'
 
 import { EbookReaderBookRef } from '../image/context'
 import { OfflineCompatibleReader } from '../types'
+import CustomizeThemeSheet from './CustomizeThemeSheet'
 import EpubLocationsSheet from './EpubLocationsSheet'
 import EpubSettingsSheet from './EpubSettingsSheet'
 import ReadiumFooter, { FOOTER_HEIGHT } from './ReadiumFooter'
@@ -81,7 +84,12 @@ export default function ReadiumReader({
 	const controlsVisible = useReaderStore((state) => state.showControls)
 	const setControlsVisible = useReaderStore((state) => state.setShowControls)
 
-	const { brightness, ...preferences } = useReaderStore((state) => ({
+	const {
+		brightness,
+		fontWeight: rawFontWeight,
+		columnCount: rawColumnCount,
+		...preferences
+	} = useReaderStore((state) => ({
 		fontSize: state.globalSettings.fontSize,
 		fontFamily: state.globalSettings.fontFamily,
 		fontWeight: state.globalSettings.fontWeight,
@@ -101,16 +109,24 @@ export default function ReadiumReader({
 		ligatures: state.globalSettings.ligatures,
 		textNormalization: state.globalSettings.textNormalization,
 		verticalText: state.globalSettings.verticalText,
+		readingDirection: (state.globalSettings.readingDirection?.toLowerCase() === 'ltr'
+			? 'ltr'
+			: 'rtl') as 'ltr' | 'rtl',
 	}))
 	const { colors } = useEpubTheme()
 
-	const config = useMemo(
-		() => ({
-			...preferences,
-			colors,
-		}),
-		[preferences, colors],
-	)
+	// Readium uses a scale factor  (1.0 = 400)
+	const fontWeight = rawFontWeight ? rawFontWeight / 400 : undefined
+	const columnCount = (rawColumnCount != null ? String(rawColumnCount) : undefined) as
+		| ColumnCount
+		| undefined
+
+	const config = {
+		...preferences,
+		fontWeight,
+		columnCount,
+		colors,
+	}
 
 	const readerRef = useRef<ReadiumViewRef>(null)
 
@@ -178,6 +194,7 @@ export default function ReadiumReader({
 		() => {
 			store.storeHeaders(ctx.requestHeaders)
 		},
+		// eslint-disable-next-line react-compiler/react-compiler
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[ctx.requestHeaders],
 	)
@@ -187,6 +204,7 @@ export default function ReadiumReader({
 			store.storeOnBookmark(onBookmark)
 			store.storeOnDeleteBookmark(onDeleteBookmark)
 		},
+		// eslint-disable-next-line react-compiler/react-compiler
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[onBookmark, onDeleteBookmark],
 	)
@@ -198,17 +216,23 @@ export default function ReadiumReader({
 				store.storeBookmarks(bookmarks.map(intoBookmarkRef))
 			}
 		},
+		// eslint-disable-next-line react-compiler/react-compiler
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[book.ebook?.bookmarks],
 	)
+
+	const closeAllSheets = useEpubSheetStore((state) => state.closeAllSheets)
 
 	useEffect(
 		() => {
 			return () => {
 				store.cleanup()
+				// FIXME: Not working...
+				closeAllSheets()
 				setLocalUri(null)
 			}
 		},
+		// eslint-disable-next-line react-compiler/react-compiler
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[],
 	)
@@ -296,6 +320,7 @@ export default function ReadiumReader({
 
 			<EpubSettingsSheet />
 			<EpubLocationsSheet />
+			<CustomizeThemeSheet />
 		</View>
 	)
 }

@@ -151,6 +151,7 @@ function Reader({ record, bookmarks }: ReaderProps) {
 				}
 			}
 		},
+		// eslint-disable-next-line react-compiler/react-compiler
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[isStreamerInitialized],
 	)
@@ -320,6 +321,7 @@ function Reader({ record, bookmarks }: ReaderProps) {
 				NavigationBar.setVisibilityAsync('visible')
 			}
 		},
+		// eslint-disable-next-line react-compiler/react-compiler
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[],
 	)

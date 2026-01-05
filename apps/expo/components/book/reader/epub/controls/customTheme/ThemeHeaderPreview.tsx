@@ -1,5 +1,6 @@
+import { ReadingDirection } from '@stump/graphql'
 import { useCallback, useEffect, useState } from 'react'
-import { Pressable, View } from 'react-native'
+import { Pressable, TextStyle, View } from 'react-native'
 
 import { Text } from '~/components/ui'
 import { IS_IOS_24_PLUS } from '~/lib/constants'
@@ -27,22 +28,39 @@ export const ThemeHeaderPreview = ({ customTheme: customThemeProp, onCancel, onS
 		themes: store.themes,
 		selectedTheme: store.selectedTheme,
 	}))
-	const { fontSize, fontFamily } = useReaderStore((state) => ({
-		fontSize: state.globalSettings.fontSize,
-		fontFamily: state.globalSettings.fontFamily,
-	}))
+	// Note: A majority of style options which apply if publisher styles are false are not easily
+	// represented here in the preview, so they are excluded
+	const { fontSize, fontFamily, fontWeight, allowPublisherStyles, ...storedPreferences } =
+		useReaderStore((state) => ({
+			fontSize: state.globalSettings.fontSize,
+			fontFamily: state.globalSettings.fontFamily,
+			fontWeight: state.globalSettings.fontWeight,
+			lineHeight: state.globalSettings.lineHeight,
+			textAlign: state.globalSettings.textAlign,
+			letterSpacing: state.globalSettings.letterSpacing,
+			typeScale: state.globalSettings.typeScale,
+			allowPublisherStyles: state.globalSettings.allowPublisherStyles,
+			readingDirection: state.globalSettings.readingDirection,
+		}))
+
+	const typeScale = allowPublisherStyles ? 1.0 : (storedPreferences.typeScale ?? 1.0)
+	const lineHeight = allowPublisherStyles ? 1.5 : (storedPreferences.lineHeight ?? 1.5)
+	const letterSpacing = allowPublisherStyles ? undefined : storedPreferences.letterSpacing
+
+	const isRTL = storedPreferences.readingDirection === ReadingDirection.Rtl
+	const textAlign = allowPublisherStyles
+		? isRTL
+			? 'right'
+			: undefined
+		: (storedPreferences.textAlign ?? (isRTL ? 'right' : undefined))
 
 	const [localTheme, setLocalTheme] = useState(() =>
 		resolveTheme(themes, selectedTheme || '', colorScheme),
 	)
 
-	useEffect(
-		() => {
-			setLocalTheme(resolveTheme(themes, selectedTheme || '', colorScheme))
-		},
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[selectedTheme],
-	)
+	useEffect(() => {
+		setLocalTheme(resolveTheme(themes, selectedTheme || '', colorScheme))
+	}, [selectedTheme, themes, colorScheme])
 
 	const displayTheme = customThemeProp ?? localTheme
 
@@ -91,9 +109,12 @@ export const ThemeHeaderPreview = ({ customTheme: customThemeProp, onCancel, onS
 				<Text
 					style={{
 						color: displayTheme.colors?.foreground,
-						fontSize: fontSize ? fontSize + 6 : 32,
-						lineHeight: fontSize ? (fontSize + 6) * 1.5 : 32,
+						fontSize: fontSize ? (fontSize + 6) * typeScale : 32,
+						lineHeight: fontSize ? (fontSize + 6) * typeScale * lineHeight : 32,
 						fontFamily: fontFamily ? getFontPath(fontFamily as SupportedMobileFont) : undefined,
+						fontWeight: fontWeight as TextStyle['fontWeight'],
+						letterSpacing: letterSpacing ? letterSpacing * (fontSize ?? 16) : undefined,
+						textAlign: isRTL ? 'right' : 'left',
 					}}
 				>
 					Aa
@@ -102,11 +123,18 @@ export const ThemeHeaderPreview = ({ customTheme: customThemeProp, onCancel, onS
 				<Text
 					style={{
 						color: displayTheme.colors?.foreground,
-						fontSize,
-						lineHeight: fontSize ? fontSize * 1.5 : 32,
+						fontSize: fontSize ? fontSize * typeScale : undefined,
+						lineHeight: fontSize ? fontSize * typeScale * lineHeight : 32,
 						fontFamily: fontFamily ? getFontPath(fontFamily as SupportedMobileFont) : undefined,
+						fontWeight: fontWeight as TextStyle['fontWeight'],
+						letterSpacing: letterSpacing ? letterSpacing * (fontSize ?? 16) : undefined,
+						textAlign: textAlign === 'start' ? 'left' : textAlign,
 					}}
-					numberOfLines={fontSize ? getNumberOfLines(fontSize, !!onCancel && !!onSaved) : 3}
+					numberOfLines={
+						fontSize
+							? getNumberOfLines(fontSize * typeScale, lineHeight, !!onCancel && !!onSaved)
+							: 3
+					}
 				>
 					{DEMO_TEXT}
 				</Text>
@@ -115,15 +143,15 @@ export const ThemeHeaderPreview = ({ customTheme: customThemeProp, onCancel, onS
 	)
 }
 
-const getNumberOfLines = (fontSize: number, hasHeader: boolean) => {
+const getNumberOfLines = (fontSize: number, lineHeight: number, hasHeader: boolean) => {
 	const sizePlusPadding =
 		(IS_IOS_24_PLUS ? HEIGHT + 16 : HEIGHT) -
 		48 - // 48 for header
 		32 - // Secondary padding
 		(hasHeader ? 48 / 2 : 0) -
-		(fontSize + 6) * 1.5 // Size of Aa text
+		(fontSize + 6) * lineHeight // Size of Aa text
 
-	const approxLineHeight = fontSize * 1.5
+	const approxLineHeight = fontSize * lineHeight
 	return Math.floor(sizePlusPadding / approxLineHeight)
 }
 

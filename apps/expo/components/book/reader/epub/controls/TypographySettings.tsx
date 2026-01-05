@@ -1,11 +1,13 @@
 import { View } from 'react-native'
 
-import { Label, Stepper, Switch, Text } from '~/components/ui'
+import { CardList, Label, Stepper, Switch, Text } from '~/components/ui'
 import { Picker } from '~/components/ui/picker/picker'
 import type { PickerOption } from '~/components/ui/picker/types'
 import { cn } from '~/lib/utils'
 import { TextAlignment } from '~/modules/readium'
 import { useReaderStore } from '~/stores'
+
+import PublisherStyles from './PublisherStyles'
 
 const TEXT_ALIGN_OPTIONS: PickerOption<TextAlignment>[] = [
 	{ label: 'Start', value: 'start' },
@@ -33,7 +35,9 @@ export default function TypographySettings() {
 	const isDisabled = store.allowPublisherStyles
 
 	return (
-		<View>
+		<CardList>
+			<PublisherStyles />
+
 			<View className="flex-row items-center justify-between px-6 py-3">
 				<Text className={cn('text-lg text-foreground', isDisabled && 'opacity-40')}>
 					Text Alignment
@@ -45,8 +49,6 @@ export default function TypographySettings() {
 					disabled={isDisabled}
 				/>
 			</View>
-
-			<View className="h-px w-full bg-edge" />
 
 			<View className="flex-row items-center justify-between px-6 py-3">
 				<Text className={cn('text-lg text-foreground', isDisabled && 'opacity-40')}>
@@ -64,8 +66,6 @@ export default function TypographySettings() {
 				/>
 			</View>
 
-			<View className="h-px w-full bg-edge" />
-
 			<View className="flex-row items-center justify-between px-6 py-3">
 				<Text className={cn('text-lg text-foreground', isDisabled && 'opacity-40')}>
 					Line Height
@@ -81,8 +81,6 @@ export default function TypographySettings() {
 					accessibilityLabel="Line Height"
 				/>
 			</View>
-
-			<View className="h-px w-full bg-edge" />
 
 			<View className="flex-row items-center justify-between px-6 py-3">
 				<Text className={cn('text-lg text-foreground', isDisabled && 'opacity-40')}>
@@ -101,8 +99,6 @@ export default function TypographySettings() {
 				/>
 			</View>
 
-			<View className="h-px w-full bg-edge" />
-
 			<View className="flex-row items-center justify-between px-6 py-3">
 				<Text className={cn('text-lg text-foreground', isDisabled && 'opacity-40')}>
 					Paragraph Spacing
@@ -119,8 +115,6 @@ export default function TypographySettings() {
 					accessibilityLabel="Paragraph Spacing"
 				/>
 			</View>
-
-			<View className="h-px w-full bg-edge" />
 
 			<View className="flex-row items-center justify-between px-6 py-3">
 				<Text className={cn('text-lg text-foreground', isDisabled && 'opacity-40')}>
@@ -139,8 +133,6 @@ export default function TypographySettings() {
 				/>
 			</View>
 
-			<View className="h-px w-full bg-edge" />
-
 			<View className="flex-row items-center justify-between px-6 py-3">
 				<Text className={cn('text-lg text-foreground', isDisabled && 'opacity-40')}>
 					Letter Spacing
@@ -157,8 +149,6 @@ export default function TypographySettings() {
 					accessibilityLabel="Letter Spacing"
 				/>
 			</View>
-
-			<View className="h-px w-full bg-edge" />
 
 			<View className="flex-row items-center justify-between px-6 py-3">
 				<Label
@@ -177,8 +167,6 @@ export default function TypographySettings() {
 					disabled={isDisabled}
 				/>
 			</View>
-
-			<View className="h-px w-full bg-edge" />
 
 			<View className="flex-row items-center justify-between px-6 py-3">
 				<Text
@@ -202,6 +190,6 @@ export default function TypographySettings() {
 					disabled={isDisabled}
 				/>
 			</View>
-		</View>
+		</CardList>
 	)
 }

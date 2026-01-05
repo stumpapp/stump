@@ -119,8 +119,7 @@
              }
 
              Prop("readingDirection") { (view: EPUBView, prop: String) in
-                 let textAlign = prop == "rtl" ? TextAlignment.right : TextAlignment.left
-                 view.pendingProps.textAlign = textAlign
+                 view.pendingProps.readingProgression = prop == "rtl" ? ReadiumNavigator.ReadingProgression.rtl : ReadiumNavigator.ReadingProgression.ltr
              }
 
              Prop("publisherStyles") { (view: EPUBView, prop: Bool) in

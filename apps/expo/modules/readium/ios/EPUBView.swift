@@ -30,6 +30,7 @@
      var ligatures: Bool?
      var textNormalization: Bool?
      var verticalText: Bool?
+     var readingProgression: ReadiumNavigator.ReadingProgression?
  }
 
  public struct FinalizedProps {
@@ -56,6 +57,7 @@
      var ligatures: Bool?
      var textNormalization: Bool?
      var verticalText: Bool?
+     var readingProgression: ReadiumNavigator.ReadingProgression?
  }
 
  public class EPUBView: ExpoView {
@@ -177,6 +179,7 @@
              fontSize: pendingProps.fontSize ?? oldProps?.fontSize ?? 1.0,
              fontWeight: pendingProps.fontWeight ?? oldProps?.fontWeight,
              textAlign: pendingProps.textAlign ?? oldProps?.textAlign ?? TextAlignment.justify,
+             publisherStyles: pendingProps.publisherStyles ?? oldProps?.publisherStyles ?? true,
              imageFilter: pendingProps.imageFilter ?? oldProps?.imageFilter,
              pageMargins: pendingProps.pageMargins ?? oldProps?.pageMargins,
              columnCount: pendingProps.columnCount ?? oldProps?.columnCount,
@@ -188,7 +191,8 @@
              hyphens: pendingProps.hyphens ?? oldProps?.hyphens,
              ligatures: pendingProps.ligatures ?? oldProps?.ligatures,
              textNormalization: pendingProps.textNormalization ?? oldProps?.textNormalization,
-             verticalText: pendingProps.verticalText ?? oldProps?.verticalText
+             verticalText: pendingProps.verticalText ?? oldProps?.verticalText,
+             readingProgression: pendingProps.readingProgression ?? oldProps?.readingProgression
          )
 
          // If this is a new book or first initialization, load the publication
@@ -383,6 +387,7 @@
                          paragraphIndent: props.paragraphIndent,
                          paragraphSpacing: props.paragraphSpacing,
                          publisherStyles: props.publisherStyles,
+                         readingProgression: props.readingProgression,
                          scroll: false,
                          textAlign: props.textAlign,
                          textColor: props.foreground,
@@ -576,6 +581,7 @@
              paragraphIndent: props.paragraphIndent,
              paragraphSpacing: props.paragraphSpacing,
              publisherStyles: props.publisherStyles,
+             readingProgression: props.readingProgression,
              scroll: false,
              textAlign: props.textAlign,
              textColor: props.foreground,

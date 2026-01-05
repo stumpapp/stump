@@ -9,18 +9,15 @@ import { useColorScheme } from '~/lib/useColorScheme'
 import { cn } from '~/lib/utils'
 import { EPUBReaderThemeConfig } from '~/modules/readium'
 import { resolveThemeName, useEpubThemesStore } from '~/stores/epub'
+import { useEpubSheetStore } from '~/stores/epubSheet'
 
-type Props = {
-	onCustomizePress?: () => void
-	onNewThemePress?: () => void
-}
-
-export default function ThemeSelect({ onCustomizePress, onNewThemePress }: Props) {
+export default function ThemeSelect() {
 	const { colorScheme } = useColorScheme()
 	const { themes, selectedTheme } = useEpubThemesStore((store) => ({
 		themes: store.themes,
 		selectedTheme: store.selectedTheme,
 	}))
+	const openCustomizeTheme = useEpubSheetStore((state) => state.openCustomizeTheme)
 
 	const activeTheme = useMemo(
 		() => resolveThemeName(themes, selectedTheme || '', colorScheme),
@@ -46,12 +43,22 @@ export default function ThemeSelect({ onCustomizePress, onNewThemePress }: Props
 			</ScrollView>
 
 			<View className="flex-row justify-center gap-4 px-4">
-				<Button size="sm" className="flex-row" onPress={onNewThemePress}>
+				<Button
+					variant="brand"
+					size="sm"
+					className="flex-row"
+					onPress={() => openCustomizeTheme('create')}
+				>
 					<Icon as={Plus} className="mr-2 h-4 w-4" />
 					<Text>New Theme</Text>
 				</Button>
 
-				<Button size="sm" className="flex-row" onPress={onCustomizePress}>
+				<Button
+					variant="outline"
+					size="sm"
+					className="flex-row"
+					onPress={() => openCustomizeTheme('edit')}
+				>
 					<Icon as={Cog} className="mr-2 h-4 w-4" />
 					<Text>Customize</Text>
 				</Button>

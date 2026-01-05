@@ -1,28 +1,31 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
-import { ScrollView } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { IS_IOS_24_PLUS, useColors } from '~/lib/constants'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { useEpubSheetStore } from '~/stores/epubSheet'
 
-import ThemeSheetContent from './ThemeSheetContent'
+import { CustomizeTheme } from './controls/customTheme'
 
-export default function EpubSettingsSheet() {
-	const sheetRef = useEpubSheetStore((state) => state.settingsSheetRef)
+export default function CustomizeThemeSheet() {
+	const sheetRef = useEpubSheetStore((state) => state.customizeThemeSheetRef)
+	const mode = useEpubSheetStore((state) => state.customizeThemeMode)
+	const closeSheet = useEpubSheetStore((state) => state.closeSheet)
 
 	const { colorScheme } = useColorScheme()
 	const colors = useColors()
 	const insets = useSafeAreaInsets()
 
+	const handleClose = () => {
+		closeSheet('customizeTheme')
+	}
+
 	return (
 		<TrueSheet
 			ref={sheetRef}
-			detents={[0.65]}
-			dimmed={false}
+			detents={[1]}
 			cornerRadius={24}
 			grabber
-			scrollable
 			backgroundColor={IS_IOS_24_PLUS ? undefined : colors.background.DEFAULT}
 			grabberOptions={{
 				color: colorScheme === 'dark' ? '#333' : '#ccc',
@@ -32,9 +35,7 @@ export default function EpubSettingsSheet() {
 			}}
 			insetAdjustment="automatic"
 		>
-			<ScrollView className="flex-1 p-6" nestedScrollEnabled>
-				<ThemeSheetContent />
-			</ScrollView>
+			<CustomizeTheme onCancel={handleClose} mode={mode} />
 		</TrueSheet>
 	)
 }

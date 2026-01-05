@@ -23,6 +23,7 @@ import org.readium.r2.navigator.preferences.ColumnCount
 import org.readium.r2.navigator.preferences.FontFamily
 import org.readium.r2.navigator.preferences.ImageFilter
 import org.readium.r2.navigator.preferences.TextAlign
+import org.readium.r2.navigator.preferences.ReadingProgression
 import org.readium.r2.navigator.epub.EpubNavigatorFragment
 import org.readium.r2.navigator.epub.EpubPreferences
 import org.readium.r2.shared.ExperimentalReadiumApi
@@ -47,7 +48,7 @@ data class Props(
     var lineHeight: Double? = null,
     var fontSize: Double? = null,
     var fontWeight: Double? = null,
-    var readingDirection: String? = null,
+    var readingProgression: ReadingProgression? = null,
     var publisherStyles: Boolean? = null,
     var imageFilter: ImageFilter? = null,
     var pageMargins: Double? = null,
@@ -74,7 +75,7 @@ data class FinalizedProps(
     val lineHeight: Double,
     val fontSize: Double,
     val fontWeight: Double?,
-    val readingDirection: String,
+    val readingProgression: ReadingProgression,
     val publisherStyles: Boolean,
     val imageFilter: ImageFilter?,
     val pageMargins: Double?,
@@ -157,7 +158,7 @@ class EPUBView(context: Context, appContext: AppContext) : ExpoView(context, app
             lineHeight = pendingProps.lineHeight ?: oldProps?.lineHeight ?: 1.4,
             fontSize = pendingProps.fontSize ?: oldProps?.fontSize ?: 1.0,
             fontWeight = pendingProps.fontWeight ?: oldProps?.fontWeight,
-            readingDirection = pendingProps.readingDirection ?: oldProps?.readingDirection ?: "ltr",
+            readingProgression = pendingProps.readingProgression ?: oldProps?.readingProgression ?: ReadingProgression.LTR,
             publisherStyles = pendingProps.publisherStyles ?: oldProps?.publisherStyles ?: true,
             imageFilter = pendingProps.imageFilter ?: oldProps?.imageFilter,
             pageMargins = pendingProps.pageMargins ?: oldProps?.pageMargins,
@@ -208,6 +209,7 @@ class EPUBView(context: Context, appContext: AppContext) : ExpoView(context, app
                 paragraphIndent = props!!.paragraphIndent,
                 paragraphSpacing = props!!.paragraphSpacing,
                 publisherStyles = props!!.publisherStyles,
+                readingProgression = props!!.readingProgression,
                 textAlign = props!!.textAlign,
                 textColor = org.readium.r2.navigator.preferences.Color(props!!.foreground),
                 textNormalization = props!!.textNormalization,

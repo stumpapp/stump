@@ -163,7 +163,10 @@ class ReadiumModule : Module() {
       }
 
       Prop("readingDirection") { view: EPUBView, prop: String ->
-        view.pendingProps.readingDirection = prop
+        view.pendingProps.readingProgression = when (prop) {
+          "rtl" -> org.readium.r2.navigator.preferences.ReadingProgression.RTL
+          else -> org.readium.r2.navigator.preferences.ReadingProgression.LTR
+        }
       }
 
       Prop("publisherStyles") { view: EPUBView, prop: Boolean ->

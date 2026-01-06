@@ -12,7 +12,7 @@ import {
 	publication,
 } from '../types'
 import { ClassQueryKeys } from './types'
-import { createRouteURLHandler, toUrlParams, urlWithParams } from './utils'
+import { createRouteURLHandler, resolveUrl, toUrlParams, urlWithParams } from './utils'
 
 type OPDSPageQuery = {
 	page: number
@@ -29,7 +29,7 @@ const OPDS_V2_ROUTE = '/opds/v2.0'
 export const opdsURL = createRouteURLHandler(OPDS_V2_ROUTE)
 
 /**
- * The api-key API controller, used for interacting with the api-key endpoints of the Stump API
+ * The OPDS API controller, used for interacting with the OPDS v2 endpoints of the Stump API
  */
 export class OPDSV2API extends APIBase {
 	get config(): AxiosRequestConfig {
@@ -61,11 +61,11 @@ export class OPDSV2API extends APIBase {
 
 	/**
 	 * A generic method to fetch an OPDS feed from a URL that may not be from a Stump server
-	 * @param url The full URL of the feed to fetch
 	 */
 	async feed(url: string, params?: OPDSPageQuery): Promise<OPDSFeed> {
+		const absoluteUrl = resolveUrl(url, this.api.rootURL)
 		const resolvedURL = urlWithParams(
-			`${url.endsWith('/') ? url.slice(0, -1) : url}`,
+			`${absoluteUrl.endsWith('/') ? absoluteUrl.slice(0, -1) : absoluteUrl}`,
 			toUrlParams(params),
 		)
 		const { data } = await this.axios.get<OPDSFeed>(resolvedURL, {
@@ -153,7 +153,7 @@ export class OPDSV2API extends APIBase {
 	}
 
 	async progression(url: string): Promise<OPDSProgression> {
-		const { data } = await this.axios.get<OPDSProgression>(url, {
+		const { data } = await this.axios.get<OPDSProgression>(resolveUrl(url, this.api.rootURL), {
 			baseURL: undefined,
 		})
 		return progression.parse(data)
@@ -161,10 +161,10 @@ export class OPDSV2API extends APIBase {
 
 	/**
 	 * A generic method to fetch a publication from a URL that may not be from a Stump server
-	 * @param url The full URL of the publication to fetch
+	 * @param url The URL of the publication to fetch
 	 */
 	async publication(url: string): Promise<OPDSPublication> {
-		const { data } = await this.axios.get<OPDSPublication>(url, {
+		const { data } = await this.axios.get<OPDSPublication>(resolveUrl(url, this.api.rootURL), {
 			baseURL: undefined,
 		})
 		return publication.parse(data)

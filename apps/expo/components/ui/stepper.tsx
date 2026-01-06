@@ -1,7 +1,7 @@
 import * as Haptics from 'expo-haptics'
 import { Minus, Plus } from 'lucide-react-native'
 import { useCallback } from 'react'
-import { Pressable, View } from 'react-native'
+import { Pressable, PressableProps, View } from 'react-native'
 
 import { cn } from '~/lib/utils'
 
@@ -54,7 +54,7 @@ export function Stepper({
 
 	return (
 		<View
-			className={cn('flex-row items-center justify-between', className)}
+			className={cn('flex-row items-center justify-between gap-2', className)}
 			accessibilityLabel={accessibilityLabel}
 			accessibilityRole="adjustable"
 			accessibilityValue={{
@@ -64,48 +64,51 @@ export function Stepper({
 				text: `${displayValue}${unit ?? ''}`,
 			}}
 		>
-			<View className="flex-row items-center">
-				<Pressable
-					onPress={handleDecrement}
-					disabled={!canDecrement}
-					className={cn(
-						'h-9 w-9 items-center justify-center rounded-l-lg border border-edge bg-background-surface',
-						!canDecrement && 'opacity-40',
-					)}
-					accessibilityLabel="Decrease"
-					accessibilityRole="button"
-				>
-					{({ pressed }) => (
-						<Icon
-							as={Minus}
-							className={cn('h-4 w-4 text-foreground', pressed && canDecrement && 'opacity-70')}
-						/>
-					)}
-				</Pressable>
+			<StepperButton
+				onPress={handleDecrement}
+				disabled={!canDecrement}
+				className={cn(!canDecrement && 'opacity-30')}
+				accessibilityLabel="Decrease"
+				accessibilityRole="button"
+			>
+				{({ pressed }) => (
+					<Icon
+						as={Minus}
+						className={cn('h-5 w-5 text-foreground', pressed && canDecrement && 'opacity-70')}
+					/>
+				)}
+			</StepperButton>
 
-				<Pressable
-					onPress={handleIncrement}
-					disabled={!canIncrement}
-					className={cn(
-						'h-9 w-9 items-center justify-center rounded-r-lg border border-l-0 border-edge bg-background-surface',
-						!canIncrement && 'opacity-40',
-					)}
-					accessibilityLabel="Increase"
-					accessibilityRole="button"
-				>
-					{({ pressed }) => (
-						<Icon
-							as={Plus}
-							className={cn('h-4 w-4 text-foreground', pressed && canIncrement && 'opacity-70')}
-						/>
-					)}
-				</Pressable>
-			</View>
-
-			<Text className={cn('ml-4 text-foreground-muted', disabled && 'opacity-40')}>
+			<Text className={cn('text-lg text-foreground-muted', disabled && 'opacity-40')}>
 				{displayValue}
 				{unit}
 			</Text>
+
+			<StepperButton
+				onPress={handleIncrement}
+				disabled={!canIncrement}
+				className={cn(!canIncrement && 'opacity-30')}
+				accessibilityLabel="Increase"
+				accessibilityRole="button"
+			>
+				{({ pressed }) => (
+					<Icon
+						as={Plus}
+						className={cn('h-5 w-5 text-foreground', pressed && canIncrement && 'opacity-70')}
+					/>
+				)}
+			</StepperButton>
 		</View>
 	)
 }
+
+const StepperButton = ({ className, ...props }: PressableProps) => (
+	<Pressable
+		className={cn(
+			'squircle h-9 w-12 items-center justify-center rounded-full border',
+			'border-black/10 bg-white/40 dark:border-white/10 dark:bg-black/40',
+			className,
+		)}
+		{...props}
+	/>
+)

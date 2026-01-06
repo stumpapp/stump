@@ -22,13 +22,15 @@ export default function Layout() {
 	const { data: progression } = useQuery({
 		queryKey: [sdk.opds.keys.progression, progressionURL],
 		queryFn: () => sdk.opds.progression(progressionURL || ''),
-		enabled: false,
+		enabled: progressionURL != null,
 	})
 
 	if (!publication) return null
 
 	return (
-		<PublicationContext.Provider value={{ publication, url: publicationURL, progression }}>
+		<PublicationContext.Provider
+			value={{ publication, url: publicationURL, progression, progressionURL }}
+		>
 			<Stack screenOptions={{ headerShown: false }} />
 		</PublicationContext.Provider>
 	)

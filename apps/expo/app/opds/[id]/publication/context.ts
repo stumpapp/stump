@@ -5,6 +5,7 @@ export type IPublicationContext = {
 	url: string
 	publication: OPDSPublication
 	progression?: OPDSProgression
+	progressionURL?: string
 }
 
 export const PublicationContext = createContext<IPublicationContext | undefined>(undefined)

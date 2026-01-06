@@ -116,6 +116,8 @@ pub enum APIError {
 	Unauthorized,
 	#[error("{0}")]
 	Forbidden(String),
+	#[error("{0}")]
+	Conflict(String),
 	#[error("This functionality has not been implemented yet")]
 	NotImplemented,
 	#[error("This functionality is not supported")]
@@ -158,6 +160,7 @@ impl APIError {
 			APIError::InternalServerError(_) => StatusCode::INTERNAL_SERVER_ERROR,
 			APIError::Unauthorized => StatusCode::UNAUTHORIZED,
 			APIError::Forbidden(_) => StatusCode::FORBIDDEN,
+			APIError::Conflict(_) => StatusCode::CONFLICT,
 			APIError::NotImplemented => StatusCode::NOT_IMPLEMENTED,
 			APIError::ServiceUnavailable(_) => StatusCode::SERVICE_UNAVAILABLE,
 			APIError::BadGateway(_) => StatusCode::BAD_GATEWAY,

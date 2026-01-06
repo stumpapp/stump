@@ -6,7 +6,7 @@ import {
 	useSDK,
 	useSuspenseGraphQL,
 } from '@stump/client'
-import { Dimension, graphql } from '@stump/graphql'
+import { graphql } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
 import { eq } from 'drizzle-orm'
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
@@ -180,7 +180,7 @@ export default function Screen() {
 	}, [book.nextInSeries.nodes])
 
 	const {
-		preferences: { preferSmallImages, trackElapsedTime },
+		preferences: { trackElapsedTime },
 	} = useBookPreferences({ book })
 	const { pause, resume, totalSeconds, isRunning, reset } = useBookTimer(book?.id || '', {
 		initial: book?.readProgress?.elapsedSeconds,
@@ -296,6 +296,7 @@ export default function Screen() {
 				])
 			}
 		},
+		// eslint-disable-next-line react-compiler/react-compiler
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[],
 	)

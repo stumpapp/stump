@@ -1,7 +1,12 @@
 import { useSDK } from '@stump/client'
+import { OPDSProgressionInput } from '@stump/sdk'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import * as Application from 'expo-application'
 import { useKeepAwake } from 'expo-keep-awake'
 import * as NavigationBar from 'expo-navigation-bar'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useFocusEffect } from 'expo-router'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Platform } from 'react-native'
 
 import { useActiveServer } from '~/components/activeServer'
 import { ImageBasedReader } from '~/components/book/reader'
@@ -22,6 +27,7 @@ export default function Screen() {
 		},
 		url,
 		progression,
+		progressionURL,
 	} = usePublicationContext()
 	const { sdk } = useSDK()
 	const {
@@ -105,6 +111,77 @@ export default function Screen() {
 		return parsedPosition
 	}, [progression])
 
+	// TODO: Consider a store for device info? If more areas need it I guess
+	const [deviceId, setDeviceId] = useState<string | null>(null)
+	useEffect(() => {
+		async function getDeviceId() {
+			if (Platform.OS === 'ios') {
+				setDeviceId(await Application.getIosIdForVendorAsync())
+			} else {
+				setDeviceId(Application.getAndroidId())
+			}
+		}
+		getDeviceId()
+	}, [])
+
+	const queryClient = useQueryClient()
+	const lastPageRef = useRef<number | null>(null)
+
+	const { mutate: updateProgression } = useMutation({
+		retry: (attempts) => attempts < 3,
+		onError: (error) => {
+			console.error('Failed to update OPDS progression:', error)
+		},
+		mutationFn: async ({ url, input }: { url: string; input: OPDSProgressionInput }) => {
+			return sdk.opds.updateProgression(url, input)
+		},
+	})
+
+	const onPageChanged = useCallback(
+		(page: number) => {
+			if (!progressionURL || !deviceId) {
+				return
+			}
+
+			lastPageRef.current = page
+			const currentLink = readingOrder?.[page - 1]
+			const input: OPDSProgressionInput = {
+				modified: new Date().toISOString(),
+				device: {
+					id: deviceId,
+					// TODO(opds): Allow user to set device name in settings?
+					name: `Stump App - ${Platform.OS === 'ios' ? 'iOS' : 'Android'}`,
+				},
+				locator: {
+					// TODO(opds): Is this a reasonable default?
+					href: currentLink?.href || `#page-${page}`,
+					type: currentLink?.type || 'image/jpeg',
+					locations: {
+						position: page,
+						progression: readingOrder?.length
+							? Math.round((page / readingOrder.length) * 100) / 100
+							: undefined,
+					},
+				},
+			}
+
+			updateProgression({ url: progressionURL, input })
+		},
+		[progressionURL, deviceId, readingOrder, updateProgression],
+	)
+
+	useFocusEffect(
+		useCallback(() => {
+			return () => {
+				if (progressionURL) {
+					queryClient.invalidateQueries({
+						queryKey: [sdk.opds.keys.progression, progressionURL],
+					})
+				}
+			}
+		}, [progressionURL, queryClient, sdk.opds.keys.progression]),
+	)
+
 	useEffect(() => {
 		setIsReading(true)
 		return () => {
@@ -141,6 +218,7 @@ export default function Screen() {
 			pageURL={(page: number) => readingOrder![page - 1]?.href || ''}
 			requestHeaders={requestHeaders}
 			resetTimer={reset}
+			onPageChanged={progressionURL ? onPageChanged : undefined}
 			isOPDS
 		/>
 	)

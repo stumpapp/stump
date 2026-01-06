@@ -138,6 +138,39 @@ export const progression = z
 	}))
 export type OPDSProgression = z.infer<typeof progression>
 
+const progressionLocationInput = z.object({
+	fragments: z.array(z.string()).optional(),
+	position: z.number().optional(),
+	progression: z.number().optional(),
+	totalProgression: z.number().optional(),
+})
+
+const progressionTextInput = z.object({
+	before: z.string().optional(),
+	highlight: z.string().optional(),
+	after: z.string().optional(),
+})
+
+const progressionLocatorInput = z.object({
+	href: z.string(),
+	type: z.string(),
+	title: z.string().optional(),
+	locations: progressionLocationInput.optional(),
+	text: progressionTextInput.optional(),
+})
+
+const progressionDeviceInput = z.object({
+	id: z.string(),
+	name: z.string(),
+})
+
+export const progressionInput = z.object({
+	modified: z.string(),
+	device: progressionDeviceInput,
+	locator: progressionLocatorInput,
+})
+export type OPDSProgressionInput = z.infer<typeof progressionInput>
+
 const feedGroup = z.object({
 	links: z.array(link).default([]),
 	navigation: z.array(navigationLink).default([]),

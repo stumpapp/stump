@@ -7,6 +7,7 @@ import {
 	OPDSAuthenticationDocument,
 	OPDSFeed,
 	OPDSProgression,
+	OPDSProgressionInput,
 	OPDSPublication,
 	progression,
 	publication,
@@ -152,6 +153,21 @@ export class OPDSV2API extends APIBase {
 		return progression.parse(data)
 	}
 
+	/**
+	 * Update the reading progression for a book, assuming the server supports it
+	 *
+	 * @param url The progression URL (from the publication's links with rel="http://www.cantook.com/api/progression")
+	 * @param data The progression data
+	 */
+	async updateProgression(url: string, data: OPDSProgressionInput): Promise<void> {
+		await this.axios.put(resolveUrl(url, this.api.rootURL), data, {
+			baseURL: undefined,
+			headers: {
+				'Content-Type': 'application/vnd.readium.progression+json',
+			},
+		})
+	}
+
 	async progression(url: string): Promise<OPDSProgression> {
 		const { data } = await this.axios.get<OPDSProgression>(resolveUrl(url, this.api.rootURL), {
 			baseURL: undefined,
@@ -200,6 +216,7 @@ export class OPDSV2API extends APIBase {
 			keepReading: 'opds.keepReading',
 			book: 'opds.book',
 			bookProgression: 'opds.bookProgression',
+			updateProgression: 'opds.updateProgression',
 			progression: 'opds.progression',
 			publication: 'opds.publication',
 			feed: 'opds.feed',

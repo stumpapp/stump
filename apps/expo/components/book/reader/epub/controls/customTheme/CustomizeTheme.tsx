@@ -12,6 +12,7 @@ import { ThemeHeaderPreview } from './ThemeHeaderPreview'
 type Props = {
 	onCancel: () => void
 	mode?: 'edit' | 'create'
+	theme?: string
 }
 
 const DEFAULT_THEMES = ['Light', 'Dark', 'Sepia']
@@ -23,7 +24,7 @@ const NEW_THEME_DEFAULTS: StoredConfig = {
 	},
 }
 
-export default function CustomizeTheme({ onCancel, mode = 'edit' }: Props) {
+export default function CustomizeTheme({ onCancel, mode = 'edit', theme: namedTheme }: Props) {
 	const { colorScheme } = useColorScheme()
 	const insets = useSafeAreaInsets()
 
@@ -38,18 +39,18 @@ export default function CustomizeTheme({ onCancel, mode = 'edit' }: Props) {
 	)
 
 	const isCreateMode = mode === 'create'
+	const themeToEdit = namedTheme || selectedTheme || ''
 
 	const [customTheme, setCustomTheme] = useState<StoredConfig>(() =>
-		isCreateMode ? NEW_THEME_DEFAULTS : resolveTheme(themes, selectedTheme || '', colorScheme),
+		isCreateMode ? NEW_THEME_DEFAULTS : resolveTheme(themes, themeToEdit, colorScheme),
 	)
 
 	const [name, setName] = useState(() =>
-		isCreateMode ? '' : resolveThemeName(themes, selectedTheme || '', colorScheme),
+		isCreateMode ? '' : resolveThemeName(themes, themeToEdit, colorScheme),
 	)
 
 	const isDefaultTheme =
-		!isCreateMode &&
-		DEFAULT_THEMES.includes(resolveThemeName(themes, selectedTheme || '', colorScheme))
+		!isCreateMode && DEFAULT_THEMES.includes(resolveThemeName(themes, themeToEdit, colorScheme))
 
 	useEffect(
 		() => {
@@ -58,13 +59,13 @@ export default function CustomizeTheme({ onCancel, mode = 'edit' }: Props) {
 				setName('')
 				return
 			}
-			const currentTheme = resolveTheme(themes, selectedTheme || '', colorScheme)
-			const currentName = resolveThemeName(themes, selectedTheme || '', colorScheme)
+			const currentTheme = resolveTheme(themes, themeToEdit, colorScheme)
+			const currentName = resolveThemeName(themes, themeToEdit, colorScheme)
 			setCustomTheme(currentTheme)
 			setName(currentName)
 		},
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[selectedTheme, mode],
+		[themeToEdit, mode],
 	)
 
 	const onChangeBackground = useCallback((value: string) => {
@@ -89,8 +90,8 @@ export default function CustomizeTheme({ onCancel, mode = 'edit' }: Props) {
 
 	const handleCancel = useCallback(() => {
 		onCancel()
-		setCustomTheme(resolveTheme(themes, selectedTheme || '', colorScheme))
-	}, [onCancel, themes, selectedTheme, colorScheme])
+		setCustomTheme(resolveTheme(themes, themeToEdit, colorScheme))
+	}, [onCancel, themes, themeToEdit, colorScheme])
 
 	const handleSave = useCallback(() => {
 		const trimmedName = name.trim()
@@ -105,7 +106,7 @@ export default function CustomizeTheme({ onCancel, mode = 'edit' }: Props) {
 			return
 		}
 
-		const currentName = resolveThemeName(themes, selectedTheme || '', colorScheme)
+		const currentName = resolveThemeName(themes, themeToEdit, colorScheme)
 
 		if (isCreateMode) {
 			if (themes[trimmedName]) {
@@ -123,7 +124,7 @@ export default function CustomizeTheme({ onCancel, mode = 'edit' }: Props) {
 		name,
 		customTheme,
 		themes,
-		selectedTheme,
+		themeToEdit,
 		colorScheme,
 		isCreateMode,
 		addTheme,
@@ -132,7 +133,7 @@ export default function CustomizeTheme({ onCancel, mode = 'edit' }: Props) {
 	])
 
 	const handleDelete = useCallback(() => {
-		const currentName = resolveThemeName(themes, selectedTheme || '', colorScheme)
+		const currentName = resolveThemeName(themes, themeToEdit, colorScheme)
 
 		if (DEFAULT_THEMES.includes(currentName)) {
 			Alert.alert('Error', 'Cannot delete default themes')
@@ -151,7 +152,7 @@ export default function CustomizeTheme({ onCancel, mode = 'edit' }: Props) {
 				},
 			},
 		])
-	}, [themes, selectedTheme, colorScheme, deleteTheme, selectTheme, onCancel])
+	}, [themes, themeToEdit, colorScheme, deleteTheme, selectTheme, onCancel])
 
 	return (
 		<Fragment>

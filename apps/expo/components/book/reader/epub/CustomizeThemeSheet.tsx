@@ -9,7 +9,10 @@ import { CustomizeTheme } from './controls/customTheme'
 
 export default function CustomizeThemeSheet() {
 	const sheetRef = useEpubSheetStore((state) => state.customizeThemeSheetRef)
-	const mode = useEpubSheetStore((state) => state.customizeThemeMode)
+	const { mode, name } = useEpubSheetStore((state) => ({
+		mode: state.customizeThemeMode,
+		name: state.customizeThemeName,
+	}))
 	const closeSheet = useEpubSheetStore((state) => state.closeSheet)
 
 	const { colorScheme } = useColorScheme()
@@ -35,7 +38,7 @@ export default function CustomizeThemeSheet() {
 			}}
 			insetAdjustment="automatic"
 		>
-			<CustomizeTheme onCancel={handleClose} mode={mode} />
+			<CustomizeTheme onCancel={handleClose} mode={mode} theme={name} />
 		</TrueSheet>
 	)
 }

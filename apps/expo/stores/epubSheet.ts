@@ -6,15 +6,21 @@ export type EpubSheetType = 'settings' | 'locations' | 'customizeTheme'
 
 export type CustomizeThemeMode = 'edit' | 'create'
 
+export type CustomizeThemeConfig = {
+	mode: CustomizeThemeMode
+	name?: string
+}
+
 type IEpubSheetStore = {
 	settingsSheetRef: RefObject<TrueSheet | null>
 	locationsSheetRef: RefObject<TrueSheet | null>
 	customizeThemeSheetRef: RefObject<TrueSheet | null>
 	customizeThemeMode: CustomizeThemeMode
+	customizeThemeName?: string
 	openSheet: (sheet: EpubSheetType) => void
 	closeSheet: (sheet: EpubSheetType) => void
 	closeAllSheets: () => void
-	openCustomizeTheme: (mode: CustomizeThemeMode) => void
+	openCustomizeTheme: (config: CustomizeThemeConfig) => void
 }
 
 export const useEpubSheetStore = create<IEpubSheetStore>((set, get) => ({
@@ -48,8 +54,8 @@ export const useEpubSheetStore = create<IEpubSheetStore>((set, get) => ({
 		state.locationsSheetRef.current?.dismiss()
 		state.customizeThemeSheetRef.current?.dismiss()
 	},
-	openCustomizeTheme: (mode) => {
-		set({ customizeThemeMode: mode })
+	openCustomizeTheme: ({ mode, name }) => {
+		set({ customizeThemeMode: mode, customizeThemeName: name })
 		get().customizeThemeSheetRef.current?.present()
 	},
 }))

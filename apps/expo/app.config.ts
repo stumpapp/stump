@@ -37,6 +37,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 				backgroundColor: '#ffffff',
 			},
 			package: 'com.stumpapp.stump',
+			permissions: ['WRITE_SETTINGS'],
 		},
 		androidNavigationBar: {
 			visible: 'immersive',

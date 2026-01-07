@@ -72,9 +72,6 @@ export default function PdfReader({ book, initialPage, onPageChanged, ...ctx }: 
 	const controlsVisible = useReaderStore((state) => state.showControls)
 	const setControlsVisible = useReaderStore((state) => state.setShowControls)
 
-	const { brightness } = useReaderStore((state) => ({
-		brightness: state.globalSettings.brightness,
-	}))
 	const { preferences: bookPreferences } = useBookPreferences({ book, serverId: ctx.serverId })
 
 	// TODO(expo-pdf): Additional PDFPreferences to consider exposing:
@@ -217,7 +214,6 @@ export default function PdfReader({ book, initialPage, onPageChanged, ...ctx }: 
 			<View
 				style={{
 					flex: 1,
-					filter: `brightness(${brightness * 100}%)`,
 					backgroundColor: config.backgroundColor || '#000000',
 				}}
 			>

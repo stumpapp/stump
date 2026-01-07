@@ -81,6 +81,7 @@ export type ReaderStore = {
 export const DEFAULT_BOOK_PREFERENCES = {
 	fontSize: 13,
 	lineHeight: 1.5,
+	// brightness will be unused unless for android we change to getBrightnessAsync() to separate system vs book brightness
 	brightness: 1,
 	readingMode: ReadingMode.Paged,
 	readingDirection: ReadingDirection.Ltr,

@@ -85,7 +85,6 @@ export default function ReadiumReader({
 	const setControlsVisible = useReaderStore((state) => state.setShowControls)
 
 	const {
-		brightness,
 		fontWeight: rawFontWeight,
 		columnCount: rawColumnCount,
 		...preferences
@@ -294,7 +293,6 @@ export default function ReadiumReader({
 			style={{
 				flex: 1,
 				backgroundColor: colors?.background,
-				filter: `brightness(${brightness * 100}%)`,
 			}}
 		>
 			<ReadiumHeader />

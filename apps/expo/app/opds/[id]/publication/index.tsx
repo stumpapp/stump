@@ -1,4 +1,7 @@
 import { useSDK } from '@stump/client'
+import { OPDSProgression } from '@stump/sdk'
+import dayjs from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime'
 import { useRouter } from 'expo-router'
 import { BookCopy, Info, Loader2 } from 'lucide-react-native'
 import { useCallback } from 'react'
@@ -7,7 +10,7 @@ import { ScrollView } from 'react-native-gesture-handler'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { useActiveServer } from '~/components/activeServer'
-import { InfoRow } from '~/components/book/overview'
+import { InfoRow, InfoStat } from '~/components/book/overview'
 import ChevronBackLink from '~/components/ChevronBackLink'
 import { ThumbnailImage } from '~/components/image'
 import { PublicationMenu } from '~/components/opds'
@@ -27,12 +30,14 @@ import { usePreferencesStore } from '~/stores'
 
 import { usePublicationContext } from './context'
 
+dayjs.extend(relativeTime)
+
 export default function Screen() {
 	const { sdk } = useSDK()
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
-	const { publication, url } = usePublicationContext()
+	const { publication, url, progression } = usePublicationContext()
 	const { metadata, images, readingOrder, links, resources } = publication
 	const { title, identifier, belongsTo } = metadata || {}
 
@@ -93,6 +98,19 @@ export default function Screen() {
 	const isSupportedStream = readingOrder?.every((link) => link.type?.startsWith('image/'))
 
 	const accentColor = usePreferencesStore((state) => state.accentColor)
+
+	const renderModifiedStat = (progression: OPDSProgression) => {
+		const percentageCompleted = progression.locator.locations?.at(0)?.totalProgression
+		const isCompleted = !!(percentageCompleted && percentageCompleted >= 1)
+
+		if (isCompleted) {
+			// TODO: I vaguely remember an alternative to dayjs someone showed me but for the life of me I can't remember what it was
+			// If I remember later I'll swap it out
+			return <InfoStat label="Completed" value={dayjs(progression.modified).fromNow(true)} />
+		} else {
+			return <InfoStat label="Last read" value={dayjs(progression.modified).fromNow()} />
+		}
+	}
 
 	// TODO: dump the rest of the metadata? Or enforce servers to conform to a standard?
 	// const restMeta = omit(rest, ['numberOfPages', 'modified'])
@@ -157,6 +175,24 @@ export default function Screen() {
 							</Button>
 						)}
 					</View>
+
+					{progression && (
+						<View className="flex flex-row justify-around">
+							{progression.locator.locations?.at(0)?.position && (
+								<InfoStat
+									label="Page"
+									value={progression.locator.locations.at(0)?.position?.toString() || '1'}
+								/>
+							)}
+							{progression.locator.locations?.at(0)?.totalProgression != null && (
+								<InfoStat
+									label="Completed"
+									value={`${Math.round((progression.locator.locations.at(0)?.totalProgression ?? 0) * 100)}%`}
+								/>
+							)}
+							{renderModifiedStat(progression)}
+						</View>
+					)}
 
 					{!canDownload && !isDownloaded && (
 						<View className="squircle rounded-lg bg-fill-warning-secondary p-3">

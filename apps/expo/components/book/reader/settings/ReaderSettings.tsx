@@ -2,8 +2,7 @@ import { ReadingMode } from '@stump/graphql'
 import { useCallback, useMemo } from 'react'
 import { View } from 'react-native'
 
-import { CardList, Switch, Text } from '~/components/ui'
-import { cn } from '~/lib/utils'
+import { CardList, CardRow, Switch } from '~/components/ui'
 import { BookPreferences, GlobalSettings, useReaderStore } from '~/stores/reader'
 
 import DoublePageSelect from './DoublePageSelect'
@@ -65,75 +64,79 @@ export default function ReaderSettings({ forBook, forServer }: Props) {
 	return (
 		<View className="flex-1 gap-8">
 			<CardList label="Mode">
-				<ReadingModeSelect
-					mode={activeSettings.readingMode}
-					onChange={(mode) => onPreferenceChange({ readingMode: mode })}
-				/>
-				{activeSettings.readingMode !== ReadingMode.ContinuousVertical && (
+				<CardRow label="Flow">
+					<ReadingModeSelect
+						mode={activeSettings.readingMode}
+						onChange={(mode) => onPreferenceChange({ readingMode: mode })}
+					/>
+				</CardRow>
+
+				<CardRow
+					label="Direction"
+					disabled={activeSettings.readingMode === ReadingMode.ContinuousVertical}
+				>
 					<ReadingDirectionSelect
 						direction={activeSettings.readingDirection}
 						onChange={(direction) => onPreferenceChange({ readingDirection: direction })}
 					/>
-				)}
+				</CardRow>
 			</CardList>
 
 			<CardList label="Image Options">
-				<DoublePageSelect
-					behavior={activeSettings.doublePageBehavior || 'auto'}
-					onChange={(behavior) => onPreferenceChange({ doublePageBehavior: behavior })}
-				/>
+				<CardRow label="Double Paged">
+					<DoublePageSelect
+						behavior={activeSettings.doublePageBehavior || 'auto'}
+						onChange={(behavior) => onPreferenceChange({ doublePageBehavior: behavior })}
+					/>
+				</CardRow>
 
-				<View
-					className={cn('flex flex-row items-center justify-between p-4', {
-						'opacity-50': activeSettings.doublePageBehavior === 'off',
-					})}
+				<CardRow
+					label="Separate Second Page"
+					disabled={activeSettings.doublePageBehavior === 'off'}
 				>
-					<Text>Separate Second Page</Text>
-
 					<Switch
 						checked={
 							activeSettings.secondPageSeparate && activeSettings.doublePageBehavior !== 'off'
 						}
 						onCheckedChange={(value) => onPreferenceChange({ secondPageSeparate: value })}
 					/>
-				</View>
+				</CardRow>
 
-				<ImageScalingSelect
-					behavior={activeSettings.imageScaling.scaleToFit}
-					onChange={(fit) => onPreferenceChange({ imageScaling: { scaleToFit: fit } })}
-				/>
+				<CardRow label="Scaling">
+					<ImageScalingSelect
+						behavior={activeSettings.imageScaling.scaleToFit}
+						onChange={(fit) => onPreferenceChange({ imageScaling: { scaleToFit: fit } })}
+					/>
+				</CardRow>
 
-				<View className="flex flex-row items-center justify-between p-4">
-					<Text>Downscaling</Text>
-
+				<CardRow label="Downscaling">
 					<Switch
 						checked={allowDownscaling}
 						onCheckedChange={(value) => onPreferenceChange({ allowDownscaling: value })}
 					/>
-				</View>
+				</CardRow>
 
 				{/* TODO: https://docs.expo.dev/versions/latest/sdk/media-library/ */}
-				<View className="flex flex-row items-center justify-between p-4 opacity-50">
-					<Text>Panel Downloads</Text>
-
+				<CardRow label="Panel Downloads" disabled>
 					<Switch checked={false} onCheckedChange={() => {}} />
-				</View>
+				</CardRow>
 			</CardList>
 
 			<CardList label="Navigation">
-				<View className="flex flex-row items-center justify-between p-4">
-					<Text>Tap Sides to Navigate</Text>
+				<CardRow label="Tap Sides to Navigate">
 					<Switch
 						variant="brand"
 						checked={activeSettings.tapSidesToNavigate ?? true}
 						onCheckedChange={(checked) => onPreferenceChange({ tapSidesToNavigate: checked })}
 					/>
-				</View>
+				</CardRow>
 
-				<FooterControlsSelect
-					variant={activeSettings.footerControls || 'images'}
-					onChange={(variant) => onPreferenceChange({ footerControls: variant })}
-				/>
+				<CardRow label="Bottom Controls">
+					<FooterControlsSelect
+						variant={activeSettings.footerControls || 'images'}
+						onChange={(variant) => onPreferenceChange({ footerControls: variant })}
+					/>
+				</CardRow>
 			</CardList>
 		</View>
 	)

@@ -7,7 +7,7 @@ import AppSettingsRow from '../AppSettingsRow'
 
 export default function AppLanguage() {
 	return (
-		<AppSettingsRow icon={Languages} title="Language">
+		<AppSettingsRow icon={Languages} title="Language" disabled>
 			<View className="flex flex-row items-center gap-2">
 				<Text className="text-foreground-muted">English</Text>
 				<Icon as={ChevronsUpDown} className="h-5 text-foreground-muted" />

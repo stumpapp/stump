@@ -136,7 +136,7 @@ export default function Screen() {
 
 			{!isCleanSlate && (
 				<ScrollView
-					key={`${width}-${allOPDSServers.length}-${stumpServers.length}`}
+					key={`${width}-${allOPDSServers.length}-${stumpServers.length}-${stumpEnabled}`}
 					className="flex-1 bg-background"
 					contentInsetAdjustmentBehavior="automatic"
 				>

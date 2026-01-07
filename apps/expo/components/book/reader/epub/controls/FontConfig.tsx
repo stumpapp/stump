@@ -1,6 +1,4 @@
-import { View } from 'react-native'
-
-import { CardList, Stepper, Switch, Text } from '~/components/ui'
+import { CardList, CardRow, Stepper, Switch } from '~/components/ui'
 import { Picker } from '~/components/ui/picker/picker'
 import type { PickerOption } from '~/components/ui/picker/types'
 import { useReaderStore } from '~/stores'
@@ -40,17 +38,15 @@ export default function FontConfig() {
 
 	return (
 		<CardList>
-			<View className="flex-row items-center justify-between px-6 py-3">
-				<Text className="text-lg">Typeface</Text>
+			<CardRow label="Typeface">
 				<Picker
 					value={store.fontFamily}
 					options={FONT_OPTIONS}
 					onValueChange={(value) => store.setSettings({ fontFamily: value || undefined })}
 				/>
-			</View>
+			</CardRow>
 
-			<View className="flex-row items-center justify-between px-6 py-3">
-				<Text className="text-lg">Font Size</Text>
+			<CardRow label="Font Size">
 				<Stepper
 					value={store.fontSize}
 					onChange={(val) => store.setSettings({ fontSize: Math.round(val) })}
@@ -60,10 +56,9 @@ export default function FontConfig() {
 					formatValue={(val) => val.toString()}
 					accessibilityLabel="Font Size"
 				/>
-			</View>
+			</CardRow>
 
-			<View className="flex-row items-center justify-between px-6 py-3">
-				<Text className="text-lg">Font Weight</Text>
+			<CardRow label="Font Weight">
 				<Picker
 					value={String(store.fontWeight)}
 					options={FONT_WEIGHT_OPTIONS}
@@ -71,35 +66,23 @@ export default function FontConfig() {
 						ensureNumber(value, (num) => store.setSettings({ fontWeight: num }))
 					}
 				/>
-			</View>
+			</CardRow>
 
-			<View className="flex-row items-center justify-between px-6 py-3">
-				<Text
-					className="text-lg"
-					onPress={() => store.setSettings({ textNormalization: !store.textNormalization })}
-				>
-					Text Normalization
-				</Text>
+			<CardRow label="Text Normalization">
 				<Switch
 					checked={store.textNormalization}
 					onCheckedChange={(checked) => store.setSettings({ textNormalization: checked })}
 					accessibilityLabel="Toggle Text Normalization"
 				/>
-			</View>
+			</CardRow>
 
-			<View className="flex-row items-center justify-between px-6 py-3">
-				<Text
-					className="text-lg"
-					onPress={() => store.setSettings({ textNormalization: !store.textNormalization })}
-				>
-					Vertical Text
-				</Text>
+			<CardRow label="Vertical Text">
 				<Switch
 					checked={store.verticalText}
 					onCheckedChange={(checked) => store.setSettings({ verticalText: checked })}
 					accessibilityLabel="Toggle Vertical Text"
 				/>
-			</View>
+			</CardRow>
 		</CardList>
 	)
 }

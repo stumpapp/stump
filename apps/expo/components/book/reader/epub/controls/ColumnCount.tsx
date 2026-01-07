@@ -1,6 +1,4 @@
-import { View } from 'react-native'
-
-import { Text } from '~/components/ui'
+import { CardRow } from '~/components/ui'
 import { Picker } from '~/components/ui/picker/picker'
 import type { PickerOption } from '~/components/ui/picker/types'
 import { useReaderStore } from '~/stores'
@@ -23,13 +21,12 @@ export default function ColumnCount() {
 	}
 
 	return (
-		<View className="flex-row items-center justify-between px-6 py-3">
-			<Text className="text-lg text-foreground">Columns</Text>
+		<CardRow label="Columns">
 			<Picker
 				value={String(store.columnCount)}
 				options={COLUMN_OPTIONS}
 				onValueChange={handleChange}
 			/>
-		</View>
+		</CardRow>
 	)
 }

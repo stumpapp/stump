@@ -1,6 +1,4 @@
-import { View } from 'react-native'
-
-import { Stepper, Text } from '~/components/ui'
+import { CardRow, Stepper } from '~/components/ui'
 import { useReaderStore } from '~/stores'
 
 export default function PageMargins() {
@@ -10,8 +8,7 @@ export default function PageMargins() {
 	}))
 
 	return (
-		<View className="flex-row items-center justify-between px-6 py-3">
-			<Text className="text-lg text-foreground">Page Margins</Text>
+		<CardRow label="Page Margins">
 			<Stepper
 				value={store.pageMargins}
 				onChange={(val) => store.setSettings({ pageMargins: val })}
@@ -22,6 +19,6 @@ export default function PageMargins() {
 				formatValue={(val) => Math.round(val * 100).toString()}
 				accessibilityLabel="Page Margins"
 			/>
-		</View>
+		</CardRow>
 	)
 }

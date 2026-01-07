@@ -1,6 +1,4 @@
-import { View } from 'react-native'
-
-import { Text } from '~/components/ui'
+import { CardRow } from '~/components/ui'
 import { Picker } from '~/components/ui/picker/picker'
 import type { PickerOption } from '~/components/ui/picker/types'
 import { ImageFilter as ImageFilterType } from '~/modules/readium'
@@ -24,13 +22,12 @@ export default function ImageFilter() {
 	}
 
 	return (
-		<View className="flex-row items-center justify-between px-6 py-3">
-			<Text className="text-lg text-foreground">Image Filter</Text>
+		<CardRow label="Image Filter">
 			<Picker
 				value={store.imageFilter ?? 'none'}
 				options={IMAGE_FILTER_OPTIONS}
 				onValueChange={handleChange}
 			/>
-		</View>
+		</CardRow>
 	)
 }

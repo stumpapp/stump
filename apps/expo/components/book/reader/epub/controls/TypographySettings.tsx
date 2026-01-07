@@ -1,9 +1,6 @@
-import { View } from 'react-native'
-
-import { CardList, Label, Stepper, Switch, Text } from '~/components/ui'
+import { CardList, CardRow, Stepper, Switch } from '~/components/ui'
 import { Picker } from '~/components/ui/picker/picker'
 import type { PickerOption } from '~/components/ui/picker/types'
-import { cn } from '~/lib/utils'
 import { TextAlignment } from '~/modules/readium'
 import { useReaderStore } from '~/stores'
 
@@ -38,22 +35,16 @@ export default function TypographySettings() {
 		<CardList>
 			<PublisherStyles />
 
-			<View className="flex-row items-center justify-between px-6 py-3">
-				<Text className={cn('text-lg text-foreground', isDisabled && 'opacity-40')}>
-					Text Alignment
-				</Text>
+			<CardRow label="Text Alignment" disabled={isDisabled}>
 				<Picker
 					value={store.textAlign}
 					options={TEXT_ALIGN_OPTIONS}
 					onValueChange={(value) => store.setSettings({ textAlign: value })}
 					disabled={isDisabled}
 				/>
-			</View>
+			</CardRow>
 
-			<View className="flex-row items-center justify-between px-6 py-3">
-				<Text className={cn('text-lg text-foreground', isDisabled && 'opacity-40')}>
-					Type Scale
-				</Text>
+			<CardRow label="Type Scale" disabled={isDisabled}>
 				<Stepper
 					value={store.typeScale}
 					onChange={(val) => store.setSettings({ typeScale: val === 1.0 ? undefined : val })}
@@ -64,12 +55,9 @@ export default function TypographySettings() {
 					formatValue={(val) => val.toFixed(1)}
 					accessibilityLabel="Type Scale"
 				/>
-			</View>
+			</CardRow>
 
-			<View className="flex-row items-center justify-between px-6 py-3">
-				<Text className={cn('text-lg text-foreground', isDisabled && 'opacity-40')}>
-					Line Height
-				</Text>
+			<CardRow label="Line Height" disabled={isDisabled}>
 				<Stepper
 					value={store.lineHeight}
 					onChange={(val) => store.setSettings({ lineHeight: val === 1.5 ? undefined : val })}
@@ -80,12 +68,9 @@ export default function TypographySettings() {
 					formatValue={(val) => val.toFixed(1)}
 					accessibilityLabel="Line Height"
 				/>
-			</View>
+			</CardRow>
 
-			<View className="flex-row items-center justify-between px-6 py-3">
-				<Text className={cn('text-lg text-foreground', isDisabled && 'opacity-40')}>
-					Paragraph Indent
-				</Text>
+			<CardRow label="Paragraph Indent" disabled={isDisabled}>
 				<Stepper
 					value={store.paragraphIndent ?? 0}
 					onChange={(val) => store.setSettings({ paragraphIndent: val === 0 ? undefined : val })}
@@ -97,12 +82,9 @@ export default function TypographySettings() {
 					formatValue={(val) => Math.round(val * 100).toString()}
 					accessibilityLabel="Paragraph Indent"
 				/>
-			</View>
+			</CardRow>
 
-			<View className="flex-row items-center justify-between px-6 py-3">
-				<Text className={cn('text-lg text-foreground', isDisabled && 'opacity-40')}>
-					Paragraph Spacing
-				</Text>
+			<CardRow label="Paragraph Spacing" disabled={isDisabled}>
 				<Stepper
 					value={store.paragraphSpacing ?? 0}
 					onChange={(val) => store.setSettings({ paragraphSpacing: val === 0 ? undefined : val })}
@@ -114,12 +96,9 @@ export default function TypographySettings() {
 					formatValue={(val) => Math.round(val * 100).toString()}
 					accessibilityLabel="Paragraph Spacing"
 				/>
-			</View>
+			</CardRow>
 
-			<View className="flex-row items-center justify-between px-6 py-3">
-				<Text className={cn('text-lg text-foreground', isDisabled && 'opacity-40')}>
-					Word Spacing
-				</Text>
+			<CardRow label="Word Spacing" disabled={isDisabled}>
 				<Stepper
 					value={store.wordSpacing ?? 0}
 					onChange={(val) => store.setSettings({ wordSpacing: val === 0 ? undefined : val })}
@@ -131,12 +110,9 @@ export default function TypographySettings() {
 					formatValue={(val) => Math.round(val * 100).toString()}
 					accessibilityLabel="Word Spacing"
 				/>
-			</View>
+			</CardRow>
 
-			<View className="flex-row items-center justify-between px-6 py-3">
-				<Text className={cn('text-lg text-foreground', isDisabled && 'opacity-40')}>
-					Letter Spacing
-				</Text>
+			<CardRow label="Letter Spacing" disabled={isDisabled}>
 				<Stepper
 					value={store.letterSpacing ?? 0}
 					onChange={(val) => store.setSettings({ letterSpacing: val === 0 ? undefined : val })}
@@ -148,39 +124,18 @@ export default function TypographySettings() {
 					formatValue={(val) => Math.round(val * 100).toString()}
 					accessibilityLabel="Letter Spacing"
 				/>
-			</View>
+			</CardRow>
 
-			<View className="flex-row items-center justify-between px-6 py-3">
-				<Label
-					className={cn(isDisabled && 'opacity-40', 'text-lg')}
-					onPress={() =>
-						!isDisabled &&
-						store.setSettings({ hyphens: store.hyphens === undefined ? true : !store.hyphens })
-					}
-				>
-					Hyphens
-				</Label>
+			<CardRow label="Hyphens" disabled={isDisabled}>
 				<Switch
 					checked={store.hyphens ?? false}
 					onCheckedChange={(checked) => store.setSettings({ hyphens: checked ? true : undefined })}
 					accessibilityLabel="Toggle Hyphens"
 					disabled={isDisabled}
 				/>
-			</View>
+			</CardRow>
 
-			<View className="flex-row items-center justify-between px-6 py-3">
-				<Text
-					className={cn(isDisabled && 'opacity-40', 'text-lg')}
-					onPress={() =>
-						!isDisabled &&
-						store.setSettings({
-							ligatures: store.ligatures === undefined ? true : !store.ligatures,
-						})
-					}
-				>
-					Ligatures
-				</Text>
-
+			<CardRow label="Ligatures" disabled={isDisabled}>
 				<Switch
 					checked={store.ligatures ?? false}
 					onCheckedChange={(checked) =>
@@ -189,7 +144,7 @@ export default function TypographySettings() {
 					accessibilityLabel="Toggle Ligatures"
 					disabled={isDisabled}
 				/>
-			</View>
+			</CardRow>
 		</CardList>
 	)
 }

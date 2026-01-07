@@ -1,6 +1,4 @@
-import { View } from 'react-native'
-
-import { Text } from '~/components/ui'
+import { CardRow } from '~/components/ui'
 import { Picker } from '~/components/ui/picker/picker'
 import type { PickerOption } from '~/components/ui/picker/types'
 import { ReadingDirection } from '~/modules/readium'
@@ -18,14 +16,13 @@ export default function ReadingProgression() {
 	}))
 
 	return (
-		<View className="flex-row items-center justify-between px-6 py-3">
-			<Text className="text-lg text-foreground">Reading Direction</Text>
+		<CardRow label="Reading Direction">
 			<Picker
 				value={store.readingDirection}
 				// @ts-expect-error PickerOption type mismatch
 				options={READING_DIRECTION_OPTIONS}
 				onValueChange={(value) => store.setSettings({ readingDirection: value })}
 			/>
-		</View>
+		</CardRow>
 	)
 }

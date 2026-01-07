@@ -1,4 +1,5 @@
-import { OPDSNavigationLink } from '@stump/sdk'
+import { useSDK } from '@stump/client'
+import { OPDSNavigationLink, resolveUrl } from '@stump/sdk'
 import { useRouter } from 'expo-router'
 import { ChevronRight } from 'lucide-react-native'
 import { ComponentPropsWithoutRef } from 'react'
@@ -16,6 +17,7 @@ type Props = {
 
 export default function NavigationLink({ link }: Props) {
 	const router = useRouter()
+	const { sdk } = useSDK()
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
@@ -26,7 +28,7 @@ export default function NavigationLink({ link }: Props) {
 			onPress={() =>
 				router.push({
 					pathname: '/opds/[id]/feed/[url]',
-					params: { id: serverID, url: link.href },
+					params: { id: serverID, url: resolveUrl(link.href, sdk.rootURL) },
 				})
 			}
 		>

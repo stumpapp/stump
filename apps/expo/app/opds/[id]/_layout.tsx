@@ -1,5 +1,5 @@
 import { SDKContext, StumpClientContextProvider } from '@stump/client'
-import { Api, authDocument } from '@stump/sdk'
+import { Api, authDocument, resolveUrl } from '@stump/sdk'
 import { Redirect, Stack, useLocalSearchParams, useRouter } from 'expo-router'
 import { X } from 'lucide-react-native'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -30,6 +30,7 @@ export default function Screen() {
 		removeInstanceFromCache: state.removeSDK,
 	}))
 
+	// eslint-disable-next-line react-hooks/refs
 	const [sdk, setSDK] = useState<Api | null>(() => cachedInstance.current || null)
 
 	useEffect(() => {
@@ -70,6 +71,9 @@ export default function Screen() {
 			}
 
 			const logoURL = authDoc.data.links.find((link) => link.rel === 'logo')?.href
+			const resolvedLogoURL = logoURL
+				? resolveUrl(logoURL, sdk?.rootURL ?? activeServer?.url)
+				: undefined
 			const username = basic.labels?.login || 'Username'
 			const password = basic.labels?.password || 'Password'
 
@@ -78,17 +82,16 @@ export default function Screen() {
 				pathname: '/opds/[id]/auth',
 				params: {
 					id: activeServer?.id || '',
-					logoURL,
+					logoURL: resolvedLogoURL,
 					username,
 					password,
 				},
 			})
 		},
-		[activeServer, router, serverID, cacheStore],
+		[activeServer, router, serverID, cacheStore, sdk],
 	)
 
 	if (!activeServer) {
-		// @ts-expect-error: Redirect works
 		return <Redirect href="/" />
 	}
 

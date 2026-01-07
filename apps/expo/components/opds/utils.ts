@@ -1,6 +1,8 @@
-import { OPDSMetadata, OPDSPublication } from '@stump/sdk'
+import { useSDK } from '@stump/client'
+import { OPDSMetadata, OPDSPublication, resolveUrl } from '@stump/sdk'
 import dayjs from 'dayjs'
 import get from 'lodash/get'
+import { useCallback } from 'react'
 import { stringMd5 } from 'react-native-quick-md5'
 
 export const getNumberField = (meta: OPDSMetadata, key: string) => {
@@ -56,23 +58,31 @@ export const getPublicationId = (
 	return identifier || hashFromURL(url)
 }
 
-export const getPublicationThumbnailURL = ({
-	images,
-	resources,
-	readingOrder,
-}: Pick<OPDSPublication, 'images' | 'resources' | 'readingOrder'>) => {
+export const getPublicationThumbnailURL = (
+	{
+		images,
+		resources,
+		readingOrder,
+	}: Pick<OPDSPublication, 'images' | 'resources' | 'readingOrder'>,
+	baseUrl?: string,
+) => {
 	const imageURL = images?.at(0)?.href
 	if (imageURL) {
-		return imageURL
+		return resolveUrl(imageURL, baseUrl)
 	}
 
 	const resourceURL = resources?.find(({ type }) => type?.startsWith('image'))?.href
 	if (resourceURL) {
-		return resourceURL
+		return resolveUrl(resourceURL, baseUrl)
 	}
 
 	const readingOrderURL = readingOrder?.find(({ type }) => type?.startsWith('image'))?.href
 	if (readingOrderURL) {
-		return readingOrderURL
+		return resolveUrl(readingOrderURL, baseUrl)
 	}
+}
+
+export function useResolveURL() {
+	const { sdk } = useSDK()
+	return useCallback((url: string) => resolveUrl(url, sdk.rootURL), [sdk.rootURL])
 }

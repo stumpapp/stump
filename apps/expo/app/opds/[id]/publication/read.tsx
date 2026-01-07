@@ -11,11 +11,11 @@ import { Platform } from 'react-native'
 import { useActiveServer } from '~/components/activeServer'
 import { ImageBasedReader } from '~/components/book/reader'
 import { ImageReaderBookRef } from '~/components/book/reader/image/context'
+import { hashFromURL, useResolveURL } from '~/components/opds/utils'
 import { useAppState } from '~/lib/hooks'
 import { useReaderStore } from '~/stores'
 import { useBookPreferences, useBookTimer } from '~/stores/reader'
 
-import { hashFromURL } from '../../../../components/opds/utils'
 import { usePublicationContext } from './context'
 
 export default function Screen() {
@@ -210,12 +210,14 @@ export default function Screen() {
 		}
 	}, [])
 
+	const getPageURL = useResolveURL()
+
 	return (
 		<ImageBasedReader
 			serverId={serverId}
 			initialPage={currentPage}
 			book={book}
-			pageURL={(page: number) => readingOrder![page - 1]?.href || ''}
+			pageURL={(page: number) => getPageURL(readingOrder![page - 1]?.href || '')}
 			requestHeaders={requestHeaders}
 			resetTimer={reset}
 			onPageChanged={progressionURL ? onPageChanged : undefined}

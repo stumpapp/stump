@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry/react-native'
 import { useSDKSafe } from '@stump/client'
-import { OPDSMetadata, OPDSPublication } from '@stump/sdk'
+import { OPDSMetadata, OPDSPublication, resolveUrl } from '@stump/sdk'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { and, eq } from 'drizzle-orm'
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
@@ -106,7 +106,7 @@ export function useOPDSDownload({ serverId }: UseOPDSDownloadParams = {}) {
 				throw new Error(`Unsupported file type: ${acquisitionLink.type || 'unknown'}`)
 			}
 
-			const downloadUrl = acquisitionLink.href
+			const downloadUrl = resolveUrl(acquisitionLink.href, sdk.rootURL)
 			const filename = `${bookID}.${extension}`
 			const placementUrl = `${booksDirectory(serverID)}/${filename}`
 

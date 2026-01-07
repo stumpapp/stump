@@ -84,6 +84,7 @@ export default function Footer() {
 				easing: visible ? Easing.out(Easing.quad) : Easing.in(Easing.quad),
 			})
 		},
+		// eslint-disable-next-line react-compiler/react-compiler
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[visible],
 	)
@@ -133,7 +134,7 @@ export default function Footer() {
 	const getPageSetSize = useCallback(
 		(idx: number) => {
 			const set = pageSets[idx]
-			const containerSize = calcPageSetSize(set)
+			const containerSize = calcPageSetSize(set || [])
 			return containerSize
 		},
 		[pageSets, calcPageSetSize],
@@ -234,6 +235,7 @@ export default function Footer() {
 				'dataCache',
 			)
 		},
+		// eslint-disable-next-line react-compiler/react-compiler
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[currentPage, readingDirection, isOPDS],
 	)
@@ -276,7 +278,7 @@ export default function Footer() {
 
 	const getSliderImageContainerStyles = useCallback(
 		(value: number, pageSet: number[]) => {
-			const isLandscape = (imageSizes?.[pageSet[0]]?.ratio || 0) >= 1
+			const isLandscape = (imageSizes?.[pageSet[0] ?? 0]?.ratio || 0) >= 1
 
 			let containerSize = baseSize
 
@@ -507,7 +509,7 @@ export default function Footer() {
 						renderItem={renderGalleryItem}
 						getItemType={(item) => {
 							if (item.length === 2) return 'double'
-							else if ((imageSizes?.[item[0]]?.ratio || 0) >= 1) return 'landscape'
+							else if ((imageSizes?.[item[0] ?? 0]?.ratio || 0) >= 1) return 'landscape'
 							else return 'single'
 						}}
 						contentContainerStyle={{ paddingHorizontal: 8 }}
@@ -547,10 +549,10 @@ export default function Footer() {
 						minimumTrackStyle={minimumTrackStyle}
 						maximumTrackStyle={maximumTrackStyle}
 						thumbStyle={{ width: 24, height: 24, backgroundColor: 'white', borderRadius: 999 }}
-						onValueChange={([value]) => handleSlideValueChange(value)}
+						onValueChange={([value]) => (value != null ? handleSlideValueChange(value) : null)}
 						animationType="timing"
 						renderAboveThumbComponent={renderAboveThumbComponent}
-						onSlidingComplete={([value]) => onSlidingComplete(value)}
+						onSlidingComplete={([value]) => (value != null ? onSlidingComplete(value) : null)}
 						onSlidingStart={() => setIsSliderDragging(true)}
 					/>
 				)}

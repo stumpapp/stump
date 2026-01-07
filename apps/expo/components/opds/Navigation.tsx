@@ -1,6 +1,7 @@
-import { OPDSNavigationLink } from '@stump/sdk'
+import { useSDK } from '@stump/client'
+import { OPDSNavigationLink, resolveUrl } from '@stump/sdk'
 import { useRouter } from 'expo-router'
-import { ChevronRight, Rss, Slash } from 'lucide-react-native'
+import { ChevronRight, Rss } from 'lucide-react-native'
 import { Fragment } from 'react'
 import { Pressable, View } from 'react-native'
 
@@ -17,6 +18,7 @@ type Props = {
 } & FeedComponentOptions
 
 export default function Navigation({ navigation, renderEmpty }: Props) {
+	const { sdk } = useSDK()
 	const { activeServer } = useActiveServer()
 	const router = useRouter()
 
@@ -36,7 +38,7 @@ export default function Navigation({ navigation, renderEmpty }: Props) {
 								pathname: '/opds/[id]/feed/[url]',
 								params: {
 									id: activeServer.id,
-									url: link.href,
+									url: resolveUrl(link.href, sdk.rootURL),
 								},
 							})
 						}

@@ -1,6 +1,6 @@
 import { FlashList } from '@shopify/flash-list'
 import { useSDK } from '@stump/client'
-import { OPDSFeed } from '@stump/sdk'
+import { OPDSFeed, resolveUrl } from '@stump/sdk'
 import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { View } from 'react-native'
@@ -78,7 +78,7 @@ export default function PublicationFeed({ feed, onRefresh, isRefreshing }: Props
 
 	const renderItem = useCallback(
 		({ item: publication }: { item: (typeof publications)[number] }) => {
-			const thumbnailURL = getPublicationThumbnailURL(publication)
+			const thumbnailURL = getPublicationThumbnailURL(publication, sdk.rootURL)
 			const selfURL = publication.links?.find((link) => link.rel === 'self')?.href
 
 			if (!thumbnailURL) return null
@@ -92,14 +92,14 @@ export default function PublicationFeed({ feed, onRefresh, isRefreshing }: Props
 							pathname: '/opds/[id]/publication',
 							params: {
 								id: serverID,
-								url: selfURL,
+								url: selfURL ? resolveUrl(selfURL, sdk.rootURL) : undefined,
 							},
 						}}
 					/>
 				</View>
 			)
 		},
-		[serverID],
+		[serverID, sdk.rootURL],
 	)
 
 	if (!publications.length) return null

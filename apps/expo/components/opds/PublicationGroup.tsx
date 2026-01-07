@@ -15,6 +15,7 @@ import { useActiveServer } from '../activeServer'
 import { ThumbnailImage } from '../image'
 import { ListEmptyMessage, Text } from '../ui'
 import { FeedComponentOptions } from './types'
+import { useResolveURL } from './utils'
 
 type Props = {
 	group: OPDSFeedGroup
@@ -36,9 +37,13 @@ export default function PublicationGroup({
 	const itemWidth = useMemo(() => (isTablet ? 150 : 100), [isTablet])
 	const itemHeight = useMemo(() => itemWidth / thumbnailRatio, [itemWidth, thumbnailRatio])
 
+	const resolveUrl = useResolveURL()
+
 	const renderItem = useCallback(
 		({ item: publication }: { item: OPDSPublication }) => {
 			const thumbnailURL = publication.images?.at(0)?.href
+				? resolveUrl(publication.images.at(0)!.href)
+				: undefined
 			const selfURL = publication.links?.find((link) => link.rel === 'self')?.href
 
 			return (
@@ -49,7 +54,7 @@ export default function PublicationGroup({
 									pathname: '/opds/[id]/publication',
 									params: {
 										id: serverID,
-										url: selfURL,
+										url: resolveUrl(selfURL),
 									},
 								})
 							: null
@@ -84,7 +89,7 @@ export default function PublicationGroup({
 				</Pressable>
 			)
 		},
-		[router, serverID, sdk, itemHeight, itemWidth],
+		[router, serverID, sdk, itemHeight, itemWidth, resolveUrl],
 	)
 
 	if (!publications.length && !renderEmpty) return null

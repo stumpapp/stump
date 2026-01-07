@@ -1,13 +1,14 @@
 import { useSDK } from '@stump/client'
-import { OPDSProgression } from '@stump/sdk'
+import { OPDSProgression, resolveUrl } from '@stump/sdk'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { useRouter } from 'expo-router'
 import { BookCopy, Info, Loader2 } from 'lucide-react-native'
-import { useCallback } from 'react'
+import { useCallback, useEffect } from 'react'
 import { Platform, Pressable, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import TImage from 'react-native-turbo-image'
 
 import { useActiveServer } from '~/components/activeServer'
 import { InfoRow, InfoStat } from '~/components/book/overview'
@@ -54,16 +55,22 @@ export default function Screen() {
 
 	// TODO: once I sort out progress sync, prefetch the current page
 	// TODO: prefetch the first page of the publication, see https://github.com/candlefinance/faster-image/issues/73
-	// const firstPageURL = readingOrder?.[0]?.href
-	// useEffect(() => {
-	// 	if (firstPageURL) {
-	// 		EImage.prefetch(firstPageURL, {
-	// 			headers: {
-	// 				Authorization: sdk.authorizationHeader || '',
-	// 			},
-	// 		})
-	// 	}
-	// }, [sdk, firstPageURL])
+	const firstPageURL = readingOrder?.[0]?.href
+		? resolveUrl(readingOrder[0].href, sdk.rootURL)
+		: undefined
+	useEffect(() => {
+		if (firstPageURL) {
+			TImage.prefetch([
+				{
+					uri: firstPageURL,
+					headers: {
+						...sdk.customHeaders,
+						Authorization: sdk.authorizationHeader || '',
+					},
+				},
+			])
+		}
+	}, [sdk, firstPageURL])
 
 	const { downloadBook, isDownloading } = useOPDSDownload({ serverId: serverID })
 
@@ -81,11 +88,14 @@ export default function Screen() {
 		})
 	}, [isDownloaded, downloadBook, url, publication, canDownload, isDownloading])
 
-	const thumbnailURL = getPublicationThumbnailURL({
-		images,
-		readingOrder,
-		resources,
-	})
+	const thumbnailURL = getPublicationThumbnailURL(
+		{
+			images,
+			readingOrder,
+			resources,
+		},
+		sdk.rootURL,
+	)
 
 	const numberOfPages = getNumberField(metadata, 'numberOfPages') ?? readingOrder?.length
 	const modified = getDateField(metadata, 'modified')
@@ -93,6 +103,7 @@ export default function Screen() {
 
 	const belongsToSeries = Array.isArray(belongsTo?.series) ? belongsTo.series[0] : belongsTo?.series
 	const seriesURL = belongsToSeries?.links?.find((link) => link.rel === 'self')?.href
+	const resolvedSeriesURL = seriesURL ? resolveUrl(seriesURL, sdk.rootURL) : undefined
 
 	const canStream = !!readingOrder && readingOrder.length > 0
 	const isSupportedStream = readingOrder?.every((link) => link.type?.startsWith('image/'))
@@ -242,14 +253,14 @@ export default function Screen() {
 							<InfoRow label="Position" value={belongsToSeries.position.toString()} />
 						)}
 
-						{seriesURL && (
+						{resolvedSeriesURL && (
 							<View className="flex flex-row items-center justify-between py-1">
 								<Text className="shrink-0 text-foreground-subtle">Feed URL</Text>
 								<Pressable
 									onPress={() =>
 										router.push({
 											pathname: '/opds/[id]/feed/[url]',
-											params: { url: seriesURL, id: serverID },
+											params: { url: resolvedSeriesURL, id: serverID },
 										})
 									}
 								>

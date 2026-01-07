@@ -1,4 +1,5 @@
 import { useRefetch, useSDK } from '@stump/client'
+import { resolveUrl } from '@stump/sdk'
 import { useQuery } from '@tanstack/react-query'
 import { useRouter } from 'expo-router'
 import partition from 'lodash/partition'
@@ -41,15 +42,16 @@ export default function Screen() {
 	const [isRefetching, onRefetch] = useRefetch(refetch)
 
 	const searchURL = feed?.links.find((link) => link.rel === 'search' && link.templated)?.href
+	const resolvedSearchURL = searchURL ? resolveUrl(searchURL, sdk.rootURL) : undefined
 
 	const router = useRouter()
 
 	const [query, setQuery] = useState('')
 
 	const onSearch = useCallback(() => {
-		if (!query || !searchURL) return
+		if (!query || !resolvedSearchURL) return
 
-		const url = searchURL.replace('{?query}', `?query=${encodeURIComponent(query)}`)
+		const url = resolvedSearchURL.replace('{?query}', `?query=${encodeURIComponent(query)}`)
 		router.push({
 			pathname: `/opds/[id]/search`,
 			params: {
@@ -58,7 +60,7 @@ export default function Screen() {
 				query,
 			},
 		})
-	}, [activeServer.id, router, searchURL, query])
+	}, [activeServer.id, router, resolvedSearchURL, query])
 
 	const hasSearch = feed?.links.some((link) => link.rel === 'search')
 

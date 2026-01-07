@@ -3036,6 +3036,7 @@ dependencies = [
  "async-graphql-axum",
  "async-stream",
  "axum",
+ "base64 0.22.1",
  "bcrypt",
  "chrono",
  "clap 4.5.48",

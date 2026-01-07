@@ -1467,6 +1467,18 @@ type Mutation {
 	uploadLibraryThumbnail(id: ID!, file: Upload!): Library!
 	uploadSeriesThumbnail(id: ID!, file: Upload!): Series!
 	uploadMediaThumbnail(id: ID!, file: Upload!): Media!
+	"""
+	Upload a series thumbnail from a base64-encoded image string.
+	This is an alternative to `uploadSeriesThumbnail` that accepts a base64 string
+	instead of a multipart file upload, which can be easier for some API clients.
+	"""
+	uploadSeriesThumbnailBase64(id: ID!, image: String!): Series!
+	"""
+	Upload a media thumbnail from a base64-encoded image string.
+	This is an alternative to `uploadMediaThumbnail` that accepts a base64 string
+	instead of a multipart file upload, which can be easier for some API clients.
+	"""
+	uploadMediaThumbnailBase64(id: ID!, image: String!): Media!
 	deleteLoginActivity: Int!
 	createUser(input: CreateUserInput!): User!
 	updateViewer(input: UpdateUserInput!): User!

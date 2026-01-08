@@ -264,6 +264,37 @@ export type CleanLibraryResponse = {
   isEmpty: Scalars['Boolean']['output'];
 };
 
+/**
+ * Represents a collected issue/series within a TPB or GN
+ * See https://github.com/mylar3/mylar3/wiki/series.json-schema-%28version-1.0.1%29
+ */
+export type CollectedItem = {
+  __typename?: 'CollectedItem';
+  /** CV ComicID of series */
+  comicid?: Maybe<Scalars['String']['output']>;
+  /** CV IssueID of single issue (not valid if multiple issues) */
+  issueid?: Maybe<Scalars['String']['output']>;
+  /** Listing of issue numbers present pertaining to related comicid in collection */
+  issues?: Maybe<Scalars['String']['output']>;
+  /** The title of the series */
+  series?: Maybe<Scalars['String']['output']>;
+};
+
+/**
+ * Represents a collected issue/series within a TPB or GN
+ * See https://github.com/mylar3/mylar3/wiki/series.json-schema-%28version-1.0.1%29
+ */
+export type CollectedItemInput = {
+  /** CV ComicID of series */
+  comicid?: InputMaybe<Scalars['String']['input']>;
+  /** CV IssueID of single issue (not valid if multiple issues) */
+  issueid?: InputMaybe<Scalars['String']['input']>;
+  /** Listing of issue numbers present pertaining to related comicid in collection */
+  issues?: InputMaybe<Scalars['String']['input']>;
+  /** The title of the series */
+  series?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type ComputedFilterReadingStatus =
   { is: ReadingStatus; isAnyOf?: never; isNoneOf?: never; isNot?: never; }
   |  { is?: never; isAnyOf: Array<ReadingStatus>; isNoneOf?: never; isNot?: never; }
@@ -337,12 +368,14 @@ export type CreatedManySeries = {
 export type CreatedMedia = {
   __typename?: 'CreatedMedia';
   id: Scalars['String']['output'];
+  libraryId: Scalars['String']['output'];
   seriesId: Scalars['String']['output'];
 };
 
 export type CreatedOrUpdatedManyMedia = {
   __typename?: 'CreatedOrUpdatedManyMedia';
   count: Scalars['Int']['output'];
+  libraryId: Scalars['String']['output'];
   seriesId: Scalars['String']['output'];
 };
 
@@ -1562,8 +1595,20 @@ export type Mutation = {
   uploadBooks: Scalars['Boolean']['output'];
   uploadLibraryThumbnail: Library;
   uploadMediaThumbnail: Media;
+  /**
+   * Upload a media thumbnail from a base64-encoded image string.
+   * Note: This was added specifically for Komf, which would have been annyoing to
+   * implement multipart uploads for
+   */
+  uploadMediaThumbnailBase64: Media;
   uploadSeries: Scalars['Boolean']['output'];
   uploadSeriesThumbnail: Series;
+  /**
+   * Upload a series thumbnail from a base64-encoded image string.
+   * Note: This was added specifically for Komf, which would have been annyoing to
+   * implement multipart uploads for
+   */
+  uploadSeriesThumbnailBase64: Series;
   /**
    * "Visit" a library, which will upsert a record of the user's last visit to the library.
    * This is used to inform the UI of the last library which was visited by the user
@@ -2056,6 +2101,12 @@ export type MutationUploadMediaThumbnailArgs = {
 };
 
 
+export type MutationUploadMediaThumbnailBase64Args = {
+  id: Scalars['ID']['input'];
+  image: Scalars['String']['input'];
+};
+
+
 export type MutationUploadSeriesArgs = {
   input: UploadSeriesInput;
 };
@@ -2064,6 +2115,12 @@ export type MutationUploadSeriesArgs = {
 export type MutationUploadSeriesThumbnailArgs = {
   file: Scalars['Upload']['input'];
   id: Scalars['ID']['input'];
+};
+
+
+export type MutationUploadSeriesThumbnailBase64Args = {
+  id: Scalars['ID']['input'];
+  image: Scalars['String']['input'];
 };
 
 
@@ -2161,6 +2218,8 @@ export type OffsetPaginationInfo = {
   pageOffset: Scalars['Int']['output'];
   /** The number of elements per page. */
   pageSize: Scalars['Int']['output'];
+  /** The total number of items available */
+  totalItems: Scalars['Int']['output'];
   /**
    * The number of pages available. This is **not** affected by the zero-based flag,
    * so a client requesting zero-based pagination will need to adjust their pagination
@@ -2834,21 +2893,45 @@ export type SeriesFilterInput = {
 
 export type SeriesMetadata = {
   __typename?: 'SeriesMetadata';
+  /** Age rating of the series */
   ageRating?: Maybe<Scalars['Int']['output']>;
+  /** Booktype of the series (Print, OneShot, TPB or GN) */
   booktype?: Maybe<Scalars['String']['output']>;
   characters: Array<Scalars['String']['output']>;
+  collects: Array<CollectedItem>;
+  /** Image URL pointing to CV image of series cover (usually issue #1) */
+  comicImage?: Maybe<Scalars['String']['output']>;
+  /** ComicVine comicid */
   comicid?: Maybe<Scalars['Int']['output']>;
+  /** Description (summary) with line breaks, carriage returns, etc. */
+  descriptionFormatted?: Maybe<Scalars['String']['output']>;
   genres: Array<Scalars['String']['output']>;
+  /** Name of imprint while under publisher */
   imprint?: Maybe<Scalars['String']['output']>;
   links: Array<Scalars['String']['output']>;
+  /** Type of series (e.g. "comicSeries") */
   metaType?: Maybe<Scalars['String']['output']>;
+  /** Start and end of the series in "Month Year - Month Year" format. If series status is Continuing, the end value is "Present" */
+  publicationRun?: Maybe<Scalars['String']['output']>;
+  /** Publisher name */
   publisher?: Maybe<Scalars['String']['output']>;
   seriesId: Scalars['String']['output'];
+  /** Either "Continuing" or "Ended" */
   status?: Maybe<Scalars['String']['output']>;
+  /**
+   * Description taken from source (un-edited) with no line breaks, carriage returns, etc.
+   * Stump calls this 'summary' to align with other models, but is derived from 'description_text' in series.json
+   */
   summary?: Maybe<Scalars['String']['output']>;
+  /** Title of series */
   title?: Maybe<Scalars['String']['output']>;
+  /** Total issues in the series up until this point in time */
+  totalIssues?: Maybe<Scalars['Int']['output']>;
+  /** Volume of the series in relation to other titles (this can be either numerical or the series year) */
   volume?: Maybe<Scalars['Int']['output']>;
   writers: Array<Scalars['String']['output']>;
+  /** Year the series started (publication start) */
+  year?: Maybe<Scalars['Int']['output']>;
 };
 
 export type SeriesMetadataFilterInput = {
@@ -2871,35 +2954,47 @@ export type SeriesMetadataInput = {
   ageRating?: InputMaybe<Scalars['Int']['input']>;
   booktype?: InputMaybe<Scalars['String']['input']>;
   characters?: InputMaybe<Array<Scalars['String']['input']>>;
+  collects?: InputMaybe<Array<CollectedItemInput>>;
+  comicImage?: InputMaybe<Scalars['String']['input']>;
   comicid?: InputMaybe<Scalars['Int']['input']>;
+  descriptionFormatted?: InputMaybe<Scalars['String']['input']>;
   genres?: InputMaybe<Array<Scalars['String']['input']>>;
   imprint?: InputMaybe<Scalars['String']['input']>;
   links?: InputMaybe<Array<Scalars['String']['input']>>;
   metaType?: InputMaybe<Scalars['String']['input']>;
+  publicationRun?: InputMaybe<Scalars['String']['input']>;
   publisher?: InputMaybe<Scalars['String']['input']>;
   status?: InputMaybe<Scalars['String']['input']>;
   summary?: InputMaybe<Scalars['String']['input']>;
   title?: InputMaybe<Scalars['String']['input']>;
+  totalIssues?: InputMaybe<Scalars['Int']['input']>;
   volume?: InputMaybe<Scalars['Int']['input']>;
   writers?: InputMaybe<Array<Scalars['String']['input']>>;
+  year?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export enum SeriesMetadataModelOrdering {
   AgeRating = 'AGE_RATING',
   Booktype = 'BOOKTYPE',
   Characters = 'CHARACTERS',
+  Collects = 'COLLECTS',
   Comicid = 'COMICID',
+  ComicImage = 'COMIC_IMAGE',
+  DescriptionFormatted = 'DESCRIPTION_FORMATTED',
   Genres = 'GENRES',
   Imprint = 'IMPRINT',
   Links = 'LINKS',
   MetaType = 'META_TYPE',
+  PublicationRun = 'PUBLICATION_RUN',
   Publisher = 'PUBLISHER',
   SeriesId = 'SERIES_ID',
   Status = 'STATUS',
   Summary = 'SUMMARY',
   Title = 'TITLE',
+  TotalIssues = 'TOTAL_ISSUES',
   Volume = 'VOLUME',
-  Writers = 'WRITERS'
+  Writers = 'WRITERS',
+  Year = 'YEAR'
 }
 
 export type SeriesMetadataOrderByField = {
@@ -3965,7 +4060,7 @@ export type SeriesBooksAlphabetQueryVariables = Exact<{
 
 export type SeriesBooksAlphabetQuery = { __typename?: 'Query', seriesById?: { __typename?: 'Series', mediaAlphabet: any } | null };
 
-export type SeriesMetadataEditorFragment = { __typename?: 'SeriesMetadata', ageRating?: number | null, booktype?: string | null, characters: Array<string>, comicid?: number | null, genres: Array<string>, imprint?: string | null, links: Array<string>, metaType?: string | null, publisher?: string | null, status?: string | null, summary?: string | null, title?: string | null, volume?: number | null, writers: Array<string> } & { ' $fragmentName'?: 'SeriesMetadataEditorFragment' };
+export type SeriesMetadataEditorFragment = { __typename?: 'SeriesMetadata', ageRating?: number | null, booktype?: string | null, characters: Array<string>, comicImage?: string | null, comicid?: number | null, descriptionFormatted?: string | null, genres: Array<string>, imprint?: string | null, links: Array<string>, metaType?: string | null, publicationRun?: string | null, publisher?: string | null, status?: string | null, summary?: string | null, title?: string | null, totalIssues?: number | null, volume?: number | null, writers: Array<string>, year?: number | null, collects: Array<{ __typename?: 'CollectedItem', series?: string | null, comicid?: string | null, issueid?: string | null, issues?: string | null }> } & { ' $fragmentName'?: 'SeriesMetadataEditorFragment' };
 
 export type UpdateSeriesMetadataMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -5202,17 +5297,28 @@ export const SeriesMetadataEditorFragmentDoc = new TypedDocumentString(`
   ageRating
   booktype
   characters
+  collects {
+    series
+    comicid
+    issueid
+    issues
+  }
+  comicImage
   comicid
+  descriptionFormatted
   genres
   imprint
   links
   metaType
+  publicationRun
   publisher
   status
   summary
   title
+  totalIssues
   volume
   writers
+  year
 }
     `, {"fragmentName":"SeriesMetadataEditor"}) as unknown as TypedDocumentString<SeriesMetadataEditorFragment, unknown>;
 export const BookFileInformationFragmentDoc = new TypedDocumentString(`
@@ -6750,17 +6856,28 @@ export const UpdateSeriesMetadataDocument = new TypedDocumentString(`
   ageRating
   booktype
   characters
+  collects {
+    series
+    comicid
+    issueid
+    issues
+  }
+  comicImage
   comicid
+  descriptionFormatted
   genres
   imprint
   links
   metaType
+  publicationRun
   publisher
   status
   summary
   title
+  totalIssues
   volume
   writers
+  year
 }`) as unknown as TypedDocumentString<UpdateSeriesMetadataMutation, UpdateSeriesMetadataMutationVariables>;
 export const UseCoreEventDocument = new TypedDocumentString(`
     subscription UseCoreEvent {
@@ -7900,17 +8017,28 @@ export const SeriesSettingsSceneDocument = new TypedDocumentString(`
   ageRating
   booktype
   characters
+  collects {
+    series
+    comicid
+    issueid
+    issues
+  }
+  comicImage
   comicid
+  descriptionFormatted
   genres
   imprint
   links
   metaType
+  publicationRun
   publisher
   status
   summary
   title
+  totalIssues
   volume
   writers
+  year
 }
 fragment SeriesThumbnailSelector on Series {
   id

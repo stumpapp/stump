@@ -1,5 +1,5 @@
 use async_graphql::{ComplexObject, SimpleObject};
-use models::entity::series_metadata;
+use models::{entity::series_metadata, shared::series_metadata::CollectedItem};
 use stump_core::utils::serde::comma_separated_list_to_vec;
 
 #[derive(Clone, Debug, SimpleObject)]
@@ -23,6 +23,10 @@ impl SeriesMetadata {
 			.clone()
 			.map(comma_separated_list_to_vec)
 			.unwrap_or_default()
+	}
+
+	async fn collects(&self) -> Vec<CollectedItem> {
+		self.model.collects.clone().map(|c| c.0).unwrap_or_default()
 	}
 
 	async fn genres(&self) -> Vec<String> {

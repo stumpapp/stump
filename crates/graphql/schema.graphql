@@ -1469,14 +1469,14 @@ type Mutation {
 	uploadMediaThumbnail(id: ID!, file: Upload!): Media!
 	"""
 	Upload a series thumbnail from a base64-encoded image string.
-	This is an alternative to `uploadSeriesThumbnail` that accepts a base64 string
-	instead of a multipart file upload, which can be easier for some API clients.
+	Note: This was added specifically for Komf, which would have been annyoing to
+	implement multipart uploads for
 	"""
 	uploadSeriesThumbnailBase64(id: ID!, image: String!): Series!
 	"""
 	Upload a media thumbnail from a base64-encoded image string.
-	This is an alternative to `uploadMediaThumbnail` that accepts a base64 string
-	instead of a multipart file upload, which can be easier for some API clients.
+	Note: This was added specifically for Komf, which would have been annyoing to
+	implement multipart uploads for
 	"""
 	uploadMediaThumbnailBase64(id: ID!, image: String!): Media!
 	deleteLoginActivity: Int!

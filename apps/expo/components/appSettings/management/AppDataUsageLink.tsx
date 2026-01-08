@@ -26,7 +26,6 @@ export default function AppDataUsageLink() {
 		<AppSettingsRow
 			icon={HardDrive}
 			title="Data usage"
-			divide={false}
 			isLink
 			onPress={() =>
 				router.push({

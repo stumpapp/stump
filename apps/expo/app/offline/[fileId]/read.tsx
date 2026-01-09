@@ -444,10 +444,15 @@ const buildBook = (
 		.otherwise(() => undefined)
 
 	const bookmarks = bookmarkRecords.map((b) => ({
-		...b,
-		chapterTitle: b.chapterTitle ?? '',
-		locations: bookmarkLocations.safeParse(b.locations).data,
+		id: b.id,
+		epubcfi: b.epubcfi,
 		mediaId: b.bookId,
+		previewContent: b.previewContent,
+		locator: {
+			chapterTitle: b.chapterTitle ?? '',
+			href: b.href,
+			locations: bookmarkLocations.safeParse(b.locations).data,
+		},
 	}))
 
 	return {

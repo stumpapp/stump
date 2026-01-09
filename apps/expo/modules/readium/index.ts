@@ -1,4 +1,4 @@
-import { ReadiumLocator as StumpReadiumLocator } from '@stump/graphql'
+import { ReadiumLocation, ReadiumLocator as StumpReadiumLocator } from '@stump/graphql'
 import omit from 'lodash/omit'
 
 import { BookmarkRef } from '~/components/book/reader/image/context'
@@ -11,7 +11,7 @@ export * from './src/Readium.types'
 export { default } from './src/ReadiumModule'
 export { default as ReadiumView } from './src/ReadiumView'
 
-type GraphQLBookmark = {
+type StumpBookmark = {
 	id: string
 	epubcfi?: string | null
 	mediaId: string
@@ -19,14 +19,7 @@ type GraphQLBookmark = {
 	locator?: {
 		chapterTitle?: string | null
 		href: string
-		locations?: {
-			fragments?: string[] | null
-			position?: number | null
-			progression?: string | number | null
-			totalProgression?: string | number | null
-			cssSelector?: string | null
-			partialCfi?: string | null
-		} | null
+		locations?: ReadiumLocation | null
 	} | null
 }
 
@@ -36,22 +29,27 @@ const safeNumber = (value: unknown): number | null => {
 	return Number.isNaN(num) ? null : num
 }
 
-export function intoBookmarkRef(bookmark: GraphQLBookmark): BookmarkRef {
+const normalizeLocations = (
+	locations: ReadiumLocation | null | undefined,
+): BookmarkRef['locations'] => {
+	if (!locations) return null
+	return {
+		fragments: locations.fragments,
+		position: locations.position,
+		progression: safeNumber(locations.progression),
+		totalProgression: safeNumber(locations.totalProgression),
+		cssSelector: locations.cssSelector,
+		partialCfi: locations.partialCfi,
+	}
+}
+
+export function intoBookmarkRef(bookmark: StumpBookmark): BookmarkRef {
 	return {
 		id: bookmark.id,
 		epubcfi: bookmark.epubcfi,
 		href: bookmark.locator?.href ?? '',
 		chapterTitle: bookmark.locator?.chapterTitle ?? '',
-		locations: bookmark.locator?.locations
-			? {
-					fragments: bookmark.locator.locations.fragments,
-					position: bookmark.locator.locations.position,
-					progression: safeNumber(bookmark.locator.locations.progression),
-					totalProgression: safeNumber(bookmark.locator.locations.totalProgression),
-					cssSelector: bookmark.locator.locations.cssSelector,
-					partialCfi: bookmark.locator.locations.partialCfi,
-				}
-			: null,
+		locations: normalizeLocations(bookmark.locator?.locations),
 		previewContent: bookmark.previewContent,
 		mediaId: bookmark.mediaId,
 	}

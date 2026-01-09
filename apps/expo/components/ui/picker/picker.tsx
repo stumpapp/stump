@@ -1,6 +1,7 @@
 import { ChevronDown } from 'lucide-react-native'
 import { View } from 'react-native'
 
+import { usePortalHost } from '~/lib/PortalHostContext'
 import { cn } from '~/lib/utils'
 
 import { Button } from '../button'
@@ -23,6 +24,7 @@ export function Picker<T extends string = string>({
 	placeholder = 'Select...',
 	className,
 }: PickerProps<T>) {
+	const portalHost = usePortalHost()
 	const selectedOption = options.find((option) => option.value === value)
 
 	return (
@@ -41,7 +43,7 @@ export function Picker<T extends string = string>({
 				</Button>
 			</DropdownMenuTrigger>
 
-			<DropdownMenuContent align="end" className="min-w-[150px]">
+			<DropdownMenuContent align="end" className="min-w-[150px]" portalHost={portalHost}>
 				<DropdownMenuRadioGroup value={value} onValueChange={(v) => onValueChange(v as T)}>
 					{options.map((option) => (
 						<DropdownMenuRadioItem key={option.value} value={option.value}>

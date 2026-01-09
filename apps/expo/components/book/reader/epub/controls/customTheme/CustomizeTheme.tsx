@@ -1,8 +1,8 @@
 import { Fragment, useCallback, useEffect, useState } from 'react'
-import { Alert, ScrollView, View } from 'react-native'
+import { Alert, ScrollView } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { Input, Text } from '~/components/ui'
+import { Input } from '~/components/ui'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { resolveTheme, resolveThemeName, StoredConfig, useEpubThemesStore } from '~/stores/epub'
 
@@ -28,15 +28,12 @@ export default function CustomizeTheme({ onCancel, mode = 'edit', theme: namedTh
 	const { colorScheme } = useColorScheme()
 	const insets = useSafeAreaInsets()
 
-	const { themes, selectedTheme, addTheme, selectTheme, deleteTheme } = useEpubThemesStore(
-		(store) => ({
-			themes: store.themes,
-			selectedTheme: store.selectedTheme,
-			addTheme: store.addTheme,
-			selectTheme: store.selectTheme,
-			deleteTheme: store.deleteTheme,
-		}),
-	)
+	const { themes, selectedTheme, addTheme, selectTheme } = useEpubThemesStore((store) => ({
+		themes: store.themes,
+		selectedTheme: store.selectedTheme,
+		addTheme: store.addTheme,
+		selectTheme: store.selectTheme,
+	}))
 
 	const isCreateMode = mode === 'create'
 	const themeToEdit = namedTheme || selectedTheme || ''
@@ -64,6 +61,7 @@ export default function CustomizeTheme({ onCancel, mode = 'edit', theme: namedTh
 			setCustomTheme(currentTheme)
 			setName(currentName)
 		},
+		// eslint-disable-next-line react-compiler/react-compiler
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[themeToEdit, mode],
 	)
@@ -132,28 +130,6 @@ export default function CustomizeTheme({ onCancel, mode = 'edit', theme: namedTh
 		onCancel,
 	])
 
-	const handleDelete = useCallback(() => {
-		const currentName = resolveThemeName(themes, themeToEdit, colorScheme)
-
-		if (DEFAULT_THEMES.includes(currentName)) {
-			Alert.alert('Error', 'Cannot delete default themes')
-			return
-		}
-
-		Alert.alert('Delete Theme', `Are you sure you want to delete "${currentName}"?`, [
-			{ text: 'Cancel', style: 'cancel' },
-			{
-				text: 'Delete',
-				style: 'destructive',
-				onPress: () => {
-					deleteTheme(currentName)
-					selectTheme(colorScheme === 'dark' ? 'Dark' : 'Light')
-					onCancel()
-				},
-			},
-		])
-	}, [themes, themeToEdit, colorScheme, deleteTheme, selectTheme, onCancel])
-
 	return (
 		<Fragment>
 			<ThemeHeaderPreview customTheme={customTheme} onCancel={handleCancel} onSaved={handleSave} />
@@ -161,26 +137,17 @@ export default function CustomizeTheme({ onCancel, mode = 'edit', theme: namedTh
 			<ScrollView
 				contentContainerStyle={{
 					paddingHorizontal: 16,
+					paddingTop: 16,
 					paddingBottom: insets.bottom + 16,
 					gap: 16,
 				}}
 			>
-				<View className="gap-2">
-					<Input
-						value={name}
-						onChangeText={setName}
-						placeholder="Theme name"
-						editable={isCreateMode || !isDefaultTheme}
-					/>
-
-					{!isDefaultTheme && !isCreateMode && (
-						<View className="flex-row justify-end">
-							<Text className="text-destructive" onPress={handleDelete}>
-								Delete Theme
-							</Text>
-						</View>
-					)}
-				</View>
+				<Input
+					value={name}
+					onChangeText={setName}
+					placeholder="Theme name"
+					editable={isCreateMode || !isDefaultTheme}
+				/>
 
 				<ColorPickerRow
 					label="Background"

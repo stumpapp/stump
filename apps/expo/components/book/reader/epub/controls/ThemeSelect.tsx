@@ -1,6 +1,6 @@
 import { Plus } from 'lucide-react-native'
-import { useMemo } from 'react'
-import { Pressable, ScrollView, View } from 'react-native'
+import { useCallback, useMemo } from 'react'
+import { Alert, Pressable, ScrollView, View } from 'react-native'
 import * as ContextMenu from 'zeego/context-menu'
 
 import { Text } from '~/components/ui'
@@ -24,7 +24,6 @@ export default function ThemeSelect() {
 		[themes, selectedTheme, colorScheme],
 	)
 
-	// TODO: Grid
 	return (
 		<ScrollView
 			horizontal
@@ -36,7 +35,12 @@ export default function ThemeSelect() {
 		>
 			{Object.entries(themes).map(([name, config]) => (
 				<View key={name} className="items-center">
-					<ThemePreview name={name} config={config} isActive={activeTheme === name} />
+					<ThemePreview
+						name={name}
+						config={config}
+						isActive={activeTheme === name}
+						themeNames={Object.keys(themes)}
+					/>
 				</View>
 			))}
 
@@ -49,12 +53,49 @@ type ThemePreviewProps = {
 	name: string
 	config: EPUBReaderThemeConfig
 	isActive?: boolean
+	themeNames: string[]
 }
 
-// TODO: Take in border?
-const ThemePreview = ({ name, config, isActive }: ThemePreviewProps) => {
-	const onSelect = useEpubThemesStore((store) => store.selectTheme)
+const ThemePreview = ({ name, config, isActive, themeNames }: ThemePreviewProps) => {
+	const { onSelect, deleteTheme, addTheme } = useEpubThemesStore((store) => ({
+		onSelect: store.selectTheme,
+		deleteTheme: store.deleteTheme,
+		addTheme: store.addTheme,
+	}))
 	const openCustomizeTheme = useEpubSheetStore((state) => state.openCustomizeTheme)
+
+	const handleDuplicate = useCallback(() => {
+		const newName = `${name} copy`
+		addTheme(newName, config)
+		onSelect(newName)
+	}, [name, config, addTheme, onSelect])
+
+	const handleDelete = useCallback(() => {
+		if (themeNames.length <= 1) {
+			Alert.alert('Error', 'You must have at least one theme')
+			return
+		}
+
+		Alert.alert('Delete Theme', `Are you sure you want to delete "${name}"?`, [
+			{ text: 'Cancel', style: 'cancel' },
+			{
+				text: 'Delete',
+				style: 'destructive',
+				onPress: () => {
+					if (isActive) {
+						const currentIndex = themeNames.indexOf(name)
+						const nextTheme =
+							themeNames[currentIndex + 1] ?? themeNames[currentIndex - 1] ?? themeNames[0]
+						// Note: This shouldn't really happen
+						if (nextTheme) {
+							onSelect(nextTheme)
+						}
+					}
+					deleteTheme(name)
+				},
+			},
+		])
+	}, [themeNames, name, deleteTheme, isActive, onSelect])
 
 	return (
 		<ContextMenu.Root>
@@ -86,19 +127,18 @@ const ThemePreview = ({ name, config, isActive }: ThemePreviewProps) => {
 					<ContextMenu.ItemTitle>Edit Theme</ContextMenu.ItemTitle>
 				</ContextMenu.Item>
 
-				{/* TODO: Add duplicate and delete? */}
-				{/* <ContextMenu.Item key="duplicate">
+				<ContextMenu.Item key="duplicate" onSelect={handleDuplicate}>
 					<ContextMenu.ItemIcon
-						ios={{ name: 'plus.square.fill.on.square.fill' }}
+						ios={{ name: 'plus.square.on.square' }}
 						androidIconName="ic_menu_add"
 					/>
 					<ContextMenu.ItemTitle>Duplicate</ContextMenu.ItemTitle>
 				</ContextMenu.Item>
 
-				<ContextMenu.Item key="delete" destructive>
+				<ContextMenu.Item key="delete" onSelect={handleDelete} destructive>
 					<ContextMenu.ItemIcon ios={{ name: 'trash' }} androidIconName="ic_menu_delete" />
 					<ContextMenu.ItemTitle>Delete</ContextMenu.ItemTitle>
-				</ContextMenu.Item> */}
+				</ContextMenu.Item>
 			</ContextMenu.Content>
 		</ContextMenu.Root>
 	)

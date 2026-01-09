@@ -50,6 +50,10 @@ export function ColorPickerRow({ label, value, onChange }: Props) {
 				detents={[0.5]}
 				cornerRadius={24}
 				grabber
+				// Note: Complex and conflicting gesture handling if not disabled,
+				// I tried a nested gesture handler but a bit yucky. For now Android can
+				// just tap the buttons to dismiss
+				dismissible={false}
 				backgroundColor={colors.background.DEFAULT}
 				grabberOptions={{
 					color: colorScheme === 'dark' ? '#333' : '#ccc',

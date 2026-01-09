@@ -192,6 +192,7 @@ export class DownloadRepository {
 						bookMetadata: newFile.bookMetadata,
 						seriesId: newFile.seriesId,
 						pages: newFile.pages,
+						toc: newFile.toc,
 					},
 				})
 				.returning()

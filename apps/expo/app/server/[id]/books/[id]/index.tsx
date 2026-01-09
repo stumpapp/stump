@@ -116,6 +116,9 @@ const query = graphql(`
 					thumbhash
 				}
 			}
+			ebook {
+				toc
+			}
 		}
 	}
 `)
@@ -173,6 +176,7 @@ export default function Screen() {
 			bookName: book.resolvedName,
 			readProgress: book.readProgress,
 			thumbnailMeta: book.thumbnail.metadata || undefined,
+			toc: book.ebook?.toc,
 		})
 	}, [isDownloaded, downloadBook, book, isDownloading])
 

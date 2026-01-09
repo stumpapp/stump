@@ -14,7 +14,6 @@ export default function ReaderSettingsLink() {
 			title="Settings"
 			onPress={() => router.push('/settings/reader')}
 			isLink
-			divide={false}
 		>
 			<View className="flex flex-row items-center gap-2">
 				<Icon as={ChevronRight} size={20} className="text-foreground-muted" />

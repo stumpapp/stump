@@ -6,6 +6,7 @@ use std::{
 use async_graphql::{
 	Context, Error, InputObject, Object, Result, Upload, UploadValue, ID,
 };
+use base64::{engine::general_purpose::STANDARD as BASE64, Engine};
 use models::{
 	entity::{library, library_config, media, series},
 	shared::enums::UserPermission,
@@ -417,6 +418,161 @@ impl UploadMutation {
 
 		Ok(book.into())
 	}
+
+	/// Upload a series thumbnail from a base64-encoded image string.
+	/// Note: This was added specifically for Komf, which would have been annyoing to
+	/// implement multipart uploads for
+	#[graphql(
+		guard = "PermissionGuard::new(&[UserPermission::UploadFile, UserPermission::EditLibrary])"
+	)]
+	async fn upload_series_thumbnail_base64(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+		image: String,
+	) -> Result<Series> {
+		let AuthContext { user, .. } = ctx.data()?;
+		let core = ctx.data::<CoreContext>()?;
+
+		let series = series::ModelWithMetadata::find_for_user(user)
+			.filter(series::Column::Id.eq(id.to_string()))
+			.into_model::<series::ModelWithMetadata>()
+			.one(core.conn.as_ref())
+			.await?
+			.ok_or("Series not found")?;
+
+		let (image_buf, extension) =
+			decode_base64_image(&image, core.config.max_file_upload_size)?;
+
+		match remove_thumbnails(
+			&[series.series.id.clone()],
+			&core.config.get_thumbnails_dir(),
+		)
+		.await
+		{
+			Ok(count) => tracing::info!("Removed {} thumbnails!", count),
+			Err(e) => tracing::error!(
+				?e,
+				"Failed to remove existing series thumbnail before replacing!"
+			),
+		}
+
+		let path_buf =
+			place_thumbnail(&series.series.id, &extension, &image_buf, &core.config)
+				.await?;
+
+		tracing::debug!(?path_buf, "Placed series thumbnail from base64");
+
+		series::Entity::update_many()
+			.col_expr(
+				series::Column::ThumbnailPath,
+				Expr::value(Some(path_buf.to_string_lossy().to_string())),
+			)
+			.filter(series::Column::Id.eq(series.series.id.clone()))
+			.exec(core.conn.as_ref())
+			.await?;
+
+		let config = library_config::Entity::find()
+			.filter(
+				library_config::Column::LibraryId.eq(series.series.library_id.clone()),
+			)
+			.one(core.conn.as_ref())
+			.await?
+			.ok_or("Library config not found")?;
+		let force_regenerate = true;
+
+		if let Err(e) = core.enqueue_job(ThumbnailGenerationJob::new(
+			config.thumbnail_config.unwrap_or_default(),
+			ThumbnailGenerationJobParams::series(
+				vec![series.series.id.clone()],
+				force_regenerate,
+			),
+		)) {
+			tracing::error!(?e, "Failed to enqueue thumbnail generation job");
+		}
+
+		Ok(series.into())
+	}
+
+	/// Upload a media thumbnail from a base64-encoded image string.
+	/// Note: This was added specifically for Komf, which would have been annyoing to
+	/// implement multipart uploads for
+	#[graphql(
+		guard = "PermissionGuard::new(&[UserPermission::UploadFile, UserPermission::EditLibrary])"
+	)]
+	async fn upload_media_thumbnail_base64(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+		image: String,
+	) -> Result<Media> {
+		let AuthContext { user, .. } = ctx.data()?;
+		let core = ctx.data::<CoreContext>()?;
+
+		let book = media::ModelWithMetadata::find_for_user(user)
+			.filter(media::Column::Id.eq(id.to_string()))
+			.into_model::<media::ModelWithMetadata>()
+			.one(core.conn.as_ref())
+			.await?
+			.ok_or("Book not found")?;
+
+		let (image_buf, extension) =
+			decode_base64_image(&image, core.config.max_file_upload_size)?;
+
+		let removal_result = remove_thumbnails(
+			&[book.media.id.clone()],
+			&core.config.get_thumbnails_dir(),
+		)
+		.await;
+		match removal_result {
+			Ok(count) => tracing::info!("Removed {} thumbnails!", count),
+			Err(e) => tracing::error!(
+				?e,
+				"Failed to remove existing book thumbnail before replacing!"
+			),
+		}
+
+		let path_buf =
+			place_thumbnail(&book.media.id, &extension, &image_buf, &core.config).await?;
+
+		tracing::debug!(?path_buf, "Placed book thumbnail from base64");
+
+		media::Entity::update_many()
+			.col_expr(
+				media::Column::ThumbnailPath,
+				Expr::value(Some(path_buf.to_string_lossy().to_string())),
+			)
+			.filter(media::Column::Id.eq(book.media.id.clone()))
+			.exec(core.conn.as_ref())
+			.await?;
+
+		let config = library_config::Entity::find()
+			.filter(
+				library_config::Column::LibraryId.in_subquery(
+					Query::select()
+						.column(series::Column::LibraryId)
+						.from(series::Entity)
+						.and_where(series::Column::Id.eq(book.media.series_id.clone()))
+						.to_owned(),
+				),
+			)
+			.one(core.conn.as_ref())
+			.await?
+			.ok_or("Library config not found")?;
+		let force_regenerate = true;
+
+		if let Err(e) = core.enqueue_job(ThumbnailGenerationJob::new(
+			config.thumbnail_config.unwrap_or_default(),
+			ThumbnailGenerationJobParams::books(
+				vec![book.media.id.clone()],
+				force_regenerate,
+			),
+		)) {
+			tracing::error!(?e, "Failed to enqueue thumbnail generation job");
+		}
+
+		Ok(book.into())
+	}
 }
 
 fn enforce_max_size(value: &UploadValue, max_size: usize) -> Result<()> {
@@ -446,6 +602,52 @@ fn enforce_valid_content_type(value: &UploadValue) -> Result<()> {
 	}
 
 	Ok(())
+}
+
+/// Decode a base64-encoded image string and detect its file extension using magic bytes.
+/// Returns a tuple of (image bytes, extension string).
+fn decode_base64_image(image: &str, max_size: usize) -> Result<(Vec<u8>, String)> {
+	const ALLOWED_IMAGE_TYPES: &[(&str, &str)] = &[
+		("image/png", "png"),
+		("image/jpeg", "jpg"),
+		("image/webp", "webp"),
+		("image/gif", "gif"),
+		("image/heif", "heif"),
+		("image/jxl", "jxl"),
+		("image/avif", "avif"),
+	];
+
+	let image_buf = BASE64
+		.decode(image)
+		.map_err(|e| format!("Failed to decode base64 image: {e}"))?;
+
+	if image_buf.len() > max_size {
+		return Err(format!(
+			"Image size exceeds maximum upload size of {max_size} bytes"
+		)
+		.into());
+	}
+
+	let inferred =
+		infer::get(&image_buf).ok_or("Unable to detect image type from provided data")?;
+
+	let mime_type = inferred.mime_type();
+
+	let extension = ALLOWED_IMAGE_TYPES
+		.iter()
+		.find(|(mime, _)| *mime == mime_type)
+		.map(|(_, ext)| (*ext).to_string())
+		.ok_or_else(|| {
+			format!(
+				"Unsupported image type: {mime_type}. Allowed types are: {:?}",
+				ALLOWED_IMAGE_TYPES
+					.iter()
+					.map(|(mime, _)| *mime)
+					.collect::<Vec<_>>()
+			)
+		})?;
+
+	Ok((image_buf, extension))
 }
 
 /// A helper function to copy a tempfile from a multipart to a provided path

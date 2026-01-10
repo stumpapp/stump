@@ -41,17 +41,28 @@ const fragment = graphql(`
 		ageRating
 		booktype
 		characters
+		collects {
+			series
+			comicid
+			issueid
+			issues
+		}
+		comicImage
 		comicid
+		descriptionFormatted
 		genres
 		imprint
 		links
 		metaType
+		publicationRun
 		publisher
 		status
 		summary
 		title
+		totalIssues
 		volume
 		writers
+		year
 	}
 `)
 
@@ -112,7 +123,7 @@ export default function SeriesMetadataEditor({ seriesId, data }: Props) {
 				header: () => null,
 				cell: (info) =>
 					match(info.getValue())
-						.with(P.union('ageRating', 'volume', 'comicid'), (field) => (
+						.with(P.union('ageRating', 'volume', 'comicid', 'year', 'totalIssues'), (field) => (
 							<NumberCell binding={field} value={metadata?.[field]} />
 						))
 						.with('publisher', () => (

@@ -1,24 +1,36 @@
 use crate::{filesystem::FileError, utils::serde::age_rating_deserializer};
-use models::entity::series_metadata;
+use models::{
+	entity::series_metadata,
+	shared::series_metadata::{CollectedItem, CollectedItems},
+};
 use sea_orm::Set;
 use serde::{Deserialize, Serialize};
 use std::{fs::File, io::BufReader, path::Path};
 
+/// Represents the processed series metadata extracted from a few different sources,
+/// but primarily from the `series.json` file.
+/// See https://github.com/mylar3/mylar3/wiki/series.json-schema-%28version-1.0.1%29
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct ProcessedSeriesMetadata {
 	/// The type of series. ex: "comicSeries"
 	#[serde(alias = "type")]
 	pub _type: Option<String>,
 	/// The title of the series, renamed from 'name' to keep consistency with the rest of the models
+	#[serde(alias = "name")]
 	pub title: Option<String>,
-	/// The associated series' description, renamed from 'description' to keep consistency with the rest of the models
+	/// The associated series' description (plain text, no formatting)
+	#[serde(alias = "description_text")]
 	pub summary: Option<String>,
+	/// The formatted description with line breaks, carriage returns, etc.
+	pub description_formatted: Option<String>,
 	/// The publisher of the associated series
 	pub publisher: Option<String>,
 	/// The name of the imprint while under the publisher
 	pub imprint: Option<String>,
 	/// The ComicVine id of the associated series
 	pub comicid: Option<i32>,
+	/// The year the series started (publication start)
+	pub year: Option<i32>,
 	/// The volume of the series in relation to other titles (this can be either numerical or the series year)
 	pub volume: Option<i32>,
 	/// The booktype of the series, e.g. Print, OneShot, TPB or GN
@@ -26,6 +38,15 @@ pub struct ProcessedSeriesMetadata {
 	/// The age rating of the associated series
 	#[serde(default, deserialize_with = "age_rating_deserializer")]
 	pub age_rating: Option<i32>,
+	/// TPB or GN may collect various single issues/series
+	pub collects: Option<Vec<CollectedItem>>,
+	/// Image URL pointing to the series cover (usually issue #1)
+	#[serde(alias = "comicImage")]
+	pub comic_image: Option<String>,
+	/// Total issues in the series up until this point in time
+	pub total_issues: Option<i32>,
+	/// Start and end of the series in 'Month Year - Month Year' format
+	pub publication_run: Option<String>,
 	/// The status of the associated series, e.g. Continuing, Ended
 	pub status: Option<String>,
 }
@@ -58,12 +79,18 @@ impl ProcessedSeriesMetadata {
 			meta_type: Set(self._type),
 			title: Set(self.title),
 			summary: Set(self.summary),
+			description_formatted: Set(self.description_formatted),
 			publisher: Set(self.publisher),
 			imprint: Set(self.imprint),
 			comicid: Set(self.comicid),
+			year: Set(self.year),
 			volume: Set(self.volume),
 			booktype: Set(self.booktype),
 			age_rating: Set(self.age_rating),
+			collects: Set(self.collects.map(CollectedItems::from)),
+			comic_image: Set(self.comic_image),
+			total_issues: Set(self.total_issues),
+			publication_run: Set(self.publication_run),
 			status: Set(self.status),
 			..Default::default()
 		}

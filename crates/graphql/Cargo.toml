@@ -12,6 +12,7 @@ alphanumeric-sort.workspace = true
 async-graphql.workspace = true
 async-stream.workspace = true
 axum.workspace = true
+base64.workspace = true
 chrono.workspace = true
 clap.workspace = true
 epub.workspace = true

@@ -224,6 +224,36 @@ type CleanLibraryResponse {
 	isEmpty: Boolean!
 }
 
+"""
+Represents a collected issue/series within a TPB or GN
+See https://github.com/mylar3/mylar3/wiki/series.json-schema-%28version-1.0.1%29
+"""
+type CollectedItem {
+	"The title of the series"
+	series: String
+	"CV ComicID of series"
+	comicid: String
+	"CV IssueID of single issue (not valid if multiple issues)"
+	issueid: String
+	"Listing of issue numbers present pertaining to related comicid in collection"
+	issues: String
+}
+
+"""
+Represents a collected issue/series within a TPB or GN
+See https://github.com/mylar3/mylar3/wiki/series.json-schema-%28version-1.0.1%29
+"""
+input CollectedItemInput {
+	"The title of the series"
+	series: String
+	"CV ComicID of series"
+	comicid: String
+	"CV IssueID of single issue (not valid if multiple issues)"
+	issueid: String
+	"Listing of issue numbers present pertaining to related comicid in collection"
+	issues: String
+}
+
 input ComputedFilterReadingStatus @oneOf {
 	is: ReadingStatus
 	isNot: ReadingStatus
@@ -296,11 +326,13 @@ type CreatedManySeries {
 type CreatedMedia {
 	id: String!
 	seriesId: String!
+	libraryId: String!
 }
 
 type CreatedOrUpdatedManyMedia {
 	count: Int!
 	seriesId: String!
+	libraryId: String!
 }
 
 "A simple cursor-based pagination input object"
@@ -1464,6 +1496,18 @@ type Mutation {
 	uploadLibraryThumbnail(id: ID!, file: Upload!): Library!
 	uploadSeriesThumbnail(id: ID!, file: Upload!): Series!
 	uploadMediaThumbnail(id: ID!, file: Upload!): Media!
+	"""
+	Upload a series thumbnail from a base64-encoded image string.
+	Note: This was added specifically for Komf, which would have been annyoing to
+	implement multipart uploads for
+	"""
+	uploadSeriesThumbnailBase64(id: ID!, image: String!): Series!
+	"""
+	Upload a media thumbnail from a base64-encoded image string.
+	Note: This was added specifically for Komf, which would have been annyoing to
+	implement multipart uploads for
+	"""
+	uploadMediaThumbnailBase64(id: ID!, image: String!): Media!
 	deleteLoginActivity: Int!
 	createUser(input: CreateUserInput!): User!
 	updateViewer(input: UpdateUserInput!): User!
@@ -1582,6 +1626,8 @@ type OffsetPaginationInfo {
 	logic accordingly.
 	"""
 	totalPages: Int!
+	"The total number of items available"
+	totalItems: Int!
 	"The current page, zero-indexed."
 	currentPage: Int!
 	"The number of elements per page."
@@ -2039,17 +2085,41 @@ input SeriesFilterInput {
 
 type SeriesMetadata {
 	seriesId: String!
+	"Age rating of the series"
 	ageRating: Int
+	"Booktype of the series (Print, OneShot, TPB or GN)"
 	booktype: String
+	"ComicVine comicid"
 	comicid: Int
+	"Image URL pointing to CV image of series cover (usually issue #1)"
+	comicImage: String
+	"Description (summary) with line breaks, carriage returns, etc."
+	descriptionFormatted: String
+	"Name of imprint while under publisher"
 	imprint: String
+	"Type of series (e.g. \"comicSeries\")"
 	metaType: String
+	"Start and end of the series in \"Month Year - Month Year\" format. If series status is Continuing, the end value is \"Present\""
+	publicationRun: String
+	"Publisher name"
 	publisher: String
+	"Either \"Continuing\" or \"Ended\""
 	status: String
+	"""
+	Description taken from source (un-edited) with no line breaks, carriage returns, etc.
+	Stump calls this 'summary' to align with other models, but is derived from 'description_text' in series.json
+	"""
 	summary: String
+	"Title of series"
 	title: String
+	"Total issues in the series up until this point in time"
+	totalIssues: Int
+	"Volume of the series in relation to other titles (this can be either numerical or the series year)"
 	volume: Int
+	"Year the series started (publication start)"
+	year: Int
 	characters: [String!]!
+	collects: [CollectedItem!]!
 	genres: [String!]!
 	links: [String!]!
 	writers: [String!]!
@@ -2075,17 +2145,23 @@ input SeriesMetadataInput {
 	ageRating: Int
 	booktype: String
 	characters: [String!]
+	collects: [CollectedItemInput!]
+	comicImage: String
 	comicid: Int
+	descriptionFormatted: String
 	genres: [String!]
 	imprint: String
 	links: [String!]
 	metaType: String
+	publicationRun: String
 	publisher: String
 	status: String
 	summary: String
 	title: String
+	totalIssues: Int
 	volume: Int
 	writers: [String!]
+	year: Int
 }
 
 enum SeriesMetadataModelOrdering {
@@ -2093,17 +2169,23 @@ enum SeriesMetadataModelOrdering {
 	AGE_RATING
 	CHARACTERS
 	BOOKTYPE
+	COLLECTS
 	COMICID
+	COMIC_IMAGE
+	DESCRIPTION_FORMATTED
 	GENRES
 	IMPRINT
 	LINKS
 	META_TYPE
+	PUBLICATION_RUN
 	PUBLISHER
 	STATUS
 	SUMMARY
 	TITLE
+	TOTAL_ISSUES
 	VOLUME
 	WRITERS
+	YEAR
 }
 
 input SeriesMetadataOrderByField {

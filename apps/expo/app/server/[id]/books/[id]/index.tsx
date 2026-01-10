@@ -403,7 +403,7 @@ export default function Screen() {
 					{progression && (
 						<View className="flex flex-row justify-around">
 							{progression.page && <InfoStat label="Page" value={progression.page.toString()} />}
-							{renderEpubLocator(progression)}
+							{!progression.page && renderEpubLocator(progression)}
 							{renderPercentage(progression)}
 							{renderReadTime(progression)}
 						</View>

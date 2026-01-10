@@ -209,6 +209,8 @@ pub struct OffsetPaginationInfo {
 	/// so a client requesting zero-based pagination will need to adjust their pagination
 	/// logic accordingly.
 	pub total_pages: u64,
+	/// The total number of items available
+	pub total_items: u64,
 	/// The current page, zero-indexed.
 	pub current_page: u64,
 	/// The number of elements per page.
@@ -236,6 +238,7 @@ impl OffsetPaginationInfo {
 			total_pages,
 			page_offset,
 			zero_based,
+			total_items: count,
 		}
 	}
 
@@ -246,6 +249,7 @@ impl OffsetPaginationInfo {
 			total_pages: 1,
 			page_offset: 0,
 			zero_based: false,
+			total_items: count,
 		}
 	}
 }

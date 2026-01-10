@@ -77,6 +77,8 @@ export const SeriesMetadataKeys: SeriesMetadataField[] = [
 	'summary',
 	'comicid',
 	'volume',
+	'year',
+	'totalIssues',
 	'publisher',
 	'booktype',
 	'ageRating',
@@ -87,4 +89,7 @@ export const SeriesMetadataKeys: SeriesMetadataField[] = [
 	'links',
 	'metaType',
 	'status',
+	'publicationRun',
+	'comicImage',
+	'descriptionFormatted',
 ]

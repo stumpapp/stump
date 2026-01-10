@@ -182,10 +182,10 @@ const defaultThemes: Record<string, EPUBReaderThemeConfig> = {
 			foreground: COLORS.dark.foreground.DEFAULT,
 		},
 	},
-	Sepia: {
+	Papyrus: {
 		colors: {
-			background: '#F5E9D3',
-			foreground: '#5B4636',
+			background: '#e7d3b5',
+			foreground: '#423328',
 		},
 	},
 }

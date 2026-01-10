@@ -6,6 +6,7 @@ import { useDisplay } from '~/lib/hooks'
 type Params = {
 	horizontalGap?: number
 	padding?: number
+	numColumns?: number
 }
 
 const defaultParams = {
@@ -18,10 +19,13 @@ export function useGridItemSize(params: Params = {}) {
 
 	const insets = useSafeAreaInsets()
 
-	const numColumns = useMemo(
-		() => (isLandscapeTablet ? 6 : isTablet ? 4 : 2),
-		[isTablet, isLandscapeTablet],
-	)
+	const numColumns = useMemo(() => {
+		if (params.numColumns) {
+			return params.numColumns
+		} else {
+			return isLandscapeTablet ? 6 : isTablet ? 4 : 2
+		}
+	}, [isTablet, isLandscapeTablet, params.numColumns])
 	const availableSpace = width - insets.left - insets.right
 
 	const { horizontalGap, padding } = { ...defaultParams, ...params }

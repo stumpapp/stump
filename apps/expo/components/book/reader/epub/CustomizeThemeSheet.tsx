@@ -29,6 +29,7 @@ export default function CustomizeThemeSheet() {
 			detents={[1]}
 			cornerRadius={24}
 			grabber
+			scrollable
 			backgroundColor={IS_IOS_24_PLUS ? undefined : colors.background.DEFAULT}
 			grabberOptions={{
 				color: colorScheme === 'dark' ? '#333' : '#ccc',

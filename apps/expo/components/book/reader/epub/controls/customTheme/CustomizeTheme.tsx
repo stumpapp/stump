@@ -1,13 +1,17 @@
 import { Fragment, useCallback, useEffect, useState } from 'react'
-import { Alert, ScrollView } from 'react-native'
+import { Alert, Pressable, ScrollView, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { Input } from '~/components/ui'
+import { useGridItemSize } from '~/components/grid/useGridItemSize'
+import { Input, Text } from '~/components/ui'
 import { useColorScheme } from '~/lib/useColorScheme'
+import { cn } from '~/lib/utils'
+import { EPUBReaderThemeConfig } from '~/modules/readium'
 import { resolveTheme, resolveThemeName, StoredConfig, useEpubThemesStore } from '~/stores/epub'
 
 import { ColorPickerRow } from './colorPickerRow/ColorPickerRow'
 import { ThemeHeaderPreview } from './ThemeHeaderPreview'
+import { ThemePreview } from './ThemePreview'
 
 type Props = {
 	onCancel: () => void
@@ -130,6 +134,14 @@ export default function CustomizeTheme({ onCancel, mode = 'edit', theme: namedTh
 		onCancel,
 	])
 
+	const applyPremadeTheme = (theme: PremadeTheme) => {
+		setName(theme.name)
+		setCustomTheme({ colors: theme.colors })
+	}
+
+	// gap-2 = 7px
+	const { itemWidth } = useGridItemSize({ numColumns: 4, horizontalGap: 7, padding: 32 })
+
 	return (
 		<Fragment>
 			<ThemeHeaderPreview customTheme={customTheme} onCancel={handleCancel} onSaved={handleSave} />
@@ -160,7 +172,50 @@ export default function CustomizeTheme({ onCancel, mode = 'edit', theme: namedTh
 					value={customTheme.colors?.foreground ?? '#000000'}
 					onChange={onChangeForeground}
 				/>
+
+				<View className="h-px bg-black/10 dark:bg-white/10" />
+
+				<Text className="text-xl">Premade themes</Text>
+				<View className="flex-row flex-wrap gap-2">
+					{PREMADE_THEMES.map((theme) => (
+						<Pressable key={theme.name} onPress={() => applyPremadeTheme(theme)}>
+							{({ pressed }) => (
+								<ThemePreview
+									name={theme.name}
+									theme={theme}
+									className={cn(pressed && 'opacity-80')}
+									style={{ width: itemWidth }}
+								/>
+							)}
+						</Pressable>
+					))}
+				</View>
 			</ScrollView>
 		</Fragment>
 	)
 }
+
+type PremadeTheme = EPUBReaderThemeConfig & { name: string }
+
+const PREMADE_THEMES: PremadeTheme[] = [
+	// Cools
+	{ colors: { background: '#ffffff', foreground: '#000000' }, name: 'Light' },
+	{ colors: { background: '#eeeeee', foreground: '#131111' }, name: 'Paper' },
+	{ colors: { background: '#4a4a4c', foreground: '#e5e5e8' }, name: 'Slate' },
+	{ colors: { background: '#212122', foreground: '#f5f5f8' }, name: 'Ink' },
+	// Neutrals
+	{ colors: { background: '#000000', foreground: '#f5f3ef' }, name: 'Dark' },
+	{ colors: { background: '#131110', foreground: '#f5f3ef' }, name: 'Smoke' },
+	{ colors: { background: '#292724', foreground: '#f5f3ef' }, name: 'Charcoal' },
+	{ colors: { background: '#44413c', foreground: '#f5f3ef' }, name: 'Stone' },
+	// Naturals
+	{ colors: { background: '#f4e8d2', foreground: '#5b4636' }, name: 'Parchment' },
+	{ colors: { background: '#e7d3b5', foreground: '#423328' }, name: 'Papyrus' },
+	{ colors: { background: '#dabd98', foreground: '#352920' }, name: 'Sepia' },
+	{ colors: { background: '#76634a', foreground: '#fff6e8' }, name: 'Leather' },
+	// Woods
+	{ colors: { background: '#433b2d', foreground: '#e8dbc7' }, name: 'Olive' },
+	{ colors: { background: '#4b3b2b', foreground: '#e2d8c8' }, name: 'Cedar' },
+	{ colors: { background: '#312923', foreground: '#ebe1d2' }, name: 'Walnut' },
+	{ colors: { background: '#382929', foreground: '#f3e9da' }, name: 'Mahogany' },
+]

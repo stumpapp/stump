@@ -73,10 +73,13 @@ export default function RootLayout() {
 	const colors = useColors()
 	const insets = useSafeAreaInsets()
 
-	const { performanceMonitor, animationEnabled } = usePreferencesStore((state) => ({
-		animationEnabled: !state.reduceAnimations,
-		performanceMonitor: state.performanceMonitor,
-	}))
+	const { performanceMonitor, animationEnabled, disableDismissGesture } = usePreferencesStore(
+		(state) => ({
+			animationEnabled: !state.reduceAnimations,
+			performanceMonitor: state.performanceMonitor,
+			disableDismissGesture: state.disableDismissGesture,
+		}),
+	)
 
 	useIsomorphicLayoutEffect(() => {
 		if (hasMounted.current) {
@@ -199,6 +202,8 @@ export default function RootLayout() {
 									title: '',
 									animation: animationEnabled ? 'default' : 'none',
 									autoHideHomeIndicator: shouldHideStatusBar,
+									presentation:
+										disableDismissGesture && Platform.OS === 'ios' ? 'fullScreenModal' : undefined,
 									contentStyle: {
 										backgroundColor: colors.background.DEFAULT,
 									},

@@ -785,10 +785,10 @@
 			"writers": "Writers",
 			"year": "Year",
 			"metaType": "Type",
-			"imprint":"Imprint",
+			"imprint": "Imprint",
 			"comicid": "Comic ID",
-			"booktype":"Book type",
-			"status":"Status"
+			"booktype": "Book type",
+			"status": "Status"
 		},
 		"addFields": {
 			"description": "Add each addition on its own line"
@@ -1581,7 +1581,7 @@
 					"nonStableChannel": {
 						"title": "You are running a non-stable build of Stump",
 						"description": [
-							"It looks like you are running the", 
+							"It looks like you are running the",
 							"build channel"
 						]
 					}

@@ -1,5 +1,6 @@
-import { Alert } from '@stump/components'
+import { Alert, AlertDescription } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
+import { AlertTriangle } from 'lucide-react'
 
 // TODO: lock down access to CoCreator?
 export default function UserAccessManager() {
@@ -7,8 +8,9 @@ export default function UserAccessManager() {
 
 	return (
 		<div>
-			<Alert level="info" icon="warning">
-				<Alert.Content>{t(getKey('disclaimer'))}</Alert.Content>
+			<Alert variant="info">
+				<AlertTriangle />
+				<AlertDescription>{t(getKey('disclaimer'))}</AlertDescription>
 			</Alert>
 		</div>
 	)

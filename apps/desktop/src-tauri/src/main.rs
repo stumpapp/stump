@@ -15,8 +15,9 @@ use store::AppStore;
 use state::AppState;
 
 use commands::{
-	clear_credential_store, delete_api_token, get_api_token, get_credential_store_state,
-	get_current_server, init_credential_store, set_api_token, set_discord_presence,
+	clear_credential_store, create_server_entry, delete_credentials, delete_tokens,
+	get_credential_store_state, get_credentials, get_current_server, get_tokens,
+	init_credential_store, set_credentials, set_discord_presence, set_tokens,
 	set_use_discord_connection,
 };
 
@@ -70,63 +71,16 @@ fn main() {
 			set_discord_presence,
 			get_current_server,
 			init_credential_store,
-			get_api_token,
-			set_api_token,
-			delete_api_token,
+			get_credentials,
+			set_credentials,
+			delete_credentials,
+			get_tokens,
+			set_tokens,
+			delete_tokens,
 			clear_credential_store,
-			get_credential_store_state
+			get_credential_store_state,
+			create_server_entry
 		])
 		.run(tauri::generate_context!())
 		.expect("error while running tauri application");
-}
-
-#[allow(unused_imports)]
-mod tests {
-	use std::{fs::File, io::Write, path::PathBuf};
-
-	use specta::{
-		ts::{export, BigIntExportBehavior, ExportConfiguration, TsExportError},
-		NamedType,
-	};
-
-	use crate::store::{app_store::*, saved_server::*, secure_store::*};
-
-	#[allow(dead_code)]
-	fn ts_export<T>() -> Result<String, TsExportError>
-	where
-		T: NamedType,
-	{
-		export::<T>(&ExportConfiguration::new().bigint(BigIntExportBehavior::Number))
-	}
-
-	#[test]
-	#[ignore]
-	fn codegen() -> Result<(), Box<dyn std::error::Error>> {
-		let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-			.join("../../../packages/sdk/src/types")
-			.join("generated.ts");
-
-		if !path.exists() {
-			panic!(
-				"Please run `cargo run --package codegen` first to generate the types"
-			);
-		}
-
-		println!(
-			"Please ensure to only generate types using `cargo run --package codegen`"
-		);
-
-		let mut file = std::fs::OpenOptions::new().append(true).open(path)?;
-
-		file.write_all(b"// DESKTOP TYPE GENERATION\n\n")?;
-
-		file.write_all(format!("{}\n\n", ts_export::<SavedServer>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<AppStore>()?).as_bytes())?;
-
-		file.write_all(
-			format!("{}\n\n", ts_export::<CredentialStoreTokenState>()?).as_bytes(),
-		)?;
-
-		Ok(())
-	}
 }

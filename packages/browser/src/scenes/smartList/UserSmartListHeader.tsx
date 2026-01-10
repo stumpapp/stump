@@ -13,7 +13,7 @@ const withLocaleKey = (key: string) => `${LOCALE_BASE_KEY}.${key}`
 export default function UserSmartListHeader() {
 	const { t } = useLocaleContext()
 	const {
-		preferences: { primary_navigation_mode, layout_max_width_px },
+		preferences: { primaryNavigationMode, layoutMaxWidthPx },
 	} = usePreferences()
 	const {
 		list: { name, description },
@@ -37,15 +37,15 @@ export default function UserSmartListHeader() {
 		)
 	}
 
-	const preferTopBar = primary_navigation_mode === 'TOPBAR'
+	const preferTopBar = primaryNavigationMode === 'TOPBAR'
 
 	return (
 		<header
 			className={cn('flex w-full flex-col gap-y-4 p-4', {
-				'mx-auto': preferTopBar && !!layout_max_width_px,
+				'mx-auto': preferTopBar && !!layoutMaxWidthPx,
 			})}
 			style={{
-				maxWidth: preferTopBar ? layout_max_width_px || undefined : undefined,
+				maxWidth: preferTopBar ? layoutMaxWidthPx || undefined : undefined,
 			}}
 		>
 			<div>

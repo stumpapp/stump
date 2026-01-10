@@ -1,0 +1,17 @@
+{
+	"name": "@stump/graphql",
+	"version": "1.0.0",
+	"main": "src/index.ts",
+	"license": "MIT",
+	"dependencies": {
+		"graphql": "^16.10.0"
+	},
+	"devDependencies": {
+		"@graphql-codegen/cli": "^5.0.5",
+		"@parcel/watcher": "^2.5.1",
+		"typescript": "^5.8.3"
+	},
+	"scripts": {
+		"codegen": "graphql-codegen"
+	}
+}

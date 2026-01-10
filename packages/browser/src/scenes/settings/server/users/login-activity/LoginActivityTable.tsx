@@ -1,6 +1,8 @@
-import { useLoginActivityQuery } from '@stump/client'
+import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Badge, Card, Text } from '@stump/components'
-import { LoginActivity } from '@stump/sdk'
+import { graphql, LoginActivityTableQuery } from '@stump/graphql'
+import { Api } from '@stump/sdk'
+import { QueryClient } from '@tanstack/react-query'
 import {
 	ColumnDef,
 	createColumnHelper,
@@ -15,69 +17,39 @@ import { Table } from '@/components/table'
 
 import UsernameRow from '../user-table/UsernameRow'
 
-const columnHelper = createColumnHelper<LoginActivity>()
-
-const baseColumns = [
-	columnHelper.display({
-		cell: ({
-			row: {
-				original: { user },
-			},
-		}) => {
-			if (!user) {
-				return null
+const query = graphql(`
+	query LoginActivityTable {
+		loginActivity {
+			id
+			ipAddress
+			userAgent
+			authenticationSuccessful
+			timestamp
+			user {
+				id
+				username
+				avatarUrl
 			}
+		}
+	}
+`)
 
-			return <UsernameRow {...user} />
+export type LoginActivity = LoginActivityTableQuery['loginActivity'][number]
+
+export const prefetchLoginActivity = async (sdk: Api, client: QueryClient) =>
+	client.prefetchQuery({
+		queryKey: sdk.cacheKey('loginActivity'),
+		queryFn: async () => {
+			const data = await sdk.execute(query)
+			return data
 		},
-		header: 'User',
-		id: 'user',
-		size: 100,
-	}),
-	columnHelper.accessor('timestamp', {
-		cell: ({ row: { original: activity } }) => (
-			<Text title={dayjs(activity.timestamp).format('LLL')} className="line-clamp-1" size="sm">
-				{dayjs(activity.timestamp).format('LLL')}
-			</Text>
-		),
-		header: 'Timestamp',
-		size: 100,
-	}),
-	columnHelper.accessor('ip_address', {
-		cell: ({ row: { original: activity } }) => (
-			<Text className="line-clamp-1" size="sm">
-				{activity.ip_address}
-			</Text>
-		),
-		header: 'IP address',
-		size: 100,
-	}),
-	columnHelper.accessor('user_agent', {
-		cell: ({ row: { original: activity } }) => (
-			<Text
-				size="sm"
-				variant="muted"
-				className="line-clamp-1 max-w-sm md:max-w-xl"
-				title={activity.user_agent}
-			>
-				{activity.user_agent}
-			</Text>
-		),
-		header: 'User-agent',
-	}),
-	columnHelper.display({
-		cell: ({ row: { original: activity } }) => (
-			<Badge variant={activity.authentication_successful ? 'success' : 'error'} size="xs">
-				{activity.authentication_successful ? 'Success' : 'Failure'}
-			</Badge>
-		),
-		header: 'Auth result',
-		id: 'authentication_successful',
-	}),
-] as ColumnDef<LoginActivity>[]
+	})
 
 export default function LoginActivityTable() {
-	const { loginActivity } = useLoginActivityQuery({})
+	const { sdk } = useSDK()
+	const {
+		data: { loginActivity },
+	} = useSuspenseGraphQL(query, sdk.cacheKey('loginActivity'))
 
 	const [pagination, setPagination] = useState<PaginationState>({
 		pageIndex: 0,
@@ -98,7 +70,7 @@ export default function LoginActivityTable() {
 					<div className="text-center">
 						<Text>No login activity</Text>
 						<Text size="sm" variant="muted">
-							No users have logged in yet, or the data has been cleared
+							You cleared this, didn&#39;t you?
 						</Text>
 					</div>
 				</div>
@@ -129,3 +101,63 @@ export default function LoginActivityTable() {
 		</Card>
 	)
 }
+
+const columnHelper = createColumnHelper<LoginActivity>()
+
+const baseColumns = [
+	columnHelper.display({
+		cell: ({
+			row: {
+				original: { user },
+			},
+		}) => {
+			if (!user) {
+				return null
+			}
+			return <UsernameRow {...user} />
+		},
+		header: 'User',
+		id: 'user',
+		size: 100,
+	}),
+	columnHelper.accessor('timestamp', {
+		cell: ({ row: { original: activity } }) => (
+			<Text title={dayjs(activity.timestamp).format('LLL')} className="line-clamp-1" size="sm">
+				{dayjs(activity.timestamp).format('LLL')}
+			</Text>
+		),
+		header: 'Timestamp',
+		size: 100,
+	}),
+	columnHelper.accessor('ipAddress', {
+		cell: ({ row: { original: activity } }) => (
+			<Text className="line-clamp-1" size="sm">
+				{activity.ipAddress}
+			</Text>
+		),
+		header: 'IP address',
+		size: 100,
+	}),
+	columnHelper.accessor('userAgent', {
+		cell: ({ row: { original: activity } }) => (
+			<Text
+				size="sm"
+				variant="muted"
+				className="line-clamp-1 max-w-sm md:max-w-xl"
+				title={activity.userAgent}
+			>
+				{activity.userAgent}
+			</Text>
+		),
+		header: 'User-agent',
+	}),
+	columnHelper.display({
+		cell: ({ row: { original: activity } }) => (
+			<Badge variant={activity.authenticationSuccessful ? 'success' : 'error'} size="xs">
+				{activity.authenticationSuccessful ? 'Success' : 'Failure'}
+			</Badge>
+		),
+		header: 'Auth result',
+		id: 'authenticationSuccessful',
+	}),
+] as ColumnDef<LoginActivity>[]

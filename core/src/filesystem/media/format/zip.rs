@@ -3,7 +3,6 @@ use tracing::{debug, error, trace};
 
 use crate::{
 	config::StumpConfig,
-	db::entity::MediaMetadata,
 	filesystem::{
 		content_type::ContentType,
 		error::FileError,
@@ -11,8 +10,9 @@ use crate::{
 		media::{
 			process::{FileProcessor, FileProcessorOptions, ProcessedFile},
 			utils::{metadata_from_buf, sort_file_names},
+			ProcessedFileHashes, ProcessedMediaMetadata,
 		},
-		FileParts, PathUtils, ProcessedFileHashes,
+		FileParts, PathUtils,
 	},
 };
 
@@ -79,7 +79,7 @@ impl FileProcessor for ZipProcessor {
 		})
 	}
 
-	fn process_metadata(path: &str) -> Result<Option<MediaMetadata>, FileError> {
+	fn process_metadata(path: &str) -> Result<Option<ProcessedMediaMetadata>, FileError> {
 		let zip_file = File::open(path)?;
 		let mut archive = zip::ZipArchive::new(zip_file)?;
 
@@ -322,11 +322,9 @@ impl FileProcessor for ZipProcessor {
 #[cfg(test)]
 mod tests {
 	use super::*;
-	use crate::filesystem::{
-		media::tests::{
-			get_nested_macos_compressed_cbz_path, get_test_cbz_path, get_test_zip_path,
-		},
-		tests::get_test_complex_zip_path,
+	use crate::filesystem::media::tests::{
+		get_nested_macos_compressed_cbz_path, get_test_cbz_path,
+		get_test_complex_zip_path, get_test_zip_path,
 	};
 
 	#[test]

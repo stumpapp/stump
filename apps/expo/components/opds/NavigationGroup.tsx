@@ -1,9 +1,11 @@
 import { OPDSFeedGroup } from '@stump/sdk'
+import { Fragment } from 'react'
 import { View } from 'react-native'
 
 import { Text } from '../ui'
 import EmptyFeed from './EmptyFeed'
 import FeedSelfURL from './FeedSelfURL'
+import { LinkDivider } from './LinkDivider'
 import NavigationLink from './NavigationLink'
 import { FeedComponentOptions } from './types'
 
@@ -21,8 +23,8 @@ export default function NavigationGroup({
 
 	return (
 		<View key={metadata.title}>
-			<View className="flex flex-row items-center justify-between pb-2">
-				<Text size="xl" className="font-medium">
+			<View className="flex flex-row items-center justify-between px-4 pb-2">
+				<Text size="xl" className="font-medium leading-6 tracking-wide">
 					{metadata.title || 'Browse'}
 				</Text>
 
@@ -30,7 +32,10 @@ export default function NavigationGroup({
 			</View>
 
 			{navigation.map((link) => (
-				<NavigationLink key={link.href} link={link} />
+				<Fragment key={link.href}>
+					<NavigationLink link={link} />
+					<LinkDivider />
+				</Fragment>
 			))}
 
 			{!navigation.length && <EmptyFeed message="No navigation links in group" />}

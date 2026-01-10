@@ -1,9 +1,10 @@
 import { Label, NativeSelect } from '@stump/components'
+import { ReadingDirection } from '@stump/graphql'
 import { useCallback } from 'react'
 
 type Props = {
-	direction: 'ltr' | 'rtl'
-	onChange: (direction: 'ltr' | 'rtl') => void
+	direction: ReadingDirection
+	onChange: (direction: ReadingDirection) => void
 }
 
 export default function ReadingDirectionSelect({ direction, onChange }: Props) {
@@ -13,7 +14,7 @@ export default function ReadingDirectionSelect({ direction, onChange }: Props) {
 	 */
 	const handleChange = useCallback(
 		(e: React.ChangeEvent<HTMLSelectElement>) => {
-			if (e.target.value === 'ltr' || e.target.value === 'rtl') {
+			if (isReadingDirection(e.target.value)) {
 				onChange(e.target.value)
 			} else {
 				console.warn(`Invalid reading direction: ${e.target.value}`)
@@ -29,8 +30,8 @@ export default function ReadingDirectionSelect({ direction, onChange }: Props) {
 				id="reading-direction"
 				size="sm"
 				options={[
-					{ label: 'Left to right', value: 'ltr' },
-					{ label: 'Right to left', value: 'rtl' },
+					{ label: 'Left to right', value: 'LTR' },
+					{ label: 'Right to left', value: 'RTL' },
 				]}
 				value={direction}
 				onChange={handleChange}
@@ -39,3 +40,6 @@ export default function ReadingDirectionSelect({ direction, onChange }: Props) {
 		</div>
 	)
 }
+
+const isReadingDirection = (value: string): value is ReadingDirection =>
+	value === ReadingDirection.Ltr || value === ReadingDirection.Rtl

@@ -11,14 +11,13 @@ import { useSeriesContext } from './context'
 export default function SeriesHeader() {
 	const { sdk } = useSDK()
 	const {
-		preferences: { primary_navigation_mode, layout_max_width_px, show_thumbnails_in_headers },
+		preferences: { primaryNavigationMode, layoutMaxWidthPx, showThumbnailsInHeaders },
 	} = usePreferences()
-	const { series } = useSeriesContext()
+	const {
+		series: { id, resolvedName, resolvedDescription, tags },
+	} = useSeriesContext()
 
-	const summary = series.metadata?.summary || series.description
-	const name = series.metadata?.title || series.name
-
-	const preferTopBar = primary_navigation_mode === 'TOPBAR'
+	const preferTopBar = primaryNavigationMode === 'TOPBAR'
 
 	const renderStats = () => null
 
@@ -27,22 +26,19 @@ export default function SeriesHeader() {
 			className={cn(
 				'flex w-full flex-col gap-4 p-4 md:flex-row md:items-start md:justify-between md:gap-0',
 				{
-					'mx-auto': preferTopBar && !!layout_max_width_px,
+					'mx-auto': preferTopBar && !!layoutMaxWidthPx,
 				},
 			)}
 			style={{
-				maxWidth: preferTopBar ? layout_max_width_px || undefined : undefined,
+				maxWidth: preferTopBar ? layoutMaxWidthPx || undefined : undefined,
 			}}
 		>
 			<div className="flex w-full flex-col items-center gap-4 md:mb-2 md:flex-row md:items-start">
 				{/* TODO: preference for showing series thumbnails? */}
-				{show_thumbnails_in_headers && (
+				{showThumbnailsInHeaders && (
 					<div className="w-[200px]">
 						<AspectRatio ratio={2 / 3}>
-							<EntityImage
-								src={sdk.series.thumbnailURL(series.id)}
-								className="rounded-md object-cover"
-							/>
+							<EntityImage src={sdk.series.thumbnailURL(id)} className="rounded-md object-cover" />
 						</AspectRatio>
 					</div>
 				)}
@@ -50,16 +46,16 @@ export default function SeriesHeader() {
 				<div className="flex h-full w-full flex-col gap-2 md:gap-4">
 					<div className="flex w-full justify-between">
 						<div className="flex w-full flex-col items-start">
-							<Heading size="lg">{name}</Heading>
-							<TagList tags={series.tags || null} />
+							<Heading size="lg">{resolvedName}</Heading>
+							<TagList tags={tags || null} />
 						</div>
 
 						<div className="flex shrink-0 flex-col items-end">{renderStats()}</div>
 					</div>
 
-					{!!summary && (
+					{!!resolvedDescription && (
 						<div className="max-w-3xl">
-							<ReadMore text={summary} />
+							<ReadMore text={resolvedDescription} />
 						</div>
 					)}
 				</div>

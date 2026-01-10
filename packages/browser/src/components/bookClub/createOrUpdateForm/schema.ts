@@ -1,4 +1,5 @@
-import { BookClub, BookClubMemberRoleSpec } from '@stump/sdk'
+import { BookClubLayoutQuery } from '@stump/graphql'
+import { BookClubMemberRoleSpec } from '@stump/sdk'
 import { z } from 'zod'
 
 import { FORBIDDEN_ENTITY_NAMES } from '@/utils/form'
@@ -26,11 +27,11 @@ export const buildSchema = (
 	isCreating: boolean,
 ) =>
 	z.object({
-		creator_display_name: z.string().optional(),
-		creator_hide_progress: isCreating ? z.boolean().default(false) : z.boolean().optional(),
+		creatorDisplayName: z.string().optional(),
+		creatorHideProgress: isCreating ? z.boolean().default(false) : z.boolean().optional(),
 		description: z.string().optional(),
-		is_private: z.boolean().default(false),
-		member_role_spec: memberRoleSpecSchema.optional(),
+		isPrivate: z.boolean().default(false),
+		memberRoleSpec: memberRoleSpecSchema.optional(),
 		name: z
 			.string()
 			.min(1, { message: t(getKey('missingName')) })
@@ -43,13 +44,16 @@ export const buildSchema = (
 			.refine((value) => !FORBIDDEN_ENTITY_NAMES.includes(value), {
 				message: t(getKey('forbiddenName')),
 			}),
+		slug: z.string().nullish(),
 	})
 export type CreateOrUpdateBookClubSchema = z.infer<ReturnType<typeof buildSchema>>
 
-export const formDefaults = (club?: BookClub): CreateOrUpdateBookClubSchema => ({
-	creator_display_name: club?.name || '',
+export const formDefaults = (
+	club?: NonNullable<BookClubLayoutQuery['bookClubBySlug']>,
+): CreateOrUpdateBookClubSchema => ({
+	creatorDisplayName: club?.name || '',
 	description: '',
-	is_private: club?.is_private ?? false,
-	member_role_spec: club?.member_role_spec,
+	isPrivate: club?.isPrivate ?? false,
+	memberRoleSpec: club?.roleSpec,
 	name: club?.name || '',
 })

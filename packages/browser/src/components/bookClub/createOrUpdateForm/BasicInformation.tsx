@@ -13,7 +13,7 @@ export default function BasicBookClubInformation() {
 	const ctx = useBookClubContextSafe()
 
 	const isCreating = !ctx?.bookClub
-	const isPrivate = form.watch('is_private')
+	const isPrivate = form.watch('isPrivate')
 
 	const { t } = useLocaleContext()
 	const { errors } = useFormState({
@@ -50,7 +50,7 @@ export default function BasicBookClubInformation() {
 				label={t(getKey('is_private.label'))}
 				description={t(getKey('is_private.description'))}
 				checked={isPrivate}
-				onClick={() => form.setValue('is_private', !isPrivate)}
+				onClick={() => form.setValue('isPrivate', !isPrivate)}
 			/>
 		</div>
 	)

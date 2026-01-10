@@ -1,50 +1,93 @@
-import { useMutation, useSDK } from '@stump/client'
-import { Button, Dialog } from '@stump/components'
-import { Media, PatchSeriesThumbnail, Series } from '@stump/sdk'
-import { useCallback, useEffect, useState } from 'react'
-import toast from 'react-hot-toast'
+import { useGraphQLMutation, useSDK } from '@stump/client'
+import { Button, Dialog, PickSelect } from '@stump/components'
+import {
+	FragmentType,
+	graphql,
+	SeriesThumbnailSelectorUpdateMutation,
+	useFragment,
+} from '@stump/graphql'
+import { Suspense, useCallback, useEffect, useState } from 'react'
+import { toast } from 'sonner'
 
 import { EntityCard } from '@/components/entity'
 import EditThumbnailDropdown from '@/components/thumbnail/EditThumbnailDropdown'
 
 import BookPageGrid from '../../../book/settings/BookPageGrid'
-import SeriesBookGrid from './SeriesBookGrid'
+import SeriesBookGrid, { SelectedBook } from './SeriesBookGrid'
+
+export const SeriesThumbnailSelectorFragment = graphql(`
+	fragment SeriesThumbnailSelector on Series {
+		id
+		thumbnail {
+			url
+		}
+	}
+`)
+
+const updateMutation = graphql(`
+	mutation SeriesThumbnailSelectorUpdate($id: ID!, $input: UpdateThumbnailInput!) {
+		updateSeriesThumbnail(id: $id, input: $input) {
+			id
+			thumbnail {
+				url
+			}
+		}
+	}
+`)
+
+const uploadMutation = graphql(`
+	mutation SeriesThumbnailSelectorUpload($id: ID!, $file: Upload!) {
+		uploadSeriesThumbnail(id: $id, file: $file) {
+			id
+			thumbnail {
+				url
+			}
+		}
+	}
+`)
+
+type OnSuccessData = PickSelect<SeriesThumbnailSelectorUpdateMutation, 'updateSeriesThumbnail'>
 
 type Props = {
-	series: Series
+	fragment: FragmentType<typeof SeriesThumbnailSelectorFragment>
 }
-// TODO: this looks doody, but it's a start
-export default function SeriesThumbnailSelector({ series }: Props) {
+
+// TODO: This entire UI looks like absolute shit IMO. I find the management pages that
+// aren't quite large enough to have their own sidebar navigation to be a bit awkward
+// to think through. That said, I would REALLY like to land on something that doesn't
+// make me cringe when looking at it
+
+export default function SeriesThumbnailSelector({ fragment }: Props) {
+	const series = useFragment(SeriesThumbnailSelectorFragment, fragment)
+
 	const { sdk } = useSDK()
-	const [selectedBook, setSelectedBook] = useState<Media>()
+	const [selectedBook, setSelectedBook] = useState<SelectedBook>()
 	const [page, setPage] = useState<number>()
 	const [isOpen, setIsOpen] = useState(false)
 
 	const onSuccess = useCallback(
-		() =>
-			sdk.axios.get(sdk.series.thumbnailURL(series.id), {
+		({ thumbnail: { url } }: OnSuccessData) =>
+			sdk.axios.get(url, {
 				headers: {
 					'Cache-Control': 'no-cache',
 					Pragma: 'no-cache',
 					Expires: '0',
 				},
 			}),
-		[sdk, series.id],
+		[sdk],
 	)
 
-	const { mutateAsync: patchThumbnail, isLoading: isPatchingThumbnail } = useMutation(
-		[sdk.series.keys.patchThumbnail, series.id],
-		async (data: PatchSeriesThumbnail) => {
-			await sdk.series.patchThumbnail(series.id, data)
-			await onSuccess()
+	const { mutateAsync: patchThumbnail, isPending: isPatchingThumbnail } = useGraphQLMutation(
+		updateMutation,
+		{
+			onSuccess: (data) => onSuccess(data.updateSeriesThumbnail),
 		},
 	)
 
-	const { mutate: uploadThumbnail, isLoading: isUploadingThumbnail } = useMutation(
-		[sdk.series.keys.uploadThumbnail, series.id],
-		async (file: File) => {
-			await sdk.series.uploadThumbnail(series.id, file)
-			await onSuccess()
+	const { mutateAsync: uploadThumbnail, isPending: isUploadingThumbnail } = useGraphQLMutation(
+		uploadMutation,
+		{
+			onSuccess: (data) => onSuccess(data.uploadSeriesThumbnail),
 		},
 	)
 
@@ -61,27 +104,30 @@ export default function SeriesThumbnailSelector({ series }: Props) {
 		setIsOpen(false)
 	}
 
-	const handleUploadImage = async (file: File) => {
-		try {
-			await uploadThumbnail(file)
-			setIsOpen(false)
-		} catch (error) {
-			console.error(error)
-			toast.error('Failed to upload image')
-		}
-	}
+	const handleUploadImage = useCallback(
+		async (file: File) => {
+			try {
+				await uploadThumbnail({ file, id: series.id })
+				setIsOpen(false)
+			} catch (error) {
+				console.error(error)
+				toast.error('Failed to upload image')
+			}
+		},
+		[series.id, uploadThumbnail],
+	)
 
-	const handleConfirm = async () => {
-		if (!selectedBook || !page) return
+	const handleConfirm = useCallback(async () => {
+		if (!selectedBook || page == null) return
 
 		try {
-			await patchThumbnail({ media_id: selectedBook.id, page })
+			await patchThumbnail({ id: series.id, input: { mediaId: selectedBook.id, page } })
 			setIsOpen(false)
 		} catch (error) {
 			console.error(error)
 			toast.error('Failed to update thumbnail')
 		}
-	}
+	}, [patchThumbnail, page, selectedBook, series.id])
 
 	const renderContent = () => {
 		if (selectedBook) {
@@ -109,9 +155,7 @@ export default function SeriesThumbnailSelector({ series }: Props) {
 		<div className="relative">
 			<EntityCard
 				imageUrl={
-					selectedBook && page
-						? sdk.media.bookPageURL(selectedBook.id, page)
-						: sdk.series.thumbnailURL(series.id)
+					selectedBook && page ? sdk.media.bookPageURL(selectedBook.id, page) : series.thumbnail.url
 				}
 				isCover
 				className="flex-auto flex-shrink-0"
@@ -150,7 +194,7 @@ export default function SeriesThumbnailSelector({ series }: Props) {
 						<Dialog.Close onClick={() => setIsOpen(false)} />
 					</Dialog.Header>
 
-					{renderContent()}
+					<Suspense>{renderContent()}</Suspense>
 
 					<Dialog.Footer>
 						<Button variant="default" onClick={handleCancel}>

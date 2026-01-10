@@ -1,29 +1,27 @@
-import axios, { AxiosInstance } from 'axios'
+import type { TypedDocumentString } from '@stump/graphql'
+import axios, { AxiosInstance, AxiosRequestConfig } from 'axios'
 
 import { AuthenticationMethod, Configuration } from './configuration'
+import { cacheKeys } from './constants'
 import {
-	APIKeyAPI,
 	AuthAPI,
-	BookClubAPI,
-	EmailerAPI,
 	EpubAPI,
-	FilesystemAPI,
-	JobAPI,
+	JwtTokenPair,
 	LibraryAPI,
-	LogAPI,
 	MediaAPI,
-	MetadataAPI,
 	OPDSV2API,
 	SeriesAPI,
 	ServerAPI,
-	SmartListAPI,
-	TagAPI,
-	UploadAPI,
-	UserAPI,
 } from './controllers'
-import { formatApiURL } from './utils/url'
+import {
+	attemptWebsocketConnect,
+	GraphQLWebsocketConnectEventHandlers,
+	GraphQLWebsocketConnectReturn,
+} from './socket'
+import { GraphQLResponse } from './types/graphql'
+import { formatApiURL } from './utils'
 
-export type ApiVersion = 'v1'
+export type ApiVersion = 'v1' | 'v2'
 
 export type ApiParams = {
 	baseURL: string
@@ -57,10 +55,10 @@ export class Api {
 	 * The Axios instance used to make requests to the API
 	 */
 	private axiosInstance: AxiosInstance
-	/**
-	 * The current access token for the API, if any
-	 */
-	private accessToken?: string
+
+	private _tokens?: JwtTokenPair
+	private _apiKey?: string
+
 	/**
 	 * The basic auth string for the API, if any. This will be encoded and sent as an
 	 * Authorization header, if present.
@@ -83,7 +81,7 @@ export class Api {
 		this.configuration = new Configuration(authMethod)
 
 		if (apiKey) {
-			this.accessToken = apiKey
+			this._apiKey = apiKey
 		}
 
 		if (params.customHeaders) {
@@ -98,8 +96,9 @@ export class Api {
 			baseURL: this.serviceURL,
 			withCredentials: this.configuration.authMethod === 'session',
 		})
-		instance.interceptors.request.use((config) => {
-			config.headers = config.headers.concat(this.headers)
+
+		instance.interceptors.request.use(async (config) => {
+			config.headers = config.headers.concat(await this.getHeaders())
 			if (this._basicAuth) {
 				config.auth = this._basicAuth
 			}
@@ -112,7 +111,7 @@ export class Api {
 	 * Check if the current authentication method is token-based
 	 */
 	get isTokenAuth(): boolean {
-		return this.configuration.authMethod === 'token'
+		return this.configuration.authMethod === 'token' || this.configuration.authMethod === 'api-key'
 	}
 
 	/**
@@ -122,18 +121,49 @@ export class Api {
 		return this.axiosInstance
 	}
 
-	/**
-	 * Get the current access token for the API, if any
-	 */
 	get token(): string | undefined {
-		return this.accessToken
+		return this._tokens?.accessToken || this._apiKey
 	}
 
-	/**
-	 * Set the current access token for the API
-	 */
-	set token(token: string | undefined) {
-		this.accessToken = token
+	get tokens(): JwtTokenPair | undefined {
+		return this._tokens
+	}
+
+	set tokens(tokens: JwtTokenPair | undefined) {
+		this._tokens = tokens
+	}
+
+	get staticToken(): string | undefined {
+		return this._apiKey
+	}
+
+	set staticToken(token: string | undefined) {
+		this._apiKey = token
+	}
+
+	async getOrRefreshTokens(): Promise<JwtTokenPair | undefined> {
+		const tokens = this._tokens
+
+		if (!tokens) return undefined
+
+		// Let's exchange the token if the expiry is <= 5 minute
+		const expiresAt = new Date(tokens.expiresAt)
+		if (expiresAt <= new Date(Date.now() + 5 * 60 * 1000)) {
+			try {
+				const newTokens = await this.auth.refreshToken()
+				this.tokens = newTokens
+			} catch (error) {
+				console.error('Failed to exchange token!', { error })
+				// If we fail to exchange the token, we should clear it
+				this.tokens = undefined
+			}
+		}
+
+		return this._tokens
+	}
+
+	async accessToken(): Promise<string | undefined> {
+		return (await this.getOrRefreshTokens())?.accessToken
 	}
 
 	/**
@@ -157,7 +187,7 @@ export class Api {
 	 * access token is expired or invalid.
 	 */
 	get isAuthed(): boolean {
-		return !!this.accessToken || !!this._basicAuth
+		return !!this._tokens || !!this._basicAuth || !!this._apiKey
 	}
 
 	/**
@@ -199,17 +229,47 @@ export class Api {
 		return `${this.baseURL.replace(/\/api(\/v\d)?$/, '')}/sse`
 	}
 
-	/**
-	 * Get the current access token for the API formatted as a Bearer token
-	 */
-	get authorizationHeader(): string | undefined {
-		if (this.accessToken) {
-			return `Bearer ${this.accessToken}`
+	get rootURL(): string {
+		return `${this.baseURL.replace(/\/api(\/v\d)?$/, '')}`
+	}
+
+	async getAuthorizationHeader(): Promise<string | undefined> {
+		const bearerToken = this._apiKey || (await this.accessToken())
+		if (bearerToken) {
+			return `Bearer ${bearerToken}`
 		} else if (this.basicAuthHeader) {
 			return `Basic ${this.basicAuthHeader}`
 		} else {
 			return undefined
 		}
+	}
+
+	/**
+	 * Get the current access token for the API formatted as a Bearer token. This
+	 * has the potential to return an expired token
+	 */
+	get authorizationHeader(): string | undefined {
+		const bearerToken = this._tokens?.accessToken || this._apiKey
+		if (bearerToken) {
+			return `Bearer ${bearerToken}`
+		} else if (this.basicAuthHeader) {
+			return `Basic ${this.basicAuthHeader}`
+		} else {
+			return undefined
+		}
+	}
+
+	async getHeaders(): Promise<Record<string, string>> {
+		const headers: Record<string, string> = {
+			...this.customHeaders,
+		}
+
+		const authHeader = await this.getAuthorizationHeader()
+		if (authHeader) {
+			headers.Authorization = authHeader
+		}
+
+		return headers
 	}
 
 	/**
@@ -222,32 +282,184 @@ export class Api {
 		}
 	}
 
+	async execute<TResult, TVariables>(
+		query: TypedDocumentString<TResult, TVariables>,
+		variables?: TVariables extends Record<string, never> ? never : TVariables,
+	): Promise<TResult> {
+		const response = await this.axiosInstance.post<GraphQLResponse<TResult>>(
+			'/api/graphql',
+			{
+				query,
+				variables,
+			},
+			{
+				headers: {
+					...this.headers,
+				},
+				baseURL: this.rootURL,
+			},
+		)
+
+		const { data, errors } = response.data
+
+		if (errors) {
+			const firstExtensionError = errors.find((error) => error.extensions?.error)?.extensions?.error
+			if (firstExtensionError && typeof firstExtensionError === 'string') {
+				throw new Error(firstExtensionError)
+			}
+			throw new Error(errors.map((error) => error.message).join(', '))
+		}
+
+		return data
+	}
+
+	/**
+	 * Execute a GraphQL mutation with file uploads using the multipart request spec
+	 */
+	async executeUpload<TResult, TVariables>(
+		query: TypedDocumentString<TResult, TVariables>,
+		variables?: TVariables extends Record<string, never> ? never : TVariables,
+		config?: Pick<AxiosRequestConfig, 'onUploadProgress'>,
+	): Promise<TResult> {
+		const formData = new FormData()
+
+		if (!variables) {
+			throw new Error('Variables are required for file uploads')
+		}
+
+		const operations = { query: query.toString(), variables: {} as Record<string, unknown> }
+		const map: Record<string, string[]> = {}
+		const files: File[] = []
+
+		const processedVariables = this.extractFiles(variables, files, map)
+		operations.variables = processedVariables as Record<string, unknown>
+
+		formData.append('operations', JSON.stringify(operations))
+		formData.append('map', JSON.stringify(map))
+
+		files.forEach((file, index) => {
+			formData.append(index.toString(), file)
+		})
+
+		const response = await this.axiosInstance.post<GraphQLResponse<TResult>>(
+			'/api/graphql',
+			formData,
+			{
+				headers: {
+					...this.headers,
+					'Content-Type': 'multipart/form-data',
+				},
+				baseURL: this.rootURL,
+				...config,
+			},
+		)
+
+		const { data, errors } = response.data
+
+		if (errors) {
+			const firstExtensionError = errors.find((error) => error.extensions?.error)?.extensions?.error
+			if (firstExtensionError && typeof firstExtensionError === 'string') {
+				throw new Error(firstExtensionError)
+			}
+			throw new Error(errors.map((error) => error.message).join(', '))
+		}
+
+		return data
+	}
+
+	// Note: This feels fragile but does work for basic uploads. If it breaks down probably best to see what is
+	// out there instead of reinventing the wheel
+	private extractFiles(
+		obj: unknown,
+		files: File[],
+		map: Record<string, string[]>,
+		path: string = 'variables',
+	): unknown {
+		if (obj instanceof File) {
+			const index = files.length
+			files.push(obj)
+			map[index.toString()] = [path]
+			return null
+		}
+
+		if (Array.isArray(obj)) {
+			return obj.map((item, index) => this.extractFiles(item, files, map, `${path}.${index}`))
+		}
+
+		if (obj && typeof obj === 'object') {
+			const result: Record<string, unknown> = {}
+			for (const [key, value] of Object.entries(obj)) {
+				result[key] = this.extractFiles(value, files, map, `${path}.${key}`)
+			}
+			return result
+		}
+
+		return obj
+	}
+
+	async executeRaw<TResult = unknown, TVariables = Record<string, unknown> | never>(
+		queryString: string,
+		variables?: TVariables extends Record<string, never> ? never : TVariables,
+		config?: Omit<AxiosRequestConfig, 'headers'>,
+	): Promise<TResult> {
+		const response = await this.axiosInstance.post<GraphQLResponse<TResult>>(
+			'/api/graphql',
+			{
+				query: queryString,
+				variables,
+			},
+			{
+				headers: {
+					...this.headers,
+				},
+				baseURL: this.rootURL,
+				...config,
+			},
+		)
+
+		const { data, errors } = response.data
+
+		if (errors) {
+			// TODO: Create specialized error to handle this better
+			throw new Error(errors.map((error) => error.message).join(', '))
+		}
+
+		return data
+	}
+
+	async connect<TResult, TVariables>(
+		query: TypedDocumentString<TResult, TVariables>,
+		variables?: TVariables extends Record<string, never> ? never : TVariables,
+		options: Partial<GraphQLWebsocketConnectEventHandlers<TResult>> = {},
+	): Promise<GraphQLWebsocketConnectReturn> {
+		return attemptWebsocketConnect<TResult, TVariables>({
+			query,
+			variables,
+			sdk: this,
+			...options,
+		})
+	}
+
+	get cacheKeys(): typeof cacheKeys {
+		return cacheKeys
+	}
+
+	/**
+	 * A convenience method to generate a cache key for a given API call. This is intended to be used
+	 * with `@tanstack/react-query` to ensure that cache keys are consistent across the application
+	 *
+	 * @param key The prefix key for the cache key
+	 * @param args Any additional arguments to be included in the cache key
+	 */
+	cacheKey(key: keyof typeof cacheKeys, args?: unknown[]): readonly unknown[] {
+		return [cacheKeys[key], ...(args || [])]
+	}
+
 	/**
 	 * Get an instance for the AuthAPI
 	 */
 	get auth(): AuthAPI {
 		return new AuthAPI(this)
-	}
-
-	/**
-	 * Get an instance for the APIKeyAPI
-	 */
-	get apiKey(): APIKeyAPI {
-		return new APIKeyAPI(this)
-	}
-
-	/**
-	 * Get an instance for the BookClubAPI
-	 */
-	get club(): BookClubAPI {
-		return new BookClubAPI(this)
-	}
-
-	/**
-	 * Get an instance for the EmailerAPI
-	 */
-	get emailer(): EmailerAPI {
-		return new EmailerAPI(this)
 	}
 
 	/**
@@ -258,20 +470,6 @@ export class Api {
 	}
 
 	/**
-	 * Get an instance for the FilesystemAPI
-	 */
-	get filesystem(): FilesystemAPI {
-		return new FilesystemAPI(this)
-	}
-
-	/**
-	 * Get an instance for the JobAPI
-	 */
-	get job(): JobAPI {
-		return new JobAPI(this)
-	}
-
-	/**
 	 * Get an instance for the LibraryAPI
 	 */
 	get library(): LibraryAPI {
@@ -279,24 +477,10 @@ export class Api {
 	}
 
 	/**
-	 * Get an instance for the LogAPI
-	 */
-	get log(): LogAPI {
-		return new LogAPI(this)
-	}
-
-	/**
 	 * Get an instance for the MediaAPI
 	 */
 	get media(): MediaAPI {
 		return new MediaAPI(this)
-	}
-
-	/**
-	 * Get an instance for the MetadataAPI
-	 */
-	get metadata(): MetadataAPI {
-		return new MetadataAPI(this)
 	}
 
 	get opds(): OPDSV2API {
@@ -316,31 +500,4 @@ export class Api {
 	get server(): ServerAPI {
 		return new ServerAPI(this)
 	}
-
-	/**
-	 * Get an instance for the SmartListAPI
-	 */
-	get smartlist(): SmartListAPI {
-		return new SmartListAPI(this)
-	}
-
-	/**
-	 * Get an instance for the TagAPI
-	 */
-	get tag(): TagAPI {
-		return new TagAPI(this)
-	}
-
-	get upload(): UploadAPI {
-		return new UploadAPI(this)
-	}
-
-	/**
-	 * Get an instance for the UserAPI
-	 */
-	get user(): UserAPI {
-		return new UserAPI(this)
-	}
 }
-
-// TODO: look into https://github.com/TanStack/query/issues/3228#issuecomment-2088266007

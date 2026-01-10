@@ -1,5 +1,8 @@
-import { useEmailerQuery, useEmailersQuery, useUpdateEmailer } from '@stump/client'
-import { useEffect, useMemo } from 'react'
+import { useGraphQLMutation, useSDK, useSuspenseGraphQL } from '@stump/client'
+import { graphql } from '@stump/graphql'
+import { useQueryClient } from '@tanstack/react-query'
+import omit from 'lodash/omit'
+import { useCallback, useEffect, useMemo } from 'react'
 import { useNavigate, useParams } from 'react-router'
 
 import { ContentContainer, SceneContainer } from '@/components/container'
@@ -8,21 +11,63 @@ import paths from '@/paths'
 import { useEmailerSettingsContext } from './context'
 import { CreateOrUpdateEmailerForm, CreateOrUpdateEmailerSchema } from './emailers'
 
+const query = graphql(`
+	query EditEmailerScene($id: Int!) {
+		emailers {
+			name
+		}
+		emailerById(id: $id) {
+			id
+			name
+			isPrimary
+			smtpHost
+			smtpPort
+			lastUsedAt
+			maxAttachmentSizeBytes
+			senderDisplayName
+			senderEmail
+			tlsEnabled
+			username
+		}
+	}
+`)
+
+const mutation = graphql(`
+	mutation EditEmailerSceneEditEmailer($id: Int!, $input: EmailerInput!) {
+		updateEmailer(id: $id, input: $input) {
+			id
+		}
+	}
+`)
+
 export default function EditEmailerScene() {
 	const navigate = useNavigate()
+	const client = useQueryClient()
 
+	const { sdk } = useSDK()
 	const { id: rawId } = useParams<{ id: string }>()
+
 	const id = useMemo(() => parseInt(rawId || '', 10), [rawId])
 
 	const { canEditEmailer } = useEmailerSettingsContext()
-	const { emailer } = useEmailerQuery({
-		enabled: !isNaN(id),
+	const {
+		data: { emailers, emailerById: emailer },
+	} = useSuspenseGraphQL(query, sdk.cacheKey('emailers', ['editEmailer', id]), {
 		id,
-		suspense: true,
 	})
-	const { emailers } = useEmailersQuery({ suspense: true })
-	const { updateAsync: updateEmailer } = useUpdateEmailer({
-		id,
+
+	const existingNames = useMemo(() => emailers.map((e) => e.name), [emailers])
+
+	const { mutate } = useGraphQLMutation(mutation, {
+		onSuccess: async () => {
+			await client.refetchQueries({
+				predicate: ({ queryKey: [baseKey] }) => baseKey === sdk.cacheKeys.emailers,
+			})
+			navigate(paths.settings('email'))
+		},
+		onError: (error) => {
+			console.error(error)
+		},
 	})
 
 	useEffect(() => {
@@ -33,27 +78,25 @@ export default function EditEmailerScene() {
 		}
 	}, [id, emailer, navigate, canEditEmailer])
 
-	const onSubmit = async ({ name, is_primary, ...config }: CreateOrUpdateEmailerSchema) => {
-		try {
-			await updateEmailer({
-				config: {
-					...config,
-					host: config.smtp_host,
-					max_attachment_size_bytes: config.max_attachment_size_bytes ?? null,
-					// TODO: support configuring this
-					max_num_attachments: null,
-					password: config.password?.length ? config.password : null,
-					port: config.smtp_port,
-				},
-				is_primary,
-				name,
-			})
-			navigate(paths.settings('server/email'))
-		} catch (error) {
-			console.error(error)
-			// TODO:toast
-		}
-	}
+	const onSubmit = useCallback(
+		({ name, isPrimary, ...config }: CreateOrUpdateEmailerSchema) => {
+			if (emailer?.id) {
+				mutate({
+					id: emailer.id,
+					input: {
+						isPrimary,
+						name,
+						config: {
+							...omit(config, ['smtpHost', 'smtpPort']),
+							host: config.smtpHost,
+							port: config.smtpPort,
+						},
+					},
+				})
+			}
+		},
+		[emailer, mutate],
+	)
 
 	if (!emailer || !canEditEmailer) {
 		return null
@@ -64,7 +107,7 @@ export default function EditEmailerScene() {
 			<ContentContainer>
 				<CreateOrUpdateEmailerForm
 					emailer={emailer}
-					existingNames={emailers?.map((e) => e.name) || []}
+					existingNames={existingNames}
 					onSubmit={onSubmit}
 				/>
 			</ContentContainer>

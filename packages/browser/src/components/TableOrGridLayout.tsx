@@ -1,9 +1,10 @@
 import { IconButton, ToolTip } from '@stump/components'
+import { InterfaceLayout } from '@stump/graphql'
 import { LayoutGrid, Table } from 'lucide-react'
 
 type Props = {
-	layout: 'GRID' | 'TABLE'
-	setLayout: (layout: 'GRID' | 'TABLE') => void
+	layout: InterfaceLayout
+	setLayout: (layout: InterfaceLayout) => void
 }
 
 export default function TableOrGridLayout({ layout, setLayout }: Props) {
@@ -15,8 +16,8 @@ export default function TableOrGridLayout({ layout, setLayout }: Props) {
 					size="xs"
 					className="hover:bg-background-surface-hover"
 					pressEffect={false}
-					onClick={() => setLayout('GRID')}
-					disabled={layout === 'GRID'}
+					onClick={() => setLayout(InterfaceLayout.Grid)}
+					disabled={layout === InterfaceLayout.Grid}
 				>
 					<LayoutGrid className="h-4 w-4" />
 				</IconButton>
@@ -28,8 +29,8 @@ export default function TableOrGridLayout({ layout, setLayout }: Props) {
 					size="xs"
 					className="hover:bg-background-surface-hover"
 					pressEffect={false}
-					onClick={() => setLayout('TABLE')}
-					disabled={layout === 'TABLE'}
+					onClick={() => setLayout(InterfaceLayout.Table)}
+					disabled={layout === InterfaceLayout.Table}
 				>
 					<Table className="h-4 w-4" />
 				</IconButton>

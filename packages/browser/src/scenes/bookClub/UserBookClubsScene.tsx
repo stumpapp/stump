@@ -1,31 +1,42 @@
-import { useBookClubsQuery } from '@stump/client'
+import { useSuspenseGraphQL } from '@stump/client'
 import { ButtonOrLink, Card, cx, Heading, Text } from '@stump/components'
-import { BookClub } from '@stump/sdk'
-import dayjs from 'dayjs'
+import { graphql, UserBookClubsSceneQuery } from '@stump/graphql'
 import pluralize from 'pluralize'
 import { Helmet } from 'react-helmet'
 
 import { SceneContainer } from '@/components/container'
 import paths from '@/paths'
 
+const query = graphql(`
+	query UserBookClubsScene {
+		bookClubs(all: false) {
+			id
+			name
+			slug
+			description
+			membersCount
+			schedule {
+				activeBooks {
+					__typename
+				}
+			}
+		}
+	}
+`)
+
+type Club = UserBookClubsSceneQuery['bookClubs'][number]
+
+// TODO: redesign this, absolute yucky poopy
 /**
  * A scene that displays all the book clubs the user is a member of
  */
 export default function UserBookClubsScene() {
-	const { bookClubs } = useBookClubsQuery({
-		params: {
-			// Only fetch book clubs that the user is a member of
-			all: false,
-		},
-	})
+	const {
+		data: { bookClubs },
+	} = useSuspenseGraphQL(query, ['bookClubs'])
 
-	// TODO: redesign this, absolute yucky poopy
-	const renderBookClub = (bookClub: BookClub) => {
-		const currentlyReading = bookClub.schedule?.books?.find(
-			(book) => dayjs(book.start_at).isBefore(dayjs()) && dayjs(book.end_at).isAfter(dayjs()),
-		)
-		const isActive = !!currentlyReading
-		const membersCount = bookClub.members?.length ?? 0
+	const renderBookClub = (bookClub: Club) => {
+		const isActive = !!bookClub.schedule?.activeBooks?.length
 
 		return (
 			<>
@@ -48,11 +59,11 @@ export default function UserBookClubsScene() {
 						<svg viewBox="0 0 2 2" className="h-0.5 w-0.5 fill-current">
 							<circle cx={1} cy={1} r={1} />
 						</svg>
-						<p className="truncate">{pluralize('member', membersCount, true)}</p>
+						<p className="truncate">{pluralize('member', bookClub.membersCount, true)}</p>
 					</div>
 				</div>
 				<div className="flex flex-none items-center gap-x-4">
-					<ButtonOrLink href={paths.bookClub(bookClub.id)} variant="secondary">
+					<ButtonOrLink href={paths.bookClub(bookClub.slug)} variant="secondary">
 						Go to club
 					</ButtonOrLink>
 				</div>

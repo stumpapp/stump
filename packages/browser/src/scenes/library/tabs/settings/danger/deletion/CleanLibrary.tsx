@@ -1,35 +1,64 @@
-import { useSDK } from '@stump/client'
-import { Alert, Button, ConfirmationModal, Heading, Text } from '@stump/components'
+import { useGraphQLMutation } from '@stump/client'
+import {
+	Alert,
+	AlertDescription,
+	AlertTitle,
+	Button,
+	ConfirmationModal,
+	Heading,
+	Text,
+} from '@stump/components'
+import { graphql } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
-import { useState } from 'react'
-import { toast } from 'react-hot-toast'
+import { Info } from 'lucide-react'
+import { useCallback, useState } from 'react'
+import { toast } from 'sonner'
 
 import { useLibraryManagement } from '../../context'
 
 // TODO: add query for whether a clean would do anything to disable this section
 
+const mutation = graphql(`
+	mutation CleanLibrary($id: ID!) {
+		cleanLibrary(id: $id) {
+			deletedMediaCount
+			deletedSeriesCount
+			isEmpty
+		}
+	}
+`)
+
 export default function CleanLibrary() {
-	const { sdk } = useSDK()
 	const {
 		library: { id },
 	} = useLibraryManagement()
 	const { t } = useLocaleContext()
 
-	const [justCleaned, setJustCleaned] = useState(false)
-	const [showConfirmation, setShowConfirmation] = useState(false)
-	const [isCleaning, setIsCleaning] = useState(false)
+	const { mutateAsync: cleanLibrary, isPending, data } = useGraphQLMutation(mutation)
 
-	const handleDeleteThumbnails = async () => {
+	const [showConfirmation, setShowConfirmation] = useState(false)
+
+	const handleClean = useCallback(async () => {
 		try {
-			setIsCleaning(true)
-			const result = await sdk.library.clean(id)
-			setJustCleaned(true)
-			toast.success(
-				`Cleaned ${result.deleted_media_count} media and ${result.deleted_series_count} series`,
-			)
-			if (result.is_empty) {
-				toast('The library is now empty')
-			}
+			toast.promise(cleanLibrary({ id }), {
+				loading: t(getKey('confirmation.loading')),
+				success: ({ cleanLibrary: result }) => {
+					if (result.isEmpty) {
+						return t(getKey('emptyText'))
+					} else if (result.deletedMediaCount === 0 && result.deletedSeriesCount === 0) {
+						return t(getKey('confirmation.nothingToDelete'))
+					} else {
+						return `Cleaned ${result.deletedMediaCount} media and ${result.deletedSeriesCount} series`
+					}
+				},
+				error: (error) => {
+					const fallbackMessage = t(getKey('confirmation.error'))
+					if (error instanceof Error) {
+						return error.message || fallbackMessage
+					}
+					return fallbackMessage
+				},
+			})
 			setShowConfirmation(false)
 		} catch (error) {
 			console.error(error)
@@ -39,10 +68,8 @@ export default function CleanLibrary() {
 			} else {
 				toast.error(fallbackMessage)
 			}
-		} finally {
-			setIsCleaning(false)
 		}
-	}
+	}, [cleanLibrary, id, t])
 
 	return (
 		<div className="flex flex-col space-y-4">
@@ -53,8 +80,10 @@ export default function CleanLibrary() {
 				</Text>
 			</div>
 
-			<Alert level="info" icon="warning">
-				<Alert.Content>{t(getKey('disclaimer'))}</Alert.Content>
+			<Alert variant="info" id="clean-library-info" dismissible>
+				<Info />
+				<AlertTitle>{t(getKey('disclaimerTitle'))}</AlertTitle>
+				<AlertDescription>{t(getKey('disclaimer'))}</AlertDescription>
 			</Alert>
 
 			<ConfirmationModal
@@ -64,8 +93,8 @@ export default function CleanLibrary() {
 				confirmVariant="danger"
 				isOpen={showConfirmation}
 				onClose={() => setShowConfirmation(false)}
-				onConfirm={handleDeleteThumbnails}
-				confirmIsLoading={isCleaning}
+				onConfirm={handleClean}
+				confirmIsLoading={isPending}
 				trigger={
 					<div>
 						<Button
@@ -73,8 +102,8 @@ export default function CleanLibrary() {
 							onClick={() => setShowConfirmation(true)}
 							className="flex-shrink-0"
 							size="md"
-							disabled={justCleaned || isCleaning}
-							isLoading={isCleaning}
+							disabled={!!data || isPending}
+							isLoading={isPending}
 							variant="danger"
 						>
 							{t(getKey('confirmation.label'))}

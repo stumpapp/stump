@@ -1,4 +1,5 @@
-import { useQuery, useSDK } from '@stump/client'
+import { useSDK } from '@stump/client'
+import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
 import { Stack, useLocalSearchParams } from 'expo-router'
 import { useMemo } from 'react'
 
@@ -8,27 +9,21 @@ export default function Layout() {
 	const { url: publicationURL } = useLocalSearchParams<{ url: string }>()
 	const { sdk } = useSDK()
 
-	const { data: publication } = useQuery(
-		[sdk.opds.keys.publication, publicationURL],
-		() => sdk.opds.publication(publicationURL),
-		{
-			suspense: true,
-		},
-	)
+	const { data: publication } = useSuspenseQuery({
+		queryKey: [sdk.opds.keys.publication, publicationURL],
+		queryFn: () => sdk.opds.publication(publicationURL),
+	})
 	const progressionURL = useMemo(
 		() =>
 			publication?.links?.find((link) => link.rel === 'http://www.cantook.com/api/progression')
 				?.href,
 		[publication],
 	)
-	const { data: progression } = useQuery(
-		[sdk.opds.keys.progression, progressionURL],
-		() => sdk.opds.progression(progressionURL || ''),
-		{
-			suspense: true,
-			enabled: false,
-		},
-	)
+	const { data: progression } = useQuery({
+		queryKey: [sdk.opds.keys.progression, progressionURL],
+		queryFn: () => sdk.opds.progression(progressionURL || ''),
+		enabled: false,
+	})
 
 	if (!publication) return null
 

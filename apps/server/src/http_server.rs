@@ -20,10 +20,9 @@ use stump_core::config::StumpConfig;
 pub async fn run_http_server(config: StumpConfig) -> ServerResult<()> {
 	let core = StumpCore::new(config.clone()).await;
 
-	if let Err(error) = core.run_migrations().await {
-		tracing::error!(?error, "Failed to run migrations");
-		return Err(ServerError::ServerStartError(error.to_string()));
-	}
+	// TODO: These need reorganizing, the core-specific initializations should just be
+	// in some initialization function. The server-specific things, e.g. watcher, scheduler,
+	// should be fully managed by the server and removed from the core...
 
 	core.get_job_controller()
 		.initialize()
@@ -59,8 +58,9 @@ pub async fn run_http_server(config: StumpConfig) -> ServerResult<()> {
 
 	println!("{}", core.get_shadow_text());
 
+	let app_router = routers::mount(app_state.clone()).await;
 	let app = Router::new()
-		.merge(routers::mount(app_state.clone()))
+		.merge(app_router)
 		.with_state(app_state.clone())
 		.layer(get_session_layer(app_state.clone()))
 		.layer(cors_layer)

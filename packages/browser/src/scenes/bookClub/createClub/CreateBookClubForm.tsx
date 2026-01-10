@@ -1,6 +1,8 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useBookClubsQuery } from '@stump/client'
+import { useSDK, useSuspenseGraphQL } from '@stump/client'
+// import { useBookClubsQuery } from '@stump/client'
 import { Button, cn, Form } from '@stump/components'
+import { graphql } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { useCallback, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
@@ -17,18 +19,28 @@ import { useSteppedFormContext } from '@/components/steppedForm'
 
 import CreateClubReview from './CreateClubReview'
 
-const LOCAL_BASE = 'createBookClubScene.form'
-export const getLocaleKey = (key: string) => `${LOCAL_BASE}.${key}`
+const query = graphql(`
+	query CreateBookClubForm {
+		bookClubs {
+			name
+			slug
+		}
+	}
+`)
 
 type Props = {
 	onSubmit: (values: CreateOrUpdateBookClubSchema) => void
 }
+
 export default function CreateBookClubForm({ onSubmit }: Props) {
+	const { sdk } = useSDK()
 	const { t } = useLocaleContext()
 	const { currentStep, setStep } = useSteppedFormContext()
 
-	const { bookClubs } = useBookClubsQuery({ params: { all: true }, suspense: true })
-	const existingNames = useMemo(() => (bookClubs ?? []).map(({ name }) => name), [bookClubs])
+	const {
+		data: { bookClubs },
+	} = useSuspenseGraphQL(query, sdk.cacheKey('bookClubs', ['names']))
+	const existingNames = useMemo(() => bookClubs.map(({ name }) => name), [bookClubs])
 
 	const schema = useMemo(() => buildSchema(t, existingNames, true), [t, existingNames])
 	const form = useForm<CreateOrUpdateBookClubSchema>({
@@ -41,11 +53,11 @@ export default function CreateBookClubForm({ onSubmit }: Props) {
 	 */
 	const handleChangeStep = useCallback(
 		async (nextStep: number) => {
-			const isValid = true
+			let isValid = true
 
 			switch (currentStep) {
 				case 1:
-					// isValid = await form.trigger(['name', 'description', 'is_private'])
+					isValid = await form.trigger(['name', 'description', 'isPrivate'])
 					break
 				case 2:
 					break
@@ -57,7 +69,7 @@ export default function CreateBookClubForm({ onSubmit }: Props) {
 				setStep(nextStep)
 			}
 		},
-		[currentStep, setStep],
+		[form, currentStep, setStep],
 	)
 
 	const renderNextButton = (nextStep: number) => (
@@ -107,16 +119,6 @@ export default function CreateBookClubForm({ onSubmit }: Props) {
 		<Form id="create-club-form" form={form} onSubmit={onSubmit}>
 			<ContentContainer className="mt-0">
 				{renderStep()}
-				{/* <div className="flex flex-col gap-6 md:max-w-md">
-					
-
-				<CreatorPreferences />
-
-				<div className="flex w-full md:max-w-sm">
-					<Button type="submit" variant="primary" size="lg">
-						{t(getLocaleKey('submit'))}
-					</Button>
-				</div> */}
 
 				<div
 					className={cn('mt-6 flex w-full md:max-w-sm', {
@@ -131,3 +133,6 @@ export default function CreateBookClubForm({ onSubmit }: Props) {
 		</Form>
 	)
 }
+
+const LOCAL_BASE = 'createBookClubScene.form'
+export const getLocaleKey = (key: string) => `${LOCAL_BASE}.${key}`

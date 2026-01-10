@@ -1,9 +1,10 @@
 import { IconButton, Popover, ToolTip } from '@stump/components'
+import { OrderDirection } from '@stump/graphql'
 import { ArrowUpDown } from 'lucide-react'
 import { useCallback, useState } from 'react'
 import { useMediaMatch } from 'rooks'
 
-import { useFilterContext } from './context'
+import { OrderingField, useFilterContext } from './context'
 import { FilterableEntity, OrderByDirection, OrderBySelect } from './form'
 
 type Props = {
@@ -13,15 +14,18 @@ type Props = {
 export default function URLOrdering({ entity }: Props) {
 	const [isOpen, setIsOpen] = useState(false)
 	const isMobile = useMediaMatch('(max-width: 768px)')
-
-	const { ordering, setFilter } = useFilterContext()
+	const {
+		ordering: { orderBy, direction },
+		setOrdering,
+	} = useFilterContext()
 
 	/**
 	 * A callback to handle the change of the ordering field.
 	 */
 	const handleChangeOrderBy = useCallback(
-		(value: string) => setFilter('order_by', value),
-		[setFilter],
+		(value: OrderingField) =>
+			setOrdering({ orderBy: value, direction: direction ? direction : OrderDirection.Asc }),
+		[setOrdering, direction],
 	)
 
 	/**
@@ -30,8 +34,9 @@ export default function URLOrdering({ entity }: Props) {
 	 * @param value The new ordering direction.
 	 */
 	const handleChangeDirection = useCallback(
-		(value: 'asc' | 'desc') => setFilter('direction', value),
-		[setFilter],
+		(value: OrderDirection) =>
+			setOrdering({ orderBy: orderBy ? orderBy : ('NAME' as OrderingField), direction: value }),
+		[setOrdering, orderBy],
 	)
 
 	return (
@@ -53,12 +58,8 @@ export default function URLOrdering({ entity }: Props) {
 				className="flex flex-col gap-3 overflow-hidden p-3 shadow-sm"
 				align={isMobile ? 'start' : 'end'}
 			>
-				<OrderBySelect
-					entity={entity}
-					value={ordering.order_by || 'name'}
-					onChange={handleChangeOrderBy}
-				/>
-				<OrderByDirection value={ordering.direction} onChange={handleChangeDirection} />
+				<OrderBySelect entity={entity} value={orderBy || 'name'} onChange={handleChangeOrderBy} />
+				<OrderByDirection value={direction} onChange={handleChangeDirection} />
 			</Popover.Content>
 		</Popover>
 	)

@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { useMediaMatch } from 'rooks'
 
 import { usePreferences } from './usePreferences'
 
@@ -7,33 +8,42 @@ import { usePreferences } from './usePreferences'
  **/
 export function useTheme() {
 	const {
-		preferences: { app_theme, enable_gradients },
+		preferences: { appTheme, enableGradients },
 		update,
 	} = usePreferences()
+	const prefersDark = useMediaMatch('(prefers-color-scheme: dark)')
 
 	const changeTheme = (theme: string) =>
 		update({
-			app_theme: theme,
+			appTheme: theme,
 		})
+
+	const darkThemes = useMemo(
+		() => [...DARK_THEMES, ...(prefersDark ? ['system'] : [])],
+		[prefersDark],
+	)
 
 	/**
 	 * Whether the current theme is a dark variant
 	 */
-	const isDarkVariant = useMemo(() => DARK_THEMES.includes(app_theme || 'light'), [app_theme])
+	const isDarkVariant = useMemo(
+		() => darkThemes.includes(appTheme || 'light'),
+		[appTheme, darkThemes],
+	)
 	/**
 	 * Whether the current theme supports gradients
 	 */
 	const isGradientSupported = useMemo(
-		() => THEMES_WITH_GRADIENTS.includes(app_theme || 'light'),
-		[app_theme],
+		() => THEMES_WITH_GRADIENTS.includes(appTheme || 'light'),
+		[appTheme],
 	)
 	/**
 	 * If the user has gradients enabled and the theme supports gradients, we will
 	 * use a gradient background instead of a solid color where possible
 	 */
 	const shouldUseGradient = useMemo(
-		() => enable_gradients && isGradientSupported,
-		[enable_gradients, isGradientSupported],
+		() => enableGradients && isGradientSupported,
+		[enableGradients, isGradientSupported],
 	)
 
 	return {
@@ -41,9 +51,9 @@ export function useTheme() {
 		isDarkVariant,
 		isGradientSupported,
 		shouldUseGradient,
-		theme: app_theme || 'light',
+		theme: appTheme || 'light',
 	}
 }
 
-export const DARK_THEMES = ['dark', 'cosmic', 'pumpkin', 'autumn']
+export const DARK_THEMES = ['dark', 'ocean', 'cosmic', 'pumpkin', 'autumn']
 export const THEMES_WITH_GRADIENTS = ['cosmic']

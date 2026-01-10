@@ -1,3 +1,5 @@
+use models::error::EntityError;
+use sea_orm;
 use tokio::sync::oneshot;
 
 use crate::{filesystem::error::FileError, CoreError};
@@ -15,23 +17,23 @@ pub enum JobError {
 	#[error("A task experienced a critical error while executing: {0}")]
 	TaskFailed(String),
 	#[error("A query error occurred: {0}")]
-	QueryError(#[from] Box<prisma_client_rust::QueryError>),
+	DbError(#[from] sea_orm::error::DbErr),
 	#[error("A file error occurred: {0}")]
 	FileError(#[from] FileError),
 	#[error("An unknown error occurred: {0}")]
 	Unknown(String),
 }
 
-impl From<prisma_client_rust::QueryError> for JobError {
-	fn from(error: prisma_client_rust::QueryError) -> Self {
-		Self::QueryError(Box::new(error))
+impl From<EntityError> for JobError {
+	fn from(err: EntityError) -> Self {
+		Self::Unknown(err.to_string())
 	}
 }
 
 impl From<CoreError> for JobError {
 	fn from(err: CoreError) -> Self {
 		match err {
-			CoreError::QueryError(err) => Self::QueryError(err),
+			CoreError::DBError(err) => Self::DbError(err),
 			_ => Self::Unknown(err.to_string()),
 		}
 	}
@@ -56,7 +58,7 @@ pub enum JobManagerError {
 	#[error("A job was found which was in a deeply invalid state")]
 	JobLostError,
 	#[error("A query error occurred {0}")]
-	QueryError(#[from] Box<prisma_client_rust::QueryError>),
+	DbError(#[from] sea_orm::error::DbErr),
 	#[error("An unknown error occurred {0}")]
 	Unknown(String),
 }
@@ -64,14 +66,8 @@ pub enum JobManagerError {
 impl From<JobError> for JobManagerError {
 	fn from(job_error: JobError) -> Self {
 		match job_error {
-			JobError::QueryError(e) => Self::QueryError(e),
+			JobError::DbError(err) => Self::DbError(err),
 			_ => Self::Unknown(job_error.to_string()),
 		}
-	}
-}
-
-impl From<prisma_client_rust::QueryError> for JobManagerError {
-	fn from(error: prisma_client_rust::QueryError) -> Self {
-		Self::QueryError(Box::new(error))
 	}
 }

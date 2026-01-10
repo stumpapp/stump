@@ -15,112 +15,34 @@
 // - https://github.com/Nukesor/pueue
 use std::{collections::VecDeque, fmt::Debug, sync::Arc, time::Duration};
 
-use prisma_client_rust::chrono::{self, DateTime, Utc};
+use models::{
+	entity::{job, log},
+	shared::enums::{JobStatus, LogLevel},
+};
+use sea_orm::{prelude::*, QuerySelect, Set};
 use serde::{de, Deserialize, Serialize};
 
 mod controller;
 pub mod error;
 mod manager;
+mod output;
 mod progress;
 mod scheduler;
 mod task;
 mod worker;
 
+use chrono::{DateTime, Utc};
 use error::JobError;
+pub use output::*;
 pub use progress::*;
 pub use scheduler::JobScheduler;
-use specta::Type;
 pub use task::JobTaskOutput;
 use task::{job_task_handler, JobTaskHandlerOutput};
-use utoipa::ToSchema;
 pub use worker::*;
 
 pub use controller::*;
 pub use manager::*;
 use uuid::Uuid;
-
-use crate::{
-	db::entity::LogLevel,
-	prisma::{job, log},
-};
-
-#[derive(
-	Clone, Debug, Default, Serialize, Deserialize, PartialEq, Eq, Type, ToSchema,
-)]
-pub enum JobStatus {
-	#[serde(rename = "RUNNING")]
-	Running,
-	#[serde(rename = "PAUSED")]
-	Paused,
-	#[serde(rename = "COMPLETED")]
-	Completed,
-	#[serde(rename = "CANCELLED")]
-	Cancelled,
-	#[serde(rename = "FAILED")]
-	Failed,
-	#[default]
-	#[serde(rename = "QUEUED")]
-	Queued,
-}
-
-impl JobStatus {
-	/// A helper function to determine if a job status is resolved. A job is considered
-	/// resolved if it is in a final state (Completed, Cancelled, or Failed).
-	pub fn is_resolved(&self) -> bool {
-		matches!(
-			self,
-			JobStatus::Completed | JobStatus::Cancelled | JobStatus::Failed
-		)
-	}
-
-	/// A helper function to determine if a job status is successful. A job is considered
-	/// successful if it is in a Completed state.
-	pub fn is_success(&self) -> bool {
-		matches!(self, JobStatus::Completed)
-	}
-
-	/// A helper function to determine if a job status is pending. A job is considered pending
-	/// if it is in a Running, Paused, or Queued state.
-	pub fn is_pending(&self) -> bool {
-		matches!(
-			self,
-			JobStatus::Running | JobStatus::Paused | JobStatus::Queued
-		)
-	}
-}
-
-impl std::fmt::Display for JobStatus {
-	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		match self {
-			JobStatus::Running => write!(f, "RUNNING"),
-			JobStatus::Paused => write!(f, "PAUSED"),
-			JobStatus::Completed => write!(f, "COMPLETED"),
-			JobStatus::Cancelled => write!(f, "CANCELLED"),
-			JobStatus::Failed => write!(f, "FAILED"),
-			JobStatus::Queued => write!(f, "QUEUED"),
-		}
-	}
-}
-
-impl From<&str> for JobStatus {
-	fn from(s: &str) -> Self {
-		match s {
-			"RUNNING" => JobStatus::Running,
-			"PAUSED" => JobStatus::Paused,
-			"COMPLETED" => JobStatus::Completed,
-			"CANCELLED" => JobStatus::Cancelled,
-			"FAILED" => JobStatus::Failed,
-			"QUEUED" => JobStatus::Queued,
-			_ => unreachable!(),
-		}
-	}
-}
-
-impl From<String> for JobStatus {
-	fn from(s: String) -> Self {
-		JobStatus::from(s.as_str())
-	}
-}
 
 /// The retry policy for a job. This is used to determine if a job should be requeued after
 /// a non-critical failure.
@@ -130,28 +52,6 @@ pub enum JobRetryPolicy {
 	Infinite,
 	/// Only retry the job a fixed number of times before giving up
 	Count(usize),
-}
-
-/// A trait to extend the output type for a job with a common interface. Job output starts
-/// in an 'empty' state (Default) and is frequently updated during execution.
-///
-/// The state is also serialized and stored in the DB, so it must implement [Serialize] and [`de::DeserializeOwned`].
-pub trait JobOutputExt: Serialize + de::DeserializeOwned + Debug {
-	/// Update the state with new data. By default, the implementation is a full replacement
-	fn update(&mut self, updated: Self) {
-		*self = updated;
-	}
-
-	/// Serialize the state to JSON. If serialization fails, the error is logged and None is returned.
-	fn into_json(self) -> Option<serde_json::Value> {
-		serde_json::to_value(&self).map_or_else(
-			|error| {
-				tracing::error!(?error, job_data = ?self, "Failed to serialize job data!");
-				None
-			},
-			Some,
-		)
-	}
 }
 
 /// A log that will be persisted from a job's execution
@@ -200,19 +100,6 @@ impl JobExecuteLog {
 			context: Some(ctx),
 			..self
 		}
-	}
-
-	/// Constructs a Prisma create payload for the error
-	pub fn into_prisma(self, job_id: String) -> (String, Vec<log::SetParam>) {
-		(
-			self.msg,
-			vec![
-				log::context::set(self.context),
-				log::level::set(self.level.to_string()),
-				log::timestamp::set(self.timestamp.into()),
-				log::job::connect(job::id::equals(job_id.clone())),
-			],
-		)
 	}
 }
 
@@ -275,12 +162,13 @@ pub trait JobExt: Send + Sync + Sized + Clone + 'static {
 		&self,
 		ctx: &WorkerCtx,
 	) -> Result<Option<WorkingState<Self::Output, Self::Task>>, JobError> {
-		let db = ctx.db.clone();
+		let conn = ctx.conn.as_ref();
 
-		let stored_job = db
-			.job()
-			.find_unique(job::id::equals(ctx.job_id.clone()))
-			.exec()
+		let stored_job = job::Entity::find_by_id(ctx.job_id.clone())
+			.select_only()
+			.column(job::Column::SaveState)
+			.into_model::<job::SaveStateSelect>()
+			.one(conn)
 			.await?;
 
 		match stored_job {
@@ -320,7 +208,7 @@ pub trait JobExt: Send + Sync + Sized + Clone + 'static {
 		completed_tasks: usize,
 		logs: &Vec<JobExecuteLog>,
 	) -> Result<(), JobError> {
-		let db = ctx.db.clone();
+		let conn = ctx.conn.as_ref();
 		let job_id = ctx.job_id.clone();
 
 		let json_output = serde_json::to_value(output)
@@ -329,6 +217,7 @@ pub trait JobExt: Send + Sync + Sized + Clone + 'static {
 			.map_err(|error| JobError::StateSaveFailed(error.to_string()))?;
 		let json_logs = serde_json::to_value(logs)
 			.map_err(|error| JobError::StateSaveFailed(error.to_string()))?;
+
 		let working_state = serde_json::json!({
 			"output": json_output,
 			"tasks": json_tasks,
@@ -339,16 +228,18 @@ pub trait JobExt: Send + Sync + Sized + Clone + 'static {
 		let save_state = serde_json::to_vec(&working_state)
 			.map_err(|error| JobError::StateSaveFailed(error.to_string()))?;
 
-		let persisted_job = db
-			.job()
-			.update(
-				job::id::equals(job_id),
-				vec![job::save_state::set(Some(save_state))],
-			)
-			.exec()
-			.await
-			.map_err(|error| JobError::StateSaveFailed(error.to_string()))?;
-		tracing::trace!(?persisted_job, "Persisted job save state to DB");
+		let affected_rows = job::Entity::update_many()
+			.filter(job::Column::Id.eq(job_id.clone()))
+			.col_expr(job::Column::SaveState, Expr::value(Some(save_state)))
+			.exec(conn)
+			.await?
+			.rows_affected;
+
+		if affected_rows == 0 {
+			return Err(JobError::StateSaveFailed(
+				"Failed to persist job save state to DB".to_string(),
+			));
+		}
 
 		Ok(())
 	}
@@ -367,7 +258,7 @@ pub trait JobExt: Send + Sync + Sized + Clone + 'static {
 		&self,
 		_: &WorkerCtx,
 		_: &Self::Output,
-	) -> Result<Option<Box<dyn Executor>>, JobError> {
+	) -> Result<Option<Vec<Box<dyn Executor>>>, JobError> {
 		Ok(None)
 	}
 
@@ -435,7 +326,7 @@ impl<J: JobExt> WrappedJob<J> {
 pub struct ExecutorOutput {
 	pub output: Option<serde_json::Value>,
 	pub logs: Vec<JobExecuteLog>,
-	pub next_job: Option<Box<dyn Executor>>,
+	pub next_jobs: Option<Vec<Box<dyn Executor>>>,
 }
 
 impl Debug for ExecutorOutput {
@@ -443,7 +334,12 @@ impl Debug for ExecutorOutput {
 		f.debug_struct("ExecutorOutput")
 			.field("output", &self.output)
 			.field("logs", &self.logs)
-			.field("next_job", &self.next_job.as_ref().map(|j| j.name()))
+			.field(
+				"next_jobs",
+				&self.next_jobs.as_ref().map(|jobs| {
+					jobs.iter().map(|j| j.name()).collect::<Vec<&'static str>>()
+				}),
+			)
 			.finish()
 	}
 }
@@ -472,64 +368,50 @@ pub trait Executor: Send + Sync {
 		output: ExecutorOutput,
 		elapsed: Duration,
 	) -> Result<(), JobError> {
-		let db = ctx.db.clone();
+		let conn = ctx.conn.as_ref();
 		let job_id = self.id();
 
 		let expected_logs = output.logs.len();
-		if expected_logs > 0 {
-			let creates = output
-				.logs
-				.into_iter()
-				.map(|log| log.into_prisma(job_id.to_string()))
-				.map(|(msg, params)| db.log().create(msg, params));
-			let persisted_logs = db._batch(creates).await.map_or_else(
-				|error| {
-					tracing::error!(?error, "Failed to persist job logs!");
-					0
-				},
-				|logs| logs.len(),
-			);
 
-			if persisted_logs != expected_logs {
-				tracing::warn!(
-					?persisted_logs,
-					?expected_logs,
-					"Failed to persist all job logs!"
-				);
+		if expected_logs > 0 {
+			let active_models = output.logs.into_iter().map(|log| log::ActiveModel {
+				job_id: Set(Some(job_id.to_string())),
+				level: Set(log.level),
+				message: Set(log.msg),
+				timestamp: Set(log.timestamp.into()),
+				context: Set(log.context),
+				..Default::default()
+			});
+
+			if let Err(error) = log::Entity::insert_many(active_models).exec(conn).await {
+				tracing::error!(?error, "Failed to persist job logs to DB");
 			}
 		}
 
 		let output_data = serde_json::to_vec(&output.output)
 			.map_err(|error| JobError::StateSaveFailed(error.to_string()))?;
 
-		let tx_timeout = chrono::Duration::seconds(60).num_milliseconds() as u64;
-		let persisted_job_with_data = db
-			._transaction()
-			.with_max_wait(tx_timeout)
-			.with_timeout(tx_timeout)
-			.run(|client| async move {
-				client
-					.job()
-					.update(
-						job::id::equals(job_id.to_string()),
-						vec![
-							job::save_state::set(None),
-							job::output_data::set(Some(output_data)),
-							job::status::set(JobStatus::Completed.to_string()),
-							job::ms_elapsed::set(
-								elapsed.as_millis().try_into().unwrap_or_else(|e| {
-									tracing::error!(error = ?e, "Wow! You defied logic and overflowed an i64 during the attempt to convert job duration to milliseconds. It must have been a long 292_471_208 years!");
-									i64::MAX
-								}),
-							),
-						],
-					)
-					.exec()
-					.await
-			})
-			.await
-			.map_err(|error| JobError::StateSaveFailed(error.to_string()))?;
-		tracing::trace!(?persisted_job_with_data, "Persisted completed job to DB");
+		let affected_rows = job::Entity::update_many()
+			.filter(job::Column::Id.eq(job_id.to_string()))
+			.col_expr(job::Column::SaveState, Expr::value(None::<Vec<u8>>))
+			.col_expr(job::Column::OutputData, Expr::value(Some(output_data)))
+			.col_expr(
+				job::Column::Status,
+				Expr::value(JobStatus::Completed.to_string()),
+			)
+			.col_expr(
+				job::Column::MsElapsed,
+				Expr::value(elapsed.as_millis() as i64),
+			)
+			.exec(conn)
+			.await?
+			.rows_affected;
+
+		if affected_rows == 0 {
+			return Err(JobError::StateSaveFailed(
+				"Failed to persist job output to DB".to_string(),
+			));
+		}
 
 		Ok(())
 	}
@@ -541,7 +423,7 @@ pub trait Executor: Send + Sync {
 		status: JobStatus,
 		elapsed: Duration,
 	) -> Result<(), JobError> {
-		let db = ctx.db.clone();
+		let conn = ctx.conn.as_ref();
 		let job_id = self.id();
 
 		if status.is_success() || status.is_pending() {
@@ -554,31 +436,22 @@ pub trait Executor: Send + Sync {
 			));
 		}
 
-		let tx_timeout = chrono::Duration::seconds(60).num_milliseconds() as u64;
-		let _persisted_job = db
-			._transaction()
-			.with_max_wait(tx_timeout)
-			.with_timeout(tx_timeout)
-			.run(|client| async move {
-				client
-					.job()
-					.update(
-						job::id::equals(job_id.to_string()),
-						vec![
-							job::status::set(status.to_string()),
-							job::ms_elapsed::set(
-								elapsed.as_millis().try_into().unwrap_or_else(|e| {
-									tracing::error!(error = ?e, "Wow! You defied logic and overflowed an i64 during the attempt to convert job duration to milliseconds. It must have been a long 292_471_208 years!");
-									i64::MAX
-								}),
-							),
-						],
-					)
-					.exec()
-					.await
-			})
-			.await
-			.map_err(|error| JobError::StateSaveFailed(error.to_string()))?;
+		let affected_rows = job::Entity::update_many()
+			.filter(job::Column::Id.eq(job_id.to_string()))
+			.col_expr(job::Column::Status, Expr::value(status.to_string()))
+			.col_expr(
+				job::Column::MsElapsed,
+				Expr::value(elapsed.as_millis() as i64),
+			)
+			.exec(conn)
+			.await?
+			.rows_affected;
+
+		if affected_rows == 0 {
+			return Err(JobError::StateSaveFailed(
+				"Failed to persist job failure to DB".to_string(),
+			));
+		}
 
 		Ok(())
 	}
@@ -735,10 +608,11 @@ impl<J: JobExt> Executor for WrappedJob<J> {
 					return Ok(ExecutorOutput {
 						output: working_output.into_json(),
 						logs,
-						next_job: None,
+						next_jobs: None,
 					});
 				},
 			};
+
 			let JobTaskOutput {
 				output: task_output,
 				logs: task_logs,
@@ -789,8 +663,8 @@ impl<J: JobExt> Executor for WrappedJob<J> {
 
 		let logs_count = logs.len();
 		tracing::debug!(?logs_count, "All tasks completed");
-		let next_job = match job.cleanup(&ctx, &working_output).await {
-			Ok(next_job) => next_job,
+		let next_jobs = match job.cleanup(&ctx, &working_output).await {
+			Ok(jobs) => jobs,
 			Err(e) => {
 				tracing::error!(?e, "Cleanup failed");
 				logs.push(JobExecuteLog::error(format!(
@@ -812,7 +686,7 @@ impl<J: JobExt> Executor for WrappedJob<J> {
 		Ok(ExecutorOutput {
 			output: working_output.into_json(),
 			logs,
-			next_job,
+			next_jobs,
 		})
 	}
 }

@@ -1,12 +1,18 @@
-import { queryClient, useScanLibrary, useSDK, useUpdateLibrary } from '@stump/client'
-import { ScanOptions, UpdateLibrary } from '@stump/sdk'
+import { useGraphQLMutation } from '@stump/client'
+import { CreateOrUpdateLibraryInput, graphql, useFragment, UserPermission } from '@stump/graphql'
+import { useQueryClient } from '@tanstack/react-query'
+import omit from 'lodash/omit'
+import pick from 'lodash/pick'
 import { lazy, Suspense, useCallback } from 'react'
 import { Navigate, Route, Routes } from 'react-router'
+import { toast } from 'sonner'
 
 import { useAppContext } from '@/context'
 
 import { useLibraryContext } from '../../context'
-import { LibraryManagementContext } from './context'
+import { LibraryManagementContext, LibraryPatchParams } from './context'
+import { ScanOptions } from './options/scanner/history/ScanHistoryTable'
+import { transformConfigForMutation } from './utils'
 
 const BasicSettingsScene = lazy(() => import('./basics/BasicSettingsScene'))
 const ThumbnailSettingsScene = lazy(() => import('./options/thumbnails/ThumbnailSettingsScene'))
@@ -17,25 +23,102 @@ const LibraryReadingDefaultsScene = lazy(() => import('./options/readingDefaults
 const AccessControlScene = lazy(() => import('./danger/accessControl'))
 const DeletionScene = lazy(() => import('./danger/deletion'))
 
+export const LibrarySettingsConfig = graphql(`
+	fragment LibrarySettingsConfig on Library {
+		config {
+			id
+			convertRarToZip
+			hardDeleteConversions
+			defaultReadingDir
+			defaultReadingMode
+			defaultReadingImageScaleFit
+			defaultLibraryViewMode
+			hideSeriesView
+			generateFileHashes
+			generateKoreaderHashes
+			processMetadata
+			watch
+			libraryPattern
+			thumbnailConfig {
+				__typename
+				resizeMethod {
+					__typename
+					... on ScaleEvenlyByFactor {
+						factor
+					}
+					... on ExactDimensionResize {
+						width
+						height
+					}
+					... on ScaledDimensionResize {
+						dimension
+						size
+					}
+				}
+				format
+				quality
+				page
+			}
+			processThumbnailColorsEvenWithoutConfig
+			ignoreRules
+		}
+	}
+`)
+
+const editMutation = graphql(`
+	mutation LibrarySettingsRouterEditLibraryMutation($id: ID!, $input: CreateOrUpdateLibraryInput!) {
+		updateLibrary(id: $id, input: $input) {
+			id
+		}
+	}
+`)
+
+const scanMutation = graphql(`
+	mutation LibrarySettingsRouterScanLibraryMutation($id: ID!, $options: JSON) {
+		scanLibrary(id: $id, options: $options)
+	}
+`)
+
 // Note: library:manage permission is enforced in the parent router
 export default function LibrarySettingsRouter() {
 	const { checkPermission } = useAppContext()
 	const { library } = useLibraryContext()
-	const { sdk } = useSDK()
-	const { editLibrary } = useUpdateLibrary({
-		id: library.id,
-		onSuccess: async ({ id }) => {
-			await queryClient.refetchQueries([sdk.library.keys.getByID, id], { exact: false })
+	const { config } = useFragment(LibrarySettingsConfig, library)
+
+	const client = useQueryClient()
+
+	const { mutate: editLibrary, isPending } = useGraphQLMutation(editMutation, {
+		onSuccess: async () => {
+			client.invalidateQueries({
+				predicate: ({ queryKey }) =>
+					queryKey.some(
+						(key) =>
+							typeof key === 'string' &&
+							[
+								'libraryById',
+								// sdk.job.keys.get,
+								// sdk.library.keys.getByID,
+							].includes(key),
+					),
+			})
 		},
 	})
 
-	const { scan } = useScanLibrary()
+	const { mutate: scan } = useGraphQLMutation(scanMutation, {
+		onError: (error) => {
+			console.error('Failed to scan library', error)
+			toast.error('Failed to scan library', {
+				description: 'Please check the logs for more details',
+			})
+		},
+	})
+
 	const scanLibrary = useCallback(
-		(options: ScanOptions = {}) => scan({ id: library.id, ...options }),
+		(options?: ScanOptions) => scan({ id: library.id, options }),
 		[library.id, scan],
 	)
 
-	const canScan = checkPermission('library:scan')
+	const canScan = checkPermission(UserPermission.ScanLibrary)
 
 	// TODO: This is particularly fallible. It would be a lot wiser to eventually just.. y'know, literally
 	// implement a patch endpoint lol. I'm being very lazy but I'll get to it. I'm tired!
@@ -44,21 +127,33 @@ export default function LibrarySettingsRouter() {
 	 * with the updates provided.
 	 */
 	const patch = useCallback(
-		(updates: Partial<UpdateLibrary>) => {
-			const payload: UpdateLibrary = {
-				...library,
+		(updates: LibraryPatchParams) => {
+			if (isPending) return
+			// TODO: This cast is very unsafe and the cause of multiple bugs already. Fix it.
+			const configWithoutId = omit(
+				updates.config ? { ...config, ...updates.config } : config,
+				'id',
+			) as CreateOrUpdateLibraryInput['config']
+			const adjustedConfig = transformConfigForMutation(configWithoutId)
+			const payload = {
+				// Note: pick returns a deep partial for whatever reason, so we cast it. This should be safe
+				...(pick(library, ['name', 'description', 'emoji', 'path']) as typeof library),
 				...updates,
-				config: updates.config ? { ...library.config, ...updates.config } : library.config,
+				config: adjustedConfig,
 				tags: updates.tags ? updates.tags : library?.tags?.map(({ name }) => name),
-			}
-			editLibrary(payload)
+			} satisfies CreateOrUpdateLibraryInput
+			editLibrary({ id: library.id, input: payload })
 		},
-		[editLibrary, library],
+		[editLibrary, library, config, isPending],
 	)
 
 	return (
 		<LibraryManagementContext.Provider
 			value={{
+				library: {
+					...library,
+					config,
+				},
 				patch,
 				scan: canScan ? scanLibrary : undefined,
 			}}

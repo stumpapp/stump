@@ -14,7 +14,7 @@ type DemoProps = ComponentProps<typeof ProgressBar> & {
 	speed?: number
 }
 const Demo = (args: DemoProps) => {
-	const interval = useRef<NodeJS.Timeout>()
+	const interval = useRef<NodeJS.Timeout>(undefined)
 	const [value, setValue] = useState(args.value || 0)
 
 	useEffect(() => {

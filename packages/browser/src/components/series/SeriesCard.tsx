@@ -1,47 +1,55 @@
-import { usePrefetchSeries, useSDK } from '@stump/client'
+import { useSDK } from '@stump/client'
 import { Text } from '@stump/components'
-import { Series } from '@stump/sdk'
+import { FileStatus } from '@stump/graphql'
+import { useCallback } from 'react'
+
+import { usePrefetchSeries } from '@/scenes/series'
+import { usePrefetchSeriesBooks } from '@/scenes/series/tabs/books/SeriesBooksScene'
 
 import paths from '../../paths'
 import pluralizeStat from '../../utils/pluralize'
 import { EntityCard } from '../entity'
 
+export interface SeriesCardData {
+	id: string
+	resolvedName: string
+	mediaCount: number
+	percentageCompleted: number
+	status: FileStatus
+}
+
 export type SeriesCardProps = {
-	series: Series
+	data: SeriesCardData
 	fullWidth?: boolean
 	variant?: 'cover' | 'default'
 }
 
-export default function SeriesCard({ series, fullWidth, variant = 'default' }: SeriesCardProps) {
+export default function SeriesCard({ data, fullWidth, variant = 'default' }: SeriesCardProps) {
 	const { sdk } = useSDK()
+
 	const isCoverOnly = variant === 'cover'
 
-	const bookCount = Number(series.media ? series.media.length : series.media_count ?? 0)
-	const booksUnread = series.unread_media_count
-
-	const { prefetch } = usePrefetchSeries({ id: series.id })
-
-	const handleHover = () => prefetch()
+	const prefetchSeries = usePrefetchSeries()
+	const prefetchSeriesBooks = usePrefetchSeriesBooks()
+	const prefetch = useCallback(
+		() => Promise.all([prefetchSeries(data.id), prefetchSeriesBooks(data.id)]),
+		[prefetchSeries, prefetchSeriesBooks, data.id],
+	)
 
 	function getProgress() {
-		if (isCoverOnly || booksUnread == null) {
+		if (isCoverOnly || data.percentageCompleted <= 0.0) {
 			return undefined
 		}
 
-		const percent = Math.round((1 - Number(booksUnread) / bookCount) * 100)
-		if (percent > 100) {
-			return 100
-		}
-
-		return percent
+		return Math.max(100, data.percentageCompleted)
 	}
 
-	const getSubtitle = (series: Series) => {
+	const getSubtitle = useCallback(() => {
 		if (isCoverOnly) {
 			return null
 		}
 
-		const isMissing = series.status === 'MISSING'
+		const isMissing = data.status === 'MISSING'
 		if (isMissing) {
 			return (
 				<Text size="xs" className="uppercase text-amber-500">
@@ -53,11 +61,11 @@ export default function SeriesCard({ series, fullWidth, variant = 'default' }: S
 		return (
 			<div className="flex items-center justify-between">
 				<Text size="xs" variant="muted">
-					{pluralizeStat('book', Number(bookCount))}
+					{pluralizeStat('book', Number(data.mediaCount))}
 				</Text>
 			</div>
 		)
-	}
+	}, [isCoverOnly, data])
 
 	const overrides = isCoverOnly
 		? {
@@ -71,13 +79,12 @@ export default function SeriesCard({ series, fullWidth, variant = 'default' }: S
 
 	return (
 		<EntityCard
-			key={series.id}
-			title={series.name}
-			href={paths.seriesOverview(series.id)}
-			imageUrl={sdk.series.thumbnailURL(series.id)}
+			title={data.resolvedName}
+			href={paths.seriesOverview(data.id)}
+			imageUrl={sdk.series.thumbnailURL(data.id)}
 			progress={getProgress()}
-			subtitle={getSubtitle(series)}
-			onMouseEnter={handleHover}
+			subtitle={getSubtitle()}
+			onMouseEnter={prefetch}
 			fullWidth={fullWidth}
 			isCover={isCoverOnly}
 			{...overrides}

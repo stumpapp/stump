@@ -18,8 +18,8 @@ export default function BookDescription({ description }: Props) {
 	}
 
 	return (
-		<View className="flex flex-row items-start justify-between py-1">
-			<Text className="shrink-0 text-foreground-subtle">Description</Text>
+		<View className="flex flex-row items-start justify-between p-3">
+			<Text className="shrink-0 text-foreground-muted">Description</Text>
 			<View className="max-w-[75%]">
 				<ContextMenu.Root>
 					<ContextMenu.Trigger>

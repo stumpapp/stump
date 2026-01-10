@@ -1,27 +1,26 @@
-import { usePrefetchClubChat } from '@stump/client'
 import { cn, cx, Link } from '@stump/components'
+import { noop } from 'lodash'
 import { useMemo } from 'react'
 import { useLocation } from 'react-router'
 
 import { useBookClubContext } from '@/components/bookClub'
 import { usePreferences } from '@/hooks'
 
+// TODO(book-clubs): Implement
 // TODO: when viewing a thread, only show something like "<-- Return to chat board"
 export default function BookClubNavigation() {
 	const location = useLocation()
 	const {
-		preferences: { primary_navigation_mode, layout_max_width_px },
+		preferences: { primaryNavigationMode, layoutMaxWidthPx },
 	} = usePreferences()
-	const {
-		bookClub: { id },
-		viewerIsMember,
-	} = useBookClubContext()
-	const { prefetch } = usePrefetchClubChat({ id })
+	const { viewerIsMember } = useBookClubContext()
+	// const { prefetch } = usePrefetchClubChat({ id })
+	const prefetch = noop
 
 	const tabs = useMemo(() => {
 		const base = [
 			{
-				isActive: location.pathname.match(/\/book-clubs\/[^/]+\/?(home)?$/),
+				isActive: location.pathname.match(/\/clubs\/[^/]+\/?(home)?$/),
 				label: 'Home',
 				to: '.',
 			},
@@ -34,25 +33,25 @@ export default function BookClubNavigation() {
 		return [
 			...base,
 			{
-				isActive: location.pathname.match(/\/book-clubs\/[^/]+\/discussion(\/.*)?$/),
+				isActive: location.pathname.match(/\/clubs\/[^/]+\/discussion(\/.*)?$/),
 				label: 'Discussion',
 				onHover: () => prefetch(),
 				to: 'discussion',
 			},
 			{
-				isActive: location.pathname.match(/\/book-clubs\/[^/]+\/members(\/.*)?$/),
+				isActive: location.pathname.match(/\/clubs\/[^/]+\/members(\/.*)?$/),
 				label: 'Members',
 				to: 'members',
 			},
 			{
-				isActive: location.pathname.match(/\/book-clubs\/[^/]+\/settings(\/.*)?$/),
+				isActive: location.pathname.match(/\/clubs\/[^/]+\/settings(\/.*)?$/),
 				label: 'Settings',
 				to: 'settings',
 			},
 		]
 	}, [location, viewerIsMember, prefetch])
 
-	const preferTopBar = primary_navigation_mode === 'TOPBAR'
+	const preferTopBar = primaryNavigationMode === 'TOPBAR'
 
 	// Don't bother rendering navigation if the user doesn't have access to any other tabs
 	if (tabs.length <= 1) {
@@ -65,10 +64,10 @@ export default function BookClubNavigation() {
 				className={cn(
 					'-mb-px flex gap-x-6 overflow-x-scroll px-3 scrollbar-hide md:overflow-x-hidden',
 					{
-						'mx-auto': preferTopBar && !!layout_max_width_px,
+						'mx-auto': preferTopBar && !!layoutMaxWidthPx,
 					},
 				)}
-				style={{ maxWidth: preferTopBar ? layout_max_width_px || undefined : undefined }}
+				style={{ maxWidth: preferTopBar ? layoutMaxWidthPx || undefined : undefined }}
 			>
 				{tabs.map((tab) => (
 					<Link

@@ -1,17 +1,21 @@
 import { Text } from '@stump/components'
+import { LibraryPattern, useFragment } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 
 import { useLibraryContext } from '@/scenes/library/context'
 
+import { LibrarySettingsConfig } from '../../LibrarySettingsRouter'
+
 export default function PatternDisplay() {
 	const { t } = useLocaleContext()
-	const {
-		library: {
-			config: { library_pattern },
-		},
-	} = useLibraryContext()
 
-	const localeKey = library_pattern === 'COLLECTION_BASED' ? 'collectionPriority' : 'seriesPriority'
+	const { library } = useLibraryContext()
+	const {
+		config: { libraryPattern },
+	} = useFragment(LibrarySettingsConfig, library)
+
+	const localeKey =
+		libraryPattern === LibraryPattern.CollectionBased ? 'collectionPriority' : 'seriesPriority'
 
 	return (
 		<div

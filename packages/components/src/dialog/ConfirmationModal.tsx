@@ -52,7 +52,7 @@ export function ConfirmationModal({
 
 	return (
 		<Dialog open={isOpen} onOpenChange={handleOpenChange}>
-			{trigger !== null && (
+			{trigger != null && (
 				<Dialog.Trigger asChild={!!trigger && typeof trigger !== 'string'}>
 					{typeof trigger === 'string' ? (
 						<Button variant={triggerVariant}>{trigger}</Button>

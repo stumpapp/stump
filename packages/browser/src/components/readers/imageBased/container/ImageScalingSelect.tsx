@@ -1,16 +1,16 @@
-import { BookImageScalingFit } from '@stump/client'
 import { Label, NativeSelect } from '@stump/components'
+import { ReadingImageScaleFit } from '@stump/graphql'
 import { useCallback } from 'react'
 
 type Props = {
-	value: BookImageScalingFit
-	onChange: (value: BookImageScalingFit) => void
+	value: ReadingImageScaleFit
+	onChange: (value: ReadingImageScaleFit) => void
 }
 
 export default function ImageScalingSelect({ value, onChange }: Props) {
 	/**
 	 * A change handler for the image scaling select, asserting that the value
-	 * is a valid {@link BookImageScalingFit} before setting the scaling method
+	 * is a valid {@link ReadingImageScaleFit} before setting the scaling method
 	 * in the book preferences (via the `doChange` callback).
 	 */
 	const handleChange = useCallback(
@@ -31,10 +31,10 @@ export default function ImageScalingSelect({ value, onChange }: Props) {
 				id="image-scaling-fit"
 				size="sm"
 				options={[
-					{ label: 'Auto', value: 'auto' },
-					{ label: 'Height', value: 'height' },
-					{ label: 'Width', value: 'width' },
-					{ label: 'Original', value: 'none' },
+					{ label: 'Auto', value: 'AUTO' },
+					{ label: 'Height', value: 'HEIGHT' },
+					{ label: 'Width', value: 'WIDTH' },
+					{ label: 'Original', value: 'NONE' },
 				]}
 				value={value}
 				onChange={handleChange}
@@ -44,5 +44,5 @@ export default function ImageScalingSelect({ value, onChange }: Props) {
 	)
 }
 
-const isBookImageScalingFit = (value: string): value is BookImageScalingFit =>
-	['height', 'width', 'auto', 'none'].includes(value)
+const isBookImageScalingFit = (value: string): value is ReadingImageScaleFit =>
+	['HEIGHT', 'WIDTH', 'AUTO', 'NONE'].includes(value)

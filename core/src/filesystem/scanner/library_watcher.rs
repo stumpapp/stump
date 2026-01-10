@@ -1,12 +1,12 @@
-use crate::db::entity::macros::library_idents_select;
-use crate::prisma::{library, library_config, PrismaClient};
 use crate::{
 	filesystem::scanner::LibraryScanJob,
 	job::{JobController, JobControllerCommand},
 	CoreError, CoreResult,
 };
 use async_trait::async_trait;
+use models::entity::{library, library_config};
 use notify::{Event, RecommendedWatcher, Watcher};
+use sea_orm::prelude::*;
 use std::collections::{HashMap, HashSet};
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -110,31 +110,31 @@ impl LibraryWatcherInternal {
 
 #[async_trait]
 trait LibrariesProvider {
-	async fn get_libraries(&self) -> CoreResult<Vec<library_idents_select::Data>>;
+	async fn get_libraries(&self) -> CoreResult<Vec<library::LibraryIdentSelect>>;
 }
 
 #[derive(Debug, Clone)]
 struct LibraryProvider {
-	db_client: Arc<PrismaClient>,
+	conn: Arc<DatabaseConnection>,
 }
 
 #[async_trait]
 impl LibrariesProvider for LibraryProvider {
-	async fn get_libraries(&self) -> CoreResult<Vec<library_idents_select::Data>> {
+	#[tracing::instrument(skip(self), err)]
+	async fn get_libraries(&self) -> CoreResult<Vec<library::LibraryIdentSelect>> {
 		// get list of all libraries
 		// for each library, if watching is enabled, watch their directory
-		Ok(self
-			.db_client
-			.library()
-			.find_many(vec![
-				library::status::equals("READY".to_string()),
-				library::config::is(vec![library_config::watch::equals(true)]),
-			])
-			.select(library_idents_select::select())
-			.exec()
-			.await?
-			.into_iter()
-			.collect())
+		let conn = self.conn.as_ref();
+
+		let libraries: Vec<library::LibraryIdentSelect> = library::Entity::find()
+			.inner_join(library_config::Entity)
+			.filter(library::Column::Status.eq("READY"))
+			.filter(library_config::Column::Watch.eq(true))
+			.into_partial_model::<library::LibraryIdentSelect>()
+			.all(conn)
+			.await?;
+
+		Ok(libraries)
 	}
 }
 
@@ -169,10 +169,10 @@ pub struct LibraryWatcher {
 
 impl LibraryWatcher {
 	pub fn new(
-		db_client: Arc<PrismaClient>,
+		conn: Arc<DatabaseConnection>,
 		job_controller: Arc<JobController>,
 	) -> LibraryWatcher {
-		let library_provider = LibraryProvider { db_client };
+		let library_provider = LibraryProvider { conn };
 		let job_submitter = JobControllerSubmitter { job_controller };
 		let (tx, rx) = unbounded_channel();
 		let watcher = create_watcher(tx.clone());
@@ -329,12 +329,12 @@ mod tests {
 
 	#[allow(dead_code)]
 	struct MockLibraryProvider {
-		libraries: Vec<library_idents_select::Data>,
+		libraries: Vec<library::LibraryIdentSelect>,
 	}
 
 	#[async_trait]
 	impl LibrariesProvider for MockLibraryProvider {
-		async fn get_libraries(&self) -> CoreResult<Vec<library_idents_select::Data>> {
+		async fn get_libraries(&self) -> CoreResult<Vec<library::LibraryIdentSelect>> {
 			Ok(self.libraries.clone())
 		}
 	}
@@ -363,7 +363,7 @@ mod tests {
 
 	#[allow(dead_code)]
 	async fn create_mock_library(
-		libraries: Vec<library_idents_select::Data>,
+		libraries: Vec<library::LibraryIdentSelect>,
 	) -> Result<MockObjs, CoreError> {
 		let (tx_jobs, rx_jobs) = tokio::sync::mpsc::unbounded_channel();
 		let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
@@ -392,9 +392,10 @@ mod tests {
 	}
 
 	#[allow(dead_code)]
-	fn create_test_libraries(base_dir: String) -> Vec<library_idents_select::Data> {
-		vec![library_idents_select::Data {
+	fn create_test_libraries(base_dir: String) -> Vec<library::LibraryIdentSelect> {
+		vec![library::LibraryIdentSelect {
 			id: "42".to_string(),
+			name: "Test Library".to_string(),
 			path: base_dir,
 		}]
 	}

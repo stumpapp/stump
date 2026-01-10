@@ -1,4 +1,5 @@
 import { cn, useSticky } from '@stump/components'
+import { useCallback } from 'react'
 import { useMediaMatch } from 'rooks'
 
 import { usePreferences } from '@/hooks/usePreferences'
@@ -31,6 +32,10 @@ type Props = {
 	 * The controls for adjusting the layout, i.e. GRID or TABLE
 	 */
 	layoutControls?: React.ReactNode
+	/**
+	 * The controls for adjusting the size of cards/items
+	 */
+	sizeControls?: React.ReactNode
 	navOffset?: boolean
 }
 
@@ -42,17 +47,33 @@ export default function FilterHeader({
 	layoutControls,
 	orderControls,
 	filterControls,
+	sizeControls,
 	navOffset,
 }: Props) {
 	const isMobile = useMediaMatch('(max-width: 768px)')
 	const {
-		preferences: { primary_navigation_mode },
+		preferences: { primaryNavigationMode },
 	} = usePreferences()
 	const { ref, isSticky } = useSticky<HTMLDivElement>({
-		extraOffset: isMobile || primary_navigation_mode === 'TOPBAR' ? 56 : 0,
+		extraOffset: isMobile || primaryNavigationMode === 'TOPBAR' ? 56 : 0,
 	})
 
-	const { filters, setFilter, removeFilter } = useFilterContext()
+	const { search, setSearch, removeSearch } = useFilterContext()
+	const onSearchChange = useCallback(
+		(value: string) => {
+			if (value === search) return
+			// Note: This prevents unnecessary state updates which causes unneeded location state
+			// changes which causes an IRRITATING bug where you have to back out of the page like
+			// 4-6 times to actually go back when using the browser back button lol
+			if (!value && !search) return
+			if (value) {
+				setSearch(value)
+			} else {
+				removeSearch()
+			}
+		},
+		[setSearch, removeSearch, search],
+	)
 
 	return (
 		<header
@@ -60,26 +81,22 @@ export default function FilterHeader({
 			className={cn(
 				'sticky z-10 flex h-12 w-full shrink-0 justify-between gap-2 border-b border-edge px-4 md:top-0',
 				{
-					'bg-background': isSticky,
+					'bg-background': isSticky || !isMobile,
 				},
 				navOffset ? 'top-12' : 'top-0',
 			)}
 		>
 			<Search
-				initialValue={filters?.search as string}
+				initialValue={search || ''}
 				placeholder={searchPlaceholder}
-				onChange={(value) => {
-					if (value) {
-						setFilter('search', value)
-					} else {
-						removeFilter('search')
-					}
-				}}
+				onChange={onSearchChange}
 				isLoading={isSearching}
 				isDisabled={isSearchDisabled}
 			/>
 
 			<div className="flex items-center gap-4">
+				{sizeControls}
+
 				<div className="flex items-center gap-x-2">
 					{orderControls}
 					{filterControls}

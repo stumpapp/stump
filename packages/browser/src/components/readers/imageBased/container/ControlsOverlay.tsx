@@ -1,9 +1,11 @@
+import { ReadingMode } from '@stump/graphql'
 import { motion } from 'framer-motion'
 import { Fragment } from 'react'
 
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
 import { useImageBaseReaderContext } from '../context'
+import NextInSeries from './NextInSeries'
 import ReaderFooter from './ReaderFooter'
 import ReaderHeader from './ReaderHeader'
 
@@ -15,13 +17,14 @@ export default function ControlsOverlay() {
 		bookPreferences: { readingMode },
 	} = useBookPreferences({ book })
 
-	const showBottomToolbar = readingMode === 'paged'
+	const showBottomToolbar = readingMode === ReadingMode.Paged
 
 	return (
 		<Fragment>
 			<ReaderHeader />
 
 			<motion.div
+				// @ts-expect-error: This exists
 				className="absolute inset-0 z-10 flex-1"
 				style={{
 					background:
@@ -33,6 +36,8 @@ export default function ControlsOverlay() {
 				transition={{ duration: 0.2, ease: 'easeInOut' }}
 				onClick={() => setSettings({ showToolBar: !showToolBar })}
 			/>
+
+			<NextInSeries />
 
 			{showBottomToolbar && <ReaderFooter />}
 		</Fragment>

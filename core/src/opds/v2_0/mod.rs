@@ -3,20 +3,19 @@
 //! draft state, it is largely stable and unlikely to change in any significant way.
 
 pub mod authentication;
+pub mod entity;
 mod error;
 pub mod feed;
 pub mod group;
 pub mod link;
 pub mod metadata;
-mod prisma_macros;
 pub mod progression;
 pub mod properties;
 pub mod publication;
 mod utils;
 
 pub use error::OPDSV2Error;
-pub use prisma_macros::*;
-pub use utils::{ArrayOrItem, OPDSV2PrismaExt};
+pub use utils::{ArrayOrItem, OPDSV2QueryExt};
 
 // TODO(OPDS-V2): facet (kinda confused on this one still)
 // TODO(OPDS-V2): constants for the various OPDS 2.0 routes

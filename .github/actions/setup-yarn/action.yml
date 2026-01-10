@@ -3,7 +3,7 @@ description: Install Yarn and setup cache
 
 inputs:
   cache-dependencies:
-    description: 'Cache dependencies. This does not affect the Prisma client cache.'
+    description: 'Cache dependencies'
     required: false
     default: 'true'
 
@@ -13,7 +13,7 @@ runs:
     - name: Setup node
       uses: actions/setup-node@v4
       with:
-        node-version: '20.9.0'
+        node-version: '22.14.0'
 
     - name: Install yarn
       shell: bash
@@ -23,7 +23,7 @@ runs:
       if: ${{ inputs.cache-dependencies == 'true' }}
       uses: actions/setup-node@v4
       with:
-        node-version: '20.9.0'
+        node-version: '22.14.0'
         cache: 'yarn'
 
     - name: Install dependencies

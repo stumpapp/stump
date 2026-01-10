@@ -8,6 +8,8 @@
 		"paths": {
 			"@stump/client": ["../../packages/client/src/index.ts"],
 			"@stump/client/*": ["../../packages/client/src/*"],
+			"@stump/components": ["../../packages/components/src/index.ts"],
+			"@stump/components/*": ["../../packages/components/src/*"],
 			"@stump/browser": ["../../packages/browser/src/index.ts"],
 			"@stump/browser/*": ["../../packages/browser/src/*"]
 		}

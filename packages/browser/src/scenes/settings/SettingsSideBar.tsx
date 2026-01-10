@@ -1,23 +1,27 @@
 import { cn, IconButton, Label } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { Home } from 'lucide-react'
-import { useLocation, useNavigate } from 'react-router'
+import { useNavigate } from 'react-router'
 
+import { useRouterContext } from '@/context'
 import { usePreferences, useTheme } from '@/hooks'
-import paths from '@/paths'
+import { usePathActive, usePaths } from '@/paths'
 import { useAppStore } from '@/stores'
 
 import SettingsSideBarLink from './SettingsSideBarLink'
 import { useSettingsRoutes } from './useSettingsRoutes'
 
 export default function SettingsSideBar() {
-	const location = useLocation()
 	const navigate = useNavigate()
+	const paths = usePaths()
 
+	const isActive = usePathActive()
+
+	const { basePath } = useRouterContext()
 	const { t } = useLocaleContext()
 	const platform = useAppStore((store) => store.platform)
 	const {
-		preferences: { enable_replace_primary_sidebar, primary_navigation_mode },
+		preferences: { enableReplacePrimarySidebar, primaryNavigationMode },
 	} = usePreferences()
 	const { shouldUseGradient } = useTheme()
 
@@ -27,7 +31,7 @@ export default function SettingsSideBar() {
 		<div
 			className={cn(
 				'relative flex h-full w-48 shrink-0 flex-col border-edge bg-background px-2 py-4 text-foreground-subtle',
-				primary_navigation_mode === 'TOPBAR'
+				primaryNavigationMode === 'TOPBAR'
 					? 'fixed top-12 z-50 h-screen border-r'
 					: 'fixed top-0 z-50 h-screen border-r',
 				{
@@ -39,16 +43,19 @@ export default function SettingsSideBar() {
 			<div className="flex h-full flex-grow flex-col gap-4">
 				{groups
 					.map(({ label, items }) => {
-						const groupLabel = t(`settingsScene.sidebar.${label.toLowerCase()}.label`)
+						const groupLabel = label
+							? t(`settingsScene.sidebar.${label.toLowerCase()}.label`)
+							: undefined
 
-						const withGroup = (key: string) => `settingsScene.sidebar.${label.toLowerCase()}.${key}`
+						const withGroup = (key: string) =>
+							`settingsScene.sidebar.${label?.toLowerCase()}.${key}`
 
 						return (
 							<div key={groupLabel}>
-								<Label>{groupLabel}</Label>
+								{groupLabel && <Label>{groupLabel}</Label>}
 
 								<ul className="flex flex-col gap-y-0.5 pt-2 text-sm">
-									{items.map(({ to, icon, label, disabled }) => {
+									{items.map(({ to, icon, label, disabled, prefetch }) => {
 										if (platform === 'browser' && to.includes('desktop')) {
 											return null
 										}
@@ -56,10 +63,11 @@ export default function SettingsSideBar() {
 										return (
 											<SettingsSideBarLink
 												key={to}
-												to={to}
-												isActive={location.pathname.startsWith(to)}
+												to={`${basePath}${to}`}
+												isActive={isActive(to)}
 												isDisabled={disabled}
 												icon={icon}
+												prefetch={prefetch}
 											>
 												{t(withGroup(label.toLowerCase()))}
 											</SettingsSideBarLink>
@@ -72,7 +80,7 @@ export default function SettingsSideBar() {
 					.filter(Boolean)}
 				<div className="flex-1" />
 
-				{enable_replace_primary_sidebar && (
+				{enableReplacePrimarySidebar && (
 					<div className="shrink-0">
 						<IconButton
 							title="Go home"

@@ -3,12 +3,12 @@ import { z } from 'zod'
 export type OPDSLinkType = string
 
 const baseLink = z.object({
-	title: z.string().optional(),
-	rel: z.union([z.string(), z.array(z.string())]).optional(),
+	title: z.string().nullish(),
+	rel: z.union([z.string(), z.array(z.string())]).nullish(),
 	href: z.string(),
-	type: z.string().optional(),
-	templated: z.boolean().optional(),
-	properties: z.record(z.unknown()).optional(),
+	type: z.string().nullish(),
+	templated: z.boolean().nullish(),
+	properties: z.record(z.unknown()).nullish(),
 })
 export type OPDSBaseLink = z.infer<typeof baseLink>
 
@@ -23,8 +23,8 @@ export type OPDSNavigationLink = z.infer<typeof navigationLink>
 
 const imageLink = z
 	.object({
-		width: z.number().optional(),
-		height: z.number().optional(),
+		width: z.number().nullish(),
+		height: z.number().nullish(),
 	})
 	.and(baseLink)
 
@@ -39,10 +39,10 @@ const authFlow = z
 		z.object({
 			labels: z
 				.object({
-					login: z.string().optional(),
-					password: z.string().optional(),
+					login: z.string().nullish(),
+					password: z.string().nullish(),
 				})
-				.optional(),
+				.nullish(),
 		}),
 	)
 
@@ -51,27 +51,27 @@ export const authDocument = z.object({
 	id: z.string(),
 	authentication: z.array(authFlow),
 	title: z.string(),
-	description: z.string().optional(),
+	description: z.string().nullish(),
 	links: z.array(link).default([]),
 })
 export type OPDSAuthenticationDocument = z.infer<typeof authDocument>
 
 const paginationMeta = z.object({
-	numberOfItems: z.number().optional(),
-	itemsPerPage: z.number().optional(),
-	currentPage: z.number().optional(),
+	numberOfItems: z.number().nullish(),
+	itemsPerPage: z.number().nullish(),
+	currentPage: z.number().nullish(),
 })
 export type OPDSPaginationMetadata = z.infer<typeof paginationMeta>
 
 const belongsToSeries = z.object({
 	name: z.string(),
-	position: z.number().optional(),
+	position: z.number().nullish(),
 	links: z.array(link).default([]),
 })
 
 // Komga sends series as an array, Stump doesnt
 const belongsTo = z.object({
-	series: z.union([belongsToSeries, z.array(belongsToSeries)]).optional(),
+	series: z.union([belongsToSeries, z.array(belongsToSeries)]).nullish(),
 })
 export type OPDSEntryBelongsTo = z.infer<typeof belongsTo>
 
@@ -79,10 +79,10 @@ export type OPDSDynamicMetadata = Record<string, unknown>
 const metadata = z
 	.object({
 		title: z.string(),
-		identifier: z.string().optional(),
-		modified: z.string().optional(),
-		description: z.string().optional(),
-		belongsTo: belongsTo.optional(),
+		identifier: z.string().nullish(),
+		modified: z.string().nullish(),
+		description: z.string().nullish(),
+		belongsTo: belongsTo.nullish(),
 	})
 	.merge(paginationMeta)
 	.and(z.record(z.unknown()))
@@ -97,28 +97,28 @@ export type OPDSMetadata = z.infer<typeof metadata>
 export const publication = z.object({
 	context: z.string().nullish(), // Codex doesn't guarantee this field
 	metadata: metadata,
-	links: z.array(link).optional(),
-	images: z.array(imageLink).optional(),
-	readingOrder: z.array(imageLink).optional(),
-	resources: z.array(link).optional(),
-	toc: z.array(link).optional(),
-	landmarks: z.array(link).optional(),
-	pageList: z.array(link).optional(),
+	links: z.array(link).nullish(),
+	images: z.array(imageLink).nullish(),
+	readingOrder: z.array(imageLink).nullish(),
+	resources: z.array(link).nullish(),
+	toc: z.array(link).nullish(),
+	landmarks: z.array(link).nullish(),
+	pageList: z.array(link).nullish(),
 })
 export type OPDSPublication = z.infer<typeof publication>
 
 const progessionLocation = z.object({
-	fragments: z.array(z.string()).optional(),
-	position: z.string().optional(),
-	progression: z.number().optional(),
-	totalProgression: z.number().optional(),
+	fragments: z.array(z.string()).nullish(),
+	position: z.string().nullish(),
+	progression: z.number().nullish(),
+	totalProgression: z.number().nullish(),
 })
 
 const progressionLocator = z.object({
-	title: z.string().optional(),
-	href: z.string().optional(),
-	type: z.string().optional(),
-	locations: z.array(progessionLocation).optional(),
+	title: z.string().nullish(),
+	href: z.string().nullish(),
+	type: z.string().nullish(),
+	locations: z.array(progessionLocation).nullish(),
 })
 
 const progressionDevice = z.object({
@@ -129,7 +129,7 @@ const progressionDevice = z.object({
 export const progression = z
 	.object({
 		modified: z.string(),
-		device: progressionDevice.optional(),
+		device: progressionDevice.nullish(),
 		locator: progressionLocator,
 	})
 	.transform((data) => ({

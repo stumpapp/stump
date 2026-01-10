@@ -2,14 +2,15 @@ use std::{thread, time::Duration};
 
 use clap::Subcommand;
 use dialoguer::{theme::ColorfulTheme, Confirm, Input, Password};
-
-use stump_core::{
-	config::StumpConfig,
-	db::create_client,
-	prisma::{session, user},
+use models::entity::{
+	bookmark, finished_reading_session, reading_session, session, user,
 };
+use sea_orm::{
+	prelude::*, ActiveValue::Set, IntoActiveModel, QueryTrait, TransactionTrait,
+};
+use stump_core::{config::StumpConfig, database::connect};
 
-use crate::{commands::chain_optional_iter, error::CliResult, CliError};
+use crate::{error::CliResult, CliError};
 
 use super::default_progress_spinner;
 
@@ -42,6 +43,15 @@ pub enum Account {
 	},
 	/// Enter a flow to change the server owner to another account
 	ResetOwner,
+	/// Migrate a local user account to an OIDC account
+	MigrateOidc {
+		/// The username of the local account to migrate
+		#[clap(long)]
+		username: String,
+		/// The email of the OIDC account to migrate to
+		#[clap(long)]
+		oidc_email: String,
+	},
 }
 
 pub async fn handle_account_command(
@@ -60,9 +70,12 @@ pub async fn handle_account_command(
 			reset_account_password(username, config.password_hash_cost, config).await
 		},
 		Account::ResetOwner => change_server_owner(config).await,
+		Account::MigrateOidc {
+			username,
+			oidc_email,
+		} => migrate_oidc_account(config, username, oidc_email).await,
 	}
 }
-
 async fn set_account_lock_status(
 	username: String,
 	lock: bool,
@@ -75,43 +88,43 @@ async fn set_account_lock_status(
 		"Unlocking account..."
 	});
 
-	let client = create_client(config).await;
+	let conn = connect(config).await?;
 
-	let affected_rows = client
-		.user()
-		.update_many(
-			vec![user::username::equals(username.clone())],
-			vec![user::is_locked::set(lock)],
-		)
-		.exec()
-		.await?;
+	let user = user::Entity::find()
+		.filter(user::Column::Username.eq(username.clone()))
+		.one(&conn)
+		.await?
+		.ok_or_else(|| {
+			progress.abandon_with_message("No account with that username was found");
+			CliError::OperationFailed(String::from(
+				"No account with that username was found",
+			))
+		})?;
+
+	let mut active_model = user.into_active_model();
+	active_model.is_locked = Set(lock);
+	let updated_user = active_model.update(&conn).await?;
 
 	if lock {
 		progress.set_message("Removing active login sessions...");
-		client
-			.session()
-			.delete_many(vec![session::user::is(vec![user::username::equals(
-				username,
-			)])])
-			.exec()
-			.await?;
+
+		let delete_sessions = session::Entity::delete_many()
+			.filter(session::Column::UserId.eq(updated_user.id.clone()))
+			.exec(&conn)
+			.await?
+			.rows_affected;
+
+		progress.set_message(format!("Removed {} active session(s)", delete_sessions));
 	}
 
 	thread::sleep(Duration::from_millis(500));
 
-	if affected_rows == 0 {
-		progress.abandon_with_message("No account with that username was found");
-		Err(CliError::OperationFailed(String::from(
-			"No account with that username was found",
-		)))
+	progress.finish_with_message(if lock {
+		"Account locked successfully!"
 	} else {
-		progress.finish_with_message(if lock {
-			"Account locked successfully!"
-		} else {
-			"Account unlocked successfully!"
-		});
-		Ok(())
-	}
+		"Account unlocked successfully!"
+	});
+	Ok(())
 }
 
 async fn reset_account_password(
@@ -119,7 +132,7 @@ async fn reset_account_password(
 	hash_cost: u32,
 	config: &StumpConfig,
 ) -> CliResult<()> {
-	let client = create_client(config).await;
+	let conn = connect(config).await?;
 
 	let theme = &ColorfulTheme::default();
 	let builder = Password::with_theme(theme)
@@ -134,50 +147,46 @@ async fn reset_account_password(
 
 	progress.set_message("Updating account...");
 
-	let affected_rows = client
-		.user()
-		.update_many(
-			vec![user::username::equals(username)],
-			vec![user::hashed_password::set(hashed_password)],
-		)
-		.exec()
-		.await?;
+	let user = user::Entity::find()
+		.filter(user::Column::Username.eq(username.clone()))
+		.one(&conn)
+		.await?
+		.ok_or_else(|| {
+			progress.abandon_with_message("No account with that username was found");
+			CliError::OperationFailed(String::from(
+				"No account with that username was found",
+			))
+		})?;
+
+	let mut active_model = user.into_active_model();
+	active_model.hashed_password = Set(hashed_password);
+
+	let _updated_user = active_model.update(&conn).await?;
 
 	thread::sleep(Duration::from_millis(500));
 
-	if affected_rows == 0 {
-		progress.abandon_with_message("No account with that username was found");
-		Err(CliError::OperationFailed(String::from(
-			"No account with that username was found",
-		)))
-	} else {
-		progress.finish_with_message("Account password updated successfully!");
-		Ok(())
-	}
+	progress.finish_with_message("Account password updated successfully!");
+	Ok(())
 }
 
 async fn print_accounts(locked: Option<bool>, config: &StumpConfig) -> CliResult<()> {
 	let progress = default_progress_spinner();
 	progress.set_message("Fetching accounts...");
 
-	// Fetch users from prisma database
-	let client = create_client(config).await;
-	let users = client
-		.user()
-		.find_many(chain_optional_iter(
-			[],
-			[locked.map(user::is_locked::equals)],
-		))
-		.exec()
+	let conn = connect(config).await?;
+
+	let users = models::entity::user::Entity::find()
+		.apply_if(locked, |query, locked| {
+			query.filter(user::Column::IsLocked.eq(locked))
+		})
+		.all(&conn)
 		.await?;
 
-	// Print results from database
 	if users.is_empty() {
 		progress.finish_with_message("No accounts found.");
 	} else {
 		progress.finish_with_message("Accounts fetched successfully!");
 
-		// Create table using prettytable-rs
 		let mut table = prettytable::Table::new();
 		table.add_row(prettytable::row!["Account", "Status"]);
 
@@ -195,13 +204,13 @@ async fn print_accounts(locked: Option<bool>, config: &StumpConfig) -> CliResult
 }
 
 async fn change_server_owner(config: &StumpConfig) -> CliResult<()> {
-	let client = create_client(config).await;
+	let conn = connect(config).await?;
 
-	let all_accounts = client
-		.user()
-		.find_many(vec![user::is_locked::equals(false)])
-		.exec()
+	let all_accounts = models::entity::user::Entity::find()
+		.filter(user::Column::IsLocked.eq(false))
+		.all(&conn)
 		.await?;
+
 	let current_server_owner = all_accounts
 		.iter()
 		.find(|user| user.is_server_owner)
@@ -239,37 +248,148 @@ async fn change_server_owner(config: &StumpConfig) -> CliResult<()> {
 	let progress = default_progress_spinner();
 	if let Some(user) = current_server_owner {
 		progress.set_message(format!("Removing owner status from {}", user.username));
-		client
-			.user()
-			.update(
-				user::id::equals(user.id.clone()),
-				vec![user::is_server_owner::set(false)],
-			)
-			.exec()
-			.await?;
-		client
-			.session()
-			.delete_many(vec![session::user_id::equals(user.id)])
-			.exec()
+		let mut active_model = user.into_active_model();
+		active_model.is_server_owner = Set(false);
+		let updated_user = active_model.update(&conn).await?;
+
+		session::Entity::delete_many()
+			.filter(session::Column::UserId.eq(updated_user.id))
+			.exec(&conn)
 			.await?;
 	}
 
 	progress.set_message(format!("Setting owner status for {}", target_user.username));
-	client
-		.user()
-		.update(
-			user::id::equals(target_user.id.clone()),
-			vec![user::is_server_owner::set(true)],
-		)
-		.exec()
+	let mut active_model = target_user.into_active_model();
+	active_model.is_server_owner = Set(true);
+	let _updated_user = active_model.update(&conn).await?;
+	session::Entity::delete_many()
+		.filter(session::Column::UserId.eq(_updated_user.id))
+		.exec(&conn)
 		.await?;
-	client
-		.session()
-		.delete_many(vec![session::user_id::equals(target_user.id)])
-		.exec()
+	progress.finish_with_message("Successfully changed the server owner!");
+
+	Ok(())
+}
+
+async fn migrate_oidc_account(
+	config: &StumpConfig,
+	username: String,
+	oidc_email: String,
+) -> CliResult<()> {
+	let conn = connect(config).await?;
+
+	let progress = default_progress_spinner();
+	progress.set_message("Finding accounts...");
+
+	// Find the local user (must not have oidc_issuer_id)
+	let local_user = user::Entity::find()
+		.filter(user::Column::Username.eq(username.clone()))
+		.filter(user::Column::OidcIssuerId.is_null())
+		.one(&conn)
+		.await?
+		.ok_or_else(|| {
+			CliError::OperationFailed(format!(
+				"No local account found with username '{}' (or account is already an OIDC account)",
+				username
+			))
+		})?;
+
+	// Find the OIDC user (must have oidc_issuer_id)
+	let oidc_user = user::Entity::find()
+		.filter(user::Column::OidcEmail.eq(oidc_email.clone()))
+		.filter(user::Column::OidcIssuerId.is_not_null())
+		.one(&conn)
+		.await?
+		.ok_or_else(|| {
+			CliError::OperationFailed(format!(
+				"No OIDC account found with email '{}' (or account is not an OIDC account)",
+				oidc_email
+			))
+		})?;
+
+	progress.finish_and_clear();
+
+	println!("\nMigration Summary:");
+	println!(
+		"  Local account: {} (ID: {})",
+		local_user.username, local_user.id
+	);
+	println!(
+		"  OIDC account:  {} (ID: {})",
+		oidc_user.username, oidc_user.id
+	);
+	println!("\nThis will:");
+	println!("  1. Transfer all reading sessions and history");
+	println!("  2. Transfer bookmarks");
+	println!("  3. Transfer user preferences");
+	println!("  4. Transfer permissions");
+	println!(
+		"  5. Reassign username '{}' to OIDC account",
+		local_user.username
+	);
+	println!("  6. Delete local account '{}'", local_user.username);
+
+	let confirmation = Confirm::new()
+		.with_prompt("\nAre you sure you want to continue?")
+		.default(false)
+		.interact()?;
+
+	if !confirmation {
+		println!("Migration cancelled.");
+		return Ok(());
+	}
+
+	let progress = default_progress_spinner();
+
+	let txn = conn.begin().await?;
+
+	progress.set_message("Transferring reading sessions...");
+	reading_session::Entity::update_many()
+		.col_expr(
+			reading_session::Column::UserId,
+			sea_orm::sea_query::Expr::value(oidc_user.id.clone()),
+		)
+		.filter(reading_session::Column::UserId.eq(local_user.id.clone()))
+		.exec(&txn)
 		.await?;
 
-	progress.finish_with_message("Successfully changed the server owner!");
+	progress.set_message("Transferring finished reading sessions...");
+	finished_reading_session::Entity::update_many()
+		.col_expr(
+			finished_reading_session::Column::UserId,
+			sea_orm::sea_query::Expr::value(oidc_user.id.clone()),
+		)
+		.filter(finished_reading_session::Column::UserId.eq(local_user.id.clone()))
+		.exec(&txn)
+		.await?;
+
+	progress.set_message("Transferring bookmarks...");
+	bookmark::Entity::update_many()
+		.col_expr(
+			bookmark::Column::UserId,
+			sea_orm::sea_query::Expr::value(oidc_user.id.clone()),
+		)
+		.filter(bookmark::Column::UserId.eq(local_user.id.clone()))
+		.exec(&txn)
+		.await?;
+
+	progress.set_message("Transferring user preferences and permissions...");
+	let mut oidc_active = oidc_user.clone().into_active_model();
+	oidc_active.user_preferences_id = Set(local_user.user_preferences_id);
+	oidc_active.permissions = Set(local_user.permissions);
+	oidc_active.username = Set(local_user.username.clone());
+	oidc_active.update(&txn).await?;
+
+	progress.set_message("Deleting local account...");
+	user::Entity::delete_by_id(local_user.id).exec(&txn).await?;
+
+	progress.set_message("Committing changes...");
+	txn.commit().await?;
+
+	progress.finish_with_message(format!(
+		"Successfully migrated local account '{}' to OIDC account!",
+		username
+	));
 
 	Ok(())
 }

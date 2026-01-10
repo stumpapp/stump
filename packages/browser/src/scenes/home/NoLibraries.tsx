@@ -1,4 +1,5 @@
 import { ButtonOrLink, Heading, Text } from '@stump/components'
+import { UserPermission } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 
 import { useAppContext } from '../../context'
@@ -8,7 +9,7 @@ export default function NoLibraries() {
 	const { t } = useLocaleContext()
 	const { checkPermission } = useAppContext()
 
-	const canCreateLibrary = checkPermission('library:create')
+	const canCreateLibrary = checkPermission(UserPermission.CreateLibrary)
 
 	return (
 		<div className="flex flex-1 flex-col items-center justify-center">

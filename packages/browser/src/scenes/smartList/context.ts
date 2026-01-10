@@ -1,52 +1,16 @@
-import {
-	AccessRole,
-	SmartList,
-	SmartListItemGrouping,
-	SmartListMeta,
-	SmartListView,
-} from '@stump/sdk'
+import { AccessRole, SaveSmartListInput, SmartListMeta } from '@stump/graphql'
 import { createContext, useContext } from 'react'
 
-import { buildColumns as buildGroupColumns } from './items/table/groupColumns'
-import { defaultColumns } from './items/table/mediaColumns'
+import { SmartListParsed } from './graphql'
+import { buildDefaultWorkingView, useSmartListViewStore } from './store'
 
-export type WorkingView = Omit<SmartListView, 'name' | 'list_id'>
-export const defaultWorkingView: WorkingView = {
-	book_columns: defaultColumns.map(({ id }, position) => ({ id: id || '', position })),
-	book_sorting: null,
-	group_columns: [],
-	group_sorting: null,
-}
-const buildDefaultWorkingView = (grouping?: SmartListItemGrouping): WorkingView => {
-	if (!grouping || grouping === 'BY_BOOKS') {
-		return defaultWorkingView
-	} else {
-		return {
-			...defaultWorkingView,
-			group_columns: buildGroupColumns(grouping === 'BY_SERIES', []).map(({ id }, position) => ({
-				id: id || '',
-				position,
-			})),
-		}
-	}
-}
+export { defaultWorkingView, type WorkingView } from './store'
 
 export type ISmartListContext = {
-	list: SmartList
+	list: SmartListParsed
 	meta?: SmartListMeta
 
-	workingView?: WorkingView
-	updateWorkingView: (updates: Partial<WorkingView>) => void
-	saveWorkingView: (name: string) => Promise<void>
-
-	selectedView?: SmartListView
-	selectStoredView: (view?: SmartListView) => void
-	saveSelectedStoredView: (newName?: string) => Promise<void>
-
-	patchSmartList: (updates: Partial<SmartList>) => Promise<void>
-
-	layout: 'table' | 'list'
-	setLayout: (layout: 'table' | 'list') => void
+	patchSmartList: (updates: Partial<SaveSmartListInput>) => Promise<void>
 
 	viewerRole: AccessRole
 }
@@ -63,20 +27,23 @@ export const useSmartListContext = () => {
 	return context
 }
 
+/**
+ * A hook that provides access to the working view with a guaranteed non-undefined value.
+ * If no working view is set, returns the default working view based on the list's grouping.
+ */
 export const useSafeWorkingView = () => {
 	const {
-		workingView,
-		saveWorkingView,
-		updateWorkingView,
-		list: { default_grouping },
+		list: { defaultGrouping },
 	} = useSmartListContext()
+
+	const workingView = useSmartListViewStore((s) => s.workingView)
+	const updateWorkingView = useSmartListViewStore((s) => s.updateWorkingView)
 
 	const workingViewIsDefined = !!workingView
 
 	return {
-		saveWorkingView,
 		updateWorkingView,
-		workingView: workingView || buildDefaultWorkingView(default_grouping),
+		workingView: workingView || buildDefaultWorkingView(defaultGrouping),
 		workingViewIsDefined,
 	}
 }

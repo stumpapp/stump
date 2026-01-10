@@ -14,13 +14,13 @@ type Props = {
 export default function AgeRatingFilter({ variant = 'media' }: Props) {
 	const form = useFormContext<{
 		metadata: {
-			age_rating: number | null
+			ageRating: number | null
 		}
 	}>()
 	const [localAgeRating, setLocalAgeRating] = useState<number | null>(8)
 
 	const handleChange = (ageRating: number | null) => {
-		form.setValue('metadata.age_rating', ageRating)
+		form.setValue('metadata.ageRating', ageRating)
 	}
 
 	const handleSelection = (option: 'custom' | 'any-age') => {
@@ -31,8 +31,8 @@ export default function AgeRatingFilter({ variant = 'media' }: Props) {
 		}
 	}
 
-	const selection = form.watch('metadata.age_rating')
-	const { onChange, ...register } = form.register('metadata.age_rating', {
+	const selection = form.watch('metadata.ageRating')
+	const { onChange, ...register } = form.register('metadata.ageRating', {
 		max: 18,
 		min: 0,
 		valueAsNumber: true,
@@ -71,7 +71,7 @@ export default function AgeRatingFilter({ variant = 'media' }: Props) {
 							}}
 							{...(selection !== null
 								? {
-										errorMessage: form.formState.errors.metadata?.age_rating?.message as string,
+										errorMessage: form.formState.errors.metadata?.ageRating?.message as string,
 									}
 								: {})}
 						/>

@@ -793,12 +793,12 @@
 									"name": "ファイル名",
 									"size": "サイズ",
 									"extension": "拡張機能",
-									"created_at": "作成日",
-									"updated_at": "更新日",
 									"status": "状態",
 									"path": "パス",
 									"pages": "ページ",
-									"tags": "タグ"
+									"tags": "タグ",
+									"createdAt": "作成日",
+									"updatedAt": "更新日"
 								}
 							},
 							"book_meta": {
@@ -807,7 +807,6 @@
 									"title": "タイトル",
 									"summary": "概要",
 									"notes": "ノート",
-									"genre": "ジャンル",
 									"writers": "ライター",
 									"pencillers": "ペンシラー",
 									"inkers": "インカー",
@@ -815,10 +814,11 @@
 									"editors": "編集者",
 									"publisher": "発行元",
 									"colorists": "カラーリスト",
-									"cover_artists": "カバーアーティスト",
 									"links": "リンク",
 									"characters": "キャラクター",
-									"teams": "チーム"
+									"teams": "チーム",
+									"genres": "ジャンル",
+									"coverArtists": "カバーアーティスト"
 								}
 							},
 							"series": {
@@ -831,16 +831,16 @@
 							"series_meta": {
 								"label": "シリーズのメタ情報",
 								"attributes": {
-									"age_rating": "年齢制限",
 									"title": "タイトル",
 									"summary": "概要",
-									"meta_type": "タイプ",
 									"publisher": "発行元",
 									"imprint": "沿革",
 									"comicid": "コミックID",
 									"booktype": "本の種類",
 									"status": "状態",
-									"volume": "ボリューム"
+									"volume": "ボリューム",
+									"metaType": "タイプ",
+									"ageRating": "年齢制限"
 								}
 							},
 							"library": {
@@ -1112,7 +1112,7 @@
 				"desktop": "デスクトップ",
 				"label": "アプリケーション"
 			},
-			"server": {
+			"management": {
 				"general": "一般",
 				"logs": "ログ",
 				"users": "ユーザー",
@@ -1174,7 +1174,7 @@
 				}
 			}
 		},
-		"app/appearance": {
+		"app/preferences": {
 			"helmet": "外観",
 			"title": "外観",
 			"description": "アプリケーションの外観と感触をカスタマイズします",

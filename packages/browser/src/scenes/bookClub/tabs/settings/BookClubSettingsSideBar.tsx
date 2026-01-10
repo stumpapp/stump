@@ -18,7 +18,7 @@ export default function BookClubSettingsSideBar() {
 	const { bookClub } = useBookClubContext()
 	const { t } = useLocaleContext()
 	const {
-		preferences: { enable_replace_primary_sidebar, primary_navigation_mode },
+		preferences: { enableReplacePrimarySidebar, primaryNavigationMode },
 	} = usePreferences()
 	const { groups } = useRouteGroups({ routeGroups })
 
@@ -26,7 +26,7 @@ export default function BookClubSettingsSideBar() {
 		<div
 			className={cn(
 				'relative flex h-full w-48 shrink-0 flex-col border-edge bg-background px-2 py-4 text-foreground-subtle',
-				primary_navigation_mode === 'TOPBAR'
+				primaryNavigationMode === 'TOPBAR'
 					? 'fixed top-12 z-50 h-screen border-r'
 					: 'fixed top-0 z-50 h-screen border-r',
 			)}
@@ -84,7 +84,7 @@ export default function BookClubSettingsSideBar() {
 					.filter(Boolean)}
 				<div className="flex-1" />
 
-				{enable_replace_primary_sidebar && (
+				{enableReplacePrimarySidebar && (
 					<div className="shrink-0">
 						<Button
 							title="Go home"

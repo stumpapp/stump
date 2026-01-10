@@ -1,49 +1,61 @@
+use std::path::PathBuf;
+
 use axum::{
+	body::Body,
 	extract::{Path, Query, State},
+	http::{header, HeaderMap, Request},
 	middleware,
+	response::IntoResponse,
 	routing::get,
 	Extension, Router,
 };
-use prisma_client_rust::or;
-use prisma_client_rust::{chrono, Direction};
+use chrono::Utc;
+use graphql::{data::AuthContext, pagination::OffsetPagination};
+use models::{
+	entity::{
+		finished_reading_session, library, media, reading_session, series,
+		series_metadata,
+	},
+	shared::{
+		enums::UserPermission,
+		image_processor_options::{ImageProcessorOptions, SupportedImageFormat},
+	},
+};
+use sea_orm::{
+	prelude::*, sea_query::OnConflict, QueryOrder, QuerySelect, QueryTrait, Set,
+};
 use serde::{Deserialize, Serialize};
 use stump_core::{
-	db::{entity::UserPermission, query::pagination::PageQuery},
+	config::StumpConfig,
 	filesystem::{
-		get_page_async,
-		image::{GenericImageProcessor, ImageProcessor, ImageProcessorOptions},
+		image::{GenericImageProcessor, ImageProcessor},
+		media::get_page_async,
 		ContentType,
 	},
-	opds::v1_2::{
-		entry::{IntoOPDSEntry, OPDSEntryBuilder, OpdsEntry},
-		feed::{
-			OPDSFeedBuilder, OPDSFeedBuilderPageParams, OPDSFeedBuilderParams, OpdsFeed,
+	opds::{
+		v1_2::{
+			entry::{IntoOPDSEntry, OPDSEntryBuilder, OpdsEntry},
+			feed::{
+				OPDSFeedBuilder, OPDSFeedBuilderPageParams, OPDSFeedBuilderParams,
+				OpdsFeed,
+			},
+			link::{OpdsLink, OpdsLinkRel, OpdsLinkType},
+			opensearch::OpdsOpenSearch,
 		},
-		link::{OpdsLink, OpdsLinkRel, OpdsLinkType},
-		opensearch::OpdsOpenSearch,
+		v2_0::entity::OPDSPublicationEntity,
 	},
-	prisma::{active_reading_session, library, media, series, series_metadata, user},
 };
-use tracing::{debug, trace};
+use tower_http::services::ServeFile;
 
 use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
-	filter::chain_optional_iter,
-	middleware::auth::{api_key_middleware, auth_middleware, RequestContext},
-	routers::api::{
-		filters::{
-			apply_in_progress_filter_for_user, apply_media_age_restriction,
-			apply_media_library_not_hidden_for_user_filter, apply_series_age_restriction,
-			library_not_hidden_from_user_filter,
-		},
-		v1::media::thumbnails::get_media_thumbnail_by_id,
-	},
-	utils::http::{ImageResponse, NamedFile, Xml},
+	middleware::auth::{api_key_middleware, auth_middleware},
+	utils::http::{ImageResponse, Xml},
 };
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
-	let primary_router = Router::new()
+	let primary_router = Router::new() //
 		.route("/catalog", get(catalog))
 		.route("/search", get(search_description))
 		.route("/keep-reading", get(keep_reading))
@@ -125,12 +137,7 @@ struct OPDSSearchQuery {
 	search: Option<String>,
 }
 
-fn pagination_bounds(page: i64, page_size: i64) -> (i64, i64) {
-	let skip = page * page_size;
-	(skip, page_size)
-}
-
-fn catalog_url(req_ctx: &RequestContext, path: &str) -> String {
+fn catalog_url(req_ctx: &AuthContext, path: &str) -> String {
 	if let Some(api_key) = req_ctx.api_key() {
 		format!("/opds/{}/v1.2/{}", api_key, path)
 	} else {
@@ -138,7 +145,7 @@ fn catalog_url(req_ctx: &RequestContext, path: &str) -> String {
 	}
 }
 
-fn service_url(req_ctx: &RequestContext) -> String {
+fn service_url(req_ctx: &AuthContext) -> String {
 	if let Some(api_key) = req_ctx.api_key() {
 		format!("/opds/{}/v1.2", api_key)
 	} else {
@@ -146,11 +153,11 @@ fn service_url(req_ctx: &RequestContext) -> String {
 	}
 }
 
-async fn catalog(Extension(req): Extension<RequestContext>) -> APIResult<Xml> {
+async fn catalog(Extension(req): Extension<AuthContext>) -> APIResult<Xml> {
 	let entries = vec![
 		OpdsEntry::new(
 			"keepReading".to_string(),
-			chrono::Utc::now().into(),
+			Utc::now().into(),
 			"Keep reading".to_string(),
 			Some(String::from("Continue reading your in progress books")),
 			None,
@@ -163,7 +170,7 @@ async fn catalog(Extension(req): Extension<RequestContext>) -> APIResult<Xml> {
 		),
 		OpdsEntry::new(
 			"allSeries".to_string(),
-			chrono::Utc::now().into(),
+			Utc::now().into(),
 			"All series".to_string(),
 			Some(String::from("Browse by series")),
 			None,
@@ -176,7 +183,7 @@ async fn catalog(Extension(req): Extension<RequestContext>) -> APIResult<Xml> {
 		),
 		OpdsEntry::new(
 			"latestSeries".to_string(),
-			chrono::Utc::now().into(),
+			Utc::now().into(),
 			"Latest series".to_string(),
 			Some(String::from("Browse latest series")),
 			None,
@@ -189,7 +196,7 @@ async fn catalog(Extension(req): Extension<RequestContext>) -> APIResult<Xml> {
 		),
 		OpdsEntry::new(
 			"allLibraries".to_string(),
-			chrono::Utc::now().into(),
+			Utc::now().into(),
 			"All libraries".to_string(),
 			Some(String::from("Browse by library")),
 			None,
@@ -233,7 +240,7 @@ async fn catalog(Extension(req): Extension<RequestContext>) -> APIResult<Xml> {
 	Ok(Xml(feed.build()?))
 }
 
-async fn search_description(Extension(req): Extension<RequestContext>) -> APIResult<Xml> {
+async fn search_description(Extension(req): Extension<AuthContext>) -> APIResult<Xml> {
 	Ok(OpdsOpenSearch::new(Some(service_url(&req)))
 		.build()
 		.map(Xml)?)
@@ -241,44 +248,21 @@ async fn search_description(Extension(req): Extension<RequestContext>) -> APIRes
 
 async fn keep_reading(
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Xml> {
-	let db = &ctx.db;
-
-	let user_id = req.id();
-	let in_progress_filter = vec![apply_in_progress_filter_for_user(user_id)];
-
-	let media = db
-		.media()
-		.find_many(vec![media::active_user_reading_sessions::some(
-			in_progress_filter.clone(),
-		)])
-		.with(media::active_user_reading_sessions::fetch(
-			in_progress_filter,
-		))
-		.order_by(media::name::order(Direction::Asc))
-		.exec()
+	let books = OPDSPublicationEntity::find_for_user(&req.user())
+		.filter(reading_session::Column::UserId.eq(req.id()))
+		.order_by_desc(reading_session::Column::UpdatedAt)
+		.into_model::<OPDSPublicationEntity>()
+		.all(ctx.conn.as_ref())
 		.await?;
 
-	let books_in_progress = media.into_iter().filter(|m| {
-		match m
-			.active_user_reading_sessions()
-			.ok()
-			.and_then(|sessions| sessions.first())
-		{
-			Some(session) if session.epubcfi.is_some() => session
-				.percentage_completed
-				.is_some_and(|value| value < 1.0),
-			Some(session) if session.page.is_some() => {
-				session.page.unwrap_or(1) < m.pages
-			},
-			_ => false,
-		}
-	});
-
-	let entries = books_in_progress
+	let entries = books
 		.into_iter()
-		.map(|m| OPDSEntryBuilder::<media::Data>::new(m, req.api_key()).into_opds_entry())
+		.map(|m| {
+			OPDSEntryBuilder::<OPDSPublicationEntity>::new(m, req.api_key())
+				.into_opds_entry()
+		})
 		.collect::<Vec<OpdsEntry>>();
 
 	let feed = OpdsFeed::new(
@@ -306,24 +290,21 @@ async fn keep_reading(
 async fn get_libraries(
 	State(ctx): State<AppState>,
 	Query(OPDSSearchQuery { search }): Query<OPDSSearchQuery>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Xml> {
-	let db = &ctx.db;
-
 	let user = req.user();
-	let libraries = db
-		.library()
-		.find_many(chain_optional_iter(
-			[library_not_hidden_from_user_filter(user)],
-			[search.as_ref().map(|q| library::name::contains(q.clone()))],
-		))
-		.order_by(library::name::order(Direction::Asc))
-		.exec()
+
+	let libraries = library::Entity::find_for_user(&user)
+		.apply_if(search, |query, search| {
+			query.filter(library::Column::Name.contains(search))
+		})
+		.order_by_asc(library::Column::Name)
+		.all(ctx.conn.as_ref())
 		.await?;
 	let entries = libraries
 		.into_iter()
 		.map(|l| {
-			OPDSEntryBuilder::<library::Data>::new(l, req.api_key()).into_opds_entry()
+			OPDSEntryBuilder::<library::Model>::new(l, req.api_key()).into_opds_entry()
 		})
 		.collect::<Vec<OpdsEntry>>();
 
@@ -354,87 +335,55 @@ async fn get_library_by_id(
 		params: OPDSIDURLParams { id },
 		..
 	}): Path<OPDSURLParams<OPDSIDURLParams>>,
-	pagination: Query<PageQuery>,
-	Extension(req): Extension<RequestContext>,
+	pagination: Query<OffsetPagination>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Xml> {
-	let db = &ctx.db;
-
-	let library_id = id.clone();
-	let page = pagination.page.unwrap_or(0);
-	let (skip, take) = pagination_bounds(page.into(), 20);
-
 	let user = req.user();
-	let age_restrictions = user
-		.age_restriction
-		.as_ref()
-		.map(|ar| apply_series_age_restriction(ar.age, ar.restrict_on_unset));
 
-	debug!(skip, take, page, library_id, "opds get_library_by_id");
+	// Note: This is just to enforce access to the library, otherwise we would get an
+	// empty result set without informing the requester that the resource they are
+	// requesting "does not exist"
+	let library = library::Entity::find_for_user(&user)
+		.select_only()
+		.columns(library::LibraryIdentSelect::columns())
+		.filter(library::Column::Id.eq(id.clone()))
+		.into_model::<library::LibraryIdentSelect>()
+		.one(ctx.conn.as_ref())
+		.await?
+		.ok_or(APIError::NotFound("Library not found".to_string()))?;
 
-	let tx_result = db
-		._transaction()
-		.run(|client| async move {
-			let library = client
-				.library()
-				.find_unique(library::id::equals(id.clone()))
-				.with(
-					library::series::fetch(chain_optional_iter(
-						[],
-						[age_restrictions.clone()],
-					))
-					.skip(skip)
-					.take(take),
-				)
-				.exec()
-				.await?;
-
-			client
-				.series()
-				.count(chain_optional_iter(
-					[series::library_id::equals(Some(id.clone()))],
-					[age_restrictions],
-				))
-				.exec()
-				.await
-				.map(|count| (library, Some(count)))
-		})
+	let series = series::Entity::find_for_user(&user)
+		.filter(series::Column::LibraryId.eq(library.id.clone()))
+		.order_by_asc(series::Column::Name)
+		.offset(pagination.offset())
+		.limit(pagination.limit())
+		.all(ctx.conn.as_ref())
 		.await?;
-	trace!(result = ?tx_result, "opds get_library_by_id transaction");
+	let count = series::Entity::find_for_user(&user)
+		.filter(series::Column::LibraryId.eq(library.id.clone()))
+		.count(ctx.conn.as_ref())
+		.await?;
 
-	if let (Some(library), Some(library_series_count)) = tx_result {
-		let library_series = library.series().unwrap_or(&Vec::new()).to_owned();
-		debug!(
-			page,
-			series_in_page = library_series.len(),
-			library_series_count,
-			"Fetched library with series"
-		);
+	let entries = series
+		.into_iter()
+		.map(|s| {
+			OPDSEntryBuilder::<series::Model>::new(s, req.api_key()).into_opds_entry()
+		})
+		.collect::<Vec<OpdsEntry>>();
 
-		let entries = library_series
-			.into_iter()
-			.map(|s| {
-				OPDSEntryBuilder::<series::Data>::new(s, req.api_key()).into_opds_entry()
-			})
-			.collect::<Vec<OpdsEntry>>();
+	let feed = OPDSFeedBuilder::new(req.api_key()).paginated(OPDSFeedBuilderParams {
+		id,
+		title: library.name.clone(),
+		entries,
+		href_postfix: format!("libraries/{}", &library.id),
+		page_params: Some(OPDSFeedBuilderPageParams {
+			page: pagination.page,
+			count,
+		}),
+		search: None,
+	})?;
 
-		let feed =
-			OPDSFeedBuilder::new(req.api_key()).paginated(OPDSFeedBuilderParams {
-				id: library.id.clone(),
-				title: library.name.clone(),
-				entries,
-				href_postfix: format!("libraries/{}", &library.id),
-				page_params: Some(OPDSFeedBuilderPageParams {
-					page: page.into(),
-					count: library_series_count,
-				}),
-				search: None,
-			})?;
-		Ok(Xml(feed.build()?))
-	} else {
-		Err(APIError::NotFound(format!(
-			"Library {library_id} not found"
-		)))
-	}
+	Ok(Xml(feed.build()?))
 }
 
 // FIXME: Based on testing with Panels, it seems like pagination isn't an expected default when
@@ -445,60 +394,41 @@ async fn get_library_by_id(
 /// pagination is zero-indexed.
 async fn get_series(
 	State(ctx): State<AppState>,
-	Query(pagination): Query<PageQuery>,
+	Query(pagination): Query<OffsetPagination>,
 	Query(OPDSSearchQuery { search }): Query<OPDSSearchQuery>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Xml> {
-	let db = &ctx.db;
-
-	let page = pagination.page.unwrap_or(0);
-	let (skip, take) = pagination_bounds(page.into(), 20);
-
 	let user = req.user();
-	let age_restrictions = user
-		.age_restriction
-		.as_ref()
-		.map(|ar| apply_series_age_restriction(ar.age, ar.restrict_on_unset));
-
-	let search_clone = search.clone();
-	let (series, count) = db
-		._transaction()
-		.run(|client| async move {
-			let series = client
-				.series()
-				.find_many(chain_optional_iter(
-					[],
-					[
-						age_restrictions.clone(),
-						search_clone.map(|q| {
-							or![
-								series::name::contains(q.clone()),
-								series::metadata::is(vec![
-									series_metadata::title::contains(q),
-								])
-							]
-						}),
-					],
-				))
-				.skip(skip)
-				.take(take)
-				.order_by(series::name::order(Direction::Asc))
-				.exec()
-				.await?;
-
-			client
-				.series()
-				.count(chain_optional_iter([], [age_restrictions]))
-				.exec()
-				.await
-				.map(|count| (series, count))
+	let search_cpy = search.clone();
+	let series = series::Entity::find_for_user(&user)
+		.apply_if(search_cpy, |query, search| {
+			query.left_join(series_metadata::Entity).filter(
+				series::Column::Name
+					.contains(search.clone())
+					.or(series_metadata::Column::Title.contains(search)),
+			)
 		})
+		.order_by_asc(series::Column::Name)
+		.offset(pagination.offset())
+		.limit(pagination.limit())
+		.all(ctx.conn.as_ref())
+		.await?;
+	let search_cpy = search.clone();
+	let count = series::Entity::find_for_user(&user)
+		.apply_if(search_cpy, |query, search| {
+			query.left_join(series_metadata::Entity).filter(
+				series::Column::Name
+					.contains(search.clone())
+					.or(series_metadata::Column::Title.contains(search)),
+			)
+		})
+		.count(ctx.conn.as_ref())
 		.await?;
 
 	let entries = series
 		.into_iter()
 		.map(|s| {
-			OPDSEntryBuilder::<series::Data>::new(s, req.api_key()).into_opds_entry()
+			OPDSEntryBuilder::<series::Model>::new(s, req.api_key()).into_opds_entry()
 		})
 		.collect::<Vec<OpdsEntry>>();
 
@@ -508,7 +438,7 @@ async fn get_series(
 		entries,
 		href_postfix: "series".to_string(),
 		page_params: Some(OPDSFeedBuilderPageParams {
-			page: page.into(),
+			page: pagination.page,
 			count,
 		}),
 		search,
@@ -519,45 +449,24 @@ async fn get_series(
 
 async fn get_latest_series(
 	State(ctx): State<AppState>,
-	pagination: Query<PageQuery>,
-	Extension(req): Extension<RequestContext>,
+	pagination: Query<OffsetPagination>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Xml> {
-	let db = &ctx.db;
-
-	let page = pagination.page.unwrap_or(0);
-	let (skip, take) = pagination_bounds(page.into(), 20);
-
 	let user = req.user();
-	let age_restrictions = user
-		.age_restriction
-		.as_ref()
-		.map(|ar| apply_series_age_restriction(ar.age, ar.restrict_on_unset));
-
-	let (series, count) = db
-		._transaction()
-		.run(|client| async move {
-			let series = client
-				.series()
-				.find_many(chain_optional_iter([], [age_restrictions.clone()]))
-				.order_by(series::updated_at::order(Direction::Desc))
-				.skip(skip)
-				.take(take)
-				.exec()
-				.await?;
-
-			client
-				.series()
-				.count(chain_optional_iter([], [age_restrictions]))
-				.exec()
-				.await
-				.map(|count| (series, count))
-		})
+	let series = series::Entity::find_for_user(&user)
+		.order_by_desc(series::Column::UpdatedAt)
+		.offset(pagination.offset())
+		.limit(pagination.limit())
+		.all(ctx.conn.as_ref())
+		.await?;
+	let count = series::Entity::find_for_user(&user)
+		.count(ctx.conn.as_ref())
 		.await?;
 
 	let entries = series
 		.into_iter()
 		.map(|s| {
-			OPDSEntryBuilder::<series::Data>::new(s, req.api_key()).into_opds_entry()
+			OPDSEntryBuilder::<series::Model>::new(s, req.api_key()).into_opds_entry()
 		})
 		.collect::<Vec<OpdsEntry>>();
 
@@ -567,7 +476,7 @@ async fn get_latest_series(
 		entries,
 		href_postfix: "series/latest".to_string(),
 		page_params: Some(OPDSFeedBuilderPageParams {
-			page: page.into(),
+			page: pagination.page,
 			count,
 		}),
 		search: None,
@@ -582,78 +491,56 @@ async fn get_series_by_id(
 		..
 	}): Path<OPDSURLParams<OPDSIDURLParams>>,
 	State(ctx): State<AppState>,
-	pagination: Query<PageQuery>,
-	Extension(req): Extension<RequestContext>,
+	pagination: Query<OffsetPagination>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Xml> {
-	let db = &ctx.db;
-
-	let series_id = id.clone();
-	let page = pagination.page.unwrap_or(0);
-	let (skip, take) = pagination_bounds(page.into(), 20);
 	let user = req.user();
-	let age_restrictions = user
-		.age_restriction
-		.as_ref()
-		.map(|ar| apply_series_age_restriction(ar.age, ar.restrict_on_unset));
+	let series::ModelWithMetadata { series, metadata } =
+		series::ModelWithMetadata::find_for_user(&user)
+			.filter(series::Column::Id.eq(id.clone()))
+			.into_model::<series::ModelWithMetadata>()
+			.one(ctx.conn.as_ref())
+			.await?
+			.ok_or(APIError::NotFound(format!("Series {id} not found")))?;
 
-	let tx_result = db
-		._transaction()
-		.run(|client| async move {
-			let series = db
-				.series()
-				.find_first(chain_optional_iter(
-					[series::id::equals(id.clone())],
-					[age_restrictions.clone()],
-				))
-				.with(
-					series::media::fetch(vec![])
-						.skip(skip)
-						.take(take)
-						.order_by(media::name::order(Direction::Asc)),
-				)
-				.exec()
-				.await?;
-
-			client
-				.media()
-				.count(vec![
-					media::series_id::equals(Some(id.clone())),
-					media::series::is(chain_optional_iter(
-						[series::id::equals(id.clone())],
-						[age_restrictions],
-					)),
-				])
-				.exec()
-				.await
-				.map(|count| (series, Some(count)))
-		})
+	let books = OPDSPublicationEntity::find_for_user(&user)
+		.filter(media::Column::SeriesId.eq(id.clone()))
+		.order_by_asc(media::Column::Name)
+		.offset(pagination.offset())
+		.limit(pagination.limit())
+		.into_model::<OPDSPublicationEntity>()
+		.all(ctx.conn.as_ref())
+		.await?;
+	let count = OPDSPublicationEntity::find_for_user(&user)
+		.filter(media::Column::SeriesId.eq(id.clone()))
+		.count(ctx.conn.as_ref())
 		.await?;
 
-	if let (Some(series), Some(series_book_count)) = tx_result {
-		let series_media = series.media().unwrap_or(&Vec::new()).to_owned();
-		let entries = series_media
-			.into_iter()
-			.map(|m| {
-				OPDSEntryBuilder::<media::Data>::new(m, req.api_key()).into_opds_entry()
-			})
-			.collect();
+	let entries = books
+		.into_iter()
+		.map(|m| {
+			OPDSEntryBuilder::<OPDSPublicationEntity>::new(m, req.api_key())
+				.into_opds_entry()
+		})
+		.collect();
 
-		let feed =
-			OPDSFeedBuilder::new(req.api_key()).paginated(OPDSFeedBuilderParams {
-				id: series.id.clone(),
-				title: series.name.clone(),
-				entries,
-				href_postfix: format!("series/{}", &series.id),
-				page_params: Some(OPDSFeedBuilderPageParams {
-					page: page.into(),
-					count: series_book_count,
-				}),
-				search: None,
-			})?;
-		Ok(Xml(feed.build()?))
-	} else {
-		Err(APIError::NotFound(format!("Series {series_id} not found")))
-	}
+	let title = metadata
+		.and_then(|m| m.title.clone())
+		.unwrap_or_else(|| series.name.clone());
+
+	let feed = OPDSFeedBuilder::new(req.api_key()).paginated(OPDSFeedBuilderParams {
+		id: series.id.clone(),
+		title,
+		entries,
+		href_postfix: format!("series/{}", &series.id),
+		page_params: Some(OPDSFeedBuilderPageParams {
+			page: pagination.page,
+			count,
+		}),
+		search: None,
+	})?;
+
+	Ok(Xml(feed.build()?))
 }
 
 // TODO: support something like `STRICT_OPDS` to enforce OPDS compliance conditionally
@@ -665,10 +552,16 @@ fn handle_opds_image_response(
 		Ok(ImageResponse::new(content_type, image_buffer))
 	} else if content_type.is_decodable_image() {
 		tracing::debug!("Converting image to JPEG for legacy OPDS compatibility");
-		let jpeg_buffer = GenericImageProcessor::generate(
-			&image_buffer,
-			ImageProcessorOptions::jpeg(),
-		)?;
+		let jpeg_buffer = tokio::task::block_in_place(|| {
+			let converted = GenericImageProcessor::generate(
+				&image_buffer,
+				ImageProcessorOptions {
+					format: SupportedImageFormat::Jpeg,
+					..Default::default()
+				},
+			)?;
+			Ok::<Vec<u8>, APIError>(converted)
+		})?;
 		Ok(ImageResponse::new(ContentType::JPEG, jpeg_buffer))
 	} else {
 		tracing::warn!(
@@ -686,32 +579,42 @@ async fn get_book_thumbnail(
 		..
 	}): Path<OPDSURLParams<OPDSIDURLParams>>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<ImageResponse> {
+	let user = req.user();
+	let book = media::Entity::find_for_user(&user)
+		.columns(vec![media::Column::Id, media::Column::Path])
+		.filter(media::Column::Id.eq(id))
+		.into_model::<media::MediaIdentSelect>()
+		.one(ctx.conn.as_ref())
+		.await?
+		.ok_or(APIError::NotFound("Book not found".to_string()))?;
+
+	let adjusted_config = StumpConfig {
+		pdf_prerender_range: 0, // Disable PDF prerendering for thumbnails since we only need the first page
+		..ctx.config.as_ref().clone()
+	};
+
 	let (content_type, image_buffer) =
-		get_media_thumbnail_by_id(id, &ctx.db, req.user(), &ctx.config).await?;
+		get_page_async(PathBuf::from(book.path), 1, &adjusted_config).await?;
 
 	handle_opds_image_response(content_type, image_buffer)
 }
 
 /// A handler for GET /opds/v1.2/books/{id}/page/{page}, returns the page
+///
+/// Note: Reading progression tracking can be disabled via the ENABLE_OPDS_PROGRESSION
+/// configuration variable to avoid inaccurate tracking when clients preload pages.
+#[tracing::instrument(skip(ctx, req), fields(book_id = %id, page, zero_based = ?pagination.zero_based))]
 async fn get_book_page(
 	Path(OPDSURLParams {
 		params: OPDSPageURLParams { id, page },
 		..
 	}): Path<OPDSURLParams<OPDSPageURLParams>>,
 	State(ctx): State<AppState>,
-	pagination: Query<PageQuery>,
-	Extension(req): Extension<RequestContext>,
+	pagination: Query<OffsetPagination>,
+	Extension(req): Extension<AuthContext>,
 ) -> APIResult<ImageResponse> {
-	let client = &ctx.db;
-
-	let user = req.user();
-	let age_restrictions = user
-		.age_restriction
-		.as_ref()
-		.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset));
-
 	// OPDS defaults to zero-indexed pages, I don't even think it allows the
 	// zero_based query param to be set.
 	let zero_based = pagination.zero_based.unwrap_or(true);
@@ -720,92 +623,123 @@ async fn get_book_page(
 		correct_page = page + 1;
 	}
 
-	let book = client
-		.media()
-		.find_first(chain_optional_iter(
-			[media::id::equals(id.clone())]
-				.into_iter()
-				.chain(apply_media_library_not_hidden_for_user_filter(user))
-				.collect::<Vec<_>>(),
-			[age_restrictions],
-		))
-		.exec()
+	let user = req.user();
+	let book = media::Entity::find_for_user(&user)
+		.filter(media::Column::Id.eq(id.clone()))
+		.one(ctx.conn.as_ref())
 		.await?
-		.ok_or(APIError::NotFound(String::from("Book not found")))?;
-	let is_completed = book.pages == correct_page;
+		.ok_or(APIError::NotFound("Book not found".to_string()))?;
 
-	if is_completed {
-		let deleted_session = client
-			.active_reading_session()
-			.delete(active_reading_session::user_id_media_id(
-				user.id.clone(),
-				id.clone(),
-			))
-			.exec()
-			.await
-			.ok();
-		tracing::trace!(?deleted_session, "Deleted active reading session");
+	// Only track reading progression if enabled in config
+	if ctx.config.enable_opds_progression {
+		if book.pages == correct_page {
+			let deleted_sessions = reading_session::Entity::delete_many()
+				.filter(
+					reading_session::Column::UserId
+						.eq(user.id.clone())
+						.and(reading_session::Column::MediaId.eq(id.clone())),
+				)
+				.exec_with_returning(ctx.conn.as_ref())
+				.await?;
+			let deleted_session = deleted_sessions.into_iter().next();
+			tracing::trace!(?deleted_session, "Deleted active reading session");
 
-		let finished_session = client
-			.finished_reading_session()
-			.create(
-				deleted_session.map(|s| s.started_at).unwrap_or_default(),
-				media::id::equals(id.clone()),
-				user::id::equals(user.id.clone()),
-				vec![],
-			)
-			.exec()
-			.await?;
-		tracing::trace!(?finished_session, "Created finished reading session");
-	} else {
-		client
-			.active_reading_session()
-			.upsert(
-				active_reading_session::user_id_media_id(user.id.clone(), id.clone()),
-				(
-					media::id::equals(id.clone()),
-					user::id::equals(user.id.clone()),
-					vec![active_reading_session::page::set(Some(correct_page))],
-				),
-				vec![active_reading_session::page::set(Some(correct_page))],
-			)
-			.exec()
-			.await?;
+			let started_at = deleted_session.as_ref().map(|s| s.started_at);
+			let device_id = deleted_session.as_ref().and_then(|s| s.device_id.clone());
+			let elapsed_seconds =
+				deleted_session.as_ref().and_then(|s| s.elapsed_seconds);
+
+			let active_model = finished_reading_session::ActiveModel {
+				user_id: Set(user.id.clone()),
+				media_id: Set(id.clone()),
+				device_id: Set(device_id),
+				started_at: Set(started_at.unwrap_or_default()),
+				elapsed_seconds: Set(elapsed_seconds),
+				completed_at: Set(Utc::now().into()),
+				..Default::default()
+			};
+			let finished_session = finished_reading_session::Entity::insert(active_model)
+				.exec(ctx.conn.as_ref())
+				.await?;
+			tracing::trace!(?finished_session, "Created finished reading session");
+		} else {
+			let on_conflict = OnConflict::new()
+				.update_columns(vec![
+					reading_session::Column::Page,
+					reading_session::Column::UpdatedAt,
+				])
+				.to_owned();
+			let active_model = reading_session::ActiveModel {
+				user_id: Set(user.id.clone()),
+				media_id: Set(id.clone()),
+				device_id: Set(None),
+				page: Set(Some(correct_page)),
+				started_at: Set(Utc::now().into()),
+				..Default::default()
+			};
+			let reading_session = reading_session::Entity::insert(active_model)
+				.on_conflict(on_conflict)
+				.exec(ctx.conn.as_ref())
+				.await?;
+			tracing::trace!(?reading_session, "Upserted active reading session");
+		}
 	}
 
 	let (content_type, image_buffer) =
-		get_page_async(book.path.as_str(), correct_page, &ctx.config).await?;
+		get_page_async(PathBuf::from(book.path), correct_page, &ctx.config).await?;
+
 	handle_opds_image_response(content_type, image_buffer)
 }
 
 /// A handler for GET /opds/v1.2/books/{id}/file/{filename}, returns the book
 async fn download_book(
 	Path(OPDSURLParams {
-		params: OPDSFilenameURLParams { id, filename },
+		params: OPDSFilenameURLParams { id, .. },
 		..
 	}): Path<OPDSURLParams<OPDSFilenameURLParams>>,
 	State(ctx): State<AppState>,
-	Extension(req): Extension<RequestContext>,
-) -> APIResult<NamedFile> {
-	let db = &ctx.db;
+	Extension(req): Extension<AuthContext>,
+	headers: HeaderMap,
+) -> APIResult<impl IntoResponse> {
+	let user = req
+		.user_and_enforce_permissions(&[UserPermission::DownloadFile])
+		.map_err(|_| {
+			tracing::error!("User does not have permission to download file");
+			APIError::forbidden_discreet()
+		})?;
 
-	let user = req.user_and_enforce_permissions(&[UserPermission::DownloadFile])?;
-	let age_restrictions = user
-		.age_restriction
-		.as_ref()
-		.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset));
-
-	trace!(?id, ?filename, "download_book");
-
-	let book = db
-		.media()
-		.find_first(chain_optional_iter(
-			[media::id::equals(id.clone())],
-			[age_restrictions],
-		))
-		.exec()
+	let book = media::Entity::find_for_user(&user)
+		.filter(media::Column::Id.eq(id.clone()))
+		.into_model::<media::MediaIdentSelect>()
+		.one(ctx.conn.as_ref())
 		.await?
-		.ok_or(APIError::NotFound(String::from("Book not found")))?;
+		.ok_or(APIError::NotFound("Book not found".to_string()))?;
 
-	Ok(NamedFile::open(book.path.clone()).await?)
+	// Note: I am reusing the original headers to support range requests
+	let mut serve_req = Request::new(Body::empty());
+	*serve_req.headers_mut() = headers;
+
+	match ServeFile::new(&book.path).try_call(serve_req).await {
+		Ok(mut response) => {
+			if let Some(filename) = std::path::Path::new(&book.path)
+				.file_name()
+				.and_then(|os_str| os_str.to_str())
+			{
+				response.headers_mut().insert(
+					header::CONTENT_DISPOSITION,
+					format!("attachment; filename=\"{}\"", filename)
+						.parse()
+						.unwrap_or_else(|_| "attachment".parse().unwrap()),
+				);
+			}
+			Ok(response)
+		},
+		Err(e) => {
+			tracing::error!(error = ?e, path = %book.path, "Error serving media file");
+			Err(APIError::InternalServerError(format!(
+				"Failed to serve file: {}",
+				e
+			)))
+		},
+	}
 }

@@ -1,3 +1,4 @@
+import { AccessRole } from '@stump/graphql'
 import { lazy, Suspense } from 'react'
 import { Navigate, Route, Routes } from 'react-router'
 
@@ -9,7 +10,7 @@ const UserSmartListItemsScene = lazy(() => import('./items/UserSmartListItemsSce
 export default function UserSmartListRouter() {
 	const { viewerRole } = useSmartListContext()
 
-	const isWriter = viewerRole !== 'Reader'
+	const isWriter = viewerRole !== AccessRole.Reader
 
 	return (
 		<Suspense fallback={null}>

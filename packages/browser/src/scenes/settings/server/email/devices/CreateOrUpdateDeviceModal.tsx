@@ -1,17 +1,33 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import {
-	invalidateQueries,
-	useCreateEmailDevice,
-	useSDK,
-	useUpdateEmailDevice,
-} from '@stump/client'
+import { useGraphQLMutation, useSDK } from '@stump/client'
 import { Button, CheckBox, Dialog, Form, Input } from '@stump/components'
+import { EmailDevicesTableQuery, graphql } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
-import { RegisteredEmailDevice } from '@stump/sdk'
-import { useEffect, useMemo } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
+import { useCallback, useEffect, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
-import toast from 'react-hot-toast'
 import { z } from 'zod'
+
+const createMutation = graphql(`
+	mutation CreateOrUpdateDeviceModalCreateEmailDevice($input: EmailDeviceInput!) {
+		createEmailDevice(input: $input) {
+			id
+			name
+		}
+	}
+`)
+
+const updateMutation = graphql(`
+	mutation CreateOrUpdateDeviceModalUpdateEmailDevice($id: Int!, $input: EmailDeviceInput!) {
+		updateEmailDevice(id: $id, input: $input) {
+			id
+			name
+			forbidden
+		}
+	}
+`)
+
+type RegisteredEmailDevice = EmailDevicesTableQuery['emailDevices'][number]
 
 type Props = {
 	isOpen: boolean
@@ -25,9 +41,29 @@ export default function CreateOrUpdateDeviceModal({ isOpen, updatingDevice, onCl
 	const { sdk } = useSDK()
 	const { t } = useLocaleContext()
 
-	const { createAsync } = useCreateEmailDevice()
-	const { updateAsync } = useUpdateEmailDevice({
-		id: updatingDevice?.id || -1,
+	const client = useQueryClient()
+
+	const { mutate: create } = useGraphQLMutation(createMutation, {
+		onSuccess: async () => {
+			await client.refetchQueries({
+				predicate: ({ queryKey: [baseKey] }) => baseKey === sdk.cacheKeys.emailDevices,
+			})
+			onClose()
+		},
+	})
+
+	const { mutate: update } = useGraphQLMutation(updateMutation, {
+		onSuccess: async () => {
+			client.setQueryData(sdk.cacheKey('emailDevices'), (oldData: EmailDevicesTableQuery) => {
+				return {
+					...oldData,
+					emailDevices: oldData.emailDevices.map((device) =>
+						device.id === updatingDevice?.id ? { ...device, ...updatingDevice } : device,
+					),
+				}
+			})
+			onClose()
+		},
 	})
 
 	const defaultValues = useMemo(
@@ -51,20 +87,19 @@ export default function CreateOrUpdateDeviceModal({ isOpen, updatingDevice, onCl
 		reset(defaultValues)
 	}, [defaultValues, reset, updatingDevice])
 
-	const handleSubmit = async (values: z.infer<typeof schema>) => {
-		try {
+	const handleSubmit = useCallback(
+		(values: z.infer<typeof schema>) => {
 			if (updatingDevice) {
-				await updateAsync(values)
+				update({
+					id: updatingDevice.id,
+					input: values,
+				})
 			} else {
-				await createAsync(values)
+				create({ input: values })
 			}
-			onClose()
-		} catch (error) {
-			console.error(error)
-			toast.error('Failed to create/update device')
-		}
-		await invalidateQueries({ keys: [sdk.emailer.keys.getDevices] })
-	}
+		},
+		[updatingDevice, create, update],
+	)
 
 	const onOpenChange = (nowOpen: boolean) => (!nowOpen ? onClose() : null)
 

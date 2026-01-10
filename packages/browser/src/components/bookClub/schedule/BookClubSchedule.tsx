@@ -29,9 +29,7 @@ export default function BookClubSchedule() {
 	 */
 	const scheduleBooks = useMemo(
 		() =>
-			(bookClub.schedule?.books || []).toSorted((a, b) =>
-				dayjs(b.start_at).diff(dayjs(a.start_at)),
-			),
+			(bookClub.schedule?.books || []).toSorted((a, b) => dayjs(b.startAt).diff(dayjs(a.startAt))),
 		[bookClub.schedule?.books],
 	)
 	/**
@@ -40,10 +38,10 @@ export default function BookClubSchedule() {
 	const currentBooks = useMemo(
 		() =>
 			scheduleBooks.filter((book) => {
-				const adjustedEnd = book.discussion_duration_days
-					? dayjs(book.end_at).add(book.discussion_duration_days, 'day')
+				const adjustedEnd = book.discussionDurationDays
+					? dayjs(book.endAt).add(book.discussionDurationDays, 'day')
 					: null
-				return dayjs().isBefore(adjustedEnd) && dayjs().isAfter(dayjs(book.start_at))
+				return dayjs().isBefore(adjustedEnd) && dayjs().isAfter(dayjs(book.startAt))
 			}),
 		[scheduleBooks],
 	)

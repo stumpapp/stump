@@ -4,7 +4,7 @@ import { isSupportedFont } from '@stump/sdk'
 import { useCallback } from 'react'
 
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
-import { SUPPORTED_FONT_OPTIONS } from '@/scenes/settings/app/appearance/FontSelect'
+import { SUPPORTED_FONT_OPTIONS } from '@/scenes/settings/app/preferences/FontSelect'
 
 import { useEpubReaderContext } from '../context'
 
@@ -22,9 +22,9 @@ export default function FontFamily() {
 		(font?: string) => {
 			if (!font) {
 				setBookPreferences({ fontFamily: undefined })
-			} else if (isSupportedFont(font)) {
+			} else if (isSupportedFont(font) || isSupportedFont(font.toUpperCase())) {
 				// Note: useApplyTheme will apply the font to the body element after the preferences are updated
-				setBookPreferences({ fontFamily: font })
+				setBookPreferences({ fontFamily: font.toUpperCase() })
 			}
 		},
 		[setBookPreferences],

@@ -1,11 +1,12 @@
 import { useSDK } from '@stump/client'
 import { Href, useRouter } from 'expo-router'
-import { View } from 'react-native'
-import { Pressable } from 'react-native-gesture-handler'
+import { Pressable, View } from 'react-native'
 
 import { cn } from '~/lib/utils'
+import { usePreferencesStore } from '~/stores'
 
-import { FasterImage } from '../Image'
+import { ThumbnailImage } from '../image'
+import { ThumbnailPlaceholderData } from '../image/ThumbnailPlaceholder'
 import { Text } from '../ui'
 import { useGridItemSize } from './useGridItemSize'
 
@@ -13,48 +14,32 @@ type Props = {
 	uri: string
 	title: string
 	href: Href
+	placeholderData?: ThumbnailPlaceholderData | null
 }
 
-export default function GridImageItem({ uri, title, href }: Props) {
+export default function GridImageItem({ uri, title, href, ...thumbnailProps }: Props) {
 	const { sdk } = useSDK()
-	const { itemDimension } = useGridItemSize()
+	const { itemWidth } = useGridItemSize()
 
 	const router = useRouter()
+	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
 
 	return (
 		<Pressable onPress={() => router.navigate(href)}>
 			{({ pressed }) => (
-				<View
-					className={cn('flex-1 gap-2 pb-4', {
-						// 'mr-auto': index % 2 === 0,
-						// 'ml-auto': index % 2 === 1,
-					})}
-				>
-					<View
-						className={cn({
-							'opacity-80': pressed,
-						})}
-						style={{
-							height: itemDimension * 1.5,
-							width: itemDimension,
+				<View className={cn('flex-1 gap-2 pb-4', { 'opacity-80': pressed })}>
+					<ThumbnailImage
+						source={{
+							uri: uri,
+							headers: {
+								...sdk.customHeaders,
+								Authorization: sdk.authorizationHeader || '',
+							},
 						}}
-					>
-						<FasterImage
-							source={{
-								url: uri,
-								headers: {
-									Authorization: sdk.authorizationHeader || '',
-								},
-								resizeMode: 'cover',
-								borderRadius: 8,
-								cachePolicy: 'discWithCacheControl',
-							}}
-							style={{
-								height: '100%',
-								width: '100%',
-							}}
-						/>
-					</View>
+						resizeMode="stretch"
+						size={{ height: itemWidth / thumbnailRatio, width: itemWidth }}
+						{...thumbnailProps}
+					/>
 
 					<Text
 						size="xl"
@@ -62,7 +47,7 @@ export default function GridImageItem({ uri, title, href }: Props) {
 						numberOfLines={2}
 						ellipsizeMode="tail"
 						style={{
-							maxWidth: itemDimension - 4,
+							maxWidth: itemWidth - 4,
 						}}
 					>
 						{title}

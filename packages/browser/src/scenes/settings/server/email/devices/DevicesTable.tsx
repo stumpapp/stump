@@ -1,7 +1,7 @@
-import { useEmailDevicesQuery } from '@stump/client'
+import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Badge, Card, Text } from '@stump/components'
+import { EmailDevicesTableQuery, graphql } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
-import { RegisteredEmailDevice } from '@stump/sdk'
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
 import { Slash, Smartphone } from 'lucide-react'
 import { useMemo, useState } from 'react'
@@ -12,42 +12,18 @@ import { useEmailerSettingsContext } from '../context'
 import DeleteDeviceConfirmation from './DeleteDeviceConfirmation'
 import DeviceActionMenu from './DeviceActionMenu'
 
-const columnHelper = createColumnHelper<RegisteredEmailDevice>()
-const baseColumns = [
-	columnHelper.accessor('name', {
-		cell: ({ getValue }) => <Text size="sm">{getValue()}</Text>,
-		header: () => (
-			<Text size="sm" variant="muted">
-				Name
-			</Text>
-		),
-	}),
-	columnHelper.accessor('email', {
-		cell: ({ getValue }) => <Text size="sm">{getValue()}</Text>,
-		header: () => (
-			<Text size="sm" variant="muted">
-				Email
-			</Text>
-		),
-	}),
-	columnHelper.display({
-		cell: ({
-			row: {
-				original: { forbidden },
-			},
-		}) => (
-			<Badge size="sm" variant={forbidden ? 'warning' : 'default'}>
-				{forbidden ? 'Forbidden' : 'Allowed'}
-			</Badge>
-		),
-		header: () => (
-			<Text size="sm" variant="muted">
-				Status
-			</Text>
-		),
-		id: 'status',
-	}),
-] as ColumnDef<RegisteredEmailDevice>[]
+const query = graphql(`
+	query EmailDevicesTable {
+		emailDevices {
+			id
+			name
+			email
+			forbidden
+		}
+	}
+`)
+
+export type RegisteredEmailDevice = EmailDevicesTableQuery['emailDevices'][number]
 
 type Props = {
 	onSelectForUpdate: (device: RegisteredEmailDevice | null) => void
@@ -56,7 +32,11 @@ type Props = {
 export default function DevicesTable({ onSelectForUpdate }: Props) {
 	const { t } = useLocaleContext()
 	const { canEditEmailer } = useEmailerSettingsContext()
-	const { devices } = useEmailDevicesQuery()
+	const { sdk } = useSDK()
+
+	const {
+		data: { emailDevices: devices },
+	} = useSuspenseGraphQL(query, sdk.cacheKey('emailDevices'))
 
 	const [deletingDevice, setDeletingDevice] = useState<RegisteredEmailDevice | null>(null)
 
@@ -130,3 +110,40 @@ export default function DevicesTable({ onSelectForUpdate }: Props) {
 }
 
 const LOCALE_BASE = 'settingsScene.server/email.sections.devices.table'
+
+const columnHelper = createColumnHelper<RegisteredEmailDevice>()
+const baseColumns = [
+	columnHelper.accessor('name', {
+		cell: ({ getValue }) => <Text size="sm">{getValue()}</Text>,
+		header: () => (
+			<Text size="sm" variant="muted">
+				Name
+			</Text>
+		),
+	}),
+	columnHelper.accessor('email', {
+		cell: ({ getValue }) => <Text size="sm">{getValue()}</Text>,
+		header: () => (
+			<Text size="sm" variant="muted">
+				Email
+			</Text>
+		),
+	}),
+	columnHelper.display({
+		cell: ({
+			row: {
+				original: { forbidden },
+			},
+		}) => (
+			<Badge size="sm" variant={forbidden ? 'warning' : 'default'}>
+				{forbidden ? 'Forbidden' : 'Allowed'}
+			</Badge>
+		),
+		header: () => (
+			<Text size="sm" variant="muted">
+				Status
+			</Text>
+		),
+		id: 'status',
+	}),
+] as ColumnDef<RegisteredEmailDevice>[]

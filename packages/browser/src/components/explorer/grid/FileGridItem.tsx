@@ -1,26 +1,26 @@
-import { useSDK } from '@stump/client'
+import { UseDirectoryListingFile, useSDK } from '@stump/client'
 import { Text, ToolTip } from '@stump/components'
-import { DirectoryListingFile, Media } from '@stump/sdk'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
-import { formatBookName } from '@/utils/format'
+import { usePrefetchBook } from '@/components/book'
+import { usePrefetchBooksAfterCursor } from '@/scenes/book/BooksAfterCursor'
 
 import { useFileExplorerContext } from '../context'
-import FileThumbnail, { getBook } from '../FileThumbnail'
+import FileThumbnail, { getBook, MediaAtPath } from '../FileThumbnail'
 
 type Props = {
-	file: DirectoryListingFile
+	file: UseDirectoryListingFile
 }
 
 export default function FileGridItem({ file }: Props) {
-	const { name, path, is_directory } = file
+	const { name, path, isDirectory } = file
 	const { sdk } = useSDK()
 
 	const { onSelect } = useFileExplorerContext()
 
-	const [book, setBook] = useState<Media>()
+	const [book, setBook] = useState<MediaAtPath>()
 
-	const tooltipName = useMemo(() => (book ? formatBookName(book) : name), [book, name])
+	const tooltipName = useMemo(() => (book ? book.resolvedName : name), [book, name])
 
 	/**
 	 * An effect that attempts to fetch the book associated with the file, if any exists.
@@ -35,20 +35,35 @@ export default function FileGridItem({ file }: Props) {
 			}
 		}
 
-		if (!is_directory) {
+		if (!isDirectory) {
 			tryGetMedia()
 		}
-	}, [path, is_directory, sdk])
+	}, [path, isDirectory, sdk])
+
+	const prefetchBook = usePrefetchBook()
+	const prefetchBooksAfterCursor = usePrefetchBooksAfterCursor()
+	const prefetch = useCallback(
+		() =>
+			book
+				? Promise.all([prefetchBook(book.id), prefetchBooksAfterCursor(book.id)])
+				: Promise.resolve(),
+		[prefetchBook, prefetchBooksAfterCursor, book],
+	)
 
 	return (
 		<ToolTip content={tooltipName} align="start">
 			<button
 				className="group flex h-full w-32 flex-col items-center justify-center gap-y-1.5 focus:outline-none"
 				onDoubleClick={() => onSelect(file)}
+				{...(book
+					? {
+							onMouseEnter: prefetch,
+						}
+					: {})}
 			>
 				<FileThumbnail
 					path={path}
-					isDirectory={is_directory}
+					isDirectory={isDirectory}
 					containerClassName="group-hover:bg-background-surface-hover/80 group-focus:bg-background-surface"
 					size="md"
 				/>

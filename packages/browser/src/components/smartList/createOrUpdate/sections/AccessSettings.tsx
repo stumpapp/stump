@@ -1,6 +1,6 @@
-import { Alert, Label, NativeSelect, Text } from '@stump/components'
+import { Alert, AlertDescription, Label, NativeSelect, Text } from '@stump/components'
+import { EntityVisibility } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
-import { EntityVisibility } from '@stump/sdk'
 import { useFormContext } from 'react-hook-form'
 
 import { SmartListFormSchema } from '../schema'
@@ -23,20 +23,22 @@ export default function AccessSettings({ isCreating }: Props) {
 				<Label>{t(getKey('label'))}</Label>
 				<NativeSelect
 					options={[
-						{ label: t(getOptionKey('PUBLIC', 'label')), value: 'PUBLIC' },
-						{ label: t(getOptionKey('SHARED', 'label')), value: 'SHARED' },
-						{ label: t(getOptionKey('PRIVATE', 'label')), value: 'PRIVATE' },
+						{ label: t(getOptionKey(EntityVisibility.Public, 'label')), value: 'PUBLIC' },
+						{ label: t(getOptionKey(EntityVisibility.Shared, 'label')), value: 'SHARED' },
+						{ label: t(getOptionKey(EntityVisibility.Private, 'label')), value: 'PRIVATE' },
 					]}
 					{...form.register('visibility')}
 				/>
 				<Text variant="muted" size="sm">
-					{t(getOptionKey(visibility, 'description'))}
+					{t(getOptionKey(visibility as EntityVisibility, 'description'))}
 				</Text>
 			</div>
 
-			{isCreating && visibility === 'SHARED' && (
-				<Alert level="info" className="-mt-4 max-w-lg">
-					<Alert.Content>{t(getOptionKey(visibility, 'createDisclaimer'))}</Alert.Content>
+			{isCreating && visibility === EntityVisibility.Shared && (
+				<Alert variant="info" className="-mt-4 max-w-lg">
+					<AlertDescription>
+						{t(getOptionKey(visibility as EntityVisibility, 'createDisclaimer'))}
+					</AlertDescription>
 				</Alert>
 			)}
 		</>

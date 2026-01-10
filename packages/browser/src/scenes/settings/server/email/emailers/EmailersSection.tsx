@@ -1,5 +1,6 @@
-import { Alert, Heading, Text } from '@stump/components'
+import { Alert, AlertDescription, Heading, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
+import { Info } from 'lucide-react'
 import { Suspense } from 'react'
 
 import EmailersList from './EmailersList'
@@ -16,12 +17,11 @@ export default function EmailersSection() {
 				</Text>
 			</div>
 
-			<Alert level="info" icon="info">
-				<Alert.Content>
-					<Text variant="muted">
-						{t('settingsScene.server/email.sections.emailers.singleInstanceDisclaimer')}
-					</Text>
-				</Alert.Content>
+			<Alert variant="info">
+				<Info />
+				<AlertDescription>
+					{t('settingsScene.server/email.sections.emailers.singleInstanceDisclaimer')}
+				</AlertDescription>
 			</Alert>
 
 			<Suspense fallback={null}>

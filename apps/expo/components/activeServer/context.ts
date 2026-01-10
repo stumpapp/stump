@@ -1,4 +1,5 @@
-import { User, UserPermission } from '@stump/sdk'
+import { UserPermission } from '@stump/graphql'
+import { AuthUser } from '@stump/sdk'
 import { createContext, useContext } from 'react'
 
 import { SavedServer } from '~/stores/savedServer'
@@ -17,12 +18,18 @@ export const useActiveServer = () => {
 	return context
 }
 
+/**
+ * Safe variant of useActiveServer that returns undefined if there's no active server
+ * Pretty much just used for features that persist across servers (e.g., downloads)
+ */
+export const useActiveServerSafe = () => useContext(ActiveServerContext)
+
 export type PermissionEnforcerOptions = {
 	onFailure?: () => void
 }
 
 export type IStumpServerContext = {
-	user: User | null
+	user: AuthUser | null
 	isServerOwner: boolean
 	checkPermission: (permission: UserPermission) => boolean
 	enforcePermission: (permission: UserPermission, options?: PermissionEnforcerOptions) => void

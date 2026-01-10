@@ -1,19 +1,16 @@
-import { ReadingMode } from '@stump/sdk'
+import { ReadingMode } from '@stump/graphql'
+import { ChevronsUpDown } from 'lucide-react-native'
 import { useState } from 'react'
 import { View } from 'react-native'
 import * as DropdownMenu from 'zeego/dropdown-menu'
 
-import { icons, Text } from '~/components/ui'
+import { Icon, Text } from '~/components/ui'
 import { cn } from '~/lib/utils'
-
-const { ChevronsUpDown } = icons
 
 type Props = {
 	mode: ReadingMode
 	onChange: (mode: ReadingMode) => void
 }
-
-// TODO: Remove hardcoded disabled values and support vertical continuous scrolling
 
 export default function ReadingModeSelect({ mode, onChange }: Props) {
 	const [isOpen, setIsOpen] = useState(false)
@@ -26,32 +23,31 @@ export default function ReadingModeSelect({ mode, onChange }: Props) {
 				<DropdownMenu.Trigger>
 					<View className={cn('flex-row items-center gap-1.5', { 'opacity-80': isOpen })}>
 						<Text>{READ_FLOW[mode]}</Text>
-						<ChevronsUpDown className="h-5 text-foreground-muted" />
+						<Icon as={ChevronsUpDown} className="h-5 text-foreground-muted" />
 					</View>
 				</DropdownMenu.Trigger>
 
 				<DropdownMenu.Content>
 					<DropdownMenu.CheckboxItem
 						key="paged"
-						value={mode === 'paged'}
-						onValueChange={() => onChange('paged')}
+						value={mode === ReadingMode.Paged}
+						onValueChange={() => onChange(ReadingMode.Paged)}
 					>
 						<DropdownMenu.ItemTitle>Paged</DropdownMenu.ItemTitle>
 					</DropdownMenu.CheckboxItem>
 
 					<DropdownMenu.CheckboxItem
 						key="continuous:horizontal"
-						value={mode === 'continuous:horizontal'}
-						onValueChange={() => onChange('continuous:horizontal')}
+						value={mode === ReadingMode.ContinuousHorizontal}
+						onValueChange={() => onChange(ReadingMode.ContinuousHorizontal)}
 					>
 						<DropdownMenu.ItemTitle>Scroll (Horizontal)</DropdownMenu.ItemTitle>
 					</DropdownMenu.CheckboxItem>
 
 					<DropdownMenu.CheckboxItem
 						key="continuous:vertical"
-						value={mode === 'continuous:vertical'}
-						onValueChange={() => onChange('continuous:vertical')}
-						disabled
+						value={mode === ReadingMode.ContinuousVertical}
+						onValueChange={() => onChange(ReadingMode.ContinuousVertical)}
 					>
 						<DropdownMenu.ItemTitle>Scroll (Vertical)</DropdownMenu.ItemTitle>
 					</DropdownMenu.CheckboxItem>
@@ -62,7 +58,7 @@ export default function ReadingModeSelect({ mode, onChange }: Props) {
 }
 
 const READ_FLOW: Record<ReadingMode, string> = {
-	paged: 'Paged',
-	'continuous:horizontal': 'Scroll (Horizontal)',
-	'continuous:vertical': 'Scroll (Vertical)',
+	[ReadingMode.Paged]: 'Paged',
+	[ReadingMode.ContinuousHorizontal]: 'Scroll (Horizontal)',
+	[ReadingMode.ContinuousVertical]: 'Scroll (Vertical)',
 }

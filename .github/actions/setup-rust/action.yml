@@ -3,7 +3,7 @@ description: Install system dependencies and setup cache
 
 inputs:
   cache-dependencies:
-    description: 'Cache dependencies. This does not affect the Prisma client cache.'
+    description: 'Cache dependencies'
     required: false
     default: 'true'
 
@@ -18,7 +18,7 @@ runs:
     - name: Install Rust
       uses: actions-rs/toolchain@v1
       with:
-        toolchain: 1.85.0
+        toolchain: 1.86.0
         profile: minimal
         override: true
         components: rustfmt, clippy
@@ -34,23 +34,3 @@ runs:
       uses: Swatinem/rust-cache@v2
       with:
         shared-key: stump-rust-cache
-
-    - name: Restore cached Prisma client
-      id: cache-prisma-restore
-      uses: actions/cache/restore@v3
-      with:
-        path: core/src/prisma.rs
-        key: ${{ runner.os }}-prisma-${{ hashFiles('**/schema.prisma') }}-${{ inputs.cache-locality }}
-
-    - name: Generate Prisma client
-      if: ${{ steps.cache-prisma-restore.outputs.cache-hit != 'true' }}
-      shell: bash
-      run: cargo prisma generate --schema=./core/prisma/schema.prisma
-
-    - name: Save Prisma client
-      id: cache-prisma-save
-      if: ${{ steps.cache-prisma-restore.outputs.cache-hit != 'true' }}
-      uses: actions/cache/save@v4
-      with:
-        path: core/src/prisma.rs
-        key: ${{ runner.os }}-prisma-${{ hashFiles('**/schema.prisma') }}-${{ inputs.cache-locality }}

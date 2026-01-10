@@ -1,124 +1,107 @@
-import { UserPermission } from '@stump/sdk'
+import { UserPermission } from '@stump/graphql'
+import { Api } from '@stump/sdk'
+import { QueryClient } from '@tanstack/react-query'
 import {
 	AlarmClock,
 	Bell,
-	Book,
+	BookOpen,
 	Brush,
-	Cog,
 	KeyRound,
-	LucideIcon,
 	Mail,
 	PcCase,
 	ScrollText,
+	Server,
+	UserCircle,
 	Users,
 } from 'lucide-react'
 
-type SubItem = {
-	localeKey: string
-	matcher: (path: string) => boolean
-	backlink?: {
-		localeKey: string
-		to: string
-	}
-}
+import { RouteGroup } from '@/hooks/useRouteGroups'
 
-type Route = {
-	icon: LucideIcon
-	label: string
-	localeKey: string
-	permission?: UserPermission
-	to: string
-	subItems?: SubItem[]
-	disabled?: boolean
-}
+import { prefetchScheduler } from './server/jobs/JobScheduler'
+import { prefetchJobs } from './server/jobs/JobTable'
+import { prefetchLoginActivity, prefetchUsersTable, prefetchUserStats } from './server/users'
 
-type RouteGroup = {
-	defaultRoute: string
-	items: Route[]
-	label: string
-}
-
-// TODO: prefetch options
-export const routeGroups: RouteGroup[] = [
+export const createRouteGroups = (client: QueryClient, api: Api): RouteGroup[] => [
 	{
 		defaultRoute: '/settings/app/account',
 		items: [
 			{
-				icon: Cog,
+				icon: UserCircle,
 				label: 'Account',
 				localeKey: 'app/account',
-				to: '/settings/app/account',
+				to: '/settings/account',
 			},
 			{
 				icon: Brush,
 				label: 'Appearance',
-				localeKey: 'app/appearance',
-				to: '/settings/app/appearance',
+				localeKey: 'app/preferences',
+				to: '/settings/preferences',
 			},
 			{
-				icon: Book,
+				icon: BookOpen,
 				label: 'Reader',
 				localeKey: 'app/reader',
-				to: '/settings/app/reader',
+				to: '/settings/reader',
 			},
 			{
 				icon: KeyRound,
 				label: 'API keys',
 				localeKey: 'app/apiKeys',
-				permission: 'feature:api_keys',
-				to: '/settings/app/api-keys',
+				permissions: [UserPermission.AccessApiKeys],
+				to: '/settings/api-keys',
 			},
 			{
 				icon: PcCase,
 				label: 'Desktop',
 				localeKey: 'app/desktop',
-				to: '/settings/app/desktop',
+				to: '/settings/desktop',
 			},
 		],
-		label: 'Application',
+		label: 'Personal',
 	},
 	{
-		defaultRoute: '/settings/server/general',
+		defaultRoute: '/settings/server',
 		items: [
 			{
-				icon: Cog,
+				icon: Server,
 				label: 'General',
 				localeKey: 'server/general',
-				permission: 'server:manage',
-				to: '/settings/server/general',
+				permissions: [UserPermission.ManageServer],
+				to: '/settings/server',
 			},
 			{
 				icon: ScrollText,
 				label: 'Logs',
 				localeKey: 'server/logs',
-				permission: 'server:manage',
-				to: '/settings/server/logs',
+				permissions: [UserPermission.ManageServer],
+				to: '/settings/logs',
 			},
 			{
 				icon: AlarmClock,
 				label: 'Jobs',
 				localeKey: 'server/jobs',
-				permission: 'server:manage',
-				to: '/settings/server/jobs',
+				permissions: [UserPermission.ReadJobs],
+				to: '/settings/jobs',
+				prefetch: () => Promise.all([prefetchJobs(client, api), prefetchScheduler(client, api)]),
 			},
 			{
 				icon: Users,
 				label: 'Users',
 				localeKey: 'server/users',
-				permission: 'user:manage',
+				permissions: [UserPermission.ManageUsers],
 				subItems: [
 					{
 						backlink: {
 							localeKey: 'server/users.title',
-							to: '/settings/server/users',
+							to: '/settings/users',
 						},
 						localeKey: 'server/users.createUser',
-						matcher: (path: string) => path.startsWith('/settings/server/users/create'),
+						matcher: (path: string) => path.startsWith('/settings/users/create'),
 					},
 					{
 						backlink: {
 							localeKey: 'server/users.title',
-							to: '/settings/server/users',
+							to: '/settings/users',
 						},
 						localeKey: 'server/users.updateUser',
 						matcher: (path: string) => {
@@ -127,53 +110,52 @@ export const routeGroups: RouteGroup[] = [
 						},
 					},
 				],
-				to: '/settings/server/users',
+				to: '/settings/users',
+				prefetch: async () => {
+					await Promise.all([
+						prefetchUserStats(api, client),
+						prefetchUsersTable(api, client),
+						prefetchLoginActivity(api, client),
+					])
+				},
 			},
-			// {
-			// 	disabled: true,
-			// 	icon: ShieldCheck,
-			// 	label: 'Access',
-			// 	localeKey: 'server/access',
-			// 	permission: 'server:manage',
-			// 	to: '/settings/server/access',
-			// },
 			{
 				icon: Mail,
 				label: 'Email',
 				localeKey: 'server/email',
-				permission: 'emailer:read',
+				permissions: [UserPermission.EmailerRead],
 				subItems: [
 					{
 						backlink: {
 							localeKey: 'server/email.title',
-							to: '/settings/server/email',
+							to: '/settings/email',
 						},
 						localeKey: 'server/email.createEmailer',
-						matcher: (path: string) => path.startsWith('/settings/server/email/new'),
+						matcher: (path: string) => path.startsWith('/settings/email/new'),
 					},
 					{
 						backlink: {
 							localeKey: 'server/email.title',
-							to: '/settings/server/email',
+							to: '/settings/email',
 						},
 						localeKey: 'server/email.updateEmailer',
 						matcher: (path: string) => {
-							const match = path.match(/\/settings\/server\/email\/[0-9]+\/edit/)
+							const match = path.match(/\/settings\/email\/[0-9]+\/edit/)
 							return !!match && match.length > 0
 						},
 					},
 				],
-				to: '/settings/server/email',
+				to: '/settings/email',
 			},
 			{
 				disabled: true,
 				icon: Bell,
 				label: 'Notifications',
 				localeKey: 'server/notifications',
-				permission: 'server:manage',
-				to: '/settings/server/notifications',
+				permissions: [UserPermission.ReadNotifier],
+				to: '/settings/notifications',
 			},
 		],
-		label: 'Server',
+		label: 'Management',
 	},
 ]

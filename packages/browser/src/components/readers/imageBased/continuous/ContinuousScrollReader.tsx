@@ -1,6 +1,6 @@
 import { BookImageScaling } from '@stump/client'
 import { cn, usePrevious } from '@stump/components'
-import { Media } from '@stump/sdk'
+import { ReadingImageScaleFit } from '@stump/graphql'
 import { forwardRef, useCallback, useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import AutoSizer from 'react-virtualized-auto-sizer'
@@ -9,12 +9,14 @@ import { ScrollerProps, Virtuoso } from 'react-virtuoso'
 import { EntityImage } from '@/components/entity'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
+import { ImageReaderBookRef } from '../context'
+
 export type ContinuousReaderOrientation = 'horizontal' | 'vertical'
 type Props = {
 	/**
 	 * The media which is being read
 	 */
-	media: Media
+	media: ImageReaderBookRef
 	/**
 	 * The initial page to start on, if any
 	 */
@@ -166,13 +168,14 @@ const Page = ({ page, src, imageScaling: { scaleToFit }, onPageClick }: PageProp
 		className={cn(
 			'z-30 select-none',
 			{
-				'mx-auto my-0 w-auto self-center': scaleToFit === 'none',
+				'mx-auto my-0 w-auto self-center': scaleToFit === ReadingImageScaleFit.None,
 			},
 			{
-				'm-auto h-full max-h-screen w-auto object-cover': scaleToFit === 'height',
+				'm-auto h-full max-h-screen w-auto object-cover':
+					scaleToFit === ReadingImageScaleFit.Height,
 			},
 			{
-				'mx-auto my-0 w-full object-contain': scaleToFit === 'width',
+				'mx-auto my-0 w-full object-contain': scaleToFit === ReadingImageScaleFit.Width,
 			},
 		)}
 		src={src}

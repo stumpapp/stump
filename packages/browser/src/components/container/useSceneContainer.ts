@@ -2,12 +2,12 @@ import { usePreferences } from '@/hooks'
 
 export function useSceneContainer() {
 	const {
-		preferences: { primary_navigation_mode, layout_max_width_px },
+		preferences: { primaryNavigationMode, layoutMaxWidthPx },
 	} = usePreferences()
 
-	const preferTopBar = primary_navigation_mode === 'TOPBAR'
+	const preferTopBar = primaryNavigationMode === 'TOPBAR'
 
 	return {
-		maxWidth: preferTopBar ? layout_max_width_px || undefined : undefined,
+		maxWidth: preferTopBar ? layoutMaxWidthPx || undefined : undefined,
 	}
 }

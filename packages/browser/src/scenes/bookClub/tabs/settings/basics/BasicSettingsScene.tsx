@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useBookClubsQuery } from '@stump/client'
+import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Button, Form } from '@stump/components'
+import { graphql } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { useCallback, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
@@ -14,14 +15,28 @@ import { BasicBookClubInformation } from '@/components/bookClub/createOrUpdateFo
 
 import { useBookClubManagement } from '../context'
 
+const query = graphql(`
+	query BookClubBasicSettingsScene {
+		bookClubs(all: true) {
+			id
+			name
+			slug
+		}
+	}
+`)
+
 export default function BasicSettingsScene() {
+	const { sdk } = useSDK()
 	const { club, patch } = useBookClubManagement()
 	const { t } = useLocaleContext()
 
-	const { bookClubs } = useBookClubsQuery({ params: { all: true }, suspense: true })
+	const {
+		data: { bookClubs: existingClubs },
+	} = useSuspenseGraphQL(query, sdk.cacheKey('bookClubs', ['basicSettings']))
+
 	const existingClubNames = useMemo(
-		() => (bookClubs?.filter((c) => c.id !== club.id) ?? []).map(({ name }) => name),
-		[bookClubs, club],
+		() => (existingClubs?.filter((c) => c.id !== club.id) ?? []).map(({ name }) => name),
+		[existingClubs, club],
 	)
 
 	const schema = useMemo(() => buildSchema(t, existingClubNames, false), [t, existingClubNames])
@@ -32,10 +47,10 @@ export default function BasicSettingsScene() {
 	})
 
 	const handleSubmit = useCallback(
-		({ name, description, is_private }: CreateOrUpdateBookClubSchema) => {
+		({ name, description, isPrivate }: CreateOrUpdateBookClubSchema) => {
 			patch({
 				description,
-				is_private,
+				isPrivate,
 				name,
 			})
 		},

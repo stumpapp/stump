@@ -1,20 +1,19 @@
 import { Link, Text } from '@stump/components'
-import { Media, ReactTableColumnSort } from '@stump/sdk'
+import { FragmentType, Media, MediaModelOrdering } from '@stump/graphql'
+import { ColumnSort } from '@stump/sdk'
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
 import dayjs from 'dayjs'
 
 import paths from '@/paths'
-import { formatBookName } from '@/utils/format'
 
+import { BookCardFragment } from '../BookCard'
 import BookLinksCell from './BookLinksCell'
 import CoverImageCell from './CoverImageCell'
 
 const columnHelper = createColumnHelper<Media>()
 
 const coverColumn = columnHelper.display({
-	cell: ({ row: { original: book } }) => (
-		<CoverImageCell id={book.id} title={formatBookName(book)} />
-	),
+	cell: ({ row: { original: book } }) => <CoverImageCell id={book.id} title={book.resolvedName} />,
 	enableGlobalFilter: true,
 	header: () => (
 		<Text size="sm" variant="secondary">
@@ -25,33 +24,30 @@ const coverColumn = columnHelper.display({
 	size: 60,
 })
 
-const nameColumn = columnHelper.accessor(
-	({ name, metadata }) => metadata?.title || name.replace(/\.[^/.]+$/, ''),
-	{
-		cell: ({
-			getValue,
-			row: {
-				original: { id },
-			},
-		}) => (
-			<Link
-				to={paths.bookOverview(id)}
-				className="line-clamp-2 text-sm text-opacity-100 no-underline hover:text-opacity-90"
-			>
-				{getValue()}
-			</Link>
-		),
-		enableGlobalFilter: true,
-		enableSorting: true,
-		header: () => (
-			<Text size="sm" variant="secondary">
-				Name
-			</Text>
-		),
-		id: 'name',
-		minSize: 285,
-	},
-)
+const nameColumn = columnHelper.accessor(({ resolvedName }) => resolvedName, {
+	cell: ({
+		getValue,
+		row: {
+			original: { id },
+		},
+	}) => (
+		<Link
+			to={paths.bookOverview(id)}
+			className="line-clamp-2 text-sm text-opacity-100 no-underline hover:text-opacity-90"
+		>
+			{getValue()}
+		</Link>
+	),
+	enableGlobalFilter: true,
+	enableSorting: true,
+	header: () => (
+		<Text size="sm" variant="secondary">
+			Name
+		</Text>
+	),
+	id: MediaModelOrdering.Name, // TODO (graphql): should this be resovledName?, sorting by `name` is different from sorting by `resolvedName`
+	minSize: 285,
+})
 
 const pagesColumn = columnHelper.accessor('pages', {
 	cell: ({ getValue }) => (
@@ -66,7 +62,7 @@ const pagesColumn = columnHelper.accessor('pages', {
 			Pages
 		</Text>
 	),
-	id: 'pages',
+	id: MediaModelOrdering.Pages,
 	size: 60,
 })
 
@@ -104,7 +100,7 @@ const publishedColumn = columnHelper.accessor(
 )
 
 const addedColumn = columnHelper.accessor(
-	({ created_at }) => dayjs(created_at).format('M/D/YYYY, HH:mm:ss'),
+	({ createdAt }) => dayjs(createdAt).format('M/D/YYYY, HH:mm:ss'),
 	{
 		cell: ({ getValue }) => (
 			<Text size="sm" variant="muted">
@@ -118,7 +114,7 @@ const addedColumn = columnHelper.accessor(
 				Added
 			</Text>
 		),
-		id: 'added',
+		id: MediaModelOrdering.CreatedAt,
 	},
 )
 
@@ -139,7 +135,7 @@ const publisherColumn = columnHelper.accessor(({ metadata }) => metadata?.publis
 	id: 'publisher',
 })
 
-const ageRatingColumn = columnHelper.accessor(({ metadata }) => metadata?.age_rating, {
+const ageRatingColumn = columnHelper.accessor(({ metadata }) => metadata?.ageRating, {
 	cell: ({ getValue }) => (
 		<Text size="sm" variant="muted">
 			{getValue()}
@@ -156,7 +152,7 @@ const ageRatingColumn = columnHelper.accessor(({ metadata }) => metadata?.age_ra
 	id: 'age_rating',
 })
 
-const genresColumn = columnHelper.accessor(({ metadata }) => metadata?.genre?.join(', '), {
+const genresColumn = columnHelper.accessor(({ metadata }) => metadata?.genres?.join(', '), {
 	cell: ({ getValue }) => (
 		<Text size="sm" variant="muted">
 			{getValue()}
@@ -276,7 +272,7 @@ const letterersColumn = columnHelper.accessor(({ metadata }) => metadata?.letter
 	id: 'letterers',
 })
 
-const artistsColumn = columnHelper.accessor(({ metadata }) => metadata?.cover_artists?.join(', '), {
+const artistsColumn = columnHelper.accessor(({ metadata }) => metadata?.coverArtists?.join(', '), {
 	cell: ({ getValue }) => (
 		<Text size="sm" variant="muted">
 			{getValue()}
@@ -382,9 +378,9 @@ export const defaultColumns = [
 	pagesColumn,
 	publishedColumn,
 	addedColumn,
-] as ColumnDef<Media>[]
+] as ColumnDef<FragmentType<typeof BookCardFragment>>[]
 
-export const defaultColumnSort: ReactTableColumnSort[] = defaultColumns.map((column, idx) => ({
+export const defaultColumnSort: ColumnSort[] = defaultColumns.map((column, idx) => ({
 	id: column.id || '',
 	position: idx,
 }))
@@ -393,7 +389,7 @@ export const defaultColumnSort: ReactTableColumnSort[] = defaultColumns.map((col
  * A helper function to build the columns for the table based on the stored column selection. If
  * no columns are selected, or if the selection is empty, the default columns will be used.
  */
-export const buildColumns = (columns?: ReactTableColumnSort[]) => {
+export const buildColumns = (columns?: ColumnSort[]) => {
 	if (!columns || columns.length === 0) {
 		return defaultColumns
 	}
@@ -403,5 +399,5 @@ export const buildColumns = (columns?: ReactTableColumnSort[]) => {
 
 	return selectedColumnIds
 		.map((id) => columnMap[id as keyof typeof columnMap])
-		.filter(Boolean) as ColumnDef<Media>[]
+		.filter(Boolean) as ColumnDef<FragmentType<typeof BookCardFragment>>[]
 }

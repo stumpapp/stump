@@ -1,12 +1,11 @@
-import { ReadingDirection } from '@stump/sdk'
+import { ReadingDirection } from '@stump/graphql'
+import { ChevronsUpDown } from 'lucide-react-native'
 import { useState } from 'react'
 import { View } from 'react-native'
 import * as DropdownMenu from 'zeego/dropdown-menu'
 
-import { icons, Text } from '~/components/ui'
+import { Icon, Text } from '~/components/ui'
 import { cn } from '~/lib/utils'
-
-const { ChevronsUpDown } = icons
 
 type Props = {
 	direction: ReadingDirection
@@ -24,23 +23,23 @@ export default function ReadingDirectionSelect({ direction, onChange }: Props) {
 				<DropdownMenu.Trigger>
 					<View className={cn('flex-row items-center gap-1.5', { 'opacity-80': isOpen })}>
 						<Text>{direction.toUpperCase()}</Text>
-						<ChevronsUpDown className="h-5 text-foreground-muted" />
+						<Icon as={ChevronsUpDown} className="h-5 text-foreground-muted" />
 					</View>
 				</DropdownMenu.Trigger>
 
 				<DropdownMenu.Content>
 					<DropdownMenu.CheckboxItem
 						key="ltr"
-						value={direction === 'ltr'}
-						onValueChange={() => onChange('ltr')}
+						value={direction === ReadingDirection.Ltr}
+						onValueChange={() => onChange(ReadingDirection.Ltr)}
 					>
 						<DropdownMenu.ItemTitle>Left to Right</DropdownMenu.ItemTitle>
 					</DropdownMenu.CheckboxItem>
 
 					<DropdownMenu.CheckboxItem
 						key="rtl"
-						value={direction === 'rtl'}
-						onValueChange={() => onChange('rtl')}
+						value={direction === ReadingDirection.Rtl}
+						onValueChange={() => onChange(ReadingDirection.Rtl)}
 					>
 						<DropdownMenu.ItemTitle>Right to Left</DropdownMenu.ItemTitle>
 					</DropdownMenu.CheckboxItem>

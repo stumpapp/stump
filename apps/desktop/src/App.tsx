@@ -1,10 +1,23 @@
-import { StumpWebClient } from '@stump/browser'
-import { DesktopAppContext, Platform, useDesktopAppContext } from '@stump/client'
-import { SavedServer, User } from '@stump/sdk'
-import { createStore, Store } from '@tauri-apps/plugin-store'
-import { useCallback, useEffect, useState } from 'react'
+import '@stump/browser/styles/index.css'
+import '@stump/components/styles/overrides.css'
 
+import { ErrorFallback } from '@stump/browser/components/ErrorFallback'
+import { Toaster } from '@stump/browser/components/Toaster'
+import { useAppStore } from '@stump/browser/stores'
+import { DesktopAppContext, useDesktopAppContext } from '@stump/client'
+import { LocaleProvider } from '@stump/i18n'
+import { QueryClient, QueryClientContext } from '@tanstack/react-query'
+import { createStore, Store } from '@tauri-apps/plugin-store'
+import { useEffect, useState } from 'react'
+import { ErrorBoundary } from 'react-error-boundary'
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
+
+import Home from './Home'
+import SavedServerEntry from './SavedServerEntry'
+import { useSavedServerStore } from './stores/savedServer'
 import { useTauriRPC } from './utils'
+
+const localClient = new QueryClient()
 
 // It looks like Apple fully blocks non-local IP addresses now. This is actually infuriating. OH WELL.
 // There really isn't much to do? Anyone using the desktop app on macOS and wants to connect outside their local
@@ -17,9 +30,11 @@ function App() {
 	const { store } = useDesktopAppContext()
 	const { getNativePlatform, ...tauriRPC } = useTauriRPC()
 
-	const [platform, setPlatform] = useState<Platform>('unknown')
-	const [baseURL, setBaseURL] = useState<string>()
+	const servers = useSavedServerStore((store) => store.servers)
+
 	const [mounted, setMounted] = useState(false)
+
+	const setPlatform = useAppStore((state) => state.setPlatform)
 
 	/**
 	 * An effect to initialize the application, setting the platform and base URL
@@ -27,12 +42,8 @@ function App() {
 	useEffect(() => {
 		async function init() {
 			try {
-				await tauriRPC.initCredentialStore()
+				await tauriRPC.initCredentialStore(servers.map((s) => s.id))
 				const platform = await getNativePlatform()
-				const activeServer = await store.get<SavedServer>('active_server')
-				if (activeServer) {
-					setBaseURL(activeServer.uri)
-				}
 				setPlatform(platform)
 			} catch (error) {
 				console.error('Critical failure! Unable to initialize the application', error)
@@ -44,34 +55,7 @@ function App() {
 		if (!mounted) {
 			init()
 		}
-	}, [getNativePlatform, mounted, tauriRPC, store])
-
-	const handleAuthenticated = useCallback(
-		async (_user: User, token?: string) => {
-			try {
-				const currentServer = await store.get<SavedServer>('active_server')
-				if (token && currentServer) {
-					await tauriRPC.setApiToken(currentServer.name, token)
-				}
-			} catch (err) {
-				console.error('Failed to initialize the credential store', err)
-			}
-		},
-		[tauriRPC, store],
-	)
-
-	const handleLogout = useCallback(async () => {
-		try {
-			const currentServer = await store.get<SavedServer>('active_server')
-			if (currentServer) {
-				await tauriRPC.deleteApiToken(currentServer.name)
-			} else {
-				await tauriRPC.clearCredentialStore()
-			}
-		} catch (err) {
-			console.error('Failed to clear credential store', err)
-		}
-	}, [tauriRPC, store])
+	}, [getNativePlatform, mounted, tauriRPC, store, servers, setPlatform])
 
 	// I want to wait until platform is properly set before rendering the app
 	if (!mounted) {
@@ -79,15 +63,29 @@ function App() {
 	}
 
 	return (
-		<StumpWebClient
-			platform={platform}
-			authMethod="token"
-			baseUrl={baseURL}
-			tauriRPC={tauriRPC}
-			onAuthenticated={handleAuthenticated}
-			onLogout={handleLogout}
-			onUnauthenticatedResponse={handleLogout}
-		/>
+		<BrowserRouter>
+			<Routes>
+				<Route
+					path="/"
+					element={
+						<QueryClientContext.Provider value={localClient}>
+							<LocaleProvider>
+								<Home />
+							</LocaleProvider>
+							<Toaster />
+						</QueryClientContext.Provider>
+					}
+				/>
+				<Route
+					path="server/:serverId/*"
+					element={
+						<ErrorBoundary FallbackComponent={ErrorFallback}>
+							<SavedServerEntry tauriRPC={tauriRPC} />
+						</ErrorBoundary>
+					}
+				/>
+			</Routes>
+		</BrowserRouter>
 	)
 }
 

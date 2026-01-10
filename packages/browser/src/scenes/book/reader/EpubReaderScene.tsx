@@ -1,5 +1,6 @@
-import { useMediaByIdQuery } from '@stump/client'
-import { useEffect, useState } from 'react'
+import { useSDK } from '@stump/client'
+import { useQueryClient } from '@tanstack/react-query'
+import { useEffect } from 'react'
 import { Navigate, useParams, useSearchParams } from 'react-router-dom'
 
 import EpubJsReader from '@/components/readers/epub/EpubJsReader'
@@ -8,38 +9,32 @@ import paths from '../../../paths'
 
 //! NOTE: Only the epub.js reader is supported for now :sob:
 export default function EpubReaderScene() {
+	const { sdk } = useSDK()
 	const { id } = useParams()
+
 	if (!id) {
 		throw new Error('Media id is required')
 	}
 
 	const [search, setSearch] = useSearchParams()
 
-	const [initialCfi] = useState(() => decodeURIComponent(search.get('cfi') || ''))
-	const [startOver] = useState(() => search.get('startOver') === 'true')
-
 	const lazyReader = search.get('stream') && search.get('stream') !== 'true'
 	const isIncognito = search.get('incognito') === 'true'
 
-	/**
-	 * An effect to remove the CFI from the URL, it will be stored in local state
-	 * so it doesn't need to pollute the URL
-	 */
+	const client = useQueryClient()
 	useEffect(() => {
-		if (initialCfi || startOver) {
-			search.delete('cfi')
-			search.delete('startOver')
-			setSearch(search)
+		return () => {
+			client.invalidateQueries({
+				exact: false,
+				predicate: ({ queryKey: [root] }) => root === sdk.cacheKeys.bookReader,
+			})
+			client.invalidateQueries({ exact: false, queryKey: [sdk.cacheKeys.bookOverview] })
+			client.invalidateQueries({ exact: false, queryKey: [sdk.cacheKeys.inProgress] })
 		}
-	}, [initialCfi, startOver, search, setSearch])
+	}, [client, sdk.cacheKeys])
 
-	const { isLoading: fetchingBook, media } = useMediaByIdQuery(id)
-
-	if (fetchingBook || !media) {
-		return null
-	} else if (lazyReader) {
-		const resolvedCfi = (initialCfi || media?.current_epubcfi) ?? null
-		return <EpubJsReader id={id} initialCfi={isIncognito ? null : resolvedCfi} />
+	if (lazyReader) {
+		return <EpubJsReader id={id} isIncognito={isIncognito} />
 	} else {
 		search.set('stream', 'true')
 		setSearch(search)

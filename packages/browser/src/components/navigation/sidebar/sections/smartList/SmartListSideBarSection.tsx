@@ -1,23 +1,38 @@
-import { usePrefetchSmartList, useSmartListsQuery } from '@stump/client'
+import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Accordion, Text } from '@stump/components'
+import { FilterableArrangementEntityLink, graphql } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { useLocation } from 'react-router'
 
-import paths from '@/paths'
+import { usePaths } from '@/paths'
+import { usePrefetchSmartList } from '@/scenes/smartList'
 
 import { EntityOptionProps } from '../../../types'
 import SideBarButtonLink from '../../SideBarButtonLink'
 
+const query = graphql(`
+	query SmartListSideBarSection {
+		smartLists {
+			id
+			name
+		}
+	}
+`)
+
 type Props = EntityOptionProps
 
 export default function SmartListSideBarSection({
-	showCreate = true,
-	showLinkToAll = false,
+	links = [FilterableArrangementEntityLink.Create],
 }: Props) {
 	const location = useLocation()
+	const paths = usePaths()
 
 	const { t } = useLocaleContext()
-	const { lists } = useSmartListsQuery()
+	const { sdk } = useSDK()
+	const {
+		data: { smartLists: lists },
+	} = useSuspenseGraphQL(query, sdk.cacheKey('smartLists'))
+
 	const { prefetch } = usePrefetchSmartList()
 
 	const isCurrentList = (id: string) => location.pathname.startsWith(paths.smartList(id))
@@ -53,7 +68,7 @@ export default function SmartListSideBarSection({
 					{t('sidebar.buttons.smartlists')}
 				</Accordion.Trigger>
 				<Accordion.Content containerClassName="flex flex-col gap-y-1.5">
-					{showLinkToAll && (
+					{links.includes(FilterableArrangementEntityLink.ShowAll) && (
 						<SideBarButtonLink
 							to={paths.smartLists()}
 							isActive={location.pathname === paths.smartLists()}
@@ -63,7 +78,7 @@ export default function SmartListSideBarSection({
 						</SideBarButtonLink>
 					)}
 					<div className="ml-2 space-y-1 border-l border-l-edge pl-1">{renderLists()}</div>
-					{showCreate && (
+					{links.includes(FilterableArrangementEntityLink.Create) && (
 						<SideBarButtonLink
 							to={paths.smartListCreate()}
 							isActive={location.pathname === paths.smartListCreate()}

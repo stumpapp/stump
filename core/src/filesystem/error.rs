@@ -68,8 +68,6 @@ impl From<FileError> for CoreError {
 
 #[derive(Error, Debug)]
 pub enum ScanError {
-	#[error("A query error occurred: {0}")]
-	QueryError(String),
 	#[error("Unsupported file: {0}")]
 	UnsupportedFile(String),
 	#[error("Failed to build globset from invalid .stumpignore file: {0}")]
@@ -86,11 +84,5 @@ impl From<FileError> for ScanError {
 			},
 			_ => ScanError::Unknown(e.to_string()),
 		}
-	}
-}
-
-impl From<prisma_client_rust::queries::QueryError> for ScanError {
-	fn from(e: prisma_client_rust::queries::QueryError) -> Self {
-		ScanError::QueryError(e.to_string())
 	}
 }

@@ -12,13 +12,10 @@ export type HoverCardProps = {
 	trigger: React.ReactNode
 	children: React.ReactNode
 	contentClassName?: string
-} & ComponentPropsWithoutRef<typeof HoverCardPrimitive>
+} & ComponentPropsWithoutRef<typeof HoverCardPrimitive> &
+	Pick<HoverCardContentProps, 'align' | 'sideOffset' | 'side'>
 
-export type HoverCardContentProps = ComponentPropsWithoutRef<typeof HoverCardPrimitiveContent> & {
-	className?: string
-	align?: 'start' | 'center' | 'end'
-	sideOffset?: number
-}
+export type HoverCardContentProps = ComponentPropsWithoutRef<typeof HoverCardPrimitiveContent>
 const HoverCardContent = React.forwardRef<
 	ElementRef<typeof HoverCardPrimitiveContent>,
 	HoverCardContentProps
@@ -28,7 +25,7 @@ const HoverCardContent = React.forwardRef<
 		align={align}
 		sideOffset={sideOffset}
 		className={cn(
-			'z-50 w-64 rounded-md border border-gray-100 bg-white p-4 shadow-md outline-none animate-in zoom-in-90 dark:border-gray-850 dark:bg-gray-950',
+			'z-50 w-64 rounded-md border border-edge bg-background-overlay p-4 shadow-md outline-none animate-in zoom-in-90',
 			className,
 		)}
 		{...props}
@@ -36,11 +33,25 @@ const HoverCardContent = React.forwardRef<
 ))
 HoverCardContent.displayName = 'HoverCardContent'
 
-export function HoverCard({ trigger, children, contentClassName }: HoverCardProps) {
+export function HoverCard({
+	trigger,
+	children,
+	contentClassName,
+	sideOffset,
+	align,
+	side,
+}: HoverCardProps) {
 	return (
 		<HoverCardPrimitive>
 			<HoverCardPrimitiveTrigger asChild>{trigger}</HoverCardPrimitiveTrigger>
-			<HoverCardContent className={contentClassName}>{children}</HoverCardContent>
+			<HoverCardContent
+				className={contentClassName}
+				sideOffset={sideOffset}
+				align={align}
+				side={side}
+			>
+				{children}
+			</HoverCardContent>
 		</HoverCardPrimitive>
 	)
 }

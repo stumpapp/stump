@@ -1,4 +1,4 @@
-import { Media } from '@stump/sdk'
+import { FragmentType } from '@stump/graphql'
 import { OnChangeFn, SortingState } from '@tanstack/react-table'
 import { useCallback, useMemo } from 'react'
 
@@ -6,10 +6,11 @@ import { orderingToTableSort, tableSortToOrdering, useFilterContext } from '@/co
 import { EntityTable, EntityTableProps } from '@/components/table'
 import { useBooksLayout } from '@/stores/layout'
 
+import { BookCardFragment } from '../BookCard'
 import { buildBookColumns } from '.'
 import { defaultColumns } from './columns'
 
-type Props = Omit<EntityTableProps<Media>, 'columns'>
+type Props = Omit<EntityTableProps<FragmentType<typeof BookCardFragment>>, 'columns'>
 
 export default function BookTable(props: Props) {
 	const configuration = useBooksLayout((state) => ({

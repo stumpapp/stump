@@ -1,6 +1,7 @@
-import { invalidateQueries, useMediaByIdQuery, useSDK, useUpdateMediaProgress } from '@stump/client'
-import { Media } from '@stump/sdk'
-import { Suspense, useEffect, useMemo } from 'react'
+import { useGraphQLMutation, useSDK, useSuspenseGraphQL } from '@stump/client'
+import { BookReaderSceneQuery, graphql, ReadingMode } from '@stump/graphql'
+import { useQueryClient } from '@tanstack/react-query'
+import { Suspense, useCallback, useEffect, useMemo } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
 import { ImageBasedReader } from '@/components/readers/imageBased'
@@ -9,17 +10,52 @@ import paths from '@/paths'
 import { ARCHIVE_EXTENSION, EBOOK_EXTENSION, PDF_EXTENSION } from '../../../utils/patterns'
 import { useBookPreferences } from './useBookPreferences'
 
+export const BOOK_READER_SCENE_QUERY = graphql(`
+	query BookReaderScene($id: ID!) {
+		mediaById(id: $id) {
+			id
+			resolvedName
+			pages
+			extension
+			readProgress {
+				percentageCompleted
+				epubcfi
+				page
+				elapsedSeconds
+			}
+			libraryConfig {
+				defaultReadingImageScaleFit
+				defaultReadingMode
+				defaultReadingDir
+			}
+			analysisData {
+				dimensions {
+					height
+					width
+				}
+			}
+			nextInSeries(pagination: { cursor: { limit: 1 } }) {
+				nodes {
+					id
+					name: resolvedName
+					thumbnail {
+						url
+					}
+				}
+			}
+		}
+	}
+`)
+
 export default function BookReaderSceneContainer() {
 	const navigate = useNavigate()
 
 	const { id } = useParams()
-
-	const { media } = useMediaByIdQuery(id || '', {
-		params: {
-			load_series: true,
-			load_library: true,
-		},
-		suspense: true,
+	const { sdk } = useSDK()
+	const {
+		data: { mediaById: media },
+	} = useSuspenseGraphQL(BOOK_READER_SCENE_QUERY, sdk.cacheKey('bookReader', [id]), {
+		id: id || '',
 	})
 
 	useEffect(() => {
@@ -39,8 +75,16 @@ export default function BookReaderSceneContainer() {
 	)
 }
 
+const mutation = graphql(`
+	mutation UpdateReadProgress($id: ID!, $input: MediaProgressInput!) {
+		updateMediaProgress(id: $id, input: $input) {
+			__typename
+		}
+	}
+`)
+
 type Props = {
-	book: Media
+	book: NonNullable<BookReaderSceneQuery['mediaById']>
 }
 
 function BookReaderScene({ book }: Props) {
@@ -51,28 +95,45 @@ function BookReaderScene({ book }: Props) {
 
 	const page = search.get('page')
 	const isIncognito = search.get('incognito') === 'true'
-	const isAnimated = search.get('animated') === 'true'
 	const isStreaming = !search.get('stream') || search.get('stream') === 'true'
 
-	const { updateReadProgress } = useUpdateMediaProgress(book.id, {
-		onError(err) {
+	const { mutate } = useGraphQLMutation(mutation, {
+		onError: (err) => {
 			console.error(err)
 		},
 	})
+	const updateProgress = useCallback(
+		(page: number, elapsedSeconds: number) => {
+			if (!book) return
+			if (isIncognito) return
+			if (book.readProgress?.page === page) return
+			mutate({
+				id: book.id,
+				input: {
+					paged: {
+						page,
+						elapsedSeconds,
+					},
+				},
+			})
+		},
+		[book, mutate, isIncognito],
+	)
 
 	const {
-		bookPreferences: { readingMode },
+		bookPreferences: { readingMode, animatedReader },
 	} = useBookPreferences({ book })
 
+	const client = useQueryClient()
 	/**
 	 * An effect to invalidate the in progress media query when the component unmounts
 	 * so that the in progress media list is updated when the user returns to that section
 	 */
 	useEffect(() => {
 		return () => {
-			invalidateQueries({ exact: false, keys: [sdk.media.keys.inProgress] })
+			client.invalidateQueries({ exact: false, queryKey: [sdk.cacheKeys.inProgress] })
 		}
-	}, [sdk.media])
+	}, [sdk, client])
 
 	/**
 	 * An effect to update the read progress whenever the page changes in the URL
@@ -86,8 +147,8 @@ function BookReaderScene({ book }: Props) {
 		const maxPage = book.pages
 		if (parsedPage <= 0 || parsedPage > maxPage) return
 
-		updateReadProgress({ page: parsedPage })
-	}, [page, updateReadProgress, book, isIncognito])
+		updateProgress(parsedPage, book.readProgress?.elapsedSeconds || 0)
+	}, [page, updateProgress, book, isIncognito])
 
 	const initialPage = useMemo(() => (page ? parseInt(page, 10) : undefined), [page])
 
@@ -95,29 +156,28 @@ function BookReaderScene({ book }: Props) {
 		if (book.extension.match(EBOOK_EXTENSION)) {
 			navigate(
 				paths.bookReader(book.id, {
-					epubcfi: book.current_epubcfi || null,
-					isAnimated,
+					epubcfi: book.readProgress?.epubcfi || null,
 					isEpub: true,
 				}),
 			)
 		} else if (book.extension.match(PDF_EXTENSION) && !isStreaming) {
 			navigate(paths.bookReader(book.id, { isPdf: true, isStreaming: false }))
 		} else if (book.extension.match(ARCHIVE_EXTENSION) || book.extension.match(PDF_EXTENSION)) {
-			if (!initialPage && readingMode === 'paged') {
-				navigate(paths.bookReader(book.id, { isAnimated, page: 1 }))
+			if (!initialPage && readingMode === ReadingMode.Paged && !animatedReader) {
+				navigate(paths.bookReader(book.id, { page: 1 }))
 			} else if (!!initialPage && initialPage > book.pages) {
-				navigate(paths.bookReader(book.id, { isAnimated, page: book.pages }))
+				navigate(paths.bookReader(book.id, { page: book.pages }))
 			}
 		}
-	}, [book, initialPage, isAnimated, readingMode, navigate, isStreaming])
+	}, [book, initialPage, readingMode, navigate, isStreaming, animatedReader])
 
 	if (book.extension.match(ARCHIVE_EXTENSION) || book.extension.match(PDF_EXTENSION)) {
 		return (
 			<ImageBasedReader
 				media={book}
-				isAnimated={isAnimated}
 				isIncognito={isIncognito}
 				initialPage={initialPage}
+				onProgress={updateProgress}
 			/>
 		)
 	}

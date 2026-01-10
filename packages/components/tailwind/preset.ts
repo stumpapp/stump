@@ -30,14 +30,15 @@ export default {
 				gray: sharedColors.gray,
 			},
 			fontFamily: {
-				inter: ['Inter var', ...defaultTheme.fontFamily.sans],
+				inter: ['Inter', ...defaultTheme.fontFamily.sans],
 				opendyslexic: ['OpenDyslexic', ...defaultTheme.fontFamily.sans],
-				atkinsonhyperlegible: ['Atkinson Hyperlegible', ...defaultTheme.fontFamily.sans],
-				charis: ['Charis SIL', ...defaultTheme.fontFamily.serif],
+				atkinsonhyperlegiblenext: ['Atkinson Hyperlegible Next', ...defaultTheme.fontFamily.sans],
+				charis: ['Charis', ...defaultTheme.fontFamily.serif],
 				literata: ['Literata', ...defaultTheme.fontFamily.serif],
 				bitter: ['Bitter', ...defaultTheme.fontFamily.serif],
 				librebaskerville: ['Libre Baskerville', ...defaultTheme.fontFamily.serif],
 				nunito: ['Nunito', ...defaultTheme.fontFamily.sans],
+				hinamincho: ['Hina Mincho', ...defaultTheme.fontFamily.serif],
 			},
 			fontSize: {
 				xxs: '0.65rem',

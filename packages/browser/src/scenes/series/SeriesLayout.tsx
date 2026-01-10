@@ -1,5 +1,7 @@
-import { useSeriesByID } from '@stump/client'
+import { PREFETCH_STALE_TIME, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { cn } from '@stump/components'
+import { graphql } from '@stump/graphql'
+import { useQueryClient } from '@tanstack/react-query'
 import { Suspense, useEffect } from 'react'
 import { Outlet, useNavigate, useParams } from 'react-router'
 
@@ -10,32 +12,62 @@ import { SeriesContext } from './context'
 import SeriesHeader from './SeriesHeader'
 import SeriesNavigation from './SeriesNavigation'
 
+const query = graphql(`
+	query SeriesLayout($id: ID!) {
+		seriesById(id: $id) {
+			id
+			path
+			library {
+				id
+				name
+			}
+			resolvedName
+			resolvedDescription
+			tags {
+				id
+				name
+			}
+		}
+	}
+`)
+
+export const usePrefetchSeries = () => {
+	const { sdk } = useSDK()
+
+	const client = useQueryClient()
+	return (id: string) =>
+		client.prefetchQuery({
+			queryKey: ['seriesById', id],
+			queryFn: async () => {
+				const response = await sdk.execute(query, {
+					id,
+				})
+				return response
+			},
+			staleTime: PREFETCH_STALE_TIME,
+		})
+}
+
 export default function SeriesLayout() {
 	const navigate = useNavigate()
 
 	const { id } = useParams()
-	if (!id) {
-		throw new Error('Library id is required')
-	}
-
-	const { series, isLoading } = useSeriesByID(id, {
-		params: {
-			load_library: true,
-		},
-	})
+	const {
+		data: { seriesById: series },
+	} = useSuspenseGraphQL(query, ['seriesById'], { id: id || '' })
 	// TODO: stats
 	// const { stats } = useSeriesStats({ cacheTime: 1000 * 60 * 5, id })
 	const {
-		preferences: { enable_hide_scrollbar },
+		preferences: { enableHideScrollbar },
 	} = usePreferences()
 
 	useEffect(() => {
-		if (!isLoading && !series) {
+		if (!series) {
 			navigate('/404')
 		}
-	}, [isLoading, series, navigate])
+	}, [series, navigate])
 
-	if (isLoading || !series) return null
+	if (!series) return null
 
 	return (
 		<SeriesContext.Provider value={{ series }}>
@@ -45,7 +77,7 @@ export default function SeriesLayout() {
 
 				<SceneContainer
 					className={cn('relative flex flex-1 flex-col gap-4 p-0 md:pb-0', {
-						'md:hide-scrollbar': !!enable_hide_scrollbar,
+						'md:hide-scrollbar': !!enableHideScrollbar,
 					})}
 				>
 					<Suspense fallback={null}>

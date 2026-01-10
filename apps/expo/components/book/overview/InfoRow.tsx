@@ -8,17 +8,18 @@ type Props = {
 	value: string
 	longValue?: boolean
 	numberOfLines?: number
+	className?: string
 }
 
-export default function InfoRow({ label, value, longValue, numberOfLines }: Props) {
+export default function InfoRow({ label, value, longValue, numberOfLines, className }: Props) {
 	return (
-		<View className="flex flex-row items-start justify-between py-1">
-			<Text className="shrink-0 text-foreground-subtle">{label}</Text>
+		<View className={cn('flex flex-row items-start justify-between bg-background p-3', className)}>
+			<Text className="shrink-0 text-foreground-muted">{label}</Text>
 			<Text
 				className={cn('max-w-[75%] text-right', {
 					'max-w-[80%]': longValue,
 				})}
-				numberOfLines={numberOfLines ?? longValue ? 4 : undefined}
+				numberOfLines={(numberOfLines ?? longValue) ? 4 : undefined}
 			>
 				{value}
 			</Text>

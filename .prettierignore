@@ -18,3 +18,7 @@ CHANGELOG.md
 /src-tauri/gen/*.json
 
 apps/expo/assets/*.json
+
+packages/graphql/src/client/*.ts
+
+apps/expo/drizzle/*

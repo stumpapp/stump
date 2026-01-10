@@ -8,21 +8,28 @@ import { usePreferences } from '../hooks'
 
 type Props = {
 	title: string
-	items: JSX.Element[]
+	items: React.ReactElement[]
 	onFetchMore: () => void
 	emptyState?: React.ReactNode
 }
 
-export default function HorizontalCardList_({ title, items, onFetchMore, emptyState }: Props) {
+export default function HorizontalCardList({ title, items, onFetchMore, emptyState }: Props) {
+	const {
+		preferences: { thumbnailRatio },
+	} = usePreferences()
+
 	const virtuosoRef = useRef<VirtuosoHandle>(null)
 
 	const isAtLeastSmall = useMediaMatch('(min-width: 640px)')
 	const isAtLeastMedium = useMediaMatch('(min-width: 768px)')
 
-	const height = useMemo(
-		() => (!isAtLeastSmall ? 325 : !isAtLeastMedium ? 350 : 385),
-		[isAtLeastSmall, isAtLeastMedium],
-	)
+	const height = useMemo(() => {
+		const imageWidth = !isAtLeastSmall ? 160 : !isAtLeastMedium ? 170.656 : 192 // widths from EntityCard
+		const imageHeight = imageWidth / thumbnailRatio
+		const footerHeight = 96 // estimated height of footer
+
+		return imageHeight + footerHeight
+	}, [isAtLeastSmall, isAtLeastMedium, thumbnailRatio])
 
 	const [firstCardRef, firstCardIsInView] = useInViewRef({ threshold: 0.5 })
 	const [lastCardRef, lastCardIsInView] = useInViewRef({ threshold: 0.5 })
@@ -150,13 +157,13 @@ export default function HorizontalCardList_({ title, items, onFetchMore, emptySt
 const HorizontalScroller = forwardRef<HTMLDivElement, ScrollerProps>(
 	({ children, ...props }, ref) => {
 		const {
-			preferences: { enable_hide_scrollbar },
+			preferences: { enableHideScrollbar },
 		} = usePreferences()
 
 		return (
 			<div
 				className={cn('flex overflow-y-hidden', {
-					'scrollbar-hide': enable_hide_scrollbar,
+					'scrollbar-hide': enableHideScrollbar,
 				})}
 				ref={ref}
 				{...props}

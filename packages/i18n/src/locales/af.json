@@ -281,9 +281,20 @@
 					"label": "Enabled",
 					"description": "Generate thumbnail images for this library"
 				},
-				"scaled": {
-					"label": "Scaled",
-					"description": "Scale the image by a custom factor per dimension",
+				"resizeMethod": {
+					"label": "Resize Method",
+					"options": {
+						"scaleEvenlyByFactor": "Evenly Scale"
+					}
+				},
+				"scaleEvenlyByFactor": {
+					"description": "Scale the thumbnail by a factor of the original size. For example, a scale factor of 0.65 will result in a thumbnail that is 65% of the original size",
+					"scaleFactor": {
+						"label": "Scale Factor"
+					}
+				},
+				"exact": {
+					"description": "Resize the thumbnail to an exact size in pixels",
 					"width": {
 						"label": "Width scale"
 					},
@@ -291,14 +302,18 @@
 						"label": "Height scale"
 					}
 				},
-				"sized": {
-					"label": "Explicitly Sized",
-					"description": "Set each dimension of the thumbnail (in pixels)",
-					"width": {
-						"label": "Width"
+				"scaleDimension": {
+					"label": "Auto Scaled",
+					"description": "Set either the width or height of the thumbnail and auto-scale the other to keep the original aspect ratio",
+					"dimension": {
+						"label": "Dimension",
+						"options": {
+							"width": "Width",
+							"height": "Height"
+						}
 					},
-					"height": {
-						"label": "Height"
+					"size": {
+						"label": "Size"
 					}
 				},
 				"format": {
@@ -307,7 +322,7 @@
 				},
 				"quality": {
 					"label": "Quality",
-					"description": "The quality of the generated thumbnail images, between 0 and 1.0"
+					"description": "The quality of the generated thumbnail images, between 1 and 100"
 				}
 			},
 			"ignoreRules": {
@@ -793,12 +808,12 @@
 									"name": "Filename",
 									"size": "Size",
 									"extension": "Extension",
-									"created_at": "Created at",
-									"updated_at": "Updated at",
 									"status": "Status",
 									"path": "Path",
 									"pages": "Pages",
-									"tags": "Tags"
+									"tags": "Tags",
+									"createdAt": "Created at",
+									"updatedAt": "Updated at"
 								}
 							},
 							"book_meta": {
@@ -807,7 +822,6 @@
 									"title": "Title",
 									"summary": "Summary",
 									"notes": "Notes",
-									"genre": "Genre",
 									"writers": "Writers",
 									"pencillers": "Pencillers",
 									"inkers": "Inkers",
@@ -815,10 +829,11 @@
 									"editors": "Editors",
 									"publisher": "Publisher",
 									"colorists": "Colorist",
-									"cover_artists": "Cover artists",
 									"links": "Links",
 									"characters": "Characters",
-									"teams": "Teams"
+									"teams": "Teams",
+									"genres": "Genre",
+									"coverArtists": "Cover artists"
 								}
 							},
 							"series": {
@@ -831,16 +846,16 @@
 							"series_meta": {
 								"label": "Series Meta",
 								"attributes": {
-									"age_rating": "Age rating",
 									"title": "Title",
 									"summary": "Summary",
-									"meta_type": "Type",
 									"publisher": "Publisher",
 									"imprint": "Imprint",
 									"comicid": "Comic ID",
 									"booktype": "Book type",
 									"status": "Status",
-									"volume": "Volume"
+									"volume": "Volume",
+									"metaType": "Type",
+									"ageRating": "Age rating"
 								}
 							},
 							"library": {
@@ -1112,7 +1127,7 @@
 				"desktop": "Desktop",
 				"label": "Application"
 			},
-			"server": {
+			"management": {
 				"general": "General",
 				"logs": "Logs",
 				"users": "Users",
@@ -1120,7 +1135,7 @@
 				"access": "Access",
 				"email": "Email",
 				"notifications": "Notifications",
-				"label": "Server"
+				"label": "Management"
 			}
 		},
 		"app/account": {
@@ -1174,7 +1189,7 @@
 				}
 			}
 		},
-		"app/appearance": {
+		"app/preferences": {
 			"helmet": "Appearance",
 			"title": "Appearance",
 			"description": "Customize the look and feel of the application",

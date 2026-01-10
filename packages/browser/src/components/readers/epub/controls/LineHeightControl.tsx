@@ -1,6 +1,6 @@
-import { cx, Label, TEXT_VARIANTS } from '@stump/components'
+import { cx, IconButton, Label, TEXT_VARIANTS } from '@stump/components'
 import { Minus, Plus } from 'lucide-react'
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import { usePressAndHold } from '@/hooks/usePressAndHold'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
@@ -15,47 +15,56 @@ export default function LineHeightControl() {
 		bookPreferences: { lineHeight = 1.5 },
 		setBookPreferences,
 	} = useBookPreferences({ book: bookEntity })
-	const lineHeightRef = useRef(lineHeight)
+
+	const [localLineHeight, setLocalLineHeight] = useState(lineHeight)
+
 	useEffect(() => {
-		lineHeightRef.current = lineHeight
-	}, [lineHeight])
+		if (localLineHeight === lineHeight) return
+		const bookPreferencesTimeout = setTimeout(() => {
+			setBookPreferences({ lineHeight: localLineHeight })
+		}, 0)
+		return () => clearTimeout(bookPreferencesTimeout)
+	}, [localLineHeight, lineHeight, setBookPreferences])
 
-	const handleSetLineHeight = useCallback(
-		(newHeight: number) => {
+	const incrementLineHeight = useCallback((increment: number) => {
+		setLocalLineHeight((currentHeight) => {
+			const newHeight = Math.round((currentHeight + increment) * 10) / 10
 			// Limit to reasonable minimum and maximum
-			if (newHeight >= 1.0 && newHeight <= 3.0) {
-				// Round to 1 decimal place for clean display
-				setBookPreferences({ lineHeight: Math.round(newHeight * 10) / 10 })
-			}
-		},
-		[setBookPreferences],
-	)
+			if (newHeight >= 1.0 && newHeight <= 3.0) return newHeight
+			return currentHeight
+		})
+	}, [])
 
-	const { bindButton } = usePressAndHold()
+	const { bindButton: bindMinus, isHolding: isHoldingMinus } = usePressAndHold()
+	const { bindButton: bindPlus, isHolding: isHoldingPlus } = usePressAndHold()
 
 	return (
 		<div className="flex flex-col gap-y-2.5">
 			<Label>Line height</Label>
 			<div className="flex items-center gap-x-2">
-				<button
-					{...bindButton({
-						callback: () => handleSetLineHeight(lineHeightRef.current - 0.1),
+				<IconButton
+					{...bindMinus({
+						callback: () => incrementLineHeight(-0.1),
 					})}
-					className={cx('text-base', TEXT_VARIANTS.secondary)}
+					variant="ghost"
+					size="xs"
+					className={isHoldingMinus ? 'select-none bg-background-surface-hover' : ''}
 				>
-					<Minus className="h-3 w-3" />
-				</button>
+					<Minus className="h-4 w-4" />
+				</IconButton>
 				<span className={cx('flex items-center justify-center', TEXT_VARIANTS.default)}>
-					{lineHeight.toFixed(1)}
+					{localLineHeight.toFixed(1)}
 				</span>
-				<button
-					{...bindButton({
-						callback: () => handleSetLineHeight(lineHeightRef.current + 0.1),
+				<IconButton
+					{...bindPlus({
+						callback: () => incrementLineHeight(+0.1),
 					})}
-					className={cx('text-base', TEXT_VARIANTS.secondary)}
+					variant="ghost"
+					size="xs"
+					className={isHoldingPlus ? 'select-none bg-background-surface-hover' : ''}
 				>
-					<Plus className="h-3 w-3" />
-				</button>
+					<Plus className="h-4 w-4" />
+				</IconButton>
 			</div>
 		</div>
 	)

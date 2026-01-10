@@ -1,10 +1,9 @@
-import type { ReadingDirection, ReadingMode } from '@stump/sdk'
+import { ReadingDirection, ReadingImageScaleFit, ReadingMode } from '@stump/graphql'
 import { create } from 'zustand'
 import { createJSONStorage, devtools, persist, StateStorage } from 'zustand/middleware'
 
-export type BookImageScalingFit = 'auto' | 'width' | 'height' | 'none'
 export type BookImageScaling = {
-	scaleToFit: BookImageScalingFit
+	scaleToFit: ReadingImageScaleFit
 }
 
 export type DoublePageBehavior = 'auto' | 'always' | 'off'
@@ -16,6 +15,7 @@ export const isDoublePageBehavior = (value: string): value is DoublePageBehavior
  * specific book
  */
 export type BookPreferences = {
+	animatedReader?: boolean
 	/**
 	 * A brightness value for the book, which will apply a filter to dim / brighten the page.
 	 * This must be a value between 0 and 1.
@@ -65,6 +65,10 @@ export type BookPreferences = {
 	 * Whether or not the page 2 should be displayed separately. This will have no effect if the book is not image-based
 	 */
 	secondPageSeparate: boolean
+	/**
+	 * Whether the Ctrl key (or also Cmd key on Mac) is required to use panning and zooming.
+	 */
+	panzoomWithoutCtrl?: boolean
 }
 
 /**
@@ -127,16 +131,18 @@ export type ReaderStore = {
 }
 
 export const DEFAULT_BOOK_PREFERENCES = {
+	animatedReader: false,
 	fontSize: 13,
 	lineHeight: 1.5,
 	brightness: 1,
-	readingMode: 'paged',
-	readingDirection: 'ltr',
+	readingMode: ReadingMode.Paged,
+	readingDirection: ReadingDirection.Ltr,
 	imageScaling: {
-		scaleToFit: 'height',
+		scaleToFit: ReadingImageScaleFit.Height,
 	},
-	doublePageBehavior: 'auto',
+	doublePageBehavior: 'off',
 	secondPageSeparate: false,
+	panWithoutCtrl: false,
 	trackElapsedTime: true,
 	tapSidesToNavigate: true,
 } as const
@@ -179,7 +185,7 @@ export const createReaderStore = (storage?: StateStorage) =>
 				{
 					name: 'stump-new-reader-store',
 					storage: storage ? createJSONStorage(() => storage) : undefined,
-					version: 3,
+					version: 4,
 				},
 			),
 		),

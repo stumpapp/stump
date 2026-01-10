@@ -10,7 +10,7 @@ import {
 } from '@stump/components'
 import { TableProperties } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 
 import { useSafeWorkingView, useSmartListContext } from '../../context'
 import { getColumnOptionMap as getGroupColumnOptionMap } from './groupColumns'
@@ -19,18 +19,18 @@ import { columnOptionMap as mediaColumnOptionMap } from './mediaColumns'
 export default function TableColumnsBottomDrawer() {
 	const [isOpen, setIsOpen] = useState(false)
 	const {
-		list: { default_grouping },
+		list: { defaultGrouping },
 	} = useSmartListContext()
 	const {
 		workingView: {
-			book_columns: selectedBookColumns,
-			group_columns: selectedGroupColumns,
-			enable_multi_sort,
+			bookColumns: selectedBookColumns,
+			groupColumns: selectedGroupColumns,
+			enableMultiSort,
 		},
 		updateWorkingView,
 	} = useSafeWorkingView()
 
-	const isGrouped = !default_grouping || default_grouping !== 'BY_BOOKS'
+	const isGrouped = !defaultGrouping || defaultGrouping !== 'BY_BOOKS'
 
 	/**
 	 * The local state to track the selected columns for the book table(s). This will be used to
@@ -60,7 +60,7 @@ export default function TableColumnsBottomDrawer() {
 	/**
 	 * The local state to track whether multi-sort is enabled
 	 */
-	const [multiSort, setMultiSort] = useState(() => enable_multi_sort ?? false)
+	const [multiSort, setMultiSort] = useState(() => enableMultiSort ?? false)
 
 	/**
 	 * The options available to the user to select from
@@ -75,7 +75,7 @@ export default function TableColumnsBottomDrawer() {
 		[bookColumnState],
 	)
 
-	const isGroupedBySeries = default_grouping === 'BY_SERIES'
+	const isGroupedBySeries = defaultGrouping === 'BY_SERIES'
 	const groupColumnOptions = useMemo(() => {
 		if (isGrouped) {
 			const all = getGroupColumnOptionMap(isGroupedBySeries)
@@ -117,14 +117,14 @@ export default function TableColumnsBottomDrawer() {
 			.filter(([, isSelected]) => isSelected)
 			.map(([id], idx) => ({ id, position: idx }))
 
-		if (!bookColumns.length || !groupColumns.length) {
+		if (!bookColumns.length || (isGrouped && !groupColumns.length)) {
 			toast.error('You must select at least one column')
 			return
 		}
 
-		const enable_multi_sort = multiSort || undefined
+		const enableMultiSort = multiSort || undefined
 
-		updateWorkingView({ book_columns: bookColumns, enable_multi_sort, group_columns: groupColumns })
+		updateWorkingView({ bookColumns: bookColumns, enableMultiSort, groupColumns: groupColumns })
 		setIsOpen(false)
 	}
 
@@ -141,10 +141,22 @@ export default function TableColumnsBottomDrawer() {
 		})
 	}, [selectedBookColumns])
 
+	// FIXME(smart-list): This is really buggy. Move all of these fucking updates out of effects,
+	// such a strong code smell
 	/**
 	 * An effect to update the local group column state whenever the working view changes
 	 */
 	useEffect(() => {
+		if (selectedGroupColumns.length === 0 && Object.keys(groupByEntityColumnState).length === 0) {
+			return
+		}
+		if (
+			selectedGroupColumns.length === Object.keys(groupByEntityColumnState).length &&
+			selectedGroupColumns.every(({ id }) => groupByEntityColumnState[id])
+		) {
+			return
+		}
+
 		setGroupByEntityColumnState(() => {
 			const newState: Record<string, boolean> = {}
 			selectedGroupColumns.forEach(({ id }) => {
@@ -152,14 +164,14 @@ export default function TableColumnsBottomDrawer() {
 			})
 			return newState
 		})
-	}, [selectedGroupColumns])
+	}, [selectedGroupColumns, groupByEntityColumnState])
 
 	/**
 	 * An effect to update the local multi-sort state whenever the working view changes
 	 */
 	useEffect(() => {
-		setMultiSort(enable_multi_sort ?? false)
-	}, [enable_multi_sort])
+		setMultiSort(enableMultiSort ?? false)
+	}, [enableMultiSort])
 
 	const handleOpenChanged = (nowOpen: boolean) => {
 		if (!nowOpen) {

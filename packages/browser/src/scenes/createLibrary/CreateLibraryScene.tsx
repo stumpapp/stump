@@ -1,12 +1,17 @@
-import { useCreateLibraryMutation, useLibraries } from '@stump/client'
-import { Alert } from '@stump/components'
+import { useGraphQLMutation, useSDK, useSuspenseGraphQL } from '@stump/client'
+import { Alert, AlertDescription, AlertTitle } from '@stump/components'
+import { CreateOrUpdateLibraryInput, graphql } from '@stump/graphql'
 import { handleApiError } from '@stump/sdk'
-import { CreateLibrary } from '@stump/sdk'
+import { useQueryClient } from '@tanstack/react-query'
+import { AlertCircle } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
 
 import { SceneContainer } from '@/components/container'
-import { CreateOrUpdateLibrarySchema } from '@/components/library/createOrUpdate'
+import {
+	CreateOrUpdateLibrarySchema,
+	intoThumbnailConfig,
+} from '@/components/library/createOrUpdate'
 import { SteppedFormContext } from '@/components/steppedForm'
 import SteppedFormSceneHeader from '@/components/steppedForm/SteppedFormSceneHeader'
 import { useConfetti } from '@/hooks/useConfetti'
@@ -14,15 +19,47 @@ import paths from '@/paths'
 
 import CreateLibraryForm from './CreateLibraryForm'
 
+const query = graphql(`
+	query CreateLibrarySceneExistingLibraries {
+		libraries(pagination: { none: { unpaginated: true } }) {
+			nodes {
+				id
+				name
+				path
+			}
+		}
+	}
+`)
+
+const mutation = graphql(`
+	mutation CreateLibrarySceneCreateLibrary($input: CreateOrUpdateLibraryInput!) {
+		createLibrary(input: $input) {
+			id
+		}
+	}
+`)
+
 export default function CreateLibraryScene() {
 	const navigate = useNavigate()
-
+	const { sdk } = useSDK()
+	const client = useQueryClient()
 	const { start: startConfetti } = useConfetti({ duration: 5000 })
-	const { libraries } = useLibraries({ suspense: true })
-	const { createLibrary, isLoading, error } = useCreateLibraryMutation({
-		onSuccess: ({ id }) => {
+	const {
+		data: {
+			libraries: { nodes: libraries },
+		},
+	} = useSuspenseGraphQL(query, [sdk.cacheKeys.libraryCreateLibraryQuery])
+
+	const {
+		mutate: createLibrary,
+		isPending,
+		error,
+	} = useGraphQLMutation(mutation, {
+		mutationKey: [sdk.cacheKeys.libraryCreate],
+		onSuccess: ({ createLibrary: { id } }) => {
 			navigate(paths.librarySeries(id))
 			startConfetti()
+			client.invalidateQueries({ queryKey: [sdk.cacheKeys.libraries] })
 		},
 	})
 	const createError = useMemo(() => (error ? handleApiError(error) : undefined), [error])
@@ -39,27 +76,26 @@ export default function CreateLibraryScene() {
 				path,
 				description,
 				tags,
-				scan_mode,
-				ignore_rules,
-				thumbnail_config,
+				scanAfterPersist,
+				ignoreRules,
+				thumbnailConfig,
 				...config
 			} = values
 
-			const payload: CreateLibrary = {
+			const input: CreateOrUpdateLibraryInput = {
 				config: {
 					...config,
-					ignore_rules: ignore_rules.map(({ glob }) => glob),
-					thumbnail_config:
-						thumbnail_config.enabled && !!thumbnail_config.resize_options ? thumbnail_config : null,
-				},
+					ignoreRules: ignoreRules.map(({ glob }) => glob),
+					thumbnailConfig: intoThumbnailConfig(thumbnailConfig),
+				} as CreateOrUpdateLibraryInput['config'],
 				description,
 				name,
 				path,
-				scan_mode,
-				tags: tags?.map(({ label }) => label),
+				scanAfterPersist,
+				tags: tags?.map(({ label }) => label).filter(Boolean),
 			}
 
-			createLibrary(payload)
+			createLibrary({ input })
 		},
 		[createLibrary],
 	)
@@ -88,13 +124,19 @@ export default function CreateLibraryScene() {
 
 				<SceneContainer>
 					<div className="flex flex-col gap-12">
-						{createError && <Alert level="error">{createError}</Alert>}
+						{createError && (
+							<Alert variant="destructive">
+								<AlertCircle />
+								<AlertTitle>Failed to create library</AlertTitle>
+								<AlertDescription>{createError}</AlertDescription>
+							</Alert>
+						)}
 
 						{libraries && (
 							<CreateLibraryForm
 								existingLibraries={libraries}
 								onSubmit={handleSubmit}
-								isLoading={isLoading}
+								isLoading={isPending}
 							/>
 						)}
 					</div>

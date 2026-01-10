@@ -3,16 +3,8 @@
 
 use std::collections::HashMap;
 
-use crate::{
-	error::CoreError,
-	opds::v1_2::{
-		entry::{IntoOPDSEntry, OPDSEntryBuilder},
-		link::OpdsLink,
-	},
-	prisma::{library, series},
-	utils::chain_optional_iter,
-};
-use prisma_client_rust::chrono::{self, DateTime, Utc};
+use crate::{error::CoreError, opds::v1_2::link::OpdsLink, utils::chain_optional_iter};
+use chrono::{DateTime, Utc};
 use xml::{writer::XmlEvent, EventWriter};
 
 use super::{
@@ -49,7 +41,7 @@ impl OpdsFeed {
 
 	/// Build an xml string from the feed.
 	pub fn build(&self) -> Result<String, CoreError> {
-		self.build_with_datetime(&chrono::Utc::now())
+		self.build_with_datetime(&Utc::now())
 	}
 
 	/// A helper function that builds an xml string from a feed using the [DateTime] object provided
@@ -95,8 +87,8 @@ pub struct OPDSFeedBuilder {
 
 #[derive(Debug, Default)]
 pub struct OPDSFeedBuilderPageParams {
-	pub page: i64,
-	pub count: i64,
+	pub page: u64,
+	pub count: u64,
 }
 
 #[derive(Debug, Default)]
@@ -135,38 +127,6 @@ impl OPDSFeedBuilder {
 			}
 		}
 		url
-	}
-
-	pub fn library(&self, library: library::Data) -> Result<OpdsFeed, CoreError> {
-		let id = library.id.clone();
-		let title = library.name.clone();
-
-		let links = vec![
-			OpdsLink::new(
-				OpdsLinkType::Navigation,
-				OpdsLinkRel::ItSelf,
-				self.format_url(&format!("libraries/{}", id)),
-			),
-			OpdsLink::new(
-				OpdsLinkType::Navigation,
-				OpdsLinkRel::Start,
-				self.format_url("catalog"),
-			),
-		];
-
-		let Ok(series) = library.series().cloned() else {
-			return Ok(OpdsFeed::new(id, title, Some(links), vec![]));
-		};
-
-		let entries = series
-			.into_iter()
-			.map(|s| {
-				OPDSEntryBuilder::<series::Data>::new(s, self.api_key.clone())
-					.into_opds_entry()
-			})
-			.collect::<Vec<OpdsEntry>>();
-
-		Ok(OpdsFeed::new(id, title, Some(links), entries))
 	}
 
 	pub fn paginated(
@@ -223,7 +183,7 @@ impl OPDSFeedBuilder {
 
 		let total_pages = (count as f32 / 20.0).ceil() as u32;
 
-		if page < total_pages as i64 && entries.len() == 20 {
+		if page < total_pages as u64 && entries.len() == 20 {
 			let next_params = chain_optional_iter(
 				[("page".to_string(), (page + 1).to_string())],
 				[search_params.clone()],
@@ -288,6 +248,8 @@ impl OPDSFeedBuilder {
 mod tests {
 	use std::str::FromStr;
 
+	use chrono::DateTime;
+
 	use super::*;
 	use crate::opds::v1_2::tests::normalize_xml;
 
@@ -318,7 +280,7 @@ mod tests {
 		// Because the updated date is set at build time, we need to dynamically insert it
 		let template_expected_result = normalize_xml(
 			r#"
-			<?xml version="1.0" encoding="utf-8"?>
+			<?xml version="1.0" encoding="UTF-8"?>
 			<feed xmlns="http://www.w3.org/2005/Atom" 
 						xmlns:opds="http://opds-spec.org/2010/catalog" 
 						xmlns:pse="http://vaemendis.net/opds-pse/ns">

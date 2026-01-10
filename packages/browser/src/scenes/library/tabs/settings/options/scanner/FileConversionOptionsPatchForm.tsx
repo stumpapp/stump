@@ -24,19 +24,18 @@ export default function FileConversionOptionsPatchForm() {
 
 	const handleSubmit = useCallback(
 		({
-			convert_rar_to_zip,
-			hard_delete_conversions,
-		}: Pick<CreateOrUpdateLibrarySchema, 'convert_rar_to_zip' | 'hard_delete_conversions'>) => {
+			convertRarToZip,
+			hardDeleteConversions,
+		}: Pick<CreateOrUpdateLibrarySchema, 'convertRarToZip' | 'hardDeleteConversions'>) => {
 			patch({
 				config: {
-					...library.config,
-					convert_rar_to_zip,
-					hard_delete_conversions,
+					convertRarToZip,
+					hardDeleteConversions,
 				},
-				scan_mode: 'NONE',
+				scanAfterPersist: false,
 			})
 		},
-		[patch, library],
+		[patch],
 	)
 
 	// Note: The underlying sub-form requires a form in the context, so I am wrapping it in one. However, the submit

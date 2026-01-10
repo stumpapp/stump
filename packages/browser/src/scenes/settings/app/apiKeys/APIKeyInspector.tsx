@@ -1,11 +1,12 @@
 import { Badge, Label, Sheet, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import { APIKey } from '@stump/sdk'
 import dayjs from 'dayjs'
 import { KeyRound, Sparkles } from 'lucide-react'
 
 import { useAppContext } from '@/context'
 import { useCurrentOrPrevious } from '@/hooks/useCurrentOrPrevious'
+
+import { APIKey } from './APIKeyTable'
 
 type Props = {
 	apiKey: APIKey | null
@@ -18,10 +19,11 @@ export default function APIKeyInspector({ apiKey, onClose }: Props) {
 
 	const displayedData = useCurrentOrPrevious(apiKey)
 
-	const expiration = dayjs(displayedData?.expires_at)
-	const lastUsedAt = dayjs(displayedData?.last_used_at)
-	const createdAt = dayjs(displayedData?.created_at)
-	const isAllPermissions = user.is_server_owner && displayedData?.permissions === 'inherit'
+	const expiration = dayjs(displayedData?.expiresAt)
+	const lastUsedAt = dayjs(displayedData?.lastUsedAt)
+	const createdAt = dayjs(displayedData?.createdAt)
+	const isAllPermissions =
+		user.isServerOwner && displayedData?.permissions.__typename === 'InheritPermissionStruct'
 
 	const renderPermissions = () => {
 		if (isAllPermissions) {
@@ -44,7 +46,9 @@ export default function APIKeyInspector({ apiKey, onClose }: Props) {
 		}
 
 		const permissions =
-			displayedData?.permissions === 'inherit' ? user.permissions : displayedData?.permissions || []
+			displayedData?.permissions.__typename === 'InheritPermissionStruct'
+				? user.permissions || []
+				: displayedData?.permissions.value || []
 
 		return (
 			<div

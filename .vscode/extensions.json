@@ -1,7 +1,6 @@
 {
 	"recommendations": [
 		"esbenp.prettier-vscode",
-		"Prisma.prisma",
 		"rust-lang.rust-analyzer",
 		"bradlc.vscode-tailwindcss",
 		"Gruntfuggly.todo-tree",

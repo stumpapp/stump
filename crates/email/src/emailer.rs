@@ -1,3 +1,4 @@
+use async_graphql::InputObject;
 use std::path::PathBuf;
 
 use lettre::{
@@ -11,13 +12,11 @@ use lettre::{
 };
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use specta::Type;
-use utoipa::ToSchema;
 
 use crate::{render_template, EmailError, EmailResult, EmailTemplate};
 
 /// The configuration for an [EmailerClient]
-#[derive(Serialize, Deserialize, ToSchema, Type)]
+#[derive(Serialize, Deserialize, InputObject)]
 pub struct EmailerClientConfig {
 	/// The email address to send from
 	pub sender_email: String,
@@ -42,7 +41,7 @@ pub struct EmailerClientConfig {
 }
 
 /// Information about an attachment to be sent in an email, including the actual content
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct AttachmentPayload {
 	/// The name of the attachment
 	pub name: String,

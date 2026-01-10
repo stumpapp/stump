@@ -1,3 +1,4 @@
+/* eslint-disable react-compiler/react-compiler */
 import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 
@@ -54,9 +55,13 @@ export function Sheet({
 		}
 	}
 
-	useEffect(() => {
-		onClose?.()
-	}, [location])
+	useEffect(
+		() => {
+			onClose?.()
+		},
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[location],
+	)
 
 	return (
 		<SheetPrimitive open={open} onOpenChange={handleOpenChange}>

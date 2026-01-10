@@ -1,1 +1,1 @@
-export { default as EpubJSReader } from './EpubJSReader'
+export { default as ReadiumReader } from './ReadiumReader'

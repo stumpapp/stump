@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
-use prisma_client_rust::not;
+use models::entity::server_config;
+use sea_orm::{prelude::*, DatabaseConnection, MockDatabase, SelectColumns};
 use tokio::sync::{
 	broadcast::{channel, Receiver, Sender},
 	mpsc::error::SendError,
@@ -8,11 +9,10 @@ use tokio::sync::{
 
 use crate::{
 	config::StumpConfig,
-	db,
+	database,
 	event::CoreEvent,
 	filesystem::scanner::LibraryWatcher,
 	job::{Executor, JobController, JobControllerCommand},
-	prisma::{self, server_config},
 	CoreError, CoreResult,
 };
 
@@ -24,16 +24,16 @@ type EventChannel = (Sender<CoreEvent>, Receiver<CoreEvent>);
 #[derive(Clone)]
 pub struct Ctx {
 	pub config: Arc<StumpConfig>,
-	pub db: Arc<prisma::PrismaClient>,
+	pub conn: Arc<DatabaseConnection>,
 	pub job_controller: Arc<JobController>,
 	pub event_channel: Arc<EventChannel>,
 	pub library_watcher: Arc<LibraryWatcher>,
 }
 
 impl Ctx {
-	/// Creates a new [Ctx] instance, creating a new prisma client. This should only be called
-	/// once per application. It takes a sender for the internal event channel, so the
-	/// core can send events to the consumer.
+	/// Creates a new [Ctx] instance. This should only be called once per application.
+	/// It takes a sender for the internal event channel, so the core can send events
+	/// to the consumer.
 	///
 	/// ## Example
 	/// ```no_run
@@ -48,77 +48,47 @@ impl Ctx {
 	/// ```
 	pub async fn new(config: StumpConfig) -> Ctx {
 		let config = Arc::new(config.clone());
-		let db = Arc::new(db::create_client(&config).await);
+		let conn = Arc::new(
+			database::connect(&config)
+				.await
+				.expect("Failed to connect to database"),
+		);
 		let event_channel = Arc::new(channel::<CoreEvent>(1024));
+
 		let job_controller =
-			JobController::new(db.clone(), config.clone(), event_channel.0.clone());
+			JobController::new(conn.clone(), config.clone(), event_channel.0.clone());
 		let library_watcher =
-			Arc::new(LibraryWatcher::new(db.clone(), job_controller.clone()));
+			Arc::new(LibraryWatcher::new(conn.clone(), job_controller.clone()));
 
 		Ctx {
 			config,
-			db,
+			conn,
 			job_controller,
 			event_channel,
 			library_watcher,
 		}
 	}
 
-	// Note: I cannot use #[cfg(test)] here because the tests are in a different crate and
-	// the `cfg` attribute only works for the current crate. Potential workarounds:
-	// - https://github.com/rust-lang/cargo/issues/8379
-
-	/// Creates a [Ctx] instance for testing **only**. The prisma client is created
-	/// pointing to the `integration-tests` crate relative to the `core` crate.
-	///
-	/// **This should not be used in production.**
-	pub async fn integration_test_mock() -> Ctx {
+	/// Creates a [Ctx] instance for testing **only**
+	pub fn mock_sea(mock_db: MockDatabase) -> Ctx {
 		let config = Arc::new(StumpConfig::debug());
-		let db = Arc::new(db::create_test_client().await);
+
 		let event_channel = Arc::new(channel::<CoreEvent>(1024));
+		let conn = Arc::new(mock_db.into_connection());
 
 		// Create job manager
 		let job_controller =
-			JobController::new(db.clone(), config.clone(), event_channel.0.clone());
-
+			JobController::new(conn.clone(), config.clone(), event_channel.0.clone());
 		let library_watcher =
-			Arc::new(LibraryWatcher::new(db.clone(), job_controller.clone()));
+			Arc::new(LibraryWatcher::new(conn.clone(), job_controller.clone()));
 
 		Ctx {
 			config,
-			db,
+			conn,
 			job_controller,
 			event_channel,
 			library_watcher,
 		}
-	}
-
-	/// Creates a [Ctx] instance for testing **only**. The prisma client is created
-	/// with a mock store, allowing for easy testing of the core without needing to
-	/// connect to a real database.
-	pub fn mock() -> (Ctx, prisma_client_rust::MockStore) {
-		let config = Arc::new(StumpConfig::debug());
-		let (client, mock) = prisma::PrismaClient::_mock();
-
-		let event_channel = Arc::new(channel::<CoreEvent>(1024));
-		let db = Arc::new(client);
-
-		// Create job manager
-		let job_controller =
-			JobController::new(db.clone(), config.clone(), event_channel.0.clone());
-
-		let library_watcher =
-			Arc::new(LibraryWatcher::new(db.clone(), job_controller.clone()));
-
-		let ctx = Ctx {
-			config,
-			db,
-			job_controller,
-			event_channel,
-			library_watcher,
-		};
-
-		(ctx, mock)
 	}
 
 	/// Wraps the [Ctx] in an [Arc], allowing it to be shared across threads. This
@@ -155,38 +125,6 @@ impl Ctx {
 	}
 
 	/// Emits a [`CoreEvent`] to the client event channel.
-	///
-	/// ## Example
-	/// ```no_run
-	/// use stump_core::{Ctx, config::StumpConfig, CoreEvent};
-	///
-	/// #[tokio::main]
-	/// async fn main() {
-	///    let config = StumpConfig::debug();
-	///    let ctx = Ctx::new(config).await;
-	///
-	///    let event = CoreEvent::CreatedMedia {
-	///        id: "id_for_the_media".to_string(),
-	///        series_id: "id_for_its_series".to_string(),
-	///    };
-	///
-	///    let ctx_cpy = ctx.clone();
-	///    tokio::spawn(async move {
-	///        let mut receiver = ctx_cpy.get_client_receiver();
-	///        let received_event = receiver.recv().await;
-	///        assert_eq!(received_event.is_ok(), true);
-	///        match received_event.unwrap() {
-	///            CoreEvent::CreatedMedia { id, series_id } => {
-	///                assert_eq!(id, "id_for_the_media");
-	///                assert_eq!(series_id, "id_for_its_series");
-	///            }
-	///            _ => unreachable!("Wrong event type received"),
-	///        }
-	///    });
-	///
-	///    ctx.emit_event(event.clone());
-	/// }
-	/// ```
 	pub fn emit_event(&self, event: CoreEvent) {
 		let _ = self.event_channel.0.send(event);
 	}
@@ -216,15 +154,14 @@ impl Ctx {
 		}
 	}
 
+	/// Retrieves the encryption key from the server configuration
 	pub async fn get_encryption_key(&self) -> CoreResult<String> {
-		let server_config = self
-			.db
-			.server_config()
-			.find_first(vec![not![server_config::encryption_key::equals(None)]])
-			.exec()
+		let record = server_config::Entity::find()
+			.select_column(server_config::Column::EncryptionKey)
+			.one(self.conn.as_ref())
 			.await?;
 
-		let encryption_key = server_config
+		let encryption_key = record
 			.and_then(|config| config.encryption_key)
 			.ok_or(CoreError::EncryptionKeyNotSet)?;
 

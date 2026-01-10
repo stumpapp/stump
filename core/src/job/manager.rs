@@ -1,21 +1,18 @@
 use std::{
 	collections::{HashMap, VecDeque},
 	sync::Arc,
-	time::Duration,
 };
 
 use futures::future::join_all;
+use models::entity::job;
+use sea_orm::{
+	prelude::*, sea_query::OnConflict, sqlx::types::chrono::Utc, ActiveValue::Set,
+	DatabaseConnection,
+};
 use tokio::sync::{broadcast, mpsc, RwLock};
 
-use super::{
-	error::JobManagerError, handle_do_cancel, Executor, JobControllerCommand, Worker,
-};
-use crate::{
-	config::StumpConfig,
-	event::CoreEvent,
-	job::JobStatus,
-	prisma::{job, PrismaClient},
-};
+use super::{error::JobManagerError, Executor, JobControllerCommand, Worker};
+use crate::{config::StumpConfig, event::CoreEvent, job::JobStatus};
 
 pub type JobManagerResult<T> = Result<T, JobManagerError>;
 
@@ -29,8 +26,8 @@ pub struct JobManager {
 	job_controller_tx: mpsc::UnboundedSender<JobControllerCommand>,
 	/// A channel to emit core events
 	core_event_tx: broadcast::Sender<CoreEvent>,
-	/// A pointer to the [`PrismaClient`]
-	client: Arc<PrismaClient>,
+	/// A pointer to the database client
+	conn: Arc<DatabaseConnection>,
 	/// A pointer to the core config
 	config: Arc<StumpConfig>,
 }
@@ -38,7 +35,7 @@ pub struct JobManager {
 impl JobManager {
 	/// Creates a new Jobs instance
 	pub fn new(
-		client: Arc<PrismaClient>,
+		conn: Arc<DatabaseConnection>,
 		config: Arc<StumpConfig>,
 		job_controller_tx: mpsc::UnboundedSender<JobControllerCommand>,
 		core_event_tx: broadcast::Sender<CoreEvent>,
@@ -48,7 +45,7 @@ impl JobManager {
 			workers: RwLock::new(HashMap::new()),
 			job_controller_tx,
 			core_event_tx,
-			client,
+			conn,
 			config,
 		}
 	}
@@ -66,27 +63,24 @@ impl JobManager {
 	/// Initialize the job manager. This will attempt to cancel any islanded jobs and re-enqueue
 	/// any paused jobs
 	pub async fn initialize(self: Arc<Self>) -> JobManagerResult<()> {
-		// Find islanded jobs and attempt to cancel them
-		let islanded_jobs = self
-			.client
-			.job()
-			.find_many(vec![job::status::equals(JobStatus::Running.to_string())])
-			.exec()
-			.await?;
+		let conn = self.conn.as_ref();
 
-		tracing::debug!(?islanded_jobs, "Found islanded jobs");
-
-		for job in islanded_jobs {
-			let job_id = job.id.clone();
-			handle_do_cancel(
-				job_id,
-				&self.client,
-				Duration::from_millis(job.ms_elapsed as u64),
+		let affected_rows = job::Entity::update_many()
+			.filter(job::Column::Status.eq(JobStatus::Running.to_string()))
+			.col_expr(
+				job::Column::Status,
+				Expr::value(JobStatus::Cancelled.to_string()),
 			)
-			.await?;
-		}
+			.col_expr(
+				job::Column::CompletedAt,
+				Expr::value(Some(Utc::now().to_rfc3339())),
+			)
+			.exec(conn)
+			.await
+			.map_err(|err| JobManagerError::JobPersistFailed(err.to_string()))?
+			.rows_affected;
 
-		// TODO: Re-enqueue paused jobs
+		tracing::debug!(affected_rows, "Cancelled islanded jobs");
 
 		Ok(())
 	}
@@ -108,19 +102,25 @@ impl JobManager {
 			return Err(JobManagerError::JobAlreadyExists(job_id));
 		}
 
-		let created_job = self
-			.client
-			.job()
-			.upsert(
-				job::id::equals(job.id().to_string()),
-				(
-					job.id().to_string(),
-					job.name().to_string(),
-					vec![job::description::set(job.description())],
-				),
-				vec![job::status::set(JobStatus::Queued.to_string())],
+		let active_model = job::ActiveModel {
+			id: Set(job.id().to_string()),
+			name: Set(job.name().to_string()),
+			description: Set(job.description()),
+			status: Set(JobStatus::Queued),
+			created_at: Set(Utc::now().into()),
+			ms_elapsed: Set(0),
+			..Default::default()
+		};
+		let created_job = job::Entity::insert(active_model)
+			// Note: This needs to be an "upsert" since jobs get written when
+			// added to queue, and so they would exist when re-queued for execution
+			// which causes a conflict and throws
+			.on_conflict(
+				OnConflict::new()
+					.update_column(job::Column::Status)
+					.to_owned(),
 			)
-			.exec()
+			.exec(self.conn.as_ref())
 			.await
 			.map_err(|err| JobManagerError::JobPersistFailed(err.to_string()))?;
 		tracing::trace!(?created_job, "Persisted job to database");
@@ -132,7 +132,7 @@ impl JobManager {
 			let worker = Worker::create_and_spawn(
 				job,
 				self.clone(),
-				self.client.clone(),
+				self.conn.clone(),
 				self.config.clone(),
 				self.get_event_tx(),
 				self.job_controller_tx.clone(),
@@ -195,8 +195,16 @@ impl JobManager {
 			drop(workers);
 			self.auto_enqueue().await;
 		} else if let Some(index) = self.get_queued_job_index(&job_id).await {
-			handle_do_cancel(job_id.clone(), &self.client, Duration::from_secs(0))
-				.await?;
+			job::Entity::update_many()
+				.filter(job::Column::Id.eq(job_id.clone()))
+				.col_expr(
+					job::Column::Status,
+					Expr::value(JobStatus::Cancelled.to_string()),
+				)
+				.exec(self.conn.as_ref())
+				.await
+				.map_err(|err| JobManagerError::JobPersistFailed(err.to_string()))?;
+
 			self.queue.write().await.remove(index).map_or_else(
 				|| {
 					tracing::warn!(index, job_id, "Unexpected result: failed to remove job with existing index precondition");
@@ -206,26 +214,21 @@ impl JobManager {
                 },
 			);
 		} else {
-			let islanded_job = self
-				.client
-				.job()
-				.find_first(vec![
-					job::id::equals(job_id.clone()),
-					job::status::equals(JobStatus::Running.to_string()),
-				])
-				.exec()
-				.await?
-				.ok_or_else(|| JobManagerError::JobNotFound(job_id.clone()))?;
-			tracing::warn!(
-				?islanded_job,
-				"Job was found in an invalid state, attempting to cancel"
-			);
-			handle_do_cancel(
-				job_id.clone(),
-				&self.client,
-				Duration::from_millis(islanded_job.ms_elapsed as u64),
-			)
-			.await?;
+			let affected_rows = job::Entity::update_many()
+				.filter(job::Column::Id.eq(job_id.clone()))
+				.col_expr(
+					job::Column::Status,
+					Expr::value(JobStatus::Cancelled.to_string()),
+				)
+				.exec(self.conn.as_ref())
+				.await
+				.map_err(|err| JobManagerError::JobPersistFailed(err.to_string()))?
+				.rows_affected;
+
+			if affected_rows == 0 {
+				return Err(JobManagerError::JobNotFound(job_id));
+			}
+
 			return Err(JobManagerError::JobLostError);
 		}
 

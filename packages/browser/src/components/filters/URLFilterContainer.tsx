@@ -1,3 +1,4 @@
+import { useFooterOffsetStore } from '@stump/client'
 import { cn } from '@stump/components'
 import { forwardRef, useEffect, useMemo } from 'react'
 import useScrollbarSize from 'react-scrollbar-size'
@@ -22,13 +23,15 @@ type Props = {
 const URLFilterContainer = forwardRef<HTMLDivElement, Props>(
 	({ children, className, tableControls, ...paginationProps }, ref) => {
 		const {
-			preferences: { enable_hide_scrollbar, primary_navigation_mode },
+			preferences: { enableHideScrollbar, primaryNavigationMode },
 		} = usePreferences()
 		const { width } = useScrollbarSize()
 		const { storedWidth, storeWidth } = useWidthStore((state) => ({
 			storeWidth: state.setWidth,
 			storedWidth: state.width,
 		}))
+
+		const storeOffset = useFooterOffsetStore((state) => state.setFooterOffset)
 
 		/**
 		 * An effect to update the stored width with any *non-zero* width value.
@@ -40,6 +43,13 @@ const URLFilterContainer = forwardRef<HTMLDivElement, Props>(
 				storeWidth(width)
 			}
 		}, [storedWidth, storeWidth, width])
+
+		useEffect(() => {
+			storeOffset(48)
+			return () => {
+				storeOffset(0)
+			}
+		}, [storeOffset])
 
 		/**
 		 * A computed width which factors the actual scroll state of the main content.
@@ -60,7 +70,7 @@ const URLFilterContainer = forwardRef<HTMLDivElement, Props>(
 		 * The value used for computing the right position of the pagination controls.
 		 * If the scrollbar is hidden, we don't need to account for it.
 		 */
-		const scrollbarWidth = enable_hide_scrollbar ? 0 : adjustedWidth
+		const scrollbarWidth = enableHideScrollbar ? 0 : adjustedWidth
 
 		return (
 			<div
@@ -72,10 +82,11 @@ const URLFilterContainer = forwardRef<HTMLDivElement, Props>(
 
 				<div
 					className="fixed bottom-0 flex h-12 items-center justify-between border-t border-edge bg-background px-4 md:h-10"
+					data-testid="urlFilterFooter"
 					style={{
 						right: scrollbarWidth,
 						width:
-							isMobile || primary_navigation_mode === 'TOPBAR'
+							isMobile || primaryNavigationMode === 'TOPBAR'
 								? '100%'
 								: `calc(100% - ${SIDEBAR_WIDTH}px - ${scrollbarWidth}px)`,
 					}}

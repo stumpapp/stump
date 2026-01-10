@@ -1,24 +1,48 @@
-import { useSDK } from '@stump/client'
-import { Media } from '@stump/sdk'
+import { FragmentType, graphql, useFragment } from '@stump/graphql'
+import { View } from 'react-native'
 
 import { useActiveServer } from '../activeServer'
 import GridImageItem from '../grid/GridImageItem'
 
+const fragment = graphql(`
+	fragment BookGridItem on Media {
+		id
+		resolvedName
+		thumbnail {
+			url
+			metadata {
+				averageColor
+				colors {
+					color
+					percentage
+				}
+				thumbhash
+			}
+		}
+	}
+`)
+
+export type IBookGridItemFragment = FragmentType<typeof fragment>
+
 type Props = {
-	book: Media
+	book: IBookGridItemFragment
 }
 
 export default function BookGridItem({ book }: Props) {
-	const { sdk } = useSDK()
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
 
+	const data = useFragment(fragment, book)
+
 	return (
-		<GridImageItem
-			uri={sdk.media.thumbnailURL(book.id)}
-			title={book.metadata?.title || book.name}
-			href={`/server/${serverID}/books/${book.id}`}
-		/>
+		<View className="w-full items-center">
+			<GridImageItem
+				uri={data.thumbnail.url}
+				title={data.resolvedName}
+				href={`/server/${serverID}/books/${data.id}`}
+				placeholderData={data.thumbnail.metadata}
+			/>
+		</View>
 	)
 }

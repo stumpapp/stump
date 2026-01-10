@@ -1,0 +1,97 @@
+import { Callout } from 'nextra/components'
+
+# Offline Reading and Progression Sync
+
+The mobile app supports managed downloads with offline reading capabilities for a subset of formats:
+
+| Format  | Status | Notes                                    |
+| ------- | ------ | ---------------------------------------- |
+| CBZ/ZIP | ✅     |                                          |
+| CBR/RAR | ❌     |                                          |
+| EPUB    | ✅     | Functional but missing features, poor UX |
+| PDF     | ✅     | Native reader is a separate experience   |
+
+## Downloads
+
+<Callout emoji="🔐">
+	This functionality is gated behind the `DOWNLOAD_FILE` user permission. To learn more about
+	permissions, see the [permissions](/guides/access-control/permissions) guide.
+</Callout>
+
+You can download books for offline reading by navigating to the book details page and tapping either the download button next to the reading button or the download button in the action menu.
+
+Once downloaded, books will appear in the `Downloads` tab at the root of the app.
+
+### Sorting
+
+You may sort your downloads by the following criteria (ascending or descending):
+
+- Name
+- Download date
+- Series
+
+When sorting by series, books will be grouped by their series and _then_ sorted by name within each series. The name sorting order will always be ascending when sorting by series.
+
+### Curated Sections
+
+There are a small number of curated sections in the downloads tab that may be toggled on or off according to your preferences:
+
+- Reading now (first 5 books with progression)
+- Continue reading (all books _past_ the initial 5 in reading now with progression)
+
+<Callout emoji="💡" type="info">
+	If you have ideas for other curated sections, feel free to suggest them on
+	[GitHub](https://github.com/stumpapp/stump/issues).
+</Callout>
+
+### Selection Mode
+
+You may enter selection mode by selecting `Select` from the action menu in the downloads tab. In selection mode, you may select multiple books to perform the following bulk actions:
+
+- Delete
+
+There is a convenience button in the top-left to select or deselect all books.
+
+<Callout emoji="💡" type="info">
+	In the future there will be options for sharing files and attempting to sync progression. If you
+	have any other ideas for features you'd like to see, feel free to suggest them on
+	[GitHub](https://github.com/stumpapp/stump/issues).
+</Callout>
+
+## Progression Sync
+
+The mobile app supports progression sync for **Stump servers only**. There is no standard for OPDS progression sync, so the app relies on Stump-specific APIs for this functionality.
+
+The app will (bidirectionally) automatically sync your reading progression in a couple of scenarios:
+
+- When entering a server with offline books that have progression (sync from device to server)
+- When exiting an online reader (sync from server to device)
+
+These allow you to more seamlessly switch between offline and online reading without losing your place. There is not currently an option to disable these, however if that is something you'd like to see, feel free to suggest it on [GitHub](https://github.com/stumpapp/stump/issues).
+
+You may also trigger a manual sync by selecting the `Attempt Sync` option from the action menu in the downloads tab. This will attempt to sync all books with progression, both from device to server and from server to device.
+
+### Limitations
+
+As mentioned above, progression sync is only supported for Stump servers. Additionally, there are some limitations primarily based on the authentication configuration:
+
+`Basic` and `Token` authentication are fully supported for progression sync. The `Login` authentication method is not supported, since it would be too annoying to implement a background operation that attempts to open a login sheet every time a sync is attempted. I will likely not add support for this feature.
+
+### Visual Indicators
+
+There are a few icons used to indicate the sync status of books with progression, varying slightly between iOS and Android:
+
+TODO: Add this once I swap out icons :sob:
+
+## Future Plans
+
+I'd like to add the following features in the future:
+
+- CBR/RAR offline reading
+- File sharing downloaded files
+- Local storage import (e.g., from Files app on iOS)
+
+<Callout emoji="💡" type="info">
+	If you have ideas for other features you'd like to see, feel free to suggest them on
+	[GitHub](https://github.com/stumpapp/stump/issues).
+</Callout>

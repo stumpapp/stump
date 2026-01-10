@@ -4,15 +4,14 @@ use time::Duration;
 
 use tower_sessions::{cookie::SameSite, Expiry, SessionManagerLayer};
 
-use super::PrismaSessionStore;
+use super::StumpSessionStore;
 
-pub const SESSION_USER_KEY: &str = "user";
+pub const SESSION_USER_KEY: &str = "user_id";
 pub const SESSION_NAME: &str = "stump_session";
 pub const SESSION_PATH: &str = "/";
 
-pub fn get_session_layer(ctx: Arc<Ctx>) -> SessionManagerLayer<PrismaSessionStore> {
-	let client = ctx.db.clone();
-	let store = PrismaSessionStore::new(client, ctx.config.clone());
+pub fn get_session_layer(ctx: Arc<Ctx>) -> SessionManagerLayer<StumpSessionStore> {
+	let store = StumpSessionStore::new(ctx.conn.clone(), ctx.config.clone());
 
 	let cleanup_interval = ctx.config.expired_session_cleanup_interval;
 	if cleanup_interval > 0 {

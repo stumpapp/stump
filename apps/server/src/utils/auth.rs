@@ -1,12 +1,11 @@
-use stump_core::{
-	config::StumpConfig,
-	db::entity::{User, UserPermission},
-};
+use models::entity::user::{AuthUser, LoginUser};
+use sea_orm::DatabaseConnection;
+use stump_core::config::StumpConfig;
 use tower_sessions::Session;
 
 use crate::{
 	config::session::SESSION_USER_KEY,
-	errors::{APIResult, AuthError},
+	errors::{APIError, AuthError},
 };
 
 /// A struct to represent the decoded username and (plaintext) password from a base64-encoded
@@ -48,35 +47,26 @@ pub fn decode_base64_credentials(
 	}
 }
 
-pub async fn get_session_user(session: &Session) -> APIResult<Option<User>> {
-	Ok(session.get::<User>(SESSION_USER_KEY).await?)
-}
+pub async fn fetch_session_user(
+	session: &Session,
+	conn: &DatabaseConnection,
+) -> Result<Option<AuthUser>, APIError> {
+	if let Some(user_id) = session.get::<String>(SESSION_USER_KEY).await? {
+		let user = LoginUser::find_by_id(user_id)
+			.into_model::<LoginUser>()
+			.one(conn)
+			.await?
+			.ok_or(APIError::Unauthorized)?;
 
-/// A function to determine whether a user has a specific permission. The permission
-/// is checked against their explicitly assigned permissions, as well as any inherited
-/// ones through permission associations.
-fn user_has_permission(user: &User, permission: UserPermission) -> bool {
-	user.is_server_owner
-		|| user
-			.permissions
-			.iter()
-			.any(|p| p == &permission || p.associated().contains(&permission))
-}
+		if user.is_locked {
+			return Err(APIError::AccountLocked);
+		}
 
-pub fn user_has_all_permissions(user: &User, permissions: &[UserPermission]) -> bool {
-	if user.is_server_owner {
-		return true;
+		Ok(Some(user.into()))
+	} else {
+		tracing::debug!("No user found in session");
+		Ok(None)
 	}
-
-	let missing_permissions = permissions
-		.iter()
-		.filter(|&permission| !user_has_permission(user, *permission))
-		.collect::<Vec<_>>();
-	if !missing_permissions.is_empty() {
-		tracing::error!(?user, ?missing_permissions, "User does not have permission");
-	}
-
-	missing_permissions.is_empty()
 }
 
 #[cfg(test)]
@@ -88,28 +78,6 @@ mod tests {
 		let hash = bcrypt::hash("password", bcrypt::DEFAULT_COST).unwrap();
 		assert!(verify_password(&hash, "password").unwrap());
 	}
-
-	// TODO(axum-upgrade): Fix all of these tests
-	// #[test]
-	// fn test_get_session_user_no_user() {
-	// 	let session = Session::default();
-	// 	let result = get_session_user(&session);
-	// 	assert!(result.is_err());
-	// }
-
-	// #[test]
-	// fn test_get_session_user_with_user() {
-	// 	let session = Session::default();
-	// 	let session_user = User {
-	// 		username: "oromei".to_string(),
-	// 		..Default::default()
-	// 	};
-	// 	session
-	// 		.insert(SESSION_USER_KEY, session_user.clone())
-	// 		.expect("Failed to insert user into session");
-	// 	let loaded_user = get_session_user(&session).expect("Failed to get session user");
-	// 	assert_eq!(loaded_user.username, session_user.username);
-	// }
 
 	#[test]
 	fn test_decode_64_credentials_with_colon_in_password() {
@@ -139,26 +107,5 @@ mod tests {
 				"wp*r@hj!1b:o4sZ#5TdvyzBd$n-bqaPiwp*r@hj!1b:o4sZ#5TdvyzBd$n-bqaPi"
 			)
 		);
-	}
-
-	#[test]
-	fn test_associated_permissions() {
-		let user = User {
-			permissions: vec![
-				UserPermission::CreateLibrary,
-				UserPermission::ManageNotifier,
-			],
-			..Default::default()
-		};
-
-		let expected_can_do = vec![
-			UserPermission::EditLibrary,
-			UserPermission::ScanLibrary,
-			UserPermission::ReadNotifier,
-			UserPermission::CreateNotifier,
-			UserPermission::DeleteNotifier,
-		];
-
-		assert!(user_has_all_permissions(&user, &expected_can_do));
 	}
 }

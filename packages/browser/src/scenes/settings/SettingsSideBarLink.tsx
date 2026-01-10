@@ -8,8 +8,17 @@ type Props = {
 	isDisabled?: boolean
 	icon: LucideIcon
 	children: React.ReactNode
+	prefetch?: () => void
 }
-export default function SettingsSideBarLink({ to, isActive, isDisabled, icon, children }: Props) {
+
+export default function SettingsSideBarLink({
+	to,
+	isActive,
+	isDisabled,
+	icon,
+	children,
+	prefetch,
+}: Props) {
 	const Icon = icon
 
 	return (
@@ -22,6 +31,7 @@ export default function SettingsSideBarLink({ to, isActive, isDisabled, icon, ch
 						'bg-background-surface': isActive && !isDisabled,
 					},
 				)}
+				{...(prefetch ? { onMouseEnter: prefetch } : {})}
 			>
 				<Icon className="mr-2 h-4 w-4 shrink-0" />
 				<span className="ml-1 line-clamp-1 font-medium">{children}</span>

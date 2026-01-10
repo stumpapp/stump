@@ -8,7 +8,7 @@ export default function ReadStatusSelect() {
 			options={[
 				{
 					label: 'Completed',
-					value: 'completed',
+					value: 'finished',
 				},
 				{
 					label: 'Reading',
@@ -16,7 +16,7 @@ export default function ReadStatusSelect() {
 				},
 				{
 					label: 'Unread',
-					value: 'unread',
+					value: 'not_started',
 				},
 			]}
 		/>

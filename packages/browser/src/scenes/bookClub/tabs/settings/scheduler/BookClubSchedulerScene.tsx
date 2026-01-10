@@ -2,6 +2,7 @@ import { BookClubSchedule, useBookClubContext } from '@/components/bookClub'
 
 import CreateOrAddToScheduleForm from './CreateOrAddToScheduleForm'
 
+// TODO: Separate query
 export default function BookClubSchedulerScene() {
 	const {
 		bookClub: { schedule },

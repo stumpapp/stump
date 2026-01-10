@@ -11,7 +11,7 @@ export default function MembershipOptions() {
 	const { t } = useLocaleContext()
 
 	const form = useFormContext<CreateOrUpdateBookClubSchema>()
-	const creator_hide_progress = form.watch('creator_hide_progress')
+	const creatorHideProgress = form.watch('creatorHideProgress')
 
 	return (
 		<div className="flex flex-col gap-4 pt-2 md:max-w-lg">
@@ -23,17 +23,17 @@ export default function MembershipOptions() {
 				descriptionPosition="top"
 				placeholder={t(getKey('displayName.placeholder'))}
 				autoComplete="off"
-				errorMessage={form.formState.errors.creator_display_name?.message}
-				{...form.register('creator_display_name')}
+				errorMessage={form.formState.errors.creatorDisplayName?.message}
+				{...form.register('creatorDisplayName')}
 			/>
 
 			<CheckBox
-				id="creator_hide_progress"
+				id="creatorHideProgress"
 				variant="primary"
 				label={t(getKey('hideProgress.label'))}
 				description={t(getKey('hideProgress.description'))}
-				checked={creator_hide_progress}
-				onClick={() => form.setValue('creator_hide_progress', !creator_hide_progress)}
+				checked={creatorHideProgress}
+				onClick={() => form.setValue('creatorHideProgress', !creatorHideProgress)}
 			/>
 		</div>
 	)

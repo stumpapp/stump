@@ -8,12 +8,16 @@ import {
 	OPDSFeed,
 	OPDSProgression,
 	OPDSPublication,
-	PageQuery,
 	progression,
 	publication,
 } from '../types'
 import { ClassQueryKeys } from './types'
 import { createRouteURLHandler, toUrlParams, urlWithParams } from './utils'
+
+type OPDSPageQuery = {
+	page: number
+	page_size: number
+}
 
 /**
  * The root route for the OPDS v2 API
@@ -59,7 +63,7 @@ export class OPDSV2API extends APIBase {
 	 * A generic method to fetch an OPDS feed from a URL that may not be from a Stump server
 	 * @param url The full URL of the feed to fetch
 	 */
-	async feed(url: string, params?: PageQuery): Promise<OPDSFeed> {
+	async feed(url: string, params?: OPDSPageQuery): Promise<OPDSFeed> {
 		const resolvedURL = urlWithParams(
 			`${url.endsWith('/') ? url.slice(0, -1) : url}`,
 			toUrlParams(params),
@@ -70,7 +74,7 @@ export class OPDSV2API extends APIBase {
 		return feedSchema.parse(data)
 	}
 
-	async libraries(pagination?: PageQuery): Promise<OPDSFeed> {
+	async libraries(pagination?: OPDSPageQuery): Promise<OPDSFeed> {
 		const { data } = await this.axios.get<OPDSFeed>(opdsURL('/libraries', pagination), this.config)
 		return feedSchema.parse(data)
 	}
@@ -84,7 +88,7 @@ export class OPDSV2API extends APIBase {
 		return this.imageURL(opdsURL(`/libraries/${libraryID}/thumbnail`))
 	}
 
-	async libraryBooks(libraryID: string, pagination?: PageQuery): Promise<OPDSFeed> {
+	async libraryBooks(libraryID: string, pagination?: OPDSPageQuery): Promise<OPDSFeed> {
 		const { data } = await this.axios.get<OPDSFeed>(
 			opdsURL(`/libraries/${libraryID}/books`, pagination),
 			this.config,
@@ -92,7 +96,7 @@ export class OPDSV2API extends APIBase {
 		return feedSchema.parse(data)
 	}
 
-	async latestLibraryBooks(libraryID: string, pagination?: PageQuery): Promise<OPDSFeed> {
+	async latestLibraryBooks(libraryID: string, pagination?: OPDSPageQuery): Promise<OPDSFeed> {
 		const { data } = await this.axios.get<OPDSFeed>(
 			opdsURL(`/libraries/${libraryID}/books/latest`, pagination),
 			this.config,
@@ -100,12 +104,12 @@ export class OPDSV2API extends APIBase {
 		return feedSchema.parse(data)
 	}
 
-	async series(pagination?: PageQuery): Promise<OPDSFeed> {
+	async series(pagination?: OPDSPageQuery): Promise<OPDSFeed> {
 		const { data } = await this.axios.get<OPDSFeed>(opdsURL('/series', pagination), this.config)
 		return feedSchema.parse(data)
 	}
 
-	async seriesByID(seriesID: string, pagination?: PageQuery): Promise<OPDSFeed> {
+	async seriesByID(seriesID: string, pagination?: OPDSPageQuery): Promise<OPDSFeed> {
 		const { data } = await this.axios.get<OPDSFeed>(
 			opdsURL(`/series/${seriesID}`, pagination),
 			this.config,
@@ -117,12 +121,12 @@ export class OPDSV2API extends APIBase {
 		return this.imageURL(opdsURL(`/series/${seriesID}/thumbnail`))
 	}
 
-	async books(pagination?: PageQuery): Promise<OPDSFeed> {
+	async books(pagination?: OPDSPageQuery): Promise<OPDSFeed> {
 		const { data } = await this.axios.get<OPDSFeed>(opdsURL('/books', pagination), this.config)
 		return feedSchema.parse(data)
 	}
 
-	async latestBooks(pagination?: PageQuery): Promise<OPDSFeed> {
+	async latestBooks(pagination?: OPDSPageQuery): Promise<OPDSFeed> {
 		const { data } = await this.axios.get<OPDSFeed>(
 			opdsURL('/books/latest', pagination),
 			this.config,
@@ -130,7 +134,7 @@ export class OPDSV2API extends APIBase {
 		return feedSchema.parse(data)
 	}
 
-	async keepReading(pagination?: PageQuery): Promise<OPDSFeed> {
+	async keepReading(pagination?: OPDSPageQuery): Promise<OPDSFeed> {
 		const { data } = await this.axios.get<OPDSFeed>(
 			opdsURL('/books/keep-reading', pagination),
 			this.config,

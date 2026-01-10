@@ -1,9 +1,3 @@
-// Note: ~technically~ 1024 is correct, but it always differed from what my computer natively reported.
-// I care more about matching a users reported byte conversion, and 1000 seems to do the trick
-
-import { Media } from '@stump/sdk'
-
-// for me in my testing.
 const KILOBYTE = 1000
 const BYTE_UNITS = ['B', 'KB', 'MiB', 'GB', 'TB']
 
@@ -71,12 +65,3 @@ export function formatBytesSeparate(bytes?: number | bigint, decimals = 2, zeroU
 		}
 	}
 }
-
-/**
- * A helper function to format a book's name. This will first pull from metadata if it exists, and then fallback to the filename,
- * removing any file extension if present.
- *
- * @param book The book to get the name of
- */
-export const formatBookName = (book: Media) =>
-	book.metadata?.title || book.name.replace(/\.[^/.]+$/, '')

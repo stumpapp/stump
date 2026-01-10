@@ -1,5 +1,4 @@
 use serde::Serialize;
-use specta::Type;
 use tauri::{App, AppHandle, Manager, Wry};
 use tauri_plugin_store::{Store, StoreExt};
 
@@ -13,12 +12,14 @@ pub enum StoreError {
 	StoreLoadError,
 }
 
-#[derive(Serialize, Type)]
-#[serde(rename = "DesktopAppStore")]
+#[derive(Serialize)]
+#[serde(rename = "DesktopAppStore", rename_all = "camelCase")]
 pub struct AppStore {
+	#[serde(default, alias = "runBundledServer")]
 	pub run_bundled_server: bool,
-	#[specta(optional)]
+	#[serde(default, alias = "activeServer")]
 	active_server: Option<SavedServer>,
+	#[serde(default, alias = "connectedServers")]
 	connected_servers: Vec<SavedServer>,
 }
 

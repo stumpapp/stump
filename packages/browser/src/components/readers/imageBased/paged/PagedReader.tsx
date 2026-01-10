@@ -1,5 +1,4 @@
 import Panzoom from '@panzoom/panzoom'
-import type { Media } from '@stump/sdk'
 import clsx from 'clsx'
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
@@ -14,12 +13,8 @@ import PageSet from './PageSet'
 export type PagedReaderProps = {
 	/** The current page which the reader should render */
 	currentPage: number
-	/** The media entity associated with the reader */
-	media: Media
 	/** A callback that is called in order to change the page */
 	onPageChange: (page: number) => void
-	/** A function that returns the url for a given page */
-	getPageUrl(page: number): string
 }
 
 /**
@@ -29,14 +24,19 @@ export type PagedReaderProps = {
  * Note: This component lacks animations between pages. The `AnimatedPagedReader` component
  * will have animations between pages, but is currently a WIP
  */
-function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedReaderProps) {
+function PagedReader({ currentPage, onPageChange }: PagedReaderProps) {
+	const { pageSets, book, getPageUrl } = useImageBaseReaderContext()
 	const {
-		bookPreferences: { tapSidesToNavigate, imageScaling, secondPageSeparate, doublePageBehavior },
+		bookPreferences: {
+			tapSidesToNavigate,
+			imageScaling,
+			secondPageSeparate,
+			doublePageBehavior,
+			panzoomWithoutCtrl,
+		},
 		settings: { showToolBar },
 		setSettings,
-	} = useBookPreferences({ book: media })
-
-	const { pageSets } = useImageBaseReaderContext()
+	} = useBookPreferences({ book })
 
 	const { innerWidth } = useWindowSize()
 
@@ -70,60 +70,58 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 		const parentElement = pageSetElement.parentElement
 		if (!parentElement) return
 
-		/**
-		 * Set up event handlers for pointer clicking and scroll wheel
-		 */
-		const setupEventHandlers = (pz: ReturnType<typeof Panzoom>) => {
-			const handleWheel = (event: WheelEvent) => {
-				if (event.ctrlKey) {
-					pz.zoomWithWheel(event)
-				}
+		const handleWheel = (event: WheelEvent) => {
+			if (event.ctrlKey || panzoomWithoutCtrl) {
+				panzoomRef.current?.zoomWithWheel(event)
 			}
+		}
 
-			// Check panning vs clicking
-			let startX = 0
-			let startY = 0
-			const handlePointerDown = (event: PointerEvent) => {
-				if (event.button === 2) return
+		// Check panning vs clicking
+		let startX = 0
+		let startY = 0
+		const handlePointerDown = (event: PointerEvent) => {
+			if (event.button === 2) return
 
-				startX = event.clientX
-				startY = event.clientY
+			startX = event.clientX
+			startY = event.clientY
 
-				const isSidebarClicked = !!(event.target as HTMLElement).closest('.z-50')
+			const isSidebarClicked = !!(event.target as HTMLElement).closest('.z-50')
 
-				if (!isSidebarClicked) {
-					pz.handleDown(event)
-					parentElement.style.cursor = 'move'
-					pageSetElement.style.cursor = 'move'
-					event.preventDefault()
-				}
+			if (!isSidebarClicked) {
+				panzoomRef.current?.handleDown(event)
+				parentElement.style.cursor = 'move'
+				pageSetElement.style.cursor = 'move'
+				event.preventDefault()
 			}
-			const handlePointerUp = (event: PointerEvent) => {
-				const deltaX = event.clientX - startX
-				const deltaY = event.clientY - startY
-				pz.handleUp(event)
-				parentElement.style.cursor = 'default'
-				pageSetElement.style.cursor = 'default'
-				panningDetected.current = Math.abs(deltaX) > 2 || Math.abs(deltaY) > 2
-				setTimeout(() => {
-					panningDetected.current = false
-				}, 100)
-			}
-
-			parentElement.removeEventListener('wheel', handleWheel)
-			parentElement.removeEventListener('pointerdown', handlePointerDown)
-			document.removeEventListener('pointermove', pz.handleMove)
-			document.removeEventListener('pointerup', handlePointerUp)
-
-			parentElement.addEventListener('wheel', handleWheel)
-			parentElement.addEventListener('pointerdown', handlePointerDown)
-			document.addEventListener('pointermove', pz.handleMove)
-			document.addEventListener('pointerup', handlePointerUp)
+		}
+		const handlePointerUp = (event: PointerEvent) => {
+			const deltaX = event.clientX - startX
+			const deltaY = event.clientY - startY
+			panzoomRef.current?.handleUp(event)
+			parentElement.style.cursor = 'default'
+			pageSetElement.style.cursor = 'default'
+			panningDetected.current = Math.abs(deltaX) > 2 || Math.abs(deltaY) > 2
+			setTimeout(() => {
+				panningDetected.current = false
+			}, 100)
+		}
+		const handleMove = (event: PointerEvent) => {
+			panzoomRef.current?.handleMove(event)
 		}
 
 		/**
-		 * A function that manually calculates the correct panzoom origin
-		 * due to the default origin setting being wrong
+		 * A function that manually calculates the correct panzoom origin due to the default origin X value being wrong
+		 *
+		 * Because we do not set pageSet imagesHolder to use w-full (for SideBarControl to expand up to the pageSet), then
+		 * for some reason '50%' from the left is marked as where this is: pageSetWidth / 2 to the left of the right side of the viewport.
+		 *
+		 * But the real center is at the center of the viewport so we must do the origin calculation with respect to this weird coordinate system.
+		 *
+		 * Hence we:
+		 * 1. Calculate the stretch factor required -> viewportWidth / pageSetWidth
+		 * 2. Calculate the fraction it is from the right side of the viewport -> 50% * viewportWidth / pageSetWidth
+		 * 3. Calculate the fraction it is from the left side of the viewport -> 1 - 50% * viewportWidth / pageSetWidth
+		 * 4. Convert to a percentage
 		 */
 		const panzoomOriginCalculation = () => {
 			const viewportWidth = window.innerWidth
@@ -132,7 +130,7 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 			return origin
 		}
 
-		const createAndConfigurePanzoom = () => {
+		const createPanzoom = () => {
 			if (panzoomRef.current) {
 				panzoomRef.current.destroy()
 			}
@@ -146,19 +144,32 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 			})
 
 			panzoomRef.current = pz
-			setupEventHandlers(pz)
 		}
 
-		createAndConfigurePanzoom()
+		createPanzoom()
 
-		window.addEventListener('resize', createAndConfigurePanzoom)
+		parentElement.addEventListener('wheel', handleWheel)
+		parentElement.addEventListener('pointerdown', handlePointerDown)
+		document.addEventListener('pointermove', handleMove)
+		document.addEventListener('pointerup', handlePointerUp)
+		window.addEventListener('resize', createPanzoom)
 
 		return () => {
-			window.removeEventListener('resize', createAndConfigurePanzoom)
-			// The others are already removed inside createAndConfigurePanzoom
+			parentElement.removeEventListener('wheel', handleWheel)
+			parentElement.removeEventListener('pointerdown', handlePointerDown)
+			document.removeEventListener('pointermove', handleMove)
+			document.removeEventListener('pointerup', handlePointerUp)
+			window.removeEventListener('resize', createPanzoom)
 			panzoomRef.current?.destroy()
 		}
-	}, [currentPage, imageScaling, secondPageSeparate, doublePageBehavior, pageSetWidth])
+	}, [
+		currentPage,
+		imageScaling,
+		secondPageSeparate,
+		doublePageBehavior,
+		pageSetWidth,
+		panzoomWithoutCtrl,
+	])
 
 	const currentSetIdx = useMemo(
 		() => pageSets.findIndex((set) => set.includes(currentPage - 1)),
@@ -200,11 +211,11 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 			const scrollTop = scrollElement?.scrollTop ?? 0
 			scrollPositionMap.current.set(currentSetIdx, { scrollTop: scrollTop, timestamp: Date.now() })
 
-			if (newPage <= media.pages && newPage > 0) {
+			if (newPage <= book.pages && newPage > 0) {
 				onPageChange(newPage)
 			}
 		},
-		[media.pages, onPageChange, currentSetIdx],
+		[book.pages, onPageChange, currentSetIdx],
 	)
 
 	/**
@@ -278,15 +289,7 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 	useHotkeys('right, left, space, escape', (_, handler) => hotKeyHandler(handler))
 
 	return (
-		<div
-			style={{
-				display: 'flex',
-				justifyContent: 'center',
-				margin: 'auto',
-				width: '100vw',
-				position: 'relative',
-			}}
-		>
+		<div className="relative m-auto flex w-[100vw] justify-center">
 			{!showToolBar && tapSidesToNavigate && (
 				<SideBarControl
 					fixed={fixSideNavigation}

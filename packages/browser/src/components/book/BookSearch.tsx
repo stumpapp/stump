@@ -1,111 +1,97 @@
-import { usePagedMediaQuery, usePrefetchMediaPaged } from '@stump/client'
-import { usePreviousIsDifferent } from '@stump/components'
-import { Media } from '@stump/sdk'
-import { useCallback, useEffect, useMemo } from 'react'
+import { useInfiniteGraphQL } from '@stump/client'
+import { Input } from '@stump/components'
+import { BookCardFragment, graphql } from '@stump/graphql'
+import { useState } from 'react'
+import { useDebouncedValue } from 'rooks'
 
-import useIsInView from '@/hooks/useIsInView'
-
-import { FilterToolBar, useFilterContext } from '../filters'
-import Pagination from '../Pagination'
-import BookGrid from './BookGrid'
+import { VirtualizedCardGrid } from '../container/DynamicCardGrid'
+import Spinner from '../Spinner'
+import BookCard from './BookCard'
 
 type Props = {
-	page: number
-	page_size?: number
-	setPage: (page: number) => void
-	onBookSelect?: (book: Media) => void
-	showFilters?: boolean
+	onBookSelect?: (book: BookCardFragment) => void
 }
 
 // TODO(bookclub): Refactor this component
+
+const query = graphql(`
+	query BookSearchOverlay($pagination: Pagination, $filter: MediaFilterInput!) {
+		media(pagination: $pagination, filter: $filter) {
+			nodes {
+				id
+				...BookCard
+			}
+			pageInfo {
+				__typename
+				... on CursorPaginationInfo {
+					currentCursor
+					nextCursor
+					limit
+				}
+			}
+		}
+	}
+`)
 
 /**
  *  A component that renders a paginated grid of books with a search bar and (optionally)
  *  a filter slide over. Must be used within a `FilterProvider`.
  */
-export default function BookSearch({ page, page_size, setPage, onBookSelect, showFilters }: Props) {
-	const { filters } = useFilterContext()
+export default function BookSearch({ onBookSelect }: Props) {
+	const [search, setSearch] = useState('')
+	const [debouncedValue] = useDebouncedValue(search, 500)
 
-	const params = useMemo(
-		() => ({
-			page,
-			page_size,
-			params: filters,
-		}),
-		[page, page_size, filters],
-	)
-	const {
-		isLoading,
-		isRefetching,
-		media,
-		pageData: { current_page, total_pages } = {},
-	} = usePagedMediaQuery(params)
-	const { prefetch } = usePrefetchMediaPaged()
-
-	const differentSearch = usePreviousIsDifferent(filters?.search as string)
-	useEffect(() => {
-		if (differentSearch) {
-			setPage(1)
-		}
-	}, [differentSearch, setPage])
-
-	const [containerRef, isInView] = useIsInView<HTMLDivElement | null>()
-	const isOnFirstPage = current_page === 1
-	// TODO: detect if going from page > 1 to page = 1 and scroll to top
-	useEffect(() => {
-		if (!isInView && !isOnFirstPage) {
-			containerRef.current?.scrollIntoView()
-		}
-	}, [current_page, isOnFirstPage])
-
-	const hasStuff = total_pages !== undefined && current_page !== undefined && total_pages > 0
-	const hasFilters = Object.keys(filters || {}).length > 0
-
-	const handlePrefetchPage = useCallback(
-		(page: number) => {
-			prefetch({
-				...params,
-				page,
-			})
+	const { data, isLoading, fetchNextPage } = useInfiniteGraphQL(
+		query,
+		['bookOverlay', debouncedValue],
+		{
+			filter: {
+				_or: [
+					{
+						name: {
+							like: `%${debouncedValue}%`,
+						},
+						metadata: {
+							title: {
+								like: `%${debouncedValue}%`,
+							},
+						},
+					},
+				],
+			},
 		},
-		[prefetch, params],
+		{
+			enabled: !!debouncedValue,
+		},
 	)
+
+	const books = data?.pages.flatMap((page) => page.media.nodes) || []
 
 	return (
-		<>
-			<section ref={containerRef} id="grid-top-indicator" className="h-0" />
-
-			<FilterToolBar
-				isRefetching={isRefetching}
-				searchPlaceholder="Search books by name or description."
-				{...(showFilters ? { entity: 'media', orderBy: true } : {})}
+		<div className="flex flex-1 flex-col gap-y-4">
+			<Input
+				placeholder="Search for a book..."
+				value={search}
+				onChange={(e) => setSearch(e.target.value)}
 			/>
 
-			<div className="flex w-full flex-col space-y-6 pb-[64px] pt-4 md:pb-0">
-				{hasStuff && (
-					<Pagination
-						pages={total_pages}
-						currentPage={current_page}
-						onChangePage={(page) => setPage(page)}
-						onPrefetchPage={handlePrefetchPage}
+			{isLoading && (
+				<div className="flex flex-1 items-center justify-center">
+					<Spinner />
+				</div>
+			)}
+
+			<VirtualizedCardGrid
+				count={books.length}
+				renderItem={(index) => (
+					<BookCard
+						key={books[index]!.id}
+						fragment={books[index]!}
+						onSelect={() => onBookSelect?.(books[index]! as BookCardFragment)}
 					/>
 				)}
-				<BookGrid
-					isLoading={isLoading}
-					books={media}
-					hasFilters={hasFilters}
-					onSelect={onBookSelect}
-				/>
-				{hasStuff && (
-					<Pagination
-						position="bottom"
-						pages={total_pages}
-						currentPage={current_page}
-						onChangePage={(page) => setPage(page)}
-						onPrefetchPage={handlePrefetchPage}
-					/>
-				)}
-			</div>
-		</>
+				onEndReached={fetchNextPage}
+			/>
+		</div>
 	)
 }

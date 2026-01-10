@@ -1,5 +1,6 @@
+import { FilterableArrangementEntityLink } from '@stump/graphql'
+
 export type EntityOptionProps = {
-	showCreate?: boolean
-	showLinkToAll?: boolean
+	links?: Array<FilterableArrangementEntityLink>
 	width?: number
 }

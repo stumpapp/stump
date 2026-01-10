@@ -1,11 +1,10 @@
-import { Alert, CheckBox, Heading, Text } from '@stump/components'
+import { Alert, AlertDescription, CheckBox, Heading, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import { useEffect } from 'react'
-import { useFormContext } from 'react-hook-form'
-import { useDebouncedValue } from 'rooks'
+import { useCallback, useMemo } from 'react'
+import { useFormContext, useWatch } from 'react-hook-form'
 
 import { CreateOrUpdateLibrarySchema } from '@/components/library/createOrUpdate'
-import { useLibraryContextSafe } from '@/scenes/library/context'
+import { useLibraryManagementSafe } from '@/scenes/library/tabs/settings/context'
 
 type Props = {
 	/**
@@ -14,56 +13,72 @@ type Props = {
 	onDidChange?: (
 		values: Pick<
 			CreateOrUpdateLibrarySchema,
-			'process_metadata' | 'watch' | 'generate_file_hashes' | 'generate_koreader_hashes'
+			'processMetadata' | 'watch' | 'generateFileHashes' | 'generateKoreaderHashes'
 		>,
 	) => void
 }
 
 export default function ScannerOptInFeatures({ onDidChange }: Props) {
 	const form = useFormContext<CreateOrUpdateLibrarySchema>()
-	const ctx = useLibraryContextSafe()
+	const ctx = useLibraryManagementSafe()
 	const isCreating = !ctx?.library
 
-	const [processMetadata, watch, generateFileHashes, koreaderHashes] = form.watch([
-		'process_metadata',
-		'watch',
-		'generate_file_hashes',
-		'generate_koreader_hashes',
-	])
-	const [debouncedOptions] = useDebouncedValue(
-		{ processMetadata, watch, generateFileHashes, koreaderHashes },
-		1000,
+	const [processMetadata, watch, generateFileHashes, koreaderHashes] = useWatch({
+		control: form.control,
+		name: ['processMetadata', 'watch', 'generateFileHashes', 'generateKoreaderHashes'],
+	})
+
+	const params = useMemo(
+		() => ({
+			processMetadata,
+			watch,
+			generateFileHashes,
+			generateKoreaderHashes: koreaderHashes,
+		}),
+		[processMetadata, watch, generateFileHashes, koreaderHashes],
 	)
 
-	const { t } = useLocaleContext()
-
-	/***
-	 * An effect that triggers the `onDidChange` callback when the form values change.
-	 */
-	useEffect(() => {
-		if (!ctx?.library || !onDidChange) return
-
-		const existingProcessMetadata = ctx.library.config.process_metadata
-		const existingWatch = ctx.library.config.watch
-		const existingHashFiles = ctx.library.config.generate_file_hashes
-		const existingKoreaderHashes = ctx.library.config.generate_koreader_hashes
-		const { processMetadata, watch, generateFileHashes, koreaderHashes } = debouncedOptions
-
-		const didChange =
-			processMetadata !== existingProcessMetadata ||
-			watch !== existingWatch ||
-			generateFileHashes !== existingHashFiles ||
-			koreaderHashes !== existingKoreaderHashes
-
-		if (didChange) {
+	const handleProcessMetadataChange = useCallback(() => {
+		form.setValue('processMetadata', !processMetadata)
+		if (onDidChange) {
 			onDidChange({
-				process_metadata: processMetadata,
-				watch: watch,
-				generate_file_hashes: generateFileHashes,
-				generate_koreader_hashes: koreaderHashes,
+				...params,
+				processMetadata: !processMetadata,
 			})
 		}
-	}, [ctx?.library, debouncedOptions, onDidChange])
+	}, [form, processMetadata, params, onDidChange])
+
+	const handleWatchChange = useCallback(() => {
+		form.setValue('watch', !watch)
+		if (onDidChange) {
+			onDidChange({
+				...params,
+				watch: !watch,
+			})
+		}
+	}, [form, watch, params, onDidChange])
+
+	const handleGenerateFileHashesChange = useCallback(() => {
+		form.setValue('generateFileHashes', !generateFileHashes)
+		if (onDidChange) {
+			onDidChange({
+				...params,
+				generateFileHashes: !generateFileHashes,
+			})
+		}
+	}, [form, generateFileHashes, params, onDidChange])
+
+	const handleGenerateKoreaderHashesChange = useCallback(() => {
+		form.setValue('generateKoreaderHashes', !koreaderHashes)
+		if (onDidChange) {
+			onDidChange({
+				...params,
+				generateKoreaderHashes: !koreaderHashes,
+			})
+		}
+	}, [form, koreaderHashes, params, onDidChange])
+
+	const { t } = useLocaleContext()
 
 	return (
 		<div className="flex flex-col gap-y-6">
@@ -75,19 +90,19 @@ export default function ScannerOptInFeatures({ onDidChange }: Props) {
 			</div>
 
 			{isCreating && (
-				<Alert level="info">
-					<Alert.Content>{t(getKey('section.disclaimer'))}</Alert.Content>
+				<Alert variant="info">
+					<AlertDescription>{t(getKey('section.disclaimer'))}</AlertDescription>
 				</Alert>
 			)}
 
 			<CheckBox
-				id="process_metadata"
+				id="processMetadata"
 				variant="primary"
 				label={t(getKey('processMetadata.label'))}
 				description={t(getKey('processMetadata.description'))}
 				checked={processMetadata}
-				onClick={() => form.setValue('process_metadata', !processMetadata)}
-				{...form.register('process_metadata')}
+				onClick={handleProcessMetadataChange}
+				{...form.register('processMetadata')}
 			/>
 
 			<CheckBox
@@ -96,28 +111,28 @@ export default function ScannerOptInFeatures({ onDidChange }: Props) {
 				label={t(getKey('watch.label'))}
 				description={t(getKey('watch.description'))}
 				checked={watch}
-				onClick={() => form.setValue('watch', !watch)}
+				onClick={handleWatchChange}
 				{...form.register('watch')}
 			/>
 
 			<CheckBox
-				id="generate_file_hashes"
+				id="generateFileHashes"
 				variant="primary"
 				label={t(getKey('generateFileHashes.label'))}
 				description={t(getKey('generateFileHashes.description'))}
 				checked={generateFileHashes}
-				onClick={() => form.setValue('generate_file_hashes', !generateFileHashes)}
-				{...form.register('generate_file_hashes')}
+				onClick={handleGenerateFileHashesChange}
+				{...form.register('generateFileHashes')}
 			/>
 
 			<CheckBox
-				id="generate_koreader_hashes"
+				id="generateKoreaderHashes"
 				variant="primary"
 				label={t(getKey('koreaderHashes.label'))}
 				description={t(getKey('koreaderHashes.description'))}
 				checked={koreaderHashes}
-				onClick={() => form.setValue('generate_koreader_hashes', !koreaderHashes)}
-				{...form.register('generate_koreader_hashes')}
+				onClick={handleGenerateKoreaderHashesChange}
+				{...form.register('generateKoreaderHashes')}
 			/>
 		</div>
 	)

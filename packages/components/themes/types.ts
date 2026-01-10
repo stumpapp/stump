@@ -121,6 +121,13 @@ type Color = Record<(typeof colorVariant)[number], SecondaryVariant & HoverVaria
 	OnBlackVariant
 
 /**
+ * A type for enforcing the structure of a colour used for the scrollbar (used by Wekbit browsers only)
+ */
+type Scrollbar = {
+	thumb: DefaultVariant & HoverVariant
+} & DefaultVariant
+
+/**
  * The primary type which represents the color tokens for the Stump UI. These are translated for use as
  * tailwind classes via tw-colors
  */
@@ -130,4 +137,5 @@ export type StumpTheme = {
 	foreground: Foreground
 	edge: Border
 	fill: Color
+	scrollbar: Scrollbar
 }

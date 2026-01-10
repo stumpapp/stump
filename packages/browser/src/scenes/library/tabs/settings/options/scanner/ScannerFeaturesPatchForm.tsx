@@ -24,26 +24,25 @@ export default function ScannerFeaturesPatchForm() {
 
 	const handleSubmit = useCallback(
 		({
-			process_metadata,
+			processMetadata,
 			watch,
-			generate_file_hashes,
-			generate_koreader_hashes,
+			generateFileHashes,
+			generateKoreaderHashes,
 		}: Pick<
 			CreateOrUpdateLibrarySchema,
-			'process_metadata' | 'watch' | 'generate_file_hashes' | 'generate_koreader_hashes'
+			'processMetadata' | 'watch' | 'generateFileHashes' | 'generateKoreaderHashes'
 		>) => {
 			patch({
 				config: {
-					...library.config,
-					generate_file_hashes,
-					process_metadata,
+					generateFileHashes,
+					processMetadata,
 					watch,
-					generate_koreader_hashes,
+					generateKoreaderHashes,
 				},
-				scan_mode: 'NONE',
+				scanAfterPersist: false,
 			})
 		},
-		[patch, library],
+		[patch],
 	)
 
 	// Note: The underlying sub-form requires a form in the context, so I am wrapping it in one. However, the submit

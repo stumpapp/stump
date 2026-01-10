@@ -1,3 +1,5 @@
+import 'tsx/cjs'
+
 import type { ConfigContext, ExpoConfig } from 'expo/config'
 
 export default ({ config }: ConfigContext): ExpoConfig => {
@@ -15,6 +17,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 		ios: {
 			supportsTablet: true,
 			bundleIdentifier: 'com.stumpapp.stump',
+			associatedDomains: ['webcredentials:www.stumpapp.dev'],
 			icon: {
 				light: './assets/images/ios-light.png',
 				dark: './assets/images/ios-dark.png',
@@ -53,8 +56,35 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 				},
 			],
 			[
+				'expo-asset',
+				{
+					assets: ['./assets/images', './assets/splash'],
+				},
+			],
+			['./plugins/withGradle.ts'],
+			['./plugins/withNetworkSecurityConfig.ts'],
+			[
+				'./plugins/withPods.ts',
+				{
+					pods: [
+						"source 'https://github.com/readium/podspecs'",
+						"source 'https://cdn.cocoapods.org/'",
+
+						"pod 'Minizip', modular_headers: true",
+						"pod 'ReadiumShared', podspec: 'https://raw.githubusercontent.com/readium/swift-toolkit/3.5.0/Support/CocoaPods/ReadiumShared.podspec'",
+						"pod 'ReadiumStreamer', podspec: 'https://raw.githubusercontent.com/readium/swift-toolkit/3.5.0/Support/CocoaPods/ReadiumStreamer.podspec'",
+						"pod 'ReadiumNavigator', podspec: 'https://raw.githubusercontent.com/readium/swift-toolkit/3.5.0/Support/CocoaPods/ReadiumNavigator.podspec'",
+						"pod 'ReadiumAdapterGCDWebServer', podspec: 'https://raw.githubusercontent.com/readium/swift-toolkit/3.5.0/Support/CocoaPods/ReadiumAdapterGCDWebServer.podspec'",
+						"pod 'ReadiumOPDS', podspec: 'https://raw.githubusercontent.com/readium/swift-toolkit/3.5.0/Support/CocoaPods/ReadiumOPDS.podspec'",
+						"pod 'ReadiumInternal', podspec: 'https://raw.githubusercontent.com/readium/swift-toolkit/3.5.0/Support/CocoaPods/ReadiumInternal.podspec'",
+						"pod 'ReadiumGCDWebServer', podspec: 'https://raw.githubusercontent.com/readium/GCDWebServer/4.0.0/GCDWebServer.podspec', modular_headers: true",
+					],
+				},
+			],
+			[
 				'expo-font',
 				{
+					// TODO: Manually define font-family in config to make access easier
 					fonts: [
 						'assets/fonts/Atkinson-Hyperlegible-Bold.ttf',
 						'assets/fonts/Atkinson-Hyperlegible-BoldItalic.ttf',
@@ -82,6 +112,11 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 						usesCleartextTraffic: true,
 						compileSdkVersion: 35,
 						targetSdkVersion: 35,
+						// Note: I've needed this since expo@^54.0.13
+						gradleProperties: {
+							'org.gradle.jvmargs':
+								'-Xmx4096m -XX:MaxMetaspaceSize=1024m -XX:+HeapDumpOnOutOfMemoryError',
+						},
 					},
 				},
 			],
@@ -97,6 +132,24 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 					},
 				},
 			],
+			[
+				'@sentry/react-native/expo',
+				{
+					url: 'https://app.glitchtip.com/',
+					project: 'stump-expo',
+					organization: 'stumpapp',
+				},
+			],
+			// TODO(expo-54): Figure out if this is still needed
+			// [
+			// 	'react-native-edge-to-edge',
+			// 	{
+			// 		android: {
+			// 			parentTheme: 'Default',
+			// 			enforceNavigationBarContrast: false,
+			// 		},
+			// 	},
+			// ],
 		],
 		owner: 'stumpapp',
 		experiments: {

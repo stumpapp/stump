@@ -1,3 +1,7 @@
 #!/bin/sh
 
 npx lint-staged
+# Note: In the past, some folks have asked to limit the number of Rust checks
+# in the pre-commit hook. This is because it is a little bit of a barrier to folks
+# who are more familiar with JS tooling. So I've commented this out for now.
+# cargo dump-schema -- --check

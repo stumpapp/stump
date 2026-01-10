@@ -1,10 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useUpdateUser } from '@stump/client'
+import { useGraphQLMutation } from '@stump/client'
 import { Button, Form, Input, Text } from '@stump/components'
+import { graphql } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { isUrl } from '@stump/sdk'
 import { useForm } from 'react-hook-form'
-import { toast } from 'react-hot-toast'
+import { toast } from 'sonner'
 import { z } from 'zod'
 
 import { useUser } from '@/stores'
@@ -13,10 +14,18 @@ import AvatarPicker from './AvatarPicker'
 
 // TODO(testing): extract schema and test components individually
 
+const mutation = graphql(`
+	mutation UpdateUserProfileForm($input: UpdateUserInput!) {
+		updateViewer(input: $input) {
+			id
+			username
+			avatarUrl
+		}
+	}
+`)
+
 export default function ProfileForm() {
 	const { t } = useLocaleContext()
-	const { updateAsync } = useUpdateUser()
-
 	const { user, setUser } = useUser()
 
 	const schema = z.object({
@@ -40,7 +49,7 @@ export default function ProfileForm() {
 
 	const form = useForm<Schema>({
 		defaultValues: {
-			avatarUrl: user!.avatar_url,
+			avatarUrl: user!.avatarUrl,
 			username: user!.username,
 		},
 		mode: 'onSubmit',
@@ -48,13 +57,32 @@ export default function ProfileForm() {
 	})
 
 	const [avatarUrl, newUsername, newPassword] = form.watch(['avatarUrl', 'username', 'password'], {
-		avatarUrl: user?.avatar_url,
+		avatarUrl: user?.avatarUrl,
 		username: user?.username,
 	})
 
 	const isChangingPassword = !!newPassword
 	const hasChanges =
-		avatarUrl !== user?.avatar_url || newUsername !== user?.username || isChangingPassword
+		!!avatarUrl !== !!user?.avatarUrl || newUsername !== user?.username || isChangingPassword
+
+	const { mutate } = useGraphQLMutation(mutation, {
+		onSuccess: ({ updateViewer: updatedUser }) => {
+			if (!user) return
+			const mergedUser = {
+				...user,
+				...updatedUser,
+			}
+			setUser(mergedUser)
+			form.reset({
+				avatarUrl: user.avatarUrl,
+				...mergedUser,
+			})
+		},
+		onError: (error) => {
+			console.error(error)
+			toast.error(t('settingsScene.app/account.sections.account.errors.updateFailed'))
+		},
+	})
 
 	const handleImageChange = (url?: string) => {
 		form.setValue('avatarUrl', url, { shouldValidate: true })
@@ -63,29 +91,16 @@ export default function ProfileForm() {
 	const handleSubmit = async (values: Schema) => {
 		if (!hasChanges || !user) return
 
-		try {
-			await updateAsync(
-				{
-					...user,
-					age_restriction: user.age_restriction || null,
-					avatar_url: values.avatarUrl || null,
-					password: values.password || null,
-					username: values.username,
-				},
-				{
-					onSuccess: (user) => {
-						setUser(user)
-						form.reset({
-							avatarUrl: user.avatar_url,
-							...user,
-						})
-					},
-				},
-			)
-		} catch (error) {
-			console.error(error)
-			toast.error(t('settingsScene.app/account.sections.account.errors.updateFailed'))
-		}
+		mutate({
+			input: {
+				username: values.username,
+				avatarUrl: values.avatarUrl,
+				password: values.password || undefined, // undefined -> no change, null or "" -> no password :(
+				permissions: user.permissions,
+				ageRestriction: user.ageRestriction || null,
+				maxSessionsAllowed: user.maxSessionsAllowed,
+			},
+		})
 	}
 
 	return (
@@ -111,7 +126,12 @@ export default function ProfileForm() {
 					/>
 
 					<div className="flex w-full flex-col items-center gap-4 md:flex-row">
-						<Button variant="primary" type="submit" className="w-full md:w-[unset]">
+						<Button
+							variant="primary"
+							type="submit"
+							className="w-full md:w-[unset]"
+							disabled={!hasChanges}
+						>
 							{t('settingsScene.app/account.sections.account.buttons.confirm')}
 						</Button>
 

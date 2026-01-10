@@ -1,8 +1,7 @@
-import { useDirectoryListing, useSDK } from '@stump/client'
-import { DirectoryListingFile } from '@stump/sdk'
+import { useDirectoryListing, UseDirectoryListingFile, useSDK } from '@stump/client'
 import { useCallback, useState } from 'react'
-import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router'
+import { toast } from 'sonner'
 
 import paths from '@/paths'
 
@@ -36,13 +35,12 @@ export default function FileExplorerProvider({ rootPath, ...ctx }: Props) {
 		canLoadMore,
 		loadMore,
 	} = useDirectoryListing({
-		enabled: !!rootPath,
 		enforcedRoot: rootPath,
 		initialPath: rootPath,
 	})
 
-	const handleSelect = async (entry: DirectoryListingFile) => {
-		if (entry.is_directory) {
+	const handleSelect = async (entry: UseDirectoryListingFile) => {
+		if (entry.isDirectory) {
 			setPath(entry.path)
 		} else {
 			try {

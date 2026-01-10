@@ -1,12 +1,13 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Form } from '@stump/components'
-import { FieldValues, useForm } from 'react-hook-form'
+import { SeriesFilterInput } from '@stump/graphql'
+import { useMemo } from 'react'
+import { useForm } from 'react-hook-form'
 import z from 'zod'
 
-import { useFilterContext } from '..'
+import { useSeriesFilterContext } from '../context'
 import AgeRatingFilter from './AgeRatingFilter'
 import GenericFilterMultiselect from './GenericFilterMultiselect'
-import { removeEmpty } from './utils'
 
 const DEFAULT_STATUS_OPTIONS = [
 	{
@@ -22,12 +23,12 @@ const DEFAULT_STATUS_OPTIONS = [
 const schema = z.object({
 	metadata: z
 		.object({
-			age_rating: z
+			ageRating: z
 				.number()
 				.optional()
 				.nullable()
 				.refine((val) => val == null || (val >= 0 && val <= 18)),
-			meta_type: z.array(z.string()).optional(),
+			metaType: z.array(z.string()).optional(),
 			status: z.array(z.string()).optional(),
 		})
 		.optional(),
@@ -35,15 +36,22 @@ const schema = z.object({
 export type SeriesFilterFormSchema = z.infer<typeof schema>
 
 export default function SeriesFilterForm() {
-	const { filters, setFilters } = useFilterContext()
+	const { filters, setFilters } = useSeriesFilterContext()
+
+	const defaultValues = useMemo(
+		() =>
+			({
+				metadata: {
+					ageRating: filters?.metadata?.ageRating?.gte ?? null,
+					metaType: filters?.metadata?.metaType?.likeAnyOf ?? [],
+					status: filters?.metadata?.status?.likeAnyOf ?? [],
+				},
+			}) satisfies SeriesFilterFormSchema,
+		[filters],
+	)
 
 	const form = useForm({
-		defaultValues: {
-			metadata: {
-				...((filters?.metadata as Record<string, string[]>) || {}),
-				age_rating: (filters?.metadata as Record<string, unknown>)?.age_rating ?? null,
-			},
-		},
+		defaultValues,
 		resolver: zodResolver(schema),
 	})
 
@@ -52,12 +60,12 @@ export default function SeriesFilterForm() {
 	 * values with the existing filters and sets the new filters.
 	 * @param values The values from the form.
 	 */
-	const handleSubmit = (values: FieldValues) => {
-		const adjustedValues = removeEmpty(values)
+	const handleSubmit = (values: SeriesFilterFormSchema) => {
+		const adjustedValues = intoGraphql(values)
 		const merged = {
 			...filters,
 			...adjustedValues,
-			metadata: { ...(filters?.metadata || {}), ...(adjustedValues?.metadata || {}) },
+			metadata: { ...(filters?.metadata || {}), ...adjustedValues.metadata },
 		}
 		setFilters(merged)
 	}
@@ -79,3 +87,24 @@ export default function SeriesFilterForm() {
 		</Form>
 	)
 }
+
+const intoGraphql = (values: SeriesFilterFormSchema) =>
+	({
+		metadata: {
+			ageRating: values.metadata?.ageRating
+				? {
+						gte: values.metadata.ageRating,
+					}
+				: undefined,
+			metaType: values.metadata?.metaType
+				? {
+						likeAnyOf: values.metadata.metaType,
+					}
+				: undefined,
+			status: values.metadata?.status
+				? {
+						likeAnyOf: values.metadata.status,
+					}
+				: undefined,
+		},
+	}) as SeriesFilterInput

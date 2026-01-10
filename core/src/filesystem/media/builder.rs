@@ -1,32 +1,56 @@
 use std::path::{Path, PathBuf};
 
-use prisma_client_rust::chrono::{DateTime, FixedOffset, Utc};
+use chrono::{DateTime, FixedOffset, Utc};
+use models::entity::{library_config, media, media_metadata};
+use sea_orm::Set;
+use uuid::Uuid;
 
 use crate::{
 	config::StumpConfig,
-	db::entity::{LibraryConfig, Media, MediaMetadata, Series},
 	filesystem::{
-		process,
+		media::process,
 		scanner::{CustomVisit, CustomVisitResult},
-		FileParts, PathUtils, SeriesJson,
+		FileParts, PathUtils,
 	},
-	CoreError, CoreResult,
+	CoreResult,
 };
 
-use super::{generate_hashes, process_metadata, ProcessedFileHashes};
+use super::{
+	generate_hashes, metadata::ProcessedMediaMetadata, process_metadata,
+	ProcessedFileHashes,
+};
 
 pub struct MediaBuilder {
 	path: PathBuf,
 	series_id: String,
-	library_config: LibraryConfig,
+	library_config: library_config::Model,
 	config: StumpConfig,
+}
+
+#[derive(Debug, Clone)]
+pub struct BuiltMedia {
+	pub media: media::ActiveModel,
+	pub metadata: Option<media_metadata::ActiveModel>,
+}
+
+impl BuiltMedia {
+	#[tracing::instrument(skip(self))]
+	pub fn path(&self) -> Option<String> {
+		match self.media.path.clone().into_value() {
+			Some(path) => Some(path.to_string()),
+			_ => {
+				tracing::warn!(result = ?self, "Failed to get path from constructed media");
+				None
+			},
+		}
+	}
 }
 
 impl MediaBuilder {
 	pub fn new(
 		path: &Path,
 		series_id: &str,
-		library_config: LibraryConfig,
+		library_config: library_config::Model,
 		config: &StumpConfig,
 	) -> Self {
 		Self {
@@ -37,16 +61,22 @@ impl MediaBuilder {
 		}
 	}
 
-	pub fn rebuild(self, media: &Media) -> CoreResult<Media> {
+	pub fn rebuild(self, media: &media::ModelWithMetadata) -> CoreResult<BuiltMedia> {
 		let generated = self.build()?;
-		Ok(Media {
-			id: media.id.clone(),
-			..generated
+		Ok(BuiltMedia {
+			media: media::ActiveModel {
+				id: Set(media.media.id.clone()),
+				..generated.media
+			},
+			metadata: generated.metadata.map(|meta| media_metadata::ActiveModel {
+				media_id: Set(Some(media.media.id.clone())),
+				..meta
+			}),
 		})
 	}
 
-	pub fn build(self) -> CoreResult<Media> {
-		let mut processed_entry =
+	pub fn build(self) -> CoreResult<BuiltMedia> {
+		let processed_entry =
 			process(&self.path, self.library_config.into(), &self.config)?;
 
 		tracing::trace!(?processed_entry, "Processed entry");
@@ -55,8 +85,8 @@ impl MediaBuilder {
 		let path = pathbuf.as_path();
 
 		let FileParts {
-			file_name,
 			extension,
+			file_stem,
 			..
 		} = path.file_parts();
 		let path_str = path.to_str().unwrap_or_default().to_string();
@@ -72,8 +102,11 @@ impl MediaBuilder {
 			0
 		});
 
+		let id = Uuid::new_v4().to_string();
 		let pages = processed_entry.pages;
-		if let Some(ref mut metadata) = processed_entry.metadata {
+		let mut resolved_metadata = None;
+
+		if let Some(mut metadata) = processed_entry.metadata {
 			let conflicting_page_counts =
 				metadata.page_count.is_some_and(|count| count != pages);
 			if conflicting_page_counts {
@@ -84,20 +117,30 @@ impl MediaBuilder {
 				);
 				metadata.page_count = Some(pages);
 			}
+
+			resolved_metadata = Some(media_metadata::ActiveModel {
+				media_id: Set(Some(id.clone())),
+				..metadata.into_active_model()
+			});
 		}
 
-		Ok(Media {
-			name: file_name,
-			size,
-			extension,
-			pages: processed_entry.pages,
-			hash: processed_entry.hash,
-			koreader_hash: processed_entry.koreader_hash,
-			path: path_str,
-			series_id: self.series_id,
-			metadata: processed_entry.metadata,
-			modified_at: last_modified_at.map(|dt| dt.to_rfc3339()),
+		let media = media::ActiveModel {
+			id: Set(id),
+			name: Set(file_stem),
+			size: Set(size),
+			extension: Set(extension),
+			pages: Set(pages),
+			hash: Set(processed_entry.hash),
+			koreader_hash: Set(processed_entry.koreader_hash),
+			path: Set(path_str),
+			series_id: Set(Some(self.series_id)),
+			modified_at: Set(last_modified_at),
 			..Default::default()
+		};
+
+		Ok(BuiltMedia {
+			media,
+			metadata: resolved_metadata,
 		})
 	}
 
@@ -108,7 +151,7 @@ impl MediaBuilder {
 		)?)
 	}
 
-	pub fn regen_meta(&self) -> CoreResult<Option<MediaMetadata>> {
+	pub fn regen_meta(&self) -> CoreResult<Option<ProcessedMediaMetadata>> {
 		Ok(process_metadata(self.path.clone())?)
 	}
 
@@ -124,50 +167,14 @@ impl MediaBuilder {
 	}
 }
 
-pub struct SeriesBuilder {
-	path: PathBuf,
-	library_id: String,
-}
-
-impl SeriesBuilder {
-	pub fn new(path: &Path, library_id: &str) -> Self {
-		Self {
-			path: path.to_path_buf(),
-			library_id: library_id.to_string(),
-		}
-	}
-
-	pub fn build(self) -> CoreResult<Series> {
-		let path = self.path.as_path();
-
-		let file_name = path
-			.file_name()
-			.and_then(|file_name| file_name.to_str().map(String::from))
-			.ok_or(CoreError::InternalError(
-				"Could not convert series file name to string".to_string(),
-			))?;
-		let path_str =
-			path.to_str()
-				.map(String::from)
-				.ok_or(CoreError::InternalError(
-					"Could not convert series path to string".to_string(),
-				))?;
-		let metadata = SeriesJson::from_folder(path).map(|json| json.metadata).ok();
-
-		tracing::debug!(file_name, path_str, ?metadata, "Parsed series information");
-
-		Ok(Series {
-			path: path_str,
-			name: file_name,
-			library_id: self.library_id,
-			metadata,
-			..Default::default()
-		})
-	}
-}
-
 #[cfg(test)]
 mod tests {
+	use models::shared::enums::{
+		LibraryPattern, LibraryViewMode, ReadingDirection, ReadingImageScaleFit,
+		ReadingMode,
+	};
+	use sea_orm::ActiveValue;
+
 	use super::*;
 	use crate::filesystem::media::tests::{
 		get_test_cbz_path, get_test_epub_path, get_test_pdf_path, get_test_rar_path,
@@ -179,48 +186,48 @@ mod tests {
 		// Test with zip
 		let media = build_media_test_helper(get_test_zip_path());
 		assert!(media.is_ok());
-		let media = media.unwrap();
-		assert_eq!(media.extension, "zip");
+		let media = media.unwrap().media;
+		assert_eq!(media.extension, ActiveValue::Set("zip".to_string()));
 	}
 
 	#[test]
 	fn test_build_media_cbz() {
 		let media = build_media_test_helper(get_test_cbz_path());
 		assert!(media.is_ok());
-		let media = media.unwrap();
-		assert_eq!(media.extension, "cbz");
+		let media = media.unwrap().media;
+		assert_eq!(media.extension, ActiveValue::Set("cbz".to_string()));
 	}
 
 	#[test]
 	fn test_build_media_rar() {
 		let media = build_media_test_helper(get_test_rar_path());
 		assert!(media.is_ok());
-		let media = media.unwrap();
-		assert_eq!(media.extension, "rar");
+		let media = media.unwrap().media;
+		assert_eq!(media.extension, ActiveValue::Set("rar".to_string()));
 	}
 
 	#[test]
 	fn test_build_media_epub() {
 		let media = build_media_test_helper(get_test_epub_path());
 		assert!(media.is_ok());
-		let media = media.unwrap();
-		assert_eq!(media.extension, "epub");
+		let media = media.unwrap().media;
+		assert_eq!(media.extension, ActiveValue::Set("epub".to_string()));
 	}
 
 	#[test]
 	fn test_build_media_pdf() {
 		let media = build_media_test_helper(get_test_pdf_path());
 		assert!(media.is_ok());
-		let media = media.unwrap();
-		assert_eq!(media.extension, "pdf");
+		let media = media.unwrap().media;
+		assert_eq!(media.extension, ActiveValue::Set("pdf".to_string()));
 	}
 
-	fn build_media_test_helper(path: String) -> Result<Media, CoreError> {
+	fn build_media_test_helper(path: String) -> CoreResult<BuiltMedia> {
 		let path = Path::new(&path);
-		let library_config = LibraryConfig {
+		let library_config = library_config::Model {
 			convert_rar_to_zip: false,
 			hard_delete_conversions: false,
-			..Default::default()
+			..library_config()
 		};
 		let series_id = "series_id";
 
@@ -231,9 +238,9 @@ mod tests {
 	fn test_regen_hashes() {
 		let path = get_test_zip_path();
 		let path = Path::new(&path);
-		let library_config = LibraryConfig {
+		let library_config = library_config::Model {
 			generate_file_hashes: true,
-			..Default::default()
+			..library_config()
 		};
 		let series_id = "series_id";
 
@@ -242,5 +249,27 @@ mod tests {
 		let hashes = builder.regen_hashes();
 		assert!(hashes.is_ok());
 		assert!(hashes.unwrap().hash.is_some());
+	}
+
+	fn library_config() -> library_config::Model {
+		library_config::Model {
+			id: 1,
+			convert_rar_to_zip: false,
+			generate_file_hashes: false,
+			default_reading_dir: ReadingDirection::Ltr,
+			default_reading_image_scale_fit: ReadingImageScaleFit::Auto,
+			default_reading_mode: ReadingMode::Paged,
+			generate_koreader_hashes: false,
+			hard_delete_conversions: false,
+			ignore_rules: None,
+			library_id: Some("library_id".to_string()),
+			library_pattern: LibraryPattern::SeriesBased,
+			process_metadata: true,
+			thumbnail_config: None,
+			process_thumbnail_colors_even_without_config: false,
+			watch: false,
+			default_library_view_mode: LibraryViewMode::Series,
+			hide_series_view: false,
+		}
 	}
 }

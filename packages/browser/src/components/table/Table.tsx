@@ -35,6 +35,7 @@ export interface TableProps<T = unknown, V = unknown> {
 	emptyRenderer?: () => React.ReactNode
 	isZeroBasedPagination?: boolean
 	cellClassName?: string
+	onPrefetchPage?: (page: number) => void
 }
 
 // TODO: move into components package!
@@ -50,6 +51,7 @@ export default function Table<T, V>({
 	emptyRenderer,
 	isZeroBasedPagination,
 	cellClassName,
+	onPrefetchPage,
 	...props
 }: TableProps<T, V>) {
 	const rootRef = useRef<HTMLDivElement | null>(null)
@@ -62,7 +64,7 @@ export default function Table<T, V>({
 	const [globalFilter, setGlobalFilter] = useState('')
 
 	const {
-		preferences: { enable_hide_scrollbar },
+		preferences: { enableHideScrollbar },
 	} = usePreferences()
 	const { isDarkVariant } = useTheme()
 
@@ -78,7 +80,7 @@ export default function Table<T, V>({
 		const { current: root } = rootRef
 		const { current: viewport } = viewportRef
 
-		if (root && viewport && !enable_hide_scrollbar) {
+		if (root && viewport && !enableHideScrollbar) {
 			initialize({
 				elements: {
 					viewport: viewport,
@@ -86,7 +88,7 @@ export default function Table<T, V>({
 				target: root,
 			})
 		}
-	}, [initialize, enable_hide_scrollbar])
+	}, [initialize, enableHideScrollbar])
 
 	const table = useReactTable({
 		onSortingChange: setSorting,
@@ -155,7 +157,7 @@ export default function Table<T, V>({
 			<div className="relative" ref={rootRef} data-overlayscrollbars-initialize>
 				<div
 					className={cn('divide block max-w-full overflow-y-hidden overflow-x-scroll', {
-						'scrollbar-hide': enable_hide_scrollbar,
+						'scrollbar-hide': enableHideScrollbar,
 					})}
 					ref={viewportRef}
 				>
@@ -277,6 +279,7 @@ export default function Table<T, V>({
 					currentPage={pageIndex + 1}
 					pages={pageCount}
 					onChangePage={handlePageChanged}
+					onPrefetchPage={onPrefetchPage}
 				/>
 			</div>
 		</div>

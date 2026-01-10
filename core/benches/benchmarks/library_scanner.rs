@@ -6,15 +6,19 @@ use std::{
 };
 
 use criterion::{criterion_group, BenchmarkId, Criterion};
+use models::{
+	entity::{job, library, library_config, media, series},
+	shared::enums::{
+		FileStatus, LibraryPattern, ReadingDirection, ReadingImageScaleFit, ReadingMode,
+	},
+};
+use sea_orm::prelude::*;
+use sea_orm::{ActiveValue::Set, DatabaseConnection};
 use stump_core::{
 	config::StumpConfig,
-	db::{
-		create_client_with_url,
-		entity::{Library, LibraryConfig},
-	},
+	database::connect_at,
 	filesystem::scanner::LibraryScanJob,
 	job::{Executor, WorkerCtx, WrappedJob},
-	prisma::{library, library_config, PrismaClient},
 };
 use tempfile::{Builder as TempDirBuilder, TempDir};
 use tokio::{
@@ -27,6 +31,7 @@ use uuid::Uuid;
 struct BenchmarkSize {
 	series_count: usize,
 	media_per_series: usize,
+	sample_count: usize,
 }
 
 impl Display for BenchmarkSize {
@@ -44,24 +49,28 @@ fn full_scan(c: &mut Criterion) {
 		BenchmarkSize {
 			series_count: 10,
 			media_per_series: 10,
+			sample_count: 100,
 		},
 		BenchmarkSize {
 			series_count: 100,
 			media_per_series: 10,
+			sample_count: 100,
 		},
 		BenchmarkSize {
 			series_count: 100,
 			media_per_series: 100,
+			sample_count: 10,
 		},
-		// Note: This benchmark is a time hog, so I have commented it out for now
 		BenchmarkSize {
 			series_count: 100,
 			media_per_series: 1000,
+			sample_count: 10,
 		},
 	];
 
 	let mut group = c.benchmark_group("full_scan");
 	for size in SIZES.iter() {
+		group.sample_size(size.sample_count);
 		group.bench_with_input(BenchmarkId::from_parameter(size), size, |b, size| {
 			let rt = Builder::new_multi_thread().enable_all().build().unwrap();
 			b.to_async(rt).iter_custom(|_| async {
@@ -73,21 +82,18 @@ fn full_scan(c: &mut Criterion) {
 					.await
 					.expect("Failed to set up test");
 
-				let client = test_ctx.worker_ctx.db.clone();
+				let conn = test_ctx.worker_ctx.conn.clone();
 
 				println!("Starting benchmark for {}", size);
 				let start = Instant::now();
 				scan_new_library(test_ctx).await;
 				let elapsed = start.elapsed();
 
-				let _ = safe_validate_counts(
-					&client,
-					size.series_count,
-					size.media_per_series,
-				)
-				.await;
+				let _ =
+					safe_validate_counts(&conn, size.series_count, size.media_per_series)
+						.await;
 
-				clean_up(&client, library, tempdirs).await;
+				clean_up(&conn, library.0, tempdirs).await;
 
 				elapsed
 			});
@@ -97,6 +103,8 @@ fn full_scan(c: &mut Criterion) {
 
 criterion_group!(benches, full_scan);
 
+type LibraryWithConfig = (library::Model, library_config::Model);
+
 struct TestCtx {
 	job: WrappedJob<LibraryScanJob>,
 	worker_ctx: WorkerCtx,
@@ -104,56 +112,61 @@ struct TestCtx {
 
 struct Setup {
 	test_ctx: TestCtx,
-	library: Library,
+	library: LibraryWithConfig,
 	tempdirs: Vec<TempDir>,
 }
 
 async fn create_test_library(
 	series_count: usize,
 	books_per_series: usize,
-) -> Result<(PrismaClient, Library, Vec<TempDir>), Box<dyn std::error::Error>> {
-	let client = create_client_with_url(&format!(
-		"file:{}/prisma/dev.db",
+) -> Result<
+	(DatabaseConnection, LibraryWithConfig, Vec<TempDir>),
+	Box<dyn std::error::Error>,
+> {
+	let conn = connect_at(&format!(
+		"sqlite://{}/benchmark.db?mode=rwc",
 		env!("CARGO_MANIFEST_DIR")
 	))
-	.await;
+	.await?;
 
-	let deleted_libraries = client
-		.library()
-		.delete_many(vec![])
-		.exec()
-		.await
-		.expect("Failed to delete libraries before bench");
+	let deleted_libraries = library::Entity::delete_many()
+		.exec(&conn)
+		.await?
+		.rows_affected;
 	tracing::debug!(?deleted_libraries, "Deleted libraries");
 
 	let library_temp_dir = TempDirBuilder::new().prefix("ROOT").tempdir()?;
 	let library_temp_dir_path = library_temp_dir.path().to_str().unwrap().to_string();
 
-	let library_config = client.library_config().create(vec![]).exec().await?;
-
 	let id = Uuid::new_v4().to_string();
-	let library = client
-		.library()
-		.create(
-			id.clone(),
-			library_temp_dir_path.clone(),
-			library_config::id::equals(library_config.id.clone()),
-			vec![library::id::set(id.clone())],
-		)
-		.exec()
-		.await?;
 
-	let library_config = client
-		.library_config()
-		.update(
-			library_config::id::equals(library_config.id),
-			vec![
-				library_config::library::connect(library::id::equals(library.id.clone())),
-				library_config::library_id::set(Some(library.id.clone())),
-			],
-		)
-		.exec()
-		.await?;
+	let library_config = library_config::ActiveModel {
+		convert_rar_to_zip: Set(false),
+		default_reading_dir: Set(ReadingDirection::Ltr),
+		default_reading_image_scale_fit: Set(ReadingImageScaleFit::Height),
+		default_reading_mode: Set(ReadingMode::Paged),
+		generate_file_hashes: Set(true),
+		generate_koreader_hashes: Set(true),
+		hard_delete_conversions: Set(false),
+		library_id: Set(Some(id.to_string())),
+		library_pattern: Set(LibraryPattern::SeriesBased),
+		watch: Set(false),
+		process_metadata: Set(true),
+		..Default::default()
+	}
+	.insert(&conn)
+	.await?;
+
+	let library = library::ActiveModel {
+		id: Set(id.clone()),
+		name: Set("Benchmark Library".to_string()),
+		path: Set(library_temp_dir_path.clone()),
+		status: Set(FileStatus::Ready),
+		config_id: Set(library_config.id),
+		..Default::default()
+	}
+	.insert(&conn)
+	.await?;
 
 	let data_dir = PathBuf::from(format!("{}/benches/data", env!("CARGO_MANIFEST_DIR")));
 
@@ -189,38 +202,36 @@ async fn create_test_library(
 
 	tracing::info!("Library created!");
 
-	let library = Library {
-		config: LibraryConfig::from(library_config),
-		..Library::from(library)
-	};
-
-	Ok((client, library, temp_dirs))
+	Ok((conn, (library, library_config), temp_dirs))
 }
 
 async fn setup_test(
 	series_count: usize,
 	books_per_series: usize,
 ) -> Result<Setup, Box<dyn std::error::Error>> {
-	let (client, library, tempdirs) =
+	let (conn, library, tempdirs) =
 		create_test_library(series_count, books_per_series).await?;
+
 	let job = WrappedJob::new(LibraryScanJob {
-		id: library.id.clone(),
-		path: library.path.clone(),
-		config: Some(library.config.clone()),
+		id: library.0.id.clone(),
+		path: library.0.path.clone(),
+		config: Some(library.1.clone()),
 		options: Default::default(),
 	});
 
 	let job_id = Uuid::new_v4().to_string();
-	let _db_job = client
-		.job()
-		.create(job_id.clone(), job.name().to_string(), vec![])
-		.exec()
-		.await?;
+	let _db_job = job::ActiveModel {
+		id: Set(job_id.clone()),
+		name: Set(job.name().to_string()),
+		..Default::default()
+	}
+	.insert(&conn)
+	.await?;
 
 	let config_dir = format!("{}/benches/config", env!("CARGO_MANIFEST_DIR"));
 	let config = StumpConfig::new(config_dir);
 	let worker_ctx = WorkerCtx {
-		db: Arc::new(client),
+		conn: Arc::new(conn),
 		config: Arc::new(config),
 		job_id,
 		job_controller_tx: mpsc::unbounded_channel().0,
@@ -239,20 +250,18 @@ async fn setup_test(
 }
 
 async fn safe_validate_counts(
-	client: &PrismaClient,
+	conn: &DatabaseConnection,
 	series_count: usize,
 	books_per_series: usize,
 ) -> bool {
 	let mut passed = true;
 
-	let actual_series_count = client
-		.series()
-		.count(vec![])
-		.exec()
+	let actual_series_count = series::Entity::find()
+		.count(conn)
 		.await
 		.expect("Failed to count series");
 
-	if actual_series_count != series_count as i64 {
+	if actual_series_count != series_count as u64 {
 		println!(
 			"Series count mismatch (actual vs expected): {} != {}",
 			actual_series_count, series_count
@@ -260,14 +269,12 @@ async fn safe_validate_counts(
 		passed = false;
 	}
 
-	let actual_media_count = client
-		.media()
-		.count(vec![])
-		.exec()
+	let actual_media_count = media::Entity::find()
+		.count(conn)
 		.await
 		.expect("Failed to count media");
 
-	if actual_media_count != (series_count * books_per_series) as i64 {
+	if actual_media_count != (series_count * books_per_series) as u64 {
 		println!(
 			"Media count mismatch (actual vs expected): {} != {}. You probably introduced a bug :)",
 			actual_media_count,
@@ -279,15 +286,17 @@ async fn safe_validate_counts(
 	passed
 }
 
-async fn clean_up(client: &PrismaClient, library: Library, tempdirs: Vec<TempDir>) {
-	let deleted_library = client
-		.library()
-		.delete(library::id::equals(library.id))
-		.exec()
+async fn clean_up(
+	conn: &DatabaseConnection,
+	library: library::Model,
+	tempdirs: Vec<TempDir>,
+) {
+	let delete_result = library::Entity::delete_by_id(library.id)
+		.exec(conn)
 		.await
 		.expect("Failed to delete library");
 
-	tracing::debug!(?deleted_library, "Deleted library");
+	tracing::debug!(?delete_result, "Deleted library");
 
 	for tempdir in tempdirs {
 		let _ = tempdir.close();

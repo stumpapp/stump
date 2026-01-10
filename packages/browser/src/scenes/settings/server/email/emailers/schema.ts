@@ -1,4 +1,4 @@
-import { SMTPEmailer } from '@stump/sdk'
+import { EmailerListItemFragment } from '@stump/graphql'
 import { z } from 'zod'
 
 import { FORBIDDEN_ENTITY_NAMES } from '@/utils/form'
@@ -11,8 +11,8 @@ export const createSchema = (
 	isCreating: boolean,
 ) =>
 	z.object({
-		is_primary: z.boolean().default(existingNames.length === 0),
-		max_attachment_size_bytes: z.number().optional().nullable(),
+		isPrimary: z.boolean().default(existingNames.length === 0),
+		maxAttachmentSizeBytes: z.number().optional().nullable(),
 		name: z
 			.string()
 			.min(1)
@@ -23,24 +23,24 @@ export const createSchema = (
 				message: t(`${LOCALE_BASE}.nameIsForbidden`),
 			}),
 		password: isCreating ? z.string().min(1) : z.string().optional(),
-		sender_display_name: z.string().min(1),
-		sender_email: z.string().email(),
-		smtp_host: z.string().min(1),
-		smtp_port: z.number(),
-		tls_enabled: z.boolean().default(false),
+		senderDisplayName: z.string().min(1),
+		senderEmail: z.string().email(),
+		smtpHost: z.string().min(1),
+		smtpPort: z.number(),
+		tlsEnabled: z.boolean().default(false),
 		username: z.string().min(1),
 	})
 export type CreateOrUpdateEmailerSchema = z.infer<ReturnType<typeof createSchema>>
 
-export const formDefaults = (emailer?: SMTPEmailer) => ({
-	is_primary: emailer?.is_primary || true,
-	max_attachment_size_bytes: emailer?.config.max_attachment_size_bytes ?? null,
+export const formDefaults = (emailer?: EmailerListItemFragment) => ({
+	isPrimary: emailer?.isPrimary || true,
+	maxAttachmentSizeBytes: emailer?.maxAttachmentSizeBytes ?? null,
 	name: emailer?.name,
 	password: undefined,
-	sender_display_name: emailer?.config.sender_display_name,
-	sender_email: emailer?.config.sender_email,
-	smtp_host: emailer?.config.smtp_host,
-	smtp_port: emailer?.config.smtp_port,
-	tls_enabled: emailer?.config.tls_enabled || false,
-	username: emailer?.config.username,
+	senderDisplayName: emailer?.senderDisplayName,
+	senderEmail: emailer?.senderEmail,
+	smtpHost: emailer?.smtpHost,
+	smtpPort: emailer?.smtpPort,
+	tlsEnabled: emailer?.tlsEnabled || false,
+	username: emailer?.username,
 })

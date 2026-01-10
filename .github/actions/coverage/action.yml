@@ -6,7 +6,7 @@ inputs:
     description: 'Codecov token'
     required: true
   cache-dependencies:
-    description: 'Whether to cache dependencies. This does not affect the Prisma client cache.'
+    description: 'Whether to cache dependencies'
     required: false
     default: 'true'
 

@@ -14,6 +14,7 @@ export default function TablePagination({
 	pages,
 	currentPage,
 	onChangePage,
+	onPrefetchPage,
 }: TablePaginationProps) {
 	const { innerWidth: screenWidth } = useWindowSize()
 
@@ -41,6 +42,8 @@ export default function TablePagination({
 				variant="ghost"
 				disabled={currentPage <= 1}
 				onClick={() => onChangePage(currentPage - 1)}
+				onMouseEnter={onPrefetchPage ? () => onPrefetchPage(currentPage - 1) : undefined}
+				className="h-5 w-5"
 			>
 				<ArrowLeft className="h-4 w-4" />
 			</Button>
@@ -53,6 +56,7 @@ export default function TablePagination({
 							isActive={page === currentPage}
 							onClick={() => onChangePage(page)}
 							page={page}
+							onPrefetch={onPrefetchPage ? () => onPrefetchPage(page) : undefined}
 						/>
 					)
 				}
@@ -65,7 +69,7 @@ export default function TablePagination({
 						totalPages={pages}
 						onPageChange={onChangePage}
 						trigger={
-							<Button>
+							<Button size="icon" className="h-5 w-5">
 								<MoreHorizontal className="h-4 w-4" />
 							</Button>
 						}
@@ -78,6 +82,8 @@ export default function TablePagination({
 				variant="ghost"
 				disabled={currentPage >= pages}
 				onClick={() => onChangePage(currentPage + 1)}
+				onMouseEnter={onPrefetchPage ? () => onPrefetchPage(currentPage + 1) : undefined}
+				className="h-5 w-5"
 			>
 				<ArrowRight className="h-4 w-4" />
 			</Button>
@@ -89,16 +95,18 @@ interface PaginationNumberProps {
 	page: number
 	isActive: boolean
 	onClick: () => void
+	onPrefetch?: () => void
 }
 
 // TODO: style
-function PaginationNumber({ onClick, page, isActive }: PaginationNumberProps) {
+function PaginationNumber({ onClick, page, isActive, onPrefetch }: PaginationNumberProps) {
 	return (
 		<Button
 			size="icon"
 			onClick={onClick}
 			variant="ghost"
 			className={cn('h-5 w-5', isActive ? '!text-brand' : '')}
+			onMouseEnter={onPrefetch ? onPrefetch : undefined}
 		>
 			{page}
 		</Button>

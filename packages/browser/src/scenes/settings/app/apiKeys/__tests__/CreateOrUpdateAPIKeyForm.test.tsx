@@ -1,5 +1,5 @@
+import { UserPermission } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
-import { UserPermission } from '@stump/sdk'
 import dayjs from 'dayjs'
 
 import { useAppContext } from '@/context'
@@ -29,7 +29,7 @@ describe('CreateOrUpdateAPIKeyForm', () => {
 	describe('schema', () => {
 		const getSchema = () => createSchema(translate)
 		const validBase: CreateOrUpdateAPIKeyFormValues = {
-			explicit_permissions: [],
+			explicitPermissions: [],
 			inherit: false,
 			name: 'test',
 		}
@@ -40,7 +40,7 @@ describe('CreateOrUpdateAPIKeyForm', () => {
 			expect(
 				schema.safeParse({
 					...validBase,
-					expires_at: dayjs().add(1, 'day').toDate(),
+					expiresAt: dayjs().add(1, 'day').toDate(),
 				}).success,
 			).toBe(true)
 		})
@@ -54,14 +54,14 @@ describe('CreateOrUpdateAPIKeyForm', () => {
 			expect(
 				schema.safeParse({
 					...validBase,
-					explicit_permissions: ['invalid-permission'],
+					explicitPermissions: ['invalid-permission'],
 				}).success,
 			).toBe(false)
 			// Valid
 			expect(
 				schema.safeParse({
 					...validBase,
-					explicit_permissions: ['feature:api_keys' satisfies UserPermission],
+					explicitPermissions: [UserPermission.AccessApiKeys],
 				}).success,
 			).toBe(true)
 		})
@@ -71,13 +71,13 @@ describe('CreateOrUpdateAPIKeyForm', () => {
 			expect(
 				schema.safeParse({
 					...validBase,
-					expires_at: dayjs().subtract(1, 'day').toDate(),
+					expiresAt: dayjs().subtract(1, 'day').toDate(),
 				}).success,
 			).toBe(false)
 			expect(
 				schema.safeParse({
 					...validBase,
-					expires_at: new Date(),
+					expiresAt: new Date(),
 				}).success,
 			).toBe(false)
 		})

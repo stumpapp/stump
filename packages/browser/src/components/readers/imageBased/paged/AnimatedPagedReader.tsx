@@ -1,302 +1,237 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-import { motion, useAnimation, useMotionValue, useTransform } from 'framer-motion'
-import { useEffect, useMemo, useRef } from 'react'
+import { cn } from '@stump/components'
+import { forwardRef, memo, useCallback, useRef, useState } from 'react'
+import { browserName, isSafari } from 'react-device-detect'
 import { useHotkeys } from 'react-hotkeys-hook'
-import { useWindowSize } from 'rooks'
+import { Hotkey } from 'react-hotkeys-hook/dist/types'
+import AutoSizer from 'react-virtualized-auto-sizer'
+import { FixedSizeList as List, ListChildComponentProps } from 'react-window'
 
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
-import { PagedReaderProps } from './PagedReader'
+import { useImageBaseReaderContext } from '../context'
+import PageSet from './PageSet'
 
-const RESET_CONTROLS = {
-	x: '0%',
+type Props = {
+	/**
+	 * The initial page to start on, if any
+	 */
+	initialPage?: number
+	/**
+	 * A callback to report when the page has changed
+	 */
+	onPageChanged(page: number): void
 }
 
-const FORWARD_START_ANIMATION = {
-	transition: {
-		duration: 0.35,
-	},
-	x: '-200%',
-}
-
-const TO_CENTER_ANIMATION = {
-	transition: {
-		duration: 0.35,
-	},
-	x: 0,
-}
-
-const BACKWARD_START_ANIMATION = {
-	transition: {
-		duration: 0.35,
-	},
-	x: '200%',
-}
-
-// FIXME: its much better overall, Works very well on portrait images, still a little stuttering
-// when moving between images of different aspect ratios. (e.g. portrait vs landscape). A little
-// funky on mobile still but not nearly as bad.
-// FIXME: animation on mobile without drag looks bad
-// TODO: slow down the animations to test better
-// TODO: kill me, and then make the animations toggleable
-export default function AnimatedPagedReader({
-	currentPage,
-	media,
-	onPageChange,
-	getPageUrl,
-}: PagedReaderProps) {
-	const { innerWidth } = useWindowSize()
-
-	const prevRef = useRef<HTMLImageElement>(null)
-	const nextRef = useRef<HTMLImageElement>(null)
-
-	const x = useMotionValue(0)
-
-	const nextX = useTransform(x, (latest) => {
-		if (nextRef.current) {
-			// Only time this will happen is when no motion is happening, or a swipe right
-			// to go to previous page is happening.
-			if (latest >= 0) {
-				return latest
-			}
-
-			const center = (innerWidth ?? 0) / 2
-			const imageWidth = nextRef.current.width
-
-			const imageCenter = imageWidth / 2
-
-			const centerPosition = center + imageCenter
-
-			// latest will be 0 at the start, and go negative as we swipe
-			// left.
-			if (Math.abs(latest) >= centerPosition) {
-				return -centerPosition
-			}
-		}
-
-		return latest
-	})
-
-	const prevX = useTransform(x, (latest) => {
-		if (prevRef.current) {
-			// Only time this will happen is when no motion is happening, or a swipe left
-			// to go to next page is happening.
-			if (latest <= 0) {
-				return latest
-			}
-
-			const center = (innerWidth ?? 0) / 2
-			const imageWidth = prevRef.current.width
-
-			const imageCenter = imageWidth / 2
-
-			const centerPosition = center + imageCenter
-
-			// latest will be 0 at the start, and go positive as we swipe
-			// left.
-			if (latest >= centerPosition) {
-				return centerPosition
-			}
-		}
-
-		return latest
-	})
-
-	const controls = useAnimation()
-	const nextControls = useAnimation()
-	const prevControls = useAnimation()
-
+function AnimatedPagedReader({ initialPage = 1, onPageChanged }: Props) {
+	const { pageSets, book } = useImageBaseReaderContext()
 	const {
+		bookPreferences: { tapSidesToNavigate },
 		settings: { showToolBar },
 		setSettings,
-	} = useBookPreferences({ book: media })
+	} = useBookPreferences({ book })
 
-	// This is for the hotkeys
-	const currPageRef = useRef(currentPage)
+	const [currentPage, setCurrentPage] = useState(() => initialPage)
+	const [initialIdx] = useState(() => pageSets.findIndex((set) => set.includes(initialPage - 1)))
 
-	useEffect(() => {
-		currPageRef.current = currentPage
-	}, [currentPage])
+	const listRef = useRef<List>(null)
 
-	const imageUrls = useMemo(() => {
-		const urls = []
+	const handleLeftwardPageChange = useCallback(() => {
+		const currentSetIdx = pageSets.findIndex((set) => set.includes(currentPage - 1))
+		const nextSetIdx = currentSetIdx - 1
+		const nextSet = pageSets[nextSetIdx]
+		const endOfNextSet = nextSet?.at(-1)
 
-		// if has previous
-		if (currentPage > 1) {
-			urls.push(getPageUrl(currentPage - 1))
-		} else {
-			urls.push(undefined)
+		// TODO: Add the panning stuff
+		if (!nextSet || endOfNextSet == null) {
+			return
 		}
 
-		urls.push(getPageUrl(currentPage))
+		if (nextSetIdx >= 0 && nextSetIdx < pageSets.length) {
+			const newPage = endOfNextSet + 1
+			setCurrentPage(newPage)
+			onPageChanged?.(newPage)
+			listRef.current?.scrollToItem(nextSetIdx, 'start')
+		}
+	}, [pageSets, currentPage, onPageChanged])
 
-		// if has next
-		if (currentPage < media.pages) {
-			urls.push(getPageUrl(currentPage + 1))
-		} else {
-			urls.push(undefined)
+	const handleRightwardPageChange = useCallback(() => {
+		const currentSetIdx = pageSets.findIndex((set) => set.includes(currentPage - 1))
+
+		const nextSetIdx = currentSetIdx + 1
+		const nextSet = pageSets[nextSetIdx]
+		const startOfNextSet = nextSet?.at(0)
+
+		// TODO: Add the panning stuff
+		if (!nextSet || startOfNextSet == null) {
+			return
 		}
 
-		return urls
-	}, [currentPage])
-
-	function startNextPageAnimation() {
-		Promise.all([
-			controls.start(FORWARD_START_ANIMATION),
-			nextControls.start(TO_CENTER_ANIMATION),
-		]).then(() => {
-			onPageChange(currPageRef.current + 1)
-		})
-	}
-
-	function startPrevPageAnimation() {
-		Promise.all([
-			controls.start(BACKWARD_START_ANIMATION),
-			prevControls.start(TO_CENTER_ANIMATION),
-		]).then(() => {
-			onPageChange(currPageRef.current - 1)
-		})
-	}
-
-	useEffect(() => {
-		controls.set(RESET_CONTROLS)
-		nextControls.set({ left: '100%' })
-		prevControls.set({ right: '100%' })
-	}, [currentPage])
-
-	function handleHotKeyPagination(direction: 'next' | 'prev') {
-		if (direction === 'next' && currPageRef.current < media.pages) {
-			startNextPageAnimation()
-		} else if (direction === 'prev' && currPageRef.current > 1) {
-			startPrevPageAnimation()
+		if (nextSetIdx >= 0 && nextSetIdx < pageSets.length) {
+			const newPage = startOfNextSet + 1
+			setCurrentPage(newPage)
+			onPageChanged?.(newPage)
+			listRef.current?.scrollToItem(nextSetIdx, 'start')
 		}
-	}
+	}, [pageSets, currentPage, onPageChanged])
 
-	useHotkeys('right, left, space, escape', (_, handler) => {
-		const targetKey = handler.keys?.at(0)
-		switch (targetKey) {
-			case 'right':
-				handleHotKeyPagination('next')
-				break
-			case 'left':
-				handleHotKeyPagination('prev')
-				break
-			case 'space':
-				setSettings({ showToolBar: !showToolBar })
-				break
-			case 'escape':
-				setSettings({ showToolBar: false })
-				break
-			default:
-				break
-		}
-	})
+	const navigateToPage = useCallback(
+		(direction: 'left' | 'right') => {
+			if (direction === 'left') {
+				handleLeftwardPageChange()
+			} else {
+				handleRightwardPageChange()
+			}
+		},
+		[handleLeftwardPageChange, handleRightwardPageChange],
+	)
+
+	const hotKeyHandler = useCallback(
+		(hotkey: Hotkey) => {
+			const targetKey = hotkey.keys?.at(0)
+			switch (targetKey) {
+				case 'right':
+					navigateToPage('right')
+					break
+				case 'left':
+					navigateToPage('left')
+					break
+				case 'space':
+					setSettings({
+						showToolBar: !showToolBar,
+					})
+					break
+				case 'escape':
+					setSettings({
+						showToolBar: false,
+					})
+					break
+				default:
+					break
+			}
+		},
+		[navigateToPage, setSettings, showToolBar],
+	)
+
+	useHotkeys('right, left, space, escape', (_, handler) => hotKeyHandler(handler))
+
+	// Side navigation click handlers
+	const handleSideClick = useCallback(
+		(direction: 'left' | 'right') => {
+			navigateToPage(direction)
+		},
+		[navigateToPage],
+	)
 
 	return (
-		<div className="relative flex h-full w-full items-center justify-center">
-			{imageUrls[0] && (
-				<motion.img
-					ref={prevRef}
-					animate={prevControls}
-					transition={{ ease: 'easeOut' }}
-					style={{ x: prevX }}
-					className="absolute max-h-full w-full md:w-auto"
-					src={imageUrls[0]}
-					onError={(err) => {
-						// @ts-expect-error: is oke
-						err.target.src = '/src/favicon.png'
-					}}
-				/>
+		<div className="relative h-full w-full bg-background-surface">
+			{tapSidesToNavigate && (
+				<>
+					<SideBarControl onClick={() => handleSideClick('left')} position="left" />
+					<SideBarControl onClick={() => handleSideClick('right')} position="right" />
+				</>
 			)}
 
-			<motion.img
-				animate={controls}
-				drag="x"
-				dragElastic={1}
-				dragConstraints={{ left: 0, right: 0 }}
-				onDragEnd={(_e, info) => {
-					const { velocity, offset } = info
-
-					if ((velocity.x <= -200 || offset.x <= -300) && currPageRef.current < media.pages) {
-						startNextPageAnimation()
-					} else if ((velocity.x >= 200 || offset.x >= 300) && currPageRef.current > 1) {
-						startPrevPageAnimation()
-					}
-				}}
-				transition={{ ease: 'easeOut' }}
-				style={{ x }}
-				className="absolute z-30 max-h-full w-full md:w-auto"
-				src={imageUrls[1]}
-				onError={(err) => {
-					// @ts-expect-error: is oke
-					err.target.src = '/favicon.png'
-				}}
-				// TODO: figure this out, I can't do this anymore with the drag...
-				// onClick={toggleToolbar}
-			/>
-
-			{imageUrls[2] && (
-				<motion.img
-					ref={nextRef}
-					animate={nextControls}
-					transition={{ ease: 'easeOut' }}
-					style={{ x: nextX }}
-					className="absolute max-h-full w-full md:w-auto"
-					src={imageUrls[2]}
-					onError={(err) => {
-						// @ts-expect-error: is oke
-						err.target.src = '/favicon.png'
+			<div className="h-full w-full">
+				<AutoSizer>
+					{({ height, width }) => {
+						const initialOffset = initialIdx > -1 ? initialIdx * width : 0
+						return (
+							<List
+								ref={listRef}
+								height={height}
+								width={width}
+								layout="horizontal"
+								itemCount={pageSets.length}
+								itemSize={width}
+								itemData={pageSets}
+								overscanCount={5}
+								style={{
+									// Note: This just does NOT work well on Safari. When in Tauri, it shows as WebKit
+									scrollSnapType: isSafari || browserName === 'WebKit' ? undefined : 'x mandatory',
+									scrollBehavior: 'smooth',
+								}}
+								className="overflow-x-auto overflow-y-hidden"
+								initialScrollOffset={initialOffset}
+							>
+								{ItemRenderer}
+							</List>
+						)
 					}}
-				/>
-			)}
+				</AutoSizer>
+			</div>
 		</div>
 	)
 }
 
-// export default function AnimatedPagedReader({
-// 	media,
-// 	currentPage,
-// 	getPageUrl,
-// 	onPageChange,
-// }: PagedReaderProps) {
-// 	const pageCount = media.pages
-// 	// Calculate the indexes of the currently visible pages
-// 	const startIndex = currentPage - 2 >= 1 ? currentPage - 2 : 0
-// 	const endIndex = startIndex + 3 >= pageCount ? pageCount - 1 : startIndex + 3
+export default memo(AnimatedPagedReader)
 
-// 	// Set up motion values for the swipe animation
-// 	const x = useMotionValue(0)
-// 	const pageWidth = useTransform(x, [0, 1], [0, -100 / pageCount])
+const ItemRenderer = forwardRef<HTMLDivElement, ListChildComponentProps>(
+	({ index, style }, ref) => {
+		const { pageSets, getPageUrl, toggleToolbar } = useImageBaseReaderContext()
 
-// 	// Handle swipe navigation
-// 	const handleSwipe = (event, info) => {
-// 		if (info.offset.x > 0 && currentPage > 1) {
-// 			// setCurrentPage(currentPage - 1)
-// 			onPageChange(currentPage - 1)
-// 		} else if (info.offset.x < 0 && currentPage < pageCount) {
-// 			// setCurrentPage(currentPage + 1)
-// 			onPageChange(currentPage + 1)
-// 		}
-// 	}
+		const pageSet = pageSets[index]
 
-// 	return (
-// 		<div className="relative flex h-full w-full items-center justify-center">
-// 			{Array.from({ length: pageCount })
-// 				.slice(startIndex, endIndex + 1)
-// 				.map((_, index) => (
-// 					<motion.img
-// 						className="z-30 max-h-full w-full select-none md:w-auto"
-// 						key={index}
-// 						src={getPageUrl(startIndex + index + 1)}
-// 						alt={`Page ${startIndex + index + 1}`}
-// 						drag="x"
-// 						dragConstraints={{ left: 0, right: 0 }}
-// 						dragElastic={1}
-// 						dragMomentum={false}
-// 						onDragEnd={handleSwipe}
-// 						style={{ x: index === 1 ? x : pageWidth }}
-// 					/>
-// 				))}
-// 		</div>
-// 	)
-// }
+		if (!pageSet) {
+			return <div style={style} />
+		}
+
+		return (
+			<div
+				ref={ref}
+				key={`animated-page-${index}-${pageSet.join('-')}`}
+				style={{
+					...style,
+					scrollSnapAlign: 'start',
+				}}
+				className="flex h-full w-full items-center justify-center"
+			>
+				<ReactWindowPageSetWrapper
+					pageSet={pageSet}
+					getPageUrl={getPageUrl}
+					onPageClick={toggleToolbar}
+				/>
+			</div>
+		)
+	},
+)
+ItemRenderer.displayName = 'ItemRenderer'
+
+type ReactWindowPageSetWrapperProps = {
+	pageSet: number[]
+	getPageUrl: (page: number) => string
+	onPageClick: () => void
+}
+
+/**
+ * A wrapper component that uses the existing PageSet component with react-window.
+ * It takes a pageSet array and renders a PageSet for the first page in the set.
+ */
+const ReactWindowPageSetWrapper = memo(
+	({ pageSet, getPageUrl, onPageClick }: ReactWindowPageSetWrapperProps) => {
+		// Use the first page in the set as the current page for PageSet
+		const currentPage = (pageSet[0] ?? 0) + 1 // Convert from 0-indexed to 1-indexed
+
+		return <PageSet currentPage={currentPage} getPageUrl={getPageUrl} onPageClick={onPageClick} />
+	},
+)
+
+ReactWindowPageSetWrapper.displayName = 'ReactWindowPageSetWrapper'
+
+type SideBarControlProps = {
+	onClick: () => void
+	position: 'left' | 'right'
+}
+
+function SideBarControl({ onClick, position }: SideBarControlProps) {
+	return (
+		<div
+			className={cn(
+				'absolute z-50 h-full w-[15%] border border-transparent transition-all duration-300',
+				'active:border-edge-subtle active:bg-background-surface active:bg-opacity-50',
+				{ 'right-0': position === 'right' },
+				{ 'left-0': position === 'left' },
+			)}
+			onClick={onClick}
+		/>
+	)
+}

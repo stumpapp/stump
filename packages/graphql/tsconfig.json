@@ -1,0 +1,17 @@
+{
+	"extends": "../../tsconfig.json",
+	"compilerOptions": {
+		"composite": true,
+		"jsx": "preserve",
+		"skipLibCheck": true,
+		"emitDeclarationOnly": true,
+		"outDir": "dist",
+		"paths": {
+			"@/*": ["./src/*"]
+		},
+		"module": "NodeNext"
+	},
+	"include": ["src"],
+	"exclude": ["node_modules"],
+	"references": []
+}

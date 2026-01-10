@@ -8,7 +8,7 @@ export const RAW_INPUT_BASE_CLASSES = [
 	'enabled:hover:bg-background-surface bg-transparent focus:bg-transparent',
 	'border-edge-subtle border outline-none',
 	'focus:ring-offset-background focus:outline-none focus:ring-2 focus:ring-edge-brand focus:ring-offset-2 focus:ring-offset-background',
-	'text-foreground-subtle placeholder:text-foreground-muted text-sm',
+	'text-foreground-subtle placeholder:text-foreground-muted text-sm light:placeholder:text-opacity-70',
 	'disabled:cursor-not-allowed disabled:opacity-50',
 ]
 export const RAW_INPUT_SIZE_VARIANTS = {

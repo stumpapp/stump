@@ -1,9 +1,9 @@
+use chrono::Utc;
 use derive_builder::Builder;
-use prisma_client_rust::chrono::Utc;
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
-use super::{books_as_publications, link::OPDSLink};
+use super::{entity::OPDSSeries, link::OPDSLink};
 
 /// Pagination-specific metadata fields for an OPDS collection
 ///
@@ -14,11 +14,11 @@ use super::{books_as_publications, link::OPDSLink};
 #[serde(rename_all = "camelCase")]
 pub struct OPDSPaginationMetadata {
 	/// The total number of items available for the feed
-	number_of_items: Option<i64>,
+	number_of_items: Option<u64>,
 	/// The number of items per page
-	items_per_page: Option<i64>,
+	items_per_page: Option<u64>,
 	/// The current page number, **1-indexed**
-	current_page: Option<i64>,
+	current_page: Option<u64>,
 }
 
 /// This is used to provide additional context for an entry, such as its position within a series.
@@ -52,12 +52,10 @@ pub enum OPDSEntryBelongsTo {
 	Series(OPDSEntryBelongsToEntity),
 }
 
-impl From<(books_as_publications::series::Data, Option<i64>)> for OPDSEntryBelongsTo {
-	fn from(
-		(series, position): (books_as_publications::series::Data, Option<i64>),
-	) -> Self {
+impl From<(OPDSSeries, Option<i64>)> for OPDSEntryBelongsTo {
+	fn from((series, position): (OPDSSeries, Option<i64>)) -> Self {
 		Self::Series(OPDSEntryBelongsToEntity {
-			name: series.name,
+			name: series.metadata.and_then(|m| m.title).unwrap_or(series.name),
 			position,
 			// TODO(OPDS-V2): relative links might not work here which means traits will be largely annoying to work with
 			// I might just need to create a separate pattern for this

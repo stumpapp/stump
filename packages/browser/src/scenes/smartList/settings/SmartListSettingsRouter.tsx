@@ -1,9 +1,8 @@
-import { useUpdateSmartList } from '@stump/client'
-import { CreateOrUpdateSmartList } from '@stump/sdk'
-import { lazy, Suspense, useCallback } from 'react'
+import { lazy, Suspense } from 'react'
 import { Navigate, Route, Routes } from 'react-router'
 
 import { useSmartListContext } from '../context'
+import { useUpdateSmartList } from '../graphql'
 import { SmartListSettingsContext } from './context'
 
 const BasicSettingsScene = lazy(() => import('./basics'))
@@ -13,7 +12,6 @@ const DangerSettingsScene = lazy(() => import('./danger'))
 
 export default function SmartListSettingsRouter() {
 	const { list } = useSmartListContext()
-	const { update } = useUpdateSmartList({ id: list.id })
 
 	// TODO: This is particularly fallible. It would be a lot wiser to eventually just.. y'know, literally
 	// implement a patch endpoint lol. I'm being very lazy but I'll get to it. I'm tired!
@@ -24,19 +22,10 @@ export default function SmartListSettingsRouter() {
 	 * of the payload, and so be careful when calling this function that you transform the filters if they are
 	 * present
 	 */
-	const patch = useCallback(
-		(updates: Partial<CreateOrUpdateSmartList>) => {
-			const payload: CreateOrUpdateSmartList = {
-				...list,
-				...updates,
-			}
-			update(payload)
-		},
-		[update, list],
-	)
+	const { update } = useUpdateSmartList({ id: list.id, list })
 
 	return (
-		<SmartListSettingsContext.Provider value={{ patch }}>
+		<SmartListSettingsContext.Provider value={{ patch: update }}>
 			<Suspense>
 				<Routes>
 					<Route path="" element={<Navigate to="basics" replace />} />

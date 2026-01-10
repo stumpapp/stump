@@ -6,13 +6,11 @@ import { isAxiosError } from 'axios'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useCallback, useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
-import { View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { Image, ScrollView, View } from 'react-native'
 import urlJoin from 'url-join'
 import { z } from 'zod'
 
 import { useActiveServer } from '~/components/activeServer'
-import { Image } from '~/components/Image'
 import { Button, Input, Text } from '~/components/ui'
 
 type Credentials = {
@@ -106,15 +104,8 @@ export default function Screen() {
 	}, [])
 
 	return (
-		<SafeAreaView className="flex-1 bg-background">
+		<ScrollView className="flex-1 bg-background" contentInsetAdjustmentBehavior="automatic">
 			<View className="flex-1 items-center gap-4 bg-background p-6">
-				<View>
-					<Text className="text-center text-2xl font-bold leading-6">Login</Text>
-					<Text className="text-center text-base text-foreground-muted">
-						You need to login to access this server
-					</Text>
-				</View>
-
 				{logoURL && (
 					<View className="w-full items-center justify-center">
 						<Image
@@ -126,7 +117,7 @@ export default function Screen() {
 				)}
 
 				{loginError && (
-					<View className="mb-2 rounded-xl bg-fill-danger-secondary p-2">
+					<View className="squircle mb-2 rounded-xl bg-fill-danger-secondary p-2">
 						<Text className="text-fill-danger">{loginError}</Text>
 					</View>
 				)}
@@ -181,7 +172,7 @@ export default function Screen() {
 					<Text>Login</Text>
 				</Button>
 			</View>
-		</SafeAreaView>
+		</ScrollView>
 	)
 }
 

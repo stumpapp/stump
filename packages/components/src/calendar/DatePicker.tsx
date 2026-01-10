@@ -18,7 +18,7 @@ type DatePickerProps = {
 	onChange: (date?: Date) => void
 	minDate?: Date
 	maxDate?: Date
-	popover?: Pick<React.ComponentProps<typeof PopoverContent>, 'align'>
+	popover?: Pick<React.ComponentProps<typeof PopoverContent>, 'align' | 'portal'>
 }
 
 // TODO: presets
@@ -60,7 +60,7 @@ export function DatePicker({
 					</Button>
 				</div>
 			</PopoverTrigger>
-			<PopoverContent className="w-auto p-0" align={popover?.align}>
+			<PopoverContent className="w-auto p-0" align={popover?.align} portal={popover?.portal}>
 				<Calendar
 					mode="single"
 					selected={selected}

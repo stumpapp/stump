@@ -1,8 +1,12 @@
 import { cn, ProgressBar, Text } from '@stump/components'
 import { Book } from 'lucide-react'
 import { type ComponentPropsWithoutRef, useState } from 'react'
-import { Link, To } from 'react-router-dom'
+import { To } from 'react-router-dom'
 
+import { Link } from '@/context'
+import { usePreferences } from '@/hooks/usePreferences'
+
+import { getDensityTextSize, useGridSizeStore } from '../container/useGridSize'
 import { EntityImage } from './EntityImage'
 
 type ContainerProps = ComponentPropsWithoutRef<'div'> & {
@@ -59,6 +63,9 @@ export default function EntityCard({
 	...props
 }: Props) {
 	const [isImageFailed, setIsImageFailed] = useState(false)
+	const {
+		preferences: { thumbnailRatio },
+	} = usePreferences()
 
 	const Container = href ? Link : Div
 	const containerProps = {
@@ -76,6 +83,8 @@ export default function EntityCard({
 
 	const isFullWidth = typeof fullWidth === 'function' ? fullWidth(isImageFailed) : fullWidth
 
+	const gridDensity = useGridSizeStore((store) => store.density)
+
 	/**
 	 * Renders the title of the card. If the title is a string, it will be truncated to 2 lines
 	 *
@@ -84,7 +93,10 @@ export default function EntityCard({
 	const renderTitle = () => {
 		if (typeof title === 'string') {
 			return (
-				<Text size="sm" className="line-clamp-2 h-[40px] min-w-0 whitespace-normal">
+				<Text
+					size={getDensityTextSize(gridDensity)}
+					className="line-clamp-2 h-[40px] min-w-0 whitespace-normal"
+				>
 					{title}
 				</Text>
 			)
@@ -150,7 +162,7 @@ export default function EntityCard({
 		} else {
 			return (
 				<div className="flex h-full w-full items-center justify-center bg-sidebar">
-					<Book className="h-16 w-16 text-foreground-muted" />
+					<Book className="absolute h-16 w-16 text-foreground-muted" />
 				</div>
 			)
 		}
@@ -170,9 +182,10 @@ export default function EntityCard({
 			)}
 		>
 			<div
-				className={cn('aspect-[2/3] h-full w-full p-0', {
+				className={cn('h-full w-full p-0', {
 					'w-[10rem] sm:w-[10.666rem] md:w-[12rem]': !isFullWidth,
 				})}
+				style={{ aspectRatio: thumbnailRatio }}
 			>
 				{renderImage()}
 			</div>

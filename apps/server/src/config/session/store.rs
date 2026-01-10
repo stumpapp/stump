@@ -1,13 +1,11 @@
-use std::sync::Arc;
+use std::{collections::HashMap, str::FromStr, sync::Arc};
 
 use async_trait::async_trait;
-use prisma_client_rust::chrono::{DateTime, Duration, FixedOffset, Utc};
-use stump_core::{
-	config::StumpConfig,
-	db::entity::User,
-	prisma::{session, user, PrismaClient},
-	Ctx,
-};
+use chrono::{DateTime, Duration, FixedOffset, Utc};
+use models::entity::session;
+use sea_orm::{prelude::*, DatabaseConnection, Set};
+use stump_core::{config::StumpConfig, Ctx};
+use time::OffsetDateTime;
 use tokio::time::MissedTickBehavior;
 use tower_sessions::{
 	session::{Id, Record},
@@ -17,16 +15,16 @@ use tower_sessions::{
 
 use super::{SessionCleanupJob, SESSION_USER_KEY};
 
-// TODO(axum-upgrade): Refactor this store. See https://github.com/maxcountryman/tower-sessions-stores/blob/main/sqlx-store/src/sqlite_store.rs
-// TODO(axum-upgrade): refactor error variants
 #[derive(Debug, thiserror::Error)]
 pub enum SessionError {
+	#[error("{0}")]
+	DbError(#[from] sea_orm::error::DbErr),
 	#[error("Session not found")]
 	NotFound,
-	#[error("{0}")]
-	QueryError(#[from] prisma_client_rust::queries::QueryError),
 	#[error("An error occurred while serializing or deserializing session data: {0}")]
 	SerdeError(#[from] serde_json::Error),
+	#[error("Failed to decode session data")]
+	DecodeFailed,
 }
 
 impl From<SessionError> for session_store::Error {
@@ -35,21 +33,24 @@ impl From<SessionError> for session_store::Error {
 			SessionError::NotFound => {
 				session_store::Error::Backend("Session not found".to_string())
 			},
-			SessionError::QueryError(e) => session_store::Error::Backend(e.to_string()),
+			SessionError::DbError(e) => session_store::Error::Backend(e.to_string()),
 			SessionError::SerdeError(e) => session_store::Error::Decode(e.to_string()),
+			SessionError::DecodeFailed => {
+				session_store::Error::Decode("Failed to decode session data".to_string())
+			},
 		}
 	}
 }
 
 #[derive(Clone, Debug)]
-pub struct PrismaSessionStore {
-	client: Arc<PrismaClient>,
+pub struct StumpSessionStore {
+	conn: Arc<DatabaseConnection>,
 	config: Arc<StumpConfig>,
 }
 
-impl PrismaSessionStore {
-	pub fn new(client: Arc<PrismaClient>, config: Arc<StumpConfig>) -> Self {
-		Self { client, config }
+impl StumpSessionStore {
+	pub fn new(conn: Arc<DatabaseConnection>, config: Arc<StumpConfig>) -> Self {
+		Self { conn, config }
 	}
 
 	pub async fn continuously_delete_expired(
@@ -72,65 +73,50 @@ impl PrismaSessionStore {
 }
 
 #[async_trait]
-impl ExpiredDeletion for PrismaSessionStore {
+impl ExpiredDeletion for StumpSessionStore {
 	#[tracing::instrument(skip(self))]
 	async fn delete_expired(&self) -> session_store::Result<()> {
-		let expired_sessions = self
-			.client
-			.session()
-			.delete_many(vec![session::expiry_time::lt(Utc::now().into())])
-			.exec()
+		let affected_rows = session::Entity::delete_many()
+			.filter(
+				session::Column::ExpiryTime.lt::<DateTimeWithTimeZone>(Utc::now().into()),
+			)
+			.exec(self.conn.as_ref())
 			.await
-			.map_err(SessionError::QueryError)?;
+			.map_err(SessionError::DbError)?
+			.rows_affected;
 
-		tracing::trace!(expired_sessions = ?expired_sessions, "Deleted expired sessions");
+		tracing::trace!(?affected_rows, "Deleted expired sessions");
 
 		Ok(())
 	}
 }
 
 #[async_trait]
-impl SessionStore for PrismaSessionStore {
+impl SessionStore for StumpSessionStore {
 	#[tracing::instrument(skip(self))]
 	async fn save(&self, record: &Record) -> session_store::Result<()> {
 		let expiry_time: DateTime<FixedOffset> =
 			(Utc::now() + Duration::seconds(self.config.session_ttl)).into();
 
-		let session_user = record
+		let user_id = record
 			.data
 			.get(SESSION_USER_KEY)
-			.cloned()
+			.and_then(|v| v.as_str())
 			.ok_or(SessionError::NotFound)?;
-		let session_data =
-			serde_json::to_vec(&record).map_err(SessionError::SerdeError)?;
-		let user = serde_json::from_value::<User>(session_user.clone())
-			.map_err(SessionError::SerdeError)?;
 		let session_id = record.id.to_string();
+		tracing::trace!(session_id, ?user_id, "Saving session");
 
-		tracing::trace!(session_id, ?user, "Saving session");
-
-		let result = self
-			.client
-			.session()
-			.upsert(
-				session::id::equals(session_id.clone()),
-				(
-					expiry_time,
-					session_data.clone(),
-					user::id::equals(user.id.clone()),
-					vec![session::id::set(session_id)],
-				),
-				vec![
-					session::user::connect(user::id::equals(user.id)),
-					session::expiry_time::set(expiry_time),
-					session::data::set(session_data),
-				],
-			)
-			.exec()
+		let active_model = session::ActiveModel {
+			session_id: Set(session_id.clone()),
+			user_id: Set(user_id.to_string()),
+			expiry_time: Set(expiry_time),
+			created_at: Set(DateTimeWithTimeZone::from(Utc::now())),
+			..Default::default()
+		};
+		let _session = active_model
+			.insert(self.conn.as_ref())
 			.await
-			.map_err(SessionError::QueryError)?;
-
-		tracing::trace!(session_id = result.id, "Upserted session");
+			.map_err(SessionError::DbError)?;
 
 		Ok(())
 	}
@@ -139,22 +125,28 @@ impl SessionStore for PrismaSessionStore {
 	async fn load(&self, session_id: &Id) -> session_store::Result<Option<Record>> {
 		tracing::trace!(?session_id, "Loading session");
 
-		let record = self
-			.client
-			.session()
-			.find_first(vec![
-				session::id::equals(session_id.to_string()),
-				session::expiry_time::gt(Utc::now().into()),
-			])
-			.exec()
+		let record = session::Entity::find()
+			.filter(session::Column::SessionId.eq(session_id.to_string()).and(
+				session::Column::ExpiryTime.gt::<DateTimeWithTimeZone>(Utc::now().into()),
+			))
+			.one(self.conn.as_ref())
 			.await
-			.map_err(SessionError::QueryError)?;
+			.map_err(SessionError::DbError)?;
 
 		if let Some(result) = record {
 			tracing::trace!("Found session record");
-			Ok(Some(
-				serde_json::from_slice(&result.data).map_err(SessionError::SerdeError)?,
-			))
+			Ok(Some(Record {
+				id: Id::from_str(&result.session_id)
+					.map_err(|_| SessionError::DecodeFailed)?,
+				data: HashMap::from_iter([(
+					SESSION_USER_KEY.to_string(),
+					result.user_id.into(),
+				)]),
+				expiry_date: OffsetDateTime::from_unix_timestamp(
+					result.expiry_time.timestamp(),
+				)
+				.map_err(|_| SessionError::DecodeFailed)?,
+			}))
 		} else {
 			tracing::trace!(?session_id, "No session found");
 			Ok(None)
@@ -165,15 +157,13 @@ impl SessionStore for PrismaSessionStore {
 	async fn delete(&self, session_id: &Id) -> session_store::Result<()> {
 		tracing::trace!(session_id = ?session_id, "Deleting session");
 
-		let removed_session = self
-			.client
-			.session()
-			.delete(session::id::equals(session_id.to_string()))
-			.exec()
+		let affected_rows = session::Entity::delete_many()
+			.filter(session::Column::SessionId.eq(session_id.to_string()))
+			.exec(self.conn.as_ref())
 			.await
-			.map_err(SessionError::QueryError)?;
-
-		tracing::trace!(removed_session = ?removed_session, "Removed session");
+			.map_err(SessionError::DbError)?
+			.rows_affected;
+		tracing::trace!(affected_rows, "Removed session");
 
 		Ok(())
 	}

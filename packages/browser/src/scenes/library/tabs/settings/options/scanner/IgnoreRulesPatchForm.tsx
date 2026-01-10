@@ -23,13 +23,14 @@ export default function IgnoreRulesPatchForm() {
 	})
 
 	const handleSubmit = useCallback(
-		({ ignore_rules }: CreateOrUpdateLibrarySchema) => {
+		({ ignoreRules }: CreateOrUpdateLibrarySchema) => {
 			patch({
+				// @ts-expect-error: This is fine?
 				config: {
 					...library.config,
-					ignore_rules: ignore_rules?.map(({ glob }) => glob),
+					ignoreRules: ignoreRules?.map(({ glob }) => glob),
 				},
-				scan_mode: 'NONE',
+				scanAfterPersist: false,
 			})
 		},
 		[patch, library],

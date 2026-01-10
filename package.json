@@ -5,13 +5,19 @@
 	"author": "Aaron Leopold <aaronleopold1221@gmail.com>",
 	"license": "SEE README.md",
 	"private": true,
-	"workspaces": [
-		"apps/*",
-		"docs",
-		"packages/*"
-	],
+	"workspaces": {
+		"packages": [
+			"apps/*",
+			"docs",
+			"packages/*"
+		],
+		"nohoist": [
+			"apps/expo"
+		]
+	},
 	"scripts": {
 		"prepare": "husky",
+		"postinstall": "patch-package",
 		"setup": "yarn && yarn web build && cargo codegen",
 		"lint": "lerna run lint --stream --parallel && yarn check-types",
 		"check-types": "lerna run check-types  --stream --parallel",
@@ -24,41 +30,46 @@
 		"docs": "lerna run --scope @stump/docs",
 		"start:desktop": "concurrently -n server,desktop -c green.bold,blue.bold \"cargo run -p stump_server\" \"yarn desktop start\"",
 		"dev:desktop": "concurrently -n server,desktop -c green.bold,blue.bold \"cargo run -p stump_server\" \"yarn desktop dev\"",
-		"dev:web": "concurrently -n server,web -c green.bold,blue.bold \"cargo watch --ignore core/prisma -x run -p stump_server\" \"yarn web dev\"",
-		"dev:expo": "concurrently -n server,expo -c green.bold,blue.bold \"cargo watch --ignore core/prisma -x run -p stump_server\" \"yarn expo dev\"",
-		"prisma-studio": "npx prisma studio --schema core/prisma/schema.prisma",
+		"dev:web": "concurrently -n server,web -c green.bold,blue.bold \"bacon run-server --headless\" \"yarn web dev\"",
+		"dev:expo": "concurrently -n server,expo -c green.bold,blue.bold \"bacon run-server --headless\" \"yarn expo dev\"",
 		"format": "lerna run format --stream --parallel",
 		"nuke": "lerna run nuke",
 		"android": "expo run:android",
 		"ios": "expo run:ios"
 	},
 	"devDependencies": {
-		"@babel/core": "^7.25.8",
-		"@babel/traverse": "^7.25.7",
-		"@eslint/js": "^9.13.0",
-		"@typescript-eslint/eslint-plugin": "^8.10.0",
-		"@typescript-eslint/parser": "^8.10.0",
+		"@0no-co/graphqlsp": "^1.15.1",
+		"@babel/core": "^7.28.5",
+		"@babel/traverse": "^7.28.5",
+		"@eslint/js": "^9.39.1",
+		"@typescript-eslint/eslint-plugin": "^8.48.1",
+		"@typescript-eslint/parser": "^8.48.1",
+		"babel-plugin-react-compiler": "^1.0.0",
 		"concurrently": "^8.2.2",
-		"eslint": "^9.13.0",
-		"eslint-config-prettier": "=9.1.2",
-		"eslint-plugin-prettier": "^5.2.1",
-		"eslint-plugin-react": "^7.37.1",
-		"eslint-plugin-react-hooks": "^5.0.0",
+		"eslint": "^9.39.1",
+		"eslint-config-prettier": "10.1.8",
+		"eslint-plugin-prettier": "^5.5.4",
+		"eslint-plugin-react": "^7.37.5",
+		"eslint-plugin-react-compiler": "^19.1.0-rc.2",
+		"eslint-plugin-react-hooks": "^7.0.1",
 		"eslint-plugin-simple-import-sort": "^12.1.1",
 		"eslint-plugin-sort-keys-fix": "^1.1.2",
-		"globals": "^15.11.0",
-		"husky": "^9.1.6",
-		"lerna": "^8.1.8",
+		"globals": "^16.5.0",
+		"husky": "^9.1.7",
+		"lerna": "^9.0.3",
 		"lint-staged": "^15.2.10",
-		"prettier": "=3.3.2",
-		"prettier-eslint": "^16.3.0",
-		"prettier-plugin-tailwindcss": "^0.6.8",
+		"patch-package": "^8.0.1",
+		"prettier": "^3.7.4",
+		"prettier-eslint": "^16.4.2",
+		"prettier-plugin-tailwindcss": "^0.7.2",
 		"rimraf": "^5.0.5",
-		"typescript": "^5.6.3",
-		"typescript-eslint": "^8.10.0"
+		"typescript": "^5.9.3",
+		"typescript-eslint": "^8.48.1"
 	},
 	"resolutions": {
-		"@types/react": "=18.3.12"
+		"@types/react": "=19.1.0",
+		"react": "=19.1.0",
+		"react-dom": "=19.1.0"
 	},
 	"lint-staged": {
 		"*.{js,jsx,ts,tsx,md,json}": [
@@ -82,7 +93,8 @@
 		}
 	},
 	"dependencies": {
-		"expo": "~52.0.37",
-		"react": "18.3.1"
+		"expo": "~54.0.10",
+		"react": "19.1.0",
+		"react-native": "0.81.4"
 	}
 }

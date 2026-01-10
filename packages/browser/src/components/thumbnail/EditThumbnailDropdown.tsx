@@ -1,4 +1,5 @@
 import { Button, DropdownMenu } from '@stump/components'
+import { UserPermission } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { ChevronDown } from 'lucide-react'
 import { useMemo, useState } from 'react'
@@ -20,7 +21,7 @@ export default function EditThumbnailDropdown({ label, onChooseSelector, onUploa
 	const { t } = useLocaleContext()
 	const { checkPermission } = useAppContext()
 
-	const canUpload = useMemo(() => checkPermission('file:upload'), [checkPermission])
+	const canUpload = useMemo(() => checkPermission(UserPermission.UploadFile), [checkPermission])
 
 	const [showUploadModal, setShowUploadModal] = useState(false)
 

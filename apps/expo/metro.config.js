@@ -1,4 +1,4 @@
-const { getDefaultConfig } = require('expo/metro-config')
+const { getDefaultConfig } = require('@expo/metro-config')
 const { withNativeWind } = require('nativewind/metro')
 const { wrapWithReanimatedMetroConfig } = require('react-native-reanimated/metro-config')
 const path = require('path')
@@ -19,6 +19,8 @@ config.resolver.nodeModulesPaths = [
 // 3. Force Metro to resolve (sub)dependencies only from the `nodeModulesPaths`
 // TODO: Needs fix - Although not ideal, this must be set to `false` in order to avoid a dependency collision on uuid
 config.resolver.disableHierarchicalLookup = false
+
+config.resolver.sourceExts.push('sql') // https://orm.drizzle.team/docs/connect-expo-sqlite
 
 module.exports = wrapWithReanimatedMetroConfig(
 	withNativeWind(config, { input: './global.css', projectRoot }),

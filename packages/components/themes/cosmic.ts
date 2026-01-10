@@ -89,4 +89,11 @@ export const cosmic = {
 			secondary: '#2A1969',
 		},
 	},
+	scrollbar: {
+		DEFAULT: '#1F0A39',
+		thumb: {
+			DEFAULT: 'hsla(0, 0%, 100%, 0.4)',
+			hover: 'hsla(0, 0%, 100%, 0.3)',
+		},
+	},
 } satisfies StumpTheme

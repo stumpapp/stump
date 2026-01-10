@@ -1,22 +1,56 @@
+use async_graphql::{SimpleObject, Union};
 use serde::{Deserialize, Serialize};
-use specta::Type;
 
-use crate::{
-	db::entity::CoreJobOutput,
-	job::{JobUpdate, WorkerSend, WorkerSendExt},
-};
+use crate::job::{CoreJobOutput, JobUpdate, WorkerSend, WorkerSendExt};
+
+#[derive(Clone, Serialize, Deserialize, Debug, SimpleObject)]
+pub struct JobStarted {
+	pub id: String,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug, SimpleObject)]
+pub struct JobOutput {
+	pub id: String,
+	pub output: CoreJobOutput,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug, SimpleObject)]
+pub struct DiscoveredMissingLibrary {
+	pub id: String,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug, SimpleObject)]
+#[serde(rename_all = "camelCase")]
+pub struct CreatedMedia {
+	pub id: String,
+	pub series_id: String,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug, SimpleObject)]
+#[serde(rename_all = "camelCase")]
+pub struct CreatedManySeries {
+	pub count: u64,
+	pub library_id: String,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug, SimpleObject)]
+#[serde(rename_all = "camelCase")]
+pub struct CreatedOrUpdatedManyMedia {
+	pub count: u64,
+	pub series_id: String,
+}
 
 /// An event that is emitted by the core and consumed by a client
-#[derive(Clone, Serialize, Deserialize, Debug, Type)]
+#[derive(Clone, Serialize, Deserialize, Debug, Union)]
 #[serde(tag = "__typename")]
 pub enum CoreEvent {
-	JobStarted(String),
+	JobStarted(JobStarted),
 	JobUpdate(JobUpdate),
-	JobOutput { id: String, output: CoreJobOutput },
-	DiscoveredMissingLibrary(String),
-	CreatedMedia { id: String, series_id: String },
-	CreatedManySeries { count: u64, library_id: String },
-	CreatedOrUpdatedManyMedia { count: u64, series_id: String },
+	JobOutput(JobOutput),
+	DiscoveredMissingLibrary(DiscoveredMissingLibrary),
+	CreatedMedia(CreatedMedia),
+	CreatedManySeries(CreatedManySeries),
+	CreatedOrUpdatedManyMedia(CreatedOrUpdatedManyMedia),
 }
 
 impl WorkerSendExt for CoreEvent {

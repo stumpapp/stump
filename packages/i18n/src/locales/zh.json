@@ -307,7 +307,7 @@
 				},
 				"quality": {
 					"label": "质量",
-					"description": "生成的缩略图图像的质量，范围 0 到 1.0"
+					"description": "生成的缩略图图像的质量，范围 0 到 100"
 				}
 			},
 			"ignoreRules": {
@@ -793,12 +793,12 @@
 									"name": "文件名",
 									"size": "大小",
 									"extension": "扩展名",
-									"created_at": "创建时间",
-									"updated_at": "更新时间",
 									"status": "状态",
 									"path": "路径",
 									"pages": "页数",
-									"tags": "标签"
+									"tags": "标签",
+									"createdAt": "创建时间",
+									"updatedAt": "更新时间"
 								}
 							},
 							"book_meta": {
@@ -807,7 +807,6 @@
 									"title": "标题",
 									"summary": "摘要",
 									"notes": "笔记",
-									"genre": "类型",
 									"writers": "编剧",
 									"pencillers": "线稿师",
 									"inkers": "描线师",
@@ -815,10 +814,11 @@
 									"editors": "编辑",
 									"publisher": "出版社",
 									"colorists": "上色师",
-									"cover_artists": "封面画师",
 									"links": "链接",
 									"characters": "角色",
-									"teams": "团队"
+									"teams": "团队",
+									"genres": "类型",
+									"coverArtists": "封面画师"
 								}
 							},
 							"series": {
@@ -831,16 +831,16 @@
 							"series_meta": {
 								"label": "系列元数据",
 								"attributes": {
-									"age_rating": "年龄分级",
 									"title": "标题",
 									"summary": "摘要",
-									"meta_type": "类型",
 									"publisher": "出版社",
 									"imprint": "版权信息",
 									"comicid": "漫画ID",
 									"booktype": "书籍类型",
 									"status": "状态",
-									"volume": "卷"
+									"volume": "卷",
+									"metaType": "类型",
+									"ageRating": "年龄分级"
 								}
 							},
 							"library": {
@@ -1112,7 +1112,7 @@
 				"desktop": "桌面",
 				"label": "应用"
 			},
-			"server": {
+			"management": {
 				"general": "通用",
 				"logs": "日志",
 				"users": "用户",
@@ -1174,7 +1174,7 @@
 				}
 			}
 		},
-		"app/appearance": {
+		"app/preferences": {
 			"helmet": "外观",
 			"title": "外观",
 			"description": "自定义应用程序的外观和感觉效果",

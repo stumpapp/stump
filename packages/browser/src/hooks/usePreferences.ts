@@ -1,8 +1,17 @@
-import { useUpdatePreferences } from '@stump/client'
-import { UpdateUserPreferences, UserPreferences } from '@stump/sdk'
+import { useGraphQLMutation } from '@stump/client'
+import { graphql, UpdateUserPreferencesInput, UserPreferences } from '@stump/graphql'
+import omit from 'lodash/omit'
 import { useCallback } from 'react'
 
 import { useUserStore } from '@/stores'
+
+const mutation = graphql(`
+	mutation UsePreferences($input: UpdateUserPreferencesInput!) {
+		updateViewerPreferences(input: $input) {
+			__typename
+		}
+	}
+`)
 
 export function usePreferences() {
 	const { preferences, setPreferences } = useUserStore((state) => ({
@@ -10,17 +19,28 @@ export function usePreferences() {
 		setPreferences: state.setUserPreferences,
 	}))
 
-	const { update: mutate } = useUpdatePreferences({
-		onSuccess: setPreferences,
+	const { mutate } = useGraphQLMutation(mutation, {
+		onSuccess: (_, { input }) => {
+			setPreferences({
+				...preferences,
+				...input,
+			} as UserPreferences)
+		},
 	})
 
 	const update = useCallback(
-		(input: Partial<UpdateUserPreferences>) => {
+		(input: Partial<UpdateUserPreferencesInput>) => {
 			if (preferences) {
-				// @ts-expect-error: FIXME: fix this type error
 				return mutate({
-					...preferences,
-					...input,
+					input: {
+						...(omit(preferences, [
+							'id',
+							'navigationArrangement',
+							'homeArrangement',
+							'userId',
+						]) as UpdateUserPreferencesInput),
+						...input,
+					},
 				})
 			} else {
 				return Promise.reject(new Error('Preferences not loaded'))
@@ -29,8 +49,23 @@ export function usePreferences() {
 		[mutate, preferences],
 	)
 
+	const store = useCallback(
+		(input: Partial<UserPreferences>) => {
+			if (preferences) {
+				setPreferences({
+					...preferences,
+					...input,
+				} as UserPreferences)
+			} else {
+				console.warn('Preferences not loaded, cannot store new preferences')
+			}
+		},
+		[preferences, setPreferences],
+	)
+
 	return {
 		preferences: (preferences || {}) as UserPreferences,
 		update,
+		store,
 	}
 }

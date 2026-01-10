@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useSmartListsQuery } from '@stump/client'
+import { useSuspenseGraphQL } from '@stump/client'
 import { Button, Form } from '@stump/components'
+import { graphql } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { useCallback, useMemo } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
@@ -17,15 +18,19 @@ import { useSmartListSettings } from '../context'
 
 type SubSchema = Pick<SmartListFormSchema, 'name' | 'description'>
 
+const query = graphql(`
+	query SmartListBasicSettingsScene {
+		smartLists(input: { mine: true }) {
+			name
+		}
+	}
+`)
 export default function BasicSettingsScene() {
 	const { t } = useLocaleContext()
 	const { list, patch } = useSmartListSettings()
-	const { lists } = useSmartListsQuery({
-		params: {
-			mine: true,
-		},
-		suspense: true,
-	})
+	const {
+		data: { smartLists: lists },
+	} = useSuspenseGraphQL(query, ['smartListBasicSettingsScene'])
 	const listNames = (lists || []).map(({ name }) => name)
 
 	const form = useForm<SubSchema>({

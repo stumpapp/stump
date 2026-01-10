@@ -1,35 +1,35 @@
-import { useUpdateBookClub } from '@stump/client'
 import { EmojiPicker } from '@stump/components'
-import { BookClub } from '@stump/sdk'
-import toast from 'react-hot-toast'
 
 type Props = {
 	emoji?: string
 	placeholder?: string | React.ReactNode
-	bookClub: BookClub
+	bookClub: unknown
 	disabled?: boolean
 }
-export default function BookClubEmoji({ emoji, placeholder, bookClub, disabled }: Props) {
-	const { updateBookClub } = useUpdateBookClub({ id: bookClub.id })
 
-	const handleEmojiSelect = async (emoji?: { native: string }) => {
+// TODO(book-club): Implement
+
+export default function BookClubEmoji({ emoji, placeholder, disabled }: Props) {
+	// const { updateBookClub } = useUpdateBookClub({ id: bookClub.id })
+
+	const handleEmojiSelect = async () => {
 		if (disabled) {
 			return
 		}
 
-		try {
-			await updateBookClub({
-				...bookClub,
-				emoji: emoji?.native ?? null,
-			})
-		} catch (error) {
-			if (error instanceof Error) {
-				toast.error(error.message)
-			} else {
-				console.error(error)
-				toast.error('Failed to update book club')
-			}
-		}
+		// try {
+		// 	await updateBookClub({
+		// 		...bookClub,
+		// 		emoji: emoji?.native ?? null,
+		// 	})
+		// } catch (error) {
+		// 	if (error instanceof Error) {
+		// 		toast.error(error.message)
+		// 	} else {
+		// 		console.error(error)
+		// 		toast.error('Failed to update book club')
+		// 	}
+		// }
 	}
 
 	if (disabled) {

@@ -1,9 +1,18 @@
-import { useDeleteBookClub } from '@stump/client'
-import { Alert, ConfirmationModal } from '@stump/components'
-import { handleApiError } from '@stump/sdk'
+import { useGraphQLMutation } from '@stump/client'
+import { ConfirmationModal } from '@stump/components'
+import { graphql } from '@stump/graphql'
 import { useNavigate } from 'react-router'
+import { toast } from 'sonner'
 
 import paths from '../../paths'
+
+const mutation = graphql(`
+	mutation DeleteBookClubConfirmation($id: ID!) {
+		deleteBookClub(id: $id) {
+			id
+		}
+	}
+`)
 
 type Props = {
 	id: string
@@ -15,23 +24,16 @@ type Props = {
 export default function DeleteBookClubConfirmation({ isOpen, id, onClose, trigger }: Props) {
 	const navigate = useNavigate()
 
-	const { deleteClub, isLoading, error } = useDeleteBookClub({
-		id,
+	const { mutate: deleteClub, isPending } = useGraphQLMutation(mutation, {
 		onSuccess: () => {
+			onClose()
 			navigate(paths.bookClubs())
 		},
+		onError: (error) => {
+			console.error('Error deleting book club:', error)
+			toast.error('Failed to delete book club')
+		},
 	})
-
-	const renderError = () => {
-		if (!error) return null
-
-		const message = handleApiError(error)
-		return (
-			<Alert level="error">
-				<Alert.Content>{message}</Alert.Content>
-			</Alert>
-		)
-	}
 
 	return (
 		<ConfirmationModal
@@ -41,11 +43,9 @@ export default function DeleteBookClubConfirmation({ isOpen, id, onClose, trigge
 			confirmVariant="danger"
 			isOpen={isOpen}
 			onClose={onClose}
-			onConfirm={() => deleteClub()}
-			confirmIsLoading={isLoading}
+			onConfirm={() => deleteClub({ id })}
+			confirmIsLoading={isPending}
 			trigger={trigger}
-		>
-			{renderError()}
-		</ConfirmationModal>
+		/>
 	)
 }

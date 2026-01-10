@@ -1,19 +1,18 @@
-import { BookImageScalingFit } from '@stump/client'
+import { ReadingImageScaleFit } from '@stump/graphql'
+import { ChevronsUpDown } from 'lucide-react-native'
 import { useState } from 'react'
 import { View } from 'react-native'
 import * as DropdownMenu from 'zeego/dropdown-menu'
 
-import { icons, Text } from '~/components/ui'
+import { Icon, Text } from '~/components/ui'
 import { cn } from '~/lib/utils'
 
-const { ChevronsUpDown } = icons
-
 type Props = {
-	behavior: BookImageScalingFit
-	onChange: (behavior: BookImageScalingFit) => void
+	behavior: ReadingImageScaleFit
+	onChange: (behavior: ReadingImageScaleFit) => void
 }
 
-// TODO: Remove hardcoded disabled values and support scaling
+// TODO: What to do with Auto here?
 
 export default function ImageScalingSelect({ behavior, onChange }: Props) {
 	const [isOpen, setIsOpen] = useState(false)
@@ -26,15 +25,15 @@ export default function ImageScalingSelect({ behavior, onChange }: Props) {
 				<DropdownMenu.Trigger>
 					<View className={cn('flex-row items-center gap-1.5', { 'opacity-80': isOpen })}>
 						<Text>{BEHAVIOR_TEXT[behavior]}</Text>
-						<ChevronsUpDown className="h-5 text-foreground-muted" />
+						<Icon as={ChevronsUpDown} className="h-5 text-foreground-muted" />
 					</View>
 				</DropdownMenu.Trigger>
 
 				<DropdownMenu.Content>
 					<DropdownMenu.CheckboxItem
 						key="width"
-						value={behavior === 'width'}
-						onValueChange={() => onChange('width')}
+						value={behavior === ReadingImageScaleFit.Width}
+						onValueChange={() => onChange(ReadingImageScaleFit.Width)}
 						disabled
 					>
 						<DropdownMenu.ItemTitle>Fit Width</DropdownMenu.ItemTitle>
@@ -42,8 +41,8 @@ export default function ImageScalingSelect({ behavior, onChange }: Props) {
 
 					<DropdownMenu.CheckboxItem
 						key="height"
-						value={behavior === 'height'}
-						onValueChange={() => onChange('height')}
+						value={behavior === ReadingImageScaleFit.Height}
+						onValueChange={() => onChange(ReadingImageScaleFit.Height)}
 						disabled
 					>
 						<DropdownMenu.ItemTitle>Fit Height</DropdownMenu.ItemTitle>
@@ -51,8 +50,8 @@ export default function ImageScalingSelect({ behavior, onChange }: Props) {
 
 					<DropdownMenu.CheckboxItem
 						key="none"
-						value={behavior === 'none'}
-						onValueChange={() => onChange('none')}
+						value={behavior === ReadingImageScaleFit.None}
+						onValueChange={() => onChange(ReadingImageScaleFit.None)}
 						disabled
 					>
 						<DropdownMenu.ItemTitle>None</DropdownMenu.ItemTitle>
@@ -63,8 +62,9 @@ export default function ImageScalingSelect({ behavior, onChange }: Props) {
 	)
 }
 
-const BEHAVIOR_TEXT: Record<BookImageScalingFit, string> = {
-	height: 'Fit Height',
-	width: 'Fit Width',
-	none: 'None',
+const BEHAVIOR_TEXT: Record<ReadingImageScaleFit, string> = {
+	[ReadingImageScaleFit.Height]: 'Fit Height',
+	[ReadingImageScaleFit.Width]: 'Fit Width',
+	[ReadingImageScaleFit.None]: 'None',
+	[ReadingImageScaleFit.Auto]: 'Auto',
 }

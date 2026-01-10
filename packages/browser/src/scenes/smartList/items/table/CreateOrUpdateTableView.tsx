@@ -3,10 +3,12 @@ import { Button, Dialog, Form, Input } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { useCallback, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 import { z } from 'zod'
 
 import { useSmartListContext } from '../../context'
+import { useSaveSelectedStoredView, useSaveWorkingView } from '../../hooks'
+import { useSmartListViewStore } from '../../store'
 
 const LOCALE_BASE_KEY = 'userSmartListScene.itemsScene.actionHeader.viewManager.modal'
 const withLocaleKey = (key: string) => `${LOCALE_BASE_KEY}.${key}`
@@ -19,19 +21,17 @@ type Props = {
 export default function CreateOrUpdateTableView({ isCreating, isOpen, onClose }: Props) {
 	const { t } = useLocaleContext()
 	const {
-		list: { saved_views },
-		selectedView,
-		saveWorkingView,
-		saveSelectedStoredView,
+		list: { views },
 	} = useSmartListContext()
+	const selectedView = useSmartListViewStore((state) => state.selectedView)
+	const { saveWorkingView } = useSaveWorkingView()
+	const { saveSelectedStoredView } = useSaveSelectedStoredView()
 
 	const form = useForm({
 		defaultValues: {
 			name: isCreating ? '' : selectedView?.name || '',
 		},
-		resolver: zodResolver(
-			buildSchema(saved_views?.map((view) => view.name) || [], selectedView?.name),
-		),
+		resolver: zodResolver(buildSchema(views?.map((view) => view.name) || [], selectedView?.name)),
 	})
 
 	/**
@@ -117,7 +117,7 @@ export default function CreateOrUpdateTableView({ isCreating, isOpen, onClose }:
 
 				<Dialog.Footer>
 					<Button onClick={onClose}>Cancel</Button>
-					<Button form="create-or-update-view">
+					<Button type="submit" form="create-or-update-view">
 						{isCreating ? t('common.create') : t('common.saveChanges')}
 					</Button>
 				</Dialog.Footer>

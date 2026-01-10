@@ -1,6 +1,8 @@
-import { useCreateSmartList } from '@stump/client'
+import { useGraphQLMutation, useSDK } from '@stump/client'
 import { Alert } from '@stump/components'
+import { graphql } from '@stump/graphql'
 import { handleApiError } from '@stump/sdk'
+import { useQueryClient } from '@tanstack/react-query'
 import { Suspense, useCallback, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
 
@@ -12,12 +14,29 @@ import paths from '@/paths'
 import { intoAPI, SmartListFormSchema } from '../../components/smartList/createOrUpdate/schema'
 import CreateSmartListForm from './CreateSmartListForm'
 
+const mutation = graphql(`
+	mutation CreateSmartListScene($input: SaveSmartListInput!) {
+		createSmartList(input: $input) {
+			id
+			name
+		}
+	}
+`)
+
 export default function CreateSmartListScene() {
+	const client = useQueryClient()
+	const { sdk } = useSDK()
 	const navigate = useNavigate()
 
-	const { create, isCreating, error } = useCreateSmartList({
-		onSuccess: ({ id }) => {
-			navigate(paths.smartList(id))
+	const {
+		mutate: mutate,
+		isPending: isCreating,
+		error: error,
+	} = useGraphQLMutation(mutation, {
+		onSuccess: (data) => {
+			navigate(paths.smartList(data.createSmartList.id))
+			client.invalidateQueries({ queryKey: [sdk.cacheKeys.smartLists] })
+			client.invalidateQueries({ queryKey: [sdk.cacheKeys.smartListNames] })
 		},
 	})
 	const createError = useMemo(() => (error ? handleApiError(error) : undefined), [error])
@@ -31,9 +50,9 @@ export default function CreateSmartListScene() {
 	const handleSubmit = useCallback(
 		(values: SmartListFormSchema) => {
 			const payload = intoAPI(values)
-			create(payload)
+			mutate({ input: payload })
 		},
-		[create],
+		[mutate],
 	)
 
 	return (
@@ -50,7 +69,7 @@ export default function CreateSmartListScene() {
 
 				<SceneContainer>
 					<div className="flex flex-col gap-12">
-						{createError && <Alert level="error">{createError}</Alert>}
+						{createError && <Alert variant="destructive">{createError}</Alert>}
 
 						<Suspense>
 							<CreateSmartListForm onSubmit={handleSubmit} isLoading={isCreating} />

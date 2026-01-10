@@ -1,42 +1,39 @@
 use serde::{Deserialize, Serialize};
-use specta::Type;
-use utoipa::ToSchema;
+use serde_with::skip_serializing_none;
 
 use super::{JobStatus, WorkerSend, WorkerSendExt};
+use async_graphql::SimpleObject;
 
 /// An update event that is emitted by a job
-#[derive(Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
+#[derive(Debug, Clone, Deserialize, Serialize, SimpleObject)]
 pub struct JobUpdate {
 	pub id: String,
 	#[serde(flatten)]
+	#[graphql(flatten)]
 	pub payload: JobProgress,
 }
 
 /// A struct that represents a progress event that is emitted by a job. This behaves like a patch,
 /// where the client will ignore any fields that are not present. This is done so all internal ops
 /// can be done without needing to know the full state of the job.
-#[derive(Debug, Clone, Default, Deserialize, Serialize, Type, ToSchema)]
+#[skip_serializing_none]
+#[derive(Debug, Clone, Default, Deserialize, Serialize, SimpleObject)]
+#[serde(rename_all = "camelCase")]
 pub struct JobProgress {
 	/// The status of the job
-	#[specta(optional)]
 	pub status: Option<JobStatus>,
 	/// The message to display
-	#[specta(optional)]
 	pub message: Option<String>,
 
 	/// The current task being worked on
-	#[specta(optional)]
 	pub completed_tasks: Option<i32>,
 	/// The number of tasks for the job. This number can change as
 	/// subtasks get added/converted to tasks
-	#[specta(optional)]
 	pub remaining_tasks: Option<i32>,
 
 	/// The current subtask being worked on
-	#[specta(optional)]
 	pub completed_subtasks: Option<i32>,
 	/// The number of subtasks that exist in the current task
-	#[specta(optional)]
 	pub total_subtasks: Option<i32>,
 }
 
@@ -50,7 +47,7 @@ impl JobProgress {
 	}
 
 	/// Constructs a new [`JobProgress`] with the given status
-	pub fn status(status: JobStatus) -> Self {
+	pub fn new_status(status: JobStatus) -> Self {
 		Self {
 			status: Some(status),
 			..Default::default()
@@ -95,9 +92,14 @@ impl JobProgress {
 		Self::task_position_msg("Job state restored from database", index, size)
 	}
 
-	pub fn subtask_position(index: i32, size: i32) -> Self {
+	/// Constructs a new [`JobProgress`] with the given subtask position and size
+	///
+	/// # Arguments
+	/// * `pos` - The current subtask position
+	/// * `size` - The total number of subtasks
+	pub fn subtask_position(pos: i32, size: i32) -> Self {
 		Self {
-			completed_subtasks: Some(index),
+			completed_subtasks: Some(pos),
 			total_subtasks: Some(size),
 			..Default::default()
 		}

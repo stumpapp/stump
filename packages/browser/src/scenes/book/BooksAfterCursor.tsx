@@ -1,51 +1,89 @@
-import { useMediaCursorQuery } from '@stump/client'
+import { PREFETCH_STALE_TIME, queryClient, useInfiniteSuspenseGraphQL, useSDK } from '@stump/client'
 import { Text } from '@stump/components'
-import { Media } from '@stump/sdk'
+import { graphql } from '@stump/graphql'
 import { BookX } from 'lucide-react'
-import { useCallback, useEffect } from 'react'
+import { Suspense, useCallback } from 'react'
 
-import MediaCard from '@/components/book/BookCard'
+import BookCard from '@/components/book/BookCard'
 import HorizontalCardList from '@/components/HorizontalCardList'
 
+const query = graphql(`
+	query BooksAfterCurrentQuery($id: ID!, $pagination: Pagination) {
+		mediaById(id: $id) {
+			nextInSeries(pagination: $pagination) {
+				nodes {
+					id
+					...BookCard
+				}
+				pageInfo {
+					__typename
+					... on CursorPaginationInfo {
+						currentCursor
+						nextCursor
+						limit
+					}
+				}
+			}
+		}
+	}
+`)
+
+export const usePrefetchBooksAfterCursor = () => {
+	const { sdk } = useSDK()
+	return (id: string) =>
+		queryClient.prefetchInfiniteQuery({
+			queryKey: ['booksAfterCursor', id],
+			initialPageParam: {
+				id,
+				pagination: {
+					cursor: { limit: 20 },
+				},
+			},
+			queryFn: async ({ pageParam }) => {
+				const response = await sdk.execute(query, pageParam)
+				return response
+			},
+			staleTime: PREFETCH_STALE_TIME,
+		})
+}
+
 type Props = {
-	cursor: Media
+	cursor: string
+}
+
+export default function BooksAfterCurrentContainer({ cursor }: Props) {
+	return (
+		<Suspense>
+			<BooksAfterCurrent cursor={cursor} />
+		</Suspense>
+	)
 }
 
 function BooksAfterCurrent({ cursor }: Props) {
-	const { media, fetchNextPage, hasNextPage, remove, isFetching } = useMediaCursorQuery({
-		initialCursor: cursor.id,
-		limit: 20,
-		params: {
-			series: {
-				id: cursor.series_id,
+	const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useInfiniteSuspenseGraphQL(
+		query,
+		['booksAfterCursor', cursor],
+		{
+			id: cursor,
+			pagination: {
+				cursor: { limit: 20 },
 			},
 		},
-		suspense: true,
-		useErrorBoundary: false,
-	})
+	)
 
-	const cards = media.map((media) => <MediaCard media={media} key={media.id} fullWidth={false} />)
+	const nodes = data.pages.flatMap((page) => page.mediaById?.nextInSeries.nodes || [])
 
-	useEffect(() => {
-		// NOTE: I'm honestly not sure why this is even required... Without this, no matter WHAT I do,
-		// previous data seems to stick around. Manually removing from the cache on unmount seems to
-		// fix it...
-		return () => {
-			remove()
-		}
-	}, [remove])
+	const cards = nodes.map((node) => <BookCard key={node.id} fragment={node} fullWidth={false} />)
 
 	const handleFetchMore = useCallback(() => {
-		if (!hasNextPage || isFetching) {
-			return
-		} else {
+		if (hasNextPage && !isFetchingNextPage) {
 			fetchNextPage()
 		}
-	}, [fetchNextPage, hasNextPage, isFetching])
+	}, [fetchNextPage, hasNextPage, isFetchingNextPage])
 
 	return (
 		<HorizontalCardList
-			title="Up next"
+			title="Next in series"
 			items={cards}
 			onFetchMore={handleFetchMore}
 			emptyState={
@@ -63,8 +101,4 @@ function BooksAfterCurrent({ cursor }: Props) {
 			}
 		/>
 	)
-}
-
-export default function BooksAfterCurrentContainer({ cursor }: Props) {
-	return <BooksAfterCurrent cursor={cursor} />
 }

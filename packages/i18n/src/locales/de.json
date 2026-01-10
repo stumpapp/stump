@@ -793,12 +793,12 @@
 									"name": "Dateiname",
 									"size": "Größe",
 									"extension": "Dateiendung",
-									"created_at": "Erstellt am",
-									"updated_at": "Aktualisiert am",
 									"status": "Status",
 									"path": "Pfad",
 									"pages": "Seiten",
-									"tags": "Schlagworte"
+									"tags": "Schlagworte",
+									"createdAt": "Erstellt am",
+									"updatedAt": "Aktualisiert am"
 								}
 							},
 							"book_meta": {
@@ -807,7 +807,6 @@
 									"title": "Titel",
 									"summary": "Zusammenfassung",
 									"notes": "Anmerkungen",
-									"genre": "Genre",
 									"writers": "Autoren",
 									"pencillers": "Penciller",
 									"inkers": "Inker",
@@ -815,10 +814,11 @@
 									"editors": "Redakteure",
 									"publisher": "Herausgeber",
 									"colorists": "Colorist",
-									"cover_artists": "Cover Künstler",
 									"links": "Links",
 									"characters": "Charaktere",
-									"teams": "Teams"
+									"teams": "Teams",
+									"genres": "Genre",
+									"coverArtists": "Cover Künstler"
 								}
 							},
 							"series": {
@@ -831,16 +831,16 @@
 							"series_meta": {
 								"label": "Serien Metadaten",
 								"attributes": {
-									"age_rating": "Alterseinstufung",
 									"title": "Titel",
 									"summary": "Zusammenfassung",
-									"meta_type": "Typ",
 									"publisher": "Herausgeber",
 									"imprint": "Imprint",
 									"comicid": "Comic-ID",
 									"booktype": "Buchtyp",
 									"status": "Status",
-									"volume": "Band"
+									"volume": "Band",
+									"metaType": "Typ",
+									"ageRating": "Alterseinstufung"
 								}
 							},
 							"library": {
@@ -1112,7 +1112,7 @@
 				"desktop": "Desktop",
 				"label": "Anwendung"
 			},
-			"server": {
+			"management": {
 				"general": "Allgemein",
 				"logs": "Protokolle",
 				"users": "Benutzer",
@@ -1120,7 +1120,7 @@
 				"access": "Zugriff",
 				"email": "E-Mail",
 				"notifications": "Benachrichtigungen",
-				"label": "Server"
+				"label": "Management"
 			}
 		},
 		"app/account": {
@@ -1174,7 +1174,7 @@
 				}
 			}
 		},
-		"app/appearance": {
+		"app/preferences": {
 			"helmet": "Darstellung",
 			"title": "Darstellung",
 			"description": "Passe das Aussehen und die Bedienung der Anwendung an",

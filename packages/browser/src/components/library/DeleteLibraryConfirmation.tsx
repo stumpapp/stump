@@ -1,11 +1,22 @@
-import { useDeleteLibrary } from '@stump/client'
+import { useGraphQLMutation } from '@stump/client'
 import { ConfirmationModal } from '@stump/components'
+import { graphql, UserPermission } from '@stump/graphql'
 import { isAxiosError } from '@stump/sdk'
-import { toast } from 'react-hot-toast'
+import { useQueryClient } from '@tanstack/react-query'
+import { useCallback, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router'
+import { toast } from 'sonner'
 
-import { useAppContext } from '../../context'
-import paths from '../../paths'
+import { useAppContext } from '@/context'
+import paths from '@/paths'
+
+const mutation = graphql(`
+	mutation DeleteLibrary($id: ID!) {
+		deleteLibrary(id: $id) {
+			id
+		}
+	}
+`)
 
 type Props = {
 	libraryId: string
@@ -13,33 +24,47 @@ type Props = {
 	isOpen: boolean
 	trigger?: React.ReactNode
 }
+
 export default function DeleteLibraryConfirmation({ isOpen, libraryId, onClose, trigger }: Props) {
 	const navigate = useNavigate()
+	const client = useQueryClient()
 
-	const { deleteLibraryAsync, isLoading } = useDeleteLibrary({
-		onSuccess: () => {
+	const {
+		mutate: deleteLibrary,
+		isPending,
+		error,
+	} = useGraphQLMutation(mutation, {
+		onSuccess: async () => {
+			await client.invalidateQueries({
+				predicate: () => true,
+			})
+			onClose()
 			navigate(paths.home())
 		},
 	})
-	const { isServerOwner } = useAppContext()
+	const { checkPermission } = useAppContext()
 
-	async function handleDelete() {
-		if (isServerOwner) {
-			try {
-				await deleteLibraryAsync(libraryId)
-			} catch (err) {
-				console.error(err)
+	const isPermitted = useMemo(
+		() => checkPermission(UserPermission.DeleteLibrary),
+		[checkPermission],
+	)
 
-				if (isAxiosError(err)) {
-					toast.error(err.message || 'An error occurred while deleting the library')
-				} else {
-					toast.error('An error occurred while deleting the library')
-				}
-			}
-		} else {
-			throw new Error('You do not have permission to delete libraries.')
+	const handleDelete = useCallback(() => {
+		if (isPermitted) {
+			deleteLibrary({ id: libraryId })
 		}
-	}
+	}, [deleteLibrary, isPermitted, libraryId])
+
+	useEffect(() => {
+		if (!error) return
+
+		console.error(error)
+		if (isAxiosError(error)) {
+			toast.error(error.message || 'An error occurred while deleting the library')
+		} else {
+			toast.error('An error occurred while deleting the library')
+		}
+	}, [error])
 
 	return (
 		<ConfirmationModal
@@ -50,7 +75,7 @@ export default function DeleteLibraryConfirmation({ isOpen, libraryId, onClose, 
 			isOpen={isOpen}
 			onClose={onClose}
 			onConfirm={handleDelete}
-			confirmIsLoading={isLoading}
+			confirmIsLoading={isPending}
 			trigger={trigger}
 		/>
 	)

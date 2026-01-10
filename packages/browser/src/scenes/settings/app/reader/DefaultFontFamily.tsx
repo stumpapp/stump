@@ -3,7 +3,7 @@ import { useLocaleContext } from '@stump/i18n'
 import { isSupportedFont } from '@stump/sdk'
 import { useCallback } from 'react'
 
-import { SUPPORTED_FONT_OPTIONS } from '@/scenes/settings/app/appearance/FontSelect'
+import { SUPPORTED_FONT_OPTIONS } from '@/scenes/settings/app/preferences/FontSelect'
 import { useReaderStore } from '@/stores'
 
 export default function DefaultFontFamily() {
@@ -20,8 +20,8 @@ export default function DefaultFontFamily() {
 		(font?: string) => {
 			if (!font) {
 				setSettings({ fontFamily: undefined })
-			} else if (isSupportedFont(font)) {
-				setSettings({ fontFamily: font })
+			} else if (isSupportedFont(font) || isSupportedFont(font.toUpperCase())) {
+				setSettings({ fontFamily: font.toUpperCase() })
 			}
 		},
 		[setSettings],

@@ -1,6 +1,7 @@
 import { Sheet } from '@stump/components'
 import { Preformatted } from '@stump/components'
-import { User } from '@stump/sdk'
+
+import { User } from './UserTable'
 
 type Props = {
 	user: User | null

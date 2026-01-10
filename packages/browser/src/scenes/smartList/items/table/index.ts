@@ -1,2 +1,2 @@
-export { default as GroupedSmartListItemTable } from './GroupedSmartListItemTable'
-export { default as SmartListBookTable } from './SmartListBookTable'
+export { default as GroupedVirtualSmartListTable } from './GroupedVirtualSmartListTable'
+export { default as VirtualSmartListTable } from './VirtualSmartListTable'

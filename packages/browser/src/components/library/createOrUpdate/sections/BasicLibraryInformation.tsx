@@ -1,9 +1,12 @@
 import { Button, Input, TextArea } from '@stump/components'
+import { UserPermission } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { Folder } from 'lucide-react'
-import { useFormContext, useFormState } from 'react-hook-form'
+import { Suspense } from 'react'
+import { useFormContext, useFormState, useWatch } from 'react-hook-form'
 
 import TagSelect from '@/components/TagSelect'
+import { useAppContext } from '@/context'
 import { useLibraryContextSafe } from '@/scenes/library/context'
 
 import { CreateOrUpdateLibrarySchema } from '../schema'
@@ -18,9 +21,10 @@ type Props = {
 export default function BasicLibraryInformation({ onSetShowDirectoryPicker }: Props) {
 	const form = useFormContext<CreateOrUpdateLibrarySchema>()
 	const ctx = useLibraryContextSafe()
+	const { checkPermission } = useAppContext()
 
 	const isCreatingLibrary = !ctx?.library
-	const tags = form.watch('tags')
+	const tags = useWatch({ control: form.control, name: 'tags' })
 
 	const { t } = useLocaleContext()
 	const { errors } = useFormState({
@@ -29,7 +33,7 @@ export default function BasicLibraryInformation({ onSetShowDirectoryPicker }: Pr
 
 	return (
 		<div className="flex flex-grow flex-col gap-6">
-			<div className="flex flex-col flex-wrap gap-y-6 md:flex-row md:gap-x-6 md:gap-y-0">
+			<div className="flex flex-col flex-wrap gap-y-6 md:flex-row md:gap-x-6 md:gap-y-6">
 				<Input
 					variant="primary"
 					label={t(getKey('name.label'))}
@@ -49,9 +53,11 @@ export default function BasicLibraryInformation({ onSetShowDirectoryPicker }: Pr
 					placeholder={t(getKey('path.placeholder'))}
 					containerClassName="max-w-full md:max-w-sm"
 					rightDecoration={
-						<Button size="icon" type="button" onClick={() => onSetShowDirectoryPicker(true)}>
-							<Folder className="h-4 w-4 text-foreground-muted" />
-						</Button>
+						checkPermission(UserPermission.FileExplorer) && (
+							<Button size="icon" type="button" onClick={() => onSetShowDirectoryPicker(true)}>
+								<Folder className="h-4 w-4 text-foreground-muted" />
+							</Button>
+						)
 					}
 					required={isCreatingLibrary}
 					errorMessage={errors.path?.message}
@@ -69,12 +75,14 @@ export default function BasicLibraryInformation({ onSetShowDirectoryPicker }: Pr
 				{...form.register('description')}
 			/>
 
-			<TagSelect
-				label={t(getKey('tags.label'))}
-				description={t(getKey('tags.description'))}
-				selected={tags}
-				onChange={(value) => form.setValue('tags', value)}
-			/>
+			<Suspense fallback={null}>
+				<TagSelect
+					label={t(getKey('tags.label'))}
+					description={t(getKey('tags.description'))}
+					selected={tags}
+					onChange={(value) => form.setValue('tags', value)}
+				/>
+			</Suspense>
 		</div>
 	)
 }

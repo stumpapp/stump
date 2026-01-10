@@ -1,17 +1,31 @@
-import { useLibraries } from '@stump/client'
+import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Accordion, Text } from '@stump/components'
+import { FilterableArrangementEntityLink, graphql, UserPermission } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { Library } from 'lucide-react'
 import { useMemo } from 'react'
 import { useLocation } from 'react-router'
 
 import { useAppContext } from '@/context'
-import paths from '@/paths'
+import { usePaths } from '@/paths'
+import { usePrefetchLibrarySeries } from '@/scenes/library/tabs/series/LibrarySeriesScene'
 
 import { EntityOptionProps } from '../../../types'
 import SideBarButtonLink from '../../SideBarButtonLink'
 import LibraryEmoji from './LibraryEmoji'
 import LibraryOptionsMenu from './LibraryOptionsMenu'
+
+const query = graphql(`
+	query LibrarySideBarSection {
+		libraries(pagination: { none: { unpaginated: true } }) {
+			nodes {
+				id
+				name
+				emoji
+			}
+		}
+	}
+`)
 
 type Props = {
 	isMobile?: boolean
@@ -19,19 +33,30 @@ type Props = {
 
 export default function LibrarySideBarSection({
 	isMobile,
-	showCreate = true,
-	showLinkToAll = false,
+	links = [FilterableArrangementEntityLink.Create],
 }: Props) {
 	const location = useLocation()
+	const paths = usePaths()
 
 	const { t } = useLocaleContext()
-	const { libraries } = useLibraries()
+	const { sdk } = useSDK()
+	const {
+		data: {
+			libraries: { nodes: libraries },
+		},
+	} = useSuspenseGraphQL(query, sdk.cacheKey('libraries'))
+
 	const { checkPermission } = useAppContext()
+
+	const prefetchSeries = usePrefetchLibrarySeries()
 
 	const isCurrentLibrary = (id: string) => location.pathname.startsWith(paths.librarySeries(id))
 
-	const canCreateLibrary = useMemo(() => checkPermission('library:create'), [checkPermission])
-	const showCreateLink = canCreateLibrary && showCreate
+	const canCreateLibrary = useMemo(
+		() => checkPermission(UserPermission.CreateLibrary),
+		[checkPermission],
+	)
+	const showCreateLink = canCreateLibrary && links.includes(FilterableArrangementEntityLink.Create)
 
 	const renderLibraries = () => {
 		if (!libraries || !libraries.length) {
@@ -43,7 +68,7 @@ export default function LibrarySideBarSection({
 		}
 
 		return libraries.map((library) => {
-			const canChange = checkPermission('library:manage') && !isMobile
+			const canChange = checkPermission(UserPermission.ManageLibrary) && !isMobile
 			const leftContent = (
 				<LibraryEmoji
 					emoji={library.emoji || undefined}
@@ -61,7 +86,7 @@ export default function LibrarySideBarSection({
 					className="pl-2 pr-0"
 					leftContent={canChange ? leftContent : undefined}
 					rightContent={<LibraryOptionsMenu library={library} />}
-					// onMouseEnter={() => prefetchLibrarySeries(library.id)}
+					onMouseEnter={() => prefetchSeries(library.id)}
 				>
 					{!canChange && leftContent}
 					{library.name}
@@ -77,7 +102,7 @@ export default function LibrarySideBarSection({
 					{t('sidebar.buttons.libraries')}
 				</Accordion.Trigger>
 				<Accordion.Content containerClassName="flex flex-col gap-y-1.5">
-					{showLinkToAll && (
+					{links.includes(FilterableArrangementEntityLink.ShowAll) && (
 						<SideBarButtonLink
 							to={paths.libraries()}
 							isActive={location.pathname === paths.libraries()}

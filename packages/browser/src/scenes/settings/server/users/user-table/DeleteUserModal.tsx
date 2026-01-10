@@ -1,42 +1,44 @@
-import { invalidateQueries, useDeleteUser, useSDK } from '@stump/client'
+import { useGraphQLMutation, useSDK } from '@stump/client'
 import { Button, CheckBox, Dialog } from '@stump/components'
-import { useState } from 'react'
-import { toast } from 'react-hot-toast'
+import { graphql } from '@stump/graphql'
+import { useQueryClient } from '@tanstack/react-query'
+import { useCallback, useState } from 'react'
 
-import { useUser } from '@/stores'
+import { User } from './UserTable'
 
-import { useUserManagementContext } from '../context'
+const mutation = graphql(`
+	mutation DeleteUser($id: ID!, $hardDelete: Boolean) {
+		deleteUser(id: $id, hardDelete: $hardDelete) {
+			id
+		}
+	}
+`)
 
-export default function DeleteUserModal() {
+type Props = {
+	deletingUser: User | null
+	onClose: () => void
+}
+
+export default function DeleteUserModal({ deletingUser, onClose }: Props) {
 	const { sdk } = useSDK()
-	const { user } = useUser()
-	const { deletingUser, setDeletingUser } = useUserManagementContext()
 
 	const [hardDelete, setHardDelete] = useState(false)
 
-	const { deleteAsync, isLoading: isDeletingUser } = useDeleteUser({
-		hardDelete,
-		userId: deletingUser?.id || '',
+	const client = useQueryClient()
+	const { mutate, isPending } = useGraphQLMutation(mutation, {
+		onSuccess: async () => {
+			await client.refetchQueries({
+				predicate: (query) => query.queryKey[0] === sdk.cacheKeys.users,
+			})
+			onClose()
+		},
 	})
 
-	const handleDelete = async () => {
-		if (!deletingUser) {
-			return
-		} else if (!!user && user.id === deletingUser.id) {
-			toast.error('You cannot delete your own account')
-		} else if (deletingUser.is_server_owner) {
-			toast.error('You cannot delete the server owner')
-		} else {
-			try {
-				await deleteAsync()
-				await invalidateQueries({ exact: false, queryKey: [sdk.user.keys.get] })
-				setDeletingUser(null)
-			} catch (error) {
-				console.error(error)
-				toast.error('Failed to delete user')
-			}
+	const handleDelete = useCallback(() => {
+		if (deletingUser) {
+			mutate({ id: deletingUser.id, hardDelete })
 		}
-	}
+	}, [deletingUser, hardDelete, mutate])
 
 	return (
 		<Dialog open={!!deletingUser}>
@@ -47,7 +49,7 @@ export default function DeleteUserModal() {
 						Are you sure you want to delete this user? If you select the hard delete option, this
 						user and all of their data will be permanently deleted.
 					</Dialog.Description>
-					<Dialog.Close onClick={() => setDeletingUser(null)} disabled={isDeletingUser} />
+					<Dialog.Close onClick={onClose} disabled={isPending} />
 				</Dialog.Header>
 
 				<Dialog.Footer className="w-full items-center gap-3 sm:justify-between sm:gap-0">
@@ -61,13 +63,13 @@ export default function DeleteUserModal() {
 					</div>
 
 					<div className="flex w-full flex-col-reverse space-y-2 space-y-reverse sm:flex-row sm:justify-end sm:space-x-2 sm:space-y-0">
-						<Button onClick={() => setDeletingUser(null)} disabled={isDeletingUser}>
+						<Button onClick={onClose} disabled={isPending}>
 							Cancel
 						</Button>
 						<Button
 							variant="primary"
-							isLoading={isDeletingUser}
-							disabled={isDeletingUser}
+							isLoading={isPending}
+							disabled={isPending}
 							onClick={handleDelete}
 						>
 							Delete User

@@ -22,6 +22,12 @@
 			"@stump/client": ["./packages/client"],
 			"@stump/sdk": ["./packages/sdk"],
 			"@stump/browser": ["./packages/browser"]
-		}
+		},
+		"plugins": [
+			{
+				"name": "@0no-co/graphqlsp",
+				"schema": "./crates/graphql/schema.graphql"
+			}
+		]
 	}
 }

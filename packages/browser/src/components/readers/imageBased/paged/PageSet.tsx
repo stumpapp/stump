@@ -1,4 +1,6 @@
 import { BookImageScaling } from '@stump/client'
+import { cn } from '@stump/components'
+import { ReadingDirection, ReadingImageScaleFit } from '@stump/graphql'
 import React, { forwardRef, useCallback, useMemo } from 'react'
 
 import { EntityImage } from '@/components/entity'
@@ -14,7 +16,7 @@ type Props = {
 
 const PageSet = forwardRef<HTMLDivElement, Props>(
 	({ currentPage, getPageUrl, onPageClick }, ref) => {
-		const { setDimensions, book, pageSets } = useImageBaseReaderContext()
+		const { setPageSize, book, pageSets } = useImageBaseReaderContext()
 		const {
 			bookPreferences: { imageScaling, brightness, readingDirection },
 		} = useBookPreferences({ book })
@@ -24,12 +26,9 @@ const PageSet = forwardRef<HTMLDivElement, Props>(
 		 */
 		const upsertDimensions = useCallback(
 			(page: number, dimensions: ImagePageDimensionRef) => {
-				setDimensions((prev) => ({
-					...prev,
-					[page - 1]: dimensions,
-				}))
+				setPageSize(page - 1, dimensions)
 			},
-			[setDimensions],
+			[setPageSize],
 		)
 
 		const currentSetIdx = useMemo(
@@ -38,48 +37,52 @@ const PageSet = forwardRef<HTMLDivElement, Props>(
 		)
 		const currentSet = pageSets[currentSetIdx] || [currentPage - 1]
 
-		const nextSetIdx = currentSetIdx + (readingDirection === 'ltr' ? 1 : -1)
+		const nextSetIdx = currentSetIdx + (readingDirection === ReadingDirection.Ltr ? 1 : -1)
 		const nextSet = pageSets[nextSetIdx] || []
 
 		return (
 			<div
 				ref={ref}
+				className="flex h-full shrink-0 justify-center"
 				style={{
 					...styles[imageScaling.scaleToFit].imagesHolder,
 					filter: `brightness(${brightness * 100}%)`,
-					display: 'flex',
-					flexDirection: 'row',
-					justifyContent: 'center',
 				}}
 			>
-				{currentSet.map((idx) => (
-					<Page
-						key={`page-${idx + 1}`}
-						page={idx + 1}
-						getPageUrl={getPageUrl}
-						onPageClick={onPageClick}
-						upsertDimensions={upsertDimensions}
-						imageScaling={imageScaling}
-						style={styles[imageScaling.scaleToFit].image}
-					/>
-				))}
-				{nextSet.map((idx) => (
-					<Page
-						key={`page-${idx + 1}`}
-						page={idx + 1}
-						getPageUrl={getPageUrl}
-						onPageClick={() => {}}
-						upsertDimensions={() => {}}
-						imageScaling={imageScaling}
-						style={{
-							position: 'fixed',
-							maxWidth: 'max-content',
-							maxHeight: '100%',
-							zIndex: -1,
-							opacity: 0,
-						}}
-					/>
-				))}
+				<div
+					className={cn('relative flex w-full justify-center', {
+						'mx-auto flex-row gap-0': currentSet.length > 1,
+					})}
+				>
+					{currentSet.map((idx) => (
+						<Page
+							key={`page-${idx + 1}`}
+							page={idx + 1}
+							getPageUrl={getPageUrl}
+							onPageClick={onPageClick}
+							upsertDimensions={upsertDimensions}
+							imageScaling={imageScaling}
+							style={styles[imageScaling.scaleToFit].image}
+						/>
+					))}
+					{nextSet.map((idx) => (
+						<Page
+							key={`page-${idx + 1}`}
+							page={idx + 1}
+							getPageUrl={getPageUrl}
+							onPageClick={() => {}}
+							upsertDimensions={() => {}}
+							imageScaling={imageScaling}
+							style={{
+								position: 'fixed',
+								maxWidth: 'max-content',
+								maxHeight: '100%',
+								zIndex: -1,
+								opacity: 0,
+							}}
+						/>
+					))}
+				</div>
 			</div>
 		)
 	},
@@ -131,9 +134,10 @@ const Page = React.memo(_Page)
  * Styles for the image and page set holder
  */
 const styles = {
-	auto: {
+	[ReadingImageScaleFit.Auto]: {
 		imagesHolder: {
 			// no min width
+			maxWidth: '100%',
 			// no width
 			// no min height
 			height: '100vh',
@@ -149,9 +153,10 @@ const styles = {
 		} as React.CSSProperties,
 	},
 
-	height: {
+	[ReadingImageScaleFit.Height]: {
 		imagesHolder: {
 			minWidth: 'max-content',
+			// no max width
 			// no width
 			// no min height
 			height: '100vh',
@@ -167,9 +172,10 @@ const styles = {
 		} as React.CSSProperties,
 	},
 
-	width: {
+	[ReadingImageScaleFit.Width]: {
 		imagesHolder: {
 			// no min width
+			// no max width
 			width: '100vw',
 			minHeight: '100vh',
 			// no neight
@@ -185,9 +191,10 @@ const styles = {
 		} as React.CSSProperties,
 	},
 
-	none: {
+	[ReadingImageScaleFit.None]: {
 		imagesHolder: {
 			minWidth: 'max-content',
+			// no max width
 			// no width
 			minHeight: '100vh',
 			// no height

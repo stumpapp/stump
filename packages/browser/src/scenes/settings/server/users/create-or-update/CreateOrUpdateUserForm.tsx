@@ -1,38 +1,68 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { invalidateQueries, useCreateUser, useSDK, useUpdateUser } from '@stump/client'
-import { Alert, Button, Form, Heading, Text } from '@stump/components'
+import { useGraphQLMutation, useSDK } from '@stump/client'
+import { Alert, AlertDescription, Button, Form, Heading, Text } from '@stump/components'
+import { CreateUserInput, extractErrorMessage, graphql, UpdateUserInput } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
-import { User } from '@stump/sdk'
+import { useQueryClient } from '@tanstack/react-query'
 import { useMemo } from 'react'
 import { useForm, useFormState } from 'react-hook-form'
-import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router'
 
 import { ContentContainer } from '@/components/container'
 import paths from '@/paths'
 
-import { useUserManagementContext } from '../context'
 import AccountDetails from './AccountDetails'
 import MaxSessionsAllowed from './MaxSessionsAllowed'
 import { buildSchema, CreateOrUpdateUserSchema, formDefaults } from './schema'
-import UserPermissionsForm from './UserPermissionsForm'
+import UserPermissionsTable from './UserPermissionsTable'
 import UserRestrictionsForm from './UserRestrictionsForm'
 
+const updateMutation = graphql(`
+	mutation CreateOrUpdateUserFormUpdateUser($id: ID!, $input: UpdateUserInput!) {
+		updateUser(id: $id, input: $input) {
+			id
+			username
+			ageRestriction {
+				age
+				restrictOnUnset
+			}
+			permissions
+			maxSessionsAllowed
+		}
+	}
+`)
+
+const createMutation = graphql(`
+	mutation CreateOrUpdateUserFormCreateUser($input: CreateUserInput!) {
+		createUser(input: $input) {
+			id
+		}
+	}
+`)
+
+interface ExistingUser extends UpdateUserInput {
+	id: string
+	isServerOwner: boolean
+}
+
 type Props = {
-	user?: User
+	user?: ExistingUser
+	existingUsernames: string[]
 }
 
 // TODO(design): stepped form from bookclub feature branch
 
-export default function CreateOrUpdateUserForm({ user }: Props) {
+export default function CreateOrUpdateUserForm({ user, existingUsernames }: Props) {
 	const { sdk } = useSDK()
 	const navigate = useNavigate()
 
 	const { t } = useLocaleContext()
-	const { users } = useUserManagementContext()
 
 	const isCreating = !user
-	const schema = useMemo(() => buildSchema(t, users, user), [t, users, user])
+	const schema = useMemo(
+		() => buildSchema(t, existingUsernames, user),
+		[t, existingUsernames, user],
+	)
 
 	const form = useForm<CreateOrUpdateUserSchema>({
 		defaultValues: formDefaults(user),
@@ -43,57 +73,65 @@ export default function CreateOrUpdateUserForm({ user }: Props) {
 		return Object.keys(formErrors).length > 0
 	}, [formErrors])
 
-	const { createAsync, error: createError } = useCreateUser()
-	const { updateAsync, error: updateError } = useUpdateUser(user?.id)
+	const client = useQueryClient()
 
-	const handleSubmit = async ({
+	const { mutate: createUser, error: createError } = useGraphQLMutation(createMutation, {
+		onSuccess: async () => {
+			await client.refetchQueries({
+				predicate: ({ queryKey: [baseKey] }) => baseKey === sdk.cacheKeys.users,
+			})
+			form.reset()
+			navigate(paths.settings('users'))
+		},
+	})
+
+	const { mutate: updateUser, error: updateError } = useGraphQLMutation(updateMutation, {
+		onSuccess: async ({ updateUser: result }) => {
+			await client.refetchQueries({
+				predicate: ({ queryKey: [baseKey] }) => baseKey === sdk.cacheKeys.users,
+			})
+			form.reset({
+				ageRestriction: result.ageRestriction?.age,
+				ageRestrictionOnUnset: result.ageRestriction?.restrictOnUnset,
+				permissions: result.permissions,
+				username: result.username,
+			})
+			navigate(paths.settings('users'))
+		},
+	})
+
+	const handleSubmit = ({
 		username,
 		password,
 		permissions,
-		max_sessions_allowed,
-		...ageRestrictions
+		maxSessionsAllowed,
+		// forbiddenTags,
+		...ageRestrictionValues
 	}: CreateOrUpdateUserSchema) => {
-		try {
-			const age_restriction = ageRestrictions.age_restriction
-				? {
-						age: ageRestrictions.age_restriction,
-						restrict_on_unset: ageRestrictions.age_restriction_on_unset ?? false,
-					}
-				: null
-
-			if (isCreating && password) {
-				await createAsync({
-					age_restriction,
-					max_sessions_allowed,
-					password: password,
-					permissions,
-					username,
-				})
-				toast.success('User created successfully')
-				await invalidateQueries({ keys: [sdk.user.keys.get, sdk.user.keys.getByID] })
-				form.reset()
-			} else if (user) {
-				const result = await updateAsync({
-					...user,
-					age_restriction,
-					max_sessions_allowed,
-					password: password || null,
-					permissions,
-					username,
-				})
-				toast.success('User updated successfully')
-				await invalidateQueries({ keys: [sdk.user.keys.get, sdk.user.keys.getByID] })
-				form.reset({
-					age_restriction: result.age_restriction?.age,
-					age_restriction_on_unset: result.age_restriction?.restrict_on_unset,
-					permissions: result.permissions,
-					username: result.username,
-				})
+		const ageRestriction = ageRestrictionValues.ageRestriction
+			? {
+					age: ageRestrictionValues.ageRestriction,
+					restrictOnUnset: ageRestrictionValues.ageRestrictionOnUnset ?? false,
+				}
+			: null
+		if (isCreating && password) {
+			const input: CreateUserInput = {
+				username,
+				password,
+				permissions,
+				maxSessionsAllowed,
+				ageRestriction,
 			}
-
-			navigate(paths.settings('server/users'))
-		} catch (error) {
-			console.error(error)
+			createUser({ input })
+		} else if (user) {
+			const input: UpdateUserInput = {
+				username,
+				password: password || null,
+				permissions,
+				maxSessionsAllowed,
+				ageRestriction,
+			}
+			updateUser({ id: user.id, input })
 		}
 	}
 
@@ -101,13 +139,13 @@ export default function CreateOrUpdateUserForm({ user }: Props) {
 		return (
 			<>
 				{createError && (
-					<Alert level="error">
-						<Alert.Content>{createError.message}</Alert.Content>
+					<Alert variant="destructive">
+						<AlertDescription>{extractErrorMessage(createError)}</AlertDescription>
 					</Alert>
 				)}
 				{updateError && (
-					<Alert level="error">
-						<Alert.Content>{updateError.message}</Alert.Content>
+					<Alert variant="destructive">
+						<AlertDescription>{extractErrorMessage(updateError)}</AlertDescription>
 					</Alert>
 				)}
 			</>
@@ -130,9 +168,9 @@ export default function CreateOrUpdateUserForm({ user }: Props) {
 					<AccountDetails />
 				</div>
 
-				{!user?.is_server_owner && (
+				{!user?.isServerOwner && (
 					<>
-						<UserPermissionsForm />
+						<UserPermissionsTable />
 						<UserRestrictionsForm />
 						<MaxSessionsAllowed />
 					</>

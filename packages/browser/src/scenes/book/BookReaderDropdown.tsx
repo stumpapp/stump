@@ -1,21 +1,21 @@
 import { ButtonOrLink, DropdownMenu, IconButton } from '@stump/components'
-import { Media } from '@stump/sdk'
+import { BookCardFragment } from '@stump/graphql'
 import { ChevronDown } from 'lucide-react'
 import { useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router'
 
-import paths from '@/paths'
+import { usePaths } from '@/paths'
 import { EBOOK_EXTENSION } from '@/utils/patterns'
 
 type Props = {
-	book: Media
+	book: BookCardFragment
 }
 
 export default function BookReaderDropdown({ book }: Props) {
 	const navigate = useNavigate()
+	const paths = usePaths()
 
-	const currentPage = book?.current_page ?? -1
-
+	const currentPage = useMemo(() => book.readProgress?.page ?? -1, [book])
 	/**
 	 * A boolean used to control the rendering of the 'Read again' prompt. A book
 	 * is considered to be read again if:
@@ -29,7 +29,7 @@ export default function BookReaderDropdown({ book }: Props) {
 		return isReadAgainPrompt(book)
 	}, [book])
 
-	const epubcfi = book?.current_epubcfi
+	const epubcfi = book?.readProgress?.epubcfi
 	const title = useMemo(() => {
 		if (isReadAgain) {
 			return 'Read again'
@@ -44,19 +44,21 @@ export default function BookReaderDropdown({ book }: Props) {
 	 * The URL to use when the user wants to continue reading from where they last left off
 	 */
 	const continueReadingLink = useMemo(() => {
-		const { current_epubcfi, id, current_page } = book
+		if (!book.readProgress) return undefined
 
-		if (current_epubcfi) {
-			return paths.bookReader(id, {
-				epubcfi: current_epubcfi,
+		const { page, epubcfi } = book.readProgress
+
+		if (epubcfi) {
+			return paths.bookReader(book.id, {
+				epubcfi,
 				isEpub: true,
 			})
-		} else if (!!current_page && current_page > 0) {
-			return paths.bookReader(id, { page: current_page })
+		} else if (!!page && page > 0) {
+			return paths.bookReader(book.id, { page })
 		} else {
 			return undefined
 		}
-	}, [book])
+	}, [book, paths])
 
 	/**
 	 * The URL to use when the user wants to read from the beginning
@@ -74,7 +76,7 @@ export default function BookReaderDropdown({ book }: Props) {
 				return paths.bookReader(id, { isIncognito: incognito || undefined, page: 1 })
 			}
 		},
-		[book],
+		[book, paths],
 	)
 
 	/**
@@ -84,35 +86,37 @@ export default function BookReaderDropdown({ book }: Props) {
 	 * If the book is completed, the read link will omit the epubcfi or page number
 	 */
 	const readUrl = useMemo(() => {
-		if (!book) return undefined
+		const { id, readProgress, extension } = book
 
-		const { current_epubcfi, extension, id, current_page } = book
+		const { epubcfi, page } = readProgress || {}
 
-		if (current_epubcfi || extension.match(EBOOK_EXTENSION)) {
+		if (epubcfi || extension.match(EBOOK_EXTENSION)) {
 			return paths.bookReader(id, {
-				epubcfi: isReadAgain ? undefined : current_epubcfi,
+				epubcfi: isReadAgain ? undefined : epubcfi,
 				isEpub: true,
 			})
 		} else {
-			return paths.bookReader(id, { page: isReadAgain ? 1 : current_page || 1 })
+			return paths.bookReader(id, { page: isReadAgain ? 1 : page || 1 })
 		}
-	}, [book, isReadAgain])
+	}, [book, isReadAgain, paths])
 
 	return (
 		<div className="flex items-center">
 			<ButtonOrLink
 				className="w-full rounded-r-none"
 				variant="primary"
+				newYork
 				href={readUrl}
 				title={title}
 			>
 				{title}
 			</ButtonOrLink>
+
 			<DropdownMenu
 				align="end"
 				contentWrapperClassName="w-18"
 				trigger={
-					<IconButton className="rounded-l-none" variant="primary">
+					<IconButton className="h-7 rounded-l-none" variant="primary">
 						<ChevronDown className="h-4 w-4" />
 					</IconButton>
 				}
@@ -140,12 +144,12 @@ export default function BookReaderDropdown({ book }: Props) {
 	)
 }
 
-export const isReadAgainPrompt = (book: Media) => {
-	const { is_completed, current_page, pages, current_epubcfi, extension } = book
+export const isReadAgainPrompt = (
+	book: Pick<BookCardFragment, 'pages' | 'readProgress' | 'readHistory' | 'extension'>,
+) => {
+	const { readProgress, readHistory } = book
 
-	const isEpub = extension.match(EBOOK_EXTENSION)
-	const epubCompleted = isEpub && !current_epubcfi && is_completed
-	const otherCompleted = !isEpub && current_page === pages && is_completed
+	const isHistoricallyCompleted = readHistory?.some((h) => h.completedAt) ?? false
 
-	return epubCompleted || otherCompleted
+	return isHistoricallyCompleted && !readProgress
 }

@@ -1,22 +1,55 @@
+import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Heading, Text } from '@stump/components'
-import { Media, MediaMetadata } from '@stump/sdk'
+import {
+	BookOverviewHeaderQuery,
+	graphql,
+	MediaFilterInput,
+	MediaMetadataFilterInput,
+} from '@stump/graphql'
 
 import SearchLinkBadge from '@/components/SearchLinkBadge'
 import TagList from '@/components/tags/TagList'
-import { formatBookName } from '@/utils/format'
 
 import paths from '../../paths'
 import BookLibrarySeriesLinks from './BookLibrarySeriesLinks'
+
+export const query = graphql(`
+	query BookOverviewHeader($id: ID!) {
+		mediaById(id: $id) {
+			id
+			resolvedName
+			seriesId
+			extension
+			pages
+			metadata {
+				ageRating
+				genres
+				publisher
+				writers
+				year
+			}
+			tags {
+				id
+				name
+			}
+		}
+	}
+`)
+
+type Props = {
+	id: string
+}
 
 interface MetadataTableItem {
 	keynameBase: string
 	prefix: string
 	values: string[]
-	searchKey: string
+	search?: MediaFilterInput
 }
 
-function build_metadata_table(metadata: MediaMetadata) {
+function build_metadata_table(media: BookOverviewHeaderQuery['mediaById']): MetadataTableItem[] {
 	const table: MetadataTableItem[] = []
+	const metadata = media?.metadata
 
 	if (!metadata) {
 		return table
@@ -26,7 +59,7 @@ function build_metadata_table(metadata: MediaMetadata) {
 		keynameBase: string,
 		prefix: string,
 		values: string[],
-		searchKey: string,
+		search?: MediaMetadataFilterInput,
 	) => {
 		if (values && values.length > 0) {
 			// if all values are empty, don't add the key
@@ -34,58 +67,67 @@ function build_metadata_table(metadata: MediaMetadata) {
 				return
 			}
 
+			const searchMedia = search ? { metadata: search } : search
+
 			table.push({
 				keynameBase: keynameBase,
 				prefix: prefix,
 				values: values,
-				searchKey: searchKey,
+				search: searchMedia,
 			})
 		}
 	}
 
-	const age_rating_num = metadata.age_rating ?? 0
+	const age_rating_num = metadata.ageRating ?? 0
 	const year_num = metadata.year ?? 0
+	const is_epub = media?.extension === 'epub'
+	const pages = media?.pages ?? 0
 
 	const publishers = [metadata.publisher ?? '']
-	const characters = metadata.characters?.filter((c) => !!c) ?? []
-	const colorists = metadata.colorists?.filter((c) => !!c) ?? []
 	const writers = metadata.writers?.filter((w) => !!w) ?? []
-	const pencillers = metadata.pencillers?.filter((p) => !!p) ?? []
-	const inkers = metadata.inkers?.filter((i) => !!i) ?? []
-	const letterers = metadata.letterers?.filter((l) => !!l) ?? []
-	const editors = metadata.editors?.filter((e) => !!e) ?? []
-	const genres = metadata.genre?.filter((g) => !!g) ?? []
+	const genres = metadata.genres?.filter((g) => !!g) ?? []
 	const age_rating = age_rating_num > 0 ? [age_rating_num.toString()] : []
 	const year = year_num > 0 ? [year_num.toString()] : []
 
-	add_to_table('writers', 'By ', writers, 'metadata[writer]')
-	add_to_table('publisher', 'Publisher: ', publishers, 'metadata[publisher]')
-	add_to_table('genres', 'Genres: ', genres, 'metadata[genre]')
-	add_to_table('characters', 'Characters: ', characters, 'metadata[character]')
-	add_to_table('colorists', 'Colorists: ', colorists, 'metadata[colorist]')
-	add_to_table('pencillers', 'Pencillers: ', pencillers, 'metadata[penciller]')
-	add_to_table('inkers', 'Inkers: ', inkers, 'metadata[inker]')
-	add_to_table('letters', 'Letterers: ', letterers, 'metadata[letterer]')
-	add_to_table('editors', 'Editors: ', editors, 'metadata[editor]')
-	add_to_table('age_rating', 'Age Rating: ', age_rating, 'metadata[age_rating]')
-	add_to_table('year_published', 'Year: ', year, 'metadata[year]')
+	if (is_epub) {
+		add_to_table('writers', 'By ', writers, {
+			writers: { likeAnyOf: metadata?.writers || '' },
+		})
+	}
+
+	add_to_table('publisher', 'Publisher: ', publishers, {
+		publisher: { contains: metadata?.publisher || '' },
+	})
+	add_to_table('genres', 'Genres: ', genres, {
+		genres: { likeAnyOf: metadata?.genres || '' },
+	})
+	add_to_table('age_rating', 'Age Rating: ', age_rating)
+	add_to_table('year_published', 'Year: ', year, { year: { eq: year_num } })
+
+	if (pages > 0) {
+		add_to_table('pages', 'Pages: ', [pages.toString()])
+	}
 
 	return table
 }
 
-type Props = {
-	media: Media | null
-}
-export default function BookOverviewSceneHeader({ media }: Props) {
+export default function BookOverviewSceneHeader({ id }: Props) {
+	const { sdk } = useSDK()
+	const {
+		data: { mediaById: media },
+	} = useSuspenseGraphQL(query, sdk.cacheKey('bookOverviewHeader', [id]), {
+		id: id || '',
+	})
+
 	if (!media) {
-		return null
+		throw new Error('Book not found')
 	}
 
-	const metadata_table = build_metadata_table(media?.metadata ?? {})
+	const metadata_table = build_metadata_table(media)
 
 	return (
 		<div className="flex flex-col items-center text-center tablet:items-start tablet:text-left">
-			<Heading size="sm">{formatBookName(media)}</Heading>
+			{<Heading size="sm">{media.resolvedName}</Heading>}
 
 			{!!metadata_table.length && (
 				<div>
@@ -94,10 +136,7 @@ export default function BookOverviewSceneHeader({ media }: Props) {
 							<Text>{metadata_row.prefix}</Text>
 							{metadata_row.values.map((element, index) => (
 								<div key={metadata_row.keynameBase + index}>
-									<SearchLinkBadge
-										searchKey={metadata_row.searchKey}
-										text={element}
-									></SearchLinkBadge>
+									<SearchLinkBadge search={metadata_row.search} text={element} />
 								</div>
 							))}
 						</div>
@@ -105,11 +144,7 @@ export default function BookOverviewSceneHeader({ media }: Props) {
 				</div>
 			)}
 
-			<BookLibrarySeriesLinks
-				libraryId={media.series?.library_id}
-				seriesId={media.series_id}
-				series={media.series}
-			/>
+			{media.seriesId && <BookLibrarySeriesLinks seriesId={media.seriesId} />}
 
 			<TagList tags={media.tags || null} baseUrl={paths.bookSearch()} />
 		</div>

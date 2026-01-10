@@ -1,22 +1,25 @@
-import { useLibraryQuery } from '@stump/client'
 import { Heading, Text } from '@stump/components'
-import { Media } from '@stump/sdk'
+import { FragmentType, graphql, useFragment } from '@stump/graphql'
 
 import { formatBytes } from '../../utils/format'
 
+export const BookFileInformationFragment = graphql(`
+	fragment BookFileInformation on Media {
+		id
+		size
+		extension
+		hash
+		relativeLibraryPath
+	}
+`)
+
 type Props = {
-	media: Media
+	fragment: FragmentType<typeof BookFileInformationFragment>
 }
+
 // TODO: redesign!!
-export default function BookFileInformation({ media }: Props) {
-	const { library } = useLibraryQuery({
-		params: {
-			series: {
-				id: [media.series_id],
-			},
-		},
-	})
-	const libraryPath = library?.path ?? ''
+export default function BookFileInformation({ fragment }: Props) {
+	const data = useFragment(BookFileInformationFragment, fragment)
 
 	/**
 	 * A function to format a long string to something more readable.
@@ -29,29 +32,24 @@ export default function BookFileInformation({ media }: Props) {
 		return `${start}...${end}`
 	}
 
-	/**
-	 * A function to format a path to something more readable. This just removes the library path from the path.
-	 */
-	const formatPath = (path: string) => path.replace(libraryPath, '')
-
 	return (
 		<div className="flex flex-col space-y-1 pb-3 pt-2 text-sm">
 			<Heading size="xs">File Information</Heading>
 			<div className="flex space-x-4">
 				<Text size="sm" variant="muted">
-					Size: {formatBytes(media.size.valueOf())}
+					Size: {formatBytes(data.size)}
 				</Text>
 				<Text size="sm" variant="muted">
-					Format: {media.extension?.toUpperCase()}
+					Format: {data.extension?.toUpperCase()}
 				</Text>
 			</div>
-			{media.hash && (
-				<Text size="sm" variant="muted" title={media.hash || ''}>
-					Hash: {formatHash(media.hash || '')}
+			{data.hash && (
+				<Text size="sm" variant="muted" title={data.hash || ''}>
+					Hash: {formatHash(data.hash || '')}
 				</Text>
 			)}
-			<Text size="sm" variant="muted" title={media.path}>
-				Relative path: {formatPath(media.path || '')}
+			<Text size="sm" variant="muted" title={data.relativeLibraryPath}>
+				Relative path: {data.relativeLibraryPath}
 			</Text>
 		</div>
 	)

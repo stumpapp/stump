@@ -1,63 +1,85 @@
-import { useMediaByIdQuery, useSDK } from '@stump/client'
-import { Alert, Breadcrumbs, Button, Heading, Text } from '@stump/components'
+import { useGraphQLMutation, useSDK, useSuspenseGraphQL } from '@stump/client'
+import { Alert, AlertDescription, Breadcrumbs, Button, Heading, Text } from '@stump/components'
+import { graphql } from '@stump/graphql'
 import { Construction } from 'lucide-react'
-import { useMemo } from 'react'
-import { Navigate, useParams } from 'react-router'
+import { useCallback, useEffect, useMemo } from 'react'
+import { useNavigate, useParams } from 'react-router'
 
 import { SceneContainer } from '@/components/container'
 import paths from '@/paths'
-import { formatBookName } from '@/utils/format'
 
 import BookThumbnailSelector from './BookThumbnailSelector'
 
+const query = graphql(`
+	query BookManagementScene($id: ID!) {
+		mediaById(id: $id) {
+			id
+			resolvedName
+			library {
+				id
+				name
+			}
+			series {
+				id
+				resolvedName
+			}
+			...BookThumbnailSelector
+		}
+	}
+`)
+
+const analyzeMutation = graphql(`
+	mutation BookManagementSceneAnalyze($id: ID!) {
+		analyzeMedia(id: $id)
+	}
+`)
+
 export default function BookManagementScene() {
+	const navigate = useNavigate()
+
 	const { sdk } = useSDK()
 	const { id } = useParams()
 
-	if (!id) {
-		throw new Error('You must provide a book ID for the reader')
-	}
-	const { media, isLoading } = useMediaByIdQuery(id, {
-		params: {
-			load_library: true,
-			load_series: true,
-		},
+	const {
+		data: { mediaById: book },
+	} = useSuspenseGraphQL(query, sdk.cacheKey('mediaById', [id]), {
+		id: id ?? '',
 	})
 
-	const breadcrumbs = useMemo(() => {
-		if (!media) return []
+	const { data, mutate: analyze, isPending } = useGraphQLMutation(analyzeMutation)
 
-		const { series } = media
+	const breadcrumbs = useMemo(() => {
+		if (!book) return []
+
+		const { series, library } = book
 
 		return [
-			...(series?.library
-				? [{ label: series.library.name, to: paths.librarySeries(series.library.id) }]
-				: []),
-			...(series
-				? [
-						{
-							label: series.metadata?.title || series.name,
-							to: paths.seriesOverview(series.id),
-						},
-					]
-				: []),
+			{ label: library.name, to: paths.librarySeries(library.id) },
 			{
-				label: formatBookName(media),
-				to: paths.bookOverview(media.id),
+				label: series.resolvedName,
+				to: paths.seriesOverview(series.id),
+			},
+			{
+				label: book.resolvedName,
+				to: paths.bookOverview(book.id),
 			},
 		]
-	}, [media])
+	}, [book])
 
-	if (isLoading) {
-		return null
-	} else if (!media) {
-		return <Navigate to={paths.notFound()} />
-	}
-
-	function handleAnalyze() {
-		if (id != undefined) {
-			sdk.media.analyze(id)
+	const handleAnalyze = useCallback(() => {
+		if (id != null) {
+			analyze({ id })
 		}
+	}, [analyze, id])
+
+	useEffect(() => {
+		if (!book) {
+			navigate(paths.notFound())
+		}
+	}, [book, navigate])
+
+	if (!book) {
+		return null
 	}
 
 	return (
@@ -74,19 +96,26 @@ export default function BookManagementScene() {
 					</Text>
 				</div>
 
-				<Alert level="warning" rounded="sm" icon={Construction}>
-					<Alert.Content>
+				<Alert variant="warning">
+					<Construction />
+					<AlertDescription>
 						Book management is currently under development and has very limited functionality
-					</Alert.Content>
+					</AlertDescription>
 				</Alert>
 
 				<div>
-					<Button size="md" variant="primary" onClick={handleAnalyze}>
+					<Button
+						title={data ? 'Analysis already in progress' : 'Analyze this book'}
+						size="md"
+						variant="primary"
+						onClick={handleAnalyze}
+						disabled={!!data || isPending}
+					>
 						Analyze Media
 					</Button>
 				</div>
 
-				<BookThumbnailSelector book={media} />
+				<BookThumbnailSelector fragment={book} />
 			</div>
 		</SceneContainer>
 	)

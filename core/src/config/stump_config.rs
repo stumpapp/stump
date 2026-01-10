@@ -8,9 +8,11 @@
 
 use std::{env, path::PathBuf};
 
+use async_graphql::SimpleObject;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
+use super::oidc_config::OidcConfig;
 use crate::{CoreError, CoreResult};
 use stump_config_gen::StumpConfigGenerator;
 
@@ -27,6 +29,7 @@ pub mod env_keys {
 	pub const PDFIUM_KEY: &str = "PDFIUM_PATH";
 	pub const ENABLE_SWAGGER_KEY: &str = "ENABLE_SWAGGER_UI";
 	pub const ENABLE_KOREADER_SYNC_KEY: &str = "ENABLE_KOREADER_SYNC";
+	pub const ENABLE_OPDS_PROGRESSION_KEY: &str = "ENABLE_OPDS_PROGRESSION";
 	pub const HASH_COST_KEY: &str = "HASH_COST";
 	pub const SESSION_TTL_KEY: &str = "SESSION_TTL";
 	pub const SESSION_EXPIRY_INTERVAL_KEY: &str = "SESSION_EXPIRY_CLEANUP_INTERVAL";
@@ -35,6 +38,20 @@ pub mod env_keys {
 	pub const MAX_IMAGE_UPLOAD_SIZE_KEY: &str = "STUMP_MAX_IMAGE_UPLOAD_SIZE";
 	pub const ENABLE_UPLOAD_KEY: &str = "STUMP_ENABLE_UPLOAD";
 	pub const MAX_FILE_UPLOAD_SIZE_KEY: &str = "STUMP_MAX_FILE_UPLOAD_SIZE";
+	pub const PDF_RENDER_DPI_KEY: &str = "STUMP_PDF_RENDER_DPI";
+	pub const PDF_MAX_DIMENSION_KEY: &str = "STUMP_PDF_MAX_DIMENSION";
+	pub const PDF_RENDER_FORMAT_KEY: &str = "STUMP_PDF_RENDER_FORMAT";
+	pub const PDF_CACHE_PAGES_KEY: &str = "STUMP_PDF_CACHE_PAGES";
+	pub const PDF_PRERENDER_RANGE_KEY: &str = "STUMP_PDF_PRERENDER_RANGE";
+	pub const PDF_HIGH_QUALITY_KEY: &str = "STUMP_PDF_HIGH_QUALITY";
+	// OIDC configuration keys
+	pub const OIDC_ENABLED_KEY: &str = "STUMP_OIDC_ENABLED";
+	pub const OIDC_CLIENT_ID_KEY: &str = "STUMP_OIDC_CLIENT_ID";
+	pub const OIDC_CLIENT_SECRET_KEY: &str = "STUMP_OIDC_CLIENT_SECRET";
+	pub const OIDC_ISSUER_URL_KEY: &str = "STUMP_OIDC_ISSUER_URL";
+	pub const OIDC_SCOPES_KEY: &str = "STUMP_OIDC_SCOPES";
+	pub const OIDC_ALLOW_REGISTRATION_KEY: &str = "STUMP_OIDC_ALLOW_REGISTRATION";
+	pub const OIDC_DISABLE_LOCAL_AUTH_KEY: &str = "STUMP_OIDC_DISABLE_LOCAL_AUTH";
 }
 use env_keys::*;
 
@@ -42,12 +59,19 @@ pub mod defaults {
 	pub const DEFAULT_PASSWORD_HASH_COST: u32 = 12;
 	pub const DEFAULT_SESSION_TTL: i64 = 3600 * 24 * 3; // 3 days
 	pub const DEFAULT_ACCESS_TOKEN_TTL: i64 = 3600 * 24; // 1 days
+	pub const DEFAULT_REFRESH_TOKEN_TTL: i64 = 3600 * 24 * 30; // 30 days
 	pub const DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL: u64 = 60 * 60 * 24; // 24 hours
 	pub const DEFAULT_MAX_SCANNER_CONCURRENCY: usize = 200;
-	pub const DEFAULT_MAX_THUMBNAIL_CONCURRENCY: usize = 50;
+	pub const DEFAULT_MAX_THUMBNAIL_CONCURRENCY: usize = 10;
 	pub const DEFAULT_MAX_IMAGE_UPLOAD_SIZE: usize = 20 * 1024 * 1024; // 20 MB
 	pub const DEFAULT_ENABLE_UPLOAD: bool = false;
 	pub const DEFAULT_MAX_FILE_UPLOAD_SIZE: usize = 20 * 1024 * 1024; // 20 MB
+	pub const DEFAULT_PDF_RENDER_DPI: u32 = 150; // Good balance of quality and performance
+	pub const DEFAULT_PDF_MAX_DIMENSION: u32 = 1200; // Optimized for faster rendering while maintaining quality
+	pub const DEFAULT_PDF_RENDER_FORMAT: &str = "webp"; // Default to WebP for better compression
+	pub const DEFAULT_PDF_CACHE_PAGES: bool = true; // Enable page caching by default
+	pub const DEFAULT_PDF_PRERENDER_RANGE: u32 = 5; // Pre-render 5 pages before/after current
+	pub const DEFAULT_PDF_HIGH_QUALITY: bool = true; // Enable high-quality rendering by default
 }
 use defaults::*;
 
@@ -78,8 +102,9 @@ use defaults::*;
 /// }
 /// ```
 #[derive(
-	StumpConfigGenerator, Serialize, Deserialize, Debug, Clone, PartialEq, specta::Type,
+	StumpConfigGenerator, Serialize, Deserialize, Debug, Clone, PartialEq, SimpleObject,
 )]
+#[graphql(name = "StumpConfig")]
 #[config_file_location(self.get_config_dir().join("Stump.toml"))]
 pub struct StumpConfig {
 	/// The "release" | "debug" profile with which the application is running.
@@ -94,8 +119,8 @@ pub struct StumpConfig {
 	#[env_key(PORT_KEY)]
 	pub port: u16,
 
-	/// The verbosity with which to log errors (default: 0).
-	#[default_value(0)]
+	/// The verbosity with which system logs are visible (default: 1).
+	#[default_value(1)]
 	#[env_key(VERBOSITY_KEY)]
 	pub verbosity: u64,
 
@@ -147,6 +172,12 @@ pub struct StumpConfig {
 	#[env_key(ENABLE_KOREADER_SYNC_KEY)]
 	pub enable_koreader_sync: bool,
 
+	/// Indicates if OPDS page access should automatically track reading progression.
+	/// When disabled, clients loading/preloading pages won't trigger progress updates.
+	#[default_value(false)]
+	#[env_key(ENABLE_OPDS_PROGRESSION_KEY)]
+	pub enable_opds_progression: bool,
+
 	/// Password hash cost
 	#[default_value(DEFAULT_PASSWORD_HASH_COST)]
 	#[env_key(HASH_COST_KEY)]
@@ -156,9 +187,15 @@ pub struct StumpConfig {
 	#[default_value(DEFAULT_SESSION_TTL)]
 	#[env_key(SESSION_TTL_KEY)]
 	pub session_ttl: i64,
+
 	#[default_value(DEFAULT_ACCESS_TOKEN_TTL)]
 	#[env_key("ACCESS_TOKEN_TTL")]
 	pub access_token_ttl: i64,
+
+	#[default_value(DEFAULT_REFRESH_TOKEN_TTL)]
+	#[env_key("REFRESH_TOKEN_TTL")]
+	pub refresh_token_ttl: i64,
+
 	/// The interval at which automatic deleted session cleanup is performed.
 	#[default_value(DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL)]
 	#[env_key(SESSION_EXPIRY_INTERVAL_KEY)]
@@ -194,6 +231,42 @@ pub struct StumpConfig {
 	#[default_value(DEFAULT_MAX_FILE_UPLOAD_SIZE)]
 	#[env_key(MAX_FILE_UPLOAD_SIZE_KEY)]
 	pub max_file_upload_size: usize,
+
+	/// The DPI (dots per inch) to use when rendering PDF pages as images.
+	#[default_value(DEFAULT_PDF_RENDER_DPI)]
+	#[env_key(PDF_RENDER_DPI_KEY)]
+	pub pdf_render_dpi: u32,
+
+	/// The maximum width or height dimension for rendered PDF pages.
+	#[default_value(DEFAULT_PDF_MAX_DIMENSION)]
+	#[env_key(PDF_MAX_DIMENSION_KEY)]
+	pub pdf_max_dimension: u32,
+
+	/// The image format to use for rendered PDF pages (webp, png, jpeg).
+	#[default_value(DEFAULT_PDF_RENDER_FORMAT.to_string())]
+	#[env_key(PDF_RENDER_FORMAT_KEY)]
+	pub pdf_render_format: String,
+
+	/// Whether to enable disk caching for rendered PDF pages.
+	#[default_value(DEFAULT_PDF_CACHE_PAGES)]
+	#[env_key(PDF_CACHE_PAGES_KEY)]
+	pub pdf_cache_pages: bool,
+
+	/// Number of pages to pre-render before and after the current page.
+	#[default_value(DEFAULT_PDF_PRERENDER_RANGE)]
+	#[env_key(PDF_PRERENDER_RANGE_KEY)]
+	pub pdf_prerender_range: u32,
+
+	/// Whether to enable high-quality rendering with smoothing (slower but better quality).
+	#[default_value(DEFAULT_PDF_HIGH_QUALITY)]
+	#[env_key(PDF_HIGH_QUALITY_KEY)]
+	pub pdf_high_quality: bool,
+
+	/// OIDC authentication configuration
+	#[serde(default)]
+	#[graphql(skip)]
+	#[default_value(None)]
+	pub oidc: Option<OidcConfig>,
 }
 
 impl StumpConfig {
@@ -231,6 +304,7 @@ impl StumpConfig {
 		let cache_dir = self.get_cache_dir();
 		let thumbs_dir = self.get_thumbnails_dir();
 		let avatars_dir = self.get_avatars_dir();
+		let pdf_cache_dir = self.get_pdf_cache_dir();
 		if !cache_dir.exists() {
 			std::fs::create_dir(cache_dir).unwrap();
 		}
@@ -239,6 +313,9 @@ impl StumpConfig {
 		}
 		if !avatars_dir.exists() {
 			std::fs::create_dir(avatars_dir).unwrap();
+		}
+		if !pdf_cache_dir.exists() {
+			std::fs::create_dir_all(pdf_cache_dir).unwrap();
 		}
 
 		// Save configuration to Stump.toml
@@ -288,9 +365,35 @@ impl StumpConfig {
 		PathBuf::from(&self.config_dir).join("avatars")
 	}
 
+	/// Returns a `PathBuf` to the PDF page cache directory
+	pub fn get_pdf_cache_dir(&self) -> PathBuf {
+		self.get_cache_dir().join("pdf_pages")
+	}
+
 	/// Returns a `PathBuf` to the Stump log file.
 	pub fn get_log_file(&self) -> PathBuf {
 		self.get_config_dir().join("Stump.log")
+	}
+
+	/// Parse the configured PDF render format into a SupportedImageFormat.
+	/// Falls back to WebP if the configured format is invalid.
+	pub fn get_pdf_render_format(
+		&self,
+	) -> models::shared::image_processor_options::SupportedImageFormat {
+		use models::shared::image_processor_options::SupportedImageFormat;
+
+		match self.pdf_render_format.to_lowercase().as_str() {
+			"webp" => SupportedImageFormat::Webp,
+			"jpeg" | "jpg" => SupportedImageFormat::Jpeg,
+			"png" => SupportedImageFormat::Png,
+			_ => {
+				tracing::warn!(
+					format = self.pdf_render_format,
+					"Invalid PDF render format, falling back to WebP"
+				);
+				SupportedImageFormat::Webp
+			},
+		}
 	}
 }
 
@@ -326,6 +429,7 @@ mod tests {
 			db_path: Some("not_a_real_path".to_string()),
 			client_dir: Some("not_a_real_dir".to_string()),
 			custom_templates_dir: None,
+			enable_opds_progression: Some(false),
 			config_dir: None,
 			allowed_origins: Some(vec!["origin1".to_string(), "origin2".to_string()]),
 			pdfium_path: Some("not_a_path_to_pdfium".to_string()),
@@ -334,12 +438,20 @@ mod tests {
 			password_hash_cost: None,
 			session_ttl: None,
 			access_token_ttl: None,
+			refresh_token_ttl: None,
 			expired_session_cleanup_interval: None,
 			max_scanner_concurrency: None,
 			max_thumbnail_concurrency: None,
 			max_image_upload_size: None,
 			enable_upload: None,
 			max_file_upload_size: None,
+			pdf_render_dpi: None,
+			pdf_max_dimension: None,
+			pdf_render_format: None,
+			pdf_cache_pages: None,
+			pdf_prerender_range: None,
+			pdf_high_quality: None,
+			oidc: None,
 		};
 		partial_config.apply_to_config(&mut config);
 
@@ -368,9 +480,11 @@ mod tests {
 				pdfium_path: Some("not_a_path_to_pdfium".to_string()),
 				enable_swagger: Some(false),
 				enable_koreader_sync: Some(false),
+				enable_opds_progression: Some(false),
 				password_hash_cost: Some(DEFAULT_PASSWORD_HASH_COST),
 				session_ttl: Some(DEFAULT_SESSION_TTL),
 				access_token_ttl: Some(DEFAULT_ACCESS_TOKEN_TTL),
+				refresh_token_ttl: Some(DEFAULT_REFRESH_TOKEN_TTL),
 				expired_session_cleanup_interval: Some(
 					DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL
 				),
@@ -378,7 +492,14 @@ mod tests {
 				max_thumbnail_concurrency: Some(DEFAULT_MAX_THUMBNAIL_CONCURRENCY),
 				max_image_upload_size: Some(DEFAULT_MAX_IMAGE_UPLOAD_SIZE),
 				enable_upload: Some(DEFAULT_ENABLE_UPLOAD),
-				max_file_upload_size: Some(DEFAULT_MAX_FILE_UPLOAD_SIZE)
+				max_file_upload_size: Some(DEFAULT_MAX_FILE_UPLOAD_SIZE),
+				pdf_render_dpi: Some(DEFAULT_PDF_RENDER_DPI),
+				pdf_max_dimension: Some(DEFAULT_PDF_MAX_DIMENSION),
+				pdf_render_format: Some(DEFAULT_PDF_RENDER_FORMAT.to_string()),
+				pdf_cache_pages: Some(DEFAULT_PDF_CACHE_PAGES),
+				pdf_prerender_range: Some(DEFAULT_PDF_PRERENDER_RANGE),
+				pdf_high_quality: Some(DEFAULT_PDF_HIGH_QUALITY),
+				oidc: None,
 			}
 		);
 
@@ -422,9 +543,11 @@ mod tests {
 						pdfium_path: None,
 						enable_swagger: true,
 						enable_koreader_sync: false,
+						enable_opds_progression: false,
 						password_hash_cost: 1,
 						session_ttl: DEFAULT_SESSION_TTL,
 						access_token_ttl: DEFAULT_ACCESS_TOKEN_TTL,
+						refresh_token_ttl: DEFAULT_REFRESH_TOKEN_TTL,
 						expired_session_cleanup_interval:
 							DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL,
 						custom_templates_dir: None,
@@ -433,6 +556,13 @@ mod tests {
 						max_image_upload_size: DEFAULT_MAX_IMAGE_UPLOAD_SIZE,
 						enable_upload: DEFAULT_ENABLE_UPLOAD,
 						max_file_upload_size: DEFAULT_MAX_FILE_UPLOAD_SIZE,
+						pdf_render_dpi: DEFAULT_PDF_RENDER_DPI,
+						pdf_max_dimension: DEFAULT_PDF_MAX_DIMENSION,
+						pdf_render_format: DEFAULT_PDF_RENDER_FORMAT.to_string(),
+						pdf_cache_pages: DEFAULT_PDF_CACHE_PAGES,
+						pdf_prerender_range: DEFAULT_PDF_PRERENDER_RANGE,
+						pdf_high_quality: DEFAULT_PDF_HIGH_QUALITY,
+						oidc: None,
 					}
 				);
 			},

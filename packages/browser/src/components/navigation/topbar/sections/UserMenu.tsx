@@ -1,8 +1,8 @@
 import { invalidateQueries, useSDK } from '@stump/client'
 import { Avatar, cn, NavigationMenu } from '@stump/components'
 import { Bell, LogOut } from 'lucide-react'
-import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router'
+import { toast } from 'sonner'
 
 import { useAppContext } from '@/context'
 import paths from '@/paths'
@@ -21,7 +21,7 @@ export default function UserMenu() {
 	const logout = async () => {
 		try {
 			await sdk.auth.logout()
-			await invalidateQueries({ keys: [sdk.server.keys.claimedStatus] })
+			await invalidateQueries({ keys: [sdk.cacheKeys.claimStatus] })
 			setUser(null)
 			navigate('/auth')
 		} catch (error) {
@@ -44,7 +44,7 @@ export default function UserMenu() {
 		<NavigationMenu.Item>
 			<NavigationMenu.Trigger className={classes} showChevron={false}>
 				<Avatar
-					src={user.avatar_url || undefined}
+					src={user.avatarUrl || undefined}
 					fallback={user.username.slice(0, 2).toUpperCase()}
 					fallbackWrapperClassName="text-xs select-none"
 					rounded="lg"

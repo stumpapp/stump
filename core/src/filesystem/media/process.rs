@@ -1,24 +1,24 @@
 use std::{
 	collections::HashMap,
-	fs::File,
-	io::BufReader,
 	path::{Path, PathBuf},
 };
 
-use serde::{Deserialize, Serialize};
+use models::{
+	entity::library_config, shared::image_processor_options::SupportedImageFormat,
+};
 use tokio::{sync::oneshot, task::spawn_blocking};
-use tracing::debug;
 
 use crate::{
 	config::StumpConfig,
-	db::entity::{LibraryConfig, MediaMetadata, SeriesMetadata},
 	filesystem::{
-		content_type::ContentType, epub::EpubProcessor, error::FileError,
-		image::ImageFormat, pdf::PdfProcessor,
+		content_type::ContentType,
+		error::FileError,
+		media::{epub::EpubProcessor, pdf::PdfProcessor},
+		FileParts, PathUtils,
 	},
 };
 
-use super::{rar::RarProcessor, zip::ZipProcessor};
+use super::{metadata::ProcessedMediaMetadata, rar::RarProcessor, zip::ZipProcessor};
 
 /// A struct representing the options for processing a file. This is a subset of [`LibraryConfig`]
 /// and is used to pass options to the [`FileProcessor`] implementations.
@@ -36,8 +36,8 @@ pub struct FileProcessorOptions {
 	pub generate_koreader_hashes: bool,
 }
 
-impl From<LibraryConfig> for FileProcessorOptions {
-	fn from(options: LibraryConfig) -> Self {
+impl From<library_config::Model> for FileProcessorOptions {
+	fn from(options: library_config::Model) -> Self {
 		Self {
 			convert_rar_to_zip: options.convert_rar_to_zip,
 			delete_conversion_source: options.hard_delete_conversions,
@@ -48,8 +48,8 @@ impl From<LibraryConfig> for FileProcessorOptions {
 	}
 }
 
-impl From<&LibraryConfig> for FileProcessorOptions {
-	fn from(options: &LibraryConfig) -> Self {
+impl From<&library_config::Model> for FileProcessorOptions {
+	fn from(options: &library_config::Model) -> Self {
 		Self {
 			convert_rar_to_zip: options.convert_rar_to_zip,
 			delete_conversion_source: options.hard_delete_conversions,
@@ -60,6 +60,7 @@ impl From<&LibraryConfig> for FileProcessorOptions {
 	}
 }
 
+#[derive(Debug, Clone, Default)]
 pub struct ProcessedFileHashes {
 	pub hash: Option<String>,
 	pub koreader_hash: Option<String>,
@@ -91,7 +92,9 @@ pub trait FileProcessor {
 		config: &StumpConfig,
 	) -> Result<ProcessedFile, FileError>;
 
-	fn process_metadata(path: &str) -> Result<Option<MediaMetadata>, FileError>;
+	/// Process the metadata of a file. This should gather the metadata of the file
+	/// without processing the entire file.
+	fn process_metadata(path: &str) -> Result<Option<ProcessedMediaMetadata>, FileError>;
 
 	/// Get the bytes of a page of the file.
 	fn get_page(
@@ -116,29 +119,9 @@ pub trait FileConverter {
 	fn to_zip(
 		path: &str,
 		delete_source: bool,
-		image_format: Option<ImageFormat>,
+		image_format: Option<SupportedImageFormat>,
 		config: &StumpConfig,
 	) -> Result<PathBuf, FileError>;
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-pub struct SeriesJson {
-	pub version: Option<String>,
-	pub metadata: SeriesMetadata,
-}
-
-impl SeriesJson {
-	pub fn from_file(path: &Path) -> Result<SeriesJson, FileError> {
-		let file = File::open(path)?;
-		let reader = BufReader::new(file);
-		let series_json: SeriesJson = serde_json::from_reader(reader)?;
-		Ok(series_json)
-	}
-
-	pub fn from_folder(folder: &Path) -> Result<SeriesJson, FileError> {
-		let series_json_path = folder.join("series.json");
-		SeriesJson::from_file(&series_json_path)
-	}
 }
 
 /// Struct representing a processed file. This is the output of the `process` function
@@ -148,8 +131,57 @@ pub struct ProcessedFile {
 	pub path: PathBuf,
 	pub hash: Option<String>,
 	pub koreader_hash: Option<String>,
-	pub metadata: Option<MediaMetadata>,
+	pub metadata: Option<ProcessedMediaMetadata>,
 	pub pages: i32,
+}
+
+#[derive(Debug)]
+enum ProcessorType {
+	Zip,
+	Rar,
+	Epub,
+	Pdf,
+}
+
+fn determine_processor(path: &Path) -> Result<ProcessorType, FileError> {
+	let mime = ContentType::from_path(path).mime_type();
+	let FileParts { extension, .. } = path.file_parts();
+
+	tracing::debug!(
+		?path,
+		?mime,
+		?extension,
+		"Determining processor type for entry"
+	);
+
+	match (mime.as_str(), extension.to_lowercase().as_str()) {
+		("application/zip" | "application/vnd.comicbook+zip", ext) if ext != "epub" => {
+			Ok(ProcessorType::Zip)
+		},
+		("application/vnd.rar" | "application/vnd.comicbook-rar", _) => {
+			Ok(ProcessorType::Rar)
+		},
+		("application/epub+zip", _) => Ok(ProcessorType::Epub),
+		("application/zip", "epub") => Ok(ProcessorType::Epub),
+		("application/pdf", _) => Ok(ProcessorType::Pdf),
+		_ => Err(FileError::UnsupportedFileType(path.display().to_string())),
+	}
+}
+
+/// A macro to dispatch a method call to the appropriate `FileProcessor` implementation
+/// based on the file's mime type. This macro is used to reduce boilerplate code in
+/// the functions below, which all follow the same pattern for determining which processor
+/// to use for the given path
+macro_rules! dispatch_processor {
+    ($path:expr, $method:ident $(, $arg:expr)*) => {{
+        let processor_type = determine_processor($path.as_ref())?;
+        match processor_type {
+            ProcessorType::Zip => ZipProcessor::$method($($arg),*),
+            ProcessorType::Rar => RarProcessor::$method($($arg),*),
+            ProcessorType::Epub => EpubProcessor::$method($($arg),*),
+            ProcessorType::Pdf => PdfProcessor::$method($($arg),*),
+        }
+    }};
 }
 
 /// A function to process a file in a blocking manner. This will call the appropriate
@@ -160,22 +192,8 @@ pub fn process(
 	options: FileProcessorOptions,
 	config: &StumpConfig,
 ) -> Result<ProcessedFile, FileError> {
-	debug!(?path, ?options, "Processing entry");
-	let mime = ContentType::from_path(path).mime_type();
-
 	let path_str = path.to_str().unwrap_or_default();
-
-	match mime.as_str() {
-		"application/zip" | "application/vnd.comicbook+zip" => {
-			ZipProcessor::process(path_str, options, config)
-		},
-		"application/vnd.rar" | "application/vnd.comicbook-rar" => {
-			RarProcessor::process(path_str, options, config)
-		},
-		"application/epub+zip" => EpubProcessor::process(path_str, options, config),
-		"application/pdf" => PdfProcessor::process(path_str, options, config),
-		_ => Err(FileError::UnsupportedFileType(path.display().to_string())),
-	}
+	dispatch_processor!(path, process, path_str, options, config)
 }
 
 /// A function to process a file in the context of a spawned, blocking task. This will call the
@@ -218,28 +236,15 @@ pub async fn process_async(
 #[tracing::instrument(err, fields(path = %path.as_ref().display()))]
 pub fn process_metadata(
 	path: impl AsRef<Path>,
-) -> Result<Option<MediaMetadata>, FileError> {
-	let mime = ContentType::from_path(path.as_ref()).mime_type();
-
+) -> Result<Option<ProcessedMediaMetadata>, FileError> {
 	let path_str = path.as_ref().to_str().unwrap_or_default();
-
-	match mime.as_str() {
-		"application/zip" | "application/vnd.comicbook+zip" => {
-			ZipProcessor::process_metadata(path_str)
-		},
-		"application/vnd.rar" | "application/vnd.comicbook-rar" => {
-			RarProcessor::process_metadata(path_str)
-		},
-		"application/epub+zip" => EpubProcessor::process_metadata(path_str),
-		"application/pdf" => PdfProcessor::process_metadata(path_str),
-		_ => Err(FileError::UnsupportedFileType(path_str.to_string())),
-	}
+	dispatch_processor!(path, process_metadata, path_str)
 }
 
 #[tracing::instrument(err, fields(path = %path.as_ref().display()))]
 pub async fn process_metadata_async(
 	path: impl AsRef<Path>,
-) -> Result<Option<MediaMetadata>, FileError> {
+) -> Result<Option<ProcessedMediaMetadata>, FileError> {
 	let (tx, rx) = oneshot::channel();
 
 	let handle = spawn_blocking({
@@ -274,20 +279,7 @@ pub fn generate_hashes(
 	options: FileProcessorOptions,
 ) -> Result<ProcessedFileHashes, FileError> {
 	let path_str = path.as_ref().to_str().unwrap_or_default();
-
-	let mime = ContentType::from_path(path.as_ref()).mime_type();
-
-	match mime.as_str() {
-		"application/zip" | "application/vnd.comicbook+zip" => {
-			ZipProcessor::generate_hashes(path_str, options)
-		},
-		"application/vnd.rar" | "application/vnd.comicbook-rar" => {
-			RarProcessor::generate_hashes(path_str, options)
-		},
-		"application/epub+zip" => EpubProcessor::generate_hashes(path_str, options),
-		"application/pdf" => PdfProcessor::generate_hashes(path_str, options),
-		_ => Err(FileError::UnsupportedFileType(path_str.to_string())),
-	}
+	dispatch_processor!(path, generate_hashes, path_str, options)
 }
 
 #[tracing::instrument(err, fields(path = %path.as_ref().display()))]
@@ -331,29 +323,27 @@ pub fn get_page(
 	page: i32,
 	config: &StumpConfig,
 ) -> Result<(ContentType, Vec<u8>), FileError> {
-	let mime = ContentType::from_file(path).mime_type();
-
-	match mime.as_str() {
-		"application/zip" | "application/vnd.comicbook+zip" => {
-			ZipProcessor::get_page(path, page, config)
-		},
-		"application/vnd.rar" | "application/vnd.comicbook-rar" => {
-			RarProcessor::get_page(path, page, config)
-		},
-		"application/epub+zip" => EpubProcessor::get_page(path, page, config),
-		"application/pdf" => PdfProcessor::get_page(path, page, config),
-		_ => Err(FileError::UnsupportedFileType(path.to_string())),
-	}
+	dispatch_processor!(Path::new(path), get_page, path, page, config)
 }
 
 /// A function to extract the bytes of a page from a file in the context of a spawned, blocking task.
 /// This will call the [get_page] function and send the result back out through a oneshot channel.
+/// For PDF files, it uses optimized caching and pre-rendering.
 #[tracing::instrument(err, fields(path = %path.as_ref().display()))]
 pub async fn get_page_async(
 	path: impl AsRef<Path>,
 	page: i32,
 	config: &StumpConfig,
 ) -> Result<(ContentType, Vec<u8>), FileError> {
+	let path_str = path.as_ref().to_str().unwrap_or_default();
+	let mime = ContentType::from_file(path_str).mime_type();
+
+	// Use optimized PDF rendering for PDF files (includes caching if enabled)
+	if mime == "application/pdf" {
+		return PdfProcessor::get_page_async(path_str, page, config).await;
+	}
+
+	// For other file types, use the original blocking approach
 	let (tx, rx) = oneshot::channel();
 
 	let handle = spawn_blocking({
@@ -387,19 +377,7 @@ pub async fn get_page_async(
 /// Get the number of pages in a file. This will call the appropriate [`FileProcessor::get_page_count`]
 /// implementation based on the file's mime type, or return an error if the file type is not supported.
 pub fn get_page_count(path: &str, config: &StumpConfig) -> Result<i32, FileError> {
-	let mime = ContentType::from_file(path).mime_type();
-
-	match mime.as_str() {
-		"application/zip" | "application/vnd.comicbook+zip" => {
-			ZipProcessor::get_page_count(path, config)
-		},
-		"application/vnd.rar" | "application/vnd.comicbook-rar" => {
-			RarProcessor::get_page_count(path, config)
-		},
-		"application/epub+zip" => EpubProcessor::get_page_count(path, config),
-		"application/pdf" => PdfProcessor::get_page_count(path, config),
-		_ => Err(FileError::UnsupportedFileType(path.to_string())),
-	}
+	dispatch_processor!(Path::new(path), get_page_count, path, config)
 }
 
 /// Get the number of pages in a file in the context of a spawned, blocking task. This will call the
@@ -446,19 +424,7 @@ pub fn get_content_types_for_pages(
 	path: &str,
 	pages: Vec<i32>,
 ) -> Result<HashMap<i32, ContentType>, FileError> {
-	let mime = ContentType::from_file(path).mime_type();
-
-	match mime.as_str() {
-		"application/zip" | "application/vnd.comicbook+zip" => {
-			ZipProcessor::get_page_content_types(path, pages)
-		},
-		"application/vnd.rar" | "application/vnd.comicbook-rar" => {
-			RarProcessor::get_page_content_types(path, pages)
-		},
-		"application/epub+zip" => EpubProcessor::get_page_content_types(path, pages),
-		"application/pdf" => PdfProcessor::get_page_content_types(path, pages),
-		_ => Err(FileError::UnsupportedFileType(path.to_string())),
-	}
+	dispatch_processor!(Path::new(path), get_page_content_types, path, pages)
 }
 
 /// Get the content type for a specific page of a file.
@@ -470,22 +436,8 @@ fn get_content_type_for_page_sync(
 	path: &str,
 	page: i32,
 ) -> Result<ContentType, FileError> {
-	let mime = ContentType::from_file(path).mime_type();
-
-	let result = match mime.as_str() {
-		"application/zip" | "application/vnd.comicbook+zip" => {
-			ZipProcessor::get_page_content_types(path, [page].to_vec())
-		},
-		"application/vnd.rar" | "application/vnd.comicbook-rar" => {
-			RarProcessor::get_page_content_types(path, [page].to_vec())
-		},
-		"application/epub+zip" => {
-			EpubProcessor::get_page_content_types(path, [page].to_vec())
-		},
-		"application/pdf" => PdfProcessor::get_page_content_types(path, [page].to_vec()),
-		_ => return Err(FileError::UnsupportedFileType(path.to_string())),
-	}?;
-
+	let result =
+		dispatch_processor!(Path::new(path), get_page_content_types, path, vec![page])?;
 	Ok(result.get(&page).cloned().unwrap_or(ContentType::UNKNOWN))
 }
 
@@ -526,4 +478,80 @@ pub async fn get_content_type_for_page(
 	};
 
 	Ok(content_type)
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use crate::filesystem::media::tests::{
+		get_test_cbz_path, get_test_epub_path, get_test_pdf_path, get_test_rar_path,
+		get_test_zip_path,
+	};
+
+	#[test]
+	fn test_determine_processor_zip() {
+		let path_str = get_test_zip_path();
+		let path = Path::new(&path_str);
+		let result = determine_processor(path);
+		assert!(result.is_ok());
+		assert!(matches!(result.unwrap(), ProcessorType::Zip));
+	}
+
+	#[test]
+	fn test_determine_processor_cbz() {
+		let path_str = get_test_cbz_path();
+		let path = Path::new(&path_str);
+		let result = determine_processor(path);
+		assert!(result.is_ok());
+		assert!(matches!(result.unwrap(), ProcessorType::Zip));
+	}
+
+	#[test]
+	fn test_determine_processor_rar() {
+		let path_str = get_test_rar_path();
+		let path = Path::new(&path_str);
+		let result = determine_processor(path);
+		assert!(result.is_ok());
+		assert!(matches!(result.unwrap(), ProcessorType::Rar));
+	}
+
+	#[test]
+	fn test_determine_processor_epub() {
+		let path_str = get_test_epub_path();
+		let path = Path::new(&path_str);
+		let result = determine_processor(path);
+		assert!(result.is_ok());
+		assert!(matches!(result.unwrap(), ProcessorType::Epub));
+	}
+
+	// Note: Added to assert fix for bug reported on Discord.
+	// See https://discord.com/channels/972593831172272148/1428031745726484560/1428050250811183144
+	#[test]
+	fn test_determine_processor_epub_with_zip_mime() {
+		let epub_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+			.join("integration-tests/data/book-zip-mime.epub");
+		let result = determine_processor(&epub_path);
+		assert!(result.is_ok());
+		assert!(
+			matches!(result.unwrap(), ProcessorType::Epub),
+			"EPUB with .epub extension should be detected as EPUB even with zip mime type"
+		);
+	}
+
+	#[test]
+	fn test_determine_processor_pdf() {
+		let path_str = get_test_pdf_path();
+		let path = Path::new(&path_str);
+		let result = determine_processor(path);
+		assert!(result.is_ok());
+		assert!(matches!(result.unwrap(), ProcessorType::Pdf));
+	}
+
+	#[test]
+	fn test_determine_processor_unsupported() {
+		let path = Path::new("/fake/path/to/file.txt");
+		let result = determine_processor(path);
+		assert!(result.is_err());
+		assert!(matches!(result, Err(FileError::UnsupportedFileType(_))));
+	}
 }

@@ -1,7 +1,14 @@
-import { Platform, TauriRPC } from '@stump/client'
-import { CredentialStoreTokenState } from '@stump/sdk'
+import {
+	CredentialStoreTokenState,
+	Platform,
+	ServerConfig,
+	StoredCredentials,
+	TauriRPC,
+} from '@stump/client'
 import { invoke } from '@tauri-apps/api/core'
 import * as os from '@tauri-apps/plugin-os'
+
+import { StoredTokens } from '../stores/savedServer'
 
 type Return = TauriRPC & {
 	getNativePlatform: () => Promise<Platform>
@@ -38,32 +45,47 @@ export function useTauriRPC(): Return {
 
 	const getCurrentServerName = () => invoke<string | null>('get_current_server')
 
-	const initCredentialStore = () => invoke<void>('init_credential_store')
+	const initCredentialStore = (servers: string[]) =>
+		invoke<void>('init_credential_store', { servers })
 
-	const getCredentialStoreState = () =>
-		invoke<CredentialStoreTokenState>('get_credential_store_state')
+	const getStoreAuthState = () => invoke<CredentialStoreTokenState>('get_credential_store_state')
 
-	const clearCredentialStore = () => invoke<void>('clear_credential_store')
+	const clearStore = () => invoke<void>('clear_credential_store')
 
-	const deleteApiToken = (forServer: string) =>
-		invoke<void>('delete_api_token', { server: forServer })
+	const getCredentials = (forServer: string) =>
+		invoke<StoredCredentials | null>('get_credentials', { server: forServer })
 
-	const getApiToken = (forServer: string) =>
-		invoke<string | null>('get_api_token', { server: forServer })
+	const setCredentials = (forServer: string, config: StoredCredentials) =>
+		invoke<ServerConfig>('set_credentials', { server: forServer, credentials: config })
 
-	const setApiToken = (forServer: string, token: string) =>
-		invoke<void>('set_api_token', { server: forServer, token })
+	const deleteCredentials = (forServer: string) =>
+		invoke<void>('delete_credentials', { server: forServer })
+
+	const deleteTokens = (forServer: string) => invoke<void>('delete_tokens', { server: forServer })
+
+	const getTokens = (forServer: string) =>
+		invoke<StoredTokens | null>('get_tokens', { server: forServer })
+
+	const setTokens = (forServer: string, tokens: StoredTokens) =>
+		invoke<void>('set_tokens', { server: forServer, tokens })
+
+	const createServerEntry = (forServer: string) =>
+		invoke<void>('create_server_entry', { server: forServer })
 
 	return {
-		clearCredentialStore,
-		deleteApiToken,
-		getApiToken,
-		getCredentialStoreState,
+		clearStore,
+		deleteTokens,
+		getTokens,
+		getStoreAuthState,
 		getCurrentServerName,
 		getNativePlatform,
+		getCredentials,
+		setCredentials,
+		deleteCredentials,
 		initCredentialStore,
-		setApiToken,
+		setTokens,
 		setDiscordPresence,
 		setUseDiscordPresence,
+		createServerEntry,
 	}
 }

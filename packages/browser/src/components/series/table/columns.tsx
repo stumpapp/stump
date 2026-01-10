@@ -1,19 +1,21 @@
 import { Link, Text } from '@stump/components'
-import { ReactTableColumnSort, Series } from '@stump/sdk'
+import { SeriesModelOrdering } from '@stump/graphql'
+import { ColumnSort } from '@stump/sdk'
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
 
 import paths from '@/paths'
 
+import { SeriesCardData } from '../SeriesCard'
 import CoverImageCell from './CoverImageCell'
 
-const columnHelper = createColumnHelper<Series>()
+const columnHelper = createColumnHelper<SeriesCardData>()
 
 const coverColumn = columnHelper.display({
 	cell: ({
 		row: {
-			original: { id, name, metadata },
+			original: { id, resolvedName },
 		},
-	}) => <CoverImageCell id={id} title={metadata?.title || name} />,
+	}) => <CoverImageCell id={id} title={resolvedName} />,
 	enableGlobalFilter: true,
 	header: () => (
 		<Text size="sm" variant="secondary">
@@ -24,7 +26,7 @@ const coverColumn = columnHelper.display({
 	size: 60,
 })
 
-const nameColumn = columnHelper.accessor(({ name, metadata }) => metadata?.title || name, {
+const nameColumn = columnHelper.accessor(({ resolvedName }) => resolvedName, {
 	cell: ({
 		getValue,
 		row: {
@@ -45,11 +47,11 @@ const nameColumn = columnHelper.accessor(({ name, metadata }) => metadata?.title
 			Name
 		</Text>
 	),
-	id: 'name',
+	id: SeriesModelOrdering.Name,
 	minSize: 285,
 })
 
-const booksCountColumn = columnHelper.accessor((series) => series.media_count?.toString(), {
+const booksCountColumn = columnHelper.accessor((series) => series.mediaCount?.toString(), {
 	cell: ({ getValue }) => (
 		<Text size="sm" variant="muted">
 			{getValue()}
@@ -76,15 +78,24 @@ export const columnMap = {
 	books: booksCountColumn,
 	cover: coverColumn,
 	name: nameColumn,
-} as Record<string, ColumnDef<Series>>
+} as Record<string, ColumnDef<SeriesCardData>>
 
-export const defaultColumns = [coverColumn, nameColumn, booksCountColumn] as ColumnDef<Series>[]
+export const defaultColumns = [
+	coverColumn,
+	nameColumn,
+	booksCountColumn,
+] as ColumnDef<SeriesCardData>[]
+
+export const defaultColumnSort: ColumnSort[] = defaultColumns.map((column, idx) => ({
+	id: column.id || '',
+	position: idx,
+}))
 
 /**
  * A helper function to build the columns for the table based on the stored column selection. If
  * no columns are selected, or if the selection is empty, the default columns will be used.
  */
-export const buildColumns = (columns?: ReactTableColumnSort[]) => {
+export const buildColumns = (columns?: ColumnSort[]) => {
 	if (!columns || columns.length === 0) {
 		return defaultColumns
 	}
@@ -94,5 +105,5 @@ export const buildColumns = (columns?: ReactTableColumnSort[]) => {
 
 	return selectedColumnIds
 		.map((id) => columnMap[id as keyof typeof columnMap])
-		.filter(Boolean) as ColumnDef<Series>[]
+		.filter(Boolean) as ColumnDef<SeriesCardData>[]
 }

@@ -1,5 +1,7 @@
-import { Bookmark, EpubContent, Media } from '@stump/sdk'
+import { Bookmark } from '@stump/graphql'
 import { createContext, useContext } from 'react'
+
+import { ImageReaderBookRef } from '@/components/readers/imageBased/context'
 
 import { noop } from '../../../utils/misc'
 
@@ -23,6 +25,13 @@ export type EpubReaderChapterMeta = {
 	cfiRange: [string | undefined, string | undefined]
 }
 
+export interface EpubContent {
+	label: string
+	content: string
+	children: EpubContent[]
+	play_order: number
+}
+
 export type EpubReaderBookMeta = {
 	chapter: EpubReaderChapterMeta
 	toc: EpubContent[]
@@ -31,7 +40,7 @@ export type EpubReaderBookMeta = {
 }
 
 export type EpubReaderMeta = {
-	bookEntity: Media
+	bookEntity: ImageReaderBookRef
 	bookMeta: EpubReaderBookMeta | null
 	progress: number | null
 }
@@ -84,7 +93,7 @@ export const EpubReaderContext = createContext<EpubReaderContextProps>({
 		visible: false,
 	},
 	readerMeta: {
-		bookEntity: {} as Media,
+		bookEntity: {} as ImageReaderBookRef,
 		bookMeta: null,
 		progress: null,
 	},

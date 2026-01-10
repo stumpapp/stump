@@ -1,25 +1,26 @@
 import { useSDK } from '@stump/client'
 import { useRouter } from 'expo-router'
-import { Fragment } from 'react'
-import { Pressable, View } from 'react-native'
+import { BookCopy, Info, Slash } from 'lucide-react-native'
+import { Platform, Pressable, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { useActiveServer } from '~/components/activeServer'
-import { BookDescription, InfoRow, InfoSection } from '~/components/book/overview'
-import { FasterImage } from '~/components/Image'
+import { InfoRow, InfoSection } from '~/components/book/overview'
+import ChevronBackLink from '~/components/ChevronBackLink'
+import { ThumbnailImage } from '~/components/image'
 import {
 	getDateField,
 	getNumberField,
 	getPublicationThumbnailURL,
 	getStringField,
 } from '~/components/opds/utils'
-import { Button, Heading, icons, Text } from '~/components/ui'
+import { Button, Icon, Text } from '~/components/ui'
+import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
 import { cn } from '~/lib/utils'
+import { usePreferencesStore } from '~/stores'
 
 import { usePublicationContext } from './context'
-
-const { Info, Slash, BookCopy } = icons
 
 export default function Screen() {
 	const { sdk } = useSDK()
@@ -33,6 +34,12 @@ export default function Screen() {
 	const { title, identifier, belongsTo } = metadata || {}
 
 	const router = useRouter()
+	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
+
+	useDynamicHeader({
+		title: title || 'Publication',
+		headerLeft: Platform.OS === 'ios' ? () => <ChevronBackLink /> : undefined,
+	})
 
 	// TODO: once I sort out progress sync, prefetch the current page
 	// TODO: prefetch the first page of the publication, see https://github.com/candlefinance/faster-image/issues/73
@@ -70,25 +77,27 @@ export default function Screen() {
 	// const restMeta = omit(rest, ['numberOfPages', 'modified'])
 
 	return (
-		<SafeAreaView className="flex-1 bg-background">
-			<ScrollView className="flex-1 gap-5 bg-background px-4 tablet:px-6">
-				<View className="flex-1 gap-8">
+		<SafeAreaView
+			style={{ flex: 1 }}
+			edges={Platform.OS === 'ios' ? ['top', 'left', 'right'] : ['left', 'right']}
+		>
+			<ScrollView
+				className="flex-1 gap-5 bg-background px-4 tablet:px-6"
+				contentInsetAdjustmentBehavior="automatic"
+			>
+				<View className="flex-1 gap-8 py-4">
 					<View className="flex items-center gap-4">
-						<Heading size="lg" className="mt-6 leading-6">
-							{title || 'Publication'}
-						</Heading>
-						<View className="aspect-[2/3] self-center overflow-hidden rounded-lg">
-							<FasterImage
-								source={{
-									url: thumbnailURL || '',
-									headers: {
-										Authorization: sdk.authorizationHeader || '',
-									},
-									resizeMode: 'fill',
-								}}
-								style={{ height: 350, width: 'auto' }}
-							/>
-						</View>
+						<ThumbnailImage
+							source={{
+								uri: thumbnailURL || '',
+								headers: {
+									...sdk.customHeaders,
+									Authorization: sdk.authorizationHeader || '',
+								},
+							}}
+							resizeMode="stretch"
+							size={{ height: 235 / thumbnailRatio, width: 235 }}
+						/>
 					</View>
 
 					<View className="flex w-full flex-row items-center gap-2 tablet:max-w-sm tablet:self-center">
@@ -110,98 +119,140 @@ export default function Screen() {
 					</View>
 
 					{!canStream && (
-						<View className="rounded-lg bg-fill-info-secondary p-3">
+						<View className="squircle rounded-lg bg-fill-info-secondary p-3">
 							<Text>This publication lacks a defined reading order and cannot be streamed</Text>
 						</View>
 					)}
 
 					{!isSupportedStream && (
-						<View className="rounded-lg bg-fill-info-secondary p-3">
+						<View className="squircle rounded-lg bg-fill-info-secondary p-3">
 							<Text>
 								This publication contains unsupported media types and cannot be streamed yet
 							</Text>
 						</View>
 					)}
 
-					<View className="flex w-full gap-2">
-						<Text className="text-lg text-foreground-muted">Information</Text>
-
-						{hasInformation && (
-							<View className="flex flex-col gap-2 rounded-lg bg-background-surface p-3">
-								{identifier && <InfoRow label="Identifier" value={identifier} longValue />}
-								{description && <BookDescription description={description} />}
-								{modified && <InfoRow label="Modified" value={modified.format('MMMM DD, YYYY')} />}
-								{numberOfPages && (
-									<InfoRow label="Number of pages" value={numberOfPages.toString()} />
-								)}
-							</View>
-						)}
-
-						{!hasInformation && (
-							<View className="h-24 w-full items-center justify-center gap-2 rounded-lg border border-dashed border-edge p-3">
-								<View className="relative flex justify-center">
-									<View className="flex items-center justify-center rounded-lg bg-background-surface p-2">
-										<Info className="h-6 w-6 text-foreground-muted" />
-										<Slash className="absolute h-6 w-6 scale-x-[-1] transform text-foreground opacity-80" />
-									</View>
-								</View>
-
-								<Text>No information available</Text>
-							</View>
-						)}
-					</View>
-
-					<InfoSection label="Series">
-						{belongsToSeries && (
-							<Fragment>
-								<InfoRow label="Name" value={belongsToSeries.name} />
-
-								{belongsToSeries.position && (
-									<InfoRow label="Position" value={belongsToSeries.position.toString()} />
-								)}
-
-								{seriesURL && (
-									<View className="flex flex-row items-center justify-between py-1">
-										<Text className="shrink-0 text-foreground-subtle">Feed URL</Text>
-										<Pressable
-											onPress={() =>
-												router.push({
-													pathname: '/opds/[id]/feed',
-													params: { url: seriesURL, id: serverID },
-												})
-											}
+					<InfoSection
+						label="Information"
+						rows={[
+							...(identifier
+								? [<InfoRow key="identifier" label="Identifier" value={identifier} longValue />]
+								: []),
+							<InfoRow key="title" label="Title" value={title} longValue />,
+							...(description
+								? [<InfoRow key="description" label="Description" value={description} longValue />]
+								: []),
+							...(modified
+								? [
+										<InfoRow
+											key="modified"
+											label="Modified"
+											value={modified.format('MMMM DD, YYYY')}
+											longValue
+										/>,
+									]
+								: []),
+							...(numberOfPages
+								? [
+										<InfoRow
+											key="numberOfPages"
+											label="Number of pages"
+											value={numberOfPages.toString()}
+											longValue
+										/>,
+									]
+								: []),
+							...(!hasInformation
+								? [
+										<View
+											key="noInformation"
+											className="squircle h-24 w-full items-center justify-center gap-2 rounded-lg border border-dashed border-edge p-3"
 										>
-											{({ pressed }) => (
-												<View
-													className={cn(
-														'rounded-lg border border-edge bg-background-surface-secondary p-1 text-center',
-														{
-															'opacity-80': pressed,
-														},
-													)}
-												>
-													<Text>Go to feed</Text>
+											<View className="relative flex justify-center">
+												<View className="squircle flex items-center justify-center rounded-lg bg-background-surface p-2">
+													<Icon as={Info} className="h-6 w-6 text-foreground-muted" />
+													<Icon
+														as={Slash}
+														className="absolute h-6 w-6 scale-x-[-1] transform text-foreground opacity-80"
+													/>
 												</View>
-											)}
-										</Pressable>
-									</View>
-								)}
-							</Fragment>
-						)}
+											</View>
 
-						{!belongsTo?.series && (
-							<View className="h-24 w-full items-center justify-center gap-2 rounded-lg border border-dashed border-edge p-3">
-								<View className="relative flex justify-center">
-									<View className="flex items-center justify-center rounded-lg bg-background-surface p-2">
-										<BookCopy className="h-6 w-6 text-foreground-muted" />
-										<Slash className="absolute h-6 w-6 scale-x-[-1] transform text-foreground opacity-80" />
-									</View>
-								</View>
+											<Text>No information available</Text>
+										</View>,
+									]
+								: []),
+						]}
+					/>
 
-								<Text>No series information</Text>
-							</View>
-						)}
-					</InfoSection>
+					<InfoSection
+						label="Series"
+						rows={[
+							...(!belongsTo?.series
+								? [
+										<View
+											key="noSeries"
+											className="squircle h-24 w-full items-center justify-center gap-2 rounded-lg border border-dashed border-edge p-3"
+										>
+											<View className="relative flex justify-center">
+												<View className="squircle flex items-center justify-center rounded-lg bg-background-surface p-2">
+													<Icon as={BookCopy} className="h-6 w-6 text-foreground-muted" />
+													<Icon
+														as={Slash}
+														className="absolute h-6 w-6 scale-x-[-1] transform text-foreground opacity-80"
+													/>
+												</View>
+											</View>
+
+											<Text>No series information</Text>
+										</View>,
+									]
+								: []),
+							...(belongsToSeries?.name
+								? [<InfoRow key="seriesName" label="Name" value={belongsToSeries.name} />]
+								: []),
+							...(belongsToSeries?.position
+								? [
+										<InfoRow
+											key="seriesPosition"
+											label="Position"
+											value={belongsToSeries.position.toString()}
+										/>,
+									]
+								: []),
+							...(seriesURL
+								? [
+										<View
+											key="seriesURL"
+											className="flex flex-row items-center justify-between py-1"
+										>
+											<Text className="shrink-0 text-foreground-subtle">Feed URL</Text>
+											<Pressable
+												onPress={() =>
+													router.push({
+														pathname: '/opds/[id]/feed/[url]',
+														params: { url: seriesURL, id: serverID },
+													})
+												}
+											>
+												{({ pressed }) => (
+													<View
+														className={cn(
+															'squircle rounded-lg border border-edge bg-background-surface-secondary p-1 text-center',
+															{
+																'opacity-80': pressed,
+															},
+														)}
+													>
+														<Text>Go to feed</Text>
+													</View>
+												)}
+											</Pressable>
+										</View>,
+									]
+								: []),
+						]}
+					/>
 				</View>
 			</ScrollView>
 		</SafeAreaView>

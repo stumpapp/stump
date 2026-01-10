@@ -1,35 +1,9 @@
-use prisma_client_rust::chrono::{DateTime, FixedOffset};
 use serde::{Deserialize, Serialize};
-use specta::Type;
-use utoipa::ToSchema;
 
-use crate::{
-	db::entity::{macros::library_scan_details, Media, MediaMetadata},
-	filesystem::ProcessedFileHashes,
-	prisma::library_scan_record,
-	CoreError,
-};
+use crate::filesystem::media::{BuiltMedia, ProcessedFileHashes, ProcessedMediaMetadata};
 
-// TODO(granular-scans/metadata-merge): Support merge strategies for metadata at some point
-/*
-enum MergeStrategy {
-   Replace,
-   Merge,
-   // A third option to record the difference to a table and allow the user to manually resolve conflicts? A bit complex! but would be neat. Prolly not viable.
-}
-
-let scan_options: ScanOptions = {
-   merge_strategy: MergeStrategy::Replace,
-   ..Default::default()
-};
-
-See also https://docs.rs/merge/latest/merge/ for potentially useful crate
-*/
-
-#[derive(
-	Debug, Default, Clone, Copy, Deserialize, Serialize, PartialEq, Type, ToSchema,
-)]
-#[serde(default)]
+#[derive(Debug, Default, Clone, Copy, Deserialize, Serialize, PartialEq)]
+#[serde(default, rename_all = "camelCase")]
 pub struct CustomVisit {
 	pub regen_meta: bool,
 	pub regen_hashes: bool,
@@ -54,13 +28,13 @@ pub struct CustomVisitResult {
 	/// The ID of the book that was visited
 	pub id: String,
 	/// The metadata that was generated during the visit, if any
-	pub meta: Option<Box<MediaMetadata>>,
+	pub meta: Option<Box<ProcessedMediaMetadata>>,
 	/// The hashes that were generated during the visit, if any
 	pub hashes: Option<ProcessedFileHashes>,
 }
 
 pub enum BookVisitResult {
-	Built(Box<Media>),
+	Built(Box<BuiltMedia>),
 	Custom(CustomVisitResult),
 }
 
@@ -69,7 +43,15 @@ impl BookVisitResult {
 	/// the path to or the ID of the book.
 	pub fn error_ctx(&self) -> String {
 		match self {
-			BookVisitResult::Built(book) => book.path.clone(),
+			BookVisitResult::Built(result) => {
+				match result.media.path.clone().into_value() {
+					Some(sea_orm::Value::String(Some(s))) => *s,
+					_ => {
+						tracing::warn!(?result, "Processed media has invalid path?");
+						String::default()
+					},
+				}
+			},
 			BookVisitResult::Custom(result) => result.id.clone(),
 		}
 	}
@@ -78,18 +60,19 @@ impl BookVisitResult {
 /// The override options for a scan job. These options are used to override the default behavior, which generally
 /// means that the scanner will visit books it otherwise would not. How much extra work is done depends on the
 /// specific options.
-#[derive(Debug, Default, Clone, Copy, Deserialize, Serialize, Type, ToSchema)]
+#[derive(Debug, Default, Clone, Copy, Deserialize, Serialize)]
 pub struct ScanOptions {
 	#[serde(default)]
 	pub config: ScanConfig,
 }
 
-#[derive(Default, Debug, Clone, Copy, Deserialize, Serialize, Type, ToSchema)]
+#[derive(Default, Debug, Clone, Copy, Deserialize, Serialize)]
 #[serde(untagged)]
 pub enum ScanConfig {
 	#[default]
 	BuildChanged,
 	ForceRebuild {
+		#[serde(rename = "forceRebuild")]
 		force_rebuild: bool,
 	},
 	Custom(CustomVisit),
@@ -129,61 +112,11 @@ impl ScanOptions {
 	}
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
-pub struct LibraryScanRecord {
-	id: i32,
-	options: Option<ScanOptions>,
-	timestamp: DateTime<FixedOffset>,
-	library_id: String,
-	job_id: Option<String>,
-}
-
-impl TryFrom<library_scan_record::Data> for LibraryScanRecord {
-	type Error = CoreError;
-
-	fn try_from(data: library_scan_record::Data) -> Result<Self, Self::Error> {
-		let options = data
-			.options
-			.map(|options| serde_json::from_slice(&options))
-			.transpose()?;
-
-		Ok(Self {
-			id: data.id,
-			options,
-			timestamp: data.timestamp,
-			library_id: data.library_id,
-			job_id: data.job_id,
-		})
-	}
-}
-
-#[derive(Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
-pub struct LastLibraryScan {
-	pub options: Option<ScanOptions>,
-	pub timestamp: DateTime<FixedOffset>,
-}
-
-impl TryFrom<library_scan_details::scan_history::Data> for LastLibraryScan {
-	type Error = CoreError;
-
-	fn try_from(
-		data: library_scan_details::scan_history::Data,
-	) -> Result<Self, Self::Error> {
-		let options = data
-			.options
-			.map(|options| serde_json::from_slice(&options))
-			.transpose()?;
-
-		Ok(Self {
-			options,
-			timestamp: data.timestamp,
-		})
-	}
-}
-
 #[cfg(test)]
 mod tests {
-	use prisma_client_rust::chrono;
+
+	use models::entity::media;
+	use sea_orm::ActiveValue;
 
 	use super::*;
 
@@ -220,55 +153,32 @@ mod tests {
 	}
 
 	#[test]
-	fn test_try_from_library_scan_record() {
-		let data = library_scan_record::Data {
-			id: 1,
-			options: Some(
-				serde_json::to_vec(&ScanOptions {
-					config: ScanConfig::ForceRebuild {
-						force_rebuild: true,
-					},
-				})
-				.unwrap(),
-			),
-			timestamp: chrono::Utc::now().into(),
-			library_id: "library".to_string(),
-			job_id: Some("job".to_string()),
-			library: None,
-			job: None,
-		};
-
-		let record = LibraryScanRecord::try_from(data).unwrap();
-		assert_eq!(record.id, 1);
-		assert!(record.options.is_some());
-		assert_eq!(record.library_id, "library");
-		assert_eq!(record.job_id, Some("job".to_string()));
-	}
-
-	#[test]
 	fn test_error_ctx() {
-		let book = Media {
-			id: "book".to_string(),
-			path: "path".to_string(),
-			..Default::default()
+		let book = BuiltMedia {
+			media: media::ActiveModel {
+				id: ActiveValue::Set("book".to_string()),
+				path: ActiveValue::Set("path".to_string()),
+				..Default::default()
+			},
+			metadata: None,
 		};
 
 		let result = BookVisitResult::Built(Box::new(book.clone()));
-		assert_eq!(result.error_ctx(), book.path);
+		assert_eq!(result.error_ctx(), "path".to_string());
 
 		let result = BookVisitResult::Custom(CustomVisitResult {
 			id: "book".to_string(),
 			meta: None,
 			hashes: None,
 		});
-		assert_eq!(result.error_ctx(), book.id);
+		assert_eq!(result.error_ctx(), "book".to_string());
 
 		let result = BookVisitResult::Custom(CustomVisitResult {
 			id: "book".to_string(),
 			meta: None,
 			hashes: None,
 		});
-		assert_eq!(result.error_ctx(), book.id);
+		assert_eq!(result.error_ctx(), "book".to_string());
 	}
 
 	#[test]
@@ -280,7 +190,7 @@ mod tests {
 				}
 			})
 			.unwrap(),
-			r#"{"config":{"force_rebuild":true}}"#
+			r#"{"config":{"forceRebuild":true}}"#
 		);
 
 		assert_eq!(
@@ -290,7 +200,7 @@ mod tests {
 				}
 			})
 			.unwrap(),
-			r#"{"config":{"force_rebuild":false}}"#
+			r#"{"config":{"forceRebuild":false}}"#
 		);
 
 		assert_eq!(
@@ -301,7 +211,7 @@ mod tests {
 				})
 			})
 			.unwrap(),
-			r#"{"config":{"regen_meta":true,"regen_hashes":false}}"#
+			r#"{"config":{"regenMeta":true,"regenHashes":false}}"#
 		);
 
 		assert_eq!(
@@ -312,7 +222,7 @@ mod tests {
 				})
 			})
 			.unwrap(),
-			r#"{"config":{"regen_meta":false,"regen_hashes":true}}"#
+			r#"{"config":{"regenMeta":false,"regenHashes":true}}"#
 		);
 
 		assert_eq!(
@@ -323,14 +233,14 @@ mod tests {
 				})
 			})
 			.unwrap(),
-			r#"{"config":{"regen_meta":true,"regen_hashes":true}}"#
+			r#"{"config":{"regenMeta":true,"regenHashes":true}}"#
 		);
 	}
 
 	#[test]
 	fn test_deserialize_scan_options() {
 		assert!(matches!(
-			serde_json::from_str::<ScanOptions>(r#"{"config":{"force_rebuild":true}}"#)
+			serde_json::from_str::<ScanOptions>(r#"{"config":{"forceRebuild":true}}"#)
 				.unwrap()
 				.config,
 			ScanConfig::ForceRebuild {
@@ -339,7 +249,7 @@ mod tests {
 		));
 
 		assert!(matches!(
-			serde_json::from_str::<ScanOptions>(r#"{"config":{"force_rebuild":false}}"#)
+			serde_json::from_str::<ScanOptions>(r#"{"config":{"forceRebuild":false}}"#)
 				.unwrap()
 				.config,
 			ScanConfig::ForceRebuild {
@@ -348,7 +258,7 @@ mod tests {
 		));
 
 		assert!(matches!(
-			serde_json::from_str::<ScanOptions>(r#"{"config":{"regen_meta":true}}"#)
+			serde_json::from_str::<ScanOptions>(r#"{"config":{"regenMeta":true}}"#)
 				.unwrap()
 				.config,
 			ScanConfig::Custom(CustomVisit {
@@ -358,7 +268,7 @@ mod tests {
 		));
 
 		assert!(matches!(
-			serde_json::from_str::<ScanOptions>(r#"{"config":{"regen_hashes":true}}"#)
+			serde_json::from_str::<ScanOptions>(r#"{"config":{"regenHashes":true}}"#)
 				.unwrap()
 				.config,
 			ScanConfig::Custom(CustomVisit {
@@ -369,7 +279,7 @@ mod tests {
 
 		assert!(matches!(
 			serde_json::from_str::<ScanOptions>(
-				r#"{"config":{"regen_meta":true,"regen_hashes":true}}"#
+				r#"{"config":{"regenMeta":true,"regenHashes":true}}"#
 			)
 			.unwrap()
 			.config,

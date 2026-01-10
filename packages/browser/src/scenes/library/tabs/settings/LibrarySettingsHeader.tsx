@@ -13,13 +13,13 @@ import { routeGroups } from './routes'
 export default function LibrarySettingsHeader() {
 	const location = useLocation()
 	const {
-		preferences: { primary_navigation_mode, layout_max_width_px, enable_double_sidebar },
+		preferences: { primaryNavigationMode, layoutMaxWidthPx, enableDoubleSidebar },
 	} = usePreferences()
 	const { t } = useLocaleContext()
 
 	const isMobile = useMediaMatch('(max-width: 768px)')
-	const preferTopBar = primary_navigation_mode === 'TOPBAR'
-	const displayingSideBar = !!enable_double_sidebar && !isMobile
+	const preferTopBar = primaryNavigationMode === 'TOPBAR'
+	const displayingSideBar = !!enableDoubleSidebar && !isMobile
 
 	/**
 	 * The active route based on the current location
@@ -60,12 +60,12 @@ export default function LibrarySettingsHeader() {
 				'flex w-full flex-col items-start justify-between gap-4 border-b border-b-edge p-4 lg:flex-row lg:gap-0',
 				{
 					// Note: We make the border transparent because the width constraint when using a top bar
-					'mx-auto border-b-transparent': preferTopBar && !!layout_max_width_px,
+					'mx-auto border-b-transparent': preferTopBar && !!layoutMaxWidthPx,
 					'pl-52': displayingSideBar,
 				},
 			)}
 			style={{
-				maxWidth: preferTopBar ? layout_max_width_px || undefined : undefined,
+				maxWidth: preferTopBar ? layoutMaxWidthPx || undefined : undefined,
 			}}
 		>
 			<div className="flex flex-col space-y-4">

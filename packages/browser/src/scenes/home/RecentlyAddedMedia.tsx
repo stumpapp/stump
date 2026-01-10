@@ -1,28 +1,73 @@
-import { useRecentlyAddedMediaQuery } from '@stump/client'
+import { PREFETCH_STALE_TIME, useInfiniteSuspenseGraphQL, useSDK } from '@stump/client'
 import { Text } from '@stump/components'
+import { graphql } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
+import { useQueryClient } from '@tanstack/react-query'
 import { BookX } from 'lucide-react'
 import { Suspense, useCallback } from 'react'
 
-import MediaCard from '@/components/book/BookCard'
+import BookCard from '@/components/book/BookCard'
 import HorizontalCardList from '@/components/HorizontalCardList'
 
-function RecentlyAddedMedia() {
-	const { t } = useLocaleContext()
-	const { media, fetchNextPage, hasNextPage, isFetching } = useRecentlyAddedMediaQuery({
-		limit: 20,
-		suspense: true,
-	})
+const query = graphql(`
+	query RecentlyAddedMediaQuery($pagination: Pagination!) {
+		recentlyAddedMedia(pagination: $pagination) {
+			nodes {
+				id
+				...BookCard
+			}
+			pageInfo {
+				__typename
+				... on CursorPaginationInfo {
+					currentCursor
+					nextCursor
+					limit
+				}
+			}
+		}
+	}
+`)
 
-	const cards = media.map((media) => <MediaCard media={media} key={media.id} fullWidth={false} />)
+export const usePrefetchRecentlyAddedMedia = () => {
+	const { sdk } = useSDK()
+	const client = useQueryClient()
+	return useCallback(() => {
+		client.prefetchInfiniteQuery({
+			queryKey: ['recentlyAddedMedia'],
+			initialPageParam: {
+				cursor: {
+					limit: 20,
+				},
+			},
+			queryFn: ({ pageParam }) => {
+				return sdk.execute(query, {
+					pagination: pageParam,
+				})
+			},
+			staleTime: PREFETCH_STALE_TIME,
+		})
+	}, [sdk, client])
+}
+
+function RecentlyAddedMedia() {
+	const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useInfiniteSuspenseGraphQL(
+		query,
+		['recentlyAddedMedia'],
+		{
+			pagination: { cursor: { limit: 20 } },
+		},
+	)
+	const nodes = data.pages.flatMap((page) => page.recentlyAddedMedia.nodes)
+
+	const { t } = useLocaleContext()
+
+	const cards = nodes.map((node) => <BookCard key={node.id} fragment={node} fullWidth={false} />)
 
 	const handleFetchMore = useCallback(() => {
-		if (!hasNextPage || isFetching) {
-			return
-		} else {
+		if (hasNextPage && !isFetchingNextPage) {
 			fetchNextPage()
 		}
-	}, [fetchNextPage, hasNextPage, isFetching])
+	}, [fetchNextPage, hasNextPage, isFetchingNextPage])
 
 	return (
 		<HorizontalCardList

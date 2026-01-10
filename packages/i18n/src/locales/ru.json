@@ -793,12 +793,12 @@
 									"name": "Имя файла",
 									"size": "Размер",
 									"extension": "Расширение",
-									"created_at": "Дата создания",
-									"updated_at": "Дата изменения",
 									"status": "Статус",
 									"path": "Путь",
 									"pages": "Страницы",
-									"tags": "Метки"
+									"tags": "Метки",
+									"createdAt": "Дата создания",
+									"updatedAt": "Дата изменения"
 								}
 							},
 							"book_meta": {
@@ -807,7 +807,6 @@
 									"title": "Заголовок",
 									"summary": "Сводка",
 									"notes": "Примечания",
-									"genre": "Жанр",
 									"writers": "Писатели",
 									"pencillers": "Иллюстраторы",
 									"inkers": "Тушевальщики",
@@ -815,10 +814,11 @@
 									"editors": "Редакторы",
 									"publisher": "Издатели",
 									"colorists": "Колористы",
-									"cover_artists": "Иллюстраторы обложек",
 									"links": "Ссылки",
 									"characters": "Персонажи",
-									"teams": "Команды"
+									"teams": "Команды",
+									"genres": "Жанр",
+									"coverArtists": "Иллюстраторы обложек"
 								}
 							},
 							"series": {
@@ -831,16 +831,16 @@
 							"series_meta": {
 								"label": "Метаданные серий",
 								"attributes": {
-									"age_rating": "Возрастной рейтинг",
 									"title": "Заголовок",
 									"summary": "Сводка",
-									"meta_type": "Тип",
 									"publisher": "Издатель",
 									"imprint": "Отпечаток",
 									"comicid": "ID комикса",
 									"booktype": "Тип книги",
 									"status": "Статус",
-									"volume": "Том"
+									"volume": "Том",
+									"metaType": "Тип",
+									"ageRating": "Возрастной рейтинг"
 								}
 							},
 							"library": {
@@ -1112,7 +1112,7 @@
 				"desktop": "Рабочий стол",
 				"label": "Приложение"
 			},
-			"server": {
+			"management": {
 				"general": "Общие",
 				"logs": "Логи",
 				"users": "Пользователи",
@@ -1174,7 +1174,7 @@
 				}
 			}
 		},
-		"app/appearance": {
+		"app/preferences": {
 			"helmet": "Внешний вид",
 			"title": "Внешний вид",
 			"description": "Настроить внешний вид приложения",

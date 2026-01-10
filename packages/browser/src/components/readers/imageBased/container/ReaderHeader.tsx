@@ -1,10 +1,9 @@
 import { Link, Text } from '@stump/components'
 import { motion } from 'framer-motion'
 import { ArrowLeft, Fullscreen, Shrink } from 'lucide-react'
-import { useMemo } from 'react'
 import { useFullscreen } from 'rooks'
 
-import paths from '@/paths'
+import { usePaths } from '@/paths'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
 
 import { useImageBaseReaderContext } from '../context'
@@ -17,10 +16,9 @@ export default function ReaderHeader() {
 	const {
 		settings: { showToolBar },
 	} = useBookPreferences({ book })
+	const paths = usePaths()
 
-	const { id, name, metadata } = book
-
-	const title = useMemo(() => metadata?.title || name, [metadata, name])
+	const { id, resolvedName } = book
 
 	const { isFullscreenAvailable, isFullscreenEnabled, toggleFullscreen } = useFullscreen()
 
@@ -28,6 +26,7 @@ export default function ReaderHeader() {
 
 	return (
 		<motion.nav
+			// @ts-expect-error: It does have className?
 			className="fixed left-0 top-0 z-[100] flex h-12 w-full items-center px-4 text-foreground"
 			initial={false}
 			animate={showToolBar ? 'visible' : 'hidden'}
@@ -45,7 +44,7 @@ export default function ReaderHeader() {
 					</Link>
 				</div>
 
-				<Text className="text-foreground-on-black">{title}</Text>
+				<Text className="text-foreground-on-black">{resolvedName}</Text>
 
 				<div className="flex items-center space-x-2">
 					{isFullscreenAvailable && (

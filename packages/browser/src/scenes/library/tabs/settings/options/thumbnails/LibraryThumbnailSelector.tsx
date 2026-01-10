@@ -1,20 +1,46 @@
-import { useMutation, useSDK } from '@stump/client'
-import { Button, Dialog, Label, Text } from '@stump/components'
-import { Media, PatchLibraryThumbnail, Series } from '@stump/sdk'
-import { useCallback, useEffect, useState } from 'react'
-import toast from 'react-hot-toast'
+import { useGraphQLMutation, useSDK } from '@stump/client'
+import { Button, Dialog, Label, PickSelect, Text } from '@stump/components'
+import { graphql, LibraryThumbnailSelectorUpdateMutation } from '@stump/graphql'
+import { Suspense, useCallback, useEffect, useState } from 'react'
+import { toast } from 'sonner'
 
 import EditThumbnailDropdown from '@/components/thumbnail/EditThumbnailDropdown'
 import BookPageGrid from '@/scenes/book/settings/BookPageGrid'
 import { useLibraryContext } from '@/scenes/library/context'
-import SeriesBookGrid from '@/scenes/series/tabs/settings/SeriesBookGrid'
+import SeriesBookGrid, { SelectedBook } from '@/scenes/series/tabs/settings/SeriesBookGrid'
 
-import LibrarySeriesGrid from '../../LibrarySeriesGrid'
+import LibrarySeriesGrid, { SelectedSeries } from '../../LibrarySeriesGrid'
+
+// TODO: Redesign this ugly shit
+
+const updateMutation = graphql(`
+	mutation LibraryThumbnailSelectorUpdate($id: ID!, $input: UpdateThumbnailInput!) {
+		updateLibraryThumbnail(id: $id, input: $input) {
+			id
+			thumbnail {
+				url
+			}
+		}
+	}
+`)
+
+const uploadMutation = graphql(`
+	mutation LibraryThumbnailSelectorUpload($id: ID!, $file: Upload!) {
+		uploadLibraryThumbnail(id: $id, file: $file) {
+			id
+			thumbnail {
+				url
+			}
+		}
+	}
+`)
+
+type OnSuccessData = PickSelect<LibraryThumbnailSelectorUpdateMutation, 'updateLibraryThumbnail'>
 
 export default function LibraryThumbnailSelector() {
 	const { sdk } = useSDK()
-	const [selectedSeries, setSelectedSeries] = useState<Series>()
-	const [selectedBook, setSelectedBook] = useState<Media>()
+	const [selectedSeries, setSelectedSeries] = useState<SelectedSeries>()
+	const [selectedBook, setSelectedBook] = useState<SelectedBook>()
 	const [page, setPage] = useState<number>()
 
 	const [isOpen, setIsOpen] = useState(false)
@@ -22,30 +48,28 @@ export default function LibraryThumbnailSelector() {
 	const { library } = useLibraryContext()
 
 	const onSuccess = useCallback(
-		() =>
-			sdk.axios.get(sdk.library.thumbnailURL(library.id), {
+		({ thumbnail }: OnSuccessData) =>
+			sdk.axios.get(thumbnail.url, {
 				headers: {
 					'Cache-Control': 'no-cache',
 					Pragma: 'no-cache',
 					Expires: '0',
 				},
 			}),
-		[sdk, library.id],
+		[sdk],
 	)
 
-	const { mutateAsync: patchThumbnail, isLoading: isPatchingThumbnail } = useMutation(
-		[sdk.library.keys.updateThumbnail, library.id],
-		async (data: PatchLibraryThumbnail) => {
-			await sdk.library.updateThumbnail(library.id, data)
-			await onSuccess()
+	const { mutateAsync: patchThumbnail, isPending: isPatchingThumbnail } = useGraphQLMutation(
+		updateMutation,
+		{
+			onSuccess: (data) => onSuccess(data.updateLibraryThumbnail),
 		},
 	)
 
-	const { mutate: uploadThumbnail, isLoading: isUploadingThumbnail } = useMutation(
-		[sdk.library.keys.uploadThumbnail, library.id],
-		async (file: File) => {
-			await sdk.library.uploadThumbnail(library.id, file)
-			await onSuccess()
+	const { mutateAsync: uploadThumbnail, isPending: isUploadingThumbnail } = useGraphQLMutation(
+		uploadMutation,
+		{
+			onSuccess: (data) => onSuccess(data.uploadLibraryThumbnail),
 		},
 	)
 
@@ -62,27 +86,30 @@ export default function LibraryThumbnailSelector() {
 		setIsOpen(false)
 	}
 
-	const handleUploadImage = async (file: File) => {
-		try {
-			await uploadThumbnail(file)
-			setIsOpen(false)
-		} catch (error) {
-			console.error(error)
-			toast.error('Failed to upload image')
-		}
-	}
+	const handleUploadImage = useCallback(
+		async (file: File) => {
+			try {
+				await uploadThumbnail({ id: library.id, file })
+				setIsOpen(false)
+			} catch (error) {
+				console.error(error)
+				toast.error('Failed to upload image')
+			}
+		},
+		[library.id, uploadThumbnail],
+	)
 
-	const handleConfirm = async () => {
+	const handleConfirm = useCallback(async () => {
 		if (!selectedBook || !page) return
 
 		try {
-			await patchThumbnail({ media_id: selectedBook.id, page })
+			await patchThumbnail({ id: library.id, input: { mediaId: selectedBook.id, page } })
 			setIsOpen(false)
 		} catch (error) {
 			console.error(error)
 			toast.error('Failed to update thumbnail')
 		}
-	}
+	}, [patchThumbnail, selectedBook, page, library.id])
 
 	useEffect(() => {
 		return () => {
@@ -166,7 +193,7 @@ export default function LibraryThumbnailSelector() {
 						<Dialog.Close onClick={() => setIsOpen(false)} />
 					</Dialog.Header>
 
-					{renderContent()}
+					<Suspense>{renderContent()}</Suspense>
 
 					<Dialog.Footer>
 						<Button variant="default" onClick={handleCancel}>

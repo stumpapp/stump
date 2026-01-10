@@ -1,10 +1,11 @@
+import { ReadingMode } from '@stump/graphql'
 import { Fragment, useCallback, useMemo } from 'react'
 import { View } from 'react-native'
 
 import { Card, Switch, Text } from '~/components/ui'
+import { cn } from '~/lib/utils'
 import { BookPreferences, GlobalSettings, useReaderStore } from '~/stores/reader'
 
-import CachePolicySelect from './CachePolicySelect'
 import DoublePageSelect from './DoublePageSelect'
 import FooterControlsSelect from './FootControlsSelect'
 import ImageScalingSelect from './ImageScalingSelect'
@@ -15,6 +16,8 @@ type Props = {
 	forBook?: string
 	forServer?: string
 }
+
+// TODO(android): Use non-native dropdown for all of these
 
 export default function ReaderSettings({ forBook, forServer }: Props) {
 	const store = useReaderStore((state) => state)
@@ -64,13 +67,13 @@ export default function ReaderSettings({ forBook, forServer }: Props) {
 			<View>
 				<Text className="mb-3 text-foreground-muted">Mode</Text>
 
-				<Card className="flex rounded-xl border border-edge bg-background-surface">
+				<Card className="squircle flex rounded-2xl border border-edge bg-background-surface">
 					<ReadingModeSelect
 						mode={activeSettings.readingMode}
 						onChange={(mode) => onPreferenceChange({ readingMode: mode })}
 					/>
 
-					{activeSettings.readingMode !== 'continuous:vertical' && (
+					{activeSettings.readingMode !== ReadingMode.ContinuousVertical && (
 						<Fragment>
 							<View className="h-px w-full bg-edge" />
 
@@ -86,18 +89,28 @@ export default function ReaderSettings({ forBook, forServer }: Props) {
 			<View>
 				<Text className="mb-3 text-foreground-muted">Image Options</Text>
 
-				<Card className="flex rounded-xl border border-edge bg-background-surface">
-					<CachePolicySelect
-						policy={activeSettings.cachePolicy || 'memory-disk'}
-						onChange={(policy) => onPreferenceChange({ cachePolicy: policy })}
-					/>
-
-					<View className="h-px w-full bg-edge" />
-
+				<Card className="squircle flex rounded-2xl border border-edge bg-background-surface">
 					<DoublePageSelect
 						behavior={activeSettings.doublePageBehavior || 'auto'}
 						onChange={(behavior) => onPreferenceChange({ doublePageBehavior: behavior })}
 					/>
+
+					<View className="h-px w-full bg-edge" />
+
+					<View
+						className={cn('flex flex-row items-center justify-between p-4', {
+							'opacity-50': activeSettings.doublePageBehavior === 'off',
+						})}
+					>
+						<Text>Separate Second Page</Text>
+
+						<Switch
+							checked={
+								activeSettings.secondPageSeparate && activeSettings.doublePageBehavior !== 'off'
+							}
+							onCheckedChange={(value) => onPreferenceChange({ secondPageSeparate: value })}
+						/>
+					</View>
 
 					<View className="h-px w-full bg-edge" />
 
@@ -131,7 +144,7 @@ export default function ReaderSettings({ forBook, forServer }: Props) {
 			<View>
 				<Text className="mb-3 text-foreground-muted">Navigation</Text>
 
-				<Card className="flex rounded-xl border border-edge bg-background-surface">
+				<Card className="squircle flex rounded-2xl border border-edge bg-background-surface">
 					<View className="flex flex-row items-center justify-between border-b border-b-edge p-4">
 						<Text>Tap Sides to Navigate</Text>
 						<Switch

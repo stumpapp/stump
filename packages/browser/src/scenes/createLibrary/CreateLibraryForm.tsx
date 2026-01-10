@@ -1,8 +1,8 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button, cn, Form } from '@stump/components'
-import type { Library } from '@stump/sdk'
+import { CreateLibrarySceneExistingLibrariesQuery, UserPermission } from '@stump/graphql'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 
 import { ContentContainer } from '@/components/container'
 import DirectoryPickerModal from '@/components/DirectoryPickerModal'
@@ -13,25 +13,28 @@ import {
 } from '@/components/library/createOrUpdate/schema'
 import {
 	BasicLibraryInformation,
+	DefaultLibraryView,
 	FileConversionOptions,
 	LibraryPattern as LibraryPatternSection,
-	ScanMode,
 	ScannerOptInFeatures,
 	ThumbnailConfig,
 } from '@/components/library/createOrUpdate/sections'
 import IgnoreRulesConfig from '@/components/library/createOrUpdate/sections/IgnoreRulesConfig'
 import { useSteppedFormContext } from '@/components/steppedForm'
+import { useAppContext } from '@/context'
 
 import LibraryReview from './LibraryReview'
+import ScanAfterPersist from './ScanAfterPersist'
 
 type Props = {
-	existingLibraries: Library[]
+	existingLibraries: CreateLibrarySceneExistingLibrariesQuery['libraries']['nodes']
 	onSubmit: (values: CreateOrUpdateLibrarySchema) => void
 	isLoading?: boolean
 }
 
 export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoading }: Props) {
 	const { currentStep, setStep } = useSteppedFormContext()
+	const { checkPermission } = useAppContext()
 
 	const [showDirectoryPicker, setShowDirectoryPicker] = useState(false)
 
@@ -52,7 +55,7 @@ export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoadi
 	/**
 	 * The current path value from the form
 	 */
-	const [formPath] = form.watch(['path'])
+	const [formPath] = useWatch({ control: form.control, name: ['path'] })
 
 	/**
 	 * A callback to handle changing the form step. This will validate the current step
@@ -68,16 +71,16 @@ export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoadi
 					break
 				case 2:
 					isValid = await form.trigger([
-						'library_pattern',
-						'ignore_rules',
-						'convert_rar_to_zip',
-						'hard_delete_conversions',
+						'libraryPattern',
+						'ignoreRules',
+						'convertRarToZip',
+						'hardDeleteConversions',
 						'watch',
 					])
 					break
 				case 3:
 					// TODO: do I need to validate children?
-					isValid = await form.trigger(['thumbnail_config'])
+					isValid = await form.trigger(['thumbnailConfig'])
 					break
 				default:
 					break
@@ -101,6 +104,7 @@ export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoadi
 						<BasicLibraryInformation onSetShowDirectoryPicker={setShowDirectoryPicker} />
 						<div className="mt-6 flex w-full md:max-w-sm">
 							<Button
+								type="button"
 								className="w-full md:w-auto"
 								variant="primary"
 								onClick={() => handleChangeStep(2)}
@@ -114,6 +118,7 @@ export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoadi
 				return (
 					<>
 						<LibraryPatternSection />
+						<DefaultLibraryView />
 						<ScannerOptInFeatures />
 						<FileConversionOptions />
 						<IgnoreRulesConfig />
@@ -148,7 +153,7 @@ export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoadi
 				return (
 					<>
 						<LibraryReview />
-						<ScanMode />
+						<ScanAfterPersist />
 					</>
 				)
 		}
@@ -158,16 +163,18 @@ export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoadi
 	// causes the form to trigger a submit event. FYI
 	return (
 		<>
-			<DirectoryPickerModal
-				isOpen={showDirectoryPicker}
-				onClose={() => setShowDirectoryPicker(false)}
-				startingPath={formPath}
-				onPathChange={(path) => {
-					if (path) {
-						form.setValue('path', path)
-					}
-				}}
-			/>
+			{checkPermission(UserPermission.FileExplorer) && (
+				<DirectoryPickerModal
+					isOpen={showDirectoryPicker}
+					onClose={() => setShowDirectoryPicker(false)}
+					startingPath={formPath}
+					onPathChange={(path) => {
+						if (path) {
+							form.setValue('path', path)
+						}
+					}}
+				/>
+			)}
 			<Form form={form} onSubmit={onSubmit} id="createLibraryForm">
 				<ContentContainer className="mt-0">
 					{renderStep()}

@@ -1,6 +1,7 @@
-import { usePrefetchFiles, usePrefetchSeriesBooks } from '@stump/client'
+import { usePrefetchFiles } from '@stump/client'
 import { cn, Link, useSticky } from '@stump/components'
-import { useMemo } from 'react'
+import { UserPermission } from '@stump/graphql'
+import { useCallback, useMemo } from 'react'
 import { useLocation } from 'react-router'
 import { useMediaMatch } from 'rooks'
 
@@ -8,31 +9,36 @@ import { useAppContext } from '@/context'
 import { usePreferences } from '@/hooks'
 
 import { useSeriesContext } from './context'
+import { usePrefetchSeriesBooks } from './tabs/books/SeriesBooksScene'
 
 export default function SeriesNavigation() {
 	const isMobile = useMediaMatch('(max-width: 768px)')
 	const location = useLocation()
 	const {
-		preferences: { primary_navigation_mode, layout_max_width_px },
+		preferences: { primaryNavigationMode, layoutMaxWidthPx },
 	} = usePreferences()
 	const {
 		series: { id, path },
 	} = useSeriesContext()
 	const { checkPermission } = useAppContext()
 	const { ref, isSticky } = useSticky<HTMLDivElement>({ extraOffset: isMobile ? 56 : 0 })
-	const { prefetch: prefetchBooks } = usePrefetchSeriesBooks({ id })
-	const { prefetch: prefetchFiles } = usePrefetchFiles({
-		path,
-		fetchConfig: checkPermission('file:upload'),
-	})
 
-	const canAccessFiles = checkPermission('file:explorer')
+	const prefetchSeriesBooks = usePrefetchSeriesBooks()
+	const handlePrefetchBooks = useCallback(() => prefetchSeriesBooks(id), [id, prefetchSeriesBooks])
+
+	const prefetchFiles = usePrefetchFiles()
+	const handlePrefetchFiles = useCallback(
+		() => prefetchFiles({ path, fetchConfig: checkPermission(UserPermission.UploadFile) }),
+		[path, checkPermission, prefetchFiles],
+	)
+
+	const canAccessFiles = checkPermission(UserPermission.FileExplorer)
 	const tabs = useMemo(
 		() => [
 			{
 				isActive: location.pathname.match(/\/series\/[^/]+\/books(\/.*)?$/),
 				label: 'Books',
-				onHover: () => prefetchBooks(),
+				onHover: () => handlePrefetchBooks(),
 				to: 'books',
 			},
 			...(canAccessFiles
@@ -40,7 +46,7 @@ export default function SeriesNavigation() {
 						{
 							isActive: location.pathname.match(/\/series\/[^/]+\/files(\/.*)?$/),
 							label: 'Files',
-							onHover: () => prefetchFiles(),
+							onHover: () => handlePrefetchFiles(),
 							to: 'files',
 						},
 					]
@@ -51,10 +57,10 @@ export default function SeriesNavigation() {
 				to: 'settings',
 			},
 		],
-		[location, canAccessFiles, prefetchBooks, prefetchFiles],
+		[location, canAccessFiles, handlePrefetchBooks, handlePrefetchFiles],
 	)
 
-	const preferTopBar = primary_navigation_mode === 'TOPBAR'
+	const preferTopBar = primaryNavigationMode == 'TOPBAR'
 
 	return (
 		<div
@@ -68,10 +74,10 @@ export default function SeriesNavigation() {
 				className={cn(
 					'-mb-px flex h-12 gap-x-6 overflow-x-scroll px-3 scrollbar-hide md:overflow-x-hidden',
 					{
-						'mx-auto': preferTopBar && !!layout_max_width_px,
+						'mx-auto': preferTopBar && !!layoutMaxWidthPx,
 					},
 				)}
-				style={{ maxWidth: preferTopBar ? layout_max_width_px || undefined : undefined }}
+				style={{ maxWidth: preferTopBar ? layoutMaxWidthPx || undefined : undefined }}
 			>
 				{tabs.map((tab) => (
 					<Link

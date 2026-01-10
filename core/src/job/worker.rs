@@ -3,13 +3,14 @@ use std::{
 	time::{Duration, Instant},
 };
 
+use models::entity::job;
+use sea_orm::{prelude::*, DatabaseConnection};
 use tokio::sync::{broadcast, mpsc, oneshot};
 
 use crate::{
 	config::StumpConfig,
-	event::CoreEvent,
+	event::{self, CoreEvent},
 	job::{JobError, JobStatus},
-	prisma::{job, PrismaClient},
 };
 
 use super::{Executor, JobControllerCommand, JobManager, JobProgress, JobUpdate};
@@ -60,7 +61,7 @@ pub struct WorkerCtx {
 	/// The ID of the job that the worker is running
 	pub job_id: String,
 	/// A pointer to the prisma client
-	pub db: Arc<PrismaClient>,
+	pub conn: Arc<DatabaseConnection>,
 	/// A pointer to the stump configuration
 	pub config: Arc<StumpConfig>,
 	/// A sender for the core event channel
@@ -77,9 +78,11 @@ pub struct WorkerCtx {
 impl WorkerCtx {
 	/// Emit a [`CoreEvent`] to any clients listening to the server that a job has started
 	pub fn report_started(&self) {
-		let send_result = self
-			.core_event_tx
-			.send(CoreEvent::JobStarted(self.job_id.clone()));
+		let send_result =
+			self.core_event_tx
+				.send(CoreEvent::JobStarted(event::JobStarted {
+					id: self.job_id.clone(),
+				}));
 		if let Err(send_error) = send_result {
 			tracing::error!(?send_error, "Failed to send started event");
 		}
@@ -222,7 +225,7 @@ impl Worker {
 	/// Create a new worker instance and its context
 	fn new(
 		job_id: &str,
-		db: Arc<PrismaClient>,
+		conn: Arc<DatabaseConnection>,
 		config: Arc<StumpConfig>,
 		core_event_tx: broadcast::Sender<CoreEvent>,
 		job_controller_tx: mpsc::UnboundedSender<JobControllerCommand>,
@@ -233,7 +236,7 @@ impl Worker {
 
 		let worker_ctx = WorkerCtx {
 			job_id: job_id.to_string(),
-			db,
+			conn,
 			config,
 			core_event_tx,
 			commands_rx,
@@ -252,7 +255,7 @@ impl Worker {
 	pub async fn create_and_spawn(
 		job: Box<dyn Executor>,
 		manager: Arc<JobManager>,
-		db: Arc<PrismaClient>,
+		conn: Arc<DatabaseConnection>,
 		config: Arc<StumpConfig>,
 		core_event_tx: broadcast::Sender<CoreEvent>,
 		job_controller_tx: mpsc::UnboundedSender<JobControllerCommand>,
@@ -260,14 +263,30 @@ impl Worker {
 		let job_id = job.id().to_string();
 		let (worker, worker_ctx, status_rx) = Worker::new(
 			job_id.as_str(),
-			db,
+			conn.clone(),
 			config,
 			core_event_tx,
 			job_controller_tx,
 		)?;
 		let worker = worker.arced();
 
-		handle_job_start(&worker_ctx.db, job_id.clone()).await?;
+		let affected_rows = job::Entity::update_many()
+			.filter(job::Column::Id.eq(job_id))
+			.col_expr(
+				job::Column::Status,
+				Expr::value(JobStatus::Running.to_string()),
+			)
+			.exec(conn.as_ref())
+			.await?
+			.rows_affected;
+
+		if affected_rows == 0 {
+			tracing::error!("Failed to update job status to running");
+			return Err(JobError::InitFailed(
+				"Failed to update job status to running".to_string(),
+			));
+		}
+
 		let worker_manager = WorkerManager {
 			status: WorkerStatus::Running,
 			worker_ctx: worker_ctx.clone(),
@@ -393,13 +412,15 @@ impl WorkerManager {
 								Ok(mut output) => {
 									tracing::info!("Job completed successfully!");
 									finalizer_ctx.report_progress(JobProgress::finished());
-									let next_job = output.next_job.take();
+									let next_jobs = output.next_jobs.take();
 									let result = returned_executor
 											.persist_output(finalizer_ctx.clone(), output, elapsed)
 											.await;
 									tracing::trace!(?result, "Output persisted?");
-									if let Some(next_job) = next_job {
-										finalizer_ctx.send_manager_command(JobControllerCommand::EnqueueJob(next_job));
+									if let Some(jobs) = next_jobs {
+										for next_job in jobs.into_iter() {
+											finalizer_ctx.send_manager_command(JobControllerCommand::EnqueueJob(next_job));
+										}
 									}
 								},
 								Err(error) => {
@@ -443,7 +464,7 @@ impl WorkerManager {
 								JobStatus::Failed,
 								&format!("Job failed: {join_error}"),
 							));
-							let _ = handle_failure_status(job_id.clone(), JobStatus::Failed, &finalizer_ctx.db, elapsed).await;
+							let _ = handle_failure_status(job_id.clone(), JobStatus::Failed, &finalizer_ctx.conn, elapsed).await;
 						}
 					}
 					return self.manager.complete(job_id).await;
@@ -481,59 +502,30 @@ impl WorkerManager {
 pub(crate) async fn handle_failure_status(
 	job_id: String,
 	status: JobStatus,
-	client: &PrismaClient,
+	conn: &DatabaseConnection,
 	elapsed: Duration,
 ) -> Result<(), JobError> {
-	let updated_job = client
-		.job()
-		.update(
-			job::id::equals(job_id),
-			vec![
-				job::status::set(status.to_string()),
-				job::ms_elapsed::set(
-					elapsed.as_millis().try_into().unwrap_or_else(|e| {
-						tracing::error!(error = ?e, "Wow! You defied logic and overflowed an i64 during the attempt to convert job duration to milliseconds. It must have been a long 292_471_208 years!");
-						i64::MAX
-					}),
-				),
-			],
+	let update_result = job::Entity::update_many()
+		.filter(job::Column::Id.eq(job_id.clone()))
+		.col_expr(
+			job::Column::Status,
+			Expr::value(status.to_string()),
 		)
-		.exec()
-		.await
-		.map_or_else(
-			|error| {
-				tracing::error!(?error, ?status, "Failed to update job status");
-				None
-			},
-			Some,
-		);
-
-	tracing::trace!(?updated_job, "Updated job?");
-
-	Ok(())
-}
-
-/// Cancel a job by its ID
-pub(crate) async fn handle_do_cancel(
-	job_id: String,
-	client: &PrismaClient,
-	elapsed: Duration,
-) -> Result<(), JobError> {
-	handle_failure_status(job_id, JobStatus::Cancelled, client, elapsed).await
-}
-
-/// Update the job status to `Running` in the database
-async fn handle_job_start(client: &PrismaClient, job_id: String) -> Result<(), JobError> {
-	let started_job = client
-		.job()
-		.update(
-			job::id::equals(job_id),
-			vec![job::status::set(JobStatus::Running.to_string())],
+		.col_expr(
+			job::Column::MsElapsed,
+			Expr::value(
+				elapsed.as_millis().try_into().unwrap_or_else(|e| {
+					tracing::error!(error = ?e, "Wow! You defied logic and overflowed an i64 during the attempt to convert job duration to milliseconds. It must have been a long 292_471_208 years!");
+					i64::MAX
+				}),
+			),
 		)
-		.exec()
-		.await?;
+		.exec(conn)
+		.await;
 
-	tracing::trace!(?started_job, "Job started?");
+	if let Err(error) = update_result {
+		tracing::error!(?error, ?status, "Failed to update job status");
+	}
 
 	Ok(())
 }

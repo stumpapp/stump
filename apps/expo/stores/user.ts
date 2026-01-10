@@ -15,6 +15,13 @@ type MobilePreferencesStore = {
 	reduceAnimations: boolean
 	cachePolicy: CachePolicy
 	allowDownscaling: boolean
+	thumbnailRatio: number
+	thumbnailPlaceholder: 'grayscale' | 'averageColor' | 'colorful' | 'thumbhash'
+	performanceMonitor: boolean
+	accentColor?: string | undefined
+	showCuratedDownloads?: boolean | undefined
+	preferNativePdf?: boolean | undefined
+	disableDismissGesture: boolean
 	/**
 	 * Patch the store with new values.
 	 */
@@ -35,6 +42,13 @@ export const usePreferencesStore = create<MobilePreferencesStore>()(
 			reduceAnimations: false,
 			cachePolicy: 'memory-disk',
 			allowDownscaling: true,
+			thumbnailRatio: 2 / 3,
+			thumbnailPlaceholder: 'grayscale',
+			accentColor: undefined,
+			performanceMonitor: false,
+			showCuratedDownloads: true,
+			preferNativePdf: false,
+			disableDismissGesture: false,
 			patch: (data) => set(data),
 		}),
 		{

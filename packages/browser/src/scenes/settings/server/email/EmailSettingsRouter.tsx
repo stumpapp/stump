@@ -1,3 +1,4 @@
+import { UserPermission } from '@stump/graphql'
 import { lazy, Suspense, useEffect } from 'react'
 import { Route, Routes, useNavigate } from 'react-router'
 
@@ -14,9 +15,9 @@ export default function EmailSettingsRouter() {
 
 	const { checkPermission } = useAppContext()
 
-	const canEdit = checkPermission('emailer:manage')
-	const canCreate = checkPermission('emailer:create')
-	const canView = checkPermission('emailer:read')
+	const canEdit = checkPermission(UserPermission.EmailerManage)
+	const canCreate = checkPermission(UserPermission.EmailerCreate)
+	const canView = checkPermission(UserPermission.EmailerRead)
 
 	useEffect(() => {
 		if (!canView) {

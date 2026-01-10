@@ -1,0 +1,59 @@
+name: 'Stump Unstable CI'
+
+on:
+  pull_request:
+    branches:
+      - unstable
+  push:
+    branches:
+      - unstable
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOCKER_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+  DOCKER_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
+
+jobs:
+  code-changes-check:
+    runs-on: [ubuntu-22.04]
+    outputs:
+      changes: ${{steps.filter.outputs.changes}}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          base: 'unstable'
+          filters: |
+            apps: ./apps/**
+            core: ./core/**
+            crates: ./crates/**
+            docker: ./docker/**
+            packages: ./packages/**
+            workflow:
+              - './.github/workflows/unstable.yml'
+              - './.github/actions/**'
+
+  nightly-docker-build:
+    needs: code-changes-check
+    name: Build docker image
+    runs-on: [self-hosted]
+    if: ${{ needs.code-changes-check.outputs.changes != '[]' }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup and build docker image
+        uses: ./.github/actions/build-docker
+        with:
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ env.DOCKER_PASSWORD }}
+          tags: 'unstable'
+          build-channel: 'unstable'
+          load: ${{ github.event_name == 'pull_request' }}
+          push: ${{ github.event_name == 'push' }}
+          archs: 'amd64'
+          discord-webhook: ${{ secrets.DISCORD_WEBHOOK }}

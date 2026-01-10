@@ -16,7 +16,7 @@ export default function DefaultFontSize() {
 
 	const onValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const value = parseInt(e.target.value)
-		if (!isNaN(value) && value >= 0) {
+		if (!isNaN(value) && value > 0) {
 			setSettings({ fontSize: value })
 		}
 	}

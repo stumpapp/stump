@@ -1,8 +1,8 @@
-import { useUpdatePreferences } from '@stump/client'
 import { ComboBox } from '@stump/components'
 import { isLocale, localeNames, useLocaleContext } from '@stump/i18n'
+import { useCallback } from 'react'
 
-import { useUserStore } from '@/stores'
+import { usePreferences } from '@/hooks/usePreferences'
 
 const options = Object.entries(localeNames).map(([value, label]) => ({
 	label,
@@ -10,22 +10,20 @@ const options = Object.entries(localeNames).map(([value, label]) => ({
 }))
 
 export default function LocaleSelector() {
-	const { t, locale } = useLocaleContext()
-	const { setUserPreferences, userPreferences } = useUserStore((store) => ({
-		setUserPreferences: store.setUserPreferences,
-		user: store.user,
-		userPreferences: store.userPreferences,
-	}))
-	const { update } = useUpdatePreferences({
-		onSuccess: (preferences) => setUserPreferences(preferences),
-	})
+	const { t } = useLocaleContext()
+	const {
+		preferences: { locale },
+		update,
+	} = usePreferences()
 
-	const handleChange = async (selected?: string) => {
-		if (selected && userPreferences && isLocale(selected || '')) {
-			// @ts-expect-error: TODO: fix this
-			await update({ ...userPreferences, locale: selected })
-		}
-	}
+	const handleChange = useCallback(
+		async (selected?: string) => {
+			if (isLocale(selected || '')) {
+				update({ locale: selected })
+			}
+		},
+		[update],
+	)
 
 	return (
 		<ComboBox

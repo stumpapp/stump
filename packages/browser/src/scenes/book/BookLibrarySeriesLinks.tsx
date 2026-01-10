@@ -1,15 +1,23 @@
-import { useSeriesByID } from '@stump/client'
+import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { cx, Link, Text } from '@stump/components'
-import { Series } from '@stump/sdk'
+import { graphql } from '@stump/graphql'
 import { Fragment } from 'react'
 
 import paths from '../../paths'
 import SeriesLibraryLink from '../series/SeriesLibraryLink'
 
+const query = graphql(`
+	query BookLibrarySeriesLinks($id: ID!) {
+		seriesById(id: $id) {
+			id
+			resolvedName
+			libraryId
+		}
+	}
+`)
+
 type Props = {
-	libraryId?: string
-	series?: Series | null
-	seriesId: string
+	seriesId?: string
 	linkSegments?: {
 		to?: string
 		label: string
@@ -17,27 +25,23 @@ type Props = {
 	}[]
 }
 
-export default function BookLibrarySeriesLinks({
-	libraryId,
-	seriesId,
-	series,
-	linkSegments,
-}: Props) {
-	const { series: fetchedSeries } = useSeriesByID(seriesId, { enabled: !!series })
-
-	const resolvedSeries = series || fetchedSeries
-	const resolvedLibraryId = libraryId || resolvedSeries?.library_id
-
+export default function BookLibrarySeriesLinks({ seriesId, linkSegments }: Props) {
+	const { sdk } = useSDK()
+	const {
+		data: { seriesById: series },
+	} = useSuspenseGraphQL(query, sdk.cacheKey('seriesLinks', [seriesId]), {
+		id: seriesId || '',
+	})
 	const renderSeriesLink = () => {
-		if (!resolvedSeries) {
+		if (!series) {
 			return null
 		}
 
 		return (
 			<>
 				<span className="mx-2 text-foreground-muted">/</span>
-				<Link to={paths.seriesOverview(resolvedSeries.id)} className="line-clamp-1">
-					{resolvedSeries.name}
+				<Link to={paths.seriesOverview(series.id)} className="line-clamp-1">
+					{series.resolvedName}
 				</Link>
 			</>
 		)
@@ -45,7 +49,7 @@ export default function BookLibrarySeriesLinks({
 
 	return (
 		<div className="flex items-center text-sm md:text-base">
-			{resolvedLibraryId && <SeriesLibraryLink id={resolvedLibraryId} />}
+			{series?.libraryId && <SeriesLibraryLink id={series?.libraryId} />}
 			{renderSeriesLink()}
 			{linkSegments?.map((segment) => {
 				const Component = segment.to ? Link : Text

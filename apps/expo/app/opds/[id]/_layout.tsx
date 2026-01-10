@@ -1,11 +1,16 @@
 import { SDKContext, StumpClientContextProvider } from '@stump/client'
 import { Api, authDocument } from '@stump/sdk'
 import { Redirect, Stack, useLocalSearchParams, useRouter } from 'expo-router'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { X } from 'lucide-react-native'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Platform } from 'react-native'
 
 import { ActiveServerContext } from '~/components/activeServer'
+import ChevronBackLink from '~/components/ChevronBackLink'
+import { IS_IOS_24_PLUS } from '~/lib/constants'
 import { getOPDSInstance } from '~/lib/sdk/auth'
 import { usePreferencesStore, useSavedServers } from '~/stores'
+import { useCacheStore } from '~/stores/cache'
 
 export default function Screen() {
 	const router = useRouter()
@@ -19,7 +24,13 @@ export default function Screen() {
 		[serverID, savedServers],
 	)
 
-	const [sdk, setSDK] = useState<Api | null>(null)
+	const cachedInstance = useRef(useCacheStore((state) => state.sdks[`${serverID}-opds`]))
+	const cacheStore = useCacheStore((state) => ({
+		addInstanceToCache: state.addSDK,
+		removeInstanceFromCache: state.removeSDK,
+	}))
+
+	const [sdk, setSDK] = useState<Api | null>(() => cachedInstance.current || null)
 
 	useEffect(() => {
 		if (!activeServer) return
@@ -34,15 +45,18 @@ export default function Screen() {
 				url,
 			})
 			setSDK(instance)
+			cacheStore.addInstanceToCache(`${id}-opds`, instance)
 		}
 
 		if (!sdk) {
 			configureSDK()
 		}
-	}, [activeServer, sdk, getServerConfig])
+	}, [activeServer, sdk, getServerConfig, cacheStore])
 
 	const onAuthError = useCallback(
 		async (_: string | undefined, data: unknown) => {
+			cacheStore.removeInstanceFromCache(`${serverID}-opds`)
+
 			const authDoc = authDocument.safeParse(data)
 			if (!authDoc.success) {
 				throw new Error('Failed to parse auth document', authDoc.error)
@@ -70,10 +84,11 @@ export default function Screen() {
 				},
 			})
 		},
-		[activeServer, router],
+		[activeServer, router, serverID, cacheStore],
 	)
 
 	if (!activeServer) {
+		// @ts-expect-error: Redirect works
 		return <Redirect href="/" />
 	}
 
@@ -91,7 +106,29 @@ export default function Screen() {
 				<SDKContext.Provider value={{ sdk, setSDK }}>
 					<Stack
 						screenOptions={{ headerShown: false, animation: animationEnabled ? 'default' : 'none' }}
-					/>
+					>
+						<Stack.Screen
+							name="auth"
+							options={{
+								title: 'Login',
+								headerShown: true,
+								headerTransparent: Platform.OS === 'ios',
+								headerBlurEffect: IS_IOS_24_PLUS ? undefined : 'regular',
+								animation: animationEnabled ? 'default' : 'none',
+								presentation: IS_IOS_24_PLUS ? 'formSheet' : 'modal',
+								sheetGrabberVisible: true,
+								sheetAllowedDetents: [0.95],
+								sheetInitialDetentIndex: 0,
+								headerBackVisible: true,
+								headerBackButtonDisplayMode: 'minimal',
+								headerLeft: () =>
+									Platform.select({
+										ios: <ChevronBackLink icon={X} />,
+										default: undefined,
+									}),
+							}}
+						/>
+					</Stack>
 				</SDKContext.Provider>
 			</StumpClientContextProvider>
 		</ActiveServerContext.Provider>

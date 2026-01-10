@@ -1,42 +1,46 @@
-import { usePrefetchSmartList, useSmartListMetaQuery } from '@stump/client'
 import { Card, Spacer, Text } from '@stump/components'
+import { FragmentType, graphql, SmartListFilterGroupInput, useFragment } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
-import { SmartList } from '@stump/sdk'
 import pluralize from 'pluralize'
 import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { match, P } from 'ts-pattern'
 
 import paths from '@/paths'
 
-const DEFAULT_META_CACHE_TIME = 900000 // 15 minutes
+import { DEFAULT_META_CACHE_TIME, usePrefetchSmartList, useSmartListMeta } from './graphql'
+
 const LOCALE_BASE_KEY = 'userSmartListsScene.list.card'
 const withLocaleKey = (key: string) => `${LOCALE_BASE_KEY}.${key}`
 
+const fragment = graphql(`
+	fragment SmartListCard on SmartList {
+		id
+		description
+		filters
+		joiner
+		name
+	}
+`)
+
 type Props = {
-	list: SmartList
+	data: FragmentType<typeof fragment>
 }
 
-export default function SmartListCard({
-	list: {
-		id,
-		name,
-		filters: { groups: filterGroups },
-		description,
-	},
-}: Props) {
+export default function SmartListCard({ data }: Props) {
+	const { id, name, filters, description } = useFragment(fragment, data)
 	const { prefetch } = usePrefetchSmartList()
 	const { t } = useLocaleContext()
-	const { meta } = useSmartListMetaQuery({
+
+	const { meta } = useSmartListMeta({
+		id,
+
 		/**
 		 * I allow a longer cache time because the query on the backend is a bit more expensive than others.
 		 * So long as another user does not update the smart list, this should be fine. Updates by the viewer
 		 * will invalidate the cache.
 		 */
-		cacheTime: DEFAULT_META_CACHE_TIME,
-		id: id,
+		staleTime: DEFAULT_META_CACHE_TIME,
 	})
-
 	/**
 	 * A function that renders the meta information for the smart list, if present.
 	 * Any invalid meta information is filtered out, and the remaining figures, if any,
@@ -47,11 +51,7 @@ export default function SmartListCard({
 			return null
 		}
 
-		const { matched_books, matched_series, matched_libraries } = meta
-
-		const matchedBooks = Number(matched_books)
-		const matchedSeries = Number(matched_series)
-		const matchedLibraries = Number(matched_libraries)
+		const { matchedBooks, matchedSeries, matchedLibraries } = meta
 
 		// TODO: I don't think pluralize supports multiple languages...
 		const figures = [
@@ -76,37 +76,14 @@ export default function SmartListCard({
 	}
 
 	/**
-	 * Aggregate the number of filters in the smart list groups using a match pattern
-	 * on the variant of the filter group (and, or, not)
+	 * Aggregate the number of filters in the smart list groups
 	 */
-	const filterCount = useMemo(
-		() =>
-			filterGroups.reduce((acc, group) => {
-				const additive = match(group)
-					.with(
-						{
-							and: P.array(),
-						},
-						({ and }) => and.length,
-					)
-					.with(
-						{
-							or: P.array(),
-						},
-						({ or }) => or.length,
-					)
-					.with(
-						{
-							not: P.array(),
-						},
-						({ not }) => not.length,
-					)
-					.otherwise(() => 0)
-
-				return acc + additive
-			}, 0),
-		[filterGroups],
-	)
+	const filterCount = useMemo(() => {
+		const filtersFromJson = JSON.parse(filters) as Array<SmartListFilterGroupInput>
+		return filtersFromJson.reduce((acc, group) => {
+			return acc + group.groups.length
+		}, 0)
+	}, [filters])
 
 	return (
 		<Link to={paths.smartList(id)} className="block w-full">

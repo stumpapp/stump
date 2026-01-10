@@ -12,9 +12,9 @@ fn main() {
 		Ok(rev) => rev,
 		Err(_) => {
 			let output = Command::new("git")
-		.args(["rev-parse", "--short", "HEAD"])
-		.output()
-		.expect("Failed to execute `git rev-parse --short HEAD`. Could not determine git revision!");
+			.args(["rev-parse", "--short", "HEAD"])
+			.output()
+			.expect("Failed to execute `git rev-parse --short HEAD`. Could not determine git revision!");
 
 			String::from_utf8(output.stdout).expect("Failed to parse git revision!")
 		},

@@ -1,28 +1,39 @@
-import { useUpdateLibrary } from '@stump/client'
+import { useGraphQLMutation } from '@stump/client'
 import { EmojiPicker } from '@stump/components'
-import { Library } from '@stump/sdk'
+import { graphql, LibrarySideBarSectionQuery } from '@stump/graphql'
+import { useQueryClient } from '@tanstack/react-query'
+import { useCallback } from 'react'
+
+const mutation = graphql(`
+	mutation UpdateLibraryEmoji($id: ID!, $emoji: String) {
+		updateLibraryEmoji(id: $id, emoji: $emoji) {
+			id
+		}
+	}
+`)
 
 type Props = {
 	emoji?: string
 	placeholder?: string | React.ReactNode
-	library: Library
+	library: LibrarySideBarSectionQuery['libraries']['nodes'][number]
 	disabled?: boolean
 }
+
 export default function LibraryEmoji({ emoji, placeholder, library, disabled }: Props) {
-	const { editLibraryAsync } = useUpdateLibrary({ id: library.id })
+	const client = useQueryClient()
 
-	const handleEmojiSelect = (emoji?: { native: string }) => {
-		if (disabled) {
-			return
-		}
+	const { mutate: updateEmoji } = useGraphQLMutation(mutation, {
+		onSuccess: () => client.invalidateQueries({ queryKey: ['libraries'] }),
+	})
 
-		editLibraryAsync({
-			...library,
-			emoji: emoji?.native ?? null,
-			scan_mode: 'NONE',
-			tags: library.tags?.map((tag) => tag.name) ?? [],
-		})
-	}
+	const handleEmojiSelect = useCallback(
+		(emoji?: { native: string }) => {
+			if (!disabled) {
+				updateEmoji({ id: library.id, emoji: emoji?.native })
+			}
+		},
+		[updateEmoji, disabled, library.id],
+	)
 
 	if (disabled) {
 		return (

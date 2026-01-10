@@ -12,24 +12,25 @@
 	"dependencies": {
 		"@stump/browser": "*",
 		"@stump/client": "*",
-		"react": "^18.3.1",
-		"react-dom": "^18.2.0",
-		"react-router": "^6.23.0",
-		"react-router-dom": "^6.23.0"
+		"react": "^19.0.0",
+		"react-dom": "^19.0.0",
+		"react-router": "^6.30.0",
+		"react-router-dom": "^6.30.0"
 	},
 	"devDependencies": {
-		"@types/react": "^18.3.12",
-		"@types/react-dom": "^18.3.1",
+		"@types/react": "^19.0.0",
+		"@types/react-dom": "^19.0.0",
 		"@types/react-router-dom": "^5.3.3",
-		"@vitejs/plugin-react": "^4.2.1",
+		"@vitejs/plugin-react": "^5.0.2",
 		"autoprefixer": "^10.4.19",
 		"postcss": "^8.4.38",
 		"tailwind": "^4.0.0",
 		"tailwind-scrollbar-hide": "^1.1.7",
 		"tailwindcss": "^3.4.3",
 		"typescript": "^5.4.5",
-		"vite": "^4.5.3",
-		"vite-plugin-pwa": "^0.21.1",
+		"vite": "^7.1.5",
+		"vite-plugin-pwa": "^1.0.3",
+		"vite-plugin-react-fallback-throttle": "^0.1.1",
 		"vite-plugin-tsconfig-paths": "^1.4.1"
 	}
 }

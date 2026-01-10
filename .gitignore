@@ -45,7 +45,6 @@ apps/server/client/*
 !apps/server/client/.placeholder
 *.db*
 *.sqlite*
-*prisma.rs*
 
 # nix
 .envrc
@@ -53,3 +52,4 @@ apps/server/client/*
 
 #Code coverage
 lcov.info
+tarpaulin-report.html

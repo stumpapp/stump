@@ -37,7 +37,7 @@ RUN set -ex; \
 # Frontend Build Stage
 # ------------------------------------------------------------------------------
 
-FROM node:20.9.0-alpine3.18 AS frontend
+FROM node:22.14.0-alpine3.21 AS frontend
 ARG TARGETARCH
 
 WORKDIR /app
@@ -59,14 +59,14 @@ RUN --mount=type=cache,target=/usr/local/yarn/.cache,id=${TARGETARCH} \
 # Cargo Build Stage
 # ------------------------------------------------------------------------------
 
-FROM rust:1.85-bookworm AS builder
+FROM rust:1.86-bookworm AS builder
 
 ARG GIT_REV
+ARG BUILD_CHANNEL
 ARG TARGETARCH
-ARG RUN_PRISMA_GENERATE
 
 ENV GIT_REV=${GIT_REV}
-ENV RUN_PRISMA_GENERATE=${RUN_PRISMA_GENERATE}
+ENV BUILD_CHANNEL=${BUILD_CHANNEL}
 
 RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/apt \
     apt-get update && apt-get install -y \
@@ -76,7 +76,6 @@ RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/
         git \
         libssl-dev \
         pkg-config \
-        # See https://github.com/juhaku/utoipa/issues/958#issuecomment-2165300584
         curl \
         libsqlite3-dev;
 
@@ -88,7 +87,7 @@ COPY . .
 
 RUN --mount=type=cache,target=/usr/local/cargo/registry,id=${TARGETARCH} \
     --mount=type=cache,target=/app/target,id=${TARGETARCH} \
-    RUN_PRISMA_GENERATE=${RUN_PRISMA_GENERATE} ./docker/build_server.sh && \
+    ./docker/build_server.sh && \
     cp ./target/release/stump_server ./stump_server
 
 # ------------------------------------------------------------------------------

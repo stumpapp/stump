@@ -81,4 +81,11 @@ export const autumn = {
 			secondary: '#4B382D',
 		},
 	},
+	scrollbar: {
+		DEFAULT: '#4B382D',
+		thumb: {
+			DEFAULT: 'hsla(0, 0%, 100%, 0.4)',
+			hover: 'hsla(0, 0%, 100%, 0.3)',
+		},
+	},
 } satisfies StumpTheme

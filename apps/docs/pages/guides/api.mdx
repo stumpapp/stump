@@ -1,0 +1,52 @@
+import { Callout } from 'nextra/components'
+
+# API
+
+Stump exposes a GraphQL API that allows you to interact with your Stump server programmatically. The API is backed by a few different [authentication methods](#authentication). The API is constantly being developed, and while it is generally stable at this point it is still subject to change.
+
+## Authentication
+
+### Sessions
+
+Stump uses server-side sessions to authenticate users. These sessions are stored in the database, and are automatically cleaned up within 60 seconds of expiring. You can change the expiry cleanup check interval by setting the `SESSION_EXPIRY_CLEANUP_INTERVAL` environment variable. See the [configuration guide](/guides/configuration) for more information.
+
+### Basic Authentication
+
+<Callout emoji="🔐">
+	This functionality is only available on OPDS endpoints. You cannot authenticate with Basic
+	Authentication on the REST API
+</Callout>
+
+Stump supports [Basic Authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication) in order to properly support OPDS clients. Authenticating using this method will **not** create a server-side session. It is only intended for OPDS client authentication.
+
+### JWT Access Tokens
+
+Short-lived JWT access tokens are available for API access, aimed at better enabling third-party applications and extensions to interact with Stump. While you can generate these tokens and use them to authenticate API requests, **the API is still in development and subject to change**.
+
+### API Keys
+
+<Callout emoji="🔐">
+	This functionality is gated behind the `ACCESS_API_KEYS` user permission. To learn more about
+	permissions, see the [permissions](/guides/access-control/permissions) guide.
+</Callout>
+
+You can generated user-scoped API keys to authenticate requests to the REST API. These keys are stored in the database and can be revoked at any time. API keys are not subject to the same expiry as sessions, and are intended for long-term use.
+
+#### Special API Key Routes
+
+There are instances where you can embed an API key in the URL directly. This will only be available for features/integrations where passing the key in the header is otherwise impossible. At the time of writing, there are two such routes:
+
+- `/koreader/{api_key}/*` - Used for the [KoReader sync](https://koreader.rocks) integration. See [here](/guides/integrations/koreader) for more information
+- `/opds/{api_key}/v1.2/*` - An optional clone of the [OPDS](/guides/opds) integration API for clients which don't support auth headers
+
+For more information on API keys, see the [API keys](/guides/features/api-keys) guide.
+
+## GraphQL Playground
+
+The playground should be enabled by default when running the server in debug mode, or if the `enable_playground` config variable is set to `true`, and will be available at `http(s)://your-server(:10801)/api/graphql`.
+
+If you're new to GraphQL, I would recommend giving the [GraphQL documentation](https://graphql.org/learn/) a quick read, and then trying out the playground.
+
+### Disabling GraphQL Playground
+
+If you don't want to expose the GraphQL Playground, you can disable it by setting the `ENABLE_GRAPHQL_PLAYGROUND` environment variable to `false`. See the [configuration guide](/guides/configuration) for more information.

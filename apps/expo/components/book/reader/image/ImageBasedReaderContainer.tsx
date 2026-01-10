@@ -1,37 +1,58 @@
-import { generatePageSets } from '@stump/sdk'
+import { FlashListRef } from '@shopify/flash-list'
+import { ReadingMode } from '@stump/graphql'
+import { generatePageSets, ImageBasedBookPageRef } from '@stump/sdk'
 import { ComponentProps, useCallback, useMemo, useRef, useState } from 'react'
-import { Dimensions, View } from 'react-native'
-import { FlatList } from 'react-native-gesture-handler'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { View } from 'react-native'
 
 import { useDisplay } from '~/lib/hooks'
-import { useBookPreferences } from '~/stores/reader'
+import { DEFAULT_BOOK_PREFERENCES, useBookPreferences } from '~/stores/reader'
 
-import { IImageBasedReaderContext, ImageBasedReaderContext } from './context'
+import { IImageBasedReaderContext, ImageBasedReaderContext, NextInSeriesBookRef } from './context'
 import ControlsOverlay from './ControlsOverlay'
 import ImageBasedReader from './ImageBasedReader'
-import { useDimensions } from './useDimensions'
+import NextUpOverlay from './NextUpOverlay'
 
 type Props = Omit<
 	IImageBasedReaderContext,
-	'currentPage' | 'flatListRef' | 'setImageSizes' | 'pageSets'
+	'currentPage' | 'flashListRef' | 'setImageSizes' | 'pageSets' | 'imageSizes'
 > &
-	ComponentProps<typeof ImageBasedReader>
+	ComponentProps<typeof ImageBasedReader> & {
+		nextInSeries?: NextInSeriesBookRef | null
+	}
 
 export default function ImageBasedReaderContainer({
 	initialPage,
 	onPageChanged,
-	imageSizes,
+	nextInSeries,
 	...ctx
 }: Props) {
 	const { height, width } = useDisplay()
 	const {
-		preferences: { incognito, doublePageBehavior = 'auto', readingMode },
-	} = useBookPreferences(ctx.book.id)
-	const { sizes, setSizes } = useDimensions({
-		bookID: ctx.book.id,
-		imageSizes,
-	})
+		preferences: {
+			incognito,
+			doublePageBehavior = DEFAULT_BOOK_PREFERENCES.doublePageBehavior,
+			readingMode,
+			secondPageSeparate,
+		},
+	} = useBookPreferences({ book: ctx.book, serverId: ctx.serverId })
+
+	const [imageSizes, setImageSizes] = useState<Record<number, ImageBasedBookPageRef>>(
+		() =>
+			ctx.book?.analysisData?.dimensions
+				?.map(({ height, width }) => ({
+					height,
+					width,
+					ratio: width / height,
+				}))
+				.reduce(
+					(acc, ref, index) => {
+						acc[index] = ref
+						return acc
+					},
+					{} as Record<number, { height: number; width: number; ratio: number }>,
+				) ?? {},
+	)
+	const [showNextUp, setShowNextUp] = useState(false)
 
 	const deviceOrientation = useMemo(
 		() => (width > height ? 'landscape' : 'portrait'),
@@ -41,14 +62,23 @@ export default function ImageBasedReaderContainer({
 	const pages = ctx.book.pages
 	const pageSets = useMemo(() => {
 		const autoButOff = doublePageBehavior === 'auto' && deviceOrientation === 'portrait'
-		const modeForceOff = readingMode === 'continuous:vertical'
-		if (doublePageBehavior === 'off' || autoButOff || modeForceOff) {
-			return Array.from({ length: pages }, (_, i) => [i])
-		}
-		return generatePageSets({ imageSizes: sizes, pages: pages })
-	}, [doublePageBehavior, pages, sizes, deviceOrientation, readingMode])
+		const modeForceOff = readingMode === ReadingMode.ContinuousVertical
 
-	const [currentPage, setCurrentPage] = useState(() => initialPage)
+		let sets: number[][] = []
+		if (doublePageBehavior === 'off' || autoButOff || modeForceOff) {
+			sets = Array.from({ length: pages }, (_, i) => [i])
+		} else {
+			sets = generatePageSets({
+				imageSizes,
+				pages: pages,
+				secondPageSeparate: secondPageSeparate,
+			})
+		}
+
+		return sets
+	}, [doublePageBehavior, pages, imageSizes, deviceOrientation, readingMode, secondPageSeparate])
+
+	const [currentPage, setCurrentPage] = useState(initialPage)
 
 	const onPageChangedHandler = useCallback(
 		(page: number) => {
@@ -60,9 +90,7 @@ export default function ImageBasedReaderContainer({
 		[incognito, onPageChanged],
 	)
 
-	const flatListRef = useRef<FlatList>(null)
-	// const flatListRef = useRef<FlashList<number>>(null)
-	const insets = useSafeAreaInsets()
+	const flashListRef = useRef<FlashListRef<number[]>>(null)
 
 	// TODO: prefetch, see https://github.com/candlefinance/faster-image/issues/73
 	// useEffect(
@@ -83,22 +111,29 @@ export default function ImageBasedReaderContainer({
 				...ctx,
 				currentPage,
 				onPageChanged: onPageChangedHandler,
-				imageSizes: sizes,
-				setImageSizes: setSizes,
+				imageSizes,
+				setImageSizes,
 				pageSets,
-				flatListRef,
+				flashListRef,
 			}}
 		>
-			<View
-				className="fixed inset-0 flex-1 bg-black"
-				style={{
-					paddingTop: insets.top,
-					paddingBottom: insets.bottom,
-					height: Dimensions.get('screen').height - insets.top - insets.bottom,
-				}}
-			>
+			<View className="fixed inset-0 flex-1 bg-black">
 				<ControlsOverlay />
-				<ImageBasedReader initialPage={initialPage} />
+
+				{nextInSeries && (
+					<NextUpOverlay
+						isVisible={showNextUp}
+						book={nextInSeries}
+						onClose={() => setShowNextUp(false)}
+					/>
+				)}
+
+				<ImageBasedReader
+					initialPage={initialPage}
+					// Note: This does not work for Android so we need an alternative solution. I'm
+					// thinking maybe adding a menu entry for it in the controls overlay
+					onPastEndReached={() => setShowNextUp(!!nextInSeries)}
+				/>
 			</View>
 		</ImageBasedReaderContext.Provider>
 	)

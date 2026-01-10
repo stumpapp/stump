@@ -18,19 +18,19 @@ export default function SettingsLayout() {
 	}))
 	const {
 		preferences: {
-			enable_double_sidebar,
-			primary_navigation_mode,
-			layout_max_width_px,
-			enable_hide_scrollbar,
+			enableDoubleSidebar,
+			primaryNavigationMode,
+			layoutMaxWidthPx,
+			enableHideScrollbar,
 		},
 	} = usePreferences()
 
 	if (!user) {
-		return <Navigate to={`/login?redirect=${encodeURIComponent(window.location.pathname)}`} />
+		return <Navigate to={`/auth?redirect=${encodeURIComponent(window.location.pathname)}`} />
 	}
 
-	const displaySideBar = !!enable_double_sidebar && !isMobile
-	const preferTopBar = primary_navigation_mode === 'TOPBAR'
+	const displaySideBar = !!enableDoubleSidebar && !isMobile
+	const preferTopBar = primaryNavigationMode === 'TOPBAR'
 
 	// 1. if we are on mobile, we always render it
 	// 2. if not displaySideBar, we always render it
@@ -42,15 +42,15 @@ export default function SettingsLayout() {
 			// The overflow on the parent is intentional, as it allows the native scrollbar to be fully
 			// to the right, instead of on the potentially restricted width of the child container
 			className={cn('flex h-full w-full flex-col overflow-y-auto md:flex-row', {
-				'scrollbar-hide': enable_hide_scrollbar,
+				'scrollbar-hide': enableHideScrollbar,
 			})}
 		>
 			<div
 				className={cn('flex w-full flex-col md:flex-row', {
-					'mx-auto': preferTopBar && !!layout_max_width_px,
+					'mx-auto': preferTopBar && !!layoutMaxWidthPx,
 				})}
 				style={{
-					maxWidth: preferTopBar ? layout_max_width_px || undefined : undefined,
+					maxWidth: preferTopBar ? layoutMaxWidthPx || undefined : undefined,
 				}}
 			>
 				{displaySideBar && <SettingsSideBar />}

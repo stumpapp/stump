@@ -1,11 +1,12 @@
 use crate::CoreResult;
 
 use super::{
+	entity::OPDSProgressionEntity,
 	link::{OPDSLinkFinalizer, OPDSLinkType},
-	reading_session_opds_progression,
 	utils::default_now,
 };
 use derive_builder::Builder;
+use rust_decimal::prelude::ToPrimitive;
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
@@ -25,10 +26,10 @@ pub struct OPDSProgression {
 
 impl OPDSProgression {
 	pub fn new(
-		data: reading_session_opds_progression::Data,
+		data: OPDSProgressionEntity,
 		link_finalizer: OPDSLinkFinalizer,
 	) -> CoreResult<Self> {
-		let book_id = data.media.id;
+		let book_id = data.book.id;
 
 		let device = match data.device {
 			Some(device) => OPDSProgressionDevice {
@@ -38,20 +39,23 @@ impl OPDSProgression {
 			_ => OPDSProgressionDevice::default(),
 		};
 
-		let extension = data.media.extension.to_lowercase();
+		let extension = data.book.extension.to_lowercase();
+		let percentage_completed =
+			data.session.percentage_completed.and_then(|d| d.to_f64());
 		let (title, href, _type, locations) =
-			match (extension.as_str(), data.epubcfi, data.page) {
+			match (extension.as_str(), data.session.epubcfi, data.session.page) {
 				("epub", Some(cfi), _) => {
 					// TODO: Lookup chapter without opening file, e.g. epubcfi?
 					let title = "Ebook Progress".to_string();
 					// TODO: Use resource URL for href, e.g. OEBPS/chapter008.xhtml ?
-					let locations = data.percentage_completed.map(|progression| {
-						vec![OPDSProgressionLocation {
-							fragments: Some(vec![cfi]),
-							total_progression: Some(progression),
-							..Default::default()
-						}]
-					});
+					let locations =
+						data.session.percentage_completed.map(|_progression| {
+							vec![OPDSProgressionLocation {
+								fragments: Some(vec![cfi]),
+								total_progression: percentage_completed,
+								..Default::default()
+							}]
+						});
 					(Some(title), None, Some(OPDSLinkType::Xhtml), locations)
 				},
 				(_, None, Some(current_page)) => {
@@ -61,8 +65,8 @@ impl OPDSProgression {
 					));
 					let locations = vec![OPDSProgressionLocation {
 						position: Some(current_page.to_string()),
-						total_progression: data.percentage_completed.or_else(|| {
-							Some(current_page as f64 / data.media.pages as f64)
+						total_progression: percentage_completed.or_else(|| {
+							Some(current_page as f64 / data.book.pages as f64)
 						}),
 						..Default::default()
 					}];

@@ -1,9 +1,11 @@
 import { queryClient, useSDK } from '@stump/client'
 import { cn } from '@stump/components'
+import { graphql, MediaAtPathQuery } from '@stump/graphql'
 import { Api } from '@stump/sdk'
-import { Media } from '@stump/sdk'
 import { Book, Folder } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
+
+import { usePreferences } from '@/hooks/usePreferences'
 
 import { EntityImage } from '../entity'
 
@@ -21,6 +23,9 @@ export default function FileThumbnail({
 	containerClassName,
 }: Props) {
 	const { sdk } = useSDK()
+	const {
+		preferences: { thumbnailRatio },
+	} = usePreferences()
 	/**
 	 * A boolean state to keep track of whether or not we should show the fallback icon. This
 	 * will be set to true if the image fails to load
@@ -29,7 +34,7 @@ export default function FileThumbnail({
 	/**
 	 * The book associated with the file, if any exists
 	 */
-	const [book, setBook] = useState<Media | null>(null)
+	const [book, setBook] = useState<MediaAtPath>(null)
 	/**
 	 * A naive ref to keep track of whether or not we have fetched the book
 	 */
@@ -54,7 +59,7 @@ export default function FileThumbnail({
 		if (book) {
 			const image = new Image()
 			return new Promise((resolve, reject) => {
-				image.src = sdk.media.thumbnailURL(book.id)
+				image.src = book.thumbnail.url
 				image.onload = () => resolve(image)
 				image.onerror = (e) => {
 					console.error('Image failed to load:', e)
@@ -64,7 +69,7 @@ export default function FileThumbnail({
 		} else {
 			return Promise.reject('No book found')
 		}
-	}, [book, sdk.media])
+	}, [book])
 
 	/**
 	 * A function that attempts to reload the image
@@ -80,7 +85,7 @@ export default function FileThumbnail({
 
 	const sizeClasses = cn('h-14', { 'h-20': size === 'md' })
 	const className = cn(
-		'flex aspect-[2/3] w-auto items-center justify-center rounded-sm border-[0.5px] border-edge bg-sidebar shadow-sm',
+		'flex w-auto items-center justify-center rounded-sm border-[0.5px] border-edge bg-sidebar shadow-sm',
 		sizeClasses,
 		containerClassName,
 	)
@@ -88,7 +93,7 @@ export default function FileThumbnail({
 
 	if (isDirectory) {
 		return (
-			<div className={className}>
+			<div className={className} style={{ aspectRatio: thumbnailRatio }}>
 				<Folder className={cn('text-foreground-muted', iconSizes)} />
 			</div>
 		)
@@ -96,7 +101,7 @@ export default function FileThumbnail({
 
 	if (showFallback || !book) {
 		return (
-			<div className={className} onClick={attemptReload}>
+			<div className={className} onClick={attemptReload} style={{ aspectRatio: thumbnailRatio }}>
 				<Book className={cn('text-foreground-muted', iconSizes)} />
 			</div>
 		)
@@ -104,31 +109,42 @@ export default function FileThumbnail({
 
 	return (
 		<EntityImage
-			className={cn('aspect-[2/3] w-auto rounded-sm object-cover', sizeClasses)}
+			className={cn('w-auto rounded-sm object-cover', sizeClasses)}
+			style={{ aspectRatio: thumbnailRatio }}
 			src={sdk.media.thumbnailURL(book.id)}
 			onError={() => setShowFallback(true)}
 		/>
 	)
 }
 
+const query = graphql(`
+	query MediaAtPath($path: String!) {
+		mediaByPath(path: $path) {
+			id
+			resolvedName
+			thumbnail {
+				url
+			}
+		}
+	}
+`)
+
+export type MediaAtPath = MediaAtPathQuery['mediaByPath']
 /**
  * A function that attempts to fetch the book associated with the file, if any exists.
  * The queryClient is used in order to properly cache the result.
  */
 export const getBook = async (path: string, sdk: Api) => {
 	try {
-		const response = await queryClient.fetchQuery(
-			[sdk.media.keys.get, { path }],
-			() =>
-				sdk.media.get({
-					path: [path],
-				}),
-			{
-				// 15 minutes
-				cacheTime: 1000 * 60 * 15,
+		const response = await queryClient.fetchQuery({
+			queryKey: ['getMediaByPath', path],
+			queryFn: async () => {
+				return sdk.execute(query, { path })
 			},
-		)
-		return response.data?.at(0) ?? null
+			// 15 minutes
+			staleTime: 1000 * 60 * 15,
+		})
+		return response.mediaByPath ?? null
 	} catch (error) {
 		console.error(error)
 		return null

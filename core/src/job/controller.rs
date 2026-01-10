@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use sea_orm::DatabaseConnection;
 use tokio::sync::{
 	broadcast,
 	mpsc::{self, error::SendError},
@@ -7,7 +8,7 @@ use tokio::sync::{
 };
 
 use super::{Executor, JobManager, JobManagerResult, WorkerSend, WorkerSendExt};
-use crate::{config::StumpConfig, event::CoreEvent, prisma::PrismaClient};
+use crate::{config::StumpConfig, event::CoreEvent};
 
 /// Input for commands that require an acknowledgement when they are completed
 /// (e.g. cancel, pause, resume)
@@ -50,14 +51,14 @@ pub struct JobController {
 impl JobController {
 	/// Creates a new job controller instance and starts the watcher loop in a new thread
 	pub fn new(
-		client: Arc<PrismaClient>,
+		conn: Arc<DatabaseConnection>,
 		config: Arc<StumpConfig>,
 		core_event_tx: broadcast::Sender<CoreEvent>,
 	) -> Arc<Self> {
 		let (commands_tx, commands_rx) = mpsc::unbounded_channel();
 		let this = Arc::new(Self {
 			commands_tx: commands_tx.clone(),
-			manager: JobManager::new(client, config, commands_tx, core_event_tx).arced(),
+			manager: JobManager::new(conn, config, commands_tx, core_event_tx).arced(),
 		});
 
 		let this_cpy = this.clone();

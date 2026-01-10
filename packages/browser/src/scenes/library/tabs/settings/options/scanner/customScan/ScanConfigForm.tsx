@@ -1,12 +1,13 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Alert, cn, Form, RadioGroup, WideSwitch } from '@stump/components'
+import { Alert, AlertDescription, cn, Form, RadioGroup, WideSwitch } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import { ScanOptions } from '@stump/sdk'
+import { AlertTriangle } from 'lucide-react'
 import { useCallback } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
 
 import { useLibraryManagement } from '../../../context'
+import { ScanOptions } from '../history/ScanHistoryTable'
 
 export const FORM_ID = 'scan-config-form'
 
@@ -40,20 +41,21 @@ export default function ScanConfigForm({ onScan }: Props) {
 		[form],
 	)
 
-	const regenMeta = !!config && 'regen_meta' in config ? config?.regen_meta : false
-	const regenHashes = !!config && 'regen_hashes' in config ? config?.regen_hashes : false
+	const regenMeta = !!config && 'regenMeta' in config ? config?.regenMeta : false
+	const regenHashes = !!config && 'regenHashes' in config ? config?.regenHashes : false
 
 	const showOverrideAlert =
-		(regenMeta && !libraryConfig.process_metadata) ||
-		(regenHashes && !libraryConfig.generate_file_hashes)
+		(regenMeta && !libraryConfig.processMetadata) ||
+		(regenHashes && !libraryConfig.generateFileHashes)
 
 	return (
 		<Form form={form} onSubmit={handleSubmit} id={FORM_ID}>
 			{showOverrideAlert && (
-				<Alert level="warning" className="rounded-xl p-3" icon="warning">
-					<Alert.Content className="text-sm text-foreground-subtle">
+				<Alert variant="warning" className="rounded-xl p-3">
+					<AlertTriangle />
+					<AlertDescription className="text-sm text-foreground-subtle">
 						{t(getKey('alert'))}
-					</Alert.Content>
+					</AlertDescription>
 				</Alert>
 			)}
 
@@ -82,10 +84,10 @@ export default function ScanConfigForm({ onScan }: Props) {
 			</RadioGroup>
 
 			{variant === 'force-rebuild' && (
-				<Alert level="info" className="rounded-xl p-3">
-					<Alert.Content className="text-sm text-foreground-subtle">
+				<Alert variant="info" className="rounded-xl p-3">
+					<AlertDescription className="text-sm text-foreground-subtle">
 						{t(getOptionKey('forceRebuild', 'alert'))}
-					</Alert.Content>
+					</AlertDescription>
 				</Alert>
 			)}
 
@@ -94,17 +96,17 @@ export default function ScanConfigForm({ onScan }: Props) {
 					<WideSwitch
 						label="Rebuild metadata"
 						description="Rebuild metadata for all books in the library"
-						name="config.regen_meta"
+						name="config.regenMeta"
 						checked={regenMeta}
-						onCheckedChange={(value) => form.setValue('config.regen_meta', value)}
+						onCheckedChange={(value) => form.setValue('config.regenMeta', value)}
 					/>
 
 					<WideSwitch
 						label="Rebuild hashes"
 						description="Rebuild hashes for all books in the library"
-						name="config.regen_hashes"
+						name="config.regenHashes"
 						checked={regenHashes}
-						onCheckedChange={(value) => form.setValue('config.regen_hashes', value)}
+						onCheckedChange={(value) => form.setValue('config.regenHashes', value)}
 					/>
 				</div>
 			)}
@@ -112,28 +114,29 @@ export default function ScanConfigForm({ onScan }: Props) {
 	)
 }
 
+// TODO(graphql): Fix
 const createSchema = (t: (key: string) => string) =>
 	z
 		.object({
 			variant: z.enum(['force-rebuild', 'custom']),
 			config: z
 				.object({
-					regen_meta: z.boolean().default(false),
-					regen_hashes: z.boolean().default(false),
+					regenMeta: z.boolean().default(false),
+					regenHashes: z.boolean().default(false),
 				})
 				.nullish(),
 		})
 		.refine(({ config }) => {
 			if (!config) return true
-			if ('regen_meta' in config && 'regen_hashes' in config) {
-				return config.regen_meta || config.regen_hashes
+			if ('regenMeta' in config && 'regenHashes' in config) {
+				return config.regenMeta || config.regenHashes
 					? true
 					: t(getOptionKey('custom', 'validation.noSelection'))
 			}
 		})
 		.transform((data) => ({
 			...data,
-			config: data.variant === 'force-rebuild' ? { force_rebuild: true } : data.config,
+			config: data.variant === 'force-rebuild' ? { forceRebuild: true } : data.config,
 		}))
 type FormValues = z.infer<ReturnType<typeof createSchema>>
 const isFormVariant = (variant: string): variant is FormValues['variant'] =>

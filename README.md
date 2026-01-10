@@ -16,7 +16,7 @@
 </p>
 
 <p align='center'>
-Stump is a free and open source comics, manga and digital book server with OPDS support, created with <a href="https://www.rust-lang.org/">Rust</a>, <a href='https://github.com/tokio-rs/axum'>Axum</a>, <a href='https://github.com/Brendonovich/prisma-client-rust'>Prisma</a> and <a href='https://reactjs.org/'>React</a>.
+Stump is a free and open source comics, manga and digital book server with OPDS support, created with <a href="https://www.rust-lang.org/">Rust</a>, <a href='https://github.com/tokio-rs/axum'>Axum</a>, <a href='https://www.sea-ql.org/SeaORM/'>SeaORM</a> and <a href='https://reactjs.org/'>React</a>.
 </p>
 
 <p align='center'>
@@ -36,10 +36,12 @@ Stump is a free and open source comics, manga and digital book server with OPDS 
   - [Apps](#apps)
   - [Core](#core)
   - [Crates](#crates)
+  - [Database](#database)
   - [Docs](#docs)
   - [Packages](#packages)
 - [Similar Projects 👯](#similar-projects-)
 - [License 📝](#license-)
+- [Attribution](#attribution)
 </details>
 
 > **🚧 Disclaimer 🚧**: Stump is under active development and is an ongoing **WIP**. Anyone is welcome to try it out, but **DO NOT** expect a fully featured or bug-free experience. If you'd like to contribute and help expedite feature development, please review the [developer guide](#developer-guide-).
@@ -56,14 +58,14 @@ The following items are the major targets for Stump's first stable release:
 - 👀 Fully responsive, built-in UI with a dark mode
 - 🏃 Low resource utilization with excellent performance
 - 🧰 Easily consumable and documented REST API, so community tools and scripts can interact with Stump
-- 🌏 Language support _(look [here](https://github.com/stumpapp/stump/issues/106))_
+- 🌏 Language support _(look [here](https://crowdin.com/project/stump))_
 - 🌈 And more!
 
 Things you can expect to see afterwards:
 
 - 🖥️ Cross-platform desktop app _(Windows, Mac, Linux)_
 - 📱 In-house mobile app _(Android, iOS)_
-- 🔎 Versatile full-text search _(blocked by [prisma#9414](https://github.com/prisma/prisma/issues/9414))_
+- 🔎 Versatile full-text search
 - 👥 Configurable book clubs _(see [this issue](https://github.com/stumpapp/stump/issues/120))_
 
 Feel free to reach out if you have anything else you'd like to see!
@@ -76,14 +78,14 @@ For more information about getting started, check out the [guides](https://stump
 
 ## Developer Guide 💻
 
-Contributions are very **welcome**! Please review the [CONTRIBUTING.md](https://github.com/stumpapp/stump/tree/develop/.github/CONTRIBUTING.md) before getting started.
+Contributions are very **welcome**! Please review the [CONTRIBUTING.md](https://github.com/stumpapp/stump/tree/nightly/.github/CONTRIBUTING.md) before getting started.
 
 A quick summary of the steps required to get going:
 
 1. Install [yarn](https://yarnpkg.com/), [rust](https://www.rust-lang.org/tools/install) and [node](https://nodejs.org/en/download/).
    - If you're running Windows, you will need [Visual C++](https://docs.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170)
    - If you're running macOS on Apple Silicon, you'll need to install [Rosetta](https://support.apple.com/en-us/HT211861)
-2. Install [cargo-watch](https://crates.io/crates/cargo-watch)
+2. Install [bacon](https://crates.io/crates/bacon)
 3. Run the setup script:
 
    ```bash
@@ -94,15 +96,6 @@ A quick summary of the steps required to get going:
 
    ```bash
    yarn run setup
-   ```
-
-   This will build the React app, generate the Prisma client, and generate the Rust-TypeScript types. To do any of these individually, you can run:
-
-   ```bash
-    # build the React app
-    yarn web build
-    # generate the Prisma client and Rust-TypeScript types
-    cargo codegen # or cargo prisma generate --schema=./core/prisma/schema.prisma for just the Prisma client
    ```
 
 4. Start one of the apps:
@@ -146,7 +139,7 @@ In general, the following areas are good places to start:
 
 <details>
   <summary><b>Click to expand</b></summary>
-  
+
 Stump has a monorepo structure managed by [yarn workspaces](https://yarnpkg.com/features/workspaces) and [cargo workspaces](https://doc.rust-lang.org/cargo/reference/workspaces.html). The project is split into a number of different packages and crates, each with their own purpose:
 
 ### Apps
@@ -170,8 +163,15 @@ Various Rust crates, at `/crates` in the root of the project:
 
 - `cli`: A CLI library used in the `server` app
 - `codegen`: A small rust app that handles all of the code generation for Stump
+- `graphql`: All of the GraphQL related object definitions
 - `integrations`: A rust library containing integrations with other notification services
-- `prisma-cli`: A small wrapper rust app to run the Prisma CLI
+
+### Database
+
+A few database-specific crates are organized in the `/database` directory in the root of the project:
+
+- `migrations`: Contains all of the database migrations
+- `models`: Contains all of the database models
 
 ### Docs
 
@@ -202,3 +202,9 @@ There are a number of other projects that are similar to Stump, it certainly isn
 ## License 📝
 
 Stump is broken up into a number of different packages and applications. Some of these have their own licenses. For example, the `expo` app is licensed under [GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.html). If a package has its own license, it will be noted in the package's README or LICENSE file. In such cases, the license file(s) in the subfolder/package take precedence. If such a license or disclaimer is not present, it is safe to assume that the code is licensed under the [MIT License](https://www.tldrlegal.com/license/mit-license).
+
+## Attribution
+
+- Some of the icons used in the web and mobile applications are from the [Spacedrive](https://github.com/spacedriveapp/spacedrive/tree/main/packages/assets/icons) repository, and are licensed under the [AGPL-3.0](<https://www.tldrlegal.com/license/gnu-affero-general-public-license-v3-(agpl-3.0)>) license.
+- The `job` crate could not be possible without the work of other open source projects which had a significant influence on the design and implementation. See the [corresponding section](core/README.md#license-) in the `core` crate for more information.
+- The native Readium expo modules were adapted from [Storyteller](https://gitlab.com/storyteller-platform/storyteller)

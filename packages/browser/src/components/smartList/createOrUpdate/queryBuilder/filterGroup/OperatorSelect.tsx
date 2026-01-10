@@ -53,13 +53,13 @@ export default function OperatorSelect({ idx }: Props) {
 			match(fieldDef.field)
 				.when(
 					(field) => isStringField(field),
-					() => ['contains', 'excludes', 'not', 'equals'] as StringOperation[],
+					() => ['contains', 'excludes', 'neq', 'eq'] as StringOperation[],
 				)
 				.when(
 					(field) => isNumberField(field) || isDateField(field),
-					() => ['gt', 'gte', 'lt', 'lte', 'not', 'equals', 'range'] as NumberOperation[],
+					() => ['gt', 'gte', 'lt', 'lte', 'neq', 'eq', 'range'] as NumberOperation[],
 				)
-				.otherwise(() => ['not', 'equals'] as Operation[]),
+				.otherwise(() => ['neq', 'eq'] as Operation[]),
 		[fieldDef],
 	)
 
@@ -137,21 +137,21 @@ export default function OperatorSelect({ idx }: Props) {
 }
 
 const operatorGroups = {
-	list: ['any', 'none'] satisfies ListOperation[],
-	number: ['gt', 'gte', 'lt', 'lte', 'not', 'equals', 'range'] satisfies NumberOperation[],
-	string: ['contains', 'excludes', 'not', 'equals'] satisfies StringOperation[],
+	list: ['anyOf', 'noneOf'] satisfies ListOperation[],
+	number: ['gt', 'gte', 'lt', 'lte', 'neq', 'eq', 'range'] satisfies NumberOperation[],
+	string: ['contains', 'excludes', 'neq', 'eq'] satisfies StringOperation[],
 }
 
 const operatorMap: Record<Operation, string> = {
-	any: 'any in list',
+	anyOf: 'any in list',
 	contains: 'contains string',
-	equals: 'equal to',
+	eq: 'equal to',
 	excludes: 'excludes string',
 	gt: 'greater than',
 	gte: 'greater than or equal to',
 	lt: 'less than',
 	lte: 'less than or equal to',
-	none: 'none in list',
-	not: 'not equal to',
+	noneOf: 'none in list',
+	neq: 'not equal to',
 	range: 'in range',
 }

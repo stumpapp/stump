@@ -16,12 +16,12 @@ export default function DefaultReadingSettings() {
 					<Label>{t(getKey('imageScaling.label'))}</Label>
 					<NativeSelect
 						options={[
-							{ label: 'Auto', value: 'auto' },
-							{ label: 'Height', value: 'height' },
-							{ label: 'Width', value: 'width' },
-							{ label: 'Original', value: 'none' },
+							{ label: 'Auto', value: 'AUTO' },
+							{ label: 'Height', value: 'HEIGHT' },
+							{ label: 'Width', value: 'WIDTH' },
+							{ label: 'Original', value: 'NONE' },
 						]}
-						{...form.register('default_reading_image_scale_fit')}
+						{...form.register('defaultReadingImageScaleFit')}
 					/>
 					<Text size="xs" variant="muted">
 						{t(getKey('imageScaling.description'))}
@@ -32,10 +32,10 @@ export default function DefaultReadingSettings() {
 					<Label>{t(getKey('readingDirection.label'))}</Label>
 					<NativeSelect
 						options={[
-							{ label: 'Left to right', value: 'ltr' },
-							{ label: 'Right to left', value: 'rtl' },
+							{ label: 'Left to right', value: 'LTR' },
+							{ label: 'Right to left', value: 'RTL' },
 						]}
-						{...form.register('default_reading_dir')}
+						{...form.register('defaultReadingDir')}
 					/>
 					<Text size="xs" variant="muted">
 						{t(getKey('readingDirection.description'))}
@@ -47,11 +47,11 @@ export default function DefaultReadingSettings() {
 				<Label>{t(getKey('readingMode.label'))}</Label>
 				<NativeSelect
 					options={[
-						{ label: 'Vertical scroll', value: 'continuous:vertical' },
-						{ label: 'Horizontal scroll', value: 'continuous:horizontal' },
-						{ label: 'Paged', value: 'paged' },
+						{ label: 'Vertical scroll', value: 'CONTINUOUS_VERTICAL' },
+						{ label: 'Horizontal scroll', value: 'CONTINUOUS_HORIZONTAL' },
+						{ label: 'Paged', value: 'PAGED' },
 					]}
-					{...form.register('default_reading_mode')}
+					{...form.register('defaultReadingMode')}
 				/>
 				<Text size="xs" variant="muted">
 					{t(getKey('readingMode.description'))}

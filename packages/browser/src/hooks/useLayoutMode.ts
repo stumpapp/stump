@@ -1,4 +1,4 @@
-import type { LayoutMode } from '@stump/sdk'
+import { InterfaceLayout } from '@stump/graphql'
 import { useEffect, useMemo, useState } from 'react'
 
 import { useUserStore } from '@/stores'
@@ -9,11 +9,11 @@ export function useLayoutMode() {
 	}))
 
 	const preferredLayoutMode = useMemo(
-		() => userPreferences?.preferred_layout_mode as LayoutMode | undefined,
-		[userPreferences?.preferred_layout_mode],
+		() => userPreferences?.preferredLayoutMode,
+		[userPreferences?.preferredLayoutMode],
 	)
 
-	const [localLayout, setLocalLayout] = useState<LayoutMode>(() => preferredLayoutMode || 'GRID')
+	const [localLayout, setLocalLayout] = useState(() => preferredLayoutMode || InterfaceLayout.Grid)
 
 	useEffect(() => {
 		if (preferredLayoutMode) {

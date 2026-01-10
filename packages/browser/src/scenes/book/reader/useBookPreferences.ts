@@ -1,11 +1,13 @@
 import { BookPreferences, ReaderSettings, ReaderStore } from '@stump/client'
-import type { LibraryConfig, Media } from '@stump/sdk'
+import { PickSelect } from '@stump/components'
+import { BookReaderSceneQuery, ReadingImageScaleFit } from '@stump/graphql'
 import { useCallback, useMemo } from 'react'
 
+import { ImageReaderBookRef } from '@/components/readers/imageBased/context'
 import { useReaderStore } from '@/stores'
 
 type Params = {
-	book: Media
+	book: ImageReaderBookRef
 }
 
 type Return = Omit<
@@ -35,7 +37,7 @@ export function useBookPreferences({ book }: Params): Return {
 	 * The library configuration, used for picking default reader settings. This realistically
 	 * should never be null once the query resolves
 	 */
-	const libraryConfig = useMemo(() => book?.series?.library?.config, [book])
+	const libraryConfig = useMemo(() => book.libraryConfig, [book])
 	const libraryDefaults = useMemo(() => defaultsFromLibraryConfig(libraryConfig), [libraryConfig])
 
 	const bookPreferences = useMemo(
@@ -61,19 +63,24 @@ export function useBookPreferences({ book }: Params): Return {
 	}
 }
 
-const defaultsFromLibraryConfig = (libraryConfig?: LibraryConfig): Partial<BookPreferences> =>
-	({
-		brightness: 1,
-		imageScaling: libraryConfig?.default_reading_image_scale_fit
-			? {
-					scaleToFit: libraryConfig?.default_reading_image_scale_fit,
-				}
-			: undefined,
-		readingDirection: libraryConfig?.default_reading_dir,
-		readingMode: libraryConfig?.default_reading_mode,
-	}) as Partial<BookPreferences>
+const defaultsFromLibraryConfig = (
+	libraryConfig?: PickSelect<NonNullable<BookReaderSceneQuery['mediaById']>, 'libraryConfig'>,
+): Partial<BookPreferences> => ({
+	brightness: 1,
+	// imageScaling: {
+	// 	scaleToFit: libraryConfig?.defaultReadingImageScaleFit || ReadingImageScaleFit.Height,
+	// },
+	imageScaling: libraryConfig?.defaultReadingImageScaleFit
+		? {
+				scaleToFit: libraryConfig?.defaultReadingImageScaleFit as ReadingImageScaleFit,
+			}
+		: undefined,
+	readingDirection: libraryConfig?.defaultReadingDir,
+	readingMode: libraryConfig?.defaultReadingMode,
+})
 
 const settingsAsBookPreferences = (settings: ReaderSettings): BookPreferences => ({
+	animatedReader: settings.animatedReader,
 	brightness: settings.brightness,
 	imageScaling: settings.imageScaling,
 	readingDirection: settings.readingDirection,
@@ -85,6 +92,7 @@ const settingsAsBookPreferences = (settings: ReaderSettings): BookPreferences =>
 	doublePageBehavior: settings.doublePageBehavior,
 	fontFamily: settings.fontFamily,
 	secondPageSeparate: settings.secondPageSeparate,
+	panzoomWithoutCtrl: settings.panzoomWithoutCtrl,
 })
 
 const buildPreferences = (

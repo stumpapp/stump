@@ -17,16 +17,24 @@
 			"@stump/client/*": ["../client/src/*"],
 			"@stump/components": ["../components/src/index.ts"],
 			"@stump/components/*": ["../components/src/*"],
+			"@stump/graphql": ["../graphql/src/index.ts"],
 			"@/components/*": ["./src/components/*"],
 			"@/hooks/*": ["./src/hooks/*"],
 			"@/i18n": ["./src/i18n/index.ts"],
 			"@/i18n/*": ["./src/i18n/*"],
 			"@/utils/*": ["./src/utils/*"],
-			"@/context": ["./src/context.ts"],
+			"@/context": ["./src/context"],
 			"@/paths": ["./src/paths.ts"],
 			"@/*": ["./src/*"]
 		},
-		"resolveJsonModule": true
+		"resolveJsonModule": true,
+		"plugins": [
+			{
+				"name": "@0no-co/graphqlsp",
+				"schema": "../../crates/graphql/schema.graphql",
+				"shouldCheckForColocatedFragments": false
+			}
+		]
 	},
 	"include": ["src", "src/**/*.json"],
 	"references": [
@@ -38,6 +46,9 @@
 		},
 		{
 			"path": "../components"
+		},
+		{
+			"path": "../graphql"
 		}
 	]
 }

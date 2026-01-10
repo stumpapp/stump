@@ -1,25 +1,56 @@
-import { useSDK, useSeriesCursorQuery } from '@stump/client'
-import { Series } from '@stump/sdk'
+/* eslint-disable react-compiler/react-compiler */
+import { useInfiniteSuspenseGraphQL } from '@stump/client'
+import { graphql, LibrarySeriesGridQuery } from '@stump/graphql'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { Fragment, useCallback, useEffect, useRef } from 'react'
 import AutoSizer from 'react-virtualized-auto-sizer'
 import { useMediaMatch } from 'rooks'
 
+import { usePreferences } from '@/hooks/usePreferences'
+
+const query = graphql(`
+	query LibrarySeriesGrid($id: String!, $pagination: Pagination) {
+		series(filter: { libraryId: { eq: $id } }, pagination: $pagination) {
+			nodes {
+				id
+				thumbnail {
+					url
+				}
+			}
+			pageInfo {
+				__typename
+				... on CursorPaginationInfo {
+					currentCursor
+					nextCursor
+					limit
+				}
+			}
+		}
+	}
+`)
+
+export type SelectedSeries = LibrarySeriesGridQuery['series']['nodes'][number]
+
 type Props = {
 	libraryId: string
-	onSelectSeries: (series: Series) => void
+	onSelectSeries: (series: SelectedSeries) => void
 }
+
 // TODO: Create generalized VirtualizedGrid component and trim the reused logic
 export default function LibrarySeriesGrid({ libraryId, onSelectSeries }: Props) {
-	const { sdk } = useSDK()
-	const { series, fetchNextPage, hasNextPage } = useSeriesCursorQuery({
-		limit: 50,
-		params: {
-			library: {
-				id: [libraryId],
-			},
+	const { data, fetchNextPage, hasNextPage } = useInfiniteSuspenseGraphQL(
+		query,
+		['librarySeriesGrid', libraryId],
+		{
+			id: libraryId,
+			pagination: { cursor: { limit: 50 } },
 		},
-	})
+	)
+	const nodes = data.pages.flatMap((page) => page.series.nodes)
+
+	const {
+		preferences: { thumbnailRatio },
+	} = usePreferences()
 
 	const parentRef = useRef<HTMLDivElement>(null)
 
@@ -36,16 +67,19 @@ export default function LibrarySeriesGrid({ libraryId, onSelectSeries }: Props) 
 		}
 	}, [isAtLeastSmall, isAtLeastMedium])
 
-	const rowCount = series.length > 4 ? series.length / 4 : 1
+	const rowCount = nodes.length > 4 ? nodes.length / 4 : 1
 	const rowVirtualizer = useVirtualizer({
 		count: rowCount,
-		// ratio is 2:3, so we take the result of estimateWidth and multiply by 3/2
-		estimateSize: useCallback(() => estimateWidth() * 1.5, [estimateWidth]),
+		// for thumbnailRatio e.g. 2:3 (thumbnailRatio = 2/3), we take the result of estimateWidth and multiply by 3/2
+		estimateSize: useCallback(
+			() => estimateWidth() / thumbnailRatio,
+			[estimateWidth, thumbnailRatio],
+		),
 		getScrollElement: () => parentRef.current,
 		overscan: 5,
 	})
 
-	const columnCount = series.length > 4 ? 4 : series.length
+	const columnCount = nodes.length > 4 ? 4 : nodes.length
 	const columnVirtualizer = useVirtualizer({
 		count: columnCount,
 		estimateSize: estimateWidth,
@@ -97,8 +131,11 @@ export default function LibrarySeriesGrid({ libraryId, onSelectSeries }: Props) 
 								<Fragment key={virtualRow.index}>
 									{columnVirtualizer.getVirtualItems().map((virtualColumn) => {
 										const virtualPage = virtualRow.index * 4 + virtualColumn.index + 1
-										const thisSeries = series[virtualPage - 1]
-										const imageUrl = sdk.series.thumbnailURL(thisSeries?.id || '')
+										const thisSeries = nodes[virtualPage - 1]
+										const imageUrl = thisSeries?.thumbnail?.url
+										if (!thisSeries || !imageUrl) {
+											return null
+										}
 										return (
 											<div
 												key={virtualColumn.index}
@@ -113,12 +150,13 @@ export default function LibrarySeriesGrid({ libraryId, onSelectSeries }: Props) 
 											>
 												<div
 													className="relative flex w-[7rem] flex-1 flex-col space-y-1 overflow-hidden rounded-md border-[1.5px] border-edge-subtle bg-background shadow-sm transition-colors duration-100 hover:border-edge-brand sm:w-[7.666rem] md:w-[9rem]"
-													onClick={() => onSelectSeries(thisSeries!)}
+													onClick={() => onSelectSeries(thisSeries)}
 												>
 													<div
-														className="relative aspect-[2/3] bg-cover bg-center p-0"
+														className="relative bg-cover bg-center p-0"
 														style={{
 															backgroundImage: `url('${imageUrl}')`,
+															aspectRatio: thumbnailRatio,
 														}}
 													/>
 												</div>

@@ -7,21 +7,29 @@ mod webp;
 pub use self::webp::WebpProcessor;
 pub use error::ProcessorError;
 pub use generic::GenericImageProcessor;
-pub use process::{
-	ImageFormat, ImageProcessor, ImageProcessorOptions, ImageResizeMode,
-	ImageResizeOptions, ScaledDimensionResize,
+use image::ImageFormat;
+use models::shared::image_processor_options::{
+	ScaledDimensionResize, SupportedImageFormat,
 };
+pub use process::{ImageProcessor, ImageProcessorOptionsExt};
 pub use thumbnail::*;
 use tokio::{sync::oneshot, task::spawn_blocking};
+
+pub fn into_image_format(format: SupportedImageFormat) -> ImageFormat {
+	match format {
+		SupportedImageFormat::Jpeg => ImageFormat::Jpeg,
+		SupportedImageFormat::Png => ImageFormat::Png,
+		SupportedImageFormat::Webp => ImageFormat::WebP,
+	}
+}
 
 fn _resize_image(
 	buf: &[u8],
 	dimension: ScaledDimensionResize,
 ) -> Result<Vec<u8>, ProcessorError> {
-	let kind = image::guess_format(buf)?;
-	match kind {
-		image::ImageFormat::WebP => Ok(WebpProcessor::resize_scaled(buf, dimension)?),
-		image::ImageFormat::Jpeg | image::ImageFormat::Png => {
+	match image::guess_format(buf)? {
+		ImageFormat::WebP => Ok(WebpProcessor::resize_scaled(buf, dimension)?),
+		ImageFormat::Jpeg | ImageFormat::Png => {
 			Ok(GenericImageProcessor::resize_scaled(buf, dimension)?)
 		},
 		_ => Err(ProcessorError::UnsupportedImageFormat),

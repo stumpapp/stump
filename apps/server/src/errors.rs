@@ -5,10 +5,6 @@ use axum::{
 	Json,
 };
 use cli::CliError;
-use prisma_client_rust::{
-	prisma_errors::query_engine::{RecordNotFound, UniqueKeyViolation},
-	QueryError,
-};
 use stump_core::{
 	error::CoreError,
 	filesystem::{
@@ -21,7 +17,6 @@ use stump_core::{
 };
 use tokio::sync::mpsc;
 use tower_sessions::session::Error as SessionError;
-use utoipa::ToSchema;
 
 use std::{net, num::TryFromIntError};
 use thiserror::Error;
@@ -107,8 +102,10 @@ impl IntoResponse for AuthError {
 /// The error representation for API errors. This is a simple enum which will be converted into a
 /// JSON response containing the status code and the error message.
 #[allow(unused)]
-#[derive(Debug, Error, ToSchema)]
+#[derive(Debug, Error)]
 pub enum APIError {
+	#[error("Your account has been locked by an administrator")]
+	AccountLocked,
 	#[error("{0}")]
 	BadRequest(String),
 	#[error("{0}")]
@@ -132,17 +129,30 @@ pub enum APIError {
 	#[error("{0}")]
 	Redirect(String),
 	#[error("{0}")]
-	#[schema(value_type = String)]
 	SessionFetchError(#[from] SessionError),
 	#[error("{0}")]
-	#[schema(value_type = Box<String>)]
-	PrismaError(#[from] Box<QueryError>),
+	DbError(#[from] sea_orm::error::DbErr),
+	#[error("OIDC is not enabled")]
+	OIDCNotEnabled,
+	#[error("The provided OIDC configuration is invalid or missing required fields")]
+	OIDCConfigurationInvalid,
+	#[error("{0}")]
+	OIDCConfigurationError(#[from] openidconnect::ConfigurationError),
+	#[error("Failed to exchange OIDC token: {0}")]
+	OIDCTokenExchangeFailed(String),
+	#[error("The OIDC token is missing from the response")]
+	OIDCMissingToken,
+	#[error("Failed to verify OIDC claims: {0}")]
+	OIDCClaimsVerificationFailed(#[from] openidconnect::ClaimsVerificationError),
+	#[error("The OIDC token is missing an email claim")]
+	OIDCMissingEmail,
 }
 
 impl APIError {
 	/// A helper function to get the status code for an APIError
 	pub fn status_code(&self) -> StatusCode {
 		match self {
+			APIError::AccountLocked => StatusCode::FORBIDDEN,
 			APIError::BadRequest(_) => StatusCode::BAD_REQUEST,
 			APIError::NotFound(_) => StatusCode::NOT_FOUND,
 			APIError::InternalServerError(_) => StatusCode::INTERNAL_SERVER_ERROR,
@@ -151,16 +161,13 @@ impl APIError {
 			APIError::NotImplemented => StatusCode::NOT_IMPLEMENTED,
 			APIError::ServiceUnavailable(_) => StatusCode::SERVICE_UNAVAILABLE,
 			APIError::BadGateway(_) => StatusCode::BAD_GATEWAY,
-			APIError::PrismaError(e) => {
-				if e.is_prisma_error::<RecordNotFound>() {
-					StatusCode::NOT_FOUND
-				} else if e.is_prisma_error::<UniqueKeyViolation>() {
-					StatusCode::UNPROCESSABLE_ENTITY
-				} else {
-					StatusCode::INTERNAL_SERVER_ERROR
-				}
+			APIError::DbError(sea_orm::error::DbErr::RecordNotFound(_)) => {
+				StatusCode::NOT_FOUND
 			},
+			APIError::DbError(_) => StatusCode::INTERNAL_SERVER_ERROR,
 			APIError::Redirect(_) => StatusCode::TEMPORARY_REDIRECT,
+			APIError::OIDCConfigurationInvalid => StatusCode::BAD_REQUEST,
+			APIError::OIDCNotEnabled => StatusCode::FORBIDDEN,
 			_ => StatusCode::INTERNAL_SERVER_ERROR,
 		}
 	}
@@ -216,7 +223,6 @@ impl From<CoreError> for APIError {
 			CoreError::InternalError(err) => APIError::InternalServerError(err),
 			CoreError::IoError(err) => APIError::InternalServerError(err.to_string()),
 			CoreError::MigrationError(err) => APIError::InternalServerError(err),
-			CoreError::QueryError(err) => APIError::InternalServerError(err.to_string()),
 			CoreError::Unknown(err) => APIError::InternalServerError(err),
 			CoreError::Utf8ConversionError(err) => {
 				APIError::InternalServerError(err.to_string())
@@ -265,12 +271,6 @@ impl From<mpsc::error::SendError<CoreEvent>> for APIError {
 	}
 }
 
-impl From<prisma_client_rust::RelationNotFetchedError> for APIError {
-	fn from(e: prisma_client_rust::RelationNotFetchedError) -> Self {
-		APIError::InternalServerError(e.to_string())
-	}
-}
-
 impl From<FileError> for APIError {
 	fn from(error: FileError) -> APIError {
 		APIError::InternalServerError(error.to_string())
@@ -293,12 +293,6 @@ impl From<ProcessorError> for APIError {
 impl From<std::io::Error> for APIError {
 	fn from(error: std::io::Error) -> APIError {
 		APIError::InternalServerError(error.to_string())
-	}
-}
-
-impl From<prisma_client_rust::QueryError> for APIError {
-	fn from(error: prisma_client_rust::QueryError) -> Self {
-		Self::PrismaError(Box::new(error))
 	}
 }
 
@@ -359,6 +353,4 @@ impl IntoResponse for APIError {
 pub mod api_error_message {
 	pub const LOCKED_ACCOUNT: &str =
 		"Your account is locked. Please contact an administrator to unlock your account.";
-	pub const FORBIDDEN_ACTION: &str =
-		"You do not have permission to perform this action.";
 }

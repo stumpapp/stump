@@ -3,10 +3,11 @@ import { checkUrl, formatApiURL } from '@stump/sdk'
 import isEqual from 'lodash/isEqual'
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 import { Controller, useForm, useFormState, useWatch } from 'react-hook-form'
-import { NativeSyntheticEvent, Pressable, TextInputFocusEventData, View } from 'react-native'
+import { FocusEvent, Platform, Pressable, View } from 'react-native'
 import Dialog from 'react-native-dialog'
 import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable'
 import Reanimated, { SharedValue, useAnimatedStyle } from 'react-native-reanimated'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { match, P } from 'ts-pattern'
 import { z } from 'zod'
 
@@ -14,14 +15,21 @@ import { cn } from '~/lib/utils'
 import { usePreferencesStore, useSavedServers } from '~/stores'
 import { SavedServerWithConfig } from '~/stores/savedServer'
 
-import { Button, Input, Label, Switch, Tabs, Text } from '../ui'
+import { BottomSheet, Button, Heading, Label, Switch, Tabs, Text } from '../ui'
 
 type Props = {
 	editingServer?: SavedServerWithConfig | null
 	onSubmit: (data: AddOrEditServerSchema) => void
+	onClose: () => void
+	onInputFocused?: (e: FocusEvent) => void
 }
 
-export default function AddOrEditServerForm({ editingServer, onSubmit }: Props) {
+export default function AddOrEditServerForm({
+	editingServer,
+	onSubmit,
+	onClose,
+	onInputFocused,
+}: Props) {
 	const { savedServers, stumpEnabled } = useSavedServers()
 
 	const { control, handleSubmit, ...form } = useForm<AddOrEditServerSchema>({
@@ -39,13 +47,14 @@ export default function AddOrEditServerForm({ editingServer, onSubmit }: Props) 
 	const [didConnect, setDidConnect] = useState(false)
 	const url = form.watch('url')
 	const checkConnection = useCallback(async () => {
-		const isValid = await checkUrl(formatApiURL(url, 'v1'))
+		const isValid = await checkUrl(formatApiURL(url, 'v2'))
 		if (!isValid) {
 			form.setError('url', {
 				type: 'manual',
 				message: 'Failed to connect to server',
 			})
 		} else {
+			form.clearErrors('url')
 			setDidConnect(true)
 		}
 	}, [url, form])
@@ -106,7 +115,7 @@ export default function AddOrEditServerForm({ editingServer, onSubmit }: Props) 
 	const renderAuthMode = () => {
 		if (authMode === 'default') {
 			return (
-				<View className="rounded-lg border border-dashed border-edge p-3">
+				<View className="squircle rounded-lg border border-dashed border-edge p-3">
 					<Text className="text-foreground-muted">
 						You will be prompted to login when accessing content as needed
 					</Text>
@@ -118,7 +127,7 @@ export default function AddOrEditServerForm({ editingServer, onSubmit }: Props) 
 					<Controller
 						control={control}
 						render={({ field: { onChange, onBlur, value } }) => (
-							<Input
+							<BottomSheet.Input
 								label="Username"
 								autoCorrect={false}
 								autoCapitalize="none"
@@ -127,6 +136,7 @@ export default function AddOrEditServerForm({ editingServer, onSubmit }: Props) 
 								onChangeText={onChange}
 								value={value}
 								errorMessage={errors.basicUser?.message}
+								onFocus={onInputFocused}
 							/>
 						)}
 						name="basicUser"
@@ -135,7 +145,7 @@ export default function AddOrEditServerForm({ editingServer, onSubmit }: Props) 
 					<Controller
 						control={control}
 						render={({ field: { onChange, onBlur, value } }) => (
-							<Input
+							<BottomSheet.Input
 								label="Password"
 								autoCorrect={false}
 								autoCapitalize="none"
@@ -145,6 +155,7 @@ export default function AddOrEditServerForm({ editingServer, onSubmit }: Props) 
 								onChangeText={onChange}
 								value={value}
 								errorMessage={errors.basicPassword?.message}
+								onFocus={onInputFocused}
 							/>
 						)}
 						name="basicPassword"
@@ -156,7 +167,7 @@ export default function AddOrEditServerForm({ editingServer, onSubmit }: Props) 
 				<Controller
 					control={control}
 					render={({ field: { onChange, onBlur, value } }) => (
-						<Input
+						<BottomSheet.Input
 							label="Token"
 							autoCorrect={false}
 							autoCapitalize="none"
@@ -166,6 +177,7 @@ export default function AddOrEditServerForm({ editingServer, onSubmit }: Props) 
 							value={value}
 							errorMessage={errors.token?.message}
 							secureTextEntry
+							onFocus={onInputFocused}
 						/>
 					)}
 					name="token"
@@ -181,7 +193,8 @@ export default function AddOrEditServerForm({ editingServer, onSubmit }: Props) 
 	)
 
 	const onURLFocused = useCallback(
-		(e: NativeSyntheticEvent<TextInputFocusEventData>) => {
+		(e: FocusEvent) => {
+			// @ts-expect-error: It's fine
 			if (e.nativeEvent.text === '') {
 				form.setValue('url', 'http://')
 			}
@@ -222,8 +235,39 @@ export default function AddOrEditServerForm({ editingServer, onSubmit }: Props) 
 		)
 	}
 
+	const insets = useSafeAreaInsets()
+
 	return (
-		<View className="w-full gap-4">
+		<View
+			className="w-full gap-4"
+			style={{ paddingBottom: Platform.OS === 'android' ? 32 : insets.bottom }}
+		>
+			<View className="flex-row items-center justify-between pb-2">
+				<Pressable onPress={onClose}>
+					<Text className="text-foreground-muted">Cancel</Text>
+				</Pressable>
+
+				<Button
+					size="sm"
+					variant="brand"
+					onPress={handleSubmit(onSubmit)}
+					disabled={editingServer ? !isUpdateReady : false}
+				>
+					<Text className="text-foreground">Save</Text>
+				</Button>
+			</View>
+
+			<View>
+				<Heading size="lg" className="font-bold leading-6">
+					{editingServer ? 'Edit Server' : 'Add Server'}
+				</Heading>
+				<Text className="text-foreground-muted">
+					{editingServer
+						? 'Make changes to the server configuration'
+						: 'Configure a new server to access your content'}
+				</Text>
+			</View>
+
 			<View className="w-full flex-row items-center justify-between">
 				<Text className="flex-1 text-base font-medium text-foreground-muted">Kind</Text>
 
@@ -252,7 +296,7 @@ export default function AddOrEditServerForm({ editingServer, onSubmit }: Props) 
 					required: true,
 				}}
 				render={({ field: { onChange, onBlur, value } }) => (
-					<Input
+					<BottomSheet.Input
 						label="Name"
 						autoCorrect={false}
 						autoCapitalize="none"
@@ -272,7 +316,7 @@ export default function AddOrEditServerForm({ editingServer, onSubmit }: Props) 
 					required: true,
 				}}
 				render={({ field: { onChange, onBlur, value } }) => (
-					<Input
+					<BottomSheet.Input
 						label={kind === 'stump' ? 'URL' : 'Catalog URL'}
 						autoCorrect={false}
 						autoCapitalize="none"
@@ -288,22 +332,26 @@ export default function AddOrEditServerForm({ editingServer, onSubmit }: Props) 
 				name="url"
 			/>
 
-			{/* <Button
-				className={cn('-mt-1 rounded-lg bg-background-surface p-2', {
-					'opacity-70': !url,
-					'bg-fill-success-secondary': didConnect,
-				})}
-				disabled={!url}
-				onPress={checkConnection}
-			>
-				<Text>{didConnect ? 'Connected' : 'Check connection'}</Text>
-			</Button> */}
+			<View className="flex-row justify-end">
+				<Button
+					variant="outline"
+					size="sm"
+					className={cn('squircle rounded-lg bg-background-surface', {
+						'opacity-70': !url,
+						'bg-fill-success-secondary': didConnect,
+					})}
+					disabled={!url}
+					onPress={checkConnection}
+				>
+					<Text>{didConnect ? 'Connected' : 'Check connection'}</Text>
+				</Button>
+			</View>
 
 			<View className="w-full gap-2">
 				<Text className="flex-1 text-base font-medium text-foreground-muted">Custom Headers</Text>
 
 				{formValues.customHeaders?.length && (
-					<View className="w-full overflow-hidden rounded-lg border border-edge">
+					<View className="squircle w-full overflow-hidden rounded-lg border border-edge">
 						{formValues.customHeaders.map((header, index) => (
 							<Swipeable
 								key={index}
@@ -383,14 +431,7 @@ export default function AddOrEditServerForm({ editingServer, onSubmit }: Props) 
 
 			<View className="w-full gap-6">
 				<Text className="flex-1 text-base font-medium text-foreground-muted">Options</Text>
-				<View className="w-full flex-row items-center gap-6">
-					<Switch
-						checked={defaultServer}
-						onCheckedChange={(value) => form.setValue('defaultServer', value)}
-						nativeID="defaultServer"
-						disabled={kind !== 'stump'}
-					/>
-
+				<View className="w-full flex-row items-center justify-between gap-6">
 					<Label
 						nativeID="defaultServer"
 						onPress={() => {
@@ -400,17 +441,17 @@ export default function AddOrEditServerForm({ editingServer, onSubmit }: Props) 
 					>
 						Set as default server
 					</Label>
+
+					<Switch
+						checked={defaultServer}
+						onCheckedChange={(value) => form.setValue('defaultServer', value)}
+						nativeID="defaultServer"
+						disabled={kind !== 'stump'}
+					/>
 				</View>
 
 				{kind === 'stump' && (
-					<View className="w-full flex-row items-center gap-6">
-						<Switch
-							checked={stumpOPDS}
-							onCheckedChange={(value) => form.setValue('stumpOPDS', value)}
-							nativeID="stumpOPDS"
-							disabled={kind !== 'stump'}
-						/>
-
+					<View className="w-full flex-row items-center justify-between gap-6">
 						<Label
 							nativeID="stumpOPDS"
 							onPress={() => {
@@ -420,18 +461,16 @@ export default function AddOrEditServerForm({ editingServer, onSubmit }: Props) 
 						>
 							Enable OPDS
 						</Label>
+
+						<Switch
+							checked={stumpOPDS}
+							onCheckedChange={(value) => form.setValue('stumpOPDS', value)}
+							nativeID="stumpOPDS"
+							disabled={kind !== 'stump'}
+						/>
 					</View>
 				)}
 			</View>
-
-			<Button
-				variant="brand"
-				className="mt-4 w-full"
-				onPress={handleSubmit(onSubmit)}
-				disabled={editingServer ? !isUpdateReady : false}
-			>
-				<Text>{editingServer ? 'Update' : 'Add'} server</Text>
-			</Button>
 		</View>
 	)
 }
@@ -485,7 +524,7 @@ const getDefaultValues = (stumpEnabled: boolean, editingServer?: SavedServerWith
 		kind: editingServer.kind,
 		name: editingServer.name,
 		url: editingServer.url,
-		defaultServer: false,
+		defaultServer: editingServer.defaultServer ?? false,
 		stumpOPDS: editingServer.stumpOPDS,
 		customHeaders: Object.entries(editingServer.config?.customHeaders || {}).map(
 			([key, value]) => ({

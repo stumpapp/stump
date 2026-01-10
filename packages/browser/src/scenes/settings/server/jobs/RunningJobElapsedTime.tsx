@@ -1,8 +1,9 @@
 import { Text } from '@stump/components'
-import { PersistedJob } from '@stump/sdk'
 import dayjs from 'dayjs'
 import { Duration } from 'dayjs/plugin/duration'
 import { useEffect, useMemo, useState } from 'react'
+
+import { PersistedJob } from './JobTable'
 
 type Props = {
 	job: PersistedJob
@@ -10,13 +11,13 @@ type Props = {
 }
 
 export default function RunningJobElapsedTime({ job, formatDuration }: Props) {
-	const [elapsedTime, setElapsedTime] = useState(dayjs().diff(dayjs(job.created_at), 'second'))
+	const [elapsedTime, setElapsedTime] = useState(dayjs().diff(dayjs(job.createdAt), 'second'))
 
 	useEffect(() => {
-		if (job.completed_at) return
+		if (job.completedAt) return
 
 		const interval = setInterval(() => {
-			setElapsedTime(dayjs().diff(dayjs(job.created_at), 'second'))
+			setElapsedTime(dayjs().diff(dayjs(job.createdAt), 'second'))
 		}, 1000)
 
 		return () => {

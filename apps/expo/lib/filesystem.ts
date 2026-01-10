@@ -1,4 +1,4 @@
-import * as FileSystem from 'expo-file-system'
+import * as FileSystem from 'expo-file-system/legacy'
 import urlJoin from 'url-join'
 
 import { useReaderStore } from '~/stores'
@@ -24,23 +24,74 @@ Filesystem structure:
 				- etc
 */
 
+// FIXME: Need to migrate off of legacy FS methods
+
 export const baseDirectory = `${FileSystem.documentDirectory}`
+export const cacheDirectory = `${FileSystem.cacheDirectory}`
 
 const serverDirectory = (serverID: string) => urlJoin(baseDirectory, serverID)
 
 export const serverPath = (serverID: string, path: string) =>
 	urlJoin(serverDirectory(serverID), path)
 
+export const serverCachePath = (serverID: string, path: string) =>
+	urlJoin(cacheDirectory, serverID, path)
+
 export const booksDirectory = (serverID: string) => serverPath(serverID, 'books')
 
-export const activelyReadingDirectory = (serverID: string) =>
-	serverPath(serverID, 'actively-reading')
+export const thumbnailsDirectory = (serverID: string) => serverPath(serverID, 'thumbnails')
+
+export const bookThumbnailPath = (serverID: string, bookID: string) =>
+	urlJoin(thumbnailsDirectory(serverID), `${bookID}.jpg`)
+
+export const unpackedDirectory = (serverID: string) => serverCachePath(serverID, 'unpacked')
+
+export const unpackedBookDirectory = (serverID: string, bookID: string) =>
+	urlJoin(unpackedDirectory(serverID), bookID)
 
 export async function ensureDirectoryExists(path = baseDirectory) {
 	const info = await FileSystem.getInfoAsync(path)
 	if (!info.exists) {
-		await FileSystem.makeDirectoryAsync(path)
+		await FileSystem.makeDirectoryAsync(path, { intermediates: true })
 	}
+}
+
+/**
+ * Verifies that a downloaded file is fully written and readable.
+ * This prevents a race condition on Android where the file system
+ * may not have fully flushed the file before Readium tries to access it
+ */
+export async function verifyFileReadable(
+	uri: string,
+	maxAttempts: number = 5,
+	delayMs: number = 200,
+): Promise<void> {
+	for (let attempt = 0; attempt < maxAttempts; attempt++) {
+		try {
+			const fileInfo = await FileSystem.getInfoAsync(uri)
+
+			if (fileInfo.exists && fileInfo.size && fileInfo.size > 0) {
+				if (attempt === 0) {
+					await new Promise((resolve) => setTimeout(resolve, delayMs))
+				}
+				return
+			}
+
+			// File doesn't exist or has zero size, wait and retry
+			if (attempt < maxAttempts - 1) {
+				await new Promise((resolve) => setTimeout(resolve, delayMs))
+			}
+		} catch (error) {
+			console.warn(`File verification attempt ${attempt + 1} failed:`, error)
+			if (attempt < maxAttempts - 1) {
+				await new Promise((resolve) => setTimeout(resolve, delayMs))
+			}
+		}
+	}
+
+	throw new Error('Failed to verify file exists', {
+		cause: `File not found or inaccessible: ${uri}`,
+	})
 }
 
 const getFileSize = async (path: string): Promise<number> => {

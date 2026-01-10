@@ -15,7 +15,7 @@ export default function RoleMappingForm() {
 
 	return (
 		<div className="flex flex-col gap-y-6">
-			<Card className="grid grid-cols-1 gap-6 bg-background-surface p-4 md:max-w-3xl md:grid-cols-2">
+			<Card className="grid grid-cols-1 gap-6 bg-background-surface/50 p-4 md:max-w-3xl md:grid-cols-2">
 				<Input
 					variant="primary"
 					fullWidth
@@ -24,9 +24,9 @@ export default function RoleMappingForm() {
 					descriptionPosition="top"
 					placeholder={t(getKey('member.placeholder'))}
 					autoComplete="off"
-					errorMessage={errors.member_role_spec?.MEMBER?.message}
+					errorMessage={errors.memberRoleSpec?.MEMBER?.message}
 					contrast
-					{...form.register('member_role_spec.MEMBER')}
+					{...form.register('memberRoleSpec.MEMBER')}
 				/>
 
 				<Input
@@ -37,9 +37,9 @@ export default function RoleMappingForm() {
 					descriptionPosition="top"
 					placeholder={t(getKey('moderator.placeholder'))}
 					autoComplete="off"
-					errorMessage={errors.member_role_spec?.MODERATOR?.message}
+					errorMessage={errors.memberRoleSpec?.MODERATOR?.message}
 					contrast
-					{...form.register('member_role_spec.MODERATOR')}
+					{...form.register('memberRoleSpec.MODERATOR')}
 				/>
 
 				<Input
@@ -50,9 +50,9 @@ export default function RoleMappingForm() {
 					descriptionPosition="top"
 					placeholder={t(getKey('admin.placeholder'))}
 					autoComplete="off"
-					errorMessage={errors.member_role_spec?.ADMIN?.message}
+					errorMessage={errors.memberRoleSpec?.ADMIN?.message}
 					contrast
-					{...form.register('member_role_spec.ADMIN')}
+					{...form.register('memberRoleSpec.ADMIN')}
 				/>
 
 				<Input
@@ -63,9 +63,9 @@ export default function RoleMappingForm() {
 					descriptionPosition="top"
 					placeholder={t(getKey('creator.placeholder'))}
 					autoComplete="off"
-					errorMessage={errors.member_role_spec?.CREATOR?.message}
+					errorMessage={errors.memberRoleSpec?.CREATOR?.message}
 					contrast
-					{...form.register('member_role_spec.CREATOR')}
+					{...form.register('memberRoleSpec.CREATOR')}
 				/>
 			</Card>
 		</div>

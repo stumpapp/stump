@@ -3,6 +3,7 @@ import { useLocaleContext } from '@stump/i18n'
 
 import DeleteLibraryThumbnails from './DeleteLibraryThumbnails'
 import LibraryThumbnailSelector from './LibraryThumbnailSelector'
+import ProcessLibraryThumbnails from './ProcessLibraryThumbnails'
 import RegenerateThumbnails from './RegenerateThumbnails'
 
 export default function ThumbnailManagementSection() {
@@ -19,6 +20,7 @@ export default function ThumbnailManagementSection() {
 
 			<LibraryThumbnailSelector />
 			<RegenerateThumbnails />
+			<ProcessLibraryThumbnails />
 			<DeleteLibraryThumbnails />
 		</div>
 	)

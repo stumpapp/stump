@@ -1,6 +1,8 @@
 {
 	"extends": "../../tsconfig.json",
 	"compilerOptions": {
+		"module": "ES2022",
+		"moduleResolution": "Node",
 		"composite": true,
 		"jsx": "preserve",
 		"skipLibCheck": true,
@@ -9,15 +11,24 @@
 		"paths": {
 			"@stump/sdk": ["../sdk/src/index.ts"],
 			"@stump/sdk/*": ["../sdk/src/*"],
+			"@stump/graphql": ["../graphql/src/index.ts"],
 			"@/*": ["./src/*"]
 		},
-		"module": "NodeNext"
+		"plugins": [
+			{
+				"name": "@0no-co/graphqlsp",
+				"schema": "../../crates/graphql/schema.graphql"
+			}
+		]
 	},
 	"include": ["src"],
 	"exclude": ["node_modules"],
 	"references": [
 		{
 			"path": "../sdk"
+		},
+		{
+			"path": "../graphql"
 		}
 	]
 }

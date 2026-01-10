@@ -13,22 +13,23 @@
 	},
 	"dependencies": {
 		"@stump/sdk": "*",
-		"@tanstack/react-query": "^4.36.1",
+		"@tanstack/react-query": "^5.87.1",
 		"axios": "^1.6.8",
 		"deep-equal": "^2.2.3",
 		"immer": "^10.0.4",
 		"react-use-websocket": "^4.8.1",
+		"ts-pattern": "^5.7.0",
 		"zustand": "^4.5.2"
 	},
 	"devDependencies": {
 		"@types/deep-equal": "^1.0.4",
 		"@types/node": "^20.12.7",
-		"@types/react": "^18.3.12",
+		"@types/react": "^19.0.0",
 		"prettier": "^3.2.5",
 		"tsconfig": "^7.0.0",
 		"typescript": "^5.4.5"
 	},
 	"peerDependencies": {
-		"react": "^18.2.0"
+		"react": "^19.0.0"
 	}
 }

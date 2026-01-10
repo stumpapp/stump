@@ -1,5 +1,4 @@
 import { cn, Text } from '@stump/components'
-import { AttachmentMeta } from '@stump/sdk'
 import {
 	createColumnHelper,
 	flexRender,
@@ -14,12 +13,14 @@ import { getTableModels, SortIcon } from '@/components/table'
 import { usePreferences } from '@/hooks'
 import { formatBytes } from '@/utils/format'
 
+import { EmailerSendRecord } from './EmailerSendHistoryTable'
+
 type Props = {
-	attachments: AttachmentMeta[]
+	attachments: EmailerSendRecord['attachmentMeta']
 }
 export default function EmailerSendRecordAttachmentTable({ attachments }: Props) {
 	const {
-		preferences: { enable_hide_scrollbar },
+		preferences: { enableHideScrollbar },
 	} = usePreferences()
 
 	const [sorting, setSorting] = useState<SortingState>([])
@@ -41,7 +42,7 @@ export default function EmailerSendRecordAttachmentTable({ attachments }: Props)
 			{({ width }) => (
 				<div
 					className={cn('h-full min-w-full overflow-x-auto', {
-						'scrollbar-hide': enable_hide_scrollbar,
+						'scrollbar-hide': enableHideScrollbar,
 					})}
 					style={{
 						width,
@@ -105,8 +106,31 @@ export default function EmailerSendRecordAttachmentTable({ attachments }: Props)
 	)
 }
 
-const columnHelper = createColumnHelper<AttachmentMeta>()
+const columnHelper = createColumnHelper<EmailerSendRecord['attachmentMeta'][number]>()
 const columns = [
+	columnHelper.display({
+		id: 'media',
+		cell: ({ row }) => {
+			const {
+				original: { media },
+			} = row
+
+			if (!media) {
+				return <Text size="sm">Not Found</Text>
+			}
+
+			return (
+				<Text size="sm" className="cursor-pointer hover:underline">
+					{media.resolvedName}
+				</Text>
+			)
+		},
+		header: () => (
+			<Text size="sm" className="text-left" variant="muted">
+				Media
+			</Text>
+		),
+	}),
 	columnHelper.accessor('filename', {
 		cell: ({ getValue }) => <Text size="sm">{getValue()}</Text>,
 		header: () => (

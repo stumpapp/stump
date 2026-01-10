@@ -2,13 +2,11 @@
 //! https://drafts.opds.io/opds-2.0
 
 use derive_builder::Builder;
+use models::entity::{library, series};
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
-use crate::{
-	filesystem::ContentType,
-	prisma::{library, series},
-};
+use crate::filesystem::ContentType;
 
 use super::{
 	properties::{OPDSProperties, AUTH_ROUTE},
@@ -20,7 +18,7 @@ use super::{
 /// This struct was derived from multiple sources within the OPDS 2.0 spec, including:
 /// - https://drafts.opds.io/opds-2.0#21-navigation
 /// - https://drafts.opds.io/opds-2.0#4-pagination
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "lowercase")]
 pub enum OPDSLinkRel {
 	#[serde(rename = "self")]
@@ -48,6 +46,15 @@ impl OPDSLinkRel {
 
 	pub fn array(rels: Vec<OPDSLinkRel>) -> ArrayOrItem<OPDSLinkRel> {
 		ArrayOrItem::Array(rels)
+	}
+}
+
+impl ArrayOrItem<OPDSLinkRel> {
+	pub fn contains(&self, rel: &OPDSLinkRel) -> bool {
+		match self {
+			ArrayOrItem::Item(item) => item == rel,
+			ArrayOrItem::Array(arr) => arr.contains(rel),
+		}
 	}
 }
 
@@ -301,8 +308,8 @@ impl OPDSLinkFinalizer {
 }
 
 // TODO(OPDS-V2): What should rel be?
-impl From<library::Data> for OPDSNavigationLink {
-	fn from(library: library::Data) -> Self {
+impl From<library::Model> for OPDSNavigationLink {
+	fn from(library: library::Model) -> Self {
 		OPDSNavigationLink {
 			title: library.name,
 			base_link: OPDSBaseLink {
@@ -316,8 +323,8 @@ impl From<library::Data> for OPDSNavigationLink {
 }
 
 // TODO(OPDS-V2): What should rel be?
-impl From<series::Data> for OPDSNavigationLink {
-	fn from(series: series::Data) -> Self {
+impl From<series::Model> for OPDSNavigationLink {
+	fn from(series: series::Model) -> Self {
 		OPDSNavigationLink {
 			title: series.name,
 			base_link: OPDSBaseLink {
@@ -332,10 +339,11 @@ impl From<series::Data> for OPDSNavigationLink {
 
 #[cfg(test)]
 mod tests {
+	use models::shared::enums::FileStatus;
+
 	use crate::opds::v2_0::properties::{OPDSDynamicProperties, OPDSPropertiesBuilder};
 
 	use super::*;
-	use prisma_client_rust::chrono;
 
 	#[test]
 	fn test_image_link_serialization() {
@@ -444,25 +452,19 @@ mod tests {
 
 	#[test]
 	fn test_navigation_link_from_library_data() {
-		let library = library::Data {
+		let library = library::Model {
 			id: "123".to_string(),
 			name: "A library".to_string(),
 			created_at: chrono::Utc::now().into(),
-			updated_at: chrono::Utc::now().into(),
+			updated_at: Some(chrono::Utc::now().into()),
 			description: None,
 			emoji: None,
-			hidden_from_users: None,
-			job_schedule_config: None,
-			job_schedule_config_id: None,
 			last_scanned_at: None,
-			scan_history: None,
-			config: None,
-			config_id: String::default(),
+			config_id: 1,
 			path: String::default(),
-			series: None,
-			status: String::from("READY"),
-			tags: None,
-			user_visits: None,
+			status: FileStatus::Ready,
+			thumbnail_meta: None,
+			thumbnail_path: None,
 		};
 
 		let link: OPDSNavigationLink = library.into();

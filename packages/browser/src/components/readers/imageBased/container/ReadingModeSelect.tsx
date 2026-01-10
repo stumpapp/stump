@@ -1,5 +1,5 @@
 import { Label, NativeSelect } from '@stump/components'
-import { ReadingMode } from '@stump/sdk'
+import { ReadingMode } from '@stump/graphql'
 import { useCallback } from 'react'
 
 type Props = {
@@ -30,9 +30,9 @@ export default function ReadingModeSelect({ value, onChange }: Props) {
 				id="reading-mode"
 				size="sm"
 				options={[
-					{ label: 'Vertical scroll', value: 'continuous:vertical' },
-					{ label: 'Horizontal scroll', value: 'continuous:horizontal' },
-					{ label: 'Paged', value: 'paged' },
+					{ label: 'Vertical scroll', value: 'CONTINUOUS_VERTICAL' },
+					{ label: 'Horizontal scroll', value: 'CONTINUOUS_HORIZONTAL' },
+					{ label: 'Paged', value: 'PAGED' },
 				]}
 				value={value}
 				onChange={handleChange}
@@ -46,4 +46,6 @@ export default function ReadingModeSelect({ value, onChange }: Props) {
  * A type guard to ensure that the provided string is a valid {@link ReadingMode}.
  */
 const isReadingMode = (mode: string): mode is ReadingMode =>
-	mode === 'continuous:vertical' || mode === 'continuous:horizontal' || mode === 'paged'
+	mode === ReadingMode.Paged ||
+	mode === ReadingMode.ContinuousHorizontal ||
+	mode === ReadingMode.ContinuousVertical

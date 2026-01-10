@@ -6,7 +6,7 @@ To ensure nobody's time and effort is wasted, please be sure to follow the guide
 
 1. Check to see if an issue already exists relevant to your feature/topic
 2. Create an issue (if an issue does not already exist) and express interest in working it (see the [issues](#issues) section below)
-3. Create a new feature branch **off of the `experimental` or `develop` branches** - _not_ `main`. All PRs should be made against either `experimental` or `develop`.
+3. Create a new feature branch **off of the `experimental` or `nightly` branches** - _not_ `main`. All PRs should be made against either `experimental` or `nightly`.
 4. Add appropiate documentation, tests, etc, if necessary.
 5. Ensure you have your code formatters properly configured (both Prettier and Rustfmt).
 6. Once you've completed your changes, create your PR!
@@ -29,13 +29,13 @@ If you're not sure if an issue is relevant or appropriate, e.g. if you have more
 
 ## Pull Requests
 
-> :information_source: There are two development branches: `experimental` and `develop`. These correspond to the `experimental` and `nightly` tags on Docker Hub, respectively. In general, `experimental` is for large or breaking changes, while `develop` is for smaller, more incremental changes.
+> :information_source: There are two development branches: `experimental` and `nightly`. These correspond to the `experimental` and `nightly` tags on Docker Hub, respectively. In general, `experimental` is for large or breaking changes, while `nightly` is for smaller, more incremental changes.
 
 PRs will be merged once the following criteria are met:
 
 - All CI checks pass
 - At least one _maintainer_ has reviewed your PR
 
-All PRs to `experimental` will be squashed. All PRs to `develop` from `experimental` and to `main` will be merge commits. This is to ensure that the commit history is clean and easy to follow, and to ensure that the changelog generator works properly.
+All PRs to `experimental` will be squashed. All PRs to `nightly` from `experimental` and to `main` will be merge commits. This is to ensure that the commit history is clean and easy to follow, and to ensure that the changelog generator works properly.
 
 Thanks for considering contributing to Stump! :heart:

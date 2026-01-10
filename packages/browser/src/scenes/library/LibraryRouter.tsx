@@ -1,8 +1,10 @@
+import { UserPermission } from '@stump/graphql'
 import { lazy, useMemo } from 'react'
 import { Navigate, Route, Routes } from 'react-router'
 
 import { useAppContext } from '@/context'
 
+import LibraryDefaultRedirect from './LibraryDefaultRedirect.tsx'
 import LibraryLayout from './LibraryLayout.tsx'
 import LibraryAdminLayout from './tabs/settings/LibraryAdminLayout.tsx'
 
@@ -16,13 +18,16 @@ const LibrarySearchScene = lazy(() => import('../librarySearch'))
 export default function LibraryRouter() {
 	const { checkPermission } = useAppContext()
 
-	const canAccessExplorer = useMemo(() => checkPermission('file:explorer'), [checkPermission])
+	const canAccessExplorer = useMemo(
+		() => checkPermission(UserPermission.FileExplorer),
+		[checkPermission],
+	)
 
 	return (
 		<Routes>
 			<Route path="" element={<LibrarySearchScene />} />
 			<Route path=":id/*" element={<LibraryLayout />}>
-				<Route path="" element={<Navigate to="series" replace />} />
+				<Route path="" element={<LibraryDefaultRedirect />} />
 				<Route path="series" element={<LibrarySeriesScene />} />
 				<Route path="books" element={<LibraryBooksScene />} />
 				{canAccessExplorer && <Route path="files" element={<LibraryExplorerScene />} />}

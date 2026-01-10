@@ -1,5 +1,7 @@
-import { useEmailersQuery, useMutation, useSDK } from '@stump/client'
-import { CreateOrUpdateEmailer } from '@stump/sdk'
+import { useGraphQLMutation, useSDK, useSuspenseGraphQL } from '@stump/client'
+import { graphql } from '@stump/graphql'
+import { useQueryClient } from '@tanstack/react-query'
+import omit from 'lodash/omit'
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router'
 
@@ -9,37 +11,54 @@ import paths from '@/paths'
 import { useEmailerSettingsContext } from './context'
 import { CreateOrUpdateEmailerForm, CreateOrUpdateEmailerSchema } from './emailers'
 
+const query = graphql(`
+	query CreateEmailerSceneEmailers {
+		emailers {
+			name
+		}
+	}
+`)
+
+const mutation = graphql(`
+	mutation CreateEmailerSceneCreateEmailer($input: EmailerInput!) {
+		createEmailer(input: $input) {
+			id
+		}
+	}
+`)
+
 export default function CreateEmailerScene() {
-	const { sdk } = useSDK()
 	const navigate = useNavigate()
+	const client = useQueryClient()
+
+	const { sdk } = useSDK()
 
 	const { canCreateEmailer } = useEmailerSettingsContext()
-	const { emailers } = useEmailersQuery({
-		suspense: true,
-	})
-	const { mutateAsync: createEmailer } = useMutation(
-		[sdk.emailer.keys.create],
-		(params: CreateOrUpdateEmailer) => sdk.emailer.create(params),
-	)
+	const {
+		data: { emailers },
+	} = useSuspenseGraphQL(query, sdk.cacheKey('emailers', ['createEmailer']))
 
-	const onSubmit = async ({ name, is_primary, ...config }: CreateOrUpdateEmailerSchema) => {
-		try {
-			await createEmailer({
-				// @ts-expect-error: FIXME: fixme
-				config: {
-					...config,
-					host: config.smtp_host,
-					max_num_attachments: null,
-					port: config.smtp_port,
-				},
-				is_primary,
-				name,
+	const { mutate } = useGraphQLMutation(mutation, {
+		onSuccess: async () => {
+			await client.invalidateQueries({
+				predicate: ({ queryKey: [baseKey] }) => baseKey === sdk.cacheKeys.emailers,
 			})
-			navigate(paths.settings('server/email'))
-		} catch (error) {
-			console.error(error)
-			// TODO:toast
-		}
+			await navigate(paths.settings('email'))
+		},
+	})
+
+	const onSubmit = ({ name, isPrimary, ...config }: CreateOrUpdateEmailerSchema) => {
+		mutate({
+			input: {
+				isPrimary,
+				name,
+				config: {
+					...omit(config, ['smtpHost', 'smtpPort']),
+					host: config.smtpHost,
+					port: config.smtpPort,
+				},
+			},
+		})
 	}
 
 	useEffect(() => {
@@ -56,7 +75,7 @@ export default function CreateEmailerScene() {
 		<SceneContainer>
 			<ContentContainer>
 				<CreateOrUpdateEmailerForm
-					existingNames={emailers?.map((e) => e.name) || []}
+					existingNames={emailers.map((e) => e.name) || []}
 					onSubmit={onSubmit}
 				/>
 			</ContentContainer>

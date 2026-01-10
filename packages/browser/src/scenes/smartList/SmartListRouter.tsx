@@ -1,3 +1,4 @@
+import { UserPermission } from '@stump/graphql'
 import { lazy, useEffect } from 'react'
 import { Navigate, Route, Routes, useNavigate } from 'react-router'
 
@@ -13,10 +14,10 @@ export default function SmartListRouter() {
 	const { checkPermission } = useAppContext()
 
 	const navigate = useNavigate()
-	const canAccess = checkPermission('smartlist:read')
+	const canAccess = checkPermission(UserPermission.AccessSmartList)
 	useEffect(() => {
 		if (!canAccess) {
-			navigate('..')
+			navigate('..', { replace: true })
 		}
 	}, [canAccess, navigate])
 

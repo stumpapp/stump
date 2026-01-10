@@ -1,8 +1,10 @@
 pub mod logging;
+pub mod oidc_config;
 mod stump_config;
 
 use std::env;
 
+pub use oidc_config::OidcConfig;
 use stump_config::env_keys::{CONFIG_DIR_KEY, IN_DOCKER_KEY};
 pub use stump_config::{defaults, env_keys, StumpConfig};
 

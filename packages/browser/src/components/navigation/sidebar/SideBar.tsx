@@ -1,17 +1,23 @@
-import { useNavigationArrangement } from '@stump/client'
+import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { cn, Spacer } from '@stump/components'
+import {
+	FilterableArrangementEntityLink,
+	graphql,
+	SystemArrangement,
+	UserPermission,
+} from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
-import { NavigationItem } from '@stump/sdk'
 import { motion } from 'framer-motion'
 import { Book, Home } from 'lucide-react'
-import { useCallback, useMemo } from 'react'
+import { Suspense, useCallback, useMemo } from 'react'
 import { useLocation } from 'react-router'
 import { useMediaMatch } from 'rooks'
 import { match } from 'ts-pattern'
 
-import { useAppContext } from '@/context'
-import { usePreferences, useTheme } from '@/hooks'
-import paths from '@/paths'
+import { useAppContext, useRouterContext } from '@/context'
+import { useTheme } from '@/hooks'
+import { usePaths } from '@/paths'
+import { usePrefetchHomeScene } from '@/scenes/home'
 import { useAppStore } from '@/stores'
 
 import UserMenu from '../../UserMenu'
@@ -19,6 +25,29 @@ import NavigationButtons from '../mobile/NavigationButtons'
 import { BookClubSideBarSection, LibrarySideBarSection, SmartListSideBarSection } from './sections'
 import SideBarButtonLink from './SideBarButtonLink'
 import SideBarFooter from './SideBarFooter'
+
+const query = graphql(`
+	query SideBarQuery {
+		me {
+			id
+			preferences {
+				navigationArrangement {
+					locked
+					sections {
+						config {
+							__typename
+							... on SystemArrangementConfig {
+								variant
+								links
+							}
+						}
+						visible
+					}
+				}
+			}
+		}
+	}
+`)
 
 type Props = {
 	asChild?: boolean
@@ -29,16 +58,20 @@ export default function SideBar({ asChild, hidden }: Props) {
 	const location = useLocation()
 	const platform = useAppStore((store) => store.platform)
 
+	const paths = usePaths()
+
+	const { basePath } = useRouterContext()
 	const { t } = useLocaleContext()
+	const { sdk } = useSDK()
+	const {
+		data: {
+			me: {
+				preferences: { navigationArrangement },
+			},
+		},
+	} = useSuspenseGraphQL(query, sdk.cacheKey('sidebar'))
 
 	const { checkPermission } = useAppContext()
-	const {
-		preferences: { navigation_arrangement },
-	} = usePreferences()
-	const { arrangement } = useNavigationArrangement({
-		defaultArrangement: navigation_arrangement,
-		suspense: false,
-	})
 	const { shouldUseGradient } = useTheme()
 
 	const isBrowser = platform === 'browser'
@@ -59,11 +92,11 @@ export default function SideBar({ asChild, hidden }: Props) {
 	}
 
 	const checkSectionPermission = useCallback(
-		(section: NavigationItem['type']) => {
-			if (section === 'BookClubs') {
-				return checkPermission('bookclub:read')
-			} else if (section === 'SmartLists') {
-				return checkPermission('smartlist:read')
+		(variant: SystemArrangement) => {
+			if (variant === SystemArrangement.BookClubs) {
+				return checkPermission(UserPermission.AccessBookClub)
+			} else if (variant === SystemArrangement.SmartLists) {
+				return checkPermission(UserPermission.AccessSmartList)
 			} else {
 				return true
 			}
@@ -71,59 +104,68 @@ export default function SideBar({ asChild, hidden }: Props) {
 		[checkPermission],
 	)
 
+	const prefetchHome = usePrefetchHomeScene()
+
+	const renderSystemSection = useCallback(
+		(config: { variant: SystemArrangement; links: Array<FilterableArrangementEntityLink> }) =>
+			match(config.variant)
+				.with(SystemArrangement.Home, () => (
+					<SideBarButtonLink
+						key="home-sidebar-navlink"
+						to={paths.home()}
+						isActive={location.pathname === basePath + '/'}
+						onMouseEnter={() => prefetchHome()}
+					>
+						<Home className="mr-2 h-4 w-4 shrink-0" />
+						{t('sidebar.buttons.home')}
+					</SideBarButtonLink>
+				))
+				.with(SystemArrangement.Explore, () => (
+					<SideBarButtonLink
+						key="explore-sidebar-navlink"
+						to={paths.bookSearch()}
+						isActive={location.pathname === paths.bookSearch()}
+					>
+						<Book className="mr-2 h-4 w-4 shrink-0" />
+						{t('sidebar.buttons.books')}
+					</SideBarButtonLink>
+				))
+				.with(SystemArrangement.Libraries, () => (
+					<Suspense key="libraries-sidebar-navlink">
+						<LibrarySideBarSection isMobile={isMobile} links={config.links} />
+					</Suspense>
+				))
+				.with(SystemArrangement.SmartLists, () => (
+					<Suspense key="smartlists-sidebar-navlink">
+						<SmartListSideBarSection links={config.links} />
+					</Suspense>
+				))
+				.with(SystemArrangement.BookClubs, () => (
+					<Suspense key="book-clubs-sidebar-navlink">
+						<BookClubSideBarSection isMobile={isMobile} links={config.links} />
+					</Suspense>
+				))
+				.otherwise(() => null),
+		[t, location.pathname, prefetchHome, isMobile, paths, basePath],
+	)
+
 	const sections = useMemo(
 		() =>
-			arrangement.items
-				.filter(({ item: { type }, visible }) => checkSectionPermission(type) && visible)
-				.map(({ item }) =>
-					match(item)
-						.with({ type: 'Home' }, () => (
-							<SideBarButtonLink
-								key="home-sidebar-navlink"
-								to={paths.home()}
-								isActive={location.pathname === '/'}
-							>
-								<Home className="mr-2 h-4 w-4 shrink-0" />
-								{t('sidebar.buttons.home')}
-							</SideBarButtonLink>
-						))
-						.with({ type: 'Explore' }, () => (
-							<SideBarButtonLink
-								key="explore-sidebar-navlink"
-								to={paths.bookSearch()}
-								isActive={location.pathname === paths.bookSearch()}
-							>
-								<Book className="mr-2 h-4 w-4 shrink-0" />
-								{t('sidebar.buttons.books')}
-							</SideBarButtonLink>
-						))
-						.with({ type: 'Libraries' }, (ctx) => (
-							<LibrarySideBarSection
-								key="libraries-sidebar-navlink"
-								isMobile={isMobile}
-								showCreate={ctx.show_create_action}
-								showLinkToAll={ctx.show_link_to_all}
-							/>
-						))
-						.with({ type: 'SmartLists' }, (ctx) => (
-							<SmartListSideBarSection
-								key="smartlists-sidebar-navlink"
-								showCreate={ctx.show_create_action}
-								showLinkToAll={ctx.show_link_to_all}
-							/>
-						))
-						.with({ type: 'BookClubs' }, (ctx) => (
-							<BookClubSideBarSection
-								key="book-clubs-sidebar-navlink"
-								isMobile={isMobile}
-								showCreate={ctx.show_create_action}
-								showLinkToAll={ctx.show_link_to_all}
-							/>
-						))
+			navigationArrangement.sections
+				.filter(({ visible }) => visible)
+				.map(({ config }) =>
+					match(config)
+						.with({ __typename: 'SystemArrangementConfig' }, (config) => {
+							const child = renderSystemSection(config)
+							if (!checkSectionPermission(config.variant)) {
+								return null
+							}
+							return child
+						})
 						.otherwise(() => null),
 				)
 				.filter(Boolean),
-		[arrangement, checkSectionPermission, location, t, isMobile],
+		[navigationArrangement, renderSystemSection, checkSectionPermission],
 	)
 
 	const renderContent = () => {
@@ -133,6 +175,7 @@ export default function SideBar({ asChild, hidden }: Props) {
 
 				<div className="flex max-h-full grow flex-col gap-2 overflow-y-auto p-1 scrollbar-hide">
 					{isAtLeastMedium && isBrowser && <UserMenu />}
+
 					{sections}
 				</div>
 				<Spacer />
@@ -154,6 +197,7 @@ export default function SideBar({ asChild, hidden }: Props) {
 	return (
 		<motion.aside
 			key="primary-sidebar"
+			// @ts-expect-error: It is there I promise
 			className="hidden min-h-full md:inline-block"
 			animate={hidden ? 'hidden' : 'visible'}
 			variants={variants}

@@ -1,15 +1,15 @@
 use std::fs;
 
 use image::{imageops, DynamicImage, EncodableLayout, GenericImageView};
+use models::shared::image_processor_options::{
+	Dimension, ImageProcessorOptions, ImageResizeMethod,
+};
 use webp::Encoder;
 
 use crate::filesystem::{
 	error::FileError,
 	image::process::resized_dimensions,
-	image::{
-		process::{ImageProcessor, ImageProcessorOptions, ImageResizeOptions},
-		ProcessorError,
-	},
+	image::{process::ImageProcessor, ProcessorError},
 };
 
 use super::{scale_height_dimension, scale_width_dimension, ScaledDimensionResize};
@@ -21,18 +21,25 @@ impl ImageProcessor for WebpProcessor {
 		buffer: &[u8],
 		options: ImageProcessorOptions,
 	) -> Result<Vec<u8>, ProcessorError> {
+		// Load the image from memory
 		let mut image = image::load_from_memory(buffer)?;
 
-		if let Some(resize_options) = options.resize_options {
-			let resized_image = WebpProcessor::resize_image(image, resize_options);
+		// Apply resizing if requested
+		if let Some(method) = options.resize_method {
+			let resized_image = WebpProcessor::resize_image(image, method);
 			image = resized_image;
 		}
 
+		// Generate WebP with quality setting
 		let encoder = Encoder::from_image(&image)
 			.map_err(|err| FileError::WebpEncodeError(err.to_string()))?;
 		let encoded_webp = encoder.encode(100f32);
 
-		Ok(encoded_webp.as_bytes().to_vec())
+		// Convert to Vec<u8> and shrink to fit to free excess capacity
+		let mut result = encoded_webp.as_bytes().to_vec();
+		result.shrink_to_fit();
+
+		Ok(result)
 	}
 
 	fn generate_from_path(
@@ -45,22 +52,22 @@ impl ImageProcessor for WebpProcessor {
 
 	fn resize_scaled(
 		buf: &[u8],
-		dimension: ScaledDimensionResize,
+		config: ScaledDimensionResize,
 	) -> Result<Vec<u8>, ProcessorError> {
 		let image = image::load_from_memory(buf)?;
 
 		let (current_width, current_height) = image.dimensions();
 
-		let (width, height) = match dimension {
-			ScaledDimensionResize::Width(width) => scale_height_dimension(
+		let (width, height) = match config.dimension {
+			Dimension::Width => scale_height_dimension(
 				current_width as f32,
 				current_height as f32,
-				width as f32,
+				config.size as f32,
 			),
-			ScaledDimensionResize::Height(height) => scale_width_dimension(
+			Dimension::Height => scale_width_dimension(
 				current_width as f32,
 				current_height as f32,
-				height as f32,
+				config.size as f32,
 			),
 		};
 
@@ -78,12 +85,11 @@ impl ImageProcessor for WebpProcessor {
 impl WebpProcessor {
 	fn resize_image(
 		image: DynamicImage,
-		resize_options: ImageResizeOptions,
+		resize_method: ImageResizeMethod,
 	) -> DynamicImage {
 		let (current_width, current_height) = image.dimensions();
 		let (height, width) =
-			resized_dimensions(current_height, current_width, &resize_options);
-
+			resized_dimensions(current_height, current_width, resize_method);
 		DynamicImage::ImageRgba8(imageops::resize(
 			&image,
 			width,
@@ -96,10 +102,14 @@ impl WebpProcessor {
 
 #[cfg(test)]
 mod tests {
+	use models::shared::image_processor_options::{
+		ExactDimensionResize, ScaleEvenlyByFactor, SupportedImageFormat,
+	};
+	use rust_decimal::Decimal;
+
 	use super::*;
-	use crate::filesystem::image::{
-		tests::{get_test_jpg_path, get_test_png_path, get_test_webp_path},
-		ImageFormat, ImageProcessorOptions,
+	use crate::filesystem::image::tests::{
+		get_test_jpg_path, get_test_png_path, get_test_webp_path,
 	};
 	use std::fs;
 
@@ -107,8 +117,8 @@ mod tests {
 	fn test_generate_webp_from_webp_data() {
 		let bytes = get_test_webp_data();
 		let options = ImageProcessorOptions {
-			resize_options: None,
-			format: ImageFormat::Webp,
+			resize_method: None,
+			format: SupportedImageFormat::Webp,
 			quality: None,
 			page: None,
 		};
@@ -129,8 +139,8 @@ mod tests {
 	fn test_generate_webp_from_jpg() {
 		let jpg_path = get_test_jpg_path();
 		let options = ImageProcessorOptions {
-			resize_options: None,
-			format: ImageFormat::Webp,
+			resize_method: None,
+			format: SupportedImageFormat::Webp,
 			quality: None,
 			page: None,
 		};
@@ -148,11 +158,15 @@ mod tests {
 	}
 
 	#[test]
-	fn test_generate_webp_from_jpg_with_rescale() {
+	fn test_generate_webp_from_jpg_with_even_rescale() {
 		let jpg_path = get_test_jpg_path();
 		let options = ImageProcessorOptions {
-			resize_options: Some(ImageResizeOptions::scaled(0.5, 0.5)),
-			format: ImageFormat::Webp,
+			resize_method: Some(ImageResizeMethod::ScaleEvenlyByFactor(
+				ScaleEvenlyByFactor {
+					factor: Decimal::new(5, 1),
+				},
+			)),
+			format: SupportedImageFormat::Webp,
 			quality: None,
 			page: None,
 		};
@@ -172,11 +186,14 @@ mod tests {
 	}
 
 	#[test]
-	fn test_generate_webp_from_jpg_with_resize() {
+	fn test_generate_webp_from_jpg_with_exact_resize() {
 		let jpg_path = get_test_jpg_path();
 		let options = ImageProcessorOptions {
-			resize_options: Some(ImageResizeOptions::sized(100f32, 100f32)),
-			format: ImageFormat::Webp,
+			resize_method: Some(ImageResizeMethod::Exact(ExactDimensionResize {
+				width: 100,
+				height: 100,
+			})),
+			format: SupportedImageFormat::Webp,
 			quality: None,
 			page: None,
 		};
@@ -196,8 +213,8 @@ mod tests {
 	fn test_generate_webp_from_png() {
 		let png_path = get_test_png_path();
 		let options = ImageProcessorOptions {
-			resize_options: None,
-			format: ImageFormat::Webp,
+			resize_method: None,
+			format: SupportedImageFormat::Webp,
 			quality: None,
 			page: None,
 		};
@@ -218,8 +235,12 @@ mod tests {
 	fn test_generate_webp_from_png_with_rescale() {
 		let png_path = get_test_png_path();
 		let options = ImageProcessorOptions {
-			resize_options: Some(ImageResizeOptions::scaled(0.5, 0.5)),
-			format: ImageFormat::Webp,
+			resize_method: Some(ImageResizeMethod::ScaleEvenlyByFactor(
+				ScaleEvenlyByFactor {
+					factor: Decimal::new(5, 1),
+				},
+			)),
+			format: SupportedImageFormat::Webp,
 			quality: None,
 			page: None,
 		};
@@ -242,8 +263,11 @@ mod tests {
 	fn test_generate_webp_from_png_with_resize() {
 		let png_path = get_test_png_path();
 		let options = ImageProcessorOptions {
-			resize_options: Some(ImageResizeOptions::sized(100f32, 100f32)),
-			format: ImageFormat::Webp,
+			resize_method: Some(ImageResizeMethod::Exact(ExactDimensionResize {
+				width: 100,
+				height: 100,
+			})),
+			format: SupportedImageFormat::Webp,
 			quality: None,
 			page: None,
 		};
@@ -263,8 +287,8 @@ mod tests {
 	fn test_generate_webp_from_webp() {
 		let webp_path = get_test_webp_path();
 		let options = ImageProcessorOptions {
-			resize_options: None,
-			format: ImageFormat::Webp,
+			resize_method: None,
+			format: SupportedImageFormat::Webp,
 			quality: None,
 			page: None,
 		};
@@ -276,8 +300,12 @@ mod tests {
 	fn test_generate_webp_from_webp_with_rescale() {
 		let webp_path = get_test_webp_path();
 		let options = ImageProcessorOptions {
-			resize_options: Some(ImageResizeOptions::scaled(0.5, 0.5)),
-			format: ImageFormat::Webp,
+			resize_method: Some(ImageResizeMethod::ScaleEvenlyByFactor(
+				ScaleEvenlyByFactor {
+					factor: Decimal::new(5, 1),
+				},
+			)),
+			format: SupportedImageFormat::Webp,
 			quality: None,
 			page: None,
 		};
@@ -300,8 +328,11 @@ mod tests {
 	fn test_generate_webp_from_webp_with_resize() {
 		let webp_path = get_test_webp_path();
 		let options = ImageProcessorOptions {
-			resize_options: Some(ImageResizeOptions::sized(100f32, 100f32)),
-			format: ImageFormat::Webp,
+			resize_method: Some(ImageResizeMethod::Exact(ExactDimensionResize {
+				width: 100,
+				height: 100,
+			})),
+			format: SupportedImageFormat::Webp,
 			quality: None,
 			page: None,
 		};

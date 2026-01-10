@@ -4,11 +4,8 @@ SCRIPTS_DIR="${BASH_SOURCE%/*}/.."
 source "${SCRIPTS_DIR}/lib"
 
 # TODO: use words instead...
-while getopts "pwrdg:" opt; do
+while getopts "wrdg:" opt; do
   case $opt in
-    p)
-      prisma_sed_correction
-    ;;
     w)
       workspaces_sed_correction
     ;;

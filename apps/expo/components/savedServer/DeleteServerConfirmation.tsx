@@ -1,7 +1,8 @@
-import React from 'react'
-import { Button, Dialog, Text } from '../ui'
-import { SavedServer } from '~/stores/savedServer'
 import { View } from 'react-native'
+
+import { SavedServer } from '~/stores/savedServer'
+
+import { Button, Dialog, Text } from '../ui'
 
 type Props = {
 	deletingServer: SavedServer | null
@@ -19,7 +20,7 @@ export default function DeleteServerConfirmation({ deletingServer, onClose, onCo
 				</Dialog.Header>
 
 				{deletingServer?.stumpOPDS && (
-					<View className="rounded-xl bg-fill-danger-secondary p-3">
+					<View className="squircle rounded-xl bg-fill-danger-secondary p-3">
 						<Text className="text-fill-danger">
 							This server is registered for both Stump and OPDS. Deleting it will remove both
 							entries

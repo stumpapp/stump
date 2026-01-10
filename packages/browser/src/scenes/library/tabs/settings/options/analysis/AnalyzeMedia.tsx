@@ -1,19 +1,25 @@
-import { useSDK } from '@stump/client'
-import { Alert, Button, Heading, Text } from '@stump/components'
+import { useGraphQLMutation } from '@stump/client'
+import { Alert, AlertDescription, AlertTitle, Button, Heading, Text } from '@stump/components'
+import { graphql } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
+import { Info } from 'lucide-react'
 import { useCallback } from 'react'
 
 import { useLibraryContext } from '@/scenes/library/context'
 
+const mutation = graphql(`
+	mutation AnalyzeLibraryMedia($id: ID!) {
+		analyzeLibrary(id: $id)
+	}
+`)
+
 export default function AnalyzeMedia() {
-	const { sdk } = useSDK()
 	const { library } = useLibraryContext()
 	const { t } = useLocaleContext()
 
-	const handleAnalyze = useCallback(
-		() => sdk.library.analyze(library.id),
-		[library.id, sdk.library],
-	)
+	const { mutate } = useGraphQLMutation(mutation)
+
+	const handleAnalyze = useCallback(() => mutate({ id: library.id }), [library.id, mutate])
 
 	return (
 		<div className="flex flex-col gap-6">
@@ -24,8 +30,10 @@ export default function AnalyzeMedia() {
 				</Text>
 			</div>
 
-			<Alert level="info" icon="info">
-				<Alert.Content>{t(getKey('disclaimer'))}</Alert.Content>
+			<Alert variant="info" dismissible id="analyze-media-info">
+				<Info />
+				<AlertTitle>{t(getKey('disclaimerTitle'))}</AlertTitle>
+				<AlertDescription>{t(getKey('disclaimer'))}</AlertDescription>
 			</Alert>
 
 			<div>

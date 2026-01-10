@@ -1,21 +1,22 @@
-import { useIsFetching } from '@stump/client'
+import { useIsFetching } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 
 export default function BackgroundFetchIndicator() {
-	const isFetching = useIsFetching()
+	const activeQueries = useIsFetching()
 
-	const [isFetchingState, setIsFetchingState] = useState(isFetching)
+	const [isFetching, setIsFetching] = useState(activeQueries > 0)
 
 	// Delay the hiding of the spinner by 100ms to prevent flickering (queries are pretty quick!)
 	useEffect(() => {
-		if (isFetchingState && !isFetching) {
-			setTimeout(() => setIsFetchingState(isFetching), 100)
+		const isActivelyFetching = activeQueries > 0
+		if (isFetching && !isActivelyFetching) {
+			setTimeout(() => setIsFetching(isActivelyFetching), 100)
 		} else {
-			setIsFetchingState(isFetching)
+			setIsFetching(isActivelyFetching)
 		}
-	}, [isFetching, isFetchingState])
+	}, [isFetching, activeQueries])
 
-	if (!isFetchingState) {
+	if (!isFetching) {
 		return null
 	}
 

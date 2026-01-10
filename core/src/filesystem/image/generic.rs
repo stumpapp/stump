@@ -1,12 +1,15 @@
 use std::{fs, io::Cursor};
 
 use image::{imageops, GenericImageView, ImageFormat};
+use models::shared::image_processor_options::{
+	Dimension, ImageProcessorOptions, ScaledDimensionResize, SupportedImageFormat,
+};
 
 use crate::filesystem::{image::process::resized_dimensions, FileError};
 
 use super::{
-	process::{self, ImageProcessor, ImageProcessorOptions, ScaledDimensionResize},
-	scale_height_dimension, scale_width_dimension, ProcessorError,
+	process::ImageProcessor, scale_height_dimension, scale_width_dimension,
+	ProcessorError,
 };
 
 /// An image processor that works for the most common image types, primarily
@@ -20,15 +23,15 @@ impl ImageProcessor for GenericImageProcessor {
 	) -> Result<Vec<u8>, ProcessorError> {
 		let mut image = image::load_from_memory(buffer)?;
 
-		if let Some(resize_options) = options.resize_options {
+		if let Some(method) = options.resize_method {
 			let (current_width, current_height) = image.dimensions();
 			let (height, width) =
-				resized_dimensions(current_height, current_width, &resize_options);
+				resized_dimensions(current_height, current_width, method);
 			image = image.resize_exact(width, height, imageops::FilterType::Triangle);
 		}
 
 		let format = match options.format {
-			process::ImageFormat::Jpeg => {
+			SupportedImageFormat::Jpeg => {
 				if image.color().has_alpha() {
 					if image.color().has_color() {
 						image = image::DynamicImage::from(image.into_rgb8());
@@ -38,7 +41,7 @@ impl ImageProcessor for GenericImageProcessor {
 				}
 				Ok(ImageFormat::Jpeg)
 			},
-			process::ImageFormat::Png => Ok(ImageFormat::Png),
+			SupportedImageFormat::Png => Ok(ImageFormat::Png),
 			_ => Err(FileError::IncorrectProcessorError),
 		}?;
 
@@ -58,7 +61,7 @@ impl ImageProcessor for GenericImageProcessor {
 
 	fn resize_scaled(
 		buf: &[u8],
-		dimension: ScaledDimensionResize,
+		config: ScaledDimensionResize,
 	) -> Result<Vec<u8>, ProcessorError> {
 		let mut image = image::load_from_memory(buf)?;
 
@@ -80,20 +83,20 @@ impl ImageProcessor for GenericImageProcessor {
 
 		let (current_width, current_height) = image.dimensions();
 
-		match dimension {
-			ScaledDimensionResize::Width(width) => {
+		match config.dimension {
+			Dimension::Width => {
 				let (width, height) = scale_height_dimension(
 					current_width as f32,
 					current_height as f32,
-					width as f32,
+					config.size as f32,
 				);
 				image = image.resize_exact(width, height, imageops::FilterType::Triangle);
 			},
-			ScaledDimensionResize::Height(height) => {
+			Dimension::Height => {
 				let (width, height) = scale_width_dimension(
 					current_width as f32,
 					current_height as f32,
-					height as f32,
+					config.size as f32,
 				);
 				image = image.resize_exact(width, height, imageops::FilterType::Triangle);
 			},
@@ -108,13 +111,14 @@ impl ImageProcessor for GenericImageProcessor {
 
 #[cfg(test)]
 mod tests {
-	use process::ImageResizeOptions;
+
+	use models::shared::image_processor_options::{
+		ExactDimensionResize, ImageResizeMethod, ScaleEvenlyByFactor,
+	};
+	use rust_decimal::Decimal;
 
 	use super::*;
-	use crate::filesystem::image::{
-		tests::{get_test_jpg_path, get_test_png_path},
-		ImageFormat, ImageProcessorOptions,
-	};
+	use crate::filesystem::image::tests::{get_test_jpg_path, get_test_png_path};
 
 	//JPG -> other Tests
 	//JPG -> JPG
@@ -122,7 +126,7 @@ mod tests {
 	fn test_generate_jpg_to_jpg() {
 		let jpg_path = get_test_jpg_path();
 		let options = ImageProcessorOptions {
-			format: ImageFormat::Jpeg,
+			format: SupportedImageFormat::Jpeg,
 			..Default::default()
 		};
 
@@ -140,8 +144,12 @@ mod tests {
 	fn test_generate_jpg_to_jpg_with_rescale() {
 		let jpg_path = get_test_jpg_path();
 		let options = ImageProcessorOptions {
-			format: ImageFormat::Jpeg,
-			resize_options: Some(ImageResizeOptions::scaled(0.5, 0.5)),
+			format: SupportedImageFormat::Jpeg,
+			resize_method: Some(ImageResizeMethod::ScaleEvenlyByFactor(
+				ScaleEvenlyByFactor {
+					factor: Decimal::new(5, 1),
+				},
+			)),
 			..Default::default()
 		};
 
@@ -163,8 +171,11 @@ mod tests {
 	fn test_generate_jpg_to_jpg_with_resize() {
 		let jpg_path = get_test_jpg_path();
 		let options = ImageProcessorOptions {
-			format: ImageFormat::Jpeg,
-			resize_options: Some(ImageResizeOptions::sized(100f32, 100f32)),
+			format: SupportedImageFormat::Jpeg,
+			resize_method: Some(ImageResizeMethod::Exact(ExactDimensionResize {
+				width: 100,
+				height: 100,
+			})),
 			..Default::default()
 		};
 
@@ -184,7 +195,7 @@ mod tests {
 	fn test_generate_jpg_to_png() {
 		let jpg_path = get_test_jpg_path();
 		let options = ImageProcessorOptions {
-			format: ImageFormat::Png,
+			format: SupportedImageFormat::Png,
 			..Default::default()
 		};
 
@@ -201,8 +212,12 @@ mod tests {
 	fn test_generate_jpg_to_png_with_rescale() {
 		let jpg_path = get_test_jpg_path();
 		let options = ImageProcessorOptions {
-			format: ImageFormat::Png,
-			resize_options: Some(ImageResizeOptions::scaled(0.5, 0.5)),
+			format: SupportedImageFormat::Png,
+			resize_method: Some(ImageResizeMethod::ScaleEvenlyByFactor(
+				ScaleEvenlyByFactor {
+					factor: Decimal::new(5, 1),
+				},
+			)),
 			..Default::default()
 		};
 
@@ -224,8 +239,11 @@ mod tests {
 	fn test_generate_jpg_to_png_with_resize() {
 		let jpg_path = get_test_jpg_path();
 		let options = ImageProcessorOptions {
-			format: ImageFormat::Png,
-			resize_options: Some(ImageResizeOptions::sized(100f32, 100f32)),
+			format: SupportedImageFormat::Png,
+			resize_method: Some(ImageResizeMethod::Exact(ExactDimensionResize {
+				width: 100,
+				height: 100,
+			})),
 			..Default::default()
 		};
 
@@ -245,7 +263,7 @@ mod tests {
 	fn test_generate_jpg_to_webp_fail() {
 		let jpg_path = get_test_jpg_path();
 		let options = ImageProcessorOptions {
-			format: ImageFormat::Webp,
+			format: SupportedImageFormat::Webp,
 			..Default::default()
 		};
 
@@ -263,7 +281,7 @@ mod tests {
 	fn test_generate_png_to_png() {
 		let png_path = get_test_png_path();
 		let options = ImageProcessorOptions {
-			format: ImageFormat::Png,
+			format: SupportedImageFormat::Png,
 			..Default::default()
 		};
 
@@ -280,8 +298,12 @@ mod tests {
 	fn test_generate_png_to_png_with_rescale() {
 		let png_path = get_test_png_path();
 		let options = ImageProcessorOptions {
-			format: ImageFormat::Png,
-			resize_options: Some(ImageResizeOptions::scaled(0.5, 0.5)),
+			format: SupportedImageFormat::Png,
+			resize_method: Some(ImageResizeMethod::ScaleEvenlyByFactor(
+				ScaleEvenlyByFactor {
+					factor: Decimal::new(5, 1),
+				},
+			)),
 			..Default::default()
 		};
 
@@ -303,8 +325,11 @@ mod tests {
 	fn test_generate_png_to_png_with_resize() {
 		let png_path = get_test_png_path();
 		let options = ImageProcessorOptions {
-			format: ImageFormat::Png,
-			resize_options: Some(ImageResizeOptions::sized(100f32, 100f32)),
+			format: SupportedImageFormat::Png,
+			resize_method: Some(ImageResizeMethod::Exact(ExactDimensionResize {
+				width: 100,
+				height: 100,
+			})),
 			..Default::default()
 		};
 
@@ -324,7 +349,7 @@ mod tests {
 	fn test_generate_png_to_jpg() {
 		let png_path = get_test_png_path();
 		let options = ImageProcessorOptions {
-			format: ImageFormat::Jpeg,
+			format: SupportedImageFormat::Jpeg,
 			..Default::default()
 		};
 
@@ -342,8 +367,12 @@ mod tests {
 	fn test_generate_png_to_jpg_with_rescale() {
 		let png_path = get_test_png_path();
 		let options = ImageProcessorOptions {
-			format: ImageFormat::Jpeg,
-			resize_options: Some(ImageResizeOptions::scaled(0.5, 0.5)),
+			format: SupportedImageFormat::Jpeg,
+			resize_method: Some(ImageResizeMethod::ScaleEvenlyByFactor(
+				ScaleEvenlyByFactor {
+					factor: Decimal::new(5, 1),
+				},
+			)),
 			..Default::default()
 		};
 
@@ -365,8 +394,11 @@ mod tests {
 	fn test_generate_png_to_jpg_with_resize() {
 		let png_path = get_test_png_path();
 		let options = ImageProcessorOptions {
-			format: ImageFormat::Jpeg,
-			resize_options: Some(ImageResizeOptions::sized(100f32, 100f32)),
+			format: SupportedImageFormat::Jpeg,
+			resize_method: Some(ImageResizeMethod::Exact(ExactDimensionResize {
+				width: 100,
+				height: 100,
+			})),
 			..Default::default()
 		};
 

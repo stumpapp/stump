@@ -1,31 +1,93 @@
-import { useContinueReading } from '@stump/client'
+import { PREFETCH_STALE_TIME, useInfiniteSuspenseGraphQL, useSDK } from '@stump/client'
 import { Text } from '@stump/components'
+import { graphql } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
+import { useQueryClient } from '@tanstack/react-query'
 import { BookMarked } from 'lucide-react'
 import { Suspense, useCallback } from 'react'
 
-import MediaCard from '@/components/book/BookCard'
-import HorizontalCardList from '@/components/HorizontalCardList'
+import BookCard from '@/components/book/BookCard'
+import HorizontalCardList_ from '@/components/HorizontalCardList'
+
+const query = graphql(`
+	query ContinueReadingMediaQuery($pagination: Pagination!) {
+		keepReading(pagination: $pagination) {
+			nodes {
+				id
+				...BookCard
+			}
+			pageInfo {
+				__typename
+				... on CursorPaginationInfo {
+					currentCursor
+					nextCursor
+					limit
+				}
+				... on OffsetPaginationInfo {
+					currentPage
+					totalPages
+					pageSize
+					pageOffset
+					zeroBased
+				}
+			}
+		}
+	}
+`)
+
+export const usePrefetchContinueReading = () => {
+	const { sdk } = useSDK()
+	const client = useQueryClient()
+	return useCallback(() => {
+		client.prefetchInfiniteQuery({
+			queryKey: sdk.cacheKey('inProgress'),
+			initialPageParam: {
+				offset: {
+					pageSize: 20,
+					page: 1,
+				},
+			},
+			queryFn: ({ pageParam }) => {
+				return sdk.execute(query, {
+					pagination: pageParam,
+				})
+			},
+			staleTime: PREFETCH_STALE_TIME,
+		})
+	}, [sdk, client])
+}
+
+export default function ContinueReadingMediaContainer() {
+	return (
+		<Suspense>
+			<ContinueReadingMedia />
+		</Suspense>
+	)
+}
 
 function ContinueReadingMedia() {
-	const { t } = useLocaleContext()
-	const { media, fetchNextPage, hasNextPage, isFetching } = useContinueReading({
-		limit: 20,
-		suspense: true,
-	})
+	const { sdk } = useSDK()
+	const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteSuspenseGraphQL(
+		query,
+		[sdk.cacheKeys.inProgress],
+		{
+			pagination: { offset: { pageSize: 20, page: 1 } },
+		},
+	)
+	const nodes = data.pages.flatMap((page) => page.keepReading.nodes)
 
-	const cards = media.map((media) => <MediaCard media={media} key={media.id} fullWidth={false} />)
+	const { t } = useLocaleContext()
 
 	const handleFetchMore = useCallback(() => {
-		if (!hasNextPage || isFetching) {
-			return
-		} else {
+		if (hasNextPage && !isFetchingNextPage) {
 			fetchNextPage()
 		}
-	}, [fetchNextPage, hasNextPage, isFetching])
+	}, [fetchNextPage, hasNextPage, isFetchingNextPage])
+
+	const cards = nodes.map((node) => <BookCard key={node.id} fragment={node} fullWidth={false} />)
 
 	return (
-		<HorizontalCardList
+		<HorizontalCardList_
 			title={t('homeScene.continueReading.title')}
 			items={cards}
 			onFetchMore={handleFetchMore}
@@ -43,13 +105,5 @@ function ContinueReadingMedia() {
 				</div>
 			}
 		/>
-	)
-}
-
-export default function ContinueReadingMediaContainer() {
-	return (
-		<Suspense>
-			<ContinueReadingMedia />
-		</Suspense>
 	)
 }

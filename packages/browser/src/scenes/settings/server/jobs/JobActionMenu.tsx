@@ -1,89 +1,112 @@
-import { invalidateQueries, useSDK } from '@stump/client'
+import { useGraphQLMutation, useSDK } from '@stump/client'
 import { Button, DropdownMenu } from '@stump/components'
-import { CoreJobOutput, PersistedJob } from '@stump/sdk'
+import { graphql } from '@stump/graphql'
+import { useQueryClient } from '@tanstack/react-query'
 import { Ban, Database, FileClock, ListX, MoreVertical, Trash2 } from 'lucide-react'
 import { useCallback, useMemo } from 'react'
-import { toast } from 'react-hot-toast'
 import { useNavigate } from 'react-router'
+import { toast } from 'sonner'
 
 import paths from '@/paths'
 
+import { JobDataInspectorFragment } from './JobDataInspector'
+import { PersistedJob } from './JobTable'
+
+const cancelMutation = graphql(`
+	mutation JobActionMenuCancelJob($id: ID!) {
+		cancelJob(id: $id)
+	}
+`)
+
+const deleteMutation = graphql(`
+	mutation JobActionMenuDeleteJob($id: ID!) {
+		cancelJob(id: $id)
+	}
+`)
+
+const deleteLogsMutation = graphql(`
+	mutation JobActionMenuDeleteLogs($id: ID!) {
+		deleteJobLogs(id: $id) {
+			affectedRows
+		}
+	}
+`)
+
 type Props = {
 	job: PersistedJob
-	onInspectData: (data: CoreJobOutput | null) => void
+	onInspectData: (data: JobDataInspectorFragment | null) => void
 }
 
 export default function JobActionMenu({ job, onInspectData }: Props) {
-	const { sdk } = useSDK()
 	const navigate = useNavigate()
+	const client = useQueryClient()
+
+	const { sdk } = useSDK()
 
 	const isCancelable =
 		job.status === 'RUNNING' || job.status === 'QUEUED' || job.status === 'PAUSED'
 	const isDeletable =
 		job.status === 'COMPLETED' || job.status === 'FAILED' || job.status === 'CANCELLED'
 
-	/**
-	 * A generic error handler for the other utility functions in this component.
-	 */
-	const handleError = (error: unknown) => {
-		if (error instanceof Error) {
-			toast.error(error.message)
-		} else {
-			console.error(error)
-			toast.error('An unknown error occurred')
-		}
-	}
+	const options = useMemo(
+		() => ({
+			onSuccess: () =>
+				client.refetchQueries({
+					predicate: ({ queryKey }) => queryKey.includes(sdk.cacheKeys.jobs),
+				}),
+			onError: (error: unknown) => {
+				if (isBadStateError(error)) {
+					toast.warning('This job was found in an invalid state', {
+						description: 'Please check server logs and report this issue',
+					})
+					client.refetchQueries({
+						predicate: ({ queryKey }) => queryKey.includes(sdk.cacheKeys.jobs),
+					})
+				} else if (error instanceof Error) {
+					toast.error(error.message)
+				} else {
+					console.error(error)
+					toast.error('An unknown error occurred')
+				}
+			},
+		}),
+		[sdk, client],
+	)
 
-	/**
-	 * Cancels the running job.
-	 */
-	const handleCancel = useCallback(async () => {
-		if (!isCancelable) {
-			// This shouldn't happen, but just in case we will refresh the jobs
-			// and just return.
-			await invalidateQueries({ exact: false, queryKey: [sdk.job.keys.get] })
-			return
-		}
+	const { mutate: cancelJob } = useGraphQLMutation(cancelMutation, options)
+	const { mutate: deleteJob } = useGraphQLMutation(deleteMutation, options)
+	const { mutate: deleteJobLogs } = useGraphQLMutation(deleteLogsMutation, options)
 
-		try {
-			await sdk.job.cancel(job.id)
-		} catch (error) {
-			handleError(error)
-		} finally {
-			await invalidateQueries({ exact: false, queryKey: [sdk.job.keys.get] })
-		}
-	}, [job.id, isCancelable, sdk.job])
+	const actions = useMemo(
+		() => ({
+			cancel: cancelJob,
+			delete: deleteJob,
+			deleteLogs: deleteJobLogs,
+		}),
+		[cancelJob, deleteJob, deleteJobLogs],
+	)
+	const handleAction = useCallback(
+		(action: keyof typeof actions) => {
+			const callback = actions[action]
+			if (!callback) {
+				throw new Error(`Action "${action}" is not defined`)
+			}
 
-	/**
-	 * Deletes the record of the job from the database.
-	 */
-	const handleDelete = useCallback(async () => {
-		// We don't allow DELETE for in-flight/queued jobs
-		if (!isDeletable) {
-			return
-		}
+			if (action === 'cancel' && !isCancelable) {
+				throw new Error('Job cannot be canceled at this time')
+			} else if (action === 'delete' && !isDeletable) {
+				throw new Error('Job cannot be deleted at this time')
+			}
 
-		try {
-			await sdk.job.delete(job.id)
-		} catch (error) {
-			handleError(error)
-		} finally {
-			await invalidateQueries({ exact: false, queryKey: [sdk.job.keys.get] })
-		}
-	}, [job.id, isDeletable, sdk.job])
-
-	const handleClearLogs = useCallback(async () => {
-		try {
-			await sdk.log.clear({ job_id: job.id })
-			await invalidateQueries({ exact: false, queryKey: [sdk.job.keys.get] })
-		} catch (error) {
-			handleError(error)
-		}
-	}, [job.id, sdk.log, sdk.job])
+			callback({ id: job.id })
+		},
+		[actions, isDeletable, isCancelable, job.id],
+	)
 
 	const jobId = job.id
-	const jobData = job.output_data
-	const associatedLogs = useMemo(() => job.logs ?? [], [job.logs])
+	const jobData = job.outputData
+	const hasLogs = job.logCount > 0
+
 	const items = useMemo(
 		() => [
 			...(isCancelable
@@ -91,7 +114,7 @@ export default function JobActionMenu({ job, onInspectData }: Props) {
 						{
 							label: 'Cancel',
 							leftIcon: <Ban className="mr-2 h-4 w-4" />,
-							onClick: handleCancel,
+							onClick: () => handleAction('cancel'),
 						},
 					]
 				: []),
@@ -104,7 +127,7 @@ export default function JobActionMenu({ job, onInspectData }: Props) {
 						},
 					]
 				: []),
-			...(associatedLogs.length > 0
+			...(hasLogs
 				? [
 						{
 							label: 'View logs',
@@ -114,7 +137,7 @@ export default function JobActionMenu({ job, onInspectData }: Props) {
 						{
 							label: 'Clear logs',
 							leftIcon: <ListX className="mr-2 h-4 w-4" />,
-							onClick: handleClearLogs,
+							onClick: () => handleAction('deleteLogs'),
 						},
 					]
 				: []),
@@ -124,23 +147,12 @@ export default function JobActionMenu({ job, onInspectData }: Props) {
 						{
 							label: 'Delete',
 							leftIcon: <Trash2 className="mr-2 h-4 w-4" />,
-							onClick: handleDelete,
+							onClick: () => handleAction('delete'),
 						},
 					]
 				: []),
 		],
-		[
-			isCancelable,
-			isDeletable,
-			associatedLogs,
-			jobId,
-			jobData,
-			navigate,
-			onInspectData,
-			handleCancel,
-			handleDelete,
-			handleClearLogs,
-		],
+		[isCancelable, isDeletable, hasLogs, jobId, jobData, navigate, onInspectData, handleAction],
 	)
 
 	return (
@@ -159,3 +171,7 @@ export default function JobActionMenu({ job, onInspectData }: Props) {
 		/>
 	)
 }
+
+const isBadStateError = (error: unknown) =>
+	error instanceof Error &&
+	error.message.includes('A job was found which was in a deeply invalid state')

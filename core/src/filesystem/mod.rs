@@ -9,6 +9,7 @@ mod hash;
 pub mod image;
 pub mod media;
 pub mod scanner;
+pub mod series;
 
 pub use common::*;
 pub use content_type::ContentType;
@@ -17,4 +18,3 @@ pub use directory_listing::{
 	DirectoryListingInput,
 };
 pub use error::FileError;
-pub use media::*;

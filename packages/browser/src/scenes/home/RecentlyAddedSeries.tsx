@@ -1,39 +1,75 @@
-import { useSDK, useSeriesCursorQuery } from '@stump/client'
+import { PREFETCH_STALE_TIME, useInfiniteSuspenseGraphQL, useSDK } from '@stump/client'
 import { Text } from '@stump/components'
+import { graphql } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
+import { useQueryClient } from '@tanstack/react-query'
 import { BookCopy } from 'lucide-react'
 import { Suspense, useCallback } from 'react'
 
 import HorizontalCardList from '@/components/HorizontalCardList'
 import SeriesCard from '@/components/series/SeriesCard'
 
-function RecentlyAddedSeries() {
-	const { sdk } = useSDK()
-	const { t } = useLocaleContext()
-	const { series, fetchNextPage, hasNextPage, isFetching } = useSeriesCursorQuery({
-		limit: 20,
-		params: {
-			count_media: true,
-			direction: 'desc',
-			order_by: 'created_at',
-		},
-		queryKey: [sdk.series.keys.recentlyAdded],
-		suspense: true,
-		useErrorBoundary: false,
-		retry: (attempts) => attempts < 3,
-	})
+const query = graphql(`
+	query RecentlyAddedSeriesQuery($pagination: Pagination!) {
+		recentlyAddedSeries(pagination: $pagination) {
+			nodes {
+				id
+				resolvedName
+				mediaCount
+				percentageCompleted
+				status
+			}
+			pageInfo {
+				__typename
+				... on CursorPaginationInfo {
+					currentCursor
+					nextCursor
+					limit
+				}
+			}
+		}
+	}
+`)
 
-	const cards = series.map((series) => (
-		<SeriesCard series={series} key={series.id} fullWidth={false} />
-	))
+export const usePrefetchRecentlyAddedSeries = () => {
+	const { sdk } = useSDK()
+	const client = useQueryClient()
+	return useCallback(() => {
+		client.prefetchInfiniteQuery({
+			queryKey: ['recentlyAddedSeries'],
+			initialPageParam: {
+				cursor: {
+					limit: 20,
+				},
+			},
+			queryFn: ({ pageParam }) => {
+				return sdk.execute(query, {
+					pagination: pageParam,
+				})
+			},
+			staleTime: PREFETCH_STALE_TIME,
+		})
+	}, [sdk, client])
+}
+
+function RecentlyAddedSeries() {
+	const { t } = useLocaleContext()
+	const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useInfiniteSuspenseGraphQL(
+		query,
+		['recentlyAddedSeries'],
+		{
+			pagination: { cursor: { limit: 20 } },
+		},
+	)
+	const nodes = data.pages.flatMap((page) => page.recentlyAddedSeries.nodes)
 
 	const handleFetchMore = useCallback(() => {
-		if (!hasNextPage || isFetching) {
-			return
-		} else {
+		if (hasNextPage && !isFetchingNextPage) {
 			fetchNextPage()
 		}
-	}, [fetchNextPage, hasNextPage, isFetching])
+	}, [hasNextPage, isFetchingNextPage, fetchNextPage])
+
+	const cards = nodes.map((node) => <SeriesCard key={node.id} data={node} fullWidth={false} />)
 
 	return (
 		<HorizontalCardList

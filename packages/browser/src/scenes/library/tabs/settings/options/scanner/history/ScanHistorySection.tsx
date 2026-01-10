@@ -1,34 +1,39 @@
-import { queryClient, useMutation, useSDK } from '@stump/client'
+import { useGraphQLMutation, useSDK } from '@stump/client'
 import { Button, Heading, Text } from '@stump/components'
+import { graphql, LibraryScanRecord } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
-import { LibraryScanRecord } from '@stump/sdk'
+import { useQueryClient } from '@tanstack/react-query'
 import { Suspense, useEffect, useState } from 'react'
 
 import { useLibraryManagement } from '../../../context'
 import ScanHistoryTable from './ScanHistoryTable'
 
+const mutation = graphql(`
+	mutation ScanHistorySectionClearHistory($id: ID!) {
+		clearScanHistory(id: $id)
+	}
+`)
+
 export default function ScanningSection() {
 	const { t } = useLocaleContext()
+	const { sdk } = useSDK()
 	const {
 		library: { id },
 	} = useLibraryManagement()
-	const { sdk } = useSDK()
 
-	const { mutate: clearHistory } = useMutation(
-		[sdk.library.keys.clearScanHistory, id],
-		() => sdk.library.clearScanHistory(id),
-		{
-			onSuccess: () => queryClient.invalidateQueries([sdk.library.keys.scanHistory, id]),
-		},
-	)
+	const client = useQueryClient()
+
+	const { mutate: clearHistory } = useGraphQLMutation(mutation, {
+		onSuccess: () => client.refetchQueries({ queryKey: sdk.cacheKey('scanHistory', [id]) }),
+	})
 
 	const [isNoHistory, setIsNoHistory] = useState(false)
 
 	useEffect(() => {
-		const unsubscribe = queryClient.getQueryCache().subscribe(({ query: { queryKey } }) => {
+		const unsubscribe = client.getQueryCache().subscribe(({ query: { queryKey } }) => {
 			const [baseKey, libraryID] = queryKey
-			if (baseKey === sdk.library.keys.scanHistory && libraryID === id) {
-				const scanHistory = queryClient.getQueryData<LibraryScanRecord[]>(queryKey)
+			if (baseKey === 'scanHistory' && libraryID === id) {
+				const scanHistory = client.getQueryData<LibraryScanRecord[]>(queryKey)
 				if (!scanHistory?.length) {
 					setIsNoHistory(true)
 				} else {
@@ -40,7 +45,7 @@ export default function ScanningSection() {
 		return () => {
 			unsubscribe()
 		}
-	}, [sdk.library.keys.scanHistory, id])
+	}, [id, client])
 
 	return (
 		<div className="flex flex-col gap-4">
@@ -53,7 +58,7 @@ export default function ScanningSection() {
 				</div>
 
 				<div className="flex shrink-0 justify-end">
-					<Button variant="secondary" onClick={() => clearHistory()} disabled={isNoHistory}>
+					<Button variant="secondary" onClick={() => clearHistory({ id })} disabled={isNoHistory}>
 						{t(getKey('clearHistory'))}
 					</Button>
 				</div>

@@ -1,11 +1,33 @@
+import { FlashListRef } from '@shopify/flash-list'
+import { BookReadScreenQuery } from '@stump/graphql'
 import { createContext, useContext } from 'react'
-import { FlatList } from 'react-native'
 
-export type ImageBasedBookRef = {
-	id: string
-	name: string
-	pages: number
+import { OfflineCompatibleReader } from '../types'
+
+type QueryData = NonNullable<BookReadScreenQuery['mediaById']>
+
+// TODO: Just use ReaderBookRef instead of juggling ImageReaderBookRef and EbookReaderBookRef
+export type ReaderBookRef = Omit<QueryData, 'libraryConfig' | 'series' | 'library'> & {
+	libraryConfig?: QueryData['libraryConfig']
+	series?: QueryData['series']
+	library?: QueryData['library']
 }
+
+export type ImageReaderBookRef = Omit<QueryData, 'libraryConfig' | 'series' | 'library'> & {
+	libraryConfig?: QueryData['libraryConfig']
+	series?: QueryData['series']
+	library?: QueryData['library']
+}
+
+export type EbookReaderBookRef = {
+	id: string
+	extension: string
+	name: string
+} & Pick<QueryData, 'ebook' | 'thumbnail' | 'metadata'> & {
+		series?: QueryData['series']
+		library?: QueryData['library']
+		readProgress?: QueryData['readProgress']
+	}
 
 export type ImageBasedBookPageRef = {
 	height: number
@@ -13,10 +35,15 @@ export type ImageBasedBookPageRef = {
 	ratio: number
 }
 
+export type NextInSeriesBookRef = {
+	id: string
+	name: string
+	thumbnailUrl: string
+}
+
 export type IImageBasedReaderContext = {
-	flatListRef: React.RefObject<FlatList>
-	// flatListRef: React.RefObject<FlashList<number>>
-	book: ImageBasedBookRef
+	flashListRef: React.RefObject<FlashListRef<number[]> | null>
+	book: ImageReaderBookRef
 	imageSizes?: Record<number, ImageBasedBookPageRef>
 	setImageSizes: React.Dispatch<React.SetStateAction<Record<number, ImageBasedBookPageRef>>>
 	pageSets: number[][]
@@ -25,7 +52,8 @@ export type IImageBasedReaderContext = {
 	currentPage?: number
 	onPageChanged?: (page: number) => void
 	resetTimer?: () => void
-}
+	isOPDS?: boolean
+} & OfflineCompatibleReader
 
 export const ImageBasedReaderContext = createContext<IImageBasedReaderContext | null>(null)
 

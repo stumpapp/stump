@@ -16,7 +16,7 @@ export default function DefaultLineHeight() {
 
 	const onValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const value = parseFloat(e.target.value)
-		if (!isNaN(value) && value >= 0) {
+		if (!isNaN(value) && value >= 1.0 && value <= 3.0) {
 			setSettings({ lineHeight: value })
 		}
 	}

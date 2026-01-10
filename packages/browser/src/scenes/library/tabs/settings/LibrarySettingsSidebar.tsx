@@ -6,7 +6,7 @@ import { useLocation, useNavigate } from 'react-router'
 import { usePreferences } from '@/hooks/usePreferences'
 import { formatRouteKey, useRouteGroups } from '@/hooks/useRouteGroups'
 import { useTheme } from '@/hooks/useTheme'
-import paths from '@/paths'
+import { usePaths } from '@/paths'
 import { SideBarLinkButton } from '@/scenes/settings'
 
 import { useLibraryContext } from '../../context'
@@ -15,11 +15,12 @@ import { routeGroups } from './routes'
 export default function LibrarySettingsSidebar() {
 	const location = useLocation()
 	const navigate = useNavigate()
+	const paths = usePaths()
 
 	const { library } = useLibraryContext()
 	const { t } = useLocaleContext()
 	const {
-		preferences: { enable_replace_primary_sidebar, primary_navigation_mode },
+		preferences: { enableReplacePrimarySidebar, primaryNavigationMode },
 	} = usePreferences()
 	const { shouldUseGradient } = useTheme()
 	const { groups } = useRouteGroups({ routeGroups })
@@ -28,7 +29,7 @@ export default function LibrarySettingsSidebar() {
 		<div
 			className={cn(
 				'relative flex h-full w-48 shrink-0 flex-col border-edge bg-background px-2 py-4 text-foreground-subtle',
-				primary_navigation_mode === 'TOPBAR'
+				primaryNavigationMode === 'TOPBAR'
 					? 'fixed top-12 z-50 h-screen border-x'
 					: 'fixed top-0 z-50 h-screen border-r',
 				{
@@ -92,7 +93,7 @@ export default function LibrarySettingsSidebar() {
 					.filter(Boolean)}
 				<div className="flex-1" />
 
-				{enable_replace_primary_sidebar && (
+				{enableReplacePrimarySidebar && (
 					<div className="shrink-0">
 						<IconButton
 							title="Go home"

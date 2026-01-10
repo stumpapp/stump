@@ -1,0 +1,2667 @@
+"""
+The different roles a user may have for a role-based access control system scoped
+to a specific entity
+"""
+enum AccessRole {
+	READER
+	WRITER
+	CO_CREATOR
+}
+
+type ActiveReadingSession {
+	id: Int!
+	page: Int
+	percentageCompleted: Decimal
+	locator: ReadiumLocator
+	epubcfi: String
+	koreaderProgress: String
+	startedAt: DateTime!
+	updatedAt: DateTime
+	mediaId: String!
+	userId: String!
+	deviceId: String
+	elapsedSeconds: Int
+}
+
+type AgeRestriction {
+	id: Int!
+	age: Int!
+	restrictOnUnset: Boolean!
+	userId: String!
+}
+
+input AgeRestrictionInput {
+	age: Int!
+	restrictOnUnset: Boolean!
+}
+
+type Apikey {
+	id: Int!
+	name: String!
+	shortToken: String!
+	longTokenHash: String!
+	createdAt: DateTime!
+	lastUsedAt: DateTime
+	expiresAt: DateTime
+	userId: String!
+	permissions: ApikeyPermissionsOutput!
+}
+
+input ApikeyInput {
+	"The name of the API key"
+	name: String!
+	"The permissions that the API key should have"
+	permissions: ApikeyPermissions!
+	"The expiration date for the API key, if any"
+	expiresAt: DateTime
+}
+
+input ApikeyPermissions @oneOf {
+	inherit: InheritPermissionValue
+	custom: [UserPermission!]
+}
+
+union ApikeyPermissionsOutput = InheritPermissionStruct | UserPermissionStruct
+
+type Arrangement {
+	locked: Boolean!
+	sections: [ArrangementSection!]!
+}
+
+union ArrangementConfig = SystemArrangementConfig | InProgressBooks | RecentlyAdded | CustomArrangementConfig
+
+input ArrangementConfigInput @oneOf {
+	system: SystemArrangementConfigInput
+	inProgressBooks: InProgressBooksInput
+	recentlyAdded: RecentlyAddedInput
+	custom: FilterableArrangementEntityLinkInput
+}
+
+type ArrangementSection {
+	config: ArrangementConfig!
+	visible: Boolean!
+}
+
+input ArrangementSectionInput {
+	config: ArrangementConfigInput!
+	visible: Boolean! = true
+}
+
+type AttachmentMeta {
+	"The filename of the attachment"
+	filename: String!
+	"The associated media ID of the attachment, if there is one"
+	mediaId: String
+	"The size of the attachment in bytes"
+	size: Int!
+	media: Media
+}
+
+type BookClub {
+	id: String!
+	name: String!
+	slug: String!
+	description: String
+	isPrivate: Boolean!
+	createdAt: DateTime!
+	emoji: String
+	creator: BookClubMember!
+	currentBook: BookClubBook
+	invitations: [BookClubInvitation!]!
+	members: [BookClubMember!]!
+	membersCount: Int!
+	membership: BookClubMember
+	roleSpec: JSON!
+	schedule: BookClubSchedule
+}
+
+type BookClubBook {
+	id: String!
+	startAt: DateTime!
+	endAt: DateTime!
+	discussionDurationDays: Int
+	title: String
+	author: String
+	url: String
+	imageUrl: String
+	bookEntityId: String
+	bookClubScheduleId: Int
+	entity: Media
+}
+
+input BookClubBookInput @oneOf {
+	stored: BookClubInternalBookInput
+	external: BookClubExternalBookInput
+}
+
+input BookClubExternalBookInput {
+	title: String!
+	author: String!
+	url: String
+	imageUrl: String
+}
+
+input BookClubInternalBookInput {
+	id: String!
+}
+
+type BookClubInvitation {
+	id: String!
+	role: BookClubMemberRole!
+	userId: String!
+	bookClubId: String!
+	"The book club that the user was invited to"
+	bookClub: BookClub!
+	"The user who was invited to the book club"
+	user: User!
+}
+
+input BookClubInvitationInput {
+	userId: String!
+	role: BookClubMemberRole
+}
+
+input BookClubInvitationResponseInput {
+	accept: Boolean!
+	member: BookClubMemberInput
+}
+
+type BookClubMember {
+	id: String!
+	displayName: String
+	isCreator: Boolean!
+	hideProgress: Boolean!
+	privateMembership: Boolean!
+	role: BookClubMemberRole!
+	userId: String!
+	bookClubId: String!
+	avatarUrl: String
+	username: String!
+	user: User!
+}
+
+input BookClubMemberInput {
+	userId: String!
+	displayName: String
+	privateMembership: Boolean
+}
+
+"The visibility of a shareable entity"
+enum BookClubMemberRole {
+	MEMBER
+	MODERATOR
+	ADMIN
+	CREATOR
+}
+
+type BookClubSchedule {
+	id: Int!
+	defaultIntervalDays: Int
+	bookClubId: String!
+	activeBooks: [BookClubBook!]!
+	books: [BookClubBook!]!
+}
+
+type Bookmark {
+	id: String!
+	previewContent: String
+	locator: ReadiumLocator
+	epubcfi: String
+	page: Int
+	mediaId: String!
+	userId: String!
+}
+
+input BookmarkInput {
+	mediaId: String!
+	locator: EpubProgressLocatorInput!
+	previewContent: String
+}
+
+type CleanLibraryResponse {
+	deletedMediaCount: Int!
+	deletedSeriesCount: Int!
+	isEmpty: Boolean!
+}
+
+input ComputedFilterReadingStatus @oneOf {
+	is: ReadingStatus
+	isNot: ReadingStatus
+	isAnyOf: [ReadingStatus!]
+	isNoneOf: [ReadingStatus!]
+}
+
+"An event that is emitted by the core and consumed by a client"
+union CoreEvent = JobStarted | JobUpdate | JobOutput | DiscoveredMissingLibrary | CreatedMedia | CreatedManySeries | CreatedOrUpdatedManyMedia
+
+union CoreJobOutput = LibraryScanOutput | SeriesScanOutput | ThumbnailGenerationOutput | PlaceholderGenerationOutput | ExternalJobOutput
+
+input CreateBookClubInput {
+	name: String!
+	slug: String
+	isPrivate: Boolean! = false
+	description: String
+	memberRoleSpec: JSON
+	creatorHideProgress: Boolean!
+	creatorDisplayName: String
+}
+
+input CreateBookClubMemberInput {
+	userId: String!
+	displayName: String
+	privateMembership: Boolean
+	role: BookClubMemberRole!
+}
+
+input CreateBookClubScheduleBook {
+	book: BookClubBookInput!
+	startAt: DateTime
+	endAt: DateTime
+	discussionDurationDays: Int
+}
+
+input CreateBookClubScheduleInput {
+	defaultIntervalDays: Int
+	books: [CreateBookClubScheduleBook!]!
+}
+
+input CreateOrUpdateLibraryInput {
+	name: String!
+	path: String!
+	description: String
+	emoji: String
+	tags: [String!]
+	config: LibraryConfigInput
+	scanAfterPersist: Boolean! = true
+}
+
+input CreateUserInput {
+	username: String!
+	password: String!
+	permissions: [UserPermission!]!
+	ageRestriction: AgeRestrictionInput = null
+	maxSessionsAllowed: Int
+}
+
+type CreatedAPIKey {
+	apiKey: Apikey!
+	secret: String!
+}
+
+type CreatedManySeries {
+	count: Int!
+	libraryId: String!
+}
+
+type CreatedMedia {
+	id: String!
+	seriesId: String!
+}
+
+type CreatedOrUpdatedManyMedia {
+	count: Int!
+	seriesId: String!
+}
+
+"A simple cursor-based pagination input object"
+input CursorPagination {
+	after: String
+	limit: Int! = 20
+}
+
+"Information about the current cursor pagination state"
+type CursorPaginationInfo {
+	"""
+	The cursor of the current page. This should only be None if there are no results,
+	since there is no cursor present to pull from. This technically deviates from
+	popular (read: Relay) specs, but it works better for Stump
+	"""
+	currentCursor: String
+	"The cursor the next page should use, if it exists."
+	nextCursor: String
+	"The limit used when querying the database"
+	limit: Int!
+}
+
+type CustomArrangementConfig {
+	entity: FilterableArrangementEntity!
+	name: String
+	filter: JSON
+	orderBy: String
+	links: [FilterableArrangementEntityLink!]!
+}
+
+"""
+Implement the DateTime<FixedOffset> scalar
+
+The input/output is a string in RFC3339 format.
+"""
+scalar DateTime
+
+scalar Decimal
+
+type DeleteJobAssociatedLogs {
+	"The number of logs deleted that were related to a job"
+	affectedRows: Int!
+}
+
+type DeleteJobHistory {
+	"The number of logs deleted that were related to a job"
+	affectedRows: Int!
+}
+
+enum Dimension {
+	HEIGHT
+	WIDTH
+}
+
+type DirectoryListing {
+	parent: String
+	files: [DirectoryListingFile!]!
+}
+
+type DirectoryListingFile {
+	isDirectory: Boolean!
+	name: String!
+	path: String!
+	media: Media
+}
+
+input DirectoryListingInput {
+	path: String
+	ignoreHidden: Boolean! = true
+	ignoreFiles: Boolean! = false
+	ignoreDirectories: Boolean! = false
+}
+
+type DiscordConfig {
+	webhookUrl: String!
+}
+
+input DiscordConfigInput {
+	webhookUrl: String!
+}
+
+type DiscoveredMissingLibrary {
+	id: String!
+}
+
+"Input object for creating or updating an email device"
+input EmailDeviceInput {
+	"The friendly name of the email device, e.g. \"Aaron's Kobo\""
+	name: String!
+	"The email address of the device"
+	email: String!
+	"Whether the device is forbidden from receiving emails from the server."
+	forbidden: Boolean!
+}
+
+type Emailer {
+	id: Int!
+	name: String!
+	isPrimary: Boolean!
+	senderEmail: String!
+	senderDisplayName: String!
+	username: String!
+	smtpHost: String!
+	smtpPort: Int!
+	tlsEnabled: Boolean!
+	maxAttachmentSizeBytes: Int
+	maxNumAttachments: Int
+	lastUsedAt: DateTime
+	sendHistory: [EmailerSendRecord!]!
+}
+
+"The configuration for an [EmailerClient]"
+input EmailerClientConfig {
+	"The email address to send from"
+	senderEmail: String!
+	"The display name to use for the sender"
+	senderDisplayName: String!
+	"The username to use for the SMTP server, typically the same as the sender email"
+	username: String!
+	"""
+	The plaintext password to use for the SMTP server, which will be encrypted before being stored.
+	This field is optional to support reusing the config for emailer config updates. If the password is not
+	set, it will error when trying to send an email.
+	"""
+	password: String
+	"The SMTP host to use"
+	host: String!
+	"The SMTP port to use"
+	port: Int!
+	"Whether to use TLS for the SMTP connection"
+	tlsEnabled: Boolean!
+	"The maximum size of an attachment in bytes"
+	maxAttachmentSizeBytes: Int
+	"The maximum number of attachments that can be sent in a single email"
+	maxNumAttachments: Int
+}
+
+"Input object for creating or updating an emailer"
+input EmailerInput {
+	"The friendly name of the emailer, e.g. \"Aaron's Kobo\""
+	name: String!
+	"Whether the emailer is the primary emailer"
+	isPrimary: Boolean!
+	"The emailer configuration"
+	config: EmailerClientConfig!
+}
+
+type EmailerSendRecord {
+	id: Int!
+	emailerId: Int!
+	recipientEmail: String!
+	sentAt: DateTime!
+	sentByUserId: String
+	sentBy: User
+	attachmentMeta: [AttachmentMeta!]!
+}
+
+input EmailerSendTo @oneOf {
+	device: SendToDevice
+	anonymous: SendToEmail
+}
+
+"The visibility of a shareable entity"
+enum EntityVisibility {
+	PUBLIC
+	SHARED
+	PRIVATE
+}
+
+type Epub {
+	mediaId: String!
+	spine: [SpineItem!]!
+	resources: JSONObject!
+	toc: [String!]!
+	metadata: JSONObject!
+	rootBase: String!
+	rootFile: String!
+	extraCss: [String!]!
+	annotations: [MediaAnnotationsModel!]!
+	bookmarks: [Bookmark!]!
+	media: Media!
+}
+
+input EpubProgressInput {
+	locator: EpubProgressLocatorInput!
+	percentage: Decimal
+	isComplete: Boolean
+	elapsedSeconds: Int
+}
+
+input EpubProgressLocatorInput @oneOf {
+	readium: ReadiumLocatorInput
+	epubcfi: String
+}
+
+"""
+A resize option which will resize the image to the given dimensions, without
+maintaining the aspect ratio.
+"""
+type ExactDimensionResize {
+	"The width (in pixels) the resulting image should be resized to"
+	width: Int!
+	"The height (in pixels) the resulting image should be resized to"
+	height: Int!
+}
+
+"""
+A resize option which will resize the image to the given dimensions, without
+maintaining the aspect ratio.
+"""
+input ExactDimensionResizeInput {
+	"The width (in pixels) the resulting image should be resized to"
+	width: Int!
+	"The height (in pixels) the resulting image should be resized to"
+	height: Int!
+}
+
+type ExternalJobOutput {
+	val: JSON!
+}
+
+input FieldFilterFileStatus @oneOf {
+	eq: FileStatus
+	neq: FileStatus
+	anyOf: [FileStatus!]
+	noneOf: [FileStatus!]
+	like: FileStatus
+	likeAnyOf: [FileStatus!]
+	likeNoneOf: [FileStatus!]
+	contains: FileStatus
+	excludes: FileStatus
+	startsWith: FileStatus
+	endsWith: FileStatus
+}
+
+input FieldFilterString @oneOf {
+	eq: String
+	neq: String
+	anyOf: [String!]
+	noneOf: [String!]
+	like: String
+	likeAnyOf: [String!]
+	likeNoneOf: [String!]
+	contains: String
+	excludes: String
+	startsWith: String
+	endsWith: String
+}
+
+"The different statuses a file reference can have"
+enum FileStatus {
+	UNKNOWN
+	READY
+	UNSUPPORTED
+	ERROR
+	MISSING
+}
+
+enum FilterableArrangementEntity {
+	BOOKS
+	LIBRARIES
+	SERIES
+	SMART_LISTS
+	BOOK_CLUBS
+}
+
+enum FilterableArrangementEntityLink {
+	CREATE
+	SHOW_ALL
+}
+
+input FilterableArrangementEntityLinkInput {
+	entity: FilterableArrangementEntity!
+	name: String
+	filter: JSON
+	orderBy: String
+	links: [FilterableArrangementEntityLink!]! = []
+}
+
+type FinishedReadingSession {
+	id: Int!
+	startedAt: DateTime!
+	completedAt: DateTime!
+	mediaId: String!
+	userId: String!
+	deviceId: String
+	elapsedSeconds: Int
+}
+
+type FinishedReadingSessionModel {
+	id: Int!
+	startedAt: DateTime!
+	completedAt: DateTime!
+	mediaId: String!
+	userId: String!
+	deviceId: String
+	elapsedSeconds: Int
+}
+
+type ImageColor {
+	color: String!
+	percentage: Decimal!
+}
+
+type ImageMetadata {
+	averageColor: String
+	colors: [ImageColor!]!
+	thumbhash: String
+}
+
+"Options for processing images throughout Stump."
+type ImageProcessorOptions {
+	"The size factor to use when generating an image. See [`ImageResizeOptions`]"
+	resizeMethod: ImageResizeMethod
+	"The format to use when generating an image. See [`SupportedImageFormat`]"
+	format: SupportedImageFormat!
+	"""
+	The quality to use when generating an image. This is a number between 1 and 100,
+	where 100 is the highest quality. Omitting this value will use the default quality
+	of 100.
+	"""
+	quality: Int
+	"The page to use when generating an image. This is not applicable to all media formats."
+	page: Int
+}
+
+"Options for processing images throughout Stump."
+input ImageProcessorOptionsInput {
+	"The size factor to use when generating an image. See [`ImageResizeOptions`]"
+	resizeMethod: ImageResizeMethodInput
+	"The format to use when generating an image. See [`SupportedImageFormat`]"
+	format: SupportedImageFormat!
+	"""
+	The quality to use when generating an image. This is a number between 1 and 100,
+	where 100 is the highest quality. Omitting this value will use the default quality
+	of 100.
+	"""
+	quality: Int
+	"The page to use when generating an image. This is not applicable to all media formats."
+	page: Int
+}
+
+type ImageRef {
+	url: String!
+	height: Int
+	width: Int
+	metadata: ImageMetadata
+}
+
+"The resize options to use when generating an image"
+union ImageResizeMethod = ExactDimensionResize | ScaleEvenlyByFactor | ScaledDimensionResize
+
+"The resize options to use when generating an image"
+input ImageResizeMethodInput @oneOf {
+	exact: ExactDimensionResizeInput
+	scaleEvenlyByFactor: ScaleEvenlyByFactorInput
+	scaleDimension: ScaledDimensionResizeInput
+}
+
+type InProgressBooks {
+	name: String
+	links: [FilterableArrangementEntityLink!]!
+}
+
+input InProgressBooksInput {
+	name: String
+	links: [FilterableArrangementEntityLink!]! = []
+}
+
+type InheritPermissionStruct {
+	value: InheritPermissionValue!
+}
+
+enum InheritPermissionValue {
+	INHERIT
+}
+
+"""
+The different types of layouts a client-side interface might present to a user
+for a collection of items
+"""
+enum InterfaceLayout {
+	GRID
+	TABLE
+}
+
+"A scalar that can represent any JSON value."
+scalar JSON
+
+"A scalar that can represent any JSON Object value."
+scalar JSONObject
+
+type Job {
+	id: String!
+	name: String!
+	description: String
+	status: JobStatus!
+	msElapsed: Int!
+	createdAt: DateTime!
+	completedAt: DateTime
+	outputData: CoreJobOutput
+	saveState: JSON
+	logCount: Int!
+	logs: [Log!]!
+}
+
+type JobOutput {
+	id: String!
+	output: CoreJobOutput!
+}
+
+type JobStarted {
+	id: String!
+}
+
+enum JobStatus {
+	RUNNING
+	PAUSED
+	COMPLETED
+	CANCELLED
+	FAILED
+	QUEUED
+}
+
+"An update event that is emitted by a job"
+type JobUpdate {
+	id: String!
+	"The status of the job"
+	status: JobStatus
+	"The message to display"
+	message: String
+	"The current task being worked on"
+	completedTasks: Int
+	"""
+	The number of tasks for the job. This number can change as
+	subtasks get added/converted to tasks
+	"""
+	remainingTasks: Int
+	"The current subtask being worked on"
+	completedSubtasks: Int
+	"The number of subtasks that exist in the current task"
+	totalSubtasks: Int
+}
+
+type Library {
+	id: String!
+	name: String!
+	description: String
+	path: String!
+	status: FileStatus!
+	thumbnailMeta: ImageMetadata
+	thumbnailPath: String
+	createdAt: DateTime!
+	updatedAt: DateTime
+	emoji: String
+	configId: Int!
+	lastScannedAt: DateTime
+	config: LibraryConfig!
+	excludedUsers: [User!]!
+	isFavorite: Boolean!
+	"Get the details of the last scan job for this library, if any exists."
+	lastScan: LibraryScanRecord
+	"Get media in this library"
+	media(take: Int = null): [Media!]!
+	mediaAlphabet: JSONObject!
+	"Get the full history of scan jobs for this library."
+	scanHistory: [LibraryScanRecord!]!
+	"Get series in this library"
+	series(take: Int = null): [Series!]!
+	seriesAlphabet: JSONObject!
+	stats(allUsers: Boolean): LibraryStats!
+	tags: [Tag!]!
+	"""
+	A reference to the thumbnail image for the thumbnail. This will be a fully
+	qualified URL to the image.
+	"""
+	thumbnail: ImageRef!
+}
+
+type LibraryConfig {
+	id: Int!
+	convertRarToZip: Boolean!
+	hardDeleteConversions: Boolean!
+	defaultReadingDir: ReadingDirection!
+	defaultReadingMode: ReadingMode!
+	defaultReadingImageScaleFit: ReadingImageScaleFit!
+	generateFileHashes: Boolean!
+	generateKoreaderHashes: Boolean!
+	processMetadata: Boolean!
+	watch: Boolean!
+	libraryPattern: LibraryPattern!
+	defaultLibraryViewMode: LibraryViewMode!
+	hideSeriesView: Boolean!
+	processThumbnailColorsEvenWithoutConfig: Boolean!
+	libraryId: String
+	thumbnailConfig: ImageProcessorOptions
+	ignoreRules: [String!]
+}
+
+input LibraryConfigInput {
+	convertRarToZip: Boolean!
+	hardDeleteConversions: Boolean!
+	generateFileHashes: Boolean!
+	generateKoreaderHashes: Boolean!
+	processMetadata: Boolean!
+	watch: Boolean!
+	libraryPattern: LibraryPattern!
+	defaultLibraryViewMode: LibraryViewMode!
+	hideSeriesView: Boolean!
+	thumbnailConfig: ImageProcessorOptionsInput
+	processThumbnailColorsEvenWithoutConfig: Boolean!
+	defaultReadingDir: ReadingDirection!
+	defaultReadingMode: ReadingMode!
+	defaultReadingImageScaleFit: ReadingImageScaleFit!
+	ignoreRules: [String!]
+}
+
+input LibraryFilterInput {
+	id: FieldFilterString = null
+	name: FieldFilterString = null
+	path: FieldFilterString = null
+	_and: [LibraryFilterInput!] = null
+	_not: [LibraryFilterInput!] = null
+	_or: [LibraryFilterInput!] = null
+}
+
+input LibraryModelOrderBy {
+	field: LibraryModelOrdering!
+	direction: OrderDirection!
+}
+
+enum LibraryModelOrdering {
+	ID
+	NAME
+	DESCRIPTION
+	PATH
+	STATUS
+	THUMBNAIL_META
+	THUMBNAIL_PATH
+	CREATED_AT
+	UPDATED_AT
+	EMOJI
+	CONFIG_ID
+	LAST_SCANNED_AT
+}
+
+"The different patterns a library may be organized by"
+enum LibraryPattern {
+	SERIES_BASED
+	COLLECTION_BASED
+}
+
+"The data that is collected and updated during the execution of a library scan job"
+type LibraryScanOutput {
+	"The number of files visited during the scan"
+	totalFiles: Int!
+	"The number of directories visited during the scan"
+	totalDirectories: Int!
+	"The number of files that were ignored during the scan"
+	ignoredFiles: Int!
+	"""
+	The number of files that were deemed to be skipped during the scan, e.g. it
+	exists in the database but has not been modified since the last scan
+	"""
+	skippedFiles: Int!
+	"The number of ignored directories during the scan"
+	ignoredDirectories: Int!
+	"The number of media entities created"
+	createdMedia: Int!
+	"The number of media entities updated"
+	updatedMedia: Int!
+	"The number of series entities created"
+	createdSeries: Int!
+	"The number of series entities updated"
+	updatedSeries: Int!
+}
+
+type LibraryScanRecord {
+	id: Int!
+	timestamp: DateTime!
+	libraryId: String!
+	jobId: String
+	options: JSON
+}
+
+type LibraryStats {
+	seriesCount: Int!
+	bookCount: Int!
+	totalBytes: Int!
+	completedBooks: Int!
+	inProgressBooks: Int!
+}
+
+enum LibraryViewMode {
+	SERIES
+	BOOKS
+}
+
+type Log {
+	id: Int!
+	level: LogLevel!
+	message: String!
+	timestamp: DateTime!
+	jobId: String
+	context: String
+}
+
+type LogDeleteOutput {
+	deleted: Int!
+}
+
+type LogFileInfo {
+	path: String!
+	size: Int!
+	modified: String!
+}
+
+input LogFilterInput {
+	level: FieldFilterString = null
+	jobId: FieldFilterString = null
+	_and: [LogFilterInput!] = null
+	_not: [LogFilterInput!] = null
+	_or: [LogFilterInput!] = null
+}
+
+enum LogLevel {
+	ERROR
+	WARN
+	INFO
+	DEBUG
+}
+
+input LogModelOrderBy {
+	field: LogModelOrdering!
+	direction: OrderDirection!
+}
+
+enum LogModelOrdering {
+	ID
+	LEVEL
+	MESSAGE
+	TIMESTAMP
+	JOB_ID
+	CONTEXT
+}
+
+type Media {
+	"The unique identifier for the media"
+	id: String!
+	"The name of the media, derived from the filename and excluding the extension"
+	name: String!
+	"The size of the media file in bytes"
+	size: Int!
+	"The extension of the media file, excluding the leading period"
+	extension: String!
+	"The number of pages in the media, if applicable. Will be -1 for certain media types"
+	pages: Int!
+	"The timestamp of the last time the media was updated. This will be set during creation, as well"
+	updatedAt: DateTime
+	"The timestamp of the creation of the media"
+	createdAt: DateTime!
+	"""
+	The timestamp of when the underlying file was last modified on disk. This will only be set if
+	a timestamp can be retrieved from the filesystem
+	"""
+	modifiedAt: DateTime
+	"""
+	A Stump-specific hash of the media file. This is used as a secondary identifier for the media, primarily
+	in aiding in the identification of duplicate media files
+	"""
+	hash: String
+	"""
+	A hash of the media file that adheres to the KoReader hash algorithm. This is used to identify
+	books from the KoReader application so progress can be synced between the two applications
+	"""
+	koreaderHash: String
+	"The path of the underlying media file on disk"
+	path: String!
+	"""
+	The status of the media. This is used to determine if the media is available for reading (i.e.,
+	if it is available on disk)
+	"""
+	status: FileStatus!
+	"The metadata for the thumbnail image of the media"
+	thumbnailMeta: ImageMetadata
+	"The path to the thumbnail image of the media on disk"
+	thumbnailPath: String
+	"""
+	The unique identifier of the series that the media belongs to. While this is nullable, it is
+	expected that all media will belong to a series
+	"""
+	seriesId: String
+	"The timestamp of when the media was **soft** deleted. This will act like a trash bin."
+	deletedAt: DateTime
+	metadata: MediaMetadata
+	"If the media is an epub, this will return the parsed epub data from the file"
+	ebook: Epub
+	"Whether the media is marked as a favorite by the current user"
+	isFavorite: Boolean!
+	"The tags associated with the media"
+	tags: [Tag!]!
+	"The series the media belongs to"
+	series: Series!
+	libraryId: String!
+	library: Library!
+	libraryConfig: LibraryConfig!
+	analysisData: MediaAnalysisData
+	"""
+	A reference to the thumbnail image for the media. This will be a fully
+	qualified URL to the image.
+	"""
+	thumbnail: ImageRef!
+	"""
+	The resolved name of the media, which will prioritize the title pulled from
+	metatadata, if available, and fallback to the name derived from the file name
+	"""
+	resolvedName: String!
+	readProgress: ActiveReadingSession
+	readHistory: [FinishedReadingSession!]!
+	seriesPosition: Int
+	"The next media in the series, ordered by name"
+	nextInSeries(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
+	"""
+	The path to the media file **relative** to the library path. This is only useful for
+	displaying a truncated path when in the context of a library, e.g. limited space
+	on a mobile device.
+	"""
+	relativeLibraryPath: String!
+}
+
+type MediaAnalysisData {
+	dimensions: [PageDimension!]!
+	contentTypes: [String!]!
+}
+
+type MediaAnnotationsModel {
+	id: String!
+	highlightedText: String
+	epubcfi: String
+	page: Int
+	pageCoordinatesX: Decimal
+	pageCoordinatesY: Decimal
+	notes: String
+	userId: String!
+	mediaId: String!
+}
+
+input MediaFilterInput {
+	name: FieldFilterString = null
+	size: NumericFilterI64 = null
+	extension: FieldFilterString = null
+	createdAt: NumericFilterDateTime = null
+	updatedAt: NumericFilterDateTime = null
+	seriesId: FieldFilterString = null
+	status: FieldFilterFileStatus = null
+	path: FieldFilterString = null
+	pages: NumericFilterI32 = null
+	readingStatus: ComputedFilterReadingStatus = null
+	metadata: MediaMetadataFilterInput = null
+	series: SeriesFilterInput = null
+	_and: [MediaFilterInput!] = null
+	_not: [MediaFilterInput!] = null
+	_or: [MediaFilterInput!] = null
+}
+
+type MediaMetadata {
+	id: Int!
+	mediaId: String
+	ageRating: Int
+	format: String
+	day: Int
+	identifierAmazon: String
+	identifierCalibre: String
+	identifierGoogle: String
+	identifierIsbn: String
+	identifierMobiAsin: String
+	identifierUuid: String
+	language: String
+	month: Int
+	notes: String
+	number: Decimal
+	pageCount: Int
+	publisher: String
+	series: String
+	seriesGroup: String
+	storyArc: String
+	storyArcNumber: Decimal
+	summary: String
+	title: String
+	titleSort: String
+	volume: Int
+	year: Int
+	writers: [String!]!
+	genres: [String!]!
+	characters: [String!]!
+	colorists: [String!]!
+	coverArtists: [String!]!
+	editors: [String!]!
+	inkers: [String!]!
+	letterers: [String!]!
+	links: [String!]!
+	pencillers: [String!]!
+	teams: [String!]!
+}
+
+input MediaMetadataFilterInput {
+	title: FieldFilterString = null
+	publisher: FieldFilterString = null
+	genres: FieldFilterString = null
+	characters: FieldFilterString = null
+	colorists: FieldFilterString = null
+	writers: FieldFilterString = null
+	pencillers: FieldFilterString = null
+	letterers: FieldFilterString = null
+	coverArtists: FieldFilterString = null
+	inkers: FieldFilterString = null
+	editors: FieldFilterString = null
+	ageRating: NumericFilterI32 = null
+	year: NumericFilterI32 = null
+	month: NumericFilterI32 = null
+	day: NumericFilterI32 = null
+	links: FieldFilterString = null
+	teams: FieldFilterString = null
+	summary: FieldFilterString = null
+	series: FieldFilterString = null
+	_and: [MediaMetadataFilterInput!] = null
+	_not: [MediaMetadataFilterInput!] = null
+	_or: [MediaMetadataFilterInput!] = null
+}
+
+input MediaMetadataInput {
+	title: String
+	titleSort: String
+	series: String
+	seriesGroup: String
+	storyArc: String
+	storyArcNumber: Decimal
+	number: Decimal
+	volume: Int
+	summary: String
+	notes: String
+	genres: [String!]
+	format: String
+	year: Int
+	month: Int
+	day: Int
+	writers: [String!]
+	pencillers: [String!]
+	inkers: [String!]
+	colorists: [String!]
+	letterers: [String!]
+	coverArtists: [String!]
+	editors: [String!]
+	publisher: String
+	links: [String!]
+	characters: [String!]
+	teams: [String!]
+	pageCount: Int
+	ageRating: Int
+	identifierAmazon: String
+	identifierCalibre: String
+	identifierGoogle: String
+	identifierIsbn: String
+	identifierMobiAsin: String
+	identifierUuid: String
+	language: String
+}
+
+enum MediaMetadataModelOrdering {
+	ID
+	MEDIA_ID
+	AGE_RATING
+	CHARACTERS
+	COLORISTS
+	COVER_ARTISTS
+	FORMAT
+	DAY
+	EDITORS
+	GENRES
+	IDENTIFIER_AMAZON
+	IDENTIFIER_CALIBRE
+	IDENTIFIER_GOOGLE
+	IDENTIFIER_ISBN
+	IDENTIFIER_MOBI_ASIN
+	IDENTIFIER_UUID
+	INKERS
+	LANGUAGE
+	LETTERERS
+	LINKS
+	MONTH
+	NOTES
+	NUMBER
+	PAGE_COUNT
+	PENCILLERS
+	PUBLISHER
+	SERIES
+	SERIES_GROUP
+	STORY_ARC
+	STORY_ARC_NUMBER
+	SUMMARY
+	TEAMS
+	TITLE
+	TITLE_SORT
+	VOLUME
+	WRITERS
+	YEAR
+}
+
+input MediaMetadataOrderByField {
+	field: MediaMetadataModelOrdering!
+	direction: OrderDirection!
+}
+
+type MediaMetadataOverview {
+	genres: [String!]!
+	writers: [String!]!
+	pencillers: [String!]!
+	inkers: [String!]!
+	colorists: [String!]!
+	letterers: [String!]!
+	editors: [String!]!
+	publishers: [String!]!
+	characters: [String!]!
+	teams: [String!]!
+	series: [String!]!
+}
+
+enum MediaModelOrdering {
+	ID
+	NAME
+	SIZE
+	EXTENSION
+	PAGES
+	UPDATED_AT
+	CREATED_AT
+	MODIFIED_AT
+	HASH
+	KOREADER_HASH
+	PATH
+	STATUS
+	THUMBNAIL_META
+	THUMBNAIL_PATH
+	SERIES_ID
+	DELETED_AT
+}
+
+input MediaOrderBy @oneOf {
+	media: MediaOrderByField
+	metadata: MediaMetadataOrderByField
+}
+
+input MediaOrderByField {
+	field: MediaModelOrdering!
+	direction: OrderDirection!
+}
+
+input MediaProgressInput @oneOf {
+	epub: EpubProgressInput
+	paged: PagedProgressInput
+}
+
+"""
+An enum representing the different types of metadata resets that can occur,
+which manifest differently depending on the context
+"""
+enum MetadataResetImpact {
+	"""
+	A reset which affects one or more series depending on context:
+	- When mutating a library, will reset all series metadata
+	- When mutating a series, will reset all its own metadata
+	"""
+	SERIES
+	"""
+	A reset which affects one or more books depending on context:
+	- When mutating a library, will reset all book metadata in all
+	library's series
+	- When mutating a series, will reset all its own books
+	- When mutating a book, will reset all its own metadata
+	"""
+	BOOKS
+	"""
+	A reset which affects multiple different entities (series, books) depending on context:
+	- When mutating a library, will reset all metadata in all library's series and books
+	- When mutating a series, will reset all its own metadata and books
+	"""
+	EVERYTHING
+}
+
+type Mutation {
+	createApiKey(input: ApikeyInput!): CreatedAPIKey!
+	updateApiKey(id: Int!, input: ApikeyInput!): Apikey!
+	deleteApiKey(id: Int!): Apikey!
+	createSmartList(input: SaveSmartListInput!): SmartList!
+	updateSmartList(id: ID!, input: SaveSmartListInput!): SmartList!
+	deleteSmartList(id: ID!): SmartList!
+	createBookClub(input: CreateBookClubInput!): BookClub!
+	updateBookClub(id: ID!, input: UpdateBookClubInput!): BookClub!
+	deleteBookClub(id: ID!): BookClub!
+	createBookClubInvitation(id: ID!, input: BookClubInvitationInput!): BookClubInvitation!
+	respondToBookClubInvitation(id: ID!, input: BookClubInvitationResponseInput!): BookClubInvitation!
+	"Creates a new member in the book club"
+	createBookClubMember(bookClubId: ID!, input: CreateBookClubMemberInput!): BookClubMember!
+	"Removes a member from the book club"
+	removeBookClubMember(bookClubId: ID!, memberId: ID!): BookClubMember!
+	"Deletes the membership of the caller to the target book club"
+	leaveBookClub(bookClubId: ID!): BookClubMember!
+	createBookClubSchedule(id: ID!, input: CreateBookClubScheduleInput!): BookClub!
+	addBooksToBookClubSchedule(id: ID!, books: [CreateBookClubScheduleBook!]!): BookClub!
+	cancelJob(id: ID!): Boolean!
+	deleteJob(id: ID!, force: Boolean! = false): Boolean!
+	deleteJobHistory: DeleteJobHistory!
+	deleteJobLogs(id: ID!): DeleteJobAssociatedLogs!
+	createNotifier(input: NotifierInput!): Notifier!
+	updateNotifier(id: Int!, input: NotifierInput!): Notifier!
+	deleteNotifier(id: Int!): Notifier!
+	"""
+	Create or update a bookmark for a user. If a bookmark already exists for the given media
+	and epubcfi, the preview content is updated.
+	"""
+	createOrUpdateBookmark(input: BookmarkInput!): Bookmark!
+	"Delete a bookmark by epubcfi. The user must be the owner of the bookmark."
+	deleteBookmark(epubcfi: String!): Bookmark!
+	analyzeMedia(id: ID!, forceReanalysis: Boolean! = false): Boolean!
+	convertMedia(id: ID!): Boolean!
+	deleteMedia(id: ID!): Media!
+	favoriteMedia(id: ID!, isFavorite: Boolean!): Media!
+	"""
+	Update the thumbnail for a book. This will replace the existing thumbnail with the the one
+	associated with the provided input (book). If the book does not have a thumbnail, one
+	will be generated based on the library's thumbnail configuration.
+	"""
+	updateMediaThumbnail(id: ID!, input: PageBasedThumbnailInput!): Media!
+	updateMediaMetadata(id: ID!, input: MediaMetadataInput!): Media!
+	deleteMediaProgress(id: ID!): Media!
+	"""
+	Deletes all of a user's reading history for a specific media item. This cannot be undone, so
+	use with caution.
+	"""
+	deleteMediaReadHistory(id: ID!): Media!
+	updateMediaProgress(id: ID!, input: MediaProgressInput!): ReadingProgressOutput!
+	markMediaAsComplete(id: ID!, isComplete: Boolean!, page: Int): FinishedReadingSessionModel
+	analyzeLibrary(id: ID!, forceReanalysis: Boolean! = false): Boolean!
+	"""
+	Delete media and series from a library that match one of the following conditions:
+	
+	- A series that is missing from disk (status is not `Ready`)
+	- A media that is missing from disk (status is not `Ready`)
+	- A series that is not associated with any media (i.e., no media in the series)
+	
+	This operation will also remove any associated thumbnails of the deleted media and series.
+	"""
+	cleanLibrary(id: ID!): CleanLibraryResponse!
+	"Clear the scan history for a specific library"
+	clearScanHistory(id: ID!): Int!
+	"""
+	Create a new library with the provided configuration. If `scan_after_persist` is `true`,
+	the library will be scanned immediately after creation.
+	"""
+	createLibrary(input: CreateOrUpdateLibraryInput!): Library!
+	resetLibraryMetadata(id: ID!, impact: MetadataResetImpact!): Library!
+	"""
+	Update an existing library with the provided configuration. If `scan_after_persist` is `true`,
+	the library will be scanned immediately after updating.
+	"""
+	updateLibrary(id: ID!, input: CreateOrUpdateLibraryInput!): Library!
+	"Update the emoji for a library"
+	updateLibraryEmoji(id: ID!, emoji: String): Library!
+	"""
+	Update the thumbnail for a library. This will replace the existing thumbnail with the the one
+	associated with the provided input (book). If the book does not have a thumbnail, one
+	will be generated based on the library's thumbnail configuration.
+	"""
+	updateLibraryThumbnail(id: ID!, input: UpdateThumbnailInput!): Library!
+	"""
+	Exclude users from a library, preventing them from seeing the library in the UI. This operates as a
+	full replacement of the excluded users list, so any users not included in the provided list will be
+	removed from the exclusion list if they were previously excluded.
+	
+	The server owner cannot be excluded from a library, nor can the user performing the action exclude
+	themselves.
+	"""
+	updateLibraryExcludedUsers(id: ID!, userIds: [String!]!): Library!
+	deleteLibraryScanHistory(id: ID!): Library!
+	"""
+	Delete a library, including all associated media and series via cascading deletes. This
+	operation cannot be undone.
+	"""
+	deleteLibrary(id: ID!): Library!
+	generateLibraryThumbnails(id: ID!, forceRegenerate: Boolean! = false): Boolean!
+	processLibraryThumbnails(id: ID!, forceRegenerate: Boolean! = false): Boolean!
+	deleteLibraryThumbnails(id: ID!): Boolean!
+	"""
+	Enqueue a scan job for a library. This will index the filesystem from the library's root path
+	and update the database accordingly.
+	"""
+	scanLibrary(id: ID!, options: JSON): Boolean!
+	"""
+	"Visit" a library, which will upsert a record of the user's last visit to the library.
+	This is used to inform the UI of the last library which was visited by the user
+	"""
+	visitLibrary(id: ID!): Library!
+	deleteLogs(filter: LogFilterInput! = {level: null, jobId: null, _and: null, _not: null, _or: null}): LogDeleteOutput!
+	deleteLogFile: Boolean!
+	"""
+	Creates a new reading list.
+	
+	# Returns
+	
+	A result containing the newly created reading list, or an error if creation failed.
+	"""
+	createReadingList(input: ReadingListInput!): ReadingList!
+	"""
+	Updates an existing reading list.
+	
+	# Returns
+	
+	A result containing the updated reading list, or an error if update failed.
+	"""
+	updateReadingList(input: ReadingListInput!): ReadingList!
+	"""
+	Deletes a reading list by ID.
+	
+	# Returns
+	
+	A result containing the deleted reading list, or an error if deletion failed.
+	"""
+	deleteReadingList(id: String!): ReadingList!
+	analyzeSeries(id: ID!, forceReanalysis: Boolean! = false): Boolean!
+	favoriteSeries(id: ID!, isFavorite: Boolean!): Series!
+	"""
+	Update the thumbnail for a series. This will replace the existing thumbnail with the the one
+	associated with the provided input (book). If the book does not have a thumbnail, one
+	will be generated based on the library's thumbnail configuration.
+	"""
+	updateSeriesThumbnail(id: ID!, input: UpdateThumbnailInput!): Series!
+	updateSeriesMetadata(id: ID!, input: SeriesMetadataInput!): Series!
+	resetSeriesMetadata(id: ID!, impact: MetadataResetImpact!): Series!
+	"""
+	Toggle the completion status of a series. If the series is marked as completed, all books
+	in the series will also be marked as completed, and vice versa for marking as not completed.
+	This is considered a dangerous operation since it can modify all your read progression related
+	to a single series all at once. Please use with caution.
+	"""
+	toggleSeriesCompletion(id: ID!, isCompleted: Boolean!): Series!
+	scanSeries(id: ID!): Boolean!
+	"""
+	Returns a list containing the newly created tags, or an error if creation failed.
+	
+	If any of the tags already exist an error is returned.
+	
+	* `tags` - A non-empty list of tags to create.
+	"""
+	createTags(tags: [String!]!): [Tag!]!
+	"""
+	Delete tags. Returns a list containing the deleted tags, or an error if deletion failed.
+	
+	* `tags` - A non-empty list of tags to create.
+	"""
+	deleteTags(tags: [String!]!): [Tag!]!
+	uploadBooks(input: UploadBooksInput!): Boolean!
+	uploadSeries(input: UploadSeriesInput!): Boolean!
+	uploadLibraryThumbnail(id: ID!, file: Upload!): Library!
+	uploadSeriesThumbnail(id: ID!, file: Upload!): Series!
+	uploadMediaThumbnail(id: ID!, file: Upload!): Media!
+	deleteLoginActivity: Int!
+	createUser(input: CreateUserInput!): User!
+	updateViewer(input: UpdateUserInput!): User!
+	updateViewerPreferences(input: UpdateUserPreferencesInput!): UserPreferences!
+	updateUser(id: ID!, input: UpdateUserInput!): User!
+	deleteUser(id: ID!, hardDelete: Boolean): User!
+	deleteUserSessions(id: ID!): Int!
+	updateUserLockStatus(id: ID!, lock: Boolean!): User!
+	updateNavigationArrangementLock(locked: Boolean!): Arrangement!
+	updateNavigationArrangement(input: NavigationArrangementInput!): Arrangement!
+	createEmailer(input: EmailerInput!): Emailer!
+	updateEmailer(id: Int!, input: EmailerInput!): Emailer!
+	deleteEmailer(id: Int!): Emailer!
+	sendAttachmentEmail(input: SendAttachmentEmailsInput!): SendAttachmentEmailOutput!
+	createEmailDevice(input: EmailDeviceInput!): RegisteredEmailDevice!
+	updateEmailDevice(id: Int!, input: EmailDeviceInput!): RegisteredEmailDevice!
+	patchEmailDevice(id: Int!, input: PatchEmailDeviceInput!): RegisteredEmailDevice!
+	deleteEmailDevice(id: Int!): RegisteredEmailDevice!
+	createSmartListView(input: SaveSmartListView!): SmartListView!
+	updateSmartListView(originalName: String!, input: SaveSmartListView!): SmartListView!
+	deleteSmartListView(id: ID!, name: String!): SmartListView!
+	createScheduledJobConfig(input: ScheduledJobConfigInput!): ScheduledJobConfig!
+	updateScheduledJobConfig(id: Int!, input: ScheduledJobConfigInput!): ScheduledJobConfig!
+	deleteScheduledJobConfig(id: Int!): Boolean!
+}
+
+input NavigationArrangementInput {
+	sections: [ArrangementSectionInput!]!
+}
+
+type Notifier {
+	id: Int!
+	type: String!
+	config: NotifierConfig!
+}
+
+union NotifierConfig = DiscordConfig | TelegramConfig
+
+input NotifierInput @oneOf {
+	discord: DiscordConfigInput
+	telegram: TelegramConfigInput
+}
+
+input NumericFilterDateTime @oneOf {
+	eq: DateTime
+	neq: DateTime
+	anyOf: [DateTime!]
+	noneOf: [DateTime!]
+	gt: DateTime
+	gte: DateTime
+	lt: DateTime
+	lte: DateTime
+	range: NumericRangeDateTime
+}
+
+input NumericFilterI32 @oneOf {
+	eq: Int
+	neq: Int
+	anyOf: [Int!]
+	noneOf: [Int!]
+	gt: Int
+	gte: Int
+	lt: Int
+	lte: Int
+	range: NumericRangeI32
+}
+
+input NumericFilterI64 @oneOf {
+	eq: Int
+	neq: Int
+	anyOf: [Int!]
+	noneOf: [Int!]
+	gt: Int
+	gte: Int
+	lt: Int
+	lte: Int
+	range: NumericRangeI64
+}
+
+input NumericRangeDateTime {
+	from: DateTime!
+	to: DateTime!
+	inclusive: Boolean!
+}
+
+input NumericRangeI32 {
+	from: Int!
+	to: Int!
+	inclusive: Boolean!
+}
+
+input NumericRangeI64 {
+	from: Int!
+	to: Int!
+	inclusive: Boolean!
+}
+
+"A simple offset-based pagination input object"
+input OffsetPagination {
+	"""
+	The page to start from. This is 1-based by default, but can be
+	changed to 0-based by setting the `zero_based` field to true.
+	"""
+	page: Int!
+	"The number of items to return per page. This is 20 by default."
+	pageSize: Int = 20
+	"Whether or not the page is zero-based. This is false by default."
+	zeroBased: Boolean = false
+}
+
+"Information about the current offset pagination state"
+type OffsetPaginationInfo {
+	"""
+	The number of pages available. This is **not** affected by the zero-based flag,
+	so a client requesting zero-based pagination will need to adjust their pagination
+	logic accordingly.
+	"""
+	totalPages: Int!
+	"The current page, zero-indexed."
+	currentPage: Int!
+	"The number of elements per page."
+	pageSize: Int!
+	"The offset of the current page. E.g. if current page is 1, and pageSize is 10, the offset is 20."
+	pageOffset: Int!
+	"Whether or not the page is zero-indexed."
+	zeroBased: Boolean!
+}
+
+enum OrderDirection {
+	ASC
+	DESC
+}
+
+input PageBasedThumbnailInput {
+	"The page to pull inside the media file for generating the thumbnail"
+	page: Int!
+	"A flag indicating whether the page is zero based (i.e. 0 is the first page)"
+	isZeroBased: Boolean = null
+}
+
+"""
+Represents a page dimension for a page of a Stump media item. It consists of a
+height and a width.
+"""
+type PageDimension {
+	height: Int!
+	width: Int!
+}
+
+input PagedProgressInput {
+	page: Int!
+	elapsedSeconds: Int
+}
+
+type PaginatedDirectoryListingResponse {
+	nodes: [DirectoryListing!]!
+	pageInfo: PaginationInfo!
+}
+
+type PaginatedJobResponse {
+	nodes: [Job!]!
+	pageInfo: PaginationInfo!
+}
+
+type PaginatedLibraryResponse {
+	nodes: [Library!]!
+	pageInfo: PaginationInfo!
+}
+
+type PaginatedLogResponse {
+	nodes: [Log!]!
+	pageInfo: PaginationInfo!
+}
+
+type PaginatedMediaResponse {
+	nodes: [Media!]!
+	pageInfo: PaginationInfo!
+}
+
+type PaginatedReadingListResponse {
+	nodes: [ReadingList!]!
+	pageInfo: PaginationInfo!
+}
+
+type PaginatedSeriesResponse {
+	nodes: [Series!]!
+	pageInfo: PaginationInfo!
+}
+
+type PaginatedUserResponse {
+	nodes: [User!]!
+	pageInfo: PaginationInfo!
+}
+
+"""
+A union of the supported pagination flavors which Stump supports. The resulting
+response will be dependent on the pagination type used, e.g. a [CursorPaginatedResponse]
+will be returned if the [CursorPagination] type is used.
+
+You may use a conditional fragment in your GraphQL query for type-specific fields:
+```graphql
+query MyQuery {
+media(pagination: { offset: { page: 1, pageSize: 20 } }) {
+... on OffsetPaginationInfo {
+totalPages
+currentPage
+}
+}
+}
+```
+
+A special case is the `None` variant, which will return an offset-based pagination info
+object based on the size of the result set. This will not paginate the results, so be
+cautious when using this with large result sets.
+
+**Note**: Be sure to call [Pagination::resolve] before using the pagination object
+to ensure that the pagination object is in a valid state.
+"""
+input Pagination @oneOf {
+	cursor: CursorPagination
+	offset: OffsetPagination
+	none: Unpaginated
+}
+
+union PaginationInfo = CursorPaginationInfo | OffsetPaginationInfo
+
+input PatchEmailDeviceInput {
+	name: String
+	email: String
+	forbidden: Boolean
+}
+
+type PlaceholderGenerationOutput {
+	"The total number of entities that were visited"
+	visitedEntities: Int!
+	"The number of entities that were skipped (already had metadata or no thumbnail file)"
+	skippedEntities: Int!
+	"The number of placeholder metadata entries that were generated"
+	generatedMetadata: Int!
+}
+
+type Query {
+	apiKeys: [Apikey!]!
+	apiKeyById(id: Int!): Apikey!
+	bookClubs(all: Boolean = null): [BookClub!]!
+	bookClubById(id: ID!): BookClub!
+	bookClubBySlug(slug: String!): BookClub
+	emailers: [Emailer!]!
+	emailerById(id: Int!): Emailer
+	emailDevices: [RegisteredEmailDevice!]!
+	emailDeviceById(id: Int!): RegisteredEmailDevice
+	listDirectory(pagination: Pagination!, input: DirectoryListingInput): PaginatedDirectoryListingResponse!
+	jobs(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedJobResponse!
+	jobById(id: ID!): Job
+	scheduledJobConfigs: [ScheduledJobConfig!]!
+	mediaCount: Int!
+	finishedReadingSessionCount: Int!
+	activeReadingSessionCount: Int!
+	mediaDiskUsage: Int!
+	media(filter: MediaFilterInput! = {name: null, size: null, extension: null, createdAt: null, updatedAt: null, seriesId: null, status: null, path: null, pages: null, readingStatus: null, metadata: null, series: null, _and: null, _not: null, _or: null}, orderBy: [MediaOrderBy!]! = [{media: {field: NAME, direction: ASC}}], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
+	mediaById(id: ID!): Media
+	mediaByPath(path: String!): Media
+	"Returns the available alphabet for all media in the server"
+	mediaAlphabet: JSONObject!
+	keepReading(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
+	onDeck(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
+	recentlyAddedMedia(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
+	duplicateMedia: [Media!]!
+	me: User!
+	userCount: Int!
+	topReaders(take: Int): [User!]!
+	users(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedUserResponse!
+	userById(id: ID!): User!
+	loginActivity: [UserLoginActivity!]!
+	loginActivityById(id: ID!): [UserLoginActivity!]!
+	getNotifiers: [Notifier!]!
+	getNotifierById(id: Int!): Notifier!
+	"""
+	Retrieves a paginated list of reading lists for the current user.
+	
+	# Returns
+	
+	A paginated list of reading lists.
+	"""
+	readingLists(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedReadingListResponse!
+	"""
+	Retrieves a reading list by ID for the current user.
+	
+	# Returns
+	A reading list with the given ID. If no reading list with this ID exists for the current user, an error will be returned.
+	"""
+	readingListById(id: ID!): ReadingList!
+	"Get a single epub by its media ID"
+	epubById(id: ID!): Epub!
+	"Get all bookmarks for a single epub by its media ID"
+	bookmarksByMediaId(id: ID!): [Bookmark!]!
+	libraries(orderBy: [LibraryModelOrderBy!]! = [{field: NAME, direction: ASC}], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}, search: String): PaginatedLibraryResponse!
+	libraryById(id: ID!): Library
+	"Returns the available alphabet for all libraries in the server"
+	librariesAlphabet: JSONObject!
+	numberOfLibraries: Int!
+	lastVisitedLibrary: Library
+	mediaMetadataOverview(seriesId: ID): MediaMetadataOverview!
+	smartListViews: [SmartListView!]!
+	series(filter: SeriesFilterInput! = {name: null, path: null, libraryId: null, metadata: null, library: null, _and: null, _not: null, _or: null}, orderBy: [SeriesOrderBy!]! = [{series: {field: NAME, direction: ASC}}], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedSeriesResponse!
+	seriesById(id: ID!): Series
+	"Returns the available alphabet for all series in the server"
+	seriesAlphabet: JSONObject!
+	numberOfSeries: Int!
+	recentlyAddedSeries(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedSeriesResponse!
+	"Returns a list of all tags."
+	tags: [Tag!]!
+	logs(filter: LogFilterInput! = {level: null, jobId: null, _and: null, _not: null, _or: null}, orderBy: [LogModelOrderBy!]! = [], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedLogResponse!
+	"""
+	Get information about the Stump log file, located at STUMP_CONFIG_DIR/Stump.log, or
+	~/.stump/Stump.log by default. Information such as the file size, last modified date, etc.
+	"""
+	logfileInfo: LogFileInfo!
+	stumpConfig: StumpConfig!
+	uploadConfig: UploadConfig!
+	smartLists(input: SmartListsInput! = {all: null, mine: true, search: null}): [SmartList!]!
+	smartListById(id: ID!): SmartList
+	smartListMeta(id: ID!): SmartListMeta
+	smartListItems(id: ID!): SmartListItems!
+}
+
+"The different reading directions supported by any Stump reader"
+enum ReadingDirection {
+	LTR
+	RTL
+}
+
+"The different ways an image may be scaled to fit a reader's viewport"
+enum ReadingImageScaleFit {
+	HEIGHT
+	WIDTH
+	AUTO
+	NONE
+}
+
+type ReadingList {
+	id: String!
+	name: String!
+	description: String
+	updatedAt: DateTime!
+	visibility: String!
+	ordering: String!
+	creatingUserId: String!
+}
+
+input ReadingListInput {
+	id: String!
+	name: String!
+	visibility: EntityVisibility
+	mediaIds: [String!]!
+}
+
+"The different reading modes supported by any Stump reader"
+enum ReadingMode {
+	PAGED
+	CONTINUOUS_VERTICAL
+	CONTINUOUS_HORIZONTAL
+}
+
+union ReadingProgressOutput = ActiveReadingSession | FinishedReadingSession
+
+enum ReadingStatus {
+	READING
+	FINISHED
+	ABANDONED
+	NOT_STARTED
+}
+
+type ReadiumLocation {
+	fragments: [String!]
+	progression: Decimal
+	position: Int
+	totalProgression: Decimal
+	cssSelector: String
+	partialCfi: String
+}
+
+input ReadiumLocationInput {
+	fragments: [String!]
+	progression: Decimal
+	position: Int
+	totalProgression: Decimal
+	cssSelector: String
+	partialCfi: String
+}
+
+type ReadiumLocator {
+	chapterTitle: String!
+	href: String!
+	title: String
+	locations: ReadiumLocation
+	text: ReadiumText
+	type: String!
+}
+
+input ReadiumLocatorInput {
+	chapterTitle: String! = ""
+	href: String!
+	title: String
+	locations: ReadiumLocationInput
+	text: ReadiumTextInput
+	type: String! = "application/xhtml+xml"
+}
+
+type ReadiumText {
+	after: String
+	before: String
+	highlight: String
+}
+
+input ReadiumTextInput {
+	after: String
+	before: String
+	highlight: String
+}
+
+type RecentlyAdded {
+	entity: FilterableArrangementEntity!
+	name: String
+	links: [FilterableArrangementEntityLink!]!
+}
+
+input RecentlyAddedInput {
+	entity: FilterableArrangementEntity!
+	name: String
+	links: [FilterableArrangementEntityLink!]! = []
+}
+
+type RegisteredEmailDevice {
+	id: Int!
+	name: String!
+	email: String!
+	forbidden: Boolean!
+	sendHistory: [EmailerSendRecord!]!
+}
+
+input SaveSmartListInput {
+	filters: [SmartListFilterGroupInput!]!
+	name: String!
+	description: String
+	joiner: SmartListJoiner!
+	defaultGrouping: SmartListGrouping!
+	visibility: EntityVisibility!
+}
+
+input SaveSmartListView {
+	name: String!
+	listId: ID!
+	bookColumns: [SmartListViewColumnInput!]!
+	groupColumns: [SmartListViewColumnInput!]!
+	bookSorting: [SmartListViewSortInput!]!
+	groupSorting: [SmartListViewSortInput!]!
+	enableMultiSort: Boolean
+	search: String
+}
+
+type ScaleEvenlyByFactor {
+	"""
+	The factor to scale the image by. Note that this was made a [Decimal]
+	to correct precision issues
+	"""
+	factor: Decimal!
+}
+
+input ScaleEvenlyByFactorInput {
+	"""
+	The factor to scale the image by. Note that this was made a [Decimal]
+	to correct precision issues
+	"""
+	factor: Decimal!
+}
+
+"""
+A resize option which will resize the image while maintaining the aspect ratio.
+The dimension *not* specified will be calculated based on the aspect ratio.
+"""
+type ScaledDimensionResize {
+	"The dimension to set with the given size, e.g. `Height` or `Width`."
+	dimension: Dimension!
+	"The size (in pixels) to set the specified dimension to."
+	size: Int!
+}
+
+"""
+A resize option which will resize the image while maintaining the aspect ratio.
+The dimension *not* specified will be calculated based on the aspect ratio.
+"""
+input ScaledDimensionResizeInput {
+	"The dimension to set with the given size, e.g. `Height` or `Width`."
+	dimension: Dimension!
+	"The size (in pixels) to set the specified dimension to."
+	size: Int!
+}
+
+type ScheduledJobConfig {
+	id: Int!
+	intervalSecs: Int!
+	scanConfigs: [Library!]!
+}
+
+input ScheduledJobConfigInput {
+	intervalSecs: Int!
+	includedLibraryIds: [String!]!
+}
+
+type SendAttachmentEmailOutput {
+	sentCount: Int!
+	errors: [String!]!
+}
+
+input SendAttachmentEmailsInput {
+	mediaIds: [ID!]!
+	sendTo: [EmailerSendTo!]!
+}
+
+input SendToDevice {
+	id: Int!
+}
+
+input SendToEmail {
+	email: String!
+}
+
+type Series {
+	id: String!
+	name: String!
+	description: String
+	createdAt: DateTime!
+	updatedAt: DateTime
+	deletedAt: DateTime
+	path: String!
+	status: FileStatus!
+	thumbnailMeta: ImageMetadata
+	thumbnailPath: String
+	libraryId: String
+	metadata: SeriesMetadata
+	isFavorite: Boolean!
+	resolvedName: String!
+	resolvedDescription: String
+	library: Library!
+	"Get media in this series"
+	media(take: Int = null): [Media!]!
+	mediaCount: Int!
+	mediaAlphabet: JSONObject!
+	upNext(take: Int! = 1, cursor: String): [Media!]!
+	isComplete: Boolean!
+	percentageCompleted: Float!
+	readCount: Int!
+	unreadCount: Int!
+	tags: [Tag!]!
+	"""
+	A reference to the thumbnail image for the thumbnail. This will be a fully
+	qualified URL to the image.
+	"""
+	thumbnail: ImageRef!
+}
+
+input SeriesFilterInput {
+	name: FieldFilterString = null
+	path: FieldFilterString = null
+	libraryId: FieldFilterString = null
+	metadata: SeriesMetadataFilterInput = null
+	library: LibraryFilterInput = null
+	_and: [SeriesFilterInput!] = null
+	_not: [SeriesFilterInput!] = null
+	_or: [SeriesFilterInput!] = null
+}
+
+type SeriesMetadata {
+	seriesId: String!
+	ageRating: Int
+	booktype: String
+	comicid: Int
+	imprint: String
+	metaType: String
+	publisher: String
+	status: String
+	summary: String
+	title: String
+	volume: Int
+	characters: [String!]!
+	genres: [String!]!
+	links: [String!]!
+	writers: [String!]!
+}
+
+input SeriesMetadataFilterInput {
+	ageRating: NumericFilterI32 = null
+	metaType: FieldFilterString = null
+	title: FieldFilterString = null
+	summary: FieldFilterString = null
+	publisher: FieldFilterString = null
+	imprint: FieldFilterString = null
+	comicid: NumericFilterI32 = null
+	booktype: FieldFilterString = null
+	volume: NumericFilterI32 = null
+	status: FieldFilterString = null
+	_and: [SeriesMetadataFilterInput!] = null
+	_not: [SeriesMetadataFilterInput!] = null
+	_or: [SeriesMetadataFilterInput!] = null
+}
+
+input SeriesMetadataInput {
+	ageRating: Int
+	booktype: String
+	characters: [String!]
+	comicid: Int
+	genres: [String!]
+	imprint: String
+	links: [String!]
+	metaType: String
+	publisher: String
+	status: String
+	summary: String
+	title: String
+	volume: Int
+	writers: [String!]
+}
+
+enum SeriesMetadataModelOrdering {
+	SERIES_ID
+	AGE_RATING
+	CHARACTERS
+	BOOKTYPE
+	COMICID
+	GENRES
+	IMPRINT
+	LINKS
+	META_TYPE
+	PUBLISHER
+	STATUS
+	SUMMARY
+	TITLE
+	VOLUME
+	WRITERS
+}
+
+input SeriesMetadataOrderByField {
+	field: SeriesMetadataModelOrdering!
+	direction: OrderDirection!
+}
+
+enum SeriesModelOrdering {
+	ID
+	NAME
+	DESCRIPTION
+	CREATED_AT
+	UPDATED_AT
+	DELETED_AT
+	PATH
+	STATUS
+	THUMBNAIL_META
+	THUMBNAIL_PATH
+	LIBRARY_ID
+}
+
+input SeriesOrderBy @oneOf {
+	series: SeriesOrderByField
+	metadata: SeriesMetadataOrderByField
+}
+
+input SeriesOrderByField {
+	field: SeriesModelOrdering!
+	direction: OrderDirection!
+}
+
+type SeriesScanOutput {
+	"The number of files to scan relative to the series root"
+	totalFiles: Int!
+	"The number of files that were ignored during the scan"
+	ignoredFiles: Int!
+	"""
+	The number of files that were deemed to be skipped during the scan, e.g. it
+	exists in the database but has not been modified since the last scan
+	"""
+	skippedFiles: Int!
+	"The number of media entities that were created"
+	createdMedia: Int!
+	"The number of media entities that were updated"
+	updatedMedia: Int!
+}
+
+type SmartList {
+	id: String!
+	name: String!
+	description: String
+	joiner: SmartListJoiner!
+	defaultGrouping: SmartListGrouping!
+	visibility: EntityVisibility!
+	creatorId: String!
+	filters: String!
+	thumbnail: ImageRef!
+	views: [SmartListView!]!
+}
+
+input SmartListFilterGroupInput {
+	groups: [SmartListFilterInput!]!
+	joiner: SmartListGroupJoiner!
+}
+
+input SmartListFilterInput @oneOf {
+	media: MediaFilterInput
+	mediaMetadata: MediaMetadataFilterInput
+	series: SeriesFilterInput
+	seriesMetadata: SeriesMetadataFilterInput
+	library: LibraryFilterInput
+}
+
+"The different filter joiners that can be used in smart lists"
+enum SmartListGroupJoiner {
+	AND
+	OR
+	NOT
+}
+
+type SmartListGrouped {
+	items: [SmartListGroupedItem!]!
+}
+
+type SmartListGroupedItem {
+	entity: SmartListItemEntity!
+	books: [Media!]!
+}
+
+"The different grouping options for smart lists"
+enum SmartListGrouping {
+	BY_BOOKS
+	BY_SERIES
+	BY_LIBRARY
+}
+
+union SmartListItemEntity = Series | Library
+
+union SmartListItems = SmartListGrouped | SmartListUngrouped
+
+"The different filter joiners that can be used in smart lists"
+enum SmartListJoiner {
+	AND
+	OR
+}
+
+type SmartListMeta {
+	matchedBooks: Int!
+	matchedSeries: Int!
+	matchedLibraries: Int!
+}
+
+type SmartListUngrouped {
+	books: [Media!]!
+}
+
+type SmartListView {
+	id: Int!
+	name: String!
+	listId: String!
+	bookColumns: [SmartListViewColumn!]!
+	groupColumns: [SmartListViewColumn!]!
+	bookSorting: [SmartListViewSort!]!
+	groupSorting: [SmartListViewSort!]!
+	enableMultiSort: Boolean
+	search: String
+}
+
+type SmartListViewColumn {
+	id: String!
+	position: Int!
+}
+
+input SmartListViewColumnInput {
+	id: String!
+	position: Int!
+}
+
+type SmartListViewSort {
+	id: String!
+	desc: Boolean!
+}
+
+input SmartListViewSortInput {
+	id: String!
+	desc: Boolean!
+}
+
+input SmartListsInput {
+	all: Boolean
+	mine: Boolean
+	search: String
+}
+
+type SpineItem {
+	idref: String!
+	id: String
+	properties: String
+	linear: Boolean!
+}
+
+"""
+Represents the configuration of a Stump application. This struct is generated at startup
+using a TOML file, environment variables, or both and is input when creating a `StumpCore`
+instance.
+
+Example:
+```
+use stump_core::{config::{self, StumpConfig}, StumpCore};
+
+#[tokio::main]
+async fn main() {
+/// Get config dir from environment variables.
+let config_dir = config::bootstrap_config_dir();
+
+// Create a StumpConfig using the config file and environment variables.
+let config = StumpConfig::new(config_dir)
+// Load Stump.toml file (if any)
+.with_config_file().unwrap()
+// Overlay environment variables
+.with_environment().unwrap();
+
+// Ensure that config directory exists and write Stump.toml.
+config.write_config_dir().unwrap();
+// Create an instance of the stump core.
+let core = StumpCore::new(config).await;
+}
+```
+"""
+type StumpConfig {
+	"The \"release\" | \"debug\" profile with which the application is running."
+	profile: String!
+	"The port from which to serve the application (default: 10801)."
+	port: Int!
+	"The verbosity with which system logs are visible (default: 1)."
+	verbosity: Int!
+	"Whether or not to pretty print logs."
+	prettyLogs: Boolean!
+	"An optional custom path for the database."
+	dbPath: String
+	"The client directory."
+	clientDir: String!
+	"An optional custom path for the templates directory."
+	customTemplatesDir: String
+	"The configuration root for the Stump application, contains thumbnails, cache, and logs."
+	configDir: String!
+	"A list of origins for CORS."
+	allowedOrigins: [String!]!
+	"Path to the PDFium binary for PDF support."
+	pdfiumPath: String
+	"Indicates if the Swagger UI should be disabled."
+	enableSwagger: Boolean!
+	"Indicates if the KoReader sync feature should be enabled."
+	enableKoreaderSync: Boolean!
+	"""
+	Indicates if OPDS page access should automatically track reading progression.
+	When disabled, clients loading/preloading pages won't trigger progress updates.
+	"""
+	enableOpdsProgression: Boolean!
+	"Password hash cost"
+	passwordHashCost: Int!
+	"The time in seconds that a login session will be valid for."
+	sessionTtl: Int!
+	accessTokenTtl: Int!
+	refreshTokenTtl: Int!
+	"The interval at which automatic deleted session cleanup is performed."
+	expiredSessionCleanupInterval: Int!
+	"""
+	The maximum number of concurrent files which may be processed by a scanner. This is used
+	to limit/increase the number of files that are processed at once. This may be useful for those
+	with high or low performance systems to configure to their needs.
+	"""
+	maxScannerConcurrency: Int!
+	"""
+	The maximum number of concurrent files which may be processed by a thumbnail generator. This is used
+	to limit/increase the number of images that are processed at once. Image generation can be
+	resource intensive, so this may be useful for those with high or low performance systems to
+	configure to their needs.
+	"""
+	maxThumbnailConcurrency: Int!
+	"""
+	The maximum file size, in bytes, of images that can be uploaded, e.g., as thumbnails for users,
+	libraries, series, or media.
+	"""
+	maxImageUploadSize: Int!
+	"Whether or not the server will allow users with the appropriate permissions to upload books and series."
+	enableUpload: Boolean!
+	"The maximum size, in bytes, of files that can be uploaded to be included in libraries."
+	maxFileUploadSize: Int!
+	"The DPI (dots per inch) to use when rendering PDF pages as images."
+	pdfRenderDpi: Int!
+	"The maximum width or height dimension for rendered PDF pages."
+	pdfMaxDimension: Int!
+	"The image format to use for rendered PDF pages (webp, png, jpeg)."
+	pdfRenderFormat: String!
+	"Whether to enable disk caching for rendered PDF pages."
+	pdfCachePages: Boolean!
+	"Number of pages to pre-render before and after the current page."
+	pdfPrerenderRange: Int!
+	"Whether to enable high-quality rendering with smoothing (slower but better quality)."
+	pdfHighQuality: Boolean!
+}
+
+type Subscription {
+	tailLogFile: String!
+	readEvents: CoreEvent!
+}
+
+enum SupportedFont {
+	ATKINSON_HYPERLEGIBLE_NEXT
+	BITTER
+	CHARIS
+	HINA_MINCHO
+	INTER
+	LIBRE_BASKERVILLE
+	LITERATA
+	NUNITO
+	OPEN_DYSLEXIC
+}
+
+"Supported image formats for processing images throughout Stump"
+enum SupportedImageFormat {
+	WEBP
+	JPEG
+	PNG
+}
+
+enum SystemArrangement {
+	HOME
+	EXPLORE
+	LIBRARIES
+	SMART_LISTS
+	BOOK_CLUBS
+}
+
+type SystemArrangementConfig {
+	variant: SystemArrangement!
+	links: [FilterableArrangementEntityLink!]!
+}
+
+input SystemArrangementConfigInput {
+	variant: SystemArrangement!
+	links: [FilterableArrangementEntityLink!]! = []
+}
+
+type Tag {
+	id: Int!
+	name: String!
+}
+
+type TelegramConfig {
+	encryptedToken: String!
+	chatId: String!
+}
+
+input TelegramConfigInput {
+	token: String!
+	chatId: String!
+}
+
+type ThumbnailGenerationOutput {
+	"The total number of files that were visited during the thumbnail generation"
+	visitedFiles: Int!
+	"The number of thumbnails that were skipped (already existed and not force regenerated)"
+	skippedFiles: Int!
+	"The number of thumbnails that were generated"
+	generatedThumbnails: Int!
+	"The number of thumbnails that were removed"
+	removedThumbnails: Int!
+}
+
+"""
+A simple pagination input object which does not paginate. An explicit struct is
+required as a limitation of async_graphql's [OneofObject], which doesn't allow
+for empty variants.
+"""
+input Unpaginated {
+	unpaginated: Boolean!
+}
+
+input UpdateBookClubInput {
+	name: String
+	description: String
+	isPrivate: Boolean
+	memberRoleSpec: JSON
+	emoji: String
+}
+
+input UpdateThumbnailInput {
+	"The ID of the media inside the series to fetch"
+	mediaId: String!
+	"The page to pull inside the media file for generating the thumbnail"
+	page: Int!
+	"A flag indicating whether the page is zero based (i.e. 0 is the first page)"
+	isZeroBased: Boolean = null
+}
+
+input UpdateUserInput {
+	username: String!
+	password: String
+	avatarUrl: String
+	permissions: [UserPermission!]!
+	ageRestriction: AgeRestrictionInput = null
+	maxSessionsAllowed: Int
+}
+
+input UpdateUserPreferencesInput {
+	locale: String!
+	preferredLayoutMode: InterfaceLayout!
+	primaryNavigationMode: String!
+	layoutMaxWidthPx: Int
+	appTheme: String!
+	enableGradients: Boolean!
+	appFont: SupportedFont!
+	showQueryIndicator: Boolean!
+	enableLiveRefetch: Boolean!
+	enableDiscordPresence: Boolean!
+	enableCompactDisplay: Boolean!
+	enableDoubleSidebar: Boolean!
+	enableReplacePrimarySidebar: Boolean!
+	enableHideScrollbar: Boolean!
+	enableJobOverlay: Boolean!
+	preferAccentColor: Boolean!
+	showThumbnailsInHeaders: Boolean!
+	thumbnailRatio: Float!
+	enableAlphabetSelect: Boolean!
+}
+
+scalar Upload
+
+input UploadBooksInput {
+	libraryId: String!
+	placeAt: String!
+	uploads: [Upload!]!
+}
+
+type UploadConfig {
+	enabled: Boolean!
+	maxFileUploadSize: Int!
+}
+
+input UploadSeriesInput {
+	libraryId: String!
+	placeAt: String!
+	seriesDirName: String!
+	upload: Upload!
+}
+
+type User {
+	id: String!
+	username: String!
+	isServerOwner: Boolean!
+	avatarUrl: String
+	createdAt: DateTime!
+	deletedAt: DateTime
+	isLocked: Boolean!
+	maxSessionsAllowed: Int
+	oidcEmail: String
+	ageRestriction: AgeRestriction
+	continueReading(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
+	permissions: [UserPermission!]!
+	preferences: UserPreferences!
+	lastLogin: DateTime
+	loginSessionsCount: Int!
+	finishedReadingSessionsCount: Int!
+}
+
+type UserLoginActivity {
+	id: Int!
+	ipAddress: String!
+	userAgent: String!
+	authenticationSuccessful: Boolean!
+	timestamp: DateTime!
+	userId: String!
+	user: User!
+}
+
+"The permissions a user may be granted"
+enum UserPermission {
+	"Grant access to read/create their own API keys"
+	ACCESS_API_KEYS
+	"Grant access to the koreader sync feature"
+	ACCESS_KOREADER_SYNC
+	"""
+	TODO: Expand permissions for bookclub + smartlist
+	Grant access to the book club feature
+	"""
+	ACCESS_BOOK_CLUB
+	"Grant access to create a book club (access book club)"
+	CREATE_BOOK_CLUB
+	"Grant access to read any emailers in the system"
+	EMAILER_READ
+	"Grant access to create an emailer"
+	EMAILER_CREATE
+	"Grant access to manage an emailer"
+	EMAILER_MANAGE
+	"Grant access to send an email"
+	EMAIL_SEND
+	"Grant access to send an arbitrary email, bypassing any registered device requirements"
+	EMAIL_ARBITRARY_SEND
+	"Grant access to access the smart list feature. This includes the ability to create and edit smart lists"
+	ACCESS_SMART_LIST
+	"Grant access to access the file explorer"
+	FILE_EXPLORER
+	"Grant access to upload files to a library"
+	UPLOAD_FILE
+	"Grant access to download files from a library"
+	DOWNLOAD_FILE
+	"Grant access to create a library"
+	CREATE_LIBRARY
+	"Grant access to edit basic details about the library"
+	EDIT_LIBRARY
+	"Grant access to scan the library for new files"
+	SCAN_LIBRARY
+	"Grant access to manage the library (scan,edit,manage relations)"
+	MANAGE_LIBRARY
+	"""
+	Grants access to edit any existing metadata for media/series. This will only
+	be applied to the database-level metadata.
+	"""
+	EDIT_METADATA
+	"""
+	Grants access to write back the database-level metadata for media/series.
+	This should be treated with caution, as technically it would allow for
+	overwriting existing metadata at the file-level
+	"""
+	WRITE_BACK_METADATA
+	"Grant access to delete the library (manage library)"
+	DELETE_LIBRARY
+	"""
+	Grant access to read users.
+	
+	Note that this is explicitly for querying users via user-specific endpoints.
+	This would not affect relational queries, such as members in a common book club.
+	"""
+	READ_USERS
+	"Grant access to manage users (create,edit,delete)"
+	MANAGE_USERS
+	"Grant access to read notifiers"
+	READ_NOTIFIER
+	"Grant access to create a notifier"
+	CREATE_NOTIFIER
+	"Grant access to manage a notifier"
+	MANAGE_NOTIFIER
+	"Grant access to delete a notifier"
+	DELETE_NOTIFIER
+	"Grant access to read jobs"
+	READ_JOBS
+	"Grant access to manage jobs, like pausing, resuming, deleting, or cancelling them"
+	MANAGE_JOBS
+	"Grant access to read application-level logs, e.g. job logs"
+	READ_PERSISTED_LOGS
+	"Grant access to read system logs"
+	READ_SYSTEM_LOGS
+	"Grant access to manage the server. This is effectively a step below server owner"
+	MANAGE_SERVER
+}
+
+type UserPermissionStruct {
+	value: [UserPermission!]!
+}
+
+type UserPreferences {
+	preferredLayoutMode: InterfaceLayout!
+	locale: String!
+	appTheme: String!
+	appFont: SupportedFont!
+	primaryNavigationMode: String!
+	layoutMaxWidthPx: Int
+	showQueryIndicator: Boolean!
+	enableLiveRefetch: Boolean!
+	enableDiscordPresence: Boolean!
+	enableCompactDisplay: Boolean!
+	enableGradients: Boolean!
+	enableDoubleSidebar: Boolean!
+	enableReplacePrimarySidebar: Boolean!
+	enableHideScrollbar: Boolean!
+	preferAccentColor: Boolean!
+	showThumbnailsInHeaders: Boolean!
+	thumbnailRatio: Float!
+	enableJobOverlay: Boolean!
+	enableAlphabetSelect: Boolean!
+	userId: String
+	homeArrangement: Arrangement!
+	navigationArrangement: Arrangement!
+}
+
+"Directs the executor to include this field or fragment only when the `if` argument is true."
+directive @include(if: Boolean!) on FIELD | FRAGMENT_SPREAD | INLINE_FRAGMENT
+"Indicates that an Input Object is a OneOf Input Object (and thus requires exactly one of its field be provided)"
+directive @oneOf on INPUT_OBJECT
+"Directs the executor to skip this field or fragment when the `if` argument is true."
+directive @skip(if: Boolean!) on FIELD | FRAGMENT_SPREAD | INLINE_FRAGMENT
+"Provides a scalar specification URL for specifying the behavior of custom scalar types."
+directive @specifiedBy(url: String!) on SCALAR
+schema {
+	query: Query
+	mutation: Mutation
+	subscription: Subscription
+}

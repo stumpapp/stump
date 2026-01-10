@@ -31,7 +31,7 @@ jsonwebtoken = "9.3.0"
 linemux = { git = "https://github.com/jmagnuson/linemux.git", rev = "acaafc602afac5d7a9cd3e087dafc937cac1e364" }
 local-ip-address = "0.6.2"
 once_cell.workspace = true
-openidconnect = "4.0"
+openidconnect = "4.0.1"
 prefixed-api-key = { workspace = true}
 rand = { workspace = true }
 reqwest.workspace = true

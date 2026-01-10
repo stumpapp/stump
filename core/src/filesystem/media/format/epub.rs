@@ -438,6 +438,7 @@ impl EpubProcessor {
 		Ok((ContentType::from(mime.as_str()), buf))
 	}
 
+	#[tracing::instrument(err)]
 	pub fn get_resource_by_path(
 		path: &str,
 		root: &str,
@@ -445,12 +446,21 @@ impl EpubProcessor {
 	) -> Result<(ContentType, Vec<u8>), FileError> {
 		let mut epub_file = Self::open(path)?;
 
-		let adjusted_path = normalize_resource_path(resource_path, root);
+		let adjusted_path = normalize_resource_path(resource_path.clone(), root);
 
 		let contents = epub_file
 			.get_resource_by_path(adjusted_path.as_path())
 			.ok_or_else(|| {
-				tracing::error!(?adjusted_path, "Failed to get resource!");
+				let available_resources: Vec<_> = epub_file
+					.resources
+					.values()
+					.map(|r| r.path.to_string_lossy().to_string())
+					.collect();
+				tracing::error!(
+					?adjusted_path,
+					?available_resources,
+					"Failed to get resource!"
+				);
 				FileError::EpubReadError("Failed to get resource".to_string())
 			})?;
 

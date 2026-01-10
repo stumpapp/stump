@@ -20,7 +20,9 @@
 			},
 			"buttons": {
 				"createAccount": "Skapa Konto",
-				"login": "Logga In"
+				"login": "Logga In",
+				"loginWithOidc": "Log in with OIDC",
+				"createAccountWithOidc": "Create Account with OIDC"
 			}
 		},
 		"toasts": {
@@ -251,6 +253,24 @@
 				"label": "Taggar",
 				"description": "Används för att kategorisera ditt bibliotek eller sköta åtkomstregler"
 			},
+			"defaultLibraryView": {
+				"label": "Default library view",
+				"description": "Configure which tab is shown by default when opening this library",
+				"hideSeriesView": {
+					"label": "Hide series tab",
+					"description": "Hide the series tab from the library navigation"
+				},
+				"options": {
+					"series": {
+						"label": "Series",
+						"description": "Show the series tab by default"
+					},
+					"books": {
+						"label": "Books",
+						"description": "Show the books tab by default"
+					}
+				}
+			},
 			"readingSettings": {
 				"section": {
 					"heading": "Läsinställningar",
@@ -275,30 +295,49 @@
 						"create": "Konfiguration Miniatyrbilder",
 						"update": "Generering"
 					},
-					"description": "Förbättra laddningstiderna när du bläddrar i biblioteket genom att generera miniatyrbilder för dina böcker"
+					"description": "Förbättra laddningstiderna när du bläddrar i biblioteket genom att generera miniatyrbilder för dina böcker",
+					"disabled": "No additional configuration is required when thumbnail generation is disabled"
 				},
 				"enableSwitch": {
 					"label": "Aktiverat",
 					"description": "Generera miniatyrbilder för detta bibliotek"
 				},
-				"scaled": {
-					"label": "Skala",
-					"description": "Skala bilden med en egen faktor per dimension",
-					"width": {
-						"label": "Breddskala"
-					},
-					"height": {
-						"label": "Höjdskala"
+				"resizeMethod": {
+					"label": "Resize Method",
+					"options": {
+						"scaleEvenlyByFactor": "Evenly Scale",
+						"exact": "Exact Size",
+						"scaleDimension": "Auto Scaled",
+						"none": "None"
 					}
 				},
-				"sized": {
-					"label": "Uttryckligen Förstorad",
-					"description": "Ställ in varje dimension av miniatyrbilden (i pixlar)",
+				"scaleEvenlyByFactor": {
+					"description": "Scale the thumbnail by a factor of the original size. E.g., 0.65 will result in a thumbnail that is 65% of the original size",
+					"factor": {
+						"label": "Scale Factor"
+					}
+				},
+				"exact": {
+					"description": "Resize the thumbnail to an exact size in pixels",
 					"width": {
-						"label": "Bredd"
+						"label": "Width"
 					},
 					"height": {
-						"label": "Höjd"
+						"label": "Height"
+					}
+				},
+				"scaleDimension": {
+					"label": "Auto Scaled",
+					"description": "Set either the width or height of the thumbnail and auto-scale the other to keep the original aspect ratio",
+					"dimension": {
+						"label": "Dimension",
+						"options": {
+							"width": "Width",
+							"height": "Height"
+						}
+					},
+					"size": {
+						"label": "Size"
 					}
 				},
 				"format": {
@@ -446,6 +485,7 @@
 				"none": "Ingen",
 				"labels": {
 					"generateThumbnails": "Generera miniatyrbilder",
+					"processThumbnailColors": "Process thumbnail colors",
 					"mode": "Läge",
 					"format": "Format",
 					"quality": "Kvalitet",
@@ -459,7 +499,11 @@
 					"deleteConversions": "Radera konverterade filer",
 					"watch": "Bevaka mappen för förändringar",
 					"processMetadata": "Behandla metadata",
-					"generateFileHashes": "Generera fil-hashar"
+					"generateFileHashes": "Generera fil-hashar",
+					"generateKoreaderHashes": "Generate KoReader hashes",
+					"scaleEvenlyByFactor": "Evenly Scale",
+					"exact": "Exact Size",
+					"scaleDimension": "Explicitly Sized"
 				}
 			},
 			"buttons": {
@@ -609,6 +653,7 @@
 				"analyzeBooks": {
 					"heading": "Analysera böcker",
 					"description": "Analysera böckerna i detta bibliotek för att bifoga ytterligare metadata i databasen, till exempel sidomått för bildbaserade böcker",
+					"disclaimerTitle": "This process is resource-intensive",
 					"disclaimer": "Denna process är resurskrävande och kan ta ett tag att slutföra. I framtiden kommer den att vara mer konfigurerbar",
 					"analyzeButton": "Analysera böcker"
 				},
@@ -631,6 +676,7 @@
 				"libraryExclusions": {
 					"heading": "Uteslut användare",
 					"description": "Förhindra vissa användare från att komma åt detta bibliotek eller dess innehåll",
+					"noUsersTitle": "No users to exclude",
 					"noUsers": "Det finns inga andra registrerade användare att utesluta från detta bibliotek",
 					"updated": "Uteslutningar uppdaterade",
 					"failure": "Det gick inte att uppdatera uteslutningar"
@@ -644,11 +690,13 @@
 				"cleanLibrary": {
 					"heading": "Rensa bibliotek",
 					"description": "Ta bort all media och serier som inte kan hittas på disk",
+					"disclaimerTitle": "No files will be deleted",
 					"disclaimer": "Även om denna åtgärd inte kommer att ta bort några filer, kommer den permanent ta bort alla handlingar som rör media och serier som anses saknade",
 					"confirmation": {
 						"label": "Rensa bibliotek",
 						"text": "Är du säker på att du vill rensa detta bibliotek?"
-					}
+					},
+					"emptyText": "There was nothing to clean"
 				},
 				"deleteLibrary": {
 					"heading": "Radera bibliotek",
@@ -670,6 +718,13 @@
 		}
 	},
 	"homeScene": {
+		"onDeck": {
+			"title": "Your next read",
+			"emptyState": {
+				"heading": "No books on deck",
+				"message": "Your next recommended books will show up here"
+			}
+		},
 		"continueReading": {
 			"title": "Fortsätt läsa",
 			"emptyState": {
@@ -690,6 +745,53 @@
 				"heading": "Inget att visa",
 				"message": "De senaste böckerna du lägger till kommer att visas här"
 			}
+		}
+	},
+	"metadataEditor": {
+		"labels": {
+			"ageRating": "Age rating",
+			"characters": "Characters",
+			"colorists": "Colorists",
+			"coverArtists": "Cover artists",
+			"day": "Day",
+			"editors": "Editors",
+			"format": "Format",
+			"identifierAmazon": "Amazon ID",
+			"identifierCalibre": "Calibre ID",
+			"identifierGoogle": "Google ID",
+			"identifierIsbn": "ISBN",
+			"identifierMobiAsin": "Mobi ASIN",
+			"identifierUuid": "Book UUID",
+			"genres": "Genres",
+			"inkers": "Inkers",
+			"language": "Language",
+			"letterers": "Letterers",
+			"links": "Links",
+			"month": "Month",
+			"notes": "Notes",
+			"number": "Number",
+			"pageCount": "Pages",
+			"pencillers": "Pencillers",
+			"publisher": "Publisher",
+			"series": "Series",
+			"seriesGroup": "Series group",
+			"storyArc": "Story arc",
+			"storyArcNumber": "Story arc number",
+			"summary": "Summary",
+			"teams": "Teams",
+			"title": "Title",
+			"titleSort": "Title sort",
+			"volume": "Volume",
+			"writers": "Writers",
+			"year": "Year",
+			"metaType": "Type",
+			"imprint": "Imprint",
+			"comicid": "Comic ID",
+			"booktype": "Book type",
+			"status": "Status"
+		},
+		"addFields": {
+			"description": "Add each addition on its own line"
 		}
 	},
 	"seriesOverviewScene": {
@@ -926,9 +1028,9 @@
 				"label": "Upphör",
 				"placeholder": "Aldrig"
 			},
-			"expires_at": {
-				"label": "Förfaller den",
-				"placeholder": "Aldrig"
+			"expiresAt": {
+				"label": "Expires at",
+				"placeholder": "Never"
 			},
 			"permissions": {
 				"inherit": {
@@ -1065,6 +1167,7 @@
 				},
 				"viewManager": {
 					"updateSelected": "Uppdatera valda",
+					"deleteSelected": "Delete view",
 					"create": "Skapa ny vy",
 					"modal": {
 						"heading": {
@@ -1089,6 +1192,10 @@
 								"description": "Det uppdaterade namnet för denna vy, om så önskas"
 							}
 						}
+					},
+					"deleteModal": {
+						"title": "Delete view",
+						"description": "Are you sure you want to delete this view?"
 					}
 				}
 			}
@@ -1104,13 +1211,13 @@
 			"desktop": "Stationär Dator"
 		},
 		"sidebar": {
-			"application": {
-				"account": "Konto",
-				"appearance": "Utseende",
-				"api keys": "API-nycklar",
-				"reader": "Läsaren",
-				"desktop": "Stationär Dator",
-				"label": "Program"
+			"personal": {
+				"account": "Account",
+				"appearance": "Preferences",
+				"api keys": "API keys",
+				"reader": "Reader",
+				"desktop": "Desktop",
+				"label": "Personal"
 			},
 			"management": {
 				"general": "Allmänt",
@@ -1186,6 +1293,7 @@
 						"dokumentationen"
 					],
 					"options": {
+						"system": "System",
 						"light": "Ljust",
 						"dark": "Mörkt",
 						"bronze": "Ljust brons",
@@ -1210,11 +1318,11 @@
 					"lock": "Lås arrangemang",
 					"unlock": "Lås upp arrangemang",
 					"options": {
-						"Home": "Hem",
-						"Explore": "Utforska",
-						"Libraries": "Bibliotek",
-						"BookClubs": "Bokklubbar",
-						"SmartLists": "Smarta listor"
+						"HOME": "Home",
+						"EXPLORE": "Explore",
+						"LIBRARIES": "Libraries",
+						"BOOK_CLUBS": "Book clubs",
+						"SMART_LISTS": "Smart lists"
 					},
 					"entityOptions": {
 						"createAction": {
@@ -1469,6 +1577,13 @@
 							"commitHash": "Exakt commit",
 							"date": "Byggdatum"
 						}
+					},
+					"nonStableChannel": {
+						"title": "You are running a non-stable build of Stump",
+						"description": [
+							"It looks like you are running the",
+							"build channel"
+						]
 					}
 				},
 				"serverPublicUrl": {
@@ -1514,7 +1629,32 @@
 			"sections": {
 				"scheduling": {
 					"title": "Schemaläggning",
-					"description": "Vissa jobb kan konfigureras att köra enligt ett schema. Ändringar till denna konfiguration kommer ta effekt efter en serveromstart"
+					"description": "Vissa jobb kan konfigureras att köra enligt ett schema. Ändringar till denna konfiguration kommer ta effekt efter en serveromstart",
+					"disclaimer": "The job scheduler is really basic and will be improved in the future. Please reach out for feedback or suggestions!",
+					"createOrUpdateConfig": {
+						"fields": {
+							"intervalSecs": {
+								"label": "Interval",
+								"description": "How often the job should run (in seconds)",
+								"placeholder": "e.g. \"86400\" for once a day"
+							},
+							"intervalPreset": {
+								"label": "Preset",
+								"options": {
+									"everySixHours": "Every 6 hours",
+									"everyTwelveHours": "Every 12 hours",
+									"oncePerDay": "Once a day",
+									"oncePerWeek": "Once a week",
+									"oncePerMonth": "Once a month"
+								}
+							},
+							"includedLibraryIds": {
+								"label": "Included libraries",
+								"description": "Choose which libraries are included"
+							}
+						},
+						"restartRequired": "Changes to this configuration will take effect after a server restart"
+					}
 				},
 				"history": {
 					"title": "Historik",
@@ -1530,10 +1670,14 @@
 						},
 						"emptyHeading": "Det finns inga jobb att visa",
 						"emptySubtitle": "Du kan inte ha ett jobb om du inte har ett jobb",
-						"deleteAllMessage": "Jobbhistorik och statistik kan raderas från databasen när som helst. Denna åtgärd kan inte ångras",
-						"deleteAllConfirmButton": "Rensa historik",
-						"deleteAllConfirmButtonTitle": "Rensa all jobbhistorik",
-						"deleteAllConfirmButtonTitleNoJobs": "Inga jobb att ta bort"
+						"deleteAllMessage": "Jobbhistorik och statistik kan raderas från databasen när som helst. Denna åtgärd kan inte ångras"
+					},
+					"deleteJobHistory": {
+						"title": "Delete job history",
+						"description": "Permanently delete all job history from the database",
+						"confirmText": "Are you sure you want to delete all job history?",
+						"confirm": "Delete",
+						"emptyState": "No jobs to clear"
 					}
 				}
 			}
@@ -1700,6 +1844,13 @@
 				},
 				"createSubmitButton": "Skapa användare",
 				"updateSubmitButton": "Uppdatera användare"
+			},
+			"loginActivity": {
+				"deleteConfirmation": {
+					"title": "Delete activity",
+					"description": "All records of login activity will be permanently deleted from the database",
+					"confirm": "Delete"
+				}
 			}
 		},
 		"server/email": {
@@ -1954,6 +2105,8 @@
 		"add": "Lätt till",
 		"cancel": "Avbryt",
 		"confirm": "Bekräfta",
+		"delete": "Delete",
+		"enter": "Enter",
 		"save": "Spara",
 		"send": "Skicka",
 		"saveChanges": "Spara förändringar",
@@ -1974,6 +2127,133 @@
 		"notReady": "Den här funktionen är inte redo",
 		"notUsedYet": "Inte använd än",
 		"never": "Aldrig",
-		"scan": "Skanna"
+		"scan": "Skanna",
+		"somethingWentWrong": "Something went wrong"
+	},
+	"userPermissions": {
+		"ACCESS_API_KEYS": {
+			"label": "API keys",
+			"description": "Allows the user to manage their own API keys"
+		},
+		"ACCESS_BOOK_CLUB": {
+			"label": "Book Clubs",
+			"description": "Allows the user to access book club features, including viewing and joining book clubs"
+		},
+		"ACCESS_KOREADER_SYNC": {
+			"label": "KoReader sync",
+			"description": "Allows the user to access the KoReader sync integration"
+		},
+		"ACCESS_SMART_LIST": {
+			"label": "Smart Lists",
+			"description": "Allows the user to access smart list features, including creating and managing smart lists"
+		},
+		"CREATE_BOOK_CLUB": {
+			"label": "Create book clubs",
+			"description": "Allows the user to create new book clubs"
+		},
+		"CREATE_LIBRARY": {
+			"label": "Create libraries",
+			"description": "Allows the user to create new libraries"
+		},
+		"CREATE_NOTIFIER": {
+			"label": "Create notifiers",
+			"description": "Allows the user to create new notification systems"
+		},
+		"DELETE_LIBRARY": {
+			"label": "Delete libraries",
+			"description": "Allows the user to delete existing libraries"
+		},
+		"DELETE_NOTIFIER": {
+			"label": "Delete notifiers",
+			"description": "Allows the user to delete notification systems"
+		},
+		"DOWNLOAD_FILE": {
+			"label": "Download files",
+			"description": "Allows the user to download files from the server"
+		},
+		"EDIT_LIBRARY": {
+			"label": "Edit libraries",
+			"description": "Allows the user to modify existing libraries"
+		},
+		"EMAILER_CREATE": {
+			"label": "Create emailer",
+			"description": "Allows the user to create email configuration"
+		},
+		"EMAILER_MANAGE": {
+			"label": "Manage emailer",
+			"description": "Allows the user to manage email configuration and settings"
+		},
+		"EMAILER_READ": {
+			"label": "Read emailer",
+			"description": "Allows the user to view email configuration"
+		},
+		"EMAIL_ARBITRARY_SEND": {
+			"label": "Send arbitrary emails",
+			"description": "Allows the user to send custom emails to any address"
+		},
+		"EMAIL_SEND": {
+			"label": "Send emails",
+			"description": "Allows the user to send emails through the system"
+		},
+		"FILE_EXPLORER": {
+			"label": "File explorer",
+			"description": "Allows the user to browse and explore the server filesystem"
+		},
+		"MANAGE_LIBRARY": {
+			"label": "Manage libraries",
+			"description": "Allows the user to manage library settings and configuration"
+		},
+		"MANAGE_NOTIFIER": {
+			"label": "Manage notifiers",
+			"description": "Allows the user to manage notification system settings"
+		},
+		"MANAGE_SERVER": {
+			"label": "Manage server",
+			"description": "Allows the user to manage server configuration and settings"
+		},
+		"MANAGE_USERS": {
+			"label": "Manage users",
+			"description": "Allows the user to create, edit, and delete user accounts"
+		},
+		"READ_JOBS": {
+			"label": "Read jobs",
+			"description": "Allows the user to view system jobs and their status"
+		},
+		"READ_NOTIFIER": {
+			"label": "Read notifiers",
+			"description": "Allows the user to view notification system configuration"
+		},
+		"READ_PERSISTED_LOGS": {
+			"label": "Read persisted logs",
+			"description": "Allows the user to view stored system logs"
+		},
+		"READ_SYSTEM_LOGS": {
+			"label": "Read system logs",
+			"description": "Allows the user to view real-time system logs"
+		},
+		"READ_USERS": {
+			"label": "Read users",
+			"description": "Allows the user to view user account information"
+		},
+		"SCAN_LIBRARY": {
+			"label": "Scan libraries",
+			"description": "Allows the user to trigger library scans to discover new content"
+		},
+		"UPLOAD_FILE": {
+			"label": "Upload files",
+			"description": "Allows the user to upload files to the server"
+		},
+		"MANAGE_JOBS": {
+			"label": "Manage jobs",
+			"description": "Allows the user to manage any queued jobs"
+		},
+		"EDIT_METADATA": {
+			"label": "Edit metadata",
+			"description": "Allows the user to edit metadata for books and series"
+		},
+		"WRITE_BACK_METADATA": {
+			"label": "Write back metadata",
+			"description": "Allows the user to write metadata changes back to the source files"
+		}
 	}
 }

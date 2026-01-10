@@ -59,18 +59,13 @@ pub struct CountQueryReturn {
 
 // TODO: Use strum, maybe move to models::shared::enums?
 
-#[derive(Debug, Copy, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]
 pub enum JournalMode {
 	#[serde(alias = "wal")]
+	#[default]
 	WAL,
 	#[serde(alias = "delete")]
 	DELETE,
-}
-
-impl Default for JournalMode {
-	fn default() -> Self {
-		Self::WAL
-	}
 }
 
 impl AsRef<str> for JournalMode {

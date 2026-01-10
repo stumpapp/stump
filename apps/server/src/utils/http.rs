@@ -1,19 +1,9 @@
 use axum::{
-	http::{header, HeaderValue, StatusCode},
+	http::{header, HeaderValue},
 	response::{IntoResponse, Response},
 };
 use stump_core::filesystem::ContentType;
 use tracing::error;
-
-/// A helper function to send an error response when something breaks *hard*. I only
-/// anticipate this being used when an error occurs when building custom [Response]
-/// objects.
-pub(crate) fn unexpected_error<E: std::error::Error>(err: E) -> impl IntoResponse {
-	(
-		StatusCode::INTERNAL_SERVER_ERROR,
-		format!("An unknown error occurred: {err}"),
-	)
-}
 
 /// [`ImageResponse`] is a thin wrapper struct to return an image correctly in Axum.
 /// It contains a subset of actual Content-Type's (using [`ContentType`] enum from
@@ -105,30 +95,6 @@ impl IntoResponse for BufferResponse {
 	}
 }
 
-/// [`UnknownBufferResponse`] is the same as [`BufferResponse`], but takes a string instead of a [`ContentType`].
-/// This makes it useful for returning a buffer with a content type that Stump doesn't know about. I don't
-/// anticipate this being used much, but it's here just in case.
-pub struct UnknownBufferResponse {
-	pub content_type: String,
-	pub data: Vec<u8>,
-}
-
-impl IntoResponse for UnknownBufferResponse {
-	fn into_response(self) -> Response {
-		let mut base_response = self.data.into_response();
-		let header_result = HeaderValue::from_str(self.content_type.as_str());
-
-		if let Ok(header) = header_result {
-			base_response
-				.headers_mut()
-				.insert(header::CONTENT_TYPE, header);
-			base_response
-		} else {
-			unexpected_error(header_result.unwrap_err()).into_response()
-		}
-	}
-}
-
 #[cfg(test)]
 mod tests {
 	use super::*;
@@ -167,20 +133,6 @@ mod tests {
 		assert_eq!(
 			axum_response.headers().get(header::CONTENT_TYPE),
 			Some(&HeaderValue::from_static("application/xml"))
-		);
-	}
-
-	#[test]
-	fn test_unknown_buffer_response() {
-		let response = UnknownBufferResponse {
-			content_type: "application/json".to_string(),
-			data: b"Hello, world!".to_vec(),
-		};
-		let axum_response = response.into_response();
-
-		assert_eq!(
-			axum_response.headers().get(header::CONTENT_TYPE),
-			Some(&HeaderValue::from_static("application/json"))
 		);
 	}
 }

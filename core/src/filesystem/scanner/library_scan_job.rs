@@ -1,4 +1,7 @@
-use std::{collections::VecDeque, path::PathBuf};
+use std::{
+	collections::VecDeque,
+	path::{Path, PathBuf},
+};
 
 use async_graphql::SimpleObject;
 use models::{
@@ -492,7 +495,7 @@ impl JobExt for LibraryScanJob {
 					.config
 					.as_ref()
 					.and_then(|o| (!o.is_collection_based()).then_some(1));
-				if path_buf == PathBuf::from(&self.path) {
+				if path_buf.as_path() == Path::new(&self.path) {
 					// The exception is when the series "is" the libray (i.e. the root of the library contains
 					// books). This is kind of an anti-pattern wrt collection-priority, but it needs to be handled
 					// in order to avoid the scanner re-scanning the entire library...

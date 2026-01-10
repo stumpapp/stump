@@ -1,5 +1,5 @@
 use std::{
-	io::{Read, Seek},
+	io::{BufReader, Read, Seek},
 	path::{Path, PathBuf},
 };
 
@@ -204,8 +204,11 @@ impl UploadMutation {
 
 		// Note: I chose to *safely* attempt the removal as to not block the upload, however after some
 		// user testing I'd like to see if this becomes a problem. We'll see!
-		match remove_thumbnails(&[library.id.clone()], &core.config.get_thumbnails_dir())
-			.await
+		match remove_thumbnails(
+			std::slice::from_ref(&library.id),
+			&core.config.get_thumbnails_dir(),
+		)
+		.await
 		{
 			Ok(count) => tracing::info!("Removed {} thumbnails!", count),
 			Err(e) => tracing::error!(
@@ -279,7 +282,7 @@ impl UploadMutation {
 		// Note: I chose to *safely* attempt the removal as to not block the upload, however after some
 		// user testing I'd like to see if this becomes a problem. We'll see!
 		match remove_thumbnails(
-			&[series.series.id.clone()],
+			std::slice::from_ref(&series.series.id),
 			&core.config.get_thumbnails_dir(),
 		)
 		.await
@@ -365,7 +368,7 @@ impl UploadMutation {
 		// Note: I chose to *safely* attempt the removal as to not block the upload, however after some
 		// user testing I'd like to see if this becomes a problem. We'll see!
 		let removal_result = remove_thumbnails(
-			&[book.media.id.clone()],
+			std::slice::from_ref(&book.media.id),
 			&core.config.get_thumbnails_dir(),
 		)
 		.await;
@@ -445,7 +448,7 @@ impl UploadMutation {
 			decode_base64_image(&image, core.config.max_file_upload_size)?;
 
 		match remove_thumbnails(
-			&[series.series.id.clone()],
+			std::slice::from_ref(&series.series.id),
 			&core.config.get_thumbnails_dir(),
 		)
 		.await
@@ -520,7 +523,7 @@ impl UploadMutation {
 			decode_base64_image(&image, core.config.max_file_upload_size)?;
 
 		let removal_result = remove_thumbnails(
-			&[book.media.id.clone()],
+			std::slice::from_ref(&book.media.id),
 			&core.config.get_thumbnails_dir(),
 		)
 		.await;
@@ -807,7 +810,10 @@ fn validate_book_file(value: &mut UploadValue) -> Result<()> {
 	}
 
 	let file = &mut value.content;
-	let magic_bytes = file.bytes().take(5).collect::<Result<Vec<_>, _>>()?;
+	let magic_bytes = BufReader::new(&*file)
+		.bytes()
+		.take(5)
+		.collect::<Result<Vec<_>, _>>()?;
 	file.rewind()?;
 
 	let inferred_type = infer::get(&magic_bytes)

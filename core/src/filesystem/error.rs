@@ -65,24 +65,3 @@ impl From<FileError> for CoreError {
 		}
 	}
 }
-
-#[derive(Error, Debug)]
-pub enum ScanError {
-	#[error("Unsupported file: {0}")]
-	UnsupportedFile(String),
-	#[error("Failed to build globset from invalid .stumpignore file: {0}")]
-	GlobParseError(#[from] globset::Error),
-	#[error("{0}")]
-	Unknown(String),
-}
-
-impl From<FileError> for ScanError {
-	fn from(e: FileError) -> Self {
-		match e {
-			FileError::UnsupportedFileType(_) => {
-				ScanError::UnsupportedFile(e.to_string())
-			},
-			_ => ScanError::Unknown(e.to_string()),
-		}
-	}
-}

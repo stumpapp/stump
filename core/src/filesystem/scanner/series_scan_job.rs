@@ -1,4 +1,7 @@
-use std::{collections::VecDeque, path::PathBuf};
+use std::{
+	collections::VecDeque,
+	path::{Path, PathBuf},
+};
 
 use async_graphql::SimpleObject;
 use models::{
@@ -144,7 +147,7 @@ impl JobExt for SeriesScanJob {
 		// Therefore, we only scan one level deep when walking a series whose library is not
 		// collection-priority to avoid scanning duplicates which are part of other series
 		let mut max_depth = (!config.is_collection_based()).then_some(1);
-		if path_buf == PathBuf::from(&library.path) {
+		if path_buf.as_path() == Path::new(&library.path) {
 			// The exception is when the series "is" the libray (i.e. the root of the library contains
 			// books). This is kind of an anti-pattern wrt collection-priority, but it needs to be handled
 			// in order to avoid the scanner re-scanning the entire library...

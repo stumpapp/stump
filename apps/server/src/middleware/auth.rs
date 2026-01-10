@@ -480,22 +480,6 @@ impl IntoResponse for OPDSBasicAuth {
 	}
 }
 
-pub struct BasicAuth;
-
-impl IntoResponse for BasicAuth {
-	fn into_response(self) -> Response {
-		Response::builder()
-			.status(StatusCode::UNAUTHORIZED)
-			.header("Authorization", "Basic")
-			.header("WWW-Authenticate", "Basic realm=\"stump\"")
-			.body(Body::default())
-			.unwrap_or_else(|e| {
-				tracing::error!(error = ?e, "Failed to build response");
-				StatusCode::INTERNAL_SERVER_ERROR.into_response()
-			})
-	}
-}
-
 #[cfg(test)]
 mod tests {
 
@@ -629,17 +613,6 @@ mod tests {
 			api_key: None,
 		};
 		assert!(request_context.enforce_server_owner().is_err());
-	}
-
-	#[test]
-	fn test_basic_auth_into_response() {
-		let response = BasicAuth.into_response();
-		assert_eq!(response.status(), StatusCode::UNAUTHORIZED);
-		assert_eq!(response.headers().get("Authorization").unwrap(), "Basic");
-		assert_eq!(
-			response.headers().get("WWW-Authenticate").unwrap(),
-			"Basic realm=\"stump\""
-		);
 	}
 
 	#[test]

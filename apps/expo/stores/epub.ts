@@ -228,7 +228,7 @@ export const useEpubThemesStore = create<IEpubThemesStore>()(
 		{
 			name: 'stump-epub-themes-store',
 			storage: createJSONStorage(() => ZustandMMKVStorage),
-			version: 1,
+			version: 2,
 		},
 	),
 )

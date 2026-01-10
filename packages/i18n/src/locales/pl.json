@@ -21,8 +21,8 @@
 			"buttons": {
 				"createAccount": "Załóż konto",
 				"login": "Zaloguj się",
-				"loginWithOidc": "Log in with OIDC",
-				"createAccountWithOidc": "Create Account with OIDC"
+				"loginWithOidc": "Zaloguj się za pomocą OIDC",
+				"createAccountWithOidc": "Utwórz konto z OIDC"
 			}
 		},
 		"toasts": {
@@ -254,20 +254,20 @@
 				"description": "Używane do kategoryzowania biblioteki lub wymuszania reguł dostępu"
 			},
 			"defaultLibraryView": {
-				"label": "Default library view",
-				"description": "Configure which tab is shown by default when opening this library",
+				"label": "Domyślny widok biblioteki",
+				"description": "Skonfiguruj, która karta jest wyświetlana domyślnie podczas otwierania tej biblioteki",
 				"hideSeriesView": {
-					"label": "Hide series tab",
-					"description": "Hide the series tab from the library navigation"
+					"label": "Ukryj zakładkę serii",
+					"description": "Ukryj zakładkę serii w nawigacji biblioteki"
 				},
 				"options": {
 					"series": {
-						"label": "Series",
-						"description": "Show the series tab by default"
+						"label": "Serie",
+						"description": "Domyślnie pokaż zakładkę serii"
 					},
 					"books": {
-						"label": "Books",
-						"description": "Show the books tab by default"
+						"label": "Książki",
+						"description": "Domyślnie pokaż zakładkę książek"
 					}
 				}
 			},
@@ -296,48 +296,48 @@
 						"update": "Generowanie"
 					},
 					"description": "Popraw czas ładowania podczas przeglądania biblioteki poprzez generowanie miniatur dla Twoich książek",
-					"disabled": "No additional configuration is required when thumbnail generation is disabled"
+					"disabled": "Dodatkowa konfiguracja nie jest wymagana, gdy generowanie miniatur jest wyłączone"
 				},
 				"enableSwitch": {
 					"label": "Aktywne",
 					"description": "Generuj miniatury dla tej biblioteki"
 				},
 				"resizeMethod": {
-					"label": "Resize Method",
+					"label": "Metoda skalowania",
 					"options": {
-						"scaleEvenlyByFactor": "Evenly Scale",
-						"exact": "Exact Size",
-						"scaleDimension": "Auto Scaled",
-						"none": "None"
+						"scaleEvenlyByFactor": "Skalowane równomiernie",
+						"exact": "Dokładny wymiar",
+						"scaleDimension": "Skalowane automatycznie",
+						"none": "Żadne"
 					}
 				},
 				"scaleEvenlyByFactor": {
-					"description": "Scale the thumbnail by a factor of the original size. E.g., 0.65 will result in a thumbnail that is 65% of the original size",
+					"description": "Skaluj miniaturę o współczynnik oryginalnego rozmiaru. Np. 0.65 spowoduje stworzenie miniatury, która będzie wynosiła 65% oryginalnego rozmiaru",
 					"factor": {
-						"label": "Scale Factor"
+						"label": "Współczynnik skali"
 					}
 				},
 				"exact": {
-					"description": "Resize the thumbnail to an exact size in pixels",
+					"description": "Zmień rozmiar miniatury do dokładnego rozmiaru w pikselach",
 					"width": {
-						"label": "Width"
+						"label": "Szerokość"
 					},
 					"height": {
-						"label": "Height"
+						"label": "Wysokość"
 					}
 				},
 				"scaleDimension": {
-					"label": "Auto Scaled",
-					"description": "Set either the width or height of the thumbnail and auto-scale the other to keep the original aspect ratio",
+					"label": "Skalowane automatycznie",
+					"description": "Ustaw szerokość lub wysokość miniatury, a druga wartość zostanie wyskalowana automatycznie tak, aby zachować oryginalny współczynnik kształtu",
 					"dimension": {
-						"label": "Dimension",
+						"label": "Wymiar",
 						"options": {
-							"width": "Width",
-							"height": "Height"
+							"width": "Szerokość",
+							"height": "Wysokość"
 						}
 					},
 					"size": {
-						"label": "Size"
+						"label": "Rozmiar"
 					}
 				},
 				"format": {
@@ -485,7 +485,7 @@
 				"none": "Brak",
 				"labels": {
 					"generateThumbnails": "Generuj miniaturki",
-					"processThumbnailColors": "Process thumbnail colors",
+					"processThumbnailColors": "Przetwarzaj kolory miniatur",
 					"mode": "Tryb",
 					"format": "Format",
 					"quality": "Jakość",
@@ -500,10 +500,10 @@
 					"watch": "Obserwuj zmiany w katalogu",
 					"processMetadata": "Przetwarzaj metadane",
 					"generateFileHashes": "Generuj skróty plików",
-					"generateKoreaderHashes": "Generate KoReader hashes",
-					"scaleEvenlyByFactor": "Evenly Scale",
-					"exact": "Exact Size",
-					"scaleDimension": "Explicitly Sized"
+					"generateKoreaderHashes": "Generuj skróty KoReader",
+					"scaleEvenlyByFactor": "Skalowane równomiernie",
+					"exact": "Dokładny wymiar",
+					"scaleDimension": "O stałych wymiarach"
 				}
 			},
 			"buttons": {
@@ -653,7 +653,7 @@
 				"analyzeBooks": {
 					"heading": "Analizuj książki",
 					"description": "Analizuj książki w tej bibliotece, aby dołączyć dodatkowe metadane w bazie danych, takie jak wymiary stron dla książek obrazkowych",
-					"disclaimerTitle": "This process is resource-intensive",
+					"disclaimerTitle": "Proces ten jest zasobochłonny",
 					"disclaimer": "Ten proces jest zasobochłonny i może trochę potrwać. W przyszłości będzie bardziej konfigurowalny",
 					"analyzeButton": "Analizuj książki"
 				},
@@ -676,7 +676,7 @@
 				"libraryExclusions": {
 					"heading": "Wyklucz użytkowników",
 					"description": "Zabroń niektórym użytkownikom dostępu do tej biblioteki lub jej zawartości",
-					"noUsersTitle": "No users to exclude",
+					"noUsersTitle": "Brak użytkowników do wykluczenia",
 					"noUsers": "Nie ma żadnych zarejestrowanych użytkowników do wykluczenia z tej biblioteki",
 					"updated": "Wykluczenia zostały zaktualizowane",
 					"failure": "Nie udało się zaktualizować wykluczeń"
@@ -690,13 +690,13 @@
 				"cleanLibrary": {
 					"heading": "Wyczyść bibliotekę",
 					"description": "Usuń wszystkie media i serie, których nie można zlokalizować na dysku",
-					"disclaimerTitle": "No files will be deleted",
+					"disclaimerTitle": "Żadne pliki nie zostaną usunięte",
 					"disclaimer": "Chociaż czynność ta nie usunie żadnych plików, usunięte zostaną wszystkie rekordy dotyczące mediów i serii posiadających status brakujących",
 					"confirmation": {
 						"label": "Wyczyść bibliotekę",
 						"text": "Czy na pewno chcesz wyczyścić tę bibliotekę?"
 					},
-					"emptyText": "There was nothing to clean"
+					"emptyText": "Nie było nic do wyczyszczenia"
 				},
 				"deleteLibrary": {
 					"heading": "Usuń bibliotekę",
@@ -719,10 +719,10 @@
 	},
 	"homeScene": {
 		"onDeck": {
-			"title": "Your next read",
+			"title": "Twoja następna pozycja do przeczytania",
 			"emptyState": {
-				"heading": "No books on deck",
-				"message": "Your next recommended books will show up here"
+				"heading": "Brak książek na pokładzie",
+				"message": "Twoje następne polecane książki pojawią się tutaj"
 			}
 		},
 		"continueReading": {
@@ -749,49 +749,49 @@
 	},
 	"metadataEditor": {
 		"labels": {
-			"ageRating": "Age rating",
-			"characters": "Characters",
-			"colorists": "Colorists",
-			"coverArtists": "Cover artists",
-			"day": "Day",
-			"editors": "Editors",
+			"ageRating": "Klasyfikacja wiekowa",
+			"characters": "Postacie",
+			"colorists": "Kolorysta",
+			"coverArtists": "Twórca okładki",
+			"day": "Dzień",
+			"editors": "Edytorzy",
 			"format": "Format",
-			"identifierAmazon": "Amazon ID",
-			"identifierCalibre": "Calibre ID",
-			"identifierGoogle": "Google ID",
+			"identifierAmazon": "Identyfikator Amazon",
+			"identifierCalibre": "Identyfikator Calibre",
+			"identifierGoogle": "Identyfikator Google",
 			"identifierIsbn": "ISBN",
-			"identifierMobiAsin": "Mobi ASIN",
-			"identifierUuid": "Book UUID",
-			"genres": "Genres",
-			"inkers": "Inkers",
-			"language": "Language",
-			"letterers": "Letterers",
-			"links": "Links",
-			"month": "Month",
-			"notes": "Notes",
-			"number": "Number",
-			"pageCount": "Pages",
-			"pencillers": "Pencillers",
-			"publisher": "Publisher",
-			"series": "Series",
-			"seriesGroup": "Series group",
-			"storyArc": "Story arc",
-			"storyArcNumber": "Story arc number",
-			"summary": "Summary",
-			"teams": "Teams",
-			"title": "Title",
-			"titleSort": "Title sort",
-			"volume": "Volume",
-			"writers": "Writers",
-			"year": "Year",
-			"metaType": "Type",
-			"imprint": "Imprint",
-			"comicid": "Comic ID",
-			"booktype": "Book type",
+			"identifierMobiAsin": "ASIN Mobi",
+			"identifierUuid": "UUID książki",
+			"genres": "Gatunki",
+			"inkers": "Kreślarze",
+			"language": "Język",
+			"letterers": "Kaligrafiści",
+			"links": "Odnośniki",
+			"month": "Miesiąc",
+			"notes": "Notatki",
+			"number": "Numer",
+			"pageCount": "Strony",
+			"pencillers": "Rysownicy",
+			"publisher": "Wydawca",
+			"series": "Seria",
+			"seriesGroup": "Grupa serii",
+			"storyArc": "Wątek fabularny",
+			"storyArcNumber": "Numer wątku fabularnego",
+			"summary": "Podsumowanie",
+			"teams": "Zespoły",
+			"title": "Tytuł",
+			"titleSort": "Sortowanie po tytule",
+			"volume": "Tom",
+			"writers": "Pisarze",
+			"year": "Rok",
+			"metaType": "Typ",
+			"imprint": "Nadruk",
+			"comicid": "Identyfikator komiksu",
+			"booktype": "Typ książki",
 			"status": "Status"
 		},
 		"addFields": {
-			"description": "Add each addition on its own line"
+			"description": "Dodaj każdy dodatkowy element w osobnej linii"
 		}
 	},
 	"seriesOverviewScene": {
@@ -936,11 +936,11 @@
 									"title": "Tytuł",
 									"summary": "Podsumowanie",
 									"publisher": "Wydawca",
-									"imprint": "Imprint",
+									"imprint": "Nadruk",
 									"comicid": "Identyfikator komiksu",
 									"booktype": "Typ książki",
 									"status": "Status",
-									"volume": "Wolumen",
+									"volume": "Tom",
 									"metaType": "Typ",
 									"ageRating": "Klasyfikacja wiekowa"
 								}
@@ -1029,8 +1029,8 @@
 				"placeholder": "Nigdy"
 			},
 			"expiresAt": {
-				"label": "Expires at",
-				"placeholder": "Never"
+				"label": "Wygasa",
+				"placeholder": "Nigdy"
 			},
 			"permissions": {
 				"inherit": {
@@ -1167,7 +1167,7 @@
 				},
 				"viewManager": {
 					"updateSelected": "Aktualizuj wybrane",
-					"deleteSelected": "Delete view",
+					"deleteSelected": "Usuń widok",
 					"create": "Utwórz nowy widok",
 					"modal": {
 						"heading": {
@@ -1194,8 +1194,8 @@
 						}
 					},
 					"deleteModal": {
-						"title": "Delete view",
-						"description": "Are you sure you want to delete this view?"
+						"title": "Usuń widok",
+						"description": "Czy na pewno chcesz usunąć ten widok?"
 					}
 				}
 			}
@@ -1212,12 +1212,12 @@
 		},
 		"sidebar": {
 			"personal": {
-				"account": "Account",
-				"appearance": "Preferences",
-				"api keys": "API keys",
-				"reader": "Reader",
-				"desktop": "Desktop",
-				"label": "Personal"
+				"account": "Konto",
+				"appearance": "Preferencje",
+				"api keys": "Klucze API",
+				"reader": "Czytnik",
+				"desktop": "Aplikacja desktopowa",
+				"label": "Personalne"
 			},
 			"management": {
 				"general": "Ogólne",
@@ -1227,7 +1227,7 @@
 				"access": "Dostęp",
 				"email": "Adres e-mail",
 				"notifications": "Powiadomienia",
-				"label": "Serwer"
+				"label": "Zarządzanie"
 			}
 		},
 		"app/account": {
@@ -1318,11 +1318,11 @@
 					"lock": "Zablokuj układ",
 					"unlock": "Odblokuj układ",
 					"options": {
-						"HOME": "Home",
-						"EXPLORE": "Explore",
-						"LIBRARIES": "Libraries",
-						"BOOK_CLUBS": "Book clubs",
-						"SMART_LISTS": "Smart lists"
+						"HOME": "Strona główna",
+						"EXPLORE": "Odkrywaj",
+						"LIBRARIES": "Biblioteki",
+						"BOOK_CLUBS": "Kluby książki",
+						"SMART_LISTS": "Inteligentne listy"
 					},
 					"entityOptions": {
 						"createAction": {
@@ -1579,10 +1579,10 @@
 						}
 					},
 					"nonStableChannel": {
-						"title": "You are running a non-stable build of Stump",
+						"title": "Używasz niestabilnej wersji Stump",
 						"description": [
-							"It looks like you are running the",
-							"build channel"
+							"Wygląda na to, że używasz",
+							"kanał kompilacji"
 						]
 					}
 				},
@@ -1630,30 +1630,30 @@
 				"scheduling": {
 					"title": "Harmonogram",
 					"description": "Niektóre zadania można skonfigurować tak, aby uruchomiały się według harmonogramu. Zmiany w tej konfiguracji zaczną obowiązywać po ponownym uruchomieniu serwera",
-					"disclaimer": "The job scheduler is really basic and will be improved in the future. Please reach out for feedback or suggestions!",
+					"disclaimer": "Harmonogram zadań jest bardzo podstawowy i zostanie ulepszony w przyszłości. Przekaż nam swoją opinię lub sugestię!",
 					"createOrUpdateConfig": {
 						"fields": {
 							"intervalSecs": {
-								"label": "Interval",
-								"description": "How often the job should run (in seconds)",
-								"placeholder": "e.g. \"86400\" for once a day"
+								"label": "Ineterwał",
+								"description": "Jak często zadanie powinno być uruchamiane (w sekundach)",
+								"placeholder": "np. \"86400\" to raz dziennie"
 							},
 							"intervalPreset": {
-								"label": "Preset",
+								"label": "Predefiniowane",
 								"options": {
-									"everySixHours": "Every 6 hours",
-									"everyTwelveHours": "Every 12 hours",
-									"oncePerDay": "Once a day",
-									"oncePerWeek": "Once a week",
-									"oncePerMonth": "Once a month"
+									"everySixHours": "Co 6 godzin",
+									"everyTwelveHours": "Co 12 godzin",
+									"oncePerDay": "Raz na dzień",
+									"oncePerWeek": "Raz w tygodniu",
+									"oncePerMonth": "Raz w miesiącu"
 								}
 							},
 							"includedLibraryIds": {
-								"label": "Included libraries",
-								"description": "Choose which libraries are included"
+								"label": "Uwzględnione biblioteki",
+								"description": "Wybierz, które biblioteki są zawarte"
 							}
 						},
-						"restartRequired": "Changes to this configuration will take effect after a server restart"
+						"restartRequired": "Zmiany w tej konfiguracji zaczną obowiązywać po ponownym uruchomieniu serwera"
 					}
 				},
 				"history": {
@@ -1673,11 +1673,11 @@
 						"deleteAllMessage": "Historia zadań i statystyk może zostać usunięta z bazy w każdym momencie. Działanie to jest nieodwracalne"
 					},
 					"deleteJobHistory": {
-						"title": "Delete job history",
-						"description": "Permanently delete all job history from the database",
-						"confirmText": "Are you sure you want to delete all job history?",
-						"confirm": "Delete",
-						"emptyState": "No jobs to clear"
+						"title": "Usuń historię zadań",
+						"description": "Trwale usuń całą historię zadań z bazy danych",
+						"confirmText": "Czy na pewno chcesz usunąć cała historię zadań?",
+						"confirm": "Usuń",
+						"emptyState": "Brak zadań do usunięcia"
 					}
 				}
 			}
@@ -1847,9 +1847,9 @@
 			},
 			"loginActivity": {
 				"deleteConfirmation": {
-					"title": "Delete activity",
-					"description": "All records of login activity will be permanently deleted from the database",
-					"confirm": "Delete"
+					"title": "Usuń aktywność",
+					"description": "Wszystkie rekordy logowań zostaną trwale usunięte z bazy danych",
+					"confirm": "Usuń"
 				}
 			}
 		},
@@ -2105,7 +2105,7 @@
 		"add": "Dodaj",
 		"cancel": "Anuluj",
 		"confirm": "Potwierdź",
-		"delete": "Delete",
+		"delete": "Usuń",
 		"enter": "Enter",
 		"save": "Zapisz",
 		"send": "Wyślij",
@@ -2119,7 +2119,7 @@
 		"unimplemented": "Ta funkcjonalność nie jest jeszcze zaimplementowana! Sprawdź ponownie później",
 		"limitedFunctionality": "Funkcjonalność ta nie jest jeszcze w pełni zaimplementowana. Sprawdź później",
 		"logIn": "Zaloguj się",
-		"login": "Nazwa użytkowika",
+		"login": "Nazwa użytkownika",
 		"seeError": "Wyświetl błąd",
 		"remove": "Usuń",
 		"goBack": "Wróć",
@@ -2128,132 +2128,132 @@
 		"notUsedYet": "Jeszcze nieużywane",
 		"never": "Nigdy",
 		"scan": "Skanuj",
-		"somethingWentWrong": "Something went wrong"
+		"somethingWentWrong": "Coś poszło nie tak"
 	},
 	"userPermissions": {
 		"ACCESS_API_KEYS": {
-			"label": "API keys",
-			"description": "Allows the user to manage their own API keys"
+			"label": "Klucze API",
+			"description": "Pozwala użytkownikowi zarządzać własnymi kluczami API"
 		},
 		"ACCESS_BOOK_CLUB": {
-			"label": "Book Clubs",
-			"description": "Allows the user to access book club features, including viewing and joining book clubs"
+			"label": "Kluby książki",
+			"description": "Pozwala użytkownikowi na dostęp do funkcji klubu książki, w tym do przeglądania i dołączania do klubów książki"
 		},
 		"ACCESS_KOREADER_SYNC": {
-			"label": "KoReader sync",
-			"description": "Allows the user to access the KoReader sync integration"
+			"label": "Synchronizacja KoReader",
+			"description": "Pozwala użytkownikowi na dostęp do integracji z synchronizacją KoReader"
 		},
 		"ACCESS_SMART_LIST": {
-			"label": "Smart Lists",
-			"description": "Allows the user to access smart list features, including creating and managing smart lists"
+			"label": "Inteligentne listy",
+			"description": "Pozwala użytkownikowi na dostęp do funkcji inteligentnych list, w tym do tworzenia i zarządzania nimi"
 		},
 		"CREATE_BOOK_CLUB": {
-			"label": "Create book clubs",
-			"description": "Allows the user to create new book clubs"
+			"label": "Tworzenie klubów książki",
+			"description": "Pozwala użytkownikowi na tworzenie nowego klubu książki"
 		},
 		"CREATE_LIBRARY": {
-			"label": "Create libraries",
-			"description": "Allows the user to create new libraries"
+			"label": "Tworzenie bibliotek",
+			"description": "Pozwala użytkownikowi na tworzenie nowych bibliotek"
 		},
 		"CREATE_NOTIFIER": {
-			"label": "Create notifiers",
-			"description": "Allows the user to create new notification systems"
+			"label": "Tworzenie systemów powiadomień",
+			"description": "Pozwala użytkownikowi na tworzenie nowych systemów powiadomień"
 		},
 		"DELETE_LIBRARY": {
-			"label": "Delete libraries",
-			"description": "Allows the user to delete existing libraries"
+			"label": "Usuwanie bibliotek",
+			"description": "Pozwala użytkownikowi na usuwanie istniejących bibliotek"
 		},
 		"DELETE_NOTIFIER": {
-			"label": "Delete notifiers",
-			"description": "Allows the user to delete notification systems"
+			"label": "Usuwanie systemów powiadomień",
+			"description": "Pozwala użytkownikowi na usuwanie systemów powiadomień"
 		},
 		"DOWNLOAD_FILE": {
-			"label": "Download files",
-			"description": "Allows the user to download files from the server"
+			"label": "Pobieranie plików",
+			"description": "Pozwala użytkownikowi na pobieranie plików z serwera"
 		},
 		"EDIT_LIBRARY": {
-			"label": "Edit libraries",
-			"description": "Allows the user to modify existing libraries"
+			"label": "Edytowanie bibliotek",
+			"description": "Pozwala użytkownikowi na modyfikowanie istniejących bibliotek"
 		},
 		"EMAILER_CREATE": {
-			"label": "Create emailer",
-			"description": "Allows the user to create email configuration"
+			"label": "Tworzenie systemu wiadomości e-mail",
+			"description": "Pozwala użytkownikowi na tworzenie konfiguracji e-mail"
 		},
 		"EMAILER_MANAGE": {
-			"label": "Manage emailer",
-			"description": "Allows the user to manage email configuration and settings"
+			"label": "Zarządzanie systemem wiadomości e-mail",
+			"description": "Pozwala użytkownikowi na zarządzanie konfiguracją i ustawieniami e-mail"
 		},
 		"EMAILER_READ": {
-			"label": "Read emailer",
-			"description": "Allows the user to view email configuration"
+			"label": "Przeglądanie systemu wiadomości e-mail",
+			"description": "Pozwala użytkownikowi na przeglądanie konfiguracji e-mail"
 		},
 		"EMAIL_ARBITRARY_SEND": {
-			"label": "Send arbitrary emails",
-			"description": "Allows the user to send custom emails to any address"
+			"label": "Wysyłanie dowolnych wiadomości e-mail",
+			"description": "Pozwala użytkownikowi na wysyłanie niestandardowych wiadomości e-mail na dowolny adres"
 		},
 		"EMAIL_SEND": {
-			"label": "Send emails",
-			"description": "Allows the user to send emails through the system"
+			"label": "Wysyłaj wiadomości poczty elektronicznej",
+			"description": "Pozwala użytkownikowi na wysyłanie wiadomości e-mail przez system"
 		},
 		"FILE_EXPLORER": {
-			"label": "File explorer",
-			"description": "Allows the user to browse and explore the server filesystem"
+			"label": "Przeglądarka plików",
+			"description": "Pozwala użytkownikowi na przeglądanie i eksploracje systemu plików serwera"
 		},
 		"MANAGE_LIBRARY": {
-			"label": "Manage libraries",
-			"description": "Allows the user to manage library settings and configuration"
+			"label": "Zarządzaj bibliotekami",
+			"description": "Pozwala użytkownikowi na zarządzanie ustawieniami biblioteki i konfiguracją"
 		},
 		"MANAGE_NOTIFIER": {
-			"label": "Manage notifiers",
-			"description": "Allows the user to manage notification system settings"
+			"label": "Zarządzanie systemami powiadomień",
+			"description": "Pozwala użytkownikowi na zarządzanie systemem powiadomień"
 		},
 		"MANAGE_SERVER": {
-			"label": "Manage server",
-			"description": "Allows the user to manage server configuration and settings"
+			"label": "Zarządzanie serwerem",
+			"description": "Pozwala użytkownikowi na zarządzanie konfiguracją i ustawieniami serwera"
 		},
 		"MANAGE_USERS": {
-			"label": "Manage users",
-			"description": "Allows the user to create, edit, and delete user accounts"
+			"label": "Zarządzanie użytkownikami",
+			"description": "Pozwala użytkownikowi na tworzenie, edytowanie i usuwanie kont użytkowników"
 		},
 		"READ_JOBS": {
-			"label": "Read jobs",
-			"description": "Allows the user to view system jobs and their status"
+			"label": "Przeglądanie zadań",
+			"description": "Pozwala użytkownikowi na wyświetlanie zadań systemowych i ich statusu"
 		},
 		"READ_NOTIFIER": {
-			"label": "Read notifiers",
-			"description": "Allows the user to view notification system configuration"
+			"label": "Przeglądanie systemów powiadamiania",
+			"description": "Pozwala użytkownikowi na przeglądanie konfiguracji systemu powiadomień"
 		},
 		"READ_PERSISTED_LOGS": {
-			"label": "Read persisted logs",
-			"description": "Allows the user to view stored system logs"
+			"label": "Przeglądanie trwałych dzienników",
+			"description": "Pozwala użytkownikowi na wyświetlanie zapisanych dzienników systemowych"
 		},
 		"READ_SYSTEM_LOGS": {
-			"label": "Read system logs",
-			"description": "Allows the user to view real-time system logs"
+			"label": "Przeglądanie dzienników systemowych",
+			"description": "Pozwala użytkownikowi na wyświetlanie dzienników systemowych w czasie rzeczywistym"
 		},
 		"READ_USERS": {
-			"label": "Read users",
-			"description": "Allows the user to view user account information"
+			"label": "Przeglądanie użytkowników",
+			"description": "Pozwala użytkownikowi na wyświetlanie informacji o koncie użytkownika"
 		},
 		"SCAN_LIBRARY": {
-			"label": "Scan libraries",
-			"description": "Allows the user to trigger library scans to discover new content"
+			"label": "Skanowanie bibliotek",
+			"description": "Pozwala użytkownikowi na uruchomienie skanowania biblioteki w celu wykrycia nowych treści"
 		},
 		"UPLOAD_FILE": {
-			"label": "Upload files",
-			"description": "Allows the user to upload files to the server"
+			"label": "Przesyłanie plików",
+			"description": "Pozwala użytkownikowi na przesyłanie plików na serwer"
 		},
 		"MANAGE_JOBS": {
-			"label": "Manage jobs",
-			"description": "Allows the user to manage any queued jobs"
+			"label": "Zarządzaj zadaniami",
+			"description": "Pozwala użytkownikowi na zarządzanie dowolnym zadaniem w kolejce"
 		},
 		"EDIT_METADATA": {
-			"label": "Edit metadata",
-			"description": "Allows the user to edit metadata for books and series"
+			"label": "Edycja metadanych",
+			"description": "Pozwala użytkownikowi na edycję metadanych książek i serii"
 		},
 		"WRITE_BACK_METADATA": {
-			"label": "Write back metadata",
-			"description": "Allows the user to write metadata changes back to the source files"
+			"label": "Zapisywanie metadanych",
+			"description": "Pozwala użytkownikowi na zapisywanie zmienionych metadanych z powrotem do plików źródłowych"
 		}
 	}
 }

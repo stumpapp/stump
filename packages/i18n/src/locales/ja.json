@@ -20,7 +20,9 @@
 			},
 			"buttons": {
 				"createAccount": "アカウント作成",
-				"login": "ログイン"
+				"login": "ログイン",
+				"loginWithOidc": "Log in with OIDC",
+				"createAccountWithOidc": "Create Account with OIDC"
 			}
 		},
 		"toasts": {
@@ -251,6 +253,24 @@
 				"label": "タグ",
 				"description": "ライブラリを分類したりアクセスルールを適用したりするために使用されます"
 			},
+			"defaultLibraryView": {
+				"label": "Default library view",
+				"description": "Configure which tab is shown by default when opening this library",
+				"hideSeriesView": {
+					"label": "Hide series tab",
+					"description": "Hide the series tab from the library navigation"
+				},
+				"options": {
+					"series": {
+						"label": "Series",
+						"description": "Show the series tab by default"
+					},
+					"books": {
+						"label": "Books",
+						"description": "Show the books tab by default"
+					}
+				}
+			},
 			"readingSettings": {
 				"section": {
 					"heading": "設定の読み込み中",
@@ -275,30 +295,49 @@
 						"create": "サムネイルの設定",
 						"update": "生成"
 					},
-					"description": "本のサムネイルを生成することでライブラリを閲覧する際の読み込み時間を短縮します。"
+					"description": "本のサムネイルを生成することでライブラリを閲覧する際の読み込み時間を短縮します。",
+					"disabled": "No additional configuration is required when thumbnail generation is disabled"
 				},
 				"enableSwitch": {
 					"label": "有効",
 					"description": "このライブラリのサムネイル画像を生成"
 				},
-				"scaled": {
-					"label": "拡大率",
-					"description": "寸法ごとにカスタムの係数で画像を拡大縮小します",
-					"width": {
-						"label": "幅のスケール"
-					},
-					"height": {
-						"label": "高さのスケール"
+				"resizeMethod": {
+					"label": "Resize Method",
+					"options": {
+						"scaleEvenlyByFactor": "Evenly Scale",
+						"exact": "Exact Size",
+						"scaleDimension": "Auto Scaled",
+						"none": "None"
 					}
 				},
-				"sized": {
-					"label": "明示的にサイズ指定",
-					"description": "サムネイルの各寸法を設定します（ピクセル単位）",
+				"scaleEvenlyByFactor": {
+					"description": "Scale the thumbnail by a factor of the original size. E.g., 0.65 will result in a thumbnail that is 65% of the original size",
+					"factor": {
+						"label": "Scale Factor"
+					}
+				},
+				"exact": {
+					"description": "Resize the thumbnail to an exact size in pixels",
 					"width": {
-						"label": "幅"
+						"label": "Width"
 					},
 					"height": {
-						"label": "高さ"
+						"label": "Height"
+					}
+				},
+				"scaleDimension": {
+					"label": "Auto Scaled",
+					"description": "Set either the width or height of the thumbnail and auto-scale the other to keep the original aspect ratio",
+					"dimension": {
+						"label": "Dimension",
+						"options": {
+							"width": "Width",
+							"height": "Height"
+						}
+					},
+					"size": {
+						"label": "Size"
 					}
 				},
 				"format": {
@@ -446,6 +485,7 @@
 				"none": "なし",
 				"labels": {
 					"generateThumbnails": "サムネイルを生成",
+					"processThumbnailColors": "Process thumbnail colors",
 					"mode": "モード",
 					"format": "形式",
 					"quality": "クオリティ",
@@ -459,7 +499,11 @@
 					"deleteConversions": "変換されたファイルを削除",
 					"watch": "Watch directory for changes",
 					"processMetadata": "プロセスメタデータ",
-					"generateFileHashes": "ファイルハッシュを生成"
+					"generateFileHashes": "ファイルハッシュを生成",
+					"generateKoreaderHashes": "Generate KoReader hashes",
+					"scaleEvenlyByFactor": "Evenly Scale",
+					"exact": "Exact Size",
+					"scaleDimension": "Explicitly Sized"
 				}
 			},
 			"buttons": {
@@ -609,6 +653,7 @@
 				"analyzeBooks": {
 					"heading": "書籍を分析",
 					"description": "このライブラリ内の書籍を分析して画像ベースの書籍のページ寸法などの追加のメタデータをデータベースに添付します",
+					"disclaimerTitle": "This process is resource-intensive",
 					"disclaimer": "このプロセスはリソースを大量に消費するため完了するまでに時間がかかる場合があります。将来的にはより細かく設定できるようになります",
 					"analyzeButton": "書籍を分析"
 				},
@@ -631,6 +676,7 @@
 				"libraryExclusions": {
 					"heading": "除外するユーザー",
 					"description": "特定のユーザーがこのライブラリまたはそのコンテンツにアクセスできないようにします",
+					"noUsersTitle": "No users to exclude",
 					"noUsers": "このライブラリから除外する他の登録ユーザーはいません",
 					"updated": "除外を更新しました",
 					"failure": "除外の更新に失敗しました"
@@ -644,11 +690,13 @@
 				"cleanLibrary": {
 					"heading": "ライブラリをクリーンアップする",
 					"description": "ディスク上に見つからないすべてのメディアとシリーズを削除します",
+					"disclaimerTitle": "No files will be deleted",
 					"disclaimer": "このアクションではファイルは削除されませんが、欠落ステータスのメディアとシリーズに関連するすべてのレコードが完全に削除されます",
 					"confirmation": {
 						"label": "ライブラリを消去",
 						"text": "このライブラリをクリーンアップしてもよろしいですか？"
-					}
+					},
+					"emptyText": "There was nothing to clean"
 				},
 				"deleteLibrary": {
 					"heading": "ライブラリを削除",
@@ -670,6 +718,13 @@
 		}
 	},
 	"homeScene": {
+		"onDeck": {
+			"title": "Your next read",
+			"emptyState": {
+				"heading": "No books on deck",
+				"message": "Your next recommended books will show up here"
+			}
+		},
 		"continueReading": {
 			"title": "続きを読む",
 			"emptyState": {
@@ -690,6 +745,53 @@
 				"heading": "表示するものがありません",
 				"message": "最近追加した本はここに表示されます"
 			}
+		}
+	},
+	"metadataEditor": {
+		"labels": {
+			"ageRating": "Age rating",
+			"characters": "Characters",
+			"colorists": "Colorists",
+			"coverArtists": "Cover artists",
+			"day": "Day",
+			"editors": "Editors",
+			"format": "Format",
+			"identifierAmazon": "Amazon ID",
+			"identifierCalibre": "Calibre ID",
+			"identifierGoogle": "Google ID",
+			"identifierIsbn": "ISBN",
+			"identifierMobiAsin": "Mobi ASIN",
+			"identifierUuid": "Book UUID",
+			"genres": "Genres",
+			"inkers": "Inkers",
+			"language": "Language",
+			"letterers": "Letterers",
+			"links": "Links",
+			"month": "Month",
+			"notes": "Notes",
+			"number": "Number",
+			"pageCount": "Pages",
+			"pencillers": "Pencillers",
+			"publisher": "Publisher",
+			"series": "Series",
+			"seriesGroup": "Series group",
+			"storyArc": "Story arc",
+			"storyArcNumber": "Story arc number",
+			"summary": "Summary",
+			"teams": "Teams",
+			"title": "Title",
+			"titleSort": "Title sort",
+			"volume": "Volume",
+			"writers": "Writers",
+			"year": "Year",
+			"metaType": "Type",
+			"imprint": "Imprint",
+			"comicid": "Comic ID",
+			"booktype": "Book type",
+			"status": "Status"
+		},
+		"addFields": {
+			"description": "Add each addition on its own line"
 		}
 	},
 	"seriesOverviewScene": {
@@ -926,9 +1028,9 @@
 				"label": "有効期限",
 				"placeholder": "まったくない"
 			},
-			"expires_at": {
-				"label": "有効期限",
-				"placeholder": "まったくない"
+			"expiresAt": {
+				"label": "Expires at",
+				"placeholder": "Never"
 			},
 			"permissions": {
 				"inherit": {
@@ -1065,6 +1167,7 @@
 				},
 				"viewManager": {
 					"updateSelected": "選択したものを更新",
+					"deleteSelected": "Delete view",
 					"create": "新しいビューを作成",
 					"modal": {
 						"heading": {
@@ -1089,6 +1192,10 @@
 								"description": "必要に応じてこのビューの更新された名前"
 							}
 						}
+					},
+					"deleteModal": {
+						"title": "Delete view",
+						"description": "Are you sure you want to delete this view?"
 					}
 				}
 			}
@@ -1104,13 +1211,13 @@
 			"desktop": "デスクトップ"
 		},
 		"sidebar": {
-			"application": {
-				"account": "アカウント",
-				"appearance": "外観",
-				"api keys": "APIキー",
-				"reader": "リーダー",
-				"desktop": "デスクトップ",
-				"label": "アプリケーション"
+			"personal": {
+				"account": "Account",
+				"appearance": "Preferences",
+				"api keys": "API keys",
+				"reader": "Reader",
+				"desktop": "Desktop",
+				"label": "Personal"
 			},
 			"management": {
 				"general": "一般",
@@ -1186,6 +1293,7 @@
 						"ドキュメント"
 					],
 					"options": {
+						"system": "System",
 						"light": "ライト",
 						"dark": "ダーク",
 						"bronze": "ブロンズライト",
@@ -1210,11 +1318,11 @@
 					"lock": "調整をロック",
 					"unlock": "調整をロック解除",
 					"options": {
-						"Home": "Home",
-						"Explore": "エクスプローラ",
-						"Libraries": "ライブラリ",
-						"BookClubs": "読書クラブ",
-						"SmartLists": "スマートリスト"
+						"HOME": "Home",
+						"EXPLORE": "Explore",
+						"LIBRARIES": "Libraries",
+						"BOOK_CLUBS": "Book clubs",
+						"SMART_LISTS": "Smart lists"
 					},
 					"entityOptions": {
 						"createAction": {
@@ -1469,6 +1577,13 @@
 							"commitHash": "Exact commit",
 							"date": "Build date"
 						}
+					},
+					"nonStableChannel": {
+						"title": "You are running a non-stable build of Stump",
+						"description": [
+							"It looks like you are running the",
+							"build channel"
+						]
 					}
 				},
 				"serverPublicUrl": {
@@ -1514,7 +1629,32 @@
 			"sections": {
 				"scheduling": {
 					"title": "Scheduling",
-					"description": "Some jobs can be configured to run on a schedule. Changes to this configuration will take effect after a server restart"
+					"description": "Some jobs can be configured to run on a schedule. Changes to this configuration will take effect after a server restart",
+					"disclaimer": "The job scheduler is really basic and will be improved in the future. Please reach out for feedback or suggestions!",
+					"createOrUpdateConfig": {
+						"fields": {
+							"intervalSecs": {
+								"label": "Interval",
+								"description": "How often the job should run (in seconds)",
+								"placeholder": "e.g. \"86400\" for once a day"
+							},
+							"intervalPreset": {
+								"label": "Preset",
+								"options": {
+									"everySixHours": "Every 6 hours",
+									"everyTwelveHours": "Every 12 hours",
+									"oncePerDay": "Once a day",
+									"oncePerWeek": "Once a week",
+									"oncePerMonth": "Once a month"
+								}
+							},
+							"includedLibraryIds": {
+								"label": "Included libraries",
+								"description": "Choose which libraries are included"
+							}
+						},
+						"restartRequired": "Changes to this configuration will take effect after a server restart"
+					}
 				},
 				"history": {
 					"title": "History",
@@ -1530,10 +1670,14 @@
 						},
 						"emptyHeading": "There are no jobs to display",
 						"emptySubtitle": "You can't have a job if you don't have a job",
-						"deleteAllMessage": "Job history and statistics may be deleted from the database at any time. This action cannot be undone",
-						"deleteAllConfirmButton": "Clear history",
-						"deleteAllConfirmButtonTitle": "Clear all job history",
-						"deleteAllConfirmButtonTitleNoJobs": "No jobs to clear"
+						"deleteAllMessage": "Job history and statistics may be deleted from the database at any time. This action cannot be undone"
+					},
+					"deleteJobHistory": {
+						"title": "Delete job history",
+						"description": "Permanently delete all job history from the database",
+						"confirmText": "Are you sure you want to delete all job history?",
+						"confirm": "Delete",
+						"emptyState": "No jobs to clear"
 					}
 				}
 			}
@@ -1700,6 +1844,13 @@
 				},
 				"createSubmitButton": "Create user",
 				"updateSubmitButton": "Update user"
+			},
+			"loginActivity": {
+				"deleteConfirmation": {
+					"title": "Delete activity",
+					"description": "All records of login activity will be permanently deleted from the database",
+					"confirm": "Delete"
+				}
 			}
 		},
 		"server/email": {
@@ -1954,6 +2105,8 @@
 		"add": "Add",
 		"cancel": "Cancel",
 		"confirm": "Confirm",
+		"delete": "Delete",
+		"enter": "Enter",
 		"save": "Save",
 		"send": "Send",
 		"saveChanges": "Save changes",
@@ -1974,6 +2127,133 @@
 		"notReady": "This feature is not ready",
 		"notUsedYet": "Not used yet",
 		"never": "Never",
-		"scan": "Scan"
+		"scan": "Scan",
+		"somethingWentWrong": "Something went wrong"
+	},
+	"userPermissions": {
+		"ACCESS_API_KEYS": {
+			"label": "API keys",
+			"description": "Allows the user to manage their own API keys"
+		},
+		"ACCESS_BOOK_CLUB": {
+			"label": "Book Clubs",
+			"description": "Allows the user to access book club features, including viewing and joining book clubs"
+		},
+		"ACCESS_KOREADER_SYNC": {
+			"label": "KoReader sync",
+			"description": "Allows the user to access the KoReader sync integration"
+		},
+		"ACCESS_SMART_LIST": {
+			"label": "Smart Lists",
+			"description": "Allows the user to access smart list features, including creating and managing smart lists"
+		},
+		"CREATE_BOOK_CLUB": {
+			"label": "Create book clubs",
+			"description": "Allows the user to create new book clubs"
+		},
+		"CREATE_LIBRARY": {
+			"label": "Create libraries",
+			"description": "Allows the user to create new libraries"
+		},
+		"CREATE_NOTIFIER": {
+			"label": "Create notifiers",
+			"description": "Allows the user to create new notification systems"
+		},
+		"DELETE_LIBRARY": {
+			"label": "Delete libraries",
+			"description": "Allows the user to delete existing libraries"
+		},
+		"DELETE_NOTIFIER": {
+			"label": "Delete notifiers",
+			"description": "Allows the user to delete notification systems"
+		},
+		"DOWNLOAD_FILE": {
+			"label": "Download files",
+			"description": "Allows the user to download files from the server"
+		},
+		"EDIT_LIBRARY": {
+			"label": "Edit libraries",
+			"description": "Allows the user to modify existing libraries"
+		},
+		"EMAILER_CREATE": {
+			"label": "Create emailer",
+			"description": "Allows the user to create email configuration"
+		},
+		"EMAILER_MANAGE": {
+			"label": "Manage emailer",
+			"description": "Allows the user to manage email configuration and settings"
+		},
+		"EMAILER_READ": {
+			"label": "Read emailer",
+			"description": "Allows the user to view email configuration"
+		},
+		"EMAIL_ARBITRARY_SEND": {
+			"label": "Send arbitrary emails",
+			"description": "Allows the user to send custom emails to any address"
+		},
+		"EMAIL_SEND": {
+			"label": "Send emails",
+			"description": "Allows the user to send emails through the system"
+		},
+		"FILE_EXPLORER": {
+			"label": "File explorer",
+			"description": "Allows the user to browse and explore the server filesystem"
+		},
+		"MANAGE_LIBRARY": {
+			"label": "Manage libraries",
+			"description": "Allows the user to manage library settings and configuration"
+		},
+		"MANAGE_NOTIFIER": {
+			"label": "Manage notifiers",
+			"description": "Allows the user to manage notification system settings"
+		},
+		"MANAGE_SERVER": {
+			"label": "Manage server",
+			"description": "Allows the user to manage server configuration and settings"
+		},
+		"MANAGE_USERS": {
+			"label": "Manage users",
+			"description": "Allows the user to create, edit, and delete user accounts"
+		},
+		"READ_JOBS": {
+			"label": "Read jobs",
+			"description": "Allows the user to view system jobs and their status"
+		},
+		"READ_NOTIFIER": {
+			"label": "Read notifiers",
+			"description": "Allows the user to view notification system configuration"
+		},
+		"READ_PERSISTED_LOGS": {
+			"label": "Read persisted logs",
+			"description": "Allows the user to view stored system logs"
+		},
+		"READ_SYSTEM_LOGS": {
+			"label": "Read system logs",
+			"description": "Allows the user to view real-time system logs"
+		},
+		"READ_USERS": {
+			"label": "Read users",
+			"description": "Allows the user to view user account information"
+		},
+		"SCAN_LIBRARY": {
+			"label": "Scan libraries",
+			"description": "Allows the user to trigger library scans to discover new content"
+		},
+		"UPLOAD_FILE": {
+			"label": "Upload files",
+			"description": "Allows the user to upload files to the server"
+		},
+		"MANAGE_JOBS": {
+			"label": "Manage jobs",
+			"description": "Allows the user to manage any queued jobs"
+		},
+		"EDIT_METADATA": {
+			"label": "Edit metadata",
+			"description": "Allows the user to edit metadata for books and series"
+		},
+		"WRITE_BACK_METADATA": {
+			"label": "Write back metadata",
+			"description": "Allows the user to write metadata changes back to the source files"
+		}
 	}
 }

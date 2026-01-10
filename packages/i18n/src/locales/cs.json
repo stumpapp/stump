@@ -20,7 +20,9 @@
 			},
 			"buttons": {
 				"createAccount": "Vytvořit účet",
-				"login": "Přihlásit se"
+				"login": "Přihlásit se",
+				"loginWithOidc": "Log in with OIDC",
+				"createAccountWithOidc": "Create Account with OIDC"
 			}
 		},
 		"toasts": {
@@ -251,6 +253,24 @@
 				"label": "Tagy",
 				"description": "Slouží ke kategorizaci knihovny nebo k vynucování pravidel přístupu"
 			},
+			"defaultLibraryView": {
+				"label": "Default library view",
+				"description": "Configure which tab is shown by default when opening this library",
+				"hideSeriesView": {
+					"label": "Hide series tab",
+					"description": "Hide the series tab from the library navigation"
+				},
+				"options": {
+					"series": {
+						"label": "Series",
+						"description": "Show the series tab by default"
+					},
+					"books": {
+						"label": "Books",
+						"description": "Show the books tab by default"
+					}
+				}
+			},
 			"readingSettings": {
 				"section": {
 					"heading": "Nastavení čtení",
@@ -275,30 +295,49 @@
 						"create": "Nastavení náhledů",
 						"update": "Generování"
 					},
-					"description": "Zlepšení doby načítání při procházení knihovny generováním náhledů knih"
+					"description": "Zlepšení doby načítání při procházení knihovny generováním náhledů knih",
+					"disabled": "No additional configuration is required when thumbnail generation is disabled"
 				},
 				"enableSwitch": {
 					"label": "Zapnuto",
 					"description": "Generovat náhledové obrázky pro tuto knihovnu"
 				},
-				"scaled": {
-					"label": "Škálování",
-					"description": "Měřítko obrázku pomocí vlastního faktoru podle rozměrů",
-					"width": {
-						"label": "Měřítko šířky"
-					},
-					"height": {
-						"label": "Měřítko výšky"
+				"resizeMethod": {
+					"label": "Resize Method",
+					"options": {
+						"scaleEvenlyByFactor": "Evenly Scale",
+						"exact": "Exact Size",
+						"scaleDimension": "Auto Scaled",
+						"none": "None"
 					}
 				},
-				"sized": {
-					"label": "Explicitní velikost",
-					"description": "Nastavit každou velikost náhledu (v pixelech)",
+				"scaleEvenlyByFactor": {
+					"description": "Scale the thumbnail by a factor of the original size. E.g., 0.65 will result in a thumbnail that is 65% of the original size",
+					"factor": {
+						"label": "Scale Factor"
+					}
+				},
+				"exact": {
+					"description": "Resize the thumbnail to an exact size in pixels",
 					"width": {
-						"label": "Šířka"
+						"label": "Width"
 					},
 					"height": {
-						"label": "Výška"
+						"label": "Height"
+					}
+				},
+				"scaleDimension": {
+					"label": "Auto Scaled",
+					"description": "Set either the width or height of the thumbnail and auto-scale the other to keep the original aspect ratio",
+					"dimension": {
+						"label": "Dimension",
+						"options": {
+							"width": "Width",
+							"height": "Height"
+						}
+					},
+					"size": {
+						"label": "Size"
 					}
 				},
 				"format": {
@@ -446,6 +485,7 @@
 				"none": "Žádné",
 				"labels": {
 					"generateThumbnails": "Generovat náhledy",
+					"processThumbnailColors": "Process thumbnail colors",
 					"mode": "Režim",
 					"format": "Formát",
 					"quality": "Kvalita",
@@ -459,7 +499,11 @@
 					"deleteConversions": "Smazat převedené soubory",
 					"watch": "Sledovaný adresář pro změny",
 					"processMetadata": "Zpracování metadat",
-					"generateFileHashes": "Generovat hash souborů"
+					"generateFileHashes": "Generovat hash souborů",
+					"generateKoreaderHashes": "Generate KoReader hashes",
+					"scaleEvenlyByFactor": "Evenly Scale",
+					"exact": "Exact Size",
+					"scaleDimension": "Explicitly Sized"
 				}
 			},
 			"buttons": {
@@ -609,6 +653,7 @@
 				"analyzeBooks": {
 					"heading": "Analyzovat knihy",
 					"description": "Analyzujte knihy v této knihovně a připojte další metadata do databáze, například rozměry stránky pro knihy založené na obrázcích",
+					"disclaimerTitle": "This process is resource-intensive",
 					"disclaimer": "Tento proces je náročný na zdroje a může chvíli trvat. V budoucnu bude více konfigurovatelný",
 					"analyzeButton": "Analyzovat knihy"
 				},
@@ -631,6 +676,7 @@
 				"libraryExclusions": {
 					"heading": "Vyloučení uživatelé",
 					"description": "Zabránit některým uživatelům v přístupu k této knihovně nebo k jejímu obsahu",
+					"noUsersTitle": "No users to exclude",
 					"noUsers": "Neexistují žádní další registrovaní uživatelé k vyloučení přístupu k této knihovně",
 					"updated": "Vyloučení aktualizována",
 					"failure": "Aktualizace vyloučení se nezdařila"
@@ -644,11 +690,13 @@
 				"cleanLibrary": {
 					"heading": "Vyčistit knihovnu",
 					"description": "Odstranit všechna média a série, které nelze najít na disku",
+					"disclaimerTitle": "No files will be deleted",
 					"disclaimer": "Tato akce sice neodstraní žádné soubory, ale trvale smaže všechny záznamy týkající se médií a sérií, které nelze najít",
 					"confirmation": {
 						"label": "Vyčistit knihovnu",
 						"text": "Opravdu chcete vyčistit tuto knihovnu?"
-					}
+					},
+					"emptyText": "There was nothing to clean"
 				},
 				"deleteLibrary": {
 					"heading": "Smazat knihovnu",
@@ -670,6 +718,13 @@
 		}
 	},
 	"homeScene": {
+		"onDeck": {
+			"title": "Your next read",
+			"emptyState": {
+				"heading": "No books on deck",
+				"message": "Your next recommended books will show up here"
+			}
+		},
 		"continueReading": {
 			"title": "Pokračovat ve čtení",
 			"emptyState": {
@@ -690,6 +745,53 @@
 				"heading": "Nic k zobrazení",
 				"message": "Zde se zobrazí všechny naposledy přidané knihy"
 			}
+		}
+	},
+	"metadataEditor": {
+		"labels": {
+			"ageRating": "Age rating",
+			"characters": "Characters",
+			"colorists": "Colorists",
+			"coverArtists": "Cover artists",
+			"day": "Day",
+			"editors": "Editors",
+			"format": "Format",
+			"identifierAmazon": "Amazon ID",
+			"identifierCalibre": "Calibre ID",
+			"identifierGoogle": "Google ID",
+			"identifierIsbn": "ISBN",
+			"identifierMobiAsin": "Mobi ASIN",
+			"identifierUuid": "Book UUID",
+			"genres": "Genres",
+			"inkers": "Inkers",
+			"language": "Language",
+			"letterers": "Letterers",
+			"links": "Links",
+			"month": "Month",
+			"notes": "Notes",
+			"number": "Number",
+			"pageCount": "Pages",
+			"pencillers": "Pencillers",
+			"publisher": "Publisher",
+			"series": "Series",
+			"seriesGroup": "Series group",
+			"storyArc": "Story arc",
+			"storyArcNumber": "Story arc number",
+			"summary": "Summary",
+			"teams": "Teams",
+			"title": "Title",
+			"titleSort": "Title sort",
+			"volume": "Volume",
+			"writers": "Writers",
+			"year": "Year",
+			"metaType": "Type",
+			"imprint": "Imprint",
+			"comicid": "Comic ID",
+			"booktype": "Book type",
+			"status": "Status"
+		},
+		"addFields": {
+			"description": "Add each addition on its own line"
 		}
 	},
 	"seriesOverviewScene": {
@@ -926,9 +1028,9 @@
 				"label": "Expirace",
 				"placeholder": "Nikdy"
 			},
-			"expires_at": {
-				"label": "Vyprší",
-				"placeholder": "Nikdy"
+			"expiresAt": {
+				"label": "Expires at",
+				"placeholder": "Never"
 			},
 			"permissions": {
 				"inherit": {
@@ -1065,6 +1167,7 @@
 				},
 				"viewManager": {
 					"updateSelected": "Aktualizovat vybrané",
+					"deleteSelected": "Delete view",
 					"create": "Vytvořit nové zobrazení",
 					"modal": {
 						"heading": {
@@ -1089,6 +1192,10 @@
 								"description": "Aktualizovaný název pro toto zobrazení, pokud je to požadováno"
 							}
 						}
+					},
+					"deleteModal": {
+						"title": "Delete view",
+						"description": "Are you sure you want to delete this view?"
 					}
 				}
 			}
@@ -1104,13 +1211,13 @@
 			"desktop": "Domovská obrazovka"
 		},
 		"sidebar": {
-			"application": {
-				"account": "Účet",
-				"appearance": "Vzhled",
-				"api keys": "API klíče",
-				"reader": "Čtečka",
-				"desktop": "Domovská obrazovka",
-				"label": "Aplikace"
+			"personal": {
+				"account": "Account",
+				"appearance": "Preferences",
+				"api keys": "API keys",
+				"reader": "Reader",
+				"desktop": "Desktop",
+				"label": "Personal"
 			},
 			"management": {
 				"general": "Obecné",
@@ -1186,6 +1293,7 @@
 						"dokumentaci"
 					],
 					"options": {
+						"system": "System",
 						"light": "Světlý",
 						"dark": "Tmavý",
 						"bronze": "Světle bronzový",
@@ -1210,11 +1318,11 @@
 					"lock": "Uzamknout uspořádání",
 					"unlock": "Odemknout uspořádání",
 					"options": {
-						"Home": "Domů",
-						"Explore": "Procházet",
-						"Libraries": "Knihovny",
-						"BookClubs": "Knižní kluby",
-						"SmartLists": "Chytré seznamy"
+						"HOME": "Home",
+						"EXPLORE": "Explore",
+						"LIBRARIES": "Libraries",
+						"BOOK_CLUBS": "Book clubs",
+						"SMART_LISTS": "Smart lists"
 					},
 					"entityOptions": {
 						"createAction": {
@@ -1469,6 +1577,13 @@
 							"commitHash": "Přesná revize",
 							"date": "Datum sestavení"
 						}
+					},
+					"nonStableChannel": {
+						"title": "You are running a non-stable build of Stump",
+						"description": [
+							"It looks like you are running the",
+							"build channel"
+						]
 					}
 				},
 				"serverPublicUrl": {
@@ -1514,7 +1629,32 @@
 			"sections": {
 				"scheduling": {
 					"title": "Plánování",
-					"description": "Některé úlohy mohou být nakonfigurovány pro naplánované spuštění. Změny v této konfiguraci se projeví po restartu serveru"
+					"description": "Některé úlohy mohou být nakonfigurovány pro naplánované spuštění. Změny v této konfiguraci se projeví po restartu serveru",
+					"disclaimer": "The job scheduler is really basic and will be improved in the future. Please reach out for feedback or suggestions!",
+					"createOrUpdateConfig": {
+						"fields": {
+							"intervalSecs": {
+								"label": "Interval",
+								"description": "How often the job should run (in seconds)",
+								"placeholder": "e.g. \"86400\" for once a day"
+							},
+							"intervalPreset": {
+								"label": "Preset",
+								"options": {
+									"everySixHours": "Every 6 hours",
+									"everyTwelveHours": "Every 12 hours",
+									"oncePerDay": "Once a day",
+									"oncePerWeek": "Once a week",
+									"oncePerMonth": "Once a month"
+								}
+							},
+							"includedLibraryIds": {
+								"label": "Included libraries",
+								"description": "Choose which libraries are included"
+							}
+						},
+						"restartRequired": "Changes to this configuration will take effect after a server restart"
+					}
 				},
 				"history": {
 					"title": "Historie",
@@ -1530,10 +1670,14 @@
 						},
 						"emptyHeading": "Žádné úlohy k zobrazení",
 						"emptySubtitle": "Nemůžete mít úlohu, když nemáte úlohu",
-						"deleteAllMessage": "Historie úloh a statistiky mohou být z databáze kdykoli odstraněny. Tuto akci nelze vrátit zpět",
-						"deleteAllConfirmButton": "Smazat historii",
-						"deleteAllConfirmButtonTitle": "Vymazat historii všech úloh",
-						"deleteAllConfirmButtonTitleNoJobs": "Žádné úlohy k vymazání"
+						"deleteAllMessage": "Historie úloh a statistiky mohou být z databáze kdykoli odstraněny. Tuto akci nelze vrátit zpět"
+					},
+					"deleteJobHistory": {
+						"title": "Delete job history",
+						"description": "Permanently delete all job history from the database",
+						"confirmText": "Are you sure you want to delete all job history?",
+						"confirm": "Delete",
+						"emptyState": "No jobs to clear"
 					}
 				}
 			}
@@ -1700,6 +1844,13 @@
 				},
 				"createSubmitButton": "Vytvořit uživatele",
 				"updateSubmitButton": "Upravit uživatele"
+			},
+			"loginActivity": {
+				"deleteConfirmation": {
+					"title": "Delete activity",
+					"description": "All records of login activity will be permanently deleted from the database",
+					"confirm": "Delete"
+				}
 			}
 		},
 		"server/email": {
@@ -1954,6 +2105,8 @@
 		"add": "Přidat",
 		"cancel": "Zrušit",
 		"confirm": "Potvrdit",
+		"delete": "Delete",
+		"enter": "Enter",
 		"save": "Uložit",
 		"send": "Odeslat",
 		"saveChanges": "Uložit změny",
@@ -1974,6 +2127,133 @@
 		"notReady": "Tato funkce není připravena",
 		"notUsedYet": "Zatím nepoužito",
 		"never": "Nikdy",
-		"scan": "Skenovat"
+		"scan": "Skenovat",
+		"somethingWentWrong": "Something went wrong"
+	},
+	"userPermissions": {
+		"ACCESS_API_KEYS": {
+			"label": "API keys",
+			"description": "Allows the user to manage their own API keys"
+		},
+		"ACCESS_BOOK_CLUB": {
+			"label": "Book Clubs",
+			"description": "Allows the user to access book club features, including viewing and joining book clubs"
+		},
+		"ACCESS_KOREADER_SYNC": {
+			"label": "KoReader sync",
+			"description": "Allows the user to access the KoReader sync integration"
+		},
+		"ACCESS_SMART_LIST": {
+			"label": "Smart Lists",
+			"description": "Allows the user to access smart list features, including creating and managing smart lists"
+		},
+		"CREATE_BOOK_CLUB": {
+			"label": "Create book clubs",
+			"description": "Allows the user to create new book clubs"
+		},
+		"CREATE_LIBRARY": {
+			"label": "Create libraries",
+			"description": "Allows the user to create new libraries"
+		},
+		"CREATE_NOTIFIER": {
+			"label": "Create notifiers",
+			"description": "Allows the user to create new notification systems"
+		},
+		"DELETE_LIBRARY": {
+			"label": "Delete libraries",
+			"description": "Allows the user to delete existing libraries"
+		},
+		"DELETE_NOTIFIER": {
+			"label": "Delete notifiers",
+			"description": "Allows the user to delete notification systems"
+		},
+		"DOWNLOAD_FILE": {
+			"label": "Download files",
+			"description": "Allows the user to download files from the server"
+		},
+		"EDIT_LIBRARY": {
+			"label": "Edit libraries",
+			"description": "Allows the user to modify existing libraries"
+		},
+		"EMAILER_CREATE": {
+			"label": "Create emailer",
+			"description": "Allows the user to create email configuration"
+		},
+		"EMAILER_MANAGE": {
+			"label": "Manage emailer",
+			"description": "Allows the user to manage email configuration and settings"
+		},
+		"EMAILER_READ": {
+			"label": "Read emailer",
+			"description": "Allows the user to view email configuration"
+		},
+		"EMAIL_ARBITRARY_SEND": {
+			"label": "Send arbitrary emails",
+			"description": "Allows the user to send custom emails to any address"
+		},
+		"EMAIL_SEND": {
+			"label": "Send emails",
+			"description": "Allows the user to send emails through the system"
+		},
+		"FILE_EXPLORER": {
+			"label": "File explorer",
+			"description": "Allows the user to browse and explore the server filesystem"
+		},
+		"MANAGE_LIBRARY": {
+			"label": "Manage libraries",
+			"description": "Allows the user to manage library settings and configuration"
+		},
+		"MANAGE_NOTIFIER": {
+			"label": "Manage notifiers",
+			"description": "Allows the user to manage notification system settings"
+		},
+		"MANAGE_SERVER": {
+			"label": "Manage server",
+			"description": "Allows the user to manage server configuration and settings"
+		},
+		"MANAGE_USERS": {
+			"label": "Manage users",
+			"description": "Allows the user to create, edit, and delete user accounts"
+		},
+		"READ_JOBS": {
+			"label": "Read jobs",
+			"description": "Allows the user to view system jobs and their status"
+		},
+		"READ_NOTIFIER": {
+			"label": "Read notifiers",
+			"description": "Allows the user to view notification system configuration"
+		},
+		"READ_PERSISTED_LOGS": {
+			"label": "Read persisted logs",
+			"description": "Allows the user to view stored system logs"
+		},
+		"READ_SYSTEM_LOGS": {
+			"label": "Read system logs",
+			"description": "Allows the user to view real-time system logs"
+		},
+		"READ_USERS": {
+			"label": "Read users",
+			"description": "Allows the user to view user account information"
+		},
+		"SCAN_LIBRARY": {
+			"label": "Scan libraries",
+			"description": "Allows the user to trigger library scans to discover new content"
+		},
+		"UPLOAD_FILE": {
+			"label": "Upload files",
+			"description": "Allows the user to upload files to the server"
+		},
+		"MANAGE_JOBS": {
+			"label": "Manage jobs",
+			"description": "Allows the user to manage any queued jobs"
+		},
+		"EDIT_METADATA": {
+			"label": "Edit metadata",
+			"description": "Allows the user to edit metadata for books and series"
+		},
+		"WRITE_BACK_METADATA": {
+			"label": "Write back metadata",
+			"description": "Allows the user to write metadata changes back to the source files"
+		}
 	}
 }

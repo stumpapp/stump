@@ -21,8 +21,8 @@
 			"buttons": {
 				"createAccount": "Skapa Konto",
 				"login": "Logga In",
-				"loginWithOidc": "Log in with OIDC",
-				"createAccountWithOidc": "Create Account with OIDC"
+				"loginWithOidc": "Logga in med OIDC",
+				"createAccountWithOidc": "Skapa konto med OIDC"
 			}
 		},
 		"toasts": {
@@ -254,20 +254,20 @@
 				"description": "Används för att kategorisera ditt bibliotek eller sköta åtkomstregler"
 			},
 			"defaultLibraryView": {
-				"label": "Default library view",
-				"description": "Configure which tab is shown by default when opening this library",
+				"label": "Standardvy för biblioteket",
+				"description": "Konfigurera vilken flik som visas som standard när du öppnar det här biblioteket",
 				"hideSeriesView": {
-					"label": "Hide series tab",
-					"description": "Hide the series tab from the library navigation"
+					"label": "Dölj flik för serie",
+					"description": "Dölj fliken serier från bibliotekets navigering"
 				},
 				"options": {
 					"series": {
-						"label": "Series",
-						"description": "Show the series tab by default"
+						"label": "Serier",
+						"description": "Visa fliken serier som standard"
 					},
 					"books": {
-						"label": "Books",
-						"description": "Show the books tab by default"
+						"label": "Böcker",
+						"description": "Visa fliken böcker som standard"
 					}
 				}
 			},
@@ -296,48 +296,48 @@
 						"update": "Generering"
 					},
 					"description": "Förbättra laddningstiderna när du bläddrar i biblioteket genom att generera miniatyrbilder för dina böcker",
-					"disabled": "No additional configuration is required when thumbnail generation is disabled"
+					"disabled": "Ingen ytterligare konfiguration krävs när miniatyrgenerering är inaktiverad"
 				},
 				"enableSwitch": {
 					"label": "Aktiverat",
 					"description": "Generera miniatyrbilder för detta bibliotek"
 				},
 				"resizeMethod": {
-					"label": "Resize Method",
+					"label": "Metod för storleksändring",
 					"options": {
-						"scaleEvenlyByFactor": "Evenly Scale",
-						"exact": "Exact Size",
-						"scaleDimension": "Auto Scaled",
-						"none": "None"
+						"scaleEvenlyByFactor": "Skala Jämnt",
+						"exact": "Exakt Storlek",
+						"scaleDimension": "Automatisk Skala",
+						"none": "Ingen"
 					}
 				},
 				"scaleEvenlyByFactor": {
-					"description": "Scale the thumbnail by a factor of the original size. E.g., 0.65 will result in a thumbnail that is 65% of the original size",
+					"description": "Skala miniatyrbilden med en faktor av den ursprungliga storleken. T.ex. 0.65 kommer att resultera i en miniatyrbild som är 65% av den ursprungliga storleken",
 					"factor": {
-						"label": "Scale Factor"
+						"label": "Skalfaktor"
 					}
 				},
 				"exact": {
-					"description": "Resize the thumbnail to an exact size in pixels",
+					"description": "Ändra storlek på miniatyrbilden till en exakt storlek i pixlar",
 					"width": {
-						"label": "Width"
+						"label": "Bredd"
 					},
 					"height": {
-						"label": "Height"
+						"label": "Höjd"
 					}
 				},
 				"scaleDimension": {
-					"label": "Auto Scaled",
-					"description": "Set either the width or height of the thumbnail and auto-scale the other to keep the original aspect ratio",
+					"label": "Automatisk Skala",
+					"description": "Ange antingen bredden eller höjden på miniatyren och skala automatiskt den andra för att behålla det ursprungliga bildförhållandet",
 					"dimension": {
-						"label": "Dimension",
+						"label": "Mått",
 						"options": {
-							"width": "Width",
-							"height": "Height"
+							"width": "Bredd",
+							"height": "Höjd"
 						}
 					},
 					"size": {
-						"label": "Size"
+						"label": "Storlek"
 					}
 				},
 				"format": {
@@ -485,7 +485,7 @@
 				"none": "Ingen",
 				"labels": {
 					"generateThumbnails": "Generera miniatyrbilder",
-					"processThumbnailColors": "Process thumbnail colors",
+					"processThumbnailColors": "Bearbeta miniatyrfärger",
 					"mode": "Läge",
 					"format": "Format",
 					"quality": "Kvalitet",
@@ -500,10 +500,10 @@
 					"watch": "Bevaka mappen för förändringar",
 					"processMetadata": "Behandla metadata",
 					"generateFileHashes": "Generera fil-hashar",
-					"generateKoreaderHashes": "Generate KoReader hashes",
-					"scaleEvenlyByFactor": "Evenly Scale",
-					"exact": "Exact Size",
-					"scaleDimension": "Explicitly Sized"
+					"generateKoreaderHashes": "Generera KoReader-hashar",
+					"scaleEvenlyByFactor": "Skala Jämnt",
+					"exact": "Exakt Storlek",
+					"scaleDimension": "Uttryckligen Förstorad"
 				}
 			},
 			"buttons": {
@@ -653,7 +653,7 @@
 				"analyzeBooks": {
 					"heading": "Analysera böcker",
 					"description": "Analysera böckerna i detta bibliotek för att bifoga ytterligare metadata i databasen, till exempel sidomått för bildbaserade böcker",
-					"disclaimerTitle": "This process is resource-intensive",
+					"disclaimerTitle": "Denna process är resurskrävande",
 					"disclaimer": "Denna process är resurskrävande och kan ta ett tag att slutföra. I framtiden kommer den att vara mer konfigurerbar",
 					"analyzeButton": "Analysera böcker"
 				},
@@ -676,7 +676,7 @@
 				"libraryExclusions": {
 					"heading": "Uteslut användare",
 					"description": "Förhindra vissa användare från att komma åt detta bibliotek eller dess innehåll",
-					"noUsersTitle": "No users to exclude",
+					"noUsersTitle": "Inga användare att exkludera",
 					"noUsers": "Det finns inga andra registrerade användare att utesluta från detta bibliotek",
 					"updated": "Uteslutningar uppdaterade",
 					"failure": "Det gick inte att uppdatera uteslutningar"
@@ -690,13 +690,13 @@
 				"cleanLibrary": {
 					"heading": "Rensa bibliotek",
 					"description": "Ta bort all media och serier som inte kan hittas på disk",
-					"disclaimerTitle": "No files will be deleted",
+					"disclaimerTitle": "Inga filer kommer att raderas",
 					"disclaimer": "Även om denna åtgärd inte kommer att ta bort några filer, kommer den permanent ta bort alla handlingar som rör media och serier som anses saknade",
 					"confirmation": {
 						"label": "Rensa bibliotek",
 						"text": "Är du säker på att du vill rensa detta bibliotek?"
 					},
-					"emptyText": "There was nothing to clean"
+					"emptyText": "Det fanns inget att städa"
 				},
 				"deleteLibrary": {
 					"heading": "Radera bibliotek",
@@ -719,10 +719,10 @@
 	},
 	"homeScene": {
 		"onDeck": {
-			"title": "Your next read",
+			"title": "Din nästa läsning",
 			"emptyState": {
-				"heading": "No books on deck",
-				"message": "Your next recommended books will show up here"
+				"heading": "Inga böcker på däck",
+				"message": "Dina nästa rekommenderade böcker dyker upp här"
 			}
 		},
 		"continueReading": {
@@ -749,12 +749,12 @@
 	},
 	"metadataEditor": {
 		"labels": {
-			"ageRating": "Age rating",
-			"characters": "Characters",
-			"colorists": "Colorists",
-			"coverArtists": "Cover artists",
-			"day": "Day",
-			"editors": "Editors",
+			"ageRating": "Åldersgräns",
+			"characters": "Karaktärer",
+			"colorists": "Färgläggare",
+			"coverArtists": "Omslagsmålare",
+			"day": "Dag",
+			"editors": "Redaktörer",
 			"format": "Format",
 			"identifierAmazon": "Amazon ID",
 			"identifierCalibre": "Calibre ID",
@@ -1217,7 +1217,7 @@
 				"api keys": "API keys",
 				"reader": "Reader",
 				"desktop": "Desktop",
-				"label": "Personal"
+				"label": "Personligt"
 			},
 			"management": {
 				"general": "Allmänt",
@@ -1227,7 +1227,7 @@
 				"access": "Åtkomst",
 				"email": "E-post",
 				"notifications": "Notifikationer",
-				"label": "Management"
+				"label": "Hantering"
 			}
 		},
 		"app/account": {
@@ -1301,7 +1301,7 @@
 						"autumn": "Höst",
 						"cosmic": "Kosmiskt",
 						"pumpkin": "Pumpa",
-						"matrix": "Matrix"
+						"matrix": "Matris"
 					}
 				},
 				"fontSelect": {
@@ -1318,11 +1318,11 @@
 					"lock": "Lås arrangemang",
 					"unlock": "Lås upp arrangemang",
 					"options": {
-						"HOME": "Home",
-						"EXPLORE": "Explore",
-						"LIBRARIES": "Libraries",
-						"BOOK_CLUBS": "Book clubs",
-						"SMART_LISTS": "Smart lists"
+						"HOME": "Hem",
+						"EXPLORE": "Utforska",
+						"LIBRARIES": "Bibliotek",
+						"BOOK_CLUBS": "Bokklubbar",
+						"SMART_LISTS": "Smarta listor"
 					},
 					"entityOptions": {
 						"createAction": {
@@ -1579,10 +1579,10 @@
 						}
 					},
 					"nonStableChannel": {
-						"title": "You are running a non-stable build of Stump",
+						"title": "Du kör en icke-stabil version av Stump",
 						"description": [
-							"It looks like you are running the",
-							"build channel"
+							"Det ser ut som du kör",
+							"byggversionen"
 						]
 					}
 				},
@@ -1630,30 +1630,30 @@
 				"scheduling": {
 					"title": "Schemaläggning",
 					"description": "Vissa jobb kan konfigureras att köra enligt ett schema. Ändringar till denna konfiguration kommer ta effekt efter en serveromstart",
-					"disclaimer": "The job scheduler is really basic and will be improved in the future. Please reach out for feedback or suggestions!",
+					"disclaimer": "Jobbschemaläggaren är verkligen grundläggande och kommer att förbättras i framtiden. Vänligen kontakta oss för feedback eller förslag!",
 					"createOrUpdateConfig": {
 						"fields": {
 							"intervalSecs": {
-								"label": "Interval",
-								"description": "How often the job should run (in seconds)",
-								"placeholder": "e.g. \"86400\" for once a day"
+								"label": "Intervall",
+								"description": "Hur ofta jobbet ska köras (i sekunder)",
+								"placeholder": "t.ex. \"86400\" för en gång om dagen"
 							},
 							"intervalPreset": {
-								"label": "Preset",
+								"label": "Förval",
 								"options": {
-									"everySixHours": "Every 6 hours",
-									"everyTwelveHours": "Every 12 hours",
-									"oncePerDay": "Once a day",
-									"oncePerWeek": "Once a week",
-									"oncePerMonth": "Once a month"
+									"everySixHours": "Var sjätte timme",
+									"everyTwelveHours": "Var tolfte timme",
+									"oncePerDay": "En gång om dagen",
+									"oncePerWeek": "En gång i veckan",
+									"oncePerMonth": "En gång i månaden"
 								}
 							},
 							"includedLibraryIds": {
-								"label": "Included libraries",
-								"description": "Choose which libraries are included"
+								"label": "Inkluderade bibliotek",
+								"description": "Välj vilka bibliotek som ingår"
 							}
 						},
-						"restartRequired": "Changes to this configuration will take effect after a server restart"
+						"restartRequired": "Ändringar i denna konfiguration kommer att träda i kraft efter att servern startats om"
 					}
 				},
 				"history": {
@@ -1673,7 +1673,7 @@
 						"deleteAllMessage": "Jobbhistorik och statistik kan raderas från databasen när som helst. Denna åtgärd kan inte ångras"
 					},
 					"deleteJobHistory": {
-						"title": "Delete job history",
+						"title": "Radera jobbhistorik",
 						"description": "Permanently delete all job history from the database",
 						"confirmText": "Are you sure you want to delete all job history?",
 						"confirm": "Delete",

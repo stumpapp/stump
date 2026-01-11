@@ -8,7 +8,7 @@ export default function FilterConfigJSON() {
 	const form = useFormContext<SmartListFormSchema>()
 	const { filters } = useWatch({ control: form.control })
 
-	const [joiner] = form.watch(['filters.joiner'])
+	const [joiner] = useWatch({ control: form.control, name: ['filters.joiner'] })
 
 	const groups = useMemo(() => (filters?.groups ?? []) as FilterGroupSchema[], [filters?.groups])
 	const apiFilters = useMemo(

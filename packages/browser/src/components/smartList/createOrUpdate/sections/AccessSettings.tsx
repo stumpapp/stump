@@ -1,7 +1,7 @@
 import { Alert, AlertDescription, Label, NativeSelect, Text } from '@stump/components'
 import { EntityVisibility } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
-import { useFormContext } from 'react-hook-form'
+import { useFormContext, useWatch } from 'react-hook-form'
 
 import { SmartListFormSchema } from '../schema'
 
@@ -13,7 +13,7 @@ type Props = {
 
 export default function AccessSettings({ isCreating }: Props) {
 	const form = useFormContext<SubSchema>()
-	const visibility = form.watch('visibility')
+	const visibility = useWatch({ control: form.control, name: 'visibility' })
 
 	const { t } = useLocaleContext()
 

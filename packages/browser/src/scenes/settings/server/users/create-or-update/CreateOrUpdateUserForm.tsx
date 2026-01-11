@@ -5,7 +5,7 @@ import { CreateUserInput, extractErrorMessage, graphql, UpdateUserInput } from '
 import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { useMemo } from 'react'
-import { useForm, useFormState } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router'
 
 import { ContentContainer } from '@/components/container'
@@ -68,10 +68,6 @@ export default function CreateOrUpdateUserForm({ user, existingUsernames }: Prop
 		defaultValues: formDefaults(user),
 		resolver: zodResolver(schema),
 	})
-	const { errors: formErrors } = useFormState({ control: form.control })
-	const formHasErrors = useMemo(() => {
-		return Object.keys(formErrors).length > 0
-	}, [formErrors])
 
 	const client = useQueryClient()
 
@@ -177,12 +173,7 @@ export default function CreateOrUpdateUserForm({ user, existingUsernames }: Prop
 				)}
 
 				<div className="mt-6 flex w-full md:max-w-sm">
-					<Button
-						type="submit"
-						className="w-full md:max-w-sm"
-						variant="primary"
-						disabled={formHasErrors}
-					>
+					<Button type="submit" className="w-full md:max-w-sm" variant="primary">
 						{t(
 							isCreating
 								? 'settingsScene.server/users.createOrUpdateForm.createSubmitButton'

@@ -13,7 +13,7 @@ import {
 import { EmailerListItemFragment } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { useCallback, useMemo } from 'react'
-import { useForm, useFormState } from 'react-hook-form'
+import { useForm, useFormState, useWatch } from 'react-hook-form'
 
 import { CreateOrUpdateEmailerSchema, createSchema, formDefaults } from './schema'
 import { commonHosts, getCommonHost } from './utils'
@@ -43,7 +43,10 @@ export default function CreateOrUpdateEmailerForm({ emailer, existingNames, onSu
 	})
 	const { errors } = useFormState({ control: form.control })
 
-	const [currentHost, tlsEnabled] = form.watch(['smtpHost', 'tlsEnabled'])
+	const [currentHost, tlsEnabled] = useWatch({
+		control: form.control,
+		name: ['smtpHost', 'tlsEnabled'],
+	})
 
 	const presetValue = useMemo(() => getCommonHost(currentHost)?.name.toLowerCase(), [currentHost])
 

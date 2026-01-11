@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button, Form } from '@stump/components'
 import { useCallback, useEffect, useMemo } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { useDebouncedValue } from 'rooks'
 
 import {
@@ -59,13 +59,16 @@ export default function ReadingDefaultsScene() {
 		resolver: zodResolver(schema),
 	})
 
-	const formValues = form.watch([
-		'defaultReadingDir',
-		'defaultReadingImageScaleFit',
-		'defaultReadingMode',
-		'defaultLibraryViewMode',
-		'hideSeriesView',
-	])
+	const formValues = useWatch({
+		control: form.control,
+		name: [
+			'defaultReadingDir',
+			'defaultReadingImageScaleFit',
+			'defaultReadingMode',
+			'defaultLibraryViewMode',
+			'hideSeriesView',
+		],
+	})
 	const didChange = useMemo(() => {
 		const config = library.config
 		const [dir, scale, mode, viewMode, hideSeriesView] = formValues

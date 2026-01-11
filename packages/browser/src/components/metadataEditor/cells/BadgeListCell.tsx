@@ -1,7 +1,7 @@
 import { Badge, Button, cn } from '@stump/components'
 import { Minus } from 'lucide-react'
 import { useCallback } from 'react'
-import { useFormContext } from 'react-hook-form'
+import { useFormContext, useWatch } from 'react-hook-form'
 import { Link } from 'react-router-dom'
 
 import AddFieldsDialog from '../AddFieldsDialog'
@@ -24,7 +24,10 @@ export default function BadgeListCell<Field extends string>({
 
 	const { isEditing } = useMetadataEditorContext()
 
-	const valuesFromForm: string[] | undefined | null = form.watch(binding)
+	const valuesFromForm: string[] | undefined | null = useWatch({
+		control: form.control,
+		name: binding,
+	})
 
 	const onRemove = useCallback(
 		(index: number) => {

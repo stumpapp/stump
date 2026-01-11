@@ -16,7 +16,7 @@ type Props = {
 export default function SmartListQueryBuilder({ disabled }: Props) {
 	const form = useFormContext<SmartListFormSchema>()
 
-	const [joiner] = form.watch(['filters.joiner'])
+	const [joiner] = useWatch({ control: form.control, name: ['filters.joiner'] })
 	const {
 		filters: { groups },
 	} = useWatch({ control: form.control }) as SmartListFormSchema

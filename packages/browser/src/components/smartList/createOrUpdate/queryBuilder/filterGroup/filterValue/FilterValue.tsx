@@ -1,8 +1,7 @@
 import { cn, DatePicker, Input } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import dayjs from 'dayjs'
-import { useMemo } from 'react'
-import { useFormContext } from 'react-hook-form'
+import { useFormContext, useWatch } from 'react-hook-form'
 import { match } from 'ts-pattern'
 
 import {
@@ -29,10 +28,11 @@ export default function FilterValue({ idx }: Props) {
 
 	const form = useFormContext<SmartListFormSchema>()
 
-	const fieldDef = useMemo(
-		() => form.watch(`filters.groups.${groupIdx}.filters.${idx}`) || ({} as FieldDef),
-		[form, groupIdx, idx],
-	)
+	const fieldDef = useWatch({
+		control: form.control,
+		name: `filters.groups.${groupIdx}.filters.${idx}`,
+		defaultValue: {} as FieldDef,
+	})
 
 	const variant = match(fieldDef.operation)
 		.when(

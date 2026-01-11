@@ -1,7 +1,7 @@
 import { Button, Input, Text, ToolTip } from '@stump/components'
 import { Minus } from 'lucide-react'
 import { useMemo } from 'react'
-import { useFormContext } from 'react-hook-form'
+import { useFormContext, useWatch } from 'react-hook-form'
 
 import { useMetadataEditorContext } from '../context'
 
@@ -22,7 +22,7 @@ export default function NumberCell<Field extends string>({
 
 	const rules = useMemo(() => validationRules[binding as keyof typeof validationRules], [binding])
 
-	const formValue = form.watch(binding)
+	const formValue = useWatch({ control: form.control, name: binding })
 
 	if (isEditing) {
 		return (

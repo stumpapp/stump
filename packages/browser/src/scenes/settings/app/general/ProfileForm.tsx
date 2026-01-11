@@ -4,7 +4,7 @@ import { Button, Form, Input, Text } from '@stump/components'
 import { graphql } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { isUrl } from '@stump/sdk'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
@@ -56,9 +56,13 @@ export default function ProfileForm() {
 		resolver: zodResolver(schema),
 	})
 
-	const [avatarUrl, newUsername, newPassword] = form.watch(['avatarUrl', 'username', 'password'], {
-		avatarUrl: user?.avatarUrl,
-		username: user?.username,
+	const [avatarUrl, newUsername, newPassword] = useWatch({
+		control: form.control,
+		name: ['avatarUrl', 'username', 'password'],
+		defaultValue: {
+			avatarUrl: user?.avatarUrl,
+			username: user?.username,
+		},
 	})
 
 	const isChangingPassword = !!newPassword

@@ -16,7 +16,7 @@ import { Api } from '@stump/sdk'
 import { QueryClient, useQueryClient } from '@tanstack/react-query'
 import { Construction } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useForm, useFormState } from 'react-hook-form'
+import { useForm, useFormState, useWatch } from 'react-hook-form'
 import { useMediaMatch } from 'rooks'
 import { toast } from 'sonner'
 import z from 'zod'
@@ -175,7 +175,10 @@ export default function JobScheduler() {
 	})
 	const { isSubmitting } = useFormState({ control: form.control })
 
-	const [includedLibraryIds, intervalSecs] = form.watch(['includedLibraryIds', 'intervalSecs'])
+	const [includedLibraryIds, intervalSecs] = useWatch({
+		control: form.control,
+		name: ['includedLibraryIds', 'intervalSecs'],
+	})
 
 	const isConfigDifferent = useMemo(() => {
 		if (!config) return true

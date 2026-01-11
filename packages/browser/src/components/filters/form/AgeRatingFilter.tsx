@@ -1,6 +1,6 @@
 import { Input, Label, RadioGroup } from '@stump/components'
 import { useState } from 'react'
-import { useFormContext } from 'react-hook-form'
+import { useFormContext, useWatch } from 'react-hook-form'
 
 type Props = {
 	variant?: 'media' | 'series'
@@ -31,7 +31,7 @@ export default function AgeRatingFilter({ variant = 'media' }: Props) {
 		}
 	}
 
-	const selection = form.watch('metadata.ageRating')
+	const selection = useWatch({ control: form.control, name: 'metadata.ageRating' })
 	const { onChange, ...register } = form.register('metadata.ageRating', {
 		max: 18,
 		min: 0,

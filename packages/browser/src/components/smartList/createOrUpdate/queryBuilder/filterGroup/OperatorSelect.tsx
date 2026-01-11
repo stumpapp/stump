@@ -1,7 +1,7 @@
 import { Button, cn, Command, Popover } from '@stump/components'
 import { ChevronsUpDown } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useFieldArray, useFormContext } from 'react-hook-form'
+import { useFieldArray, useFormContext, useWatch } from 'react-hook-form'
 import { match } from 'ts-pattern'
 
 import {
@@ -34,10 +34,11 @@ export default function OperatorSelect({ idx }: Props) {
 		name: `filters.groups.${groupIdx}.filters`,
 	})
 
-	const fieldDef = useMemo(
-		() => form.watch(`filters.groups.${groupIdx}.filters.${idx}`) || ({} as FieldDef),
-		[form, groupIdx, idx],
-	)
+	const fieldDef = useWatch({
+		control: form.control,
+		name: `filters.groups.${groupIdx}.filters.${idx}`,
+		defaultValue: {} as FieldDef,
+	})
 
 	const updateField = useCallback(
 		(params: Partial<FieldDef>, close = true) => {

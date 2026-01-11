@@ -1,7 +1,7 @@
 import { Label, NativeSelect, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { useCallback } from 'react'
-import { useFormContext } from 'react-hook-form'
+import { useFormContext, useWatch } from 'react-hook-form'
 
 import { isGrouping, SmartListFormSchema, SmartListGroupBy } from '../schema'
 
@@ -12,7 +12,7 @@ type Props = {
 export default function GroupBy({ disabled }: Props) {
 	const form = useFormContext<SmartListFormSchema>()
 
-	const grouping = form.watch('grouping')
+	const grouping = useWatch({ control: form.control, name: 'grouping' })
 
 	const handleChange = useCallback(
 		(e: React.ChangeEvent<HTMLSelectElement>) => {

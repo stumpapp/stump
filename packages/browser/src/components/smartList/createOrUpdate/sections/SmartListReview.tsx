@@ -1,6 +1,6 @@
 import { Label, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import { useFormContext } from 'react-hook-form'
+import { useFormContext, useWatch } from 'react-hook-form'
 
 import { ReviewStepContainer } from '@/components/steppedForm'
 
@@ -9,7 +9,7 @@ import FilterConfigJSON from './FilterConfigJSON'
 
 export default function SmartListReview() {
 	const form = useFormContext<SmartListFormSchema>()
-	const state = form.watch()
+	const state = useWatch({ control: form.control })
 
 	const { t } = useLocaleContext()
 

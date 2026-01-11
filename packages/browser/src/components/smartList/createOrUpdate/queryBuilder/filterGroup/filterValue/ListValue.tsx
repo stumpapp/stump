@@ -1,7 +1,7 @@
 import { ComboBox } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import { useCallback, useMemo } from 'react'
-import { useFormContext } from 'react-hook-form'
+import { useCallback } from 'react'
+import { useFormContext, useWatch } from 'react-hook-form'
 
 import { isNumberField, SmartListFormSchema } from '@/components/smartList/createOrUpdate'
 
@@ -17,15 +17,17 @@ export default function ListValue({ idx }: Props) {
 	const { groupIdx } = useFilterGroupContext()
 
 	const form = useFormContext<SmartListFormSchema>()
-	const fieldDef = useMemo(
-		() => form.watch(`filters.groups.${groupIdx}.filters.${idx}`) || ({} as FieldDef),
-		[form, groupIdx, idx],
-	)
-	const values = useMemo(
-		() =>
-			(form.watch(`filters.groups.${groupIdx}.filters.${idx}.value`) || []) as (string | number)[],
-		[form, groupIdx, idx],
-	)
+	const fieldDef = useWatch({
+		control: form.control,
+		name: `filters.groups.${groupIdx}.filters.${idx}`,
+		defaultValue: {} as FieldDef,
+	})
+
+	const values = useWatch({
+		control: form.control,
+		name: `filters.groups.${groupIdx}.filters.${idx}.value`,
+		defaultValue: [],
+	}) as (string | number)[]
 
 	const isNumber = isNumberField(fieldDef.field)
 

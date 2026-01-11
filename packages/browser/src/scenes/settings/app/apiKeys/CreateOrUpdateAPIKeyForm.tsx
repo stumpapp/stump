@@ -13,7 +13,7 @@ import { useLocaleContext } from '@stump/i18n'
 import { allPermissions, isUserPermission } from '@stump/sdk'
 import dayjs from 'dayjs'
 import { useCallback } from 'react'
-import { useForm, useFormState } from 'react-hook-form'
+import { useForm, useFormState, useWatch } from 'react-hook-form'
 import { z } from 'zod'
 
 import { useAppContext } from '@/context'
@@ -65,11 +65,10 @@ export default function CreateOrUpdateAPIKeyForm({
 	})
 	const { errors } = useFormState({ control: form.control })
 
-	const [inherit, permissions, expiresAt] = form.watch([
-		'inherit',
-		'explicitPermissions',
-		'expiresAt',
-	])
+	const [inherit, permissions, expiresAt] = useWatch({
+		control: form.control,
+		name: ['inherit', 'explicitPermissions', 'expiresAt'],
+	})
 
 	const handleDateChange = useCallback(
 		(date?: Date) => {

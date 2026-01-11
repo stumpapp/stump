@@ -3,7 +3,7 @@ import { UserPermission } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { createColumnHelper, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { useCallback, useEffect, useMemo } from 'react'
-import { useFormContext } from 'react-hook-form'
+import { useFormContext, useWatch } from 'react-hook-form'
 
 import paths from '@/paths'
 
@@ -14,7 +14,7 @@ export default function UserPermissionsTable() {
 
 	const form = useFormContext<CreateOrUpdateUserSchema>()
 
-	const selectedPermissions = form.watch('permissions')
+	const selectedPermissions = useWatch({ control: form.control, name: 'permissions' })
 
 	useEffect(() => {
 		const selectionsWithAssociations = (selectedPermissions || []).reduce<UserPermission[]>(

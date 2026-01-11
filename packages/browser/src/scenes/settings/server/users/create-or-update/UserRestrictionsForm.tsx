@@ -1,7 +1,7 @@
 import { CheckBox, Heading, Input, Link, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { useCallback, useEffect } from 'react'
-import { useFormContext } from 'react-hook-form'
+import { useFormContext, useWatch } from 'react-hook-form'
 
 import paths from '@/paths'
 
@@ -16,10 +16,10 @@ export default function UserRestrictionsForm() {
 
 	const form = useFormContext<CreateOrUpdateUserSchema>()
 
-	const [ageRestrictionOnUnset, ageRestriction] = form.watch([
-		'ageRestrictionOnUnset',
-		'ageRestriction',
-	])
+	const [ageRestrictionOnUnset, ageRestriction] = useWatch({
+		control: form.control,
+		name: ['ageRestrictionOnUnset', 'ageRestriction'],
+	})
 
 	useEffect(() => {
 		const didChange = ageRestriction !== form.getValues('ageRestriction')

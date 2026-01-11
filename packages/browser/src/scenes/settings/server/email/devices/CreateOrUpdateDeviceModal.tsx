@@ -5,7 +5,7 @@ import { EmailDevicesTableQuery, graphql } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
 
 const createMutation = graphql(`
@@ -81,7 +81,7 @@ export default function CreateOrUpdateDeviceModal({ isOpen, updatingDevice, onCl
 	})
 	const { reset } = form
 
-	const isForbidden = form.watch('forbidden')
+	const isForbidden = useWatch({ control: form.control, name: 'forbidden' })
 
 	useEffect(() => {
 		reset(defaultValues)

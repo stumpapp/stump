@@ -1,6 +1,6 @@
 import { Input } from '@stump/components'
 import { useCallback, useEffect } from 'react'
-import { useFormContext, useFormState } from 'react-hook-form'
+import { useFormContext, useFormState, useWatch } from 'react-hook-form'
 
 import { CreateOrUpdateUserSchema } from './schema'
 
@@ -8,7 +8,7 @@ export default function MaxSessionsAllowed() {
 	const form = useFormContext<CreateOrUpdateUserSchema>()
 	const { errors } = useFormState({ control: form.control })
 
-	const [maxSessionsAllowed] = form.watch(['maxSessionsAllowed'])
+	const [maxSessionsAllowed] = useWatch({ control: form.control, name: ['maxSessionsAllowed'] })
 
 	useEffect(() => {
 		const isSameValue = maxSessionsAllowed === form.getValues('maxSessionsAllowed')

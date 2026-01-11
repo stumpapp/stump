@@ -28,7 +28,7 @@ export default function ScanConfigForm({ onScan }: Props) {
 		resolver: zodResolver(createSchema(t)),
 	})
 
-	const variant = form.watch('variant')
+	const variant = useWatch({ control: form.control, name: 'variant' })
 	const config = useWatch({ control: form.control, name: 'config' })
 
 	const handleSubmit = useCallback(({ config }: FormValues) => onScan({ config }), [onScan])

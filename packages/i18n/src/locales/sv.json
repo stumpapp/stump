@@ -1674,10 +1674,10 @@
 					},
 					"deleteJobHistory": {
 						"title": "Radera jobbhistorik",
-						"description": "Permanently delete all job history from the database",
-						"confirmText": "Are you sure you want to delete all job history?",
-						"confirm": "Delete",
-						"emptyState": "No jobs to clear"
+						"description": "Radera all jobbhistorik permanent från databasen",
+						"confirmText": "Är du säker på att du vill radera all jobbhistorik?",
+						"confirm": "Radera",
+						"emptyState": "Inga jobb att ta bort"
 					}
 				}
 			}
@@ -1847,9 +1847,9 @@
 			},
 			"loginActivity": {
 				"deleteConfirmation": {
-					"title": "Delete activity",
-					"description": "All records of login activity will be permanently deleted from the database",
-					"confirm": "Delete"
+					"title": "Radera aktivitet",
+					"description": "Alla inloggningshistorik kommer raderas permanent från databasen",
+					"confirm": "Radera"
 				}
 			}
 		},
@@ -2105,8 +2105,8 @@
 		"add": "Lätt till",
 		"cancel": "Avbryt",
 		"confirm": "Bekräfta",
-		"delete": "Delete",
-		"enter": "Enter",
+		"delete": "Radera",
+		"enter": "Ange",
 		"save": "Spara",
 		"send": "Skicka",
 		"saveChanges": "Spara förändringar",
@@ -2128,16 +2128,16 @@
 		"notUsedYet": "Inte använd än",
 		"never": "Aldrig",
 		"scan": "Skanna",
-		"somethingWentWrong": "Something went wrong"
+		"somethingWentWrong": "Någonting gick fel"
 	},
 	"userPermissions": {
 		"ACCESS_API_KEYS": {
-			"label": "API keys",
-			"description": "Allows the user to manage their own API keys"
+			"label": "API-nycklar",
+			"description": "Tillåt användaren att hantera sina egna API-nycklar"
 		},
 		"ACCESS_BOOK_CLUB": {
-			"label": "Book Clubs",
-			"description": "Allows the user to access book club features, including viewing and joining book clubs"
+			"label": "Bokklubbar",
+			"description": "Ger användaren tillgång till bokklubbens funktioner, inklusive visning och anslutning till bokklubbar"
 		},
 		"ACCESS_KOREADER_SYNC": {
 			"label": "KoReader sync",

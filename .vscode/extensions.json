@@ -6,6 +6,7 @@
 		"Gruntfuggly.todo-tree",
 		"mike-co.import-sorter",
 		"aaron-bond.better-comments",
-		"ryanluker.vscode-coverage-gutters"
+		"ryanluker.vscode-coverage-gutters",
+		"blazejkustra.react-compiler-marker"
 	]
 }

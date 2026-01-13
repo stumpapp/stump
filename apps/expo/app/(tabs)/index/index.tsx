@@ -25,7 +25,8 @@ export default function Screen() {
 	const [deletingServer, setDeletingServer] = useState<SavedServer | null>(null)
 
 	const allOPDSServers = [...stumpServers.filter((server) => server.stumpOPDS), ...opdsServers]
-	const defaultServer = allOPDSServers.find((server) => server.defaultServer)
+
+	const defaultServer = savedServers.find((server) => server.defaultServer)
 
 	const [didMount, setDidMount] = useState(false)
 	useEffect(() => {

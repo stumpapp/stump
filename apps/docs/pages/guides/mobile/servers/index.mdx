@@ -1,0 +1,41 @@
+# Servers
+
+The mobile app supports two types of servers:
+
+1. A Stump instance, which will use native APIs for all interactions
+2. Any OPDS v2.0-compatible server
+
+A Stump server may be configured as both an OPDS server and a Stump server, as the functionality is split between two modalities of the app.
+
+import { Callout } from 'nextra/components'
+
+<Callout emoji="❌" type="info">
+	OPDS v1.2 will not be supported. I don't have any interest in maintaining an XML client for the
+	app. I will consider outside contributions that successfully wrangle v1.2 vs v2.0 client-side
+	negotiations without breakage
+</Callout>
+
+## Multi-Server Support
+
+There is no limit to the number of servers you can configure in the app. This is useful if you have multiple Stump instances or OPDS servers you want to access from the app, or if you have a mix of access points (e.g., via local network and via VPN).
+
+## Stump Enablement
+
+If you don't have a Stump server, you can disable Stump-specific features in the app settings. This will remove the `Stump` section from the root screen, so you are only presented with OPDS servers. A few things to note:
+
+- When disabled:
+  - You will not be able to configure a Stump server. However, if you already have a Stump server configured it will not be deleted
+  - You will still be required to choose unique names for an OPDS server. If you have a hidden Stump server, it will still be considered
+  - If a Stump server is set as the default server, that designation will be removed
+- When re-enabled:
+  - The `Stump` section will reappear on the root screen
+  - You will be able to configure a Stump server again
+  - Any preconfigured Stump servers will be unhidden
+
+## Default Server
+
+A server may be configured as the default server. When a default server is set, the app will take you directly to that server when you open the app. A few things to note:
+
+- You may only have one default server at a time
+- A dual-mode server will take you to the Stump server by default
+- You may change the default server at any time in the app settings

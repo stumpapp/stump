@@ -1,0 +1,72 @@
+import { Callout, Steps } from 'nextra/components'
+
+# Configuration
+
+This guide covers adding, editing, and deleting servers in the mobile app.
+
+## Adding a Server
+
+The process for adding a Stump server and an OPDS server is the same. The only difference is that an OPDS server requires a URL pointing to the root catalog for the feed
+
+<Callout emoji="ℹ️" type="info">
+	If you configure a Stump server as a dual-mode server, you may use the root URL for the Stump
+	server instead of the catalog URL
+</Callout>
+
+<Steps>
+
+#### Go to the Servers screen
+
+This is the very first screen you will see when you open the app
+
+#### Click the `+` button
+
+The button is located in the top right corner of the screen
+
+#### Select either `Stump` or `OPDS`
+
+The very first field labeled `Kind` will allow you to select the type of server you are configuring.
+
+If you wish to configure a Stump server _with_ OPDS support, select `Stump` and then enable the `Enable OPDS` switch towards the bottom of the form
+
+#### Fill in the required fields
+
+The form will have the following required fields:
+
+- **Name**: A friendly name for the server
+- **URL**: The URL of the server. If `OPDS`, this will be labeled `Catalog URL`
+- **Auth**: The type of authentication to use
+
+If you choose `Login` for auth, there will be no additional fields to fill in. If you choose `Basic`, you will need to provide a username and password. If you choose `Token`, you will need to provide a token
+
+#### Fill in the optional fields
+
+You may configure the following optional fields:
+
+- **Custom Headers**: Any custom headers you wish to send with each request
+
+You may enable/disable the following optional fields:
+
+- **Enable OPDS**: If you are configuring a Stump server, you may enable OPDS support here
+- **Set as default server**: If enabled, the app will take you into this server when you open the app instead of the root screen
+
+#### Click `Add server`
+
+</Steps>
+
+## Editing a Server
+
+Force press on a server in the list to bring up a context menu. Select `Edit` to edit the server.
+
+The process for editing a server is the same as adding a server, so follow the same steps as above. The notable difference is that you may not name it the same as an existing server
+
+## Deleting a Server
+
+Force press on a server in the list to bring up a context menu. Select `Remove` to delete the server.
+
+You will be presented with a confirmation dialog before the server is deleted. If the server is a dual-mode server, an additional warning will be presented.
+
+<Callout emoji="ℹ️" type="info">
+	Any disk space used by the server will be freed up when the server is deleted. This includes any
+	books downloaded from the server or cached data
+</Callout>

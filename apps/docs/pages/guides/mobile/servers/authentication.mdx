@@ -1,0 +1,59 @@
+import { Callout } from 'nextra/components'
+
+# Authentication
+
+The app supports 3 types of authentication:
+
+1. Login-based authentication (e.g., username/password or OIDC)
+2. Basic authentication (e.g., username/password)
+3. Token-based authentication (e.g., API key)
+
+## Login-based Authentication
+
+Login-based authentication does not store credentials on the device. Instead, you will be prompted to log in when you try to access the server. This has drawbacks for OPDS configurations since you will be prompted _each_ time you try to access the server. Stump servers will use short-lived JWT tokens when you log in, so you will only be prompted to log in when the token expires.
+
+### OIDC Authentication
+
+<Callout emoji="🔐" type="info">
+	**OIDC authentication is only available when using Login-based authentication.** If your server
+	has OIDC configured, a "Login with OIDC" button will appear on the login sheet
+</Callout>
+
+When you choose a login-based authentication type for a Stump server that has OIDC configured, you will see a "Login with OIDC" button on the login sheet. This will initiate the OIDC login flow as described in the [OIDC guide](/guides/access-control/oidc).
+
+## Basic Authentication
+
+<Callout emoji="ℹ️" type="info">
+	Stump will not use actual [Basic
+	Auth](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication) for native API operations.
+	If you choose basic auth for a Stump server, it would only use Basic Auth for OPDS (if enabled)
+	and fetch a token from the server for native API operations
+</Callout>
+
+<Callout emoji="⚡" type="warning">
+	**Performance Note:** Basic Auth for OPDS requires the server to verify your password on every
+	request. This involves computationally expensive password hashing, which impacts image loading. If
+	you are a heavy OPDS user, consider using [Token-based
+	Authentication](#token-based-authentication) with a scoped API key for much faster performance
+</Callout>
+
+## Token-based Authentication
+
+Token-based authentication will embed a provided token in the `Authorization` header of each request. While this should be an API key for Stump servers, it can be any valid token which the server will accept.
+
+The following servers, besides Stump, have viable, long-lived, token-based authentication mechanisms:
+
+| Server                                   | Status | Notes                       |
+| ---------------------------------------- | ------ | --------------------------- |
+| [Kavita](https://wiki.kavitareader.com/) | ✅     | ❌ Does not support OPDS v2 |
+| [Komga](https://komga.org/)              | ✅     | Must use `X-API-Key` header |
+
+Note that token viability **does not** equate to support for the app. Only OPDS v2-compatible servers are supported by the app.
+
+<Callout emoji="📣" type="info">
+	If there is a server that should be listed here, please let me know!
+</Callout>
+
+## Security Considerations
+
+The mobile app uses native encryption to store credentials on the device. There is no in-house encryption or security mechanism, so the security of your credentials is dependent on the security of the device itself. For more information on the library being used, see the [Expo SecureStore](https://docs.expo.dev/versions/latest/sdk/securestore/) documentation.

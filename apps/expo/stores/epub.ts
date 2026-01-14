@@ -8,6 +8,7 @@ import { useColorScheme } from '~/lib/useColorScheme'
 import {
 	BookMetadata,
 	EPUBReaderThemeConfig,
+	NativeTableOfContentsItem,
 	ReadiumLocator,
 	ReadiumViewRef,
 } from '~/modules/readium'
@@ -20,11 +21,35 @@ export const trimFragmentFromHref = (href: string) => {
 	return href.split('#')[0]
 }
 
+export const findTocItemByHref = (
+	toc: TableOfContentsItem[],
+	href: string,
+): TableOfContentsItem | undefined => {
+	const targetHref = trimFragmentFromHref(href)
+	for (const item of toc) {
+		if (trimFragmentFromHref(item.content) === targetHref) {
+			return item
+		}
+		if (item.children.length > 0) {
+			const found = findTocItemByHref(item.children, href)
+			if (found) return found
+		}
+	}
+	return undefined
+}
+
 export type TableOfContentsItem = {
 	label: string
 	content: string
 	children: TableOfContentsItem[]
 	play_order: number
+}
+
+export const convertNativeToc = (items: NativeTableOfContentsItem[]): TableOfContentsItem[] => {
+	return items.map((item) => ({
+		...item,
+		children: item.children ? convertNativeToc(item.children) : [],
+	}))
 }
 
 export const parseToc = (toc?: string[]): TableOfContentsItem[] => {
@@ -51,6 +76,8 @@ export type OnBookmarkCallback = (
 	previewContent?: string,
 ) => Promise<{ id: string } | void>
 
+export type TocSource = 'native' | 'server'
+
 export type IEpubLocationStore = {
 	book?: EbookReaderBookRef
 	storeBook: (book: EbookReaderBookRef) => void
@@ -65,9 +92,10 @@ export type IEpubLocationStore = {
 	position: number
 	totalPages: number
 	toc: TableOfContentsItem[]
+	tocSource: TocSource | null
 	embeddedMetadata?: EmbeddedMetadata
 
-	onTocChange: (toc: TableOfContentsItem[] | string[]) => void
+	onTocChange: (toc: TableOfContentsItem[] | string[], source: TocSource) => void
 	onBookLoad: (metadata?: BookMetadata) => void
 	onLocationChange: (locator: ReadiumLocator) => void
 	onUnload: () => void
@@ -96,15 +124,18 @@ export const useEpubLocationStore = create<IEpubLocationStore>((set, get) => ({
 	position: 0,
 	totalPages: 0,
 	toc: [],
+	tocSource: null,
 
-	onTocChange: (toc) => {
+	onTocChange: (toc, source) => {
 		if (typeof toc[0] === 'string') {
 			set({
 				toc: parseToc(toc as string[]),
+				tocSource: source,
 			})
 		} else {
 			set({
 				toc: toc as TableOfContentsItem[],
+				tocSource: source,
 			})
 		}
 	},
@@ -160,6 +191,7 @@ export const useEpubLocationStore = create<IEpubLocationStore>((set, get) => ({
 			position: 0,
 			totalPages: 0,
 			toc: [],
+			tocSource: null,
 			book: undefined,
 			embeddedMetadata: undefined,
 			actions: null,

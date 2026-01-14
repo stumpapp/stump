@@ -82,7 +82,7 @@ export type OnPageChangeEventPayload = {
 
 export type ReadiumModuleEvents = {
 	onChange: (params: ChangeEventPayload) => void
-	onBookLoaded: (params: { success: boolean; error?: string; bookMetadata?: BookMetadata }) => void
+	onBookLoaded: (params: BookLoadedEventPayload) => void
 	onLocatorChange: (params: ReadiumLocator) => void
 	onMiddleTouch: () => void
 	onSelection: (params: {
@@ -103,6 +103,13 @@ export type ChangeEventPayload = {
 	value: string
 }
 
+export type NativeTableOfContentsItem = {
+	label: string
+	content: string
+	children: NativeTableOfContentsItem[]
+	play_order: number
+}
+
 export type BookMetadata = {
 	title: string
 	author?: string
@@ -111,6 +118,13 @@ export type BookMetadata = {
 	language?: string
 	totalPages: number
 	chapterCount: number
+}
+
+export type BookLoadedEventPayload = {
+	success: boolean
+	error?: string
+	bookMetadata?: BookMetadata
+	tableOfContents?: NativeTableOfContentsItem[]
 }
 
 export type EPUBReaderThemeConfig = {
@@ -163,9 +177,7 @@ export type ReadiumViewProps = {
 	locator?: ReadiumLocator
 	initialLocator?: ReadiumLocator
 	onLoad?: (event: { nativeEvent: OnLoadEventPayload }) => void
-	onBookLoaded?: (event: {
-		nativeEvent: { success: boolean; error?: string; bookMetadata?: BookMetadata }
-	}) => void
+	onBookLoaded?: (event: { nativeEvent: BookLoadedEventPayload }) => void
 	onLayoutChange?: (event: { nativeEvent: { bookMetadata?: BookMetadata } }) => void
 	onLocatorChange?: (event: { nativeEvent: ReadiumLocator }) => void
 	onMiddleTouch?: (event: { nativeEvent: void }) => void

@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
-import { useWindowDimensions, View } from 'react-native'
-import { Pressable, ScrollView } from 'react-native-gesture-handler'
+import { Pressable, useWindowDimensions, View } from 'react-native'
+import { ScrollView } from 'react-native-gesture-handler'
 import PagerView from 'react-native-pager-view'
 import { stripHtml } from 'string-strip-html'
 

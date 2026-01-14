@@ -35,6 +35,7 @@ import org.readium.r2.shared.publication.services.positions
 import org.readium.r2.shared.util.AbsoluteUrl
 import org.readium.r2.navigator.input.InputListener
 import org.readium.r2.navigator.input.TapEvent
+import org.readium.r2.shared.publication.Link
 import java.net.URL
 
 data class Props(
@@ -361,6 +362,8 @@ class EPUBView(context: Context, appContext: AppContext) : ExpoView(context, app
 
             initializeNavigator()
 
+            val tableOfContents = convertLinksToToc(publication.tableOfContents)
+
             withContext(Dispatchers.Main) {
                 onBookLoaded(mapOf(
                     "success" to true,
@@ -372,7 +375,8 @@ class EPUBView(context: Context, appContext: AppContext) : ExpoView(context, app
                         "language" to (publication.metadata.languages.firstOrNull() ?: "en"),
                         "totalPages" to publication.positions().size,
                         "chapterCount" to publication.readingOrder.size
-                    )
+                    ),
+                    "tableOfContents" to tableOfContents
                 ))
             }
         } catch (e: Exception) {
@@ -480,6 +484,22 @@ class EPUBView(context: Context, appContext: AppContext) : ExpoView(context, app
 //        } catch (e: ActivityNotFoundException) {
 //            context.startActivity(Intent(Intent. ACTION_VIEW, uri))
 //        }
+    }
+
+    private fun convertLinksToToc(links: List<Link>): List<Map<String, Any>> {
+        return links.mapIndexed { index, link ->
+            val item = mutableMapOf<String, Any>(
+                "label" to (link.title ?: ""),
+                "content" to link.href.toString(),
+                "play_order" to index
+            )
+            if (link.children.isNotEmpty()) {
+                item["children"] = convertLinksToToc(link.children)
+            } else {
+                item["children"] = emptyList<Map<String, Any>>()
+            }
+            item
+        }
     }
 
     /**

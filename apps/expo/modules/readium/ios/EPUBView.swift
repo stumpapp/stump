@@ -425,6 +425,10 @@
                  let positionsResult = await publication.positions()
                  let totalPages = (try? positionsResult.get().count) ?? 0
                  
+                 let tocResult = await publication.tableOfContents()
+                 let tocLinks = (try? tocResult.get()) ?? []
+                 let tableOfContents = self.convertLinksToToc(tocLinks)
+                 
                  // Check if we're cancelled before updating UI
                  try? Task.checkCancellation()
                  
@@ -440,6 +444,7 @@
                              "totalPages": totalPages,
                              "chapterCount": publication.readingOrder.count,
                          ],
+                         "tableOfContents": tableOfContents,
                      ])
                  }
              }
@@ -468,6 +473,22 @@
          // Remove publication from cache
          if let bookId = props?.bookId {
              BookService.instance.closePublication(for: bookId)
+         }
+     }
+
+     private func convertLinksToToc(_ links: [Link]) -> [[String: Any]] {
+         return links.enumerated().map { (index, link) in
+             var item: [String: Any] = [
+                 "label": link.title ?? "",
+                 "content": link.href,
+                 "play_order": index,
+             ]
+             if !link.children.isEmpty {
+                 item["children"] = convertLinksToToc(link.children)
+             } else {
+                 item["children"] = [] as [[String: Any]]
+             }
+             return item
          }
      }
 

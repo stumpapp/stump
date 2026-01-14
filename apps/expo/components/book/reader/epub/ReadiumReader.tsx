@@ -7,7 +7,7 @@ import { FullScreenLoader } from '~/components/ui'
 import { verifyFileReadable } from '~/lib/filesystem'
 import { useDownload } from '~/lib/hooks'
 import {
-	BookMetadata,
+	BookLoadedEventPayload,
 	ColumnCount,
 	intoBookmarkRef,
 	ReadiumLocator,
@@ -16,8 +16,9 @@ import {
 } from '~/modules/readium'
 import { useReaderStore } from '~/stores'
 import {
+	convertNativeToc,
+	findTocItemByHref,
 	OnBookmarkCallback,
-	trimFragmentFromHref,
 	useEpubLocationStore,
 	useEpubTheme,
 } from '~/stores/epub'
@@ -237,9 +238,21 @@ export default function ReadiumReader({
 	)
 
 	const handleBookLoaded = useCallback(
-		(metadata?: BookMetadata) => {
-			store.onBookLoad(metadata)
-			store.onTocChange(book.ebook?.toc ?? [])
+		(event: BookLoadedEventPayload) => {
+			store.onBookLoad(event.bookMetadata)
+
+			// Note: This is kinda treating a symptom rather than the cause, but the server-derived ToC is less
+			// accurate than Readium's for some reason. I don't have time to dig into the weeds of the epub parsing
+			// library I use to sus out the cause, so for now when feasible we just defer to Readium's ToC.
+			// Frankly it even makes more sense, since this is a fully encapsulated experience for mobile. I think
+			// once web supports Readium then it becomes more of an important thing to figure out, since the server will
+			// basically need to return something more alike what the native Readium libraries do
+			if (event.tableOfContents && event.tableOfContents.length > 0) {
+				store.onTocChange(convertNativeToc(event.tableOfContents), 'native')
+			} else if (book.ebook?.toc && book.ebook.toc.length > 0) {
+				store.onTocChange(book.ebook.toc, 'server')
+			}
+
 			store.storeBook(book)
 			store.storeActions(navigator)
 		},
@@ -249,9 +262,7 @@ export default function ReadiumReader({
 	const handleLocationChanged = useCallback(
 		(locator: ReadiumLocator) => {
 			if (!locator.chapterTitle) {
-				const tocItem = store.toc.find(
-					(item) => trimFragmentFromHref(item.content) === locator.href,
-				)
+				const tocItem = findTocItemByHref(store.toc, locator.href)
 				if (tocItem) {
 					locator.chapterTitle = tocItem.label
 				}
@@ -302,7 +313,7 @@ export default function ReadiumReader({
 				bookId={book.id}
 				url={localUri}
 				initialLocator={initialLocator}
-				onBookLoaded={({ nativeEvent }) => handleBookLoaded(nativeEvent.bookMetadata)}
+				onBookLoaded={({ nativeEvent }) => handleBookLoaded(nativeEvent)}
 				onLocatorChange={({ nativeEvent: locator }) => handleLocationChanged(locator)}
 				onMiddleTouch={handleMiddleTouch}
 				onSelection={handleSelection}

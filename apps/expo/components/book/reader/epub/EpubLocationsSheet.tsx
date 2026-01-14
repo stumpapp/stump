@@ -1,7 +1,7 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { useColors } from '~/lib/constants'
+import { IS_IOS_24_PLUS, useColors } from '~/lib/constants'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { useEpubSheetStore } from '~/stores/epubSheet'
 
@@ -19,8 +19,10 @@ export default function EpubLocationsSheet() {
 			ref={sheetRef}
 			detents={[1]}
 			cornerRadius={24}
+			dimmed={false}
+			scrollable
 			grabber
-			backgroundColor={colors.background.DEFAULT}
+			backgroundColor={IS_IOS_24_PLUS ? undefined : colors.background.DEFAULT}
 			grabberOptions={{
 				color: colorScheme === 'dark' ? '#333' : '#ccc',
 			}}
@@ -28,6 +30,7 @@ export default function EpubLocationsSheet() {
 				paddingBottom: insets.bottom,
 				flex: 1,
 			}}
+			insetAdjustment="automatic"
 		>
 			<LocationsSheetContent />
 		</TrueSheet>

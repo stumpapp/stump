@@ -409,6 +409,24 @@ impl MediaMutation {
 				active_session.into(),
 			)))
 		} else {
+			let recent_completion =
+				finished_reading_session::Entity::recent_completed_record(
+					conn,
+					&user.id,
+					id.as_ref(),
+					finished_reading_session::COMPLETION_DEDUP_TIMEOUT_MINUTES,
+				)
+				.await?;
+
+			// TODO: See if this creates too much churn in practice
+			if let Some(existing_session) = recent_completion {
+				// Already completed recently - delete active session but return existing finished session
+				let _ = active_session.delete(conn).await?;
+				return Ok(ReadingProgressOutput::Finished(Box::new(
+					existing_session.into(),
+				)));
+			}
+
 			let finished_reading_session = finished_reading_session::ActiveModel {
 				user_id: Set(user.id.clone()),
 				media_id: Set(id.to_string()),

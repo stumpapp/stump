@@ -2,7 +2,7 @@ use crate::prefixer::{parse_query_to_model, parse_query_to_model_optional, Prefi
 
 use super::{media, registered_reading_device, user::AuthUser};
 use async_graphql::SimpleObject;
-use sea_orm::{entity::prelude::*, FromQueryResult, QuerySelect};
+use sea_orm::{entity::prelude::*, FromQueryResult, QueryOrder, QuerySelect};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
 #[graphql(name = "FinishedReadingSessionModel")]
@@ -100,6 +100,10 @@ impl Related<super::user::Entity> for Entity {
 
 impl ActiveModelBehavior for ActiveModel {}
 
+// TODO: Make this configurable via server settings
+/// The number of minutes after which a book can be re-completed
+pub const COMPLETION_DEDUP_TIMEOUT_MINUTES: i64 = 5;
+
 impl Entity {
 	pub fn find_finished_in_series(user: &AuthUser, series_id: String) -> Select<Self> {
 		Self::find()
@@ -107,6 +111,22 @@ impl Entity {
 			.filter(media::Column::SeriesId.eq(series_id))
 			.filter(Column::UserId.eq(user.id.clone()))
 			.distinct_on([Column::MediaId])
+	}
+
+	pub async fn recent_completed_record(
+		conn: &DatabaseConnection,
+		user_id: &str,
+		media_id: &str,
+		timeout_minutes: i64,
+	) -> Result<Option<Model>, DbErr> {
+		let cutoff = chrono::Utc::now() - chrono::Duration::minutes(timeout_minutes);
+		Self::find()
+			.filter(Column::UserId.eq(user_id))
+			.filter(Column::MediaId.eq(media_id))
+			.filter(Column::CompletedAt.gt(cutoff))
+			.order_by_desc(Column::CompletedAt)
+			.one(conn)
+			.await
 	}
 }
 

@@ -81,7 +81,7 @@ export const executeSingleServerSync = async (serverId: string, api: Api): Promi
 									readium: data,
 								},
 								elapsedSeconds: record.elapsedSeconds,
-								isComplete: record.percentage ? parseFloat(record.percentage) >= 100 : false,
+								isComplete: record.percentage ? parseFloat(record.percentage) >= 0.99 : false,
 								percentage: record.percentage,
 							},
 						}) satisfies MediaProgressInput,

@@ -155,13 +155,13 @@ export const getInstancesForServers = async (
 				.otherwise(() => false),
 	)
 
-	if (incompatibleServers.length > 0) {
-		console.warn(`Found ${incompatibleServers.length} incompatible servers for progress sync`)
-	}
-
 	if (compatibleServers.length === 0) {
 		console.warn('No compatible servers found for progress sync')
 		return {}
+	}
+
+	if (incompatibleServers.length > 0) {
+		console.warn(`Found ${incompatibleServers.length} incompatible servers for progress sync`)
 	}
 
 	const instances: Record<string, Api> = {}

@@ -214,6 +214,7 @@ mod tests {
 		let filters: Vec<SmartListFilterGroupInput> = vec![SmartListFilterGroupInput {
 			joiner: SmartListGroupJoiner::And,
 			groups: vec![SmartListFilterInput::Media(MediaFilterInput {
+				id: None,
 				name: Some(StringLikeFilter::Eq("Test".to_string())),
 				_and: None,
 				created_at: None,
@@ -242,6 +243,7 @@ mod tests {
 			SmartListFilterGroupInput {
 				joiner: SmartListGroupJoiner::Not,
 				groups: vec![SmartListFilterInput::Media(MediaFilterInput {
+					id: None,
 					name: Some(StringLikeFilter::Eq("Book".to_string())),
 					_and: None,
 					created_at: None,

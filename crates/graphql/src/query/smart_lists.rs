@@ -246,6 +246,7 @@ mod tests {
 			SmartListFilterGroupInput {
 				joiner: SmartListGroupJoiner::Or,
 				groups: vec![SmartListFilterInput::Media(MediaFilterInput {
+					id: None,
 					name: Some(StringLikeFilter::Eq("Book".to_string())),
 					_and: None,
 					created_at: None,

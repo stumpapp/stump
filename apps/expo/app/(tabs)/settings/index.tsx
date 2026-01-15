@@ -6,6 +6,7 @@ import { AppDataUsageLink } from '~/components/appSettings/management'
 import {
 	AppLanguage,
 	AppTheme,
+	AutoSyncOfflineProgress,
 	DefaultServer,
 	DeleteDatabase,
 	ImageCacheActions,
@@ -46,6 +47,7 @@ export default function Screen() {
 					description="Stump features are optional, you can completely turn them off if you just want OPDS support"
 				>
 					<StumpEnabled />
+					<AutoSyncOfflineProgress />
 				</CardList>
 
 				<CardList label="Management">

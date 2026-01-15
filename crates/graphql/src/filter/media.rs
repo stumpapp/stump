@@ -46,6 +46,8 @@ fn apply_reading_status_filter(
 #[serde(rename_all = "camelCase")]
 pub struct MediaFilterInput {
 	#[graphql(default)]
+	pub id: Option<StringLikeFilter<String>>,
+	#[graphql(default)]
 	pub name: Option<StringLikeFilter<String>>,
 	#[graphql(default)]
 	pub size: Option<NumericFilter<i64>>,
@@ -191,6 +193,7 @@ mod tests {
 	#[test]
 	fn test_reading_status_in() {
 		let filter = MediaFilterInput {
+			id: None,
 			_and: None,
 			created_at: None,
 			extension: None,
@@ -225,6 +228,7 @@ mod tests {
 	#[test]
 	fn test_reading_status_not_in() {
 		let filter = MediaFilterInput {
+			id: None,
 			_and: None,
 			created_at: None,
 			extension: None,

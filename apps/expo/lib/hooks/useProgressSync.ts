@@ -1,12 +1,14 @@
 import * as Sentry from '@sentry/react-native'
 import { MediaProgressInput } from '@stump/graphql'
-import { and, eq, ne } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
 import { useFocusEffect } from 'expo-router'
 import { useCallback, useRef } from 'react'
+import { toast } from 'sonner-native'
 import { match, P } from 'ts-pattern'
 
-import { executeProgressSync } from '~/backgroundTasks/progressSync'
+import { executePullProgressSync } from '~/backgroundTasks/pullServerProgress'
+import { executePushProgressSync } from '~/backgroundTasks/pushLocalProgress'
 import { useActiveServer } from '~/components/activeServer'
 import { db, epubProgress, readProgress, syncStatus } from '~/db'
 import { useSavedServers } from '~/stores'
@@ -41,7 +43,7 @@ export function useProgressSync() {
 		[getFullServer],
 	)
 
-	const syncProgress = useCallback(
+	const getInstances = useCallback(
 		async (forServers?: string[]) => {
 			const servers = await Promise.all(
 				savedServers
@@ -55,14 +57,12 @@ export function useProgressSync() {
 					}),
 			)
 
-			const instances = await getInstancesForServers(servers, {
+			return getInstancesForServers(servers, {
 				getServerToken,
 				saveToken: saveServerToken,
 				getCachedInstance,
 				onCacheInstance,
 			})
-
-			return executeProgressSync(instances)
 		},
 		[
 			savedServers,
@@ -74,30 +74,45 @@ export function useProgressSync() {
 		],
 	)
 
-	return { syncProgress, syncServerProgress }
-}
+	type PushProgressParams = {
+		forServers?: string[]
+		ignoreBookIds?: string[]
+	}
 
-type UseProgressToSyncExistsParams = {
-	serverId?: string
-}
-
-export function useProgressToSyncExists({ serverId }: UseProgressToSyncExistsParams = {}) {
-	const { data } = useLiveQuery(
-		db
-			.select()
-			.from(readProgress)
-			.where(
-				serverId
-					? and(
-							ne(readProgress.syncStatus, syncStatus.enum.SYNCED),
-							eq(readProgress.serverId, serverId),
-						)
-					: ne(readProgress.syncStatus, syncStatus.enum.SYNCED),
-			)
-			.limit(1),
+	const pushProgress = useCallback(
+		async ({ forServers, ignoreBookIds }: PushProgressParams = {}) => {
+			const instances = await getInstances(forServers)
+			return executePushProgressSync(instances, ignoreBookIds)
+		},
+		[getInstances],
 	)
 
-	return data?.length > 0
+	const pullProgress = useCallback(
+		async (forServers?: string[]) => {
+			const instances = await getInstances(forServers)
+			return executePullProgressSync(instances)
+		},
+		[getInstances],
+	)
+
+	const syncProgress = useCallback(
+		async (forServers?: string[]) => {
+			const pullResults = await pullProgress(forServers)
+
+			const ignoreBookIds = Object.values(pullResults).flatMap((r) => r.failedBookIds)
+
+			const pushResults = await pushProgress({ forServers, ignoreBookIds })
+
+			if (ignoreBookIds.length > 0) {
+				throw new Error(`Failed to pull progress for ${ignoreBookIds.length} book(s)`)
+			}
+
+			return { pullResults, pushResults }
+		},
+		[pullProgress, pushProgress],
+	)
+
+	return { syncProgress, syncServerProgress, pushProgress, pullProgress }
 }
 
 type Params = {
@@ -113,22 +128,33 @@ export function useAutoSyncActiveServer({ enabled = true }: Params = {}) {
 
 	const didSync = useRef(false)
 
-	const isUnsyncedProgressExists = useProgressToSyncExists({ serverId })
-
 	useFocusEffect(
 		useCallback(() => {
 			const syncIfNeeded = async () => {
-				if (!enabled || !isUnsyncedProgressExists || didSync.current) return
+				if (!enabled || didSync.current) return
+
 				didSync.current = true
-				await syncProgress([serverId])
+
+				try {
+					await syncProgress([serverId])
+				} catch (error) {
+					console.error('Failed to sync progress', error)
+					Sentry.captureException(error, {
+						extra: { serverId },
+					})
+					toast.error('Failed to sync offline progress', {
+						description: error instanceof Error ? error.message : 'Unknown error',
+					})
+				}
 			}
 			syncIfNeeded()
 
 			return () => {
 				didSync.current = false
 			}
+			// eslint-disable-next-line react-compiler/react-compiler
 			// eslint-disable-next-line react-hooks/exhaustive-deps
-		}, [enabled, serverId, isUnsyncedProgressExists]),
+		}, [enabled, serverId]),
 	)
 }
 

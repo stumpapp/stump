@@ -22,6 +22,7 @@ type MobilePreferencesStore = {
 	showCuratedDownloads?: boolean | undefined
 	preferNativePdf?: boolean | undefined
 	disableDismissGesture: boolean
+	autoSyncOfflineProgress: boolean
 	/**
 	 * Patch the store with new values.
 	 */
@@ -49,6 +50,7 @@ export const usePreferencesStore = create<MobilePreferencesStore>()(
 			showCuratedDownloads: true,
 			preferNativePdf: false,
 			disableDismissGesture: false,
+			autoSyncOfflineProgress: true,
 			patch: (data) => set(data),
 		}),
 		{

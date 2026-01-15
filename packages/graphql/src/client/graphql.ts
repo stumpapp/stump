@@ -1166,6 +1166,7 @@ export type MediaFilterInput = {
   _or?: InputMaybe<Array<MediaFilterInput>>;
   createdAt?: InputMaybe<NumericFilterDateTime>;
   extension?: InputMaybe<FieldFilterString>;
+  id?: InputMaybe<FieldFilterString>;
   metadata?: InputMaybe<MediaMetadataFilterInput>;
   name?: InputMaybe<FieldFilterString>;
   pages?: InputMaybe<NumericFilterI32>;
@@ -3736,13 +3737,20 @@ export type SeriesScreenQuery = { __typename?: 'Query', series: { __typename?: '
       & { ' $fragmentRefs'?: { 'SeriesGridItemFragment': SeriesGridItemFragment } }
     )>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', totalPages: number, currentPage: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
 
-export type UpdateReadProgressionBackgroundTaskMutationVariables = Exact<{
+export type PullServerReadProgressionQueryVariables = Exact<{
+  filter: MediaFilterInput;
+}>;
+
+
+export type PullServerReadProgressionQuery = { __typename?: 'Query', media: { __typename?: 'PaginatedMediaResponse', nodes: Array<{ __typename?: 'Media', id: string, readProgress?: { __typename?: 'ActiveReadingSession', page?: number | null, percentageCompleted?: any | null, epubcfi?: string | null, updatedAt?: any | null, elapsedSeconds?: number | null, locator?: { __typename?: 'ReadiumLocator', chapterTitle: string, href: string, title?: string | null, type: string, locations?: { __typename?: 'ReadiumLocation', fragments?: Array<string> | null, progression?: any | null, position?: number | null, totalProgression?: any | null, cssSelector?: string | null, partialCfi?: string | null } | null } | null } | null, readHistory: Array<{ __typename?: 'FinishedReadingSession', completedAt: any }> }> } };
+
+export type PushLocalReadProgressionMutationVariables = Exact<{
   id: Scalars['ID']['input'];
   input: MediaProgressInput;
 }>;
 
 
-export type UpdateReadProgressionBackgroundTaskMutation = { __typename?: 'Mutation', updateMediaProgress: { __typename: 'ActiveReadingSession' } | { __typename: 'FinishedReadingSession' } };
+export type PushLocalReadProgressionMutation = { __typename?: 'Mutation', updateMediaProgress: { __typename: 'ActiveReadingSession' } | { __typename: 'FinishedReadingSession' } };
 
 export type ContinueReadingQueryVariables = Exact<{
   pagination?: InputMaybe<Pagination>;
@@ -6158,13 +6166,46 @@ export const SeriesScreenDocument = new TypedDocumentString(`
     }
   }
 }`) as unknown as TypedDocumentString<SeriesScreenQuery, SeriesScreenQueryVariables>;
-export const UpdateReadProgressionBackgroundTaskDocument = new TypedDocumentString(`
-    mutation UpdateReadProgressionBackgroundTask($id: ID!, $input: MediaProgressInput!) {
+export const PullServerReadProgressionDocument = new TypedDocumentString(`
+    query PullServerReadProgression($filter: MediaFilterInput!) {
+  media(filter: $filter, pagination: {none: {unpaginated: true}}) {
+    nodes {
+      id
+      readProgress {
+        page
+        percentageCompleted
+        epubcfi
+        updatedAt
+        elapsedSeconds
+        locator {
+          chapterTitle
+          href
+          title
+          type
+          locations {
+            fragments
+            progression
+            position
+            totalProgression
+            cssSelector
+            partialCfi
+          }
+        }
+      }
+      readHistory {
+        completedAt
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<PullServerReadProgressionQuery, PullServerReadProgressionQueryVariables>;
+export const PushLocalReadProgressionDocument = new TypedDocumentString(`
+    mutation PushLocalReadProgression($id: ID!, $input: MediaProgressInput!) {
   updateMediaProgress(id: $id, input: $input) {
     __typename
   }
 }
-    `) as unknown as TypedDocumentString<UpdateReadProgressionBackgroundTaskMutation, UpdateReadProgressionBackgroundTaskMutationVariables>;
+    `) as unknown as TypedDocumentString<PushLocalReadProgressionMutation, PushLocalReadProgressionMutationVariables>;
 export const ContinueReadingDocument = new TypedDocumentString(`
     query ContinueReading($pagination: Pagination) {
   keepReading(pagination: $pagination) {

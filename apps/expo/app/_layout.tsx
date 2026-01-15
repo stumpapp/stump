@@ -16,6 +16,7 @@ import { SystemBars } from 'react-native-edge-to-edge'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { KeyboardProvider } from 'react-native-keyboard-controller'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { Toaster } from 'sonner-native'
 
 import darkSplash from '~/assets/splash/dark.json'
 import lightSplash from '~/assets/splash/light.json'
@@ -213,6 +214,7 @@ export default function RootLayout() {
 						<PortalHost />
 					</KeyboardProvider>
 				</BottomSheet.Provider>
+				<Toaster position="bottom-center" />
 			</ThemeProvider>
 		</GestureHandlerRootView>
 	)

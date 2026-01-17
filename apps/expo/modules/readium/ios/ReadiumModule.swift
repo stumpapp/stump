@@ -54,7 +54,7 @@
          }
 
          View(EPUBView.self) {
-             Events("onLocatorChange", "onPageChange", "onBookLoaded", "onLayoutChange", "onMiddleTouch", "onSelection", "onDoubleTouch", "onError")
+             Events("onLocatorChange", "onPageChange", "onBookLoaded", "onLayoutChange", "onMiddleTouch", "onSelection", "onAnnotationTap", "onHighlightRequest", "onNoteRequest", "onEditHighlight", "onDeleteHighlight", "onDoubleTouch", "onError")
 
              AsyncFunction("goToLocation") { (view: EPUBView, locatorJson: [String: Any]) in
                  guard let locator = try? Locator(json: locatorJson) else {
@@ -73,6 +73,14 @@
              
              AsyncFunction("destroy") { (view: EPUBView) in
                  view.destroyNavigator()
+             }
+             
+             AsyncFunction("getSelection") { (view: EPUBView) -> [String: Any]? in
+                 return view.getSelection()
+             }
+             
+             AsyncFunction("clearSelection") { (view: EPUBView) in
+                 view.clearSelection()
              }
 
              Prop("bookId") { (view: EPUBView, prop: String) in
@@ -95,6 +103,21 @@
 
              Prop("url") { (view: EPUBView, prop: String) in
                  view.pendingProps.url = prop
+             }
+
+             Prop("decorations") { (view: EPUBView, prop: [[String: Any]]) in
+                 let decorations = prop.compactMap { (decorationDict: [String: Any]) -> DecorationItem? in
+                     guard let id = decorationDict["id"] as? String,
+                           let colorHex = decorationDict["color"] as? String,
+                           let locatorDict = decorationDict["locator"] as? [String: Any],
+                           let locator = try? Locator(json: locatorDict),
+                           let color = Color(hex: colorHex)?.uiColor
+                     else {
+                         return nil
+                     }
+                     return DecorationItem(id: id, color: color, locator: locator)
+                 }
+                 view.pendingProps.decorations = decorations
              }
 
              Prop("colors") { (view: EPUBView, prop: [String: String]) in

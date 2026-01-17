@@ -1,6 +1,6 @@
 use async_graphql::{InputObject, OneofObject};
 use models::{
-	entity::{bookmark, media_metadata, user::AuthUser},
+	entity::{bookmark, media_annotation, media_metadata, user::AuthUser},
 	shared::readium::ReadiumLocator,
 };
 use sea_orm::{prelude::*, ActiveValue::Set, IntoActiveModel};
@@ -152,4 +152,29 @@ fn into_array_string(s: Option<Vec<String>>) -> Option<String> {
 		Some(v) if !v.is_empty() => Some(v.join(", ")),
 		_ => None,
 	}
+}
+
+#[derive(Debug, Clone, InputObject)]
+pub struct CreateAnnotationInput {
+	pub media_id: String,
+	pub locator: ReadiumLocator,
+	pub annotation_text: Option<String>,
+}
+
+impl CreateAnnotationInput {
+	pub fn into_active_model(self, user: &AuthUser) -> media_annotation::ActiveModel {
+		media_annotation::ActiveModel {
+			locator: Set(self.locator),
+			annotation_text: Set(self.annotation_text),
+			media_id: Set(self.media_id),
+			user_id: Set(user.id.clone()),
+			..Default::default()
+		}
+	}
+}
+
+#[derive(Debug, Clone, InputObject)]
+pub struct UpdateAnnotationInput {
+	pub id: String,
+	pub annotation_text: Option<String>,
 }

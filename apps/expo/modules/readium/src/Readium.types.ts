@@ -135,7 +135,7 @@ export type EPUBReaderThemeConfig = {
 	colors?: {
 		background: string
 		foreground: string
-		// highlight: string
+		highlight: string
 	}
 }
 
@@ -176,15 +176,18 @@ export type ReadiumViewProps = {
 	url: string
 	locator?: ReadiumLocator
 	initialLocator?: ReadiumLocator
+	decorations?: Decoration[]
 	onLoad?: (event: { nativeEvent: OnLoadEventPayload }) => void
 	onBookLoaded?: (event: { nativeEvent: BookLoadedEventPayload }) => void
 	onLayoutChange?: (event: { nativeEvent: { bookMetadata?: BookMetadata } }) => void
 	onLocatorChange?: (event: { nativeEvent: ReadiumLocator }) => void
 	onMiddleTouch?: (event: { nativeEvent: void }) => void
-	onSelection?: (event: {
-		nativeEvent: { cleared?: boolean; x?: number; y?: number; locator?: ReadiumLocator }
-	}) => void
-	// onHighlightTap
+	onSelection?: (event: { nativeEvent: SelectionEvent }) => void
+	onAnnotationTap?: (event: { nativeEvent: DecoratorTapEvent }) => void
+	onHighlightRequest?: (event: { nativeEvent: HighlightRequestEvent }) => void
+	onNoteRequest?: (event: { nativeEvent: NoteRequestEvent }) => void
+	onEditHighlight?: (event: { nativeEvent: { decorationId: string } }) => void
+	onDeleteHighlight?: (event: { nativeEvent: { decorationId: string } }) => void
 	onDoubleTouch?: (event: { nativeEvent: ReadiumLocator }) => void
 	onError?: (event: {
 		nativeEvent: { errorDescription: string; failureReason: string; recoverySuggestion: string }
@@ -212,9 +215,43 @@ export interface EPUBHighlight extends EPUBLocation {
 	text: string
 }
 
+export interface Decoration {
+	id: string // Note: I use nums but Readium requires strings
+	bookId: string
+	locator: ReadiumLocator
+	color: string // Note: Added to support future where we can override color per annotation
+	annotationText?: string
+	createdAt: Date
+	updatedAt: Date
+}
+
+export interface DecoratorTapEvent {
+	decorationId: string
+	rect?: { x: number; y: number; width: number; height: number }
+}
+
+export interface SelectionEvent {
+	cleared?: boolean
+	x?: number
+	y?: number
+	locator?: ReadiumLocator
+}
+
+export interface HighlightRequestEvent {
+	locator: ReadiumLocator
+	text: string
+}
+
+export interface NoteRequestEvent {
+	locator: ReadiumLocator
+	text: string
+}
+
 export type ReadiumViewRef = {
 	goToLocation: (locator: ReadiumLocator) => Promise<void>
 	goForward: () => Promise<void>
 	goBackward: () => Promise<void>
 	destroy: () => Promise<void>
+	getSelection: () => Promise<SelectionEvent | null>
+	clearSelection: () => Promise<void>
 }

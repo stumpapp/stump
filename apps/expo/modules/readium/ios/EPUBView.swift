@@ -5,6 +5,12 @@
  import ReadiumInternal
  import WebKit
 
+ struct DecorationItem: Equatable {
+     var id: String
+     var color: UIColor
+     var locator: Locator
+ }
+
  public struct Props {
      var bookId: String?
      var locator: Locator?
@@ -31,6 +37,7 @@
      var textNormalization: Bool?
      var verticalText: Bool?
      var readingProgression: ReadiumNavigator.ReadingProgression?
+     var decorations: [DecorationItem]?
  }
 
  public struct FinalizedProps {
@@ -58,6 +65,7 @@
      var textNormalization: Bool?
      var verticalText: Bool?
      var readingProgression: ReadiumNavigator.ReadingProgression?
+     var decorations: [DecorationItem]
  }
 
  public class EPUBView: ExpoView {
@@ -68,7 +76,15 @@
      let onMiddleTouch = EventDispatcher()
      let onDoubleTouch = EventDispatcher()
      let onSelection = EventDispatcher()
+     let onAnnotationTap = EventDispatcher()
+     let onHighlightRequest = EventDispatcher()
+     let onNoteRequest = EventDispatcher()
+     let onEditHighlight = EventDispatcher()
+     let onDeleteHighlight = EventDispatcher()
      let onError = EventDispatcher()
+     
+     private var tappedHighlightId: String?
+     private var tappedHighlightRect: CGRect?
 
      public var navigator: EPUBNavigatorViewController?
 
@@ -77,6 +93,9 @@
 
      private var changingResource = false
      private var isInitialized = false
+     
+     private let highlightDecorationGroup = "highlights"
+     private var decorationObserverRegistered = false
      
      // Misc tasks for cleanup
      private var loadPublicationTask: Task<Void, Never>?
@@ -192,7 +211,8 @@
              ligatures: pendingProps.ligatures ?? oldProps?.ligatures,
              textNormalization: pendingProps.textNormalization ?? oldProps?.textNormalization,
              verticalText: pendingProps.verticalText ?? oldProps?.verticalText,
-             readingProgression: pendingProps.readingProgression ?? oldProps?.readingProgression
+             readingProgression: pendingProps.readingProgression ?? oldProps?.readingProgression,
+             decorations: pendingProps.decorations ?? oldProps?.decorations ?? []
          )
 
          // If this is a new book or first initialization, load the publication
@@ -207,6 +227,10 @@
          // Update navigator if locator changed
          if props!.locator != oldProps?.locator, let locator = props!.locator {
              go(locator: locator)
+         }
+
+         if props!.decorations != oldProps?.decorations {
+             applyDecorations()
          }
 
          // Update preferences (only if navigator is initialized)
@@ -368,6 +392,14 @@
          ]
 
          do {
+             // TODO: I had to do all manual bc iOS seems to always place native ones first which
+             // I don't want. Eventually I'll want to add back look up and translate
+             let editingActions: [EditingAction] = [
+                 EditingAction(title: "Highlight", action: #selector(handleHighlightAction)),
+                 EditingAction(title: "Note", action: #selector(handleNoteAction)),
+                 EditingAction(title: "Copy", action: #selector(handleCopyAction)),
+             ]
+             
              let navigator = try EPUBNavigatorViewController(
                  publication: publication,
                  initialLocation: props.locator,
@@ -400,6 +432,7 @@
                          publisherStyles: true,
                          scroll: false
                      ),
+                     editingActions: editingActions,
                      contentInset: [
                          .compact: (top: 0, bottom: 0),
                          .regular: (top: 0, bottom: 0),
@@ -416,6 +449,8 @@
              addSubview(navigator.view)
              self.navigator = navigator
              isInitialized = true
+
+             applyDecorations()
 
              // Cancel any existing positions task and start new one
              positionsTask?.cancel()
@@ -583,6 +618,117 @@
          navigationTasks.append(task)
          navigationTasks.removeAll { $0.isCancelled }
      }
+     
+     
+     func applyDecorations() {
+         guard let navigator = navigator, let props = props else { return }
+         
+         let decorations = props.decorations.map { item in
+             let style = Decoration.Style.highlight(tint: item.color, isActive: true)
+             return Decoration(
+                 id: item.id,
+                 locator: item.locator,
+                 style: style
+             )
+         }
+         
+         navigator.apply(decorations: decorations, in: highlightDecorationGroup)
+         
+         if !decorationObserverRegistered {
+             registerDecorationObserver(for: highlightDecorationGroup)
+         }
+     }
+     
+     func getSelection() -> [String: Any]? {
+         guard let navigator = navigator,
+               let selection = navigator.currentSelection
+         else {
+             return nil
+         }
+         
+         var result: [String: Any] = [
+             "locator": selection.locator.json
+         ]
+         
+         if let frame = selection.frame {
+             result["rect"] = [
+                 "x": frame.origin.x,
+                 "y": frame.origin.y,
+                 "width": frame.size.width,
+                 "height": frame.size.height
+             ]
+         }
+         
+         return result
+     }
+     
+     func clearSelection() {
+         navigator?.clearSelection()
+     }
+     
+     private func registerDecorationObserver(for group: String) {
+         guard let navigator = navigator else { return }
+         
+         navigator.observeDecorationInteractions(inGroup: group) { [weak self] event in
+             guard let self = self else { return }
+             
+             self.tappedHighlightId = event.decoration.id
+             self.tappedHighlightRect = event.rect
+             
+             self.showHighlightContextMenu(at: event.rect, decorationId: event.decoration.id)
+         }
+         
+         decorationObserverRegistered = true
+     }
+     
+     private func showHighlightContextMenu(at rect: CGRect?, decorationId: String) {
+         let editAction = UIAction(title: "Edit Note", image: UIImage(systemName: "pencil")) { [weak self] _ in
+             self?.onEditHighlight(["decorationId": decorationId])
+         }
+         
+         let deleteAction = UIAction(title: "Delete", image: UIImage(systemName: "trash"), attributes: .destructive) { [weak self] _ in
+             self?.onDeleteHighlight(["decorationId": decorationId])
+         }
+         
+         let menu = UIMenu(children: [editAction, deleteAction])
+         
+         DispatchQueue.main.async { [weak self] in
+             guard let self = self else { return }
+             
+             let sourceRect = rect ?? CGRect(x: self.bounds.midX, y: self.bounds.midY, width: 1, height: 1)
+             
+             let interaction = UIContextMenuInteraction(delegate: self)
+             self.addInteraction(interaction)
+             
+             self.pendingHighlightMenu = menu
+             self.pendingMenuSourceRect = sourceRect
+             
+             self.showMenuController(menu: menu, at: sourceRect)
+         }
+     }
+     
+     private var pendingHighlightMenu: UIMenu?
+     private var pendingMenuSourceRect: CGRect?
+     
+     private func showMenuController(menu: UIMenu, at rect: CGRect) {
+         if #available(iOS 16.0, *) {
+             let editMenuInteraction = UIEditMenuInteraction(delegate: self)
+             self.addInteraction(editMenuInteraction)
+             
+             let config = UIEditMenuConfiguration(identifier: "highlightMenu", sourcePoint: CGPoint(x: rect.midX, y: rect.minY))
+             editMenuInteraction.presentEditMenu(with: config)
+         } else {
+             self.onAnnotationTap([
+                 "decorationId": tappedHighlightId ?? "",
+                 "rect": [
+                     "x": rect.origin.x,
+                     "y": rect.origin.y,
+                     "width": rect.size.width,
+                     "height": rect.size.height
+                 ]
+             ])
+         }
+     }
 
      func updatePreferences() {
          guard let props = props else { return }
@@ -644,6 +790,10 @@
          ])
      }
 
+     public func navigator(_ navigator: any SelectableNavigator, shouldShowMenuForSelection selection: Selection) -> Bool {
+         return true // use native
+     }
+
      public func navigator(_ navigator: VisualNavigator, didTapAt point: CGPoint) {
          let navigator = navigator as! EPUBNavigatorViewController
 
@@ -667,5 +817,75 @@
          }
 
          onMiddleTouch()
+     }
+ }
+
+ extension EPUBView {
+     @objc func handleHighlightAction(_ sender: Any?) {
+         guard let selection = navigator?.currentSelection else {
+             print("EPUBView: No current selection for highlight")
+             return
+         }
+         
+         let selectedText = selection.locator.text.highlight ?? ""
+         onHighlightRequest([
+             "locator": selection.locator.json,
+             "text": selectedText
+         ])
+         
+         navigator?.clearSelection()
+     }
+     
+     @objc func handleNoteAction(_ sender: Any?) {
+         guard let selection = navigator?.currentSelection else {
+             print("EPUBView: No current selection for note")
+             return
+         }
+         
+         let selectedText = selection.locator.text.highlight ?? ""
+         onNoteRequest([
+             "locator": selection.locator.json,
+             "text": selectedText
+         ])
+         
+         navigator?.clearSelection()
+     }
+     
+     @objc func handleCopyAction(_ sender: Any?) {
+         guard let selection = navigator?.currentSelection else {
+             print("EPUBView: No current selection for copy")
+             return
+         }
+         
+         let text = selection.locator.text.highlight ?? ""
+         UIPasteboard.general.string = text
+         navigator?.clearSelection()
+     }
+ }
+
+ @available(iOS 16.0, *)
+ extension EPUBView: UIEditMenuInteractionDelegate {
+     public func editMenuInteraction(_ interaction: UIEditMenuInteraction, menuFor configuration: UIEditMenuConfiguration, suggestedActions: [UIMenuElement]) -> UIMenu? {
+         guard let highlightId = tappedHighlightId else { return nil }
+         
+         let editAction = UIAction(title: "Edit Note", image: UIImage(systemName: "pencil")) { [weak self] _ in
+             self?.onEditHighlight(["decorationId": highlightId])
+         }
+         
+         let deleteAction = UIAction(title: "Delete", image: UIImage(systemName: "trash"), attributes: .destructive) { [weak self] _ in
+             self?.onDeleteHighlight(["decorationId": highlightId])
+         }
+         
+         return UIMenu(children: [editAction, deleteAction])
+     }
+     
+     public func editMenuInteraction(_ interaction: UIEditMenuInteraction, targetRectFor configuration: UIEditMenuConfiguration) -> CGRect {
+         return pendingMenuSourceRect ?? CGRect(x: bounds.midX, y: bounds.midY, width: 1, height: 1)
+     }
+ }
+
+ extension EPUBView: UIContextMenuInteractionDelegate {
+     public func contextMenuInteraction(_ interaction: UIContextMenuInteraction, configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
+         return nil
      }
  }

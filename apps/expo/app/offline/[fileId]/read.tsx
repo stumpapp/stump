@@ -2,10 +2,9 @@ import * as Sentry from '@sentry/react-native'
 import { ARCHIVE_EXTENSION, EBOOK_EXTENSION, PDF_EXTENSION } from '@stump/client'
 import { PagedProgressInput } from '@stump/graphql'
 import { useMutation } from '@tanstack/react-query'
-import { eq } from 'drizzle-orm'
+import { and, eq, isNull } from 'drizzle-orm'
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
 import { useKeepAwake } from 'expo-keep-awake'
-import { uuid } from 'expo-modules-core'
 import * as NavigationBar from 'expo-navigation-bar'
 import { useLocalSearchParams } from 'expo-router'
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -16,6 +15,8 @@ import { ImageBasedReader, PdfReader, ReadiumReader } from '~/components/book/re
 import { ImageReaderBookRef } from '~/components/book/reader/image/context'
 import ServerErrorBoundary from '~/components/ServerErrorBoundary'
 import {
+	annotationLocator,
+	annotations as annotationsTable,
 	bookmarkLocations,
 	bookmarks as bookmarksTable,
 	db,
@@ -31,9 +32,9 @@ import {
 	thumbnailsDirectory,
 	unpackedBookDirectory,
 } from '~/lib/filesystem'
-import { useAppState } from '~/lib/hooks'
+import { useAppState, useLocalAnnotationMutations, useLocalBookmarkMutations } from '~/lib/hooks'
+import type { ReadiumLocator } from '~/modules/readium'
 import { intoReadiumLocator } from '~/modules/readium'
-import { ReadiumLocator } from '~/modules/readium/src/Readium.types'
 import StumpStreamer from '~/modules/streamer'
 import { useBookPreferences, useBookTimer, useReaderStore } from '~/stores/reader'
 
@@ -62,7 +63,15 @@ export default function Screen() {
 	)
 
 	const { data: bookmarkRecords } = useLiveQuery(
-		db.select().from(bookmarksTable).where(eq(bookmarksTable.bookId, fileId)),
+		db
+			.select()
+			.from(bookmarksTable)
+			.where(and(eq(bookmarksTable.bookId, fileId), isNull(bookmarksTable.deletedAt))),
+		[fileId],
+	)
+
+	const { data: annotationRecords } = useLiveQuery(
+		db.select().from(annotationsTable).where(eq(annotationsTable.bookId, fileId)),
 		[fileId],
 	)
 
@@ -74,7 +83,13 @@ export default function Screen() {
 		return null
 	}
 
-	return <Reader record={record} bookmarks={bookmarkRecords || []} />
+	return (
+		<Reader
+			record={record}
+			bookmarks={bookmarkRecords || []}
+			annotations={annotationRecords || []}
+		/>
+	)
 }
 
 type ReaderProps = {
@@ -83,9 +98,10 @@ type ReaderProps = {
 		read_progress: typeof readProgress.$inferSelect | null
 	}
 	bookmarks: (typeof bookmarksTable.$inferSelect)[]
+	annotations: (typeof annotationsTable.$inferSelect)[]
 }
 
-function Reader({ record, bookmarks }: ReaderProps) {
+function Reader({ record, bookmarks, annotations }: ReaderProps) {
 	const downloadedFile = useMemo(() => record.downloaded_files, [record])
 
 	const unsyncedProgress = useMemo(() => record.read_progress, [record])
@@ -96,8 +112,8 @@ function Reader({ record, bookmarks }: ReaderProps) {
 	)
 
 	const book = useMemo(
-		() => buildBook(downloadedFile, unsyncedProgress, bookmarks),
-		[downloadedFile, unsyncedProgress, bookmarks],
+		() => buildBook(downloadedFile, unsyncedProgress, bookmarks, annotations),
+		[downloadedFile, unsyncedProgress, bookmarks, annotations],
 	)
 
 	const [isStreamerInitialized, setIsStreamerInitialized] = useState(false)
@@ -254,55 +270,15 @@ function Reader({ record, bookmarks }: ReaderProps) {
 		[book.id, downloadedFile.serverId, updateEbookProgress],
 	)
 
-	const { mutateAsync: createBookmark } = useMutation({
-		mutationFn: async ({
-			locator,
-			previewContent,
-		}: {
-			locator: ReadiumLocator
-			previewContent?: string
-		}) => {
-			const id = uuid.v4()
-			await db.insert(bookmarksTable).values({
-				id,
-				bookId: book.id,
-				serverId: downloadedFile.serverId,
-				href: locator.href,
-				chapterTitle: locator.chapterTitle,
-				epubcfi: locator.locations?.partialCfi,
-				locations: locator.locations,
-				previewContent,
-				syncStatus: syncStatus.enum.UNSYNCED,
-			})
-			return { id }
-		},
-		onError: (error) => {
-			console.error('Failed to create offline bookmark:', error)
-		},
+	const { createBookmark, deleteBookmark } = useLocalBookmarkMutations({
+		bookId: book.id,
+		serverId: downloadedFile.serverId,
 	})
 
-	const { mutateAsync: deleteOfflineBookmark } = useMutation({
-		mutationFn: async (bookmarkId: string) => {
-			await db.delete(bookmarksTable).where(eq(bookmarksTable.id, bookmarkId))
-		},
-		onError: (error) => {
-			console.error('Failed to delete offline bookmark:', error)
-		},
+	const { createAnnotation, updateAnnotation, deleteAnnotation } = useLocalAnnotationMutations({
+		bookId: book.id,
+		serverId: downloadedFile.serverId,
 	})
-
-	const onBookmark = useCallback(
-		async (locator: ReadiumLocator, previewContent?: string) => {
-			return createBookmark({ locator, previewContent })
-		},
-		[createBookmark],
-	)
-
-	const onDeleteBookmark = useCallback(
-		async (bookmarkId: string) => {
-			await deleteOfflineBookmark(bookmarkId)
-		},
-		[deleteOfflineBookmark],
-	)
 
 	const pageURL = useCallback(
 		(page: number) => StumpStreamer.getPageURL(book.id, page) || '',
@@ -357,8 +333,11 @@ function Reader({ record, bookmarks }: ReaderProps) {
 				book={book}
 				initialLocator={initialLocator ? intoReadiumLocator(initialLocator) : undefined}
 				onLocationChanged={onLocationChanged}
-				onBookmark={onBookmark}
-				onDeleteBookmark={onDeleteBookmark}
+				onBookmark={createBookmark}
+				onDeleteBookmark={deleteBookmark}
+				onCreateAnnotation={createAnnotation}
+				onUpdateAnnotation={updateAnnotation}
+				onDeleteAnnotation={deleteAnnotation}
 				offlineUri={`${booksDirectory(downloadedFile.serverId)}/${downloadedFile.filename}`}
 				serverId={downloadedFile.serverId}
 			/>
@@ -400,6 +379,7 @@ const buildBook = (
 	downloadedFile: typeof downloadedFiles.$inferSelect,
 	unsyncedProgress: typeof readProgress.$inferSelect | null,
 	bookmarkRecords: (typeof bookmarksTable.$inferSelect)[] = [],
+	annotationRecords: (typeof annotationsTable.$inferSelect)[] = [],
 ): ImageReaderBookRef => {
 	const thumbnail = {
 		// TODO: Don't assume JPG
@@ -444,7 +424,7 @@ const buildBook = (
 		.otherwise(() => undefined)
 
 	const bookmarks = bookmarkRecords.map((b) => ({
-		id: b.id,
+		id: String(b.id),
 		epubcfi: b.epubcfi,
 		mediaId: b.bookId,
 		previewContent: b.previewContent,
@@ -454,6 +434,20 @@ const buildBook = (
 			locations: bookmarkLocations.safeParse(b.locations).data,
 		},
 	}))
+
+	const annotations = annotationRecords
+		.filter((a) => !a.deletedAt)
+		.map((a) => {
+			return {
+				id: String(a.id),
+				annotationText: a.annotationText,
+				createdAt: a.createdAt.toISOString(),
+				updatedAt: a.updatedAt.toISOString(),
+				locator: annotationLocator.safeParse(a.locator).data,
+			}
+		})
+		// Note: cast should be safe, too lazy to impl a guard, which ts was smarter sometimes
+		.filter((a) => a.locator != null) as NonNullable<ImageReaderBookRef['ebook']>['annotations']
 
 	return {
 		__typename: 'Media',
@@ -473,6 +467,7 @@ const buildBook = (
 					toc: epubToc.safeParse(downloadedFile.toc).data || [],
 					spine: [],
 					bookmarks,
+					annotations,
 				}
 			: undefined,
 	}

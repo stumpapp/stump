@@ -1,9 +1,9 @@
 use async_graphql::{Context, Object, Result, ID};
-use models::entity::{bookmark, media};
+use models::entity::{bookmark, media, media_annotation};
 
 use crate::{
 	data::{AuthContext, CoreContext},
-	object::{bookmark::Bookmark, epub::Epub},
+	object::{bookmark::Bookmark, epub::Epub, media_annotation::MediaAnnotation},
 };
 
 #[derive(Default)]
@@ -43,5 +43,25 @@ impl EpubQuery {
 				.map(Bookmark::from)
 				.collect(),
 		)
+	}
+
+	/// Get all annotations (highlights/notes) for a single book
+	async fn annotations_by_media_id(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+	) -> Result<Vec<MediaAnnotation>> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		Ok(media_annotation::Model::find_for_user_and_media_id(
+			&user.id,
+			id.as_ref(),
+			conn,
+		)
+		.await?
+		.into_iter()
+		.map(MediaAnnotation::from)
+		.collect())
 	}
 }

@@ -6,11 +6,11 @@ import { z } from 'zod'
  * Stores information about books that have been downloaded for offline reading
  */
 export const downloadedFiles = sqliteTable('downloaded_files', {
-	id: text('id').primaryKey(), // Book ID from Stump server
-	filename: text('filename').notNull(), // Local filename (e.g., bookID.epub)
-	uri: text('uri').notNull(), // Local file URI
-	serverId: text('server_id').notNull(), // Server the book was downloaded from
-	size: integer('size'), // File size in bytes
+	id: text('id').primaryKey(),
+	filename: text('filename').notNull(), // e.g., bookID.epub
+	uri: text('uri').notNull(),
+	serverId: text('server_id').notNull(),
+	size: integer('size'), // bytes
 	downloadedAt: integer('downloaded_at', { mode: 'timestamp' })
 		.notNull()
 		.$defaultFn(() => new Date()),
@@ -125,10 +125,9 @@ export const imageMeta = z.object({
 
 /**
  * Bookmarks table for offline reading
- * Stores bookmarks that haven't been synced to the server yet
  */
 export const bookmarks = sqliteTable('bookmarks', {
-	id: text('id').primaryKey(), // UUID
+	id: integer('id').primaryKey({ autoIncrement: true }),
 	bookId: text('book_id')
 		.notNull()
 		.references(() => downloadedFiles.id, { onDelete: 'cascade' }),
@@ -141,8 +140,14 @@ export const bookmarks = sqliteTable('bookmarks', {
 	createdAt: integer('created_at', { mode: 'timestamp' })
 		.notNull()
 		.$defaultFn(() => new Date()),
+	updatedAt: integer('updated_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date()),
 	syncStatus: text('sync_status').notNull().default(syncStatus.enum.UNSYNCED),
+	// Note: Null unitl synced to server
 	serverBookmarkId: text('server_bookmark_id'),
+	// Note: Soft delete for sync purposes
+	deletedAt: integer('deleted_at', { mode: 'timestamp' }),
 })
 
 export type Bookmark = typeof bookmarks.$inferSelect
@@ -155,4 +160,43 @@ export const bookmarkLocations = z.object({
 	totalProgression: z.number().nullish(),
 	cssSelector: z.string().nullish(),
 	partialCfi: z.string().nullish(),
+})
+
+export const annotations = sqliteTable('annotations', {
+	id: integer('id').primaryKey({ autoIncrement: true }),
+	bookId: text('book_id')
+		.notNull()
+		.references(() => downloadedFiles.id, { onDelete: 'cascade' }),
+	serverId: text('server_id').notNull(), // Server the book belongs to
+	locator: text('locator', { mode: 'json' }).notNull(), // Full ReadiumLocator JSON
+	annotationText: text('annotation_text'), // Optional note text
+	createdAt: integer('created_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date()),
+	updatedAt: integer('updated_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date()),
+	syncStatus: text('sync_status').notNull().default(syncStatus.enum.UNSYNCED),
+	// Note: Null unitl synced to server
+	serverAnnotationId: text('server_annotation_id'),
+	// Note: Soft delete for sync purposes
+	deletedAt: integer('deleted_at', { mode: 'timestamp' }),
+})
+
+export type AnnotationRecord = typeof annotations.$inferSelect
+export type NewAnnotationRecord = typeof annotations.$inferInsert
+
+export const annotationLocator = z.object({
+	chapterTitle: z.string().nullish(),
+	href: z.string(),
+	title: z.string().nullish(),
+	locations: bookmarkLocations.nullish(),
+	text: z
+		.object({
+			after: z.string().nullish(),
+			before: z.string().nullish(),
+			highlight: z.string().nullish(),
+		})
+		.nullish(),
+	type: z.string().nullish(),
 })

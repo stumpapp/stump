@@ -9,6 +9,7 @@ import android.graphics.PointF
 import android.util.Log
 import android.view.View
 import android.widget.FrameLayout
+import android.widget.PopupMenu
 import android.widget.TextView
 import androidx.annotation.ColorInt
 import androidx.fragment.app.FragmentActivity
@@ -38,6 +39,12 @@ import org.readium.r2.navigator.input.TapEvent
 import org.readium.r2.shared.publication.Link
 import java.net.URL
 
+data class DecorationItem(
+    val id: String,
+    @ColorInt val color: Int,
+    val locator: Locator
+)
+
 data class Props(
     var bookId: String? = null,
     var locator: Locator? = null,
@@ -63,7 +70,8 @@ data class Props(
     var hyphens: Boolean? = null,
     var ligatures: Boolean? = null,
     var textNormalization: Boolean? = null,
-    var verticalText: Boolean? = null
+    var verticalText: Boolean? = null,
+    var decorations: List<DecorationItem>? = null
 )
 
 data class FinalizedProps(
@@ -90,7 +98,8 @@ data class FinalizedProps(
     val hyphens: Boolean?,
     val ligatures: Boolean?,
     val textNormalization: Boolean?,
-    val verticalText: Boolean?
+    val verticalText: Boolean?,
+    val decorations: List<DecorationItem>
 )
 
 @SuppressLint("ViewConstructor", "ResourceType")
@@ -112,12 +121,19 @@ class EPUBView(context: Context, appContext: AppContext) : ExpoView(context, app
     val onLayoutChange by EventDispatcher()
     val onMiddleTouch by EventDispatcher()
     val onSelection by EventDispatcher()
+    val onAnnotationTap by EventDispatcher()
+    val onHighlightRequest by EventDispatcher()
+    val onNoteRequest by EventDispatcher()
+    val onEditHighlight by EventDispatcher()
+    val onDeleteHighlight by EventDispatcher()
     val onDoubleTouch by EventDispatcher()
     val onError by EventDispatcher()
 
     var navigator: EpubNavigatorFragment? = null
     private var publication: Publication? = null
     private var changingResource = false
+    
+    private val highlightDecorationGroup = "highlights"
 
     val pendingProps = Props()
     var props: FinalizedProps? = null
@@ -173,7 +189,8 @@ class EPUBView(context: Context, appContext: AppContext) : ExpoView(context, app
             hyphens = pendingProps.hyphens ?: oldProps?.hyphens,
             ligatures = pendingProps.ligatures ?: oldProps?.ligatures,
             textNormalization = pendingProps.textNormalization ?: oldProps?.textNormalization,
-            verticalText = pendingProps.verticalText ?: oldProps?.verticalText
+            verticalText = pendingProps.verticalText ?: oldProps?.verticalText,
+            decorations = pendingProps.decorations ?: oldProps?.decorations ?: emptyList()
         )
 
         if (props!!.bookId != oldProps?.bookId || props!!.url != oldProps?.url) {
@@ -187,6 +204,10 @@ class EPUBView(context: Context, appContext: AppContext) : ExpoView(context, app
 
         if (props!!.locator != oldProps?.locator && props!!.locator != null) {
             go(props!!.locator!!)
+        }
+
+        if (props!!.decorations != oldProps?.decorations) {
+            applyDecorations()
         }
 
         val nav = navigator ?: run {
@@ -245,6 +266,9 @@ class EPUBView(context: Context, appContext: AppContext) : ExpoView(context, app
         navigator = epubFragment.navigator
 
         navigator?.addInputListener(TapInputListener())
+        navigator?.addDecorationListener(highlightDecorationGroup, this)
+
+        applyDecorations()
 
         locatorCollectionJob = coroutineScope.launch {
             try {
@@ -282,6 +306,8 @@ class EPUBView(context: Context, appContext: AppContext) : ExpoView(context, app
             Log.d("EPUBView", "Navigator already destroyed")
             return
         }
+        
+        navigator.removeDecorationListener(this)
         
         this.navigator = null
         
@@ -407,15 +433,92 @@ class EPUBView(context: Context, appContext: AppContext) : ExpoView(context, app
         }
         nav.go(locator, animated)
     }
+    
+    @OptIn(InternalReadiumApi::class)
+    fun applyDecorations() {
+        val nav = navigator ?: run {
+            Log.w("EPUBView", "Cannot apply decorations: navigator is null")
+            return
+        }
+        val currentProps = props ?: return
+        
+        val decorations = currentProps.decorations.map { item ->
+            val style = org.readium.r2.navigator.Decoration.Style.Highlight(
+                tint = item.color,
+                isActive = true
+            )
+            org.readium.r2.navigator.Decoration(
+                id = item.id,
+                locator = item.locator,
+                style = style
+            )
+        }
+        
+        coroutineScope.launch {
+            nav.applyDecorations(decorations, highlightDecorationGroup)
+        }
+    }
+    
+    @OptIn(InternalReadiumApi::class)
+    suspend fun getSelection(): Map<String, Any>? {
+        val nav = navigator ?: return null
+        val selection = nav.currentSelection() ?: return null
+        
+        val result = mutableMapOf<String, Any>(
+            "locator" to selection.locator.toJSON().toMap()
+        )
+        
+        selection.rect?.let { rect ->
+            result["rect"] = mapOf(
+                "x" to rect.left,
+                "y" to rect.top,
+                "width" to rect.width(),
+                "height" to rect.height()
+            )
+        }
+        
+        return result
+    }
+    
+    fun clearSelection() {
+        navigator?.clearSelection()
+    }
 
-//    TODO: Implement
     override fun onDecorationActivated(event: DecorableNavigator.OnActivatedEvent): Boolean {
-        val rect = event.rect ?: return false
-//        val x = ceil(rect.centerX() / this.resources.displayMetrics.density).toInt()
-//        val y = ceil(rect.top / this.resources.displayMetrics.density).toInt() - 16
-//        this.onHighlightTap(mapOf("decoration" to event.decoration.id, "x" to x, "y" to y))
-//        return true
-        return false
+        val rect = event.rect
+        val decorationId = event.decoration.id
+        
+        // Note: If I don't post this, hard crash:
+        // Only the original thread that created a view hierarchy can touch its views
+        post {
+            val anchorView = View(context).apply {
+                val params = FrameLayout.LayoutParams(1, 1)
+                params.leftMargin = rect?.centerX()?.toInt() ?: (width / 2)
+                params.topMargin = rect?.top?.toInt() ?: (height / 2)
+                layoutParams = params
+            }
+            addView(anchorView)
+            
+            val popup = PopupMenu(context, anchorView)
+            popup.menu.add(0, 1, 0, "Edit Note")
+            popup.menu.add(0, 2, 1, "Delete")
+            
+            popup.setOnMenuItemClickListener { menuItem ->
+                when (menuItem.itemId) {
+                    1 -> onEditHighlight(mapOf("decorationId" to decorationId))
+                    2 -> onDeleteHighlight(mapOf("decorationId" to decorationId))
+                }
+                true
+            }
+            
+            popup.setOnDismissListener {
+                removeView(anchorView)
+            }
+            
+            popup.show()
+        }
+        
+        return true
     }
 
     override fun onDetachedFromWindow() {

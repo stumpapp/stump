@@ -84,7 +84,7 @@ class ReadiumModule : Module() {
     }
 
     View(EPUBView::class) {
-      Events("onLocatorChange", "onPageChange", "onBookLoaded", "onLayoutChange", "onMiddleTouch", "onSelection", "onDoubleTouch", "onError")
+      Events("onLocatorChange", "onPageChange", "onBookLoaded", "onLayoutChange", "onMiddleTouch", "onSelection", "onAnnotationTap", "onHighlightRequest", "onNoteRequest", "onEditHighlight", "onDeleteHighlight", "onDoubleTouch", "onError")
 
       Prop("bookId") { view: EPUBView, prop: String ->
         if (view.bookService == null) {
@@ -118,6 +118,14 @@ class ReadiumModule : Module() {
         Log.d("ReadiumModule", "destroy called - cleaning up EPUBView resources")
         view.destroyNavigator()
       }
+      
+      AsyncFunction("getSelection") Coroutine { view: EPUBView ->
+        view.getSelection()
+      }
+      
+      AsyncFunction("clearSelection") { view: EPUBView ->
+        view.clearSelection()
+      }
 
       Prop("locator") { view: EPUBView, prop: Map<String, Any?>? ->
         if (prop == null) {
@@ -141,6 +149,19 @@ class ReadiumModule : Module() {
 
       Prop("url") { view: EPUBView, prop: String ->
         view.pendingProps.url = prop
+      }
+
+      Prop("decorations") { view: EPUBView, prop: List<Map<String, Any?>> ->
+        val decorations = prop.mapNotNull { decorationMap ->
+          val id = decorationMap["id"] as? String ?: return@mapNotNull null
+          val colorHex = decorationMap["color"] as? String ?: return@mapNotNull null
+          @Suppress("UNCHECKED_CAST")
+          val locatorMap = decorationMap["locator"] as? Map<String, Any?> ?: return@mapNotNull null
+          val locator = Locator.fromJSON(JSONObject(locatorMap)) ?: return@mapNotNull null
+          val color = try { Color.parseColor(colorHex) } catch (e: Exception) { return@mapNotNull null }
+          DecorationItem(id = id, color = color, locator = locator)
+        }
+        view.pendingProps.decorations = decorations
       }
 
       Prop("colors") { view: EPUBView, prop: Map<String, String> ->

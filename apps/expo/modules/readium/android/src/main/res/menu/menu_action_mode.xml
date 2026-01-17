@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto">
+
+  <item android:id="@+id/action_highlight" android:title="Highlight" app:showAsAction="ifRoom" />
+
+  <item android:id="@+id/action_note" android:title="Note" app:showAsAction="ifRoom" />
+
+  <item android:id="@+id/action_copy" android:title="Copy" app:showAsAction="ifRoom" />
+
+</menu>

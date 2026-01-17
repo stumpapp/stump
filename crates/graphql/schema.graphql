@@ -266,6 +266,12 @@ union CoreEvent = JobStarted | JobUpdate | JobOutput | DiscoveredMissingLibrary 
 
 union CoreJobOutput = LibraryScanOutput | SeriesScanOutput | ThumbnailGenerationOutput | PlaceholderGenerationOutput | ExternalJobOutput
 
+input CreateAnnotationInput {
+	mediaId: String!
+	locator: ReadiumLocatorInput!
+	annotationText: String
+}
+
 input CreateBookClubInput {
 	name: String!
 	slug: String
@@ -511,7 +517,7 @@ type Epub {
 	rootBase: String!
 	rootFile: String!
 	extraCss: [String!]!
-	annotations: [MediaAnnotationsModel!]!
+	annotations: [MediaAnnotationModel!]!
 	bookmarks: [Bookmark!]!
 	media: Media!
 }
@@ -1068,16 +1074,25 @@ type MediaAnalysisData {
 	contentTypes: [String!]!
 }
 
-type MediaAnnotationsModel {
+type MediaAnnotation {
 	id: String!
-	highlightedText: String
-	epubcfi: String
-	page: Int
-	pageCoordinatesX: Decimal
-	pageCoordinatesY: Decimal
-	notes: String
-	userId: String!
+	locator: ReadiumLocator!
+	annotationText: String
 	mediaId: String!
+	userId: String!
+	createdAt: DateTime!
+	updatedAt: DateTime!
+}
+
+"A media annotation represents a highlight and/or note"
+type MediaAnnotationModel {
+	id: String!
+	locator: ReadiumLocator!
+	annotationText: String
+	mediaId: String!
+	userId: String!
+	createdAt: DateTime!
+	updatedAt: DateTime!
 }
 
 input MediaFilterInput {
@@ -1355,6 +1370,12 @@ type Mutation {
 	deleteBookmark(id: String!): Bookmark!
 	"Delete a bookmark by epubcfi"
 	deleteBookmarkByEpubcfi(epubcfi: String!): Bookmark!
+	"Create an annotation (highlight/note)"
+	createAnnotation(input: CreateAnnotationInput!): MediaAnnotation!
+	"Update an annotation's note text"
+	updateAnnotation(input: UpdateAnnotationInput!): MediaAnnotation!
+	"Delete an annotation by ID"
+	deleteAnnotation(id: String!): MediaAnnotation!
 	analyzeMedia(id: ID!, forceReanalysis: Boolean! = false): Boolean!
 	convertMedia(id: ID!): Boolean!
 	deleteMedia(id: ID!): Media!
@@ -1807,6 +1828,8 @@ type Query {
 	epubById(id: ID!): Epub!
 	"Get all bookmarks for a single epub by its media ID"
 	bookmarksByMediaId(id: ID!): [Bookmark!]!
+	"Get all annotations (highlights/notes) for a single book"
+	annotationsByMediaId(id: ID!): [MediaAnnotation!]!
 	libraries(orderBy: [LibraryModelOrderBy!]! = [{field: NAME, direction: ASC}], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}, search: String): PaginatedLibraryResponse!
 	libraryById(id: ID!): Library
 	"Returns the available alphabet for all libraries in the server"
@@ -2533,6 +2556,11 @@ for empty variants.
 """
 input Unpaginated {
 	unpaginated: Boolean!
+}
+
+input UpdateAnnotationInput {
+	id: String!
+	annotationText: String
 }
 
 input UpdateBookClubInput {

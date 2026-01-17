@@ -25,7 +25,12 @@ import {
 import { NextInSeriesBookRef } from '~/components/book/reader/image/context'
 import { db, downloadedFiles } from '~/db'
 import { booksDirectory } from '~/lib/filesystem'
-import { useAppState, useSyncOnlineToOfflineProgress } from '~/lib/hooks'
+import {
+	useAppState,
+	useSyncOnlineToOfflineAnnotations,
+	useSyncOnlineToOfflineBookmarks,
+	useSyncOnlineToOfflineProgress,
+} from '~/lib/hooks'
 import { intoReadiumLocator, ReadiumLocator } from '~/modules/readium'
 import { usePreferencesStore, useReaderStore } from '~/stores'
 import { useBookPreferences, useBookTimer } from '~/stores/reader'
@@ -126,6 +131,31 @@ export const query = graphql(`
 						}
 					}
 				}
+				annotations {
+					id
+					annotationText
+					createdAt
+					updatedAt
+					locator {
+						chapterTitle
+						href
+						title
+						type
+						locations {
+							fragments
+							progression
+							position
+							totalProgression
+							cssSelector
+							partialCfi
+						}
+						text {
+							after
+							before
+							highlight
+						}
+					}
+				}
 				spine {
 					id
 					idref
@@ -172,6 +202,54 @@ const createBookmarkMutation = graphql(`
 const deleteBookmarkMutation = graphql(`
 	mutation DeleteBookmarkMobile($id: String!) {
 		deleteBookmark(id: $id) {
+			id
+		}
+	}
+`)
+
+const createAnnotationMutation = graphql(`
+	mutation CreateAnnotationMobile($input: CreateAnnotationInput!) {
+		createAnnotation(input: $input) {
+			id
+			annotationText
+			createdAt
+			updatedAt
+			locator {
+				chapterTitle
+				href
+				title
+				type
+				locations {
+					fragments
+					progression
+					position
+					totalProgression
+					cssSelector
+					partialCfi
+				}
+				text {
+					after
+					before
+					highlight
+				}
+			}
+		}
+	}
+`)
+
+const updateAnnotationMutation = graphql(`
+	mutation UpdateAnnotationMobile($input: UpdateAnnotationInput!) {
+		updateAnnotation(input: $input) {
+			id
+			annotationText
+			updatedAt
+		}
+	}
+`)
+
+const deleteAnnotationMutation = graphql(`
+	mutation DeleteAnnotationMobile($id: String!) {
+		deleteAnnotation(id: $id) {
 			id
 		}
 	}
@@ -283,12 +361,29 @@ export default function Screen() {
 		[book.id, totalSeconds, updateProgress],
 	)
 
+	const { syncCreate: syncBookmarkCreate, syncDelete: syncBookmarkDelete } =
+		useSyncOnlineToOfflineBookmarks({
+			bookId: book.id,
+			serverId,
+		})
+
 	const { mutateAsync: createBookmark } = useGraphQLMutation(createBookmarkMutation, {
 		onError: (error) => {
 			console.error('Failed to create bookmark:', error)
 		},
-		onSuccess: () => {
+		onSuccess: (data) => {
 			queryClient.invalidateQueries({ queryKey: ['readBook', book.id] })
+			const { id, locator, previewContent } = data.createBookmark
+			if (locator) {
+				syncBookmarkCreate(
+					id,
+					{
+						...locator,
+						type: 'application/xhtml+xml',
+					},
+					previewContent,
+				)
+			}
 		},
 	})
 
@@ -296,8 +391,9 @@ export default function Screen() {
 		onError: (error) => {
 			console.error('Failed to delete bookmark:', error)
 		},
-		onSuccess: () => {
+		onSuccess: (data) => {
 			queryClient.invalidateQueries({ queryKey: ['readBook', book.id] })
+			syncBookmarkDelete(data.deleteBookmark.id)
 		},
 	})
 
@@ -329,6 +425,82 @@ export default function Screen() {
 			await deleteBookmark({ id: bookmarkId })
 		},
 		[deleteBookmark],
+	)
+
+	const { syncCreate, syncUpdate, syncDelete } = useSyncOnlineToOfflineAnnotations({
+		bookId: book.id,
+		serverId,
+	})
+
+	const { mutateAsync: createAnnotation } = useGraphQLMutation(createAnnotationMutation, {
+		onError: (error) => {
+			console.error('Failed to create annotation:', error)
+		},
+		onSuccess: (data) => {
+			queryClient.invalidateQueries({ queryKey: ['readBook', book.id] })
+			const { id, locator, annotationText } = data.createAnnotation
+			syncCreate(id, intoReadiumLocator(locator), annotationText)
+		},
+	})
+
+	const { mutateAsync: updateAnnotation } = useGraphQLMutation(updateAnnotationMutation, {
+		onError: (error) => {
+			console.error('Failed to update annotation:', error)
+		},
+		onSuccess: (data) => {
+			queryClient.invalidateQueries({ queryKey: ['readBook', book.id] })
+			syncUpdate(data.updateAnnotation.id, data.updateAnnotation.annotationText ?? null)
+		},
+	})
+
+	const { mutateAsync: deleteAnnotation } = useGraphQLMutation(deleteAnnotationMutation, {
+		onError: (error) => {
+			console.error('Failed to delete annotation:', error)
+		},
+		onSuccess: (data) => {
+			queryClient.invalidateQueries({ queryKey: ['readBook', book.id] })
+			syncDelete(data.deleteAnnotation.id)
+		},
+	})
+
+	const onCreateAnnotation = useCallback(
+		async (locator: ReadiumLocator, annotationText?: string) => {
+			const result = await createAnnotation({
+				input: {
+					mediaId: book.id,
+					locator: {
+						chapterTitle: locator.chapterTitle ?? '',
+						href: locator.href,
+						title: locator.title,
+						type: locator.type || 'application/xhtml+xml',
+						locations: locator.locations,
+						text: locator.text,
+					},
+					annotationText,
+				},
+			})
+			return { id: result.createAnnotation.id }
+		},
+		[book.id, createAnnotation],
+	)
+
+	const onUpdateAnnotation = useCallback(
+		async (annotationId: string, annotationText: string | null) => {
+			await updateAnnotation({
+				input: {
+					id: annotationId,
+					annotationText,
+				},
+			})
+		},
+		[updateAnnotation],
+	)
+
+	const onDeleteAnnotation = useCallback(
+		async (annotationId: string) => {
+			await deleteAnnotation({ id: annotationId })
+		},
+		[deleteAnnotation],
 	)
 
 	const setIsReading = useReaderStore((state) => state.setIsReading)
@@ -417,6 +589,9 @@ export default function Screen() {
 				offlineUri={offlineUri}
 				serverId={serverId}
 				requestHeaders={requestHeaders}
+				onCreateAnnotation={onCreateAnnotation}
+				onUpdateAnnotation={onUpdateAnnotation}
+				onDeleteAnnotation={onDeleteAnnotation}
 			/>
 		)
 	} else if (book.extension.match(PDF_EXTENSION) && preferNativePdfReader) {

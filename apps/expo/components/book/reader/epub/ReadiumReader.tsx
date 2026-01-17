@@ -9,7 +9,11 @@ import { useDownload } from '~/lib/hooks'
 import {
 	BookLoadedEventPayload,
 	ColumnCount,
+	Decoration,
+	DecoratorTapEvent,
+	HighlightRequestEvent,
 	intoBookmarkRef,
+	NoteRequestEvent,
 	ReadiumLocator,
 	ReadiumView,
 	ReadiumViewRef,
@@ -26,11 +30,22 @@ import { useEpubSheetStore } from '~/stores/epubSheet'
 
 import { EbookReaderBookRef } from '../image/context'
 import { OfflineCompatibleReader } from '../types'
+import {
+	CreateAnnotationSheet,
+	CreateAnnotationSheetRef,
+	UpdateAnnotationSheet,
+	UpdateAnnotationSheetRef,
+} from './annotations'
 import CustomizeThemeSheet from './CustomizeThemeSheet'
 import EpubLocationsSheet from './EpubLocationsSheet'
 import EpubSettingsSheet from './EpubSettingsSheet'
 import ReadiumFooter, { FOOTER_HEIGHT } from './ReadiumFooter'
 import ReadiumHeader, { HEADER_HEIGHT } from './ReadiumHeader'
+
+export type OnCreateAnnotationCallback = (
+	locator: ReadiumLocator,
+	annotationText?: string,
+) => Promise<{ id: string }>
 
 type Props = {
 	/**
@@ -61,6 +76,13 @@ type Props = {
 	 * Callback to delete a bookmark by ID
 	 */
 	onDeleteBookmark?: (bookmarkId: string) => Promise<void>
+	onCreateAnnotation?: OnCreateAnnotationCallback
+	/**
+	 * Callback to update an annotation's text, including highlights since they
+	 * are a type of annotation
+	 */
+	onUpdateAnnotation?: (annotationId: string, annotationText: string | null) => Promise<void>
+	onDeleteAnnotation?: (annotationId: string) => Promise<void>
 } & OfflineCompatibleReader
 
 // FIXME: There is a pretty gnarly bug for single-page EPUBs where Readium doesn't do a great job of
@@ -75,6 +97,9 @@ export default function ReadiumReader({
 	onLocationChanged,
 	onBookmark,
 	onDeleteBookmark,
+	onCreateAnnotation,
+	onUpdateAnnotation,
+	onDeleteAnnotation,
 	...ctx
 }: Props) {
 	const { downloadBook } = useDownload({ serverId: ctx.serverId })
@@ -144,6 +169,12 @@ export default function ReadiumReader({
 				},
 				destroy: async () => {
 					readerRef.current?.destroy()
+				},
+				getSelection: async () => {
+					return readerRef.current?.getSelection() ?? null
+				},
+				clearSelection: async () => {
+					readerRef.current?.clearSelection()
 				},
 			}) satisfies ReadiumViewRef,
 		[],
@@ -283,14 +314,120 @@ export default function ReadiumReader({
 		setControlsVisible(!controlsVisible)
 	}, [controlsVisible, setControlsVisible])
 
-	const handleSelection = useCallback(
-		(event: {
-			nativeEvent: { cleared?: boolean; x?: number; y?: number; locator?: ReadiumLocator }
-		}) => {
-			// eslint-disable-next-line no-console
-			console.log('Text selection:', event.nativeEvent)
+	const createAnnotationSheetRef = useRef<CreateAnnotationSheetRef>(null)
+	const updateAnnotationSheetRef = useRef<UpdateAnnotationSheetRef>(null)
+
+	const highlightColor = colors?.highlight ?? '#FFEB3B'
+
+	const annotations = useMemo<Decoration[]>(() => {
+		const bookAnnotations = book.ebook?.annotations ?? []
+		return bookAnnotations.map((a) => ({
+			id: a.id,
+			bookId: book.id,
+			locator: a.locator as ReadiumLocator,
+			color: highlightColor,
+			annotationText: a.annotationText ?? undefined,
+			createdAt: new Date(a.createdAt),
+			updatedAt: new Date(a.updatedAt),
+		}))
+	}, [book.ebook?.annotations, book.id, highlightColor])
+
+	const getAnnotation = useCallback(
+		(annotationId: string): Decoration | undefined => {
+			return annotations.find((h) => h.id === annotationId)
 		},
-		[],
+		[annotations],
+	)
+
+	const handleHighlightRequest = useCallback(
+		async (event: { nativeEvent: HighlightRequestEvent }) => {
+			if (!onCreateAnnotation) return
+			const { locator } = event.nativeEvent
+			try {
+				await onCreateAnnotation(locator)
+			} catch (error) {
+				console.error('Failed to create annotation:', error)
+			}
+		},
+		[onCreateAnnotation],
+	)
+
+	const handleNoteRequest = useCallback((event: { nativeEvent: NoteRequestEvent }) => {
+		const { locator, text } = event.nativeEvent
+		createAnnotationSheetRef.current?.open(locator, text)
+	}, [])
+
+	const handleAnnotationTap = useCallback(
+		(event: { nativeEvent: DecoratorTapEvent }) => {
+			const { decorationId } = event.nativeEvent
+			const highlight = getAnnotation(decorationId)
+			if (highlight) {
+				updateAnnotationSheetRef.current?.open(highlight)
+			}
+		},
+		[getAnnotation],
+	)
+
+	const handleEditHighlight = useCallback(
+		(event: { nativeEvent: { decorationId: string } }) => {
+			const { decorationId } = event.nativeEvent
+			const highlight = getAnnotation(decorationId)
+			if (highlight) {
+				updateAnnotationSheetRef.current?.open(highlight)
+			}
+		},
+		[getAnnotation],
+	)
+
+	const handleNativeDeleteAnnotation = useCallback(
+		async (event: { nativeEvent: { decorationId: string } }) => {
+			if (!onDeleteAnnotation) return
+			const { decorationId } = event.nativeEvent
+			try {
+				await onDeleteAnnotation(decorationId)
+			} catch (error) {
+				console.error('Failed to delete annotation:', error)
+			}
+		},
+		[onDeleteAnnotation],
+	)
+
+	const handleCreateAnnotation = useCallback(
+		async (locator: ReadiumLocator, annotation?: string) => {
+			if (!onCreateAnnotation) return
+			try {
+				await onCreateAnnotation(locator, annotation)
+				await readerRef.current?.clearSelection()
+			} catch (error) {
+				console.error('Failed to create annotation:', error)
+			}
+		},
+		[onCreateAnnotation],
+	)
+
+	const handleAnnotationChange = useCallback(
+		async (highlightId: string, annotation: string | undefined) => {
+			if (!onUpdateAnnotation) return
+			try {
+				await onUpdateAnnotation(highlightId, annotation ?? null)
+			} catch (error) {
+				console.error('Failed to update annotation:', error)
+			}
+		},
+		[onUpdateAnnotation],
+	)
+
+	const handleDeleteHighlight = useCallback(
+		async (highlightId: string) => {
+			if (!onDeleteAnnotation) return
+
+			try {
+				await onDeleteAnnotation(highlightId)
+			} catch (error) {
+				console.error('Failed to delete annotation:', error)
+			}
+		},
+		[onDeleteAnnotation],
 	)
 
 	const insets = useSafeAreaInsets()
@@ -313,10 +450,15 @@ export default function ReadiumReader({
 				bookId={book.id}
 				url={localUri}
 				initialLocator={initialLocator}
+				decorations={annotations}
 				onBookLoaded={({ nativeEvent }) => handleBookLoaded(nativeEvent)}
 				onLocatorChange={({ nativeEvent: locator }) => handleLocationChanged(locator)}
 				onMiddleTouch={handleMiddleTouch}
-				onSelection={handleSelection}
+				onHighlightRequest={handleHighlightRequest}
+				onNoteRequest={handleNoteRequest}
+				onAnnotationTap={handleAnnotationTap}
+				onEditHighlight={handleEditHighlight}
+				onDeleteHighlight={handleNativeDeleteAnnotation}
 				style={{
 					flex: 1,
 					marginTop: insets.top + HEADER_HEIGHT,
@@ -330,6 +472,17 @@ export default function ReadiumReader({
 			<EpubSettingsSheet />
 			<EpubLocationsSheet />
 			<CustomizeThemeSheet />
+
+			<CreateAnnotationSheet
+				ref={createAnnotationSheetRef}
+				onCreateAnnotation={handleCreateAnnotation}
+				onDismiss={() => readerRef.current?.clearSelection()}
+			/>
+			<UpdateAnnotationSheet
+				ref={updateAnnotationSheetRef}
+				onAnnotationChange={handleAnnotationChange}
+				onDelete={handleDeleteHighlight}
+			/>
 		</View>
 	)
 }

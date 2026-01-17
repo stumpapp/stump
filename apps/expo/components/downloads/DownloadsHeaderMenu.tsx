@@ -2,7 +2,7 @@ import { CheckCircle, Menu, RefreshCw, Sparkles, Trash } from 'lucide-react-nati
 import { useState } from 'react'
 import Dialog from 'react-native-dialog'
 
-import { useDownload, useDownloadsCount, useProgressSync } from '~/lib/hooks'
+import { useDownload, useDownloadsCount, useFullSync } from '~/lib/hooks'
 import { usePreferencesStore } from '~/stores'
 import { useSelectionStore } from '~/stores/selection'
 
@@ -33,7 +33,7 @@ export default function DownloadsHeaderMenu() {
 
 	const downloadsCount = useDownloadsCount()
 
-	const { syncProgress } = useProgressSync()
+	const { syncAll } = useFullSync()
 
 	return (
 		<>
@@ -65,7 +65,7 @@ export default function DownloadsHeaderMenu() {
 								// Note: I removed the guard that checked if there was unsynced local progress since
 								// now a sync is always bi-directional (so we might be able to pull)
 								onPress: async () => {
-									await syncProgress()
+									await syncAll()
 									refetchDownloads()
 								},
 							},

@@ -1,9 +1,13 @@
 package expo.modules.readium
 
 import android.annotation.SuppressLint
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.os.Bundle
 import android.view.ActionMode
 import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
@@ -27,22 +31,43 @@ import kotlin.math.ceil
 class SelectionActionModeCallback(private val epubView: EPUBView) : BaseActionModeCallback() {
     @OptIn(InternalReadiumApi::class)
     override fun onCreateActionMode(mode: ActionMode?, menu: Menu?): Boolean {
-        val activity: FragmentActivity? = epubView.appContext.currentActivity as FragmentActivity?
-        activity?.lifecycleScope?.launch {
+        mode?.menuInflater?.inflate(R.menu.menu_action_mode, menu)
+        return true
+    }
+    
+    @OptIn(InternalReadiumApi::class)
+    override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
+        val activity = epubView.appContext.currentActivity as? FragmentActivity ?: return false
+        
+        activity.lifecycleScope.launch {
             val selection = epubView.navigator?.currentSelection() ?: return@launch
-            selection.rect?.let {
-                val x = ceil(it.centerX() / epubView.resources.displayMetrics.density).toInt()
-                val y = ceil(it.top / epubView.resources.displayMetrics.density).toInt() - 16
-                epubView.onSelection(
-                    mapOf(
-                        "locator" to selection.locator.toJSON().toMap(),
-                        "x" to x,
-                        "y" to y
-                    )
-                )
+            val locator = selection.locator
+            val text = locator.text.highlight ?: ""
+            
+            when (item.itemId) {
+                R.id.action_highlight -> {
+                    epubView.onHighlightRequest(mapOf(
+                        "locator" to locator.toJSON().toMap(),
+                        "text" to text
+                    ))
+                }
+                R.id.action_note -> {
+                    epubView.onNoteRequest(mapOf(
+                        "locator" to locator.toJSON().toMap(),
+                        "text" to text
+                    ))
+                }
+                R.id.action_copy -> {
+                    val clipboard = epubView.context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                    val clip = ClipData.newPlainText("Selected Text", text)
+                    clipboard.setPrimaryClip(clip)
+                }
             }
+            
+            epubView.navigator?.clearSelection()
         }
-
+        
+        mode?.finish()
         return true
     }
 }

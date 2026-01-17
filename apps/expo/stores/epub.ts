@@ -201,23 +201,27 @@ export const useEpubLocationStore = create<IEpubLocationStore>((set, get) => ({
 		}),
 }))
 
+// TODO(highlights): Think through highlight colors that make sense for each preset theme
 const defaultThemes: Record<string, EPUBReaderThemeConfig> = {
 	Light: {
 		colors: {
 			background: COLORS.light.background.DEFAULT,
 			foreground: COLORS.light.foreground.DEFAULT,
+			highlight: '#FFEB3B',
 		},
 	},
 	Dark: {
 		colors: {
 			background: COLORS.dark.background.DEFAULT,
 			foreground: COLORS.dark.foreground.DEFAULT,
+			highlight: '#FFEB3B',
 		},
 	},
 	Papyrus: {
 		colors: {
 			background: '#e7d3b5',
 			foreground: '#423328',
+			highlight: '#FFEB3B',
 		},
 	},
 }

@@ -1,7 +1,7 @@
 export { default as AllowDownscaling } from './AllowDownscaling'
 export { default as AppLanguage } from './AppLanguage'
 export { default as AppTheme } from './AppTheme'
-export { default as AutoSyncOfflineProgress } from './AutoSyncOfflineProgress'
+export { default as AutoSyncLocalData } from './AutoSyncLocalData'
 export { default as DefaultServer } from './DefaultServer'
 export { default as DeleteDatabase } from './DeleteDatabase'
 export { default as ImageCacheActions } from './ImageCacheActions'

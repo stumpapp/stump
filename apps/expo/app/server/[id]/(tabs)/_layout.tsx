@@ -20,7 +20,7 @@ export default function TabLayout() {
 	const accentColor = usePreferencesStore((state) => state.accentColor)
 	const animationEnabled = usePreferencesStore((state) => !state.reduceAnimations)
 	const setUser = useUserStore((state) => state.setUser)
-	const autoSyncEnabled = usePreferencesStore((state) => state.autoSyncOfflineProgress)
+	const autoSyncEnabled = usePreferencesStore((state) => state.autoSyncLocalData)
 
 	useAutoSyncActiveServer({
 		enabled: sdk.isAuthed && autoSyncEnabled,

@@ -3,12 +3,7 @@ import { useRouter } from 'expo-router'
 import { X } from 'lucide-react-native'
 import { useCallback, useEffect } from 'react'
 import { Platform, View } from 'react-native'
-import Animated, {
-	Easing,
-	useAnimatedStyle,
-	useSharedValue,
-	withTiming,
-} from 'react-native-reanimated'
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Heading } from '~/components/ui'

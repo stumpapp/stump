@@ -18,6 +18,7 @@ pub mod library_config;
 pub mod library_scan_record;
 pub mod log;
 pub mod media;
+pub mod media_annotation;
 pub mod media_metadata;
 pub mod media_metadata_overview;
 pub mod notifier;

@@ -2,7 +2,6 @@ import { Fragment, useCallback, useEffect, useState } from 'react'
 import { Alert, Pressable, ScrollView, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { useGridItemSize } from '~/components/grid/useGridItemSize'
 import { Input, Text } from '~/components/ui'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { cn } from '~/lib/utils'
@@ -139,9 +138,6 @@ export default function CustomizeTheme({ onCancel, mode = 'edit', theme: namedTh
 		setCustomTheme({ colors: theme.colors })
 	}
 
-	// gap-2 = 7px
-	const { itemWidth } = useGridItemSize({ numColumns: 4, horizontalGap: 7, padding: 32 })
-
 	return (
 		<Fragment>
 			<ThemeHeaderPreview customTheme={customTheme} onCancel={handleCancel} onSaved={handleSave} />
@@ -176,18 +172,19 @@ export default function CustomizeTheme({ onCancel, mode = 'edit', theme: namedTh
 				<View className="h-px bg-black/10 dark:bg-white/10" />
 
 				<Text className="text-xl">Premade themes</Text>
-				<View className="flex-row flex-wrap gap-2">
+				<View className="flex-row flex-wrap gap-y-2">
 					{PREMADE_THEMES.map((theme) => (
-						<Pressable key={theme.name} onPress={() => applyPremadeTheme(theme)}>
-							{({ pressed }) => (
-								<ThemePreview
-									name={theme.name}
-									theme={theme}
-									className={cn(pressed && 'opacity-80')}
-									style={{ width: itemWidth }}
-								/>
-							)}
-						</Pressable>
+						<View className="w-1/4 px-1" key={theme.name}>
+							<Pressable onPress={() => applyPremadeTheme(theme)}>
+								{({ pressed }) => (
+									<ThemePreview
+										name={theme.name}
+										theme={theme}
+										className={cn(pressed && 'opacity-80', 'w-full tablet:aspect-[5/3]')}
+									/>
+								)}
+							</Pressable>
+						</View>
 					))}
 				</View>
 			</ScrollView>

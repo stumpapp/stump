@@ -30,9 +30,8 @@
  }
 
  public final class BookService {
-     /// An instance of AssetRetriever for accessing publication assets
-     private let assetRetriever: AssetRetriever
-     
+    /// An instance of AssetRetriever for accessing publication assets
+    public let assetRetriever: AssetRetriever
      /// An instance of PublicationOpener for opening publications
      private let publicationOpener: PublicationOpener
 

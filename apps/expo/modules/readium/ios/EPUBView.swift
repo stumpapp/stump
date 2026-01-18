@@ -441,7 +441,7 @@
                      fontFamilyDeclarations: fontFamilyDeclarations
                  ),
                  httpServer: GCDHTTPServer(
-                     assetRetriever: AssetRetriever(httpClient: DefaultHTTPClient())
+                    assetRetriever: BookService.instance.assetRetriever
                  )
              )
 

@@ -188,8 +188,8 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 	return (
 		<>
 			<ContextMenu.Root>
-				<ContextMenu.Trigger>
-					<Pressable onPress={onPress}>
+				<ContextMenu.Trigger className="w-full">
+					<Pressable onPress={onPress} onLongPress={() => {}} delayLongPress={100}>
 						{({ pressed }) => (
 							<View
 								className="white relative mx-4 flex-row gap-4"

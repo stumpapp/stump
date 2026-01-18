@@ -1,0 +1,11 @@
+import { Callout } from 'nextra/components'
+
+# Troubleshooting
+
+This guide is very young and so won't cover much ground yet. As I notice common issues or points of confusion, I'll try my best to update this page accordingly.
+
+## I keep getting `Incompatible server` errors
+
+The mobile app is alpha software and only available on TestFlight and Google Play Beta at the moment. In order to facilitate development, this means that those versions of the app are only compatible with more experimental versions of the Stump server.
+
+If you are running a stable version of the Stump server earlier than `0.1.0`, which at the time of writing doesn't exist yet, you will see this error. The version you are running is not compatible with the API that the mobile app expects. The solution is to migrate to either `nightly` or `experimental`. I cannot guarantee the stability of these builds, this is the nature of alpha software.

@@ -5,5 +5,6 @@ export default {
 	servers: 'Servers',
 	reading: 'Reading',
 	settings: 'Settings',
+	troubleshooting: 'Troubleshooting',
 	faq: 'FAQ',
 } satisfies Meta

@@ -14,7 +14,14 @@ export function ColorPickerRow({ label, value, onChange }: Props) {
 		<View className="flex-row items-center justify-between py-2">
 			<Text className="text-lg">{label}</Text>
 			<Host matchContents>
-				<ColorPicker label="" selection={value} onValueChanged={onChange} supportsOpacity={false} />
+				<ColorPicker
+					// Note: key was necessary to get the color to respond when externally changed (e.g., picking a premade theme)
+					key={value}
+					label=""
+					selection={value}
+					onValueChanged={onChange}
+					supportsOpacity={false}
+				/>
 			</Host>
 		</View>
 	)

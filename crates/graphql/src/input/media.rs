@@ -61,6 +61,7 @@ impl BookmarkInput {
 			media_id: Set(self.media_id.clone()),
 			user_id: Set(user.id.clone()),
 			page: Set(Some(-1)),
+			..Default::default()
 		}
 	}
 }

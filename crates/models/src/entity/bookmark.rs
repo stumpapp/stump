@@ -22,6 +22,7 @@ pub struct Model {
 	pub media_id: String,
 	#[sea_orm(column_type = "Text")]
 	pub user_id: String,
+	pub created_at: DateTimeUtc,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
@@ -74,8 +75,11 @@ impl ActiveModelBehavior for ActiveModel {
 	where
 		C: ConnectionTrait,
 	{
-		if insert && self.id.is_not_set() {
-			self.id = ActiveValue::Set(Uuid::new_v4().to_string());
+		if insert {
+			self.created_at = ActiveValue::Set(chrono::Utc::now());
+			if self.id.is_not_set() {
+				self.id = ActiveValue::Set(Uuid::new_v4().to_string());
+			}
 		}
 
 		Ok(self)

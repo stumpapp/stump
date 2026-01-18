@@ -11,6 +11,7 @@ import { usePreferencesStore } from '~/stores'
 import { type TableOfContentsItem, useEpubLocationStore } from '~/stores/epub'
 import { useEpubSheetStore } from '~/stores/epubSheet'
 
+import AnnotationsAndBookmarks from './AnnotationsAndBookmarks'
 import BookmarkListItem from './BookmarkListItem'
 
 // TODO: Add annotations
@@ -69,7 +70,6 @@ export default function LocationsSheetContent() {
 					)}
 				</Pressable>
 
-				{/* TODO: Should bookmarks and annotations be shown together? */}
 				<Pressable onPress={() => ref.current?.setPage(2)}>
 					{({ pressed }) => (
 						<Text
@@ -78,7 +78,7 @@ export default function LocationsSheetContent() {
 							})}
 							style={{ opacity: pressed && activePage !== 2 ? 0.7 : 1 }}
 						>
-							Bookmarks
+							Annotations
 						</Text>
 					)}
 				</Pressable>
@@ -151,7 +151,7 @@ export default function LocationsSheetContent() {
 					}}
 					key="3"
 				>
-					{bookmarks.length === 0 ? (
+					{/* {bookmarks.length === 0 ? (
 						<View className="flex-1 items-center justify-center p-4">
 							<Text className="text-center text-foreground-muted">No bookmarks yet</Text>
 						</View>
@@ -164,7 +164,9 @@ export default function LocationsSheetContent() {
 								</View>
 							))}
 						</ScrollView>
-					)}
+					)} */}
+
+					<AnnotationsAndBookmarks />
 				</View>
 			</PagerView>
 		</View>

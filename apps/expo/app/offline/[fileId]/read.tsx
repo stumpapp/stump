@@ -424,6 +424,7 @@ const buildBook = (
 		.otherwise(() => undefined)
 
 	const bookmarks = bookmarkRecords.map((b) => ({
+		__typename: 'Bookmark' as const,
 		id: String(b.id),
 		epubcfi: b.epubcfi,
 		mediaId: b.bookId,
@@ -439,6 +440,7 @@ const buildBook = (
 		.filter((a) => !a.deletedAt)
 		.map((a) => {
 			return {
+				__typename: 'MediaAnnotationModel' as const,
 				id: String(a.id),
 				annotationText: a.annotationText,
 				createdAt: a.createdAt.toISOString(),

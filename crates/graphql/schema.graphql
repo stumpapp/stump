@@ -210,6 +210,7 @@ type Bookmark {
 	page: Int
 	mediaId: String!
 	userId: String!
+	createdAt: DateTime!
 }
 
 input BookmarkInput {

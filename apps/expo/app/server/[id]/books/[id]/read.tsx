@@ -130,6 +130,7 @@ export const query = graphql(`
 							partialCfi
 						}
 					}
+					createdAt
 				}
 				annotations {
 					id

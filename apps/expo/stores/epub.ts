@@ -7,6 +7,7 @@ import { COLORS } from '~/lib/constants'
 import { useColorScheme } from '~/lib/useColorScheme'
 import {
 	BookMetadata,
+	Decoration,
 	EPUBReaderThemeConfig,
 	NativeTableOfContentsItem,
 	ReadiumLocator,
@@ -16,6 +17,7 @@ import {
 import { ZustandMMKVStorage } from './store'
 
 export { BookmarkRef } from '~/components/book/reader/image/context'
+export type { Decoration } from '~/modules/readium'
 
 export const trimFragmentFromHref = (href: string) => {
 	return href.split('#')[0]
@@ -76,7 +78,25 @@ export type OnBookmarkCallback = (
 	previewContent?: string,
 ) => Promise<{ id: string } | void>
 
+export type OnCreateAnnotationCallback = (
+	locator: ReadiumLocator,
+	annotationText?: string,
+) => Promise<{ id: string }>
+
+export type OnUpdateAnnotationCallback = (
+	annotationId: string,
+	annotationText: string | null,
+) => Promise<void>
+
+export type OnDeleteAnnotationCallback = (annotationId: string) => Promise<void>
+
 export type TocSource = 'native' | 'server'
+
+// FIXME: This store has gotten way out of control. Originally, I shoved all this in a store
+// because I was using expo router for navigation between various sheets within the reader stack,
+// however since moving to a programmatic sheet we don't need the store necessarily any more. I
+// kept the same approach for annotations, mostly because I don't have the time to rethink it and refactor,
+// however it should be done at some point down the road
 
 export type IEpubLocationStore = {
 	book?: EbookReaderBookRef
@@ -111,6 +131,20 @@ export type IEpubLocationStore = {
 	storeOnBookmark: (callback: OnBookmarkCallback | undefined) => void
 	onDeleteBookmark?: (bookmarkId: string) => Promise<void>
 	storeOnDeleteBookmark: (callback: ((bookmarkId: string) => Promise<void>) | undefined) => void
+
+	annotations: Decoration[]
+	storeAnnotations: (annotations: Decoration[]) => void
+	addAnnotation: (annotation: Decoration) => void
+	updateAnnotation: (annotation: Decoration) => void
+	removeAnnotation: (annotationId: string) => void
+	getAnnotation: (annotationId: string) => Decoration | undefined
+
+	onCreateAnnotation?: OnCreateAnnotationCallback
+	storeOnCreateAnnotation: (callback: OnCreateAnnotationCallback | undefined) => void
+	onUpdateAnnotation?: OnUpdateAnnotationCallback
+	storeOnUpdateAnnotation: (callback: OnUpdateAnnotationCallback | undefined) => void
+	onDeleteAnnotation?: OnDeleteAnnotationCallback
+	storeOnDeleteAnnotation: (callback: OnDeleteAnnotationCallback | undefined) => void
 }
 
 export const useEpubLocationStore = create<IEpubLocationStore>((set, get) => ({
@@ -185,6 +219,31 @@ export const useEpubLocationStore = create<IEpubLocationStore>((set, get) => ({
 	onDeleteBookmark: undefined,
 	storeOnDeleteBookmark: (callback) => set({ onDeleteBookmark: callback }),
 
+	annotations: [],
+	storeAnnotations: (annotations) => set({ annotations }),
+	addAnnotation: (annotation) =>
+		set((state) => ({
+			annotations: [...state.annotations, annotation],
+		})),
+	updateAnnotation: (annotation) =>
+		set((state) => ({
+			annotations: state.annotations.map((a) => (a.id === annotation.id ? annotation : a)),
+		})),
+	removeAnnotation: (annotationId) =>
+		set((state) => ({
+			annotations: state.annotations.filter((a) => a.id !== annotationId),
+		})),
+	getAnnotation: (annotationId) => {
+		return get().annotations.find((a) => a.id === annotationId)
+	},
+
+	onCreateAnnotation: undefined,
+	storeOnCreateAnnotation: (callback) => set({ onCreateAnnotation: callback }),
+	onUpdateAnnotation: undefined,
+	storeOnUpdateAnnotation: (callback) => set({ onUpdateAnnotation: callback }),
+	onDeleteAnnotation: undefined,
+	storeOnDeleteAnnotation: (callback) => set({ onDeleteAnnotation: callback }),
+
 	onUnload: () =>
 		set({
 			currentChapter: '',
@@ -198,6 +257,10 @@ export const useEpubLocationStore = create<IEpubLocationStore>((set, get) => ({
 			bookmarks: [],
 			onBookmark: undefined,
 			onDeleteBookmark: undefined,
+			annotations: [],
+			onCreateAnnotation: undefined,
+			onUpdateAnnotation: undefined,
+			onDeleteAnnotation: undefined,
 		}),
 }))
 

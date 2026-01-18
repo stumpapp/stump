@@ -23,7 +23,7 @@ export default function TabLayout() {
 	const autoSyncEnabled = usePreferencesStore((state) => state.autoSyncLocalData)
 
 	useAutoSyncActiveServer({
-		enabled: sdk.isAuthed && autoSyncEnabled,
+		enabled: !!sdk.token && autoSyncEnabled,
 	})
 
 	const { onUnauthenticatedResponse } = useClientContext()

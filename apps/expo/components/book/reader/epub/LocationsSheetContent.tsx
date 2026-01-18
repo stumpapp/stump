@@ -12,7 +12,6 @@ import { type TableOfContentsItem, useEpubLocationStore } from '~/stores/epub'
 import { useEpubSheetStore } from '~/stores/epubSheet'
 
 import AnnotationsAndBookmarks from './AnnotationsAndBookmarks'
-import BookmarkListItem from './BookmarkListItem'
 
 // TODO: Add annotations
 export default function LocationsSheetContent() {
@@ -29,7 +28,6 @@ export default function LocationsSheetContent() {
 	const book = useEpubLocationStore((store) => store.book)
 	const toc = useEpubLocationStore((store) => store.toc)
 	const embeddedMetadata = useEpubLocationStore((store) => store.embeddedMetadata)
-	const bookmarks = useEpubLocationStore((store) => store.bookmarks)
 
 	const requestHeaders = useEpubLocationStore((store) => store.requestHeaders)
 
@@ -151,21 +149,6 @@ export default function LocationsSheetContent() {
 					}}
 					key="3"
 				>
-					{/* {bookmarks.length === 0 ? (
-						<View className="flex-1 items-center justify-center p-4">
-							<Text className="text-center text-foreground-muted">No bookmarks yet</Text>
-						</View>
-					) : (
-						<ScrollView className="w-full" contentContainerStyle={{ paddingBottom: 16 }}>
-							{bookmarks.map((bookmark) => (
-								<View key={bookmark.id}>
-									<BookmarkListItem bookmark={bookmark} />
-									<Divider />
-								</View>
-							))}
-						</ScrollView>
-					)} */}
-
 					<AnnotationsAndBookmarks />
 				</View>
 			</PagerView>

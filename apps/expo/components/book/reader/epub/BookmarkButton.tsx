@@ -42,6 +42,7 @@ export default function BookmarkButton({ color }: Props) {
 				const result = await onBookmark(locator, previewText)
 				if (result?.id) {
 					addBookmark({
+						__typename: 'Bookmark',
 						id: result.id,
 						href: locator.href,
 						chapterTitle: locator.chapterTitle,

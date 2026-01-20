@@ -1,9 +1,6 @@
 import { useRefetch, useSDK } from '@stump/client'
-import { resolveUrl } from '@stump/sdk'
 import { useQuery } from '@tanstack/react-query'
-import { useRouter } from 'expo-router'
 import partition from 'lodash/partition'
-import { useCallback, useState } from 'react'
 import { View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -41,41 +38,9 @@ export default function Screen() {
 	})
 	const [isRefetching, onRefetch] = useRefetch(refetch)
 
-	const searchURL = feed?.links.find((link) => link.rel === 'search' && link.templated)?.href
-	const resolvedSearchURL = searchURL ? resolveUrl(searchURL, sdk.rootURL) : undefined
-
-	const router = useRouter()
-
-	const [query, setQuery] = useState('')
-
-	const onSearch = useCallback(() => {
-		if (!query || !resolvedSearchURL) return
-
-		const url = resolvedSearchURL.replace('{?query}', `?query=${encodeURIComponent(query)}`)
-		router.push({
-			pathname: `/opds/[id]/search`,
-			params: {
-				id: activeServer.id,
-				url,
-				query,
-			},
-		})
-	}, [activeServer.id, router, resolvedSearchURL, query])
-
-	const hasSearch = feed?.links.some((link) => link.rel === 'search')
-
 	useDynamicHeader({
 		title: activeServer?.name || 'OPDS Feed',
 		headerLeft: () => <ChevronBackLink />,
-		headerSearchBarOptions: hasSearch
-			? {
-					placeholder: 'Search',
-					// @ts-expect-error: NativeSearchBarEvent
-					onChangeText: (e) => setQuery(e.nativeEvent.text),
-					shouldShowHintSearchIcon: true,
-					onSearchButtonPress: () => onSearch(),
-				}
-			: undefined,
 	})
 
 	const insets = useSafeAreaInsets()

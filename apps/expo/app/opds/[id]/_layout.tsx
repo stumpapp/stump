@@ -1,16 +1,52 @@
-import { SDKContext, StumpClientContextProvider } from '@stump/client'
+import { SDKContext, StumpClientContextProvider, useSDK } from '@stump/client'
 import { Api, authDocument, resolveUrl } from '@stump/sdk'
+import { useQuery } from '@tanstack/react-query'
 import { Redirect, Stack, useLocalSearchParams, useRouter } from 'expo-router'
 import { X } from 'lucide-react-native'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Platform } from 'react-native'
 
-import { ActiveServerContext } from '~/components/activeServer'
+import { ActiveServerContext, useActiveServer } from '~/components/activeServer'
 import ChevronBackLink from '~/components/ChevronBackLink'
+import { FullScreenLoader } from '~/components/ui'
+import { feedHasSearch, getSearchURL, OPDSFeedContext } from '~/context/opds'
 import { IS_IOS_24_PLUS } from '~/lib/constants'
 import { getOPDSInstance } from '~/lib/sdk/auth'
 import { usePreferencesStore, useSavedServers } from '~/stores'
 import { useCacheStore } from '~/stores/cache'
+
+function OPDSFeedProvider({ children }: { children: React.ReactNode }) {
+	const { sdk } = useSDK()
+	const { activeServer } = useActiveServer()
+
+	const { data: catalog, isLoading: isCatalogLoading } = useQuery({
+		queryKey: [sdk.opds.keys.catalog, activeServer?.id],
+		queryFn: () => {
+			if (activeServer?.stumpOPDS) {
+				return sdk.opds.catalog()
+			} else {
+				return sdk.opds.feed(activeServer?.url || '')
+			}
+		},
+		enabled: !!activeServer,
+	})
+
+	const feedContextValue = useMemo(
+		() => ({
+			catalog: catalog ?? null,
+			searchURL: getSearchURL(catalog, sdk?.rootURL),
+			hasSearch: feedHasSearch(catalog),
+			isLoading: isCatalogLoading,
+		}),
+		[catalog, sdk?.rootURL, isCatalogLoading],
+	)
+
+	if (isCatalogLoading && !catalog) {
+		return <FullScreenLoader label="Loading feed..." />
+	}
+
+	return <OPDSFeedContext.Provider value={feedContextValue}>{children}</OPDSFeedContext.Provider>
+}
 
 export default function Screen() {
 	const router = useRouter()
@@ -92,6 +128,7 @@ export default function Screen() {
 	)
 
 	if (!activeServer) {
+		// @ts-expect-error: It's fine
 		return <Redirect href="/" />
 	}
 
@@ -107,31 +144,36 @@ export default function Screen() {
 		>
 			<StumpClientContextProvider onUnauthenticatedResponse={onAuthError}>
 				<SDKContext.Provider value={{ sdk, setSDK }}>
-					<Stack
-						screenOptions={{ headerShown: false, animation: animationEnabled ? 'default' : 'none' }}
-					>
-						<Stack.Screen
-							name="auth"
-							options={{
-								title: 'Login',
-								headerShown: true,
-								headerTransparent: Platform.OS === 'ios',
-								headerBlurEffect: IS_IOS_24_PLUS ? undefined : 'regular',
+					<OPDSFeedProvider>
+						<Stack
+							screenOptions={{
+								headerShown: false,
 								animation: animationEnabled ? 'default' : 'none',
-								presentation: IS_IOS_24_PLUS ? 'formSheet' : 'modal',
-								sheetGrabberVisible: true,
-								sheetAllowedDetents: [0.95],
-								sheetInitialDetentIndex: 0,
-								headerBackVisible: true,
-								headerBackButtonDisplayMode: 'minimal',
-								headerLeft: () =>
-									Platform.select({
-										ios: <ChevronBackLink icon={X} />,
-										default: undefined,
-									}),
 							}}
-						/>
-					</Stack>
+						>
+							<Stack.Screen
+								name="auth"
+								options={{
+									title: 'Login',
+									headerShown: true,
+									headerTransparent: Platform.OS === 'ios',
+									headerBlurEffect: IS_IOS_24_PLUS ? undefined : 'regular',
+									animation: animationEnabled ? 'default' : 'none',
+									presentation: IS_IOS_24_PLUS ? 'formSheet' : 'modal',
+									sheetGrabberVisible: true,
+									sheetAllowedDetents: [0.95],
+									sheetInitialDetentIndex: 0,
+									headerBackVisible: true,
+									headerBackButtonDisplayMode: 'minimal',
+									headerLeft: () =>
+										Platform.select({
+											ios: <ChevronBackLink icon={X} />,
+											default: undefined,
+										}),
+								}}
+							/>
+						</Stack>
+					</OPDSFeedProvider>
 				</SDKContext.Provider>
 			</StumpClientContextProvider>
 		</ActiveServerContext.Provider>

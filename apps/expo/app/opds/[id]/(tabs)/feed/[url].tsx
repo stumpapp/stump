@@ -4,7 +4,7 @@ import { useLocalSearchParams } from 'expo-router'
 import { ScrollView } from 'react-native-gesture-handler'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { MaybeErrorFeed, OPDSFeed, OPDSPublicationFeed } from '~/components/opds'
+import { MaybeErrorFeed, OPDSFeed, OPDSPublicationFeed, useFeedTitle } from '~/components/opds'
 import RefreshControl from '~/components/RefreshControl'
 
 export default function Screen() {
@@ -22,8 +22,9 @@ export default function Screen() {
 	})
 
 	const insets = useSafeAreaInsets()
-
 	const [isRefetching, onRefetch] = useRefetch(refetch)
+
+	useFeedTitle(feed)
 
 	if (isLoading) return null
 

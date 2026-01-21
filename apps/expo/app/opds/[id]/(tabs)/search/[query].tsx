@@ -9,11 +9,16 @@ import ChevronBackLink from '~/components/ChevronBackLink'
 import { MaybeErrorFeed, OPDSFeed } from '~/components/opds'
 import RefreshControl from '~/components/RefreshControl'
 import { ListEmptyMessage } from '~/components/ui'
+import { useOPDSFeedContext } from '~/context/opds'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
 
 export default function Screen() {
-	const { url: feedURL, query } = useLocalSearchParams<{ url: string; query: string }>()
+	const { query } = useLocalSearchParams<{ query: string }>()
 	const { sdk } = useSDK()
+	const { searchURL } = useOPDSFeedContext()
+
+	const feedURL = searchURL?.replace('{?query}', `?query=${encodeURIComponent(query || '')}`)
+
 	const {
 		data: feed,
 		isLoading,
@@ -21,7 +26,8 @@ export default function Screen() {
 		error,
 	} = useQuery({
 		queryKey: [sdk.opds.keys.feed, feedURL],
-		queryFn: () => sdk.opds.feed(feedURL),
+		queryFn: () => sdk.opds.feed(feedURL || ''),
+		enabled: !!feedURL,
 		throwOnError: false,
 	})
 
@@ -53,7 +59,7 @@ export default function Screen() {
 			edges={Platform.OS === 'ios' ? ['top', 'left', 'right', 'bottom'] : ['left', 'right']}
 		>
 			<ScrollView
-				className="flex-1 gap-5 bg-background px-6"
+				className="flex-1 gap-5 bg-background"
 				refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={onRefetch} />}
 				contentInsetAdjustmentBehavior="automatic"
 			>

@@ -27,6 +27,7 @@ export default function Layout() {
 			<Stack.Screen
 				name="[url]"
 				options={{
+					title: '',
 					headerShown: true,
 					headerTransparent: Platform.OS === 'ios',
 					headerBlurEffect: IS_IOS_24_PLUS ? undefined : 'regular',

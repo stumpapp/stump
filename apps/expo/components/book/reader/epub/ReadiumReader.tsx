@@ -104,7 +104,6 @@ export default function ReadiumReader({
 	const { downloadBook } = useDownload({ serverId: ctx.serverId })
 
 	const [localUri, setLocalUri] = useState<string | null>(() => ctx.offlineUri || null)
-	// const [isDownloading, setIsDownloading] = useState(false)
 
 	const controlsVisible = useReaderStore((state) => state.showControls)
 	const setControlsVisible = useReaderStore((state) => state.setShowControls)
@@ -179,6 +178,10 @@ export default function ReadiumReader({
 		[],
 	)
 
+	// TODO: Refactor to avoid registering callbacks. This is a bit yucky and the original reason for doing
+	// is (using expo router w different screens) is no longer relevant since we have the programmatic sheets
+	// instead of navigation-based ones. I figure the callbacks and less mutable state can just go into context,
+	// which cuts the majority if not all the unnecessary store logic
 	const store = useEpubLocationStore((store) => ({
 		storeBook: store.storeBook,
 		onTocChange: store.onTocChange,

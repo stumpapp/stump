@@ -1,11 +1,10 @@
 import { Host, Image } from '@expo/ui/swift-ui'
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { useRouter } from 'expo-router'
-import { CheckCircle2 } from 'lucide-react-native'
+import { BookOpenCheck, CheckCircle2, CircleMinus, Info, Trash } from 'lucide-react-native'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
-import { Alert, Platform, Pressable, View } from 'react-native'
+import { Alert, Platform, View } from 'react-native'
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
-import * as ContextMenu from 'zeego/context-menu'
 
 import { epubProgress, imageMeta, syncStatus } from '~/db'
 import { useColors } from '~/lib/constants'
@@ -15,6 +14,7 @@ import { useSelectionStore } from '~/stores/selection'
 
 import { ThumbnailImage } from '../image'
 import { Heading, Progress, Text } from '../ui'
+import { ContextMenu } from '../ui/context-menu/context-menu'
 import { Icon } from '../ui/icon'
 import { DownloadedBookDetailsSheet } from './DownloadedBookDetailsSheet'
 import { SyncIcon } from './sync-icon/SyncIcon'
@@ -187,103 +187,122 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 
 	return (
 		<>
-			<ContextMenu.Root>
-				<ContextMenu.Trigger className="w-full">
-					<Pressable onPress={onPress} onLongPress={() => {}} delayLongPress={100}>
-						{({ pressed }) => (
-							<View
-								className="white relative mx-4 flex-row gap-4"
-								style={{
-									opacity: pressed && !selectionStore.isSelectionMode ? 0.8 : 1,
-								}}
-							>
-								{/* TODO: Use file icons when no thumbnail is available? */}
-								<ThumbnailImage
-									source={{
-										// @ts-expect-error: URI doesn't like undefined but it shows a placeholder when
-										// undefined so it's fine
-										uri: getThumbnailPath(downloadedFile),
-									}}
-									resizeMode="stretch"
-									size={{ height, width }}
-									placeholderData={thumbnailData}
+			<ContextMenu
+				onPress={onPress}
+				groups={[
+					{
+						items: [
+							{
+								label: 'See Details',
+								icon: {
+									ios: 'info.circle',
+									android: Info,
+								},
+								onPress: () => sheetRef.current?.present(),
+							},
+							{
+								label: 'Select',
+								icon: {
+									ios: 'checkmark.circle',
+									android: CheckCircle2,
+								},
+								onPress: handleSelect,
+							},
+						],
+					},
+					{
+						items: [
+							...(!progression.isCompleted
+								? [
+										{
+											label: 'Mark as Read',
+											icon: {
+												ios: 'book.closed',
+												android: BookOpenCheck,
+											},
+											onPress: handleMarkAsComplete,
+										} as const,
+									]
+								: []),
+							...(progression.hasProgress
+								? [
+										{
+											label: 'Clear Progress',
+											icon: {
+												ios: 'minus.circle',
+												android: CircleMinus,
+											},
+											onPress: handleClearProgress,
+										} as const,
+									]
+								: []),
+						],
+					},
+					{
+						items: [
+							{
+								label: 'Delete Download',
+								icon: {
+									ios: 'trash',
+									android: Trash,
+								},
+								onPress: handleDelete,
+								role: 'destructive',
+							},
+						],
+					},
+				]}
+			>
+				<View className="white relative mx-4 flex-row gap-4">
+					{/* TODO: Use file icons when no thumbnail is available? */}
+					<ThumbnailImage
+						source={{
+							// @ts-expect-error: URI doesn't like undefined but it shows a placeholder when
+							// undefined so it's fine
+							uri: getThumbnailPath(downloadedFile),
+						}}
+						resizeMode="stretch"
+						size={{ height, width }}
+						placeholderData={thumbnailData}
+					/>
+
+					<View className="flex-1 justify-center py-1.5">
+						<View className="flex flex-1 flex-row justify-between gap-2">
+							<View className="flex shrink gap-0.5">
+								<Heading numberOfLines={2}>{downloadedFile.bookName || 'Untitled'}</Heading>
+								<Text className="text-foreground-muted">{renderSubtitle()}</Text>
+							</View>
+
+							{status && (
+								<Animated.View className="mt-1 shrink-0" style={syncIconStyle}>
+									<SyncIcon status={status} />
+								</Animated.View>
+							)}
+						</View>
+
+						{readProgress && (
+							<View className="flex-row items-center gap-4">
+								<Progress
+									className="h-1 shrink bg-background-surface-secondary"
+									value={getProgress()}
+									style={{ height: 6, borderRadius: 3 }}
 								/>
 
-								<View className="flex-1 justify-center py-1.5">
-									<View className="flex flex-1 flex-row justify-between gap-2">
-										<View className="flex shrink gap-0.5">
-											<Heading numberOfLines={2}>{downloadedFile.bookName || 'Untitled'}</Heading>
-											<Text className="text-foreground-muted">{renderSubtitle()}</Text>
-										</View>
-
-										{status && (
-											<Animated.View className="mt-1 shrink-0" style={syncIconStyle}>
-												<SyncIcon status={status} />
-											</Animated.View>
-										)}
-									</View>
-
-									{readProgress && (
-										<View className="flex-row items-center gap-4">
-											<Progress
-												className="h-1 shrink bg-background-surface-secondary"
-												value={getProgress()}
-												style={{ height: 6, borderRadius: 3 }}
-											/>
-
-											<Text className="shrink-0 text-foreground-muted">
-												{(getProgress() || 0).toFixed(0)}%
-											</Text>
-										</View>
-									)}
-								</View>
-
-								<Animated.View
-									className="squircle absolute inset-0 z-10 -m-1 rounded-lg border-2"
-									style={overlayStyle}
-								>
-									<View className="flex flex-1 items-center justify-center">{CheckIcon}</View>
-								</Animated.View>
+								<Text className="shrink-0 text-foreground-muted">
+									{(getProgress() || 0).toFixed(0)}%
+								</Text>
 							</View>
 						)}
-					</Pressable>
-				</ContextMenu.Trigger>
+					</View>
 
-				<ContextMenu.Content>
-					<ContextMenu.Group>
-						<ContextMenu.Item key="details" onSelect={() => sheetRef.current?.present()}>
-							<ContextMenu.ItemTitle>See Details</ContextMenu.ItemTitle>
-							<ContextMenu.ItemIcon ios={{ name: 'info.circle' }} />
-						</ContextMenu.Item>
-
-						<ContextMenu.Item key="select" onSelect={handleSelect}>
-							<ContextMenu.ItemTitle>Select</ContextMenu.ItemTitle>
-							<ContextMenu.ItemIcon ios={{ name: 'checkmark.circle' }} />
-						</ContextMenu.Item>
-					</ContextMenu.Group>
-
-					<ContextMenu.Group>
-						{!progression.isCompleted && (
-							<ContextMenu.Item key="markAsRead" onSelect={handleMarkAsComplete}>
-								<ContextMenu.ItemTitle>Mark as Read</ContextMenu.ItemTitle>
-								<ContextMenu.ItemIcon ios={{ name: 'book.closed' }} />
-							</ContextMenu.Item>
-						)}
-
-						{progression.hasProgress && (
-							<ContextMenu.Item key="clearProgress" onSelect={handleClearProgress}>
-								<ContextMenu.ItemTitle>Clear Progress</ContextMenu.ItemTitle>
-								<ContextMenu.ItemIcon ios={{ name: 'minus.circle' }} />
-							</ContextMenu.Item>
-						)}
-					</ContextMenu.Group>
-
-					<ContextMenu.Item key="delete" destructive onSelect={handleDelete}>
-						<ContextMenu.ItemTitle>Delete Download</ContextMenu.ItemTitle>
-						<ContextMenu.ItemIcon ios={{ name: 'trash' }} />
-					</ContextMenu.Item>
-				</ContextMenu.Content>
-			</ContextMenu.Root>
+					<Animated.View
+						className="squircle absolute inset-0 z-10 -m-1 rounded-lg border-2"
+						style={overlayStyle}
+					>
+						<View className="flex flex-1 items-center justify-center">{CheckIcon}</View>
+					</Animated.View>
+				</View>
+			</ContextMenu>
 
 			<DownloadedBookDetailsSheet ref={sheetRef} downloadedFile={downloadedFile} />
 		</>

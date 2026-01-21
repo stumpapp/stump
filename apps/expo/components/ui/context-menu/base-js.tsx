@@ -41,13 +41,13 @@ function ContextMenuSubTrigger({
 	return (
 		<TextClassContext.Provider
 			value={cn(
-				'text-sm select-none group-active:text-accent-foreground',
+				'text-lg select-none group-active:text-accent-foreground',
 				open && 'text-accent-foreground',
 			)}
 		>
 			<ContextMenuPrimitive.SubTrigger
 				className={cn(
-					'active:bg-accent group flex flex-row items-center rounded-sm px-2 py-2 sm:py-1.5',
+					'group flex flex-row items-center rounded-lg px-2 py-2 active:bg-background-surface sm:py-1.5',
 					open && cn('bg-accent', Platform.select({ native: 'mb-1' })),
 					inset && 'pl-8',
 					className,
@@ -69,7 +69,7 @@ function ContextMenuSubContent({
 		<NativeOnlyAnimatedView entering={FadeIn}>
 			<ContextMenuPrimitive.SubContent
 				className={cn(
-					'bg-popover overflow-hidden rounded-md border border-edge p-1 shadow-lg shadow-black/5',
+					'squircle overflow-hidden rounded-2xl border border-edge bg-background p-1 shadow-lg shadow-black/5',
 					className,
 				)}
 				{...props}
@@ -110,7 +110,7 @@ function ContextMenuContent({
 						<TextClassContext.Provider value="text-foreground">
 							<ContextMenuPrimitive.Content
 								className={cn(
-									'min-w-[8rem] overflow-hidden rounded-md border border-edge bg-background p-1 shadow-lg shadow-black/5',
+									'squircle min-w-[12rem] overflow-hidden rounded-2xl border border-edge bg-background p-3 shadow-lg shadow-black/5',
 									className,
 								)}
 								{...props}
@@ -137,13 +137,13 @@ function ContextMenuItem({
 	return (
 		<TextClassContext.Provider
 			value={cn(
-				'select-none text-sm text-foreground group-active:text-foreground',
+				'select-none text-lg text-foreground group-active:text-foreground',
 				variant === 'destructive' && 'text-fill-danger group-active:text-fill-danger',
 			)}
 		>
 			<ContextMenuPrimitive.Item
 				className={cn(
-					'group relative flex flex-row items-center gap-2 rounded-sm px-2 py-2 sm:py-1.5',
+					'squircle group relative flex flex-row items-center gap-4 rounded-lg px-2 py-2 active:bg-background-surface sm:py-1.5',
 					variant === 'destructive' && 'active:bg-fill-danger-secondary',
 					props.disabled && 'opacity-50',
 					inset && 'pl-8',
@@ -164,10 +164,10 @@ function ContextMenuCheckboxItem({
 		children?: React.ReactNode
 	}) {
 	return (
-		<TextClassContext.Provider value="text-sm text-foreground select-none group-active:text-accent-foreground">
+		<TextClassContext.Provider value="text-lg text-foreground select-none group-active:text-accent-foreground">
 			<ContextMenuPrimitive.CheckboxItem
 				className={cn(
-					'active:bg-accent group relative flex flex-row items-center gap-2 rounded-sm py-2 pl-8 pr-2 sm:py-1.5',
+					'active:bg-accent group relative flex flex-row items-center gap-2 rounded-md py-2 pl-8 pr-2 sm:py-1.5',
 					props.disabled && 'opacity-50',
 					className,
 				)}
@@ -199,10 +199,10 @@ function ContextMenuRadioItem({
 		children?: React.ReactNode
 	}) {
 	return (
-		<TextClassContext.Provider value="text-sm text-foreground select-none group-active:text-foreground">
+		<TextClassContext.Provider value="text-lg text-foreground select-none group-active:text-foreground">
 			<ContextMenuPrimitive.RadioItem
 				className={cn(
-					'group relative flex flex-row items-center gap-2 rounded-sm py-2 pl-8 pr-2 active:bg-background-surface sm:py-1.5',
+					'group relative flex flex-row items-center gap-2 rounded-md py-2 pl-8 pr-2 active:bg-background-surface sm:py-1.5',
 					props.disabled && 'opacity-50',
 					className,
 				)}
@@ -231,7 +231,7 @@ function ContextMenuLabel({
 	return (
 		<ContextMenuPrimitive.Label
 			className={cn(
-				'px-2 py-2 text-sm font-medium text-foreground sm:py-1.5',
+				'px-2 py-2 text-lg font-medium text-foreground sm:py-1.5',
 				inset && 'pl-8',
 				className,
 			)}

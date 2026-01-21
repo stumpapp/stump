@@ -1,5 +1,7 @@
 import { usePortalHost } from '~/lib/PortalHostContext'
+import { cn } from '~/lib/utils'
 
+import { Icon } from '../icon'
 import { Text } from '../text'
 import * as JSBase from './base-js'
 import { ContextMenuProps } from './types'
@@ -20,10 +22,17 @@ export function ContextMenu({ groups, disabled, children, onPress }: ContextMenu
 								disabled={disabled || item.disabled}
 								variant={item.role}
 							>
-								<Text>{item.label}</Text>
-								{item.subtext && (
-									<Text className="text-xs text-foreground-muted">{item.subtext}</Text>
+								{item.icon && (
+									<Icon
+										as={item.icon.android}
+										className={cn('size-6 text-foreground-muted', {
+											'text-fill-danger': item.role === 'destructive',
+										})}
+									/>
 								)}
+								<Text>{item.label}</Text>
+								{/* TODO: Make subtext not look garbo */}
+								{/* {item.subtext && <Text className="text-foreground-muted">{item.subtext}</Text>} */}
 							</JSBase.ContextMenuItem>
 						))}
 					</JSBase.ContextMenuGroup>

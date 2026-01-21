@@ -82,6 +82,7 @@
      let onEditHighlight = EventDispatcher()
      let onDeleteHighlight = EventDispatcher()
      let onError = EventDispatcher()
+     let onReachedEnd = EventDispatcher()
      
      private var tappedHighlightId: String?
      private var tappedHighlightRect: CGRect?
@@ -604,7 +605,24 @@
      func goForward() {
          let task = Task { [weak self] in
              guard let self = self else { return }
-             _ = await self.navigator?.goForward(options: NavigatorGoOptions(animated: true))
+             let didMove = await self.navigator?.goForward(options: NavigatorGoOptions(animated: true)) ?? false
+             if !didMove {
+                 await MainActor.run {
+                     guard let navigator = self.navigator,
+                           let currentLocator = navigator.currentLocation
+                     else {
+                         return
+                     }
+                     self.onReachedEnd(makeJSON([
+                         "chapterTitle": currentLocator.title ?? "",
+                         "href": currentLocator.href.string,
+                         "title": encodeIfNotNil(currentLocator.title),
+                         "locations": encodeIfNotEmpty(currentLocator.locations.json),
+                         "text": encodeIfNotEmpty(currentLocator.text.json),
+                         "type": encodeIfNotEmpty(currentLocator.mediaType.string),
+                     ]))
+                 }
+             }
          }
          navigationTasks.append(task)
          navigationTasks.removeAll { $0.isCancelled }
@@ -795,24 +813,12 @@
      }
 
      public func navigator(_ navigator: VisualNavigator, didTapAt point: CGPoint) {
-         let navigator = navigator as! EPUBNavigatorViewController
-
          if point.x < bounds.maxX * 0.2 {
-             let task = Task { [weak self] in
-                 guard self != nil else { return }
-                 _ = await navigator.goBackward(options: NavigatorGoOptions(animated: true))
-             }
-             navigationTasks.append(task)
-             navigationTasks.removeAll { $0.isCancelled }
+             goBackward()
              return
          }
          if point.x > bounds.maxX * 0.8 {
-             let task = Task { [weak self] in
-                 guard self != nil else { return }
-                 _ = await navigator.goForward(options: NavigatorGoOptions(animated: true))
-             }
-             navigationTasks.append(task)
-             navigationTasks.removeAll { $0.isCancelled }
+             goForward()
              return
          }
 

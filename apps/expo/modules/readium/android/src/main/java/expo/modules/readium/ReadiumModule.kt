@@ -67,13 +67,11 @@ class ReadiumModule : Module() {
     }
 
     AsyncFunction("goForward") { view: EPUBView ->
-      val navigator = view.navigator ?: return@AsyncFunction
-      navigator.goForward(animated = false)
+      view.goForward()
     }
 
     AsyncFunction("goBackward") { view: EPUBView ->
-      val navigator = view.navigator ?: return@AsyncFunction
-      navigator.goBackward(animated = false)
+      view.goBackward()
     }
 
     AsyncFunction("goToLocation") { view: EPUBView, locatorMap: Map<String, Any> ->
@@ -84,7 +82,7 @@ class ReadiumModule : Module() {
     }
 
     View(EPUBView::class) {
-      Events("onLocatorChange", "onPageChange", "onBookLoaded", "onLayoutChange", "onMiddleTouch", "onSelection", "onAnnotationTap", "onHighlightRequest", "onNoteRequest", "onEditHighlight", "onDeleteHighlight", "onDoubleTouch", "onError")
+      Events("onLocatorChange", "onPageChange", "onBookLoaded", "onLayoutChange", "onMiddleTouch", "onSelection", "onAnnotationTap", "onHighlightRequest", "onNoteRequest", "onEditHighlight", "onDeleteHighlight", "onDoubleTouch", "onError", "onReachedEnd")
 
       Prop("bookId") { view: EPUBView, prop: String ->
         if (view.bookService == null) {
@@ -94,13 +92,11 @@ class ReadiumModule : Module() {
       }
 
       AsyncFunction("goForward") { view: EPUBView ->
-        val navigator = view.navigator ?: return@AsyncFunction
-        navigator.goForward(animated = false)
+        view.goForward()
       }
 
       AsyncFunction("goBackward") { view: EPUBView ->
-        val navigator = view.navigator ?: return@AsyncFunction
-        navigator.goBackward(animated = false)
+        view.goBackward()
       }
 
       AsyncFunction("goToLocation") { view: EPUBView, locatorMap: Map<String, Any> ->

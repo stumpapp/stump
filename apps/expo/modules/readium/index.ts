@@ -21,6 +21,7 @@ type StumpBookmark = {
 		href: string
 		locations?: ReadiumLocation | null
 	} | null
+	createdAt: string
 }
 
 const safeNumber = (value: unknown): number | null => {
@@ -52,6 +53,7 @@ export function intoBookmarkRef(bookmark: StumpBookmark): BookmarkRef {
 		locations: normalizeLocations(bookmark.locator?.locations),
 		previewContent: bookmark.previewContent,
 		mediaId: bookmark.mediaId,
+		createdAt: new Date(bookmark.createdAt),
 	}
 }
 
@@ -110,4 +112,21 @@ export function intoPDFReadiumLocator(page: number): PDFLocator {
 		href: 'publication.pdf',
 		type: 'application/pdf',
 	}
+}
+
+export function isLastReadiumLocator(
+	locator: ReadiumLocator,
+	positions: ReadiumLocator[],
+): boolean {
+	if (positions.length === 0) return false
+	const totalPositions = positions.length
+	const totalProgression = locator.locations?.totalProgression
+	const position = locator.locations?.position
+
+	return (
+		position != null &&
+		totalProgression != null &&
+		position >= totalPositions &&
+		totalProgression >= 0.95
+	)
 }

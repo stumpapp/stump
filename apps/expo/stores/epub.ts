@@ -114,9 +114,10 @@ export type IEpubLocationStore = {
 	toc: TableOfContentsItem[]
 	tocSource: TocSource | null
 	embeddedMetadata?: EmbeddedMetadata
+	positions: ReadiumLocator[]
 
 	onTocChange: (toc: TableOfContentsItem[] | string[], source: TocSource) => void
-	onBookLoad: (metadata?: BookMetadata) => void
+	onBookLoad: (metadata?: BookMetadata, positions?: ReadiumLocator[]) => void
 	onLocationChange: (locator: ReadiumLocator) => void
 	onUnload: () => void
 
@@ -159,6 +160,7 @@ export const useEpubLocationStore = create<IEpubLocationStore>((set, get) => ({
 	totalPages: 0,
 	toc: [],
 	tocSource: null,
+	positions: [],
 
 	onTocChange: (toc, source) => {
 		if (typeof toc[0] === 'string') {
@@ -173,10 +175,11 @@ export const useEpubLocationStore = create<IEpubLocationStore>((set, get) => ({
 			})
 		}
 	},
-	onBookLoad: (metadata) =>
+	onBookLoad: (metadata, positions) =>
 		set({
 			totalPages: metadata?.totalPages ?? 0,
 			embeddedMetadata: metadata,
+			positions: positions ?? [],
 		}),
 	onLocationChange: (locator) =>
 		set({

@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import setProperty from 'lodash/set'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -10,8 +11,10 @@ import {
 	BookLoadedEventPayload,
 	ColumnCount,
 	DecoratorTapEvent,
+	getPositions,
 	HighlightRequestEvent,
 	intoBookmarkRef,
+	isLastReadiumLocator,
 	NoteRequestEvent,
 	ReadiumLocator,
 	ReadiumView,
@@ -64,6 +67,10 @@ type Props = {
 	 */
 	onLocationChanged: (locator: ReadiumLocator, percentage: number) => void
 	/**
+	 * Callback when the user has reached the end of the book
+	 */
+	onReachedEnd?: (locator: ReadiumLocator) => void
+	/**
 	 * The URI of the offline book, if available
 	 */
 	offlineUri?: string
@@ -94,6 +101,7 @@ export default function ReadiumReader({
 	initialLocator,
 	incognito,
 	onLocationChanged,
+	onReachedEnd,
 	onBookmark,
 	onDeleteBookmark,
 	onCreateAnnotation,
@@ -107,6 +115,8 @@ export default function ReadiumReader({
 
 	const controlsVisible = useReaderStore((state) => state.showControls)
 	const setControlsVisible = useReaderStore((state) => state.setShowControls)
+
+	const hasReachedEndRef = useRef(false)
 
 	const {
 		fontWeight: rawFontWeight,
@@ -206,6 +216,7 @@ export default function ReadiumReader({
 		storeOnCreateAnnotation: store.storeOnCreateAnnotation,
 		storeOnUpdateAnnotation: store.storeOnUpdateAnnotation,
 		storeOnDeleteAnnotation: store.storeOnDeleteAnnotation,
+		positions: store.positions,
 	}))
 
 	const { isLoading: isDownloading } = useQuery({
@@ -316,8 +327,10 @@ export default function ReadiumReader({
 	)
 
 	const handleBookLoaded = useCallback(
-		(event: BookLoadedEventPayload) => {
-			store.onBookLoad(event.bookMetadata)
+		async (event: BookLoadedEventPayload) => {
+			store.onBookLoad(event.bookMetadata, await getPositions(book.id))
+
+			hasReachedEndRef.current = false
 
 			// Note: This is kinda treating a symptom rather than the cause, but the server-derived ToC is less
 			// accurate than Readium's for some reason. I don't have time to dig into the weeds of the epub parsing
@@ -349,12 +362,27 @@ export default function ReadiumReader({
 			store.onLocationChange(locator)
 
 			const totalProgression = locator.locations?.totalProgression
+			const isLikelyLastLocator = isLastReadiumLocator(locator, store.positions)
 
-			if (!incognito && totalProgression != null) {
+			if (!hasReachedEndRef.current && !incognito && isLikelyLastLocator) {
+				hasReachedEndRef.current = true
+				setProperty(locator, 'locations.totalProgression', 1.0)
+				onReachedEnd?.(locator)
+			} else if (!incognito && totalProgression != null) {
 				onLocationChanged(locator, totalProgression)
 			}
 		},
-		[onLocationChanged, incognito, store],
+		[onLocationChanged, onReachedEnd, incognito, store],
+	)
+
+	const handleReachedEnd = useCallback(
+		(event: { nativeEvent: ReadiumLocator }) => {
+			if (!hasReachedEndRef.current && !incognito) {
+				hasReachedEndRef.current = true
+				onReachedEnd?.(event.nativeEvent)
+			}
+		},
+		[onReachedEnd, incognito],
 	)
 
 	const handleMiddleTouch = useCallback(() => {
@@ -508,6 +536,7 @@ export default function ReadiumReader({
 				onBookLoaded={({ nativeEvent }) => handleBookLoaded(nativeEvent)}
 				onLocatorChange={({ nativeEvent: locator }) => handleLocationChanged(locator)}
 				onMiddleTouch={handleMiddleTouch}
+				onReachedEnd={handleReachedEnd}
 				onHighlightRequest={handleHighlightRequest}
 				onNoteRequest={handleNoteRequest}
 				onAnnotationTap={handleAnnotationTap}

@@ -362,6 +362,30 @@ export default function Screen() {
 		[book.id, totalSeconds, updateProgress],
 	)
 
+	const onReachedEnd = useCallback(
+		(locator: ReadiumLocator) => {
+			updateProgress({
+				id: book.id,
+				input: {
+					epub: {
+						locator: {
+							readium: {
+								chapterTitle: locator.chapterTitle,
+								href: locator.href,
+								locations: locator.locations,
+								text: locator.text,
+								title: locator.title,
+								type: locator.type || 'application/xhtml+xml',
+							},
+						},
+						isComplete: true,
+					},
+				},
+			})
+		},
+		[book.id, updateProgress],
+	)
+
 	const { syncCreate: syncBookmarkCreate, syncDelete: syncBookmarkDelete } =
 		useSyncOnlineToOfflineBookmarks({
 			bookId: book.id,
@@ -585,6 +609,7 @@ export default function Screen() {
 				book={book}
 				initialLocator={initialLocator ? intoReadiumLocator(initialLocator) : undefined}
 				onLocationChanged={onLocationChanged}
+				onReachedEnd={onReachedEnd}
 				onBookmark={onBookmark}
 				onDeleteBookmark={onDeleteBookmark}
 				offlineUri={offlineUri}

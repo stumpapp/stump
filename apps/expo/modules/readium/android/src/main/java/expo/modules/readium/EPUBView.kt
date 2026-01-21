@@ -128,6 +128,7 @@ class EPUBView(context: Context, appContext: AppContext) : ExpoView(context, app
     val onDeleteHighlight by EventDispatcher()
     val onDoubleTouch by EventDispatcher()
     val onError by EventDispatcher()
+    val onReachedEnd by EventDispatcher()
 
     var navigator: EpubNavigatorFragment? = null
     private var publication: Publication? = null
@@ -546,15 +547,34 @@ class EPUBView(context: Context, appContext: AppContext) : ExpoView(context, app
     
     fun handleTap(point: PointF): Boolean {
         if (point.x < width * 0.2) {
-            navigator?.goBackward(animated = true)
+            goBackward()
             return true
         }
         if (point.x > width * 0.8) {
-            navigator?.goForward(animated = true)
+            goForward()
             return true
         }
         onMiddleTouch(mapOf())
         return false
+    }
+
+    @OptIn(InternalReadiumApi::class)
+    fun goForward() {
+        val nav = navigator ?: return
+        coroutineScope.launch {
+            val didMove = nav.goForward(animated = true)
+            if (!didMove) {
+                val currentLocator = nav.currentLocator?.value ?: return@launch
+                onReachedEnd(currentLocator.toJSON().toMap())
+            }
+        }
+    }
+
+    fun goBackward() {
+        val nav = navigator ?: return
+        coroutineScope.launch {
+            nav.goBackward(animated = true)
+        }
     }
 
     private suspend fun onLocatorChanged(locator: Locator) {

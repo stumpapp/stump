@@ -92,6 +92,7 @@ export type ReadiumModuleEvents = {
 		locator?: ReadiumLocator
 	}) => void
 	onDoubleTouch: (params: ReadiumLocator) => void
+	onReachedEnd: (params: ReadiumLocator) => void
 	onError: (params: {
 		errorDescription: string
 		failureReason: string
@@ -189,6 +190,7 @@ export type ReadiumViewProps = {
 	onEditHighlight?: (event: { nativeEvent: { decorationId: string } }) => void
 	onDeleteHighlight?: (event: { nativeEvent: { decorationId: string } }) => void
 	onDoubleTouch?: (event: { nativeEvent: ReadiumLocator }) => void
+	onReachedEnd?: (event: { nativeEvent: ReadiumLocator }) => void
 	onError?: (event: {
 		nativeEvent: { errorDescription: string; failureReason: string; recoverySuggestion: string }
 	}) => void

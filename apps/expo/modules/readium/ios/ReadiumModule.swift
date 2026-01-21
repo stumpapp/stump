@@ -54,7 +54,7 @@
          }
 
          View(EPUBView.self) {
-             Events("onLocatorChange", "onPageChange", "onBookLoaded", "onLayoutChange", "onMiddleTouch", "onSelection", "onAnnotationTap", "onHighlightRequest", "onNoteRequest", "onEditHighlight", "onDeleteHighlight", "onDoubleTouch", "onError")
+             Events("onLocatorChange", "onPageChange", "onBookLoaded", "onLayoutChange", "onMiddleTouch", "onSelection", "onAnnotationTap", "onHighlightRequest", "onNoteRequest", "onEditHighlight", "onDeleteHighlight", "onDoubleTouch", "onError", "onReachedEnd")
 
              AsyncFunction("goToLocation") { (view: EPUBView, locatorJson: [String: Any]) in
                  guard let locator = try? Locator(json: locatorJson) else {

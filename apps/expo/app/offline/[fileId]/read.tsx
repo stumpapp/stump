@@ -270,6 +270,18 @@ function Reader({ record, bookmarks, annotations }: ReaderProps) {
 		[book.id, downloadedFile.serverId, updateEbookProgress],
 	)
 
+	const onReachedEnd = useCallback(
+		(locator: ReadiumLocator) => {
+			updateEbookProgress({
+				bookId: book.id,
+				serverId: downloadedFile.serverId,
+				percentage: 1.0,
+				...locator,
+			})
+		},
+		[book.id, downloadedFile.serverId, updateEbookProgress],
+	)
+
 	const { createBookmark, deleteBookmark } = useLocalBookmarkMutations({
 		bookId: book.id,
 		serverId: downloadedFile.serverId,
@@ -333,6 +345,7 @@ function Reader({ record, bookmarks, annotations }: ReaderProps) {
 				book={book}
 				initialLocator={initialLocator ? intoReadiumLocator(initialLocator) : undefined}
 				onLocationChanged={onLocationChanged}
+				onReachedEnd={onReachedEnd}
 				onBookmark={createBookmark}
 				onDeleteBookmark={deleteBookmark}
 				onCreateAnnotation={createAnnotation}

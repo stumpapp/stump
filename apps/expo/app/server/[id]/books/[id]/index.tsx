@@ -20,6 +20,7 @@ import { ThumbnailImage } from '~/components/image'
 import RefreshControl from '~/components/RefreshControl'
 import { Button, CardList, Heading, Text } from '~/components/ui'
 import { Icon } from '~/components/ui/icon'
+import { formatSeriesPosition } from '~/lib/bookUtils'
 import { formatBytes, parseGraphQLDecimal } from '~/lib/format'
 import { useDownload, useIsBookDownloaded } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
@@ -218,7 +219,13 @@ export default function Screen() {
 	const characters = book.metadata?.characters?.join(', ')
 
 	const seriesName = book.metadata?.series || book.series.resolvedName
-	const seriesPosition = Number(book.metadata?.number) || book.seriesPosition
+	const seriesPosition = formatSeriesPosition(
+		(Number(book.metadata?.number) || book.seriesPosition) ?? null,
+		book.series.mediaCount,
+		{
+			seriesName,
+		},
+	)
 
 	const seriesVolume = book.metadata?.volume
 
@@ -355,12 +362,8 @@ export default function Screen() {
 							{book.resolvedName}
 						</Heading>
 
-						{seriesName && seriesPosition != null && (
-							<Text className="text-center text-base text-foreground-muted">
-								{seriesPosition}
-								{seriesPosition > book.series.mediaCount ? null : ` of ${book.series.mediaCount} `}
-								in {seriesName}
-							</Text>
+						{seriesPosition != null && (
+							<Text className="text-center text-base text-foreground-muted">{seriesPosition}</Text>
 						)}
 					</View>
 

@@ -5,6 +5,7 @@ import { memo } from 'react'
 import { Easing, Pressable, View } from 'react-native'
 import { easeGradient } from 'react-native-easing-gradient'
 
+import { formatSeriesPosition } from '~/lib/bookUtils'
 import { COLORS } from '~/lib/constants'
 import { useListItemSize } from '~/lib/hooks'
 
@@ -32,6 +33,7 @@ const fragment = graphql(`
 		}
 		seriesPosition
 		series {
+			resolvedName
 			mediaCount
 		}
 	}
@@ -66,12 +68,13 @@ function OnDeckBookItem({ book }: Props) {
 
 	const { url: uri, metadata: placeholderData } = data.thumbnail
 
-	const seriesPosition = Number(data.metadata?.number) || data.seriesPosition
-	// If seriesPosition is fractional, we show "Book X in series"
-	// If it's an integer, we show "Book X of Y"
-	// If the integer is more than the total mediaCount, we fallback to "Book X in series"
-	const isFractional = !Number.isInteger(seriesPosition)
-	const showOfY = !!seriesPosition && !isFractional && seriesPosition <= data.series.mediaCount
+	const seriesPosition = formatSeriesPosition(
+		Number(data.metadata?.number) || data.seriesPosition,
+		data.series.mediaCount,
+		{
+			seriesName: data.series.resolvedName,
+		},
+	)
 
 	return (
 		<Pressable onPress={() => router.navigate(`/server/${serverID}/books/${data.id}`)}>
@@ -118,9 +121,7 @@ function OnDeckBookItem({ book }: Props) {
 								}}
 								numberOfLines={0}
 							>
-								{showOfY
-									? `Book ${seriesPosition} of ${data.series.mediaCount}`
-									: `Book ${seriesPosition} in series`}
+								{seriesPosition}
 							</Text>
 						)}
 					</View>

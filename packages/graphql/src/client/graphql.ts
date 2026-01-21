@@ -3920,7 +3920,7 @@ export type BookListItemFragment = { __typename?: 'Media', id: string, resolvedN
 
 export type BookSearchItemFragment = { __typename?: 'Media', id: string, resolvedName: string, size: number, pages: number, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } & { ' $fragmentName'?: 'BookSearchItemFragment' };
 
-export type OnDeckBookItemFragment = { __typename?: 'Media', id: string, resolvedName: string, seriesPosition?: number | null, metadata?: { __typename?: 'MediaMetadata', number?: any | null } | null, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null }, series: { __typename?: 'Series', mediaCount: number } } & { ' $fragmentName'?: 'OnDeckBookItemFragment' };
+export type OnDeckBookItemFragment = { __typename?: 'Media', id: string, resolvedName: string, seriesPosition?: number | null, metadata?: { __typename?: 'MediaMetadata', number?: any | null } | null, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null }, series: { __typename?: 'Series', resolvedName: string, mediaCount: number } } & { ' $fragmentName'?: 'OnDeckBookItemFragment' };
 
 export type CharactersQueryVariables = Exact<{
   seriesId?: InputMaybe<Scalars['ID']['input']>;
@@ -5248,6 +5248,7 @@ export const OnDeckBookItemFragmentDoc = new TypedDocumentString(`
   }
   seriesPosition
   series {
+    resolvedName
     mediaCount
   }
 }
@@ -6583,6 +6584,7 @@ export const OnDeckBooksDocument = new TypedDocumentString(`
   }
   seriesPosition
   series {
+    resolvedName
     mediaCount
   }
 }`) as unknown as TypedDocumentString<OnDeckBooksQuery, OnDeckBooksQueryVariables>;

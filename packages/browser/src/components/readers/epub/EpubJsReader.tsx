@@ -118,6 +118,7 @@ const query = graphql(`
 				userId
 				epubcfi
 				mediaId
+				createdAt
 			}
 			media {
 				id

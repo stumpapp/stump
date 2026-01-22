@@ -2,6 +2,7 @@ import { OPDSFeed } from '@stump/sdk'
 import partition from 'lodash/partition'
 import { View } from 'react-native'
 
+import FeedSubtitle from './FeedSubtitle'
 import MaybeErrorFeed from './MaybeErrorFeed'
 import Navigation from './Navigation'
 import NavigationGroup from './NavigationGroup'
@@ -28,6 +29,12 @@ export default function Feed({ feed, ...options }: Props) {
 
 	return (
 		<View className="flex-1 gap-8 pt-4">
+			{feed.metadata.subtitle && (
+				<View className="-mt-2 px-4">
+					<FeedSubtitle value={feed.metadata.subtitle} />
+				</View>
+			)}
+
 			<Navigation navigation={feed.navigation} {...options} />
 
 			{publicationGroups.map((group) => (

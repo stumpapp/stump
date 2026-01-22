@@ -79,6 +79,7 @@ export type OPDSDynamicMetadata = Record<string, unknown>
 const metadata = z
 	.object({
 		title: z.string(),
+		subtitle: z.string().nullish(),
 		identifier: z.string().nullish(),
 		modified: z.string().nullish(),
 		description: z.string().nullish(),

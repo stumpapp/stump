@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useActiveServer } from '~/components/activeServer'
 import ChevronBackLink from '~/components/ChevronBackLink'
 import {
+	FeedSubtitle,
 	MaybeErrorFeed,
 	OPDSNavigation,
 	OPDSNavigationGroup,
@@ -68,6 +69,12 @@ export default function Screen() {
 			}}
 		>
 			<View className="mt-6 flex-1 gap-6 tablet:gap-8">
+				{feed.metadata.subtitle && (
+					<View className="-mt-2 px-4 tablet:-mt-4">
+						<FeedSubtitle value={feed.metadata.subtitle} />
+					</View>
+				)}
+
 				<OPDSNavigation navigation={feed.navigation} renderEmpty />
 
 				{navGroups.map((group) => (

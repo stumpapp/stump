@@ -21,6 +21,10 @@ export default function Layout() {
 					title: 'Feeds',
 					headerTransparent: Platform.OS === 'ios',
 					headerBlurEffect: IS_IOS_24_PLUS ? undefined : 'regular',
+					headerLargeTitle: Platform.OS === 'ios',
+					headerLargeTitleStyle: {
+						fontSize: 30,
+					},
 				}}
 			/>
 

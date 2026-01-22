@@ -14,7 +14,6 @@ export function useFeedTitle(feed?: OPDSFeed | null) {
 			title,
 			headerShown: !!title,
 			headerTransparent: Platform.OS === 'ios',
-			// TODO: Can't decide if I like the large header or not
 			headerLargeTitleStyle: {
 				fontSize: 30,
 			},

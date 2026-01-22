@@ -6,11 +6,11 @@ import { Text } from '~/components/ui'
 import { IS_IOS_24_PLUS, useColors } from '~/lib/constants'
 import { useColorScheme } from '~/lib/useColorScheme'
 
-import InfoRow from '../InfoRow'
-import { LongValueProps } from './types'
+type Props = {
+	value: string
+}
 
-// TODO: Don't intake stripped HTML, strip for preview and render markdown in sheet
-export default function LongValue({ label, value }: LongValueProps) {
+export default function FeedSubtitle({ value }: Props) {
 	const ref = useRef<TrueSheet | null>(null)
 
 	const colors = useColors()
@@ -19,7 +19,9 @@ export default function LongValue({ label, value }: LongValueProps) {
 	return (
 		<Fragment>
 			<Pressable onPress={() => ref.current?.present()}>
-				<InfoRow label={label} value={value} longValue />
+				<Text className="text-foreground-muted" numberOfLines={3}>
+					{value}
+				</Text>
 			</Pressable>
 
 			<TrueSheet

@@ -174,7 +174,7 @@ const TableOfContentsListItem = ({ item }: { item: TableOfContentsItem }) => {
 				? {
 						fragments: [fragment],
 					}
-				: undefined,
+				: {},
 		})
 
 		closeSheet('locations')

@@ -20,6 +20,8 @@ import org.readium.r2.navigator.epub.EpubNavigatorFragment
 import org.readium.r2.navigator.epub.EpubPreferences
 import org.readium.r2.navigator.epub.css.FontStyle
 import org.readium.r2.navigator.epub.css.FontWeight
+import org.readium.r2.navigator.epub.css.Length
+import org.readium.r2.navigator.epub.css.RsProperties
 import org.readium.r2.navigator.preferences.FontFamily
 import org.readium.r2.navigator.util.BaseActionModeCallback
 import org.readium.r2.shared.ExperimentalReadiumApi
@@ -93,6 +95,13 @@ class EPUBFragment(
             listener.props!!.locator,
             listener = listener,
             configuration = EpubNavigatorFragment.Configuration {
+                // Note: This was an irritating issue. In the Readium source, they define CSS which TDLR;
+                // applies a 39.99rem max line length for tablet-sized screens and up. Setting to `nil` does
+                // nothing, so I set it to a very large value to effectively disable it.
+                readiumCssRsProperties = RsProperties(
+                    maxLineLength = Length.Rem(200.0)
+                )
+
                 servedAssets = listOf(
                     "fonts/OpenDyslexic-Regular.otf",
                     "fonts/OpenDyslexic-Bold.otf",

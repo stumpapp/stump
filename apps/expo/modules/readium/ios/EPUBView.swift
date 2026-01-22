@@ -434,12 +434,18 @@
                          scroll: false
                      ),
                      editingActions: editingActions,
-                     contentInset: [
-                         .compact: (top: 0, bottom: 0),
-                         .regular: (top: 0, bottom: 0),
-                         .unspecified: (top: 0, bottom: 0),
-                     ],
-                     fontFamilyDeclarations: fontFamilyDeclarations
+                    contentInset: [
+                        .compact: (top: 0, bottom: 0),
+                        .regular: (top: 0, bottom: 0),
+                        .unspecified: (top: 0, bottom: 0),
+                    ],
+                     fontFamilyDeclarations: fontFamilyDeclarations,
+                     // Note: This was an irritating issue. In the Readium source, they define CSS which TDLR;
+                     // applies a 39.99rem max line length for tablet-sized screens and up. Setting to `nil` does
+                     // nothing, so I set it to a very large value to effectively disable it.
+                     readiumCSSRSProperties: CSSRSProperties(
+                        maxLineLength: CSSRemLength(200) 
+                    )
                  ),
                  httpServer: GCDHTTPServer(
                     assetRetriever: BookService.instance.assetRetriever
@@ -795,6 +801,10 @@
  }
 
  extension EPUBView: EPUBNavigatorDelegate {
+    public func navigatorContentInset(_ navigator: VisualNavigator) -> UIEdgeInsets? {
+        return .zero
+    }
+
      public func navigator(_: Navigator, locationDidChange _: Locator) {
          changingResource = false
          emitCurrentLocator()

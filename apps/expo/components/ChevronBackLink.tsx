@@ -1,6 +1,7 @@
 import { useRouter } from 'expo-router'
 import { ChevronLeft, LucideIcon } from 'lucide-react-native'
-import { Pressable, TextStyle } from 'react-native'
+import { TextStyle } from 'react-native'
+import { Pressable } from 'react-native-gesture-handler'
 
 import { IS_IOS_24_PLUS } from '~/lib/constants'
 import { cn } from '~/lib/utils'

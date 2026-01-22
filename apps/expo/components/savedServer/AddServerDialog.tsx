@@ -2,7 +2,8 @@ import { BottomSheetModal, BottomSheetScrollViewMethods } from '@gorhom/bottom-s
 import { Plus } from 'lucide-react-native'
 import { useColorScheme } from 'nativewind'
 import { useCallback, useMemo, useRef, useState } from 'react'
-import { Pressable, View } from 'react-native'
+import { View } from 'react-native'
+import { Pressable } from 'react-native-gesture-handler'
 import { useSharedValue } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 

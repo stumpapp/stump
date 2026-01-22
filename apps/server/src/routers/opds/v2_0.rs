@@ -1201,16 +1201,16 @@ async fn update_book_progression(
 		}
 	}
 
-	let device_id = if !input.device.id.is_empty() {
+	let device_id = if let Some(input_device) = input.device() {
 		let existing_device =
-			registered_reading_device::Entity::find_by_id(&input.device.id)
+			registered_reading_device::Entity::find_by_id(&input_device.id)
 				.one(conn)
 				.await?;
 
 		if existing_device.is_none() {
 			let new_device = registered_reading_device::ActiveModel {
-				id: Set(input.device.id.clone()),
-				name: Set(input.device.name.clone()),
+				id: Set(input_device.id.clone()),
+				name: Set(input_device.name.clone()),
 				kind: Set(None),
 			};
 			registered_reading_device::Entity::insert(new_device)
@@ -1218,7 +1218,7 @@ async fn update_book_progression(
 				.await?;
 		}
 
-		Some(input.device.id.clone())
+		Some(input_device.id.clone())
 	} else {
 		None
 	};

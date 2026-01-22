@@ -110,7 +110,7 @@ export type OPDSPublication = z.infer<typeof publication>
 
 const progessionLocation = z.object({
 	fragments: z.array(z.string()).nullish(),
-	position: z.string().nullish(),
+	position: z.number().nullish(),
 	progression: z.number().nullish(),
 	totalProgression: z.number().nullish(),
 })

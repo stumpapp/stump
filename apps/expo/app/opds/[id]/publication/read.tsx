@@ -18,6 +18,11 @@ import { useBookPreferences, useBookTimer } from '~/stores/reader'
 
 import { usePublicationContext } from './context'
 
+// TODO(opds): We need to add ALL the progression tracking enhancements I made to the online/offline readers
+// to this one as well. I'm tired now though lol. Part of the problem is that determining the reader to use
+// is less straightforward, it might just wind up being that as part of downloads I can take an optional
+// progressionUrl or something so that the syncing locic in downloads can use it for OPDS servers
+
 export default function Screen() {
 	useKeepAwake()
 	const {
@@ -100,15 +105,11 @@ export default function Screen() {
 	const setShowControls = useReaderStore((state) => state.setShowControls)
 
 	const currentPage = useMemo(() => {
-		const rawPosition = progression?.locator.locations?.at(0)?.position
-		if (!rawPosition) {
+		const extractedPosition = progression?.locator.locations?.at(0)?.position
+		if (!extractedPosition) {
 			return 1
 		}
-		const parsedPosition = parseInt(rawPosition, 10)
-		if (isNaN(parsedPosition)) {
-			return 1
-		}
-		return parsedPosition
+		return extractedPosition
 	}, [progression])
 
 	// TODO: Consider a store for device info? If more areas need it I guess
@@ -143,6 +144,10 @@ export default function Screen() {
 				return
 			}
 
+			const progression = readingOrder?.length
+				? Math.round((page / readingOrder.length) * 100) / 100
+				: undefined
+
 			lastPageRef.current = page
 			const currentLink = readingOrder?.[page - 1]
 			const input: OPDSProgressionInput = {
@@ -153,14 +158,13 @@ export default function Screen() {
 					name: `Stump App - ${Platform.OS === 'ios' ? 'iOS' : 'Android'}`,
 				},
 				locator: {
-					// TODO(opds): Is this a reasonable default?
 					href: currentLink?.href || `#page-${page}`,
 					type: currentLink?.type || 'image/jpeg',
 					locations: {
 						position: page,
-						progression: readingOrder?.length
-							? Math.round((page / readingOrder.length) * 100) / 100
-							: undefined,
+						// Note: progression and totalProgression are the same for image-based readers
+						progression,
+						totalProgression: progression,
 					},
 				},
 			}

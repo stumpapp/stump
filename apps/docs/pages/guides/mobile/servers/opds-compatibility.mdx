@@ -18,9 +18,28 @@ Excluding Stump itself, the following servers have been tested:
 | [Komga](https://komga.org/)                | ✅     | ✅          | -             |
 | [Codex](https://github.com/ajslater/codex) | ✅     | ✅          | Codex v1.9.0+ |
 
+## Progression
+
+There exists a proposed standard for tracking reading progression in OPDS v2. If your OPDS server supports this feature, the mobile app will automatically attempt to sync your reading progression back to the server in most scenarios.
+
+<Callout emoji="❌" type="info">
+	At this time, only page-based OPDS progression tracking is supported. In other words, EPUB files
+	are not able to sync progression yet. This will be addressed in a future release.
+</Callout>
+
 ## Limitations, Known Issues, and Future Improvements
 
 The mobile app aims to be a fully compatible OPDS v2 client. However, since there aren't many client/servers in the space, and the mobile app is still very young, there are some limitations and known issues that will be addressed in future releases
+
+### EPUB Progression
+
+<Callout emoji="ℹ️" type="info">
+	This only applies to OPDS servers that support progression tracking. If you are using a Stump
+	server, it does not apply since Stump uses its own custom API for progression syncing.
+</Callout>
+
+At this time, only page-based OPDS progression tracking is supported. In other words, EPUB files
+are not able to sync back progression yet. This will be addressed in a future release.
 
 ### Search URL Templating
 

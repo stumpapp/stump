@@ -66,7 +66,7 @@ impl OPDSProgression {
 						"/opds/v2.0/books/{book_id}/pages/{current_page}",
 					));
 					let locations = vec![OPDSProgressionLocation {
-						position: Some(current_page.to_string()),
+						position: Some(current_page),
 						total_progression: percentage_completed.or_else(|| {
 							Some(current_page as f64 / data.book.pages as f64)
 						}),
@@ -120,10 +120,16 @@ struct OPDSProgressionLocation {
 	/// A list of fragments within the resource referenced by the [OPDSProgressionLocator] struct.
 	fragments: Option<Vec<String>>,
 	/// An index in the publication (1-based).
-	position: Option<String>,
-	/// Progression in the resource expressed as a percentage (0.0 to 1.0).
+	position: Option<i32>,
+	/// Progression in the resource expressed as a percentage (0.0 to 1.0). This is
+	/// progression within the current resource, not the entire publication.
+	///
+	/// A few clarifying notes:
+	/// If the publication is a single resource, e.g., comics, manga, etc, this is equivalent to total_progression
+	/// If the publication has multiple resources, e.g., EPUB, this is progression within the current resource only
 	progression: Option<f64>,
-	/// Progression in the publication expressed as a percentage (0.0 to 1.0).
+	/// Progression in the publication expressed as a percentage (0.0 to 1.0). This is
+	/// progression within the entire publication.
 	total_progression: Option<f64>,
 }
 
@@ -186,6 +192,14 @@ pub struct OPDSProgressionTextInput {
 }
 
 impl OPDSProgressionInput {
+	pub fn device(&self) -> Option<OPDSProgressionDeviceInput> {
+		if self.device.id.is_empty() && self.device.name.is_empty() {
+			None
+		} else {
+			Some(self.device.clone())
+		}
+	}
+
 	pub fn page(&self) -> Option<i32> {
 		self.locator.locations.as_ref().and_then(|l| l.position)
 	}

@@ -11,13 +11,14 @@ import RefreshControl from '~/components/RefreshControl'
 import { ListEmptyMessage } from '~/components/ui'
 import { useOPDSFeedContext } from '~/context/opds'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
+import { constructSearchURL } from '~/lib/opdsUtils'
 
 export default function Screen() {
 	const { query } = useLocalSearchParams<{ query: string }>()
 	const { sdk } = useSDK()
 	const { searchURL } = useOPDSFeedContext()
 
-	const feedURL = searchURL?.replace('{?query}', `?query=${encodeURIComponent(query || '')}`)
+	const feedURL = searchURL && query ? constructSearchURL(searchURL, query) : undefined
 
 	const {
 		data: feed,

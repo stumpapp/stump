@@ -1,5 +1,5 @@
 import { CircleAlert, LucideIcon } from 'lucide-react-native'
-import React from 'react'
+import React, { ComponentProps } from 'react'
 import { Platform, View, ViewProps } from 'react-native'
 
 import { Icon, Text } from '~/components/ui'
@@ -43,7 +43,11 @@ export function CardList({
 				<Text className="ios:px-4 px-2 text-lg font-semibold text-foreground-muted">{label}</Text>
 			)}
 
-			{count === 0 ? <ListEmptyMessage {...listEmptyStyle} /> : <Background>{children}</Background>}
+			{count === 0 ? (
+				<ListEmptyMessage {...listEmptyStyle} />
+			) : (
+				<CardBackground>{children}</CardBackground>
+			)}
 
 			{description && <Text className="ios:px-4 px-2 text-foreground-muted">{description}</Text>}
 		</View>
@@ -80,7 +84,7 @@ export function CardRow({ label, icon, disabled, children, className, ...props }
 	)
 }
 
-function Background({ className, ...props }: ViewProps) {
+export function CardBackground({ className, ...props }: ViewProps) {
 	return (
 		<View
 			className={cn(
@@ -91,6 +95,35 @@ function Background({ className, ...props }: ViewProps) {
 			)}
 			{...props}
 		/>
+	)
+}
+
+export function CardLabel({ className, ...props }: ComponentProps<typeof Text>) {
+	return (
+		<Text
+			className={cn('ios:px-4 px-2 text-lg font-semibold text-foreground-muted', className)}
+			{...props}
+		/>
+	)
+}
+
+type CardProps = ViewProps & {
+	label?: string
+}
+
+export function Card({ label, className, ...props }: CardProps) {
+	return (
+		<View className="gap-2">
+			{label && <CardLabel>{label}</CardLabel>}
+			<View
+				className={cn(
+					'ios:p-4 squircle gap-2 bg-black/5 p-2 dark:bg-white/10',
+					Platform.OS === 'ios' ? 'rounded-[2rem]' : 'rounded-2xl border border-edge',
+					className,
+				)}
+				{...props}
+			/>
+		</View>
 	)
 }
 

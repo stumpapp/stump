@@ -1001,6 +1001,7 @@ export type LibraryStats = {
   inProgressBooks: Scalars['Int']['output'];
   seriesCount: Scalars['Int']['output'];
   totalBytes: Scalars['Int']['output'];
+  totalReadingTimeSeconds: Scalars['Int']['output'];
 };
 
 export enum LibraryViewMode {
@@ -2906,6 +2907,7 @@ export type Series = {
   readCount: Scalars['Int']['output'];
   resolvedDescription?: Maybe<Scalars['String']['output']>;
   resolvedName: Scalars['String']['output'];
+  stats: SeriesStats;
   status: FileStatus;
   tags: Array<Tag>;
   /**
@@ -2924,6 +2926,11 @@ export type Series = {
 export type SeriesMediaArgs = {
   skip?: InputMaybe<Scalars['Int']['input']>;
   take?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type SeriesStatsArgs = {
+  allUsers?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 
@@ -3092,6 +3099,15 @@ export type SeriesScanOutput = {
   totalFiles: Scalars['Int']['output'];
   /** The number of media entities that were updated */
   updatedMedia: Scalars['Int']['output'];
+};
+
+export type SeriesStats = {
+  __typename?: 'SeriesStats';
+  bookCount: Scalars['Int']['output'];
+  completedBooks: Scalars['Int']['output'];
+  inProgressBooks: Scalars['Int']['output'];
+  totalBytes: Scalars['Int']['output'];
+  totalReadingTimeSeconds: Scalars['Int']['output'];
 };
 
 export type SmartList = {
@@ -3986,6 +4002,13 @@ export type LibraryActionMenuScanLibraryMutation = { __typename?: 'Mutation', sc
 
 export type LibraryGridItemFragment = { __typename?: 'Library', id: string, name: string, series: Array<{ __typename?: 'Series', thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } }> } & { ' $fragmentName'?: 'LibraryGridItemFragment' };
 
+export type LibraryOverviewSheetQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type LibraryOverviewSheetQuery = { __typename?: 'Query', libraryById?: { __typename?: 'Library', name: string, description?: string | null, stats: { __typename?: 'LibraryStats', seriesCount: number, bookCount: number, totalBytes: number, completedBooks: number, inProgressBooks: number, totalReadingTimeSeconds: number }, tags: Array<{ __typename?: 'Tag', name: string }> } | null };
+
 export type LibrarySearchItemFragment = { __typename?: 'Library', id: string, name: string, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } & { ' $fragmentName'?: 'LibrarySearchItemFragment' };
 
 export type RecentlyAddedSeriesGridQueryVariables = Exact<{
@@ -4000,7 +4023,21 @@ export type RecentlyAddedSeriesGridQuery = { __typename?: 'Query', series: { __t
 
 export type RecentlyAddedSeriesItemFragment = { __typename?: 'Series', id: string, createdAt: any, resolvedName: string, mediaCount: number, readCount: number, media: Array<{ __typename?: 'Media', resolvedName: string, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } }>, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } & { ' $fragmentName'?: 'RecentlyAddedSeriesItemFragment' };
 
+export type SeriesActionMenuScanSeriesMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type SeriesActionMenuScanSeriesMutation = { __typename?: 'Mutation', scanSeries: boolean };
+
 export type SeriesGridItemFragment = { __typename?: 'Series', id: string, resolvedName: string, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } & { ' $fragmentName'?: 'SeriesGridItemFragment' };
+
+export type SeriesOverviewSheetQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type SeriesOverviewSheetQuery = { __typename?: 'Query', seriesById?: { __typename?: 'Series', resolvedName: string, metadata?: { __typename?: 'SeriesMetadata', ageRating?: number | null, booktype?: string | null, characters: Array<string>, comicImage?: string | null, comicid?: number | null, descriptionFormatted?: string | null, genres: Array<string>, imprint?: string | null, links: Array<string>, metaType?: string | null, publicationRun?: string | null, publisher?: string | null, status?: string | null, summary?: string | null, title?: string | null, totalIssues?: number | null, volume?: number | null, writers: Array<string>, year?: number | null, collects: Array<{ __typename?: 'CollectedItem', series?: string | null, comicid?: string | null, issueid?: string | null, issues?: string | null }> } | null, stats: { __typename?: 'SeriesStats', bookCount: number, totalBytes: number, completedBooks: number, inProgressBooks: number, totalReadingTimeSeconds: number }, tags: Array<{ __typename?: 'Tag', name: string }> } | null };
 
 export type SeriesSearchItemFragment = { __typename?: 'Series', id: string, resolvedName: string, readCount: number, mediaCount: number, percentageCompleted: number, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } & { ' $fragmentName'?: 'SeriesSearchItemFragment' };
 
@@ -6736,6 +6773,25 @@ export const LibraryActionMenuScanLibraryDocument = new TypedDocumentString(`
   scanLibrary(id: $id)
 }
     `) as unknown as TypedDocumentString<LibraryActionMenuScanLibraryMutation, LibraryActionMenuScanLibraryMutationVariables>;
+export const LibraryOverviewSheetDocument = new TypedDocumentString(`
+    query LibraryOverviewSheet($id: ID!) {
+  libraryById(id: $id) {
+    name
+    description
+    stats {
+      seriesCount
+      bookCount
+      totalBytes
+      completedBooks
+      inProgressBooks
+      totalReadingTimeSeconds
+    }
+    tags {
+      name
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<LibraryOverviewSheetQuery, LibraryOverviewSheetQueryVariables>;
 export const RecentlyAddedSeriesGridDocument = new TypedDocumentString(`
     query RecentlyAddedSeriesGrid($pagination: Pagination) {
   series(
@@ -6773,6 +6829,55 @@ export const RecentlyAddedSeriesGridDocument = new TypedDocumentString(`
     }
   }
 }`) as unknown as TypedDocumentString<RecentlyAddedSeriesGridQuery, RecentlyAddedSeriesGridQueryVariables>;
+export const SeriesActionMenuScanSeriesDocument = new TypedDocumentString(`
+    mutation SeriesActionMenuScanSeries($id: ID!) {
+  scanSeries(id: $id)
+}
+    `) as unknown as TypedDocumentString<SeriesActionMenuScanSeriesMutation, SeriesActionMenuScanSeriesMutationVariables>;
+export const SeriesOverviewSheetDocument = new TypedDocumentString(`
+    query SeriesOverviewSheet($id: ID!) {
+  seriesById(id: $id) {
+    resolvedName
+    metadata {
+      ageRating
+      booktype
+      characters
+      collects {
+        series
+        comicid
+        issueid
+        issues
+      }
+      comicImage
+      comicid
+      descriptionFormatted
+      genres
+      imprint
+      links
+      metaType
+      publicationRun
+      publisher
+      status
+      summary
+      title
+      totalIssues
+      volume
+      writers
+      year
+    }
+    stats {
+      bookCount
+      totalBytes
+      completedBooks
+      inProgressBooks
+      totalReadingTimeSeconds
+    }
+    tags {
+      name
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<SeriesOverviewSheetQuery, SeriesOverviewSheetQueryVariables>;
 export const UseFavoriteBookDocument = new TypedDocumentString(`
     mutation UseFavoriteBook($id: ID!, $isFavorite: Boolean!) {
   favoriteMedia(id: $id, isFavorite: $isFavorite) {

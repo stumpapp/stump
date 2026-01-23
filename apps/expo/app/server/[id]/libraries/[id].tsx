@@ -1,14 +1,18 @@
+import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { FlashList } from '@shopify/flash-list'
 import { useInfiniteSuspenseGraphQL, useRefetch, useSuspenseGraphQL } from '@stump/client'
-import { graphql, UserPermission } from '@stump/graphql'
+import { graphql } from '@stump/graphql'
 import { useLocalSearchParams } from 'expo-router'
-import { useCallback } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { Platform } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
-import { useStumpServer } from '~/components/activeServer'
 import { useGridItemSize } from '~/components/grid/useGridItemSize'
-import { LibraryActionMenu } from '~/components/library'
+import {
+	LibraryActionMenu,
+	LibraryOverviewSheet,
+	usePrefetchLibraryOverview,
+} from '~/components/library'
 import ListEmpty from '~/components/ListEmpty'
 import RefreshControl from '~/components/RefreshControl'
 import SeriesGridItem from '~/components/series/SeriesGridItem'
@@ -48,7 +52,9 @@ export default function Screen() {
 	const {
 		data: { libraryById: library },
 	} = useSuspenseGraphQL(query, ['libraryById', id], { id })
-	const { checkPermission } = useStumpServer()
+
+	const sheetRef = useRef<TrueSheet>(null)
+	const prefetch = usePrefetchLibraryOverview()
 
 	if (!library) {
 		throw new Error(`Series with ID ${id} not found`)
@@ -56,10 +62,14 @@ export default function Screen() {
 
 	useDynamicHeader({
 		title: library.name,
-		headerRight: checkPermission(UserPermission.ScanLibrary)
-			? () => <LibraryActionMenu libraryId={id} />
-			: undefined,
+		headerRight: () => (
+			<LibraryActionMenu libraryId={id} onShowOverview={() => sheetRef.current?.present()} />
+		),
 	})
+
+	useEffect(() => {
+		prefetch(id)
+	}, [id, prefetch])
 
 	const { data, hasNextPage, fetchNextPage, refetch } = useInfiniteSuspenseGraphQL(
 		seriesQuery,
@@ -123,6 +133,8 @@ export default function Screen() {
 					/>
 				}
 			/>
+
+			<LibraryOverviewSheet ref={sheetRef} libraryId={id} />
 		</SafeAreaView>
 	)
 }

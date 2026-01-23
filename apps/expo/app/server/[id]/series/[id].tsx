@@ -1,9 +1,10 @@
+import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { useNavigationState, useScrollToTop } from '@react-navigation/native'
 import { FlashList, FlashListRef } from '@shopify/flash-list'
 import { useInfiniteSuspenseGraphQL, useRefetch, useSuspenseGraphQL } from '@stump/client'
 import { graphql } from '@stump/graphql'
 import { useLocalSearchParams } from 'expo-router'
-import { useCallback, useMemo, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { Platform } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useStore } from 'zustand'
@@ -14,6 +15,11 @@ import { BookFilterHeader } from '~/components/book/filterHeader'
 import { useGridItemSize } from '~/components/grid/useGridItemSize'
 import ListEmpty from '~/components/ListEmpty'
 import RefreshControl from '~/components/RefreshControl'
+import {
+	SeriesActionMenu,
+	SeriesOverviewSheet,
+	usePrefetchSeriesOverview,
+} from '~/components/series'
 import { Button, RefreshButton, Text } from '~/components/ui'
 import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
@@ -63,6 +69,9 @@ export default function Screen() {
 		return navigationState?.length <= 1 && Platform.OS === 'ios'
 	}, [navigationState])
 
+	const sheetRef = useRef<TrueSheet>(null)
+	const prefetch = usePrefetchSeriesOverview()
+
 	if (!series) {
 		throw new Error(`Series with ID ${id} not found`)
 	}
@@ -70,8 +79,16 @@ export default function Screen() {
 	useDynamicHeader({
 		title: series.resolvedName,
 		showBackButton,
+		headerRight: () => (
+			<SeriesActionMenu seriesId={id} onShowOverview={() => sheetRef.current?.present()} />
+		),
 	})
 
+	useEffect(() => {
+		prefetch(id)
+	}, [id, prefetch])
+
+	// eslint-disable-next-line react-hooks/refs
 	const store = useRef(createBookFilterStore()).current
 	const { filters, sort, resetFilters } = useStore(store, (state) => ({
 		filters: state.filters,
@@ -162,6 +179,8 @@ export default function Screen() {
 					}
 				/>
 			</SafeAreaView>
+
+			<SeriesOverviewSheet ref={sheetRef} seriesId={id} />
 		</BookFilterContext.Provider>
 	)
 }

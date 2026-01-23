@@ -7,28 +7,32 @@ import { useStumpServer } from '../activeServer'
 import { ActionMenu } from '../ui/action-menu/action-menu'
 
 const mutation = graphql(`
-	mutation LibraryActionMenuScanLibrary($id: ID!) {
-		scanLibrary(id: $id)
+	mutation SeriesActionMenuScanSeries($id: ID!) {
+		scanSeries(id: $id)
 	}
 `)
 
 type Props = {
-	libraryId: string
+	seriesId: string
 	onShowOverview: () => void
 }
 
-export default function LibraryActionMenu({ libraryId, onShowOverview }: Props) {
+export default function SeriesActionMenu({ seriesId, onShowOverview }: Props) {
 	const { checkPermission } = useStumpServer()
 
 	const client = useQueryClient()
 	const { mutate } = useGraphQLMutation(mutation, {
 		onSuccess: () => {
 			setTimeout(
-				() => client.refetchQueries({ queryKey: ['libraryById', libraryId], exact: false }),
+				() => client.refetchQueries({ queryKey: ['seriesById', seriesId], exact: false }),
 				2000,
 			)
 		},
 	})
+
+	if (!checkPermission(UserPermission.ScanLibrary)) {
+		return null
+	}
 
 	return (
 		<ActionMenu
@@ -54,8 +58,8 @@ export default function LibraryActionMenu({ libraryId, onShowOverview }: Props) 
 											ios: 'document.viewfinder',
 											android: ScanLine,
 										},
-										label: 'Scan Library',
-										onPress: () => mutate({ id: libraryId }),
+										label: 'Scan Series',
+										onPress: () => mutate({ id: seriesId }),
 									} as const,
 								],
 							},

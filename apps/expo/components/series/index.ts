@@ -1,4 +1,6 @@
 export { default as RecentlyAddedSeries } from './RecentlyAddedSeries'
 export { default as RecentlyAddedSeriesItem } from './RecentlyAddedSeriesItem'
+export { default as SeriesActionMenu } from './SeriesActionMenu'
 export { default as SeriesGridItem } from './SeriesGridItem'
+export { SeriesOverviewSheet, usePrefetchSeriesOverview } from './SeriesOverviewSheet'
 export { ISeriesSearchItemFragment, default as SeriesSearchItem } from './SeriesSearchItem'

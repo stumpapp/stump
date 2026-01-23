@@ -931,6 +931,7 @@ type LibraryStats {
 	totalBytes: Int!
 	completedBooks: Int!
 	inProgressBooks: Int!
+	totalReadingTimeSeconds: Int!
 }
 
 enum LibraryViewMode {
@@ -2095,6 +2096,7 @@ type Series {
 	qualified URL to the image.
 	"""
 	thumbnail: ImageRef!
+	stats(allUsers: Boolean): SeriesStats!
 }
 
 input SeriesFilterInput {
@@ -2256,6 +2258,14 @@ type SeriesScanOutput {
 	createdMedia: Int!
 	"The number of media entities that were updated"
 	updatedMedia: Int!
+}
+
+type SeriesStats {
+	bookCount: Int!
+	totalBytes: Int!
+	completedBooks: Int!
+	inProgressBooks: Int!
+	totalReadingTimeSeconds: Int!
 }
 
 type SmartList {

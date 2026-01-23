@@ -13,7 +13,6 @@ import { useEpubSheetStore } from '~/stores/epubSheet'
 
 import AnnotationsAndBookmarks from './AnnotationsAndBookmarks'
 
-// TODO: Add annotations
 export default function LocationsSheetContent() {
 	const [activePage, setActivePage] = useState(0)
 	const { height: windowHeight } = useWindowDimensions()

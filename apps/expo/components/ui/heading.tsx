@@ -14,6 +14,7 @@ const headingVariants = cva('text-foreground font-bold leading-6', {
 			default: 'text-xl tablet:text-2xl',
 			lg: 'text-2xl tablet:text-3xl',
 			xl: 'text-3xl tablet:text-4xl',
+			'2xl': 'text-4xl tablet:text-5xl',
 		},
 	},
 	defaultVariants: {

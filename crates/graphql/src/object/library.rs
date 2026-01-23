@@ -274,7 +274,8 @@ impl Library {
 				progress_counts AS (
 					SELECT
 						COUNT(frs.id) AS completed_books,
-						COUNT(rs.id) AS in_progress_books
+						COUNT(rs.id) AS in_progress_books,
+						IFNULL(SUM(frs.elapsed_seconds), 0) + IFNULL(SUM(rs.elapsed_seconds), 0) AS total_reading_time_seconds
 					FROM
 						media m
 						LEFT JOIN finished_reading_sessions frs ON frs.media_id = m.id
@@ -344,4 +345,5 @@ pub struct LibraryStats {
 	total_bytes: i64,
 	completed_books: i64,
 	in_progress_books: i64,
+	total_reading_time_seconds: i64,
 }

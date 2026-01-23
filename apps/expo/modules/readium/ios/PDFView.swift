@@ -1,8 +1,8 @@
 import ExpoModulesCore
-import ReadiumNavigator
-import ReadiumShared
 import ReadiumAdapterGCDWebServer
 import ReadiumInternal
+import ReadiumNavigator
+import ReadiumShared
 import UIKit
 
 public struct PDFProps {
@@ -36,36 +36,36 @@ public class PDFView: ExpoView {
     let onBookLoaded = EventDispatcher()
     let onMiddleTouch = EventDispatcher()
     let onError = EventDispatcher()
-    
+
     public var navigator: PDFNavigatorViewController?
-    
+
     public var pendingProps: PDFProps = .init()
     public var props: FinalizedPDFProps?
-    
+
     private var isInitialized = false
-    
+
     // Tasks for cleanup
     private var loadPublicationTask: Task<Void, Never>?
     private var positionsTask: Task<Void, Never>?
     private var navigationTasks: [Task<Void, Never>] = []
-    
+
     // Background handling
     private var backgroundObserver: NSObjectProtocol?
     private var foregroundObserver: NSObjectProtocol?
     private var isInBackground = false
-    
+
     public required init(appContext: AppContext? = nil) {
         super.init(appContext: appContext)
         setupBackgroundObservers()
     }
-    
+
     deinit {
         print("PDFView: deinit called - cleaning up resources")
         cancelAllTasks()
         removeBackgroundObservers()
         cleanupNavigator()
     }
-    
+
     private func setupBackgroundObservers() {
         backgroundObserver = NotificationCenter.default.addObserver(
             forName: UIApplication.didEnterBackgroundNotification,
@@ -74,7 +74,7 @@ public class PDFView: ExpoView {
         ) { [weak self] _ in
             self?.handleAppDidEnterBackground()
         }
-        
+
         foregroundObserver = NotificationCenter.default.addObserver(
             forName: UIApplication.willEnterForegroundNotification,
             object: nil,
@@ -83,7 +83,7 @@ public class PDFView: ExpoView {
             self?.handleAppWillEnterForeground()
         }
     }
-    
+
     private func removeBackgroundObservers() {
         if let observer = backgroundObserver {
             NotificationCenter.default.removeObserver(observer)
@@ -94,18 +94,18 @@ public class PDFView: ExpoView {
             foregroundObserver = nil
         }
     }
-    
+
     private func handleAppDidEnterBackground() {
         print("PDFView: App entered background - suspending operations")
         isInBackground = true
         positionsTask?.cancel()
     }
-    
+
     private func handleAppWillEnterForeground() {
         print("PDFView: App entering foreground - resuming operations")
         isInBackground = false
     }
-    
+
     private func cancelAllTasks() {
         print("PDFView: Cancelling all tasks")
         loadPublicationTask?.cancel()
@@ -113,23 +113,23 @@ public class PDFView: ExpoView {
         navigationTasks.forEach { $0.cancel() }
         navigationTasks.removeAll()
     }
-    
+
     private func cleanupNavigator() {
         print("PDFView: Cleaning up navigator")
         navigator?.view.removeFromSuperview()
         navigator = nil
     }
-    
+
     public func finalizeProps() {
         let oldProps = props
-        
+
         // Don't proceed if we don't have required props
         guard let bookId = pendingProps.bookId,
               let url = pendingProps.url
         else {
             return
         }
-        
+
         props = FinalizedPDFProps(
             bookId: bookId,
             locator: pendingProps.locator ?? pendingProps.initialLocator ?? oldProps?.locator,
@@ -141,8 +141,7 @@ public class PDFView: ExpoView {
             readingProgression: pendingProps.readingProgression ?? oldProps?.readingProgression ?? .ltr,
             spread: pendingProps.spread ?? oldProps?.spread ?? .auto
         )
-        
-        
+
         // If this is a new book or first initialization, load the publication
         if props!.bookId != oldProps?.bookId || props!.url != oldProps?.url || !isInitialized {
             loadPublicationTask?.cancel()
@@ -151,42 +150,42 @@ public class PDFView: ExpoView {
             }
             return
         }
-        
+
         // Update navigator if locator changed
         if props!.locator != oldProps?.locator, let locator = props!.locator {
             go(locator: locator)
         }
-        
-        if isInitialized && preferencesChanged(oldProps: oldProps) {
+
+        if isInitialized, preferencesChanged(oldProps: oldProps) {
             updatePreferences()
         }
     }
-    
+
     private func preferencesChanged(oldProps: FinalizedPDFProps?) -> Bool {
         guard let oldProps = oldProps, let props = props else { return false }
         return props.background != oldProps.background ||
-               props.pageSpacing != oldProps.pageSpacing ||
-               props.scrollAxis != oldProps.scrollAxis ||
-               props.scroll != oldProps.scroll ||
-               props.readingProgression != oldProps.readingProgression ||
-               props.spread != oldProps.spread
+            props.pageSpacing != oldProps.pageSpacing ||
+            props.scrollAxis != oldProps.scrollAxis ||
+            props.scroll != oldProps.scroll ||
+            props.readingProgression != oldProps.readingProgression ||
+            props.spread != oldProps.spread
     }
-    
+
     private func loadPublication() async {
         guard let props = props else { return }
-        
+
         do {
             if let url = URL(string: props.url) {
                 var publicationUrl = url
-                
+
                 if url.scheme == "http" || url.scheme == "https" {
                     publicationUrl = try await downloadPDF(from: url)
                 }
-                
+
                 let publication = try await BookService.instance.openPublication(for: props.bookId, at: publicationUrl)
-                
+
                 try Task.checkCancellation()
-                
+
                 await MainActor.run { [weak self] in
                     self?.initializeNavigator(with: publication)
                 }
@@ -196,7 +195,7 @@ public class PDFView: ExpoView {
                 print("Publication load cancelled")
                 return
             }
-            
+
             print("Error loading publication: \(error)")
             await MainActor.run { [weak self] in
                 self?.onError([
@@ -207,20 +206,20 @@ public class PDFView: ExpoView {
             }
         }
     }
-    
+
     private func downloadPDF(from url: URL) async throws -> URL {
         let (data, _) = try await URLSession.shared.data(from: url)
-        
+
         let tempDirectory = FileManager.default.temporaryDirectory
         let pdfFile = tempDirectory.appendingPathComponent(UUID().uuidString + ".pdf")
-        
+
         try data.write(to: pdfFile)
         return pdfFile
     }
-    
+
     public func initializeNavigator(with publication: Publication) {
         guard let props = props else { return }
-        
+
         do {
             let navigator = try PDFNavigatorViewController(
                 publication: publication,
@@ -240,21 +239,21 @@ public class PDFView: ExpoView {
                     assetRetriever: AssetRetriever(httpClient: DefaultHTTPClient())
                 )
             )
-            
+
             navigator.delegate = self
             addSubview(navigator.view)
             self.navigator = navigator
             isInitialized = true
-            
+
             positionsTask?.cancel()
             positionsTask = Task { [weak self] in
                 guard let self = self else { return }
-                
+
                 let positionsResult = await publication.positions()
                 let totalPages = (try? positionsResult.get().count) ?? 0
-                
+
                 try? Task.checkCancellation()
-                
+
                 await MainActor.run { [weak self] in
                     self?.onBookLoaded([
                         "success": true,
@@ -269,9 +268,9 @@ public class PDFView: ExpoView {
                     ])
                 }
             }
-            
+
             emitCurrentLocator()
-            
+
         } catch {
             print("Failed to create PDF Navigator instance: \(error)")
             onError([
@@ -281,21 +280,21 @@ public class PDFView: ExpoView {
             ])
         }
     }
-    
+
     public func destroyNavigator() {
         print("PDFView: destroyNavigator called")
-        
+
         cancelAllTasks()
-        
+
         navigator?.view.removeFromSuperview()
         navigator = nil
         isInitialized = false
-        
+
         if let bookId = props?.bookId {
             BookService.instance.closePublication(for: bookId)
         }
     }
-    
+
     // TODO: Determine if I even need a locator for PDFs + Readium, just using page numbers
     // would be much less hassle
     func emitCurrentLocator() {
@@ -304,7 +303,7 @@ public class PDFView: ExpoView {
         else {
             return
         }
-        
+
         onLocatorChange(makeJSON([
             "href": currentLocator.href.string,
             "title": encodeIfNotNil(currentLocator.title),
@@ -312,14 +311,14 @@ public class PDFView: ExpoView {
             "text": encodeIfNotEmpty(currentLocator.text.json),
             "type": encodeIfNotEmpty(currentLocator.mediaType.string),
         ]))
-        
+
         if let pageNumber = currentLocator.locations.position {
             onPageChange([
                 "currentPage": pageNumber,
             ])
         }
     }
-    
+
     func go(locator: Locator) {
         let task = Task { [weak self] in
             guard let self = self else { return }
@@ -328,33 +327,33 @@ public class PDFView: ExpoView {
         navigationTasks.append(task)
         navigationTasks.removeAll { $0.isCancelled }
     }
-    
+
     func goToLocation(locator: Locator) {
         go(locator: locator)
     }
-    
+
     func goToPage(page: Int) {
         guard let navigator = navigator else { return }
-        
+
         let task = Task { [weak self] in
             guard let self = self else { return }
-            
+
             let positionsResult = await navigator.publication.positions()
             guard let positions = try? positionsResult.get() else { return }
-            
+
             // Ensure page is within bounds
             guard page > 0 && page <= positions.count else {
                 print("PDFView: Invalid page number \(page)")
                 return
             }
-            
+
             let locator = positions[page - 1]
             _ = await navigator.go(to: locator, options: NavigatorGoOptions(animated: true))
         }
         navigationTasks.append(task)
         navigationTasks.removeAll { $0.isCancelled }
     }
-    
+
     func goForward() {
         let task = Task { [weak self] in
             guard let self = self else { return }
@@ -363,7 +362,7 @@ public class PDFView: ExpoView {
         navigationTasks.append(task)
         navigationTasks.removeAll { $0.isCancelled }
     }
-    
+
     func goBackward() {
         let task = Task { [weak self] in
             guard let self = self else { return }
@@ -372,10 +371,10 @@ public class PDFView: ExpoView {
         navigationTasks.append(task)
         navigationTasks.removeAll { $0.isCancelled }
     }
-    
+
     func updatePreferences() {
         guard let props = props else { return }
-        
+
         let preferences = PDFPreferences(
             backgroundColor: props.background,
             pageSpacing: props.pageSpacing,
@@ -384,10 +383,10 @@ public class PDFView: ExpoView {
             scrollAxis: props.scrollAxis,
             spread: props.spread
         )
-        
+
         navigator?.submitPreferences(preferences)
     }
-    
+
     override public func layoutSubviews() {
         super.layoutSubviews()
         guard let navigatorView = navigator?.view else {
@@ -401,7 +400,7 @@ extension PDFView: PDFNavigatorDelegate {
     public func navigator(_: Navigator, locationDidChange _: Locator) {
         emitCurrentLocator()
     }
-    
+
     public func navigator(_: Navigator, presentError error: NavigatorError) {
         onError([
             "errorDescription": error.localizedDescription,
@@ -409,10 +408,10 @@ extension PDFView: PDFNavigatorDelegate {
             "recoverySuggestion": "Try again",
         ])
     }
-    
+
     public func navigator(_ navigator: VisualNavigator, didTapAt point: CGPoint) {
         let navigator = navigator as! PDFNavigatorViewController
-        
+
         if point.x < bounds.maxX * 0.2 {
             let task = Task { [weak self] in
                 guard self != nil else { return }
@@ -431,7 +430,7 @@ extension PDFView: PDFNavigatorDelegate {
             navigationTasks.removeAll { $0.isCancelled }
             return
         }
-        
+
         onMiddleTouch()
     }
 }

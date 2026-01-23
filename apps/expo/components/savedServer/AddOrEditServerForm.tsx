@@ -109,11 +109,10 @@ export default function AddOrEditServerForm({
 		}
 	}, [didConnect])
 
-	const [defaultServer, stumpOPDS, authMode] = form.watch([
-		'defaultServer',
-		'stumpOPDS',
-		'authMode',
-	])
+	const [defaultServer, stumpOPDS, authMode] = useWatch({
+		control,
+		name: ['defaultServer', 'stumpOPDS', 'authMode'],
+	})
 
 	const renderAuthMode = () => {
 		if (authMode === 'default') {

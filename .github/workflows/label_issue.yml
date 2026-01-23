@@ -1,0 +1,45 @@
+name: Label Issue
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  issues: write
+
+jobs:
+  format-issue:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Label Issue
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const issue = context.payload.issue;
+            const body = issue.body || "";
+            const labels = issue.labels.map(l => l.name);
+            const originalLabelCount = labels.length;
+
+            if (body.includes('- [x] Mobile App') && !labels.includes('mobile-app')) {
+              labels.push('mobile-app');
+            }
+
+            if (body.includes('- [x] Web App') && !labels.includes('web-app')) {
+              labels.push('web-app');
+            }
+
+            if (body.includes('- [x] Server') && !labels.includes('server')) {
+              labels.push('server');
+            }
+
+            if (body.includes('- [x] Documentation') && !labels.includes('documentation')) {
+              labels.push('documentation');
+            }
+
+            if (labels.length > originalLabelCount) {
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                labels: labels
+              });
+            }

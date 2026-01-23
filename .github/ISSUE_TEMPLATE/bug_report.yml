@@ -1,0 +1,68 @@
+name: 🐛 Bug report
+description: Help us improve Stump by creating a bug report
+title: '[BUG] Give a suitable title'
+labels: ['bug']
+body:
+  - type: textarea
+    attributes:
+      label: Description of the Bug
+      description: A clear and concise description of what the bug is.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Expected Behavior
+      description: A clear and concise description of what you expected to happen.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Steps To Reproduce
+      description: The steps to reproduce the behavior.
+      placeholder: |
+        1. Go to '...'
+        2. Click on '....'
+        3. Scroll down to '....'
+        4. See error
+    validations:
+      required: false
+
+  - type: checkboxes
+    attributes:
+      label: Where is this issue happening?
+      description: Select all that apply, to the best of your knowledge.
+      options:
+        - label: Web App
+        - label: Mobile App
+        - label: Server
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Server & Client Details
+      description: |
+        Please enter details for where this issue occured. Feel free to specify multiple clients if relevant. Versioned releases are `latest`.
+
+      value: |
+        #### Server Details:
+          - Release Channel: [latest / nightly / experimental / unstable / Not Applicable]
+          - Server OS: [macOS 26 / Debian 13 / Windows 11 / Not Applicable / ...]
+          - Using Docker: [Yes / No / Not Applicable]
+          - Server Version: [0.1.0 / 857351f / Not Applicable / ...]
+
+        #### Client Details:
+          - Device: [iPhone 18 / Samsung Galaxy S25 / PC / Mac / Not Applicable / ...]
+          - OS: [iOS 26 / Android 16 / Windows 11 / Not Applicable / ...]
+          - Browser: [Chrome / Firefox / Safari / Not Applicable / ...] (applicable only for Web App)
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Additional context
+      description: Any extra context, links, logs, screenshots, etc.
+    validations:
+      required: false

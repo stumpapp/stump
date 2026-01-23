@@ -102,10 +102,18 @@ impl UserMutation {
 			..Default::default()
 		};
 
-		user_preferences.save(&txn).await.map_err(|e| {
-			tracing::error!(error = ?e, "Failed to create user preferences");
-			"Failed to create user preferences"
-		})?;
+		let user_preferences = user_preferences
+			.save(&txn)
+			.await
+			.map_err(|e| {
+				tracing::error!(error = ?e, "Failed to create user preferences");
+				"Failed to create user preferences"
+			})?
+			.try_into_model()?;
+
+		let mut user_model = user_model.into_active_model();
+		user_model.user_preferences_id = Set(Some(user_preferences.id));
+		let user_model = user_model.update(&txn).await?;
 
 		txn.commit().await?;
 

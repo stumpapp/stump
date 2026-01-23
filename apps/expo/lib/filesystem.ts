@@ -5,11 +5,6 @@ import { useReaderStore } from '~/stores'
 import { BookPreferences } from '~/stores/reader'
 import { useSavedServerStore } from '~/stores/savedServer'
 
-// TODO: allow for:
-// - Custom organization of files on UI (e.g. folders)
-// - Organization derived from server-side metadata (e.g. series, library)
-// - Deleting files
-
 /*
 Filesystem structure:
 
@@ -28,6 +23,40 @@ Filesystem structure:
 
 export const baseDirectory = `${FileSystem.documentDirectory}`
 export const cacheDirectory = `${FileSystem.cacheDirectory}`
+
+/**
+ * Converts an absolute path to a relative path by stripping the documentDirectory prefix.
+ * Note: iOS changes the app container UUID between app updates, so when we store
+ * paths in the db we need to store relative paths and construct at runtime
+ */
+export const toRelativePath = (absolutePath: string): string => {
+	if (!absolutePath) return absolutePath
+
+	const path = absolutePath.replace('file://', '')
+
+	const docDir = baseDirectory.replace('file://', '')
+	if (path.startsWith(docDir)) {
+		return path.slice(docDir.length)
+	}
+
+	return path
+}
+
+/**
+ * Converts a stored relative path back to an absolute path by prepending the current documentDirectory
+ */
+export const toAbsolutePath = (storedPath: string): string => {
+	if (!storedPath) return storedPath
+
+	const path = storedPath.replace('file://', '')
+
+	if (path.startsWith('/')) {
+		return path
+	}
+
+	const docDir = baseDirectory.replace('file://', '')
+	return urlJoin(docDir, path)
+}
 
 const serverDirectory = (serverID: string) => urlJoin(baseDirectory, serverID)
 
@@ -149,6 +178,7 @@ export async function getAllServersUsage() {
 	const usage = await Promise.all(serverIDs.map(getServerUsage))
 	return serverIDs.reduce(
 		(acc, server, i) => {
+			// @ts-expect-error: indexing
 			acc[server] = usage[i]
 			return acc
 		},
@@ -173,6 +203,7 @@ export async function getAppUsage() {
 		serversTotal: serverUsageTotal,
 		perServer: serverUsage.reduce(
 			(acc, size, i) => {
+				// @ts-expect-error: indexing
 				acc[serverIDs[i]] = size
 				return acc
 			},

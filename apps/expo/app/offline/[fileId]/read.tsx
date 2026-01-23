@@ -30,6 +30,7 @@ import {
 	booksDirectory,
 	ensureDirectoryExists,
 	thumbnailsDirectory,
+	toAbsolutePath,
 	unpackedBookDirectory,
 } from '~/lib/filesystem'
 import { useAppState, useLocalAnnotationMutations, useLocalBookmarkMutations } from '~/lib/hooks'
@@ -121,9 +122,7 @@ function Reader({ record, bookmarks, annotations }: ReaderProps) {
 	const [streamerError, setStreamerError] = useState<Error | null>(null)
 
 	const initializeStreamer = useCallback(async () => {
-		const filePath = downloadedFile.uri.startsWith('file://')
-			? decodeURIComponent(downloadedFile.uri.replace('file://', ''))
-			: downloadedFile.uri
+		const filePath = toAbsolutePath(downloadedFile.uri)
 
 		const cacheDir = unpackedBookDirectory(downloadedFile.serverId, book.id)
 		const cacheDirPath = cacheDir.startsWith('file://')

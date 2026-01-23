@@ -8,13 +8,12 @@ import { z } from 'zod'
 export const downloadedFiles = sqliteTable('downloaded_files', {
 	id: text('id').primaryKey(),
 	filename: text('filename').notNull(), // e.g., bookID.epub
-	uri: text('uri').notNull(),
+	uri: text('uri').notNull(), // relative, not absolute path
 	serverId: text('server_id').notNull(),
 	size: integer('size'), // bytes
 	downloadedAt: integer('downloaded_at', { mode: 'timestamp' })
 		.notNull()
 		.$defaultFn(() => new Date()),
-	// Book metadata for offline display
 	bookName: text('book_name'),
 	bookDescription: text('book_description'),
 	bookMetadata: text('book_metadata', { mode: 'json' }),
@@ -22,7 +21,7 @@ export const downloadedFiles = sqliteTable('downloaded_files', {
 	pages: integer('pages').default(-1), // Number of pages (for comic books)
 	// TODO: Store for PDF, too?
 	toc: text('toc', { mode: 'json' }), // Table of contents for EPUB books
-	thumbnailPath: text('thumbnail_path'),
+	thumbnailPath: text('thumbnail_path'), // relative, not absolute path
 	thumbnailMeta: text('thumbnail_meta', { mode: 'json' }),
 })
 
@@ -31,10 +30,10 @@ export const downloadedFiles = sqliteTable('downloaded_files', {
  * Stores minimal series information for offline display
  */
 export const seriesRefs = sqliteTable('series_refs', {
-	id: text('id').primaryKey(), // Series ID from Stump server
-	serverId: text('server_id').notNull(), // Server the series belongs to
+	id: text('id').primaryKey(),
+	serverId: text('server_id').notNull(),
 	name: text('name').notNull(),
-	libraryId: text('library_id'), // Reference to library table
+	libraryId: text('library_id'),
 })
 
 /**
@@ -42,8 +41,8 @@ export const seriesRefs = sqliteTable('series_refs', {
  * Stores minimal library information for offline display
  */
 export const libraryRefs = sqliteTable('library_refs', {
-	id: text('id').primaryKey(), // Library ID from Stump server
-	serverId: text('server_id').notNull(), // Server the library belongs to
+	id: text('id').primaryKey(),
+	serverId: text('server_id').notNull(),
 	name: text('name').notNull(),
 })
 

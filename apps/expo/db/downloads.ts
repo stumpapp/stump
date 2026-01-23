@@ -2,7 +2,7 @@ import * as Sentry from '@sentry/react-native'
 import { ImageMetadata, MediaMetadata, ReadiumLocator } from '@stump/graphql'
 import { and, count, eq } from 'drizzle-orm'
 
-import { thumbnailsDirectory } from '~/lib/filesystem'
+import { thumbnailsDirectory, toRelativePath } from '~/lib/filesystem'
 
 import StumpStreamer from '../modules/streamer'
 import { db } from './client'
@@ -165,7 +165,7 @@ export class DownloadRepository {
 			const newFile: NewDownloadedFile = {
 				id: file.id,
 				filename: file.filename,
-				uri: file.uri,
+				uri: toRelativePath(file.uri),
 				serverId: file.serverId,
 				size: file.size,
 				bookName: file.bookName ?? file.metadata?.title,
@@ -175,7 +175,7 @@ export class DownloadRepository {
 				pages,
 				toc: file.toc,
 				thumbnailMeta: file.imageMetadata,
-				thumbnailPath,
+				thumbnailPath: thumbnailPath ? toRelativePath(thumbnailPath) : null,
 			}
 
 			const result = await tx

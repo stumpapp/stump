@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { checkUrl, formatApiURL } from '@stump/sdk'
+import { checkOPDSURL, checkUrl, formatApiURL } from '@stump/sdk'
 import isEqual from 'lodash/isEqual'
 import omit from 'lodash/omit'
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
@@ -46,10 +46,12 @@ export default function AddOrEditServerForm({
 	const maskURLs = usePreferencesStore((state) => state.maskURLs)
 
 	const [didConnect, setDidConnect] = useState(false)
-	const url = form.watch('url')
+
+	const [kind, url] = useWatch({ control, name: ['kind', 'url'] })
 
 	const checkConnection = useCallback(async () => {
-		const isValid = await checkUrl(formatApiURL(url, 'v2'))
+		const isValid =
+			kind === 'stump' ? await checkUrl(formatApiURL(url, 'v2')) : await checkOPDSURL(url)
 		if (!isValid) {
 			form.setError('url', {
 				type: 'manual',
@@ -59,7 +61,7 @@ export default function AddOrEditServerForm({
 			form.clearErrors('url')
 			setDidConnect(true)
 		}
-	}, [url, form, setDidConnect])
+	}, [kind, url, form, setDidConnect])
 
 	const [isAddingHeader, setIsAddingHeader] = useState(false)
 
@@ -90,7 +92,6 @@ export default function AddOrEditServerForm({
 		setIsAddingHeader(false)
 	}
 
-	const kind = form.watch('kind')
 	const { setValue } = form
 	useEffect(() => {
 		if (kind !== 'stump') {

@@ -1,4 +1,4 @@
-import { isAxiosError } from 'axios'
+import axios, { isAxiosError } from 'axios'
 
 import { ApiVersion } from '../api'
 
@@ -63,9 +63,18 @@ export async function checkOPDSURL(url: string) {
 		return false
 	}
 
-	const res = await fetch(url).catch((err) => err)
-
-	return res.status === 200
+	try {
+		const response = await axios.head(url, { timeout: 5000 })
+		return response.status < 500
+	} catch (error) {
+		const axiosError = isAxiosError(error) ? error : null
+		if (axiosError?.code === 'ERR_NETWORK') {
+			return false
+		} else if (axiosError?.response) {
+			return axiosError.response.status < 500 // Unauth is valid response to check
+		}
+		return false
+	}
 }
 
 export const isNetworkError = (error: unknown) => {

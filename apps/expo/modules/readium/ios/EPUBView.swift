@@ -394,10 +394,12 @@
 
          do {
              // TODO: I had to do all manual bc iOS seems to always place native ones first which
-             // I don't want. Eventually I'll want to add back look up and translate
+             // I don't want. Eventually I'll want to add back translate
+             // See comment below at handleLookUpAction
              let editingActions: [EditingAction] = [
                  EditingAction(title: "Highlight", action: #selector(handleHighlightAction)),
                  EditingAction(title: "Note", action: #selector(handleNoteAction)),
+                 EditingAction(title: "Look Up", action: #selector(handleLookUpAction)),
                  EditingAction(title: "Copy", action: #selector(handleCopyAction)),
              ]
              
@@ -434,11 +436,11 @@
                          scroll: false
                      ),
                      editingActions: editingActions,
-                    contentInset: [
+                     contentInset: [
                         .compact: (top: 0, bottom: 0),
                         .regular: (top: 0, bottom: 0),
                         .unspecified: (top: 0, bottom: 0),
-                    ],
+                     ],
                      fontFamilyDeclarations: fontFamilyDeclarations,
                      // Note: This was an irritating issue. In the Readium source, they define CSS which TDLR;
                      // applies a 39.99rem max line length for tablet-sized screens and up. Setting to `nil` does
@@ -714,6 +716,7 @@
              self?.onDeleteHighlight(["decorationId": decorationId])
          }
          
+         //  TODO: Support quick action for changing color
          let menu = UIMenu(children: [editAction, deleteAction])
          
          DispatchQueue.main.async { [weak self] in
@@ -875,6 +878,42 @@
          
          let text = selection.locator.text.highlight ?? ""
          UIPasteboard.general.string = text
+         navigator?.clearSelection()
+     }
+     
+     // Note: So this was an interesting one to figure out. A cursory search for 
+     // general lookup functionalities initial led me towards UIReferenceLibraryViewController,
+     // but it is an entirely different experience compared to what I was used to in Apple Books,
+     // which if you're familiar spawns a little sheet with dictionary/Siri Knowledge/etc.
+     // From what I can tell, WKWebView manages that experience and Readium just enables it.
+     // I can't find a way to impose _my_ ordering of the menu items while also getting that
+     // native experience.
+     // 
+     // All that to say, for now let's try to use UIReferenceLibraryViewController to at least get
+     // dictionary lookup working. I assume I will hit the same obstacles for translate...
+     @objc func handleLookUpAction(_ sender: Any?) {
+         guard let selection = navigator?.currentSelection else {
+             print("EPUBView: No current selection for look up")
+             return
+         }
+         
+         let text = selection.locator.text.highlight ?? ""
+         guard !text.isEmpty else {
+             return
+         }
+         
+         // See https://developer.apple.com/documentation/uikit/uireferencelibraryviewcontroller
+         let referenceVC = UIReferenceLibraryViewController(term: text)
+         
+         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+            let rootVC = windowScene.windows.first?.rootViewController {
+             var topVC = rootVC
+             while let presented = topVC.presentedViewController {
+                 topVC = presented
+             }
+             topVC.present(referenceVC, animated: true)
+         }
+         
          navigator?.clearSelection()
      }
  }

@@ -13,7 +13,7 @@ import urlJoin from 'url-join'
 
 import { ImageBasedReader, PdfReader, ReadiumReader } from '~/components/book/reader'
 import { ImageReaderBookRef } from '~/components/book/reader/image/context'
-import ServerErrorBoundary from '~/components/ServerErrorBoundary'
+import { ServerErrorBoundary } from '~/components/error'
 import {
 	annotationLocator,
 	annotations as annotationsTable,

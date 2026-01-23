@@ -1,11 +1,13 @@
-import { isNetworkError } from '@stump/sdk'
+import { isNetworkError, isOutdatedGraphQLSchemaError } from '@stump/sdk'
 import { useRouter } from 'expo-router'
 import { Linking, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
-import Owl from './Owl'
+import Owl from '../Owl'
+import { Button, Heading, Text } from '../ui'
+import PotentiallyOutdatedServer from './PotentiallyOutdatedServer'
 import ServerConnectFailed from './ServerConnectFailed'
-import { Button, Heading, Text } from './ui'
+import { getIssueUrl } from './utils'
 
 type Props = {
 	error: Error
@@ -17,6 +19,10 @@ export default function ServerErrorBoundary({ error, onRetry }: Props) {
 
 	if (isNetworkError(error)) {
 		return <ServerConnectFailed onRetry={onRetry} />
+	}
+
+	if (isOutdatedGraphQLSchemaError(error)) {
+		return <PotentiallyOutdatedServer error={error} onRetry={onRetry} />
 	}
 
 	return (
@@ -67,30 +73,4 @@ export default function ServerErrorBoundary({ error, onRetry }: Props) {
 			</View>
 		</SafeAreaView>
 	)
-}
-
-const getIssueUrl = (error: Error) => {
-	const labels = ['bug', 'mobile-app']
-
-	const errorTitle = '[BUG] Mobile App Error'
-
-	let errorDetails = '## Error Details\n\n'
-	errorDetails += `**Error Type:** ${error.constructor.name}\n\n`
-	errorDetails += `**Message:** ${error.message}\n\n`
-
-	if (error.stack) {
-		errorDetails += `**Stack Trace:**\n\`\`\`\n${error.stack}\n\`\`\`\n\n`
-	}
-
-	if (error.cause) {
-		errorDetails += `**Cause:**\n\`\`\`\n${typeof error.cause === 'string' ? error.cause : JSON.stringify(error.cause, null, 2)}\n\`\`\`\n\n`
-	}
-
-	const params = new URLSearchParams({
-		title: errorTitle,
-		labels: labels.join(','),
-		body: errorDetails,
-	})
-
-	return `https://github.com/stumpapp/stump/issues/new?${params.toString()}`
 }

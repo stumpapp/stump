@@ -1,15 +1,17 @@
 import { useRouter } from 'expo-router'
-import { View } from 'react-native'
+import { Linking, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
-import Owl, { useOwlHeaderOffset } from './Owl'
-import { Button, Heading, Text } from './ui'
+import Owl, { useOwlHeaderOffset } from '../Owl'
+import { Button, Heading, Text } from '../ui'
+import { getIssueUrl } from './utils'
 
 type Props = {
+	error: Error
 	onRetry?: () => void
 }
 
-export default function ServerConnectFailed({ onRetry }: Props) {
+export default function PotentiallyOutdatedServer({ error, onRetry }: Props) {
 	const router = useRouter()
 	const emptyContainerStyle = useOwlHeaderOffset()
 
@@ -23,12 +25,12 @@ export default function ServerConnectFailed({ onRetry }: Props) {
 
 				<View className="gap-2 px-4 tablet:max-w-lg">
 					<Heading size="xl" className="text-center font-semibold leading-tight">
-						Failed to Connect
+						Outdated Server
 					</Heading>
 
 					<Text size="lg" className="text-center">
-						A network error suggests this server is currently unavailable. Please ensure that it is
-						running and accessible from this device
+						An error was returned that suggests your server is outdated. Please make sure your
+						server is updated to continue.
 					</Text>
 				</View>
 
@@ -39,14 +41,20 @@ export default function ServerConnectFailed({ onRetry }: Props) {
 						<Text>Return Home</Text>
 					</Button>
 
+					<Button
+						className="rounded-full"
+						size="lg"
+						variant="secondary"
+						onPress={() => {
+							const issueUrl = getIssueUrl(error)
+							Linking.openURL(issueUrl)
+						}}
+					>
+						<Text>Report Issue</Text>
+					</Button>
+
 					{onRetry && (
-						<Button
-							variant="secondary"
-							size="lg"
-							roundness="full"
-							className="ml-2"
-							onPress={onRetry}
-						>
+						<Button variant="ghost" size="lg" roundness="full" className="ml-2" onPress={onRetry}>
 							<Text>Try Again</Text>
 						</Button>
 					)}

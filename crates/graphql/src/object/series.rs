@@ -97,6 +97,7 @@ impl Series {
 		&self,
 		ctx: &Context<'_>,
 		#[graphql(default, validator(minimum = 1))] take: Option<u64>,
+		#[graphql(default, validator(minimum = 0))] skip: Option<u64>,
 	) -> Result<Vec<Media>> {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
@@ -106,6 +107,7 @@ impl Series {
 			// TODO: Consider allowing custom ordering?
 			.order_by_asc(media::Column::Name)
 			.apply_if(take, |query, take| query.limit(take))
+			.apply_if(skip, |query, skip| query.offset(skip))
 			.into_model::<media::ModelWithMetadata>()
 			.all(conn)
 			.await?;

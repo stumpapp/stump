@@ -12,8 +12,9 @@ import SeriesStackedThumbnails from './SeriesStackedThumbnails'
 const fragment = graphql(`
 	fragment RecentlyAddedSeriesItem on Series {
 		id
+		createdAt
 		resolvedName
-		media(take: 3) {
+		media(take: 2, skip: 1) {
 			resolvedName
 			thumbnail {
 				url
@@ -27,9 +28,19 @@ const fragment = graphql(`
 				}
 			}
 		}
-		readCount
 		mediaCount
-		createdAt
+		readCount
+		thumbnail {
+			url
+			metadata {
+				averageColor
+				colors {
+					color
+					percentage
+				}
+				thumbhash
+			}
+		}
 	}
 `)
 
@@ -50,7 +61,7 @@ export default function RecentlyAddedSeriesItem({ series }: Props) {
 	const data = useFragment(fragment, series)
 	const router = useRouter()
 
-	const thumbnailData = data.media.map((m) => m.thumbnail)
+	const thumbnailData = [data.thumbnail, ...data.media.map((m) => m.thumbnail)]
 
 	return (
 		<Pressable onPress={() => router.push(`/server/${serverID}/series/${data.id}`)}>

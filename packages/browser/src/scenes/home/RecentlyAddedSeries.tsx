@@ -26,7 +26,7 @@ const query = graphql(`
 				percentageCompleted
 				status
 				createdAt
-				media(take: 3) {
+				media(take: 2, skip: 1) {
 					id
 					resolvedName
 					thumbnail {
@@ -39,6 +39,17 @@ const query = graphql(`
 							}
 							thumbhash
 						}
+					}
+				}
+				thumbnail {
+					url
+					metadata {
+						averageColor
+						colors {
+							color
+							percentage
+						}
+						thumbhash
 					}
 				}
 			}
@@ -81,7 +92,7 @@ type RecentlyAddedSeriesCardProps = {
 }
 
 function RecentlyAddedSeriesCard({ series, cardWidth }: RecentlyAddedSeriesCardProps) {
-	const thumbnailData = series.media.map((m) => m.thumbnail)
+	const thumbnailData = [series.thumbnail, ...series.media.map((m) => m.thumbnail)]
 
 	return (
 		<Link

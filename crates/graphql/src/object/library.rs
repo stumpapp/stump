@@ -195,6 +195,7 @@ impl Library {
 		&self,
 		ctx: &Context<'_>,
 		#[graphql(default, validator(minimum = 1))] take: Option<u64>,
+		#[graphql(default, validator(minimum = 0))] skip: Option<u64>,
 	) -> Result<Vec<Series>> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
@@ -203,6 +204,7 @@ impl Library {
 			// TODO: Consider allowing custom ordering?
 			.order_by_asc(series::Column::Name)
 			.apply_if(take, |query, take| query.limit(take))
+			.apply_if(skip, |query, skip| query.offset(skip))
 			.into_model::<series::ModelWithMetadata>()
 			.all(conn)
 			.await?;

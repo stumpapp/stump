@@ -81,3 +81,20 @@ export const isNetworkError = (error: unknown) => {
 	const axiosError = isAxiosError(error) ? error : null
 	return axiosError?.code === 'ERR_NETWORK'
 }
+
+// This is pretty naive, but it looks for a few telltale signs of the outdated schema error, e.g.:
+// - "Unknown argument "X" on field "Y"
+// - "Cannot query field "X" on type "Y"
+// - "Field "X" of type "Y" must have a selection of subfields"
+export const isOutdatedGraphQLSchemaError = (error: unknown) => {
+	if (error instanceof Error) {
+		const message = error.message
+		const patterns = [
+			/Unknown argument ".*" on field ".*"/,
+			/Cannot query field ".*" on type ".*"/,
+			/Field ".*" of type ".*" must have a selection of subfields/,
+		]
+		return patterns.some((pattern) => pattern.test(message))
+	}
+	return false
+}

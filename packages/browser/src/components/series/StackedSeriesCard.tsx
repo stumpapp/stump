@@ -50,7 +50,7 @@ const StackedSeriesCard = memo(function StackedSeriesCard({ data }: Props) {
 		[prefetchSeries, prefetchSeriesBooks, data.id],
 	)
 
-	const thumbnailData = data.media.map((m) => m.thumbnail)
+	const thumbnailData = [data.thumbnail, ...data.media.map((m) => m.thumbnail)]
 	const isMissing = data.status === 'MISSING'
 
 	return (

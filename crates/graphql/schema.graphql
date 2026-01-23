@@ -808,7 +808,7 @@ type Library {
 	"Get the full history of scan jobs for this library."
 	scanHistory: [LibraryScanRecord!]!
 	"Get series in this library"
-	series(take: Int = null): [Series!]!
+	series(take: Int = null, skip: Int = null): [Series!]!
 	seriesAlphabet: JSONObject!
 	stats(allUsers: Boolean): LibraryStats!
 	tags: [Tag!]!
@@ -2081,7 +2081,7 @@ type Series {
 	resolvedDescription: String
 	library: Library!
 	"Get media in this series"
-	media(take: Int = null): [Media!]!
+	media(take: Int = null, skip: Int = null): [Media!]!
 	mediaCount: Int!
 	mediaAlphabet: JSONObject!
 	upNext(take: Int! = 1, cursor: String): [Media!]!

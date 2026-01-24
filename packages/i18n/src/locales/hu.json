@@ -788,7 +788,11 @@
 			"imprint": "Imprint",
 			"comicid": "Comic ID",
 			"booktype": "Book type",
-			"status": "Status"
+			"status": "Status",
+			"totalIssues": "Total issues",
+			"publicationRun": "Publication run",
+			"comicImage": "Comic image",
+			"descriptionFormatted": "Description (formatted)"
 		},
 		"addFields": {
 			"description": "Add each addition on its own line"

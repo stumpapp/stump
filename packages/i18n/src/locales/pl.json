@@ -789,10 +789,10 @@
 			"comicid": "Identyfikator komiksu",
 			"booktype": "Typ książki",
 			"status": "Status",
-			"totalIssues": "Total issues",
+			"totalIssues": "Łącznie wydań",
 			"publicationRun": "Publication run",
 			"comicImage": "Comic image",
-			"descriptionFormatted": "Description (formatted)"
+			"descriptionFormatted": "Opis (sformatowany)"
 		},
 		"addFields": {
 			"description": "Dodaj każdy dodatkowy element w osobnej linii"

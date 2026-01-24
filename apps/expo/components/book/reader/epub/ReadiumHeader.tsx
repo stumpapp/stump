@@ -33,19 +33,19 @@ export default function ReadiumHeader() {
 
 	const insets = useSafeAreaInsets()
 
-	const translateY = useSharedValue(-400)
+	const opacity = useSharedValue(0)
 	useEffect(() => {
-		translateY.value = withTiming(visible ? 0 : 400 * -1, {
-			duration: 300,
+		opacity.value = withTiming(visible ? 1 : 0, {
+			duration: 250,
 		})
-	}, [visible, translateY, height, insets.top])
+	}, [visible, opacity, height, insets.top])
 
 	const animatedStyles = useAnimatedStyle(() => {
 		return {
 			top: insets.top + (Platform.OS === 'android' ? 0 : 0),
 			left: insets.left,
 			right: insets.right,
-			transform: [{ translateY: translateY.value }],
+			opacity: opacity.value,
 		}
 	})
 

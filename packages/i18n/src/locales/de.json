@@ -465,7 +465,7 @@
 				},
 				{
 					"label": "Wird gescannt",
-					"heading": "Scanne",
+					"heading": "Scanning",
 					"description": "Einstellungen in Bezug darauf, wie Stumpf diese Bibliothek scannt"
 				},
 				{
@@ -497,7 +497,7 @@
 					"ignoreRules": "Dateien ignorieren",
 					"convertRar": "Konvertiere RAR/CBR",
 					"deleteConversions": "Konvertierte Dateien löschen",
-					"watch": "Überwache Ordner nach Änderungen",
+					"watch": "Watch directory for changes",
 					"processMetadata": "Metadaten verarbeiten",
 					"generateFileHashes": "Datei-Hashes generieren",
 					"generateKoreaderHashes": "Generate KoReader hashes",
@@ -788,7 +788,11 @@
 			"imprint": "Imprint",
 			"comicid": "Comic ID",
 			"booktype": "Book type",
-			"status": "Status"
+			"status": "Status",
+			"totalIssues": "Total issues",
+			"publicationRun": "Publication run",
+			"comicImage": "Comic image",
+			"descriptionFormatted": "Description (formatted)"
 		},
 		"addFields": {
 			"description": "Add each addition on its own line"

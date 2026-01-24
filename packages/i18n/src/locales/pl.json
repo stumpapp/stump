@@ -788,7 +788,11 @@
 			"imprint": "Nadruk",
 			"comicid": "Identyfikator komiksu",
 			"booktype": "Typ książki",
-			"status": "Status"
+			"status": "Status",
+			"totalIssues": "Total issues",
+			"publicationRun": "Publication run",
+			"comicImage": "Comic image",
+			"descriptionFormatted": "Description (formatted)"
 		},
 		"addFields": {
 			"description": "Dodaj każdy dodatkowy element w osobnej linii"

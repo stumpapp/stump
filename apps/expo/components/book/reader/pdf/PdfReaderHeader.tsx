@@ -7,7 +7,7 @@ import Animated, {
 	useSharedValue,
 	withTiming,
 } from 'react-native-reanimated'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { initialWindowMetrics, useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Heading } from '~/components/ui'
 import { HeaderButton } from '~/components/ui/header-button/header-button'
@@ -43,7 +43,7 @@ export function PdfReaderHeader() {
 
 	const animatedStyles = useAnimatedStyle(() => {
 		return {
-			top: insets.top + (Platform.OS === 'android' ? 12 : 0),
+			top: (initialWindowMetrics?.insets.top || insets.top) + (Platform.OS === 'android' ? 12 : 0),
 			left: insets.left,
 			right: insets.right,
 			// transform: [{ translateY: translateY.value }],

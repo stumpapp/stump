@@ -4,6 +4,7 @@ import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-na
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Text } from '~/components/ui'
+import { CONTROLS_TIMING_CONFIG } from '~/lib/constants'
 import { useDisplay } from '~/lib/hooks'
 import { useReaderStore } from '~/stores'
 import { useEpubLocationStore, useEpubTheme } from '~/stores/epub'
@@ -25,9 +26,7 @@ export default function ReadiumFooter() {
 
 	const opacity = useSharedValue(0)
 	useEffect(() => {
-		opacity.value = withTiming(visible ? 1 : 0, {
-			duration: 250,
-		})
+		opacity.value = withTiming(visible ? 1 : 0, CONTROLS_TIMING_CONFIG)
 	}, [visible, opacity, height, insets.bottom])
 
 	const animatedStyles = useAnimatedStyle(() => {

@@ -29,7 +29,7 @@ import { setAndroidNavigationBar } from '~/lib/android-navigation-bar'
 import { NAV_THEME, useColors } from '~/lib/constants'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { usePreferencesStore } from '~/stores'
-import { useHideStatusBar } from '~/stores/reader'
+import { useHideSystemBars, useReaderStore } from '~/stores/reader'
 
 dayjs.extend(relativeTime)
 dayjs.extend(duration)
@@ -68,7 +68,7 @@ export default function RootLayout() {
 	const { error } = useMigrations(db, migrations)
 
 	const animation = React.useRef<LottieView>(null)
-	const shouldHideStatusBar = useHideStatusBar()
+	const { hideStatusBar, hideNavigationBar } = useHideSystemBars()
 	const hasMounted = React.useRef(false)
 
 	const colors = useColors()
@@ -81,6 +81,7 @@ export default function RootLayout() {
 			disableDismissGesture: state.disableDismissGesture,
 		}),
 	)
+	const isReading = useReaderStore((state) => state.isReading)
 
 	useIsomorphicLayoutEffect(() => {
 		if (hasMounted.current) {
@@ -121,6 +122,21 @@ export default function RootLayout() {
 		return () => subscription.remove()
 	}, [])
 
+	// TODO: Account for epub theme background when in epub reader, this is the logic
+	// const { colors: epubThemeColors } = useEpubTheme()
+	// let isDarkEpubTheme: boolean = isDarkColorScheme
+	// if (epubThemeColors?.background) {
+	// 	const backgroundColor = getColor(epubThemeColors?.background)
+	// 	const foregroundColor = getColor(epubThemeColors?.foreground)
+
+	// 	const backgroundLightness = to(backgroundColor, 'oklch').coords[0]
+	// 	const foregroundLightness = to(foregroundColor, 'oklch').coords[0]
+
+	// 	// Choosing based on relative difference rather than e.g. absolute lightness < 0.5 seems
+	// 	// to look much better for edge cases near the boundry
+	// 	isDarkEpubTheme = foregroundLightness > backgroundLightness
+	// }
+
 	if (!isColorSchemeLoaded || !isAnimationReady) {
 		return <View className="flex-1 bg-background" />
 	}
@@ -155,7 +171,12 @@ export default function RootLayout() {
 				{performanceMonitor && <PerformanceMonitor style={{ top: insets.top || 12 }} />}
 				<BottomSheet.Provider>
 					<KeyboardProvider>
-						<SystemBars style={isDarkColorScheme ? 'light' : 'dark'} hidden={shouldHideStatusBar} />
+						<SystemBars
+							// TODO: Account for epub theme background when in epub reader, isReading does both
+							// image based and epub but it should use the separate logic (above) for the epub reader
+							style={isDarkColorScheme || isReading ? 'light' : 'dark'}
+							hidden={{ statusBar: hideStatusBar, navigationBar: hideNavigationBar }}
+						/>
 						<Stack
 							// https://github.com/expo/expo/issues/15244 ?
 							// screenOptions={{
@@ -182,7 +203,7 @@ export default function RootLayout() {
 									headerShown: false,
 									title: '',
 									animation: animationEnabled ? 'default' : 'none',
-									autoHideHomeIndicator: shouldHideStatusBar,
+									autoHideHomeIndicator: hideNavigationBar,
 									contentStyle: {
 										backgroundColor: colors.background.DEFAULT,
 									},
@@ -202,7 +223,7 @@ export default function RootLayout() {
 									headerShown: false,
 									title: '',
 									animation: animationEnabled ? 'default' : 'none',
-									autoHideHomeIndicator: shouldHideStatusBar,
+									autoHideHomeIndicator: hideNavigationBar,
 									presentation:
 										disableDismissGesture && Platform.OS === 'ios' ? 'fullScreenModal' : undefined,
 									contentStyle: {

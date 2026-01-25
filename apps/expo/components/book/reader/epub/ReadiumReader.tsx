@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import setProperty from 'lodash/set'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { View } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { initialWindowMetrics, useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { FullScreenLoader } from '~/components/ui'
 import { verifyFileReadable } from '~/lib/filesystem'
@@ -567,7 +567,7 @@ export default function ReadiumReader({
 				onDeleteHighlight={handleNativeDeleteAnnotation}
 				style={{
 					flex: 1,
-					marginTop: insets.top + HEADER_HEIGHT,
+					marginTop: (initialWindowMetrics?.insets.top || insets.top) + HEADER_HEIGHT,
 					marginBottom: insets.bottom + FOOTER_HEIGHT,
 				}}
 				{...config}

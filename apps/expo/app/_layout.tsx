@@ -3,6 +3,7 @@ import '~/global.css'
 import { DarkTheme, DefaultTheme, Theme, ThemeProvider } from '@react-navigation/native'
 import { PortalHost } from '@rn-primitives/portal'
 import * as Sentry from '@sentry/react-native'
+import { getColor, to } from 'colorjs.io/fn'
 import dayjs from 'dayjs'
 import duration from 'dayjs/plugin/duration'
 import relativeTime from 'dayjs/plugin/relativeTime'
@@ -29,6 +30,7 @@ import { setAndroidNavigationBar } from '~/lib/android-navigation-bar'
 import { NAV_THEME, useColors } from '~/lib/constants'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { usePreferencesStore } from '~/stores'
+import { useEpubLocationStore, useEpubTheme } from '~/stores/epub'
 import { useHideSystemBars, useReaderStore } from '~/stores/reader'
 
 dayjs.extend(relativeTime)
@@ -82,6 +84,8 @@ export default function RootLayout() {
 		}),
 	)
 	const isReading = useReaderStore((state) => state.isReading)
+	const isReadingEbook = useEpubLocationStore((state) => !!state.book)
+	const { colors: epubThemeColors } = useEpubTheme()
 
 	useIsomorphicLayoutEffect(() => {
 		if (hasMounted.current) {
@@ -122,20 +126,20 @@ export default function RootLayout() {
 		return () => subscription.remove()
 	}, [])
 
-	// TODO: Account for epub theme background when in epub reader, this is the logic
-	// const { colors: epubThemeColors } = useEpubTheme()
-	// let isDarkEpubTheme: boolean = isDarkColorScheme
-	// if (epubThemeColors?.background) {
-	// 	const backgroundColor = getColor(epubThemeColors?.background)
-	// 	const foregroundColor = getColor(epubThemeColors?.foreground)
+	let isDarkEpubTheme: boolean = isDarkColorScheme
+	if (epubThemeColors?.background && isReadingEbook) {
+		const backgroundColor = getColor(epubThemeColors?.background)
+		const foregroundColor = getColor(epubThemeColors?.foreground)
 
-	// 	const backgroundLightness = to(backgroundColor, 'oklch').coords[0]
-	// 	const foregroundLightness = to(foregroundColor, 'oklch').coords[0]
+		const backgroundLightness = to(backgroundColor, 'oklch').coords[0]
+		const foregroundLightness = to(foregroundColor, 'oklch').coords[0]
 
-	// 	// Choosing based on relative difference rather than e.g. absolute lightness < 0.5 seems
-	// 	// to look much better for edge cases near the boundry
-	// 	isDarkEpubTheme = foregroundLightness > backgroundLightness
-	// }
+		// Choosing based on relative difference rather than e.g. absolute lightness < 0.5 seems
+		// to look much better for edge cases near the boundry
+		isDarkEpubTheme = foregroundLightness > backgroundLightness
+	}
+
+	const isDarkBackground = isReadingEbook ? isDarkEpubTheme : isDarkColorScheme || isReading
 
 	if (!isColorSchemeLoaded || !isAnimationReady) {
 		return <View className="flex-1 bg-background" />
@@ -172,9 +176,7 @@ export default function RootLayout() {
 				<BottomSheet.Provider>
 					<KeyboardProvider>
 						<SystemBars
-							// TODO: Account for epub theme background when in epub reader, isReading does both
-							// image based and epub but it should use the separate logic (above) for the epub reader
-							style={isDarkColorScheme || isReading ? 'light' : 'dark'}
+							style={isDarkBackground ? 'light' : 'dark'}
 							hidden={{ statusBar: hideStatusBar, navigationBar: hideNavigationBar }}
 						/>
 						<Stack

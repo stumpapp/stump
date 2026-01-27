@@ -14,7 +14,8 @@ import { booksDirectory, bookThumbnailPath, ensureDirectoryExists } from '~/lib/
 import { useDownloadQueue } from './downloadQueue'
 
 // TODO(opds): See if I can just use a few intersection types to remove this and unify
-// with downloads.ts
+// with downloads.ts. I originally split because it was quicker, and not saying unify is the
+// way, but ideally I can cut down on maintaince by minimizing that
 
 const downloadKeys = {
 	all: ['downloads'] as const,

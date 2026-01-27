@@ -46,7 +46,7 @@ export function FloatingQueueButton() {
 
 	return (
 		<>
-			{activeQueueCount === 0 && (
+			{activeQueueCount > 0 && (
 				<Pressable
 					onPress={handlePress}
 					// Note: I put it on the left because of how iOS collapse works, it just looked funky in the center or on the right above a search

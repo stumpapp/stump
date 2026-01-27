@@ -178,7 +178,7 @@ export const getInstanceForServer = async (
 			onCacheInstance?.(server.id, authedInstance)
 			return authedInstance
 		} else {
-			console.warn(`Failed to authenticate server ${server.name} for progress sync`)
+			console.warn(`Failed to authenticate server ${server.name} for auto-auth`)
 		}
 	} catch (error) {
 		console.error(`Failed to authenticate server ${server.name}:`, error)
@@ -202,12 +202,12 @@ export const getInstancesForServers = async (
 	)
 
 	if (compatibleServers.length === 0) {
-		console.warn('No compatible servers found for progress sync')
+		console.warn('No compatible servers found for auto-auth')
 		return {}
 	}
 
 	if (incompatibleServers.length > 0) {
-		console.warn(`Found ${incompatibleServers.length} incompatible servers for progress sync`)
+		console.warn(`Found ${incompatibleServers.length} incompatible servers for auto-auth`)
 	}
 
 	const instances: Record<string, Api> = {}

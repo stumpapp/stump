@@ -15,6 +15,7 @@ import {
 	getDownloadQueueManager,
 } from '~/lib/downloadQueue'
 import { booksDirectory, bookThumbnailPath, ensureDirectoryExists } from '~/lib/filesystem'
+import { LOCAL_LIBRARY_SERVER_ID } from '~/lib/localLibrary'
 import { useSavedServerStore } from '~/stores/savedServer'
 
 import { type EnqueueBookParams, useDownloadQueue } from './downloadQueue'
@@ -199,7 +200,7 @@ export function useDownload({ serverId }: UseDownloadParams = {}) {
 		mutationFn: async () => {
 			console.warn('Deleting all downloads for all servers...', allServerIds)
 			return Promise.all(
-				allServerIds.map(async (srvID) => {
+				[...allServerIds, LOCAL_LIBRARY_SERVER_ID].map(async (srvID) => {
 					const downloads = await DownloadRepository.getFilesByServer(srvID)
 					console.warn(`Found ${downloads.length} downloads for server ${srvID}`)
 					const bookIDs = downloads.map((download) => download.id)

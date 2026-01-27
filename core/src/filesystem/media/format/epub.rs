@@ -1,6 +1,7 @@
 use merge::Merge;
 use quick_xml::{events::Event, Reader};
 use std::{collections::HashMap, fs::File, io::BufReader, path::PathBuf};
+use zip::ZipArchive;
 
 const ACCEPTED_EPUB_COVER_MIMES: [&str; 2] = ["image/jpeg", "image/png"];
 const DEFAULT_EPUB_COVER_ID: &str = "cover";
@@ -138,8 +139,27 @@ impl FileProcessor for EpubProcessor {
 
 		let path_buf = PathBuf::from(path);
 		let epub_file = Self::open(path)?;
+		let mut epub_archive = Self::open_archive(path)?;
 
-		let pages = epub_file.get_num_pages() as i32;
+		let mut total_pages: i32 = 0;
+
+		for spine_item in &epub_file.spine {
+			// Skip non-linear items (e.g. some epubs skip the cover by marking them as such, and Readium does not show these)
+			if spine_item.linear {
+				if let Some(resource) = epub_file.resources.get(&spine_item.idref) {
+					let Some(path) = resource.path.to_str() else {
+						continue;
+					};
+
+					if let Ok(entry) = epub_archive.by_name(path) {
+						let pages =
+							(entry.compressed_size() as f64 / 1024.0).ceil() as i32;
+						total_pages += if pages == 0 { 1 } else { pages };
+					}
+				}
+			}
+		}
+
 		// Get metadata from epub file if process_metadata failed
 		let metadata = match metadata {
 			Ok(Some(m)) => m,
@@ -160,7 +180,7 @@ impl FileProcessor for EpubProcessor {
 			hash,
 			koreader_hash,
 			metadata: Some(metadata),
-			pages,
+			pages: total_pages,
 		})
 	}
 
@@ -177,13 +197,30 @@ impl FileProcessor for EpubProcessor {
 		}
 	}
 
+	/// Get the synthetic page count for Readium https://wiki.mobileread.com/wiki/Adobe_Digital_Editions#Page_numbers
 	fn get_page_count(path: &str, _: &StumpConfig) -> Result<i32, FileError> {
-		// TODO At present, this likely does not return the correct count of
-		// pages. It should be updated when a better method is determined.
 		let epub_file = Self::open(path)?;
-		let pages = epub_file.get_num_pages() as i32;
+		let mut epub_archive = Self::open_archive(path)?;
 
-		Ok(pages)
+		let mut total_pages: i32 = 0;
+
+		for spine_item in &epub_file.spine {
+			// Skip non-linear items (e.g. some epubs skip the cover by marking them as such, and Readium does not show these)
+			if spine_item.linear {
+				if let Some(resource) = epub_file.resources.get(&spine_item.idref) {
+					let Some(path) = resource.path.to_str() else {
+						continue;
+					};
+
+					if let Ok(entry) = epub_archive.by_name(path) {
+						let pages =
+							(entry.compressed_size() as f64 / 1024.0).ceil() as i32;
+						total_pages += if pages == 0 { 1 } else { pages };
+					}
+				}
+			}
+		}
+		Ok(total_pages)
 	}
 
 	fn get_page_content_types(
@@ -240,6 +277,12 @@ impl FileProcessor for EpubProcessor {
 impl EpubProcessor {
 	pub fn open(path: &str) -> Result<EpubDoc<BufReader<File>>, FileError> {
 		EpubDoc::new(path).map_err(|e| FileError::EpubOpenError(e.to_string()))
+	}
+
+	fn open_archive(path: &str) -> Result<ZipArchive<BufReader<File>>, FileError> {
+		let file = File::open(path)?;
+		let reader = BufReader::new(file);
+		Ok(ZipArchive::new(reader)?)
 	}
 
 	fn metadata_to_map(

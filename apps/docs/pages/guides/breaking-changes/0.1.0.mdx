@@ -28,6 +28,7 @@ Thankfully, the vast majority of data is migratable. However, there are some pie
 - User-assigned permissions
 - Smart lists
 - Scheduled job configurations
+- Bookmarks and highlights
 
 To be clear: these pieces of data will be lost during the migration process. Please take extra care to re-assign permisions to users and re-create API keys after the migration is complete.
 
@@ -42,25 +43,50 @@ To be clear: these pieces of data will be lost during the migration process. Ple
 
 This section outlines the steps needed to migrate your existing Stump instance to version 0.1.0 or later. Please note that these steps only apply if you are upgrading from a version prior to 0.1.0.
 
+I should also note that if you don't have a complicated setup, and you don't care about losing things like reading history, it might just be easier to start fresh with a new Stump instance. The migration process is primarily intended for users who have a significant amount of data and configurations that they wish to retain.
+
 <Steps>
 
 ### Backup Your Data
 
 Before proceeding with the migration, ensure you have a complete backup of your Stump database. This is crucial in case anything goes wrong during the migration process.
 
-### Update Stump
+### Create a separate Stump instance
 
-Once you've backed up your data, you'll need to update your Stump instance. I highly recommend doing this in total isolation from your existing instance to avoid any potential data loss. We will bring over your existing configs and database in the next steps.
+I absolutely do not recommend updating your existing Stump instance in place. Please do not do that. This process should be in total isolation from your existing instance to avoid any potential data loss. We will bring over your existing configs and database in the next steps.
+
+You could do something like the following:
+
+```bash
+/stump-old/      # Your existing Stump instance
+	├── docker-compose.yml
+	└── config/
+	    └── stump.db
+/stump-new/      # Your new Stump instance
+	├── docker-compose.yml
+	└── config/ # Empty, first start will create what you need
+```
 
 The important part here is to ensure you have an upgraded instance running to get the new database created and migrated, which happens automatically after the first start.
+
+A few suggestions:
+
+- If your existing setup uses `latest` alias for the Docker image, pin it to `0.0.12` instead to avoid accidental upgrades
+- Make sure to fully stop your existing Stump instance before starting the new one (even though they are isolated)
+
+### Start the new Stump instance
+
+Start the new Stump instance to allow it to create all the fresh configs and database files. Once you see the startup messages in the logs, fully stop the instance.
+
+Be sure your old Stump instance is fully stopped as well. At this point, you can copy over your old instance's `stump.db` file into the new instance's config directory as `stump-legacy.db` (or any other name you prefer, just not `stump.db`). You may also mount is separately if preferred.
 
 ### Download the `backfill.sql` Script
 
 <Callout emoji="">
 	The `backfill.sql` script will be one of the downloadable assets in the release page for `0.1.0`.
 	You may be viewing this guide before the release is published. Until then, the link referenced
-	below will not work. You can find the script in the `develop` or `experimental` branches at
-	`/crates/migrations/backfill.sql`
+	below will not work. You can find the script in the `nightly` or `experimental` branches at
+	[`/crates/migrations/backfill.sql`](https://github.com/stumpapp/stump/blob/nightly/crates/migrations/backfill.sql)
 </Callout>
 
 Download the `backfill.sql` script from the [release page for 0.1.0](https://github.com/stumpapp/stump/releases/tag/v0.1.0).
@@ -75,12 +101,12 @@ The updated Stump instance includes a CLI tool to help with the migration proces
 
 - The new Stump instance has been started at least once, has not been configured, and is fully stopped. There should be a new database created with no data in any of the tables
 - The old Stump instance is fully stopped
-- The old Stump database is accessible (if running Docker, ensure both database files are mounted properly)
+- The old Stump database is accessible (if running Docker, ensure both database files are mounted properly or you copied it over accordingly)
 
 To migrate your database using the CLI tool, run the following:
 
 ```bash
-# If using Docker, exec into the container
+# If using Docker, exec into the NEW stump container
 ./stump system sea-orm-migration
 ```
 
@@ -107,3 +133,4 @@ There are several new features that were added as part of this release that I th
   - Offline reading
 - OIDC authentication support ([#246](https://github.com/stumpapp/stump/issues/246))
 - Improved smart list performance
+- Refreshed UI components and styles

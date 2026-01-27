@@ -4041,6 +4041,13 @@ export type SeriesOverviewSheetQuery = { __typename?: 'Query', seriesById?: { __
 
 export type SeriesSearchItemFragment = { __typename?: 'Series', id: string, resolvedName: string, readCount: number, mediaCount: number, percentageCompleted: number, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } & { ' $fragmentName'?: 'SeriesSearchItemFragment' };
 
+export type SeriesBooksForDownloadQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type SeriesBooksForDownloadQuery = { __typename?: 'Query', seriesById?: { __typename?: 'Series', id: string, resolvedName: string, library: { __typename?: 'Library', id: string, name: string }, media: Array<{ __typename?: 'Media', id: string, extension: string, resolvedName: string, metadata?: { __typename?: 'MediaMetadata', ageRating?: number | null, characters: Array<string>, colorists: Array<string>, coverArtists: Array<string>, day?: number | null, editors: Array<string>, format?: string | null, identifierAmazon?: string | null, identifierCalibre?: string | null, identifierGoogle?: string | null, identifierIsbn?: string | null, identifierMobiAsin?: string | null, identifierUuid?: string | null, genres: Array<string>, inkers: Array<string>, language?: string | null, letterers: Array<string>, links: Array<string>, month?: number | null, notes?: string | null, number?: any | null, pageCount?: number | null, pencillers: Array<string>, publisher?: string | null, series?: string | null, seriesGroup?: string | null, storyArc?: string | null, storyArcNumber?: any | null, summary?: string | null, teams: Array<string>, title?: string | null, titleSort?: string | null, volume?: number | null, writers: Array<string>, year?: number | null } | null, readProgress?: { __typename?: 'ActiveReadingSession', page?: number | null, percentageCompleted?: any | null, elapsedSeconds?: number | null, updatedAt?: any | null, locator?: { __typename?: 'ReadiumLocator', chapterTitle: string, href: string, type: string, title?: string | null, locations?: { __typename?: 'ReadiumLocation', fragments?: Array<string> | null, position?: number | null, progression?: any | null, totalProgression?: any | null, cssSelector?: string | null, partialCfi?: string | null } | null } | null } | null, thumbnail: { __typename?: 'ImageRef', metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null }, ebook?: { __typename?: 'Epub', toc: Array<string> } | null }> } | null };
+
 export type UseFavoriteBookMutationVariables = Exact<{
   id: Scalars['ID']['input'];
   isFavorite: Scalars['Boolean']['input'];
@@ -6878,6 +6885,93 @@ export const SeriesOverviewSheetDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<SeriesOverviewSheetQuery, SeriesOverviewSheetQueryVariables>;
+export const SeriesBooksForDownloadDocument = new TypedDocumentString(`
+    query SeriesBooksForDownload($id: ID!) {
+  seriesById(id: $id) {
+    id
+    resolvedName
+    library {
+      id
+      name
+    }
+    media {
+      id
+      extension
+      resolvedName
+      metadata {
+        ageRating
+        characters
+        colorists
+        coverArtists
+        day
+        editors
+        format
+        identifierAmazon
+        identifierCalibre
+        identifierGoogle
+        identifierIsbn
+        identifierMobiAsin
+        identifierUuid
+        genres
+        inkers
+        language
+        letterers
+        links
+        month
+        notes
+        number
+        pageCount
+        pencillers
+        publisher
+        series
+        seriesGroup
+        storyArc
+        storyArcNumber
+        summary
+        teams
+        title
+        titleSort
+        volume
+        writers
+        year
+      }
+      readProgress {
+        page
+        percentageCompleted
+        elapsedSeconds
+        locator {
+          chapterTitle
+          href
+          type
+          title
+          locations {
+            fragments
+            position
+            progression
+            totalProgression
+            cssSelector
+            partialCfi
+          }
+        }
+        updatedAt
+      }
+      thumbnail {
+        metadata {
+          averageColor
+          colors {
+            color
+            percentage
+          }
+          thumbhash
+        }
+      }
+      ebook {
+        toc
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<SeriesBooksForDownloadQuery, SeriesBooksForDownloadQueryVariables>;
 export const UseFavoriteBookDocument = new TypedDocumentString(`
     mutation UseFavoriteBook($id: ID!, $isFavorite: Boolean!) {
   favoriteMedia(id: $id, isFavorite: $isFavorite) {

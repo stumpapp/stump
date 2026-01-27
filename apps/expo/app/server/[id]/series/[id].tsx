@@ -22,6 +22,7 @@ import {
 } from '~/components/series'
 import { Button, RefreshButton, Text } from '~/components/ui'
 import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
+import { useDownloadSeries } from '~/lib/hooks/db/downloadSeries'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
 import { BookFilterContext, createBookFilterStore } from '~/stores/filters'
 
@@ -64,6 +65,7 @@ export default function Screen() {
 	const {
 		data: { seriesById: series },
 	} = useSuspenseGraphQL(query, ['seriesById', id], { id })
+	const { downloadSeries } = useDownloadSeries()
 
 	const showBackButton = useMemo(() => {
 		return navigationState?.length <= 1 && Platform.OS === 'ios'
@@ -80,7 +82,11 @@ export default function Screen() {
 		title: series.resolvedName,
 		showBackButton,
 		headerRight: () => (
-			<SeriesActionMenu seriesId={id} onShowOverview={() => sheetRef.current?.present()} />
+			<SeriesActionMenu
+				seriesId={id}
+				onShowOverview={() => sheetRef.current?.present()}
+				onDownloadSeries={() => downloadSeries(id)}
+			/>
 		),
 	})
 

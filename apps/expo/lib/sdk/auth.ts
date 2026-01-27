@@ -141,6 +141,52 @@ type GetInstancesForServersParams = {
 	onCacheInstance?: (id: string, instance: Api) => void
 }
 
+export const getInstanceForServer = async (
+	server: SavedServerWithConfig,
+	{ getServerToken, saveToken, onCacheInstance, getCachedInstance }: GetInstancesForServersParams,
+) => {
+	const storedToken = await getServerToken(server.id)
+	const authMethod = match(server.config?.auth)
+		.with({ bearer: P.string }, () => 'api-key' as const)
+		.otherwise(() => 'token' as const)
+
+	const cachedInstance = onCacheInstance ? getCachedInstance?.(server.id) : undefined
+
+	const instance =
+		cachedInstance ??
+		new Api({
+			baseURL: server.url,
+			authMethod,
+			customHeaders: server.config?.customHeaders,
+		})
+
+	instance.tokens = storedToken || undefined
+	const existingToken = await instance.getOrRefreshTokens()
+
+	try {
+		const authedInstance = await authSDKInstance(instance, {
+			config: server.config,
+			existingToken,
+			saveToken: async (token) => {
+				if (token) {
+					await saveToken(server.id, token)
+				}
+			},
+		})
+
+		if (authedInstance) {
+			onCacheInstance?.(server.id, authedInstance)
+			return authedInstance
+		} else {
+			console.warn(`Failed to authenticate server ${server.name} for progress sync`)
+		}
+	} catch (error) {
+		console.error(`Failed to authenticate server ${server.name}:`, error)
+	}
+
+	return null
+}
+
 export const getInstancesForServers = async (
 	servers: SavedServerWithConfig[],
 	{ getServerToken, saveToken, onCacheInstance, getCachedInstance }: GetInstancesForServersParams,
@@ -166,48 +212,19 @@ export const getInstancesForServers = async (
 
 	const instances: Record<string, Api> = {}
 
-	const getInstanceForServer = async (server: SavedServerWithConfig) => {
-		const storedToken = await getServerToken(server.id)
-		const authMethod = match(server.config?.auth)
-			.with({ bearer: P.string }, () => 'api-key' as const)
-			.otherwise(() => 'token' as const)
-
-		const cachedInstance = onCacheInstance ? getCachedInstance?.(server.id) : undefined
-
-		const instance =
-			cachedInstance ??
-			new Api({
-				baseURL: server.url,
-				authMethod,
-				customHeaders: server.config?.customHeaders,
-			})
-
-		instance.tokens = storedToken || undefined
-		const existingToken = await instance.getOrRefreshTokens()
-
-		try {
-			const authedInstance = await authSDKInstance(instance, {
-				config: server.config,
-				existingToken,
-				saveToken: async (token) => {
-					if (token) {
-						await saveToken(server.id, token)
-					}
-				},
-			})
-
-			if (authedInstance) {
-				onCacheInstance?.(server.id, authedInstance)
-				instances[server.id] = authedInstance
-			} else {
-				console.warn(`Failed to authenticate server ${server.name} for progress sync`)
-			}
-		} catch (error) {
-			console.error(`Failed to authenticate server ${server.name}:`, error)
+	const getInstance = async (server: SavedServerWithConfig) => {
+		const instance = await getInstanceForServer(server, {
+			getServerToken,
+			saveToken,
+			onCacheInstance,
+			getCachedInstance,
+		})
+		if (instance) {
+			instances[server.id] = instance
 		}
 	}
 
-	await Promise.all(compatibleServers.map((server) => getInstanceForServer(server)))
+	await Promise.all(compatibleServers.map((server) => getInstance(server)))
 
 	return instances
 }

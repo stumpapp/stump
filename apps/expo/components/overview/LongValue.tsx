@@ -16,8 +16,8 @@ type LongValueProps = {
 // TODO: Don't intake stripped HTML, strip for preview and render markdown in sheet
 export default function LongValue({ label, value }: LongValueProps) {
 	const ref = useRef<TrueSheet | null>(null)
-
 	const colors = useColors()
+
 	const { isDarkColorScheme } = useColorScheme()
 
 	return (

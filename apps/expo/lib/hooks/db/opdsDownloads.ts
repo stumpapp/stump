@@ -1,6 +1,5 @@
 import * as Sentry from '@sentry/react-native'
-import { useSDKSafe } from '@stump/client'
-import { OPDSMetadata, OPDSPublication, resolveUrl } from '@stump/sdk'
+import { OPDSMetadata } from '@stump/sdk'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { and, eq } from 'drizzle-orm'
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
@@ -8,24 +7,20 @@ import * as FileSystem from 'expo-file-system/legacy'
 import { useEffect, useMemo } from 'react'
 
 import { useActiveServerSafe } from '~/components/activeServer'
-import { extensionFromMime, getAcquisitionLink, getPublicationId } from '~/components/opds/utils'
+import { getPublicationId } from '~/components/opds/utils'
 import { db, downloadedFiles, DownloadRepository } from '~/db'
 import { booksDirectory, bookThumbnailPath, ensureDirectoryExists } from '~/lib/filesystem'
+
+import { useDownloadQueue } from './downloadQueue'
+
+// TODO(opds): See if I can just use a few intersection types to remove this and unify
+// with downloads.ts
 
 const downloadKeys = {
 	all: ['downloads'] as const,
 	server: (serverID: string) => [...downloadKeys.all, 'server', serverID] as const,
 	opdsBook: (bookID: string, serverID: string) =>
 		[...downloadKeys.all, 'opds-book', bookID, serverID] as const,
-}
-
-type DownloadOPDSBookParams = {
-	/**
-	 * The URL to the publication manifest. If the publication lacks any identifier in metadata,
-	 * this will be used to generate an ID
-	 */
-	publicationUrl: string
-	publication: OPDSPublication
 }
 
 export type UseOPDSDownloadParams = {
@@ -64,84 +59,15 @@ export function useOPDSDownload({ serverId }: UseOPDSDownloadParams = {}) {
 	const activeServerCtx = useActiveServerSafe()
 	const serverID = serverId ?? activeServerCtx?.activeServer.id
 
-	const sdkCtx = useSDKSafe()
 	const queryClient = useQueryClient()
 
-	// Ensure books directory exists
+	const { enqueueOPDSBook, counts: queueCounts } = useDownloadQueue({ serverId: serverID })
+
 	useEffect(() => {
 		if (serverID) {
 			ensureDirectoryExists(booksDirectory(serverID))
 		}
 	}, [serverID])
-
-	const downloadMutation = useMutation({
-		mutationFn: async ({ publicationUrl, publication }: DownloadOPDSBookParams) => {
-			if (!serverID) {
-				throw new Error('No active server available for downloads')
-			}
-
-			if (!sdkCtx?.sdk) {
-				throw new Error('SDK is not initialized')
-			}
-
-			const { sdk } = sdkCtx
-
-			await ensureDirectoryExists(booksDirectory(serverID))
-
-			const { metadata, links } = publication
-			const bookID = getPublicationId(publicationUrl, metadata)
-
-			const existingBook = await DownloadRepository.getFile(bookID, serverID)
-			if (existingBook) {
-				return `${booksDirectory(serverID)}/${existingBook.filename}`
-			}
-
-			const acquisitionLink = getAcquisitionLink(links)
-			if (!acquisitionLink?.href) {
-				throw new Error('No acquisition link found for this publication')
-			}
-
-			const extension = extensionFromMime(acquisitionLink.type)
-			if (!extension) {
-				throw new Error(`Unsupported file type: ${acquisitionLink.type || 'unknown'}`)
-			}
-
-			const downloadUrl = resolveUrl(acquisitionLink.href, sdk.rootURL)
-			const filename = `${bookID}.${extension}`
-			const placementUrl = `${booksDirectory(serverID)}/${filename}`
-
-			const result = await FileSystem.downloadAsync(downloadUrl, placementUrl, {
-				headers: sdk.headers,
-			})
-
-			if (result.status !== 200) {
-				throw new Error(`Failed to download file, status code: ${result.status}`)
-			}
-
-			const size = Number(result.headers['Content-Length'] ?? 0)
-
-			await DownloadRepository.addFile({
-				id: bookID,
-				filename,
-				uri: result.uri,
-				serverId: serverID,
-				size: !isNaN(size) && size > 0 ? size : undefined,
-				bookName: metadata?.title,
-				metadata: {
-					title: metadata?.title,
-					summary: metadata?.description ?? undefined,
-				},
-			})
-
-			return result.uri
-		},
-		onSuccess: (_, variables) => {
-			if (!serverID) return
-			const bookID = getPublicationId(variables.publicationUrl, variables.publication.metadata)
-			queryClient.invalidateQueries({ queryKey: downloadKeys.server(serverID) })
-			queryClient.invalidateQueries({ queryKey: downloadKeys.opdsBook(bookID, serverID) })
-		},
-	})
 
 	const deleteMutation = useMutation({
 		mutationFn: async ({
@@ -205,12 +131,11 @@ export function useOPDSDownload({ serverId }: UseOPDSDownloadParams = {}) {
 	})
 
 	return {
-		downloadBook: downloadMutation.mutateAsync,
+		downloadBook: enqueueOPDSBook,
 		deleteBook: (publicationUrl: string, metadata?: OPDSMetadata | null) =>
 			deleteMutation.mutateAsync({ publicationUrl, metadata }),
-		isDownloading: downloadMutation.isPending,
+		isDownloading: Boolean(queueCounts.pending + queueCounts.downloading > 0),
 		isDeleting: deleteMutation.isPending,
-		downloadError: downloadMutation.error,
 		deleteError: deleteMutation.error,
 	}
 }

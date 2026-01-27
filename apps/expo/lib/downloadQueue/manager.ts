@@ -12,7 +12,15 @@ import {
 } from '~/db/schema'
 import { booksDirectory, ensureDirectoryExists } from '~/lib/filesystem'
 import { useCacheStore } from '~/stores/cache'
+import {
+	getServerConfig,
+	getServerToken,
+	SavedServerWithConfig,
+	saveServerToken,
+	useSavedServerStore,
+} from '~/stores/savedServer'
 
+import { getInstanceForServer } from '../sdk/auth'
 import {
 	type DownloadProgress,
 	type DownloadQueueEvent,
@@ -74,8 +82,29 @@ class DownloadQueueManager {
 		this.listeners.forEach((listener) => listener(event))
 	}
 
-	private getSDK(serverId: string): Api | null {
-		return useCacheStore.getState().sdks[serverId] ?? null
+	private async getSDK(serverId: string): Promise<Api | null> {
+		const cachedInstance = useCacheStore.getState().sdks[serverId]
+		if (cachedInstance) {
+			return cachedInstance
+		}
+
+		const serverBase = useSavedServerStore.getState().servers.find((s) => s.id === serverId)
+		if (!serverBase) {
+			return null
+		}
+
+		const savedServer = {
+			...serverBase,
+			config: await getServerConfig(serverId),
+		} satisfies SavedServerWithConfig
+
+		const instance = await getInstanceForServer(savedServer, {
+			getServerToken,
+			saveToken: saveServerToken,
+			onCacheInstance: useCacheStore.getState().addSDK,
+		})
+
+		return instance
 	}
 
 	/**
@@ -180,7 +209,6 @@ class DownloadQueueManager {
 					eq(downloadQueue.status, downloadQueueStatus.enum.failed),
 				),
 			)
-
 		this.emit({ type: 'queue-changed' })
 		this.processQueue()
 	}
@@ -209,7 +237,7 @@ class DownloadQueueManager {
 			return `${booksDirectory(params.serverId)}/${downloaded.filename}`
 		}
 
-		const sdk = this.getSDK(params.serverId)
+		const sdk = await this.getSDK(params.serverId)
 		if (!sdk) {
 			throw new Error('Server not connected. Please reconnect and try again.')
 		}
@@ -329,7 +357,7 @@ class DownloadQueueManager {
 	}
 
 	private async startDownload(item: DownloadQueueItem): Promise<void> {
-		const sdk = this.getSDK(item.serverId)
+		const sdk = await this.getSDK(item.serverId)
 
 		if (!sdk) {
 			await this.markFailed(item.id, 'Server not connected. Please reconnect and retry.')

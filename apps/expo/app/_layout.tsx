@@ -20,6 +20,7 @@ import { Toaster } from 'sonner-native'
 
 import darkSplash from '~/assets/splash/dark.json'
 import lightSplash from '~/assets/splash/light.json'
+import { FloatingQueueButton } from '~/components/downloadQueue'
 import { PerformanceMonitor } from '~/components/PerformanceMonitor'
 import { BottomSheet } from '~/components/ui/bottom-sheet'
 import { db } from '~/db'
@@ -27,6 +28,7 @@ import migrations from '~/drizzle/migrations'
 import { reactNavigationIntegration } from '~/index'
 import { setAndroidNavigationBar } from '~/lib/android-navigation-bar'
 import { NAV_THEME, useColors } from '~/lib/constants'
+import { getDownloadQueueManager } from '~/lib/downloadQueue'
 import { useFileImportListener } from '~/lib/import'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { usePreferencesStore } from '~/stores'
@@ -122,6 +124,14 @@ export default function RootLayout() {
 		return () => subscription.remove()
 	}, [])
 
+	React.useEffect(() => {
+		const manager = getDownloadQueueManager()
+		manager.initialize().catch((err) => {
+			console.error('Failed to initialize download queue manager:', err)
+			Sentry.captureException(err)
+		})
+	}, [])
+
 	useFileImportListener()
 
 	if (!isColorSchemeLoaded || !isAnimationReady) {
@@ -214,6 +224,7 @@ export default function RootLayout() {
 								}}
 							/>
 						</Stack>
+						<FloatingQueueButton />
 						<PortalHost />
 					</KeyboardProvider>
 				</BottomSheet.Provider>

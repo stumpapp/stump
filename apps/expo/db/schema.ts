@@ -85,22 +85,24 @@ export type NewUnsyncedReadProgress = typeof readProgress.$inferInsert
 export const epubProgress = z.object({
 	chapterTitle: z.string().default(''),
 	href: z.string(),
-	locations: z.object({
-		fragments: z.array(z.string()).nullish(),
-		position: z.number().nullish(),
-		// Note: Stored as strings in the DB, so need to preprocess
-		progression: z.preprocess((val) => {
-			if (typeof val === 'string') return parseInt(val, 10)
-			return val
-		}, z.number().nullish()),
-		// Note: Stored as strings in the DB, so need to preprocess
-		totalProgression: z.preprocess((val) => {
-			if (typeof val === 'string') return parseInt(val, 10)
-			return val
-		}, z.number().nullish()),
-		cssSelector: z.string().nullish(),
-		partialCfi: z.string().nullish(),
-	}),
+	locations: z
+		.object({
+			fragments: z.array(z.string()).nullish(),
+			position: z.number().nullish(),
+			// Note: Stored as strings in the DB, so need to preprocess
+			progression: z.preprocess((val) => {
+				if (typeof val === 'string') return parseInt(val, 10)
+				return val
+			}, z.number().nullish()),
+			// Note: Stored as strings in the DB, so need to preprocess
+			totalProgression: z.preprocess((val) => {
+				if (typeof val === 'string') return parseInt(val, 10)
+				return val
+			}, z.number().nullish()),
+			cssSelector: z.string().nullish(),
+			partialCfi: z.string().nullish(),
+		})
+		.nullish(),
 	title: z.string().nullish(),
 	type: z.string().default('application/xhtml+xml'),
 })

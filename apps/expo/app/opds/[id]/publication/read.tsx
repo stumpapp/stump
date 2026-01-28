@@ -33,6 +33,7 @@ export default function Screen() {
 		url,
 		progression,
 		progressionURL,
+		refetchProgression,
 	} = usePublicationContext()
 	const { sdk } = useSDK()
 	const {
@@ -105,7 +106,7 @@ export default function Screen() {
 	const setShowControls = useReaderStore((state) => state.setShowControls)
 
 	const currentPage = useMemo(() => {
-		const extractedPosition = progression?.locator.locations?.at(0)?.position
+		const extractedPosition = progression?.locator.locations?.position
 		if (!extractedPosition) {
 			return 1
 		}
@@ -207,12 +208,18 @@ export default function Screen() {
 		[sdk],
 	)
 
-	useEffect(() => {
-		NavigationBar.setVisibilityAsync('hidden')
-		return () => {
-			NavigationBar.setVisibilityAsync('visible')
-		}
-	}, [])
+	useEffect(
+		() => {
+			NavigationBar.setVisibilityAsync('hidden')
+			return () => {
+				refetchProgression()
+				NavigationBar.setVisibilityAsync('visible')
+			}
+		},
+		// eslint-disable-next-line react-compiler/react-compiler
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[],
+	)
 
 	const getPageURL = useResolveURL()
 

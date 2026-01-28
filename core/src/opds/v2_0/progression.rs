@@ -44,6 +44,7 @@ impl OPDSProgression {
 		let extension = data.book.extension.to_lowercase();
 		let percentage_completed =
 			data.session.percentage_completed.and_then(|d| d.to_f64());
+
 		let (title, href, _type, locations) =
 			match (extension.as_str(), data.session.epubcfi, data.session.page) {
 				("epub", Some(cfi), _) => {
@@ -52,11 +53,11 @@ impl OPDSProgression {
 					// TODO: Use resource URL for href, e.g. OEBPS/chapter008.xhtml ?
 					let locations =
 						data.session.percentage_completed.map(|_progression| {
-							vec![OPDSProgressionLocation {
+							OPDSProgressionLocation {
 								fragments: Some(vec![cfi]),
 								total_progression: percentage_completed,
 								..Default::default()
-							}]
+							}
 						});
 					(Some(title), None, Some(OPDSLinkType::Xhtml), locations)
 				},
@@ -65,13 +66,13 @@ impl OPDSProgression {
 					let href = link_finalizer.format_link(format!(
 						"/opds/v2.0/books/{book_id}/pages/{current_page}",
 					));
-					let locations = vec![OPDSProgressionLocation {
+					let locations = OPDSProgressionLocation {
 						position: Some(current_page),
 						total_progression: percentage_completed.or_else(|| {
 							Some(current_page as f64 / data.book.pages as f64)
 						}),
 						..Default::default()
-					}];
+					};
 					// TODO: Don't assume JPEG, use analysis to determine this
 					let _type = OPDSLinkType::ImageJpeg;
 					(Some(title), Some(href), Some(_type), Some(locations))
@@ -109,7 +110,7 @@ struct OPDSProgressionLocator {
 	#[serde(rename = "type")]
 	_type: Option<OPDSLinkType>,
 	#[builder(default)]
-	locations: Option<Vec<OPDSProgressionLocation>>,
+	locations: Option<OPDSProgressionLocation>,
 }
 
 #[skip_serializing_none]
@@ -239,5 +240,43 @@ impl OPDSProgressionInput {
 			locations,
 			text,
 		})
+	}
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+
+	#[test]
+	fn test_progression_input_deserializes_from_json() {
+		let json = r#"{
+        "modified": "2026-01-28T08:17:11.986000-07:00",
+        "device": { "id": "device-123", "name": "Stump App - iOS" },
+        "locator": {
+            "href": "/opds/v2.0/books/1/pages/5",
+            "type": "image/jpeg",
+            "locations": {
+                "position": 5,
+                "progression": 0.25,
+                "totalProgression": 0.25
+            }
+        }
+    }"#;
+
+		let input: OPDSProgressionInput = serde_json::from_str(json).unwrap();
+		assert_eq!(input.page(), Some(5));
+		assert_eq!(input.device().unwrap().id, "device-123");
+	}
+
+	#[test]
+	fn test_empty_device_returns_none() {
+		let json = r#"{
+        "modified": "2026-01-28T08:17:11.986000-07:00",
+        "device": { "id": "", "name": "" },
+        "locator": { "href": "/opds/v2.0/books/1/pages/5", "type": "image/jpeg" }
+	}"#;
+
+		let input: OPDSProgressionInput = serde_json::from_str(json).unwrap();
+		assert!(input.device().is_none());
 	}
 }

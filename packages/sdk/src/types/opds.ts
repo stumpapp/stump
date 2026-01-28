@@ -119,7 +119,7 @@ const progressionLocator = z.object({
 	title: z.string().nullish(),
 	href: z.string().nullish(),
 	type: z.string().nullish(),
-	locations: z.array(progessionLocation).nullish(),
+	locations: progessionLocation.nullish(),
 })
 
 const progressionDevice = z.object({

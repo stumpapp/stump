@@ -5,6 +5,9 @@ import get from 'lodash/get'
 import { useCallback } from 'react'
 import { stringMd5 } from 'react-native-quick-md5'
 
+const CANTOOK_PROGRESSION_REL = 'http://www.cantook.com/api/progression'
+const READIUM_PROGRESSION_TYPE = 'application/vnd.readium.progression+json'
+
 export const getNumberField = (meta: OPDSMetadata, key: string) => {
 	const value = get(meta, key)
 	return typeof value === 'number' ? value : null
@@ -56,6 +59,15 @@ export const getPublicationId = (
 ): string => {
 	const identifier = metadata?.identifier
 	return identifier || hashFromURL(url)
+}
+
+export const getProgressionURL = (links: OPDSPublication['links'], baseUrl?: string) => {
+	const progressionLink = links?.find(
+		(link) => link.rel === CANTOOK_PROGRESSION_REL || link.type === READIUM_PROGRESSION_TYPE,
+	)
+	if (progressionLink?.href) {
+		return resolveUrl(progressionLink.href, baseUrl)
+	}
 }
 
 export const getPublicationThumbnailURL = (

@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import setProperty from 'lodash/set'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { View } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { initialWindowMetrics, useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { FullScreenLoader } from '~/components/ui'
 import { verifyFileReadable } from '~/lib/filesystem'
@@ -351,8 +351,31 @@ export default function ReadiumReader({
 		[store, book, navigator],
 	)
 
+	const controlsVisibleTimestamp = useRef(0)
+	useEffect(() => {
+		if (!controlsVisible) return
+
+		controlsVisibleTimestamp.current = Date.now()
+
+		const hideControlsTimer = setTimeout(() => {
+			setControlsVisible(false)
+		}, 6000)
+
+		return () => clearTimeout(hideControlsTimer)
+	}, [controlsVisible, setControlsVisible])
+
 	const handleLocationChanged = useCallback(
 		(locator: ReadiumLocator) => {
+			// If we turn the page then immediately tap to show controls, handleLocationChanged hasn't run yet
+			// so the controls will appear then disappear. From some testing, ~650ms was the
+			// longest time I could create by turning then tapping so 800ms should be plenty of time.
+			// Perhaps it should be hide when page swipe starts and also when sides are tapped
+			const controlsVisibleRecentlyChanged = Date.now() - controlsVisibleTimestamp.current < 800
+
+			if (controlsVisible && !controlsVisibleRecentlyChanged) {
+				setControlsVisible(false)
+			}
+
 			if (!locator.chapterTitle) {
 				const tocItem = findTocItemByHref(store.toc, locator.href)
 				if (tocItem) {
@@ -373,7 +396,7 @@ export default function ReadiumReader({
 				onLocationChanged(locator, totalProgression)
 			}
 		},
-		[onLocationChanged, onReachedEnd, incognito, store],
+		[onLocationChanged, onReachedEnd, incognito, store, controlsVisible, setControlsVisible],
 	)
 
 	const handleReachedEnd = useCallback(
@@ -545,7 +568,7 @@ export default function ReadiumReader({
 				onDeleteHighlight={handleNativeDeleteAnnotation}
 				style={{
 					flex: 1,
-					marginTop: insets.top + HEADER_HEIGHT,
+					marginTop: (initialWindowMetrics?.insets.top || insets.top) + HEADER_HEIGHT,
 					marginBottom: insets.bottom + FOOTER_HEIGHT,
 				}}
 				{...config}

@@ -4,11 +4,12 @@ import { X } from 'lucide-react-native'
 import { useCallback, useEffect } from 'react'
 import { Platform, View } from 'react-native'
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { initialWindowMetrics, useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Heading } from '~/components/ui'
 import { HeaderButton } from '~/components/ui/header-button/header-button'
 import { COLORS } from '~/lib/constants'
+import { CONTROLS_TIMING_CONFIG } from '~/lib/constants'
 import { useDisplay } from '~/lib/hooks'
 import { useReaderStore } from '~/stores'
 import { useBookPreferences } from '~/stores/reader'
@@ -40,14 +41,12 @@ export default function Header({ onShowGlobalSettings }: Props) {
 		// 	duration: 250,
 		// 	easing: visible ? Easing.out(Easing.quad) : Easing.in(Easing.quad),
 		// })
-		opacity.value = withTiming(visible ? 1 : 0, {
-			duration: 250,
-		})
+		opacity.value = withTiming(visible ? 1 : 0, CONTROLS_TIMING_CONFIG)
 	}, [visible, height, insets.top, opacity])
 
 	const animatedStyles = useAnimatedStyle(() => {
 		return {
-			top: insets.top || 12,
+			top: initialWindowMetrics?.insets.top || insets.top || 12,
 			left: insets.left,
 			right: insets.right,
 			// transform: [{ translateY: translateY.value }],

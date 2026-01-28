@@ -271,10 +271,12 @@ export const useBookTimer = (id: string, params: UseBookTimerParams = defaultPar
 	}
 }
 
-export const useHideStatusBar = () => {
-	const { isReading } = useReaderStore((state) => ({
+export const useHideSystemBars = () => {
+	const { isReading, showControls } = useReaderStore((state) => ({
 		isReading: state.isReading,
+		showControls: state.showControls,
 	}))
 
-	return isReading
+	// when reading, hideNavigationBar keep the android and iPad nav bar hidden
+	return { hideStatusBar: isReading && !showControls, hideNavigationBar: isReading }
 }

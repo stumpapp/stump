@@ -1,7 +1,6 @@
 use merge::Merge;
 use quick_xml::{events::Event, Reader};
 use std::{collections::HashMap, fs::File, io::BufReader, path::PathBuf};
-use zip::ZipArchive;
 
 const ACCEPTED_EPUB_COVER_MIMES: [&str; 2] = ["image/jpeg", "image/png"];
 const DEFAULT_EPUB_COVER_ID: &str = "cover";
@@ -138,28 +137,9 @@ impl FileProcessor for EpubProcessor {
 		let metadata = Self::process_metadata(path);
 
 		let path_buf = PathBuf::from(path);
-		let epub_file = Self::open(path)?;
-		let mut epub_archive = Self::open_archive(path)?;
+		let mut epub_file = Self::open(path)?;
 
-		let mut total_pages: i32 = 0;
-
-		for spine_item in &epub_file.spine {
-			// Skip non-linear items (e.g. some epubs skip the cover by marking them as such, and Readium does not show these)
-			if spine_item.linear {
-				if let Some(resource) = epub_file.resources.get(&spine_item.idref) {
-					let Some(path) = resource.path.to_str() else {
-						continue;
-					};
-
-					if let Ok(entry) = epub_archive.by_name(path) {
-						let pages =
-							(entry.compressed_size() as f64 / 1024.0).ceil() as i32;
-						total_pages += if pages == 0 { 1 } else { pages };
-					}
-				}
-			}
-		}
-
+		let pages = Self::compute_synthetic_page_count(&mut epub_file)?;
 		// Get metadata from epub file if process_metadata failed
 		let metadata = match metadata {
 			Ok(Some(m)) => m,
@@ -180,7 +160,7 @@ impl FileProcessor for EpubProcessor {
 			hash,
 			koreader_hash,
 			metadata: Some(metadata),
-			pages: total_pages,
+			pages,
 		})
 	}
 
@@ -197,30 +177,9 @@ impl FileProcessor for EpubProcessor {
 		}
 	}
 
-	/// Get the synthetic page count for Readium https://wiki.mobileread.com/wiki/Adobe_Digital_Editions#Page_numbers
 	fn get_page_count(path: &str, _: &StumpConfig) -> Result<i32, FileError> {
-		let epub_file = Self::open(path)?;
-		let mut epub_archive = Self::open_archive(path)?;
-
-		let mut total_pages: i32 = 0;
-
-		for spine_item in &epub_file.spine {
-			// Skip non-linear items (e.g. some epubs skip the cover by marking them as such, and Readium does not show these)
-			if spine_item.linear {
-				if let Some(resource) = epub_file.resources.get(&spine_item.idref) {
-					let Some(path) = resource.path.to_str() else {
-						continue;
-					};
-
-					if let Ok(entry) = epub_archive.by_name(path) {
-						let pages =
-							(entry.compressed_size() as f64 / 1024.0).ceil() as i32;
-						total_pages += if pages == 0 { 1 } else { pages };
-					}
-				}
-			}
-		}
-		Ok(total_pages)
+		let mut epub_file = Self::open(path)?;
+		Self::compute_synthetic_page_count(&mut epub_file)
 	}
 
 	fn get_page_content_types(
@@ -279,10 +238,25 @@ impl EpubProcessor {
 		EpubDoc::new(path).map_err(|e| FileError::EpubOpenError(e.to_string()))
 	}
 
-	fn open_archive(path: &str) -> Result<ZipArchive<BufReader<File>>, FileError> {
-		let file = File::open(path)?;
-		let reader = BufReader::new(file);
-		Ok(ZipArchive::new(reader)?)
+	/// Compute the synthetic page count for Readium https://wiki.mobileread.com/wiki/Adobe_Digital_Editions#Page_numbers
+	fn compute_synthetic_page_count(
+		epub_file: &mut EpubDoc<BufReader<File>>,
+	) -> Result<i32, FileError> {
+		let mut total_pages: i32 = 0;
+
+		for spine_item in epub_file.spine.clone() {
+			// Skip non-linear items (e.g. some epubs skip the cover by marking them as such, and Readium does not show these)
+			if spine_item.linear {
+				if let Some(compressed_size) =
+					epub_file.get_resource_compressed_size(&spine_item.idref)
+				{
+					let pages = (compressed_size as f64 / 1024.0).ceil() as i32;
+					total_pages += if pages == 0 { 1 } else { pages };
+				}
+			}
+		}
+
+		Ok(total_pages)
 	}
 
 	fn metadata_to_map(

@@ -2288,13 +2288,13 @@ dependencies = [
 
 [[package]]
 name = "epub"
-version = "2.1.4"
-source = "git+https://github.com/stumpapp/epub-rs?rev=b80cfe4#b80cfe42bdc2ef9896539a371d8382fb02b112c0"
+version = "2.1.5"
+source = "git+https://github.com/stumpapp/epub-rs?rev=baf89d1#baf89d16a6f0bcfb55968e8495b32d29aded4858"
 dependencies = [
  "percent-encoding",
  "regex",
  "thiserror 2.0.17",
- "xml-rs 0.8.27",
+ "xml-rs 1.0.0",
  "zip 3.0.0",
 ]
 
@@ -3008,7 +3008,7 @@ dependencies = [
  "aho-corasick",
  "bstr",
  "log",
- "regex-automata 0.4.11",
+ "regex-automata 0.4.13",
  "regex-syntax 0.8.6",
 ]
 
@@ -5685,9 +5685,9 @@ dependencies = [
 
 [[package]]
 name = "percent-encoding"
-version = "2.3.1"
+version = "2.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e3148f5046208a5d56bcfc03053e3ca6334e51da8dfb19b6cdc8b306fae3283e"
+checksum = "9b4f627cb1b25917193a259e49bdad08f671f8d9708acfd5fe0a8c1455d87220"
 
 [[package]]
 name = "pest"
@@ -6602,13 +6602,13 @@ dependencies = [
 
 [[package]]
 name = "regex"
-version = "1.11.3"
+version = "1.12.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8b5288124840bee7b386bc413c487869b360b2b4ec421ea56425128692f2a82c"
+checksum = "843bc0191f75f3e22651ae5f1e72939ab2f72a4bc30fa80a066bd66edefc24d4"
 dependencies = [
  "aho-corasick",
  "memchr",
- "regex-automata 0.4.11",
+ "regex-automata 0.4.13",
  "regex-syntax 0.8.6",
 ]
 
@@ -6623,9 +6623,9 @@ dependencies = [
 
 [[package]]
 name = "regex-automata"
-version = "0.4.11"
+version = "0.4.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "833eb9ce86d40ef33cb1306d8accf7bc8ec2bfea4355cbdebb3df68b40925cad"
+checksum = "5276caf25ac86c8d810222b3dbb938e512c55c6831a10f3e6ed1c93b84041f1c"
 dependencies = [
  "aho-corasick",
  "memchr",

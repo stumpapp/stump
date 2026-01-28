@@ -29,7 +29,7 @@ impl FileProcessor for EpubProcessor {
 		let mut epub_file = Self::open(file)?;
 
 		let mut sample_size = 0;
-		let page_count = epub_file.get_num_pages();
+		let page_count = epub_file.get_num_chapters();
 
 		for i in 0..page_count {
 			if i > 5 {
@@ -37,7 +37,7 @@ impl FileProcessor for EpubProcessor {
 			}
 
 			if i > 0 {
-				epub_file.set_current_page(i);
+				epub_file.set_current_chapter(i);
 			}
 
 			let (chapter_buffer, _) = epub_file.get_current().ok_or_else(|| {
@@ -198,7 +198,7 @@ impl FileProcessor for EpubProcessor {
 				continue;
 			}
 
-			if !epub_file.set_current_page(chapter as usize) {
+			if !epub_file.set_current_chapter(chapter as usize) {
 				tracing::error!(path, chapter, "Failed to get chapter from epub file!");
 				return Err(FileError::EpubReadError(
 					"Failed to get chapter from epub file".to_string(),
@@ -398,7 +398,7 @@ impl EpubProcessor {
 	) -> Result<(ContentType, Vec<u8>), FileError> {
 		let mut epub_file = Self::open(path)?;
 
-		if !epub_file.set_current_page(chapter) {
+		if !epub_file.set_current_chapter(chapter) {
 			tracing::error!(path, chapter, "Failed to get chapter from epub file!");
 			return Err(FileError::EpubReadError(
 				"Failed to get chapter from epub file".to_string(),

@@ -150,7 +150,7 @@ export default function Screen() {
 	if (!data || data.length === 0) {
 		return (
 			<SafeAreaView style={{ flex: 1 }} edges={['left', 'right']}>
-				<NoDownloadsOnDevice />
+				<NoDownloadsOnDevice source={sourceFilter} />
 			</SafeAreaView>
 		)
 	}

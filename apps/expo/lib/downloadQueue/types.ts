@@ -11,6 +11,9 @@ export type DownloadProgress = {
 	percentage: number // 0-100
 }
 
+// TODO(opds): It should be possible to intake progressionUrl for OPDS downloads, which would allow
+// Stump to attempt pull/push sync for offline books. That would be a really nice enhancement for non-Stump
+// users who currently can't use sync offline
 export type EnqueueDownloadParams = {
 	bookId: string
 	serverId: string

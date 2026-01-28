@@ -2,8 +2,13 @@ import { View } from 'react-native'
 
 import Owl, { useOwlHeaderOffset } from '../Owl'
 import { Heading, Text } from '../ui'
+import { DownloadSourceFilter } from './store'
 
-export default function NoDownloadsOnDevice() {
+type Props = {
+	source: DownloadSourceFilter
+}
+
+export default function NoDownloadsOnDevice({ source }: Props) {
 	const emptyContainerStyle = useOwlHeaderOffset()
 	return (
 		<View
@@ -14,12 +19,22 @@ export default function NoDownloadsOnDevice() {
 
 			<View className="gap-2 px-4 tablet:max-w-lg">
 				<Heading size="lg" className="text-center font-semibold leading-tight">
-					Nothing to read yet
+					{TITLES[source]}
 				</Heading>
-				<Text className="text-center text-lg">
-					Once you download books for offline reading, they will appear here
-				</Text>
+				<Text className="text-center text-lg">{DESCRIPTIONS[source]}</Text>
 			</View>
 		</View>
 	)
+}
+
+const TITLES: Record<DownloadSourceFilter, string> = {
+	all: 'Nothing to read yet',
+	imported: 'No imported books',
+	server: 'No downloaded books',
+}
+
+const DESCRIPTIONS: Record<DownloadSourceFilter, string> = {
+	all: 'Once you have books for offline reading, they will appear here',
+	imported: 'Import books to read them offline',
+	server: 'Download books from your server to read them offline',
 }

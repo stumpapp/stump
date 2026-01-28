@@ -251,7 +251,18 @@ export default function RootLayout() {
 						<PortalHost />
 					</KeyboardProvider>
 				</BottomSheet.Provider>
-				<Toaster position="bottom-center" />
+
+				<Toaster
+					position="bottom-center"
+					styles={{
+						title: {
+							fontSize: 18,
+						},
+						description: {
+							fontSize: 16,
+						},
+					}}
+				/>
 			</ThemeProvider>
 		</GestureHandlerRootView>
 	)

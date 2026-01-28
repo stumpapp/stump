@@ -1,6 +1,7 @@
 import { useGraphQLMutation } from '@stump/client'
 import { graphql } from '@stump/graphql'
 import { useCallback } from 'react'
+import { toast } from 'sonner-native'
 
 import { useActiveServer } from '~/components/activeServer'
 
@@ -134,7 +135,13 @@ export function useDownloadSeries({ serverId }: UseDownloadSeriesParams = {}) {
 				}),
 			)
 
-			await Promise.all(enqueuePromises)
+			const positions = await Promise.all(enqueuePromises)
+
+			if (positions.every((pos) => pos === -1)) {
+				toast.info('Nothing to download', {
+					description: 'All books in this series are already downloaded or in the queue',
+				})
+			}
 
 			return series.media.length
 		},

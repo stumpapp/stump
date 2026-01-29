@@ -343,24 +343,38 @@ impl Series {
 					WHERE
 						media.series_id = $1
 				),
-				progress_counts AS (
+				finished_stats AS (
 					SELECT
-						COUNT(frs.id) AS completed_books,
-						COUNT(rs.id) AS in_progress_books,
-						IFNULL(SUM(frs.elapsed_seconds), 0) + IFNULL(SUM(rs.elapsed_seconds), 0) AS total_reading_time_seconds
+						COUNT(DISTINCT frs.media_id) AS completed_books,
+						IFNULL(SUM(frs.elapsed_seconds), 0) AS finished_reading_time
 					FROM
-						media m
-						LEFT JOIN finished_reading_sessions frs ON frs.media_id = m.id
-						LEFT JOIN reading_sessions rs ON rs.media_id = m.id
+						finished_reading_sessions frs
+						INNER JOIN media m ON frs.media_id = m.id
 					WHERE
 						m.series_id = $1
-						AND ($2 IS TRUE OR (rs.user_id = $3 OR frs.user_id = $3))
+						AND ($2 IS TRUE OR frs.user_id = $3)
+				),
+				in_progress_stats AS (
+					SELECT
+						COUNT(DISTINCT rs.media_id) AS in_progress_books,
+						IFNULL(SUM(rs.elapsed_seconds), 0) AS in_progress_reading_time
+					FROM
+						reading_sessions rs
+						INNER JOIN media m ON rs.media_id = m.id
+					WHERE
+						m.series_id = $1
+						AND ($2 IS TRUE OR rs.user_id = $3)
 				)
 				SELECT
-					*
+					bc.book_count,
+					bc.total_bytes,
+					fs.completed_books,
+					ips.in_progress_books,
+					(fs.finished_reading_time + ips.in_progress_reading_time) AS total_reading_time_seconds
 				FROM
-					base_counts
-					INNER JOIN progress_counts;
+					base_counts bc
+					CROSS JOIN finished_stats fs
+					CROSS JOIN in_progress_stats ips;
 				",
 				[
 					self.model.id.clone().into(),

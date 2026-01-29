@@ -1,7 +1,5 @@
 use crate::middleware::{auth::auth_middleware, host::HostExtractor};
-use async_graphql::http::{
-	playground_source, GraphQLPlaygroundConfig, ALL_WEBSOCKET_PROTOCOLS,
-};
+use async_graphql::http::{Credentials, GraphiQLSource, ALL_WEBSOCKET_PROTOCOLS};
 use async_graphql_axum::{
 	GraphQLProtocol, GraphQLRequest, GraphQLResponse, GraphQLWebSocket,
 };
@@ -44,11 +42,13 @@ async fn playground(
 		return Err(APIError::forbidden_discreet());
 	}
 
-	Ok(Html(playground_source(
-		GraphQLPlaygroundConfig::new("/api/graphql")
+	Ok(Html(
+		GraphiQLSource::build()
+			.endpoint("/api/graphql")
 			.subscription_endpoint("/api/graphql/ws")
-			.with_setting("request.credentials", "include"),
-	)))
+			.credentials(Credentials::Include)
+			.finish(),
+	))
 }
 
 async fn graphql_handler(

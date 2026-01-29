@@ -17,8 +17,8 @@ rust-version = "1.92.0"
 
 [workspace.dependencies]
 alphanumeric-sort = "1.5.3"
-async-graphql = { version = "7.0.17", features = ["chrono", "decimal", "dynamic-schema", "dataloader"] }
-async-graphql-axum = "7.0.17"
+async-graphql = { version = "7.2.1", features = ["chrono", "decimal", "dynamic-schema", "dataloader"] }
+async-graphql-axum = "7.2.1"
 async-trait = "0.1.89"
 async-stream = "0.3.6"
 axum = { version = "0.8.6", features = [

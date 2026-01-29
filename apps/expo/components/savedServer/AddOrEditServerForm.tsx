@@ -356,7 +356,7 @@ export default function AddOrEditServerForm({
 					</View>
 				)}
 
-				<Button variant="outline" onPress={() => setIsAddingHeader(true)}>
+				<Button roundness="xl" variant="outline" onPress={() => setIsAddingHeader(true)}>
 					<Text>Add header</Text>
 				</Button>
 			</View>

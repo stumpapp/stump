@@ -27,6 +27,8 @@ const buttonVariants = cva('group flex items-center justify-center squircle roun
 		},
 		roundness: {
 			default: 'rounded-lg',
+			lg: 'rounded-xl',
+			xl: 'rounded-2xl',
 			full: 'rounded-full',
 		},
 	},

@@ -1,5 +1,4 @@
-import { useRefetch, useSDK } from '@stump/client'
-import { useQuery } from '@tanstack/react-query'
+import { useRefetch } from '@stump/client'
 import partition from 'lodash/partition'
 import { View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
@@ -16,27 +15,12 @@ import {
 } from '~/components/opds'
 import RefreshControl from '~/components/RefreshControl'
 import { FullScreenLoader } from '~/components/ui'
+import { useOPDSFeedContext } from '~/context/opds'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
 
 export default function Screen() {
 	const { activeServer } = useActiveServer()
-	const { sdk } = useSDK()
-	const {
-		data: feed,
-		isLoading,
-		refetch,
-		error,
-	} = useQuery({
-		queryKey: [sdk.opds.keys.catalog, activeServer?.id],
-		queryFn: () => {
-			if (activeServer.stumpOPDS) {
-				return sdk.opds.catalog()
-			} else {
-				return sdk.opds.feed(activeServer.url)
-			}
-		},
-		throwOnError: false,
-	})
+	const { catalog: feed, isLoading, error, refetch } = useOPDSFeedContext()
 	const [isRefetching, onRefetch] = useRefetch(refetch)
 
 	useDynamicHeader({

@@ -95,7 +95,7 @@ syn = "2.0.106"
 # TODO: I want to update since the latest is in the 5.x.x range now and don't want to lag. I need to test against the above ^
 zip = { version = "=1.1.3", features = ["deflate"], default-features = false }
 # TODO: Use danigm/epub-rs once PR merged: https://github.com/danigm/epub-rs/pull/57
-epub = { git = "https://github.com/stumpapp/epub-rs", rev = "b80cfe4", features = ["mock"] }
+epub = { git = "https://github.com/stumpapp/epub-rs", rev = "baf89d1", features = ["mock"] }
 uuid = { version = "1.18.1", features = ["v4"] }
 tokio-test = "0.4.4"
 pretty_assertions = "1.4.1"

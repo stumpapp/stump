@@ -1,5 +1,5 @@
 import { Api, AuthUser, constants } from '@stump/sdk'
-import { isAxiosError } from 'axios'
+import { AxiosError, isAxiosError } from 'axios'
 import * as AuthSession from 'expo-auth-session'
 import * as WebBrowser from 'expo-web-browser'
 import partition from 'lodash/partition'
@@ -92,6 +92,16 @@ const login = async (
 		onAttemptingAutoAuth?.(false)
 	}
 }
+
+// Note: I've observed Codex return 403s which originally threw off the auth flow
+// since we were only checking for 401s. This kinda goes against the semantics of
+// HTTP status codes, it doesn't make sense to render a login prompt if the user is forbidden
+// from accessing OPDS.
+// TODO(opds): For now, treat 403s the same as 401s but I definitely would like to revisiot this
+export const OPDS_AUTH_ERROR_STATUSES = [401, 403]
+
+export const isOPDSAuthError = (error: unknown): error is AxiosError =>
+	isAxiosError(error) && OPDS_AUTH_ERROR_STATUSES.includes(error.response?.status ?? 0)
 
 type GetOPDSParams = {
 	config: ServerConfig | null

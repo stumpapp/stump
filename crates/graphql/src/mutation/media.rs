@@ -547,7 +547,7 @@ async fn set_completed_media(
 	let started_at = active_session
 		.as_ref()
 		.map(|s| s.started_at)
-		.unwrap_or_default();
+		.unwrap_or_else(|| Utc::now().into());
 
 	let finished_reading_session = finished_reading_session::ActiveModel {
 		user_id: Set(user.id.clone()),
@@ -560,6 +560,7 @@ async fn set_completed_media(
 	let finished_reading_session =
 		insert_finished_reading_session(active_session, finished_reading_session, txn)
 			.await?;
+
 	Ok(finished_reading_session)
 }
 

@@ -1,10 +1,10 @@
-import { useClientContext, useSDK } from '@stump/client'
 import { isAxiosError } from 'axios'
 import { useRouter } from 'expo-router'
-import { useEffect } from 'react'
 import { Linking, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { ZodError } from 'zod'
+
+import { isOPDSAuthError } from '~/lib/sdk/auth'
 
 import Owl from '../Owl'
 import { Button, Heading, Text } from '../ui'
@@ -14,26 +14,12 @@ type Props = {
 	onRetry?: () => void
 }
 export default function MaybeErrorFeed({ error, onRetry }: Props) {
-	const { sdk } = useSDK()
-	const { onUnauthenticatedResponse, onConnectionWithServerChanged } = useClientContext()
-
-	useEffect(() => {
-		if (!error || !sdk) return
-		const axiosError = isAxiosError(error)
-		const isNetworkError = axiosError && error?.code === 'ERR_NETWORK'
-		const isAuthError = axiosError && error.response?.status === 401
-		if (isAuthError) {
-			onUnauthenticatedResponse?.(undefined, error.response?.data)
-		} else if (isNetworkError) {
-			onConnectionWithServerChanged?.(false)
-		}
-	}, [error, sdk, onUnauthenticatedResponse, onConnectionWithServerChanged])
-
 	const router = useRouter()
 
-	// If we aren't authed the lifecycles outside this component will handle it
-	// If there is no error, we don't need to render anything
-	if (!error || !sdk.isAuthed) return null
+	if (!error) return null
+
+	// Note: This is handled above in tree
+	if (isOPDSAuthError(error)) return null
 
 	const errorTitle = error instanceof ZodError ? 'Invalid Feed' : 'Error Loading Feed'
 	const errorMessage =

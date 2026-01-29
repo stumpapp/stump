@@ -3,6 +3,8 @@ import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
 import { Stack, useLocalSearchParams } from 'expo-router'
 import { useMemo } from 'react'
 
+import { getProgressionURL } from '~/components/opds/utils'
+
 import { PublicationContext } from './context'
 
 export default function Layout() {
@@ -14,12 +16,10 @@ export default function Layout() {
 		queryFn: () => sdk.opds.publication(publicationURL),
 	})
 	const progressionURL = useMemo(
-		() =>
-			publication?.links?.find((link) => link.rel === 'http://www.cantook.com/api/progression')
-				?.href,
-		[publication],
+		() => getProgressionURL(publication?.links || [], sdk.rootURL),
+		[publication, sdk.rootURL],
 	)
-	const { data: progression } = useQuery({
+	const { data: progression, refetch: refetchProgression } = useQuery({
 		queryKey: [sdk.opds.keys.progression, progressionURL],
 		queryFn: () => sdk.opds.progression(progressionURL || ''),
 		enabled: progressionURL != null,
@@ -29,7 +29,7 @@ export default function Layout() {
 
 	return (
 		<PublicationContext.Provider
-			value={{ publication, url: publicationURL, progression, progressionURL }}
+			value={{ publication, url: publicationURL, progression, progressionURL, refetchProgression }}
 		>
 			<Stack screenOptions={{ headerShown: false }} />
 		</PublicationContext.Provider>

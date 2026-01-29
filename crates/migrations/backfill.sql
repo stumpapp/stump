@@ -256,7 +256,7 @@ SELECT "title",
     "volume",
     "summary",
     "notes",
-    "genre",
+    "genres",
     "year",
     "month",
     "day",
@@ -279,43 +279,8 @@ FROM backup."media_metadata";
 -- Now just go in alpha-ish order and dump everything:
 
 -- Note: It is not feasible to port over the api_keys because a few columns were changed
--- INSERT INTO "api_keys"(
---         "id",
---         "name",
---         "short_token",
---         "long_token_hash",
---         "permissions",
---         "created_at",
---         "last_used_at",
---         "expires_at",
---         "user_id"
---     )
--- SELECT "id",
---     "name",
---     "short_token",
---     "long_token_hash",
---     "permissions",
---     "created_at",
---     "last_used_at",
---     "expires_at",
---     "user_id"
--- FROM backup."api_keys";
-
-INSERT INTO "bookmarks"(
-        "id",
-        "preview_content",
-        "epubcfi",
-        "page",
-        "media_id",
-        "user_id"
-    )
-SELECT "id",
-    "preview_content",
-    "epubcfi",
-    "page",
-    "media_id",
-    "user_id"
-FROM backup."bookmarks";
+-- Note: It is not feasible to port over the api_keys because a few columns were changed
+-- Note: It is not feasible to port over bookmarks because the table was dropped and recreated with a new locator-based schema
 
 INSERT INTO "emailer_send_records"(
         "id",
@@ -413,27 +378,7 @@ SELECT "id",
     "job_id"
 FROM backup."logs";
 
-INSERT INTO "media_annotations"(
-        "id",
-        "highlighted_text",
-        "epubcfi",
-        "page",
-        "page_coordinates_x",
-        "page_coordinates_y",
-        "notes",
-        "user_id",
-        "media_id"
-    )
-SELECT "id",
-    "highlighted_text",
-    "epubcfi",
-    "page",
-    "page_coordinates_x",
-    "page_coordinates_y",
-    "notes",
-    "user_id",
-    "media_id"
-FROM backup."media_annotations";
+-- Note: It is not feasible to port over media_annotations because the schema was completely rewritten to use the Readium locator model
 
 INSERT INTO "registered_email_devices"(
         "id",
@@ -671,3 +616,6 @@ COMMIT;
 -- There are a few features which simply could not be migrated due to complexity of the change:
 -- 1. Smart Lists
 -- 2. Scheduled Jobs
+-- 3. API Keys (columns were changed)
+-- 4. Bookmarks (table dropped and recreated with new locator-based schema)
+-- 5. Media Annotations (schema completely rewritten to use Readium locator model)

@@ -111,7 +111,7 @@ export default function Screen() {
 	const accentColor = usePreferencesStore((state) => state.accentColor)
 
 	const renderModifiedStat = (progression: OPDSProgression) => {
-		const percentageCompleted = progression.locator.locations?.at(0)?.totalProgression
+		const percentageCompleted = progression.locator.locations?.totalProgression
 		const isCompleted = !!(percentageCompleted && percentageCompleted >= 1)
 
 		if (isCompleted) {
@@ -189,16 +189,16 @@ export default function Screen() {
 
 					{progression && (
 						<View className="flex flex-row justify-around">
-							{progression.locator.locations?.at(0)?.position && (
+							{progression.locator.locations?.position && (
 								<InfoStat
 									label="Page"
-									value={progression.locator.locations.at(0)?.position?.toString() || '1'}
+									value={progression.locator.locations.position?.toString() || '1'}
 								/>
 							)}
-							{progression.locator.locations?.at(0)?.totalProgression != null && (
+							{progression.locator.locations?.totalProgression != null && (
 								<InfoStat
 									label="Completed"
-									value={`${Math.round((progression.locator.locations.at(0)?.totalProgression ?? 0) * 100)}%`}
+									value={`${Math.round((progression.locator.locations?.totalProgression ?? 0) * 100)}%`}
 								/>
 							)}
 							{renderModifiedStat(progression)}

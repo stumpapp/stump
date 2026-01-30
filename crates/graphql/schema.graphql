@@ -2624,6 +2624,7 @@ input UpdateUserPreferencesInput {
 	enableAlphabetSelect: Boolean!
 }
 
+"A multipart file upload"
 scalar Upload
 
 input UploadBooksInput {

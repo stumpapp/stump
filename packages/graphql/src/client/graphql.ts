@@ -25,6 +25,7 @@ export type Scalars = {
   JSON: { input: any; output: any; }
   /** A scalar that can represent any JSON Object value. */
   JSONObject: { input: any; output: any; }
+  /** A multipart file upload */
   Upload: { input: any; output: any; }
 };
 

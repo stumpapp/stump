@@ -14,10 +14,10 @@ import { Platform, Pressable, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { useStumpServer } from '~/components/activeServer'
+import { Divider } from '~/components/Divider'
 import { RecentlyAddedSeries } from '~/components/series'
 import { Heading, Text } from '~/components/ui'
 import { Icon } from '~/components/ui/icon'
-import { IS_IOS_24_PLUS } from '~/lib/constants'
 import { cn } from '~/lib/utils'
 
 const ITEMS = [
@@ -112,7 +112,7 @@ export default function Screen() {
 										)}
 									</Pressable>
 
-									<Divider />
+									<Divider hasIcon />
 								</Fragment>
 							))}
 						</View>
@@ -126,9 +126,3 @@ export default function Screen() {
 		</SafeAreaView>
 	)
 }
-
-const Divider = () => (
-	// ios: left padding (px-4) + icon width (w-6) + gap between icon and text (gap-4) = ml-14
-	// give ios 26+ right margin too = mr-4
-	<View className={cn('ios:ml-14 h-px bg-edge', IS_IOS_24_PLUS && 'mr-4')} />
-)

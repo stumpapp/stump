@@ -321,7 +321,7 @@ export default function Screen() {
 			]}
 		>
 			<ScrollView
-				className="flex-1 bg-background px-6"
+				className="flex-1 bg-background px-4 tablet:px-6"
 				refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={onRefresh} />}
 				contentInsetAdjustmentBehavior="automatic"
 			>

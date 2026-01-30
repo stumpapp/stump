@@ -67,8 +67,7 @@ export const LibraryOverviewSheet = forwardRef<TrueSheet, Props>(({ libraryId },
 	return (
 		<TrueSheet
 			ref={ref}
-			detents={[0.65, 1]}
-			dimmed={false}
+			detents={['auto', 1]}
 			cornerRadius={24}
 			grabber
 			scrollable

@@ -1,6 +1,6 @@
 import { getColor, serialize } from 'colorjs.io/fn'
 import { useRef, useState } from 'react'
-import { Pressable, useWindowDimensions, View } from 'react-native'
+import { Platform, Pressable, useWindowDimensions, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import PagerView from 'react-native-pager-view'
 import { stripHtml } from 'string-strip-html'
@@ -277,6 +277,12 @@ const TableOfContentsListItem = ({
 const Divider = ({ level = 0 }: { level?: number }) => (
 	<View
 		className="h-px bg-black/10 dark:bg-white/10"
-		style={{ marginLeft: 16 + level * 16, marginRight: 16 }}
+		style={{
+			// for android, it's quite hard to size child dividers to complement full width dividers,
+			// or to size any dividers to complement the active background (since it doesn't touch the sides)
+			// so instead we won't use full width dividers for android
+			marginLeft: (Platform.OS === 'ios' ? 16 : 10) + level * 16,
+			marginRight: Platform.OS === 'ios' ? 16 : 10,
+		}}
 	/>
 )

@@ -3,9 +3,9 @@ import { Rss } from 'lucide-react-native'
 import { Fragment } from 'react'
 import { View } from 'react-native'
 
+import { Divider } from '../Divider'
 import { ListEmptyMessage, Text } from '../ui'
 import FeedSelfURL from './FeedSelfURL'
-import { LinkDivider } from './LinkDivider'
 import NavigationLink from './NavigationLink'
 import { FeedComponentOptions } from './types'
 
@@ -34,7 +34,7 @@ export default function NavigationGroup({
 			{navigation.map((link) => (
 				<Fragment key={link.href}>
 					<NavigationLink link={link} />
-					<LinkDivider />
+					<Divider />
 				</Fragment>
 			))}
 

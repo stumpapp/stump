@@ -93,8 +93,7 @@ export const SeriesOverviewSheet = forwardRef<TrueSheet, Props>(({ seriesId }, r
 	return (
 		<TrueSheet
 			ref={ref}
-			detents={[0.65, 1]}
-			dimmed={false}
+			detents={['auto', 1]}
 			cornerRadius={24}
 			grabber
 			scrollable

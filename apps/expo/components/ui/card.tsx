@@ -3,7 +3,6 @@ import React, { ComponentProps } from 'react'
 import { Platform, View, ViewProps } from 'react-native'
 
 import { Icon, Text } from '~/components/ui'
-import { IS_IOS_24_PLUS } from '~/lib/constants'
 import { cn } from '~/lib/utils'
 
 type CardListProps = ViewProps & {
@@ -39,9 +38,7 @@ export function CardList({
 
 	return (
 		<View className={cn('gap-2', className)} {...props}>
-			{label && (
-				<Text className="ios:px-4 px-2 text-lg font-semibold text-foreground-muted">{label}</Text>
-			)}
+			{label && <CardLabel>{label}</CardLabel>}
 
 			{count === 0 ? (
 				<ListEmptyMessage {...listEmptyStyle} />
@@ -89,8 +86,7 @@ export function CardBackground({ className, ...props }: ViewProps) {
 		<View
 			className={cn(
 				// We hide the overflow so that the first divider gets hidden
-				'squircle flex overflow-hidden bg-black/5 dark:bg-white/10',
-				Platform.OS === 'ios' ? 'rounded-[2rem]' : 'rounded-2xl border border-edge',
+				'squircle ios:rounded-[2rem] flex overflow-hidden rounded-3xl bg-black/5 dark:bg-white/10',
 				className,
 			)}
 			{...props}
@@ -111,18 +107,14 @@ type CardProps = ViewProps & {
 	label?: string
 }
 
-export function Card({ label, className, ...props }: CardProps) {
+export function Card({ label, children, className, ...props }: CardProps) {
 	return (
 		<View className="gap-2">
 			{label && <CardLabel>{label}</CardLabel>}
-			<View
-				className={cn(
-					'ios:p-4 squircle gap-2 bg-black/5 p-2 dark:bg-white/10',
-					Platform.OS === 'ios' ? 'rounded-[2rem]' : 'rounded-2xl border border-edge',
-					className,
-				)}
-				{...props}
-			/>
+
+			<CardBackground className={cn('ios:p-4 gap-2 p-3', className)} {...props}>
+				{children}
+			</CardBackground>
 		</View>
 	)
 }
@@ -131,11 +123,9 @@ function Divider({ hasIcon, className, ...props }: { hasIcon?: boolean } & ViewP
 	return (
 		<View
 			className={cn(
-				'h-px',
-				Platform.OS === 'ios' ? 'ml-4 bg-black/10 dark:bg-white/10' : 'bg-edge',
-				IS_IOS_24_PLUS && 'mr-4',
+				'ios:mx-4 mx-2 h-px bg-black/10 dark:bg-white/10',
 				// gap between icon and text (gap-4) + icon width (w-8) + initial ios padding (ml-4)
-				hasIcon && Platform.OS === 'ios' && 'ml-16',
+				hasIcon && 'ios:ml-16',
 				className,
 			)}
 			{...props}

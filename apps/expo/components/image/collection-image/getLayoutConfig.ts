@@ -102,7 +102,8 @@ const LAYOUT_MAP: Record<number, StackConfig[]> = {
 
 export function getLayoutConfig(thumbnailCount: number, layoutNumber: number) {
 	const layoutOptions = LAYOUT_MAP[thumbnailCount]
-	const resolvedLayoutNumber: number = layoutNumber % layoutOptions.length
+	const resolvedLayoutNumber: number = layoutNumber % (layoutOptions?.length || 1)
+	// @ts-expect-error: it's fine
 	const layoutConfig: StackConfig = layoutOptions[resolvedLayoutNumber]
 	return layoutConfig
 }

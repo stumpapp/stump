@@ -6,8 +6,8 @@ import { Platform, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { useActiveServer } from '~/components/activeServer'
+import { useCollectionItemSize } from '~/components/image/collection-image/useCollectionSizes'
 import { LibraryGridItem } from '~/components/library'
-import { useLibraryItemSize } from '~/components/library/useLibraryItemSize'
 import ListEmpty from '~/components/ListEmpty'
 import RefreshControl from '~/components/RefreshControl'
 import { RefreshButton, Text } from '~/components/ui'
@@ -41,7 +41,7 @@ export default function Screen() {
 		'libraries',
 		serverID,
 	])
-	const { numColumns, verticalGap, paddingHorizontal } = useLibraryItemSize()
+	const { numColumns, verticalGap, paddingHorizontal } = useCollectionItemSize()
 
 	const nodes = data?.pages.flatMap((page) => page.libraries.nodes) || []
 

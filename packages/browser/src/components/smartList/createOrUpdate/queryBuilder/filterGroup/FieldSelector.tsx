@@ -178,6 +178,7 @@ const sourceOptions: Record<FilterSource, { value: string }[]> = {
 		{ value: 'path' },
 		{ value: 'pages' },
 		{ value: 'tags' },
+		{ value: 'readingStatus' },
 	],
 	book_meta: [
 		{ value: 'title' },

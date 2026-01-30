@@ -1859,7 +1859,7 @@ type Query {
 	smartLists(input: SmartListsInput! = {all: null, mine: true, search: null}): [SmartList!]!
 	smartListById(id: ID!): SmartList
 	smartListMeta(id: ID!): SmartListMeta
-	smartListItems(id: ID!): SmartListItems!
+	smartListItems(id: ID!, limit: Int = null): SmartListItems!
 }
 
 "The different reading directions supported by any Stump reader"
@@ -2279,6 +2279,9 @@ type SmartList {
 	filters: String!
 	thumbnail: ImageRef!
 	views: [SmartListView!]!
+	books(limit: Int = null): [Media!]!
+	items(limit: Int = null): SmartListItems!
+	meta: SmartListMeta!
 }
 
 input SmartListFilterGroupInput {

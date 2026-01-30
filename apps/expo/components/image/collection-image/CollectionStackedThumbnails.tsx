@@ -18,14 +18,14 @@ import { Easing, View } from 'react-native'
 import { easeGradient } from 'react-native-easing-gradient'
 import LinearGradient from 'react-native-linear-gradient'
 
+import { BorderAndShadow } from '~/components/BorderAndShadow'
 import { useColors } from '~/lib/constants'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { usePreferencesStore } from '~/stores'
 
-import { BorderAndShadow } from '../BorderAndShadow'
-import { ThumbnailImage } from '../image'
+import { ThumbnailImage } from '../ThumbnailImage'
 import { getLayoutConfig } from './getLayoutConfig'
-import { useLibraryItemSize } from './useLibraryItemSize'
+import { useCollectionItemSize } from './useCollectionSizes'
 
 ColorSpace.register(sRGB)
 ColorSpace.register(Lab)
@@ -36,10 +36,10 @@ type Props = {
 	layoutNumber: number | undefined
 }
 
-export default function LibraryStackedThumbnails({ thumbnailData, layoutNumber }: Props) {
+export default function CollectionStackedThumbnails({ thumbnailData, layoutNumber }: Props) {
 	const { sdk } = useSDK()
 	const colors = useColors()
-	const { itemWidth: cardWidth } = useLibraryItemSize()
+	const { itemWidth: cardWidth } = useCollectionItemSize()
 	const { thumbnailRatio, accentColor } = usePreferencesStore((state) => ({
 		thumbnailRatio: state.thumbnailRatio,
 		accentColor: state.accentColor,
@@ -65,6 +65,7 @@ export default function LibraryStackedThumbnails({ thumbnailData, layoutNumber }
 
 		return layoutConfig.map((config, index) => {
 			const currentThumbnailData = thumbnailData[index]
+			if (!currentThumbnailData) return null
 
 			const currentThumbnailSize = {
 				width: baseThumbnailWidth * config.scale,
@@ -122,13 +123,13 @@ export default function LibraryStackedThumbnails({ thumbnailData, layoutNumber }
 		const plainColors: PlainColorObject[] = usableColors.map((c) => getColor(c))
 
 		if (thumbnailData.length === 1) {
-			darken(plainColors[0], 0.2)
-			lighten(plainColors[1], 0.2)
+			darken(plainColors[0] || '', 0.2)
+			lighten(plainColors[1] || '', 0.2)
 		}
 
 		backgroundGradient = []
 		for (let i = 0; i < plainColors.length - 1; i++) {
-			const interpolation = steps(plainColors[i], plainColors[i + 1], {
+			const interpolation = steps(plainColors[i] || '', plainColors[i + 1] || '', {
 				space: OKLab,
 				outputSpace: sRGB,
 				steps: 5,

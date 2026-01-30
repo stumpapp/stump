@@ -6,8 +6,8 @@ import { COLORS } from '~/lib/constants'
 import { cn } from '~/lib/utils'
 
 import { useActiveServer } from '../activeServer'
+import { CollectionStackedThumbnails } from '../image/collection-image'
 import { Text } from '../ui'
-import LibraryStackedThumbnails from './LibraryStackedThumbnails'
 
 const fragment = graphql(`
 	fragment LibraryGridItem on Library {
@@ -56,7 +56,10 @@ export default function LibraryGridItem({ library, getLayoutNumber }: Props) {
 			<Pressable onPress={() => router.navigate(href)}>
 				{({ pressed }) => (
 					<View className={cn('relative', { 'opacity-80': pressed })}>
-						<LibraryStackedThumbnails thumbnailData={thumbnailData} layoutNumber={layoutNumber} />
+						<CollectionStackedThumbnails
+							thumbnailData={thumbnailData}
+							layoutNumber={layoutNumber}
+						/>
 
 						<View className="absolute bottom-0 left-0 z-20 w-full px-4 py-2">
 							<Text

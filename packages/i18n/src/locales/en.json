@@ -904,7 +904,8 @@
 									"pages": "Pages",
 									"tags": "Tags",
 									"createdAt": "Created at",
-									"updatedAt": "Updated at"
+									"updatedAt": "Updated at",
+									"readingStatus": "Reading status"
 								}
 							},
 							"book_meta": {
@@ -976,6 +977,11 @@
 					"listValue": {
 						"placeholder": "Add values",
 						"emptyState": "No values to display"
+					},
+					"enumValue": {
+						"placeholder": "Select values",
+						"emptyState": "No options available",
+						"selectPlaceholder": "Select a value"
 					}
 				}
 			}

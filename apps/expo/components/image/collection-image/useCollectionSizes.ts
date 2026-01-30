@@ -15,7 +15,7 @@ const defaultParams = {
 	padding: 16 * 2,
 }
 
-export function useLibraryItemSize(params: Params = {}) {
+export function useCollectionItemSize(params: Params = {}) {
 	const { width, isTablet } = useDisplay()
 
 	const insets = useSafeAreaInsets()

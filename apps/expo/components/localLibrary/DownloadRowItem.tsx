@@ -253,7 +253,7 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 					},
 				]}
 			>
-				<View className="white relative mx-4 flex-row gap-4">
+				<View className="relative mx-4 flex-row gap-4">
 					{/* TODO: Use file icons when no thumbnail is available? */}
 					<ThumbnailImage
 						source={{

@@ -2648,6 +2648,7 @@ export type QuerySmartListByIdArgs = {
 
 export type QuerySmartListItemsArgs = {
   id: Scalars['ID']['input'];
+  limit?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -3113,16 +3114,29 @@ export type SeriesStats = {
 
 export type SmartList = {
   __typename?: 'SmartList';
+  books: Array<Media>;
   creatorId: Scalars['String']['output'];
   defaultGrouping: SmartListGrouping;
   description?: Maybe<Scalars['String']['output']>;
   filters: Scalars['String']['output'];
   id: Scalars['String']['output'];
+  items: SmartListItems;
   joiner: SmartListJoiner;
+  meta: SmartListMeta;
   name: Scalars['String']['output'];
   thumbnail: ImageRef;
   views: Array<SmartListView>;
   visibility: EntityVisibility;
+};
+
+
+export type SmartListBooksArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type SmartListItemsArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type SmartListFilterGroupInput = {
@@ -3827,6 +3841,27 @@ export type SeriesScreenQuery = { __typename?: 'Query', series: { __typename?: '
       & { ' $fragmentRefs'?: { 'SeriesGridItemFragment': SeriesGridItemFragment } }
     )>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', totalPages: number, currentPage: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
 
+export type SmartListScreenQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type SmartListScreenQuery = { __typename?: 'Query', smartListById?: { __typename?: 'SmartList', id: string, name: string, description?: string | null, items: { __typename: 'SmartListGrouped', items: Array<{ __typename?: 'SmartListGroupedItem', entity: { __typename: 'Library', id: string, name: string } | { __typename: 'Series', id: string, resolvedName: string }, books: Array<(
+          { __typename?: 'Media', id: string, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } }
+          & { ' $fragmentRefs'?: { 'SmartListBookItemFragment': SmartListBookItemFragment } }
+        )> }> } | { __typename: 'SmartListUngrouped', books: Array<(
+        { __typename?: 'Media', id: string, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } }
+        & { ' $fragmentRefs'?: { 'SmartListBookItemFragment': SmartListBookItemFragment } }
+      )> } } | null };
+
+export type SmartListsTabListQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type SmartListsTabListQuery = { __typename?: 'Query', smartLists: Array<(
+    { __typename?: 'SmartList', id: string }
+    & { ' $fragmentRefs'?: { 'SmartListGridItemFragment': SmartListGridItemFragment } }
+  )> };
+
 export type PullServerAnnotationsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
@@ -4041,6 +4076,10 @@ export type SeriesOverviewSheetQueryVariables = Exact<{
 export type SeriesOverviewSheetQuery = { __typename?: 'Query', seriesById?: { __typename?: 'Series', resolvedName: string, metadata?: { __typename?: 'SeriesMetadata', ageRating?: number | null, booktype?: string | null, characters: Array<string>, comicImage?: string | null, comicid?: number | null, descriptionFormatted?: string | null, genres: Array<string>, imprint?: string | null, links: Array<string>, metaType?: string | null, publicationRun?: string | null, publisher?: string | null, status?: string | null, summary?: string | null, title?: string | null, totalIssues?: number | null, volume?: number | null, writers: Array<string>, year?: number | null, collects: Array<{ __typename?: 'CollectedItem', series?: string | null, comicid?: string | null, issueid?: string | null, issues?: string | null }> } | null, stats: { __typename?: 'SeriesStats', bookCount: number, totalBytes: number, completedBooks: number, inProgressBooks: number, totalReadingTimeSeconds: number }, tags: Array<{ __typename?: 'Tag', name: string }> } | null };
 
 export type SeriesSearchItemFragment = { __typename?: 'Series', id: string, resolvedName: string, readCount: number, mediaCount: number, percentageCompleted: number, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } & { ' $fragmentName'?: 'SeriesSearchItemFragment' };
+
+export type SmartListBookItemFragment = { __typename?: 'Media', id: string, resolvedName: string, pages: number, size: number, readProgress?: { __typename?: 'ActiveReadingSession', page?: number | null, percentageCompleted?: any | null, locator?: { __typename?: 'ReadiumLocator', chapterTitle: string } | null } | null, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } & { ' $fragmentName'?: 'SmartListBookItemFragment' };
+
+export type SmartListGridItemFragment = { __typename?: 'SmartList', id: string, name: string, description?: string | null, books: Array<{ __typename?: 'Media', thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } }>, meta: { __typename?: 'SmartListMeta', matchedBooks: number, matchedSeries: number, matchedLibraries: number } } & { ' $fragmentName'?: 'SmartListGridItemFragment' };
 
 export type SeriesBooksForDownloadQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -5427,6 +5466,57 @@ export const SeriesSearchItemFragmentDoc = new TypedDocumentString(`
   percentageCompleted
 }
     `, {"fragmentName":"SeriesSearchItem"}) as unknown as TypedDocumentString<SeriesSearchItemFragment, unknown>;
+export const SmartListBookItemFragmentDoc = new TypedDocumentString(`
+    fragment SmartListBookItem on Media {
+  id
+  resolvedName
+  readProgress {
+    page
+    percentageCompleted
+    locator {
+      chapterTitle
+    }
+  }
+  pages
+  size
+  thumbnail {
+    url
+    metadata {
+      averageColor
+      colors {
+        color
+        percentage
+      }
+      thumbhash
+    }
+  }
+}
+    `, {"fragmentName":"SmartListBookItem"}) as unknown as TypedDocumentString<SmartListBookItemFragment, unknown>;
+export const SmartListGridItemFragmentDoc = new TypedDocumentString(`
+    fragment SmartListGridItem on SmartList {
+  id
+  name
+  description
+  books(limit: 5) {
+    thumbnail {
+      url
+      metadata {
+        averageColor
+        colors {
+          color
+          percentage
+        }
+        thumbhash
+      }
+    }
+  }
+  meta {
+    matchedBooks
+    matchedSeries
+    matchedLibraries
+  }
+}
+    `, {"fragmentName":"SmartListGridItem"}) as unknown as TypedDocumentString<SmartListGridItemFragment, unknown>;
 export const BookCardFragmentDoc = new TypedDocumentString(`
     fragment BookCard on Media {
   id
@@ -6416,6 +6506,118 @@ export const SeriesScreenDocument = new TypedDocumentString(`
     }
   }
 }`) as unknown as TypedDocumentString<SeriesScreenQuery, SeriesScreenQueryVariables>;
+export const SmartListScreenDocument = new TypedDocumentString(`
+    query SmartListScreen($id: ID!) {
+  smartListById(id: $id) {
+    id
+    name
+    description
+    items {
+      __typename
+      ... on SmartListGrouped {
+        items {
+          entity {
+            __typename
+            ... on Series {
+              id
+              resolvedName
+            }
+            ... on Library {
+              id
+              name
+            }
+          }
+          books {
+            id
+            thumbnail {
+              url
+              metadata {
+                averageColor
+                colors {
+                  color
+                  percentage
+                }
+                thumbhash
+              }
+            }
+            ...SmartListBookItem
+          }
+        }
+      }
+      ... on SmartListUngrouped {
+        books {
+          id
+          thumbnail {
+            url
+            metadata {
+              averageColor
+              colors {
+                color
+                percentage
+              }
+              thumbhash
+            }
+          }
+          ...SmartListBookItem
+        }
+      }
+    }
+  }
+}
+    fragment SmartListBookItem on Media {
+  id
+  resolvedName
+  readProgress {
+    page
+    percentageCompleted
+    locator {
+      chapterTitle
+    }
+  }
+  pages
+  size
+  thumbnail {
+    url
+    metadata {
+      averageColor
+      colors {
+        color
+        percentage
+      }
+      thumbhash
+    }
+  }
+}`) as unknown as TypedDocumentString<SmartListScreenQuery, SmartListScreenQueryVariables>;
+export const SmartListsTabListDocument = new TypedDocumentString(`
+    query SmartListsTabList {
+  smartLists {
+    id
+    ...SmartListGridItem
+  }
+}
+    fragment SmartListGridItem on SmartList {
+  id
+  name
+  description
+  books(limit: 5) {
+    thumbnail {
+      url
+      metadata {
+        averageColor
+        colors {
+          color
+          percentage
+        }
+        thumbhash
+      }
+    }
+  }
+  meta {
+    matchedBooks
+    matchedSeries
+    matchedLibraries
+  }
+}`) as unknown as TypedDocumentString<SmartListsTabListQuery, SmartListsTabListQueryVariables>;
 export const PullServerAnnotationsDocument = new TypedDocumentString(`
     query PullServerAnnotations($id: ID!) {
   annotationsByMediaId(id: $id) {

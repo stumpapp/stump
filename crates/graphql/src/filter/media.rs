@@ -17,7 +17,6 @@ use super::{
 	StringLikeFilter,
 };
 
-// TODO: Probably not correct....
 fn apply_reading_status_filter(
 	value: ReadingStatus,
 	not: bool,
@@ -26,7 +25,9 @@ fn apply_reading_status_filter(
 		ReadingStatus::Reading => reading_session::Column::Id.is_not_null(),
 		ReadingStatus::Finished => finished_reading_session::Column::Id.is_not_null(),
 		// TODO: add a field to reading_session for marking DNF
-		ReadingStatus::Abandoned => unimplemented!("Abandoned filter not implemented"),
+		ReadingStatus::Abandoned => {
+			media::Column::Id.eq("").and(media::Column::Id.ne(""))
+		},
 		ReadingStatus::NotStarted => reading_session::Column::Id
 			.is_null()
 			.and(finished_reading_session::Column::Id.is_null()),

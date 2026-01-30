@@ -214,6 +214,18 @@ export function useUpdateSmartList({ id, list }: { id: string; list?: SmartListP
 		delete listWithoutFields.id
 		delete listWithoutFields.creatorId
 		delete listWithoutFields.views
+
+		if (listWithoutFields.joiner) {
+			listWithoutFields.joiner =
+				listWithoutFields.joiner.toUpperCase() as typeof listWithoutFields.joiner
+		}
+		if (listWithoutFields.filters) {
+			listWithoutFields.filters = listWithoutFields.filters.map((group) => ({
+				...group,
+				joiner: group.joiner.toUpperCase() as typeof group.joiner,
+			}))
+		}
+
 		return listWithoutFields
 	}, [list])
 

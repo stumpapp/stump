@@ -10,14 +10,17 @@ use crate::{
 			SmartListUngrouped,
 		},
 	},
+	query::media::{add_sessions_join_for_filter, should_add_sessions_join_for_filter},
 };
 use async_graphql::Result;
 use models::entity::{
-	library, series,
+	library, media, series,
 	smart_list::{self, SmartListGrouping},
 	user::AuthUser,
 };
-use sea_orm::{prelude::*, Condition, DatabaseTransaction, QuerySelect};
+use sea_orm::{
+	prelude::*, Condition, DatabaseTransaction, QuerySelect, QueryTrait, Select,
+};
 
 use std::collections::{HashMap, HashSet};
 
@@ -186,14 +189,90 @@ pub fn build_filters(
 	})
 }
 
+pub fn build_books_query(
+	user: &AuthUser,
+	joiner: smart_list::SmartListJoiner,
+	filters: &[SmartListFilterGroupInput],
+	limit: Option<u64>,
+) -> Select<media::Entity> {
+	let conditions = build_filters(joiner, filters);
+	let query =
+		add_sessions_join(user, media::ModelWithMetadata::find_for_user(user), filters)
+			.apply_if(limit, |query, limit| query.limit(limit));
+	let query = add_library_join(query, filters);
+
+	query.filter(conditions)
+}
+
+fn add_library_join(
+	query: Select<media::Entity>,
+	filters: &[SmartListFilterGroupInput],
+) -> Select<media::Entity> {
+	let is_using_library = filters.iter().any(|filter_group| {
+		for filter in &filter_group.groups {
+			if let SmartListFilterInput::Library(_) = filter {
+				return true;
+			}
+		}
+
+		false
+	});
+
+	if is_using_library {
+		query.join_rev(
+			sea_orm::JoinType::InnerJoin,
+			library::Entity::belongs_to(series::Entity)
+				.from(models::entity::library::Column::Id)
+				.to(models::entity::series::Column::LibraryId)
+				.into(),
+		)
+	} else {
+		query
+	}
+}
+
+fn add_sessions_join(
+	user: &AuthUser,
+	query: Select<media::Entity>,
+	filters: &[SmartListFilterGroupInput],
+) -> Select<media::Entity> {
+	let filter_using_session = filters.iter().find(|filter_group| {
+		for filter in &filter_group.groups {
+			if let SmartListFilterInput::Media(media_filter) = filter {
+				if should_add_sessions_join_for_filter(media_filter) {
+					return true;
+				}
+			}
+		}
+
+		false
+	});
+
+	if let Some(filter_group) = filter_using_session {
+		for filter in &filter_group.groups {
+			if let SmartListFilterInput::Media(media_filter) = filter {
+				return add_sessions_join_for_filter(user, media_filter, query);
+			}
+		}
+	}
+
+	query
+}
+
 #[cfg(test)]
 mod tests {
 	use super::*;
-	use crate::filter::{
-		library::LibraryFilterInput, media::MediaFilterInput, StringLikeFilter,
+	use crate::{
+		filter::{
+			library::LibraryFilterInput, media::MediaFilterInput, StringLikeFilter,
+		},
+		tests::common::get_default_user,
 	};
 	use pretty_assertions::assert_eq;
-	use sea_orm::sea_query::{Query, SqliteQueryBuilder};
+	use sea_orm::{
+		sea_query::{Query, SqliteQueryBuilder},
+		QueryTrait,
+	};
 
 	pub fn condition_to_string(condition: &Condition) -> String {
 		Query::select()
@@ -278,6 +357,56 @@ mod tests {
 		assert_eq!(
 			sql,
 			r#"SELECT  WHERE (NOT "media"."name" = 'Book') OR "libraries"."name" = 'Test'"#
+		);
+	}
+
+	#[test]
+	fn test_build_books_query() {
+		let filters: Vec<SmartListFilterGroupInput> = vec![
+			SmartListFilterGroupInput {
+				joiner: SmartListGroupJoiner::Or,
+				groups: vec![SmartListFilterInput::Media(MediaFilterInput {
+					id: None,
+					name: Some(StringLikeFilter::Eq("Book".to_string())),
+					_and: None,
+					created_at: None,
+					extension: None,
+					metadata: None,
+					_not: None,
+					_or: None,
+					pages: None,
+					path: None,
+					reading_status: None,
+					series: None,
+					series_id: None,
+					size: None,
+					status: None,
+					updated_at: None,
+				})],
+			},
+			SmartListFilterGroupInput {
+				joiner: SmartListGroupJoiner::Or,
+				groups: vec![SmartListFilterInput::Library(LibraryFilterInput {
+					id: None,
+					name: Some(StringLikeFilter::Eq("Test".to_string())),
+					path: None,
+					_and: None,
+					_not: None,
+					_or: None,
+				})],
+			},
+		];
+		let user = get_default_user();
+		let query =
+			build_books_query(&user, smart_list::SmartListJoiner::Or, &filters, None);
+
+		let sql = query
+			.select_only()
+			.into_query()
+			.to_string(SqliteQueryBuilder);
+		assert_eq!(
+			sql,
+			r#"SELECT  FROM "media" LEFT JOIN "media_metadata" ON "media"."id" = "media_metadata"."media_id" INNER JOIN "series" ON "media"."series_id" = "series"."id" LEFT JOIN "series_metadata" ON "series_metadata"."series_id" = "series"."id" INNER JOIN "libraries" ON "libraries"."id" = "series"."library_id" WHERE "series"."library_id" NOT IN (SELECT "library_id" FROM "library_exclusions" WHERE "library_exclusions"."user_id" = '42') AND ("media"."name" = 'Book' OR "libraries"."name" = 'Test')"#
 		);
 	}
 }

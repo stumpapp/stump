@@ -5,6 +5,7 @@ import { useFormContext, useWatch } from 'react-hook-form'
 import { match } from 'ts-pattern'
 
 import {
+	isConceptualField,
 	isDateField,
 	isListOperator,
 	isNumberField,
@@ -13,6 +14,7 @@ import {
 } from '@/components/smartList/createOrUpdate'
 
 import { useFilterGroupContext } from '../context'
+import EnumValue from './EnumValue'
 import ListValue from './ListValue'
 import RangeValue, { RangeFilterDef } from './RangeValue'
 
@@ -44,6 +46,10 @@ export default function FilterValue({ idx }: Props) {
 			(value) => (value === 'range' ? 'range' : 'number'),
 		)
 		.otherwise(() => 'string')
+
+	if (isConceptualField(fieldDef.field)) {
+		return <EnumValue idx={idx} />
+	}
 
 	if (variant === 'list') {
 		return <ListValue idx={idx} />

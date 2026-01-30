@@ -581,6 +581,7 @@ export default function Screen() {
 				queryClient.refetchQueries({ queryKey: ['onDeck'], exact: false }),
 				queryClient.refetchQueries({ queryKey: ['recentlyAddedBooks'], exact: false }),
 				queryClient.refetchQueries({ queryKey: ['recentlyAddedSeries'], exact: false }),
+				queryClient.refetchQueries({ queryKey: ['smartListById'], exact: false }),
 			])
 		}
 	}, [queryClient, bookID])

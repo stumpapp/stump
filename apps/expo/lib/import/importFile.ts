@@ -1,4 +1,4 @@
-import * as FileSystem from 'expo-file-system/legacy'
+import { File } from 'expo-file-system'
 
 import { DownloadRepository } from '~/db/downloads'
 import { booksDirectory, toAbsolutePath } from '~/lib/filesystem'
@@ -48,15 +48,16 @@ export async function importLocalFile(
 		const storedFilename = `${bookId}.${extension}`
 
 		const booksDir = booksDirectory(LOCAL_LIBRARY_SERVER_ID)
-		await FileSystem.makeDirectoryAsync(booksDir, { intermediates: true })
 
 		const destinationUri = `${booksDir}/${storedFilename}`
-		await FileSystem.copyAsync({
-			from: externalUri,
-			to: destinationUri,
-		})
 
-		const fileInfo = await FileSystem.getInfoAsync(destinationUri)
+		const sourceFile = new File(externalUri)
+		const bytes = await sourceFile.bytes()
+		const destFile = new File(destinationUri)
+		destFile.create({ intermediates: true })
+		destFile.write(bytes)
+
+		const fileInfo = destFile.info()
 		const fileSize = fileInfo.exists && 'size' in fileInfo ? fileInfo.size : undefined
 
 		await DownloadRepository.addFile({

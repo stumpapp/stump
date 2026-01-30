@@ -1,6 +1,6 @@
 import { FlashList } from '@shopify/flash-list'
 import { useRefetch, useSuspenseGraphQL } from '@stump/client'
-import { graphql, SmartListScreenQuery } from '@stump/graphql'
+import { graphql, SmartListBookItemFragment, SmartListScreenQuery } from '@stump/graphql'
 // import {
 // 	clone,
 // 	ColorSpace,
@@ -15,14 +15,16 @@ import { graphql, SmartListScreenQuery } from '@stump/graphql'
 // 	sRGB,
 // 	steps,
 // } from 'colorjs.io/fn'
-import { useLocalSearchParams } from 'expo-router'
-import { useCallback, useMemo } from 'react'
-import { View } from 'react-native'
+import { useLocalSearchParams, useNavigation } from 'expo-router'
+import debounce from 'lodash/debounce'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { NativeSyntheticEvent, TextInputFocusEventData, View } from 'react-native'
 import { match } from 'ts-pattern'
 
 import { useActiveServer } from '~/components/activeServer'
 import RefreshControl from '~/components/RefreshControl'
 import { SmartListBookItem, SmartListGroupItem } from '~/components/smartList'
+import SmartListActionMenu from '~/components/smartList/SmartListActionMenu'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
 import { useSmartListGroupStore } from '~/stores/smartList'
 
@@ -108,10 +110,64 @@ export default function Screen() {
 	} = useSuspenseGraphQL(query, ['smartListById', id, serverID], { id })
 
 	const [isRefreshing, onRefresh] = useRefetch(refetch)
+	const [fuzzyText, setFuzzyText] = useState('')
+
+	const onFuzzyTextChange = debounce(setFuzzyText, 500)
+
+	const navigation = useNavigation()
+	useEffect(() => {
+		navigation.setOptions({
+			headerSearchBarOptions: {
+				allowToolbarIntegration: false, // This makes it render top-right iOS, otherwise in toolbar on bottom
+				placement: 'integratedButton',
+				// Note: Client-side sorting which is obv not ideal but WAY too complicated for me to do properly without
+				// a large refactor of the smart list API sooooo it's fine for now. Web is the same. Just
+				// means lower-powered devices might struggle a bit with the feature
+				onChangeText: (e: NativeSyntheticEvent<TextInputFocusEventData>) => {
+					const text = e.nativeEvent.text || ''
+					if (!text) {
+						onFuzzyTextChange.cancel()
+						setFuzzyText('')
+					} else {
+						onFuzzyTextChange(e.nativeEvent.text?.toLowerCase() || '')
+					}
+				},
+				shouldShowHintSearchIcon: true,
+			},
+			// Otherwise shows the "Smart Lists" text briefly before search button returns and then
+			// it goes to minimal _anyways_ so just setting so it doesn't flash between
+			headerBackButtonDisplayMode: 'minimal',
+		})
+	}, [navigation, onFuzzyTextChange])
+
+	const isCollapsibleList = smartList?.items.__typename === 'SmartListGrouped'
 
 	const collapsedItems = useSmartListGroupStore(
 		(state) => state.collapsedGroupsByList.get(id) || new Set(),
 	)
+
+	const clearList = useSmartListGroupStore((state) => state.clearList)
+	const onClearList = () => clearList(id)
+
+	const collapseAll = useSmartListGroupStore((state) => state.collapseAll)
+	const onCollapseAll = useCallback(() => {
+		if (!smartList) return
+		const groupNames: string[] = []
+		match(smartList.items)
+			.with({ __typename: 'SmartListGrouped' }, (grouped) => {
+				for (const groupItem of grouped.items) {
+					const entityName = match(groupItem.entity)
+						.with({ __typename: 'Series' }, (series) => series.resolvedName)
+						.with({ __typename: 'Library' }, (library) => library.name)
+						.otherwise(() => '')
+					if (entityName) {
+						groupNames.push(entityName)
+					}
+				}
+			})
+			.otherwise(() => {})
+		collapseAll(id, groupNames)
+	}, [collapseAll, id, smartList])
 
 	const toggleGroup = useSmartListGroupStore((state) => state.toggleGroup)
 	const onToggleGroup = useCallback(
@@ -123,6 +179,10 @@ export default function Screen() {
 
 	useDynamicHeader({
 		title: smartList?.name || '',
+		// Note: I HATE that I can't arrange this to the right of search
+		headerRight: isCollapsibleList
+			? () => <SmartListActionMenu onCollapseAll={onCollapseAll} onExpandAll={onClearList} />
+			: undefined,
 	})
 
 	const data = useMemo(() => {
@@ -141,6 +201,22 @@ export default function Screen() {
 						.with({ __typename: 'Library' }, (library) => library.name)
 						.otherwise(() => '')
 
+					const isEntityGroupMatch =
+						!fuzzyText || entityName.toLowerCase().includes(fuzzyText.trim().toLowerCase())
+
+					const filteredBooks = !fuzzyText
+						? groupItem.books
+						: groupItem.books.filter((book) => {
+								const casted = book as SmartListBookItemFragment
+								return [casted.name, casted.resolvedName].some((name) =>
+									name.toLowerCase().includes(fuzzyText.trim().toLowerCase()),
+								)
+							})
+
+					if (!isEntityGroupMatch && filteredBooks.length === 0) {
+						continue
+					}
+
 					// If the group is collapsed, only add the header
 					if (collapsedItems.has(entityName)) {
 						listData.push(entityName)
@@ -151,13 +227,13 @@ export default function Screen() {
 						listData.push(entityName)
 					}
 
-					listData.push(...groupItem.books)
+					listData.push(...filteredBooks)
 				}
 
 				return listData
 			})
 			.exhaustive() // I want to throw here so I know if something if wrong
-	}, [smartList, collapsedItems])
+	}, [smartList, collapsedItems, fuzzyText])
 
 	const stickyHeaderIndices = useMemo(() => {
 		const indices: number[] = []
@@ -266,13 +342,7 @@ export default function Screen() {
 				paddingVertical: 16,
 			}}
 			ItemSeparatorComponent={() => <View className="h-6" />}
-			// ListHeaderComponent={
-			// 	<SmartListHeader
-			// 		name={smartList.name}
-			// 		description={smartList.description}
-			// 		gradientColors={backgroundGradient}
-			// 	/>
-			// }
+			// ListHeaderComponent={<SmartListHeader onFilterTextChange={onFuzzyTextChange} />}
 			// FIXME: Sticks to very top behind header on iOS
 			stickyHeaderIndices={stickyHeaderIndices}
 			maintainVisibleContentPosition={{ disabled: true }}

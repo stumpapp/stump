@@ -16,6 +16,7 @@ const fragment = graphql(`
 	fragment SmartListBookItem on Media {
 		id
 		resolvedName
+		name
 		readProgress {
 			page
 			percentageCompleted

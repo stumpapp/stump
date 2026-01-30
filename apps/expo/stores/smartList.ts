@@ -5,8 +5,8 @@ type SmartListGroupStore = {
 	toggleGroup: (listId: string, groupName: string) => void
 	isCollapsed: (listId: string, groupName: string) => boolean
 	collapseAll: (listId: string, groupNames: string[]) => void
-	expandAll: (listId: string) => void
 	clearList: (listId: string) => void
+	isAllExpanded: (listId: string) => boolean
 	reset: () => void
 }
 
@@ -38,19 +38,17 @@ export const useSmartListGroupStore = create<SmartListGroupStore>((set, get) => 
 			return { collapsedGroupsByList: newMap }
 		}),
 
-	expandAll: (listId) =>
-		set((state) => {
-			const newMap = new Map(state.collapsedGroupsByList)
-			newMap.set(listId, new Set())
-			return { collapsedGroupsByList: newMap }
-		}),
-
 	clearList: (listId) =>
 		set((state) => {
 			const newMap = new Map(state.collapsedGroupsByList)
 			newMap.delete(listId)
 			return { collapsedGroupsByList: newMap }
 		}),
+
+	isAllExpanded: (listId) => {
+		const collapsedGroups = get().collapsedGroupsByList.get(listId)
+		return !collapsedGroups || collapsedGroups.size === 0
+	},
 
 	reset: () => set({ collapsedGroupsByList: new Map() }),
 }))

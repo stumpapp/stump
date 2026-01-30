@@ -45,6 +45,7 @@ export type TableOfContentsItem = {
 	content: string
 	children: TableOfContentsItem[]
 	play_order: number
+	position?: number | undefined | null
 }
 
 export const convertNativeToc = (items: NativeTableOfContentsItem[]): TableOfContentsItem[] => {
@@ -69,6 +70,27 @@ export const parseToc = (toc?: string[]): TableOfContentsItem[] => {
 		.filter((item) => item !== null) as TableOfContentsItem[]
 
 	return parsedToc
+}
+
+export const addPositionsToToc = (
+	toc: TableOfContentsItem[],
+	positions: ReadiumLocator[],
+): TableOfContentsItem[] => {
+	const tocWithPositions = toc.map((item) => {
+		const tocItemLocator = positions.find(
+			(p) => trimFragmentFromHref(p.href) === trimFragmentFromHref(item.content),
+		)
+
+		const tocItemWithPosition = {
+			...item,
+			position: tocItemLocator?.locations?.position,
+			children: item.children ? addPositionsToToc(item.children, positions) : [],
+		}
+
+		return tocItemWithPosition
+	})
+
+	return tocWithPositions
 }
 
 export type EmbeddedMetadata = Pick<BookMetadata, 'title' | 'author' | 'language' | 'publisher'>
@@ -163,17 +185,22 @@ export const useEpubLocationStore = create<IEpubLocationStore>((set, get) => ({
 	positions: [],
 
 	onTocChange: (toc, source) => {
+		let parsedToc: TableOfContentsItem[] = []
 		if (typeof toc[0] === 'string') {
-			set({
-				toc: parseToc(toc as string[]),
-				tocSource: source,
-			})
+			parsedToc = parseToc(toc as string[])
 		} else {
-			set({
-				toc: toc as TableOfContentsItem[],
-				tocSource: source,
-			})
+			parsedToc = toc as TableOfContentsItem[]
 		}
+
+		const positions = get().positions
+		if (positions && positions.length > 0) {
+			parsedToc = addPositionsToToc(parsedToc, positions)
+		}
+
+		set({
+			toc: parsedToc,
+			tocSource: source,
+		})
 	},
 	onBookLoad: (metadata, positions) =>
 		set({

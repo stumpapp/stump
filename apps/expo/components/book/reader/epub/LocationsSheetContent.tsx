@@ -1,3 +1,4 @@
+import { getColor, serialize } from 'colorjs.io/fn'
 import { useRef, useState } from 'react'
 import { Pressable, useWindowDimensions, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
@@ -6,6 +7,8 @@ import { stripHtml } from 'string-strip-html'
 
 import { ThumbnailImage } from '~/components/image'
 import { Heading, Text } from '~/components/ui'
+import { useColors } from '~/lib/constants'
+import { useColorScheme } from '~/lib/useColorScheme'
 import { cn } from '~/lib/utils'
 import { usePreferencesStore } from '~/stores'
 import { type TableOfContentsItem, useEpubLocationStore } from '~/stores/epub'
@@ -155,10 +158,19 @@ export default function LocationsSheetContent() {
 	)
 }
 
-// TODO: Calculate page?
-const TableOfContentsListItem = ({ item }: { item: TableOfContentsItem }) => {
+const TableOfContentsListItem = ({
+	item,
+	level = 0,
+	className,
+}: {
+	item: TableOfContentsItem
+	level?: number
+	className?: string
+}) => {
 	const actions = useEpubLocationStore((store) => store.actions)
 	const currentChapter = useEpubLocationStore((store) => store.currentChapter)
+	const position = useEpubLocationStore((store) => store.position)
+	const toc = useEpubLocationStore((store) => store.toc)
 	const closeSheet = useEpubSheetStore((state) => state.closeSheet)
 
 	const handlePress = async () => {
@@ -169,39 +181,106 @@ const TableOfContentsListItem = ({ item }: { item: TableOfContentsItem }) => {
 			href: hrefWithoutFragment || item.content,
 			type: 'application/xhtml+xml',
 			chapterTitle: item.label,
-			locations: fragment
-				? {
-						fragments: [fragment],
-					}
-				: {},
+			locations: fragment ? { fragments: [fragment] } : {},
 		})
 
 		closeSheet('locations')
 	}
 
+	const { isDarkColorScheme } = useColorScheme()
+	const colors = useColors()
+	const accentColor = usePreferencesStore((state) => state.accentColor)
+
+	const color = getColor(accentColor || colors.fill.brand.DEFAULT)
+	color.alpha = isDarkColorScheme ? 0.1 : 0.15
+	const backgroundColor = serialize(color, { format: 'hex' })
+
+	const isChild = level > 0
+	color.alpha = isDarkColorScheme ? (isChild ? 0.5 : 0.8) : isChild ? 0.7 : 0.9
+	const textColor = serialize(color, { format: 'hex' })
+
+	const findNextItem = (item: TableOfContentsItem) => {
+		const flatToc = flattenToc(toc)
+		const index = flatToc.indexOf(item)
+		return flatToc[index + 1]
+	}
+
+	const checkIsActive = (item: TableOfContentsItem) => {
+		const nextItem = findNextItem(item)
+		if (item.position) {
+			const isAfterChapterStart = position >= item.position
+			const isBeforeChapterEnd = nextItem?.position ? position < nextItem?.position : true
+			return isAfterChapterStart && isBeforeChapterEnd
+		}
+		return item.label === currentChapter
+	}
+
+	// Hide Divider if:
+	// 1. next item is active (hides Divider above active item)
+	// 2. current item is active (hides Divider below active item)
+	const nextItem = findNextItem(item)
+	const currentChapterActive = checkIsActive(item)
+	const nextChapterActive = nextItem ? checkIsActive(nextItem) : false
+
 	return (
 		<View>
 			<Pressable onPress={handlePress}>
 				{({ pressed }) => (
-					<View
-						className={cn('w-full px-4', {
-							'bg-background-surface': currentChapter === item.label,
-						})}
-						style={{ opacity: pressed ? 0.7 : 1 }}
-					>
-						<Text className="py-4 text-base">{item.label}</Text>
-					</View>
+					<>
+						<View
+							className={cn('squircle absolute inset-0 rounded-[1.25rem]')}
+							style={[
+								{ opacity: pressed ? 0.7 : 1, marginLeft: 6 + level * 16, marginRight: 6 },
+								currentChapterActive && { backgroundColor: backgroundColor },
+							]}
+						/>
+
+						<View
+							className="w-full flex-row justify-between"
+							style={{ opacity: pressed ? 0.7 : 1, paddingLeft: 16 + level * 16, paddingRight: 16 }}
+						>
+							<Text
+								className={cn('py-4 text-base', currentChapterActive && 'font-bold', className)}
+								style={currentChapterActive && { color: textColor }}
+							>
+								{item.label}
+							</Text>
+							<Text
+								className={cn(
+									'py-4 text-base text-foreground-muted',
+									currentChapterActive && 'font-bold',
+								)}
+								style={currentChapterActive && { color: textColor }}
+							>
+								{item.position || 'Not Available'}
+							</Text>
+						</View>
+					</>
 				)}
 			</Pressable>
-			<Divider />
+
+			{!nextChapterActive && !currentChapterActive && <Divider level={level} />}
 
 			{item.children.map((child) => (
-				<View key={child.label} className="ml-4">
-					<TableOfContentsListItem item={child} />
+				<View key={child.label}>
+					<TableOfContentsListItem
+						item={child}
+						level={level + 1}
+						className="text-foreground-muted"
+					/>
 				</View>
 			))}
 		</View>
 	)
 }
 
-const Divider = () => <View className="h-px w-full bg-edge" />
+const Divider = ({ level = 0 }: { level?: number }) => (
+	<View
+		className="h-px bg-black/10 dark:bg-white/10"
+		style={{ marginLeft: 16 + level * 16, marginRight: 16 }}
+	/>
+)
+
+function flattenToc(toc: TableOfContentsItem[]): TableOfContentsItem[] {
+	return toc.flatMap((item) => [item, ...flattenToc(item.children || [])])
+}

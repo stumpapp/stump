@@ -11,7 +11,7 @@ import { useColors } from '~/lib/constants'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { cn } from '~/lib/utils'
 import { usePreferencesStore } from '~/stores'
-import { type TableOfContentsItem, useEpubLocationStore } from '~/stores/epub'
+import { flattenToc, type TableOfContentsItem, useEpubLocationStore } from '~/stores/epub'
 import { useEpubSheetStore } from '~/stores/epubSheet'
 
 import AnnotationsAndBookmarks from './AnnotationsAndBookmarks'
@@ -280,7 +280,3 @@ const Divider = ({ level = 0 }: { level?: number }) => (
 		style={{ marginLeft: 16 + level * 16, marginRight: 16 }}
 	/>
 )
-
-function flattenToc(toc: TableOfContentsItem[]): TableOfContentsItem[] {
-	return toc.flatMap((item) => [item, ...flattenToc(item.children || [])])
-}

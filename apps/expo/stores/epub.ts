@@ -93,6 +93,10 @@ export const addPositionsToToc = (
 	return tocWithPositions
 }
 
+export const flattenToc = (toc: TableOfContentsItem[]): TableOfContentsItem[] => {
+	return toc.flatMap((item) => [item, ...flattenToc(item.children || [])])
+}
+
 export type EmbeddedMetadata = Pick<BookMetadata, 'title' | 'author' | 'language' | 'publisher'>
 
 export type OnBookmarkCallback = (

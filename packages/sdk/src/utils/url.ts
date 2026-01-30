@@ -28,14 +28,9 @@ export const formatApiURL = (url: string, version: ApiVersion) => {
 export const formatOPDSURL = (url: string) => {
 	let correctedUrl = url
 
-	// Remove trailing slash
-	if (correctedUrl.endsWith('/')) {
-		correctedUrl = correctedUrl.slice(0, -1)
-	}
-
-	// if (correctedUrl.endsWith('/api')) {
-	// 	correctedUrl = correctedUrl.slice(0, -4)
-	// }
+	// We don't remove trailing slash for OPDS urls since we don't have
+	// the knowledge of if they are needed like we do for internal API urls
+	// See https://github.com/ajslater/codex/issues/524
 
 	// Remove all double slashes AFTER the initial http://, https://, etc
 	correctedUrl = correctedUrl.replace(/([^:]\/)\/+/g, '$1')

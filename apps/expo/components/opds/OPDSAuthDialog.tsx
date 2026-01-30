@@ -6,8 +6,9 @@ import { opdsURL } from '@stump/sdk/controllers'
 import { isAxiosError } from 'axios'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Controller, useForm, useFormState } from 'react-hook-form'
-import { Image, View } from 'react-native'
+import { View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import TurboImage from 'react-native-turbo-image'
 import urlJoin from 'url-join'
 import { z } from 'zod'
 
@@ -154,7 +155,7 @@ export default function OPDSAuthDialog({ isOpen, authDoc, onClose }: OPDSAuthDia
 			<View className="flex-1 items-start gap-4 p-6">
 				{logoURL && (
 					<View className="w-full items-center justify-center">
-						<Image
+						<TurboImage
 							className="self-center"
 							source={{ uri: logoURL }}
 							style={{ width: 100, height: 100 }}

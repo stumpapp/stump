@@ -95,6 +95,24 @@ export class Api {
 		const instance = axios.create({
 			baseURL: this.serviceURL,
 			withCredentials: this.configuration.authMethod === 'session',
+			// Note: Keeping this here for posterity. I went down a DEEP rabbit hole on this one.
+			// If you read through https://github.com/ajslater/codex/issues/524 basically Stump
+			// was stripping trailing slashes from OPDS urls which caused issues with Codex, it would
+			// redirect to a url and axios wasn't preserving the Authorization header on the redirect for iOS.
+			// It _does_ on Android, though. From what I can tell about how axios works in the context of iOS in
+			// a react-native app, it uses native networking (i.e., CFNetwork/NSURLSession) which doesn't seem to
+			// adhere to _this_ beforeRedirect config. From what I understand, I'd need to hook into maybe
+			// https://developer.apple.com/documentation/foundation/urlsessiontaskdelegate/urlsession(_:task:willperformhttpredirection:newrequest:completionhandler:)
+			// which would mean a native module to handle it. That is a pretty sizable effort so for now I am just
+			// going to accept it as a limitation for iOS. A little unfortunate, but as long as there aren't servers
+			// which put feeds behind layers of redirects it should be fine.
+			// beforeRedirect: (config) => {
+			// 	config.headers = config.headers.concat(this.getHeaders())
+			// 	if (this._basicAuth) {
+			// 		config.auth = this._basicAuth
+			// 	}
+			// 	return config
+			// },
 		})
 
 		instance.interceptors.request.use(async (config) => {

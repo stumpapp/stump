@@ -1,20 +1,6 @@
 import { FlashList } from '@shopify/flash-list'
 import { useRefetch, useSuspenseGraphQL } from '@stump/client'
 import { graphql, SmartListBookItemFragment, SmartListScreenQuery } from '@stump/graphql'
-// import {
-// 	clone,
-// 	ColorSpace,
-// 	darken,
-// 	getColor,
-// 	Lab,
-// 	lighten,
-// 	OKLab,
-// 	PlainColorObject,
-// 	serialize,
-// 	set,
-// 	sRGB,
-// 	steps,
-// } from 'colorjs.io/fn'
 import { useLocalSearchParams, useNavigation } from 'expo-router'
 import debounce from 'lodash/debounce'
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -27,10 +13,6 @@ import { SmartListBookItem, SmartListGroupItem } from '~/components/smartList'
 import SmartListActionMenu from '~/components/smartList/SmartListActionMenu'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
 import { useSmartListGroupStore } from '~/stores/smartList'
-
-// ColorSpace.register(sRGB)
-// ColorSpace.register(Lab)
-// ColorSpace.register(OKLab)
 
 const query = graphql(`
 	query SmartListScreen($id: ID!) {
@@ -328,11 +310,9 @@ export default function Screen() {
 	if (!smartList) return null
 
 	// TODO: Better design, incorporate user-defined description and maybe gradient colors
-	// TODO: Support quick text filtering (fuzzy search)
 	return (
 		<FlashList
 			data={data}
-			// extraData={[collapsedItems]}
 			renderItem={renderItem}
 			getItemType={(item) => (typeof item === 'string' ? 'sectionHeader' : 'row')}
 			keyExtractor={(item, index) => {
@@ -342,7 +322,6 @@ export default function Screen() {
 				paddingVertical: 16,
 			}}
 			ItemSeparatorComponent={() => <View className="h-6" />}
-			// ListHeaderComponent={<SmartListHeader onFilterTextChange={onFuzzyTextChange} />}
 			// FIXME: Sticks to very top behind header on iOS
 			stickyHeaderIndices={stickyHeaderIndices}
 			maintainVisibleContentPosition={{ disabled: true }}

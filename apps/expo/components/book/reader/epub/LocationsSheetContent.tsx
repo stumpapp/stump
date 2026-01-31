@@ -305,7 +305,7 @@ const TableOfContentsListItem = ({
 						>
 							<Text
 								className={cn(
-									'py-4 text-base',
+									'flex-1 py-4 text-base',
 									currentChapterActive && 'font-bold',
 									isChild && 'text-foreground-muted',
 								)}
@@ -315,7 +315,7 @@ const TableOfContentsListItem = ({
 							</Text>
 							<Text
 								className={cn(
-									'py-4 text-base text-foreground-muted',
+									'shrink-0 py-4 text-base text-foreground-muted',
 									currentChapterActive && 'font-bold',
 								)}
 								style={currentChapterActive && { color: textColor }}

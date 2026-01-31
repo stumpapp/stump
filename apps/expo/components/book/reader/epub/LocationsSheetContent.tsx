@@ -304,7 +304,11 @@ const TableOfContentsListItem = ({
 							style={{ opacity: pressed ? 0.7 : 1, paddingLeft: 16 + level * 16, paddingRight: 16 }}
 						>
 							<Text
-								className={cn('py-4 text-base', currentChapterActive && 'font-bold')}
+								className={cn(
+									'py-4 text-base',
+									currentChapterActive && 'font-bold',
+									isChild && 'text-foreground-muted',
+								)}
 								style={currentChapterActive && { color: textColor }}
 							>
 								{item.label}

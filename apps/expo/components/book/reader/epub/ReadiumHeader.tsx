@@ -10,7 +10,7 @@ import { Icon } from '~/components/ui/icon'
 import { CONTROLS_TIMING_CONFIG } from '~/lib/constants'
 import { useDisplay } from '~/lib/hooks'
 import { useReaderStore } from '~/stores'
-import { flattenToc, useEpubLocationStore, useEpubTheme } from '~/stores/epub'
+import { useEpubLocationStore, useEpubTheme } from '~/stores/epub'
 import { useEpubSheetStore } from '~/stores/epubSheet'
 
 import BookmarkButton from './BookmarkButton'
@@ -29,22 +29,6 @@ export default function ReadiumHeader() {
 	const chapterTitle = useEpubLocationStore(
 		(state) => state.currentChapter || state.book?.name || state.embeddedMetadata?.title,
 	)
-	const position = useEpubLocationStore((state) => state.position)
-	const toc = useEpubLocationStore((state) => state.toc)
-
-	const flatToc = flattenToc(toc)
-
-	// for cases where we have chapter2_1.xhtml, chapter2_insert.xhtml, chapter2_2.xhtml in the spine but only
-	// chapter2_1.xhtml is mentioned in the toc, we can try to find the toc item based on the current position
-	const chapterItem = flatToc.find((item, index) => {
-		const nextItem = flatToc[index + 1]
-		if (item.position) {
-			const isAfterChapterStart = position >= item.position
-			const isBeforeChapterEnd = nextItem?.position ? position < nextItem?.position : true
-			return isAfterChapterStart && isBeforeChapterEnd
-		}
-	})
-
 	const { colors } = useEpubTheme()
 
 	const insets = useSafeAreaInsets()
@@ -84,7 +68,7 @@ export default function ReadiumHeader() {
 
 			<View className="absolute left-0 right-0 items-center justify-center px-16">
 				<Text numberOfLines={1} style={{ color: colors?.foreground }} className="max-w-[90%]">
-					{chapterItem?.label || chapterTitle}
+					{chapterTitle}
 				</Text>
 			</View>
 

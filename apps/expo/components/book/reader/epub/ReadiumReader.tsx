@@ -26,6 +26,7 @@ import {
 	convertNativeToc,
 	findTocItemByHref,
 	OnBookmarkCallback,
+	resolveTocItemByPosition,
 	useEpubLocationStore,
 	useEpubTheme,
 } from '~/stores/epub'
@@ -377,7 +378,8 @@ export default function ReadiumReader({
 			}
 
 			if (!locator.chapterTitle) {
-				const tocItem = findTocItemByHref(store.toc, locator.href)
+				const tocItem =
+					resolveTocItemByPosition(locator.locations?.position) || findTocItemByHref(locator.href)
 				if (tocItem) {
 					locator.chapterTitle = tocItem.label
 				}

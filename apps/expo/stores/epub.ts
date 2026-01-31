@@ -10,6 +10,7 @@ import {
 	Decoration,
 	EPUBReaderThemeConfig,
 	NativeTableOfContentsItem,
+	ReadiumLocation,
 	ReadiumLocator,
 	ReadiumViewRef,
 } from '~/modules/readium'
@@ -23,21 +24,11 @@ export const trimFragmentFromHref = (href: string) => {
 	return href.split('#')[0]
 }
 
-export const findTocItemByHref = (
-	toc: TableOfContentsItem[],
-	href: string,
-): TableOfContentsItem | undefined => {
+export const findTocItemByHref = (href: string) => {
+	const toc = useEpubLocationStore.getState().toc
+	const flatToc = flattenToc(toc)
 	const targetHref = trimFragmentFromHref(href)
-	for (const item of toc) {
-		if (trimFragmentFromHref(item.content) === targetHref) {
-			return item
-		}
-		if (item.children.length > 0) {
-			const found = findTocItemByHref(item.children, href)
-			if (found) return found
-		}
-	}
-	return undefined
+	return flatToc.find((item) => trimFragmentFromHref(item.content) === targetHref)
 }
 
 export type TableOfContentsItem = {
@@ -95,6 +86,25 @@ export const addPositionsToToc = (
 
 export const flattenToc = (toc: TableOfContentsItem[]): TableOfContentsItem[] => {
 	return toc.flatMap((item) => [item, ...flattenToc(item.children || [])])
+}
+
+/**
+ * Resolves the toc item for a given position.
+ *
+ * For cases where we have `chapter2_1.xhtml`, `chapter2_insert.xhtml`, `chapter2_2.xhtml` in the spine,
+ * but only `chapter2_1.xhtml` is mentioned in the toc, it will try to find this toc item.
+ */
+export const resolveTocItemByPosition = (position: ReadiumLocation['position']) => {
+	const toc = useEpubLocationStore.getState().toc
+	const flatToc = flattenToc(toc)
+	return flatToc.find((item, index) => {
+		const nextItem = flatToc[index + 1]
+		if (item.position && position) {
+			const isAfterChapterStart = position >= item.position
+			const isBeforeChapterEnd = nextItem?.position ? position < nextItem?.position : true
+			return isAfterChapterStart && isBeforeChapterEnd
+		}
+	})
 }
 
 export type EmbeddedMetadata = Pick<BookMetadata, 'title' | 'author' | 'language' | 'publisher'>
@@ -212,12 +222,14 @@ export const useEpubLocationStore = create<IEpubLocationStore>((set, get) => ({
 			embeddedMetadata: metadata,
 			positions: positions ?? [],
 		}),
-	onLocationChange: (locator) =>
+	onLocationChange: (locator) => {
+		const tocItem = resolveTocItemByPosition(locator.locations?.position)
 		set({
-			currentChapter: locator.chapterTitle,
+			currentChapter: tocItem?.label || locator.chapterTitle,
 			position: locator.locations?.position ?? 0,
 			locator,
-		}),
+		})
+	},
 
 	bookmarks: [],
 	storeBookmarks: (bookmarks) => set({ bookmarks }),

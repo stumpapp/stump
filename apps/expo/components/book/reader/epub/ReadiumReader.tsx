@@ -202,7 +202,6 @@ export default function ReadiumReader({
 		cleanup: store.onUnload,
 		storeActions: store.storeActions,
 		storeHeaders: store.storeHeaders,
-		toc: store.toc,
 		storeBookmarks: store.storeBookmarks,
 		storeOnBookmark: store.storeOnBookmark,
 		storeOnDeleteBookmark: store.storeOnDeleteBookmark,

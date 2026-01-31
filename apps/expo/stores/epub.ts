@@ -222,14 +222,12 @@ export const useEpubLocationStore = create<IEpubLocationStore>((set, get) => ({
 			embeddedMetadata: metadata,
 			positions: positions ?? [],
 		}),
-	onLocationChange: (locator) => {
-		const tocItem = resolveTocItemByPosition(locator.locations?.position)
+	onLocationChange: (locator) =>
 		set({
-			currentChapter: tocItem?.label || locator.chapterTitle,
+			currentChapter: locator.chapterTitle,
 			position: locator.locations?.position ?? 0,
 			locator,
-		})
-	},
+		}),
 
 	bookmarks: [],
 	storeBookmarks: (bookmarks) => set({ bookmarks }),

@@ -1,5 +1,6 @@
 export * from './graphql'
 export * from './opds'
+export * from './opds-legacy'
 export * from './type-guards'
 import { SupportedFont } from '@stump/graphql'
 import { z } from 'zod'

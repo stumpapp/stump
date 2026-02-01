@@ -2,7 +2,7 @@ import { AxiosRequestConfig } from 'axios'
 import { XMLParser } from 'fast-xml-parser'
 
 import { APIBase } from '../base'
-import { feedSchema, OPDSLegacyFeed } from '../types/opds-legacy'
+import { legacyFeed, OPDSLegacyFeed } from '../types/opds-legacy'
 import { resolveUrl, toUrlParams, urlWithParams } from './utils'
 
 type OPDSPageQuery = {
@@ -37,7 +37,7 @@ export class OPDSLegacyAPI extends APIBase {
 		if (typeof data !== 'object' || data?.feed == null) {
 			throw new Error('Invalid OPDS feed format')
 		}
-		return feedSchema.parse(data.feed)
+		return legacyFeed.parse(data.feed)
 	}
 
 	async feed(url: string, params?: OPDSPageQuery): Promise<OPDSLegacyFeed> {
@@ -50,6 +50,6 @@ export class OPDSLegacyAPI extends APIBase {
 		if (typeof data !== 'object' || data?.feed == null) {
 			throw new Error('Invalid OPDS feed format')
 		}
-		return feedSchema.parse(data.feed)
+		return legacyFeed.parse(data.feed)
 	}
 }

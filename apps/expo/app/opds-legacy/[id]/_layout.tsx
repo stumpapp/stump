@@ -11,6 +11,7 @@ import { Redirect, Stack, useLocalSearchParams, useRouter } from 'expo-router'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { ActiveServerContext, useActiveServer } from '~/components/activeServer'
+import { FileExplorerAssetsProvider } from '~/components/fileExplorer'
 import { FullScreenLoader } from '~/components/ui'
 import {
 	feedLegacyHasSearch,
@@ -130,23 +131,25 @@ export default function Screen() {
 	}
 
 	return (
-		<ActiveServerContext.Provider
-			value={{
-				activeServer: activeServer,
-			}}
-		>
-			<StumpClientContextProvider onUnauthenticatedResponse={onAuthError}>
-				<SDKContext.Provider value={{ sdk, setSDK }}>
-					<OPDSFeedProvider>
-						<Stack
-							screenOptions={{
-								headerShown: false,
-								animation: animationEnabled ? 'default' : 'none',
-							}}
-						/>
-					</OPDSFeedProvider>
-				</SDKContext.Provider>
-			</StumpClientContextProvider>
-		</ActiveServerContext.Provider>
+		<FileExplorerAssetsProvider>
+			<ActiveServerContext.Provider
+				value={{
+					activeServer: activeServer,
+				}}
+			>
+				<StumpClientContextProvider onUnauthenticatedResponse={onAuthError}>
+					<SDKContext.Provider value={{ sdk, setSDK }}>
+						<OPDSFeedProvider>
+							<Stack
+								screenOptions={{
+									headerShown: false,
+									animation: animationEnabled ? 'default' : 'none',
+								}}
+							/>
+						</OPDSFeedProvider>
+					</SDKContext.Provider>
+				</StumpClientContextProvider>
+			</ActiveServerContext.Provider>
+		</FileExplorerAssetsProvider>
 	)
 }

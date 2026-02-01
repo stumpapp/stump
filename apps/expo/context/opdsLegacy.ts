@@ -1,5 +1,5 @@
-import { resolveUrl } from '@stump/sdk'
-import { OPDSLegacyFeed } from '@stump/sdk/types/opds-legacy'
+import { isPseStreamLink, resolveUrl } from '@stump/sdk'
+import { OPDSLegacyEntry, OPDSLegacyFeed } from '@stump/sdk'
 import { QueryObserverResult, RefetchOptions } from '@tanstack/react-query'
 import { createContext, useContext } from 'react'
 
@@ -34,3 +34,8 @@ export const getLegacySearchURL = (
 
 export const feedLegacyHasSearch = (feed: OPDSLegacyFeed | null | undefined) =>
 	feed?.links.some((link) => link.rel === 'search') ?? false
+
+export const getLegacyPageStreamingURL = (entry: OPDSLegacyEntry, rootURL: string | undefined) => {
+	const streamingLink = entry.links.find(isPseStreamLink)?.href
+	return streamingLink ? resolveUrl(streamingLink, rootURL) : undefined
+}

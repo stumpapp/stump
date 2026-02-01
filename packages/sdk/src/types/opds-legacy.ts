@@ -15,6 +15,12 @@ const linkType = z
 		z.string().refine((val) => val.startsWith('image/'), { message: 'Must be a valid MIME type' }),
 	)
 
+export const isLegacyNavigationLink = (link: OPDSLegacyLink) =>
+	link.type === 'application/atom+xml;profile=opds-catalog;kind=navigation'
+
+export const isLegacyDownloadableLink = (link: OPDSLegacyLink) =>
+	link.rel === 'http://opds-spec.org/acquisition'
+
 const linkRel = z.enum([
 	'self',
 	'subsection',
@@ -27,6 +33,9 @@ const linkRel = z.enum([
 	'http://vaemendis.net/opds-pse/stream', // PSE stream
 	'search',
 ])
+
+export const isPseStreamLink = (link: OPDSLegacyLink) =>
+	link.rel === 'http://vaemendis.net/opds-pse/stream'
 
 const linkSchema = z.object({
 	href: z.string(),
@@ -56,7 +65,7 @@ const feedAuthor = z.object({
 })
 export type OPDSLegacyFeedAuthor = z.infer<typeof feedAuthor>
 
-export const feedSchema = z
+export const legacyFeed = z
 	.object({
 		id: z.string(),
 		title: z.string(),
@@ -69,4 +78,4 @@ export const feedSchema = z
 		links: Array.isArray(obj.link) ? obj.link : [obj.link],
 		entries: Array.isArray(obj.entry) ? obj.entry : [obj.entry],
 	}))
-export type OPDSLegacyFeed = z.infer<typeof feedSchema>
+export type OPDSLegacyFeed = z.infer<typeof legacyFeed>

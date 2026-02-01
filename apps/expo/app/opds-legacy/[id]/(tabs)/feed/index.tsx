@@ -1,3 +1,4 @@
+import { FlashList } from '@shopify/flash-list'
 import { useRefetch } from '@stump/client'
 import partition from 'lodash/partition'
 import { View } from 'react-native'
@@ -13,6 +14,7 @@ import {
 	OPDSNavigationGroup,
 	OPDSPublicationGroup,
 } from '~/components/opds'
+import { OPDSLegacyEntryItem } from '~/components/opdsLegacy'
 import RefreshControl from '~/components/RefreshControl'
 import { FullScreenLoader, Text } from '~/components/ui'
 import { useOPDSFeedContext } from '~/context/opds'
@@ -36,8 +38,12 @@ export default function Screen() {
 	if (!feed || !!error) return <MaybeErrorFeed error={error} onRetry={onRefetch} />
 
 	return (
-		<View>
-			<Text>{feed.title}</Text>
-		</View>
+		<FlashList
+			data={feed.entries}
+			numColumns={3}
+			keyExtractor={(item, index) => item.id || item.title || index.toString()}
+			renderItem={({ item }) => <OPDSLegacyEntryItem entry={item} />}
+			contentInsetAdjustmentBehavior="automatic"
+		/>
 	)
 }

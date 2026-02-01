@@ -1,9 +1,11 @@
+import { Api } from '@stump/sdk'
 import { useRouter } from 'expo-router'
 import partition from 'lodash/partition'
 import { ExternalLink, Rss, Server } from 'lucide-react-native'
 import { Fragment, useCallback, useEffect, useState } from 'react'
 import { Linking, useWindowDimensions, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
+import { parseXml } from 'react-native-turboxml'
 
 import EmptyState from '~/components/EmptyState'
 import { useOwlHeaderOffset } from '~/components/Owl'
@@ -141,6 +143,15 @@ export default function Screen() {
 					className="flex-1 bg-background"
 					contentInsetAdjustmentBehavior="automatic"
 				>
+					<Button
+						variant="brand"
+						size="lg"
+						roundness="full"
+						className="relative"
+						onPress={testOpds}
+					>
+						<Text>Test</Text>
+					</Button>
 					<View className="flex-1 items-start justify-start gap-5 bg-background p-6">
 						{stumpEnabled && (
 							<View className="flex w-full items-start gap-2">
@@ -183,4 +194,40 @@ export default function Screen() {
 			)}
 		</Fragment>
 	)
+}
+
+async function testOpds() {
+	const api = new Api({
+		baseURL: 'http://localhost:10801/opds/v1.2/catalog',
+		authMethod: 'basic',
+		shouldFormatURL: false,
+	})
+	api.basicAuth = {
+		username: 'oromei',
+		password: 'oromei',
+	}
+	try {
+		console.log('Testing OPDS Legacy API parsing...')
+		const jsParsingStart = Date.now()
+		const jsParsing = await api.opdsLegacy.catalog()
+		const jsParsingEnd = Date.now()
+
+		// const nativeParsingStart = Date.now()
+		// const navtiveParsing = parseXml(await api.opdsLegacy.catalogRaw())
+		// const nativeParsingEnd = Date.now()
+
+		// TODO: The native parsing was... slower?? For simplicity I'll defer this for now,
+		// both were in the 900-1100ms range which is so gross. The bulk of functionality
+		// can be roughed out without optimization ig
+		console.log('JS Parsing Time:', jsParsingEnd - jsParsingStart, 'ms', {
+			parsedValue: JSON.stringify(jsParsing, null, 2),
+		})
+		console.log('-----------------------------------')
+		// console.log('Raw catalog', {
+		// 	response: await api.opdsLegacy.catalogRaw(),
+		// })
+		// console.log('Native Parsing Time:', nativeParsingEnd - nativeParsingStart, 'ms', navtiveParsing)
+	} catch (err) {
+		console.error('Error testing OPDS Legacy API parsing:', err)
+	}
 }

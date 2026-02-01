@@ -3,6 +3,7 @@ import { Api } from '@stump/sdk'
 import { useRouter } from 'expo-router'
 import { KeyRound, Sliders, SquareX, Trash } from 'lucide-react-native'
 import { View } from 'react-native'
+import { match } from 'ts-pattern'
 
 import { usePreferencesStore } from '~/stores'
 import { useCacheStore } from '~/stores/cache'
@@ -52,13 +53,19 @@ export default function SavedServerListItem({ server, onEdit, onDelete, forceOPD
 
 	const router = useRouter()
 
+	const serverPath = match(server.kind)
+		.with('stump', () => (forceOPDS ? '/opds/[id]' : '/server/[id]'))
+		.with('opds', () => '/opds/[id]')
+		.with('opds-legacy', () => '/opds-legacy/[id]')
+		.exhaustive()
+
 	return (
 		<View className="w-full">
 			<ContextMenu
 				onPress={() =>
 					router.push({
 						// @ts-expect-error: It's fine
-						pathname: server.kind === 'stump' && !forceOPDS ? '/server/[id]' : '/opds/[id]',
+						pathname: serverPath,
 						params: {
 							id: server.id,
 						},

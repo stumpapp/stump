@@ -9,6 +9,7 @@ import {
 	JwtTokenPair,
 	LibraryAPI,
 	MediaAPI,
+	OPDSLegacyAPI,
 	OPDSV2API,
 	SeriesAPI,
 	ServerAPI,
@@ -503,6 +504,10 @@ export class Api {
 
 	get opds(): OPDSV2API {
 		return new OPDSV2API(this)
+	}
+
+	get opdsLegacy(): OPDSLegacyAPI {
+		return new OPDSLegacyAPI(this)
 	}
 
 	/**

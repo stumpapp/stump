@@ -262,6 +262,10 @@ export default function AddOrEditServerForm({
 								<Tabs.Trigger value="opds">
 									<Text>OPDS</Text>
 								</Tabs.Trigger>
+
+								<Tabs.Trigger value="opds-legacy">
+									<Text>OPDS (Legacy)</Text>
+								</Tabs.Trigger>
 							</Tabs.List>
 						</Tabs>
 					)}
@@ -557,7 +561,9 @@ const createSchema = (names: string[]) =>
 				message: 'Name already exists',
 			}),
 		url: z.string().url(),
-		kind: z.union([z.literal('stump'), z.literal('opds')]).default('stump'),
+		kind: z
+			.union([z.literal('stump'), z.literal('opds'), z.literal('opds-legacy')])
+			.default('stump'),
 		defaultServer: z.boolean().default(false),
 		stumpOPDS: z.boolean().default(false),
 		authMode: z

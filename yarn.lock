@@ -21399,11 +21399,6 @@ react-native-turbo-image@^1.23.1:
   resolved "https://registry.yarnpkg.com/react-native-turbo-image/-/react-native-turbo-image-1.23.1.tgz#ef56b4aa6efe169793795dfbd01a0b57f70762c1"
   integrity sha512-PXJO5x2mzrtfcyWaYrSFSMluYjYKKK+u6kPiw9Qk47JTOT/evNyBlMsTjbIWHlHYnb5eGTPhvoFy91csplyUkw==
 
-react-native-turboxml@^1.0.3:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/react-native-turboxml/-/react-native-turboxml-1.0.3.tgz#a89e190f5adad55276f2f641e14732714e146677"
-  integrity sha512-0SQSg09WoPYsAJFLW3W9zg3UtGkOFzeTmAh8Feh441i+vvx4NJro5J+fkU/PNzmnxj/DlkDYG8IyoGOnYZfDiQ==
-
 react-native-web@^0.21.0:
   version "0.21.2"
   resolved "https://registry.yarnpkg.com/react-native-web/-/react-native-web-0.21.2.tgz#0f6983dfea600d9cc1c66fda87ff9ca585eaa647"

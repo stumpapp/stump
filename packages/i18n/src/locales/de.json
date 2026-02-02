@@ -1,28 +1,28 @@
 {
 	"underConstruction": {
 		"heading": "Das ist unangenehm",
-		"message": "Diese Seite befindet sich noch in Entwicklung. Leider ist sie noch nicht ganz fertig, weshalb sie noch nicht angezeigt werden kann.",
+		"message": "Sie sind über eine Seite gestolpert, welche noch entwickelt wird. Ich würde sie gerne Ihnen zeigen, aber sie ist noch nicht ganz fertig.",
 		"homeLink": "Zur Startseite",
 		"githubLink": "GitHub Issue anzeigen"
 	},
 	"authScene": {
 		"claimHeading": "Server initialisieren",
-		"claimText": "Dieser Stump-Server ist noch nicht initialisiert. Benutze das untenstehende Formular, um ein Konto zu erstellen. Danach erhältst du vollen Zugriff auf alle Serverfunktionen.",
+		"claimText": "Dieser Stump-Server ist noch nicht initialisiert. Benutze das untenstehende Formular, um ein Konto zu erstellen. Danach erhalten Sie vollen Zugriff auf alle Serverfunktionen.",
 		"form": {
 			"validation": {
-				"missingUsername": "Der Benutzername ist erforderlich",
+				"missingUsername": "Ein Benutzername ist erforderlich",
 				"missingPassword": "Ein Passwort wird benötigt",
-				"usernameAlreadyExists": "Benutzername existiert bereits"
+				"usernameAlreadyExists": "Der Benutzername existiert bereits"
 			},
 			"labels": {
 				"username": "Benutzername",
 				"password": "Passwort"
 			},
 			"buttons": {
-				"createAccount": "Konto erstellen",
+				"createAccount": "Benutzerkonto erstellen",
 				"login": "Anmelden",
 				"loginWithOidc": "Mit OIDC einloggen",
-				"createAccountWithOidc": "Account mit OIDC erstellen"
+				"createAccountWithOidc": "Benutzerkonto mit OIDC erstellen"
 			}
 		},
 		"toasts": {
@@ -105,7 +105,7 @@
 				"admin": {
 					"label": "Administrator",
 					"placeholder": "Administrator",
-					"description": "Der Anzeigename für Administratoren dieses Buchclubs"
+					"description": "Der Anzeigename für Administratorenrolle dieses Buchclubs"
 				},
 				"creator": {
 					"label": "Ersteller",

@@ -1,13 +1,13 @@
 {
 	"underConstruction": {
 		"heading": "Das ist unangenehm",
-		"message": "Sie sind über eine Seite gestolpert, welche noch entwickelt wird. Ich würde sie gerne Ihnen zeigen, aber sie ist noch nicht ganz fertig.",
+		"message": "Du bist über eine Seite gestolpert, welche noch entwickelt wird. Ich würde sie gerne dir zeigen, aber sie ist noch nicht ganz fertig.",
 		"homeLink": "Zur Startseite",
 		"githubLink": "GitHub Issue anzeigen"
 	},
 	"authScene": {
 		"claimHeading": "Server initialisieren",
-		"claimText": "Dieser Stump-Server ist noch nicht initialisiert. Benutze das untenstehende Formular, um ein Konto zu erstellen. Danach erhalten Sie vollen Zugriff auf alle Serverfunktionen.",
+		"claimText": "Dieser Stump-Server ist noch nicht initialisiert. Benutze das untenstehende Formular, um ein Konto zu erstellen. Danach erhaltest du vollen Zugriff auf alle Serverfunktionen.",
 		"form": {
 			"validation": {
 				"missingUsername": "Ein Benutzername ist erforderlich",
@@ -75,11 +75,11 @@
 			"name": {
 				"label": "Name",
 				"placeholder": "Mein Buchclub",
-				"description": "Der Name des Buchclubs"
+				"description": "Der Name deines Buchclubs"
 			},
 			"description": {
 				"label": "Beschreibung",
-				"placeholder": "Ein \"Our Flag Means Death\" Fanclub. Wir lesen Piratenfiktion nach Herzenslust",
+				"placeholder": "Ein \"Unsere Flagge bedeutet den Tod\" Fanclub. Wir lesen Piratenfiktion nach Herzenslust",
 				"description": "Eine optionale, kurze Beschreibung des Buchclubs"
 			},
 			"is_private": {
@@ -110,7 +110,7 @@
 				"creator": {
 					"label": "Ersteller",
 					"placeholder": "Ersteller",
-					"description": "Der Anzeigename für den Ersteller dieses Buchclubs!"
+					"description": "Der Anzeigename für die Erstellerrolle dieses Buchclubs!"
 				}
 			},
 			"membershipOptions": {
@@ -121,7 +121,7 @@
 				},
 				"hideProgress": {
 					"label": "Fortschritt verbergen",
-					"description": "Wenn aktiviert, wird der Lesefortschritt vor anderen Mitgliedern des Buchclubs verborgen"
+					"description": "Wenn aktiviert, wird dein Lesefortschritt vor anderen Mitgliedern des Buchclubs verborgen"
 				}
 			}
 		},
@@ -144,23 +144,23 @@
 				{
 					"label": "Rollen",
 					"heading": "Rollen",
-					"description": "Passen Sie die Rollen im Buchclub an"
+					"description": "Passe die Rollen in deinem Buchclub an"
 				},
 				{
 					"label": "Mitgliedschaft",
 					"heading": "Mitgliedschaftseinstellungen",
-					"description": "Zusätzliche Optionen für den Buchclub"
+					"description": "Zusätzliche Optionen für deinen Buchclub"
 				},
 				{
 					"label": "Überprüfung",
 					"heading": "Überprüfung",
-					"description": "Clubeinstellungen vorm Erstellen nochmals prüfen"
+					"description": "Überprüfe deine Clubeinstellungen noch einmal vor dem Erstellen"
 				}
 			],
 			"review": {
 				"yes": "Ja",
 				"no": "Nein",
-				"none": "Überspringen",
+				"none": "Keine",
 				"labels": {
 					"name": "Name",
 					"description": "Beschreibung"
@@ -211,7 +211,7 @@
 		},
 		"scheduling/scheduler": {
 			"title": "Planer",
-			"description": "Erstellen und verwalten Sie die Lesetermine für diesen Buchclub"
+			"description": "Erstelle und verwalte die Lesetermine für diesen Buchclub"
 		},
 		"scheduling/options": {
 			"title": "Optionen",
@@ -236,26 +236,26 @@
 		"fields": {
 			"name": {
 				"label": "Name",
-				"description": "Der Anzeigename für diese Bibliothek",
+				"description": "Ein freundlicher Anzeigename für deine Bibliothek",
 				"placeholder": "Meine Bibliothek"
 			},
 			"path": {
 				"label": "Pfad",
-				"description": "Der Serverpfad zu dieser Bibliothek",
-				"placeholder": "/Pfad/zur/Bibliothek"
+				"description": "Der Pfad zu der Bibliothek, wie dieser auf deinem Server existiert",
+				"placeholder": "/Pfad/zu/der/Bibliothek"
 			},
 			"description": {
 				"label": "Beschreibung",
-				"description": "Eine kurze Beschreibung der Bibliothek",
+				"description": "Eine kurze Beschreibung deiner Bibliothek",
 				"placeholder": "Eine Bibliothek für alle meine Lieblingsbücher"
 			},
 			"tags": {
-				"label": "Schlagworte",
-				"description": "Wird verwendet, um eine Bibliothek zu kategorisieren oder Zugriffsrechte anzuwenden"
+				"label": "Tags",
+				"description": "Wird verwendet, um deine Bibliothek zu kategorisieren oder Zugriffsrechte anzuwenden"
 			},
 			"defaultLibraryView": {
-				"label": "Standard Bibliotheksansicht",
-				"description": "Konfigurieren Sie, welcher Reiter beim Öffnen dieser Bibliothek standardmäßig angezeigt wird",
+				"label": "Standard-Bibliotheksansicht",
+				"description": "Konfiguriere, welcher Reiter beim Öffnen dieser Bibliothek standardmäßig angezeigt wird",
 				"hideSeriesView": {
 					"label": "Serienreiter ausblenden",
 					"description": "Blende den Serienreiter in der Bibliotheksnavigation"
@@ -274,11 +274,11 @@
 			"readingSettings": {
 				"section": {
 					"heading": "Leseeinstellungen",
-					"description": "Standardeinstellungen des Readers für Bücher"
+					"description": "Standard-Readereinstellungen für Bücher"
 				},
 				"imageScaling": {
 					"label": "Bildskalierung",
-					"description": "Wie der Reader für bildbasierte Bücher, die Bilder auf die Seite skaliert"
+					"description": "Wie der bildbasierte Reader, die Bilder auf die Seite skaliert"
 				},
 				"readingMode": {
 					"label": "Standard-Reader",
@@ -295,7 +295,7 @@
 						"create": "Vorschaubilder konfigurieren",
 						"update": "Generierung"
 					},
-					"description": "Verbessert die Ladezeiten während des Durchsuchens der Bibliothek, indem Vorschaubilder für alle Bücher generiert werden",
+					"description": "Verbesser die Ladezeiten während des Durchsuchens deiner Bibliothek, indem du Vorschaubilder für all deine Bücher generierst",
 					"disabled": "Keine zusätzliche Konfiguration erforderlich, wenn die Vorschaubildgenerierung deaktiviert ist"
 				},
 				"enableSwitch": {
@@ -328,7 +328,7 @@
 				},
 				"scaleDimension": {
 					"label": "Auto-Skalierung",
-					"description": "Set either the width or height of the thumbnail and auto-scale the other to keep the original aspect ratio",
+					"description": "Setze entweder die Breite oder Höhe des Vorschaubildes und skaliere automatisch die anderen, um das ursprüngliche Seitenverhältnis beizubehalten",
 					"dimension": {
 						"label": "Abmessung",
 						"options": {
@@ -346,15 +346,15 @@
 				},
 				"quality": {
 					"label": "Qualität",
-					"description": "Die Qualität der erzeugten Vorschaubilder zwischen 0 und 1.0"
+					"description": "Die Qualität der erzeugten Vorschaubilder zwischen 1 und 100"
 				}
 			},
 			"ignoreRules": {
 				"section": {
-					"heading": "Dateien ignorieren",
-					"description": "Glob-Regeln definieren, um bestimmte Dateien oder Verzeichnisse während des Scan-Vorgangs zu ignorieren"
+					"heading": "Regeln ignorieren",
+					"description": "Glob-Regeln definieren, um bestimmte Dateien oder Verzeichnisse während des Scanvorganges zu ignorieren"
 				},
-				"noRules": "Es wurden keine Regeln zum Ignorieren von Dateien konfiguriert",
+				"noRules": "Keine Ignorierregeln wurden konfiguriert",
 				"save": "Änderungen speichern",
 				"addRule": {
 					"label": "Neue Regel",
@@ -391,7 +391,7 @@
 				},
 				"deleteRarAfter": {
 					"label": "Lösche RAR-Dateien nach der Konvertierung",
-					"description": "Löscht die originalen RAR/CBR-Dateien nach der Konvertierung. Dies kann nicht rückgängig gemacht werden"
+					"description": "Lösche die originalen RAR/CBR-Dateien nach der Konvertierung. Dies kann nicht rückgängig gemacht werden"
 				}
 			},
 			"scannerFeatures": {
@@ -402,11 +402,11 @@
 				},
 				"processMetadata": {
 					"label": "Metadaten verarbeiten",
-					"description": "Extrahiere Metadaten aus Bibliotheksdateien und speichere diese in der Datenbank"
+					"description": "Extrahiere alle Metadaten aus Bibliotheksdateien und speichere diese in der Datenbank"
 				},
 				"watch": {
 					"label": "Beobachten",
-					"description": "Überwache den Bibliotheksordner auf Änderungen und aktualisiere die Datenbank dementsprechend"
+					"description": "Beobachte den Bibliotheksordner auf Änderungen und aktualisiere die Datenbank dementsprechend"
 				},
 				"generateFileHashes": {
 					"label": "Datei-Hashes generieren",
@@ -422,23 +422,23 @@
 					"heading": "Organisierung",
 					"description": "Bestimme, welches Muster am besten der Organisation der Bibliothek entspricht",
 					"docs": [
-						"Nicht sicher, welches ausgewählt werden soll?",
-						"Hier",
-						"klicken, um weitere Informationen zu erhalten.",
-						"Diese Einstellung kann später nicht mehr geändert werden."
+						"Nicht sicher, welches ausgewählt werden soll? Klicke",
+						"hier",
+						", um weitere Informationen zu erhalten.",
+						"Diese Einstellung kann später nicht mehr geändert werden"
 					],
 					"disabled": "Diese Einstellung kann nicht geändert werden"
 				},
 				"options": {
 					"label": "Bibliotheksmuster",
-					"description": "Die Einstellung, welche festlegt, wie Stump Bibliotheken organisieren soll.",
+					"description": "Die Einstellung, welche festlegt, wie Stump deine Bibliothek organisieren soll",
 					"collectionPriority": {
 						"label": "Sammlungspriorität",
-						"description": "Ordner auf der obersten Ebene des Stammverzeichnisses der Bibliothek enthalten eine einzelne Serie"
+						"description": "Jeder Ordner auf der obersten Ebene des Stammverzeichnisses der Bibliothek enthalten eine einzelne Serie"
 					},
 					"seriesPriority": {
 						"label": "Serienpriorität",
-						"description": "Jeder Ordner auf jeder Ebene enthält eine einzelne Serie"
+						"description": "Jeder Ordner auf jeder Ebene enthält rekursiv eine einzelne Serie"
 					}
 				}
 			}
@@ -448,35 +448,35 @@
 				"create": "Nach der Erstellung scannen",
 				"update": "Nach jeder Veränderung scannen"
 			},
-			"description": "Indizieren der Bibliotheksdateien, um die Datenbank zu füllen"
+			"description": "Indiziere die Bibliotheksdateien, um die Datenbank auszufüllen"
 		}
 	},
 	"createLibraryScene": {
 		"heading": "Bibliothek erstellen",
-		"subtitle": "Bibliotheken dienen dazu, Ihre Bücher zusammenzufassen. Die Funktionsweise hierzu kann nachgeschlagen werden in der dafür",
-		"subtitleLink": "dazugehörigen Dokumentation",
+		"subtitle": "Bibliotheken dienen dazu, deine Bücher zusammenzufassen. Die Funktionsweise hierzu kann nachgeschlagen werden in der dafür",
+		"subtitleLink": "relevanten Dokumentation",
 		"form": {
 			"stepLabel": "Schritt",
 			"steps": [
 				{
 					"label": "Grundeinstellungen",
 					"heading": "Grundlegende Informationen",
-					"description": "Die Details zu dieser Bibliothek, einschließlich Name, Pfad und Beschreibung"
+					"description": "Die Einzelheiten zu dieser Bibliothek, einschließlich Name, Pfad und Beschreibung"
 				},
 				{
-					"label": "Wird gescannt",
-					"heading": "Scannen",
-					"description": "Einstellungen in Bezug darauf, wie Stumpf diese Bibliothek scannt"
+					"label": "Scannt",
+					"heading": "Scannt",
+					"description": "Einstellungen in Bezug, wie Stump diese Bibliothek scannt"
 				},
 				{
 					"label": "Vorschaubilder",
 					"heading": "Vorschaubilder",
-					"description": "Die Optionen, wie und ob Stump Vorschaubilder für diese Bibliothek erzeugt"
+					"description": "Die Optionen, ob und wie Stump Vorschaubilder für diese Bibliothek generiert"
 				},
 				{
 					"label": "Überprüfung",
 					"heading": "Überprüfung",
-					"description": "Bibliothekseinstellungen vorm Erstellen nochmals prüfen"
+					"description": "Überprüfe deine Bibliothekseinstellung vor dem Erstellen noch einmal"
 				}
 			],
 			"review": {
@@ -492,7 +492,7 @@
 					"name": "Name",
 					"path": "Pfad",
 					"description": "Beschreibung",
-					"tags": "Schlagworte",
+					"tags": "Tags",
 					"pattern": "Muster",
 					"ignoreRules": "Dateien ignorieren",
 					"convertRar": "Konvertiere RAR/CBR",

@@ -11,13 +11,13 @@ import { ImageBasedReader } from '~/components/book/reader'
 import { ImageReaderBookRef } from '~/components/book/reader/image/context'
 import { useResolveURL } from '~/components/opds/utils'
 import { OPDSLegacyStreamingContextValue } from '~/context/opdsLegacy'
-import { db, downloadedFiles } from '~/db'
+import { db, downloadedFiles, readProgress, syncStatus } from '~/db'
 import { useAppState } from '~/lib/hooks'
 import { useReaderStore } from '~/stores'
 import { useBookPreferences, useBookTimer } from '~/stores/reader'
 
 type Params = Omit<OPDSLegacyStreamingContextValue, 'pageCount'> & {
-	pageCount: string // conform to Route params
+	pageCount: string // conform to Route params, reqs being a string
 }
 
 export default function Screen() {
@@ -59,24 +59,11 @@ export default function Screen() {
 		(pageNumber: number) => {
 			const streamingURL = resolveUrl(contextValue.streamingURL)
 
-			// We look for two things really:
-			// 1. "{pageNumber}" -> Replace with page, based on:
-			// 2. ?zero_based=true|false OR zeroBased=true|false
-
 			const urlObj = new URL(streamingURL)
 			const zeroBasedParam =
 				urlObj.searchParams.get('zero_based') || urlObj.searchParams.get('zeroBased')
 			const isZeroBased = zeroBasedParam === 'true'
 			const actualPageNumber = isZeroBased ? pageNumber - 1 : pageNumber
-
-			console.log('getStreamURLForPage', {
-				streamingURL,
-				pageNumber,
-				zeroBasedParam,
-				isZeroBased,
-				actualPageNumber,
-				actualURL: streamingURL.replace('{pageNumber}', actualPageNumber.toString()),
-			})
 
 			if (streamingURL.includes('{pageNumber}')) {
 				return streamingURL.replace('{pageNumber}', actualPageNumber.toString())
@@ -105,9 +92,35 @@ export default function Screen() {
 	const {
 		preferences: { trackElapsedTime },
 	} = useBookPreferences({ book })
-	const { pause, resume, isRunning, reset } = useBookTimer(contextValue.id, {
+
+	const { pause, resume, isRunning, totalSeconds, reset } = useBookTimer(contextValue.entryId, {
 		enabled: trackElapsedTime,
 	})
+
+	const onPageChanged = useCallback(
+		async (pageNumber: number) => {
+			if (isLoadingRecord || !record) return
+			return db
+				.insert(readProgress)
+				.values({
+					bookId: record.id,
+					serverId: record.serverId,
+					page: pageNumber,
+					elapsedSeconds: totalSeconds,
+					lastModified: new Date(),
+				})
+				.onConflictDoUpdate({
+					target: readProgress.bookId,
+					set: {
+						page: pageNumber,
+						elapsedSeconds: totalSeconds,
+						lastModified: new Date(),
+						syncStatus: syncStatus.enum.UNSYNCED,
+					},
+				})
+		},
+		[isLoadingRecord, record, totalSeconds],
+	)
 
 	const onFocusedChanged = useCallback(
 		(focused: boolean) => {
@@ -164,22 +177,15 @@ export default function Screen() {
 		}
 	}, [])
 
-	console.log('Rendering OPDS Legacy Reader', {
-		contextValue,
-		book,
-	})
-
 	return (
 		<ImageBasedReader
 			serverId={serverId}
 			initialPage={1}
 			book={book}
-			// TODO: tthis throws so maybe a wrapper
 			pageURL={getStreamURLForPage}
 			requestHeaders={requestHeaders}
 			resetTimer={reset}
-			// TODO: offline tracking?
-			// onPageChanged={progressionURL ? onPageChanged : undefined}
+			onPageChanged={onPageChanged}
 			isOPDS
 		/>
 	)

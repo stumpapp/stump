@@ -2,11 +2,6 @@ import { Callout } from 'nextra/components'
 
 # EPUB Reader
 
-<Callout emoji="⚠️" type="warning">
-	The ebook reader is functional but still in active development. Some features may be missing or
-	work differently than expected. Improvements are planned for future releases.
-</Callout>
-
 The EPUB reader in Stump's mobile app is powered by Readium, providing a native reading experience for digital books. While still being refined, it offers essential reading functionality with customizable themes and settings.
 
 ## Layout and Navigation
@@ -23,12 +18,19 @@ The EPUB reader provides several customization options accessible through the se
 
 ### Visual Themes
 
-The reader includes several built-in themes for different reading preferences:
+The reader includes several built-in themes for different reading preferences. There are too many to enumerate here, however something more notable than the defaults is that you can create your own custom themes.
 
-- **Light**: Standard light theme with black text on white background
-- **Dark**: Dark theme for low-light reading
-- **Sepia**: Warm sepia tones for reduced eye strain
-- **Custom Themes**: Create and customize your own color schemes
+A custom theme allows you to configure:
+
+- Friendly name
+- Background color
+- Text color
+- Highlight color
+
+<Callout emoji="🎨" type="info">
+	Custom themes are stored locally on your device and are not synced across devices. If you would
+	like to see more advanced options for this feature, please reach out
+</Callout>
 
 ### Font Configuration
 
@@ -63,9 +65,7 @@ Toggle whether to respect the original formatting and styles defined by the book
 
 ## Navigation Features
 
-### Table of Contents
-
-Access the book's table of contents to jump to specific chapters or sections. The table of contents preserves the hierarchical structure of the book.
+A sheet accessible from the header controls provides a few different categories of information and navigation options:
 
 ### Book Overview
 
@@ -75,6 +75,20 @@ View book metadata including:
 - Title and author information
 - Publisher details
 - Book summary (when available)
+
+### Table of Contents
+
+Access the book's table of contents to jump to specific chapters or sections. The table of contents preserves the hierarchical structure of the book.
+
+### Annotations
+
+The annotations tab lists all types of annotations you've made in the book, including:
+
+- Highlights
+- Notes
+- Bookmarks
+
+There is a tab at the top for filtering by just specific types, but the default is to show all annotations at once
 
 ## Progress Tracking
 
@@ -91,7 +105,9 @@ Like the image-based reader, the EPUB reader also supports:
 	The EPUB reader is actively being improved. Current limitations include:
 </Callout>
 
-- **Annotations**: Text highlighting and note-taking are not yet supported
 - **Advanced Navigation**: Some navigation features are still in development
 - **Search**: In-book text search is not yet available
-- **Text Selection**: Limited text selection and copying functionality
+- **Parity with Image Reader**: Some features available in the image-based reader are not yet implemented for EPUBs:
+  - Reading timer settings
+  - Incognito mode
+- **General UX and Stability**: Ongoing improvements to performance and user experience, annotation management, etc

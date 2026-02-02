@@ -2,7 +2,12 @@ import { AxiosRequestConfig } from 'axios'
 import { XMLParser } from 'fast-xml-parser'
 
 import { APIBase } from '../base'
-import { legacyFeed, OPDSLegacyFeed } from '../types/opds-legacy'
+import {
+	legacyFeed,
+	OPDSLegacyFeed,
+	OPDSLegacyOpenSearchDoc,
+	openSearchDoc,
+} from '../types/opds-legacy'
 import { resolveUrl, toUrlParams, urlWithParams } from './utils'
 
 type OPDSPageQuery = {
@@ -20,13 +25,6 @@ export class OPDSLegacyAPI extends APIBase {
 		return {
 			baseURL: this.serviceURL.replace(/\/api(\/.+)?$/, ''),
 		}
-	}
-
-	async catalogRaw(): Promise<string> {
-		const { data: xmlData } = await this.axios.get(this.api.rootURL, {
-			baseURL: undefined,
-		})
-		return String(xmlData)
 	}
 
 	async catalog(): Promise<OPDSLegacyFeed> {
@@ -53,12 +51,15 @@ export class OPDSLegacyAPI extends APIBase {
 		return legacyFeed.parse(data.feed)
 	}
 
-	async feedRaw(url: string, params?: OPDSPageQuery): Promise<string> {
+	async searchDocument(url: string): Promise<OPDSLegacyOpenSearchDoc> {
 		const absoluteUrl = resolveUrl(url, this.api.rootURL)
-		const resolvedURL = urlWithParams(absoluteUrl, toUrlParams(params))
-		const { data: xmlData } = await this.axios.get(resolvedURL, {
+		const { data: xmlData } = await this.axios.get(absoluteUrl, {
 			baseURL: undefined,
 		})
-		return String(xmlData)
+		const data = this.xmlParser.parse(xmlData)
+		if (typeof data !== 'object' || data?.['OpenSearchDescription'] == null) {
+			throw new Error('Invalid OPDS OpenSearch document format')
+		}
+		return openSearchDoc.parse(data['OpenSearchDescription'])
 	}
 }

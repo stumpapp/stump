@@ -4,8 +4,17 @@ import { Callout } from 'nextra/components'
 
 This guide is very young and so won't cover much ground yet. As I notice common issues or points of confusion, I'll try my best to update this page accordingly.
 
+<Callout emoji="ℹ️" type="info">
+	Most error pages in the mobile app will have a button to quickly open an issue with relevant
+	details
+</Callout>
+
 ## I keep getting `Incompatible server` errors
 
 The mobile app is alpha software and only available on TestFlight and Google Play Beta at the moment. In order to facilitate development, this means that those versions of the app are only compatible with more experimental versions of the Stump server.
 
 If you are running a stable version of the Stump server earlier than `0.1.0`, which at the time of writing doesn't exist yet, you will see this error. The version you are running is not compatible with the API that the mobile app expects. The solution is to migrate to either `nightly` or `experimental`. I cannot guarantee the stability of these builds, this is the nature of alpha software.
+
+## I get validation errors when browsing my OPDS catalog
+
+It's possible that either the app is being overly strict in its validation of a quirk in your OPDS server, or that your OPDS server is not fully compliant with the OPDS specification. Either way, please open an issue on [GitHub](https://github.com/stumpapp/stump/issues/new/choose) so we can work through the issue together.

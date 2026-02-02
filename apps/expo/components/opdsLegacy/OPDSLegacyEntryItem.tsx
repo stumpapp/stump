@@ -1,9 +1,11 @@
 import { useSDK } from '@stump/client'
 import { isLegacyDownloadableLink, isLegacyNavigationLink, OPDSLegacyEntry } from '@stump/sdk'
 import { useRouter } from 'expo-router'
+import { Download, Radio, Trash } from 'lucide-react-native'
 import { Image, Platform, Pressable, View } from 'react-native'
 
-import { getLegacyPageStreamingURL, getLegacyStreamingContextValue } from '~/context/opdsLegacy'
+import { getLegacyStreamingContextValue } from '~/context/opdsLegacy'
+import { useIsLegacyOPDSEntryDownloaded, useOPDSDownload } from '~/lib/hooks'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { usePreferencesStore } from '~/stores'
 
@@ -11,7 +13,8 @@ import { useActiveServer } from '../activeServer'
 import { useFileExplorerAssets } from '../fileExplorer'
 import { ThumbnailImage, TurboImage } from '../image'
 import { useResolveURL } from '../opds/utils'
-import { Text } from '../ui'
+import { Icon, Text } from '../ui'
+import { ContextMenu } from '../ui/context-menu/context-menu'
 
 type Props = {
 	entry: OPDSLegacyEntry
@@ -24,18 +27,22 @@ export default function OPDSEntry({ entry }: Props) {
 		activeServer: { id: serverID },
 	} = useActiveServer()
 
+	const { downloadBook, deleteBook } = useOPDSDownload({ serverId: serverID })
+
+	const isDownloaded = useIsLegacyOPDSEntryDownloaded(entry.id, serverID)
+
 	const assets = useFileExplorerAssets()
 	const iconSource = getIconSource(entry, colorScheme, assets)
 
 	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
 
 	const navigateUrl = entry.links.find(isLegacyNavigationLink)?.href || ''
-	const downloadUrl = entry.links.find(isLegacyDownloadableLink)?.href || ''
+	const downloadLink = entry.links.find(isLegacyDownloadableLink)
 	const thumbnailUrl = entry.links.find(
 		(link) => link.rel === 'http://opds-spec.org/image/thumbnail',
 	)?.href
-	// const streamUrl = getLegacyPageStreamingURL(entry, sdk?.rootURL)
 	const streamingContext = getLegacyStreamingContextValue(entry, sdk?.rootURL)
+	const isStreamable = !!streamingContext
 
 	const friendlyName = entry.title
 
@@ -52,7 +59,6 @@ export default function OPDSEntry({ entry }: Props) {
 				},
 			})
 		} else if (streamingContext) {
-			// TODO: Check acquisition type to determine if we can stream?
 			router.push({
 				pathname: `/opds-legacy/[id]/read`,
 				params: {
@@ -64,57 +70,135 @@ export default function OPDSEntry({ entry }: Props) {
 					pageCount: streamingContext.pageCount.toString(),
 				},
 			})
-		} else if (downloadUrl) {
-			console.log('Downloading from URL:', resolveUrl(downloadUrl))
 		} else {
-			console.warn('No valid action for this entry.')
+			console.warn('No valid pressable action for this entry.')
 		}
 	}
 
 	return (
-		<Pressable onPress={onPress}>
-			{({ pressed }) => (
-				<View className="items-center" style={{ opacity: pressed ? 0.75 : 1 }}>
-					{!thumbnailUrl &&
-						Platform.select({
-							ios: (
-								<TurboImage
-									source={{ uri: iconSource.localUri || iconSource.uri }}
-									style={{ width: 100, height: 100 }}
-									resize={100 * 1.5}
-								/>
-							),
-							android: (
-								<Image
-									// @ts-expect-error: It's fine
-									source={iconSource}
-									style={{ width: 100, height: 100 }}
-								/>
-							),
-						})}
+		<ContextMenu
+			onPress={onPress}
+			groups={[
+				{
+					items: [
+						{
+							label: 'Download',
+							disabled: !downloadLink || isDownloaded,
+							onPress: () => {
+								if (!downloadLink) return
 
-					{thumbnailUrl && (
-						<ThumbnailImage
-							source={{
-								uri: resolveUrl(thumbnailUrl),
-								headers: {
-									...sdk.customHeaders,
-									Authorization: sdk.authorizationHeader || '',
-								},
-							}}
-							resizeMode="stretch"
-							size={{ height: 70 / thumbnailRatio, width: 70 }}
-						/>
-					)}
+								downloadBook({
+									id: entry.id,
+									publicationUrl: downloadLink.href,
+									publication: {
+										metadata: {
+											title: entry.title,
+											subtitle: entry.content,
+											modified: entry.updated,
+										},
+										// Note: The OPDS download flow was built around OPDS v2, and so this
+										// is a bit of a translation hack to get it working without having to
+										// comletely rewrite the flow for legacy OPDS
+										links: [
+											{
+												title: downloadLink.title,
+												href: downloadLink.href,
+												rel: 'http://opds-spec.org/acquisition',
+												type: downloadLink.type,
+											},
+										],
+									},
+								})
+							},
+							icon: {
+								ios: 'arrow.down.circle',
+								android: Download,
+							},
+						},
+					],
+				},
+				...(isDownloaded
+					? [
+							{
+								items: [
+									{
+										label: 'Delete Download',
+										onPress: () => {
+											deleteBook({
+												id: entry.id,
+												publicationUrl: downloadLink?.href || '',
+											})
+										},
+										icon: {
+											ios: 'trash',
+											android: Trash,
+										},
+										role: 'destructive',
+									} as const,
+								],
+							},
+						]
+					: []),
+			]}
+		>
+			<Pressable onPress={onPress}>
+				{({ pressed }) => (
+					<View className="items-center" style={{ opacity: pressed ? 0.75 : 1 }}>
+						{!thumbnailUrl &&
+							Platform.select({
+								ios: (
+									<TurboImage
+										source={{ uri: iconSource.localUri || iconSource.uri }}
+										style={{ width: 100, height: 100 }}
+										resize={100 * 1.5}
+									/>
+								),
+								android: (
+									<Image
+										// @ts-expect-error: It's fine
+										source={iconSource}
+										style={{ width: 100, height: 100 }}
+									/>
+								),
+							})}
 
-					<View>
-						<Text className="text-base font-medium" numberOfLines={1}>
-							{friendlyName}
-						</Text>
+						{thumbnailUrl && (
+							<View className="relative">
+								<ThumbnailImage
+									source={{
+										uri: resolveUrl(thumbnailUrl),
+										headers: {
+											...sdk.customHeaders,
+											Authorization: sdk.authorizationHeader || '',
+										},
+									}}
+									resizeMode="stretch"
+									size={{ height: 70 / thumbnailRatio, width: 70 }}
+								/>
+
+								{isStreamable && (
+									<View className="absolute left-1 top-1 rounded-full bg-black/60 p-1">
+										<Icon as={Radio} size={12} color="white" />
+									</View>
+								)}
+
+								{isDownloaded && (
+									<View className="absolute bottom-1 left-1 rounded-full bg-black/60 p-1">
+										<Download size={12} color="white" />
+									</View>
+								)}
+							</View>
+						)}
+
+						<View>
+							<Text className="text-base font-medium" numberOfLines={1}>
+								{friendlyName}
+							</Text>
+						</View>
 					</View>
-				</View>
-			)}
-		</Pressable>
+				)}
+			</Pressable>
+		</ContextMenu>
 	)
 }
 

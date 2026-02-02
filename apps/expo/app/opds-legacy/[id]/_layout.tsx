@@ -1,13 +1,7 @@
-import {
-	queryClient,
-	SDKContext,
-	StumpClientContextProvider,
-	useClientContext,
-	useSDK,
-} from '@stump/client'
+import { SDKContext, StumpClientContextProvider, useClientContext, useSDK } from '@stump/client'
 import { Api } from '@stump/sdk'
 import { useQuery } from '@tanstack/react-query'
-import { Redirect, Stack, useLocalSearchParams, useRouter } from 'expo-router'
+import { Redirect, Stack, useLocalSearchParams } from 'expo-router'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { ActiveServerContext, useActiveServer } from '~/components/activeServer'
@@ -15,7 +9,7 @@ import { FileExplorerAssetsProvider } from '~/components/fileExplorer'
 import { FullScreenLoader } from '~/components/ui'
 import {
 	feedLegacyHasSearch,
-	getLegacySearchURL,
+	getLegacySearchDocumentURL,
 	OPDSLegacyFeedContext,
 } from '~/context/opdsLegacy'
 import { getOPDSInstance, isOPDSAuthError } from '~/lib/sdk/auth'
@@ -43,6 +37,14 @@ function OPDSFeedProvider({ children }: OPDSFeedProviderProps) {
 		throwOnError: false,
 	})
 
+	const searchDocumentURL = getLegacySearchDocumentURL(catalog, sdk?.rootURL)
+
+	const { data: searchDocument } = useQuery({
+		enabled: !!searchDocumentURL,
+		queryKey: ['searchDocument', searchDocumentURL],
+		queryFn: () => sdk.opdsLegacy.searchDocument(searchDocumentURL!),
+	})
+
 	useEffect(() => {
 		if (!error) return
 		if (isOPDSAuthError(error)) {
@@ -52,18 +54,22 @@ function OPDSFeedProvider({ children }: OPDSFeedProviderProps) {
 
 	const feedContextValue = useMemo(
 		() => ({
-			catalog: catalog ?? null,
-			searchURL: getLegacySearchURL(catalog, sdk?.rootURL),
+			catalogMeta: catalog
+				? {
+						id: catalog.id,
+						url: activeServer?.url,
+						title: catalog.title,
+						author: catalog.author,
+					}
+				: null,
+			searchDoc: searchDocument ?? null,
 			hasSearch: feedLegacyHasSearch(catalog),
 			isLoading: isCatalogLoading,
 			error: error ?? null,
 			refetch,
 		}),
-		[catalog, sdk?.rootURL, isCatalogLoading, error, refetch],
+		[catalog, searchDocument, isCatalogLoading, error, refetch, activeServer?.url],
 	)
-	console.log('OPDSFeedProvider render', {
-		feedContextValue,
-	})
 
 	if (isCatalogLoading && !catalog) {
 		return <FullScreenLoader label="Loading feed..." />
@@ -117,8 +123,7 @@ export default function Screen() {
 
 	const onAuthError = useCallback(() => {
 		removeInstanceFromCache(`${serverID}-opds`)
-		// TODO: Better handling here
-		throw new Error('OPDS Authentication required')
+		throw new Error('This OPDS server requires authentication')
 	}, [serverID, removeInstanceFromCache])
 
 	if (!activeServer) {

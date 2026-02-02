@@ -63,7 +63,6 @@ export function useImageSizeCache({ windowSize = 10 }: Params = {}) {
 		const sizes = imageSizes?.slice(start, end) || []
 		const allAlreadyLoaded = sizes.every(Boolean)
 		if (allAlreadyLoaded) {
-			console.log('allAlreadyLoaded')
 			return
 		}
 

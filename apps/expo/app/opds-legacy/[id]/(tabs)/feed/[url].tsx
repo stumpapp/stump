@@ -1,62 +1,57 @@
 import { FlashList } from '@shopify/flash-list'
-import { useRefetch, useSDK } from '@stump/client'
-import { useQuery } from '@tanstack/react-query'
+import { useRefetch } from '@stump/client'
 import { useLocalSearchParams } from 'expo-router'
-import { XMLParser } from 'fast-xml-parser'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { View } from 'react-native'
 
-import { MaybeErrorFeed } from '~/components/opds'
+import EmptyState from '~/components/EmptyState'
+import { MaybeErrorLegacyFeed } from '~/components/opdsLegacy'
 import OPDSLegacyEntryItem from '~/components/opdsLegacy/OPDSLegacyEntryItem'
+import RefreshControl from '~/components/RefreshControl'
+import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
+import { useLegacyOPDSFeed } from '~/lib/hooks'
 
 export default function Screen() {
 	const { url: feedURL } = useLocalSearchParams<{ url: string }>()
-	const { sdk } = useSDK()
-	// TODO: Pagination, probably will just make a special useLegacyOPDSFeed hook that will
-	// handle the start/previous/next links to get infinite scrolling working
 	const {
-		data: feed,
+		feed, // The current page feed
+		entries,
 		refetch,
 		isLoading,
 		error,
-	} = useQuery({
-		queryKey: [sdk.opds.keys.feed, feedURL],
-		queryFn: () => sdk.opdsLegacy.feed(feedURL),
-		throwOnError: false,
-	})
+		fetchNextPage,
+		hasNextPage,
+	} = useLegacyOPDSFeed({ url: feedURL })
 
-	const insets = useSafeAreaInsets()
 	const [isRefetching, onRefetch] = useRefetch(refetch)
 
-	// useFeedTitle(feed)
+	const onEndReached = () => {
+		if (hasNextPage) {
+			fetchNextPage()
+		}
+	}
 
 	if (isLoading) return null
 
-	if (!feed || !!error) return <MaybeErrorFeed error={error} onRetry={onRefetch} />
+	if (!feed || !!error) return <MaybeErrorLegacyFeed error={error} onRetry={onRefetch} />
 
-	// if (isPublicationFeed) {
-	// 	return <OPDSPublicationFeed feed={feed} onRefresh={refetch} isRefreshing={isRefetching} />
-	// } else {
-	// 	return (
-	// 		<ScrollView
-	// 			className="flex-1 bg-background"
-	// 			refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={onRefetch} />}
-	// 			contentInsetAdjustmentBehavior="automatic"
-	// 			contentContainerStyle={{
-	// 				paddingBottom: insets.bottom,
-	// 			}}
-	// 		>
-	// 			<OPDSFeed feed={feed} />
-	// 		</ScrollView>
-	// 	)
-	// }
+	if (!entries.length) {
+		return <EmptyState title="Nothing to show" message="No entries were returned for this feed" />
+	}
 
 	return (
 		<FlashList
-			data={feed.entries}
+			data={entries}
 			numColumns={3}
 			keyExtractor={(item, index) => item.id || item.title || index.toString()}
 			renderItem={({ item }) => <OPDSLegacyEntryItem entry={item} />}
+			contentContainerStyle={{
+				paddingVertical: 16,
+			}}
 			contentInsetAdjustmentBehavior="automatic"
+			onEndReachedThreshold={ON_END_REACHED_THRESHOLD}
+			onEndReached={onEndReached}
+			refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={onRefetch} />}
+			ItemSeparatorComponent={() => <View className="h-4" />}
 		/>
 	)
 }

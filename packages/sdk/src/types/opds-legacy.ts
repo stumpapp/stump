@@ -10,6 +10,7 @@ const linkType = z
 		'application/zip',
 		'application/epub+zip',
 		'application/opensearchdescription+xml',
+		'application/opds+json',
 	])
 	.or(
 		z.string().refine((val) => val.startsWith('image/'), { message: 'Must be a valid MIME type' }),
@@ -32,6 +33,7 @@ const linkRel = z.enum([
 	'http://opds-spec.org/image/thumbnail', // thumbnail
 	'http://vaemendis.net/opds-pse/stream', // PSE stream
 	'search',
+	'alternate', // e.g., link for different OPDS feed or version
 ])
 
 export const isPseStreamLink = (link: OPDSLegacyLink) =>
@@ -94,3 +96,22 @@ export const legacyFeed = z
 		entries: Array.isArray(obj.entry) ? obj.entry : [obj.entry],
 	}))
 export type OPDSLegacyFeed = z.infer<typeof legacyFeed>
+
+const openSearchUrl = z.object({
+	type: z.string(),
+	template: z.string(),
+})
+
+export const openSearchDoc = z
+	.object({
+		ShortName: z.string(),
+		Description: z.string(),
+		Url: z.union([openSearchUrl, z.array(openSearchUrl)]),
+	})
+	.transform((obj) => ({
+		// Note: Honestly I did not check the spec for whether multiple URLs are allowed, but just anticipate
+		// funk from different implementations
+		...omit(obj, ['Url']),
+		Urls: Array.isArray(obj.Url) ? obj.Url : [obj.Url],
+	}))
+export type OPDSLegacyOpenSearchDoc = z.infer<typeof openSearchDoc>

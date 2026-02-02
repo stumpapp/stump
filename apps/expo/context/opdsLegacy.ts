@@ -1,11 +1,15 @@
-import { isPseStreamLink, resolveUrl } from '@stump/sdk'
+import { isPseStreamLink, OPDSLegacyOpenSearchDoc, resolveUrl } from '@stump/sdk'
 import { OPDSLegacyEntry, OPDSLegacyFeed } from '@stump/sdk'
 import { QueryObserverResult, RefetchOptions } from '@tanstack/react-query'
 import { createContext, useContext } from 'react'
 
+export type OPDSLegacyCatalogMeta = Pick<OPDSLegacyFeed, 'id' | 'title' | 'author'> & {
+	url: string | undefined
+}
+
 export type OPDSLegacyFeedContextValue = {
-	catalog: OPDSLegacyFeed | null
-	searchURL: string | undefined
+	catalogMeta: OPDSLegacyCatalogMeta | null
+	searchDoc: OPDSLegacyOpenSearchDoc | null
 	hasSearch: boolean
 	isLoading: boolean
 	error: unknown | null
@@ -24,7 +28,7 @@ export const useOPDSLegacyFeedContext = () => {
 	return context
 }
 
-export const getLegacySearchURL = (
+export const getLegacySearchDocumentURL = (
 	feed: OPDSLegacyFeed | null | undefined,
 	rootURL: string | undefined,
 ) => {
@@ -72,23 +76,10 @@ export const getLegacyStreamingContextValue = (
 	}
 
 	const pageCountLink = entry.links.find(isPseStreamLink)
-	if (!pageCountLink) {
-		console.log('getLegacyStreamingContextValue: No page count link found')
-		return null
-	}
-	const pageCount = pageCountLink['pse:count']
-	if (pageCount == null) {
-		console.log('getLegacyStreamingContextValue: No page count found on link', {
-			pageCountLink,
-		})
-		return null
-	}
+	if (!pageCountLink) return null
 
-	console.log('getLegacyStreamingContextValue', {
-		entryId: entry.id,
-		streamingURL,
-		pageCount,
-	})
+	const pageCount = pageCountLink['pse:count']
+	if (pageCount == null) return null
 
 	return {
 		entryId: entry.id,

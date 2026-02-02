@@ -1,20 +1,27 @@
 import { FlashList } from '@shopify/flash-list'
 import { useRefetch } from '@stump/client'
+import { useLocalSearchParams } from 'expo-router'
 import { View } from 'react-native'
 
-import { useActiveServer } from '~/components/activeServer'
 import ChevronBackLink from '~/components/ChevronBackLink'
-import { MaybeErrorLegacyFeed, OPDSLegacyEntryItem } from '~/components/opdsLegacy'
+import EmptyState from '~/components/EmptyState'
+import { MaybeErrorFeed } from '~/components/opds'
+import { OPDSLegacyEntryItem } from '~/components/opdsLegacy'
 import RefreshControl from '~/components/RefreshControl'
-import { FullScreenLoader } from '~/components/ui'
 import { useOPDSLegacyFeedContext } from '~/context/opdsLegacy'
 import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
 import { useLegacyOPDSFeed } from '~/lib/hooks'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
+import { constructLegacySearchURL } from '~/lib/opdsUtils'
 
 export default function Screen() {
-	const { activeServer } = useActiveServer()
-	const { catalogMeta } = useOPDSLegacyFeedContext()
+	const { query } = useLocalSearchParams<{ query: string }>()
+	const { searchDoc } = useOPDSLegacyFeedContext()
+
+	const firstSearchUrl = searchDoc?.Urls.at(0)?.template || ''
+	const feedURL =
+		firstSearchUrl && query ? constructLegacySearchURL(firstSearchUrl, query) : undefined
+
 	const {
 		feed, // The current page feed
 		entries,
@@ -23,11 +30,12 @@ export default function Screen() {
 		error,
 		fetchNextPage,
 		hasNextPage,
-	} = useLegacyOPDSFeed({ url: catalogMeta?.url || '' })
+	} = useLegacyOPDSFeed({ url: feedURL })
+
 	const [isRefetching, onRefetch] = useRefetch(refetch)
 
 	useDynamicHeader({
-		title: activeServer?.name || 'OPDS Feed',
+		title: query || 'Search Results',
 		headerLeft: () => <ChevronBackLink />,
 	})
 
@@ -37,9 +45,13 @@ export default function Screen() {
 		}
 	}
 
-	if (isLoading) return <FullScreenLoader label="Loading..." />
+	if (isLoading) return null
 
-	if (!feed || !!error) return <MaybeErrorLegacyFeed error={error} onRetry={onRefetch} />
+	if (!feed || !!error) return <MaybeErrorFeed error={error} onRetry={onRefetch} />
+
+	if (!entries.length) {
+		return <EmptyState title="Empty Feed" message="Your search returned no results" />
+	}
 
 	return (
 		<FlashList
@@ -50,7 +62,7 @@ export default function Screen() {
 			contentContainerStyle={{
 				paddingVertical: 16,
 			}}
-			contentInsetAdjustmentBehavior="always"
+			contentInsetAdjustmentBehavior="automatic"
 			onEndReachedThreshold={ON_END_REACHED_THRESHOLD}
 			onEndReached={onEndReached}
 			refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={onRefetch} />}

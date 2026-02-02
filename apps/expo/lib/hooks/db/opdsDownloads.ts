@@ -28,6 +28,14 @@ export type UseOPDSDownloadParams = {
 	serverId?: string
 }
 
+/**
+ * A hook to determine if an OPDS v2.0 publication is downloaded. For OPDS v1.2, use {@link useIsLegacyOPDSEntryDownloaded}
+ *
+ * @param publicationUrl The URL at which the book can be downloaded
+ * @param metadata Any metadata present which will be used for display purposes offline
+ * @param serverID The server ID to check against. If not provided, will use the active server
+ * @returns
+ */
 export function useIsOPDSPublicationDownloaded(
 	publicationUrl: string,
 	metadata: OPDSMetadata | null | undefined,
@@ -56,6 +64,38 @@ export function useIsOPDSPublicationDownloaded(
 	return isDownloaded
 }
 
+/**
+ * A hook to determine if a legacy OPDS v1.2 entry is downloaded. For OPDS v2.0, use {@link useIsOPDSPublicationDownloaded}
+ *
+ * @param entryId The ID of the entry as pulled from the XML
+ * @param serverID The server ID to check against. If not provided, will use the active server
+ */
+export function useIsLegacyOPDSEntryDownloaded(entryId: string, serverID?: string) {
+	const activeServerCtx = useActiveServerSafe()
+	const effectiveServerID = serverID ?? activeServerCtx?.activeServer.id
+
+	const {
+		data: [downloadedFile],
+	} = useLiveQuery(
+		db
+			.select({ id: downloadedFiles.id })
+			.from(downloadedFiles)
+			.where(
+				and(eq(downloadedFiles.id, entryId), eq(downloadedFiles.serverId, effectiveServerID || '')),
+			)
+			.limit(1),
+	)
+	const isDownloaded = !!downloadedFile as boolean
+
+	return isDownloaded
+}
+
+/**
+ * A hook to manage OPDS book downloads, including downloading and deleting books.
+ *
+ * Note: This hook is largely centered around OPDS v2.0 interactions. For legacy OPDS v1.2 support,
+ * there were a few tweaks that were made, particularly around book idents.
+ */
 export function useOPDSDownload({ serverId }: UseOPDSDownloadParams = {}) {
 	const activeServerCtx = useActiveServerSafe()
 	const serverID = serverId ?? activeServerCtx?.activeServer.id
@@ -70,19 +110,29 @@ export function useOPDSDownload({ serverId }: UseOPDSDownloadParams = {}) {
 		}
 	}, [serverID])
 
+	type DeleteParams = {
+		/**
+		 * The ID of the book to delete. If not provided, it will be derived from the publicationUrl and metadata.
+		 *
+		 * Note: This should only be used for legacy OPDS v1.2 entries that have a stable ID derived directly from
+		 * the feed.
+		 */
+		id?: string
+		/**
+		 * The URL at which the publication can be downloaded. If `id` is not provided, this will be used to
+		 * generate the book ID.
+		 */
+		publicationUrl: string
+		metadata?: OPDSMetadata | null
+	}
+
 	const deleteMutation = useMutation({
-		mutationFn: async ({
-			publicationUrl,
-			metadata,
-		}: {
-			publicationUrl: string
-			metadata?: OPDSMetadata | null
-		}) => {
+		mutationFn: async ({ id, publicationUrl, metadata }: DeleteParams) => {
 			if (!serverID) {
 				throw new Error('No active server available for deleting downloads')
 			}
 
-			const bookID = getPublicationId(publicationUrl, metadata)
+			const bookID = id || getPublicationId(publicationUrl, metadata)
 			const file = await DownloadRepository.getFile(bookID, serverID)
 			if (!file) {
 				console.warn('File not found in download store')
@@ -133,8 +183,7 @@ export function useOPDSDownload({ serverId }: UseOPDSDownloadParams = {}) {
 
 	return {
 		downloadBook: enqueueOPDSBook,
-		deleteBook: (publicationUrl: string, metadata?: OPDSMetadata | null) =>
-			deleteMutation.mutateAsync({ publicationUrl, metadata }),
+		deleteBook: (params: DeleteParams) => deleteMutation.mutateAsync(params),
 		isDownloading: Boolean(queueCounts.pending + queueCounts.downloading > 0),
 		isDeleting: deleteMutation.isPending,
 		deleteError: deleteMutation.error,

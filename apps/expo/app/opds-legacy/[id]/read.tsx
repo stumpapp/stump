@@ -1,0 +1,191 @@
+import { useSDK } from '@stump/client'
+import { eq } from 'drizzle-orm'
+import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
+import { useKeepAwake } from 'expo-keep-awake'
+import * as NavigationBar from 'expo-navigation-bar'
+import { useLocalSearchParams } from 'expo-router'
+import { useCallback, useEffect, useMemo } from 'react'
+
+import { useActiveServer } from '~/components/activeServer'
+import { ImageBasedReader } from '~/components/book/reader'
+import { ImageReaderBookRef } from '~/components/book/reader/image/context'
+import { useResolveURL } from '~/components/opds/utils'
+import { OPDSLegacyStreamingContextValue } from '~/context/opdsLegacy'
+import { db, downloadedFiles } from '~/db'
+import { useAppState } from '~/lib/hooks'
+import { useReaderStore } from '~/stores'
+import { useBookPreferences, useBookTimer } from '~/stores/reader'
+
+type Params = Omit<OPDSLegacyStreamingContextValue, 'pageCount'> & {
+	pageCount: string // conform to Route params
+}
+
+export default function Screen() {
+	useKeepAwake()
+
+	const params = useLocalSearchParams<Params>()
+
+	const contextValue = useMemo(
+		() => ({
+			...params,
+			pageCount: getValidNumber(params.pageCount),
+		}),
+		[params],
+	)
+
+	const { sdk } = useSDK()
+	const {
+		activeServer: { id: serverId },
+	} = useActiveServer()
+	const {
+		data: [record],
+		updatedAt,
+	} = useLiveQuery(
+		db.select().from(downloadedFiles).where(eq(downloadedFiles.id, params.entryId)).limit(1),
+		[params.entryId],
+	)
+	const isLoadingRecord = updatedAt == null
+
+	const resolveUrl = useResolveURL()
+
+	/**
+	 * Get the streaming URL for a specific page
+	 *
+	 * @param pageNumber 1-based page
+	 * @returns streaming URL for the page
+	 * @throws Error if the streaming URL format is unsupported or the URL is not valid
+	 */
+	const getStreamURLForPage = useCallback(
+		(pageNumber: number) => {
+			const streamingURL = resolveUrl(contextValue.streamingURL)
+
+			// We look for two things really:
+			// 1. "{pageNumber}" -> Replace with page, based on:
+			// 2. ?zero_based=true|false OR zeroBased=true|false
+
+			const urlObj = new URL(streamingURL)
+			const zeroBasedParam =
+				urlObj.searchParams.get('zero_based') || urlObj.searchParams.get('zeroBased')
+			const isZeroBased = zeroBasedParam === 'true'
+			const actualPageNumber = isZeroBased ? pageNumber - 1 : pageNumber
+
+			console.log('getStreamURLForPage', {
+				streamingURL,
+				pageNumber,
+				zeroBasedParam,
+				isZeroBased,
+				actualPageNumber,
+				actualURL: streamingURL.replace('{pageNumber}', actualPageNumber.toString()),
+			})
+
+			if (streamingURL.includes('{pageNumber}')) {
+				return streamingURL.replace('{pageNumber}', actualPageNumber.toString())
+			} else {
+				throw new Error('Unsupported streaming URL format')
+			}
+		},
+		[resolveUrl, contextValue.streamingURL],
+	)
+
+	const book = useMemo(
+		() =>
+			({
+				id: contextValue.entryId,
+				name: contextValue.entryTitle,
+				pages: contextValue.pageCount,
+				nextInSeries: { nodes: [] },
+				thumbnail: {
+					url: getStreamURLForPage(1),
+				},
+				extension: 'unknown',
+			}) satisfies ImageReaderBookRef,
+		[contextValue, getStreamURLForPage],
+	)
+
+	const {
+		preferences: { trackElapsedTime },
+	} = useBookPreferences({ book })
+	const { pause, resume, isRunning, reset } = useBookTimer(contextValue.id, {
+		enabled: trackElapsedTime,
+	})
+
+	const onFocusedChanged = useCallback(
+		(focused: boolean) => {
+			if (!focused) {
+				pause()
+			} else if (focused) {
+				resume()
+			}
+		},
+		[pause, resume],
+	)
+
+	const appState = useAppState({
+		onStateChanged: onFocusedChanged,
+	})
+
+	const showControls = useReaderStore((state) => state.showControls)
+	useEffect(() => {
+		if ((showControls && isRunning) || appState !== 'active') {
+			pause()
+		} else if (!showControls && !isRunning && appState === 'active') {
+			resume()
+		}
+	}, [showControls, pause, resume, isRunning, appState])
+
+	const setIsReading = useReaderStore((state) => state.setIsReading)
+	const setShowControls = useReaderStore((state) => state.setShowControls)
+
+	useEffect(() => {
+		setIsReading(true)
+		return () => {
+			setIsReading(false)
+		}
+	}, [setIsReading])
+
+	useEffect(() => {
+		return () => {
+			setShowControls(false)
+		}
+	}, [setShowControls])
+
+	const requestHeaders = useCallback(
+		() => ({
+			...sdk.customHeaders,
+			Authorization: sdk.authorizationHeader || '',
+		}),
+		[sdk],
+	)
+
+	useEffect(() => {
+		NavigationBar.setVisibilityAsync('hidden')
+		return () => {
+			NavigationBar.setVisibilityAsync('visible')
+		}
+	}, [])
+
+	console.log('Rendering OPDS Legacy Reader', {
+		contextValue,
+		book,
+	})
+
+	return (
+		<ImageBasedReader
+			serverId={serverId}
+			initialPage={1}
+			book={book}
+			// TODO: tthis throws so maybe a wrapper
+			pageURL={getStreamURLForPage}
+			requestHeaders={requestHeaders}
+			resetTimer={reset}
+			// TODO: offline tracking?
+			// onPageChanged={progressionURL ? onPageChanged : undefined}
+			isOPDS
+		/>
+	)
+}
+
+const getValidNumber = (value: string) => {
+	const parsed = parseInt(value, 10)
+	return isNaN(parsed) ? -1 : parsed
+}

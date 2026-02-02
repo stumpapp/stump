@@ -52,4 +52,13 @@ export class OPDSLegacyAPI extends APIBase {
 		}
 		return legacyFeed.parse(data.feed)
 	}
+
+	async feedRaw(url: string, params?: OPDSPageQuery): Promise<string> {
+		const absoluteUrl = resolveUrl(url, this.api.rootURL)
+		const resolvedURL = urlWithParams(absoluteUrl, toUrlParams(params))
+		const { data: xmlData } = await this.axios.get(resolvedURL, {
+			baseURL: undefined,
+		})
+		return String(xmlData)
+	}
 }

@@ -67,11 +67,25 @@ export default function ImageBasedReaderContainer({
 		let sets: number[][] = []
 		if (doublePageBehavior === 'off' || autoButOff || modeForceOff) {
 			sets = Array.from({ length: pages }, (_, i) => [i])
+			console.log('Generated single page sets', {
+				sets,
+				huh: Array.from({ length: pages }, (_, i) => [i]),
+				doublePageBehavior,
+				readingMode,
+				secondPageSeparate,
+				pages,
+			})
 		} else {
 			sets = generatePageSets({
 				imageSizes,
 				pages: pages,
 				secondPageSeparate: secondPageSeparate,
+			})
+			console.log('Generated page sets', {
+				sets,
+				doublePageBehavior,
+				readingMode,
+				secondPageSeparate,
 			})
 		}
 
@@ -91,6 +105,14 @@ export default function ImageBasedReaderContainer({
 	)
 
 	const flashListRef = useRef<FlashListRef<number[]>>(null)
+
+	console.log('Rendering ImageBasedReaderContainer', {
+		currentPage,
+		initialPage,
+		pageSets,
+		imageSizes,
+		bookId: ctx.book.id,
+	})
 
 	return (
 		<ImageBasedReaderContext.Provider

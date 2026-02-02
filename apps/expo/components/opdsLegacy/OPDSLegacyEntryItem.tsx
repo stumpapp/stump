@@ -3,7 +3,7 @@ import { isLegacyDownloadableLink, isLegacyNavigationLink, OPDSLegacyEntry } fro
 import { useRouter } from 'expo-router'
 import { Image, Platform, Pressable, View } from 'react-native'
 
-import { getLegacyPageStreamingURL } from '~/context/opdsLegacy'
+import { getLegacyPageStreamingURL, getLegacyStreamingContextValue } from '~/context/opdsLegacy'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { usePreferencesStore } from '~/stores'
 
@@ -34,7 +34,8 @@ export default function OPDSEntry({ entry }: Props) {
 	const thumbnailUrl = entry.links.find(
 		(link) => link.rel === 'http://opds-spec.org/image/thumbnail',
 	)?.href
-	const streamUrl = getLegacyPageStreamingURL(entry, sdk?.rootURL)
+	// const streamUrl = getLegacyPageStreamingURL(entry, sdk?.rootURL)
+	const streamingContext = getLegacyStreamingContextValue(entry, sdk?.rootURL)
 
 	const friendlyName = entry.title
 
@@ -50,16 +51,19 @@ export default function OPDSEntry({ entry }: Props) {
 					url: navigateUrl,
 				},
 			})
-		} else if (streamUrl) {
+		} else if (streamingContext) {
 			// TODO: Check acquisition type to determine if we can stream?
-			console.log('Streaming from URL:', resolveUrl(streamUrl))
-			// router.push({
-			// 	pathname: `/opds-legacy/[id]/read`,
-			// 	params: {
-			// 		id: serverID,
-			// 		url: streamUrl,
-			// 	},
-			// })
+			router.push({
+				pathname: `/opds-legacy/[id]/read`,
+				params: {
+					id: serverID,
+					entryId: entry.id,
+					entryTitle: entry.title,
+					entryContent: entry.content,
+					streamingURL: streamingContext.streamingURL,
+					pageCount: streamingContext.pageCount.toString(),
+				},
+			})
 		} else if (downloadUrl) {
 			console.log('Downloading from URL:', resolveUrl(downloadUrl))
 		} else {

@@ -37,12 +37,27 @@ const linkRel = z.enum([
 export const isPseStreamLink = (link: OPDSLegacyLink) =>
 	link.rel === 'http://vaemendis.net/opds-pse/stream'
 
-const linkSchema = z.object({
-	href: z.string(),
-	title: z.string().nullish(),
-	type: linkType.nullish(),
-	rel: linkRel.nullish(),
-})
+const intoValidNumber = (value: string | number) => {
+	if (typeof value === 'number') return value
+	const parsed = parseInt(value, 10)
+	return isNaN(parsed) ? null : parsed
+}
+
+const linkSchema = z
+	.object({
+		href: z.string(),
+		title: z.string().nullish(),
+		type: linkType.nullish(),
+		rel: linkRel.nullish(),
+		'pse:count': z.union([z.string(), z.number()]).nullish(),
+	})
+	.transform((obj) => ({
+		...obj,
+		'pse:count':
+			typeof obj['pse:count'] === 'string'
+				? intoValidNumber(obj['pse:count'])
+				: (obj['pse:count'] ?? undefined),
+	}))
 export type OPDSLegacyLink = z.infer<typeof linkSchema>
 
 const entry = z

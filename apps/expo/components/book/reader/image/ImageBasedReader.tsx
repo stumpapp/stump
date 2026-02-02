@@ -122,6 +122,17 @@ export default function ImageBasedReader({ initialPage, onPastEndReached }: Prop
 
 	const isRtl = readingDirection === ReadingDirection.Rtl
 	const isVertical = readingMode === ReadingMode.ContinuousVertical
+
+	console.log('Rendering ImageBasedReader', {
+		readingMode,
+		readingDirection,
+		currentPage,
+		initialPage,
+		pageSets,
+		imageSizes,
+		bookId: book.id,
+	})
+
 	return (
 		<View style={[{ width, height }, isRtl && { transform: [{ scaleX: -1 }] }]}>
 			<FlashList
@@ -134,7 +145,7 @@ export default function ImageBasedReader({ initialPage, onPastEndReached }: Prop
 						deviceOrientation={deviceOrientation}
 						index={index}
 						indexes={item as [number, number]}
-						sizes={item.map((i: number) => imageSizes[i]).filter(Boolean)}
+						sizes={item.map((i: number) => imageSizes[i]).filter((i) => i != null)}
 						maxWidth={width}
 						maxHeight={height}
 						readingDirection="horizontal"
@@ -290,6 +301,16 @@ const PageSet = React.memo(
 
 		const isRtl = readingDirection === ReadingDirection.Rtl
 		const directionRespectingIndexes = isRtl ? [...indexes].reverse() : indexes
+
+		console.log('Rendering PageSet', {
+			index,
+			indexes,
+			sizes,
+			imageRatio,
+			readingDirection,
+			readingMode,
+			bookId: book.id,
+		})
 
 		return (
 			<View style={isRtl && { transform: [{ scaleX: -1 }] }}>

@@ -39,3 +39,62 @@ export const getLegacyPageStreamingURL = (entry: OPDSLegacyEntry, rootURL: strin
 	const streamingLink = entry.links.find(isPseStreamLink)?.href
 	return streamingLink ? resolveUrl(streamingLink, rootURL) : undefined
 }
+
+export type OPDSLegacyStreamingContextValue = {
+	entryId: string
+	entryTitle: string
+	entryContent: string
+	streamingURL: string
+	pageCount: number
+}
+
+export const OPDSLegacyStreamingContext = createContext<OPDSLegacyStreamingContextValue | null>(
+	null,
+)
+
+export const useOPDSLegacyStreamingContext = () => {
+	const context = useContext(OPDSLegacyStreamingContext)
+	if (!context) {
+		throw new Error(
+			'useOPDSLegacyStreamingContext must be used within an OPDSLegacyStreamingContextProvider',
+		)
+	}
+	return context
+}
+
+export const getLegacyStreamingContextValue = (
+	entry: OPDSLegacyEntry,
+	rootURL: string | undefined,
+): OPDSLegacyStreamingContextValue | null => {
+	const streamingURL = getLegacyPageStreamingURL(entry, rootURL)
+	if (!streamingURL) {
+		return null
+	}
+
+	const pageCountLink = entry.links.find(isPseStreamLink)
+	if (!pageCountLink) {
+		console.log('getLegacyStreamingContextValue: No page count link found')
+		return null
+	}
+	const pageCount = pageCountLink['pse:count']
+	if (pageCount == null) {
+		console.log('getLegacyStreamingContextValue: No page count found on link', {
+			pageCountLink,
+		})
+		return null
+	}
+
+	console.log('getLegacyStreamingContextValue', {
+		entryId: entry.id,
+		streamingURL,
+		pageCount,
+	})
+
+	return {
+		entryId: entry.id,
+		entryTitle: entry.title,
+		entryContent: entry.content || '',
+		streamingURL,
+		pageCount,
+	}
+}

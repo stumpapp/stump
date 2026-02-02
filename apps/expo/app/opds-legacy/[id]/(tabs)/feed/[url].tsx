@@ -2,6 +2,7 @@ import { FlashList } from '@shopify/flash-list'
 import { useRefetch, useSDK } from '@stump/client'
 import { useQuery } from '@tanstack/react-query'
 import { useLocalSearchParams } from 'expo-router'
+import { XMLParser } from 'fast-xml-parser'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { MaybeErrorFeed } from '~/components/opds'

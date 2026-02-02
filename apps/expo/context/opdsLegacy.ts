@@ -50,6 +50,10 @@ export type OPDSLegacyStreamingContextValue = {
 	entryContent: string
 	streamingURL: string
 	pageCount: number
+	// TODO: I _could_ use this for resuming, but is that the best way?
+	// It doesn't necessarily sync back as you progress, depends on server,
+	// sooooo
+	// currentPage?: number
 }
 
 export const OPDSLegacyStreamingContext = createContext<OPDSLegacyStreamingContextValue | null>(

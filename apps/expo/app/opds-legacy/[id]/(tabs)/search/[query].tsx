@@ -1,13 +1,15 @@
 import { FlashList } from '@shopify/flash-list'
-import { useRefetch } from '@stump/client'
+import { useRefetch, useShowSlowLoader } from '@stump/client'
 import { useLocalSearchParams } from 'expo-router'
 import { View } from 'react-native'
 
 import ChevronBackLink from '~/components/ChevronBackLink'
 import EmptyState from '~/components/EmptyState'
 import { MaybeErrorFeed } from '~/components/opds'
-import { OPDSLegacyEntryItem } from '~/components/opdsLegacy'
+import { OPDSLegacyEntryItem, OPDSLegacyFeedActionMenu } from '~/components/opdsLegacy'
+import { useLegacyOPDSEntrySize } from '~/components/opdsLegacy/useLegacyOPDSEntrySize'
 import RefreshControl from '~/components/RefreshControl'
+import { FullScreenLoader } from '~/components/ui'
 import { useOPDSLegacyFeedContext } from '~/context/opdsLegacy'
 import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
 import { useLegacyOPDSFeed } from '~/lib/hooks'
@@ -17,6 +19,7 @@ import { constructLegacySearchURL } from '~/lib/opdsUtils'
 export default function Screen() {
 	const { query } = useLocalSearchParams<{ query: string }>()
 	const { searchDoc } = useOPDSLegacyFeedContext()
+	const { numColumns } = useLegacyOPDSEntrySize()
 
 	const firstSearchUrl = searchDoc?.Urls.at(0)?.template || ''
 	const feedURL =
@@ -33,10 +36,12 @@ export default function Screen() {
 	} = useLegacyOPDSFeed({ url: feedURL })
 
 	const [isRefetching, onRefetch] = useRefetch(refetch)
+	const showLoader = useShowSlowLoader(isLoading)
 
 	useDynamicHeader({
 		title: query || 'Search Results',
 		headerLeft: () => <ChevronBackLink />,
+		headerRight: () => <OPDSLegacyFeedActionMenu />,
 	})
 
 	const onEndReached = () => {
@@ -44,6 +49,8 @@ export default function Screen() {
 			fetchNextPage()
 		}
 	}
+
+	if (showLoader) return <FullScreenLoader label="Loading..." />
 
 	if (isLoading) return null
 
@@ -55,8 +62,9 @@ export default function Screen() {
 
 	return (
 		<FlashList
+			key={`feed-root-${numColumns}`}
 			data={entries}
-			numColumns={3}
+			numColumns={numColumns}
 			keyExtractor={(item, index) => item.id || item.title || index.toString()}
 			renderItem={({ item }) => <OPDSLegacyEntryItem entry={item} />}
 			contentContainerStyle={{

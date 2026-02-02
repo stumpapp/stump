@@ -1,14 +1,20 @@
 import { FlashList } from '@shopify/flash-list'
-import { useRefetch } from '@stump/client'
+import { useRefetch, useShowSlowLoader } from '@stump/client'
 import { useLocalSearchParams } from 'expo-router'
-import { View } from 'react-native'
 
 import EmptyState from '~/components/EmptyState'
-import { MaybeErrorLegacyFeed } from '~/components/opdsLegacy'
+import {
+	MaybeErrorLegacyFeed,
+	OPDSLegacyEntryDivider,
+	OPDSLegacyFeedActionMenu,
+} from '~/components/opdsLegacy'
 import OPDSLegacyEntryItem from '~/components/opdsLegacy/OPDSLegacyEntryItem'
+import { useLegacyOPDSEntrySize } from '~/components/opdsLegacy/useLegacyOPDSEntrySize'
 import RefreshControl from '~/components/RefreshControl'
+import { FullScreenLoader } from '~/components/ui'
 import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
 import { useLegacyOPDSFeed } from '~/lib/hooks'
+import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
 
 export default function Screen() {
 	const { url: feedURL } = useLocalSearchParams<{ url: string }>()
@@ -21,14 +27,23 @@ export default function Screen() {
 		fetchNextPage,
 		hasNextPage,
 	} = useLegacyOPDSFeed({ url: feedURL })
+	const { numColumns } = useLegacyOPDSEntrySize()
 
 	const [isRefetching, onRefetch] = useRefetch(refetch)
+	const showLoader = useShowSlowLoader(isLoading)
+
+	useDynamicHeader({
+		title: feed?.title || '',
+		headerRight: () => <OPDSLegacyFeedActionMenu />,
+	})
 
 	const onEndReached = () => {
 		if (hasNextPage) {
 			fetchNextPage()
 		}
 	}
+
+	if (showLoader) return <FullScreenLoader label="Loading..." />
 
 	if (isLoading) return null
 
@@ -40,8 +55,9 @@ export default function Screen() {
 
 	return (
 		<FlashList
+			key={`feed-root-${numColumns}`}
 			data={entries}
-			numColumns={3}
+			numColumns={numColumns}
 			keyExtractor={(item, index) => item.id || item.title || index.toString()}
 			renderItem={({ item }) => <OPDSLegacyEntryItem entry={item} />}
 			contentContainerStyle={{
@@ -51,7 +67,7 @@ export default function Screen() {
 			onEndReachedThreshold={ON_END_REACHED_THRESHOLD}
 			onEndReached={onEndReached}
 			refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={onRefetch} />}
-			ItemSeparatorComponent={() => <View className="h-4" />}
+			ItemSeparatorComponent={() => <OPDSLegacyEntryDivider />}
 		/>
 	)
 }

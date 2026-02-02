@@ -47,6 +47,7 @@ export default function Screen() {
 		activeServer: { id: serverID },
 	} = useActiveServer()
 
+	// eslint-disable-next-line react-hooks/refs
 	const store = useRef(createSeriesFilterStore()).current
 
 	const { filters, sort, resetFilters } = useStore(store, (state) => ({

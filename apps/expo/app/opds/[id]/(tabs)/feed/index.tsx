@@ -1,4 +1,4 @@
-import { useRefetch } from '@stump/client'
+import { useRefetch, useShowSlowLoader } from '@stump/client'
 import partition from 'lodash/partition'
 import { View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
@@ -22,6 +22,7 @@ export default function Screen() {
 	const { activeServer } = useActiveServer()
 	const { catalog: feed, isLoading, error, refetch } = useOPDSFeedContext()
 	const [isRefetching, onRefetch] = useRefetch(refetch)
+	const showLoader = useShowSlowLoader(isLoading)
 
 	useDynamicHeader({
 		title: activeServer?.name || 'OPDS Feed',
@@ -30,7 +31,9 @@ export default function Screen() {
 
 	const insets = useSafeAreaInsets()
 
-	if (isLoading) return <FullScreenLoader label="Loading..." />
+	if (showLoader) return <FullScreenLoader label="Loading..." />
+
+	if (isLoading) return null
 
 	if (!feed || !!error) return <MaybeErrorFeed error={error} onRetry={onRefetch} />
 

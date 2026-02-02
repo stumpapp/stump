@@ -82,6 +82,12 @@ function OPDSFeedProvider({ children }: OPDSFeedProviderProps) {
 	)
 }
 
+// TODO(opds): The general look-and-feel for the v1.2 OPDS flow is heavily inspired by how I remember Panels being.
+// I think the really simplistic approach lends itself well to the more simplistic nature of v1.2. I don't think
+// I want to take these patterns (e.g., the file-based icons for non-publications, simple grids everywhere, etc)
+// to the OPDS v2 flow, but I don't think this one kinda just looks and feels better? It's like using one of those
+// minimal smart phones where theres just a few buttons for the essentials etc. Definitely something to revisit
+// for the v2 flow, as I think that can be much prettier than it currently is
 export default function Screen() {
 	const animationEnabled = usePreferencesStore((state) => !state.reduceAnimations)
 

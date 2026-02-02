@@ -11,10 +11,10 @@ const linkType = z
 		'application/epub+zip',
 		'application/opensearchdescription+xml',
 		'application/opds+json',
+		'application/x-rar-compressed',
+		'application/vnd.rar',
 	])
-	.or(
-		z.string().refine((val) => val.startsWith('image/'), { message: 'Must be a valid MIME type' }),
-	)
+	.or(z.string()) // no real need to be stricter here
 
 export const isLegacyNavigationLink = (link: OPDSLegacyLink) =>
 	link.type === 'application/atom+xml;profile=opds-catalog;kind=navigation'
@@ -52,6 +52,8 @@ const linkSchema = z
 		type: linkType.nullish(),
 		rel: linkRel.nullish(),
 		'pse:count': z.union([z.string(), z.number()]).nullish(),
+		'pse:lastRead': z.union([z.string(), z.number()]).nullish(),
+		'pse:lastReadDate': z.string().nullish(),
 	})
 	.transform((obj) => ({
 		...obj,
@@ -59,8 +61,18 @@ const linkSchema = z
 			typeof obj['pse:count'] === 'string'
 				? intoValidNumber(obj['pse:count'])
 				: (obj['pse:count'] ?? undefined),
+		'pse:lastRead':
+			typeof obj['pse:lastRead'] === 'string'
+				? intoValidNumber(obj['pse:lastRead'])
+				: (obj['pse:lastRead'] ?? undefined),
 	}))
 export type OPDSLegacyLink = z.infer<typeof linkSchema>
+
+const entryAuthor = z.object({
+	name: z.string(),
+	uri: z.string().nullish(),
+})
+export type OPDSLegacyEntryAuthor = z.infer<typeof entryAuthor>
 
 const entry = z
 	.object({
@@ -69,10 +81,12 @@ const entry = z
 		updated: z.string().nullish(),
 		content: z.string().nullish(),
 		link: z.union([linkSchema, z.array(linkSchema)]).default([]),
+		author: z.union([entryAuthor, z.array(entryAuthor)]).default([]),
 	})
 	.transform((obj) => ({
-		...omit(obj, ['link']),
+		...omit(obj, ['link', 'author']),
 		links: Array.isArray(obj.link) ? obj.link : [obj.link],
+		authors: Array.isArray(obj.author) ? obj.author : [obj.author],
 	}))
 export type OPDSLegacyEntry = z.infer<typeof entry>
 

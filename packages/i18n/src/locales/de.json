@@ -21,8 +21,8 @@
 			"buttons": {
 				"createAccount": "Konto erstellen",
 				"login": "Anmelden",
-				"loginWithOidc": "Log in with OIDC",
-				"createAccountWithOidc": "Create Account with OIDC"
+				"loginWithOidc": "Mit OIDC einloggen",
+				"createAccountWithOidc": "Account mit OIDC erstellen"
 			}
 		},
 		"toasts": {
@@ -254,19 +254,19 @@
 				"description": "Wird verwendet, um eine Bibliothek zu kategorisieren oder Zugriffsrechte anzuwenden"
 			},
 			"defaultLibraryView": {
-				"label": "Default library view",
+				"label": "Standard Bibliotheksansicht",
 				"description": "Configure which tab is shown by default when opening this library",
 				"hideSeriesView": {
-					"label": "Hide series tab",
-					"description": "Hide the series tab from the library navigation"
+					"label": "Serienreiter ausblenden",
+					"description": "Blende den Serienreiter in der Bibliotheksnavigation"
 				},
 				"options": {
 					"series": {
-						"label": "Series",
-						"description": "Show the series tab by default"
+						"label": "Serien",
+						"description": "Serienreiter standardmäßig anzeigen"
 					},
 					"books": {
-						"label": "Books",
+						"label": "Bücher",
 						"description": "Show the books tab by default"
 					}
 				}
@@ -307,12 +307,12 @@
 					"options": {
 						"scaleEvenlyByFactor": "Evenly Scale",
 						"exact": "Exact Size",
-						"scaleDimension": "Auto Scaled",
-						"none": "None"
+						"scaleDimension": "Auto-Skalierung",
+						"none": "Keine"
 					}
 				},
 				"scaleEvenlyByFactor": {
-					"description": "Scale the thumbnail by a factor of the original size. E.g., 0.65 will result in a thumbnail that is 65% of the original size",
+					"description": "Skaliere das Vorschaubild um einem Faktor der ursprünglichen Größe. Z.B. 0.65 führt zu einem Vorschaubild, welcher 65% der Originalgröße beträgt",
 					"factor": {
 						"label": "Scale Factor"
 					}
@@ -330,14 +330,14 @@
 					"label": "Auto Scaled",
 					"description": "Set either the width or height of the thumbnail and auto-scale the other to keep the original aspect ratio",
 					"dimension": {
-						"label": "Dimension",
+						"label": "Abmessung",
 						"options": {
-							"width": "Width",
-							"height": "Height"
+							"width": "Breite",
+							"height": "Höhe"
 						}
 					},
 					"size": {
-						"label": "Size"
+						"label": "Größe"
 					}
 				},
 				"format": {
@@ -370,7 +370,7 @@
 					}
 				},
 				"invalidGlob": "Ungültige Glob-Regel",
-				"duplicateGlob": "Duplicate of an existing rule",
+				"duplicateGlob": "Duplikat einer bestehenden Regel",
 				"lockConfig": {
 					"lock": "Konfiguration sperren",
 					"unlock": "Konfiguration entsperren"
@@ -405,16 +405,16 @@
 					"description": "Extrahiere Metadaten aus Bibliotheksdateien und speichere diese in der Datenbank"
 				},
 				"watch": {
-					"label": "Watch",
-					"description": "Watch the library directory for changes and update the database accordingly"
+					"label": "Beobachten",
+					"description": "Überwache den Bibliotheksordner auf Änderungen und aktualisiere die Datenbank dementsprechend"
 				},
 				"generateFileHashes": {
 					"label": "Datei-Hashes generieren",
 					"description": "Generiert einen Hash für jede Datei in der Bibliothek, um Duplikate zu erkennen"
 				},
 				"koreaderHashes": {
-					"label": "KoReader-compatible hashes",
-					"description": "If using KoReader, generate additional hashes in the format it expects"
+					"label": "KoReader kompatible Hashes",
+					"description": "Wenn KoReader verwendet wird, generiere zusätzliche Hashes in dem Format, das dieser erwartet"
 				}
 			},
 			"libraryPattern": {
@@ -465,7 +465,7 @@
 				},
 				{
 					"label": "Wird gescannt",
-					"heading": "Scanning",
+					"heading": "Scannen",
 					"description": "Einstellungen in Bezug darauf, wie Stumpf diese Bibliothek scannt"
 				},
 				{
@@ -485,7 +485,7 @@
 				"none": "Überspringen",
 				"labels": {
 					"generateThumbnails": "Vorschaubilder generieren",
-					"processThumbnailColors": "Process thumbnail colors",
+					"processThumbnailColors": "Verarbeite Vorschaubildfarben",
 					"mode": "Modus",
 					"format": "Format",
 					"quality": "Qualität",
@@ -497,13 +497,13 @@
 					"ignoreRules": "Dateien ignorieren",
 					"convertRar": "Konvertiere RAR/CBR",
 					"deleteConversions": "Konvertierte Dateien löschen",
-					"watch": "Watch directory for changes",
+					"watch": "Überwache Ordner auf Änderungen",
 					"processMetadata": "Metadaten verarbeiten",
 					"generateFileHashes": "Datei-Hashes generieren",
-					"generateKoreaderHashes": "Generate KoReader hashes",
-					"scaleEvenlyByFactor": "Evenly Scale",
-					"exact": "Exact Size",
-					"scaleDimension": "Explicitly Sized"
+					"generateKoreaderHashes": "KoReader-Hashes generieren",
+					"scaleEvenlyByFactor": "Gleichmäßig skalieren",
+					"exact": "Genaue Größe",
+					"scaleDimension": "Explizite Größe"
 				}
 			},
 			"buttons": {

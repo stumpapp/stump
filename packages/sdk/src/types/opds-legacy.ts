@@ -34,6 +34,7 @@ const linkRel = z.enum([
 	'http://vaemendis.net/opds-pse/stream', // PSE stream
 	'search',
 	'alternate', // e.g., link for different OPDS feed or version
+	'http://opds-spec.org/acquisition/open-access', // open access acquisition
 ])
 
 export const isPseStreamLink = (link: OPDSLegacyLink) =>
@@ -45,6 +46,19 @@ const intoValidNumber = (value: string | number) => {
 	return isNaN(parsed) ? null : parsed
 }
 
+const resolveCountFromLink = (
+	pseCount?: string | number | null,
+	p5Count?: string | number | null,
+) => {
+	if (pseCount != null) {
+		return intoValidNumber(pseCount) ?? undefined
+	}
+	if (p5Count != null) {
+		return intoValidNumber(p5Count) ?? undefined
+	}
+	return undefined
+}
+
 const linkSchema = z
 	.object({
 		href: z.string(),
@@ -52,15 +66,13 @@ const linkSchema = z
 		type: linkType.nullish(),
 		rel: linkRel.nullish(),
 		'pse:count': z.union([z.string(), z.number()]).nullish(),
+		'p5:count': z.union([z.string(), z.number()]).nullish(), // Kavita uses this
 		'pse:lastRead': z.union([z.string(), z.number()]).nullish(),
 		'pse:lastReadDate': z.string().nullish(),
 	})
 	.transform((obj) => ({
 		...obj,
-		'pse:count':
-			typeof obj['pse:count'] === 'string'
-				? intoValidNumber(obj['pse:count'])
-				: (obj['pse:count'] ?? undefined),
+		'pse:count': resolveCountFromLink(obj['pse:count'], obj['p5:count']),
 		'pse:lastRead':
 			typeof obj['pse:lastRead'] === 'string'
 				? intoValidNumber(obj['pse:lastRead'])
@@ -74,12 +86,24 @@ const entryAuthor = z.object({
 })
 export type OPDSLegacyEntryAuthor = z.infer<typeof entryAuthor>
 
+const contentSchema = z
+	.union([
+		z.string(),
+		z.object({
+			'#text': z.string(),
+			type: z.string().nullish(),
+		}),
+	])
+	.transform((val) => (typeof val === 'string' ? val : val['#text']))
+
+const idSchema = z.union([z.string(), z.number()]).transform((val) => val.toString())
+
 const entry = z
 	.object({
-		id: z.string(),
+		id: idSchema,
 		title: z.string(),
 		updated: z.string().nullish(),
-		content: z.string().nullish(),
+		content: contentSchema.nullish(),
 		link: z.union([linkSchema, z.array(linkSchema)]).default([]),
 		author: z.union([entryAuthor, z.array(entryAuthor)]).default([]),
 	})

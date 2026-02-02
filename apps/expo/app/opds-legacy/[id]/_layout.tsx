@@ -5,6 +5,7 @@ import { Redirect, Stack, useLocalSearchParams } from 'expo-router'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { ActiveServerContext, useActiveServer } from '~/components/activeServer'
+import { ServerErrorBoundary } from '~/components/error'
 import { FileExplorerAssetsProvider } from '~/components/fileExplorer'
 import { FullScreenLoader } from '~/components/ui'
 import {
@@ -49,6 +50,8 @@ function OPDSFeedProvider({ children }: OPDSFeedProviderProps) {
 		if (!error) return
 		if (isOPDSAuthError(error)) {
 			onUnauthenticatedResponse?.(undefined, error.response?.data)
+		} else if (error) {
+			throw error
 		}
 	}, [error, onUnauthenticatedResponse])
 
@@ -163,4 +166,8 @@ export default function Screen() {
 			</ActiveServerContext.Provider>
 		</FileExplorerAssetsProvider>
 	)
+}
+
+export function ErrorBoundary({ error, retry }: { error: Error; retry: () => Promise<void> }) {
+	return <ServerErrorBoundary error={error} onRetry={() => retry()} />
 }

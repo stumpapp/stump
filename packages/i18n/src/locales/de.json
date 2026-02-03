@@ -3,7 +3,7 @@
 		"heading": "Das ist unangenehm",
 		"message": "Du bist über eine Seite gestolpert, welche noch entwickelt wird. Ich würde sie dir gerne zeigen, aber sie ist noch nicht ganz fertig.",
 		"homeLink": "Zur Startseite",
-		"githubLink": "GitHub Issue anzeigen"
+		"githubLink": "Schaue die GitHub Issue an"
 	},
 	"authScene": {
 		"claimHeading": "Initialisiere deinen Server",
@@ -38,8 +38,8 @@
 	"adminLibrarySidebar": {
 		"libraryConfiguration": {
 			"heading": "Bibliothekskonfiguration",
-			"subtitleCreating": "Eine Vorschau der neuen Bibliothek wird unten angezeigt",
-			"subtitleEditing": "Eine Vorschau der Änderungen in der Bibliothek wird unten angezeigt"
+			"subtitleCreating": "Eine Vorschau deiner neuen Bibliothek wird unten angezeigt",
+			"subtitleEditing": "Eine Vorschau deiner Bibliotheksänderungen wird unten angezeigt"
 		}
 	},
 	"bookOverviewScene": {
@@ -53,7 +53,7 @@
 			}
 		},
 		"emailBook": {
-			"heading": "Buch per E-Mail versenden",
+			"heading": "E-Mail das Buch",
 			"description": "Dieses Buch an ein Gerät oder eine E-Mail-Adresse senden",
 			"form": {
 				"email": {
@@ -80,44 +80,44 @@
 			"description": {
 				"label": "Beschreibung",
 				"placeholder": "Ein \"Unsere Flagge bedeutet den Tod\" Fanclub. Wir lesen Piratenfiktion nach Herzenslust",
-				"description": "Eine optionale, kurze Beschreibung des Buchclubs"
+				"description": "Eine optionale, kurze Beschreibung deines Buchclubs"
 			},
 			"is_private": {
 				"label": "Privater Club",
-				"description": "Wenn aktiviert, können nur eingeladene Nutzer diesem Buchclub beitreten"
+				"description": "Wenn aktiviert, können nur eingeladene Nutzer deinem Buchclub beitreten"
 			},
 			"member_role_spec": {
 				"heading": "Benutzerdefinierte Rollenzuordnung",
 				"subtitle": [
-					"Es können benutzerdefinierte Rollennamen erzeugt werden. Weitere Informationen hierzu gibt es in der",
+					"Du kannst benutzerdefinierte Rollennamen erstellen. Weitere Informationen hierzu gibt es in der",
 					"Dokumentation"
 				],
 				"member": {
 					"label": "Mitglied",
 					"placeholder": "Mitglied",
-					"description": "Der Name der Standardrolle für diesen Buchclub"
+					"description": "Der Name der Standardrolle für deinen Buchclub"
 				},
 				"moderator": {
 					"label": "Moderator",
 					"placeholder": "Moderator",
-					"description": "Der Anzeigename für Moderatoren dieses Buchclubs"
+					"description": "Der Name für die Moderatorenrolle deines Buchclubs"
 				},
 				"admin": {
 					"label": "Administrator",
 					"placeholder": "Administrator",
-					"description": "Der Anzeigename für Administratorenrolle dieses Buchclubs"
+					"description": "Der Name für die Administratorenrolle deines Buchclubs"
 				},
 				"creator": {
 					"label": "Ersteller",
 					"placeholder": "Ersteller",
-					"description": "Der Anzeigename für die Erstellerrolle dieses Buchclubs!"
+					"description": "Der Name für die Erstellerrolle deines Buchclubs! Das bist du!"
 				}
 			},
 			"membershipOptions": {
 				"displayName": {
 					"label": "Anzeigename",
 					"placeholder": "oromei",
-					"description": "Ein optionaler Anzeigename für deine Mitgliedschaft im Buchclub. Wenn aktiviert, wird dieser statt des Benutzernamen angezeigt"
+					"description": "Ein optionaler Anzeigename für deine Mitgliedschaft im Buchclub. Wenn aktiviert, wird dieser statt des Benutzernamens angezeigt"
 				},
 				"hideProgress": {
 					"label": "Fortschritt verbergen",
@@ -126,13 +126,13 @@
 			}
 		},
 		"validation": {
-			"missingName": "Name ist erforderlich",
+			"missingName": "Ein Name ist erforderlich",
 			"alreadyTaken": "ist bereits vergeben"
 		}
 	},
 	"createBookClubScene": {
 		"heading": "Neuen Buchclub erstellen",
-		"subtitle": "Erstelle einen privaten Buchclub oder mache ihn für jeden auf dem Server öffentlich machen",
+		"subtitle": "Du kannst einen privaten Buchclub für einzelne Ausgewählte erstellen oder einen öffentlichen, welcher jeder auf dem Server beitreten kann",
 		"form": {
 			"stepLabel": "Schritt",
 			"steps": [
@@ -196,7 +196,7 @@
 		},
 		"members": {
 			"title": "Mitglieder",
-			"description": "Die Mitglieder dieses Buchclubs verwalten",
+			"description": "Verwalte die Mitglieder dieses Buchclubs",
 			"sections": {}
 		},
 		"roles": {

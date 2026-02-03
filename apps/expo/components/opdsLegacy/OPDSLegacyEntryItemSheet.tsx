@@ -16,7 +16,7 @@ import { useActiveServer } from '../activeServer'
 import { useFileExplorerAssets } from '../fileExplorer'
 import { ThumbnailImage, TurboImage } from '../image'
 import { useResolveURL } from '../opds/utils'
-import { InfoRow, LongValue } from '../overview'
+import { InfoRow, LongValue, MetadataBadgeSection } from '../overview'
 import { CardList, Heading } from '../ui'
 import { getIconSource } from './OPDSLegacyEntryItem'
 
@@ -49,9 +49,7 @@ export const OPDSLegacyEntryItemSheet = forwardRef<TrueSheet, Props>(
 		const pageCount = pseLink?.['pse:count']
 		const currentPage = pseLink?.['pse:lastRead']
 
-		const showMetadata = Boolean(
-			!!entry.content || pageCount != undefined || currentPage != undefined || entry.updated,
-		)
+		const showMetadata = Boolean(!!entry.content || pageCount != null || currentPage != null)
 
 		return (
 			<TrueSheet
@@ -114,14 +112,19 @@ export const OPDSLegacyEntryItemSheet = forwardRef<TrueSheet, Props>(
 							{entry.content && (
 								<LongValue label="Content" value={stripHtml(entry.content).result} />
 							)}
-							{pageCount != undefined && <InfoRow label="Pages" value={pageCount.toString()} />}
-							{currentPage != undefined && (
+							{pageCount != null && <InfoRow label="Pages" value={pageCount.toString()} />}
+							{currentPage != null && (
 								<InfoRow label="Current Page" value={currentPage.toString()} />
 							)}
 						</CardList>
 					)}
 
-					<CardList label="Details">
+					<MetadataBadgeSection
+						label="Authors"
+						items={entry.authors?.map((author) => author.name) || []}
+					/>
+
+					<CardList label="Technical Info">
 						<InfoRow label="Identifier" value={entry.id} />
 						<InfoRow label="Server" value={serverName} />
 						<InfoRow label="Updated" value={dayjs(entry.updated).format('LLL')} />

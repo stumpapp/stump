@@ -201,7 +201,7 @@
 		},
 		"roles": {
 			"title": "Rollen",
-			"description": "Die Rollen dieses Buchclubs anpassen",
+			"description": "Passe die Rollen in diesem Buchclub an",
 			"sections": {
 				"roleMappings": {
 					"heading": "Vorhandene Rollenzuordnungen",

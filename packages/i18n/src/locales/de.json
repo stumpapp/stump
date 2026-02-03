@@ -1,13 +1,13 @@
 {
 	"underConstruction": {
 		"heading": "Das ist unangenehm",
-		"message": "Du bist über eine Seite gestolpert, welche noch entwickelt wird. Ich würde sie gerne dir zeigen, aber sie ist noch nicht ganz fertig.",
+		"message": "Du bist über eine Seite gestolpert, welche noch entwickelt wird. Ich würde sie dir gerne zeigen, aber sie ist noch nicht ganz fertig.",
 		"homeLink": "Zur Startseite",
 		"githubLink": "GitHub Issue anzeigen"
 	},
 	"authScene": {
-		"claimHeading": "Server initialisieren",
-		"claimText": "Dieser Stump-Server ist noch nicht initialisiert. Benutze das untenstehende Formular, um ein Konto zu erstellen. Danach erhaltest du vollen Zugriff auf alle Serverfunktionen.",
+		"claimHeading": "Initialisiere deinen Server",
+		"claimText": "Dieser Stump-Server ist noch nicht initialisiert. Benutze das untenstehende Formular, um ein Konto zu erstellen. Danach erhältst du vollen Zugriff auf alle Serverfunktionen.",
 		"form": {
 			"validation": {
 				"missingUsername": "Ein Benutzername ist erforderlich",

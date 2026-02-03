@@ -243,6 +243,10 @@ export default function OPDSEntry({ entry }: Props) {
 								>
 									{friendlyName}
 								</Text>
+
+								{layout === 'list' && streamingContext?.pageCount != null && (
+									<Text className="text-foreground-muted">{streamingContext.pageCount} pages</Text>
+								)}
 							</View>
 						</View>
 					)}

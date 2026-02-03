@@ -26,7 +26,6 @@ import { usePreferencesStore, useReaderStore } from '~/stores'
 import {
 	convertNativeToc,
 	findTocItemByHref,
-	OnBookmarkCallback,
 	resolveTocItemByPosition,
 	useEpubLocationStore,
 	useEpubTheme,
@@ -41,16 +40,15 @@ import {
 	UpdateAnnotationSheet,
 	UpdateAnnotationSheetRef,
 } from './annotations'
+import { EpubReaderContext, EpubReaderContextValue } from './context'
 import CustomizeThemeSheet from './CustomizeThemeSheet'
 import EpubLocationsSheet from './EpubLocationsSheet'
 import EpubSettingsSheet from './EpubSettingsSheet'
 import ReadiumFooter, { FOOTER_HEIGHT } from './ReadiumFooter'
 import ReadiumHeader, { HEADER_HEIGHT } from './ReadiumHeader'
 
-export type OnCreateAnnotationCallback = (
-	locator: ReadiumLocator,
-	annotationText?: string,
-) => Promise<{ id: string }>
+type BaseProps = OfflineCompatibleReader &
+	Omit<EpubReaderContextValue, 'readerRef' | 'getRequestHeaders'>
 
 type Props = {
 	/**
@@ -77,22 +75,7 @@ type Props = {
 	 * The URI of the offline book, if available
 	 */
 	offlineUri?: string
-	/**
-	 * Callback to create a bookmark at the given locator
-	 */
-	onBookmark?: OnBookmarkCallback
-	/**
-	 * Callback to delete a bookmark by ID
-	 */
-	onDeleteBookmark?: (bookmarkId: string) => Promise<void>
-	onCreateAnnotation?: OnCreateAnnotationCallback
-	/**
-	 * Callback to update an annotation's text, including highlights since they
-	 * are a type of annotation
-	 */
-	onUpdateAnnotation?: (annotationId: string, annotationText: string | null) => Promise<void>
-	onDeleteAnnotation?: (annotationId: string) => Promise<void>
-} & OfflineCompatibleReader
+} & BaseProps
 
 // FIXME: There is a pretty gnarly bug for single-page EPUBs where Readium doesn't do a great job of
 // reporting the location back. It manifests as the chapterTitle always being missing (and a "fix" I added
@@ -192,33 +175,19 @@ export default function ReadiumReader({
 		[],
 	)
 
-	// TODO: Refactor to avoid registering callbacks. This is a bit yucky and the original reason for doing
-	// is (using expo router w different screens) is no longer relevant since we have the programmatic sheets
-	// instead of navigation-based ones. I figure the callbacks and less mutable state can just go into context,
-	// which cuts the majority if not all the unnecessary store logic
 	const store = useEpubLocationStore((store) => ({
-		storeBook: store.storeBook,
+		setBook: store.setBook,
 		onTocChange: store.onTocChange,
 		onBookLoad: store.onBookLoad,
 		onLocationChange: store.onLocationChange,
 		cleanup: store.onUnload,
-		storeActions: store.storeActions,
-		storeHeaders: store.storeHeaders,
-		storeBookmarks: store.storeBookmarks,
-		storeOnBookmark: store.storeOnBookmark,
-		storeOnDeleteBookmark: store.storeOnDeleteBookmark,
+		setBookmarks: store.setBookmarks,
 		annotations: store.annotations,
-		storeAnnotations: store.storeAnnotations,
+		setAnnotations: store.setAnnotations,
 		addAnnotation: store.addAnnotation,
 		updateAnnotation: store.updateAnnotation,
 		removeAnnotation: store.removeAnnotation,
 		getAnnotation: store.getAnnotation,
-		onCreateAnnotation: store.onCreateAnnotation,
-		onUpdateAnnotation: store.onUpdateAnnotation,
-		onDeleteAnnotation: store.onDeleteAnnotation,
-		storeOnCreateAnnotation: store.storeOnCreateAnnotation,
-		storeOnUpdateAnnotation: store.storeOnUpdateAnnotation,
-		storeOnDeleteAnnotation: store.storeOnDeleteAnnotation,
 		positions: store.positions,
 	}))
 
@@ -251,39 +220,9 @@ export default function ReadiumReader({
 
 	useEffect(
 		() => {
-			store.storeHeaders(ctx.requestHeaders)
-		},
-		// eslint-disable-next-line react-compiler/react-compiler
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[ctx.requestHeaders],
-	)
-
-	useEffect(
-		() => {
-			store.storeOnBookmark(onBookmark)
-			store.storeOnDeleteBookmark(onDeleteBookmark)
-		},
-		// eslint-disable-next-line react-compiler/react-compiler
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[onBookmark, onDeleteBookmark],
-	)
-
-	useEffect(
-		() => {
-			store.storeOnCreateAnnotation(onCreateAnnotation)
-			store.storeOnUpdateAnnotation(onUpdateAnnotation)
-			store.storeOnDeleteAnnotation(onDeleteAnnotation)
-		},
-		// eslint-disable-next-line react-compiler/react-compiler
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[onCreateAnnotation, onUpdateAnnotation, onDeleteAnnotation],
-	)
-
-	useEffect(
-		() => {
 			const bookmarks = book.ebook?.bookmarks
 			if (bookmarks) {
-				store.storeBookmarks(bookmarks.map(intoBookmarkRef))
+				store.setBookmarks(bookmarks.map(intoBookmarkRef))
 			}
 		},
 		// eslint-disable-next-line react-compiler/react-compiler
@@ -296,7 +235,7 @@ export default function ReadiumReader({
 	useEffect(
 		() => {
 			const bookAnnotations = book.ebook?.annotations ?? []
-			store.storeAnnotations(
+			store.setAnnotations(
 				bookAnnotations.map((a) => ({
 					id: a.id,
 					bookId: book.id,
@@ -342,15 +281,14 @@ export default function ReadiumReader({
 			// once web supports Readium then it becomes more of an important thing to figure out, since the server will
 			// basically need to return something more alike what the native Readium libraries do
 			if (event.tableOfContents && event.tableOfContents.length > 0) {
-				store.onTocChange(convertNativeToc(event.tableOfContents), 'native')
+				store.onTocChange(convertNativeToc(event.tableOfContents))
 			} else if (book.ebook?.toc && book.ebook.toc.length > 0) {
-				store.onTocChange(book.ebook.toc, 'server')
+				store.onTocChange(book.ebook.toc)
 			}
 
-			store.storeBook(book)
-			store.storeActions(navigator)
+			store.setBook(book)
 		},
-		[store, book, navigator],
+		[store, book],
 	)
 
 	const controlsVisibleTimestamp = useRef(0)
@@ -455,10 +393,10 @@ export default function ReadiumReader({
 
 	const handleHighlightRequest = useCallback(
 		async (event: { nativeEvent: HighlightRequestEvent }) => {
-			if (!store.onCreateAnnotation) return
+			if (!onCreateAnnotation) return
 			const { locator } = event.nativeEvent
 			try {
-				const result = await store.onCreateAnnotation(locator)
+				const result = await onCreateAnnotation(locator)
 				if (result?.id) {
 					store.addAnnotation({
 						id: result.id,
@@ -473,7 +411,7 @@ export default function ReadiumReader({
 				console.error('Failed to create annotation:', error)
 			}
 		},
-		[store, book.id, highlightColor],
+		[onCreateAnnotation, store, book.id, highlightColor],
 	)
 
 	const handleNoteRequest = useCallback((event: { nativeEvent: NoteRequestEvent }) => {
@@ -505,23 +443,23 @@ export default function ReadiumReader({
 
 	const handleNativeDeleteAnnotation = useCallback(
 		async (event: { nativeEvent: { decorationId: string } }) => {
-			if (!store.onDeleteAnnotation) return
+			if (!onDeleteAnnotation) return
 			const { decorationId } = event.nativeEvent
 			try {
-				await store.onDeleteAnnotation(decorationId)
+				await onDeleteAnnotation(decorationId)
 				store.removeAnnotation(decorationId)
 			} catch (error) {
 				console.error('Failed to delete annotation:', error)
 			}
 		},
-		[store],
+		[onDeleteAnnotation, store],
 	)
 
 	const handleCreateAnnotation = useCallback(
 		async (locator: ReadiumLocator, annotationText?: string) => {
-			if (!store.onCreateAnnotation) return
+			if (!onCreateAnnotation) return
 			try {
-				const result = await store.onCreateAnnotation(locator, annotationText)
+				const result = await onCreateAnnotation(locator, annotationText)
 				if (result?.id) {
 					store.addAnnotation({
 						id: result.id,
@@ -538,16 +476,16 @@ export default function ReadiumReader({
 				console.error('Failed to create annotation:', error)
 			}
 		},
-		[store, book.id, highlightColor],
+		[onCreateAnnotation, store, book.id, highlightColor],
 	)
 
 	const handleAnnotationChange = useCallback(
 		async (decorationId: string, annotationText: string | undefined) => {
-			if (!store.onUpdateAnnotation) return
+			if (!onUpdateAnnotation) return
 			const existing = store.getAnnotation(decorationId)
 			if (!existing) return
 			try {
-				await store.onUpdateAnnotation(decorationId, annotationText ?? null)
+				await onUpdateAnnotation(decorationId, annotationText ?? null)
 				store.updateAnnotation({
 					...existing,
 					annotationText,
@@ -557,20 +495,20 @@ export default function ReadiumReader({
 				console.error('Failed to update annotation:', error)
 			}
 		},
-		[store],
+		[onUpdateAnnotation, store],
 	)
 
 	const handleDeleteHighlight = useCallback(
 		async (decorationId: string) => {
-			if (!store.onDeleteAnnotation) return
+			if (!onDeleteAnnotation) return
 			try {
-				await store.onDeleteAnnotation(decorationId)
+				await onDeleteAnnotation(decorationId)
 				store.removeAnnotation(decorationId)
 			} catch (error) {
 				console.error('Failed to delete annotation:', error)
 			}
 		},
-		[store],
+		[onDeleteAnnotation, store],
 	)
 
 	const insets = useSafeAreaInsets()
@@ -580,53 +518,65 @@ export default function ReadiumReader({
 	if (!localUri) return null
 
 	return (
-		<View
-			style={{
-				flex: 1,
-				backgroundColor: colors?.background,
+		<EpubReaderContext.Provider
+			value={{
+				readerRef: navigator,
+				getRequestHeaders: ctx.requestHeaders,
+				onBookmark,
+				onDeleteBookmark,
+				onCreateAnnotation,
+				onUpdateAnnotation,
+				onDeleteAnnotation,
 			}}
 		>
-			<ReadiumHeader />
-
-			<ReadiumView
-				ref={readerRef}
-				bookId={book.id}
-				url={localUri}
-				initialLocator={initialLocator}
-				decorations={store.annotations}
-				onBookLoaded={({ nativeEvent }) => handleBookLoaded(nativeEvent)}
-				onLocatorChange={({ nativeEvent: locator }) => handleLocationChanged(locator)}
-				onMiddleTouch={handleMiddleTouch}
-				onReachedEnd={handleReachedEnd}
-				onHighlightRequest={handleHighlightRequest}
-				onNoteRequest={handleNoteRequest}
-				onAnnotationTap={handleAnnotationTap}
-				onEditHighlight={handleEditHighlight}
-				onDeleteHighlight={handleNativeDeleteAnnotation}
+			<View
 				style={{
 					flex: 1,
-					marginTop: (initialWindowMetrics?.insets.top || insets.top) + HEADER_HEIGHT,
-					marginBottom: insets.bottom + FOOTER_HEIGHT,
+					backgroundColor: colors?.background,
 				}}
-				{...config}
-			/>
+			>
+				<ReadiumHeader />
 
-			<ReadiumFooter />
+				<ReadiumView
+					ref={readerRef}
+					bookId={book.id}
+					url={localUri}
+					initialLocator={initialLocator}
+					decorations={store.annotations}
+					onBookLoaded={({ nativeEvent }) => handleBookLoaded(nativeEvent)}
+					onLocatorChange={({ nativeEvent: locator }) => handleLocationChanged(locator)}
+					onMiddleTouch={handleMiddleTouch}
+					onReachedEnd={handleReachedEnd}
+					onHighlightRequest={handleHighlightRequest}
+					onNoteRequest={handleNoteRequest}
+					onAnnotationTap={handleAnnotationTap}
+					onEditHighlight={handleEditHighlight}
+					onDeleteHighlight={handleNativeDeleteAnnotation}
+					style={{
+						flex: 1,
+						marginTop: (initialWindowMetrics?.insets.top || insets.top) + HEADER_HEIGHT,
+						marginBottom: insets.bottom + FOOTER_HEIGHT,
+					}}
+					{...config}
+				/>
 
-			<EpubSettingsSheet />
-			<EpubLocationsSheet />
-			<CustomizeThemeSheet />
+				<ReadiumFooter />
 
-			<CreateAnnotationSheet
-				ref={createAnnotationSheetRef}
-				onCreateAnnotation={handleCreateAnnotation}
-				onDismiss={() => readerRef.current?.clearSelection()}
-			/>
-			<UpdateAnnotationSheet
-				ref={updateAnnotationSheetRef}
-				onAnnotationChange={handleAnnotationChange}
-				onDelete={handleDeleteHighlight}
-			/>
-		</View>
+				<EpubSettingsSheet />
+				<EpubLocationsSheet />
+				<CustomizeThemeSheet />
+
+				<CreateAnnotationSheet
+					ref={createAnnotationSheetRef}
+					onCreateAnnotation={handleCreateAnnotation}
+					onDismiss={() => readerRef.current?.clearSelection()}
+				/>
+				<UpdateAnnotationSheet
+					ref={updateAnnotationSheetRef}
+					onAnnotationChange={handleAnnotationChange}
+					onDelete={handleDeleteHighlight}
+				/>
+			</View>
+		</EpubReaderContext.Provider>
 	)
 }

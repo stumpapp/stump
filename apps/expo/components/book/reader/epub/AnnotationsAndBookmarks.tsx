@@ -12,11 +12,15 @@ import { Decoration, ReadiumLocator } from '~/modules/readium'
 import { BookmarkRef, useEpubLocationStore } from '~/stores/epub'
 import { useEpubSheetStore } from '~/stores/epubSheet'
 
+import { useEpubReaderContext } from './context'
+
 type Tab = 'ALL' | 'NOTES' | 'HIGHLIGHTS' | 'BOOKMARKS'
 
 const TAB_ARRANGEMENT: Tab[] = ['ALL', 'NOTES', 'HIGHLIGHTS', 'BOOKMARKS']
 
 export default function AnnotationsAndBookmarks() {
+	const { readerRef, onDeleteBookmark, onDeleteAnnotation } = useEpubReaderContext()
+
 	const book = useEpubLocationStore((store) => store.book)
 	const annotations = useEpubLocationStore((store) => store.annotations)
 	const bookmarks = useEpubLocationStore((store) => store.bookmarks)
@@ -42,22 +46,20 @@ export default function AnnotationsAndBookmarks() {
 		}
 	}, [tab, annotations, bookmarks])
 
-	const actions = useEpubLocationStore((state) => state.actions)
 	const closeSheet = useEpubSheetStore((state) => state.closeSheet)
 
 	const onNavigate = useCallback(
 		async (locator: ReadiumLocator) => {
-			if (!actions) return
+			if (!readerRef) return
 
-			await actions.goToLocation(locator)
+			await readerRef.goToLocation(locator)
 
 			closeSheet('locations')
 		},
-		[actions, closeSheet],
+		[readerRef, closeSheet],
 	)
 
 	const removeBookmark = useEpubLocationStore((state) => state.removeBookmark)
-	const onDeleteBookmark = useEpubLocationStore((state) => state.onDeleteBookmark)
 
 	const handleDeleteBookmark = useCallback(
 		async (id: string) => {
@@ -72,7 +74,6 @@ export default function AnnotationsAndBookmarks() {
 		[onDeleteBookmark, removeBookmark],
 	)
 
-	const onDeleteAnnotation = useEpubLocationStore((state) => state.onDeleteAnnotation)
 	const removeAnnotation = useEpubLocationStore((state) => state.removeAnnotation)
 
 	const handleDeleteAnnotation = useCallback(

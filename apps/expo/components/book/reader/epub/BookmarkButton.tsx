@@ -5,6 +5,8 @@ import { Pressable } from 'react-native'
 import { Icon } from '~/components/ui/icon'
 import { useEpubLocationStore } from '~/stores/epub'
 
+import { useEpubReaderContext } from './context'
+
 type Props = {
 	color?: string
 }
@@ -12,12 +14,12 @@ type Props = {
 export default function BookmarkButton({ color }: Props) {
 	const [isLoading, setIsLoading] = useState(false)
 
+	const { onBookmark, onDeleteBookmark } = useEpubReaderContext()
+
 	const book = useEpubLocationStore((state) => state.book)
 	const locator = useEpubLocationStore((state) => state.locator)
 	const addBookmark = useEpubLocationStore((state) => state.addBookmark)
 	const removeBookmark = useEpubLocationStore((state) => state.removeBookmark)
-	const onBookmark = useEpubLocationStore((state) => state.onBookmark)
-	const onDeleteBookmark = useEpubLocationStore((state) => state.onDeleteBookmark)
 	const isCurrentLocationBookmarked = useEpubLocationStore((state) =>
 		state.isCurrentLocationBookmarked(),
 	)

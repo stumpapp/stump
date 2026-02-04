@@ -1747,7 +1747,7 @@
 						},
 						"koreader_sync": {
 							"label": "KoReader Synchronisierung",
-							"description": "Erlaube dem Benutzer auf die KoReader-Synchronisierungsintegration zuzugreifen"
+							"description": "Erlaube dem Benutzer auf die KoReader Synchronisierungsintegration zuzugreifen"
 						}
 					},
 					"file": {
@@ -1948,7 +1948,7 @@
 				},
 				"password": {
 					"label": "Passwort",
-					"description": "Das Passwort für die Authentifizierung mit dem SMTP-Server. Bei der Verwendung von Gmail muss möglicherweise ein app-spezifisches Passwort generiert werden"
+					"description": "Das Passwort für die Authentifizierung mit dem SMTP-Server. Bei der Verwendung von Gmail muss möglicherweise ein App-spezifisches Passwort generiert werden"
 				},
 				"senderSettings": {
 					"heading": "Absender-Einstellungen",
@@ -1976,9 +1976,9 @@
 				}
 			},
 			"createEmailer": {
-				"helmet": "Mailserver hinzufügen",
-				"title": "Mailserver hinzufügen",
-				"description": "Fügt einen neuen SMTP-Mailserver für diese Stump-Serverinstanz hinzu"
+				"helmet": "Mailserver erstellen",
+				"title": "Mailserver erstellen",
+				"description": "Erstelle einen neuen SMTP-Mailserver für diese Stump Serverinstanz hinzu"
 			},
 			"updateEmailer": {
 				"helmet": "Mailserver aktualisieren",
@@ -1988,11 +1988,11 @@
 		}
 	},
 	"jobOverlay": {
-		"backupHeading": "Aufgabe in Bearbeitung"
+		"backupHeading": "Job in Bearbeitung"
 	},
 	"libraryStats": {
-		"seriesCount": "Serien Gesamt",
-		"bookCount": "Bücher Gesamt",
+		"seriesCount": "Totale Anzahl Serien",
+		"bookCount": "Totale Anzahl Bücher",
 		"diskUsage": "Speichernutzung"
 	},
 	"noLibraries": {
@@ -2000,7 +2000,7 @@
 		"messagePrefix": "Du kannst nicht sehen, was du nicht hast",
 		"message": {
 			"create": "Erstelle eine Bibliothek um loszulegen",
-			"wait": "Sobald Bibliotheken erstellt wurden, werden sie hier angezeigt"
+			"wait": "Sobald Bibliotheken erstellt werden, werden sie hier angezeigt"
 		},
 		"links": {
 			"create": "Bibliothek erstellen",
@@ -2013,7 +2013,7 @@
 			"previous": "Zurück"
 		},
 		"popover": {
-			"heading": "Gehe zu Seite",
+			"heading": "Gehe zur Seite",
 			"buttons": {
 				"confirm": "Los",
 				"cancel": "Abbrechen"
@@ -2066,10 +2066,10 @@
 	"serverSOS": {
 		"heading": "Server nicht erreichbar",
 		"desktop": {
-			"message": "Ein Netzwerkfehler ist aufgetreten, der darauf hindeutet, dass der Stump-Server derzeit nicht verfügbar ist. Bitte stelle sicher, dass er läuft und von diesem Gerät aus erreichbar ist.\nWenn sich die Server-URL geändert hat, kann sie mit dem untenstehenden Formular aktualisiert werden"
+			"message": "Ein Netzwerkfehler ist aufgetreten, der darauf hindeutet, dass der Stump Server derzeit nicht verfügbar ist. Bitte stelle sicher, dass er läuft und von diesem Gerät aus erreichbar ist.\nWenn sich die Server-URL geändert hat, kann sie mit dem untenstehenden Formular aktualisiert werden"
 		},
 		"web": {
-			"message": "Ein Netzwerkfehler ist aufgetreten, der darauf hindeutet, dass der Stump-Server derzeit nicht verfügbar ist. Bitte stelle sicher, dass er läuft und von diesem Gerät aus erreichbar ist"
+			"message": "Ein Netzwerkfehler ist aufgetreten, der darauf hindeutet, dass der Stump Server derzeit nicht verfügbar ist. Bitte stelle sicher, dass er läuft und von diesem Gerät aus erreichbar ist"
 		},
 		"reconnected": "Verbindung zum Server wiederhergestellt! Weiterleiten...",
 		"reconnectionFailed": "Etwas ist schiefgelaufen!"
@@ -2078,8 +2078,8 @@
 		"heading": "Server ist nicht verbunden",
 		"message": [
 			"Bitte die Internetverbindung überprüfen",
-			"Hier klicken,",
-			"um die Server-URL zu ändern"
+			"Hier klicken",
+			", um die Server URL zu ändern"
 		]
 	},
 	"slidingList": {
@@ -2090,8 +2090,8 @@
 		}
 	},
 	"tagSelect": {
-		"placeholder": "Schlagwort auswählen oder erstellen",
-		"placeholderNoTags": "Keine Schlagworte vorhanden"
+		"placeholder": "Tag auswählen oder erstellen",
+		"placeholderNoTags": "Keine Tags vorhanden"
 	},
 	"thumbnailDropdown": {
 		"label": "Vorschaubild auswählen",
@@ -2109,7 +2109,7 @@
 		"add": "Hinzufügen",
 		"cancel": "Abbrechen",
 		"confirm": "Bestätigen",
-		"delete": "Delete",
+		"delete": "Löschen",
 		"enter": "Enter",
 		"save": "Speichern",
 		"send": "Absenden",
@@ -2120,8 +2120,8 @@
 		"update": "Aktualisieren",
 		"upload": "Hochladen",
 		"uploading": "Wird hochgeladen",
-		"unimplemented": "Diese Funktion ist noch nicht implementiert! Schaue später wieder vorbei",
-		"limitedFunctionality": "Das hier ist noch nicht vollständig implementiert und es fehlen noch ein paar Funktionen! Schaue später wieder vorbei",
+		"unimplemented": "Diese Funktionalität ist noch nicht implementiert! Schaue später wieder vorbei",
+		"limitedFunctionality": "Das ist noch nicht vollständig implementiert und es fehlen noch ein paar Funktionen! Schaue später wieder vorbei",
 		"logIn": "Anmelden",
 		"login": "Login",
 		"seeError": "Fehler anzeigen",
@@ -2132,132 +2132,132 @@
 		"notUsedYet": "Noch nicht verwendet",
 		"never": "Nie",
 		"scan": "Scannen",
-		"somethingWentWrong": "Something went wrong"
+		"somethingWentWrong": "Etwas ist falsch gelaufen"
 	},
 	"userPermissions": {
 		"ACCESS_API_KEYS": {
-			"label": "API keys",
-			"description": "Allows the user to manage their own API keys"
+			"label": "API Schlüssel",
+			"description": "Erlaubt dem Benutzer seine eigenen API Schlüssel zu verwalten"
 		},
 		"ACCESS_BOOK_CLUB": {
-			"label": "Book Clubs",
-			"description": "Allows the user to access book club features, including viewing and joining book clubs"
+			"label": "Buchclubs",
+			"description": "Erlaubt dem Benutzer den Zugriff auf die Buchclubfunktionen, einschließlich der Ansicht und Teilnahme an Buchclubs"
 		},
 		"ACCESS_KOREADER_SYNC": {
-			"label": "KoReader sync",
-			"description": "Allows the user to access the KoReader sync integration"
+			"label": "KoReader Synchronisierung",
+			"description": "Erlaubt dem Benutzer auf die KoReader Synchronisierungsintegration zuzugreifen"
 		},
 		"ACCESS_SMART_LIST": {
-			"label": "Smart Lists",
-			"description": "Allows the user to access smart list features, including creating and managing smart lists"
+			"label": "Intelligente Listen",
+			"description": "Erlaubt dem Benutzer den Zugriff auf Funktionen der intelligenten Listen, inklusive Erstellung und Verwaltung von intelligenten Listen"
 		},
 		"CREATE_BOOK_CLUB": {
-			"label": "Create book clubs",
-			"description": "Allows the user to create new book clubs"
+			"label": "Buchclubs erstellen",
+			"description": "Erlaubt dem Benutzer neue Buchclubs zu erstellen"
 		},
 		"CREATE_LIBRARY": {
-			"label": "Create libraries",
-			"description": "Allows the user to create new libraries"
+			"label": "Bibliotheken erstellen",
+			"description": "Erlaubt dem Benutzer neue Bibliotheken zu erstellen"
 		},
 		"CREATE_NOTIFIER": {
-			"label": "Create notifiers",
-			"description": "Allows the user to create new notification systems"
+			"label": "Benachrichtigungen erstellen",
+			"description": "Erlaubt dem Benutzer neue Benachrichtigungssysteme zu erstellen"
 		},
 		"DELETE_LIBRARY": {
-			"label": "Delete libraries",
-			"description": "Allows the user to delete existing libraries"
+			"label": "Bibliotheken löschen",
+			"description": "Erlaubt dem Benutzer bestehende Bibliotheken zu löschen"
 		},
 		"DELETE_NOTIFIER": {
-			"label": "Delete notifiers",
-			"description": "Allows the user to delete notification systems"
+			"label": "Benachrichtigungen löschen",
+			"description": "Erlaubt dem Benutzer Benachrichtigungssysteme zu löschen"
 		},
 		"DOWNLOAD_FILE": {
-			"label": "Download files",
-			"description": "Allows the user to download files from the server"
+			"label": "Dateien herunterladen",
+			"description": "Erlaubt dem Benutzer Dateien vom Server herunterzuladen"
 		},
 		"EDIT_LIBRARY": {
-			"label": "Edit libraries",
-			"description": "Allows the user to modify existing libraries"
+			"label": "Bibliotheken bearbeiten",
+			"description": "Erlaubt dem Benutzer bestehende Bibliotheken zu bearbeiten"
 		},
 		"EMAILER_CREATE": {
-			"label": "Create emailer",
-			"description": "Allows the user to create email configuration"
+			"label": "Mailserver erstellen",
+			"description": "Erlaubt dem Benutzer E-Mail-Konfiguration zu erstellen"
 		},
 		"EMAILER_MANAGE": {
-			"label": "Manage emailer",
-			"description": "Allows the user to manage email configuration and settings"
+			"label": "Mailserver verwalten",
+			"description": "Erlaubt dem Benutzer E-Mail-Konfiguration und Einstellung zu bearbeiten"
 		},
 		"EMAILER_READ": {
-			"label": "Read emailer",
-			"description": "Allows the user to view email configuration"
+			"label": "Mailserver lesen",
+			"description": "Erlaubt dem Benutzer E-Mail-Konfiguration anzusehen"
 		},
 		"EMAIL_ARBITRARY_SEND": {
-			"label": "Send arbitrary emails",
-			"description": "Allows the user to send custom emails to any address"
+			"label": "Beliebige E-Mails senden",
+			"description": "Erlaubt dem Benutzer eigene E-Mails an jede Adresse zu senden"
 		},
 		"EMAIL_SEND": {
-			"label": "Send emails",
-			"description": "Allows the user to send emails through the system"
+			"label": "E-Mails senden",
+			"description": "Erlaubt dem Benutzer E-Mails über das System zu senden"
 		},
 		"FILE_EXPLORER": {
-			"label": "File explorer",
-			"description": "Allows the user to browse and explore the server filesystem"
+			"label": "Dateiexplorer",
+			"description": "Erlaubt dem Benutzer das Dateisystem des Servers zu durchsuchen und zu erkunden"
 		},
 		"MANAGE_LIBRARY": {
-			"label": "Manage libraries",
-			"description": "Allows the user to manage library settings and configuration"
+			"label": "Bibliotheken verwalten",
+			"description": "Erlaubt dem Benutzer die Bibliothekseinstellungen und -konfiguration zu verwalten"
 		},
 		"MANAGE_NOTIFIER": {
-			"label": "Manage notifiers",
-			"description": "Allows the user to manage notification system settings"
+			"label": "Benachrichtigungen verwalten",
+			"description": "Erlaubt dem Benutzer Benachrichtigungssystemeinstellungen zu verwalten"
 		},
 		"MANAGE_SERVER": {
-			"label": "Manage server",
-			"description": "Allows the user to manage server configuration and settings"
+			"label": "Server verwalten",
+			"description": "Erlaubt dem Benutzer Serverkonfiguration und Einstellung zu bearbeiten"
 		},
 		"MANAGE_USERS": {
-			"label": "Manage users",
-			"description": "Allows the user to create, edit, and delete user accounts"
+			"label": "Benutzer verwalten",
+			"description": "Erlaubt dem Benutzer Benutzerkonten zu erstellen, bearbeiten und löschen"
 		},
 		"READ_JOBS": {
-			"label": "Read jobs",
-			"description": "Allows the user to view system jobs and their status"
+			"label": "Jobs lesen",
+			"description": "Erlaubt dem Benutzer die Einsicht von Systemjobs und deren Status"
 		},
 		"READ_NOTIFIER": {
-			"label": "Read notifiers",
-			"description": "Allows the user to view notification system configuration"
+			"label": "Benachrichtigungen lesen",
+			"description": "Erlaubt dem Benutzer Benachrichtigungssystemeinstellungen anzusehen"
 		},
 		"READ_PERSISTED_LOGS": {
-			"label": "Read persisted logs",
-			"description": "Allows the user to view stored system logs"
+			"label": "Gespeicherte Protokolle lesen",
+			"description": "Ermöglicht dem Benutzer gespeicherte Systemprotokolle anzusehen"
 		},
 		"READ_SYSTEM_LOGS": {
-			"label": "Read system logs",
-			"description": "Allows the user to view real-time system logs"
+			"label": "Systemprotokolle lesen",
+			"description": "Ermöglicht dem Benutzer Echtzeit Systemprotokolle anzusehen"
 		},
 		"READ_USERS": {
-			"label": "Read users",
-			"description": "Allows the user to view user account information"
+			"label": "Benutzer lesen",
+			"description": "Erlaubt dem Benutzer Benutzerkontoinformationen anzusehen"
 		},
 		"SCAN_LIBRARY": {
 			"label": "Bibliotheken scannen",
-			"description": "Allows the user to trigger library scans to discover new content"
+			"description": "Erlaubt dem Benutzer Bibliotheksscans auszulösen, um neue Inhalte zu entdecken"
 		},
 		"UPLOAD_FILE": {
-			"label": "Upload files",
-			"description": "Allows the user to upload files to the server"
+			"label": "Dateien hochladen",
+			"description": "Erlaubt dem Benutzer Dateien auf den Server hochzuladen"
 		},
 		"MANAGE_JOBS": {
-			"label": "Manage jobs",
-			"description": "Allows the user to manage any queued jobs"
+			"label": "Jobs verwalten",
+			"description": "Erlaubt dem Benutzer alle Jobs in der Warteschlange zu verwalten"
 		},
 		"EDIT_METADATA": {
-			"label": "Edit metadata",
-			"description": "Allows the user to edit metadata for books and series"
+			"label": "Metadaten bearbeiten",
+			"description": "Erlaubt dem Benutzer Metadaten für Bücher und Serien zu bearbeiten"
 		},
 		"WRITE_BACK_METADATA": {
-			"label": "Write back metadata",
-			"description": "Allows the user to write metadata changes back to the source files"
+			"label": "Metadaten zurückschreiben",
+			"description": "Erlaubt dem Benutzer Metadatenänderungen zurück auf die Quelldateien zu schreiben"
 		}
 	}
 }

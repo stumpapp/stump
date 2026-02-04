@@ -761,41 +761,41 @@
 			"identifierGoogle": "Google ID",
 			"identifierIsbn": "ISBN",
 			"identifierMobiAsin": "Mobi ASIN",
-			"identifierUuid": "Book UUID",
-			"genres": "Genres",
-			"inkers": "Inkers",
-			"language": "Language",
-			"letterers": "Letterers",
-			"links": "Links",
-			"month": "Month",
-			"notes": "Notes",
-			"number": "Number",
-			"pageCount": "Pages",
-			"pencillers": "Pencillers",
-			"publisher": "Publisher",
-			"series": "Series",
-			"seriesGroup": "Series group",
-			"storyArc": "Story arc",
-			"storyArcNumber": "Story arc number",
-			"summary": "Summary",
-			"teams": "Teams",
-			"title": "Title",
-			"titleSort": "Title sort",
-			"volume": "Volume",
-			"writers": "Writers",
-			"year": "Year",
-			"metaType": "Type",
+			"identifierUuid": "Bok UUID",
+			"genres": "Genrer",
+			"inkers": "Tuschare",
+			"language": "Språk",
+			"letterers": "Textare",
+			"links": "Länkar",
+			"month": "Månad",
+			"notes": "Anteckningar",
+			"number": "Nummer",
+			"pageCount": "Sidor",
+			"pencillers": "Tecknare",
+			"publisher": "Utgivare",
+			"series": "Serier",
+			"seriesGroup": "Seriegrupp",
+			"storyArc": "Övergripande historia",
+			"storyArcNumber": "Nummer i övergripande historien",
+			"summary": "Sammanfattning",
+			"teams": "Team",
+			"title": "Titel",
+			"titleSort": "Sortera efter titel",
+			"volume": "Volym",
+			"writers": "Författare",
+			"year": "År",
+			"metaType": "Sort",
 			"imprint": "Imprint",
 			"comicid": "Comic ID",
-			"booktype": "Book type",
+			"booktype": "Boktyp",
 			"status": "Status",
-			"totalIssues": "Total issues",
-			"publicationRun": "Publication run",
-			"comicImage": "Comic image",
-			"descriptionFormatted": "Description (formatted)"
+			"totalIssues": "Totalt antal nummer",
+			"publicationRun": "Utgivningslöpning",
+			"comicImage": "Seriebild",
+			"descriptionFormatted": "Beskrivning (formaterad)"
 		},
 		"addFields": {
-			"description": "Add each addition on its own line"
+			"description": "Lägg till varje tillägg på sin egen rad"
 		}
 	},
 	"seriesOverviewScene": {
@@ -1033,8 +1033,8 @@
 				"placeholder": "Aldrig"
 			},
 			"expiresAt": {
-				"label": "Expires at",
-				"placeholder": "Never"
+				"label": "Förfaller den",
+				"placeholder": "Aldrig"
 			},
 			"permissions": {
 				"inherit": {
@@ -1171,7 +1171,7 @@
 				},
 				"viewManager": {
 					"updateSelected": "Uppdatera valda",
-					"deleteSelected": "Delete view",
+					"deleteSelected": "Radera vy",
 					"create": "Skapa ny vy",
 					"modal": {
 						"heading": {
@@ -1198,8 +1198,8 @@
 						}
 					},
 					"deleteModal": {
-						"title": "Delete view",
-						"description": "Are you sure you want to delete this view?"
+						"title": "Radera vy",
+						"description": "Är du säker på att du vill ta bort denna vy?"
 					}
 				}
 			}
@@ -1216,7 +1216,7 @@
 		},
 		"sidebar": {
 			"personal": {
-				"account": "Account",
+				"account": "Konto",
 				"appearance": "Preferences",
 				"api keys": "API keys",
 				"reader": "Reader",

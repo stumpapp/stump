@@ -2236,28 +2236,28 @@
 			"description": "Allows the user to view real-time system logs"
 		},
 		"READ_USERS": {
-			"label": "Read users",
-			"description": "Allows the user to view user account information"
+			"label": "Visa användare",
+			"description": "Tillåter användaren att visa information om användarkonton"
 		},
 		"SCAN_LIBRARY": {
-			"label": "Scan libraries",
-			"description": "Allows the user to trigger library scans to discover new content"
+			"label": "Skanna bibliotek",
+			"description": "Tillåter användaren att trigga bibliotekssökning för att upptäcka nytt innehåll"
 		},
 		"UPLOAD_FILE": {
-			"label": "Upload files",
-			"description": "Allows the user to upload files to the server"
+			"label": "Ladda upp filer",
+			"description": "Tillåt användaren att ladda upp filer till servern"
 		},
 		"MANAGE_JOBS": {
-			"label": "Manage jobs",
-			"description": "Allows the user to manage any queued jobs"
+			"label": "Hantera jobb",
+			"description": "Tillåter användaren att hantera köade jobb"
 		},
 		"EDIT_METADATA": {
-			"label": "Edit metadata",
-			"description": "Allows the user to edit metadata for books and series"
+			"label": "Redigera metadata",
+			"description": "Tillåter användaren att redigera metadata för böcker och serier"
 		},
 		"WRITE_BACK_METADATA": {
-			"label": "Write back metadata",
-			"description": "Allows the user to write metadata changes back to the source files"
+			"label": "Skriv tillbaka metadata",
+			"description": "Tillåter användaren att skriva tillbaka ändrad metadata till källfilerna"
 		}
 	}
 }

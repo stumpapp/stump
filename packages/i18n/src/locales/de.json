@@ -137,8 +137,8 @@
 			"stepLabel": "Schritt",
 			"steps": [
 				{
-					"label": "Grundlegendes",
-					"heading": "Grundlegende Informationen",
+					"label": "Allgemeines",
+					"heading": "Allgemeine Informationen",
 					"description": "Die Details des Clubs, einschließlich Name und Beschreibung"
 				},
 				{
@@ -171,7 +171,7 @@
 	},
 	"bookClubSettingsScene": {
 		"sidebar": {
-			"basics": "Grundlegendes",
+			"basics": "Allgemeines",
 			"members": {
 				"members": "Mitglieder",
 				"roles": "Rollen",
@@ -188,7 +188,7 @@
 			}
 		},
 		"basics": {
-			"title": "Grundlegende Informationen",
+			"title": "Allgemeine Informationen",
 			"description": "Die Details dieses Buchclubs, einschließlich Name und Beschreibung",
 			"form": {
 				"submit": "Club aktualisieren"
@@ -459,9 +459,9 @@
 			"stepLabel": "Schritt",
 			"steps": [
 				{
-					"label": "Grundeinstellungen",
-					"heading": "Grundlegende Informationen",
-					"description": "Die Einzelheiten zu dieser Bibliothek, einschließlich Name, Pfad und Beschreibung"
+					"label": "Allgemeines",
+					"heading": "Allgemeine Informationen",
+					"description": "Die Details zu dieser Bibliothek, einschließlich Name, Pfad und Beschreibung"
 				},
 				{
 					"label": "Scannt",
@@ -539,7 +539,7 @@
 		"subtitle": "Verwalte deine Bibliothek hier. Weitere Informationen über diese Einstellung findest du in der",
 		"subtitleLink": "dazugehörigen Dokumentation",
 		"sidebar": {
-			"basics": "Grundeinstellungen",
+			"basics": "Allgemeines",
 			"options": {
 				"general": "Allgemein",
 				"reading": "Lesen",
@@ -556,7 +556,7 @@
 			}
 		},
 		"basics": {
-			"title": "Grundlegende Informationen",
+			"title": "Allgemeine Informationen",
 			"description": "Die Details zu dieser Bibliothek, einschließlich Name, Pfad und Beschreibung",
 			"form": {
 				"submit": "Bibliothek aktualisieren"
@@ -694,7 +694,7 @@
 					"disclaimer": "Diese Aktion löscht keine Dateien, aber es werden alle Datensätze in Bezug auf Medien und Serien die nicht gefunden werden konnten dauerhaft gelöscht",
 					"confirmation": {
 						"label": "Bibliothek bereinigen",
-						"text": "Sind Sie sicher, dass Sie diese Bibliothek bereinigen möchten?"
+						"text": "Bist du sicher, dass du diese Bibliothek bereinigen möchtest?"
 					},
 					"emptyText": "Es gab nichts zu reinigen"
 				},
@@ -719,17 +719,17 @@
 	},
 	"homeScene": {
 		"onDeck": {
-			"title": "Your next read",
+			"title": "Deine nächste Lesung",
 			"emptyState": {
-				"heading": "No books on deck",
-				"message": "Your next recommended books will show up here"
+				"heading": "Keine Bücher im Deck",
+				"message": "Deine nächsten Buchempfehlungen werden hier angezeigt"
 			}
 		},
 		"continueReading": {
 			"title": "Weiterlesen",
 			"emptyState": {
 				"heading": "Nichts zu zeigen",
-				"message": "Alle angefangene Bücher, die Sie starten, werden hier angezeigt"
+				"message": "Alle angefangene Bücher, die du startest, werden hier angezeigt"
 			}
 		},
 		"recentlyAddedSeries": {
@@ -749,12 +749,12 @@
 	},
 	"metadataEditor": {
 		"labels": {
-			"ageRating": "Age rating",
-			"characters": "Characters",
-			"colorists": "Colorists",
-			"coverArtists": "Cover artists",
-			"day": "Day",
-			"editors": "Editors",
+			"ageRating": "Altersfreigabe",
+			"characters": "Charaktere",
+			"colorists": "Koloristen",
+			"coverArtists": "Cover-Künstler",
+			"day": "Tag",
+			"editors": "Editoren",
 			"format": "Format",
 			"identifierAmazon": "Amazon ID",
 			"identifierCalibre": "Calibre ID",
@@ -763,39 +763,39 @@
 			"identifierMobiAsin": "Mobi ASIN",
 			"identifierUuid": "Buch UUID",
 			"genres": "Genre",
-			"inkers": "Inkers",
+			"inkers": "Zeichner",
 			"language": "Sprache",
-			"letterers": "Letterers",
+			"letterers": "Schriftsteller",
 			"links": "Links",
 			"month": "Monat",
 			"notes": "Anmerkungen",
 			"number": "Nummer",
 			"pageCount": "Seiten",
-			"pencillers": "Pencillers",
-			"publisher": "Publisher",
-			"series": "Series",
-			"seriesGroup": "Series group",
-			"storyArc": "Story arc",
-			"storyArcNumber": "Story arc number",
+			"pencillers": "Zeichner",
+			"publisher": "Verlag",
+			"series": "Serien",
+			"seriesGroup": "Seriengruppe",
+			"storyArc": "Handlungsbogen",
+			"storyArcNumber": "Handlungsbogennummer",
 			"summary": "Zusammenfassung",
 			"teams": "Teams",
-			"title": "Title",
-			"titleSort": "Title sort",
-			"volume": "Volume",
-			"writers": "Writers",
-			"year": "Year",
-			"metaType": "Type",
-			"imprint": "Imprint",
+			"title": "Titel",
+			"titleSort": "Titelsortierung",
+			"volume": "Band",
+			"writers": "Schriftsteller",
+			"year": "Jahr",
+			"metaType": "Typ",
+			"imprint": "Impressum",
 			"comicid": "Comic ID",
-			"booktype": "Book type",
+			"booktype": "Buchtyp",
 			"status": "Status",
-			"totalIssues": "Total issues",
-			"publicationRun": "Publication run",
-			"comicImage": "Comic image",
-			"descriptionFormatted": "Description (formatted)"
+			"totalIssues": "Gesamtanzahl der Ausgaben",
+			"publicationRun": "Publikationslauf",
+			"comicImage": "Comicbild",
+			"descriptionFormatted": "Beschreibung (formatiert)"
 		},
 		"addFields": {
-			"description": "Add each addition on its own line"
+			"description": "Füge jede Ergänzung in eine eigene Zeile hinzu"
 		}
 	},
 	"seriesOverviewScene": {
@@ -830,16 +830,16 @@
 					"shared": {
 						"label": "Geteilt",
 						"description": "Bestimmte Benutzer können auf diese intelligente Liste zugreifen",
-						"createDisclaimer": "Nach dem Erstellen kann ausgewählt werden, wer Zugriff auf diese intelligente Liste erhält"
+						"createDisclaimer": "Du kannst auswählen, mit wem die Liste nach Erstellung geteilt wird"
 					},
 					"private": {
 						"label": "Privat",
-						"description": "Niemand sonst kann auf diese intelligente Liste zugreifen"
+						"description": "Niemand außer dir kann auf diese intelligente Liste zugreifen"
 					}
 				}
 			},
 			"queryBuilder": {
-				"uiPerformance": "This feature is missing performance optimizations on the UI and may be slow with filters which produce large result sets. This will be improved in the future",
+				"uiPerformance": "Dieser Funktion fehlen Leistungsoptimierungen in der Benutzeroberfläche und kann langsam mit Filtern, welche große Suchergebnisse erzeugen, sein. Dies wird in der Zukunft verbessert",
 				"rootJoiner": {
 					"and": {
 						"label": "UND",
@@ -902,29 +902,29 @@
 									"status": "Status",
 									"path": "Pfad",
 									"pages": "Seiten",
-									"tags": "Schlagworte",
+									"tags": "Tags",
 									"createdAt": "Erstellt am",
 									"updatedAt": "Aktualisiert am"
 								}
 							},
 							"book_meta": {
-								"label": "Buch Metadaten",
+								"label": "Buchmetadaten",
 								"attributes": {
 									"title": "Titel",
 									"summary": "Zusammenfassung",
 									"notes": "Anmerkungen",
 									"writers": "Autoren",
-									"pencillers": "Penciller",
-									"inkers": "Inker",
-									"letterers": "Letterer",
-									"editors": "Redakteure",
-									"publisher": "Herausgeber",
-									"colorists": "Colorist",
+									"pencillers": "Zeichner",
+									"inkers": "Zeichner",
+									"letterers": "Schriftsteller",
+									"editors": "Editoren",
+									"publisher": "Verlag",
+									"colorists": "Kolorist",
 									"links": "Links",
 									"characters": "Charaktere",
 									"teams": "Teams",
 									"genres": "Genre",
-									"coverArtists": "Cover Künstler"
+									"coverArtists": "Cover-Künstler"
 								}
 							},
 							"series": {
@@ -935,18 +935,18 @@
 								}
 							},
 							"series_meta": {
-								"label": "Serien Metadaten",
+								"label": "Serienmetadaten",
 								"attributes": {
 									"title": "Titel",
 									"summary": "Zusammenfassung",
-									"publisher": "Herausgeber",
-									"imprint": "Imprint",
-									"comicid": "Comic-ID",
+									"publisher": "Verlag",
+									"imprint": "Impressum",
+									"comicid": "Comic ID",
 									"booktype": "Buchtyp",
 									"status": "Status",
 									"volume": "Band",
 									"metaType": "Typ",
-									"ageRating": "Alterseinstufung"
+									"ageRating": "Altersfreigabe"
 								}
 							},
 							"library": {
@@ -964,11 +964,11 @@
 					},
 					"rangeValue": {
 						"from": {
-							"date": "Von",
+							"date": "Von Datum",
 							"number": "Von"
 						},
 						"to": {
-							"date": "Bis",
+							"date": "Bis Datum",
 							"number": "Bis"
 						},
 						"inclusive": "Einschließend"
@@ -983,24 +983,24 @@
 	},
 	"createSmartListScene": {
 		"heading": "Intelligente Liste erstellen",
-		"subtitle": "On-the-fly list creation based on a set of filters",
+		"subtitle": "Spontane Listenerstellung basiert auf eine Reihe von Filtern",
 		"form": {
 			"stepLabel": "Schritt",
 			"steps": [
 				{
-					"label": "Allgemein",
+					"label": "Allgemeines",
 					"heading": "Allgemeine Informationen",
-					"description": "The details of this smart list, including its name, description, and visibility"
+					"description": "Die Details dieser intelligenten Liste, einschließlich Name, Beschreibung und Sichtbarkeit"
 				},
 				{
 					"label": "Filter",
 					"heading": "Filter",
-					"description": "The filters to apply to this smart list"
+					"description": "Die Filter, welche zu dieser intelligenten Liste angewendet werden sollen"
 				},
 				{
 					"label": "Überprüfung",
 					"heading": "Überprüfung",
-					"description": "Review your smart list settings before creating it"
+					"description": "Überprüfe deine intelligente Listeneinstellung vor dem Erstellen"
 				}
 			],
 			"review": {
@@ -1038,20 +1038,20 @@
 			},
 			"permissions": {
 				"inherit": {
-					"label": "Berechtigungen übernommen",
-					"description": "Die gleichen Berechtigungen wie Ihr Konto"
+					"label": "Berechtigungen erben",
+					"description": "Die gleichen Berechtigungen wie dein Konto"
 				},
 				"explicit": {
 					"label": "Explizite Berechtigungen",
-					"description": "Wählen Sie die Berechtigungen die dieser Schlüssel haben soll"
+					"description": "Wähle die Berechtigungen, die dieser Schlüssel haben soll"
 				}
 			}
 		},
-		"inheritDisclaimer": "Dieser API Schlüssel wird Ihre vollen Berechtigungen übernehmen, was bedeutet, dass er alles tun kann, was Sie tun können. Seien Sie vorsichtig mit dieser Einstellung"
+		"inheritDisclaimer": "Dieser API Schlüssel wird deine vollen Berechtigungen übernehmen, was bedeutet, dass er alles tun kann, was du kannst. Sei vorsichtig mit dieser Einstellung"
 	},
 	"userSmartListsScene": {
 		"heading": "Intelligente Listen",
-		"subtitle": "Deine bevorzugten Suchen und Filter, die zum einfachen Zugriff gespeichert wurden",
+		"subtitle": "Deine Lieblingssuchen und Filter gespeichert für einfachen Zugriff",
 		"searchPlaceholder": "Intelligente Listen filtern",
 		"buttons": {
 			"createSmartList": "Intelligente Liste erstellen"
@@ -1060,7 +1060,7 @@
 			"emptyState": {
 				"heading": "Keine intelligenten Listen zur Ansicht vorhanden",
 				"noListsMessage": "Erstelle eine intelligente Liste, um loszulegen",
-				"noMatchesMessage": "Versuche, deine Suchanfrage zu ändern"
+				"noMatchesMessage": "Versuche, deine Suche zu ändern"
 			},
 			"card": {
 				"meta": {
@@ -1093,14 +1093,14 @@
 		},
 		"access": {
 			"title": "Zugriff",
-			"description": "Legen Sie fest, wer auf diese Smart-Liste zugreifen kann",
+			"description": "Bestimme, wer auf diese Smart-Liste zugreifen kann",
 			"sections": {
 				"visibility": {
 					"confirmation": {
 						"public": "Dies wird die Liste für alle sichtbar machen",
 						"private": "Dies ändert die Liste zu privat, dadurch kann jeder, der Zugriff hat, nicht mehr diese sehen",
-						"shared": "Sie müssen die Liste mit bestimmten Benutzern teilen, um ihnen Zugriff zu gewähren",
-						"fallback": "Sind Sie sicher, dass Sie die Sichtbarkeit dieser Liste ändern möchten?"
+						"shared": "Du musst die Liste mit bestimmten Benutzern teilen, um ihnen Zugriff zu gewähren",
+						"fallback": "Bist du sicher, dass du die Sichtbarkeit dieser Liste ändern möchten?"
 					}
 				},
 				"accessManager": {
@@ -1110,21 +1110,21 @@
 		},
 		"filters": {
 			"title": "Filtergenerator",
-			"description": "Verwalten Sie die Filter, die diese intelligente Liste erstellen"
+			"description": "Verwalte die Filter, die diese intelligente Liste erstellen"
 		},
 		"danger-zone/delete": {
 			"title": "Löschaktionen",
-			"description": "Permanentes Löschen dieser intelligenten Liste und aller ihrer Inhalte oder bestimmter Ressourcen",
+			"description": "Dauerhaft diese intelligente Liste und all seine Inhalte oder gewisse Ressourcen löschen",
 			"sections": {
 				"deleteList": {
 					"heading": "Liste löschen",
 					"description": [
-						"Diese intelligente Liste und ihren gesamten Inhalt dauerhaft löschen.",
+						"Dauerhaft diese intelligente Liste und all seine Inhalte löschen.",
 						"Dieser Vorgang kann nicht rückgängig gemacht werden"
 					],
 					"confirmation": {
 						"title": "Liste löschen",
-						"description": "Möchten Sie diese intelligente Liste wirklich löschen?",
+						"description": "Bist du dir sicher, dass du diese intelligente Liste wirklich löschen möchtest?",
 						"confirm": "Liste löschen"
 					}
 				}
@@ -1152,7 +1152,7 @@
 					"customView": "Benutzerdefinierte Ansicht",
 					"defaultView": "Standardansicht",
 					"noViewsSaved": "Keine Ansichten gespeichert",
-					"selectView": "Gespeicherte Ansicht auswählen"
+					"selectView": "Eine gespeicherte Ansicht auswählen"
 				},
 				"filterDrawer": {
 					"heading": "Filter für intelligente Listen",
@@ -1170,7 +1170,7 @@
 					"placeholder": "Schnellfilter"
 				},
 				"viewManager": {
-					"updateSelected": "Auswahl aktualisieren",
+					"updateSelected": "Ansicht aktualisieren",
 					"deleteSelected": "Ansicht löschen",
 					"create": "Neue Ansicht erstellen",
 					"modal": {
@@ -1180,7 +1180,7 @@
 						},
 						"description": {
 							"create": "Neue Ansicht für diese intelligente Liste erstellen",
-							"update": "Ansicht aktualisieren "
+							"update": "Die Ansicht aktualisieren"
 						},
 						"createForm": {
 							"name": {

@@ -610,16 +610,16 @@
 					"runScan": "Scan starten",
 					"inspect": "Details anzeigen",
 					"inspector": {
-						"title": "Scanverlauf",
-						"description": "A detailed view of this scan record",
+						"title": "Scanaufzeichnung",
+						"description": "Eine detaillierte Ansicht dieser Scanaufzeichnung",
 						"fields": {
 							"library": "Bibliothek",
 							"date": "Datum",
 							"config": "Konfiguration",
-							"jobOutput": "Job output",
+							"jobOutput": "Jobausgabe",
 							"logs": "Protokolle"
 						},
-						"logsPresent": "Logs were persisted for this job",
+						"logsPresent": "Protokolle für diesen Job wurden gespeichert",
 						"seeLogs": "Protokolle ansehen"
 					},
 					"table": {
@@ -639,7 +639,7 @@
 			"description": "Einstellungen und Verwaltungsoptionen für Vorschaubilder in dieser Bibliothek",
 			"sections": {
 				"management": {
-					"heading": "Verwaltung",
+					"heading": "Vorschaubilder verwalten",
 					"description": "Existierende Vorschaubilder für diese Bibliothek verwalten",
 					"thumbnailSelector": {},
 					"deleteThumbnails": {}
@@ -648,22 +648,22 @@
 		},
 		"options/analysis": {
 			"title": "Analyse",
-			"description": "Analysiere den Inhalt dieser Bibliothek, um mögliche Probleme oder Verbesserungen zu ermitteln",
+			"description": "Analysiere den Inhalt dieser Bibliothek, um mögliche Probleme oder Verbesserungen zu identifizieren",
 			"sections": {
 				"analyzeBooks": {
 					"heading": "Bücher analysieren",
 					"description": "Analysiere die Bücher in dieser Bibliothek, um zusätzliche Metadaten in der Datenbank zu speichern, wie z.B. die Seitenabmessungen für bildbasierte Bücher",
-					"disclaimerTitle": "This process is resource-intensive",
-					"disclaimer": "Dieser Prozess ist ressourcenintensiv und kann einige Zeit in Anspruch nehmen. Weitere Konfigurationsmöglichkeiten werden in Zukunft verfügbar sein",
+					"disclaimerTitle": "Dieser Prozess ist ressourcenintensiv",
+					"disclaimer": "Es kann eine Weile dauern, bis es fertig ist. In Zukunft wird es konfigurierbarer sein",
 					"analyzeButton": "Bücher analysieren"
 				},
 				"missingFiles": {
 					"heading": "Fehlende Dateien",
 					"description": "Dateien, die in der Datenbank gespeichert sind, aber nicht auf der Festplatte gefunden werden können",
-					"noMissingFiles": "Es gibt keine fehlenden Dateien in dieser Datenbank"
+					"noMissingFiles": "Es gibt keine fehlenden Dateien in dieser Bibliothek"
 				},
 				"duplicateFiles": {
-					"heading": "Doppelte Dateien",
+					"heading": "Duplizierte Dateien",
 					"description": "Dateien, die möglicherweise mehrfach auf der Festplatte vorkommen",
 					"noDuplicateFiles": "Es wurden keine doppelten Dateien für diese Bibliothek erkannt"
 				}
@@ -675,8 +675,8 @@
 			"sections": {
 				"libraryExclusions": {
 					"heading": "Benutzer ausschließen",
-					"description": "Verhindern Sie für bestimmte Benutzer den Zugriff auf diese Bibliothek oder deren Inhalte",
-					"noUsersTitle": "No users to exclude",
+					"description": "Verweigere bestimmte Benutzer den Zugriff auf diese Bibliothek oder deren Inhalte",
+					"noUsersTitle": "Keine Benutzer auszuschließen",
 					"noUsers": "Es gibt keine anderen registrierten Benutzer, die von dieser Bibliothek ausgeschlossen werden können",
 					"updated": "Ausgeschlossene Benutzer aktualisiert",
 					"failure": "Fehler beim Aktualisieren der ausgeschlossenen Benutzer"
@@ -1227,7 +1227,7 @@
 				"general": "Allgemein",
 				"logs": "Protokolle",
 				"users": "Benutzer",
-				"jobs": "Aufgaben",
+				"jobs": "Jobs",
 				"access": "Zugriff",
 				"email": "E-Mail",
 				"notifications": "Benachrichtigungen",
@@ -1627,12 +1627,12 @@
 			}
 		},
 		"server/jobs": {
-			"helmet": "Aufgaben",
-			"title": "Aufgaben",
+			"helmet": "Jobs",
+			"title": "Jobs",
 			"description": "Hintergrundaufgaben, die in der Stump-Serverinstanz ausgeführt werden",
 			"sections": {
 				"scheduling": {
-					"title": "Planung",
+					"title": "Geplante Jobs",
 					"description": "Einige Aufgaben können so konfiguriert werden, dass sie nach einem Zeitplan ausgeführt werden. Änderungen an dieser Konfiguration werden erst nach einem Neustart des Servers wirksam",
 					"disclaimer": "The job scheduler is really basic and will be improved in the future. Please reach out for feedback or suggestions!",
 					"createOrUpdateConfig": {

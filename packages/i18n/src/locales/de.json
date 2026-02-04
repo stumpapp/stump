@@ -1186,20 +1186,20 @@
 							"name": {
 								"label": "Name",
 								"placeholder": "Meine Ansicht",
-								"description": "Ein eindeutiger Anzeigename für diese Ansicht"
+								"description": "Ein freundlicher Anzeigename um die Ansicht eindeutig zu bestimmen"
 							}
 						},
 						"updateForm": {
 							"name": {
 								"label": "Name",
 								"placeholder": "Meine Ansicht",
-								"description": "Der aktualisierte Name für diese Ansicht, falls gewünscht"
+								"description": "Der aktualisierte Name für diese Ansicht, falls erwünscht"
 							}
 						}
 					},
 					"deleteModal": {
 						"title": "Ansicht löschen",
-						"description": "Are you sure you want to delete this view?"
+						"description": "Bist du dir sicher, dass du die Ansicht löschen möchtest?"
 					}
 				}
 			}
@@ -1217,21 +1217,21 @@
 		"sidebar": {
 			"personal": {
 				"account": "Konto",
-				"appearance": "Preferences",
-				"api keys": "API keys",
+				"appearance": "Präferenzen",
+				"api keys": "API Schlüssel",
 				"reader": "Reader",
 				"desktop": "Desktop",
-				"label": "Personal"
+				"label": "Persönlich"
 			},
 			"management": {
-				"general": "Allgemein",
+				"general": "Server",
 				"logs": "Protokolle",
 				"users": "Benutzer",
 				"jobs": "Jobs",
 				"access": "Zugriff",
 				"email": "E-Mail",
 				"notifications": "Benachrichtigungen",
-				"label": "Management"
+				"label": "Verwaltung"
 			}
 		},
 		"app/account": {
@@ -1247,15 +1247,15 @@
 					"labels": {
 						"username": "Benutzername",
 						"password": "Passwort",
-						"activeChangesPrompt": "Es gibt ungespeicherte Änderungen"
+						"activeChangesPrompt": "Du hast ungespeicherte Änderungen"
 					},
 					"errors": {
-						"updateFailed": "Beim Aktualisieren des Profils ist ein Fehler aufgetreten. Bitte versuche es noch einmal"
+						"updateFailed": "Beim Aktualisieren deines Profils ist ein Fehler aufgetreten. Bitte versuche es noch einmal."
 					},
 					"avatarPicker": {
 						"heading": "Wähle dein Avatar-Bild",
-						"subtitle": "Stump unterstützt benutzerdefinierte Avatare, die durch die Angabe einer Bild-URL gesetzt werden können. Bild-Uploads werden nicht unterstützt, um die Datenmenge auf dem Server zu reduzieren.",
-						"preview": "Sobald eine Bild-URL eingegeben wurde erscheint hier eine Vorschau davon.",
+						"subtitle": "Stump unterstützt benutzerdefinierte Avatare, die durch die Angabe einer Bild URL gesetzt werden können. Hochladen von Bildern wird nicht unterstützt, um die Datenmenge auf dem Server zu reduzieren.",
+						"preview": "Eine Vorschaue wird erscheinen, sobald du eine URL eingegeben hast.",
 						"labels": {
 							"imageUrl": "Bild URL",
 							"customAvatar": "Benutzerdefinierter Avatar"
@@ -1278,7 +1278,7 @@
 					},
 					"heading": "Spracheinstellungen",
 					"subtitle": [
-						"Stump unterstützt mehrere Sprachen, die hierunter eingestellt werden können. Bitte hilf mit, die Qualität der ",
+						"Stump unterstützt mehrere Sprachen, die hierunter eingestellt werden können. Bitte überlege dir mitzuhelfen die Qualität von den",
 						"Stump-Übersetzungen ",
 						"zu verbessern, wenn du dazu in der Lage bist!"
 					]
@@ -1286,14 +1286,14 @@
 			}
 		},
 		"app/preferences": {
-			"helmet": "Darstellung",
-			"title": "Darstellung",
+			"helmet": "Präferenzen",
+			"title": "Präferenzen",
 			"description": "Passe das Aussehen und die Bedienung der Anwendung an",
 			"sections": {
 				"themeSelect": {
 					"label": "Design",
 					"description": [
-						"Wie ein eigenes Design erstellt werden kann, ist nachzulesen in der",
+						"Wie du ein eigenes Design erstellen kannst, ist nachzulesen in der",
 						"Dokumentation"
 					],
 					"options": {
@@ -1322,11 +1322,11 @@
 					"lock": "Anordnung sperren",
 					"unlock": "Anordnung entsperren",
 					"options": {
-						"HOME": "Home",
-						"EXPLORE": "Explore",
-						"LIBRARIES": "Libraries",
-						"BOOK_CLUBS": "Book clubs",
-						"SMART_LISTS": "Smart lists"
+						"HOME": "Startseite",
+						"EXPLORE": "Entdecken",
+						"LIBRARIES": "Bibliotheken",
+						"BOOK_CLUBS": "Buchclubs",
+						"SMART_LISTS": "Intelligente Listen"
 					},
 					"entityOptions": {
 						"createAction": {
@@ -1335,7 +1335,7 @@
 						},
 						"linkToAll": {
 							"label": "Alles anzeigen Link",
-							"help": "Ein Link zu einer Seite, die sich alle Elemente dieses Typs anzeigt"
+							"help": "Ein Link zu einer Seite, auf der alle Elemente dieses Typs anzeigt werden"
 						}
 					}
 				}
@@ -1344,7 +1344,7 @@
 		"app/apiKeys": {
 			"helmet": "API Schlüssel",
 			"title": "API Schlüssel",
-			"description": "Verwalten Sie Ihre generierten Stump API Schlüssel",
+			"description": "Verwalte deine generierten Stump API Schlüssel",
 			"shared": {
 				"fields": {
 					"name": "Name",
@@ -1362,7 +1362,7 @@
 					"description": "Eine detaillierte Ansicht dieses Schlüssels",
 					"unrestrictedKey": {
 						"heading": "Unbeschränkter Schlüssel",
-						"description": "Since you are the server owner, this key has unrestricted access when configured to inherit permissions. Please be careful."
+						"description": "Da du der Serverinhaber bist, hat dieser Schlüssel uneingeschränkten Zugriff, wenn er so konfiguriert ist, dass er die Berechtigungen übernimmt. Bitte sei vorsichtig."
 					}
 				},
 				"createKey": {
@@ -1370,27 +1370,27 @@
 						"trigger": "API Schlüssel erstellen",
 						"heading": {
 							"creating": "API Schlüssel erstellen",
-							"created": "erstellte Schlüssel"
+							"created": "Schlüssel erstellen"
 						},
 						"description": {
-							"creating": "API keys are long-lived credentials that can be used to authenticate with the API",
-							"created": "Your new API key has been created. Save the secret somewhere safe, as it will not be shown again"
+							"creating": "API Schlüssel sind langlebige Zugangsdaten, die zur Authentifizierung mit der API verwendet werden können",
+							"created": "Dein neuer API Schlüssel wurde erstellt. Speicher das Geheimnis irgendwo sicher ab, da es nicht wieder angezeigt wird"
 						},
-						"inheritDisclaimer": "Dieser API Schlüssel wird Ihre vollen Berechtigungen übernehmen, was bedeutet, dass er alles tun kann, was Sie tun können. Seien Sie vorsichtig mit dieser Einstellung",
-						"createdKey": "erstellte Schlüssel",
+						"inheritDisclaimer": "Dieser API Schlüssel wird deine vollen Berechtigungen übernehmen, was bedeutet, dass er alles tun kann, was du kannst. Sei vorsichtig mit dieser Einstellung",
+						"createdKey": "Erstellte Schlüssel",
 						"savedConfirm": "Ich habe meinen Schlüssel gespeichert",
 						"submit": "Schlüssel erstellen"
 					}
 				},
 				"table": {
-					"title": "Ihre Schlüssel",
-					"description": "Dies sind die API Schlüssel, die Sie erstellt haben",
+					"title": "Deine Schlüssel",
+					"description": "Dies sind die API Schlüssel, die du erstellt hast",
 					"actionMenu": {
-						"inspect": "Inspect",
+						"inspect": "Inspizieren",
 						"delete": "Löschen"
 					},
 					"empty": {
-						"title": "Sie haben noch keine API Schlüssel erstellt",
+						"title": "Du hast noch keine Schlüssel erstellt",
 						"action": "Erstelle einen API Schlüssel um loszulegen"
 					},
 					"noExpiration": "Kein Ablaufdatum gesetzt"
@@ -1398,15 +1398,15 @@
 			}
 		},
 		"app/reader": {
-			"helmet": "Reader-Einstellungen",
-			"title": "Reader-Einstellungen",
-			"description": "Standardeinstellungen für Stump Reader. Diese Einstellung betrifft nur das aktuelle Gerät",
+			"helmet": "Readereinstellungen",
+			"title": "Readereinstellungen",
+			"description": "Standardeinstellungen für den Stump Reader. Diese Einstellung betrifft nur das aktuelle Gerät",
 			"sections": {
 				"universal": {
 					"sections": {
 						"readingDirection": {
-							"label": "Reading direction",
-							"description": "The direction in which the reader will progress through pages"
+							"label": "Leserichtung",
+							"description": "Die Richtung, in der der Reader durch die Seiten blättert"
 						}
 					}
 				},
@@ -1415,39 +1415,39 @@
 					"description": "Comics, Mangas und andere bildbasierte Bücher",
 					"sections": {
 						"preloadAheadCount": {
-							"label": "Lade vorherige Seiten",
-							"description": "Die Anzahl der Seiten, vor der aktuellen Seite, die bereits vorab geladen werden sollen"
+							"label": "Vorder Vorladeanzahl",
+							"description": "Die Anzahl an Seiten, welche vor der aktuellen Seite vorgeladen werden soll"
 						},
 						"preloadBehindCount": {
-							"label": "Lade nächste Seiten",
-							"description": "Die Anzahl der Seiten, hinter der aktuellen Seite, die bereits vorab geladen werden sollen"
+							"label": "Hinter Vorladeanzahl",
+							"description": "Die Anzahl an Seiten, welche hinter der aktuellen Seite vorgeladen werden soll"
 						}
 					}
 				},
 				"textBasedBooks": {
-					"label": "Ebook reader",
-					"description": "Default settings for text-based books",
+					"label": "Ebook Reader",
+					"description": "Standardeinstellungen für textbasierte Bücher",
 					"sections": {
 						"fontSize": {
-							"label": "Font size",
-							"description": "The size of the font used in the reader"
+							"label": "Schriftgröße",
+							"description": "Die Größe der im Reader verwendeten Schriftart"
 						},
 						"fontFamily": {
-							"label": "Font family",
-							"description": "The font used in the reader"
+							"label": "Schriftfamilie",
+							"description": "Die im Reader verwendete Schriftart"
 						},
 						"lineHeight": {
-							"label": "Line height",
-							"description": "The height of the lines in the reader"
+							"label": "Zeilenhöhe",
+							"description": "Die Höhe der Zeilen im Reader"
 						}
 					}
 				},
 				"data": {
 					"sections": {
 						"clearStore": {
-							"label": "Clear preferences",
-							"description": "Reset all individual book settings that override the defaults",
-							"button": "Clear preferences"
+							"label": "Präferenzen löschen",
+							"description": "Zurücksetzen aller individuellen Bucheinstellungen, die die Standardwerte überschreiben",
+							"button": "Präferenzen löschen"
 						}
 					}
 				}
@@ -1460,7 +1460,7 @@
 			"sections": {
 				"configuredServers": {
 					"label": "Konfigurierte Server",
-					"description": "Liste der Stump-Server, mit denen sich verbunden werden kann",
+					"description": "Liste der Stump Server, mit denen sich verbunden werden kann",
 					"getStarted": "Server hinzufügen, um loszulegen",
 					"unreachableServer": {
 						"tooltip": "Server nicht erreichbar"
@@ -1477,12 +1477,12 @@
 						"fields": {
 							"name": {
 								"label": "Name",
-								"description": "Der Anzeigename für diesen Server",
+								"description": "Ein freundlicher Name um diesen Server zu identifizieren",
 								"placeholder": "Mein Server"
 							},
 							"uri": {
-								"label": "URI",
-								"description": "Die URL des Stump-Servers",
+								"label": "URL",
+								"description": "Die URL des Stump Servers",
 								"placeholder": "https://stump.example.com"
 							}
 						}
@@ -1490,7 +1490,7 @@
 					"addServer": {
 						"trigger": "Server hinzufügen",
 						"title": "Neuen Server hinzufügen",
-						"description": "Einen neuen Stump-Server zur Desktopanwendung hinzufügen",
+						"description": "Einen neuen Stump Server zur Desktopanwendung hinzufügen",
 						"confirm": "Server hinzufügen"
 					},
 					"editServer": {
@@ -1534,45 +1534,45 @@
 						}
 					},
 					"resetTokens": {
-						"label": "Authentifizierung löschen",
+						"label": "Tokens löschen",
 						"description": [
-							"Entfernen Sie alle sicher gespeicherten Zugriffstoken für Ihre Server",
-							"Sie werden sich mit jedem Server erneut authentifizieren müssen"
+							"Entferne alle sicher gespeicherten Zugriffstoken für deine Server, inklusive API Schlüssel",
+							"Du wirst dich mit jedem Server erneut authentifizieren müssen und/oder jeden Server neu konfigurieren"
 						],
 						"confirmation": {
-							"trigger": "Authentifizierung löschen",
-							"title": "Authentifizierung löschen",
-							"description": "Dies wird alle Ihre sicher gespeicherten Zugriffstoken für Ihre Server entfernen",
-							"confirm": "Authentifizierung löschen"
+							"trigger": "Tokens löschen",
+							"title": "Tokens löschen",
+							"description": "Bist du dir sicher, dass du alle gespeicherten Tokens löschen möchtest?",
+							"confirm": "Tokens löschen"
 						}
 					}
 				},
 				"optionalFeatures": {
 					"label": "Optionale Funktionen",
-					"description": "Verwalte optionale Funktionen der Desktopanwendung",
+					"description": "Verwalte optionale Funktionen einzigartig zu der Desktopanwendung",
 					"bundledServer": {
 						"label": "Gebündelte Server",
 						"description": "Führe den gebündelten Server im Hintergrund aus, während die Desktopanwendung läuft (Neustart erforderlich)"
 					},
 					"discordPresence": {
-						"label": "Discord Präsenz",
-						"description": "Zeige deine Stump-Aktivität in Discord mit Discord Rich Presence",
-						"reconnect": "Erneut mit Discord verbinden"
+						"label": "Discord Presence",
+						"description": "Zeige deine Stump Aktivität in Discord mit Discord Rich Presence",
+						"reconnect": "Wieder mit Discord verbinden"
 					}
 				}
 			}
 		},
 		"server/general": {
-			"helmet": "Allgemeine Servereinstellungen",
-			"title": "Allgemeine Einstellungen",
-			"description": "Allgemeine Einstellungen von Ihrer Stump-Serverinstanz",
+			"helmet": "Servereinstellungen",
+			"title": "Einstellungen",
+			"description": "Allgemeine Einstellungen von Ihrer Stump Serverinstanz",
 			"sections": {
 				"updateAvailable": {
 					"message": "Dein Server ist nicht aktuell. Bitte aktualisiere auf die neueste Version!"
 				},
 				"serverInfo": {
 					"title": "Serverinformation",
-					"description": "Grundlegende Informationen über diese Sump-Serverinstanz",
+					"description": "Allgemeine Informationen über diese Sump Serverinstanz",
 					"build": {
 						"label": "Build",
 						"description": "Versions- und Build-Details",
@@ -1583,10 +1583,10 @@
 						}
 					},
 					"nonStableChannel": {
-						"title": "You are running a non-stable build of Stump",
+						"title": "Du führst eine instabile Version von Stump aus",
 						"description": [
-							"It looks like you are running the",
-							"build channel"
+							"Es scheint als ob, du den",
+							"Build Channel ausführst"
 						]
 					}
 				},
@@ -1599,10 +1599,10 @@
 		"server/logs": {
 			"helmet": "Protokolle",
 			"title": "Protokolle",
-			"description": "Von der Stump-Serverinstanz generierte Protokolle",
+			"description": "Die Protokolle generiert von der Stump Serverinstanz",
 			"sections": {
 				"persistedLogs": {
-					"title": "Dauerhafte Protokolle",
+					"title": "Gespeicherte Protokolle",
 					"description": "Diese Protokolle wurden manuell in der Datenbank gespeichert, normalerweise durch einen bestimmten Job oder Ereignis",
 					"table": {
 						"columns": {
@@ -1611,77 +1611,77 @@
 							"timestamp": "Zeitstempel"
 						},
 						"emptyHeading": "Keine Protokolle zur Ansicht verfügbar",
-						"emptySubtitle": "Es ist entweder alles in Ordnung oder es besteht ein größeres Problem mit dem Server"
+						"emptySubtitle": "Dein Server ist entweder in einem sehr guten oder sehr schlechten Zustand"
 					},
 					"deleteLogs": {
-						"title": "Delete logs",
-						"description": "Permanently delete all persisted logs from the database",
-						"disclaimer": "This action cannot be undone",
-						"confirm": "Delete logs"
+						"title": "Protokolle löschen",
+						"description": "Dauerhaft alle gespeicherten Protokolle von der Datenbank löschen",
+						"disclaimer": "Diese Aktion kann nicht rückgängig gemacht werden",
+						"confirm": "Protokolle löschen"
 					}
 				},
 				"liveLogs": {
 					"title": "Live-Protokoll-Feed",
-					"description": "Direkt und in Echtzeit gestreamt aus der Stump-Serverinstanz"
+					"description": "Direkt und in Echtzeit gestreamt von deiner Stump Serverinstanz"
 				}
 			}
 		},
 		"server/jobs": {
 			"helmet": "Jobs",
 			"title": "Jobs",
-			"description": "Hintergrundaufgaben, die in der Stump-Serverinstanz ausgeführt werden",
+			"description": "Hintergrundjobs, die auf deiner Stump Serverinstanz ausgeführt werden",
 			"sections": {
 				"scheduling": {
 					"title": "Geplante Jobs",
-					"description": "Einige Aufgaben können so konfiguriert werden, dass sie nach einem Zeitplan ausgeführt werden. Änderungen an dieser Konfiguration werden erst nach einem Neustart des Servers wirksam",
-					"disclaimer": "The job scheduler is really basic and will be improved in the future. Please reach out for feedback or suggestions!",
+					"description": "Einige Jobs können so konfiguriert werden, dass sie automatisch nach einem Zeitplan ausgeführt werden",
+					"disclaimer": "Der Jobplaner ist sehr einfach und wird in der Zukunft verbessert. Bitte teile uns dein Feedback oder deine Vorschläge mit!",
 					"createOrUpdateConfig": {
 						"fields": {
 							"intervalSecs": {
-								"label": "Interval",
-								"description": "How often the job should run (in seconds)",
-								"placeholder": "e.g. \"86400\" for once a day"
+								"label": "Intervall",
+								"description": "Wie oft der Job ausgeführt werden soll (in Sekunden)",
+								"placeholder": "z.B. \"86400\" für einmal am Tag"
 							},
 							"intervalPreset": {
-								"label": "Preset",
+								"label": "Voreinstellung",
 								"options": {
-									"everySixHours": "Every 6 hours",
-									"everyTwelveHours": "Every 12 hours",
-									"oncePerDay": "Once a day",
-									"oncePerWeek": "Once a week",
-									"oncePerMonth": "Once a month"
+									"everySixHours": "Alle 6 Stunden",
+									"everyTwelveHours": "Alle 12 Stunden",
+									"oncePerDay": "Einmal am Tag",
+									"oncePerWeek": "Einmal pro Woche",
+									"oncePerMonth": "Einmal pro Monat"
 								}
 							},
 							"includedLibraryIds": {
-								"label": "Included libraries",
-								"description": "Choose which libraries are included"
+								"label": "Beinhaltete Bibliotheken",
+								"description": "Wähle aus, welche Bibliotheken beinhalten werden"
 							}
 						},
-						"restartRequired": "Changes to this configuration will take effect after a server restart"
+						"restartRequired": "Änderungen an dieser Konfiguration werden nach einem Neustart des Servers wirksam"
 					}
 				},
 				"history": {
 					"title": "Verlauf",
-					"description": "Eine Aufzeichnung der Aufträge, die auf der Stump-Serverinstanz ausgeführt wurden",
+					"description": "Eine Aufzeichnung der Jobs, die auf der Stump Serverinstanz ausgeführt wurden",
 					"table": {
 						"columns": {
 							"name": "Typ",
 							"description": "Beschreibung",
 							"status": "Status",
-							"createdAt": "Startzeitpunkt",
+							"createdAt": "Gestartet am",
 							"elapsed": "Dauer",
 							"tasks": "Aufgabe"
 						},
-						"emptyHeading": "Keine Aufgaben zur Ansicht verfügbar",
-						"emptySubtitle": "Es gibt aktuell keine Aufgaben",
-						"deleteAllMessage": "Der Aufgabenverlauf und Statistiken können jederzeit aus der Datenbank gelöscht werden. Diese Aktion kann nicht rückgängig gemacht werden"
+						"emptyHeading": "Keine Jobs zur Ansicht verfügbar",
+						"emptySubtitle": "Du kannst keinen Job haben, falls du keinen Job hast",
+						"deleteAllMessage": "Jobverlauf und Statistiken können jederzeit aus der Datenbank gelöscht werden. Diese Aktion kann nicht rückgängig gemacht werden"
 					},
 					"deleteJobHistory": {
-						"title": "Delete job history",
-						"description": "Permanently delete all job history from the database",
-						"confirmText": "Are you sure you want to delete all job history?",
-						"confirm": "Delete",
-						"emptyState": "No jobs to clear"
+						"title": "Jobverlauf löschen",
+						"description": "Dauerhaft alle Jobverläufe von der Datenbank löschen",
+						"confirmText": "Bist du dir sicher, dass du den ganzen Jobverlauf löschen möchtest?",
+						"confirm": "Löschen",
+						"emptyState": "Keine Jobs zum Löschen"
 					}
 				}
 			}
@@ -1709,17 +1709,17 @@
 					],
 					"ageRestriction": {
 						"label": "Altersbeschränkung",
-						"description": "Hindert den Zugriff des Benutzers auf Inhalte mit einer Altersfreigabe, die über der Einstellung liegt",
+						"description": "Hindert den Zugriff des Benutzers auf Inhalte mit einer Altersbeschränkung, die über der Einstellung liegt",
 						"placeholder": "13",
 						"enforceUnset": {
-							"label": "Kein Zugriff auf Inhalte mit fehlender Altersfreigabe",
-							"description": "Wenn aktiviert, wird Benutzern der Zugriff auf Inhalte ohne Altersfreigabe verwehrt"
+							"label": "Kein Zugriff auf nicht gesetzte",
+							"description": "Wenn aktiviert, wird Benutzern der Zugriff auf Inhalte ohne Altersbeschränkung verwehrt"
 						}
 					},
 					"tagRestriction": {
-						"label": "Schlagworteinschränkungen",
-						"description": "Hindert den Zugriff des Benutzers auf Inhalte mit den ausgewählten Schlagworten",
-						"placeholder": "Adult, Gore"
+						"label": "Tageinschränkungen",
+						"description": "Hindert den Zugriff des Benutzers auf Inhalte mit den ausgewählten Tags",
+						"placeholder": "Erwachsen, Gewalt"
 					}
 				},
 				"permissions": {
@@ -1731,12 +1731,12 @@
 					"bookclub": {
 						"label": "Buchclubs",
 						"read": {
-							"label": "Auf Buchclub-Funktionen zugreifen",
-							"description": "Erlaubt dem Benutzer den Zugriff auf die Buchclub-Funktionen, einschließlich der Anzeige und Teilnahme an Buchclubs"
+							"label": "Zugriff auf Buchclubfunktionen",
+							"description": "Erlaubt dem Benutzer den Zugriff auf die Buchclubfunktionen, einschließlich der Ansicht und Teilnahme an Buchclubs"
 						},
 						"create": {
 							"label": "Buchclubs erstellen",
-							"description": "Erlaubt dem Benutzer, neue Buchclubs zu erstellen"
+							"description": "Erlaube dem Benutzer, neue Buchclubs zu erstellen"
 						}
 					},
 					"feature": {
@@ -1754,7 +1754,7 @@
 						"label": "Dateiverwaltung",
 						"explorer": {
 							"label": "Dateiexplorer",
-							"description": "Erlaubt dem Benutzer den Zugang zu den verschiedenen Dateiexplorern.\nDie Inhaltsbeschränkung kann nicht garantiert werden, wenn diese Funktion gewährt wird"
+							"description": "Erlaubt dem Benutzer den Zugang zu den verschiedenen Dateiexplorer.\nDie Inhaltsbeschränkung kann nicht garantiert werden, wenn diese Funktion gewährt wird"
 						},
 						"download": {
 							"label": "Dateien herunterladen",
@@ -1781,13 +1781,13 @@
 						}
 					},
 					"email": {
-						"label": "E-Mails",
+						"label": "E-Mailing",
 						"send": {
 							"label": "E-Mails senden",
 							"description": "Erlaubt dem Benutzer, E-Mails vom Server an alle konfigurierten Aliase zu senden"
 						},
 						"arbitrary_send": {
-							"label": "An beliebige E-Mail senden",
+							"label": "Beliebige E-Mails senden",
 							"description": "Erlaubt dem Benutzer, E-Mails vom Server an eine beliebige E-Mail-Adresse zu senden"
 						}
 					},
@@ -1851,23 +1851,23 @@
 			},
 			"loginActivity": {
 				"deleteConfirmation": {
-					"title": "Delete activity",
-					"description": "All records of login activity will be permanently deleted from the database",
-					"confirm": "Delete"
+					"title": "Aktivität löschen",
+					"description": "Alle Aufzeichnungen der Login-Aktivitäten werden dauerhaft von der Datenbank gelöscht",
+					"confirm": "Löschen"
 				}
 			}
 		},
 		"server/email": {
 			"helmet": "E-Maileinstellungen",
 			"title": "E-Mail",
-			"description": "Einstellungen für die Konfiguration eines SMTP-Servers für Ihre Stump-Serverinstanz",
+			"description": "Einstellungen für die Konfiguration eines SMTP Mailserver für deine Stump Serverinstanz",
 			"sections": {
 				"emailers": {
-					"title": "SMTP- Server",
-					"description": "Die Clients die für den Versand von E-Mails aus der Stump-Serverinstanz konfiguriert wurden",
+					"title": "SMTP Mailserver",
+					"description": "Die Clients die für den Versand von E-Mails aus der Stump Serverinstanz konfiguriert wurden",
 					"singleInstanceDisclaimer": "Während Stump mehrere SMTP-Konfigurationen im Backend unterstützt, kann jedoch nur eine auf der Benutzeroberfläche konfiguriert werden. Dies wird in Zukunft verbessert werden",
 					"list": {
-						"emptyHeading": "Keine SMTP-Server konfiguriert",
+						"emptyHeading": "Keine SMTP Mailserver konfiguriert",
 						"primaryEmailer": "Primärer Mailserver",
 						"sendHistory": {
 							"heading": "Sendeverlauf",
@@ -1877,7 +1877,7 @@
 									"to": "An",
 									"subject": "Betreff",
 									"status": "Status",
-									"createdAt": "Gesendet um"
+									"createdAt": "Gesendet am"
 								}
 							},
 							"emptyHeading": "Kein Verlauf",
@@ -1887,7 +1887,7 @@
 				},
 				"devices": {
 					"title": "E-Mail Geräte",
-					"description": "The device aliases you have configured for receiving emails from your Stump server instance",
+					"description": "Die Gerätealiase, die konfiguriert wurden, um E-Mails von deiner Stump Serverinstanz zu erhalten",
 					"addDevice": "Gerätealias hinzufügen",
 					"addOrUpdateDevice": {
 						"title": {
@@ -1896,11 +1896,11 @@
 						},
 						"name": {
 							"label": "Name",
-							"description": "Ein eindeutiger Anzeigename für diesen Gerätealias"
+							"description": "Ein freundlicher Anzeigename um diesen Gerätealias eindeutig zu bestimmen"
 						},
 						"email": {
 							"label": "E-Mail",
-							"description": "Die E-Mail-Adresse, mit der dieser Alias verknüpft wir"
+							"description": "Die E-Mail-Adresse, mit der dieser Alias verknüpft wird"
 						},
 						"forbidden": {
 							"label": "Verboten",
@@ -1920,14 +1920,14 @@
 			"createOrUpdateForm": {
 				"name": {
 					"label": "Name",
-					"description": "Ein eindeutiger Anzeigename für diesen E-Mailserver"
+					"description": "Ein freundlicher Anzeigename um diesen Mailserver eindeutig zu bestimmen"
 				},
 				"smtpSettings": {
 					"heading": "SMTP-Einstellungen",
 					"description": "Die SMTP-Einstellungen für diesen Mailserver"
 				},
 				"smtpProvider": {
-					"label": "Voreingestellte SMPT-Anbieter",
+					"label": "Voreingestellte SMTP-Anbieter",
 					"description": "Der Anbieter des SMTP-Servers. Dieser wird verwendet, um einige gängige Einstellungen auszufüllen. Es werden jedoch nicht alle Anbieter aufgelistet"
 				},
 				"smtpHost": {

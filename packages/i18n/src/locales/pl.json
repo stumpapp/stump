@@ -790,8 +790,8 @@
 			"booktype": "Typ książki",
 			"status": "Status",
 			"totalIssues": "Łącznie wydań",
-			"publicationRun": "Publication run",
-			"comicImage": "Comic image",
+			"publicationRun": "Okres publikacji",
+			"comicImage": "Grafika komiksu",
 			"descriptionFormatted": "Opis (sformatowany)"
 		},
 		"addFields": {

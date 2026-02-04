@@ -6,6 +6,8 @@ import { Text } from '~/components/ui'
 import { usePreferencesStore } from '~/stores'
 import { useEpubLocationStore, useEpubTheme } from '~/stores/epub'
 
+import JumpButton from './JumpButton'
+
 export const FOOTER_HEIGHT = 48
 
 export default function ReadiumFooter() {
@@ -30,6 +32,8 @@ export default function ReadiumFooter() {
 
 			{/* Controls shown: Page out of total */}
 			<Animated.View className="absolute w-full items-center justify-center" style={secondaryStyle}>
+				<JumpButton />
+
 				<Animated.View key={page} entering={FADE_IN} exiting={FADE_OUT}>
 					<Text className="font-medium opacity-50" style={{ color: colors?.foreground }}>
 						{preferMinimalReader ? formattedPageOfTotal : pageOfTotal}

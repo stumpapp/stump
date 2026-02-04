@@ -244,8 +244,19 @@ const TableOfContentsListItem = ({
 }) => {
 	const { readerRef } = useEpubReaderContext()
 	const closeSheet = useEpubSheetStore((state) => state.closeSheet)
+	const locator = useEpubLocationStore((state) => state.locator)
+	const position = useEpubLocationStore((state) => state.position)
+	const pushJump = useEpubLocationStore((state) => state.pushJump)
 
 	const handlePress = async () => {
+		const previousLocator = locator
+
+		// If jumping to higher position, return direction should be 'back'
+		// If jumping to lower position, return direction should be 'forward'
+		const targetPosition = item.position
+		const direction: 'back' | 'forward' =
+			targetPosition != null && position != null && targetPosition > position ? 'back' : 'forward'
+
 		// E.g.: "text/part0010.html#9H5K0-..." -> ["text/part0010.html", "9H5K0-..."]
 		const [hrefWithoutFragment, fragment] = item.content.split('#')
 
@@ -255,6 +266,10 @@ const TableOfContentsListItem = ({
 			chapterTitle: item.label,
 			locations: fragment ? { fragments: [fragment] } : {},
 		})
+
+		if (previousLocator) {
+			pushJump(previousLocator, direction)
+		}
 
 		closeSheet('locations')
 	}

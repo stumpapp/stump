@@ -219,13 +219,13 @@
 		},
 		"danger-zone/delete": {
 			"title": "Löschaktionen",
-			"description": "Diesen Buchclub und all seine Inhalte oder gewisse Ressourcen dauerhaft löschen",
+			"description": "Dauerhaft diesen Buchclub und all seine Inhalte oder gewisse Ressourcen löschen",
 			"sections": {
 				"deleteClub": {
 					"heading": "Club löschen",
 					"description": [
-						"Diesen Buchclub und seinen gesamten Inhalt dauerhaft löschen.",
-						"Dieser Vorgang kann nicht rückgängig gemacht werden"
+						"Dauerhaft diesen Buchclub und seinen gesamten Inhalt dauerhaft löschen.",
+						"Diese Aktion kann nicht rückgängig gemacht werden"
 					],
 					"trigger": "Club löschen"
 				}
@@ -236,7 +236,7 @@
 		"fields": {
 			"name": {
 				"label": "Name",
-				"description": "Ein freundlicher Anzeigename für deine Bibliothek",
+				"description": "Ein freundlicher Name für deine Bibliothek",
 				"placeholder": "Meine Bibliothek"
 			},
 			"path": {
@@ -257,8 +257,8 @@
 				"label": "Standard-Bibliotheksansicht",
 				"description": "Konfiguriere, welcher Reiter beim Öffnen dieser Bibliothek standardmäßig angezeigt wird",
 				"hideSeriesView": {
-					"label": "Serienreiter ausblenden",
-					"description": "Blende den Serienreiter in der Bibliotheksnavigation"
+					"label": "Serienreiter verbergen",
+					"description": "Verberge den Serienreiter in der Bibliotheksnavigation"
 				},
 				"options": {
 					"series": {
@@ -303,7 +303,7 @@
 					"description": "Vorschaubilder für diese Bibliothek erstellen"
 				},
 				"resizeMethod": {
-					"label": "Größenänderungsmethode",
+					"label": "Größenveränderungsmethode",
 					"options": {
 						"scaleEvenlyByFactor": "Gleichmäßig skalieren",
 						"exact": "Genaue Größe",
@@ -312,13 +312,13 @@
 					}
 				},
 				"scaleEvenlyByFactor": {
-					"description": "Skaliere das Vorschaubild um einem Faktor der ursprünglichen Größe. Z.B. 0.65 führt zu einem Vorschaubild, welcher 65% der Originalgröße beträgt",
+					"description": "Skaliere das Vorschaubild um einem Faktor der ursprünglichen Größe. Z.B. 0.65 führt zu einem Vorschaubild, welches 65% der Originalgröße beträgt",
 					"factor": {
 						"label": "Skalierungsfaktor"
 					}
 				},
 				"exact": {
-					"description": "Größenänderung des Vorschaubildes auf eine exakte Größe in Pixeln",
+					"description": "Größenveränderung des Vorschaubildes auf eine exakte Größe in Pixeln",
 					"width": {
 						"label": "Breite"
 					},
@@ -352,7 +352,7 @@
 			"ignoreRules": {
 				"section": {
 					"heading": "Regeln ignorieren",
-					"description": "Glob-Regeln definieren, um bestimmte Dateien oder Verzeichnisse während des Scanvorganges zu ignorieren"
+					"description": "Glob-Regeln definieren, um bestimmte Dateien oder Verzeichnisse während des Scans zu ignorieren"
 				},
 				"noRules": "Keine Ignorierregeln wurden konfiguriert",
 				"save": "Änderungen speichern",
@@ -387,7 +387,7 @@
 				},
 				"rarToZip": {
 					"label": "Konvertiere RAR in ZIP",
-					"description": "Konvertiere RAR/CBR-Dateien in ZIP/CBZ-Dateien während des Scan-Vorgangs"
+					"description": "Konvertiere RAR/CBR-Dateien in ZIP/CBZ-Dateien während des Scans"
 				},
 				"deleteRarAfter": {
 					"label": "Lösche RAR-Dateien nach der Konvertierung",
@@ -398,7 +398,7 @@
 				"section": {
 					"heading": "Optionale Verarbeitung",
 					"description": "Opt-in-Verarbeitungsfunktionen für den Scanner",
-					"disclaimer": "Diesen Funktionen beinhalten zusätzliche Lesevorgänge, die den Scan-Vorgang verlangsamen können."
+					"disclaimer": "Diesen Funktionen beinhalten zusätzliche Lesevorgänge, die den Scan verlangsamen können"
 				},
 				"processMetadata": {
 					"label": "Metadaten verarbeiten",
@@ -414,7 +414,7 @@
 				},
 				"koreaderHashes": {
 					"label": "KoReader kompatible Hashes",
-					"description": "Wenn KoReader verwendet wird, generiere zusätzliche Hashes in dem Format, das dieser erwartet"
+					"description": "Wenn der KoReader verwendet wird, generiere zusätzliche Hashes in dem Format, welches dieser erwartet"
 				}
 			},
 			"libraryPattern": {
@@ -434,7 +434,7 @@
 					"description": "Die Einstellung, welche festlegt, wie Stump deine Bibliothek organisieren soll",
 					"collectionPriority": {
 						"label": "Sammlungspriorität",
-						"description": "Jeder Ordner auf der obersten Ebene des Stammverzeichnisses der Bibliothek enthalten eine einzelne Serie"
+						"description": "Jeder Ordner auf der obersten Ebene des Stammverzeichnisses der Bibliothek enthält eine einzelne Serie"
 					},
 					"seriesPriority": {
 						"label": "Serienpriorität",
@@ -453,8 +453,8 @@
 	},
 	"createLibraryScene": {
 		"heading": "Bibliothek erstellen",
-		"subtitle": "Bibliotheken dienen dazu, deine Bücher zusammenzufassen. Die Funktionsweise hierzu kann nachgeschlagen werden in der dafür",
-		"subtitleLink": "relevanten Dokumentation",
+		"subtitle": "Bibliotheken dienen dazu, deine Bücher zusammenzufassen. Weitere Informationen über diese Einstellung findest du in der",
+		"subtitleLink": "dazugehörigen Dokumentation",
 		"form": {
 			"stepLabel": "Schritt",
 			"steps": [
@@ -497,7 +497,7 @@
 					"ignoreRules": "Dateien ignorieren",
 					"convertRar": "Konvertiere RAR/CBR",
 					"deleteConversions": "Konvertierte Dateien löschen",
-					"watch": "Überwache Ordner auf Änderungen",
+					"watch": "Beobachte Ordner auf Änderungen",
 					"processMetadata": "Metadaten verarbeiten",
 					"generateFileHashes": "Datei-Hashes generieren",
 					"generateKoreaderHashes": "KoReader-Hashes generieren",
@@ -518,25 +518,25 @@
 				"series": "Reihe hochladen"
 			},
 			"description": {
-				"books": "Fügen Sie Bücher direkt zum aktuellen Pfad im Dateimanager hinzu",
-				"series": "Fügen Sie eine Reihe direkt zum aktuellen Pfad im Dateimanager hinzu"
+				"books": "Füge Bücher direkt zum aktuellen Pfad im Dateimanager hinzu",
+				"series": "Füge eine Reihe direkt zum aktuellen Pfad im Dateimanager hinzu"
 			},
 			"seriesDisclaimer": [
-				"It must be a ",
+				"Es muss eine ",
 				"gezippte Datei",
-				"enthält den Ordner, der die Reihe sein soll, die alle Bücher beinhaltet"
+				"sein welche den Ordner enthält, der die Reihe sein soll, die alle Bücher beinhaltet"
 			],
 			"dropzone": {
-				"books": "Drag and drop books here",
-				"series": "Drag and drop a zip file here",
-				"alt": "Oder klicken Sie, um Ihren Computer nach Büchern zum Hochladen zu durchsuchen"
+				"books": "Ziehe und lege Bücher hier ab",
+				"series": "Ziehe und lege eine Zip-Datei hier ab",
+				"alt": "Oder klicke, um deinen Computer nach Büchern zum Hochladen zu durchsuchen"
 			},
 			"addedFiles": "Hinzugefügte Dateien"
 		}
 	},
 	"librarySettingsScene": {
 		"heading": "Einstellungen",
-		"subtitle": "Hier kann die Bibliothek verwaltet werden. Wie die Einstellungen aktualisiert werden können, kann nachgelesen werden in der",
+		"subtitle": "Verwalte deine Bibliothek hier. Weitere Informationen über diese Einstellung findest du in der",
 		"subtitleLink": "dazugehörigen Dokumentation",
 		"sidebar": {
 			"basics": "Grundeinstellungen",
@@ -568,49 +568,49 @@
 		},
 		"options/scanning": {
 			"title": "Scannen",
-			"description": "Einstellungen das bestimmt wie Stump diese Bibliothek scannt.",
+			"description": "Einstellungen die bestimmen wie Stump diese Bibliothek scannt",
 			"sections": {
 				"configureScan": {
 					"heading": "Scan konfigurieren",
-					"description": "A scan with additional options for more fine-grained control",
+					"description": "Ein Scan mit zusätzlichen Optionen für eine feinere Steuerung",
 					"form": {
-						"alert": "These will override corresponding library-wide settings",
+						"alert": "Diese werden die entsprechenden Bibliotheksweiten Einstellungen überschreiben",
 						"options": {
 							"forceRebuild": {
-								"label": "Force rebuild",
-								"description": "Rebuild every book in the library on disk",
-								"alert": "This will rebuild every book in the library from scratch, including metadata and hashes"
+								"label": "Wiederaufbau erzwingen",
+								"description": "Jedes Buch in der Bibliothek auf der Festplatte wiederaufbauen",
+								"alert": "Dies wird jedes Buch in der Bibliothek von Grund auf wiederaufbauen, einschließlich Metadaten und Hashes"
 							},
 							"custom": {
-								"label": "Custom",
-								"description": "Customize the scan configuration",
+								"label": "Benutzerdefiniert",
+								"description": "Passe die Scan-Konfiguration an",
 								"validation": {
-									"noSelection": "At least one option must be enabled"
+									"noSelection": "Mindestens eine Option muss aktiviert sein"
 								}
 							},
 							"rebuildMeta": {
-								"label": "Rebuild metadata",
-								"description": "Rebuild metadata for books in the library"
+								"label": "Metadaten wiederaufbauen",
+								"description": "Metadaten für Bücher in der Bibliothek wiederaufbauen"
 							},
 							"regenHashes": {
-								"label": "Regenerate hashes",
-								"description": "Recreate hashes for books in the library"
+								"label": "Regeneriere Hashes",
+								"description": "Erstelle die Hashes für die Bücher in der Bibliothek neu"
 							}
 						}
 					}
 				},
 				"defaultScan": {
 					"heading": "Standardscan",
-					"description": "A standard scan to index your library for new content"
+					"description": "Ein Standardscan um die Bibliothek für neue Inhalte zu indexieren"
 				},
 				"history": {
 					"heading": "Scanverlauf",
-					"description": "The history of all scans recorded for this library",
-					"empty": "There are no scans recorded for this library",
+					"description": "Der Verlauf von allen Scans aufgezeichnet für diese Bibliothek",
+					"empty": "Für diese Bibliothek sind keine Scans aufgezeichnet",
 					"runScan": "Scan starten",
 					"inspect": "Details anzeigen",
 					"inspector": {
-						"title": "Scan record",
+						"title": "Scanverlauf",
 						"description": "A detailed view of this scan record",
 						"fields": {
 							"library": "Bibliothek",
@@ -2131,7 +2131,7 @@
 		"notReady": "Diese Funktion ist noch nicht bereit",
 		"notUsedYet": "Noch nicht verwendet",
 		"never": "Nie",
-		"scan": "Scan",
+		"scan": "Scannen",
 		"somethingWentWrong": "Something went wrong"
 	},
 	"userPermissions": {
@@ -2240,7 +2240,7 @@
 			"description": "Allows the user to view user account information"
 		},
 		"SCAN_LIBRARY": {
-			"label": "Scan libraries",
+			"label": "Bibliotheken scannen",
 			"description": "Allows the user to trigger library scans to discover new content"
 		},
 		"UPLOAD_FILE": {

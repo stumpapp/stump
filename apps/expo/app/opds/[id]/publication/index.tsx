@@ -24,7 +24,11 @@ import {
 	getStringField,
 } from '~/components/opds/utils'
 import { Button, CardList, Icon, Text } from '~/components/ui'
-import { useIsOPDSPublicationDownloaded, useOPDSDownload } from '~/lib/hooks'
+import {
+	useIsOPDSBookDownloading,
+	useIsOPDSPublicationDownloaded,
+	useOPDSDownload,
+} from '~/lib/hooks'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
 import { cn } from '~/lib/utils'
 import { usePreferencesStore } from '~/stores'
@@ -58,6 +62,7 @@ export default function Screen() {
 	const firstPageURL = readingOrder?.[0]?.href
 		? resolveUrl(readingOrder[0].href, sdk.rootURL)
 		: undefined
+
 	useEffect(() => {
 		if (firstPageURL) {
 			TImage.prefetch([
@@ -72,12 +77,14 @@ export default function Screen() {
 		}
 	}, [sdk, firstPageURL])
 
-	const { downloadBook, isDownloading } = useOPDSDownload({ serverId: serverID })
+	const { downloadBook } = useOPDSDownload({ serverId: serverID })
 
 	const acquisitionLink = getAcquisitionLink(links)
 	const downloadURL = acquisitionLink?.href
 	const downloadExtension = extensionFromMime(acquisitionLink?.type)
 	const canDownload = !!downloadURL && !!downloadExtension
+
+	const isDownloading = useIsOPDSBookDownloading(downloadURL || url)
 
 	const onDownloadBook = useCallback(async () => {
 		if (isDownloaded || !canDownload || isDownloading) return

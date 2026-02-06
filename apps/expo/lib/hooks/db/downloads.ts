@@ -8,7 +8,7 @@ import { toast } from 'sonner-native'
 
 import { useActiveServerSafe } from '~/components/activeServer'
 import { useDownloadsState } from '~/components/localLibrary/store'
-import { db, downloadedFiles, DownloadRepository, readProgress } from '~/db'
+import { db, downloadedFiles, downloadQueue, DownloadRepository, readProgress } from '~/db'
 import {
 	type DownloadProgress,
 	type DownloadQueueMetadata,
@@ -332,7 +332,7 @@ export function useDownload({ serverId }: UseDownloadParams = {}) {
 		deleteServerDownloads: deleteServerDownloadsMutation.mutateAsync,
 		markAsComplete,
 		clearProgress,
-		isDownloading: Boolean(queueCounts.pending + queueCounts.downloading > 0),
+		isQueueActive: Boolean(queueCounts.pending + queueCounts.downloading > 0),
 		isDeleting: deleteMutation.isPending,
 		deleteError: deleteMutation.error,
 	}
@@ -347,4 +347,13 @@ export function useDownloadsCount() {
 		fetchCounter,
 	])
 	return result?.count || 0
+}
+
+export function useIsBookDownloading(id: string) {
+	const {
+		data: [record],
+	} = useLiveQuery(db.select().from(downloadQueue).where(eq(downloadQueue.bookId, id)), [
+		`is-book-downloading-${id}`,
+	])
+	return record ? record.status === 'downloading' : false
 }

@@ -155,6 +155,20 @@ export const getInstanceForServer = async (
 	server: SavedServerWithConfig,
 	{ getServerToken, saveToken, onCacheInstance, getCachedInstance }: GetInstancesForServersParams,
 ) => {
+	if (server.kind !== 'stump') {
+		const cachedInstance = onCacheInstance ? getCachedInstance?.(server.id) : undefined
+		if (cachedInstance) {
+			return cachedInstance
+		}
+		const instance = await getOPDSInstance({
+			config: server.config,
+			serverKind: server.kind,
+			url: server.url,
+		})
+		onCacheInstance?.(server.id, instance)
+		return instance
+	}
+
 	const storedToken = await getServerToken(server.id)
 	const authMethod = match(server.config?.auth)
 		.with({ bearer: P.string }, () => 'api-key' as const)

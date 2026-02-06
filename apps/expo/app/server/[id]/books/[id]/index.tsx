@@ -21,7 +21,7 @@ import { Button, CardList, Heading, Text } from '~/components/ui'
 import { Icon } from '~/components/ui/icon'
 import { formatSeriesPosition } from '~/lib/bookUtils'
 import { formatBytes, parseGraphQLDecimal } from '~/lib/format'
-import { useDownload, useIsBookDownloaded } from '~/lib/hooks'
+import { useDownload, useIsBookDownloaded, useIsBookDownloading } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 import { usePreferencesStore } from '~/stores'
 
@@ -145,7 +145,9 @@ export default function Screen() {
 	} = useSuspenseGraphQL(query, ['bookById', bookID], {
 		id: bookID,
 	})
-	const { downloadBook, isDownloading } = useDownload({ serverId: serverID })
+	const { downloadBook } = useDownload({ serverId: serverID })
+
+	const isDownloading = useIsBookDownloading(bookID)
 
 	const [isRefetching, setIsRefetching] = useState(false)
 

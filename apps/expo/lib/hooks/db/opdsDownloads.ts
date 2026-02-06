@@ -8,7 +8,7 @@ import { useEffect, useMemo } from 'react'
 
 import { useActiveServerSafe } from '~/components/activeServer'
 import { getPublicationId } from '~/components/opds/utils'
-import { db, downloadedFiles, DownloadRepository } from '~/db'
+import { db, downloadedFiles, downloadQueue, DownloadRepository } from '~/db'
 import { booksDirectory, bookThumbnailPath, ensureDirectoryExists } from '~/lib/filesystem'
 
 import { useDownloadQueue } from './downloadQueue'
@@ -184,8 +184,17 @@ export function useOPDSDownload({ serverId }: UseOPDSDownloadParams = {}) {
 	return {
 		downloadBook: enqueueOPDSBook,
 		deleteBook: (params: DeleteParams) => deleteMutation.mutateAsync(params),
-		isDownloading: Boolean(queueCounts.pending + queueCounts.downloading > 0),
+		isQueueActive: Boolean(queueCounts.pending + queueCounts.downloading > 0),
 		isDeleting: deleteMutation.isPending,
 		deleteError: deleteMutation.error,
 	}
+}
+
+export function useIsOPDSBookDownloading(url: string) {
+	const {
+		data: [record],
+	} = useLiveQuery(db.select().from(downloadQueue).where(eq(downloadQueue.downloadUrl, url)), [
+		`is-book-downloading-${url}`,
+	])
+	return record ? record.status === 'downloading' : false
 }

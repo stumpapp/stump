@@ -231,6 +231,13 @@ export default function RootLayout() {
 									animation: animationEnabled ? 'default' : 'none',
 								}}
 							/>
+							<Stack.Screen
+								name="opds-legacy/[id]"
+								options={{
+									headerShown: false,
+									animation: animationEnabled ? 'default' : 'none',
+								}}
+							/>
 
 							<Stack.Screen
 								name="offline"

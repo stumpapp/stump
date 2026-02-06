@@ -24,3 +24,11 @@ export function constructSearchURL(templatedUrl: string, query: string) {
 	const replacement = `?${queryParam}=${encodedQuery}`
 	return templatedUrl.replace(/{\?([^}]+)}/, replacement)
 }
+
+export function constructLegacySearchURL(templatedUrl: string, query: string) {
+	// OPDS v1.2 uses OpenSearch templates like: ?search={searchTerms}
+	// We just replace {searchTerms} (or any {placeholder}) with the query. I don't
+	// know if there will be mutltiple but for now this is fine for a POC
+	const encodedQuery = encodeURIComponent(query)
+	return templatedUrl.replace(/{[^}]+}/g, encodedQuery)
+}

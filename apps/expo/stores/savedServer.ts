@@ -10,7 +10,7 @@ import { useCacheStore } from './cache'
 import { ZustandMMKVStorage } from './store'
 
 type ServerID = string
-export type ServerKind = 'stump' | 'opds'
+export type ServerKind = 'stump' | 'opds' | 'opds-legacy'
 
 export type SavedServer = {
 	id: ServerID

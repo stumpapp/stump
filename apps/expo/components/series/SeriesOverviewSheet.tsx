@@ -143,9 +143,9 @@ function SheetContent({ series: { stats, metadata, resolvedName, tags } }: Sheet
 	const hasAbout = metadata?.summary || metadata?.descriptionFormatted
 
 	return (
-		<ScrollView className="flex-1 p-6" nestedScrollEnabled>
+		<ScrollView className="flex-1 py-6" nestedScrollEnabled>
 			<View className="gap-8">
-				<View>
+				<View className="px-6">
 					<Heading size="2xl" numberOfLines={3}>
 						{resolvedName}
 					</Heading>
@@ -161,7 +161,11 @@ function SheetContent({ series: { stats, metadata, resolvedName, tags } }: Sheet
 					)}
 				</View>
 
-				<Card label="Stats" className="flex flex-row flex-wrap justify-around gap-x-6 gap-y-4">
+				<Card
+					label="Stats"
+					className="flex flex-row flex-wrap justify-around gap-x-6 gap-y-4"
+					containerClassName="px-6"
+				>
 					<InfoStat size="md" label="Books" value={stats.bookCount.toString()} />
 					{formattedSize && <InfoStat size="md" label="Size" value={formattedSize} />}
 					<InfoStat size="md" label="In Progress" value={stats.inProgressBooks.toString()} />
@@ -176,7 +180,7 @@ function SheetContent({ series: { stats, metadata, resolvedName, tags } }: Sheet
 				</Card>
 
 				{hasAbout && (
-					<CardList label="About">
+					<CardList label="About" className="px-6">
 						{metadata?.summary && <LongValue label="Summary" value={metadata.summary} />}
 						{metadata?.descriptionFormatted && !metadata?.summary && (
 							<LongValue label="Description" value={metadata.descriptionFormatted} />
@@ -185,7 +189,7 @@ function SheetContent({ series: { stats, metadata, resolvedName, tags } }: Sheet
 				)}
 
 				{hasPublicationInfo && (
-					<CardList label="Publication">
+					<CardList label="Publication" className="px-6">
 						{metadata?.publisher && <InfoRow label="Publisher" value={metadata.publisher} />}
 						{metadata?.imprint && <InfoRow label="Imprint" value={metadata.imprint} />}
 						{metadata?.publicationRun && (
@@ -202,7 +206,7 @@ function SheetContent({ series: { stats, metadata, resolvedName, tags } }: Sheet
 				)}
 
 				{hasDetails && (
-					<CardList label="Details">
+					<CardList label="Details" className="px-6">
 						{metadata?.ageRating && (
 							<InfoRow label="Age Rating" value={metadata.ageRating.toString()} />
 						)}

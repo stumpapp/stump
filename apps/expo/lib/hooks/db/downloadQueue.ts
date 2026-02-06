@@ -45,6 +45,7 @@ export type EnqueueBookParams = {
 }
 
 export type EnqueueOPDSParams = {
+	id?: string
 	publicationUrl: string
 	publication: OPDSPublication
 }
@@ -189,7 +190,7 @@ export function useDownloadQueue({ serverId }: UseDownloadQueueParams = {}) {
 			const { publicationUrl, publication } = params
 			const { metadata, links } = publication
 
-			const bookId = getPublicationId(publicationUrl, metadata)
+			const bookId = params.id || getPublicationId(publicationUrl, metadata)
 			const acquisitionLink = getAcquisitionLink(links)
 
 			if (!acquisitionLink?.href) {

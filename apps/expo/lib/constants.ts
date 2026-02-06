@@ -28,7 +28,7 @@ export const ENABLE_LARGE_HEADER = Platform.select({
 
 export const IS_IOS_24_PLUS = Platform.OS === 'ios' && parseInt(Platform.Version, 10) >= 24
 
-export const ON_END_REACHED_THRESHOLD = Platform.OS === 'ios' ? 75 : 0.6
+export const ON_END_REACHED_THRESHOLD = Platform.OS === 'ios' ? 0.75 : 0.6
 
 export const CONTROLS_TIMING_CONFIG: WithTimingConfig = {
 	// Note: It seems to take the ios status bar 350ms to fade in and out,

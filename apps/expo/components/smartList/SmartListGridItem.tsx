@@ -55,7 +55,7 @@ function StatItem({ iosIcon, androidIcon, count }: StatItemProps) {
 	const color = COLORS.dark.foreground.DEFAULT
 
 	return (
-		<View className="flex-row items-center gap-1 rounded-full bg-black/70 px-2.5 py-1.5 shadow-lg">
+		<View className="squircle flex-row items-center gap-1 rounded-full bg-black/70 px-2.5 py-1.5 shadow-lg">
 			{Platform.OS === 'ios' ? (
 				<Host matchContents>
 					<Image systemName={iosIcon} size={iconSize} color={color} />

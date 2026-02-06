@@ -24,7 +24,10 @@ export default function PublicationMenu({ publicationUrl, metadata }: Props) {
 	const { deleteBook, isDeleting } = useOPDSDownload({ serverId: serverID })
 
 	const handleDeleteDownload = () => {
-		deleteBook(publicationUrl, metadata)
+		deleteBook({
+			publicationUrl,
+			metadata,
+		})
 	}
 
 	if (Platform.OS === 'android') {

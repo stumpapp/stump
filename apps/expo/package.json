@@ -78,6 +78,7 @@
 		"expo-sqlite": "~16.0.10",
 		"expo-status-bar": "~3.0.9",
 		"expo-system-ui": "~6.0.9",
+		"fast-xml-parser": "^5.3.4",
 		"image-size": "^2.0.0",
 		"lodash": "^4.17.21",
 		"lottie-react-native": "~7.3.4",

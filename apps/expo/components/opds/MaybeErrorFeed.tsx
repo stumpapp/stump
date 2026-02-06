@@ -24,7 +24,7 @@ export default function MaybeErrorFeed({ error, onRetry }: Props) {
 	const errorTitle = error instanceof ZodError ? 'Invalid Feed' : 'Error Loading Feed'
 	const errorMessage =
 		error instanceof ZodError
-			? `This feed does not adhere to the OPDS v2.0 specification. It contains ${error.issues.length} issue${error.issues.length !== 1 ? 's' : ''} that need to be resolved`
+			? `This feed does not adhere to the OPDS v2.0 specification: ${error.message}`
 			: error instanceof Error && error.message
 				? error.message
 				: 'There was an error fetching this feed.'

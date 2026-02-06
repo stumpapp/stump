@@ -49,6 +49,15 @@ export default function AddOrEditServerForm({
 
 	const [kind, url] = useWatch({ control, name: ['kind', 'url'] })
 
+	// Note: Internally v1 is referred to as legacy. Stump was also developed with v2 in mind, and so
+	// "regressing" to v1 felt like adding "legacy" support. I obviously understand that v1.2 is WILDY used.
+	// On the UI, I will only refer to versions explicitly.
+	const [opdsVersion, setOpdsVersion] = useState<'v1' | 'v2'>(() =>
+		kind === 'opds-legacy' ? 'v1' : 'v2',
+	)
+
+	const broadKind = useMemo(() => (kind === 'stump' ? 'stump' : 'opds'), [kind])
+
 	const checkConnection = useCallback(async () => {
 		const isValid =
 			kind === 'stump' ? await checkUrl(formatApiURL(url, 'v2')) : await checkOPDSURL(url)
@@ -250,24 +259,45 @@ export default function AddOrEditServerForm({
 			<View className="w-full flex-row items-center justify-between">
 				<Text className="flex-1 text-base font-medium text-foreground-muted">Kind</Text>
 
-				<Controller
-					control={control}
-					render={({ field: { onChange, value } }) => (
-						<Tabs value={value} onValueChange={onChange}>
-							<Tabs.List className="flex-row">
-								<Tabs.Trigger value="stump">
-									<Text>Stump</Text>
-								</Tabs.Trigger>
+				<Tabs
+					value={broadKind}
+					onValueChange={(v) => form.setValue('kind', v as 'stump' | 'opds' | 'opds-legacy')}
+				>
+					<Tabs.List className="flex-row">
+						<Tabs.Trigger value="stump">
+							<Text>Stump</Text>
+						</Tabs.Trigger>
 
-								<Tabs.Trigger value="opds">
-									<Text>OPDS</Text>
-								</Tabs.Trigger>
-							</Tabs.List>
-						</Tabs>
-					)}
-					name="kind"
-				/>
+						<Tabs.Trigger value="opds">
+							<Text>OPDS</Text>
+						</Tabs.Trigger>
+					</Tabs.List>
+				</Tabs>
 			</View>
+
+			{broadKind === 'opds' && (
+				<View className="w-full flex-row items-center justify-between">
+					<Text className="flex-1 text-base font-medium text-foreground-muted">OPDS Version</Text>
+
+					<Tabs
+						value={opdsVersion}
+						onValueChange={(v) => {
+							setOpdsVersion(v as 'v1' | 'v2')
+							form.setValue('kind', v === 'v1' ? 'opds-legacy' : 'opds')
+						}}
+					>
+						<Tabs.List className="flex-row">
+							<Tabs.Trigger value="v1">
+								<Text>v1.2</Text>
+							</Tabs.Trigger>
+
+							<Tabs.Trigger value="v2">
+								<Text>v2.0</Text>
+							</Tabs.Trigger>
+						</Tabs.List>
+					</Tabs>
+				</View>
+			)}
 
 			<Controller
 				control={control}
@@ -299,7 +329,7 @@ export default function AddOrEditServerForm({
 						label={kind === 'stump' ? 'URL' : 'Catalog URL'}
 						autoCorrect={false}
 						autoCapitalize="none"
-						placeholder={`https://stump.my-domain.cloud${kind !== 'stump' ? '/opds/v2.0/catalog' : ''}`}
+						placeholder={`https://stump.my-domain.cloud${kind !== 'stump' ? `/opds/${opdsVersion === 'v1' ? 'v1.2' : 'v2.0'}/catalog` : ''}`}
 						onBlur={onBlur}
 						onChangeText={onChange}
 						value={value}
@@ -557,7 +587,9 @@ const createSchema = (names: string[]) =>
 				message: 'Name already exists',
 			}),
 		url: z.string().url(),
-		kind: z.union([z.literal('stump'), z.literal('opds')]).default('stump'),
+		kind: z
+			.union([z.literal('stump'), z.literal('opds'), z.literal('opds-legacy')])
+			.default('stump'),
 		defaultServer: z.boolean().default(false),
 		stumpOPDS: z.boolean().default(false),
 		authMode: z

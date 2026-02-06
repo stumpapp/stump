@@ -105,11 +105,12 @@ export function CardLabel({ className, ...props }: ComponentProps<typeof Text>) 
 
 type CardProps = ViewProps & {
 	label?: string
+	containerClassName?: string
 }
 
-export function Card({ label, children, className, ...props }: CardProps) {
+export function Card({ label, children, className, containerClassName, ...props }: CardProps) {
 	return (
-		<View className="gap-2">
+		<View className={cn('gap-2', containerClassName)}>
 			{label && <CardLabel>{label}</CardLabel>}
 
 			<CardBackground className={cn('ios:p-4 gap-2 p-3', className)} {...props}>

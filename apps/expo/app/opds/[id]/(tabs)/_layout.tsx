@@ -10,6 +10,8 @@ import { useColors } from '~/lib/constants'
 import { cn } from '~/lib/utils'
 import { usePreferencesStore } from '~/stores'
 
+// TODO(opds): Support favorites and add a tab for it
+
 export default function TabLayout() {
 	const { sdk } = useSDK()
 	const { hasSearch } = useOPDSFeedContext()

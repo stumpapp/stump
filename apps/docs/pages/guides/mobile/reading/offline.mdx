@@ -4,12 +4,12 @@ import { Callout } from 'nextra/components'
 
 The mobile app supports managed downloads with offline reading capabilities for a subset of formats:
 
-| Format  | Status | Notes                                    |
-| ------- | ------ | ---------------------------------------- |
-| CBZ/ZIP | ✅     |                                          |
-| CBR/RAR | ❌     |                                          |
-| EPUB    | ✅     | Functional but missing features, poor UX |
-| PDF     | ✅     | Native reader is a separate experience   |
+| Format  | Status | Notes                                  |
+| ------- | ------ | -------------------------------------- |
+| CBZ/ZIP | ✅     |                                        |
+| CBR/RAR | ❌     |                                        |
+| EPUB    | ✅     |                                        |
+| PDF     | ✅     | Native reader is a separate experience |
 
 ## Downloads
 
@@ -60,7 +60,12 @@ There is a convenience button in the top-left to select or deselect all books.
 
 ## Progression Sync
 
-The mobile app supports progression sync for **Stump servers only**. There is no standard for OPDS progression sync, so the app relies on Stump-specific APIs for this functionality.
+The mobile app supports progression sync for **Stump servers only**.
+
+<Callout emoji="🚧" type="info">
+	In the future this may be expanded to support OPDS v2 servers that implement the progression
+	specification. OPDS v1.2 servers will not be supported due to limitations in the specification.
+</Callout>
 
 The app will (bidirectionally) automatically sync your reading progression in a couple of scenarios:
 
@@ -69,13 +74,13 @@ The app will (bidirectionally) automatically sync your reading progression in a 
 
 These allow you to more seamlessly switch between offline and online reading without losing your place. There is not currently an option to disable these, however if that is something you'd like to see, feel free to suggest it on [GitHub](https://github.com/stumpapp/stump/issues).
 
-You may also trigger a manual sync by selecting the `Attempt Sync` option from the action menu in the downloads tab. This will attempt to sync all books with progression, both from device to server and from server to device.
+You may also trigger a manual sync by selecting the `Attempt Sync` option from the action menu in the local library tab. This will attempt to sync all books with progression, both from device to server and from server to device.
 
 ### Limitations
 
 As mentioned above, progression sync is only supported for Stump servers. Additionally, there are some limitations primarily based on the authentication configuration:
 
-`Basic` and `Token` authentication are fully supported for progression sync. The `Login` authentication method is not supported, since it would be too annoying to implement a background operation that attempts to open a login sheet every time a sync is attempted. I will likely not add support for this feature.
+`Basic` and `Token` authentication are fully supported for progression sync. The `Login` authentication method is not supported, since it would be too annoying to implement a background operation that attempts to open a login sheet every time a sync is attempted.
 
 ### Visual Indicators
 

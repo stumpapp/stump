@@ -712,7 +712,7 @@ describe('schema', () => {
 					joiner: SmartListJoiner.Or,
 					name: 'bar',
 					visibility: EntityVisibility.Public,
-				}),
+				} as any),
 			).toEqual({
 				description: 'baz',
 				filters: {

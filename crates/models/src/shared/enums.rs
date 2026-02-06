@@ -371,6 +371,37 @@ pub enum LogLevel {
 	Debug,
 }
 
+#[derive(
+	Eq,
+	Copy,
+	Hash,
+	Debug,
+	Default,
+	Clone,
+	EnumIter,
+	PartialEq,
+	Serialize,
+	Deserialize,
+	DeriveActiveEnum,
+	Enum,
+	EnumString,
+	Display,
+)]
+#[sea_orm(
+	rs_type = "String",
+	rename_all = "SCREAMING_SNAKE_CASE",
+	db_type = "String(StringLen::None)"
+)]
+#[strum(serialize_all = "SCREAMING_SNAKE_CASE")]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum MetadataFetchStatus {
+	#[default]
+	NotStarted,
+	InProgress,
+	Completed,
+	Failed,
+}
+
 /// An enum representing the different types of metadata resets that can occur,
 /// which manifest differently depending on the context
 #[derive(

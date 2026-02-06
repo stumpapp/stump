@@ -145,7 +145,6 @@ export default function Screen() {
 									Authorization: sdk.authorizationHeader || '',
 								},
 							}}
-							resizeMode="stretch"
 							size={{ height: 235 / thumbnailRatio, width: 235 }}
 						/>
 					</View>

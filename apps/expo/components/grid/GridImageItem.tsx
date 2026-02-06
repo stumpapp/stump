@@ -37,7 +37,6 @@ export default function GridImageItem({ uri, title, href, ...thumbnailProps }: P
 								Authorization: sdk.authorizationHeader || '',
 							},
 						}}
-						resizeMode="stretch"
 						size={{ height: itemWidth / thumbnailRatio, width: itemWidth }}
 						{...thumbnailProps}
 					/>

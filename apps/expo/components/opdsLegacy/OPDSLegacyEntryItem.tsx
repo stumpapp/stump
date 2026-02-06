@@ -214,7 +214,6 @@ export default function OPDSEntry({ entry }: Props) {
 												Authorization: sdk.authorizationHeader || '',
 											},
 										}}
-										resizeMode="stretch"
 										size={{
 											height: thumbnailWidth / thumbnailRatio,
 											width: thumbnailWidth,

@@ -242,7 +242,6 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 						// undefined so it's fine
 						uri: thumbnailPath,
 					}}
-					resizeMode="stretch"
 					size={{ height: imageHeight, width: IMAGE_WIDTH }}
 					gradient={{ colors: gradientColors, locations: gradientLocations }}
 					placeholderData={thumbnailData}

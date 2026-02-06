@@ -81,7 +81,6 @@ export default function BookSearchItem({ book }: Props) {
 							Authorization: sdk.authorizationHeader || '',
 						},
 					}}
-					resizeMode="stretch"
 					size={{ height: 75 / thumbnailRatio, width: 75 }}
 					placeholderData={placeholderData}
 					originalDimensions={

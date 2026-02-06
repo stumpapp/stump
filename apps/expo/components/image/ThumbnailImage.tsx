@@ -8,30 +8,6 @@ import { usePreferencesStore } from '~/stores'
 import { BorderAndShadow, BorderAndShadowStyle } from '../BorderAndShadow'
 import { ThumbnailPlaceholder, ThumbnailPlaceholderData } from './ThumbnailPlaceholder'
 
-function calculateFitDimensions(
-	containerWidth: number,
-	containerHeight: number,
-	originalWidth: number,
-	originalHeight: number,
-): { width: number; height: number } {
-	const containerRatio = containerWidth / containerHeight
-	const imageRatio = originalWidth / originalHeight
-
-	if (imageRatio > containerRatio) {
-		// Image is wider than container ratio -> fit to width
-		return {
-			width: containerWidth,
-			height: containerWidth / imageRatio,
-		}
-	} else {
-		// Image is taller than container ratio -> fit to height
-		return {
-			width: containerHeight * imageRatio,
-			height: containerHeight,
-		}
-	}
-}
-
 type ThumbnailImageProps = {
 	size: { height: number; width: number }
 	gradient?: LinearGradientProps
@@ -42,7 +18,7 @@ type ThumbnailImageProps = {
 	 * Override the default border and shadow style.
 	 */
 	borderAndShadowStyle?: Partial<BorderAndShadowStyle>
-} & Omit<TurboImageProps, 'style' | 'resize'>
+} & Omit<TurboImageProps, 'style' | 'resize' | 'resizeMode'>
 
 export const ThumbnailImage = ({
 	source,
@@ -144,4 +120,55 @@ export const ThumbnailImage = ({
 			{Platform.OS === 'android' && gradientElement}
 		</View>
 	)
+}
+
+export function calculateFitDimensions(
+	containerWidth: number,
+	containerHeight: number,
+	originalWidth: number,
+	originalHeight: number,
+): { width: number; height: number } {
+	const containerRatio = containerWidth / containerHeight
+	const imageRatio = originalWidth / originalHeight
+
+	if (imageRatio > containerRatio) {
+		// Image is wider than container ratio -> fit to width
+		return {
+			width: containerWidth,
+			height: containerWidth / imageRatio,
+		}
+	} else {
+		// Image is taller than container ratio -> fit to height
+		return {
+			width: containerHeight * imageRatio,
+			height: containerHeight,
+		}
+	}
+}
+
+type GetThumbnailResizePropsParams = {
+	containerWidth: number
+	containerHeight: number
+	originalWidth: number
+	originalHeight: number
+}
+export function getThumbnailResizeProps(
+	thumbnailResizeMode: 'cover' | 'stretch' | 'fit',
+	{ containerWidth, containerHeight, originalWidth, originalHeight }: GetThumbnailResizePropsParams,
+): { resizeMode: 'cover' | 'stretch'; style?: { width: number; height: number } } {
+	if (thumbnailResizeMode === 'stretch') {
+		return { resizeMode: 'stretch' }
+	}
+
+	if (thumbnailResizeMode === 'fit') {
+		const fitDimensions = calculateFitDimensions(
+			containerWidth,
+			containerHeight,
+			originalWidth,
+			originalHeight,
+		)
+		return { resizeMode: 'cover', style: fitDimensions }
+	}
+
+	return { resizeMode: 'cover' }
 }

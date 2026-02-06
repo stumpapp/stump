@@ -61,7 +61,6 @@ function BookListItem({ book }: Props) {
 								Authorization: sdk.authorizationHeader || '',
 							},
 						}}
-						resizeMode="stretch"
 						size={{ height, width }}
 						placeholderData={placeholderData}
 						originalDimensions={

@@ -121,7 +121,6 @@ export default function SmartListBookItem({ book }: Props) {
 							Authorization: sdk.authorizationHeader || '',
 						},
 					}}
-					resizeMode="stretch"
 					size={{ height, width }}
 					cachePolicy="urlCache"
 					placeholderData={data.thumbnail.metadata}

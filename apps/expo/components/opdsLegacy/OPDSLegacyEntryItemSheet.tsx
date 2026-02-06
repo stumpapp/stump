@@ -95,7 +95,6 @@ export const OPDSLegacyEntryItemSheet = forwardRef<TrueSheet, Props>(
 										Authorization: sdk.authorizationHeader || '',
 									},
 								}}
-								resizeMode="stretch"
 								size={{ height: 110 / thumbnailRatio, width: 110 }}
 							/>
 						)}

@@ -95,7 +95,6 @@ function OnDeckBookItem({ book }: Props) {
 								Authorization: sdk.authorizationHeader || '',
 							},
 						}}
-						resizeMode="stretch"
 						size={{ width, height }}
 						gradient={{ colors: gradientColors, locations: gradientLocations }}
 						placeholderData={placeholderData}

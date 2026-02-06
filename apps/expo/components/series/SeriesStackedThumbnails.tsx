@@ -98,7 +98,6 @@ export default function SeriesStackedThumbnails({ thumbnailData, width: cardWidt
 								Authorization: sdk.authorizationHeader || '',
 							},
 						}}
-						resizeMode="stretch"
 						size={currentThumbnailSize}
 						borderAndShadowStyle={{ shadowColor: 'rgba(0 0 0 / 0.4)', shadowRadius: 3 }}
 						placeholderData={currentThumbnailData.metadata}

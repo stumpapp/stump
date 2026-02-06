@@ -3,35 +3,75 @@ use crate::types::PublicationStatus;
 // TODO: Hone the fields we can pull across different providers
 
 /// Metadata about a media item from an external metadata provider
+#[derive(Debug, Clone)]
 pub struct ExternalMediaMetadata {
 	pub provider: &'static str,
 	pub external_id: String,
 
 	pub title: Option<String>,
 	pub summary: Option<String>,
-	pub number: Option<f32>,          // TODO: string?
-	pub release_date: Option<String>, // TODO: Date type?
 	pub page_count: Option<i32>,
+
+	pub series_name: Option<String>,
+	pub series_external_id: Option<String>,
+	pub number: Option<f32>, // TODO: string?
+
+	pub day: Option<i32>,
+	pub month: Option<i32>,
+	pub year: Option<i32>,
+
+	pub genres: Option<Vec<String>>,
+	pub tags: Option<Vec<String>>,
 
 	pub isbn: Option<String>,
 	pub isbn_13: Option<String>,
 
-	pub writers: Vec<String>,
-	pub artists: Vec<String>,
-	pub colorists: Vec<String>,
-	pub letterers: Vec<String>,
-	pub cover_artists: Vec<String>,
+	pub writers: Option<Vec<String>>,
+	pub artists: Option<Vec<String>>,
+	pub colorists: Option<Vec<String>>,
+	pub letterers: Option<Vec<String>>,
+	pub cover_artists: Option<Vec<String>>,
 
 	pub cover_url: Option<String>,
 
 	pub provider_url: Option<String>,
 }
 
+impl Default for ExternalMediaMetadata {
+	fn default() -> Self {
+		Self {
+			provider: "",
+			external_id: "".to_string(),
+			series_name: None,
+			series_external_id: None,
+			title: None,
+			summary: None,
+			number: None,
+			day: None,
+			month: None,
+			year: None,
+			page_count: None,
+			genres: None,
+			tags: None,
+			isbn: None,
+			isbn_13: None,
+			writers: None,
+			artists: None,
+			colorists: None,
+			letterers: None,
+			cover_artists: None,
+			cover_url: None,
+			provider_url: None,
+		}
+	}
+}
+
 /// Metadata about a series from an external metadata provider
+#[derive(Debug, Clone)]
 pub struct ExternalSeriesMetadata {
 	pub provider: &'static str,
 	pub external_id: String,
-
+	// pub provider_url: Option<String>,
 	pub title: String,
 	pub alternative_titles: Vec<String>,
 	pub summary: Option<String>,
@@ -39,14 +79,38 @@ pub struct ExternalSeriesMetadata {
 	pub year: Option<i32>,
 	pub end_year: Option<i32>,
 
-	pub genres: Vec<String>,
-	pub tags: Vec<String>,
+	pub genres: Option<Vec<String>>,
+	pub tags: Option<Vec<String>>,
 	pub age_rating: Option<String>,
 
-	pub authors: Vec<String>,
-	pub artists: Vec<String>,
+	// TODO: Consider something like Vec<ExternalAuthor> to capture IDs
+	pub authors: Option<Vec<String>>,
+	pub artists: Option<Vec<String>>,
 	pub publisher: Option<String>,
 
 	pub cover_url: Option<String>,
 	pub volume_count: Option<i32>,
+}
+
+impl Default for ExternalSeriesMetadata {
+	fn default() -> Self {
+		Self {
+			provider: "",
+			external_id: "".to_string(),
+			title: "".to_string(),
+			alternative_titles: vec![],
+			summary: None,
+			status: None,
+			year: None,
+			end_year: None,
+			genres: None,
+			tags: None,
+			age_rating: None,
+			authors: None,
+			artists: None,
+			publisher: None,
+			cover_url: None,
+			volume_count: None,
+		}
+	}
 }

@@ -5,3 +5,15 @@ pub struct SearchQuery {
 	pub year: Option<i32>,
 	pub limit: Option<u32>,
 }
+
+impl Default for SearchQuery {
+	fn default() -> Self {
+		Self {
+			title: String::new(),
+			author: None,
+			isbn: None,
+			year: None,
+			limit: Some(50),
+		}
+	}
+}

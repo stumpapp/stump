@@ -43,11 +43,11 @@ export function ThumbnailPlaceholder(props?: ThumbnailPlaceholderData) {
 			meshColors[0], meshColors[0], meshColors[0],
 			meshColors[1], meshColors[1], meshColors[1],
 			meshColors[2], meshColors[2], meshColors[2],
-		]
+		] as string[] | null
 	}, [meshColors])
 
-	const averageColor = useMemo(() => props?.averageColor || null, [props?.averageColor])
-	const thumbHash = useMemo(() => props?.thumbhash || null, [props?.thumbhash])
+	const averageColor = useMemo(() => props?.averageColor || null, [props])
+	const thumbHash = useMemo(() => props?.thumbhash || null, [props])
 	const grayscaleStyle = useMemo(
 		() => [styles.placeholder, { backgroundColor: thumbnail.placeholder }],
 		[thumbnail],

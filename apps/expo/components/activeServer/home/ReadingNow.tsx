@@ -40,6 +40,8 @@ const fragment = graphql(`
 				}
 				thumbhash
 			}
+			height
+			width
 		}
 		pages
 		readProgress {

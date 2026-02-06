@@ -115,6 +115,8 @@ const query = graphql(`
 					}
 					thumbhash
 				}
+				height
+				width
 			}
 			ebook {
 				toc
@@ -205,7 +207,7 @@ export default function Screen() {
 
 	if (!book) return null
 
-	const { url: uri, metadata: placeholderData } = book.thumbnail
+	const { url: uri, metadata: placeholderData, width: originalWidth, height: originalHeight } = book.thumbnail
 
 	const progression = book.readProgress || null
 	const lastCompletion = book.readHistory?.at(0) || null
@@ -353,6 +355,11 @@ export default function Screen() {
 							size={{ height: 235 / thumbnailRatio, width: 235 }}
 							placeholderData={placeholderData}
 							borderAndShadowStyle={{ shadowRadius: 5 }}
+							originalDimensions={
+								originalWidth && originalHeight
+									? { width: originalWidth, height: originalHeight }
+									: null
+							}
 						/>
 					</View>
 

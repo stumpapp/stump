@@ -16,6 +16,7 @@ type MobilePreferencesStore = {
 	cachePolicy: CachePolicy
 	allowDownscaling: boolean
 	thumbnailRatio: number
+	thumbnailResizeMode: 'cover' | 'stretch' | 'fit'
 	thumbnailPlaceholder: 'grayscale' | 'averageColor' | 'colorful' | 'thumbhash'
 	performanceMonitor: boolean
 	accentColor?: string | undefined
@@ -51,6 +52,7 @@ export const usePreferencesStore = create<MobilePreferencesStore>()(
 			preferNativePdf: false,
 			disableDismissGesture: false,
 			autoSyncLocalData: true,
+			thumbnailResizeMode: 'cover',
 			patch: (data) => set(data),
 		}),
 		{

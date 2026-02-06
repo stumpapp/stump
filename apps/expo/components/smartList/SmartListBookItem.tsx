@@ -36,6 +36,8 @@ const fragment = graphql(`
 				}
 				thumbhash
 			}
+			height
+			width
 		}
 	}
 `)
@@ -123,6 +125,11 @@ export default function SmartListBookItem({ book }: Props) {
 					size={{ height, width }}
 					cachePolicy="urlCache"
 					placeholderData={data.thumbnail.metadata}
+					originalDimensions={
+						data.thumbnail.width && data.thumbnail.height
+							? { width: data.thumbnail.width, height: data.thumbnail.height }
+							: null
+					}
 				/>
 
 				<View className="flex-1 justify-center py-1.5">

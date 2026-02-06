@@ -15,6 +15,7 @@ type Props = {
 	title: string
 	href: Href
 	placeholderData?: ThumbnailPlaceholderData | null
+	originalDimensions?: { width: number; height: number } | null
 }
 
 export default function GridImageItem({ uri, title, href, ...thumbnailProps }: Props) {

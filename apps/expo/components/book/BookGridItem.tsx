@@ -18,6 +18,8 @@ const fragment = graphql(`
 				}
 				thumbhash
 			}
+			height
+			width
 		}
 	}
 `)
@@ -42,6 +44,11 @@ export default function BookGridItem({ book }: Props) {
 				title={data.resolvedName}
 				href={`/server/${serverID}/books/${data.id}`}
 				placeholderData={data.thumbnail.metadata}
+				originalDimensions={
+					data.thumbnail.width && data.thumbnail.height
+						? { width: data.thumbnail.width, height: data.thumbnail.height }
+						: null
+				}
 			/>
 		</View>
 	)

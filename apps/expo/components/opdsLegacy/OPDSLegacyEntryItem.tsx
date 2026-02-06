@@ -15,7 +15,7 @@ import { getLegacyStreamingContextValue } from '~/context/opdsLegacy'
 import { useIsLegacyOPDSEntryDownloaded, useOPDSDownload } from '~/lib/hooks'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { cn } from '~/lib/utils'
-import { useOPDSPreferencesStore, usePreferencesStore } from '~/stores'
+import { usePreferencesStore } from '~/stores'
 
 import { useActiveServer } from '../activeServer'
 import { useFileExplorerAssets } from '../fileExplorer'
@@ -46,7 +46,7 @@ export default function OPDSEntry({ entry }: Props) {
 	const iconSource = getIconSource(entry, colorScheme, assets)
 
 	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
-	const layout = useOPDSPreferencesStore((state) => state.layout)
+	const layout = usePreferencesStore((state) => state.opdsLayout)
 
 	const navigateUrl = entry.links.find(isLegacyNavigationLink)?.href || ''
 	const subsectionUrl = entry.links.find(isSubsectionLink)?.href || ''

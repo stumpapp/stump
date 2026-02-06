@@ -15,7 +15,7 @@ import {
 	Text,
 } from '~/components/ui'
 import { useColors } from '~/lib/constants'
-import { useOPDSPreferencesStore } from '~/stores'
+import { usePreferencesStore } from '~/stores'
 
 export default function FeedActionMenu() {
 	const [isOpen, setIsOpen] = useState(false)
@@ -23,8 +23,8 @@ export default function FeedActionMenu() {
 	const insets = useSafeAreaInsets()
 	const colors = useColors()
 
-	const layout = useOPDSPreferencesStore((state) => state.layout)
-	const setLayout = useOPDSPreferencesStore((state) => state.setLayout)
+	const setPreferences = usePreferencesStore((state) => state.patch)
+	const layout = usePreferencesStore((state) => state.opdsLayout)
 
 	const contentInsets = {
 		top: insets.top,
@@ -67,7 +67,7 @@ export default function FeedActionMenu() {
 						<NativeDropdownMenu.CheckboxItem
 							value={layout === 'grid'}
 							key="displayAsGrid"
-							onSelect={() => setLayout('grid')}
+							onSelect={() => setPreferences({ opdsLayout: 'grid' })}
 						>
 							<NativeDropdownMenu.ItemTitle>Grid</NativeDropdownMenu.ItemTitle>
 							<NativeDropdownMenu.ItemIcon ios={{ name: 'square.grid.3x2' }} />
@@ -77,7 +77,7 @@ export default function FeedActionMenu() {
 						<NativeDropdownMenu.CheckboxItem
 							value={layout === 'list'}
 							key="displayAsList"
-							onSelect={() => setLayout('list')}
+							onSelect={() => setPreferences({ opdsLayout: 'list' })}
 						>
 							<NativeDropdownMenu.ItemTitle>List</NativeDropdownMenu.ItemTitle>
 							<NativeDropdownMenu.ItemIcon ios={{ name: 'list.bullet' }} />
@@ -119,7 +119,7 @@ export default function FeedActionMenu() {
 				>
 					<DropdownMenuCheckboxItem
 						checked={layout === 'grid'}
-						onCheckedChange={() => setLayout('grid')}
+						onCheckedChange={() => setPreferences({ opdsLayout: 'grid' })}
 						className="text-foreground"
 						closeOnPress={false}
 					>
@@ -129,7 +129,7 @@ export default function FeedActionMenu() {
 
 					<DropdownMenuCheckboxItem
 						checked={layout === 'list'}
-						onCheckedChange={() => setLayout('list')}
+						onCheckedChange={() => setPreferences({ opdsLayout: 'list' })}
 						className="text-foreground"
 						closeOnPress={false}
 					>

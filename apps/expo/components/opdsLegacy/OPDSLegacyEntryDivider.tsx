@@ -1,11 +1,11 @@
 import { View } from 'react-native'
 
-import { useOPDSPreferencesStore } from '~/stores'
+import { usePreferencesStore } from '~/stores'
 
 import { Divider } from '../Divider'
 
 export default function OPDSLegacyEntryDivider() {
-	const layout = useOPDSPreferencesStore((state) => state.layout)
+	const layout = usePreferencesStore((state) => state.opdsLayout)
 
 	if (layout === 'grid') {
 		return <View className="h-4" />

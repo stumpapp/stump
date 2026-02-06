@@ -21,8 +21,8 @@ import { useColors } from '~/lib/constants'
 import { usePreferencesStore } from '~/stores'
 
 type Props = {
-	onCollapseAll: () => void
-	onExpandAll: () => void
+	onCollapseAll?: () => void
+	onExpandAll?: () => void
 }
 
 export default function SmartListActionMenu({ onCollapseAll, onExpandAll }: Props) {
@@ -91,17 +91,19 @@ export default function SmartListActionMenu({ onCollapseAll, onExpandAll }: Prop
 						</NativeDropdownMenu.CheckboxItem>
 					</NativeDropdownMenu.Group>
 
-					<NativeDropdownMenu.Group>
-						<NativeDropdownMenu.Item key="collapseAll" onSelect={onCollapseAll}>
-							<NativeDropdownMenu.ItemTitle>Collapse All</NativeDropdownMenu.ItemTitle>
-							<NativeDropdownMenu.ItemIcon ios={{ name: 'rectangle.stack.badge.minus' }} />
-						</NativeDropdownMenu.Item>
+					{onCollapseAll && onExpandAll && (
+						<NativeDropdownMenu.Group>
+							<NativeDropdownMenu.Item key="collapseAll" onSelect={onCollapseAll}>
+								<NativeDropdownMenu.ItemTitle>Collapse All</NativeDropdownMenu.ItemTitle>
+								<NativeDropdownMenu.ItemIcon ios={{ name: 'rectangle.stack.badge.minus' }} />
+							</NativeDropdownMenu.Item>
 
-						<NativeDropdownMenu.Item key="expandAll" onSelect={onExpandAll}>
-							<NativeDropdownMenu.ItemTitle>Expand All</NativeDropdownMenu.ItemTitle>
-							<NativeDropdownMenu.ItemIcon ios={{ name: 'rectangle.stack.badge.plus' }} />
-						</NativeDropdownMenu.Item>
-					</NativeDropdownMenu.Group>
+							<NativeDropdownMenu.Item key="expandAll" onSelect={onExpandAll}>
+								<NativeDropdownMenu.ItemTitle>Expand All</NativeDropdownMenu.ItemTitle>
+								<NativeDropdownMenu.ItemIcon ios={{ name: 'rectangle.stack.badge.plus' }} />
+							</NativeDropdownMenu.Item>
+						</NativeDropdownMenu.Group>
+					)}
 				</NativeDropdownMenu.Content>
 			</NativeDropdownMenu.Root>
 		),
@@ -155,19 +157,23 @@ export default function SmartListActionMenu({ onCollapseAll, onExpandAll }: Prop
 						<Icon as={List} size={20} className="ml-auto text-foreground-muted" />
 					</DropdownMenuCheckboxItem>
 
-					<DropdownMenuSeparator />
+					{onCollapseAll && onExpandAll && (
+						<>
+							<DropdownMenuSeparator />
 
-					<DropdownMenuGroup>
-						<DropdownMenuItem onPress={onCollapseAll}>
-							<Icon as={ListMinus} size={16} className="mr-2 text-foreground" />
-							<Text className="text-lg">Collapse All</Text>
-						</DropdownMenuItem>
+							<DropdownMenuGroup>
+								<DropdownMenuItem onPress={onCollapseAll}>
+									<Icon as={ListMinus} size={16} className="mr-2 text-foreground" />
+									<Text className="text-lg">Collapse All</Text>
+								</DropdownMenuItem>
 
-						<DropdownMenuItem onPress={onExpandAll}>
-							<Icon as={ListPlus} size={16} className="mr-2 text-foreground" />
-							<Text className="text-lg">Expand All</Text>
-						</DropdownMenuItem>
-					</DropdownMenuGroup>
+								<DropdownMenuItem onPress={onExpandAll}>
+									<Icon as={ListPlus} size={16} className="mr-2 text-foreground" />
+									<Text className="text-lg">Expand All</Text>
+								</DropdownMenuItem>
+							</DropdownMenuGroup>
+						</>
+					)}
 				</DropdownMenuContent>
 			</DropdownMenu>
 		),

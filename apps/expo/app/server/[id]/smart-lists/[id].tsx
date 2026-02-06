@@ -166,9 +166,11 @@ export default function Screen() {
 	useDynamicHeader({
 		title: smartList?.name || '',
 		// Note: I HATE that I can't arrange this to the right of search
-		headerRight: isCollapsibleList
-			? () => <SmartListActionMenu onCollapseAll={onCollapseAll} onExpandAll={onClearList} />
-			: undefined,
+		headerRight: () => (
+			<SmartListActionMenu
+				{...(isCollapsibleList ? { onCollapseAll, onExpandAll: onClearList } : {})}
+			/>
+		),
 	})
 
 	const data = useMemo(() => {

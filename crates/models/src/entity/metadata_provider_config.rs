@@ -20,6 +20,7 @@ pub struct Model {
 	// within our system
 	pub api_key_expires_at: Option<DateTimeWithTimeZone>,
 	pub auto_apply_threshold: Decimal,
+	pub auto_apply_matches: bool,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
 	pub created_at: DateTimeWithTimeZone,
 	#[sea_orm(column_type = "custom(\"DATETIME\")", nullable)]
@@ -41,6 +42,9 @@ impl ActiveModelBehavior for ActiveModel {
 				self.auto_apply_threshold = ActiveValue::Set(
 					Decimal::from_str_exact("0.95").expect("This should never happen!"),
 				);
+			}
+			if self.auto_apply_matches.is_not_set() {
+				self.auto_apply_matches = ActiveValue::Set(false);
 			}
 		} else {
 			self.updated_at =

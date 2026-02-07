@@ -152,6 +152,7 @@ type GetThumbnailResizePropsParams = {
 	originalWidth: number
 	originalHeight: number
 }
+
 export function getThumbnailResizeProps(
 	thumbnailResizeMode: 'cover' | 'stretch' | 'fit',
 	{ containerWidth, containerHeight, originalWidth, originalHeight }: GetThumbnailResizePropsParams,
@@ -167,6 +168,9 @@ export function getThumbnailResizeProps(
 			originalWidth,
 			originalHeight,
 		)
+		// Note: This might feel convoluted but the reason I avoided `contain` is because we
+		// wouldn't be able to add the border radius. We would have sharp edges inside the
+		// rounded container which looks poop
 		return { resizeMode: 'cover', style: fitDimensions }
 	}
 

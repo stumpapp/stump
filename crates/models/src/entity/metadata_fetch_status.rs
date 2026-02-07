@@ -4,6 +4,7 @@ use sea_orm::{
 	prelude::{async_trait::async_trait, *},
 	ActiveValue, DeriveEntityModel,
 };
+use serde_json::Value as JsonValue;
 
 use crate::shared::enums::MetadataFetchStatus;
 
@@ -13,9 +14,15 @@ use crate::shared::enums::MetadataFetchStatus;
 pub struct Model {
 	#[sea_orm(primary_key, auto_increment = true)]
 	pub id: i32,
-	// TODO: More fields
 	pub status: MetadataFetchStatus,
-	pub media_id: String,
+	#[sea_orm(column_type = "Text", nullable)]
+	pub media_id: Option<String>, // null if this is for a series
+	#[sea_orm(column_type = "Text", nullable)]
+	pub series_id: Option<String>, // null if this is for a media
+	#[sea_orm(column_type = "Json", nullable)]
+	pub match_candidates: Option<JsonValue>,
+	#[sea_orm(column_type = "Json", nullable)]
+	pub accepted_match_candidate: Option<JsonValue>, // auto or manual
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
 	pub added_at: DateTimeWithTimeZone,
 	#[sea_orm(column_type = "custom(\"DATETIME\")", nullable)]
@@ -24,13 +31,33 @@ pub struct Model {
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
-	#[sea_orm(has_one = "super::media::Entity")]
+	#[sea_orm(
+		belongs_to = "super::media::Entity",
+		from = "Column::MediaId",
+		to = "super::media::Column::Id",
+		on_update = "Cascade",
+		on_delete = "Cascade"
+	)]
 	Media,
+	#[sea_orm(
+		belongs_to = "super::series::Entity",
+		from = "Column::SeriesId",
+		to = "super::series::Column::Id",
+		on_update = "Cascade",
+		on_delete = "Cascade"
+	)]
+	Series,
 }
 
 impl Related<super::media::Entity> for Entity {
 	fn to() -> RelationDef {
 		Relation::Media.def()
+	}
+}
+
+impl Related<super::series::Entity> for Entity {
+	fn to() -> RelationDef {
+		Relation::Series.def()
 	}
 }
 
@@ -41,6 +68,11 @@ impl ActiveModelBehavior for ActiveModel {
 		C: ConnectionTrait,
 	{
 		if insert {
+			if self.series_id.is_not_set() && self.media_id.is_not_set() {
+				return Err(DbErr::Custom(
+					"Either media_id or series_id must be set".to_string(),
+				));
+			}
 			self.added_at = ActiveValue::Set(DateTimeWithTimeZone::from(Utc::now()));
 			if self.status.is_not_set() {
 				self.status = ActiveValue::Set(MetadataFetchStatus::NotStarted);

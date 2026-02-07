@@ -336,8 +336,10 @@ pub enum LibraryType {
 	Manga,
 	Book,
 	LightNovel,
+	Manhwa,
 	#[default]
 	Mixed,
+	WebNovel,
 	Webtoon,
 }
 

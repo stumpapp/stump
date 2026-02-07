@@ -338,6 +338,7 @@ pub enum LibraryType {
 	LightNovel,
 	#[default]
 	Mixed,
+	Webtoon,
 }
 
 #[derive(

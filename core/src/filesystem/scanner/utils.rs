@@ -721,6 +721,7 @@ pub(crate) async fn safely_build_and_insert_media(
 		};
 		match create_media(&worker_ctx.conn, book).await {
 			Ok(created_media) => {
+				// TODO(metadata-fetching): Track this as needing fetching (assuming enabled)
 				output.created_media += 1;
 				worker_ctx.send_batch(vec![
 					JobProgress::subtask_position(

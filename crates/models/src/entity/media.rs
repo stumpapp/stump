@@ -346,7 +346,7 @@ pub enum Relation {
 	Series,
 	#[sea_orm(has_many = "super::media_analysis::Entity")]
 	Analysis,
-	#[sea_orm(has_many = "super::metadata_fetch_status::Entity")]
+	#[sea_orm(has_one = "super::metadata_fetch_status::Entity")]
 	MetadataFetchStatus,
 }
 

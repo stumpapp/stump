@@ -1,28 +1,28 @@
 {
 	"underConstruction": {
 		"heading": "Das ist unangenehm",
-		"message": "Diese Seite befindet sich noch in Entwicklung. Leider ist sie noch nicht ganz fertig, weshalb sie noch nicht angezeigt werden kann.",
+		"message": "Du bist über eine Seite gestolpert, welche noch entwickelt wird. Ich würde sie dir gerne zeigen, aber sie ist noch nicht ganz fertig.",
 		"homeLink": "Zur Startseite",
-		"githubLink": "GitHub Issue anzeigen"
+		"githubLink": "Schaue die GitHub Issue an"
 	},
 	"authScene": {
-		"claimHeading": "Server initialisieren",
+		"claimHeading": "Initialisiere deinen Server",
 		"claimText": "Dieser Stump-Server ist noch nicht initialisiert. Benutze das untenstehende Formular, um ein Konto zu erstellen. Danach erhältst du vollen Zugriff auf alle Serverfunktionen.",
 		"form": {
 			"validation": {
-				"missingUsername": "Der Benutzername ist erforderlich",
+				"missingUsername": "Ein Benutzername ist erforderlich",
 				"missingPassword": "Ein Passwort wird benötigt",
-				"usernameAlreadyExists": "Benutzername existiert bereits"
+				"usernameAlreadyExists": "Der Benutzername existiert bereits"
 			},
 			"labels": {
 				"username": "Benutzername",
 				"password": "Passwort"
 			},
 			"buttons": {
-				"createAccount": "Konto erstellen",
+				"createAccount": "Benutzerkonto erstellen",
 				"login": "Anmelden",
-				"loginWithOidc": "Log in with OIDC",
-				"createAccountWithOidc": "Create Account with OIDC"
+				"loginWithOidc": "Mit OIDC einloggen",
+				"createAccountWithOidc": "Benutzerkonto mit OIDC erstellen"
 			}
 		},
 		"toasts": {
@@ -38,8 +38,8 @@
 	"adminLibrarySidebar": {
 		"libraryConfiguration": {
 			"heading": "Bibliothekskonfiguration",
-			"subtitleCreating": "Eine Vorschau der neuen Bibliothek wird unten angezeigt",
-			"subtitleEditing": "Eine Vorschau der Änderungen in der Bibliothek wird unten angezeigt"
+			"subtitleCreating": "Eine Vorschau deiner neuen Bibliothek wird unten angezeigt",
+			"subtitleEditing": "Eine Vorschau deiner Bibliotheksänderungen wird unten angezeigt"
 		}
 	},
 	"bookOverviewScene": {
@@ -53,7 +53,7 @@
 			}
 		},
 		"emailBook": {
-			"heading": "Buch per E-Mail versenden",
+			"heading": "E-Mail das Buch",
 			"description": "Dieses Buch an ein Gerät oder eine E-Mail-Adresse senden",
 			"form": {
 				"email": {
@@ -75,92 +75,92 @@
 			"name": {
 				"label": "Name",
 				"placeholder": "Mein Buchclub",
-				"description": "Der Name des Buchclubs"
+				"description": "Der Name deines Buchclubs"
 			},
 			"description": {
 				"label": "Beschreibung",
-				"placeholder": "Ein \"Our Flag Means Death\" Fanclub. Wir lesen Piratenfiktion nach Herzenslust",
-				"description": "Eine optionale, kurze Beschreibung des Buchclubs"
+				"placeholder": "Ein \"Unsere Flagge bedeutet den Tod\" Fanclub. Wir lesen Piratenfiktion nach Herzenslust",
+				"description": "Eine optionale, kurze Beschreibung deines Buchclubs"
 			},
 			"is_private": {
 				"label": "Privater Club",
-				"description": "Wenn aktiviert, können nur eingeladene Nutzer diesem Buchclub beitreten"
+				"description": "Wenn aktiviert, können nur eingeladene Nutzer deinem Buchclub beitreten"
 			},
 			"member_role_spec": {
 				"heading": "Benutzerdefinierte Rollenzuordnung",
 				"subtitle": [
-					"Es können benutzerdefinierte Rollennamen erzeugt werden. Weitere Informationen hierzu gibt es in der",
+					"Du kannst benutzerdefinierte Rollennamen erstellen. Weitere Informationen hierzu gibt es in der",
 					"Dokumentation"
 				],
 				"member": {
 					"label": "Mitglied",
 					"placeholder": "Mitglied",
-					"description": "Der Name der Standardrolle für diesen Buchclub"
+					"description": "Der Name der Standardrolle für deinen Buchclub"
 				},
 				"moderator": {
 					"label": "Moderator",
 					"placeholder": "Moderator",
-					"description": "Der Anzeigename für Moderatoren dieses Buchclubs"
+					"description": "Der Name für die Moderatorenrolle deines Buchclubs"
 				},
 				"admin": {
 					"label": "Administrator",
 					"placeholder": "Administrator",
-					"description": "Der Anzeigename für Administratoren dieses Buchclubs"
+					"description": "Der Name für die Administratorenrolle deines Buchclubs"
 				},
 				"creator": {
 					"label": "Ersteller",
 					"placeholder": "Ersteller",
-					"description": "Der Anzeigename für den Ersteller dieses Buchclubs!"
+					"description": "Der Name für die Erstellerrolle deines Buchclubs! Das bist du!"
 				}
 			},
 			"membershipOptions": {
 				"displayName": {
 					"label": "Anzeigename",
 					"placeholder": "oromei",
-					"description": "Ein optionaler Anzeigename für deine Mitgliedschaft im Buchclub. Wenn aktiviert, wird dieser statt des Benutzernamen angezeigt"
+					"description": "Ein optionaler Anzeigename für deine Mitgliedschaft im Buchclub. Wenn aktiviert, wird dieser statt des Benutzernamens angezeigt"
 				},
 				"hideProgress": {
 					"label": "Fortschritt verbergen",
-					"description": "Wenn aktiviert, wird der Lesefortschritt vor anderen Mitgliedern des Buchclubs verborgen"
+					"description": "Wenn aktiviert, wird dein Lesefortschritt vor anderen Mitgliedern des Buchclubs verborgen"
 				}
 			}
 		},
 		"validation": {
-			"missingName": "Name ist erforderlich",
+			"missingName": "Ein Name ist erforderlich",
 			"alreadyTaken": "ist bereits vergeben"
 		}
 	},
 	"createBookClubScene": {
 		"heading": "Neuen Buchclub erstellen",
-		"subtitle": "Erstelle einen privaten Buchclub oder mache ihn für jeden auf dem Server öffentlich machen",
+		"subtitle": "Du kannst einen privaten Buchclub für einzelne Ausgewählte erstellen oder einen öffentlichen, welcher jeder auf dem Server beitreten kann",
 		"form": {
 			"stepLabel": "Schritt",
 			"steps": [
 				{
-					"label": "Grundlegendes",
-					"heading": "Grundlegende Informationen",
+					"label": "Allgemeines",
+					"heading": "Allgemeine Informationen",
 					"description": "Die Details des Clubs, einschließlich Name und Beschreibung"
 				},
 				{
 					"label": "Rollen",
 					"heading": "Rollen",
-					"description": "Passen Sie die Rollen im Buchclub an"
+					"description": "Passe die Rollen in deinem Buchclub an"
 				},
 				{
 					"label": "Mitgliedschaft",
 					"heading": "Mitgliedschaftseinstellungen",
-					"description": "Zusätzliche Optionen für den Buchclub"
+					"description": "Zusätzliche Optionen für deinen Buchclub"
 				},
 				{
 					"label": "Überprüfung",
 					"heading": "Überprüfung",
-					"description": "Clubeinstellungen vorm Erstellen nochmals prüfen"
+					"description": "Überprüfe deine Clubeinstellungen noch einmal vor dem Erstellen"
 				}
 			],
 			"review": {
 				"yes": "Ja",
 				"no": "Nein",
-				"none": "Überspringen",
+				"none": "Keine",
 				"labels": {
 					"name": "Name",
 					"description": "Beschreibung"
@@ -171,7 +171,7 @@
 	},
 	"bookClubSettingsScene": {
 		"sidebar": {
-			"basics": "Grundlegendes",
+			"basics": "Allgemeines",
 			"members": {
 				"members": "Mitglieder",
 				"roles": "Rollen",
@@ -188,7 +188,7 @@
 			}
 		},
 		"basics": {
-			"title": "Grundlegende Informationen",
+			"title": "Allgemeine Informationen",
 			"description": "Die Details dieses Buchclubs, einschließlich Name und Beschreibung",
 			"form": {
 				"submit": "Club aktualisieren"
@@ -196,12 +196,12 @@
 		},
 		"members": {
 			"title": "Mitglieder",
-			"description": "Die Mitglieder dieses Buchclubs verwalten",
+			"description": "Verwalte die Mitglieder dieses Buchclubs",
 			"sections": {}
 		},
 		"roles": {
 			"title": "Rollen",
-			"description": "Die Rollen dieses Buchclubs anpassen",
+			"description": "Passe die Rollen in diesem Buchclub an",
 			"sections": {
 				"roleMappings": {
 					"heading": "Vorhandene Rollenzuordnungen",
@@ -211,21 +211,21 @@
 		},
 		"scheduling/scheduler": {
 			"title": "Planer",
-			"description": "Create and manage the schedule readings for this book club"
+			"description": "Erstelle und verwalte die Lesetermine für diesen Buchclub"
 		},
 		"scheduling/options": {
 			"title": "Optionen",
-			"description": "Additional options for this book club's scheduling"
+			"description": "Zusätzliche Optionen für die Terminplanung dieses Buchclubs"
 		},
 		"danger-zone/delete": {
 			"title": "Löschaktionen",
-			"description": "Diesen Buchclub und all seine Inhalte oder gewisse Ressourcen dauerhaft löschen",
+			"description": "Dauerhaft diesen Buchclub und all seine Inhalte oder gewisse Ressourcen löschen",
 			"sections": {
 				"deleteClub": {
 					"heading": "Club löschen",
 					"description": [
-						"Diesen Buchclub und seinen gesamten Inhalt dauerhaft löschen.",
-						"Dieser Vorgang kann nicht rückgängig gemacht werden"
+						"Dauerhaft diesen Buchclub und seinen gesamten Inhalt dauerhaft löschen.",
+						"Diese Aktion kann nicht rückgängig gemacht werden"
 					],
 					"trigger": "Club löschen"
 				}
@@ -236,49 +236,49 @@
 		"fields": {
 			"name": {
 				"label": "Name",
-				"description": "Der Anzeigename für diese Bibliothek",
+				"description": "Ein freundlicher Name für deine Bibliothek",
 				"placeholder": "Meine Bibliothek"
 			},
 			"path": {
 				"label": "Pfad",
-				"description": "Der Serverpfad zu dieser Bibliothek",
-				"placeholder": "/Pfad/zur/Bibliothek"
+				"description": "Der Pfad zu der Bibliothek, wie dieser auf deinem Server existiert",
+				"placeholder": "/Pfad/zu/der/Bibliothek"
 			},
 			"description": {
 				"label": "Beschreibung",
-				"description": "Eine kurze Beschreibung der Bibliothek",
+				"description": "Eine kurze Beschreibung deiner Bibliothek",
 				"placeholder": "Eine Bibliothek für alle meine Lieblingsbücher"
 			},
 			"tags": {
-				"label": "Schlagworte",
-				"description": "Wird verwendet, um eine Bibliothek zu kategorisieren oder Zugriffsrechte anzuwenden"
+				"label": "Tags",
+				"description": "Wird verwendet, um deine Bibliothek zu kategorisieren oder Zugriffsrechte anzuwenden"
 			},
 			"defaultLibraryView": {
-				"label": "Default library view",
-				"description": "Configure which tab is shown by default when opening this library",
+				"label": "Standard-Bibliotheksansicht",
+				"description": "Konfiguriere, welcher Reiter beim Öffnen dieser Bibliothek standardmäßig angezeigt wird",
 				"hideSeriesView": {
-					"label": "Hide series tab",
-					"description": "Hide the series tab from the library navigation"
+					"label": "Serienreiter verbergen",
+					"description": "Verberge den Serienreiter in der Bibliotheksnavigation"
 				},
 				"options": {
 					"series": {
-						"label": "Series",
-						"description": "Show the series tab by default"
+						"label": "Serien",
+						"description": "Serienreiter standardmäßig anzeigen"
 					},
 					"books": {
-						"label": "Books",
-						"description": "Show the books tab by default"
+						"label": "Bücher",
+						"description": "Buchreiter standardmäßig anzeigen"
 					}
 				}
 			},
 			"readingSettings": {
 				"section": {
 					"heading": "Leseeinstellungen",
-					"description": "Standardeinstellungen des Readers für Bücher"
+					"description": "Standard-Readereinstellungen für Bücher"
 				},
 				"imageScaling": {
 					"label": "Bildskalierung",
-					"description": "Wie der Reader für bildbasierte Bücher, die Bilder auf die Seite skaliert"
+					"description": "Wie der bildbasierte Reader, die Bilder auf die Seite skaliert"
 				},
 				"readingMode": {
 					"label": "Standard-Reader",
@@ -295,49 +295,49 @@
 						"create": "Vorschaubilder konfigurieren",
 						"update": "Generierung"
 					},
-					"description": "Verbessert die Ladezeiten während des Durchsuchens der Bibliothek, indem Vorschaubilder für alle Bücher generiert werden",
-					"disabled": "No additional configuration is required when thumbnail generation is disabled"
+					"description": "Verbesser die Ladezeiten während des Durchsuchens deiner Bibliothek, indem du Vorschaubilder für all deine Bücher generierst",
+					"disabled": "Keine zusätzliche Konfiguration erforderlich, wenn die Vorschaubildgenerierung deaktiviert ist"
 				},
 				"enableSwitch": {
 					"label": "Aktiviert",
 					"description": "Vorschaubilder für diese Bibliothek erstellen"
 				},
 				"resizeMethod": {
-					"label": "Resize Method",
+					"label": "Größenveränderungsmethode",
 					"options": {
-						"scaleEvenlyByFactor": "Evenly Scale",
-						"exact": "Exact Size",
-						"scaleDimension": "Auto Scaled",
-						"none": "None"
+						"scaleEvenlyByFactor": "Gleichmäßig skalieren",
+						"exact": "Genaue Größe",
+						"scaleDimension": "Auto-Skalierung",
+						"none": "Keine"
 					}
 				},
 				"scaleEvenlyByFactor": {
-					"description": "Scale the thumbnail by a factor of the original size. E.g., 0.65 will result in a thumbnail that is 65% of the original size",
+					"description": "Skaliere das Vorschaubild um einem Faktor der ursprünglichen Größe. Z.B. 0.65 führt zu einem Vorschaubild, welches 65% der Originalgröße beträgt",
 					"factor": {
-						"label": "Scale Factor"
+						"label": "Skalierungsfaktor"
 					}
 				},
 				"exact": {
-					"description": "Resize the thumbnail to an exact size in pixels",
+					"description": "Größenveränderung des Vorschaubildes auf eine exakte Größe in Pixeln",
 					"width": {
-						"label": "Width"
+						"label": "Breite"
 					},
 					"height": {
-						"label": "Height"
+						"label": "Höhe"
 					}
 				},
 				"scaleDimension": {
-					"label": "Auto Scaled",
-					"description": "Set either the width or height of the thumbnail and auto-scale the other to keep the original aspect ratio",
+					"label": "Auto-Skalierung",
+					"description": "Setze entweder die Breite oder Höhe des Vorschaubildes und skaliere automatisch die anderen, um das ursprüngliche Seitenverhältnis beizubehalten",
 					"dimension": {
-						"label": "Dimension",
+						"label": "Abmessung",
 						"options": {
-							"width": "Width",
-							"height": "Height"
+							"width": "Breite",
+							"height": "Höhe"
 						}
 					},
 					"size": {
-						"label": "Size"
+						"label": "Größe"
 					}
 				},
 				"format": {
@@ -346,15 +346,15 @@
 				},
 				"quality": {
 					"label": "Qualität",
-					"description": "Die Qualität der erzeugten Vorschaubilder zwischen 0 und 1.0"
+					"description": "Die Qualität der erzeugten Vorschaubilder zwischen 1 und 100"
 				}
 			},
 			"ignoreRules": {
 				"section": {
-					"heading": "Dateien ignorieren",
-					"description": "Glob-Regeln definieren, um bestimmte Dateien oder Verzeichnisse während des Scan-Vorgangs zu ignorieren"
+					"heading": "Regeln ignorieren",
+					"description": "Glob-Regeln definieren, um bestimmte Dateien oder Verzeichnisse während des Scans zu ignorieren"
 				},
-				"noRules": "Es wurden keine Regeln zum Ignorieren von Dateien konfiguriert",
+				"noRules": "Keine Ignorierregeln wurden konfiguriert",
 				"save": "Änderungen speichern",
 				"addRule": {
 					"label": "Neue Regel",
@@ -370,7 +370,7 @@
 					}
 				},
 				"invalidGlob": "Ungültige Glob-Regel",
-				"duplicateGlob": "Duplicate of an existing rule",
+				"duplicateGlob": "Duplikat einer bestehenden Regel",
 				"lockConfig": {
 					"lock": "Konfiguration sperren",
 					"unlock": "Konfiguration entsperren"
@@ -387,34 +387,34 @@
 				},
 				"rarToZip": {
 					"label": "Konvertiere RAR in ZIP",
-					"description": "Konvertiere RAR/CBR-Dateien in ZIP/CBZ-Dateien während des Scan-Vorgangs"
+					"description": "Konvertiere RAR/CBR-Dateien in ZIP/CBZ-Dateien während des Scans"
 				},
 				"deleteRarAfter": {
 					"label": "Lösche RAR-Dateien nach der Konvertierung",
-					"description": "Löscht die originalen RAR/CBR-Dateien nach der Konvertierung. Dies kann nicht rückgängig gemacht werden"
+					"description": "Lösche die originalen RAR/CBR-Dateien nach der Konvertierung. Dies kann nicht rückgängig gemacht werden"
 				}
 			},
 			"scannerFeatures": {
 				"section": {
 					"heading": "Optionale Verarbeitung",
 					"description": "Opt-in-Verarbeitungsfunktionen für den Scanner",
-					"disclaimer": "Diesen Funktionen beinhalten zusätzliche Lesevorgänge, die den Scan-Vorgang verlangsamen können."
+					"disclaimer": "Diesen Funktionen beinhalten zusätzliche Lesevorgänge, die den Scan verlangsamen können"
 				},
 				"processMetadata": {
 					"label": "Metadaten verarbeiten",
-					"description": "Extrahiere Metadaten aus Bibliotheksdateien und speichere diese in der Datenbank"
+					"description": "Extrahiere alle Metadaten aus Bibliotheksdateien und speichere diese in der Datenbank"
 				},
 				"watch": {
-					"label": "Watch",
-					"description": "Watch the library directory for changes and update the database accordingly"
+					"label": "Beobachten",
+					"description": "Beobachte den Bibliotheksordner auf Änderungen und aktualisiere die Datenbank dementsprechend"
 				},
 				"generateFileHashes": {
 					"label": "Datei-Hashes generieren",
 					"description": "Generiert einen Hash für jede Datei in der Bibliothek, um Duplikate zu erkennen"
 				},
 				"koreaderHashes": {
-					"label": "KoReader-compatible hashes",
-					"description": "If using KoReader, generate additional hashes in the format it expects"
+					"label": "KoReader kompatible Hashes",
+					"description": "Wenn der KoReader verwendet wird, generiere zusätzliche Hashes in dem Format, welches dieser erwartet"
 				}
 			},
 			"libraryPattern": {
@@ -422,23 +422,23 @@
 					"heading": "Organisierung",
 					"description": "Bestimme, welches Muster am besten der Organisation der Bibliothek entspricht",
 					"docs": [
-						"Nicht sicher, welches ausgewählt werden soll?",
-						"Hier",
-						"klicken, um weitere Informationen zu erhalten.",
-						"Diese Einstellung kann später nicht mehr geändert werden."
+						"Nicht sicher, welches ausgewählt werden soll? Klicke",
+						"hier",
+						", um weitere Informationen zu erhalten.",
+						"Diese Einstellung kann später nicht mehr geändert werden"
 					],
 					"disabled": "Diese Einstellung kann nicht geändert werden"
 				},
 				"options": {
 					"label": "Bibliotheksmuster",
-					"description": "Die Einstellung, welche festlegt, wie Stump Bibliotheken organisieren soll.",
+					"description": "Die Einstellung, welche festlegt, wie Stump deine Bibliothek organisieren soll",
 					"collectionPriority": {
 						"label": "Sammlungspriorität",
-						"description": "Ordner auf der obersten Ebene des Stammverzeichnisses der Bibliothek enthalten eine einzelne Serie"
+						"description": "Jeder Ordner auf der obersten Ebene des Stammverzeichnisses der Bibliothek enthält eine einzelne Serie"
 					},
 					"seriesPriority": {
 						"label": "Serienpriorität",
-						"description": "Jeder Ordner auf jeder Ebene enthält eine einzelne Serie"
+						"description": "Jeder Ordner auf jeder Ebene enthält rekursiv eine einzelne Serie"
 					}
 				}
 			}
@@ -448,35 +448,35 @@
 				"create": "Nach der Erstellung scannen",
 				"update": "Nach jeder Veränderung scannen"
 			},
-			"description": "Indizieren der Bibliotheksdateien, um die Datenbank zu füllen"
+			"description": "Indiziere die Bibliotheksdateien, um die Datenbank auszufüllen"
 		}
 	},
 	"createLibraryScene": {
 		"heading": "Bibliothek erstellen",
-		"subtitle": "Bibliotheken dienen dazu, Ihre Bücher zusammenzufassen. Die Funktionsweise hierzu kann nachgeschlagen werden in der dafür",
+		"subtitle": "Bibliotheken dienen dazu, deine Bücher zusammenzufassen. Weitere Informationen über diese Einstellung findest du in der",
 		"subtitleLink": "dazugehörigen Dokumentation",
 		"form": {
 			"stepLabel": "Schritt",
 			"steps": [
 				{
-					"label": "Grundeinstellungen",
-					"heading": "Grundlegende Informationen",
+					"label": "Allgemeines",
+					"heading": "Allgemeine Informationen",
 					"description": "Die Details zu dieser Bibliothek, einschließlich Name, Pfad und Beschreibung"
 				},
 				{
-					"label": "Wird gescannt",
-					"heading": "Scanne",
-					"description": "Einstellungen in Bezug darauf, wie Stumpf diese Bibliothek scannt"
+					"label": "Scannt",
+					"heading": "Scannt",
+					"description": "Einstellungen in Bezug, wie Stump diese Bibliothek scannt"
 				},
 				{
 					"label": "Vorschaubilder",
 					"heading": "Vorschaubilder",
-					"description": "Die Optionen, wie und ob Stump Vorschaubilder für diese Bibliothek erzeugt"
+					"description": "Die Optionen, ob und wie Stump Vorschaubilder für diese Bibliothek generiert"
 				},
 				{
 					"label": "Überprüfung",
 					"heading": "Überprüfung",
-					"description": "Bibliothekseinstellungen vorm Erstellen nochmals prüfen"
+					"description": "Überprüfe deine Bibliothekseinstellung vor dem Erstellen noch einmal"
 				}
 			],
 			"review": {
@@ -485,25 +485,25 @@
 				"none": "Überspringen",
 				"labels": {
 					"generateThumbnails": "Vorschaubilder generieren",
-					"processThumbnailColors": "Process thumbnail colors",
+					"processThumbnailColors": "Verarbeite Vorschaubildfarben",
 					"mode": "Modus",
 					"format": "Format",
 					"quality": "Qualität",
 					"name": "Name",
 					"path": "Pfad",
 					"description": "Beschreibung",
-					"tags": "Schlagworte",
+					"tags": "Tags",
 					"pattern": "Muster",
 					"ignoreRules": "Dateien ignorieren",
 					"convertRar": "Konvertiere RAR/CBR",
 					"deleteConversions": "Konvertierte Dateien löschen",
-					"watch": "Überwache Ordner nach Änderungen",
+					"watch": "Beobachte Ordner auf Änderungen",
 					"processMetadata": "Metadaten verarbeiten",
 					"generateFileHashes": "Datei-Hashes generieren",
-					"generateKoreaderHashes": "Generate KoReader hashes",
-					"scaleEvenlyByFactor": "Evenly Scale",
-					"exact": "Exact Size",
-					"scaleDimension": "Explicitly Sized"
+					"generateKoreaderHashes": "KoReader-Hashes generieren",
+					"scaleEvenlyByFactor": "Gleichmäßig skalieren",
+					"exact": "Genaue Größe",
+					"scaleDimension": "Explizite Größe"
 				}
 			},
 			"buttons": {
@@ -518,28 +518,28 @@
 				"series": "Reihe hochladen"
 			},
 			"description": {
-				"books": "Fügen Sie Bücher direkt zum aktuellen Pfad im Dateimanager hinzu",
-				"series": "Fügen Sie eine Reihe direkt zum aktuellen Pfad im Dateimanager hinzu"
+				"books": "Füge Bücher direkt zum aktuellen Pfad im Dateimanager hinzu",
+				"series": "Füge eine Reihe direkt zum aktuellen Pfad im Dateimanager hinzu"
 			},
 			"seriesDisclaimer": [
-				"It must be a ",
+				"Es muss eine ",
 				"gezippte Datei",
-				"enthält den Ordner, der die Reihe sein soll, die alle Bücher beinhaltet"
+				"sein welche den Ordner enthält, der die Reihe sein soll, die alle Bücher beinhaltet"
 			],
 			"dropzone": {
-				"books": "Drag and drop books here",
-				"series": "Drag and drop a zip file here",
-				"alt": "Oder klicken Sie, um Ihren Computer nach Büchern zum Hochladen zu durchsuchen"
+				"books": "Ziehe und lege Bücher hier ab",
+				"series": "Ziehe und lege eine Zip-Datei hier ab",
+				"alt": "Oder klicke, um deinen Computer nach Büchern zum Hochladen zu durchsuchen"
 			},
 			"addedFiles": "Hinzugefügte Dateien"
 		}
 	},
 	"librarySettingsScene": {
 		"heading": "Einstellungen",
-		"subtitle": "Hier kann die Bibliothek verwaltet werden. Wie die Einstellungen aktualisiert werden können, kann nachgelesen werden in der",
+		"subtitle": "Verwalte deine Bibliothek hier. Weitere Informationen über diese Einstellung findest du in der",
 		"subtitleLink": "dazugehörigen Dokumentation",
 		"sidebar": {
-			"basics": "Grundeinstellungen",
+			"basics": "Allgemeines",
 			"options": {
 				"general": "Allgemein",
 				"reading": "Lesen",
@@ -556,7 +556,7 @@
 			}
 		},
 		"basics": {
-			"title": "Grundlegende Informationen",
+			"title": "Allgemeine Informationen",
 			"description": "Die Details zu dieser Bibliothek, einschließlich Name, Pfad und Beschreibung",
 			"form": {
 				"submit": "Bibliothek aktualisieren"
@@ -567,70 +567,70 @@
 			"description": "Die Standardeinstellungen des Readers für Bücher in dieser Bibliothek. Dies kann für jedes Buch in der Bibliothek überschrieben werden"
 		},
 		"options/scanning": {
-			"title": "Scanning",
-			"description": "Einstellungen das bestimmt wie Stump diese Bibliothek scannt.",
+			"title": "Scannen",
+			"description": "Einstellungen die bestimmen wie Stump diese Bibliothek scannt",
 			"sections": {
 				"configureScan": {
-					"heading": "Configure scan",
-					"description": "A scan with additional options for more fine-grained control",
+					"heading": "Scan konfigurieren",
+					"description": "Ein Scan mit zusätzlichen Optionen für eine feinere Steuerung",
 					"form": {
-						"alert": "These will override corresponding library-wide settings",
+						"alert": "Diese werden die entsprechenden Bibliotheksweiten Einstellungen überschreiben",
 						"options": {
 							"forceRebuild": {
-								"label": "Force rebuild",
-								"description": "Rebuild every book in the library on disk",
-								"alert": "This will rebuild every book in the library from scratch, including metadata and hashes"
+								"label": "Wiederaufbau erzwingen",
+								"description": "Jedes Buch in der Bibliothek auf der Festplatte wiederaufbauen",
+								"alert": "Dies wird jedes Buch in der Bibliothek von Grund auf wiederaufbauen, einschließlich Metadaten und Hashes"
 							},
 							"custom": {
-								"label": "Custom",
-								"description": "Customize the scan configuration",
+								"label": "Benutzerdefiniert",
+								"description": "Passe die Scan-Konfiguration an",
 								"validation": {
-									"noSelection": "At least one option must be enabled"
+									"noSelection": "Mindestens eine Option muss aktiviert sein"
 								}
 							},
 							"rebuildMeta": {
-								"label": "Rebuild metadata",
-								"description": "Rebuild metadata for books in the library"
+								"label": "Metadaten wiederaufbauen",
+								"description": "Metadaten für Bücher in der Bibliothek wiederaufbauen"
 							},
 							"regenHashes": {
-								"label": "Regenerate hashes",
-								"description": "Recreate hashes for books in the library"
+								"label": "Regeneriere Hashes",
+								"description": "Erstelle die Hashes für die Bücher in der Bibliothek neu"
 							}
 						}
 					}
 				},
 				"defaultScan": {
-					"heading": "Default scan",
-					"description": "A standard scan to index your library for new content"
+					"heading": "Standardscan",
+					"description": "Ein Standardscan um die Bibliothek für neue Inhalte zu indexieren"
 				},
 				"history": {
-					"heading": "Scan history",
-					"description": "The history of all scans recorded for this library",
-					"empty": "There are no scans recorded for this library",
-					"runScan": "Run scan",
-					"inspect": "See details",
+					"heading": "Scanverlauf",
+					"description": "Der Verlauf von allen Scans aufgezeichnet für diese Bibliothek",
+					"empty": "Für diese Bibliothek sind keine Scans aufgezeichnet",
+					"runScan": "Scan starten",
+					"inspect": "Details anzeigen",
 					"inspector": {
-						"title": "Scan record",
-						"description": "A detailed view of this scan record",
+						"title": "Scanaufzeichnung",
+						"description": "Eine detaillierte Ansicht dieser Scanaufzeichnung",
 						"fields": {
-							"library": "Library",
-							"date": "Date",
-							"config": "Config",
-							"jobOutput": "Job output",
-							"logs": "Logs"
+							"library": "Bibliothek",
+							"date": "Datum",
+							"config": "Konfiguration",
+							"jobOutput": "Jobausgabe",
+							"logs": "Protokolle"
 						},
-						"logsPresent": "Logs were persisted for this job",
-						"seeLogs": "See logs"
+						"logsPresent": "Protokolle für diesen Job wurden gespeichert",
+						"seeLogs": "Protokolle ansehen"
 					},
 					"table": {
 						"columns": {
-							"timestamp": "Scanned at",
-							"config": "Config"
+							"timestamp": "Gescannt am",
+							"config": "Konfiguration"
 						},
-						"default": "Default",
-						"custom": "Custom"
+						"default": "Standard",
+						"custom": "Benutzerdefiniert"
 					},
-					"clearHistory": "Delete scan history"
+					"clearHistory": "Scanverlauf löschen"
 				}
 			}
 		},
@@ -639,7 +639,7 @@
 			"description": "Einstellungen und Verwaltungsoptionen für Vorschaubilder in dieser Bibliothek",
 			"sections": {
 				"management": {
-					"heading": "Verwaltung",
+					"heading": "Vorschaubilder verwalten",
 					"description": "Existierende Vorschaubilder für diese Bibliothek verwalten",
 					"thumbnailSelector": {},
 					"deleteThumbnails": {}
@@ -648,22 +648,22 @@
 		},
 		"options/analysis": {
 			"title": "Analyse",
-			"description": "Analysiere den Inhalt dieser Bibliothek, um mögliche Probleme oder Verbesserungen zu ermitteln",
+			"description": "Analysiere den Inhalt dieser Bibliothek, um mögliche Probleme oder Verbesserungen zu identifizieren",
 			"sections": {
 				"analyzeBooks": {
 					"heading": "Bücher analysieren",
 					"description": "Analysiere die Bücher in dieser Bibliothek, um zusätzliche Metadaten in der Datenbank zu speichern, wie z.B. die Seitenabmessungen für bildbasierte Bücher",
-					"disclaimerTitle": "This process is resource-intensive",
-					"disclaimer": "Dieser Prozess ist ressourcenintensiv und kann einige Zeit in Anspruch nehmen. Weitere Konfigurationsmöglichkeiten werden in Zukunft verfügbar sein",
+					"disclaimerTitle": "Dieser Prozess ist ressourcenintensiv",
+					"disclaimer": "Es kann eine Weile dauern, bis es fertig ist. In Zukunft wird es konfigurierbarer sein",
 					"analyzeButton": "Bücher analysieren"
 				},
 				"missingFiles": {
 					"heading": "Fehlende Dateien",
 					"description": "Dateien, die in der Datenbank gespeichert sind, aber nicht auf der Festplatte gefunden werden können",
-					"noMissingFiles": "Es gibt keine fehlenden Dateien in dieser Datenbank"
+					"noMissingFiles": "Es gibt keine fehlenden Dateien in dieser Bibliothek"
 				},
 				"duplicateFiles": {
-					"heading": "Doppelte Dateien",
+					"heading": "Duplizierte Dateien",
 					"description": "Dateien, die möglicherweise mehrfach auf der Festplatte vorkommen",
 					"noDuplicateFiles": "Es wurden keine doppelten Dateien für diese Bibliothek erkannt"
 				}
@@ -675,8 +675,8 @@
 			"sections": {
 				"libraryExclusions": {
 					"heading": "Benutzer ausschließen",
-					"description": "Verhindern Sie für bestimmte Benutzer den Zugriff auf diese Bibliothek oder deren Inhalte",
-					"noUsersTitle": "No users to exclude",
+					"description": "Verweigere bestimmte Benutzer den Zugriff auf diese Bibliothek oder deren Inhalte",
+					"noUsersTitle": "Keine Benutzer auszuschließen",
 					"noUsers": "Es gibt keine anderen registrierten Benutzer, die von dieser Bibliothek ausgeschlossen werden können",
 					"updated": "Ausgeschlossene Benutzer aktualisiert",
 					"failure": "Fehler beim Aktualisieren der ausgeschlossenen Benutzer"
@@ -690,13 +690,13 @@
 				"cleanLibrary": {
 					"heading": "Bibliothek bereinigen",
 					"description": "Entferne alle Medien und Serien, die nicht auf der Festplatte gefunden werden können",
-					"disclaimerTitle": "No files will be deleted",
+					"disclaimerTitle": "Keine Dateien werden gelöscht",
 					"disclaimer": "Diese Aktion löscht keine Dateien, aber es werden alle Datensätze in Bezug auf Medien und Serien die nicht gefunden werden konnten dauerhaft gelöscht",
 					"confirmation": {
 						"label": "Bibliothek bereinigen",
-						"text": "Sind Sie sicher, dass Sie diese Bibliothek bereinigen möchten?"
+						"text": "Bist du sicher, dass du diese Bibliothek bereinigen möchtest?"
 					},
-					"emptyText": "There was nothing to clean"
+					"emptyText": "Es gab nichts zu reinigen"
 				},
 				"deleteLibrary": {
 					"heading": "Bibliothek löschen",
@@ -719,17 +719,17 @@
 	},
 	"homeScene": {
 		"onDeck": {
-			"title": "Your next read",
+			"title": "Deine nächste Lesung",
 			"emptyState": {
-				"heading": "No books on deck",
-				"message": "Your next recommended books will show up here"
+				"heading": "Keine Bücher im Deck",
+				"message": "Deine nächsten Buchempfehlungen werden hier angezeigt"
 			}
 		},
 		"continueReading": {
 			"title": "Weiterlesen",
 			"emptyState": {
 				"heading": "Nichts zu zeigen",
-				"message": "Alle angefangene Bücher, die Sie starten, werden hier angezeigt"
+				"message": "Alle angefangene Bücher, die du startest, werden hier angezeigt"
 			}
 		},
 		"recentlyAddedSeries": {
@@ -749,49 +749,53 @@
 	},
 	"metadataEditor": {
 		"labels": {
-			"ageRating": "Age rating",
-			"characters": "Characters",
-			"colorists": "Colorists",
-			"coverArtists": "Cover artists",
-			"day": "Day",
-			"editors": "Editors",
+			"ageRating": "Altersfreigabe",
+			"characters": "Charaktere",
+			"colorists": "Koloristen",
+			"coverArtists": "Cover-Künstler",
+			"day": "Tag",
+			"editors": "Editoren",
 			"format": "Format",
 			"identifierAmazon": "Amazon ID",
 			"identifierCalibre": "Calibre ID",
 			"identifierGoogle": "Google ID",
 			"identifierIsbn": "ISBN",
 			"identifierMobiAsin": "Mobi ASIN",
-			"identifierUuid": "Book UUID",
-			"genres": "Genres",
-			"inkers": "Inkers",
-			"language": "Language",
-			"letterers": "Letterers",
+			"identifierUuid": "Buch UUID",
+			"genres": "Genre",
+			"inkers": "Zeichner",
+			"language": "Sprache",
+			"letterers": "Schriftsteller",
 			"links": "Links",
-			"month": "Month",
-			"notes": "Notes",
-			"number": "Number",
-			"pageCount": "Pages",
-			"pencillers": "Pencillers",
-			"publisher": "Publisher",
-			"series": "Series",
-			"seriesGroup": "Series group",
-			"storyArc": "Story arc",
-			"storyArcNumber": "Story arc number",
-			"summary": "Summary",
+			"month": "Monat",
+			"notes": "Anmerkungen",
+			"number": "Nummer",
+			"pageCount": "Seiten",
+			"pencillers": "Zeichner",
+			"publisher": "Verlag",
+			"series": "Serien",
+			"seriesGroup": "Seriengruppe",
+			"storyArc": "Handlungsbogen",
+			"storyArcNumber": "Handlungsbogennummer",
+			"summary": "Zusammenfassung",
 			"teams": "Teams",
-			"title": "Title",
-			"titleSort": "Title sort",
-			"volume": "Volume",
-			"writers": "Writers",
-			"year": "Year",
-			"metaType": "Type",
-			"imprint": "Imprint",
+			"title": "Titel",
+			"titleSort": "Titelsortierung",
+			"volume": "Band",
+			"writers": "Schriftsteller",
+			"year": "Jahr",
+			"metaType": "Typ",
+			"imprint": "Impressum",
 			"comicid": "Comic ID",
-			"booktype": "Book type",
-			"status": "Status"
+			"booktype": "Buchtyp",
+			"status": "Status",
+			"totalIssues": "Gesamtanzahl der Ausgaben",
+			"publicationRun": "Publikationslauf",
+			"comicImage": "Comicbild",
+			"descriptionFormatted": "Beschreibung (formatiert)"
 		},
 		"addFields": {
-			"description": "Add each addition on its own line"
+			"description": "Füge jede Ergänzung in eine eigene Zeile hinzu"
 		}
 	},
 	"seriesOverviewScene": {
@@ -826,16 +830,16 @@
 					"shared": {
 						"label": "Geteilt",
 						"description": "Bestimmte Benutzer können auf diese intelligente Liste zugreifen",
-						"createDisclaimer": "Nach dem Erstellen kann ausgewählt werden, wer Zugriff auf diese intelligente Liste erhält"
+						"createDisclaimer": "Du kannst auswählen, mit wem die Liste nach Erstellung geteilt wird"
 					},
 					"private": {
 						"label": "Privat",
-						"description": "Niemand sonst kann auf diese intelligente Liste zugreifen"
+						"description": "Niemand außer dir kann auf diese intelligente Liste zugreifen"
 					}
 				}
 			},
 			"queryBuilder": {
-				"uiPerformance": "This feature is missing performance optimizations on the UI and may be slow with filters which produce large result sets. This will be improved in the future",
+				"uiPerformance": "Dieser Funktion fehlen Leistungsoptimierungen in der Benutzeroberfläche und kann langsam mit Filtern, welche große Suchergebnisse erzeugen, sein. Dies wird in der Zukunft verbessert",
 				"rootJoiner": {
 					"and": {
 						"label": "UND",
@@ -898,29 +902,29 @@
 									"status": "Status",
 									"path": "Pfad",
 									"pages": "Seiten",
-									"tags": "Schlagworte",
+									"tags": "Tags",
 									"createdAt": "Erstellt am",
 									"updatedAt": "Aktualisiert am"
 								}
 							},
 							"book_meta": {
-								"label": "Buch Metadaten",
+								"label": "Buchmetadaten",
 								"attributes": {
 									"title": "Titel",
 									"summary": "Zusammenfassung",
 									"notes": "Anmerkungen",
 									"writers": "Autoren",
-									"pencillers": "Penciller",
-									"inkers": "Inker",
-									"letterers": "Letterer",
-									"editors": "Redakteure",
-									"publisher": "Herausgeber",
-									"colorists": "Colorist",
+									"pencillers": "Zeichner",
+									"inkers": "Zeichner",
+									"letterers": "Schriftsteller",
+									"editors": "Editoren",
+									"publisher": "Verlag",
+									"colorists": "Kolorist",
 									"links": "Links",
 									"characters": "Charaktere",
 									"teams": "Teams",
 									"genres": "Genre",
-									"coverArtists": "Cover Künstler"
+									"coverArtists": "Cover-Künstler"
 								}
 							},
 							"series": {
@@ -931,18 +935,18 @@
 								}
 							},
 							"series_meta": {
-								"label": "Serien Metadaten",
+								"label": "Serienmetadaten",
 								"attributes": {
 									"title": "Titel",
 									"summary": "Zusammenfassung",
-									"publisher": "Herausgeber",
-									"imprint": "Imprint",
-									"comicid": "Comic-ID",
+									"publisher": "Verlag",
+									"imprint": "Impressum",
+									"comicid": "Comic ID",
 									"booktype": "Buchtyp",
 									"status": "Status",
 									"volume": "Band",
 									"metaType": "Typ",
-									"ageRating": "Alterseinstufung"
+									"ageRating": "Altersfreigabe"
 								}
 							},
 							"library": {
@@ -960,11 +964,11 @@
 					},
 					"rangeValue": {
 						"from": {
-							"date": "Von",
+							"date": "Von Datum",
 							"number": "Von"
 						},
 						"to": {
-							"date": "Bis",
+							"date": "Bis Datum",
 							"number": "Bis"
 						},
 						"inclusive": "Einschließend"
@@ -979,24 +983,24 @@
 	},
 	"createSmartListScene": {
 		"heading": "Intelligente Liste erstellen",
-		"subtitle": "On-the-fly list creation based on a set of filters",
+		"subtitle": "Spontane Listenerstellung basiert auf eine Reihe von Filtern",
 		"form": {
 			"stepLabel": "Schritt",
 			"steps": [
 				{
-					"label": "Allgemein",
+					"label": "Allgemeines",
 					"heading": "Allgemeine Informationen",
-					"description": "The details of this smart list, including its name, description, and visibility"
+					"description": "Die Details dieser intelligenten Liste, einschließlich Name, Beschreibung und Sichtbarkeit"
 				},
 				{
 					"label": "Filter",
 					"heading": "Filter",
-					"description": "The filters to apply to this smart list"
+					"description": "Die Filter, welche zu dieser intelligenten Liste angewendet werden sollen"
 				},
 				{
 					"label": "Überprüfung",
 					"heading": "Überprüfung",
-					"description": "Review your smart list settings before creating it"
+					"description": "Überprüfe deine intelligente Listeneinstellung vor dem Erstellen"
 				}
 			],
 			"review": {
@@ -1029,25 +1033,25 @@
 				"placeholder": "Nie"
 			},
 			"expiresAt": {
-				"label": "Expires at",
-				"placeholder": "Never"
+				"label": "Verfällt am",
+				"placeholder": "Niemals"
 			},
 			"permissions": {
 				"inherit": {
-					"label": "Berechtigungen übernommen",
-					"description": "Die gleichen Berechtigungen wie Ihr Konto"
+					"label": "Berechtigungen erben",
+					"description": "Die gleichen Berechtigungen wie dein Konto"
 				},
 				"explicit": {
 					"label": "Explizite Berechtigungen",
-					"description": "Wählen Sie die Berechtigungen die dieser Schlüssel haben soll"
+					"description": "Wähle die Berechtigungen, die dieser Schlüssel haben soll"
 				}
 			}
 		},
-		"inheritDisclaimer": "Dieser API Schlüssel wird Ihre vollen Berechtigungen übernehmen, was bedeutet, dass er alles tun kann, was Sie tun können. Seien Sie vorsichtig mit dieser Einstellung"
+		"inheritDisclaimer": "Dieser API Schlüssel wird deine vollen Berechtigungen übernehmen, was bedeutet, dass er alles tun kann, was du kannst. Sei vorsichtig mit dieser Einstellung"
 	},
 	"userSmartListsScene": {
 		"heading": "Intelligente Listen",
-		"subtitle": "Deine bevorzugten Suchen und Filter, die zum einfachen Zugriff gespeichert wurden",
+		"subtitle": "Deine Lieblingssuchen und Filter gespeichert für einfachen Zugriff",
 		"searchPlaceholder": "Intelligente Listen filtern",
 		"buttons": {
 			"createSmartList": "Intelligente Liste erstellen"
@@ -1056,7 +1060,7 @@
 			"emptyState": {
 				"heading": "Keine intelligenten Listen zur Ansicht vorhanden",
 				"noListsMessage": "Erstelle eine intelligente Liste, um loszulegen",
-				"noMatchesMessage": "Versuche, deine Suchanfrage zu ändern"
+				"noMatchesMessage": "Versuche, deine Suche zu ändern"
 			},
 			"card": {
 				"meta": {
@@ -1089,14 +1093,14 @@
 		},
 		"access": {
 			"title": "Zugriff",
-			"description": "Legen Sie fest, wer auf diese Smart-Liste zugreifen kann",
+			"description": "Bestimme, wer auf diese Smart-Liste zugreifen kann",
 			"sections": {
 				"visibility": {
 					"confirmation": {
 						"public": "Dies wird die Liste für alle sichtbar machen",
 						"private": "Dies ändert die Liste zu privat, dadurch kann jeder, der Zugriff hat, nicht mehr diese sehen",
-						"shared": "Sie müssen die Liste mit bestimmten Benutzern teilen, um ihnen Zugriff zu gewähren",
-						"fallback": "Sind Sie sicher, dass Sie die Sichtbarkeit dieser Liste ändern möchten?"
+						"shared": "Du musst die Liste mit bestimmten Benutzern teilen, um ihnen Zugriff zu gewähren",
+						"fallback": "Bist du sicher, dass du die Sichtbarkeit dieser Liste ändern möchten?"
 					}
 				},
 				"accessManager": {
@@ -1106,21 +1110,21 @@
 		},
 		"filters": {
 			"title": "Filtergenerator",
-			"description": "Verwalten Sie die Filter, die diese intelligente Liste erstellen"
+			"description": "Verwalte die Filter, die diese intelligente Liste erstellen"
 		},
 		"danger-zone/delete": {
 			"title": "Löschaktionen",
-			"description": "Permanentes Löschen dieser intelligenten Liste und aller ihrer Inhalte oder bestimmter Ressourcen",
+			"description": "Dauerhaft diese intelligente Liste und all seine Inhalte oder gewisse Ressourcen löschen",
 			"sections": {
 				"deleteList": {
 					"heading": "Liste löschen",
 					"description": [
-						"Diese intelligente Liste und ihren gesamten Inhalt dauerhaft löschen.",
+						"Dauerhaft diese intelligente Liste und all seine Inhalte löschen.",
 						"Dieser Vorgang kann nicht rückgängig gemacht werden"
 					],
 					"confirmation": {
 						"title": "Liste löschen",
-						"description": "Möchten Sie diese intelligente Liste wirklich löschen?",
+						"description": "Bist du dir sicher, dass du diese intelligente Liste wirklich löschen möchtest?",
 						"confirm": "Liste löschen"
 					}
 				}
@@ -1148,7 +1152,7 @@
 					"customView": "Benutzerdefinierte Ansicht",
 					"defaultView": "Standardansicht",
 					"noViewsSaved": "Keine Ansichten gespeichert",
-					"selectView": "Gespeicherte Ansicht auswählen"
+					"selectView": "Eine gespeicherte Ansicht auswählen"
 				},
 				"filterDrawer": {
 					"heading": "Filter für intelligente Listen",
@@ -1166,8 +1170,8 @@
 					"placeholder": "Schnellfilter"
 				},
 				"viewManager": {
-					"updateSelected": "Auswahl aktualisieren",
-					"deleteSelected": "Delete view",
+					"updateSelected": "Ansicht aktualisieren",
+					"deleteSelected": "Ansicht löschen",
 					"create": "Neue Ansicht erstellen",
 					"modal": {
 						"heading": {
@@ -1176,26 +1180,26 @@
 						},
 						"description": {
 							"create": "Neue Ansicht für diese intelligente Liste erstellen",
-							"update": "Ansicht aktualisieren "
+							"update": "Die Ansicht aktualisieren"
 						},
 						"createForm": {
 							"name": {
 								"label": "Name",
 								"placeholder": "Meine Ansicht",
-								"description": "Ein eindeutiger Anzeigename für diese Ansicht"
+								"description": "Ein freundlicher Anzeigename um die Ansicht eindeutig zu bestimmen"
 							}
 						},
 						"updateForm": {
 							"name": {
 								"label": "Name",
 								"placeholder": "Meine Ansicht",
-								"description": "Der aktualisierte Name für diese Ansicht, falls gewünscht"
+								"description": "Der aktualisierte Name für diese Ansicht, falls erwünscht"
 							}
 						}
 					},
 					"deleteModal": {
-						"title": "Delete view",
-						"description": "Are you sure you want to delete this view?"
+						"title": "Ansicht löschen",
+						"description": "Bist du dir sicher, dass du die Ansicht löschen möchtest?"
 					}
 				}
 			}
@@ -1212,22 +1216,22 @@
 		},
 		"sidebar": {
 			"personal": {
-				"account": "Account",
-				"appearance": "Preferences",
-				"api keys": "API keys",
+				"account": "Konto",
+				"appearance": "Präferenzen",
+				"api keys": "API Schlüssel",
 				"reader": "Reader",
 				"desktop": "Desktop",
-				"label": "Personal"
+				"label": "Persönlich"
 			},
 			"management": {
-				"general": "Allgemein",
+				"general": "Server",
 				"logs": "Protokolle",
 				"users": "Benutzer",
-				"jobs": "Aufgaben",
+				"jobs": "Jobs",
 				"access": "Zugriff",
 				"email": "E-Mail",
 				"notifications": "Benachrichtigungen",
-				"label": "Management"
+				"label": "Verwaltung"
 			}
 		},
 		"app/account": {
@@ -1243,15 +1247,15 @@
 					"labels": {
 						"username": "Benutzername",
 						"password": "Passwort",
-						"activeChangesPrompt": "Es gibt ungespeicherte Änderungen"
+						"activeChangesPrompt": "Du hast ungespeicherte Änderungen"
 					},
 					"errors": {
-						"updateFailed": "Beim Aktualisieren des Profils ist ein Fehler aufgetreten. Bitte versuche es noch einmal"
+						"updateFailed": "Beim Aktualisieren deines Profils ist ein Fehler aufgetreten. Bitte versuche es noch einmal."
 					},
 					"avatarPicker": {
 						"heading": "Wähle dein Avatar-Bild",
-						"subtitle": "Stump unterstützt benutzerdefinierte Avatare, die durch die Angabe einer Bild-URL gesetzt werden können. Bild-Uploads werden nicht unterstützt, um die Datenmenge auf dem Server zu reduzieren.",
-						"preview": "Sobald eine Bild-URL eingegeben wurde erscheint hier eine Vorschau davon.",
+						"subtitle": "Stump unterstützt benutzerdefinierte Avatare, die durch die Angabe einer Bild URL gesetzt werden können. Hochladen von Bildern wird nicht unterstützt, um die Datenmenge auf dem Server zu reduzieren.",
+						"preview": "Eine Vorschaue wird erscheinen, sobald du eine URL eingegeben hast.",
 						"labels": {
 							"imageUrl": "Bild URL",
 							"customAvatar": "Benutzerdefinierter Avatar"
@@ -1274,7 +1278,7 @@
 					},
 					"heading": "Spracheinstellungen",
 					"subtitle": [
-						"Stump unterstützt mehrere Sprachen, die hierunter eingestellt werden können. Bitte hilf mit, die Qualität der ",
+						"Stump unterstützt mehrere Sprachen, die hierunter eingestellt werden können. Bitte überlege dir mitzuhelfen die Qualität von den",
 						"Stump-Übersetzungen ",
 						"zu verbessern, wenn du dazu in der Lage bist!"
 					]
@@ -1282,14 +1286,14 @@
 			}
 		},
 		"app/preferences": {
-			"helmet": "Darstellung",
-			"title": "Darstellung",
+			"helmet": "Präferenzen",
+			"title": "Präferenzen",
 			"description": "Passe das Aussehen und die Bedienung der Anwendung an",
 			"sections": {
 				"themeSelect": {
 					"label": "Design",
 					"description": [
-						"Wie ein eigenes Design erstellt werden kann, ist nachzulesen in der",
+						"Wie du ein eigenes Design erstellen kannst, ist nachzulesen in der",
 						"Dokumentation"
 					],
 					"options": {
@@ -1318,11 +1322,11 @@
 					"lock": "Anordnung sperren",
 					"unlock": "Anordnung entsperren",
 					"options": {
-						"HOME": "Home",
-						"EXPLORE": "Explore",
-						"LIBRARIES": "Libraries",
-						"BOOK_CLUBS": "Book clubs",
-						"SMART_LISTS": "Smart lists"
+						"HOME": "Startseite",
+						"EXPLORE": "Entdecken",
+						"LIBRARIES": "Bibliotheken",
+						"BOOK_CLUBS": "Buchclubs",
+						"SMART_LISTS": "Intelligente Listen"
 					},
 					"entityOptions": {
 						"createAction": {
@@ -1331,7 +1335,7 @@
 						},
 						"linkToAll": {
 							"label": "Alles anzeigen Link",
-							"help": "Ein Link zu einer Seite, die sich alle Elemente dieses Typs anzeigt"
+							"help": "Ein Link zu einer Seite, auf der alle Elemente dieses Typs anzeigt werden"
 						}
 					}
 				}
@@ -1340,7 +1344,7 @@
 		"app/apiKeys": {
 			"helmet": "API Schlüssel",
 			"title": "API Schlüssel",
-			"description": "Verwalten Sie Ihre generierten Stump API Schlüssel",
+			"description": "Verwalte deine generierten Stump API Schlüssel",
 			"shared": {
 				"fields": {
 					"name": "Name",
@@ -1358,7 +1362,7 @@
 					"description": "Eine detaillierte Ansicht dieses Schlüssels",
 					"unrestrictedKey": {
 						"heading": "Unbeschränkter Schlüssel",
-						"description": "Since you are the server owner, this key has unrestricted access when configured to inherit permissions. Please be careful."
+						"description": "Da du der Serverinhaber bist, hat dieser Schlüssel uneingeschränkten Zugriff, wenn er so konfiguriert ist, dass er die Berechtigungen übernimmt. Bitte sei vorsichtig."
 					}
 				},
 				"createKey": {
@@ -1366,27 +1370,27 @@
 						"trigger": "API Schlüssel erstellen",
 						"heading": {
 							"creating": "API Schlüssel erstellen",
-							"created": "erstellte Schlüssel"
+							"created": "Schlüssel erstellen"
 						},
 						"description": {
-							"creating": "API keys are long-lived credentials that can be used to authenticate with the API",
-							"created": "Your new API key has been created. Save the secret somewhere safe, as it will not be shown again"
+							"creating": "API Schlüssel sind langlebige Zugangsdaten, die zur Authentifizierung mit der API verwendet werden können",
+							"created": "Dein neuer API Schlüssel wurde erstellt. Speicher das Geheimnis irgendwo sicher ab, da es nicht wieder angezeigt wird"
 						},
-						"inheritDisclaimer": "Dieser API Schlüssel wird Ihre vollen Berechtigungen übernehmen, was bedeutet, dass er alles tun kann, was Sie tun können. Seien Sie vorsichtig mit dieser Einstellung",
-						"createdKey": "erstellte Schlüssel",
+						"inheritDisclaimer": "Dieser API Schlüssel wird deine vollen Berechtigungen übernehmen, was bedeutet, dass er alles tun kann, was du kannst. Sei vorsichtig mit dieser Einstellung",
+						"createdKey": "Erstellte Schlüssel",
 						"savedConfirm": "Ich habe meinen Schlüssel gespeichert",
 						"submit": "Schlüssel erstellen"
 					}
 				},
 				"table": {
-					"title": "Ihre Schlüssel",
-					"description": "Dies sind die API Schlüssel, die Sie erstellt haben",
+					"title": "Deine Schlüssel",
+					"description": "Dies sind die API Schlüssel, die du erstellt hast",
 					"actionMenu": {
-						"inspect": "Inspect",
+						"inspect": "Inspizieren",
 						"delete": "Löschen"
 					},
 					"empty": {
-						"title": "Sie haben noch keine API Schlüssel erstellt",
+						"title": "Du hast noch keine Schlüssel erstellt",
 						"action": "Erstelle einen API Schlüssel um loszulegen"
 					},
 					"noExpiration": "Kein Ablaufdatum gesetzt"
@@ -1394,15 +1398,15 @@
 			}
 		},
 		"app/reader": {
-			"helmet": "Reader-Einstellungen",
-			"title": "Reader-Einstellungen",
-			"description": "Standardeinstellungen für Stump Reader. Diese Einstellung betrifft nur das aktuelle Gerät",
+			"helmet": "Readereinstellungen",
+			"title": "Readereinstellungen",
+			"description": "Standardeinstellungen für den Stump Reader. Diese Einstellung betrifft nur das aktuelle Gerät",
 			"sections": {
 				"universal": {
 					"sections": {
 						"readingDirection": {
-							"label": "Reading direction",
-							"description": "The direction in which the reader will progress through pages"
+							"label": "Leserichtung",
+							"description": "Die Richtung, in der der Reader durch die Seiten blättert"
 						}
 					}
 				},
@@ -1411,39 +1415,39 @@
 					"description": "Comics, Mangas und andere bildbasierte Bücher",
 					"sections": {
 						"preloadAheadCount": {
-							"label": "Lade vorherige Seiten",
-							"description": "Die Anzahl der Seiten, vor der aktuellen Seite, die bereits vorab geladen werden sollen"
+							"label": "Vorder Vorladeanzahl",
+							"description": "Die Anzahl an Seiten, welche vor der aktuellen Seite vorgeladen werden soll"
 						},
 						"preloadBehindCount": {
-							"label": "Lade nächste Seiten",
-							"description": "Die Anzahl der Seiten, hinter der aktuellen Seite, die bereits vorab geladen werden sollen"
+							"label": "Hinter Vorladeanzahl",
+							"description": "Die Anzahl an Seiten, welche hinter der aktuellen Seite vorgeladen werden soll"
 						}
 					}
 				},
 				"textBasedBooks": {
-					"label": "Ebook reader",
-					"description": "Default settings for text-based books",
+					"label": "Ebook Reader",
+					"description": "Standardeinstellungen für textbasierte Bücher",
 					"sections": {
 						"fontSize": {
-							"label": "Font size",
-							"description": "The size of the font used in the reader"
+							"label": "Schriftgröße",
+							"description": "Die Größe der im Reader verwendeten Schriftart"
 						},
 						"fontFamily": {
-							"label": "Font family",
-							"description": "The font used in the reader"
+							"label": "Schriftfamilie",
+							"description": "Die im Reader verwendete Schriftart"
 						},
 						"lineHeight": {
-							"label": "Line height",
-							"description": "The height of the lines in the reader"
+							"label": "Zeilenhöhe",
+							"description": "Die Höhe der Zeilen im Reader"
 						}
 					}
 				},
 				"data": {
 					"sections": {
 						"clearStore": {
-							"label": "Clear preferences",
-							"description": "Reset all individual book settings that override the defaults",
-							"button": "Clear preferences"
+							"label": "Präferenzen löschen",
+							"description": "Zurücksetzen aller individuellen Bucheinstellungen, die die Standardwerte überschreiben",
+							"button": "Präferenzen löschen"
 						}
 					}
 				}
@@ -1456,7 +1460,7 @@
 			"sections": {
 				"configuredServers": {
 					"label": "Konfigurierte Server",
-					"description": "Liste der Stump-Server, mit denen sich verbunden werden kann",
+					"description": "Liste der Stump Server, mit denen sich verbunden werden kann",
 					"getStarted": "Server hinzufügen, um loszulegen",
 					"unreachableServer": {
 						"tooltip": "Server nicht erreichbar"
@@ -1473,12 +1477,12 @@
 						"fields": {
 							"name": {
 								"label": "Name",
-								"description": "Der Anzeigename für diesen Server",
+								"description": "Ein freundlicher Name um diesen Server zu identifizieren",
 								"placeholder": "Mein Server"
 							},
 							"uri": {
-								"label": "URI",
-								"description": "Die URL des Stump-Servers",
+								"label": "URL",
+								"description": "Die URL des Stump Servers",
 								"placeholder": "https://stump.example.com"
 							}
 						}
@@ -1486,7 +1490,7 @@
 					"addServer": {
 						"trigger": "Server hinzufügen",
 						"title": "Neuen Server hinzufügen",
-						"description": "Einen neuen Stump-Server zur Desktopanwendung hinzufügen",
+						"description": "Einen neuen Stump Server zur Desktopanwendung hinzufügen",
 						"confirm": "Server hinzufügen"
 					},
 					"editServer": {
@@ -1530,45 +1534,45 @@
 						}
 					},
 					"resetTokens": {
-						"label": "Authentifizierung löschen",
+						"label": "Tokens löschen",
 						"description": [
-							"Entfernen Sie alle sicher gespeicherten Zugriffstoken für Ihre Server",
-							"Sie werden sich mit jedem Server erneut authentifizieren müssen"
+							"Entferne alle sicher gespeicherten Zugriffstoken für deine Server, inklusive API Schlüssel",
+							"Du wirst dich mit jedem Server erneut authentifizieren müssen und/oder jeden Server neu konfigurieren"
 						],
 						"confirmation": {
-							"trigger": "Authentifizierung löschen",
-							"title": "Authentifizierung löschen",
-							"description": "Dies wird alle Ihre sicher gespeicherten Zugriffstoken für Ihre Server entfernen",
-							"confirm": "Authentifizierung löschen"
+							"trigger": "Tokens löschen",
+							"title": "Tokens löschen",
+							"description": "Bist du dir sicher, dass du alle gespeicherten Tokens löschen möchtest?",
+							"confirm": "Tokens löschen"
 						}
 					}
 				},
 				"optionalFeatures": {
 					"label": "Optionale Funktionen",
-					"description": "Verwalte optionale Funktionen der Desktopanwendung",
+					"description": "Verwalte optionale Funktionen einzigartig zu der Desktopanwendung",
 					"bundledServer": {
 						"label": "Gebündelte Server",
 						"description": "Führe den gebündelten Server im Hintergrund aus, während die Desktopanwendung läuft (Neustart erforderlich)"
 					},
 					"discordPresence": {
-						"label": "Discord Präsenz",
-						"description": "Zeige deine Stump-Aktivität in Discord mit Discord Rich Presence",
-						"reconnect": "Erneut mit Discord verbinden"
+						"label": "Discord Presence",
+						"description": "Zeige deine Stump Aktivität in Discord mit Discord Rich Presence",
+						"reconnect": "Wieder mit Discord verbinden"
 					}
 				}
 			}
 		},
 		"server/general": {
-			"helmet": "Allgemeine Servereinstellungen",
-			"title": "Allgemeine Einstellungen",
-			"description": "Allgemeine Einstellungen von Ihrer Stump-Serverinstanz",
+			"helmet": "Servereinstellungen",
+			"title": "Einstellungen",
+			"description": "Allgemeine Einstellungen von Ihrer Stump Serverinstanz",
 			"sections": {
 				"updateAvailable": {
 					"message": "Dein Server ist nicht aktuell. Bitte aktualisiere auf die neueste Version!"
 				},
 				"serverInfo": {
 					"title": "Serverinformation",
-					"description": "Grundlegende Informationen über diese Sump-Serverinstanz",
+					"description": "Allgemeine Informationen über diese Sump Serverinstanz",
 					"build": {
 						"label": "Build",
 						"description": "Versions- und Build-Details",
@@ -1579,10 +1583,10 @@
 						}
 					},
 					"nonStableChannel": {
-						"title": "You are running a non-stable build of Stump",
+						"title": "Du führst eine instabile Version von Stump aus",
 						"description": [
-							"It looks like you are running the",
-							"build channel"
+							"Es scheint als ob, du den",
+							"Build Channel ausführst"
 						]
 					}
 				},
@@ -1595,10 +1599,10 @@
 		"server/logs": {
 			"helmet": "Protokolle",
 			"title": "Protokolle",
-			"description": "Von der Stump-Serverinstanz generierte Protokolle",
+			"description": "Die Protokolle generiert von der Stump Serverinstanz",
 			"sections": {
 				"persistedLogs": {
-					"title": "Dauerhafte Protokolle",
+					"title": "Gespeicherte Protokolle",
 					"description": "Diese Protokolle wurden manuell in der Datenbank gespeichert, normalerweise durch einen bestimmten Job oder Ereignis",
 					"table": {
 						"columns": {
@@ -1607,77 +1611,77 @@
 							"timestamp": "Zeitstempel"
 						},
 						"emptyHeading": "Keine Protokolle zur Ansicht verfügbar",
-						"emptySubtitle": "Es ist entweder alles in Ordnung oder es besteht ein größeres Problem mit dem Server"
+						"emptySubtitle": "Dein Server ist entweder in einem sehr guten oder sehr schlechten Zustand"
 					},
 					"deleteLogs": {
-						"title": "Delete logs",
-						"description": "Permanently delete all persisted logs from the database",
-						"disclaimer": "This action cannot be undone",
-						"confirm": "Delete logs"
+						"title": "Protokolle löschen",
+						"description": "Dauerhaft alle gespeicherten Protokolle von der Datenbank löschen",
+						"disclaimer": "Diese Aktion kann nicht rückgängig gemacht werden",
+						"confirm": "Protokolle löschen"
 					}
 				},
 				"liveLogs": {
 					"title": "Live-Protokoll-Feed",
-					"description": "Direkt und in Echtzeit gestreamt aus der Stump-Serverinstanz"
+					"description": "Direkt und in Echtzeit gestreamt von deiner Stump Serverinstanz"
 				}
 			}
 		},
 		"server/jobs": {
-			"helmet": "Aufgaben",
-			"title": "Aufgaben",
-			"description": "Hintergrundaufgaben, die in der Stump-Serverinstanz ausgeführt werden",
+			"helmet": "Jobs",
+			"title": "Jobs",
+			"description": "Hintergrundjobs, die auf deiner Stump Serverinstanz ausgeführt werden",
 			"sections": {
 				"scheduling": {
-					"title": "Planung",
-					"description": "Einige Aufgaben können so konfiguriert werden, dass sie nach einem Zeitplan ausgeführt werden. Änderungen an dieser Konfiguration werden erst nach einem Neustart des Servers wirksam",
-					"disclaimer": "The job scheduler is really basic and will be improved in the future. Please reach out for feedback or suggestions!",
+					"title": "Geplante Jobs",
+					"description": "Einige Jobs können so konfiguriert werden, dass sie automatisch nach einem Zeitplan ausgeführt werden",
+					"disclaimer": "Der Jobplaner ist sehr einfach und wird in der Zukunft verbessert. Bitte teile uns dein Feedback oder deine Vorschläge mit!",
 					"createOrUpdateConfig": {
 						"fields": {
 							"intervalSecs": {
-								"label": "Interval",
-								"description": "How often the job should run (in seconds)",
-								"placeholder": "e.g. \"86400\" for once a day"
+								"label": "Intervall",
+								"description": "Wie oft der Job ausgeführt werden soll (in Sekunden)",
+								"placeholder": "z.B. \"86400\" für einmal am Tag"
 							},
 							"intervalPreset": {
-								"label": "Preset",
+								"label": "Voreinstellung",
 								"options": {
-									"everySixHours": "Every 6 hours",
-									"everyTwelveHours": "Every 12 hours",
-									"oncePerDay": "Once a day",
-									"oncePerWeek": "Once a week",
-									"oncePerMonth": "Once a month"
+									"everySixHours": "Alle 6 Stunden",
+									"everyTwelveHours": "Alle 12 Stunden",
+									"oncePerDay": "Einmal am Tag",
+									"oncePerWeek": "Einmal pro Woche",
+									"oncePerMonth": "Einmal pro Monat"
 								}
 							},
 							"includedLibraryIds": {
-								"label": "Included libraries",
-								"description": "Choose which libraries are included"
+								"label": "Beinhaltete Bibliotheken",
+								"description": "Wähle aus, welche Bibliotheken beinhalten werden"
 							}
 						},
-						"restartRequired": "Changes to this configuration will take effect after a server restart"
+						"restartRequired": "Änderungen an dieser Konfiguration werden nach einem Neustart des Servers wirksam"
 					}
 				},
 				"history": {
 					"title": "Verlauf",
-					"description": "Eine Aufzeichnung der Aufträge, die auf der Stump-Serverinstanz ausgeführt wurden",
+					"description": "Eine Aufzeichnung der Jobs, die auf der Stump Serverinstanz ausgeführt wurden",
 					"table": {
 						"columns": {
 							"name": "Typ",
 							"description": "Beschreibung",
 							"status": "Status",
-							"createdAt": "Startzeitpunkt",
+							"createdAt": "Gestartet am",
 							"elapsed": "Dauer",
 							"tasks": "Aufgabe"
 						},
-						"emptyHeading": "Keine Aufgaben zur Ansicht verfügbar",
-						"emptySubtitle": "Es gibt aktuell keine Aufgaben",
-						"deleteAllMessage": "Der Aufgabenverlauf und Statistiken können jederzeit aus der Datenbank gelöscht werden. Diese Aktion kann nicht rückgängig gemacht werden"
+						"emptyHeading": "Keine Jobs zur Ansicht verfügbar",
+						"emptySubtitle": "Du kannst keinen Job haben, falls du keinen Job hast",
+						"deleteAllMessage": "Jobverlauf und Statistiken können jederzeit aus der Datenbank gelöscht werden. Diese Aktion kann nicht rückgängig gemacht werden"
 					},
 					"deleteJobHistory": {
-						"title": "Delete job history",
-						"description": "Permanently delete all job history from the database",
-						"confirmText": "Are you sure you want to delete all job history?",
-						"confirm": "Delete",
-						"emptyState": "No jobs to clear"
+						"title": "Jobverlauf löschen",
+						"description": "Dauerhaft alle Jobverläufe von der Datenbank löschen",
+						"confirmText": "Bist du dir sicher, dass du den ganzen Jobverlauf löschen möchtest?",
+						"confirm": "Löschen",
+						"emptyState": "Keine Jobs zum Löschen"
 					}
 				}
 			}
@@ -1705,17 +1709,17 @@
 					],
 					"ageRestriction": {
 						"label": "Altersbeschränkung",
-						"description": "Hindert den Zugriff des Benutzers auf Inhalte mit einer Altersfreigabe, die über der Einstellung liegt",
+						"description": "Hindert den Zugriff des Benutzers auf Inhalte mit einer Altersbeschränkung, die über der Einstellung liegt",
 						"placeholder": "13",
 						"enforceUnset": {
-							"label": "Kein Zugriff auf Inhalte mit fehlender Altersfreigabe",
-							"description": "Wenn aktiviert, wird Benutzern der Zugriff auf Inhalte ohne Altersfreigabe verwehrt"
+							"label": "Kein Zugriff auf nicht gesetzte",
+							"description": "Wenn aktiviert, wird Benutzern der Zugriff auf Inhalte ohne Altersbeschränkung verwehrt"
 						}
 					},
 					"tagRestriction": {
-						"label": "Schlagworteinschränkungen",
-						"description": "Hindert den Zugriff des Benutzers auf Inhalte mit den ausgewählten Schlagworten",
-						"placeholder": "Adult, Gore"
+						"label": "Tageinschränkungen",
+						"description": "Hindert den Zugriff des Benutzers auf Inhalte mit den ausgewählten Tags",
+						"placeholder": "Erwachsen, Gewalt"
 					}
 				},
 				"permissions": {
@@ -1727,12 +1731,12 @@
 					"bookclub": {
 						"label": "Buchclubs",
 						"read": {
-							"label": "Auf Buchclub-Funktionen zugreifen",
-							"description": "Erlaubt dem Benutzer den Zugriff auf die Buchclub-Funktionen, einschließlich der Anzeige und Teilnahme an Buchclubs"
+							"label": "Zugriff auf Buchclubfunktionen",
+							"description": "Erlaubt dem Benutzer den Zugriff auf die Buchclubfunktionen, einschließlich der Ansicht und Teilnahme an Buchclubs"
 						},
 						"create": {
 							"label": "Buchclubs erstellen",
-							"description": "Erlaubt dem Benutzer, neue Buchclubs zu erstellen"
+							"description": "Erlaube dem Benutzer, neue Buchclubs zu erstellen"
 						}
 					},
 					"feature": {
@@ -1743,14 +1747,14 @@
 						},
 						"koreader_sync": {
 							"label": "KoReader Synchronisierung",
-							"description": "Erlaube dem Benutzer auf die KoReader-Synchronisierungsintegration zuzugreifen"
+							"description": "Erlaube dem Benutzer auf die KoReader Synchronisierungsintegration zuzugreifen"
 						}
 					},
 					"file": {
 						"label": "Dateiverwaltung",
 						"explorer": {
 							"label": "Dateiexplorer",
-							"description": "Erlaubt dem Benutzer den Zugang zu den verschiedenen Dateiexplorern.\nDie Inhaltsbeschränkung kann nicht garantiert werden, wenn diese Funktion gewährt wird"
+							"description": "Erlaubt dem Benutzer den Zugang zu den verschiedenen Dateiexplorer.\nDie Inhaltsbeschränkung kann nicht garantiert werden, wenn diese Funktion gewährt wird"
 						},
 						"download": {
 							"label": "Dateien herunterladen",
@@ -1777,13 +1781,13 @@
 						}
 					},
 					"email": {
-						"label": "E-Mails",
+						"label": "E-Mailing",
 						"send": {
 							"label": "E-Mails senden",
 							"description": "Erlaubt dem Benutzer, E-Mails vom Server an alle konfigurierten Aliase zu senden"
 						},
 						"arbitrary_send": {
-							"label": "An beliebige E-Mail senden",
+							"label": "Beliebige E-Mails senden",
 							"description": "Erlaubt dem Benutzer, E-Mails vom Server an eine beliebige E-Mail-Adresse zu senden"
 						}
 					},
@@ -1847,23 +1851,23 @@
 			},
 			"loginActivity": {
 				"deleteConfirmation": {
-					"title": "Delete activity",
-					"description": "All records of login activity will be permanently deleted from the database",
-					"confirm": "Delete"
+					"title": "Aktivität löschen",
+					"description": "Alle Aufzeichnungen der Login-Aktivitäten werden dauerhaft von der Datenbank gelöscht",
+					"confirm": "Löschen"
 				}
 			}
 		},
 		"server/email": {
 			"helmet": "E-Maileinstellungen",
 			"title": "E-Mail",
-			"description": "Einstellungen für die Konfiguration eines SMTP-Servers für Ihre Stump-Serverinstanz",
+			"description": "Einstellungen für die Konfiguration eines SMTP Mailserver für deine Stump Serverinstanz",
 			"sections": {
 				"emailers": {
-					"title": "SMTP- Server",
-					"description": "Die Clients die für den Versand von E-Mails aus der Stump-Serverinstanz konfiguriert wurden",
+					"title": "SMTP Mailserver",
+					"description": "Die Clients die für den Versand von E-Mails aus der Stump Serverinstanz konfiguriert wurden",
 					"singleInstanceDisclaimer": "Während Stump mehrere SMTP-Konfigurationen im Backend unterstützt, kann jedoch nur eine auf der Benutzeroberfläche konfiguriert werden. Dies wird in Zukunft verbessert werden",
 					"list": {
-						"emptyHeading": "Keine SMTP-Server konfiguriert",
+						"emptyHeading": "Keine SMTP Mailserver konfiguriert",
 						"primaryEmailer": "Primärer Mailserver",
 						"sendHistory": {
 							"heading": "Sendeverlauf",
@@ -1873,7 +1877,7 @@
 									"to": "An",
 									"subject": "Betreff",
 									"status": "Status",
-									"createdAt": "Gesendet um"
+									"createdAt": "Gesendet am"
 								}
 							},
 							"emptyHeading": "Kein Verlauf",
@@ -1883,7 +1887,7 @@
 				},
 				"devices": {
 					"title": "E-Mail Geräte",
-					"description": "The device aliases you have configured for receiving emails from your Stump server instance",
+					"description": "Die Gerätealiase, die konfiguriert wurden, um E-Mails von deiner Stump Serverinstanz zu erhalten",
 					"addDevice": "Gerätealias hinzufügen",
 					"addOrUpdateDevice": {
 						"title": {
@@ -1892,11 +1896,11 @@
 						},
 						"name": {
 							"label": "Name",
-							"description": "Ein eindeutiger Anzeigename für diesen Gerätealias"
+							"description": "Ein freundlicher Anzeigename um diesen Gerätealias eindeutig zu bestimmen"
 						},
 						"email": {
 							"label": "E-Mail",
-							"description": "Die E-Mail-Adresse, mit der dieser Alias verknüpft wir"
+							"description": "Die E-Mail-Adresse, mit der dieser Alias verknüpft wird"
 						},
 						"forbidden": {
 							"label": "Verboten",
@@ -1916,14 +1920,14 @@
 			"createOrUpdateForm": {
 				"name": {
 					"label": "Name",
-					"description": "Ein eindeutiger Anzeigename für diesen E-Mailserver"
+					"description": "Ein freundlicher Anzeigename um diesen Mailserver eindeutig zu bestimmen"
 				},
 				"smtpSettings": {
 					"heading": "SMTP-Einstellungen",
 					"description": "Die SMTP-Einstellungen für diesen Mailserver"
 				},
 				"smtpProvider": {
-					"label": "Voreingestellte SMPT-Anbieter",
+					"label": "Voreingestellte SMTP-Anbieter",
 					"description": "Der Anbieter des SMTP-Servers. Dieser wird verwendet, um einige gängige Einstellungen auszufüllen. Es werden jedoch nicht alle Anbieter aufgelistet"
 				},
 				"smtpHost": {
@@ -1944,7 +1948,7 @@
 				},
 				"password": {
 					"label": "Passwort",
-					"description": "Das Passwort für die Authentifizierung mit dem SMTP-Server. Bei der Verwendung von Gmail muss möglicherweise ein app-spezifisches Passwort generiert werden"
+					"description": "Das Passwort für die Authentifizierung mit dem SMTP-Server. Bei der Verwendung von Gmail muss möglicherweise ein App-spezifisches Passwort generiert werden"
 				},
 				"senderSettings": {
 					"heading": "Absender-Einstellungen",
@@ -1972,9 +1976,9 @@
 				}
 			},
 			"createEmailer": {
-				"helmet": "Mailserver hinzufügen",
-				"title": "Mailserver hinzufügen",
-				"description": "Fügt einen neuen SMTP-Mailserver für diese Stump-Serverinstanz hinzu"
+				"helmet": "Mailserver erstellen",
+				"title": "Mailserver erstellen",
+				"description": "Erstelle einen neuen SMTP-Mailserver für diese Stump Serverinstanz hinzu"
 			},
 			"updateEmailer": {
 				"helmet": "Mailserver aktualisieren",
@@ -1984,11 +1988,11 @@
 		}
 	},
 	"jobOverlay": {
-		"backupHeading": "Aufgabe in Bearbeitung"
+		"backupHeading": "Job in Bearbeitung"
 	},
 	"libraryStats": {
-		"seriesCount": "Serien Gesamt",
-		"bookCount": "Bücher Gesamt",
+		"seriesCount": "Totale Anzahl Serien",
+		"bookCount": "Totale Anzahl Bücher",
 		"diskUsage": "Speichernutzung"
 	},
 	"noLibraries": {
@@ -1996,7 +2000,7 @@
 		"messagePrefix": "Du kannst nicht sehen, was du nicht hast",
 		"message": {
 			"create": "Erstelle eine Bibliothek um loszulegen",
-			"wait": "Sobald Bibliotheken erstellt wurden, werden sie hier angezeigt"
+			"wait": "Sobald Bibliotheken erstellt werden, werden sie hier angezeigt"
 		},
 		"links": {
 			"create": "Bibliothek erstellen",
@@ -2009,7 +2013,7 @@
 			"previous": "Zurück"
 		},
 		"popover": {
-			"heading": "Gehe zu Seite",
+			"heading": "Gehe zur Seite",
 			"buttons": {
 				"confirm": "Los",
 				"cancel": "Abbrechen"
@@ -2062,10 +2066,10 @@
 	"serverSOS": {
 		"heading": "Server nicht erreichbar",
 		"desktop": {
-			"message": "Ein Netzwerkfehler ist aufgetreten, der darauf hindeutet, dass der Stump-Server derzeit nicht verfügbar ist. Bitte stelle sicher, dass er läuft und von diesem Gerät aus erreichbar ist.\nWenn sich die Server-URL geändert hat, kann sie mit dem untenstehenden Formular aktualisiert werden"
+			"message": "Ein Netzwerkfehler ist aufgetreten, der darauf hindeutet, dass der Stump Server derzeit nicht verfügbar ist. Bitte stelle sicher, dass er läuft und von diesem Gerät aus erreichbar ist.\nWenn sich die Server-URL geändert hat, kann sie mit dem untenstehenden Formular aktualisiert werden"
 		},
 		"web": {
-			"message": "Ein Netzwerkfehler ist aufgetreten, der darauf hindeutet, dass der Stump-Server derzeit nicht verfügbar ist. Bitte stelle sicher, dass er läuft und von diesem Gerät aus erreichbar ist"
+			"message": "Ein Netzwerkfehler ist aufgetreten, der darauf hindeutet, dass der Stump Server derzeit nicht verfügbar ist. Bitte stelle sicher, dass er läuft und von diesem Gerät aus erreichbar ist"
 		},
 		"reconnected": "Verbindung zum Server wiederhergestellt! Weiterleiten...",
 		"reconnectionFailed": "Etwas ist schiefgelaufen!"
@@ -2074,8 +2078,8 @@
 		"heading": "Server ist nicht verbunden",
 		"message": [
 			"Bitte die Internetverbindung überprüfen",
-			"Hier klicken,",
-			"um die Server-URL zu ändern"
+			"Hier klicken",
+			", um die Server URL zu ändern"
 		]
 	},
 	"slidingList": {
@@ -2086,8 +2090,8 @@
 		}
 	},
 	"tagSelect": {
-		"placeholder": "Schlagwort auswählen oder erstellen",
-		"placeholderNoTags": "Keine Schlagworte vorhanden"
+		"placeholder": "Tag auswählen oder erstellen",
+		"placeholderNoTags": "Keine Tags vorhanden"
 	},
 	"thumbnailDropdown": {
 		"label": "Vorschaubild auswählen",
@@ -2105,7 +2109,7 @@
 		"add": "Hinzufügen",
 		"cancel": "Abbrechen",
 		"confirm": "Bestätigen",
-		"delete": "Delete",
+		"delete": "Löschen",
 		"enter": "Enter",
 		"save": "Speichern",
 		"send": "Absenden",
@@ -2116,8 +2120,8 @@
 		"update": "Aktualisieren",
 		"upload": "Hochladen",
 		"uploading": "Wird hochgeladen",
-		"unimplemented": "Diese Funktion ist noch nicht implementiert! Schaue später wieder vorbei",
-		"limitedFunctionality": "Das hier ist noch nicht vollständig implementiert und es fehlen noch ein paar Funktionen! Schaue später wieder vorbei",
+		"unimplemented": "Diese Funktionalität ist noch nicht implementiert! Schaue später wieder vorbei",
+		"limitedFunctionality": "Das ist noch nicht vollständig implementiert und es fehlen noch ein paar Funktionen! Schaue später wieder vorbei",
 		"logIn": "Anmelden",
 		"login": "Login",
 		"seeError": "Fehler anzeigen",
@@ -2127,133 +2131,133 @@
 		"notReady": "Diese Funktion ist noch nicht bereit",
 		"notUsedYet": "Noch nicht verwendet",
 		"never": "Nie",
-		"scan": "Scan",
-		"somethingWentWrong": "Something went wrong"
+		"scan": "Scannen",
+		"somethingWentWrong": "Etwas ist falsch gelaufen"
 	},
 	"userPermissions": {
 		"ACCESS_API_KEYS": {
-			"label": "API keys",
-			"description": "Allows the user to manage their own API keys"
+			"label": "API Schlüssel",
+			"description": "Erlaubt dem Benutzer seine eigenen API Schlüssel zu verwalten"
 		},
 		"ACCESS_BOOK_CLUB": {
-			"label": "Book Clubs",
-			"description": "Allows the user to access book club features, including viewing and joining book clubs"
+			"label": "Buchclubs",
+			"description": "Erlaubt dem Benutzer den Zugriff auf die Buchclubfunktionen, einschließlich der Ansicht und Teilnahme an Buchclubs"
 		},
 		"ACCESS_KOREADER_SYNC": {
-			"label": "KoReader sync",
-			"description": "Allows the user to access the KoReader sync integration"
+			"label": "KoReader Synchronisierung",
+			"description": "Erlaubt dem Benutzer auf die KoReader Synchronisierungsintegration zuzugreifen"
 		},
 		"ACCESS_SMART_LIST": {
-			"label": "Smart Lists",
-			"description": "Allows the user to access smart list features, including creating and managing smart lists"
+			"label": "Intelligente Listen",
+			"description": "Erlaubt dem Benutzer den Zugriff auf Funktionen der intelligenten Listen, inklusive Erstellung und Verwaltung von intelligenten Listen"
 		},
 		"CREATE_BOOK_CLUB": {
-			"label": "Create book clubs",
-			"description": "Allows the user to create new book clubs"
+			"label": "Buchclubs erstellen",
+			"description": "Erlaubt dem Benutzer neue Buchclubs zu erstellen"
 		},
 		"CREATE_LIBRARY": {
-			"label": "Create libraries",
-			"description": "Allows the user to create new libraries"
+			"label": "Bibliotheken erstellen",
+			"description": "Erlaubt dem Benutzer neue Bibliotheken zu erstellen"
 		},
 		"CREATE_NOTIFIER": {
-			"label": "Create notifiers",
-			"description": "Allows the user to create new notification systems"
+			"label": "Benachrichtigungen erstellen",
+			"description": "Erlaubt dem Benutzer neue Benachrichtigungssysteme zu erstellen"
 		},
 		"DELETE_LIBRARY": {
-			"label": "Delete libraries",
-			"description": "Allows the user to delete existing libraries"
+			"label": "Bibliotheken löschen",
+			"description": "Erlaubt dem Benutzer bestehende Bibliotheken zu löschen"
 		},
 		"DELETE_NOTIFIER": {
-			"label": "Delete notifiers",
-			"description": "Allows the user to delete notification systems"
+			"label": "Benachrichtigungen löschen",
+			"description": "Erlaubt dem Benutzer Benachrichtigungssysteme zu löschen"
 		},
 		"DOWNLOAD_FILE": {
-			"label": "Download files",
-			"description": "Allows the user to download files from the server"
+			"label": "Dateien herunterladen",
+			"description": "Erlaubt dem Benutzer Dateien vom Server herunterzuladen"
 		},
 		"EDIT_LIBRARY": {
-			"label": "Edit libraries",
-			"description": "Allows the user to modify existing libraries"
+			"label": "Bibliotheken bearbeiten",
+			"description": "Erlaubt dem Benutzer bestehende Bibliotheken zu bearbeiten"
 		},
 		"EMAILER_CREATE": {
-			"label": "Create emailer",
-			"description": "Allows the user to create email configuration"
+			"label": "Mailserver erstellen",
+			"description": "Erlaubt dem Benutzer E-Mail-Konfiguration zu erstellen"
 		},
 		"EMAILER_MANAGE": {
-			"label": "Manage emailer",
-			"description": "Allows the user to manage email configuration and settings"
+			"label": "Mailserver verwalten",
+			"description": "Erlaubt dem Benutzer E-Mail-Konfiguration und Einstellung zu bearbeiten"
 		},
 		"EMAILER_READ": {
-			"label": "Read emailer",
-			"description": "Allows the user to view email configuration"
+			"label": "Mailserver lesen",
+			"description": "Erlaubt dem Benutzer E-Mail-Konfiguration anzusehen"
 		},
 		"EMAIL_ARBITRARY_SEND": {
-			"label": "Send arbitrary emails",
-			"description": "Allows the user to send custom emails to any address"
+			"label": "Beliebige E-Mails senden",
+			"description": "Erlaubt dem Benutzer eigene E-Mails an jede Adresse zu senden"
 		},
 		"EMAIL_SEND": {
-			"label": "Send emails",
-			"description": "Allows the user to send emails through the system"
+			"label": "E-Mails senden",
+			"description": "Erlaubt dem Benutzer E-Mails über das System zu senden"
 		},
 		"FILE_EXPLORER": {
-			"label": "File explorer",
-			"description": "Allows the user to browse and explore the server filesystem"
+			"label": "Dateiexplorer",
+			"description": "Erlaubt dem Benutzer das Dateisystem des Servers zu durchsuchen und zu erkunden"
 		},
 		"MANAGE_LIBRARY": {
-			"label": "Manage libraries",
-			"description": "Allows the user to manage library settings and configuration"
+			"label": "Bibliotheken verwalten",
+			"description": "Erlaubt dem Benutzer die Bibliothekseinstellungen und -konfiguration zu verwalten"
 		},
 		"MANAGE_NOTIFIER": {
-			"label": "Manage notifiers",
-			"description": "Allows the user to manage notification system settings"
+			"label": "Benachrichtigungen verwalten",
+			"description": "Erlaubt dem Benutzer Benachrichtigungssystemeinstellungen zu verwalten"
 		},
 		"MANAGE_SERVER": {
-			"label": "Manage server",
-			"description": "Allows the user to manage server configuration and settings"
+			"label": "Server verwalten",
+			"description": "Erlaubt dem Benutzer Serverkonfiguration und Einstellung zu bearbeiten"
 		},
 		"MANAGE_USERS": {
-			"label": "Manage users",
-			"description": "Allows the user to create, edit, and delete user accounts"
+			"label": "Benutzer verwalten",
+			"description": "Erlaubt dem Benutzer Benutzerkonten zu erstellen, bearbeiten und löschen"
 		},
 		"READ_JOBS": {
-			"label": "Read jobs",
-			"description": "Allows the user to view system jobs and their status"
+			"label": "Jobs lesen",
+			"description": "Erlaubt dem Benutzer die Einsicht von Systemjobs und deren Status"
 		},
 		"READ_NOTIFIER": {
-			"label": "Read notifiers",
-			"description": "Allows the user to view notification system configuration"
+			"label": "Benachrichtigungen lesen",
+			"description": "Erlaubt dem Benutzer Benachrichtigungssystemeinstellungen anzusehen"
 		},
 		"READ_PERSISTED_LOGS": {
-			"label": "Read persisted logs",
-			"description": "Allows the user to view stored system logs"
+			"label": "Gespeicherte Protokolle lesen",
+			"description": "Ermöglicht dem Benutzer gespeicherte Systemprotokolle anzusehen"
 		},
 		"READ_SYSTEM_LOGS": {
-			"label": "Read system logs",
-			"description": "Allows the user to view real-time system logs"
+			"label": "Systemprotokolle lesen",
+			"description": "Ermöglicht dem Benutzer Echtzeit Systemprotokolle anzusehen"
 		},
 		"READ_USERS": {
-			"label": "Read users",
-			"description": "Allows the user to view user account information"
+			"label": "Benutzer lesen",
+			"description": "Erlaubt dem Benutzer Benutzerkontoinformationen anzusehen"
 		},
 		"SCAN_LIBRARY": {
-			"label": "Scan libraries",
-			"description": "Allows the user to trigger library scans to discover new content"
+			"label": "Bibliotheken scannen",
+			"description": "Erlaubt dem Benutzer Bibliotheksscans auszulösen, um neue Inhalte zu entdecken"
 		},
 		"UPLOAD_FILE": {
-			"label": "Upload files",
-			"description": "Allows the user to upload files to the server"
+			"label": "Dateien hochladen",
+			"description": "Erlaubt dem Benutzer Dateien auf den Server hochzuladen"
 		},
 		"MANAGE_JOBS": {
-			"label": "Manage jobs",
-			"description": "Allows the user to manage any queued jobs"
+			"label": "Jobs verwalten",
+			"description": "Erlaubt dem Benutzer alle Jobs in der Warteschlange zu verwalten"
 		},
 		"EDIT_METADATA": {
-			"label": "Edit metadata",
-			"description": "Allows the user to edit metadata for books and series"
+			"label": "Metadaten bearbeiten",
+			"description": "Erlaubt dem Benutzer Metadaten für Bücher und Serien zu bearbeiten"
 		},
 		"WRITE_BACK_METADATA": {
-			"label": "Write back metadata",
-			"description": "Allows the user to write metadata changes back to the source files"
+			"label": "Metadaten zurückschreiben",
+			"description": "Erlaubt dem Benutzer Metadatenänderungen zurück auf die Quelldateien zu schreiben"
 		}
 	}
 }

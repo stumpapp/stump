@@ -107,6 +107,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 					assets: ['./assets/images', './assets/splash'],
 				},
 			],
+			['expo-localization'],
 			['./plugins/withGradle.ts'],
 			['./plugins/withNetworkSecurityConfig.ts'],
 			[

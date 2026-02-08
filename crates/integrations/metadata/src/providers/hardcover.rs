@@ -8,7 +8,7 @@ use crate::{
 		ExternalMediaMetadata, ExternalSeriesMetadata, MatchCandidate, MediaType,
 		SearchQuery,
 	},
-	MetadataProvider, RateLimiter,
+	ExternalMetadata, MetadataProvider, RateLimiter,
 };
 
 const HARDCOVER_DEFAULT_RATE_LIMIT: u32 = 5;
@@ -125,6 +125,9 @@ impl HardcoverClient {
 			id
 		);
 
+		let raw_data: serde_json::Value = self.execute_graphql(&graphql_query).await?;
+		dbg!(&raw_data);
+
 		let data: SeriesQueryData = self.execute_graphql(&graphql_query).await?;
 		data.series
 			.into_iter()
@@ -185,7 +188,7 @@ impl MetadataProvider for HardcoverClient {
 		vec![MediaType::Book]
 	}
 
-	/// Search for series on Hardcover.
+	/// Search for series on Hardcover and fetch full metadata for each result
 	/// See: https://docs.hardcover.app/api/guides/searching/#series
 	async fn search_series(
 		&self,
@@ -195,28 +198,39 @@ impl MetadataProvider for HardcoverClient {
 			.search(
 				&query.title,
 				HardcoverSearchType::Series,
-				query.limit.unwrap_or(25),
+				query.limit.unwrap_or(10),
 			)
 			.await?;
 
 		let hits = response.parse_series_hits()?;
 
-		Ok(hits
-			.into_iter()
-			.map(|hit| {
-				let doc = hit.document;
-				MatchCandidate {
-					provider: self.id(),
-					external_id: doc.id,
-					title: doc.name.unwrap_or_default(),
-					authors: doc.author_name.into_iter().collect(),
-					..Default::default()
-				}
-			})
-			.collect())
+		// TODO: Parallelize these fetches
+		let mut candidates = Vec::with_capacity(hits.len());
+		for hit in hits {
+			let external_id = hit.document.id;
+			match self.fetch_series_metadata(&external_id).await {
+				Ok(metadata) => candidates.push(MatchCandidate {
+					external_id,
+					metadata: ExternalMetadata::Series(metadata),
+					provider: self.id().to_string(),
+				}),
+				Err(e) => {
+					// TODO: Maybe if fetch fails, use naive meta from search?
+					// A full skip failure feels wasteful? Idk, it's a complicated feature
+					dbg!(&external_id, &e);
+					tracing::warn!(
+						external_id,
+						error = ?e,
+						"Failed to fetch series metadata for search result"
+					);
+				},
+			}
+		}
+
+		Ok(candidates)
 	}
 
-	/// Search for books on Hardcover.
+	/// Search for books on Hardcover and fetch full metadata for each result
 	/// See: https://docs.hardcover.app/api/guides/searching/#books
 	async fn search_media(
 		&self,
@@ -226,28 +240,37 @@ impl MetadataProvider for HardcoverClient {
 			.search(
 				&query.title,
 				HardcoverSearchType::Book,
-				query.limit.unwrap_or(25),
+				query.limit.unwrap_or(10),
 			)
 			.await?;
 
 		let hits = response.parse_book_hits()?;
 
-		Ok(hits
-			.into_iter()
-			.map(|hit| {
-				let doc = hit.document;
-				MatchCandidate {
-					provider: self.id(),
-					external_id: doc.id,
-					title: doc.title.unwrap_or_default(),
-					alternative_titles: vec![],
-					year: doc.release_year,
-					authors: doc.author_names,
-					description: doc.description,
-					..Default::default()
-				}
-			})
-			.collect())
+		// TODO: Parallelize these fetches
+		let mut candidates = Vec::with_capacity(hits.len());
+		for hit in hits {
+			let external_id = hit.document.id;
+			match self.fetch_media_metadata(&external_id).await {
+				Ok(metadata) => {
+					candidates.push(MatchCandidate {
+						external_id,
+						metadata: ExternalMetadata::Media(metadata),
+						provider: self.id().to_string(),
+					});
+				},
+				Err(e) => {
+					// TODO: Maybe if fetch fails, use naive meta from search?
+					// A full skip failure feels wasteful? Idk, it's a complicated feature
+					tracing::warn!(
+						external_id,
+						error = ?e,
+						"Failed to fetch book metadata for search result"
+					);
+				},
+			}
+		}
+
+		Ok(candidates)
 	}
 
 	async fn fetch_series_metadata(
@@ -264,7 +287,7 @@ impl MetadataProvider for HardcoverClient {
 			series.author.and_then(|a| a.name).into_iter().collect();
 
 		Ok(ExternalSeriesMetadata {
-			provider: self.id(),
+			provider: self.id().to_string(),
 			external_id: series.id.to_string(),
 			title: series.name.unwrap_or_default(),
 			alternative_titles: vec![],
@@ -361,7 +384,7 @@ impl MetadataProvider for HardcoverClient {
 		let series_external_id = book.featured_book_series_id.map(|id| id.to_string());
 
 		Ok(ExternalMediaMetadata {
-			provider: self.id(),
+			provider: self.id().to_string(),
 			external_id: book.id.to_string(),
 			series_name,
 			series_external_id,
@@ -549,10 +572,7 @@ mod tests {
 		assert!(!candidates.is_empty());
 		println!("Found {} series candidates", candidates.len());
 		for candidate in &candidates {
-			println!(
-				"  - {} (id: {}, authors: {:?})",
-				candidate.title, candidate.external_id, candidate.authors
-			);
+			println!("{:?}", candidate);
 		}
 	}
 
@@ -574,10 +594,7 @@ mod tests {
 		assert!(!candidates.is_empty());
 		println!("Found {} book candidates", candidates.len());
 		for candidate in &candidates {
-			println!(
-				"  - {} ({:?}) by {:?}",
-				candidate.title, candidate.year, candidate.authors
-			);
+			println!("{:?}", candidate);
 		}
 	}
 
@@ -586,7 +603,6 @@ mod tests {
 	async fn test_fetch_series_metadata() {
 		let client = get_test_client();
 
-		// First search for a series to get a valid ID
 		let query = SearchQuery {
 			title: "Wayfarers".to_string(),
 			limit: Some(1),

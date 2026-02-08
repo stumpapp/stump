@@ -12,6 +12,8 @@ pub enum MetadataProviderError {
 	EmptyResponse,
 	#[error("Resource not found: {0}")]
 	NotFound(String),
+	#[error("Unsupported provider: {0}")]
+	UnsupportedProvider(String),
 	#[error("{0}")]
 	Other(String),
 }

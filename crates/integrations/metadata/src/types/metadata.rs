@@ -1,11 +1,19 @@
+use serde::{Deserialize, Serialize};
+
 use crate::types::PublicationStatus;
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum ExternalMetadata {
+	Media(ExternalMediaMetadata),
+	Series(ExternalSeriesMetadata),
+}
 
 // TODO: Hone the fields we can pull across different providers
 
 /// Metadata about a media item from an external metadata provider
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ExternalMediaMetadata {
-	pub provider: &'static str,
+	pub provider: String,
 	pub external_id: String,
 
 	pub title: Option<String>,
@@ -37,39 +45,10 @@ pub struct ExternalMediaMetadata {
 	pub provider_url: Option<String>,
 }
 
-impl Default for ExternalMediaMetadata {
-	fn default() -> Self {
-		Self {
-			provider: "",
-			external_id: "".to_string(),
-			series_name: None,
-			series_external_id: None,
-			title: None,
-			summary: None,
-			number: None,
-			day: None,
-			month: None,
-			year: None,
-			page_count: None,
-			genres: None,
-			tags: None,
-			isbn: None,
-			isbn_13: None,
-			writers: None,
-			artists: None,
-			colorists: None,
-			letterers: None,
-			cover_artists: None,
-			cover_url: None,
-			provider_url: None,
-		}
-	}
-}
-
 /// Metadata about a series from an external metadata provider
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ExternalSeriesMetadata {
-	pub provider: &'static str,
+	pub provider: String,
 	pub external_id: String,
 	// pub provider_url: Option<String>,
 	pub title: String,
@@ -90,27 +69,4 @@ pub struct ExternalSeriesMetadata {
 
 	pub cover_url: Option<String>,
 	pub volume_count: Option<i32>,
-}
-
-impl Default for ExternalSeriesMetadata {
-	fn default() -> Self {
-		Self {
-			provider: "",
-			external_id: "".to_string(),
-			title: "".to_string(),
-			alternative_titles: vec![],
-			summary: None,
-			status: None,
-			year: None,
-			end_year: None,
-			genres: None,
-			tags: None,
-			age_rating: None,
-			authors: None,
-			artists: None,
-			publisher: None,
-			cover_url: None,
-			volume_count: None,
-		}
-	}
 }

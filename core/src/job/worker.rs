@@ -3,9 +3,11 @@ use std::{
 	time::{Duration, Instant},
 };
 
-use models::entity::job;
-use sea_orm::{prelude::*, DatabaseConnection};
+use models::entity::{job, server_config};
+use sea_orm::{prelude::*, DatabaseConnection, SelectColumns};
 use tokio::sync::{broadcast, mpsc, oneshot};
+
+use crate::{CoreError, CoreResult};
 
 use crate::{
 	config::StumpConfig,
@@ -140,6 +142,19 @@ impl WorkerCtx {
 				},
 			}
 		}
+	}
+
+	pub async fn get_encryption_key(&self) -> CoreResult<String> {
+		let record = server_config::Entity::find()
+			.select_column(server_config::Column::EncryptionKey)
+			.one(self.conn.as_ref())
+			.await?;
+
+		let encryption_key = record
+			.and_then(|config| config.encryption_key)
+			.ok_or(CoreError::EncryptionKeyNotSet)?;
+
+		Ok(encryption_key)
 	}
 
 	/// Send a status request to the worker loop and await the response

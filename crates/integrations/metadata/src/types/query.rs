@@ -13,7 +13,7 @@ impl Default for SearchQuery {
 			author: None,
 			isbn: None,
 			year: None,
-			limit: Some(50),
+			limit: Some(10),
 		}
 	}
 }

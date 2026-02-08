@@ -23,6 +23,7 @@ image = { version = "0.25.2" }
 imagesize = "0.14.0"
 infer.workspace = true
 itertools.workspace = true
+metadata_integrations = { path = "../crates/integrations/metadata" }
 migrations = { path = "../crates/migrations" }
 models = { path = "../crates/models" }
 md5.workspace = true

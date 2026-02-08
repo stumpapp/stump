@@ -404,6 +404,7 @@ pub enum MetadataFetchStatus {
 	InProgress,
 	Fetched,
 	Matched,
+	NoMatch,
 	Failed,
 }
 

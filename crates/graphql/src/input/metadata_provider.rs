@@ -1,4 +1,4 @@
-use async_graphql::{InputObject, Result};
+use async_graphql::{InputObject, OneofObject, Result};
 use models::{entity::metadata_provider_config, shared::enums::MetadataProvider};
 use sea_orm::{prelude::Decimal, ActiveValue::NotSet, Set, Unchanged};
 use stump_core::utils::encryption::encrypt_string;
@@ -107,4 +107,12 @@ impl PatchMetadataProviderConfigInput {
 			..Default::default()
 		})
 	}
+}
+
+/// An identifer for specifying the target of a metadata fetch status query. I added
+/// mostly for type safety and not annoyingly wrangling both media_id and series_id
+#[derive(OneofObject)]
+pub enum MetadataFetchStatusId {
+	Series(String),
+	Media(String),
 }

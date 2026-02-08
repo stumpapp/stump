@@ -10,6 +10,7 @@ mod job;
 mod library;
 mod log;
 mod media;
+mod metadata_provider;
 mod notifier;
 mod reading_list;
 mod scheduled_job_config;
@@ -32,6 +33,7 @@ use job::JobMutation;
 use library::LibraryMutation;
 use log::LogMutation;
 use media::MediaMutation;
+use metadata_provider::MetadataProviderMutation;
 use notifier::NotifierMutation;
 use reading_list::ReadingListMutation;
 use scheduled_job_config::ScheduledJobConfigMutation;
@@ -65,4 +67,5 @@ pub struct Mutation(
 	EmailDeviceMutation,
 	SmartListViewMutation,
 	ScheduledJobConfigMutation,
+	MetadataProviderMutation,
 );

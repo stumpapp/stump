@@ -11,6 +11,7 @@ mod library;
 mod log;
 pub(crate) mod media;
 mod media_metadata_overview;
+mod metadata_provider;
 mod notifier;
 pub(crate) mod reading_list;
 mod series;
@@ -32,6 +33,7 @@ use library::LibraryQuery;
 use log::LogQuery;
 use media::MediaQuery;
 use media_metadata_overview::MediaMetadataOverviewQuery;
+use metadata_provider::MetadataProviderQuery;
 use notifier::NotifierQuery;
 use reading_list::ReadingListQuery;
 use series::SeriesQuery;
@@ -64,4 +66,5 @@ pub struct Query(
 	LogQuery,
 	ConfigQuery,
 	SmartListsQuery,
+	MetadataProviderQuery,
 );

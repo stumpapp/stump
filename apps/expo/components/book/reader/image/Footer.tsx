@@ -2,8 +2,8 @@ import { Slider } from '@miblanchard/react-native-slider'
 import { FlashList, FlashListRef, useMappingHelper } from '@shopify/flash-list'
 import { ReadingDirection, ReadingMode } from '@stump/graphql'
 import { STUMP_SAVE_BASIC_SESSION_HEADER } from '@stump/sdk/constants'
-import dayjs from 'dayjs'
-import duration from 'dayjs/plugin/duration'
+import { formatDuration } from 'date-fns'
+import { es } from 'date-fns/locale'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Platform, Pressable, View } from 'react-native'
 import Animated, {
@@ -24,8 +24,6 @@ import { usePreferencesStore, useReaderStore } from '~/stores'
 import { useBookPreferences, useBookReadTime } from '~/stores/reader'
 
 import { useImageBasedReader } from './context'
-
-dayjs.extend(duration)
 
 const SIZE_MODIFIER = 1.5
 
@@ -167,19 +165,15 @@ export default function Footer() {
 		}
 	}, [footerControls, currentPage, visible, visibilityChanged, pageSets, doublePageBehaviorChanged])
 
-	const formatDuration = useCallback(() => {
-		const duration = dayjs.duration(elapsedSeconds, 'seconds')
-		const hours = Math.trunc(duration.asHours())
-		const minutes = duration.minutes()
-		const seconds = duration.seconds()
+	const renderReadingTime = useCallback(() => {
+		const hours = Math.trunc(elapsedSeconds / 3600)
+		const minutes = Math.trunc((elapsedSeconds % 3600) / 60)
+		const seconds = elapsedSeconds % 60
 
-		if (elapsedSeconds <= 59) {
-			return `${seconds} ${seconds === 1 ? 'second' : 'seconds'}`
-		}
-		if (elapsedSeconds <= 3599) {
-			return `${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ${seconds} ${seconds === 1 ? 'second' : 'seconds'}`
-		}
-		return `${hours} ${hours === 1 ? 'hour' : 'hours'} ${minutes} ${minutes === 1 ? 'minute' : 'minutes'}`
+		return formatDuration(
+			{ hours, minutes, seconds },
+			{ format: hours === 0 ? ['minutes', 'seconds'] : ['hours', 'minutes'], locale: es },
+		)
 	}, [elapsedSeconds])
 
 	const pageSource = useCallback(
@@ -563,7 +557,7 @@ export default function Footer() {
 				>
 					{trackElapsedTime && (
 						<View>
-							<Text className="text-sm text-[#898d94]">Reading time: {formatDuration()}</Text>
+							<Text className="text-sm text-[#898d94]">Reading time: {renderReadingTime()}</Text>
 						</View>
 					)}
 

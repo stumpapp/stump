@@ -407,6 +407,34 @@ pub enum MetadataFetchStatus {
 	Failed,
 }
 
+/// The supported external metadata providers
+#[derive(
+	Eq,
+	Copy,
+	Hash,
+	Debug,
+	Clone,
+	EnumIter,
+	PartialEq,
+	Serialize,
+	Deserialize,
+	DeriveActiveEnum,
+	EnumString,
+	Display,
+	Enum,
+)]
+#[sea_orm(
+	rs_type = "String",
+	rename_all = "SCREAMING_SNAKE_CASE",
+	db_type = "String(StringLen::None)"
+)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+#[strum(serialize_all = "SCREAMING_SNAKE_CASE")]
+pub enum MetadataProvider {
+	/// Hardcover (https://hardcover.app)
+	Hardcover,
+}
+
 /// An enum representing the different types of metadata resets that can occur,
 /// which manifest differently depending on the context
 #[derive(
@@ -688,6 +716,10 @@ pub enum UserPermission {
 	ReadJobs,
 	/// Grant access to manage jobs, like pausing, resuming, deleting, or cancelling them
 	ManageJobs,
+	/// Grant access to read metadata provider configurations
+	MetadataProviderRead,
+	/// Grant access to manage metadata provider configurations (create, update, delete)
+	MetadataProviderManage,
 	/// Grant access to read application-level logs, e.g. job logs
 	ReadPersistedLogs,
 	/// Grant access to read system logs

@@ -1,16 +1,13 @@
 use async_graphql::{InputObject, Result};
-use models::entity::metadata_provider_config;
+use models::{entity::metadata_provider_config, shared::enums::MetadataProvider};
 use sea_orm::{prelude::Decimal, ActiveValue::NotSet, Set, Unchanged};
 use stump_core::utils::encryption::encrypt_string;
 
 /// Input object for creating a metadata provider configuration
 #[derive(InputObject)]
 pub struct CreateMetadataProviderConfigInput {
-	// TODO: Consider an enum value since we pretty much know what is supported and
-	// it would be an easy way to prevent invalid values. Would need to flow
-	// from the integration, though, which means adding sea_orm etc
-	/// The provider type identifier (e.g., "hardcover")
-	pub provider_type: String,
+	/// The provider type
+	pub provider_type: MetadataProvider,
 	/// The API token for authenticating with the provider
 	pub api_token: String,
 	/// Whether the provider is enabled

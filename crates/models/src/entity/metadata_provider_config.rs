@@ -5,13 +5,15 @@ use sea_orm::{
 	ActiveValue, DeriveEntityModel,
 };
 
+use crate::shared::enums::MetadataProvider;
+
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
 #[graphql(name = "MetadataProviderConfigModel")]
 #[sea_orm(table_name = "metadata_provider_configs")]
 pub struct Model {
 	#[sea_orm(primary_key, auto_increment = true)]
 	pub id: i32,
-	pub provider_type: String,
+	pub provider_type: MetadataProvider,
 	pub enabled: bool,
 	#[graphql(skip)]
 	pub encrypted_api_token: Option<String>,

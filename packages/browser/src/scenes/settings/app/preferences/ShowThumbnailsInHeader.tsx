@@ -1,9 +1,11 @@
 import { WideSwitch } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { useCallback } from 'react'
 
 import { usePreferences } from '@/hooks'
 
 export default function ShowThumbnailsInHeader() {
+	const { t } = useLocaleContext()
 	const {
 		preferences: { showThumbnailsInHeaders },
 		update,
@@ -19,16 +21,17 @@ export default function ShowThumbnailsInHeader() {
 
 	return (
 		<WideSwitch
-			label="Show thumbnails in headers"
-			description="If you prefer to see thumbnails more often, this setting will show them in more places"
+			label={t(getKey('label'))}
+			description={t(getKey('description'))}
 			checked={showThumbnailsInHeaders}
 			onCheckedChange={handleToggle}
 			formId="showThumbnailsInHeaders"
 			title={
-				showThumbnailsInHeaders
-					? 'This setting will show thumbnails in more places'
-					: 'This setting will not show thumbnails in more places'
+				showThumbnailsInHeaders ? t(getKey('tooltips.enabled')) : t(getKey('tooltips.disabled'))
 			}
 		/>
 	)
 }
+
+const LOCALE_BASE = 'settingsScene.app/preferences.sections.showThumbnailsInHeader'
+const getKey = (key: string) => `${LOCALE_BASE}.${key}`

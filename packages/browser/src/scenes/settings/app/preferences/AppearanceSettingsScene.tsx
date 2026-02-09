@@ -39,9 +39,11 @@ export default function AppearanceSettingsScene() {
 
 				<div className="flex flex-col gap-y-8">
 					<div>
-						<h3 className="text-base font-medium text-foreground">Theme and appearance</h3>
+						<h3 className="text-base font-medium text-foreground">
+							{t(getKey('themeAndAppearance.label'))}
+						</h3>
 						<p className="text-sm text-foreground-muted">
-							The basic look and feel options for Stump
+							{t(getKey('themeAndAppearance.description'))}
 						</p>
 					</div>
 
@@ -53,9 +55,11 @@ export default function AppearanceSettingsScene() {
 				</div>
 
 				<div>
-					<h3 className="text-base font-medium text-foreground">Layout and arrangement</h3>
+					<h3 className="text-base font-medium text-foreground">
+						{t(getKey('layoutAndArrangement.label'))}
+					</h3>
 					<p className="text-sm text-foreground-muted">
-						Customize how Stump displays information and organizes content
+						{t(getKey('layoutAndArrangement.description'))}
 					</p>
 				</div>
 
@@ -75,9 +79,11 @@ export default function AppearanceSettingsScene() {
 
 				<div className="flex flex-col gap-y-8">
 					<div>
-						<h3 className="text-base font-medium text-foreground">Additional preferences</h3>
+						<h3 className="text-base font-medium text-foreground">
+							{t(getKey('additionalPreferences.label'))}
+						</h3>
 						<p className="text-sm text-foreground-muted">
-							Customize the appearance and behavior of Stump with these additional settings
+							{t(getKey('additionalPreferences.description'))}
 						</p>
 					</div>
 					<ShowThumbnailsInHeader />
@@ -92,3 +98,6 @@ export default function AppearanceSettingsScene() {
 		</Container>
 	)
 }
+
+const LOCALE_BASE = 'settingsScene.app/preferences.sections'
+const getKey = (key: string) => `${LOCALE_BASE}.${key}`

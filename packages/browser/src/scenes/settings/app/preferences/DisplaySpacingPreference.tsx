@@ -1,9 +1,11 @@
 import { cn, cx, Label, Text } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { Check } from 'lucide-react'
 
 import { usePreferences, useTheme } from '@/hooks'
 
 export default function DisplaySpacingPreference() {
+	const { t } = useLocaleContext()
 	const {
 		preferences: { enableCompactDisplay },
 		update,
@@ -21,25 +23,26 @@ export default function DisplaySpacingPreference() {
 
 	return (
 		<div className="flex flex-col gap-y-1.5">
-			<Label>Display spacing</Label>
+			<Label>{t(getKey('label'))}</Label>
 			<Text size="sm" variant="muted">
-				Adjusts the overall spacing between elements throughout the app
+				{t(getKey('description'))}
 			</Text>
 			<div className="flex items-center gap-x-4">
 				<AppearanceOption
-					label="Default"
+					label={t(getKey('options.default'))}
 					isSelected={!enableCompactDisplay}
 					onSelect={() => handleChange(false)}
+					isDefaultDisplay
 				/>
 				<AppearanceOption
-					label="Compact"
+					label={t(getKey('options.compact'))}
 					isSelected={!!enableCompactDisplay}
 					onSelect={() => handleChange(true)}
 					isDisabled
 				/>
 			</div>
 			<Text size="xs" variant="muted" className="italic">
-				* Compact display mode is not implemented yet
+				{t(getKey('disclaimer'))}
 			</Text>
 		</div>
 	)
@@ -50,11 +53,17 @@ type AppearanceOptionProps = {
 	isSelected: boolean
 	isDisabled?: boolean
 	onSelect: () => void
+	isDefaultDisplay?: boolean
 }
-function AppearanceOption({ label, isSelected, isDisabled, onSelect }: AppearanceOptionProps) {
+function AppearanceOption({
+	label,
+	isSelected,
+	isDisabled,
+	onSelect,
+	isDefaultDisplay,
+}: AppearanceOptionProps) {
 	const { isDarkVariant } = useTheme()
 
-	const isDefaultDisplay = label === 'Default'
 	const isLightVariant = !isDarkVariant
 
 	return (
@@ -114,3 +123,6 @@ function AppearanceOption({ label, isSelected, isDisabled, onSelect }: Appearanc
 		</div>
 	)
 }
+
+const LOCALE_BASE = 'settingsScene.app/preferences.sections.displaySpacing'
+const getKey = (key: string) => `${LOCALE_BASE}.${key}`

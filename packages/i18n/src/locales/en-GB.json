@@ -6,8 +6,8 @@
 		"githubLink": "View the GitHub issue"
 	},
 	"authScene": {
-		"claimHeading": "Initialize your server",
-		"claimText": "This Stump server is not initialized. Use the form below to create your account. Once created, you will have full access to all server features.",
+		"claimHeading": "Initialise your server",
+		"claimText": "This Stump server is not initialised. Fill in the form below to create your account. Once created, you will have full access to all server features.",
 		"form": {
 			"validation": {
 				"missingUsername": "Username is required",
@@ -59,7 +59,7 @@
 				"email": {
 					"label": "Email",
 					"placeholder": "Email address",
-					"description": "An email address to send the book to. Click add to finalize each input"
+					"description": "An email address to send the book to. Click add to finalise each input"
 				},
 				"devices": {
 					"label": "Devices",
@@ -144,7 +144,7 @@
 				{
 					"label": "Roles",
 					"heading": "Roles",
-					"description": "Customize the roles in your book club"
+					"description": "Customise the roles in your book club"
 				},
 				{
 					"label": "Membership",
@@ -201,7 +201,7 @@
 		},
 		"roles": {
 			"title": "Roles",
-			"description": "Customize the roles in this book club",
+			"description": "Customise the roles in this book club",
 			"sections": {
 				"roleMappings": {
 					"heading": "Existing role mappings",
@@ -247,11 +247,11 @@
 			"description": {
 				"label": "Description",
 				"description": "A short description of your library",
-				"placeholder": "A library of all my favorite books"
+				"placeholder": "A library of all my favourite books"
 			},
 			"tags": {
 				"label": "Tags",
-				"description": "Used to categorize your library or enforce access rules"
+				"description": "Used to categorise your library or enforce access rules"
 			},
 			"defaultLibraryView": {
 				"label": "Default library view",
@@ -419,8 +419,8 @@
 			},
 			"libraryPattern": {
 				"section": {
-					"heading": "Organization",
-					"description": "Identify which pattern most closely matches the organization of your library",
+					"heading": "Organisation",
+					"description": "Identify which pattern most closely matches the organisation of your library",
 					"docs": [
 						"Not sure which to choose? Click",
 						"here",
@@ -431,7 +431,7 @@
 				},
 				"options": {
 					"label": "Library pattern",
-					"description": "The setting which determines how Stump will organize your library",
+					"description": "The setting which determines how Stump will organise your library",
 					"collectionPriority": {
 						"label": "Collection priority",
 						"description": "Each folder at the top-most level of the library root is a single series"
@@ -485,7 +485,7 @@
 				"none": "None",
 				"labels": {
 					"generateThumbnails": "Generate thumbnails",
-					"processThumbnailColors": "Process thumbnail colors",
+					"processThumbnailColors": "Process thumbnail colours",
 					"mode": "Mode",
 					"format": "Format",
 					"quality": "Quality",
@@ -583,7 +583,7 @@
 							},
 							"custom": {
 								"label": "Custom",
-								"description": "Customize the scan configuration",
+								"description": "Customise the scan configuration",
 								"validation": {
 									"noSelection": "At least one option must be enabled"
 								}
@@ -648,14 +648,14 @@
 		},
 		"options/analysis": {
 			"title": "Analysis",
-			"description": "Analyze the contents of this library to identify potential issues or improvements",
+			"description": "Analyse the contents of this library to identify potential issues or improvements",
 			"sections": {
 				"analyzeBooks": {
-					"heading": "Analyze books",
-					"description": "Analyze the books in this library to attach additional metadata in the database, such as page dimensions for image-based books",
+					"heading": "Analyse books",
+					"description": "Analyse the books in this library to attach additional metadata in the database, such as page dimensions for image-based books",
 					"disclaimerTitle": "This process is resource-intensive",
 					"disclaimer": "It may take a while to complete. In the future, it will be more configurable",
-					"analyzeButton": "Analyze books"
+					"analyzeButton": "Analyse books"
 				},
 				"missingFiles": {
 					"heading": "Missing files",
@@ -751,7 +751,7 @@
 		"labels": {
 			"ageRating": "Age rating",
 			"characters": "Characters",
-			"colorists": "Colorists",
+			"colorists": "Colourists",
 			"coverArtists": "Cover artists",
 			"day": "Day",
 			"editors": "Editors",
@@ -839,7 +839,7 @@
 				}
 			},
 			"queryBuilder": {
-				"uiPerformance": "This feature is missing performance optimizations on the UI and may be slow with filters which produce large result sets. This will be improved in the future",
+				"uiPerformance": "This feature is missing performance optimisations on the UI and may be slow with filters that produce large result sets. This will be improved in the future",
 				"rootJoiner": {
 					"and": {
 						"label": "AND",
@@ -919,7 +919,7 @@
 									"letterers": "Letterers",
 									"editors": "Editors",
 									"publisher": "Publisher",
-									"colorists": "Colorist",
+									"colorists": "Colourists",
 									"links": "Links",
 									"characters": "Characters",
 									"teams": "Teams",
@@ -1021,7 +1021,7 @@
 	},
 	"createOrUpdateApiKey": {
 		"validation": {
-			"futureDate": "Expiration date must be in the future"
+			"futureDate": "Expiry date must be in the future"
 		},
 		"fields": {
 			"name": {
@@ -1029,7 +1029,7 @@
 				"placeholder": "Koreader Sync"
 			},
 			"expiration": {
-				"label": "Expiration",
+				"label": "Expiry",
 				"placeholder": "Never"
 			},
 			"expiresAt": {
@@ -1051,7 +1051,7 @@
 	},
 	"userSmartListsScene": {
 		"heading": "Smart lists",
-		"subtitle": "Your favorite searches and filters saved for easy access",
+		"subtitle": "Your favourite searches and filters saved for easy access",
 		"searchPlaceholder": "Filter smart lists",
 		"buttons": {
 			"createSmartList": "Create smart list"
@@ -1278,7 +1278,7 @@
 					},
 					"heading": "Language and locale",
 					"subtitle": [
-						"Stump supports multiple languages and locales, set your preferences below. Please consider helping improve the quality of",
+						"Stump supports multiple languages and locales; set your preferences below. Please consider helping to improve the quality of",
 						"Stump's translations",
 						"if you're able to!"
 					]
@@ -1288,7 +1288,7 @@
 		"app/preferences": {
 			"helmet": "Preferences",
 			"title": "Preferences",
-			"description": "Customize the look and feel of the application",
+			"description": "Customise the look and feel of the application",
 			"sections": {
 				"themeSelect": {
 					"label": "Theme",
@@ -1310,13 +1310,13 @@
 				},
 				"fontSelect": {
 					"label": "Font",
-					"description": "Customize the font used in the application"
+					"description": "Customise the font used in the application"
 				},
 				"navigationArrangement": {
 					"label": "Navigation arrangement",
 					"description": {
-						"sidebar": "Arrange and customize the navigation items in the sidebar",
-						"topbar": "Arrange and customize the navigation items in the topbar"
+						"sidebar": "Arrange and customise the navigation items in the sidebar",
+						"topbar": "Arrange and customise the navigation items in the top bar"
 					},
 					"isLocked": "Arrangement is locked",
 					"lock": "Lock arrangement",
@@ -1348,7 +1348,7 @@
 			"shared": {
 				"fields": {
 					"name": "Name",
-					"expiration": "Expiration",
+					"expiration": "Expiry",
 					"last_used": "Last used",
 					"created": "Created",
 					"permissions": "Permissions",
@@ -1378,7 +1378,7 @@
 						},
 						"inheritDisclaimer": "This API key will inherit your full permissions, which means it can do anything you can do. Be careful with this setting",
 						"createdKey": "Created key",
-						"savedConfirm": "I saved my key",
+						"savedConfirm": "I've saved my key",
 						"submit": "Create key"
 					}
 				},
@@ -1393,7 +1393,7 @@
 						"title": "You haven't created any keys yet",
 						"action": "Create an API key to get started"
 					},
-					"noExpiration": "No expiration set"
+					"noExpiration": "No expiry set"
 				}
 			}
 		},
@@ -1505,7 +1505,7 @@
 							"title": "Delete this server",
 							"description": "This will remove the server from the desktop application",
 							"disclaimerActiveServer": "This server is currently active. You will be logged out",
-							"disclaimerLastServer": "This is the last configured server. You will be logged out and have to reconfigure any servers in the initialization process",
+							"disclaimerLastServer": "This is the last configured server. You will be logged out and have to reconfigure any servers in the initialisation process",
 							"confirm": "Delete server"
 						}
 					},
@@ -1529,7 +1529,7 @@
 							"trigger": "Delete all servers",
 							"title": "Delete all servers",
 							"description": "This will remove all servers from the desktop application",
-							"disclaimer": "You will be logged out and have to reconfigure any servers in the initialization process",
+							"disclaimer": "You will be logged out and have to reconfigure any servers in the initialisation process",
 							"confirm": "Delete all servers"
 						}
 					},
@@ -1634,7 +1634,7 @@
 				"scheduling": {
 					"title": "Scheduled Jobs",
 					"description": "Some jobs can be configured to automatically run on a schedule",
-					"disclaimer": "The job scheduler is really basic and will be improved in the future. Please reach out for feedback or suggestions!",
+					"disclaimer": "The job scheduler is very basic and will be improved in the future. Please get in touch with any feedback or suggestions!",
 					"createOrUpdateConfig": {
 						"fields": {
 							"intervalSecs": {

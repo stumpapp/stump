@@ -54,7 +54,7 @@
 		},
 		"emailBook": {
 			"heading": "E-Mail das Buch",
-			"description": "Dieses Buch an ein Gerät oder eine E-Mail-Adresse senden",
+			"description": "Send this book to a device or email address",
 			"form": {
 				"email": {
 					"label": "E-Mail",
@@ -79,7 +79,7 @@
 			},
 			"description": {
 				"label": "Beschreibung",
-				"placeholder": "Ein \"Unsere Flagge bedeutet den Tod\" Fanclub. Wir lesen Piratenfiktion nach Herzenslust",
+				"placeholder": "An 'Our Flag Means Death' fan club. We read pirate fiction to our hearts' content",
 				"description": "Eine optionale, kurze Beschreibung deines Buchclubs"
 			},
 			"is_private": {
@@ -121,7 +121,7 @@
 				},
 				"hideProgress": {
 					"label": "Fortschritt verbergen",
-					"description": "Wenn aktiviert, wird dein Lesefortschritt vor anderen Mitgliedern des Buchclubs verborgen"
+					"description": "If enabled, your reading progress will be hidden from other members of the book club"
 				}
 			}
 		},
@@ -132,7 +132,7 @@
 	},
 	"createBookClubScene": {
 		"heading": "Neuen Buchclub erstellen",
-		"subtitle": "Du kannst einen privaten Buchclub für einzelne Ausgewählte erstellen oder einen öffentlichen, welcher jeder auf dem Server beitreten kann",
+		"subtitle": "You can create a private book club for a select few, or make it public for anyone on the server to join",
 		"form": {
 			"stepLabel": "Schritt",
 			"steps": [
@@ -211,7 +211,7 @@
 		},
 		"scheduling/scheduler": {
 			"title": "Planer",
-			"description": "Erstelle und verwalte die Lesetermine für diesen Buchclub"
+			"description": "Create and manage the scheduled readings for this book club"
 		},
 		"scheduling/options": {
 			"title": "Optionen",
@@ -453,7 +453,7 @@
 	},
 	"createLibraryScene": {
 		"heading": "Bibliothek erstellen",
-		"subtitle": "Bibliotheken dienen dazu, deine Bücher zusammenzufassen. Weitere Informationen über diese Einstellung findest du in der",
+		"subtitle": "Libraries are used to group your books together. If you want a refresh on how they work, check out the",
 		"subtitleLink": "dazugehörigen Dokumentation",
 		"form": {
 			"stepLabel": "Schritt",
@@ -536,7 +536,7 @@
 	},
 	"librarySettingsScene": {
 		"heading": "Einstellungen",
-		"subtitle": "Verwalte deine Bibliothek hier. Weitere Informationen über diese Einstellung findest du in der",
+		"subtitle": "Manage your library here. If you want a refresh on these settings, check out the",
 		"subtitleLink": "dazugehörigen Dokumentation",
 		"sidebar": {
 			"basics": "Allgemeines",
@@ -1098,7 +1098,7 @@
 				"visibility": {
 					"confirmation": {
 						"public": "Dies wird die Liste für alle sichtbar machen",
-						"private": "Dies ändert die Liste zu privat, dadurch kann jeder, der Zugriff hat, nicht mehr diese sehen",
+						"private": "This will change the list to be private, hiding it from anyone who previously had access",
 						"shared": "Du musst die Liste mit bestimmten Benutzern teilen, um ihnen Zugriff zu gewähren",
 						"fallback": "Bist du sicher, dass du die Sichtbarkeit dieser Liste ändern möchten?"
 					}
@@ -1290,6 +1290,10 @@
 			"title": "Präferenzen",
 			"description": "Passe das Aussehen und die Bedienung der Anwendung an",
 			"sections": {
+				"themeAndAppearance": {
+					"label": "Theme and appearance",
+					"description": "The basic look and feel options for Stump"
+				},
 				"themeSelect": {
 					"label": "Design",
 					"description": [
@@ -1308,9 +1312,52 @@
 						"matrix": "Matrix"
 					}
 				},
+				"gradientToggle": {
+					"label": "Enable gradients",
+					"description": "Some themes optionally support gradients for a more dynamic look"
+				},
 				"fontSelect": {
 					"label": "Schriftart",
 					"description": "Passe die Schriftart an, die in der Anwendung genutzt wird"
+				},
+				"thumbnailRatioSelect": {
+					"label": "Thumbnail Ratio",
+					"description": "The aspect ratio to use for thumbnails"
+				},
+				"thumbnailPlaceholder": {
+					"label": "Thumbnail placeholder",
+					"description": "The style to use for thumbnail placeholders",
+					"options": {
+						"grayscale": "Grayscale",
+						"averageColor": "Average color",
+						"colorful": "Colorful",
+						"thumbhash": "Thumbhash"
+					}
+				},
+				"layoutAndArrangement": {
+					"label": "Layout and arrangement",
+					"description": "Customize how Stump displays information and organizes content"
+				},
+				"primaryNavigation": {
+					"label": "Primary navigation",
+					"description": "Choose between a minimal sidebar or a topbar navigation",
+					"options": {
+						"sidebar": "Sidebar",
+						"topbar": "Topbar"
+					},
+					"disclaimer": "* Settings for the unselected option will be disabled or hidden"
+				},
+				"doubleSidebar": {
+					"label": "Settings sidebar",
+					"description": "Enables the sidebar navigation for the settings pages. If you frequently use a smaller screen, you may want to disable this."
+				},
+				"replacePrimarySidebar": {
+					"label": "Replace primary sidebar",
+					"description": "Any instance of a secondary sidebar will replace the primary sidebar instead of being displayed next to it",
+					"tooltips": {
+						"doubleSidebar": "This setting requires the settings sidebar to be enabled",
+						"topbar": "This setting is not currently supported when the primary navigation is set to top bar"
+					}
 				},
 				"navigationArrangement": {
 					"label": "Navigationsanordnung",
@@ -1338,6 +1385,60 @@
 							"help": "Ein Link zu einer Seite, auf der alle Elemente dieses Typs anzeigt werden"
 						}
 					}
+				},
+				"displaySpacing": {
+					"label": "Display spacing",
+					"description": "Adjusts the overall spacing between elements throughout the app",
+					"options": {
+						"default": "Default",
+						"compact": "Compact"
+					},
+					"disclaimer": "* Compact display mode is not implemented yet"
+				},
+				"maxWidthPreference": {
+					"label": "Adjusted width",
+					"description": "Stump applies a max-width to the viewport. This setting allows you to adjust or remove this limit",
+					"tooltip": "This setting is not currently supported when the primary navigation is set to sidebar"
+				},
+				"additionalPreferences": {
+					"label": "Additional preferences",
+					"description": "Customize the appearance and behavior of Stump with these additional settings"
+				},
+				"showThumbnailsInHeader": {
+					"label": "Show thumbnails in headers",
+					"description": "If you prefer to see thumbnails more often, this setting will show them in more places",
+					"tooltips": {
+						"enabled": "This setting will show thumbnails in more places",
+						"disabled": "This setting will not show thumbnails in more places"
+					}
+				},
+				"hideScrollbarToggle": {
+					"label": "Hide scrollbar",
+					"description": "Some pages simply look better without a scrollbar, this setting will hide it when possible",
+					"tooltips": {
+						"enabled": "This setting will hide the scrollbar on some pages",
+						"disabled": "This setting will show the scrollbar on some pages"
+					}
+				},
+				"enableAlphabetFiltering": {
+					"label": "Alphabet filtering",
+					"description": "Show an alphabet filter when applicable"
+				},
+				"enableFancyAnimations": {
+					"label": "Fancy animations",
+					"description": "A broad opt-in for fancier animations throughout the app"
+				},
+				"queryIndicatorToggle": {
+					"label": "Background fetch indicator",
+					"description": "Show a loading indicator whenever a query is running in the background"
+				},
+				"liveRefetchToggle": {
+					"label": "Live refetch",
+					"description": "Refetch queries on the fly to hydrate the UI with new data as it comes in. This can be resource intensive"
+				},
+				"enableJobOverlayToggle": {
+					"label": "Job overlay",
+					"description": "Show a floating overlay while a job is running"
 				}
 			}
 		},
@@ -1860,7 +1961,7 @@
 		"server/email": {
 			"helmet": "E-Maileinstellungen",
 			"title": "E-Mail",
-			"description": "Einstellungen für die Konfiguration eines SMTP Mailserver für deine Stump Serverinstanz",
+			"description": "Settings related to configuring an SMTP emailer for your Stump server instance",
 			"sections": {
 				"emailers": {
 					"title": "SMTP Mailserver",

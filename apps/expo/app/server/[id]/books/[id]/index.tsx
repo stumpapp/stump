@@ -4,7 +4,7 @@ import dayjs from 'dayjs'
 import duration from 'dayjs/plugin/duration'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router'
-import { ChevronLeft, Loader2 } from 'lucide-react-native'
+import { ArrowDown, ChevronLeft, X } from 'lucide-react-native'
 import { useCallback, useLayoutEffect, useState } from 'react'
 import { Platform, Pressable, View } from 'react-native'
 import Animated, {
@@ -13,6 +13,7 @@ import Animated, {
 	useAnimatedRef,
 	useAnimatedStyle,
 	useScrollOffset,
+	withSpring,
 } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import TImage from 'react-native-turbo-image'
@@ -28,7 +29,12 @@ import { Button, Card, Heading, Text } from '~/components/ui'
 import { Icon } from '~/components/ui/icon'
 import { formatSeriesPosition } from '~/lib/bookUtils'
 import { formatBytes, parseGraphQLDecimal } from '~/lib/format'
-import { useDownload, useIsBookDownloaded, useIsBookDownloading } from '~/lib/hooks'
+import {
+	useDownload,
+	useDownloadQueue,
+	useIsBookDownloaded,
+	useIsBookDownloading,
+} from '~/lib/hooks'
 import { usePreferencesStore } from '~/stores'
 
 dayjs.extend(relativeTime)
@@ -153,8 +159,20 @@ export default function Screen() {
 		id: bookID,
 	})
 	const { downloadBook } = useDownload({ serverId: serverID })
+	const { activeItems, cancel } = useDownloadQueue({ serverId: serverID })
 
 	const isDownloading = useIsBookDownloading(bookID)
+	const activeDownload = activeItems.find((item) => item.bookId === bookID)
+	const downloadProgress = activeDownload?.progress?.percentage ?? 0
+
+	const progressWidth = useAnimatedStyle(() => {
+		return {
+			width: withSpring(
+				`${interpolate(downloadProgress, [0, 100], [1, 100], Extrapolation.CLAMP)}%`,
+				{ overshootClamping: true },
+			),
+		}
+	}, [downloadProgress])
 
 	const [isRefetching, setIsRefetching] = useState(false)
 
@@ -433,23 +451,34 @@ export default function Screen() {
 							<Button
 								variant="secondary"
 								roundness="full"
-								disabled={isDownloaded || isDownloading}
-								onPress={onDownloadBook}
-								className="flex-row gap-2"
+								disabled={isDownloaded}
+								onPress={() => {
+									if (isDownloading && activeDownload) {
+										cancel(activeDownload.id)
+									} else {
+										onDownloadBook()
+									}
+								}}
+								className="native:px-0 w-36 flex-row gap-2"
 							>
 								{isDownloading && (
-									<View className="pointer-events-none animate-spin">
-										<Icon
-											className="h-5 w-5"
-											as={Loader2}
-											style={{
-												// @ts-expect-error: It's fine
-												color: accentColor,
-											}}
-										/>
-									</View>
+									<Animated.View
+										style={[progressWidth, { backgroundColor: accentColor }]}
+										className="absolute inset-0 opacity-25"
+									/>
 								)}
-								<Text>Download</Text>
+
+								<Icon
+									as={isDownloading ? X : ArrowDown}
+									style={{
+										// @ts-expect-error: It's fine
+										color: accentColor,
+									}}
+									size={24}
+									// this makes it look better because icons have a bit of empty space all around
+									className="-ml-1"
+								/>
+								<Text className="font-medium">{isDownloading ? 'Cancel' : 'Download'}</Text>
 							</Button>
 						)}
 					</View>

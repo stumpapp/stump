@@ -54,7 +54,7 @@
 		},
 		"emailBook": {
 			"heading": "Mejla bok",
-			"description": "Skicka den här boken till en enhet eller mejladress",
+			"description": "Send this book to a device or email address",
 			"form": {
 				"email": {
 					"label": "E-post",
@@ -79,7 +79,7 @@
 			},
 			"description": {
 				"label": "Beskrivning",
-				"placeholder": "En \"Our Flag Means Death\" fan-klubb. Vi älskar att läsa fiktion om pirater",
+				"placeholder": "An 'Our Flag Means Death' fan club. We read pirate fiction to our hearts' content",
 				"description": "En valfri, kort beskrivning av din bokklubb"
 			},
 			"is_private": {
@@ -121,7 +121,7 @@
 				},
 				"hideProgress": {
 					"label": "Dölj Framsteg",
-					"description": "Om aktiverat, kommer dina läsningsframsteg vara dolda från andra medlemmar i bokklubben"
+					"description": "If enabled, your reading progress will be hidden from other members of the book club"
 				}
 			}
 		},
@@ -132,7 +132,7 @@
 	},
 	"createBookClubScene": {
 		"heading": "Skapa en ny bokklubb",
-		"subtitle": "Du kan skapa en privat bokklubb för några få personer, eller göra den offentlig så vem som helst kan gå med",
+		"subtitle": "You can create a private book club for a select few, or make it public for anyone on the server to join",
 		"form": {
 			"stepLabel": "Steg",
 			"steps": [
@@ -211,7 +211,7 @@
 		},
 		"scheduling/scheduler": {
 			"title": "Schemaläggare",
-			"description": "Skapa och hantera de schemalagda läsningarna för denna bokklubb"
+			"description": "Create and manage the scheduled readings for this book club"
 		},
 		"scheduling/options": {
 			"title": "Inställningar",
@@ -453,7 +453,7 @@
 	},
 	"createLibraryScene": {
 		"heading": "Create New Library",
-		"subtitle": "Libraries are used to group your books together. If you're wanting a refresh on libraries and how they work, check out the",
+		"subtitle": "Libraries are used to group your books together. If you want a refresh on how they work, check out the",
 		"subtitleLink": "relevant dokumentation",
 		"form": {
 			"stepLabel": "Steg",
@@ -536,7 +536,7 @@
 	},
 	"librarySettingsScene": {
 		"heading": "Inställningar",
-		"subtitle": "Update the details or configuration of your library, change control access rules, or scan files. If you're wanting a refresh on libraries and how they work, check out the",
+		"subtitle": "Manage your library here. If you want a refresh on these settings, check out the",
 		"subtitleLink": "relevant dokumentation",
 		"sidebar": {
 			"basics": "Grundläggande",
@@ -1098,7 +1098,7 @@
 				"visibility": {
 					"confirmation": {
 						"public": "Detta kommer att göra listan synlig för alla",
-						"private": "Detta kommer att göra listan privat, så att alla med åtkomst inte längre kan se den",
+						"private": "This will change the list to be private, hiding it from anyone who previously had access",
 						"shared": "Du måste dela listan med specifika användare för att ge dem åtkomst",
 						"fallback": "Är du säker på att du vill ändra synligheten för denna listan?"
 					}
@@ -1290,6 +1290,10 @@
 			"title": "Utseende",
 			"description": "Anpassa utseendet i programmet",
 			"sections": {
+				"themeAndAppearance": {
+					"label": "Theme and appearance",
+					"description": "The basic look and feel options for Stump"
+				},
 				"themeSelect": {
 					"label": "Tema",
 					"description": [
@@ -1308,9 +1312,52 @@
 						"matrix": "Matris"
 					}
 				},
+				"gradientToggle": {
+					"label": "Enable gradients",
+					"description": "Some themes optionally support gradients for a more dynamic look"
+				},
 				"fontSelect": {
 					"label": "Typsnitt",
 					"description": "Anpassa typsnittet som används i programmet"
+				},
+				"thumbnailRatioSelect": {
+					"label": "Thumbnail Ratio",
+					"description": "The aspect ratio to use for thumbnails"
+				},
+				"thumbnailPlaceholder": {
+					"label": "Thumbnail placeholder",
+					"description": "The style to use for thumbnail placeholders",
+					"options": {
+						"grayscale": "Grayscale",
+						"averageColor": "Average color",
+						"colorful": "Colorful",
+						"thumbhash": "Thumbhash"
+					}
+				},
+				"layoutAndArrangement": {
+					"label": "Layout and arrangement",
+					"description": "Customize how Stump displays information and organizes content"
+				},
+				"primaryNavigation": {
+					"label": "Primary navigation",
+					"description": "Choose between a minimal sidebar or a topbar navigation",
+					"options": {
+						"sidebar": "Sidebar",
+						"topbar": "Topbar"
+					},
+					"disclaimer": "* Settings for the unselected option will be disabled or hidden"
+				},
+				"doubleSidebar": {
+					"label": "Settings sidebar",
+					"description": "Enables the sidebar navigation for the settings pages. If you frequently use a smaller screen, you may want to disable this."
+				},
+				"replacePrimarySidebar": {
+					"label": "Replace primary sidebar",
+					"description": "Any instance of a secondary sidebar will replace the primary sidebar instead of being displayed next to it",
+					"tooltips": {
+						"doubleSidebar": "This setting requires the settings sidebar to be enabled",
+						"topbar": "This setting is not currently supported when the primary navigation is set to top bar"
+					}
 				},
 				"navigationArrangement": {
 					"label": "Navigationsarrangemang",
@@ -1338,6 +1385,60 @@
 							"help": "En länk till en sida tillägnad till att visa alla objekt av denna typ"
 						}
 					}
+				},
+				"displaySpacing": {
+					"label": "Display spacing",
+					"description": "Adjusts the overall spacing between elements throughout the app",
+					"options": {
+						"default": "Default",
+						"compact": "Compact"
+					},
+					"disclaimer": "* Compact display mode is not implemented yet"
+				},
+				"maxWidthPreference": {
+					"label": "Adjusted width",
+					"description": "Stump applies a max-width to the viewport. This setting allows you to adjust or remove this limit",
+					"tooltip": "This setting is not currently supported when the primary navigation is set to sidebar"
+				},
+				"additionalPreferences": {
+					"label": "Additional preferences",
+					"description": "Customize the appearance and behavior of Stump with these additional settings"
+				},
+				"showThumbnailsInHeader": {
+					"label": "Show thumbnails in headers",
+					"description": "If you prefer to see thumbnails more often, this setting will show them in more places",
+					"tooltips": {
+						"enabled": "This setting will show thumbnails in more places",
+						"disabled": "This setting will not show thumbnails in more places"
+					}
+				},
+				"hideScrollbarToggle": {
+					"label": "Hide scrollbar",
+					"description": "Some pages simply look better without a scrollbar, this setting will hide it when possible",
+					"tooltips": {
+						"enabled": "This setting will hide the scrollbar on some pages",
+						"disabled": "This setting will show the scrollbar on some pages"
+					}
+				},
+				"enableAlphabetFiltering": {
+					"label": "Alphabet filtering",
+					"description": "Show an alphabet filter when applicable"
+				},
+				"enableFancyAnimations": {
+					"label": "Fancy animations",
+					"description": "A broad opt-in for fancier animations throughout the app"
+				},
+				"queryIndicatorToggle": {
+					"label": "Background fetch indicator",
+					"description": "Show a loading indicator whenever a query is running in the background"
+				},
+				"liveRefetchToggle": {
+					"label": "Live refetch",
+					"description": "Refetch queries on the fly to hydrate the UI with new data as it comes in. This can be resource intensive"
+				},
+				"enableJobOverlayToggle": {
+					"label": "Job overlay",
+					"description": "Show a floating overlay while a job is running"
 				}
 			}
 		},
@@ -1860,7 +1961,7 @@
 		"server/email": {
 			"helmet": "E-postinställningar",
 			"title": "E-post",
-			"description": "Inställningar relaterade till att konfigurera en SMTP e-postare för din Stump-serverinstans",
+			"description": "Settings related to configuring an SMTP emailer for your Stump server instance",
 			"sections": {
 				"emailers": {
 					"title": "SMTP e-postare",

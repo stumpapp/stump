@@ -17,7 +17,7 @@ import { BookActionMenu } from '~/components/book/overview'
 import { InfoRow, InfoStat, LongValue } from '~/components/book/overview'
 import { ThumbnailImage } from '~/components/image'
 import RefreshControl from '~/components/RefreshControl'
-import { Button, CardList, Heading, Text } from '~/components/ui'
+import { Button, Card, Heading, Text } from '~/components/ui'
 import { Icon } from '~/components/ui/icon'
 import { formatSeriesPosition } from '~/lib/bookUtils'
 import { formatBytes, parseGraphQLDecimal } from '~/lib/format'
@@ -425,26 +425,26 @@ export default function Screen() {
 						</View>
 					)}
 
-					<CardList label="Information">
+					<Card label="Information">
 						<InfoRow label="Identifier" value={book.id} />
 						{book.metadata?.language && <InfoRow label="Language" value={book.metadata.language} />}
 						<InfoRow label="Pages" value={pages.toString()} />
 						<InfoRow label="Kind" value={book.extension.toUpperCase()} />
 						{formattedSize && <InfoRow label="Size" value={formattedSize} />}
-					</CardList>
+					</Card>
 
 					{!noExternalIdentifiers && (
-						<CardList label="External Identifiers">
+						<Card label="External Identifiers">
 							{identifierAmazon && <InfoRow label="Amazon" value={identifierAmazon} />}
 							{identifierCalibre && <InfoRow label="Calibre" value={identifierCalibre} />}
 							{identifierGoogle && <InfoRow label="Google" value={identifierGoogle} />}
 							{identifierIsbn && <InfoRow label="ISBN" value={identifierIsbn} />}
 							{identifierMobiAsin && <InfoRow label="Mobi ASIN" value={identifierMobiAsin} />}
 							{identifierUuid && <InfoRow label="UUID" value={identifierUuid} />}
-						</CardList>
+						</Card>
 					)}
 
-					<CardList label="Metadata" listEmptyStyle={{ message: 'No metadata available' }}>
+					<Card label="Metadata" listEmptyStyle={{ message: 'No metadata available' }}>
 						{description && <LongValue label="Description" value={stripHtml(description).result} />}
 						{seriesName && <InfoRow label="Series" value={seriesName} />}
 						{seriesPosition && (
@@ -459,17 +459,17 @@ export default function Screen() {
 						{/* TODO: Separate into separate section, maybe merge with links? */}
 						{genres && <InfoRow label="Genres" value={genres} />}
 						{characters && <InfoRow label="Characters" value={characters} />}
-					</CardList>
+					</Card>
 
 					{!noAcknowledgements && (
-						<CardList label="Acknowledgements">
+						<Card label="Acknowledgements">
 							{publisher && <InfoRow label="Publisher" value={publisher} />}
 							{writers && <InfoRow label="Writers" value={writers} />}
 							{colorists && <InfoRow label="Colorists" value={colorists} />}
 							{inkers && <InfoRow label="Inkers" value={inkers} />}
 							{letterers && <InfoRow label="Letterers" value={letterers} />}
 							{coverArtists && <InfoRow label="Cover Artists" value={coverArtists} />}
-						</CardList>
+						</Card>
 					)}
 
 					{links.length > 0 && (

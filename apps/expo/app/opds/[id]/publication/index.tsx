@@ -23,7 +23,7 @@ import {
 	getPublicationThumbnailURL,
 	getStringField,
 } from '~/components/opds/utils'
-import { Button, CardList, Icon, Text } from '~/components/ui'
+import { Button, Card, Icon, Text } from '~/components/ui'
 import {
 	useIsOPDSBookDownloading,
 	useIsOPDSPublicationDownloaded,
@@ -236,7 +236,7 @@ export default function Screen() {
 						</View>
 					)}
 
-					<CardList
+					<Card
 						label="Information"
 						listEmptyStyle={{ icon: Info, message: 'No information available' }}
 					>
@@ -249,9 +249,9 @@ export default function Screen() {
 						{!!numberOfPages && (
 							<InfoRow label="Number of pages" value={numberOfPages.toString()} longValue />
 						)}
-					</CardList>
+					</Card>
 
-					<CardList
+					<Card
 						label="Series"
 						listEmptyStyle={{ icon: BookCopy, message: 'No series information' }}
 					>
@@ -286,7 +286,7 @@ export default function Screen() {
 								</Pressable>
 							</View>
 						)}
-					</CardList>
+					</Card>
 				</View>
 			</ScrollView>
 		</SafeAreaView>

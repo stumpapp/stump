@@ -7,7 +7,7 @@ import { Pressable, ScrollView } from 'react-native-gesture-handler'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import RefreshControl from '~/components/RefreshControl'
-import { CardList, CardRow, Heading, Icon, ListEmptyMessage, Text } from '~/components/ui'
+import { Card, Heading, Icon, ListEmptyMessage, Text } from '~/components/ui'
 import { getAppUsage } from '~/lib/filesystem'
 import { formatBytes } from '~/lib/format'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
@@ -73,7 +73,7 @@ export default function Screen() {
 						<Heading>Servers</Heading>
 
 						{savedServers.length > 0 && (
-							<CardList>
+							<Card>
 								{savedServers.map((server) => (
 									<Pressable
 										key={server.id}
@@ -84,15 +84,15 @@ export default function Screen() {
 											})
 										}
 									>
-										<CardRow label={server.name}>
+										<Card.Row label={server.name}>
 											<View className="flex flex-row items-center gap-2">
 												<Text>{formatBytes(serverToUsage[server.id], 0, 'MB')}</Text>
 												<Icon as={ChevronRight} className="h-5 w-5 text-foreground-muted" />
 											</View>
-										</CardRow>
+										</Card.Row>
 									</Pressable>
 								))}
-							</CardList>
+							</Card>
 						)}
 
 						{savedServers.length === 0 && (

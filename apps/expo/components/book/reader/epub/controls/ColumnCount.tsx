@@ -1,4 +1,4 @@
-import { CardRow } from '~/components/ui'
+import { Card } from '~/components/ui'
 import { Picker } from '~/components/ui/picker/picker'
 import type { PickerOption } from '~/components/ui/picker/types'
 import { useReaderStore } from '~/stores'
@@ -21,12 +21,12 @@ export default function ColumnCount() {
 	}
 
 	return (
-		<CardRow label="Columns">
+		<Card.Row label="Columns">
 			<Picker
 				value={String(store.columnCount)}
 				options={COLUMN_OPTIONS}
 				onValueChange={handleChange}
 			/>
-		</CardRow>
+		</Card.Row>
 	)
 }

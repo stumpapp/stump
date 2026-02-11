@@ -2,6 +2,8 @@ import { createUserStore } from '@stump/client'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 
+import { ThumbnailPlaceholderType } from '~/components/image/ThumbnailPlaceholder'
+
 import { CachePolicy } from './reader'
 import { ZustandMMKVStorage } from './store'
 
@@ -18,7 +20,7 @@ type MobilePreferencesStore = {
 	cachePolicy: CachePolicy
 	allowDownscaling: boolean
 	thumbnailRatio: number
-	thumbnailPlaceholder: 'grayscale' | 'averageColor' | 'colorful' | 'thumbhash'
+	thumbnailPlaceholder: ThumbnailPlaceholderType
 	performanceMonitor: boolean
 	accentColor?: string | undefined
 	showCuratedDownloads?: boolean | undefined

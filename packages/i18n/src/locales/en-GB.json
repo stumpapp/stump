@@ -1328,15 +1328,15 @@
 					"label": "Thumbnail placeholder",
 					"description": "The style to use for thumbnail placeholders",
 					"options": {
-						"grayscale": "Grayscale",
-						"averageColor": "Average color",
-						"colorful": "Colorful",
+						"grayscale": "Greyscale",
+						"averageColor": "Average colour",
+						"colorful": "Colourful",
 						"thumbhash": "Thumbhash"
 					}
 				},
 				"layoutAndArrangement": {
 					"label": "Layout and arrangement",
-					"description": "Customize how Stump displays information and organizes content"
+					"description": "Customise how Stump displays information and organises content"
 				},
 				"primaryNavigation": {
 					"label": "Primary navigation",
@@ -1402,7 +1402,7 @@
 				},
 				"additionalPreferences": {
 					"label": "Additional preferences",
-					"description": "Customize the appearance and behavior of Stump with these additional settings"
+					"description": "Customise the appearance and behaviour of Stump with these additional settings"
 				},
 				"showThumbnailsInHeader": {
 					"label": "Show thumbnails in headers",

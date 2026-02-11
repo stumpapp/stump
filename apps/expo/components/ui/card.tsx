@@ -94,13 +94,8 @@ export function CardBackground({ className, ...props }: ViewProps) {
 	)
 }
 
-export function CardLabel({ className, ...props }: ComponentProps<typeof Text>) {
-	return (
-		<Text
-			className={cn('ios:px-4 px-2 text-lg font-semibold text-foreground-muted', className)}
-			{...props}
-		/>
-	)
+function CardLabel({ className, ...props }: ComponentProps<typeof Text>) {
+	return <ListLabel className={cn('ios:px-4 px-2', className)} {...props} />
 }
 
 type CardProps = ViewProps & {
@@ -156,3 +151,9 @@ export const ListEmptyMessage = ({ icon, message }: ListEmptyMessageProps) => (
 		<Text>{message || 'Nothing to display'}</Text>
 	</View>
 )
+
+export function ListLabel({ className, ...props }: ComponentProps<typeof Text>) {
+	return (
+		<Text className={cn('text-lg font-semibold text-foreground-muted', className)} {...props} />
+	)
+}

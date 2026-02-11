@@ -54,7 +54,7 @@
 		},
 		"emailBook": {
 			"heading": "Wyślij książkę przez e-mail",
-			"description": "Send this book to a device or email address",
+			"description": "Wyślij tę książkę na urządzenie lub adres e-mail",
 			"form": {
 				"email": {
 					"label": "Adres e-mail",
@@ -79,7 +79,7 @@
 			},
 			"description": {
 				"label": "Opis",
-				"placeholder": "An 'Our Flag Means Death' fan club. We read pirate fiction to our hearts' content",
+				"placeholder": "Fanklub 'Nasza flaga oznacza śmierć'. Czytamy fikcję piracką ile dusza zapragnie",
 				"description": "Opcjonalny, krótki opis Twojego klubu książki"
 			},
 			"is_private": {
@@ -121,7 +121,7 @@
 				},
 				"hideProgress": {
 					"label": "Ukryj postęp",
-					"description": "If enabled, your reading progress will be hidden from other members of the book club"
+					"description": "Jeśli opcja jest włączona, Twój postęp przeczytania zostanie ukryty przed innymi członkami klubu książki"
 				}
 			}
 		},
@@ -132,7 +132,7 @@
 	},
 	"createBookClubScene": {
 		"heading": "Stwórz nowy klub książki",
-		"subtitle": "You can create a private book club for a select few, or make it public for anyone on the server to join",
+		"subtitle": "Możesz utworzyć prywatny klub dla wybranych lub ustawić go jako publiczny dla każdego na serwerze",
 		"form": {
 			"stepLabel": "Krok",
 			"steps": [
@@ -211,7 +211,7 @@
 		},
 		"scheduling/scheduler": {
 			"title": "Harmonogram",
-			"description": "Create and manage the scheduled readings for this book club"
+			"description": "Utwórz i zarządzaj zaplanowane czytania dla tego klubu książki"
 		},
 		"scheduling/options": {
 			"title": "Opcje",
@@ -453,7 +453,7 @@
 	},
 	"createLibraryScene": {
 		"heading": "Utwórz bibliotekę",
-		"subtitle": "Libraries are used to group your books together. If you want a refresh on how they work, check out the",
+		"subtitle": "Biblioteki służą do grupowania książek. Jeśli chcesz odświeżyć sobie metodykę ich działania, sprawdź",
 		"subtitleLink": "stosowną dokumentację",
 		"form": {
 			"stepLabel": "Krok",

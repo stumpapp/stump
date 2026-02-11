@@ -536,7 +536,7 @@
 	},
 	"librarySettingsScene": {
 		"heading": "Ustawienia",
-		"subtitle": "Manage your library here. If you want a refresh on these settings, check out the",
+		"subtitle": "Zarządzaj tutaj swoją biblioteką. Jeśli chcesz odświeżyć sobie działanie tych ustawień, sprawdź",
 		"subtitleLink": "stosowną dokumentację",
 		"sidebar": {
 			"basics": "Podstawowe",
@@ -1098,7 +1098,7 @@
 				"visibility": {
 					"confirmation": {
 						"public": "To uczyni listę widoczną dla każdego",
-						"private": "This will change the list to be private, hiding it from anyone who previously had access",
+						"private": "Zmieni to listę na prywatną, ukrywając ją przed każdym, kto miał do tej pory dostęp",
 						"shared": "Wymagane będzie współdzielenie listy z wybranymi użytkownikami w celu nadania im dostępu",
 						"fallback": "Czy na pewno chcesz zmienić widoczność tej listy?"
 					}
@@ -1291,8 +1291,8 @@
 			"description": "Dostosuj wygląd aplikacji",
 			"sections": {
 				"themeAndAppearance": {
-					"label": "Theme and appearance",
-					"description": "The basic look and feel options for Stump"
+					"label": "Motyw i wygląd",
+					"description": "Podstawowe opcje wyglądu Stump"
 				},
 				"themeSelect": {
 					"label": "Motyw",
@@ -1313,50 +1313,50 @@
 					}
 				},
 				"gradientToggle": {
-					"label": "Enable gradients",
-					"description": "Some themes optionally support gradients for a more dynamic look"
+					"label": "Włącz gradienty",
+					"description": "Niektóre motywy opcjonalnie wspierają gradienty dla bardziej dynamicznego wyglądu"
 				},
 				"fontSelect": {
 					"label": "Czcionka",
 					"description": "Dostosuj czcionkę używaną w aplikacji"
 				},
 				"thumbnailRatioSelect": {
-					"label": "Thumbnail Ratio",
-					"description": "The aspect ratio to use for thumbnails"
+					"label": "Współczynnik miniatur",
+					"description": "Współczynnik proporcji używany dla miniatur"
 				},
 				"thumbnailPlaceholder": {
-					"label": "Thumbnail placeholder",
-					"description": "The style to use for thumbnail placeholders",
+					"label": "Miniatury zastępcze",
+					"description": "Styl używany dla zastępczych miniatur",
 					"options": {
-						"grayscale": "Grayscale",
-						"averageColor": "Average color",
-						"colorful": "Colorful",
+						"grayscale": "Odcienie szarości",
+						"averageColor": "Średnie wartości kolorów",
+						"colorful": "Kolorowe",
 						"thumbhash": "Thumbhash"
 					}
 				},
 				"layoutAndArrangement": {
-					"label": "Layout and arrangement",
-					"description": "Customize how Stump displays information and organizes content"
+					"label": "Układ i aranżacja",
+					"description": "Dostosuj jak Stump wyświetla informacje i organizuje zawartość"
 				},
 				"primaryNavigation": {
-					"label": "Primary navigation",
-					"description": "Choose between a minimal sidebar or a topbar navigation",
+					"label": "Główna nawigacja",
+					"description": "Wybierz pomiędzy minimalnym panelem bocznym lub nawigacją u górnym ekranu",
 					"options": {
-						"sidebar": "Sidebar",
-						"topbar": "Topbar"
+						"sidebar": "Pasek boczny",
+						"topbar": "Pasek górny"
 					},
-					"disclaimer": "* Settings for the unselected option will be disabled or hidden"
+					"disclaimer": "* Ustawienia niewybranych opcji będą wyłączone lub ukryte"
 				},
 				"doubleSidebar": {
-					"label": "Settings sidebar",
-					"description": "Enables the sidebar navigation for the settings pages. If you frequently use a smaller screen, you may want to disable this."
+					"label": "Panel boczny ustawień",
+					"description": "Włącza nawigację na panelu bocznym dla stron ustawień. Jeśli często używasz mniejszego ekranu, możesz chcieć to wyłączyć."
 				},
 				"replacePrimarySidebar": {
-					"label": "Replace primary sidebar",
-					"description": "Any instance of a secondary sidebar will replace the primary sidebar instead of being displayed next to it",
+					"label": "Zastąp główny panel boczny",
+					"description": "Każde wystąpienie drugorzędnego panelu bocznego zastąpi główny panel boczny, zamiast pokazywać go obok",
 					"tooltips": {
-						"doubleSidebar": "This setting requires the settings sidebar to be enabled",
-						"topbar": "This setting is not currently supported when the primary navigation is set to top bar"
+						"doubleSidebar": "To ustawienie wymaga włączenia panelu bocznego ustawień",
+						"topbar": "To ustawienie nie jest obecnie obsługiwane, gdy główna nawigacja jest ustawiona jako pasek u góry ekranu"
 					}
 				},
 				"navigationArrangement": {
@@ -1387,58 +1387,58 @@
 					}
 				},
 				"displaySpacing": {
-					"label": "Display spacing",
-					"description": "Adjusts the overall spacing between elements throughout the app",
+					"label": "Rozstaw wyświetlania",
+					"description": "Dostosuj odstępy między elementami w aplikacji",
 					"options": {
-						"default": "Default",
-						"compact": "Compact"
+						"default": "Domyślne",
+						"compact": "Kompaktowe"
 					},
-					"disclaimer": "* Compact display mode is not implemented yet"
+					"disclaimer": "* Tryb kompaktowy wyświetlania nie jest jeszcze zaimplementowany"
 				},
 				"maxWidthPreference": {
-					"label": "Adjusted width",
-					"description": "Stump applies a max-width to the viewport. This setting allows you to adjust or remove this limit",
-					"tooltip": "This setting is not currently supported when the primary navigation is set to sidebar"
+					"label": "Dostosowana szerokość",
+					"description": "Stump stosuje maksymalną szerokość widoku. To ustawienie pozwala dostosować lub usunąć ten limit",
+					"tooltip": "To ustawienie nie jest obecnie obsługiwane, jeśli główna nawigacja ustawiona jest jako panel boczny"
 				},
 				"additionalPreferences": {
-					"label": "Additional preferences",
-					"description": "Customize the appearance and behavior of Stump with these additional settings"
+					"label": "Dodatkowe ustawienia",
+					"description": "Dostosuj wygląd i zachowanie Stump za pomocą tych dodatkowych ustawień"
 				},
 				"showThumbnailsInHeader": {
-					"label": "Show thumbnails in headers",
-					"description": "If you prefer to see thumbnails more often, this setting will show them in more places",
+					"label": "Pokazuj miniatury w nagłówkach",
+					"description": "Jeśli chcesz widzieć częściej miniatury, to ustawienie pokaże je w większej ilości miejsc",
 					"tooltips": {
-						"enabled": "This setting will show thumbnails in more places",
-						"disabled": "This setting will not show thumbnails in more places"
+						"enabled": "To ustawienie pokaże miniatury w większej ilości miejsc",
+						"disabled": "To ustawienie nie pokaże miniatur w większej ilości miejsc"
 					}
 				},
 				"hideScrollbarToggle": {
-					"label": "Hide scrollbar",
-					"description": "Some pages simply look better without a scrollbar, this setting will hide it when possible",
+					"label": "Ukrywaj pasek przewijania",
+					"description": "Niektóre strony po prostu wyglądają lepiej bez paska przewijania, to ustawienie ukrywa go, gdy jest to możliwe",
 					"tooltips": {
-						"enabled": "This setting will hide the scrollbar on some pages",
-						"disabled": "This setting will show the scrollbar on some pages"
+						"enabled": "To ustawienie ukrywa pasek przewijania na niektórych stronach",
+						"disabled": "To ustawienie wyświetli pasek przewijania na niektórych stronach"
 					}
 				},
 				"enableAlphabetFiltering": {
-					"label": "Alphabet filtering",
-					"description": "Show an alphabet filter when applicable"
+					"label": "Filtrowanie alfabetyczne",
+					"description": "Pokaż filtrowanie alfabetyczne, jeśli dotyczy"
 				},
 				"enableFancyAnimations": {
-					"label": "Fancy animations",
-					"description": "A broad opt-in for fancier animations throughout the app"
+					"label": "Ozdobne animacje",
+					"description": "Szeroko pojęta opcja dla ozdobnych animacji w aplikacji"
 				},
 				"queryIndicatorToggle": {
-					"label": "Background fetch indicator",
-					"description": "Show a loading indicator whenever a query is running in the background"
+					"label": "Wskaźnik pobierania w tle",
+					"description": "Pokaż wskaźnik ładowania za każdym razem, gdy w tle uruchomione jest zapytanie"
 				},
 				"liveRefetchToggle": {
-					"label": "Live refetch",
-					"description": "Refetch queries on the fly to hydrate the UI with new data as it comes in. This can be resource intensive"
+					"label": "Pobieranie na żywo",
+					"description": "Pobierz zapytania w locie, aby pokazać nowe dane w miarę ich dodawania. Opcja ta może być zasobożerna"
 				},
 				"enableJobOverlayToggle": {
-					"label": "Job overlay",
-					"description": "Show a floating overlay while a job is running"
+					"label": "Nakładka zadań",
+					"description": "Pokaż pływającą nakładkę, gdy wykonywane jest zadanie"
 				}
 			}
 		},
@@ -1961,7 +1961,7 @@
 		"server/email": {
 			"helmet": "Ustawienia e-mail",
 			"title": "Adres e-mail",
-			"description": "Settings related to configuring an SMTP emailer for your Stump server instance",
+			"description": "Ustawienia powiązane z konfiguracją wysyłki SMTP tego serwera Stump",
 			"sections": {
 				"emailers": {
 					"title": "Wysyłka SMTP",

@@ -1,8 +1,8 @@
 {
 	"underConstruction": {
-		"heading": "Questo è strano",
-		"message": "Sei incappato su una pagina ancora in fase di sviluppo. Mi piacerebbe mostrarla, ma non è ancora abbastanza pronta.",
-		"homeLink": "Torna alla home",
+		"heading": "This is awkward",
+		"message": "You've stumbled upon a page that's still being developed. I'd love to show it to you, but it isn't quite ready yet.",
+		"homeLink": "Go Home",
 		"githubLink": "View the GitHub issue"
 	},
 	"authScene": {
@@ -10,45 +10,45 @@
 		"claimText": "This Stump server is not initialized. Use the form below to create your account. Once created, you will have full access to all server features.",
 		"form": {
 			"validation": {
-				"missingUsername": "Il nome utente è obbligatorio",
-				"missingPassword": "La password è obbligatoria",
+				"missingUsername": "Username is required",
+				"missingPassword": "Password is required",
 				"usernameAlreadyExists": "Username already exists"
 			},
 			"labels": {
-				"username": "Nome utente",
+				"username": "Username",
 				"password": "Password"
 			},
 			"buttons": {
-				"createAccount": "Crea un account",
+				"createAccount": "Create Account",
 				"login": "Log in",
 				"loginWithOidc": "Log in with OIDC",
 				"createAccountWithOidc": "Create Account with OIDC"
 			}
 		},
 		"toasts": {
-			"loggingIn": "Accesso in corso...",
+			"loggingIn": "Logging in...",
 			"loggedIn": "Welcome back!",
 			"loggedInFirstTime": "Welcome!",
-			"registering": "Registrazione in corso...",
-			"registered": "Registrazione completata!",
+			"registering": "Registering...",
+			"registered": "Registered!",
 			"loginFailed": "Login failed. Please try again",
 			"registrationFailed": "Registration failed. Please try again"
 		}
 	},
 	"adminLibrarySidebar": {
 		"libraryConfiguration": {
-			"heading": "Configurazione della libreria",
+			"heading": "Library Configuration",
 			"subtitleCreating": "A preview of your new library will be shown below",
 			"subtitleEditing": "A preview of your library edits will be shown below"
 		}
 	},
 	"bookOverviewScene": {
 		"fileInformation": {
-			"heading": "Informazioni sul file",
+			"heading": "File Information",
 			"labels": {
-				"fileSize": "Dimensioni del file",
-				"fileType": "Tipo di file",
-				"fileLocation": "Posizione del file",
+				"fileSize": "File Size",
+				"fileType": "File Type",
+				"fileLocation": "File Location",
 				"fileChecksum": "Checksum"
 			}
 		},
@@ -68,7 +68,7 @@
 				}
 			}
 		},
-		"nextInSeries": "Prossimo nella serie"
+		"nextInSeries": "Next in Series"
 	},
 	"createOrUpdateBookClubForm": {
 		"fields": {
@@ -452,9 +452,9 @@
 		}
 	},
 	"createLibraryScene": {
-		"heading": "Crea nuova libreria",
+		"heading": "Create library",
 		"subtitle": "Libraries are used to group your books together. If you want a refresh on how they work, check out the",
-		"subtitleLink": "documentazione correlata",
+		"subtitleLink": "relevant documentation",
 		"form": {
 			"stepLabel": "Step",
 			"steps": [
@@ -507,7 +507,7 @@
 				}
 			},
 			"buttons": {
-				"confirm": "Crea libreria"
+				"confirm": "Create Library"
 			}
 		}
 	},
@@ -535,7 +535,7 @@
 		}
 	},
 	"librarySettingsScene": {
-		"heading": "Impostazioni libreria",
+		"heading": "Settings",
 		"subtitle": "Manage your library here. If you want a refresh on these settings, check out the",
 		"subtitleLink": "relevant documentation",
 		"sidebar": {
@@ -639,7 +639,7 @@
 			"description": "Settings and management options for thumbnails in this library",
 			"sections": {
 				"management": {
-					"heading": "Management",
+					"heading": "Manage thumbnails",
 					"description": "Manage the existing thumbnails for this library",
 					"thumbnailSelector": {},
 					"deleteThumbnails": {}
@@ -654,7 +654,7 @@
 					"heading": "Analyze books",
 					"description": "Analyze the books in this library to attach additional metadata in the database, such as page dimensions for image-based books",
 					"disclaimerTitle": "This process is resource-intensive",
-					"disclaimer": "This process is resource-intensive and may take a while to complete. In the future, it will be more configurable",
+					"disclaimer": "It may take a while to complete. In the future, it will be more configurable",
 					"analyzeButton": "Analyze books"
 				},
 				"missingFiles": {
@@ -684,7 +684,7 @@
 			}
 		},
 		"danger-zone/delete": {
-			"title": "Deletion Actions",
+			"title": "Deletion",
 			"description": "Permanently delete this library and all of its contents or certain resources",
 			"sections": {
 				"cleanLibrary": {
@@ -709,12 +709,12 @@
 		}
 	},
 	"errorScene": {
-		"heading": "Ops, si è verificato un errore",
-		"message": "Si è verificato un errore:",
+		"heading": "lol, oops",
+		"message": "An error occurred:",
 		"buttons": {
-			"report": "Segnala problema",
-			"copy": "Copia dettagli errore",
-			"goHome": "Torna alla home"
+			"report": "Report Bug",
+			"copy": "Copy Error Details",
+			"goHome": "Go Home"
 		}
 	},
 	"homeScene": {
@@ -800,8 +800,8 @@
 	},
 	"seriesOverviewScene": {
 		"buttons": {
-			"continueReading": "Continua a leggere",
-			"downloadSeries": "Scarica serie"
+			"continueReading": "Continue Reading",
+			"downloadSeries": "Download Series"
 		}
 	},
 	"createOrUpdateSmartListForm": {
@@ -1170,7 +1170,7 @@
 					"placeholder": "Quick filter"
 				},
 				"viewManager": {
-					"updateSelected": "Update selected",
+					"updateSelected": "Update view",
 					"deleteSelected": "Delete view",
 					"create": "Create new view",
 					"modal": {
@@ -1184,14 +1184,14 @@
 						},
 						"createForm": {
 							"name": {
-								"label": "Nome",
+								"label": "Name",
 								"placeholder": "My view",
 								"description": "A friendly name to uniquely identify this view"
 							}
 						},
 						"updateForm": {
 							"name": {
-								"label": "Nome",
+								"label": "Name",
 								"placeholder": "My view",
 								"description": "The updated name for this view, if desired"
 							}
@@ -1207,11 +1207,11 @@
 	},
 	"settingsScene": {
 		"navigation": {
-			"general": "Generale",
+			"general": "General",
 			"logs": "Logs",
 			"server": "Server",
-			"jobs": "Lavori e configurazione",
-			"users": "Gestione utenti",
+			"jobs": "Jobs and Configuration",
+			"users": "User Management",
 			"desktop": "Desktop"
 		},
 		"sidebar": {
@@ -1224,7 +1224,7 @@
 				"label": "Personal"
 			},
 			"management": {
-				"general": "General",
+				"general": "Server",
 				"logs": "Logs",
 				"users": "Users",
 				"jobs": "Jobs",
@@ -1242,10 +1242,10 @@
 				"account": {
 					"validation": {
 						"invalidUrl": "Please enter a valid URL",
-						"missingUsername": "Il nome utente è obbligatorio"
+						"missingUsername": "Username is required"
 					},
 					"labels": {
-						"username": "Nome utente",
+						"username": "Username",
 						"password": "Password",
 						"activeChangesPrompt": "You have unsaved changes"
 					},
@@ -1286,8 +1286,8 @@
 			}
 		},
 		"app/preferences": {
-			"helmet": "Appearance",
-			"title": "Appearance",
+			"helmet": "Preferences",
+			"title": "Preferences",
 			"description": "Customize the look and feel of the application",
 			"sections": {
 				"themeAndAppearance": {
@@ -1635,16 +1635,16 @@
 						}
 					},
 					"resetTokens": {
-						"label": "Clear authentication",
+						"label": "Delete tokens",
 						"description": [
-							"Remove all securely-stored access tokens for your servers",
-							"You will have to re-authenticate with each server"
+							"Remove all securely-stored tokens for your servers, including API keys",
+							"You will have to re-authenticate with and/or re-configure each server"
 						],
 						"confirmation": {
-							"trigger": "Clear authentication",
-							"title": "Clear authentication",
-							"description": "This will remove all securely-stored access tokens for your servers",
-							"confirm": "Clear authentication"
+							"trigger": "Delete tokens",
+							"title": "Delete tokens",
+							"description": "Are you sure you want to delete all stored tokens?",
+							"confirm": "Delete tokens"
 						}
 					}
 				},
@@ -1664,8 +1664,8 @@
 			}
 		},
 		"server/general": {
-			"helmet": "General server settings",
-			"title": "General settings",
+			"helmet": "Server settings",
+			"title": "Server settings",
 			"description": "General settings related to your Stump server instance",
 			"sections": {
 				"updateAvailable": {
@@ -1733,8 +1733,8 @@
 			"description": "Background jobs that run on your Stump server instance",
 			"sections": {
 				"scheduling": {
-					"title": "Scheduling",
-					"description": "Some jobs can be configured to run on a schedule. Changes to this configuration will take effect after a server restart",
+					"title": "Scheduled Jobs",
+					"description": "Some jobs can be configured to automatically run on a schedule",
 					"disclaimer": "The job scheduler is really basic and will be improved in the future. Please reach out for feedback or suggestions!",
 					"createOrUpdateConfig": {
 						"fields": {
@@ -1854,8 +1854,8 @@
 					"file": {
 						"label": "File Management",
 						"explorer": {
-							"label": "Esplora file",
-							"description": "Consente all'utente di accedere ai vari esplora file. La restrizione dei contenuti non può essere garantita quando questa funzione viene abilitata"
+							"label": "File explorer",
+							"description": "Allows the user to access the various file explorers.\nContent restriction cannot be guaranteed when this feature is granted"
 						},
 						"download": {
 							"label": "Download files",
@@ -1863,7 +1863,7 @@
 						},
 						"upload": {
 							"label": "Upload files",
-							"description": "Consente all'utente di caricare file sul server"
+							"description": "Allows the user to upload files to the server"
 						}
 					},
 					"emailer": {
@@ -1893,62 +1893,62 @@
 						}
 					},
 					"library": {
-						"label": "Gestione Libreria",
+						"label": "Library Management",
 						"create": {
-							"label": "Creare librerie",
-							"description": "Consente all'utente di creare nuove librerie.\nInclude le autorizzazioni per modificare ed eseguire la scansione"
+							"label": "Create libraries",
+							"description": "Allows the user to create new libraries.\nIncludes permissions to edit and scan"
 						},
 						"scan": {
-							"label": "Scansionare librerie",
-							"description": "Consente all'utente di avviare scansioni per le librerie esistenti"
+							"label": "Scan libraries",
+							"description": "Allows the user to initiate scans for existing libraries"
 						},
 						"edit": {
-							"label": "Modificare librerie",
-							"description": "Consente all'utente di modificare i dettagli di base per le librerie esistenti"
+							"label": "Edit libraries",
+							"description": "Allows the user to edit basic details for existing libraries"
 						},
 						"manage": {
-							"label": "Gestire librerie",
-							"description": "Consente all'utente di gestire le impostazioni avanzate per le librerie esistenti.\nInclude le autorizzazioni per modificare ed eseguire la scansione"
+							"label": "Manage libraries",
+							"description": "Allows the user to manage advanced settings for existing libraries.\nIncludes permissions to edit and scan"
 						},
 						"delete": {
-							"label": "Eliminare librerie",
-							"description": "Consente all'utente di eliminare le librerie esistenti.\nInclude le autorizzazioni per modificare, gestire ed eseguire scansioni"
+							"label": "Delete libraries",
+							"description": "Allows the user to delete existing libraries.\nIncludes permissions to edit, manage, and scan"
 						}
 					},
 					"server": {
-						"label": "Gestione Server",
+						"label": "Server Management",
 						"manage": {
-							"label": "Gestire server",
-							"description": "Consente all'utente di gestire il server.\nInclude *molte* altre autorizzazioni"
+							"label": "Manage server",
+							"description": "Allows the user to manage the server.\nIncludes *many* other permissions"
 						}
 					},
 					"user": {
-						"label": "Gestione utenti",
+						"label": "User Management",
 						"read": {
-							"label": "Leggere utenti",
-							"description": "Consente all'utente d'interrogare altri utenti sul server. Richiesto per altre funzionalità, ad esempio escludere gli utenti dall'accesso a una libreria"
+							"label": "Read users",
+							"description": "Allows the user to query other users on the server. This is required for some other features, e.g. excluding users from accessing a library"
 						},
 						"manage": {
-							"label": "Gestire utenti",
-							"description": "Consente all'utente di gestire altri utenti sul server.\nInclude i permessi per leggere, creare e aggiornare"
+							"label": "Manage users",
+							"description": "Allows the user to manage other users on the server.\nIncludes permissions to read, create, and update"
 						}
 					},
 					"smartlist": {
 						"label": "Smart Lists",
 						"read": {
 							"label": "Access smart list feature",
-							"description": "Consente all'utente di accedere alle funzionalità delle smart list. Le autorizzazioni granulari non sono ancora implementate, quindi questa include i permessi per leggere, creare e aggiornare le proprie liste"
+							"description": "Allows the user to access smart lists features. Granular permissions are not yet implemented, so this\nincludes permissions to read, create, and update their own lists"
 						}
 					}
 				},
 				"validation": {
-					"ageRestrictionTooLow": "La limitazione dell'età non può essere inferiore a 0",
+					"ageRestrictionTooLow": "Age restriction cannot be less than 0",
 					"missingUsername": "Username is required",
 					"missingPassword": "Password is required",
 					"usernameAlreadyExists": "Username already exists"
 				},
-				"createSubmitButton": "Crea utente",
-				"updateSubmitButton": "Aggiorna utente"
+				"createSubmitButton": "Create user",
+				"updateSubmitButton": "Update user"
 			},
 			"loginActivity": {
 				"deleteConfirmation": {
@@ -1959,7 +1959,7 @@
 			}
 		},
 		"server/email": {
-			"helmet": "Impostazioni email",
+			"helmet": "Email settings",
 			"title": "Email",
 			"description": "Settings related to configuring an SMTP emailer for your Stump server instance",
 			"sections": {
@@ -1996,7 +1996,7 @@
 							"update": "Update device alias"
 						},
 						"name": {
-							"label": "Nome",
+							"label": "Name",
 							"description": "A friendly name to uniquely identify this device alias"
 						},
 						"email": {
@@ -2004,7 +2004,7 @@
 							"description": "The email address this alias will be associated with"
 						},
 						"forbidden": {
-							"label": "Vietato",
+							"label": "Forbidden",
 							"description": "When enabled, no user may send emails to the address associated with this alias"
 						},
 						"submit": {
@@ -2020,7 +2020,7 @@
 			},
 			"createOrUpdateForm": {
 				"name": {
-					"label": "Nome",
+					"label": "Name",
 					"description": "A friendly name to uniquely identify this emailer"
 				},
 				"smtpSettings": {
@@ -2044,8 +2044,8 @@
 					"description": "If enabled, the connection to the SMTP server will be encrypted"
 				},
 				"username": {
-					"label": "Nome utente",
-					"description": "Il nome utente per l'autenticazione con il server SMTP. Tipicamente è l'indirizzo email"
+					"label": "Username",
+					"description": "The username for authenticating with the SMTP server. This is typically the email address"
 				},
 				"password": {
 					"label": "Password",
@@ -2056,7 +2056,7 @@
 					"description": "The settings for the sender of the email"
 				},
 				"senderDisplayName": {
-					"label": "Nome visualizzato del mittente",
+					"label": "Sender display name",
 					"description": "The name that will be displayed to recipients"
 				},
 				"senderEmail": {
@@ -2064,7 +2064,7 @@
 					"description": "The email address that will be displayed to recipients"
 				},
 				"additionalSettings": {
-					"heading": "Impostazioni aggiuntive",
+					"heading": "Additional settings",
 					"description": "Additional settings for the emailer"
 				},
 				"maxAttachmentSize": {
@@ -2089,140 +2089,140 @@
 		}
 	},
 	"jobOverlay": {
-		"backupHeading": "Lavoro in corso"
+		"backupHeading": "Job in Progress"
 	},
 	"libraryStats": {
-		"seriesCount": "Serie totali",
-		"bookCount": "Libri totali",
-		"diskUsage": "Utilizzo del disco"
+		"seriesCount": "Total Series",
+		"bookCount": "Total Books",
+		"diskUsage": "Disk Usage"
 	},
 	"noLibraries": {
-		"heading": "Niente da vedere qui",
+		"heading": "Nothing to see here",
 		"messagePrefix": "You can't see what you don't have",
 		"message": {
-			"create": "Crea una libreria per iniziare",
-			"wait": "Una volta create le librerie, verranno visualizzate qui"
+			"create": "Create a library to get started",
+			"wait": "Once libraries are created, they'll be displayed here"
 		},
 		"links": {
-			"create": "Crea libreria",
+			"create": "Create library",
 			"settings": "Go to settings"
 		}
 	},
 	"pagination": {
 		"buttons": {
-			"next": "Avanti",
-			"previous": "Indietro"
+			"next": "Next",
+			"previous": "Previous"
 		},
 		"popover": {
-			"heading": "Vai alla pagina",
+			"heading": "Go to page",
 			"buttons": {
-				"confirm": "Vai",
-				"cancel": "Annulla"
+				"confirm": "Go",
+				"cancel": "Cancel"
 			}
 		}
 	},
 	"signOutModal": {
-		"title": "Disconnessione",
-		"message": "Sei sicuro di voler uscire?",
+		"title": "Sign out",
+		"message": "Are you sure you want to sign out?",
 		"buttons": {
-			"cancel": "Annulla",
-			"signOut": "Esci"
+			"cancel": "Cancel",
+			"signOut": "Sign out"
 		}
 	},
 	"sidebar": {
 		"buttons": {
-			"home": "Casa",
-			"libraries": "Librerie",
-			"books": "Esplora",
-			"bookClubs": "Club del libro",
-			"createLibrary": "Crea libreria",
-			"noLibraries": "Nessuna libreria",
-			"createBookClub": "Crea club del libro",
-			"noBookClubs": "Nessun club del libro",
-			"settings": "Impostazioni",
-			"themeToggle": "Cambia Tema",
-			"goForward": "Vai Avanti",
-			"goBack": "Torna Indietro",
-			"smartlists": "Smart list",
-			"noSmartlists": "Nessuna smart list",
-			"createSmartlist": "Crea smart list",
-			"seeAll": "Mostra tutti"
+			"home": "Home",
+			"libraries": "Libraries",
+			"books": "Explore",
+			"bookClubs": "Book clubs",
+			"createLibrary": "Create library",
+			"noLibraries": "No libraries",
+			"createBookClub": "Create book club",
+			"noBookClubs": "No book clubs",
+			"settings": "Settings",
+			"themeToggle": "Toggle Theme",
+			"goForward": "Go Forward",
+			"goBack": "Go Back",
+			"smartlists": "Smart lists",
+			"noSmartlists": "No smart lists",
+			"createSmartlist": "Create smart list",
+			"seeAll": "See all"
 		},
 		"libraryOptions": {
-			"scanLibrary": "Analizza",
+			"scanLibrary": "Scan",
 			"fileExplorer": "Files",
-			"manageLibrary": "Manage",
-			"deleteLibrary": "Cancella"
+			"manageLibrary": "Settings",
+			"deleteLibrary": "Delete"
 		},
 		"versionInformation": {
-			"heading": "Informazioni sulla versione",
-			"semVer": "Versione Semantica",
-			"commitHash": "Hash del Commit",
-			"buildDate": "Data di compilazione"
+			"heading": "Version Information",
+			"semVer": "Semantic Version",
+			"commitHash": "Commit Hash",
+			"buildDate": "Build Date"
 		}
 	},
 	"search": {
-		"placeholder": "Cerca"
+		"placeholder": "Search"
 	},
 	"serverSOS": {
-		"heading": "Server non disponibile",
+		"heading": "Server Unavailable",
 		"desktop": {
-			"message": "Si è verificato un errore di rete, sembra che il tuo server Stump non è al momento disponibile. Assicurati che sia in funzione e accessibile da questo dispositivo.\nSe l'URL del tuo server è cambiato, puoi aggiornarlo utilizzando il modulo sottostante"
+			"message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device.\nIf your server URL has changed, you can update it using the form below"
 		},
 		"web": {
-			"message": "Si è verificato un errore di rete, sembra che il tuo server Stump non è al momento disponibile. Assicurati che sia in funzione e accessibile da questo dispositivo"
+			"message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device"
 		},
-		"reconnected": "Riconnesso al server! Redirezione in corso...",
-		"reconnectionFailed": "Qualcosa è andato storto!"
+		"reconnected": "Reconnected to server! Redirecting...",
+		"reconnectionFailed": "Something went wrong!"
 	},
 	"serverStatusOverlay": {
-		"heading": "Il server non è connesso",
+		"heading": "Server isn't connected",
 		"message": [
-			"Controlla la tua connessione internet",
-			"Fai clic qui",
-			"per cambiare l'URL del tuo server"
+			"Please check your internet connection",
+			"Click here",
+			"to change your server URL"
 		]
 	},
 	"slidingList": {
-		"empty": "Nessun elemento da visualizzare",
+		"empty": "No items to display",
 		"buttons": {
-			"next": "Vai avanti",
-			"previous": "Torna indietro"
+			"next": "Seek Ahead",
+			"previous": "Seek Backwards"
 		}
 	},
 	"tagSelect": {
 		"placeholder": "Select or create tag",
-		"placeholderNoTags": "Nessun tag disponibile"
+		"placeholderNoTags": "No tags available"
 	},
 	"thumbnailDropdown": {
-		"label": "Edit thumbnail",
+		"label": "Select thumbnail",
 		"options": {
-			"selectFromBooks": "Seleziona dai libri",
-			"uploadImage": "Carica immagine"
+			"selectFromBooks": "Select from books",
+			"uploadImage": "Upload image"
 		},
 		"uploadImage": {
-			"emptyState": "Un'anteprima della tua immagine apparirà qui",
-			"prompt": "Trascina qui l'immagine o fai clic per selezionare",
-			"remove": "Rimuovi immagine"
+			"emptyState": "A preview of your image will appear here",
+			"prompt": "Drop image here or click to select",
+			"remove": "Remove image"
 		}
 	},
 	"common": {
-		"add": "Aggiungi",
-		"cancel": "Annulla",
-		"confirm": "Conferma",
+		"add": "Add",
+		"cancel": "Cancel",
+		"confirm": "Confirm",
 		"delete": "Delete",
 		"enter": "Enter",
-		"save": "Salva",
-		"send": "Invia",
-		"saveChanges": "Salve le modifiche",
+		"save": "Save",
+		"send": "Send",
+		"saveChanges": "Save changes",
 		"noChanges": "No changes",
-		"create": "Crea",
-		"edit": "Modifica",
-		"update": "Aggiorna",
+		"create": "Create",
+		"edit": "Edit",
+		"update": "Update",
 		"upload": "Upload",
 		"uploading": "Uploading",
-		"unimplemented": "Questa funzionalità non è stata ancora implementata! Riprova più tardi",
-		"limitedFunctionality": "Questo non è stato ancora implementato completamente e mancano alcune funzionalità. Riprova più tardi",
+		"unimplemented": "This functionality is not yet implemented! Check back later",
+		"limitedFunctionality": "This is not yet fully implemented and is lacking some features. Check back later",
 		"logIn": "Log in",
 		"login": "Login",
 		"seeError": "See error",

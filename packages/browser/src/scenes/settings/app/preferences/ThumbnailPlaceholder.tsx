@@ -1,17 +1,12 @@
 import { Label, NativeSelect, Text } from '@stump/components'
 import { ThumbnailPlaceholderStyle } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import React from 'react'
 
 import { usePreferences } from '@/hooks/usePreferences'
 
-const OPTIONS = [
-	{ label: 'Grayscale', value: ThumbnailPlaceholderStyle.Grayscale },
-	{ label: 'Average color', value: ThumbnailPlaceholderStyle.AverageColor },
-	{ label: 'Colorful', value: ThumbnailPlaceholderStyle.Colorful },
-	{ label: 'Thumbhash', value: ThumbnailPlaceholderStyle.Thumbhash },
-] satisfies { label: string; value: ThumbnailPlaceholderStyle }[]
-
 export default function ThumbnailPlaceholder() {
+	const { t } = useLocaleContext()
 	const {
 		preferences: { thumbnailPlaceholderStyle },
 		update,
@@ -22,12 +17,19 @@ export default function ThumbnailPlaceholder() {
 		return update({ thumbnailPlaceholderStyle: e.target.value })
 	}
 
+	const options = [
+		{ label: t(getKey('options.grayscale')), value: ThumbnailPlaceholderStyle.Grayscale },
+		{ label: t(getKey('options.averageColor')), value: ThumbnailPlaceholderStyle.AverageColor },
+		{ label: t(getKey('options.colorful')), value: ThumbnailPlaceholderStyle.Colorful },
+		{ label: t(getKey('options.thumbhash')), value: ThumbnailPlaceholderStyle.Thumbhash },
+	] satisfies { label: string; value: ThumbnailPlaceholderStyle }[]
+
 	return (
 		<div className="flex flex-col gap-y-1.5 md:max-w-md">
-			<Label>Thumbnail placeholder</Label>
-			<NativeSelect value={thumbnailPlaceholderStyle} options={OPTIONS} onChange={handleChange} />
+			<Label>{t(getKey('label'))}</Label>
+			<NativeSelect value={thumbnailPlaceholderStyle} options={options} onChange={handleChange} />
 			<Text size="xs" variant="muted">
-				The style to use for thumbnail placeholders
+				{t(getKey('description'))}
 			</Text>
 		</div>
 	)
@@ -36,3 +38,6 @@ export default function ThumbnailPlaceholder() {
 const isPlaceholderStyle = (value: string): value is ThumbnailPlaceholderStyle => {
 	return Object.values(ThumbnailPlaceholderStyle).includes(value as ThumbnailPlaceholderStyle)
 }
+
+const LOCALE_BASE = 'settingsScene.app/preferences.sections.thumbnailPlaceholder'
+const getKey = (key: string) => `${LOCALE_BASE}.${key}`

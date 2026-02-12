@@ -22,7 +22,7 @@ import { useActiveServer, useStumpServer } from '~/components/activeServer'
 import { BookMetaLink } from '~/components/book'
 import { BookActionMenu } from '~/components/book/overview'
 import { InfoRow, LongValue } from '~/components/book/overview'
-import { ThumbnailImage, ThumbnailPlaceholder } from '~/components/image'
+import { ThumbnailImage } from '~/components/image'
 import RefreshControl from '~/components/RefreshControl'
 import { Button, Card, Heading, Text } from '~/components/ui'
 import { Icon } from '~/components/ui/icon'
@@ -361,33 +361,24 @@ export default function Screen() {
 					className="absolute -inset-24 opacity-70 dark:opacity-30"
 					style={parallaxStyle}
 				>
-					{Platform.select({
-						ios: (
-							<TImage
-								source={{
-									uri,
-									headers: {
-										...sdk.customHeaders,
-										Authorization: sdk.authorizationHeader || '',
-									},
-								}}
-								style={{ width: '100%', height: '100%' }}
-								resizeMode="cover"
-								fadeDuration={2000}
-								{...(Platform.OS === 'ios' && { indicator: { color: 'transparent' } })}
-								// android only supports up to blur={25} which doesn't look good
-								blur={40}
-							/>
-						),
-						android: (
-							// Not as good as using the real image, especially with the parallax and translucent components but what can I do
-							<ThumbnailPlaceholder
-								placeholderData={placeholderData}
-								placeholderType="thumbhash"
-								fadeDuration={2000}
-							/>
-						),
-					})}
+					<TImage
+						source={{
+							uri,
+							headers: {
+								...sdk.customHeaders,
+								Authorization: sdk.authorizationHeader || '',
+							},
+						}}
+						style={{ width: '100%', height: '100%' }}
+						resizeMode="cover"
+						fadeDuration={2000}
+						{...(Platform.OS === 'ios' && { indicator: { color: 'transparent' } })}
+						// android only supports up to blur={25} which doesn't look good,
+						// but if we heavily downscale first, the following looks near identical to using
+						// original res with blur={40} on ios, which is what I originally settled on
+						resize={60}
+						blur={Platform.OS === 'ios' ? 7 : 16}
+					/>
 				</Animated.View>
 
 				<View className="gap-8 px-4 tablet:px-6">

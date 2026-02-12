@@ -151,34 +151,31 @@ export default function Screen() {
 
 	return (
 		<Animated.ScrollView className="flex-1 bg-background" ref={animatedScrollRef}>
-			<View className="ios:pt-safe-offset-20 ios:pb-8 overflow-hidden pt-4">
+			<View className="ios:pt-safe-offset-20 overflow-hidden pb-8 pt-4">
 				<Animated.View
 					// -inset-24 is because when using a lot of blur, the sides get more transparent
 					// so we have to "zoom in" to have a clean line at the bottom rather than a gradient
 					className="absolute -inset-24 opacity-70 dark:opacity-30"
 					style={parallaxStyle}
 				>
-					{Platform.select({
-						ios: (
-							<TImage
-								source={{
-									uri: thumbnailURL || '',
-									headers: {
-										...sdk.customHeaders,
-										Authorization: sdk.authorizationHeader || '',
-									},
-								}}
-								style={{ width: '100%', height: '100%' }}
-								resizeMode="cover"
-								fadeDuration={2000}
-								{...(Platform.OS === 'ios' && { indicator: { color: 'transparent' } })}
-								// android only supports up to blur={25} which doesn't look good
-								blur={40}
-							/>
-						),
-						// (╥﹏╥)
-						android: null,
-					})}
+					<TImage
+						source={{
+							uri: thumbnailURL || '',
+							headers: {
+								...sdk.customHeaders,
+								Authorization: sdk.authorizationHeader || '',
+							},
+						}}
+						style={{ width: '100%', height: '100%' }}
+						resizeMode="cover"
+						fadeDuration={2000}
+						{...(Platform.OS === 'ios' && { indicator: { color: 'transparent' } })}
+						// android only supports up to blur={25} which doesn't look good,
+						// but if we heavily downscale first, the following looks near identical to using
+						// original res with blur={40} on ios, which is what I originally settled on
+						resize={60}
+						blur={Platform.OS === 'ios' ? 7 : 16}
+					/>
 				</Animated.View>
 
 				<View className="gap-8 px-4 tablet:px-6">

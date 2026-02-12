@@ -1,233 +1,233 @@
 {
 	"underConstruction": {
-		"heading": "Det här är pinsamt",
-		"message": "Du har snubblat på en sida som är under utveckling. Jag skulle vilja visa den för dig, men den är inte riktigt klar än.",
-		"homeLink": "Gå Hem",
-		"githubLink": "Se problemet på GitHub"
+		"heading": "This is awkward",
+		"message": "You've stumbled upon a page that's still being developed. I'd love to show it to you, but it isn't quite ready yet.",
+		"homeLink": "Go Home",
+		"githubLink": "View the GitHub issue"
 	},
 	"authScene": {
-		"claimHeading": "Initiera din server",
-		"claimText": "Denna Stump-server är inte initierad. Använd formuläret nedan för att skapa ditt konto. När det är skapat kommer du ha full tillgång till alla serverfunktioner.",
+		"claimHeading": "Initialize your server",
+		"claimText": "This Stump server is not initialized. Use the form below to create your account. Once created, you will have full access to all server features.",
 		"form": {
 			"validation": {
-				"missingUsername": "Användarnamn krävs",
-				"missingPassword": "Lösenord krävs",
-				"usernameAlreadyExists": "Användarnamnet existerar redan"
+				"missingUsername": "Username is required",
+				"missingPassword": "Password is required",
+				"usernameAlreadyExists": "Username already exists"
 			},
 			"labels": {
-				"username": "Användarnamn",
-				"password": "Lösenord"
+				"username": "Username",
+				"password": "Password"
 			},
 			"buttons": {
-				"createAccount": "Skapa Konto",
-				"login": "Logga In",
-				"loginWithOidc": "Logga in med OIDC",
-				"createAccountWithOidc": "Skapa konto med OIDC"
+				"createAccount": "Create Account",
+				"login": "Log in",
+				"loginWithOidc": "Log in with OIDC",
+				"createAccountWithOidc": "Create Account with OIDC"
 			}
 		},
 		"toasts": {
-			"loggingIn": "Loggar In...",
-			"loggedIn": "Välkommen tillbaka!",
-			"loggedInFirstTime": "Välkommen!",
-			"registering": "Registrerar...",
-			"registered": "Registrerad!",
-			"loginFailed": "Det gick inte att logga in. Försök igen",
-			"registrationFailed": "Det gick inte att registrera. Försök igen"
+			"loggingIn": "Logging in...",
+			"loggedIn": "Welcome back!",
+			"loggedInFirstTime": "Welcome!",
+			"registering": "Registering...",
+			"registered": "Registered!",
+			"loginFailed": "Login failed. Please try again",
+			"registrationFailed": "Registration failed. Please try again"
 		}
 	},
 	"adminLibrarySidebar": {
 		"libraryConfiguration": {
-			"heading": "Bibliotek Konfigurering",
-			"subtitleCreating": "En förhandsvisning av ditt nya bibliotek visas nedan",
-			"subtitleEditing": "En förhandsvisning av dina biblioteksändringar visas nedan"
+			"heading": "Library Configuration",
+			"subtitleCreating": "A preview of your new library will be shown below",
+			"subtitleEditing": "A preview of your library edits will be shown below"
 		}
 	},
 	"bookOverviewScene": {
 		"fileInformation": {
-			"heading": "Fil Information",
+			"heading": "File Information",
 			"labels": {
-				"fileSize": "Filstorlek",
-				"fileType": "Filtyp",
-				"fileLocation": "Filsökväg",
-				"fileChecksum": "Checksumma"
+				"fileSize": "File Size",
+				"fileType": "File Type",
+				"fileLocation": "File Location",
+				"fileChecksum": "Checksum"
 			}
 		},
 		"emailBook": {
-			"heading": "Mejla bok",
+			"heading": "Email book",
 			"description": "Send this book to a device or email address",
 			"form": {
 				"email": {
-					"label": "E-post",
-					"placeholder": "E-post adress",
-					"description": "En mejladress att skicka boken till. Tryck på lägg till för att slutföra varje tillägg"
+					"label": "Email",
+					"placeholder": "Email address",
+					"description": "An email address to send the book to. Click add to finalize each input"
 				},
 				"devices": {
-					"label": "Enheter",
-					"placeholder": "Välj enheter",
-					"noFilterMatch": "Inga enheter matchar filtreringen"
+					"label": "Devices",
+					"placeholder": "Select devices",
+					"noFilterMatch": "No devices match the filter"
 				}
 			}
 		},
-		"nextInSeries": "Nästa i Serien"
+		"nextInSeries": "Next in Series"
 	},
 	"createOrUpdateBookClubForm": {
 		"fields": {
 			"name": {
-				"label": "Namn",
-				"placeholder": "Min bokklubb",
-				"description": "Namnet på din bokklubb"
+				"label": "Name",
+				"placeholder": "My book club",
+				"description": "The name of your book club"
 			},
 			"description": {
-				"label": "Beskrivning",
+				"label": "Description",
 				"placeholder": "An 'Our Flag Means Death' fan club. We read pirate fiction to our hearts' content",
-				"description": "En valfri, kort beskrivning av din bokklubb"
+				"description": "An optional, short description of your book club"
 			},
 			"is_private": {
-				"label": "Privat klubb",
-				"description": "Om aktiverat, så kan bara inbjudna användare gå med i din bokklubb"
+				"label": "Private club",
+				"description": "If enabled, only users you invite will be able to join your book club"
 			},
 			"member_role_spec": {
-				"heading": "Speciella roller",
+				"heading": "Custom role mapping",
 				"subtitle": [
-					"Om du vill, kan du skapa egna namn för rollerna i din bokklubb. För mer information, se",
-					"dokumentation"
+					"You can create custom names for the roles in your book club if you'd like. For more information, refer to the",
+					"documentation"
 				],
 				"member": {
-					"label": "Medlem",
-					"placeholder": "Medlem",
-					"description": "Namnet på standardrollen i din bokklubb"
+					"label": "Member",
+					"placeholder": "Member",
+					"description": "The name of the default role for your book club"
 				},
 				"moderator": {
 					"label": "Moderator",
 					"placeholder": "Moderator",
-					"description": "Namnet på moderatorrollen i din bokklubb"
+					"description": "The name of the moderator role for your book club"
 				},
 				"admin": {
-					"label": "Administratör",
-					"placeholder": "Administratör",
-					"description": "Namnet på administratörsrollen i din bokklubb"
+					"label": "Admin",
+					"placeholder": "Admin",
+					"description": "The name of the admin role for your book club"
 				},
 				"creator": {
-					"label": "Skapare",
-					"placeholder": "Skapare",
-					"description": "Namnet på skaparrollen i din bokklubb. Detta är du!"
+					"label": "Creator",
+					"placeholder": "Creator",
+					"description": "The name of the creator role for your book club. This is you!"
 				}
 			},
 			"membershipOptions": {
 				"displayName": {
-					"label": "Visningsnamn",
+					"label": "Display Name",
 					"placeholder": "oromei",
-					"description": "Ett valfritt visningsnamn för ditt medlemskap i bokklubben. Detta kommer visas istället för ditt användarnamnet"
+					"description": "An optional display name for your membership in the book club. If set, this takes precedence over your username"
 				},
 				"hideProgress": {
-					"label": "Dölj Framsteg",
+					"label": "Hide Progress",
 					"description": "If enabled, your reading progress will be hidden from other members of the book club"
 				}
 			}
 		},
 		"validation": {
-			"missingName": "Namn krävs",
-			"alreadyTaken": "är redan upptaget"
+			"missingName": "Name is required",
+			"alreadyTaken": "is already taken"
 		}
 	},
 	"createBookClubScene": {
-		"heading": "Skapa en ny bokklubb",
+		"heading": "Create a new book club",
 		"subtitle": "You can create a private book club for a select few, or make it public for anyone on the server to join",
 		"form": {
-			"stepLabel": "Steg",
+			"stepLabel": "Step",
 			"steps": [
 				{
-					"label": "Grundläggande",
-					"heading": "Grundläggande Information",
-					"description": "Detaljerna av klubben, inklusive namn och beskrivning"
+					"label": "Basics",
+					"heading": "Basic Information",
+					"description": "The details of the club, including its name and description"
 				},
 				{
-					"label": "Roller",
-					"heading": "Roller",
-					"description": "Ställ in rollerna i din bokklubb"
+					"label": "Roles",
+					"heading": "Roles",
+					"description": "Customize the roles in your book club"
 				},
 				{
-					"label": "Medlemskap",
-					"heading": "Inställningar för Medlemskap",
-					"description": "Ytterligare inställningar för din bokklubb"
+					"label": "Membership",
+					"heading": "Membership Preferences",
+					"description": "Additional options for your book club"
 				},
 				{
-					"label": "Granska",
-					"heading": "Granska",
-					"description": "Granska inställningarna för din bokklubb innan du skapar den"
+					"label": "Review",
+					"heading": "Review",
+					"description": "Review your club settings before creating it"
 				}
 			],
 			"review": {
-				"yes": "Ja",
-				"no": "Nej",
-				"none": "Ingen",
+				"yes": "Yes",
+				"no": "No",
+				"none": "None",
 				"labels": {
-					"name": "Namn",
-					"description": "Beskrivning"
+					"name": "Name",
+					"description": "Description"
 				}
 			},
-			"submit": "Skapa Bokklubb"
+			"submit": "Create Book Club"
 		}
 	},
 	"bookClubSettingsScene": {
 		"sidebar": {
-			"basics": "Grundläggande",
+			"basics": "Basics",
 			"members": {
-				"members": "Medlemmar",
-				"roles": "Roller",
-				"label": "Medlemskap"
+				"members": "Members",
+				"roles": "Roles",
+				"label": "Membership"
 			},
 			"scheduling": {
-				"scheduler": "Schemaläggare",
-				"options": "Inställningar",
-				"label": "Schemaläggning"
+				"scheduler": "Scheduler",
+				"options": "Options",
+				"label": "Scheduling"
 			},
 			"danger-zone": {
-				"delete": "Radering",
-				"label": "Farozonen"
+				"delete": "Deletion",
+				"label": "Danger Zone"
 			}
 		},
 		"basics": {
-			"title": "Grundläggande Information",
-			"description": "Detaljerna för bokklubben, inklusive dess namn och beskrivning",
+			"title": "Basic Information",
+			"description": "The details of this book club, including its name and description",
 			"form": {
-				"submit": "Uppdatera klubb"
+				"submit": "Update club"
 			}
 		},
 		"members": {
-			"title": "Medlemmar",
-			"description": "Hantera denna bokklubbs medlemmar",
+			"title": "Members",
+			"description": "Manage the members of this book club",
 			"sections": {}
 		},
 		"roles": {
-			"title": "Roller",
-			"description": "Ställ in rollerna i denna bokklubb",
+			"title": "Roles",
+			"description": "Customize the roles in this book club",
 			"sections": {
 				"roleMappings": {
-					"heading": "Existerande roller",
-					"description": "De nuvarande rollerna för denna bokklubb"
+					"heading": "Existing role mappings",
+					"description": "The current role mappings for this book club"
 				}
 			}
 		},
 		"scheduling/scheduler": {
-			"title": "Schemaläggare",
+			"title": "Scheduler",
 			"description": "Create and manage the scheduled readings for this book club"
 		},
 		"scheduling/options": {
-			"title": "Inställningar",
-			"description": "Ytterligare inställningar för denna bokklubbs schemaläggning"
+			"title": "Options",
+			"description": "Additional options for this book club's scheduling"
 		},
 		"danger-zone/delete": {
-			"title": "Radering",
-			"description": "Radera denna bokklubb permanent tillsammans med allt dess innehåll eller vissa resurser",
+			"title": "Deletion Actions",
+			"description": "Permanently delete this book club and all of its contents or certain resources",
 			"sections": {
 				"deleteClub": {
-					"heading": "Radera klubb",
+					"heading": "Delete club",
 					"description": [
-						"Radera denna bokklubb tillsammans med allt dess innehåll.",
-						"Denna åtgärd kan inte ångras"
+						"Permanently delete this book club and all its contents.",
+						"This action cannot be undone"
 					],
-					"trigger": "Radera klubb"
+					"trigger": "Delete club"
 				}
 			}
 		}
@@ -235,897 +235,897 @@
 	"createOrUpdateLibraryForm": {
 		"fields": {
 			"name": {
-				"label": "Namn",
-				"description": "Ett trevligt namn för ditt bibliotek",
-				"placeholder": "Mitt Bibliotek"
+				"label": "Name",
+				"description": "A friendly name for your library",
+				"placeholder": "My Library"
 			},
 			"path": {
-				"label": "Sökväg",
-				"description": "Sökvägen till biblioteket så som det finns på din server",
-				"placeholder": "/sökväg/till/bibliotek"
+				"label": "Path",
+				"description": "The path to the library as it exists on your server",
+				"placeholder": "/path/to/library"
 			},
 			"description": {
-				"label": "Beskrivning",
-				"description": "En kort beskrivning av ditt bibliotek",
-				"placeholder": "Ett bibliotek med alla mina favoritböcker"
+				"label": "Description",
+				"description": "A short description of your library",
+				"placeholder": "A library of all my favorite books"
 			},
 			"tags": {
-				"label": "Taggar",
-				"description": "Används för att kategorisera ditt bibliotek eller sköta åtkomstregler"
+				"label": "Tags",
+				"description": "Used to categorize your library or enforce access rules"
 			},
 			"defaultLibraryView": {
-				"label": "Standardvy för biblioteket",
-				"description": "Konfigurera vilken flik som visas som standard när du öppnar det här biblioteket",
+				"label": "Default library view",
+				"description": "Configure which tab is shown by default when opening this library",
 				"hideSeriesView": {
-					"label": "Dölj flik för serie",
-					"description": "Dölj fliken serier från bibliotekets navigering"
+					"label": "Hide series tab",
+					"description": "Hide the series tab from the library navigation"
 				},
 				"options": {
 					"series": {
-						"label": "Serier",
-						"description": "Visa fliken serier som standard"
+						"label": "Series",
+						"description": "Show the series tab by default"
 					},
 					"books": {
-						"label": "Böcker",
-						"description": "Visa fliken böcker som standard"
+						"label": "Books",
+						"description": "Show the books tab by default"
 					}
 				}
 			},
 			"readingSettings": {
 				"section": {
-					"heading": "Läsinställningar",
-					"description": "Standardinställningar för läsaren att använda för böcker"
+					"heading": "Reading settings",
+					"description": "Default reader settings to use for books"
 				},
 				"imageScaling": {
-					"label": "Bildskalning",
-					"description": "Hur den bildbaserade läsaren skalar bilder till sidan"
+					"label": "Image scaling",
+					"description": "How the image-based reader scales images to the page"
 				},
 				"readingMode": {
-					"label": "Standardläsare",
-					"description": "Standardläsaren att använda för bildbaserade böcker"
+					"label": "Default reader",
+					"description": "The default reader to use for image-based books"
 				},
 				"readingDirection": {
-					"label": "Läsriktning",
-					"description": "Vilken riktning läsaren går genom sidor"
+					"label": "Reading direction",
+					"description": "Which direction the reader progresses through pages"
 				}
 			},
 			"thumbnailConfig": {
 				"section": {
 					"heading": {
-						"create": "Konfiguration Miniatyrbilder",
-						"update": "Generering"
+						"create": "Thumbnail configuration",
+						"update": "Generation"
 					},
-					"description": "Förbättra laddningstiderna när du bläddrar i biblioteket genom att generera miniatyrbilder för dina böcker",
-					"disabled": "Ingen ytterligare konfiguration krävs när miniatyrgenerering är inaktiverad"
+					"description": "Improve loading times while browsing your library by generating thumbnails for your books",
+					"disabled": "No additional configuration is required when thumbnail generation is disabled"
 				},
 				"enableSwitch": {
-					"label": "Aktiverat",
-					"description": "Generera miniatyrbilder för detta bibliotek"
+					"label": "Enabled",
+					"description": "Generate thumbnail images for this library"
 				},
 				"resizeMethod": {
-					"label": "Metod för storleksändring",
+					"label": "Resize Method",
 					"options": {
-						"scaleEvenlyByFactor": "Skala Jämnt",
-						"exact": "Exakt Storlek",
-						"scaleDimension": "Automatisk Skala",
-						"none": "Ingen"
+						"scaleEvenlyByFactor": "Evenly Scale",
+						"exact": "Exact Size",
+						"scaleDimension": "Auto Scaled",
+						"none": "None"
 					}
 				},
 				"scaleEvenlyByFactor": {
-					"description": "Skala miniatyrbilden med en faktor av den ursprungliga storleken. T.ex. 0.65 kommer att resultera i en miniatyrbild som är 65% av den ursprungliga storleken",
+					"description": "Scale the thumbnail by a factor of the original size. E.g., 0.65 will result in a thumbnail that is 65% of the original size",
 					"factor": {
-						"label": "Skalfaktor"
+						"label": "Scale Factor"
 					}
 				},
 				"exact": {
-					"description": "Ändra storlek på miniatyrbilden till en exakt storlek i pixlar",
+					"description": "Resize the thumbnail to an exact size in pixels",
 					"width": {
-						"label": "Bredd"
+						"label": "Width"
 					},
 					"height": {
-						"label": "Höjd"
+						"label": "Height"
 					}
 				},
 				"scaleDimension": {
-					"label": "Automatisk Skala",
-					"description": "Ange antingen bredden eller höjden på miniatyren och skala automatiskt den andra för att behålla det ursprungliga bildförhållandet",
+					"label": "Auto Scaled",
+					"description": "Set either the width or height of the thumbnail and auto-scale the other to keep the original aspect ratio",
 					"dimension": {
-						"label": "Mått",
+						"label": "Dimension",
 						"options": {
-							"width": "Bredd",
-							"height": "Höjd"
+							"width": "Width",
+							"height": "Height"
 						}
 					},
 					"size": {
-						"label": "Storlek"
+						"label": "Size"
 					}
 				},
 				"format": {
-					"label": "Bildformat",
-					"description": "Formatet av de genererade miniatyrbilderna"
+					"label": "Image format",
+					"description": "The format of the generated thumbnail images"
 				},
 				"quality": {
-					"label": "Kvalitet",
-					"description": "Kvaliteten på den genererade miniatyrbilden, mellan 0 och 1.0"
+					"label": "Quality",
+					"description": "The quality of the generated thumbnail images, between 1 and 100"
 				}
 			},
 			"ignoreRules": {
 				"section": {
-					"heading": "Ignorera regler",
-					"description": "Definiera glob-mönster för att ignorera vissa filer eller mappar under skanning"
+					"heading": "Ignore rules",
+					"description": "Define glob patterns to ignore certain files or directories during a scan"
 				},
-				"noRules": "Inga ignoreringsregler har konfigurerats",
-				"save": "Spara förändringar",
+				"noRules": "No ignore rules have been configured",
+				"save": "Save changes",
 				"addRule": {
-					"label": "Ny regel",
-					"description": "Glob-mönster för att ignorera filer eller mappar",
-					"addButton": "Lägg till regel",
+					"label": "New rule",
+					"description": "Glob pattern to ignore files or directories",
+					"addButton": "Add rule",
 					"ignoreParents": {
-						"title": "Ignorera alla överordnade mappar",
-						"label": "Ignorera föräldrar"
+						"title": "Ignore all parent directories",
+						"label": "Ignore parents"
 					},
 					"ignoreSubdirs": {
-						"title": "Ignorera alla undermappar",
-						"label": "Ignorera undermappar"
+						"title": "Ignore all subdirectories",
+						"label": "Ignore subdirectories"
 					}
 				},
-				"invalidGlob": "Ogiltigt glob-mönster",
-				"duplicateGlob": "Dubblett av en redan existerande regel",
+				"invalidGlob": "Invalid glob pattern",
+				"duplicateGlob": "Duplicate of an existing rule",
 				"lockConfig": {
-					"lock": "Lås konfiguration",
-					"unlock": "Lås upp konfiguration"
+					"lock": "Lock configuration",
+					"unlock": "Unlock configuration"
 				},
-				"editRule": "Ändra regel",
-				"deleteRule": "Radera regel",
-				"cancelEdit": "Avbryt redigering",
-				"confirmEdit": "Bekräfta ändring"
+				"editRule": "Edit rule",
+				"deleteRule": "Delete rule",
+				"cancelEdit": "Cancel edit",
+				"confirmEdit": "Confirm edit"
 			},
 			"convertOptions": {
 				"section": {
-					"heading": "Filkonvertering",
-					"description": "Stump kan konvertera vissa filformat till mer kompatibla filer"
+					"heading": "File conversion",
+					"description": "Stump is capable of converting certain file formats to more compatible ones"
 				},
 				"rarToZip": {
-					"label": "Konvertera RAR till ZIP",
-					"description": "Konvertera RAR/CBR-filer till ZIP/CBZ-filer vid skanning"
+					"label": "Convert RAR to ZIP",
+					"description": "Convert RAR/CBR files to ZIP/CBZ files during a scan"
 				},
 				"deleteRarAfter": {
-					"label": "Radera RAR efter konvertering",
-					"description": "Radera den ursprungliga RAR/CBR-filen efter konvertering. Detta är oåterkalleligt"
+					"label": "Delete RAR after conversion",
+					"description": "Delete the original RAR/CBR file after conversion. This is irreversible"
 				}
 			},
 			"scannerFeatures": {
 				"section": {
-					"heading": "Valfri bearbetning",
-					"description": "Valfria behandlingsfunktioner för skannern",
-					"disclaimer": "Dessa funktioner innebär ytterligare filläsningar som kan sakta ner skanningsprocessen"
+					"heading": "Optional processing",
+					"description": "Opt-in processing features for the scanner",
+					"disclaimer": "These features involve additional file reads which may slow down the scan process"
 				},
 				"processMetadata": {
-					"label": "Behandla metadata",
-					"description": "Extrahera all metadata från bibliotekets filer och lagra resultaten i databasen"
+					"label": "Process metadata",
+					"description": "Extract any metadata from library files and store the results in the database"
 				},
 				"watch": {
-					"label": "Bevaka",
-					"description": "Bevaka biblioteksmappen för förändringar och uppdatera databasen"
+					"label": "Watch",
+					"description": "Watch the library directory for changes and update the database accordingly"
 				},
 				"generateFileHashes": {
-					"label": "Generera fil-hashar",
-					"description": "Generera en hash för varje fil i biblioteket för att upptäcka dubbletter"
+					"label": "Generate file hashes",
+					"description": "Generate a hash for each file in the library to detect duplicates"
 				},
 				"koreaderHashes": {
-					"label": "KoReader-kompatibla hashar",
-					"description": "Om du använder KoReader, generera ytterligare hashar i det format som den förväntar sig"
+					"label": "KoReader-compatible hashes",
+					"description": "If using KoReader, generate additional hashes in the format it expects"
 				}
 			},
 			"libraryPattern": {
 				"section": {
-					"heading": "Organisering",
-					"description": "Identifiera vilket mönster som bäst passar ditt biblioteks organisering",
+					"heading": "Organization",
+					"description": "Identify which pattern most closely matches the organization of your library",
 					"docs": [
-						"Inte säker på vilken? Tryck",
-						"här",
-						"för mer information.",
-						"Du kan inte ändra denna inställning senare"
+						"Not sure which to choose? Click",
+						"here",
+						"for more information.",
+						"You cannot change this setting later"
 					],
-					"disabled": "Du kan inte ändra denna inställning"
+					"disabled": "You cannot change this setting"
 				},
 				"options": {
-					"label": "Biblioteksmönster",
-					"description": "Den inställning som avgör hur Stump kommer att organisera ditt bibliotek",
+					"label": "Library pattern",
+					"description": "The setting which determines how Stump will organize your library",
 					"collectionPriority": {
-						"label": "Samlingsprioritet",
-						"description": "Varje mapp på översta nivån av bibliotekets rot är en enda serie"
+						"label": "Collection priority",
+						"description": "Each folder at the top-most level of the library root is a single series"
 					},
 					"seriesPriority": {
-						"label": "Serieprioritet",
-						"description": "Varje mapp på vilken nivå som helst rekursivt är en enda serie"
+						"label": "Series priority",
+						"description": "Each folder at any level recursively is a single series"
 					}
 				}
 			}
 		},
 		"scan": {
 			"label": {
-				"create": "Skanna efter skapande",
-				"update": "Skanna efter uppdatering"
+				"create": "Scan after creation",
+				"update": "Scan after updates"
 			},
-			"description": "Indexera bibliotekets filer för att fylla i databasen"
+			"description": "Index the library files to populate your database"
 		}
 	},
 	"createLibraryScene": {
-		"heading": "Create New Library",
+		"heading": "Create library",
 		"subtitle": "Libraries are used to group your books together. If you want a refresh on how they work, check out the",
-		"subtitleLink": "relevant dokumentation",
+		"subtitleLink": "relevant documentation",
 		"form": {
-			"stepLabel": "Steg",
+			"stepLabel": "Step",
 			"steps": [
 				{
-					"label": "Grundläggande",
-					"heading": "Grundläggande Information",
-					"description": "Detaljerna för detta bibliotek, inklusive dess namn, sökväg och beskrivning"
+					"label": "Basics",
+					"heading": "Basic Information",
+					"description": "The details of this library, including its name, path, and description"
 				},
 				{
-					"label": "Skanning",
-					"heading": "Skanning",
-					"description": "Inställningar relaterade till hur Stump skannar detta bibliotek"
+					"label": "Scanning",
+					"heading": "Scanning",
+					"description": "Settings related to how Stump scans this library"
 				},
 				{
-					"label": "Miniatyrbilder",
-					"heading": "Miniatyrbilder",
-					"description": "Alternativen för om och hur Stump genererar miniatyrbilder för detta bibliotek"
+					"label": "Thumbnails",
+					"heading": "Thumbnails",
+					"description": "The options for if and how Stump generates thumbnails for this library"
 				},
 				{
-					"label": "Granska",
-					"heading": "Granska",
-					"description": "Granska inställningarna för ditt bibliotek innan du skapar det"
+					"label": "Review",
+					"heading": "Review",
+					"description": "Review your library settings before creating it"
 				}
 			],
 			"review": {
-				"yes": "Ja",
-				"no": "Nej",
-				"none": "Ingen",
+				"yes": "Yes",
+				"no": "No",
+				"none": "None",
 				"labels": {
-					"generateThumbnails": "Generera miniatyrbilder",
-					"processThumbnailColors": "Bearbeta miniatyrfärger",
-					"mode": "Läge",
+					"generateThumbnails": "Generate thumbnails",
+					"processThumbnailColors": "Process thumbnail colors",
+					"mode": "Mode",
 					"format": "Format",
-					"quality": "Kvalitet",
-					"name": "Namn",
-					"path": "Sökväg",
-					"description": "Beskrivning",
-					"tags": "Taggar",
-					"pattern": "Mönster",
-					"ignoreRules": "Ignorera regler",
-					"convertRar": "Konvertera RAR/CBR",
-					"deleteConversions": "Radera konverterade filer",
-					"watch": "Bevaka mappen för förändringar",
-					"processMetadata": "Behandla metadata",
-					"generateFileHashes": "Generera fil-hashar",
-					"generateKoreaderHashes": "Generera KoReader-hashar",
-					"scaleEvenlyByFactor": "Skala Jämnt",
-					"exact": "Exakt Storlek",
-					"scaleDimension": "Uttryckligen Förstorad"
+					"quality": "Quality",
+					"name": "Name",
+					"path": "Path",
+					"description": "Description",
+					"tags": "Tags",
+					"pattern": "Pattern",
+					"ignoreRules": "Ignore rules",
+					"convertRar": "Convert RAR/CBR",
+					"deleteConversions": "Delete converted files",
+					"watch": "Watch directory for changes",
+					"processMetadata": "Process metadata",
+					"generateFileHashes": "Generate file hashes",
+					"generateKoreaderHashes": "Generate KoReader hashes",
+					"scaleEvenlyByFactor": "Evenly Scale",
+					"exact": "Exact Size",
+					"scaleDimension": "Explicitly Sized"
 				}
 			},
 			"buttons": {
-				"confirm": "Skapa Bibliotek"
+				"confirm": "Create Library"
 			}
 		}
 	},
 	"fileExplorer": {
 		"uploadModal": {
 			"title": {
-				"books": "Ladda upp böcker",
-				"series": "Ladda upp serie"
+				"books": "Upload books",
+				"series": "Upload series"
 			},
 			"description": {
-				"books": "Lägg till böcker direkt till nuvarande sökväg i filutforskaren",
-				"series": "Lägg till serie direkt till nuvarande sökväg i filutforskaren"
+				"books": "Add books directly to the current path in the file explorer",
+				"series": "Add a series directly to the current path in the file explorer"
 			},
 			"seriesDisclaimer": [
-				"Det måste vara en ",
-				"zippad fil",
-				"som innehåller mappen som ska vara serien, med alla böcker inuti"
+				"It must be a ",
+				"zipped file",
+				"containing the folder which should be the series, with all the books inside"
 			],
 			"dropzone": {
-				"books": "Dra böcker hit",
-				"series": "Dra en zippad fil hit",
-				"alt": "Eller tryck för att surfa din dator efter böcker att ladda upp"
+				"books": "Drag and drop books here",
+				"series": "Drag and drop a zip file here",
+				"alt": "Or click to browse your computer for books to upload"
 			},
-			"addedFiles": "Tillagda filer"
+			"addedFiles": "Added files"
 		}
 	},
 	"librarySettingsScene": {
-		"heading": "Inställningar",
+		"heading": "Settings",
 		"subtitle": "Manage your library here. If you want a refresh on these settings, check out the",
-		"subtitleLink": "relevant dokumentation",
+		"subtitleLink": "relevant documentation",
 		"sidebar": {
-			"basics": "Grundläggande",
+			"basics": "Basics",
 			"options": {
-				"general": "Allmänt",
-				"reading": "Läsning",
-				"scanning": "Skanning",
-				"thumbnails": "Miniatyrbilder",
-				"ignore-rules": "Ignorera Regler",
-				"analysis": "Analys",
-				"label": "Inställningar"
+				"general": "General",
+				"reading": "Reading",
+				"scanning": "Scanning",
+				"thumbnails": "Thumbnails",
+				"ignore-rules": "Ignore Rules",
+				"analysis": "Analysis",
+				"label": "Options"
 			},
 			"danger-zone": {
-				"access-control": "Åtkomstkontroll",
-				"delete": "Radering",
-				"label": "Farozon"
+				"access-control": "Access Control",
+				"delete": "Deletion",
+				"label": "Danger Zone"
 			}
 		},
 		"basics": {
-			"title": "Grundläggande Information",
-			"description": "Detaljerna för detta bibliotek, inklusive dess namn, sökväg och beskrivning",
+			"title": "Basic Information",
+			"description": "The details of this library, including its name, path, and description",
 			"form": {
-				"submit": "Uppdatera bibliotek"
+				"submit": "Update library"
 			}
 		},
 		"options/reading": {
-			"title": "Läsning",
-			"description": "Standardinställningarna för läsaren för böcker i det här biblioteket. Alla böcker kan åsidosätta dessa inställningar"
+			"title": "Reading",
+			"description": "The default reader settings to use for books in this library. Any book can override these settings"
 		},
 		"options/scanning": {
-			"title": "Skanning",
-			"description": "Inställningar relaterade till hur Stump skannar detta bibliotek",
+			"title": "Scanning",
+			"description": "Settings related to how Stump scans this library",
 			"sections": {
 				"configureScan": {
-					"heading": "Konfigurera skanning",
-					"description": "En skanning med ytterligare alternativ för mer finkornig kontroll",
+					"heading": "Configure scan",
+					"description": "A scan with additional options for more fine-grained control",
 					"form": {
-						"alert": "Dessa kommer åsidosätta motsvarande inställningar för hela bibliotek",
+						"alert": "These will override corresponding library-wide settings",
 						"options": {
 							"forceRebuild": {
-								"label": "Tvinga ombyggnad",
-								"description": "Bygg om alla böcker i biblioteket på disk",
-								"alert": "Detta kommer att bygga om varje bok i biblioteket från början, inklusive metadata och hash"
+								"label": "Force rebuild",
+								"description": "Rebuild every book in the library on disk",
+								"alert": "This will rebuild every book in the library from scratch, including metadata and hashes"
 							},
 							"custom": {
-								"label": "Anpassad",
-								"description": "Anpassa konfigurationen för skanning",
+								"label": "Custom",
+								"description": "Customize the scan configuration",
 								"validation": {
-									"noSelection": "Minst ett alternativ måste vara aktiverat"
+									"noSelection": "At least one option must be enabled"
 								}
 							},
 							"rebuildMeta": {
-								"label": "Bygg om metadata",
-								"description": "Bygg om metadata för böcker i biblioteket"
+								"label": "Rebuild metadata",
+								"description": "Rebuild metadata for books in the library"
 							},
 							"regenHashes": {
-								"label": "Återskapa hashar",
-								"description": "Återskapa hashar för böcker i biblioteket"
+								"label": "Regenerate hashes",
+								"description": "Recreate hashes for books in the library"
 							}
 						}
 					}
 				},
 				"defaultScan": {
-					"heading": "Standardskanning",
-					"description": "En standardskanning för att indexera ditt bibliotek efter nytt innehåll"
+					"heading": "Default scan",
+					"description": "A standard scan to index your library for new content"
 				},
 				"history": {
-					"heading": "Skanningshistorik",
-					"description": "Historiken för alla skanningar som registrerats för detta bibliotek",
-					"empty": "Det finns inga skanningar registrerade för detta bibliotek",
-					"runScan": "Kör skanning",
-					"inspect": "Visa detaljer",
+					"heading": "Scan history",
+					"description": "The history of all scans recorded for this library",
+					"empty": "There are no scans recorded for this library",
+					"runScan": "Run scan",
+					"inspect": "See details",
 					"inspector": {
-						"title": "Skanningsinfo",
-						"description": "En detaljerad vy av denna skanning",
+						"title": "Scan record",
+						"description": "A detailed view of this scan record",
 						"fields": {
-							"library": "Bibliotek",
-							"date": "Datum",
-							"config": "Konfiguration",
-							"jobOutput": "Utdata från jobb",
-							"logs": "Loggar"
+							"library": "Library",
+							"date": "Date",
+							"config": "Config",
+							"jobOutput": "Job output",
+							"logs": "Logs"
 						},
-						"logsPresent": "Loggar har bevarats för detta jobb",
-						"seeLogs": "Visa loggar"
+						"logsPresent": "Logs were persisted for this job",
+						"seeLogs": "See logs"
 					},
 					"table": {
 						"columns": {
-							"timestamp": "Skannad den",
-							"config": "Konfiguration"
+							"timestamp": "Scanned at",
+							"config": "Config"
 						},
-						"default": "Standard",
-						"custom": "Anpassad"
+						"default": "Default",
+						"custom": "Custom"
 					},
-					"clearHistory": "Radera skanningshistorik"
+					"clearHistory": "Delete scan history"
 				}
 			}
 		},
 		"options/thumbnails": {
-			"title": "Miniatyrbilder",
-			"description": "Inställningar och hanteringsalternativ för miniatyrbilder i detta bibliotek",
+			"title": "Thumbnails",
+			"description": "Settings and management options for thumbnails in this library",
 			"sections": {
 				"management": {
-					"heading": "Hantering",
-					"description": "Hantera befintliga miniatyrbilder för detta bibliotek",
+					"heading": "Manage thumbnails",
+					"description": "Manage the existing thumbnails for this library",
 					"thumbnailSelector": {},
 					"deleteThumbnails": {}
 				}
 			}
 		},
 		"options/analysis": {
-			"title": "Analys",
-			"description": "Analysera innehållet i detta bibliotek för att identifiera potentiella problem eller förbättringar",
+			"title": "Analysis",
+			"description": "Analyze the contents of this library to identify potential issues or improvements",
 			"sections": {
 				"analyzeBooks": {
-					"heading": "Analysera böcker",
-					"description": "Analysera böckerna i detta bibliotek för att bifoga ytterligare metadata i databasen, till exempel sidomått för bildbaserade böcker",
-					"disclaimerTitle": "Denna process är resurskrävande",
-					"disclaimer": "Denna process är resurskrävande och kan ta ett tag att slutföra. I framtiden kommer den att vara mer konfigurerbar",
-					"analyzeButton": "Analysera böcker"
+					"heading": "Analyze books",
+					"description": "Analyze the books in this library to attach additional metadata in the database, such as page dimensions for image-based books",
+					"disclaimerTitle": "This process is resource-intensive",
+					"disclaimer": "It may take a while to complete. In the future, it will be more configurable",
+					"analyzeButton": "Analyze books"
 				},
 				"missingFiles": {
-					"heading": "Saknade filer",
-					"description": "Filer som refereras i databasen men inte kan hittas på disk",
-					"noMissingFiles": "Det saknas inga filer i detta bibliotek"
+					"heading": "Missing files",
+					"description": "Files that are referenced in the database but cannot be located on disk",
+					"noMissingFiles": "There are no missing files in this library"
 				},
 				"duplicateFiles": {
-					"heading": "Duplicerade filer",
-					"description": "Filer som potentiellt är duplicerade på disk",
-					"noDuplicateFiles": "Det finns inga duplicerade filer i detta bibliotek"
+					"heading": "Duplicate files",
+					"description": "Files that are potentially duplicated on disk",
+					"noDuplicateFiles": "There are no duplicate files detected for this library"
 				}
 			}
 		},
 		"danger-zone/access-control": {
-			"title": "Åtkomstkontroll",
-			"description": "Styr vem som har åtkomst till innehållet i detta bibliotek",
+			"title": "Access Control",
+			"description": "Control who can access the content in this library",
 			"sections": {
 				"libraryExclusions": {
-					"heading": "Uteslut användare",
-					"description": "Förhindra vissa användare från att komma åt detta bibliotek eller dess innehåll",
-					"noUsersTitle": "Inga användare att exkludera",
-					"noUsers": "Det finns inga andra registrerade användare att utesluta från detta bibliotek",
-					"updated": "Uteslutningar uppdaterade",
-					"failure": "Det gick inte att uppdatera uteslutningar"
+					"heading": "Exclude users",
+					"description": "Prevent certain users from accessing this library or its contents",
+					"noUsersTitle": "No users to exclude",
+					"noUsers": "There are no other registered users to exclude from this library",
+					"updated": "Exclusions updated",
+					"failure": "Failed to update exclusions"
 				}
 			}
 		},
 		"danger-zone/delete": {
-			"title": "Radering",
-			"description": "Radera detta bibliotek permanent tillsammans med allt dess innehåll eller vissa resurser",
+			"title": "Deletion",
+			"description": "Permanently delete this library and all of its contents or certain resources",
 			"sections": {
 				"cleanLibrary": {
-					"heading": "Rensa bibliotek",
-					"description": "Ta bort all media och serier som inte kan hittas på disk",
-					"disclaimerTitle": "Inga filer kommer att raderas",
-					"disclaimer": "Även om denna åtgärd inte kommer att ta bort några filer, kommer den permanent ta bort alla handlingar som rör media och serier som anses saknade",
+					"heading": "Clean library",
+					"description": "Remove all media and series that cannot be located on disk",
+					"disclaimerTitle": "No files will be deleted",
+					"disclaimer": "While this action will not delete any files, it will permanently delete all records relating to media and series which have a missing status",
 					"confirmation": {
-						"label": "Rensa bibliotek",
-						"text": "Är du säker på att du vill rensa detta bibliotek?"
+						"label": "Clean library",
+						"text": "Are you sure you want to clean this library?"
 					},
-					"emptyText": "Det fanns inget att städa"
+					"emptyText": "There was nothing to clean"
 				},
 				"deleteLibrary": {
-					"heading": "Radera bibliotek",
+					"heading": "Delete library",
 					"description": [
-						"Radera detta bibliotek tillsammans med allt dess innehåll.",
-						"Denna åtgärd kan inte ångras"
+						"Permanently delete this library and all its contents.",
+						"This action cannot be undone"
 					]
 				}
 			}
 		}
 	},
 	"errorScene": {
-		"heading": "lol, oj",
-		"message": "Ett fel inträffade:",
+		"heading": "lol, oops",
+		"message": "An error occurred:",
 		"buttons": {
-			"report": "Rapportera Bugg",
-			"copy": "Kopiera Felinformation",
-			"goHome": "Gå till startsidan"
+			"report": "Report Bug",
+			"copy": "Copy Error Details",
+			"goHome": "Go Home"
 		}
 	},
 	"homeScene": {
 		"onDeck": {
-			"title": "Din nästa läsning",
+			"title": "Your next read",
 			"emptyState": {
-				"heading": "Inga böcker på däck",
-				"message": "Dina nästa rekommenderade böcker dyker upp här"
+				"heading": "No books on deck",
+				"message": "Your next recommended books will show up here"
 			}
 		},
 		"continueReading": {
-			"title": "Fortsätt läsa",
+			"title": "Continue reading",
 			"emptyState": {
-				"heading": "Inget att visa",
-				"message": "Alla pågående böcker som du startar visas här"
+				"heading": "Nothing to show",
+				"message": "Any in-progress books you start will show up here"
 			}
 		},
 		"recentlyAddedSeries": {
-			"title": "Nyligen tillagda serier",
+			"title": "Recently added series",
 			"emptyState": {
-				"heading": "Inga serier att visa",
-				"message": "Alla serier som du lägger till i dina bibliotek kommer att visas här"
+				"heading": "No series to display",
+				"message": "Any series you add to your libraries will show up here"
 			}
 		},
 		"recentlyAddedBooks": {
-			"title": "Nyligen tillagda böcker",
+			"title": "Recently added books",
 			"emptyState": {
-				"heading": "Inget att visa",
-				"message": "De senaste böckerna du lägger till kommer att visas här"
+				"heading": "Nothing to show",
+				"message": "Any recent books you add will show up here"
 			}
 		}
 	},
 	"metadataEditor": {
 		"labels": {
-			"ageRating": "Åldersgräns",
-			"characters": "Karaktärer",
-			"colorists": "Färgläggare",
-			"coverArtists": "Omslagsmålare",
-			"day": "Dag",
-			"editors": "Redaktörer",
+			"ageRating": "Age rating",
+			"characters": "Characters",
+			"colorists": "Colorists",
+			"coverArtists": "Cover artists",
+			"day": "Day",
+			"editors": "Editors",
 			"format": "Format",
 			"identifierAmazon": "Amazon ID",
 			"identifierCalibre": "Calibre ID",
 			"identifierGoogle": "Google ID",
 			"identifierIsbn": "ISBN",
 			"identifierMobiAsin": "Mobi ASIN",
-			"identifierUuid": "Bok UUID",
-			"genres": "Genrer",
-			"inkers": "Tuschare",
-			"language": "Språk",
-			"letterers": "Textare",
-			"links": "Länkar",
-			"month": "Månad",
-			"notes": "Anteckningar",
-			"number": "Nummer",
-			"pageCount": "Sidor",
-			"pencillers": "Tecknare",
-			"publisher": "Utgivare",
-			"series": "Serier",
-			"seriesGroup": "Seriegrupp",
-			"storyArc": "Övergripande historia",
-			"storyArcNumber": "Nummer i övergripande historien",
-			"summary": "Sammanfattning",
-			"teams": "Team",
-			"title": "Titel",
-			"titleSort": "Sortera efter titel",
-			"volume": "Volym",
-			"writers": "Författare",
-			"year": "År",
-			"metaType": "Sort",
+			"identifierUuid": "Book UUID",
+			"genres": "Genres",
+			"inkers": "Inkers",
+			"language": "Language",
+			"letterers": "Letterers",
+			"links": "Links",
+			"month": "Month",
+			"notes": "Notes",
+			"number": "Number",
+			"pageCount": "Pages",
+			"pencillers": "Pencillers",
+			"publisher": "Publisher",
+			"series": "Series",
+			"seriesGroup": "Series group",
+			"storyArc": "Story arc",
+			"storyArcNumber": "Story arc number",
+			"summary": "Summary",
+			"teams": "Teams",
+			"title": "Title",
+			"titleSort": "Title sort",
+			"volume": "Volume",
+			"writers": "Writers",
+			"year": "Year",
+			"metaType": "Type",
 			"imprint": "Imprint",
 			"comicid": "Comic ID",
-			"booktype": "Boktyp",
+			"booktype": "Book type",
 			"status": "Status",
-			"totalIssues": "Totalt antal nummer",
-			"publicationRun": "Utgivningslöpning",
-			"comicImage": "Seriebild",
-			"descriptionFormatted": "Beskrivning (formaterad)"
+			"totalIssues": "Total issues",
+			"publicationRun": "Publication run",
+			"comicImage": "Comic image",
+			"descriptionFormatted": "Description (formatted)"
 		},
 		"addFields": {
-			"description": "Lägg till varje tillägg på sin egen rad"
+			"description": "Add each addition on its own line"
 		}
 	},
 	"seriesOverviewScene": {
 		"buttons": {
-			"continueReading": "Fortsätt Läsa",
-			"downloadSeries": "Ladda Ner Serie"
+			"continueReading": "Continue Reading",
+			"downloadSeries": "Download Series"
 		}
 	},
 	"createOrUpdateSmartListForm": {
 		"validation": {
-			"nameTooShort": "Namnet måste bestå av minst 2 tecken",
-			"nameTaken": "Kan inte använda detta namn"
+			"nameTooShort": "Name must be at least 2 characters",
+			"nameTaken": "Cannot use this name"
 		},
 		"fields": {
 			"name": {
-				"label": "Namn",
-				"placeholder": "Min smarta lista",
-				"description": "Måste vara unikt, men kan ändras senare"
+				"label": "Name",
+				"placeholder": "My smart list",
+				"description": "Must be unique, but can be changed later"
 			},
 			"description": {
-				"label": "Beskrivning",
-				"placeholder": "En mycket intelligent lista",
-				"description": "En valfri beskrivning av din smarta lista"
+				"label": "Description",
+				"placeholder": "A very intelligent list",
+				"description": "An optional description of your smart list"
 			},
 			"visibility": {
-				"label": "Synlighet",
+				"label": "Visibility",
 				"options": {
 					"public": {
-						"label": "Offentlig",
-						"description": "Tillgänglig för alla användare på servern"
+						"label": "Public",
+						"description": "Accessible to all users on the server"
 					},
 					"shared": {
-						"label": "Delad",
-						"description": "Vissa användare kan komma åt den här smarta listan",
-						"createDisclaimer": "Du kan välja vem den här listan delas med efter skapandet"
+						"label": "Shared",
+						"description": "Specific users can access this smart list",
+						"createDisclaimer": "You can select who this list is shared with after creation"
 					},
 					"private": {
-						"label": "Privat",
-						"description": "Bara du har tillgång till den här smarta listan"
+						"label": "Private",
+						"description": "Only you can access this smart list"
 					}
 				}
 			},
 			"queryBuilder": {
-				"uiPerformance": "Denna funktion saknar prestandaoptimering i UI och kan vara långsam med filter som visar många resultat. Detta kommer förbättras i framtiden",
+				"uiPerformance": "This feature is missing performance optimizations on the UI and may be slow with filters which produce large result sets. This will be improved in the future",
 				"rootJoiner": {
 					"and": {
-						"label": "OCH",
-						"description": "Alla filtergrupper måste vara sanna för att en bok ska matchas"
+						"label": "AND",
+						"description": "All filter groups must be true for a book to be matched"
 					},
 					"or": {
-						"label": "ELLER",
-						"description": "Minst en filtergrupp måste vara sann för att en bok ska matchas"
+						"label": "OR",
+						"description": "At least one filter group must be true for a book to be matched"
 					}
 				},
 				"groupJoiner": {
 					"and": {
-						"label": "OCH",
-						"description": "Alla måste vara sanna"
+						"label": "AND",
+						"description": "All must be true"
 					},
 					"or": {
-						"label": "ELLER",
-						"description": "Åtminstone en måste vara sann"
+						"label": "OR",
+						"description": "At least one must be true"
 					},
 					"not": {
-						"label": "INTE",
-						"description": "Inget kan vara sant"
+						"label": "NOT",
+						"description": "None can be true"
 					}
 				},
 				"grouping": {
-					"label": "Gruppera efter",
-					"description": "Hur böckerna i denna smarta lista ska grupperas",
+					"label": "Group by",
+					"description": "How the books in this smart list should be grouped",
 					"options": {
 						"by_books": {
-							"label": "Ingen"
+							"label": "None"
 						},
 						"by_series": {
-							"label": "Serier"
+							"label": "Series"
 						},
 						"by_library": {
-							"label": "Bibliotek"
+							"label": "Library"
 						}
 					}
 				},
 				"filters": {
-					"emptyState": "Lägg till en grupp för att komma igång",
+					"emptyState": "Add a group to get started",
 					"actions": {
-						"addFilter": "Lägg till filter",
-						"addGroup": "Lägg till grupp",
-						"deleteFilter": "Radera filter",
-						"deleteGroup": "Radera grupp"
+						"addFilter": "Add filter",
+						"addGroup": "Add group",
+						"deleteFilter": "Delete filter",
+						"deleteGroup": "Delete group"
 					},
-					"is": "är",
+					"is": "is",
 					"fieldSelect": {
-						"placeholder": "Egenskap",
+						"placeholder": "Attribute",
 						"source": {
-							"label": "Källa",
-							"back": "Tillbaka",
+							"label": "Source",
+							"back": "Back",
 							"book": {
-								"label": "Bok",
+								"label": "Book",
 								"attributes": {
-									"name": "Filnamn",
-									"size": "Storlek",
-									"extension": "Filnamnstillägg",
+									"name": "Filename",
+									"size": "Size",
+									"extension": "Extension",
 									"status": "Status",
-									"path": "Sökväg",
-									"pages": "Sidor",
-									"tags": "Taggar",
-									"createdAt": "Skapad vid",
-									"updatedAt": "Uppdaterad vid"
+									"path": "Path",
+									"pages": "Pages",
+									"tags": "Tags",
+									"createdAt": "Created at",
+									"updatedAt": "Updated at"
 								}
 							},
 							"book_meta": {
-								"label": "Bok Meta",
+								"label": "Book Meta",
 								"attributes": {
-									"title": "Titel",
-									"summary": "Sammanfattning",
-									"notes": "Anteckningar",
-									"writers": "Författare",
-									"pencillers": "Tecknare",
-									"inkers": "Tuschare",
-									"letterers": "Textare",
-									"editors": "Redaktörer",
-									"publisher": "Utgivare",
-									"colorists": "Färgläggare",
-									"links": "Länkar",
-									"characters": "Karaktärer",
-									"teams": "Team",
+									"title": "Title",
+									"summary": "Summary",
+									"notes": "Notes",
+									"writers": "Writers",
+									"pencillers": "Pencillers",
+									"inkers": "Inkers",
+									"letterers": "Letterers",
+									"editors": "Editors",
+									"publisher": "Publisher",
+									"colorists": "Colorist",
+									"links": "Links",
+									"characters": "Characters",
+									"teams": "Teams",
 									"genres": "Genre",
-									"coverArtists": "Omslagsmålare"
+									"coverArtists": "Cover artists"
 								}
 							},
 							"series": {
-								"label": "Serier",
+								"label": "Series",
 								"attributes": {
-									"name": "Namn",
-									"path": "Sökväg"
+									"name": "Name",
+									"path": "Path"
 								}
 							},
 							"series_meta": {
-								"label": "Seriens Meta",
+								"label": "Series Meta",
 								"attributes": {
-									"title": "Titel",
-									"summary": "Sammanfattning",
-									"publisher": "Utgivare",
+									"title": "Title",
+									"summary": "Summary",
+									"publisher": "Publisher",
 									"imprint": "Imprint",
 									"comicid": "Comic ID",
-									"booktype": "Boktyp",
+									"booktype": "Book type",
 									"status": "Status",
-									"volume": "Volym",
-									"metaType": "Typ",
-									"ageRating": "Åldersgräns"
+									"volume": "Volume",
+									"metaType": "Type",
+									"ageRating": "Age rating"
 								}
 							},
 							"library": {
-								"label": "Bibliotek",
+								"label": "Library",
 								"attributes": {
-									"name": "Namn",
-									"path": "Sökväg"
+									"name": "Name",
+									"path": "Path"
 								}
 							}
 						}
 					},
 					"basicValue": {
-						"placeholder": "Värde",
-						"date": "Datum"
+						"placeholder": "Value",
+						"date": "Date"
 					},
 					"rangeValue": {
 						"from": {
-							"date": "Från datum",
-							"number": "Från"
+							"date": "From date",
+							"number": "From"
 						},
 						"to": {
-							"date": "Till datum",
-							"number": "Till"
+							"date": "To date",
+							"number": "To"
 						},
-						"inclusive": "Inklusive"
+						"inclusive": "Inclusive"
 					},
 					"listValue": {
-						"placeholder": "Lägg till värden",
-						"emptyState": "Inga värden att visa"
+						"placeholder": "Add values",
+						"emptyState": "No values to display"
 					}
 				}
 			}
 		}
 	},
 	"createSmartListScene": {
-		"heading": "Skapa smart lista",
-		"subtitle": "Skapa lista i farten baserat på en uppsättning filter",
+		"heading": "Create smart list",
+		"subtitle": "On-the-fly list creation based on a set of filters",
 		"form": {
-			"stepLabel": "Steg",
+			"stepLabel": "Step",
 			"steps": [
 				{
-					"label": "Grunderna",
-					"heading": "Grundläggande Information",
-					"description": "Detaljerna för denna smarta lista, inklusive dess namn, beskrivning och synlighet"
+					"label": "Basics",
+					"heading": "Basic Information",
+					"description": "The details of this smart list, including its name, description, and visibility"
 				},
 				{
-					"label": "Filter",
-					"heading": "Filter",
-					"description": "Filtren som ska tillämpas på denna smarta lista"
+					"label": "Filters",
+					"heading": "Filters",
+					"description": "The filters to apply to this smart list"
 				},
 				{
-					"label": "Granska",
-					"heading": "Granska",
-					"description": "Granska inställningarna för din smarta lista innan du skapar den"
+					"label": "Review",
+					"heading": "Review",
+					"description": "Review your smart list settings before creating it"
 				}
 			],
 			"review": {
-				"yes": "Ja",
-				"no": "Nej",
-				"none": "Ingen",
+				"yes": "Yes",
+				"no": "No",
+				"none": "None",
 				"labels": {
-					"name": "Namn",
-					"description": "Beskrivning",
-					"visibility": "Synlighet",
-					"grouping": "Gruppera efter"
+					"name": "Name",
+					"description": "Description",
+					"visibility": "Visibility",
+					"grouping": "Group by"
 				}
 			},
 			"buttons": {
-				"confirm": "Skapa lista"
+				"confirm": "Create list"
 			}
 		}
 	},
 	"createOrUpdateApiKey": {
 		"validation": {
-			"futureDate": "Utgångsdatumet måste vara i framtiden"
+			"futureDate": "Expiration date must be in the future"
 		},
 		"fields": {
 			"name": {
-				"label": "Namn",
-				"placeholder": "Synkronisering KoReader"
+				"label": "Name",
+				"placeholder": "Koreader Sync"
 			},
 			"expiration": {
-				"label": "Upphör",
-				"placeholder": "Aldrig"
+				"label": "Expiration",
+				"placeholder": "Never"
 			},
 			"expiresAt": {
-				"label": "Förfaller den",
-				"placeholder": "Aldrig"
+				"label": "Expires at",
+				"placeholder": "Never"
 			},
 			"permissions": {
 				"inherit": {
-					"label": "Ärv behörigheter",
-					"description": "Samma behörigheter som ditt konto"
+					"label": "Inherit permissions",
+					"description": "The same permissions as your account"
 				},
 				"explicit": {
-					"label": "Uttryckligen behörigheter",
-					"description": "Välj de behörigheter som denna nyckel ska ha"
+					"label": "Explicit permissions",
+					"description": "Choose the permissions this key should have"
 				}
 			}
 		},
-		"inheritDisclaimer": "Denna API-nyckel kommer att ärva dina fullständiga behörigheter, vilket innebär att det kan göra vad du kan göra. Var försiktig med denna inställning"
+		"inheritDisclaimer": "This API key will inherit your full permissions, which means it can do anything you can do. Be careful with this setting"
 	},
 	"userSmartListsScene": {
-		"heading": "Smarta listor",
-		"subtitle": "Dina favoritsökningar och filter sparade för enkel åtkomst",
-		"searchPlaceholder": "Filtrera smarta listor",
+		"heading": "Smart lists",
+		"subtitle": "Your favorite searches and filters saved for easy access",
+		"searchPlaceholder": "Filter smart lists",
 		"buttons": {
-			"createSmartList": "Skapa smart lista"
+			"createSmartList": "Create smart list"
 		},
 		"list": {
 			"emptyState": {
-				"heading": "Inga smarta listor att visa",
-				"noListsMessage": "Skapa en smart lista för att komma igång",
-				"noMatchesMessage": "Försök att ändra din sökning"
+				"heading": "No smart lists to display",
+				"noListsMessage": "Create a smart list to get started",
+				"noMatchesMessage": "Try changing your search query"
 			},
 			"card": {
 				"meta": {
 					"figures": {
-						"books": "bok",
-						"series": "serier",
-						"library": "bibliotek"
+						"books": "book",
+						"series": "series",
+						"library": "library"
 					},
-					"matches": "Träffar"
+					"matches": "Matches"
 				}
 			}
 		}
 	},
 	"smartListSettingsScene": {
 		"sidebar": {
-			"basics": "Grunderna",
+			"basics": "Basics",
 			"configuration": {
-				"label": "Inställningar",
-				"access": "Åtkomst",
-				"filters": "Filter"
+				"label": "Configuration",
+				"access": "Access",
+				"filters": "Filters"
 			},
 			"danger-zone": {
-				"delete": "Radering",
-				"label": "Farozon"
+				"delete": "Deletion",
+				"label": "Danger Zone"
 			}
 		},
 		"basics": {
-			"title": "Grundläggande Information",
-			"description": "Detaljerna för denna smarta lista, inklusive dess namn och beskrivning"
+			"title": "Basic Information",
+			"description": "The details of this smart list, including its name and description"
 		},
 		"access": {
-			"title": "Åtkomst",
-			"description": "Bestäm vem som kan komma åt den här smarta listan",
+			"title": "Access",
+			"description": "Control who can access this smart list",
 			"sections": {
 				"visibility": {
 					"confirmation": {
-						"public": "Detta kommer att göra listan synlig för alla",
+						"public": "This will make the list visible to everyone",
 						"private": "This will change the list to be private, hiding it from anyone who previously had access",
-						"shared": "Du måste dela listan med specifika användare för att ge dem åtkomst",
-						"fallback": "Är du säker på att du vill ändra synligheten för denna listan?"
+						"shared": "You will need to share the list with specific users to give them access",
+						"fallback": "Are you sure you want to change the visibility of this list?"
 					}
 				},
 				"accessManager": {
-					"disclaimer": "Delning är inte redo ännu. Kom tillbaka senare!"
+					"disclaimer": "Sharing is not ready yet. Please check back later!"
 				}
 			}
 		},
 		"filters": {
-			"title": "Filterbyggare",
-			"description": "Hantera de filter som konstruerar denna smarta lista"
+			"title": "Filter Builder",
+			"description": "Manage the filters which construct this smart list"
 		},
 		"danger-zone/delete": {
-			"title": "Radering",
-			"description": "Radera denna smarta lista permanent tillsammans med allt dess innehåll eller vissa resurser",
+			"title": "Deletion Actions",
+			"description": "Permanently delete this smart list and all of its contents or certain resources",
 			"sections": {
 				"deleteList": {
-					"heading": "Radera lista",
+					"heading": "Delete list",
 					"description": [
-						"Radera denna smarta lista tillsammans med allt dess innehåll.",
-						"Denna åtgärd kan inte ångras"
+						"Permanently delete this smart list and all its contents.",
+						"This action cannot be undone"
 					],
 					"confirmation": {
-						"title": "Radera lista",
-						"description": "Är du säker på att du vill radera denna smarta lista?",
-						"confirm": "Radera lista"
+						"title": "Delete list",
+						"description": "Are you sure you want to delete this smart list?",
+						"confirm": "Delete list"
 					}
 				}
 			}
@@ -1133,73 +1133,73 @@
 	},
 	"userSmartListScene": {
 		"navigation": {
-			"items": "Föremål",
-			"settings": "Inställningar"
+			"items": "Items",
+			"settings": "Settings"
 		},
 		"layout": {
-			"missingIdError": "Denna scen kräver ett ID i webbadressen",
-			"smartListNotFound": "Smarta listan hittades inte",
-			"viewCreateError": "Kunde inte skapa vyn",
-			"viewSaveError": "Kunde inte spara vyn"
+			"missingIdError": "This scene requires an ID in the URL",
+			"smartListNotFound": "Smart list not found",
+			"viewCreateError": "Failed to create view",
+			"viewSaveError": "Failed to save view"
 		},
 		"header": {
-			"backLink": "Listor"
+			"backLink": "Lists"
 		},
 		"itemsScene": {
-			"smartListNotFound": "Smarta listan hittades inte",
+			"smartListNotFound": "Smart list not found",
 			"actionHeader": {
 				"viewSelector": {
-					"customView": "Anpassad vy",
-					"defaultView": "Standardvy",
-					"noViewsSaved": "Inga sparade vyer",
-					"selectView": "Välj en sparad vy"
+					"customView": "Custom view",
+					"defaultView": "Default view",
+					"noViewsSaved": "No views saved",
+					"selectView": "Select a saved view"
 				},
 				"filterDrawer": {
-					"heading": "Filter för smarta listor",
-					"description": "Ändra filtren för denna visning",
+					"heading": "Smart list filters",
+					"description": "Change the filters for this viewing session",
 					"rawData": {
-						"heading": "Rå filterdata",
-						"description": "Detta är hur Stump kommer att behandla filtren"
+						"heading": "Raw filter data",
+						"description": "This is how Stump will process the filters"
 					},
 					"buttons": {
-						"save": "Spara",
-						"cancel": "Avbryt"
+						"save": "Save",
+						"cancel": "Cancel"
 					}
 				},
 				"search": {
-					"placeholder": "Snabbfilter"
+					"placeholder": "Quick filter"
 				},
 				"viewManager": {
-					"updateSelected": "Uppdatera valda",
-					"deleteSelected": "Radera vy",
-					"create": "Skapa ny vy",
+					"updateSelected": "Update view",
+					"deleteSelected": "Delete view",
+					"create": "Create new view",
 					"modal": {
 						"heading": {
-							"create": "Skapa vy",
-							"update": "Uppdatera vy"
+							"create": "Create view",
+							"update": "Update view"
 						},
 						"description": {
-							"create": "Skapa en ny vy för den här smarta listan",
-							"update": "Uppdatera vyn"
+							"create": "Create a new view for this smart list",
+							"update": "Update the view"
 						},
 						"createForm": {
 							"name": {
-								"label": "Namn",
-								"placeholder": "Min vy",
-								"description": "Ett trevligt namn för att unikt identifiera denna vy"
+								"label": "Name",
+								"placeholder": "My view",
+								"description": "A friendly name to uniquely identify this view"
 							}
 						},
 						"updateForm": {
 							"name": {
-								"label": "Namn",
-								"placeholder": "Min vy",
-								"description": "Det uppdaterade namnet för denna vy, om så önskas"
+								"label": "Name",
+								"placeholder": "My view",
+								"description": "The updated name for this view, if desired"
 							}
 						}
 					},
 					"deleteModal": {
-						"title": "Radera vy",
-						"description": "Är du säker på att du vill ta bort denna vy?"
+						"title": "Delete view",
+						"description": "Are you sure you want to delete this view?"
 					}
 				}
 			}
@@ -1207,109 +1207,109 @@
 	},
 	"settingsScene": {
 		"navigation": {
-			"general": "Allmänt",
-			"logs": "Loggar",
+			"general": "General",
+			"logs": "Logs",
 			"server": "Server",
-			"jobs": "Jobb och Konfigurering",
-			"users": "Användarhantering",
-			"desktop": "Stationär Dator"
+			"jobs": "Jobs and Configuration",
+			"users": "User Management",
+			"desktop": "Desktop"
 		},
 		"sidebar": {
 			"personal": {
-				"account": "Konto",
+				"account": "Account",
 				"appearance": "Preferences",
 				"api keys": "API keys",
 				"reader": "Reader",
 				"desktop": "Desktop",
-				"label": "Personligt"
+				"label": "Personal"
 			},
 			"management": {
-				"general": "Allmänt",
-				"logs": "Loggar",
-				"users": "Användare",
-				"jobs": "Jobb",
-				"access": "Åtkomst",
-				"email": "E-post",
-				"notifications": "Notifikationer",
-				"label": "Hantering"
+				"general": "Server",
+				"logs": "Logs",
+				"users": "Users",
+				"jobs": "Jobs",
+				"access": "Access",
+				"email": "Email",
+				"notifications": "Notifications",
+				"label": "Management"
 			}
 		},
 		"app/account": {
-			"helmet": "Kontoinställningar",
-			"title": "Kontoinställningar",
-			"description": "Inställningar för ditt konto",
+			"helmet": "Account settings",
+			"title": "Account settings",
+			"description": "Settings related to your account",
 			"sections": {
 				"account": {
 					"validation": {
-						"invalidUrl": "Vänligen ange en giltig länk",
-						"missingUsername": "Användarnamn krävs"
+						"invalidUrl": "Please enter a valid URL",
+						"missingUsername": "Username is required"
 					},
 					"labels": {
-						"username": "Användarnamn",
-						"password": "Lösenord",
-						"activeChangesPrompt": "Du har osparade ändringar"
+						"username": "Username",
+						"password": "Password",
+						"activeChangesPrompt": "You have unsaved changes"
 					},
 					"errors": {
-						"updateFailed": "Ett serverfel uppstod vid uppdateringen av din profil. Försök igen."
+						"updateFailed": "A server error occurred while updating your profile. Please try again."
 					},
 					"avatarPicker": {
-						"heading": "Ställ in din avatarbild",
-						"subtitle": "Stump stöder anpassade avatarer, som kan ställas in genom att ange en URL till en bild. Bilduppladdningar stöds inte för att minska mängden data som lagras på servern.",
-						"preview": "En förhandsvisning visas här när du har angett en webbadress.",
+						"heading": "Set your Avatar Image",
+						"subtitle": "Stump supports custom avatars, which can be set by providing a URL to an image. Image uploads are not supported in order to reduce the amount of data stored on the server.",
+						"preview": "A preview will appear here once you have entered a URL.",
 						"labels": {
-							"imageUrl": "URL till Bild",
-							"customAvatar": "Anpassad Avatar"
+							"imageUrl": "Image URL",
+							"customAvatar": "Custom Avatar"
 						},
 						"buttons": {
-							"confirm": "Bekräfta Bild",
-							"cancel": "Avbryt",
-							"edit": "Ändra",
-							"changeImage": "Ändra Bild",
-							"removeImage": "Ta Bort Bild"
+							"confirm": "Confirm Image",
+							"cancel": "Cancel",
+							"edit": "Edit",
+							"changeImage": "Change Image",
+							"removeImage": "Remove Image"
 						}
 					},
 					"buttons": {
-						"confirm": "Spara Ändringar"
+						"confirm": "Save Changes"
 					}
 				},
 				"locale": {
 					"localeSelector": {
-						"label": "Språk"
+						"label": "Language"
 					},
-					"heading": "Språk och lokalisering",
+					"heading": "Language and locale",
 					"subtitle": [
-						"Stump stöder flera språk och lokaliseringar, ange dina inställningar nedan. Överväg att hjälpa till att förbättra kvaliteten på",
-						"Stumps översättningar",
-						"om du kan göra det!"
+						"Stump supports multiple languages and locales, set your preferences below. Please consider helping improve the quality of",
+						"Stump's translations",
+						"if you're able to!"
 					]
 				}
 			}
 		},
 		"app/preferences": {
-			"helmet": "Utseende",
-			"title": "Utseende",
-			"description": "Anpassa utseendet i programmet",
+			"helmet": "Preferences",
+			"title": "Preferences",
+			"description": "Customize the look and feel of the application",
 			"sections": {
 				"themeAndAppearance": {
 					"label": "Theme and appearance",
 					"description": "The basic look and feel options for Stump"
 				},
 				"themeSelect": {
-					"label": "Tema",
+					"label": "Theme",
 					"description": [
-						"Om du är intresserad av att skapa ditt eget tema, kolla in",
-						"dokumentationen"
+						"If you're interested in creating your own custom theme, check out the",
+						"documentation"
 					],
 					"options": {
 						"system": "System",
-						"light": "Ljust",
-						"dark": "Mörkt",
-						"bronze": "Ljust brons",
-						"ocean": "Hav",
-						"autumn": "Höst",
-						"cosmic": "Kosmiskt",
-						"pumpkin": "Pumpa",
-						"matrix": "Matris"
+						"light": "Light",
+						"dark": "Dark",
+						"bronze": "Bronze light",
+						"ocean": "Ocean",
+						"autumn": "Autumn",
+						"cosmic": "Cosmic",
+						"pumpkin": "Pumpkin",
+						"matrix": "Matrix"
 					}
 				},
 				"gradientToggle": {
@@ -1317,8 +1317,8 @@
 					"description": "Some themes optionally support gradients for a more dynamic look"
 				},
 				"fontSelect": {
-					"label": "Typsnitt",
-					"description": "Anpassa typsnittet som används i programmet"
+					"label": "Font",
+					"description": "Customize the font used in the application"
 				},
 				"thumbnailRatioSelect": {
 					"label": "Thumbnail Ratio",
@@ -1360,29 +1360,29 @@
 					}
 				},
 				"navigationArrangement": {
-					"label": "Navigationsarrangemang",
+					"label": "Navigation arrangement",
 					"description": {
-						"sidebar": "Ordna och anpassa navigeringsobjekten i sidofältet",
-						"topbar": "Ordna och anpassa navigationsobjekten i toppraden"
+						"sidebar": "Arrange and customize the navigation items in the sidebar",
+						"topbar": "Arrange and customize the navigation items in the topbar"
 					},
-					"isLocked": "Arrangemanget är låst",
-					"lock": "Lås arrangemang",
-					"unlock": "Lås upp arrangemang",
+					"isLocked": "Arrangement is locked",
+					"lock": "Lock arrangement",
+					"unlock": "Unlock arrangement",
 					"options": {
-						"HOME": "Hem",
-						"EXPLORE": "Utforska",
-						"LIBRARIES": "Bibliotek",
-						"BOOK_CLUBS": "Bokklubbar",
-						"SMART_LISTS": "Smarta listor"
+						"HOME": "Home",
+						"EXPLORE": "Explore",
+						"LIBRARIES": "Libraries",
+						"BOOK_CLUBS": "Book clubs",
+						"SMART_LISTS": "Smart lists"
 					},
 					"entityOptions": {
 						"createAction": {
-							"label": "Visa skapa-åtgärd",
-							"help": "Visa den skapande åtgärden i navigationen"
+							"label": "Show create action",
+							"help": "Show the create action in the navigation"
 						},
 						"linkToAll": {
-							"label": "Se alla länkar",
-							"help": "En länk till en sida tillägnad till att visa alla objekt av denna typ"
+							"label": "See all link",
+							"help": "A link to a page dedicated to viewing all items of this type"
 						}
 					}
 				},
@@ -1443,806 +1443,806 @@
 			}
 		},
 		"app/apiKeys": {
-			"helmet": "API-nycklar",
-			"title": "API-nycklar",
-			"description": "Hantera dina genererade API-nycklar för Stump",
+			"helmet": "API keys",
+			"title": "API keys",
+			"description": "Manage your generated Stump API keys",
 			"shared": {
 				"fields": {
-					"name": "Namn",
-					"expiration": "Upphör",
-					"last_used": "Senast använd",
-					"created": "Skapad",
-					"permissions": "Behörigheter",
-					"inherited": "Ärvd",
-					"explicit": "Uttryckligen"
+					"name": "Name",
+					"expiration": "Expiration",
+					"last_used": "Last used",
+					"created": "Created",
+					"permissions": "Permissions",
+					"inherited": "Inherited",
+					"explicit": "Explicit"
 				}
 			},
 			"sections": {
 				"inspector": {
-					"heading": "API-nyckel",
-					"description": "En detaljerad vy av denna nyckel",
+					"heading": "API key",
+					"description": "A detailed view of this key",
 					"unrestrictedKey": {
-						"heading": "Obegränsad nyckel",
-						"description": "Eftersom du är serverägare har denna nyckel obegränsad åtkomst när den är konfigurerad att ärva behörigheter. Var försiktig."
+						"heading": "Unrestricted key",
+						"description": "Since you are the server owner, this key has unrestricted access when configured to inherit permissions. Please be careful."
 					}
 				},
 				"createKey": {
 					"modal": {
-						"trigger": "Skapa API-nyckel",
+						"trigger": "Create API key",
 						"heading": {
-							"creating": "Skapa API-nyckel",
-							"created": "Skapade nyckel"
+							"creating": "Create API key",
+							"created": "Created key"
 						},
 						"description": {
-							"creating": "API-nycklar är långlivade autentiseringsuppgifter som kan användas för att autentisera med API:n",
-							"created": "Din nya API-nyckel har skapats. Spara hemligheten någonstans säkert, eftersom den inte kommer att visas igen"
+							"creating": "API keys are long-lived credentials that can be used to authenticate with the API",
+							"created": "Your new API key has been created. Save the secret somewhere safe, as it will not be shown again"
 						},
-						"inheritDisclaimer": "Denna API-nyckel kommer att ärva dina fullständiga behörigheter, vilket innebär att det kan göra vad du kan göra. Var försiktig med denna inställning",
-						"createdKey": "Skapade nyckel",
-						"savedConfirm": "Jag har sparat min nyckel",
-						"submit": "Skapa nyckel"
+						"inheritDisclaimer": "This API key will inherit your full permissions, which means it can do anything you can do. Be careful with this setting",
+						"createdKey": "Created key",
+						"savedConfirm": "I saved my key",
+						"submit": "Create key"
 					}
 				},
 				"table": {
-					"title": "Dina nycklar",
-					"description": "Dessa är de API-nycklar som du har skapat",
+					"title": "Your keys",
+					"description": "These are the API keys you have created",
 					"actionMenu": {
-						"inspect": "Granska",
-						"delete": "Radera"
+						"inspect": "Inspect",
+						"delete": "Delete"
 					},
 					"empty": {
-						"title": "Du har inte skapat några nycklar ännu",
-						"action": "Skapa en API-nyckel för att komma igång"
+						"title": "You haven't created any keys yet",
+						"action": "Create an API key to get started"
 					},
-					"noExpiration": "Inget utgångsdatum har angetts"
+					"noExpiration": "No expiration set"
 				}
 			}
 		},
 		"app/reader": {
-			"helmet": "Läsinställningar",
-			"title": "Läsinställningar",
-			"description": "Standardalternativ för Stump-läsaren. Dessa är endast bundna till din nuvarande enhet",
+			"helmet": "Reader settings",
+			"title": "Reader settings",
+			"description": "Default options for the Stump readers. These are bound to your current device only",
 			"sections": {
 				"universal": {
 					"sections": {
 						"readingDirection": {
-							"label": "Läsriktning",
-							"description": "Den riktning i vilken läsaren kommer att gå igenom sidor"
+							"label": "Reading direction",
+							"description": "The direction in which the reader will progress through pages"
 						}
 					}
 				},
 				"imageBasedBooks": {
-					"label": "Bildbaserade böcker",
-					"description": "Serietidningar, manga och andra bildbaserade böcker",
+					"label": "Image-based books",
+					"description": "Comic books, manga, and other image-based books",
 					"sections": {
 						"preloadAheadCount": {
-							"label": "Förbered antal före",
-							"description": "Antalet sidor som ska laddas upp framför den aktuella sidan"
+							"label": "Preload ahead count",
+							"description": "The number of pages to preload ahead of the current page"
 						},
 						"preloadBehindCount": {
-							"label": "Förbered antal bakom",
-							"description": "Antalet sidor som ska laddas upp bakom den aktuella sidan"
+							"label": "Preload behind count",
+							"description": "The number of pages to preload behind the current page"
 						}
 					}
 				},
 				"textBasedBooks": {
-					"label": "E-bokläsare",
-					"description": "Standardinställningar för textbaserade böcker",
+					"label": "Ebook reader",
+					"description": "Default settings for text-based books",
 					"sections": {
 						"fontSize": {
-							"label": "Teckenstorlek",
-							"description": "Storleken på typsnittet som används i läsaren"
+							"label": "Font size",
+							"description": "The size of the font used in the reader"
 						},
 						"fontFamily": {
-							"label": "Typsnittsfamilj",
-							"description": "Typsnittet som används i läsaren"
+							"label": "Font family",
+							"description": "The font used in the reader"
 						},
 						"lineHeight": {
-							"label": "Radavstånd",
-							"description": "Höjden på raderna i läsaren"
+							"label": "Line height",
+							"description": "The height of the lines in the reader"
 						}
 					}
 				},
 				"data": {
 					"sections": {
 						"clearStore": {
-							"label": "Rensa inställningar",
-							"description": "Återställ alla individuella bokinställningar som åsidosätter standardinställningarna",
-							"button": "Rensa inställningar"
+							"label": "Clear preferences",
+							"description": "Reset all individual book settings that override the defaults",
+							"button": "Clear preferences"
 						}
 					}
 				}
 			}
 		},
 		"app/desktop": {
-			"helmet": "Skrivbordsinställningar",
-			"title": "Skrivbordsinställningar",
-			"description": "Inställningar relaterade till Stump-skrivbordsprogrammet",
+			"helmet": "Desktop settings",
+			"title": "Desktop settings",
+			"description": "Settings related to the Stump desktop application",
 			"sections": {
 				"configuredServers": {
-					"label": "Konfigurerade servrar",
-					"description": "Listan över Stump-servrar som du kan ansluta till",
-					"getStarted": "Lägg till en server för att komma igång",
+					"label": "Configured servers",
+					"description": "The list of Stump servers you can connect to",
+					"getStarted": "Add a server to get started",
 					"unreachableServer": {
-						"tooltip": "Servern kan inte nås"
+						"tooltip": "Server unreachable"
 					},
 					"activeServer": {
-						"tooltip": "Nuvarande server"
+						"tooltip": "Current server"
 					},
 					"addOrEditServer": {
 						"validation": {
-							"nameExists": "En server med detta namn finns redan",
-							"nameForbidden": "Detta namn är reserverat",
-							"urlExists": "En server med denna URL finns redan"
+							"nameExists": "A server with this name already exists",
+							"nameForbidden": "This name is reserved",
+							"urlExists": "A server with this URL already exists"
 						},
 						"fields": {
 							"name": {
-								"label": "Namn",
-								"description": "Ett trevligt namn för att identifiera denna server",
-								"placeholder": "Min server"
+								"label": "Name",
+								"description": "A friendly name to identify this server",
+								"placeholder": "My server"
 							},
 							"uri": {
 								"label": "URI",
-								"description": "Webbadressen till Stump-servern",
-								"placeholder": "https://stump.exempel.se"
+								"description": "The URL of the Stump server",
+								"placeholder": "https://stump.example.com"
 							}
 						}
 					},
 					"addServer": {
-						"trigger": "Lägg till server",
-						"title": "Lägg till en ny server",
-						"description": "Lägg till en ny Stump-server till skrivbordsprogrammet",
-						"confirm": "Lägg till server"
+						"trigger": "Add server",
+						"title": "Add a new server",
+						"description": "Add a new Stump server to the desktop application",
+						"confirm": "Add server"
 					},
 					"editServer": {
-						"tooltip": "Redigera server",
-						"title": "Redigera server",
-						"description": "Redigera detaljer för denna server",
-						"confirm": "Spara ändringar"
+						"tooltip": "Edit server",
+						"title": "Edit server",
+						"description": "Edit the details of this server",
+						"confirm": "Save changes"
 					},
 					"deleteServer": {
-						"tooltip": "Ta bort server",
+						"tooltip": "Delete server",
 						"confirmation": {
-							"title": "Ta bort server",
-							"description": "Detta kommer att ta bort servern från skrivbordsprogrammet",
-							"disclaimerActiveServer": "Denna server är för närvarande aktiv. Du kommer att loggas ut",
-							"disclaimerLastServer": "Detta är den sista konfigurerade servern. Du kommer att loggas ut och måste konfigurera om alla servrar i initieringsprocessen",
-							"confirm": "Ta bort server"
+							"title": "Delete this server",
+							"description": "This will remove the server from the desktop application",
+							"disclaimerActiveServer": "This server is currently active. You will be logged out",
+							"disclaimerLastServer": "This is the last configured server. You will be logged out and have to reconfigure any servers in the initialization process",
+							"confirm": "Delete server"
 						}
 					},
 					"switchToServer": {
-						"tooltip": "Byt till server",
+						"tooltip": "Switch to server",
 						"confirmation": {
-							"title": "Byt till denna server",
-							"description": "Detta kommer att logga ut dig från din nuvarande server",
-							"confirm": "Byt till server",
+							"title": "Switch to this server",
+							"description": "This will log you out of your current server",
+							"confirm": "Switch to server",
 							"server": "Server",
-							"uri": "Länk"
+							"uri": "URL"
 						}
 					},
 					"resetConfiguration": {
-						"label": "Ta bort alla servrar",
+						"label": "Delete all servers",
 						"description": [
-							"Ta bort alla konfigurerade servrar från skrivbordsprogrammet",
-							"Denna åtgärd kan inte ångras"
+							"Delete all configured servers from the desktop application",
+							"This action cannot be undone"
 						],
 						"confirmation": {
-							"trigger": "Ta bort alla servrar",
-							"title": "Ta bort alla servrar",
-							"description": "Detta kommer att ta bort alla servrar från skrivbordsprogrammet",
-							"disclaimer": "Du kommer att loggas ut och måste konfigurera om alla servrar i initieringsprocessen",
-							"confirm": "Ta bort alla servrar"
+							"trigger": "Delete all servers",
+							"title": "Delete all servers",
+							"description": "This will remove all servers from the desktop application",
+							"disclaimer": "You will be logged out and have to reconfigure any servers in the initialization process",
+							"confirm": "Delete all servers"
 						}
 					},
 					"resetTokens": {
-						"label": "Rensa autentisering",
+						"label": "Delete tokens",
 						"description": [
-							"Ta bort alla åtkomsttokens som lagras på ett säkert sätt för dina servrar",
-							"Du kommer att behöva återautentisera med varje server"
+							"Remove all securely-stored tokens for your servers, including API keys",
+							"You will have to re-authenticate with and/or re-configure each server"
 						],
 						"confirmation": {
-							"trigger": "Rensa autentisering",
-							"title": "Rensa autentisering",
-							"description": "Detta kommer att ta bort alla åtkomsttokens som lagras på ett säkert sätt för dina servrar",
-							"confirm": "Rensa autentisering"
+							"trigger": "Delete tokens",
+							"title": "Delete tokens",
+							"description": "Are you sure you want to delete all stored tokens?",
+							"confirm": "Delete tokens"
 						}
 					}
 				},
 				"optionalFeatures": {
-					"label": "Valfria funktioner",
-					"description": "Hantera de valfria funktioner som är unika för skrivbordsprogrammet",
+					"label": "Optional features",
+					"description": "Manage the optional features unique to the desktop application",
 					"bundledServer": {
-						"label": "Paketerad server",
-						"description": "Kör den medföljande servern i bakgrunden medan skrivbordsprogrammet körs (kräver omstart)"
+						"label": "Bundled server",
+						"description": "Run the bundled server in the background while the desktop application is running (requires restart)"
 					},
 					"discordPresence": {
-						"label": "Närvaro i Discord",
-						"description": "Visa din Stump-aktivitet i Discord med Discord Rich Presence",
-						"reconnect": "Återanslut till Discord"
+						"label": "Discord Presence",
+						"description": "Display your Stump activity in Discord using Discord Rich Presence",
+						"reconnect": "Reconnect to Discord"
 					}
 				}
 			}
 		},
 		"server/general": {
-			"helmet": "Allmänna serverinställningar",
-			"title": "Allmänna inställningar",
-			"description": "Allmänna inställningar relaterade till din Stump-serverinstans",
+			"helmet": "Server settings",
+			"title": "Server settings",
+			"description": "General settings related to your Stump server instance",
 			"sections": {
 				"updateAvailable": {
-					"message": "Din server är inte uppdaterad. Vänligen uppdatera till senaste versionen!"
+					"message": "Your server is not up to date. Please update to the latest version!"
 				},
 				"serverInfo": {
-					"title": "Serverinformation",
-					"description": "Grundläggande information om din Stump-serverinstans",
+					"title": "Server information",
+					"description": "Basic details about your Stump server instance",
 					"build": {
-						"label": "Bygge",
-						"description": "Detaljer om versionen och bygget",
+						"label": "Build",
+						"description": "Details about the version and build",
 						"version": {
 							"semver": "Version",
-							"commitHash": "Exakt commit",
-							"date": "Byggdatum"
+							"commitHash": "Exact commit",
+							"date": "Build date"
 						}
 					},
 					"nonStableChannel": {
-						"title": "Du kör en icke-stabil version av Stump",
+						"title": "You are running a non-stable build of Stump",
 						"description": [
-							"Det ser ut som du kör",
-							"byggversionen"
+							"It looks like you are running the",
+							"build channel"
 						]
 					}
 				},
 				"serverPublicUrl": {
-					"label": "Offentlig URL",
-					"description": "Webbadressen som din server är tillgänglig från utanför nätverket, om det är möjligt. Detta kommer att aktivera inbjudningslänkar och andra funktioner"
+					"label": "Public URL",
+					"description": "The URL that your server is accessible from outside your network, if applicable. This will enable invite links and other features"
 				}
 			}
 		},
 		"server/logs": {
-			"helmet": "Loggar",
-			"title": "Loggar",
-			"description": "Loggarna som genereras av din Stump-serverinstans",
+			"helmet": "Logs",
+			"title": "Logs",
+			"description": "The logs generated by your Stump server instance",
 			"sections": {
 				"persistedLogs": {
-					"title": "Bestående loggar",
-					"description": "Dessa loggar har manuellt bevarats i databasen, vanligtvis associerade med ett visst jobb eller händelse",
+					"title": "Persisted logs",
+					"description": "These logs have been manually persisted to the database, typically associated with a specific job or event",
 					"table": {
 						"columns": {
-							"level": "Nivå",
-							"message": "Meddelande",
-							"timestamp": "Tidsstämpel"
+							"level": "Level",
+							"message": "Message",
+							"timestamp": "Timestamp"
 						},
-						"emptyHeading": "Inga loggar att visa",
-						"emptySubtitle": "Din server är antingen mycket frisk eller mycket ohälsosam"
+						"emptyHeading": "No logs to display",
+						"emptySubtitle": "Your server is either very healthy or very unhealthy"
 					},
 					"deleteLogs": {
-						"title": "Radera loggar",
-						"description": "Radera alla bestående loggar från databasen permanent",
-						"disclaimer": "Denna åtgärd kan inte ångras",
-						"confirm": "Radera loggar"
+						"title": "Delete logs",
+						"description": "Permanently delete all persisted logs from the database",
+						"disclaimer": "This action cannot be undone",
+						"confirm": "Delete logs"
 					}
 				},
 				"liveLogs": {
-					"title": "Live logg-flöde",
-					"description": "Strömmas direkt från din Stump-serverinstans i realtid"
+					"title": "Live logs feed",
+					"description": "Streamed directly from your Stump server instance in real-time"
 				}
 			}
 		},
 		"server/jobs": {
-			"helmet": "Jobb",
-			"title": "Jobb",
-			"description": "Jobb som körs i bakgrunden på din Stump-serverinstans",
+			"helmet": "Jobs",
+			"title": "Jobs",
+			"description": "Background jobs that run on your Stump server instance",
 			"sections": {
 				"scheduling": {
-					"title": "Schemaläggning",
-					"description": "Vissa jobb kan konfigureras att köra enligt ett schema. Ändringar till denna konfiguration kommer ta effekt efter en serveromstart",
-					"disclaimer": "Jobbschemaläggaren är verkligen grundläggande och kommer att förbättras i framtiden. Vänligen kontakta oss för feedback eller förslag!",
+					"title": "Scheduled Jobs",
+					"description": "Some jobs can be configured to automatically run on a schedule",
+					"disclaimer": "The job scheduler is really basic and will be improved in the future. Please reach out for feedback or suggestions!",
 					"createOrUpdateConfig": {
 						"fields": {
 							"intervalSecs": {
-								"label": "Intervall",
-								"description": "Hur ofta jobbet ska köras (i sekunder)",
-								"placeholder": "t.ex. \"86400\" för en gång om dagen"
+								"label": "Interval",
+								"description": "How often the job should run (in seconds)",
+								"placeholder": "e.g. \"86400\" for once a day"
 							},
 							"intervalPreset": {
-								"label": "Förval",
+								"label": "Preset",
 								"options": {
-									"everySixHours": "Var sjätte timme",
-									"everyTwelveHours": "Var tolfte timme",
-									"oncePerDay": "En gång om dagen",
-									"oncePerWeek": "En gång i veckan",
-									"oncePerMonth": "En gång i månaden"
+									"everySixHours": "Every 6 hours",
+									"everyTwelveHours": "Every 12 hours",
+									"oncePerDay": "Once a day",
+									"oncePerWeek": "Once a week",
+									"oncePerMonth": "Once a month"
 								}
 							},
 							"includedLibraryIds": {
-								"label": "Inkluderade bibliotek",
-								"description": "Välj vilka bibliotek som ingår"
+								"label": "Included libraries",
+								"description": "Choose which libraries are included"
 							}
 						},
-						"restartRequired": "Ändringar i denna konfiguration kommer att träda i kraft efter att servern startats om"
+						"restartRequired": "Changes to this configuration will take effect after a server restart"
 					}
 				},
 				"history": {
-					"title": "Historik",
-					"description": "Ett arkiv av jobb som har körts på din Stump-serverinstans",
+					"title": "History",
+					"description": "A record of jobs that have been run on your Stump server instance",
 					"table": {
 						"columns": {
-							"name": "Typ",
-							"description": "Beskrivning",
+							"name": "Type",
+							"description": "Description",
 							"status": "Status",
-							"createdAt": "Startade den",
-							"elapsed": "Passerat",
-							"tasks": "Uppgifter"
+							"createdAt": "Started At",
+							"elapsed": "Elapsed",
+							"tasks": "Tasks"
 						},
-						"emptyHeading": "Det finns inga jobb att visa",
-						"emptySubtitle": "Du kan inte ha ett jobb om du inte har ett jobb",
-						"deleteAllMessage": "Jobbhistorik och statistik kan raderas från databasen när som helst. Denna åtgärd kan inte ångras"
+						"emptyHeading": "There are no jobs to display",
+						"emptySubtitle": "You can't have a job if you don't have a job",
+						"deleteAllMessage": "Job history and statistics may be deleted from the database at any time. This action cannot be undone"
 					},
 					"deleteJobHistory": {
-						"title": "Radera jobbhistorik",
-						"description": "Radera all jobbhistorik permanent från databasen",
-						"confirmText": "Är du säker på att du vill radera all jobbhistorik?",
-						"confirm": "Radera",
-						"emptyState": "Inga jobb att ta bort"
+						"title": "Delete job history",
+						"description": "Permanently delete all job history from the database",
+						"confirmText": "Are you sure you want to delete all job history?",
+						"confirm": "Delete",
+						"emptyState": "No jobs to clear"
 					}
 				}
 			}
 		},
 		"server/users": {
-			"helmet": "Användarhantering",
-			"title": "Användare",
-			"description": "Hantera användare på denna server",
+			"helmet": "User management",
+			"title": "Users",
+			"description": "Manage the users on this server",
 			"createUser": {
-				"helmet": "Skapa användare",
-				"title": "Skapa användare",
-				"description": "Skapa en ny användare på denna server"
+				"helmet": "Create user",
+				"title": "Create user",
+				"description": "Create a new user on this server"
 			},
 			"updateUser": {
-				"helmet": "Uppdatera användare",
-				"title": "Uppdatera användare",
-				"description": "Uppdatera detaljer för denna användare"
+				"helmet": "Update user",
+				"title": "Update user",
+				"description": "Update the details of this user"
 			},
 			"createOrUpdateForm": {
 				"accessControl": {
-					"heading": "Åtkomstkontroll och begränsningar",
+					"heading": "Access control and restrictions",
 					"subtitle": [
-						"Konfigurera eventuella begränsningar som du vill tillämpa för denna användare. För mer information om åtkomstkontroll, se",
-						"dokumentationen"
+						"Configure any restrictions you want to apply to this user. For more information about access control, see the",
+						"documentation"
 					],
 					"ageRestriction": {
-						"label": "Åldersbegränsning",
-						"description": "Begränsar användaren från att komma åt innehåll ovanför den inställda åldersgränsen",
+						"label": "Age restriction",
+						"description": "Restricts the user from accessing content above the set age rating threshold",
 						"placeholder": "13",
 						"enforceUnset": {
-							"label": "Tvinga vid avmarkering",
-							"description": "Om aktiverad, kommer användare att vara begränsade från att komma åt innehåll utan bestämd åldersgräns"
+							"label": "Enforce on unset",
+							"description": "If enabled, users will be restricted from accessing content with no age rating available"
 						}
 					},
 					"tagRestriction": {
-						"label": "Taggbegränsningar",
-						"description": "Begränsar användaren från att komma åt innehåll med de valda taggarna",
-						"placeholder": "Vuxet, Blodigt"
+						"label": "Tag restrictions",
+						"description": "Restricts the user from accessing content with the selected tags",
+						"placeholder": "Adult, Gore"
 					}
 				},
 				"permissions": {
-					"heading": "Behörigheter",
+					"heading": "Permissions",
 					"subtitle": [
-						"Välj de behörigheter du vill ge till den här användaren. För mer information om vad varje behörighet gör, se",
-						"dokumentationen"
+						"Select the permissions you want to grant to this user. For more information on what each permission does, see the",
+						"documentation"
 					],
 					"bookclub": {
-						"label": "Bokklubbar",
+						"label": "Book Clubs",
 						"read": {
-							"label": "Kom åt bokklubbens funktioner",
-							"description": "Ger användaren tillgång till bokklubbens funktioner, inklusive visning och anslutning till bokklubbar"
+							"label": "Access book club features",
+							"description": "Allows the user to access book club features, including viewing and joining book clubs"
 						},
 						"create": {
-							"label": "Skapa bokklubbar",
-							"description": "Tillåter användaren att skapa nya bokklubbar"
+							"label": "Create book clubs",
+							"description": "Allows the user to create new book clubs"
 						}
 					},
 					"feature": {
-						"label": "Valfria Funktioner",
+						"label": "Feature Opt-In",
 						"api_keys": {
-							"label": "API-nycklar",
-							"description": "Tillåt användaren att hantera sina egna API-nycklar"
+							"label": "API keys",
+							"description": "Allow the user to manage their own API keys"
 						},
 						"koreader_sync": {
-							"label": "Synkronisering KoReader",
-							"description": "Tillåt användaren att komma åt KoReaders synkroniseringsintegration"
+							"label": "KoReader sync",
+							"description": "Allow the user to access the KoReader sync integration"
 						}
 					},
 					"file": {
-						"label": "Filhantering",
+						"label": "File Management",
 						"explorer": {
-							"label": "Filutforskaren",
-							"description": "Allows the user to access the Library File Explorer.\nContent restriction is not supported when this feature is granted"
+							"label": "File explorer",
+							"description": "Allows the user to access the various file explorers.\nContent restriction cannot be guaranteed when this feature is granted"
 						},
 						"download": {
-							"label": "Ladda ner filer",
-							"description": "Tillåt användaren att ladda ner filer från servern"
+							"label": "Download files",
+							"description": "Allows the user to download files from the server"
 						},
 						"upload": {
-							"label": "Ladda upp filer",
-							"description": "Tillåt användaren att ladda upp filer till servern"
+							"label": "Upload files",
+							"description": "Allows the user to upload files to the server"
 						}
 					},
 					"emailer": {
-						"label": "E-postare",
+						"label": "Emailers",
 						"read": {
-							"label": "Få åtkomst till e-post",
-							"description": "Tillåt användaren att visa de konfigurerade e-postarna"
+							"label": "Access emailers",
+							"description": "Allows the user to view the configured emailers"
 						},
 						"create": {
-							"label": "Skapa e-postare",
-							"description": "Tillåt användaren att skapa nya e-postare"
+							"label": "Create emailers",
+							"description": "Allows the user to create new emailers"
 						},
 						"manage": {
-							"label": "Hantera e-postare",
-							"description": "Tillåt användaren att hantera befintliga e-postare"
+							"label": "Manage emailers",
+							"description": "Allows the user to manage existing emailers"
 						}
 					},
 					"email": {
-						"label": "E-post",
+						"label": "Emailing",
 						"send": {
-							"label": "Skicka e-post",
-							"description": "Tillåter användaren att skicka e-post från servern till alla konfigurerade alias"
+							"label": "Send emails",
+							"description": "Allows the user to send emails from the server to any configured aliases"
 						},
 						"arbitrary_send": {
-							"label": "Skicka godtyckliga e-postmeddelanden",
-							"description": "Tillåter användaren att skicka e-post från servern till valfri e-postadress"
+							"label": "Send arbitrary emails",
+							"description": "Allows the user to send emails from the server to any email address"
 						}
 					},
 					"library": {
-						"label": "Hantera Bibliotek",
+						"label": "Library Management",
 						"create": {
-							"label": "Skapa bibliotek",
-							"description": "Tillåter användaren att skapa nya bibliotek.\nInkluderar behörigheter att redigera och skanna"
+							"label": "Create libraries",
+							"description": "Allows the user to create new libraries.\nIncludes permissions to edit and scan"
 						},
 						"scan": {
-							"label": "Skanna bibliotek",
-							"description": "Tillåter användaren att starta sökningar efter befintliga bibliotek"
+							"label": "Scan libraries",
+							"description": "Allows the user to initiate scans for existing libraries"
 						},
 						"edit": {
-							"label": "Redigera bibliotek",
-							"description": "Tillåter användaren att redigera grundläggande uppgifter för befintliga bibliotek"
+							"label": "Edit libraries",
+							"description": "Allows the user to edit basic details for existing libraries"
 						},
 						"manage": {
-							"label": "Hantera bibliotek",
-							"description": "Tillåter användaren att hantera avancerade inställningar för befintliga bibliotek.\nInkluderar behörigheter att redigera och skanna"
+							"label": "Manage libraries",
+							"description": "Allows the user to manage advanced settings for existing libraries.\nIncludes permissions to edit and scan"
 						},
 						"delete": {
-							"label": "Radera bibliotek",
-							"description": "Tillåter användaren att radera befintliga bibliotek.\nInkluderar behörigheter att redigera, hantera och skanna"
+							"label": "Delete libraries",
+							"description": "Allows the user to delete existing libraries.\nIncludes permissions to edit, manage, and scan"
 						}
 					},
 					"server": {
-						"label": "Serverhantering",
+						"label": "Server Management",
 						"manage": {
-							"label": "Hantera server",
-							"description": "Tillåter användaren att hantera servern.\nInnehåller *många* andra behörigheter"
+							"label": "Manage server",
+							"description": "Allows the user to manage the server.\nIncludes *many* other permissions"
 						}
 					},
 					"user": {
-						"label": "Användarhantering",
+						"label": "User Management",
 						"read": {
-							"label": "Visa användare",
-							"description": "Tillåter användaren att se andra användare på servern. Detta krävs för vissa andra funktioner, t.ex. att exkludera användare från att komma åt ett bibliotek"
+							"label": "Read users",
+							"description": "Allows the user to query other users on the server. This is required for some other features, e.g. excluding users from accessing a library"
 						},
 						"manage": {
-							"label": "Hantera användare",
-							"description": "Allows the user to manage other users on the server.\nIncludes permissions to create and update"
+							"label": "Manage users",
+							"description": "Allows the user to manage other users on the server.\nIncludes permissions to read, create, and update"
 						}
 					},
 					"smartlist": {
-						"label": "Smarta Listor",
+						"label": "Smart Lists",
 						"read": {
-							"label": "Få tillgång till funktioner för smarta listor",
-							"description": "Allows the user to access smart lists features"
+							"label": "Access smart list feature",
+							"description": "Allows the user to access smart lists features. Granular permissions are not yet implemented, so this\nincludes permissions to read, create, and update their own lists"
 						}
 					}
 				},
 				"validation": {
-					"ageRestrictionTooLow": "Åldersgräns kan inte vara mindre än 0",
-					"missingUsername": "Användarnamn krävs",
-					"missingPassword": "Lösenord krävs",
-					"usernameAlreadyExists": "Användarnamnet är redan använt"
+					"ageRestrictionTooLow": "Age restriction cannot be less than 0",
+					"missingUsername": "Username is required",
+					"missingPassword": "Password is required",
+					"usernameAlreadyExists": "Username already exists"
 				},
-				"createSubmitButton": "Skapa användare",
-				"updateSubmitButton": "Uppdatera användare"
+				"createSubmitButton": "Create user",
+				"updateSubmitButton": "Update user"
 			},
 			"loginActivity": {
 				"deleteConfirmation": {
-					"title": "Radera aktivitet",
-					"description": "Alla inloggningshistorik kommer raderas permanent från databasen",
-					"confirm": "Radera"
+					"title": "Delete activity",
+					"description": "All records of login activity will be permanently deleted from the database",
+					"confirm": "Delete"
 				}
 			}
 		},
 		"server/email": {
-			"helmet": "E-postinställningar",
-			"title": "E-post",
+			"helmet": "Email settings",
+			"title": "Email",
 			"description": "Settings related to configuring an SMTP emailer for your Stump server instance",
 			"sections": {
 				"emailers": {
-					"title": "SMTP e-postare",
-					"description": "De klienter du har konfigurerat för att skicka e-post från din Stump-serverinstans",
-					"singleInstanceDisclaimer": "Medan Stump stöder flera SMTP-konfigurationer i backend, kan endast en konfigureras grafiskt. Detta kommer att förbättras i framtiden",
+					"title": "SMTP emailers",
+					"description": "The clients you have configured for sending emails from your Stump server instance",
+					"singleInstanceDisclaimer": "While Stump supports multiple SMTP configurations in the backend, only one can be configured on the UI. This will be improved in the future",
 					"list": {
-						"emptyHeading": "Inga SMTP e-postare konfigurerade",
-						"primaryEmailer": "Primär e-postare",
+						"emptyHeading": "No SMTP emailers configured",
+						"primaryEmailer": "Primary emailer",
 						"sendHistory": {
-							"heading": "Avsändningshistorik",
-							"description": "Ett register över e-postmeddelanden som har skickats från denna e-postare",
+							"heading": "Send history",
+							"description": "A record of emails sent from this emailer",
 							"table": {
 								"columns": {
-									"to": "Till",
-									"subject": "Ämne",
+									"to": "To",
+									"subject": "Subject",
 									"status": "Status",
-									"createdAt": "Skickad vid"
+									"createdAt": "Sent at"
 								}
 							},
-							"emptyHeading": "Ingen historik",
-							"emptySubtitle": "Historiken för denna e-postare är tom. Den har antingen inte använts eller är historiken rensad"
+							"emptyHeading": "No history",
+							"emptySubtitle": "The history of this emailer is empty. It has either not been used or the history has been cleared"
 						}
 					}
 				},
 				"devices": {
-					"title": "E-postenheter",
-					"description": "De enhetsalias du har konfigurerat för att motta e-post från din Stump-serverinstans",
-					"addDevice": "Lägg till enhetsalias",
+					"title": "Email devices",
+					"description": "The device aliases you have configured for receiving emails from your Stump server instance",
+					"addDevice": "Add device alias",
 					"addOrUpdateDevice": {
 						"title": {
-							"create": "Skapa enhetsalias",
-							"update": "Uppdatera enhetsalias"
+							"create": "Create device alias",
+							"update": "Update device alias"
 						},
 						"name": {
-							"label": "Namn",
-							"description": "Ett trevligt namn för att unikt identifiera denna enhetsalias"
+							"label": "Name",
+							"description": "A friendly name to uniquely identify this device alias"
 						},
 						"email": {
-							"label": "E-post",
-							"description": "E-postadressen som detta alias kommer att förknippas med"
+							"label": "Email",
+							"description": "The email address this alias will be associated with"
 						},
 						"forbidden": {
-							"label": "Förbjudet",
-							"description": "När detta är aktiverat kan ingen användare kunna skicka e-post till den adress som är kopplad till detta alias"
+							"label": "Forbidden",
+							"description": "When enabled, no user may send emails to the address associated with this alias"
 						},
 						"submit": {
-							"create": "Skapa enhetsalias",
-							"update": "Uppdatera enhetsalias"
+							"create": "Create device alias",
+							"update": "Update device alias"
 						}
 					},
 					"table": {
-						"emptyHeading": "Inga enheter registrerade",
-						"emptySubtitle": "Skapa ett nytt enhetsalias för framtida användning"
+						"emptyHeading": "No devices registered",
+						"emptySubtitle": "Create a new device alias for future use"
 					}
 				}
 			},
 			"createOrUpdateForm": {
 				"name": {
-					"label": "Namn",
-					"description": "Ett trevligt namn för att unikt identifiera denna e-postare"
+					"label": "Name",
+					"description": "A friendly name to uniquely identify this emailer"
 				},
 				"smtpSettings": {
-					"heading": "SMTP-inställningar",
-					"description": "De SMTP-specifika inställningarna för denna e-postare"
+					"heading": "SMTP settings",
+					"description": "The SMTP-specific settings for this emailer"
 				},
 				"smtpProvider": {
-					"label": "Standardinställningar för SMTP-leverantör",
-					"description": "Leverantören av denna SMTP-server. Detta används för att fylla i några vanliga inställningar, men täcker inte alla leverantörer"
+					"label": "SMTP provider preset",
+					"description": "The provider of the SMTP server. This is used to prefill some common settings, but doesn't capture all providers"
 				},
 				"smtpHost": {
-					"label": "SMTP-värd",
-					"description": "Värdnamnet för SMTP-servern"
+					"label": "SMTP host",
+					"description": "The hostname of the SMTP server"
 				},
 				"smtpPort": {
-					"label": "SMTP-port",
-					"description": "Porten till SMTP-servern"
+					"label": "SMTP port",
+					"description": "The port of the SMTP server"
 				},
 				"tlsEnabled": {
-					"label": "TLS aktiverat",
-					"description": "Om aktiverad, kommer anslutningen till SMTP-servern att krypteras"
+					"label": "TLS enabled",
+					"description": "If enabled, the connection to the SMTP server will be encrypted"
 				},
 				"username": {
-					"label": "Användarnamn",
-					"description": "Användarnamnet för autentisering med SMTP-servern. Detta brukar vara e-postadressen"
+					"label": "Username",
+					"description": "The username for authenticating with the SMTP server. This is typically the email address"
 				},
 				"password": {
-					"label": "Lösenord",
-					"description": "Lösenordet för autentisering med SMTP-servern. Om du använder Gmail kan du behöva skapa ett app-specifikt lösenord"
+					"label": "Password",
+					"description": "The password for authenticating with the SMTP server. If you're using Gmail, you may need to generate an app-specific password"
 				},
 				"senderSettings": {
-					"heading": "Avsändarens inställningar",
-					"description": "Inställningarna för avsändaren av e-post"
+					"heading": "Sender settings",
+					"description": "The settings for the sender of the email"
 				},
 				"senderDisplayName": {
-					"label": "Visningsnamn för avsändare",
-					"description": "Det namn som kommer att visas för mottagare"
+					"label": "Sender display name",
+					"description": "The name that will be displayed to recipients"
 				},
 				"senderEmail": {
-					"label": "Avsändarens e-postadress",
-					"description": "Den e-postadress som kommer att visas för mottagare"
+					"label": "Sender email address",
+					"description": "The email address that will be displayed to recipients"
 				},
 				"additionalSettings": {
-					"heading": "Ytterligare inställningar",
-					"description": "Ytterligare inställningar för e-postare"
+					"heading": "Additional settings",
+					"description": "Additional settings for the emailer"
 				},
 				"maxAttachmentSize": {
-					"label": "Max storlek på bilaga",
-					"description": "Maximal storlek, i bytes, som en bilaga kan vara"
+					"label": "Max attachment size",
+					"description": "The maximum size, in bytes, that an attachment can be"
 				},
 				"submit": {
-					"create": "Skapa e-postare",
-					"update": "Uppdatera e-postare"
+					"create": "Create emailer",
+					"update": "Update emailer"
 				}
 			},
 			"createEmailer": {
-				"helmet": "Skapa e-postare",
-				"title": "Skapa e-postare",
-				"description": "Skapa en ny SMTP-e-postare för din Stump-serverinstans"
+				"helmet": "Create emailer",
+				"title": "Create emailer",
+				"description": "Create a new SMTP emailer for your Stump server instance"
 			},
 			"updateEmailer": {
-				"helmet": "Uppdatera e-postare",
-				"title": "Uppdatera e-postare",
-				"description": "Uppdatera detaljer för denna SMTP-e-postare"
+				"helmet": "Update emailer",
+				"title": "Update emailer",
+				"description": "Update the details of this SMTP emailer"
 			}
 		}
 	},
 	"jobOverlay": {
-		"backupHeading": "Jobb Pågår"
+		"backupHeading": "Job in Progress"
 	},
 	"libraryStats": {
-		"seriesCount": "Totalt Antal Serier",
-		"bookCount": "Totalt Antal Böcker",
-		"diskUsage": "Diskanvändning"
+		"seriesCount": "Total Series",
+		"bookCount": "Total Books",
+		"diskUsage": "Disk Usage"
 	},
 	"noLibraries": {
-		"heading": "Inget att se här",
-		"messagePrefix": "Du kan inte se vad du inte har",
+		"heading": "Nothing to see here",
+		"messagePrefix": "You can't see what you don't have",
 		"message": {
-			"create": "Skapa ett bibliotek för att komma igång",
-			"wait": "När biblioteken har skapats kommer de visas här"
+			"create": "Create a library to get started",
+			"wait": "Once libraries are created, they'll be displayed here"
 		},
 		"links": {
-			"create": "Skapa bibliotek",
-			"settings": "Gå till Inställningar"
+			"create": "Create library",
+			"settings": "Go to settings"
 		}
 	},
 	"pagination": {
 		"buttons": {
-			"next": "Nästa",
-			"previous": "Föregående"
+			"next": "Next",
+			"previous": "Previous"
 		},
 		"popover": {
-			"heading": "Gå till sida",
+			"heading": "Go to page",
 			"buttons": {
-				"confirm": "Gå till",
-				"cancel": "Avbryt"
+				"confirm": "Go",
+				"cancel": "Cancel"
 			}
 		}
 	},
 	"signOutModal": {
-		"title": "Logga ut",
-		"message": "Är du säker på att du vill logga ut?",
+		"title": "Sign out",
+		"message": "Are you sure you want to sign out?",
 		"buttons": {
-			"cancel": "Avbryt",
-			"signOut": "Logga ut"
+			"cancel": "Cancel",
+			"signOut": "Sign out"
 		}
 	},
 	"sidebar": {
 		"buttons": {
-			"home": "Hem",
-			"libraries": "Bibliotek",
-			"books": "Utforska",
-			"bookClubs": "Bokklubbar",
-			"createLibrary": "Skapa bibliotek",
-			"noLibraries": "Inga bibliotek",
-			"createBookClub": "Skapa bokklubb",
-			"noBookClubs": "Inga bokklubbar",
-			"settings": "Inställningar",
-			"themeToggle": "Växla Tema",
-			"goForward": "Gå Framåt",
-			"goBack": "Gå Tillbaka",
-			"smartlists": "Smarta listor",
-			"noSmartlists": "Inga smarta listor",
-			"createSmartlist": "Skapa smart lista",
-			"seeAll": "Se alla"
+			"home": "Home",
+			"libraries": "Libraries",
+			"books": "Explore",
+			"bookClubs": "Book clubs",
+			"createLibrary": "Create library",
+			"noLibraries": "No libraries",
+			"createBookClub": "Create book club",
+			"noBookClubs": "No book clubs",
+			"settings": "Settings",
+			"themeToggle": "Toggle Theme",
+			"goForward": "Go Forward",
+			"goBack": "Go Back",
+			"smartlists": "Smart lists",
+			"noSmartlists": "No smart lists",
+			"createSmartlist": "Create smart list",
+			"seeAll": "See all"
 		},
 		"libraryOptions": {
-			"scanLibrary": "Skanna",
-			"fileExplorer": "Filer",
-			"manageLibrary": "Manage",
-			"deleteLibrary": "Radera"
+			"scanLibrary": "Scan",
+			"fileExplorer": "Files",
+			"manageLibrary": "Settings",
+			"deleteLibrary": "Delete"
 		},
 		"versionInformation": {
-			"heading": "Information om Version",
-			"semVer": "Semantisk Version",
-			"commitHash": "Hash för bygg-commit",
-			"buildDate": "Byggdatum"
+			"heading": "Version Information",
+			"semVer": "Semantic Version",
+			"commitHash": "Commit Hash",
+			"buildDate": "Build Date"
 		}
 	},
 	"search": {
-		"placeholder": "Sök"
+		"placeholder": "Search"
 	},
 	"serverSOS": {
-		"heading": "Otillgänglig Server",
+		"heading": "Server Unavailable",
 		"desktop": {
-			"message": "Ett nätverksfel som uppstod tyder på att din Stump-server för närvarande inte är tillgänglig. Se till att den körs och är tillgänglig från denna enhet.\nOm din serverlänk har ändrats, kan du uppdatera den med formuläret nedan"
+			"message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device.\nIf your server URL has changed, you can update it using the form below"
 		},
 		"web": {
-			"message": "Ett nätverksfel som uppstod tyder på att din Stump-server inte är tillgänglig. Se till att den körs och är tillgänglig från denna enhet"
+			"message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device"
 		},
-		"reconnected": "Återansluten till servern! Omdirigerar...",
-		"reconnectionFailed": "Någonting gick fel!"
+		"reconnected": "Reconnected to server! Redirecting...",
+		"reconnectionFailed": "Something went wrong!"
 	},
 	"serverStatusOverlay": {
-		"heading": "Servern är inte ansluten",
+		"heading": "Server isn't connected",
 		"message": [
-			"Vänligen kontrollera din internetanslutning",
-			"Klicka här",
-			"för att ändra din serverlänk"
+			"Please check your internet connection",
+			"Click here",
+			"to change your server URL"
 		]
 	},
 	"slidingList": {
-		"empty": "Inga föremål att visa",
+		"empty": "No items to display",
 		"buttons": {
-			"next": "Sök Framåt",
-			"previous": "Sök Bakåt"
+			"next": "Seek Ahead",
+			"previous": "Seek Backwards"
 		}
 	},
 	"tagSelect": {
-		"placeholder": "Välj eller skapa tagg",
-		"placeholderNoTags": "Inga taggar tillgängliga"
+		"placeholder": "Select or create tag",
+		"placeholderNoTags": "No tags available"
 	},
 	"thumbnailDropdown": {
-		"label": "Edit thumbnail",
+		"label": "Select thumbnail",
 		"options": {
-			"selectFromBooks": "Välj från böcker",
-			"uploadImage": "Ladda upp bild"
+			"selectFromBooks": "Select from books",
+			"uploadImage": "Upload image"
 		},
 		"uploadImage": {
-			"emptyState": "En förhandsvisning av din bild visas här",
-			"prompt": "Släpp bilden här eller klicka för att välja",
-			"remove": "Ta bort bilden"
+			"emptyState": "A preview of your image will appear here",
+			"prompt": "Drop image here or click to select",
+			"remove": "Remove image"
 		}
 	},
 	"common": {
-		"add": "Lätt till",
-		"cancel": "Avbryt",
-		"confirm": "Bekräfta",
-		"delete": "Radera",
-		"enter": "Ange",
-		"save": "Spara",
-		"send": "Skicka",
-		"saveChanges": "Spara förändringar",
-		"noChanges": "Inga förändringar",
-		"create": "Skapa",
-		"edit": "Ändra",
-		"update": "Uppdatera",
-		"upload": "Ladda Upp",
-		"uploading": "Laddar upp",
-		"unimplemented": "Denna funktion finns inte ännu! Kom tillbaka senare",
-		"limitedFunctionality": "Detta är ännu inte fullt komplett och saknar vissa funktioner. Kom tillbaka senare",
-		"logIn": "Logga in",
-		"login": "Inlogg",
-		"seeError": "Se fel",
-		"remove": "Ta bort",
-		"goBack": "Gå tillbaka",
-		"goToServers": "Gå till servrar",
-		"notReady": "Den här funktionen är inte redo",
-		"notUsedYet": "Inte använd än",
-		"never": "Aldrig",
-		"scan": "Skanna",
-		"somethingWentWrong": "Någonting gick fel"
+		"add": "Add",
+		"cancel": "Cancel",
+		"confirm": "Confirm",
+		"delete": "Delete",
+		"enter": "Enter",
+		"save": "Save",
+		"send": "Send",
+		"saveChanges": "Save changes",
+		"noChanges": "No changes",
+		"create": "Create",
+		"edit": "Edit",
+		"update": "Update",
+		"upload": "Upload",
+		"uploading": "Uploading",
+		"unimplemented": "This functionality is not yet implemented! Check back later",
+		"limitedFunctionality": "This is not yet fully implemented and is lacking some features. Check back later",
+		"logIn": "Log in",
+		"login": "Login",
+		"seeError": "See error",
+		"remove": "Remove",
+		"goBack": "Go back",
+		"goToServers": "Go to servers",
+		"notReady": "This feature is not ready",
+		"notUsedYet": "Not used yet",
+		"never": "Never",
+		"scan": "Scan",
+		"somethingWentWrong": "Something went wrong"
 	},
 	"userPermissions": {
 		"ACCESS_API_KEYS": {
-			"label": "API-nycklar",
-			"description": "Tillåt användaren att hantera sina egna API-nycklar"
+			"label": "API keys",
+			"description": "Allows the user to manage their own API keys"
 		},
 		"ACCESS_BOOK_CLUB": {
-			"label": "Bokklubbar",
-			"description": "Ger användaren tillgång till bokklubbens funktioner, inklusive visning och anslutning till bokklubbar"
+			"label": "Book Clubs",
+			"description": "Allows the user to access book club features, including viewing and joining book clubs"
 		},
 		"ACCESS_KOREADER_SYNC": {
 			"label": "KoReader sync",
@@ -2337,28 +2337,28 @@
 			"description": "Allows the user to view real-time system logs"
 		},
 		"READ_USERS": {
-			"label": "Visa användare",
-			"description": "Tillåter användaren att visa information om användarkonton"
+			"label": "Read users",
+			"description": "Allows the user to view user account information"
 		},
 		"SCAN_LIBRARY": {
-			"label": "Skanna bibliotek",
-			"description": "Tillåter användaren att trigga bibliotekssökning för att upptäcka nytt innehåll"
+			"label": "Scan libraries",
+			"description": "Allows the user to trigger library scans to discover new content"
 		},
 		"UPLOAD_FILE": {
-			"label": "Ladda upp filer",
-			"description": "Tillåt användaren att ladda upp filer till servern"
+			"label": "Upload files",
+			"description": "Allows the user to upload files to the server"
 		},
 		"MANAGE_JOBS": {
-			"label": "Hantera jobb",
-			"description": "Tillåter användaren att hantera köade jobb"
+			"label": "Manage jobs",
+			"description": "Allows the user to manage any queued jobs"
 		},
 		"EDIT_METADATA": {
-			"label": "Redigera metadata",
-			"description": "Tillåter användaren att redigera metadata för böcker och serier"
+			"label": "Edit metadata",
+			"description": "Allows the user to edit metadata for books and series"
 		},
 		"WRITE_BACK_METADATA": {
-			"label": "Skriv tillbaka metadata",
-			"description": "Tillåter användaren att skriva tillbaka ändrad metadata till källfilerna"
+			"label": "Write back metadata",
+			"description": "Allows the user to write metadata changes back to the source files"
 		}
 	}
 }

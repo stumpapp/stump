@@ -2,7 +2,7 @@ import { ReadingMode } from '@stump/graphql'
 import { useCallback, useMemo } from 'react'
 import { View } from 'react-native'
 
-import { CardList, CardRow, Switch } from '~/components/ui'
+import { Card, Switch } from '~/components/ui'
 import { BookPreferences, GlobalSettings, useReaderStore } from '~/stores/reader'
 
 import DoublePageSelect from './DoublePageSelect'
@@ -63,15 +63,15 @@ export default function ReaderSettings({ forBook, forServer }: Props) {
 
 	return (
 		<View className="flex-1 gap-8">
-			<CardList label="Mode">
-				<CardRow label="Flow">
+			<Card label="Mode">
+				<Card.Row label="Flow">
 					<ReadingModeSelect
 						mode={activeSettings.readingMode}
 						onChange={(mode) => onPreferenceChange({ readingMode: mode })}
 					/>
-				</CardRow>
+				</Card.Row>
 
-				<CardRow
+				<Card.Row
 					label="Direction"
 					disabled={activeSettings.readingMode === ReadingMode.ContinuousVertical}
 				>
@@ -79,18 +79,18 @@ export default function ReaderSettings({ forBook, forServer }: Props) {
 						direction={activeSettings.readingDirection}
 						onChange={(direction) => onPreferenceChange({ readingDirection: direction })}
 					/>
-				</CardRow>
-			</CardList>
+				</Card.Row>
+			</Card>
 
-			<CardList label="Image Options">
-				<CardRow label="Double Paged">
+			<Card label="Image Options">
+				<Card.Row label="Double Paged">
 					<DoublePageSelect
 						behavior={activeSettings.doublePageBehavior || 'auto'}
 						onChange={(behavior) => onPreferenceChange({ doublePageBehavior: behavior })}
 					/>
-				</CardRow>
+				</Card.Row>
 
-				<CardRow
+				<Card.Row
 					label="Separate Second Page"
 					disabled={activeSettings.doublePageBehavior === 'off'}
 				>
@@ -100,44 +100,44 @@ export default function ReaderSettings({ forBook, forServer }: Props) {
 						}
 						onCheckedChange={(value) => onPreferenceChange({ secondPageSeparate: value })}
 					/>
-				</CardRow>
+				</Card.Row>
 
-				<CardRow label="Scaling">
+				<Card.Row label="Scaling">
 					<ImageScalingSelect
 						behavior={activeSettings.imageScaling.scaleToFit}
 						onChange={(fit) => onPreferenceChange({ imageScaling: { scaleToFit: fit } })}
 					/>
-				</CardRow>
+				</Card.Row>
 
-				<CardRow label="Downscaling">
+				<Card.Row label="Downscaling">
 					<Switch
 						checked={allowDownscaling}
 						onCheckedChange={(value) => onPreferenceChange({ allowDownscaling: value })}
 					/>
-				</CardRow>
+				</Card.Row>
 
 				{/* TODO: https://docs.expo.dev/versions/latest/sdk/media-library/ */}
-				<CardRow label="Panel Downloads" disabled>
+				<Card.Row label="Panel Downloads" disabled>
 					<Switch checked={false} onCheckedChange={() => {}} />
-				</CardRow>
-			</CardList>
+				</Card.Row>
+			</Card>
 
-			<CardList label="Navigation">
-				<CardRow label="Tap Sides to Navigate">
+			<Card label="Navigation">
+				<Card.Row label="Tap Sides to Navigate">
 					<Switch
 						variant="brand"
 						checked={activeSettings.tapSidesToNavigate ?? true}
 						onCheckedChange={(checked) => onPreferenceChange({ tapSidesToNavigate: checked })}
 					/>
-				</CardRow>
+				</Card.Row>
 
-				<CardRow label="Bottom Controls">
+				<Card.Row label="Bottom Controls">
 					<FooterControlsSelect
 						variant={activeSettings.footerControls || 'images'}
 						onChange={(variant) => onPreferenceChange({ footerControls: variant })}
 					/>
-				</CardRow>
-			</CardList>
+				</Card.Row>
+			</Card>
 		</View>
 	)
 }

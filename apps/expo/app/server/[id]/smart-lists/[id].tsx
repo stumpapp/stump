@@ -9,7 +9,11 @@ import { match } from 'ts-pattern'
 
 import { useActiveServer } from '~/components/activeServer'
 import RefreshControl from '~/components/RefreshControl'
-import { SmartListBookItem, SmartListGroupItem } from '~/components/smartList'
+import {
+	SmartListBookItem,
+	SmartListGroupItem,
+	useSmartListItemsSize,
+} from '~/components/smartList'
 import SmartListActionMenu from '~/components/smartList/SmartListActionMenu'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
 import { useSmartListGroupStore } from '~/stores/smartList'
@@ -162,9 +166,11 @@ export default function Screen() {
 	useDynamicHeader({
 		title: smartList?.name || '',
 		// Note: I HATE that I can't arrange this to the right of search
-		headerRight: isCollapsibleList
-			? () => <SmartListActionMenu onCollapseAll={onCollapseAll} onExpandAll={onClearList} />
-			: undefined,
+		headerRight: () => (
+			<SmartListActionMenu
+				{...(isCollapsibleList ? { onCollapseAll, onExpandAll: onClearList } : {})}
+			/>
+		),
 	})
 
 	const data = useMemo(() => {
@@ -228,6 +234,8 @@ export default function Screen() {
 		}
 		return indices
 	}, [data])
+
+	const { numColumns } = useSmartListItemsSize()
 
 	// TODO: I struggled to get the look I was aiming for, ideally I want the native router
 	// decorations inside the gradient header, but my (admittedly few) attempts didn't
@@ -312,7 +320,14 @@ export default function Screen() {
 	// TODO: Better design, incorporate user-defined description and maybe gradient colors
 	return (
 		<FlashList
+			key={`${id}-${numColumns}`} // Force re-render when numColumns changes to avoid layout issues
 			data={data}
+			numColumns={numColumns}
+			overrideItemLayout={(layout, item) => {
+				if (typeof item === 'string') {
+					layout.span = numColumns
+				}
+			}}
 			renderItem={renderItem}
 			getItemType={(item) => (typeof item === 'string' ? 'sectionHeader' : 'row')}
 			keyExtractor={(item, index) => {

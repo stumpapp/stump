@@ -2,10 +2,10 @@ import { useMemo } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { useDisplay } from '~/lib/hooks'
-import { useOPDSPreferencesStore } from '~/stores'
+import { usePreferencesStore } from '~/stores'
 
 export function useLegacyOPDSEntrySize() {
-	const layout = useOPDSPreferencesStore((state) => state.layout)
+	const layout = usePreferencesStore((state) => state.opdsLayout)
 
 	const { width, isTablet, isLandscapeTablet } = useDisplay()
 

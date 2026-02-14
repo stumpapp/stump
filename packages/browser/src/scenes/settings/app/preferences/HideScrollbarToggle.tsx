@@ -1,9 +1,11 @@
 import { WideSwitch } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { useCallback } from 'react'
 
 import { usePreferences } from '@/hooks'
 
 export default function HideScrollbarToggle() {
+	const { t } = useLocaleContext()
 	const {
 		preferences: { enableHideScrollbar },
 		update,
@@ -19,16 +21,15 @@ export default function HideScrollbarToggle() {
 
 	return (
 		<WideSwitch
-			label="Hide scrollbar"
-			description="Some pages simply look better without a scrollbar, this setting will hide it when possible"
+			label={t(getKey('label'))}
+			description={t(getKey('description'))}
 			checked={enableHideScrollbar}
 			onCheckedChange={handleToggle}
 			formId="enableHideScrollbar"
-			title={
-				enableHideScrollbar
-					? 'This setting will hide the scrollbar on some pages'
-					: 'This setting will show the scrollbar on some pages'
-			}
+			title={enableHideScrollbar ? t(getKey('tooltips.enabled')) : t(getKey('tooltips.disabled'))}
 		/>
 	)
 }
+
+const LOCALE_BASE = 'settingsScene.app/preferences.sections.hideScrollbarToggle'
+const getKey = (key: string) => `${LOCALE_BASE}.${key}`

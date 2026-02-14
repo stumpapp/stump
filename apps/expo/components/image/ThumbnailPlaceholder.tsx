@@ -2,7 +2,7 @@ import { selectMeshColors } from '@stump/client'
 import { ImageColor } from '@stump/graphql'
 import { MeshGradientView } from 'expo-mesh-gradient'
 import { useMemo } from 'react'
-import { Image, StyleSheet, View } from 'react-native'
+import { Image, ImageStyle, StyleProp, StyleSheet, View } from 'react-native'
 import { thumbHashToDataURL } from 'thumbhash'
 
 import { useColors } from '~/lib/constants'
@@ -19,23 +19,35 @@ export type ThumbnailPlaceholderData = {
 	averageColor?: string | null
 	colors?: ImageColor[] | null
 	thumbhash?: string | null
-}
+} | null
 
-// TODO(aaron): Come back and fix lints later
+export type ThumbnailPlaceholderType = 'grayscale' | 'averageColor' | 'colorful' | 'thumbhash'
 
-export function ThumbnailPlaceholder(props?: ThumbnailPlaceholderData) {
-	const thumbnailPlaceholder = usePreferencesStore((state) => state.thumbnailPlaceholder)
+export function ThumbnailPlaceholder({
+	placeholderData,
+	placeholderType,
+	fadeDuration,
+	style,
+}: {
+	placeholderData?: ThumbnailPlaceholderData
+	placeholderType?: ThumbnailPlaceholderType
+	fadeDuration?: number
+	style?: StyleProp<ImageStyle>
+}) {
+	const thumbnailPlaceholderPreference = usePreferencesStore((state) => state.thumbnailPlaceholder)
 	const { thumbnail } = useColors()
 
+	const thumbnailPlaceholder = placeholderType || thumbnailPlaceholderPreference
+
 	const meshColors = useMemo(() => {
-		if (!props?.colors) {
+		if (!placeholderData?.colors) {
 			return null
 		}
-		return selectMeshColors(props?.colors)
-	}, [props?.colors])
+		return selectMeshColors(placeholderData?.colors)
+	}, [placeholderData?.colors])
 
 	const colorPoints = useMemo(() => {
-		if (!meshColors) {
+		if (!meshColors || !meshColors[0] || !meshColors[1] || !meshColors[2]) {
 			return null
 		}
 		// prettier-ignore
@@ -46,21 +58,25 @@ export function ThumbnailPlaceholder(props?: ThumbnailPlaceholderData) {
 		]
 	}, [meshColors])
 
-	const averageColor = useMemo(() => props?.averageColor || null, [props?.averageColor])
-	const thumbHash = useMemo(() => props?.thumbhash || null, [props?.thumbhash])
+	const averageColor = useMemo(() => placeholderData?.averageColor, [placeholderData?.averageColor])
+	const thumbHash = useMemo(() => placeholderData?.thumbhash, [placeholderData?.thumbhash])
 	const grayscaleStyle = useMemo(
 		() => [styles.placeholder, { backgroundColor: thumbnail.placeholder }],
 		[thumbnail],
 	)
 
 	if (thumbnailPlaceholder === 'grayscale') {
-		return <View style={grayscaleStyle} />
+		return <View style={[grayscaleStyle, style]} />
 	}
 
 	if (thumbnailPlaceholder === 'averageColor') {
 		return (
 			<View
-				style={[styles.placeholder, { backgroundColor: averageColor || thumbnail.placeholder }]}
+				style={[
+					styles.placeholder,
+					{ backgroundColor: averageColor || thumbnail.placeholder },
+					style,
+				]}
 			/>
 		)
 	}
@@ -68,7 +84,7 @@ export function ThumbnailPlaceholder(props?: ThumbnailPlaceholderData) {
 	if (thumbnailPlaceholder === 'colorful') {
 		return colorPoints ? (
 			<MeshGradientView
-				style={styles.placeholder}
+				style={[styles.placeholder, style]}
 				columns={3}
 				rows={3}
 				colors={colorPoints}
@@ -82,12 +98,19 @@ export function ThumbnailPlaceholder(props?: ThumbnailPlaceholderData) {
 	if (thumbnailPlaceholder === 'thumbhash' && thumbHash) {
 		const thumbHashBinary = Uint8Array.from(atob(thumbHash), (c) => c.charCodeAt(0))
 		const dataUrl = thumbHashToDataURL(thumbHashBinary)
-		return <Image source={{ uri: dataUrl }} style={styles.placeholder} resizeMode="stretch" />
+		return (
+			<Image
+				source={{ uri: dataUrl }}
+				style={[styles.placeholder, style]}
+				resizeMode="stretch"
+				fadeDuration={fadeDuration ?? 0}
+			/>
+		)
 	}
 
 	return <View style={grayscaleStyle} />
 }
 
 const styles = StyleSheet.create({
-	placeholder: { position: 'absolute', inset: 0, zIndex: 10, overflow: 'hidden' },
+	placeholder: { position: 'absolute', inset: 0, overflow: 'hidden' },
 })

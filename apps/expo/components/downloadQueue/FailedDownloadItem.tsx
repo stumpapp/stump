@@ -4,7 +4,7 @@ import { Pressable, View } from 'react-native'
 import { downloadQueueMetadata } from '~/db'
 import { useDownloadQueue } from '~/lib/hooks'
 
-import { CardRow, Icon, Text } from '../ui'
+import { Card, Icon, Text } from '../ui'
 
 type Props = {
 	item: ReturnType<typeof useDownloadQueue>['failedItems'][number]
@@ -14,7 +14,7 @@ type Props = {
 
 export default function FailedDownloadItem({ item, onRetry, onDismiss }: Props) {
 	return (
-		<CardRow>
+		<Card.Row>
 			<Icon as={AlertCircle} size={20} className="text-fill-danger" />
 			<View className="flex-1 gap-0.5">
 				<Text className="font-medium" numberOfLines={1}>
@@ -39,6 +39,6 @@ export default function FailedDownloadItem({ item, onRetry, onDismiss }: Props) 
 					<Icon as={X} size={16} className="text-foreground-muted" />
 				</Pressable>
 			</View>
-		</CardRow>
+		</Card.Row>
 	)
 }

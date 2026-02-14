@@ -1,4 +1,4 @@
-import { CardRow, Text } from '~/components/ui'
+import { Card, Text } from '~/components/ui'
 
 type Props = {
 	label: string
@@ -10,13 +10,13 @@ type Props = {
 
 export default function InfoRow({ label, value, longValue, numberOfLines }: Props) {
 	return (
-		<CardRow label={label}>
+		<Card.Row label={label}>
 			<Text
 				className="flex-1 text-right text-lg text-foreground-muted"
 				numberOfLines={(numberOfLines ?? longValue) ? 4 : undefined}
 			>
 				{value}
 			</Text>
-		</CardRow>
+		</Card.Row>
 	)
 }

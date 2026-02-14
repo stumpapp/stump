@@ -49,13 +49,13 @@ export const ThumbnailImage = ({
 	)
 
 	return (
-		<View>
+		<View className="items-center">
 			<BorderAndShadow
 				style={{ borderRadius, borderWidth, shadowRadius, shadowColor, shadowOffset }}
 			>
 				{Platform.OS === 'ios' && gradientElement}
 
-				<ThumbnailPlaceholder {...placeholderData} />
+				<ThumbnailPlaceholder placeholderData={placeholderData} style={{ zIndex: 10 }} />
 
 				<TImage
 					source={source}

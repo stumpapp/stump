@@ -1,4 +1,4 @@
-import { Heading, Text } from '@stump/components'
+import { Heading, Link, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 
 import { useSteppedFormContext } from './context'
@@ -21,7 +21,10 @@ export default function SteppedFormSceneHeader() {
 					{t(`${localeBase}.heading`)}
 				</Heading>
 				<Text size="sm" variant="muted" className="mt-1.5">
-					{t(`${localeBase}.subtitle`)}
+					{t(`${localeBase}.subtitle`)}{' '}
+					<Link href="https://www.stumpapp.dev/guides/basics/libraries">
+						{t(`${localeBase}.subtitleLink`)}
+					</Link>
 				</Text>
 			</div>
 

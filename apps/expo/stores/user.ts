@@ -2,10 +2,14 @@ import { createUserStore } from '@stump/client'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 
+import { ThumbnailPlaceholderType } from '~/components/image/ThumbnailPlaceholder'
+
 import { CachePolicy } from './reader'
 import { ZustandMMKVStorage } from './store'
 
 export const useUserStore = createUserStore(ZustandMMKVStorage)
+
+export type ListLayout = 'grid' | 'list'
 
 type MobilePreferencesStore = {
 	showTabLabels: boolean
@@ -16,13 +20,15 @@ type MobilePreferencesStore = {
 	cachePolicy: CachePolicy
 	allowDownscaling: boolean
 	thumbnailRatio: number
-	thumbnailPlaceholder: 'grayscale' | 'averageColor' | 'colorful' | 'thumbhash'
+	thumbnailPlaceholder: ThumbnailPlaceholderType
 	performanceMonitor: boolean
 	accentColor?: string | undefined
 	showCuratedDownloads?: boolean | undefined
 	preferNativePdf?: boolean | undefined
 	disableDismissGesture: boolean
 	autoSyncLocalData: boolean
+	opdsLayout: ListLayout
+	smartListLayout: ListLayout
 	/**
 	 * Patch the store with new values.
 	 */
@@ -51,6 +57,8 @@ export const usePreferencesStore = create<MobilePreferencesStore>()(
 			preferNativePdf: false,
 			disableDismissGesture: false,
 			autoSyncLocalData: true,
+			opdsLayout: 'grid',
+			smartListLayout: 'grid',
 			patch: (data) => set(data),
 		}),
 		{

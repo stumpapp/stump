@@ -405,7 +405,9 @@ class DownloadQueueManager {
 				item.downloadUrl,
 				placementUrl,
 				{
-					headers: sdk.headers,
+					headers: {
+						...sdk.headers,
+					},
 				},
 				progressCallback,
 			)

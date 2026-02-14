@@ -1,4 +1,5 @@
 import { cx, Label, NativeSelect, Text } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 
 import { usePreferences } from '@/hooks'
 
@@ -27,6 +28,7 @@ const OPTIONS = [
 ]
 
 export default function MaxWidthPreference() {
+	const { t } = useLocaleContext()
 	const {
 		preferences: { layoutMaxWidthPx, primaryNavigationMode },
 		update,
@@ -54,12 +56,12 @@ export default function MaxWidthPreference() {
 			title={
 				primaryNavigationMode === 'SIDEBAR'
 					? // TODO: support it
-						'This setting is not currently supported when the primary navigation is set to sidebar'
+						t(getKey('tooltip'))
 					: undefined
 			}
 		>
 			<Label className={cx({ 'text-opacity-50': primaryNavigationMode === 'SIDEBAR' })}>
-				Adjusted width
+				{t(getKey('label'))}
 			</Label>
 			<NativeSelect
 				value={layoutMaxWidthPx || undefined}
@@ -72,9 +74,11 @@ export default function MaxWidthPreference() {
 				variant="muted"
 				className={cx({ 'text-opacity-50': primaryNavigationMode === 'SIDEBAR' })}
 			>
-				Stump applies a max-width to the viewport. This setting allows you to adjust or remove this
-				limit
+				{t(getKey('description'))}
 			</Text>
 		</div>
 	)
 }
+
+const LOCALE_BASE = 'settingsScene.app/preferences.sections.maxWidthPreference'
+const getKey = (key: string) => `${LOCALE_BASE}.${key}`

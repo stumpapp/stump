@@ -1,0 +1,2364 @@
+{
+	"underConstruction": {
+		"heading": "To je nepříjemné",
+		"message": "Narazili jste na stránku, která je stále vyvíjena. Rád bych vám ji ukázal, ale ještě není připravena.",
+		"homeLink": "Návrat domů",
+		"githubLink": "Zobrazit problém na GitHubu"
+	},
+	"authScene": {
+		"claimHeading": "Inicializovat váš server",
+		"claimText": "Tento server Stump není inicializovaný. Pro vytvoření účtu použijte níže uvedený formulář. Po vytvoření budete mít plný přístup ke všem funkcím serveru.",
+		"form": {
+			"validation": {
+				"missingUsername": "Jméno uživatele je vyžadováno",
+				"missingPassword": "Heslo je vyžadováno",
+				"usernameAlreadyExists": "Uživatelské jméno již existuje"
+			},
+			"labels": {
+				"username": "Uživatelské jméno",
+				"password": "Heslo"
+			},
+			"buttons": {
+				"createAccount": "Vytvořit účet",
+				"login": "Přihlásit se",
+				"loginWithOidc": "Log in with OIDC",
+				"createAccountWithOidc": "Create Account with OIDC"
+			}
+		},
+		"toasts": {
+			"loggingIn": "Přihlašování...",
+			"loggedIn": "Vítejte zpět!",
+			"loggedInFirstTime": "Vítejte!",
+			"registering": "Registrace...",
+			"registered": "Registrováno!",
+			"loginFailed": "Přihlášení se nezdařilo. Zkuste to znovu",
+			"registrationFailed": "Registrace se nezdařila. Zkuste to prosím znovu"
+		}
+	},
+	"adminLibrarySidebar": {
+		"libraryConfiguration": {
+			"heading": "Nastavení knihovny",
+			"subtitleCreating": "Náhled nové knihovny bude zobrazen níže",
+			"subtitleEditing": "Náhled úprav knihovny bude zobrazen níže"
+		}
+	},
+	"bookOverviewScene": {
+		"fileInformation": {
+			"heading": "Informace o souboru",
+			"labels": {
+				"fileSize": "Velikost souboru",
+				"fileType": "Formát souboru",
+				"fileLocation": "Umístění souboru",
+				"fileChecksum": "Kontrolní součet"
+			}
+		},
+		"emailBook": {
+			"heading": "Odeslat knihu",
+			"description": "Send this book to a device or email address",
+			"form": {
+				"email": {
+					"label": "E-mail",
+					"placeholder": "E-mailová adresa",
+					"description": "E-mailová adresa pro odeslání knihy. Klepněte na tlačítko Přidat pro dokončení"
+				},
+				"devices": {
+					"label": "Zařízení",
+					"placeholder": "Vybrat zařízení",
+					"noFilterMatch": "Filtru neodpovídá žádná zařízení"
+				}
+			}
+		},
+		"nextInSeries": "Další v řadě"
+	},
+	"createOrUpdateBookClubForm": {
+		"fields": {
+			"name": {
+				"label": "Název",
+				"placeholder": "Můj knižní klub",
+				"description": "Název vašeho knižního klubu"
+			},
+			"description": {
+				"label": "Popis",
+				"placeholder": "An 'Our Flag Means Death' fan club. We read pirate fiction to our hearts' content",
+				"description": "Volitelný krátký popis vašeho knižního klubu"
+			},
+			"is_private": {
+				"label": "Soukromý klub",
+				"description": "Pokud je povoleno, pouze uživatelé, které pozvete se budou moci připojit do tohoto knižního klubu"
+			},
+			"member_role_spec": {
+				"heading": "Určení rolí v klubu",
+				"subtitle": [
+					"Můžete vytvořit vlastní názvy rolí v knižním klubu, pokud chcete. Další informace naleznete v",
+					"dokumentaci"
+				],
+				"member": {
+					"label": "Člen",
+					"placeholder": "Člen",
+					"description": "Název výchozí role pro váš knižní klub"
+				},
+				"moderator": {
+					"label": "Moderátor",
+					"placeholder": "Moderátor",
+					"description": "Název role moderátora pro tvůj knižní klub"
+				},
+				"admin": {
+					"label": "Administrátor",
+					"placeholder": "Administrátor",
+					"description": "Název administrátorské role pro váš knižní klub"
+				},
+				"creator": {
+					"label": "Tvůrce",
+					"placeholder": "Tvůrce",
+					"description": "Název role tvůrce pro tvůj knižní klub. Tohle jste!"
+				}
+			},
+			"membershipOptions": {
+				"displayName": {
+					"label": "Zobrazované jméno",
+					"placeholder": "oromei",
+					"description": "Volitelné zobrazované jméno pro vaše členství v knižním klubu. Je-li nastaveno, má přednost před vaším uživatelským jménem"
+				},
+				"hideProgress": {
+					"label": "Skrýt průběh",
+					"description": "If enabled, your reading progress will be hidden from other members of the book club"
+				}
+			}
+		},
+		"validation": {
+			"missingName": "Název je povinný",
+			"alreadyTaken": "je již obsazeno"
+		}
+	},
+	"createBookClubScene": {
+		"heading": "Vytvořit nový knižní klub",
+		"subtitle": "You can create a private book club for a select few, or make it public for anyone on the server to join",
+		"form": {
+			"stepLabel": "Krok",
+			"steps": [
+				{
+					"label": "Základní",
+					"heading": "Základní informace",
+					"description": "Podrobnosti o klubu včetně jeho názvu a popisu"
+				},
+				{
+					"label": "Role",
+					"heading": "Role",
+					"description": "Přizpůsobte si role ve svém knižním klubu"
+				},
+				{
+					"label": "Členství",
+					"heading": "Nastavení členství",
+					"description": "Další možnosti pro váš knižní klub"
+				},
+				{
+					"label": "Zkontrolovat",
+					"heading": "Zkontrolovat",
+					"description": "Zkontrolujte nastavení klubu před jeho vytvořením"
+				}
+			],
+			"review": {
+				"yes": "Ano",
+				"no": "Ne",
+				"none": "Nic",
+				"labels": {
+					"name": "Název",
+					"description": "Popis"
+				}
+			},
+			"submit": "Vytvořit knižní klub"
+		}
+	},
+	"bookClubSettingsScene": {
+		"sidebar": {
+			"basics": "Základní",
+			"members": {
+				"members": "Členové",
+				"roles": "Role",
+				"label": "Členství"
+			},
+			"scheduling": {
+				"scheduler": "Plánování",
+				"options": "Volby",
+				"label": "Plánování"
+			},
+			"danger-zone": {
+				"delete": "Odstranění",
+				"label": "Nebezpečná zóna"
+			}
+		},
+		"basics": {
+			"title": "Základní informace",
+			"description": "Podrobnosti o klubu včetně jeho názvu a popisu",
+			"form": {
+				"submit": "Aktualizovat klub"
+			}
+		},
+		"members": {
+			"title": "Členové",
+			"description": "Správa členů tohoto knižního klubu",
+			"sections": {}
+		},
+		"roles": {
+			"title": "Role",
+			"description": "Přizpůsobte si role v knižním klubu",
+			"sections": {
+				"roleMappings": {
+					"heading": "Stávající mapování rolí",
+					"description": "Aktuální mapování rolí pro tento knižní klub"
+				}
+			}
+		},
+		"scheduling/scheduler": {
+			"title": "Plánování",
+			"description": "Create and manage the scheduled readings for this book club"
+		},
+		"scheduling/options": {
+			"title": "Volby",
+			"description": "Další možnosti pro plánování tohoto knižního klubu"
+		},
+		"danger-zone/delete": {
+			"title": "Akce odstranění",
+			"description": "Trvale smazat tento knižní klub a veškerý jeho obsah nebo určité zdroje",
+			"sections": {
+				"deleteClub": {
+					"heading": "Smazat klub",
+					"description": [
+						"Trvale smazat tento knižní klub a veškerý jeho obsah.",
+						"Tuto akci nelze vrátit zpět"
+					],
+					"trigger": "Smazat klub"
+				}
+			}
+		}
+	},
+	"createOrUpdateLibraryForm": {
+		"fields": {
+			"name": {
+				"label": "Název",
+				"description": "Přátelský název pro tvou knihovnu",
+				"placeholder": "Moje knihovna"
+			},
+			"path": {
+				"label": "Umístění",
+				"description": "Umístění knihovny, tak jak existuje na vašem serveru",
+				"placeholder": "/složka/umístění/knihovny"
+			},
+			"description": {
+				"label": "Popis",
+				"description": "Krátký popis vaší knihovny",
+				"placeholder": "Knihovna mých oblíbených knih"
+			},
+			"tags": {
+				"label": "Tagy",
+				"description": "Slouží ke kategorizaci knihovny nebo k vynucování pravidel přístupu"
+			},
+			"defaultLibraryView": {
+				"label": "Default library view",
+				"description": "Configure which tab is shown by default when opening this library",
+				"hideSeriesView": {
+					"label": "Hide series tab",
+					"description": "Hide the series tab from the library navigation"
+				},
+				"options": {
+					"series": {
+						"label": "Series",
+						"description": "Show the series tab by default"
+					},
+					"books": {
+						"label": "Books",
+						"description": "Show the books tab by default"
+					}
+				}
+			},
+			"readingSettings": {
+				"section": {
+					"heading": "Nastavení čtení",
+					"description": "Výchozí nastavení čtečky pro knihy"
+				},
+				"imageScaling": {
+					"label": "Měřítko obrázku",
+					"description": "Jak čtečka založená na obrázcích škáluje obrázky na stránku"
+				},
+				"readingMode": {
+					"label": "Výchozí čtečka",
+					"description": "Výchozí čtečka pro knihy založené na obrázcích"
+				},
+				"readingDirection": {
+					"label": "Směr čtení",
+					"description": "Jakým směrem se čte po stránkách"
+				}
+			},
+			"thumbnailConfig": {
+				"section": {
+					"heading": {
+						"create": "Nastavení náhledů",
+						"update": "Generování"
+					},
+					"description": "Zlepšení doby načítání při procházení knihovny generováním náhledů knih",
+					"disabled": "No additional configuration is required when thumbnail generation is disabled"
+				},
+				"enableSwitch": {
+					"label": "Zapnuto",
+					"description": "Generovat náhledové obrázky pro tuto knihovnu"
+				},
+				"resizeMethod": {
+					"label": "Resize Method",
+					"options": {
+						"scaleEvenlyByFactor": "Evenly Scale",
+						"exact": "Exact Size",
+						"scaleDimension": "Auto Scaled",
+						"none": "None"
+					}
+				},
+				"scaleEvenlyByFactor": {
+					"description": "Scale the thumbnail by a factor of the original size. E.g., 0.65 will result in a thumbnail that is 65% of the original size",
+					"factor": {
+						"label": "Scale Factor"
+					}
+				},
+				"exact": {
+					"description": "Resize the thumbnail to an exact size in pixels",
+					"width": {
+						"label": "Width"
+					},
+					"height": {
+						"label": "Height"
+					}
+				},
+				"scaleDimension": {
+					"label": "Auto Scaled",
+					"description": "Set either the width or height of the thumbnail and auto-scale the other to keep the original aspect ratio",
+					"dimension": {
+						"label": "Dimension",
+						"options": {
+							"width": "Width",
+							"height": "Height"
+						}
+					},
+					"size": {
+						"label": "Size"
+					}
+				},
+				"format": {
+					"label": "Formát obrázku",
+					"description": "Formát vygenerovaných obrázků náhledů"
+				},
+				"quality": {
+					"label": "Kvalita",
+					"description": "Kvalita vygenerovaných obrázků náhledů mezi 0 a 1.0"
+				}
+			},
+			"ignoreRules": {
+				"section": {
+					"heading": "Pravidla Ignorování",
+					"description": "Definujte globální vzory, podle kterých se budou ignorovat určité soubory nebo adresáře během skenu"
+				},
+				"noRules": "Nebyla nakonfigurována žádná pravidla pro ignorování",
+				"save": "Uložit změny",
+				"addRule": {
+					"label": "Nové pravidlo",
+					"description": "Globální vzor pro ignorování souborů nebo složek",
+					"addButton": "Přidat pravidlo",
+					"ignoreParents": {
+						"title": "Ignorovat všechny nadřazené adresáře",
+						"label": "Ignorovat nadřazené"
+					},
+					"ignoreSubdirs": {
+						"title": "Ignorovat všechny podadresáře",
+						"label": "Ignorovat podadresáře"
+					}
+				},
+				"invalidGlob": "Neplatný globální vzor",
+				"duplicateGlob": "Duplikovat existující pravidlo",
+				"lockConfig": {
+					"lock": "Uzamknout nastavení",
+					"unlock": "Odemknout nastavení"
+				},
+				"editRule": "Upravit pravidlo",
+				"deleteRule": "Smazat pravidlo",
+				"cancelEdit": "Zrušit úpravu",
+				"confirmEdit": "Potvrdit úpravu"
+			},
+			"convertOptions": {
+				"section": {
+					"heading": "Konverze souboru",
+					"description": "Stump je schopný převádět určité formáty souborů do více kompatibilních"
+				},
+				"rarToZip": {
+					"label": "Převést RAR na ZIP",
+					"description": "Převést RAR/CBR soubory na ZIP/CBZ soubory během skenování"
+				},
+				"deleteRarAfter": {
+					"label": "Odstranit RAR po konverzi",
+					"description": "Smazat původní RAR/CBR soubor po konverzi. Toto je nevratné"
+				}
+			},
+			"scannerFeatures": {
+				"section": {
+					"heading": "Volitelné zpracování",
+					"description": "Opt-in funkce zpracování pro skener",
+					"disclaimer": "Tyto funkce zahrnují další čtení souborů, které mohou zpomalit proces skenování"
+				},
+				"processMetadata": {
+					"label": "Zpracování metadat",
+					"description": "Extrahovat metadata ze souborů knihovny a ukládat výsledky v databázi"
+				},
+				"watch": {
+					"label": "Sledování",
+					"description": "Sledujte adresář knihovny pro změny a podle toho aktualizujte databázi"
+				},
+				"generateFileHashes": {
+					"label": "Generovat hash souborů",
+					"description": "Generovat hash pro každý soubor v knihovně pro detekci duplicit"
+				},
+				"koreaderHashes": {
+					"label": "Hash kompatibilní s KoReaderem",
+					"description": "Pokud používáte KoReader, vygenerujte další hash ve formátu, který očekává"
+				}
+			},
+			"libraryPattern": {
+				"section": {
+					"heading": "Organizace",
+					"description": "Určete, který vzor nejvíce odpovídá organizaci vaší knihovny",
+					"docs": [
+						"Nejste si jisti, co vybrat? Klikněte",
+						"zde",
+						"pro více informací.",
+						"Toto nastavení nelze později změnit"
+					],
+					"disabled": "Toto nastavení nemůžete změnit"
+				},
+				"options": {
+					"label": "Vzor knihovny",
+					"description": "Nastavení, které určuje, jak bude Stump organizovat vaši knihovnu",
+					"collectionPriority": {
+						"label": "Priorita sbírky",
+						"description": "Každá složka na nejvyšší úrovni kořene knihovny je jedna série"
+					},
+					"seriesPriority": {
+						"label": "Priorita série",
+						"description": "Každá složka na libovolné úrovni rekurzivně je jedna série"
+					}
+				}
+			}
+		},
+		"scan": {
+			"label": {
+				"create": "Naskenovat po vytvoření",
+				"update": "Skenovat po aktualizaci"
+			},
+			"description": "Indexovat soubory knihovny k naplnění databáze"
+		}
+	},
+	"createLibraryScene": {
+		"heading": "Vytvořit novou knihovnu",
+		"subtitle": "Libraries are used to group your books together. If you want a refresh on how they work, check out the",
+		"subtitleLink": "příslušná dokumentace",
+		"form": {
+			"stepLabel": "Krok",
+			"steps": [
+				{
+					"label": "Základní",
+					"heading": "Základní informace",
+					"description": "Podrobnosti o této knihovně, včetně jejího názvu, umístění a popisu"
+				},
+				{
+					"label": "Skenování",
+					"heading": "Skenování",
+					"description": "Nastavení týkající se skenování této knihovny"
+				},
+				{
+					"label": "Náhledy",
+					"heading": "Náhledy",
+					"description": "Možnosti pro zobrazení a vygenerování náhledů pro tuto knihovnu"
+				},
+				{
+					"label": "Zkontrolovat",
+					"heading": "Zkontrolovat",
+					"description": "Zkontrolujte nastavení knihovny před jejím vytvořením"
+				}
+			],
+			"review": {
+				"yes": "Ano",
+				"no": "Ne",
+				"none": "Žádné",
+				"labels": {
+					"generateThumbnails": "Generovat náhledy",
+					"processThumbnailColors": "Process thumbnail colors",
+					"mode": "Režim",
+					"format": "Formát",
+					"quality": "Kvalita",
+					"name": "Název",
+					"path": "Umístění",
+					"description": "Popis",
+					"tags": "Tagy",
+					"pattern": "Vzor",
+					"ignoreRules": "Pravidla Ignorování",
+					"convertRar": "Konverze RAR/CBR",
+					"deleteConversions": "Smazat převedené soubory",
+					"watch": "Sledovaný adresář pro změny",
+					"processMetadata": "Zpracování metadat",
+					"generateFileHashes": "Generovat hash souborů",
+					"generateKoreaderHashes": "Generate KoReader hashes",
+					"scaleEvenlyByFactor": "Evenly Scale",
+					"exact": "Exact Size",
+					"scaleDimension": "Explicitly Sized"
+				}
+			},
+			"buttons": {
+				"confirm": "Vytvořit knihovnu"
+			}
+		}
+	},
+	"fileExplorer": {
+		"uploadModal": {
+			"title": {
+				"books": "Nahrát knihy",
+				"series": "Nahrát série"
+			},
+			"description": {
+				"books": "Přidat knihy přímo do aktuální cesty ve správci souborů",
+				"series": "Přidat série přímo do aktuální cesty ve správci souborů"
+			},
+			"seriesDisclaimer": [
+				"Musí to být ",
+				"zip soubor",
+				"obsahující složku, která by měla být sérií, se všemi knihami uvnitř"
+			],
+			"dropzone": {
+				"books": "Sem přetáhněte knihy",
+				"series": "Sem přetáhněte zip soubor",
+				"alt": "Nebo klikněte zde pro procházení počítače, aby bylo možné nahrát knihy"
+			},
+			"addedFiles": "Přidané soubory"
+		}
+	},
+	"librarySettingsScene": {
+		"heading": "Správa knihovny",
+		"subtitle": "Manage your library here. If you want a refresh on these settings, check out the",
+		"subtitleLink": "příslušná dokumentace",
+		"sidebar": {
+			"basics": "Základní",
+			"options": {
+				"general": "Obecné",
+				"reading": "Čtení",
+				"scanning": "Skenování",
+				"thumbnails": "Náhledy",
+				"ignore-rules": "Pravidla Ignorování",
+				"analysis": "Analýza",
+				"label": "Volby"
+			},
+			"danger-zone": {
+				"access-control": "Správa přístupu",
+				"delete": "Smazání",
+				"label": "Nebezpečná zóna"
+			}
+		},
+		"basics": {
+			"title": "Základní informace",
+			"description": "Podrobnosti o této knihovně, včetně jejího názvu, umístění a popisu",
+			"form": {
+				"submit": "Aktualizace knihovny"
+			}
+		},
+		"options/reading": {
+			"title": "Čtení",
+			"description": "Výchozí nastavení čtečky pro knihy v této knihovně. Kniha může přepsat tato nastavení"
+		},
+		"options/scanning": {
+			"title": "Skenování",
+			"description": "Nastavení týkající se skenování této knihovny",
+			"sections": {
+				"configureScan": {
+					"heading": "Nastavit skenování",
+					"description": "Další možnosti nastavení skenování",
+					"form": {
+						"alert": "Toto přepíše odpovídající nastavení pro celou knihovnu",
+						"options": {
+							"forceRebuild": {
+								"label": "Vynutit obnovu",
+								"description": "Znovu sestavit každou knihu v knihovně na disku",
+								"alert": "Toto obnoví každou knihu v knihovně od začátku, včetně metadat a hashů"
+							},
+							"custom": {
+								"label": "Vlastní",
+								"description": "Přizpůsobit nastavení skenování",
+								"validation": {
+									"noSelection": "Alespoň jedna možnost musí být povolena"
+								}
+							},
+							"rebuildMeta": {
+								"label": "Obnovit metadata",
+								"description": "Obnovit metadata pro knihy v knihovně"
+							},
+							"regenHashes": {
+								"label": "Regenerovat kontrolní součty",
+								"description": "Regenerovat kontrolní součty pro knihy v knihovně"
+							}
+						}
+					}
+				},
+				"defaultScan": {
+					"heading": "Výchozí sken",
+					"description": "Výchozí sken vyhledává nový obsah ve vaší knihovně"
+				},
+				"history": {
+					"heading": "Historie skenů",
+					"description": "Historie všech skenů zaznamenaných pro tuto knihovnu",
+					"empty": "Pro tuto knihovnu nejsou zaznamenány žádné skeny",
+					"runScan": "Spustit skenování",
+					"inspect": "Zobrazit detaily",
+					"inspector": {
+						"title": "Záznam skenu",
+						"description": "Podrobný náhled tohoto záznamu skenu",
+						"fields": {
+							"library": "Knihovna",
+							"date": "Datum",
+							"config": "Nastavení",
+							"jobOutput": "Výstup",
+							"logs": "Logy"
+						},
+						"logsPresent": "Logy pro tento výstup jsou perzistentní",
+						"seeLogs": "Zobrazit logy"
+					},
+					"table": {
+						"columns": {
+							"timestamp": "Skenováno",
+							"config": "Nastavení"
+						},
+						"default": "Výchozí",
+						"custom": "Vlastní"
+					},
+					"clearHistory": "Smazat historii skenování"
+				}
+			}
+		},
+		"options/thumbnails": {
+			"title": "Náhledy",
+			"description": "Možnosti nastavení a správy náhledů v této knihovně",
+			"sections": {
+				"management": {
+					"heading": "Správa",
+					"description": "Spravovat existující náhledy pro tuto knihovnu",
+					"thumbnailSelector": {},
+					"deleteThumbnails": {}
+				}
+			}
+		},
+		"options/analysis": {
+			"title": "Analýza",
+			"description": "Analyzujte obsah této knihovny, abyste zjistili možné problémy nebo vylepšení",
+			"sections": {
+				"analyzeBooks": {
+					"heading": "Analyzovat knihy",
+					"description": "Analyzujte knihy v této knihovně a připojte další metadata do databáze, například rozměry stránky pro knihy založené na obrázcích",
+					"disclaimerTitle": "This process is resource-intensive",
+					"disclaimer": "Tento proces je náročný na zdroje a může chvíli trvat. V budoucnu bude více konfigurovatelný",
+					"analyzeButton": "Analyzovat knihy"
+				},
+				"missingFiles": {
+					"heading": "Chybějící soubory",
+					"description": "Soubory, na které je odkazováno v databázi, ale nelze je nalézt na disku",
+					"noMissingFiles": "V této knihovně nejsou žádné chybějící soubory"
+				},
+				"duplicateFiles": {
+					"heading": "Duplicitní soubory",
+					"description": "Soubory, které mohou být na disku duplicitní",
+					"noDuplicateFiles": "Nebyly zjištěny žádné duplicitní soubory pro tuto knihovnu"
+				}
+			}
+		},
+		"danger-zone/access-control": {
+			"title": "Správa přístupu",
+			"description": "Kontrolujte, kdo má přístup k obsahu v této knihovně",
+			"sections": {
+				"libraryExclusions": {
+					"heading": "Vyloučení uživatelé",
+					"description": "Zabránit některým uživatelům v přístupu k této knihovně nebo k jejímu obsahu",
+					"noUsersTitle": "No users to exclude",
+					"noUsers": "Neexistují žádní další registrovaní uživatelé k vyloučení přístupu k této knihovně",
+					"updated": "Vyloučení aktualizována",
+					"failure": "Aktualizace vyloučení se nezdařila"
+				}
+			}
+		},
+		"danger-zone/delete": {
+			"title": "Akce smazání",
+			"description": "Trvale smazat tuto knihovnu a veškerý její obsah nebo určité zdroje",
+			"sections": {
+				"cleanLibrary": {
+					"heading": "Vyčistit knihovnu",
+					"description": "Odstranit všechna média a série, které nelze najít na disku",
+					"disclaimerTitle": "No files will be deleted",
+					"disclaimer": "Tato akce sice neodstraní žádné soubory, ale trvale smaže všechny záznamy týkající se médií a sérií, které nelze najít",
+					"confirmation": {
+						"label": "Vyčistit knihovnu",
+						"text": "Opravdu chcete vyčistit tuto knihovnu?"
+					},
+					"emptyText": "There was nothing to clean"
+				},
+				"deleteLibrary": {
+					"heading": "Smazat knihovnu",
+					"description": [
+						"Trvale smazat tuto knihovnu a veškerý její obsah.",
+						"Tuto akci nelze vrátit zpět"
+					]
+				}
+			}
+		}
+	},
+	"errorScene": {
+		"heading": "lol, oops",
+		"message": "Došlo k chybě:",
+		"buttons": {
+			"report": "Nahlásit chybu",
+			"copy": "Kopírovat podrobnosti o chybě",
+			"goHome": "Návrat domů"
+		}
+	},
+	"homeScene": {
+		"onDeck": {
+			"title": "Your next read",
+			"emptyState": {
+				"heading": "No books on deck",
+				"message": "Your next recommended books will show up here"
+			}
+		},
+		"continueReading": {
+			"title": "Pokračovat ve čtení",
+			"emptyState": {
+				"heading": "Nic k zobrazení",
+				"message": "Zde se zobrazí všechny rozečtené knihy"
+			}
+		},
+		"recentlyAddedSeries": {
+			"title": "Nedávno přidané série",
+			"emptyState": {
+				"heading": "Žádná série k zobrazení",
+				"message": "Všechny série, které přidáte do vašich knihoven, se zobrazí zde"
+			}
+		},
+		"recentlyAddedBooks": {
+			"title": "Nedávno přidané knihy",
+			"emptyState": {
+				"heading": "Nic k zobrazení",
+				"message": "Zde se zobrazí všechny naposledy přidané knihy"
+			}
+		}
+	},
+	"metadataEditor": {
+		"labels": {
+			"ageRating": "Age rating",
+			"characters": "Characters",
+			"colorists": "Colorists",
+			"coverArtists": "Cover artists",
+			"day": "Day",
+			"editors": "Editors",
+			"format": "Format",
+			"identifierAmazon": "Amazon ID",
+			"identifierCalibre": "Calibre ID",
+			"identifierGoogle": "Google ID",
+			"identifierIsbn": "ISBN",
+			"identifierMobiAsin": "Mobi ASIN",
+			"identifierUuid": "Book UUID",
+			"genres": "Genres",
+			"inkers": "Inkers",
+			"language": "Language",
+			"letterers": "Letterers",
+			"links": "Links",
+			"month": "Month",
+			"notes": "Notes",
+			"number": "Number",
+			"pageCount": "Pages",
+			"pencillers": "Pencillers",
+			"publisher": "Publisher",
+			"series": "Series",
+			"seriesGroup": "Series group",
+			"storyArc": "Story arc",
+			"storyArcNumber": "Story arc number",
+			"summary": "Summary",
+			"teams": "Teams",
+			"title": "Title",
+			"titleSort": "Title sort",
+			"volume": "Volume",
+			"writers": "Writers",
+			"year": "Year",
+			"metaType": "Type",
+			"imprint": "Imprint",
+			"comicid": "Comic ID",
+			"booktype": "Book type",
+			"status": "Status",
+			"totalIssues": "Total issues",
+			"publicationRun": "Publication run",
+			"comicImage": "Comic image",
+			"descriptionFormatted": "Description (formatted)"
+		},
+		"addFields": {
+			"description": "Add each addition on its own line"
+		}
+	},
+	"seriesOverviewScene": {
+		"buttons": {
+			"continueReading": "Pokračovat ve čtení",
+			"downloadSeries": "Stáhnout série"
+		}
+	},
+	"createOrUpdateSmartListForm": {
+		"validation": {
+			"nameTooShort": "Název musí obsahovat alespoň 2 znaky",
+			"nameTaken": "Nelze použít tento název"
+		},
+		"fields": {
+			"name": {
+				"label": "Název",
+				"placeholder": "Můj chytrý seznam",
+				"description": "Musí být jedinečný, ale později je možné jej změnit"
+			},
+			"description": {
+				"label": "Popis",
+				"placeholder": "Velmi inteligentní seznam",
+				"description": "Volitelný popis vašeho chytrého seznamu"
+			},
+			"visibility": {
+				"label": "Viditelnost",
+				"options": {
+					"public": {
+						"label": "Veřejný",
+						"description": "Dostupné pro všechny uživatele na serveru"
+					},
+					"shared": {
+						"label": "Sdílený",
+						"description": "Konkrétní uživatelé mají přístup k tomuto chytrému seznamu",
+						"createDisclaimer": "Můžete si vybrat, s kým bude tento seznam po vytvoření sdílen"
+					},
+					"private": {
+						"label": "Soukromý",
+						"description": "Pouze vy můžete přistupovat k tomuto chytrému seznamu"
+					}
+				}
+			},
+			"queryBuilder": {
+				"uiPerformance": "V této funkci chybí optimalizace výkonu v uživatelském rozhraní a může být pomalá s filtry, které vytvářejí velké výsledné sady. To se v budoucnu zlepší",
+				"rootJoiner": {
+					"and": {
+						"label": "A",
+						"description": "Aby byla kniha přiřazena, musí být všechny skupiny filtrů pravdivé"
+					},
+					"or": {
+						"label": "NEBO",
+						"description": "Aby byla kniha přiřazena, musí být alespoň jedna skupina filtrů pravdivá"
+					}
+				},
+				"groupJoiner": {
+					"and": {
+						"label": "A",
+						"description": "Vše musí být pravdivé"
+					},
+					"or": {
+						"label": "NEBO",
+						"description": "Alespoň jeden musí být pravda"
+					},
+					"not": {
+						"label": "NENÍ",
+						"description": "Žádný nemůže být pravda"
+					}
+				},
+				"grouping": {
+					"label": "Seskupit podle",
+					"description": "Jak by měly být knihy v tomto chytrém seznamu seskupeny",
+					"options": {
+						"by_books": {
+							"label": "Nic"
+						},
+						"by_series": {
+							"label": "Série"
+						},
+						"by_library": {
+							"label": "Knihovna"
+						}
+					}
+				},
+				"filters": {
+					"emptyState": "Přidejte skupinu, abyste mohli začít",
+					"actions": {
+						"addFilter": "Přidat filtr",
+						"addGroup": "Přidat skupinu",
+						"deleteFilter": "Smazat filtr",
+						"deleteGroup": "Smazat skupinu"
+					},
+					"is": "je",
+					"fieldSelect": {
+						"placeholder": "Vlastnost",
+						"source": {
+							"label": "Zdroj",
+							"back": "Zpět",
+							"book": {
+								"label": "Kniha",
+								"attributes": {
+									"name": "Název souboru",
+									"size": "Velikost",
+									"extension": "Přípona",
+									"status": "Stav",
+									"path": "Umístění",
+									"pages": "Stran",
+									"tags": "Tagy",
+									"createdAt": "Vytvořeno",
+									"updatedAt": "Aktualizováno"
+								}
+							},
+							"book_meta": {
+								"label": "Metadata",
+								"attributes": {
+									"title": "Nadpis",
+									"summary": "Shrnutí",
+									"notes": "Poznámky",
+									"writers": "Autoři",
+									"pencillers": "Ilustrátoři",
+									"inkers": "Inkers",
+									"letterers": "Sazba",
+									"editors": "Editoři",
+									"publisher": "Vydavatel",
+									"colorists": "Barvy",
+									"links": "Odkazy",
+									"characters": "Znaky",
+									"teams": "Týmy",
+									"genres": "Žánr",
+									"coverArtists": "Design obálky"
+								}
+							},
+							"series": {
+								"label": "Série",
+								"attributes": {
+									"name": "Název",
+									"path": "Umístění"
+								}
+							},
+							"series_meta": {
+								"label": "Metadata",
+								"attributes": {
+									"title": "Nadpis",
+									"summary": "Shrnutí",
+									"publisher": "Vydavatel",
+									"imprint": "Tisk",
+									"comicid": "Comic ID",
+									"booktype": "Typ knihy",
+									"status": "Stav",
+									"volume": "Hlasitost",
+									"metaType": "Typ",
+									"ageRating": "Věkové hodnocení"
+								}
+							},
+							"library": {
+								"label": "Knihovna",
+								"attributes": {
+									"name": "Název",
+									"path": "Umístění"
+								}
+							}
+						}
+					},
+					"basicValue": {
+						"placeholder": "Hodnota",
+						"date": "Datum"
+					},
+					"rangeValue": {
+						"from": {
+							"date": "Od data",
+							"number": "Od"
+						},
+						"to": {
+							"date": "Do data",
+							"number": "Do"
+						},
+						"inclusive": "Inkluzivní"
+					},
+					"listValue": {
+						"placeholder": "Přidat hodnoty",
+						"emptyState": "Žádné hodnoty k zobrazení"
+					}
+				}
+			}
+		}
+	},
+	"createSmartListScene": {
+		"heading": "Vytvořit chytrý seznam",
+		"subtitle": "Vytváření seznamu na základě sady filtrů",
+		"form": {
+			"stepLabel": "Krok",
+			"steps": [
+				{
+					"label": "Základní",
+					"heading": "Základní informace",
+					"description": "Podrobnosti o seznamu včetně jeho názvu, popisu a viditelnosti"
+				},
+				{
+					"label": "Filtry",
+					"heading": "Filtry",
+					"description": "Filtry použité pro tento chytrý seznam"
+				},
+				{
+					"label": "Zkontrolovat",
+					"heading": "Zkontrolovat",
+					"description": "Zkontrolujte nastavení seznamu před jeho vytvořením"
+				}
+			],
+			"review": {
+				"yes": "Ano",
+				"no": "Ne",
+				"none": "Nic",
+				"labels": {
+					"name": "Název",
+					"description": "Popis",
+					"visibility": "Viditelnost",
+					"grouping": "Seskupit podle"
+				}
+			},
+			"buttons": {
+				"confirm": "Vytvořit seznam"
+			}
+		}
+	},
+	"createOrUpdateApiKey": {
+		"validation": {
+			"futureDate": "Datum expirace musí být v budoucnu"
+		},
+		"fields": {
+			"name": {
+				"label": "Název",
+				"placeholder": "Koreader synchronizace"
+			},
+			"expiration": {
+				"label": "Expirace",
+				"placeholder": "Nikdy"
+			},
+			"expiresAt": {
+				"label": "Expires at",
+				"placeholder": "Never"
+			},
+			"permissions": {
+				"inherit": {
+					"label": "Zdědit oprávnění",
+					"description": "Stejná oprávnění jako váš účet"
+				},
+				"explicit": {
+					"label": "Explicitní oprávnění",
+					"description": "Zvolte oprávnění, která by měla mít tento klíč"
+				}
+			}
+		},
+		"inheritDisclaimer": "Tento API klíč zdědí všechna vaše oprávnění, což znamená, že může dělat cokoliv, co můžete udělat. Buďte opatrní s tímto nastavením"
+	},
+	"userSmartListsScene": {
+		"heading": "Chytré seznamy",
+		"subtitle": "Vaše oblíbené vyhledávání a filtry jsou uloženy pro snadný přístup",
+		"searchPlaceholder": "Filtrovat chytré seznamy",
+		"buttons": {
+			"createSmartList": "Vytvořit chytrý seznam"
+		},
+		"list": {
+			"emptyState": {
+				"heading": "Žádné chytré seznamy k zobrazení",
+				"noListsMessage": "Vytvořte chytrý seznam pro začátek",
+				"noMatchesMessage": "Zkuste změnit váš vyhledávací dotaz"
+			},
+			"card": {
+				"meta": {
+					"figures": {
+						"books": "kniha",
+						"series": "série",
+						"library": "knihovna"
+					},
+					"matches": "Shody"
+				}
+			}
+		}
+	},
+	"smartListSettingsScene": {
+		"sidebar": {
+			"basics": "Základní",
+			"configuration": {
+				"label": "Nastavení",
+				"access": "Přístup",
+				"filters": "Filtry"
+			},
+			"danger-zone": {
+				"delete": "Smazání",
+				"label": "Nebezpečná zóna"
+			}
+		},
+		"basics": {
+			"title": "Základní informace",
+			"description": "Podrobnosti o seznamu včetně jeho názvu a popisu"
+		},
+		"access": {
+			"title": "Přístup",
+			"description": "Ovládejte, kdo má přístup k tomuto chytrému seznamu",
+			"sections": {
+				"visibility": {
+					"confirmation": {
+						"public": "Toto zviditelní seznam pro všechny",
+						"private": "This will change the list to be private, hiding it from anyone who previously had access",
+						"shared": "Budete muset sdílet seznam s konkrétními uživateli, abyste jim poskytli přístup",
+						"fallback": "Opravdu chcete změnit viditelnost tohoto seznamu?"
+					}
+				},
+				"accessManager": {
+					"disclaimer": "Sdílení ještě není připraveno. Zkuste to prosím později!"
+				}
+			}
+		},
+		"filters": {
+			"title": "Editor filtrů",
+			"description": "Spravovat filtry, které vytvářejí tento chytrý seznam"
+		},
+		"danger-zone/delete": {
+			"title": "Akce smazání",
+			"description": "Trvale smazat tento chytrý seznam a veškerý jeho obsah nebo určité zdroje",
+			"sections": {
+				"deleteList": {
+					"heading": "Smazat seznam",
+					"description": [
+						"Trvale smazat tento chytrý seznam a veškerý jeho obsah.",
+						"Tuto akci nelze vrátit zpět"
+					],
+					"confirmation": {
+						"title": "Smazat seznam",
+						"description": "Jste si jisti, že chcete odstranit tento chytrý seznam?",
+						"confirm": "Smazat seznam"
+					}
+				}
+			}
+		}
+	},
+	"userSmartListScene": {
+		"navigation": {
+			"items": "Položky",
+			"settings": "Nastavení"
+		},
+		"layout": {
+			"missingIdError": "Tato scéna vyžaduje ID v URL",
+			"smartListNotFound": "Chytrý seznam nenalezen",
+			"viewCreateError": "Nepodařilo se vytvořit vlastní zobrazení",
+			"viewSaveError": "Nepodařilo se uložit vlastní zobrazení"
+		},
+		"header": {
+			"backLink": "Seznamy"
+		},
+		"itemsScene": {
+			"smartListNotFound": "Chytrý seznam nenalezen",
+			"actionHeader": {
+				"viewSelector": {
+					"customView": "Vlastní zobrazení",
+					"defaultView": "Výchozí zobrazení",
+					"noViewsSaved": "Žádná zobrazení nebyla uložena",
+					"selectView": "Vyberte uložené zobrazení"
+				},
+				"filterDrawer": {
+					"heading": "Chytré filtry",
+					"description": "Změnit filtry pro tuto relaci zobrazení",
+					"rawData": {
+						"heading": "Syrová data filtru",
+						"description": "Stump zpracuje filtry takto"
+					},
+					"buttons": {
+						"save": "Uložit",
+						"cancel": "Zrušit"
+					}
+				},
+				"search": {
+					"placeholder": "Rychlý filtr"
+				},
+				"viewManager": {
+					"updateSelected": "Aktualizovat vybrané",
+					"deleteSelected": "Delete view",
+					"create": "Vytvořit nové zobrazení",
+					"modal": {
+						"heading": {
+							"create": "Vytvořit zobrazení",
+							"update": "Upravit zobrazení"
+						},
+						"description": {
+							"create": "Vytvořit nové zobrazení pro tento chytrý seznam",
+							"update": "Upravit zobrazení"
+						},
+						"createForm": {
+							"name": {
+								"label": "Název",
+								"placeholder": "Moje zobrazení",
+								"description": "Přátelský název k jedinečné identifikaci tohoto zobrazení"
+							}
+						},
+						"updateForm": {
+							"name": {
+								"label": "Název",
+								"placeholder": "Moje zobrazení",
+								"description": "Aktualizovaný název pro toto zobrazení, pokud je to požadováno"
+							}
+						}
+					},
+					"deleteModal": {
+						"title": "Delete view",
+						"description": "Are you sure you want to delete this view?"
+					}
+				}
+			}
+		}
+	},
+	"settingsScene": {
+		"navigation": {
+			"general": "Obecné",
+			"logs": "Logy",
+			"server": "Server",
+			"jobs": "Úlohy a konfigurace",
+			"users": "Správa uživatelů",
+			"desktop": "Domovská obrazovka"
+		},
+		"sidebar": {
+			"personal": {
+				"account": "Account",
+				"appearance": "Preferences",
+				"api keys": "API keys",
+				"reader": "Reader",
+				"desktop": "Desktop",
+				"label": "Personal"
+			},
+			"management": {
+				"general": "Obecné",
+				"logs": "Logy",
+				"users": "Uživatelé",
+				"jobs": "Úlohy",
+				"access": "Přístup",
+				"email": "E-mail",
+				"notifications": "Notifikace",
+				"label": "Management"
+			}
+		},
+		"app/account": {
+			"helmet": "Nastavení účtu",
+			"title": "Nastavení účtu",
+			"description": "Nastavení související s vaším účtem",
+			"sections": {
+				"account": {
+					"validation": {
+						"invalidUrl": "Zadejte platnou adresu URL",
+						"missingUsername": "Uživatelské jméno je vyžadováno"
+					},
+					"labels": {
+						"username": "Uživatelské jméno",
+						"password": "Heslo",
+						"activeChangesPrompt": "Máte neuložené změny"
+					},
+					"errors": {
+						"updateFailed": "Při aktualizaci profilu došlo k chybě. Zkuste to prosím znovu."
+					},
+					"avatarPicker": {
+						"heading": "Nastavte obrázek avataru",
+						"subtitle": "Stump podporuje vlastní avatary, které lze nastavit zadáním adresy URL obrázku. Nahrávání obrázků není podporováno, aby se snížilo množství dat uložených na serveru.",
+						"preview": "Náhled se zobrazí zde, jakmile zadáte adresu URL.",
+						"labels": {
+							"imageUrl": "URL obrázku",
+							"customAvatar": "Vlastní avatar"
+						},
+						"buttons": {
+							"confirm": "Potvrdit obrázek",
+							"cancel": "Zrušit",
+							"edit": "Upravit",
+							"changeImage": "Změnit obrázek",
+							"removeImage": "Odstranit obrázek"
+						}
+					},
+					"buttons": {
+						"confirm": "Uložit změny"
+					}
+				},
+				"locale": {
+					"localeSelector": {
+						"label": "Jazyk"
+					},
+					"heading": "Jazyk a lokalizace",
+					"subtitle": [
+						"Stump podporuje více jazyků a místních jazykových mutací, nastavte si je níže. Prosím, zvažte pomoc při zlepšování kvality",
+						"Přeložte Stump",
+						"pokud můžete!"
+					]
+				}
+			}
+		},
+		"app/preferences": {
+			"helmet": "Vzhled",
+			"title": "Vzhled",
+			"description": "Přizpůsobte si vzhled aplikace",
+			"sections": {
+				"themeAndAppearance": {
+					"label": "Theme and appearance",
+					"description": "The basic look and feel options for Stump"
+				},
+				"themeSelect": {
+					"label": "Motiv",
+					"description": [
+						"Pokud máte zájem o vytvoření vlastního motivu, podívejte se na",
+						"dokumentaci"
+					],
+					"options": {
+						"system": "System",
+						"light": "Světlý",
+						"dark": "Tmavý",
+						"bronze": "Světle bronzový",
+						"ocean": "Oceán",
+						"autumn": "Podzim",
+						"cosmic": "Cosmic",
+						"pumpkin": "Pumpkin",
+						"matrix": "Matrix"
+					}
+				},
+				"gradientToggle": {
+					"label": "Enable gradients",
+					"description": "Some themes optionally support gradients for a more dynamic look"
+				},
+				"fontSelect": {
+					"label": "Písmo",
+					"description": "Přizpůsobte písmo použité v aplikaci"
+				},
+				"thumbnailRatioSelect": {
+					"label": "Thumbnail Ratio",
+					"description": "The aspect ratio to use for thumbnails"
+				},
+				"thumbnailPlaceholder": {
+					"label": "Thumbnail placeholder",
+					"description": "The style to use for thumbnail placeholders",
+					"options": {
+						"grayscale": "Grayscale",
+						"averageColor": "Average color",
+						"colorful": "Colorful",
+						"thumbhash": "Thumbhash"
+					}
+				},
+				"layoutAndArrangement": {
+					"label": "Layout and arrangement",
+					"description": "Customize how Stump displays information and organizes content"
+				},
+				"primaryNavigation": {
+					"label": "Primary navigation",
+					"description": "Choose between a minimal sidebar or a topbar navigation",
+					"options": {
+						"sidebar": "Sidebar",
+						"topbar": "Topbar"
+					},
+					"disclaimer": "* Settings for the unselected option will be disabled or hidden"
+				},
+				"doubleSidebar": {
+					"label": "Settings sidebar",
+					"description": "Enables the sidebar navigation for the settings pages. If you frequently use a smaller screen, you may want to disable this."
+				},
+				"replacePrimarySidebar": {
+					"label": "Replace primary sidebar",
+					"description": "Any instance of a secondary sidebar will replace the primary sidebar instead of being displayed next to it",
+					"tooltips": {
+						"doubleSidebar": "This setting requires the settings sidebar to be enabled",
+						"topbar": "This setting is not currently supported when the primary navigation is set to top bar"
+					}
+				},
+				"navigationArrangement": {
+					"label": "Uspořádání navigace",
+					"description": {
+						"sidebar": "Uspořádání a přizpůsobení navigačních položek v postranním panelu",
+						"topbar": "Uspořádání a přizpůsobení navigačních položek v horním panelu"
+					},
+					"isLocked": "Uspořádání je uzamčené",
+					"lock": "Uzamknout uspořádání",
+					"unlock": "Odemknout uspořádání",
+					"options": {
+						"HOME": "Home",
+						"EXPLORE": "Explore",
+						"LIBRARIES": "Libraries",
+						"BOOK_CLUBS": "Book clubs",
+						"SMART_LISTS": "Smart lists"
+					},
+					"entityOptions": {
+						"createAction": {
+							"label": "Zobrazit akci vytvoření",
+							"help": "Zobrazení akce vytvořit v navigaci"
+						},
+						"linkToAll": {
+							"label": "Odkaz pro zobrazit vše",
+							"help": "Odkaz na stránku určenou k prohlížení všech položek tohoto typu"
+						}
+					}
+				},
+				"displaySpacing": {
+					"label": "Display spacing",
+					"description": "Adjusts the overall spacing between elements throughout the app",
+					"options": {
+						"default": "Default",
+						"compact": "Compact"
+					},
+					"disclaimer": "* Compact display mode is not implemented yet"
+				},
+				"maxWidthPreference": {
+					"label": "Adjusted width",
+					"description": "Stump applies a max-width to the viewport. This setting allows you to adjust or remove this limit",
+					"tooltip": "This setting is not currently supported when the primary navigation is set to sidebar"
+				},
+				"additionalPreferences": {
+					"label": "Additional preferences",
+					"description": "Customize the appearance and behavior of Stump with these additional settings"
+				},
+				"showThumbnailsInHeader": {
+					"label": "Show thumbnails in headers",
+					"description": "If you prefer to see thumbnails more often, this setting will show them in more places",
+					"tooltips": {
+						"enabled": "This setting will show thumbnails in more places",
+						"disabled": "This setting will not show thumbnails in more places"
+					}
+				},
+				"hideScrollbarToggle": {
+					"label": "Hide scrollbar",
+					"description": "Some pages simply look better without a scrollbar, this setting will hide it when possible",
+					"tooltips": {
+						"enabled": "This setting will hide the scrollbar on some pages",
+						"disabled": "This setting will show the scrollbar on some pages"
+					}
+				},
+				"enableAlphabetFiltering": {
+					"label": "Alphabet filtering",
+					"description": "Show an alphabet filter when applicable"
+				},
+				"enableFancyAnimations": {
+					"label": "Fancy animations",
+					"description": "A broad opt-in for fancier animations throughout the app"
+				},
+				"queryIndicatorToggle": {
+					"label": "Background fetch indicator",
+					"description": "Show a loading indicator whenever a query is running in the background"
+				},
+				"liveRefetchToggle": {
+					"label": "Live refetch",
+					"description": "Refetch queries on the fly to hydrate the UI with new data as it comes in. This can be resource intensive"
+				},
+				"enableJobOverlayToggle": {
+					"label": "Job overlay",
+					"description": "Show a floating overlay while a job is running"
+				}
+			}
+		},
+		"app/apiKeys": {
+			"helmet": "API klíče",
+			"title": "API klíče",
+			"description": "Spravujte vygenerované API klíče Stump",
+			"shared": {
+				"fields": {
+					"name": "Název",
+					"expiration": "Expirace",
+					"last_used": "Naposledy použito",
+					"created": "Vytvořeno",
+					"permissions": "Oprávnění",
+					"inherited": "Zděděno",
+					"explicit": "Explicitní"
+				}
+			},
+			"sections": {
+				"inspector": {
+					"heading": "API klíč",
+					"description": "Podrobný náhled tohoto klíče",
+					"unrestrictedKey": {
+						"heading": "Neomezený klíč",
+						"description": "Vzhledem k tomu, že jste vlastníkem serveru, má tento klíč neomezený přístup, pokud je nastaven na oprávnění dědit. Buďte prosím opatrní."
+					}
+				},
+				"createKey": {
+					"modal": {
+						"trigger": "Vytvořit API klíč",
+						"heading": {
+							"creating": "Vytvořit API klíč",
+							"created": "Vytvořený klíč"
+						},
+						"description": {
+							"creating": "API klíče jsou dlouhotrvající přihlašovací údaje, které mohou být použity k ověření s API",
+							"created": "Váš nový API klíč byl vytvořen. Uložte tajný klíč někde bezpečně, protože se znovu nezobrazí"
+						},
+						"inheritDisclaimer": "Tento API klíč zdědí všechna vaše oprávnění, což znamená, že může dělat cokoliv, co můžete udělat. Buďte opatrní s tímto nastavením",
+						"createdKey": "Vytvořený klíč",
+						"savedConfirm": "Uložil jsem svůj klíč",
+						"submit": "Vytvořit klíč"
+					}
+				},
+				"table": {
+					"title": "Vaše klíče",
+					"description": "Toto jsou API klíče, které jste vytvořili",
+					"actionMenu": {
+						"inspect": "Projít",
+						"delete": "Smazat"
+					},
+					"empty": {
+						"title": "Zatím jste nevytvořili žádné klíče",
+						"action": "Vytvořte API klíč pro začátek"
+					},
+					"noExpiration": "Není nastavena žádná expirace"
+				}
+			}
+		},
+		"app/reader": {
+			"helmet": "Nastavení čtečky",
+			"title": "Nastavení čtečky",
+			"description": "Výchozí možnosti pro čtečky Stump. Jsou vázány pouze na vaše aktuální zařízení",
+			"sections": {
+				"universal": {
+					"sections": {
+						"readingDirection": {
+							"label": "Směr čtení",
+							"description": "Směr, ve kterém bude čtečka pokračovat přes stránky"
+						}
+					}
+				},
+				"imageBasedBooks": {
+					"label": "Obrázkové knihy",
+					"description": "Komiksy, manga a další knihy založené na obrázcích",
+					"sections": {
+						"preloadAheadCount": {
+							"label": "Přednačíst počet stran dopředu",
+							"description": "Počet stránek, které se mají načíst před aktuální stránkou"
+						},
+						"preloadBehindCount": {
+							"label": "Přednačíst počet stran vzad",
+							"description": "Počet stránek, které se mají přednačíst před aktuální stránkou"
+						}
+					}
+				},
+				"textBasedBooks": {
+					"label": "Čtečka e-knih",
+					"description": "Výchozí nastavení pro textové knihy",
+					"sections": {
+						"fontSize": {
+							"label": "Velikost písma",
+							"description": "Velikost písma použitého v čtečce"
+						},
+						"fontFamily": {
+							"label": "Rodina písem",
+							"description": "Písmo použité v čtečce"
+						},
+						"lineHeight": {
+							"label": "Výška řádku",
+							"description": "Výška řádků ve čtečce"
+						}
+					}
+				},
+				"data": {
+					"sections": {
+						"clearStore": {
+							"label": "Vymazat nastavení",
+							"description": "Resetovat všechna individuální nastavení knihy, která přepíší výchozí hodnoty",
+							"button": "Vymazat nastavení"
+						}
+					}
+				}
+			}
+		},
+		"app/desktop": {
+			"helmet": "Nastavení plochy",
+			"title": "Nastavení plochy",
+			"description": "Nastavení vztahující se k aplikaci Stump",
+			"sections": {
+				"configuredServers": {
+					"label": "Nastavené servery",
+					"description": "Seznam serverů Stump, ke kterým se můžete připojit",
+					"getStarted": "Přidejte server pro začátek",
+					"unreachableServer": {
+						"tooltip": "Server je nedostupný"
+					},
+					"activeServer": {
+						"tooltip": "Aktuální server"
+					},
+					"addOrEditServer": {
+						"validation": {
+							"nameExists": "Server s tímto názvem již existuje",
+							"nameForbidden": "Toto jméno nelze použít",
+							"urlExists": "Server s touto URL již existuje"
+						},
+						"fields": {
+							"name": {
+								"label": "Název",
+								"description": "Přátelské jméno pro identifikaci tohoto serveru",
+								"placeholder": "Můj server"
+							},
+							"uri": {
+								"label": "URI",
+								"description": "URL serveru Stump",
+								"placeholder": "https://stump.example.com"
+							}
+						}
+					},
+					"addServer": {
+						"trigger": "Přidat server",
+						"title": "Přidat nový server",
+						"description": "Přidat nový server Stump do aplikace",
+						"confirm": "Přidat server"
+					},
+					"editServer": {
+						"tooltip": "Upravit server",
+						"title": "Upravit server",
+						"description": "Upravit detaily tohoto serveru",
+						"confirm": "Uložit změny"
+					},
+					"deleteServer": {
+						"tooltip": "Smazat server",
+						"confirmation": {
+							"title": "Smazat tento server",
+							"description": "Tímto odstraníte server z desktopové aplikace",
+							"disclaimerActiveServer": "Tento server je aktuálně aktivní. Budete odhlášeni",
+							"disclaimerLastServer": "Toto je poslední nakonfigurovaný server. Budete odhlášeni a budete muset znovu nakonfigurovat všechny servery v procesu inicializace",
+							"confirm": "Smazat server"
+						}
+					},
+					"switchToServer": {
+						"tooltip": "Přepnout na server",
+						"confirmation": {
+							"title": "Přepnout na tento server",
+							"description": "Toto vás odhlásí z aktuálního serveru",
+							"confirm": "Přepnout na server",
+							"server": "Server",
+							"uri": "URL"
+						}
+					},
+					"resetConfiguration": {
+						"label": "Smazat všechny servery",
+						"description": [
+							"Odstranit všechny nastavené servery z aplikace",
+							"Tuto akci nelze vrátit zpět"
+						],
+						"confirmation": {
+							"trigger": "Smazat všechny servery",
+							"title": "Smazat všechny servery",
+							"description": "Tímto odstraníte všechny servery z desktopové aplikace",
+							"disclaimer": "Budete odhlášeni a budete muset znovu nakonfigurovat všechny servery v procesu inicializace",
+							"confirm": "Smazat všechny servery"
+						}
+					},
+					"resetTokens": {
+						"label": "Smazat ověření",
+						"description": [
+							"Odstranit všechny bezpečně uložené přístupové tokeny pro vaše servery",
+							"Budete se muset znovu přihlásit na každém serveru"
+						],
+						"confirmation": {
+							"trigger": "Smazat ověření",
+							"title": "Smazat ověření",
+							"description": "Tímto odstraníte všechny bezpečně uložené přístupové tokeny pro vaše servery",
+							"confirm": "Smazat ověření"
+						}
+					}
+				},
+				"optionalFeatures": {
+					"label": "Volitelné funkce",
+					"description": "Správa volitelných funkcí unikátních pro desktopovou aplikaci",
+					"bundledServer": {
+						"label": "Bundled server",
+						"description": "Spustit připojený server na pozadí, zatímco je spuštěna desktopová aplikace (vyžaduje restart)"
+					},
+					"discordPresence": {
+						"label": "Status na Discordu",
+						"description": "Zobrazit tvou aktivitu v Discordu pomocí Discord Rich Presence",
+						"reconnect": "Znovu připojit k Discordu"
+					}
+				}
+			}
+		},
+		"server/general": {
+			"helmet": "Obecné nastavení serveru",
+			"title": "Obecná nastavení",
+			"description": "Obecná nastavení týkající se instance serveru Stump",
+			"sections": {
+				"updateAvailable": {
+					"message": "Váš server není aktualizován. Aktualizujte prosím na nejnovější verzi!"
+				},
+				"serverInfo": {
+					"title": "Informace o serveru",
+					"description": "Základní podrobnosti o instanci serveru Stump",
+					"build": {
+						"label": "Sestavení",
+						"description": "Podrobnosti o verzi a sestavení",
+						"version": {
+							"semver": "Verze",
+							"commitHash": "Přesná revize",
+							"date": "Datum sestavení"
+						}
+					},
+					"nonStableChannel": {
+						"title": "You are running a non-stable build of Stump",
+						"description": [
+							"It looks like you are running the",
+							"build channel"
+						]
+					}
+				},
+				"serverPublicUrl": {
+					"label": "Veřejná adresa URL",
+					"description": "URL, kterou je váš server přístupný mimo vaši síť, pokud je to možné. Tímto povolíte odkazy na pozvánky a další funkce"
+				}
+			}
+		},
+		"server/logs": {
+			"helmet": "Logy",
+			"title": "Logy",
+			"description": "Protokoly generované instancí tvého serveru",
+			"sections": {
+				"persistedLogs": {
+					"title": "Trvalé logy",
+					"description": "Tyto protokoly byly ručně uloženy do databáze, obvykle přiřazené ke konkrétní úloze nebo události",
+					"table": {
+						"columns": {
+							"level": "Úroveň",
+							"message": "Zpráva",
+							"timestamp": "Časové razítko"
+						},
+						"emptyHeading": "Žádné záznamy k zobrazení",
+						"emptySubtitle": "Váš server je buď velmi zdravý, nebo velmi nezdravý"
+					},
+					"deleteLogs": {
+						"title": "Smazat logy",
+						"description": "Trvale odstranit všechny perzistentní logy z databáze",
+						"disclaimer": "Tuto akci nelze vrátit zpět",
+						"confirm": "Smazat logy"
+					}
+				},
+				"liveLogs": {
+					"title": "Kanál živých logů",
+					"description": "Streamováno přímo z instance vašeho serveru Stump v reálném čase"
+				}
+			}
+		},
+		"server/jobs": {
+			"helmet": "Úlohy",
+			"title": "Úlohy",
+			"description": "Úlohy na pozadí, které běží na instanci vašeho serveru",
+			"sections": {
+				"scheduling": {
+					"title": "Plánování",
+					"description": "Některé úlohy mohou být nakonfigurovány pro naplánované spuštění. Změny v této konfiguraci se projeví po restartu serveru",
+					"disclaimer": "The job scheduler is really basic and will be improved in the future. Please reach out for feedback or suggestions!",
+					"createOrUpdateConfig": {
+						"fields": {
+							"intervalSecs": {
+								"label": "Interval",
+								"description": "How often the job should run (in seconds)",
+								"placeholder": "e.g. \"86400\" for once a day"
+							},
+							"intervalPreset": {
+								"label": "Preset",
+								"options": {
+									"everySixHours": "Every 6 hours",
+									"everyTwelveHours": "Every 12 hours",
+									"oncePerDay": "Once a day",
+									"oncePerWeek": "Once a week",
+									"oncePerMonth": "Once a month"
+								}
+							},
+							"includedLibraryIds": {
+								"label": "Included libraries",
+								"description": "Choose which libraries are included"
+							}
+						},
+						"restartRequired": "Changes to this configuration will take effect after a server restart"
+					}
+				},
+				"history": {
+					"title": "Historie",
+					"description": "Záznam úloh, které byly spuštěny na instanci serveru Stump",
+					"table": {
+						"columns": {
+							"name": "Název",
+							"description": "Popis",
+							"status": "Stav",
+							"createdAt": "Spuštěno v",
+							"elapsed": "Uplynulo",
+							"tasks": "Úlohy"
+						},
+						"emptyHeading": "Žádné úlohy k zobrazení",
+						"emptySubtitle": "Nemůžete mít úlohu, když nemáte úlohu",
+						"deleteAllMessage": "Historie úloh a statistiky mohou být z databáze kdykoli odstraněny. Tuto akci nelze vrátit zpět"
+					},
+					"deleteJobHistory": {
+						"title": "Delete job history",
+						"description": "Permanently delete all job history from the database",
+						"confirmText": "Are you sure you want to delete all job history?",
+						"confirm": "Delete",
+						"emptyState": "No jobs to clear"
+					}
+				}
+			}
+		},
+		"server/users": {
+			"helmet": "Správa uživatelů",
+			"title": "Uživatelé",
+			"description": "Správa uživatelů na tomto serveru",
+			"createUser": {
+				"helmet": "Vytvořit uživatele",
+				"title": "Vytvořit uživatele",
+				"description": "Vytvořit nového uživatele na tomto serveru"
+			},
+			"updateUser": {
+				"helmet": "Upravit uživatele",
+				"title": "Upravit uživatele",
+				"description": "Upravit detaily tohoto uživatele"
+			},
+			"createOrUpdateForm": {
+				"accessControl": {
+					"heading": "Řízení přístupu a omezení",
+					"subtitle": [
+						"Nakonfigurujte všechna omezení, která chcete použít pro tohoto uživatele. Další informace o kontrole přístupu naleznete v",
+						"dokumentaci"
+					],
+					"ageRestriction": {
+						"label": "Věkové omezení",
+						"description": "Omezuje uživateli přístup k obsahu vyššímu než stanovený věkový práh",
+						"placeholder": "13",
+						"enforceUnset": {
+							"label": "Vynutit při nenastavení",
+							"description": "Pokud je povoleno, uživatelé nebudou mít přístup k obsahu bez hodnocení věku"
+						}
+					},
+					"tagRestriction": {
+						"label": "Omezení tagů",
+						"description": "Omezuje uživateli přístup k obsahu s vybranými štítky",
+						"placeholder": "Pro dospělé"
+					}
+				},
+				"permissions": {
+					"heading": "Oprávnění",
+					"subtitle": [
+						"Vyberte oprávnění, která chcete tomuto uživateli udělit. Další informace o tom, co každé oprávnění dělá, naleznete v",
+						"dokumentaci"
+					],
+					"bookclub": {
+						"label": "Knižní kluby",
+						"read": {
+							"label": "Přístup k funkcím knižního klubu",
+							"description": "Umožňuje uživateli přístup k funkcím knižního klubu, včetně prohlížení a připojení se k nim"
+						},
+						"create": {
+							"label": "Vytvořit knižní klub",
+							"description": "Umožňuje uživateli vytvářet nové knižní kluby"
+						}
+					},
+					"feature": {
+						"label": "Volitelné funkce",
+						"api_keys": {
+							"label": "API klíče",
+							"description": "Povolit uživateli spravovat vlastní API klíče"
+						},
+						"koreader_sync": {
+							"label": "KoReader synchronizace",
+							"description": "Povolit uživateli přístup k synchronizaci KoReader"
+						}
+					},
+					"file": {
+						"label": "Správa souborů",
+						"explorer": {
+							"label": "File Explorer",
+							"description": "Allows the user to access the Library File Explorer.\nContent restriction is not supported when this feature is granted"
+						},
+						"download": {
+							"label": "Stahování souborů",
+							"description": "Umožňuje uživateli stahovat soubory ze serveru"
+						},
+						"upload": {
+							"label": "Nahrát soubory",
+							"description": "Umožňuje uživateli nahrát soubory na server"
+						}
+					},
+					"emailer": {
+						"label": "E-mailery",
+						"read": {
+							"label": "Přístup k e-mailerům",
+							"description": "Umožňuje uživateli zobrazit nakonfigurované e-mailery"
+						},
+						"create": {
+							"label": "Vytvořit e-mailery",
+							"description": "Umožňuje uživateli vytvářet nové e-mailery"
+						},
+						"manage": {
+							"label": "Spravovat e-mailery",
+							"description": "Umožňuje uživateli spravovat existující e-mailery"
+						}
+					},
+					"email": {
+						"label": "E-mailing",
+						"send": {
+							"label": "Odeslat e-maily",
+							"description": "Umožňuje uživateli odesílat e-maily ze serveru na libovolné nakonfigurované aliasy"
+						},
+						"arbitrary_send": {
+							"label": "Odesílat libovolné e-maily",
+							"description": "Umožňuje uživateli odesílat e-maily ze serveru na libovolnou e-mailovou adresu"
+						}
+					},
+					"library": {
+						"label": "Správa knihovny",
+						"create": {
+							"label": "Vytvořit knihovny",
+							"description": "Umožňuje uživateli vytvářet nové knihovny.\nObsahuje oprávnění k úpravám a skenování"
+						},
+						"scan": {
+							"label": "Skenovat knihovny",
+							"description": "Umožňuje uživateli spustit skenování pro existující knihovny"
+						},
+						"edit": {
+							"label": "Upravit knihovny",
+							"description": "Umožňuje uživateli upravovat základní podrobnosti pro existující knihovny"
+						},
+						"manage": {
+							"label": "Správa knihoven",
+							"description": "Umožňuje uživateli spravovat pokročilé nastavení pro existující knihovny.\nObsahuje oprávnění k úpravám a skenování"
+						},
+						"delete": {
+							"label": "Smazat knihovny",
+							"description": "Umožňuje uživateli odstranit existující knihovny.\nObsahuje oprávnění pro úpravu, správu a skenování"
+						}
+					},
+					"server": {
+						"label": "Správa serveru",
+						"manage": {
+							"label": "Správa serveru",
+							"description": "Umožňuje uživateli spravovat server.\nObsahuje *mnoho* dalších oprávnění"
+						}
+					},
+					"user": {
+						"label": "Správa uživatelů",
+						"read": {
+							"label": "Načíst uživatele",
+							"description": "Umožňuje uživateli načíst ostatní uživatele na serveru. To je vyžadováno pro některé další funkce, např. vyloučení uživatelů z přístupu do knihovny"
+						},
+						"manage": {
+							"label": "Správa uživatelů",
+							"description": "Allows the user to manage other users on the server.\nIncludes permissions to create and update"
+						}
+					},
+					"smartlist": {
+						"label": "Chytré seznamy",
+						"read": {
+							"label": "Přístup k funkci chytrého seznamu",
+							"description": "Allows the user to access smart lists features"
+						}
+					}
+				},
+				"validation": {
+					"ageRestrictionTooLow": "Věková omezení nesmí být nižší než 0",
+					"missingUsername": "Uživatelské jméno je vyžadováno",
+					"missingPassword": "Heslo je vyžadováno",
+					"usernameAlreadyExists": "Uživatelské jméno již existuje"
+				},
+				"createSubmitButton": "Vytvořit uživatele",
+				"updateSubmitButton": "Upravit uživatele"
+			},
+			"loginActivity": {
+				"deleteConfirmation": {
+					"title": "Delete activity",
+					"description": "All records of login activity will be permanently deleted from the database",
+					"confirm": "Delete"
+				}
+			}
+		},
+		"server/email": {
+			"helmet": "Nastavení e-mailu",
+			"title": "E-mail",
+			"description": "Settings related to configuring an SMTP emailer for your Stump server instance",
+			"sections": {
+				"emailers": {
+					"title": "SMTP e-mailery",
+					"description": "Klienti, které jste nakonfigurovali pro odesílání e-mailů z instance serveru Stump",
+					"singleInstanceDisclaimer": "Zatímco Stump podporuje více SMTP konfigurací v pozadí, pouze jedna může být nakonfigurována v uživatelském rozhraní. To bude v budoucnu vylepšeno",
+					"list": {
+						"emptyHeading": "Nejsou nakonfigurovány žádné SMTP e-mailery",
+						"primaryEmailer": "Primární e-mailer",
+						"sendHistory": {
+							"heading": "Historie odesílání",
+							"description": "Záznam e-mailů odeslaných tímto e-mailerem",
+							"table": {
+								"columns": {
+									"to": "Pro",
+									"subject": "Předmět",
+									"status": "Stav",
+									"createdAt": "Odesláno v"
+								}
+							},
+							"emptyHeading": "Žádná historie",
+							"emptySubtitle": "Historie tohoto e-maileru je prázdná. Buď nebyl použit, nebo byla historie vymazána"
+						}
+					}
+				},
+				"devices": {
+					"title": "E-mailová zařízení",
+					"description": "Aliasy zařízení, které jste nakonfigurovali pro příjem e-mailů z instance serveru Stump",
+					"addDevice": "Přidat alias zařízení",
+					"addOrUpdateDevice": {
+						"title": {
+							"create": "Vytvořit alias zařízení",
+							"update": "Upravit alias zařízení"
+						},
+						"name": {
+							"label": "Název",
+							"description": "Přátelský název k jedinečné identifikaci tohoto zobrazení"
+						},
+						"email": {
+							"label": "E-mail",
+							"description": "E-mailová adresa tohoto aliasu bude přiřazena k"
+						},
+						"forbidden": {
+							"label": "Zakázáno",
+							"description": "Pokud je povoleno, žádný uživatel nesmí odesílat e-maily na adresu přidruženou k tomuto aliasu"
+						},
+						"submit": {
+							"create": "Vytvořit alias zařízení",
+							"update": "Upravit alias zařízení"
+						}
+					},
+					"table": {
+						"emptyHeading": "Žádná zařízení nejsou registrována",
+						"emptySubtitle": "Vytvořit nový alias zařízení pro budoucí použití"
+					}
+				}
+			},
+			"createOrUpdateForm": {
+				"name": {
+					"label": "Název",
+					"description": "Přátelský název k jedinečné identifikaci tohoto e-maileru"
+				},
+				"smtpSettings": {
+					"heading": "Nastavení SMTP",
+					"description": "Specifické nastavení SMTP pro tento e-mailer"
+				},
+				"smtpProvider": {
+					"label": "Nastavení poskytovatele SMTP",
+					"description": "Poskytovatel SMTP serveru. Používá se k předvyplnění některých běžných nastavení, ale nezachycuje všechny poskytovatele"
+				},
+				"smtpHost": {
+					"label": "SMTP host",
+					"description": "Název hostitele SMTP serveru"
+				},
+				"smtpPort": {
+					"label": "Port SMTP",
+					"description": "Port SMTP serveru"
+				},
+				"tlsEnabled": {
+					"label": "Zapnutí TLS",
+					"description": "Pokud je zapnuto, připojení k SMTP serveru bude šifrováno"
+				},
+				"username": {
+					"label": "Uživatelské jméno",
+					"description": "Uživatelské jméno pro autentizaci pomocí SMTP serveru. Obvykle je to e-mailová adresa"
+				},
+				"password": {
+					"label": "Heslo",
+					"description": "Heslo pro ověření pomocí SMTP serveru. Pokud používáte Gmail, možná budete muset vygenerovat specifické heslo pro aplikaci"
+				},
+				"senderSettings": {
+					"heading": "Nastavení odesílatele",
+					"description": "Nastavení odesílatele e-mailu"
+				},
+				"senderDisplayName": {
+					"label": "Zobrazované jméno odesílatele",
+					"description": "Jméno, které se zobrazí příjemcům"
+				},
+				"senderEmail": {
+					"label": "E-mail odesílatele",
+					"description": "E-mailová adresa, která se zobrazí příjemcům"
+				},
+				"additionalSettings": {
+					"heading": "Další nastavení",
+					"description": "Další nastavení pro e-mailer"
+				},
+				"maxAttachmentSize": {
+					"label": "Maximální velikost přílohy",
+					"description": "Maximální velikost v bajtech, kterou může příloha mít"
+				},
+				"submit": {
+					"create": "Vytvořit e-mailer",
+					"update": "Upravit e-mailer"
+				}
+			},
+			"createEmailer": {
+				"helmet": "Vytvořit e-mailer",
+				"title": "Vytvořit e-mailer",
+				"description": "Vytvořit nový SMTP e-mailer pro instanci vašeho serveru Stump"
+			},
+			"updateEmailer": {
+				"helmet": "Upravit e-mailer",
+				"title": "Upravit e-mailer",
+				"description": "Upravit podrobnosti o tomto SMTP e-maileru"
+			}
+		}
+	},
+	"jobOverlay": {
+		"backupHeading": "Probíhá zpracování úlohy"
+	},
+	"libraryStats": {
+		"seriesCount": "Celkem sérií",
+		"bookCount": "Celkem knih",
+		"diskUsage": "Využití disku"
+	},
+	"noLibraries": {
+		"heading": "Zde není nic k zobrazení",
+		"messagePrefix": "Nemůžete vidět, co nemáte",
+		"message": {
+			"create": "Vytvořte knihovnu pro začátek",
+			"wait": "Jakmile budou knihovny vytvořeny, zobrazí se zde"
+		},
+		"links": {
+			"create": "Vytvořit knihovnu",
+			"settings": "Přejít do nastavení"
+		}
+	},
+	"pagination": {
+		"buttons": {
+			"next": "Další",
+			"previous": "Předchozí"
+		},
+		"popover": {
+			"heading": "Přejít na stránku",
+			"buttons": {
+				"confirm": "Přejít",
+				"cancel": "Zrušit"
+			}
+		}
+	},
+	"signOutModal": {
+		"title": "Odhlásit se",
+		"message": "Opravdu se chcete odhlásit?",
+		"buttons": {
+			"cancel": "Zrušit",
+			"signOut": "Odhlásit se"
+		}
+	},
+	"sidebar": {
+		"buttons": {
+			"home": "Domů",
+			"libraries": "Knihovny",
+			"books": "Procházet",
+			"bookClubs": "Knižní kluby",
+			"createLibrary": "Vytvořit knihovnu",
+			"noLibraries": "Žádné knihovny",
+			"createBookClub": "Vytvořit nový knižní klub",
+			"noBookClubs": "Žádné knižní kluby",
+			"settings": "Nastavení",
+			"themeToggle": "Přepnout motiv",
+			"goForward": "Jít vpřed",
+			"goBack": "Jít zpět",
+			"smartlists": "Chytré seznamy",
+			"noSmartlists": "Žádné chytré seznamy",
+			"createSmartlist": "Vytvořit chytrý seznam",
+			"seeAll": "Zobrazit vše"
+		},
+		"libraryOptions": {
+			"scanLibrary": "Skenovat",
+			"fileExplorer": "Soubory",
+			"manageLibrary": "Manage",
+			"deleteLibrary": "Smazat"
+		},
+		"versionInformation": {
+			"heading": "Informace o verzi",
+			"semVer": "Sémantická verze",
+			"commitHash": "Hash revize",
+			"buildDate": "Datum vytvoření"
+		}
+	},
+	"search": {
+		"placeholder": "Hledat"
+	},
+	"serverSOS": {
+		"heading": "Server není dostupný",
+		"desktop": {
+			"message": "Došlo k chybě sítě, která naznačuje, že server je momentálně nedostupný. Ujistěte se, že je spuštěn a přístupný z tohoto zařízení.\nPokud se URL adresa serveru změnila, můžete ji aktualizovat pomocí formuláře níže"
+		},
+		"web": {
+			"message": "Došlo k chybě sítě, která naznačuje, že server je momentálně nedostupný. Ujistěte se, že je spuštěn a přístupný z tohoto zařízení"
+		},
+		"reconnected": "Znovu připojeno k serveru! Probíhá přesměrování...",
+		"reconnectionFailed": "Něco se pokazilo!"
+	},
+	"serverStatusOverlay": {
+		"heading": "Server není připojen",
+		"message": [
+			"Zkontrolujte prosím připojení k internetu",
+			"Klikněte zde",
+			"pro změnu URL adresy serveru"
+		]
+	},
+	"slidingList": {
+		"empty": "Žádné položky k zobrazení",
+		"buttons": {
+			"next": "Posunout vpřed",
+			"previous": "Posunout zpět"
+		}
+	},
+	"tagSelect": {
+		"placeholder": "Vyberte nebo vytvořte štítek",
+		"placeholderNoTags": "Nejsou k dispozici žádné štítky"
+	},
+	"thumbnailDropdown": {
+		"label": "Upravit náhled",
+		"options": {
+			"selectFromBooks": "Vybrat z knih",
+			"uploadImage": "Nahrát obrázek"
+		},
+		"uploadImage": {
+			"emptyState": "Zde se zobrazí náhled vašeho obrázku",
+			"prompt": "Přetáhněte obrázek sem nebo klikněte pro výběr",
+			"remove": "Odstranit obrázek"
+		}
+	},
+	"common": {
+		"add": "Přidat",
+		"cancel": "Zrušit",
+		"confirm": "Potvrdit",
+		"delete": "Delete",
+		"enter": "Enter",
+		"save": "Uložit",
+		"send": "Odeslat",
+		"saveChanges": "Uložit změny",
+		"noChanges": "Žádné změny",
+		"create": "Vytvořit",
+		"edit": "Upravit",
+		"update": "Aktualizovat",
+		"upload": "Nahrát",
+		"uploading": "Nahrávání",
+		"unimplemented": "Tato funkce ještě není implementována! Zkuste to později",
+		"limitedFunctionality": "Toto ještě není plně implementováno a chybí některé funkce. Zkuste to později",
+		"logIn": "Přihlásit se",
+		"login": "Přihlášení",
+		"seeError": "Zobrazit chybu",
+		"remove": "Odstranit",
+		"goBack": "Jít zpět",
+		"goToServers": "Jít na servery",
+		"notReady": "Tato funkce není připravena",
+		"notUsedYet": "Zatím nepoužito",
+		"never": "Nikdy",
+		"scan": "Skenovat",
+		"somethingWentWrong": "Something went wrong"
+	},
+	"userPermissions": {
+		"ACCESS_API_KEYS": {
+			"label": "API keys",
+			"description": "Allows the user to manage their own API keys"
+		},
+		"ACCESS_BOOK_CLUB": {
+			"label": "Book Clubs",
+			"description": "Allows the user to access book club features, including viewing and joining book clubs"
+		},
+		"ACCESS_KOREADER_SYNC": {
+			"label": "KoReader sync",
+			"description": "Allows the user to access the KoReader sync integration"
+		},
+		"ACCESS_SMART_LIST": {
+			"label": "Smart Lists",
+			"description": "Allows the user to access smart list features, including creating and managing smart lists"
+		},
+		"CREATE_BOOK_CLUB": {
+			"label": "Create book clubs",
+			"description": "Allows the user to create new book clubs"
+		},
+		"CREATE_LIBRARY": {
+			"label": "Create libraries",
+			"description": "Allows the user to create new libraries"
+		},
+		"CREATE_NOTIFIER": {
+			"label": "Create notifiers",
+			"description": "Allows the user to create new notification systems"
+		},
+		"DELETE_LIBRARY": {
+			"label": "Delete libraries",
+			"description": "Allows the user to delete existing libraries"
+		},
+		"DELETE_NOTIFIER": {
+			"label": "Delete notifiers",
+			"description": "Allows the user to delete notification systems"
+		},
+		"DOWNLOAD_FILE": {
+			"label": "Download files",
+			"description": "Allows the user to download files from the server"
+		},
+		"EDIT_LIBRARY": {
+			"label": "Edit libraries",
+			"description": "Allows the user to modify existing libraries"
+		},
+		"EMAILER_CREATE": {
+			"label": "Create emailer",
+			"description": "Allows the user to create email configuration"
+		},
+		"EMAILER_MANAGE": {
+			"label": "Manage emailer",
+			"description": "Allows the user to manage email configuration and settings"
+		},
+		"EMAILER_READ": {
+			"label": "Read emailer",
+			"description": "Allows the user to view email configuration"
+		},
+		"EMAIL_ARBITRARY_SEND": {
+			"label": "Send arbitrary emails",
+			"description": "Allows the user to send custom emails to any address"
+		},
+		"EMAIL_SEND": {
+			"label": "Send emails",
+			"description": "Allows the user to send emails through the system"
+		},
+		"FILE_EXPLORER": {
+			"label": "File explorer",
+			"description": "Allows the user to browse and explore the server filesystem"
+		},
+		"MANAGE_LIBRARY": {
+			"label": "Manage libraries",
+			"description": "Allows the user to manage library settings and configuration"
+		},
+		"MANAGE_NOTIFIER": {
+			"label": "Manage notifiers",
+			"description": "Allows the user to manage notification system settings"
+		},
+		"MANAGE_SERVER": {
+			"label": "Manage server",
+			"description": "Allows the user to manage server configuration and settings"
+		},
+		"MANAGE_USERS": {
+			"label": "Manage users",
+			"description": "Allows the user to create, edit, and delete user accounts"
+		},
+		"READ_JOBS": {
+			"label": "Read jobs",
+			"description": "Allows the user to view system jobs and their status"
+		},
+		"READ_NOTIFIER": {
+			"label": "Read notifiers",
+			"description": "Allows the user to view notification system configuration"
+		},
+		"READ_PERSISTED_LOGS": {
+			"label": "Read persisted logs",
+			"description": "Allows the user to view stored system logs"
+		},
+		"READ_SYSTEM_LOGS": {
+			"label": "Read system logs",
+			"description": "Allows the user to view real-time system logs"
+		},
+		"READ_USERS": {
+			"label": "Read users",
+			"description": "Allows the user to view user account information"
+		},
+		"SCAN_LIBRARY": {
+			"label": "Scan libraries",
+			"description": "Allows the user to trigger library scans to discover new content"
+		},
+		"UPLOAD_FILE": {
+			"label": "Upload files",
+			"description": "Allows the user to upload files to the server"
+		},
+		"MANAGE_JOBS": {
+			"label": "Manage jobs",
+			"description": "Allows the user to manage any queued jobs"
+		},
+		"EDIT_METADATA": {
+			"label": "Edit metadata",
+			"description": "Allows the user to edit metadata for books and series"
+		},
+		"WRITE_BACK_METADATA": {
+			"label": "Write back metadata",
+			"description": "Allows the user to write metadata changes back to the source files"
+		}
+	}
+}

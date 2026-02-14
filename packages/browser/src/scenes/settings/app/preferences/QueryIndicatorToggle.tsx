@@ -1,9 +1,11 @@
 import { WideSwitch } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { useCallback } from 'react'
 
 import { usePreferences } from '@/hooks/usePreferences'
 
 export default function QueryIndicatorToggle() {
+	const { t } = useLocaleContext()
 	const {
 		preferences: { showQueryIndicator },
 		update,
@@ -18,10 +20,13 @@ export default function QueryIndicatorToggle() {
 	return (
 		<WideSwitch
 			formId="showQueryIndicator"
-			label="Background fetch indicator"
-			description="Show a loading indicator whenever a query is running in the background"
+			label={t(getKey('label'))}
+			description={t(getKey('description'))}
 			checked={showQueryIndicator}
 			onCheckedChange={handleChange}
 		/>
 	)
 }
+
+const LOCALE_BASE = 'settingsScene.app/preferences.sections.queryIndicatorToggle'
+const getKey = (key: string) => `${LOCALE_BASE}.${key}`

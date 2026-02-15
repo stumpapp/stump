@@ -7,7 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useColors } from '~/lib/constants'
 import { useDownloadQueue } from '~/lib/hooks'
 
-import { CardList, Heading } from '../ui'
+import { Card, Heading } from '../ui'
 import { Button } from '../ui/button'
 import { Icon } from '../ui/icon'
 import { Text } from '../ui/text'
@@ -80,11 +80,11 @@ export const DownloadProblemsSheet = forwardRef<TrueSheet, Props>(function Downl
 							</Button>
 						</View>
 
-						<CardList>
+						<Card>
 							{failedItems.map((item) => (
 								<FailedDownloadItem key={item.id} item={item} onRetry={retry} onDismiss={dismiss} />
 							))}
-						</CardList>
+						</Card>
 					</>
 				)}
 			</View>

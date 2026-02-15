@@ -378,12 +378,13 @@ export default function Screen() {
 								type: locator.type || 'application/xhtml+xml',
 							},
 						},
+						elapsedSeconds: totalSeconds,
 						isComplete: true,
 					},
 				},
 			})
 		},
-		[book.id, updateProgress],
+		[book.id, totalSeconds, updateProgress],
 	)
 
 	const { syncCreate: syncBookmarkCreate, syncDelete: syncBookmarkDelete } =

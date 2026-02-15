@@ -21,46 +21,46 @@ import {
 import AppPrimaryColor from '~/components/appSettings/preferences/AppPrimaryColor'
 import DisableDismissGesture from '~/components/appSettings/preferences/DisableDismissGesture'
 import { StumpEnabled } from '~/components/appSettings/stump'
-import { CardList } from '~/components/ui'
+import { Card } from '~/components/ui'
 
 export default function Screen() {
 	return (
 		<ScrollView className="flex-1 bg-background" contentInsetAdjustmentBehavior="automatic">
 			<View className="flex-1 gap-8 bg-background p-4 tablet:p-6">
-				<CardList label="Preferences">
+				<Card label="Preferences">
 					<AppTheme />
 					<AppPrimaryColor />
 					<AppLanguage />
 					<DefaultServer />
 					<ThumbnailRatio />
 					<ThumbnailPlaceholder />
-				</CardList>
+				</Card>
 
-				<CardList label="Reading">
+				<Card label="Reading">
 					<PreferNativePdf />
 					{Platform.OS === 'ios' && <DisableDismissGesture />}
 					<ReaderSettingsLink />
-				</CardList>
+				</Card>
 
-				<CardList
+				<Card
 					label="Stump"
 					description="Stump features are optional, you can completely turn them off if you just want OPDS support"
 				>
 					<StumpEnabled />
 					<AutoSyncLocalData />
-				</CardList>
+				</Card>
 
-				<CardList label="Management">
+				<Card label="Management">
 					<AppDataUsageLink />
-				</CardList>
+				</Card>
 
-				<CardList label="Debug">
+				<Card label="Debug">
 					<ImageCacheActions />
 					{__DEV__ && <DeleteDatabase />}
 					<PerformanceMonitor />
 					<ReduceAnimations />
 					<MaskURLs />
-				</CardList>
+				</Card>
 
 				<ContactInformation />
 

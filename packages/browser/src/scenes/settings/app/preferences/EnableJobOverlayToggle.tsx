@@ -1,9 +1,11 @@
 import { WideSwitch } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { useCallback } from 'react'
 
 import { usePreferences } from '@/hooks/usePreferences'
 
 export default function EnableJobOverlayToggle() {
+	const { t } = useLocaleContext()
 	const {
 		preferences: { enableJobOverlay },
 		update,
@@ -18,10 +20,13 @@ export default function EnableJobOverlayToggle() {
 	return (
 		<WideSwitch
 			formId="enableJobOverlay"
-			label="Job overlay"
-			description="Show a floating overlay while a job is running"
+			label={t(getKey('label'))}
+			description={t(getKey('description'))}
 			checked={enableJobOverlay}
 			onCheckedChange={handleChange}
 		/>
 	)
 }
+
+const LOCALE_BASE = 'settingsScene.app/preferences.sections.enableJobOverlayToggle'
+const getKey = (key: string) => `${LOCALE_BASE}.${key}`

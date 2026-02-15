@@ -5,7 +5,7 @@ import { Pressable, View } from 'react-native'
 import { downloadQueueMetadata } from '~/db'
 import { useDownloadQueue } from '~/lib/hooks'
 
-import { CardRow, Icon, Progress, Text } from '../ui'
+import { Card, Icon, Progress, Text } from '../ui'
 
 type Props = {
 	item: ReturnType<typeof useDownloadQueue>['activeItems'][number]
@@ -33,7 +33,7 @@ export default function DownloadQueueItem({ item, onCancel }: Props) {
 	}
 
 	return (
-		<CardRow>
+		<Card.Row>
 			<View className="flex-1 gap-1">
 				<Text className="font-medium" numberOfLines={1}>
 					{downloadQueueMetadata.safeParse(item.metadata).data?.bookName || item.filename}
@@ -47,6 +47,6 @@ export default function DownloadQueueItem({ item, onCancel }: Props) {
 			>
 				<Icon as={X} size={16} className="text-foreground-muted" />
 			</Pressable>
-		</CardRow>
+		</Card.Row>
 	)
 }

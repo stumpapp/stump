@@ -5,7 +5,9 @@ import { Platform, View, ViewProps } from 'react-native'
 import { Icon, Text } from '~/components/ui'
 import { cn } from '~/lib/utils'
 
-type CardListProps = ViewProps & {
+// MARK: Types
+
+type CardProps = ViewProps & {
 	/**
 	 * A label displayed above the card (e.g. "Information", "Metadata", "Acknowledgements")
 	 */
@@ -26,19 +28,32 @@ type RowProps = ViewProps & {
 	disabled?: boolean
 }
 
-export function CardList({
+type StatGroupProps = ViewProps
+
+type StatProps = {
+	label: string
+	value: string | number | undefined | null
+	suffix?: string | number | undefined | null
+}
+
+// MARK: Card component
+
+/**
+ * The Card component. This acts as the container for Card.Row and Card.StatGroup items.
+ */
+export function Card({
 	label,
 	description,
 	listEmptyStyle,
 	children,
 	className,
 	...props
-}: CardListProps) {
+}: CardProps) {
 	const count = React.Children.count(children)
 
 	return (
 		<View className={cn('gap-2', className)} {...props}>
-			{label && <CardLabel>{label}</CardLabel>}
+			{label && <ListLabel className="ios:px-4 px-2">{label}</ListLabel>}
 
 			{count === 0 ? (
 				<ListEmptyMessage {...listEmptyStyle} />
@@ -46,12 +61,61 @@ export function CardList({
 				<CardBackground>{children}</CardBackground>
 			)}
 
-			{description && <Text className="ios:px-4 px-2 text-foreground-muted">{description}</Text>}
+			{description && (
+				<Text size="sm" className="ios:px-4 px-2 text-foreground-muted">
+					{description}
+				</Text>
+			)}
 		</View>
 	)
 }
 
-export function CardRow({ label, icon, disabled, children, className, ...props }: RowProps) {
+Card.StatGroup = StatGroup
+Card.Stat = Stat
+Card.Row = Row
+
+// MARK: Child components
+
+/**
+ * The StatGroup component. This acts as the container for Card.Stat items.
+ */
+function StatGroup({ children, className }: StatGroupProps) {
+	return (
+		// We shift up by 1px to hide the first divider in a list
+		<View className="-mt-[1px]">
+			<Divider />
+
+			<View
+				className={cn(
+					'ios:p-4 flex-row flex-wrap items-start justify-evenly gap-x-1 gap-y-4 p-3',
+					className,
+				)}
+			>
+				{children}
+			</View>
+		</View>
+	)
+}
+
+function Stat({ label, value, suffix }: StatProps) {
+	return (
+		<View className="items-center justify-center">
+			<Text className="mb-1 text-center font-medium text-foreground-muted">{label}</Text>
+			<View className="flex-row items-end gap-0">
+				<Text size="xl" className="text-center font-semibold">
+					{value}
+				</Text>
+				{suffix != null && (
+					<Text size="xs" className="py-1 text-center text-foreground-muted">
+						{suffix}
+					</Text>
+				)}
+			</View>
+		</View>
+	)
+}
+
+function Row({ label, icon, disabled, children, className, ...props }: RowProps) {
 	return (
 		// We shift up by 1px to hide the first divider in a list
 		<View className="-mt-[1px]">
@@ -81,7 +145,9 @@ export function CardRow({ label, icon, disabled, children, className, ...props }
 	)
 }
 
-export function CardBackground({ className, ...props }: ViewProps) {
+// MARK: Internal components
+
+function CardBackground({ className, ...props }: ViewProps) {
 	return (
 		<View
 			className={cn(
@@ -91,32 +157,6 @@ export function CardBackground({ className, ...props }: ViewProps) {
 			)}
 			{...props}
 		/>
-	)
-}
-
-export function CardLabel({ className, ...props }: ComponentProps<typeof Text>) {
-	return (
-		<Text
-			className={cn('ios:px-4 px-2 text-lg font-semibold text-foreground-muted', className)}
-			{...props}
-		/>
-	)
-}
-
-type CardProps = ViewProps & {
-	label?: string
-	containerClassName?: string
-}
-
-export function Card({ label, children, className, containerClassName, ...props }: CardProps) {
-	return (
-		<View className={cn('gap-2', containerClassName)}>
-			{label && <CardLabel>{label}</CardLabel>}
-
-			<CardBackground className={cn('ios:p-4 gap-2 p-3', className)} {...props}>
-				{children}
-			</CardBackground>
-		</View>
 	)
 }
 
@@ -139,6 +179,8 @@ type ListEmptyMessageProps = {
 	message?: string
 }
 
+// MARK: Shared components
+
 export const ListEmptyMessage = ({ icon, message }: ListEmptyMessageProps) => (
 	<View
 		className={cn(
@@ -156,3 +198,9 @@ export const ListEmptyMessage = ({ icon, message }: ListEmptyMessageProps) => (
 		<Text>{message || 'Nothing to display'}</Text>
 	</View>
 )
+
+export function ListLabel({ className, ...props }: ComponentProps<typeof Text>) {
+	return (
+		<Text className={cn('text-lg font-semibold text-foreground-muted', className)} {...props} />
+	)
+}

@@ -1,4 +1,4 @@
-import { CardRow, Stepper } from '~/components/ui'
+import { Card, Stepper } from '~/components/ui'
 import { useReaderStore } from '~/stores'
 
 export default function PageMargins() {
@@ -8,7 +8,7 @@ export default function PageMargins() {
 	}))
 
 	return (
-		<CardRow label="Page Margins">
+		<Card.Row label="Page Margins">
 			<Stepper
 				value={store.pageMargins}
 				onChange={(val) => store.setSettings({ pageMargins: val })}
@@ -19,6 +19,6 @@ export default function PageMargins() {
 				formatValue={(val) => Math.round(val * 100).toString()}
 				accessibilityLabel="Page Margins"
 			/>
-		</CardRow>
+		</Card.Row>
 	)
 }

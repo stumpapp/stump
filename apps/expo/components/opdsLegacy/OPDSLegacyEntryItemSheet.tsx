@@ -17,7 +17,7 @@ import { useFileExplorerAssets } from '../fileExplorer'
 import { ThumbnailImage, TurboImage } from '../image'
 import { useResolveURL } from '../opds/utils'
 import { InfoRow, LongValue, MetadataBadgeSection } from '../overview'
-import { CardList, Heading } from '../ui'
+import { Card, Heading } from '../ui'
 import { getIconSource } from './OPDSLegacyEntryItem'
 
 dayjs.extend(localizedFormat)
@@ -108,7 +108,7 @@ export const OPDSLegacyEntryItemSheet = forwardRef<TrueSheet, Props>(
 					</View>
 
 					{showMetadata && (
-						<CardList label="Metadata">
+						<Card label="Metadata">
 							{entry.content && (
 								<LongValue label="Content" value={stripHtml(entry.content).result} />
 							)}
@@ -116,7 +116,7 @@ export const OPDSLegacyEntryItemSheet = forwardRef<TrueSheet, Props>(
 							{currentPage != null && (
 								<InfoRow label="Current Page" value={currentPage.toString()} />
 							)}
-						</CardList>
+						</Card>
 					)}
 
 					<MetadataBadgeSection
@@ -124,11 +124,11 @@ export const OPDSLegacyEntryItemSheet = forwardRef<TrueSheet, Props>(
 						items={entry.authors?.map((author) => author.name) || []}
 					/>
 
-					<CardList label="Technical Info">
+					<Card label="Technical Info">
 						<InfoRow label="Identifier" value={entry.id} />
 						<InfoRow label="Server" value={serverName} />
 						<InfoRow label="Updated" value={dayjs(entry.updated).format('LLL')} />
-					</CardList>
+					</Card>
 				</View>
 			</TrueSheet>
 		)

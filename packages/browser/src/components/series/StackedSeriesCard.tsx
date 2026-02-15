@@ -1,8 +1,9 @@
-import { Text } from '@stump/components'
+import { cn, Text } from '@stump/components'
 import { LibrarySeriesQuery } from '@stump/graphql'
 import { memo, useCallback, useEffect, useRef, useState } from 'react'
 
 import { Link } from '@/context'
+import { useFancyAnimations } from '@/hooks/useFancyAnimations'
 import { usePaths } from '@/paths'
 import { usePrefetchSeries } from '@/scenes/series'
 import { usePrefetchSeriesBooks } from '@/scenes/series/tabs/books/SeriesBooksScene'
@@ -20,6 +21,8 @@ const StackedSeriesCard = memo(function StackedSeriesCard({ data }: Props) {
 	const paths = usePaths()
 	const containerRef = useRef<HTMLAnchorElement>(null)
 	const [width, setWidth] = useState<number | null>(null)
+
+	const { shouldFancyHover } = useFancyAnimations()
 
 	// The cards in the traversal bits of the web app are resizable (to an extent), and so providing
 	// a width to the stacked thumb component is a bit annoying. This should DEFINITELY be rethought, though,
@@ -57,7 +60,7 @@ const StackedSeriesCard = memo(function StackedSeriesCard({ data }: Props) {
 		<Link
 			ref={containerRef}
 			to={paths.seriesOverview(data.id)}
-			className="group relative block w-full"
+			className={cn('group relative block w-full', !shouldFancyHover && 'hover:opacity-80')}
 			onMouseEnter={prefetch}
 		>
 			{width != null && <SeriesStackedThumbnails width={width} thumbnailData={thumbnailData} />}

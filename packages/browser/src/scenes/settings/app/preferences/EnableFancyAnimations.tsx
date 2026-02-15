@@ -1,8 +1,10 @@
 import { WideSwitch } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 
 import { usePreferences } from '@/hooks/usePreferences'
 
 export default function EnableFancyAnimations() {
+	const { t } = useLocaleContext()
 	const {
 		preferences: { enableFancyAnimations },
 		update,
@@ -16,11 +18,14 @@ export default function EnableFancyAnimations() {
 
 	return (
 		<WideSwitch
-			label="Fancy animations"
-			description="A broad opt-in for fancier animations throughout the app"
+			label={t(getKey('label'))}
+			description={t(getKey('description'))}
 			checked={enableFancyAnimations}
 			onCheckedChange={handleChange}
 			formId="enableFancyAnimations"
 		/>
 	)
 }
+
+const LOCALE_BASE = 'settingsScene.app/preferences.sections.enableFancyAnimations'
+const getKey = (key: string) => `${LOCALE_BASE}.${key}`

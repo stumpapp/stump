@@ -1,6 +1,6 @@
 import { View } from 'react-native'
 
-import { CardList } from '~/components/ui'
+import { Card } from '~/components/ui'
 
 import {
 	Brightness,
@@ -26,15 +26,15 @@ export default function ThemeSheetContent() {
 
 			<FontConfig />
 
-			<CardList>
+			<Card>
 				<ReadingProgression />
 				<ColumnCount />
 				<PageMargins />
-			</CardList>
+			</Card>
 
-			<CardList>
+			<Card>
 				<ImageFilter />
-			</CardList>
+			</Card>
 
 			<TypographySettings />
 		</View>

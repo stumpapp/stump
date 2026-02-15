@@ -258,52 +258,43 @@ impl Library {
 			.query_one(Statement::from_sql_and_values(
 				DatabaseBackend::Sqlite,
 				r"
-				WITH base_counts AS (
+				WITH library_media AS (
+					SELECT media.id, media.size
+					FROM media
+					INNER JOIN series ON media.series_id = series.id
+					WHERE series.library_id = $1
+				),
+				base_counts AS (
 					SELECT
-						COUNT(DISTINCT m.id) AS book_count,
-						IFNULL(SUM(m.size), 0) AS total_bytes,
-						COUNT(DISTINCT s.id) AS series_count
-					FROM
-						series s
-						LEFT JOIN media m ON m.series_id = s.id
-					WHERE
-						s.library_id = $1
+						COUNT(*) AS book_count,
+						IFNULL(SUM(size), 0) AS total_bytes,
+						(SELECT COUNT(*) FROM series WHERE series.library_id = $1) AS series_count
+					FROM library_media
 				),
 				finished_stats AS (
 					SELECT
 						COUNT(DISTINCT frs.media_id) AS completed_books,
 						IFNULL(SUM(frs.elapsed_seconds), 0) AS finished_reading_time
-					FROM
-						finished_reading_sessions frs
-						INNER JOIN media m ON frs.media_id = m.id
-						INNER JOIN series s ON m.series_id = s.id
-					WHERE
-						s.library_id = $1
+					FROM finished_reading_sessions frs
+					WHERE frs.media_id IN (SELECT id FROM library_media)
 						AND ($2 IS TRUE OR frs.user_id = $3)
 				),
-				in_progress_stats AS (
+				active_stats AS (
 					SELECT
 						COUNT(DISTINCT rs.media_id) AS in_progress_books,
-						IFNULL(SUM(rs.elapsed_seconds), 0) AS in_progress_reading_time
-					FROM
-						reading_sessions rs
-						INNER JOIN media m ON rs.media_id = m.id
-						INNER JOIN series s ON m.series_id = s.id
-					WHERE
-						s.library_id = $1
+						IFNULL(SUM(rs.elapsed_seconds), 0) AS active_reading_time
+					FROM reading_sessions rs
+					WHERE rs.media_id IN (SELECT id FROM library_media)
 						AND ($2 IS TRUE OR rs.user_id = $3)
 				)
 				SELECT
-					bc.book_count,
-					bc.total_bytes,
-					bc.series_count,
-					fs.completed_books,
-					ips.in_progress_books,
-					(fs.finished_reading_time + ips.in_progress_reading_time) AS total_reading_time_seconds
-				FROM
-					base_counts bc
-					CROSS JOIN finished_stats fs
-					CROSS JOIN in_progress_stats ips;
+					base_counts.book_count,
+					base_counts.total_bytes,
+					base_counts.series_count,
+					finished_stats.completed_books,
+					active_stats.in_progress_books,
+					(finished_stats.finished_reading_time + active_stats.active_reading_time) AS total_reading_time_seconds
+				FROM base_counts, finished_stats, active_stats;
 				",
 				[
 					self.model.id.clone().into(),

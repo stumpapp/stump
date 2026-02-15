@@ -13,6 +13,7 @@ const textVariants = cva('text-foreground', {
 		size: {
 			// TODO: These sizes need to be updated. I'm constantly battling them, I think I lean
 			// towards larger for mobile
+			xs: 'text-xs tablet:text-sm',
 			sm: 'text-sm tablet:text-base',
 			default: 'text-base tablet:text-lg',
 			lg: 'text-lg tablet:text-xl',

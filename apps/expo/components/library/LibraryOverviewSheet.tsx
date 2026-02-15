@@ -9,9 +9,8 @@ import { ScrollView } from 'react-native-gesture-handler'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { IS_IOS_24_PLUS, useColors } from '~/lib/constants'
-import { formatBytes } from '~/lib/format'
+import { formatBytesSeparate } from '~/lib/format'
 
-import { InfoStat } from '../stats'
 import { Card, Heading, Text } from '../ui'
 
 const query = graphql(`
@@ -95,7 +94,7 @@ type SheetContentProps = {
 function SheetContent({ library }: SheetContentProps) {
 	const { stats } = library
 
-	const formattedSize = formatBytes(stats.totalBytes)
+	const formattedSize = formatBytesSeparate(stats.totalBytes)
 	const formattedTime = useMemo(() => {
 		if (stats.totalReadingTimeSeconds >= 3600 && stats.totalReadingTimeSeconds < 3600 * 2) {
 			return dayjs.duration(stats.totalReadingTimeSeconds, 'seconds').format('H [hr] m [mins]')
@@ -129,19 +128,23 @@ function SheetContent({ library }: SheetContentProps) {
 					)}
 				</View>
 
-				<Card label="Stats" className="flex flex-row flex-wrap justify-around gap-x-6 gap-y-4">
-					<InfoStat size="md" label="Series" value={stats.seriesCount.toString()} />
-					<InfoStat size="md" label="Books" value={stats.bookCount.toString()} />
-					{formattedSize && <InfoStat size="md" label="Size" value={formattedSize} />}
-					<InfoStat size="md" label="In Progress" value={stats.inProgressBooks.toString()} />
-					<InfoStat
-						size="md"
-						label="Completed"
-						value={`${stats.completedBooks} / ${stats.bookCount}`}
-					/>
-					{stats.totalReadingTimeSeconds > 0 && (
-						<InfoStat size="md" label="Reading Time" value={formattedTime} />
-					)}
+				<Card label="Stats">
+					<Card.StatGroup>
+						<Card.Stat label="In Progress" value={stats.inProgressBooks} />
+						<Card.Stat
+							label="Completed"
+							value={stats.completedBooks}
+							suffix={` / ${stats.bookCount}`}
+						/>
+						<Card.Stat label="Books" value={stats.bookCount} />
+						<Card.Stat label="Series" value={stats.seriesCount} />
+						<Card.Stat label="Reading Time" value={formattedTime} />
+						<Card.Stat
+							label="Size"
+							value={formattedSize?.value || 'Unknown'}
+							suffix={formattedSize?.unit && ` ${formattedSize?.unit}`}
+						/>
+					</Card.StatGroup>
 				</Card>
 			</View>
 		</ScrollView>

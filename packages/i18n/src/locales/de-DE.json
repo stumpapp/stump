@@ -1406,18 +1406,18 @@
 				},
 				"showThumbnailsInHeader": {
 					"label": "Vorschaubilder in Kopfzeilen anzeigen",
-					"description": "If you prefer to see thumbnails more often, this setting will show them in more places",
+					"description": "Falls du die Vorschaubilder öfters sehen möchtest, wird diese Einstellung sie an mehr Stellen zeigen",
 					"tooltips": {
-						"enabled": "This setting will show thumbnails in more places",
-						"disabled": "This setting will not show thumbnails in more places"
+						"enabled": "Diese Einstellung wird Vorschaubilder an mehr Stellen zeigen",
+						"disabled": "Diese Einstellung wird nicht mehr Vorschaubilder an mehr Stelllen zeigen"
 					}
 				},
 				"hideScrollbarToggle": {
-					"label": "Hide scrollbar",
-					"description": "Some pages simply look better without a scrollbar, this setting will hide it when possible",
+					"label": "Scrollbar ausblenden",
+					"description": "Manche Seiten sehen einfach besser aus ohne Scrollbar. Diese Einstellung wird diese, wenn möglich, verstecken",
 					"tooltips": {
-						"enabled": "This setting will hide the scrollbar on some pages",
-						"disabled": "This setting will show the scrollbar on some pages"
+						"enabled": "Diese Einstellung versteckt die Scrollbar auf manchen Seiten",
+						"disabled": "Diese Einstellung zeigt die Scrollbar auf manchen Seiten"
 					}
 				},
 				"enableAlphabetFiltering": {

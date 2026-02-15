@@ -5,7 +5,7 @@ use sea_orm::{DeriveActiveEnum, EnumIter, FromJsonQueryResult};
 use serde::{Deserialize, Serialize};
 use strum::Display;
 
-/// The visibility of a shareable entity
+/// The role of a member within a book club
 #[derive(
 	Eq,
 	Copy,
@@ -95,4 +95,33 @@ pub struct BookClubExternalBook {
 #[graphql(input_name = "BookClubInternalBookInput")]
 pub struct BookClubInternalBook {
 	pub id: String,
+}
+
+/// The status of a book suggestion
+#[derive(
+	Eq,
+	Copy,
+	Hash,
+	Debug,
+	Clone,
+	Default,
+	EnumIter,
+	PartialEq,
+	Serialize,
+	Deserialize,
+	DeriveActiveEnum,
+	Enum,
+	Display,
+)]
+#[sea_orm(rs_type = "String", db_type = "Text")]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+#[strum(serialize_all = "SCREAMING_SNAKE_CASE")]
+pub enum BookClubSuggestionStatus {
+	#[default]
+	#[sea_orm(string_value = "PENDING")]
+	Pending,
+	#[sea_orm(string_value = "ACCEPTED")]
+	Accepted,
+	#[sea_orm(string_value = "REJECTED")]
+	Rejected,
 }

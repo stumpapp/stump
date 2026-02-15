@@ -16,10 +16,14 @@ pub struct Model {
 	pub id: String,
 	#[sea_orm(column_type = "Text", nullable)]
 	pub display_name: Option<String>,
+	#[sea_orm(column_type = "Text", nullable)]
+	pub bio: Option<String>,
 	pub is_creator: bool,
 	pub hide_progress: bool,
 	pub private_membership: bool,
 	pub role: BookClubMemberRole,
+	#[sea_orm(column_type = "custom(\"DATETIME\")")]
+	pub joined_at: DateTimeWithTimeZone,
 	#[sea_orm(column_type = "Text")]
 	pub user_id: String,
 	#[sea_orm(column_type = "Text")]

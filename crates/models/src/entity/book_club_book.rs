@@ -14,6 +14,8 @@ pub struct Model {
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
 	pub end_at: DateTimeWithTimeZone,
 	pub discussion_duration_days: Option<i32>,
+	#[sea_orm(column_type = "custom(\"DATETIME\")", nullable)]
+	pub completed_at: Option<DateTimeWithTimeZone>,
 	#[sea_orm(column_type = "Text", nullable)]
 	pub title: Option<String>,
 	#[sea_orm(column_type = "Text", nullable)]

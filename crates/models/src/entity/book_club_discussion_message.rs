@@ -1,6 +1,8 @@
+use async_graphql::SimpleObject;
 use sea_orm::entity::prelude::*;
 
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
+#[graphql(name = "BookClubDiscussionMessageModel")]
 #[sea_orm(table_name = "book_club_discussion_message")]
 pub struct Model {
 	#[sea_orm(primary_key, auto_increment = false, column_type = "Text")]
@@ -9,6 +11,8 @@ pub struct Model {
 	pub content: String,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
 	pub timestamp: DateTimeWithTimeZone,
+	#[sea_orm(column_type = "custom(\"DATETIME\")", nullable)]
+	pub edited_at: Option<DateTimeWithTimeZone>,
 	pub is_top_message: bool,
 	#[sea_orm(column_type = "custom(\"DATETIME\")", nullable)]
 	pub deleted_at: Option<String>,

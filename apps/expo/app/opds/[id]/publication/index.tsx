@@ -1,7 +1,6 @@
 import { useSDK } from '@stump/client'
 import { OPDSProgression, resolveUrl } from '@stump/sdk'
-import dayjs from 'dayjs'
-import relativeTime from 'dayjs/plugin/relativeTime'
+import { formatDistanceToNow, intlFormat } from 'date-fns'
 import { useRouter } from 'expo-router'
 import { BookCopy, Info, Loader2 } from 'lucide-react-native'
 import { useCallback, useEffect } from 'react'
@@ -39,8 +38,6 @@ import { cn } from '~/lib/utils'
 import { usePreferencesStore } from '~/stores'
 
 import { usePublicationContext } from './context'
-
-dayjs.extend(relativeTime)
 
 export default function Screen() {
 	const { sdk } = useSDK()
@@ -127,11 +124,16 @@ export default function Screen() {
 		const isCompleted = !!(percentageCompleted && percentageCompleted >= 1)
 
 		if (isCompleted) {
-			// TODO: I vaguely remember an alternative to dayjs someone showed me but for the life of me I can't remember what it was
-			// If I remember later I'll swap it out
-			return <Card.Stat label="Completed" value={dayjs(progression.modified).fromNow(true)} />
+			return (
+				<Card.Stat label="Completed" value={formatDistanceToNow(new Date(progression.modified))} />
+			)
 		} else {
-			return <Card.Stat label="Last read" value={dayjs(progression.modified).fromNow()} />
+			return (
+				<Card.Stat
+					label="Last read"
+					value={formatDistanceToNow(new Date(progression.modified), { addSuffix: true })}
+				/>
+			)
 		}
 	}
 
@@ -288,7 +290,11 @@ export default function Screen() {
 					<InfoRow label="Title" value={title} longValue />
 					{description && <LongValue label="Description" value={description} />}
 					{modified && (
-						<InfoRow label="Modified" value={modified.format('MMMM DD, YYYY')} longValue />
+						<InfoRow
+							label="Modified"
+							value={intlFormat(modified, { month: 'long', day: 'numeric', year: 'numeric' })}
+							longValue
+						/>
 					)}
 					{!!numberOfPages && (
 						<InfoRow label="Number of pages" value={numberOfPages.toString()} longValue />

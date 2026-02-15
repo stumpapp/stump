@@ -2,7 +2,6 @@ import { useGraphQLMutation, useSDK } from '@stump/client'
 import { Badge, Card, Text, ToolTip } from '@stump/components'
 import { FragmentType, graphql, useFragment } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
-import dayjs from 'dayjs'
 import { Sparkles } from 'lucide-react'
 import { Suspense, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router'
@@ -71,7 +70,7 @@ export default function EmailerListItem({ fragment }: Props) {
 				</Text>
 			)
 		} else {
-			return <EmailerSendHistory emailerId={emailer.id} lastUsedAt={dayjs(emailer.lastUsedAt)} />
+			return <EmailerSendHistory emailerId={emailer.id} lastUsedAt={new Date(emailer.lastUsedAt)} />
 		}
 	}
 

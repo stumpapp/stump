@@ -11,7 +11,7 @@ import {
 	TEXT_VARIANTS,
 } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import dayjs from 'dayjs'
+import { intlFormat } from 'date-fns'
 import toUpper from 'lodash/toUpper'
 import { Info } from 'lucide-react'
 import { useMemo } from 'react'
@@ -109,7 +109,13 @@ export default function ServerInfoSection() {
 					<div>
 						<Label>Build date</Label>
 						<Text size="sm" variant="muted">
-							{dayjs(version.compileTime).format('LLL')}
+							{intlFormat(new Date(version.compileTime), {
+								month: 'long',
+								day: 'numeric',
+								year: 'numeric',
+								hour: 'numeric',
+								minute: '2-digit',
+							})}
 						</Text>
 					</div>
 				</div>

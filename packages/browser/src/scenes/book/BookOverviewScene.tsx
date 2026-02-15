@@ -1,6 +1,6 @@
 import { ButtonOrLink, Heading, Spacer, Text } from '@stump/components'
 import { useFragment } from '@stump/graphql'
-import dayjs from 'dayjs'
+import { intlFormat } from 'date-fns'
 import sortBy from 'lodash/sortBy'
 import { Suspense, useEffect, useRef } from 'react'
 import { Helmet } from 'react-helmet'
@@ -44,7 +44,7 @@ export default function BookOverviewScene() {
 	const fragmentData = useFragment(BookCardFragment, media)
 
 	const completedAt = sortBy(media.readHistory, ({ completedAt }) =>
-		dayjs(completedAt).toDate(),
+		new Date(completedAt).getTime(),
 	).at(-1)?.completedAt
 	const links = media.metadata?.links.filter((l) => !!l) ?? []
 
@@ -73,7 +73,13 @@ export default function BookOverviewScene() {
 							{completedAt && (
 								<Text size="xs" variant="muted">
 									{media.readHistory.length > 1 ? 'Last completed' : 'Completed'} on{' '}
-									{dayjs(completedAt).format('LLL')}
+									{intlFormat(new Date(completedAt), {
+										month: 'long',
+										day: 'numeric',
+										year: 'numeric',
+										hour: 'numeric',
+										minute: '2-digit',
+									})}
 								</Text>
 							)}
 							{isAtLeastTablet && <ReadMore text={media.metadata?.summary} />}

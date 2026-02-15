@@ -3,9 +3,7 @@ import { Card, Heading, Text, ToolTip } from '@stump/components'
 import { graphql, LogModelOrdering, OrderDirection, PersistedLogsQuery } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { createColumnHelper, SortingState } from '@tanstack/react-table'
-import dayjs from 'dayjs'
-import duration from 'dayjs/plugin/duration'
-import relativeTime from 'dayjs/plugin/relativeTime'
+import { intlFormat, isBefore } from 'date-fns'
 import { CircleSlash2 } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
@@ -13,9 +11,6 @@ import { useSearchParams } from 'react-router-dom'
 import { Table } from '@/components/table'
 
 import LogLevelBadge from './LogLevelBadge'
-
-dayjs.extend(duration)
-dayjs.extend(relativeTime)
 
 const query = graphql(`
 	query PersistedLogs(
@@ -148,13 +143,20 @@ const baseColumns = [
 			},
 		}) => (
 			<Text size="sm" variant="muted">
-				{dayjs(timestamp).format('YYYY-MM-DD HH:mm:ss')}
+				{intlFormat(new Date(timestamp), {
+					year: 'numeric',
+					month: '2-digit',
+					day: '2-digit',
+					hour: '2-digit',
+					minute: '2-digit',
+					second: '2-digit',
+				})}
 			</Text>
 		),
 		enableSorting: true,
 		header: 'Time',
 		sortingFn: ({ original: a }, { original: b }) => {
-			return dayjs(a.timestamp).isBefore(b.timestamp) ? -1 : 1
+			return isBefore(new Date(a.timestamp), new Date(b.timestamp)) ? -1 : 1
 		},
 	}),
 	columnHelper.accessor('level', {

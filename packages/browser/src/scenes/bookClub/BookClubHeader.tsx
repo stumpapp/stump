@@ -1,5 +1,5 @@
 import { Avatar, Card, cn, Heading, Text } from '@stump/components'
-import dayjs from 'dayjs'
+import { intlFormat } from 'date-fns'
 import pluralize from 'pluralize'
 
 import { useBookClubContext } from '@/components/bookClub'
@@ -57,7 +57,7 @@ export default function BookClubHeader() {
 				<div className="mt-2">
 					<Text size="sm">
 						<b>{membersCount}</b> {pluralize(roleSpec['MEMBER'], membersCount)} • Created{' '}
-						<b>{dayjs(createdAt).format('MMMM YYYY')}</b>
+						<b>{intlFormat(new Date(createdAt), { month: 'long', year: 'numeric' })}</b>
 					</Text>
 				</div>
 			</div>

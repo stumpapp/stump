@@ -164,6 +164,12 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 							'org.gradle.jvmargs':
 								'-Xmx4096m -XX:MaxMetaspaceSize=1024m -XX:+HeapDumpOnOutOfMemoryError',
 						},
+						// Note: For i18next and date-fns intlFormat
+						hermesFlags: ['-fuseIntlPlurals', '-fuseIntlDateTimeFormat'],
+					},
+					ios: {
+						// Note: For i18next and date-fns intlFormat
+						hermesFlags: ['-fuseIntlPlurals', '-fuseIntlDateTimeFormat'],
 					},
 				},
 			],

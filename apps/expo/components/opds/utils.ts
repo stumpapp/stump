@@ -1,6 +1,6 @@
 import { useSDK } from '@stump/client'
 import { OPDSMetadata, OPDSPublication, resolveUrl } from '@stump/sdk'
-import dayjs from 'dayjs'
+import { isValid, parseISO } from 'date-fns'
 import get from 'lodash/get'
 import { useCallback } from 'react'
 import { stringMd5 } from 'react-native-quick-md5'
@@ -20,8 +20,9 @@ export const getStringField = (meta: OPDSMetadata, key: string) => {
 
 export const getDateField = (meta: OPDSMetadata, key: string) => {
 	const value = get(meta, key)
-	const _dayjs = dayjs(typeof value === 'string' ? value : null)
-	return _dayjs.isValid() ? _dayjs : null
+	if (typeof value !== 'string') return null
+	const date = parseISO(value)
+	return isValid(date) ? date : null
 }
 
 // An identifier that can be generated from a URL to uniquely identify a publication

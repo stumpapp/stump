@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 
 import { AllowedLocale, i18n } from './config'
 import { getDefaultLocale, LocaleContext } from './context'
+import { initDateFnsLocale } from './dateFnsLocale'
 
 type Props = {
 	children: React.ReactNode
@@ -14,6 +15,7 @@ export default function LocaleProvider({ locale = getDefaultLocale(), children }
 
 	useEffect(() => {
 		i18n.changeLanguage(locale)
+		initDateFnsLocale(locale)
 	}, [locale])
 
 	return (

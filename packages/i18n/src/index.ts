@@ -1,6 +1,7 @@
 import { AllowedLocale } from './config'
 
 export { LocaleContext, type LocaleContextProps, useLocaleContext } from './context'
+export { formatElapsedDuration, formatHumanDuration, initDateFnsLocale } from './dateFnsLocale'
 export { default as LocaleProvider } from './LocaleProvider'
 export type { AllowedLocale }
 

@@ -1,5 +1,5 @@
 import { MediaMetadata } from '@stump/graphql'
-import dayjs from 'dayjs'
+import { formatDistanceToNow } from 'date-fns'
 import { useRouter } from 'expo-router'
 import { useCallback, useMemo, useRef } from 'react'
 import { Easing, Pressable, View } from 'react-native'
@@ -304,7 +304,9 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 										opacity: 0.9,
 									}}
 								>
-									{dayjs(book.readProgress?.lastModified).fromNow()}
+									{formatDistanceToNow(new Date(book.readProgress?.lastModified), {
+										addSuffix: true,
+									})}
 								</Text>
 							)}
 						</View>

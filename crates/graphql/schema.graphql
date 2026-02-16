@@ -120,18 +120,93 @@ type BookClubBook {
 	startAt: DateTime!
 	endAt: DateTime!
 	discussionDurationDays: Int
+	completedAt: DateTime
 	title: String
 	author: String
 	url: String
 	imageUrl: String
 	bookEntityId: String
 	bookClubScheduleId: Int
+	bookClubId: String!
 	entity: Media
 }
 
 input BookClubBookInput @oneOf {
 	stored: BookClubInternalBookInput
 	external: BookClubExternalBookInput
+}
+
+type BookClubBookSuggestion {
+	id: String!
+	bookClubId: String!
+	title: String
+	author: String
+	url: String
+	notes: String
+	status: BookClubSuggestionStatus!
+	resolvedAt: DateTime
+	resolvedById: String
+	votingClosesAt: DateTime
+	createdAt: DateTime!
+	suggestedById: String!
+	bookId: String
+	"Get the member who suggested this book"
+	suggestedBy: BookClubMember!
+	"Get the member who resolved this suggestion"
+	resolvedBy: BookClubMember
+	"""
+	Get the count of likes (votes) on this suggestion
+	TODO(dataloader): Create dataloader
+	"""
+	likeCount: Int!
+	"Check if the current user has liked this suggestion"
+	isLikedByMe: Boolean!
+}
+
+type BookClubDiscussion {
+	id: String!
+	isLocked: Boolean!
+	bookClubBookId: String!
+	bookClubId: String!
+	"Get the book this discussion is for"
+	book: BookClubBook!
+	"""
+	Get the count of messages in this discussion (excluding deleted messages)
+	TODO(dataloader): Create dataloader
+	"""
+	messageCount: Int!
+}
+
+type BookClubDiscussionMessage {
+	id: String!
+	content: String!
+	timestamp: DateTime!
+	editedAt: DateTime
+	isPinnedMessage: Boolean!
+	deletedAt: String
+	parentMessageId: String
+	discussionId: String!
+	memberId: String
+	bookClubId: String!
+	"Get the member who posted this message"
+	member: BookClubMember
+	"""
+	Get the count of likes on this message
+	TODO(dataloader): Create dataloader
+	"""
+	likeCount: Int!
+	"Check if the current user has liked this message"
+	isLikedByMe: Boolean!
+	"""
+	Get replies to this message
+	TODO(dataloader): Create dataloader
+	"""
+	replies: [BookClubDiscussionMessage!]!
+	"""
+	Get the count of replies to this message
+	TODO(dataloader): Create dataloader
+	"""
+	replyCount: Int!
 }
 
 input BookClubExternalBookInput {
@@ -169,10 +244,12 @@ input BookClubInvitationResponseInput {
 type BookClubMember {
 	id: String!
 	displayName: String
+	bio: String
 	isCreator: Boolean!
 	hideProgress: Boolean!
 	privateMembership: Boolean!
 	role: BookClubMemberRole!
+	joinedAt: DateTime!
 	userId: String!
 	bookClubId: String!
 	avatarUrl: String
@@ -186,7 +263,7 @@ input BookClubMemberInput {
 	privateMembership: Boolean
 }
 
-"The visibility of a shareable entity"
+"The role of a member within a book club"
 enum BookClubMemberRole {
 	MEMBER
 	MODERATOR
@@ -200,6 +277,13 @@ type BookClubSchedule {
 	bookClubId: String!
 	activeBooks: [BookClubBook!]!
 	books: [BookClubBook!]!
+}
+
+"The status of a book suggestion"
+enum BookClubSuggestionStatus {
+	PENDING
+	ACCEPTED
+	REJECTED
 }
 
 type Bookmark {
@@ -342,6 +426,11 @@ type CreatedOrUpdatedManyMedia {
 	libraryId: String!
 }
 
+type CursorPaginatedBookClubDiscussionMessageResponse {
+	nodes: [BookClubDiscussionMessage!]!
+	cursorInfo: CursorPaginationInfo!
+}
+
 "A simple cursor-based pagination input object"
 input CursorPagination {
 	after: String
@@ -423,6 +512,10 @@ input DiscordConfigInput {
 
 type DiscoveredMissingLibrary {
 	id: String!
+}
+
+input EditMessageInput {
+	content: String!
 }
 
 "Input object for creating or updating an email device"
@@ -1349,6 +1442,20 @@ type Mutation {
 	createBookClub(input: CreateBookClubInput!): BookClub!
 	updateBookClub(id: ID!, input: UpdateBookClubInput!): BookClub!
 	deleteBookClub(id: ID!): BookClub!
+	"Send a message in a discussion"
+	sendMessage(discussionId: ID!, input: SendMessageInput!): BookClubDiscussionMessage!
+	"Edit your own message"
+	editMessage(messageId: ID!, input: EditMessageInput!): BookClubDiscussionMessage!
+	"Delete (soft delete) your own message"
+	deleteMessage(messageId: ID!): BookClubDiscussionMessage!
+	"Toggle like on a message"
+	toggleMessageLike(messageId: ID!): Boolean!
+	"Lock or unlock a discussion (Moderator+)"
+	lockDiscussion(discussionId: ID!, locked: Boolean!): Boolean!
+	"Pin or unpin a message (Moderator+)"
+	pinMessage(messageId: ID!, pinned: Boolean!): Boolean!
+	"Manually create a discussion for a book"
+	createDiscussion(bookClubBookId: ID!): BookClubDiscussion!
 	createBookClubInvitation(id: ID!, input: BookClubInvitationInput!): BookClubInvitation!
 	respondToBookClubInvitation(id: ID!, input: BookClubInvitationResponseInput!): BookClubInvitation!
 	"Creates a new member in the book club"
@@ -1359,6 +1466,14 @@ type Mutation {
 	leaveBookClub(bookClubId: ID!): BookClubMember!
 	createBookClubSchedule(id: ID!, input: CreateBookClubScheduleInput!): BookClub!
 	addBooksToBookClubSchedule(id: ID!, books: [CreateBookClubScheduleBook!]!): BookClub!
+	"Suggest a book for the book club"
+	suggestBook(bookClubId: ID!, input: SuggestBookInput!): BookClubBookSuggestion!
+	"Remove your own suggestion (only before it's resolved)"
+	removeSuggestion(suggestionId: ID!): BookClubBookSuggestion!
+	"Toggle like on a suggestion"
+	toggleSuggestionLike(suggestionId: ID!): Boolean!
+	"Update the status of a suggestion (Admin+)"
+	updateSuggestionStatus(suggestionId: ID!, status: BookClubSuggestionStatus!, notes: String): BookClubBookSuggestion!
 	cancelJob(id: ID!): Boolean!
 	deleteJob(id: ID!, force: Boolean! = false): Boolean!
 	deleteJobHistory: DeleteJobHistory!
@@ -1781,6 +1896,16 @@ type Query {
 	bookClubs(all: Boolean = null): [BookClub!]!
 	bookClubById(id: ID!): BookClub!
 	bookClubBySlug(slug: String!): BookClub
+	"Get a discussion by ID"
+	bookClubDiscussion(id: ID!): BookClubDiscussion!
+	"Get a discussion by the book it's associated with"
+	bookClubDiscussionByBook(bookClubBookId: ID!): BookClubDiscussion
+	"Get messages in a discussion"
+	bookClubDiscussionMessages(discussionId: ID!, parentId: ID, pagination: CursorPagination! = {after: null, limit: 20}): CursorPaginatedBookClubDiscussionMessageResponse!
+	"Get all suggestions for a book club"
+	bookClubSuggestions(bookClubId: ID!, status: BookClubSuggestionStatus): [BookClubBookSuggestion!]!
+	"Get a single suggestion by ID"
+	bookClubSuggestion(suggestionId: ID!): BookClubBookSuggestion!
 	emailers: [Emailer!]!
 	emailerById(id: Int!): Emailer
 	emailDevices: [RegisteredEmailDevice!]!
@@ -2054,6 +2179,11 @@ type SendAttachmentEmailOutput {
 input SendAttachmentEmailsInput {
 	mediaIds: [ID!]!
 	sendTo: [EmailerSendTo!]!
+}
+
+input SendMessageInput {
+	content: String!
+	parentMessageId: String
 }
 
 input SendToDevice {
@@ -2490,6 +2620,15 @@ type StumpConfig {
 type Subscription {
 	tailLogFile: String!
 	readEvents: CoreEvent!
+}
+
+input SuggestBookInput {
+	bookId: String
+	title: String
+	author: String
+	url: String
+	notes: String
+	votingClosesAt: DateTime
 }
 
 enum SupportedFont {

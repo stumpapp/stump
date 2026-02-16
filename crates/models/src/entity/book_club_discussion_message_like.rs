@@ -1,4 +1,4 @@
-use sea_orm::entity::prelude::*;
+use sea_orm::{entity::prelude::*, prelude::async_trait::async_trait, ActiveValue};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
 #[sea_orm(table_name = "book_club_discussion_message_likes")]
@@ -45,4 +45,15 @@ impl Related<super::book_club_member::Entity> for Entity {
 	}
 }
 
-impl ActiveModelBehavior for ActiveModel {}
+#[async_trait]
+impl ActiveModelBehavior for ActiveModel {
+	async fn before_save<C>(mut self, _db: &C, insert: bool) -> Result<Self, DbErr>
+	where
+		C: ConnectionTrait,
+	{
+		if insert {
+			self.timestamp = ActiveValue::Set(chrono::Utc::now().into());
+		}
+		Ok(self)
+	}
+}

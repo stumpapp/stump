@@ -18,9 +18,7 @@ pub struct Model {
 	pub display_name: Option<String>,
 	#[sea_orm(column_type = "Text", nullable)]
 	pub bio: Option<String>,
-	pub is_creator: bool,
 	pub hide_progress: bool,
-	pub private_membership: bool,
 	pub role: BookClubMemberRole,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
 	pub joined_at: DateTimeWithTimeZone,
@@ -116,17 +114,15 @@ impl Entity {
 	}
 
 	fn members_accessible_to_user_for_non_book_club_member() -> Condition {
-		Condition::all()
-			.add(Column::PrivateMembership.eq(false))
-			.add(
-				Column::BookClubId.in_subquery(
-					Query::select()
-						.column(book_club::Column::Id)
-						.from(Self)
-						.and_where(book_club::Column::IsPrivate.eq(false))
-						.to_owned(),
-				),
-			)
+		Condition::all().add(
+			Column::BookClubId.in_subquery(
+				Query::select()
+					.column(book_club::Column::Id)
+					.from(Self)
+					.and_where(book_club::Column::IsPrivate.eq(false))
+					.to_owned(),
+			),
+		)
 	}
 
 	pub fn find_members_accessible_to_user(user: &AuthUser) -> Select<Self> {
@@ -174,7 +170,7 @@ mod tests {
 			select_no_cols_to_string(select),
 			(r#"SELECT  FROM "book_club_members" WHERE "#.to_string()
 				+ r#""book_club_members"."book_club_id" IN (SELECT "book_club_id" FROM "book_club_members" WHERE "book_club_members"."user_id" = '42') "#
-				+ r#"OR ("book_club_members"."private_membership" = FALSE AND "book_club_members"."book_club_id" IN (SELECT "id" FROM "book_club_members" WHERE "book_clubs"."is_private" = FALSE))"#)
+				+ r#"OR "book_club_members"."book_club_id" IN (SELECT "id" FROM "book_club_members" WHERE "book_clubs"."is_private" = FALSE)"#)
 		);
 	}
 

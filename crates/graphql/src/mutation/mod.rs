@@ -1,8 +1,10 @@
 mod api_key;
 mod book_club;
+mod book_club_book;
+mod book_club_discussion;
 mod book_club_invitation;
 mod book_club_member;
-mod book_club_schedule;
+mod book_club_suggestion;
 mod email_device;
 mod emailer;
 mod epub;
@@ -22,9 +24,11 @@ mod user;
 
 use api_key::APIKeyMutation;
 use book_club::BookClubMutation;
+use book_club_book::BookClubBookMutation;
+use book_club_discussion::BookClubDiscussionMutation;
 use book_club_invitation::BookClubInvitationMutation;
 use book_club_member::BookClubMemberMutation;
-use book_club_schedule::BookClubScheduleMutation;
+use book_club_suggestion::BookClubSuggestionMutation;
 use email_device::EmailDeviceMutation;
 use emailer::EmailerMutation;
 use epub::EpubMutation;
@@ -47,9 +51,11 @@ pub struct Mutation(
 	APIKeyMutation,
 	SmartListMutation,
 	BookClubMutation,
+	BookClubDiscussionMutation,
 	BookClubInvitationMutation,
 	BookClubMemberMutation,
-	BookClubScheduleMutation,
+	BookClubBookMutation,
+	BookClubSuggestionMutation,
 	JobMutation,
 	NotifierMutation,
 	EpubMutation,

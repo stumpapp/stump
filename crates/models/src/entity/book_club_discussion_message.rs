@@ -1,5 +1,8 @@
 use async_graphql::SimpleObject;
-use sea_orm::entity::prelude::*;
+use sea_orm::{
+	entity::prelude::*, prelude::async_trait::async_trait, sqlx::types::chrono,
+	ActiveValue,
+};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
 #[graphql(name = "BookClubDiscussionMessageModel")]
@@ -13,7 +16,7 @@ pub struct Model {
 	pub timestamp: DateTimeWithTimeZone,
 	#[sea_orm(column_type = "custom(\"DATETIME\")", nullable)]
 	pub edited_at: Option<DateTimeWithTimeZone>,
-	pub is_top_message: bool,
+	pub is_pinned_message: bool,
 	#[sea_orm(column_type = "custom(\"DATETIME\")", nullable)]
 	pub deleted_at: Option<String>,
 	#[sea_orm(column_type = "Text", nullable)]
@@ -22,10 +25,20 @@ pub struct Model {
 	pub discussion_id: String,
 	#[sea_orm(column_type = "Text", nullable)]
 	pub member_id: Option<String>,
+	#[sea_orm(column_type = "Text")]
+	pub book_club_id: String,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
+	#[sea_orm(
+		belongs_to = "super::book_club::Entity",
+		from = "Column::BookClubId",
+		to = "super::book_club::Column::Id",
+		on_update = "Cascade",
+		on_delete = "Cascade"
+	)]
+	BookClub,
 	#[sea_orm(has_many = "super::book_club_discussion_message_like::Entity")]
 	BookClubDiscussionMessageLike,
 	#[sea_orm(
@@ -54,6 +67,12 @@ pub enum Relation {
 	BookClubMember,
 }
 
+impl Related<super::book_club::Entity> for Entity {
+	fn to() -> RelationDef {
+		Relation::BookClub.def()
+	}
+}
+
 impl Related<super::book_club_discussion_message_like::Entity> for Entity {
 	fn to() -> RelationDef {
 		Relation::BookClubDiscussionMessageLike.def()
@@ -72,4 +91,17 @@ impl Related<super::book_club_member::Entity> for Entity {
 	}
 }
 
-impl ActiveModelBehavior for ActiveModel {}
+#[async_trait]
+impl ActiveModelBehavior for ActiveModel {
+	async fn before_save<C>(mut self, _db: &C, insert: bool) -> Result<Self, DbErr>
+	where
+		C: ConnectionTrait,
+	{
+		if insert {
+			self.timestamp = ActiveValue::Set(chrono::Utc::now().into());
+		} else {
+			self.edited_at = ActiveValue::Set(Some(chrono::Utc::now().into()));
+		}
+		Ok(self)
+	}
+}

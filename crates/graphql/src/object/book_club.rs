@@ -1,13 +1,16 @@
-use super::{book_club_member::BookClubMember, book_club_schedule::BookClubSchedule};
+use super::book_club_member::BookClubMember;
 use crate::data::{AuthContext, CoreContext};
 use crate::object::book_club_book::BookClubBook;
+use crate::object::book_club_discussion::BookClubDiscussion;
 use crate::object::book_club_invitation::BookClubInvitation;
 use async_graphql::{ComplexObject, Context, Json, Result, SimpleObject};
 use models::entity::{
-	book_club, book_club_book, book_club_invitation, book_club_member, book_club_schedule,
+	book_club, book_club_book, book_club_discussion, book_club_invitation,
+	book_club_member,
 };
-use models::shared::book_club::BookClubMemberRoleSpec;
+use models::shared::book_club::{BookClubMemberRole, BookClubMemberRoleSpec};
 use sea_orm::prelude::*;
+use sea_orm::QueryOrder;
 
 #[derive(Debug, SimpleObject)]
 #[graphql(complex)]
@@ -24,6 +27,10 @@ impl From<book_club::Model> for BookClub {
 
 #[ComplexObject]
 impl BookClub {
+	async fn role_spec(&self) -> Option<Json<BookClubMemberRoleSpec>> {
+		self.model.member_role_spec.clone().map(Json)
+	}
+
 	async fn creator(&self, ctx: &Context<'_>) -> Result<BookClubMember> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
@@ -31,7 +38,7 @@ impl BookClub {
 			.filter(
 				book_club_member::Column::BookClubId
 					.eq(self.model.id.clone())
-					.and(book_club_member::Column::IsCreator.eq(true)),
+					.and(book_club_member::Column::Role.eq(BookClubMemberRole::Creator)),
 			)
 			.one(conn)
 			.await?
@@ -40,23 +47,27 @@ impl BookClub {
 		Ok(BookClubMember::from(creator))
 	}
 
-	// TODO(book-clubs): Support multiple books at once?
+	/// The current book being read
 	async fn current_book(&self, ctx: &Context<'_>) -> Result<Option<BookClubBook>> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let book_club_book = book_club_book::Entity::find_with_schedule_for_book_club_id(
-			&self.model.id,
-			chrono::Utc::now(),
-		)
-		.into_model::<book_club_book::Model>()
-		.one(conn)
-		.await?;
+		let book = book_club_book::Entity::find_current_for_book_club_id(&self.model.id)
+			.one(conn)
+			.await?;
 
-		if let Some(book_club_book) = book_club_book {
-			Ok(Some(book_club_book.into()))
-		} else {
-			Ok(None)
-		}
+		Ok(book.map(BookClubBook::from))
+	}
+
+	// TODO: Pagination
+	/// All books in the club's queue, ordered by position
+	async fn books(&self, ctx: &Context<'_>) -> Result<Vec<BookClubBook>> {
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let books = book_club_book::Entity::find_for_book_club_id(&self.model.id)
+			.all(conn)
+			.await?;
+
+		Ok(books.into_iter().map(BookClubBook::from).collect())
 	}
 
 	async fn invitations(&self, ctx: &Context<'_>) -> Result<Vec<BookClubInvitation>> {
@@ -122,24 +133,23 @@ impl BookClub {
 		Ok(membership.map(BookClubMember::from))
 	}
 
-	async fn role_spec(&self) -> Result<Json<BookClubMemberRoleSpec>> {
-		let spec = self.model.member_role_spec.clone().unwrap_or_default();
-		Ok(Json(spec))
-	}
-
-	async fn schedule(&self, ctx: &Context<'_>) -> Result<Option<BookClubSchedule>> {
+	/// Get discussions that are pinned for this book club
+	async fn pinned_discussions(
+		&self,
+		ctx: &Context<'_>,
+	) -> Result<Vec<BookClubDiscussion>> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let book_club_schedule =
-			book_club_schedule::Entity::find_for_book_club_id(&self.model.id.clone())
-				.into_model::<book_club_schedule::Model>()
-				.one(conn)
-				.await?;
+		let discussions = book_club_discussion::Entity::find()
+			.filter(book_club_discussion::Column::BookClubId.eq(&self.model.id))
+			.filter(book_club_discussion::Column::IsPinned.eq(true))
+			.order_by_asc(book_club_discussion::Column::CreatedAt)
+			.all(conn)
+			.await?;
 
-		if let Some(book_club_schedule) = book_club_schedule {
-			Ok(Some(book_club_schedule.into()))
-		} else {
-			Ok(None)
-		}
+		Ok(discussions
+			.into_iter()
+			.map(BookClubDiscussion::from)
+			.collect())
 	}
 }

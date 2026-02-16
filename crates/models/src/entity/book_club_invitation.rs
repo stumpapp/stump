@@ -67,6 +67,10 @@ impl Entity {
 		Self::find().filter(Column::BookClubId.eq(book_club_id))
 	}
 
+	pub fn find_for_user(user: &AuthUser) -> Select<Entity> {
+		Self::find().filter(Column::UserId.eq(&user.id))
+	}
+
 	pub fn find_for_user_and_id(user: &AuthUser, id: &str) -> Select<Entity> {
 		Self::find_by_id(id).filter(Column::UserId.eq(&user.id))
 	}
@@ -87,6 +91,16 @@ mod tests {
 		assert_eq!(
 			select_no_cols_to_string(select),
 			r#"SELECT  FROM "book_club_invitations" WHERE "book_club_invitations"."id" = '123' AND "book_club_invitations"."user_id" = '42'"#.to_string()
+		);
+	}
+
+	#[test]
+	fn test_find_for_user() {
+		let user = get_default_user();
+		let select = Entity::find_for_user(&user);
+		assert_eq!(
+			select_no_cols_to_string(select),
+			r#"SELECT  FROM "book_club_invitations" WHERE "book_club_invitations"."user_id" = '42'"#.to_string()
 		);
 	}
 

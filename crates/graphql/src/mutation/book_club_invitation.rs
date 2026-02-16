@@ -155,12 +155,12 @@ fn create_member_active_model(
 	book_club_member::ActiveModel {
 		id: Set(Uuid::new_v4().to_string()),
 		display_name: Set(input.display_name),
-		private_membership: Set(input.private_membership.unwrap_or(false)),
 		user_id: Set(user.id.clone()),
 		book_club_id: Set(invitation.book_club_id.clone()),
 		role: Set(invitation.role),
-		hide_progress: Set(input.private_membership.unwrap_or(false)),
-		is_creator: Set(false),
+		hide_progress: Set(false),
+		bio: Set(None),
+		joined_at: Set(chrono::Utc::now().into()),
 	}
 }
 
@@ -202,7 +202,6 @@ mod tests {
 		let member = BookClubMemberInput {
 			user_id: "42".to_string(),
 			display_name: None,
-			private_membership: None,
 		};
 		let input = BookClubInvitationResponseInput {
 			accept: false,
@@ -227,7 +226,6 @@ mod tests {
 		let member = BookClubMemberInput {
 			user_id: "42".to_string(),
 			display_name: None,
-			private_membership: None,
 		};
 
 		let input = BookClubInvitationResponseInput {

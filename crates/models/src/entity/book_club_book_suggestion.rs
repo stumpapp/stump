@@ -24,8 +24,6 @@ pub struct Model {
 	pub resolved_at: Option<DateTimeWithTimeZone>,
 	#[sea_orm(column_type = "Text", nullable)]
 	pub resolved_by_id: Option<String>,
-	#[sea_orm(column_type = "custom(\"DATETIME\")", nullable)]
-	pub voting_closes_at: Option<DateTimeWithTimeZone>,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
 	pub created_at: DateTimeWithTimeZone,
 	#[sea_orm(column_type = "Text")]

@@ -3,7 +3,9 @@ use models::entity::{
 	book_club, book_club_book, book_club_discussion, book_club_discussion_message,
 	book_club_member, user::AuthUser,
 };
-use sea_orm::{prelude::*, ColumnTrait, QueryFilter, QueryOrder, QuerySelect};
+use sea_orm::{
+	prelude::*, sea_query::Query, ColumnTrait, QueryFilter, QueryOrder, QuerySelect,
+};
 
 use crate::{
 	data::{AuthContext, CoreContext},
@@ -161,6 +163,59 @@ impl BookClubDiscussionQuery {
 				limit,
 			},
 		})
+	}
+
+	async fn previous_book_club_discussions(
+		&self,
+		ctx: &Context<'_>,
+		book_club_id: ID,
+	) -> Result<Vec<BookClubDiscussion>> {
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let current_book_position =
+			book_club_book::Entity::find_current_for_book_club_id(book_club_id.as_ref())
+				.one(conn)
+				.await?
+				.map(|book| book.position)
+				.unwrap_or(0);
+
+		let discussions = book_club_discussion::Entity::find()
+			.filter(book_club_discussion::Column::BookClubId.eq(book_club_id.as_ref()))
+			.filter(book_club_discussion::Column::IsPinned.eq(false))
+			// If the discussion is linked to a book, it should only be included if it is linked to a book BEFORE
+			// the current book.
+			.filter(
+				book_club_discussion::Column::BookClubBookId
+					.is_not_null()
+					.and(
+						book_club_discussion::Column::BookClubBookId.in_subquery(
+							Query::select()
+								.column(book_club_book::Column::Id)
+								.from(book_club_book::Entity)
+								.and_where(
+									sea_orm::sea_query::Expr::col(
+										book_club_book::Column::BookClubId,
+									)
+									.eq(book_club_id.as_ref()),
+								)
+								.and_where(
+									sea_orm::sea_query::Expr::col(
+										book_club_book::Column::Position,
+									)
+									.lt(current_book_position),
+								)
+								.take(),
+						),
+					),
+			)
+			.order_by_desc(book_club_discussion::Column::CreatedAt)
+			.all(conn)
+			.await?;
+
+		Ok(discussions
+			.into_iter()
+			.map(BookClubDiscussion::from)
+			.collect())
 	}
 }
 

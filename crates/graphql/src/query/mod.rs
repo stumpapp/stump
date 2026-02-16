@@ -1,5 +1,6 @@
 mod api_key;
 mod book_club;
+mod book_club_book;
 mod book_club_discussion;
 mod book_club_invitation;
 mod book_club_suggestion;
@@ -24,6 +25,7 @@ pub(crate) mod user;
 
 use api_key::APIKeyQuery;
 use book_club::BookClubQuery;
+use book_club_book::BookClubBookQuery;
 use book_club_discussion::BookClubDiscussionQuery;
 use book_club_invitation::BookClubInvitationQuery;
 use book_club_suggestion::BookClubSuggestionQuery;
@@ -50,6 +52,7 @@ use crate::query::job::JobQuery;
 pub struct Query(
 	APIKeyQuery,
 	BookClubQuery,
+	BookClubBookQuery,
 	BookClubDiscussionQuery,
 	BookClubInvitationQuery,
 	BookClubSuggestionQuery,

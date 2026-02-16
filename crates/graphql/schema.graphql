@@ -113,6 +113,8 @@ type BookClub {
 	creator: BookClubMember!
 	"The current book being read"
 	currentBook: BookClubBook
+	"The previous book that was read, if it exists"
+	previousBook: BookClubBook
 	"All books in the club's queue, ordered by position"
 	books: [BookClubBook!]!
 	invitations: [BookClubInvitation!]!
@@ -121,6 +123,7 @@ type BookClub {
 	membership: BookClubMember
 	"Get discussions that are pinned for this book club"
 	pinnedDiscussions: [BookClubDiscussion!]!
+	previousDiscussionsCount: Int!
 }
 
 type BookClubBook {

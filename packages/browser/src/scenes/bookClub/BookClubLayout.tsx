@@ -16,6 +16,7 @@ import BookClubNavigation from './BookClubNavigation'
 import { BookClubSettingsSideBar } from './tabs/settings'
 import { routeGroups } from './tabs/settings/routes'
 
+// TODO(book-clubs): This query needs a complete rewrite
 const query = graphql(`
 	query BookClubLayout($slug: String!) {
 		bookClubBySlug(slug: $slug) {
@@ -33,31 +34,17 @@ const query = graphql(`
 			membersCount
 			membership {
 				role
-				isCreator
 				avatarUrl
-				__typename
 			}
-			schedule {
+			currentBook {
 				id
-				defaultIntervalDays
-				books {
+				title
+				author
+				imageUrl
+				entity {
 					id
-					startAt
-					endAt
-					discussionDurationDays
-					imageUrl
-					title
-					author
-					url
-					entity {
-						id
-						resolvedName
-						thumbnail {
-							url
-						}
-						metadata {
-							writers
-						}
+					thumbnail {
+						url
 					}
 				}
 			}

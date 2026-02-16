@@ -9,8 +9,9 @@ use models::entity::{
 	book_club_member,
 };
 use models::shared::book_club::{BookClubMemberRole, BookClubMemberRoleSpec};
-use sea_orm::prelude::*;
+use sea_orm::sea_query::Query;
 use sea_orm::QueryOrder;
+use sea_orm::{prelude::*, QuerySelect};
 
 #[derive(Debug, SimpleObject)]
 #[graphql(complex)]
@@ -52,6 +53,18 @@ impl BookClub {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let book = book_club_book::Entity::find_current_for_book_club_id(&self.model.id)
+			.one(conn)
+			.await?;
+
+		Ok(book.map(BookClubBook::from))
+	}
+
+	/// The previous book that was read, if it exists
+	async fn previous_book(&self, ctx: &Context<'_>) -> Result<Option<BookClubBook>> {
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let book = book_club_book::Entity::find_current_for_book_club_id(&self.model.id)
+			.offset(1)
 			.one(conn)
 			.await?;
 
@@ -151,5 +164,50 @@ impl BookClub {
 			.into_iter()
 			.map(BookClubDiscussion::from)
 			.collect())
+	}
+
+	async fn previous_discussions_count(&self, ctx: &Context<'_>) -> Result<u64> {
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let current_book_position =
+			book_club_book::Entity::find_current_for_book_club_id(&self.model.id)
+				.one(conn)
+				.await?
+				.map(|book| book.position)
+				.unwrap_or(0);
+
+		let count = book_club_discussion::Entity::find()
+			.filter(book_club_discussion::Column::BookClubId.eq(&self.model.id))
+			.filter(book_club_discussion::Column::IsPinned.eq(false))
+			// If the discussion is linked to a book, it should only count if it is linked to a book BEFORE
+			// the current book.
+			.filter(
+				book_club_discussion::Column::BookClubBookId
+					.is_not_null()
+					.and(
+						book_club_discussion::Column::BookClubBookId.in_subquery(
+							Query::select()
+								.column(book_club_book::Column::Id)
+								.from(book_club_book::Entity)
+								.and_where(
+									sea_orm::sea_query::Expr::col(
+										book_club_book::Column::BookClubId,
+									)
+									.eq(self.model.id.clone()),
+								)
+								.and_where(
+									sea_orm::sea_query::Expr::col(
+										book_club_book::Column::Position,
+									)
+									.lt(current_book_position),
+								)
+								.take(),
+						),
+					),
+			)
+			.count(conn)
+			.await?;
+
+		Ok(count)
 	}
 }

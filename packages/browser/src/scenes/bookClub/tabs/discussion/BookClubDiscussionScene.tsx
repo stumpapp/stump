@@ -53,7 +53,7 @@ export default function BookClubDiscussionScene() {
 // 			{
 // 				content: 'I know right?!?!',
 // 				id: '2',
-// 				is_top_message: false,
+// 				is_pinned_message: false,
 // 				member: {
 // 					hide_progress: false,
 // 					id: '1',
@@ -70,7 +70,7 @@ export default function BookClubDiscussionScene() {
 // 		],
 // 		content: 'WOW! Did you see that coming?? I cannot believe that happened!!!!',
 // 		id: '1',
-// 		is_top_message: true,
+// 		is_pinned_message: true,
 // 		member: {
 // 			hide_progress: false,
 // 			id: '2',

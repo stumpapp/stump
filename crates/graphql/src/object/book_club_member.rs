@@ -1,5 +1,8 @@
 use async_graphql::{ComplexObject, Context, Result, SimpleObject};
-use models::entity::{book_club_member, user};
+use models::{
+	entity::{book_club_member, user},
+	shared::book_club::BookClubMemberRole,
+};
 use sea_orm::{prelude::*, QuerySelect};
 
 use crate::{data::CoreContext, object::user::User};
@@ -59,5 +62,9 @@ impl BookClubMember {
 			.ok_or_else(|| async_graphql::Error::new("User not found"))?;
 
 		Ok(User::from(model))
+	}
+
+	async fn is_creator(&self) -> bool {
+		self.model.role == BookClubMemberRole::Creator
 	}
 }

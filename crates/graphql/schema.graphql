@@ -23,6 +23,10 @@ type ActiveReadingSession {
 	elapsedSeconds: Int
 }
 
+input AddBookToClubInput {
+	book: BookClubBookInput!
+}
+
 type AgeRestriction {
 	id: Int!
 	age: Int!
@@ -105,30 +109,33 @@ type BookClub {
 	isPrivate: Boolean!
 	createdAt: DateTime!
 	emoji: String
+	roleSpec: JSON
 	creator: BookClubMember!
+	"The current book being read"
 	currentBook: BookClubBook
+	"All books in the club's queue, ordered by position"
+	books: [BookClubBook!]!
 	invitations: [BookClubInvitation!]!
 	members: [BookClubMember!]!
 	membersCount: Int!
 	membership: BookClubMember
-	roleSpec: JSON!
-	schedule: BookClubSchedule
+	"Get discussions that are pinned for this book club"
+	pinnedDiscussions: [BookClubDiscussion!]!
 }
 
 type BookClubBook {
 	id: String!
-	startAt: DateTime!
-	endAt: DateTime!
-	discussionDurationDays: Int
+	position: Int!
 	completedAt: DateTime
 	title: String
 	author: String
 	url: String
 	imageUrl: String
 	bookEntityId: String
-	bookClubScheduleId: Int
 	bookClubId: String!
+	addedAt: DateTime!
 	entity: Media
+	discussions: [BookClubDiscussion!]!
 }
 
 input BookClubBookInput @oneOf {
@@ -146,7 +153,6 @@ type BookClubBookSuggestion {
 	status: BookClubSuggestionStatus!
 	resolvedAt: DateTime
 	resolvedById: String
-	votingClosesAt: DateTime
 	createdAt: DateTime!
 	suggestedById: String!
 	bookId: String
@@ -166,15 +172,27 @@ type BookClubBookSuggestion {
 type BookClubDiscussion {
 	id: String!
 	isLocked: Boolean!
-	bookClubBookId: String!
+	isArchived: Boolean!
+	bookClubBookId: String
+	title: String
+	isPinned: Boolean!
+	createdAt: DateTime!
 	bookClubId: String!
 	"Get the book this discussion is for"
-	book: BookClubBook!
+	book: BookClubBook
+	"A display name for the discussion"
+	displayName: String!
 	"""
 	Get the count of messages in this discussion (excluding deleted messages)
 	TODO(dataloader): Create dataloader
 	"""
 	messageCount: Int!
+}
+
+input BookClubDiscussionInput {
+	bookClubBookId: ID
+	title: String
+	isPinned: Boolean!
 }
 
 type BookClubDiscussionMessage {
@@ -245,9 +263,7 @@ type BookClubMember {
 	id: String!
 	displayName: String
 	bio: String
-	isCreator: Boolean!
 	hideProgress: Boolean!
-	privateMembership: Boolean!
 	role: BookClubMemberRole!
 	joinedAt: DateTime!
 	userId: String!
@@ -255,12 +271,12 @@ type BookClubMember {
 	avatarUrl: String
 	username: String!
 	user: User!
+	isCreator: Boolean!
 }
 
 input BookClubMemberInput {
 	userId: String!
 	displayName: String
-	privateMembership: Boolean
 }
 
 "The role of a member within a book club"
@@ -269,14 +285,6 @@ enum BookClubMemberRole {
 	MODERATOR
 	ADMIN
 	CREATOR
-}
-
-type BookClubSchedule {
-	id: Int!
-	defaultIntervalDays: Int
-	bookClubId: String!
-	activeBooks: [BookClubBook!]!
-	books: [BookClubBook!]!
 }
 
 "The status of a book suggestion"
@@ -370,20 +378,7 @@ input CreateBookClubInput {
 input CreateBookClubMemberInput {
 	userId: String!
 	displayName: String
-	privateMembership: Boolean
 	role: BookClubMemberRole!
-}
-
-input CreateBookClubScheduleBook {
-	book: BookClubBookInput!
-	startAt: DateTime
-	endAt: DateTime
-	discussionDurationDays: Int
-}
-
-input CreateBookClubScheduleInput {
-	defaultIntervalDays: Int
-	books: [CreateBookClubScheduleBook!]!
 }
 
 input CreateOrUpdateLibraryInput {
@@ -1455,7 +1450,9 @@ type Mutation {
 	"Pin or unpin a message (Moderator+)"
 	pinMessage(messageId: ID!, pinned: Boolean!): Boolean!
 	"Manually create a discussion for a book"
-	createDiscussion(bookClubBookId: ID!): BookClubDiscussion!
+	createDiscussion(bookClubId: ID!, input: BookClubDiscussionInput!): BookClubDiscussion!
+	"Archive or unarchive a discussion (Moderator+)"
+	archiveDiscussion(discussionId: ID!, archived: Boolean!): Boolean!
 	createBookClubInvitation(id: ID!, input: BookClubInvitationInput!): BookClubInvitation!
 	respondToBookClubInvitation(id: ID!, input: BookClubInvitationResponseInput!): BookClubInvitation!
 	"Creates a new member in the book club"
@@ -1464,8 +1461,12 @@ type Mutation {
 	removeBookClubMember(bookClubId: ID!, memberId: ID!): BookClubMember!
 	"Deletes the membership of the caller to the target book club"
 	leaveBookClub(bookClubId: ID!): BookClubMember!
-	createBookClubSchedule(id: ID!, input: CreateBookClubScheduleInput!): BookClub!
-	addBooksToBookClubSchedule(id: ID!, books: [CreateBookClubScheduleBook!]!): BookClub!
+	"Add a book to the club's queue"
+	addBookToClub(bookClubId: ID!, input: AddBookToClubInput!): BookClub!
+	"Mark the current book as completed"
+	completeBook(bookClubBookId: ID!): BookClub!
+	"Reorder uncompleted books in the club's queue. Completed books cannot be reordered since they are effectively archived"
+	reorderBooks(bookClubId: ID!, bookIds: [String!]!): BookClub!
 	"Suggest a book for the book club"
 	suggestBook(bookClubId: ID!, input: SuggestBookInput!): BookClubBookSuggestion!
 	"Remove your own suggestion (only before it's resolved)"
@@ -1900,8 +1901,12 @@ type Query {
 	bookClubDiscussion(id: ID!): BookClubDiscussion!
 	"Get a discussion by the book it's associated with"
 	bookClubDiscussionByBook(bookClubBookId: ID!): BookClubDiscussion
+	"Get all discussions for a book club, ordered by pinned first, then by date created"
+	bookClubDiscussions(bookClubId: ID!): [BookClubDiscussion!]!
 	"Get messages in a discussion"
 	bookClubDiscussionMessages(discussionId: ID!, parentId: ID, pagination: CursorPagination! = {after: null, limit: 20}): CursorPaginatedBookClubDiscussionMessageResponse!
+	"Get all pending invitations for the current user"
+	myBookClubInvitations: [BookClubInvitation!]!
 	"Get all suggestions for a book club"
 	bookClubSuggestions(bookClubId: ID!, status: BookClubSuggestionStatus): [BookClubBookSuggestion!]!
 	"Get a single suggestion by ID"
@@ -2628,7 +2633,6 @@ input SuggestBookInput {
 	author: String
 	url: String
 	notes: String
-	votingClosesAt: DateTime
 }
 
 enum SupportedFont {

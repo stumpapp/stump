@@ -29,6 +29,7 @@ type MobilePreferencesStore = {
 	autoSyncLocalData: boolean
 	opdsLayout: ListLayout
 	smartListLayout: ListLayout
+	bookClubsEnabled: boolean
 	/**
 	 * Patch the store with new values.
 	 */
@@ -59,6 +60,7 @@ export const usePreferencesStore = create<MobilePreferencesStore>()(
 			autoSyncLocalData: true,
 			opdsLayout: 'grid',
 			smartListLayout: 'grid',
+			bookClubsEnabled: false,
 			patch: (data) => set(data),
 		}),
 		{

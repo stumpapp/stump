@@ -1,3 +1,5 @@
+export { AddBookSheet, type AddBookSheetRef } from './AddBookSheet'
 export { BookClubCard } from './BookClubCard'
 export { CurrentBookCard } from './CurrentBookCard'
+export { PastBookGridItem } from './PastBookGridItem'
 export { PastDiscussionsLink } from './PastDiscussionsLink'

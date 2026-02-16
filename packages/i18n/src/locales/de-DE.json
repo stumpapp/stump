@@ -1421,24 +1421,24 @@
 					}
 				},
 				"enableAlphabetFiltering": {
-					"label": "Alphabet filtering",
-					"description": "Show an alphabet filter when applicable"
+					"label": "Alphabetisches Filtern",
+					"description": "Zeige einen Alphabetfilter, wenn zutreffend"
 				},
 				"enableFancyAnimations": {
-					"label": "Fancy animations",
-					"description": "A broad opt-in for fancier animations throughout the app"
+					"label": "Schicke Animationen",
+					"description": "Ein generelles Opt-In für schickere Animationen in der gesamten App"
 				},
 				"queryIndicatorToggle": {
-					"label": "Background fetch indicator",
-					"description": "Show a loading indicator whenever a query is running in the background"
+					"label": "Hintergrundabrufindikator",
+					"description": "Zeige einen Ladeindikator, wenn eine Abfrage im Hintergrund ausgeführt wird"
 				},
 				"liveRefetchToggle": {
-					"label": "Live refetch",
-					"description": "Refetch queries on the fly to hydrate the UI with new data as it comes in. This can be resource intensive"
+					"label": "Live Neuaufruf",
+					"description": "Rufe Abfragen sofort neu auf, um die Benutzeroberfläche mit neuen Daten zu befüllen, sobald diese eintreffen. Dies kann sehr ressourcenintensiv sein"
 				},
 				"enableJobOverlayToggle": {
-					"label": "Job overlay",
-					"description": "Show a floating overlay while a job is running"
+					"label": "Job Overlay",
+					"description": "Zeige ein schwebendes Overlay, während ein Job läuft"
 				}
 			}
 		},
@@ -1656,7 +1656,7 @@
 						"description": "Führe den gebündelten Server im Hintergrund aus, während die Desktopanwendung läuft (Neustart erforderlich)"
 					},
 					"discordPresence": {
-						"label": "Discord Presence",
+						"label": "Discord Rich-Präsenz",
 						"description": "Zeige deine Stump Aktivität in Discord mit Discord Rich Presence",
 						"reconnect": "Wieder mit Discord verbinden"
 					}
@@ -1841,7 +1841,7 @@
 						}
 					},
 					"feature": {
-						"label": "Feature Opt-In",
+						"label": "Funktionen Opt-In",
 						"api_keys": {
 							"label": "API Schlüssel",
 							"description": "Erlaube dem Benutzer seine eigenen API Schlüssel zu verwalten"
@@ -1961,7 +1961,7 @@
 		"server/email": {
 			"helmet": "E-Maileinstellungen",
 			"title": "E-Mail",
-			"description": "Settings related to configuring an SMTP emailer for your Stump server instance",
+			"description": "Einstellungen für die Konfiguration eines SMTP Mailserver für deine Stump Serverinstanz",
 			"sections": {
 				"emailers": {
 					"title": "SMTP Mailserver",

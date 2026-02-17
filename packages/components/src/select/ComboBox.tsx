@@ -282,6 +282,7 @@ export function ComboBox({
 											option.fontClassName,
 										)}
 										value={option.value}
+										keywords={[option.label]}
 									>
 										<Check
 											className={cn(

@@ -1,5 +1,4 @@
 import { useSDK } from '@stump/client'
-import { Href, useRouter } from 'expo-router'
 import { Easing, Pressable, View } from 'react-native'
 import { easeGradient } from 'react-native-easing-gradient'
 
@@ -14,7 +13,7 @@ import { useGridItemSize } from './useGridItemSize'
 type Props = {
 	uri: string
 	title: string
-	href: Href
+	onPress: () => void
 	placeholderData?: ThumbnailPlaceholderData | null
 	percentageCompleted?: number | null
 }
@@ -22,14 +21,13 @@ type Props = {
 export default function GridImageItem({
 	uri,
 	title,
-	href,
+	onPress,
 	percentageCompleted,
 	...thumbnailProps
 }: Props) {
 	const { sdk } = useSDK()
 	const { itemWidth } = useGridItemSize()
 
-	const router = useRouter()
 	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
 
 	const { colors: gradientColors, locations: gradientLocations } = easeGradient({
@@ -47,7 +45,7 @@ export default function GridImageItem({
 			: undefined
 
 	return (
-		<Pressable onPress={() => router.navigate(href)}>
+		<Pressable onPress={onPress}>
 			{({ pressed }) => (
 				<View className={cn('flex-1 gap-2 pb-4', { 'opacity-80': pressed })}>
 					<ThumbnailImage

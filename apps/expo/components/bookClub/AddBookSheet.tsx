@@ -12,6 +12,7 @@ import BookGridItem from '../book/BookGridItem'
 import { useGridItemSize } from '../grid/useGridItemSize'
 import ListEmpty from '../ListEmpty'
 import { Button, Input, Text } from '../ui'
+import { PreviewBookSheet, PreviewBookSheetRef } from './PreviewBookSheet'
 
 const query = graphql(`
 	query AddBookSheet($pagination: Pagination, $filters: MediaFilterInput) {
@@ -39,14 +40,28 @@ export type AddBookSheetRef = {
 	close: () => void
 }
 
-export const AddBookSheet = forwardRef<AddBookSheetRef>((props, ref) => {
+// TODO(book-club): Support non-server books
+
+type Props = {
+	onAddBook: (bookId: string) => void
+}
+
+export const AddBookSheet = forwardRef<AddBookSheetRef, Props>(({ onAddBook }, ref) => {
 	const sheetRef = useRef<TrueSheet>(null)
+	const previewSheetRef = useRef<PreviewBookSheetRef>(null)
 
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
 
 	const [search, setSearch] = useState('')
+
+	const [previewBookId, setPreviewBookId] = useState<string | null>(null)
+
+	const onSelectBook = (bookId: string) => {
+		setPreviewBookId(bookId)
+		previewSheetRef.current?.open()
+	}
 
 	const filters = useMemo(
 		() =>
@@ -117,8 +132,9 @@ export const AddBookSheet = forwardRef<AddBookSheetRef>((props, ref) => {
 		>
 			<FlashList
 				data={data?.pages.flatMap((page) => page.media.nodes) || []}
-				// TODO: This will link out, either create a special separate grid item or add an override for onPress
-				renderItem={({ item }) => <BookGridItem book={item} />}
+				renderItem={({ item }) => (
+					<BookGridItem book={item} onPress={() => onSelectBook(item.id)} />
+				)}
 				contentContainerStyle={{
 					paddingVertical: 16,
 					paddingHorizontal: paddingHorizontal,
@@ -148,6 +164,12 @@ export const AddBookSheet = forwardRef<AddBookSheetRef>((props, ref) => {
 						}
 					/>
 				}
+			/>
+
+			<PreviewBookSheet
+				ref={previewSheetRef}
+				bookId={previewBookId}
+				onConfirmAddBook={() => (previewBookId ? onAddBook(previewBookId) : null)}
 			/>
 		</TrueSheet>
 	)

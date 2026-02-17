@@ -1900,6 +1900,8 @@ type Query {
 	bookClubs(all: Boolean = null): [BookClub!]!
 	bookClubById(id: ID!): BookClub!
 	bookClubBySlug(slug: String!): BookClub
+	"Get a club book by ID"
+	bookClubBook(id: ID!): BookClubBook!
 	"Get a discussion by ID"
 	bookClubDiscussion(id: ID!): BookClubDiscussion!
 	"Get a discussion by the book it's associated with"
@@ -1908,6 +1910,7 @@ type Query {
 	bookClubDiscussions(bookClubId: ID!): [BookClubDiscussion!]!
 	"Get messages in a discussion"
 	bookClubDiscussionMessages(discussionId: ID!, parentId: ID, pagination: CursorPagination! = {after: null, limit: 20}): CursorPaginatedBookClubDiscussionMessageResponse!
+	previousBookClubDiscussions(bookClubId: ID!): [BookClubDiscussion!]!
 	"Get all pending invitations for the current user"
 	myBookClubInvitations: [BookClubInvitation!]!
 	"Get all suggestions for a book club"

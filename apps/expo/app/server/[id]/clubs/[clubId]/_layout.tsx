@@ -29,6 +29,17 @@ export default function Screen() {
 				name="settings"
 				options={{ presentation: 'modal', headerShown: true, title: 'Club Settings' }}
 			/>
+
+			<Stack.Screen
+				name="discussion/[roomId]"
+				options={{
+					headerShown: false,
+					title: '',
+					headerTransparent: Platform.OS === 'ios',
+					headerBlurEffect: IS_IOS_24_PLUS ? undefined : 'regular',
+					headerLeft: Platform.OS === 'android' ? undefined : () => <ChevronBackLink />,
+				}}
+			/>
 		</Stack>
 	)
 }

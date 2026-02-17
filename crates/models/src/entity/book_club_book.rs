@@ -103,7 +103,7 @@ impl Entity {
 		book_club_id: &str,
 		conn: &C,
 	) -> Result<i32, DbErr> {
-		let max: Option<i32> = Entity::find()
+		let result: Option<(Option<i32>,)> = Entity::find()
 			.filter(Column::BookClubId.eq(book_club_id))
 			.select_only()
 			.column_as(Column::Position.max(), "max_pos")
@@ -111,7 +111,7 @@ impl Entity {
 			.one(conn)
 			.await?;
 
-		Ok(max.map_or(0, |p| p + 1))
+		Ok(result.and_then(|(max,)| max).map_or(0, |p| p + 1))
 	}
 
 	/// Get the next position after all completed books in a club
@@ -119,7 +119,7 @@ impl Entity {
 		book_club_id: &str,
 		conn: &C,
 	) -> Result<i32, DbErr> {
-		let max: Option<i32> = Entity::find()
+		let result: Option<(Option<i32>,)> = Entity::find()
 			.filter(Column::BookClubId.eq(book_club_id))
 			.filter(Column::CompletedAt.is_not_null())
 			.select_only()
@@ -128,7 +128,7 @@ impl Entity {
 			.one(conn)
 			.await?;
 
-		Ok(max.map_or(0, |p| p + 1))
+		Ok(result.and_then(|(max,)| max).map_or(0, |p| p + 1))
 	}
 }
 

@@ -183,6 +183,7 @@ where
 	let discussion_models: Vec<_> = book_ids
 		.iter()
 		.map(|book_id| book_club_discussion::ActiveModel {
+			id: Set(Uuid::new_v4().to_string()),
 			is_locked: Set(false),
 			is_archived: Set(false),
 			book_club_book_id: Set(Some(book_id.clone())),
@@ -190,7 +191,6 @@ where
 			is_pinned: Set(false),
 			created_at: Set(DateTimeWithTimeZone::from(Utc::now())),
 			book_club_id: Set(book_club_id.to_string()),
-			..Default::default()
 		})
 		.collect();
 

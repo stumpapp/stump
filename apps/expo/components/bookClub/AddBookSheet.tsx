@@ -1,7 +1,7 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { FlashList } from '@shopify/flash-list'
-import { useInfiniteSuspenseGraphQL } from '@stump/client'
-import { graphql, MediaFilterInput } from '@stump/graphql'
+import { useInfiniteGraphQL, usePrefetchGraphQL } from '@stump/client'
+import { BookClubBookInput, graphql, MediaFilterInput } from '@stump/graphql'
 import { forwardRef, useCallback, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
@@ -35,15 +35,33 @@ const query = graphql(`
 	}
 `)
 
+export const usePrefetchAddBookSheet = () => {
+	const {
+		activeServer: { id: serverID },
+	} = useActiveServer()
+	const { client, execute, onError } = usePrefetchGraphQL()
+	return useCallback(() => {
+		client
+			.prefetchInfiniteQuery({
+				queryKey: ['books', serverID, {}],
+				initialPageParam: { offset: { page: 1 } },
+				queryFn: () =>
+					execute(query, {
+						filters: {},
+						pagination: { offset: { page: 1 } },
+					}),
+			})
+			.catch(onError)
+	}, [client, onError, serverID, execute])
+}
+
 export type AddBookSheetRef = {
 	open: () => void
 	close: () => void
 }
 
-// TODO(book-club): Support non-server books
-
 type Props = {
-	onAddBook: (bookId: string) => void
+	onAddBook: (input: BookClubBookInput) => void
 }
 
 export const AddBookSheet = forwardRef<AddBookSheetRef, Props>(({ onAddBook }, ref) => {
@@ -86,11 +104,11 @@ export const AddBookSheet = forwardRef<AddBookSheetRef, Props>(({ onAddBook }, r
 		[search],
 	)
 
-	const { data, hasNextPage, fetchNextPage, refetch } = useInfiniteSuspenseGraphQL(
-		query,
-		['books', serverID, filters],
-		{ filters, pagination: { offset: { page: 1 } } },
-	)
+	const { data, hasNextPage, fetchNextPage, isFetchingNextPage, isLoading, refetch } =
+		useInfiniteGraphQL(query, ['books', serverID, filters], {
+			filters,
+			pagination: { offset: { page: 1 } },
+		})
 	const { numColumns, paddingHorizontal } = useGridItemSize()
 
 	const colors = useColors()
@@ -106,10 +124,10 @@ export const AddBookSheet = forwardRef<AddBookSheetRef, Props>(({ onAddBook }, r
 	}))
 
 	const onEndReached = useCallback(() => {
-		if (hasNextPage) {
+		if (hasNextPage && !isFetchingNextPage && !isLoading) {
 			fetchNextPage()
 		}
-	}, [hasNextPage, fetchNextPage])
+	}, [hasNextPage, isFetchingNextPage, isLoading, fetchNextPage])
 
 	const isFiltered = Object.keys(filters ?? {}).length > 0
 
@@ -171,7 +189,7 @@ export const AddBookSheet = forwardRef<AddBookSheetRef, Props>(({ onAddBook }, r
 				bookId={previewBookId}
 				onConfirmAddBook={() => {
 					if (previewBookId) {
-						onAddBook(previewBookId)
+						onAddBook({ stored: { id: previewBookId } })
 						previewSheetRef.current?.close()
 					}
 				}}

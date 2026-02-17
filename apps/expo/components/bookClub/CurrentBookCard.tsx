@@ -1,17 +1,32 @@
 import { Host, Image } from '@expo/ui/swift-ui'
 import { useGraphQLMutation, useSDK } from '@stump/client'
-import { BookClubMemberRole, FragmentType, graphql, useFragment } from '@stump/graphql'
+import {
+	BookClubBookInput,
+	BookClubMemberRole,
+	FragmentType,
+	graphql,
+	useFragment,
+} from '@stump/graphql'
+import { ColorSpace, getColor, OKLCH, serialize, set, sRGB } from 'colorjs.io/fn'
 import { Archive, Edit, Plus } from 'lucide-react-native'
-import { useRef, useState } from 'react'
-import { Platform, Pressable, View } from 'react-native'
+import { useCallback, useMemo, useRef, useState } from 'react'
+import { Easing, Platform, Pressable, View } from 'react-native'
 import Dialog from 'react-native-dialog'
+import { easeGradient } from 'react-native-easing-gradient'
+import LinearGradient from 'react-native-linear-gradient'
 import { toast } from 'sonner-native'
+
+import { useColorScheme } from '~/lib/useColorScheme'
+import { usePreferencesStore } from '~/stores'
 
 import { ThumbnailImage } from '../image'
 import { Icon, Text } from '../ui'
-import { AddBookSheet, AddBookSheetRef } from './AddBookSheet'
+import { AddBookOptionsSheet, type AddBookOptionsSheetRef } from './AddBookOptionsSheet'
 import { useBookClubContext } from './context'
 import { getClubBookThumbnailData } from './utils'
+
+ColorSpace.register(sRGB)
+ColorSpace.register(OKLCH)
 
 const fragment = graphql(`
 	fragment CurrentBookCard on BookClubBook {
@@ -61,7 +76,9 @@ type Props = {
 export function CurrentBookCard({ data }: Props) {
 	const { clubId, checkRole, refetchClub } = useBookClubContext()
 	const book = useFragment(fragment, data)
-	const addSheetRef = useRef<AddBookSheetRef>(null)
+	const optionsSheetRef = useRef<AddBookOptionsSheetRef>(null)
+
+	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
 
 	const { sdk } = useSDK()
 
@@ -72,12 +89,50 @@ export function CurrentBookCard({ data }: Props) {
 		}),
 	})
 
+	const { isDarkColorScheme } = useColorScheme()
+
+	const backgroundGradient = useMemo(() => {
+		const averageColor = imageProps?.placeholderData?.averageColor
+		if (!averageColor) return null
+
+		const color = getColor(averageColor)
+		set(color, {
+			'oklch.l': isDarkColorScheme ? 0.25 : 0.88,
+			'oklch.c': (c: number) => Math.min(c / 2, 0.2),
+		})
+		const mutedColor = serialize(color, { format: 'hex' })
+
+		// TODO(colors): I am not great at color science and def think this can be better,
+		// i have putzed around with it for a bit but amm moving on
+		const { colors: gradientColors, locations: gradientLocations } = easeGradient({
+			colorStops: {
+				0: { color: mutedColor },
+				1: { color: 'transparent' },
+			},
+			extraColorStopsPerTransition: 16,
+			easing: Easing.bezier(0.42, 0, 1, 1),
+		})
+
+		return { colors: gradientColors, locations: gradientLocations }
+	}, [imageProps?.placeholderData?.averageColor, isDarkColorScheme])
+
+	const spineColor = useMemo(() => {
+		const averageColor = imageProps?.placeholderData?.averageColor
+		if (!averageColor) return 'rgba(0,0,0,0.25)'
+
+		const color = getColor(averageColor)
+		set(color, {
+			'oklch.l': (l: number) => Math.max(l - 0.3, 0.1),
+		})
+		return serialize(color, { format: 'hex' })
+	}, [imageProps?.placeholderData?.averageColor])
+
 	const isEmpty = book == null
 
 	const { mutate: addBookToClub } = useGraphQLMutation(addBookMutation, {
 		onSuccess: () => {
 			refetchClub()
-			addSheetRef.current?.close()
+			optionsSheetRef.current?.close()
 		},
 		onError: (error) => {
 			console.error('Failed to add book to club', error)
@@ -86,6 +141,13 @@ export function CurrentBookCard({ data }: Props) {
 			})
 		},
 	})
+
+	const handleAddBook = useCallback(
+		(input: BookClubBookInput) => {
+			addBookToClub({ bookClubId: clubId, input: { book: input } })
+		},
+		[addBookToClub, clubId],
+	)
 
 	const [isShowingArchiveConfirm, setIsShowingArchiveConfirm] = useState(false)
 
@@ -108,38 +170,73 @@ export function CurrentBookCard({ data }: Props) {
 	const isModerator = checkRole(BookClubMemberRole.Moderator)
 
 	// TODO(book-club): Render generic placeholder for thumb if no image
-	// TODO(book-club): Add functional "Add a book" state when no current book
-	// TODO(book-club): Add gradient background if data available
 	return (
 		<>
-			<View className="squircle ios:rounded-[2rem] relative flex-grow flex-row gap-6 rounded-3xl bg-black/5 p-3 dark:bg-white/10">
-				<View className="ml-3">
-					<ThumbnailImage
-						key={imageProps?.url}
-						source={{
-							uri: imageProps?.url || '',
-							headers: imageProps?.headers,
-						}}
-						placeholderData={imageProps?.placeholderData}
-						size={{
-							width: 56,
-							height: 80,
-						}}
-					/>
-				</View>
+			<Pressable
+				onPress={isEmpty && isModerator ? () => optionsSheetRef.current?.open() : undefined}
+				disabled={!isEmpty || !isModerator}
+				style={{ flexGrow: 1 }}
+			>
+				<View className="squircle ios:rounded-[2rem] relative flex-grow overflow-hidden rounded-3xl bg-black/5 dark:bg-white/10">
+					{backgroundGradient && (
+						<LinearGradient
+							colors={backgroundGradient.colors}
+							locations={backgroundGradient.locations}
+							useAngle
+							angle={135}
+							style={{ position: 'absolute', inset: 0 }}
+						/>
+					)}
 
-				{isModerator && (
-					<View className="absolute right-3 top-3 flex-row items-center gap-3">
-						{isEmpty && (
-							<Pressable onPress={() => addSheetRef.current?.open()}>
-								<View className="shrink-0 items-center rounded-full border border-black/10 p-2.5 dark:border-white/20">
-									{PlusIcon}
-								</View>
-							</Pressable>
-						)}
+					<View className="relative flex-grow flex-row gap-6 p-3">
+						<View
+							className="ml-5"
+							style={{
+								height: 100,
+								transform: [
+									{ rotateZ: '-10deg' },
+									{ skewY: '3deg' },
+									{ scaleX: 0.97 },
+									{ translateY: 28 },
+								],
+							}}
+						>
+							<View
+								style={{
+									position: 'absolute',
+									left: -5,
+									top: 0,
+									bottom: 0,
+									width: 6,
+									backgroundColor: spineColor,
+									borderTopLeftRadius: 3,
+									borderBottomLeftRadius: 3,
+									zIndex: 1,
+								}}
+							/>
 
-						{!isEmpty && (
-							<>
+							<ThumbnailImage
+								key={imageProps?.url}
+								source={{
+									uri: imageProps?.url || '',
+									headers: imageProps?.headers,
+								}}
+								placeholderData={imageProps?.placeholderData}
+								size={{
+									width: 90,
+									height: 90 / thumbnailRatio,
+								}}
+								resizeMode="cover"
+								borderAndShadowStyle={{
+									shadowRadius: 5,
+									shadowOffset: { width: -2, height: 4 },
+									shadowColor: 'rgba(0,0,0,0.35)',
+								}}
+							/>
+						</View>
+
+						{isModerator && !isEmpty && (
+							<View className="absolute right-3 top-3 flex-row items-center gap-3">
 								<Pressable disabled>
 									<View className="shrink-0 items-center rounded-full border border-black/10 p-2.5 dark:border-white/20">
 										{EditIcon}
@@ -150,26 +247,29 @@ export function CurrentBookCard({ data }: Props) {
 										{ArchiveIcon}
 									</View>
 								</Pressable>
-							</>
+							</View>
 						)}
-					</View>
-				)}
 
-				<View className="flex-1 items-end justify-end gap-2 self-end p-1">
-					<Text className="text-muted-foreground text-right text-base font-medium">
-						{isEmpty ? 'Add a book' : 'Currently reading'}
-					</Text>
+						{isModerator && isEmpty && (
+							<View className="absolute right-3 top-3">
+								<View className="shrink-0 items-center rounded-full border border-black/10 p-2.5 dark:border-white/20">
+									{PlusIcon}
+								</View>
+							</View>
+						)}
+
+						<View className="flex-1 items-end justify-end gap-2 self-end p-1">
+							<Text className="text-muted-foreground text-right text-base font-medium">
+								{isEmpty ? 'Add a book' : 'Currently reading'}
+							</Text>
+						</View>
+					</View>
 				</View>
-			</View>
+			</Pressable>
 
 			{isModerator && (
 				<>
-					<AddBookSheet
-						ref={addSheetRef}
-						onAddBook={(bookId) =>
-							addBookToClub({ bookClubId: clubId, input: { book: { stored: { id: bookId } } } })
-						}
-					/>
+					<AddBookOptionsSheet ref={optionsSheetRef} onAddBook={handleAddBook} />
 
 					<Dialog.Container visible={isShowingArchiveConfirm}>
 						<Dialog.Title>Archive book</Dialog.Title>

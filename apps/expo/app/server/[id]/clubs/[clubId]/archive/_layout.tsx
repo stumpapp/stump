@@ -12,8 +12,16 @@ export default function Screen() {
 			<Stack.Screen
 				name="index"
 				options={{
-					headerShown: false,
-					title: '',
+					headerShown: true,
+					title: 'Past Discussions',
+					headerLeft: Platform.OS === 'android' ? undefined : () => <ChevronBackLink />,
+				}}
+			/>
+
+			<Stack.Screen
+				name="past-book"
+				options={{
+					title: 'Past Book',
 					headerLeft: Platform.OS === 'android' ? undefined : () => <ChevronBackLink />,
 				}}
 			/>

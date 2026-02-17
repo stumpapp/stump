@@ -3,7 +3,8 @@ use chrono::Utc;
 use models::{
 	entity::{
 		book_club_book, book_club_discussion, book_club_discussion_message,
-		book_club_discussion_message_like, book_club_member, user::AuthUser,
+		book_club_discussion_message_reaction, book_club_member, custom_emoji,
+		user::AuthUser,
 	},
 	shared::book_club::BookClubMemberRole,
 };
@@ -45,8 +46,26 @@ impl BookClubDiscussionMutation {
 		let member = get_member_for_user(&discussion.book_club_id, user, conn).await?;
 
 		if let Some(ref parent_id) = input.parent_message_id {
-			let parent_exists =
-				book_club_discussion_message::Entity::find_by_id(parent_id)
+			let parent = book_club_discussion_message::Entity::find_by_id(parent_id)
+				.filter(
+					book_club_discussion_message::Column::DiscussionId.eq(&discussion.id),
+				)
+				.filter(book_club_discussion_message::Column::DeletedAt.is_null())
+				.one(conn)
+				.await?
+				.ok_or("Parent message not found or deleted")?;
+
+			if parent.parent_message_id.is_some() {
+				return Err(
+					"Cannot create nested threads, that is way too complex for a side project"
+						.into(),
+				);
+			}
+		}
+
+		if let Some(ref reply_to_id) = input.reply_to_message_id {
+			let reply_exists =
+				book_club_discussion_message::Entity::find_by_id(reply_to_id)
 					.filter(
 						book_club_discussion_message::Column::DiscussionId
 							.eq(&discussion.id),
@@ -56,8 +75,8 @@ impl BookClubDiscussionMutation {
 					.await?
 					.is_some();
 
-			if !parent_exists {
-				return Err("Parent message not found or deleted".into());
+			if !reply_exists {
+				return Err("Reply-to message not found or deleted".into());
 			}
 		}
 
@@ -66,6 +85,7 @@ impl BookClubDiscussionMutation {
 			content: Set(input.content),
 			timestamp: Set(DateTimeWithTimeZone::from(Utc::now())),
 			parent_message_id: Set(input.parent_message_id),
+			reply_to_message_id: Set(input.reply_to_message_id),
 			discussion_id: Set(discussion.id.clone()),
 			member_id: Set(Some(member.id.clone())),
 			is_pinned_message: Set(false),
@@ -174,14 +194,24 @@ impl BookClubDiscussionMutation {
 		Ok(deleted_message.into())
 	}
 
-	/// Toggle like on a message
-	async fn toggle_message_like(
+	/// Toggle a reaction on a message
+	///
+	/// Returns true if the reaction was added, false if removed
+	async fn toggle_reaction(
 		&self,
 		ctx: &Context<'_>,
 		message_id: ID,
+		emoji: Option<String>,
+		custom_emoji_id: Option<i32>,
 	) -> Result<bool> {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		if emoji.is_some() == custom_emoji_id.is_some() {
+			return Err(
+				"Exactly one of `emoji` or `customEmojiId` must be provided".into()
+			);
+		}
 
 		let message =
 			book_club_discussion_message::Entity::find_by_id(message_id.as_ref())
@@ -190,7 +220,7 @@ impl BookClubDiscussionMutation {
 				.ok_or("Message not found")?;
 
 		if message.deleted_at.is_some() {
-			return Err("Cannot like a deleted message".into());
+			return Err("Cannot react to a deleted message".into());
 		}
 
 		let discussion = book_club_discussion::Entity::find_by_id(&message.discussion_id)
@@ -200,32 +230,57 @@ impl BookClubDiscussionMutation {
 
 		let member = get_member_for_user(&discussion.book_club_id, user, conn).await?;
 
-		let existing_like = book_club_discussion_message_like::Entity::find()
+		if let Some(ce_id) = custom_emoji_id {
+			let exists = custom_emoji::Entity::find_by_id(ce_id)
+				.one(conn)
+				.await?
+				.is_some();
+
+			if !exists {
+				return Err("Custom emoji not found".into());
+			}
+		}
+
+		let mut query = book_club_discussion_message_reaction::Entity::find()
 			.filter(
-				book_club_discussion_message_like::Column::MessageId
+				book_club_discussion_message_reaction::Column::MessageId
 					.eq(message_id.as_ref()),
 			)
-			.filter(book_club_discussion_message_like::Column::LikedById.eq(&member.id))
-			.one(conn)
-			.await?;
+			.filter(
+				book_club_discussion_message_reaction::Column::MemberId.eq(&member.id),
+			);
 
-		let liked = if let Some(like) = existing_like {
-			like.delete(conn).await?;
+		if let Some(ref e) = emoji {
+			query =
+				query.filter(book_club_discussion_message_reaction::Column::Emoji.eq(e));
+		} else {
+			query = query.filter(
+				book_club_discussion_message_reaction::Column::CustomEmojiId
+					.eq(custom_emoji_id),
+			);
+		}
+
+		let existing_reaction = query.one(conn).await?;
+
+		let reacted = if let Some(reaction) = existing_reaction {
+			reaction.delete(conn).await?;
 			false
 		} else {
-			let like = book_club_discussion_message_like::ActiveModel {
+			let reaction = book_club_discussion_message_reaction::ActiveModel {
 				id: Set(Uuid::new_v4().to_string()),
-				timestamp: Set(DateTimeWithTimeZone::from(Utc::now())),
-				liked_by_id: Set(member.id.clone()),
+				created_at: Set(DateTimeWithTimeZone::from(Utc::now())),
+				emoji: Set(emoji),
+				custom_emoji_id: Set(custom_emoji_id),
+				member_id: Set(member.id.clone()),
 				message_id: Set(message_id.to_string()),
 			};
-			like.insert(conn).await?;
+			reaction.insert(conn).await?;
 			true
 		};
 
 		// TODO: Emit some kind of message event when event broker is implemented
 
-		Ok(liked)
+		Ok(reacted)
 	}
 
 	/// Lock or unlock a discussion (Moderator+)

@@ -127,6 +127,7 @@ export function PastDiscussionsLink({ data }: Props) {
 								width: 65,
 								height: 65 / thumbnailRatio,
 							}}
+							resizeMode="cover"
 						/>
 					</View>
 				)}

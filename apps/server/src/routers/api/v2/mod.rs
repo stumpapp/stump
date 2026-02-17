@@ -1,4 +1,5 @@
 pub(crate) mod auth;
+pub(crate) mod emoji;
 pub(crate) mod epub;
 pub(crate) mod library;
 pub(crate) mod media;
@@ -24,6 +25,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
 		.merge(auth::mount(app_state.clone()))
 		.merge(oidc::mount())
+		.merge(emoji::mount(app_state.clone()))
 		.merge(media::mount(app_state.clone()))
 		.merge(epub::mount(app_state.clone()))
 		.merge(series::mount(app_state.clone()))

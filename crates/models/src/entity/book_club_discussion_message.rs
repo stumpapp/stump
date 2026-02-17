@@ -21,6 +21,8 @@ pub struct Model {
 	pub deleted_at: Option<String>,
 	#[sea_orm(column_type = "Text", nullable)]
 	pub parent_message_id: Option<String>,
+	#[sea_orm(column_type = "Text", nullable)]
+	pub reply_to_message_id: Option<String>,
 	#[sea_orm(column_type = "Text")]
 	pub discussion_id: String,
 	#[sea_orm(column_type = "Text", nullable)]
@@ -39,8 +41,8 @@ pub enum Relation {
 		on_delete = "Cascade"
 	)]
 	BookClub,
-	#[sea_orm(has_many = "super::book_club_discussion_message_like::Entity")]
-	BookClubDiscussionMessageLike,
+	#[sea_orm(has_many = "super::book_club_discussion_message_reaction::Entity")]
+	BookClubDiscussionMessageReaction,
 	#[sea_orm(
 		belongs_to = "Entity",
 		from = "Column::ParentMessageId",
@@ -49,6 +51,14 @@ pub enum Relation {
 		on_delete = "SetNull"
 	)]
 	SelfRef,
+	#[sea_orm(
+		belongs_to = "Entity",
+		from = "Column::ReplyToMessageId",
+		to = "Column::Id",
+		on_update = "Cascade",
+		on_delete = "SetNull"
+	)]
+	ReplyTo,
 	#[sea_orm(
 		belongs_to = "super::book_club_discussion::Entity",
 		from = "Column::DiscussionId",
@@ -73,9 +83,9 @@ impl Related<super::book_club::Entity> for Entity {
 	}
 }
 
-impl Related<super::book_club_discussion_message_like::Entity> for Entity {
+impl Related<super::book_club_discussion_message_reaction::Entity> for Entity {
 	fn to() -> RelationDef {
-		Relation::BookClubDiscussionMessageLike.def()
+		Relation::BookClubDiscussionMessageReaction.def()
 	}
 }
 

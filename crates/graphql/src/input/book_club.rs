@@ -180,12 +180,26 @@ impl CreateBookClubMemberInput {
 #[derive(Debug, InputObject)]
 pub struct SendMessageInput {
 	pub content: String,
+	/// The parent message inside a thread, denoting this message as a child
 	pub parent_message_id: Option<String>,
+	/// An inline reply reference, NOT a child of a thread
+	pub reply_to_message_id: Option<String>,
 }
 
 #[derive(Debug, InputObject)]
 pub struct EditMessageInput {
 	pub content: String,
+}
+
+#[derive(Debug, InputObject)]
+pub struct CreateCustomEmojiInput {
+	pub name: String,
+	pub is_animated: bool,
+}
+
+#[derive(Debug, InputObject)]
+pub struct UpdateCustomEmojiInput {
+	pub name: String,
 }
 
 #[derive(Debug, InputObject)]

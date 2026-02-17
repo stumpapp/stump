@@ -31,6 +31,13 @@ export default function Screen() {
 			/>
 
 			<Stack.Screen
+				name="archive"
+				options={{
+					headerShown: false,
+				}}
+			/>
+
+			<Stack.Screen
 				name="discussion/[roomId]"
 				options={{
 					headerShown: false,

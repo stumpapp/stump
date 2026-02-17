@@ -34,8 +34,8 @@ pub enum Relation {
 	BookClubBookSuggestionLike,
 	#[sea_orm(has_many = "super::book_club_book_suggestion::Entity")]
 	BookClubBookSuggestion,
-	#[sea_orm(has_many = "super::book_club_discussion_message_like::Entity")]
-	BookClubDiscussionMessageLike,
+	#[sea_orm(has_many = "super::book_club_discussion_message_reaction::Entity")]
+	BookClubDiscussionMessageReaction,
 	#[sea_orm(has_many = "super::book_club_discussion_message::Entity")]
 	BookClubDiscussionMessage,
 	#[sea_orm(has_one = "super::book_club_member_favorite_book::Entity")]
@@ -70,9 +70,9 @@ impl Related<super::book_club_book_suggestion::Entity> for Entity {
 	}
 }
 
-impl Related<super::book_club_discussion_message_like::Entity> for Entity {
+impl Related<super::book_club_discussion_message_reaction::Entity> for Entity {
 	fn to() -> RelationDef {
-		Relation::BookClubDiscussionMessageLike.def()
+		Relation::BookClubDiscussionMessageReaction.def()
 	}
 }
 

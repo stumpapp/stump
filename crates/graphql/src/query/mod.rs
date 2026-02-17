@@ -5,6 +5,7 @@ mod book_club_discussion;
 mod book_club_invitation;
 mod book_club_suggestion;
 mod config;
+mod custom_emoji;
 mod email_device;
 mod emailer;
 mod epub;
@@ -30,6 +31,7 @@ use book_club_discussion::BookClubDiscussionQuery;
 use book_club_invitation::BookClubInvitationQuery;
 use book_club_suggestion::BookClubSuggestionQuery;
 use config::ConfigQuery;
+use custom_emoji::CustomEmojiQuery;
 use email_device::EmailDeviceQuery;
 use emailer::EmailerQuery;
 use epub::EpubQuery;
@@ -52,6 +54,7 @@ use crate::query::job::JobQuery;
 pub struct Query(
 	APIKeyQuery,
 	BookClubQuery,
+	CustomEmojiQuery,
 	BookClubBookQuery,
 	BookClubDiscussionQuery,
 	BookClubInvitationQuery,

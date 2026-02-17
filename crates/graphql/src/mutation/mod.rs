@@ -5,6 +5,7 @@ mod book_club_discussion;
 mod book_club_invitation;
 mod book_club_member;
 mod book_club_suggestion;
+mod custom_emoji;
 mod email_device;
 mod emailer;
 mod epub;
@@ -29,6 +30,7 @@ use book_club_discussion::BookClubDiscussionMutation;
 use book_club_invitation::BookClubInvitationMutation;
 use book_club_member::BookClubMemberMutation;
 use book_club_suggestion::BookClubSuggestionMutation;
+use custom_emoji::CustomEmojiMutation;
 use email_device::EmailDeviceMutation;
 use emailer::EmailerMutation;
 use epub::EpubMutation;
@@ -56,6 +58,7 @@ pub struct Mutation(
 	BookClubMemberMutation,
 	BookClubBookMutation,
 	BookClubSuggestionMutation,
+	CustomEmojiMutation,
 	JobMutation,
 	NotifierMutation,
 	EpubMutation,

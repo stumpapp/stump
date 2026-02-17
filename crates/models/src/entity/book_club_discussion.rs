@@ -16,6 +16,8 @@ pub struct Model {
 	pub book_club_book_id: Option<String>,
 	#[sea_orm(column_type = "Text", nullable)]
 	pub title: Option<String>,
+	#[sea_orm(column_type = "Text", nullable)]
+	pub emoji: Option<String>,
 	pub is_pinned: bool,
 	pub created_at: DateTimeWithTimeZone,
 	#[sea_orm(column_type = "Text")]

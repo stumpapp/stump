@@ -178,6 +178,7 @@ type BookClubDiscussion {
 	isArchived: Boolean!
 	bookClubBookId: String
 	title: String
+	emoji: String
 	isPinned: Boolean!
 	createdAt: DateTime!
 	bookClubId: String!

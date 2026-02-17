@@ -169,7 +169,12 @@ export const AddBookSheet = forwardRef<AddBookSheetRef, Props>(({ onAddBook }, r
 			<PreviewBookSheet
 				ref={previewSheetRef}
 				bookId={previewBookId}
-				onConfirmAddBook={() => (previewBookId ? onAddBook(previewBookId) : null)}
+				onConfirmAddBook={() => {
+					if (previewBookId) {
+						onAddBook(previewBookId)
+						previewSheetRef.current?.close()
+					}
+				}}
 			/>
 		</TrueSheet>
 	)

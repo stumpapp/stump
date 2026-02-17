@@ -69,6 +69,7 @@ export function PastDiscussionsLink({ data }: Props) {
 				{imageProps && (
 					<View className="absolute inset-0 -bottom-2 flex-1 items-center justify-end">
 						<ThumbnailImage
+							key={imageProps.url}
 							source={{
 								uri: imageProps?.url || '',
 								headers: imageProps?.headers,

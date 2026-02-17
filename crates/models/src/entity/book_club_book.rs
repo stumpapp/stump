@@ -114,6 +114,38 @@ impl Entity {
 		Ok(result.and_then(|(max,)| max).map_or(0, |p| p + 1))
 	}
 
+	/// Get the effective "current" book position for filtering previous discussions.
+	///
+	/// Returns:
+	/// - `Some(position)` of the current (uncompleted) book if one exists
+	/// - `Some(max_position + 1)` if all books are completed (so `position < value` matches all books)
+	/// - `None` if no books exist at all
+	pub async fn get_current_or_next_position<C: ConnectionTrait>(
+		book_club_id: &str,
+		conn: &C,
+	) -> Result<Option<i32>, DbErr> {
+		let current_book = Entity::find_current_for_book_club_id(book_club_id)
+			.one(conn)
+			.await?;
+
+		if let Some(book) = current_book {
+			return Ok(Some(book.position));
+		}
+
+		let max_position = Self::get_max_position_for_club(book_club_id, conn).await?;
+		if max_position == 0 {
+			let has_books = Entity::find()
+				.filter(Column::BookClubId.eq(book_club_id))
+				.count(conn)
+				.await?;
+			if has_books == 0 {
+				return Ok(None);
+			}
+		}
+
+		Ok(Some(max_position))
+	}
+
 	/// Get the next position after all completed books in a club
 	pub async fn get_next_position_after_completed<C: ConnectionTrait>(
 		book_club_id: &str,

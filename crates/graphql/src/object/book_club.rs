@@ -9,9 +9,9 @@ use models::entity::{
 	book_club_member,
 };
 use models::shared::book_club::{BookClubMemberRole, BookClubMemberRoleSpec};
+use sea_orm::prelude::*;
 use sea_orm::sea_query::Query;
 use sea_orm::QueryOrder;
-use sea_orm::{prelude::*, QuerySelect};
 
 #[derive(Debug, SimpleObject)]
 #[graphql(complex)]
@@ -63,8 +63,10 @@ impl BookClub {
 	async fn previous_book(&self, ctx: &Context<'_>) -> Result<Option<BookClubBook>> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let book = book_club_book::Entity::find_current_for_book_club_id(&self.model.id)
-			.offset(1)
+		let book = book_club_book::Entity::find()
+			.filter(book_club_book::Column::BookClubId.eq(&self.model.id))
+			.filter(book_club_book::Column::CompletedAt.is_not_null())
+			.order_by_desc(book_club_book::Column::CompletedAt)
 			.one(conn)
 			.await?;
 
@@ -170,11 +172,16 @@ impl BookClub {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let current_book_position =
-			book_club_book::Entity::find_current_for_book_club_id(&self.model.id)
-				.one(conn)
-				.await?
-				.map(|book| book.position)
-				.unwrap_or(0);
+			match book_club_book::Entity::get_current_or_next_position(
+				&self.model.id,
+				conn,
+			)
+			.await?
+			{
+				Some(pos) => pos,
+				// No books exist at all, so there can be no previous discussions
+				None => return Ok(0),
+			};
 
 		let count = book_club_discussion::Entity::find()
 			.filter(book_club_discussion::Column::BookClubId.eq(&self.model.id))

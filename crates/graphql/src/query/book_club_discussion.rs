@@ -173,11 +173,16 @@ impl BookClubDiscussionQuery {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let current_book_position =
-			book_club_book::Entity::find_current_for_book_club_id(book_club_id.as_ref())
-				.one(conn)
-				.await?
-				.map(|book| book.position)
-				.unwrap_or(0);
+			match book_club_book::Entity::get_current_or_next_position(
+				book_club_id.as_ref(),
+				conn,
+			)
+			.await?
+			{
+				Some(pos) => pos,
+				// No books exist at all, so there can be no previous discussions
+				None => return Ok(vec![]),
+			};
 
 		let discussions = book_club_discussion::Entity::find()
 			.filter(book_club_discussion::Column::BookClubId.eq(book_club_id.as_ref()))

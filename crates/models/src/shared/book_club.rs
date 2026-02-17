@@ -33,7 +33,7 @@ use strum::Display;
 pub enum BookClubMemberRole {
 	#[default]
 	Member = 0, // default, read-only access
-	Moderator = 1, // can delete messages
+	Moderator = 1, // can delete messages, change schedule
 	Admin = 2,     // can add/remove members, change schedule, etc.
 	Creator = 3,   // can delete the book club, change name, etc.
 }

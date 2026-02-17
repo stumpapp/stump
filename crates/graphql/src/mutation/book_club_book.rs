@@ -191,6 +191,7 @@ where
 			is_pinned: Set(false),
 			created_at: Set(DateTimeWithTimeZone::from(Utc::now())),
 			book_club_id: Set(book_club_id.to_string()),
+			..Default::default()
 		})
 		.collect();
 

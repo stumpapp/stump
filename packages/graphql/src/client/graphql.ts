@@ -218,6 +218,7 @@ export type BookClubDiscussion = {
   createdAt: Scalars['DateTime']['output'];
   /** A display name for the discussion */
   displayName: Scalars['String']['output'];
+  emoji?: Maybe<Scalars['String']['output']>;
   id: Scalars['String']['output'];
   isArchived: Scalars['Boolean']['output'];
   isLocked: Scalars['Boolean']['output'];
@@ -4115,7 +4116,7 @@ export type BookClubDetailScreenQuery = { __typename?: 'Query', bookClubById: (
     { __typename?: 'BookClub', id: string, name: string, emoji?: string | null, membership?: { __typename?: 'BookClubMember', id: string, role: BookClubMemberRole } | null, pinnedDiscussions: Array<{ __typename?: 'BookClubDiscussion', id: string, displayName: string, messageCount: number }>, currentBook?: (
       { __typename?: 'BookClubBook', id: string, discussions: Array<{ __typename?: 'BookClubDiscussion', id: string, displayName: string, messageCount: number }> }
       & { ' $fragmentRefs'?: { 'CurrentBookCardFragment': CurrentBookCardFragment } }
-    ) | null, books: Array<{ __typename?: 'BookClubBook', id: string, completedAt?: any | null }> }
+    ) | null }
     & { ' $fragmentRefs'?: { 'PastDiscussionsLinkFragment': PastDiscussionsLinkFragment } }
   ) };
 
@@ -4420,6 +4421,13 @@ export type AddBookToClubMutationVariables = Exact<{
 
 
 export type AddBookToClubMutation = { __typename?: 'Mutation', addBookToClub: { __typename?: 'BookClub', id: string } };
+
+export type ArchiveCurrentBookMutationVariables = Exact<{
+  bookClubBookId: Scalars['ID']['input'];
+}>;
+
+
+export type ArchiveCurrentBookMutation = { __typename?: 'Mutation', completeBook: { __typename?: 'BookClub', id: string } };
 
 export type PastBookGridItemFragment = { __typename?: 'BookClubBook', id: string, imageUrl?: string | null, completedAt?: any | null, entity?: { __typename: 'Media', id: string, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } | null } & { ' $fragmentName'?: 'PastBookGridItemFragment' };
 
@@ -7001,10 +7009,6 @@ export const BookClubDetailScreenDocument = new TypedDocumentString(`
         messageCount
       }
     }
-    books {
-      id
-      completedAt
-    }
     ...PastDiscussionsLink
   }
 }
@@ -7766,6 +7770,13 @@ export const AddBookToClubDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<AddBookToClubMutation, AddBookToClubMutationVariables>;
+export const ArchiveCurrentBookDocument = new TypedDocumentString(`
+    mutation ArchiveCurrentBook($bookClubBookId: ID!) {
+  completeBook(bookClubBookId: $bookClubBookId) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<ArchiveCurrentBookMutation, ArchiveCurrentBookMutationVariables>;
 export const PreviewBookSheetDocument = new TypedDocumentString(`
     query PreviewBookSheet($id: ID!) {
   mediaById(id: $id) {

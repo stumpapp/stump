@@ -1,6 +1,6 @@
 import { Host, Image } from '@expo/ui/swift-ui'
 import { useLocalSearchParams, useRouter } from 'expo-router'
-import { MessageCircle } from 'lucide-react-native'
+import { Hash, MessageCircle } from 'lucide-react-native'
 import { Platform, Pressable, View } from 'react-native'
 
 import { useActiveServer } from '~/components/activeServer'
@@ -9,11 +9,12 @@ import { Icon, Text } from '~/components/ui'
 type Props = {
 	id: string
 	name: string
+	emoji?: string | null
 	messageCount: number
 }
 
 // TODO(book-club): Context menu for management (admins only)
-export default function DiscussionListItem({ id, name, messageCount }: Props) {
+export default function DiscussionListItem({ id, name, emoji, messageCount }: Props) {
 	const { clubId } = useLocalSearchParams<{ clubId: string }>()
 	const router = useRouter()
 	const {
@@ -25,9 +26,18 @@ export default function DiscussionListItem({ id, name, messageCount }: Props) {
 			onPress={() => router.push(`/server/${serverID}/clubs/${clubId}/discussion/${id}`)}
 			className="flex-row items-center justify-between p-3"
 		>
-			<Text className="flex-1 font-medium" numberOfLines={1}>
-				{name}
-			</Text>
+			<View className="flex flex-1 flex-row items-center gap-2">
+				<View className="squircle flex h-8 w-8 items-center justify-center rounded-xl bg-white/75 dark:bg-black/40">
+					{emoji ? (
+						<Text className="text-base">{emoji}</Text>
+					) : (
+						<Icon as={Hash} className="h-5 w-5 text-foreground-muted" />
+					)}
+				</View>
+				<Text className="flex-1 font-medium" numberOfLines={1}>
+					{name}
+				</Text>
+			</View>
 			<View className="flex-row items-center gap-1">
 				{MessageIcon}
 				<Text className="text-muted-foreground text-sm">{messageCount}</Text>

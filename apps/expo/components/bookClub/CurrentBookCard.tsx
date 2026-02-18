@@ -7,6 +7,7 @@ import {
 	graphql,
 	useFragment,
 } from '@stump/graphql'
+import { useQueryClient } from '@tanstack/react-query'
 import { ColorSpace, getColor, OKLCH, serialize, set, sRGB } from 'colorjs.io/fn'
 import { Archive, Edit, Plus } from 'lucide-react-native'
 import { useCallback, useMemo, useRef, useState } from 'react'
@@ -74,7 +75,8 @@ type Props = {
 }
 
 export function CurrentBookCard({ data }: Props) {
-	const { clubId, checkRole, refetchClub } = useBookClubContext()
+	const { clubId, checkRole } = useBookClubContext()
+	const queryClient = useQueryClient()
 	const book = useFragment(fragment, data)
 	const optionsSheetRef = useRef<AddBookOptionsSheetRef>(null)
 
@@ -131,7 +133,8 @@ export function CurrentBookCard({ data }: Props) {
 
 	const { mutate: addBookToClub } = useGraphQLMutation(addBookMutation, {
 		onSuccess: () => {
-			refetchClub()
+			queryClient.invalidateQueries({ queryKey: ['bookClubById', clubId] })
+			queryClient.invalidateQueries({ queryKey: ['bookClubContext', clubId] })
 			optionsSheetRef.current?.close()
 		},
 		onError: (error) => {
@@ -153,7 +156,8 @@ export function CurrentBookCard({ data }: Props) {
 
 	const { mutate: archiveBook } = useGraphQLMutation(archiveBookMutation, {
 		onSuccess: () => {
-			refetchClub()
+			queryClient.invalidateQueries({ queryKey: ['bookClubById', clubId] })
+			queryClient.invalidateQueries({ queryKey: ['bookClubContext', clubId] })
 			setIsShowingArchiveConfirm(false)
 			toast.success('Book archived', {
 				description: 'The current book has been archived',

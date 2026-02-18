@@ -9,7 +9,6 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { useActiveServer } from '~/components/activeServer'
 import { CurrentBookCard, PastDiscussionsLink } from '~/components/bookClub'
-import { BookClubContext } from '~/components/bookClub/context'
 import { DiscussionListItem } from '~/components/bookClub/discussion'
 import RefreshControl from '~/components/RefreshControl'
 import { Card, Icon } from '~/components/ui'
@@ -76,42 +75,16 @@ export default function Screen() {
 	// TODO(book-club): Add top-right action to Pinned Rooms card for adding a new one
 	// This would require some cahnges to the Card comp
 	return (
-		<BookClubContext.Provider
-			value={{ clubId: club.id, viewerMembership: club.membership, refetchClub: refetch }}
-		>
-			<SafeAreaView edges={['bottom']} className="flex-1 bg-background">
-				<ScrollView
-					refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />}
-					className="flex-1"
-					contentInsetAdjustmentBehavior="always"
-				>
-					<View className="gap-6 px-4 py-4">
-						{club.pinnedDiscussions.length > 0 && (
-							<Card label="Pinned Rooms">
-								{club.pinnedDiscussions.map((discussion) => (
-									<Card.Row key={discussion.id}>
-										<DiscussionListItem
-											id={discussion.id}
-											name={discussion.displayName}
-											messageCount={discussion.messageCount}
-										/>
-									</Card.Row>
-								))}
-							</Card>
-						)}
-
-						<View className="flex-row gap-3">
-							<CurrentBookCard data={club.currentBook} />
-							<PastDiscussionsLink data={club} />
-						</View>
-
-						<Card
-							label="Active Discussions"
-							listEmptyStyle={{
-								message: 'No active discussions right now',
-							}}
-						>
-							{club.currentBook?.discussions.map((discussion) => (
+		<SafeAreaView edges={['bottom']} className="flex-1 bg-background">
+			<ScrollView
+				refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />}
+				className="flex-1"
+				contentInsetAdjustmentBehavior="always"
+			>
+				<View className="gap-6 px-4 py-4">
+					{club.pinnedDiscussions.length > 0 && (
+						<Card label="Pinned Rooms">
+							{club.pinnedDiscussions.map((discussion) => (
 								<Card.Row key={discussion.id}>
 									<DiscussionListItem
 										id={discussion.id}
@@ -121,10 +94,32 @@ export default function Screen() {
 								</Card.Row>
 							))}
 						</Card>
+					)}
+
+					<View className="flex-row gap-3">
+						<CurrentBookCard data={club.currentBook} />
+						<PastDiscussionsLink data={club} />
 					</View>
-				</ScrollView>
-			</SafeAreaView>
-		</BookClubContext.Provider>
+
+					<Card
+						label="Active Discussions"
+						listEmptyStyle={{
+							message: 'No active discussions right now',
+						}}
+					>
+						{club.currentBook?.discussions.map((discussion) => (
+							<Card.Row key={discussion.id}>
+								<DiscussionListItem
+									id={discussion.id}
+									name={discussion.displayName}
+									messageCount={discussion.messageCount}
+								/>
+							</Card.Row>
+						))}
+					</Card>
+				</View>
+			</ScrollView>
+		</SafeAreaView>
 	)
 }
 

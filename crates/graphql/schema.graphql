@@ -1952,6 +1952,8 @@ type Query {
 	bookClubDiscussionByBook(bookClubBookId: ID!): BookClubDiscussion
 	"Get all discussions for a book club, ordered by pinned first, then by date created"
 	bookClubDiscussions(bookClubId: ID!): [BookClubDiscussion!]!
+	"Get a single message by ID"
+	bookClubDiscussionMessage(id: ID!): BookClubDiscussionMessage!
 	"Get messages in a discussion"
 	bookClubDiscussionMessages(discussionId: ID!, parentId: ID, pagination: CursorPagination! = {after: null, limit: 20}): CursorPaginatedBookClubDiscussionMessageResponse!
 	previousBookClubDiscussions(bookClubId: ID!): [BookClubDiscussion!]!

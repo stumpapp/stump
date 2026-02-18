@@ -91,6 +91,30 @@ impl BookClubDiscussionQuery {
 			.collect())
 	}
 
+	/// Get a single message by ID
+	async fn book_club_discussion_message(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+	) -> Result<BookClubDiscussionMessage> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let message = book_club_discussion_message::Entity::find_by_id(id.as_ref())
+			.one(conn)
+			.await?
+			.ok_or("Message not found")?;
+
+		let discussion = book_club_discussion::Entity::find_by_id(&message.discussion_id)
+			.one(conn)
+			.await?
+			.ok_or("Discussion not found")?;
+
+		verify_read_access(&discussion.book_club_id, user, conn).await?;
+
+		Ok(message.into())
+	}
+
 	/// Get messages in a discussion
 	async fn book_club_discussion_messages(
 		&self,

@@ -92,6 +92,7 @@ export function BookClubCard({ club }: Props) {
 							width: 56,
 							height: 80,
 						}}
+						resizeMode="cover"
 					/>
 
 					<View className="flex-1 justify-between gap-4">
@@ -105,7 +106,14 @@ export function BookClubCard({ club }: Props) {
 						</View>
 
 						<View className="flex-row items-center gap-2">
-							<AvatarStack avatars={avatars} overflowCount={overflowCount} size="sm" />
+							<AvatarStack
+								avatars={avatars}
+								overflowCount={overflowCount}
+								requestHeaders={{
+									...sdk.customHeaders,
+									Authorization: sdk.authorizationHeader || '',
+								}}
+							/>
 							<Text className="text-muted-foreground text-sm">
 								{pluralize('member', data.membersCount, true)}
 							</Text>

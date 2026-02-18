@@ -72,6 +72,14 @@ export type AgeRestrictionInput = {
   restrictOnUnset: Scalars['Boolean']['input'];
 };
 
+export type AggregatedReaction = {
+  __typename?: 'AggregatedReaction';
+  count: Scalars['Int']['output'];
+  customEmojiId?: Maybe<Scalars['Int']['output']>;
+  emoji?: Maybe<Scalars['String']['output']>;
+  reactedByMe: Scalars['Boolean']['output'];
+};
+
 export type Apikey = {
   __typename?: 'Apikey';
   createdAt: Scalars['DateTime']['output'];
@@ -245,28 +253,29 @@ export type BookClubDiscussionMessage = {
   discussionId: Scalars['String']['output'];
   editedAt?: Maybe<Scalars['DateTime']['output']>;
   id: Scalars['String']['output'];
-  /** Check if the current user has liked this message */
-  isLikedByMe: Scalars['Boolean']['output'];
   isPinnedMessage: Scalars['Boolean']['output'];
-  /**
-   * Get the count of likes on this message
-   * TODO(dataloader): Create dataloader
-   */
-  likeCount: Scalars['Int']['output'];
   /** Get the member who posted this message */
   member?: Maybe<BookClubMember>;
   memberId?: Maybe<Scalars['String']['output']>;
   parentMessageId?: Maybe<Scalars['String']['output']>;
   /**
-   * Get replies to this message
+   * Get aggregated reactions for this message, grouped by emoji, sorted by count desc
    * TODO(dataloader): Create dataloader
    */
-  replies: Array<BookClubDiscussionMessage>;
+  reactions: Array<AggregatedReaction>;
+  /** Get the message this message is an inline reply to (if any) */
+  replyTo?: Maybe<BookClubDiscussionMessage>;
+  replyToMessageId?: Maybe<Scalars['String']['output']>;
   /**
-   * Get the count of replies to this message
+   * Get the threaded replies to this message (if any)
    * TODO(dataloader): Create dataloader
    */
-  replyCount: Scalars['Int']['output'];
+  threadChildren: Array<BookClubDiscussionMessage>;
+  /**
+   * Get the count of threaded replies to this message (if any)
+   * TODO(dataloader): Create dataloader
+   */
+  threadChildrenCount: Scalars['Int']['output'];
   timestamp: Scalars['DateTime']['output'];
 };
 
@@ -428,6 +437,11 @@ export type CreateBookClubMemberInput = {
   userId: Scalars['String']['input'];
 };
 
+export type CreateCustomEmojiInput = {
+  isAnimated: Scalars['Boolean']['input'];
+  name: Scalars['String']['input'];
+};
+
 export type CreateOrUpdateLibraryInput = {
   config?: InputMaybe<LibraryConfigInput>;
   description?: InputMaybe<Scalars['String']['input']>;
@@ -506,6 +520,26 @@ export type CustomArrangementConfig = {
   links: Array<FilterableArrangementEntityLink>;
   name?: Maybe<Scalars['String']['output']>;
   orderBy?: Maybe<Scalars['String']['output']>;
+};
+
+export type CustomEmoji = {
+  __typename?: 'CustomEmoji';
+  createdAt: Scalars['DateTime']['output'];
+  createdById: Scalars['String']['output'];
+  fileExtension: Scalars['String']['output'];
+  id: Scalars['Int']['output'];
+  isAnimated: Scalars['Boolean']['output'];
+  name: Scalars['String']['output'];
+};
+
+export type CustomEmojiModel = {
+  __typename?: 'CustomEmojiModel';
+  createdAt: Scalars['DateTime']['output'];
+  createdById: Scalars['String']['output'];
+  fileExtension: Scalars['String']['output'];
+  id: Scalars['Int']['output'];
+  isAnimated: Scalars['Boolean']['output'];
+  name: Scalars['String']['output'];
 };
 
 export type DeleteJobAssociatedLogs = {
@@ -1589,6 +1623,8 @@ export type Mutation = {
   deleteBookmark: Bookmark;
   /** Delete a bookmark by epubcfi */
   deleteBookmarkByEpubcfi: Bookmark;
+  /** Delete a custom emoji */
+  deleteCustomEmoji: Scalars['Boolean']['output'];
   deleteEmailDevice: RegisteredEmailDevice;
   deleteEmailer: Emailer;
   deleteJob: Scalars['Boolean']['output'];
@@ -1667,8 +1703,12 @@ export type Mutation = {
   sendMessage: BookClubDiscussionMessage;
   /** Suggest a book for the book club */
   suggestBook: BookClubBookSuggestion;
-  /** Toggle like on a message */
-  toggleMessageLike: Scalars['Boolean']['output'];
+  /**
+   * Toggle a reaction on a message
+   *
+   * Returns true if the reaction was added, false if removed
+   */
+  toggleReaction: Scalars['Boolean']['output'];
   /**
    * Toggle the completion status of a series. If the series is marked as completed, all books
    * in the series will also be marked as completed, and vice versa for marking as not completed.
@@ -1682,6 +1722,8 @@ export type Mutation = {
   updateAnnotation: MediaAnnotation;
   updateApiKey: Apikey;
   updateBookClub: BookClub;
+  /** Rename a custom emoji */
+  updateCustomEmoji: CustomEmoji;
   updateEmailDevice: RegisteredEmailDevice;
   updateEmailer: Emailer;
   /**
@@ -1742,6 +1784,8 @@ export type Mutation = {
   updateViewer: User;
   updateViewerPreferences: UserPreferences;
   uploadBooks: Scalars['Boolean']['output'];
+  /** Upload a new custom emoji */
+  uploadCustomEmoji: CustomEmoji;
   uploadLibraryThumbnail: Library;
   uploadMediaThumbnail: Media;
   /**
@@ -1931,6 +1975,11 @@ export type MutationDeleteBookmarkArgs = {
 
 export type MutationDeleteBookmarkByEpubcfiArgs = {
   epubcfi: Scalars['String']['input'];
+};
+
+
+export type MutationDeleteCustomEmojiArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -2160,7 +2209,9 @@ export type MutationSuggestBookArgs = {
 };
 
 
-export type MutationToggleMessageLikeArgs = {
+export type MutationToggleReactionArgs = {
+  customEmojiId?: InputMaybe<Scalars['Int']['input']>;
+  emoji?: InputMaybe<Scalars['String']['input']>;
   messageId: Scalars['ID']['input'];
 };
 
@@ -2190,6 +2241,12 @@ export type MutationUpdateApiKeyArgs = {
 export type MutationUpdateBookClubArgs = {
   id: Scalars['ID']['input'];
   input: UpdateBookClubInput;
+};
+
+
+export type MutationUpdateCustomEmojiArgs = {
+  id: Scalars['ID']['input'];
+  input: UpdateCustomEmojiInput;
 };
 
 
@@ -2329,6 +2386,12 @@ export type MutationUpdateViewerPreferencesArgs = {
 
 export type MutationUploadBooksArgs = {
   input: UploadBooksInput;
+};
+
+
+export type MutationUploadCustomEmojiArgs = {
+  input: CreateCustomEmojiInput;
+  upload: Scalars['Upload']['input'];
 };
 
 
@@ -2610,6 +2673,8 @@ export type Query = {
   bookClubDiscussion: BookClubDiscussion;
   /** Get a discussion by the book it's associated with */
   bookClubDiscussionByBook?: Maybe<BookClubDiscussion>;
+  /** Get a single message by ID */
+  bookClubDiscussionMessage: BookClubDiscussionMessage;
   /** Get messages in a discussion */
   bookClubDiscussionMessages: CursorPaginatedBookClubDiscussionMessageResponse;
   /** Get all discussions for a book club, ordered by pinned first, then by date created */
@@ -2621,6 +2686,8 @@ export type Query = {
   bookClubs: Array<BookClub>;
   /** Get all bookmarks for a single epub by its media ID */
   bookmarksByMediaId: Array<Bookmark>;
+  /** List the custom emojis available on this server */
+  customEmojis: Array<CustomEmojiModel>;
   duplicateMedia: Array<Media>;
   emailDeviceById?: Maybe<RegisteredEmailDevice>;
   emailDevices: Array<RegisteredEmailDevice>;
@@ -2733,6 +2800,11 @@ export type QueryBookClubDiscussionArgs = {
 
 export type QueryBookClubDiscussionByBookArgs = {
   bookClubBookId: Scalars['ID']['input'];
+};
+
+
+export type QueryBookClubDiscussionMessageArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -3139,7 +3211,10 @@ export type SendAttachmentEmailsInput = {
 
 export type SendMessageInput = {
   content: Scalars['String']['input'];
+  /** The parent message inside a thread, denoting this message as a child */
   parentMessageId?: InputMaybe<Scalars['String']['input']>;
+  /** An inline reply reference, NOT a child of a thread */
+  replyToMessageId?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type SendToDevice = {
@@ -3723,6 +3798,10 @@ export type UpdateBookClubInput = {
   name?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type UpdateCustomEmojiInput = {
+  name: Scalars['String']['input'];
+};
+
 export type UpdateThumbnailInput = {
   /** A flag indicating whether the page is zero based (i.e. 0 is the first page) */
   isZeroBased?: InputMaybe<Scalars['Boolean']['input']>;
@@ -3944,7 +4023,10 @@ export type CreateBookClubMobileMutation = { __typename?: 'Mutation', createBook
 export type BookClubsScreenQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type BookClubsScreenQuery = { __typename?: 'Query', bookClubs: Array<{ __typename?: 'BookClub', id: string, name: string, slug: string, description?: string | null, membersCount: number, members: Array<{ __typename?: 'BookClubMember', id: string, displayName?: string | null, avatarUrl?: string | null }>, currentBook?: { __typename?: 'BookClubBook', id: string, imageUrl?: string | null, title?: string | null, entity?: { __typename?: 'Media', id: string, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } | null } | null }>, myBookClubInvitations: Array<{ __typename?: 'BookClubInvitation', id: string }> };
+export type BookClubsScreenQuery = { __typename?: 'Query', bookClubs: Array<(
+    { __typename?: 'BookClub', id: string }
+    & { ' $fragmentRefs'?: { 'BookClubCardFragment': BookClubCardFragment } }
+  )>, myBookClubInvitations: Array<{ __typename?: 'BookClubInvitation', id: string }> };
 
 export type BookClubInvitesScreenQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -4072,6 +4154,13 @@ export type BookSearchScreenQuery = { __typename?: 'Query', media: { __typename?
       & { ' $fragmentRefs'?: { 'BookGridItemFragment': BookGridItemFragment } }
     )>, pageInfo: { __typename: 'CursorPaginationInfo', currentCursor?: string | null, nextCursor?: string | null, limit: number } | { __typename: 'OffsetPaginationInfo' } } };
 
+export type BookClubContextLayoutQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type BookClubContextLayoutQuery = { __typename?: 'Query', bookClubById: { __typename?: 'BookClub', id: string, membership?: { __typename?: 'BookClubMember', id: string, role: BookClubMemberRole } | null } };
+
 export type BookClubPastDiscussionsQueryVariables = Exact<{
   bookClubId: Scalars['ID']['input'];
 }>;
@@ -4091,21 +4180,82 @@ export type BookClubDiscussionRoomQuery = { __typename?: 'Query', bookClubDiscus
 
 export type BookClubDiscussionMessagesQueryVariables = Exact<{
   discussionId: Scalars['ID']['input'];
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  after?: InputMaybe<Scalars['String']['input']>;
+  pagination?: InputMaybe<CursorPagination>;
 }>;
 
 
-export type BookClubDiscussionMessagesQuery = { __typename?: 'Query', bookClubDiscussionMessages: { __typename?: 'CursorPaginatedBookClubDiscussionMessageResponse', nodes: Array<{ __typename?: 'BookClubDiscussionMessage', id: string, content: string, timestamp: any, parentMessageId?: string | null, member?: { __typename?: 'BookClubMember', id: string, displayName?: string | null, avatarUrl?: string | null, username: string } | null }>, cursorInfo: { __typename?: 'CursorPaginationInfo', nextCursor?: string | null } } };
+export type BookClubDiscussionMessagesQuery = { __typename?: 'Query', bookClubDiscussionMessages: { __typename?: 'CursorPaginatedBookClubDiscussionMessageResponse', nodes: Array<{ __typename?: 'BookClubDiscussionMessage', id: string, content: string, timestamp: any, editedAt?: any | null, deletedAt?: string | null, isPinnedMessage: boolean, parentMessageId?: string | null, memberId?: string | null, threadChildrenCount: number, reactions: Array<{ __typename?: 'AggregatedReaction', emoji?: string | null, customEmojiId?: number | null, count: number, reactedByMe: boolean }>, replyTo?: { __typename?: 'BookClubDiscussionMessage', id: string, content: string, member?: { __typename?: 'BookClubMember', displayName?: string | null, username: string } | null } | null, member?: { __typename?: 'BookClubMember', id: string, displayName?: string | null, avatarUrl?: string | null, username: string } | null }>, cursorInfo: { __typename?: 'CursorPaginationInfo', nextCursor?: string | null, limit: number } } };
 
 export type SendDiscussionMessageMutationVariables = Exact<{
   discussionId: Scalars['ID']['input'];
-  content: Scalars['String']['input'];
-  parentMessageId?: InputMaybe<Scalars['String']['input']>;
+  input: SendMessageInput;
 }>;
 
 
 export type SendDiscussionMessageMutation = { __typename?: 'Mutation', sendMessage: { __typename?: 'BookClubDiscussionMessage', id: string } };
+
+export type ToggleMessageReactionMutationVariables = Exact<{
+  messageId: Scalars['ID']['input'];
+  emoji?: InputMaybe<Scalars['String']['input']>;
+  customEmojiId?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type ToggleMessageReactionMutation = { __typename?: 'Mutation', toggleReaction: boolean };
+
+export type DeleteDiscussionMessageMutationVariables = Exact<{
+  messageId: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteDiscussionMessageMutation = { __typename?: 'Mutation', deleteMessage: { __typename?: 'BookClubDiscussionMessage', id: string } };
+
+export type ThreadParentMessageQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type ThreadParentMessageQuery = { __typename?: 'Query', bookClubDiscussionMessage: { __typename?: 'BookClubDiscussionMessage', id: string, content: string, timestamp: any, editedAt?: any | null, deletedAt?: string | null, isPinnedMessage: boolean, parentMessageId?: string | null, memberId?: string | null, threadChildrenCount: number, reactions: Array<{ __typename?: 'AggregatedReaction', emoji?: string | null, customEmojiId?: number | null, count: number, reactedByMe: boolean }>, replyTo?: { __typename?: 'BookClubDiscussionMessage', id: string, content: string, member?: { __typename?: 'BookClubMember', displayName?: string | null, username: string } | null } | null, member?: { __typename?: 'BookClubMember', id: string, displayName?: string | null, avatarUrl?: string | null, username: string } | null } };
+
+export type ThreadRepliesQueryVariables = Exact<{
+  discussionId: Scalars['ID']['input'];
+  parentId?: InputMaybe<Scalars['ID']['input']>;
+  pagination?: InputMaybe<CursorPagination>;
+}>;
+
+
+export type ThreadRepliesQuery = { __typename?: 'Query', bookClubDiscussionMessages: { __typename?: 'CursorPaginatedBookClubDiscussionMessageResponse', nodes: Array<{ __typename?: 'BookClubDiscussionMessage', id: string, content: string, timestamp: any, editedAt?: any | null, deletedAt?: string | null, isPinnedMessage: boolean, parentMessageId?: string | null, memberId?: string | null, threadChildrenCount: number, reactions: Array<{ __typename?: 'AggregatedReaction', emoji?: string | null, customEmojiId?: number | null, count: number, reactedByMe: boolean }>, replyTo?: { __typename?: 'BookClubDiscussionMessage', id: string, content: string, member?: { __typename?: 'BookClubMember', displayName?: string | null, username: string } | null } | null, member?: { __typename?: 'BookClubMember', id: string, displayName?: string | null, avatarUrl?: string | null, username: string } | null }>, cursorInfo: { __typename?: 'CursorPaginationInfo', nextCursor?: string | null, limit: number } } };
+
+export type SendThreadReplyMutationVariables = Exact<{
+  discussionId: Scalars['ID']['input'];
+  input: SendMessageInput;
+}>;
+
+
+export type SendThreadReplyMutation = { __typename?: 'Mutation', sendMessage: { __typename?: 'BookClubDiscussionMessage', id: string } };
+
+export type ToggleThreadMessageReactionMutationVariables = Exact<{
+  messageId: Scalars['ID']['input'];
+  emoji?: InputMaybe<Scalars['String']['input']>;
+  customEmojiId?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type ToggleThreadMessageReactionMutation = { __typename?: 'Mutation', toggleReaction: boolean };
+
+export type DeleteThreadMessageMutationVariables = Exact<{
+  messageId: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteThreadMessageMutation = { __typename?: 'Mutation', deleteMessage: { __typename?: 'BookClubDiscussionMessage', id: string } };
+
+export type ThreadDiscussionInfoQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type ThreadDiscussionInfoQuery = { __typename?: 'Query', bookClubDiscussion: { __typename?: 'BookClubDiscussion', id: string, displayName: string, isLocked: boolean } };
 
 export type BookClubDetailScreenQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -4412,6 +4562,8 @@ export type AddBookSheetQuery = { __typename?: 'Query', media: { __typename?: 'P
       & { ' $fragmentRefs'?: { 'BookGridItemFragment': BookGridItemFragment } }
     )>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', totalPages: number, currentPage: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
 
+export type BookClubCardFragment = { __typename?: 'BookClub', id: string, name: string, slug: string, description?: string | null, membersCount: number, members: Array<{ __typename?: 'BookClubMember', id: string, displayName?: string | null, avatarUrl?: string | null }>, currentBook?: { __typename?: 'BookClubBook', id: string, imageUrl?: string | null, title?: string | null, entity?: { __typename: 'Media', id: string, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } | null } | null } & { ' $fragmentName'?: 'BookClubCardFragment' };
+
 export type CurrentBookCardFragment = { __typename?: 'BookClubBook', id: string, title?: string | null, author?: string | null, imageUrl?: string | null, addedAt: any, entity?: { __typename: 'Media', id: string, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } | null } & { ' $fragmentName'?: 'CurrentBookCardFragment' };
 
 export type AddBookToClubMutationVariables = Exact<{
@@ -4439,6 +4591,14 @@ export type PreviewBookSheetQueryVariables = Exact<{
 
 
 export type PreviewBookSheetQuery = { __typename?: 'Query', mediaById?: { __typename?: 'Media', id: string, resolvedName: string, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null }, metadata?: { __typename?: 'MediaMetadata', genres: Array<string>, writers: Array<string> } | null, tags: Array<{ __typename?: 'Tag', name: string }> } | null };
+
+export type SuggestionsPickerSheetQueryVariables = Exact<{
+  bookClubId: Scalars['ID']['input'];
+  status?: InputMaybe<BookClubSuggestionStatus>;
+}>;
+
+
+export type SuggestionsPickerSheetQuery = { __typename?: 'Query', bookClubSuggestions: Array<{ __typename?: 'BookClubBookSuggestion', id: string, title?: string | null, author?: string | null, url?: string | null, bookId?: string | null, notes?: string | null, suggestedBy: { __typename?: 'BookClubMember', user: { __typename?: 'User', username: string } } }> };
 
 export type LibraryActionMenuScanLibraryMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -5773,6 +5933,40 @@ export const BookMenuFragmentDoc = new TypedDocumentString(`
   }
 }
     `, {"fragmentName":"BookMenu"}) as unknown as TypedDocumentString<BookMenuFragment, unknown>;
+export const BookClubCardFragmentDoc = new TypedDocumentString(`
+    fragment BookClubCard on BookClub {
+  id
+  name
+  slug
+  description
+  membersCount
+  members {
+    id
+    displayName
+    avatarUrl
+  }
+  currentBook {
+    id
+    imageUrl
+    title
+    entity {
+      __typename
+      id
+      thumbnail {
+        url
+        metadata {
+          averageColor
+          colors {
+            color
+            percentage
+          }
+          thumbhash
+        }
+      }
+    }
+  }
+}
+    `, {"fragmentName":"BookClubCard"}) as unknown as TypedDocumentString<BookClubCardFragment, unknown>;
 export const CurrentBookCardFragmentDoc = new TypedDocumentString(`
     fragment CurrentBookCard on BookClubBook {
   id
@@ -6363,40 +6557,44 @@ export const BookClubsScreenDocument = new TypedDocumentString(`
     query BookClubsScreen {
   bookClubs {
     id
-    name
-    slug
-    description
-    membersCount
-    members {
-      id
-      displayName
-      avatarUrl
-    }
-    currentBook {
-      id
-      imageUrl
-      title
-      entity {
-        id
-        thumbnail {
-          url
-          metadata {
-            averageColor
-            colors {
-              color
-              percentage
-            }
-            thumbhash
-          }
-        }
-      }
-    }
+    ...BookClubCard
   }
   myBookClubInvitations {
     id
   }
 }
-    `) as unknown as TypedDocumentString<BookClubsScreenQuery, BookClubsScreenQueryVariables>;
+    fragment BookClubCard on BookClub {
+  id
+  name
+  slug
+  description
+  membersCount
+  members {
+    id
+    displayName
+    avatarUrl
+  }
+  currentBook {
+    id
+    imageUrl
+    title
+    entity {
+      __typename
+      id
+      thumbnail {
+        url
+        metadata {
+          averageColor
+          colors {
+            color
+            percentage
+          }
+          thumbhash
+        }
+      }
+    }
+  }
+}`) as unknown as TypedDocumentString<BookClubsScreenQuery, BookClubsScreenQueryVariables>;
 export const BookClubInvitesScreenDocument = new TypedDocumentString(`
     query BookClubInvitesScreen {
   myBookClubInvitations {
@@ -6905,6 +7103,17 @@ export const BookSearchScreenDocument = new TypedDocumentString(`
     percentageCompleted
   }
 }`) as unknown as TypedDocumentString<BookSearchScreenQuery, BookSearchScreenQueryVariables>;
+export const BookClubContextLayoutDocument = new TypedDocumentString(`
+    query BookClubContextLayout($id: ID!) {
+  bookClubById(id: $id) {
+    id
+    membership {
+      id
+      role
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<BookClubContextLayoutQuery, BookClubContextLayoutQueryVariables>;
 export const BookClubPastDiscussionsDocument = new TypedDocumentString(`
     query BookClubPastDiscussions($bookClubId: ID!) {
   previousBookClubDiscussions(bookClubId: $bookClubId) {
@@ -6952,16 +7161,32 @@ export const BookClubDiscussionRoomDocument = new TypedDocumentString(`
 }
     `) as unknown as TypedDocumentString<BookClubDiscussionRoomQuery, BookClubDiscussionRoomQueryVariables>;
 export const BookClubDiscussionMessagesDocument = new TypedDocumentString(`
-    query BookClubDiscussionMessages($discussionId: ID!, $limit: Int, $after: String) {
-  bookClubDiscussionMessages(
-    discussionId: $discussionId
-    pagination: {limit: $limit, after: $after}
-  ) {
+    query BookClubDiscussionMessages($discussionId: ID!, $pagination: CursorPagination) {
+  bookClubDiscussionMessages(discussionId: $discussionId, pagination: $pagination) {
     nodes {
       id
       content
       timestamp
+      editedAt
+      deletedAt
+      isPinnedMessage
       parentMessageId
+      memberId
+      threadChildrenCount
+      reactions {
+        emoji
+        customEmojiId
+        count
+        reactedByMe
+      }
+      replyTo {
+        id
+        content
+        member {
+          displayName
+          username
+        }
+      }
       member {
         id
         displayName
@@ -6971,20 +7196,146 @@ export const BookClubDiscussionMessagesDocument = new TypedDocumentString(`
     }
     cursorInfo {
       nextCursor
+      limit
     }
   }
 }
     `) as unknown as TypedDocumentString<BookClubDiscussionMessagesQuery, BookClubDiscussionMessagesQueryVariables>;
 export const SendDiscussionMessageDocument = new TypedDocumentString(`
-    mutation SendDiscussionMessage($discussionId: ID!, $content: String!, $parentMessageId: String) {
-  sendMessage(
-    discussionId: $discussionId
-    input: {content: $content, parentMessageId: $parentMessageId}
-  ) {
+    mutation SendDiscussionMessage($discussionId: ID!, $input: SendMessageInput!) {
+  sendMessage(discussionId: $discussionId, input: $input) {
     id
   }
 }
     `) as unknown as TypedDocumentString<SendDiscussionMessageMutation, SendDiscussionMessageMutationVariables>;
+export const ToggleMessageReactionDocument = new TypedDocumentString(`
+    mutation ToggleMessageReaction($messageId: ID!, $emoji: String, $customEmojiId: Int) {
+  toggleReaction(
+    messageId: $messageId
+    emoji: $emoji
+    customEmojiId: $customEmojiId
+  )
+}
+    `) as unknown as TypedDocumentString<ToggleMessageReactionMutation, ToggleMessageReactionMutationVariables>;
+export const DeleteDiscussionMessageDocument = new TypedDocumentString(`
+    mutation DeleteDiscussionMessage($messageId: ID!) {
+  deleteMessage(messageId: $messageId) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<DeleteDiscussionMessageMutation, DeleteDiscussionMessageMutationVariables>;
+export const ThreadParentMessageDocument = new TypedDocumentString(`
+    query ThreadParentMessage($id: ID!) {
+  bookClubDiscussionMessage(id: $id) {
+    id
+    content
+    timestamp
+    editedAt
+    deletedAt
+    isPinnedMessage
+    parentMessageId
+    memberId
+    threadChildrenCount
+    reactions {
+      emoji
+      customEmojiId
+      count
+      reactedByMe
+    }
+    replyTo {
+      id
+      content
+      member {
+        displayName
+        username
+      }
+    }
+    member {
+      id
+      displayName
+      avatarUrl
+      username
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<ThreadParentMessageQuery, ThreadParentMessageQueryVariables>;
+export const ThreadRepliesDocument = new TypedDocumentString(`
+    query ThreadReplies($discussionId: ID!, $parentId: ID, $pagination: CursorPagination) {
+  bookClubDiscussionMessages(
+    discussionId: $discussionId
+    parentId: $parentId
+    pagination: $pagination
+  ) {
+    nodes {
+      id
+      content
+      timestamp
+      editedAt
+      deletedAt
+      isPinnedMessage
+      parentMessageId
+      memberId
+      threadChildrenCount
+      reactions {
+        emoji
+        customEmojiId
+        count
+        reactedByMe
+      }
+      replyTo {
+        id
+        content
+        member {
+          displayName
+          username
+        }
+      }
+      member {
+        id
+        displayName
+        avatarUrl
+        username
+      }
+    }
+    cursorInfo {
+      nextCursor
+      limit
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<ThreadRepliesQuery, ThreadRepliesQueryVariables>;
+export const SendThreadReplyDocument = new TypedDocumentString(`
+    mutation SendThreadReply($discussionId: ID!, $input: SendMessageInput!) {
+  sendMessage(discussionId: $discussionId, input: $input) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<SendThreadReplyMutation, SendThreadReplyMutationVariables>;
+export const ToggleThreadMessageReactionDocument = new TypedDocumentString(`
+    mutation ToggleThreadMessageReaction($messageId: ID!, $emoji: String, $customEmojiId: Int) {
+  toggleReaction(
+    messageId: $messageId
+    emoji: $emoji
+    customEmojiId: $customEmojiId
+  )
+}
+    `) as unknown as TypedDocumentString<ToggleThreadMessageReactionMutation, ToggleThreadMessageReactionMutationVariables>;
+export const DeleteThreadMessageDocument = new TypedDocumentString(`
+    mutation DeleteThreadMessage($messageId: ID!) {
+  deleteMessage(messageId: $messageId) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<DeleteThreadMessageMutation, DeleteThreadMessageMutationVariables>;
+export const ThreadDiscussionInfoDocument = new TypedDocumentString(`
+    query ThreadDiscussionInfo($id: ID!) {
+  bookClubDiscussion(id: $id) {
+    id
+    displayName
+    isLocked
+  }
+}
+    `) as unknown as TypedDocumentString<ThreadDiscussionInfoQuery, ThreadDiscussionInfoQueryVariables>;
 export const BookClubDetailScreenDocument = new TypedDocumentString(`
     query BookClubDetailScreen($id: ID!) {
   bookClubById(id: $id) {
@@ -7803,6 +8154,23 @@ export const PreviewBookSheetDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<PreviewBookSheetQuery, PreviewBookSheetQueryVariables>;
+export const SuggestionsPickerSheetDocument = new TypedDocumentString(`
+    query SuggestionsPickerSheet($bookClubId: ID!, $status: BookClubSuggestionStatus) {
+  bookClubSuggestions(bookClubId: $bookClubId, status: $status) {
+    id
+    title
+    author
+    url
+    bookId
+    notes
+    suggestedBy {
+      user {
+        username
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<SuggestionsPickerSheetQuery, SuggestionsPickerSheetQueryVariables>;
 export const LibraryActionMenuScanLibraryDocument = new TypedDocumentString(`
     mutation LibraryActionMenuScanLibrary($id: ID!) {
   scanLibrary(id: $id)

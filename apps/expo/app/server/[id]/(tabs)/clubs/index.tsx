@@ -18,34 +18,7 @@ const query = graphql(`
 	query BookClubsScreen {
 		bookClubs {
 			id
-			name
-			slug
-			description
-			membersCount
-			members {
-				id
-				displayName
-				avatarUrl
-			}
-			currentBook {
-				id
-				imageUrl
-				title
-				entity {
-					id
-					thumbnail {
-						url
-						metadata {
-							averageColor
-							colors {
-								color
-								percentage
-							}
-							thumbhash
-						}
-					}
-				}
-			}
+			...BookClubCard
 		}
 		myBookClubInvitations {
 			id

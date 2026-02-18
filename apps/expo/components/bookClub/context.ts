@@ -7,7 +7,6 @@ export type IBookClubContext = {
 		id: string
 		role: BookClubMemberRole
 	} | null
-	refetchClub: () => void
 }
 
 export const BookClubContext = createContext<IBookClubContext | null>(null)

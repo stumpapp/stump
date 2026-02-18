@@ -26,6 +26,8 @@ pub struct Model {
 	#[graphql(skip)]
 	pub hashed_password: String,
 	pub is_server_owner: bool,
+	// TODO: Support image uploads instead and store a path, or both? OIDC will be URL but most people will just want to upload an avatar
+	// I know I cam back to this feature for book clubs and was annoyed at myself for doing this lol
 	#[sea_orm(column_type = "Text", nullable)]
 	pub avatar_url: Option<String>,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]

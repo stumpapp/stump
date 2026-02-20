@@ -9,7 +9,7 @@ use axum::{
 	Json,
 };
 use base64::{engine::general_purpose::STANDARD, Engine};
-use graphql::data::AuthContext;
+use graphql::data::{AuthContext, ServiceContext};
 use models::{
 	entity::{
 		api_key::{self, APIKeyWithUser},
@@ -50,6 +50,14 @@ use super::host::HostExtractor;
 
 pub const STUMP_SAVE_BASIC_SESSION_HEADER: &str = "X-Stump-Save-Session";
 
+fn inject_avatar_url(mut user: AuthUser, service: ServiceContext) -> AuthUser {
+	if user.avatar_path.is_some() {
+		user.avatar_url =
+			Some(service.format_url(format!("/api/v2/users/{}/avatar", user.id)));
+	}
+	user
+}
+
 /// A middleware to authenticate a user by one of the three methods:
 /// - Bearer token (JWT or API key)
 /// - Session cookie
@@ -84,6 +92,9 @@ pub async fn auth_middleware(
 		|path| path.0.path().to_owned(),
 	);
 
+	let service =
+		ServiceContext::new(host_details.host.clone(), host_details.scheme.clone());
+
 	let session_user = fetch_session_user(&session, ctx.conn.as_ref())
 		.await
 		.map_err(|e| {
@@ -93,7 +104,7 @@ pub async fn auth_middleware(
 
 	if let Some(user) = session_user {
 		req.extensions_mut().insert(AuthContext {
-			user,
+			user: inject_avatar_url(user, service),
 			api_key: None,
 		});
 		return Ok(next.run(req).await);
@@ -143,7 +154,7 @@ pub async fn auth_middleware(
 		return Err(APIError::Unauthorized.into_response());
 	};
 
-	let req_ctx = match auth_header {
+	let mut req_ctx = match auth_header {
 		_ if auth_header.starts_with("Bearer ") && auth_header.len() > 7 => {
 			let token = auth_header[7..].to_owned();
 			handle_bearer_auth(token, ctx.conn.as_ref())
@@ -163,6 +174,8 @@ pub async fn auth_middleware(
 		},
 		_ => return Err(APIError::Unauthorized.into_response()),
 	};
+
+	req_ctx.user = inject_avatar_url(req_ctx.user, service);
 
 	req.extensions_mut().insert(req_ctx);
 

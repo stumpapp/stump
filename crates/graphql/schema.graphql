@@ -1688,6 +1688,16 @@ type Mutation {
 	"""
 	uploadMediaThumbnailBase64(id: ID!, image: String!): Media!
 	deleteLoginActivity: Int!
+	"""
+	Upload an avatar image for either the authenticated viewer or for any user if
+	called by a server owner
+	"""
+	uploadUserAvatar(id: ID, upload: Upload!): User!
+	"""
+	Delete the avatar for the authenticated viewer, or for any user if
+	called by a server owner (by passing `id`).
+	"""
+	deleteUserAvatar(id: ID): User!
 	createUser(input: CreateUserInput!): User!
 	updateViewer(input: UpdateUserInput!): User!
 	updateViewerPreferences(input: UpdateUserPreferencesInput!): UserPreferences!
@@ -2801,7 +2811,6 @@ input UpdateThumbnailInput {
 input UpdateUserInput {
 	username: String!
 	password: String
-	avatarUrl: String
 	permissions: [UserPermission!]!
 	ageRestriction: AgeRestrictionInput = null
 	maxSessionsAllowed: Int
@@ -2856,12 +2865,13 @@ type User {
 	id: String!
 	username: String!
 	isServerOwner: Boolean!
-	avatarUrl: String
+	avatarPath: String
 	createdAt: DateTime!
 	deletedAt: DateTime
 	isLocked: Boolean!
 	maxSessionsAllowed: Int
 	oidcEmail: String
+	avatarUrl: String
 	ageRestriction: AgeRestriction
 	continueReading(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
 	permissions: [UserPermission!]!

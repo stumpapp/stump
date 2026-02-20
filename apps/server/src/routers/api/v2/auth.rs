@@ -8,7 +8,7 @@ use axum::{
 };
 use axum_extra::{headers::UserAgent, TypedHeader};
 use chrono::{DateTime, Duration, FixedOffset, Utc};
-use graphql::data::AuthContext;
+use graphql::data::{AuthContext, ServiceContext};
 use models::entity::{
 	session,
 	user::{self, AuthUser, LoginUser},
@@ -32,7 +32,7 @@ use crate::{
 	},
 	errors::{APIError, APIResult},
 	http_server::StumpRequestInfo,
-	middleware::auth::auth_middleware,
+	middleware::{auth::auth_middleware, host::HostExtractor},
 	utils::{default_true, fetch_session_user, hash_password, verify_password},
 };
 
@@ -168,6 +168,14 @@ async fn handle_remove_earliest_session(
 	}
 }
 
+fn inject_avatar_url(mut user: AuthUser, service: ServiceContext) -> AuthUser {
+	if user.avatar_path.is_some() {
+		user.avatar_url =
+			Some(service.format_url(format!("/api/v2/users/{}/avatar", user.id)));
+	}
+	user
+}
+
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct GeneratedToken {
@@ -190,6 +198,7 @@ async fn login(
 	ConnectInfo(request_info): ConnectInfo<StumpRequestInfo>,
 	session: Session,
 	State(state): State<AppState>,
+	HostExtractor(details): HostExtractor,
 	Query(AuthenticationOptions {
 		generate_token,
 		create_session,
@@ -197,6 +206,7 @@ async fn login(
 	Json(PasswordUserInput { username, password }): Json<PasswordUserInput>,
 ) -> APIResult<Json<LoginResponse>> {
 	let config = state.config.clone();
+	let service = ServiceContext::new(details.host, details.scheme);
 
 	let is_oidc_only_auth = config
 		.oidc
@@ -234,7 +244,10 @@ async fn login(
 			}
 
 			// The user already has a session, so we just return them immediately
-			return Ok(Json(LoginResponse::User(user.into())));
+			return Ok(Json(LoginResponse::User(inject_avatar_url(
+				user.into(),
+				service,
+			))));
 		},
 		_ => {},
 	}
@@ -306,7 +319,7 @@ async fn login(
 		enforce_max_sessions(&user, state.conn.as_ref()).await?;
 	}
 
-	let auth_user = AuthUser::from(user);
+	let auth_user = inject_avatar_url(AuthUser::from(user), service);
 
 	if create_session {
 		session
@@ -356,9 +369,11 @@ async fn logout(session: Session) -> APIResult<impl IntoResponse> {
 pub async fn register(
 	session: Session,
 	State(ctx): State<AppState>,
+	HostExtractor(details): HostExtractor,
 	Json(input): Json<PasswordUserInput>,
 ) -> APIResult<Json<AuthUser>> {
 	let config = ctx.config.clone();
+	let service = ServiceContext::new(details.host, details.scheme);
 
 	let is_oidc_only_auth = config
 		.oidc
@@ -431,7 +446,7 @@ pub async fn register(
 
 	tx.commit().await?;
 
-	let auth_user = AuthUser::from(auth_user);
+	let auth_user = inject_avatar_url(AuthUser::from(auth_user), service);
 
 	Ok(Json(auth_user))
 }

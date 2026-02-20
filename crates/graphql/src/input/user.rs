@@ -24,7 +24,6 @@ pub struct CreateUserInput {
 pub struct UpdateUserInput {
 	pub username: String,
 	pub password: Option<String>,
-	pub avatar_url: Option<String>,
 	pub permissions: Vec<UserPermission>,
 	#[graphql(default)]
 	pub age_restriction: Option<AgeRestrictionInput>,

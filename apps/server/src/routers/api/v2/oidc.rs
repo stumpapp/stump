@@ -22,6 +22,7 @@ use crate::{
 	errors::{APIError, APIResult},
 	middleware::host::{HostDetails, HostExtractor},
 	routers::enforce_max_sessions,
+	utils::http::download_image,
 };
 
 pub(crate) fn mount() -> Router<AppState> {
@@ -200,8 +201,8 @@ async fn callback(
 
 	let (user_model, is_new_user) = if let Some(user) = existing_user {
 		tracing::debug!(user_id = %user.id, "Existing OIDC user logging in");
-		// TODO(oidc): Update avatar_url if it changed from the provider? Idk if that would be desired behavior. The problem
-		// could be if I update my avatar in Stump then it gets overwritten by the provider on next login. I would want to avoid that.
+		// TODO(oidc): Re-download avatar from provider if the picture URL has changed?
+		// Currently the avatar is only fetched once at registration
 		(user, false)
 	} else {
 		let allow_registration = config
@@ -236,7 +237,6 @@ async fn callback(
 			hashed_password: Set(String::new()), // OIDC users don't have a password
 			oidc_issuer_id: Set(Some(claims.subject.clone())),
 			oidc_email: Set(Some(claims.email.clone())),
-			avatar_url: Set(claims.picture.clone()),
 			is_server_owner: Set(is_server_owner),
 			..Default::default()
 		};
@@ -254,6 +254,42 @@ async fn callback(
 		let user = updated_user.update(&tx).await?;
 
 		tx.commit().await?;
+
+		if let Some(picture_url) = &claims.picture {
+			match download_image(picture_url).await {
+				Ok((bytes, ext)) => {
+					let dest_path = ctx
+						.config
+						.get_avatars_dir()
+						.join(format!("{}.{}", user.id, ext));
+
+					match tokio::fs::write(&dest_path, &bytes).await {
+						Ok(_) => {
+							let avatar_path_str = dest_path.to_string_lossy().to_string();
+							if let Err(e) = user::Entity::update_many()
+								.col_expr(
+									user::Column::AvatarPath,
+									sea_orm::sea_query::Expr::value(Some(
+										avatar_path_str,
+									)),
+								)
+								.filter(user::Column::Id.eq(user.id.clone()))
+								.exec(ctx.conn.as_ref())
+								.await
+							{
+								tracing::warn!(?e, "Failed to persist OIDC avatar path");
+							}
+						},
+						Err(e) => {
+							tracing::warn!(?e, "Failed to write OIDC avatar to disk")
+						},
+					}
+				},
+				Err(e) => {
+					tracing::warn!(?e, "Failed to download OIDC avatar — continuing")
+				},
+			}
+		}
 
 		tracing::info!(user_id = %user.id, is_server_owner = %is_server_owner, "Created new OIDC user");
 

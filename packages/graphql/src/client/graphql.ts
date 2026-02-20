@@ -1661,6 +1661,11 @@ export type Mutation = {
    */
   deleteTags: Array<Tag>;
   deleteUser: User;
+  /**
+   * Delete the avatar for the authenticated viewer, or for any user if
+   * called by a server owner (by passing `id`).
+   */
+  deleteUserAvatar: User;
   deleteUserSessions: Scalars['Int']['output'];
   /** Edit your own message */
   editMessage: BookClubDiscussionMessage;
@@ -1796,6 +1801,11 @@ export type Mutation = {
    * implement multipart uploads for
    */
   uploadSeriesThumbnailBase64: Series;
+  /**
+   * Upload an avatar image for either the authenticated viewer or for any user if
+   * called by a server owner
+   */
+  uploadUserAvatar: User;
   /**
    * "Visit" a library, which will upsert a record of the user's last visit to the library.
    * This is used to inform the UI of the last library which was visited by the user
@@ -2072,6 +2082,11 @@ export type MutationDeleteTagsArgs = {
 export type MutationDeleteUserArgs = {
   hardDelete?: InputMaybe<Scalars['Boolean']['input']>;
   id: Scalars['ID']['input'];
+};
+
+
+export type MutationDeleteUserAvatarArgs = {
+  id?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -2426,6 +2441,12 @@ export type MutationUploadSeriesThumbnailArgs = {
 export type MutationUploadSeriesThumbnailBase64Args = {
   id: Scalars['ID']['input'];
   image: Scalars['String']['input'];
+};
+
+
+export type MutationUploadUserAvatarArgs = {
+  id?: InputMaybe<Scalars['ID']['input']>;
+  upload: Scalars['Upload']['input'];
 };
 
 
@@ -3820,7 +3841,6 @@ export type UpdateThumbnailInput = {
 
 export type UpdateUserInput = {
   ageRestriction?: InputMaybe<AgeRestrictionInput>;
-  avatarUrl?: InputMaybe<Scalars['String']['input']>;
   maxSessionsAllowed?: InputMaybe<Scalars['Int']['input']>;
   password?: InputMaybe<Scalars['String']['input']>;
   permissions: Array<UserPermission>;
@@ -3873,6 +3893,7 @@ export type UploadSeriesInput = {
 export type User = {
   __typename?: 'User';
   ageRestriction?: Maybe<AgeRestriction>;
+  avatarPath?: Maybe<Scalars['String']['output']>;
   avatarUrl?: Maybe<Scalars['String']['output']>;
   continueReading: PaginatedMediaResponse;
   createdAt: Scalars['DateTime']['output'];
@@ -5411,12 +5432,24 @@ export type DeleteApiKeyConfirmModalMutationVariables = Exact<{
 
 export type DeleteApiKeyConfirmModalMutation = { __typename?: 'Mutation', deleteApiKey: { __typename?: 'Apikey', id: number } };
 
+export type UploadUserAvatarMutationVariables = Exact<{
+  file: Scalars['Upload']['input'];
+}>;
+
+
+export type UploadUserAvatarMutation = { __typename?: 'Mutation', uploadUserAvatar: { __typename?: 'User', id: string, avatarUrl?: string | null } };
+
+export type DeleteUserAvatarMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type DeleteUserAvatarMutation = { __typename?: 'Mutation', deleteUserAvatar: { __typename?: 'User', id: string, avatarUrl?: string | null } };
+
 export type UpdateUserProfileFormMutationVariables = Exact<{
   input: UpdateUserInput;
 }>;
 
 
-export type UpdateUserProfileFormMutation = { __typename?: 'Mutation', updateViewer: { __typename?: 'User', id: string, username: string, avatarUrl?: string | null } };
+export type UpdateUserProfileFormMutation = { __typename?: 'Mutation', updateViewer: { __typename?: 'User', id: string, username: string } };
 
 export type NavigationArrangementQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -10187,12 +10220,27 @@ export const DeleteApiKeyConfirmModalDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<DeleteApiKeyConfirmModalMutation, DeleteApiKeyConfirmModalMutationVariables>;
+export const UploadUserAvatarDocument = new TypedDocumentString(`
+    mutation UploadUserAvatar($file: Upload!) {
+  uploadUserAvatar(upload: $file) {
+    id
+    avatarUrl
+  }
+}
+    `) as unknown as TypedDocumentString<UploadUserAvatarMutation, UploadUserAvatarMutationVariables>;
+export const DeleteUserAvatarDocument = new TypedDocumentString(`
+    mutation DeleteUserAvatar {
+  deleteUserAvatar {
+    id
+    avatarUrl
+  }
+}
+    `) as unknown as TypedDocumentString<DeleteUserAvatarMutation, DeleteUserAvatarMutationVariables>;
 export const UpdateUserProfileFormDocument = new TypedDocumentString(`
     mutation UpdateUserProfileForm($input: UpdateUserInput!) {
   updateViewer(input: $input) {
     id
     username
-    avatarUrl
   }
 }
     `) as unknown as TypedDocumentString<UpdateUserProfileFormMutation, UpdateUserProfileFormMutationVariables>;

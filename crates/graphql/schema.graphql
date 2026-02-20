@@ -42,6 +42,7 @@ input AgeRestrictionInput {
 type AggregatedReaction {
 	emoji: String
 	customEmojiId: Int
+	customEmojiUrl: String
 	count: Int!
 	reactedByMe: Boolean!
 }
@@ -478,15 +479,8 @@ type CustomEmoji {
 	fileExtension: String!
 	createdAt: DateTime!
 	createdById: String!
-}
-
-type CustomEmojiModel {
-	id: Int!
-	name: String!
-	isAnimated: Boolean!
-	fileExtension: String!
-	createdAt: DateTime!
-	createdById: String!
+	"A reference to the URL of the custom emoji's thumbnail. This is not the full image, but a smaller thumbnail version."
+	url: String!
 }
 
 """
@@ -1943,7 +1937,7 @@ type Query {
 	bookClubById(id: ID!): BookClub!
 	bookClubBySlug(slug: String!): BookClub
 	"List the custom emojis available on this server"
-	customEmojis: [CustomEmojiModel!]!
+	customEmojis: [CustomEmoji!]!
 	"Get a club book by ID"
 	bookClubBook(id: ID!): BookClubBook!
 	"Get a discussion by ID"

@@ -2,6 +2,8 @@ import { FlashList } from '@shopify/flash-list'
 import { useCallback, useRef, useState } from 'react'
 import { View } from 'react-native'
 
+import type { EmojiSelection } from '~/components/emoji/types'
+
 import Message, { type MessageData } from './Message'
 import { MessageActionSheet, type MessageActionSheetRef } from './MessageActionSheet'
 import MessageComposer from './MessageComposer'
@@ -11,7 +13,7 @@ type DiscussionRoomProps = {
 	messages: MessageData[]
 	onSend: (content: string, replyToMessageId?: string) => void
 	isSending?: boolean
-	onToggleReaction: (messageId: string, emoji?: string, customEmojiId?: number) => void
+	onToggleReaction: (messageId: string, selection: EmojiSelection) => void
 	onDelete: (messageId: string) => void
 	// Note: If on thread screen this should not be provided
 	onThreadPress?: (message: MessageData) => void
@@ -78,7 +80,7 @@ export default function DiscussionRoom({
 				onStartReachedThreshold={0.5}
 				drawDistance={250}
 				contentContainerStyle={{ paddingVertical: 8 }}
-				ItemSeparatorComponent={() => <View className="h-px" />}
+				ItemSeparatorComponent={() => <View className="h-0.5" />}
 				ListHeaderComponent={listHeader}
 			/>
 

@@ -76,6 +76,7 @@ export type AggregatedReaction = {
   __typename?: 'AggregatedReaction';
   count: Scalars['Int']['output'];
   customEmojiId?: Maybe<Scalars['Int']['output']>;
+  customEmojiUrl?: Maybe<Scalars['String']['output']>;
   emoji?: Maybe<Scalars['String']['output']>;
   reactedByMe: Scalars['Boolean']['output'];
 };
@@ -530,16 +531,8 @@ export type CustomEmoji = {
   id: Scalars['Int']['output'];
   isAnimated: Scalars['Boolean']['output'];
   name: Scalars['String']['output'];
-};
-
-export type CustomEmojiModel = {
-  __typename?: 'CustomEmojiModel';
-  createdAt: Scalars['DateTime']['output'];
-  createdById: Scalars['String']['output'];
-  fileExtension: Scalars['String']['output'];
-  id: Scalars['Int']['output'];
-  isAnimated: Scalars['Boolean']['output'];
-  name: Scalars['String']['output'];
+  /** A reference to the URL of the custom emoji's thumbnail. This is not the full image, but a smaller thumbnail version. */
+  url: Scalars['String']['output'];
 };
 
 export type DeleteJobAssociatedLogs = {
@@ -2687,7 +2680,7 @@ export type Query = {
   /** Get all bookmarks for a single epub by its media ID */
   bookmarksByMediaId: Array<Bookmark>;
   /** List the custom emojis available on this server */
-  customEmojis: Array<CustomEmojiModel>;
+  customEmojis: Array<CustomEmoji>;
   duplicateMedia: Array<Media>;
   emailDeviceById?: Maybe<RegisteredEmailDevice>;
   emailDevices: Array<RegisteredEmailDevice>;
@@ -4184,7 +4177,7 @@ export type BookClubDiscussionMessagesQueryVariables = Exact<{
 }>;
 
 
-export type BookClubDiscussionMessagesQuery = { __typename?: 'Query', bookClubDiscussionMessages: { __typename?: 'CursorPaginatedBookClubDiscussionMessageResponse', nodes: Array<{ __typename?: 'BookClubDiscussionMessage', id: string, content: string, timestamp: any, editedAt?: any | null, deletedAt?: string | null, isPinnedMessage: boolean, parentMessageId?: string | null, memberId?: string | null, threadChildrenCount: number, reactions: Array<{ __typename?: 'AggregatedReaction', emoji?: string | null, customEmojiId?: number | null, count: number, reactedByMe: boolean }>, replyTo?: { __typename?: 'BookClubDiscussionMessage', id: string, content: string, member?: { __typename?: 'BookClubMember', displayName?: string | null, username: string } | null } | null, member?: { __typename?: 'BookClubMember', id: string, displayName?: string | null, avatarUrl?: string | null, username: string } | null }>, cursorInfo: { __typename?: 'CursorPaginationInfo', nextCursor?: string | null, limit: number } } };
+export type BookClubDiscussionMessagesQuery = { __typename?: 'Query', bookClubDiscussionMessages: { __typename?: 'CursorPaginatedBookClubDiscussionMessageResponse', nodes: Array<{ __typename?: 'BookClubDiscussionMessage', id: string, content: string, timestamp: any, editedAt?: any | null, deletedAt?: string | null, isPinnedMessage: boolean, parentMessageId?: string | null, memberId?: string | null, threadChildrenCount: number, reactions: Array<{ __typename?: 'AggregatedReaction', emoji?: string | null, customEmojiId?: number | null, customEmojiUrl?: string | null, count: number, reactedByMe: boolean }>, replyTo?: { __typename?: 'BookClubDiscussionMessage', id: string, content: string, member?: { __typename?: 'BookClubMember', displayName?: string | null, username: string, avatarUrl?: string | null } | null } | null, member?: { __typename?: 'BookClubMember', id: string, displayName?: string | null, avatarUrl?: string | null, username: string } | null }>, cursorInfo: { __typename?: 'CursorPaginationInfo', nextCursor?: string | null, limit: number } } };
 
 export type SendDiscussionMessageMutationVariables = Exact<{
   discussionId: Scalars['ID']['input'];
@@ -4215,7 +4208,7 @@ export type ThreadParentMessageQueryVariables = Exact<{
 }>;
 
 
-export type ThreadParentMessageQuery = { __typename?: 'Query', bookClubDiscussionMessage: { __typename?: 'BookClubDiscussionMessage', id: string, content: string, timestamp: any, editedAt?: any | null, deletedAt?: string | null, isPinnedMessage: boolean, parentMessageId?: string | null, memberId?: string | null, threadChildrenCount: number, reactions: Array<{ __typename?: 'AggregatedReaction', emoji?: string | null, customEmojiId?: number | null, count: number, reactedByMe: boolean }>, replyTo?: { __typename?: 'BookClubDiscussionMessage', id: string, content: string, member?: { __typename?: 'BookClubMember', displayName?: string | null, username: string } | null } | null, member?: { __typename?: 'BookClubMember', id: string, displayName?: string | null, avatarUrl?: string | null, username: string } | null } };
+export type ThreadParentMessageQuery = { __typename?: 'Query', bookClubDiscussionMessage: { __typename?: 'BookClubDiscussionMessage', id: string, content: string, timestamp: any, editedAt?: any | null, deletedAt?: string | null, isPinnedMessage: boolean, parentMessageId?: string | null, memberId?: string | null, threadChildrenCount: number, reactions: Array<{ __typename?: 'AggregatedReaction', emoji?: string | null, customEmojiId?: number | null, customEmojiUrl?: string | null, count: number, reactedByMe: boolean }>, replyTo?: { __typename?: 'BookClubDiscussionMessage', id: string, content: string, member?: { __typename?: 'BookClubMember', displayName?: string | null, username: string, avatarUrl?: string | null } | null } | null, member?: { __typename?: 'BookClubMember', id: string, displayName?: string | null, avatarUrl?: string | null, username: string } | null } };
 
 export type ThreadRepliesQueryVariables = Exact<{
   discussionId: Scalars['ID']['input'];
@@ -4599,6 +4592,11 @@ export type SuggestionsPickerSheetQueryVariables = Exact<{
 
 
 export type SuggestionsPickerSheetQuery = { __typename?: 'Query', bookClubSuggestions: Array<{ __typename?: 'BookClubBookSuggestion', id: string, title?: string | null, author?: string | null, url?: string | null, bookId?: string | null, notes?: string | null, suggestedBy: { __typename?: 'BookClubMember', user: { __typename?: 'User', username: string } } }> };
+
+export type UseEmojisQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type UseEmojisQuery = { __typename?: 'Query', customEmojis: Array<{ __typename?: 'CustomEmoji', id: number, name: string, isAnimated: boolean, url: string }> };
 
 export type LibraryActionMenuScanLibraryMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -7176,6 +7174,7 @@ export const BookClubDiscussionMessagesDocument = new TypedDocumentString(`
       reactions {
         emoji
         customEmojiId
+        customEmojiUrl
         count
         reactedByMe
       }
@@ -7185,6 +7184,7 @@ export const BookClubDiscussionMessagesDocument = new TypedDocumentString(`
         member {
           displayName
           username
+          avatarUrl
         }
       }
       member {
@@ -7239,6 +7239,7 @@ export const ThreadParentMessageDocument = new TypedDocumentString(`
     reactions {
       emoji
       customEmojiId
+      customEmojiUrl
       count
       reactedByMe
     }
@@ -7248,6 +7249,7 @@ export const ThreadParentMessageDocument = new TypedDocumentString(`
       member {
         displayName
         username
+        avatarUrl
       }
     }
     member {
@@ -8171,6 +8173,16 @@ export const SuggestionsPickerSheetDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<SuggestionsPickerSheetQuery, SuggestionsPickerSheetQueryVariables>;
+export const UseEmojisDocument = new TypedDocumentString(`
+    query useEmojis {
+  customEmojis {
+    id
+    name
+    isAnimated
+    url
+  }
+}
+    `) as unknown as TypedDocumentString<UseEmojisQuery, UseEmojisQueryVariables>;
 export const LibraryActionMenuScanLibraryDocument = new TypedDocumentString(`
     mutation LibraryActionMenuScanLibrary($id: ID!) {
   scanLibrary(id: $id)

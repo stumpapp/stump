@@ -8,7 +8,7 @@ import { KeyboardAvoidingView } from 'react-native-keyboard-controller'
 
 import { useBookClubContext } from '~/components/bookClub/context'
 import { DiscussionRoom, Message, type MessageData } from '~/components/bookClub/discussion'
-import { Text } from '~/components/ui'
+import type { EmojiSelection } from '~/components/emoji/types'
 
 const parentMessageQuery = graphql(`
 	query ThreadParentMessage($id: ID!) {
@@ -25,6 +25,7 @@ const parentMessageQuery = graphql(`
 			reactions {
 				emoji
 				customEmojiId
+				customEmojiUrl
 				count
 				reactedByMe
 			}
@@ -34,6 +35,7 @@ const parentMessageQuery = graphql(`
 				member {
 					displayName
 					username
+					avatarUrl
 				}
 			}
 			member {
@@ -201,8 +203,13 @@ export default function ThreadScreen() {
 	}
 
 	const handleToggleReaction = useCallback(
-		async (msgId: string, emoji?: string, customEmojiId?: number) => {
-			await toggleReaction({ messageId: msgId, emoji, customEmojiId })
+		async (msgId: string, selection: EmojiSelection) => {
+			if (selection.kind === 'unicode') {
+				await toggleReaction({ messageId: msgId, emoji: selection.emoji, customEmojiId: null })
+			} else {
+				await toggleReaction({ messageId: msgId, emoji: null, customEmojiId: selection.emojiId })
+			}
+
 			queryClient.invalidateQueries({ queryKey: repliesQueryKey })
 		},
 		[toggleReaction, queryClient, repliesQueryKey],
@@ -222,22 +229,16 @@ export default function ThreadScreen() {
 	const threadHeader = useMemo(() => {
 		if (!parentMessage) return undefined
 		return (
-			<View className="border-b border-edge pb-2">
+			<View className="border-b border-edge">
 				<Message
 					message={parentMessage}
 					currentMemberId={currentMemberId}
 					onToggleReaction={handleToggleReaction}
 					isThreadHeader
 				/>
-
-				<View className="mx-4 mt-1">
-					<Text className="text-xs font-medium text-foreground-muted">
-						{replies.length} {replies.length === 1 ? 'reply' : 'replies'}
-					</Text>
-				</View>
 			</View>
 		)
-	}, [parentMessage, currentMemberId, handleToggleReaction, replies.length])
+	}, [parentMessage, currentMemberId, handleToggleReaction])
 
 	return (
 		<KeyboardAvoidingView

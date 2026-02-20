@@ -6,13 +6,14 @@ use models::entity::{
 };
 use sea_orm::{prelude::*, ColumnTrait, EntityTrait, QueryFilter, QuerySelect};
 
-use crate::data::CoreContext;
+use crate::data::{AuthContext, CoreContext, ServiceContext};
 use crate::object::book_club_member::BookClubMember;
 
 #[derive(Debug, SimpleObject)]
 pub struct AggregatedReaction {
 	pub emoji: Option<String>,
 	pub custom_emoji_id: Option<i32>,
+	pub custom_emoji_url: Option<String>,
 	pub count: i64,
 	pub reacted_by_me: bool,
 }
@@ -51,7 +52,8 @@ impl BookClubDiscussionMessage {
 	/// TODO(dataloader): Create dataloader
 	async fn reactions(&self, ctx: &Context<'_>) -> Result<Vec<AggregatedReaction>> {
 		let core = ctx.data::<CoreContext>()?;
-		let auth_ctx = ctx.data::<crate::data::AuthContext>()?;
+		let service = ctx.data::<ServiceContext>()?;
+		let auth_ctx = ctx.data::<AuthContext>()?;
 
 		let my_member_id = book_club_member::Entity::find_by_club_for_user(
 			&auth_ctx.user,
@@ -88,6 +90,8 @@ impl BookClubDiscussionMessage {
 				AggregatedReaction {
 					emoji,
 					custom_emoji_id,
+					custom_emoji_url: custom_emoji_id
+						.map(|id| service.format_url(format!("/api/v2/emojis/{}", id))),
 					count,
 					reacted_by_me,
 				}

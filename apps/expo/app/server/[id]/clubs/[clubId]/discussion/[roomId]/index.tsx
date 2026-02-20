@@ -9,6 +9,7 @@ import { KeyboardAvoidingView } from 'react-native-keyboard-controller'
 import { useActiveServer } from '~/components/activeServer'
 import type { MessageData } from '~/components/bookClub/discussion'
 import { DiscussionRoom } from '~/components/bookClub/discussion'
+import type { EmojiSelection } from '~/components/emoji/types'
 
 const discussionQuery = graphql(`
 	query BookClubDiscussionRoom($id: ID!) {
@@ -41,6 +42,7 @@ const messagesQuery = graphql(`
 				reactions {
 					emoji
 					customEmojiId
+					customEmojiUrl
 					count
 					reactedByMe
 				}
@@ -50,6 +52,7 @@ const messagesQuery = graphql(`
 					member {
 						displayName
 						username
+						avatarUrl
 					}
 				}
 				member {
@@ -158,12 +161,13 @@ export default function Screen() {
 		queryClient.invalidateQueries({ queryKey: messagesQueryKey })
 	}
 
-	const handleToggleReaction = async (
-		messageId: string,
-		emoji?: string,
-		customEmojiId?: number,
-	) => {
-		await toggleReaction({ messageId, emoji, customEmojiId })
+	const handleToggleReaction = async (messageId: string, selection: EmojiSelection) => {
+		if (selection.kind === 'unicode') {
+			await toggleReaction({ messageId, emoji: selection.emoji, customEmojiId: null })
+		} else {
+			await toggleReaction({ messageId, emoji: null, customEmojiId: selection.emojiId })
+		}
+
 		queryClient.invalidateQueries({ queryKey: messagesQueryKey })
 	}
 

@@ -9,9 +9,10 @@ import { Divider } from '~/components/Divider'
 import { IS_IOS_24_PLUS, useColors } from '~/lib/constants'
 import { cn } from '~/lib/utils'
 
+import { EmojiPickerSheet, type EmojiPickerSheetRef } from '../../emoji/EmojiPickerSheet'
+import type { EmojiSelection } from '../../emoji/types'
 import { Icon, Text } from '../../ui'
 import { useBookClubContext } from '../context'
-import { EmojiPickerSheet, type EmojiPickerSheetRef } from './EmojiPickerSheet'
 import type { MessageData } from './Message'
 
 // TODO: I'd rather not have this static and use the user's most used or something
@@ -26,7 +27,7 @@ type Props = {
 	quickEmojis?: string[]
 	onReply?: (message: MessageData) => void
 	onThreadPress?: (message: MessageData) => void
-	onToggleReaction?: (messageId: string, emoji?: string, customEmojiId?: number) => void
+	onToggleReaction?: (messageId: string, selection: EmojiSelection) => void
 	onDelete?: (messageId: string) => void
 }
 
@@ -61,7 +62,7 @@ export const MessageActionSheet = forwardRef<MessageActionSheetRef, Props>(
 			(emoji: string) => {
 				if (!message || !onToggleReaction) return
 				dismiss()
-				onToggleReaction(message.id, emoji)
+				onToggleReaction(message.id, { kind: 'unicode', emoji })
 			},
 			[message, onToggleReaction, dismiss],
 		)
@@ -87,10 +88,10 @@ export const MessageActionSheet = forwardRef<MessageActionSheetRef, Props>(
 		const handleOpenEmojiPicker = useCallback(() => emojiPickerRef.current?.present(), [])
 
 		const handlePickerEmojiSelect = useCallback(
-			(emoji: string) => {
+			(selection: EmojiSelection) => {
 				if (!message || !onToggleReaction) return
 				dismiss()
-				onToggleReaction(message.id, emoji)
+				onToggleReaction(message.id, selection)
 			},
 			[message, onToggleReaction, dismiss],
 		)
@@ -128,7 +129,7 @@ export const MessageActionSheet = forwardRef<MessageActionSheetRef, Props>(
 
 					<View className="gap-2 px-4 pt-1">
 						{/* TODO: Support message editing */}
-						<ActionRow icon={Pencil} label="Edit" description="Edit your message" disabled />
+						<ActionRow icon={Pencil} label="Edit" description="Edit this message" disabled />
 
 						{onReply && (
 							<ActionRow
@@ -145,7 +146,7 @@ export const MessageActionSheet = forwardRef<MessageActionSheetRef, Props>(
 								// I'm kinda surprised sf doens't have yarn or spool or something thread related
 								icon={Spool}
 								label="Thread"
-								description="Start or view a thread"
+								description="Start a thread"
 								onPress={handleThread}
 							/>
 						)}

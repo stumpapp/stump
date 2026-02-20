@@ -1,6 +1,5 @@
 export { default as DiscussionListItem } from './DiscussionListItem'
 export { default as DiscussionRoom } from './DiscussionRoom'
-export { EmojiPickerSheet, type EmojiPickerSheetRef } from './EmojiPickerSheet'
 export type { MessageData } from './Message'
 export { default as Message } from './Message'
 export { MessageActionSheet, type MessageActionSheetRef } from './MessageActionSheet'

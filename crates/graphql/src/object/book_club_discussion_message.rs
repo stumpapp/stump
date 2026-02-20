@@ -2,9 +2,10 @@ use std::collections::HashMap;
 
 use async_graphql::{ComplexObject, Context, Result, SimpleObject};
 use models::entity::{
-	book_club_discussion_message, book_club_discussion_message_reaction, book_club_member,
+	book_club_discussion_message, book_club_discussion_message_reaction,
+	book_club_member, custom_emoji,
 };
-use sea_orm::{prelude::*, ColumnTrait, EntityTrait, QueryFilter, QuerySelect};
+use sea_orm::{prelude::*, ColumnTrait, EntityTrait, QueryFilter};
 
 use crate::data::{AuthContext, CoreContext, ServiceContext};
 use crate::object::book_club_member::BookClubMember;
@@ -84,6 +85,24 @@ impl BookClubDiscussionMessage {
 			}
 		}
 
+		let mut custom_emoji_urls: HashMap<i32, String> = HashMap::new();
+		for (_, custom_emoji_id) in reaction_map.keys() {
+			if let Some(custom_emoji_id) = custom_emoji_id {
+				if custom_emoji_urls.contains_key(custom_emoji_id) {
+					continue;
+				}
+				let emoji_record = custom_emoji::Entity::find_by_id(*custom_emoji_id)
+					.one(core.conn.as_ref())
+					.await?;
+				if let Some(emoji) = emoji_record {
+					custom_emoji_urls.insert(
+						*custom_emoji_id,
+						service.format_url(format!("/api/v2/emojis/{}", emoji.name)),
+					);
+				}
+			}
+		}
+
 		let mut results: Vec<AggregatedReaction> = reaction_map
 			.into_iter()
 			.map(|((emoji, custom_emoji_id), (count, reacted_by_me))| {
@@ -91,7 +110,7 @@ impl BookClubDiscussionMessage {
 					emoji,
 					custom_emoji_id,
 					custom_emoji_url: custom_emoji_id
-						.map(|id| service.format_url(format!("/api/v2/emojis/{}", id))),
+						.and_then(|id| custom_emoji_urls.get(&id).cloned()),
 					count,
 					reacted_by_me,
 				}

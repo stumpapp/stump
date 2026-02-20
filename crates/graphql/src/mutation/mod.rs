@@ -17,6 +17,7 @@ mod notifier;
 mod reading_list;
 mod scheduled_job_config;
 mod series;
+mod server_config;
 mod smart_list_view;
 mod smart_lists;
 mod tag;
@@ -42,6 +43,7 @@ use notifier::NotifierMutation;
 use reading_list::ReadingListMutation;
 use scheduled_job_config::ScheduledJobConfigMutation;
 use series::SeriesMutation;
+use server_config::ServerConfigMutation;
 use smart_list_view::SmartListViewMutation;
 use smart_lists::SmartListMutation;
 use tag::TagMutation;
@@ -72,6 +74,7 @@ pub struct Mutation(
 	UserMutation,
 	EmailerMutation,
 	EmailDeviceMutation,
+	ServerConfigMutation,
 	SmartListViewMutation,
 	ScheduledJobConfigMutation,
 );

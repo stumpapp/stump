@@ -3,7 +3,6 @@ use std::io::Read;
 use async_graphql::{Context, Object, Result, Upload, ID};
 use models::{entity::custom_emoji, shared::enums::UserPermission};
 use sea_orm::{prelude::*, ActiveValue::Set, ColumnTrait, IntoActiveModel, QueryFilter};
-use stump_core::config::StumpConfig;
 
 use crate::{
 	data::{AuthContext, CoreContext},
@@ -66,7 +65,7 @@ impl CustomEmojiMutation {
 
 		let created = emoji.insert(conn).await?;
 
-		let config = ctx.data::<StumpConfig>()?;
+		let config = core.config.as_ref();
 		let emoji_path = config
 			.get_emojis_dir()
 			.join(format!("{}.{}", created.id, created.file_extension));
@@ -92,7 +91,7 @@ impl CustomEmojiMutation {
 			.await?
 			.ok_or("Custom emoji not found")?;
 
-		let config = ctx.data::<StumpConfig>()?;
+		let config = core.config.as_ref();
 		let emoji_path = config
 			.get_emojis_dir()
 			.join(format!("{}.{}", emoji.id, emoji.file_extension));

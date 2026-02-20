@@ -167,7 +167,7 @@ export type BookClub = {
   /** The previous book that was read, if it exists */
   previousBook?: Maybe<BookClubBook>;
   previousDiscussionsCount: Scalars['Int']['output'];
-  roleSpec?: Maybe<Scalars['JSON']['output']>;
+  roleSpec: Scalars['JSON']['output'];
   slug: Scalars['String']['output'];
 };
 
@@ -1752,6 +1752,7 @@ export type Mutation = {
   updateNavigationArrangement: Arrangement;
   updateNavigationArrangementLock: Arrangement;
   updateNotifier: Notifier;
+  updatePublicUrl: ServerConfigModel;
   /**
    * Updates an existing reading list.
    *
@@ -2313,6 +2314,11 @@ export type MutationUpdateNotifierArgs = {
 };
 
 
+export type MutationUpdatePublicUrlArgs = {
+  publicUrl: Scalars['String']['input'];
+};
+
+
 export type MutationUpdateReadingListArgs = {
   input: ReadingListInput;
 };
@@ -2745,6 +2751,7 @@ export type Query = {
   /** Returns the available alphabet for all series in the server */
   seriesAlphabet: Scalars['JSONObject']['output'];
   seriesById?: Maybe<Series>;
+  serverConfig: ServerConfigModel;
   smartListById?: Maybe<SmartList>;
   smartListItems: SmartListItems;
   smartListMeta?: Maybe<SmartListMeta>;
@@ -3440,6 +3447,13 @@ export type SeriesStats = {
   inProgressBooks: Scalars['Int']['output'];
   totalBytes: Scalars['Int']['output'];
   totalReadingTimeSeconds: Scalars['Int']['output'];
+};
+
+export type ServerConfigModel = {
+  __typename?: 'ServerConfigModel';
+  id: Scalars['Int']['output'];
+  initialWalSetupComplete: Scalars['Boolean']['output'];
+  publicUrl?: Maybe<Scalars['String']['output']>;
 };
 
 export type SmartList = {
@@ -5011,7 +5025,7 @@ export type BookClubLayoutQueryVariables = Exact<{
 }>;
 
 
-export type BookClubLayoutQuery = { __typename?: 'Query', bookClubBySlug?: { __typename?: 'BookClub', id: string, name: string, slug: string, description?: string | null, isPrivate: boolean, roleSpec?: any | null, membersCount: number, createdAt: any, creator: { __typename?: 'BookClubMember', id: string, displayName?: string | null, avatarUrl?: string | null }, membership?: { __typename?: 'BookClubMember', role: BookClubMemberRole, avatarUrl?: string | null } | null, currentBook?: { __typename?: 'BookClubBook', id: string, title?: string | null, author?: string | null, imageUrl?: string | null, entity?: { __typename?: 'Media', id: string, thumbnail: { __typename?: 'ImageRef', url: string } } | null } | null } | null };
+export type BookClubLayoutQuery = { __typename?: 'Query', bookClubBySlug?: { __typename?: 'BookClub', id: string, name: string, slug: string, description?: string | null, isPrivate: boolean, roleSpec: any, membersCount: number, createdAt: any, creator: { __typename?: 'BookClubMember', id: string, displayName?: string | null, avatarUrl?: string | null }, membership?: { __typename?: 'BookClubMember', role: BookClubMemberRole, avatarUrl?: string | null, isCreator: boolean } | null, currentBook?: { __typename?: 'BookClubBook', id: string, title?: string | null, author?: string | null, imageUrl?: string | null, entity?: { __typename?: 'Media', id: string, thumbnail: { __typename?: 'ImageRef', url: string } } | null } | null } | null };
 
 export type UserBookClubsSceneQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -5501,6 +5515,46 @@ export type EmailersListQuery = { __typename?: 'Query', emailers: Array<(
     { __typename?: 'Emailer', id: number }
     & { ' $fragmentRefs'?: { 'EmailerListItemFragment': EmailerListItemFragment } }
   )> };
+
+export type ServerEmojisSectionQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ServerEmojisSectionQuery = { __typename?: 'Query', customEmojis: Array<{ __typename?: 'CustomEmoji', id: number, name: string, isAnimated: boolean, url: string }> };
+
+export type ServerEmojisSectionUploadEmojiMutationVariables = Exact<{
+  input: CreateCustomEmojiInput;
+  upload: Scalars['Upload']['input'];
+}>;
+
+
+export type ServerEmojisSectionUploadEmojiMutation = { __typename?: 'Mutation', uploadCustomEmoji: { __typename?: 'CustomEmoji', id: number, name: string, isAnimated: boolean, url: string } };
+
+export type ServerEmojisSectionRenameEmojiMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  input: UpdateCustomEmojiInput;
+}>;
+
+
+export type ServerEmojisSectionRenameEmojiMutation = { __typename?: 'Mutation', updateCustomEmoji: { __typename?: 'CustomEmoji', id: number, name: string, isAnimated: boolean, url: string } };
+
+export type ServerEmojisSectionDeleteEmojiMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type ServerEmojisSectionDeleteEmojiMutation = { __typename?: 'Mutation', deleteCustomEmoji: boolean };
+
+export type ServerPublicUrlUpdateMutationVariables = Exact<{
+  publicUrl: Scalars['String']['input'];
+}>;
+
+
+export type ServerPublicUrlUpdateMutation = { __typename?: 'Mutation', updatePublicUrl: { __typename?: 'ServerConfigModel', publicUrl?: string | null } };
+
+export type ServerPublicUrlQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ServerPublicUrlQuery = { __typename?: 'Query', serverConfig: { __typename?: 'ServerConfigModel', publicUrl?: string | null } };
 
 export type ServerStatsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -9181,6 +9235,7 @@ export const BookClubLayoutDocument = new TypedDocumentString(`
     membership {
       role
       avatarUrl
+      isCreator
     }
     currentBook {
       id
@@ -10302,6 +10357,55 @@ export const EmailersListDocument = new TypedDocumentString(`
   tlsEnabled
   username
 }`) as unknown as TypedDocumentString<EmailersListQuery, EmailersListQueryVariables>;
+export const ServerEmojisSectionDocument = new TypedDocumentString(`
+    query ServerEmojisSection {
+  customEmojis {
+    id
+    name
+    isAnimated
+    url
+  }
+}
+    `) as unknown as TypedDocumentString<ServerEmojisSectionQuery, ServerEmojisSectionQueryVariables>;
+export const ServerEmojisSectionUploadEmojiDocument = new TypedDocumentString(`
+    mutation ServerEmojisSectionUploadEmoji($input: CreateCustomEmojiInput!, $upload: Upload!) {
+  uploadCustomEmoji(input: $input, upload: $upload) {
+    id
+    name
+    isAnimated
+    url
+  }
+}
+    `) as unknown as TypedDocumentString<ServerEmojisSectionUploadEmojiMutation, ServerEmojisSectionUploadEmojiMutationVariables>;
+export const ServerEmojisSectionRenameEmojiDocument = new TypedDocumentString(`
+    mutation ServerEmojisSectionRenameEmoji($id: ID!, $input: UpdateCustomEmojiInput!) {
+  updateCustomEmoji(id: $id, input: $input) {
+    id
+    name
+    isAnimated
+    url
+  }
+}
+    `) as unknown as TypedDocumentString<ServerEmojisSectionRenameEmojiMutation, ServerEmojisSectionRenameEmojiMutationVariables>;
+export const ServerEmojisSectionDeleteEmojiDocument = new TypedDocumentString(`
+    mutation ServerEmojisSectionDeleteEmoji($id: ID!) {
+  deleteCustomEmoji(id: $id)
+}
+    `) as unknown as TypedDocumentString<ServerEmojisSectionDeleteEmojiMutation, ServerEmojisSectionDeleteEmojiMutationVariables>;
+export const ServerPublicUrlUpdateDocument = new TypedDocumentString(`
+    mutation ServerPublicURLUpdate($publicUrl: String!) {
+  updatePublicUrl(publicUrl: $publicUrl) {
+    publicUrl
+  }
+}
+    `) as unknown as TypedDocumentString<ServerPublicUrlUpdateMutation, ServerPublicUrlUpdateMutationVariables>;
+export const ServerPublicUrlDocument = new TypedDocumentString(`
+    query ServerPublicURL {
+  serverConfig {
+    publicUrl
+  }
+}
+    `) as unknown as TypedDocumentString<ServerPublicUrlQuery, ServerPublicUrlQueryVariables>;
 export const ServerStatsDocument = new TypedDocumentString(`
     query ServerStats {
   numberOfLibraries

@@ -18,6 +18,7 @@ mod media_metadata_overview;
 mod notifier;
 pub(crate) mod reading_list;
 mod series;
+mod server_config;
 mod smart_list_view;
 mod smart_lists;
 pub(crate) mod smart_lists_builder;
@@ -43,6 +44,7 @@ use media_metadata_overview::MediaMetadataOverviewQuery;
 use notifier::NotifierQuery;
 use reading_list::ReadingListQuery;
 use series::SeriesQuery;
+use server_config::ServerConfigQuery;
 use smart_list_view::SmartListViewQuery;
 use smart_lists::SmartListsQuery;
 use tag::TagQuery;
@@ -75,5 +77,6 @@ pub struct Query(
 	TagQuery,
 	LogQuery,
 	ConfigQuery,
+	ServerConfigQuery,
 	SmartListsQuery,
 );

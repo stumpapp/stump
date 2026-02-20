@@ -1,9 +1,9 @@
+import { useSDK } from '@stump/client'
 import { AggregatedReaction } from '@stump/graphql'
 import dayjs from 'dayjs'
 import { MessageSquare, Pin } from 'lucide-react-native'
 import { memo } from 'react'
-import { Pressable, View } from 'react-native'
-import TImage from 'react-native-turbo-image'
+import { Image, Pressable, View } from 'react-native'
 
 import type { EmojiSelection } from '~/components/emoji/types'
 import { Avatar, AvatarFallback, AvatarImage, Icon, Text } from '~/components/ui'
@@ -75,6 +75,8 @@ function Message({
 	onThreadPress,
 	onToggleReaction,
 }: MessageProps) {
+	const { sdk } = useSDK()
+
 	const isDeleted = !!message.deletedAt
 	const displayName = message.member?.displayName || message.member?.username || 'Unknown'
 	const threadChildrenCount = message.threadChildrenCount ?? 0
@@ -179,9 +181,14 @@ function Message({
 									}
 								>
 									{reaction.customEmojiUrl ? (
-										<TImage
-											source={{ uri: reaction.customEmojiUrl || '' }}
-											style={{ width: 12, height: 12 }}
+										<Image
+											source={{
+												uri: reaction.customEmojiUrl || '',
+												headers: {
+													Authorization: sdk.authorizationHeader || '',
+												},
+											}}
+											style={{ width: 20, height: 20 }}
 											resizeMode="contain"
 										/>
 									) : (

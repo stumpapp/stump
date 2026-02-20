@@ -35,6 +35,7 @@ const query = graphql(`
 			membership {
 				role
 				avatarUrl
+				isCreator
 			}
 			currentBook {
 				id

@@ -117,7 +117,7 @@ type BookClub {
 	isPrivate: Boolean!
 	createdAt: DateTime!
 	emoji: String
-	roleSpec: JSON
+	roleSpec: JSON!
 	creator: BookClubMember!
 	"The current book being read"
 	currentBook: BookClubBook
@@ -1705,6 +1705,7 @@ type Mutation {
 	updateEmailDevice(id: Int!, input: EmailDeviceInput!): RegisteredEmailDevice!
 	patchEmailDevice(id: Int!, input: PatchEmailDeviceInput!): RegisteredEmailDevice!
 	deleteEmailDevice(id: Int!): RegisteredEmailDevice!
+	updatePublicUrl(publicUrl: String!): ServerConfigModel!
 	createSmartListView(input: SaveSmartListView!): SmartListView!
 	updateSmartListView(originalName: String!, input: SaveSmartListView!): SmartListView!
 	deleteSmartListView(id: ID!, name: String!): SmartListView!
@@ -2032,6 +2033,7 @@ type Query {
 	logfileInfo: LogFileInfo!
 	stumpConfig: StumpConfig!
 	uploadConfig: UploadConfig!
+	serverConfig: ServerConfigModel!
 	smartLists(input: SmartListsInput! = {all: null, mine: true, search: null}): [SmartList!]!
 	smartListById(id: ID!): SmartList
 	smartListMeta(id: ID!): SmartListMeta
@@ -2450,6 +2452,12 @@ type SeriesStats {
 	completedBooks: Int!
 	inProgressBooks: Int!
 	totalReadingTimeSeconds: Int!
+}
+
+type ServerConfigModel {
+	id: Int!
+	publicUrl: String
+	initialWalSetupComplete: Boolean!
 }
 
 type SmartList {

@@ -28,8 +28,8 @@ impl From<book_club::Model> for BookClub {
 
 #[ComplexObject]
 impl BookClub {
-	async fn role_spec(&self) -> Option<Json<BookClubMemberRoleSpec>> {
-		self.model.member_role_spec.clone().map(Json)
+	async fn role_spec(&self) -> Json<BookClubMemberRoleSpec> {
+		Json(self.model.member_role_spec.clone().unwrap_or_default())
 	}
 
 	async fn creator(&self, ctx: &Context<'_>) -> Result<BookClubMember> {

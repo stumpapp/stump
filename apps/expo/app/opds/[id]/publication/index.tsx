@@ -1,11 +1,12 @@
+import { FlashList } from '@shopify/flash-list'
 import { useSDK } from '@stump/client'
-import { OPDSProgression, resolveUrl } from '@stump/sdk'
+import { OPDSLink, OPDSProgression, resolveUrl } from '@stump/sdk'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { useRouter } from 'expo-router'
 import { BookCopy, Info, Loader2 } from 'lucide-react-native'
-import { useCallback, useEffect } from 'react'
-import { Platform, Pressable, View } from 'react-native'
+import { useCallback, useEffect, useMemo } from 'react'
+import { Platform, View } from 'react-native'
 import Animated, {
 	Extrapolation,
 	interpolate,
@@ -19,12 +20,20 @@ import { useActiveServer } from '~/components/activeServer'
 import { InfoRow, LongValue } from '~/components/book/overview'
 import ChevronBackLink from '~/components/ChevronBackLink'
 import { ThumbnailImage } from '~/components/image'
-import { CreditsSection, PublicationMenu } from '~/components/opds'
+import {
+	CreditsSection,
+	PublicationMenu,
+	RelatedPublicationItem,
+	useRelatedPublications,
+} from '~/components/opds'
 import {
 	extensionFromMime,
 	getAcquisitionLink,
 	getDateField,
-	getFlexibleArrayField,
+	getFirstLink,
+	getFirstSubsectionLink,
+	getLanguages,
+	getLinkableMetadataArrayField,
 	getNumberField,
 	getPublicationThumbnailURL,
 	getStringField,
@@ -37,7 +46,6 @@ import {
 	useOPDSDownload,
 } from '~/lib/hooks'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
-import { cn } from '~/lib/utils'
 import { usePreferencesStore } from '~/stores'
 
 import { usePublicationContext } from './context'
@@ -111,23 +119,72 @@ export default function Screen() {
 		sdk.rootURL,
 	)
 
+	// TODO: Eventually I'd like to curate the UI more based on the metadata
+	// def better now but still a lot of just dumping on page
+
 	const numberOfPages = getNumberField(metadata, 'numberOfPages') ?? readingOrder?.length
 	const modified = getDateField(metadata, 'modified')
 	const published = getDateField(metadata, 'published')
 	const description = getStringField(metadata, 'description')
 	const subtitle = getStringField(metadata, 'subtitle')
-	const publisher = getStringField(metadata, 'publisher')
-	const language = getStringField(metadata, 'language')
+	const publisher = getLinkableMetadataArrayField(metadata, 'publisher')
+		.map((entry) => entry.label)
+		.join(', ')
+	const language = getLanguages(metadata).join(', ') || null
 	const readingDirection = getStringField(metadata, 'readingDirection')
 	const volume = getNumberField(metadata, 'volume')
 	const issue = getNumberField(metadata, 'issue')
-	const subjects = getFlexibleArrayField(metadata, 'subject')
+	const subjects = getLinkableMetadataArrayField(metadata, 'subject')
 
-	const belongsToSeries = Array.isArray(belongsTo?.series) ? belongsTo.series[0] : belongsTo?.series
-	const seriesURL = belongsToSeries?.links?.find((link) => link.rel === 'self')?.href
-	const resolvedSeriesURL = seriesURL ? resolveUrl(seriesURL, sdk.rootURL) : undefined
+	const belongsToSeries = useMemo(
+		() => (Array.isArray(belongsTo?.series) ? belongsTo.series[0] : belongsTo?.series),
+		[belongsTo],
+	)
+	const belongsToCollection = Array.isArray(belongsTo?.collection)
+		? belongsTo.collection[0]
+		: belongsTo?.collection
+
+	const toResolvedURL = useCallback(
+		(href?: string | null) => (href ? resolveUrl(href, sdk.rootURL) : undefined),
+		[sdk.rootURL],
+	)
+
+	const goToFeedLink = useCallback(
+		(link?: OPDSLink | null) => {
+			if (!link?.href) return
+
+			const resolvedURL = toResolvedURL(link.href)
+			if (!resolvedURL) return
+
+			router.push({
+				pathname: '/opds/[id]/feed/[url]',
+				params: { url: resolvedURL, id: serverID },
+			})
+		},
+		[toResolvedURL, router, serverID],
+	)
+
+	const seriesLink = getFirstSubsectionLink(belongsToSeries?.links)
+	const collectionLink = getFirstSubsectionLink(belongsToCollection?.links)
+	const seriesUrl = toResolvedURL(seriesLink?.href)
+	const collectionUrl = toResolvedURL(collectionLink?.href)
 
 	const canStream = !!readingOrder && readingOrder.length > 0
+
+	const {
+		seriesPublications,
+		initialSeriesPublicationIndex,
+		fetchMoreSeriesPublications,
+		collectionPublications,
+		initialCollectionPublicationIndex,
+		fetchMoreCollectionPublications,
+		keyExtractor,
+	} = useRelatedPublications({
+		seriesUrl,
+		collectionUrl,
+		belongsTo,
+	})
+
 	const isSupportedStream = readingOrder?.every((link) => link.type?.startsWith('image/'))
 
 	const accentColor = usePreferencesStore((state) => state.accentColor)
@@ -312,37 +369,79 @@ export default function Screen() {
 						<InfoRow label="Position" value={belongsToSeries.position.toString()} />
 					)}
 
-					{resolvedSeriesURL && (
-						<View className="flex flex-row items-center justify-between py-1">
-							<Text className="shrink-0 text-foreground-subtle">Feed URL</Text>
-							<Pressable
-								onPress={() =>
-									router.push({
-										pathname: '/opds/[id]/feed/[url]',
-										params: { url: resolvedSeriesURL, id: serverID },
-									})
-								}
+					{/* TODO: I don't love this design, just easiest right now */}
+					{seriesUrl && (
+						<Card.Row label="Feed">
+							<Button
+								onPress={() => goToFeedLink(seriesLink)}
+								size="sm"
+								variant="secondary"
+								roundness="full"
+								className="flex-row gap-2"
 							>
-								{({ pressed }) => (
-									<View
-										className={cn(
-											'squircle rounded-lg border border-edge bg-background-surface-secondary p-1 px-3 text-center',
-											{
-												'opacity-80': pressed,
-											},
-										)}
-									>
-										<Text>Go to feed</Text>
-									</View>
-								)}
-							</Pressable>
-						</View>
+								<Text>Go to series</Text>
+							</Button>
+						</Card.Row>
 					)}
 				</Card>
 
-				<CreditsSection metadata={metadata} />
+				{seriesPublications.length > 0 && (
+					<View className="gap-3">
+						<Text className="text-lg font-semibold text-foreground-muted">Series Books</Text>
+						<FlashList
+							data={seriesPublications}
+							renderItem={({ item }) => <RelatedPublicationItem item={item} />}
+							horizontal
+							showsHorizontalScrollIndicator={false}
+							initialScrollIndex={initialSeriesPublicationIndex}
+							keyExtractor={keyExtractor}
+							onEndReached={fetchMoreSeriesPublications}
+						/>
+					</View>
+				)}
 
-				<MetadataBadgeSection label="Subjects" items={subjects} />
+				{/* TODO: Support multiple collections, not sure what ideal UI might be for that */}
+				{belongsToCollection && (
+					<Card
+						label="Collection"
+						listEmptyStyle={{ icon: BookCopy, message: 'No collection information' }}
+					>
+						{belongsToCollection.name && <InfoRow label="Name" value={belongsToCollection.name} />}
+						{belongsToCollection.position != null && (
+							<InfoRow label="Position" value={belongsToCollection.position.toString()} />
+						)}
+					</Card>
+				)}
+
+				{/* TODO: See above ^ this will drastically change based on above. It might not
+				 make sense to pull collections pubs if multiple are present */}
+				{collectionPublications.length > 0 && (
+					<View className="gap-3">
+						<Text className="text-lg font-semibold text-foreground-muted">Collection Books</Text>
+						<FlashList
+							data={collectionPublications}
+							renderItem={({ item }) => <RelatedPublicationItem item={item} />}
+							horizontal
+							showsHorizontalScrollIndicator={false}
+							initialScrollIndex={initialCollectionPublicationIndex}
+							keyExtractor={keyExtractor}
+							onEndReached={fetchMoreCollectionPublications}
+						/>
+					</View>
+				)}
+
+				<CreditsSection
+					metadata={metadata}
+					onPressCredit={(credit) => goToFeedLink(getFirstLink(credit.links))}
+				/>
+
+				<MetadataBadgeSection
+					label="Subjects"
+					items={subjects.map((subject) => ({
+						label: subject.label,
+						onPress: () => goToFeedLink(getFirstLink(subject.links)),
+					}))}
+				/>
 			</View>
 		</Animated.ScrollView>
 	)

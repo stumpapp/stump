@@ -121,7 +121,7 @@ export const OPDSLegacyEntryItemSheet = forwardRef<TrueSheet, Props>(
 
 					<MetadataBadgeSection
 						label="Authors"
-						items={[...new Set(entry.authors?.map((author) => author.name) || [])]}
+						items={[...new Set(entry.authors?.map((author) => ({ label: author.name })) || [])]}
 					/>
 
 					<Card label="Technical Info">

@@ -50,6 +50,7 @@ const query = graphql(`
 						url
 					}
 				}
+				...BookClubBookItem
 			}
 			createdAt
 		}

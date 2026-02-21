@@ -167,6 +167,8 @@ export type BookClub = {
   pinnedDiscussions: Array<BookClubDiscussion>;
   /** The previous book that was read, if it exists */
   previousBook?: Maybe<BookClubBook>;
+  /** All previous books that were read, ordered by completion date (most recent first) */
+  previousBooks: Array<BookClubBook>;
   previousDiscussionsCount: Scalars['Int']['output'];
   roleSpec: Scalars['JSON']['output'];
   slug: Scalars['String']['output'];
@@ -4770,6 +4772,18 @@ export type DeleteBookClubConfirmationMutationVariables = Exact<{
 
 export type DeleteBookClubConfirmationMutation = { __typename?: 'Mutation', deleteBookClub: { __typename?: 'BookClub', id: string } };
 
+export type BookClubBookItemFragment = { __typename?: 'BookClubBook', id: string, title?: string | null, author?: string | null, imageUrl?: string | null, url?: string | null, completedAt?: any | null, addedAt: any, entity?: { __typename: 'Media', id: string, resolvedName: string, metadata?: { __typename?: 'MediaMetadata', writers: Array<string> } | null, thumbnail: { __typename?: 'ImageRef', url: string } } | null } & { ' $fragmentName'?: 'BookClubBookItemFragment' };
+
+export type BookClubBooksSceneQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type BookClubBooksSceneQuery = { __typename?: 'Query', bookClubById: { __typename?: 'BookClub', id: string, previousBooks: Array<(
+      { __typename?: 'BookClubBook', id: string }
+      & { ' $fragmentRefs'?: { 'BookClubBookItemFragment': BookClubBookItemFragment } }
+    )> } };
+
 export type MediaAtPathQueryVariables = Exact<{
   path: Scalars['String']['input'];
 }>;
@@ -5065,7 +5079,10 @@ export type BookClubLayoutQueryVariables = Exact<{
 }>;
 
 
-export type BookClubLayoutQuery = { __typename?: 'Query', bookClubBySlug?: { __typename?: 'BookClub', id: string, name: string, slug: string, description?: string | null, isPrivate: boolean, roleSpec: any, membersCount: number, createdAt: any, creator: { __typename?: 'BookClubMember', id: string, displayName?: string | null, avatarUrl?: string | null }, membership?: { __typename?: 'BookClubMember', role: BookClubMemberRole, avatarUrl?: string | null, isCreator: boolean } | null, currentBook?: { __typename?: 'BookClubBook', id: string, title?: string | null, author?: string | null, imageUrl?: string | null, entity?: { __typename?: 'Media', id: string, thumbnail: { __typename?: 'ImageRef', url: string } } | null } | null } | null };
+export type BookClubLayoutQuery = { __typename?: 'Query', bookClubBySlug?: { __typename?: 'BookClub', id: string, name: string, slug: string, description?: string | null, isPrivate: boolean, roleSpec: any, membersCount: number, createdAt: any, creator: { __typename?: 'BookClubMember', id: string, displayName?: string | null, avatarUrl?: string | null }, membership?: { __typename?: 'BookClubMember', role: BookClubMemberRole, avatarUrl?: string | null, isCreator: boolean } | null, currentBook?: (
+      { __typename?: 'BookClubBook', id: string, title?: string | null, author?: string | null, imageUrl?: string | null, entity?: { __typename?: 'Media', id: string, thumbnail: { __typename?: 'ImageRef', url: string } } | null }
+      & { ' $fragmentRefs'?: { 'BookClubBookItemFragment': BookClubBookItemFragment } }
+    ) | null } | null };
 
 export type UpdateBookClubMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -6391,6 +6408,28 @@ export const MediaMetadataEditorFragmentDoc = new TypedDocumentString(`
   year
 }
     `, {"fragmentName":"MediaMetadataEditor"}) as unknown as TypedDocumentString<MediaMetadataEditorFragment, unknown>;
+export const BookClubBookItemFragmentDoc = new TypedDocumentString(`
+    fragment BookClubBookItem on BookClubBook {
+  id
+  title
+  author
+  imageUrl
+  url
+  entity {
+    __typename
+    id
+    resolvedName
+    metadata {
+      writers
+    }
+    thumbnail {
+      url
+    }
+  }
+  completedAt
+  addedAt
+}
+    `, {"fragmentName":"BookClubBookItem"}) as unknown as TypedDocumentString<BookClubBookItemFragment, unknown>;
 export const SeriesMetadataEditorFragmentDoc = new TypedDocumentString(`
     fragment SeriesMetadataEditor on SeriesMetadata {
   ageRating
@@ -8749,6 +8788,36 @@ export const DeleteBookClubConfirmationDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<DeleteBookClubConfirmationMutation, DeleteBookClubConfirmationMutationVariables>;
+export const BookClubBooksSceneDocument = new TypedDocumentString(`
+    query BookClubBooksScene($id: ID!) {
+  bookClubById(id: $id) {
+    id
+    previousBooks {
+      id
+      ...BookClubBookItem
+    }
+  }
+}
+    fragment BookClubBookItem on BookClubBook {
+  id
+  title
+  author
+  imageUrl
+  url
+  entity {
+    __typename
+    id
+    resolvedName
+    metadata {
+      writers
+    }
+    thumbnail {
+      url
+    }
+  }
+  completedAt
+  addedAt
+}`) as unknown as TypedDocumentString<BookClubBooksSceneQuery, BookClubBooksSceneQueryVariables>;
 export const MediaAtPathDocument = new TypedDocumentString(`
     query MediaAtPath($path: String!) {
   mediaByPath(path: $path) {
@@ -9358,11 +9427,31 @@ export const BookClubLayoutDocument = new TypedDocumentString(`
           url
         }
       }
+      ...BookClubBookItem
     }
     createdAt
   }
 }
-    `) as unknown as TypedDocumentString<BookClubLayoutQuery, BookClubLayoutQueryVariables>;
+    fragment BookClubBookItem on BookClubBook {
+  id
+  title
+  author
+  imageUrl
+  url
+  entity {
+    __typename
+    id
+    resolvedName
+    metadata {
+      writers
+    }
+    thumbnail {
+      url
+    }
+  }
+  completedAt
+  addedAt
+}`) as unknown as TypedDocumentString<BookClubLayoutQuery, BookClubLayoutQueryVariables>;
 export const UpdateBookClubDocument = new TypedDocumentString(`
     mutation UpdateBookClub($id: ID!, $input: UpdateBookClubInput!) {
   updateBookClub(id: $id, input: $input) {

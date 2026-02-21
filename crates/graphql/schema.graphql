@@ -123,6 +123,8 @@ type BookClub {
 	currentBook: BookClubBook
 	"The previous book that was read, if it exists"
 	previousBook: BookClubBook
+	"All previous books that were read, ordered by completion date (most recent first)"
+	previousBooks: [BookClubBook!]!
 	"All books in the club's queue, ordered by position"
 	books: [BookClubBook!]!
 	invitations: [BookClubInvitation!]!

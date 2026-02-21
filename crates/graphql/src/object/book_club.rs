@@ -74,6 +74,21 @@ impl BookClub {
 	}
 
 	// TODO: Pagination
+	/// All previous books that were read, ordered by completion date (most recent first)
+	async fn previous_books(&self, ctx: &Context<'_>) -> Result<Vec<BookClubBook>> {
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let books = book_club_book::Entity::find()
+			.filter(book_club_book::Column::BookClubId.eq(&self.model.id))
+			.filter(book_club_book::Column::CompletedAt.is_not_null())
+			.order_by_desc(book_club_book::Column::CompletedAt)
+			.all(conn)
+			.await?;
+
+		Ok(books.into_iter().map(BookClubBook::from).collect())
+	}
+
+	// TODO: Pagination
 	/// All books in the club's queue, ordered by position
 	async fn books(&self, ctx: &Context<'_>) -> Result<Vec<BookClubBook>> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();

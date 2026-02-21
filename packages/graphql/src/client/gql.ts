@@ -118,6 +118,8 @@ type Documents = {
     "\n\tmutation UpdateMediaMetadata($id: ID!, $input: MediaMetadataInput!) {\n\t\tupdateMediaMetadata(id: $id, input: $input) {\n\t\t\tmetadata {\n\t\t\t\t...MediaMetadataEditor\n\t\t\t}\n\t\t}\n\t}\n": typeof types.UpdateMediaMetadataDocument,
     "\n\tquery BookOverviewScene($id: ID!) {\n\t\tmediaById(id: $id) {\n\t\t\tid\n\t\t\t...BookCard\n\t\t\t...BookFileInformation\n\t\t\tresolvedName\n\t\t\textension\n\t\t\tmetadata {\n\t\t\t\tlinks\n\t\t\t\tsummary\n\t\t\t\t...MediaMetadataEditor\n\t\t\t}\n\t\t\treadHistory {\n\t\t\t\tcompletedAt\n\t\t\t}\n\t\t}\n\t}\n": typeof types.BookOverviewSceneDocument,
     "\n\tmutation DeleteBookClubConfirmation($id: ID!) {\n\t\tdeleteBookClub(id: $id) {\n\t\t\tid\n\t\t}\n\t}\n": typeof types.DeleteBookClubConfirmationDocument,
+    "\n\tfragment BookClubBookItem on BookClubBook {\n\t\tid\n\t\ttitle\n\t\tauthor\n\t\timageUrl\n\t\turl\n\t\tentity {\n\t\t\t__typename\n\t\t\tid\n\t\t\tresolvedName\n\t\t\tmetadata {\n\t\t\t\twriters\n\t\t\t}\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t\tcompletedAt\n\t\taddedAt\n\t}\n": typeof types.BookClubBookItemFragmentDoc,
+    "\n\tquery BookClubBooksScene($id: ID!) {\n\t\tbookClubById(id: $id) {\n\t\t\tid\n\t\t\tpreviousBooks {\n\t\t\t\tid\n\t\t\t\t...BookClubBookItem\n\t\t\t}\n\t\t}\n\t}\n": typeof types.BookClubBooksSceneDocument,
     "\n\tquery MediaAtPath($path: String!) {\n\t\tmediaByPath(path: $path) {\n\t\t\tid\n\t\t\tresolvedName\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": typeof types.MediaAtPathDocument,
     "\n\tmutation UploadLibraryBooks($input: UploadBooksInput!) {\n\t\tuploadBooks(input: $input)\n\t}\n": typeof types.UploadLibraryBooksDocument,
     "\n\tmutation UploadLibrarySeries($input: UploadSeriesInput!) {\n\t\tuploadSeries(input: $input)\n\t}\n": typeof types.UploadLibrarySeriesDocument,
@@ -163,7 +165,7 @@ type Documents = {
     "\n\tfragment BookThumbnailSelector on Media {\n\t\tid\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t\tpages\n\t}\n": typeof types.BookThumbnailSelectorFragmentDoc,
     "\n\tmutation BookThumbnailSelectorUpdate($id: ID!, $input: PageBasedThumbnailInput!) {\n\t\tupdateMediaThumbnail(id: $id, input: $input) {\n\t\t\tid\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": typeof types.BookThumbnailSelectorUpdateDocument,
     "\n\tmutation BookThumbnailSelectorUpload($id: ID!, $file: Upload!) {\n\t\tuploadMediaThumbnail(id: $id, file: $file) {\n\t\t\tid\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": typeof types.BookThumbnailSelectorUploadDocument,
-    "\n\tquery BookClubLayout($slug: String!) {\n\t\tbookClubBySlug(slug: $slug) {\n\t\t\tid\n\t\t\tname\n\t\t\tslug\n\t\t\tdescription\n\t\t\tisPrivate\n\t\t\troleSpec\n\t\t\tcreator {\n\t\t\t\tid\n\t\t\t\tdisplayName\n\t\t\t\tavatarUrl\n\t\t\t}\n\t\t\tmembersCount\n\t\t\tmembership {\n\t\t\t\trole\n\t\t\t\tavatarUrl\n\t\t\t\tisCreator\n\t\t\t}\n\t\t\tcurrentBook {\n\t\t\t\tid\n\t\t\t\ttitle\n\t\t\t\tauthor\n\t\t\t\timageUrl\n\t\t\t\tentity {\n\t\t\t\t\tid\n\t\t\t\t\tthumbnail {\n\t\t\t\t\t\turl\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t\tcreatedAt\n\t\t}\n\t}\n": typeof types.BookClubLayoutDocument,
+    "\n\tquery BookClubLayout($slug: String!) {\n\t\tbookClubBySlug(slug: $slug) {\n\t\t\tid\n\t\t\tname\n\t\t\tslug\n\t\t\tdescription\n\t\t\tisPrivate\n\t\t\troleSpec\n\t\t\tcreator {\n\t\t\t\tid\n\t\t\t\tdisplayName\n\t\t\t\tavatarUrl\n\t\t\t}\n\t\t\tmembersCount\n\t\t\tmembership {\n\t\t\t\trole\n\t\t\t\tavatarUrl\n\t\t\t\tisCreator\n\t\t\t}\n\t\t\tcurrentBook {\n\t\t\t\tid\n\t\t\t\ttitle\n\t\t\t\tauthor\n\t\t\t\timageUrl\n\t\t\t\tentity {\n\t\t\t\t\tid\n\t\t\t\t\tthumbnail {\n\t\t\t\t\t\turl\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\t...BookClubBookItem\n\t\t\t}\n\t\t\tcreatedAt\n\t\t}\n\t}\n": typeof types.BookClubLayoutDocument,
     "\n\tmutation UpdateBookClub($id: ID!, $input: UpdateBookClubInput!) {\n\t\tupdateBookClub(id: $id, input: $input) {\n\t\t\tid\n\t\t\tname\n\t\t\temoji\n\t\t\tisPrivate\n\t\t\troleSpec\n\t\t\tdescription\n\t\t}\n\t}\n": typeof types.UpdateBookClubDocument,
     "\n\tquery UserBookClubsScene {\n\t\tbookClubs(all: false) {\n\t\t\tid\n\t\t\tname\n\t\t\tslug\n\t\t\tdescription\n\t\t\tmembersCount\n\t\t\tcurrentBook {\n\t\t\t\tid\n\t\t\t}\n\t\t}\n\t}\n": typeof types.UserBookClubsSceneDocument,
     "\n\tquery CreateBookClubForm {\n\t\tbookClubs {\n\t\t\tname\n\t\t\tslug\n\t\t}\n\t}\n": typeof types.CreateBookClubFormDocument,
@@ -387,6 +389,8 @@ const documents: Documents = {
     "\n\tmutation UpdateMediaMetadata($id: ID!, $input: MediaMetadataInput!) {\n\t\tupdateMediaMetadata(id: $id, input: $input) {\n\t\t\tmetadata {\n\t\t\t\t...MediaMetadataEditor\n\t\t\t}\n\t\t}\n\t}\n": types.UpdateMediaMetadataDocument,
     "\n\tquery BookOverviewScene($id: ID!) {\n\t\tmediaById(id: $id) {\n\t\t\tid\n\t\t\t...BookCard\n\t\t\t...BookFileInformation\n\t\t\tresolvedName\n\t\t\textension\n\t\t\tmetadata {\n\t\t\t\tlinks\n\t\t\t\tsummary\n\t\t\t\t...MediaMetadataEditor\n\t\t\t}\n\t\t\treadHistory {\n\t\t\t\tcompletedAt\n\t\t\t}\n\t\t}\n\t}\n": types.BookOverviewSceneDocument,
     "\n\tmutation DeleteBookClubConfirmation($id: ID!) {\n\t\tdeleteBookClub(id: $id) {\n\t\t\tid\n\t\t}\n\t}\n": types.DeleteBookClubConfirmationDocument,
+    "\n\tfragment BookClubBookItem on BookClubBook {\n\t\tid\n\t\ttitle\n\t\tauthor\n\t\timageUrl\n\t\turl\n\t\tentity {\n\t\t\t__typename\n\t\t\tid\n\t\t\tresolvedName\n\t\t\tmetadata {\n\t\t\t\twriters\n\t\t\t}\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t\tcompletedAt\n\t\taddedAt\n\t}\n": types.BookClubBookItemFragmentDoc,
+    "\n\tquery BookClubBooksScene($id: ID!) {\n\t\tbookClubById(id: $id) {\n\t\t\tid\n\t\t\tpreviousBooks {\n\t\t\t\tid\n\t\t\t\t...BookClubBookItem\n\t\t\t}\n\t\t}\n\t}\n": types.BookClubBooksSceneDocument,
     "\n\tquery MediaAtPath($path: String!) {\n\t\tmediaByPath(path: $path) {\n\t\t\tid\n\t\t\tresolvedName\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": types.MediaAtPathDocument,
     "\n\tmutation UploadLibraryBooks($input: UploadBooksInput!) {\n\t\tuploadBooks(input: $input)\n\t}\n": types.UploadLibraryBooksDocument,
     "\n\tmutation UploadLibrarySeries($input: UploadSeriesInput!) {\n\t\tuploadSeries(input: $input)\n\t}\n": types.UploadLibrarySeriesDocument,
@@ -432,7 +436,7 @@ const documents: Documents = {
     "\n\tfragment BookThumbnailSelector on Media {\n\t\tid\n\t\tthumbnail {\n\t\t\turl\n\t\t}\n\t\tpages\n\t}\n": types.BookThumbnailSelectorFragmentDoc,
     "\n\tmutation BookThumbnailSelectorUpdate($id: ID!, $input: PageBasedThumbnailInput!) {\n\t\tupdateMediaThumbnail(id: $id, input: $input) {\n\t\t\tid\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": types.BookThumbnailSelectorUpdateDocument,
     "\n\tmutation BookThumbnailSelectorUpload($id: ID!, $file: Upload!) {\n\t\tuploadMediaThumbnail(id: $id, file: $file) {\n\t\t\tid\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n": types.BookThumbnailSelectorUploadDocument,
-    "\n\tquery BookClubLayout($slug: String!) {\n\t\tbookClubBySlug(slug: $slug) {\n\t\t\tid\n\t\t\tname\n\t\t\tslug\n\t\t\tdescription\n\t\t\tisPrivate\n\t\t\troleSpec\n\t\t\tcreator {\n\t\t\t\tid\n\t\t\t\tdisplayName\n\t\t\t\tavatarUrl\n\t\t\t}\n\t\t\tmembersCount\n\t\t\tmembership {\n\t\t\t\trole\n\t\t\t\tavatarUrl\n\t\t\t\tisCreator\n\t\t\t}\n\t\t\tcurrentBook {\n\t\t\t\tid\n\t\t\t\ttitle\n\t\t\t\tauthor\n\t\t\t\timageUrl\n\t\t\t\tentity {\n\t\t\t\t\tid\n\t\t\t\t\tthumbnail {\n\t\t\t\t\t\turl\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t\tcreatedAt\n\t\t}\n\t}\n": types.BookClubLayoutDocument,
+    "\n\tquery BookClubLayout($slug: String!) {\n\t\tbookClubBySlug(slug: $slug) {\n\t\t\tid\n\t\t\tname\n\t\t\tslug\n\t\t\tdescription\n\t\t\tisPrivate\n\t\t\troleSpec\n\t\t\tcreator {\n\t\t\t\tid\n\t\t\t\tdisplayName\n\t\t\t\tavatarUrl\n\t\t\t}\n\t\t\tmembersCount\n\t\t\tmembership {\n\t\t\t\trole\n\t\t\t\tavatarUrl\n\t\t\t\tisCreator\n\t\t\t}\n\t\t\tcurrentBook {\n\t\t\t\tid\n\t\t\t\ttitle\n\t\t\t\tauthor\n\t\t\t\timageUrl\n\t\t\t\tentity {\n\t\t\t\t\tid\n\t\t\t\t\tthumbnail {\n\t\t\t\t\t\turl\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\t...BookClubBookItem\n\t\t\t}\n\t\t\tcreatedAt\n\t\t}\n\t}\n": types.BookClubLayoutDocument,
     "\n\tmutation UpdateBookClub($id: ID!, $input: UpdateBookClubInput!) {\n\t\tupdateBookClub(id: $id, input: $input) {\n\t\t\tid\n\t\t\tname\n\t\t\temoji\n\t\t\tisPrivate\n\t\t\troleSpec\n\t\t\tdescription\n\t\t}\n\t}\n": types.UpdateBookClubDocument,
     "\n\tquery UserBookClubsScene {\n\t\tbookClubs(all: false) {\n\t\t\tid\n\t\t\tname\n\t\t\tslug\n\t\t\tdescription\n\t\t\tmembersCount\n\t\t\tcurrentBook {\n\t\t\t\tid\n\t\t\t}\n\t\t}\n\t}\n": types.UserBookClubsSceneDocument,
     "\n\tquery CreateBookClubForm {\n\t\tbookClubs {\n\t\t\tname\n\t\t\tslug\n\t\t}\n\t}\n": types.CreateBookClubFormDocument,
@@ -968,6 +972,14 @@ export function graphql(source: "\n\tmutation DeleteBookClubConfirmation($id: ID
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
+export function graphql(source: "\n\tfragment BookClubBookItem on BookClubBook {\n\t\tid\n\t\ttitle\n\t\tauthor\n\t\timageUrl\n\t\turl\n\t\tentity {\n\t\t\t__typename\n\t\t\tid\n\t\t\tresolvedName\n\t\t\tmetadata {\n\t\t\t\twriters\n\t\t\t}\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t\tcompletedAt\n\t\taddedAt\n\t}\n"): typeof import('./graphql').BookClubBookItemFragmentDoc;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tquery BookClubBooksScene($id: ID!) {\n\t\tbookClubById(id: $id) {\n\t\t\tid\n\t\t\tpreviousBooks {\n\t\t\t\tid\n\t\t\t\t...BookClubBookItem\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').BookClubBooksSceneDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
 export function graphql(source: "\n\tquery MediaAtPath($path: String!) {\n\t\tmediaByPath(path: $path) {\n\t\t\tid\n\t\t\tresolvedName\n\t\t\tthumbnail {\n\t\t\t\turl\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').MediaAtPathDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
@@ -1148,7 +1160,7 @@ export function graphql(source: "\n\tmutation BookThumbnailSelectorUpload($id: I
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n\tquery BookClubLayout($slug: String!) {\n\t\tbookClubBySlug(slug: $slug) {\n\t\t\tid\n\t\t\tname\n\t\t\tslug\n\t\t\tdescription\n\t\t\tisPrivate\n\t\t\troleSpec\n\t\t\tcreator {\n\t\t\t\tid\n\t\t\t\tdisplayName\n\t\t\t\tavatarUrl\n\t\t\t}\n\t\t\tmembersCount\n\t\t\tmembership {\n\t\t\t\trole\n\t\t\t\tavatarUrl\n\t\t\t\tisCreator\n\t\t\t}\n\t\t\tcurrentBook {\n\t\t\t\tid\n\t\t\t\ttitle\n\t\t\t\tauthor\n\t\t\t\timageUrl\n\t\t\t\tentity {\n\t\t\t\t\tid\n\t\t\t\t\tthumbnail {\n\t\t\t\t\t\turl\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t\tcreatedAt\n\t\t}\n\t}\n"): typeof import('./graphql').BookClubLayoutDocument;
+export function graphql(source: "\n\tquery BookClubLayout($slug: String!) {\n\t\tbookClubBySlug(slug: $slug) {\n\t\t\tid\n\t\t\tname\n\t\t\tslug\n\t\t\tdescription\n\t\t\tisPrivate\n\t\t\troleSpec\n\t\t\tcreator {\n\t\t\t\tid\n\t\t\t\tdisplayName\n\t\t\t\tavatarUrl\n\t\t\t}\n\t\t\tmembersCount\n\t\t\tmembership {\n\t\t\t\trole\n\t\t\t\tavatarUrl\n\t\t\t\tisCreator\n\t\t\t}\n\t\t\tcurrentBook {\n\t\t\t\tid\n\t\t\t\ttitle\n\t\t\t\tauthor\n\t\t\t\timageUrl\n\t\t\t\tentity {\n\t\t\t\t\tid\n\t\t\t\t\tthumbnail {\n\t\t\t\t\t\turl\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\t...BookClubBookItem\n\t\t\t}\n\t\t\tcreatedAt\n\t\t}\n\t}\n"): typeof import('./graphql').BookClubLayoutDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

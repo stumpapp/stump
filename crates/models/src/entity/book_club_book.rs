@@ -29,6 +29,20 @@ pub struct Model {
 	pub added_at: DateTimeWithTimeZone,
 }
 
+impl Model {
+	/// This is used to remove the book_entity_id in the scenario where a user
+	/// shouldn't have access to the book (e.g., access rules, etc). This is a really
+	/// awkward way to handle this honestly, but it avoids having to build out a super
+	/// complex flow for adding books that checks EACH member's access to the book
+	pub fn sanitize_entity(&mut self) {
+		let entity_id = self.book_entity_id.take();
+		tracing::debug!(
+			?entity_id,
+			"Sanitizing book club book by removing entity ID"
+		);
+	}
+}
+
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
 	#[sea_orm(

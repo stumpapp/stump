@@ -85,7 +85,6 @@
 		"lodash": "^4.17.21",
 		"lottie-react-native": "~7.3.4",
 		"lucide-react-native": "^0.544.0",
-		"luxon": "^3.7.2",
 		"nativewind": "^4.2.1",
 		"react": "19.1.0",
 		"react-dom": "19.1.0",
@@ -127,7 +126,6 @@
 	},
 	"devDependencies": {
 		"@babel/core": "^7.26.0",
-		"@types/luxon": "^3.7.1",
 		"@types/react": "^19.0.10",
 		"drizzle-kit": "^0.31.5",
 		"tsx": "^4.20.5",

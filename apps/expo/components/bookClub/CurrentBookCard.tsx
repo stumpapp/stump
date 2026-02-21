@@ -271,7 +271,7 @@ export function CurrentBookCard({ data }: Props) {
 						)}
 
 						<View className="flex-1 items-end justify-end gap-2 self-end p-1">
-							<Text className="text-muted-foreground text-right text-base font-medium">
+							<Text className="text-right text-base font-medium text-foreground-muted">
 								{isEmpty ? 'Add a book' : 'Currently reading'}
 							</Text>
 						</View>

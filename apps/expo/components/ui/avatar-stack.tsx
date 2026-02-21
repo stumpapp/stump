@@ -36,7 +36,7 @@ export function AvatarStack({
 				>
 					{avatar.src && <AvatarImage source={{ uri: avatar.src, headers: requestHeaders }} />}
 					<AvatarFallback className="bg-black/5 dark:bg-white/10">
-						<Text className="text-muted-foreground text-[10px] font-medium">
+						<Text className="text-[10px] font-medium text-foreground-muted">
 							{avatar.fallback || '?'}
 						</Text>
 					</AvatarFallback>
@@ -45,7 +45,7 @@ export function AvatarStack({
 
 			{overflowCount && overflowCount > 0 ? (
 				<View className="bg-muted -ml-2 h-8 w-8 items-center justify-center rounded-full border-2 border-background">
-					<Text className="text-muted-foreground text-[10px] font-medium">+{overflowCount}</Text>
+					<Text className="text-[10px] font-medium text-foreground-muted">+{overflowCount}</Text>
 				</View>
 			) : null}
 		</View>

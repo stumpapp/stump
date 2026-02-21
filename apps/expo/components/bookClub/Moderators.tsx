@@ -49,7 +49,7 @@ export function Moderators({ moderators }: Props) {
 			>
 				{moderator.avatarUrl && <AvatarImage source={{ uri: moderator.avatarUrl, headers }} />}
 				<AvatarFallback className="bg-black/5 dark:bg-white/10">
-					<Text className="text-muted-foreground text-[10px] font-medium">
+					<Text className="text-[10px] font-medium text-foreground-muted">
 						{getFallback(moderator.displayName)}
 					</Text>
 				</AvatarFallback>

@@ -99,7 +99,7 @@ export function BookClubCard({ club }: Props) {
 						<View className="gap-1">
 							<Heading className="font-medium">{data.name}</Heading>
 							{data.description && (
-								<Text className="text-muted-foreground" numberOfLines={2}>
+								<Text className="text-foreground-muted" numberOfLines={2}>
 									{data.description}
 								</Text>
 							)}
@@ -114,7 +114,7 @@ export function BookClubCard({ club }: Props) {
 									Authorization: sdk.authorizationHeader || '',
 								}}
 							/>
-							<Text className="text-muted-foreground text-sm">
+							<Text className="text-sm text-foreground-muted">
 								{pluralize('member', data.membersCount, true)}
 							</Text>
 						</View>

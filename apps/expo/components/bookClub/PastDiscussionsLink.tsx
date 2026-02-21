@@ -134,7 +134,7 @@ export function PastDiscussionsLink({ data }: Props) {
 
 				{isLinkDisabled && (
 					<View className="items-end justify-end">
-						<Text className="text-muted-foreground text-right text-base font-medium">
+						<Text className="text-right text-base font-medium text-foreground-muted">
 							No past discussions
 						</Text>
 					</View>

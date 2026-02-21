@@ -1,0 +1,39 @@
+import { Callout } from 'nextra/components'
+
+# Book Club Books
+
+There are two types of books that can be added to a book club schedule:
+
+1. **Internal books**: These are books that exist in the Stump library
+2. **External books**: These are books that do not exist in the Stump library, but can still be added to a book club via manual entry of the book's details (title, author, and optionally a cover image URL)
+
+## Scheduling
+
+There is no explicit scheduling features for book clubs yet. The general flow is that a book is designated as the 'current book' for a given book club, and then members read that book at their own pace. When the club is ready to move on, the current selection is archived and a new book is then selected.
+
+This might change in the future to support users who want more powerful automations around scheduling, but for now this is the general process.
+
+## Book-Specific Discussions
+
+<Callout emoji="💬" type="info">
+	See the [social features](/guides/features/book-clubs/social-features) guide for more information
+	about discussions in book clubs
+</Callout>
+
+## Suggestions and Voting
+
+<Callout emoji="🚧" type="info">
+	This is not yet implemented, so present tense phrasing should be taken with a grain of salt. I
+	just don't want to delete and rewrite this section when I implement it
+</Callout>
+
+Any member of a book club can suggest a book for the club to read. These suggestions are visible to all members of the club, and they can upvote suggestions that they like. I will not add any downvoting features, please don't ask.
+
+The club admins can then view the list of suggestions and their respective upvotes, and use that information to help guide their decision on what book to select next.
+
+## Future Improvements
+
+Some features that I think would be nice to have:
+
+- Loose scheduling features, such as the ability to set a target date for finishing a book and some basic reminders around that
+- Automation around suggestions based on upvotes, such as the ability for club admins to configure a setting that will automatically make the most upvoted suggestion the current book once the current book is archived

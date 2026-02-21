@@ -7,8 +7,8 @@ import { Text } from './text'
 
 export type AvatarStackItem = {
 	src?: string | null
-	fallback?: string
-	alt?: string
+	fallback?: string | null
+	alt?: string | null
 }
 
 type AvatarStackProps = {
@@ -30,10 +30,12 @@ export function AvatarStack({
 				<Avatar
 					alt={avatar.alt || avatar.fallback || 'Avatar'}
 					key={index}
-					className={cn('h-6 w-6 border-2 border-background', index > 0 && '-ml-2')}
+					className={cn('h-8 w-8 border border-background', index > 0 && '-ml-2', {
+						'border-black/10 dark:border-white/20': !avatar.src,
+					})}
 				>
 					{avatar.src && <AvatarImage source={{ uri: avatar.src, headers: requestHeaders }} />}
-					<AvatarFallback>
+					<AvatarFallback className="bg-black/5 dark:bg-white/10">
 						<Text className="text-muted-foreground text-[10px] font-medium">
 							{avatar.fallback || '?'}
 						</Text>
@@ -42,7 +44,7 @@ export function AvatarStack({
 			))}
 
 			{overflowCount && overflowCount > 0 ? (
-				<View className="bg-muted -ml-2 h-6 w-6 items-center justify-center rounded-full border-2 border-background">
+				<View className="bg-muted -ml-2 h-8 w-8 items-center justify-center rounded-full border-2 border-background">
 					<Text className="text-muted-foreground text-[10px] font-medium">+{overflowCount}</Text>
 				</View>
 			) : null}

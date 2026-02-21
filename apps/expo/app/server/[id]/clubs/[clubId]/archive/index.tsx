@@ -9,6 +9,7 @@ import { View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { PastBookGridItem } from '~/components/bookClub'
+import { usePastDiscussionSize } from '~/components/bookClub/usePastDiscussionSize'
 import ListEmpty from '~/components/ListEmpty'
 import RefreshControl from '~/components/RefreshControl'
 
@@ -83,9 +84,12 @@ export default function Screen() {
 		[nonBookDiscussions, resolvedBookDiscussions],
 	)
 
+	const { numColumns, paddingHorizontal } = usePastDiscussionSize()
+
 	return (
 		<SafeAreaView edges={['bottom']} className="flex-1 bg-background">
 			<FlashList
+				numColumns={numColumns}
 				data={listData}
 				keyExtractor={(item) =>
 					item.__typename === 'DiscussionWithoutBook'
@@ -94,7 +98,7 @@ export default function Screen() {
 				}
 				contentInsetAdjustmentBehavior="always"
 				refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />}
-				contentContainerStyle={{ padding: 16 }}
+				contentContainerStyle={{ paddingHorizontal, paddingVertical: 16 }}
 				ItemSeparatorComponent={() => <View className="h-2" />}
 				ListEmptyComponent={
 					<ListEmpty title="No Past Books" message="Completed books will appear here" />

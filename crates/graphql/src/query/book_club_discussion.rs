@@ -40,12 +40,12 @@ impl BookClubDiscussionQuery {
 		Ok(discussion.into())
 	}
 
-	/// Get a discussion by the book it's associated with
+	/// Get the discussions by the book they're associated with
 	async fn book_club_discussion_by_book(
 		&self,
 		ctx: &Context<'_>,
 		book_club_book_id: ID,
-	) -> Result<Option<BookClubDiscussion>> {
+	) -> Result<Vec<BookClubDiscussion>> {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
@@ -61,10 +61,13 @@ impl BookClubDiscussionQuery {
 				book_club_discussion::Column::BookClubBookId
 					.eq(book_club_book_id.as_ref()),
 			)
-			.one(conn)
+			.all(conn)
 			.await?;
 
-		Ok(discussion.map(BookClubDiscussion::from))
+		Ok(discussion
+			.into_iter()
+			.map(BookClubDiscussion::from)
+			.collect())
 	}
 
 	/// Get all discussions for a book club, ordered by pinned first, then by date created

@@ -161,6 +161,7 @@ export type BookClub = {
   members: Array<BookClubMember>;
   membersCount: Scalars['Int']['output'];
   membership?: Maybe<BookClubMember>;
+  moderators: Array<BookClubMember>;
   name: Scalars['String']['output'];
   /** Get discussions that are pinned for this book club */
   pinnedDiscussions: Array<BookClubDiscussion>;
@@ -2691,8 +2692,8 @@ export type Query = {
   bookClubBySlug?: Maybe<BookClub>;
   /** Get a discussion by ID */
   bookClubDiscussion: BookClubDiscussion;
-  /** Get a discussion by the book it's associated with */
-  bookClubDiscussionByBook?: Maybe<BookClubDiscussion>;
+  /** Get the discussions by the book they're associated with */
+  bookClubDiscussionByBook: Array<BookClubDiscussion>;
   /** Get a single message by ID */
   bookClubDiscussionMessage: BookClubDiscussionMessage;
   /** Get messages in a discussion */
@@ -4199,6 +4200,16 @@ export type BookClubPastDiscussionsQuery = { __typename?: 'Query', previousBookC
       & { ' $fragmentRefs'?: { 'PastBookGridItemFragment': PastBookGridItemFragment } }
     ) | null }> };
 
+export type BookClubPastBookScreenQueryVariables = Exact<{
+  bookId: Scalars['ID']['input'];
+}>;
+
+
+export type BookClubPastBookScreenQuery = { __typename?: 'Query', bookClubDiscussionByBook: Array<(
+    { __typename?: 'BookClubDiscussion', id: string }
+    & { ' $fragmentRefs'?: { 'DiscussionListItemFragment': DiscussionListItemFragment } }
+  )>, bookClubBook: { __typename?: 'BookClubBook', title?: string | null, entity?: { __typename?: 'Media', resolvedName: string } | null } };
+
 export type BookClubDiscussionRoomQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
@@ -4291,8 +4302,14 @@ export type BookClubDetailScreenQueryVariables = Exact<{
 
 
 export type BookClubDetailScreenQuery = { __typename?: 'Query', bookClubById: (
-    { __typename?: 'BookClub', id: string, name: string, emoji?: string | null, membership?: { __typename?: 'BookClubMember', id: string, role: BookClubMemberRole } | null, pinnedDiscussions: Array<{ __typename?: 'BookClubDiscussion', id: string, displayName: string, messageCount: number }>, currentBook?: (
-      { __typename?: 'BookClubBook', id: string, discussions: Array<{ __typename?: 'BookClubDiscussion', id: string, displayName: string, messageCount: number }> }
+    { __typename?: 'BookClub', id: string, name: string, emoji?: string | null, membership?: { __typename?: 'BookClubMember', id: string, role: BookClubMemberRole } | null, moderators: Array<{ __typename?: 'BookClubMember', id: string, avatarUrl?: string | null, displayName?: string | null }>, pinnedDiscussions: Array<(
+      { __typename?: 'BookClubDiscussion', id: string }
+      & { ' $fragmentRefs'?: { 'DiscussionListItemFragment': DiscussionListItemFragment } }
+    )>, currentBook?: (
+      { __typename?: 'BookClubBook', id: string, discussions: Array<(
+        { __typename?: 'BookClubDiscussion', id: string }
+        & { ' $fragmentRefs'?: { 'DiscussionListItemFragment': DiscussionListItemFragment } }
+      )> }
       & { ' $fragmentRefs'?: { 'CurrentBookCardFragment': CurrentBookCardFragment } }
     ) | null }
     & { ' $fragmentRefs'?: { 'PastDiscussionsLinkFragment': PastDiscussionsLinkFragment } }
@@ -4609,7 +4626,7 @@ export type ArchiveCurrentBookMutationVariables = Exact<{
 
 export type ArchiveCurrentBookMutation = { __typename?: 'Mutation', completeBook: { __typename?: 'BookClub', id: string } };
 
-export type PastBookGridItemFragment = { __typename?: 'BookClubBook', id: string, imageUrl?: string | null, completedAt?: any | null, entity?: { __typename: 'Media', id: string, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } | null } & { ' $fragmentName'?: 'PastBookGridItemFragment' };
+export type PastBookGridItemFragment = { __typename?: 'BookClubBook', id: string, imageUrl?: string | null, title?: string | null, completedAt?: any | null, entity?: { __typename: 'Media', id: string, resolvedName: string, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } | null } & { ' $fragmentName'?: 'PastBookGridItemFragment' };
 
 export type PastDiscussionsLinkFragment = { __typename?: 'BookClub', previousDiscussionsCount: number, previousBook?: { __typename?: 'BookClubBook', imageUrl?: string | null, entity?: { __typename: 'Media', id: string, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } | null } | null } & { ' $fragmentName'?: 'PastDiscussionsLinkFragment' };
 
@@ -4627,6 +4644,8 @@ export type SuggestionsPickerSheetQueryVariables = Exact<{
 
 
 export type SuggestionsPickerSheetQuery = { __typename?: 'Query', bookClubSuggestions: Array<{ __typename?: 'BookClubBookSuggestion', id: string, title?: string | null, author?: string | null, url?: string | null, bookId?: string | null, notes?: string | null, suggestedBy: { __typename?: 'BookClubMember', user: { __typename?: 'User', username: string } } }> };
+
+export type DiscussionListItemFragment = { __typename?: 'BookClubDiscussion', id: string, displayName: string, emoji?: string | null, messageCount: number, isLocked: boolean, isArchived: boolean } & { ' $fragmentName'?: 'DiscussionListItemFragment' };
 
 export type UseEmojisQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -5047,6 +5066,14 @@ export type BookClubLayoutQueryVariables = Exact<{
 
 
 export type BookClubLayoutQuery = { __typename?: 'Query', bookClubBySlug?: { __typename?: 'BookClub', id: string, name: string, slug: string, description?: string | null, isPrivate: boolean, roleSpec: any, membersCount: number, createdAt: any, creator: { __typename?: 'BookClubMember', id: string, displayName?: string | null, avatarUrl?: string | null }, membership?: { __typename?: 'BookClubMember', role: BookClubMemberRole, avatarUrl?: string | null, isCreator: boolean } | null, currentBook?: { __typename?: 'BookClubBook', id: string, title?: string | null, author?: string | null, imageUrl?: string | null, entity?: { __typename?: 'Media', id: string, thumbnail: { __typename?: 'ImageRef', url: string } } | null } | null } | null };
+
+export type UpdateBookClubMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  input: UpdateBookClubInput;
+}>;
+
+
+export type UpdateBookClubMutation = { __typename?: 'Mutation', updateBookClub: { __typename?: 'BookClub', id: string, name: string, emoji?: string | null, isPrivate: boolean, roleSpec: any, description?: string | null } };
 
 export type UserBookClubsSceneQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -6080,9 +6107,11 @@ export const PastBookGridItemFragmentDoc = new TypedDocumentString(`
     fragment PastBookGridItem on BookClubBook {
   id
   imageUrl
+  title
   entity {
     __typename
     id
+    resolvedName
     thumbnail {
       url
       metadata {
@@ -6121,6 +6150,16 @@ export const PastDiscussionsLinkFragmentDoc = new TypedDocumentString(`
   previousDiscussionsCount
 }
     `, {"fragmentName":"PastDiscussionsLink"}) as unknown as TypedDocumentString<PastDiscussionsLinkFragment, unknown>;
+export const DiscussionListItemFragmentDoc = new TypedDocumentString(`
+    fragment DiscussionListItem on BookClubDiscussion {
+  id
+  displayName
+  emoji
+  messageCount
+  isLocked
+  isArchived
+}
+    `, {"fragmentName":"DiscussionListItem"}) as unknown as TypedDocumentString<DiscussionListItemFragment, unknown>;
 export const LibraryGridItemFragmentDoc = new TypedDocumentString(`
     fragment LibraryGridItem on Library {
   id
@@ -7214,9 +7253,11 @@ export const BookClubPastDiscussionsDocument = new TypedDocumentString(`
     fragment PastBookGridItem on BookClubBook {
   id
   imageUrl
+  title
   entity {
     __typename
     id
+    resolvedName
     thumbnail {
       url
       metadata {
@@ -7231,6 +7272,27 @@ export const BookClubPastDiscussionsDocument = new TypedDocumentString(`
   }
   completedAt
 }`) as unknown as TypedDocumentString<BookClubPastDiscussionsQuery, BookClubPastDiscussionsQueryVariables>;
+export const BookClubPastBookScreenDocument = new TypedDocumentString(`
+    query BookClubPastBookScreen($bookId: ID!) {
+  bookClubDiscussionByBook(bookClubBookId: $bookId) {
+    id
+    ...DiscussionListItem
+  }
+  bookClubBook(id: $bookId) {
+    title
+    entity {
+      resolvedName
+    }
+  }
+}
+    fragment DiscussionListItem on BookClubDiscussion {
+  id
+  displayName
+  emoji
+  messageCount
+  isLocked
+  isArchived
+}`) as unknown as TypedDocumentString<BookClubPastBookScreenQuery, BookClubPastBookScreenQueryVariables>;
 export const BookClubDiscussionRoomDocument = new TypedDocumentString(`
     query BookClubDiscussionRoom($id: ID!) {
   bookClubDiscussion(id: $id) {
@@ -7435,18 +7497,21 @@ export const BookClubDetailScreenDocument = new TypedDocumentString(`
       id
       role
     }
+    moderators {
+      id
+      avatarUrl
+      displayName
+    }
     pinnedDiscussions {
       id
-      displayName
-      messageCount
+      ...DiscussionListItem
     }
     currentBook {
       id
       ...CurrentBookCard
       discussions {
         id
-        displayName
-        messageCount
+        ...DiscussionListItem
       }
     }
     ...PastDiscussionsLink
@@ -7494,6 +7559,14 @@ fragment PastDiscussionsLink on BookClub {
     }
   }
   previousDiscussionsCount
+}
+fragment DiscussionListItem on BookClubDiscussion {
+  id
+  displayName
+  emoji
+  messageCount
+  isLocked
+  isArchived
 }`) as unknown as TypedDocumentString<BookClubDetailScreenQuery, BookClubDetailScreenQueryVariables>;
 export const BookClubSettingsDocument = new TypedDocumentString(`
     query BookClubSettings($id: ID!) {
@@ -9286,6 +9359,18 @@ export const BookClubLayoutDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<BookClubLayoutQuery, BookClubLayoutQueryVariables>;
+export const UpdateBookClubDocument = new TypedDocumentString(`
+    mutation UpdateBookClub($id: ID!, $input: UpdateBookClubInput!) {
+  updateBookClub(id: $id, input: $input) {
+    id
+    name
+    emoji
+    isPrivate
+    roleSpec
+    description
+  }
+}
+    `) as unknown as TypedDocumentString<UpdateBookClubMutation, UpdateBookClubMutationVariables>;
 export const UserBookClubsSceneDocument = new TypedDocumentString(`
     query UserBookClubsScene {
   bookClubs(all: false) {

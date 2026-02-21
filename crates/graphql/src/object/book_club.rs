@@ -117,6 +117,26 @@ impl BookClub {
 			.collect())
 	}
 
+	async fn moderators(&self, ctx: &Context<'_>) -> Result<Vec<BookClubMember>> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let book_club_members =
+			book_club_member::Entity::find_members_accessible_to_user_for_book_club_id(
+				user,
+				&self.model.id.clone(),
+			)
+			.filter(book_club_member::Column::Role.eq(BookClubMemberRole::Moderator))
+			.into_model::<book_club_member::Model>()
+			.all(conn)
+			.await?;
+
+		Ok(book_club_members
+			.into_iter()
+			.map(BookClubMember::from)
+			.collect())
+	}
+
 	async fn members_count(&self, ctx: &Context<'_>) -> Result<u64> {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();

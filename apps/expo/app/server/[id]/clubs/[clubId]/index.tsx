@@ -8,10 +8,10 @@ import { Platform, Pressable, ScrollView, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { useActiveServer } from '~/components/activeServer'
-import { CurrentBookCard, PastDiscussionsLink } from '~/components/bookClub'
+import { CurrentBookCard, Moderators, PastDiscussionsLink } from '~/components/bookClub'
 import { DiscussionListItem } from '~/components/bookClub/discussion'
 import RefreshControl from '~/components/RefreshControl'
-import { Card, Icon } from '~/components/ui'
+import { Badge, Card, Icon, Text } from '~/components/ui'
 
 const query = graphql(`
 	query BookClubDetailScreen($id: ID!) {
@@ -23,18 +23,21 @@ const query = graphql(`
 				id
 				role
 			}
+			moderators {
+				id
+				avatarUrl
+				displayName
+			}
 			pinnedDiscussions {
 				id
-				displayName
-				messageCount
+				...DiscussionListItem
 			}
 			currentBook {
 				id
 				...CurrentBookCard
 				discussions {
 					id
-					displayName
-					messageCount
+					...DiscussionListItem
 				}
 			}
 			...PastDiscussionsLink
@@ -82,15 +85,21 @@ export default function Screen() {
 				contentInsetAdjustmentBehavior="always"
 			>
 				<View className="gap-6 px-4 py-4">
+					{club.moderators.length > 0 && (
+						<View className="flex flex-row items-center justify-between gap-2">
+							<Badge>
+								<Text>Moderated by</Text>
+							</Badge>
+
+							<Moderators moderators={club.moderators} />
+						</View>
+					)}
+
 					{club.pinnedDiscussions.length > 0 && (
 						<Card label="Pinned Rooms">
 							{club.pinnedDiscussions.map((discussion) => (
 								<Card.Row key={discussion.id}>
-									<DiscussionListItem
-										id={discussion.id}
-										name={discussion.displayName}
-										messageCount={discussion.messageCount}
-									/>
+									<DiscussionListItem data={discussion} />
 								</Card.Row>
 							))}
 						</Card>
@@ -109,11 +118,7 @@ export default function Screen() {
 					>
 						{club.currentBook?.discussions.map((discussion) => (
 							<Card.Row key={discussion.id}>
-								<DiscussionListItem
-									id={discussion.id}
-									name={discussion.displayName}
-									messageCount={discussion.messageCount}
-								/>
+								<DiscussionListItem data={discussion} />
 							</Card.Row>
 						))}
 					</Card>

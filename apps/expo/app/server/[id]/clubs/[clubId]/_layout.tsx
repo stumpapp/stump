@@ -60,6 +60,7 @@ export default function Screen() {
 				<Stack.Screen
 					name="archive"
 					options={{
+						title: 'Archive',
 						headerShown: false,
 					}}
 				/>

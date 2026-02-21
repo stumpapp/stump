@@ -91,7 +91,7 @@ export default function BookClubSideBarSection({
 	const showLinkToAll = links.includes(FilterableArrangementEntityLink.ShowAll)
 
 	return (
-		<Accordion type="single" collapsible className="w-full py-2">
+		<Accordion type="single" collapsible className="w-full py-2" defaultValue="bookClubs">
 			<Accordion.Item value="bookClubs" className="border-none">
 				<Accordion.Trigger noUnderline asLabel className="px-1 py-0 pb-2">
 					{t('sidebar.buttons.bookClubs')}

@@ -10,6 +10,7 @@ import { ContentContainer } from '@/components/container'
 import { SceneContainer } from '@/components/container'
 import { useAppContext } from '@/context'
 
+import HelpfulLinks from './HelpfulLinks'
 import ServerEmojisSection from './ServerEmojisSection'
 import ServerInfoSection from './ServerInfoSection'
 import ServerPublicURL from './ServerPublicURL'
@@ -46,6 +47,8 @@ export default function GeneralServerSettingsScene() {
 					<ServerInfoSection />
 					<ServerPublicURL />
 					{uploadConfig?.enabled && <ServerEmojisSection />}
+
+					<HelpfulLinks />
 				</div>
 			</ContentContainer>
 		</SceneContainer>

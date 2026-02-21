@@ -1686,6 +1686,14 @@
 						]
 					}
 				},
+				"helpfulLinks": {
+					"title": "Helpful links",
+					"description": "Links to resources that may be helpful for managing your Stump server instance",
+					"links": {
+						"documentation": "Documentation",
+						"changelog": "Changelog"
+					}
+				},
 				"serverPublicUrl": {
 					"label": "Public URL",
 					"description": "The URL that your server is accessible from outside your network, if applicable. This will enable invite links and other features"

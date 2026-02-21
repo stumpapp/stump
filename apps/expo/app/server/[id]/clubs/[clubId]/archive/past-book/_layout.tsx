@@ -10,19 +10,10 @@ export default function Screen() {
 	return (
 		<Stack screenOptions={{ animation: animationEnabled ? 'default' : 'none' }}>
 			<Stack.Screen
-				name="index"
+				name="[bookId]"
 				options={{
-					headerShown: true,
-					title: 'Past Discussions',
+					headerShown: false,
 					headerLeft: Platform.OS === 'android' ? undefined : () => <ChevronBackLink />,
-				}}
-			/>
-
-			<Stack.Screen
-				name="past-book"
-				options={{
-					title: '',
-					headerShown: true,
 				}}
 			/>
 		</Stack>

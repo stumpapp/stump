@@ -213,9 +213,18 @@ function SheetContent({ series: { stats, metadata, resolvedName, tags } }: Sheet
 					</Card>
 				)}
 
-				<MetadataBadgeSection label="Genres" items={metadata?.genres ?? []} />
-				<MetadataBadgeSection label="Writers" items={metadata?.writers ?? []} />
-				<MetadataBadgeSection label="Characters" items={metadata?.characters ?? []} />
+				<MetadataBadgeSection
+					label="Genres"
+					items={(metadata?.genres ?? []).map((genre) => ({ label: genre }))}
+				/>
+				<MetadataBadgeSection
+					label="Writers"
+					items={(metadata?.writers ?? []).map((writer) => ({ label: writer }))}
+				/>
+				<MetadataBadgeSection
+					label="Characters"
+					items={(metadata?.characters ?? []).map((character) => ({ label: character }))}
+				/>
 			</View>
 		</ScrollView>
 	)

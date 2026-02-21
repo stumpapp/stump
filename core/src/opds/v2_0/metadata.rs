@@ -1,9 +1,10 @@
 use chrono::Utc;
 use derive_builder::Builder;
+use models::entity::media_metadata;
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
-use super::{entity::OPDSSeries, link::OPDSLink};
+use super::link::OPDSLink;
 
 /// Pagination-specific metadata fields for an OPDS collection
 ///
@@ -52,21 +53,50 @@ pub enum OPDSEntryBelongsTo {
 	Series(OPDSEntryBelongsToEntity),
 }
 
-impl From<(OPDSSeries, Option<i64>)> for OPDSEntryBelongsTo {
-	fn from((series, position): (OPDSSeries, Option<i64>)) -> Self {
-		Self::Series(OPDSEntryBelongsToEntity {
-			name: series.metadata.and_then(|m| m.title).unwrap_or(series.name),
-			position,
-			// TODO(OPDS-V2): relative links might not work here which means traits will be largely annoying to work with
-			// I might just need to create a separate pattern for this
-			links: vec![],
-		})
-	}
-}
-
 #[skip_serializing_none]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct OPDSDynamicMetadata(pub serde_json::Value);
+
+impl TryFrom<media_metadata::Model> for OPDSDynamicMetadata {
+	type Error = crate::CoreError;
+
+	fn try_from(value: media_metadata::Model) -> Result<Self, Self::Error> {
+		let mut json = serde_json::to_value(value)?;
+
+		// Note: This was kinda a bug, basically I forgot to split comma-separated values
+		// into arrays like I have for GraphQL
+		if let Some(obj) = json.as_object_mut() {
+			const ARRAY_FIELDS: &[&str] = &[
+				"characters",
+				"colorists",
+				"cover_artists",
+				"editors",
+				"genres",
+				"inkers",
+				"letterers",
+				"links",
+				"pencillers",
+				"teams",
+				"writers",
+			];
+
+			for field in ARRAY_FIELDS {
+				if let Some(val) = obj.get_mut(*field) {
+					if let Some(s) = val.as_str() {
+						let arr: Vec<serde_json::Value> = s
+							.split(',')
+							.map(|v| serde_json::Value::String(v.trim().to_owned()))
+							.filter(|v| v.as_str().is_some_and(|s| !s.is_empty()))
+							.collect();
+						*val = serde_json::Value::Array(arr);
+					}
+				}
+			}
+		}
+
+		Ok(Self(json))
+	}
+}
 
 /// Metadata for an OPDS 2.0 feed or collection
 /// See also: https://github.com/readium/webpub-manifest/tree/master/contexts/default

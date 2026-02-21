@@ -474,7 +474,7 @@ export default function Screen() {
 										// @ts-expect-error: It's fine
 										color: accentColor,
 									}}
-									size={24}
+									size={20}
 									// this makes it look better because icons have a bit of empty space all around
 									className="-ml-1"
 								/>

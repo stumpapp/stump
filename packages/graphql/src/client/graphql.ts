@@ -4609,7 +4609,7 @@ export type AddBookSheetQuery = { __typename?: 'Query', media: { __typename?: 'P
 
 export type BookClubCardFragment = { __typename?: 'BookClub', id: string, name: string, slug: string, description?: string | null, membersCount: number, members: Array<{ __typename?: 'BookClubMember', id: string, displayName?: string | null, avatarUrl?: string | null }>, currentBook?: { __typename?: 'BookClubBook', id: string, imageUrl?: string | null, title?: string | null, entity?: { __typename: 'Media', id: string, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } | null } | null } & { ' $fragmentName'?: 'BookClubCardFragment' };
 
-export type CurrentBookCardFragment = { __typename?: 'BookClubBook', id: string, title?: string | null, author?: string | null, imageUrl?: string | null, addedAt: any, entity?: { __typename: 'Media', id: string, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } | null } & { ' $fragmentName'?: 'CurrentBookCardFragment' };
+export type CurrentBookCardFragment = { __typename?: 'BookClubBook', id: string, title?: string | null, author?: string | null, imageUrl?: string | null, addedAt: any, url?: string | null, entity?: { __typename: 'Media', id: string, resolvedName: string, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } | null } & { ' $fragmentName'?: 'CurrentBookCardFragment' };
 
 export type AddBookToClubMutationVariables = Exact<{
   bookClubId: Scalars['ID']['input'];
@@ -6086,9 +6086,11 @@ export const CurrentBookCardFragmentDoc = new TypedDocumentString(`
   author
   imageUrl
   addedAt
+  url
   entity {
     __typename
     id
+    resolvedName
     thumbnail {
       url
       metadata {
@@ -7523,9 +7525,11 @@ export const BookClubDetailScreenDocument = new TypedDocumentString(`
   author
   imageUrl
   addedAt
+  url
   entity {
     __typename
     id
+    resolvedName
     thumbnail {
       url
       metadata {

@@ -24,6 +24,7 @@ import { ThumbnailImage } from '../image'
 import { Icon, Text } from '../ui'
 import { AddBookOptionsSheet, type AddBookOptionsSheetRef } from './AddBookOptionsSheet'
 import { useBookClubContext } from './context'
+import { CurrentBookSheet, CurrentBookSheetRef } from './CurrentBookSheet'
 import { getClubBookThumbnailData } from './utils'
 
 ColorSpace.register(sRGB)
@@ -36,9 +37,11 @@ const fragment = graphql(`
 		author
 		imageUrl
 		addedAt
+		url
 		entity {
 			__typename
 			id
+			resolvedName
 			thumbnail {
 				url
 				metadata {
@@ -76,9 +79,11 @@ type Props = {
 
 export function CurrentBookCard({ data }: Props) {
 	const { clubId, checkRole } = useBookClubContext()
+
 	const queryClient = useQueryClient()
 	const book = useFragment(fragment, data)
 	const optionsSheetRef = useRef<AddBookOptionsSheetRef>(null)
+	const bookSheetRef = useRef<CurrentBookSheetRef>(null)
 
 	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
 
@@ -177,8 +182,11 @@ export function CurrentBookCard({ data }: Props) {
 	return (
 		<>
 			<Pressable
-				onPress={isEmpty && isModerator ? () => optionsSheetRef.current?.open() : undefined}
-				disabled={!isEmpty || !isModerator}
+				onPress={
+					isEmpty && isModerator
+						? () => optionsSheetRef.current?.open()
+						: () => bookSheetRef.current?.open()
+				}
 				style={{ flexGrow: 1 }}
 			>
 				<View className="squircle ios:rounded-[2rem] relative flex-grow overflow-hidden rounded-3xl bg-black/5 dark:bg-white/10">
@@ -292,6 +300,8 @@ export function CurrentBookCard({ data }: Props) {
 					</Dialog.Container>
 				</>
 			)}
+
+			{book && <CurrentBookSheet ref={bookSheetRef} book={book} />}
 		</>
 	)
 }

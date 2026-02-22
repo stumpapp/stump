@@ -7,7 +7,7 @@ import {
 	SortDirection,
 	useReactTable,
 } from '@tanstack/react-table'
-import dayjs from 'dayjs'
+import { intlFormat } from 'date-fns'
 import { ChevronDown, Copy } from 'lucide-react'
 import { Fragment, useState } from 'react'
 
@@ -89,7 +89,17 @@ export default function EmailerSendHistoryTable({ records }: Props) {
 const columnHelper = createColumnHelper<EmailerSendRecord>()
 const columns = [
 	columnHelper.accessor('sentAt', {
-		cell: ({ getValue }) => <Text size="sm">{dayjs(getValue()).format('LLL')}</Text>,
+		cell: ({ getValue }) => (
+			<Text size="sm">
+				{intlFormat(new Date(getValue()), {
+					month: 'long',
+					day: 'numeric',
+					year: 'numeric',
+					hour: 'numeric',
+					minute: '2-digit',
+				})}
+			</Text>
+		),
 		header: () => (
 			<Text size="sm" className="text-left" variant="muted">
 				Sent at

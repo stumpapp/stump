@@ -1,6 +1,6 @@
 import { cn, DatePicker, Input } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import dayjs from 'dayjs'
+import { endOfDay } from 'date-fns'
 import { useFormContext, useWatch } from 'react-hook-form'
 import { match } from 'ts-pattern'
 
@@ -61,10 +61,10 @@ export default function FilterValue({ idx }: Props) {
 		return (
 			<DatePicker
 				placeholder={t(getKey('date'))}
-				selected={dayjs(fieldDef.value as string).toDate()}
+				selected={fieldDef.value ? new Date(fieldDef.value as string) : undefined}
 				onChange={(value) => {
 					if (value) {
-						const adjustedValue = dayjs(value).endOf('day').toDate()
+						const adjustedValue = endOfDay(value)
 						form.setValue(`filters.groups.${groupIdx}.filters.${idx}.value`, adjustedValue)
 					} else {
 						form.resetField(`filters.groups.${groupIdx}.filters.${idx}.value`)

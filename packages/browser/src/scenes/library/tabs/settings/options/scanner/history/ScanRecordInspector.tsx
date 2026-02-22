@@ -2,7 +2,7 @@ import { useGraphQL } from '@stump/client'
 import { Alert, AlertDescription, ButtonOrLink, cn, Label, Sheet, Text } from '@stump/components'
 import { graphql, UserPermission } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
-import dayjs from 'dayjs'
+import { intlFormat } from 'date-fns'
 import { useMemo } from 'react'
 
 import { useAppContext } from '@/context'
@@ -77,7 +77,15 @@ export default function ScanRecordInspector({ record, onClose }: Props) {
 
 	const displayedData = useCurrentOrPrevious(record)
 
-	const scannedAt = dayjs(displayedData?.timestamp)
+	const scannedAtFormatted = displayedData?.timestamp
+		? intlFormat(new Date(displayedData.timestamp), {
+				month: 'long',
+				day: 'numeric',
+				year: 'numeric',
+				hour: 'numeric',
+				minute: '2-digit',
+			})
+		: ''
 
 	return (
 		<Sheet
@@ -102,7 +110,7 @@ export default function ScanRecordInspector({ record, onClose }: Props) {
 
 				<div className="px-4 py-2" data-testid="name-meta">
 					<Label className="text-foreground-muted">{t(getFieldKey('date'))}</Label>
-					<Text size="sm">{scannedAt.format('LLL')}</Text>
+					<Text size="sm">{scannedAtFormatted}</Text>
 				</div>
 
 				{displayedData?.options?.config && (

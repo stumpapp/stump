@@ -1,5 +1,5 @@
 import { FragmentType, graphql, useFragment } from '@stump/graphql'
-import dayjs from 'dayjs'
+import { formatDistanceToNow } from 'date-fns'
 import { useRouter } from 'expo-router'
 import { Pressable, View } from 'react-native'
 
@@ -94,7 +94,7 @@ export default function RecentlyAddedSeriesItem({ series }: Props) {
 							}}
 							numberOfLines={0}
 						>
-							{dayjs(data.createdAt).fromNow()}
+							{formatDistanceToNow(new Date(data.createdAt), { addSuffix: true })}
 						</Text>
 					</View>
 				</View>

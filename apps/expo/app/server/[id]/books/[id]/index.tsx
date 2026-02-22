@@ -1,8 +1,7 @@
 import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { BookByIdQuery, graphql, UserPermission } from '@stump/graphql'
-import dayjs from 'dayjs'
-import duration from 'dayjs/plugin/duration'
-import relativeTime from 'dayjs/plugin/relativeTime'
+import { formatHumanDuration } from '@stump/i18n'
+import { formatDistanceToNow } from 'date-fns'
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router'
 import { ChevronLeft, Loader2 } from 'lucide-react-native'
 import { useCallback, useLayoutEffect, useState } from 'react'
@@ -30,9 +29,6 @@ import { formatSeriesPosition } from '~/lib/bookUtils'
 import { formatBytes, parseGraphQLDecimal } from '~/lib/format'
 import { useDownload, useIsBookDownloaded, useIsBookDownloading } from '~/lib/hooks'
 import { usePreferencesStore } from '~/stores'
-
-dayjs.extend(relativeTime)
-dayjs.extend(duration)
 
 const query = graphql(`
 	query BookById($id: ID!) {
@@ -312,10 +308,10 @@ export default function Screen() {
 		}
 
 		if (elapsedSeconds) {
-			const readTime = dayjs.duration(elapsedSeconds, 'seconds').humanize()
+			const readTime = formatHumanDuration(elapsedSeconds, { significantUnits: 1 })
 			return <Card.Stat label="Read time" value={readTime} />
 		} else {
-			return <Card.Stat label="Started" value={dayjs(startedAt).fromNow(true)} />
+			return <Card.Stat label="Started" value={formatDistanceToNow(new Date(startedAt))} />
 		}
 	}
 
@@ -334,12 +330,12 @@ export default function Screen() {
 
 	const lastCompletionDistance =
 		lastCompletion?.completedAt != null
-			? dayjs(lastCompletion.completedAt).fromNow(false)
+			? formatDistanceToNow(new Date(lastCompletion.completedAt), { addSuffix: true })
 			: 'Unknown'
 
 	const lastCompletionReadTime =
 		lastCompletion?.elapsedSeconds != null
-			? dayjs.duration(lastCompletion.elapsedSeconds, 'seconds').humanize()
+			? formatHumanDuration(lastCompletion.elapsedSeconds, { significantUnits: 1 })
 			: 'Unknown'
 
 	return (

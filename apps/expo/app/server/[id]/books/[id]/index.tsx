@@ -3,7 +3,7 @@ import { BookByIdQuery, graphql, UserPermission } from '@stump/graphql'
 import { formatHumanDuration } from '@stump/i18n'
 import { formatDistanceToNow } from 'date-fns'
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router'
-import { ArrowDown, ChevronLeft, X } from 'lucide-react-native'
+import { ChevronLeft } from 'lucide-react-native'
 import { useCallback, useLayoutEffect, useState } from 'react'
 import { Platform, Pressable, View } from 'react-native'
 import Animated, {
@@ -12,7 +12,6 @@ import Animated, {
 	useAnimatedRef,
 	useAnimatedStyle,
 	useScrollOffset,
-	withSpring,
 } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import TImage from 'react-native-turbo-image'
@@ -20,7 +19,7 @@ import { stripHtml } from 'string-strip-html'
 
 import { useActiveServer, useStumpServer } from '~/components/activeServer'
 import { BookMetaLink } from '~/components/book'
-import { BookActionMenu } from '~/components/book/overview'
+import { BookActionMenu, DownloadButton } from '~/components/book/overview'
 import { InfoRow, LongValue } from '~/components/book/overview'
 import { ThumbnailImage } from '~/components/image'
 import RefreshControl from '~/components/RefreshControl'
@@ -28,12 +27,7 @@ import { Button, Card, Heading, Text } from '~/components/ui'
 import { Icon } from '~/components/ui/icon'
 import { formatSeriesPosition } from '~/lib/bookUtils'
 import { formatBytes, parseGraphQLDecimal } from '~/lib/format'
-import {
-	useDownload,
-	useDownloadQueue,
-	useIsBookDownloaded,
-	useIsBookDownloading,
-} from '~/lib/hooks'
+import { useDownload } from '~/lib/hooks'
 import { usePreferencesStore } from '~/stores'
 
 const query = graphql(`
@@ -155,20 +149,6 @@ export default function Screen() {
 		id: bookID,
 	})
 	const { downloadBook } = useDownload({ serverId: serverID })
-	const { activeItems, cancel } = useDownloadQueue({ serverId: serverID })
-
-	const isDownloading = useIsBookDownloading(bookID)
-	const activeDownload = activeItems.find((item) => item.bookId === bookID)
-	const downloadProgress = activeDownload?.progress?.percentage ?? 0
-
-	const progressWidth = useAnimatedStyle(() => {
-		return {
-			width: withSpring(
-				`${interpolate(downloadProgress, [0, 100], [1, 100], Extrapolation.CLAMP)}%`,
-				{ overshootClamping: true },
-			),
-		}
-	}, [downloadProgress])
 
 	const [isRefetching, setIsRefetching] = useState(false)
 
@@ -181,12 +161,8 @@ export default function Screen() {
 		})
 	}
 
-	const isDownloaded = useIsBookDownloaded(bookID, serverID)
-
-	const accentColor = usePreferencesStore((state) => state.accentColor)
-
 	const onDownloadBook = useCallback(async () => {
-		if (isDownloaded || !book || isDownloading) return
+		if (!book) return
 
 		return await downloadBook({
 			id: book.id,
@@ -201,7 +177,7 @@ export default function Screen() {
 			thumbnailMeta: book.thumbnail.metadata || undefined,
 			toc: book.ebook?.toc,
 		})
-	}, [isDownloaded, downloadBook, book, isDownloading])
+	}, [downloadBook, book])
 
 	const router = useRouter()
 	const insets = useSafeAreaInsets()
@@ -443,39 +419,8 @@ export default function Screen() {
 						>
 							{renderRead()}
 						</Button>
-						{checkPermission(UserPermission.DownloadFile) && !isDownloaded && (
-							<Button
-								variant="secondary"
-								roundness="full"
-								disabled={isDownloaded}
-								onPress={() => {
-									if (isDownloading && activeDownload) {
-										cancel(activeDownload.id)
-									} else {
-										onDownloadBook()
-									}
-								}}
-								className="native:px-0 w-36 flex-row gap-2"
-							>
-								{isDownloading && (
-									<Animated.View
-										style={[progressWidth, { backgroundColor: accentColor }]}
-										className="absolute inset-0 opacity-25"
-									/>
-								)}
-
-								<Icon
-									as={isDownloading ? X : ArrowDown}
-									style={{
-										// @ts-expect-error: It's fine
-										color: accentColor,
-									}}
-									size={20}
-									// this makes it look better because icons have a bit of empty space all around
-									className="-ml-1"
-								/>
-								<Text className="font-medium">{isDownloading ? 'Cancel' : 'Download'}</Text>
-							</Button>
+						{checkPermission(UserPermission.DownloadFile) && (
+							<DownloadButton bookId={bookID} serverId={serverID} onDownload={onDownloadBook} />
 						)}
 					</View>
 

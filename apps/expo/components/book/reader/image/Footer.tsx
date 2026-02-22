@@ -1,9 +1,8 @@
 import { Slider } from '@miblanchard/react-native-slider'
 import { FlashList, FlashListRef, useMappingHelper } from '@shopify/flash-list'
 import { ReadingDirection, ReadingMode } from '@stump/graphql'
+import { formatHumanDuration } from '@stump/i18n'
 import { STUMP_SAVE_BASIC_SESSION_HEADER } from '@stump/sdk/constants'
-import { formatDuration } from 'date-fns'
-import { es } from 'date-fns/locale'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Platform, Pressable, View } from 'react-native'
 import Animated, {
@@ -165,16 +164,7 @@ export default function Footer() {
 		}
 	}, [footerControls, currentPage, visible, visibilityChanged, pageSets, doublePageBehaviorChanged])
 
-	const renderReadingTime = useCallback(() => {
-		const hours = Math.trunc(elapsedSeconds / 3600)
-		const minutes = Math.trunc((elapsedSeconds % 3600) / 60)
-		const seconds = elapsedSeconds % 60
-
-		return formatDuration(
-			{ hours, minutes, seconds },
-			{ format: hours === 0 ? ['minutes', 'seconds'] : ['hours', 'minutes'], locale: es },
-		)
-	}, [elapsedSeconds])
+	const formattedReadTime = formatHumanDuration(elapsedSeconds)
 
 	const pageSource = useCallback(
 		(page: number) => ({
@@ -557,7 +547,7 @@ export default function Footer() {
 				>
 					{trackElapsedTime && (
 						<View>
-							<Text className="text-sm text-[#898d94]">Reading time: {renderReadingTime()}</Text>
+							<Text className="text-sm text-[#898d94]">Reading time: {formattedReadTime}</Text>
 						</View>
 					)}
 

@@ -1,5 +1,5 @@
 import type { Locale } from 'date-fns'
-import { formatDuration, intervalToDuration, setDefaultOptions } from 'date-fns'
+import { formatDuration, setDefaultOptions } from 'date-fns'
 
 import type { AllowedLocale } from './config'
 
@@ -126,29 +126,18 @@ export async function initDateFnsLocale(locale: string): Promise<AllowedLocale> 
 }
 
 /**
- * Format elapsed time for job timers and similar use cases
- *
- * @param seconds - Total elapsed time in seconds (can include decimals)
- * @returns Formatted duration string
+ * Format elapsed time (HH:MM:SS) for job timers and similar use cases
  */
 export function formatElapsedDuration(seconds: number): string {
-	if (seconds < 60) {
-		return `${seconds.toFixed(3)}s`
-	}
-
 	const totalSeconds = Math.floor(seconds)
 	const hours = Math.floor(totalSeconds / 3600)
 	const minutes = Math.floor((totalSeconds % 3600) / 60)
 	const secs = totalSeconds % 60
 
-	if (hours > 0) {
-		// "HH:MM:SS"
-		return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
-	}
-
-	// "MM:SS"
-	return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+	return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
 }
+
+type DurationUnit = 'hours' | 'minutes' | 'seconds'
 
 /**
  * Format a duration in human-readable form
@@ -156,14 +145,31 @@ export function formatElapsedDuration(seconds: number): string {
 export function formatHumanDuration(
 	seconds: number,
 	options?: {
-		format?: ('years' | 'months' | 'weeks' | 'days' | 'hours' | 'minutes' | 'seconds')[]
+		significantUnits?: 1 | 2 | 3
 		delimiter?: string
 	},
 ): string {
-	const duration = intervalToDuration({ start: 0, end: seconds * 1000 })
+	if (seconds <= 0) {
+		return formatDuration({ seconds: 0 }, { format: ['seconds'] })
+	}
 
-	return formatDuration(duration, {
-		format: options?.format,
-		delimiter: options?.delimiter,
-	})
+	const h = Math.trunc(seconds / 3600)
+	const m = Math.trunc((seconds % 3600) / 60)
+	const s = Math.trunc(seconds % 60)
+
+	let units: DurationUnit[] = ['seconds']
+
+	if (h !== 0) {
+		units = ['hours', 'minutes', 'seconds']
+	} else if (m !== 0) {
+		units = ['minutes', 'seconds']
+	}
+
+	return formatDuration(
+		{ hours: h, minutes: m, seconds: s },
+		{
+			format: units.slice(0, options?.significantUnits ?? 2),
+			delimiter: options?.delimiter,
+		},
+	)
 }

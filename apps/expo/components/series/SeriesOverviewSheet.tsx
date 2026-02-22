@@ -3,7 +3,7 @@ import { PREFETCH_STALE_TIME, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { graphql, SeriesOverviewSheetQuery } from '@stump/graphql'
 import { formatHumanDuration } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
-import { forwardRef, useMemo } from 'react'
+import { forwardRef } from 'react'
 import { View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -117,17 +117,7 @@ type SheetContentProps = {
 
 function SheetContent({ series: { stats, metadata, resolvedName, tags } }: SheetContentProps) {
 	const formattedSize = formatBytesSeparate(stats.totalBytes)
-	const formattedTime = useMemo(() => {
-		if (stats.totalReadingTimeSeconds === 0) return '0 secs'
-		return formatHumanDuration(stats.totalReadingTimeSeconds, {
-			format:
-				stats.totalReadingTimeSeconds >= 3600
-					? ['hours', 'minutes']
-					: stats.totalReadingTimeSeconds >= 60
-						? ['minutes']
-						: ['seconds'],
-		})
-	}, [stats.totalReadingTimeSeconds])
+	const formattedTime = formatHumanDuration(stats.totalReadingTimeSeconds, { significantUnits: 1 })
 
 	const hasPublicationInfo =
 		metadata?.publisher ||

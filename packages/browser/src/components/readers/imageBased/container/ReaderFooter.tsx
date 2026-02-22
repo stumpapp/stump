@@ -54,15 +54,7 @@ export default function ReaderFooter() {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [showToolBar, currentPageSetIdx])
 
-	const formatDuration = useCallback(() => {
-		if (elapsedSeconds <= 59) {
-			return formatHumanDuration(elapsedSeconds, { format: ['seconds'] })
-		} else if (elapsedSeconds <= 3599) {
-			return formatHumanDuration(elapsedSeconds, { format: ['minutes', 'seconds'] })
-		} else {
-			return formatHumanDuration(elapsedSeconds, { format: ['hours', 'minutes'] })
-		}
-	}, [elapsedSeconds])
+	const formattedReadTime = formatHumanDuration(elapsedSeconds)
 
 	const renderItem = useCallback(
 		(idx: number, indexes: number[]) => {
@@ -184,7 +176,7 @@ export default function ReaderFooter() {
 					className={cn('flex flex-row justify-between', { 'justify-around': !trackElapsedTime })}
 				>
 					{trackElapsedTime && (
-						<Text className="text-sm text-[#898d94]">Reading time: {formatDuration()}</Text>
+						<Text className="text-sm text-[#898d94]">Reading time: {formattedReadTime}</Text>
 					)}
 
 					<Text className="text-sm text-[#898d94]">

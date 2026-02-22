@@ -1,3 +1,4 @@
+#![recursion_limit = "256"]
 #![warn(clippy::dbg_macro)]
 
 pub mod config;

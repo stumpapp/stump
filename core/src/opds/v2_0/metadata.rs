@@ -4,6 +4,8 @@ use models::entity::media_metadata;
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
+use crate::CoreError;
+
 use super::link::OPDSLink;
 
 /// Pagination-specific metadata fields for an OPDS collection
@@ -58,7 +60,7 @@ pub enum OPDSEntryBelongsTo {
 pub struct OPDSDynamicMetadata(pub serde_json::Value);
 
 impl TryFrom<media_metadata::Model> for OPDSDynamicMetadata {
-	type Error = crate::CoreError;
+	type Error = CoreError;
 
 	fn try_from(value: media_metadata::Model) -> Result<Self, Self::Error> {
 		let mut json = serde_json::to_value(value)?;
@@ -94,6 +96,14 @@ impl TryFrom<media_metadata::Model> for OPDSDynamicMetadata {
 			}
 		}
 
+		if let Some(page_count) = json.get("page_count").cloned() {
+			json.as_object_mut()
+				.ok_or_else(|| {
+					CoreError::Unknown("Expected JSON but recieved nothing".to_string())
+				})?
+				.insert("numberOfPages".to_string(), page_count);
+		}
+
 		Ok(Self(json))
 	}
 }
@@ -117,6 +127,8 @@ pub struct OPDSMetadata {
 	belongs_to: Option<OPDSEntryBelongsTo>,
 	#[serde(flatten)]
 	pagination: Option<OPDSPaginationMetadata>,
+	// TODO: OPDS v2 has way more known metadata fields that justifies naming them here instead of the hacky-ish field
+	// but i don't have time right now so LATER
 	#[serde(flatten)]
 	dynamic_metadata: Option<OPDSDynamicMetadata>,
 }

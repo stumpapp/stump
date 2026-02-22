@@ -1,6 +1,7 @@
 import { Host, Image } from '@expo/ui/swift-ui'
 import { useRefetch, useSuspenseGraphQL } from '@stump/client'
 import { graphql } from '@stump/graphql'
+import dayjs from 'dayjs'
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router'
 import { Settings } from 'lucide-react-native'
 import { useLayoutEffect } from 'react'
@@ -11,7 +12,9 @@ import { useActiveServer } from '~/components/activeServer'
 import { CurrentBookCard, Moderators, PastDiscussionsLink } from '~/components/bookClub'
 import { DiscussionListItem } from '~/components/bookClub/discussion'
 import RefreshControl from '~/components/RefreshControl'
-import { Badge, Card, Icon, Text } from '~/components/ui'
+import { Badge, Button, Card, Icon, Text } from '~/components/ui'
+import { useColors } from '~/lib/constants'
+import { parseGraphQLDecimal } from '~/lib/format'
 
 const query = graphql(`
 	query BookClubDetailScreen($id: ID!) {
@@ -39,6 +42,18 @@ const query = graphql(`
 					id
 					...DiscussionListItem
 				}
+				entity {
+					id
+					readProgress {
+						percentageCompleted
+						elapsedSeconds
+						startedAt
+					}
+					readHistory {
+						__typename
+						completedAt
+					}
+				}
 			}
 			...PastDiscussionsLink
 		}
@@ -57,6 +72,8 @@ export default function Screen() {
 	})
 	const [isRefreshing, handleRefresh] = useRefetch(refetch)
 
+	const colors = useColors()
+
 	const club = data.bookClubById
 	const isAdmin = club.membership?.role === 'ADMIN' || club.membership?.role === 'CREATOR'
 
@@ -74,6 +91,35 @@ export default function Screen() {
 				: undefined,
 		})
 	}, [navigation, club.name, isAdmin, router, serverID, clubId])
+
+	const currentBookCompletedAt = club.currentBook?.entity?.readHistory?.at(0)?.completedAt
+	const activeProgress = club.currentBook?.entity?.readProgress
+
+	const renderProgression = () => {
+		if (currentBookCompletedAt) {
+			const completedDate = dayjs(currentBookCompletedAt)
+			return (
+				<Text className="text-sm text-foreground-subtle">
+					Completed {completedDate.format('LL')}
+				</Text>
+			)
+		} else if (activeProgress) {
+			const decimal = activeProgress.percentageCompleted
+				? parseGraphQLDecimal(activeProgress.percentageCompleted)
+				: null
+			if (decimal != null) {
+				return (
+					<Text size="lg" className="text-foreground-subtle">
+						You are {decimal.toFixed(2)}% through the book!
+					</Text>
+				)
+			}
+			const startedAt = dayjs(activeProgress.startedAt)
+			return <Text className="text-foreground-subtle">Started {startedAt.format('LL')}</Text>
+		} else {
+			return <Text className="text-foreground-subtle">You have not started this book yet</Text>
+		}
+	}
 
 	// TODO(book-club): Add top-right action to Pinned Rooms card for adding a new one
 	// This would require some cahnges to the Card comp
@@ -109,6 +155,33 @@ export default function Screen() {
 						<CurrentBookCard data={club.currentBook} />
 						<PastDiscussionsLink data={club} />
 					</View>
+
+					{club.currentBook?.entity?.id != null && (
+						<View
+							className="squircle ios:rounded-[2rem] relative flex-grow overflow-hidden rounded-3xl p-3"
+							style={{
+								backgroundColor: colors.fill.brand.secondary,
+							}}
+						>
+							<View className="flex-row items-center justify-between gap-4 px-4 py-3.5">
+								{renderProgression()}
+
+								<View className="shrink-0">
+									<Button
+										size="sm"
+										roundness="full"
+										onPress={() =>
+											router.push(`/server/${serverID}/books/${club.currentBook!.entity!.id}`)
+										}
+									>
+										<Text>
+											{currentBookCompletedAt ? 'See book' : activeProgress ? 'Continue' : 'Start'}
+										</Text>
+									</Button>
+								</View>
+							</View>
+						</View>
+					)}
 
 					<Card
 						label="Active Discussions"

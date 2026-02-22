@@ -4311,7 +4311,7 @@ export type BookClubDetailScreenQuery = { __typename?: 'Query', bookClubById: (
       { __typename?: 'BookClubBook', id: string, discussions: Array<(
         { __typename?: 'BookClubDiscussion', id: string }
         & { ' $fragmentRefs'?: { 'DiscussionListItemFragment': DiscussionListItemFragment } }
-      )> }
+      )>, entity?: { __typename?: 'Media', id: string, readProgress?: { __typename?: 'ActiveReadingSession', percentageCompleted?: any | null, elapsedSeconds?: number | null, startedAt: any } | null, readHistory: Array<{ __typename: 'FinishedReadingSession', completedAt: any }> } | null }
       & { ' $fragmentRefs'?: { 'CurrentBookCardFragment': CurrentBookCardFragment } }
     ) | null }
     & { ' $fragmentRefs'?: { 'PastDiscussionsLinkFragment': PastDiscussionsLinkFragment } }
@@ -7553,6 +7553,18 @@ export const BookClubDetailScreenDocument = new TypedDocumentString(`
       discussions {
         id
         ...DiscussionListItem
+      }
+      entity {
+        id
+        readProgress {
+          percentageCompleted
+          elapsedSeconds
+          startedAt
+        }
+        readHistory {
+          __typename
+          completedAt
+        }
       }
     }
     ...PastDiscussionsLink

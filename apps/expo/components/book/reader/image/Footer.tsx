@@ -164,7 +164,7 @@ export default function Footer() {
 		}
 	}, [footerControls, currentPage, visible, visibilityChanged, pageSets, doublePageBehaviorChanged])
 
-	const formattedReadTime = formatHumanDuration(elapsedSeconds)
+	const formattedReadTime = formatHumanDuration(elapsedSeconds, { significantUnits: 2 })
 
 	const pageSource = useCallback(
 		(page: number) => ({

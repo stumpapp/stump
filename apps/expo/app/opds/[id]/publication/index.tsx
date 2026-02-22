@@ -369,9 +369,6 @@ export default function Screen() {
 							longValue
 						/>
 					)}
-					{!!numberOfPages && (
-						<InfoRow label="Number of pages" value={numberOfPages.toString()} longValue />
-					)}
 					{publisher && <InfoRow label="Publisher" value={publisher} />}
 					{published && (
 						<InfoRow

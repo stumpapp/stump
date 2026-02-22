@@ -1,4 +1,5 @@
 import { createUserStore } from '@stump/client'
+import type { AllowedLocale } from '@stump/i18n'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 
@@ -27,6 +28,7 @@ type MobilePreferencesStore = {
 	preferNativePdf?: boolean | undefined
 	disableDismissGesture: boolean
 	autoSyncLocalData: boolean
+	locale: AllowedLocale | undefined
 	opdsLayout: ListLayout
 	smartListLayout: ListLayout
 	/**
@@ -57,6 +59,8 @@ export const usePreferencesStore = create<MobilePreferencesStore>()(
 			preferNativePdf: false,
 			disableDismissGesture: false,
 			autoSyncLocalData: true,
+			// Note: I default to undefined so the localization library can determine a default
+			locale: undefined,
 			opdsLayout: 'grid',
 			smartListLayout: 'grid',
 			patch: (data) => set(data),

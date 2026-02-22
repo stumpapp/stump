@@ -92,7 +92,9 @@ export default function RootLayout() {
 		if (hasMounted.current) {
 			return
 		}
-		initDateFnsLocale(Localization.getLocales()[0]?.languageTag ?? 'en-US')
+		const preferredLocale = usePreferencesStore.getState().locale
+		const deviceLocale = Localization.getLocales()[0]?.languageTag ?? 'en-US'
+		initDateFnsLocale(preferredLocale ?? deviceLocale)
 		setAndroidNavigationBar(colorScheme)
 		setIsColorSchemeLoaded(true)
 		hasMounted.current = true

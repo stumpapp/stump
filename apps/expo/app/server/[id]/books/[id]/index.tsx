@@ -233,6 +233,7 @@ export default function Screen() {
 	} = book.thumbnail
 
 	const progression = book.readProgress || null
+	const isEpub = !!progression?.locator
 	const lastCompletion = book.readHistory?.at(0) || null
 
 	const formattedSize = formatBytes(book.size)
@@ -323,6 +324,8 @@ export default function Screen() {
 			return <Card.Stat label="Locator" value={`${epubcfi?.slice(0, 4)}...${epubcfi?.slice(-4)}`} />
 		}
 	}
+
+	const currentPage = progression?.page ?? progression?.locator?.locations?.position ?? '??'
 
 	const lastCompletionDistance =
 		lastCompletion?.completedAt != null
@@ -460,18 +463,16 @@ export default function Screen() {
 
 					{(progression || lastCompletion) && (
 						<Card>
-							{progression && (
-								<Card.StatGroup>
-									{progression.page && (
-										<Card.Stat label="Page" value={progression.page} suffix={` / ${pages}`} />
-									)}
-									{!progression.page && renderEpubLocator(progression)}
-									{renderPercentage(progression)}
-									{renderReadTime(progression)}
-								</Card.StatGroup>
-							)}
-
-							{lastCompletion && !progression && (
+							{progression ? (
+								<>
+									{isEpub && <Card.StatGroup>{renderEpubLocator(progression)}</Card.StatGroup>}
+									<Card.StatGroup>
+										<Card.Stat label="Page" value={currentPage} suffix={` / ${pages}`} />
+										{renderPercentage(progression)}
+										{renderReadTime(progression)}
+									</Card.StatGroup>
+								</>
+							) : (
 								<Card.StatGroup>
 									<Card.Stat label="Pages" value={pages} />
 									<Card.Stat label="Finished" value={lastCompletionDistance} />

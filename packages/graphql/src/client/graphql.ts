@@ -4527,7 +4527,7 @@ export type OnDeckBooksQuery = { __typename?: 'Query', onDeck: { __typename?: 'P
       & { ' $fragmentRefs'?: { 'OnDeckBookItemFragment': OnDeckBookItemFragment } }
     )>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', totalPages: number, currentPage: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
 
-export type ReadingNowFragment = { __typename?: 'Media', id: string, resolvedName: string, pages: number, metadata?: { __typename?: 'MediaMetadata', summary?: string | null, genres: Array<string>, links: Array<string> } | null, thumbnail: { __typename?: 'ImageRef', url: string, height?: number | null, width?: number | null, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null }, readProgress?: { __typename?: 'ActiveReadingSession', epubcfi?: string | null, page?: number | null, percentageCompleted?: any | null, updatedAt?: any | null } | null } & { ' $fragmentName'?: 'ReadingNowFragment' };
+export type ReadingNowFragment = { __typename?: 'Media', id: string, resolvedName: string, pages: number, metadata?: { __typename?: 'MediaMetadata', summary?: string | null, genres: Array<string>, links: Array<string> } | null, thumbnail: { __typename?: 'ImageRef', url: string, height?: number | null, width?: number | null, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null }, readProgress?: { __typename?: 'ActiveReadingSession', epubcfi?: string | null, page?: number | null, percentageCompleted?: any | null, updatedAt?: any | null, locator?: { __typename?: 'ReadiumLocator', locations?: { __typename?: 'ReadiumLocation', position?: number | null } | null } | null } | null } & { ' $fragmentName'?: 'ReadingNowFragment' };
 
 export type RecentlyAddedBooksQueryVariables = Exact<{
   pagination?: InputMaybe<Pagination>;
@@ -6004,6 +6004,11 @@ export const ReadingNowFragmentDoc = new TypedDocumentString(`
     page
     percentageCompleted
     updatedAt
+    locator {
+      locations {
+        position
+      }
+    }
   }
 }
     `, {"fragmentName":"ReadingNow"}) as unknown as TypedDocumentString<ReadingNowFragment, unknown>;
@@ -8204,6 +8209,11 @@ export const ContinueReadingDocument = new TypedDocumentString(`
     page
     percentageCompleted
     updatedAt
+    locator {
+      locations {
+        position
+      }
+    }
   }
 }
 fragment BookListItem on Media {

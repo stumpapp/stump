@@ -308,7 +308,7 @@ export default function Screen() {
 		}
 
 		if (elapsedSeconds) {
-			const readTime = formatHumanDuration(elapsedSeconds)
+			const readTime = formatHumanDuration(elapsedSeconds, { significantUnits: 1 })
 			return <Card.Stat label="Read time" value={readTime} />
 		} else {
 			return <Card.Stat label="Started" value={formatDistanceToNow(new Date(startedAt))} />
@@ -335,7 +335,7 @@ export default function Screen() {
 
 	const lastCompletionReadTime =
 		lastCompletion?.elapsedSeconds != null
-			? formatHumanDuration(lastCompletion.elapsedSeconds)
+			? formatHumanDuration(lastCompletion.elapsedSeconds, { significantUnits: 1 })
 			: 'Unknown'
 
 	return (

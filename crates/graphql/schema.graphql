@@ -1460,12 +1460,6 @@ enum MetadataResetImpact {
 }
 
 type Mutation {
-	createApiKey(input: ApikeyInput!): CreatedAPIKey!
-	updateApiKey(id: Int!, input: ApikeyInput!): Apikey!
-	deleteApiKey(id: Int!): Apikey!
-	createSmartList(input: SaveSmartListInput!): SmartList!
-	updateSmartList(id: ID!, input: SaveSmartListInput!): SmartList!
-	deleteSmartList(id: ID!): SmartList!
 	createBookClub(input: CreateBookClubInput!): BookClub!
 	updateBookClub(id: ID!, input: UpdateBookClubInput!): BookClub!
 	deleteBookClub(id: ID!): BookClub!
@@ -1511,31 +1505,6 @@ type Mutation {
 	toggleSuggestionLike(suggestionId: ID!): Boolean!
 	"Update the status of a suggestion (Admin+)"
 	updateSuggestionStatus(suggestionId: ID!, status: BookClubSuggestionStatus!, notes: String): BookClubBookSuggestion!
-	"Upload a new custom emoji"
-	uploadCustomEmoji(input: CreateCustomEmojiInput!, upload: Upload!): CustomEmoji!
-	"Delete a custom emoji"
-	deleteCustomEmoji(id: ID!): Boolean!
-	"Rename a custom emoji"
-	updateCustomEmoji(id: ID!, input: UpdateCustomEmojiInput!): CustomEmoji!
-	cancelJob(id: ID!): Boolean!
-	deleteJob(id: ID!, force: Boolean! = false): Boolean!
-	deleteJobHistory: DeleteJobHistory!
-	deleteJobLogs(id: ID!): DeleteJobAssociatedLogs!
-	createNotifier(input: NotifierInput!): Notifier!
-	updateNotifier(id: Int!, input: NotifierInput!): Notifier!
-	deleteNotifier(id: Int!): Notifier!
-	"Create a bookmark for a user"
-	createBookmark(input: BookmarkInput!): Bookmark!
-	"Delete a bookmark by ID, only if the user created it"
-	deleteBookmark(id: String!): Bookmark!
-	"Delete a bookmark by epubcfi"
-	deleteBookmarkByEpubcfi(epubcfi: String!): Bookmark!
-	"Create an annotation (highlight/note)"
-	createAnnotation(input: CreateAnnotationInput!): MediaAnnotation!
-	"Update an annotation's note text"
-	updateAnnotation(input: UpdateAnnotationInput!): MediaAnnotation!
-	"Delete an annotation by ID"
-	deleteAnnotation(id: String!): MediaAnnotation!
 	analyzeMedia(id: ID!, forceReanalysis: Boolean! = false): Boolean!
 	convertMedia(id: ID!): Boolean!
 	deleteMedia(id: ID!): Media!
@@ -1615,32 +1584,6 @@ type Mutation {
 	This is used to inform the UI of the last library which was visited by the user
 	"""
 	visitLibrary(id: ID!): Library!
-	deleteLogs(filter: LogFilterInput! = {level: null, jobId: null, _and: null, _not: null, _or: null}): LogDeleteOutput!
-	deleteLogFile: Boolean!
-	"""
-	Creates a new reading list.
-	
-	# Returns
-	
-	A result containing the newly created reading list, or an error if creation failed.
-	"""
-	createReadingList(input: ReadingListInput!): ReadingList!
-	"""
-	Updates an existing reading list.
-	
-	# Returns
-	
-	A result containing the updated reading list, or an error if update failed.
-	"""
-	updateReadingList(input: ReadingListInput!): ReadingList!
-	"""
-	Deletes a reading list by ID.
-	
-	# Returns
-	
-	A result containing the deleted reading list, or an error if deletion failed.
-	"""
-	deleteReadingList(id: String!): ReadingList!
 	analyzeSeries(id: ID!, forceReanalysis: Boolean! = false): Boolean!
 	favoriteSeries(id: ID!, isFavorite: Boolean!): Series!
 	"""
@@ -1659,6 +1602,18 @@ type Mutation {
 	"""
 	toggleSeriesCompletion(id: ID!, isCompleted: Boolean!): Series!
 	scanSeries(id: ID!): Boolean!
+	"Create a bookmark for a user"
+	createBookmark(input: BookmarkInput!): Bookmark!
+	"Delete a bookmark by ID, only if the user created it"
+	deleteBookmark(id: String!): Bookmark!
+	"Delete a bookmark by epubcfi"
+	deleteBookmarkByEpubcfi(epubcfi: String!): Bookmark!
+	"Create an annotation (highlight/note)"
+	createAnnotation(input: CreateAnnotationInput!): MediaAnnotation!
+	"Update an annotation's note text"
+	updateAnnotation(input: UpdateAnnotationInput!): MediaAnnotation!
+	"Delete an annotation by ID"
+	deleteAnnotation(id: String!): MediaAnnotation!
 	"""
 	Returns a list containing the newly created tags, or an error if creation failed.
 	
@@ -1718,13 +1673,58 @@ type Mutation {
 	updateEmailDevice(id: Int!, input: EmailDeviceInput!): RegisteredEmailDevice!
 	patchEmailDevice(id: Int!, input: PatchEmailDeviceInput!): RegisteredEmailDevice!
 	deleteEmailDevice(id: Int!): RegisteredEmailDevice!
+	createApiKey(input: ApikeyInput!): CreatedAPIKey!
+	updateApiKey(id: Int!, input: ApikeyInput!): Apikey!
+	deleteApiKey(id: Int!): Apikey!
+	cancelJob(id: ID!): Boolean!
+	deleteJob(id: ID!, force: Boolean! = false): Boolean!
+	deleteJobHistory: DeleteJobHistory!
+	deleteJobLogs(id: ID!): DeleteJobAssociatedLogs!
+	deleteLogs(filter: LogFilterInput! = {level: null, jobId: null, _and: null, _not: null, _or: null}): LogDeleteOutput!
+	deleteLogFile: Boolean!
+	createNotifier(input: NotifierInput!): Notifier!
+	updateNotifier(id: Int!, input: NotifierInput!): Notifier!
+	deleteNotifier(id: Int!): Notifier!
 	updatePublicUrl(publicUrl: String!): ServerConfigModel!
-	createSmartListView(input: SaveSmartListView!): SmartListView!
-	updateSmartListView(originalName: String!, input: SaveSmartListView!): SmartListView!
-	deleteSmartListView(id: ID!, name: String!): SmartListView!
 	createScheduledJobConfig(input: ScheduledJobConfigInput!): ScheduledJobConfig!
 	updateScheduledJobConfig(id: Int!, input: ScheduledJobConfigInput!): ScheduledJobConfig!
 	deleteScheduledJobConfig(id: Int!): Boolean!
+	createSmartList(input: SaveSmartListInput!): SmartList!
+	updateSmartList(id: ID!, input: SaveSmartListInput!): SmartList!
+	deleteSmartList(id: ID!): SmartList!
+	createSmartListView(input: SaveSmartListView!): SmartListView!
+	updateSmartListView(originalName: String!, input: SaveSmartListView!): SmartListView!
+	deleteSmartListView(id: ID!, name: String!): SmartListView!
+	"""
+	Creates a new reading list.
+	
+	# Returns
+	
+	A result containing the newly created reading list, or an error if creation failed.
+	"""
+	createReadingList(input: ReadingListInput!): ReadingList!
+	"""
+	Updates an existing reading list.
+	
+	# Returns
+	
+	A result containing the updated reading list, or an error if update failed.
+	"""
+	updateReadingList(input: ReadingListInput!): ReadingList!
+	"""
+	Deletes a reading list by ID.
+	
+	# Returns
+	
+	A result containing the deleted reading list, or an error if deletion failed.
+	"""
+	deleteReadingList(id: String!): ReadingList!
+	"Upload a new custom emoji"
+	uploadCustomEmoji(input: CreateCustomEmojiInput!, upload: Upload!): CustomEmoji!
+	"Delete a custom emoji"
+	deleteCustomEmoji(id: ID!): Boolean!
+	"Rename a custom emoji"
+	updateCustomEmoji(id: ID!, input: UpdateCustomEmojiInput!): CustomEmoji!
 }
 
 input NavigationArrangementInput {
@@ -1945,13 +1945,9 @@ type PlaceholderGenerationOutput {
 }
 
 type Query {
-	apiKeys: [Apikey!]!
-	apiKeyById(id: Int!): Apikey!
 	bookClubs(all: Boolean = null): [BookClub!]!
 	bookClubById(id: ID!): BookClub!
 	bookClubBySlug(slug: String!): BookClub
-	"List the custom emojis available on this server"
-	customEmojis: [CustomEmoji!]!
 	"Get a club book by ID"
 	bookClubBook(id: ID!): BookClubBook!
 	"Get a discussion by ID"
@@ -1971,14 +1967,6 @@ type Query {
 	bookClubSuggestions(bookClubId: ID!, status: BookClubSuggestionStatus): [BookClubBookSuggestion!]!
 	"Get a single suggestion by ID"
 	bookClubSuggestion(suggestionId: ID!): BookClubBookSuggestion!
-	emailers: [Emailer!]!
-	emailerById(id: Int!): Emailer
-	emailDevices: [RegisteredEmailDevice!]!
-	emailDeviceById(id: Int!): RegisteredEmailDevice
-	listDirectory(pagination: Pagination!, input: DirectoryListingInput): PaginatedDirectoryListingResponse!
-	jobs(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedJobResponse!
-	jobById(id: ID!): Job
-	scheduledJobConfigs: [ScheduledJobConfig!]!
 	mediaCount: Int!
 	finishedReadingSessionCount: Int!
 	activeReadingSessionCount: Int!
@@ -1992,6 +1980,27 @@ type Query {
 	onDeck(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
 	recentlyAddedMedia(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
 	duplicateMedia: [Media!]!
+	libraries(orderBy: [LibraryModelOrderBy!]! = [{field: NAME, direction: ASC}], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}, search: String): PaginatedLibraryResponse!
+	libraryById(id: ID!): Library
+	"Returns the available alphabet for all libraries in the server"
+	librariesAlphabet: JSONObject!
+	numberOfLibraries: Int!
+	lastVisitedLibrary: Library
+	series(filter: SeriesFilterInput! = {name: null, path: null, libraryId: null, metadata: null, library: null, _and: null, _not: null, _or: null}, orderBy: [SeriesOrderBy!]! = [{series: {field: NAME, direction: ASC}}], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedSeriesResponse!
+	seriesById(id: ID!): Series
+	"Returns the available alphabet for all series in the server"
+	seriesAlphabet: JSONObject!
+	numberOfSeries: Int!
+	recentlyAddedSeries(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedSeriesResponse!
+	"Get a single epub by its media ID"
+	epubById(id: ID!): Epub!
+	"Get all bookmarks for a single epub by its media ID"
+	bookmarksByMediaId(id: ID!): [Bookmark!]!
+	"Get all annotations (highlights/notes) for a single book"
+	annotationsByMediaId(id: ID!): [MediaAnnotation!]!
+	"Returns a list of all tags."
+	tags: [Tag!]!
+	mediaMetadataOverview(seriesId: ID): MediaMetadataOverview!
 	me: User!
 	userCount: Int!
 	topReaders(take: Int): [User!]!
@@ -1999,8 +2008,32 @@ type Query {
 	userById(id: ID!): User!
 	loginActivity: [UserLoginActivity!]!
 	loginActivityById(id: ID!): [UserLoginActivity!]!
+	emailers: [Emailer!]!
+	emailerById(id: Int!): Emailer
+	emailDevices: [RegisteredEmailDevice!]!
+	emailDeviceById(id: Int!): RegisteredEmailDevice
 	getNotifiers: [Notifier!]!
 	getNotifierById(id: Int!): Notifier!
+	apiKeys: [Apikey!]!
+	apiKeyById(id: Int!): Apikey!
+	jobs(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedJobResponse!
+	jobById(id: ID!): Job
+	scheduledJobConfigs: [ScheduledJobConfig!]!
+	logs(filter: LogFilterInput! = {level: null, jobId: null, _and: null, _not: null, _or: null}, orderBy: [LogModelOrderBy!]! = [], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedLogResponse!
+	"""
+	Get information about the Stump log file, located at STUMP_CONFIG_DIR/Stump.log, or
+	~/.stump/Stump.log by default. Information such as the file size, last modified date, etc.
+	"""
+	logfileInfo: LogFileInfo!
+	stumpConfig: StumpConfig!
+	uploadConfig: UploadConfig!
+	serverConfig: ServerConfigModel!
+	listDirectory(pagination: Pagination!, input: DirectoryListingInput): PaginatedDirectoryListingResponse!
+	smartLists(input: SmartListsInput! = {all: null, mine: true, search: null}): [SmartList!]!
+	smartListById(id: ID!): SmartList
+	smartListMeta(id: ID!): SmartListMeta
+	smartListItems(id: ID!, limit: Int = null): SmartListItems!
+	smartListViews: [SmartListView!]!
 	"""
 	Retrieves a paginated list of reading lists for the current user.
 	
@@ -2016,41 +2049,8 @@ type Query {
 	A reading list with the given ID. If no reading list with this ID exists for the current user, an error will be returned.
 	"""
 	readingListById(id: ID!): ReadingList!
-	"Get a single epub by its media ID"
-	epubById(id: ID!): Epub!
-	"Get all bookmarks for a single epub by its media ID"
-	bookmarksByMediaId(id: ID!): [Bookmark!]!
-	"Get all annotations (highlights/notes) for a single book"
-	annotationsByMediaId(id: ID!): [MediaAnnotation!]!
-	libraries(orderBy: [LibraryModelOrderBy!]! = [{field: NAME, direction: ASC}], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}, search: String): PaginatedLibraryResponse!
-	libraryById(id: ID!): Library
-	"Returns the available alphabet for all libraries in the server"
-	librariesAlphabet: JSONObject!
-	numberOfLibraries: Int!
-	lastVisitedLibrary: Library
-	mediaMetadataOverview(seriesId: ID): MediaMetadataOverview!
-	smartListViews: [SmartListView!]!
-	series(filter: SeriesFilterInput! = {name: null, path: null, libraryId: null, metadata: null, library: null, _and: null, _not: null, _or: null}, orderBy: [SeriesOrderBy!]! = [{series: {field: NAME, direction: ASC}}], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedSeriesResponse!
-	seriesById(id: ID!): Series
-	"Returns the available alphabet for all series in the server"
-	seriesAlphabet: JSONObject!
-	numberOfSeries: Int!
-	recentlyAddedSeries(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedSeriesResponse!
-	"Returns a list of all tags."
-	tags: [Tag!]!
-	logs(filter: LogFilterInput! = {level: null, jobId: null, _and: null, _not: null, _or: null}, orderBy: [LogModelOrderBy!]! = [], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedLogResponse!
-	"""
-	Get information about the Stump log file, located at STUMP_CONFIG_DIR/Stump.log, or
-	~/.stump/Stump.log by default. Information such as the file size, last modified date, etc.
-	"""
-	logfileInfo: LogFileInfo!
-	stumpConfig: StumpConfig!
-	uploadConfig: UploadConfig!
-	serverConfig: ServerConfigModel!
-	smartLists(input: SmartListsInput! = {all: null, mine: true, search: null}): [SmartList!]!
-	smartListById(id: ID!): SmartList
-	smartListMeta(id: ID!): SmartListMeta
-	smartListItems(id: ID!, limit: Int = null): SmartListItems!
+	"List the custom emojis available on this server"
+	customEmojis: [CustomEmoji!]!
 }
 
 "The different reading directions supported by any Stump reader"

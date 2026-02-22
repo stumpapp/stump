@@ -52,31 +52,55 @@ use user::UserQuery;
 
 use crate::query::job::JobQuery;
 
+// Note: I had to split the Query/Mutation root types into chunks to avoid a compiler
+// overflow. It seems like a flat MergedObject creates a really large async block
+// that is too deep for the compiler.
+
 #[derive(async_graphql::MergedObject, Default)]
-pub struct Query(
-	APIKeyQuery,
+struct BookClubQueries(
 	BookClubQuery,
-	CustomEmojiQuery,
 	BookClubBookQuery,
 	BookClubDiscussionQuery,
 	BookClubInvitationQuery,
 	BookClubSuggestionQuery,
-	EmailerQuery,
-	EmailDeviceQuery,
-	FilesystemQuery,
-	JobQuery,
+);
+
+#[derive(async_graphql::MergedObject, Default)]
+struct ContentQueries(
 	MediaQuery,
-	UserQuery,
-	NotifierQuery,
-	ReadingListQuery,
-	EpubQuery,
 	LibraryQuery,
-	MediaMetadataOverviewQuery,
-	SmartListViewQuery,
 	SeriesQuery,
+	EpubQuery,
 	TagQuery,
+	MediaMetadataOverviewQuery,
+);
+
+#[derive(async_graphql::MergedObject, Default)]
+struct UserAndNotifsQueries(UserQuery, EmailerQuery, EmailDeviceQuery, NotifierQuery);
+
+#[derive(async_graphql::MergedObject, Default)]
+struct SystemQueries(
+	APIKeyQuery,
+	JobQuery,
 	LogQuery,
 	ConfigQuery,
 	ServerConfigQuery,
+	FilesystemQuery,
+);
+
+#[derive(async_graphql::MergedObject, Default)]
+struct ListQueries(
 	SmartListsQuery,
+	SmartListViewQuery,
+	ReadingListQuery,
+	CustomEmojiQuery,
+);
+
+#[derive(async_graphql::MergedObject, Default)]
+pub struct Query(
+	BookClubQueries,
+	ContentQueries,
+	UserAndNotifsQueries,
+	SystemQueries,
+	ListQueries,
 );

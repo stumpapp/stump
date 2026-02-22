@@ -51,30 +51,51 @@ use upload::UploadMutation;
 use user::UserMutation;
 
 #[derive(async_graphql::MergedObject, Default)]
-pub struct Mutation(
-	APIKeyMutation,
-	SmartListMutation,
+struct BookClubMutations(
 	BookClubMutation,
 	BookClubDiscussionMutation,
 	BookClubInvitationMutation,
 	BookClubMemberMutation,
 	BookClubBookMutation,
 	BookClubSuggestionMutation,
-	CustomEmojiMutation,
-	JobMutation,
-	NotifierMutation,
-	EpubMutation,
+);
+
+#[derive(async_graphql::MergedObject, Default)]
+struct ContentMutations(
 	MediaMutation,
 	LibraryMutation,
-	LogMutation,
-	ReadingListMutation,
 	SeriesMutation,
+	EpubMutation,
 	TagMutation,
 	UploadMutation,
-	UserMutation,
-	EmailerMutation,
-	EmailDeviceMutation,
+);
+
+#[derive(async_graphql::MergedObject, Default)]
+struct UserAndNotifsMutations(UserMutation, EmailerMutation, EmailDeviceMutation);
+
+#[derive(async_graphql::MergedObject, Default)]
+struct SystemMutations(
+	APIKeyMutation,
+	JobMutation,
+	LogMutation,
+	NotifierMutation,
 	ServerConfigMutation,
-	SmartListViewMutation,
 	ScheduledJobConfigMutation,
+);
+
+#[derive(async_graphql::MergedObject, Default)]
+struct ListMutations(
+	SmartListMutation,
+	SmartListViewMutation,
+	ReadingListMutation,
+	CustomEmojiMutation,
+);
+
+#[derive(async_graphql::MergedObject, Default)]
+pub struct Mutation(
+	BookClubMutations,
+	ContentMutations,
+	UserAndNotifsMutations,
+	SystemMutations,
+	ListMutations,
 );

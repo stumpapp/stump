@@ -27,6 +27,7 @@ pub async fn build_schema(ctx: CoreContext) -> AppSchema {
 	)
 	// AccessRole is used in a serialized json for SmartList so we need to register it manually
 	.register_output_type::<AccessRole>()
+	.limit_depth(10)
 	.data(ctx);
 
 	add_data_loaders(schema_builder, conn).finish()

@@ -1,8 +1,7 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { useSDK } from '@stump/client'
 import { isPseStreamLink, OPDSLegacyEntry } from '@stump/sdk'
-import dayjs from 'dayjs'
-import localizedFormat from 'dayjs/plugin/localizedFormat'
+import { intlFormat } from 'date-fns'
 import { forwardRef } from 'react'
 import { Image, Platform, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -19,8 +18,6 @@ import { useResolveURL } from '../opds/utils'
 import { InfoRow, LongValue, MetadataBadgeSection } from '../overview'
 import { Card, Heading } from '../ui'
 import { getIconSource } from './OPDSLegacyEntryItem'
-
-dayjs.extend(localizedFormat)
 
 type Props = {
 	entry: OPDSLegacyEntry
@@ -127,7 +124,18 @@ export const OPDSLegacyEntryItemSheet = forwardRef<TrueSheet, Props>(
 					<Card label="Technical Info">
 						<InfoRow label="Identifier" value={entry.id} />
 						<InfoRow label="Server" value={serverName} />
-						<InfoRow label="Updated" value={dayjs(entry.updated).format('LLL')} />
+						{entry.updated && (
+							<InfoRow
+								label="Updated"
+								value={intlFormat(new Date(entry.updated), {
+									month: 'long',
+									day: 'numeric',
+									year: 'numeric',
+									hour: 'numeric',
+									minute: '2-digit',
+								})}
+							/>
+						)}
 					</Card>
 				</View>
 			</TrueSheet>

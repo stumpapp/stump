@@ -3,8 +3,7 @@ import { cn, Text } from '@stump/components'
 import { graphql, RecentlyAddedSeriesQuery } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
-import dayjs from 'dayjs'
-import relativeTime from 'dayjs/plugin/relativeTime'
+import { formatDistanceToNow } from 'date-fns'
 import { BookCopy } from 'lucide-react'
 import { Suspense, useCallback, useMemo } from 'react'
 import { useMediaMatch } from 'rooks'
@@ -14,8 +13,6 @@ import { SeriesStackedThumbnails } from '@/components/thumbnail'
 import { Link } from '@/context'
 import { useFancyAnimations } from '@/hooks/useFancyAnimations'
 import { usePreferences } from '@/hooks/usePreferences'
-
-dayjs.extend(relativeTime)
 
 const query = graphql(`
 	query RecentlyAddedSeries($pagination: Pagination!) {
@@ -123,7 +120,7 @@ function RecentlyAddedSeriesCard({ series, cardWidth }: RecentlyAddedSeriesCardP
 						textShadow: '2px 1px 2px rgba(0, 0, 0, 0.5)',
 					}}
 				>
-					{dayjs(series.createdAt).fromNow()}
+					{formatDistanceToNow(new Date(series.createdAt), { addSuffix: true })}
 				</Text>
 			</div>
 		</Link>

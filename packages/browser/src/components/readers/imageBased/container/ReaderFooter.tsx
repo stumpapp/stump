@@ -2,8 +2,8 @@
 import { useSDK } from '@stump/client'
 import { cn, ProgressBar, Text, usePreviousIsDifferent } from '@stump/components'
 import { ReadingDirection } from '@stump/graphql'
+import { formatHumanDuration } from '@stump/i18n'
 import { motion } from 'framer-motion'
-import { Duration } from 'luxon'
 import { forwardRef, useCallback, useEffect, useMemo, useRef } from 'react'
 import { ItemProps, ScrollerProps, Virtuoso, VirtuosoHandle } from 'react-virtuoso'
 
@@ -26,7 +26,7 @@ export default function ReaderFooter() {
 	} = useBookPreferences({ book })
 	const elapsedSeconds = useBookReadTime(book.id)
 	const {
-		preferences: { thumbnailRatio, locale },
+		preferences: { thumbnailRatio },
 	} = usePreferences()
 
 	const virtuosoRef = useRef<VirtuosoHandle>(null)
@@ -54,21 +54,7 @@ export default function ReaderFooter() {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [showToolBar, currentPageSetIdx])
 
-	const formatDuration = useCallback(() => {
-		const duration = Duration.fromObject({ seconds: elapsedSeconds }).reconfigure({ locale })
-
-		let formattedDuration
-		if (elapsedSeconds <= 59) {
-			formattedDuration = duration.shiftTo('seconds')
-		} else if (elapsedSeconds <= 3599) {
-			formattedDuration = duration.shiftTo('minutes', 'seconds')
-		} else {
-			const hms = duration.shiftTo('hours', 'minutes', 'seconds')
-			formattedDuration = Duration.fromObject({ hours: hms.hours, minutes: hms.minutes })
-		}
-
-		return formattedDuration.toHuman()
-	}, [elapsedSeconds, locale])
+	const formattedReadTime = formatHumanDuration(elapsedSeconds)
 
 	const renderItem = useCallback(
 		(idx: number, indexes: number[]) => {
@@ -190,7 +176,7 @@ export default function ReaderFooter() {
 					className={cn('flex flex-row justify-between', { 'justify-around': !trackElapsedTime })}
 				>
 					{trackElapsedTime && (
-						<Text className="text-sm text-[#898d94]">Reading time: {formatDuration()}</Text>
+						<Text className="text-sm text-[#898d94]">Reading time: {formattedReadTime}</Text>
 					)}
 
 					<Text className="text-sm text-[#898d94]">

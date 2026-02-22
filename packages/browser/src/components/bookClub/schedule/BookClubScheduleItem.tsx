@@ -1,7 +1,7 @@
 import { useSDK } from '@stump/client'
 import { AspectRatio, Badge, ButtonOrLink, Card, cx, Heading, Link, Text } from '@stump/components'
 import { BookClubLayoutQuery } from '@stump/graphql'
-import dayjs from 'dayjs'
+import { addDays, differenceInDays, intlFormat, isAfter, isBefore } from 'date-fns'
 import { Book } from 'lucide-react'
 import pluralize from 'pluralize'
 import { useMemo } from 'react'
@@ -20,36 +20,37 @@ export default function BookClubScheduleTimelineItem({ book }: Props) {
 	const { bookClub } = useBookClubContext()
 
 	const adjustedEnd = book.discussionDurationDays
-		? dayjs(book.endAt).add(book.discussionDurationDays, 'day')
+		? addDays(new Date(book.endAt), book.discussionDurationDays)
 		: null
-	const isCurrent = dayjs().isBefore(adjustedEnd) && dayjs().isAfter(dayjs(book.startAt))
-	const isDiscussing = dayjs().isBefore(adjustedEnd) && dayjs().isAfter(dayjs(book.endAt))
-	const isFuture = dayjs().isBefore(dayjs(book.startAt))
+	const now = new Date()
+	const startAt = new Date(book.startAt)
+	const endAt = new Date(book.endAt)
+	const isCurrent = adjustedEnd && isBefore(now, adjustedEnd) && isAfter(now, startAt)
+	const isDiscussing = adjustedEnd && isBefore(now, adjustedEnd) && isAfter(now, endAt)
+	const isFuture = isBefore(now, startAt)
 
 	const daysInfo = useMemo(() => {
 		let message = ''
-		const start = dayjs(book.startAt)
-		const end = dayjs(book.endAt)
 
 		if (isDiscussing) {
-			const diff = dayjs(adjustedEnd).diff(dayjs(), 'days') + 1 // add one to include the current day
+			const diff = adjustedEnd ? differenceInDays(adjustedEnd, now) + 1 : 0 // add one to include the current day
 			message = `${diff} ${pluralize('day', diff)} left for discussion`
 		} else if (isCurrent) {
-			const diff = dayjs(book.endAt).diff(dayjs(), 'days') + 1 // add one to include the current day
+			const diff = differenceInDays(endAt, now) + 1 // add one to include the current day
 			message = `${diff} ${pluralize('day', diff)} left to read`
 		} else if (isFuture) {
 			message = 'Not yet available'
 		} else {
-			const daysAgo = dayjs().diff(end, 'days')
+			const daysAgo = differenceInDays(now, endAt)
 			message = `${daysAgo} ${pluralize('day', daysAgo)} ago`
 		}
 
 		return {
-			end: end.format('MMMM DD YYYY'),
+			end: intlFormat(endAt, { month: 'long', day: 'numeric', year: 'numeric' }),
 			message,
-			start: start.format('MMMM DD YYYY'),
+			start: intlFormat(startAt, { month: 'long', day: 'numeric', year: 'numeric' }),
 		}
-	}, [book, isCurrent, isFuture, isDiscussing, adjustedEnd])
+	}, [startAt, endAt, now, isCurrent, isFuture, isDiscussing, adjustedEnd])
 
 	const discussionInfo = useMemo(() => {
 		const archived = !isCurrent && !isDiscussing

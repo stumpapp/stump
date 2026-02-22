@@ -3,18 +3,13 @@ import { Drawer, Text, ToolTip } from '@stump/components'
 import { graphql, UserPermission } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
-import dayjs from 'dayjs'
-import localizedFormat from 'dayjs/plugin/localizedFormat'
-import relativeTime from 'dayjs/plugin/relativeTime'
+import { formatDistanceToNow, intlFormat } from 'date-fns'
 import { useCallback, useMemo, useState } from 'react'
 
 import GenericEmptyState from '@/components/GenericEmptyState'
 import { useCheckPermission } from '@/context'
 
 import EmailerSendHistoryTable from './EmailerSendHistoryTable'
-
-dayjs.extend(localizedFormat)
-dayjs.extend(relativeTime)
 
 const query = graphql(`
 	query EmailerSendHistory($id: Int!, $fetchUser: Boolean!) {
@@ -64,7 +59,7 @@ export const usePrefetchEmailerSendHistory = ({ emailerId }: { emailerId: number
 
 type Props = {
 	emailerId: number
-	lastUsedAt: dayjs.Dayjs
+	lastUsedAt: Date
 }
 
 export default function EmailerSendHistory({ emailerId, lastUsedAt }: Props) {
@@ -99,14 +94,24 @@ export default function EmailerSendHistory({ emailerId, lastUsedAt }: Props) {
 	return (
 		<>
 			<div className="flex">
-				<ToolTip content={lastUsedAt.format('LLL')} align="start" size="sm">
+				<ToolTip
+					content={intlFormat(lastUsedAt, {
+						month: 'long',
+						day: 'numeric',
+						year: 'numeric',
+						hour: 'numeric',
+						minute: '2-digit',
+					})}
+					align="start"
+					size="sm"
+				>
 					<Text
 						size="sm"
 						variant="muted"
 						className="cursor-pointer hover:underline"
 						onClick={() => setDrawerOpen(!drawerOpen)}
 					>
-						{lastUsedAt.fromNow()}
+						{formatDistanceToNow(lastUsedAt, { addSuffix: true })}
 					</Text>
 				</ToolTip>
 			</div>

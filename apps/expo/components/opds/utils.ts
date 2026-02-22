@@ -1,6 +1,6 @@
 import { useSDK } from '@stump/client'
 import { OPDSEntryBelongsTo, OPDSLink, OPDSMetadata, OPDSPublication, resolveUrl } from '@stump/sdk'
-import dayjs from 'dayjs'
+import { isValid, parseISO } from 'date-fns'
 import get from 'lodash/get'
 import { useCallback } from 'react'
 import { stringMd5 } from 'react-native-quick-md5'
@@ -236,8 +236,9 @@ export const getFirstLink = (links?: OPDSLink[] | null) => links?.find((link) =>
 
 export const getDateField = (meta: OPDSMetadata, key: string) => {
 	const value = get(meta, key)
-	const _dayjs = dayjs(typeof value === 'string' ? value : null)
-	return _dayjs.isValid() ? _dayjs : null
+	if (typeof value !== 'string') return null
+	const date = parseISO(value)
+	return isValid(date) ? date : null
 }
 
 export const getLanguages = (meta: OPDSMetadata): string[] => {

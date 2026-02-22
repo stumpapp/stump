@@ -1,8 +1,7 @@
 import { FlashList } from '@shopify/flash-list'
 import { useSDK } from '@stump/client'
 import { OPDSLink, OPDSProgression, resolveUrl } from '@stump/sdk'
-import dayjs from 'dayjs'
-import relativeTime from 'dayjs/plugin/relativeTime'
+import { formatDistanceToNow, intlFormat } from 'date-fns'
 import { useRouter } from 'expo-router'
 import { BookCopy, Info, Loader2 } from 'lucide-react-native'
 import { useCallback, useEffect, useMemo } from 'react'
@@ -49,8 +48,6 @@ import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
 import { usePreferencesStore } from '~/stores'
 
 import { usePublicationContext } from './context'
-
-dayjs.extend(relativeTime)
 
 export default function Screen() {
 	const { sdk } = useSDK()
@@ -194,11 +191,16 @@ export default function Screen() {
 		const isCompleted = !!(percentageCompleted && percentageCompleted >= 1)
 
 		if (isCompleted) {
-			// TODO: I vaguely remember an alternative to dayjs someone showed me but for the life of me I can't remember what it was
-			// If I remember later I'll swap it out
-			return <Card.Stat label="Completed" value={dayjs(progression.modified).fromNow(true)} />
+			return (
+				<Card.Stat label="Completed" value={formatDistanceToNow(new Date(progression.modified))} />
+			)
 		} else {
-			return <Card.Stat label="Last read" value={dayjs(progression.modified).fromNow()} />
+			return (
+				<Card.Stat
+					label="Last read"
+					value={formatDistanceToNow(new Date(progression.modified), { addSuffix: true })}
+				/>
+			)
 		}
 	}
 
@@ -353,9 +355,23 @@ export default function Screen() {
 					<InfoRow label="Title" value={title} longValue />
 					{subtitle && <InfoRow label="Subtitle" value={subtitle} longValue />}
 					{description && <LongValue label="Description" value={description} />}
+					{modified && (
+						<InfoRow
+							label="Modified"
+							value={intlFormat(modified, { month: 'long', day: 'numeric', year: 'numeric' })}
+							longValue
+						/>
+					)}
+					{!!numberOfPages && (
+						<InfoRow label="Number of pages" value={numberOfPages.toString()} longValue />
+					)}
 					{publisher && <InfoRow label="Publisher" value={publisher} />}
-					{published && <InfoRow label="Published" value={published.format('MMMM DD, YYYY')} />}
-					{modified && <InfoRow label="Modified" value={modified.format('MMMM DD, YYYY')} />}
+					{published && (
+						<InfoRow
+							label="Published"
+							value={intlFormat(published, { month: 'long', day: 'numeric', year: 'numeric' })}
+						/>
+					)}
 					{!!numberOfPages && <InfoRow label="Number of pages" value={numberOfPages.toString()} />}
 					{volume != null && <InfoRow label="Volume" value={volume.toString()} />}
 					{issue != null && <InfoRow label="Issue" value={issue.toString()} />}

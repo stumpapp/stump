@@ -187,22 +187,27 @@ export default function Screen() {
 	const accentColor = usePreferencesStore((state) => state.accentColor)
 
 	const renderModifiedStat = (progression: OPDSProgression) => {
+		if (!progression.modified) return null
+
 		const percentageCompleted = progression.locator.locations?.totalProgression
 		const isCompleted = !!(percentageCompleted && percentageCompleted >= 1)
 
 		if (isCompleted) {
-			return (
-				<Card.Stat label="Completed" value={formatDistanceToNow(new Date(progression.modified))} />
-			)
+			return <Card.Stat label="Completed" value={formatDistanceToNow(progression.modified)} />
 		} else {
 			return (
 				<Card.Stat
 					label="Last read"
-					value={formatDistanceToNow(new Date(progression.modified), { addSuffix: true })}
+					value={formatDistanceToNow(progression.modified, { addSuffix: true })}
 				/>
 			)
 		}
 	}
+
+	const existsSomeProgression =
+		!!progression?.locator.locations?.position ||
+		!!progression?.locator.locations?.totalProgression ||
+		!!progression?.modified
 
 	const animatedScrollRef = useAnimatedRef<Animated.ScrollView>()
 	const scrollOffset = useScrollOffset(animatedScrollRef)
@@ -299,14 +304,16 @@ export default function Screen() {
 						)}
 					</View>
 
-					{progression && (
+					{progression && existsSomeProgression && (
 						<Card>
 							<Card.StatGroup>
 								{progression.locator.locations?.position && (
 									<Card.Stat
 										label="Page"
 										value={progression.locator.locations.position || '1'}
-										suffix={` / ${numberOfPages}`}
+										suffix={
+											numberOfPages != null && numberOfPages > 0 ? ` / ${numberOfPages}` : undefined
+										}
 									/>
 								)}
 								{progression.locator.locations?.totalProgression != null && (
@@ -403,12 +410,15 @@ export default function Screen() {
 
 				{seriesPublications.length > 0 && (
 					<View className="gap-3">
-						<Text className="text-lg font-semibold text-foreground-muted">Series Books</Text>
+						<Text className="ios:px-4 px-2 text-lg font-semibold text-foreground-muted">
+							Series Books
+						</Text>
 						<FlashList
 							data={seriesPublications}
 							renderItem={({ item }) => <RelatedPublicationItem item={item} />}
 							horizontal
 							showsHorizontalScrollIndicator={false}
+							contentContainerStyle={{ paddingHorizontal: Platform.OS === 'ios' ? 16 : 8 }}
 							initialScrollIndex={initialSeriesPublicationIndex}
 							keyExtractor={keyExtractor}
 							onEndReached={fetchMoreSeriesPublications}
@@ -433,12 +443,15 @@ export default function Screen() {
 				 make sense to pull collections pubs if multiple are present */}
 				{collectionPublications.length > 0 && (
 					<View className="gap-3">
-						<Text className="text-lg font-semibold text-foreground-muted">Collection Books</Text>
+						<Text className="ios:px-4 px-2 text-lg font-semibold text-foreground-muted">
+							Collection Books
+						</Text>
 						<FlashList
 							data={collectionPublications}
 							renderItem={({ item }) => <RelatedPublicationItem item={item} />}
 							horizontal
 							showsHorizontalScrollIndicator={false}
+							contentContainerStyle={{ paddingHorizontal: Platform.OS === 'ios' ? 16 : 8 }}
 							initialScrollIndex={initialCollectionPublicationIndex}
 							keyExtractor={keyExtractor}
 							onEndReached={fetchMoreCollectionPublications}

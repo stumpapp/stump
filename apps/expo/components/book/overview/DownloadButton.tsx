@@ -3,7 +3,6 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import Animated, {
 	Easing,
 	Extrapolation,
-	FadeIn,
 	FadeOut,
 	interpolate,
 	useAnimatedStyle,
@@ -18,6 +17,7 @@ import { usePreferencesStore } from '~/stores'
 
 type DownloadState = 'downloading' | 'completed'
 
+const FADE_DURATION = 350
 const COMPLETION_LINGER_MS = 1500
 
 type DownloadButtonProps = {
@@ -38,6 +38,7 @@ export default function DownloadButton({ bookId, serverId, onDownload }: Downloa
 	const downloadPercentage = activeDownload?.progress?.percentage ?? 0
 
 	const progress = useSharedValue(0)
+	const contentOpacity = useSharedValue(1)
 
 	const wasDownloadingRef = useRef(false)
 	const wasCancelledRef = useRef(false)
@@ -48,6 +49,9 @@ export default function DownloadButton({ bookId, serverId, onDownload }: Downloa
 		if (isDownloading) return 'downloading'
 		return undefined
 	})
+
+	// Note: I don't _love_ having to dup the state but couldn't get it quite right without doing so
+	const [displayedState, setDisplayedState] = useState(downloadState)
 	const [visible, setVisible] = useState(!isDownloaded)
 
 	useEffect(() => {
@@ -61,6 +65,7 @@ export default function DownloadButton({ bookId, serverId, onDownload }: Downloa
 		} else if (wasDownloaded && !isDownloaded) {
 			wasDownloadingRef.current = false
 			setDownloadState(undefined)
+			setDisplayedState(undefined)
 			setVisible(true)
 		}
 	}, [isDownloaded, downloadState])
@@ -82,13 +87,31 @@ export default function DownloadButton({ bookId, serverId, onDownload }: Downloa
 	}, [isDownloading])
 
 	useEffect(() => {
+		if (displayedState === downloadState) return
+
+		if (displayedState === 'downloading' && downloadState === 'completed') {
+			contentOpacity.value = withTiming(0, { duration: FADE_DURATION })
+
+			const timer = setTimeout(() => {
+				setDisplayedState(downloadState)
+				contentOpacity.value = withTiming(1, { duration: FADE_DURATION })
+			}, FADE_DURATION)
+
+			return () => clearTimeout(timer)
+		}
+
+		setDisplayedState(downloadState)
+		contentOpacity.value = 1
+	}, [downloadState, displayedState, contentOpacity])
+
+	useEffect(() => {
 		if (downloadState !== 'completed' || !visible) return
 
 		// Note: I found it looked better to linger just a little bit after completion before
 		// starting the fade out
 		const timer = setTimeout(() => {
 			setVisible(false)
-		}, COMPLETION_LINGER_MS)
+		}, FADE_DURATION + COMPLETION_LINGER_MS)
 		return () => clearTimeout(timer)
 	}, [downloadState, visible])
 
@@ -111,6 +134,10 @@ export default function DownloadButton({ bookId, serverId, onDownload }: Downloa
 		width: `${interpolate(progress.value, [0, 100], [0, 100], Extrapolation.CLAMP)}%`,
 	}))
 
+	const contentStyle = useAnimatedStyle(() => ({
+		opacity: contentOpacity.value,
+	}))
+
 	const onPress = useCallback(() => {
 		if (downloadState === 'downloading' && activeDownload) {
 			wasCancelledRef.current = true
@@ -122,8 +149,8 @@ export default function DownloadButton({ bookId, serverId, onDownload }: Downloa
 
 	if (!visible) return null
 
-	const isCompleted = downloadState === 'completed'
-	const isActive = downloadState === 'downloading'
+	const isCompleted = displayedState === 'completed'
+	const isActive = displayedState === 'downloading'
 
 	const iconComponent = isCompleted ? Check : isActive ? X : ArrowDown
 	const label = isCompleted ? 'Downloaded' : isActive ? 'Cancel' : 'Download'
@@ -144,12 +171,7 @@ export default function DownloadButton({ bookId, serverId, onDownload }: Downloa
 					/>
 				)}
 
-				<Animated.View
-					key={downloadState ?? 'notDownloading'}
-					entering={FadeIn.duration(200)}
-					exiting={FadeOut.duration(200)}
-					className="flex-row items-center gap-2"
-				>
+				<Animated.View style={contentStyle} className="flex-row items-center gap-2">
 					<Icon
 						as={iconComponent}
 						style={{

@@ -1,6 +1,6 @@
 import { AspectRatio, Badge, Card, cx, Heading, Link, Text } from '@stump/components'
 import { FragmentType, graphql, useFragment } from '@stump/graphql'
-import dayjs from 'dayjs'
+import { differenceInDays, formatDistanceToNow } from 'date-fns'
 import { Book } from 'lucide-react'
 import pluralize from 'pluralize'
 import { useMemo } from 'react'
@@ -45,17 +45,17 @@ export default function BookClubBookItem({ data }: Props) {
 	const isCurrent = book.id === bookClub.currentBook?.id
 
 	const daysInfo = useMemo(() => {
-		const startedAt = dayjs(book.addedAt)
-		const completedAt = book.completedAt ? dayjs(book.completedAt) : null
+		const startedAt = new Date(book.addedAt)
+		const completedAt = book.completedAt ? new Date(book.completedAt) : null
 
 		let message
 		if (isCurrent) {
-			message = `Started ${startedAt.fromNow()}`
+			message = `Started ${formatDistanceToNow(startedAt, { addSuffix: true })}`
 		} else if (completedAt) {
-			const daysAgo = dayjs().diff(completedAt, 'days')
+			const daysAgo = differenceInDays(new Date(), completedAt)
 			message = `Completed ${daysAgo} ${pluralize('day', daysAgo)} ago`
 		} else {
-			message = `Added ${startedAt.fromNow()}`
+			message = `Added ${formatDistanceToNow(startedAt, { addSuffix: true })}`
 		}
 
 		return {
@@ -169,9 +169,9 @@ export default function BookClubBookItem({ data }: Props) {
 							)}
 						>
 							{daysInfo.end
-								? `Read for ${daysInfo.end.diff(daysInfo.start, 'days')} ${pluralize(
+								? `Read for ${differenceInDays(daysInfo.end, daysInfo.start)} ${pluralize(
 										'day',
-										daysInfo.end.diff(daysInfo.start, 'days'),
+										differenceInDays(daysInfo.end, daysInfo.start),
 									)}`
 								: 'Not completed yet'}
 						</span>

@@ -1,6 +1,6 @@
 import { useSDK } from '@stump/client'
 import { AggregatedReaction } from '@stump/graphql'
-import dayjs from 'dayjs'
+import { differenceInCalendarDays, intlFormat } from 'date-fns'
 import { MessageSquare, Pin } from 'lucide-react-native'
 import { memo } from 'react'
 import { Image, Pressable, View } from 'react-native'
@@ -55,16 +55,16 @@ type MessageProps = {
 }
 
 function formatTimestamp(timestamp: string): string {
-	const date = dayjs(timestamp)
-	const now = dayjs()
+	const date = new Date(timestamp)
+	const now = new Date()
+	const daysDiff = differenceInCalendarDays(now, date)
 
-	// TODO(localization): Refactor once date-fns is merged
-	if (now.diff(date, 'day') === 0) {
-		return date.format('h:mm A')
-	} else if (now.diff(date, 'day') < 7) {
-		return date.format('ddd h:mm A')
+	if (daysDiff === 0) {
+		return intlFormat(date, { hour: 'numeric', minute: 'numeric' })
+	} else if (daysDiff < 7) {
+		return intlFormat(date, { weekday: 'short', hour: 'numeric', minute: 'numeric' })
 	} else {
-		return date.format('MMM D, h:mm A')
+		return intlFormat(date, { month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric' })
 	}
 }
 

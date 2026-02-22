@@ -1,7 +1,7 @@
 import { Host, Image } from '@expo/ui/swift-ui'
 import { useRefetch, useSuspenseGraphQL } from '@stump/client'
 import { graphql } from '@stump/graphql'
-import dayjs from 'dayjs'
+import { intlFormat } from 'date-fns'
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router'
 import { Settings } from 'lucide-react-native'
 import { useLayoutEffect } from 'react'
@@ -97,10 +97,10 @@ export default function Screen() {
 
 	const renderProgression = () => {
 		if (currentBookCompletedAt) {
-			const completedDate = dayjs(currentBookCompletedAt)
 			return (
 				<Text className="text-sm text-foreground-subtle">
-					Completed {completedDate.format('LL')}
+					Completed{' '}
+					{intlFormat(new Date(currentBookCompletedAt), { month: 'long', year: 'numeric' })}
 				</Text>
 			)
 		} else if (activeProgress) {
@@ -114,8 +114,12 @@ export default function Screen() {
 					</Text>
 				)
 			}
-			const startedAt = dayjs(activeProgress.startedAt)
-			return <Text className="text-foreground-subtle">Started {startedAt.format('LL')}</Text>
+			const startedAt = new Date(activeProgress.startedAt)
+			return (
+				<Text className="text-foreground-subtle">
+					Started {intlFormat(startedAt, { month: 'long', year: 'numeric' })}
+				</Text>
+			)
 		} else {
 			return <Text className="text-foreground-subtle">You have not started this book yet</Text>
 		}

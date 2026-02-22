@@ -153,14 +153,16 @@ export function FieldSelector({ idx }: Props) {
 			</Popover.Trigger>
 			<Popover.Content className="mt-1 max-h-96 w-52 overflow-y-auto p-0" align="start">
 				<Command>
-					<Command.Group
-						heading={renderGroupHeader()}
-						className={cn({
-							'[&_[cmdk-group-heading]]:px-0': !!source,
-						})}
-					>
-						{renderSource()}
-					</Command.Group>
+					<Command.List>
+						<Command.Group
+							heading={renderGroupHeader()}
+							className={cn({
+								'[&_[cmdk-group-heading]]:px-0': !!source,
+							})}
+						>
+							{renderSource()}
+						</Command.Group>
+					</Command.List>
 				</Command>
 			</Popover.Content>
 		</Popover>

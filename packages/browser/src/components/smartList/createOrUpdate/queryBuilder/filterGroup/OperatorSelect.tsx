@@ -119,25 +119,27 @@ export default function OperatorSelect({ idx }: Props) {
 
 			<Popover.Content className="mt-1 max-h-96 w-52 overflow-y-auto p-0" align="start">
 				<Command>
-					{selectGroups.map(({ label, operators }) => (
-						<Command.Group
-							key={label}
-							heading={<span className="text-foreground-muted">{label}</span>}
-						>
-							{operators.map((operator) => (
-								<Command.Item
-									key={operator}
-									onSelect={() => updateField({ operation: operator })}
-									className={cn('transition-all duration-75', {
-										'text-brand': operator === fieldDef.operation,
-									})}
-									value={operator}
-								>
-									{operatorMap[operator]}
-								</Command.Item>
-							))}
-						</Command.Group>
-					))}
+					<Command.List>
+						{selectGroups.map(({ label, operators }) => (
+							<Command.Group
+								key={label}
+								heading={<span className="text-foreground-muted">{label}</span>}
+							>
+								{operators.map((operator) => (
+									<Command.Item
+										key={operator}
+										onSelect={() => updateField({ operation: operator })}
+										className={cn('transition-all duration-75', {
+											'text-brand': operator === fieldDef.operation,
+										})}
+										value={operator}
+									>
+										{operatorMap[operator]}
+									</Command.Item>
+								))}
+							</Command.Group>
+						))}
+					</Command.List>
 				</Command>
 			</Popover.Content>
 		</Popover>

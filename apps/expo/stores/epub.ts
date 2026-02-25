@@ -97,12 +97,16 @@ export const flattenToc = (toc: TableOfContentsItem[]): TableOfContentsItem[] =>
 export const resolveTocItemByPosition = (position: ReadiumLocation['position']) => {
 	const toc = useEpubLocationStore.getState().toc
 	const flatToc = flattenToc(toc)
-	return flatToc.find((item, index) => {
+	// if `isNextItemMissingPosition` is true, then two toc items will meet the criteria:
+	// 1. A toc item where its nextItem has no associated position number, and it's before the current chapter, and
+	// 2. The actual toc item for the current chapter. So we use findLast
+	return flatToc.findLast((item, index) => {
 		const nextItem = flatToc[index + 1]
 		if (item.position && position) {
-			const isAfterChapterStart = position >= item.position
-			const isBeforeChapterEnd = nextItem?.position ? position < nextItem?.position : true
-			return isAfterChapterStart && isBeforeChapterEnd
+			const isCurrentChapterOrBefore = item.position <= position
+			const isCurrentChapterOrAfter = nextItem?.position ? position < nextItem.position : false
+			const isNextItemMissingPosition = nextItem?.position == undefined
+			return isCurrentChapterOrBefore && (isCurrentChapterOrAfter || isNextItemMissingPosition)
 		}
 	})
 }

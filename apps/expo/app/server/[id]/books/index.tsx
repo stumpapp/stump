@@ -14,7 +14,7 @@ import ListEmpty from '~/components/ListEmpty'
 import RefreshControl from '~/components/RefreshControl'
 import { Button, Text } from '~/components/ui'
 import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
-import { BookFilterContext, createBookFilterStore } from '~/stores/filters'
+import { BookFilterContext, createBookFilterStore, useInitialBookFilters } from '~/stores/filters'
 
 const query = graphql(`
 	query BooksScreen(
@@ -45,8 +45,10 @@ export default function Screen() {
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
+	const initialFilters = useInitialBookFilters()
 
-	const store = useRef(createBookFilterStore()).current
+	// eslint-disable-next-line react-hooks/refs
+	const store = useRef(createBookFilterStore(initialFilters)).current
 
 	const { filters, sort, resetFilters } = useStore(store, (state) => ({
 		filters: state.filters,

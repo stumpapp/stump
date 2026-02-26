@@ -54,9 +54,14 @@ type Documents = {
     "\n\tfragment BookGridItem on Media {\n\t\tid\n\t\tresolvedName\n\t\tthumbnail {\n\t\t\turl\n\t\t\tmetadata {\n\t\t\t\taverageColor\n\t\t\t\tcolors {\n\t\t\t\t\tcolor\n\t\t\t\t\tpercentage\n\t\t\t\t}\n\t\t\t\tthumbhash\n\t\t\t}\n\t\t}\n\t\treadProgress {\n\t\t\tpercentageCompleted\n\t\t}\n\t}\n": typeof types.BookGridItemFragmentDoc,
     "\n\tfragment BookListItem on Media {\n\t\tid\n\t\tresolvedName\n\t\tthumbnail {\n\t\t\turl\n\t\t\tmetadata {\n\t\t\t\taverageColor\n\t\t\t\tcolors {\n\t\t\t\t\tcolor\n\t\t\t\t\tpercentage\n\t\t\t\t}\n\t\t\t\tthumbhash\n\t\t\t}\n\t\t}\n\t}\n": typeof types.BookListItemFragmentDoc,
     "\n\tfragment BookSearchItem on Media {\n\t\tid\n\t\tresolvedName\n\t\tthumbnail {\n\t\t\turl\n\t\t\tmetadata {\n\t\t\t\taverageColor\n\t\t\t\tcolors {\n\t\t\t\t\tcolor\n\t\t\t\t\tpercentage\n\t\t\t\t}\n\t\t\t\tthumbhash\n\t\t\t}\n\t\t}\n\t\tsize\n\t\tpages\n\t}\n": typeof types.BookSearchItemFragmentDoc,
+    "\n\tquery BooksAfterCursor($id: ID!, $pagination: Pagination) {\n\t\tmediaById(id: $id) {\n\t\t\tnextInSeries(pagination: $pagination) {\n\t\t\t\tnodes {\n\t\t\t\t\tid\n\t\t\t\t\t...BookListItem\n\t\t\t\t}\n\t\t\t\tpageInfo {\n\t\t\t\t\t__typename\n\t\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\t\tcurrentCursor\n\t\t\t\t\t\tnextCursor\n\t\t\t\t\t\tlimit\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.BooksAfterCursorDocument,
     "\n\tfragment OnDeckBookItem on Media {\n\t\tid\n\t\tmetadata {\n\t\t\tnumber\n\t\t}\n\t\tresolvedName\n\t\tthumbnail {\n\t\t\turl\n\t\t\tmetadata {\n\t\t\t\taverageColor\n\t\t\t\tcolors {\n\t\t\t\t\tcolor\n\t\t\t\t\tpercentage\n\t\t\t\t}\n\t\t\t\tthumbhash\n\t\t\t}\n\t\t}\n\t\tseriesPosition\n\t\tseries {\n\t\t\tresolvedName\n\t\t\tmediaCount\n\t\t}\n\t}\n": typeof types.OnDeckBookItemFragmentDoc,
     "\n\tquery Characters($seriesId: ID) {\n\t\tmediaMetadataOverview(seriesId: $seriesId) {\n\t\t\tcharacters\n\t\t}\n\t}\n": typeof types.CharactersDocument,
+    "\n\tquery Colorists($seriesId: ID) {\n\t\tmediaMetadataOverview(seriesId: $seriesId) {\n\t\t\tcolorists\n\t\t}\n\t}\n": typeof types.ColoristsDocument,
+    "\n\tquery CoverArtists($seriesId: ID) {\n\t\tmediaMetadataOverview(seriesId: $seriesId) {\n\t\t\tcoverArtists\n\t\t}\n\t}\n": typeof types.CoverArtistsDocument,
     "\n\tquery Genres($seriesId: ID) {\n\t\tmediaMetadataOverview(seriesId: $seriesId) {\n\t\t\tgenres\n\t\t}\n\t}\n": typeof types.GenresDocument,
+    "\n\tquery Inkers($seriesId: ID) {\n\t\tmediaMetadataOverview(seriesId: $seriesId) {\n\t\t\tinkers\n\t\t}\n\t}\n": typeof types.InkersDocument,
+    "\n\tquery Letterers($seriesId: ID) {\n\t\tmediaMetadataOverview(seriesId: $seriesId) {\n\t\t\tletterers\n\t\t}\n\t}\n": typeof types.LetterersDocument,
     "\n\tquery SeriesMetadata($seriesId: ID) {\n\t\tmediaMetadataOverview(seriesId: $seriesId) {\n\t\t\tseries\n\t\t}\n\t}\n": typeof types.SeriesMetadataDocument,
     "\n\tquery Writers($seriesId: ID) {\n\t\tmediaMetadataOverview(seriesId: $seriesId) {\n\t\t\twriters\n\t\t}\n\t}\n": typeof types.WritersDocument,
     "\n\tfragment BookMenu on Media {\n\t\tid\n\t\tisFavorite\n\t\tlibrary {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t\tseries {\n\t\t\tid\n\t\t\tresolvedName\n\t\t}\n\t\treadProgress {\n\t\t\t__typename\n\t\t}\n\t\treadHistory {\n\t\t\t__typename\n\t\t}\n\t}\n": typeof types.BookMenuFragmentDoc,
@@ -280,9 +285,14 @@ const documents: Documents = {
     "\n\tfragment BookGridItem on Media {\n\t\tid\n\t\tresolvedName\n\t\tthumbnail {\n\t\t\turl\n\t\t\tmetadata {\n\t\t\t\taverageColor\n\t\t\t\tcolors {\n\t\t\t\t\tcolor\n\t\t\t\t\tpercentage\n\t\t\t\t}\n\t\t\t\tthumbhash\n\t\t\t}\n\t\t}\n\t\treadProgress {\n\t\t\tpercentageCompleted\n\t\t}\n\t}\n": types.BookGridItemFragmentDoc,
     "\n\tfragment BookListItem on Media {\n\t\tid\n\t\tresolvedName\n\t\tthumbnail {\n\t\t\turl\n\t\t\tmetadata {\n\t\t\t\taverageColor\n\t\t\t\tcolors {\n\t\t\t\t\tcolor\n\t\t\t\t\tpercentage\n\t\t\t\t}\n\t\t\t\tthumbhash\n\t\t\t}\n\t\t}\n\t}\n": types.BookListItemFragmentDoc,
     "\n\tfragment BookSearchItem on Media {\n\t\tid\n\t\tresolvedName\n\t\tthumbnail {\n\t\t\turl\n\t\t\tmetadata {\n\t\t\t\taverageColor\n\t\t\t\tcolors {\n\t\t\t\t\tcolor\n\t\t\t\t\tpercentage\n\t\t\t\t}\n\t\t\t\tthumbhash\n\t\t\t}\n\t\t}\n\t\tsize\n\t\tpages\n\t}\n": types.BookSearchItemFragmentDoc,
+    "\n\tquery BooksAfterCursor($id: ID!, $pagination: Pagination) {\n\t\tmediaById(id: $id) {\n\t\t\tnextInSeries(pagination: $pagination) {\n\t\t\t\tnodes {\n\t\t\t\t\tid\n\t\t\t\t\t...BookListItem\n\t\t\t\t}\n\t\t\t\tpageInfo {\n\t\t\t\t\t__typename\n\t\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\t\tcurrentCursor\n\t\t\t\t\t\tnextCursor\n\t\t\t\t\t\tlimit\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.BooksAfterCursorDocument,
     "\n\tfragment OnDeckBookItem on Media {\n\t\tid\n\t\tmetadata {\n\t\t\tnumber\n\t\t}\n\t\tresolvedName\n\t\tthumbnail {\n\t\t\turl\n\t\t\tmetadata {\n\t\t\t\taverageColor\n\t\t\t\tcolors {\n\t\t\t\t\tcolor\n\t\t\t\t\tpercentage\n\t\t\t\t}\n\t\t\t\tthumbhash\n\t\t\t}\n\t\t}\n\t\tseriesPosition\n\t\tseries {\n\t\t\tresolvedName\n\t\t\tmediaCount\n\t\t}\n\t}\n": types.OnDeckBookItemFragmentDoc,
     "\n\tquery Characters($seriesId: ID) {\n\t\tmediaMetadataOverview(seriesId: $seriesId) {\n\t\t\tcharacters\n\t\t}\n\t}\n": types.CharactersDocument,
+    "\n\tquery Colorists($seriesId: ID) {\n\t\tmediaMetadataOverview(seriesId: $seriesId) {\n\t\t\tcolorists\n\t\t}\n\t}\n": types.ColoristsDocument,
+    "\n\tquery CoverArtists($seriesId: ID) {\n\t\tmediaMetadataOverview(seriesId: $seriesId) {\n\t\t\tcoverArtists\n\t\t}\n\t}\n": types.CoverArtistsDocument,
     "\n\tquery Genres($seriesId: ID) {\n\t\tmediaMetadataOverview(seriesId: $seriesId) {\n\t\t\tgenres\n\t\t}\n\t}\n": types.GenresDocument,
+    "\n\tquery Inkers($seriesId: ID) {\n\t\tmediaMetadataOverview(seriesId: $seriesId) {\n\t\t\tinkers\n\t\t}\n\t}\n": types.InkersDocument,
+    "\n\tquery Letterers($seriesId: ID) {\n\t\tmediaMetadataOverview(seriesId: $seriesId) {\n\t\t\tletterers\n\t\t}\n\t}\n": types.LetterersDocument,
     "\n\tquery SeriesMetadata($seriesId: ID) {\n\t\tmediaMetadataOverview(seriesId: $seriesId) {\n\t\t\tseries\n\t\t}\n\t}\n": types.SeriesMetadataDocument,
     "\n\tquery Writers($seriesId: ID) {\n\t\tmediaMetadataOverview(seriesId: $seriesId) {\n\t\t\twriters\n\t\t}\n\t}\n": types.WritersDocument,
     "\n\tfragment BookMenu on Media {\n\t\tid\n\t\tisFavorite\n\t\tlibrary {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t\tseries {\n\t\t\tid\n\t\t\tresolvedName\n\t\t}\n\t\treadProgress {\n\t\t\t__typename\n\t\t}\n\t\treadHistory {\n\t\t\t__typename\n\t\t}\n\t}\n": types.BookMenuFragmentDoc,
@@ -626,6 +636,10 @@ export function graphql(source: "\n\tfragment BookSearchItem on Media {\n\t\tid\
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
+export function graphql(source: "\n\tquery BooksAfterCursor($id: ID!, $pagination: Pagination) {\n\t\tmediaById(id: $id) {\n\t\t\tnextInSeries(pagination: $pagination) {\n\t\t\t\tnodes {\n\t\t\t\t\tid\n\t\t\t\t\t...BookListItem\n\t\t\t\t}\n\t\t\t\tpageInfo {\n\t\t\t\t\t__typename\n\t\t\t\t\t... on CursorPaginationInfo {\n\t\t\t\t\t\tcurrentCursor\n\t\t\t\t\t\tnextCursor\n\t\t\t\t\t\tlimit\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').BooksAfterCursorDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
 export function graphql(source: "\n\tfragment OnDeckBookItem on Media {\n\t\tid\n\t\tmetadata {\n\t\t\tnumber\n\t\t}\n\t\tresolvedName\n\t\tthumbnail {\n\t\t\turl\n\t\t\tmetadata {\n\t\t\t\taverageColor\n\t\t\t\tcolors {\n\t\t\t\t\tcolor\n\t\t\t\t\tpercentage\n\t\t\t\t}\n\t\t\t\tthumbhash\n\t\t\t}\n\t\t}\n\t\tseriesPosition\n\t\tseries {\n\t\t\tresolvedName\n\t\t\tmediaCount\n\t\t}\n\t}\n"): typeof import('./graphql').OnDeckBookItemFragmentDoc;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
@@ -634,7 +648,23 @@ export function graphql(source: "\n\tquery Characters($seriesId: ID) {\n\t\tmedi
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
+export function graphql(source: "\n\tquery Colorists($seriesId: ID) {\n\t\tmediaMetadataOverview(seriesId: $seriesId) {\n\t\t\tcolorists\n\t\t}\n\t}\n"): typeof import('./graphql').ColoristsDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tquery CoverArtists($seriesId: ID) {\n\t\tmediaMetadataOverview(seriesId: $seriesId) {\n\t\t\tcoverArtists\n\t\t}\n\t}\n"): typeof import('./graphql').CoverArtistsDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
 export function graphql(source: "\n\tquery Genres($seriesId: ID) {\n\t\tmediaMetadataOverview(seriesId: $seriesId) {\n\t\t\tgenres\n\t\t}\n\t}\n"): typeof import('./graphql').GenresDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tquery Inkers($seriesId: ID) {\n\t\tmediaMetadataOverview(seriesId: $seriesId) {\n\t\t\tinkers\n\t\t}\n\t}\n"): typeof import('./graphql').InkersDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tquery Letterers($seriesId: ID) {\n\t\tmediaMetadataOverview(seriesId: $seriesId) {\n\t\t\tletterers\n\t\t}\n\t}\n"): typeof import('./graphql').LetterersDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

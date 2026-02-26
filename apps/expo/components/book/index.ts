@@ -1,5 +1,6 @@
 export { default as BookGridItem } from './BookGridItem'
 export { default as BookListItem } from './BookListItem'
 export { default as BookMetaLink } from './BookMetaLink'
+export { BooksAfterCursor } from './BooksAfterCursor'
 export { default as BookSearchItem, IBookSearchItemFragment } from './BookSearchItem'
 export { default as OnDeckBookItem } from './OnDeckBookItem'

@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/react-native'
 import {
 	MediaFilterInput,
 	MediaModelOrdering,
@@ -7,14 +8,16 @@ import {
 	SeriesModelOrdering,
 	SeriesOrderBy,
 } from '@stump/graphql'
+import { useLocalSearchParams } from 'expo-router'
 import clone from 'lodash/cloneDeep'
-import { createContext, useContext } from 'react'
+import { createContext, useContext, useMemo } from 'react'
 import { create, useStore } from 'zustand'
 
 export type IFilterStore<F, O> = {
 	filters: F
 	setFilters: (filters: F) => void
 	resetFilters: () => void
+	clear: () => void
 	sort: O
 	setSort: (sort: O) => void
 	secondarySort?: O | null
@@ -28,6 +31,7 @@ export function createFilterStore<F, O>(defaultFilter: F, defaultSort: O) {
 		resetFilters: () => {
 			set({ filters: clone(defaultFilter) })
 		},
+		clear: () => set({ filters: {} as F }),
 		sort: clone(defaultSort),
 		setSort: (sort) => set({ sort }),
 		secondarySort: null,
@@ -35,13 +39,28 @@ export function createFilterStore<F, O>(defaultFilter: F, defaultSort: O) {
 	}))
 }
 
-export const createBookFilterStore = () =>
-	createFilterStore<MediaFilterInput, MediaOrderBy>(
-		{},
-		{
-			media: { field: MediaModelOrdering.Name, direction: OrderDirection.Asc },
-		},
-	)
+export const createBookFilterStore = (initialFilter: Partial<MediaFilterInput> = {}) =>
+	createFilterStore<MediaFilterInput, MediaOrderBy>(initialFilter, {
+		media: { field: MediaModelOrdering.Name, direction: OrderDirection.Asc },
+	})
+
+export const useInitialBookFilters = () => {
+	const initialFilters = useLocalSearchParams<{ initialFilters?: string }>()
+	return useMemo(() => {
+		if (!initialFilters.initialFilters) return {}
+		try {
+			// TODO: We should parse more safely than this, but for now it's fine
+			return JSON.parse(initialFilters.initialFilters) as Partial<MediaFilterInput>
+		} catch (e) {
+			Sentry.captureException(e, {
+				extra: {
+					initialFilters: initialFilters.initialFilters,
+				},
+			})
+			return {}
+		}
+	}, [initialFilters])
+}
 
 export type BookFilterStore = ReturnType<typeof createBookFilterStore>
 

@@ -1271,6 +1271,7 @@ type MediaMetadataOverview {
 	inkers: [String!]!
 	colorists: [String!]!
 	letterers: [String!]!
+	coverArtists: [String!]!
 	editors: [String!]!
 	publishers: [String!]!
 	characters: [String!]!

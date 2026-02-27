@@ -12,18 +12,21 @@ import { useActiveServer } from '../activeServer'
 import { GridImageItem } from '../grid'
 import { useGridItemSize } from '../grid/useGridItemSize'
 import RefreshControl from '../RefreshControl'
-import { useFeedTitle } from './useFeedTitle'
 import { getPublicationThumbnailURL } from './utils'
 
 type Props = {
 	feed: OPDSFeed
 	onRefresh?: () => void
 	isRefreshing?: boolean
+	ListHeaderComponent?: React.ReactElement
 }
 
-export default function PublicationFeed({ feed, onRefresh, isRefreshing }: Props) {
-	useFeedTitle(feed)
-
+export default function PublicationFeed({
+	feed,
+	onRefresh,
+	isRefreshing,
+	ListHeaderComponent,
+}: Props) {
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
@@ -112,6 +115,7 @@ export default function PublicationFeed({ feed, onRefresh, isRefreshing }: Props
 				onEndReachedThreshold={ON_END_REACHED_THRESHOLD}
 				onEndReached={onEndReached}
 				contentInsetAdjustmentBehavior="always"
+				ListHeaderComponent={ListHeaderComponent}
 				ListHeaderComponentStyle={{ paddingBottom: 16, marginHorizontal: -paddingHorizontal }}
 				refreshControl={<RefreshControl refreshing={Boolean(isRefreshing)} onRefresh={onRefresh} />}
 			/>

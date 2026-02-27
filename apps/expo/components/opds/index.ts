@@ -1,5 +1,6 @@
 export { default as CreditsSection } from './CreditsSection'
 export { default as OPDSFeed } from './Feed'
+export { default as FeedContent } from './FeedContent'
 export { default as FeedSubtitle } from './FeedSubtitle'
 export { default as MaybeErrorFeed } from './MaybeErrorFeed'
 export { default as OPDSNavigation } from './Navigation'

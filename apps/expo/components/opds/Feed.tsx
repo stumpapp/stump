@@ -1,51 +1,43 @@
 import { OPDSFeed } from '@stump/sdk'
-import partition from 'lodash/partition'
-import { View } from 'react-native'
+import { ScrollView } from 'react-native-gesture-handler'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import FeedSubtitle from './FeedSubtitle'
+import RefreshControl from '../RefreshControl'
+import FeedContent from './FeedContent'
 import MaybeErrorFeed from './MaybeErrorFeed'
-import Navigation from './Navigation'
-import NavigationGroup from './NavigationGroup'
 import PublicationFeed from './PublicationFeed'
-import PublicationGroup from './PublicationGroup'
 import { FeedComponentOptions } from './types'
-import { useFeedTitle } from './useFeedTitle'
 
 type Props = {
 	feed: OPDSFeed
+	onRefresh?: () => void
+	isRefreshing?: boolean
 } & FeedComponentOptions
 
-export default function Feed({ feed, ...options }: Props) {
-	useFeedTitle(feed)
+export default function Feed({ feed, onRefresh, isRefreshing, ...options }: Props) {
+	const insets = useSafeAreaInsets()
 
-	const [navGroups, publicationGroups] = partition(
-		feed.groups.filter((group) => group.navigation.length || group.publications.length),
-		(group) => group.publications.length === 0,
-	)
+	const content = <FeedContent feed={feed} {...options} />
 
-	if (!navGroups.length && !publicationGroups.length && !feed.navigation.length) {
-		return <MaybeErrorFeed />
+	if (feed.publications?.length > 0) {
+		return (
+			<PublicationFeed
+				feed={feed}
+				onRefresh={onRefresh}
+				isRefreshing={isRefreshing}
+				ListHeaderComponent={content}
+			/>
+		)
 	}
 
 	return (
-		<View className="flex-1 gap-8 pt-4">
-			{feed.metadata.subtitle && (
-				<View className="-mt-2 px-4">
-					<FeedSubtitle value={feed.metadata.subtitle} />
-				</View>
-			)}
-
-			<Navigation navigation={feed.navigation} {...options} />
-
-			{publicationGroups.map((group) => (
-				<PublicationGroup key={group.metadata.title} group={group} {...options} />
-			))}
-
-			{navGroups.map((group) => (
-				<NavigationGroup key={group.metadata.title} group={group} {...options} />
-			))}
-
-			<PublicationFeed feed={feed} />
-		</View>
+		<ScrollView
+			className="flex-1 bg-background"
+			refreshControl={<RefreshControl refreshing={Boolean(isRefreshing)} onRefresh={onRefresh} />}
+			contentInsetAdjustmentBehavior="automatic"
+			contentContainerStyle={{ paddingBottom: insets.bottom }}
+		>
+			{content || <MaybeErrorFeed />}
+		</ScrollView>
 	)
 }

@@ -1,6 +1,6 @@
 import { useNavigation, useRouter } from 'expo-router'
 import { ChevronLeft } from 'lucide-react-native'
-import { useLayoutEffect, useMemo, useState } from 'react'
+import { useLayoutEffect, useMemo } from 'react'
 import { NativeSyntheticEvent, Platform, TextInputChangeEvent, View } from 'react-native'
 
 import { Icon } from '~/components/ui'
@@ -29,7 +29,6 @@ export function useDynamicHeader({
 	...rest
 }: Params) {
 	const navigation = useNavigation()
-	const [didSetOptions, setDidSetOptions] = useState(false)
 
 	const router = useRouter()
 	const resolvedHeaderLeft = useMemo(
@@ -51,7 +50,6 @@ export function useDynamicHeader({
 	)
 
 	useLayoutEffect(() => {
-		if (didSetOptions) return
 		navigation.setOptions({
 			...(headerLeft || showBackButton ? { headerLeft: resolvedHeaderLeft } : {}),
 			headerRight,
@@ -65,16 +63,5 @@ export function useDynamicHeader({
 			headerBlurEffect: IS_IOS_24_PLUS ? undefined : 'regular',
 			...rest,
 		})
-		setDidSetOptions(true)
-	}, [
-		navigation,
-		title,
-		headerLeft,
-		headerRight,
-		rest,
-		didSetOptions,
-		resolvedHeaderLeft,
-		showBackButton,
-	])
-	return didSetOptions
+	}, [navigation, title, headerLeft, headerRight, rest, resolvedHeaderLeft, showBackButton])
 }

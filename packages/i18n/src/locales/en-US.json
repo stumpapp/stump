@@ -1230,6 +1230,7 @@
 				"jobs": "Jobs",
 				"access": "Access",
 				"email": "Email",
+				"metadata": "Metadata",
 				"notifications": "Notifications",
 				"label": "Management"
 			}
@@ -2086,6 +2087,60 @@
 				"title": "Update emailer",
 				"description": "Update the details of this SMTP emailer"
 			}
+		},
+		"server/metadataIntegrations": {
+			"helmet": "Metadata integrations",
+			"title": "Metadata integrations",
+			"addProvider": "Add provider",
+			"noProviders": "No providers configured yet. Add one to get started",
+			"providers": {
+				"title": "Providers",
+				"description": "Configure external metadata providers to fetch and enrich your library data"
+			},
+			"providerForm": {
+				"apiToken": {
+					"label": "API token",
+					"description": "The API token for authenticating with this provider"
+				},
+				"apiTokenExpiresAt": {
+					"label": "API token expiration",
+					"description": "The date when the API token will expire (optional)"
+				},
+				"enableProvider": {
+					"label": "Enable provider",
+					"description": "It will be used for fetching if enabled"
+				},
+				"autoApplyConfig": {
+					"enabled": {
+						"label": "Enable auto-apply",
+						"description": "Skip manual approval and apply likely matches"
+					},
+					"threshold": {
+						"label": "Confidence threshold",
+						"description": "Minimum confidence score (0-1) to auto-apply a match",
+						"disclaimer": "The computed confidence score is a best-effort estimation. It may not always be accurate"
+					},
+					"strategy": {
+						"label": "Merge strategy",
+						"options": {
+							"FILL_GAPS": "Accept missing fields",
+							"FILL_AND_MERGE_LISTS": "Accept missing fields and merge lists",
+							"PREFER_EXTERNAL": "Prefer external data"
+						}
+					}
+				}
+			},
+			"providerEnabled": "This provider is enabled",
+			"providerDisabled": "This provider is disabled",
+			"autoApplyOn": "Auto-apply on",
+			"autoApplyOff": "Auto-apply off",
+			"editDialog": {
+				"tooltip": "Edit provider"
+			},
+			"deleteDialog": {
+				"title": "Delete provider",
+				"description": "Are you sure you want to delete {{providerName}}? This action cannot be undone."
+			}
 		}
 	},
 	"jobOverlay": {
@@ -2233,7 +2288,9 @@
 		"notUsedYet": "Not used yet",
 		"never": "Never",
 		"scan": "Scan",
-		"somethingWentWrong": "Something went wrong"
+		"somethingWentWrong": "Something went wrong",
+		"back": "Back",
+		"continue": "Continue"
 	},
 	"userPermissions": {
 		"ACCESS_API_KEYS": {

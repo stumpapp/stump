@@ -214,6 +214,11 @@ type Documents = {
     "\n\tsubscription LiveLogsFeed {\n\t\ttailLogFile\n\t}\n": typeof types.LiveLogsFeedDocument,
     "\n\tmutation DeleteLogs {\n\t\tdeleteLogs {\n\t\t\tdeleted\n\t\t}\n\t}\n": typeof types.DeleteLogsDocument,
     "\n\tquery PersistedLogs(\n\t\t$filter: LogFilterInput!\n\t\t$pagination: Pagination!\n\t\t$orderBy: [LogModelOrderBy!]!\n\t) {\n\t\tlogs(filter: $filter, pagination: $pagination, orderBy: $orderBy) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\ttimestamp\n\t\t\t\tlevel\n\t\t\t\tmessage\n\t\t\t\tjobId\n\t\t\t\tcontext\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\ttotalPages\n\t\t\t\t\tcurrentPage\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.PersistedLogsDocument,
+    "\n\tmutation CreateProviderDialogCreateProvider($input: CreateMetadataProviderConfigInput!) {\n\t\tcreateMetadataProvider(input: $input) {\n\t\t\tid\n\t\t\tproviderType\n\t\t\tenabled\n\t\t}\n\t}\n": typeof types.CreateProviderDialogCreateProviderDocument,
+    "\n\tmutation EditProviderDialog($id: Int!, $input: PatchMetadataProviderConfigInput!) {\n\t\tupdateMetadataProvider(id: $id, input: $input) {\n\t\t\tid\n\t\t\t...ExistingProviderCard\n\t\t}\n\t}\n": typeof types.EditProviderDialogDocument,
+    "\n\tmutation DeleteProviderDialog($id: Int!) {\n\t\tdeleteMetadataProvider(id: $id) {\n\t\t\tid\n\t\t}\n\t}\n": typeof types.DeleteProviderDialogDocument,
+    "\n\tfragment ExistingProviderCard on MetadataProviderConfigModel {\n\t\tid\n\t\tproviderType\n\t\tenabled\n\t\tapiTokenExpiresAt\n\t\tautoApplyConfig\n\t\tcreatedAt\n\t\tupdatedAt\n\t}\n": typeof types.ExistingProviderCardFragmentDoc,
+    "\n\tquery ProvidersSectionGetProviders {\n\t\tmetadataProviderConfigs {\n\t\t\tid\n\t\t\t...ExistingProviderCard\n\t\t}\n\t}\n": typeof types.ProvidersSectionGetProvidersDocument,
     "\n\tquery UserStats {\n\t\tuserCount\n\t\ttopReaders(take: 1) {\n\t\t\tid\n\t\t\tusername\n\t\t\tfinishedReadingSessionsCount\n\t\t}\n\t\tactiveReadingSessionCount\n\t\tfinishedReadingSessionCount\n\t}\n": typeof types.UserStatsDocument,
     "\n\tmutation CreateOrUpdateUserFormUpdateUser($id: ID!, $input: UpdateUserInput!) {\n\t\tupdateUser(id: $id, input: $input) {\n\t\t\tid\n\t\t\tusername\n\t\t\tageRestriction {\n\t\t\t\tage\n\t\t\t\trestrictOnUnset\n\t\t\t}\n\t\t\tpermissions\n\t\t\tmaxSessionsAllowed\n\t\t}\n\t}\n": typeof types.CreateOrUpdateUserFormUpdateUserDocument,
     "\n\tmutation CreateOrUpdateUserFormCreateUser($input: CreateUserInput!) {\n\t\tcreateUser(input: $input) {\n\t\t\tid\n\t\t}\n\t}\n": typeof types.CreateOrUpdateUserFormCreateUserDocument,
@@ -440,6 +445,11 @@ const documents: Documents = {
     "\n\tsubscription LiveLogsFeed {\n\t\ttailLogFile\n\t}\n": types.LiveLogsFeedDocument,
     "\n\tmutation DeleteLogs {\n\t\tdeleteLogs {\n\t\t\tdeleted\n\t\t}\n\t}\n": types.DeleteLogsDocument,
     "\n\tquery PersistedLogs(\n\t\t$filter: LogFilterInput!\n\t\t$pagination: Pagination!\n\t\t$orderBy: [LogModelOrderBy!]!\n\t) {\n\t\tlogs(filter: $filter, pagination: $pagination, orderBy: $orderBy) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\ttimestamp\n\t\t\t\tlevel\n\t\t\t\tmessage\n\t\t\t\tjobId\n\t\t\t\tcontext\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\ttotalPages\n\t\t\t\t\tcurrentPage\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.PersistedLogsDocument,
+    "\n\tmutation CreateProviderDialogCreateProvider($input: CreateMetadataProviderConfigInput!) {\n\t\tcreateMetadataProvider(input: $input) {\n\t\t\tid\n\t\t\tproviderType\n\t\t\tenabled\n\t\t}\n\t}\n": types.CreateProviderDialogCreateProviderDocument,
+    "\n\tmutation EditProviderDialog($id: Int!, $input: PatchMetadataProviderConfigInput!) {\n\t\tupdateMetadataProvider(id: $id, input: $input) {\n\t\t\tid\n\t\t\t...ExistingProviderCard\n\t\t}\n\t}\n": types.EditProviderDialogDocument,
+    "\n\tmutation DeleteProviderDialog($id: Int!) {\n\t\tdeleteMetadataProvider(id: $id) {\n\t\t\tid\n\t\t}\n\t}\n": types.DeleteProviderDialogDocument,
+    "\n\tfragment ExistingProviderCard on MetadataProviderConfigModel {\n\t\tid\n\t\tproviderType\n\t\tenabled\n\t\tapiTokenExpiresAt\n\t\tautoApplyConfig\n\t\tcreatedAt\n\t\tupdatedAt\n\t}\n": types.ExistingProviderCardFragmentDoc,
+    "\n\tquery ProvidersSectionGetProviders {\n\t\tmetadataProviderConfigs {\n\t\t\tid\n\t\t\t...ExistingProviderCard\n\t\t}\n\t}\n": types.ProvidersSectionGetProvidersDocument,
     "\n\tquery UserStats {\n\t\tuserCount\n\t\ttopReaders(take: 1) {\n\t\t\tid\n\t\t\tusername\n\t\t\tfinishedReadingSessionsCount\n\t\t}\n\t\tactiveReadingSessionCount\n\t\tfinishedReadingSessionCount\n\t}\n": types.UserStatsDocument,
     "\n\tmutation CreateOrUpdateUserFormUpdateUser($id: ID!, $input: UpdateUserInput!) {\n\t\tupdateUser(id: $id, input: $input) {\n\t\t\tid\n\t\t\tusername\n\t\t\tageRestriction {\n\t\t\t\tage\n\t\t\t\trestrictOnUnset\n\t\t\t}\n\t\t\tpermissions\n\t\t\tmaxSessionsAllowed\n\t\t}\n\t}\n": types.CreateOrUpdateUserFormUpdateUserDocument,
     "\n\tmutation CreateOrUpdateUserFormCreateUser($input: CreateUserInput!) {\n\t\tcreateUser(input: $input) {\n\t\t\tid\n\t\t}\n\t}\n": types.CreateOrUpdateUserFormCreateUserDocument,
@@ -1263,6 +1273,26 @@ export function graphql(source: "\n\tmutation DeleteLogs {\n\t\tdeleteLogs {\n\t
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n\tquery PersistedLogs(\n\t\t$filter: LogFilterInput!\n\t\t$pagination: Pagination!\n\t\t$orderBy: [LogModelOrderBy!]!\n\t) {\n\t\tlogs(filter: $filter, pagination: $pagination, orderBy: $orderBy) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\ttimestamp\n\t\t\t\tlevel\n\t\t\t\tmessage\n\t\t\t\tjobId\n\t\t\t\tcontext\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\ttotalPages\n\t\t\t\t\tcurrentPage\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').PersistedLogsDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tmutation CreateProviderDialogCreateProvider($input: CreateMetadataProviderConfigInput!) {\n\t\tcreateMetadataProvider(input: $input) {\n\t\t\tid\n\t\t\tproviderType\n\t\t\tenabled\n\t\t}\n\t}\n"): typeof import('./graphql').CreateProviderDialogCreateProviderDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tmutation EditProviderDialog($id: Int!, $input: PatchMetadataProviderConfigInput!) {\n\t\tupdateMetadataProvider(id: $id, input: $input) {\n\t\t\tid\n\t\t\t...ExistingProviderCard\n\t\t}\n\t}\n"): typeof import('./graphql').EditProviderDialogDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tmutation DeleteProviderDialog($id: Int!) {\n\t\tdeleteMetadataProvider(id: $id) {\n\t\t\tid\n\t\t}\n\t}\n"): typeof import('./graphql').DeleteProviderDialogDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tfragment ExistingProviderCard on MetadataProviderConfigModel {\n\t\tid\n\t\tproviderType\n\t\tenabled\n\t\tapiTokenExpiresAt\n\t\tautoApplyConfig\n\t\tcreatedAt\n\t\tupdatedAt\n\t}\n"): typeof import('./graphql').ExistingProviderCardFragmentDoc;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tquery ProvidersSectionGetProviders {\n\t\tmetadataProviderConfigs {\n\t\t\tid\n\t\t\t...ExistingProviderCard\n\t\t}\n\t}\n"): typeof import('./graphql').ProvidersSectionGetProvidersDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

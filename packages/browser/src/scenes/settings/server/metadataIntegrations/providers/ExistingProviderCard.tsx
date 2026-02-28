@@ -1,0 +1,82 @@
+import { Badge, Card, Text, ToolTip } from '@stump/components'
+import { FragmentType, graphql, useFragment, UserPermission } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
+import { intlFormat } from 'date-fns'
+import { BadgeCheck, BadgeX } from 'lucide-react'
+
+import { useAppContext } from '@/context'
+
+import { PROVIDER_LABELS } from './constants'
+import { EditProviderDialog } from './EditProviderDialog'
+import { ProviderLogo } from './ProviderLogo'
+
+const fragment = graphql(`
+	fragment ExistingProviderCard on MetadataProviderConfigModel {
+		id
+		providerType
+		enabled
+		apiTokenExpiresAt
+		autoApplyConfig
+		createdAt
+		updatedAt
+	}
+`)
+
+type Props = {
+	data: FragmentType<typeof fragment>
+}
+
+export function ExistingProviderCard({ data }: Props) {
+	const provider = useFragment(fragment, data)
+
+	const { t } = useLocaleContext()
+	const { checkPermission } = useAppContext()
+
+	const canEdit = checkPermission(UserPermission.MetadataProviderManage)
+
+	return (
+		<Card key={provider.id} className="flex flex-col gap-4 p-4">
+			<div className="flex items-center justify-between gap-1">
+				<div className="flex items-center gap-4">
+					<ProviderLogo provider={provider.providerType} className="h-8 w-8" />
+					<Text className="font-medium">
+						{PROVIDER_LABELS[provider.providerType] ?? provider.providerType}
+					</Text>
+				</div>
+
+				<div className="flex items-center gap-2">
+					{canEdit && <EditProviderDialog provider={provider} />}
+
+					{provider.enabled && (
+						<ToolTip content={t(getKey('providerEnabled'))} align="end" size="xs">
+							<div className="flex h-7 w-7 items-center justify-center rounded-full border border-fill-success/10 bg-fill-success-secondary">
+								<BadgeCheck className="text-primary h-4 w-4" strokeWidth={1} />
+							</div>
+						</ToolTip>
+					)}
+
+					{!provider.enabled && (
+						<ToolTip content={t(getKey('providerDisabled'))} align="end" size="xs">
+							<div className="flex h-7 w-7 items-center justify-center rounded-full border border-fill-info/10 bg-fill-info-secondary">
+								<BadgeX className="text-primary h-4 w-4" strokeWidth={1} />
+							</div>
+						</ToolTip>
+					)}
+				</div>
+			</div>
+
+			<div className="flex items-center justify-between gap-1">
+				<Text size="xs" variant="muted">
+					Added {intlFormat(new Date(provider.createdAt))}
+				</Text>
+
+				<Badge size="xs">
+					{t(provider.autoApplyConfig?.enabled ? getKey('autoApplyOn') : getKey('autoApplyOff'))}
+				</Badge>
+			</div>
+		</Card>
+	)
+}
+
+const LOCALE_KEY = 'settingsScene.server/metadataIntegrations'
+const getKey = (key: string) => `${LOCALE_KEY}.${key}`

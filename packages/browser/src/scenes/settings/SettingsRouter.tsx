@@ -1,5 +1,5 @@
 import { UserPermission } from '@stump/graphql'
-import { lazy, useMemo } from 'react'
+import { lazy } from 'react'
 import { Navigate, Route, Routes } from 'react-router'
 
 import { useAppContext } from '@/context'
@@ -18,6 +18,7 @@ const APIKeySettingsScene = lazy(() => import('./app/apiKeys'))
 const GeneralServerSettingsScene = lazy(
 	() => import('./server/general/GeneralServerSettingsScene.tsx'),
 )
+const MetadataIntegrationsScene = lazy(() => import('./server/metadataIntegrations/index.ts'))
 const ServerLogsScene = lazy(() => import('./server/logs/ServerLogsScene.tsx'))
 const JobSettingsScene = lazy(() => import('./server/jobs/JobSettingsScene.tsx'))
 
@@ -28,20 +29,12 @@ export default function SettingsRouter() {
 	const { checkPermission } = useAppContext()
 
 	const isDesktop = useAppStore((store) => store.platform !== 'browser')
-	const apiKeys = checkPermission(UserPermission.AccessApiKeys)
 
-	const canManageServer = useMemo(
-		() => checkPermission(UserPermission.ManageServer),
-		[checkPermission],
-	)
-	const canManageUsers = useMemo(
-		() => checkPermission(UserPermission.ManageUsers),
-		[checkPermission],
-	)
-	const canManageEmail = useMemo(
-		() => checkPermission(UserPermission.EmailerManage),
-		[checkPermission],
-	)
+	const apiKeys = checkPermission(UserPermission.AccessApiKeys)
+	const canManageServer = checkPermission(UserPermission.ManageServer)
+	const canManageUsers = checkPermission(UserPermission.ManageUsers)
+	const canManageEmail = checkPermission(UserPermission.EmailerManage)
+	const canReadProviders = checkPermission(UserPermission.MetadataProviderRead)
 
 	return (
 		<Routes>
@@ -59,6 +52,9 @@ export default function SettingsRouter() {
 				{canManageServer && <Route path="jobs" element={<JobSettingsScene />} />}
 				{canManageUsers && <Route path="users/*" element={<UsersRouter />} />}
 				{canManageEmail && <Route path="email/*" element={<EmailSettingsRouter />} />}
+				{canReadProviders && (
+					<Route path="metadata-integrations" element={<MetadataIntegrationsScene />} />
+				)}
 
 				<Route path="*" element={<Navigate to="account" replace />} />
 			</Route>

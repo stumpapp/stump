@@ -132,6 +132,37 @@ export type AttachmentMeta = {
   size: Scalars['Int']['output'];
 };
 
+export type Author = {
+  __typename?: 'Author';
+  books: Array<Media>;
+  name: Scalars['String']['output'];
+  /**
+   * The role of this author relative to the context they are queried in (e.g., a series).
+   * This field will be None when queried outside of a context in which an author has a role,
+   * like at a library-level query
+   */
+  role?: Maybe<AuthorRole>;
+  series: Array<AuthorSeries>;
+  /** Books where this author shares credit with other writers (co-authored works) */
+  sharedWorks: Array<SharedWork>;
+  /** Books where this author is the sole credited writer (no co-authors) */
+  standalones: Array<Media>;
+};
+
+/** The role of an author in relation to a work or series */
+export enum AuthorRole {
+  CoAuthor = 'CO_AUTHOR',
+  Primary = 'PRIMARY'
+}
+
+export type AuthorSeries = {
+  __typename?: 'AuthorSeries';
+  /** Authors who contributed to this series */
+  authors: Array<Author>;
+  books: Array<Media>;
+  title: Scalars['String']['output'];
+};
+
 export type BookClub = {
   __typename?: 'BookClub';
   createdAt: Scalars['DateTime']['output'];
@@ -303,6 +334,17 @@ export type ComputedFilterReadingStatus =
   |  { is?: never; isAnyOf?: never; isNoneOf: Array<ReadingStatus>; isNot?: never; }
   |  { is?: never; isAnyOf?: never; isNoneOf?: never; isNot: ReadingStatus; };
 
+/** A factor that contributed to a match's confidence score */
+export type ConfidenceFactor = {
+  __typename?: 'ConfidenceFactor';
+  /** Name of the scoring factor (e.g., "title_exact_match", "isbn_match") */
+  factor: Scalars['String']['output'];
+  /** Whether this factor matched */
+  matched: Scalars['Boolean']['output'];
+  /** How much weight this factor carried */
+  weight: Scalars['Float']['output'];
+};
+
 /** An event that is emitted by the core and consumed by a client */
 export type CoreEvent = CreatedManySeries | CreatedMedia | CreatedOrUpdatedManyMedia | DiscoveredMissingLibrary | JobOutput | JobStarted | JobUpdate;
 
@@ -341,6 +383,23 @@ export type CreateBookClubScheduleBook = {
 export type CreateBookClubScheduleInput = {
   books: Array<CreateBookClubScheduleBook>;
   defaultIntervalDays?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** Input object for creating a metadata provider configuration */
+export type CreateMetadataProviderConfigInput = {
+  /** The API token for authenticating with the provider */
+  apiToken: Scalars['String']['input'];
+  /**
+   * Optional expiration date for the API key. This is exclusively a QOL thing,
+   * since the creds don't live within the management domain of Stump
+   */
+  apiTokenExpiresAt?: InputMaybe<Scalars['DateTime']['input']>;
+  /** Auto-apply configuration */
+  autoApplyConfig?: InputMaybe<Scalars['JSON']['input']>;
+  /** Whether the provider is enabled */
+  enabled?: InputMaybe<Scalars['Boolean']['input']>;
+  /** The provider type */
+  providerType: MetadataProvider;
 };
 
 export type CreateOrUpdateLibraryInput = {
@@ -608,6 +667,56 @@ export type ExternalJobOutput = {
   val: Scalars['JSON']['output'];
 };
 
+/** Metadata about a media item from an external metadata provider */
+export type ExternalMediaMetadata = {
+  __typename?: 'ExternalMediaMetadata';
+  artists?: Maybe<Array<Scalars['String']['output']>>;
+  colorists?: Maybe<Array<Scalars['String']['output']>>;
+  coverArtists?: Maybe<Array<Scalars['String']['output']>>;
+  coverUrl?: Maybe<Scalars['String']['output']>;
+  day?: Maybe<Scalars['Int']['output']>;
+  externalId: Scalars['String']['output'];
+  genres?: Maybe<Array<Scalars['String']['output']>>;
+  isbn?: Maybe<Scalars['String']['output']>;
+  isbn13?: Maybe<Scalars['String']['output']>;
+  letterers?: Maybe<Array<Scalars['String']['output']>>;
+  month?: Maybe<Scalars['Int']['output']>;
+  number?: Maybe<Scalars['Float']['output']>;
+  pageCount?: Maybe<Scalars['Int']['output']>;
+  provider: Scalars['String']['output'];
+  providerUrl?: Maybe<Scalars['String']['output']>;
+  seriesExternalId?: Maybe<Scalars['String']['output']>;
+  seriesName?: Maybe<Scalars['String']['output']>;
+  summary?: Maybe<Scalars['String']['output']>;
+  tags?: Maybe<Array<Scalars['String']['output']>>;
+  title?: Maybe<Scalars['String']['output']>;
+  writers?: Maybe<Array<Scalars['String']['output']>>;
+  year?: Maybe<Scalars['Int']['output']>;
+};
+
+export type ExternalMetadata = ExternalMediaMetadata | ExternalSeriesMetadata;
+
+/** Metadata about a series from an external metadata provider */
+export type ExternalSeriesMetadata = {
+  __typename?: 'ExternalSeriesMetadata';
+  ageRating?: Maybe<Scalars['String']['output']>;
+  alternativeTitles: Array<Scalars['String']['output']>;
+  artists?: Maybe<Array<Scalars['String']['output']>>;
+  authors?: Maybe<Array<Scalars['String']['output']>>;
+  coverUrl?: Maybe<Scalars['String']['output']>;
+  endYear?: Maybe<Scalars['Int']['output']>;
+  externalId: Scalars['String']['output'];
+  genres?: Maybe<Array<Scalars['String']['output']>>;
+  provider: Scalars['String']['output'];
+  publisher?: Maybe<Scalars['String']['output']>;
+  status?: Maybe<PublicationStatus>;
+  summary?: Maybe<Scalars['String']['output']>;
+  tags?: Maybe<Array<Scalars['String']['output']>>;
+  title: Scalars['String']['output'];
+  volumeCount?: Maybe<Scalars['Int']['output']>;
+  year?: Maybe<Scalars['Int']['output']>;
+};
+
 export type FieldFilterFileStatus =
   { anyOf: Array<FileStatus>; contains?: never; endsWith?: never; eq?: never; excludes?: never; like?: never; likeAnyOf?: never; likeNoneOf?: never; neq?: never; noneOf?: never; startsWith?: never; }
   |  { anyOf?: never; contains: FileStatus; endsWith?: never; eq?: never; excludes?: never; like?: never; likeAnyOf?: never; likeNoneOf?: never; neq?: never; noneOf?: never; startsWith?: never; }
@@ -836,6 +945,7 @@ export type JobUpdate = {
 
 export type Library = {
   __typename?: 'Library';
+  authors: Array<Author>;
   config: LibraryConfig;
   configId: Scalars['Int']['output'];
   createdAt: Scalars['DateTime']['output'];
@@ -901,6 +1011,7 @@ export type LibraryConfig = {
   ignoreRules?: Maybe<Array<Scalars['String']['output']>>;
   libraryId?: Maybe<Scalars['String']['output']>;
   libraryPattern: LibraryPattern;
+  libraryType: LibraryType;
   processMetadata: Scalars['Boolean']['output'];
   processThumbnailColorsEvenWithoutConfig: Scalars['Boolean']['output'];
   thumbnailConfig?: Maybe<ImageProcessorOptions>;
@@ -919,6 +1030,7 @@ export type LibraryConfigInput = {
   hideSeriesView: Scalars['Boolean']['input'];
   ignoreRules?: InputMaybe<Array<Scalars['String']['input']>>;
   libraryPattern: LibraryPattern;
+  libraryType: LibraryType;
   processMetadata: Scalars['Boolean']['input'];
   processThumbnailColorsEvenWithoutConfig: Scalars['Boolean']['input'];
   thumbnailConfig?: InputMaybe<ImageProcessorOptionsInput>;
@@ -1005,6 +1117,18 @@ export type LibraryStats = {
   totalReadingTimeSeconds: Scalars['Int']['output'];
 };
 
+/** The type of content a library contains */
+export enum LibraryType {
+  Book = 'BOOK',
+  Comic = 'COMIC',
+  LightNovel = 'LIGHT_NOVEL',
+  Manga = 'MANGA',
+  Manhwa = 'MANHWA',
+  Mixed = 'MIXED',
+  Webtoon = 'WEBTOON',
+  WebNovel = 'WEB_NOVEL'
+}
+
 export enum LibraryViewMode {
   Books = 'BOOKS',
   Series = 'SERIES'
@@ -1060,6 +1184,20 @@ export enum LogModelOrdering {
   Message = 'MESSAGE',
   Timestamp = 'TIMESTAMP'
 }
+
+/** A potential match from an external provider */
+export type MatchCandidate = {
+  __typename?: 'MatchCandidate';
+  /** Confidence score (0.0 - 1.0) */
+  confidence: Scalars['Float']['output'];
+  /** Factors that contributed to the confidence score */
+  confidenceFactors: Array<ConfidenceFactor>;
+  /** External ID on the provider's system */
+  externalId: Scalars['String']['output'];
+  metadata: ExternalMetadata;
+  /** The provider this match came from */
+  provider: Scalars['String']['output'];
+};
 
 export type Media = {
   __typename?: 'Media';
@@ -1221,6 +1359,10 @@ export type MediaMetadata = {
   letterers: Array<Scalars['String']['output']>;
   links: Array<Scalars['String']['output']>;
   mediaId?: Maybe<Scalars['String']['output']>;
+  /** The external ID on the metadata provider's system */
+  metadataExternalId?: Maybe<Scalars['String']['output']>;
+  /** The external metadata provider that supplied this metadata (e.g., "HARDCOVER") */
+  metadataSource?: Maybe<Scalars['String']['output']>;
   month?: Maybe<Scalars['Int']['output']>;
   notes?: Maybe<Scalars['String']['output']>;
   number?: Maybe<Scalars['Decimal']['output']>;
@@ -1323,7 +1465,10 @@ export enum MediaMetadataModelOrdering {
   Language = 'LANGUAGE',
   Letterers = 'LETTERERS',
   Links = 'LINKS',
+  LockedFields = 'LOCKED_FIELDS',
   MediaId = 'MEDIA_ID',
+  MetadataExternalId = 'METADATA_EXTERNAL_ID',
+  MetadataSource = 'METADATA_SOURCE',
   Month = 'MONTH',
   Notes = 'NOTES',
   Number = 'NUMBER',
@@ -1395,6 +1540,64 @@ export type MediaProgressInput =
   { epub: EpubProgressInput; paged?: never; }
   |  { epub?: never; paged: PagedProgressInput; };
 
+/** How to merge external metadata values onto existing entity metadata */
+export enum MergeStrategy {
+  /** FillGaps and merge/dedupe for array fields */
+  FillAndMergeLists = 'FILL_AND_MERGE_LISTS',
+  /** Only populate fields that are currently nullish */
+  FillGaps = 'FILL_GAPS',
+  /** Overwrite existing values with (truthy) external data */
+  PreferExternal = 'PREFER_EXTERNAL'
+}
+
+export enum MetadataFetchStatus {
+  AwaitingReview = 'AWAITING_REVIEW',
+  Failed = 'FAILED',
+  Fetched = 'FETCHED',
+  InProgress = 'IN_PROGRESS',
+  Matched = 'MATCHED',
+  NotStarted = 'NOT_STARTED',
+  NoMatch = 'NO_MATCH'
+}
+
+/**
+ * An identifer for specifying the target of a metadata fetch status query. I added
+ * mostly for type safety and not annoyingly wrangling both media_id and series_id
+ */
+export type MetadataFetchStatusId =
+  { media: Scalars['String']['input']; series?: never; }
+  |  { media?: never; series: Scalars['String']['input']; };
+
+export type MetadataFetchStatusModel = {
+  __typename?: 'MetadataFetchStatusModel';
+  acceptedMatchCandidate?: Maybe<Scalars['JSON']['output']>;
+  addedAt: Scalars['DateTime']['output'];
+  id: Scalars['Int']['output'];
+  matchCandidates?: Maybe<Scalars['JSON']['output']>;
+  mediaId?: Maybe<Scalars['String']['output']>;
+  seriesId?: Maybe<Scalars['String']['output']>;
+  status: MetadataFetchStatus;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+/** The supported external metadata providers */
+export enum MetadataProvider {
+  /** Hardcover (https://hardcover.app) */
+  Hardcover = 'HARDCOVER'
+}
+
+export type MetadataProviderConfigModel = {
+  __typename?: 'MetadataProviderConfigModel';
+  apiTokenExpiresAt?: Maybe<Scalars['DateTime']['output']>;
+  /** JSON blob for auto-apply settings: { enabled, threshold, strategy, exclude_fields } */
+  autoApplyConfig?: Maybe<Scalars['JSON']['output']>;
+  createdAt: Scalars['DateTime']['output'];
+  enabled: Scalars['Boolean']['output'];
+  id: Scalars['Int']['output'];
+  providerType: MetadataProvider;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
 /**
  * An enum representing the different types of metadata resets that can occur,
  * which manifest differently depending on the context
@@ -1424,6 +1627,10 @@ export enum MetadataResetImpact {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  /** Accept a match candidate and apply it to media metadata */
+  acceptMediaMatch: MetadataFetchStatusModel;
+  /** Accept a match candidate and apply it to the series metadata */
+  acceptSeriesMatch: MetadataFetchStatusModel;
   addBooksToBookClubSchedule: BookClub;
   analyzeLibrary: Scalars['Boolean']['output'];
   analyzeMedia: Scalars['Boolean']['output'];
@@ -1459,6 +1666,7 @@ export type Mutation = {
    * the library will be scanned immediately after creation.
    */
   createLibrary: Library;
+  createMetadataProvider: MetadataProviderConfigModel;
   createNotifier: Notifier;
   /**
    * Creates a new reading list.
@@ -1510,6 +1718,7 @@ export type Mutation = {
    * use with caution.
    */
   deleteMediaReadHistory: Media;
+  deleteMetadataProvider: MetadataProviderConfigModel;
   deleteNotifier: Notifier;
   /**
    * Deletes a reading list by ID.
@@ -1532,12 +1741,20 @@ export type Mutation = {
   deleteUserSessions: Scalars['Int']['output'];
   favoriteMedia: Media;
   favoriteSeries: Series;
+  /** Search external metadata providers for a media item and return match candidates */
+  fetchMediaMetadata: Array<MatchCandidate>;
+  /** Search external metadata providers for a series and return match candidates */
+  fetchSeriesMetadata: Array<MatchCandidate>;
   generateLibraryThumbnails: Scalars['Boolean']['output'];
   /** Deletes the membership of the caller to the target book club */
   leaveBookClub: BookClubMember;
   markMediaAsComplete?: Maybe<FinishedReadingSessionModel>;
   patchEmailDevice: RegisteredEmailDevice;
   processLibraryThumbnails: Scalars['Boolean']['output'];
+  /** Reject the current match candidates for a media item */
+  rejectMediaMatch: MetadataFetchStatusModel;
+  /** Reject the current match candidates for a series */
+  rejectSeriesMatch: MetadataFetchStatusModel;
   /** Removes a member from the book club */
   removeBookClubMember: BookClubMember;
   resetLibraryMetadata: Library;
@@ -1593,6 +1810,7 @@ export type Mutation = {
    * will be generated based on the library's thumbnail configuration.
    */
   updateMediaThumbnail: Media;
+  updateMetadataProvider: MetadataProviderConfigModel;
   updateNavigationArrangement: Arrangement;
   updateNavigationArrangementLock: Arrangement;
   updateNotifier: Notifier;
@@ -1640,6 +1858,20 @@ export type Mutation = {
    * This is used to inform the UI of the last library which was visited by the user
    */
   visitLibrary: Library;
+};
+
+
+export type MutationAcceptMediaMatchArgs = {
+  candidateIndex: Scalars['Int']['input'];
+  mediaId: Scalars['ID']['input'];
+  strategy?: InputMaybe<MergeStrategy>;
+};
+
+
+export type MutationAcceptSeriesMatchArgs = {
+  candidateIndex: Scalars['Int']['input'];
+  seriesId: Scalars['ID']['input'];
+  strategy?: InputMaybe<MergeStrategy>;
 };
 
 
@@ -1737,6 +1969,11 @@ export type MutationCreateEmailerArgs = {
 
 export type MutationCreateLibraryArgs = {
   input: CreateOrUpdateLibraryInput;
+};
+
+
+export type MutationCreateMetadataProviderArgs = {
+  input: CreateMetadataProviderConfigInput;
 };
 
 
@@ -1856,6 +2093,11 @@ export type MutationDeleteMediaReadHistoryArgs = {
 };
 
 
+export type MutationDeleteMetadataProviderArgs = {
+  id: Scalars['Int']['input'];
+};
+
+
 export type MutationDeleteNotifierArgs = {
   id: Scalars['Int']['input'];
 };
@@ -1910,6 +2152,16 @@ export type MutationFavoriteSeriesArgs = {
 };
 
 
+export type MutationFetchMediaMetadataArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationFetchSeriesMetadataArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type MutationGenerateLibraryThumbnailsArgs = {
   forceRegenerate?: Scalars['Boolean']['input'];
   id: Scalars['ID']['input'];
@@ -1937,6 +2189,18 @@ export type MutationPatchEmailDeviceArgs = {
 export type MutationProcessLibraryThumbnailsArgs = {
   forceRegenerate?: Scalars['Boolean']['input'];
   id: Scalars['ID']['input'];
+};
+
+
+export type MutationRejectMediaMatchArgs = {
+  candidateIndex: Scalars['Int']['input'];
+  mediaId: Scalars['ID']['input'];
+};
+
+
+export type MutationRejectSeriesMatchArgs = {
+  candidateIndex: Scalars['Int']['input'];
+  seriesId: Scalars['ID']['input'];
 };
 
 
@@ -2054,6 +2318,12 @@ export type MutationUpdateMediaProgressArgs = {
 export type MutationUpdateMediaThumbnailArgs = {
   id: Scalars['ID']['input'];
   input: PageBasedThumbnailInput;
+};
+
+
+export type MutationUpdateMetadataProviderArgs = {
+  id: Scalars['Int']['input'];
+  input: PatchMetadataProviderConfigInput;
 };
 
 
@@ -2303,6 +2573,12 @@ export type PagedProgressInput = {
   page: Scalars['Int']['input'];
 };
 
+export type PaginatedAuthorResponse = {
+  __typename?: 'PaginatedAuthorResponse';
+  nodes: Array<Author>;
+  pageInfo: PaginationInfo;
+};
+
 export type PaginatedDirectoryListingResponse = {
   __typename?: 'PaginatedDirectoryListingResponse';
   nodes: Array<DirectoryListing>;
@@ -2388,6 +2664,21 @@ export type PatchEmailDeviceInput = {
   name?: InputMaybe<Scalars['String']['input']>;
 };
 
+/** A patch equivalent of [CreateMetadataProviderConfigInput], i.e. just with optional fields. */
+export type PatchMetadataProviderConfigInput = {
+  /** The API token for authenticating with the provider */
+  apiToken?: InputMaybe<Scalars['String']['input']>;
+  /**
+   * Optional expiration date for the API key. This is exclusively a QOL thing,
+   * since the creds don't live within the management domain of Stump
+   */
+  apiTokenExpiresAt?: InputMaybe<Scalars['DateTime']['input']>;
+  /** Auto-apply configuration */
+  autoApplyConfig?: InputMaybe<Scalars['JSON']['input']>;
+  /** Whether the provider is enabled */
+  enabled?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
 export type PlaceholderGenerationOutput = {
   __typename?: 'PlaceholderGenerationOutput';
   /** The number of placeholder metadata entries that were generated */
@@ -2398,6 +2689,14 @@ export type PlaceholderGenerationOutput = {
   visitedEntities: Scalars['Int']['output'];
 };
 
+export enum PublicationStatus {
+  Cancelled = 'CANCELLED',
+  Completed = 'COMPLETED',
+  Hiatus = 'HIATUS',
+  Ongoing = 'ONGOING',
+  Upcoming = 'UPCOMING'
+}
+
 export type Query = {
   __typename?: 'Query';
   activeReadingSessionCount: Scalars['Int']['output'];
@@ -2405,6 +2704,12 @@ export type Query = {
   annotationsByMediaId: Array<MediaAnnotation>;
   apiKeyById: Apikey;
   apiKeys: Array<Apikey>;
+  /** Get a single author by name (case-insensitive exact match) */
+  authorByName?: Maybe<Author>;
+  /** Get a single author series by name (case-insensitive exact match) */
+  authorSeriesByName?: Maybe<AuthorSeries>;
+  /** Get a paginated list of authors with optional search filter */
+  authors: PaginatedAuthorResponse;
   bookClubById: BookClub;
   bookClubBySlug?: Maybe<BookClub>;
   bookClubs: Array<BookClub>;
@@ -2446,9 +2751,14 @@ export type Query = {
   mediaCount: Scalars['Int']['output'];
   mediaDiskUsage: Scalars['Int']['output'];
   mediaMetadataOverview: MediaMetadataOverview;
+  metadataFetchStatus?: Maybe<MetadataFetchStatusModel>;
+  metadataProviderConfigById?: Maybe<MetadataProviderConfigModel>;
+  metadataProviderConfigs: Array<MetadataProviderConfigModel>;
   numberOfLibraries: Scalars['Int']['output'];
   numberOfSeries: Scalars['Int']['output'];
   onDeck: PaginatedMediaResponse;
+  /** Return all metadata fetch statuses that are awaiting user review. */
+  pendingMetadataMatches: Array<MetadataFetchStatusModel>;
   /**
    * Retrieves a reading list by ID for the current user.
    *
@@ -2494,6 +2804,25 @@ export type QueryAnnotationsByMediaIdArgs = {
 
 export type QueryApiKeyByIdArgs = {
   id: Scalars['Int']['input'];
+};
+
+
+export type QueryAuthorByNameArgs = {
+  libraryId?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+};
+
+
+export type QueryAuthorSeriesByNameArgs = {
+  libraryId?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+};
+
+
+export type QueryAuthorsArgs = {
+  libraryId?: InputMaybe<Scalars['String']['input']>;
+  pagination?: Pagination;
+  search?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -2601,6 +2930,16 @@ export type QueryMediaByPathArgs = {
 
 export type QueryMediaMetadataOverviewArgs = {
   seriesId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type QueryMetadataFetchStatusArgs = {
+  id: MetadataFetchStatusId;
+};
+
+
+export type QueryMetadataProviderConfigByIdArgs = {
+  id: Scalars['Int']['input'];
 };
 
 
@@ -2972,6 +3311,10 @@ export type SeriesMetadata = {
   links: Array<Scalars['String']['output']>;
   /** Type of series (e.g. "comicSeries") */
   metaType?: Maybe<Scalars['String']['output']>;
+  /** The external ID on the metadata provider's system */
+  metadataExternalId?: Maybe<Scalars['String']['output']>;
+  /** The external metadata provider that supplied this metadata (e.g., "HARDCOVER") */
+  metadataSource?: Maybe<Scalars['String']['output']>;
   /** Start and end of the series in "Month Year - Month Year" format. If series status is Continuing, the end value is "Present" */
   publicationRun?: Maybe<Scalars['String']['output']>;
   /** Publisher name */
@@ -3045,6 +3388,9 @@ export enum SeriesMetadataModelOrdering {
   Genres = 'GENRES',
   Imprint = 'IMPRINT',
   Links = 'LINKS',
+  LockedFields = 'LOCKED_FIELDS',
+  MetadataExternalId = 'METADATA_EXTERNAL_ID',
+  MetadataSource = 'METADATA_SOURCE',
   MetaType = 'META_TYPE',
   PublicationRun = 'PUBLICATION_RUN',
   Publisher = 'PUBLISHER',
@@ -3110,6 +3456,20 @@ export type SeriesStats = {
   inProgressBooks: Scalars['Int']['output'];
   totalBytes: Scalars['Int']['output'];
   totalReadingTimeSeconds: Scalars['Int']['output'];
+};
+
+/**
+ * A work that has multiple authors (co-authored). This wrapper allows querying
+ * the authors/co-authors of the work in context.
+ */
+export type SharedWork = {
+  __typename?: 'SharedWork';
+  /** All authors who contributed to this work, with their roles */
+  authors: Array<Author>;
+  /** Authors who contributed to this work, excluding the viewing author */
+  coAuthors: Array<Author>;
+  /** The media/book itself */
+  media: Media;
 };
 
 export type SmartList = {
@@ -3604,6 +3964,14 @@ export enum UserPermission {
   ManageServer = 'MANAGE_SERVER',
   /** Grant access to manage users (create,edit,delete) */
   ManageUsers = 'MANAGE_USERS',
+  /** Grant access to manage metadata fetch statuses (accept matches, etc) */
+  MetadataFetchStatusManage = 'METADATA_FETCH_STATUS_MANAGE',
+  /** Grant access to read metadata fetch statuses */
+  MetadataFetchStatusRead = 'METADATA_FETCH_STATUS_READ',
+  /** Grant access to manage metadata provider configurations (create, update, delete) */
+  MetadataProviderManage = 'METADATA_PROVIDER_MANAGE',
+  /** Grant access to read metadata provider configurations */
+  MetadataProviderRead = 'METADATA_PROVIDER_READ',
   /** Grant access to read jobs */
   ReadJobs = 'READ_JOBS',
   /** Grant access to read notifiers */
@@ -5044,6 +5412,41 @@ export type PersistedLogsQueryVariables = Exact<{
 
 export type PersistedLogsQuery = { __typename?: 'Query', logs: { __typename?: 'PaginatedLogResponse', nodes: Array<{ __typename?: 'Log', id: number, timestamp: any, level: LogLevel, message: string, jobId?: string | null, context?: string | null }>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', totalPages: number, currentPage: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
 
+export type CreateProviderDialogCreateProviderMutationVariables = Exact<{
+  input: CreateMetadataProviderConfigInput;
+}>;
+
+
+export type CreateProviderDialogCreateProviderMutation = { __typename?: 'Mutation', createMetadataProvider: { __typename?: 'MetadataProviderConfigModel', id: number, providerType: MetadataProvider, enabled: boolean } };
+
+export type EditProviderDialogMutationVariables = Exact<{
+  id: Scalars['Int']['input'];
+  input: PatchMetadataProviderConfigInput;
+}>;
+
+
+export type EditProviderDialogMutation = { __typename?: 'Mutation', updateMetadataProvider: (
+    { __typename?: 'MetadataProviderConfigModel', id: number }
+    & { ' $fragmentRefs'?: { 'ExistingProviderCardFragment': ExistingProviderCardFragment } }
+  ) };
+
+export type DeleteProviderDialogMutationVariables = Exact<{
+  id: Scalars['Int']['input'];
+}>;
+
+
+export type DeleteProviderDialogMutation = { __typename?: 'Mutation', deleteMetadataProvider: { __typename?: 'MetadataProviderConfigModel', id: number } };
+
+export type ExistingProviderCardFragment = { __typename?: 'MetadataProviderConfigModel', id: number, providerType: MetadataProvider, enabled: boolean, apiTokenExpiresAt?: any | null, autoApplyConfig?: any | null, createdAt: any, updatedAt?: any | null } & { ' $fragmentName'?: 'ExistingProviderCardFragment' };
+
+export type ProvidersSectionGetProvidersQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ProvidersSectionGetProvidersQuery = { __typename?: 'Query', metadataProviderConfigs: Array<(
+    { __typename?: 'MetadataProviderConfigModel', id: number }
+    & { ' $fragmentRefs'?: { 'ExistingProviderCardFragment': ExistingProviderCardFragment } }
+  )> };
+
 export type UserStatsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -5823,6 +6226,17 @@ export const JobDataInspectorFragmentDoc = new TypedDocumentString(`
   }
 }
     `, {"fragmentName":"JobDataInspector"}) as unknown as TypedDocumentString<JobDataInspectorFragment, unknown>;
+export const ExistingProviderCardFragmentDoc = new TypedDocumentString(`
+    fragment ExistingProviderCard on MetadataProviderConfigModel {
+  id
+  providerType
+  enabled
+  apiTokenExpiresAt
+  autoApplyConfig
+  createdAt
+  updatedAt
+}
+    `, {"fragmentName":"ExistingProviderCard"}) as unknown as TypedDocumentString<ExistingProviderCardFragment, unknown>;
 export const SmartListCardFragmentDoc = new TypedDocumentString(`
     fragment SmartListCard on SmartList {
   id
@@ -9310,6 +9724,54 @@ export const PersistedLogsDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<PersistedLogsQuery, PersistedLogsQueryVariables>;
+export const CreateProviderDialogCreateProviderDocument = new TypedDocumentString(`
+    mutation CreateProviderDialogCreateProvider($input: CreateMetadataProviderConfigInput!) {
+  createMetadataProvider(input: $input) {
+    id
+    providerType
+    enabled
+  }
+}
+    `) as unknown as TypedDocumentString<CreateProviderDialogCreateProviderMutation, CreateProviderDialogCreateProviderMutationVariables>;
+export const EditProviderDialogDocument = new TypedDocumentString(`
+    mutation EditProviderDialog($id: Int!, $input: PatchMetadataProviderConfigInput!) {
+  updateMetadataProvider(id: $id, input: $input) {
+    id
+    ...ExistingProviderCard
+  }
+}
+    fragment ExistingProviderCard on MetadataProviderConfigModel {
+  id
+  providerType
+  enabled
+  apiTokenExpiresAt
+  autoApplyConfig
+  createdAt
+  updatedAt
+}`) as unknown as TypedDocumentString<EditProviderDialogMutation, EditProviderDialogMutationVariables>;
+export const DeleteProviderDialogDocument = new TypedDocumentString(`
+    mutation DeleteProviderDialog($id: Int!) {
+  deleteMetadataProvider(id: $id) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<DeleteProviderDialogMutation, DeleteProviderDialogMutationVariables>;
+export const ProvidersSectionGetProvidersDocument = new TypedDocumentString(`
+    query ProvidersSectionGetProviders {
+  metadataProviderConfigs {
+    id
+    ...ExistingProviderCard
+  }
+}
+    fragment ExistingProviderCard on MetadataProviderConfigModel {
+  id
+  providerType
+  enabled
+  apiTokenExpiresAt
+  autoApplyConfig
+  createdAt
+  updatedAt
+}`) as unknown as TypedDocumentString<ProvidersSectionGetProvidersQuery, ProvidersSectionGetProvidersQueryVariables>;
 export const UserStatsDocument = new TypedDocumentString(`
     query UserStats {
   userCount

@@ -2,7 +2,7 @@ use crate::{
 	data::{AuthContext, CoreContext},
 	guard::PermissionGuard,
 	input::media::MediaMetadataInput,
-	object::media::Media,
+	object::{media::Media, metadata_fetch_record::MetadataFetchRecord},
 };
 use async_graphql::{Context, Object, Result, ID};
 use metadata_integrations::{MatchCandidate, MergeStrategy, MetadataField};
@@ -94,7 +94,7 @@ impl MediaMetadataMutation {
 		candidate_index: u32,
 		strategy: Option<MergeStrategy>,
 		exclude_fields: Option<Vec<MetadataField>>,
-	) -> Result<metadata_fetch_record::Model> {
+	) -> Result<MetadataFetchRecord> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 		let strategy = strategy.unwrap_or(MergeStrategy::FillGaps);
 		let exclude_fields = exclude_fields.unwrap_or_default();
@@ -137,7 +137,7 @@ impl MediaMetadataMutation {
 			.await?
 			.ok_or("Failed to re-fetch status")?;
 
-		Ok(updated)
+		Ok(MetadataFetchRecord::from(updated))
 	}
 
 	/// Reject the current match candidates for a media item
@@ -147,7 +147,7 @@ impl MediaMetadataMutation {
 		ctx: &Context<'_>,
 		media_id: ID,
 		candidate_index: u32,
-	) -> Result<metadata_fetch_record::Model> {
+	) -> Result<MetadataFetchRecord> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let status = metadata_fetch_record::Entity::find()
@@ -183,6 +183,6 @@ impl MediaMetadataMutation {
 			.exec(conn)
 			.await?;
 
-		Ok(updated)
+		Ok(MetadataFetchRecord::from(updated))
 	}
 }

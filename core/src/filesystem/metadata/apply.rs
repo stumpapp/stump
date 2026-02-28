@@ -13,13 +13,16 @@ use crate::CoreError;
 
 /// Apply the given match candidate to series metadata, merging fields
 /// according to the provided strategy and locked fields
-pub async fn apply_series_match(
-	conn: &DatabaseConnection,
+pub async fn apply_series_match<C>(
+	conn: &C,
 	series_id: &str,
 	candidate: &MatchCandidate,
 	strategy: MergeStrategy,
 	exclude_fields: Vec<MetadataField>,
-) -> Result<(), CoreError> {
+) -> Result<(), CoreError>
+where
+	C: ConnectionTrait,
+{
 	let ext = match &candidate.metadata {
 		ExternalMetadata::Series(s) => s,
 		_ => {
@@ -68,13 +71,16 @@ pub async fn apply_series_match(
 
 /// Apply the given match candidate to media metadata, merging fields
 /// according to the provided strategy and locked fields
-pub async fn apply_media_match(
-	conn: &DatabaseConnection,
+pub async fn apply_media_match<C>(
+	conn: &C,
 	media_id: &str,
 	candidate: &MatchCandidate,
 	strategy: MergeStrategy,
 	exclude_fields: Vec<MetadataField>,
-) -> Result<(), CoreError> {
+) -> Result<(), CoreError>
+where
+	C: ConnectionTrait,
+{
 	let ext = match &candidate.metadata {
 		ExternalMetadata::Media(m) => m,
 		_ => {
@@ -158,12 +164,15 @@ fn parse_locked_fields(json: &Option<JsonValue>) -> Vec<MetadataField> {
 		.unwrap_or_default()
 }
 
-async fn mark_fetch_status_accepted(
-	conn: &DatabaseConnection,
+async fn mark_fetch_status_accepted<C>(
+	conn: &C,
 	series_id: Option<&str>,
 	media_id: Option<&str>,
 	candidate: &MatchCandidate,
-) -> Result<(), CoreError> {
+) -> Result<(), CoreError>
+where
+	C: ConnectionTrait,
+{
 	let candidate_json = serde_json::to_value(candidate)
 		.map_err(|e| CoreError::InternalError(e.to_string()))?;
 

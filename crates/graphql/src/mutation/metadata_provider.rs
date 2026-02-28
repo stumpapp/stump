@@ -6,8 +6,12 @@ use crate::{
 	},
 };
 use async_graphql::{Context, Object, Result};
-use models::{entity::metadata_provider_config, shared::enums::UserPermission};
-use sea_orm::{prelude::*, TryIntoModel};
+use metadata_integrations::{MatchCandidate, MergeStrategy, MetadataField};
+use models::{
+	entity::{metadata_fetch_record, metadata_provider_config},
+	shared::enums::{MetadataFetchStatus, UserPermission},
+};
+use sea_orm::{prelude::*, IntoActiveModel, Set, TransactionTrait, TryIntoModel};
 
 #[derive(Default)]
 pub struct MetadataProviderMutation;
@@ -72,5 +76,108 @@ impl MetadataProviderMutation {
 			.await?;
 
 		Ok(model)
+	}
+
+	/// Accept the top-ranked candidate for all pending metadata matches
+	#[graphql(guard = "PermissionGuard::one(UserPermission::MetadataFetchRecordManage)")]
+	async fn accept_all_pending_matches(
+		&self,
+		ctx: &Context<'_>,
+		strategy: Option<MergeStrategy>,
+		exclude_fields: Option<Vec<MetadataField>>,
+	) -> Result<u32> {
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+		let strategy = strategy.unwrap_or(MergeStrategy::FillGaps);
+		let exclude_fields = exclude_fields.unwrap_or_default();
+
+		let pending = metadata_fetch_record::Entity::find()
+			.filter(
+				metadata_fetch_record::Column::Status
+					.eq(MetadataFetchStatus::AwaitingReview),
+			)
+			.all(conn)
+			.await?;
+
+		let tx = conn.begin().await?;
+		let mut accepted = 0u32;
+
+		for record in pending {
+			let candidates: Vec<MatchCandidate> = record
+				.match_candidates
+				.as_ref()
+				.and_then(|v| serde_json::from_value(v.clone()).ok())
+				.unwrap_or_default();
+
+			let Some(candidate) = candidates.first() else {
+				continue;
+			};
+
+			let result = if record.media_id.is_some() {
+				stump_core::filesystem::metadata::apply_media_match(
+					&tx,
+					record.media_id.as_deref().unwrap(),
+					candidate,
+					strategy,
+					exclude_fields.clone(),
+				)
+				.await
+			} else if record.series_id.is_some() {
+				stump_core::filesystem::metadata::apply_series_match(
+					&tx,
+					record.series_id.as_deref().unwrap(),
+					candidate,
+					strategy,
+					exclude_fields.clone(),
+				)
+				.await
+			} else {
+				continue;
+			};
+
+			match result {
+				Ok(()) => accepted += 1,
+				Err(e) => {
+					tracing::error!(
+						record_id = record.id,
+						error = ?e,
+						"Failed to auto-accept pending match"
+					);
+				},
+			}
+		}
+
+		tx.commit().await?;
+
+		Ok(accepted)
+	}
+
+	/// Reject all pending metadata matches, setting their status to NoMatch
+	#[graphql(guard = "PermissionGuard::one(UserPermission::MetadataFetchRecordManage)")]
+	async fn reject_all_pending_matches(&self, ctx: &Context<'_>) -> Result<u32> {
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let pending = metadata_fetch_record::Entity::find()
+			.filter(
+				metadata_fetch_record::Column::Status
+					.eq(MetadataFetchStatus::AwaitingReview),
+			)
+			.all(conn)
+			.await?;
+
+		let count = pending.len() as u32;
+		let tx = conn.begin().await?;
+
+		for record in pending {
+			let mut active = record.into_active_model();
+			active.status = Set(MetadataFetchStatus::NoMatch);
+			active.match_candidates = Set(None);
+			metadata_fetch_record::Entity::update(active)
+				.exec(&tx)
+				.await?;
+		}
+
+		tx.commit().await?;
+
+		Ok(count)
 	}
 }

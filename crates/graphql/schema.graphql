@@ -1461,16 +1461,7 @@ enum MergeStrategy {
 	FILL_AND_MERGE_LISTS
 }
 
-"""
-An identifer for specifying the target of a metadata fetch record query. I added
-mostly for type safety and not annoyingly wrangling both media_id and series_id
-"""
-input MetadataFetchRecordId @oneOf {
-	series: String
-	media: String
-}
-
-type MetadataFetchRecordModel {
+type MetadataFetchRecord {
 	id: Int!
 	status: MetadataFetchStatus!
 	mediaId: String
@@ -1479,6 +1470,19 @@ type MetadataFetchRecordModel {
 	acceptedMatchCandidate: JSON
 	addedAt: DateTime!
 	updatedAt: DateTime
+	"The media item associated with this fetch record, if any"
+	media: Media
+	"The series associated with this fetch record, if any"
+	series: Series
+}
+
+"""
+An identifer for specifying the target of a metadata fetch record query. I added
+mostly for type safety and not annoyingly wrangling both media_id and series_id
+"""
+input MetadataFetchRecordId @oneOf {
+	series: String
+	media: String
 }
 
 enum MetadataFetchStatus {
@@ -1621,17 +1625,17 @@ type Mutation {
 	"Search external metadata providers for a media item and return match candidates"
 	fetchMediaMetadata(id: ID!): [MatchCandidate!]!
 	"Accept a match candidate and apply it to media metadata"
-	acceptMediaMatch(mediaId: ID!, candidateIndex: Int!, strategy: MergeStrategy, excludeFields: [MetadataField!]): MetadataFetchRecordModel!
+	acceptMediaMatch(mediaId: ID!, candidateIndex: Int!, strategy: MergeStrategy, excludeFields: [MetadataField!]): MetadataFetchRecord!
 	"Reject the current match candidates for a media item"
-	rejectMediaMatch(mediaId: ID!, candidateIndex: Int!): MetadataFetchRecordModel!
+	rejectMediaMatch(mediaId: ID!, candidateIndex: Int!): MetadataFetchRecord!
 	updateSeriesMetadata(id: ID!, input: SeriesMetadataInput!): Series!
 	resetSeriesMetadata(id: ID!, impact: MetadataResetImpact!): Series!
 	"Search external metadata providers for a series and return match candidates"
 	fetchSeriesMetadata(id: ID!): [MatchCandidate!]!
 	"Accept a match candidate and apply it to the series metadata"
-	acceptSeriesMatch(seriesId: ID!, candidateIndex: Int!, strategy: MergeStrategy, excludeFields: [MetadataField!]): MetadataFetchRecordModel!
+	acceptSeriesMatch(seriesId: ID!, candidateIndex: Int!, strategy: MergeStrategy, excludeFields: [MetadataField!]): MetadataFetchRecord!
 	"Reject the current match candidates for a series"
-	rejectSeriesMatch(seriesId: ID!, candidateIndex: Int!): MetadataFetchRecordModel!
+	rejectSeriesMatch(seriesId: ID!, candidateIndex: Int!): MetadataFetchRecord!
 	analyzeLibrary(id: ID!, forceReanalysis: Boolean! = false): Boolean!
 	"""
 	Delete media and series from a library that match one of the following conditions:
@@ -1792,6 +1796,10 @@ type Mutation {
 	createMetadataProvider(input: CreateMetadataProviderConfigInput!): MetadataProviderConfigModel!
 	updateMetadataProvider(id: Int!, input: PatchMetadataProviderConfigInput!): MetadataProviderConfigModel!
 	deleteMetadataProvider(id: Int!): MetadataProviderConfigModel!
+	"Accept the top-ranked candidate for all pending metadata matches"
+	acceptAllPendingMatches(strategy: MergeStrategy, excludeFields: [MetadataField!]): Int!
+	"Reject all pending metadata matches, setting their status to NoMatch"
+	rejectAllPendingMatches: Int!
 }
 
 input NavigationArrangementInput {
@@ -2143,9 +2151,9 @@ type Query {
 	smartListItems(id: ID!, limit: Int = null): SmartListItems!
 	metadataProviderConfigs: [MetadataProviderConfigModel!]!
 	metadataProviderConfigById(id: Int!): MetadataProviderConfigModel
-	metadataFetchRecord(id: MetadataFetchRecordId!): MetadataFetchRecordModel
-	"Return all metadata fetch statuses that are awaiting user review."
-	pendingMetadataMatches: [MetadataFetchRecordModel!]!
+	metadataFetchRecord(id: MetadataFetchRecordId!): MetadataFetchRecord
+	"Return all metadata fetch records that are awaiting user review."
+	pendingMetadataMatches: [MetadataFetchRecord!]!
 }
 
 "The different reading directions supported by any Stump reader"

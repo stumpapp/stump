@@ -1,6 +1,7 @@
 use crate::{
 	data::CoreContext, guard::PermissionGuard,
 	input::metadata_provider::MetadataFetchRecordId,
+	object::metadata_fetch_record::MetadataFetchRecord,
 };
 use async_graphql::{Context, Object, Result};
 use models::{
@@ -42,7 +43,7 @@ impl MetadataProviderQuery {
 		&self,
 		ctx: &Context<'_>,
 		id: MetadataFetchRecordId,
-	) -> Result<Option<metadata_fetch_record::Model>> {
+	) -> Result<Option<MetadataFetchRecord>> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let (col, value) = match id {
@@ -54,23 +55,23 @@ impl MetadataProviderQuery {
 			},
 		};
 
-		let status = metadata_fetch_record::Entity::find()
+		let record = metadata_fetch_record::Entity::find()
 			.filter(col.eq(value))
 			.one(conn)
 			.await?;
 
-		Ok(status)
+		Ok(record.map(MetadataFetchRecord::from))
 	}
 
-	/// Return all metadata fetch statuses that are awaiting user review.
+	/// Return all metadata fetch records that are awaiting user review.
 	#[graphql(guard = "PermissionGuard::one(UserPermission::MetadataFetchRecordRead)")]
 	async fn pending_metadata_matches(
 		&self,
 		ctx: &Context<'_>,
-	) -> Result<Vec<metadata_fetch_record::Model>> {
+	) -> Result<Vec<MetadataFetchRecord>> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let statuses = metadata_fetch_record::Entity::find()
+		let records = metadata_fetch_record::Entity::find()
 			.filter(
 				metadata_fetch_record::Column::Status
 					.eq(MetadataFetchStatus::AwaitingReview),
@@ -78,6 +79,6 @@ impl MetadataProviderQuery {
 			.all(conn)
 			.await?;
 
-		Ok(statuses)
+		Ok(records.into_iter().map(MetadataFetchRecord::from).collect())
 	}
 }

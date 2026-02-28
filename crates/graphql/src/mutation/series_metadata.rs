@@ -11,7 +11,7 @@ use crate::{
 	data::{AuthContext, CoreContext},
 	guard::PermissionGuard,
 	input::series::SeriesMetadataInput,
-	object::series::Series,
+	object::{metadata_fetch_record::MetadataFetchRecord, series::Series},
 };
 
 #[derive(Default)]
@@ -159,7 +159,7 @@ impl SeriesMetadataMutation {
 		candidate_index: u32,
 		strategy: Option<MergeStrategy>,
 		exclude_fields: Option<Vec<MetadataField>>,
-	) -> Result<metadata_fetch_record::Model> {
+	) -> Result<MetadataFetchRecord> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 		let strategy = strategy.unwrap_or(MergeStrategy::FillGaps);
 		let exclude_fields = exclude_fields.unwrap_or_default();
@@ -202,7 +202,7 @@ impl SeriesMetadataMutation {
 			.await?
 			.ok_or("Failed to re-fetch status")?;
 
-		Ok(updated)
+		Ok(MetadataFetchRecord::from(updated))
 	}
 
 	/// Reject the current match candidates for a series
@@ -212,7 +212,7 @@ impl SeriesMetadataMutation {
 		ctx: &Context<'_>,
 		series_id: ID,
 		candidate_index: u32,
-	) -> Result<metadata_fetch_record::Model> {
+	) -> Result<MetadataFetchRecord> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let status = metadata_fetch_record::Entity::find()
@@ -248,6 +248,6 @@ impl SeriesMetadataMutation {
 			.exec(conn)
 			.await?;
 
-		Ok(updated)
+		Ok(MetadataFetchRecord::from(updated))
 	}
 }

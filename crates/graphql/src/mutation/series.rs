@@ -3,15 +3,15 @@ use chrono::Utc;
 use models::{
 	entity::{
 		favorite_series, finished_reading_session, library, library_config, media,
-		media_metadata, reading_session, series, user::AuthUser,
+		reading_session, series, user::AuthUser,
 	},
-	shared::enums::{MetadataResetImpact, UserPermission},
+	shared::enums::UserPermission,
 };
 use sea_orm::{
 	prelude::*,
 	sea_query::{OnConflict, Query},
 	ActiveValue::Set,
-	IntoActiveModel, QuerySelect, TransactionTrait,
+	QuerySelect, TransactionTrait,
 };
 use stump_core::filesystem::{
 	image::{generate_book_thumbnail, GenerateThumbnailOptions},
@@ -22,7 +22,7 @@ use stump_core::filesystem::{
 use crate::{
 	data::{AuthContext, CoreContext},
 	guard::PermissionGuard,
-	input::{series::SeriesMetadataInput, thumbnail::UpdateThumbnailInput},
+	input::thumbnail::UpdateThumbnailInput,
 	object::series::Series,
 };
 

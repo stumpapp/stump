@@ -1477,6 +1477,7 @@ export type MediaMetadataOverview = {
   __typename?: 'MediaMetadataOverview';
   characters: Array<Scalars['String']['output']>;
   colorists: Array<Scalars['String']['output']>;
+  coverArtists: Array<Scalars['String']['output']>;
   editors: Array<Scalars['String']['output']>;
   genres: Array<Scalars['String']['output']>;
   inkers: Array<Scalars['String']['output']>;
@@ -4543,6 +4544,17 @@ export type BookListItemFragment = { __typename?: 'Media', id: string, resolvedN
 
 export type BookSearchItemFragment = { __typename?: 'Media', id: string, resolvedName: string, size: number, pages: number, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null } } & { ' $fragmentName'?: 'BookSearchItemFragment' };
 
+export type BooksAfterCursorQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+  pagination?: InputMaybe<Pagination>;
+}>;
+
+
+export type BooksAfterCursorQuery = { __typename?: 'Query', mediaById?: { __typename?: 'Media', nextInSeries: { __typename?: 'PaginatedMediaResponse', nodes: Array<(
+        { __typename?: 'Media', id: string }
+        & { ' $fragmentRefs'?: { 'BookListItemFragment': BookListItemFragment } }
+      )>, pageInfo: { __typename: 'CursorPaginationInfo', currentCursor?: string | null, nextCursor?: string | null, limit: number } | { __typename: 'OffsetPaginationInfo' } } } | null };
+
 export type OnDeckBookItemFragment = { __typename?: 'Media', id: string, resolvedName: string, seriesPosition?: number | null, metadata?: { __typename?: 'MediaMetadata', number?: any | null } | null, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null }, series: { __typename?: 'Series', resolvedName: string, mediaCount: number } } & { ' $fragmentName'?: 'OnDeckBookItemFragment' };
 
 export type CharactersQueryVariables = Exact<{
@@ -4552,12 +4564,40 @@ export type CharactersQueryVariables = Exact<{
 
 export type CharactersQuery = { __typename?: 'Query', mediaMetadataOverview: { __typename?: 'MediaMetadataOverview', characters: Array<string> } };
 
+export type ColoristsQueryVariables = Exact<{
+  seriesId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type ColoristsQuery = { __typename?: 'Query', mediaMetadataOverview: { __typename?: 'MediaMetadataOverview', colorists: Array<string> } };
+
+export type CoverArtistsQueryVariables = Exact<{
+  seriesId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type CoverArtistsQuery = { __typename?: 'Query', mediaMetadataOverview: { __typename?: 'MediaMetadataOverview', coverArtists: Array<string> } };
+
 export type GenresQueryVariables = Exact<{
   seriesId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
 export type GenresQuery = { __typename?: 'Query', mediaMetadataOverview: { __typename?: 'MediaMetadataOverview', genres: Array<string> } };
+
+export type InkersQueryVariables = Exact<{
+  seriesId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type InkersQuery = { __typename?: 'Query', mediaMetadataOverview: { __typename?: 'MediaMetadataOverview', inkers: Array<string> } };
+
+export type LetterersQueryVariables = Exact<{
+  seriesId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type LetterersQuery = { __typename?: 'Query', mediaMetadataOverview: { __typename?: 'MediaMetadataOverview', letterers: Array<string> } };
 
 export type SeriesMetadataQueryVariables = Exact<{
   seriesId?: InputMaybe<Scalars['ID']['input']>;
@@ -4726,7 +4766,7 @@ export type TagSelectQueryQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type TagSelectQueryQuery = { __typename?: 'Query', tags: Array<{ __typename?: 'Tag', id: number, name: string }> };
 
-export type BookCardFragment = { __typename?: 'Media', id: string, resolvedName: string, extension: string, pages: number, size: number, status: FileStatus, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null }, readProgress?: { __typename?: 'ActiveReadingSession', percentageCompleted?: any | null, epubcfi?: string | null, page?: number | null, updatedAt?: any | null } | null, readHistory: Array<{ __typename: 'FinishedReadingSession', completedAt: any }> } & { ' $fragmentName'?: 'BookCardFragment' };
+export type BookCardFragment = { __typename?: 'Media', id: string, resolvedName: string, extension: string, pages: number, size: number, status: FileStatus, createdAt: any, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null }, readProgress?: { __typename?: 'ActiveReadingSession', percentageCompleted?: any | null, epubcfi?: string | null, page?: number | null, updatedAt?: any | null } | null, readHistory: Array<{ __typename: 'FinishedReadingSession', completedAt: any }> } & { ' $fragmentName'?: 'BookCardFragment' };
 
 export type BookSearchOverlayQueryVariables = Exact<{
   pagination?: InputMaybe<Pagination>;
@@ -6367,6 +6407,7 @@ export const BookCardFragmentDoc = new TypedDocumentString(`
     __typename
     completedAt
   }
+  createdAt
 }
     `, {"fragmentName":"BookCard"}) as unknown as TypedDocumentString<BookCardFragment, unknown>;
 export const MediaMetadataEditorFragmentDoc = new TypedDocumentString(`
@@ -8245,6 +8286,40 @@ export const RecentlyAddedSeriesHorizontalDocument = new TypedDocumentString(`
     }
   }
 }`) as unknown as TypedDocumentString<RecentlyAddedSeriesHorizontalQuery, RecentlyAddedSeriesHorizontalQueryVariables>;
+export const BooksAfterCursorDocument = new TypedDocumentString(`
+    query BooksAfterCursor($id: ID!, $pagination: Pagination) {
+  mediaById(id: $id) {
+    nextInSeries(pagination: $pagination) {
+      nodes {
+        id
+        ...BookListItem
+      }
+      pageInfo {
+        __typename
+        ... on CursorPaginationInfo {
+          currentCursor
+          nextCursor
+          limit
+        }
+      }
+    }
+  }
+}
+    fragment BookListItem on Media {
+  id
+  resolvedName
+  thumbnail {
+    url
+    metadata {
+      averageColor
+      colors {
+        color
+        percentage
+      }
+      thumbhash
+    }
+  }
+}`) as unknown as TypedDocumentString<BooksAfterCursorQuery, BooksAfterCursorQueryVariables>;
 export const CharactersDocument = new TypedDocumentString(`
     query Characters($seriesId: ID) {
   mediaMetadataOverview(seriesId: $seriesId) {
@@ -8252,6 +8327,20 @@ export const CharactersDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<CharactersQuery, CharactersQueryVariables>;
+export const ColoristsDocument = new TypedDocumentString(`
+    query Colorists($seriesId: ID) {
+  mediaMetadataOverview(seriesId: $seriesId) {
+    colorists
+  }
+}
+    `) as unknown as TypedDocumentString<ColoristsQuery, ColoristsQueryVariables>;
+export const CoverArtistsDocument = new TypedDocumentString(`
+    query CoverArtists($seriesId: ID) {
+  mediaMetadataOverview(seriesId: $seriesId) {
+    coverArtists
+  }
+}
+    `) as unknown as TypedDocumentString<CoverArtistsQuery, CoverArtistsQueryVariables>;
 export const GenresDocument = new TypedDocumentString(`
     query Genres($seriesId: ID) {
   mediaMetadataOverview(seriesId: $seriesId) {
@@ -8259,6 +8348,20 @@ export const GenresDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<GenresQuery, GenresQueryVariables>;
+export const InkersDocument = new TypedDocumentString(`
+    query Inkers($seriesId: ID) {
+  mediaMetadataOverview(seriesId: $seriesId) {
+    inkers
+  }
+}
+    `) as unknown as TypedDocumentString<InkersQuery, InkersQueryVariables>;
+export const LetterersDocument = new TypedDocumentString(`
+    query Letterers($seriesId: ID) {
+  mediaMetadataOverview(seriesId: $seriesId) {
+    letterers
+  }
+}
+    `) as unknown as TypedDocumentString<LetterersQuery, LetterersQueryVariables>;
 export const SeriesMetadataDocument = new TypedDocumentString(`
     query SeriesMetadata($seriesId: ID) {
   mediaMetadataOverview(seriesId: $seriesId) {
@@ -8656,6 +8759,7 @@ export const BookSearchOverlayDocument = new TypedDocumentString(`
     __typename
     completedAt
   }
+  createdAt
 }`) as unknown as TypedDocumentString<BookSearchOverlayQuery, BookSearchOverlayQueryVariables>;
 export const UpdateMediaMetadataDocument = new TypedDocumentString(`
     mutation UpdateMediaMetadata($id: ID!, $input: MediaMetadataInput!) {
@@ -8748,6 +8852,7 @@ export const BookOverviewSceneDocument = new TypedDocumentString(`
     __typename
     completedAt
   }
+  createdAt
 }
 fragment MediaMetadataEditor on MediaMetadata {
   ageRating
@@ -9295,6 +9400,7 @@ export const BooksAfterCurrentQueryDocument = new TypedDocumentString(`
     __typename
     completedAt
   }
+  createdAt
 }`) as unknown as TypedDocumentString<BooksAfterCurrentQueryQuery, BooksAfterCurrentQueryQueryVariables>;
 export const BooksAlphabetDocument = new TypedDocumentString(`
     query BooksAlphabet {
@@ -9585,6 +9691,7 @@ export const BookSearchSceneDocument = new TypedDocumentString(`
     __typename
     completedAt
   }
+  createdAt
 }
 fragment BookMetadata on Media {
   metadata {
@@ -9940,6 +10047,7 @@ export const LibraryBooksSceneDocument = new TypedDocumentString(`
     __typename
     completedAt
   }
+  createdAt
 }
 fragment BookMetadata on Media {
   metadata {
@@ -10259,6 +10367,7 @@ export const SeriesBooksSceneDocument = new TypedDocumentString(`
     __typename
     completedAt
   }
+  createdAt
 }
 fragment BookMetadata on Media {
   metadata {
@@ -11084,6 +11193,7 @@ export const SmartListItemsDocument = new TypedDocumentString(`
     __typename
     completedAt
   }
+  createdAt
 }
 fragment BookMetadata on Media {
   metadata {

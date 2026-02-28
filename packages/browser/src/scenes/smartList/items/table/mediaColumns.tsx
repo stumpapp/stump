@@ -2,7 +2,7 @@ import { Link, Text } from '@stump/components'
 import { Media } from '@stump/graphql'
 import { ColumnSort } from '@stump/sdk'
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
-import { format, intlFormat } from 'date-fns'
+import { format, intlFormat, isValid } from 'date-fns'
 
 import paths from '@/paths'
 
@@ -98,15 +98,15 @@ const publishedColumn = columnHelper.accessor(
 )
 
 const addedColumn = columnHelper.accessor(
-	({ createdAt }) =>
-		intlFormat(new Date(createdAt), {
+	({ createdAt }) => {
+		const date = new Date(createdAt)
+		if (!isValid(date)) return ''
+		return intlFormat(date, {
 			year: 'numeric',
 			month: 'numeric',
 			day: 'numeric',
-			hour: '2-digit',
-			minute: '2-digit',
-			second: '2-digit',
-		}),
+		})
+	},
 	{
 		cell: ({ getValue }) => (
 			<Text size="sm" variant="muted">

@@ -43,6 +43,7 @@ export const BookCardFragment = graphql(`
 			__typename
 			completedAt
 		}
+		createdAt
 	}
 `)
 

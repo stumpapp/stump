@@ -1,9 +1,15 @@
 import { useSDK, useSuspenseGraphQL } from '@stump/client'
-import { BookByIdQuery, graphql, UserPermission } from '@stump/graphql'
+import {
+	BookByIdQuery,
+	graphql,
+	MediaFilterInput,
+	MediaMetadataFilterInput,
+	UserPermission,
+} from '@stump/graphql'
 import { formatHumanDuration } from '@stump/i18n'
 import { formatDistanceToNow } from 'date-fns'
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router'
-import { ChevronLeft, Loader2 } from 'lucide-react-native'
+import { ChevronLeft } from 'lucide-react-native'
 import { useCallback, useLayoutEffect, useState } from 'react'
 import { Platform, Pressable, View } from 'react-native'
 import Animated, {
@@ -18,16 +24,17 @@ import TImage from 'react-native-turbo-image'
 import { stripHtml } from 'string-strip-html'
 
 import { useActiveServer, useStumpServer } from '~/components/activeServer'
-import { BookMetaLink } from '~/components/book'
-import { BookActionMenu } from '~/components/book/overview'
+import { BookMetaLink, BooksAfterCursor } from '~/components/book'
+import { BookActionMenu, DownloadButton } from '~/components/book/overview'
 import { InfoRow, LongValue } from '~/components/book/overview'
 import { ThumbnailImage } from '~/components/image'
+import { MetadataBadgeSection } from '~/components/overview'
 import RefreshControl from '~/components/RefreshControl'
 import { Button, Card, Heading, Text } from '~/components/ui'
 import { Icon } from '~/components/ui/icon'
 import { formatSeriesPosition } from '~/lib/bookUtils'
 import { formatBytes, parseGraphQLDecimal } from '~/lib/format'
-import { useDownload, useIsBookDownloaded, useIsBookDownloading } from '~/lib/hooks'
+import { useDownload } from '~/lib/hooks'
 import { usePreferencesStore } from '~/stores'
 
 const query = graphql(`
@@ -150,8 +157,6 @@ export default function Screen() {
 	})
 	const { downloadBook } = useDownload({ serverId: serverID })
 
-	const isDownloading = useIsBookDownloading(bookID)
-
 	const [isRefetching, setIsRefetching] = useState(false)
 
 	// Note: I am not binding the refresh control to the isRefetching state from useSuspenseGraphQL because
@@ -163,12 +168,8 @@ export default function Screen() {
 		})
 	}
 
-	const isDownloaded = useIsBookDownloaded(bookID, serverID)
-
-	const accentColor = usePreferencesStore((state) => state.accentColor)
-
 	const onDownloadBook = useCallback(async () => {
-		if (isDownloaded || !book || isDownloading) return
+		if (!book) return
 
 		return await downloadBook({
 			id: book.id,
@@ -183,7 +184,7 @@ export default function Screen() {
 			thumbnailMeta: book.thumbnail.metadata || undefined,
 			toc: book.ebook?.toc,
 		})
-	}, [isDownloaded, downloadBook, book, isDownloading])
+	}, [downloadBook, book])
 
 	const router = useRouter()
 	const insets = useSafeAreaInsets()
@@ -246,11 +247,11 @@ export default function Screen() {
 	const seriesVolume = book.metadata?.volume
 
 	const publisher = book.metadata?.publisher
-	const writers = book.metadata?.writers?.join(', ')
-	const colorists = book.metadata?.colorists?.join(', ')
-	const inkers = book.metadata?.inkers?.join(', ')
-	const letterers = book.metadata?.letterers?.join(', ')
-	const coverArtists = book.metadata?.coverArtists?.join(', ')
+	const writers = book.metadata?.writers || []
+	const colorists = book.metadata?.colorists || []
+	const inkers = book.metadata?.inkers || []
+	const letterers = book.metadata?.letterers || []
+	const coverArtists = book.metadata?.coverArtists || []
 
 	const identifierAmazon = book.metadata?.identifierAmazon
 	const identifierCalibre = book.metadata?.identifierCalibre
@@ -259,16 +260,12 @@ export default function Screen() {
 	const identifierMobiAsin = book.metadata?.identifierMobiAsin
 	const identifierUuid = book.metadata?.identifierUuid
 
-	const noExternalIdentifiers =
-		!identifierAmazon &&
-		!identifierCalibre &&
-		!identifierGoogle &&
-		!identifierIsbn &&
-		!identifierMobiAsin &&
-		!identifierUuid
-
 	const noAcknowledgements =
-		!publisher && !writers && !colorists && !inkers && !letterers && !coverArtists
+		!writers.length &&
+		!colorists.length &&
+		!inkers.length &&
+		!letterers.length &&
+		!coverArtists.length
 
 	const renderRead = () => {
 		const { page, percentageCompleted, epubcfi } = book.readProgress || {}
@@ -337,6 +334,27 @@ export default function Screen() {
 		lastCompletion?.elapsedSeconds != null
 			? formatHumanDuration(lastCompletion.elapsedSeconds, { significantUnits: 1 })
 			: 'Unknown'
+
+	// Reminder: Whenever this page introduces a new clickable filter field, make sure to
+	// add a corresponding bit in the filter header and prolly metadata overview object
+	const onClickFilterField = (
+		field: Exclude<keyof MediaMetadataFilterInput, '_or' | '_and' | '_not'>,
+		value: string,
+	) => {
+		const filter = {
+			metadata: {
+				[field]: {
+					// Note: Most of these are "arrays" stored as comma-separated string
+					likeAnyOf: [value],
+				},
+			},
+		} satisfies MediaFilterInput
+		const filterString = JSON.stringify(filter)
+		router.push({
+			// @ts-expect-error: String path
+			pathname: `/server/${serverID}/books?initialFilters=${filterString}`,
+		})
+	}
 
 	return (
 		<Animated.ScrollView
@@ -418,35 +436,15 @@ export default function Screen() {
 							roundness="full"
 							onPress={() =>
 								router.push({
-									// @ts-expect-error: It's fine
+									// @ts-expect-error: String path
 									pathname: `/server/${serverID}/books/${bookID}/read`,
 								})
 							}
 						>
 							{renderRead()}
 						</Button>
-						{checkPermission(UserPermission.DownloadFile) && !isDownloaded && (
-							<Button
-								variant="secondary"
-								roundness="full"
-								disabled={isDownloaded || isDownloading}
-								onPress={onDownloadBook}
-								className="flex-row gap-2"
-							>
-								{isDownloading && (
-									<View className="pointer-events-none animate-spin">
-										<Icon
-											className="h-5 w-5"
-											as={Loader2}
-											style={{
-												// @ts-expect-error: It's fine
-												color: accentColor,
-											}}
-										/>
-									</View>
-								)}
-								<Text>Download</Text>
-							</Button>
+						{checkPermission(UserPermission.DownloadFile) && (
+							<DownloadButton bookId={bookID} serverId={serverID} onDownload={onDownloadBook} />
 						)}
 					</View>
 
@@ -477,26 +475,15 @@ export default function Screen() {
 
 			<View className="gap-8 px-4 py-8 tablet:px-6">
 				<Card label="Information">
-					<InfoRow label="Identifier" value={book.id} />
 					{book.metadata?.language && <InfoRow label="Language" value={book.metadata.language} />}
 					<InfoRow label="Pages" value={pages.toString()} />
 					<InfoRow label="Kind" value={book.extension.toUpperCase()} />
 					{formattedSize && <InfoRow label="Size" value={formattedSize} />}
 				</Card>
 
-				{!noExternalIdentifiers && (
-					<Card label="External Identifiers">
-						{identifierAmazon && <InfoRow label="Amazon" value={identifierAmazon} />}
-						{identifierCalibre && <InfoRow label="Calibre" value={identifierCalibre} />}
-						{identifierGoogle && <InfoRow label="Google" value={identifierGoogle} />}
-						{identifierIsbn && <InfoRow label="ISBN" value={identifierIsbn} />}
-						{identifierMobiAsin && <InfoRow label="Mobi ASIN" value={identifierMobiAsin} />}
-						{identifierUuid && <InfoRow label="UUID" value={identifierUuid} />}
-					</Card>
-				)}
-
 				<Card label="Metadata" listEmptyStyle={{ message: 'No metadata available' }}>
 					{description && <LongValue label="Description" value={stripHtml(description).result} />}
+					{publisher && <InfoRow label="Publisher" value={publisher} />}
 					{seriesName && <InfoRow label="Series" value={seriesName} />}
 					{seriesPosition && (
 						<InfoRow
@@ -512,15 +499,50 @@ export default function Screen() {
 					{characters && <InfoRow label="Characters" value={characters} />}
 				</Card>
 
+				<BooksAfterCursor cursor={bookID} />
+
 				{!noAcknowledgements && (
-					<Card label="Acknowledgements">
-						{publisher && <InfoRow label="Publisher" value={publisher} />}
-						{writers && <InfoRow label="Writers" value={writers} />}
-						{colorists && <InfoRow label="Colorists" value={colorists} />}
-						{inkers && <InfoRow label="Inkers" value={inkers} />}
-						{letterers && <InfoRow label="Letterers" value={letterers} />}
-						{coverArtists && <InfoRow label="Cover Artists" value={coverArtists} />}
-					</Card>
+					<View className="gap-6">
+						<MetadataBadgeSection
+							label="Writers"
+							items={writers.map((writer) => ({
+								label: writer,
+								onPress: () => onClickFilterField('writers', writer),
+							}))}
+						/>
+
+						<MetadataBadgeSection
+							label="Colorists"
+							items={colorists.map((colorist) => ({
+								label: colorist,
+								onPress: () => onClickFilterField('colorists', colorist),
+							}))}
+						/>
+
+						<MetadataBadgeSection
+							label="Inkers"
+							items={inkers.map((inker) => ({
+								label: inker,
+								onPress: () => onClickFilterField('inkers', inker),
+							}))}
+						/>
+
+						<MetadataBadgeSection
+							label="Letterers"
+							items={letterers.map((letterer) => ({
+								label: letterer,
+								onPress: () => onClickFilterField('letterers', letterer),
+							}))}
+						/>
+
+						<MetadataBadgeSection
+							label="Cover Artists"
+							items={coverArtists.map((coverArtist) => ({
+								label: coverArtist,
+								onPress: () => onClickFilterField('coverArtists', coverArtist),
+							}))}
+						/>
+					</View>
 				)}
 
 				{links.length > 0 && (
@@ -534,6 +556,16 @@ export default function Screen() {
 						</View>
 					</View>
 				)}
+
+				<Card label="Identifiers">
+					<InfoRow label="Stump" value={book.id} />
+					{identifierAmazon && <InfoRow label="Amazon" value={identifierAmazon} />}
+					{identifierCalibre && <InfoRow label="Calibre" value={identifierCalibre} />}
+					{identifierGoogle && <InfoRow label="Google" value={identifierGoogle} />}
+					{identifierIsbn && <InfoRow label="ISBN" value={identifierIsbn} />}
+					{identifierMobiAsin && <InfoRow label="Mobi ASIN" value={identifierMobiAsin} />}
+					{identifierUuid && <InfoRow label="UUID" value={identifierUuid} />}
+				</Card>
 			</View>
 		</Animated.ScrollView>
 	)

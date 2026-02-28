@@ -10,6 +10,7 @@ mod job;
 mod library;
 mod log;
 mod media;
+mod media_metadata;
 mod metadata_provider;
 mod notifier;
 mod reading_list;
@@ -33,6 +34,7 @@ use job::JobMutation;
 use library::LibraryMutation;
 use log::LogMutation;
 use media::MediaMutation;
+use media_metadata::MediaMetadataMutation;
 use metadata_provider::MetadataProviderMutation;
 use notifier::NotifierMutation;
 use reading_list::ReadingListMutation;
@@ -56,6 +58,7 @@ pub struct Mutation(
 	NotifierMutation,
 	EpubMutation,
 	MediaMutation,
+	MediaMetadataMutation,
 	LibraryMutation,
 	LogMutation,
 	ReadingListMutation,

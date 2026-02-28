@@ -193,6 +193,7 @@ impl JobExt for MetadataFetchJob {
 
 		self.get_or_init_cache(ctx).await?;
 
+		// TODO: The names should be entity.metadata.name.or(entity.name)
 		let tasks: VecDeque<MetadataFetchTask> = match &self.params.scope {
 			MetadataFetchScope::Series(ids) => {
 				let series_list = series::Entity::find()
@@ -423,15 +424,13 @@ impl JobExt for MetadataFetchJob {
 					}
 				}
 
-				let search_title = series_name.unwrap_or(media_name.clone());
-
 				let mut all_candidates: Vec<MatchCandidate> = Vec::new();
 
 				for config in &provider_configs {
 					match provider_cache.get_or_create(config).await {
 						Ok(provider) => {
 							let query = SearchQuery {
-								title: search_title.clone(),
+								title: media_name.clone(),
 								limit: Some(10),
 								..Default::default()
 							};

@@ -131,7 +131,6 @@ const belongsTo = z.object({
 })
 export type OPDSEntryBelongsTo = z.infer<typeof belongsTo>
 
-export type OPDSDynamicMetadata = Record<string, unknown>
 // See https://readium.org/webpub-manifest/schema/metadata.schema.json
 const metadata = z
 	.object({

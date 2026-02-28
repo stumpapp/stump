@@ -4101,7 +4101,7 @@ export type TagSelectQueryQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type TagSelectQueryQuery = { __typename?: 'Query', tags: Array<{ __typename?: 'Tag', id: number, name: string }> };
 
-export type BookCardFragment = { __typename?: 'Media', id: string, resolvedName: string, extension: string, pages: number, size: number, status: FileStatus, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null }, readProgress?: { __typename?: 'ActiveReadingSession', percentageCompleted?: any | null, epubcfi?: string | null, page?: number | null, updatedAt?: any | null } | null, readHistory: Array<{ __typename: 'FinishedReadingSession', completedAt: any }> } & { ' $fragmentName'?: 'BookCardFragment' };
+export type BookCardFragment = { __typename?: 'Media', id: string, resolvedName: string, extension: string, pages: number, size: number, status: FileStatus, createdAt: any, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null }, readProgress?: { __typename?: 'ActiveReadingSession', percentageCompleted?: any | null, epubcfi?: string | null, page?: number | null, updatedAt?: any | null } | null, readHistory: Array<{ __typename: 'FinishedReadingSession', completedAt: any }> } & { ' $fragmentName'?: 'BookCardFragment' };
 
 export type BookSearchOverlayQueryVariables = Exact<{
   pagination?: InputMaybe<Pagination>;
@@ -5550,6 +5550,7 @@ export const BookCardFragmentDoc = new TypedDocumentString(`
     __typename
     completedAt
   }
+  createdAt
 }
     `, {"fragmentName":"BookCard"}) as unknown as TypedDocumentString<BookCardFragment, unknown>;
 export const MediaMetadataEditorFragmentDoc = new TypedDocumentString(`
@@ -7251,6 +7252,7 @@ export const BookSearchOverlayDocument = new TypedDocumentString(`
     __typename
     completedAt
   }
+  createdAt
 }`) as unknown as TypedDocumentString<BookSearchOverlayQuery, BookSearchOverlayQueryVariables>;
 export const UpdateMediaMetadataDocument = new TypedDocumentString(`
     mutation UpdateMediaMetadata($id: ID!, $input: MediaMetadataInput!) {
@@ -7343,6 +7345,7 @@ export const BookOverviewSceneDocument = new TypedDocumentString(`
     __typename
     completedAt
   }
+  createdAt
 }
 fragment MediaMetadataEditor on MediaMetadata {
   ageRating
@@ -7860,6 +7863,7 @@ export const BooksAfterCurrentQueryDocument = new TypedDocumentString(`
     __typename
     completedAt
   }
+  createdAt
 }`) as unknown as TypedDocumentString<BooksAfterCurrentQueryQuery, BooksAfterCurrentQueryQueryVariables>;
 export const BooksAlphabetDocument = new TypedDocumentString(`
     query BooksAlphabet {
@@ -8133,6 +8137,7 @@ export const BookSearchSceneDocument = new TypedDocumentString(`
     __typename
     completedAt
   }
+  createdAt
 }
 fragment BookMetadata on Media {
   metadata {
@@ -8488,6 +8493,7 @@ export const LibraryBooksSceneDocument = new TypedDocumentString(`
     __typename
     completedAt
   }
+  createdAt
 }
 fragment BookMetadata on Media {
   metadata {
@@ -8807,6 +8813,7 @@ export const SeriesBooksSceneDocument = new TypedDocumentString(`
     __typename
     completedAt
   }
+  createdAt
 }
 fragment BookMetadata on Media {
   metadata {
@@ -9568,6 +9575,7 @@ export const SmartListItemsDocument = new TypedDocumentString(`
     __typename
     completedAt
   }
+  createdAt
 }
 fragment BookMetadata on Media {
   metadata {

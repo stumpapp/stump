@@ -210,10 +210,13 @@ export const progression = z
 		device: progressionDevice.nullish(),
 		locator: progressionLocator,
 	})
-	.transform((data) => ({
-		...data,
-		modified: new Date(data.modified),
-	}))
+	.transform((data) => {
+		const date = new Date(data.modified)
+		return {
+			...data,
+			modified: isNaN(date.getTime()) ? null : date,
+		}
+	})
 export type OPDSProgression = z.infer<typeof progression>
 
 const progressionLocationInput = z.object({

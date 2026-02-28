@@ -138,18 +138,21 @@ export default function DownloadButton({ bookId, serverId, onDownload }: Downloa
 		opacity: contentOpacity.value,
 	}))
 
+	const isCompleted = displayedState === 'completed'
+
 	const onPress = useCallback(() => {
+		if (isCompleted) return
+
 		if (downloadState === 'downloading' && activeDownload) {
 			wasCancelledRef.current = true
 			cancel(activeDownload.id)
 		} else if (downloadState === undefined) {
 			onDownload()
 		}
-	}, [downloadState, activeDownload, cancel, onDownload])
+	}, [downloadState, activeDownload, cancel, onDownload, isCompleted])
 
 	if (!visible) return null
 
-	const isCompleted = displayedState === 'completed'
 	const isActive = displayedState === 'downloading'
 
 	const iconComponent = isCompleted ? Check : isActive ? X : ArrowDown
@@ -160,7 +163,6 @@ export default function DownloadButton({ bookId, serverId, onDownload }: Downloa
 			<Button
 				variant="secondary"
 				roundness="full"
-				disabled={isCompleted}
 				onPress={onPress}
 				className="native:px-0 w-36 flex-row gap-2 overflow-hidden"
 			>

@@ -1,9 +1,9 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { PREFETCH_STALE_TIME, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { graphql, LibraryOverviewSheetQuery } from '@stump/graphql'
+import { formatHumanDuration } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
-import dayjs from 'dayjs'
-import { forwardRef, useMemo } from 'react'
+import { forwardRef } from 'react'
 import { View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -95,15 +95,7 @@ function SheetContent({ library }: SheetContentProps) {
 	const { stats } = library
 
 	const formattedSize = formatBytesSeparate(stats.totalBytes)
-	const formattedTime = useMemo(() => {
-		if (stats.totalReadingTimeSeconds >= 3600 && stats.totalReadingTimeSeconds < 3600 * 2) {
-			return dayjs.duration(stats.totalReadingTimeSeconds, 'seconds').format('H [hr] m [mins]')
-		} else if (stats.totalReadingTimeSeconds >= 60) {
-			return dayjs.duration(stats.totalReadingTimeSeconds, 'seconds').format('m [mins]')
-		} else {
-			return dayjs.duration(stats.totalReadingTimeSeconds, 'seconds').format('s [secs]')
-		}
-	}, [stats.totalReadingTimeSeconds])
+	const formattedTime = formatHumanDuration(stats.totalReadingTimeSeconds, { significantUnits: 1 })
 
 	return (
 		<ScrollView className="flex-1 p-6" nestedScrollEnabled>

@@ -3,8 +3,7 @@ import { Heading, ProgressBar, Text } from '@stump/components'
 import { FragmentType, graphql, useFragment } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
-import dayjs from 'dayjs'
-import relativeTime from 'dayjs/plugin/relativeTime'
+import { formatDistanceToNow } from 'date-fns'
 import { BookMarked } from 'lucide-react'
 import { memo, Suspense, useCallback, useMemo } from 'react'
 import { useMediaMatch } from 'rooks'
@@ -15,8 +14,6 @@ import { ThumbnailPlaceholderData } from '@/components/thumbnail/ThumbnailPlaceh
 import { Link } from '@/context'
 import { usePreferences } from '@/hooks/usePreferences'
 import { usePaths } from '@/paths'
-
-dayjs.extend(relativeTime)
 
 const IMAGE_WIDTH_MOBILE = 200
 const IMAGE_WIDTH_TABLET = 220
@@ -252,7 +249,7 @@ const ContinueReadingCard = memo(function ContinueReadingCard({
 
 					{data.readProgress?.updatedAt && (
 						<Text size="xs" className="text-gray-200 opacity-90">
-							{dayjs(data.readProgress.updatedAt).fromNow()}
+							{formatDistanceToNow(new Date(data.readProgress.updatedAt), { addSuffix: true })}
 						</Text>
 					)}
 				</div>

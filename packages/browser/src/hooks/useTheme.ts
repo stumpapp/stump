@@ -10,7 +10,7 @@ import { usePreferences } from './usePreferences'
 export function getThemeColor(path: string): string | undefined {
 	const variableName = `--twc-${path.replace(/\./g, '-')}`
 	const value = getComputedStyle(document.documentElement).getPropertyValue(variableName).trim()
-	return value || undefined
+	return value ? `hsl(${value})` : undefined
 }
 
 /**

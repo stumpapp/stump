@@ -8,8 +8,7 @@ import {
 	getCoreRowModel,
 	useReactTable,
 } from '@tanstack/react-table'
-import dayjs from 'dayjs'
-import relativeTime from 'dayjs/plugin/relativeTime'
+import { formatDistanceToNow, intlFormat, isValid, parseISO } from 'date-fns'
 import { KeyRound, Slash } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
@@ -18,8 +17,6 @@ import { getCommonPinningStyles } from '@/components/table/Table'
 import APIKeyActionMenu from './APIKeyActionMenu'
 import APIKeyInspector from './APIKeyInspector'
 import DeleteAPIKeyConfirmModal from './DeleteAPIKeyConfirmModal'
-
-dayjs.extend(relativeTime)
 
 const query = graphql(`
 	query APIKeyTable {
@@ -106,13 +103,25 @@ export default function APIKeyTable() {
 					</Text>
 				),
 				cell: ({ getValue }) => {
-					const parsed = dayjs(getValue())
+					const value = getValue()
+					const parsed = value ? parseISO(value) : null
+					const valid = parsed && isValid(parsed)
 					return (
 						<Text
 							size="sm"
-							title={parsed.isValid() ? parsed.format('LLL') : t('common.notUsedYet')}
+							title={
+								valid
+									? intlFormat(parsed, {
+											month: 'long',
+											day: 'numeric',
+											year: 'numeric',
+											hour: 'numeric',
+											minute: '2-digit',
+										})
+									: t('common.notUsedYet')
+							}
 						>
-							{parsed.isValid() ? parsed.fromNow() : t('common.never')}
+							{valid ? formatDistanceToNow(parsed, { addSuffix: true }) : t('common.never')}
 						</Text>
 					)
 				},
@@ -124,13 +133,27 @@ export default function APIKeyTable() {
 					</Text>
 				),
 				cell: ({ getValue }) => {
-					const parsed = dayjs(getValue())
+					const value = getValue()
+					const parsed = value ? parseISO(value) : null
+					const valid = parsed && isValid(parsed)
 					return (
 						<Text
 							size="sm"
-							title={parsed.isValid() ? parsed.format('LLL') : t(getKey('noExpiration'))}
+							title={
+								valid
+									? intlFormat(parsed, {
+											month: 'long',
+											day: 'numeric',
+											year: 'numeric',
+											hour: 'numeric',
+											minute: '2-digit',
+										})
+									: t(getKey('noExpiration'))
+							}
 						>
-							{parsed.isValid() ? parsed.format('LL') : 'Never'}
+							{valid
+								? intlFormat(parsed, { month: 'long', day: 'numeric', year: 'numeric' })
+								: 'Never'}
 						</Text>
 					)
 				},

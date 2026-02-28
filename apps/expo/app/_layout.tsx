@@ -3,11 +3,10 @@ import '~/global.css'
 import { DarkTheme, DefaultTheme, Theme, ThemeProvider } from '@react-navigation/native'
 import { PortalHost } from '@rn-primitives/portal'
 import * as Sentry from '@sentry/react-native'
+import { initDateFnsLocale } from '@stump/i18n'
 import { getColor, to } from 'colorjs.io/fn'
-import dayjs from 'dayjs'
-import duration from 'dayjs/plugin/duration'
-import relativeTime from 'dayjs/plugin/relativeTime'
 import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator'
+import * as Localization from 'expo-localization'
 import { Stack, useNavigationContainerRef } from 'expo-router'
 import * as SplashScreen from 'expo-splash-screen'
 import LottieView from 'lottie-react-native'
@@ -35,9 +34,6 @@ import { useColorScheme } from '~/lib/useColorScheme'
 import { usePreferencesStore } from '~/stores'
 import { useEpubLocationStore, useEpubTheme } from '~/stores/epub'
 import { useHideSystemBars, useReaderStore } from '~/stores/reader'
-
-dayjs.extend(relativeTime)
-dayjs.extend(duration)
 
 const LIGHT_THEME: Theme = {
 	...DefaultTheme,
@@ -96,6 +92,9 @@ export default function RootLayout() {
 		if (hasMounted.current) {
 			return
 		}
+		const preferredLocale = usePreferencesStore.getState().locale
+		const deviceLocale = Localization.getLocales()[0]?.languageTag ?? 'en-US'
+		initDateFnsLocale(preferredLocale ?? deviceLocale)
 		setAndroidNavigationBar(colorScheme)
 		setIsColorSchemeLoaded(true)
 		hasMounted.current = true

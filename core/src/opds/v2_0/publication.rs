@@ -11,6 +11,7 @@ use serde_with::skip_serializing_none;
 
 use crate::{
 	filesystem::{media::get_content_type_for_page, ContentType},
+	opds::v2_0::metadata::OPDSEntryBelongsToEntityBuilder,
 	CoreError, CoreResult,
 };
 
@@ -118,10 +119,25 @@ impl OPDSPublication {
 				.title(title)
 				.modified(OPDSMetadata::generate_modified())
 				.description(description)
-				.belongs_to(OPDSEntryBelongsTo::from((series, position)))
-				.dynamic_metadata(OPDSDynamicMetadata(serde_json::to_value(
-					media_metadata,
-				)?))
+				.belongs_to(OPDSEntryBelongsTo::Series(
+					OPDSEntryBelongsToEntityBuilder::default()
+						.name(
+							series.metadata.and_then(|m| m.title).unwrap_or(series.name),
+						)
+						.position(position)
+						.links(vec![OPDSLink::Link(
+							OPDSBaseLinkBuilder::default()
+								.href(finalizer.format_link(format!(
+									"/opds/v2.0/series/{}",
+									book.series.id
+								)))
+								.rel(OPDSLinkRel::Subsection.item())
+								._type(OPDSLinkType::OpdsJson)
+								.build()?,
+						)])
+						.build()?,
+				))
+				.dynamic_metadata(OPDSDynamicMetadata::try_from(media_metadata)?)
 				.build()?;
 
 			let publication = OPDSPublicationBuilder::default()
@@ -206,8 +222,28 @@ impl OPDSPublication {
 			.identifier(book.media.id.clone())
 			.modified(OPDSMetadata::generate_modified())
 			.description(description)
-			.belongs_to(OPDSEntryBelongsTo::from((book.series.clone(), position)))
-			.dynamic_metadata(OPDSDynamicMetadata(serde_json::to_value(media_metadata)?))
+			.belongs_to(OPDSEntryBelongsTo::Series(
+				OPDSEntryBelongsToEntityBuilder::default()
+					.name(
+						book.series
+							.metadata
+							.and_then(|m| m.title)
+							.unwrap_or(book.series.name),
+					)
+					.position(position)
+					.links(vec![OPDSLink::Link(
+						OPDSBaseLinkBuilder::default()
+							.href(finalizer.format_link(format!(
+								"/opds/v2.0/series/{}",
+								book.series.id
+							)))
+							.rel(OPDSLinkRel::Subsection.item())
+							._type(OPDSLinkType::OpdsJson)
+							.build()?,
+					)])
+					.build()?,
+			))
+			.dynamic_metadata(OPDSDynamicMetadata::try_from(media_metadata)?)
 			.build()?;
 
 		let publication = OPDSPublicationBuilder::default()

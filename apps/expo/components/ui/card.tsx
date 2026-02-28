@@ -130,13 +130,13 @@ function Row({ label, icon, disabled, children, className, ...props }: RowProps)
 				{...props}
 			>
 				{label && (
-					<View className="flex-row items-center justify-center gap-4">
+					<View className="shrink flex-row items-center justify-center gap-4">
 						{icon && (
-							<View className="squircle flex h-8 w-8 items-center justify-center rounded-xl bg-white/75 dark:bg-black/40">
+							<View className="squircle flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white/75 dark:bg-black/40">
 								<Icon as={icon} className="h-6 w-6 text-foreground-muted" />
 							</View>
 						)}
-						<Text className="text-lg">{label}</Text>
+						<Text className="shrink text-lg">{label}</Text>
 					</View>
 				)}
 				{children}

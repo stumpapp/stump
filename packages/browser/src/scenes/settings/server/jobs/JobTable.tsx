@@ -1,13 +1,11 @@
 import { useJobStore, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Badge, Card, Heading, Text } from '@stump/components'
 import { graphql, JobStatus, JobTableQuery, UserPermission } from '@stump/graphql'
-import { useLocaleContext } from '@stump/i18n'
+import { formatElapsedDuration, useLocaleContext } from '@stump/i18n'
 import { Api } from '@stump/sdk'
 import { QueryClient, useQueryClient } from '@tanstack/react-query'
 import { ColumnDef, createColumnHelper, PaginationState } from '@tanstack/react-table'
-import dayjs from 'dayjs'
-import duration from 'dayjs/plugin/duration'
-import relativeTime from 'dayjs/plugin/relativeTime'
+import { intlFormat } from 'date-fns'
 import { CircleSlash2 } from 'lucide-react'
 import { useCallback, useMemo, useState } from 'react'
 
@@ -17,9 +15,6 @@ import { useAppContext } from '@/context'
 import JobActionMenu from './JobActionMenu.tsx'
 import JobDataInspector, { JobDataInspectorFragment } from './JobDataInspector.tsx'
 import RunningJobElapsedTime from './RunningJobElapsedTime.tsx'
-
-dayjs.extend(duration)
-dayjs.extend(relativeTime)
 
 const LOCALE_BASE = 'settingsScene.server/jobs.sections.history.table'
 
@@ -178,7 +173,15 @@ export default function JobTable() {
 						if (job.createdAt) {
 							return (
 								<Text size="sm" variant="muted" className="line-clamp-1">
-									{dayjs(job.createdAt).format('YYYY-MM-DD HH:mm:ss')}
+									{intlFormat(new Date(job.createdAt), {
+										year: 'numeric',
+										month: '2-digit',
+										day: '2-digit',
+										hour: '2-digit',
+										minute: '2-digit',
+										second: '2-digit',
+										hour12: false,
+									})}
 								</Text>
 							)
 						}
@@ -214,24 +217,14 @@ export default function JobTable() {
 				}),
 				columnHelper.display({
 					cell: ({ row: { original: job } }) => {
-						const displayDuration = (duration: duration.Duration) => {
-							//? TODO(aaron): This might be funny to have two formats, I think I should
-							//? either just always show ms or just accept the 'rounding' of the duration
-							if (duration.asSeconds() < 1) {
-								return duration.format('HH:mm:ss:SSS')
-							}
-
-							return duration.format('HH:mm:ss')
-						}
-
 						const isRunningOrQueued = job.status === 'RUNNING' || job.status === 'QUEUED'
 
 						if (job.status === 'RUNNING') {
-							return <RunningJobElapsedTime job={job} formatDuration={displayDuration} />
+							return <RunningJobElapsedTime job={job} />
 						} else if (!isRunningOrQueued && job.msElapsed !== null) {
 							return (
 								<Text size="sm" variant="muted" className="line-clamp-1">
-									{displayDuration(dayjs.duration(Number(job.msElapsed)))}
+									{formatElapsedDuration(Number(job.msElapsed) / 1000)}
 								</Text>
 							)
 						}

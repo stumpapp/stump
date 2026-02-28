@@ -14,7 +14,8 @@ export function Picker<T extends string = string>({
 	const { foreground } = useColors()
 
 	return (
-		<Host matchContents>
+		// This negative margin is because there is some padding around the picker making it larger than it's true size
+		<Host matchContents style={{ marginHorizontal: -12, marginVertical: -6 }}>
 			<NativePicker
 				variant="menu"
 				selectedIndex={options.findIndex((option) => option.value === value)}

@@ -67,9 +67,9 @@ module.exports = {
 					DEFAULT: 'var(--foreground)',
 					brand: 'var(--foreground-brand)',
 					disabled: 'var(--foreground-disabled)',
-
 					muted: 'var(--foreground-muted)',
 					'on-inverse': 'var(--foreground-on-inverse)',
+					'on-fill': 'var(--foreground-on-fill)',
 					subtle: 'var(--foreground-subtle)',
 				},
 			},

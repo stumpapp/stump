@@ -3,8 +3,7 @@ import { Text } from '@stump/components'
 import { FragmentType, graphql, useFragment } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
-import dayjs from 'dayjs'
-import relativeTime from 'dayjs/plugin/relativeTime'
+import { formatDistanceToNow } from 'date-fns'
 import { BookX } from 'lucide-react'
 import { memo, Suspense, useCallback, useMemo } from 'react'
 import { useMediaMatch } from 'rooks'
@@ -15,8 +14,6 @@ import { ThumbnailPlaceholderData } from '@/components/thumbnail/ThumbnailPlaceh
 import { Link } from '@/context'
 import { usePreferences } from '@/hooks/usePreferences'
 import { usePaths } from '@/paths'
-
-dayjs.extend(relativeTime)
 
 const IMAGE_WIDTH_MOBILE = 112
 const IMAGE_WIDTH_TABLET = 140
@@ -205,7 +202,7 @@ const RecentlyAddedBookCard = memo(function RecentlyAddedBookCard({
 						textShadow: '1px 1px 2px rgba(0, 0, 0, 0.5)',
 					}}
 				>
-					{dayjs(data.createdAt).fromNow()}
+					{formatDistanceToNow(new Date(data.createdAt), { addSuffix: true })}
 				</Text>
 			</div>
 		</Link>

@@ -1,6 +1,6 @@
 import { useSDK } from '@stump/client'
 import { FragmentType, graphql, useFragment } from '@stump/graphql'
-import dayjs from 'dayjs'
+import { formatDistanceToNow } from 'date-fns'
 import { useRouter } from 'expo-router'
 import { useCallback, useRef } from 'react'
 import { Easing, Pressable, View } from 'react-native'
@@ -330,7 +330,7 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 										opacity: 0.9,
 									}}
 								>
-									{dayjs(data.readProgress?.updatedAt).fromNow()}
+									{formatDistanceToNow(new Date(data.readProgress?.updatedAt), { addSuffix: true })}
 								</Text>
 							)}
 						</View>

@@ -9,7 +9,7 @@ import {
 	getPaginationRowModel,
 	PaginationState,
 } from '@tanstack/react-table'
-import dayjs from 'dayjs'
+import { intlFormat } from 'date-fns'
 import { Fingerprint, Slash } from 'lucide-react'
 import { useState } from 'react'
 
@@ -121,11 +121,20 @@ const baseColumns = [
 		size: 100,
 	}),
 	columnHelper.accessor('timestamp', {
-		cell: ({ row: { original: activity } }) => (
-			<Text title={dayjs(activity.timestamp).format('LLL')} className="line-clamp-1" size="sm">
-				{dayjs(activity.timestamp).format('LLL')}
-			</Text>
-		),
+		cell: ({ row: { original: activity } }) => {
+			const formatted = intlFormat(new Date(activity.timestamp), {
+				month: 'long',
+				day: 'numeric',
+				year: 'numeric',
+				hour: 'numeric',
+				minute: '2-digit',
+			})
+			return (
+				<Text title={formatted} className="line-clamp-1" size="sm">
+					{formatted}
+				</Text>
+			)
+		},
 		header: 'Timestamp',
 		size: 100,
 	}),

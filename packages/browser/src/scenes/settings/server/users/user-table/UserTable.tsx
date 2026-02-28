@@ -4,7 +4,7 @@ import { graphql, UserTableQuery } from '@stump/graphql'
 import { Api } from '@stump/sdk'
 import { QueryClient } from '@tanstack/react-query'
 import { ColumnDef, createColumnHelper, PaginationState } from '@tanstack/react-table'
-import dayjs from 'dayjs'
+import { intlFormat } from 'date-fns'
 import { HelpCircle } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
@@ -171,7 +171,7 @@ const baseColumns = [
 			},
 		}) => (
 			<Text size="sm" variant="muted">
-				{dayjs(createdAt).format('LL')}
+				{intlFormat(new Date(createdAt), { month: 'long', day: 'numeric', year: 'numeric' })}
 			</Text>
 		),
 		header: 'Created at',
@@ -183,7 +183,9 @@ const baseColumns = [
 			},
 		}) => (
 			<Text size="sm" variant="muted">
-				{lastLogin ? dayjs(lastLogin).format('LL') : 'Never'}
+				{lastLogin
+					? intlFormat(new Date(lastLogin), { month: 'long', day: 'numeric', year: 'numeric' })
+					: 'Never'}
 			</Text>
 		),
 		header: 'Last login',

@@ -1,10 +1,9 @@
 import { useSDK, useSuspenseGraphQL } from '@stump/client'
 import { BookByIdQuery, graphql, UserPermission } from '@stump/graphql'
-import dayjs from 'dayjs'
-import duration from 'dayjs/plugin/duration'
-import relativeTime from 'dayjs/plugin/relativeTime'
+import { formatHumanDuration } from '@stump/i18n'
+import { formatDistanceToNow } from 'date-fns'
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router'
-import { ChevronLeft, Loader2 } from 'lucide-react-native'
+import { ChevronLeft } from 'lucide-react-native'
 import { useCallback, useLayoutEffect, useState } from 'react'
 import { Platform, Pressable, View } from 'react-native'
 import Animated, {
@@ -20,7 +19,7 @@ import { stripHtml } from 'string-strip-html'
 
 import { useActiveServer, useStumpServer } from '~/components/activeServer'
 import { BookMetaLink } from '~/components/book'
-import { BookActionMenu } from '~/components/book/overview'
+import { BookActionMenu, DownloadButton } from '~/components/book/overview'
 import { InfoRow, LongValue } from '~/components/book/overview'
 import { ThumbnailImage } from '~/components/image'
 import RefreshControl from '~/components/RefreshControl'
@@ -28,11 +27,8 @@ import { Button, Card, Heading, Text } from '~/components/ui'
 import { Icon } from '~/components/ui/icon'
 import { formatSeriesPosition } from '~/lib/bookUtils'
 import { formatBytes, parseGraphQLDecimal } from '~/lib/format'
-import { useDownload, useIsBookDownloaded, useIsBookDownloading } from '~/lib/hooks'
+import { useDownload } from '~/lib/hooks'
 import { usePreferencesStore } from '~/stores'
-
-dayjs.extend(relativeTime)
-dayjs.extend(duration)
 
 const query = graphql(`
 	query BookById($id: ID!) {
@@ -154,8 +150,6 @@ export default function Screen() {
 	})
 	const { downloadBook } = useDownload({ serverId: serverID })
 
-	const isDownloading = useIsBookDownloading(bookID)
-
 	const [isRefetching, setIsRefetching] = useState(false)
 
 	// Note: I am not binding the refresh control to the isRefetching state from useSuspenseGraphQL because
@@ -167,12 +161,8 @@ export default function Screen() {
 		})
 	}
 
-	const isDownloaded = useIsBookDownloaded(bookID, serverID)
-
-	const accentColor = usePreferencesStore((state) => state.accentColor)
-
 	const onDownloadBook = useCallback(async () => {
-		if (isDownloaded || !book || isDownloading) return
+		if (!book) return
 
 		return await downloadBook({
 			id: book.id,
@@ -187,7 +177,7 @@ export default function Screen() {
 			thumbnailMeta: book.thumbnail.metadata || undefined,
 			toc: book.ebook?.toc,
 		})
-	}, [isDownloaded, downloadBook, book, isDownloading])
+	}, [downloadBook, book])
 
 	const router = useRouter()
 	const insets = useSafeAreaInsets()
@@ -312,10 +302,10 @@ export default function Screen() {
 		}
 
 		if (elapsedSeconds) {
-			const readTime = dayjs.duration(elapsedSeconds, 'seconds').humanize()
+			const readTime = formatHumanDuration(elapsedSeconds, { significantUnits: 1 })
 			return <Card.Stat label="Read time" value={readTime} />
 		} else {
-			return <Card.Stat label="Started" value={dayjs(startedAt).fromNow(true)} />
+			return <Card.Stat label="Started" value={formatDistanceToNow(new Date(startedAt))} />
 		}
 	}
 
@@ -334,12 +324,12 @@ export default function Screen() {
 
 	const lastCompletionDistance =
 		lastCompletion?.completedAt != null
-			? dayjs(lastCompletion.completedAt).fromNow(false)
+			? formatDistanceToNow(new Date(lastCompletion.completedAt), { addSuffix: true })
 			: 'Unknown'
 
 	const lastCompletionReadTime =
 		lastCompletion?.elapsedSeconds != null
-			? dayjs.duration(lastCompletion.elapsedSeconds, 'seconds').humanize()
+			? formatHumanDuration(lastCompletion.elapsedSeconds, { significantUnits: 1 })
 			: 'Unknown'
 
 	return (
@@ -429,28 +419,8 @@ export default function Screen() {
 						>
 							{renderRead()}
 						</Button>
-						{checkPermission(UserPermission.DownloadFile) && !isDownloaded && (
-							<Button
-								variant="secondary"
-								roundness="full"
-								disabled={isDownloaded || isDownloading}
-								onPress={onDownloadBook}
-								className="flex-row gap-2"
-							>
-								{isDownloading && (
-									<View className="pointer-events-none animate-spin">
-										<Icon
-											className="h-5 w-5"
-											as={Loader2}
-											style={{
-												// @ts-expect-error: It's fine
-												color: accentColor,
-											}}
-										/>
-									</View>
-								)}
-								<Text>Download</Text>
-							</Button>
+						{checkPermission(UserPermission.DownloadFile) && (
+							<DownloadButton bookId={bookID} serverId={serverID} onDownload={onDownloadBook} />
 						)}
 					</View>
 

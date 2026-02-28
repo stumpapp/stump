@@ -1,18 +1,21 @@
 import { useMemo } from 'react'
-import { ScrollView, View } from 'react-native'
+import { Pressable, ScrollView, View } from 'react-native'
 
 import { Badge, Text } from '~/components/ui'
+import { cn } from '~/lib/utils'
 
-// TODO: Can probably extend to have some kind of onBadgePress or sm
+type MetadataBadgeItem = {
+	label: string
+	// TODO: It might be better to have an getPressHandler or something so that it can evaluate whether
+	// onPress will actually do anything. I'm too lazy right now
+	onPress?: () => void
+}
 
 type Props = {
 	label: string
-	items: string[]
+	items: MetadataBadgeItem[]
 	singleRowThreshold?: number // if <= to this then will render in a single row
 }
-
-// TODO: The spacing here is fucked, too lazy to fix it now. It should align
-// better when used with cards etc, and/or provide props to adjust
 
 export default function MetadataBadgeSection({ label, items, singleRowThreshold = 4 }: Props) {
 	const rows = useMemo(() => {
@@ -30,22 +33,33 @@ export default function MetadataBadgeSection({ label, items, singleRowThreshold 
 
 	return (
 		<View className="gap-2">
-			<Text className="px-4 text-lg font-semibold text-foreground-muted">{label}</Text>
+			<Text className="ios:px-4 px-2 text-lg font-semibold text-foreground-muted">{label}</Text>
 
 			<ScrollView
 				horizontal
 				showsHorizontalScrollIndicator={false}
-				contentContainerStyle={{
-					paddingHorizontal: 24,
-				}}
+				contentContainerClassName="ios:px-4 gap-2 px-2"
 			>
 				<View className="gap-2">
 					{rows.map((row, rowIndex) => (
 						<View key={rowIndex} className="flex-row gap-2">
-							{row.map((item) => (
-								<Badge key={item}>
-									<Text className="text-sm">{item}</Text>
-								</Badge>
+							{row.map((item, itemIndex) => (
+								<Pressable
+									key={`${item.label}-${itemIndex}`}
+									onPress={item.onPress}
+									disabled={!item.onPress}
+								>
+									{({ pressed }) => (
+										<Badge
+											className={cn({
+												'opacity-80': pressed,
+												'border border-edge bg-background-surface-secondary': item.onPress,
+											})}
+										>
+											<Text className="text-sm">{item.label}</Text>
+										</Badge>
+									)}
+								</Pressable>
 							))}
 						</View>
 					))}

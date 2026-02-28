@@ -1,6 +1,5 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
-import dayjs from 'dayjs'
-import duration from 'dayjs/plugin/duration'
+import { formatHumanDuration } from '@stump/i18n'
 import { forwardRef, useMemo } from 'react'
 import { View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -15,8 +14,6 @@ import { ThumbnailImage } from '../image'
 import { Card, Heading, Text } from '../ui'
 import { DownloadedFile } from './types'
 import { getThumbnailPath } from './utils'
-
-dayjs.extend(duration)
 
 type Props = {
 	downloadedFile: DownloadedFile
@@ -64,7 +61,7 @@ export const DownloadedBookDetailsSheet = forwardRef<TrueSheet, Props>(
 
 		const readTime = useMemo(() => {
 			if (!readProgressData?.elapsedSeconds) return null
-			return dayjs.duration(readProgressData.elapsedSeconds, 'seconds').humanize()
+			return formatHumanDuration(readProgressData.elapsedSeconds)
 		}, [readProgressData])
 
 		// TODO: Consider more metadata fields

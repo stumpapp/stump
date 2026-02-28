@@ -1,6 +1,6 @@
 import { UserPermission } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
-import dayjs from 'dayjs'
+import { addDays, subDays } from 'date-fns'
 
 import { useAppContext } from '@/context'
 
@@ -40,7 +40,7 @@ describe('CreateOrUpdateAPIKeyForm', () => {
 			expect(
 				schema.safeParse({
 					...validBase,
-					expiresAt: dayjs().add(1, 'day').toDate(),
+					expiresAt: addDays(new Date(), 1),
 				}).success,
 			).toBe(true)
 		})
@@ -71,7 +71,7 @@ describe('CreateOrUpdateAPIKeyForm', () => {
 			expect(
 				schema.safeParse({
 					...validBase,
-					expiresAt: dayjs().subtract(1, 'day').toDate(),
+					expiresAt: subDays(new Date(), 1),
 				}).success,
 			).toBe(false)
 			expect(

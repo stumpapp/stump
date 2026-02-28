@@ -1,6 +1,6 @@
 import { CheckBox, DatePicker, Input } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import dayjs from 'dayjs'
+import { endOfDay } from 'date-fns'
 import { useMemo } from 'react'
 import { useFormContext, useFormState } from 'react-hook-form'
 import { useMediaMatch } from 'rooks'
@@ -40,7 +40,7 @@ export default function RangeValue({ def: { field, value }, idx }: Props) {
 		if (value === undefined) {
 			form.resetField(`filters.groups.${groupIdx}.filters.${idx}.value.${key}`)
 		} else {
-			const adjustedValue = typeof value === 'number' ? value : dayjs(value).endOf('day').toDate()
+			const adjustedValue = typeof value === 'number' ? value : endOfDay(value)
 			form.setValue(`filters.groups.${groupIdx}.filters.${idx}.value.${key}`, adjustedValue)
 		}
 	}
@@ -52,7 +52,7 @@ export default function RangeValue({ def: { field, value }, idx }: Props) {
 					<>
 						<DatePicker
 							placeholder={t(getKey('from.date'))}
-							selected={value && value.from ? dayjs(value.from).toDate() : undefined}
+							selected={value && value.from ? new Date(value.from) : undefined}
 							onChange={changeHandler('from')}
 							className="md:w-52"
 							popover={{
@@ -61,7 +61,7 @@ export default function RangeValue({ def: { field, value }, idx }: Props) {
 						/>
 						<DatePicker
 							placeholder={t(getKey('to.date'))}
-							selected={value && value.to ? dayjs(value.to).toDate() : undefined}
+							selected={value && value.to ? new Date(value.to) : undefined}
 							onChange={changeHandler('to')}
 							className="md:w-52"
 							popover={{

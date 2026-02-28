@@ -11,11 +11,11 @@ use sea_orm::{prelude::*, sea_query::OnConflict, Set};
 use serde::{Deserialize, Serialize};
 
 use crate::job::{
-	error::JobError, JobExt, JobOutputExt, JobProgress, JobTaskOutput, WorkerCtx,
-	WorkingState, WrappedJob,
+	error::JobError, JobExecuteLog, JobExt, JobOutputExt, JobProgress, JobTaskOutput,
+	WorkerCtx, WorkingState, WrappedJob,
 };
 
-use super::ProviderClientCache;
+use super::{apply, ProviderClientCache};
 
 type Id = String;
 
@@ -95,6 +95,8 @@ pub struct MetadataFetchJobOutput {
 	pub skipped: u64,
 	/// Number of entities that failed during fetch
 	pub failed: u64,
+	/// Number of entities that were auto-applied
+	pub auto_applied: u64,
 }
 
 impl JobOutputExt for MetadataFetchJobOutput {
@@ -104,6 +106,7 @@ impl JobOutputExt for MetadataFetchJobOutput {
 		self.no_matches += updated.no_matches;
 		self.skipped += updated.skipped;
 		self.failed += updated.failed;
+		self.auto_applied += updated.auto_applied;
 	}
 }
 
@@ -296,6 +299,8 @@ impl JobExt for MetadataFetchJob {
 			});
 		}
 
+		let mut logs = vec![];
+
 		match task {
 			MetadataFetchTask::FetchSeries {
 				series_id,
@@ -310,10 +315,10 @@ impl JobExt for MetadataFetchJob {
 				if !self.params.force_refetch {
 					let existing = metadata_fetch_status::Entity::find()
 						.filter(metadata_fetch_status::Column::SeriesId.eq(&series_id))
-						.filter(
-							metadata_fetch_status::Column::Status
-								.eq(MetadataFetchStatus::Matched),
-						)
+						.filter(metadata_fetch_status::Column::Status.is_in([
+							MetadataFetchStatus::AwaitingReview,
+							MetadataFetchStatus::Fetched,
+						]))
 						.one(conn)
 						.await?;
 
@@ -321,7 +326,7 @@ impl JobExt for MetadataFetchJob {
 						output.skipped = 1;
 						return Ok(JobTaskOutput {
 							output,
-							logs: vec![],
+							logs,
 							subtasks: vec![],
 						});
 					}
@@ -343,7 +348,11 @@ impl JobExt for MetadataFetchJob {
 									all_candidates.extend(candidates);
 								},
 								Err(e) => {
-									tracing::warn!(
+									logs.push(JobExecuteLog::error(format!(
+										"Failed to search provider for series metadata: {:?}",
+										e
+									)));
+									tracing::error!(
 										provider = ?config.provider_type,
 										error = ?e,
 										"Failed to search provider for series metadata"
@@ -352,7 +361,11 @@ impl JobExt for MetadataFetchJob {
 							}
 						},
 						Err(e) => {
-							tracing::warn!(
+							logs.push(JobExecuteLog::error(format!(
+								"Failed to get provider client: {:?}",
+								e
+							)));
+							tracing::error!(
 								provider = ?config.provider_type,
 								error = ?e,
 								"Failed to get provider client"
@@ -366,7 +379,7 @@ impl JobExt for MetadataFetchJob {
 					MetadataFetchStatus::NoMatch
 				} else {
 					output.matches_found = 1;
-					MetadataFetchStatus::Matched
+					MetadataFetchStatus::AwaitingReview
 				};
 
 				let candidates_json = serde_json::to_value(&all_candidates)
@@ -391,12 +404,47 @@ impl JobExt for MetadataFetchJob {
 					)
 					.exec(conn)
 					.await?;
+
+				if let Some((candidate, config)) =
+					apply::find_auto_apply_candidate(&all_candidates, &provider_configs)
+				{
+					tracing::info!(
+						series_id,
+						provider = candidate.provider,
+						confidence = candidate.confidence,
+						"Auto-applying series metadata match"
+					);
+					match apply::apply_series_match(
+						conn,
+						&series_id,
+						&candidate,
+						config.strategy,
+					)
+					.await
+					{
+						Ok(()) => output.auto_applied = 1,
+						Err(e) => {
+							logs.push(
+								JobExecuteLog::error(format!(
+									"Failed to auto-apply series metadata: {:?}",
+									e
+								))
+								.with_ctx(format!("For {series_name}")),
+							);
+							tracing::error!(
+								series_id,
+								error = ?e,
+								"Failed to auto-apply series metadata"
+							);
+						},
+					}
+				}
 			},
 
 			MetadataFetchTask::FetchMedia {
 				media_id,
 				media_name,
-				series_name,
+				..
 			} => {
 				output.total_processed = 1;
 				ctx.report_progress(JobProgress::msg(&format!(
@@ -407,10 +455,10 @@ impl JobExt for MetadataFetchJob {
 				if !self.params.force_refetch {
 					let existing = metadata_fetch_status::Entity::find()
 						.filter(metadata_fetch_status::Column::MediaId.eq(&media_id))
-						.filter(
-							metadata_fetch_status::Column::Status
-								.eq(MetadataFetchStatus::Matched),
-						)
+						.filter(metadata_fetch_status::Column::Status.is_in([
+							MetadataFetchStatus::AwaitingReview,
+							MetadataFetchStatus::Fetched,
+						]))
 						.one(conn)
 						.await?;
 
@@ -440,7 +488,7 @@ impl JobExt for MetadataFetchJob {
 									all_candidates.extend(candidates);
 								},
 								Err(e) => {
-									tracing::warn!(
+									tracing::error!(
 										provider = ?config.provider_type,
 										error = ?e,
 										"Failed to search provider for media metadata"
@@ -449,7 +497,7 @@ impl JobExt for MetadataFetchJob {
 							}
 						},
 						Err(e) => {
-							tracing::warn!(
+							tracing::error!(
 								provider = ?config.provider_type,
 								error = ?e,
 								"Failed to get provider client"
@@ -463,7 +511,7 @@ impl JobExt for MetadataFetchJob {
 					MetadataFetchStatus::NoMatch
 				} else {
 					output.matches_found = 1;
-					MetadataFetchStatus::Matched
+					MetadataFetchStatus::AwaitingReview
 				};
 
 				let candidates_json = serde_json::to_value(&all_candidates)
@@ -488,12 +536,47 @@ impl JobExt for MetadataFetchJob {
 					)
 					.exec(conn)
 					.await?;
+
+				if let Some((candidate, config)) =
+					apply::find_auto_apply_candidate(&all_candidates, &provider_configs)
+				{
+					tracing::info!(
+						media_id,
+						provider = candidate.provider,
+						confidence = candidate.confidence,
+						"Auto-applying media metadata match"
+					);
+					match apply::apply_media_match(
+						conn,
+						&media_id,
+						&candidate,
+						config.strategy,
+					)
+					.await
+					{
+						Ok(()) => output.auto_applied = 1,
+						Err(e) => {
+							logs.push(
+								JobExecuteLog::error(format!(
+									"Failed to auto-apply media metadata: {:?}",
+									e
+								))
+								.with_ctx(format!("For {media_name}")),
+							);
+							tracing::error!(
+								media_id,
+								error = ?e,
+								"Failed to auto-apply media metadata"
+							);
+						},
+					}
+				}
 			},
 		}
 
 		Ok(JobTaskOutput {
 			output,
-			logs: vec![],
+			logs,
 			subtasks: vec![],
 		})
 	}

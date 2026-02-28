@@ -97,6 +97,35 @@ type AttachmentMeta {
 	media: Media
 }
 
+type Author {
+	name: String!
+	"""
+	The role of this author relative to the context they are queried in (e.g., a series).
+	This field will be None when queried outside of a context in which an author has a role,
+	like at a library-level query
+	"""
+	role: AuthorRole
+	books: [Media!]!
+	series: [AuthorSeries!]!
+	"Books where this author is the sole credited writer (no co-authors)"
+	standalones: [Media!]!
+	"Books where this author shares credit with other writers (co-authored works)"
+	sharedWorks: [SharedWork!]!
+}
+
+"The role of an author in relation to a work or series"
+enum AuthorRole {
+	PRIMARY
+	CO_AUTHOR
+}
+
+type AuthorSeries {
+	title: String!
+	books: [Media!]!
+	"Authors who contributed to this series"
+	authors: [Author!]!
+}
+
 type BookClub {
 	id: String!
 	name: String!
@@ -262,6 +291,16 @@ input ComputedFilterReadingStatus @oneOf {
 	isNoneOf: [ReadingStatus!]
 }
 
+"A factor that contributed to a match's confidence score"
+type ConfidenceFactor {
+	"Name of the scoring factor (e.g., \"title_exact_match\", \"isbn_match\")"
+	factor: String!
+	"How much weight this factor carried"
+	weight: Float!
+	"Whether this factor matched"
+	matched: Boolean!
+}
+
 "An event that is emitted by the core and consumed by a client"
 union CoreEvent = JobStarted | JobUpdate | JobOutput | DiscoveredMissingLibrary | CreatedMedia | CreatedManySeries | CreatedOrUpdatedManyMedia
 
@@ -300,6 +339,23 @@ input CreateBookClubScheduleBook {
 input CreateBookClubScheduleInput {
 	defaultIntervalDays: Int
 	books: [CreateBookClubScheduleBook!]!
+}
+
+"Input object for creating a metadata provider configuration"
+input CreateMetadataProviderConfigInput {
+	"The provider type"
+	providerType: MetadataProvider!
+	"The API token for authenticating with the provider"
+	apiToken: String!
+	"Whether the provider is enabled"
+	enabled: Boolean
+	"Auto-apply configuration"
+	autoApplyConfig: JSON
+	"""
+	Optional expiration date for the API key. This is exclusively a QOL thing,
+	since the creds don't live within the management domain of Stump
+	"""
+	apiTokenExpiresAt: DateTime
 }
 
 input CreateOrUpdateLibraryInput {
@@ -561,6 +617,54 @@ type ExternalJobOutput {
 	val: JSON!
 }
 
+"Metadata about a media item from an external metadata provider"
+type ExternalMediaMetadata {
+	provider: String!
+	externalId: String!
+	title: String
+	summary: String
+	pageCount: Int
+	seriesName: String
+	seriesExternalId: String
+	number: Float
+	day: Int
+	month: Int
+	year: Int
+	genres: [String!]
+	tags: [String!]
+	isbn: String
+	isbn13: String
+	writers: [String!]
+	artists: [String!]
+	colorists: [String!]
+	letterers: [String!]
+	coverArtists: [String!]
+	coverUrl: String
+	providerUrl: String
+}
+
+union ExternalMetadata = ExternalMediaMetadata | ExternalSeriesMetadata
+
+"Metadata about a series from an external metadata provider"
+type ExternalSeriesMetadata {
+	provider: String!
+	externalId: String!
+	title: String!
+	alternativeTitles: [String!]!
+	summary: String
+	status: PublicationStatus
+	year: Int
+	endYear: Int
+	genres: [String!]
+	tags: [String!]
+	ageRating: String
+	authors: [String!]
+	artists: [String!]
+	publisher: String
+	coverUrl: String
+	volumeCount: Int
+}
+
 input FieldFilterFileStatus @oneOf {
 	eq: FileStatus
 	neq: FileStatus
@@ -797,6 +901,7 @@ type Library {
 	emoji: String
 	configId: Int!
 	lastScannedAt: DateTime
+	authors: [Author!]!
 	config: LibraryConfig!
 	excludedUsers: [User!]!
 	isFavorite: Boolean!
@@ -833,6 +938,7 @@ type LibraryConfig {
 	libraryPattern: LibraryPattern!
 	defaultLibraryViewMode: LibraryViewMode!
 	hideSeriesView: Boolean!
+	libraryType: LibraryType!
 	processThumbnailColorsEvenWithoutConfig: Boolean!
 	libraryId: String
 	thumbnailConfig: ImageProcessorOptions
@@ -847,6 +953,7 @@ input LibraryConfigInput {
 	processMetadata: Boolean!
 	watch: Boolean!
 	libraryPattern: LibraryPattern!
+	libraryType: LibraryType!
 	defaultLibraryViewMode: LibraryViewMode!
 	hideSeriesView: Boolean!
 	thumbnailConfig: ImageProcessorOptionsInput
@@ -934,6 +1041,18 @@ type LibraryStats {
 	totalReadingTimeSeconds: Int!
 }
 
+"The type of content a library contains"
+enum LibraryType {
+	COMIC
+	MANGA
+	BOOK
+	LIGHT_NOVEL
+	MANHWA
+	MIXED
+	WEB_NOVEL
+	WEBTOON
+}
+
 enum LibraryViewMode {
 	SERIES
 	BOOKS
@@ -985,6 +1104,19 @@ enum LogModelOrdering {
 	TIMESTAMP
 	JOB_ID
 	CONTEXT
+}
+
+"A potential match from an external provider"
+type MatchCandidate {
+	"The provider this match came from"
+	provider: String!
+	"External ID on the provider's system"
+	externalId: String!
+	metadata: ExternalMetadata!
+	"Confidence score (0.0 - 1.0)"
+	confidence: Float!
+	"Factors that contributed to the confidence score"
+	confidenceFactors: [ConfidenceFactor!]!
 }
 
 type Media {
@@ -1143,6 +1275,10 @@ type MediaMetadata {
 	titleSort: String
 	volume: Int
 	year: Int
+	"The external metadata provider that supplied this metadata (e.g., \"HARDCOVER\")"
+	metadataSource: String
+	"The external ID on the metadata provider's system"
+	metadataExternalId: String
 	writers: [String!]!
 	genres: [String!]!
 	characters: [String!]!
@@ -1257,6 +1393,9 @@ enum MediaMetadataModelOrdering {
 	VOLUME
 	WRITERS
 	YEAR
+	METADATA_SOURCE
+	METADATA_EXTERNAL_ID
+	LOCKED_FIELDS
 }
 
 input MediaMetadataOrderByField {
@@ -1310,6 +1449,63 @@ input MediaOrderByField {
 input MediaProgressInput @oneOf {
 	epub: EpubProgressInput
 	paged: PagedProgressInput
+}
+
+"How to merge external metadata values onto existing entity metadata"
+enum MergeStrategy {
+	"Only populate fields that are currently nullish"
+	FILL_GAPS
+	"Overwrite existing values with (truthy) external data"
+	PREFER_EXTERNAL
+	"FillGaps and merge/dedupe for array fields"
+	FILL_AND_MERGE_LISTS
+}
+
+enum MetadataFetchStatus {
+	AWAITING_REVIEW
+	NOT_STARTED
+	IN_PROGRESS
+	FETCHED
+	MATCHED
+	NO_MATCH
+	FAILED
+}
+
+"""
+An identifer for specifying the target of a metadata fetch status query. I added
+mostly for type safety and not annoyingly wrangling both media_id and series_id
+"""
+input MetadataFetchStatusId @oneOf {
+	series: String
+	media: String
+}
+
+type MetadataFetchStatusModel {
+	id: Int!
+	status: MetadataFetchStatus!
+	mediaId: String
+	seriesId: String
+	matchCandidates: JSON
+	acceptedMatchCandidate: JSON
+	addedAt: DateTime!
+	updatedAt: DateTime
+}
+
+"The supported external metadata providers"
+enum MetadataProvider {
+	"Hardcover (https://hardcover.app)"
+	HARDCOVER
+}
+
+type MetadataProviderConfigModel {
+	id: Int!
+	providerType: MetadataProvider!
+	enabled: Boolean!
+	apiTokenExpiresAt: DateTime
+	"JSON blob for auto-apply settings: { enabled, threshold, strategy, exclude_fields }"
+	autoApplyConfig: JSON
+	createdAt: DateTime!
+	updatedAt: DateTime
 }
 
 """
@@ -1388,7 +1584,6 @@ type Mutation {
 	will be generated based on the library's thumbnail configuration.
 	"""
 	updateMediaThumbnail(id: ID!, input: PageBasedThumbnailInput!): Media!
-	updateMediaMetadata(id: ID!, input: MediaMetadataInput!): Media!
 	deleteMediaProgress(id: ID!): Media!
 	"""
 	Deletes all of a user's reading history for a specific media item. This cannot be undone, so
@@ -1397,6 +1592,21 @@ type Mutation {
 	deleteMediaReadHistory(id: ID!): Media!
 	updateMediaProgress(id: ID!, input: MediaProgressInput!): ReadingProgressOutput!
 	markMediaAsComplete(id: ID!, isComplete: Boolean!, page: Int): FinishedReadingSessionModel
+	updateMediaMetadata(id: ID!, input: MediaMetadataInput!): Media!
+	"Search external metadata providers for a media item and return match candidates"
+	fetchMediaMetadata(id: ID!): [MatchCandidate!]!
+	"Accept a match candidate and apply it to media metadata"
+	acceptMediaMatch(mediaId: ID!, candidateIndex: Int!, strategy: MergeStrategy): MetadataFetchStatusModel!
+	"Reject the current match candidates for a media item"
+	rejectMediaMatch(mediaId: ID!, candidateIndex: Int!): MetadataFetchStatusModel!
+	updateSeriesMetadata(id: ID!, input: SeriesMetadataInput!): Series!
+	resetSeriesMetadata(id: ID!, impact: MetadataResetImpact!): Series!
+	"Search external metadata providers for a series and return match candidates"
+	fetchSeriesMetadata(id: ID!): [MatchCandidate!]!
+	"Accept a match candidate and apply it to the series metadata"
+	acceptSeriesMatch(seriesId: ID!, candidateIndex: Int!, strategy: MergeStrategy): MetadataFetchStatusModel!
+	"Reject the current match candidates for a series"
+	rejectSeriesMatch(seriesId: ID!, candidateIndex: Int!): MetadataFetchStatusModel!
 	analyzeLibrary(id: ID!, forceReanalysis: Boolean! = false): Boolean!
 	"""
 	Delete media and series from a library that match one of the following conditions:
@@ -1491,8 +1701,6 @@ type Mutation {
 	will be generated based on the library's thumbnail configuration.
 	"""
 	updateSeriesThumbnail(id: ID!, input: UpdateThumbnailInput!): Series!
-	updateSeriesMetadata(id: ID!, input: SeriesMetadataInput!): Series!
-	resetSeriesMetadata(id: ID!, impact: MetadataResetImpact!): Series!
 	"""
 	Toggle the completion status of a series. If the series is marked as completed, all books
 	in the series will also be marked as completed, and vice versa for marking as not completed.
@@ -1556,6 +1764,9 @@ type Mutation {
 	createScheduledJobConfig(input: ScheduledJobConfigInput!): ScheduledJobConfig!
 	updateScheduledJobConfig(id: Int!, input: ScheduledJobConfigInput!): ScheduledJobConfig!
 	deleteScheduledJobConfig(id: Int!): Boolean!
+	createMetadataProvider(input: CreateMetadataProviderConfigInput!): MetadataProviderConfigModel!
+	updateMetadataProvider(id: Int!, input: PatchMetadataProviderConfigInput!): MetadataProviderConfigModel!
+	deleteMetadataProvider(id: Int!): MetadataProviderConfigModel!
 }
 
 input NavigationArrangementInput {
@@ -1688,6 +1899,11 @@ input PagedProgressInput {
 	elapsedSeconds: Int
 }
 
+type PaginatedAuthorResponse {
+	nodes: [Author!]!
+	pageInfo: PaginationInfo!
+}
+
 type PaginatedDirectoryListingResponse {
 	nodes: [DirectoryListing!]!
 	pageInfo: PaginationInfo!
@@ -1766,6 +1982,21 @@ input PatchEmailDeviceInput {
 	forbidden: Boolean
 }
 
+"A patch equivalent of [CreateMetadataProviderConfigInput], i.e. just with optional fields."
+input PatchMetadataProviderConfigInput {
+	"The API token for authenticating with the provider"
+	apiToken: String
+	"Whether the provider is enabled"
+	enabled: Boolean
+	"Auto-apply configuration"
+	autoApplyConfig: JSON
+	"""
+	Optional expiration date for the API key. This is exclusively a QOL thing,
+	since the creds don't live within the management domain of Stump
+	"""
+	apiTokenExpiresAt: DateTime
+}
+
 type PlaceholderGenerationOutput {
 	"The total number of entities that were visited"
 	visitedEntities: Int!
@@ -1775,9 +2006,34 @@ type PlaceholderGenerationOutput {
 	generatedMetadata: Int!
 }
 
+enum PublicationStatus {
+	ONGOING
+	COMPLETED
+	HIATUS
+	CANCELLED
+	UPCOMING
+}
+
 type Query {
 	apiKeys: [Apikey!]!
 	apiKeyById(id: Int!): Apikey!
+	"Get a single author by name (case-insensitive exact match)"
+	authorByName(		name: String!,
+		"Optional library ID to scope the author search"
+		libraryId: String
+	): Author
+	"Get a paginated list of authors with optional search filter"
+	authors(
+		"Case-insensitive substring search filter"
+		search: String,
+		"Optional library ID to scope the author search"
+		libraryId: String,		pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}
+	): PaginatedAuthorResponse!
+	"Get a single author series by name (case-insensitive exact match)"
+	authorSeriesByName(		name: String!,
+		"Optional library ID to scope the series search"
+		libraryId: String
+	): AuthorSeries
 	bookClubs(all: Boolean = null): [BookClub!]!
 	bookClubById(id: ID!): BookClub!
 	bookClubBySlug(slug: String!): BookClub
@@ -1860,6 +2116,11 @@ type Query {
 	smartListById(id: ID!): SmartList
 	smartListMeta(id: ID!): SmartListMeta
 	smartListItems(id: ID!, limit: Int = null): SmartListItems!
+	metadataProviderConfigs: [MetadataProviderConfigModel!]!
+	metadataProviderConfigById(id: Int!): MetadataProviderConfigModel
+	metadataFetchStatus(id: MetadataFetchStatusId!): MetadataFetchStatusModel
+	"Return all metadata fetch statuses that are awaiting user review."
+	pendingMetadataMatches: [MetadataFetchStatusModel!]!
 }
 
 "The different reading directions supported by any Stump reader"
@@ -2145,6 +2406,10 @@ type SeriesMetadata {
 	volume: Int
 	"Year the series started (publication start)"
 	year: Int
+	"The external metadata provider that supplied this metadata (e.g., \"HARDCOVER\")"
+	metadataSource: String
+	"The external ID on the metadata provider's system"
+	metadataExternalId: String
 	characters: [String!]!
 	collects: [CollectedItem!]!
 	genres: [String!]!
@@ -2213,6 +2478,9 @@ enum SeriesMetadataModelOrdering {
 	VOLUME
 	WRITERS
 	YEAR
+	METADATA_SOURCE
+	METADATA_EXTERNAL_ID
+	LOCKED_FIELDS
 }
 
 input SeriesMetadataOrderByField {
@@ -2266,6 +2534,19 @@ type SeriesStats {
 	completedBooks: Int!
 	inProgressBooks: Int!
 	totalReadingTimeSeconds: Int!
+}
+
+"""
+A work that has multiple authors (co-authored). This wrapper allows querying
+the authors/co-authors of the work in context.
+"""
+type SharedWork {
+	"The media/book itself"
+	media: Media!
+	"All authors who contributed to this work, with their roles"
+	authors: [Author!]!
+	"Authors who contributed to this work, excluding the viewing author"
+	coAuthors: [Author!]!
 }
 
 type SmartList {
@@ -2750,6 +3031,14 @@ enum UserPermission {
 	READ_JOBS
 	"Grant access to manage jobs, like pausing, resuming, deleting, or cancelling them"
 	MANAGE_JOBS
+	"Grant access to read metadata fetch statuses"
+	METADATA_FETCH_STATUS_READ
+	"Grant access to manage metadata fetch statuses (accept matches, etc)"
+	METADATA_FETCH_STATUS_MANAGE
+	"Grant access to read metadata provider configurations"
+	METADATA_PROVIDER_READ
+	"Grant access to manage metadata provider configurations (create, update, delete)"
+	METADATA_PROVIDER_MANAGE
 	"Grant access to read application-level logs, e.g. job logs"
 	READ_PERSISTED_LOGS
 	"Grant access to read system logs"

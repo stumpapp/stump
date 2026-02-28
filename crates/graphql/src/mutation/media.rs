@@ -23,10 +23,7 @@ use stump_core::{
 use crate::{
 	data::{AuthContext, CoreContext},
 	guard::PermissionGuard,
-	input::{
-		media::{MediaMetadataInput, MediaProgressInput},
-		thumbnail::PageBasedThumbnailInput,
-	},
+	input::{media::MediaProgressInput, thumbnail::PageBasedThumbnailInput},
 	object::{
 		media::Media,
 		reading_session::{ActiveReadingSession, FinishedReadingSession},

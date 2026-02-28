@@ -1,16 +1,20 @@
 pub mod error;
+pub mod merge;
 mod provider;
 mod providers;
 pub mod rate_limit;
+pub mod scoring;
 pub(crate) mod serde_utils;
 pub mod types;
 
 pub use error::{MetadataProviderError, MetadataResult};
+pub use merge::{AutoApplyConfig, FieldMerger, MergeStrategy};
 pub use provider::MetadataProvider;
 pub use rate_limit::RateLimiter;
+pub use scoring::MatchScorer;
 pub use types::{
-	ExternalMediaMetadata, ExternalMetadata, ExternalSeriesMetadata, MatchCandidate,
-	MediaType, PublicationStatus, SearchQuery,
+	ConfidenceFactor, ExternalMediaMetadata, ExternalMetadata, ExternalSeriesMetadata,
+	MatchCandidate, MediaType, MetadataField, PublicationStatus, SearchQuery,
 };
 
 use providers::HardcoverClient;

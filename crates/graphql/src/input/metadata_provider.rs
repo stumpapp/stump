@@ -1,6 +1,7 @@
-use async_graphql::{InputObject, OneofObject, Result};
+use async_graphql::{InputObject, Json, OneofObject, Result};
+use metadata_integrations::merge::AutoApplyConfig;
 use models::{entity::metadata_provider_config, shared::enums::MetadataProvider};
-use sea_orm::{prelude::Decimal, ActiveValue::NotSet, Set, Unchanged};
+use sea_orm::{ActiveValue::NotSet, Set, Unchanged};
 use stump_core::utils::encryption::encrypt_string;
 
 /// Input object for creating a metadata provider configuration
@@ -12,14 +13,11 @@ pub struct CreateMetadataProviderConfigInput {
 	pub api_token: String,
 	/// Whether the provider is enabled
 	pub enabled: Option<bool>,
-	/// The confidence threshold for auto-applying matches (0.0 - 1.0, defaults to 0.95).
-	/// This will only be considered if [Self::auto_apply_matches] is true
-	pub auto_apply_threshold: Option<f64>,
-	/// Whether to automatically apply matches that meet the threshold
-	pub auto_apply_matches: Option<bool>,
+	/// Auto-apply configuration
+	pub auto_apply_config: Option<Json<AutoApplyConfig>>,
 	/// Optional expiration date for the API key. This is exclusively a QOL thing,
 	/// since the creds don't live within the management domain of Stump
-	pub api_key_expires_at: Option<chrono::DateTime<chrono::FixedOffset>>,
+	pub api_token_expires_at: Option<chrono::DateTime<chrono::FixedOffset>>,
 }
 
 impl CreateMetadataProviderConfigInput {
@@ -29,20 +27,19 @@ impl CreateMetadataProviderConfigInput {
 	) -> Result<metadata_provider_config::ActiveModel> {
 		let encrypted_api_token = encrypt_string(&self.api_token, encryption_key)?;
 
-		let auto_apply_threshold = self.auto_apply_threshold.map(|t| {
-			Decimal::from_f64_retain(t).unwrap_or_else(|| {
-				Decimal::from_str_exact("0.95").expect("This should never happen!")
-			})
-		});
+		let auto_apply_json = self
+			.auto_apply_config
+			.map(|c| serde_json::to_value(c.0))
+			.transpose()
+			.map_err(|e| async_graphql::Error::new(e.to_string()))?;
 
 		Ok(metadata_provider_config::ActiveModel {
 			id: NotSet,
 			provider_type: Set(self.provider_type),
 			enabled: Set(self.enabled.unwrap_or(true)),
 			encrypted_api_token: Set(Some(encrypted_api_token)),
-			api_key_expires_at: Set(self.api_key_expires_at),
-			auto_apply_threshold: auto_apply_threshold.map(Set).unwrap_or(NotSet),
-			auto_apply_matches: self.auto_apply_matches.map(Set).unwrap_or(NotSet),
+			api_token_expires_at: Set(self.api_token_expires_at),
+			auto_apply_config: auto_apply_json.map(|v| Set(Some(v))).unwrap_or(NotSet),
 			created_at: NotSet,
 			updated_at: NotSet,
 		})
@@ -59,13 +56,11 @@ pub struct PatchMetadataProviderConfigInput {
 	pub api_token: Option<String>,
 	/// Whether the provider is enabled
 	pub enabled: Option<bool>,
-	/// The confidence threshold for auto-applying matches (0.0 - 1.0)
-	pub auto_apply_threshold: Option<f64>,
-	/// Whether to automatically apply matches that meet the threshold
-	pub auto_apply_matches: Option<bool>,
+	/// Auto-apply configuration
+	pub auto_apply_config: Option<Json<AutoApplyConfig>>,
 	/// Optional expiration date for the API key. This is exclusively a QOL thing,
 	/// since the creds don't live within the management domain of Stump
-	pub api_key_expires_at: Option<chrono::DateTime<chrono::FixedOffset>>,
+	pub api_token_expires_at: Option<chrono::DateTime<chrono::FixedOffset>>,
 }
 
 impl PatchMetadataProviderConfigInput {
@@ -79,11 +74,11 @@ impl PatchMetadataProviderConfigInput {
 			.map(|token| encrypt_string(&token, encryption_key))
 			.transpose()?;
 
-		let auto_apply_threshold = self.auto_apply_threshold.map(|t| {
-			Decimal::from_f64_retain(t).unwrap_or_else(|| {
-				Decimal::from_str_exact("0.95").expect("This should never happen!")
-			})
-		});
+		let auto_apply_json = self
+			.auto_apply_config
+			.map(|c| serde_json::to_value(c.0))
+			.transpose()
+			.map_err(|e| async_graphql::Error::new(e.to_string()))?;
 
 		Ok(metadata_provider_config::ActiveModel {
 			id: Unchanged(model.id),
@@ -92,17 +87,13 @@ impl PatchMetadataProviderConfigInput {
 			encrypted_api_token: encrypted_api_token
 				.map(|t| Set(Some(t)))
 				.unwrap_or(Unchanged(model.encrypted_api_token)),
-			api_key_expires_at: self
-				.api_key_expires_at
+			api_token_expires_at: self
+				.api_token_expires_at
 				.map(|t| Set(Some(t)))
-				.unwrap_or(Unchanged(model.api_key_expires_at)),
-			auto_apply_threshold: auto_apply_threshold
-				.map(Set)
-				.unwrap_or(Unchanged(model.auto_apply_threshold)),
-			auto_apply_matches: self
-				.auto_apply_matches
-				.map(Set)
-				.unwrap_or(Unchanged(model.auto_apply_matches)),
+				.unwrap_or(Unchanged(model.api_token_expires_at)),
+			auto_apply_config: auto_apply_json
+				.map(|v| Set(Some(v)))
+				.unwrap_or(Unchanged(model.auto_apply_config)),
 			created_at: Unchanged(model.created_at),
 			..Default::default()
 		})

@@ -5,8 +5,13 @@ use crate::{
 	object::media::Media,
 };
 use async_graphql::{Context, Object, Result, ID};
-use models::{entity::media, shared::enums::UserPermission};
+use metadata_integrations::{MatchCandidate, MergeStrategy};
+use models::{
+	entity::{media, metadata_fetch_status},
+	shared::enums::{MetadataFetchStatus, UserPermission},
+};
 use sea_orm::{prelude::*, ActiveValue::Set, IntoActiveModel};
+use stump_core::filesystem::metadata::ProviderClientCache;
 
 #[derive(Default)]
 pub struct MediaMetadataMutation;
@@ -49,19 +54,132 @@ impl MediaMetadataMutation {
 		Ok(model.into())
 	}
 
-	// FIXME: Implement
+	/// Search external metadata providers for a media item and return match candidates
 	#[graphql(guard = "PermissionGuard::one(UserPermission::MetadataFetchStatusManage)")]
-	async fn fetch_media_metadata(&self, ctx: &Context<'_>, id: ID) -> Result<Media> {
-		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
-		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+	async fn fetch_media_metadata(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+	) -> Result<Vec<MatchCandidate>> {
+		let AuthContext { .. } = ctx.data::<AuthContext>()?;
+		let core_ctx = ctx.data::<CoreContext>()?;
+		let conn = core_ctx.conn.as_ref();
 
-		let model = media::ModelWithMetadata::find_for_user(user)
+		let m = media::Entity::find()
 			.filter(media::Column::Id.eq(id.to_string()))
-			.into_model::<media::ModelWithMetadata>()
 			.one(conn)
 			.await?
 			.ok_or("Media not found")?;
 
-		unimplemented!()
+		let encryption_key = core_ctx.get_encryption_key().await?;
+		let provider_cache = ProviderClientCache::new(encryption_key);
+
+		let candidates = stump_core::filesystem::metadata::fetch_media_metadata(
+			conn,
+			&m.id,
+			&m.name,
+			&provider_cache,
+		)
+		.await?;
+
+		Ok(candidates)
+	}
+
+	/// Accept a match candidate and apply it to media metadata
+	#[graphql(guard = "PermissionGuard::one(UserPermission::MetadataFetchStatusManage)")]
+	async fn accept_media_match(
+		&self,
+		ctx: &Context<'_>,
+		media_id: ID,
+		candidate_index: u32,
+		strategy: Option<MergeStrategy>,
+	) -> Result<metadata_fetch_status::Model> {
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+		let strategy = strategy.unwrap_or(MergeStrategy::FillGaps);
+
+		let status = metadata_fetch_status::Entity::find()
+			.filter(metadata_fetch_status::Column::MediaId.eq(media_id.to_string()))
+			.one(conn)
+			.await?
+			.ok_or("No fetch status found for this media")?;
+
+		if status.status != MetadataFetchStatus::AwaitingReview {
+			return Err(async_graphql::Error::new(format!(
+				"Fetch status is {:?}, expected AwaitingReview",
+				status.status
+			)));
+		}
+
+		let candidates: Vec<MatchCandidate> = status
+			.match_candidates
+			.as_ref()
+			.and_then(|v| serde_json::from_value(v.clone()).ok())
+			.unwrap_or_default();
+
+		let candidate = candidates
+			.get(candidate_index as usize)
+			.ok_or("Candidate index out of bounds")?;
+
+		stump_core::filesystem::metadata::apply_media_match(
+			conn,
+			media_id.as_ref(),
+			candidate,
+			strategy,
+		)
+		.await?;
+
+		let updated = metadata_fetch_status::Entity::find()
+			.filter(metadata_fetch_status::Column::MediaId.eq(media_id.to_string()))
+			.one(conn)
+			.await?
+			.ok_or("Failed to re-fetch status")?;
+
+		Ok(updated)
+	}
+
+	/// Reject the current match candidates for a media item
+	#[graphql(guard = "PermissionGuard::one(UserPermission::MetadataFetchStatusManage)")]
+	async fn reject_media_match(
+		&self,
+		ctx: &Context<'_>,
+		media_id: ID,
+		candidate_index: u32,
+	) -> Result<metadata_fetch_status::Model> {
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let status = metadata_fetch_status::Entity::find()
+			.filter(metadata_fetch_status::Column::MediaId.eq(media_id.to_string()))
+			.one(conn)
+			.await?
+			.ok_or("No fetch status found for this media")?;
+
+		let existing_candidates: Vec<MatchCandidate> = status
+			.match_candidates
+			.as_ref()
+			.and_then(|v| serde_json::from_value(v.clone()).ok())
+			.unwrap_or_default();
+
+		if (candidate_index as usize) >= existing_candidates.len() {
+			return Err(async_graphql::Error::new("Candidate index out of bounds"));
+		}
+
+		let adjusted_candidates = existing_candidates
+			.into_iter()
+			.enumerate()
+			.filter(|(i, _)| *i != candidate_index as usize)
+			.map(|(_, c)| c)
+			.collect::<Vec<_>>();
+
+		let mut active = status.into_active_model();
+		if adjusted_candidates.is_empty() {
+			active.status = Set(MetadataFetchStatus::NoMatch);
+		}
+		active.match_candidates = Set(Some(serde_json::to_value(adjusted_candidates)?));
+
+		let updated = metadata_fetch_status::Entity::update(active)
+			.exec(conn)
+			.await?;
+
+		Ok(updated)
 	}
 }

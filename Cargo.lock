@@ -3158,6 +3158,7 @@ dependencies = [
  "itertools 0.14.0",
  "linemux",
  "maplit",
+ "metadata_integrations",
  "models",
  "num-traits",
  "pretty_assertions",
@@ -4711,6 +4712,7 @@ dependencies = [
 name = "metadata_integrations"
 version = "0.0.8"
 dependencies = [
+ "async-graphql",
  "async-trait",
  "chrono",
  "dateparser",
@@ -4733,6 +4735,7 @@ dependencies = [
  "models",
  "sea-orm",
  "sea-orm-migration",
+ "tokio",
 ]
 
 [[package]]

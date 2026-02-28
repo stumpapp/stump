@@ -14,6 +14,7 @@ mod m20260108_000000_add_series_metadata_fields;
 mod m20260116_000000_rewrite_media_annotations;
 mod m20260118_204601_add_bookmark_created_at;
 mod m20260128_000000_add_library_type;
+mod m20260207_000000_metadata_provider_integration;
 
 pub struct Migrator;
 
@@ -34,6 +35,7 @@ impl MigratorTrait for Migrator {
 			Box::new(m20260116_000000_rewrite_media_annotations::Migration),
 			Box::new(m20260118_204601_add_bookmark_created_at::Migration),
 			Box::new(m20260128_000000_add_library_type::Migration),
+			Box::new(m20260207_000000_metadata_provider_integration::Migration),
 		]
 	}
 }

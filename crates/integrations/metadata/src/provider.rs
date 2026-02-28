@@ -6,6 +6,7 @@ use crate::{
 		ExternalMediaMetadata, ExternalSeriesMetadata, MatchCandidate, MediaType,
 		SearchQuery,
 	},
+	MatchScorer,
 };
 
 /// Represents an external metadata source
@@ -31,6 +32,17 @@ pub trait MetadataProvider: Send + Sync {
 		&self,
 		query: &SearchQuery,
 	) -> Result<Vec<MatchCandidate>, MetadataProviderError>;
+
+	/// Score and sort search results based on their relevance to the query
+	fn score_search(
+		&self,
+		query: &SearchQuery,
+		mut candidates: Vec<MatchCandidate>,
+	) -> Vec<MatchCandidate> {
+		let scorer = MatchScorer;
+		scorer.score_and_sort(query, &mut candidates);
+		candidates
+	}
 
 	/// Fetch full metadata for a known external ID
 	async fn fetch_series_metadata(

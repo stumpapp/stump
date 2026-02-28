@@ -20,9 +20,9 @@ pub struct Model {
 	#[sea_orm(column_type = "custom(\"DATETIME\")", nullable)]
 	// Mostly just to serve as a reminder, this isn't enforced since it isn't managed
 	// within our system
-	pub api_key_expires_at: Option<DateTimeWithTimeZone>,
-	pub auto_apply_threshold: Decimal,
-	pub auto_apply_matches: bool,
+	pub api_token_expires_at: Option<DateTimeWithTimeZone>,
+	#[sea_orm(column_type = "Json", nullable)]
+	pub auto_apply_config: Option<serde_json::Value>,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
 	pub created_at: DateTimeWithTimeZone,
 	#[sea_orm(column_type = "custom(\"DATETIME\")", nullable)]
@@ -40,14 +40,6 @@ impl ActiveModelBehavior for ActiveModel {
 	{
 		if insert {
 			self.created_at = ActiveValue::Set(DateTimeWithTimeZone::from(Utc::now()));
-			if self.auto_apply_threshold.is_not_set() {
-				self.auto_apply_threshold = ActiveValue::Set(
-					Decimal::from_str_exact("0.95").expect("This should never happen!"),
-				);
-			}
-			if self.auto_apply_matches.is_not_set() {
-				self.auto_apply_matches = ActiveValue::Set(false);
-			}
 		} else {
 			self.updated_at =
 				ActiveValue::Set(Some(DateTimeWithTimeZone::from(Utc::now())));

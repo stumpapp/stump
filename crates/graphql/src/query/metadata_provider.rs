@@ -5,7 +5,7 @@ use crate::{
 use async_graphql::{Context, Object, Result};
 use models::{
 	entity::{metadata_fetch_status, metadata_provider_config},
-	shared::enums::UserPermission,
+	shared::enums::{MetadataFetchStatus, UserPermission},
 };
 use sea_orm::prelude::*;
 
@@ -37,8 +37,6 @@ impl MetadataProviderQuery {
 		Ok(config)
 	}
 
-	// TODO: Break out into separate query? If enough needed, we def will need a separate mutation for
-	// managing them (accept,reject,etc)
 	#[graphql(guard = "PermissionGuard::one(UserPermission::MetadataFetchStatusRead)")]
 	async fn metadata_fetch_status(
 		&self,
@@ -62,5 +60,24 @@ impl MetadataProviderQuery {
 			.await?;
 
 		Ok(status)
+	}
+
+	/// Return all metadata fetch statuses that are awaiting user review.
+	#[graphql(guard = "PermissionGuard::one(UserPermission::MetadataFetchStatusRead)")]
+	async fn pending_metadata_matches(
+		&self,
+		ctx: &Context<'_>,
+	) -> Result<Vec<metadata_fetch_status::Model>> {
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let statuses = metadata_fetch_status::Entity::find()
+			.filter(
+				metadata_fetch_status::Column::Status
+					.eq(MetadataFetchStatus::AwaitingReview),
+			)
+			.all(conn)
+			.await?;
+
+		Ok(statuses)
 	}
 }

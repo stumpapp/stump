@@ -125,9 +125,6 @@ impl HardcoverClient {
 			id
 		);
 
-		let raw_data: serde_json::Value = self.execute_graphql(&graphql_query).await?;
-		dbg!(&raw_data);
-
 		let data: SeriesQueryData = self.execute_graphql(&graphql_query).await?;
 		data.series
 			.into_iter()
@@ -213,11 +210,12 @@ impl MetadataProvider for HardcoverClient {
 					external_id,
 					metadata: ExternalMetadata::Series(metadata),
 					provider: self.id().to_string(),
+					confidence: 0.0,
+					confidence_factors: Vec::new(),
 				}),
 				Err(e) => {
 					// TODO: Maybe if fetch fails, use naive meta from search?
 					// A full skip failure feels wasteful? Idk, it's a complicated feature
-					dbg!(&external_id, &e);
 					tracing::warn!(
 						external_id,
 						error = ?e,
@@ -227,7 +225,7 @@ impl MetadataProvider for HardcoverClient {
 			}
 		}
 
-		Ok(candidates)
+		Ok(self.score_search(query, candidates))
 	}
 
 	/// Search for books on Hardcover and fetch full metadata for each result
@@ -256,6 +254,8 @@ impl MetadataProvider for HardcoverClient {
 						external_id,
 						metadata: ExternalMetadata::Media(metadata),
 						provider: self.id().to_string(),
+						confidence: 0.0,
+						confidence_factors: Vec::new(),
 					});
 				},
 				Err(e) => {
@@ -270,7 +270,7 @@ impl MetadataProvider for HardcoverClient {
 			}
 		}
 
-		Ok(candidates)
+		Ok(self.score_search(query, candidates))
 	}
 
 	async fn fetch_series_metadata(

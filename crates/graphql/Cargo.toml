@@ -22,6 +22,7 @@ futures-util.workspace = true
 infer.workspace = true
 itertools.workspace = true
 linemux = { git = "https://github.com/jmagnuson/linemux.git", rev = "acaafc602afac5d7a9cd3e087dafc937cac1e364" }
+metadata_integrations = { path = "../integrations/metadata" }
 models = { path = "../models" }
 num-traits.workspace = true
 email = { path = "../email" }

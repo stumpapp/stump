@@ -282,7 +282,7 @@ async fn put_progress(
 			user_id: Set(user.id.clone()),
 			media_id: Set(book.id.clone()),
 			device_id: Set(Some(device_id.clone())),
-			started_at: Set(started_at.unwrap_or_default()),
+			started_at: Set(started_at.unwrap_or_else(|| chrono::Utc::now().into())),
 			..Default::default()
 		};
 		let finished_session = finished_session.insert(&tx).await?;

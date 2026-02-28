@@ -1,4 +1,4 @@
-import { CardList, CardRow, Stepper, Switch } from '~/components/ui'
+import { Card, Stepper, Switch } from '~/components/ui'
 import { Picker } from '~/components/ui/picker/picker'
 import type { PickerOption } from '~/components/ui/picker/types'
 import { useReaderStore } from '~/stores'
@@ -37,16 +37,16 @@ export default function FontConfig() {
 	}
 
 	return (
-		<CardList>
-			<CardRow label="Typeface">
+		<Card>
+			<Card.Row label="Typeface">
 				<Picker
 					value={store.fontFamily}
 					options={FONT_OPTIONS}
 					onValueChange={(value) => store.setSettings({ fontFamily: value || undefined })}
 				/>
-			</CardRow>
+			</Card.Row>
 
-			<CardRow label="Font Size">
+			<Card.Row label="Font Size">
 				<Stepper
 					value={store.fontSize}
 					onChange={(val) => store.setSettings({ fontSize: Math.round(val) })}
@@ -56,9 +56,9 @@ export default function FontConfig() {
 					formatValue={(val) => val.toString()}
 					accessibilityLabel="Font Size"
 				/>
-			</CardRow>
+			</Card.Row>
 
-			<CardRow label="Font Weight">
+			<Card.Row label="Font Weight">
 				<Picker
 					value={String(store.fontWeight)}
 					options={FONT_WEIGHT_OPTIONS}
@@ -66,23 +66,23 @@ export default function FontConfig() {
 						ensureNumber(value, (num) => store.setSettings({ fontWeight: num }))
 					}
 				/>
-			</CardRow>
+			</Card.Row>
 
-			<CardRow label="Text Normalization">
+			<Card.Row label="Text Normalization">
 				<Switch
 					checked={store.textNormalization}
 					onCheckedChange={(checked) => store.setSettings({ textNormalization: checked })}
 					accessibilityLabel="Toggle Text Normalization"
 				/>
-			</CardRow>
+			</Card.Row>
 
-			<CardRow label="Vertical Text">
+			<Card.Row label="Vertical Text">
 				<Switch
 					checked={store.verticalText}
 					onCheckedChange={(checked) => store.setSettings({ verticalText: checked })}
 					accessibilityLabel="Toggle Vertical Text"
 				/>
-			</CardRow>
-		</CardList>
+			</Card.Row>
+		</Card>
 	)
 }

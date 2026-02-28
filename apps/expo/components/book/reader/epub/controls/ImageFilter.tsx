@@ -1,4 +1,4 @@
-import { CardRow } from '~/components/ui'
+import { Card } from '~/components/ui'
 import { Picker } from '~/components/ui/picker/picker'
 import type { PickerOption } from '~/components/ui/picker/types'
 import { ImageFilter as ImageFilterType } from '~/modules/readium'
@@ -22,12 +22,12 @@ export default function ImageFilter() {
 	}
 
 	return (
-		<CardRow label="Image Filter">
+		<Card.Row label="Image Filter">
 			<Picker
 				value={store.imageFilter ?? 'none'}
 				options={IMAGE_FILTER_OPTIONS}
 				onValueChange={handleChange}
 			/>
-		</CardRow>
+		</Card.Row>
 	)
 }

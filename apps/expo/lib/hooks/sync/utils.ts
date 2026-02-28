@@ -1,5 +1,6 @@
 import { useCallback } from 'react'
 
+import { isLocalLibrary } from '~/lib/localLibrary'
 import { useSavedServers } from '~/stores'
 import { useCacheStore } from '~/stores/cache'
 import { SavedServerWithConfig } from '~/stores/savedServer'
@@ -14,6 +15,7 @@ export function useServerInstances() {
 
 	const getFullServer = useCallback(
 		async (serverId: string) => {
+			if (isLocalLibrary(serverId)) return null
 			const server = savedServers.find((s) => s.id === serverId)
 			if (!server) return null
 			const config = await getServerConfig(serverId)
@@ -24,11 +26,15 @@ export function useServerInstances() {
 
 	const getInstances = useCallback(
 		async (forServers?: string[]) => {
+			const actualServers = forServers?.filter((id) => !isLocalLibrary(id))
+
 			const servers = await Promise.all(
 				savedServers
 					.filter(
 						(server) =>
-							!forServers?.length || server.id === forServers.find((id) => id === server.id),
+							!isLocalLibrary(server.id) &&
+							(!actualServers?.length ||
+								server.id === actualServers.find((id) => id === server.id)),
 					)
 					.map(async (server) => {
 						const config = await getServerConfig(server.id)

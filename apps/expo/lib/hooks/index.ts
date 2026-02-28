@@ -14,6 +14,7 @@ export {
 } from './sync'
 export { useAppState } from './useAppState'
 export { useDisplay } from './useDisplay'
+export { useLegacyOPDSFeed } from './useLegacyOPDSFeed'
 export { useListItemSize } from './useListItemSize'
 export { usePrevious } from './usePrevious'
 export { useSingleOrDoubleTap } from './useSingleOrDoubleTap'

@@ -30,7 +30,22 @@ export type NumberOperation = z.infer<typeof numberOperation>
 export const isNumberOperator = (value: string): value is NumberOperation =>
 	numberOperation.safeParse(value).success
 
-export const operation = z.union([stringOperation, listOperation, numberOperation])
+export const conceptualOperation = z.enum(['is', 'isNot', 'isAnyOf', 'isNoneOf'])
+export type ConceptualOperation = z.infer<typeof conceptualOperation>
+export const isConceptualOperator = (value: string): value is ConceptualOperation =>
+	conceptualOperation.safeParse(value).success
+
+export const conceptualField = z.enum(['readingStatus'])
+export type ConceptualField = z.infer<typeof conceptualField>
+export const isConceptualField = (field: string): field is ConceptualField =>
+	conceptualField.safeParse(field).success
+
+export const operation = z.union([
+	stringOperation,
+	listOperation,
+	numberOperation,
+	conceptualOperation,
+])
 export type Operation = z.infer<typeof operation>
 
 export const fromOperation = z.object({

@@ -4,7 +4,57 @@ import { Callout } from 'nextra/components'
 
 This page covers tested OPDS servers and known issues or limitations when using OPDS with the mobile app.
 
-## Tested OPDS Servers
+## OPDS Versions
+
+The mobile app was built to be an OPDS v2.0-compatible client. OPDS v2.0 is a JSON-based (draft) standard that improves upon OPDS v1.2 (which is XML-based) in many ways, including better support for modern features like progression tracking.
+
+That said, the app does have compatibility with some OPDS v1.2 servers, however the primary focus for OPDS-related features and compatibility will remain on OPDS v2.0.
+
+### Feature Comparison Matrix
+
+| Feature                     | OPDS v1.2 | OPDS v2.0 | Notes                                                                   |
+| --------------------------- | --------- | --------- | ----------------------------------------------------------------------- |
+| Basic Catalog Browsing      | ✅        | ✅        |                                                                         |
+| Basic Downloading           | ✅        | ✅        | Single publications only                                                |
+| Collection Downloading      | 🚧        | 🚧        |                                                                         |
+| Publication Streaming       | ✅        | ✅        | OPDS v1.2 support via [PSE](https://github.com/anansi-project/opds-pse) |
+| Basic Search                | ✅        | ✅        |                                                                         |
+| Complex Search              | ❌        | 🚧        | This is not a v2.0 limitation                                           |
+| Reading Progression Syncing | ❌        | ✅        |                                                                         |
+| Arbitrary Metadata Support  | ❌        | 🚧        | This is not a v2.0 limitation                                           |
+| Facets                      | 🚧        | 🚧        | This is not an OPDS limitation                                          |
+
+## OPDS v1.2
+
+### Tested Servers
+
+<Callout emoji="📣" type="info">
+	If you have tested the app with a server not listed here, please let me know so I can add it to
+	the list!
+</Callout>
+
+Excluding Stump itself, the following servers have been tested:
+
+| Server                                     | Status | Notes |
+| ------------------------------------------ | ------ | ----- |
+| [Codex](https://github.com/ajslater/codex) | ✅     | -     |
+| [Kavita](https://wiki.kavitareader.com/)   | ✅     | -     |
+| [Komga](https://komga.org/)                | ✅     | -     |
+
+### Limitations, Known Issues, and Future Improvements
+
+- If you configure an OPDS v1.2 server with `Login` authentication, the feed must not be behind a login wall
+- There is no progression syncing support
+- Complex search queries are not supported
+
+#### Future Improvements / Planned Features
+
+- Support for collection downloads (e.g., downloading an entire series at once)
+- Support for favorites with a dedicated tab for easy access
+
+## OPDS v2.0
+
+### Tested Servers
 
 <Callout emoji="📣" type="info">
 	If you have tested the app with a server not listed here, please let me know so I can add it to
@@ -15,23 +65,23 @@ Excluding Stump itself, the following servers have been tested:
 
 | Server                                     | Status | Progression | Notes         |
 | ------------------------------------------ | ------ | ----------- | ------------- |
-| [Komga](https://komga.org/)                | ✅     | ✅          | -             |
 | [Codex](https://github.com/ajslater/codex) | ✅     | ✅          | Codex v1.9.0+ |
+| [Komga](https://komga.org/)                | ✅     | ✅          | -             |
 
-## Progression
+### Progression
 
 There exists a proposed standard for tracking reading progression in OPDS v2. If your OPDS server supports this feature, the mobile app will automatically attempt to sync your reading progression back to the server in most scenarios.
 
 <Callout emoji="❌" type="info">
-	At this time, only page-based OPDS progression tracking is supported. In other words, EPUB files
-	are not able to sync progression yet. This will be addressed in a future release.
+	At this time, only page-based progression tracking is supported. In other words, EPUB files are
+	not able to sync progression yet. This will be addressed in a future release.
 </Callout>
 
-## Limitations, Known Issues, and Future Improvements
+### Limitations, Known Issues, and Future Improvements
 
 The mobile app aims to be a fully compatible OPDS v2 client. However, since there aren't many client/servers in the space, and the mobile app is still very young, there are some limitations and known issues that will be addressed in future releases
 
-### EPUB Progression
+#### EPUB Progression
 
 <Callout emoji="ℹ️" type="info">
 	This only applies to OPDS servers that support progression tracking. If you are using a Stump
@@ -41,14 +91,22 @@ The mobile app aims to be a fully compatible OPDS v2 client. However, since ther
 At this time, only page-based OPDS progression tracking is supported. In other words, EPUB files
 are not able to sync back progression yet. This will be addressed in a future release.
 
-### Search URL Templating
+#### Search URL Templating
 
 Some OPDS servers support templated search URLs, which allow clients to issue targeted search queries. An example templated URL might look like:
 
 ```
-/opds/v2.0/search{?query, author, title, subject}
+/opds/v2.0/search{?query,author,title,subject}
 ```
 
 The idea is that the client can replace _any_ of the templated parameters with actual search values.
 
 Currently, the mobile app only supports replacing a single `query` parameter in templated search URLs. This should function as a basic search, but more advanced searches that utilize the full templated options are not supported yet.
+
+#### Future Improvements / Planned Features
+
+- Full support for templated search URLs
+- Support for displaying more metadata fields
+- Support for facets
+- Support for collection downloads (e.g., downloading an entire series at once)
+- Support for favorites with a dedicated tab for easy access

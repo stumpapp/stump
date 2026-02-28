@@ -1,10 +1,11 @@
 import { cn, DatePicker, Input } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import dayjs from 'dayjs'
+import { endOfDay } from 'date-fns'
 import { useFormContext, useWatch } from 'react-hook-form'
 import { match } from 'ts-pattern'
 
 import {
+	isConceptualField,
 	isDateField,
 	isListOperator,
 	isNumberField,
@@ -13,6 +14,7 @@ import {
 } from '@/components/smartList/createOrUpdate'
 
 import { useFilterGroupContext } from '../context'
+import EnumValue from './EnumValue'
 import ListValue from './ListValue'
 import RangeValue, { RangeFilterDef } from './RangeValue'
 
@@ -45,6 +47,10 @@ export default function FilterValue({ idx }: Props) {
 		)
 		.otherwise(() => 'string')
 
+	if (isConceptualField(fieldDef.field)) {
+		return <EnumValue idx={idx} />
+	}
+
 	if (variant === 'list') {
 		return <ListValue idx={idx} />
 	} else if (variant === 'range') {
@@ -55,10 +61,10 @@ export default function FilterValue({ idx }: Props) {
 		return (
 			<DatePicker
 				placeholder={t(getKey('date'))}
-				selected={dayjs(fieldDef.value as string).toDate()}
+				selected={fieldDef.value ? new Date(fieldDef.value as string) : undefined}
 				onChange={(value) => {
 					if (value) {
-						const adjustedValue = dayjs(value).endOf('day').toDate()
+						const adjustedValue = endOfDay(value)
 						form.setValue(`filters.groups.${groupIdx}.filters.${idx}.value`, adjustedValue)
 					} else {
 						form.resetField(`filters.groups.${groupIdx}.filters.${idx}.value`)

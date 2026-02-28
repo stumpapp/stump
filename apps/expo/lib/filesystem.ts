@@ -19,7 +19,7 @@ Filesystem structure:
 				- etc
 */
 
-// FIXME: Need to migrate off of legacy FS methods
+// TODO(filesystem): Use non-deprecated filesystem
 
 export const baseDirectory = `${FileSystem.documentDirectory}`
 export const cacheDirectory = `${FileSystem.cacheDirectory}`

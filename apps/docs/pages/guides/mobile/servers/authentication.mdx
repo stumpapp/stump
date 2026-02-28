@@ -12,6 +12,8 @@ The app supports 3 types of authentication:
 
 Login-based authentication does not store credentials on the device. Instead, you will be prompted to log in when you try to access the server. This has drawbacks for OPDS configurations since you will be prompted _each_ time you try to access the server. Stump servers will use short-lived JWT tokens when you log in, so you will only be prompted to log in when the token expires.
 
+Please note that if you are configuring an OPDS v1.2 server with login-based authentication, the feed must not be behind a login wall. Unlike Stump's native API or the newer OPDS v2.0, OPDS v1.2 does not have a standardized way to handle login flows.
+
 ### OIDC Authentication
 
 <Callout emoji="🔐" type="info">

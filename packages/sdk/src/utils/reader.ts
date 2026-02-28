@@ -17,6 +17,10 @@ export const generatePageSets = ({
 }: GeneratePageSetsParams): number[][] => {
 	const sets: number[][] = []
 
+	if (Object.keys(imageSizes).length === 0) {
+		return Array.from({ length: pages }, (_, i) => [i])
+	}
+
 	const landscapePages = Object.keys(imageSizes).reduce(
 		(acc, key) => {
 			const idx = parseInt(key)

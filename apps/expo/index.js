@@ -1,3 +1,4 @@
+import 'intl-pluralrules'
 import 'expo-asset'
 
 import { Buffer } from 'buffer'

@@ -338,29 +338,32 @@ impl Series {
 					SELECT
 						COUNT(*) AS book_count,
 						IFNULL(SUM(media.size), 0) AS total_bytes
-					FROM
-						media
-					WHERE
-						media.series_id = $1
+					FROM media
+					WHERE media.series_id = $1
 				),
-				progress_counts AS (
+				finished_stats AS (
 					SELECT
-						COUNT(frs.id) AS completed_books,
-						COUNT(rs.id) AS in_progress_books,
-						IFNULL(SUM(frs.elapsed_seconds), 0) + IFNULL(SUM(rs.elapsed_seconds), 0) AS total_reading_time_seconds
-					FROM
-						media m
-						LEFT JOIN finished_reading_sessions frs ON frs.media_id = m.id
-						LEFT JOIN reading_sessions rs ON rs.media_id = m.id
-					WHERE
-						m.series_id = $1
-						AND ($2 IS TRUE OR (rs.user_id = $3 OR frs.user_id = $3))
+						COUNT(DISTINCT frs.media_id) AS completed_books,
+						IFNULL(SUM(frs.elapsed_seconds), 0) AS finished_reading_time
+					FROM finished_reading_sessions frs
+					WHERE frs.media_id IN (SELECT id FROM media WHERE series_id = $1)
+						AND ($2 IS TRUE OR frs.user_id = $3)
+				),
+				active_stats AS (
+					SELECT
+						COUNT(DISTINCT rs.media_id) AS in_progress_books,
+						IFNULL(SUM(rs.elapsed_seconds), 0) AS active_reading_time
+					FROM reading_sessions rs
+					WHERE rs.media_id IN (SELECT id FROM media WHERE series_id = $1)
+						AND ($2 IS TRUE OR rs.user_id = $3)
 				)
 				SELECT
-					*
-				FROM
-					base_counts
-					INNER JOIN progress_counts;
+					base_counts.book_count,
+					base_counts.total_bytes,
+					finished_stats.completed_books,
+					active_stats.in_progress_books,
+					(finished_stats.finished_reading_time + active_stats.active_reading_time) AS total_reading_time_seconds
+				FROM base_counts, finished_stats, active_stats;
 				",
 				[
 					self.model.id.clone().into(),

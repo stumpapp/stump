@@ -1,12 +1,13 @@
 import { ALargeSmall, TableOfContents } from 'lucide-react-native'
 import { useEffect } from 'react'
-import { Platform, Pressable, View } from 'react-native'
+import { Pressable, View } from 'react-native'
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { initialWindowMetrics, useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import ChevronBackLink from '~/components/ChevronBackLink'
 import { Text } from '~/components/ui'
 import { Icon } from '~/components/ui/icon'
+import { CONTROLS_TIMING_CONFIG } from '~/lib/constants'
 import { useDisplay } from '~/lib/hooks'
 import { useReaderStore } from '~/stores'
 import { useEpubLocationStore, useEpubTheme } from '~/stores/epub'
@@ -28,24 +29,21 @@ export default function ReadiumHeader() {
 	const chapterTitle = useEpubLocationStore(
 		(state) => state.currentChapter || state.book?.name || state.embeddedMetadata?.title,
 	)
-
 	const { colors } = useEpubTheme()
 
 	const insets = useSafeAreaInsets()
 
-	const translateY = useSharedValue(-400)
+	const opacity = useSharedValue(0)
 	useEffect(() => {
-		translateY.value = withTiming(visible ? 0 : 400 * -1, {
-			duration: 300,
-		})
-	}, [visible, translateY, height, insets.top])
+		opacity.value = withTiming(visible ? 1 : 0, CONTROLS_TIMING_CONFIG)
+	}, [visible, opacity, height, insets.top])
 
 	const animatedStyles = useAnimatedStyle(() => {
 		return {
-			top: insets.top + (Platform.OS === 'android' ? 0 : 0),
+			top: initialWindowMetrics?.insets.top || insets.top,
 			left: insets.left,
 			right: insets.right,
-			transform: [{ translateY: translateY.value }],
+			opacity: opacity.value,
 		}
 	})
 

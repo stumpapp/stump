@@ -1,6 +1,6 @@
 import { isNetworkError, isOutdatedGraphQLSchemaError } from '@stump/sdk'
 import { useRouter } from 'expo-router'
-import { Linking, View } from 'react-native'
+import { Linking, ScrollView, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import Owl from '../Owl'
@@ -36,9 +36,11 @@ export default function ServerErrorBoundary({ error, onRetry }: Props) {
 							Something went wrong!
 						</Heading>
 
-						<Text size="lg" className="text-center">
-							{error.message}
-						</Text>
+						<ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 200 }}>
+							<Text size="lg" className="text-center">
+								{error.message}
+							</Text>
+						</ScrollView>
 					</View>
 				</View>
 

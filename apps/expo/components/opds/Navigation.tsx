@@ -8,9 +8,9 @@ import { Pressable, View } from 'react-native'
 import { cn } from '~/lib/utils'
 
 import { useActiveServer } from '../activeServer'
+import { Divider } from '../Divider'
 import { ListEmptyMessage, Text } from '../ui'
 import { Icon } from '../ui/icon'
-import { LinkDivider } from './LinkDivider'
 import { FeedComponentOptions } from './types'
 
 type Props = {
@@ -55,7 +55,7 @@ export default function Navigation({ navigation, renderEmpty }: Props) {
 						)}
 					</Pressable>
 
-					<LinkDivider />
+					<Divider />
 				</Fragment>
 			))}
 

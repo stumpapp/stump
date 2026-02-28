@@ -1,7 +1,5 @@
 import * as Sentry from '@sentry/react-native'
-import { useSDKSafe } from '@stump/client'
-import { ImageMetadata, MediaMetadata, ReadiumLocator } from '@stump/graphql'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { and, count, eq } from 'drizzle-orm'
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
 import * as FileSystem from 'expo-file-system/legacy'
@@ -9,10 +7,18 @@ import { useCallback, useEffect } from 'react'
 import { toast } from 'sonner-native'
 
 import { useActiveServerSafe } from '~/components/activeServer'
-import { useDownloadsState } from '~/components/downloads/store'
-import { db, downloadedFiles, DownloadRepository, readProgress } from '~/db'
+import { useDownloadsState } from '~/components/localLibrary/store'
+import { db, downloadedFiles, downloadQueue, DownloadRepository, readProgress } from '~/db'
+import {
+	type DownloadProgress,
+	type DownloadQueueMetadata,
+	getDownloadQueueManager,
+} from '~/lib/downloadQueue'
 import { booksDirectory, bookThumbnailPath, ensureDirectoryExists } from '~/lib/filesystem'
+import { LOCAL_LIBRARY_SERVER_ID } from '~/lib/localLibrary'
 import { useSavedServerStore } from '~/stores/savedServer'
+
+import { type EnqueueBookParams, useDownloadQueue } from './downloadQueue'
 
 const downloadKeys = {
 	all: ['downloads'] as const,
@@ -29,23 +35,6 @@ type DeleteBookParams = {
 type DeleteManyBooksParams = {
 	bookIds: string[]
 	serverId?: string
-}
-
-/**
- * Hook to get all downloaded files for the active server
- */
-export function useServerDownloads(serverID?: string) {
-	const activeServerCtx = useActiveServerSafe()
-	const effectiveServerID = serverID ?? activeServerCtx?.activeServer.id
-
-	return useQuery({
-		queryKey: downloadKeys.server(effectiveServerID ?? 'no-server'),
-		queryFn: () => {
-			if (!effectiveServerID) return []
-			return DownloadRepository.getFilesByServer(effectiveServerID)
-		},
-		enabled: !!effectiveServerID,
-	})
 }
 
 /**
@@ -71,120 +60,25 @@ export function useIsBookDownloaded(bookID: string, serverID?: string) {
 	return isDownloaded
 }
 
-type DownloadBookParams = {
-	id: string
-	url?: string | null
-	extension: string
-	seriesId?: string | null
-	seriesName?: string | null
-	libraryId?: string | null
-	libraryName?: string | null
-	bookName?: string | null
-	metadata?: Partial<MediaMetadata> | null
-	toc?: string[] | null
-	readProgress?: {
-		percentageCompleted?: string | null
-		page?: number | null
-		elapsedSeconds?: number | null
-		locator?: ReadiumLocator | null
-		updatedAt?: Date | null
-	} | null
-	thumbnailMeta?: ImageMetadata | null
-}
-
 export type UseDownloadParams = {
 	serverId?: string
 }
 
-/**
- * Main hook for download operations (download, delete, check status)
- */
 export function useDownload({ serverId }: UseDownloadParams = {}) {
 	const activeServerCtx = useActiveServerSafe()
 	const serverID = serverId ?? activeServerCtx?.activeServer.id
 
 	const allServerIds = useSavedServerStore((state) => state.servers.map((srv) => srv.id))
 
-	const sdkCtx = useSDKSafe()
-
 	const queryClient = useQueryClient()
 
-	// Ensure books directory exists
+	const { enqueueBook, counts: queueCounts } = useDownloadQueue({ serverId: serverID })
+
 	useEffect(() => {
 		if (serverID) {
 			ensureDirectoryExists(booksDirectory(serverID))
 		}
 	}, [serverID])
-
-	const downloadMutation = useMutation({
-		mutationFn: async (params: DownloadBookParams) => {
-			if (!serverID) {
-				throw new Error('No active server available for downloads')
-			}
-
-			if (!sdkCtx?.sdk) {
-				throw new Error('SDK is not initialized')
-			}
-
-			const { sdk } = sdkCtx
-
-			await ensureDirectoryExists(booksDirectory(serverID))
-
-			// Check if already downloaded
-			const existingBook = await DownloadRepository.getFile(params.id, serverID)
-			if (existingBook) {
-				return `${booksDirectory(serverID)}/${existingBook.filename}`
-			}
-
-			const downloadUrl = params.url || sdk.media.downloadURL(params.id)
-			const filename = `${params.id}.${params.extension}`
-			const placementUrl = `${booksDirectory(serverID)}/${filename}`
-
-			// Only then download the file
-			const result = await FileSystem.downloadAsync(downloadUrl, placementUrl, {
-				headers: sdk.headers,
-			})
-
-			if (result.status !== 200) {
-				throw new Error(`Failed to download file, status code: ${result.status}`)
-			}
-
-			const size = Number(result.headers['Content-Length'] ?? 0)
-
-			await DownloadRepository.addFile(
-				{
-					id: params.id,
-					filename,
-					uri: result.uri,
-					serverId: serverID,
-					size: !isNaN(size) && size > 0 ? size : undefined,
-					metadata: params.metadata,
-					seriesId: params.seriesId,
-					bookName: params.bookName,
-					imageMetadata: params.thumbnailMeta,
-					toc: params.toc,
-				},
-				{
-					seriesRef:
-						params.seriesId && params.seriesName
-							? { id: params.seriesId, name: params.seriesName, libraryId: params.libraryId }
-							: undefined,
-					libraryRef:
-						params.libraryId && params.libraryName
-							? { id: params.libraryId, name: params.libraryName }
-							: undefined,
-					existingProgression: params.readProgress,
-				},
-			)
-
-			return result.uri
-		},
-		onSuccess: (_, variables) => {
-			if (!serverID) return
-			queryClient.invalidateQueries({ queryKey: downloadKeys.server(serverID) })
-			queryClient.invalidateQueries({ queryKey: downloadKeys.book(variables.id, serverID) })
-		},
-	})
 
 	const deleteMutation = useMutation({
 		mutationFn: async ({ bookId, serverId: paramServerId }: DeleteBookParams) => {
@@ -306,7 +200,7 @@ export function useDownload({ serverId }: UseDownloadParams = {}) {
 		mutationFn: async () => {
 			console.warn('Deleting all downloads for all servers...', allServerIds)
 			return Promise.all(
-				allServerIds.map(async (srvID) => {
+				[...allServerIds, LOCAL_LIBRARY_SERVER_ID].map(async (srvID) => {
 					const downloads = await DownloadRepository.getFilesByServer(srvID)
 					console.warn(`Found ${downloads.length} downloads for server ${srvID}`)
 					const bookIDs = downloads.map((download) => download.id)
@@ -387,8 +281,49 @@ export function useDownload({ serverId }: UseDownloadParams = {}) {
 		[serverID, queryClient],
 	)
 
+	const downloadImmediate = useCallback(
+		async (
+			params: Omit<EnqueueBookParams, 'url'> & { url: string },
+			onProgress?: (progress: DownloadProgress) => void,
+		) => {
+			const effectiveServerId = serverID
+			if (!effectiveServerId) {
+				throw new Error('No active server available')
+			}
+
+			const filename = `${params.id}.${params.extension}`
+
+			const metadata: DownloadQueueMetadata = {
+				bookName: params.bookName ?? params.metadata?.title,
+				seriesId: params.seriesId,
+				seriesName: params.seriesName,
+				libraryId: params.libraryId,
+				libraryName: params.libraryName,
+				thumbnailMeta: params.thumbnailMeta,
+				toc: params.toc,
+				bookMetadata: params.metadata,
+				readProgress: params.readProgress,
+			}
+
+			const manager = getDownloadQueueManager()
+			return manager.downloadImmediate(
+				{
+					bookId: params.id,
+					serverId: effectiveServerId,
+					downloadUrl: params.url,
+					filename,
+					extension: params.extension,
+					metadata,
+				},
+				onProgress,
+			)
+		},
+		[serverID],
+	)
+
 	return {
-		downloadBook: downloadMutation.mutateAsync,
+		downloadBook: enqueueBook,
+		downloadImmediate,
 		deleteBook: (bookId: string, serverId?: string) =>
 			deleteMutation.mutateAsync({ bookId, serverId }),
 		deleteManyBooks: (bookIds: string[], serverId?: string) =>
@@ -397,9 +332,8 @@ export function useDownload({ serverId }: UseDownloadParams = {}) {
 		deleteServerDownloads: deleteServerDownloadsMutation.mutateAsync,
 		markAsComplete,
 		clearProgress,
-		isDownloading: downloadMutation.isPending,
+		isQueueActive: Boolean(queueCounts.pending + queueCounts.downloading > 0),
 		isDeleting: deleteMutation.isPending,
-		downloadError: downloadMutation.error,
 		deleteError: deleteMutation.error,
 	}
 }
@@ -413,4 +347,13 @@ export function useDownloadsCount() {
 		fetchCounter,
 	])
 	return result?.count || 0
+}
+
+export function useIsBookDownloading(id: string) {
+	const {
+		data: [record],
+	} = useLiveQuery(db.select().from(downloadQueue).where(eq(downloadQueue.bookId, id)), [
+		`is-book-downloading-${id}`,
+	])
+	return record ? record.status === 'downloading' : false
 }

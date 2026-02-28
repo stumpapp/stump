@@ -28,14 +28,6 @@ Regardless, I am confident that it is at least a good fit for Stump, as it is a 
 	to help out, please feel free to reach out!
 </Callout>
 
-## Why don't my OPDS v1.2 catalogs work?
-
-The mobile app only supports OPDS v2.0.
-
-I recognize that there are many OPDS v1.2-compatible servers out there and that OPDS v2.0 is not widely adopted yet. However, I **really** don't like XML - at least not from the perspective of a developer. I don't want to have to maintain an XML client for the app. There are lots of really great v1.2-compatible apps out there, so I'm only supporting OPDS v2.0.
-
-That said, I will consider outside contributions that successfully wrangle v1.2 vs v2.0 client-side negotiations without breakage. Please reach out if you're interested in contributing!
-
 ## Will there be translations?
 
 Yes! The app will be translated into multiple languages in the same way the web app is. I plan to start this effort once the app is more stable and feature-complete.
@@ -43,3 +35,20 @@ Yes! The app will be translated into multiple languages in the same way the web 
 ## How can I provide feedback or report bugs?
 
 The best way to provide feedback or report bugs is to open an issue on GitHub, directly. If you are a TestFlight user and prefer to submit feedback directly through TestFlight, please make sure to not anonymously submit questions that require a response. Apple does not provide any way for me to respond to anonymous feedback submitted through TestFlight.
+
+There is also a [troubleshooting guide](/guides/mobile/troubleshooting) that may help you resolve common issues.
+
+## Will the macOS version be developed more?
+
+You might have noticed you can install the mobile app on macOS devices with Apple Silicon. This is a neat feature of macOS where it will run the iPad version of the app, however it is not a first-class masOS application. The app will not be optimized for macOS, nor will it receive macOS-specific features, until the app is more stable and feature-complete on mobile platforms. Eventually, though, it is on my radar.
+
+## First-class support for other server types?
+
+<Callout emoji="❓">
+	What this refers to is support for other server types like Kavita, Komga, etc, through their own
+	APIs, rather than through OPDS which has some limitations.
+</Callout>
+
+At this time, the mobile app only supports Stump servers natively. I am not strictly opposed to first-class support for other server types existing in the same application, but it would require **significant** development effort and comes with an exponential maintenance burden that I would not want to take on myself, to be honest.
+
+I think the existing OPDS support gets you most of the high-level features you'd want from a non-Stump server, anyways.

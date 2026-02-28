@@ -10,6 +10,7 @@ import {
 	Decoration,
 	EPUBReaderThemeConfig,
 	NativeTableOfContentsItem,
+	ReadiumLocation,
 	ReadiumLocator,
 	ReadiumViewRef,
 } from '~/modules/readium'
@@ -23,21 +24,11 @@ export const trimFragmentFromHref = (href: string) => {
 	return href.split('#')[0]
 }
 
-export const findTocItemByHref = (
-	toc: TableOfContentsItem[],
-	href: string,
-): TableOfContentsItem | undefined => {
+export const findTocItemByHref = (href: string) => {
+	const toc = useEpubLocationStore.getState().toc
+	const flatToc = flattenToc(toc)
 	const targetHref = trimFragmentFromHref(href)
-	for (const item of toc) {
-		if (trimFragmentFromHref(item.content) === targetHref) {
-			return item
-		}
-		if (item.children.length > 0) {
-			const found = findTocItemByHref(item.children, href)
-			if (found) return found
-		}
-	}
-	return undefined
+	return flatToc.find((item) => trimFragmentFromHref(item.content) === targetHref)
 }
 
 export type TableOfContentsItem = {
@@ -45,6 +36,7 @@ export type TableOfContentsItem = {
 	content: string
 	children: TableOfContentsItem[]
 	play_order: number
+	position?: number | undefined | null
 }
 
 export const convertNativeToc = (items: NativeTableOfContentsItem[]): TableOfContentsItem[] => {
@@ -69,6 +61,54 @@ export const parseToc = (toc?: string[]): TableOfContentsItem[] => {
 		.filter((item) => item !== null) as TableOfContentsItem[]
 
 	return parsedToc
+}
+
+export const addPositionsToToc = (
+	toc: TableOfContentsItem[],
+	positions: ReadiumLocator[],
+): TableOfContentsItem[] => {
+	const tocWithPositions = toc.map((item) => {
+		const tocItemLocator = positions.find(
+			(p) => trimFragmentFromHref(p.href) === trimFragmentFromHref(item.content),
+		)
+
+		const tocItemWithPosition = {
+			...item,
+			position: tocItemLocator?.locations?.position,
+			children: item.children ? addPositionsToToc(item.children, positions) : [],
+		}
+
+		return tocItemWithPosition
+	})
+
+	return tocWithPositions
+}
+
+export const flattenToc = (toc: TableOfContentsItem[]): TableOfContentsItem[] => {
+	return toc.flatMap((item) => [item, ...flattenToc(item.children || [])])
+}
+
+/**
+ * Resolves the toc item for a given position.
+ *
+ * For cases where we have `chapter2_1.xhtml`, `chapter2_insert.xhtml`, `chapter2_2.xhtml` in the spine,
+ * but only `chapter2_1.xhtml` is mentioned in the toc, it will try to find this toc item.
+ */
+export const resolveTocItemByPosition = (position: ReadiumLocation['position']) => {
+	const toc = useEpubLocationStore.getState().toc
+	const flatToc = flattenToc(toc)
+	// if `isNextItemMissingPosition` is true, then two toc items will meet the criteria:
+	// 1. A toc item where its nextItem has no associated position number, and it's before the current chapter, and
+	// 2. The actual toc item for the current chapter. So we use findLast
+	return flatToc.findLast((item, index) => {
+		const nextItem = flatToc[index + 1]
+		if (item.position && position) {
+			const isCurrentChapterOrBefore = item.position <= position
+			const isCurrentChapterOrAfter = nextItem?.position ? position < nextItem.position : false
+			const isNextItemMissingPosition = nextItem?.position == undefined
+			return isCurrentChapterOrBefore && (isCurrentChapterOrAfter || isNextItemMissingPosition)
+		}
+	})
 }
 
 export type EmbeddedMetadata = Pick<BookMetadata, 'title' | 'author' | 'language' | 'publisher'>
@@ -163,17 +203,22 @@ export const useEpubLocationStore = create<IEpubLocationStore>((set, get) => ({
 	positions: [],
 
 	onTocChange: (toc, source) => {
+		let parsedToc: TableOfContentsItem[] = []
 		if (typeof toc[0] === 'string') {
-			set({
-				toc: parseToc(toc as string[]),
-				tocSource: source,
-			})
+			parsedToc = parseToc(toc as string[])
 		} else {
-			set({
-				toc: toc as TableOfContentsItem[],
-				tocSource: source,
-			})
+			parsedToc = toc as TableOfContentsItem[]
 		}
+
+		const positions = get().positions
+		if (positions && positions.length > 0) {
+			parsedToc = addPositionsToToc(parsedToc, positions)
+		}
+
+		set({
+			toc: parsedToc,
+			tocSource: source,
+		})
 	},
 	onBookLoad: (metadata, positions) =>
 		set({

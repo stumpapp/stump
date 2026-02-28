@@ -1,4 +1,5 @@
 import { OPDSFeed, resolveUrl } from '@stump/sdk'
+import { QueryObserverResult, RefetchOptions } from '@tanstack/react-query'
 import { createContext, useContext } from 'react'
 
 export type OPDSFeedContextValue = {
@@ -6,6 +7,8 @@ export type OPDSFeedContextValue = {
 	searchURL: string | undefined
 	hasSearch: boolean
 	isLoading: boolean
+	error: unknown | null
+	refetch: (options?: RefetchOptions) => Promise<QueryObserverResult<OPDSFeed | undefined, Error>>
 	// TODO: Should facets be a tab?
 	// TODO: Should navigation be a `Browse` tab?
 	// ^ I think depends on how curated-feeling we want the OPDS flow to be

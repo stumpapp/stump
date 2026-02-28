@@ -1,9 +1,8 @@
 import { Slider } from '@miblanchard/react-native-slider'
 import { FlashList, FlashListRef, useMappingHelper } from '@shopify/flash-list'
 import { ReadingDirection, ReadingMode } from '@stump/graphql'
+import { formatHumanDuration } from '@stump/i18n'
 import { STUMP_SAVE_BASIC_SESSION_HEADER } from '@stump/sdk/constants'
-import dayjs from 'dayjs'
-import duration from 'dayjs/plugin/duration'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Platform, Pressable, View } from 'react-native'
 import Animated, {
@@ -17,14 +16,13 @@ import TImage from 'react-native-turbo-image'
 
 import { TurboImage } from '~/components/image'
 import { Progress, Text } from '~/components/ui'
+import { CONTROLS_TIMING_CONFIG } from '~/lib/constants'
 import { useDisplay, usePrevious } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 import { usePreferencesStore, useReaderStore } from '~/stores'
 import { useBookPreferences, useBookReadTime } from '~/stores/reader'
 
 import { useImageBasedReader } from './context'
-
-dayjs.extend(duration)
 
 const SIZE_MODIFIER = 1.5
 
@@ -76,12 +74,12 @@ export default function Footer() {
 	const translateY = useSharedValue(visible ? 0 : 50)
 	useEffect(
 		() => {
-			opacity.value = withTiming(visible ? 1 : 0, {
-				duration: 250,
-			})
+			opacity.value = withTiming(visible ? 1 : 0, CONTROLS_TIMING_CONFIG)
 			translateY.value = withTiming(visible ? 0 : 50, {
-				duration: 250,
-				easing: visible ? Easing.out(Easing.quad) : Easing.in(Easing.quad),
+				...CONTROLS_TIMING_CONFIG,
+				easing: visible
+					? Easing.out(Easing.quad) // slow near the start
+					: Easing.in(Easing.quad), // slow near the end
 			})
 		},
 		// eslint-disable-next-line react-compiler/react-compiler
@@ -166,20 +164,7 @@ export default function Footer() {
 		}
 	}, [footerControls, currentPage, visible, visibilityChanged, pageSets, doublePageBehaviorChanged])
 
-	const formatDuration = useCallback(() => {
-		const duration = dayjs.duration(elapsedSeconds, 'seconds')
-		const hours = Math.trunc(duration.asHours())
-		const minutes = duration.minutes()
-		const seconds = duration.seconds()
-
-		if (elapsedSeconds <= 59) {
-			return `${seconds} ${seconds === 1 ? 'second' : 'seconds'}`
-		}
-		if (elapsedSeconds <= 3599) {
-			return `${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ${seconds} ${seconds === 1 ? 'second' : 'seconds'}`
-		}
-		return `${hours} ${hours === 1 ? 'hour' : 'hours'} ${minutes} ${minutes === 1 ? 'minute' : 'minutes'}`
-	}, [elapsedSeconds])
+	const formattedReadTime = formatHumanDuration(elapsedSeconds, { significantUnits: 2 })
 
 	const pageSource = useCallback(
 		(page: number) => ({
@@ -562,7 +547,7 @@ export default function Footer() {
 				>
 					{trackElapsedTime && (
 						<View>
-							<Text className="text-sm text-[#898d94]">Reading time: {formatDuration()}</Text>
+							<Text className="text-sm text-[#898d94]">Reading time: {formattedReadTime}</Text>
 						</View>
 					)}
 

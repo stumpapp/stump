@@ -36,14 +36,15 @@ async fn main() -> Result<(), EntryError> {
 	if let Some(command) = cli.command {
 		Ok(handle_command(command, &cli.config.merge_stump_config(config)).await?)
 	} else {
+		let resolved_config = cli.config.merge_stump_config(config);
 		// Note: init_tracing after loading the environment so the correct verbosity
 		// level is used for logging.
-		init_tracing(&config);
+		init_tracing(&resolved_config);
 
-		if config.verbosity >= 3 {
-			tracing::trace!(?config, "App config");
+		if resolved_config.verbosity >= 3 {
+			tracing::trace!(?resolved_config, "App config");
 		}
 
-		Ok(http_server::run_http_server(config).await?)
+		Ok(http_server::run_http_server(resolved_config).await?)
 	}
 }

@@ -1,19 +1,18 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { PREFETCH_STALE_TIME, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { graphql, SeriesOverviewSheetQuery } from '@stump/graphql'
+import { formatHumanDuration } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
-import dayjs from 'dayjs'
-import { forwardRef, useMemo } from 'react'
+import { forwardRef } from 'react'
 import { View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { IS_IOS_24_PLUS, useColors } from '~/lib/constants'
-import { formatBytes } from '~/lib/format'
+import { formatBytesSeparate } from '~/lib/format'
 
 import { InfoRow, LongValue, MetadataBadgeSection } from '../overview'
-import { InfoStat } from '../stats'
-import { Card, CardList, Heading, Text } from '../ui'
+import { Card, Heading, Text } from '../ui'
 
 const query = graphql(`
 	query SeriesOverviewSheet($id: ID!) {
@@ -93,8 +92,7 @@ export const SeriesOverviewSheet = forwardRef<TrueSheet, Props>(({ seriesId }, r
 	return (
 		<TrueSheet
 			ref={ref}
-			detents={[0.65, 1]}
-			dimmed={false}
+			detents={['auto', 1]}
 			cornerRadius={24}
 			grabber
 			scrollable
@@ -118,16 +116,8 @@ type SheetContentProps = {
 }
 
 function SheetContent({ series: { stats, metadata, resolvedName, tags } }: SheetContentProps) {
-	const formattedSize = formatBytes(stats.totalBytes)
-	const formattedTime = useMemo(() => {
-		if (stats.totalReadingTimeSeconds >= 3600 && stats.totalReadingTimeSeconds < 3600 * 2) {
-			return dayjs.duration(stats.totalReadingTimeSeconds, 'seconds').format('H [hr] m [mins]')
-		} else if (stats.totalReadingTimeSeconds >= 60) {
-			return dayjs.duration(stats.totalReadingTimeSeconds, 'seconds').format('m [mins]')
-		} else {
-			return dayjs.duration(stats.totalReadingTimeSeconds, 'seconds').format('s [secs]')
-		}
-	}, [stats.totalReadingTimeSeconds])
+	const formattedSize = formatBytesSeparate(stats.totalBytes)
+	const formattedTime = formatHumanDuration(stats.totalReadingTimeSeconds, { significantUnits: 1 })
 
 	const hasPublicationInfo =
 		metadata?.publisher ||
@@ -144,9 +134,9 @@ function SheetContent({ series: { stats, metadata, resolvedName, tags } }: Sheet
 	const hasAbout = metadata?.summary || metadata?.descriptionFormatted
 
 	return (
-		<ScrollView className="flex-1 p-6" nestedScrollEnabled>
-			<View className="gap-8">
-				<View>
+		<ScrollView className="flex-1 px-4 py-6" nestedScrollEnabled>
+			<View className="gap-6">
+				<View className="px-2">
 					<Heading size="2xl" numberOfLines={3}>
 						{resolvedName}
 					</Heading>
@@ -162,31 +152,35 @@ function SheetContent({ series: { stats, metadata, resolvedName, tags } }: Sheet
 					)}
 				</View>
 
-				<Card label="Stats" className="flex flex-row flex-wrap justify-around gap-x-6 gap-y-4">
-					<InfoStat size="md" label="Books" value={stats.bookCount.toString()} />
-					{formattedSize && <InfoStat size="md" label="Size" value={formattedSize} />}
-					<InfoStat size="md" label="In Progress" value={stats.inProgressBooks.toString()} />
-					<InfoStat
-						size="md"
-						label="Completed"
-						value={`${stats.completedBooks} / ${stats.bookCount}`}
-					/>
-					{stats.totalReadingTimeSeconds > 0 && (
-						<InfoStat size="md" label="Reading Time" value={formattedTime} />
-					)}
+				<Card label="Stats">
+					<Card.StatGroup>
+						<Card.Stat label="In Progress" value={stats.inProgressBooks} />
+						<Card.Stat
+							label="Completed"
+							value={stats.completedBooks}
+							suffix={` / ${stats.bookCount}`}
+						/>
+						<Card.Stat label="Books" value={stats.bookCount} />
+						<Card.Stat label="Reading Time" value={formattedTime} />
+						<Card.Stat
+							label="Size"
+							value={formattedSize?.value || 'Unknown'}
+							suffix={formattedSize?.unit && ` ${formattedSize?.unit}`}
+						/>
+					</Card.StatGroup>
 				</Card>
 
 				{hasAbout && (
-					<CardList label="About">
+					<Card label="About" className="px-6">
 						{metadata?.summary && <LongValue label="Summary" value={metadata.summary} />}
 						{metadata?.descriptionFormatted && !metadata?.summary && (
 							<LongValue label="Description" value={metadata.descriptionFormatted} />
 						)}
-					</CardList>
+					</Card>
 				)}
 
 				{hasPublicationInfo && (
-					<CardList label="Publication">
+					<Card label="Publication" className="px-6">
 						{metadata?.publisher && <InfoRow label="Publisher" value={metadata.publisher} />}
 						{metadata?.imprint && <InfoRow label="Imprint" value={metadata.imprint} />}
 						{metadata?.publicationRun && (
@@ -199,21 +193,30 @@ function SheetContent({ series: { stats, metadata, resolvedName, tags } }: Sheet
 						{metadata?.totalIssues && (
 							<InfoRow label="Total Issues" value={metadata.totalIssues.toString()} />
 						)}
-					</CardList>
+					</Card>
 				)}
 
 				{hasDetails && (
-					<CardList label="Details">
+					<Card label="Details" className="px-6">
 						{metadata?.ageRating && (
 							<InfoRow label="Age Rating" value={metadata.ageRating.toString()} />
 						)}
 						{metadata?.metaType && <InfoRow label="Type" value={metadata.metaType} />}
-					</CardList>
+					</Card>
 				)}
 
-				<MetadataBadgeSection label="Genres" items={metadata?.genres ?? []} />
-				<MetadataBadgeSection label="Writers" items={metadata?.writers ?? []} />
-				<MetadataBadgeSection label="Characters" items={metadata?.characters ?? []} />
+				<MetadataBadgeSection
+					label="Genres"
+					items={(metadata?.genres ?? []).map((genre) => ({ label: genre }))}
+				/>
+				<MetadataBadgeSection
+					label="Writers"
+					items={(metadata?.writers ?? []).map((writer) => ({ label: writer }))}
+				/>
+				<MetadataBadgeSection
+					label="Characters"
+					items={(metadata?.characters ?? []).map((character) => ({ label: character }))}
+				/>
 			</View>
 		</ScrollView>
 	)

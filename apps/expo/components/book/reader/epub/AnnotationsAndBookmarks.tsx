@@ -1,6 +1,6 @@
 import { Host, Picker } from '@expo/ui/swift-ui'
 import { FlashList } from '@shopify/flash-list'
-import dayjs from 'dayjs'
+import { intlFormat } from 'date-fns'
 import { Bookmark, Highlighter, Notebook, Trash } from 'lucide-react-native'
 import { useCallback, useMemo, useState } from 'react'
 import { Platform, View } from 'react-native'
@@ -208,7 +208,13 @@ function AnnotationListItem({ annotation, onTap, onDelete }: Props) {
 	const title = annotation.locator.chapterTitle || (isHighlightOnly ? 'Highlight' : 'Note')
 	const displayText = annotation.annotationText
 	const displayDate = annotation.createdAt
-		? dayjs(annotation.createdAt).format('MMM D, YYYY [at] h:mm A')
+		? intlFormat(new Date(annotation.createdAt), {
+				month: 'short',
+				day: 'numeric',
+				year: 'numeric',
+				hour: 'numeric',
+				minute: '2-digit',
+			})
 		: null
 
 	return (
@@ -263,7 +269,13 @@ function BookmarkListItem({ bookmark, onDelete, onTap }: BookmarkProps) {
 	const title = bookmark.chapterTitle || 'Bookmark'
 	const displayText = bookmark.previewContent
 	const displayDate = bookmark.createdAt
-		? dayjs(bookmark.createdAt).format('MMM D, YYYY [at] h:mm A')
+		? intlFormat(new Date(bookmark.createdAt), {
+				month: 'short',
+				day: 'numeric',
+				year: 'numeric',
+				hour: 'numeric',
+				minute: '2-digit',
+			})
 		: null
 
 	return (

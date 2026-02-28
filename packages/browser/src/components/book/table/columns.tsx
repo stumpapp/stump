@@ -2,7 +2,7 @@ import { Link, Text } from '@stump/components'
 import { FragmentType, Media, MediaModelOrdering } from '@stump/graphql'
 import { ColumnSort } from '@stump/sdk'
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
-import dayjs from 'dayjs'
+import { format, intlFormat } from 'date-fns'
 
 import paths from '@/paths'
 
@@ -72,11 +72,11 @@ const publishedColumn = columnHelper.accessor(
 
 		// TODO: validation
 		if (!!year && !!month && !!day) {
-			return dayjs(`${year}-${month}-${day}`).format('YYYY-MM-DD')
+			return format(new Date(year, month - 1, day), 'yyyy-MM-dd')
 		} else if (!!year && !!month) {
-			return dayjs(`${year}-${month}`).format('YYYY-MM')
+			return format(new Date(year, month - 1), 'yyyy-MM')
 		} else if (year) {
-			return dayjs(`${year}`).format('YYYY')
+			return String(year)
 		}
 
 		return ''
@@ -100,7 +100,15 @@ const publishedColumn = columnHelper.accessor(
 )
 
 const addedColumn = columnHelper.accessor(
-	({ createdAt }) => dayjs(createdAt).format('M/D/YYYY, HH:mm:ss'),
+	({ createdAt }) =>
+		intlFormat(new Date(createdAt), {
+			year: 'numeric',
+			month: 'numeric',
+			day: 'numeric',
+			hour: '2-digit',
+			minute: '2-digit',
+			second: '2-digit',
+		}),
 	{
 		cell: ({ getValue }) => (
 			<Text size="sm" variant="muted">

@@ -446,6 +446,7 @@ const buildBook = (
 			href: b.href,
 			locations: bookmarkLocations.safeParse(b.locations).data,
 		},
+		createdAt: b.createdAt.toISOString(),
 	}))
 
 	const annotations = annotationRecords

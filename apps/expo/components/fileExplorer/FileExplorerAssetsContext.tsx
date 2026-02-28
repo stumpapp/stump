@@ -31,6 +31,10 @@ const ICON_REQUIRES = [
 	require('../../assets/icons/Document_pdf_Light.png'),
 ]
 
+/**
+ * A provider that loads and provides file explorer asset icons. Also used for OPDS v1.2 feed traversal,
+ * using file-based icons non-acquisition entries
+ */
 export function FileExplorerAssetsProvider({ children }: { children: ReactNode }) {
 	const [assets, error] = useAssets(ICON_REQUIRES)
 
@@ -45,14 +49,14 @@ export function FileExplorerAssetsProvider({ children }: { children: ReactNode }
 	}
 
 	const contextValue: FileExplorerAssets = {
-		folder: assets[0],
-		folderLight: assets[1],
-		document: assets[2],
-		documentLight: assets[3],
-		archive: assets[4],
-		archiveLight: assets[5],
-		documentPdf: assets[6],
-		documentPdfLight: assets[7],
+		folder: assets[0]!,
+		folderLight: assets[1]!,
+		document: assets[2]!,
+		documentLight: assets[3]!,
+		archive: assets[4]!,
+		archiveLight: assets[5]!,
+		documentPdf: assets[6]!,
+		documentPdfLight: assets[7]!,
 	}
 
 	return (

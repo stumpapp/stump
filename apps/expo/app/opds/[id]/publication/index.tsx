@@ -1,37 +1,53 @@
+import { FlashList } from '@shopify/flash-list'
 import { useSDK } from '@stump/client'
-import { OPDSProgression, resolveUrl } from '@stump/sdk'
-import dayjs from 'dayjs'
-import relativeTime from 'dayjs/plugin/relativeTime'
+import { OPDSLink, OPDSProgression, resolveUrl } from '@stump/sdk'
+import { formatDistanceToNow, intlFormat } from 'date-fns'
 import { useRouter } from 'expo-router'
 import { BookCopy, Info, Loader2 } from 'lucide-react-native'
-import { useCallback, useEffect } from 'react'
-import { Platform, Pressable, View } from 'react-native'
-import { ScrollView } from 'react-native-gesture-handler'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { useCallback, useEffect, useMemo } from 'react'
+import { Platform, View } from 'react-native'
+import Animated, {
+	Extrapolation,
+	interpolate,
+	useAnimatedRef,
+	useAnimatedStyle,
+	useScrollOffset,
+} from 'react-native-reanimated'
 import TImage from 'react-native-turbo-image'
 
 import { useActiveServer } from '~/components/activeServer'
-import { InfoRow, InfoStat, LongValue } from '~/components/book/overview'
+import { InfoRow, LongValue } from '~/components/book/overview'
 import ChevronBackLink from '~/components/ChevronBackLink'
 import { ThumbnailImage } from '~/components/image'
-import { PublicationMenu } from '~/components/opds'
+import {
+	CreditsSection,
+	PublicationMenu,
+	RelatedPublicationItem,
+	useRelatedPublications,
+} from '~/components/opds'
 import {
 	extensionFromMime,
 	getAcquisitionLink,
 	getDateField,
+	getFirstLink,
+	getFirstSubsectionLink,
+	getLanguages,
+	getLinkableMetadataArrayField,
 	getNumberField,
 	getPublicationThumbnailURL,
 	getStringField,
 } from '~/components/opds/utils'
-import { Button, CardList, Icon, Text } from '~/components/ui'
-import { useIsOPDSPublicationDownloaded, useOPDSDownload } from '~/lib/hooks'
+import MetadataBadgeSection from '~/components/overview/MetadataBadgeSection'
+import { Button, Card, Icon, Text } from '~/components/ui'
+import {
+	useIsOPDSBookDownloading,
+	useIsOPDSPublicationDownloaded,
+	useOPDSDownload,
+} from '~/lib/hooks'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
-import { cn } from '~/lib/utils'
 import { usePreferencesStore } from '~/stores'
 
 import { usePublicationContext } from './context'
-
-dayjs.extend(relativeTime)
 
 export default function Screen() {
 	const { sdk } = useSDK()
@@ -58,6 +74,7 @@ export default function Screen() {
 	const firstPageURL = readingOrder?.[0]?.href
 		? resolveUrl(readingOrder[0].href, sdk.rootURL)
 		: undefined
+
 	useEffect(() => {
 		if (firstPageURL) {
 			TImage.prefetch([
@@ -72,12 +89,14 @@ export default function Screen() {
 		}
 	}, [sdk, firstPageURL])
 
-	const { downloadBook, isDownloading } = useOPDSDownload({ serverId: serverID })
+	const { downloadBook } = useOPDSDownload({ serverId: serverID })
 
 	const acquisitionLink = getAcquisitionLink(links)
 	const downloadURL = acquisitionLink?.href
 	const downloadExtension = extensionFromMime(acquisitionLink?.type)
 	const canDownload = !!downloadURL && !!downloadExtension
+
+	const isDownloading = useIsOPDSBookDownloading(downloadURL || url)
 
 	const onDownloadBook = useCallback(async () => {
 		if (isDownloaded || !canDownload || isDownloading) return
@@ -97,45 +116,140 @@ export default function Screen() {
 		sdk.rootURL,
 	)
 
+	// TODO: Eventually I'd like to curate the UI more based on the metadata
+	// def better now but still a lot of just dumping on page
+
 	const numberOfPages = getNumberField(metadata, 'numberOfPages') ?? readingOrder?.length
 	const modified = getDateField(metadata, 'modified')
+	const published = getDateField(metadata, 'published')
 	const description = getStringField(metadata, 'description')
+	const subtitle = getStringField(metadata, 'subtitle')
+	const publisher = getLinkableMetadataArrayField(metadata, 'publisher')
+		.map((entry) => entry.label)
+		.join(', ')
+	const language = getLanguages(metadata).join(', ') || null
+	const readingDirection = getStringField(metadata, 'readingDirection')
+	const volume = getNumberField(metadata, 'volume')
+	const issue = getNumberField(metadata, 'issue')
+	const subjects = getLinkableMetadataArrayField(metadata, 'subject')
 
-	const belongsToSeries = Array.isArray(belongsTo?.series) ? belongsTo.series[0] : belongsTo?.series
-	const seriesURL = belongsToSeries?.links?.find((link) => link.rel === 'self')?.href
-	const resolvedSeriesURL = seriesURL ? resolveUrl(seriesURL, sdk.rootURL) : undefined
+	const belongsToSeries = useMemo(
+		() => (Array.isArray(belongsTo?.series) ? belongsTo.series[0] : belongsTo?.series),
+		[belongsTo],
+	)
+	const belongsToCollection = Array.isArray(belongsTo?.collection)
+		? belongsTo.collection[0]
+		: belongsTo?.collection
+
+	const toResolvedURL = useCallback(
+		(href?: string | null) => (href ? resolveUrl(href, sdk.rootURL) : undefined),
+		[sdk.rootURL],
+	)
+
+	const goToFeedLink = useCallback(
+		(link?: OPDSLink | null) => {
+			if (!link?.href) return
+
+			const resolvedURL = toResolvedURL(link.href)
+			if (!resolvedURL) return
+
+			router.push({
+				pathname: '/opds/[id]/feed/[url]',
+				params: { url: resolvedURL, id: serverID },
+			})
+		},
+		[toResolvedURL, router, serverID],
+	)
+
+	const seriesLink = getFirstSubsectionLink(belongsToSeries?.links)
+	const collectionLink = getFirstSubsectionLink(belongsToCollection?.links)
+	const seriesUrl = toResolvedURL(seriesLink?.href)
+	const collectionUrl = toResolvedURL(collectionLink?.href)
 
 	const canStream = !!readingOrder && readingOrder.length > 0
+
+	const {
+		seriesPublications,
+		initialSeriesPublicationIndex,
+		fetchMoreSeriesPublications,
+		collectionPublications,
+		initialCollectionPublicationIndex,
+		fetchMoreCollectionPublications,
+		keyExtractor,
+	} = useRelatedPublications({
+		seriesUrl,
+		collectionUrl,
+		belongsTo,
+	})
+
 	const isSupportedStream = readingOrder?.every((link) => link.type?.startsWith('image/'))
 
 	const accentColor = usePreferencesStore((state) => state.accentColor)
 
 	const renderModifiedStat = (progression: OPDSProgression) => {
-		const percentageCompleted = progression.locator.locations?.at(0)?.totalProgression
+		if (!progression.modified) return null
+
+		const percentageCompleted = progression.locator.locations?.totalProgression
 		const isCompleted = !!(percentageCompleted && percentageCompleted >= 1)
 
 		if (isCompleted) {
-			// TODO: I vaguely remember an alternative to dayjs someone showed me but for the life of me I can't remember what it was
-			// If I remember later I'll swap it out
-			return <InfoStat label="Completed" value={dayjs(progression.modified).fromNow(true)} />
+			return <Card.Stat label="Completed" value={formatDistanceToNow(progression.modified)} />
 		} else {
-			return <InfoStat label="Last read" value={dayjs(progression.modified).fromNow()} />
+			return (
+				<Card.Stat
+					label="Last read"
+					value={formatDistanceToNow(progression.modified, { addSuffix: true })}
+				/>
+			)
 		}
 	}
 
-	// TODO: dump the rest of the metadata? Or enforce servers to conform to a standard?
-	// const restMeta = omit(rest, ['numberOfPages', 'modified'])
+	const existsSomeProgression =
+		!!progression?.locator.locations?.position ||
+		!!progression?.locator.locations?.totalProgression ||
+		!!progression?.modified
+
+	const animatedScrollRef = useAnimatedRef<Animated.ScrollView>()
+	const scrollOffset = useScrollOffset(animatedScrollRef)
+
+	const parallaxStyle = useAnimatedStyle(() => {
+		return {
+			transform: [
+				{ translateY: interpolate(scrollOffset.value, [0, 200], [0, 100], Extrapolation.EXTEND) },
+			],
+		}
+	})
 
 	return (
-		<SafeAreaView
-			style={{ flex: 1 }}
-			edges={Platform.OS === 'ios' ? ['top', 'left', 'right'] : ['left', 'right']}
-		>
-			<ScrollView
-				className="flex-1 gap-5 bg-background px-4 tablet:px-6"
-				contentInsetAdjustmentBehavior="automatic"
-			>
-				<View className="flex-1 gap-8 py-4">
+		<Animated.ScrollView className="flex-1 bg-background" ref={animatedScrollRef}>
+			<View className="ios:pt-safe-offset-20 overflow-hidden pb-8 pt-4">
+				<Animated.View
+					// -inset-24 is because when using a lot of blur, the sides get more transparent
+					// so we have to "zoom in" to have a clean line at the bottom rather than a gradient
+					className="absolute -inset-24 opacity-70 dark:opacity-30"
+					style={parallaxStyle}
+				>
+					<TImage
+						source={{
+							uri: thumbnailURL || '',
+							headers: {
+								...sdk.customHeaders,
+								Authorization: sdk.authorizationHeader || '',
+							},
+						}}
+						style={{ width: '100%', height: '100%' }}
+						resizeMode="cover"
+						fadeDuration={2000}
+						{...(Platform.OS === 'ios' && { indicator: { color: 'transparent' } })}
+						// android only supports up to blur={25} which doesn't look good,
+						// but if we heavily downscale first, the following looks near identical to using
+						// original res with blur={40} on ios, which is what I originally settled on
+						resize={60}
+						blur={Platform.OS === 'ios' ? 7 : 16}
+					/>
+				</Animated.View>
+
+				<View className="gap-8 px-4 tablet:px-6">
 					<View className="flex items-center gap-4">
 						<ThumbnailImage
 							source={{
@@ -152,7 +266,9 @@ export default function Screen() {
 
 					<View className="flex w-full flex-row items-center gap-2 tablet:max-w-sm tablet:self-center">
 						<Button
-							className="flex-1 border border-edge"
+							variant="brand"
+							className="flex-1"
+							roundness="full"
 							onPress={() =>
 								router.push({
 									pathname: `/opds/[id]/publication/read`,
@@ -166,6 +282,7 @@ export default function Screen() {
 						{!isDownloaded && (
 							<Button
 								variant="secondary"
+								roundness="full"
 								disabled={!canDownload || isDownloading}
 								onPress={onDownloadBook}
 								className="flex-row gap-2"
@@ -187,101 +304,171 @@ export default function Screen() {
 						)}
 					</View>
 
-					{progression && (
-						<View className="flex flex-row justify-around">
-							{progression.locator.locations?.at(0)?.position && (
-								<InfoStat
-									label="Page"
-									value={progression.locator.locations.at(0)?.position?.toString() || '1'}
-								/>
-							)}
-							{progression.locator.locations?.at(0)?.totalProgression != null && (
-								<InfoStat
-									label="Completed"
-									value={`${Math.round((progression.locator.locations.at(0)?.totalProgression ?? 0) * 100)}%`}
-								/>
-							)}
-							{renderModifiedStat(progression)}
-						</View>
+					{progression && existsSomeProgression && (
+						<Card>
+							<Card.StatGroup>
+								{progression.locator.locations?.position && (
+									<Card.Stat
+										label="Page"
+										value={progression.locator.locations.position || '1'}
+										suffix={
+											numberOfPages != null && numberOfPages > 0 ? ` / ${numberOfPages}` : undefined
+										}
+									/>
+								)}
+								{progression.locator.locations?.totalProgression != null && (
+									<Card.Stat
+										label="Completed"
+										value={`${Math.round((progression.locator.locations?.totalProgression ?? 0) * 100)}%`}
+									/>
+								)}
+								{renderModifiedStat(progression)}
+							</Card.StatGroup>
+						</Card>
 					)}
-
-					{!canDownload && !isDownloaded && (
-						<View className="squircle rounded-lg bg-fill-warning-secondary p-3">
-							<Text>
-								{!downloadURL
-									? 'No download link available for this publication'
-									: `Unsupported file format: ${acquisitionLink?.type || 'unknown'}`}
-							</Text>
-						</View>
-					)}
-
-					{!canStream && (
-						<View className="squircle rounded-lg bg-fill-info-secondary p-3">
-							<Text>This publication lacks a defined reading order and cannot be streamed</Text>
-						</View>
-					)}
-
-					{!isSupportedStream && (
-						<View className="squircle rounded-lg bg-fill-info-secondary p-3">
-							<Text>
-								This publication contains unsupported media types and cannot be streamed yet
-							</Text>
-						</View>
-					)}
-
-					<CardList
-						label="Information"
-						listEmptyStyle={{ icon: Info, message: 'No information available' }}
-					>
-						{identifier && <InfoRow label="Identifier" value={identifier} longValue />}
-						<InfoRow label="Title" value={title} longValue />
-						{description && <LongValue label="Description" value={description} />}
-						{modified && (
-							<InfoRow label="Modified" value={modified.format('MMMM DD, YYYY')} longValue />
-						)}
-						{!!numberOfPages && (
-							<InfoRow label="Number of pages" value={numberOfPages.toString()} longValue />
-						)}
-					</CardList>
-
-					<CardList
-						label="Series"
-						listEmptyStyle={{ icon: BookCopy, message: 'No series information' }}
-					>
-						{belongsToSeries?.name && <InfoRow label="Name" value={belongsToSeries.name} />}
-						{belongsToSeries?.position && (
-							<InfoRow label="Position" value={belongsToSeries.position.toString()} />
-						)}
-
-						{resolvedSeriesURL && (
-							<View className="flex flex-row items-center justify-between py-1">
-								<Text className="shrink-0 text-foreground-subtle">Feed URL</Text>
-								<Pressable
-									onPress={() =>
-										router.push({
-											pathname: '/opds/[id]/feed/[url]',
-											params: { url: resolvedSeriesURL, id: serverID },
-										})
-									}
-								>
-									{({ pressed }) => (
-										<View
-											className={cn(
-												'squircle rounded-lg border border-edge bg-background-surface-secondary p-1 px-3 text-center',
-												{
-													'opacity-80': pressed,
-												},
-											)}
-										>
-											<Text>Go to feed</Text>
-										</View>
-									)}
-								</Pressable>
-							</View>
-						)}
-					</CardList>
 				</View>
-			</ScrollView>
-		</SafeAreaView>
+			</View>
+
+			<View className="gap-8 px-4 py-8 tablet:px-6">
+				{!canDownload && !isDownloaded && (
+					<View className="squircle rounded-lg bg-fill-warning-secondary p-3">
+						<Text>
+							{!downloadURL
+								? 'No download link available for this publication'
+								: `Unsupported file format: ${acquisitionLink?.type || 'unknown'}`}
+						</Text>
+					</View>
+				)}
+
+				{!canStream && (
+					<View className="squircle rounded-lg bg-fill-info-secondary p-3">
+						<Text>This publication lacks a defined reading order and cannot be streamed</Text>
+					</View>
+				)}
+
+				{!isSupportedStream && (
+					<View className="squircle rounded-lg bg-fill-info-secondary p-3">
+						<Text>
+							This publication contains unsupported media types and cannot be streamed yet
+						</Text>
+					</View>
+				)}
+
+				<Card
+					label="Information"
+					listEmptyStyle={{ icon: Info, message: 'No information available' }}
+				>
+					{identifier && <InfoRow label="Identifier" value={identifier} longValue />}
+					<InfoRow label="Title" value={title} longValue />
+					{subtitle && <InfoRow label="Subtitle" value={subtitle} longValue />}
+					{description && <LongValue label="Description" value={description} />}
+					{modified && (
+						<InfoRow
+							label="Modified"
+							value={intlFormat(modified, { month: 'long', day: 'numeric', year: 'numeric' })}
+							longValue
+						/>
+					)}
+					{publisher && <InfoRow label="Publisher" value={publisher} />}
+					{published && (
+						<InfoRow
+							label="Published"
+							value={intlFormat(published, { month: 'long', day: 'numeric', year: 'numeric' })}
+						/>
+					)}
+					{!!numberOfPages && <InfoRow label="Number of pages" value={numberOfPages.toString()} />}
+					{volume != null && <InfoRow label="Volume" value={volume.toString()} />}
+					{issue != null && <InfoRow label="Issue" value={issue.toString()} />}
+					{language && <InfoRow label="Language" value={language} />}
+					{readingDirection && <InfoRow label="Reading direction" value={readingDirection} />}
+				</Card>
+
+				<Card label="Series" listEmptyStyle={{ icon: BookCopy, message: 'No series information' }}>
+					{belongsToSeries?.name && <InfoRow label="Name" value={belongsToSeries.name} />}
+					{belongsToSeries?.position && (
+						<InfoRow label="Position" value={belongsToSeries.position.toString()} />
+					)}
+
+					{/* TODO: I don't love this design, just easiest right now */}
+					{seriesUrl && (
+						<Card.Row label="Feed">
+							<Button
+								onPress={() => goToFeedLink(seriesLink)}
+								size="sm"
+								variant="secondary"
+								roundness="full"
+								className="flex-row gap-2"
+							>
+								<Text>Go to series</Text>
+							</Button>
+						</Card.Row>
+					)}
+				</Card>
+
+				{seriesPublications.length > 0 && (
+					<View className="gap-3">
+						<Text className="ios:px-4 px-2 text-lg font-semibold text-foreground-muted">
+							Series Books
+						</Text>
+						<FlashList
+							data={seriesPublications}
+							renderItem={({ item }) => <RelatedPublicationItem item={item} />}
+							horizontal
+							showsHorizontalScrollIndicator={false}
+							contentContainerStyle={{ paddingHorizontal: Platform.OS === 'ios' ? 16 : 8 }}
+							initialScrollIndex={initialSeriesPublicationIndex}
+							keyExtractor={keyExtractor}
+							onEndReached={fetchMoreSeriesPublications}
+						/>
+					</View>
+				)}
+
+				{/* TODO: Support multiple collections, not sure what ideal UI might be for that */}
+				{belongsToCollection && (
+					<Card
+						label="Collection"
+						listEmptyStyle={{ icon: BookCopy, message: 'No collection information' }}
+					>
+						{belongsToCollection.name && <InfoRow label="Name" value={belongsToCollection.name} />}
+						{belongsToCollection.position != null && (
+							<InfoRow label="Position" value={belongsToCollection.position.toString()} />
+						)}
+					</Card>
+				)}
+
+				{/* TODO: See above ^ this will drastically change based on above. It might not
+				 make sense to pull collections pubs if multiple are present */}
+				{collectionPublications.length > 0 && (
+					<View className="gap-3">
+						<Text className="ios:px-4 px-2 text-lg font-semibold text-foreground-muted">
+							Collection Books
+						</Text>
+						<FlashList
+							data={collectionPublications}
+							renderItem={({ item }) => <RelatedPublicationItem item={item} />}
+							horizontal
+							showsHorizontalScrollIndicator={false}
+							contentContainerStyle={{ paddingHorizontal: Platform.OS === 'ios' ? 16 : 8 }}
+							initialScrollIndex={initialCollectionPublicationIndex}
+							keyExtractor={keyExtractor}
+							onEndReached={fetchMoreCollectionPublications}
+						/>
+					</View>
+				)}
+
+				<CreditsSection
+					metadata={metadata}
+					onPressCredit={(credit) => goToFeedLink(getFirstLink(credit.links))}
+				/>
+
+				<MetadataBadgeSection
+					label="Subjects"
+					items={subjects.map((subject) => ({
+						label: subject.label,
+						onPress: () => goToFeedLink(getFirstLink(subject.links)),
+					}))}
+				/>
+			</View>
+		</Animated.ScrollView>
 	)
 }

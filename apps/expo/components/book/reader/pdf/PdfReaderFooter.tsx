@@ -4,6 +4,7 @@ import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-na
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Text } from '~/components/ui'
+import { CONTROLS_TIMING_CONFIG } from '~/lib/constants'
 import { useDisplay } from '~/lib/hooks'
 import { useReaderStore } from '~/stores'
 import { usePdfStore } from '~/stores/pdf'
@@ -24,19 +25,17 @@ export function PdfReaderFooter() {
 
 	const insets = useSafeAreaInsets()
 
-	const translateY = useSharedValue(400)
+	const opacity = useSharedValue(0)
 	useEffect(() => {
-		translateY.value = withTiming(visible ? 0 : 400 * 1, {
-			duration: 300,
-		})
-	}, [visible, translateY, height, insets.bottom])
+		opacity.value = withTiming(visible ? 1 : 0, CONTROLS_TIMING_CONFIG)
+	}, [visible, opacity, height, insets.bottom])
 
 	const animatedStyles = useAnimatedStyle(() => {
 		return {
 			bottom: insets.bottom + (Platform.OS === 'android' ? 12 : 0),
 			left: insets.left,
 			right: insets.right,
-			transform: [{ translateY: translateY.value }],
+			opacity: opacity.value,
 		}
 	})
 

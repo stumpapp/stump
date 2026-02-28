@@ -9,6 +9,7 @@ import { executePullAnnotationsSync } from '~/backgroundTasks/pullServerAnnotati
 import { executePushAnnotationsSync } from '~/backgroundTasks/pushLocalAnnotations'
 import { useActiveServer } from '~/components/activeServer'
 import { annotations, db, downloadedFiles, syncStatus } from '~/db'
+import { isLocalLibrary } from '~/lib/localLibrary'
 import { ReadiumLocator } from '~/modules/readium'
 
 import { useServerInstances } from './utils'
@@ -73,7 +74,7 @@ export function useAutoSyncAnnotationsForActiveServer({ enabled = true }: AutoSy
 	useFocusEffect(
 		useCallback(() => {
 			const syncIfNeeded = async () => {
-				if (!enabled || didSync.current) return
+				if (!enabled || didSync.current || isLocalLibrary(serverId)) return
 
 				didSync.current = true
 

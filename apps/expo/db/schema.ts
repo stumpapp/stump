@@ -85,22 +85,24 @@ export type NewUnsyncedReadProgress = typeof readProgress.$inferInsert
 export const epubProgress = z.object({
 	chapterTitle: z.string().default(''),
 	href: z.string(),
-	locations: z.object({
-		fragments: z.array(z.string()).nullish(),
-		position: z.number().nullish(),
-		// Note: Stored as strings in the DB, so need to preprocess
-		progression: z.preprocess((val) => {
-			if (typeof val === 'string') return parseInt(val, 10)
-			return val
-		}, z.number().nullish()),
-		// Note: Stored as strings in the DB, so need to preprocess
-		totalProgression: z.preprocess((val) => {
-			if (typeof val === 'string') return parseInt(val, 10)
-			return val
-		}, z.number().nullish()),
-		cssSelector: z.string().nullish(),
-		partialCfi: z.string().nullish(),
-	}),
+	locations: z
+		.object({
+			fragments: z.array(z.string()).nullish(),
+			position: z.number().nullish(),
+			// Note: Stored as strings in the DB, so need to preprocess
+			progression: z.preprocess((val) => {
+				if (typeof val === 'string') return parseInt(val, 10)
+				return val
+			}, z.number().nullish()),
+			// Note: Stored as strings in the DB, so need to preprocess
+			totalProgression: z.preprocess((val) => {
+				if (typeof val === 'string') return parseInt(val, 10)
+				return val
+			}, z.number().nullish()),
+			cssSelector: z.string().nullish(),
+			partialCfi: z.string().nullish(),
+		})
+		.nullish(),
 	title: z.string().nullish(),
 	type: z.string().default('application/xhtml+xml'),
 })
@@ -198,4 +200,50 @@ export const annotationLocator = z.object({
 		})
 		.nullish(),
 	type: z.string().nullish(),
+})
+
+export const downloadQueueStatus = z.enum(['pending', 'downloading', 'completed', 'failed'])
+export type DownloadQueueStatus = z.infer<typeof downloadQueueStatus>
+
+export const downloadQueue = sqliteTable('download_queue', {
+	id: integer('id').primaryKey({ autoIncrement: true }),
+	bookId: text('book_id').notNull(),
+	serverId: text('server_id').notNull(),
+	status: text('status').notNull().default(downloadQueueStatus.enum.pending),
+	downloadUrl: text('download_url').notNull(),
+	filename: text('filename').notNull(),
+	extension: text('extension').notNull(),
+	// Note: This is more than just downloadedFiles.bookMetadata, it will also contain the series/library ref info.
+	// See below for structure
+	metadata: text('metadata', { mode: 'json' }),
+	createdAt: integer('created_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date()),
+	failureReason: text('failure_reason'),
+})
+
+export type DownloadQueueItem = typeof downloadQueue.$inferSelect
+export type NewDownloadQueueItem = typeof downloadQueue.$inferInsert
+
+export const downloadQueueMetadata = z.object({
+	bookName: z.string().nullish(),
+	seriesId: z.string().nullish(),
+	seriesName: z.string().nullish(),
+	libraryId: z.string().nullish(),
+	libraryName: z.string().nullish(),
+	thumbnailMeta: imageMeta.nullish(),
+	toc: z.array(z.string()).nullish(),
+	bookMetadata: z.record(z.unknown()).nullish(),
+	readProgress: z
+		.object({
+			percentageCompleted: z.string().nullish(),
+			page: z.number().nullish(),
+			elapsedSeconds: z.number().nullish(),
+			locator: epubProgress.nullish(),
+			updatedAt: z.coerce.date().nullish(),
+		})
+		.nullish(),
+	// OPDS downloads:
+	isOPDS: z.boolean().nullish(),
+	publicationUrl: z.string().nullish(),
 })

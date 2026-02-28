@@ -1,4 +1,6 @@
 export * from './annotations'
 export * from './bookmarks'
+export * from './downloadQueue'
 export * from './downloads'
+export * from './downloadSeries'
 export * from './opdsDownloads'

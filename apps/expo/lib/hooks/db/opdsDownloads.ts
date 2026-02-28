@@ -1,6 +1,5 @@
 import * as Sentry from '@sentry/react-native'
-import { useSDKSafe } from '@stump/client'
-import { OPDSMetadata, OPDSPublication, resolveUrl } from '@stump/sdk'
+import { OPDSMetadata } from '@stump/sdk'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { and, eq } from 'drizzle-orm'
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
@@ -8,9 +7,15 @@ import * as FileSystem from 'expo-file-system/legacy'
 import { useEffect, useMemo } from 'react'
 
 import { useActiveServerSafe } from '~/components/activeServer'
-import { extensionFromMime, getAcquisitionLink, getPublicationId } from '~/components/opds/utils'
-import { db, downloadedFiles, DownloadRepository } from '~/db'
+import { getPublicationId } from '~/components/opds/utils'
+import { db, downloadedFiles, downloadQueue, DownloadRepository } from '~/db'
 import { booksDirectory, bookThumbnailPath, ensureDirectoryExists } from '~/lib/filesystem'
+
+import { useDownloadQueue } from './downloadQueue'
+
+// TODO(opds): See if I can just use a few intersection types to remove this and unify
+// with downloads.ts. I originally split because it was quicker, and not saying unify is the
+// way, but ideally I can cut down on maintaince by minimizing that
 
 const downloadKeys = {
 	all: ['downloads'] as const,
@@ -19,19 +24,18 @@ const downloadKeys = {
 		[...downloadKeys.all, 'opds-book', bookID, serverID] as const,
 }
 
-type DownloadOPDSBookParams = {
-	/**
-	 * The URL to the publication manifest. If the publication lacks any identifier in metadata,
-	 * this will be used to generate an ID
-	 */
-	publicationUrl: string
-	publication: OPDSPublication
-}
-
 export type UseOPDSDownloadParams = {
 	serverId?: string
 }
 
+/**
+ * A hook to determine if an OPDS v2.0 publication is downloaded. For OPDS v1.2, use {@link useIsLegacyOPDSEntryDownloaded}
+ *
+ * @param publicationUrl The URL at which the book can be downloaded
+ * @param metadata Any metadata present which will be used for display purposes offline
+ * @param serverID The server ID to check against. If not provided, will use the active server
+ * @returns
+ */
 export function useIsOPDSPublicationDownloaded(
 	publicationUrl: string,
 	metadata: OPDSMetadata | null | undefined,
@@ -60,102 +64,75 @@ export function useIsOPDSPublicationDownloaded(
 	return isDownloaded
 }
 
+/**
+ * A hook to determine if a legacy OPDS v1.2 entry is downloaded. For OPDS v2.0, use {@link useIsOPDSPublicationDownloaded}
+ *
+ * @param entryId The ID of the entry as pulled from the XML
+ * @param serverID The server ID to check against. If not provided, will use the active server
+ */
+export function useIsLegacyOPDSEntryDownloaded(entryId: string, serverID?: string) {
+	const activeServerCtx = useActiveServerSafe()
+	const effectiveServerID = serverID ?? activeServerCtx?.activeServer.id
+
+	const {
+		data: [downloadedFile],
+	} = useLiveQuery(
+		db
+			.select({ id: downloadedFiles.id })
+			.from(downloadedFiles)
+			.where(
+				and(eq(downloadedFiles.id, entryId), eq(downloadedFiles.serverId, effectiveServerID || '')),
+			)
+			.limit(1),
+	)
+	const isDownloaded = !!downloadedFile as boolean
+
+	return isDownloaded
+}
+
+/**
+ * A hook to manage OPDS book downloads, including downloading and deleting books.
+ *
+ * Note: This hook is largely centered around OPDS v2.0 interactions. For legacy OPDS v1.2 support,
+ * there were a few tweaks that were made, particularly around book idents.
+ */
 export function useOPDSDownload({ serverId }: UseOPDSDownloadParams = {}) {
 	const activeServerCtx = useActiveServerSafe()
 	const serverID = serverId ?? activeServerCtx?.activeServer.id
 
-	const sdkCtx = useSDKSafe()
 	const queryClient = useQueryClient()
 
-	// Ensure books directory exists
+	const { enqueueOPDSBook, counts: queueCounts } = useDownloadQueue({ serverId: serverID })
+
 	useEffect(() => {
 		if (serverID) {
 			ensureDirectoryExists(booksDirectory(serverID))
 		}
 	}, [serverID])
 
-	const downloadMutation = useMutation({
-		mutationFn: async ({ publicationUrl, publication }: DownloadOPDSBookParams) => {
-			if (!serverID) {
-				throw new Error('No active server available for downloads')
-			}
-
-			if (!sdkCtx?.sdk) {
-				throw new Error('SDK is not initialized')
-			}
-
-			const { sdk } = sdkCtx
-
-			await ensureDirectoryExists(booksDirectory(serverID))
-
-			const { metadata, links } = publication
-			const bookID = getPublicationId(publicationUrl, metadata)
-
-			const existingBook = await DownloadRepository.getFile(bookID, serverID)
-			if (existingBook) {
-				return `${booksDirectory(serverID)}/${existingBook.filename}`
-			}
-
-			const acquisitionLink = getAcquisitionLink(links)
-			if (!acquisitionLink?.href) {
-				throw new Error('No acquisition link found for this publication')
-			}
-
-			const extension = extensionFromMime(acquisitionLink.type)
-			if (!extension) {
-				throw new Error(`Unsupported file type: ${acquisitionLink.type || 'unknown'}`)
-			}
-
-			const downloadUrl = resolveUrl(acquisitionLink.href, sdk.rootURL)
-			const filename = `${bookID}.${extension}`
-			const placementUrl = `${booksDirectory(serverID)}/${filename}`
-
-			const result = await FileSystem.downloadAsync(downloadUrl, placementUrl, {
-				headers: sdk.headers,
-			})
-
-			if (result.status !== 200) {
-				throw new Error(`Failed to download file, status code: ${result.status}`)
-			}
-
-			const size = Number(result.headers['Content-Length'] ?? 0)
-
-			await DownloadRepository.addFile({
-				id: bookID,
-				filename,
-				uri: result.uri,
-				serverId: serverID,
-				size: !isNaN(size) && size > 0 ? size : undefined,
-				bookName: metadata?.title,
-				metadata: {
-					title: metadata?.title,
-					summary: metadata?.description ?? undefined,
-				},
-			})
-
-			return result.uri
-		},
-		onSuccess: (_, variables) => {
-			if (!serverID) return
-			const bookID = getPublicationId(variables.publicationUrl, variables.publication.metadata)
-			queryClient.invalidateQueries({ queryKey: downloadKeys.server(serverID) })
-			queryClient.invalidateQueries({ queryKey: downloadKeys.opdsBook(bookID, serverID) })
-		},
-	})
+	type DeleteParams = {
+		/**
+		 * The ID of the book to delete. If not provided, it will be derived from the publicationUrl and metadata.
+		 *
+		 * Note: This should only be used for legacy OPDS v1.2 entries that have a stable ID derived directly from
+		 * the feed.
+		 */
+		id?: string
+		/**
+		 * The URL at which the publication can be downloaded. If `id` is not provided, this will be used to
+		 * generate the book ID.
+		 */
+		publicationUrl: string
+		metadata?: OPDSMetadata | null
+	}
 
 	const deleteMutation = useMutation({
-		mutationFn: async ({
-			publicationUrl,
-			metadata,
-		}: {
-			publicationUrl: string
-			metadata?: OPDSMetadata | null
-		}) => {
+		mutationFn: async ({ id, publicationUrl, metadata }: DeleteParams) => {
 			if (!serverID) {
 				throw new Error('No active server available for deleting downloads')
 			}
 
-			const bookID = getPublicationId(publicationUrl, metadata)
+			const bookID = id || getPublicationId(publicationUrl, metadata)
 			const file = await DownloadRepository.getFile(bookID, serverID)
 			if (!file) {
 				console.warn('File not found in download store')
@@ -205,12 +182,19 @@ export function useOPDSDownload({ serverId }: UseOPDSDownloadParams = {}) {
 	})
 
 	return {
-		downloadBook: downloadMutation.mutateAsync,
-		deleteBook: (publicationUrl: string, metadata?: OPDSMetadata | null) =>
-			deleteMutation.mutateAsync({ publicationUrl, metadata }),
-		isDownloading: downloadMutation.isPending,
+		downloadBook: enqueueOPDSBook,
+		deleteBook: (params: DeleteParams) => deleteMutation.mutateAsync(params),
+		isQueueActive: Boolean(queueCounts.pending + queueCounts.downloading > 0),
 		isDeleting: deleteMutation.isPending,
-		downloadError: downloadMutation.error,
 		deleteError: deleteMutation.error,
 	}
+}
+
+export function useIsOPDSBookDownloading(url: string) {
+	const {
+		data: [record],
+	} = useLiveQuery(db.select().from(downloadQueue).where(eq(downloadQueue.downloadUrl, url)), [
+		`is-book-downloading-${url}`,
+	])
+	return record ? record.status === 'downloading' : false
 }

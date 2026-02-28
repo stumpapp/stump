@@ -11,6 +11,7 @@ import { executePullProgressSync } from '~/backgroundTasks/pullServerProgress'
 import { executePushProgressSync } from '~/backgroundTasks/pushLocalProgress'
 import { useActiveServer } from '~/components/activeServer'
 import { db, epubProgress, readProgress, syncStatus } from '~/db'
+import { isLocalLibrary } from '~/lib/localLibrary'
 
 import { useServerInstances } from './utils'
 
@@ -84,7 +85,7 @@ export function useAutoSyncActiveServer({ enabled = true }: Params = {}) {
 	useFocusEffect(
 		useCallback(() => {
 			const syncIfNeeded = async () => {
-				if (!enabled || didSync.current) return
+				if (!enabled || didSync.current || isLocalLibrary(serverId)) return
 
 				didSync.current = true
 

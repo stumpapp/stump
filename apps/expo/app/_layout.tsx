@@ -3,10 +3,10 @@ import '~/global.css'
 import { DarkTheme, DefaultTheme, Theme, ThemeProvider } from '@react-navigation/native'
 import { PortalHost } from '@rn-primitives/portal'
 import * as Sentry from '@sentry/react-native'
-import dayjs from 'dayjs'
-import duration from 'dayjs/plugin/duration'
-import relativeTime from 'dayjs/plugin/relativeTime'
+import { initDateFnsLocale } from '@stump/i18n'
+import { getColor, to } from 'colorjs.io/fn'
 import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator'
+import * as Localization from 'expo-localization'
 import { Stack, useNavigationContainerRef } from 'expo-router'
 import * as SplashScreen from 'expo-splash-screen'
 import LottieView from 'lottie-react-native'
@@ -20,6 +20,7 @@ import { Toaster } from 'sonner-native'
 
 import darkSplash from '~/assets/splash/dark.json'
 import lightSplash from '~/assets/splash/light.json'
+import { FloatingQueueButton } from '~/components/downloadQueue'
 import { PerformanceMonitor } from '~/components/PerformanceMonitor'
 import { BottomSheet } from '~/components/ui/bottom-sheet'
 import { db } from '~/db'
@@ -27,12 +28,12 @@ import migrations from '~/drizzle/migrations'
 import { reactNavigationIntegration } from '~/index'
 import { setAndroidNavigationBar } from '~/lib/android-navigation-bar'
 import { NAV_THEME, useColors } from '~/lib/constants'
+import { getDownloadQueueManager } from '~/lib/downloadQueue'
+import { useFileImportListener } from '~/lib/import'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { usePreferencesStore } from '~/stores'
-import { useHideStatusBar } from '~/stores/reader'
-
-dayjs.extend(relativeTime)
-dayjs.extend(duration)
+import { useEpubLocationStore, useEpubTheme } from '~/stores/epub'
+import { useHideSystemBars, useReaderStore } from '~/stores/reader'
 
 const LIGHT_THEME: Theme = {
 	...DefaultTheme,
@@ -68,11 +69,13 @@ export default function RootLayout() {
 	const { error } = useMigrations(db, migrations)
 
 	const animation = React.useRef<LottieView>(null)
-	const shouldHideStatusBar = useHideStatusBar()
+	const { hideStatusBar, hideNavigationBar } = useHideSystemBars()
 	const hasMounted = React.useRef(false)
 
 	const colors = useColors()
 	const insets = useSafeAreaInsets()
+
+	useFileImportListener()
 
 	const { performanceMonitor, animationEnabled, disableDismissGesture } = usePreferencesStore(
 		(state) => ({
@@ -81,11 +84,17 @@ export default function RootLayout() {
 			disableDismissGesture: state.disableDismissGesture,
 		}),
 	)
+	const isReading = useReaderStore((state) => state.isReading)
+	const isReadingEbook = useEpubLocationStore((state) => !!state.book)
+	const { colors: epubThemeColors } = useEpubTheme()
 
 	useIsomorphicLayoutEffect(() => {
 		if (hasMounted.current) {
 			return
 		}
+		const preferredLocale = usePreferencesStore.getState().locale
+		const deviceLocale = Localization.getLocales()[0]?.languageTag ?? 'en-US'
+		initDateFnsLocale(preferredLocale ?? deviceLocale)
 		setAndroidNavigationBar(colorScheme)
 		setIsColorSchemeLoaded(true)
 		hasMounted.current = true
@@ -121,6 +130,29 @@ export default function RootLayout() {
 		return () => subscription.remove()
 	}, [])
 
+	React.useEffect(() => {
+		const manager = getDownloadQueueManager()
+		manager.initialize().catch((err) => {
+			console.error('Failed to initialize download queue manager:', err)
+			Sentry.captureException(err)
+		})
+	}, [])
+
+	let isDarkEpubTheme: boolean = isDarkColorScheme
+	if (epubThemeColors?.background && isReadingEbook) {
+		const backgroundColor = getColor(epubThemeColors?.background)
+		const foregroundColor = getColor(epubThemeColors?.foreground)
+
+		const backgroundLightness = to(backgroundColor, 'oklch').coords[0]
+		const foregroundLightness = to(foregroundColor, 'oklch').coords[0]
+
+		// Choosing based on relative difference rather than e.g. absolute lightness < 0.5 seems
+		// to look much better for edge cases near the boundry
+		isDarkEpubTheme = foregroundLightness > backgroundLightness
+	}
+
+	const isDarkBackground = isReadingEbook ? isDarkEpubTheme : isDarkColorScheme || isReading
+
 	if (!isColorSchemeLoaded || !isAnimationReady) {
 		return <View className="flex-1 bg-background" />
 	}
@@ -155,7 +187,10 @@ export default function RootLayout() {
 				{performanceMonitor && <PerformanceMonitor style={{ top: insets.top || 12 }} />}
 				<BottomSheet.Provider>
 					<KeyboardProvider>
-						<SystemBars style={isDarkColorScheme ? 'light' : 'dark'} hidden={shouldHideStatusBar} />
+						<SystemBars
+							style={isDarkBackground ? 'light' : 'dark'}
+							hidden={{ statusBar: hideStatusBar, navigationBar: hideNavigationBar }}
+						/>
 						<Stack
 							// https://github.com/expo/expo/issues/15244 ?
 							// screenOptions={{
@@ -182,7 +217,7 @@ export default function RootLayout() {
 									headerShown: false,
 									title: '',
 									animation: animationEnabled ? 'default' : 'none',
-									autoHideHomeIndicator: shouldHideStatusBar,
+									autoHideHomeIndicator: hideNavigationBar,
 									contentStyle: {
 										backgroundColor: colors.background.DEFAULT,
 									},
@@ -195,6 +230,13 @@ export default function RootLayout() {
 									animation: animationEnabled ? 'default' : 'none',
 								}}
 							/>
+							<Stack.Screen
+								name="opds-legacy/[id]"
+								options={{
+									headerShown: false,
+									animation: animationEnabled ? 'default' : 'none',
+								}}
+							/>
 
 							<Stack.Screen
 								name="offline"
@@ -202,7 +244,7 @@ export default function RootLayout() {
 									headerShown: false,
 									title: '',
 									animation: animationEnabled ? 'default' : 'none',
-									autoHideHomeIndicator: shouldHideStatusBar,
+									autoHideHomeIndicator: hideNavigationBar,
 									presentation:
 										disableDismissGesture && Platform.OS === 'ios' ? 'fullScreenModal' : undefined,
 									contentStyle: {
@@ -211,10 +253,22 @@ export default function RootLayout() {
 								}}
 							/>
 						</Stack>
+						<FloatingQueueButton />
 						<PortalHost />
 					</KeyboardProvider>
 				</BottomSheet.Provider>
-				<Toaster position="bottom-center" />
+
+				<Toaster
+					position="bottom-center"
+					styles={{
+						title: {
+							fontSize: 18,
+						},
+						description: {
+							fontSize: 16,
+						},
+					}}
+				/>
 			</ThemeProvider>
 		</GestureHandlerRootView>
 	)

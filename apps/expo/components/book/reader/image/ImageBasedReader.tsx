@@ -122,6 +122,7 @@ export default function ImageBasedReader({ initialPage, onPastEndReached }: Prop
 
 	const isRtl = readingDirection === ReadingDirection.Rtl
 	const isVertical = readingMode === ReadingMode.ContinuousVertical
+
 	return (
 		<View style={[{ width, height }, isRtl && { transform: [{ scaleX: -1 }] }]}>
 			<FlashList
@@ -134,7 +135,7 @@ export default function ImageBasedReader({ initialPage, onPastEndReached }: Prop
 						deviceOrientation={deviceOrientation}
 						index={index}
 						indexes={item as [number, number]}
-						sizes={item.map((i: number) => imageSizes[i]).filter(Boolean)}
+						sizes={item.map((i: number) => imageSizes[i]).filter((i) => i != null)}
 						maxWidth={width}
 						maxHeight={height}
 						readingDirection="horizontal"

@@ -66,7 +66,9 @@ export class OPDSV2API extends APIBase {
 	async feed(url: string, params?: OPDSPageQuery): Promise<OPDSFeed> {
 		const absoluteUrl = resolveUrl(url, this.api.rootURL)
 		const resolvedURL = urlWithParams(
-			`${absoluteUrl.endsWith('/') ? absoluteUrl.slice(0, -1) : absoluteUrl}`,
+			// See https://github.com/ajslater/codex/issues/524 for commented out line
+			// `${absoluteUrl.endsWith('/') ? absoluteUrl.slice(0, -1) : absoluteUrl}`,
+			absoluteUrl,
 			toUrlParams(params),
 		)
 		const { data } = await this.axios.get<OPDSFeed>(resolvedURL, {
@@ -172,7 +174,12 @@ export class OPDSV2API extends APIBase {
 		const { data } = await this.axios.get<OPDSProgression>(resolveUrl(url, this.api.rootURL), {
 			baseURL: undefined,
 		})
-		return progression.parse(data)
+		const result = progression.safeParse(data)
+		if (!result.success) {
+			console.warn('Failed to parse progression:', result.error)
+			throw new Error('Failed to parse progression', result.error)
+		}
+		return result.data
 	}
 
 	/**

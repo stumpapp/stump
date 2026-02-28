@@ -3,11 +3,12 @@ import { Rss } from 'lucide-react-native'
 import { Fragment } from 'react'
 import { View } from 'react-native'
 
+import { Divider } from '../Divider'
 import { ListEmptyMessage, Text } from '../ui'
 import FeedSelfURL from './FeedSelfURL'
-import { LinkDivider } from './LinkDivider'
 import NavigationLink from './NavigationLink'
 import { FeedComponentOptions } from './types'
+import { useResolveURL } from './utils'
 
 type Props = {
 	group: OPDSFeedGroup
@@ -19,6 +20,8 @@ export default function NavigationGroup({
 }: Props) {
 	const selfURL = links.find((link) => link.rel === 'self')?.href
 
+	const resolveUrl = useResolveURL()
+
 	if (!navigation.length && !renderEmpty) return null
 
 	return (
@@ -28,13 +31,13 @@ export default function NavigationGroup({
 					{metadata.title || 'Browse'}
 				</Text>
 
-				{selfURL && <FeedSelfURL url={selfURL} />}
+				{selfURL && <FeedSelfURL url={resolveUrl(selfURL)} />}
 			</View>
 
 			{navigation.map((link) => (
 				<Fragment key={link.href}>
 					<NavigationLink link={link} />
-					<LinkDivider />
+					<Divider />
 				</Fragment>
 			))}
 

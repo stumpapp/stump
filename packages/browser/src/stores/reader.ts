@@ -1,5 +1,5 @@
 import { createReaderStore } from '@stump/client'
-import dayjs from 'dayjs'
+import { addSeconds } from 'date-fns'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useStopwatch } from 'react-timer-hook'
 
@@ -38,9 +38,7 @@ export const useBookTimer = (id: string, params: UseBookTimerParams = defaultPar
 
 	const { pause, totalSeconds, reset, isRunning } = useStopwatch({
 		autoStart: !!id && !!params.enabled,
-		offsetTimestamp: dayjs()
-			.add(resolvedTimer || 0, 'seconds')
-			.toDate(),
+		offsetTimestamp: addSeconds(new Date(), resolvedTimer || 0),
 	})
 
 	const pauseTimer = useCallback(() => {
@@ -54,7 +52,7 @@ export const useBookTimer = (id: string, params: UseBookTimerParams = defaultPar
 		if (!params.enabled) return
 
 		if (!isRunning) {
-			const offset = dayjs().add(totalSeconds, 'seconds').toDate()
+			const offset = addSeconds(new Date(), totalSeconds)
 			reset(offset)
 		}
 	}, [totalSeconds, reset, isRunning, params.enabled])
@@ -65,11 +63,7 @@ export const useBookTimer = (id: string, params: UseBookTimerParams = defaultPar
 	}, [reset, params.enabled, id, setBookTimer])
 
 	useEffect(() => {
-		reset(
-			dayjs()
-				.add(resolvedTimer || 0, 'seconds')
-				.toDate(),
-		)
+		reset(addSeconds(new Date(), resolvedTimer || 0))
 	}, [resolvedTimer, reset])
 
 	useEffect(() => {

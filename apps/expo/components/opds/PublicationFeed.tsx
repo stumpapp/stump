@@ -12,50 +12,48 @@ import { useActiveServer } from '../activeServer'
 import { GridImageItem } from '../grid'
 import { useGridItemSize } from '../grid/useGridItemSize'
 import RefreshControl from '../RefreshControl'
-import { useFeedTitle } from './useFeedTitle'
 import { getPublicationThumbnailURL } from './utils'
 
 type Props = {
 	feed: OPDSFeed
 	onRefresh?: () => void
 	isRefreshing?: boolean
+	ListHeaderComponent?: React.ReactElement
 }
 
-export default function PublicationFeed({ feed, onRefresh, isRefreshing }: Props) {
-	useFeedTitle(feed)
-
+export default function PublicationFeed({
+	feed,
+	onRefresh,
+	isRefreshing,
+	ListHeaderComponent,
+}: Props) {
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
 	const { sdk } = useSDK()
 
 	const feedURL = feed.links?.find((link) => link.rel === 'self')?.href || ''
-	const [pageSize, setPageSize] = useState(() => Math.max(10, feed.publications.length))
+	const [pageSize, setPageSize] = useState(() => feed.metadata.itemsPerPage || 20)
+
+	// Note: We cannot assume indexing of page query params, and I don't see it definfed in
+	// the spec, so we just have to rely on the next link
+	const getNextPageParam = (lastPage: OPDSFeed) => {
+		const links = lastPage.links || []
+		const nextLink = links.find((link) => link.rel === 'next')
+		if (nextLink) {
+			return nextLink.href
+		}
+		return undefined
+	}
 
 	const { data, hasNextPage, fetchNextPage } = useInfiniteQuery({
-		initialPageParam: 1,
+		initialPageParam: feedURL,
 		queryKey: [sdk.opds.keys.feed, feedURL, 'paged', pageSize],
-		queryFn: ({ pageParam = 1 }) => {
-			return sdk.opds.feed(feedURL, {
-				page: pageParam,
-				page_size: pageSize,
-			})
+		queryFn: ({ pageParam = feedURL }) => {
+			return sdk.opds.feed(pageParam)
 		},
 		placeholderData: keepPreviousData,
-		getNextPageParam: (lastPage) => {
-			const metadata = lastPage.metadata
-			const numberOfItems = metadata.numberOfItems || feed.metadata.numberOfItems
-			const numberOfPages = metadata.itemsPerPage || feed.metadata.itemsPerPage
-			if (!numberOfPages || !numberOfItems) return undefined
-
-			const currentPage = metadata.currentPage || 1
-
-			const pagesRemaining = Math.ceil(numberOfItems / numberOfPages) - currentPage
-			if (pagesRemaining > 0) {
-				return currentPage + 1
-			}
-			return undefined
-		},
+		getNextPageParam,
 		enabled: !!feedURL,
 	})
 
@@ -117,6 +115,7 @@ export default function PublicationFeed({ feed, onRefresh, isRefreshing }: Props
 				onEndReachedThreshold={ON_END_REACHED_THRESHOLD}
 				onEndReached={onEndReached}
 				contentInsetAdjustmentBehavior="always"
+				ListHeaderComponent={ListHeaderComponent}
 				ListHeaderComponentStyle={{ paddingBottom: 16, marginHorizontal: -paddingHorizontal }}
 				refreshControl={<RefreshControl refreshing={Boolean(isRefreshing)} onRefresh={onRefresh} />}
 			/>

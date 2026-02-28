@@ -1,4 +1,4 @@
-import { constructSearchURL } from '../opdsUtils'
+import { constructLegacySearchURL, constructSearchURL } from '../opdsUtils'
 
 describe('constructSearchURL', () => {
 	it('should return URL unchanged when no template section exists', () => {
@@ -49,5 +49,34 @@ describe('constructSearchURL', () => {
 	it('should reject non-templated URLs and return them unchanged', () => {
 		const url = '/opds/v2.0/search?query=test'
 		expect(constructSearchURL(url, 'new search')).toBe(url)
+	})
+})
+
+describe('constructLegacySearchURL', () => {
+	it('should replace {searchTerms} with encoded query', () => {
+		const url = '/opds/v1.2/series?search={searchTerms}'
+		expect(constructLegacySearchURL(url, 'Fire')).toBe('/opds/v1.2/series?search=Fire')
+	})
+
+	it('should handle query with spaces', () => {
+		const url = '/opds/v1.2/series?search={searchTerms}'
+		expect(constructLegacySearchURL(url, 'Fire Power')).toBe(
+			'/opds/v1.2/series?search=Fire%20Power',
+		)
+	})
+
+	it('should return URL unchanged when no template exists', () => {
+		const url = '/opds/v1.2/series?search=existing'
+		expect(constructLegacySearchURL(url, 'new')).toBe(url)
+	})
+
+	it('should handle empty query string', () => {
+		const url = '/opds/v1.2/series?search={searchTerms}'
+		expect(constructLegacySearchURL(url, '')).toBe('/opds/v1.2/series?search=')
+	})
+
+	it('should replace multiple placeholders if present', () => {
+		const url = '/opds/v1.2/search?q={searchTerms}&author={author}'
+		expect(constructLegacySearchURL(url, 'test')).toBe('/opds/v1.2/search?q=test&author=test')
 	})
 })

@@ -18,8 +18,9 @@ export const resolveUrl = (url: string, baseUrl?: string): string => {
 	}
 
 	try {
-		// Let URL do the work
-		return new URL(url, baseUrl).toString()
+		// Note: URL encodes the template strings we rely on for OPDS searches, e.g.
+		// `{?query}` becomes `%7B%3Fquery%7D`, so we decode the final URL before returning
+		return decodeURIComponent(new URL(url, baseUrl).toString())
 	} catch {
 		if (url.startsWith('/')) {
 			const match = baseUrl.match(/^(https?:\/\/[^/]+)/)

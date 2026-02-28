@@ -653,7 +653,7 @@ async fn get_book_page(
 				user_id: Set(user.id.clone()),
 				media_id: Set(id.clone()),
 				device_id: Set(device_id),
-				started_at: Set(started_at.unwrap_or_default()),
+				started_at: Set(started_at.unwrap_or_else(|| Utc::now().into())),
 				elapsed_seconds: Set(elapsed_seconds),
 				completed_at: Set(Utc::now().into()),
 				..Default::default()

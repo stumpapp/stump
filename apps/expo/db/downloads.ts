@@ -3,6 +3,7 @@ import { ImageMetadata, MediaMetadata, ReadiumLocator } from '@stump/graphql'
 import { and, count, eq } from 'drizzle-orm'
 
 import { thumbnailsDirectory, toRelativePath } from '~/lib/filesystem'
+import { generateLocalBookId, LOCAL_LIBRARY_SERVER_ID } from '~/lib/localLibrary'
 
 import StumpStreamer from '../modules/streamer'
 import { db } from './client'
@@ -231,5 +232,25 @@ export class DownloadRepository {
 		await db
 			.delete(downloadedFiles)
 			.where(and(eq(downloadedFiles.id, bookID), eq(downloadedFiles.serverId, serverId)))
+	}
+
+	static async addLocalFile(params: {
+		filename: string
+		uri: string
+		size?: number | null
+		bookName?: string | null
+	}): Promise<DownloadedFile> {
+		const bookId = generateLocalBookId()
+
+		return this.addFile({
+			id: bookId,
+			filename: params.filename,
+			uri: params.uri,
+			serverId: LOCAL_LIBRARY_SERVER_ID,
+			size: params.size,
+			bookName: params.bookName,
+			metadata: null,
+			imageMetadata: null,
+		})
 	}
 }

@@ -1,32 +1,41 @@
 import { useSDK, useSuspenseGraphQL } from '@stump/client'
-import { BookByIdQuery, graphql, UserPermission } from '@stump/graphql'
-import dayjs from 'dayjs'
-import duration from 'dayjs/plugin/duration'
-import relativeTime from 'dayjs/plugin/relativeTime'
+import {
+	BookByIdQuery,
+	graphql,
+	MediaFilterInput,
+	MediaMetadataFilterInput,
+	UserPermission,
+} from '@stump/graphql'
+import { formatHumanDuration } from '@stump/i18n'
+import { formatDistanceToNow } from 'date-fns'
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router'
-import { ChevronLeft, Loader2 } from 'lucide-react-native'
+import { ChevronLeft } from 'lucide-react-native'
 import { useCallback, useLayoutEffect, useState } from 'react'
 import { Platform, Pressable, View } from 'react-native'
-import { ScrollView } from 'react-native-gesture-handler'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import Animated, {
+	Extrapolation,
+	interpolate,
+	useAnimatedRef,
+	useAnimatedStyle,
+	useScrollOffset,
+} from 'react-native-reanimated'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import TImage from 'react-native-turbo-image'
 import { stripHtml } from 'string-strip-html'
 
 import { useActiveServer, useStumpServer } from '~/components/activeServer'
-import { BookMetaLink } from '~/components/book'
-import { BookActionMenu } from '~/components/book/overview'
-import { InfoRow, InfoStat, LongValue } from '~/components/book/overview'
+import { BookMetaLink, BooksAfterCursor } from '~/components/book'
+import { BookActionMenu, DownloadButton } from '~/components/book/overview'
+import { InfoRow, LongValue } from '~/components/book/overview'
 import { ThumbnailImage } from '~/components/image'
+import { MetadataBadgeSection } from '~/components/overview'
 import RefreshControl from '~/components/RefreshControl'
-import { Button, CardList, Heading, Text } from '~/components/ui'
+import { Button, Card, Heading, Text } from '~/components/ui'
 import { Icon } from '~/components/ui/icon'
 import { formatSeriesPosition } from '~/lib/bookUtils'
 import { formatBytes, parseGraphQLDecimal } from '~/lib/format'
-import { useDownload, useIsBookDownloaded } from '~/lib/hooks'
-import { cn } from '~/lib/utils'
+import { useDownload } from '~/lib/hooks'
 import { usePreferencesStore } from '~/stores'
-
-dayjs.extend(relativeTime)
-dayjs.extend(duration)
 
 const query = graphql(`
 	query BookById($id: ID!) {
@@ -92,6 +101,7 @@ const query = graphql(`
 			}
 			readHistory {
 				completedAt
+				elapsedSeconds
 			}
 			resolvedName
 			series {
@@ -145,7 +155,7 @@ export default function Screen() {
 	} = useSuspenseGraphQL(query, ['bookById', bookID], {
 		id: bookID,
 	})
-	const { downloadBook, isDownloading } = useDownload({ serverId: serverID })
+	const { downloadBook } = useDownload({ serverId: serverID })
 
 	const [isRefetching, setIsRefetching] = useState(false)
 
@@ -158,12 +168,8 @@ export default function Screen() {
 		})
 	}
 
-	const isDownloaded = useIsBookDownloaded(bookID, serverID)
-
-	const accentColor = usePreferencesStore((state) => state.accentColor)
-
 	const onDownloadBook = useCallback(async () => {
-		if (isDownloaded || !book || isDownloading) return
+		if (!book) return
 
 		return await downloadBook({
 			id: book.id,
@@ -178,9 +184,10 @@ export default function Screen() {
 			thumbnailMeta: book.thumbnail.metadata || undefined,
 			toc: book.ebook?.toc,
 		})
-	}, [isDownloaded, downloadBook, book, isDownloading])
+	}, [downloadBook, book])
 
 	const router = useRouter()
+	const insets = useSafeAreaInsets()
 	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
 
 	// TODO: prefetch, see https://github.com/candlefinance/faster-image/issues/73
@@ -202,6 +209,17 @@ export default function Screen() {
 			})
 		}
 	}, [navigation, book, bookID])
+
+	const animatedScrollRef = useAnimatedRef<Animated.ScrollView>()
+	const scrollOffset = useScrollOffset(animatedScrollRef)
+
+	const parallaxStyle = useAnimatedStyle(() => {
+		return {
+			transform: [
+				{ translateY: interpolate(scrollOffset.value, [0, 200], [0, 100], Extrapolation.EXTEND) },
+			],
+		}
+	})
 
 	if (!book) return null
 
@@ -229,11 +247,11 @@ export default function Screen() {
 	const seriesVolume = book.metadata?.volume
 
 	const publisher = book.metadata?.publisher
-	const writers = book.metadata?.writers?.join(', ')
-	const colorists = book.metadata?.colorists?.join(', ')
-	const inkers = book.metadata?.inkers?.join(', ')
-	const letterers = book.metadata?.letterers?.join(', ')
-	const coverArtists = book.metadata?.coverArtists?.join(', ')
+	const writers = book.metadata?.writers || []
+	const colorists = book.metadata?.colorists || []
+	const inkers = book.metadata?.inkers || []
+	const letterers = book.metadata?.letterers || []
+	const coverArtists = book.metadata?.coverArtists || []
 
 	const identifierAmazon = book.metadata?.identifierAmazon
 	const identifierCalibre = book.metadata?.identifierCalibre
@@ -242,16 +260,12 @@ export default function Screen() {
 	const identifierMobiAsin = book.metadata?.identifierMobiAsin
 	const identifierUuid = book.metadata?.identifierUuid
 
-	const noExternalIdentifiers =
-		!identifierAmazon &&
-		!identifierCalibre &&
-		!identifierGoogle &&
-		!identifierIsbn &&
-		!identifierMobiAsin &&
-		!identifierUuid
-
 	const noAcknowledgements =
-		!publisher && !writers && !colorists && !inkers && !letterers && !coverArtists
+		!writers.length &&
+		!colorists.length &&
+		!inkers.length &&
+		!letterers.length &&
+		!coverArtists.length
 
 	const renderRead = () => {
 		const { page, percentageCompleted, epubcfi } = book.readProgress || {}
@@ -272,17 +286,17 @@ export default function Screen() {
 
 		if (locator?.locations?.totalProgression != null && !percentageCompleted) {
 			const percentage = Math.round(locator.locations.totalProgression * 100)
-			return <InfoStat label="Completed" value={`${percentage}%`} />
+			return <Card.Stat label="Completed" value={`${percentage}%`} />
 		}
 
-		let percentage: number
+		let percentage
 		const decimal = percentageCompleted ? parseGraphQLDecimal(percentageCompleted) : null
 		if (decimal) {
-			percentage = Number((decimal * 100).toFixed(2))
+			percentage = (decimal * 100).toFixed(1)
 		} else {
-			percentage = Math.round(((page || 0) / pages) * 100)
+			percentage = (((page || 0) / pages) * 100).toFixed(1)
 		}
-		return <InfoStat label="Completed" value={`${percentage}%`} />
+		return <Card.Stat label="Completed" value={percentage} suffix={'%'} />
 	}
 
 	const renderReadTime = ({ elapsedSeconds, startedAt }: ActiveReadingSession) => {
@@ -291,10 +305,10 @@ export default function Screen() {
 		}
 
 		if (elapsedSeconds) {
-			const readTime = dayjs.duration(elapsedSeconds, 'seconds').humanize()
-			return <InfoStat label="Read time" value={readTime} />
+			const readTime = formatHumanDuration(elapsedSeconds, { significantUnits: 1 })
+			return <Card.Stat label="Read time" value={readTime} />
 		} else {
-			return <InfoStat label="Started" value={dayjs(startedAt).fromNow(true)} />
+			return <Card.Stat label="Started" value={formatDistanceToNow(new Date(startedAt))} />
 		}
 	}
 
@@ -305,31 +319,83 @@ export default function Screen() {
 
 		if (locator) {
 			const chapterTitle = locator.chapterTitle || locator.href || 'Unknown'
-			return <InfoStat label="Chapter" value={chapterTitle} />
+			return <Card.Stat label="Chapter" value={chapterTitle} />
 		} else {
-			return <InfoStat label="Locator" value={`${epubcfi?.slice(0, 4)}...${epubcfi?.slice(-4)}`} />
+			return <Card.Stat label="Locator" value={`${epubcfi?.slice(0, 4)}...${epubcfi?.slice(-4)}`} />
 		}
 	}
 
+	const lastCompletionDistance =
+		lastCompletion?.completedAt != null
+			? formatDistanceToNow(new Date(lastCompletion.completedAt), { addSuffix: true })
+			: 'Unknown'
+
+	const lastCompletionReadTime =
+		lastCompletion?.elapsedSeconds != null
+			? formatHumanDuration(lastCompletion.elapsedSeconds, { significantUnits: 1 })
+			: 'Unknown'
+
+	// Reminder: Whenever this page introduces a new clickable filter field, make sure to
+	// add a corresponding bit in the filter header and prolly metadata overview object
+	const onClickFilterField = (
+		field: Exclude<keyof MediaMetadataFilterInput, '_or' | '_and' | '_not'>,
+		value: string,
+	) => {
+		const filter = {
+			metadata: {
+				[field]: {
+					// Note: Most of these are "arrays" stored as comma-separated string
+					likeAnyOf: [value],
+				},
+			},
+		} satisfies MediaFilterInput
+		const filterString = JSON.stringify(filter)
+		router.push({
+			// @ts-expect-error: String path
+			pathname: `/server/${serverID}/books?initialFilters=${filterString}`,
+		})
+	}
+
 	return (
-		<SafeAreaView
-			style={{ flex: 1 }}
-			edges={[
-				'left',
-				'right',
-				...(Platform.OS === 'ios' ? [] : ['bottom' as const, 'top' as const]),
-			]}
+		<Animated.ScrollView
+			className="flex-1 bg-background"
+			ref={animatedScrollRef}
+			refreshControl={
+				<RefreshControl
+					refreshing={isRefetching}
+					onRefresh={onRefresh}
+					progressViewOffset={insets.top}
+				/>
+			}
 		>
-			<ScrollView
-				className="flex-1 bg-background px-6"
-				refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={onRefresh} />}
-				contentInsetAdjustmentBehavior="automatic"
-			>
-				<View
-					className={cn('flex-1 gap-8', {
-						'pt-4': Platform.OS === 'ios',
-					})}
+			<View className="ios:pt-safe-offset-20 pt-safe overflow-hidden pb-8">
+				<Animated.View
+					// -inset-24 is because when using a lot of blur, the sides get more transparent
+					// so we have to "zoom in" to have a clean line at the bottom rather than a gradient
+					className="absolute -inset-24 opacity-70 dark:opacity-30"
+					style={parallaxStyle}
 				>
+					<TImage
+						source={{
+							uri,
+							headers: {
+								...sdk.customHeaders,
+								Authorization: sdk.authorizationHeader || '',
+							},
+						}}
+						style={{ width: '100%', height: '100%' }}
+						resizeMode="cover"
+						fadeDuration={2000}
+						{...(Platform.OS === 'ios' && { indicator: { color: 'transparent' } })}
+						// android only supports up to blur={25} which doesn't look good,
+						// but if we heavily downscale first, the following looks near identical to using
+						// original res with blur={40} on ios, which is what I originally settled on
+						resize={60}
+						blur={Platform.OS === 'ios' ? 7 : 16}
+					/>
+				</Animated.View>
+
+				<View className="gap-8 px-4 tablet:px-6">
 					{Platform.OS === 'android' && book && (
 						<View className="flex flex-row justify-between pt-2">
 							<Pressable onPress={() => router.back()}>
@@ -340,21 +406,19 @@ export default function Screen() {
 						</View>
 					)}
 
-					<View className="flex items-center gap-4">
-						<ThumbnailImage
-							source={{
-								uri,
-								headers: {
-									...sdk.customHeaders,
-									Authorization: sdk.authorizationHeader || '',
-								},
-							}}
-							resizeMode="stretch"
-							size={{ height: 235 / thumbnailRatio, width: 235 }}
-							placeholderData={placeholderData}
-							borderAndShadowStyle={{ shadowRadius: 5 }}
-						/>
-					</View>
+					<ThumbnailImage
+						source={{
+							uri,
+							headers: {
+								...sdk.customHeaders,
+								Authorization: sdk.authorizationHeader || '',
+							},
+						}}
+						resizeMode="stretch"
+						size={{ height: 235 / thumbnailRatio, width: 235 }}
+						placeholderData={placeholderData}
+						borderAndShadowStyle={{ shadowRadius: 5 }}
+					/>
 
 					<View className="gap-2">
 						<Heading size="lg" className="text-center leading-6">
@@ -368,121 +432,141 @@ export default function Screen() {
 
 					<View className="flex w-full flex-row items-center gap-x-2 tablet:max-w-sm tablet:self-center">
 						<Button
-							className="flex-1 border border-edge"
+							className="flex-1"
+							roundness="full"
 							onPress={() =>
 								router.push({
-									// @ts-expect-error: It's fine
+									// @ts-expect-error: String path
 									pathname: `/server/${serverID}/books/${bookID}/read`,
 								})
 							}
 						>
 							{renderRead()}
 						</Button>
-						{checkPermission(UserPermission.DownloadFile) && !isDownloaded && (
-							<Button
-								variant="secondary"
-								disabled={isDownloaded || isDownloading}
-								onPress={onDownloadBook}
-								className="flex-row gap-2"
-							>
-								{isDownloading && (
-									<View className="pointer-events-none animate-spin">
-										<Icon
-											className="h-5 w-5"
-											as={Loader2}
-											style={{
-												// @ts-expect-error: It's fine
-												color: accentColor,
-											}}
-										/>
-									</View>
-								)}
-								<Text>Download</Text>
-							</Button>
+						{checkPermission(UserPermission.DownloadFile) && (
+							<DownloadButton bookId={bookID} serverId={serverID} onDownload={onDownloadBook} />
 						)}
 					</View>
 
-					{progression && (
-						<View className="flex flex-row justify-around">
-							{progression.page && <InfoStat label="Page" value={progression.page.toString()} />}
-							{!progression.page && renderEpubLocator(progression)}
-							{renderPercentage(progression)}
-							{renderReadTime(progression)}
-						</View>
-					)}
-
-					{lastCompletion && !progression && (
-						<View className="flex flex-row justify-around">
-							<InfoStat label="Pages" value={pages.toString()} />
-							{lastCompletion.completedAt && (
-								<InfoStat
-									label="Finished"
-									value={dayjs(lastCompletion.completedAt).fromNow(false)}
-								/>
+					{(progression || lastCompletion) && (
+						<Card>
+							{progression && (
+								<Card.StatGroup>
+									{progression.page && (
+										<Card.Stat label="Page" value={progression.page} suffix={` / ${pages}`} />
+									)}
+									{!progression.page && renderEpubLocator(progression)}
+									{renderPercentage(progression)}
+									{renderReadTime(progression)}
+								</Card.StatGroup>
 							)}
-						</View>
-					)}
 
-					<CardList label="Information">
-						<InfoRow label="Identifier" value={book.id} />
-						{book.metadata?.language && <InfoRow label="Language" value={book.metadata.language} />}
-						<InfoRow label="Pages" value={pages.toString()} />
-						<InfoRow label="Kind" value={book.extension.toUpperCase()} />
-						{formattedSize && <InfoRow label="Size" value={formattedSize} />}
-					</CardList>
-
-					{!noExternalIdentifiers && (
-						<CardList label="External Identifiers">
-							{identifierAmazon && <InfoRow label="Amazon" value={identifierAmazon} />}
-							{identifierCalibre && <InfoRow label="Calibre" value={identifierCalibre} />}
-							{identifierGoogle && <InfoRow label="Google" value={identifierGoogle} />}
-							{identifierIsbn && <InfoRow label="ISBN" value={identifierIsbn} />}
-							{identifierMobiAsin && <InfoRow label="Mobi ASIN" value={identifierMobiAsin} />}
-							{identifierUuid && <InfoRow label="UUID" value={identifierUuid} />}
-						</CardList>
-					)}
-
-					<CardList label="Metadata" listEmptyStyle={{ message: 'No metadata available' }}>
-						{description && <LongValue label="Description" value={stripHtml(description).result} />}
-						{seriesName && <InfoRow label="Series" value={seriesName} />}
-						{seriesPosition && (
-							<InfoRow
-								label={seriesName ? 'Position' : 'Series Position'}
-								value={seriesPosition.toString()}
-							/>
-						)}
-						{seriesVolume && (
-							<InfoRow key="seriesVolume" label="Volume" value={seriesVolume.toString()} />
-						)}
-						{/* TODO: Separate into separate section, maybe merge with links? */}
-						{genres && <InfoRow label="Genres" value={genres} />}
-						{characters && <InfoRow label="Characters" value={characters} />}
-					</CardList>
-
-					{!noAcknowledgements && (
-						<CardList label="Acknowledgements">
-							{publisher && <InfoRow label="Publisher" value={publisher} />}
-							{writers && <InfoRow label="Writers" value={writers} />}
-							{colorists && <InfoRow label="Colorists" value={colorists} />}
-							{inkers && <InfoRow label="Inkers" value={inkers} />}
-							{letterers && <InfoRow label="Letterers" value={letterers} />}
-							{coverArtists && <InfoRow label="Cover Artists" value={coverArtists} />}
-						</CardList>
-					)}
-
-					{links.length > 0 && (
-						<View className="flex w-full gap-2">
-							<Text className="text-lg text-foreground-muted">Links</Text>
-
-							<View className="flex flex-row flex-wrap gap-2">
-								{links.map((link) => (
-									<BookMetaLink key={link} href={link} />
-								))}
-							</View>
-						</View>
+							{lastCompletion && !progression && (
+								<Card.StatGroup>
+									<Card.Stat label="Pages" value={pages} />
+									<Card.Stat label="Finished" value={lastCompletionDistance} />
+									<Card.Stat label="Read time" value={lastCompletionReadTime} />
+								</Card.StatGroup>
+							)}
+						</Card>
 					)}
 				</View>
-			</ScrollView>
-		</SafeAreaView>
+			</View>
+
+			<View className="gap-8 px-4 py-8 tablet:px-6">
+				<Card label="Information">
+					{book.metadata?.language && <InfoRow label="Language" value={book.metadata.language} />}
+					<InfoRow label="Pages" value={pages.toString()} />
+					<InfoRow label="Kind" value={book.extension.toUpperCase()} />
+					{formattedSize && <InfoRow label="Size" value={formattedSize} />}
+				</Card>
+
+				<Card label="Metadata" listEmptyStyle={{ message: 'No metadata available' }}>
+					{description && <LongValue label="Description" value={stripHtml(description).result} />}
+					{publisher && <InfoRow label="Publisher" value={publisher} />}
+					{seriesName && <InfoRow label="Series" value={seriesName} />}
+					{seriesPosition && (
+						<InfoRow
+							label={seriesName ? 'Position' : 'Series Position'}
+							value={seriesPosition.toString()}
+						/>
+					)}
+					{seriesVolume && (
+						<InfoRow key="seriesVolume" label="Volume" value={seriesVolume.toString()} />
+					)}
+					{/* TODO: Separate into separate section, maybe merge with links? */}
+					{genres && <InfoRow label="Genres" value={genres} />}
+					{characters && <InfoRow label="Characters" value={characters} />}
+				</Card>
+
+				<BooksAfterCursor cursor={bookID} />
+
+				{!noAcknowledgements && (
+					<View className="gap-6">
+						<MetadataBadgeSection
+							label="Writers"
+							items={writers.map((writer) => ({
+								label: writer,
+								onPress: () => onClickFilterField('writers', writer),
+							}))}
+						/>
+
+						<MetadataBadgeSection
+							label="Colorists"
+							items={colorists.map((colorist) => ({
+								label: colorist,
+								onPress: () => onClickFilterField('colorists', colorist),
+							}))}
+						/>
+
+						<MetadataBadgeSection
+							label="Inkers"
+							items={inkers.map((inker) => ({
+								label: inker,
+								onPress: () => onClickFilterField('inkers', inker),
+							}))}
+						/>
+
+						<MetadataBadgeSection
+							label="Letterers"
+							items={letterers.map((letterer) => ({
+								label: letterer,
+								onPress: () => onClickFilterField('letterers', letterer),
+							}))}
+						/>
+
+						<MetadataBadgeSection
+							label="Cover Artists"
+							items={coverArtists.map((coverArtist) => ({
+								label: coverArtist,
+								onPress: () => onClickFilterField('coverArtists', coverArtist),
+							}))}
+						/>
+					</View>
+				)}
+
+				{links.length > 0 && (
+					<View className="flex w-full gap-2">
+						<Text className="text-lg text-foreground-muted">Links</Text>
+
+						<View className="flex flex-row flex-wrap gap-2">
+							{links.map((link) => (
+								<BookMetaLink key={link} href={link} />
+							))}
+						</View>
+					</View>
+				)}
+
+				<Card label="Identifiers">
+					<InfoRow label="Stump" value={book.id} />
+					{identifierAmazon && <InfoRow label="Amazon" value={identifierAmazon} />}
+					{identifierCalibre && <InfoRow label="Calibre" value={identifierCalibre} />}
+					{identifierGoogle && <InfoRow label="Google" value={identifierGoogle} />}
+					{identifierIsbn && <InfoRow label="ISBN" value={identifierIsbn} />}
+					{identifierMobiAsin && <InfoRow label="Mobi ASIN" value={identifierMobiAsin} />}
+					{identifierUuid && <InfoRow label="UUID" value={identifierUuid} />}
+				</Card>
+			</View>
+		</Animated.ScrollView>
 	)
 }

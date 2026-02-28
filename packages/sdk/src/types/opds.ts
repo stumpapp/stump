@@ -31,6 +31,61 @@ const imageLink = z
 const link = z.union([baseLink, navigationLink, imageLink])
 export type OPDSLink = z.infer<typeof link>
 
+// See https://readium.org/webpub-manifest/schema/language-map.schema.json
+const languageMap = z.union([
+	z.string(),
+	z.record(
+		z
+			.string()
+			.regex(
+				/^((?<grandfathered>(en-GB-oed|i-ami|i-bnn|i-default|i-enochian|i-hak|i-klingon|i-lux|i-mingo|i-navajo|i-pwn|i-tao|i-tay|i-tsu|sgn-BE-FR|sgn-BE-NL|sgn-CH-DE)|(art-lojban|cel-gaulish|no-bok|no-nyn|zh-guoyu|zh-hakka|zh-min|zh-min-nan|zh-xiang))|((?<language>([A-Za-z]{2,3}(-(?<extlang>[A-Za-z]{3}(-[A-Za-z]{3}){0,2}))?)|[A-Za-z]{4}|[A-Za-z]{5,8})(-(?<script>[A-Za-z]{4}))?(-(?<region>[A-Za-z]{2}|[0-9]{3}))?(-(?<variant>[A-Za-z0-9]{5,8}|[0-9][A-Za-z0-9]{3}))*(-(?<extension>[0-9A-WY-Za-wy-z](-[A-Za-z0-9]{2,8})+))*(-(?<privateUse>x(-[A-Za-z0-9]{1,8})+))?)|(?<privateUse2>x(-[A-Za-z0-9]{1,8})+))$/,
+			),
+	),
+])
+
+// See https://readium.org/webpub-manifest/schema/altIdentifier.schema.json
+const altIdentifier = z.union([
+	z.string(),
+	z.object({
+		value: z.string(),
+		scheme: z.string().nullish(),
+	}),
+])
+
+const contributorObject = z.object({
+	name: languageMap,
+	identifier: z.string().nullish(),
+	altIdentifier: altIdentifier.nullish(),
+	// TODO: sortAs: languageMap.nullish(),??
+	role: z.union([z.string(), z.array(z.string())]).nullish(),
+	links: z.array(link).nullish(),
+})
+
+const contributor = z.union([
+	z.string(),
+	z.array(z.string()),
+	contributorObject,
+	z.array(z.union([z.string(), contributorObject])),
+])
+export type OPDSContributor = z.infer<typeof contributor>
+
+const subjectObject = z.object({
+	name: languageMap,
+	// TODO: sortAs: languageMap.nullish(),??
+	code: z.string().nullish(),
+	scheme: z.string().nullish(),
+	links: z.array(link).nullish(),
+})
+
+// See https://readium.org/webpub-manifest/schema/subject.schema.json
+const subject = z.union([
+	z.string(),
+	z.array(z.string()),
+	subjectObject,
+	z.array(z.union([z.string(), subjectObject])),
+])
+export type OPDSSubject = z.infer<typeof subject>
+
 const authFlow = z
 	.object({
 		type: z.literal('http://opds-spec.org/auth/basic'),
@@ -63,27 +118,48 @@ const paginationMeta = z.object({
 })
 export type OPDSPaginationMetadata = z.infer<typeof paginationMeta>
 
-const belongsToSeries = z.object({
+const belongsToObject = z.object({
 	name: z.string(),
 	position: z.number().nullish(),
 	links: z.array(link).default([]),
 })
 
-// Komga sends series as an array, Stump doesnt
+// https://readium.org/webpub-manifest/schema/metadata.schema.json -> belongsTo
 const belongsTo = z.object({
-	series: z.union([belongsToSeries, z.array(belongsToSeries)]).nullish(),
+	series: z.union([belongsToObject, z.array(belongsToObject)]).nullish(),
+	collection: z.union([belongsToObject, z.array(belongsToObject)]).nullish(),
 })
 export type OPDSEntryBelongsTo = z.infer<typeof belongsTo>
 
-export type OPDSDynamicMetadata = Record<string, unknown>
+// See https://readium.org/webpub-manifest/schema/metadata.schema.json
 const metadata = z
 	.object({
 		title: z.string(),
 		subtitle: z.string().nullish(),
 		identifier: z.string().nullish(),
+		published: z.string().nullish(),
 		modified: z.string().nullish(),
 		description: z.string().nullish(),
+		language: z.union([z.string(), z.array(z.string())]).nullish(),
+		readingDirection: z.union([z.literal('rtl'), z.literal('ltr')]).nullish(),
+		numberOfPages: z.number().nullish(),
+		volume: z.number().nullish(),
+		issue: z.number().nullish(),
 		belongsTo: belongsTo.nullish(),
+		author: contributor.nullish(),
+		translator: contributor.nullish(),
+		editor: contributor.nullish(),
+		artist: contributor.nullish(),
+		illustrator: contributor.nullish(),
+		letterer: contributor.nullish(),
+		penciler: contributor.nullish(),
+		colorist: contributor.nullish(),
+		inker: contributor.nullish(),
+		narrator: contributor.nullish(),
+		contributor: contributor.nullish(),
+		publisher: contributor.nullish(),
+		imprint: contributor.nullish(),
+		subject: subject.nullish(),
 	})
 	.merge(paginationMeta)
 	.and(z.record(z.unknown()))
@@ -119,7 +195,7 @@ const progressionLocator = z.object({
 	title: z.string().nullish(),
 	href: z.string().nullish(),
 	type: z.string().nullish(),
-	locations: z.array(progessionLocation).nullish(),
+	locations: progessionLocation.nullish(),
 })
 
 const progressionDevice = z.object({
@@ -133,10 +209,13 @@ export const progression = z
 		device: progressionDevice.nullish(),
 		locator: progressionLocator,
 	})
-	.transform((data) => ({
-		...data,
-		modified: new Date(data.modified),
-	}))
+	.transform((data) => {
+		const date = new Date(data.modified)
+		return {
+			...data,
+			modified: isNaN(date.getTime()) ? null : date,
+		}
+	})
 export type OPDSProgression = z.infer<typeof progression>
 
 const progressionLocationInput = z.object({
@@ -180,11 +259,20 @@ const feedGroup = z.object({
 })
 export type OPDSFeedGroup = z.infer<typeof feedGroup>
 
+export type OPDSFeed = {
+	links: OPDSLink[]
+	navigation: OPDSNavigationLink[]
+	groups: OPDSFeedGroup[]
+	publications: OPDSPublication[]
+	metadata: OPDSMetadata
+}
+
+// Note: This officially became too complex of a type for inference,
+// so I cast it manually
 export const feedSchema = z.object({
 	links: z.array(link).default([]),
 	navigation: z.array(navigationLink).default([]),
 	groups: z.array(feedGroup).default([]),
 	publications: z.array(publication).default([]),
 	metadata,
-})
-export type OPDSFeed = z.infer<typeof feedSchema>
+}) as z.ZodType<OPDSFeed>

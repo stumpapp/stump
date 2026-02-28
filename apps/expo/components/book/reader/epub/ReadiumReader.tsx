@@ -1,8 +1,9 @@
+import { useSDKSafe } from '@stump/client'
 import { useQuery } from '@tanstack/react-query'
 import setProperty from 'lodash/set'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { View } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { initialWindowMetrics, useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { FullScreenLoader } from '~/components/ui'
 import { verifyFileReadable } from '~/lib/filesystem'
@@ -25,6 +26,7 @@ import {
 	convertNativeToc,
 	findTocItemByHref,
 	OnBookmarkCallback,
+	resolveTocItemByPosition,
 	useEpubLocationStore,
 	useEpubTheme,
 } from '~/stores/epub'
@@ -109,7 +111,7 @@ export default function ReadiumReader({
 	onDeleteAnnotation,
 	...ctx
 }: Props) {
-	const { downloadBook } = useDownload({ serverId: ctx.serverId })
+	const { downloadImmediate } = useDownload({ serverId: ctx.serverId })
 
 	const [localUri, setLocalUri] = useState<string | null>(() => ctx.offlineUri || null)
 
@@ -200,7 +202,6 @@ export default function ReadiumReader({
 		cleanup: store.onUnload,
 		storeActions: store.storeActions,
 		storeHeaders: store.storeHeaders,
-		toc: store.toc,
 		storeBookmarks: store.storeBookmarks,
 		storeOnBookmark: store.storeOnBookmark,
 		storeOnDeleteBookmark: store.storeOnDeleteBookmark,
@@ -219,12 +220,17 @@ export default function ReadiumReader({
 		positions: store.positions,
 	}))
 
+	const sdkCtx = useSDKSafe()
+
 	const { isLoading: isDownloading } = useQuery({
 		queryKey: ['readium-reader-offline-uri', book.id, ctx.serverId],
-		enabled: !localUri,
+		enabled: !localUri && !!sdkCtx?.sdk,
 		queryFn: async () => {
-			const result = await downloadBook({
+			if (!sdkCtx?.sdk) throw new Error('SDK not available')
+
+			const result = await downloadImmediate({
 				...book,
+				url: sdkCtx.sdk.media.downloadURL(book.id),
 				bookName: book.name,
 				libraryId: book.library?.id,
 				libraryName: book.library?.name,
@@ -235,14 +241,9 @@ export default function ReadiumReader({
 				thumbnailMeta: book.thumbnail.metadata || undefined,
 			})
 
-			if (result) {
-				await verifyFileReadable(result)
-				setLocalUri(result)
-				return result
-			} else {
-				console.error('Failed to download book')
-				return null
-			}
+			await verifyFileReadable(result)
+			setLocalUri(result)
+			return result
 		},
 	})
 
@@ -350,10 +351,34 @@ export default function ReadiumReader({
 		[store, book, navigator],
 	)
 
+	const controlsVisibleTimestamp = useRef(0)
+	useEffect(() => {
+		if (!controlsVisible) return
+
+		controlsVisibleTimestamp.current = Date.now()
+
+		const hideControlsTimer = setTimeout(() => {
+			setControlsVisible(false)
+		}, 6000)
+
+		return () => clearTimeout(hideControlsTimer)
+	}, [controlsVisible, setControlsVisible])
+
 	const handleLocationChanged = useCallback(
 		(locator: ReadiumLocator) => {
+			// If we turn the page then immediately tap to show controls, handleLocationChanged hasn't run yet
+			// so the controls will appear then disappear. From some testing, ~650ms was the
+			// longest time I could create by turning then tapping so 800ms should be plenty of time.
+			// Perhaps it should be hide when page swipe starts and also when sides are tapped
+			const controlsVisibleRecentlyChanged = Date.now() - controlsVisibleTimestamp.current < 800
+
+			if (controlsVisible && !controlsVisibleRecentlyChanged) {
+				setControlsVisible(false)
+			}
+
 			if (!locator.chapterTitle) {
-				const tocItem = findTocItemByHref(store.toc, locator.href)
+				const tocItem =
+					resolveTocItemByPosition(locator.locations?.position) || findTocItemByHref(locator.href)
 				if (tocItem) {
 					locator.chapterTitle = tocItem.label
 				}
@@ -372,7 +397,7 @@ export default function ReadiumReader({
 				onLocationChanged(locator, totalProgression)
 			}
 		},
-		[onLocationChanged, onReachedEnd, incognito, store],
+		[onLocationChanged, onReachedEnd, incognito, store, controlsVisible, setControlsVisible],
 	)
 
 	const handleReachedEnd = useCallback(
@@ -544,7 +569,7 @@ export default function ReadiumReader({
 				onDeleteHighlight={handleNativeDeleteAnnotation}
 				style={{
 					flex: 1,
-					marginTop: insets.top + HEADER_HEIGHT,
+					marginTop: (initialWindowMetrics?.insets.top || insets.top) + HEADER_HEIGHT,
 					marginBottom: insets.bottom + FOOTER_HEIGHT,
 				}}
 				{...config}

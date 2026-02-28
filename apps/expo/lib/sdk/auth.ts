@@ -1,5 +1,5 @@
 import { Api, AuthUser, constants } from '@stump/sdk'
-import { isAxiosError } from 'axios'
+import { AxiosError, isAxiosError } from 'axios'
 import * as AuthSession from 'expo-auth-session'
 import * as WebBrowser from 'expo-web-browser'
 import partition from 'lodash/partition'
@@ -93,6 +93,16 @@ const login = async (
 	}
 }
 
+// Note: I've observed Codex return 403s which originally threw off the auth flow
+// since we were only checking for 401s. This kinda goes against the semantics of
+// HTTP status codes, it doesn't make sense to render a login prompt if the user is forbidden
+// from accessing OPDS.
+// TODO(opds): For now, treat 403s the same as 401s but I definitely would like to revisiot this
+export const OPDS_AUTH_ERROR_STATUSES = [401, 403]
+
+export const isOPDSAuthError = (error: unknown): error is AxiosError =>
+	isAxiosError(error) && OPDS_AUTH_ERROR_STATUSES.includes(error.response?.status ?? 0)
+
 type GetOPDSParams = {
 	config: ServerConfig | null
 	serverKind: ServerKind
@@ -141,6 +151,66 @@ type GetInstancesForServersParams = {
 	onCacheInstance?: (id: string, instance: Api) => void
 }
 
+export const getInstanceForServer = async (
+	server: SavedServerWithConfig,
+	{ getServerToken, saveToken, onCacheInstance, getCachedInstance }: GetInstancesForServersParams,
+) => {
+	if (server.kind !== 'stump') {
+		const cachedInstance = onCacheInstance ? getCachedInstance?.(server.id) : undefined
+		if (cachedInstance) {
+			return cachedInstance
+		}
+		const instance = await getOPDSInstance({
+			config: server.config,
+			serverKind: server.kind,
+			url: server.url,
+		})
+		onCacheInstance?.(server.id, instance)
+		return instance
+	}
+
+	const storedToken = await getServerToken(server.id)
+	const authMethod = match(server.config?.auth)
+		.with({ bearer: P.string }, () => 'api-key' as const)
+		.otherwise(() => 'token' as const)
+
+	const cachedInstance = onCacheInstance ? getCachedInstance?.(server.id) : undefined
+
+	const instance =
+		cachedInstance ??
+		new Api({
+			baseURL: server.url,
+			authMethod,
+			customHeaders: server.config?.customHeaders,
+		})
+
+	instance.tokens = storedToken || undefined
+	const existingToken = await instance.getOrRefreshTokens()
+
+	try {
+		const authedInstance = await authSDKInstance(instance, {
+			config: server.config,
+			existingToken,
+			saveToken: async (token) => {
+				if (token) {
+					await saveToken(server.id, token)
+				}
+			},
+		})
+
+		if (authedInstance) {
+			onCacheInstance?.(server.id, authedInstance)
+			return authedInstance
+		} else {
+			console.warn(`Failed to authenticate server ${server.name} for auto-auth`)
+		}
+	} catch (error) {
+		console.error(`Failed to authenticate server ${server.name}:`, error)
+	}
+
+	return null
+}
+
 export const getInstancesForServers = async (
 	servers: SavedServerWithConfig[],
 	{ getServerToken, saveToken, onCacheInstance, getCachedInstance }: GetInstancesForServersParams,
@@ -156,58 +226,29 @@ export const getInstancesForServers = async (
 	)
 
 	if (compatibleServers.length === 0) {
-		console.warn('No compatible servers found for progress sync')
+		console.warn('No compatible servers found for auto-auth')
 		return {}
 	}
 
 	if (incompatibleServers.length > 0) {
-		console.warn(`Found ${incompatibleServers.length} incompatible servers for progress sync`)
+		console.warn(`Found ${incompatibleServers.length} incompatible servers for auto-auth`)
 	}
 
 	const instances: Record<string, Api> = {}
 
-	const getInstanceForServer = async (server: SavedServerWithConfig) => {
-		const storedToken = await getServerToken(server.id)
-		const authMethod = match(server.config?.auth)
-			.with({ bearer: P.string }, () => 'api-key' as const)
-			.otherwise(() => 'token' as const)
-
-		const cachedInstance = onCacheInstance ? getCachedInstance?.(server.id) : undefined
-
-		const instance =
-			cachedInstance ??
-			new Api({
-				baseURL: server.url,
-				authMethod,
-				customHeaders: server.config?.customHeaders,
-			})
-
-		instance.tokens = storedToken || undefined
-		const existingToken = await instance.getOrRefreshTokens()
-
-		try {
-			const authedInstance = await authSDKInstance(instance, {
-				config: server.config,
-				existingToken,
-				saveToken: async (token) => {
-					if (token) {
-						await saveToken(server.id, token)
-					}
-				},
-			})
-
-			if (authedInstance) {
-				onCacheInstance?.(server.id, authedInstance)
-				instances[server.id] = authedInstance
-			} else {
-				console.warn(`Failed to authenticate server ${server.name} for progress sync`)
-			}
-		} catch (error) {
-			console.error(`Failed to authenticate server ${server.name}:`, error)
+	const getInstance = async (server: SavedServerWithConfig) => {
+		const instance = await getInstanceForServer(server, {
+			getServerToken,
+			saveToken,
+			onCacheInstance,
+			getCachedInstance,
+		})
+		if (instance) {
+			instances[server.id] = instance
 		}
 	}
 
-	await Promise.all(compatibleServers.map((server) => getInstanceForServer(server)))
+	await Promise.all(compatibleServers.map((server) => getInstance(server)))
 
 	return instances
 }

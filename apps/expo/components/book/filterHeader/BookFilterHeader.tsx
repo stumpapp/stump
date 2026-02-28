@@ -4,8 +4,12 @@ import { ClearFilters, FilterHeader } from '~/components/filter'
 import { useBookFilterStore } from '~/stores/filters'
 
 import Characters from './Characters'
+import Colorists from './Colorists'
 import { BookFilterHeaderContext, IBookFilterHeaderContext } from './context'
+import CoverArtists from './CoverArtists'
 import Genres from './Genres'
+import Inkers from './Inkers'
+import Letterers from './Letterers'
 import ReadStatus from './ReadStatus'
 import Series from './Series'
 import Sort from './Sort'
@@ -22,13 +26,19 @@ type Props = IBookFilterHeaderContext
 
 // Note: The FlashList header doesn't seem to like Suspense
 export default function BookFilterHeader(context: Props) {
-	const clear = useBookFilterStore((state) => state.resetFilters)
+	const clear = useBookFilterStore((state) => state.clear)
+
+	const filters = useBookFilterStore((state) => state.filters)
+	const isFiltersActive = Object.keys(filters).length > 0
 
 	return (
 		<BookFilterHeaderContext.Provider value={context}>
 			<FilterHeader>
 				<View className="w-[16]" />
 				<Sort />
+
+				<View className="w-2" />
+				{isFiltersActive && <ClearFilters onPress={clear} />}
 
 				<View className="w-2" />
 				<Characters />
@@ -46,7 +56,17 @@ export default function BookFilterHeader(context: Props) {
 				<Writers />
 
 				<View className="w-2" />
-				<ClearFilters onPress={clear} />
+				<Colorists />
+
+				<View className="w-2" />
+				<Inkers />
+
+				<View className="w-2" />
+				<Letterers />
+
+				<View className="w-2" />
+				<CoverArtists />
+
 				<View className="w-[16]" />
 			</FilterHeader>
 		</BookFilterHeaderContext.Provider>

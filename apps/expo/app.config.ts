@@ -28,6 +28,26 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 				NSAppTransportSecurity: {
 					NSAllowsArbitraryLoads: true,
 				},
+				UISupportsDocumentBrowser: true,
+				UIFileSharingEnabled: true,
+				LSSupportsOpeningDocumentsInPlace: true,
+				CFBundleDocumentTypes: [
+					{
+						CFBundleTypeName: 'EPUB Document',
+						LSItemContentTypes: ['org.idpf.epub-container'],
+						LSHandlerRank: 'Alternate',
+					},
+					{
+						CFBundleTypeName: 'Comic Book Archive (CBZ)',
+						LSItemContentTypes: ['public.zip-archive'],
+						LSHandlerRank: 'Alternate',
+					},
+					{
+						CFBundleTypeName: 'PDF Document',
+						LSItemContentTypes: ['com.adobe.pdf'],
+						LSHandlerRank: 'Alternate',
+					},
+				],
 			},
 		},
 		android: {
@@ -38,6 +58,31 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 			},
 			package: 'com.stumpapp.stump',
 			permissions: ['WRITE_SETTINGS'],
+			intentFilters: [
+				{
+					action: 'VIEW',
+					category: ['BROWSABLE', 'DEFAULT'],
+					data: [
+						{ mimeType: 'application/epub+zip', scheme: 'content' },
+						{ mimeType: 'application/epub+zip', scheme: 'file' },
+						{ mimeType: 'application/pdf', scheme: 'content' },
+						{ mimeType: 'application/pdf', scheme: 'file' },
+						{ mimeType: 'application/x-cbz', scheme: 'content' },
+						{ mimeType: 'application/x-cbz', scheme: 'file' },
+						{ mimeType: 'application/vnd.comicbook+zip', scheme: 'content' },
+						{ mimeType: 'application/vnd.comicbook+zip', scheme: 'file' },
+					],
+				},
+				{
+					action: 'VIEW',
+					category: ['BROWSABLE', 'DEFAULT'],
+					data: [
+						{ mimeType: '*/*', pathPattern: '.*\\.epub', scheme: 'content' },
+						{ mimeType: '*/*', pathPattern: '.*\\.cbz', scheme: 'content' },
+						{ mimeType: '*/*', pathPattern: '.*\\.pdf', scheme: 'content' },
+					],
+				},
+			],
 		},
 		androidNavigationBar: {
 			visible: 'immersive',
@@ -62,6 +107,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 					assets: ['./assets/images', './assets/splash'],
 				},
 			],
+			['expo-localization'],
 			['./plugins/withGradle.ts'],
 			['./plugins/withNetworkSecurityConfig.ts'],
 			[
@@ -118,6 +164,12 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 							'org.gradle.jvmargs':
 								'-Xmx4096m -XX:MaxMetaspaceSize=1024m -XX:+HeapDumpOnOutOfMemoryError',
 						},
+						// Note: For i18next and date-fns intlFormat
+						hermesFlags: ['-fuseIntlPlurals', '-fuseIntlDateTimeFormat'],
+					},
+					ios: {
+						// Note: For i18next and date-fns intlFormat
+						hermesFlags: ['-fuseIntlPlurals', '-fuseIntlDateTimeFormat'],
 					},
 				},
 			],

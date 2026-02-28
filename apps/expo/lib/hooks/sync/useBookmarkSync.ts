@@ -9,6 +9,7 @@ import { executePullBookmarksSync } from '~/backgroundTasks/pullServerBookmarks'
 import { executePushBookmarksSync } from '~/backgroundTasks/pushLocalBookmarks'
 import { useActiveServer } from '~/components/activeServer'
 import { bookmarks, db, downloadedFiles, syncStatus } from '~/db'
+import { isLocalLibrary } from '~/lib/localLibrary'
 import { ReadiumLocator } from '~/modules/readium'
 
 import { useServerInstances } from './utils'
@@ -73,7 +74,7 @@ export function useAutoSyncBookmarksForActiveServer({ enabled = true }: AutoSync
 	useFocusEffect(
 		useCallback(() => {
 			const syncIfNeeded = async () => {
-				if (!enabled || didSync.current) return
+				if (!enabled || didSync.current || isLocalLibrary(serverId)) return
 
 				didSync.current = true
 

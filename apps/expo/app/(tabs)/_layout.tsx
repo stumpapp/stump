@@ -23,9 +23,9 @@ export default function TabLayout() {
 					<Label>Servers</Label>
 					<Icon sf="server.rack" drawable="custom_android_drawable" />
 				</NativeTabs.Trigger>
-				<NativeTabs.Trigger name="downloads">
-					<Label>Downloads</Label>
-					<Icon sf="arrow.down.circle" drawable="custom_android_drawable" />
+				<NativeTabs.Trigger name="library">
+					<Label>Library</Label>
+					<Icon sf="books.vertical" drawable="custom_android_drawable" />
 				</NativeTabs.Trigger>
 				<NativeTabs.Trigger name="settings">
 					<Label>Settings</Label>
@@ -55,9 +55,9 @@ export default function TabLayout() {
 					}}
 				/>
 				<Tabs.Screen
-					name="downloads"
+					name="library"
 					options={{
-						title: 'Downloads',
+						title: 'Library',
 						tabBarIcon: ({ focused }) => (
 							<JSIcon
 								as={HardDriveDownload}

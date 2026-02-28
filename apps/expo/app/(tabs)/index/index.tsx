@@ -10,7 +10,7 @@ import { useOwlHeaderOffset } from '~/components/Owl'
 import DeleteServerConfirmation from '~/components/savedServer/DeleteServerConfirmation'
 import EditServerDialog from '~/components/savedServer/EditServerDialog'
 import SavedServerListItem from '~/components/savedServer/SavedServerListItem'
-import { Button, Icon, ListEmptyMessage, Text } from '~/components/ui'
+import { Button, Icon, ListEmptyMessage, ListLabel, Text } from '~/components/ui'
 import { useSavedServers } from '~/stores'
 import { CreateServer, SavedServer, SavedServerWithConfig } from '~/stores/savedServer'
 
@@ -47,6 +47,7 @@ export default function Screen() {
 				})
 			}
 		},
+		// eslint-disable-next-line react-compiler/react-compiler
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[router, didMount],
 	)
@@ -141,10 +142,10 @@ export default function Screen() {
 					className="flex-1 bg-background"
 					contentInsetAdjustmentBehavior="automatic"
 				>
-					<View className="flex-1 items-start justify-start gap-5 bg-background p-6">
+					<View className="flex-1 items-start justify-start gap-5 bg-background p-4 tablet:p-6">
 						{stumpEnabled && (
 							<View className="flex w-full items-start gap-2">
-								<Text className="text-foreground-muted">Stump</Text>
+								<ListLabel className="px-2">Stump</ListLabel>
 
 								{!stumpServers.length && (
 									<ListEmptyMessage icon={Server} message="No Stump servers added" />
@@ -162,7 +163,7 @@ export default function Screen() {
 						)}
 
 						<View className="flex w-full items-start gap-2">
-							<Text className="text-foreground-muted">OPDS</Text>
+							<ListLabel className="px-2">OPDS</ListLabel>
 
 							{!allOPDSServers.length && (
 								<ListEmptyMessage icon={Rss} message="No OPDS feeds added" />

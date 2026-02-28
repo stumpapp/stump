@@ -1,14 +1,10 @@
 import { useRefetch, useSDK } from '@stump/client'
 import { useQuery } from '@tanstack/react-query'
 import { useLocalSearchParams } from 'expo-router'
-import { Rss } from 'lucide-react-native'
-import { Platform, ScrollView } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
 
 import ChevronBackLink from '~/components/ChevronBackLink'
+import EmptyState from '~/components/EmptyState'
 import { MaybeErrorFeed, OPDSFeed } from '~/components/opds'
-import RefreshControl from '~/components/RefreshControl'
-import { ListEmptyMessage } from '~/components/ui'
 import { useOPDSFeedContext } from '~/context/opds'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
 import { constructSearchURL } from '~/lib/opdsUtils'
@@ -39,33 +35,18 @@ export default function Screen() {
 		headerLeft: () => <ChevronBackLink />,
 	})
 
+	if (isLoading) return null
+
 	const emptyFeed =
 		!feed?.groups?.length && !feed?.publications?.length && !feed?.navigation?.length
 
-	const render = () => {
-		if (emptyFeed) {
-			return <ListEmptyMessage icon={Rss} message="No results for this search" />
-		} else if (feed && !error) {
-			return <OPDSFeed feed={feed} />
-		} else {
-			return <MaybeErrorFeed error={error} onRetry={onRefetch} />
-		}
+	if (emptyFeed) {
+		return <EmptyState title="Empty Feed" message="Your search returned no results" />
 	}
 
-	if (isLoading) return null
+	if (!feed || !!error) {
+		return <MaybeErrorFeed error={error} onRetry={onRefetch} />
+	}
 
-	return (
-		<SafeAreaView
-			style={{ flex: 1 }}
-			edges={Platform.OS === 'ios' ? ['top', 'left', 'right', 'bottom'] : ['left', 'right']}
-		>
-			<ScrollView
-				className="flex-1 gap-5 bg-background"
-				refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={onRefetch} />}
-				contentInsetAdjustmentBehavior="automatic"
-			>
-				{render()}
-			</ScrollView>
-		</SafeAreaView>
-	)
+	return <OPDSFeed feed={feed} onRefresh={onRefetch} isRefreshing={isRefetching} />
 }

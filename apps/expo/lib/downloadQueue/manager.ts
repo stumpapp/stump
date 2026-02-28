@@ -35,7 +35,7 @@ type ActiveDownload = {
 	queueId: number
 	bookId: string
 	serverId: string
-	resumable: FileSystem.DownloadResumable
+	resumable: FileSystem.DownloadResumable | null // null if pending etc
 	progress: DownloadProgress
 }
 
@@ -174,10 +174,12 @@ class DownloadQueueManager {
 		const active = this.activeDownloads.get(queueId)
 
 		if (active) {
-			try {
-				await active.resumable.cancelAsync()
-			} catch {
-				// Ignore cancellation errors, might be irrelevant
+			if (active.resumable) {
+				try {
+					await active.resumable.cancelAsync()
+				} catch {
+					// Ignore cancellation errors, might be irrelevant
+				}
 			}
 			this.activeDownloads.delete(queueId)
 			this.emit({ type: 'cancelled', queueId, bookId: active.bookId })
@@ -332,6 +334,10 @@ class DownloadQueueManager {
 		this.processQueue()
 	}
 
+	/**
+	 * The main processing loop for the manager. It will loop through the activeDownloads
+	 * map and kick off downloads per the max concurrency
+	 */
 	private async processQueue(): Promise<void> {
 		if (this.isProcessing) return
 
@@ -349,14 +355,47 @@ class DownloadQueueManager {
 
 				if (!nextItem) break
 
-				await this.startDownload(nextItem)
+				await this.persistDownload(nextItem)
+
+				// Note: No await as to not block the loop which effectively kills the concurrency
+				this.executeDownload(nextItem).catch((error) => {
+					Sentry.captureException(error, {
+						extra: {
+							downloadItem: nextItem,
+						},
+					})
+				})
 			}
 		} finally {
 			this.isProcessing = false
 		}
 	}
 
-	private async startDownload(item: DownloadQueueItem): Promise<void> {
+	/**
+	 * A helper to persist a download to both the database and the activeDownloads map
+	 */
+	private async persistDownload(item: DownloadQueueItem): Promise<void> {
+		await db
+			.update(downloadQueue)
+			.set({ status: downloadQueueStatus.enum.downloading })
+			.where(eq(downloadQueue.id, item.id))
+
+		this.activeDownloads.set(item.id, {
+			queueId: item.id,
+			bookId: item.bookId,
+			serverId: item.serverId,
+			resumable: null,
+			progress: { totalBytes: 0, downloadedBytes: 0, percentage: 0 },
+		})
+
+		this.emit({ type: 'started', queueId: item.id, bookId: item.bookId })
+		this.emit({ type: 'queue-changed' })
+	}
+
+	/**
+	 * Execute the actual file download
+	 */
+	private async executeDownload(item: DownloadQueueItem): Promise<void> {
 		const sdk = await this.getSDK(item.serverId)
 
 		if (!sdk) {
@@ -365,14 +404,6 @@ class DownloadQueueManager {
 		}
 
 		try {
-			await db
-				.update(downloadQueue)
-				.set({ status: downloadQueueStatus.enum.downloading })
-				.where(eq(downloadQueue.id, item.id))
-
-			this.emit({ type: 'started', queueId: item.id, bookId: item.bookId })
-			this.emit({ type: 'queue-changed' })
-
 			await ensureDirectoryExists(booksDirectory(item.serverId))
 
 			const placementUrl = `${booksDirectory(item.serverId)}/${item.filename}`
@@ -412,13 +443,14 @@ class DownloadQueueManager {
 				progressCallback,
 			)
 
-			this.activeDownloads.set(item.id, {
-				queueId: item.id,
-				bookId: item.bookId,
-				serverId: item.serverId,
-				resumable,
-				progress: { totalBytes: 0, downloadedBytes: 0, percentage: 0 },
-			})
+			const active = this.activeDownloads.get(item.id)
+			if (active) {
+				active.resumable = resumable
+			} else {
+				// Note: This shouldn't happen, I think maybe if cancel before initialized
+				// it could
+				return
+			}
 
 			const result = await resumable.downloadAsync()
 

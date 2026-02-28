@@ -718,9 +718,9 @@ pub enum UserPermission {
 	/// Grant access to manage jobs, like pausing, resuming, deleting, or cancelling them
 	ManageJobs,
 	/// Grant access to read metadata fetch statuses
-	MetadataFetchStatusRead,
+	MetadataFetchRecordRead,
 	/// Grant access to manage metadata fetch statuses (accept matches, etc)
-	MetadataFetchStatusManage,
+	MetadataFetchRecordManage,
 	/// Grant access to read metadata provider configurations
 	MetadataProviderRead,
 	/// Grant access to manage metadata provider configurations (create, update, delete)

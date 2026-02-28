@@ -3,7 +3,7 @@ use metadata_integrations::{
 	FieldMerger, MatchCandidate, MergeStrategy, MetadataField,
 };
 use models::{
-	entity::{media_metadata, metadata_fetch_status, series_metadata},
+	entity::{media_metadata, metadata_fetch_record, series_metadata},
 	shared::enums::MetadataFetchStatus,
 };
 use sea_orm::{prelude::*, IntoActiveModel, Set};
@@ -18,6 +18,7 @@ pub async fn apply_series_match(
 	series_id: &str,
 	candidate: &MatchCandidate,
 	strategy: MergeStrategy,
+	exclude_fields: Vec<MetadataField>,
 ) -> Result<(), CoreError> {
 	let ext = match &candidate.metadata {
 		ExternalMetadata::Series(s) => s,
@@ -38,7 +39,7 @@ pub async fn apply_series_match(
 			let merger = FieldMerger::new(
 				strategy,
 				parse_locked_fields(&model.locked_fields),
-				vec![],
+				exclude_fields,
 			);
 
 			let mut active = model.clone().into_active_model();
@@ -72,6 +73,7 @@ pub async fn apply_media_match(
 	media_id: &str,
 	candidate: &MatchCandidate,
 	strategy: MergeStrategy,
+	exclude_fields: Vec<MetadataField>,
 ) -> Result<(), CoreError> {
 	let ext = match &candidate.metadata {
 		ExternalMetadata::Media(m) => m,
@@ -93,7 +95,7 @@ pub async fn apply_media_match(
 			let merger = FieldMerger::new(
 				strategy,
 				parse_locked_fields(&model.locked_fields),
-				vec![],
+				exclude_fields,
 			);
 
 			let mut active = model.clone().into_active_model();
@@ -165,12 +167,12 @@ async fn mark_fetch_status_accepted(
 	let candidate_json = serde_json::to_value(candidate)
 		.map_err(|e| CoreError::InternalError(e.to_string()))?;
 
-	let mut query = metadata_fetch_status::Entity::find();
+	let mut query = metadata_fetch_record::Entity::find();
 	if let Some(sid) = series_id {
-		query = query.filter(metadata_fetch_status::Column::SeriesId.eq(sid));
+		query = query.filter(metadata_fetch_record::Column::SeriesId.eq(sid));
 	}
 	if let Some(mid) = media_id {
-		query = query.filter(metadata_fetch_status::Column::MediaId.eq(mid));
+		query = query.filter(metadata_fetch_record::Column::MediaId.eq(mid));
 	}
 
 	// Note: This realistically shouldn't happen but is more of a safeguard
@@ -181,10 +183,10 @@ async fn mark_fetch_status_accepted(
 			?candidate,
 			"Unable to fetch the original fetch record!"
 		);
-		let mut active: metadata_fetch_status::ActiveModel = status.into();
+		let mut active: metadata_fetch_record::ActiveModel = status.into();
 		active.status = Set(MetadataFetchStatus::Fetched);
 		active.accepted_match_candidate = Set(Some(candidate_json));
-		metadata_fetch_status::Entity::update(active)
+		metadata_fetch_record::Entity::update(active)
 			.exec(conn)
 			.await?;
 	}

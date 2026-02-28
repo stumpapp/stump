@@ -337,7 +337,7 @@ export type ComputedFilterReadingStatus =
 /** A factor that contributed to a match's confidence score */
 export type ConfidenceFactor = {
   __typename?: 'ConfidenceFactor';
-  /** Name of the scoring factor (e.g., "title_exact_match", "isbn_match") */
+  /** Name of the scoring factor (e.g., "title_exact_match") */
   factor: Scalars['String']['output'];
   /** Whether this factor matched */
   matched: Scalars['Boolean']['output'];
@@ -1550,6 +1550,26 @@ export enum MergeStrategy {
   PreferExternal = 'PREFER_EXTERNAL'
 }
 
+/**
+ * An identifer for specifying the target of a metadata fetch record query. I added
+ * mostly for type safety and not annoyingly wrangling both media_id and series_id
+ */
+export type MetadataFetchRecordId =
+  { media: Scalars['String']['input']; series?: never; }
+  |  { media?: never; series: Scalars['String']['input']; };
+
+export type MetadataFetchRecordModel = {
+  __typename?: 'MetadataFetchRecordModel';
+  acceptedMatchCandidate?: Maybe<Scalars['JSON']['output']>;
+  addedAt: Scalars['DateTime']['output'];
+  id: Scalars['Int']['output'];
+  matchCandidates?: Maybe<Scalars['JSON']['output']>;
+  mediaId?: Maybe<Scalars['String']['output']>;
+  seriesId?: Maybe<Scalars['String']['output']>;
+  status: MetadataFetchStatus;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
 export enum MetadataFetchStatus {
   AwaitingReview = 'AWAITING_REVIEW',
   Failed = 'FAILED',
@@ -1561,24 +1581,30 @@ export enum MetadataFetchStatus {
 }
 
 /**
- * An identifer for specifying the target of a metadata fetch status query. I added
- * mostly for type safety and not annoyingly wrangling both media_id and series_id
+ * Represents a specific metadata field that can be locked or configured
+ * for per-field merge strategies
  */
-export type MetadataFetchStatusId =
-  { media: Scalars['String']['input']; series?: never; }
-  |  { media?: never; series: Scalars['String']['input']; };
-
-export type MetadataFetchStatusModel = {
-  __typename?: 'MetadataFetchStatusModel';
-  acceptedMatchCandidate?: Maybe<Scalars['JSON']['output']>;
-  addedAt: Scalars['DateTime']['output'];
-  id: Scalars['Int']['output'];
-  matchCandidates?: Maybe<Scalars['JSON']['output']>;
-  mediaId?: Maybe<Scalars['String']['output']>;
-  seriesId?: Maybe<Scalars['String']['output']>;
-  status: MetadataFetchStatus;
-  updatedAt?: Maybe<Scalars['DateTime']['output']>;
-};
+export enum MetadataField {
+  AgeRating = 'AGE_RATING',
+  Artists = 'ARTISTS',
+  Authors = 'AUTHORS',
+  Colorists = 'COLORISTS',
+  Cover = 'COVER',
+  CoverArtists = 'COVER_ARTISTS',
+  Genres = 'GENRES',
+  Isbn = 'ISBN',
+  Letterers = 'LETTERERS',
+  PageCount = 'PAGE_COUNT',
+  Publisher = 'PUBLISHER',
+  ReleaseDate = 'RELEASE_DATE',
+  Status = 'STATUS',
+  Summary = 'SUMMARY',
+  Tags = 'TAGS',
+  Title = 'TITLE',
+  VolumeCount = 'VOLUME_COUNT',
+  Writers = 'WRITERS',
+  Year = 'YEAR'
+}
 
 /** The supported external metadata providers */
 export enum MetadataProvider {
@@ -1589,7 +1615,6 @@ export enum MetadataProvider {
 export type MetadataProviderConfigModel = {
   __typename?: 'MetadataProviderConfigModel';
   apiTokenExpiresAt?: Maybe<Scalars['DateTime']['output']>;
-  /** JSON blob for auto-apply settings: { enabled, threshold, strategy, exclude_fields } */
   autoApplyConfig?: Maybe<Scalars['JSON']['output']>;
   createdAt: Scalars['DateTime']['output'];
   enabled: Scalars['Boolean']['output'];
@@ -1628,9 +1653,9 @@ export enum MetadataResetImpact {
 export type Mutation = {
   __typename?: 'Mutation';
   /** Accept a match candidate and apply it to media metadata */
-  acceptMediaMatch: MetadataFetchStatusModel;
+  acceptMediaMatch: MetadataFetchRecordModel;
   /** Accept a match candidate and apply it to the series metadata */
-  acceptSeriesMatch: MetadataFetchStatusModel;
+  acceptSeriesMatch: MetadataFetchRecordModel;
   addBooksToBookClubSchedule: BookClub;
   analyzeLibrary: Scalars['Boolean']['output'];
   analyzeMedia: Scalars['Boolean']['output'];
@@ -1752,9 +1777,9 @@ export type Mutation = {
   patchEmailDevice: RegisteredEmailDevice;
   processLibraryThumbnails: Scalars['Boolean']['output'];
   /** Reject the current match candidates for a media item */
-  rejectMediaMatch: MetadataFetchStatusModel;
+  rejectMediaMatch: MetadataFetchRecordModel;
   /** Reject the current match candidates for a series */
-  rejectSeriesMatch: MetadataFetchStatusModel;
+  rejectSeriesMatch: MetadataFetchRecordModel;
   /** Removes a member from the book club */
   removeBookClubMember: BookClubMember;
   resetLibraryMetadata: Library;
@@ -1863,6 +1888,7 @@ export type Mutation = {
 
 export type MutationAcceptMediaMatchArgs = {
   candidateIndex: Scalars['Int']['input'];
+  excludeFields?: InputMaybe<Array<MetadataField>>;
   mediaId: Scalars['ID']['input'];
   strategy?: InputMaybe<MergeStrategy>;
 };
@@ -1870,6 +1896,7 @@ export type MutationAcceptMediaMatchArgs = {
 
 export type MutationAcceptSeriesMatchArgs = {
   candidateIndex: Scalars['Int']['input'];
+  excludeFields?: InputMaybe<Array<MetadataField>>;
   seriesId: Scalars['ID']['input'];
   strategy?: InputMaybe<MergeStrategy>;
 };
@@ -2751,14 +2778,14 @@ export type Query = {
   mediaCount: Scalars['Int']['output'];
   mediaDiskUsage: Scalars['Int']['output'];
   mediaMetadataOverview: MediaMetadataOverview;
-  metadataFetchStatus?: Maybe<MetadataFetchStatusModel>;
+  metadataFetchRecord?: Maybe<MetadataFetchRecordModel>;
   metadataProviderConfigById?: Maybe<MetadataProviderConfigModel>;
   metadataProviderConfigs: Array<MetadataProviderConfigModel>;
   numberOfLibraries: Scalars['Int']['output'];
   numberOfSeries: Scalars['Int']['output'];
   onDeck: PaginatedMediaResponse;
   /** Return all metadata fetch statuses that are awaiting user review. */
-  pendingMetadataMatches: Array<MetadataFetchStatusModel>;
+  pendingMetadataMatches: Array<MetadataFetchRecordModel>;
   /**
    * Retrieves a reading list by ID for the current user.
    *
@@ -2933,8 +2960,8 @@ export type QueryMediaMetadataOverviewArgs = {
 };
 
 
-export type QueryMetadataFetchStatusArgs = {
-  id: MetadataFetchStatusId;
+export type QueryMetadataFetchRecordArgs = {
+  id: MetadataFetchRecordId;
 };
 
 
@@ -3965,9 +3992,9 @@ export enum UserPermission {
   /** Grant access to manage users (create,edit,delete) */
   ManageUsers = 'MANAGE_USERS',
   /** Grant access to manage metadata fetch statuses (accept matches, etc) */
-  MetadataFetchStatusManage = 'METADATA_FETCH_STATUS_MANAGE',
+  MetadataFetchRecordManage = 'METADATA_FETCH_RECORD_MANAGE',
   /** Grant access to read metadata fetch statuses */
-  MetadataFetchStatusRead = 'METADATA_FETCH_STATUS_READ',
+  MetadataFetchRecordRead = 'METADATA_FETCH_RECORD_READ',
   /** Grant access to manage metadata provider configurations (create, update, delete) */
   MetadataProviderManage = 'METADATA_PROVIDER_MANAGE',
   /** Grant access to read metadata provider configurations */

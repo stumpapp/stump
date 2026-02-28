@@ -21,6 +21,7 @@ pub mod media;
 pub mod media_annotation;
 pub mod media_metadata;
 pub mod media_metadata_overview;
+pub mod metadata_fetch_record;
 pub mod notifier;
 pub mod reading_list;
 pub mod reading_list_item;

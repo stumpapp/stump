@@ -32,7 +32,7 @@ pub mod media_analysis;
 pub mod media_annotation;
 pub mod media_metadata;
 pub mod media_tag;
-pub mod metadata_fetch_status;
+pub mod metadata_fetch_record;
 pub mod metadata_provider_config;
 pub mod notifier;
 pub mod reading_list;

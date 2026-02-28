@@ -4,7 +4,7 @@ use std::sync::Arc;
 use async_graphql::SimpleObject;
 use metadata_integrations::{MatchCandidate, SearchQuery};
 use models::{
-	entity::{media, metadata_fetch_status, metadata_provider_config, series},
+	entity::{media, metadata_fetch_record, metadata_provider_config, series},
 	shared::enums::MetadataFetchStatus,
 };
 use sea_orm::{prelude::*, sea_query::OnConflict, Set};
@@ -313,9 +313,9 @@ impl JobExt for MetadataFetchJob {
 				)));
 
 				if !self.params.force_refetch {
-					let existing = metadata_fetch_status::Entity::find()
-						.filter(metadata_fetch_status::Column::SeriesId.eq(&series_id))
-						.filter(metadata_fetch_status::Column::Status.is_in([
+					let existing = metadata_fetch_record::Entity::find()
+						.filter(metadata_fetch_record::Column::SeriesId.eq(&series_id))
+						.filter(metadata_fetch_record::Column::Status.is_in([
 							MetadataFetchStatus::AwaitingReview,
 							MetadataFetchStatus::Fetched,
 						]))
@@ -385,20 +385,20 @@ impl JobExt for MetadataFetchJob {
 				let candidates_json = serde_json::to_value(&all_candidates)
 					.map_err(|e| JobError::TaskFailed(e.to_string()))?;
 
-				let active_model = metadata_fetch_status::ActiveModel {
+				let active_model = metadata_fetch_record::ActiveModel {
 					series_id: Set(Some(series_id.clone())),
 					status: Set(status),
 					match_candidates: Set(Some(candidates_json)),
 					..Default::default()
 				};
 
-				metadata_fetch_status::Entity::insert(active_model)
+				metadata_fetch_record::Entity::insert(active_model)
 					.on_conflict(
-						OnConflict::column(metadata_fetch_status::Column::SeriesId)
+						OnConflict::column(metadata_fetch_record::Column::SeriesId)
 							.update_columns([
-								metadata_fetch_status::Column::Status,
-								metadata_fetch_status::Column::MatchCandidates,
-								metadata_fetch_status::Column::UpdatedAt,
+								metadata_fetch_record::Column::Status,
+								metadata_fetch_record::Column::MatchCandidates,
+								metadata_fetch_record::Column::UpdatedAt,
 							])
 							.to_owned(),
 					)
@@ -419,6 +419,7 @@ impl JobExt for MetadataFetchJob {
 						&series_id,
 						&candidate,
 						config.strategy,
+						config.exclude_fields,
 					)
 					.await
 					{
@@ -453,9 +454,9 @@ impl JobExt for MetadataFetchJob {
 				)));
 
 				if !self.params.force_refetch {
-					let existing = metadata_fetch_status::Entity::find()
-						.filter(metadata_fetch_status::Column::MediaId.eq(&media_id))
-						.filter(metadata_fetch_status::Column::Status.is_in([
+					let existing = metadata_fetch_record::Entity::find()
+						.filter(metadata_fetch_record::Column::MediaId.eq(&media_id))
+						.filter(metadata_fetch_record::Column::Status.is_in([
 							MetadataFetchStatus::AwaitingReview,
 							MetadataFetchStatus::Fetched,
 						]))
@@ -517,20 +518,20 @@ impl JobExt for MetadataFetchJob {
 				let candidates_json = serde_json::to_value(&all_candidates)
 					.map_err(|e| JobError::TaskFailed(e.to_string()))?;
 
-				let active_model = metadata_fetch_status::ActiveModel {
+				let active_model = metadata_fetch_record::ActiveModel {
 					media_id: Set(Some(media_id.clone())),
 					status: Set(status),
 					match_candidates: Set(Some(candidates_json)),
 					..Default::default()
 				};
 
-				metadata_fetch_status::Entity::insert(active_model)
+				metadata_fetch_record::Entity::insert(active_model)
 					.on_conflict(
-						OnConflict::column(metadata_fetch_status::Column::MediaId)
+						OnConflict::column(metadata_fetch_record::Column::MediaId)
 							.update_columns([
-								metadata_fetch_status::Column::Status,
-								metadata_fetch_status::Column::MatchCandidates,
-								metadata_fetch_status::Column::UpdatedAt,
+								metadata_fetch_record::Column::Status,
+								metadata_fetch_record::Column::MatchCandidates,
+								metadata_fetch_record::Column::UpdatedAt,
 							])
 							.to_owned(),
 					)
@@ -551,6 +552,7 @@ impl JobExt for MetadataFetchJob {
 						&media_id,
 						&candidate,
 						config.strategy,
+						config.exclude_fields,
 					)
 					.await
 					{

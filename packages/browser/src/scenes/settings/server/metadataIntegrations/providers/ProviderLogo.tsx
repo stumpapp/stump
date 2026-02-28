@@ -11,7 +11,7 @@ export function ProviderLogo({ provider, className }: Props) {
 		<img
 			src={LOGOS[provider]}
 			alt={`${provider[0] + provider.slice(1).toLowerCase()} logo`}
-			className={cn('h-28 w-28', className, {
+			className={cn('h-28 w-28 object-scale-down', className, {
 				'rotate-[12deg] transform': provider === MetadataProvider.Hardcover,
 			})}
 		/>

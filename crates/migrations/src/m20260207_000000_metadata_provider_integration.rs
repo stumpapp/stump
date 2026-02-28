@@ -52,41 +52,41 @@ impl MigrationTrait for Migration {
 		manager
 			.create_table(
 				Table::create()
-					.table(MetadataFetchStatuses::Table)
+					.table(MetadataFetchRecords::Table)
 					.if_not_exists()
 					.col(
-						ColumnDef::new(MetadataFetchStatuses::Id)
+						ColumnDef::new(MetadataFetchRecords::Id)
 							.integer()
 							.not_null()
 							.auto_increment()
 							.primary_key(),
 					)
 					.col(
-						ColumnDef::new(MetadataFetchStatuses::Status)
+						ColumnDef::new(MetadataFetchRecords::Status)
 							.string()
 							.not_null()
 							.default("NOT_STARTED"),
 					)
-					.col(ColumnDef::new(MetadataFetchStatuses::MediaId).string())
-					.col(ColumnDef::new(MetadataFetchStatuses::SeriesId).string())
-					.col(ColumnDef::new(MetadataFetchStatuses::MatchCandidates).json())
+					.col(ColumnDef::new(MetadataFetchRecords::MediaId).string())
+					.col(ColumnDef::new(MetadataFetchRecords::SeriesId).string())
+					.col(ColumnDef::new(MetadataFetchRecords::MatchCandidates).json())
 					.col(
-						ColumnDef::new(MetadataFetchStatuses::AcceptedMatchCandidate)
+						ColumnDef::new(MetadataFetchRecords::AcceptedMatchCandidate)
 							.json(),
 					)
 					.col(
-						ColumnDef::new(MetadataFetchStatuses::AddedAt)
+						ColumnDef::new(MetadataFetchRecords::AddedAt)
 							.timestamp()
 							.not_null()
 							.default(Expr::current_timestamp()),
 					)
-					.col(ColumnDef::new(MetadataFetchStatuses::UpdatedAt).timestamp())
+					.col(ColumnDef::new(MetadataFetchRecords::UpdatedAt).timestamp())
 					.foreign_key(
 						ForeignKey::create()
-							.name("fk_metadata_fetch_statuses_media_id")
+							.name("fk_metadata_fetch_records_media_id")
 							.from(
-								MetadataFetchStatuses::Table,
-								MetadataFetchStatuses::MediaId,
+								MetadataFetchRecords::Table,
+								MetadataFetchRecords::MediaId,
 							)
 							.to(Media::Table, Media::Id)
 							.on_delete(ForeignKeyAction::Cascade)
@@ -94,10 +94,10 @@ impl MigrationTrait for Migration {
 					)
 					.foreign_key(
 						ForeignKey::create()
-							.name("fk_metadata_fetch_statuses_series_id")
+							.name("fk_metadata_fetch_records_series_id")
 							.from(
-								MetadataFetchStatuses::Table,
-								MetadataFetchStatuses::SeriesId,
+								MetadataFetchRecords::Table,
+								MetadataFetchRecords::SeriesId,
 							)
 							.to(Series::Table, Series::Id)
 							.on_delete(ForeignKeyAction::Cascade)
@@ -111,9 +111,9 @@ impl MigrationTrait for Migration {
 		manager
 			.create_index(
 				Index::create()
-					.name("idx_metadata_fetch_statuses_media_id")
-					.table(MetadataFetchStatuses::Table)
-					.col(MetadataFetchStatuses::MediaId)
+					.name("idx_metadata_fetch_records_media_id")
+					.table(MetadataFetchRecords::Table)
+					.col(MetadataFetchRecords::MediaId)
 					.unique()
 					.to_owned(),
 			)
@@ -122,9 +122,9 @@ impl MigrationTrait for Migration {
 		manager
 			.create_index(
 				Index::create()
-					.name("idx_metadata_fetch_statuses_series_id")
-					.table(MetadataFetchStatuses::Table)
-					.col(MetadataFetchStatuses::SeriesId)
+					.name("idx_metadata_fetch_records_series_id")
+					.table(MetadataFetchRecords::Table)
+					.col(MetadataFetchRecords::SeriesId)
 					.unique()
 					.to_owned(),
 			)
@@ -246,9 +246,9 @@ impl MigrationTrait for Migration {
 			)
 			.await?;
 
-		// Drop metadata_fetch_statuses table
+		// Drop metadata_fetch_records table
 		manager
-			.drop_table(Table::drop().table(MetadataFetchStatuses::Table).to_owned())
+			.drop_table(Table::drop().table(MetadataFetchRecords::Table).to_owned())
 			.await?;
 
 		// Drop metadata_provider_configs table
@@ -279,8 +279,8 @@ enum MetadataProviderConfigs {
 }
 
 #[derive(DeriveIden)]
-enum MetadataFetchStatuses {
-	#[sea_orm(iden = "metadata_fetch_statuses")]
+enum MetadataFetchRecords {
+	#[sea_orm(iden = "metadata_fetch_records")]
 	Table,
 	Id,
 	Status,

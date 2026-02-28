@@ -2,7 +2,7 @@ import { Badge, Card, Text, ToolTip } from '@stump/components'
 import { FragmentType, graphql, useFragment, UserPermission } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { intlFormat } from 'date-fns'
-import { BadgeCheck, BadgeX } from 'lucide-react'
+import { BadgeAlert, BadgeCheck, BadgeX } from 'lucide-react'
 
 import { useAppContext } from '@/context'
 
@@ -33,6 +33,9 @@ export function ExistingProviderCard({ data }: Props) {
 	const { checkPermission } = useAppContext()
 
 	const canEdit = checkPermission(UserPermission.MetadataProviderManage)
+	const expiresSoon = provider.apiTokenExpiresAt
+		? getDoesExpireSoon(new Date(provider.apiTokenExpiresAt))
+		: false
 
 	return (
 		<Card key={provider.id} className="flex flex-col gap-4 p-4">
@@ -46,6 +49,14 @@ export function ExistingProviderCard({ data }: Props) {
 
 				<div className="flex items-center gap-2">
 					{canEdit && <EditProviderDialog provider={provider} />}
+
+					{expiresSoon && (
+						<ToolTip content={t(getKey('providerTokenExpiresSoon'))} align="end" size="xs">
+							<div className="flex h-7 w-7 items-center justify-center rounded-full border border-fill-danger/10 bg-fill-danger-secondary">
+								<BadgeAlert className="text-primary h-4 w-4" strokeWidth={1} />
+							</div>
+						</ToolTip>
+					)}
 
 					{provider.enabled && (
 						<ToolTip content={t(getKey('providerEnabled'))} align="end" size="xs">
@@ -80,3 +91,7 @@ export function ExistingProviderCard({ data }: Props) {
 
 const LOCALE_KEY = 'settingsScene.server/metadataIntegrations'
 const getKey = (key: string) => `${LOCALE_KEY}.${key}`
+
+const getDoesExpireSoon = (expiresAt: Date) => {
+	return new Date(expiresAt).getTime() - Date.now() < 7 * 24 * 60 * 60 * 1000 // 7 days
+}

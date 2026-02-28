@@ -9,8 +9,8 @@ use serde_json::Value as JsonValue;
 use crate::shared::enums::MetadataFetchStatus;
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
-#[graphql(name = "MetadataFetchStatusModel")]
-#[sea_orm(table_name = "metadata_fetch_statuses")]
+#[graphql(name = "MetadataFetchRecordModel")]
+#[sea_orm(table_name = "metadata_fetch_records")]
 pub struct Model {
 	#[sea_orm(primary_key, auto_increment = true)]
 	pub id: i32,

@@ -100,10 +100,10 @@ impl PatchMetadataProviderConfigInput {
 	}
 }
 
-/// An identifer for specifying the target of a metadata fetch status query. I added
+/// An identifer for specifying the target of a metadata fetch record query. I added
 /// mostly for type safety and not annoyingly wrangling both media_id and series_id
 #[derive(OneofObject)]
-pub enum MetadataFetchStatusId {
+pub enum MetadataFetchRecordId {
 	Series(String),
 	Media(String),
 }

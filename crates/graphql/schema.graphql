@@ -293,7 +293,7 @@ input ComputedFilterReadingStatus @oneOf {
 
 "A factor that contributed to a match's confidence score"
 type ConfidenceFactor {
-	"Name of the scoring factor (e.g., \"title_exact_match\", \"isbn_match\")"
+	"Name of the scoring factor (e.g., \"title_exact_match\")"
 	factor: String!
 	"How much weight this factor carried"
 	weight: Float!
@@ -1461,6 +1461,26 @@ enum MergeStrategy {
 	FILL_AND_MERGE_LISTS
 }
 
+"""
+An identifer for specifying the target of a metadata fetch record query. I added
+mostly for type safety and not annoyingly wrangling both media_id and series_id
+"""
+input MetadataFetchRecordId @oneOf {
+	series: String
+	media: String
+}
+
+type MetadataFetchRecordModel {
+	id: Int!
+	status: MetadataFetchStatus!
+	mediaId: String
+	seriesId: String
+	matchCandidates: JSON
+	acceptedMatchCandidate: JSON
+	addedAt: DateTime!
+	updatedAt: DateTime
+}
+
 enum MetadataFetchStatus {
 	AWAITING_REVIEW
 	NOT_STARTED
@@ -1472,23 +1492,29 @@ enum MetadataFetchStatus {
 }
 
 """
-An identifer for specifying the target of a metadata fetch status query. I added
-mostly for type safety and not annoyingly wrangling both media_id and series_id
+Represents a specific metadata field that can be locked or configured
+for per-field merge strategies
 """
-input MetadataFetchStatusId @oneOf {
-	series: String
-	media: String
-}
-
-type MetadataFetchStatusModel {
-	id: Int!
-	status: MetadataFetchStatus!
-	mediaId: String
-	seriesId: String
-	matchCandidates: JSON
-	acceptedMatchCandidate: JSON
-	addedAt: DateTime!
-	updatedAt: DateTime
+enum MetadataField {
+	TITLE
+	SUMMARY
+	GENRES
+	TAGS
+	AUTHORS
+	ARTISTS
+	PUBLISHER
+	YEAR
+	AGE_RATING
+	COVER
+	STATUS
+	VOLUME_COUNT
+	PAGE_COUNT
+	ISBN
+	RELEASE_DATE
+	COLORISTS
+	LETTERERS
+	COVER_ARTISTS
+	WRITERS
 }
 
 "The supported external metadata providers"
@@ -1502,7 +1528,6 @@ type MetadataProviderConfigModel {
 	providerType: MetadataProvider!
 	enabled: Boolean!
 	apiTokenExpiresAt: DateTime
-	"JSON blob for auto-apply settings: { enabled, threshold, strategy, exclude_fields }"
 	autoApplyConfig: JSON
 	createdAt: DateTime!
 	updatedAt: DateTime
@@ -1596,17 +1621,17 @@ type Mutation {
 	"Search external metadata providers for a media item and return match candidates"
 	fetchMediaMetadata(id: ID!): [MatchCandidate!]!
 	"Accept a match candidate and apply it to media metadata"
-	acceptMediaMatch(mediaId: ID!, candidateIndex: Int!, strategy: MergeStrategy): MetadataFetchStatusModel!
+	acceptMediaMatch(mediaId: ID!, candidateIndex: Int!, strategy: MergeStrategy, excludeFields: [MetadataField!]): MetadataFetchRecordModel!
 	"Reject the current match candidates for a media item"
-	rejectMediaMatch(mediaId: ID!, candidateIndex: Int!): MetadataFetchStatusModel!
+	rejectMediaMatch(mediaId: ID!, candidateIndex: Int!): MetadataFetchRecordModel!
 	updateSeriesMetadata(id: ID!, input: SeriesMetadataInput!): Series!
 	resetSeriesMetadata(id: ID!, impact: MetadataResetImpact!): Series!
 	"Search external metadata providers for a series and return match candidates"
 	fetchSeriesMetadata(id: ID!): [MatchCandidate!]!
 	"Accept a match candidate and apply it to the series metadata"
-	acceptSeriesMatch(seriesId: ID!, candidateIndex: Int!, strategy: MergeStrategy): MetadataFetchStatusModel!
+	acceptSeriesMatch(seriesId: ID!, candidateIndex: Int!, strategy: MergeStrategy, excludeFields: [MetadataField!]): MetadataFetchRecordModel!
 	"Reject the current match candidates for a series"
-	rejectSeriesMatch(seriesId: ID!, candidateIndex: Int!): MetadataFetchStatusModel!
+	rejectSeriesMatch(seriesId: ID!, candidateIndex: Int!): MetadataFetchRecordModel!
 	analyzeLibrary(id: ID!, forceReanalysis: Boolean! = false): Boolean!
 	"""
 	Delete media and series from a library that match one of the following conditions:
@@ -2118,9 +2143,9 @@ type Query {
 	smartListItems(id: ID!, limit: Int = null): SmartListItems!
 	metadataProviderConfigs: [MetadataProviderConfigModel!]!
 	metadataProviderConfigById(id: Int!): MetadataProviderConfigModel
-	metadataFetchStatus(id: MetadataFetchStatusId!): MetadataFetchStatusModel
+	metadataFetchRecord(id: MetadataFetchRecordId!): MetadataFetchRecordModel
 	"Return all metadata fetch statuses that are awaiting user review."
-	pendingMetadataMatches: [MetadataFetchStatusModel!]!
+	pendingMetadataMatches: [MetadataFetchRecordModel!]!
 }
 
 "The different reading directions supported by any Stump reader"
@@ -3032,9 +3057,9 @@ enum UserPermission {
 	"Grant access to manage jobs, like pausing, resuming, deleting, or cancelling them"
 	MANAGE_JOBS
 	"Grant access to read metadata fetch statuses"
-	METADATA_FETCH_STATUS_READ
+	METADATA_FETCH_RECORD_READ
 	"Grant access to manage metadata fetch statuses (accept matches, etc)"
-	METADATA_FETCH_STATUS_MANAGE
+	METADATA_FETCH_RECORD_MANAGE
 	"Grant access to read metadata provider configurations"
 	METADATA_PROVIDER_READ
 	"Grant access to manage metadata provider configurations (create, update, delete)"

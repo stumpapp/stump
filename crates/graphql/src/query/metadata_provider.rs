@@ -1,10 +1,10 @@
 use crate::{
 	data::CoreContext, guard::PermissionGuard,
-	input::metadata_provider::MetadataFetchStatusId,
+	input::metadata_provider::MetadataFetchRecordId,
 };
 use async_graphql::{Context, Object, Result};
 use models::{
-	entity::{metadata_fetch_status, metadata_provider_config},
+	entity::{metadata_fetch_record, metadata_provider_config},
 	shared::enums::{MetadataFetchStatus, UserPermission},
 };
 use sea_orm::prelude::*;
@@ -37,24 +37,24 @@ impl MetadataProviderQuery {
 		Ok(config)
 	}
 
-	#[graphql(guard = "PermissionGuard::one(UserPermission::MetadataFetchStatusRead)")]
-	async fn metadata_fetch_status(
+	#[graphql(guard = "PermissionGuard::one(UserPermission::MetadataFetchRecordRead)")]
+	async fn metadata_fetch_record(
 		&self,
 		ctx: &Context<'_>,
-		id: MetadataFetchStatusId,
-	) -> Result<Option<metadata_fetch_status::Model>> {
+		id: MetadataFetchRecordId,
+	) -> Result<Option<metadata_fetch_record::Model>> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let (col, value) = match id {
-			MetadataFetchStatusId::Media(media_id) => {
-				(metadata_fetch_status::Column::MediaId, media_id)
+			MetadataFetchRecordId::Media(media_id) => {
+				(metadata_fetch_record::Column::MediaId, media_id)
 			},
-			MetadataFetchStatusId::Series(series_id) => {
-				(metadata_fetch_status::Column::SeriesId, series_id)
+			MetadataFetchRecordId::Series(series_id) => {
+				(metadata_fetch_record::Column::SeriesId, series_id)
 			},
 		};
 
-		let status = metadata_fetch_status::Entity::find()
+		let status = metadata_fetch_record::Entity::find()
 			.filter(col.eq(value))
 			.one(conn)
 			.await?;
@@ -63,16 +63,16 @@ impl MetadataProviderQuery {
 	}
 
 	/// Return all metadata fetch statuses that are awaiting user review.
-	#[graphql(guard = "PermissionGuard::one(UserPermission::MetadataFetchStatusRead)")]
+	#[graphql(guard = "PermissionGuard::one(UserPermission::MetadataFetchRecordRead)")]
 	async fn pending_metadata_matches(
 		&self,
 		ctx: &Context<'_>,
-	) -> Result<Vec<metadata_fetch_status::Model>> {
+	) -> Result<Vec<metadata_fetch_record::Model>> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let statuses = metadata_fetch_status::Entity::find()
+		let statuses = metadata_fetch_record::Entity::find()
 			.filter(
-				metadata_fetch_status::Column::Status
+				metadata_fetch_record::Column::Status
 					.eq(MetadataFetchStatus::AwaitingReview),
 			)
 			.all(conn)

@@ -1,6 +1,6 @@
 use metadata_integrations::{MatchCandidate, SearchQuery};
 use models::{
-	entity::{metadata_fetch_status, metadata_provider_config},
+	entity::{metadata_fetch_record, metadata_provider_config},
 	shared::enums::MetadataFetchStatus,
 };
 use sea_orm::{prelude::*, sea_query::OnConflict, Set};
@@ -69,20 +69,20 @@ pub async fn fetch_series_metadata(
 	let candidates_json = serde_json::to_value(&all_candidates)
 		.map_err(|e| CoreError::InternalError(e.to_string()))?;
 
-	let active_model = metadata_fetch_status::ActiveModel {
+	let active_model = metadata_fetch_record::ActiveModel {
 		series_id: Set(Some(series_id.to_string())),
 		status: Set(status),
 		match_candidates: Set(Some(candidates_json)),
 		..Default::default()
 	};
 
-	metadata_fetch_status::Entity::insert(active_model)
+	metadata_fetch_record::Entity::insert(active_model)
 		.on_conflict(
-			OnConflict::column(metadata_fetch_status::Column::SeriesId)
+			OnConflict::column(metadata_fetch_record::Column::SeriesId)
 				.update_columns([
-					metadata_fetch_status::Column::Status,
-					metadata_fetch_status::Column::MatchCandidates,
-					metadata_fetch_status::Column::UpdatedAt,
+					metadata_fetch_record::Column::Status,
+					metadata_fetch_record::Column::MatchCandidates,
+					metadata_fetch_record::Column::UpdatedAt,
 				])
 				.to_owned(),
 		)
@@ -98,8 +98,14 @@ pub async fn fetch_series_metadata(
 			confidence = candidate.confidence,
 			"Auto-applying series metadata match"
 		);
-		if let Err(e) =
-			apply::apply_series_match(conn, series_id, &candidate, config.strategy).await
+		if let Err(e) = apply::apply_series_match(
+			conn,
+			series_id,
+			&candidate,
+			config.strategy,
+			config.exclude_fields,
+		)
+		.await
 		{
 			tracing::error!(
 				series_id,
@@ -173,20 +179,20 @@ pub async fn fetch_media_metadata(
 	let candidates_json = serde_json::to_value(&all_candidates)
 		.map_err(|e| CoreError::InternalError(e.to_string()))?;
 
-	let active_model = metadata_fetch_status::ActiveModel {
+	let active_model = metadata_fetch_record::ActiveModel {
 		media_id: Set(Some(media_id.to_string())),
 		status: Set(status),
 		match_candidates: Set(Some(candidates_json)),
 		..Default::default()
 	};
 
-	metadata_fetch_status::Entity::insert(active_model)
+	metadata_fetch_record::Entity::insert(active_model)
 		.on_conflict(
-			OnConflict::column(metadata_fetch_status::Column::MediaId)
+			OnConflict::column(metadata_fetch_record::Column::MediaId)
 				.update_columns([
-					metadata_fetch_status::Column::Status,
-					metadata_fetch_status::Column::MatchCandidates,
-					metadata_fetch_status::Column::UpdatedAt,
+					metadata_fetch_record::Column::Status,
+					metadata_fetch_record::Column::MatchCandidates,
+					metadata_fetch_record::Column::UpdatedAt,
 				])
 				.to_owned(),
 		)
@@ -202,8 +208,14 @@ pub async fn fetch_media_metadata(
 			confidence = candidate.confidence,
 			"Auto-applying media metadata match"
 		);
-		if let Err(e) =
-			apply::apply_media_match(conn, media_id, &candidate, config.strategy).await
+		if let Err(e) = apply::apply_media_match(
+			conn,
+			media_id,
+			&candidate,
+			config.strategy,
+			config.exclude_fields,
+		)
+		.await
 		{
 			tracing::error!(
 				media_id,

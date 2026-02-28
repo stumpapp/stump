@@ -5,9 +5,9 @@ use crate::{
 	object::media::Media,
 };
 use async_graphql::{Context, Object, Result, ID};
-use metadata_integrations::{MatchCandidate, MergeStrategy};
+use metadata_integrations::{MatchCandidate, MergeStrategy, MetadataField};
 use models::{
-	entity::{media, metadata_fetch_status},
+	entity::{media, metadata_fetch_record},
 	shared::enums::{MetadataFetchStatus, UserPermission},
 };
 use sea_orm::{prelude::*, ActiveValue::Set, IntoActiveModel};
@@ -55,7 +55,7 @@ impl MediaMetadataMutation {
 	}
 
 	/// Search external metadata providers for a media item and return match candidates
-	#[graphql(guard = "PermissionGuard::one(UserPermission::MetadataFetchStatusManage)")]
+	#[graphql(guard = "PermissionGuard::one(UserPermission::MetadataFetchRecordManage)")]
 	async fn fetch_media_metadata(
 		&self,
 		ctx: &Context<'_>,
@@ -86,19 +86,21 @@ impl MediaMetadataMutation {
 	}
 
 	/// Accept a match candidate and apply it to media metadata
-	#[graphql(guard = "PermissionGuard::one(UserPermission::MetadataFetchStatusManage)")]
+	#[graphql(guard = "PermissionGuard::one(UserPermission::MetadataFetchRecordManage)")]
 	async fn accept_media_match(
 		&self,
 		ctx: &Context<'_>,
 		media_id: ID,
 		candidate_index: u32,
 		strategy: Option<MergeStrategy>,
-	) -> Result<metadata_fetch_status::Model> {
+		exclude_fields: Option<Vec<MetadataField>>,
+	) -> Result<metadata_fetch_record::Model> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 		let strategy = strategy.unwrap_or(MergeStrategy::FillGaps);
+		let exclude_fields = exclude_fields.unwrap_or_default();
 
-		let status = metadata_fetch_status::Entity::find()
-			.filter(metadata_fetch_status::Column::MediaId.eq(media_id.to_string()))
+		let status = metadata_fetch_record::Entity::find()
+			.filter(metadata_fetch_record::Column::MediaId.eq(media_id.to_string()))
 			.one(conn)
 			.await?
 			.ok_or("No fetch status found for this media")?;
@@ -125,11 +127,12 @@ impl MediaMetadataMutation {
 			media_id.as_ref(),
 			candidate,
 			strategy,
+			exclude_fields,
 		)
 		.await?;
 
-		let updated = metadata_fetch_status::Entity::find()
-			.filter(metadata_fetch_status::Column::MediaId.eq(media_id.to_string()))
+		let updated = metadata_fetch_record::Entity::find()
+			.filter(metadata_fetch_record::Column::MediaId.eq(media_id.to_string()))
 			.one(conn)
 			.await?
 			.ok_or("Failed to re-fetch status")?;
@@ -138,17 +141,17 @@ impl MediaMetadataMutation {
 	}
 
 	/// Reject the current match candidates for a media item
-	#[graphql(guard = "PermissionGuard::one(UserPermission::MetadataFetchStatusManage)")]
+	#[graphql(guard = "PermissionGuard::one(UserPermission::MetadataFetchRecordManage)")]
 	async fn reject_media_match(
 		&self,
 		ctx: &Context<'_>,
 		media_id: ID,
 		candidate_index: u32,
-	) -> Result<metadata_fetch_status::Model> {
+	) -> Result<metadata_fetch_record::Model> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let status = metadata_fetch_status::Entity::find()
-			.filter(metadata_fetch_status::Column::MediaId.eq(media_id.to_string()))
+		let status = metadata_fetch_record::Entity::find()
+			.filter(metadata_fetch_record::Column::MediaId.eq(media_id.to_string()))
 			.one(conn)
 			.await?
 			.ok_or("No fetch status found for this media")?;
@@ -176,7 +179,7 @@ impl MediaMetadataMutation {
 		}
 		active.match_candidates = Set(Some(serde_json::to_value(adjusted_candidates)?));
 
-		let updated = metadata_fetch_status::Entity::update(active)
+		let updated = metadata_fetch_record::Entity::update(active)
 			.exec(conn)
 			.await?;
 

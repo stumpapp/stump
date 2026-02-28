@@ -2132,6 +2132,7 @@
 			},
 			"providerEnabled": "This provider is enabled",
 			"providerDisabled": "This provider is disabled",
+			"providerTokenExpiresSoon": "This provider's token will expire soon",
 			"autoApplyOn": "Auto-apply on",
 			"autoApplyOff": "Auto-apply off",
 			"editDialog": {

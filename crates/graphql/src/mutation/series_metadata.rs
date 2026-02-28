@@ -1,7 +1,7 @@
 use async_graphql::{Context, Object, Result, ID};
-use metadata_integrations::{MatchCandidate, MergeStrategy};
+use metadata_integrations::{MatchCandidate, MergeStrategy, MetadataField};
 use models::{
-	entity::{media, media_metadata, metadata_fetch_status, series},
+	entity::{media, media_metadata, metadata_fetch_record, series},
 	shared::enums::{MetadataFetchStatus, MetadataResetImpact, UserPermission},
 };
 use sea_orm::{prelude::*, sea_query::Query, IntoActiveModel, Set, TransactionTrait};
@@ -120,7 +120,7 @@ impl SeriesMetadataMutation {
 	}
 
 	/// Search external metadata providers for a series and return match candidates
-	#[graphql(guard = "PermissionGuard::one(UserPermission::MetadataFetchStatusManage)")]
+	#[graphql(guard = "PermissionGuard::one(UserPermission::MetadataFetchRecordManage)")]
 	async fn fetch_series_metadata(
 		&self,
 		ctx: &Context<'_>,
@@ -151,19 +151,21 @@ impl SeriesMetadataMutation {
 	}
 
 	/// Accept a match candidate and apply it to the series metadata
-	#[graphql(guard = "PermissionGuard::one(UserPermission::MetadataFetchStatusManage)")]
+	#[graphql(guard = "PermissionGuard::one(UserPermission::MetadataFetchRecordManage)")]
 	async fn accept_series_match(
 		&self,
 		ctx: &Context<'_>,
 		series_id: ID,
 		candidate_index: u32,
 		strategy: Option<MergeStrategy>,
-	) -> Result<metadata_fetch_status::Model> {
+		exclude_fields: Option<Vec<MetadataField>>,
+	) -> Result<metadata_fetch_record::Model> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 		let strategy = strategy.unwrap_or(MergeStrategy::FillGaps);
+		let exclude_fields = exclude_fields.unwrap_or_default();
 
-		let status = metadata_fetch_status::Entity::find()
-			.filter(metadata_fetch_status::Column::SeriesId.eq(series_id.to_string()))
+		let status = metadata_fetch_record::Entity::find()
+			.filter(metadata_fetch_record::Column::SeriesId.eq(series_id.to_string()))
 			.one(conn)
 			.await?
 			.ok_or("No fetch status found for this series")?;
@@ -190,11 +192,12 @@ impl SeriesMetadataMutation {
 			series_id.as_ref(),
 			candidate,
 			strategy,
+			exclude_fields,
 		)
 		.await?;
 
-		let updated = metadata_fetch_status::Entity::find()
-			.filter(metadata_fetch_status::Column::SeriesId.eq(series_id.to_string()))
+		let updated = metadata_fetch_record::Entity::find()
+			.filter(metadata_fetch_record::Column::SeriesId.eq(series_id.to_string()))
 			.one(conn)
 			.await?
 			.ok_or("Failed to re-fetch status")?;
@@ -203,17 +206,17 @@ impl SeriesMetadataMutation {
 	}
 
 	/// Reject the current match candidates for a series
-	#[graphql(guard = "PermissionGuard::one(UserPermission::MetadataFetchStatusManage)")]
+	#[graphql(guard = "PermissionGuard::one(UserPermission::MetadataFetchRecordManage)")]
 	async fn reject_series_match(
 		&self,
 		ctx: &Context<'_>,
 		series_id: ID,
 		candidate_index: u32,
-	) -> Result<metadata_fetch_status::Model> {
+	) -> Result<metadata_fetch_record::Model> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let status = metadata_fetch_status::Entity::find()
-			.filter(metadata_fetch_status::Column::SeriesId.eq(series_id.to_string()))
+		let status = metadata_fetch_record::Entity::find()
+			.filter(metadata_fetch_record::Column::SeriesId.eq(series_id.to_string()))
 			.one(conn)
 			.await?
 			.ok_or("No fetch status found for this series")?;
@@ -241,7 +244,7 @@ impl SeriesMetadataMutation {
 		}
 		active.match_candidates = Set(Some(serde_json::to_value(adjusted_candidates)?));
 
-		let updated = metadata_fetch_status::Entity::update(active)
+		let updated = metadata_fetch_record::Entity::update(active)
 			.exec(conn)
 			.await?;
 

@@ -89,18 +89,25 @@ impl HardcoverClient {
 		response.data.ok_or(MetadataProviderError::EmptyResponse)
 	}
 
+	#[tracing::instrument(skip(self))]
 	async fn search(
 		&self,
 		query: &str,
 		query_type: HardcoverSearchType,
 		limit: u32,
 	) -> Result<SearchResponse, MetadataProviderError> {
+		let sanitized_query = query
+			.replace('\\', "\\\\")
+			.replace('"', "\\\"")
+			.replace(['\n', '\r', '\t'], " ");
 		let graphql_query = format!(
 			r#"query Search {{ search(query: "{}", query_type: "{}", per_page: {}) {{ results }} }}"#,
-			query.replace('"', "\\\""),
+			sanitized_query,
 			query_type.as_str(),
 			limit,
 		);
+		tracing::trace!(?graphql_query, "Searching Hardcover...");
+		dbg!(&graphql_query);
 
 		let data: SearchData = self.execute_graphql(&graphql_query).await?;
 		Ok(data.search)
@@ -191,6 +198,7 @@ impl MetadataProvider for HardcoverClient {
 		&self,
 		query: &SearchQuery,
 	) -> Result<Vec<MatchCandidate>, MetadataProviderError> {
+		tracing::trace!("Searching for series on Hardcover");
 		let response = self
 			.search(
 				&query.title,
@@ -206,17 +214,20 @@ impl MetadataProvider for HardcoverClient {
 		for hit in hits {
 			let external_id = hit.document.id;
 			match self.fetch_series_metadata(&external_id).await {
-				Ok(metadata) => candidates.push(MatchCandidate {
-					external_id,
-					metadata: ExternalMetadata::Series(metadata),
-					provider: self.id().to_string(),
-					confidence: 0.0,
-					confidence_factors: Vec::new(),
-				}),
+				Ok(metadata) => {
+					tracing::trace!(external_id, "Fetched series metadata successfully");
+					candidates.push(MatchCandidate {
+						external_id,
+						metadata: ExternalMetadata::Series(metadata),
+						provider: self.id().to_string(),
+						confidence: 0.0,
+						confidence_factors: Vec::new(),
+					})
+				},
 				Err(e) => {
 					// TODO: Maybe if fetch fails, use naive meta from search?
 					// A full skip failure feels wasteful? Idk, it's a complicated feature
-					tracing::warn!(
+					tracing::error!(
 						external_id,
 						error = ?e,
 						"Failed to fetch series metadata for search result"
@@ -230,6 +241,7 @@ impl MetadataProvider for HardcoverClient {
 
 	/// Search for books on Hardcover and fetch full metadata for each result
 	/// See: https://docs.hardcover.app/api/guides/searching/#books
+	#[tracing::instrument(skip(self))]
 	async fn search_media(
 		&self,
 		query: &SearchQuery,
@@ -250,6 +262,7 @@ impl MetadataProvider for HardcoverClient {
 			let external_id = hit.document.id;
 			match self.fetch_media_metadata(&external_id).await {
 				Ok(metadata) => {
+					tracing::trace!(external_id, "Fetched book metadata successfully");
 					candidates.push(MatchCandidate {
 						external_id,
 						metadata: ExternalMetadata::Media(metadata),
@@ -261,7 +274,7 @@ impl MetadataProvider for HardcoverClient {
 				Err(e) => {
 					// TODO: Maybe if fetch fails, use naive meta from search?
 					// A full skip failure feels wasteful? Idk, it's a complicated feature
-					tracing::warn!(
+					tracing::error!(
 						external_id,
 						error = ?e,
 						"Failed to fetch book metadata for search result"

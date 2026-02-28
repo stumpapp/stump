@@ -122,7 +122,7 @@ pub async fn fetch_series_metadata(
 pub async fn fetch_media_metadata(
 	conn: &DatabaseConnection,
 	media_id: &str,
-	media_name: &str,
+	search: SearchQuery,
 	provider_cache: &ProviderClientCache,
 ) -> Result<Vec<MatchCandidate>, CoreError> {
 	let provider_configs = metadata_provider_config::Entity::find()
@@ -140,25 +140,17 @@ pub async fn fetch_media_metadata(
 
 	for config in &provider_configs {
 		match provider_cache.get_or_create(config).await {
-			Ok(provider) => {
-				let query = SearchQuery {
-					title: media_name.to_string(),
-					limit: Some(10),
-					..Default::default()
-				};
-
-				match provider.search_media(&query).await {
-					Ok(candidates) => {
-						all_candidates.extend(candidates);
-					},
-					Err(e) => {
-						tracing::error!(
-							provider = ?config.provider_type,
-							error = ?e,
-							"Failed to search provider for media metadata"
-						);
-					},
-				}
+			Ok(provider) => match provider.search_media(&search).await {
+				Ok(candidates) => {
+					all_candidates.extend(candidates);
+				},
+				Err(e) => {
+					tracing::error!(
+						provider = ?config.provider_type,
+						error = ?e,
+						"Failed to search provider for media metadata"
+					);
+				},
 			},
 			Err(e) => {
 				tracing::error!(

@@ -1,3 +1,4 @@
+#[derive(Debug, Clone)]
 pub struct SearchQuery {
 	pub title: String,
 	pub author: Option<String>,

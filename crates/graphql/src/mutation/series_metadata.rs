@@ -130,8 +130,9 @@ impl SeriesMetadataMutation {
 		let core_ctx = ctx.data::<CoreContext>()?;
 		let conn = core_ctx.conn.as_ref();
 
-		let s = series::Entity::find()
+		let model = series::ModelWithMetadata::find()
 			.filter(series::Column::Id.eq(id.to_string()))
+			.into_model::<series::ModelWithMetadata>()
 			.one(conn)
 			.await?
 			.ok_or("Series not found")?;
@@ -139,10 +140,16 @@ impl SeriesMetadataMutation {
 		let encryption_key = core_ctx.get_encryption_key().await?;
 		let provider_cache = ProviderClientCache::new(encryption_key);
 
+		let search_name = model
+			.metadata
+			.as_ref()
+			.and_then(|m| m.title.clone())
+			.unwrap_or_else(|| model.series.name.clone());
+
 		let candidates = stump_core::filesystem::metadata::fetch_series_metadata(
 			conn,
-			&s.id,
-			&s.name,
+			&model.series.id,
+			&search_name,
 			&provider_cache,
 		)
 		.await?;

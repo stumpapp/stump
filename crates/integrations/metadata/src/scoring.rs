@@ -27,9 +27,73 @@ use crate::types::{ConfidenceFactor, ExternalMetadata, MatchCandidate, SearchQue
 ///
 /// Note: Fuzzy matching uses [Dice-Sørensen](https://en.wikipedia.org/wiki/Dice-S%C3%B8rensen_coefficient)
 /// and [Jaro-Winkler](https://en.wikipedia.org/wiki/Jaro%E2%80%93Winkler_distance). This is NOT my wheelhouse
-/// but from what I can tell, these are reasonable starting points
+/// but from what I can tell, these are reasonable starting points.
+///
+/// Additionally, a token-overlap signal runs in parallel: both the query and candidate
+/// titles are tokenized and the overlap ratio is computed with per-token fuzzy matching
 #[derive(Debug, Clone, Copy)]
 pub struct MatchScorer;
+
+// TODO(localization): Might be good to localize these at some point
+/// Common words filtered out during tokenization
+const STOP_WORDS: &[&str] = &[
+	"a", "an", "the", "of", "and", "for", "in", "to", "or", "is", "at", "by", "on",
+	"with", "from",
+];
+
+fn tokenize(title: &str) -> Vec<String> {
+	let cleaned: String = title
+		.chars()
+		// strip punctuation
+		.map(|c| match c {
+			'&' | ':' | ',' | '-' | '\'' | '"' | '(' | ')' | '[' | ']' => ' ',
+			other => other,
+		})
+		.collect();
+
+	// lowercase + filter stop words
+	cleaned
+		.split_whitespace()
+		.map(|w| w.to_lowercase())
+		.filter(|w| !w.is_empty() && !STOP_WORDS.contains(&w.as_str()))
+		.collect()
+}
+
+/// Check if two tokens match fuzzily (Jaro-Winkler > 0.90)
+fn tokens_match(a: &str, b: &str) -> bool {
+	a == b || strsim::jaro_winkler(a, b) > 0.90
+}
+
+/// Compute a token-overlap score between a query and candidate title
+///
+/// Returns a value in `0.0..=1.0` representing how well the titles overlap
+/// at the token level. Candidate coverage is weighted more heavily (0.7)
+/// since the common problem case is a short candidate title matching a
+/// longer query that includes a subtitle
+fn token_overlap_score(query_title: &str, candidate_title: &str) -> f64 {
+	let q_tokens = tokenize(query_title);
+	let c_tokens = tokenize(candidate_title);
+
+	if q_tokens.is_empty() || c_tokens.is_empty() {
+		return 0.0;
+	}
+
+	let candidate_hits = c_tokens
+		.iter()
+		.filter(|ct| q_tokens.iter().any(|qt| tokens_match(qt, ct)))
+		.count();
+	// Note: This is the fraction of candidate tokens that are found in the query
+	let candidate_coverage = candidate_hits as f64 / c_tokens.len() as f64;
+
+	let query_hits = q_tokens
+		.iter()
+		.filter(|qt| c_tokens.iter().any(|ct| tokens_match(qt, ct)))
+		.count();
+	// Note: This is the fraction of query tokens that are found in the candidate
+	let query_coverage = query_hits as f64 / q_tokens.len() as f64;
+
+	0.7 * candidate_coverage + 0.3 * query_coverage
+}
 
 impl MatchScorer {
 	const ISBN_FLOOR: f32 = 0.98;
@@ -133,11 +197,18 @@ impl MatchScorer {
 			}
 		}
 
+		// String-level similarity (Dice-Sørensen / Jaro-Winkler)
 		let q_lower = query_title.to_lowercase();
 		let c_lower = candidate_title.to_lowercase();
 		let dice = strsim::sorensen_dice(&q_lower, &c_lower);
 		let jw = strsim::jaro_winkler(&q_lower, &c_lower);
-		let sim = dice.max(jw);
+		let string_sim = dice.max(jw);
+
+		// Token-overlap similarity (handles subtitle dilution)
+		let token_sim = token_overlap_score(query_title, candidate_title);
+
+		// Take the best of both signals
+		let sim = string_sim.max(token_sim);
 
 		let fuzzy_score = if sim >= Self::FUZZY_THRESHOLD {
 			// Note: This is a linear scaling from the threshold to the ceiling, so
@@ -148,10 +219,16 @@ impl MatchScorer {
 			0.0
 		};
 
+		let factor_name = if token_sim > string_sim {
+			"title_token_overlap"
+		} else {
+			"title_fuzzy"
+		};
+
 		(
 			fuzzy_score,
 			vec![ConfidenceFactor {
-				factor: "title_fuzzy".into(),
+				factor: factor_name.into(),
 				weight: fuzzy_score,
 				matched: fuzzy_score > 0.0,
 			}],
@@ -412,5 +489,89 @@ mod tests {
 		);
 		assert!(candidates[0].confidence >= candidates[1].confidence);
 		assert!(candidates[1].confidence >= candidates[2].confidence);
+	}
+
+	#[test]
+	fn subtitle_dilution_still_scores() {
+		let scorer = MatchScorer;
+		let query = SearchQuery {
+			title: "Legends Lattes: A Novel of High Fantasy and Low Stakes".into(),
+			..Default::default()
+		};
+		let mut c = make_media_candidate("Legends & Lattes", None, vec![]);
+		scorer.score_candidate(&query, &mut c);
+
+		assert!(
+			c.confidence > 0.0,
+			"Subtitle-diluted query should still score > 0 via token overlap, got {}",
+			c.confidence
+		);
+		assert!(
+			c.confidence_factors
+				.iter()
+				.any(|f| f.factor == "title_token_overlap" && f.matched),
+			"Should use token_overlap signal: {:?}",
+			c.confidence_factors
+		);
+	}
+
+	#[test]
+	fn token_overlap_unrelated_still_near_zero() {
+		let scorer = MatchScorer;
+		let query = SearchQuery {
+			title: "Some Book: Extended Edition".into(),
+			..Default::default()
+		};
+		let mut c = make_media_candidate("Completely Different", None, vec![]);
+		scorer.score_candidate(&query, &mut c);
+
+		assert!(
+			c.confidence < 0.05,
+			"Unrelated titles should still be near zero, got {}",
+			c.confidence
+		);
+	}
+
+	#[test]
+	fn single_word_typo_uses_string_similarity() {
+		let scorer = MatchScorer;
+		let query = SearchQuery {
+			title: "Wayferers".into(), // typo
+			..Default::default()
+		};
+		let mut c = make_series_candidate("Wayfarers", vec![]);
+		scorer.score_candidate(&query, &mut c);
+
+		assert!(
+			c.confidence > 0.0,
+			"Single-word typo should score > 0 via string similarity, got {}",
+			c.confidence
+		);
+	}
+
+	#[test]
+	fn tokenize_strips_punctuation_and_stops() {
+		let tokens = super::tokenize("The Long Way: A Novel & More");
+		// "the", "a", "and" are stop words; & becomes space; : becomes space
+		assert!(!tokens.contains(&"the".to_string()));
+		assert!(!tokens.contains(&"a".to_string()));
+		assert!(tokens.contains(&"long".to_string()));
+		assert!(tokens.contains(&"way".to_string()));
+		assert!(tokens.contains(&"novel".to_string()));
+		assert!(tokens.contains(&"more".to_string()));
+	}
+
+	#[test]
+	fn token_overlap_full_containment() {
+		// Candidate fully contained in query → high score
+		let score = super::token_overlap_score(
+			"Legends Lattes: A Novel of High Fantasy and Low Stakes",
+			"Legends & Lattes",
+		);
+		assert!(
+			score >= 0.70,
+			"Full candidate containment should yield high overlap, got {}",
+			score
+		);
 	}
 }

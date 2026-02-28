@@ -5,7 +5,7 @@ use crate::{
 	object::{media::Media, metadata_fetch_record::MetadataFetchRecord},
 };
 use async_graphql::{Context, Object, Result, ID};
-use metadata_integrations::{MatchCandidate, MergeStrategy, MetadataField};
+use metadata_integrations::{MatchCandidate, MergeStrategy, MetadataField, SearchQuery};
 use models::{
 	entity::{media, metadata_fetch_record},
 	shared::enums::{MetadataFetchStatus, UserPermission},
@@ -65,8 +65,9 @@ impl MediaMetadataMutation {
 		let core_ctx = ctx.data::<CoreContext>()?;
 		let conn = core_ctx.conn.as_ref();
 
-		let m = media::Entity::find()
+		let model = media::ModelWithMetadata::find()
 			.filter(media::Column::Id.eq(id.to_string()))
+			.into_model::<media::ModelWithMetadata>()
 			.one(conn)
 			.await?
 			.ok_or("Media not found")?;
@@ -74,10 +75,33 @@ impl MediaMetadataMutation {
 		let encryption_key = core_ctx.get_encryption_key().await?;
 		let provider_cache = ProviderClientCache::new(encryption_key);
 
+		let title = model
+			.metadata
+			.as_ref()
+			.and_then(|m| m.title.clone())
+			.unwrap_or_else(|| model.media.name.clone());
+
+		let author = match model.metadata.as_ref().and_then(|m| m.writers.clone()) {
+			Some(authors_str) => {
+				authors_str.split(',').map(|s| s.trim().to_string()).next()
+			},
+			None => None,
+		};
+
+		let isbn = model
+			.metadata
+			.as_ref()
+			.and_then(|m| m.identifier_isbn.clone());
+
 		let candidates = stump_core::filesystem::metadata::fetch_media_metadata(
 			conn,
-			&m.id,
-			&m.name,
+			&model.media.id,
+			SearchQuery {
+				title,
+				author,
+				isbn,
+				..Default::default()
+			},
 			&provider_cache,
 		)
 		.await?;

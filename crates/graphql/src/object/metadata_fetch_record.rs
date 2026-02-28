@@ -1,4 +1,5 @@
 use async_graphql::{ComplexObject, Context, Result, SimpleObject};
+use metadata_integrations::MatchCandidate;
 use models::entity::{media, metadata_fetch_record, series};
 
 use crate::{
@@ -15,6 +16,25 @@ pub struct MetadataFetchRecord {
 
 #[ComplexObject]
 impl MetadataFetchRecord {
+	async fn match_candidates(&self) -> Result<Vec<MatchCandidate>> {
+		let candidates: Vec<MatchCandidate> = self
+			.model
+			.match_candidates
+			.as_ref()
+			.and_then(|v| serde_json::from_value(v.clone()).ok())
+			.unwrap_or_default();
+		Ok(candidates)
+	}
+
+	async fn accepted_match_candidate(&self) -> Result<Option<MatchCandidate>> {
+		let candidate: Option<MatchCandidate> = self
+			.model
+			.accepted_match_candidate
+			.as_ref()
+			.and_then(|v| serde_json::from_value(v.clone()).ok());
+		Ok(candidate)
+	}
+
 	/// The media item associated with this fetch record, if any
 	async fn media(&self, ctx: &Context<'_>) -> Result<Option<Media>> {
 		let Some(media_id) = &self.model.media_id else {

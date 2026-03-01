@@ -1,8 +1,10 @@
 import { Card, cn, Heading, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import { useMemo } from 'react'
+import { useOverlayScrollbars } from 'overlayscrollbars-react'
+import { useEffect, useMemo, useRef } from 'react'
 
 import { usePreferences } from '@/hooks/usePreferences'
+import { useTheme } from '@/hooks/useTheme'
 
 import {
 	FieldComparison,
@@ -37,6 +39,24 @@ export function MatchPreviewEditor() {
 		return []
 	}, [candidate, currentMetadata, isMedia])
 
+	const scrollRef = useRef<HTMLDivElement>(null)
+
+	const { isDarkVariant } = useTheme()
+	const [initialize] = useOverlayScrollbars({
+		options: {
+			scrollbars: {
+				theme: isDarkVariant ? 'os-theme-light' : 'os-theme-dark',
+			},
+		},
+	})
+
+	useEffect(() => {
+		const { current: scrollContainer } = scrollRef
+		if (scrollContainer && !enableHideScrollbar) {
+			initialize(scrollContainer)
+		}
+	}, [initialize, enableHideScrollbar])
+
 	if (!candidate) {
 		return (
 			<div className="flex flex-1 items-center justify-center py-12">
@@ -53,6 +73,8 @@ export function MatchPreviewEditor() {
 				className={cn('overflow-y-auto rounded-xl bg-edge/25 p-4', {
 					'scrollbar-hide': enableHideScrollbar,
 				})}
+				ref={scrollRef}
+				data-overlayscrollbars-initialize
 			>
 				<Card className="overflow-hidden">
 					<div className="grid grid-cols-[140px_1fr_1fr_40px_1fr] items-center border-b border-edge bg-background-surface/50 py-2.5 pl-2.5">

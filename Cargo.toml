@@ -30,7 +30,7 @@ axum = { version = "0.8.6", features = [
 base64 = "0.22.1"
 data-encoding = "2.9.0"
 bcrypt = "0.17.1"
-rust_decimal = "1.38.0"
+rust_decimal = { version = "1.38.0", features = ["serde-with-float"] }
 derive_builder = "0.20.2"
 derivative = "2.2.0"
 chrono = { version = "0.4.42", features = ["serde"] }

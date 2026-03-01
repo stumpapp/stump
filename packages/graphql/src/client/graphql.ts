@@ -1550,6 +1550,22 @@ export enum MergeStrategy {
   PreferExternal = 'PREFER_EXTERNAL'
 }
 
+export type MetadataFetchRecord = {
+  __typename?: 'MetadataFetchRecord';
+  acceptedMatchCandidate?: Maybe<MatchCandidate>;
+  addedAt: Scalars['DateTime']['output'];
+  id: Scalars['Int']['output'];
+  matchCandidates: Array<MatchCandidate>;
+  /** The media item associated with this fetch record, if any */
+  media?: Maybe<Media>;
+  mediaId?: Maybe<Scalars['String']['output']>;
+  /** The series associated with this fetch record, if any */
+  series?: Maybe<Series>;
+  seriesId?: Maybe<Scalars['String']['output']>;
+  status: MetadataFetchStatus;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
 /**
  * An identifer for specifying the target of a metadata fetch record query. I added
  * mostly for type safety and not annoyingly wrangling both media_id and series_id
@@ -1557,18 +1573,6 @@ export enum MergeStrategy {
 export type MetadataFetchRecordId =
   { media: Scalars['String']['input']; series?: never; }
   |  { media?: never; series: Scalars['String']['input']; };
-
-export type MetadataFetchRecordModel = {
-  __typename?: 'MetadataFetchRecordModel';
-  acceptedMatchCandidate?: Maybe<Scalars['JSON']['output']>;
-  addedAt: Scalars['DateTime']['output'];
-  id: Scalars['Int']['output'];
-  matchCandidates?: Maybe<Scalars['JSON']['output']>;
-  mediaId?: Maybe<Scalars['String']['output']>;
-  seriesId?: Maybe<Scalars['String']['output']>;
-  status: MetadataFetchStatus;
-  updatedAt?: Maybe<Scalars['DateTime']['output']>;
-};
 
 export enum MetadataFetchStatus {
   AwaitingReview = 'AWAITING_REVIEW',
@@ -1652,10 +1656,12 @@ export enum MetadataResetImpact {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  /** Accept the top-ranked candidate for all pending metadata matches */
+  acceptAllPendingMatches: Scalars['Int']['output'];
   /** Accept a match candidate and apply it to media metadata */
-  acceptMediaMatch: MetadataFetchRecordModel;
+  acceptMediaMatch: MetadataFetchRecord;
   /** Accept a match candidate and apply it to the series metadata */
-  acceptSeriesMatch: MetadataFetchRecordModel;
+  acceptSeriesMatch: MetadataFetchRecord;
   addBooksToBookClubSchedule: BookClub;
   analyzeLibrary: Scalars['Boolean']['output'];
   analyzeMedia: Scalars['Boolean']['output'];
@@ -1776,10 +1782,12 @@ export type Mutation = {
   markMediaAsComplete?: Maybe<FinishedReadingSessionModel>;
   patchEmailDevice: RegisteredEmailDevice;
   processLibraryThumbnails: Scalars['Boolean']['output'];
+  /** Reject all pending metadata matches, setting their status to NoMatch */
+  rejectAllPendingMatches: Scalars['Int']['output'];
   /** Reject the current match candidates for a media item */
-  rejectMediaMatch: MetadataFetchRecordModel;
+  rejectMediaMatch: MetadataFetchRecord;
   /** Reject the current match candidates for a series */
-  rejectSeriesMatch: MetadataFetchRecordModel;
+  rejectSeriesMatch: MetadataFetchRecord;
   /** Removes a member from the book club */
   removeBookClubMember: BookClubMember;
   resetLibraryMetadata: Library;
@@ -1883,6 +1891,12 @@ export type Mutation = {
    * This is used to inform the UI of the last library which was visited by the user
    */
   visitLibrary: Library;
+};
+
+
+export type MutationAcceptAllPendingMatchesArgs = {
+  excludeFields?: InputMaybe<Array<MetadataField>>;
+  strategy?: InputMaybe<MergeStrategy>;
 };
 
 
@@ -2778,14 +2792,14 @@ export type Query = {
   mediaCount: Scalars['Int']['output'];
   mediaDiskUsage: Scalars['Int']['output'];
   mediaMetadataOverview: MediaMetadataOverview;
-  metadataFetchRecord?: Maybe<MetadataFetchRecordModel>;
+  metadataFetchRecord?: Maybe<MetadataFetchRecord>;
   metadataProviderConfigById?: Maybe<MetadataProviderConfigModel>;
   metadataProviderConfigs: Array<MetadataProviderConfigModel>;
   numberOfLibraries: Scalars['Int']['output'];
   numberOfSeries: Scalars['Int']['output'];
   onDeck: PaginatedMediaResponse;
-  /** Return all metadata fetch statuses that are awaiting user review. */
-  pendingMetadataMatches: Array<MetadataFetchRecordModel>;
+  /** Return all metadata fetch records that are awaiting user review. */
+  pendingMetadataMatches: Array<MetadataFetchRecord>;
   /**
    * Retrieves a reading list by ID for the current user.
    *
@@ -4596,6 +4610,77 @@ export type LibrarySeriesAlphabetQueryVariables = Exact<{
 
 export type LibrarySeriesAlphabetQuery = { __typename?: 'Query', libraryById?: { __typename?: 'Library', seriesAlphabet: any } | null };
 
+export type PendingMatchRecordFragment = { __typename?: 'MetadataFetchRecord', id: number, status: MetadataFetchStatus, mediaId?: string | null, seriesId?: string | null, addedAt: any, updatedAt?: any | null, matchCandidates: Array<{ __typename?: 'MatchCandidate', provider: string, externalId: string, confidence: number, metadata: { __typename: 'ExternalMediaMetadata', title?: string | null, seriesName?: string | null, seriesExternalId?: string | null, summary?: string | null, pageCount?: number | null, number?: number | null, day?: number | null, month?: number | null, year?: number | null, genres?: Array<string> | null, tags?: Array<string> | null, isbn?: string | null, isbn13?: string | null, writers?: Array<string> | null, artists?: Array<string> | null, colorists?: Array<string> | null, letterers?: Array<string> | null, coverArtists?: Array<string> | null } | { __typename: 'ExternalSeriesMetadata', alternativeTitles: Array<string>, summary?: string | null, volumeCount?: number | null, coverUrl?: string | null, status?: PublicationStatus | null, year?: number | null, endYear?: number | null, genres?: Array<string> | null, tags?: Array<string> | null, authors?: Array<string> | null, ageRating?: string | null, publisher?: string | null, seriesTitle: string }, confidenceFactors: Array<{ __typename?: 'ConfidenceFactor', factor: string, weight: number, matched: boolean }> }>, media?: { __typename?: 'Media', id: string, resolvedName: string, metadata?: { __typename?: 'MediaMetadata', title?: string | null, summary?: string | null, genres: Array<string>, writers: Array<string>, colorists: Array<string>, letterers: Array<string>, coverArtists: Array<string>, publisher?: string | null, year?: number | null, month?: number | null, day?: number | null, pageCount?: number | null, identifierIsbn?: string | null } | null } | null, series?: { __typename?: 'Series', id: string, resolvedName: string, metadata?: { __typename?: 'SeriesMetadata', title?: string | null, summary?: string | null, genres: Array<string>, writers: Array<string>, publisher?: string | null, year?: number | null, status?: string | null, ageRating?: number | null, volume?: number | null } | null } | null } & { ' $fragmentName'?: 'PendingMatchRecordFragment' };
+
+export type PendingMetadataMatchesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type PendingMetadataMatchesQuery = { __typename?: 'Query', pendingMetadataMatches: Array<(
+    { __typename?: 'MetadataFetchRecord' }
+    & { ' $fragmentRefs'?: { 'PendingMatchRecordFragment': PendingMatchRecordFragment } }
+  )> };
+
+export type AcceptAllPendingMatchesMutationVariables = Exact<{
+  strategy?: InputMaybe<MergeStrategy>;
+  excludeFields?: InputMaybe<Array<MetadataField> | MetadataField>;
+}>;
+
+
+export type AcceptAllPendingMatchesMutation = { __typename?: 'Mutation', acceptAllPendingMatches: number };
+
+export type RejectAllPendingMatchesMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type RejectAllPendingMatchesMutation = { __typename?: 'Mutation', rejectAllPendingMatches: number };
+
+export type AcceptMediaMatchMutationVariables = Exact<{
+  mediaId: Scalars['ID']['input'];
+  candidateIndex: Scalars['Int']['input'];
+  strategy?: InputMaybe<MergeStrategy>;
+  excludeFields?: InputMaybe<Array<MetadataField> | MetadataField>;
+}>;
+
+
+export type AcceptMediaMatchMutation = { __typename?: 'Mutation', acceptMediaMatch: (
+    { __typename?: 'MetadataFetchRecord' }
+    & { ' $fragmentRefs'?: { 'PendingMatchRecordFragment': PendingMatchRecordFragment } }
+  ) };
+
+export type AcceptSeriesMatchMutationVariables = Exact<{
+  seriesId: Scalars['ID']['input'];
+  candidateIndex: Scalars['Int']['input'];
+  strategy?: InputMaybe<MergeStrategy>;
+  excludeFields?: InputMaybe<Array<MetadataField> | MetadataField>;
+}>;
+
+
+export type AcceptSeriesMatchMutation = { __typename?: 'Mutation', acceptSeriesMatch: (
+    { __typename?: 'MetadataFetchRecord' }
+    & { ' $fragmentRefs'?: { 'PendingMatchRecordFragment': PendingMatchRecordFragment } }
+  ) };
+
+export type RejectMediaMatchMutationVariables = Exact<{
+  mediaId: Scalars['ID']['input'];
+  candidateIndex: Scalars['Int']['input'];
+}>;
+
+
+export type RejectMediaMatchMutation = { __typename?: 'Mutation', rejectMediaMatch: (
+    { __typename?: 'MetadataFetchRecord' }
+    & { ' $fragmentRefs'?: { 'PendingMatchRecordFragment': PendingMatchRecordFragment } }
+  ) };
+
+export type RejectSeriesMatchMutationVariables = Exact<{
+  seriesId: Scalars['ID']['input'];
+  candidateIndex: Scalars['Int']['input'];
+}>;
+
+
+export type RejectSeriesMatchMutation = { __typename?: 'Mutation', rejectSeriesMatch: (
+    { __typename?: 'MetadataFetchRecord' }
+    & { ' $fragmentRefs'?: { 'PendingMatchRecordFragment': PendingMatchRecordFragment } }
+  ) };
+
 export type SideBarQueryQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -6022,6 +6107,98 @@ export const MediaMetadataEditorFragmentDoc = new TypedDocumentString(`
   year
 }
     `, {"fragmentName":"MediaMetadataEditor"}) as unknown as TypedDocumentString<MediaMetadataEditorFragment, unknown>;
+export const PendingMatchRecordFragmentDoc = new TypedDocumentString(`
+    fragment PendingMatchRecord on MetadataFetchRecord {
+  id
+  status
+  mediaId
+  seriesId
+  matchCandidates {
+    provider
+    externalId
+    metadata {
+      __typename
+      ... on ExternalMediaMetadata {
+        title
+        seriesName
+        seriesExternalId
+        summary
+        pageCount
+        number
+        day
+        month
+        year
+        genres
+        tags
+        isbn
+        isbn13
+        writers
+        artists
+        colorists
+        letterers
+        coverArtists
+      }
+      ... on ExternalSeriesMetadata {
+        seriesTitle: title
+        alternativeTitles
+        summary
+        volumeCount
+        coverUrl
+        status
+        year
+        endYear
+        genres
+        tags
+        authors
+        ageRating
+        publisher
+      }
+    }
+    confidence
+    confidenceFactors {
+      factor
+      weight
+      matched
+    }
+  }
+  addedAt
+  updatedAt
+  media {
+    id
+    resolvedName
+    metadata {
+      title
+      summary
+      genres
+      writers
+      colorists
+      letterers
+      coverArtists
+      publisher
+      year
+      month
+      day
+      pageCount
+      identifierIsbn
+    }
+  }
+  series {
+    id
+    resolvedName
+    metadata {
+      title
+      summary
+      genres
+      writers
+      publisher
+      year
+      status
+      ageRating
+      volume
+    }
+  }
+}
+    `, {"fragmentName":"PendingMatchRecord"}) as unknown as TypedDocumentString<PendingMatchRecordFragment, unknown>;
 export const SeriesMetadataEditorFragmentDoc = new TypedDocumentString(`
     fragment SeriesMetadataEditor on SeriesMetadata {
   ageRating
@@ -7907,6 +8084,506 @@ export const LibrarySeriesAlphabetDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<LibrarySeriesAlphabetQuery, LibrarySeriesAlphabetQueryVariables>;
+export const PendingMetadataMatchesDocument = new TypedDocumentString(`
+    query PendingMetadataMatches {
+  pendingMetadataMatches {
+    ...PendingMatchRecord
+  }
+}
+    fragment PendingMatchRecord on MetadataFetchRecord {
+  id
+  status
+  mediaId
+  seriesId
+  matchCandidates {
+    provider
+    externalId
+    metadata {
+      __typename
+      ... on ExternalMediaMetadata {
+        title
+        seriesName
+        seriesExternalId
+        summary
+        pageCount
+        number
+        day
+        month
+        year
+        genres
+        tags
+        isbn
+        isbn13
+        writers
+        artists
+        colorists
+        letterers
+        coverArtists
+      }
+      ... on ExternalSeriesMetadata {
+        seriesTitle: title
+        alternativeTitles
+        summary
+        volumeCount
+        coverUrl
+        status
+        year
+        endYear
+        genres
+        tags
+        authors
+        ageRating
+        publisher
+      }
+    }
+    confidence
+    confidenceFactors {
+      factor
+      weight
+      matched
+    }
+  }
+  addedAt
+  updatedAt
+  media {
+    id
+    resolvedName
+    metadata {
+      title
+      summary
+      genres
+      writers
+      colorists
+      letterers
+      coverArtists
+      publisher
+      year
+      month
+      day
+      pageCount
+      identifierIsbn
+    }
+  }
+  series {
+    id
+    resolvedName
+    metadata {
+      title
+      summary
+      genres
+      writers
+      publisher
+      year
+      status
+      ageRating
+      volume
+    }
+  }
+}`) as unknown as TypedDocumentString<PendingMetadataMatchesQuery, PendingMetadataMatchesQueryVariables>;
+export const AcceptAllPendingMatchesDocument = new TypedDocumentString(`
+    mutation AcceptAllPendingMatches($strategy: MergeStrategy, $excludeFields: [MetadataField!]) {
+  acceptAllPendingMatches(strategy: $strategy, excludeFields: $excludeFields)
+}
+    `) as unknown as TypedDocumentString<AcceptAllPendingMatchesMutation, AcceptAllPendingMatchesMutationVariables>;
+export const RejectAllPendingMatchesDocument = new TypedDocumentString(`
+    mutation RejectAllPendingMatches {
+  rejectAllPendingMatches
+}
+    `) as unknown as TypedDocumentString<RejectAllPendingMatchesMutation, RejectAllPendingMatchesMutationVariables>;
+export const AcceptMediaMatchDocument = new TypedDocumentString(`
+    mutation AcceptMediaMatch($mediaId: ID!, $candidateIndex: Int!, $strategy: MergeStrategy, $excludeFields: [MetadataField!]) {
+  acceptMediaMatch(
+    mediaId: $mediaId
+    candidateIndex: $candidateIndex
+    strategy: $strategy
+    excludeFields: $excludeFields
+  ) {
+    ...PendingMatchRecord
+  }
+}
+    fragment PendingMatchRecord on MetadataFetchRecord {
+  id
+  status
+  mediaId
+  seriesId
+  matchCandidates {
+    provider
+    externalId
+    metadata {
+      __typename
+      ... on ExternalMediaMetadata {
+        title
+        seriesName
+        seriesExternalId
+        summary
+        pageCount
+        number
+        day
+        month
+        year
+        genres
+        tags
+        isbn
+        isbn13
+        writers
+        artists
+        colorists
+        letterers
+        coverArtists
+      }
+      ... on ExternalSeriesMetadata {
+        seriesTitle: title
+        alternativeTitles
+        summary
+        volumeCount
+        coverUrl
+        status
+        year
+        endYear
+        genres
+        tags
+        authors
+        ageRating
+        publisher
+      }
+    }
+    confidence
+    confidenceFactors {
+      factor
+      weight
+      matched
+    }
+  }
+  addedAt
+  updatedAt
+  media {
+    id
+    resolvedName
+    metadata {
+      title
+      summary
+      genres
+      writers
+      colorists
+      letterers
+      coverArtists
+      publisher
+      year
+      month
+      day
+      pageCount
+      identifierIsbn
+    }
+  }
+  series {
+    id
+    resolvedName
+    metadata {
+      title
+      summary
+      genres
+      writers
+      publisher
+      year
+      status
+      ageRating
+      volume
+    }
+  }
+}`) as unknown as TypedDocumentString<AcceptMediaMatchMutation, AcceptMediaMatchMutationVariables>;
+export const AcceptSeriesMatchDocument = new TypedDocumentString(`
+    mutation AcceptSeriesMatch($seriesId: ID!, $candidateIndex: Int!, $strategy: MergeStrategy, $excludeFields: [MetadataField!]) {
+  acceptSeriesMatch(
+    seriesId: $seriesId
+    candidateIndex: $candidateIndex
+    strategy: $strategy
+    excludeFields: $excludeFields
+  ) {
+    ...PendingMatchRecord
+  }
+}
+    fragment PendingMatchRecord on MetadataFetchRecord {
+  id
+  status
+  mediaId
+  seriesId
+  matchCandidates {
+    provider
+    externalId
+    metadata {
+      __typename
+      ... on ExternalMediaMetadata {
+        title
+        seriesName
+        seriesExternalId
+        summary
+        pageCount
+        number
+        day
+        month
+        year
+        genres
+        tags
+        isbn
+        isbn13
+        writers
+        artists
+        colorists
+        letterers
+        coverArtists
+      }
+      ... on ExternalSeriesMetadata {
+        seriesTitle: title
+        alternativeTitles
+        summary
+        volumeCount
+        coverUrl
+        status
+        year
+        endYear
+        genres
+        tags
+        authors
+        ageRating
+        publisher
+      }
+    }
+    confidence
+    confidenceFactors {
+      factor
+      weight
+      matched
+    }
+  }
+  addedAt
+  updatedAt
+  media {
+    id
+    resolvedName
+    metadata {
+      title
+      summary
+      genres
+      writers
+      colorists
+      letterers
+      coverArtists
+      publisher
+      year
+      month
+      day
+      pageCount
+      identifierIsbn
+    }
+  }
+  series {
+    id
+    resolvedName
+    metadata {
+      title
+      summary
+      genres
+      writers
+      publisher
+      year
+      status
+      ageRating
+      volume
+    }
+  }
+}`) as unknown as TypedDocumentString<AcceptSeriesMatchMutation, AcceptSeriesMatchMutationVariables>;
+export const RejectMediaMatchDocument = new TypedDocumentString(`
+    mutation RejectMediaMatch($mediaId: ID!, $candidateIndex: Int!) {
+  rejectMediaMatch(mediaId: $mediaId, candidateIndex: $candidateIndex) {
+    ...PendingMatchRecord
+  }
+}
+    fragment PendingMatchRecord on MetadataFetchRecord {
+  id
+  status
+  mediaId
+  seriesId
+  matchCandidates {
+    provider
+    externalId
+    metadata {
+      __typename
+      ... on ExternalMediaMetadata {
+        title
+        seriesName
+        seriesExternalId
+        summary
+        pageCount
+        number
+        day
+        month
+        year
+        genres
+        tags
+        isbn
+        isbn13
+        writers
+        artists
+        colorists
+        letterers
+        coverArtists
+      }
+      ... on ExternalSeriesMetadata {
+        seriesTitle: title
+        alternativeTitles
+        summary
+        volumeCount
+        coverUrl
+        status
+        year
+        endYear
+        genres
+        tags
+        authors
+        ageRating
+        publisher
+      }
+    }
+    confidence
+    confidenceFactors {
+      factor
+      weight
+      matched
+    }
+  }
+  addedAt
+  updatedAt
+  media {
+    id
+    resolvedName
+    metadata {
+      title
+      summary
+      genres
+      writers
+      colorists
+      letterers
+      coverArtists
+      publisher
+      year
+      month
+      day
+      pageCount
+      identifierIsbn
+    }
+  }
+  series {
+    id
+    resolvedName
+    metadata {
+      title
+      summary
+      genres
+      writers
+      publisher
+      year
+      status
+      ageRating
+      volume
+    }
+  }
+}`) as unknown as TypedDocumentString<RejectMediaMatchMutation, RejectMediaMatchMutationVariables>;
+export const RejectSeriesMatchDocument = new TypedDocumentString(`
+    mutation RejectSeriesMatch($seriesId: ID!, $candidateIndex: Int!) {
+  rejectSeriesMatch(seriesId: $seriesId, candidateIndex: $candidateIndex) {
+    ...PendingMatchRecord
+  }
+}
+    fragment PendingMatchRecord on MetadataFetchRecord {
+  id
+  status
+  mediaId
+  seriesId
+  matchCandidates {
+    provider
+    externalId
+    metadata {
+      __typename
+      ... on ExternalMediaMetadata {
+        title
+        seriesName
+        seriesExternalId
+        summary
+        pageCount
+        number
+        day
+        month
+        year
+        genres
+        tags
+        isbn
+        isbn13
+        writers
+        artists
+        colorists
+        letterers
+        coverArtists
+      }
+      ... on ExternalSeriesMetadata {
+        seriesTitle: title
+        alternativeTitles
+        summary
+        volumeCount
+        coverUrl
+        status
+        year
+        endYear
+        genres
+        tags
+        authors
+        ageRating
+        publisher
+      }
+    }
+    confidence
+    confidenceFactors {
+      factor
+      weight
+      matched
+    }
+  }
+  addedAt
+  updatedAt
+  media {
+    id
+    resolvedName
+    metadata {
+      title
+      summary
+      genres
+      writers
+      colorists
+      letterers
+      coverArtists
+      publisher
+      year
+      month
+      day
+      pageCount
+      identifierIsbn
+    }
+  }
+  series {
+    id
+    resolvedName
+    metadata {
+      title
+      summary
+      genres
+      writers
+      publisher
+      year
+      status
+      ageRating
+      volume
+    }
+  }
+}`) as unknown as TypedDocumentString<RejectSeriesMatchMutation, RejectSeriesMatchMutationVariables>;
 export const SideBarQueryDocument = new TypedDocumentString(`
     query SideBarQuery {
   me {

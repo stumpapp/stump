@@ -6,6 +6,7 @@ use models::{
 	entity::{media_metadata, metadata_fetch_record, series_metadata},
 	shared::enums::MetadataFetchStatus,
 };
+use rust_decimal::prelude::FromPrimitive;
 use sea_orm::{prelude::*, IntoActiveModel, Set};
 use serde_json::Value as JsonValue;
 
@@ -148,7 +149,10 @@ pub fn find_auto_apply_candidate(
 				.as_ref()
 				.and_then(|v| serde_json::from_value::<AutoApplyConfig>(v.clone()).ok())
 			{
-				if auto_config.enabled && candidate.confidence >= auto_config.threshold {
+				let confidence =
+					Decimal::from_f32(candidate.confidence).unwrap_or(Decimal::ZERO);
+
+				if auto_config.enabled && confidence >= auto_config.threshold {
 					return Some((candidate.clone(), auto_config));
 				}
 			}

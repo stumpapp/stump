@@ -1,4 +1,5 @@
 use async_graphql::Enum;
+use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 
 use crate::types::MetadataField;
@@ -23,7 +24,8 @@ pub struct AutoApplyConfig {
 	/// Whether auto-apply is enabled
 	pub enabled: bool,
 	/// Minimum confidence score (0.0–1.0) for a match to be auto-applied
-	pub threshold: f32,
+	#[serde(with = "rust_decimal::serde::float")]
+	pub threshold: Decimal,
 	/// The merge strategy to use when applying external metadata
 	pub strategy: MergeStrategy,
 	/// Fields to skip during auto-apply (regardless of strategy)
@@ -35,7 +37,7 @@ impl Default for AutoApplyConfig {
 	fn default() -> Self {
 		Self {
 			enabled: false,
-			threshold: 0.95,
+			threshold: Decimal::new(95, 2),
 			strategy: MergeStrategy::FillGaps,
 			exclude_fields: Vec::new(),
 		}
@@ -50,7 +52,7 @@ mod tests {
 	fn auto_apply_config_serialization() {
 		let config = AutoApplyConfig {
 			enabled: true,
-			threshold: 0.80,
+			threshold: Decimal::new(80, 2),
 			strategy: MergeStrategy::FillAndMergeLists,
 			exclude_fields: vec![MetadataField::Cover, MetadataField::Tags],
 		};
@@ -69,7 +71,7 @@ mod tests {
 		let config: AutoApplyConfig = serde_json::from_str(json).unwrap();
 
 		assert!(config.enabled);
-		assert!((config.threshold - 0.80).abs() < f32::EPSILON);
+		assert!((config.threshold - Decimal::new(80, 2)).abs() < Decimal::new(1, 2));
 		assert_eq!(config.strategy, MergeStrategy::FillAndMergeLists);
 		assert_eq!(config.exclude_fields.len(), 2);
 		assert!(config.exclude_fields.contains(&MetadataField::Cover));

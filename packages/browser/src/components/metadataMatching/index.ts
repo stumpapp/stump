@@ -1,1 +1,9 @@
-// TODO: Build out metadata matching components and context/stores to support complex flows
+export { default as PendingMatchesSection } from './PendingMatchesSection'
+export { ConfidenceBadge } from './reviewDialog/ConfidenceBadge'
+export { FieldValue } from './reviewDialog/FieldValue'
+export { MatchFieldRow } from './reviewDialog/MatchFieldRow'
+export { MatchReviewDialog } from './reviewDialog/MatchReviewDialog'
+export type { FieldComparison, MatchRecord } from './types'
+export { resolveFieldValue } from './types'
+export { useMatchActions } from './useMatchActions'
+export { useMatchReviewStore } from './useMatchReviewStore'

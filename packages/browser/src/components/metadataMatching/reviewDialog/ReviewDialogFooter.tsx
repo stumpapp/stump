@@ -1,0 +1,76 @@
+import { Button, Dialog, NativeSelect, Text } from '@stump/components'
+import { MergeStrategy } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
+import { ArrowLeft, ArrowRight, Check, SkipForward, X } from 'lucide-react'
+
+import { useMatchActions } from '../useMatchActions'
+import { useMatchReviewStore } from '../useMatchReviewStore'
+
+const MERGE_STRATEGY_OPTIONS = [
+	{ label: 'Fill Gaps', value: MergeStrategy.FillGaps },
+	{ label: 'Prefer External', value: MergeStrategy.PreferExternal },
+	{ label: 'Fill & Merge Lists', value: MergeStrategy.FillAndMergeLists },
+]
+
+export function ReviewDialogFooter() {
+	const { t } = useLocaleContext()
+	const { records, currentRecordIndex, strategy, nextRecord, prevRecord, setStrategy } =
+		useMatchReviewStore()
+	const { accept, reject, skip, isPending, hasCandidate } = useMatchActions()
+
+	// TODO: I can't decide if I like or hate those icons
+	return (
+		<Dialog.Footer className="flex items-center justify-between">
+			<div className="flex items-center gap-4">
+				<div className="flex items-center gap-1">
+					<Button
+						size="icon"
+						variant="ghost"
+						className="h-7 w-7"
+						disabled={currentRecordIndex === 0}
+						onClick={prevRecord}
+					>
+						<ArrowLeft className="h-4 w-4" />
+					</Button>
+					<Text size="xs" variant="muted">
+						{currentRecordIndex + 1}/{records.length}
+					</Text>
+					<Button
+						size="icon"
+						variant="ghost"
+						className="h-7 w-7"
+						disabled={currentRecordIndex >= records.length - 1}
+						onClick={nextRecord}
+					>
+						<ArrowRight className="h-4 w-4" />
+					</Button>
+				</div>
+
+				<NativeSelect
+					options={MERGE_STRATEGY_OPTIONS}
+					value={strategy}
+					onChange={(e) => setStrategy(e.target.value as MergeStrategy)}
+					className="h-8 w-44 text-xs"
+				/>
+			</div>
+
+			<div className="flex items-center gap-2">
+				<Button variant="secondary" size="sm" onClick={skip} disabled={isPending}>
+					<SkipForward className="mr-1.5 h-3.5 w-3.5" />
+					{t(getKey('skip'))}
+				</Button>
+				<Button variant="danger" size="sm" onClick={reject} disabled={isPending || !hasCandidate}>
+					<X className="mr-1.5 h-3.5 w-3.5" />
+					{t(getKey('reject'))}
+				</Button>
+				<Button variant="primary" size="sm" onClick={accept} disabled={isPending || !hasCandidate}>
+					<Check className="mr-1.5 h-3.5 w-3.5" />
+					{t(getKey('accept'))}
+				</Button>
+			</div>
+		</Dialog.Footer>
+	)
+}
+
+const LOCALE_KEY = 'metadataMatching.reviewDialog.footer'
+const getKey = (key: string) => `${LOCALE_KEY}.${key}`

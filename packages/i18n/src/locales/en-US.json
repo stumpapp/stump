@@ -798,6 +798,59 @@
 			"description": "Add each addition on its own line"
 		}
 	},
+	"metadataMatching": {
+		"section": {
+			"heading": "Pending matches",
+			"description": "Review metadata matches fetched from external providers"
+		},
+		"confidenceBadge": {
+			"label": "confidence"
+		},
+		"includeField": "Include this field",
+		"excludeField": "Exclude this field",
+		"reviewDialog": {
+			"previewEditor": {
+				"noCandidates": "No candidates available for this record",
+				"noComparableFields": "No comparable fields found",
+				"headers": {
+					"field": "Field",
+					"current": "Current",
+					"external": "External",
+					"resolved": "Resolved"
+				},
+				"toolbar": {
+					"candidatePosition": "Candidate {{position}} of {{total}}",
+					"provider": "Provider"
+				}
+			},
+			"footer": {
+				"accept": "Accept",
+				"reject": "Reject",
+				"skip": "Skip"
+			}
+		},
+		"matchesTable": {
+			"columns": {
+				"entityName": "Name",
+				"entityType": "Type",
+				"candidateCount": "Candidates",
+				"topConfidence": "Top Confidence",
+				"addedAt": "Fetched"
+			},
+			"acceptAll": {
+				"label": "Accept all",
+				"failed": "Failed to accept all matches",
+				"success": "All pending matches accepted"
+			},
+			"rejectAll": {
+				"label": "Reject all",
+				"failed": "Failed to reject all matches",
+				"success": "All pending matches rejected"
+			},
+			"startReview": "Start review",
+			"nothingToReview": "No pending metadata matches to review"
+		}
+	},
 	"seriesOverviewScene": {
 		"buttons": {
 			"continueReading": "Continue Reading",
@@ -2291,7 +2344,9 @@
 		"scan": "Scan",
 		"somethingWentWrong": "Something went wrong",
 		"back": "Back",
-		"continue": "Continue"
+		"continue": "Continue",
+		"book": "Book",
+		"series": "Series"
 	},
 	"userPermissions": {
 		"ACCESS_API_KEYS": {

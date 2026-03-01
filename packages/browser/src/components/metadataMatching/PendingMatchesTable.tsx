@@ -1,0 +1,356 @@
+import { useGraphQLMutation, useSuspenseGraphQL } from '@stump/client'
+import { Badge, Button, Card, Text } from '@stump/components'
+import { graphql, useFragment } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
+import { useQueryClient } from '@tanstack/react-query'
+import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
+import { Eye } from 'lucide-react'
+import { useCallback, useMemo } from 'react'
+import { toast } from 'sonner'
+
+import Table from '@/components/table/Table'
+
+import { ConfidenceBadge } from './reviewDialog/ConfidenceBadge'
+import { MatchRecord } from './types'
+import { useMatchReviewStore } from './useMatchReviewStore'
+
+// TODO: a CHONKER fragment, should prolly break it up
+
+const fragment = graphql(`
+	fragment PendingMatchRecord on MetadataFetchRecord {
+		id
+		status
+		mediaId
+		seriesId
+		matchCandidates {
+			provider
+			externalId
+			metadata {
+				__typename
+				... on ExternalMediaMetadata {
+					title
+					seriesName
+					seriesExternalId
+					summary
+					pageCount
+					number
+					day
+					month
+					year
+					genres
+					tags
+					isbn
+					isbn13
+					writers
+					artists
+					colorists
+					letterers
+					coverArtists
+				}
+				... on ExternalSeriesMetadata {
+					seriesTitle: title
+					alternativeTitles
+					summary
+					volumeCount
+					coverUrl
+					status
+					year
+					endYear
+					genres
+					tags
+					authors
+					ageRating
+					publisher
+				}
+			}
+			confidence
+			confidenceFactors {
+				factor
+				weight
+				matched
+			}
+		}
+		addedAt
+		updatedAt
+		media {
+			id
+			resolvedName
+			metadata {
+				title
+				summary
+				genres
+				writers
+				colorists
+				letterers
+				coverArtists
+				publisher
+				year
+				month
+				day
+				pageCount
+				identifierIsbn
+			}
+		}
+		series {
+			id
+			resolvedName
+			metadata {
+				title
+				summary
+				genres
+				writers
+				publisher
+				year
+				status
+				ageRating
+				volume
+			}
+		}
+	}
+`)
+
+const pendingMatchesQuery = graphql(`
+	query PendingMetadataMatches {
+		pendingMetadataMatches {
+			...PendingMatchRecord
+		}
+	}
+`)
+
+const acceptAllPendingMatchesMutation = graphql(`
+	mutation AcceptAllPendingMatches($strategy: MergeStrategy, $excludeFields: [MetadataField!]) {
+		acceptAllPendingMatches(strategy: $strategy, excludeFields: $excludeFields)
+	}
+`)
+
+const rejectAllPendingMatchesMutation = graphql(`
+	mutation RejectAllPendingMatches {
+		rejectAllPendingMatches
+	}
+`)
+
+type PendingMatchRow = {
+	id: number
+	entityName: string
+	entityType: 'Media' | 'Series'
+	entityId: string
+	candidateCount: number
+	topConfidence: number | null
+	addedAt: string
+	record: MatchRecord
+}
+
+const columnHelper = createColumnHelper<PendingMatchRow>()
+
+function ReviewButton({ record }: { record: MatchRecord }) {
+	const open = useMatchReviewStore((s) => s.open)
+	return (
+		<div className="inline-flex items-end md:w-2">
+			<Button
+				size="icon"
+				variant="ghost"
+				className="h-7 w-7 shrink-0"
+				title="Review match"
+				onClick={() => open([record])}
+			>
+				<Eye className="h-4 w-4" />
+			</Button>
+		</div>
+	)
+}
+
+export function PendingMatchesTable() {
+	const { t } = useLocaleContext()
+	const { data } = useSuspenseGraphQL(pendingMatchesQuery, ['pendingMetadataMatches'])
+
+	const records = useFragment(fragment, data.pendingMetadataMatches)
+	const open = useMatchReviewStore((s) => s.open)
+	const client = useQueryClient()
+
+	const rows: PendingMatchRow[] = useMemo(
+		() =>
+			records.map((record) => {
+				const candidates = record.matchCandidates
+				const topCandidate = candidates[0]
+				return {
+					id: record.id,
+					entityName: record.media?.resolvedName ?? record.series?.resolvedName ?? 'Unknown',
+					entityType: record.mediaId ? 'Media' : 'Series',
+					entityId: record.mediaId ?? record.seriesId ?? '',
+					candidateCount: candidates.length,
+					topConfidence: topCandidate?.confidence ?? null,
+					addedAt: record.addedAt,
+					record,
+				}
+			}),
+		[records],
+	)
+
+	const columns = useMemo(
+		() =>
+			createColumns(t, [
+				columnHelper.display({
+					cell: ({ row }) => <ReviewButton record={row.original.record} />,
+					id: 'actions',
+					size: 28,
+				}),
+			]),
+		[t],
+	)
+
+	const { mutate: acceptAll, isPending: isAcceptingAll } = useGraphQLMutation(
+		acceptAllPendingMatchesMutation,
+		{
+			onSuccess: () => {
+				toast.success('All pending matches accepted')
+				client.invalidateQueries({
+					predicate: ({ queryKey }) =>
+						queryKey.some((key) => typeof key === 'string' && key === 'pendingMetadataMatches'),
+				})
+			},
+			onError: (error) =>
+				toast.error(t(getKey('acceptAll.failed')), {
+					description: error instanceof Error ? error.message : undefined,
+				}),
+		},
+	)
+
+	const { mutate: rejectAll, isPending: isRejectingAll } = useGraphQLMutation(
+		rejectAllPendingMatchesMutation,
+		{
+			onSuccess: () => {
+				toast.success(t(getKey('rejectAll.success')))
+				client.invalidateQueries({
+					predicate: ({ queryKey }) =>
+						queryKey.some((key) => typeof key === 'string' && key === 'pendingMetadataMatches'),
+				})
+			},
+			onError: (error) =>
+				toast.error(t(getKey('rejectAll.failed')), {
+					description: error instanceof Error ? error.message : undefined,
+				}),
+		},
+	)
+
+	const handleReviewAll = useCallback(() => {
+		if (records.length > 0) {
+			open(records, 0)
+		}
+	}, [records, open])
+
+	if (rows.length === 0) {
+		return (
+			<div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-edge p-8">
+				<Text size="sm" variant="muted">
+					{t(getKey('nothingToReview'))}
+				</Text>
+			</div>
+		)
+	}
+
+	return (
+		<div className="flex flex-col gap-4">
+			<div className="flex items-center gap-2">
+				<Button
+					variant="secondary"
+					size="sm"
+					disabled={isAcceptingAll}
+					onClick={() => acceptAll({})}
+				>
+					{t(getKey('acceptAll.label'))}
+				</Button>
+				<Button
+					variant="danger"
+					size="sm"
+					disabled={isRejectingAll}
+					onClick={() => rejectAll(undefined as never)}
+				>
+					{t(getKey('rejectAll.label'))}
+				</Button>
+
+				<div className="flex-1" />
+
+				<Button variant="primary" size="sm" onClick={handleReviewAll}>
+					{t(getKey('startReview'))}
+				</Button>
+			</div>
+
+			<Card>
+				<Table
+					sortable
+					columns={columns}
+					options={{
+						state: {
+							columnPinning: {
+								right: ['actions'],
+							},
+						},
+					}}
+					data={rows}
+					fullWidth
+					cellClassName="bg-background"
+				/>
+			</Card>
+		</div>
+	)
+}
+
+const LOCALE_KEY = 'metadataMatching.matchesTable'
+const getKey = (key: string) => `${LOCALE_KEY}.${key}`
+
+const createColumns = (
+	translate: (key: string) => string,
+	dynamicColumns: ColumnDef<PendingMatchRow>[],
+) =>
+	[
+		columnHelper.accessor('entityName', {
+			cell: ({ getValue }) => <Text size="sm">{getValue()}</Text>,
+			header: translate(getKey('columns.entityName')),
+			size: 300,
+		}),
+		columnHelper.accessor('entityType', {
+			cell: ({ getValue }) => (
+				<Badge variant="default" size="xs">
+					{getValue()}
+				</Badge>
+			),
+			header: translate(getKey('columns.entityType')),
+			size: 80,
+		}),
+		columnHelper.accessor('candidateCount', {
+			cell: ({ getValue }) => {
+				const count = getValue()
+				return (
+					<Badge variant={count > 0 ? 'primary' : 'warning'} size="xs">
+						{count}
+					</Badge>
+				)
+			},
+			header: translate(getKey('columns.candidateCount')),
+			size: 100,
+		}),
+		columnHelper.accessor('topConfidence', {
+			cell: ({ getValue }) => {
+				const confidence = getValue()
+				if (confidence == null)
+					return (
+						<Text size="sm" variant="muted">
+							—
+						</Text>
+					)
+				return <ConfidenceBadge confidence={confidence} />
+			},
+			header: translate(getKey('columns.topConfidence')),
+			size: 120,
+		}),
+		columnHelper.accessor('addedAt', {
+			cell: ({ getValue }) => (
+				<Text size="sm" variant="muted">
+					{new Date(getValue()).toLocaleDateString()}
+				</Text>
+			),
+			header: translate(getKey('columns.addedAt')),
+			size: 150,
+		}),
+		...dynamicColumns,
+	] as ColumnDef<PendingMatchRow>[]

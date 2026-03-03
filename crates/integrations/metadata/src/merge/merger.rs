@@ -1,6 +1,9 @@
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
-use crate::{AutoApplyConfig, MergeStrategy, MetadataField};
+use serde::de::DeserializeOwned;
+use serde_json::Value as JsonValue;
+
+use crate::{AutoApplyConfig, MergeStrategy, MetadataField, MetadataFieldOverride};
 
 // Note: This is a little verbose, but I think its fine. I started to think through a macro route and quickly said fuck that lol
 
@@ -8,6 +11,7 @@ pub struct FieldMerger {
 	strategy: MergeStrategy,
 	locked_fields: HashSet<MetadataField>,
 	exclude_fields: HashSet<MetadataField>,
+	overrides: HashMap<MetadataField, JsonValue>,
 }
 
 impl FieldMerger {
@@ -20,6 +24,21 @@ impl FieldMerger {
 			strategy,
 			locked_fields: locked_fields.into_iter().collect(),
 			exclude_fields: exclude_fields.into_iter().collect(),
+			overrides: HashMap::new(),
+		}
+	}
+
+	pub fn with_overrides(
+		strategy: MergeStrategy,
+		locked_fields: Vec<MetadataField>,
+		exclude_fields: Vec<MetadataField>,
+		overrides: Vec<MetadataFieldOverride>,
+	) -> Self {
+		Self {
+			strategy,
+			locked_fields: locked_fields.into_iter().collect(),
+			exclude_fields: exclude_fields.into_iter().collect(),
+			overrides: overrides.into_iter().map(|o| (o.field, o.value)).collect(),
 		}
 	}
 
@@ -36,6 +55,57 @@ impl FieldMerger {
 
 	fn can_write(&self, field: MetadataField) -> bool {
 		!self.locked_fields.contains(&field) && !self.exclude_fields.contains(&field)
+	}
+
+	pub fn has_override(&self, field: MetadataField) -> bool {
+		self.can_write(field) && self.overrides.contains_key(&field)
+	}
+
+	/// Apply a user-provided override for an optional scalar field:
+	///
+	/// - `Some(Some(value))` if the override should be applied with the given value
+	/// - `Some(None)` if the override should clear the field
+	/// - `None` if there is no override for this field
+	pub fn apply_scalar_override<T: DeserializeOwned>(
+		&self,
+		field: MetadataField,
+	) -> Option<Option<T>> {
+		if !self.can_write(field) {
+			return None;
+		}
+		match self.overrides.get(&field) {
+			Some(v) if v.is_null() => Some(None),
+			Some(v) => serde_json::from_value::<T>(v.clone()).ok().map(Some),
+			None => None,
+		}
+	}
+
+	/// Apply a user-provided override for a comma-separated list field.
+	/// The override JSON value should be an array of strings.
+	///
+	/// - `Some(Some(joined))` if the override should be applied with the given value
+	/// - `Some(None)` if the override should clear the field
+	/// - `None` if there is no override for this field
+	pub fn apply_comma_list_override(
+		&self,
+		field: MetadataField,
+	) -> Option<Option<String>> {
+		if !self.can_write(field) {
+			return None;
+		}
+		match self.overrides.get(&field) {
+			Some(v) if v.is_null() => Some(None),
+			Some(v) => {
+				let items: Vec<String> =
+					serde_json::from_value(v.clone()).unwrap_or_default();
+				if items.is_empty() {
+					Some(None)
+				} else {
+					Some(Some(items.join(", ")))
+				}
+			},
+			None => None,
+		}
 	}
 
 	/// Merge a scalar Option<T> value:

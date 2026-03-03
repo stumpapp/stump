@@ -5,7 +5,9 @@ use crate::{
 	object::{media::Media, metadata_fetch_record::MetadataFetchRecord},
 };
 use async_graphql::{Context, Object, Result, ID};
-use metadata_integrations::{MatchCandidate, MergeStrategy, MetadataField, SearchQuery};
+use metadata_integrations::{
+	MatchCandidate, MergeStrategy, MetadataField, MetadataFieldOverride, SearchQuery,
+};
 use models::{
 	entity::{media, metadata_fetch_record},
 	shared::enums::{MetadataFetchStatus, UserPermission},
@@ -118,10 +120,12 @@ impl MediaMetadataMutation {
 		candidate_index: u32,
 		strategy: Option<MergeStrategy>,
 		exclude_fields: Option<Vec<MetadataField>>,
+		overrides: Option<Vec<MetadataFieldOverride>>,
 	) -> Result<MetadataFetchRecord> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 		let strategy = strategy.unwrap_or(MergeStrategy::FillGaps);
 		let exclude_fields = exclude_fields.unwrap_or_default();
+		let overrides = overrides.unwrap_or_default();
 
 		let status = metadata_fetch_record::Entity::find()
 			.filter(metadata_fetch_record::Column::MediaId.eq(media_id.to_string()))
@@ -152,6 +156,7 @@ impl MediaMetadataMutation {
 			candidate,
 			strategy,
 			exclude_fields,
+			overrides,
 		)
 		.await?;
 

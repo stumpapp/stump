@@ -171,7 +171,11 @@ export function resolveFieldValue(
 	candidateValue: unknown,
 	strategy: MergeStrategy,
 	excluded: boolean,
+	override?: unknown,
 ): unknown {
+	// If the user has explicitly overridden this field, use their value
+	if (override !== undefined) return override
+
 	if (excluded) return currentValue
 
 	const currentEmpty = isEmpty(currentValue)

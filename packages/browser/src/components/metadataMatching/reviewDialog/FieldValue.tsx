@@ -32,7 +32,7 @@ export function FieldValue({ value, highlight, compareWith }: Props) {
 				{value.map((item, i) => {
 					const isNew = currentSet != null && !currentSet.has(String(item))
 					return (
-						<Badge key={i} variant={isNew ? 'primary' : 'default'} size="xs">
+						<Badge key={i} variant={isNew ? 'primary' : 'default'} size="sm">
 							{String(item)}
 						</Badge>
 					)
@@ -48,7 +48,7 @@ export function FieldValue({ value, highlight, compareWith }: Props) {
 		return (
 			<ToolTip content={<div className="max-w-[400px]">{str}</div>}>
 				<Text
-					size="xs"
+					size="sm"
 					className={cn('line-clamp-2 cursor-help', highlight && 'font-semibold text-brand')}
 				>
 					{str}
@@ -58,7 +58,7 @@ export function FieldValue({ value, highlight, compareWith }: Props) {
 	}
 
 	return (
-		<Text size="xs" className={cn(highlight && 'font-semibold text-brand')}>
+		<Text size="sm" className={cn(highlight && 'font-semibold text-brand')}>
 			{str}
 		</Text>
 	)

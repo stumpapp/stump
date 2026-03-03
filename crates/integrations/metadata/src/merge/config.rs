@@ -1,6 +1,7 @@
-use async_graphql::Enum;
+use async_graphql::{Enum, InputObject};
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
+use serde_json::Value as JsonValue;
 
 use crate::types::MetadataField;
 
@@ -42,6 +43,15 @@ impl Default for AutoApplyConfig {
 			exclude_fields: Vec::new(),
 		}
 	}
+}
+
+/// A user-provided override value for a specific metadata field
+#[derive(Debug, Clone, Serialize, Deserialize, InputObject)]
+pub struct MetadataFieldOverride {
+	/// Which metadata field this override applies to
+	pub field: MetadataField,
+	/// The value to set, using Json because I am lazy
+	pub value: JsonValue,
 }
 
 #[cfg(test)]

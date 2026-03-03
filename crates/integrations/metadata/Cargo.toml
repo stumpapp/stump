@@ -10,6 +10,8 @@ chrono = { workspace = true }
 dateparser = "0.2.1"
 governor = "0.6"
 reqwest = { workspace = true }
+reqwest-middleware = { workspace = true }
+reqwest-retry = { workspace = true }
 rust_decimal = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }

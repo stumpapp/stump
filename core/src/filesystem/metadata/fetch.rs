@@ -104,6 +104,7 @@ pub async fn fetch_series_metadata(
 			&candidate,
 			config.strategy,
 			config.exclude_fields,
+			vec![],
 		)
 		.await
 		{
@@ -206,6 +207,7 @@ pub async fn fetch_media_metadata(
 			&candidate,
 			config.strategy,
 			config.exclude_fields,
+			vec![],
 		)
 		.await
 		{

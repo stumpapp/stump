@@ -1,3 +1,4 @@
+pub mod client;
 pub mod error;
 pub mod merge;
 mod provider;
@@ -7,8 +8,9 @@ pub mod scoring;
 pub(crate) mod serde_utils;
 pub mod types;
 
+pub use client::build_client_with_retry;
 pub use error::{MetadataProviderError, MetadataResult};
-pub use merge::{AutoApplyConfig, FieldMerger, MergeStrategy};
+pub use merge::{AutoApplyConfig, FieldMerger, MergeStrategy, MetadataFieldOverride};
 pub use provider::MetadataProvider;
 pub use rate_limit::RateLimiter;
 pub use scoring::MatchScorer;

@@ -1,7 +1,9 @@
 use chrono::Datelike;
+use reqwest_middleware::ClientWithMiddleware;
 use serde::Deserialize;
 
 use crate::{
+	client::{build_client_with_retry, RetryClientConfig},
 	error::MetadataProviderError,
 	serde_utils::string_or_number,
 	types::{
@@ -14,7 +16,7 @@ use crate::{
 const HARDCOVER_DEFAULT_RATE_LIMIT: u32 = 5;
 
 pub struct HardcoverClient {
-	client: reqwest::Client,
+	client: ClientWithMiddleware,
 	api_token: Option<String>,
 	rate_limiter: RateLimiter,
 }
@@ -41,7 +43,10 @@ impl HardcoverClient {
 
 	pub fn new(api_token: String, rate_limit: Option<u32>) -> Self {
 		Self {
-			client: reqwest::Client::new(),
+			client: build_client_with_retry(
+				reqwest::Client::new(),
+				RetryClientConfig::default(),
+			),
 			api_token: Some(api_token),
 			rate_limiter: RateLimiter::new(
 				rate_limit.unwrap_or(HARDCOVER_DEFAULT_RATE_LIMIT),

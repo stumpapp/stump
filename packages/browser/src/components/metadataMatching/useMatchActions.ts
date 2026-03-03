@@ -1,5 +1,5 @@
 import { useGraphQLMutation } from '@stump/client'
-import { graphql } from '@stump/graphql'
+import { graphql, MetadataField } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
@@ -11,12 +11,14 @@ const acceptMediaMatchMutation = graphql(`
 		$candidateIndex: Int!
 		$strategy: MergeStrategy
 		$excludeFields: [MetadataField!]
+		$overrides: [MetadataFieldOverrideInput!]
 	) {
 		acceptMediaMatch(
 			mediaId: $mediaId
 			candidateIndex: $candidateIndex
 			strategy: $strategy
 			excludeFields: $excludeFields
+			overrides: $overrides
 		) {
 			...PendingMatchRecord
 		}
@@ -29,12 +31,14 @@ const acceptSeriesMatchMutation = graphql(`
 		$candidateIndex: Int!
 		$strategy: MergeStrategy
 		$excludeFields: [MetadataField!]
+		$overrides: [MetadataFieldOverrideInput!]
 	) {
 		acceptSeriesMatch(
 			seriesId: $seriesId
 			candidateIndex: $candidateIndex
 			strategy: $strategy
 			excludeFields: $excludeFields
+			overrides: $overrides
 		) {
 			...PendingMatchRecord
 		}
@@ -64,6 +68,7 @@ export function useMatchActions() {
 		currentCandidateIndex,
 		excludedFields,
 		strategy,
+		fieldOverrides,
 		nextRecord,
 		close,
 	} = useMatchReviewStore()
@@ -134,12 +139,19 @@ export function useMatchActions() {
 		const excludeFieldsList = Array.from(excludedFields)
 		const exclude = excludeFieldsList.length > 0 ? excludeFieldsList : undefined
 
+		const overrideEntries = Array.from(fieldOverrides.entries()).map(([field, value]) => ({
+			field,
+			value,
+		}))
+		const overrides = overrideEntries.length > 0 ? overrideEntries : undefined
+
 		if (isMedia) {
 			acceptMedia({
 				mediaId: entityId,
 				candidateIndex: currentCandidateIndex,
 				strategy,
 				excludeFields: exclude,
+				overrides,
 			})
 		} else {
 			acceptSeries({
@@ -147,6 +159,7 @@ export function useMatchActions() {
 				candidateIndex: currentCandidateIndex,
 				strategy,
 				excludeFields: exclude,
+				overrides,
 			})
 		}
 	}

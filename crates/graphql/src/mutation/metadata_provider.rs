@@ -119,6 +119,7 @@ impl MetadataProviderMutation {
 					candidate,
 					strategy,
 					exclude_fields.clone(),
+					vec![],
 				)
 				.await
 			} else if record.series_id.is_some() {
@@ -128,6 +129,7 @@ impl MetadataProviderMutation {
 					candidate,
 					strategy,
 					exclude_fields.clone(),
+					vec![],
 				)
 				.await
 			} else {

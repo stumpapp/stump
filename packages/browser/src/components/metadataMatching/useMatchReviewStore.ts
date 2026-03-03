@@ -10,6 +10,7 @@ export type MatchReviewState = {
 	currentCandidateIndex: number
 	excludedFields: Set<MetadataField>
 	strategy: MergeStrategy
+	fieldOverrides: Map<MetadataField, unknown>
 
 	open: (records: MatchRecord[], startIndex?: number) => void
 	close: () => void
@@ -20,6 +21,9 @@ export type MatchReviewState = {
 	toggleField: (field: MetadataField) => void
 	resetExcludedFields: () => void
 	setStrategy: (strategy: MergeStrategy) => void
+	setFieldOverride: (field: MetadataField, value: unknown) => void
+	clearFieldOverride: (field: MetadataField) => void
+	clearAllOverrides: () => void
 }
 
 export const useMatchReviewStore = create<MatchReviewState>((set, get) => ({
@@ -29,6 +33,7 @@ export const useMatchReviewStore = create<MatchReviewState>((set, get) => ({
 	currentCandidateIndex: 0,
 	excludedFields: new Set(),
 	strategy: MergeStrategy.FillGaps,
+	fieldOverrides: new Map(),
 
 	open: (records, startIndex = 0) =>
 		set({
@@ -37,6 +42,7 @@ export const useMatchReviewStore = create<MatchReviewState>((set, get) => ({
 			currentRecordIndex: Math.min(startIndex, records.length - 1),
 			currentCandidateIndex: 0,
 			excludedFields: new Set(),
+			fieldOverrides: new Map(),
 		}),
 
 	close: () =>
@@ -46,6 +52,7 @@ export const useMatchReviewStore = create<MatchReviewState>((set, get) => ({
 			currentRecordIndex: 0,
 			currentCandidateIndex: 0,
 			excludedFields: new Set(),
+			fieldOverrides: new Map(),
 		}),
 
 	nextRecord: () => {
@@ -55,6 +62,7 @@ export const useMatchReviewStore = create<MatchReviewState>((set, get) => ({
 				currentRecordIndex: currentRecordIndex + 1,
 				currentCandidateIndex: 0,
 				excludedFields: new Set(),
+				fieldOverrides: new Map(),
 			})
 		}
 	},
@@ -66,6 +74,7 @@ export const useMatchReviewStore = create<MatchReviewState>((set, get) => ({
 				currentRecordIndex: currentRecordIndex - 1,
 				currentCandidateIndex: 0,
 				excludedFields: new Set(),
+				fieldOverrides: new Map(),
 			})
 		}
 	},
@@ -100,4 +109,20 @@ export const useMatchReviewStore = create<MatchReviewState>((set, get) => ({
 	resetExcludedFields: () => set({ excludedFields: new Set() }),
 
 	setStrategy: (strategy) => set({ strategy }),
+
+	setFieldOverride: (field, value) =>
+		set((state) => {
+			const next = new Map(state.fieldOverrides)
+			next.set(field, value)
+			return { fieldOverrides: next }
+		}),
+
+	clearFieldOverride: (field) =>
+		set((state) => {
+			const next = new Map(state.fieldOverrides)
+			next.delete(field)
+			return { fieldOverrides: next }
+		}),
+
+	clearAllOverrides: () => set({ fieldOverrides: new Map() }),
 }))

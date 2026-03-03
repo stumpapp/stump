@@ -1,6 +1,6 @@
 use metadata_integrations::{
 	AutoApplyConfig, ExternalMediaMetadata, ExternalMetadata, ExternalSeriesMetadata,
-	FieldMerger, MatchCandidate, MergeStrategy, MetadataField,
+	FieldMerger, MatchCandidate, MergeStrategy, MetadataField, MetadataFieldOverride,
 };
 use models::{
 	entity::{media_metadata, metadata_fetch_record, series_metadata},
@@ -20,6 +20,7 @@ pub async fn apply_series_match<C>(
 	candidate: &MatchCandidate,
 	strategy: MergeStrategy,
 	exclude_fields: Vec<MetadataField>,
+	overrides: Vec<MetadataFieldOverride>,
 ) -> Result<(), CoreError>
 where
 	C: ConnectionTrait,
@@ -40,10 +41,11 @@ where
 
 	match existing {
 		Some(model) => {
-			let merger = FieldMerger::new(
+			let merger = FieldMerger::with_overrides(
 				strategy,
 				parse_locked_fields(&model.locked_fields),
 				exclude_fields,
+				overrides,
 			);
 
 			let mut active = model.clone().into_active_model();
@@ -78,6 +80,7 @@ pub async fn apply_media_match<C>(
 	candidate: &MatchCandidate,
 	strategy: MergeStrategy,
 	exclude_fields: Vec<MetadataField>,
+	overrides: Vec<MetadataFieldOverride>,
 ) -> Result<(), CoreError>
 where
 	C: ConnectionTrait,
@@ -99,10 +102,11 @@ where
 
 	match existing {
 		Some(model) => {
-			let merger = FieldMerger::new(
+			let merger = FieldMerger::with_overrides(
 				strategy,
 				parse_locked_fields(&model.locked_fields),
 				exclude_fields,
+				overrides,
 			);
 
 			let mut active = model.clone().into_active_model();
@@ -268,6 +272,34 @@ fn apply_series_fields(
 	{
 		active.writers = Set(v);
 	}
+
+	if let Some(v) = merger.apply_scalar_override::<String>(MetadataField::Title) {
+		active.title = Set(v);
+	}
+	if let Some(v) = merger.apply_scalar_override::<String>(MetadataField::Summary) {
+		active.summary = Set(v);
+	}
+	if let Some(v) = merger.apply_scalar_override::<String>(MetadataField::Publisher) {
+		active.publisher = Set(v);
+	}
+	if let Some(v) = merger.apply_scalar_override::<i32>(MetadataField::Year) {
+		active.year = Set(v);
+	}
+	if let Some(v) = merger.apply_scalar_override::<i32>(MetadataField::AgeRating) {
+		active.age_rating = Set(v);
+	}
+	if let Some(v) = merger.apply_scalar_override::<String>(MetadataField::Status) {
+		active.status = Set(v);
+	}
+	if let Some(v) = merger.apply_scalar_override::<i32>(MetadataField::VolumeCount) {
+		active.total_issues = Set(v);
+	}
+	if let Some(v) = merger.apply_comma_list_override(MetadataField::Genres) {
+		active.genres = Set(v);
+	}
+	if let Some(v) = merger.apply_comma_list_override(MetadataField::Writers) {
+		active.writers = Set(v);
+	}
 }
 
 fn apply_media_fields(
@@ -353,6 +385,44 @@ fn apply_media_fields(
 	if let Some(v) =
 		merger.merge_comma_list(MetadataField::Artists, &model.pencillers, &ext.artists)
 	{
+		active.pencillers = Set(v);
+	}
+
+	if let Some(v) = merger.apply_scalar_override::<String>(MetadataField::Title) {
+		active.title = Set(v);
+	}
+	if let Some(v) = merger.apply_scalar_override::<String>(MetadataField::Summary) {
+		active.summary = Set(v);
+	}
+	if let Some(v) = merger.apply_scalar_override::<i32>(MetadataField::Year) {
+		active.year = Set(v);
+	}
+	if let Some(v) = merger.apply_scalar_override::<i32>(MetadataField::PageCount) {
+		active.page_count = Set(v);
+	}
+	// TODO: Sort this one out
+	// if let Some(v) = merger.apply_scalar_override::<i32>(MetadataField::ReleaseDate) {
+	// 	active.day = Set(v);
+	// }
+	if let Some(v) = merger.apply_scalar_override::<String>(MetadataField::Isbn) {
+		active.identifier_isbn = Set(v);
+	}
+	if let Some(v) = merger.apply_comma_list_override(MetadataField::Genres) {
+		active.genres = Set(v);
+	}
+	if let Some(v) = merger.apply_comma_list_override(MetadataField::Writers) {
+		active.writers = Set(v);
+	}
+	if let Some(v) = merger.apply_comma_list_override(MetadataField::Colorists) {
+		active.colorists = Set(v);
+	}
+	if let Some(v) = merger.apply_comma_list_override(MetadataField::Letterers) {
+		active.letterers = Set(v);
+	}
+	if let Some(v) = merger.apply_comma_list_override(MetadataField::CoverArtists) {
+		active.cover_artists = Set(v);
+	}
+	if let Some(v) = merger.apply_comma_list_override(MetadataField::Artists) {
 		active.pencillers = Set(v);
 	}
 }

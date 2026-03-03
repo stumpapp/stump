@@ -77,12 +77,13 @@ export function MatchPreviewEditor() {
 				data-overlayscrollbars-initialize
 			>
 				<Card className="overflow-hidden">
-					<div className="grid grid-cols-[140px_1fr_1fr_40px_1fr] items-center border-b border-edge bg-background-surface/50 py-2.5 pl-2.5">
+					<div className="grid grid-cols-[140px_1fr_1fr_40px_1fr_32px] items-center border-b border-edge bg-background-surface/50 py-2.5 pl-2.5">
 						<Heading className="text-sm font-medium">{t(getKey('headers.field'))}</Heading>
 						<Heading className="text-sm font-medium">{t(getKey('headers.current'))}</Heading>
 						<Heading className="text-sm font-medium">{t(getKey('headers.external'))}</Heading>
 						<div />
 						<Heading className="text-sm font-medium">{t(getKey('headers.resolved'))}</Heading>
+						<div />
 					</div>
 
 					<div className="divide-y divide-edge">

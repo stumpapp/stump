@@ -420,6 +420,7 @@ impl JobExt for MetadataFetchJob {
 						&candidate,
 						config.strategy,
 						config.exclude_fields,
+						vec![],
 					)
 					.await
 					{
@@ -553,6 +554,7 @@ impl JobExt for MetadataFetchJob {
 						&candidate,
 						config.strategy,
 						config.exclude_fields,
+						vec![],
 					)
 					.await
 					{

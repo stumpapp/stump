@@ -1610,6 +1610,11 @@ export enum MetadataField {
   Year = 'YEAR'
 }
 
+export type MetadataFieldOverrideInput = {
+  field: MetadataField;
+  value: Scalars['JSON']['input'];
+};
+
 /** The supported external metadata providers */
 export enum MetadataProvider {
   /** Hardcover (https://hardcover.app) */
@@ -1904,6 +1909,7 @@ export type MutationAcceptMediaMatchArgs = {
   candidateIndex: Scalars['Int']['input'];
   excludeFields?: InputMaybe<Array<MetadataField>>;
   mediaId: Scalars['ID']['input'];
+  overrides?: InputMaybe<Array<MetadataFieldOverrideInput>>;
   strategy?: InputMaybe<MergeStrategy>;
 };
 
@@ -1911,6 +1917,7 @@ export type MutationAcceptMediaMatchArgs = {
 export type MutationAcceptSeriesMatchArgs = {
   candidateIndex: Scalars['Int']['input'];
   excludeFields?: InputMaybe<Array<MetadataField>>;
+  overrides?: InputMaybe<Array<MetadataFieldOverrideInput>>;
   seriesId: Scalars['ID']['input'];
   strategy?: InputMaybe<MergeStrategy>;
 };
@@ -4638,6 +4645,7 @@ export type AcceptMediaMatchMutationVariables = Exact<{
   candidateIndex: Scalars['Int']['input'];
   strategy?: InputMaybe<MergeStrategy>;
   excludeFields?: InputMaybe<Array<MetadataField> | MetadataField>;
+  overrides?: InputMaybe<Array<MetadataFieldOverrideInput> | MetadataFieldOverrideInput>;
 }>;
 
 
@@ -4651,6 +4659,7 @@ export type AcceptSeriesMatchMutationVariables = Exact<{
   candidateIndex: Scalars['Int']['input'];
   strategy?: InputMaybe<MergeStrategy>;
   excludeFields?: InputMaybe<Array<MetadataField> | MetadataField>;
+  overrides?: InputMaybe<Array<MetadataFieldOverrideInput> | MetadataFieldOverrideInput>;
 }>;
 
 
@@ -8191,12 +8200,13 @@ export const RejectAllPendingMatchesDocument = new TypedDocumentString(`
 }
     `) as unknown as TypedDocumentString<RejectAllPendingMatchesMutation, RejectAllPendingMatchesMutationVariables>;
 export const AcceptMediaMatchDocument = new TypedDocumentString(`
-    mutation AcceptMediaMatch($mediaId: ID!, $candidateIndex: Int!, $strategy: MergeStrategy, $excludeFields: [MetadataField!]) {
+    mutation AcceptMediaMatch($mediaId: ID!, $candidateIndex: Int!, $strategy: MergeStrategy, $excludeFields: [MetadataField!], $overrides: [MetadataFieldOverrideInput!]) {
   acceptMediaMatch(
     mediaId: $mediaId
     candidateIndex: $candidateIndex
     strategy: $strategy
     excludeFields: $excludeFields
+    overrides: $overrides
   ) {
     ...PendingMatchRecord
   }
@@ -8292,12 +8302,13 @@ export const AcceptMediaMatchDocument = new TypedDocumentString(`
   }
 }`) as unknown as TypedDocumentString<AcceptMediaMatchMutation, AcceptMediaMatchMutationVariables>;
 export const AcceptSeriesMatchDocument = new TypedDocumentString(`
-    mutation AcceptSeriesMatch($seriesId: ID!, $candidateIndex: Int!, $strategy: MergeStrategy, $excludeFields: [MetadataField!]) {
+    mutation AcceptSeriesMatch($seriesId: ID!, $candidateIndex: Int!, $strategy: MergeStrategy, $excludeFields: [MetadataField!], $overrides: [MetadataFieldOverrideInput!]) {
   acceptSeriesMatch(
     seriesId: $seriesId
     candidateIndex: $candidateIndex
     strategy: $strategy
     excludeFields: $excludeFields
+    overrides: $overrides
   ) {
     ...PendingMatchRecord
   }

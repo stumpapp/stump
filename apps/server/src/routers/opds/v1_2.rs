@@ -13,8 +13,8 @@ use chrono::Utc;
 use graphql::{data::AuthContext, pagination::OffsetPagination};
 use models::{
 	entity::{
-		finished_reading_session, library, media, reading_session, series,
-		series_metadata,
+		finished_reading_session, library, media, media_metadata, reading_session,
+		series, series_metadata,
 	},
 	shared::{
 		enums::UserPermission,
@@ -58,6 +58,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	let primary_router = Router::new() //
 		.route("/catalog", get(catalog))
 		.route("/search", get(search_description))
+		.route("/search/feed", get(search_feed))
 		.route("/keep-reading", get(keep_reading))
 		.nest(
 			"/libraries",
@@ -73,11 +74,13 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				.route("/{id}", get(get_series_by_id)),
 		)
 		.nest(
-			"/books/{id}",
+			"/books",
 			Router::new()
-				.route("/thumbnail", get(get_book_thumbnail))
-				.route("/pages/{page}", get(get_book_page))
-				.route("/file/{filename}", get(download_book)),
+				.route("/", get(get_books))
+				.route("/latest", get(get_latest_books))
+				.route("/{id}/thumbnail", get(get_book_thumbnail))
+				.route("/{id}/pages/{page}", get(get_book_page))
+				.route("/{id}/file/{filename}", get(download_book)),
 		);
 
 	Router::new()
@@ -159,6 +162,7 @@ async fn catalog(Extension(req): Extension<AuthContext>) -> APIResult<Xml> {
 			"keepReading".to_string(),
 			Utc::now().into(),
 			"Keep reading".to_string(),
+			None,
 			Some(String::from("Continue reading your in progress books")),
 			None,
 			Some(vec![OpdsLink {
@@ -172,6 +176,7 @@ async fn catalog(Extension(req): Extension<AuthContext>) -> APIResult<Xml> {
 			"allSeries".to_string(),
 			Utc::now().into(),
 			"All series".to_string(),
+			None,
 			Some(String::from("Browse by series")),
 			None,
 			Some(vec![OpdsLink {
@@ -185,6 +190,7 @@ async fn catalog(Extension(req): Extension<AuthContext>) -> APIResult<Xml> {
 			"latestSeries".to_string(),
 			Utc::now().into(),
 			"Latest series".to_string(),
+			None,
 			Some(String::from("Browse latest series")),
 			None,
 			Some(vec![OpdsLink {
@@ -198,6 +204,7 @@ async fn catalog(Extension(req): Extension<AuthContext>) -> APIResult<Xml> {
 			"allLibraries".to_string(),
 			Utc::now().into(),
 			"All libraries".to_string(),
+			None,
 			Some(String::from("Browse by library")),
 			None,
 			Some(vec![OpdsLink {
@@ -207,9 +214,34 @@ async fn catalog(Extension(req): Extension<AuthContext>) -> APIResult<Xml> {
 			}]),
 			None,
 		),
-		// TODO: more?
-		// TODO: get user stored searches, so they don't have to redo them over and over?
-		// e.g. /opds/v1.2/series?search={searchTerms}, /opds/v1.2/libraries?search={searchTerms}, etc.
+		OpdsEntry::new(
+			"allBooks".to_string(),
+			Utc::now().into(),
+			"All books".to_string(),
+			None,
+			Some(String::from("Browse all books")),
+			None,
+			Some(vec![OpdsLink {
+				link_type: OpdsLinkType::Navigation,
+				rel: OpdsLinkRel::Subsection,
+				href: catalog_url(&req, "books"),
+			}]),
+			None,
+		),
+		OpdsEntry::new(
+			"latestBooks".to_string(),
+			Utc::now().into(),
+			"Latest books".to_string(),
+			None,
+			Some(String::from("Browse latest books")),
+			None,
+			Some(vec![OpdsLink {
+				link_type: OpdsLinkType::Navigation,
+				rel: OpdsLinkRel::Subsection,
+				href: catalog_url(&req, "books/latest"),
+			}]),
+			None,
+		),
 	];
 
 	let links = vec![
@@ -533,6 +565,214 @@ async fn get_series_by_id(
 		title,
 		entries,
 		href_postfix: format!("series/{}", &series.id),
+		page_params: Some(OPDSFeedBuilderPageParams {
+			page: pagination.page,
+			count,
+		}),
+		search: None,
+	})?;
+
+	Ok(Xml(feed.build()?))
+}
+
+/// A handler for GET /opds/v1.2/search/feed, unified search returning libraries + series + books
+async fn search_feed(
+	State(ctx): State<AppState>,
+	Query(OPDSSearchQuery { search }): Query<OPDSSearchQuery>,
+	Extension(req): Extension<AuthContext>,
+) -> APIResult<Xml> {
+	let search = search.unwrap_or_default();
+	if search.is_empty() {
+		let feed = OpdsFeed::new(
+			"searchFeed".to_string(),
+			"Search Results".to_string(),
+			Some(vec![
+				OpdsLink {
+					link_type: OpdsLinkType::Navigation,
+					rel: OpdsLinkRel::ItSelf,
+					href: catalog_url(&req, "search/feed"),
+				},
+				OpdsLink {
+					link_type: OpdsLinkType::Navigation,
+					rel: OpdsLinkRel::Start,
+					href: catalog_url(&req, "catalog"),
+				},
+			]),
+			vec![],
+		);
+		return Ok(Xml(feed.build()?));
+	}
+
+	let user = req.user();
+	let mut entries = Vec::new();
+
+	// Search libraries
+	let libraries = library::Entity::find_for_user(&user)
+		.filter(library::Column::Name.contains(&search))
+		.order_by_asc(library::Column::Name)
+		.all(ctx.conn.as_ref())
+		.await?;
+	for lib in libraries {
+		entries.push(
+			OPDSEntryBuilder::<library::Model>::new(lib, req.api_key()).into_opds_entry(),
+		);
+	}
+
+	// Search series
+	let series = series::Entity::find_for_user(&user)
+		.left_join(series_metadata::Entity)
+		.filter(
+			series::Column::Name
+				.contains(&search)
+				.or(series_metadata::Column::Title.contains(&search)),
+		)
+		.order_by_asc(series::Column::Name)
+		.all(ctx.conn.as_ref())
+		.await?;
+	for s in series {
+		entries.push(
+			OPDSEntryBuilder::<series::Model>::new(s, req.api_key()).into_opds_entry(),
+		);
+	}
+
+	// Search books by name, metadata title, summary, and writers
+	let books = OPDSPublicationEntity::find_for_user(&user)
+		.filter(
+			media::Column::Name
+				.contains(&search)
+				.or(media_metadata::Column::Title.contains(&search))
+				.or(media_metadata::Column::Summary.contains(&search))
+				.or(media_metadata::Column::Writers.contains(&search)),
+		)
+		.order_by_asc(media::Column::Name)
+		.into_model::<OPDSPublicationEntity>()
+		.all(ctx.conn.as_ref())
+		.await?;
+	for book in books {
+		entries.push(
+			OPDSEntryBuilder::<OPDSPublicationEntity>::new(book, req.api_key())
+				.into_opds_entry(),
+		);
+	}
+
+	let feed = OpdsFeed::new(
+		"searchFeed".to_string(),
+		"Search Results".to_string(),
+		Some(vec![
+			OpdsLink {
+				link_type: OpdsLinkType::Navigation,
+				rel: OpdsLinkRel::ItSelf,
+				href: catalog_url(&req, &format!("search/feed?search={}", &search)),
+			},
+			OpdsLink {
+				link_type: OpdsLinkType::Navigation,
+				rel: OpdsLinkRel::Start,
+				href: catalog_url(&req, "catalog"),
+			},
+		]),
+		entries,
+	);
+
+	Ok(Xml(feed.build()?))
+}
+
+/// A handler for GET /opds/v1.2/books, paginated book listing with optional search
+async fn get_books(
+	State(ctx): State<AppState>,
+	Query(pagination): Query<OffsetPagination>,
+	Query(OPDSSearchQuery { search }): Query<OPDSSearchQuery>,
+	Extension(req): Extension<AuthContext>,
+) -> APIResult<Xml> {
+	let user = req.user();
+	let search_cpy = search.clone();
+
+	let books = OPDSPublicationEntity::find_for_user(&user)
+		.apply_if(search_cpy, |query, search| {
+			query.filter(
+				media::Column::Name
+					.contains(search.clone())
+					.or(media_metadata::Column::Title.contains(search.clone()))
+					.or(media_metadata::Column::Summary.contains(search.clone()))
+					.or(media_metadata::Column::Writers.contains(search)),
+			)
+		})
+		.order_by_asc(media::Column::Name)
+		.offset(pagination.offset())
+		.limit(pagination.limit())
+		.into_model::<OPDSPublicationEntity>()
+		.all(ctx.conn.as_ref())
+		.await?;
+
+	let search_cpy = search.clone();
+	let count = OPDSPublicationEntity::find_for_user(&user)
+		.apply_if(search_cpy, |query, search| {
+			query.filter(
+				media::Column::Name
+					.contains(search.clone())
+					.or(media_metadata::Column::Title.contains(search.clone()))
+					.or(media_metadata::Column::Summary.contains(search.clone()))
+					.or(media_metadata::Column::Writers.contains(search)),
+			)
+		})
+		.count(ctx.conn.as_ref())
+		.await?;
+
+	let entries = books
+		.into_iter()
+		.map(|m| {
+			OPDSEntryBuilder::<OPDSPublicationEntity>::new(m, req.api_key())
+				.into_opds_entry()
+		})
+		.collect::<Vec<OpdsEntry>>();
+
+	let feed = OPDSFeedBuilder::new(req.api_key()).paginated(OPDSFeedBuilderParams {
+		id: "allBooks".to_string(),
+		title: "All Books".to_string(),
+		entries,
+		href_postfix: "books".to_string(),
+		page_params: Some(OPDSFeedBuilderPageParams {
+			page: pagination.page,
+			count,
+		}),
+		search,
+	})?;
+
+	Ok(Xml(feed.build()?))
+}
+
+/// A handler for GET /opds/v1.2/books/latest, latest books ordered by created_at DESC
+async fn get_latest_books(
+	State(ctx): State<AppState>,
+	pagination: Query<OffsetPagination>,
+	Extension(req): Extension<AuthContext>,
+) -> APIResult<Xml> {
+	let user = req.user();
+
+	let books = OPDSPublicationEntity::find_for_user(&user)
+		.order_by_desc(media::Column::CreatedAt)
+		.offset(pagination.offset())
+		.limit(pagination.limit())
+		.into_model::<OPDSPublicationEntity>()
+		.all(ctx.conn.as_ref())
+		.await?;
+
+	let count = OPDSPublicationEntity::find_for_user(&user)
+		.count(ctx.conn.as_ref())
+		.await?;
+
+	let entries = books
+		.into_iter()
+		.map(|m| {
+			OPDSEntryBuilder::<OPDSPublicationEntity>::new(m, req.api_key())
+				.into_opds_entry()
+		})
+		.collect::<Vec<OpdsEntry>>();
+
+	let feed = OPDSFeedBuilder::new(req.api_key()).paginated(OPDSFeedBuilderParams {
+		id: "latestBooks".to_string(),
+		title: "Latest Books".to_string(),
+		entries,
+		href_postfix: "books/latest".to_string(),
 		page_params: Some(OPDSFeedBuilderPageParams {
 			page: pagination.page,
 			count,

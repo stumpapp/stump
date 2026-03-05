@@ -406,6 +406,7 @@ pub enum MetadataFetchStatus {
 	Matched,
 	NoMatch,
 	Failed,
+	// RateLimited, TODO(metadata): I can add this to for more focused retry feature?
 }
 
 /// The supported external metadata providers

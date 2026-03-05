@@ -27,7 +27,7 @@ export default function InitFetchJob() {
 
 	const {
 		data: { metadataProviderConfigs },
-	} = useSuspenseGraphQL(query, ['metadataProviderConfigs'])
+	} = useSuspenseGraphQL(query, ['metadataProviderConfigs', 'initFetchJob', library.id])
 	const { mutate } = useGraphQLMutation(mutation)
 
 	const handleFetch = useCallback(() => mutate({ id: library.id }), [library.id, mutate])

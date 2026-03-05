@@ -3,9 +3,14 @@ import { Badge, Button, Card, Text } from '@stump/components'
 import { graphql, useFragment } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
-import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
+import {
+	ColumnDef,
+	createColumnHelper,
+	getPaginationRowModel,
+	PaginationState,
+} from '@tanstack/react-table'
 import { Eye } from 'lucide-react'
-import { useCallback, useMemo } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
 import Table from '@/components/table/Table'
@@ -169,6 +174,11 @@ export function PendingMatchesTable() {
 	const open = useMatchReviewStore((s) => s.open)
 	const client = useQueryClient()
 
+	const [pagination, setPagination] = useState<PaginationState>({
+		pageIndex: 0,
+		pageSize: 10,
+	})
+
 	const rows: PendingMatchRow[] = useMemo(
 		() =>
 			records.map((record) => {
@@ -278,15 +288,21 @@ export function PendingMatchesTable() {
 			</div>
 
 			<Card>
+				{/* FIXME: Client-side pagination currently broken */}
 				<Table
 					sortable
 					columns={columns}
 					options={{
+						onPaginationChange: setPagination,
+						pageCount: Math.ceil(rows.length / pagination.pageSize),
 						state: {
 							columnPinning: {
 								right: ['actions'],
 							},
+							pagination,
 						},
+						getPaginationRowModel: getPaginationRowModel(),
+						manualPagination: false,
 					}}
 					data={rows}
 					fullWidth

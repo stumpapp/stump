@@ -1,5 +1,5 @@
 import { useGraphQLMutation } from '@stump/client'
-import { graphql, MetadataField } from '@stump/graphql'
+import { graphql } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
@@ -11,7 +11,7 @@ const acceptMediaMatchMutation = graphql(`
 		$candidateIndex: Int!
 		$strategy: MergeStrategy
 		$excludeFields: [MetadataField!]
-		$overrides: [MetadataFieldOverrideInput!]
+		$overrides: [MetadataFieldOverride!]
 	) {
 		acceptMediaMatch(
 			mediaId: $mediaId
@@ -31,7 +31,7 @@ const acceptSeriesMatchMutation = graphql(`
 		$candidateIndex: Int!
 		$strategy: MergeStrategy
 		$excludeFields: [MetadataField!]
-		$overrides: [MetadataFieldOverrideInput!]
+		$overrides: [MetadataFieldOverride!]
 	) {
 		acceptSeriesMatch(
 			seriesId: $seriesId

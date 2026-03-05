@@ -23,6 +23,7 @@ use stump_core::filesystem::{
 		ThumbnailGenerationJob, ThumbnailGenerationJobParams,
 	},
 	media::analysis::{AnalysisJobConfig, AnalyzeMediaJob, MediaAnalysisJobScope},
+	metadata::{MetadataFetchJob, MetadataFetchJobParams, MetadataFetchScope},
 	scanner::{LibraryScanJob, ScanOptions},
 };
 use tokio::fs;
@@ -900,6 +901,33 @@ impl LibraryMutation {
 			tracing::error!(?error, "Failed to remove library thumbnails");
 			return Err(error.into());
 		}
+
+		Ok(true)
+	}
+
+	/// Start a job which will search external metadata providers
+	#[graphql(guard = "PermissionGuard::one(UserPermission::MetadataFetchRecordManage)")]
+	#[tracing::instrument(skip(self, ctx))]
+	async fn fetch_library_metadata(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+		#[graphql(default = false)] force_refetch: bool,
+	) -> Result<bool> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let core = ctx.data::<CoreContext>()?;
+
+		let library = library::Entity::find_for_user(user)
+			.filter(library::Column::Id.eq(id.to_string()))
+			.one(core.conn.as_ref())
+			.await?
+			.ok_or("Library not found")?;
+
+		core.enqueue_job(MetadataFetchJob::new(MetadataFetchJobParams {
+			force_refetch,
+			scope: MetadataFetchScope::MediaInLibrary(library.id),
+		}))?;
+		tracing::debug!("Enqueued library metadata fetch job");
 
 		Ok(true)
 	}

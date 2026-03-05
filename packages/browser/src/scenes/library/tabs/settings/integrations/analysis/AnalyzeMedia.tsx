@@ -45,5 +45,5 @@ export default function AnalyzeMedia() {
 	)
 }
 
-const LOCALE_KEY = 'librarySettingsScene.options/analysis.sections.analyzeBooks'
+const LOCALE_KEY = 'librarySettingsScene.integrations/analysis.sections.analyzeBooks'
 const getKey = (key: string) => `${LOCALE_KEY}.${key}`

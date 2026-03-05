@@ -7,7 +7,11 @@ use models::{
 	entity::{media, metadata_fetch_record, metadata_provider_config, series},
 	shared::enums::MetadataFetchStatus,
 };
-use sea_orm::{prelude::*, sea_query::OnConflict, Set};
+use sea_orm::{
+	prelude::*,
+	sea_query::{OnConflict, Query},
+	Set,
+};
 use serde::{Deserialize, Serialize};
 
 use crate::job::{
@@ -23,6 +27,7 @@ type Id = String;
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "type")]
 pub enum MetadataFetchScope {
+	MediaInLibrary(Id),
 	/// Fetch metadata for specific series by ID
 	Series(Vec<Id>),
 	/// Fetch metadata for all series in a library
@@ -185,6 +190,9 @@ impl JobExt for MetadataFetchJob {
 			MetadataFetchScope::MediaInSeries(id) => {
 				Some(format!("Metadata fetch for media in series {}", id))
 			},
+			MetadataFetchScope::MediaInLibrary(id) => {
+				Some(format!("Metadata fetch for media in library {}", id))
+			},
 		}
 	}
 
@@ -245,6 +253,32 @@ impl JobExt for MetadataFetchJob {
 			MetadataFetchScope::MediaInSeries(series_id) => {
 				let media_list = media::Entity::find()
 					.filter(media::Column::SeriesId.eq(series_id))
+					.find_also_related(series::Entity)
+					.all(conn)
+					.await?;
+
+				media_list
+					.into_iter()
+					.map(|(m, s)| MetadataFetchTask::FetchMedia {
+						media_id: m.id,
+						media_name: m.name,
+						series_name: s.map(|s| s.name),
+					})
+					.collect()
+			},
+			MetadataFetchScope::MediaInLibrary(library_id) => {
+				let media_list = media::Entity::find()
+					.filter(
+						media::Column::SeriesId.in_subquery(
+							// TODO(perf): I think I just need to add a direct fk to library on media at this point
+							// bc I do this way too often
+							Query::select()
+								.column(series::Column::Id)
+								.from(series::Entity)
+								.and_where(series::Column::LibraryId.eq(library_id))
+								.to_owned(),
+						),
+					)
 					.find_also_related(series::Entity)
 					.all(conn)
 					.await?;

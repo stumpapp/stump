@@ -260,7 +260,7 @@
 					"label": "Hide series tab",
 					"description": "Hide the series tab from the library navigation"
 				},
-				"options": {
+				"configuration": {
 					"series": {
 						"label": "Series",
 						"description": "Show the series tab by default"
@@ -304,7 +304,7 @@
 				},
 				"resizeMethod": {
 					"label": "Resize Method",
-					"options": {
+					"configuration": {
 						"scaleEvenlyByFactor": "Evenly Scale",
 						"exact": "Exact Size",
 						"scaleDimension": "Auto Scaled",
@@ -331,7 +331,7 @@
 					"description": "Set either the width or height of the thumbnail and auto-scale the other to keep the original aspect ratio",
 					"dimension": {
 						"label": "Dimension",
-						"options": {
+						"configuration": {
 							"width": "Width",
 							"height": "Height"
 						}
@@ -429,7 +429,7 @@
 					],
 					"disabled": "この設定は後で変更できません"
 				},
-				"options": {
+				"configuration": {
 					"label": "ライブラリのパターン",
 					"description": "Stumpがライブラリをどのように整理するかを決定する設定",
 					"collectionPriority": {
@@ -540,7 +540,7 @@
 		"subtitleLink": "関連ドキュメント",
 		"sidebar": {
 			"basics": "基本",
-			"options": {
+			"configuration": {
 				"general": "一般",
 				"reading": "閲覧中",
 				"scanning": "スキャン中",
@@ -575,7 +575,7 @@
 					"description": "A scan with additional options for more fine-grained control",
 					"form": {
 						"alert": "These will override corresponding library-wide settings",
-						"options": {
+						"configuration": {
 							"forceRebuild": {
 								"label": "Force rebuild",
 								"description": "Rebuild every book in the library on disk",
@@ -646,7 +646,7 @@
 				}
 			}
 		},
-		"options/analysis": {
+		"integrations/analysis": {
 			"title": "分析",
 			"description": "このライブラリの内容を分析して潜在的な問題や改善点を特定します",
 			"sections": {
@@ -822,7 +822,7 @@
 			},
 			"visibility": {
 				"label": "公開範囲",
-				"options": {
+				"configuration": {
 					"public": {
 						"label": "公開",
 						"description": "サーバー上のすべてのユーザーがアクセス可能"
@@ -867,7 +867,7 @@
 				"grouping": {
 					"label": "グループ化",
 					"description": "このスマートリスト内の書籍をグループ化する方法",
-					"options": {
+					"configuration": {
 						"by_books": {
 							"label": "なし"
 						},
@@ -1300,7 +1300,7 @@
 						"独自のカスタムテーマの作成に興味がある場合は、",
 						"ドキュメント"
 					],
-					"options": {
+					"configuration": {
 						"system": "System",
 						"light": "ライト",
 						"dark": "ダーク",
@@ -1327,7 +1327,7 @@
 				"thumbnailPlaceholder": {
 					"label": "Thumbnail placeholder",
 					"description": "The style to use for thumbnail placeholders",
-					"options": {
+					"configuration": {
 						"grayscale": "Grayscale",
 						"averageColor": "Average color",
 						"colorful": "Colorful",
@@ -1341,7 +1341,7 @@
 				"primaryNavigation": {
 					"label": "Primary navigation",
 					"description": "Choose between a minimal sidebar or a topbar navigation",
-					"options": {
+					"configuration": {
 						"sidebar": "Sidebar",
 						"topbar": "Topbar"
 					},
@@ -1368,7 +1368,7 @@
 					"isLocked": "配置はロックされています",
 					"lock": "調整をロック",
 					"unlock": "調整をロック解除",
-					"options": {
+					"configuration": {
 						"HOME": "Home",
 						"EXPLORE": "Explore",
 						"LIBRARIES": "Libraries",
@@ -1389,7 +1389,7 @@
 				"displaySpacing": {
 					"label": "Display spacing",
 					"description": "Adjusts the overall spacing between elements throughout the app",
-					"options": {
+					"configuration": {
 						"default": "Default",
 						"compact": "Compact"
 					},
@@ -1745,7 +1745,7 @@
 							},
 							"intervalPreset": {
 								"label": "Preset",
-								"options": {
+								"configuration": {
 									"everySixHours": "Every 6 hours",
 									"everyTwelveHours": "Every 12 hours",
 									"oncePerDay": "Once a day",
@@ -2196,7 +2196,7 @@
 	},
 	"thumbnailDropdown": {
 		"label": "Edit thumbnail",
-		"options": {
+		"configuration": {
 			"selectFromBooks": "Select from books",
 			"uploadImage": "Upload image"
 		},

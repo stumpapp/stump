@@ -1610,8 +1610,11 @@ export enum MetadataField {
   Year = 'YEAR'
 }
 
-export type MetadataFieldOverrideInput = {
+/** A user-provided override value for a specific metadata field */
+export type MetadataFieldOverride = {
+  /** Which metadata field this override applies to */
   field: MetadataField;
+  /** The value to set, using Json because I am lazy */
   value: Scalars['JSON']['input'];
 };
 
@@ -1777,6 +1780,8 @@ export type Mutation = {
   deleteUserSessions: Scalars['Int']['output'];
   favoriteMedia: Media;
   favoriteSeries: Series;
+  /** Start a job which will search external metadata providers */
+  fetchLibraryMetadata: Scalars['Boolean']['output'];
   /** Search external metadata providers for a media item and return match candidates */
   fetchMediaMetadata: Array<MatchCandidate>;
   /** Search external metadata providers for a series and return match candidates */
@@ -1909,7 +1914,7 @@ export type MutationAcceptMediaMatchArgs = {
   candidateIndex: Scalars['Int']['input'];
   excludeFields?: InputMaybe<Array<MetadataField>>;
   mediaId: Scalars['ID']['input'];
-  overrides?: InputMaybe<Array<MetadataFieldOverrideInput>>;
+  overrides?: InputMaybe<Array<MetadataFieldOverride>>;
   strategy?: InputMaybe<MergeStrategy>;
 };
 
@@ -1917,7 +1922,7 @@ export type MutationAcceptMediaMatchArgs = {
 export type MutationAcceptSeriesMatchArgs = {
   candidateIndex: Scalars['Int']['input'];
   excludeFields?: InputMaybe<Array<MetadataField>>;
-  overrides?: InputMaybe<Array<MetadataFieldOverrideInput>>;
+  overrides?: InputMaybe<Array<MetadataFieldOverride>>;
   seriesId: Scalars['ID']['input'];
   strategy?: InputMaybe<MergeStrategy>;
 };
@@ -2197,6 +2202,12 @@ export type MutationFavoriteMediaArgs = {
 export type MutationFavoriteSeriesArgs = {
   id: Scalars['ID']['input'];
   isFavorite: Scalars['Boolean']['input'];
+};
+
+
+export type MutationFetchLibraryMetadataArgs = {
+  forceRefetch?: Scalars['Boolean']['input'];
+  id: Scalars['ID']['input'];
 };
 
 
@@ -4645,7 +4656,7 @@ export type AcceptMediaMatchMutationVariables = Exact<{
   candidateIndex: Scalars['Int']['input'];
   strategy?: InputMaybe<MergeStrategy>;
   excludeFields?: InputMaybe<Array<MetadataField> | MetadataField>;
-  overrides?: InputMaybe<Array<MetadataFieldOverrideInput> | MetadataFieldOverrideInput>;
+  overrides?: InputMaybe<Array<MetadataFieldOverride> | MetadataFieldOverride>;
 }>;
 
 
@@ -4659,7 +4670,7 @@ export type AcceptSeriesMatchMutationVariables = Exact<{
   candidateIndex: Scalars['Int']['input'];
   strategy?: InputMaybe<MergeStrategy>;
   excludeFields?: InputMaybe<Array<MetadataField> | MetadataField>;
-  overrides?: InputMaybe<Array<MetadataFieldOverrideInput> | MetadataFieldOverrideInput>;
+  overrides?: InputMaybe<Array<MetadataFieldOverride> | MetadataFieldOverride>;
 }>;
 
 
@@ -5156,6 +5167,18 @@ export type AnalyzeLibraryMediaMutationVariables = Exact<{
 
 
 export type AnalyzeLibraryMediaMutation = { __typename?: 'Mutation', analyzeLibrary: boolean };
+
+export type InitFetchJobCheckProvidersQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type InitFetchJobCheckProvidersQuery = { __typename?: 'Query', metadataProviderConfigs: Array<{ __typename?: 'MetadataProviderConfigModel', id: number }> };
+
+export type InitFetchJobMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type InitFetchJobMutation = { __typename?: 'Mutation', fetchLibraryMetadata: boolean };
 
 export type ScanHistorySectionClearHistoryMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -8200,7 +8223,7 @@ export const RejectAllPendingMatchesDocument = new TypedDocumentString(`
 }
     `) as unknown as TypedDocumentString<RejectAllPendingMatchesMutation, RejectAllPendingMatchesMutationVariables>;
 export const AcceptMediaMatchDocument = new TypedDocumentString(`
-    mutation AcceptMediaMatch($mediaId: ID!, $candidateIndex: Int!, $strategy: MergeStrategy, $excludeFields: [MetadataField!], $overrides: [MetadataFieldOverrideInput!]) {
+    mutation AcceptMediaMatch($mediaId: ID!, $candidateIndex: Int!, $strategy: MergeStrategy, $excludeFields: [MetadataField!], $overrides: [MetadataFieldOverride!]) {
   acceptMediaMatch(
     mediaId: $mediaId
     candidateIndex: $candidateIndex
@@ -8302,7 +8325,7 @@ export const AcceptMediaMatchDocument = new TypedDocumentString(`
   }
 }`) as unknown as TypedDocumentString<AcceptMediaMatchMutation, AcceptMediaMatchMutationVariables>;
 export const AcceptSeriesMatchDocument = new TypedDocumentString(`
-    mutation AcceptSeriesMatch($seriesId: ID!, $candidateIndex: Int!, $strategy: MergeStrategy, $excludeFields: [MetadataField!], $overrides: [MetadataFieldOverrideInput!]) {
+    mutation AcceptSeriesMatch($seriesId: ID!, $candidateIndex: Int!, $strategy: MergeStrategy, $excludeFields: [MetadataField!], $overrides: [MetadataFieldOverride!]) {
   acceptSeriesMatch(
     seriesId: $seriesId
     candidateIndex: $candidateIndex
@@ -9780,6 +9803,18 @@ export const AnalyzeLibraryMediaDocument = new TypedDocumentString(`
   analyzeLibrary(id: $id)
 }
     `) as unknown as TypedDocumentString<AnalyzeLibraryMediaMutation, AnalyzeLibraryMediaMutationVariables>;
+export const InitFetchJobCheckProvidersDocument = new TypedDocumentString(`
+    query InitFetchJobCheckProviders {
+  metadataProviderConfigs {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<InitFetchJobCheckProvidersQuery, InitFetchJobCheckProvidersQueryVariables>;
+export const InitFetchJobDocument = new TypedDocumentString(`
+    mutation InitFetchJob($id: ID!) {
+  fetchLibraryMetadata(id: $id)
+}
+    `) as unknown as TypedDocumentString<InitFetchJobMutation, InitFetchJobMutationVariables>;
 export const ScanHistorySectionClearHistoryDocument = new TypedDocumentString(`
     mutation ScanHistorySectionClearHistory($id: ID!) {
   clearScanHistory(id: $id)

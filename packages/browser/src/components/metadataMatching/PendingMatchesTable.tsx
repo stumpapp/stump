@@ -159,6 +159,8 @@ function ReviewButton({ record }: { record: MatchRecord }) {
 	)
 }
 
+// TODO: Intake optional ids for series or library, so we can fetch only relevant matches
+
 export function PendingMatchesTable() {
 	const { t } = useLocaleContext()
 	const { data } = useSuspenseGraphQL(pendingMatchesQuery, ['pendingMetadataMatches'])

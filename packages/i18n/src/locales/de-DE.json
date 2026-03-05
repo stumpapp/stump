@@ -260,7 +260,7 @@
 					"label": "Serienreiter verbergen",
 					"description": "Verberge den Serienreiter in der Bibliotheksnavigation"
 				},
-				"options": {
+				"configuration": {
 					"series": {
 						"label": "Serien",
 						"description": "Serienreiter standardmäßig anzeigen"
@@ -304,7 +304,7 @@
 				},
 				"resizeMethod": {
 					"label": "Größenveränderungsmethode",
-					"options": {
+					"configuration": {
 						"scaleEvenlyByFactor": "Gleichmäßig skalieren",
 						"exact": "Genaue Größe",
 						"scaleDimension": "Auto-Skalierung",
@@ -331,7 +331,7 @@
 					"description": "Setze entweder die Breite oder Höhe des Vorschaubildes und skaliere automatisch die anderen, um das ursprüngliche Seitenverhältnis beizubehalten",
 					"dimension": {
 						"label": "Abmessung",
-						"options": {
+						"configuration": {
 							"width": "Breite",
 							"height": "Höhe"
 						}
@@ -429,7 +429,7 @@
 					],
 					"disabled": "Diese Einstellung kann nicht geändert werden"
 				},
-				"options": {
+				"configuration": {
 					"label": "Bibliotheksmuster",
 					"description": "Die Einstellung, welche festlegt, wie Stump deine Bibliothek organisieren soll",
 					"collectionPriority": {
@@ -540,7 +540,7 @@
 		"subtitleLink": "dazugehörigen Dokumentation",
 		"sidebar": {
 			"basics": "Allgemeines",
-			"options": {
+			"configuration": {
 				"general": "Allgemein",
 				"reading": "Lesen",
 				"scanning": "Wird gescannt",
@@ -575,7 +575,7 @@
 					"description": "Ein Scan mit zusätzlichen Optionen für eine feinere Steuerung",
 					"form": {
 						"alert": "Diese werden die entsprechenden Bibliotheksweiten Einstellungen überschreiben",
-						"options": {
+						"configuration": {
 							"forceRebuild": {
 								"label": "Wiederaufbau erzwingen",
 								"description": "Jedes Buch in der Bibliothek auf der Festplatte wiederaufbauen",
@@ -646,7 +646,7 @@
 				}
 			}
 		},
-		"options/analysis": {
+		"integrations/analysis": {
 			"title": "Analyse",
 			"description": "Analysiere den Inhalt dieser Bibliothek, um mögliche Probleme oder Verbesserungen zu identifizieren",
 			"sections": {
@@ -822,7 +822,7 @@
 			},
 			"visibility": {
 				"label": "Sichtbarkeit",
-				"options": {
+				"configuration": {
 					"public": {
 						"label": "Öffentlich",
 						"description": "Für alle Benutzer auf dem Server zugänglich"
@@ -867,7 +867,7 @@
 				"grouping": {
 					"label": "Gruppierung",
 					"description": "Wie die Bücher in dieser intelligenten Liste gruppiert werden sollen",
-					"options": {
+					"configuration": {
 						"by_books": {
 							"label": "Keine"
 						},
@@ -1300,7 +1300,7 @@
 						"Wie du ein eigenes Design erstellen kannst, ist nachzulesen in der",
 						"Dokumentation"
 					],
-					"options": {
+					"configuration": {
 						"system": "System",
 						"light": "Hell",
 						"dark": "Dunkel",
@@ -1327,7 +1327,7 @@
 				"thumbnailPlaceholder": {
 					"label": "Thumbnail placeholder",
 					"description": "The style to use for thumbnail placeholders",
-					"options": {
+					"configuration": {
 						"grayscale": "Grayscale",
 						"averageColor": "Average color",
 						"colorful": "Colorful",
@@ -1341,7 +1341,7 @@
 				"primaryNavigation": {
 					"label": "Primary navigation",
 					"description": "Choose between a minimal sidebar or a topbar navigation",
-					"options": {
+					"configuration": {
 						"sidebar": "Sidebar",
 						"topbar": "Topbar"
 					},
@@ -1368,7 +1368,7 @@
 					"isLocked": "Anordnung ist gesperrt",
 					"lock": "Anordnung sperren",
 					"unlock": "Anordnung entsperren",
-					"options": {
+					"configuration": {
 						"HOME": "Startseite",
 						"EXPLORE": "Entdecken",
 						"LIBRARIES": "Bibliotheken",
@@ -1389,7 +1389,7 @@
 				"displaySpacing": {
 					"label": "Display spacing",
 					"description": "Adjusts the overall spacing between elements throughout the app",
-					"options": {
+					"configuration": {
 						"default": "Default",
 						"compact": "Compact"
 					},
@@ -1745,7 +1745,7 @@
 							},
 							"intervalPreset": {
 								"label": "Voreinstellung",
-								"options": {
+								"configuration": {
 									"everySixHours": "Alle 6 Stunden",
 									"everyTwelveHours": "Alle 12 Stunden",
 									"oncePerDay": "Einmal am Tag",
@@ -2196,7 +2196,7 @@
 	},
 	"thumbnailDropdown": {
 		"label": "Vorschaubild auswählen",
-		"options": {
+		"configuration": {
 			"selectFromBooks": "Aus Büchern auswählen",
 			"uploadImage": "Bild hochladen"
 		},

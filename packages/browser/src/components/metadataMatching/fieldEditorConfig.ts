@@ -48,3 +48,7 @@ export const FIELD_BINDING_NAME: Partial<Record<MetadataField, string>> = {
 	[MetadataField.Letterers]: 'letterers',
 	[MetadataField.CoverArtists]: 'coverArtists',
 }
+
+export function isArrayField(field: MetadataField): boolean {
+	return FIELD_EDITOR_MAP[field] === 'badgeList'
+}

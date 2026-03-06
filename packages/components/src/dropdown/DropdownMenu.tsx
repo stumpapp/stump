@@ -29,6 +29,7 @@ export type DropdownItem = {
 	subItems?: DropdownItem[]
 	hidden?: boolean
 	disabled?: boolean
+	isActive?: boolean
 }
 export type DropdownItemGroup = {
 	title?: string
@@ -95,7 +96,7 @@ export function DropdownMenu({
 
 				return (
 					<Container {...containerProps} key={key}>
-						<DropdownItem onClick={item.onClick} disabled={item.disabled}>
+						<DropdownItem onClick={item.onClick} disabled={item.disabled} isActive={item.isActive}>
 							{item.leftIcon}
 							<span>{item.label}</span>
 							{item.shortCut && <DropdownShortcut>{item.shortCut}</DropdownShortcut>}

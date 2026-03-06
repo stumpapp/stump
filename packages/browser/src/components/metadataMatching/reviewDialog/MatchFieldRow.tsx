@@ -1,10 +1,11 @@
 import { CheckBox, cn, IconButton, Text, ToolTip } from '@stump/components'
-import { Check, Pencil, Undo2 } from 'lucide-react'
+import { useLocaleContext } from '@stump/i18n'
+import { Undo2 } from 'lucide-react'
 import { useState } from 'react'
 
-import { FIELD_EDITOR_MAP } from '../fieldEditorConfig'
 import { type FieldComparison, resolveFieldValue } from '../types'
 import { useMatchReviewStore } from '../useMatchReviewStore'
+import { FieldActionMenu } from './FieldActionMenu'
 import { FieldValue } from './FieldValue'
 import { ResolvedFieldEditor } from './ResolvedFieldEditor'
 import { getDidValuesEffectivelyChange } from './utils'
@@ -14,6 +15,7 @@ type Props = {
 }
 
 export function MatchFieldRow({ comparison }: Props) {
+	const { t } = useLocaleContext()
 	const { strategy, excludedFields, toggleField, fieldOverrides, clearFieldOverride } =
 		useMatchReviewStore()
 	const { label, currentValue, candidateValue, field } = comparison
@@ -23,13 +25,16 @@ export function MatchFieldRow({ comparison }: Props) {
 	const resolved = resolveFieldValue(currentValue, candidateValue, strategy, excluded, override)
 	const willChange = getDidValuesEffectivelyChange(currentValue, resolved)
 	const hasOverride = fieldOverrides.has(field)
-	const hasEditor = !!FIELD_EDITOR_MAP[field]
 
 	const [isEditing, setIsEditing] = useState(false)
 
 	const handleUndo = () => {
 		clearFieldOverride(field)
 		setIsEditing(false)
+	}
+
+	const handleEditManually = () => {
+		setIsEditing(true)
 	}
 
 	return (
@@ -54,7 +59,11 @@ export function MatchFieldRow({ comparison }: Props) {
 			</div>
 
 			<div className="flex justify-center">
-				<ToolTip content={excluded ? 'Include this field' : 'Exclude this field'}>
+				<ToolTip
+					content={
+						excluded ? t('metadataMatching.includeField') : t('metadataMatching.excludeField')
+					}
+				>
 					<CheckBox
 						variant={willChange && !excluded ? 'primary' : 'default'}
 						rounded="lg"
@@ -76,37 +85,15 @@ export function MatchFieldRow({ comparison }: Props) {
 				)}
 			</div>
 
-			<div className="flex justify-center">
-				{hasEditor && !excluded && (
-					<>
-						{hasOverride ? (
-							<ToolTip content="Undo manual edit">
-								<IconButton variant="ghost" size="xs" onClick={handleUndo}>
-									<Undo2 className="h-3.5 w-3.5" />
-								</IconButton>
-							</ToolTip>
-						) : (
-							<ToolTip content="Edit resolved value">
-								<IconButton
-									className={cn(
-										'opacity-0 transition-opacity duration-150 group-hover/edit:opacity-100',
-										{
-											'opacity-100': isEditing,
-										},
-									)}
-									variant="ghost"
-									size="xs"
-									onClick={() => setIsEditing((prev) => !prev)}
-								>
-									{isEditing ? (
-										<Check className="h-3.5 w-3.5" />
-									) : (
-										<Pencil className="h-3.5 w-3.5" />
-									)}
-								</IconButton>
-							</ToolTip>
-						)}
-					</>
+			<div className="flex items-center justify-center">
+				{isEditing && hasOverride ? (
+					<ToolTip content={t('metadataMatching.reviewDialog.fieldAction.undoManualEdit')}>
+						<IconButton variant="ghost" size="xs" onClick={handleUndo}>
+							<Undo2 className="h-3.5 w-3.5" />
+						</IconButton>
+					</ToolTip>
+				) : (
+					<FieldActionMenu field={field} excluded={excluded} onEditManually={handleEditManually} />
 				)}
 			</div>
 		</div>

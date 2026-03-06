@@ -1,7 +1,7 @@
 import { MergeStrategy, MetadataField } from '@stump/graphql'
 import { create } from 'zustand'
 
-import { MatchRecord } from './types'
+import { FieldOverride, MatchRecord } from './types'
 
 export type MatchReviewState = {
 	isOpen: boolean
@@ -10,7 +10,7 @@ export type MatchReviewState = {
 	currentCandidateIndex: number
 	excludedFields: Set<MetadataField>
 	strategy: MergeStrategy
-	fieldOverrides: Map<MetadataField, unknown>
+	fieldOverrides: Map<MetadataField, FieldOverride>
 
 	open: (records: MatchRecord[], startIndex?: number) => void
 	close: () => void
@@ -21,7 +21,7 @@ export type MatchReviewState = {
 	toggleField: (field: MetadataField) => void
 	resetExcludedFields: () => void
 	setStrategy: (strategy: MergeStrategy) => void
-	setFieldOverride: (field: MetadataField, value: unknown) => void
+	setFieldOverride: (field: MetadataField, override: FieldOverride) => void
 	clearFieldOverride: (field: MetadataField) => void
 	clearAllOverrides: () => void
 }
@@ -110,10 +110,10 @@ export const useMatchReviewStore = create<MatchReviewState>((set, get) => ({
 
 	setStrategy: (strategy) => set({ strategy }),
 
-	setFieldOverride: (field, value) =>
+	setFieldOverride: (field, override) =>
 		set((state) => {
 			const next = new Map(state.fieldOverrides)
-			next.set(field, value)
+			next.set(field, override)
 			return { fieldOverrides: next }
 		}),
 

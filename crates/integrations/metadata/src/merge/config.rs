@@ -14,6 +14,8 @@ pub enum MergeStrategy {
 	FillGaps,
 	/// Overwrite existing values with (truthy) external data
 	PreferExternal,
+	/// PreferExternal for scalars, merge/dedupe for array fields
+	PreferExternalAndMergeLists,
 	/// FillGaps and merge/dedupe for array fields
 	FillAndMergeLists,
 }

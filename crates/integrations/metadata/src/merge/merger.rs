@@ -135,7 +135,8 @@ impl FieldMerger {
 					None
 				}
 			},
-			MergeStrategy::PreferExternal => Some(Some(external_val.clone())),
+			MergeStrategy::PreferExternal
+			| MergeStrategy::PreferExternalAndMergeLists => Some(Some(external_val.clone())),
 		}
 	}
 
@@ -161,7 +162,8 @@ impl FieldMerger {
 		match self.strategy {
 			// For required fields that already have a value, FillGaps does nothing
 			MergeStrategy::FillGaps | MergeStrategy::FillAndMergeLists => None,
-			MergeStrategy::PreferExternal => Some(external_val.clone()),
+			MergeStrategy::PreferExternal
+			| MergeStrategy::PreferExternalAndMergeLists => Some(external_val.clone()),
 		}
 	}
 
@@ -194,7 +196,8 @@ impl FieldMerger {
 				}
 			},
 			MergeStrategy::PreferExternal => Some(Some(external_items.join(", "))),
-			MergeStrategy::FillAndMergeLists => {
+			MergeStrategy::PreferExternalAndMergeLists
+			| MergeStrategy::FillAndMergeLists => {
 				let existing_items: HashSet<String> = existing
 					.as_ref()
 					.map(|s| {
@@ -309,6 +312,40 @@ mod tests {
 			&Some(vec!["Horror".into(), "Sci-Fi".into(), "Romance".into()]),
 		); // existing has value -> should merge/dedup
 
+		assert_eq!(
+			result,
+			Some(Some("Fantasy, Horror, Romance, Sci-Fi".to_string()))
+		);
+	}
+
+	#[test]
+	fn prefer_external_and_merge_lists_overwrites_scalars_merges_lists() {
+		let merger =
+			FieldMerger::new(MergeStrategy::PreferExternalAndMergeLists, vec![], vec![]);
+
+		assert_eq!(
+			merger.merge_scalar(
+				MetadataField::Title,
+				&Some("Old".to_string()),
+				&Some("New".to_string())
+			),
+			Some(Some("New".to_string()))
+		);
+
+		assert_eq!(
+			merger.merge_required_scalar(
+				MetadataField::Title,
+				&"Old".to_string(),
+				&Some("New".to_string())
+			),
+			Some("New".to_string())
+		);
+
+		let result = merger.merge_comma_list(
+			MetadataField::Genres,
+			&Some("Fantasy, Sci-Fi".into()),
+			&Some(vec!["Horror".into(), "Sci-Fi".into(), "Romance".into()]),
+		);
 		assert_eq!(
 			result,
 			Some(Some("Fantasy, Horror, Romance, Sci-Fi".to_string()))

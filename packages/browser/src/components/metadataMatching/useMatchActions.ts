@@ -1,8 +1,15 @@
 import { useGraphQLMutation } from '@stump/client'
 import { graphql } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
+import { useMemo } from 'react'
 import { toast } from 'sonner'
 
+import {
+	getMediaFieldComparisons,
+	getSeriesFieldComparisons,
+	isMediaCandidate,
+	resolveFieldValue,
+} from './types'
 import { useMatchReviewStore } from './useMatchReviewStore'
 
 const acceptMediaMatchMutation = graphql(`
@@ -76,7 +83,20 @@ export function useMatchActions() {
 	const record = records[currentRecordIndex]
 	const isMedia = !!record?.mediaId
 	const entityId = (isMedia ? record?.mediaId : record?.seriesId) ?? ''
-	const hasCandidate = (record?.matchCandidates?.length ?? 0) > currentCandidateIndex
+	const candidate = record?.matchCandidates?.[currentCandidateIndex]
+	const hasCandidate = !!candidate
+	const currentMetadata = isMedia ? record?.media?.metadata : record?.series?.metadata
+
+	const fieldComparisons = useMemo(() => {
+		if (!candidate) return []
+		const meta = candidate.metadata as Record<string, unknown>
+		if (isMedia && isMediaCandidate(candidate.metadata)) {
+			return getMediaFieldComparisons(currentMetadata, meta)
+		} else if (!isMedia && !isMediaCandidate(candidate.metadata)) {
+			return getSeriesFieldComparisons(currentMetadata, meta)
+		}
+		return []
+	}, [candidate, currentMetadata, isMedia])
 
 	const client = useQueryClient()
 
@@ -139,10 +159,23 @@ export function useMatchActions() {
 		const excludeFieldsList = Array.from(excludedFields)
 		const exclude = excludeFieldsList.length > 0 ? excludeFieldsList : undefined
 
-		const overrideEntries = Array.from(fieldOverrides.entries()).map(([field, value]) => ({
-			field,
-			value,
-		}))
+		const overrideEntries = Array.from(fieldOverrides.entries())
+			.map(([field, override]) => {
+				if (override.type === 'custom') {
+					return { field, value: override.value }
+				}
+				const comparison = fieldComparisons.find((c) => c.field === field)
+				if (!comparison) return null
+				const resolved = resolveFieldValue(
+					comparison.currentValue,
+					comparison.candidateValue,
+					strategy,
+					false, // strategy overrides bypass exclusion
+					override,
+				)
+				return { field, value: resolved }
+			})
+			.filter((entry): entry is NonNullable<typeof entry> => entry != null)
 		const overrides = overrideEntries.length > 0 ? overrideEntries : undefined
 
 		if (isMedia) {
@@ -173,5 +206,5 @@ export function useMatchActions() {
 		}
 	}
 
-	return { accept, reject, skip: advance, isPending, hasCandidate }
+	return { accept, reject, isPending, hasCandidate }
 }

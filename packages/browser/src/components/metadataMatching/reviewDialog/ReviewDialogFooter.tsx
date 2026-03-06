@@ -1,22 +1,16 @@
 import { Button, Dialog, NativeSelect, Text } from '@stump/components'
 import { MergeStrategy } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
-import { ArrowLeft, ArrowRight, Check, SkipForward, X } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Check, X } from 'lucide-react'
 
 import { useMatchActions } from '../useMatchActions'
 import { useMatchReviewStore } from '../useMatchReviewStore'
-
-const MERGE_STRATEGY_OPTIONS = [
-	{ label: 'Fill Gaps', value: MergeStrategy.FillGaps },
-	{ label: 'Prefer External', value: MergeStrategy.PreferExternal },
-	{ label: 'Fill & Merge Lists', value: MergeStrategy.FillAndMergeLists },
-]
 
 export function ReviewDialogFooter() {
 	const { t } = useLocaleContext()
 	const { records, currentRecordIndex, strategy, nextRecord, prevRecord, setStrategy } =
 		useMatchReviewStore()
-	const { accept, reject, skip, isPending, hasCandidate } = useMatchActions()
+	const { accept, reject, isPending, hasCandidate } = useMatchActions()
 
 	// TODO: I can't decide if I like or hate those icons
 	return (
@@ -47,18 +41,17 @@ export function ReviewDialogFooter() {
 				</div>
 
 				<NativeSelect
-					options={MERGE_STRATEGY_OPTIONS}
+					options={Object.values(MergeStrategy).map((strategy) => ({
+						label: t(getKey(`strategies.${strategy}`)),
+						value: strategy,
+					}))}
 					value={strategy}
 					onChange={(e) => setStrategy(e.target.value as MergeStrategy)}
-					className="h-8 w-44 text-xs"
+					className="h-8 w-52 text-xs"
 				/>
 			</div>
 
 			<div className="flex items-center gap-2">
-				<Button variant="secondary" size="sm" onClick={skip} disabled={isPending}>
-					<SkipForward className="mr-1.5 h-3.5 w-3.5" />
-					{t(getKey('skip'))}
-				</Button>
 				<Button variant="danger" size="sm" onClick={reject} disabled={isPending || !hasCandidate}>
 					<X className="mr-1.5 h-3.5 w-3.5" />
 					{t(getKey('reject'))}

@@ -24,7 +24,7 @@ export function ResolvedFieldEditor({ field, resolvedValue }: Props) {
 			return (
 				<InlineTextInput
 					value={resolvedValue as string | null}
-					onChange={(value) => setFieldOverride(field, value)}
+					onChange={(value) => setFieldOverride(field, { type: 'custom', value })}
 					size="sm"
 				/>
 			)
@@ -33,7 +33,7 @@ export function ResolvedFieldEditor({ field, resolvedValue }: Props) {
 			return (
 				<InlineTextInput
 					value={resolvedValue as string | null}
-					onChange={(value) => setFieldOverride(field, value)}
+					onChange={(value) => setFieldOverride(field, { type: 'custom', value })}
 					isLong
 					size="sm"
 				/>
@@ -43,7 +43,7 @@ export function ResolvedFieldEditor({ field, resolvedValue }: Props) {
 			return (
 				<InlineNumberInput
 					value={resolvedValue as number | null}
-					onChange={(value) => setFieldOverride(field, value)}
+					onChange={(value) => setFieldOverride(field, { type: 'custom', value })}
 					fieldName={FIELD_VALIDATION_NAME[field]}
 				/>
 			)
@@ -54,7 +54,7 @@ export function ResolvedFieldEditor({ field, resolvedValue }: Props) {
 			return (
 				<InlineBadgeListInput
 					values={(resolvedValue as string[] | null) ?? []}
-					onChange={(values) => setFieldOverride(field, values)}
+					onChange={(values) => setFieldOverride(field, { type: 'custom', value: values })}
 					binding={binding}
 				/>
 			)

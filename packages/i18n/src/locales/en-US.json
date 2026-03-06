@@ -848,7 +848,20 @@
 			"footer": {
 				"accept": "Accept",
 				"reject": "Reject",
-				"skip": "Skip"
+				"strategies": {
+					"FILL_GAPS": "Fill gaps",
+					"PREFER_EXTERNAL": "Prefer external",
+					"PREFER_EXTERNAL_AND_MERGE_LISTS": "Prefer external and merge lists",
+					"FILL_AND_MERGE_LISTS": "Fill and merge lists"
+				}
+			},
+			"fieldAction": {
+				"keepCurrent": "Keep current",
+				"takeExternal": "Take external",
+				"mergeLists": "Merge lists",
+				"editManually": "Edit manually",
+				"reset": "Reset",
+				"undoManualEdit": "Undo manual edit"
 			}
 		},
 		"matchesTable": {

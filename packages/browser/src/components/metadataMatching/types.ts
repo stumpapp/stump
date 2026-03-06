@@ -10,6 +10,16 @@ export type FieldComparison = {
 	candidateValue: unknown
 }
 
+/**
+ * A per-field strategy override that tells the resolver to use a specific
+ * strategy rather than the global one
+ */
+export type PerFieldStrategy = 'keepCurrent' | 'takeExternal' | 'merge'
+
+export type FieldOverride =
+	| { type: 'strategy'; strategy: PerFieldStrategy }
+	| { type: 'custom'; value: unknown }
+
 export function isMediaCandidate(metadata: { __typename: string }): boolean {
 	return metadata.__typename === 'ExternalMediaMetadata'
 }
@@ -171,12 +181,30 @@ export function resolveFieldValue(
 	candidateValue: unknown,
 	strategy: MergeStrategy,
 	excluded: boolean,
-	override?: unknown,
+	override?: FieldOverride,
 ): unknown {
-	// If the user has explicitly overridden this field, use their value
-	if (override !== undefined) return override
-
+	// Excluded fields always keep the current value, regardless of overrides
 	if (excluded) return currentValue
+
+	if (override !== undefined) {
+		if (override.type === 'custom') {
+			return override.value
+		}
+		if (override.type === 'strategy') {
+			switch (override.strategy) {
+				case 'keepCurrent':
+					return currentValue
+				case 'takeExternal':
+					return candidateValue
+				case 'merge':
+					if (Array.isArray(currentValue) && Array.isArray(candidateValue)) {
+						return mergeArrays(currentValue, candidateValue)
+					}
+					// For non-array fields, "merge" acts as take-external
+					return candidateValue
+			}
+		}
+	}
 
 	const currentEmpty = isEmpty(currentValue)
 	const candidateEmpty = isEmpty(candidateValue)
@@ -186,6 +214,12 @@ export function resolveFieldValue(
 			return currentEmpty ? candidateValue : currentValue
 
 		case MergeStrategy.PreferExternal:
+			return candidateEmpty ? currentValue : candidateValue
+
+		case MergeStrategy.PreferExternalAndMergeLists:
+			if (Array.isArray(currentValue) && Array.isArray(candidateValue)) {
+				return mergeArrays(currentValue, candidateValue)
+			}
 			return candidateEmpty ? currentValue : candidateValue
 
 		case MergeStrategy.FillAndMergeLists:

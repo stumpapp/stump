@@ -1547,7 +1547,9 @@ export enum MergeStrategy {
   /** Only populate fields that are currently nullish */
   FillGaps = 'FILL_GAPS',
   /** Overwrite existing values with (truthy) external data */
-  PreferExternal = 'PREFER_EXTERNAL'
+  PreferExternal = 'PREFER_EXTERNAL',
+  /** PreferExternal for scalars, merge/dedupe for array fields */
+  PreferExternalAndMergeLists = 'PREFER_EXTERNAL_AND_MERGE_LISTS'
 }
 
 export type MetadataFetchRecord = {

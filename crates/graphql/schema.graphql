@@ -1457,6 +1457,8 @@ enum MergeStrategy {
 	FILL_GAPS
 	"Overwrite existing values with (truthy) external data"
 	PREFER_EXTERNAL
+	"PreferExternal for scalars, merge/dedupe for array fields"
+	PREFER_EXTERNAL_AND_MERGE_LISTS
 	"FillGaps and merge/dedupe for array fields"
 	FILL_AND_MERGE_LISTS
 }

@@ -147,7 +147,7 @@ type PendingMatchRow = {
 
 const columnHelper = createColumnHelper<PendingMatchRow>()
 
-function ReviewButton({ record }: { record: MatchRecord }) {
+function ReviewButton({ records, startIndex }: { records: MatchRecord[]; startIndex: number }) {
 	const open = useMatchReviewStore((s) => s.open)
 	return (
 		<div className="inline-flex items-end md:w-2">
@@ -156,7 +156,7 @@ function ReviewButton({ record }: { record: MatchRecord }) {
 				variant="ghost"
 				className="h-7 w-7 shrink-0"
 				title="Review match"
-				onClick={() => open([record])}
+				onClick={() => open(records, startIndex)}
 			>
 				<Eye className="h-4 w-4" />
 			</Button>
@@ -202,12 +202,12 @@ export function PendingMatchesTable() {
 		() =>
 			createColumns(t, [
 				columnHelper.display({
-					cell: ({ row }) => <ReviewButton record={row.original.record} />,
+					cell: ({ row }) => <ReviewButton records={records} startIndex={row.index} />,
 					id: 'actions',
 					size: 28,
 				}),
 			]),
-		[t],
+		[t, records],
 	)
 
 	const { mutate: acceptAll, isPending: isAcceptingAll } = useGraphQLMutation(

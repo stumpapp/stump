@@ -283,7 +283,11 @@ impl IntoOPDSEntry for OPDSEntryBuilder<OPDSPublicationEntity> {
 			.metadata
 			.as_ref()
 			.and_then(|m| m.writers.clone())
-			.map(|w| w.split(',').map(|s| s.trim().to_string()).collect::<Vec<_>>())
+			.map(|w| {
+				w.split(',')
+					.map(|s| s.trim().to_string())
+					.collect::<Vec<_>>()
+			})
 			.filter(|v| !v.is_empty());
 
 		let content = match &summary {

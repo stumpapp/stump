@@ -36,6 +36,7 @@ pub struct OpdsEntry {
 }
 
 impl OpdsEntry {
+	#[allow(clippy::too_many_arguments)]
 	pub fn new(
 		id: String,
 		updated: DateTime<FixedOffset>,

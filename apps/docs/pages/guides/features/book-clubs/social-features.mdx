@@ -1,0 +1,42 @@
+import { Callout } from 'nextra/components'
+
+# Social Features
+
+<Callout emoji="🚧">
+	This aspect isn't fully thought out yet. Please share ideas by opening an
+	[issue](https://github.com/stumpapp/stump/issues/new/choose) if you have any!
+</Callout>
+
+## Discussions
+
+Book clubs have dedicated discussion rooms where members can chat about the current book, suggest future books, or just talk in general. There are two types of discussions:
+
+1. Pinned discussions
+2. Book-specific discussions (e.g., a discussion for a specific book)
+
+You can see the [book club books](/guides/features/book-clubs/books) guide for more information about book-specific discussions, however the pair function almost identically. The main difference is the internal detail of the book relationship.
+
+### Chat Features
+
+The discussion rooms support basic chat features, such as:
+
+- Non-live chat (messages are only fetched when the page is loaded or manually refreshed)
+- Reactions (emoji-based, with support for custom emojis)
+- Inline replies
+- Threaded discussions
+
+### Future Improvements
+
+While Stump is notably **not** a chat application, I will try to make these as functional as possible while still keeping the scope reasonable. Some features that I think would be nice to have:
+
+- Editing and deleting messages
+- Live chat (currently, messages are only fetched when the page is loaded or manually refreshed)
+- Better UX for message actions (e.g., double-tapping to edit, etc.)
+- @mentions with notifications and other typical chat-like features
+- Inline markdown support, mostly for things like spoilers and inline emojis
+
+## Import Disclaimer
+
+The chat features are not and will not be designed to be a secure messaging platform. It is purely meant for casual discussions around books, and should not be used for anything that requires a high level of security or privacy. Messages are stored in plaintext in the database without encryption, and there are no plans to change this.
+
+Of course, you own your data so it isn't like a third party is snooping on your messages, however I still want to make it very clear that this is **not** an intentionally secure messaging platform.

@@ -11,7 +11,7 @@ import {
 	TEXT_VARIANTS,
 } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
-import dayjs from 'dayjs'
+import { intlFormat } from 'date-fns'
 import toUpper from 'lodash/toUpper'
 import { Info } from 'lucide-react'
 import { useMemo } from 'react'
@@ -64,8 +64,8 @@ export default function ServerInfoSection() {
 				</Alert>
 			)}
 
-			{version && (
-				<div className="flex flex-col gap-8 md:flex-row">
+			<div className="flex flex-row flex-wrap gap-12 md:gap-8">
+				{version && (
 					<div>
 						<Label>Semantic version</Label>
 						<Link
@@ -81,16 +81,18 @@ export default function ServerInfoSection() {
 							<span>v{version.semver}</span>
 						</Link>
 					</div>
+				)}
 
-					{buildChannel && (
-						<div>
-							<Label>Build channel</Label>
-							<Text size="sm" variant="muted">
-								{toUpper(buildChannel.charAt(0)) + buildChannel.slice(1)}
-							</Text>
-						</div>
-					)}
+				{buildChannel && (
+					<div>
+						<Label>Build channel</Label>
+						<Text size="sm" variant="muted">
+							{toUpper(buildChannel.charAt(0)) + buildChannel.slice(1)}
+						</Text>
+					</div>
+				)}
 
+				{version && (
 					<div>
 						<Label>Exact commit</Label>
 						<Link
@@ -106,14 +108,23 @@ export default function ServerInfoSection() {
 							<span>{version.rev}</span>
 						</Link>
 					</div>
+				)}
+
+				{version && (
 					<div>
 						<Label>Build date</Label>
 						<Text size="sm" variant="muted">
-							{dayjs(version.compileTime).format('LLL')}
+							{intlFormat(new Date(version.compileTime), {
+								month: 'long',
+								day: 'numeric',
+								year: 'numeric',
+								hour: 'numeric',
+								minute: '2-digit',
+							})}
 						</Text>
 					</div>
-				</div>
-			)}
+				)}
+			</div>
 		</div>
 	)
 }

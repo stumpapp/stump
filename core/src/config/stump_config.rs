@@ -304,6 +304,7 @@ impl StumpConfig {
 		let cache_dir = self.get_cache_dir();
 		let thumbs_dir = self.get_thumbnails_dir();
 		let avatars_dir = self.get_avatars_dir();
+		let emojis_dir = self.get_emojis_dir();
 		let pdf_cache_dir = self.get_pdf_cache_dir();
 		if !cache_dir.exists() {
 			std::fs::create_dir(cache_dir).unwrap();
@@ -313,6 +314,9 @@ impl StumpConfig {
 		}
 		if !avatars_dir.exists() {
 			std::fs::create_dir(avatars_dir).unwrap();
+		}
+		if !emojis_dir.exists() {
+			std::fs::create_dir(emojis_dir).unwrap();
 		}
 		if !pdf_cache_dir.exists() {
 			std::fs::create_dir_all(pdf_cache_dir).unwrap();
@@ -363,6 +367,11 @@ impl StumpConfig {
 	/// Returns a `PathBuf` to the Stump avatars directory
 	pub fn get_avatars_dir(&self) -> PathBuf {
 		PathBuf::from(&self.config_dir).join("avatars")
+	}
+
+	/// Returns a `PathBuf` to the Stump custom emojis directory
+	pub fn get_emojis_dir(&self) -> PathBuf {
+		PathBuf::from(&self.config_dir).join("emojis")
 	}
 
 	/// Returns a `PathBuf` to the PDF page cache directory

@@ -14,7 +14,7 @@ import { useColors } from '~/lib/constants'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { cn } from '~/lib/utils'
 import { usePreferencesStore } from '~/stores'
-import { flattenToc, type TableOfContentsItem, useEpubLocationStore } from '~/stores/epub'
+import { type TableOfContentsItem, useEpubLocationStore } from '~/stores/epub'
 import { useEpubSheetStore } from '~/stores/epubSheet'
 
 import AnnotationsAndBookmarks from './AnnotationsAndBookmarks'
@@ -36,7 +36,6 @@ export default function LocationsSheetContent() {
 	const book = useEpubLocationStore((store) => store.book)
 	const toc = useEpubLocationStore((store) => store.toc)
 	const embeddedMetadata = useEpubLocationStore((store) => store.embeddedMetadata)
-	const position = useEpubLocationStore((store) => store.position)
 	const currentChapter = useEpubLocationStore((store) => store.currentChapter)
 
 	const requestHeaders = useEpubLocationStore((store) => store.requestHeaders)
@@ -49,23 +48,9 @@ export default function LocationsSheetContent() {
 
 	const flatTocWithLevels = flattenTocWithLevels(toc)
 
-	const findNextItem = (item: TableOfContentsItem) => {
-		const flatToc = flattenToc(toc)
-		const index = flatToc.indexOf(item)
-		return flatToc[index + 1]
-	}
-
-	const checkIsActive = (item: TableOfContentsItem) => {
-		const nextItem = findNextItem(item)
-		if (item.position) {
-			const isAfterChapterStart = position >= item.position
-			const isBeforeChapterEnd = nextItem?.position ? position < nextItem?.position : true
-			return isAfterChapterStart && isBeforeChapterEnd
-		}
+	const activeTocItemIndex = flatTocWithLevels.findIndex(({ item }) => {
 		return item.label === currentChapter
-	}
-
-	const activeTocItemIndex = flatTocWithLevels.findIndex(({ item }) => checkIsActive(item))
+	})
 
 	const scrollToCurrentChapter = useCallback(
 		({ animated }: { animated: boolean }) =>

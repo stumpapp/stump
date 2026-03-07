@@ -1,8 +1,7 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { useSDK } from '@stump/client'
 import { isPseStreamLink, OPDSLegacyEntry } from '@stump/sdk'
-import dayjs from 'dayjs'
-import localizedFormat from 'dayjs/plugin/localizedFormat'
+import { intlFormat } from 'date-fns'
 import { forwardRef } from 'react'
 import { Image, Platform, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -17,10 +16,8 @@ import { useFileExplorerAssets } from '../fileExplorer'
 import { ThumbnailImage, TurboImage } from '../image'
 import { useResolveURL } from '../opds/utils'
 import { InfoRow, LongValue, MetadataBadgeSection } from '../overview'
-import { CardList, Heading } from '../ui'
+import { Card, Heading } from '../ui'
 import { getIconSource } from './OPDSLegacyEntryItem'
-
-dayjs.extend(localizedFormat)
 
 type Props = {
 	entry: OPDSLegacyEntry
@@ -107,7 +104,7 @@ export const OPDSLegacyEntryItemSheet = forwardRef<TrueSheet, Props>(
 					</View>
 
 					{showMetadata && (
-						<CardList label="Metadata">
+						<Card label="Metadata">
 							{entry.content && (
 								<LongValue label="Content" value={stripHtml(entry.content).result} />
 							)}
@@ -115,19 +112,30 @@ export const OPDSLegacyEntryItemSheet = forwardRef<TrueSheet, Props>(
 							{currentPage != null && (
 								<InfoRow label="Current Page" value={currentPage.toString()} />
 							)}
-						</CardList>
+						</Card>
 					)}
 
 					<MetadataBadgeSection
 						label="Authors"
-						items={entry.authors?.map((author) => author.name) || []}
+						items={[...new Set(entry.authors?.map((author) => ({ label: author.name })) || [])]}
 					/>
 
-					<CardList label="Technical Info">
+					<Card label="Technical Info">
 						<InfoRow label="Identifier" value={entry.id} />
 						<InfoRow label="Server" value={serverName} />
-						<InfoRow label="Updated" value={dayjs(entry.updated).format('LLL')} />
-					</CardList>
+						{entry.updated && (
+							<InfoRow
+								label="Updated"
+								value={intlFormat(new Date(entry.updated), {
+									month: 'long',
+									day: 'numeric',
+									year: 'numeric',
+									hour: 'numeric',
+									minute: '2-digit',
+								})}
+							/>
+						)}
+					</Card>
 				</View>
 			</TrueSheet>
 		)

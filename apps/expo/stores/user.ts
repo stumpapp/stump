@@ -1,6 +1,9 @@
 import { createUserStore } from '@stump/client'
+import type { AllowedLocale } from '@stump/i18n'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
+
+import { ThumbnailPlaceholderType } from '~/components/image/ThumbnailPlaceholder'
 
 import { CachePolicy } from './reader'
 import { ZustandMMKVStorage } from './store'
@@ -19,15 +22,17 @@ type MobilePreferencesStore = {
 	allowDownscaling: boolean
 	thumbnailRatio: number
 	thumbnailResizeMode: 'cover' | 'stretch' | 'fit'
-	thumbnailPlaceholder: 'grayscale' | 'averageColor' | 'colorful' | 'thumbhash'
+	thumbnailPlaceholder: ThumbnailPlaceholderType
 	performanceMonitor: boolean
 	accentColor?: string | undefined
 	showCuratedDownloads?: boolean | undefined
 	preferNativePdf?: boolean | undefined
 	disableDismissGesture: boolean
 	autoSyncLocalData: boolean
+	locale: AllowedLocale | undefined
 	opdsLayout: ListLayout
 	smartListLayout: ListLayout
+	bookClubsEnabled: boolean
 	/**
 	 * Patch the store with new values.
 	 */
@@ -57,8 +62,11 @@ export const usePreferencesStore = create<MobilePreferencesStore>()(
 			disableDismissGesture: false,
 			autoSyncLocalData: true,
 			thumbnailResizeMode: 'cover',
+			// Note: I default to undefined so the localization library can determine a default
+			locale: undefined,
 			opdsLayout: 'grid',
 			smartListLayout: 'grid',
+			bookClubsEnabled: false,
 			patch: (data) => set(data),
 		}),
 		{

@@ -16,6 +16,7 @@
 		"typescript": "^5.4.5"
 	},
 	"dependencies": {
+		"date-fns": "^4.1.0",
 		"react": "^19.0.0"
 	}
 }

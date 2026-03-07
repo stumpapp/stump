@@ -1,20 +1,75 @@
-import { Input } from '@stump/components'
+import { useGraphQLMutation, useSuspenseGraphQL } from '@stump/client'
+import { Button, Input } from '@stump/components'
+import { graphql } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
+import { useQueryClient } from '@tanstack/react-query'
+import { useState } from 'react'
+import { toast } from 'sonner'
+
+const mutation = graphql(`
+	mutation ServerPublicURLUpdate($publicUrl: String!) {
+		updatePublicUrl(publicUrl: $publicUrl) {
+			publicUrl
+		}
+	}
+`)
+
+const query = graphql(`
+	query ServerPublicURL {
+		serverConfig {
+			publicUrl
+		}
+	}
+`)
 
 export default function ServerPublicURL() {
 	const { t } = useLocaleContext()
 
-	// TODO: query for public URL
-	// TODO: debounced update of public URL
+	const client = useQueryClient()
+	const {
+		data: { serverConfig },
+	} = useSuspenseGraphQL(query, ['serverConfig', 'publicUrl'])
+
+	const [publicUrl, setPublicUrl] = useState(() => serverConfig.publicUrl || '')
+
+	const { mutate: updatePublicUrl } = useGraphQLMutation(mutation, {
+		onSuccess: (data) => {
+			toast.success('Public URL updated successfully')
+			client.setQueryData(['serverConfig', 'publicUrl'], {
+				serverConfig: {
+					publicUrl: data.updatePublicUrl.publicUrl,
+				},
+			})
+		},
+		onError: (error) => {
+			toast.error('Failed to update public URL', {
+				description: error instanceof Error ? error.message : 'An unknown error occurred',
+			})
+		},
+	})
+
+	const isDifferent = (serverConfig.publicUrl || '') !== publicUrl
 
 	return (
-		<div title="This feature is not available yet">
+		<div className="flex items-start gap-4">
 			<Input
 				label={t(getKey('label'))}
 				description={t(getKey('description'))}
 				placeholder="https://my-stump-instance.cloud"
-				disabled
+				value={publicUrl}
+				onChange={(e) => setPublicUrl(e.target.value)}
+				containerClassName="md:max-w-sm max-w-[unset]"
 			/>
+
+			{isDifferent && (
+				<Button
+					variant="primary"
+					className="mt-[26px] shrink"
+					onClick={() => updatePublicUrl({ publicUrl })}
+				>
+					{t('common.save')}
+				</Button>
+			)}
 		</div>
 	)
 }

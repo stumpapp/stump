@@ -134,12 +134,18 @@ impl Entity {
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
+	#[sea_orm(has_many = "super::book_club_book::Entity")]
+	BookClubBook,
 	#[sea_orm(has_many = "super::book_club_invitation::Entity")]
 	BookClubInvitation,
 	#[sea_orm(has_many = "super::book_club_member::Entity")]
 	BookClubMember,
-	#[sea_orm(has_one = "super::book_club_schedule::Entity")]
-	BookClubSchedule,
+}
+
+impl Related<super::book_club_book::Entity> for Entity {
+	fn to() -> RelationDef {
+		Relation::BookClubBook.def()
+	}
 }
 
 impl Related<super::book_club_invitation::Entity> for Entity {
@@ -151,12 +157,6 @@ impl Related<super::book_club_invitation::Entity> for Entity {
 impl Related<super::book_club_member::Entity> for Entity {
 	fn to() -> RelationDef {
 		Relation::BookClubMember.def()
-	}
-}
-
-impl Related<super::book_club_schedule::Entity> for Entity {
-	fn to() -> RelationDef {
-		Relation::BookClubSchedule.def()
 	}
 }
 
@@ -174,11 +174,11 @@ impl ActiveModelBehavior for ActiveModel {
 				let slug = slugify!(self.name.as_ref().as_str());
 				self.slug = Set(slug);
 			}
-			if self.created_at.is_not_set() {
-				self.created_at = Set(DateTimeWithTimeZone::from(Utc::now()));
-			}
 			if self.member_role_spec.is_not_set() {
 				self.member_role_spec = Set(Some(BookClubMemberRoleSpec::default()));
+			}
+			if self.created_at.is_not_set() {
+				self.created_at = Set(DateTimeWithTimeZone::from(Utc::now()));
 			}
 		}
 

@@ -95,6 +95,45 @@ impl IntoResponse for BufferResponse {
 	}
 }
 
+/// Download an image from a URL and return its raw bytes and extension (derived from the content type)
+pub async fn download_image(url: &str) -> Result<(Vec<u8>, String), String> {
+	let response = reqwest::get(url)
+		.await
+		.map_err(|e| format!("Failed to fetch image from '{url}': {e}"))?;
+
+	if !response.status().is_success() {
+		return Err(format!(
+			"Non-success status {} fetching image from '{url}'",
+			response.status()
+		));
+	}
+
+	let content_type = response
+		.headers()
+		.get(header::CONTENT_TYPE)
+		.and_then(|v| v.to_str().ok())
+		.unwrap_or_default();
+
+	if !content_type.starts_with("image/") {
+		return Err(format!(
+			"Invalid content type '{content_type}' fetching image from '{url}'"
+		));
+	}
+
+	let ext = content_type
+		.split('/')
+		.nth(1)
+		.map(|s| s.split(';').next().unwrap_or(s).trim().to_lowercase())
+		.unwrap_or_else(|| "jpg".to_string());
+
+	let bytes = response.bytes().await.map_err(|e| {
+		tracing::error!(?e, "Failed to read image bytes from response");
+		format!("Failed to read image bytes from '{url}'")
+	})?;
+
+	Ok((bytes.to_vec(), ext))
+}
+
 #[cfg(test)]
 mod tests {
 	use super::*;

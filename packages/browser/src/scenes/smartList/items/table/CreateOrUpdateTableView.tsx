@@ -97,7 +97,7 @@ export default function CreateOrUpdateTableView({ isCreating, isOpen, onClose }:
 					<Dialog.Description>
 						{isCreating
 							? t(withLocaleKey('description.create'))
-							: `${t(withLocaleKey('description.update'))}} "${selectedView?.name}"`}
+							: `${t(withLocaleKey('description.update'))} "${selectedView?.name}"`}
 					</Dialog.Description>
 					<Dialog.Close onClick={onClose} />
 				</Dialog.Header>

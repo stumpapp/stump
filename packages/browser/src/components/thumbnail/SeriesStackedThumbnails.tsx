@@ -1,9 +1,9 @@
 import { cn } from '@stump/components'
 import { ImageRef } from '@stump/graphql'
 import { ColorSpace, getColor, OKLCH, serialize, set, sRGB } from 'colorjs.io/fn'
-import { useMemo, useState } from 'react'
-import { useMediaMatch } from 'rooks'
+import { useMemo } from 'react'
 
+import { useFancyAnimations } from '@/hooks/useFancyAnimations'
 import { usePreferences } from '@/hooks/usePreferences'
 import { useTheme } from '@/hooks/useTheme'
 
@@ -58,10 +58,9 @@ type Props = {
 export function SeriesStackedThumbnails({ thumbnailData, width: cardWidth, className }: Props) {
 	const { isDarkVariant, getColor: getThemeColor } = useTheme()
 	const {
-		preferences: { thumbnailRatio, enableFancyAnimations },
+		preferences: { thumbnailRatio },
 	} = usePreferences()
-	const [isTouchDevice] = useState(() => !!('ontouchstart' in window))
-	const isDesktop = useMediaMatch('(min-width: 1024px)')
+	const { shouldFancyHover } = useFancyAnimations()
 
 	const baseThumbnailWidth = cardWidth * 0.7
 	const baseThumbnailHeight = baseThumbnailWidth / thumbnailRatio
@@ -105,8 +104,6 @@ export function SeriesStackedThumbnails({ thumbnailData, width: cardWidth, class
 				height: baseThumbnailHeight * config.scale,
 			}
 
-			const shouldAnimate = enableFancyAnimations && !isTouchDevice && isDesktop
-
 			const leftOffset = cardWidth * config.x - currentThumbnailSize.width / 2
 			const translateY = baseThumbnailHeight * config.y
 
@@ -131,7 +128,7 @@ export function SeriesStackedThumbnails({ thumbnailData, width: cardWidth, class
 					className={cn(
 						'absolute bottom-0 will-change-transform',
 						'translate-x-[var(--x)] translate-y-[var(--y)] rotate-[var(--r)]',
-						shouldAnimate && [
+						shouldFancyHover && [
 							'transform-gpu duration-300',
 							'group-hover:translate-x-[var(--x-hover)] group-hover:translate-y-[var(--y-hover)] group-hover:rotate-[var(--r-hover)]',
 						],
@@ -141,11 +138,13 @@ export function SeriesStackedThumbnails({ thumbnailData, width: cardWidth, class
 							zIndex: config.zIndex,
 							left: leftOffset,
 							'--x': '0px',
-							'--x-hover': shouldAnimate ? `${hoverTranslateX}px` : '0px',
 							'--y': `${translateY}px`,
-							'--y-hover': shouldAnimate ? `${hoverTranslateY}px` : `${translateY}px`,
 							'--r': '0deg',
-							'--r-hover': shouldAnimate ? `${hoverRotate}deg` : '0deg',
+							...(shouldFancyHover && {
+								'--x-hover': `${hoverTranslateX}px`,
+								'--y-hover': `${hoverTranslateY}px`,
+								'--r-hover': `${hoverRotate}deg`,
+							}),
 						} as React.CSSProperties
 					}
 				>

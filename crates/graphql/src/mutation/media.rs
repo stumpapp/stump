@@ -353,6 +353,7 @@ impl MediaMutation {
 		};
 
 		let is_complete: bool;
+		let has_elapsed_seconds: bool;
 
 		match input.clone() {
 			MediaProgressInput::Epub(input) => {
@@ -361,6 +362,7 @@ impl MediaMutation {
 				active_session.locator = Set(locator);
 				active_session.percentage_completed = Set(input.percentage);
 				active_session.elapsed_seconds = Set(input.elapsed_seconds);
+				has_elapsed_seconds = input.elapsed_seconds.is_some();
 				is_complete = input.is_complete.unwrap_or(
 					input.percentage.unwrap_or_default() >= Decimal::new(1, 0),
 				);
@@ -368,6 +370,7 @@ impl MediaMutation {
 			MediaProgressInput::Paged(input) => {
 				active_session.page = Set(Some(input.page));
 				active_session.elapsed_seconds = Set(input.elapsed_seconds);
+				has_elapsed_seconds = input.elapsed_seconds.is_some();
 
 				let book_pages = get_book_pages(id.to_string(), conn).await?;
 				is_complete = input.page >= book_pages;
@@ -380,9 +383,11 @@ impl MediaMutation {
 			[
 				reading_session::Column::UpdatedAt,
 				reading_session::Column::PercentageCompleted,
-				reading_session::Column::ElapsedSeconds,
 			],
 			[
+				// Note: This does mean you effectively cannot unset the field. I think that is acceptable,
+				// since you can just send Some(0) to "unset" the elapsed seconds
+				has_elapsed_seconds.then_some(reading_session::Column::ElapsedSeconds),
 				(matches!(input, MediaProgressInput::Epub(_)))
 					.then(|| reading_session::Column::Epubcfi),
 				(matches!(input, MediaProgressInput::Epub(_)))

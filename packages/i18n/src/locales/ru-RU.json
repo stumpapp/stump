@@ -1,0 +1,2364 @@
+{
+	"underConstruction": {
+		"heading": "Это неловко",
+		"message": "Ты наткнулся на страницу, которая все еще разрабатывается. Я бы хотел показать ее тебе, но она еще не совсем готова.",
+		"homeLink": "На главную",
+		"githubLink": "Просмотреть проблему GitHub"
+	},
+	"authScene": {
+		"claimHeading": "Инициализируйте сервер",
+		"claimText": "Этот сервер Stump не инициализирован. Используйте форму ниже, чтобы создать свою учетную запись. После создания вы получите полный доступ ко всем функциям сервера.",
+		"form": {
+			"validation": {
+				"missingUsername": "Вы не ввели имя пользователя",
+				"missingPassword": "Пароль не может быть пустым",
+				"usernameAlreadyExists": "Это имя пользователя уже занято"
+			},
+			"labels": {
+				"username": "Логин",
+				"password": "Пароль"
+			},
+			"buttons": {
+				"createAccount": "Создать Аккаунт",
+				"login": "Войти",
+				"loginWithOidc": "Log in with OIDC",
+				"createAccountWithOidc": "Create Account with OIDC"
+			}
+		},
+		"toasts": {
+			"loggingIn": "Вход...",
+			"loggedIn": "С возвращением!",
+			"loggedInFirstTime": "Добро пожаловать!",
+			"registering": "Регистрация...",
+			"registered": "Зарегистрировано!",
+			"loginFailed": "Не удалось войти. Пожалуйста, попробуйте снова",
+			"registrationFailed": "Ошибка регистрации. Пожалуйста, попробуйте еще раз"
+		}
+	},
+	"adminLibrarySidebar": {
+		"libraryConfiguration": {
+			"heading": "Настройки библиотеки",
+			"subtitleCreating": "Предпросмотр вашей новой библиотеки будет показан ниже",
+			"subtitleEditing": "Предварительный просмотр правок вашей библиотеки будет показан ниже"
+		}
+	},
+	"bookOverviewScene": {
+		"fileInformation": {
+			"heading": "Информация о файле",
+			"labels": {
+				"fileSize": "Размер файла",
+				"fileType": "Тип файла",
+				"fileLocation": "Расположение файла",
+				"fileChecksum": "Контрольная сумма"
+			}
+		},
+		"emailBook": {
+			"heading": "Email книга",
+			"description": "Send this book to a device or email address",
+			"form": {
+				"email": {
+					"label": "Электронная почта",
+					"placeholder": "Адрес эл. почты",
+					"description": "Адрес электронной почты для отправки книги. Нажмите 'Добавить' после ввода каждой строки"
+				},
+				"devices": {
+					"label": "Устройства",
+					"placeholder": "Выбор устройств",
+					"noFilterMatch": "Нет подходящих устройств"
+				}
+			}
+		},
+		"nextInSeries": "Следующая в Серии"
+	},
+	"createOrUpdateBookClubForm": {
+		"fields": {
+			"name": {
+				"label": "Название",
+				"placeholder": "Мой книжный клуб",
+				"description": "Название вашего книжного клуба"
+			},
+			"description": {
+				"label": "Описание",
+				"placeholder": "An 'Our Flag Means Death' fan club. We read pirate fiction to our hearts' content",
+				"description": "Краткое описание вашего книжного клуба — опционально"
+			},
+			"is_private": {
+				"label": "Частный клуб",
+				"description": "Если эта опция включена, только приглашаемые вами пользователи смогут присоединиться к клубу"
+			},
+			"member_role_spec": {
+				"heading": "Настраиваемые роли пользователей",
+				"subtitle": [
+					"Если хотите, можете задать собственные названия ролям в книжном клубе. Дополнительную информацию можно посмотреть в разделе",
+					"документация"
+				],
+				"member": {
+					"label": "Участник",
+					"placeholder": "Участник",
+					"description": "Название роли по умолчанию для вашего книжного клуба"
+				},
+				"moderator": {
+					"label": "Модератор",
+					"placeholder": "Модератор",
+					"description": "Название роли модератора для вашего книжного клуба"
+				},
+				"admin": {
+					"label": "Админ",
+					"placeholder": "Админ",
+					"description": "Название роли администратора для вашего книжного клуба"
+				},
+				"creator": {
+					"label": "Создатель",
+					"placeholder": "Создатель",
+					"description": "Название роли создателя для вашего книжного клуба. Это вы!"
+				}
+			},
+			"membershipOptions": {
+				"displayName": {
+					"label": "Отображаемое имя",
+					"placeholder": "Отображаемое имя",
+					"description": "Опциональное отображаемое имя в книжном клубе. Если установлено, то замещает ваше имя пользователя"
+				},
+				"hideProgress": {
+					"label": "Скрыть прогресс",
+					"description": "If enabled, your reading progress will be hidden from other members of the book club"
+				}
+			}
+		},
+		"validation": {
+			"missingName": "Название обязательно",
+			"alreadyTaken": "уже занято"
+		}
+	},
+	"createBookClubScene": {
+		"heading": "Создать новый книжный клуб",
+		"subtitle": "You can create a private book club for a select few, or make it public for anyone on the server to join",
+		"form": {
+			"stepLabel": "Шаг",
+			"steps": [
+				{
+					"label": "Базовые сведения",
+					"heading": "Основная информация",
+					"description": "Детали клуба, включая его название и описание"
+				},
+				{
+					"label": "Роли",
+					"heading": "Роли",
+					"description": "Настройте роли в книжном клубе"
+				},
+				{
+					"label": "Членство",
+					"heading": "Настройки членства",
+					"description": "Дополнительные настройки вашего книжного клуба"
+				},
+				{
+					"label": "Предпросмотр",
+					"heading": "Предпросмотр",
+					"description": "Проверьте настройки клуба перед созданием"
+				}
+			],
+			"review": {
+				"yes": "Да",
+				"no": "Нет",
+				"none": "Отсутствует",
+				"labels": {
+					"name": "Название",
+					"description": "Описание"
+				}
+			},
+			"submit": "Создать Книжный Клуб"
+		}
+	},
+	"bookClubSettingsScene": {
+		"sidebar": {
+			"basics": "Базовые сведения",
+			"members": {
+				"members": "Участники",
+				"roles": "Роли",
+				"label": "Членство"
+			},
+			"scheduling": {
+				"scheduler": "Планировщик",
+				"options": "Настройки",
+				"label": "Планирование"
+			},
+			"danger-zone": {
+				"delete": "Удаление",
+				"label": "Осторожно, зона риска"
+			}
+		},
+		"basics": {
+			"title": "Основная информация",
+			"description": "Информация об этом клубе, включая его название и описание",
+			"form": {
+				"submit": "Обновить клуб"
+			}
+		},
+		"members": {
+			"title": "Участники",
+			"description": "Управление участниками книжного клуба",
+			"sections": {}
+		},
+		"roles": {
+			"title": "Роли",
+			"description": "Настройка ролей в книжном клубе",
+			"sections": {
+				"roleMappings": {
+					"heading": "Существующие профили ролей",
+					"description": "Текущие сопоставления ролей для книжного клуба"
+				}
+			}
+		},
+		"scheduling/scheduler": {
+			"title": "Планировщик",
+			"description": "Create and manage the scheduled readings for this book club"
+		},
+		"scheduling/options": {
+			"title": "Настройки",
+			"description": "Дополнительные параметры для планирования в клубе"
+		},
+		"danger-zone/delete": {
+			"title": "Действия при удалении",
+			"description": "Полностью удалить этот книжный клуб и все его содержимое или определенные ресурсы",
+			"sections": {
+				"deleteClub": {
+					"heading": "Удалить клуб",
+					"description": [
+						"Полностью удалить этот книжный клуб и все его содержимое.",
+						"Это действие нельзя будет отменить"
+					],
+					"trigger": "Удалить клуб"
+				}
+			}
+		}
+	},
+	"createOrUpdateLibraryForm": {
+		"fields": {
+			"name": {
+				"label": "Название",
+				"description": "Понятное название вашей библиотеки",
+				"placeholder": "Моя библиотека"
+			},
+			"path": {
+				"label": "Путь",
+				"description": "Путь к папке библиотеки на вашем сервере",
+				"placeholder": "/путь/к/библиотеке"
+			},
+			"description": {
+				"label": "Описание",
+				"description": "Краткое описание вашей библиотеки",
+				"placeholder": "Библиотека всех моих любимых книг"
+			},
+			"tags": {
+				"label": "Метки",
+				"description": "Используется для категоризации вашей библиотеки или обеспечения соблюдения правил доступа"
+			},
+			"defaultLibraryView": {
+				"label": "Default library view",
+				"description": "Configure which tab is shown by default when opening this library",
+				"hideSeriesView": {
+					"label": "Hide series tab",
+					"description": "Hide the series tab from the library navigation"
+				},
+				"options": {
+					"series": {
+						"label": "Series",
+						"description": "Show the series tab by default"
+					},
+					"books": {
+						"label": "Books",
+						"description": "Show the books tab by default"
+					}
+				}
+			},
+			"readingSettings": {
+				"section": {
+					"heading": "Настройки чтения",
+					"description": "Настройки чтения по умолчанию для книг"
+				},
+				"imageScaling": {
+					"label": "Масштабирование изображения",
+					"description": "Как читалка на основе изображений масштабирует картинки на странице"
+				},
+				"readingMode": {
+					"label": "Читалка по умолчанию",
+					"description": "Читалка по умолчанию для книг с изображениями"
+				},
+				"readingDirection": {
+					"label": "Направление чтения",
+					"description": "В каком направлении читатель продвигается по страницам"
+				}
+			},
+			"thumbnailConfig": {
+				"section": {
+					"heading": {
+						"create": "Настройки миниатюр",
+						"update": "Создание"
+					},
+					"description": "Ускорьте загрузку при просмотре вашей библиотеки путем создания эскизов для ваших книг",
+					"disabled": "No additional configuration is required when thumbnail generation is disabled"
+				},
+				"enableSwitch": {
+					"label": "Включено",
+					"description": "Создать эскизы для этой библиотеки"
+				},
+				"resizeMethod": {
+					"label": "Resize Method",
+					"options": {
+						"scaleEvenlyByFactor": "Evenly Scale",
+						"exact": "Exact Size",
+						"scaleDimension": "Auto Scaled",
+						"none": "None"
+					}
+				},
+				"scaleEvenlyByFactor": {
+					"description": "Scale the thumbnail by a factor of the original size. E.g., 0.65 will result in a thumbnail that is 65% of the original size",
+					"factor": {
+						"label": "Scale Factor"
+					}
+				},
+				"exact": {
+					"description": "Resize the thumbnail to an exact size in pixels",
+					"width": {
+						"label": "Width"
+					},
+					"height": {
+						"label": "Height"
+					}
+				},
+				"scaleDimension": {
+					"label": "Auto Scaled",
+					"description": "Set either the width or height of the thumbnail and auto-scale the other to keep the original aspect ratio",
+					"dimension": {
+						"label": "Dimension",
+						"options": {
+							"width": "Width",
+							"height": "Height"
+						}
+					},
+					"size": {
+						"label": "Size"
+					}
+				},
+				"format": {
+					"label": "Формат изображения",
+					"description": "Формат создаваемых эскизов изображений"
+				},
+				"quality": {
+					"label": "Качество",
+					"description": "Качество создаваемых эскизов изображений, между 0 и 1,0"
+				}
+			},
+			"ignoreRules": {
+				"section": {
+					"heading": "Правила игнорирования",
+					"description": "Определите глобальные шаблоны, позволяющие игнорировать определенные файлы или каталоги во время сканирования"
+				},
+				"noRules": "Нет настроенных правил игнорирования",
+				"save": "Сохранить изменения",
+				"addRule": {
+					"label": "Новое правило",
+					"description": "Глобальный шаблон для игнорирования файлов или каталогов",
+					"addButton": "Добавить правило",
+					"ignoreParents": {
+						"title": "Игнорировать все родительские каталоги",
+						"label": "Игнорировать родительские каталоги"
+					},
+					"ignoreSubdirs": {
+						"title": "Игнорировать все подкаталоги",
+						"label": "Игнорировать подкаталоги"
+					}
+				},
+				"invalidGlob": "Неверный глобальный шаблон",
+				"duplicateGlob": "Скопировать существующее правило",
+				"lockConfig": {
+					"lock": "Заблокировать настройку",
+					"unlock": "Разблокировать настройку"
+				},
+				"editRule": "Редактировать правило",
+				"deleteRule": "Удалить правило",
+				"cancelEdit": "Отменить изменения",
+				"confirmEdit": "Подтвердить изменение"
+			},
+			"convertOptions": {
+				"section": {
+					"heading": "Преобразование файла",
+					"description": "Stump может преобразовать некоторые форматы файлов в более совместимые"
+				},
+				"rarToZip": {
+					"label": "Преобразовать RAR в ZIP",
+					"description": "Во время сканирования преобразовать RAR/CBR файлы в ZIP/CBZ"
+				},
+				"deleteRarAfter": {
+					"label": "Удалить RAR после преобразования",
+					"description": "Удалить исходный файл RAR/CBR после преобразования. Это необратимо"
+				}
+			},
+			"scannerFeatures": {
+				"section": {
+					"heading": "Дополнительная обработка",
+					"description": "Дополнительные функции обработки для сканера",
+					"disclaimer": "Эти функции включают дополнительные процессы чтения файлов, которые могут замедлить сканирование"
+				},
+				"processMetadata": {
+					"label": "Обработка метаданных",
+					"description": "Извлечь любые метаданные из файлов библиотеки и сохранить результаты в базе данных"
+				},
+				"watch": {
+					"label": "Отслеживание",
+					"description": "Отслеживание изменений в каталоге библиотеки и актуализация их в базе данных"
+				},
+				"generateFileHashes": {
+					"label": "Генерировать хэши файлов",
+					"description": "Сгенерировать хэш каждого файла в библиотеке для обнаружения дубликатов"
+				},
+				"koreaderHashes": {
+					"label": "Совместимые с KoReader хэши",
+					"description": "При использовании KoReader, генерировать дополнительные хэши в формате, который он ожидает"
+				}
+			},
+			"libraryPattern": {
+				"section": {
+					"heading": "Организация",
+					"description": "Определить, какой шаблон наиболее близко соответствует организации вашей библиотеки",
+					"docs": [
+						"Не уверены, какой выбрать? Нажмите",
+						"сюда",
+						"чтобы получить больше информации.",
+						"Вы не сможете изменить эту настройку позже"
+					],
+					"disabled": "Нельзя изменить эту настройку"
+				},
+				"options": {
+					"label": "Шаблон библиотеки",
+					"description": "Параметр, который определяет, как Stump будет упорядочивать вашу библиотеку",
+					"collectionPriority": {
+						"label": "Приоритет коллекции",
+						"description": "Каждая папка самого верхнего уровня корня библиотеки является отдельной серией"
+					},
+					"seriesPriority": {
+						"label": "Приоритет серий",
+						"description": "Каждая папка рекурсивно на любом уровне является отдельной серией"
+					}
+				}
+			}
+		},
+		"scan": {
+			"label": {
+				"create": "Сканировать после создания",
+				"update": "Сканировать после обновления"
+			},
+			"description": "Индексация файлов библиотеки для заполнения базы данных"
+		}
+	},
+	"createLibraryScene": {
+		"heading": "Создать библиотеку",
+		"subtitle": "Libraries are used to group your books together. If you want a refresh on how they work, check out the",
+		"subtitleLink": "соответствующую документацию",
+		"form": {
+			"stepLabel": "Шаг",
+			"steps": [
+				{
+					"label": "Базовые сведения",
+					"heading": "Основная информация",
+					"description": "Детали этой библиотеки, включая ее название, путь и описание"
+				},
+				{
+					"label": "Сканирование",
+					"heading": "Сканирование",
+					"description": "Настройки, связанные с тем, как Stump сканирует библиотеку"
+				},
+				{
+					"label": "Эскизы",
+					"heading": "Эскизы",
+					"description": "Настройки, связанные с тем, будет ли Stump для этой библиотеки создавать эскизы и как"
+				},
+				{
+					"label": "Предпросмотр",
+					"heading": "Предпросмотр",
+					"description": "Просмотр настроек библиотеки перед созданием"
+				}
+			],
+			"review": {
+				"yes": "Да",
+				"no": "Нет",
+				"none": "Отсутствует",
+				"labels": {
+					"generateThumbnails": "Создать миниатюры",
+					"processThumbnailColors": "Process thumbnail colors",
+					"mode": "Режим",
+					"format": "Формат",
+					"quality": "Качество",
+					"name": "Название",
+					"path": "Путь",
+					"description": "Описание",
+					"tags": "Метки",
+					"pattern": "Шаблон",
+					"ignoreRules": "Правила игнорирования",
+					"convertRar": "Преобразование RAR/CBR",
+					"deleteConversions": "Удалить преобразованные файлы",
+					"watch": "Следить за изменениями в каталоге",
+					"processMetadata": "Обработка метаданных",
+					"generateFileHashes": "Генерировать хэши файлов",
+					"generateKoreaderHashes": "Generate KoReader hashes",
+					"scaleEvenlyByFactor": "Evenly Scale",
+					"exact": "Exact Size",
+					"scaleDimension": "Explicitly Sized"
+				}
+			},
+			"buttons": {
+				"confirm": "Создать библиотеку"
+			}
+		}
+	},
+	"fileExplorer": {
+		"uploadModal": {
+			"title": {
+				"books": "Загрузка книг на сервер",
+				"series": "Загрузка серий на сервер"
+			},
+			"description": {
+				"books": "Добавить книги непосредственно по текущему пути в обозревателе файлов",
+				"series": "Добавить серии непосредственно по текущему пути в обозревателе файлов"
+			},
+			"seriesDisclaimer": [
+				"Это должно быть ",
+				"архивированный файл",
+				"содержащий папку, которая должна быть серией, со всеми книгами внутри"
+			],
+			"dropzone": {
+				"books": "Перетащите книги сюда",
+				"series": "Перетащите архив zip сюда",
+				"alt": "Или нажмите для просмотра и загрузки книг с вашего компьютера"
+			},
+			"addedFiles": "Добавленные файлы"
+		}
+	},
+	"librarySettingsScene": {
+		"heading": "Управление Библиотекой",
+		"subtitle": "Manage your library here. If you want a refresh on these settings, check out the",
+		"subtitleLink": "соответствующую документацию",
+		"sidebar": {
+			"basics": "Базовые сведения",
+			"options": {
+				"general": "Основные",
+				"reading": "Чтение",
+				"scanning": "Сканирование",
+				"thumbnails": "Эскизы",
+				"ignore-rules": "Правила игнорирования",
+				"analysis": "Анализ",
+				"label": "Настройки"
+			},
+			"danger-zone": {
+				"access-control": "Управление доступом",
+				"delete": "Удаление",
+				"label": "Осторожно, зона риска"
+			}
+		},
+		"basics": {
+			"title": "Основная информация",
+			"description": "Детали этой библиотеки, включая ее название, путь и описание",
+			"form": {
+				"submit": "Обновление библиотеки"
+			}
+		},
+		"options/reading": {
+			"title": "Чтение",
+			"description": "Настройки чтения по умолчанию для книг в этой библиотеке. Любая книга может переопределить эти настройки"
+		},
+		"options/scanning": {
+			"title": "Сканирование",
+			"description": "Настройки, связанные с тем, как Stump сканирует библиотеку",
+			"sections": {
+				"configureScan": {
+					"heading": "Настройка сканирования",
+					"description": "Сканирование с дополнительными опциями для более тонкого контроля",
+					"form": {
+						"alert": "Это переопределит соответствующие настройки для всей библиотеки",
+						"options": {
+							"forceRebuild": {
+								"label": "Принудительное реконструирование",
+								"description": "Реконструировать на диске каждую книгу из библиотеки",
+								"alert": "Это позволит реконструировать все книги в библиотеке с нуля, включая метаданные и хэши"
+							},
+							"custom": {
+								"label": "Настраиваемый",
+								"description": "Настроить конфигурацию сканирования",
+								"validation": {
+									"noSelection": "По крайней мере одна опция должна быть включена"
+								}
+							},
+							"rebuildMeta": {
+								"label": "Реконструировать метаданные",
+								"description": "Реконструировать метаданные книг в библиотеке"
+							},
+							"regenHashes": {
+								"label": "Сгенерировать новые хэши",
+								"description": "Пересоздать хэши книг в библиотеке"
+							}
+						}
+					}
+				},
+				"defaultScan": {
+					"heading": "Сканирование по умолчанию",
+					"description": "Стандартное сканирование для индексирования нового контента в вашей библиотеке"
+				},
+				"history": {
+					"heading": "История сканирования",
+					"description": "История сканирования этой библиотеки",
+					"empty": "Нет сохраненной информации о сканировании этой библиотеки",
+					"runScan": "Запустить сканирование",
+					"inspect": "Смотреть подробности",
+					"inspector": {
+						"title": "Запись о сканировании",
+						"description": "Подробности записи о сканировании",
+						"fields": {
+							"library": "Библиотека",
+							"date": "Дата",
+							"config": "Конфигурация",
+							"jobOutput": "Результат задания",
+							"logs": "Логи"
+						},
+						"logsPresent": "Сохраненные логи этого задания",
+						"seeLogs": "Смотреть логи"
+					},
+					"table": {
+						"columns": {
+							"timestamp": "Сканировалось в",
+							"config": "Конфигурация"
+						},
+						"default": "По умолчанию",
+						"custom": "Настраиваемый"
+					},
+					"clearHistory": "Удалить историю сканирования"
+				}
+			}
+		},
+		"options/thumbnails": {
+			"title": "Эскизы",
+			"description": "Настройки и параметры управления миниатюрами в этой библиотеке",
+			"sections": {
+				"management": {
+					"heading": "Управление",
+					"description": "Управление существующими миниатюрами для этой библиотеки",
+					"thumbnailSelector": {},
+					"deleteThumbnails": {}
+				}
+			}
+		},
+		"options/analysis": {
+			"title": "Анализ",
+			"description": "Анализ содержимого этой библиотеки для выявления потенциальных проблем или улучшений",
+			"sections": {
+				"analyzeBooks": {
+					"heading": "Анализ книг",
+					"description": "Анализ книг в этой библиотеке для прикрепления дополнительных метаданных в базе данных, таких, как размеры страниц для книг на основе изображений",
+					"disclaimerTitle": "This process is resource-intensive",
+					"disclaimer": "Этот процесс потребляет много ресурсов и может длиться продолжительное время. В будущем он будет более настраиваемым",
+					"analyzeButton": "Анализ книг"
+				},
+				"missingFiles": {
+					"heading": "Отсутствующие файлы",
+					"description": "Файлы, на которые ссылается база данных, но не обнаруженные на диске",
+					"noMissingFiles": "В этой библиотеке нет отсутствующих файлов"
+				},
+				"duplicateFiles": {
+					"heading": "Дубликаты файлов",
+					"description": "Файлы, которые потенциально дублируются на диске",
+					"noDuplicateFiles": "В этой библиотеке е обнаружено дубликатов файлов"
+				}
+			}
+		},
+		"danger-zone/access-control": {
+			"title": "Управление доступом",
+			"description": "Контролирование получения доступа к содержимому этой библиотеки",
+			"sections": {
+				"libraryExclusions": {
+					"heading": "Исключенные пользователи",
+					"description": "Запретить определенным пользователям доступ к этой библиотеке или ее содержимому",
+					"noUsersTitle": "No users to exclude",
+					"noUsers": "Нет зарегистрированных пользователей для исключения из этой библиотеки",
+					"updated": "Исключения обновлены",
+					"failure": "Не удалось обновить исключения"
+				}
+			}
+		},
+		"danger-zone/delete": {
+			"title": "Действия при удалении",
+			"description": "Полностью удалить эту библиотеку и все ее содержимое или определенные ресурсы",
+			"sections": {
+				"cleanLibrary": {
+					"heading": "Почистить библиотеку",
+					"description": "Удалить все медиа и серии, которые не удалось обнаружить на диске",
+					"disclaimerTitle": "No files will be deleted",
+					"disclaimer": "Хотя это действие не удалит ни одного файла, оно навсегда удалит все записи, относящиеся к медиа и сериям со статусом \"отсутствует\"",
+					"confirmation": {
+						"label": "Почистить библиотеку",
+						"text": "Вы уверены, что хотите почистить эту библиотеку?"
+					},
+					"emptyText": "There was nothing to clean"
+				},
+				"deleteLibrary": {
+					"heading": "Удалить библиотеку",
+					"description": [
+						"Полностью удалить эту библиотеку и все ее содержимое.",
+						"Это действие нельзя будет отменить"
+					]
+				}
+			}
+		}
+	},
+	"errorScene": {
+		"heading": "Уупс, что-то пошло не так",
+		"message": "Произошла ошибка:",
+		"buttons": {
+			"report": "Сообщить об ошибке",
+			"copy": "Скопировать информацию об ошибке",
+			"goHome": "На главную"
+		}
+	},
+	"homeScene": {
+		"onDeck": {
+			"title": "Your next read",
+			"emptyState": {
+				"heading": "No books on deck",
+				"message": "Your next recommended books will show up here"
+			}
+		},
+		"continueReading": {
+			"title": "Продолжить чтение",
+			"emptyState": {
+				"heading": "Нет данных для отображения",
+				"message": "Здесь будут отображаться все начатые книги"
+			}
+		},
+		"recentlyAddedSeries": {
+			"title": "Недавно добавленные серии",
+			"emptyState": {
+				"heading": "Нет серий для отображения",
+				"message": "Здесь будут отображаться все добавленные в библиотеку серии"
+			}
+		},
+		"recentlyAddedBooks": {
+			"title": "Недавно добавленные книги",
+			"emptyState": {
+				"heading": "Нет данных для отображения",
+				"message": "Здесь будут отображаться недавно добавленные книги"
+			}
+		}
+	},
+	"metadataEditor": {
+		"labels": {
+			"ageRating": "Age rating",
+			"characters": "Characters",
+			"colorists": "Colorists",
+			"coverArtists": "Cover artists",
+			"day": "Day",
+			"editors": "Editors",
+			"format": "Format",
+			"identifierAmazon": "Amazon ID",
+			"identifierCalibre": "Calibre ID",
+			"identifierGoogle": "Google ID",
+			"identifierIsbn": "ISBN",
+			"identifierMobiAsin": "Mobi ASIN",
+			"identifierUuid": "Book UUID",
+			"genres": "Genres",
+			"inkers": "Inkers",
+			"language": "Language",
+			"letterers": "Letterers",
+			"links": "Links",
+			"month": "Month",
+			"notes": "Notes",
+			"number": "Number",
+			"pageCount": "Pages",
+			"pencillers": "Pencillers",
+			"publisher": "Publisher",
+			"series": "Series",
+			"seriesGroup": "Series group",
+			"storyArc": "Story arc",
+			"storyArcNumber": "Story arc number",
+			"summary": "Summary",
+			"teams": "Teams",
+			"title": "Title",
+			"titleSort": "Title sort",
+			"volume": "Volume",
+			"writers": "Writers",
+			"year": "Year",
+			"metaType": "Type",
+			"imprint": "Imprint",
+			"comicid": "Comic ID",
+			"booktype": "Book type",
+			"status": "Status",
+			"totalIssues": "Total issues",
+			"publicationRun": "Publication run",
+			"comicImage": "Comic image",
+			"descriptionFormatted": "Description (formatted)"
+		},
+		"addFields": {
+			"description": "Add each addition on its own line"
+		}
+	},
+	"seriesOverviewScene": {
+		"buttons": {
+			"continueReading": "Продолжить чтение",
+			"downloadSeries": "Скачать серии"
+		}
+	},
+	"createOrUpdateSmartListForm": {
+		"validation": {
+			"nameTooShort": "Название должно содержать не менее 2 символов",
+			"nameTaken": "Нельзя использовать это название"
+		},
+		"fields": {
+			"name": {
+				"label": "Название",
+				"placeholder": "Мой умный список",
+				"description": "Должно быть уникальным, но может быть изменено позже"
+			},
+			"description": {
+				"label": "Описание",
+				"placeholder": "Очень умный список",
+				"description": "Описание вашего умного списка — опционально"
+			},
+			"visibility": {
+				"label": "Доступность просмотра",
+				"options": {
+					"public": {
+						"label": "Открытый доступ",
+						"description": "Доступно для всех пользователей сервера"
+					},
+					"shared": {
+						"label": "Общий доступ",
+						"description": "Определенные пользователи имеют доступ к этому умному списку",
+						"createDisclaimer": "После создания вы можете выбрать, с кем поделиться этим список"
+					},
+					"private": {
+						"label": "Частный",
+						"description": "Только вы имеете доступ к этому умному списку"
+					}
+				}
+			},
+			"queryBuilder": {
+				"uiPerformance": "Производительность этой функции не оптимизирована на уровне интерфейса пользователя и может медленно работать с фильтрами, возвращающими большие объемы данных. В будущем мы это улучшим и оптимизируем",
+				"rootJoiner": {
+					"and": {
+						"label": "И",
+						"description": "Все группы фильтров должны быть истиной для подходящей книги"
+					},
+					"or": {
+						"label": "ИЛИ",
+						"description": "По крайней мере одна группа фильтров должна быть истиной для подходящей книги"
+					}
+				},
+				"groupJoiner": {
+					"and": {
+						"label": "И",
+						"description": "Все должны быть истиной"
+					},
+					"or": {
+						"label": "ИЛИ",
+						"description": "По крайней мере один должен быть истиной"
+					},
+					"not": {
+						"label": "НЕ",
+						"description": "None может быть истиной"
+					}
+				},
+				"grouping": {
+					"label": "Группировать по",
+					"description": "Как следует сгруппировать книги в этом умном списке",
+					"options": {
+						"by_books": {
+							"label": "Без группировки"
+						},
+						"by_series": {
+							"label": "По сериям"
+						},
+						"by_library": {
+							"label": "По библиотеке"
+						}
+					}
+				},
+				"filters": {
+					"emptyState": "Добавить группу для начала",
+					"actions": {
+						"addFilter": "Добавить фильтр",
+						"addGroup": "Добавить группу",
+						"deleteFilter": "Удалить фильтр",
+						"deleteGroup": "Удалить группу"
+					},
+					"is": "равно",
+					"fieldSelect": {
+						"placeholder": "Атрибут",
+						"source": {
+							"label": "Источник",
+							"back": "Назад",
+							"book": {
+								"label": "Книга",
+								"attributes": {
+									"name": "Имя файла",
+									"size": "Размер",
+									"extension": "Расширение",
+									"status": "Статус",
+									"path": "Путь",
+									"pages": "Страницы",
+									"tags": "Метки",
+									"createdAt": "Дата создания",
+									"updatedAt": "Дата изменения"
+								}
+							},
+							"book_meta": {
+								"label": "Метаданные книги",
+								"attributes": {
+									"title": "Заголовок",
+									"summary": "Сводка",
+									"notes": "Примечания",
+									"writers": "Писатели",
+									"pencillers": "Иллюстраторы",
+									"inkers": "Тушевальщики",
+									"letterers": "Литераторы",
+									"editors": "Редакторы",
+									"publisher": "Издатели",
+									"colorists": "Колористы",
+									"links": "Ссылки",
+									"characters": "Персонажи",
+									"teams": "Команды",
+									"genres": "Жанр",
+									"coverArtists": "Иллюстраторы обложек"
+								}
+							},
+							"series": {
+								"label": "Серии",
+								"attributes": {
+									"name": "Название",
+									"path": "Путь"
+								}
+							},
+							"series_meta": {
+								"label": "Метаданные серий",
+								"attributes": {
+									"title": "Заголовок",
+									"summary": "Сводка",
+									"publisher": "Издатель",
+									"imprint": "Отпечаток",
+									"comicid": "ID комикса",
+									"booktype": "Тип книги",
+									"status": "Статус",
+									"volume": "Том",
+									"metaType": "Тип",
+									"ageRating": "Возрастной рейтинг"
+								}
+							},
+							"library": {
+								"label": "Библиотека",
+								"attributes": {
+									"name": "Название",
+									"path": "Путь"
+								}
+							}
+						}
+					},
+					"basicValue": {
+						"placeholder": "Значение",
+						"date": "Дата"
+					},
+					"rangeValue": {
+						"from": {
+							"date": "С даты",
+							"number": "С"
+						},
+						"to": {
+							"date": "До даты",
+							"number": "До"
+						},
+						"inclusive": "Включительно"
+					},
+					"listValue": {
+						"placeholder": "Добавить значение",
+						"emptyState": "Нет значений для отображения"
+					}
+				}
+			}
+		}
+	},
+	"createSmartListScene": {
+		"heading": "Создать умный список",
+		"subtitle": "Создание списка на лету на основе набора фильтров",
+		"form": {
+			"stepLabel": "Шаг",
+			"steps": [
+				{
+					"label": "Базовые сведения",
+					"heading": "Основная информация",
+					"description": "Детали этого умного списка, включая его название, описание и видимость"
+				},
+				{
+					"label": "Фильтры",
+					"heading": "Фильтры",
+					"description": "Применяемые к этому умному списку фильтры"
+				},
+				{
+					"label": "Предпросмотр",
+					"heading": "Предпросмотр",
+					"description": "Просмотр вашего умного списка перед созданием"
+				}
+			],
+			"review": {
+				"yes": "Да",
+				"no": "Нет",
+				"none": "Отсутствует",
+				"labels": {
+					"name": "Название",
+					"description": "Описание",
+					"visibility": "Видимость",
+					"grouping": "Группировать по"
+				}
+			},
+			"buttons": {
+				"confirm": "Создать список"
+			}
+		}
+	},
+	"createOrUpdateApiKey": {
+		"validation": {
+			"futureDate": "Срок действия должен быть в будущем"
+		},
+		"fields": {
+			"name": {
+				"label": "Название",
+				"placeholder": "Синхронизация Koreader"
+			},
+			"expiration": {
+				"label": "Срок действия",
+				"placeholder": "Никогда"
+			},
+			"expiresAt": {
+				"label": "Expires at",
+				"placeholder": "Never"
+			},
+			"permissions": {
+				"inherit": {
+					"label": "Наследовать права доступа",
+					"description": "Те же права, что и у вашей учетной записи"
+				},
+				"explicit": {
+					"label": "Явные права",
+					"description": "Выберите права, которые должен иметь ключ"
+				}
+			}
+		},
+		"inheritDisclaimer": "Этот ключ API наследует ваши полные права доступа. Это значит, что он может делать всё, что можете сделать вы. Будьте осторожны с этой настройкой"
+	},
+	"userSmartListsScene": {
+		"heading": "Умные списки",
+		"subtitle": "Ваши любимые поисковые запросы и фильтры сохранены для удобного доступа",
+		"searchPlaceholder": "Фильтр умных списков",
+		"buttons": {
+			"createSmartList": "Создать умный список"
+		},
+		"list": {
+			"emptyState": {
+				"heading": "Нет умных списков для отображения",
+				"noListsMessage": "Создать умный список, чтобы начать",
+				"noMatchesMessage": "Попробуйте изменить поисковый запрос"
+			},
+			"card": {
+				"meta": {
+					"figures": {
+						"books": "книга",
+						"series": "серии",
+						"library": "библиотека"
+					},
+					"matches": "Совпадения"
+				}
+			}
+		}
+	},
+	"smartListSettingsScene": {
+		"sidebar": {
+			"basics": "Базовые сведения",
+			"configuration": {
+				"label": "Конфигурация",
+				"access": "Доступ",
+				"filters": "Фильтры"
+			},
+			"danger-zone": {
+				"delete": "Удаление",
+				"label": "Осторожно, зона риска"
+			}
+		},
+		"basics": {
+			"title": "Основная информация",
+			"description": "Информация об этом умном списке, включая его название и описание"
+		},
+		"access": {
+			"title": "Доступ",
+			"description": "Управление доступом к этому умному списку",
+			"sections": {
+				"visibility": {
+					"confirmation": {
+						"public": "Это сделает список видимым для всех",
+						"private": "This will change the list to be private, hiding it from anyone who previously had access",
+						"shared": "Вам нужно поделиться списком с конкретными пользователями, чтобы предоставить им доступ",
+						"fallback": "Вы уверены, что хотите изменить видимость этого списка?"
+					}
+				},
+				"accessManager": {
+					"disclaimer": "Совместное использование еще не готово. Пожалуйста, проверьте позже!"
+				}
+			}
+		},
+		"filters": {
+			"title": "Конструктор фильтра",
+			"description": "Управление фильтрами, создающими этот умный список"
+		},
+		"danger-zone/delete": {
+			"title": "Действия при удалении",
+			"description": "Полностью удалить этот умный список и все его содержимое или определенные ресурсы",
+			"sections": {
+				"deleteList": {
+					"heading": "Удалить список",
+					"description": [
+						"Полностью удалить этот умный список и все его содержимое.",
+						"Это действие нельзя будет отменить"
+					],
+					"confirmation": {
+						"title": "Удалить список",
+						"description": "Уверены, что хотите удалить этот умный список?",
+						"confirm": "Удалить список"
+					}
+				}
+			}
+		}
+	},
+	"userSmartListScene": {
+		"navigation": {
+			"items": "Элементы",
+			"settings": "Настройки"
+		},
+		"layout": {
+			"missingIdError": "Для этого эпизода требуется ID в URL",
+			"smartListNotFound": "Умный список не найден",
+			"viewCreateError": "Не удалось создать вид",
+			"viewSaveError": "Не удалось сохранить вид"
+		},
+		"header": {
+			"backLink": "Списки"
+		},
+		"itemsScene": {
+			"smartListNotFound": "Умный список не найден",
+			"actionHeader": {
+				"viewSelector": {
+					"customView": "Настраиваемый вид",
+					"defaultView": "Вид по умолчанию",
+					"noViewsSaved": "Нет сохраненных видов",
+					"selectView": "Выбор сохраненного вида"
+				},
+				"filterDrawer": {
+					"heading": "Фильтры умного списка",
+					"description": "Изменить фильтры для текущего сеанса просмотра",
+					"rawData": {
+						"heading": "Необработанные данные фильтра",
+						"description": "Так Stump будет обрабатывать фильтры"
+					},
+					"buttons": {
+						"save": "Сохранить",
+						"cancel": "Отменить"
+					}
+				},
+				"search": {
+					"placeholder": "Быстрый фильтр"
+				},
+				"viewManager": {
+					"updateSelected": "Обновить выбранное",
+					"deleteSelected": "Delete view",
+					"create": "Создать новый вид",
+					"modal": {
+						"heading": {
+							"create": "Создать вид",
+							"update": "Обновить вид"
+						},
+						"description": {
+							"create": "Создать новый вид для этого умного списка",
+							"update": "Обновить этот вид"
+						},
+						"createForm": {
+							"name": {
+								"label": "Название",
+								"placeholder": "Мой вид",
+								"description": "Понятное название для уникальной идентификации этого вида"
+							}
+						},
+						"updateForm": {
+							"name": {
+								"label": "Название",
+								"placeholder": "Мой вид",
+								"description": "Обновленное название для этого вида, если необходимо"
+							}
+						}
+					},
+					"deleteModal": {
+						"title": "Delete view",
+						"description": "Are you sure you want to delete this view?"
+					}
+				}
+			}
+		}
+	},
+	"settingsScene": {
+		"navigation": {
+			"general": "Общие",
+			"logs": "Логи",
+			"server": "Сервер",
+			"jobs": "Задачи и настройки",
+			"users": "Управление пользователями",
+			"desktop": "Компьютер"
+		},
+		"sidebar": {
+			"personal": {
+				"account": "Account",
+				"appearance": "Preferences",
+				"api keys": "API keys",
+				"reader": "Reader",
+				"desktop": "Desktop",
+				"label": "Personal"
+			},
+			"management": {
+				"general": "Общие",
+				"logs": "Логи",
+				"users": "Пользователи",
+				"jobs": "Задачи",
+				"access": "Права доступа",
+				"email": "Электронная почта",
+				"notifications": "Уведомления",
+				"label": "Сервер"
+			}
+		},
+		"app/account": {
+			"helmet": "Настройки учетной записи",
+			"title": "Настройки учетной записи",
+			"description": "Настройки, связанные с вашей учетной записью",
+			"sections": {
+				"account": {
+					"validation": {
+						"invalidUrl": "Пожалуйста, введите правильный URL",
+						"missingUsername": "Требуется имя пользователя"
+					},
+					"labels": {
+						"username": "Имя пользователя",
+						"password": "Пароль",
+						"activeChangesPrompt": "У вас есть несохраненные изменения"
+					},
+					"errors": {
+						"updateFailed": "Произошла ошибка сервера при обновлении вашего профиля. Пожалуйста, попробуйте еще раз."
+					},
+					"avatarPicker": {
+						"heading": "Установить ваш аватар",
+						"subtitle": "Stump поддерживает внешние пользовательские аватары, которые можно установить с помощью URL. Загрузка изображений не поддерживается, чтобы уменьшить количество данных, хранящихся на сервере.",
+						"preview": "После ввода URL здесь будет предварительный просмотр.",
+						"labels": {
+							"imageUrl": "URL изображения",
+							"customAvatar": "Пользовательский аватар"
+						},
+						"buttons": {
+							"confirm": "Подтвердить изображение",
+							"cancel": "Отменить",
+							"edit": "Редактировать",
+							"changeImage": "Изменить изображение",
+							"removeImage": "Удалить изображение"
+						}
+					},
+					"buttons": {
+						"confirm": "Сохранить изменения"
+					}
+				},
+				"locale": {
+					"localeSelector": {
+						"label": "Язык"
+					},
+					"heading": "Язык и локализация",
+					"subtitle": [
+						"Stump поддерживает несколько языков и локализаций, установите предпочитаемые. Пожалуйста, подумайте о помощи в улучшении качества",
+						"Переводы Stump",
+						"если вы можете!"
+					]
+				}
+			}
+		},
+		"app/preferences": {
+			"helmet": "Внешний вид",
+			"title": "Внешний вид",
+			"description": "Настроить внешний вид приложения",
+			"sections": {
+				"themeAndAppearance": {
+					"label": "Theme and appearance",
+					"description": "The basic look and feel options for Stump"
+				},
+				"themeSelect": {
+					"label": "Тема оформления",
+					"description": [
+						"Если вы заинтересованы в создании собственной пользовательской темы, посмотрите",
+						"документацию"
+					],
+					"options": {
+						"system": "System",
+						"light": "Светлая",
+						"dark": "Темная",
+						"bronze": "Светлая бронза",
+						"ocean": "Океан",
+						"autumn": "Осень",
+						"cosmic": "Космическая",
+						"pumpkin": "Тыквенная",
+						"matrix": "Матрица"
+					}
+				},
+				"gradientToggle": {
+					"label": "Enable gradients",
+					"description": "Some themes optionally support gradients for a more dynamic look"
+				},
+				"fontSelect": {
+					"label": "Шрифт",
+					"description": "Настроить шрифт, используемый в приложении"
+				},
+				"thumbnailRatioSelect": {
+					"label": "Thumbnail Ratio",
+					"description": "The aspect ratio to use for thumbnails"
+				},
+				"thumbnailPlaceholder": {
+					"label": "Thumbnail placeholder",
+					"description": "The style to use for thumbnail placeholders",
+					"options": {
+						"grayscale": "Grayscale",
+						"averageColor": "Average color",
+						"colorful": "Colorful",
+						"thumbhash": "Thumbhash"
+					}
+				},
+				"layoutAndArrangement": {
+					"label": "Layout and arrangement",
+					"description": "Customize how Stump displays information and organizes content"
+				},
+				"primaryNavigation": {
+					"label": "Primary navigation",
+					"description": "Choose between a minimal sidebar or a topbar navigation",
+					"options": {
+						"sidebar": "Sidebar",
+						"topbar": "Topbar"
+					},
+					"disclaimer": "* Settings for the unselected option will be disabled or hidden"
+				},
+				"doubleSidebar": {
+					"label": "Settings sidebar",
+					"description": "Enables the sidebar navigation for the settings pages. If you frequently use a smaller screen, you may want to disable this."
+				},
+				"replacePrimarySidebar": {
+					"label": "Replace primary sidebar",
+					"description": "Any instance of a secondary sidebar will replace the primary sidebar instead of being displayed next to it",
+					"tooltips": {
+						"doubleSidebar": "This setting requires the settings sidebar to be enabled",
+						"topbar": "This setting is not currently supported when the primary navigation is set to top bar"
+					}
+				},
+				"navigationArrangement": {
+					"label": "Расположение навигации",
+					"description": {
+						"sidebar": "Размещать и настраивать элементы навигации в боковой панели",
+						"topbar": "Размещать и настраивать навигационные элементы в верхней панели"
+					},
+					"isLocked": "Размещение заблокировано",
+					"lock": "Заблокировать размещения",
+					"unlock": "Разблокировать размещения",
+					"options": {
+						"HOME": "Home",
+						"EXPLORE": "Explore",
+						"LIBRARIES": "Libraries",
+						"BOOK_CLUBS": "Book clubs",
+						"SMART_LISTS": "Smart lists"
+					},
+					"entityOptions": {
+						"createAction": {
+							"label": "Показывать действие создания",
+							"help": "Показывать действие создания в навигации"
+						},
+						"linkToAll": {
+							"label": "Показывать все ссылки",
+							"help": "Ссылка на страницу, посвященную просмотру всех элементов этого типа"
+						}
+					}
+				},
+				"displaySpacing": {
+					"label": "Display spacing",
+					"description": "Adjusts the overall spacing between elements throughout the app",
+					"options": {
+						"default": "Default",
+						"compact": "Compact"
+					},
+					"disclaimer": "* Compact display mode is not implemented yet"
+				},
+				"maxWidthPreference": {
+					"label": "Adjusted width",
+					"description": "Stump applies a max-width to the viewport. This setting allows you to adjust or remove this limit",
+					"tooltip": "This setting is not currently supported when the primary navigation is set to sidebar"
+				},
+				"additionalPreferences": {
+					"label": "Additional preferences",
+					"description": "Customize the appearance and behavior of Stump with these additional settings"
+				},
+				"showThumbnailsInHeader": {
+					"label": "Show thumbnails in headers",
+					"description": "If you prefer to see thumbnails more often, this setting will show them in more places",
+					"tooltips": {
+						"enabled": "This setting will show thumbnails in more places",
+						"disabled": "This setting will not show thumbnails in more places"
+					}
+				},
+				"hideScrollbarToggle": {
+					"label": "Hide scrollbar",
+					"description": "Some pages simply look better without a scrollbar, this setting will hide it when possible",
+					"tooltips": {
+						"enabled": "This setting will hide the scrollbar on some pages",
+						"disabled": "This setting will show the scrollbar on some pages"
+					}
+				},
+				"enableAlphabetFiltering": {
+					"label": "Alphabet filtering",
+					"description": "Show an alphabet filter when applicable"
+				},
+				"enableFancyAnimations": {
+					"label": "Fancy animations",
+					"description": "A broad opt-in for fancier animations throughout the app"
+				},
+				"queryIndicatorToggle": {
+					"label": "Background fetch indicator",
+					"description": "Show a loading indicator whenever a query is running in the background"
+				},
+				"liveRefetchToggle": {
+					"label": "Live refetch",
+					"description": "Refetch queries on the fly to hydrate the UI with new data as it comes in. This can be resource intensive"
+				},
+				"enableJobOverlayToggle": {
+					"label": "Job overlay",
+					"description": "Show a floating overlay while a job is running"
+				}
+			}
+		},
+		"app/apiKeys": {
+			"helmet": "Ключи API",
+			"title": "Ключи API",
+			"description": "Управление созданными API-ключами Stump",
+			"shared": {
+				"fields": {
+					"name": "Название",
+					"expiration": "Срок действия",
+					"last_used": "Последнее использование",
+					"created": "Дата создания",
+					"permissions": "Права доступа",
+					"inherited": "Унаследовано",
+					"explicit": "Явные"
+				}
+			},
+			"sections": {
+				"inspector": {
+					"heading": "Ключ API",
+					"description": "Подробности об этом ключе",
+					"unrestrictedKey": {
+						"heading": "Неограниченный ключ",
+						"description": "Поскольку вы являетесь владельцем сервера, этот ключ имеет неограниченный доступ при настройке наследования разрешений. Пожалуйста, будьте осторожны."
+					}
+				},
+				"createKey": {
+					"modal": {
+						"trigger": "Создать ключ API",
+						"heading": {
+							"creating": "Создать ключ API",
+							"created": "Создать ключ"
+						},
+						"description": {
+							"creating": "Ключи API - это учетные данные с длительным сроком жизни, которые можно использовать для аутентификации с помощью API",
+							"created": "Ваш новый API ключ был создан. Сохраните секретную комбинацию где-то в безопасном месте, позже ее нельзя будет тут подсмотреть"
+						},
+						"inheritDisclaimer": "Этот ключ API наследует ваши полные права доступа. Это значит, что он может делать всё, что можете сделать вы. Будьте осторожны с этой настройкой",
+						"createdKey": "Созданный ключ",
+						"savedConfirm": "Я сохранил свой ключ",
+						"submit": "Создать ключ"
+					}
+				},
+				"table": {
+					"title": "Ваши ключи",
+					"description": "Это созданные вами ключи API",
+					"actionMenu": {
+						"inspect": "Осмотреть",
+						"delete": "Удалить"
+					},
+					"empty": {
+						"title": "Вы еще не создали ни одного ключа",
+						"action": "Для начала создайте ключ API"
+					},
+					"noExpiration": "Срок действия не установлен"
+				}
+			}
+		},
+		"app/reader": {
+			"helmet": "Настройки читалки",
+			"title": "Настройки читалки",
+			"description": "Опции по умолчанию для читалки Stump. Они привязаны только к вашему текущему устройству",
+			"sections": {
+				"universal": {
+					"sections": {
+						"readingDirection": {
+							"label": "Направление чтения",
+							"description": "Направление смены страниц в процессе чтения"
+						}
+					}
+				},
+				"imageBasedBooks": {
+					"label": "Книги на основе изображений",
+					"description": "Комиксы, манга и другие книги на основе изображений",
+					"sections": {
+						"preloadAheadCount": {
+							"label": "Количество предзагруженных до",
+							"description": "Количество страниц до текущей, которые требуется предзагрузить"
+						},
+						"preloadBehindCount": {
+							"label": "Количество предзагруженных после",
+							"description": "Количество страниц после текущей, которые требуется предзагрузить"
+						}
+					}
+				},
+				"textBasedBooks": {
+					"label": "Читалка электронных книг",
+					"description": "Настройки по умолчанию для текстовых книг",
+					"sections": {
+						"fontSize": {
+							"label": "Размер шрифта",
+							"description": "Размер шрифта, используемого в читалке"
+						},
+						"fontFamily": {
+							"label": "Семейство шрифтов",
+							"description": "Шрифт, используемый в читалке"
+						},
+						"lineHeight": {
+							"label": "Высота строки",
+							"description": "Высота строк в читалке"
+						}
+					}
+				},
+				"data": {
+					"sections": {
+						"clearStore": {
+							"label": "Очистить настройки",
+							"description": "Сбросить индивидуальные настройки книг, которые переопределяют значения по умолчанию",
+							"button": "Очистить настройки"
+						}
+					}
+				}
+			}
+		},
+		"app/desktop": {
+			"helmet": "Настройки рабочего стола",
+			"title": "Настройки рабочего стола",
+			"description": "Настройки, относящиеся к десктопному приложению Stump",
+			"sections": {
+				"configuredServers": {
+					"label": "Настроенные серверы",
+					"description": "Список серверов Stump, к которым можно подключаться",
+					"getStarted": "Для начала добавьте сервер",
+					"unreachableServer": {
+						"tooltip": "Сервер недоступен"
+					},
+					"activeServer": {
+						"tooltip": "Текущий сервер"
+					},
+					"addOrEditServer": {
+						"validation": {
+							"nameExists": "Сервер с таким именем уже существует",
+							"nameForbidden": "Это имя зарезервировано",
+							"urlExists": "Сервер с таким URL уже существует"
+						},
+						"fields": {
+							"name": {
+								"label": "Имя",
+								"description": "Понятное имя для идентификации этого сервера",
+								"placeholder": "Мой сервер"
+							},
+							"uri": {
+								"label": "URI",
+								"description": "URL-адрес сервера Stump",
+								"placeholder": "https://stump.example.com"
+							}
+						}
+					},
+					"addServer": {
+						"trigger": "Добавить сервер",
+						"title": "Добавить новый сервер",
+						"description": "Добавить новый сервер Stump в десктопное приложение",
+						"confirm": "Добавить сервер"
+					},
+					"editServer": {
+						"tooltip": "Редактировать сервер",
+						"title": "Редактировать сервер",
+						"description": "Редактировать сведения об этом сервере",
+						"confirm": "Сохранить изменения"
+					},
+					"deleteServer": {
+						"tooltip": "Удалить сервер",
+						"confirmation": {
+							"title": "Удалить этот сервер",
+							"description": "Это удалит сервер из десктопного приложения",
+							"disclaimerActiveServer": "Этот сервер в настоящее время активен. Вы выйдите из системы",
+							"disclaimerLastServer": "Это последний настроенный сервер. Вы выйдете из системы и должны будете перенастроить все серверы в процессе инициализации",
+							"confirm": "Удалить сервер"
+						}
+					},
+					"switchToServer": {
+						"tooltip": "Переключиться на сервер",
+						"confirmation": {
+							"title": "Переключиться на этот сервер",
+							"description": "Вы выйдете из вашего текущего сервера",
+							"confirm": "Переключиться на сервер",
+							"server": "Сервер",
+							"uri": "URL"
+						}
+					},
+					"resetConfiguration": {
+						"label": "Удалить все серверы",
+						"description": [
+							"Удалить все настроенные серверы из десктопного приложения",
+							"Это действие нельзя будет отменить"
+						],
+						"confirmation": {
+							"trigger": "Удалить все серверы",
+							"title": "Удалить все серверы",
+							"description": "Это удалит все серверы из десктопного приложения",
+							"disclaimer": "Вы выйдете из системы и должны будете перенастроить все серверы в процессе инициализации",
+							"confirm": "Удалить все серверы"
+						}
+					},
+					"resetTokens": {
+						"label": "Сбросить аутентификацию",
+						"description": [
+							"Удалите все сохраненные токены доступа к вашим серверам",
+							"Вам придется повторно авторизоваться на каждом сервере"
+						],
+						"confirmation": {
+							"trigger": "Сбросить аутентификацию",
+							"title": "Сбросить аутентификацию",
+							"description": "Это удалит все сохраненные токены доступа к вашим серверам",
+							"confirm": "Сбросить аутентификацию"
+						}
+					}
+				},
+				"optionalFeatures": {
+					"label": "Дополнительные функции",
+					"description": "Управление дополнительными функциями, уникальными для десктопного приложения",
+					"bundledServer": {
+						"label": "Встроенный сервер",
+						"description": "Запускать встроенный сервер в фоновом режиме, пока запущено десктопное приложение (требуется перезапуск)"
+					},
+					"discordPresence": {
+						"label": "Отображение в Discord",
+						"description": "Отображать активность вашего Stump в Discord, используя Discord Rich Presence",
+						"reconnect": "Переподключиться к Discord"
+					}
+				}
+			}
+		},
+		"server/general": {
+			"helmet": "Основные настройки сервера",
+			"title": "Основные настройки",
+			"description": "Общие настройки, относящиеся к вашему серверу Stump",
+			"sections": {
+				"updateAvailable": {
+					"message": "Ваш сервер потерял свою свежесть. Пожалуйста, обновите до последней версии!"
+				},
+				"serverInfo": {
+					"title": "Информация о сервере",
+					"description": "Основные сведения о вашем сервере Stump",
+					"build": {
+						"label": "Сборка",
+						"description": "Подробности о версии и сборке",
+						"version": {
+							"semver": "Версия",
+							"commitHash": "Точный коммит",
+							"date": "Дата сборки"
+						}
+					},
+					"nonStableChannel": {
+						"title": "You are running a non-stable build of Stump",
+						"description": [
+							"It looks like you are running the",
+							"build channel"
+						]
+					}
+				},
+				"serverPublicUrl": {
+					"label": "Общедоступный URL",
+					"description": "URL, по которому сервер доступен извне вашей локальной сети, если применимо. Это даст доступ к пригласительным ссылкам и другим функциям"
+				}
+			}
+		},
+		"server/logs": {
+			"helmet": "Логи",
+			"title": "Логи",
+			"description": "Логи, созданные вашим сервером Stump",
+			"sections": {
+				"persistedLogs": {
+					"title": "Сохраненные логи",
+					"description": "Эти логи были сохранены в базе данных вручную, обычно связаны с конкретным заданием или событием",
+					"table": {
+						"columns": {
+							"level": "Уровень",
+							"message": "Сообщение",
+							"timestamp": "Временная метка"
+						},
+						"emptyHeading": "Нет логов для отображения",
+						"emptySubtitle": "Вашему серверу либо очень хорошо, либо он сильно заболел"
+					},
+					"deleteLogs": {
+						"title": "Удалить логи",
+						"description": "Полностью удалить все сохраненные логи из базы данных",
+						"disclaimer": "Это действие нельзя будет отменить",
+						"confirm": "Удалить логи"
+					}
+				},
+				"liveLogs": {
+					"title": "Лента текущих логов",
+					"description": "Трансляция непосредственно с вашего сервера Stump в режиме реального времени"
+				}
+			}
+		},
+		"server/jobs": {
+			"helmet": "Задачи",
+			"title": "Задачи",
+			"description": "Задачи, выполняемые в фоне на вашем сервере Stump",
+			"sections": {
+				"scheduling": {
+					"title": "Планирование",
+					"description": "Некоторые задачи могут быть настроены для запуска по расписанию. Изменения в этой конфигурации вступят в силу после перезапуска сервера",
+					"disclaimer": "The job scheduler is really basic and will be improved in the future. Please reach out for feedback or suggestions!",
+					"createOrUpdateConfig": {
+						"fields": {
+							"intervalSecs": {
+								"label": "Interval",
+								"description": "How often the job should run (in seconds)",
+								"placeholder": "e.g. \"86400\" for once a day"
+							},
+							"intervalPreset": {
+								"label": "Preset",
+								"options": {
+									"everySixHours": "Every 6 hours",
+									"everyTwelveHours": "Every 12 hours",
+									"oncePerDay": "Once a day",
+									"oncePerWeek": "Once a week",
+									"oncePerMonth": "Once a month"
+								}
+							},
+							"includedLibraryIds": {
+								"label": "Included libraries",
+								"description": "Choose which libraries are included"
+							}
+						},
+						"restartRequired": "Changes to this configuration will take effect after a server restart"
+					}
+				},
+				"history": {
+					"title": "История",
+					"description": "Запись задач, которые были запущены на вашем сервере Stump",
+					"table": {
+						"columns": {
+							"name": "Тип",
+							"description": "Описание",
+							"status": "Статус",
+							"createdAt": "Началось в",
+							"elapsed": "Прошло времени",
+							"tasks": "Задачи"
+						},
+						"emptyHeading": "Нет задач для отображения",
+						"emptySubtitle": "У вас не может быт задач, если у вас нет задач",
+						"deleteAllMessage": "История задач и статистика могут быть удалены из базы данных в любое время. Это действие не может быть отменено"
+					},
+					"deleteJobHistory": {
+						"title": "Delete job history",
+						"description": "Permanently delete all job history from the database",
+						"confirmText": "Are you sure you want to delete all job history?",
+						"confirm": "Delete",
+						"emptyState": "No jobs to clear"
+					}
+				}
+			}
+		},
+		"server/users": {
+			"helmet": "Управление пользователями",
+			"title": "Пользователи",
+			"description": "Управление пользователями на этом сервере",
+			"createUser": {
+				"helmet": "Создать пользователя",
+				"title": "Создать пользователя",
+				"description": "Создать нового пользователя на этом сервере"
+			},
+			"updateUser": {
+				"helmet": "Обновить пользователя",
+				"title": "Обновить пользователя",
+				"description": "Обновить данные этого пользователя"
+			},
+			"createOrUpdateForm": {
+				"accessControl": {
+					"heading": "Контроль и ограничения доступа",
+					"subtitle": [
+						"Настройте ограничения, которые вы хотите применить к этому пользователю. Для получения дополнительной информации о контроле доступа обратитесь к",
+						"документации"
+					],
+					"ageRestriction": {
+						"label": "Ограничение по возрасту",
+						"description": "Ограничивает доступ пользователя к содержимому выше установленного возрастного рейтинга",
+						"placeholder": "13",
+						"enforceUnset": {
+							"label": "Принудительно применять при отключении",
+							"description": "Если этот параметр включен, пользователи будут ограничены доступом к содержимому без возрастной оценки"
+						}
+					},
+					"tagRestriction": {
+						"label": "Ограничение по меткам",
+						"description": "Ограничение доступа пользователя к содержимому с выбранными метками",
+						"placeholder": "Для взрослых, Насилие"
+					}
+				},
+				"permissions": {
+					"heading": "Права доступа",
+					"subtitle": [
+						"Выберите разрешения, которые вы хотите предоставить этому пользователю. Для получения дополнительной информации о том, что делает каждое разрешение, смотрите",
+						"документацию"
+					],
+					"bookclub": {
+						"label": "Книжные клубы",
+						"read": {
+							"label": "Доступ к функционалу книжных клубов",
+							"description": "Разрешить пользователю доступ к функционалу книжных клубов, включая просмотр и присоединение"
+						},
+						"create": {
+							"label": "Создание книжных клубов",
+							"description": "Позволяет пользователю создавать новые книжные клубы"
+						}
+					},
+					"feature": {
+						"label": "Включенные функции",
+						"api_keys": {
+							"label": "Ключи API",
+							"description": "Разрешить пользователю управлять собственными ключами API"
+						},
+						"koreader_sync": {
+							"label": "Синхронизация KoReader",
+							"description": "Разрешить пользователю доступ к интеграции синхронизации KoReader"
+						}
+					},
+					"file": {
+						"label": "Управление файлами",
+						"explorer": {
+							"label": "Проводник файлов",
+							"description": "Разрешить пользователю доступ к различным проводникам файлов.\nОграничение содержимого не гарантируется, если эта функция включена"
+						},
+						"download": {
+							"label": "Скачивание файлов",
+							"description": "Позволяет пользователю скачивать файлы с сервера"
+						},
+						"upload": {
+							"label": "Загрузка файлов",
+							"description": "Позволяет пользователю загружать файлы на сервер"
+						}
+					},
+					"emailer": {
+						"label": "Модули отправки электронных писем",
+						"read": {
+							"label": "Доступ к модулям отправки",
+							"description": "Позволяет пользователю просматривать настроенные модули отправки"
+						},
+						"create": {
+							"label": "Создание модулей отправки",
+							"description": "Позволяет пользователю создавать новые модули отправки"
+						},
+						"manage": {
+							"label": "Управление модулями отправки",
+							"description": "Позволяет пользователю управлять существующими модулями отправки"
+						}
+					},
+					"email": {
+						"label": "Обмен электронной почтой",
+						"send": {
+							"label": "Отправка писем",
+							"description": "Позволяет пользователю отправлять письма с сервера на любые настроенные псевдонимы"
+						},
+						"arbitrary_send": {
+							"label": "Отправка произвольных писем",
+							"description": "Позволяет пользователю отправлять письма с сервера на любой адрес электронной почты"
+						}
+					},
+					"library": {
+						"label": "Управление библиотекой",
+						"create": {
+							"label": "Создание библиотек",
+							"description": "Позволяет пользователю создавать новые библиотеки. Включает в себя доступ к редактированию и сканированию"
+						},
+						"scan": {
+							"label": "Сканирование библиотек",
+							"description": "Позволяет пользователю запускать сканирование существующих библиотек"
+						},
+						"edit": {
+							"label": "Редактирование библиотек",
+							"description": "Позволяет пользователю редактировать основные сведения существующих библиотек"
+						},
+						"manage": {
+							"label": "Управление библиотеками",
+							"description": "Позволяет пользователю управлять расширенными настройками существующих библиотек. Включает в себя доступ к редактированию и сканированию"
+						},
+						"delete": {
+							"label": "Удаление библиотек",
+							"description": "Позволяет пользователю удалять существующие библиотеки. Включает в себя доступ к редактированию, управлению и сканированию"
+						}
+					},
+					"server": {
+						"label": "Управление сервером",
+						"manage": {
+							"label": "Управление сервером",
+							"description": "Позволяет пользователю управлять сервером. Включает *множество* других доступов"
+						}
+					},
+					"user": {
+						"label": "Управление пользователями",
+						"read": {
+							"label": "Просмотр пользователей",
+							"description": "Позволяет пользователю запрашивать информацию о других пользователях на сервере. Это необходимо для некоторых других функций, например, для запрета доступа пользователей к библиотеке"
+						},
+						"manage": {
+							"label": "Управление пользователями",
+							"description": "Позволяет пользователю управлять другими пользователями на сервере. Включает в себя доступ на просмотр, создание и обновление."
+						}
+					},
+					"smartlist": {
+						"label": "Умные списки",
+						"read": {
+							"label": "Доступ к функционалу умных списков",
+							"description": "Позволяет пользователю получать доступ к функционалу умных списков. Подробные разрешения еще не реализованы, поэтому они\nвключают в себя разрешения на чтение, создание и обновление собственных списков"
+						}
+					}
+				},
+				"validation": {
+					"ageRestrictionTooLow": "Возрастное ограничение не может быть меньше 0",
+					"missingUsername": "Требуется имя пользователя",
+					"missingPassword": "Требуется пароль",
+					"usernameAlreadyExists": "Пользователь с таким именем уже существует"
+				},
+				"createSubmitButton": "Создать пользователя",
+				"updateSubmitButton": "Обновить пользователя"
+			},
+			"loginActivity": {
+				"deleteConfirmation": {
+					"title": "Delete activity",
+					"description": "All records of login activity will be permanently deleted from the database",
+					"confirm": "Delete"
+				}
+			}
+		},
+		"server/email": {
+			"helmet": "Настройки электронной почты",
+			"title": "Электронная почта",
+			"description": "Settings related to configuring an SMTP emailer for your Stump server instance",
+			"sections": {
+				"emailers": {
+					"title": "SMTP модулей отправки",
+					"description": "Клиенты, которые вы настроили для отправки писем с вашего сервера Stump",
+					"singleInstanceDisclaimer": "Хотя движок Stump поддерживает настройку нескольких SMTP, через пользовательский интерфейс может быть настроен только один. В будущем это будет улучшено",
+					"list": {
+						"emptyHeading": "Не настроено ни одного SMTP модулей отправки",
+						"primaryEmailer": "Основной модуль отправки",
+						"sendHistory": {
+							"heading": "История отправки",
+							"description": "Запись писем, отправленных этим модулем",
+							"table": {
+								"columns": {
+									"to": "Получатель",
+									"subject": "Тема",
+									"status": "Статус",
+									"createdAt": "Отправлено в"
+								}
+							},
+							"emptyHeading": "Нет истории",
+							"emptySubtitle": "История этого модуля отправки пуста. Он не использовался или история была очищена"
+						}
+					}
+				},
+				"devices": {
+					"title": "Почтовые устройства",
+					"description": "Псевдонимы устройств, которые вы настроили для получения писем от вашего сервера Stump",
+					"addDevice": "Добавить псевдоним устройства",
+					"addOrUpdateDevice": {
+						"title": {
+							"create": "Создать псевдоним устройства",
+							"update": "Обновить псевдоним устройства"
+						},
+						"name": {
+							"label": "Название",
+							"description": "Понятное название для идентификации этого псевдонима"
+						},
+						"email": {
+							"label": "Электронная почта",
+							"description": "Адрес электронной почты, с которым будет связан псевдоним"
+						},
+						"forbidden": {
+							"label": "Запрещено",
+							"description": "Когда включено, ни один пользователь не может отправлять письма на адрес, связанный с этим псевдонимом"
+						},
+						"submit": {
+							"create": "Создать псевдоним устройства",
+							"update": "Обновить псевдоним устройства"
+						}
+					},
+					"table": {
+						"emptyHeading": "Нет зарегистрированных устройств",
+						"emptySubtitle": "Создать новый псевдоним устройства для использования в будущем"
+					}
+				}
+			},
+			"createOrUpdateForm": {
+				"name": {
+					"label": "Название",
+					"description": "Понятное имя для уникальной идентификации этого модуля отправки"
+				},
+				"smtpSettings": {
+					"heading": "Настройка SMTP",
+					"description": "Специфические настройки SMTP для этого модуля отправки"
+				},
+				"smtpProvider": {
+					"label": "Предустановка поставщика SMTP",
+					"description": "Поставщик SMTP-сервера. Используется для предварительного заполнения общих настроек, но не всех поставщиков"
+				},
+				"smtpHost": {
+					"label": "Хост SMTP",
+					"description": "Имя хоста SMTP сервера"
+				},
+				"smtpPort": {
+					"label": "Порт SMTP",
+					"description": "Порт SMTP сервера"
+				},
+				"tlsEnabled": {
+					"label": "TLS включен",
+					"description": "Если включено, соединение с SMTP сервером будет зашифровано"
+				},
+				"username": {
+					"label": "Имя пользователя",
+					"description": "Имя пользователя для аутентификации на SMTP сервере. Обычно это адрес электронной почты"
+				},
+				"password": {
+					"label": "Пароль",
+					"description": "Пароль для аутентификации на SMTP сервере. Если вы используете Gmail, вам может потребоваться дополнительно создать пароль приложения"
+				},
+				"senderSettings": {
+					"heading": "Настройки отправителя",
+					"description": "Настройки отправителя электронной почты"
+				},
+				"senderDisplayName": {
+					"label": "Отображаемое имя отправителя",
+					"description": "Имя, которое будет отображаться у получателей"
+				},
+				"senderEmail": {
+					"label": "Адрес электронной почты отправителя",
+					"description": "Адрес электронной почты, который будет отображаться у получателей"
+				},
+				"additionalSettings": {
+					"heading": "Дополнительные настройки",
+					"description": "Дополнительные настройки модуля отправки"
+				},
+				"maxAttachmentSize": {
+					"label": "Максимальный размер вложения",
+					"description": "Максимальный размер в байтах файла, который может быть приложен к письму"
+				},
+				"submit": {
+					"create": "Создать модуль отправки",
+					"update": "Обновить модуль отправки"
+				}
+			},
+			"createEmailer": {
+				"helmet": "Создать модуль отправки",
+				"title": "Обновить модуль отправки",
+				"description": "Создать новый SMTP модуля отправки для вашего сервера Stump"
+			},
+			"updateEmailer": {
+				"helmet": "Обновить модуль отправки",
+				"title": "Обновить модуль отправки",
+				"description": "Обновить сведения об этом SMTP модуля отправки"
+			}
+		}
+	},
+	"jobOverlay": {
+		"backupHeading": "Идёт выполнение задачи"
+	},
+	"libraryStats": {
+		"seriesCount": "Всего серий",
+		"bookCount": "Всего книг",
+		"diskUsage": "Использование диска"
+	},
+	"noLibraries": {
+		"heading": "Здесь не на что смотреть",
+		"messagePrefix": "Вы не можете увидеть то, чего у вас нет",
+		"message": {
+			"create": "Для начала создайте библиотеку",
+			"wait": "После создания библиотек, они будут отображаться здесь"
+		},
+		"links": {
+			"create": "Создать библиотеку",
+			"settings": "Перейти к настройкам"
+		}
+	},
+	"pagination": {
+		"buttons": {
+			"next": "Далее",
+			"previous": "Назад"
+		},
+		"popover": {
+			"heading": "Перейти",
+			"buttons": {
+				"confirm": "Перейти",
+				"cancel": "Отмена"
+			}
+		}
+	},
+	"signOutModal": {
+		"title": "Выйти",
+		"message": "Вы действительно хотите выйти?",
+		"buttons": {
+			"cancel": "Отмена",
+			"signOut": "Выйти"
+		}
+	},
+	"sidebar": {
+		"buttons": {
+			"home": "Главная",
+			"libraries": "Библиотеки",
+			"books": "Обзор",
+			"bookClubs": "Книжные клубы",
+			"createLibrary": "Создать библиотеку",
+			"noLibraries": "Нет библиотек",
+			"createBookClub": "Создать Книжный Клуб",
+			"noBookClubs": "Нет книжных клубов",
+			"settings": "Настройки",
+			"themeToggle": "Изменить тему",
+			"goForward": "Вперёд",
+			"goBack": "Назад",
+			"smartlists": "Умные списки",
+			"noSmartlists": "Нет умных списков",
+			"createSmartlist": "Создать умный список",
+			"seeAll": "Показать все"
+		},
+		"libraryOptions": {
+			"scanLibrary": "Сканирование",
+			"fileExplorer": "Файлы",
+			"manageLibrary": "Manage",
+			"deleteLibrary": "Удалить"
+		},
+		"versionInformation": {
+			"heading": "Версия",
+			"semVer": "Семантическая версия",
+			"commitHash": "Хэш коммита",
+			"buildDate": "Дата сборки"
+		}
+	},
+	"search": {
+		"placeholder": "Поиск"
+	},
+	"serverSOS": {
+		"heading": "Сервер недоступен",
+		"desktop": {
+			"message": "Произошла сетевая ошибка, предполагающая что ваш сервер в настоящее время недоступен. Пожалуйста, убедитесь, что он запущен и доступен с этого устройства.\nЕсли ваш URL сервера изменился, вы можете обновить его, используя форму ниже"
+		},
+		"web": {
+			"message": "Произошла сетевая ошибка, предполагающая что ваш сервер в настоящее время недоступен. Пожалуйста, убедитесь, что он запущен и доступен с этого устройства"
+		},
+		"reconnected": "Переподключено к серверу! Перенаправление...",
+		"reconnectionFailed": "Что-то пошло не так!"
+	},
+	"serverStatusOverlay": {
+		"heading": "Сервер не подключен",
+		"message": [
+			"Пожалуйста, проверьте ваше интернет-соединение",
+			"Нажмите сюда",
+			"чтобы изменить URL сервера"
+		]
+	},
+	"slidingList": {
+		"empty": "Нет элементов для отображения",
+		"buttons": {
+			"next": "Перемотка вперед",
+			"previous": "Перемотка назад"
+		}
+	},
+	"tagSelect": {
+		"placeholder": "Выбрать или создать метку",
+		"placeholderNoTags": "Нет доступных тегов"
+	},
+	"thumbnailDropdown": {
+		"label": "Выбор миниатюры",
+		"options": {
+			"selectFromBooks": "Выбрать из книг",
+			"uploadImage": "Загрузить изображение"
+		},
+		"uploadImage": {
+			"emptyState": "Предпросмотр вашего изображения появится здесь",
+			"prompt": "Перетащите изображение сюда или нажмите для выбора",
+			"remove": "Удалить изображение"
+		}
+	},
+	"common": {
+		"add": "Добавить",
+		"cancel": "Отменить",
+		"confirm": "Подтвердить",
+		"delete": "Delete",
+		"enter": "Enter",
+		"save": "Сохранить",
+		"send": "Отправить",
+		"saveChanges": "Сохранить изменения",
+		"noChanges": "Нет изменений",
+		"create": "Создать",
+		"edit": "Редактировать",
+		"update": "Обновить",
+		"upload": "Загрузить",
+		"uploading": "Загрузка",
+		"unimplemented": "Эта функция еще не реализована! Проверьте позже",
+		"limitedFunctionality": "Это еще не полностью реализовано, некоторые функции отсутствуют. Проверьте позже",
+		"logIn": "Войти",
+		"login": "Вход",
+		"seeError": "Посмотреть ошибку",
+		"remove": "Удалить",
+		"goBack": "Вернуться",
+		"goToServers": "Перейти к серверам",
+		"notReady": "Эта функция еще не готова",
+		"notUsedYet": "Пока не используется",
+		"never": "Никогда",
+		"scan": "Сканирование",
+		"somethingWentWrong": "Something went wrong"
+	},
+	"userPermissions": {
+		"ACCESS_API_KEYS": {
+			"label": "API keys",
+			"description": "Allows the user to manage their own API keys"
+		},
+		"ACCESS_BOOK_CLUB": {
+			"label": "Book Clubs",
+			"description": "Allows the user to access book club features, including viewing and joining book clubs"
+		},
+		"ACCESS_KOREADER_SYNC": {
+			"label": "KoReader sync",
+			"description": "Allows the user to access the KoReader sync integration"
+		},
+		"ACCESS_SMART_LIST": {
+			"label": "Smart Lists",
+			"description": "Allows the user to access smart list features, including creating and managing smart lists"
+		},
+		"CREATE_BOOK_CLUB": {
+			"label": "Create book clubs",
+			"description": "Allows the user to create new book clubs"
+		},
+		"CREATE_LIBRARY": {
+			"label": "Create libraries",
+			"description": "Allows the user to create new libraries"
+		},
+		"CREATE_NOTIFIER": {
+			"label": "Create notifiers",
+			"description": "Allows the user to create new notification systems"
+		},
+		"DELETE_LIBRARY": {
+			"label": "Delete libraries",
+			"description": "Allows the user to delete existing libraries"
+		},
+		"DELETE_NOTIFIER": {
+			"label": "Delete notifiers",
+			"description": "Allows the user to delete notification systems"
+		},
+		"DOWNLOAD_FILE": {
+			"label": "Download files",
+			"description": "Allows the user to download files from the server"
+		},
+		"EDIT_LIBRARY": {
+			"label": "Edit libraries",
+			"description": "Allows the user to modify existing libraries"
+		},
+		"EMAILER_CREATE": {
+			"label": "Create emailer",
+			"description": "Allows the user to create email configuration"
+		},
+		"EMAILER_MANAGE": {
+			"label": "Manage emailer",
+			"description": "Allows the user to manage email configuration and settings"
+		},
+		"EMAILER_READ": {
+			"label": "Read emailer",
+			"description": "Allows the user to view email configuration"
+		},
+		"EMAIL_ARBITRARY_SEND": {
+			"label": "Send arbitrary emails",
+			"description": "Allows the user to send custom emails to any address"
+		},
+		"EMAIL_SEND": {
+			"label": "Send emails",
+			"description": "Allows the user to send emails through the system"
+		},
+		"FILE_EXPLORER": {
+			"label": "File explorer",
+			"description": "Allows the user to browse and explore the server filesystem"
+		},
+		"MANAGE_LIBRARY": {
+			"label": "Manage libraries",
+			"description": "Allows the user to manage library settings and configuration"
+		},
+		"MANAGE_NOTIFIER": {
+			"label": "Manage notifiers",
+			"description": "Allows the user to manage notification system settings"
+		},
+		"MANAGE_SERVER": {
+			"label": "Manage server",
+			"description": "Allows the user to manage server configuration and settings"
+		},
+		"MANAGE_USERS": {
+			"label": "Manage users",
+			"description": "Allows the user to create, edit, and delete user accounts"
+		},
+		"READ_JOBS": {
+			"label": "Read jobs",
+			"description": "Allows the user to view system jobs and their status"
+		},
+		"READ_NOTIFIER": {
+			"label": "Read notifiers",
+			"description": "Allows the user to view notification system configuration"
+		},
+		"READ_PERSISTED_LOGS": {
+			"label": "Read persisted logs",
+			"description": "Allows the user to view stored system logs"
+		},
+		"READ_SYSTEM_LOGS": {
+			"label": "Read system logs",
+			"description": "Allows the user to view real-time system logs"
+		},
+		"READ_USERS": {
+			"label": "Read users",
+			"description": "Allows the user to view user account information"
+		},
+		"SCAN_LIBRARY": {
+			"label": "Scan libraries",
+			"description": "Allows the user to trigger library scans to discover new content"
+		},
+		"UPLOAD_FILE": {
+			"label": "Upload files",
+			"description": "Allows the user to upload files to the server"
+		},
+		"MANAGE_JOBS": {
+			"label": "Manage jobs",
+			"description": "Allows the user to manage any queued jobs"
+		},
+		"EDIT_METADATA": {
+			"label": "Edit metadata",
+			"description": "Allows the user to edit metadata for books and series"
+		},
+		"WRITE_BACK_METADATA": {
+			"label": "Write back metadata",
+			"description": "Allows the user to write metadata changes back to the source files"
+		}
+	}
+}

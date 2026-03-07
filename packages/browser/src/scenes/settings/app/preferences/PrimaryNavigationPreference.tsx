@@ -1,9 +1,11 @@
 import { cn, cx, Label, Text } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { Check } from 'lucide-react'
 
 import { usePreferences, useTheme } from '@/hooks'
 
 export default function PrimaryNavigationPreference() {
+	const { t } = useLocaleContext()
 	const {
 		preferences: { primaryNavigationMode },
 		update,
@@ -19,24 +21,25 @@ export default function PrimaryNavigationPreference() {
 
 	return (
 		<div className="flex flex-col gap-y-1.5">
-			<Label>Primary navigation</Label>
+			<Label>{t(getKey('label'))}</Label>
 			<Text size="sm" variant="muted">
-				Choose between a minimal sidebar or a topbar navigation
+				{t(getKey('description'))}
 			</Text>
 			<div className="flex items-center gap-x-4">
 				<AppearanceOption
-					label="Sidebar"
+					label={t(getKey('options.sidebar'))}
 					isSelected={primaryNavigationMode === 'SIDEBAR'}
 					onSelect={() => handleChange('SIDEBAR')}
+					isSidebar
 				/>
 				<AppearanceOption
-					label="Topbar"
+					label={t(getKey('options.topbar'))}
 					isSelected={primaryNavigationMode === 'TOPBAR'}
 					onSelect={() => handleChange('TOPBAR')}
 				/>
 			</div>
 			<Text size="xs" variant="muted" className="italic">
-				* Settings for the unselected option will be disabled or hidden
+				{t(getKey('disclaimer'))}
 			</Text>
 		</div>
 	)
@@ -46,11 +49,11 @@ type AppearanceOptionProps = {
 	label: string
 	isSelected: boolean
 	onSelect: () => void
+	isSidebar?: boolean
 }
-function AppearanceOption({ label, isSelected, onSelect }: AppearanceOptionProps) {
+function AppearanceOption({ label, isSelected, onSelect, isSidebar }: AppearanceOptionProps) {
 	const { isDarkVariant } = useTheme()
 
-	const isSidebar = label === 'Sidebar'
 	const isLightVariant = !isDarkVariant
 
 	return (
@@ -88,3 +91,6 @@ function AppearanceOption({ label, isSelected, onSelect }: AppearanceOptionProps
 		</div>
 	)
 }
+
+const LOCALE_BASE = 'settingsScene.app/preferences.sections.primaryNavigation'
+const getKey = (key: string) => `${LOCALE_BASE}.${key}`

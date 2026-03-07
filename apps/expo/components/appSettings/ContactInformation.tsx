@@ -1,14 +1,14 @@
 import { ArrowUpRight, Github, Mail } from 'lucide-react-native'
 import { Linking } from 'react-native'
 
-import { CardList, Icon, icons } from '../ui'
+import { Card, Icon, icons } from '../ui'
 import AppSettingsRow from './AppSettingsRow'
 
 const { Discord } = icons
 
 export default function ContactInformation() {
 	return (
-		<CardList label="Contact">
+		<Card label="Contact">
 			<AppSettingsRow
 				icon={Mail}
 				title="Email"
@@ -36,6 +36,6 @@ export default function ContactInformation() {
 			>
 				<Icon as={ArrowUpRight} size={20} className="text-foreground-muted" />
 			</AppSettingsRow>
-		</CardList>
+		</Card>
 	)
 }

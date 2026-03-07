@@ -1,13 +1,13 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useGraphQLMutation } from '@stump/client'
+import { useGraphQLMutation, useUploadConfig } from '@stump/client'
 import { Button, Form, Input, Text } from '@stump/components'
-import { graphql } from '@stump/graphql'
+import { graphql, UserPermission } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
-import { isUrl } from '@stump/sdk'
 import { useForm, useWatch } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
+import { useAppContext } from '@/context'
 import { useUser } from '@/stores'
 
 import AvatarPicker from './AvatarPicker'
@@ -19,7 +19,6 @@ const mutation = graphql(`
 		updateViewer(input: $input) {
 			id
 			username
-			avatarUrl
 		}
 	}
 `)
@@ -27,18 +26,10 @@ const mutation = graphql(`
 export default function ProfileForm() {
 	const { t } = useLocaleContext()
 	const { user, setUser } = useUser()
+	const { checkPermission } = useAppContext()
+	const { uploadConfig } = useUploadConfig({ enabled: checkPermission(UserPermission.UploadFile) })
 
 	const schema = z.object({
-		avatarUrl: z
-			.string()
-			.optional()
-			.nullable()
-			.refine(
-				(url) => !url || isUrl(url),
-				() => ({
-					message: t('settingsScene.app/account.sections.account.validation.invalidUrl'),
-				}),
-			),
 		name: z.string().optional(),
 		password: z.string().optional(),
 		username: z.string().min(1, {
@@ -49,25 +40,22 @@ export default function ProfileForm() {
 
 	const form = useForm<Schema>({
 		defaultValues: {
-			avatarUrl: user!.avatarUrl,
 			username: user!.username,
 		},
 		mode: 'onSubmit',
 		resolver: zodResolver(schema),
 	})
 
-	const [avatarUrl, newUsername, newPassword] = useWatch({
+	const [newUsername, newPassword] = useWatch({
 		control: form.control,
-		name: ['avatarUrl', 'username', 'password'],
+		name: ['username', 'password'],
 		defaultValue: {
-			avatarUrl: user?.avatarUrl,
 			username: user?.username,
 		},
 	})
 
 	const isChangingPassword = !!newPassword
-	const hasChanges =
-		!!avatarUrl !== !!user?.avatarUrl || newUsername !== user?.username || isChangingPassword
+	const hasChanges = newUsername !== user?.username || isChangingPassword
 
 	const { mutate } = useGraphQLMutation(mutation, {
 		onSuccess: ({ updateViewer: updatedUser }) => {
@@ -88,17 +76,12 @@ export default function ProfileForm() {
 		},
 	})
 
-	const handleImageChange = (url?: string) => {
-		form.setValue('avatarUrl', url, { shouldValidate: true })
-	}
-
 	const handleSubmit = async (values: Schema) => {
 		if (!hasChanges || !user) return
 
 		mutate({
 			input: {
 				username: values.username,
-				avatarUrl: values.avatarUrl,
 				password: values.password || undefined, // undefined -> no change, null or "" -> no password :(
 				permissions: user.permissions,
 				ageRestriction: user.ageRestriction || null,
@@ -147,12 +130,7 @@ export default function ProfileForm() {
 					</div>
 				</div>
 
-				<input className="hidden" {...form.register('avatarUrl')} />
-				<AvatarPicker
-					imageUrl={avatarUrl}
-					fallback={user?.username}
-					onImageChange={handleImageChange}
-				/>
+				{uploadConfig?.enabled && <AvatarPicker />}
 			</div>
 		</Form>
 	)

@@ -11,7 +11,7 @@ import {
 import { Apikey } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { allPermissions, isUserPermission } from '@stump/sdk'
-import dayjs from 'dayjs'
+import { addDays, endOfDay } from 'date-fns'
 import { useCallback } from 'react'
 import { useForm, useFormState, useWatch } from 'react-hook-form'
 import { z } from 'zod'
@@ -73,7 +73,7 @@ export default function CreateOrUpdateAPIKeyForm({
 	const handleDateChange = useCallback(
 		(date?: Date) => {
 			if (date) {
-				const adjusted = dayjs(date).endOf('day').toDate()
+				const adjusted = endOfDay(date)
 				form.setValue('expiresAt', adjusted)
 			} else {
 				form.setValue('expiresAt', undefined)
@@ -167,7 +167,7 @@ export default function CreateOrUpdateAPIKeyForm({
 				placeholder={t(getFieldKey('expiresAt.placeholder'))}
 				selected={expiresAt}
 				onChange={handleDateChange}
-				minDate={dayjs().add(1, 'day').endOf('day').toDate()}
+				minDate={endOfDay(addDays(new Date(), 1))}
 			/>
 		</>
 	)

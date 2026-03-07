@@ -2,125 +2,136 @@ import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
 
 import {
-	af,
-	ar,
-	ca,
-	cs,
-	da,
-	de,
-	el,
-	en,
-	es,
-	fi,
-	fr,
-	he,
-	hu,
-	it,
-	ja,
-	ko,
-	nl,
-	no,
-	pl,
-	pt,
-	ro,
-	ru,
-	sr,
-	sv,
-	tr,
-	uk,
-	vi,
-	zh,
+	afZA,
+	arSA,
+	caES,
+	csCZ,
+	daDK,
+	deDE,
+	elGR,
+	enGB,
+	enUS,
+	esES,
+	fiFI,
+	frFR,
+	heIL,
+	huHU,
+	itIT,
+	jaJP,
+	koKR,
+	nlNL,
+	noNO,
+	plPL,
+	ptBR,
+	ptPT,
+	roRO,
+	ruRU,
+	srSP,
+	svSE,
+	trTR,
+	ukUA,
+	viVN,
+	zhCN,
+	zhTW,
 } from './locales'
 
-// TODO: this is verbose, figure out a clean way to do this
 export const resources = {
-	af: {
-		af,
+	'af-ZA': {
+		'af-ZA': afZA,
 	},
-	ar: {
-		ar,
+	'ar-SA': {
+		'ar-SA': arSA,
 	},
-	ca: {
-		ca,
+	'ca-ES': {
+		'ca-ES': caES,
 	},
-	cs: {
-		cs,
+	'cs-CZ': {
+		'cs-CZ': csCZ,
 	},
-	da: {
-		da,
+	'da-DK': {
+		'da-DK': daDK,
 	},
-	de: {
-		de,
+	'de-DE': {
+		'de-DE': deDE,
 	},
-	el: {
-		el,
+	'el-GR': {
+		'el-GR': elGR,
 	},
-	en: {
-		en,
+	'en-GB': {
+		'en-GB': enGB,
 	},
-	es: {
-		es,
+	'en-US': {
+		'en-US': enUS,
 	},
-	fi: {
-		fi,
+	'es-ES': {
+		'es-ES': esES,
 	},
-	fr: {
-		fr,
+	'fi-FI': {
+		'fi-FI': fiFI,
 	},
-	he: {
-		he,
+	'fr-FR': {
+		'fr-FR': frFR,
 	},
-	hu: {
-		hu,
+	'he-IL': {
+		'he-IL': heIL,
 	},
-	it: {
-		it,
+	'hu-HU': {
+		'hu-HU': huHU,
 	},
-	ja: {
-		ja,
+	'it-IT': {
+		'it-IT': itIT,
 	},
-	ko: {
-		ko,
+	'ja-JP': {
+		'ja-JP': jaJP,
 	},
-	nl: {
-		nl,
+	'ko-KR': {
+		'ko-KR': koKR,
 	},
-	no: {
-		no,
+	'nl-NL': {
+		'nl-NL': nlNL,
 	},
-	pl: {
-		pl,
+	'no-NO': {
+		'no-NO': noNO,
 	},
-	pt: {
-		pt,
+	'pl-PL': {
+		'pl-PL': plPL,
 	},
-	ro: {
-		ro,
+	'pt-BR': {
+		'pt-BR': ptBR,
 	},
-	ru: {
-		ru,
+	'pt-PT': {
+		'pt-PT': ptPT,
 	},
-	sr: {
-		sr,
+	'ro-RO': {
+		'ro-RO': roRO,
 	},
-	sv: {
-		sv,
+	'ru-RU': {
+		'ru-RU': ruRU,
 	},
-	tr: {
-		tr,
+	'sr-SP': {
+		'sr-SP': srSP,
 	},
-	uk: {
-		uk,
+	'sv-SE': {
+		'sv-SE': svSE,
 	},
-	vi: {
-		vi,
+	'tr-TR': {
+		'tr-TR': trTR,
 	},
-	zh: {
-		zh,
+	'uk-UA': {
+		'uk-UA': ukUA,
+	},
+	'vi-VN': {
+		'vi-VN': viVN,
+	},
+	'zh-CN': {
+		'zh-CN': zhCN,
+	},
+	'zh-TW': {
+		'zh-TW': zhTW,
 	},
 } as const
 export type AllowedLocale = keyof typeof resources
-export type Translation = (typeof resources)['en']['en']
+export type Translation = (typeof resources)['en-US']['en-US']
 
 function parseMissingKeyHandler(missingKey: string) {
 	try {
@@ -128,7 +139,7 @@ function parseMissingKeyHandler(missingKey: string) {
 			.split('.')
 			.filter(Boolean)
 			// @ts-expect-error: This is a complicated type, but we know it will work
-			.reduce((previous, current) => previous?.[current], resources.en.en)
+			.reduce((previous, current) => previous?.[current], resources['en-US']['en-US'])
 
 		if (typeof translation === 'string') {
 			return translation
@@ -142,7 +153,7 @@ function parseMissingKeyHandler(missingKey: string) {
 }
 
 i18n.use(initReactI18next).init({
-	fallbackLng: 'en',
+	fallbackLng: 'en-US',
 	interpolation: {
 		escapeValue: false, // not needed for react as it escapes by default
 	},

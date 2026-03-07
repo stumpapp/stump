@@ -7,6 +7,7 @@ import { Helmet } from 'react-helmet'
 import { SceneContainer } from '@/components/container'
 import paths from '@/paths'
 
+// TODO(book-clubs): This query needs a complete rewrite
 const query = graphql(`
 	query UserBookClubsScene {
 		bookClubs(all: false) {
@@ -15,10 +16,8 @@ const query = graphql(`
 			slug
 			description
 			membersCount
-			schedule {
-				activeBooks {
-					__typename
-				}
+			currentBook {
+				id
 			}
 		}
 	}
@@ -36,7 +35,7 @@ export default function UserBookClubsScene() {
 	} = useSuspenseGraphQL(query, ['bookClubs'])
 
 	const renderBookClub = (bookClub: Club) => {
-		const isActive = !!bookClub.schedule?.activeBooks?.length
+		const isActive = !!bookClub.currentBook
 
 		return (
 			<>

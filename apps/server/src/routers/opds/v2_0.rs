@@ -131,6 +131,132 @@ struct OPDSSearchQuery {
 	query: Option<String>,
 }
 
+/// The filter options for browsing books, based on the OPDS/Readium spec
+///
+/// See https://readium.org/webpub-manifest/schema/metadata.schema.json
+#[derive(Debug, Default, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct OPDSBrowseFilter {
+	author: Option<String>, // Note: Filter by writers
+	penciler: Option<String>,
+	colorist: Option<String>,
+	inker: Option<String>,
+	letterer: Option<String>,
+	editor: Option<String>,
+	cover_artist: Option<String>,
+	subject: Option<String>,
+	characters: Option<String>,
+	teams: Option<String>,
+}
+
+impl OPDSBrowseFilter {
+	/// Transform self into a valid SeaORM [Condition] to apply as a filter
+	fn into_condition(self) -> Option<Condition> {
+		let mut condition = Condition::all();
+		let mut has_filter = false;
+
+		let field_mappings: Vec<(Option<String>, media_metadata::Column)> = vec![
+			(self.author, media_metadata::Column::Writers),
+			(self.penciler, media_metadata::Column::Pencillers),
+			(self.colorist, media_metadata::Column::Colorists),
+			(self.inker, media_metadata::Column::Inkers),
+			(self.letterer, media_metadata::Column::Letterers),
+			(self.editor, media_metadata::Column::Editors),
+			(self.cover_artist, media_metadata::Column::CoverArtists),
+			(self.subject, media_metadata::Column::Genres),
+			(self.characters, media_metadata::Column::Characters),
+			(self.teams, media_metadata::Column::Teams),
+		];
+
+		for (value, column) in field_mappings {
+			if let Some(val) = value {
+				condition = condition.add(column.like(format!("%{val}%")));
+				has_filter = true;
+			}
+		}
+
+		if has_filter {
+			Some(condition)
+		} else {
+			None
+		}
+	}
+
+	/// Generate a query string from the filter, used for the browse links
+	fn to_query_string(&self) -> String {
+		let mut parts = Vec::new();
+
+		let fields: Vec<(&str, &Option<String>)> = vec![
+			("author", &self.author),
+			("penciler", &self.penciler),
+			("colorist", &self.colorist),
+			("inker", &self.inker),
+			("letterer", &self.letterer),
+			("editor", &self.editor),
+			("coverArtist", &self.cover_artist),
+			("subject", &self.subject),
+			("characters", &self.characters),
+			("teams", &self.teams),
+		];
+
+		for (key, value) in fields {
+			if let Some(val) = value {
+				parts.push(format!("{}={}", key, urlencoding::encode(val)));
+			}
+		}
+
+		parts.join("&")
+	}
+
+	// TODO: There is an argument to have localization for the OPDS
+
+	/// Generate a basic human-readable subtitle describing the active filters, basically
+	/// just lists them out
+	fn subtitle(&self) -> Option<String> {
+		let parts: Vec<String> = [
+			self.author.as_ref().map(|v| format!("author {v}")),
+			self.penciler.as_ref().map(|v| format!("penciler {v}")),
+			self.colorist.as_ref().map(|v| format!("colorist {v}")),
+			self.inker.as_ref().map(|v| format!("inker {v}")),
+			self.letterer.as_ref().map(|v| format!("letterer {v}")),
+			self.editor.as_ref().map(|v| format!("editor {v}")),
+			self.cover_artist
+				.as_ref()
+				.map(|v| format!("cover artist {v}")),
+			self.subject.as_ref().map(|v| format!("subject {v}")),
+			self.characters.as_ref().map(|v| format!("characters {v}")),
+			self.teams.as_ref().map(|v| format!("teams {v}")),
+		]
+		.into_iter()
+		.flatten()
+		.collect();
+
+		if parts.is_empty() {
+			return None;
+		}
+
+		let list = match parts.len() {
+			1 => parts[0].clone(),
+			2 => format!("{} and {}", parts[0], parts[1]),
+			_ => {
+				let (last, rest) = parts.split_last().unwrap();
+				format!("{}, and {last}", rest.join(", "))
+			},
+		};
+
+		Some(format!("Filtered by {list}"))
+	}
+}
+
+#[derive(Debug, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct OPDSBrowseParams {
+	#[serde(flatten)]
+	pagination: OffsetPagination,
+	#[serde(flatten)]
+	filter: OPDSBrowseFilter,
+}
+
 #[tracing::instrument]
 async fn auth(HostExtractor(host): HostExtractor) -> APIResult<OPDSAuthDocWrapper> {
 	Ok(OPDSAuthDocWrapper(
@@ -719,6 +845,7 @@ async fn fetch_books_and_generate_feed<C>(
 	order: (C, Order),
 	pagination: OffsetPagination,
 	title: &str,
+	subtitle: Option<String>,
 	base_url: &str,
 ) -> APIResult<Json<OPDSFeed>>
 where
@@ -760,11 +887,12 @@ where
 			.await?;
 
 	let next_page = pagination.next_page();
+	let page_separator = if base_url.contains('?') { "&" } else { "?" };
 	let previous_link = match pagination.previous_page() {
 		Some(page) => Some(
 			link_finalizer.finalize(OPDSLink::Link(
 				OPDSBaseLinkBuilder::default()
-					.href(format!("{base_url}?page={page}"))
+					.href(format!("{base_url}{page_separator}page={page}"))
 					.rel(OPDSLinkRel::Previous.item())
 					.build()?,
 			)),
@@ -788,7 +916,7 @@ where
 			),
 			OPDSLink::Link(
 				OPDSBaseLinkBuilder::default()
-					.href(format!("{base_url}?page={next_page}"))
+					.href(format!("{base_url}{page_separator}page={next_page}"))
 					.rel(OPDSLinkRel::Next.item())
 					.build()?,
 			),
@@ -801,6 +929,7 @@ where
 			.metadata(
 				OPDSMetadataBuilder::default()
 					.title(title.to_string())
+					.subtitle(subtitle)
 					.pagination(Some(
 						OPDSPaginationMetadataBuilder::default()
 							.number_of_items(books_count)
@@ -835,6 +964,7 @@ async fn browse_library_books(
 		(media::Column::Name, Order::Asc),
 		pagination.0,
 		"Library Books - All",
+		None,
 		format!("/opds/v2.0/libraries/{id}/books").as_str(),
 	)
 	.await
@@ -858,6 +988,7 @@ async fn latest_library_books(
 		(media::Column::CreatedAt, Order::Desc),
 		pagination.0,
 		"Library Books - Latest",
+		None,
 		format!("/opds/v2.0/libraries/{id}/books/latest").as_str(),
 	)
 	.await
@@ -984,30 +1115,43 @@ async fn browse_series_by_id(
 		(media::Column::Name, Order::Asc),
 		pagination.0,
 		&title,
+		None,
 		&format!("/opds/v2.0/series/{id}"),
 	)
 	.await
 }
 
-/// A route handler which returns a feed of books for a user.
+/// A route handler which returns a feed of books for a user
 #[tracing::instrument(skip(ctx))]
 async fn browse_books(
 	State(ctx): State<AppState>,
 	HostExtractor(host): HostExtractor,
-	pagination: Query<OffsetPagination>,
+	Query(params): Query<OPDSBrowseParams>,
 	Extension(req): Extension<AuthContext>,
 ) -> APIResult<Json<OPDSFeed>> {
 	let user = req.user();
+
+	let filter_query_string = params.filter.to_query_string();
+	let subtitle = params.filter.subtitle();
+
+	let base_url = if filter_query_string.is_empty() {
+		"/opds/v2.0/books/browse".to_string()
+	} else {
+		format!("/opds/v2.0/books/browse?{filter_query_string}")
+	};
+
+	let condition = params.filter.into_condition();
 
 	fetch_books_and_generate_feed(
 		&ctx,
 		OPDSLinkFinalizer::from(host),
 		&user,
-		None,
+		condition,
 		(media::Column::Name, Order::Asc),
-		pagination.0,
-		"Browse All Books",
-		"/opds/v2.0/books/browse",
+		params.pagination,
+		"Browse Books",
+		subtitle,
+		&base_url,
 	)
 	.await
 }
@@ -1030,6 +1174,7 @@ async fn latest_books(
 		(media::Column::CreatedAt, Order::Desc),
 		pagination.0,
 		"Latest Books",
+		None,
 		"/opds/v2.0/books/latest",
 	)
 	.await
@@ -1064,6 +1209,7 @@ async fn keep_reading(
 		(reading_session::Column::UpdatedAt, Order::Desc),
 		pagination.0,
 		"Currently Reading",
+		None,
 		"/opds/v2.0/books/keep-reading",
 	)
 	.await

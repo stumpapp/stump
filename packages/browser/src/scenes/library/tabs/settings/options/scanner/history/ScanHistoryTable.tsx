@@ -9,8 +9,7 @@ import {
 	getPaginationRowModel,
 	useReactTable,
 } from '@tanstack/react-table'
-import dayjs from 'dayjs'
-import relativeTime from 'dayjs/plugin/relativeTime'
+import { intlFormat, isValid, parseISO } from 'date-fns'
 import { Database, Ellipsis, Slash } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
@@ -19,8 +18,6 @@ import { getCommonPinningStyles } from '@/components/table/Table'
 
 import { useLibraryManagement } from '../../../context'
 import ScanRecordInspector from './ScanRecordInspector'
-
-dayjs.extend(relativeTime)
 
 const query = graphql(`
 	query ScanHistoryTable($id: ID!) {
@@ -80,12 +77,21 @@ export default function ScanHistoryTable() {
 					</Text>
 				),
 				cell: ({ getValue }) => {
-					const parsed = dayjs(getValue())
-					if (!parsed.isValid()) return null
+					const parsed =
+						typeof getValue() === 'string' ? parseISO(getValue()) : new Date(getValue())
+					if (!isValid(parsed)) return null
+
+					const formatted = intlFormat(parsed, {
+						month: 'long',
+						day: 'numeric',
+						year: 'numeric',
+						hour: 'numeric',
+						minute: '2-digit',
+					})
 
 					return (
-						<Text size="sm" title={parsed.format('LLL')}>
-							{parsed.format('LLL')}
+						<Text size="sm" title={formatted}>
+							{formatted}
 						</Text>
 					)
 				},

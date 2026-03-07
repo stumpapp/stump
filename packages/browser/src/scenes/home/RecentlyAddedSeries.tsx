@@ -1,10 +1,9 @@
 import { PREFETCH_STALE_TIME, useInfiniteSuspenseGraphQL, useSDK } from '@stump/client'
-import { Text } from '@stump/components'
+import { cn, Text } from '@stump/components'
 import { graphql, RecentlyAddedSeriesQuery } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
-import dayjs from 'dayjs'
-import relativeTime from 'dayjs/plugin/relativeTime'
+import { formatDistanceToNow } from 'date-fns'
 import { BookCopy } from 'lucide-react'
 import { Suspense, useCallback, useMemo } from 'react'
 import { useMediaMatch } from 'rooks'
@@ -12,9 +11,8 @@ import { useMediaMatch } from 'rooks'
 import MultiRowHorizontalCardList from '@/components/MultiRowHorizontalCardList'
 import { SeriesStackedThumbnails } from '@/components/thumbnail'
 import { Link } from '@/context'
+import { useFancyAnimations } from '@/hooks/useFancyAnimations'
 import { usePreferences } from '@/hooks/usePreferences'
-
-dayjs.extend(relativeTime)
 
 const query = graphql(`
 	query RecentlyAddedSeries($pagination: Pagination!) {
@@ -92,12 +90,17 @@ type RecentlyAddedSeriesCardProps = {
 }
 
 function RecentlyAddedSeriesCard({ series, cardWidth }: RecentlyAddedSeriesCardProps) {
+	const { shouldFancyHover } = useFancyAnimations()
+
 	const thumbnailData = [series.thumbnail, ...series.media.map((m) => m.thumbnail)]
 
 	return (
 		<Link
 			to={`/series/${series.id}`}
-			className="group relative block flex-shrink-0 transition-opacity hover:opacity-90"
+			className={cn(
+				'group relative block flex-shrink-0 transition-opacity',
+				!shouldFancyHover && 'hover:opacity-80',
+			)}
 			style={{ width: cardWidth }}
 		>
 			<SeriesStackedThumbnails width={cardWidth} thumbnailData={thumbnailData} />
@@ -117,7 +120,7 @@ function RecentlyAddedSeriesCard({ series, cardWidth }: RecentlyAddedSeriesCardP
 						textShadow: '2px 1px 2px rgba(0, 0, 0, 0.5)',
 					}}
 				>
-					{dayjs(series.createdAt).fromNow()}
+					{formatDistanceToNow(new Date(series.createdAt), { addSuffix: true })}
 				</Text>
 			</div>
 		</Link>

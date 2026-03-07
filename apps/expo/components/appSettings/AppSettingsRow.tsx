@@ -2,7 +2,7 @@ import { LucideIcon } from 'lucide-react-native'
 import { forwardRef } from 'react'
 import { Pressable, View } from 'react-native'
 
-import { CardRow } from '../ui'
+import { Card } from '../ui'
 
 type Props = {
 	icon: LucideIcon
@@ -20,14 +20,14 @@ const AppSettingsRow = forwardRef<View, Props>(
 		return (
 			<Pressable {...props} ref={ref}>
 				{({ pressed }) => (
-					<CardRow
+					<Card.Row
 						icon={icon}
 						label={title}
 						style={pressed && isLink && { opacity: 0.7 }}
 						disabled={disabled}
 					>
 						{children}
-					</CardRow>
+					</Card.Row>
 				)}
 			</Pressable>
 		)

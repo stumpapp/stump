@@ -1,9 +1,11 @@
 import { WideSwitch } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { useCallback } from 'react'
 
 import { usePreferences } from '@/hooks'
 
 export default function DoubleSidebarToggle() {
+	const { t } = useLocaleContext()
 	const {
 		preferences: { enableDoubleSidebar },
 		update,
@@ -19,11 +21,14 @@ export default function DoubleSidebarToggle() {
 
 	return (
 		<WideSwitch
-			label="Settings sidebar"
-			description="Enables the sidebar navigation for the settings pages. If you frequently use a smaller screen, you may want to disable this."
+			label={t(getKey('label'))}
+			description={t(getKey('description'))}
 			checked={enableDoubleSidebar}
 			onCheckedChange={handleToggle}
 			formId="enableDoubleSidebar"
 		/>
 	)
 }
+
+const LOCALE_BASE = 'settingsScene.app/preferences.sections.doubleSidebar'
+const getKey = (key: string) => `${LOCALE_BASE}.${key}`

@@ -1,6 +1,5 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
-import dayjs from 'dayjs'
-import duration from 'dayjs/plugin/duration'
+import { formatHumanDuration } from '@stump/i18n'
 import { forwardRef, useMemo } from 'react'
 import { View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -10,13 +9,11 @@ import { epubProgress, imageMeta } from '~/db'
 import { useColors } from '~/lib/constants'
 import { formatBytes } from '~/lib/format'
 
-import { InfoRow, InfoStat, LongValue } from '../book/overview'
+import { InfoRow, LongValue } from '../book/overview'
 import { ThumbnailImage } from '../image'
-import { CardList, Heading, Text } from '../ui'
+import { Card, Heading, Text } from '../ui'
 import { DownloadedFile } from './types'
 import { getThumbnailPath } from './utils'
-
-dayjs.extend(duration)
 
 type Props = {
 	downloadedFile: DownloadedFile
@@ -64,7 +61,7 @@ export const DownloadedBookDetailsSheet = forwardRef<TrueSheet, Props>(
 
 		const readTime = useMemo(() => {
 			if (!readProgressData?.elapsedSeconds) return null
-			return dayjs.duration(readProgressData.elapsedSeconds, 'seconds').humanize()
+			return formatHumanDuration(readProgressData.elapsedSeconds)
 		}, [readProgressData])
 
 		// TODO: Consider more metadata fields
@@ -116,27 +113,31 @@ export const DownloadedBookDetailsSheet = forwardRef<TrueSheet, Props>(
 						</View>
 					</View>
 
-					<View className="flex-row justify-around py-2">
-						{formattedSize && <InfoStat label="Size" value={formattedSize} />}
-						{pages && <InfoStat label="Pages" value={String(pages)} />}
-						{progressPercentage != null && (
-							<InfoStat label="Progress" value={`${progressPercentage.toFixed(0)}%`} />
-						)}
-						{readTime && <InfoStat label="Read time" value={readTime} />}
-					</View>
+					<Card>
+						<Card.StatGroup>
+							{pages && <Card.Stat label="Pages" value={pages} />}
+							{epubProgressData?.chapterTitle &&
+								!epubProgressData.chapterTitle.match(/\.(html|xml|xhtml)$/i) && (
+									<Card.Stat label="Chapter" value={epubProgressData.chapterTitle} />
+								)}
+							{progressPercentage != null && (
+								<Card.Stat
+									label="Progress"
+									value={`${progressPercentage.toFixed(1)}`}
+									suffix={'%'}
+								/>
+							)}
+							{readTime && <Card.Stat label="Read time" value={readTime} />}
+						</Card.StatGroup>
+					</Card>
 
-					<CardList>
+					<Card>
 						{downloadedFile.bookDescription && (
 							<LongValue
 								label="Description"
 								value={stripHtml(downloadedFile.bookDescription).result}
 							/>
 						)}
-
-						{epubProgressData?.chapterTitle &&
-							!epubProgressData.chapterTitle.match(/\.(html|xml|xhtml)$/i) && (
-								<InfoRow label="Chapter" value={epubProgressData.chapterTitle} />
-							)}
 
 						{downloadedFile.series && <InfoRow label="Series" value={downloadedFile.series.name} />}
 
@@ -154,7 +155,8 @@ export const DownloadedBookDetailsSheet = forwardRef<TrueSheet, Props>(
 								value={new Date(downloadedFile.downloadedAt).toLocaleDateString()}
 							/>
 						)}
-					</CardList>
+						{formattedSize && <InfoRow label="Size" value={formattedSize} />}
+					</Card>
 				</View>
 			</TrueSheet>
 		)

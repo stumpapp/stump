@@ -241,7 +241,7 @@ export default function AddOrEditServerForm({
 					onPress={handleSubmit(onSubmit)}
 					disabled={editingServer ? !isUpdateReady : false}
 				>
-					<Text className="text-foreground">Save</Text>
+					<Text>Save</Text>
 				</Button>
 			</View>
 

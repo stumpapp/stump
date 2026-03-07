@@ -78,7 +78,7 @@ export const ThumbnailImage = ({
 	const innerBorderRadius = isFitMode ? Math.max(0, borderRadius - 2) : 0
 
 	return (
-		<View>
+		<View className="items-center">
 			<BorderAndShadow
 				style={{
 					borderRadius,
@@ -90,7 +90,7 @@ export const ThumbnailImage = ({
 			>
 				{Platform.OS === 'ios' && gradientElement}
 
-				<ThumbnailPlaceholder {...placeholderData} />
+				<ThumbnailPlaceholder placeholderData={placeholderData} style={{ zIndex: 10 }} />
 
 				<View
 					style={[

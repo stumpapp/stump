@@ -8,7 +8,7 @@ import { useColors } from '~/lib/constants'
 import { useDownloadQueue } from '~/lib/hooks'
 
 import Owl from '../Owl'
-import { CardList, Tabs } from '../ui'
+import { Card, Tabs } from '../ui'
 import { Text } from '../ui/text'
 import DownloadQueueItem from './DownloadQueueItem'
 import FailedDownloadItem from './FailedDownloadItem'
@@ -123,11 +123,11 @@ export const DownloadQueueSheet = forwardRef<TrueSheet, Props>(function Download
 					)}
 
 					{activeAndPendingItems.length > 0 && tab === 'HEALTHY' && (
-						<CardList className="gap-0">
+						<Card className="gap-0">
 							{activeAndPendingItems.map((item) => (
 								<DownloadQueueItem key={item.id} item={item} onCancel={cancel} />
 							))}
-						</CardList>
+						</Card>
 					)}
 
 					{activeAndPendingItems.length === 0 && tab === 'HEALTHY' && !isTotalEmptyState && (
@@ -138,11 +138,11 @@ export const DownloadQueueSheet = forwardRef<TrueSheet, Props>(function Download
 					)}
 
 					{failedItems.length > 0 && tab === 'FAILED' && (
-						<CardList>
+						<Card>
 							{failedItems.map((item) => (
 								<FailedDownloadItem key={item.id} item={item} onRetry={retry} onDismiss={dismiss} />
 							))}
-						</CardList>
+						</Card>
 					)}
 
 					{failedItems.length === 0 && tab === 'FAILED' && !isTotalEmptyState && (

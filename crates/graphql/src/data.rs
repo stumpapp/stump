@@ -27,6 +27,10 @@ impl Default for ServiceContext {
 }
 
 impl ServiceContext {
+	pub fn new(host: String, scheme: String) -> Self {
+		Self { host, scheme }
+	}
+
 	pub fn url(&self) -> String {
 		format!("{}://{}", self.scheme, self.host)
 	}

@@ -3,7 +3,10 @@ import type { AllowedLocale } from '@stump/i18n'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 
-import { ThumbnailPlaceholderType } from '~/components/image/ThumbnailPlaceholder'
+import {
+	ThumbnailPlaceholderType,
+	ThumbnailResizeMode,
+} from '~/components/image/ThumbnailPlaceholder'
 
 import { CachePolicy } from './reader'
 import { ZustandMMKVStorage } from './store'
@@ -21,7 +24,7 @@ type MobilePreferencesStore = {
 	cachePolicy: CachePolicy
 	allowDownscaling: boolean
 	thumbnailRatio: number
-	thumbnailResizeMode: 'cover' | 'stretch' | 'fit'
+	thumbnailResizeMode: ThumbnailResizeMode
 	thumbnailPlaceholder: ThumbnailPlaceholderType
 	performanceMonitor: boolean
 	accentColor?: string | undefined

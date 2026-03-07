@@ -22,18 +22,21 @@ export type ThumbnailPlaceholderData = {
 } | null
 
 export type ThumbnailPlaceholderType = 'grayscale' | 'averageColor' | 'colorful' | 'thumbhash'
+export type ThumbnailResizeMode = 'cover' | 'stretch' | 'fit'
+
+type Props = {
+	placeholderData?: ThumbnailPlaceholderData
+	placeholderType?: ThumbnailPlaceholderType
+	fadeDuration?: number
+	style?: StyleProp<ImageStyle>
+}
 
 export function ThumbnailPlaceholder({
 	placeholderData,
 	placeholderType,
 	fadeDuration,
 	style,
-}: {
-	placeholderData?: ThumbnailPlaceholderData
-	placeholderType?: ThumbnailPlaceholderType
-	fadeDuration?: number
-	style?: StyleProp<ImageStyle>
-}) {
+}: Props) {
 	const thumbnailPlaceholderPreference = usePreferencesStore((state) => state.thumbnailPlaceholder)
 	const { thumbnail } = useColors()
 

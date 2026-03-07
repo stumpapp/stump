@@ -14,6 +14,7 @@ use crate::shared::{
 
 use super::{library_exclusion, user::AuthUser};
 
+// TODO(thumbs): Add thumbnail_dimensions to model
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject, Ordering)]
 #[graphql(name = "LibraryModel")]
 #[sea_orm(table_name = "libraries")]

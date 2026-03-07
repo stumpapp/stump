@@ -6,7 +6,11 @@ import TImage, { type TurboImageProps } from 'react-native-turbo-image'
 import { usePreferencesStore } from '~/stores'
 
 import { BorderAndShadow, BorderAndShadowStyle } from '../BorderAndShadow'
-import { ThumbnailPlaceholder, ThumbnailPlaceholderData } from './ThumbnailPlaceholder'
+import {
+	ThumbnailPlaceholder,
+	ThumbnailPlaceholderData,
+	ThumbnailResizeMode,
+} from './ThumbnailPlaceholder'
 
 type ThumbnailImageProps = {
 	size: { height: number; width: number }
@@ -122,6 +126,8 @@ export const ThumbnailImage = ({
 	)
 }
 
+const FIT_X_PADDING = 16
+
 export function calculateFitDimensions(
 	containerWidth: number,
 	containerHeight: number,
@@ -134,7 +140,7 @@ export function calculateFitDimensions(
 	if (imageRatio > containerRatio) {
 		// Image is wider than container ratio -> fit to width
 		return {
-			width: containerWidth,
+			width: containerWidth - FIT_X_PADDING,
 			height: containerWidth / imageRatio,
 		}
 	} else {
@@ -154,7 +160,7 @@ type GetThumbnailResizePropsParams = {
 }
 
 export function getThumbnailResizeProps(
-	thumbnailResizeMode: 'cover' | 'stretch' | 'fit',
+	thumbnailResizeMode: ThumbnailResizeMode,
 	{ containerWidth, containerHeight, originalWidth, originalHeight }: GetThumbnailResizePropsParams,
 ): { resizeMode: 'cover' | 'stretch'; style?: { width: number; height: number } } {
 	if (thumbnailResizeMode === 'stretch') {
@@ -170,7 +176,7 @@ export function getThumbnailResizeProps(
 		)
 		// Note: This might feel convoluted but the reason I avoided `contain` is because we
 		// wouldn't be able to add the border radius. We would have sharp edges inside the
-		// rounded container which looks poop
+		// rounded container which looks poopy
 		return { resizeMode: 'cover', style: fitDimensions }
 	}
 

@@ -5,7 +5,7 @@ import { LayoutGrid, Table } from 'lucide-react'
 import { useSeriesLayout } from '@/stores/layout'
 
 export default function SeriesExplorationLayout() {
-	const { layout, setLayout } = useSeriesLayout((state) => ({
+	const { layout, setLayout } = useSeriesLayout('global', (state) => ({
 		layout: state.layout,
 		setLayout: state.setLayout,
 	}))

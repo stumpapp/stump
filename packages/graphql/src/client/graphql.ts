@@ -1028,6 +1028,7 @@ export type LibraryConfig = {
   libraryPattern: LibraryPattern;
   processMetadata: Scalars['Boolean']['output'];
   processThumbnailColorsEvenWithoutConfig: Scalars['Boolean']['output'];
+  skipBookOverview: Scalars['Boolean']['output'];
   thumbnailConfig?: Maybe<ImageProcessorOptions>;
   watch: Scalars['Boolean']['output'];
 };
@@ -1046,6 +1047,7 @@ export type LibraryConfigInput = {
   libraryPattern: LibraryPattern;
   processMetadata: Scalars['Boolean']['input'];
   processThumbnailColorsEvenWithoutConfig: Scalars['Boolean']['input'];
+  skipBookOverview: Scalars['Boolean']['input'];
   thumbnailConfig?: InputMaybe<ImageProcessorOptionsInput>;
   watch: Scalars['Boolean']['input'];
 };
@@ -4766,7 +4768,7 @@ export type TagSelectQueryQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type TagSelectQueryQuery = { __typename?: 'Query', tags: Array<{ __typename?: 'Tag', id: number, name: string }> };
 
-export type BookCardFragment = { __typename?: 'Media', id: string, resolvedName: string, extension: string, pages: number, size: number, status: FileStatus, createdAt: any, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null }, readProgress?: { __typename?: 'ActiveReadingSession', percentageCompleted?: any | null, epubcfi?: string | null, page?: number | null, updatedAt?: any | null } | null, readHistory: Array<{ __typename: 'FinishedReadingSession', completedAt: any }> } & { ' $fragmentName'?: 'BookCardFragment' };
+export type BookCardFragment = { __typename?: 'Media', id: string, resolvedName: string, extension: string, pages: number, size: number, status: FileStatus, createdAt: any, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null }, readProgress?: { __typename?: 'ActiveReadingSession', percentageCompleted?: any | null, epubcfi?: string | null, page?: number | null, updatedAt?: any | null } | null, readHistory: Array<{ __typename: 'FinishedReadingSession', completedAt: any }>, libraryConfig: { __typename?: 'LibraryConfig', skipBookOverview: boolean } } & { ' $fragmentName'?: 'BookCardFragment' };
 
 export type BookSearchOverlayQueryVariables = Exact<{
   pagination?: InputMaybe<Pagination>;
@@ -5026,7 +5028,7 @@ export type BookLibrarySeriesLinksQueryVariables = Exact<{
 
 export type BookLibrarySeriesLinksQuery = { __typename?: 'Query', seriesById?: { __typename?: 'Series', id: string, resolvedName: string, libraryId?: string | null } | null };
 
-export type BookMetadataFragment = { __typename?: 'Media', metadata?: { __typename?: 'MediaMetadata', ageRating?: number | null, characters: Array<string>, colorists: Array<string>, coverArtists: Array<string>, editors: Array<string>, genres: Array<string>, inkers: Array<string>, letterers: Array<string>, links: Array<string>, pencillers: Array<string>, publisher?: string | null, teams: Array<string>, writers: Array<string>, year?: number | null, month?: number | null, day?: number | null } | null } & { ' $fragmentName'?: 'BookMetadataFragment' };
+export type BookMetadataFragment = { __typename?: 'Media', metadata?: { __typename?: 'MediaMetadata', ageRating?: number | null, characters: Array<string>, colorists: Array<string>, coverArtists: Array<string>, editors: Array<string>, genres: Array<string>, inkers: Array<string>, letterers: Array<string>, links: Array<string>, pencillers: Array<string>, publisher?: string | null, teams: Array<string>, writers: Array<string>, year?: number | null, month?: number | null, day?: number | null, volume?: number | null, number?: any | null } | null } & { ' $fragmentName'?: 'BookMetadataFragment' };
 
 export type BookOverviewHeaderQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -5299,7 +5301,7 @@ export type LibrarySeriesGridQueryVariables = Exact<{
 
 export type LibrarySeriesGridQuery = { __typename?: 'Query', series: { __typename?: 'PaginatedSeriesResponse', nodes: Array<{ __typename?: 'Series', id: string, thumbnail: { __typename?: 'ImageRef', url: string } }>, pageInfo: { __typename: 'CursorPaginationInfo', currentCursor?: string | null, nextCursor?: string | null, limit: number } | { __typename: 'OffsetPaginationInfo' } } };
 
-export type LibrarySettingsConfigFragment = { __typename?: 'Library', config: { __typename?: 'LibraryConfig', id: number, convertRarToZip: boolean, hardDeleteConversions: boolean, defaultReadingDir: ReadingDirection, defaultReadingMode: ReadingMode, defaultReadingImageScaleFit: ReadingImageScaleFit, defaultLibraryViewMode: LibraryViewMode, hideSeriesView: boolean, generateFileHashes: boolean, generateKoreaderHashes: boolean, processMetadata: boolean, watch: boolean, libraryPattern: LibraryPattern, processThumbnailColorsEvenWithoutConfig: boolean, ignoreRules?: Array<string> | null, thumbnailConfig?: { __typename: 'ImageProcessorOptions', format: SupportedImageFormat, quality?: number | null, page?: number | null, resizeMethod?: { __typename: 'ExactDimensionResize', width: number, height: number } | { __typename: 'ScaleEvenlyByFactor', factor: any } | { __typename: 'ScaledDimensionResize', dimension: Dimension, size: number } | null } | null } } & { ' $fragmentName'?: 'LibrarySettingsConfigFragment' };
+export type LibrarySettingsConfigFragment = { __typename?: 'Library', config: { __typename?: 'LibraryConfig', id: number, convertRarToZip: boolean, hardDeleteConversions: boolean, defaultReadingDir: ReadingDirection, defaultReadingMode: ReadingMode, defaultReadingImageScaleFit: ReadingImageScaleFit, defaultLibraryViewMode: LibraryViewMode, hideSeriesView: boolean, skipBookOverview: boolean, generateFileHashes: boolean, generateKoreaderHashes: boolean, processMetadata: boolean, watch: boolean, libraryPattern: LibraryPattern, processThumbnailColorsEvenWithoutConfig: boolean, ignoreRules?: Array<string> | null, thumbnailConfig?: { __typename: 'ImageProcessorOptions', format: SupportedImageFormat, quality?: number | null, page?: number | null, resizeMethod?: { __typename: 'ExactDimensionResize', width: number, height: number } | { __typename: 'ScaleEvenlyByFactor', factor: any } | { __typename: 'ScaledDimensionResize', dimension: Dimension, size: number } | null } | null } } & { ' $fragmentName'?: 'LibrarySettingsConfigFragment' };
 
 export type LibrarySettingsRouterEditLibraryMutationMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -6408,6 +6410,9 @@ export const BookCardFragmentDoc = new TypedDocumentString(`
     completedAt
   }
   createdAt
+  libraryConfig {
+    skipBookOverview
+  }
 }
     `, {"fragmentName":"BookCard"}) as unknown as TypedDocumentString<BookCardFragment, unknown>;
 export const MediaMetadataEditorFragmentDoc = new TypedDocumentString(`
@@ -6528,6 +6533,8 @@ export const BookMetadataFragmentDoc = new TypedDocumentString(`
     year
     month
     day
+    volume
+    number
   }
 }
     `, {"fragmentName":"BookMetadata"}) as unknown as TypedDocumentString<BookMetadataFragment, unknown>;
@@ -6617,6 +6624,7 @@ export const LibrarySettingsConfigFragmentDoc = new TypedDocumentString(`
     defaultReadingImageScaleFit
     defaultLibraryViewMode
     hideSeriesView
+    skipBookOverview
     generateFileHashes
     generateKoreaderHashes
     processMetadata
@@ -8760,6 +8768,9 @@ export const BookSearchOverlayDocument = new TypedDocumentString(`
     completedAt
   }
   createdAt
+  libraryConfig {
+    skipBookOverview
+  }
 }`) as unknown as TypedDocumentString<BookSearchOverlayQuery, BookSearchOverlayQueryVariables>;
 export const UpdateMediaMetadataDocument = new TypedDocumentString(`
     mutation UpdateMediaMetadata($id: ID!, $input: MediaMetadataInput!) {
@@ -8853,6 +8864,9 @@ export const BookOverviewSceneDocument = new TypedDocumentString(`
     completedAt
   }
   createdAt
+  libraryConfig {
+    skipBookOverview
+  }
 }
 fragment MediaMetadataEditor on MediaMetadata {
   ageRating
@@ -9401,6 +9415,9 @@ export const BooksAfterCurrentQueryDocument = new TypedDocumentString(`
     completedAt
   }
   createdAt
+  libraryConfig {
+    skipBookOverview
+  }
 }`) as unknown as TypedDocumentString<BooksAfterCurrentQueryQuery, BooksAfterCurrentQueryQueryVariables>;
 export const BooksAlphabetDocument = new TypedDocumentString(`
     query BooksAlphabet {
@@ -9692,6 +9709,9 @@ export const BookSearchSceneDocument = new TypedDocumentString(`
     completedAt
   }
   createdAt
+  libraryConfig {
+    skipBookOverview
+  }
 }
 fragment BookMetadata on Media {
   metadata {
@@ -9711,6 +9731,8 @@ fragment BookMetadata on Media {
     year
     month
     day
+    volume
+    number
   }
 }`) as unknown as TypedDocumentString<BookSearchSceneQuery, BookSearchSceneQueryVariables>;
 export const CreateLibrarySceneExistingLibrariesDocument = new TypedDocumentString(`
@@ -9963,6 +9985,7 @@ export const LibraryLayoutDocument = new TypedDocumentString(`
     defaultReadingImageScaleFit
     defaultLibraryViewMode
     hideSeriesView
+    skipBookOverview
     generateFileHashes
     generateKoreaderHashes
     processMetadata
@@ -10048,6 +10071,9 @@ export const LibraryBooksSceneDocument = new TypedDocumentString(`
     completedAt
   }
   createdAt
+  libraryConfig {
+    skipBookOverview
+  }
 }
 fragment BookMetadata on Media {
   metadata {
@@ -10067,6 +10093,8 @@ fragment BookMetadata on Media {
     year
     month
     day
+    volume
+    number
   }
 }`) as unknown as TypedDocumentString<LibraryBooksSceneQuery, LibraryBooksSceneQueryVariables>;
 export const LibrarySeriesDocument = new TypedDocumentString(`
@@ -10368,6 +10396,9 @@ export const SeriesBooksSceneDocument = new TypedDocumentString(`
     completedAt
   }
   createdAt
+  libraryConfig {
+    skipBookOverview
+  }
 }
 fragment BookMetadata on Media {
   metadata {
@@ -10387,6 +10418,8 @@ fragment BookMetadata on Media {
     year
     month
     day
+    volume
+    number
   }
 }`) as unknown as TypedDocumentString<SeriesBooksSceneQuery, SeriesBooksSceneQueryVariables>;
 export const SeriesBookGridDocument = new TypedDocumentString(`
@@ -11194,6 +11227,9 @@ export const SmartListItemsDocument = new TypedDocumentString(`
     completedAt
   }
   createdAt
+  libraryConfig {
+    skipBookOverview
+  }
 }
 fragment BookMetadata on Media {
   metadata {
@@ -11213,6 +11249,8 @@ fragment BookMetadata on Media {
     year
     month
     day
+    volume
+    number
   }
 }
 fragment SmartListItemBookMetadata on Media {

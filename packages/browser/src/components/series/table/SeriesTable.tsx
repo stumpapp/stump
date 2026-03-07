@@ -8,10 +8,12 @@ import { useSeriesLayout } from '@/stores/layout'
 import { SeriesCardData } from '../SeriesCard'
 import { defaultColumns } from './columns'
 
-type Props = Omit<EntityTableProps<SeriesCardData>, 'columns' | 'options'>
+type Props = Omit<EntityTableProps<SeriesCardData>, 'columns' | 'options'> & {
+	layoutKey?: string
+}
 
-export default function SeriesTable(props: Props) {
-	const configuration = useSeriesLayout((state) => ({
+export default function SeriesTable({ layoutKey = 'global', ...props }: Props) {
+	const configuration = useSeriesLayout(layoutKey, (state) => ({
 		columns: state.columns,
 	}))
 	const { ordering, setOrdering } = useFilterContext()

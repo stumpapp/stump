@@ -1,16 +1,42 @@
-import { Link, Text } from '@stump/components'
+import { Badge, Link, Text } from '@stump/components'
 import { FragmentType, Media, MediaModelOrdering } from '@stump/graphql'
 import { ColumnSort } from '@stump/sdk'
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
 import { format, intlFormat } from 'date-fns'
 
 import paths from '@/paths'
+import { formatBytes } from '@/utils/format'
 
 import { BookCardFragment } from '../BookCard'
 import BookLinksCell from './BookLinksCell'
 import CoverImageCell from './CoverImageCell'
 
 const columnHelper = createColumnHelper<Media>()
+const MAX_LIST_BADGES = 8
+
+function MetadataBadgeListCell({ values }: { values?: string[] | null }) {
+	if (!values?.length) {
+		return null
+	}
+
+	const visible = values.slice(0, MAX_LIST_BADGES)
+	const remaining = Math.max(values.length - visible.length, 0)
+
+	return (
+		<div className="flex max-h-[3.125rem] flex-wrap gap-1 overflow-hidden">
+			{visible.map((value) => (
+				<Badge key={value} size="sm" className="line-clamp-1 max-w-full">
+					{value}
+				</Badge>
+			))}
+			{remaining > 0 && (
+				<Badge size="sm" variant="secondary">
+					+{remaining}
+				</Badge>
+			)}
+		</div>
+	)
+}
 
 const coverColumn = columnHelper.display({
 	cell: ({ row: { original: book } }) => <CoverImageCell id={book.id} title={book.resolvedName} />,
@@ -21,18 +47,25 @@ const coverColumn = columnHelper.display({
 		</Text>
 	),
 	id: 'cover',
-	size: 60,
+	size: 0,
 })
 
 const nameColumn = columnHelper.accessor(({ resolvedName }) => resolvedName, {
 	cell: ({
 		getValue,
 		row: {
-			original: { id },
+			original: { id, libraryConfig, readProgress },
 		},
 	}) => (
 		<Link
-			to={paths.bookOverview(id)}
+			to={
+				libraryConfig?.skipBookOverview
+					? paths.bookReader(id, {
+							epubcfi: readProgress?.epubcfi,
+							page: readProgress?.page ?? undefined,
+						})
+					: paths.bookOverview(id)
+			}
 			className="line-clamp-2 text-sm text-opacity-100 no-underline hover:text-opacity-90"
 		>
 			{getValue()}
@@ -66,6 +99,40 @@ const pagesColumn = columnHelper.accessor('pages', {
 	size: 60,
 })
 
+const fileSizeColumn = columnHelper.accessor('size', {
+	cell: ({ getValue }) => (
+		<Text size="sm" variant="muted">
+			{formatBytes(getValue())}
+		</Text>
+	),
+	enableGlobalFilter: true,
+	enableSorting: true,
+	header: () => (
+		<Text size="sm" variant="secondary">
+			File Size
+		</Text>
+	),
+	id: MediaModelOrdering.Size,
+	size: 100,
+})
+
+const extensionColumn = columnHelper.accessor('extension', {
+	cell: ({ getValue }) => (
+		<Text size="sm" variant="muted">
+			{getValue()}
+		</Text>
+	),
+	enableGlobalFilter: true,
+	enableSorting: true,
+	header: () => (
+		<Text size="sm" variant="secondary">
+			Extension
+		</Text>
+	),
+	id: MediaModelOrdering.Extension,
+	size: 90,
+})
+
 const publishedColumn = columnHelper.accessor(
 	({ metadata }) => {
 		const { year, month, day } = metadata || {}
@@ -88,7 +155,7 @@ const publishedColumn = columnHelper.accessor(
 			</Text>
 		),
 		enableGlobalFilter: true,
-		// TODO(prisma 0.7.0): Support order by relation
+		// TODO(relation-ordering): Support order by relation
 		enableSorting: false,
 		header: () => (
 			<Text size="sm" variant="secondary">
@@ -133,7 +200,7 @@ const publisherColumn = columnHelper.accessor(({ metadata }) => metadata?.publis
 		</Text>
 	),
 	enableGlobalFilter: true,
-	// TODO(prisma 0.7.0): Support order by relation
+	// TODO(relation-ordering): Support order by relation
 	enableSorting: false,
 	header: () => (
 		<Text size="sm" variant="secondary">
@@ -150,7 +217,7 @@ const ageRatingColumn = columnHelper.accessor(({ metadata }) => metadata?.ageRat
 		</Text>
 	),
 	enableGlobalFilter: true,
-	// TODO(prisma 0.7.0): Support order by relation
+	// TODO(relation-ordering): Support order by relation
 	enableSorting: false,
 	header: () => (
 		<Text size="sm" variant="secondary">
@@ -160,14 +227,10 @@ const ageRatingColumn = columnHelper.accessor(({ metadata }) => metadata?.ageRat
 	id: 'age_rating',
 })
 
-const genresColumn = columnHelper.accessor(({ metadata }) => metadata?.genres?.join(', '), {
-	cell: ({ getValue }) => (
-		<Text size="sm" variant="muted">
-			{getValue()}
-		</Text>
-	),
+const genresColumn = columnHelper.accessor(({ metadata }) => metadata?.genres, {
+	cell: ({ getValue }) => <MetadataBadgeListCell values={getValue()} />,
 	enableGlobalFilter: true,
-	// TODO(prisma 0.7.0): Support order by relation
+	// TODO(relation-ordering): Support order by relation
 	enableSorting: false,
 	header: () => (
 		<Text size="sm" variant="secondary">
@@ -184,7 +247,7 @@ const volumeColumn = columnHelper.accessor(({ metadata }) => metadata?.volume, {
 		</Text>
 	),
 	enableGlobalFilter: true,
-	// TODO(prisma 0.7.0): Support order by relation
+	// TODO(relation-ordering): Support order by relation
 	enableSorting: false,
 	header: () => (
 		<Text size="sm" variant="secondary">
@@ -194,14 +257,10 @@ const volumeColumn = columnHelper.accessor(({ metadata }) => metadata?.volume, {
 	id: 'volume',
 })
 
-const inkersColumn = columnHelper.accessor(({ metadata }) => metadata?.inkers?.join(', '), {
-	cell: ({ getValue }) => (
-		<Text size="sm" variant="muted">
-			{getValue()}
-		</Text>
-	),
+const inkersColumn = columnHelper.accessor(({ metadata }) => metadata?.inkers, {
+	cell: ({ getValue }) => <MetadataBadgeListCell values={getValue()} />,
 	enableGlobalFilter: true,
-	// TODO(prisma 0.7.0): Support order by relation
+	// TODO(relation-ordering): Support order by relation
 	enableSorting: false,
 	header: () => (
 		<Text size="sm" variant="secondary">
@@ -211,14 +270,10 @@ const inkersColumn = columnHelper.accessor(({ metadata }) => metadata?.inkers?.j
 	id: 'inkers',
 })
 
-const writersColumn = columnHelper.accessor(({ metadata }) => metadata?.writers?.join(', '), {
-	cell: ({ getValue }) => (
-		<Text size="sm" variant="muted">
-			{getValue()}
-		</Text>
-	),
+const writersColumn = columnHelper.accessor(({ metadata }) => metadata?.writers, {
+	cell: ({ getValue }) => <MetadataBadgeListCell values={getValue()} />,
 	enableGlobalFilter: true,
-	// TODO(prisma 0.7.0): Support order by relation
+	// TODO(relation-ordering): Support order by relation
 	enableSorting: false,
 	header: () => (
 		<Text size="sm" variant="secondary">
@@ -228,14 +283,10 @@ const writersColumn = columnHelper.accessor(({ metadata }) => metadata?.writers?
 	id: 'writers',
 })
 
-const pencillersColumn = columnHelper.accessor(({ metadata }) => metadata?.pencillers?.join(', '), {
-	cell: ({ getValue }) => (
-		<Text size="sm" variant="muted">
-			{getValue()}
-		</Text>
-	),
+const pencillersColumn = columnHelper.accessor(({ metadata }) => metadata?.pencillers, {
+	cell: ({ getValue }) => <MetadataBadgeListCell values={getValue()} />,
 	enableGlobalFilter: true,
-	// TODO(prisma 0.7.0): Support order by relation
+	// TODO(relation-ordering): Support order by relation
 	enableSorting: false,
 	header: () => (
 		<Text size="sm" variant="secondary">
@@ -245,14 +296,10 @@ const pencillersColumn = columnHelper.accessor(({ metadata }) => metadata?.penci
 	id: 'pencillers',
 })
 
-const coloristsColumn = columnHelper.accessor(({ metadata }) => metadata?.colorists?.join(', '), {
-	cell: ({ getValue }) => (
-		<Text size="sm" variant="muted">
-			{getValue()}
-		</Text>
-	),
+const coloristsColumn = columnHelper.accessor(({ metadata }) => metadata?.colorists, {
+	cell: ({ getValue }) => <MetadataBadgeListCell values={getValue()} />,
 	enableGlobalFilter: true,
-	// TODO(prisma 0.7.0): Support order by relation
+	// TODO(relation-ordering): Support order by relation
 	enableSorting: false,
 	header: () => (
 		<Text size="sm" variant="secondary">
@@ -262,15 +309,11 @@ const coloristsColumn = columnHelper.accessor(({ metadata }) => metadata?.colori
 	id: 'colorists',
 })
 
-const letterersColumn = columnHelper.accessor(({ metadata }) => metadata?.letterers?.join(', '), {
-	cell: ({ getValue }) => (
-		<Text size="sm" variant="muted">
-			{getValue()}
-		</Text>
-	),
+const letterersColumn = columnHelper.accessor(({ metadata }) => metadata?.letterers, {
+	cell: ({ getValue }) => <MetadataBadgeListCell values={getValue()} />,
 
 	enableGlobalFilter: true,
-	// TODO(prisma 0.7.0): Support order by relation
+	// TODO(relation-ordering): Support order by relation
 	enableSorting: false,
 	header: () => (
 		<Text size="sm" variant="secondary">
@@ -280,15 +323,11 @@ const letterersColumn = columnHelper.accessor(({ metadata }) => metadata?.letter
 	id: 'letterers',
 })
 
-const artistsColumn = columnHelper.accessor(({ metadata }) => metadata?.coverArtists?.join(', '), {
-	cell: ({ getValue }) => (
-		<Text size="sm" variant="muted">
-			{getValue()}
-		</Text>
-	),
+const artistsColumn = columnHelper.accessor(({ metadata }) => metadata?.coverArtists, {
+	cell: ({ getValue }) => <MetadataBadgeListCell values={getValue()} />,
 
 	enableGlobalFilter: true,
-	// TODO(prisma 0.7.0): Support order by relation
+	// TODO(relation-ordering): Support order by relation
 	enableSorting: false,
 	header: () => (
 		<Text size="sm" variant="secondary">
@@ -298,15 +337,11 @@ const artistsColumn = columnHelper.accessor(({ metadata }) => metadata?.coverArt
 	id: 'artists',
 })
 
-const charactersColumn = columnHelper.accessor(({ metadata }) => metadata?.characters?.join(', '), {
-	cell: ({ getValue }) => (
-		<Text size="sm" variant="muted">
-			{getValue()}
-		</Text>
-	),
+const charactersColumn = columnHelper.accessor(({ metadata }) => metadata?.characters, {
+	cell: ({ getValue }) => <MetadataBadgeListCell values={getValue()} />,
 
 	enableGlobalFilter: true,
-	// TODO(prisma 0.7.0): Support order by relation
+	// TODO(relation-ordering): Support order by relation
 	enableSorting: false,
 	header: () => (
 		<Text size="sm" variant="secondary">
@@ -324,7 +359,7 @@ const linksColumn = columnHelper.accessor(({ metadata }) => metadata?.links?.joi
 	}) => <BookLinksCell links={metadata?.links || []} />,
 
 	enableGlobalFilter: true,
-	// TODO(prisma 0.7.0): Support order by relation
+	// TODO(relation-ordering): Support order by relation
 	enableSorting: false,
 	header: () => (
 		<Text size="sm" variant="secondary">
@@ -333,6 +368,32 @@ const linksColumn = columnHelper.accessor(({ metadata }) => metadata?.links?.joi
 	),
 	id: 'links',
 })
+
+const positionColumn = columnHelper.accessor(
+	({ metadata, seriesPosition }) => seriesPosition ?? Number(metadata?.number),
+	{
+		cell: ({ getValue }) => {
+			const value = getValue()
+			if (value == null || isNaN(value)) return null
+
+			return (
+				<Text size="sm" variant="muted">
+					{value}
+				</Text>
+			)
+		},
+		enableGlobalFilter: true,
+		// TODO(relation-ordering): Support order by relation
+		enableSorting: false,
+		header: () => (
+			<Text size="sm" variant="muted">
+				#
+			</Text>
+		),
+		id: 'position',
+		size: 20,
+	},
+)
 
 export type MediaTableColumnDef = ColumnDef<Media>
 
@@ -346,6 +407,8 @@ export const columnMap = {
 	characters: charactersColumn,
 	colorists: coloristsColumn,
 	cover: coverColumn,
+	extension: extensionColumn,
+	file_size: fileSizeColumn,
 	genres: genresColumn,
 	inkers: inkersColumn,
 	letterers: letterersColumn,
@@ -357,6 +420,7 @@ export const columnMap = {
 	publisher: publisherColumn,
 	volume: volumeColumn,
 	writers: writersColumn,
+	position: positionColumn,
 } as Record<string, ColumnDef<Media>>
 
 // TODO: localization keys instead of hardcoded strings
@@ -367,6 +431,8 @@ export const columnOptionMap: Record<keyof typeof columnMap, string> = {
 	characters: 'Characters',
 	colorists: 'Colorists',
 	cover: 'Cover',
+	extension: 'Extension',
+	file_size: 'File Size',
 	genres: 'Genres',
 	inkers: 'Inkers',
 	letterers: 'Letterers',
@@ -378,6 +444,7 @@ export const columnOptionMap: Record<keyof typeof columnMap, string> = {
 	publisher: 'Publisher',
 	volume: 'Volume',
 	writers: 'Writers',
+	position: 'Position',
 }
 
 export const defaultColumns = [

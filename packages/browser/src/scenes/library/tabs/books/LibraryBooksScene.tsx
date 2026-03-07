@@ -175,7 +175,10 @@ function LibraryBooksScene() {
 	)
 
 	const [containerRef, isInView] = useIsInView<HTMLDivElement>()
-	const { layoutMode, setLayout, columns, setColumns } = useBooksLayout((state) => ({
+
+	const layoutKey = `library-${library.id}-books`
+
+	const { layoutMode, setLayout, columns, setColumns } = useBooksLayout(layoutKey, (state) => ({
 		columns: state.columns,
 		layoutMode: state.layout,
 		setColumns: state.setColumns,
@@ -324,6 +327,7 @@ function LibraryBooksScene() {
 		} else {
 			return (
 				<BookTable
+					layoutKey={layoutKey}
 					items={nodes || []}
 					render={(props) => (
 						<URLFilterContainer

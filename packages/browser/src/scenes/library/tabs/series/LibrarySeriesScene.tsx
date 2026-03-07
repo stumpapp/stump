@@ -261,8 +261,9 @@ export default function LibrarySeriesScene() {
 		},
 		[prefetch, id, pageSize, orderBy, filters],
 	)
+	const layoutKey = `library-${id}-series`
 
-	const { layoutMode, setLayout, columns, setColumns } = useSeriesLayout((state) => ({
+	const { layoutMode, setLayout, columns, setColumns } = useSeriesLayout(layoutKey, (state) => ({
 		columns: state.columns,
 		layoutMode: state.layout,
 		setColumns: state.setColumns,
@@ -361,6 +362,7 @@ export default function LibrarySeriesScene() {
 		} else {
 			return (
 				<SeriesTable
+					layoutKey={layoutKey}
 					items={nodes || []}
 					render={(props) => (
 						<URLFilterContainer

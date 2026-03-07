@@ -171,11 +171,12 @@ function SeriesBooksScene() {
 	)
 
 	const prefetch = usePrefetchSeriesBooks()
+	const layoutKey = `library-${series.library.id}-seriesBooks`
 
 	const {
 		preferences: { enableAlphabetSelect },
 	} = usePreferences()
-	const { layoutMode, setLayout, columns, setColumns } = useBooksLayout((state) => ({
+	const { layoutMode, setLayout, columns, setColumns } = useBooksLayout(layoutKey, (state) => ({
 		columns: state.columns,
 		layoutMode: state.layout,
 		setColumns: state.setColumns,
@@ -317,6 +318,7 @@ function SeriesBooksScene() {
 		} else {
 			return (
 				<BookTable
+					layoutKey={layoutKey}
 					items={nodes || []}
 					render={(props) => (
 						<URLFilterContainer

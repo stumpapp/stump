@@ -52,12 +52,14 @@ export default function CoverImageCell({ id, title }: Props) {
 	}
 
 	return (
-		<EntityImage
-			title={title}
-			className="h-14 w-auto rounded-sm object-cover"
-			style={{ aspectRatio: thumbnailRatio }}
-			src={sdk.media.thumbnailURL(id)}
-			onError={() => setShowFallback(true)}
-		/>
+		<div className="flex h-14 w-auto items-center justify-center">
+			<EntityImage
+				title={title}
+				className="h-14 w-auto rounded-md object-cover p-px"
+				style={{ aspectRatio: thumbnailRatio }}
+				src={sdk.media.thumbnailURL(id)}
+				onError={() => setShowFallback(true)}
+			/>
+		</div>
 	)
 }

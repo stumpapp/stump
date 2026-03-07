@@ -41,13 +41,9 @@ function MetadataBadgeListCell({ values }: { values?: string[] | null }) {
 const coverColumn = columnHelper.display({
 	cell: ({ row: { original: book } }) => <CoverImageCell id={book.id} title={book.resolvedName} />,
 	enableGlobalFilter: true,
-	header: () => (
-		<Text size="sm" variant="secondary">
-			Cover
-		</Text>
-	),
+	header: () => null,
 	id: 'cover',
-	size: 0,
+	size: 40,
 })
 
 const nameColumn = columnHelper.accessor(({ resolvedName }) => resolvedName, {
@@ -377,7 +373,7 @@ const positionColumn = columnHelper.accessor(
 			if (value == null || isNaN(value)) return null
 
 			return (
-				<Text size="sm" variant="muted">
+				<Text size="sm" variant="muted" className="text-right">
 					{value}
 				</Text>
 			)
@@ -386,12 +382,12 @@ const positionColumn = columnHelper.accessor(
 		// TODO(relation-ordering): Support order by relation
 		enableSorting: false,
 		header: () => (
-			<Text size="sm" variant="muted">
+			<Text size="sm" variant="muted" className="w-full text-center">
 				#
 			</Text>
 		),
 		id: 'position',
-		size: 20,
+		size: 0,
 	},
 )
 

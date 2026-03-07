@@ -1,5 +1,6 @@
-import { ScrollArea, useBoolean } from '@stump/components'
-import { Fragment } from 'react'
+import { useBoolean } from '@stump/components'
+import { AnimatePresence, motion } from 'framer-motion'
+import { useRef, useState } from 'react'
 
 import { DEBUG_ENV } from '../index.ts'
 import Markdown from './markdown/MarkdownPreview.tsx'
@@ -10,9 +11,18 @@ type Props = {
 
 export default function ReadMore({ text }: Props) {
 	const [showingAll, { toggle }] = useBoolean(false)
+	const contentRef = useRef<HTMLDivElement>(null)
+	const [expandedHeight, setExpandedHeight] = useState<number | 'auto'>('auto')
 
 	const resolvedText = text ? text : DEBUG_ENV ? DEBUG_FAKE_TEXT : ''
 	const canReadMore = resolvedText.length > 250
+
+	const handleToggle = () => {
+		if (!showingAll && contentRef.current) {
+			setExpandedHeight(Math.min(contentRef.current.scrollHeight, 300))
+		}
+		toggle()
+	}
 
 	if (!resolvedText && !DEBUG_ENV) {
 		return null
@@ -22,18 +32,45 @@ export default function ReadMore({ text }: Props) {
 		return <Markdown>{resolvedText}</Markdown>
 	}
 
-	// TODO: I don't like how this looks...
-	const MarkdownContainer = showingAll ? ScrollArea : Fragment
-	const markdownContainerProps = showingAll ? { className: 'h-[200px]' } : {}
+	const collapsedHeight = 72
 
 	return (
 		<div>
-			<MarkdownContainer {...markdownContainerProps}>
-				<Markdown>{showingAll ? resolvedText : resolvedText.slice(0, 250) + '...'}</Markdown>
-			</MarkdownContainer>
-			<button onClick={toggle} className="cursor-pointer font-semibold text-foreground">
-				{showingAll ? ' Read less' : 'Read more'}
-			</button>
+			<motion.div
+				ref={contentRef}
+				initial={false}
+				animate={{ height: showingAll ? expandedHeight : collapsedHeight }}
+				transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+				// @ts-expect-error: it does exist lol
+				className="overflow-hidden"
+			>
+				<Markdown>{resolvedText}</Markdown>
+			</motion.div>
+
+			<AnimatePresence mode="wait">
+				{!showingAll && (
+					<motion.div
+						key="fade"
+						initial={{ opacity: 0 }}
+						animate={{ opacity: 1 }}
+						exit={{ opacity: 0 }}
+						transition={{ duration: 0.15 }}
+						// @ts-expect-error: it does exist lol
+						className="pointer-events-none -mt-8 h-8 bg-gradient-to-t from-background to-transparent"
+					/>
+				)}
+			</AnimatePresence>
+
+			<div className="relative mt-2 flex w-full items-center">
+				<div className="flex-1 border-t border-dashed border-edge" />
+				<button
+					onClick={handleToggle}
+					className="cursor-pointer rounded-full border border-dashed border-edge bg-background px-3 py-0.5 text-xs font-medium text-foreground-muted transition-colors hover:bg-background-surface hover:text-foreground"
+				>
+					{showingAll ? 'Read less' : 'Read more'}
+				</button>
+				<div className="flex-1 border-t border-dashed border-edge" />
+			</div>
 		</div>
 	)
 }

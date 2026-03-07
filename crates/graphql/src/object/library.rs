@@ -7,7 +7,7 @@ use async_graphql::{
 use models::{
 	entity::{
 		library, library_config, library_exclusion, library_scan_record, library_tag,
-		media, series, tag, user,
+		media, media_metadata, series, tag, user,
 	},
 	shared::{
 		alphabet::{AvailableAlphabet, EntityLetter},
@@ -306,6 +306,41 @@ impl Library {
 			.ok_or("Library stats failed to be calculated")?;
 
 		Ok(LibraryStats::from_query_result(&result, "")?)
+	}
+
+	async fn publishers(&self, ctx: &Context<'_>) -> Result<Vec<String>> {
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let publisher_strings = media_metadata::Entity::find()
+			.select_only()
+			.column(media_metadata::Column::Publisher)
+			.distinct()
+			// just a lil inefficient
+			.filter(
+				media_metadata::Column::MediaId.in_subquery(
+					Query::select()
+						.column(media::Column::Id)
+						.from(media::Entity)
+						.and_where(
+							media::Column::SeriesId.in_subquery(
+								Query::select()
+									.column(series::Column::Id)
+									.from(series::Entity)
+									.and_where(
+										series::Column::LibraryId
+											.eq(self.model.id.clone()),
+									)
+									.to_owned(),
+							),
+						)
+						.to_owned(),
+				),
+			)
+			.into_tuple::<String>()
+			.all(conn)
+			.await?;
+
+		Ok(publisher_strings)
 	}
 
 	async fn tags(&self, ctx: &Context<'_>) -> Result<Vec<Tag>> {

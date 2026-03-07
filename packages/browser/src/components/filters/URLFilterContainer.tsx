@@ -75,7 +75,7 @@ const URLFilterContainer = forwardRef<HTMLDivElement, Props>(
 		return (
 			<div
 				ref={ref}
-				className={cn('flex flex-1 flex-col overflow-x-auto pb-24 md:pb-10', className)}
+				className={cn('flex flex-1 flex-col overflow-x-auto pb-24 md:pb-6', className)}
 				id="urlFilterContainer"
 			>
 				{children}

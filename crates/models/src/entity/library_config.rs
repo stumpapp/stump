@@ -33,6 +33,8 @@ pub struct Model {
 	#[sea_orm(column_type = "Text")]
 	pub default_library_view_mode: LibraryViewMode,
 	pub hide_series_view: bool,
+	#[sea_orm(default_value = "false")]
+	pub skip_book_overview: bool,
 	#[graphql(skip)]
 	#[sea_orm(column_type = "Json", nullable)]
 	pub thumbnail_config: Option<ImageProcessorOptions>,

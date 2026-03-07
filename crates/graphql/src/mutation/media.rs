@@ -44,6 +44,7 @@ pub struct MediaMutation;
 
 #[Object]
 impl MediaMutation {
+	#[graphql(guard = "PermissionGuard::one(UserPermission::ManageLibrary)")]
 	async fn analyze_media(
 		&self,
 		ctx: &Context<'_>,
@@ -75,6 +76,7 @@ impl MediaMutation {
 	}
 
 	// TODO: Support converting other formats in the future
+	#[graphql(guard = "PermissionGuard::one(UserPermission::ManageLibrary)")]
 	async fn convert_media(&self, ctx: &Context<'_>, id: ID) -> Result<bool> {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let core = ctx.data::<CoreContext>()?;
@@ -98,6 +100,7 @@ impl MediaMutation {
 		Err("Not implemented".into())
 	}
 
+	#[graphql(guard = "PermissionGuard::one(UserPermission::ManageLibrary)")]
 	async fn delete_media(&self, ctx: &Context<'_>, id: ID) -> Result<Media> {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let core = ctx.data::<CoreContext>()?;
@@ -171,7 +174,7 @@ impl MediaMutation {
 	/// Update the thumbnail for a book. This will replace the existing thumbnail with the the one
 	/// associated with the provided input (book). If the book does not have a thumbnail, one
 	/// will be generated based on the library's thumbnail configuration.
-	#[graphql(guard = "PermissionGuard::one(UserPermission::EditLibrary)")]
+	#[graphql(guard = "PermissionGuard::one(UserPermission::EditThumbnails)")]
 	async fn update_media_thumbnail(
 		&self,
 		ctx: &Context<'_>,

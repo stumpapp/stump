@@ -169,7 +169,7 @@ impl UploadMutation {
 	// I think we can refactor this into some utility function(s) that take the model type and the ID as parameters
 
 	#[graphql(
-		guard = "OptionalFeatureGuard::new(OptionalFeature::Upload).and(PermissionGuard::new(&[UserPermission::UploadFile, UserPermission::EditLibrary]))"
+		guard = "OptionalFeatureGuard::new(OptionalFeature::Upload).and(PermissionGuard::new(&[UserPermission::UploadFile, UserPermission::EditLibrary, UserPermission::EditThumbnails]))"
 	)]
 	async fn upload_library_thumbnail(
 		&self,
@@ -245,7 +245,7 @@ impl UploadMutation {
 	}
 
 	#[graphql(
-		guard = "OptionalFeatureGuard::new(OptionalFeature::Upload).and(PermissionGuard::new(&[UserPermission::UploadFile, UserPermission::EditLibrary]))"
+		guard = "OptionalFeatureGuard::new(OptionalFeature::Upload).and(PermissionGuard::new(&[UserPermission::UploadFile, UserPermission::EditThumbnails]))"
 	)]
 	async fn upload_series_thumbnail(
 		&self,
@@ -332,7 +332,7 @@ impl UploadMutation {
 	}
 
 	#[graphql(
-		guard = "OptionalFeatureGuard::new(OptionalFeature::Upload).and(PermissionGuard::new(&[UserPermission::UploadFile, UserPermission::EditLibrary]))"
+		guard = "OptionalFeatureGuard::new(OptionalFeature::Upload).and(PermissionGuard::new(&[UserPermission::UploadFile, UserPermission::EditThumbnails]))"
 	)]
 	async fn upload_media_thumbnail(
 		&self,
@@ -426,7 +426,7 @@ impl UploadMutation {
 	/// Note: This was added specifically for Komf, which would have been annyoing to
 	/// implement multipart uploads for
 	#[graphql(
-		guard = "PermissionGuard::new(&[UserPermission::UploadFile, UserPermission::EditLibrary])"
+		guard = "PermissionGuard::new(&[UserPermission::UploadFile, UserPermission::EditThumbnails])"
 	)]
 	async fn upload_series_thumbnail_base64(
 		&self,
@@ -501,7 +501,7 @@ impl UploadMutation {
 	/// Note: This was added specifically for Komf, which would have been annyoing to
 	/// implement multipart uploads for
 	#[graphql(
-		guard = "PermissionGuard::new(&[UserPermission::UploadFile, UserPermission::EditLibrary])"
+		guard = "PermissionGuard::new(&[UserPermission::UploadFile, UserPermission::EditThumbnails])"
 	)]
 	async fn upload_media_thumbnail_base64(
 		&self,

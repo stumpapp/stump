@@ -290,7 +290,11 @@ export const associatedPermissions: Record<UserPermission, UserPermission[]> = {
 	[UserPermission.CreateLibrary]: [UserPermission.EditLibrary],
 	[UserPermission.EditLibrary]: [],
 	[UserPermission.ScanLibrary]: [],
-	[UserPermission.ManageLibrary]: [UserPermission.EditLibrary, UserPermission.ScanLibrary],
+	[UserPermission.ManageLibrary]: [
+		UserPermission.EditLibrary,
+		UserPermission.ScanLibrary,
+		UserPermission.EditThumbnails,
+	],
 	[UserPermission.DeleteLibrary]: [UserPermission.ManageLibrary],
 	[UserPermission.CreateNotifier]: [UserPermission.ReadNotifier],
 	[UserPermission.ReadNotifier]: [],
@@ -310,4 +314,5 @@ export const associatedPermissions: Record<UserPermission, UserPermission[]> = {
 	],
 	[UserPermission.EditMetadata]: [],
 	[UserPermission.WriteBackMetadata]: [UserPermission.EditMetadata],
+	[UserPermission.EditThumbnails]: [],
 }

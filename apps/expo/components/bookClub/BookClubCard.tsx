@@ -92,7 +92,7 @@ export function BookClubCard({ club }: Props) {
 							width: 56,
 							height: 80,
 						}}
-						resizeMode="cover"
+						originalDimensions={imageProps?.originalDimensions}
 					/>
 
 					<View className="flex-1 justify-between gap-4">

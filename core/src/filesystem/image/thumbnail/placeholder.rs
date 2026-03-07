@@ -1,7 +1,7 @@
 use base64::prelude::*;
-use image::{self, DynamicImage};
+use image::{self, DynamicImage, GenericImageView};
 use kmeans_colors::{get_kmeans, Kmeans, Sort};
-use models::shared::image::{ImageColor, ImageMetadata};
+use models::shared::image::{ImageColor, ImageDimensions, ImageMetadata};
 use palette::{cast::from_component_slice, FromColor, IntoColor, Lab, Srgb};
 use rust_decimal::Decimal;
 use std::path::Path;
@@ -94,11 +94,13 @@ fn _generate_image_metadata_from_image(
 	let colors = process_image_colors_from_image(&img, 7)?;
 	let average_color_vec = process_image_colors_from_image(&img, 1)?;
 	let thumbhash = process_image_thumbhash_from_image(&img)?;
+	let (width, height) = img.dimensions();
 
 	Ok(ImageMetadata {
 		average_color: average_color_vec.first().map(|c| c.color.clone()),
 		colors,
 		thumbhash: Some(thumbhash),
+		dimensions: Some(ImageDimensions { width, height }),
 	})
 }
 

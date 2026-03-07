@@ -18,7 +18,6 @@ use crate::{
 
 use super::{library_exclusion, media_metadata, series, series_metadata, user::AuthUser};
 
-// TODO(thumbs): Add thumbnail_dimensions to model
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject, Ordering)]
 #[graphql(name = "MediaModel")]
 #[sea_orm(table_name = "media")]

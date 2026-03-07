@@ -19,7 +19,6 @@ use super::{library_exclusion, series_metadata, user::AuthUser};
 
 // TODO: Properly support soft deletion
 
-// TODO(thumbs): Add thumbnail_dimensions to model
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject, Ordering)]
 #[graphql(name = "SeriesModel")]
 #[sea_orm(table_name = "series")]

@@ -238,7 +238,6 @@ export function CurrentBookCard({ data }: Props) {
 									width: 90,
 									height: 90 / thumbnailRatio,
 								}}
-								resizeMode="cover"
 								borderAndShadowStyle={{
 									shadowRadius: 5,
 									shadowOffset: { width: -2, height: 4 },

@@ -24,6 +24,8 @@ const fragment = graphql(`
 					}
 					thumbhash
 				}
+				height
+				width
 			}
 		}
 	}

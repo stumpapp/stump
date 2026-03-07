@@ -334,16 +334,19 @@ impl Library {
 	async fn thumbnail(&self, ctx: &Context<'_>) -> Result<ImageRef> {
 		let service = ctx.data::<ServiceContext>()?;
 
-		// TODO: Spawn a blocking task to get the image dimensions
-		// Use a cache as to not read the file system every time?
+		let dimensions = self
+			.model
+			.thumbnail_meta
+			.as_ref()
+			.and_then(|meta| meta.dimensions.as_ref())
+			.map(|dim| (dim.width, dim.height));
 
 		Ok(ImageRef {
 			url: service
 				.format_url(format!("/api/v2/library/{}/thumbnail", self.model.id)),
-			// height: page_dimension.as_ref().map(|dim| dim.height),
-			// width: page_dimension.as_ref().map(|dim| dim.width),
+			height: dimensions.map(|(_, height)| height),
+			width: dimensions.map(|(width, _)| width),
 			metadata: self.model.thumbnail_meta.clone(),
-			..Default::default()
 		})
 	}
 }

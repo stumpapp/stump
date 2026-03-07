@@ -202,16 +202,27 @@ impl Media {
 		let service = ctx.data::<ServiceContext>()?;
 		let loader = ctx.data::<DataLoader<MediaAnalysisLoader>>()?;
 
-		let page_dimension = loader
-			.load_one(PageDimensionLoaderKey {
-				media_id: self.model.id.clone(),
-			})
-			.await?;
+		let dimensions = match self
+			.model
+			.thumbnail_meta
+			.as_ref()
+			.and_then(|meta| meta.dimensions.as_ref())
+		{
+			Some(dim) => Some((dim.width, dim.height)),
+			None => {
+				let page_dimension = loader
+					.load_one(PageDimensionLoaderKey {
+						media_id: self.model.id.clone(),
+					})
+					.await?;
+				page_dimension.map(|dim| (dim.width, dim.height))
+			},
+		};
 
 		Ok(ImageRef {
 			url: service.format_url(format!("/api/v2/media/{}/thumbnail", self.model.id)),
-			height: page_dimension.as_ref().map(|dim| dim.height),
-			width: page_dimension.as_ref().map(|dim| dim.width),
+			height: dimensions.as_ref().map(|dim| dim.1),
+			width: dimensions.as_ref().map(|dim| dim.0),
 			metadata: self.model.thumbnail_meta.clone(),
 		})
 	}

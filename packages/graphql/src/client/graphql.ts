@@ -817,10 +817,17 @@ export type ImageColor = {
   percentage: Scalars['Decimal']['output'];
 };
 
+export type ImageDimensions = {
+  __typename?: 'ImageDimensions';
+  height: Scalars['Int']['output'];
+  width: Scalars['Int']['output'];
+};
+
 export type ImageMetadata = {
   __typename?: 'ImageMetadata';
   averageColor?: Maybe<Scalars['String']['output']>;
   colors: Array<ImageColor>;
+  dimensions?: Maybe<ImageDimensions>;
   thumbhash?: Maybe<Scalars['String']['output']>;
 };
 

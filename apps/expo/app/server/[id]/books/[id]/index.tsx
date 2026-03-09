@@ -21,12 +21,16 @@ import Animated, {
 } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import TImage from 'react-native-turbo-image'
-import { stripHtml } from 'string-strip-html'
 
 import { useActiveServer, useStumpServer } from '~/components/activeServer'
 import { BookMetaLink, BooksAfterCursor } from '~/components/book'
-import { BookActionMenu, DownloadButton } from '~/components/book/overview'
-import { InfoRow, LongValue } from '~/components/book/overview'
+import {
+	BookActionMenu,
+	DescriptionSection,
+	DownloadButton,
+	IdentifiersSheet,
+} from '~/components/book/overview'
+import { InfoRow } from '~/components/book/overview'
 import { ThumbnailImage } from '~/components/image'
 import { MetadataBadgeSection } from '~/components/overview'
 import RefreshControl from '~/components/RefreshControl'
@@ -137,11 +141,6 @@ type ActiveReadingSession = NonNullable<
 	NonNullable<Pick<NonNullable<BookByIdQuery['mediaById']>, 'readProgress'>>['readProgress']
 >
 
-// TODO: I think we can rethink some of this information arch. I originally just kinda dumped
-// all of the metadata on the page but I think we can definitely curate some of it better to be
-// prettier. Like {seriesPosition} of {series.mediaCount} in {seriesName} instead of just dumping
-// the series-related metadata in a list.
-
 export default function Screen() {
 	const { id: bookID } = useLocalSearchParams<{ id: string }>()
 	const {
@@ -230,10 +229,10 @@ export default function Screen() {
 
 	const formattedSize = formatBytes(book.size)
 	const description = book.metadata?.summary || ''
-	const genres = book.metadata?.genres?.map((genre) => `#${genre}`).join(', ')
+	const genres = book.metadata?.genres || []
 	const links = book.metadata?.links || []
 	const pages = book.metadata?.pageCount || book.pages
-	const characters = book.metadata?.characters?.join(', ')
+	const characters = book.metadata?.characters || []
 
 	const seriesName = book.metadata?.series || book.series.resolvedName
 	const seriesPosition = formatSeriesPosition(
@@ -252,13 +251,6 @@ export default function Screen() {
 	const inkers = book.metadata?.inkers || []
 	const letterers = book.metadata?.letterers || []
 	const coverArtists = book.metadata?.coverArtists || []
-
-	const identifierAmazon = book.metadata?.identifierAmazon
-	const identifierCalibre = book.metadata?.identifierCalibre
-	const identifierGoogle = book.metadata?.identifierGoogle
-	const identifierIsbn = book.metadata?.identifierIsbn
-	const identifierMobiAsin = book.metadata?.identifierMobiAsin
-	const identifierUuid = book.metadata?.identifierUuid
 
 	const noAcknowledgements =
 		!writers.length &&
@@ -355,6 +347,12 @@ export default function Screen() {
 			pathname: `/server/${serverID}/books?initialFilters=${filterString}`,
 		})
 	}
+
+	const showGroupIDontLikeAhhh =
+		publisher ||
+		seriesVolume ||
+		book.metadata?.language ||
+		(book.metadata?.ageRating && book.metadata.ageRating > 0)
 
 	return (
 		<Animated.ScrollView
@@ -474,30 +472,35 @@ export default function Screen() {
 			</View>
 
 			<View className="gap-8 px-4 py-8 tablet:px-6">
-				<Card label="Information">
-					{book.metadata?.language && <InfoRow label="Language" value={book.metadata.language} />}
-					<InfoRow label="Pages" value={pages.toString()} />
-					<InfoRow label="Kind" value={book.extension.toUpperCase()} />
-					{formattedSize && <InfoRow label="Size" value={formattedSize} />}
+				{!!description && <DescriptionSection description={description} />}
+
+				{/* TODO: Not sure about this stat group, kinda dupe info kinda less priority too */}
+				<Card>
+					<Card.StatGroup>
+						<Card.Stat label="Pages" value={pages} />
+						<Card.Stat label="Format" value={book.extension.toUpperCase()} />
+						{formattedSize && <Card.Stat label="Size" value={formattedSize} />}
+						{book.metadata?.year != null && book.metadata.year > 0 && (
+							<Card.Stat label="Year" value={book.metadata.year} />
+						)}
+					</Card.StatGroup>
 				</Card>
 
-				<Card label="Metadata" listEmptyStyle={{ message: 'No metadata available' }}>
-					{description && <LongValue label="Description" value={stripHtml(description).result} />}
-					{publisher && <InfoRow label="Publisher" value={publisher} />}
-					{seriesName && <InfoRow label="Series" value={seriesName} />}
-					{seriesPosition && (
-						<InfoRow
-							label={seriesName ? 'Position' : 'Series Position'}
-							value={seriesPosition.toString()}
-						/>
-					)}
-					{seriesVolume && (
-						<InfoRow key="seriesVolume" label="Volume" value={seriesVolume.toString()} />
-					)}
-					{/* TODO: Separate into separate section, maybe merge with links? */}
-					{genres && <InfoRow label="Genres" value={genres} />}
-					{characters && <InfoRow label="Characters" value={characters} />}
-				</Card>
+				<MetadataBadgeSection
+					label="Genres"
+					items={genres.map((genre) => ({
+						label: genre,
+						onPress: () => onClickFilterField('genres', genre),
+					}))}
+				/>
+
+				<MetadataBadgeSection
+					label="Characters"
+					items={characters.map((character) => ({
+						label: character,
+						onPress: () => onClickFilterField('characters', character),
+					}))}
+				/>
 
 				<BooksAfterCursor cursor={bookID} />
 
@@ -547,9 +550,9 @@ export default function Screen() {
 
 				{links.length > 0 && (
 					<View className="flex w-full gap-2">
-						<Text className="text-lg text-foreground-muted">Links</Text>
+						<Text className="ios:px-4 px-2 text-lg font-semibold text-foreground-muted">Links</Text>
 
-						<View className="flex flex-row flex-wrap gap-2">
+						<View className="ios:px-4 flex flex-row flex-wrap gap-2 px-2">
 							{links.map((link) => (
 								<BookMetaLink key={link} href={link} />
 							))}
@@ -557,15 +560,29 @@ export default function Screen() {
 					</View>
 				)}
 
-				<Card label="Identifiers">
-					<InfoRow label="Stump" value={book.id} />
-					{identifierAmazon && <InfoRow label="Amazon" value={identifierAmazon} />}
-					{identifierCalibre && <InfoRow label="Calibre" value={identifierCalibre} />}
-					{identifierGoogle && <InfoRow label="Google" value={identifierGoogle} />}
-					{identifierIsbn && <InfoRow label="ISBN" value={identifierIsbn} />}
-					{identifierMobiAsin && <InfoRow label="Mobi ASIN" value={identifierMobiAsin} />}
-					{identifierUuid && <InfoRow label="UUID" value={identifierUuid} />}
-				</Card>
+				{/* TODO: I don't love this group, I just shoved them together because I want to find them a home */}
+				{showGroupIDontLikeAhhh && (
+					<Card label="Details">
+						{publisher && <InfoRow label="Publisher" value={publisher} />}
+						{seriesVolume && <InfoRow label="Volume" value={seriesVolume.toString()} />}
+						{book.metadata?.language && <InfoRow label="Language" value={book.metadata.language} />}
+						{book.metadata?.ageRating != null && book.metadata.ageRating > 0 && (
+							<InfoRow label="Age Rating" value={`${book.metadata.ageRating}+`} />
+						)}
+					</Card>
+				)}
+
+				<IdentifiersSheet
+					identifiers={{
+						stumpId: book.id,
+						amazon: book.metadata?.identifierAmazon,
+						calibre: book.metadata?.identifierCalibre,
+						google: book.metadata?.identifierGoogle,
+						isbn: book.metadata?.identifierIsbn,
+						mobiAsin: book.metadata?.identifierMobiAsin,
+						uuid: book.metadata?.identifierUuid,
+					}}
+				/>
 			</View>
 		</Animated.ScrollView>
 	)

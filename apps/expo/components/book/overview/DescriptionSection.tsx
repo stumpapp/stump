@@ -1,0 +1,65 @@
+import { TrueSheet } from '@lodev09/react-native-true-sheet'
+import { GlassView } from 'expo-glass-effect'
+import { Fragment, useRef } from 'react'
+import { Platform, Pressable, ScrollView, View } from 'react-native'
+import { stripHtml } from 'string-strip-html'
+
+import { Markdown, Text } from '~/components/ui'
+import { IS_IOS_24_PLUS, useColors } from '~/lib/constants'
+
+type Props = {
+	description: string
+}
+
+export default function DescriptionSection({ description }: Props) {
+	const sheetRef = useRef<TrueSheet | null>(null)
+
+	const colors = useColors()
+
+	const plainPreview = stripHtml(description).result
+
+	return (
+		<Fragment>
+			<View className="gap-4">
+				<Text className="text-base leading-5 text-foreground-muted" numberOfLines={4}>
+					{plainPreview}
+				</Text>
+
+				<View className="flex-row items-center">
+					<View className="flex-1 border-t border-dashed border-edge opacity-70" />
+					<Pressable onPress={() => sheetRef.current?.present()}>
+						<GlassView
+							glassEffectStyle="regular"
+							style={{ borderRadius: 999 }}
+							isInteractive
+							className="bg-background-surface"
+						>
+							<View className="px-4 py-2">
+								<Text
+									className="text-base font-semibold"
+									style={{ color: colors.fill.brand.DEFAULT }}
+								>
+									Read more
+								</Text>
+							</View>
+						</GlassView>
+					</Pressable>
+					<View className="flex-1 border-t border-dashed border-edge opacity-70" />
+				</View>
+			</View>
+
+			<TrueSheet
+				ref={sheetRef}
+				detents={Platform.OS === 'android' ? [0.5, 1] : ['auto']}
+				grabber
+				scrollable
+				backgroundColor={IS_IOS_24_PLUS ? undefined : colors.background.DEFAULT}
+				grabberOptions={{ color: colors.sheet.grabber }}
+			>
+				<ScrollView className="flex-1 p-6">
+					<Markdown>{description}</Markdown>
+				</ScrollView>
+			</TrueSheet>
+		</Fragment>
+	)
+}

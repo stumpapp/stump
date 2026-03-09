@@ -1,6 +1,4 @@
 import { useBoolean } from '@stump/components'
-import { AnimatePresence, motion } from 'framer-motion'
-import { useRef, useState } from 'react'
 
 import { DEBUG_ENV } from '../index.ts'
 import Markdown from './markdown/MarkdownPreview.tsx'
@@ -9,20 +7,14 @@ type Props = {
 	text?: string | null
 }
 
+const COLLAPSED_HEIGHT = 72
+const MAX_EXPANDED_HEIGHT = 300
+
 export default function ReadMore({ text }: Props) {
 	const [showingAll, { toggle }] = useBoolean(false)
-	const contentRef = useRef<HTMLDivElement>(null)
-	const [expandedHeight, setExpandedHeight] = useState<number | 'auto'>('auto')
 
 	const resolvedText = text ? text : DEBUG_ENV ? DEBUG_FAKE_TEXT : ''
 	const canReadMore = resolvedText.length > 250
-
-	const handleToggle = () => {
-		if (!showingAll && contentRef.current) {
-			setExpandedHeight(Math.min(contentRef.current.scrollHeight, 300))
-		}
-		toggle()
-	}
 
 	if (!resolvedText && !DEBUG_ENV) {
 		return null
@@ -32,39 +24,27 @@ export default function ReadMore({ text }: Props) {
 		return <Markdown>{resolvedText}</Markdown>
 	}
 
-	const collapsedHeight = 72
-
 	return (
 		<div>
-			<motion.div
-				ref={contentRef}
-				initial={false}
-				animate={{ height: showingAll ? expandedHeight : collapsedHeight }}
-				transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-				// @ts-expect-error: it does exist lol
-				className="overflow-hidden"
+			<div
+				className={showingAll ? 'overflow-y-auto' : 'overflow-hidden'}
+				style={{
+					maxHeight: showingAll ? MAX_EXPANDED_HEIGHT : COLLAPSED_HEIGHT,
+					transition: 'max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+				}}
 			>
 				<Markdown>{resolvedText}</Markdown>
-			</motion.div>
+			</div>
 
-			<AnimatePresence mode="wait">
-				{!showingAll && (
-					<motion.div
-						key="fade"
-						initial={{ opacity: 0 }}
-						animate={{ opacity: 1 }}
-						exit={{ opacity: 0 }}
-						transition={{ duration: 0.15 }}
-						// @ts-expect-error: it does exist lol
-						className="pointer-events-none -mt-8 h-8 bg-gradient-to-t from-background to-transparent"
-					/>
-				)}
-			</AnimatePresence>
+			<div
+				className="pointer-events-none -mt-8 h-8 bg-gradient-to-t from-background to-transparent transition-opacity duration-150"
+				style={{ opacity: showingAll ? 0 : 1 }}
+			/>
 
 			<div className="relative mt-2 flex w-full items-center">
 				<div className="flex-1 border-t border-dashed border-edge" />
 				<button
-					onClick={handleToggle}
+					onClick={toggle}
 					className="cursor-pointer rounded-full border border-dashed border-edge bg-background px-3 py-0.5 text-xs font-medium text-foreground-muted transition-colors hover:bg-background-surface hover:text-foreground"
 				>
 					{showingAll ? 'Read less' : 'Read more'}

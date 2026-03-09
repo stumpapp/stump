@@ -1,7 +1,8 @@
-import { Badge, cn, Heading, Link, Text } from '@stump/components'
+import { Badge, cn, Heading, Link, Statistic, Text } from '@stump/components'
 import { formatHumanDuration } from '@stump/i18n'
 import { ExternalLink } from 'lucide-react'
 
+import BadgeList from '@/components/BadgeList'
 import ReadMore from '@/components/ReadMore'
 import TagList from '@/components/tags/TagList'
 import { ProminentThumbnailImage } from '@/components/thumbnail'
@@ -10,30 +11,6 @@ import paths from '@/paths'
 import { formatBytes } from '@/utils/format'
 
 import { useSeriesContext } from './context'
-
-type StatItemProps = {
-	label: string
-	value: string | number
-	suffix?: string
-}
-
-function StatItem({ label, value, suffix }: StatItemProps) {
-	return (
-		<div className="flex flex-col">
-			<Text size="xs" variant="muted">
-				{label}
-			</Text>
-			<Text size="sm" className="font-semibold">
-				{value}
-				{suffix && (
-					<Text size="xs" variant="muted" className="inline">
-						{suffix}
-					</Text>
-				)}
-			</Text>
-		</div>
-	)
-}
 
 // TODO(localization): Use localized strings for labels etc
 export default function SeriesHeader() {
@@ -74,15 +51,15 @@ export default function SeriesHeader() {
 					<Heading size="lg">{resolvedName}</Heading>
 
 					<div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:flex md:flex-wrap md:gap-6">
-						<StatItem label="Books" value={stats.bookCount} />
-						<StatItem
+						<Statistic.Item label="Books" value={stats.bookCount} />
+						<Statistic.Item
 							label="Completed"
 							value={stats.completedBooks}
 							suffix={` / ${stats.bookCount}`}
 						/>
-						<StatItem label="In progress" value={stats.inProgressBooks} />
-						{formattedTime && <StatItem label="Reading time" value={formattedTime} />}
-						{formattedSize && <StatItem label="Total size" value={formattedSize} />}
+						<Statistic.Item label="In progress" value={stats.inProgressBooks} />
+						{formattedTime && <Statistic.Item label="Reading time" value={formattedTime} />}
+						{formattedSize && <Statistic.Item label="Total size" value={formattedSize} />}
 					</div>
 
 					{hasMetadataBadges && (
@@ -116,12 +93,12 @@ export default function SeriesHeader() {
 							<Text size="xs" variant="muted">
 								Genres
 							</Text>
-							<div className="flex flex-wrap gap-1.5">
+							<BadgeList>
 								{metadata.genres.map((genre) => (
 									<Link
 										key={genre}
 										to={paths.bookSearchWithFilter({
-											metadata: { genres: { anyOf: [genre] } },
+											metadata: { genres: { likeAnyOf: [genre] } },
 										})}
 										underline={false}
 									>
@@ -130,7 +107,7 @@ export default function SeriesHeader() {
 										</Badge>
 									</Link>
 								))}
-							</div>
+							</BadgeList>
 						</div>
 					)}
 
@@ -148,7 +125,7 @@ export default function SeriesHeader() {
 							<Text size="xs" variant="muted">
 								Links
 							</Text>
-							<div className="flex flex-wrap gap-1.5">
+							<BadgeList>
 								{metadata.links.map((link) => {
 									let label = link.replace(/^(https?:\/\/)?(www\.)?/, '')
 									try {
@@ -165,7 +142,7 @@ export default function SeriesHeader() {
 										</Link>
 									)
 								})}
-							</div>
+							</BadgeList>
 						</div>
 					)}
 				</div>

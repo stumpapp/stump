@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use async_graphql::{
 	dataloader::DataLoader, ComplexObject, Context, Result, SimpleObject,
@@ -308,37 +308,25 @@ impl Library {
 		Ok(LibraryStats::from_query_result(&result, "")?)
 	}
 
+	async fn genres(&self, ctx: &Context<'_>) -> Result<Vec<String>> {
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let genre_strings = get_unique_str_list_metadata_fields(
+			self,
+			media_metadata::Column::Genres,
+			conn,
+		)
+		.await?;
+
+		Ok(genre_strings)
+	}
+
 	async fn publishers(&self, ctx: &Context<'_>) -> Result<Vec<String>> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let publisher_strings = media_metadata::Entity::find()
-			.select_only()
-			.column(media_metadata::Column::Publisher)
-			.distinct()
-			// just a lil inefficient
-			.filter(
-				media_metadata::Column::MediaId.in_subquery(
-					Query::select()
-						.column(media::Column::Id)
-						.from(media::Entity)
-						.and_where(
-							media::Column::SeriesId.in_subquery(
-								Query::select()
-									.column(series::Column::Id)
-									.from(series::Entity)
-									.and_where(
-										series::Column::LibraryId
-											.eq(self.model.id.clone()),
-									)
-									.to_owned(),
-							),
-						)
-						.to_owned(),
-				),
-			)
-			.into_tuple::<String>()
-			.all(conn)
-			.await?;
+		let publisher_strings =
+			get_unique_metadata_fields(self, media_metadata::Column::Publisher, conn)
+				.await?;
 
 		Ok(publisher_strings)
 	}
@@ -393,4 +381,90 @@ pub struct LibraryStats {
 	completed_books: i64,
 	in_progress_books: i64,
 	total_reading_time_seconds: i64,
+}
+
+async fn get_unique_metadata_fields(
+	library: &Library,
+	column: media_metadata::Column,
+	conn: &DatabaseConnection,
+) -> Result<Vec<String>> {
+	let values = media_metadata::Entity::find()
+		.select_only()
+		.column(column)
+		.distinct()
+		.filter(column.is_not_null())
+		// just a lil inefficient
+		.filter(
+			media_metadata::Column::MediaId.in_subquery(
+				Query::select()
+					.column(media::Column::Id)
+					.from(media::Entity)
+					.and_where(
+						media::Column::SeriesId.in_subquery(
+							Query::select()
+								.column(series::Column::Id)
+								.from(series::Entity)
+								.and_where(
+									series::Column::LibraryId
+										.eq(library.model.id.clone()),
+								)
+								.to_owned(),
+						),
+					)
+					.to_owned(),
+			),
+		)
+		.into_tuple::<String>()
+		.all(conn)
+		.await?;
+
+	Ok(values)
+}
+
+/// Get unique values from fields which are string arrays
+async fn get_unique_str_list_metadata_fields(
+	library: &Library,
+	column: media_metadata::Column,
+	conn: &DatabaseConnection,
+) -> Result<Vec<String>> {
+	let csv_list = media_metadata::Entity::find()
+		.select_only()
+		.column(column)
+		.distinct()
+		.filter(column.is_not_null())
+		// just a lil inefficient
+		.filter(
+			media_metadata::Column::MediaId.in_subquery(
+				Query::select()
+					.column(media::Column::Id)
+					.from(media::Entity)
+					.and_where(
+						media::Column::SeriesId.in_subquery(
+							Query::select()
+								.column(series::Column::Id)
+								.from(series::Entity)
+								.and_where(
+									series::Column::LibraryId
+										.eq(library.model.id.clone()),
+								)
+								.to_owned(),
+						),
+					)
+					.to_owned(),
+			),
+		)
+		.into_tuple::<String>()
+		.all(conn)
+		.await?;
+
+	let mut unique_values = HashSet::new();
+	for csv in csv_list {
+		for value in csv.split(',') {
+			if !value.trim().is_empty() {
+				unique_values.insert(value.trim().to_string());
+			}
+		}
+	}
+
+	Ok(unique_values.into_iter().collect())
 }

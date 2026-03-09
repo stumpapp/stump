@@ -92,6 +92,7 @@
 		"react-native-dialog": "^9.3.0",
 		"react-native-easing-gradient": "^1.1.1",
 		"react-native-edge-to-edge": "^1.7.0",
+		"react-native-enriched-markdown": "^0.3.0",
 		"react-native-gesture-handler": "~2.28.0",
 		"react-native-ios-context-menu": "^3.2.1",
 		"react-native-ios-utilities": "^5.2.0",

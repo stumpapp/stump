@@ -967,6 +967,7 @@ export type Library = {
   description?: Maybe<Scalars['String']['output']>;
   emoji?: Maybe<Scalars['String']['output']>;
   excludedUsers: Array<User>;
+  genres: Array<Scalars['String']['output']>;
   id: Scalars['String']['output'];
   isFavorite: Scalars['Boolean']['output'];
   /** Get the details of the last scan job for this library, if any exists. */
@@ -977,6 +978,7 @@ export type Library = {
   mediaAlphabet: Scalars['JSONObject']['output'];
   name: Scalars['String']['output'];
   path: Scalars['String']['output'];
+  publishers: Array<Scalars['String']['output']>;
   /** Get the full history of scan jobs for this library. */
   scanHistory: Array<LibraryScanRecord>;
   /** Get series in this library */
@@ -4800,10 +4802,10 @@ export type BookOverviewSceneQueryVariables = Exact<{
 
 
 export type BookOverviewSceneQuery = { __typename?: 'Query', mediaById?: (
-    { __typename?: 'Media', id: string, resolvedName: string, extension: string, metadata?: (
-      { __typename?: 'MediaMetadata', links: Array<string>, summary?: string | null }
+    { __typename?: 'Media', id: string, resolvedName: string, extension: string, seriesId?: string | null, pages: number, size: number, metadata?: (
+      { __typename?: 'MediaMetadata', links: Array<string>, summary?: string | null, ageRating?: number | null, genres: Array<string>, language?: string | null, publisher?: string | null, writers: Array<string>, year?: number | null }
       & { ' $fragmentRefs'?: { 'MediaMetadataEditorFragment': MediaMetadataEditorFragment } }
-    ) | null, readHistory: Array<{ __typename?: 'FinishedReadingSession', completedAt: any }> }
+    ) | null, tags: Array<{ __typename?: 'Tag', id: number, name: string }>, readHistory: Array<{ __typename?: 'FinishedReadingSession', completedAt: any }> }
     & { ' $fragmentRefs'?: { 'BookCardFragment': BookCardFragment;'BookFileInformationFragment': BookFileInformationFragment } }
   ) | null };
 
@@ -5026,16 +5028,9 @@ export type BookLibrarySeriesLinksQueryVariables = Exact<{
 }>;
 
 
-export type BookLibrarySeriesLinksQuery = { __typename?: 'Query', seriesById?: { __typename?: 'Series', id: string, resolvedName: string, libraryId?: string | null } | null };
+export type BookLibrarySeriesLinksQuery = { __typename?: 'Query', seriesById?: { __typename?: 'Series', id: string, resolvedName: string, library: { __typename?: 'Library', id: string, name: string } } | null };
 
 export type BookMetadataFragment = { __typename?: 'Media', metadata?: { __typename?: 'MediaMetadata', ageRating?: number | null, characters: Array<string>, colorists: Array<string>, coverArtists: Array<string>, editors: Array<string>, genres: Array<string>, inkers: Array<string>, letterers: Array<string>, links: Array<string>, pencillers: Array<string>, publisher?: string | null, teams: Array<string>, writers: Array<string>, year?: number | null, month?: number | null, day?: number | null, volume?: number | null, number?: any | null } | null } & { ' $fragmentName'?: 'BookMetadataFragment' };
-
-export type BookOverviewHeaderQueryVariables = Exact<{
-  id: Scalars['ID']['input'];
-}>;
-
-
-export type BookOverviewHeaderQuery = { __typename?: 'Query', mediaById?: { __typename?: 'Media', id: string, resolvedName: string, seriesId?: string | null, extension: string, pages: number, metadata?: { __typename?: 'MediaMetadata', ageRating?: number | null, genres: Array<string>, publisher?: string | null, writers: Array<string>, year?: number | null } | null, tags: Array<{ __typename?: 'Tag', id: number, name: string }> } | null };
 
 export type BooksAfterCurrentQueryQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -5261,7 +5256,7 @@ export type LibraryLayoutQueryVariables = Exact<{
 
 
 export type LibraryLayoutQuery = { __typename?: 'Query', libraryById?: (
-    { __typename?: 'Library', id: string, name: string, description?: string | null, path: string, stats: { __typename?: 'LibraryStats', bookCount: number, completedBooks: number, inProgressBooks: number }, tags: Array<{ __typename?: 'Tag', id: number, name: string }>, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null }, config: { __typename?: 'LibraryConfig', defaultLibraryViewMode: LibraryViewMode, hideSeriesView: boolean } }
+    { __typename?: 'Library', id: string, name: string, description?: string | null, path: string, genres: Array<string>, publishers: Array<string>, stats: { __typename?: 'LibraryStats', seriesCount: number, bookCount: number, completedBooks: number, inProgressBooks: number, totalBytes: number, totalReadingTimeSeconds: number }, tags: Array<{ __typename?: 'Tag', id: number, name: string }>, thumbnail: { __typename?: 'ImageRef', url: string, metadata?: { __typename?: 'ImageMetadata', averageColor?: string | null, thumbhash?: string | null, colors: Array<{ __typename?: 'ImageColor', color: string, percentage: any }> } | null }, config: { __typename?: 'LibraryConfig', defaultLibraryViewMode: LibraryViewMode, hideSeriesView: boolean } }
     & { ' $fragmentRefs'?: { 'LibrarySettingsConfigFragment': LibrarySettingsConfigFragment } }
   ) | null };
 
@@ -8825,10 +8820,23 @@ export const BookOverviewSceneDocument = new TypedDocumentString(`
     ...BookFileInformation
     resolvedName
     extension
+    seriesId
+    pages
+    size
     metadata {
       links
       summary
+      ageRating
+      genres
+      language
+      publisher
+      writers
+      year
       ...MediaMetadataEditor
+    }
+    tags {
+      id
+      name
     }
     readHistory {
       completedAt
@@ -9341,32 +9349,13 @@ export const BookLibrarySeriesLinksDocument = new TypedDocumentString(`
   seriesById(id: $id) {
     id
     resolvedName
-    libraryId
-  }
-}
-    `) as unknown as TypedDocumentString<BookLibrarySeriesLinksQuery, BookLibrarySeriesLinksQueryVariables>;
-export const BookOverviewHeaderDocument = new TypedDocumentString(`
-    query BookOverviewHeader($id: ID!) {
-  mediaById(id: $id) {
-    id
-    resolvedName
-    seriesId
-    extension
-    pages
-    metadata {
-      ageRating
-      genres
-      publisher
-      writers
-      year
-    }
-    tags {
+    library {
       id
       name
     }
   }
 }
-    `) as unknown as TypedDocumentString<BookOverviewHeaderQuery, BookOverviewHeaderQueryVariables>;
+    `) as unknown as TypedDocumentString<BookLibrarySeriesLinksQuery, BookLibrarySeriesLinksQueryVariables>;
 export const BooksAfterCurrentQueryDocument = new TypedDocumentString(`
     query BooksAfterCurrentQuery($id: ID!, $pagination: Pagination) {
   mediaById(id: $id) {
@@ -9949,10 +9938,15 @@ export const LibraryLayoutDocument = new TypedDocumentString(`
     description
     path
     stats {
+      seriesCount
       bookCount
       completedBooks
       inProgressBooks
+      totalBytes
+      totalReadingTimeSeconds
     }
+    genres
+    publishers
     tags {
       id
       name

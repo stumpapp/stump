@@ -16,10 +16,12 @@ pub struct Model {
 	pub id: String,
 	#[sea_orm(column_type = "Text", nullable)]
 	pub display_name: Option<String>,
-	pub is_creator: bool,
+	#[sea_orm(column_type = "Text", nullable)]
+	pub bio: Option<String>,
 	pub hide_progress: bool,
-	pub private_membership: bool,
 	pub role: BookClubMemberRole,
+	#[sea_orm(column_type = "custom(\"DATETIME\")")]
+	pub joined_at: DateTimeWithTimeZone,
 	#[sea_orm(column_type = "Text")]
 	pub user_id: String,
 	#[sea_orm(column_type = "Text")]
@@ -32,8 +34,8 @@ pub enum Relation {
 	BookClubBookSuggestionLike,
 	#[sea_orm(has_many = "super::book_club_book_suggestion::Entity")]
 	BookClubBookSuggestion,
-	#[sea_orm(has_many = "super::book_club_discussion_message_like::Entity")]
-	BookClubDiscussionMessageLike,
+	#[sea_orm(has_many = "super::book_club_discussion_message_reaction::Entity")]
+	BookClubDiscussionMessageReaction,
 	#[sea_orm(has_many = "super::book_club_discussion_message::Entity")]
 	BookClubDiscussionMessage,
 	#[sea_orm(has_one = "super::book_club_member_favorite_book::Entity")]
@@ -68,9 +70,9 @@ impl Related<super::book_club_book_suggestion::Entity> for Entity {
 	}
 }
 
-impl Related<super::book_club_discussion_message_like::Entity> for Entity {
+impl Related<super::book_club_discussion_message_reaction::Entity> for Entity {
 	fn to() -> RelationDef {
-		Relation::BookClubDiscussionMessageLike.def()
+		Relation::BookClubDiscussionMessageReaction.def()
 	}
 }
 
@@ -112,17 +114,15 @@ impl Entity {
 	}
 
 	fn members_accessible_to_user_for_non_book_club_member() -> Condition {
-		Condition::all()
-			.add(Column::PrivateMembership.eq(false))
-			.add(
-				Column::BookClubId.in_subquery(
-					Query::select()
-						.column(book_club::Column::Id)
-						.from(Self)
-						.and_where(book_club::Column::IsPrivate.eq(false))
-						.to_owned(),
-				),
-			)
+		Condition::all().add(
+			Column::BookClubId.in_subquery(
+				Query::select()
+					.column(book_club::Column::Id)
+					.from(Self)
+					.and_where(book_club::Column::IsPrivate.eq(false))
+					.to_owned(),
+			),
+		)
 	}
 
 	pub fn find_members_accessible_to_user(user: &AuthUser) -> Select<Self> {
@@ -170,7 +170,7 @@ mod tests {
 			select_no_cols_to_string(select),
 			(r#"SELECT  FROM "book_club_members" WHERE "#.to_string()
 				+ r#""book_club_members"."book_club_id" IN (SELECT "book_club_id" FROM "book_club_members" WHERE "book_club_members"."user_id" = '42') "#
-				+ r#"OR ("book_club_members"."private_membership" = FALSE AND "book_club_members"."book_club_id" IN (SELECT "id" FROM "book_club_members" WHERE "book_clubs"."is_private" = FALSE))"#)
+				+ r#"OR "book_club_members"."book_club_id" IN (SELECT "id" FROM "book_club_members" WHERE "book_clubs"."is_private" = FALSE)"#)
 		);
 	}
 

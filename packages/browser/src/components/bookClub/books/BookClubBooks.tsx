@@ -1,6 +1,6 @@
+import { useGraphQL } from '@stump/client'
 import { ButtonOrLink, cn, Heading, ScrollArea, Text } from '@stump/components'
-import { addDays, differenceInDays, isAfter, isBefore } from 'date-fns'
-import { useMemo } from 'react'
+import { graphql } from '@stump/graphql'
 import AutoSizer from 'react-virtualized-auto-sizer'
 import { useMediaMatch, useToggle } from 'rooks'
 
@@ -8,13 +8,25 @@ import { useBookClubContext } from '@/components/bookClub'
 import GenericEmptyState from '@/components/GenericEmptyState'
 import paths from '@/paths'
 
-import BookClubScheduleItem from './BookClubScheduleItem'
+import BookClubBookItem from './BookClubBookItem'
 
 // TODO: two variants for:
 // - home (constrained width)
 // - settings (full width)
 
-export default function BookClubSchedule() {
+const query = graphql(`
+	query BookClubBooksScene($id: ID!) {
+		bookClubById(id: $id) {
+			id
+			previousBooks {
+				id
+				...BookClubBookItem
+			}
+		}
+	}
+`)
+
+export default function BookClubBooks() {
 	const { bookClub, viewerCanManage } = useBookClubContext()
 
 	const isMobile = useMediaMatch('(max-width: 768px)')
@@ -24,37 +36,23 @@ export default function BookClubSchedule() {
 	 */
 	const [showPastBooks, togglePastBooks] = useToggle()
 
-	/**
-	 * All books in the schedule, sorted by start date descending (most recent first)
-	 */
-	const scheduleBooks = useMemo(
-		() =>
-			(bookClub.schedule?.books || []).toSorted((a, b) =>
-				differenceInDays(new Date(b.startAt), new Date(a.startAt)),
-			),
-		[bookClub.schedule?.books],
+	const { data: pastQueryData } = useGraphQL(
+		query,
+		['bookClubBooks', 'pastBooks', bookClub.id],
+		{
+			id: bookClub.id,
+		},
+		{
+			enabled: showPastBooks,
+			initialData: {
+				bookClubById: {
+					id: bookClub.id,
+					previousBooks: [],
+				},
+			},
+		},
 	)
-	/**
-	 * The books which are currently active, based on their start and end dates
-	 */
-	const currentBooks = useMemo(
-		() =>
-			scheduleBooks.filter((book) => {
-				const adjustedEnd = book.discussionDurationDays
-					? addDays(new Date(book.endAt), book.discussionDurationDays)
-					: null
-				const now = new Date()
-				return adjustedEnd && isBefore(now, adjustedEnd) && isAfter(now, new Date(book.startAt))
-			}),
-		[scheduleBooks],
-	)
-	/**
-	 * The books which have already ended
-	 */
-	const pastBooks = useMemo(
-		() => scheduleBooks.filter((book) => !currentBooks.includes(book)),
-		[scheduleBooks, currentBooks],
-	)
+	const pastBooks = pastQueryData?.bookClubById.previousBooks || []
 
 	// TODO(book-clubs): animate the transition between showing and hiding past books, probably just
 	// break out the past books into separate list?
@@ -66,9 +64,7 @@ export default function BookClubSchedule() {
 						'pb-2': showPastBooks,
 					})}
 				>
-					{currentBooks.map((book) => (
-						<BookClubScheduleItem key={book.id} book={book} />
-					))}
+					{bookClub.currentBook && <BookClubBookItem data={bookClub.currentBook} />}
 
 					<div className="ml-3">
 						<button
@@ -84,8 +80,8 @@ export default function BookClubSchedule() {
 
 					{showPastBooks && (
 						<>
-							{pastBooks.map((book) => (
-								<BookClubScheduleItem key={book.id} book={book} />
+							{pastBooks?.map((book) => (
+								<BookClubBookItem key={book.id} data={book} />
 							))}
 						</>
 					)}
@@ -95,7 +91,7 @@ export default function BookClubSchedule() {
 	}
 
 	const renderContent = () => {
-		if (!scheduleBooks?.length) {
+		if (!bookClub.currentBook && pastBooks.length === 0) {
 			return (
 				<div className="flex flex-col px-4">
 					<GenericEmptyState
@@ -128,9 +124,9 @@ export default function BookClubSchedule() {
 
 	return (
 		<div className="flex h-full w-full flex-col md:-ml-4 md:w-2/3 lg:w-[28rem]">
-			{!!scheduleBooks.length && (
+			{!!bookClub.currentBook && (
 				<Heading size="md" className="flex items-center px-4 pb-4">
-					Schedule
+					Books
 				</Heading>
 			)}
 			{renderContent()}

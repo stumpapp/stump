@@ -243,7 +243,7 @@ export const useColors = () => {
 
 		const secondaryColor = cloneColor(color)
 		secondaryColor.alpha = isDarkColorScheme ? 0.21 : 0.15
-		setProperty(resolvedTheme, 'fill.brand.secondary', serialize(secondaryColor))
+		setProperty(resolvedTheme, 'fill.brand.secondary', serialize(secondaryColor, { format: 'hex' }))
 
 		const oklchColor = to(color, OKLCH)
 		const lightness = oklchColor.coords[0]

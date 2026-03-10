@@ -27,7 +27,7 @@ pub struct Model {
 	pub hashed_password: String,
 	pub is_server_owner: bool,
 	#[sea_orm(column_type = "Text", nullable)]
-	pub avatar_url: Option<String>,
+	pub avatar_path: Option<String>,
 	#[sea_orm(column_type = "custom(\"DATETIME\")")]
 	pub created_at: DateTimeWithTimeZone,
 	#[sea_orm(column_type = "custom(\"DATETIME\")", nullable)]
@@ -51,6 +51,7 @@ pub struct Model {
 #[serde(rename_all = "camelCase")]
 pub struct AuthUser {
 	pub id: String,
+	pub avatar_path: Option<String>,
 	pub avatar_url: Option<String>,
 	pub username: String,
 	pub is_server_owner: bool,
@@ -77,7 +78,7 @@ impl FromQueryResult for AuthUser {
 		let is_locked = res.try_get("", "is_locked")?;
 		let permissions_str: String = res.try_get("", "permissions")?;
 		let permissions = PermissionSet::from(permissions_str).resolve_into_vec();
-		let avatar_url: Option<String> = res.try_get("", "avatar_url")?;
+		let avatar_path: Option<String> = res.try_get("", "avatar_path")?;
 		let age_restriction = match age_restriction::Model::from_query_result(res, "") {
 			Ok(age_restriction) => Some(age_restriction),
 			Err(sea_orm::DbErr::RecordNotFound(_)) => None,
@@ -100,7 +101,10 @@ impl FromQueryResult for AuthUser {
 
 		Ok(AuthUser {
 			id,
-			avatar_url,
+			avatar_path,
+			// Note: This will never get populated at the db-level, the API will
+			// inject based on the service details
+			avatar_url: None,
 			username,
 			is_server_owner,
 			is_locked,
@@ -114,7 +118,7 @@ impl FromQueryResult for AuthUser {
 #[derive(Clone)]
 pub struct LoginUser {
 	pub id: String,
-	pub avatar_url: Option<String>,
+	pub avatar_path: Option<String>,
 	pub username: String,
 	pub hashed_password: String,
 	pub is_server_owner: bool,
@@ -166,7 +170,7 @@ impl FromQueryResult for LoginUser {
 
 		Ok(LoginUser {
 			id: user.id,
-			avatar_url: user.avatar_url,
+			avatar_path: user.avatar_path,
 			username: user.username,
 			hashed_password: user.hashed_password,
 			is_server_owner: user.is_server_owner,
@@ -186,7 +190,10 @@ impl From<LoginUser> for AuthUser {
 	fn from(user: LoginUser) -> Self {
 		AuthUser {
 			id: user.id,
-			avatar_url: user.avatar_url,
+			avatar_path: user.avatar_path,
+			// Note: This will never get populated at the db-level, the API will
+			// inject based on the service details
+			avatar_url: None,
 			username: user.username,
 			is_server_owner: user.is_server_owner,
 			is_locked: user.is_locked,

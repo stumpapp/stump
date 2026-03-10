@@ -1,7 +1,12 @@
 mod api_key;
 mod author;
 mod book_club;
+mod book_club_book;
+mod book_club_discussion;
+mod book_club_invitation;
+mod book_club_suggestion;
 mod config;
+mod custom_emoji;
 mod email_device;
 mod emailer;
 mod epub;
@@ -15,6 +20,7 @@ mod metadata_provider;
 mod notifier;
 pub(crate) mod reading_list;
 mod series;
+mod server_config;
 mod smart_list_view;
 mod smart_lists;
 pub(crate) mod smart_lists_builder;
@@ -24,7 +30,12 @@ pub(crate) mod user;
 use api_key::APIKeyQuery;
 use author::AuthorQuery;
 use book_club::BookClubQuery;
+use book_club_book::BookClubBookQuery;
+use book_club_discussion::BookClubDiscussionQuery;
+use book_club_invitation::BookClubInvitationQuery;
+use book_club_suggestion::BookClubSuggestionQuery;
 use config::ConfigQuery;
+use custom_emoji::CustomEmojiQuery;
 use email_device::EmailDeviceQuery;
 use emailer::EmailerQuery;
 use epub::EpubQuery;
@@ -37,6 +48,7 @@ use metadata_provider::MetadataProviderQuery;
 use notifier::NotifierQuery;
 use reading_list::ReadingListQuery;
 use series::SeriesQuery;
+use server_config::ServerConfigQuery;
 use smart_list_view::SmartListViewQuery;
 use smart_lists::SmartListsQuery;
 use tag::TagQuery;
@@ -44,27 +56,56 @@ use user::UserQuery;
 
 use crate::query::job::JobQuery;
 
+// Note: I had to split the Query/Mutation root types into chunks to avoid a compiler
+// overflow. It seems like a flat MergedObject creates a really large async block
+// that is too deep for the compiler.
+
 #[derive(async_graphql::MergedObject, Default)]
-pub struct Query(
-	APIKeyQuery,
-	AuthorQuery,
+struct BookClubQueries(
 	BookClubQuery,
-	EmailerQuery,
-	EmailDeviceQuery,
-	FilesystemQuery,
-	JobQuery,
+	BookClubBookQuery,
+	BookClubDiscussionQuery,
+	BookClubInvitationQuery,
+	BookClubSuggestionQuery,
+);
+
+#[derive(async_graphql::MergedObject, Default)]
+struct ContentQueries(
 	MediaQuery,
-	UserQuery,
-	NotifierQuery,
-	ReadingListQuery,
-	EpubQuery,
 	LibraryQuery,
-	MediaMetadataOverviewQuery,
-	SmartListViewQuery,
 	SeriesQuery,
+	EpubQuery,
 	TagQuery,
+	MediaMetadataOverviewQuery,
+);
+
+#[derive(async_graphql::MergedObject, Default)]
+struct UserAndNotifsQueries(UserQuery, EmailerQuery, EmailDeviceQuery, NotifierQuery);
+
+#[derive(async_graphql::MergedObject, Default)]
+struct SystemQueries(
+	APIKeyQuery,
+	JobQuery,
 	LogQuery,
 	ConfigQuery,
-	SmartListsQuery,
 	MetadataProviderQuery,
+	ServerConfigQuery,
+	FilesystemQuery,
+);
+
+#[derive(async_graphql::MergedObject, Default)]
+struct ListQueries(
+	SmartListsQuery,
+	SmartListViewQuery,
+	ReadingListQuery,
+	CustomEmojiQuery,
+);
+
+#[derive(async_graphql::MergedObject, Default)]
+pub struct Query(
+	BookClubQueries,
+	ContentQueries,
+	UserAndNotifsQueries,
+	SystemQueries,
+	ListQueries,
 );

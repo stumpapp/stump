@@ -26,7 +26,7 @@ function DebugSettings() {
 				<Label className="flex items-center justify-between rounded-lg border border-dashed border-fill-brand/40 bg-fill-brand-secondary p-3">
 					<div className="flex flex-col gap-1">
 						<span>Query Tools</span>
-						<p className="text-muted-foreground text-sm">Enable debugging tools for queries</p>
+						<p className="text-sm text-foreground-muted">Enable debugging tools for queries</p>
 					</div>
 					<RawSwitch
 						id="showQueryTools"

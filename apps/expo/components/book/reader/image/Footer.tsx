@@ -14,7 +14,7 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import TImage from 'react-native-turbo-image'
 
-import { TurboImage } from '~/components/image'
+import { getThumbnailResizeProps, TurboImage } from '~/components/image'
 import { Progress, Text } from '~/components/ui'
 import { CONTROLS_TIMING_CONFIG } from '~/lib/constants'
 import { useDisplay, usePrevious } from '~/lib/hooks'
@@ -59,6 +59,7 @@ export default function Footer() {
 	const visible = useReaderStore((state) => state.showControls)
 	const setShowControls = useReaderStore((state) => state.setShowControls)
 	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
+	const thumbnailResizeMode = usePreferencesStore((state) => state.thumbnailResizeMode)
 
 	const [isSliderDragging, setIsSliderDragging] = useState(false)
 
@@ -325,6 +326,14 @@ export default function Footer() {
 					>
 						{directionRespectingPageSet.map((pageIdx, i) => {
 							const source = pageSource(pageIdx + 1)
+
+							const { resizeMode, style } = getThumbnailResizeProps(thumbnailResizeMode, {
+								containerWidth: containerSize.width / (pageSet.length === 1 ? 1 : 2),
+								containerHeight: containerSize.height,
+								originalHeight: imageSizes?.[pageIdx]?.height || baseSize.height,
+								originalWidth: imageSizes?.[pageIdx]?.width || baseSize.width,
+							})
+
 							return (
 								<TurboImage
 									key={`thumb-${pageIdx + 1}-${i}`}
@@ -332,7 +341,7 @@ export default function Footer() {
 										uri: source.uri,
 										headers: source.headers as Record<string, string>,
 									}}
-									resizeMode="stretch"
+									resizeMode={resizeMode}
 									resize={containerSize.width * 1.5}
 									style={{
 										width: pageSet.length === 1 ? '100%' : '50%',
@@ -341,6 +350,7 @@ export default function Footer() {
 										// @ts-expect-error bug in library (to be fixed soon). StyleProp<ImageStyle> should be StyleProp<ViewStyle>
 										borderCurve: 'continuous',
 										overflow: 'hidden',
+										...style,
 									}}
 									onSuccess={({ nativeEvent }) => onImageLoaded(pageIdx, nativeEvent)}
 								/>
@@ -357,6 +367,7 @@ export default function Footer() {
 				</View>
 			)
 		},
+		// lol this dep array is absurd, def a smell
 		[
 			isSliderDragging,
 			pageSource,
@@ -366,6 +377,9 @@ export default function Footer() {
 			onImageLoaded,
 			readingDirection,
 			getPageSetIndex,
+			thumbnailResizeMode,
+			imageSizes,
+			baseSize,
 		],
 	)
 
@@ -441,17 +455,30 @@ export default function Footer() {
 								]}
 							>
 								{directionRespectingItem.map((pageIdx, i) => {
+									const source = pageSource(pageIdx + 1)
+
+									const { resizeMode, style } = getThumbnailResizeProps(thumbnailResizeMode, {
+										containerWidth: pageSetSize.width / (item.length === 1 ? 1 : 2),
+										containerHeight: pageSetSize.height,
+										originalHeight: imageSizes?.[pageIdx]?.height || baseSize.height,
+										originalWidth: imageSizes?.[pageIdx]?.width || baseSize.width,
+									})
+
 									return (
 										<TurboImage
 											key={getMappingKey(pageIdx, i)}
 											source={{
-												uri: pageSource(pageIdx + 1).uri,
-												headers: pageSource(pageIdx + 1).headers as Record<string, string>,
+												uri: source.uri,
+												headers: source.headers as Record<string, string>,
 											}}
-											resizeMode="stretch"
+											resizeMode={resizeMode}
 											// we downscale (resize) by width, so when we resize an individual image, the gallery size is halved when the item length is 2.
 											resize={(pageSetSize.width / item.length) * 1.5}
-											style={{ width: item.length === 1 ? '100%' : '50%', height: '100%' }}
+											style={{
+												width: item.length === 1 ? '100%' : '50%',
+												height: '100%',
+												...style,
+											}}
 											onSuccess={({ nativeEvent }) => onImageLoaded(pageIdx, nativeEvent)}
 										/>
 									)
@@ -479,7 +506,9 @@ export default function Footer() {
 			getMappingKey,
 			getPageSetSize,
 			isRtl,
-			baseSize.height,
+			baseSize,
+			thumbnailResizeMode,
+			imageSizes,
 		],
 	)
 

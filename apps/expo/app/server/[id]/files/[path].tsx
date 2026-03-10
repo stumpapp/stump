@@ -53,7 +53,7 @@ export default function Screen() {
 					<Heading size="lg" className="text-center">
 						Something went wrong
 					</Heading>
-					<Text className="text-muted-foreground text-center text-base">{errorMessage}</Text>
+					<Text className="text-center text-base text-foreground-muted">{errorMessage}</Text>
 				</View>
 			)
 		} else {

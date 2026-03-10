@@ -1,4 +1,5 @@
 import { FragmentType, graphql, useFragment } from '@stump/graphql'
+import { useRouter } from 'expo-router'
 import { View } from 'react-native'
 
 import { useActiveServer } from '../activeServer'
@@ -18,6 +19,8 @@ const fragment = graphql(`
 				}
 				thumbhash
 			}
+			height
+			width
 		}
 		readProgress {
 			percentageCompleted
@@ -29,9 +32,11 @@ export type IBookGridItemFragment = FragmentType<typeof fragment>
 
 type Props = {
 	book: IBookGridItemFragment
+	onPress?: () => void
 }
 
-export default function BookGridItem({ book }: Props) {
+export default function BookGridItem({ book, onPress }: Props) {
+	const router = useRouter()
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
@@ -45,8 +50,13 @@ export default function BookGridItem({ book }: Props) {
 			<GridImageItem
 				uri={data.thumbnail.url}
 				title={data.resolvedName}
-				href={`/server/${serverID}/books/${data.id}`}
+				onPress={onPress ?? (() => router.navigate(`/server/${serverID}/books/${data.id}`))}
 				placeholderData={data.thumbnail.metadata}
+				originalDimensions={
+					data.thumbnail.width && data.thumbnail.height
+						? { width: data.thumbnail.width, height: data.thumbnail.height }
+						: null
+				}
 				percentageCompleted={isNaN(percentageCompleted) ? undefined : percentageCompleted}
 			/>
 		</View>

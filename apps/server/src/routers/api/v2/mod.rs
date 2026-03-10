@@ -1,16 +1,18 @@
 pub(crate) mod auth;
+pub(crate) mod emoji;
 pub(crate) mod epub;
 pub(crate) mod library;
 pub(crate) mod media;
 mod oidc;
 mod series;
+mod user;
 
 use axum::{
 	extract::State,
 	routing::{get, post},
 	Json, Router,
 };
-use models::entity::user;
+use models::entity;
 use reqwest::header::USER_AGENT;
 use sea_orm::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -24,10 +26,12 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
 		.merge(auth::mount(app_state.clone()))
 		.merge(oidc::mount())
+		.merge(emoji::mount(app_state.clone()))
 		.merge(media::mount(app_state.clone()))
 		.merge(epub::mount(app_state.clone()))
 		.merge(series::mount(app_state.clone()))
-		.merge(library::mount(app_state))
+		.merge(library::mount(app_state.clone()))
+		.merge(user::mount(app_state))
 		.route("/claim", get(claim))
 		.route("/ping", get(ping))
 		.route("/version", post(version))
@@ -41,7 +45,10 @@ pub struct ClaimResponse {
 }
 
 async fn claim(State(ctx): State<AppState>) -> APIResult<Json<ClaimResponse>> {
-	let is_claimed = user::Entity::find().count(ctx.conn.as_ref()).await? > 0;
+	let is_claimed = entity::user::Entity::find()
+		.count(ctx.conn.as_ref())
+		.await?
+		> 0;
 
 	Ok(Json(ClaimResponse { is_claimed }))
 }

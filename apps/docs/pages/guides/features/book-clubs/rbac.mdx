@@ -1,0 +1,50 @@
+# Roles and Permissions for Book Clubs
+
+There are two relevant user permissions that affect access to the book club feature as a whole:
+
+    1. Any managed account with the `ACCESS_BOOK_CLUB` permission may access the book club feature. This means that they can view and join book clubs
+    2. Any managed account with the `CREATE_BOOK_CLUB` permission may create book clubs (and therefore inherently has the `ACCESS_BOOK_CLUB` permission)
+
+The server owner can assign these permissions to other users in the user management settings page. For more information about that process, see the [user permissions](/guides/access-control/permissions) guide.
+
+## Club Visibility
+
+A club can be either public or private. Public clubs are visible to all users who have access to the book club feature, and they can join at any time. Private clubs are only visible to members of the club, and users must be invited by a club member to join. As with everything else, a server owner is not bound by these restrictions.
+
+## Club Roles
+
+Within a book club, there are 4 roles:
+
+| Role          | Permissions                                                                                |
+| ------------- | ------------------------------------------------------------------------------------------ |
+| **Creator**   | Full control over the book club, including deleting it at any time                         |
+| **Admin**     | Almost all of the same permissions as the creator, except they cannot delete the book club |
+| **Moderator** | Management permissions over club discussions and membership                                |
+| **Member**    | No special permissions within the book club                                                |
+
+The server owner retains all of the permissions as a creator of any book club that exists on the server.
+
+### Customizing Roles
+
+Book clubs can create custom names for each of the four available roles. This was added to better support book clubs that want some themed and/or immersive names for their roles. For example, a book club that wants to take on a D&D-inspired theme might use names like these:
+
+| Internal Role | Custom Name    |
+| ------------- | -------------- |
+| Creator       | Dungeon Master |
+| Admin         | Adventurer     |
+| Moderator     | Explorer       |
+| Member        | Novice         |
+
+Internally, nothing changes, but the names are displayed in the UI accordingly.
+
+## Permissions
+
+The following table outlines some examples of what each role can do within a book club. This is not an exhaustive list, but over time hopefully it becomes more complete:
+
+| Permission                 | Example                             | Creator | Admin | Moderator | Member | Notes                                 |
+| -------------------------- | ----------------------------------- | ------- | ----- | --------- | ------ | ------------------------------------- |
+| Manage club settings       | Rename club, change settings        | ✅      | ✅    |           |        |                                       |
+| Manage books               | Mark book as reading for club       | ✅      | ✅    |           |        |                                       |
+| Manage discussions         | Delete an inappropriate message     | ✅      | ✅    | ✅        |        | Members can delete their own messages |
+| Suggest books              | Suggest a book for the club         | ✅      | ✅    | ✅        | ✅     |                                       |
+| Participate in discussions | Chat in the club's discussion rooms | ✅      | ✅    | ✅        | ✅     |                                       |

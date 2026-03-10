@@ -1,6 +1,6 @@
 import { useSDK } from '@stump/client'
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
-import { Stack, useLocalSearchParams } from 'expo-router'
+import { Stack, useGlobalSearchParams } from 'expo-router'
 import { useMemo } from 'react'
 
 import { getProgressionURL } from '~/components/opds/utils'
@@ -8,7 +8,7 @@ import { getProgressionURL } from '~/components/opds/utils'
 import { PublicationContext } from './context'
 
 export default function Layout() {
-	const { url: publicationURL } = useLocalSearchParams<{ url: string }>()
+	const { url: publicationURL } = useGlobalSearchParams<{ url: string }>()
 	const { sdk } = useSDK()
 
 	const { data: publication } = useSuspenseQuery({

@@ -40,6 +40,8 @@ const fragment = graphql(`
 				}
 				thumbhash
 			}
+			height
+			width
 		}
 		pages
 		readProgress {
@@ -185,6 +187,11 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
 	const imageHeight = IMAGE_WIDTH / thumbnailRatio
 
+	const originalDimensions =
+		data.thumbnail.width && data.thumbnail.height
+			? { width: data.thumbnail.width, height: data.thumbnail.height }
+			: null
+
 	// TODO: figure out why I need explicit widths for *each* elem
 	const renderBookContent = useCallback(() => {
 		if (!isTablet) return null
@@ -274,10 +281,10 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 							Authorization: sdk.authorizationHeader || '',
 						},
 					}}
-					resizeMode="stretch"
 					size={{ height: imageHeight, width: IMAGE_WIDTH }}
 					gradient={{ colors: gradientColors, locations: gradientLocations }}
 					placeholderData={placeholderData}
+					originalDimensions={originalDimensions}
 				/>
 
 				<View className="absolute bottom-0 z-20 w-full gap-2 p-3">

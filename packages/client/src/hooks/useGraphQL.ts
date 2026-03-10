@@ -1,4 +1,9 @@
-import type { Pagination, PaginationInfo, TypedDocumentString } from '@stump/graphql'
+import type {
+	CursorPagination,
+	Pagination,
+	PaginationInfo,
+	TypedDocumentString,
+} from '@stump/graphql'
 import { Api } from '@stump/sdk'
 import { GraphQLWebsocketConnectEventHandlers } from '@stump/sdk/socket'
 import {
@@ -383,6 +388,84 @@ export function useInfiniteGraphQL<TResult, TVariables>(
 		initialPageParam,
 		getNextPageParam: (lastPage) => getNextPageParam(extractPageInfo(lastPage)),
 		experimental_prefetchInRender: true,
+		...options,
+	})
+
+	useEffect(() => {
+		if (!error) return
+		handleError({
+			sdk,
+			error,
+			onUnauthenticatedResponse,
+			onConnectionWithServerChanged,
+		})
+	}, [error, sdk, onUnauthenticatedResponse, onConnectionWithServerChanged])
+
+	return {
+		error,
+		...rest,
+	} as UseInfiniteQueryResult<InfiniteData<TResult>>
+}
+
+const extractCursorInfo = (data: unknown): CursorPagination | undefined => {
+	if (!data || Array.isArray(data)) return undefined
+
+	if (typeof data === 'object' && 'cursorInfo' in data) {
+		const info = data.cursorInfo as { nextCursor?: string | null; limit?: number }
+		if (!info.nextCursor) return undefined
+		return { after: info.nextCursor, limit: info.limit ?? 20 }
+	}
+
+	for (const key in data) {
+		const value = data[key as keyof typeof data]
+		if (typeof value === 'object' && value !== null) {
+			const cursor = extractCursorInfo(value)
+			if (cursor) return cursor
+		}
+	}
+
+	return undefined
+}
+
+const extractInitialCursorParam = <TVariables>(variables: TVariables): CursorPagination => {
+	if (typeof variables !== 'object' || !variables) return { limit: 20 }
+	if ('pagination' in variables) {
+		const pagination = variables.pagination as CursorPagination
+		if (pagination) return pagination
+	}
+	return { limit: 20 }
+}
+
+export function useInfiniteCursorGraphQL<TResult, TVariables>(
+	document: TypedDocumentString<TResult, TVariables>,
+	queryKey: QueryKey,
+	variables?: TVariables extends Record<string, never> ? never : TVariables,
+	options?: {
+		enabled?: boolean
+	},
+): UseInfiniteQueryResult<InfiniteData<TResult>> {
+	const { sdk } = useSDK()
+	const { onUnauthenticatedResponse, onConnectionWithServerChanged } = useClientContext()
+
+	const [initialPageParam] = useState<CursorPagination>(() => extractInitialCursorParam(variables))
+
+	const constructVariables = useCallback(
+		(pageParam: CursorPagination) =>
+			({
+				...variables,
+				pagination: pageParam,
+			}) as TVariables extends Record<string, never> ? never : TVariables,
+		[variables],
+	)
+
+	const { error, ...rest } = useInfiniteQuery({
+		queryKey,
+		queryFn: async ({ pageParam }) => {
+			const response = await sdk.execute(document, constructVariables(pageParam))
+			return response
+		},
+		initialPageParam,
+		getNextPageParam: (lastPage) => extractCursorInfo(lastPage),
 		...options,
 	})
 

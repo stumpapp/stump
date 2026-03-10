@@ -90,6 +90,12 @@ impl MediaMetadataOverview {
 		get_unique_values_inner!(Letterers, conn, series_id)
 	}
 
+	async fn cover_artists(&self, ctx: &Context<'_>) -> Result<Vec<String>> {
+		let conn: &DatabaseConnection = ctx.data::<CoreContext>()?.conn.as_ref();
+		let series_id = self.series_id.clone();
+		get_unique_values_inner!(CoverArtists, conn, series_id)
+	}
+
 	async fn editors(&self, ctx: &Context<'_>) -> Result<Vec<String>> {
 		let conn: &DatabaseConnection = ctx.data::<CoreContext>()?.conn.as_ref();
 		let series_id = self.series_id.clone();

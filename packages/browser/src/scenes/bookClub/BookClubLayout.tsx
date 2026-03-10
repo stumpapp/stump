@@ -1,6 +1,7 @@
-import { useSDK, useSuspenseGraphQL } from '@stump/client'
+import { useGraphQLMutation, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { cn } from '@stump/components'
-import { graphql } from '@stump/graphql'
+import { BookClubLayoutQuery, graphql } from '@stump/graphql'
+import { useQueryClient } from '@tanstack/react-query'
 import { Suspense, useEffect, useMemo } from 'react'
 import { Outlet, useLocation, useNavigate, useParams } from 'react-router'
 import { useMediaMatch } from 'rooks'
@@ -10,12 +11,14 @@ import { SceneContainer } from '@/components/container'
 import { GenericSettingsHeader } from '@/components/settings'
 import { usePreferences } from '@/hooks'
 import { useUserStore } from '@/stores'
+import { noop } from '@/utils/misc'
 
 import BookClubHeader from './BookClubHeader'
 import BookClubNavigation from './BookClubNavigation'
 import { BookClubSettingsSideBar } from './tabs/settings'
 import { routeGroups } from './tabs/settings/routes'
 
+// TODO(book-clubs): This query needs a complete rewrite
 const query = graphql(`
 	query BookClubLayout($slug: String!) {
 		bookClubBySlug(slug: $slug) {
@@ -33,35 +36,36 @@ const query = graphql(`
 			membersCount
 			membership {
 				role
-				isCreator
 				avatarUrl
-				__typename
+				isCreator
 			}
-			schedule {
+			currentBook {
 				id
-				defaultIntervalDays
-				books {
+				title
+				author
+				imageUrl
+				entity {
 					id
-					startAt
-					endAt
-					discussionDurationDays
-					imageUrl
-					title
-					author
-					url
-					entity {
-						id
-						resolvedName
-						thumbnail {
-							url
-						}
-						metadata {
-							writers
-						}
+					thumbnail {
+						url
 					}
 				}
+				...BookClubBookItem
 			}
 			createdAt
+		}
+	}
+`)
+
+const mutation = graphql(`
+	mutation UpdateBookClub($id: ID!, $input: UpdateBookClubInput!) {
+		updateBookClub(id: $id, input: $input) {
+			id
+			name
+			emoji
+			isPrivate
+			roleSpec
+			description
 		}
 	}
 `)
@@ -73,6 +77,26 @@ export default function BookClubLayout() {
 	const {
 		data: { bookClubBySlug: bookClub },
 	} = useSuspenseGraphQL(query, sdk.cacheKey('bookClubBySlug', [slug]), { slug: slug || '' })
+
+	const client = useQueryClient()
+	const { mutate: patchClub } = useGraphQLMutation(mutation, {
+		onSuccess: ({ updateBookClub }) => {
+			client.setQueryData(
+				sdk.cacheKey('bookClubBySlug', [slug]),
+				(oldData: BookClubLayoutQuery) => {
+					if (!oldData) return oldData
+
+					return {
+						...oldData,
+						bookClubBySlug: {
+							...oldData.bookClubBySlug,
+							...updateBookClub,
+						},
+					}
+				},
+			)
+		},
+	})
 
 	const navigate = useNavigate()
 	const location = useLocation()
@@ -127,6 +151,13 @@ export default function BookClubLayout() {
 				bookClub,
 				viewerCanManage,
 				viewerIsMember,
+				patchClub: viewerCanManage
+					? (data) =>
+							patchClub({
+								id: bookClub.id,
+								input: data,
+							})
+					: noop,
 			}}
 		>
 			<div

@@ -1,7 +1,7 @@
 use crate::{
 	data::{AuthContext, CoreContext},
 	error_message::FORBIDDEN_ACTION,
-	guard::{PermissionGuard, ServerOwnerGuard},
+	guard::{OptionalFeature, OptionalFeatureGuard, PermissionGuard, ServerOwnerGuard},
 	input::user::{
 		AgeRestrictionInput, CreateUserInput, NavigationArrangementInput,
 		UpdateUserInput, UpdateUserPreferencesInput,
@@ -9,7 +9,7 @@ use crate::{
 	object::{user::User, user_preferences::UserPreferences},
 	utils::save_user_session,
 };
-use async_graphql::{Context, Object, Result, ID};
+use async_graphql::{Context, Object, Result, Upload, ID};
 use models::{
 	entity::{
 		age_restriction, session,
@@ -21,9 +21,10 @@ use models::{
 	},
 };
 use sea_orm::{
-	prelude::*, ActiveValue::NotSet, DatabaseTransaction, IntoActiveModel, Set,
-	TransactionTrait, TryIntoModel,
+	prelude::*, ActiveValue::NotSet, ColumnTrait, DatabaseTransaction, IntoActiveModel,
+	Set, TransactionTrait, TryIntoModel,
 };
+use std::{io::Read, path::Path};
 use stump_core::config::StumpConfig;
 use tower_sessions::Session;
 
@@ -42,6 +43,138 @@ impl UserMutation {
 		tracing::debug!("Deleted login activity entries");
 
 		Ok(deleted_rows.rows_affected)
+	}
+
+	/// Upload an avatar image for either the authenticated viewer or for any user if
+	/// called by a server owner
+	#[graphql(
+		guard = "OptionalFeatureGuard::new(OptionalFeature::Upload).and(PermissionGuard::one(UserPermission::UploadFile))"
+	)]
+	async fn upload_user_avatar(
+		&self,
+		ctx: &Context<'_>,
+		id: Option<ID>,
+		upload: Upload,
+	) -> Result<User> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let core = ctx.data::<CoreContext>()?;
+		let conn = core.conn.as_ref();
+
+		let target_id = match &id {
+			Some(id) => {
+				if id.as_str() != user.id && !user.is_server_owner {
+					return Err(FORBIDDEN_ACTION.into());
+				}
+				id.to_string()
+			},
+			None => user.id.clone(),
+		};
+
+		let mut value = upload.value(ctx)?;
+
+		let content_type = value
+			.content_type
+			.clone()
+			.as_deref()
+			.map(stump_core::filesystem::ContentType::from)
+			.ok_or("Could not verify content type of uploaded file")?;
+
+		if !content_type.is_image() {
+			return Err("Uploaded file is not an image".into());
+		}
+
+		match value.size() {
+			Ok(size) if size as usize > core.config.max_image_upload_size => {
+				return Err(format!(
+					"File size exceeds maximum upload size of {} bytes",
+					core.config.max_image_upload_size
+				)
+				.into());
+			},
+			Err(e) => return Err(format!("Failed to get file size: {e}").into()),
+			_ => {},
+		}
+
+		let extension = Path::new(&value.filename)
+			.extension()
+			.and_then(|e| e.to_str())
+			.map(str::to_ascii_lowercase)
+			.ok_or("Uploaded file must have a file extension")?;
+
+		let mut image_bytes = Vec::new();
+		value
+			.content
+			.read_to_end(&mut image_bytes)
+			.map_err(|e| format!("Failed to read upload: {e}"))?;
+
+		let avatars_dir = core.config.get_avatars_dir();
+		if let Ok(mut entries) = tokio::fs::read_dir(&avatars_dir).await {
+			let prefix = format!("{}.", target_id);
+			while let Ok(Some(entry)) = entries.next_entry().await {
+				let name = entry.file_name();
+				if name.to_string_lossy().starts_with(&prefix) {
+					let _ = tokio::fs::remove_file(entry.path()).await;
+				}
+			}
+		}
+
+		let avatar_path = avatars_dir.join(format!("{}.{}", target_id, extension));
+		tokio::fs::write(&avatar_path, &image_bytes)
+			.await
+			.map_err(|e| format!("Failed to write avatar to disk: {e}"))?;
+
+		let avatar_path_str = avatar_path.to_string_lossy().to_string();
+
+		let updated_user = user::Entity::find()
+			.filter(user::Column::Id.eq(&target_id))
+			.one(conn)
+			.await?
+			.ok_or("User not found")?
+			.into_active_model();
+
+		let mut active = updated_user;
+		active.avatar_path = Set(Some(avatar_path_str));
+		let result = active.update(conn).await?;
+
+		Ok(User::from(result))
+	}
+
+	/// Delete the avatar for the authenticated viewer, or for any user if
+	/// called by a server owner (by passing `id`).
+	async fn delete_user_avatar(
+		&self,
+		ctx: &Context<'_>,
+		id: Option<ID>,
+	) -> Result<User> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let core = ctx.data::<CoreContext>()?;
+		let conn = core.conn.as_ref();
+
+		let target_id = match &id {
+			Some(id) => {
+				if id.as_str() != user.id && !user.is_server_owner {
+					return Err(FORBIDDEN_ACTION.into());
+				}
+				id.to_string()
+			},
+			None => user.id.clone(),
+		};
+
+		let existing = user::Entity::find()
+			.filter(user::Column::Id.eq(&target_id))
+			.one(conn)
+			.await?
+			.ok_or("User not found")?;
+
+		if let Some(ref path_str) = existing.avatar_path {
+			let _ = tokio::fs::remove_file(path_str).await;
+		}
+
+		let mut active = existing.into_active_model();
+		active.avatar_path = Set(None);
+		let result = active.update(conn).await?;
+
+		Ok(User::from(result))
 	}
 
 	#[graphql(guard = "PermissionGuard::one(UserPermission::ManageUsers)")]
@@ -438,7 +571,6 @@ async fn update_user(
 	let mut update_user = user::ActiveModel {
 		id: Set(for_user_id.clone()),
 		username: Set(input.username.clone()),
-		avatar_url: Set(input.avatar_url.clone()),
 		max_sessions_allowed: Set(input.max_sessions_allowed),
 		..Default::default()
 	};
@@ -592,7 +724,7 @@ mod tests {
 					is_locked: false,
 					permissions: None,
 					max_sessions_allowed: None,
-					avatar_url: None,
+					avatar_path: None,
 					created_at: chrono::Utc::now().into(),
 					deleted_at: None,
 					user_preferences_id: None,
@@ -607,7 +739,6 @@ mod tests {
 			username: "test_user".to_string(),
 			password: None,
 			max_sessions_allowed: Some(5),
-			avatar_url: Some("http://example.com/avatar.png".to_string()),
 			permissions: vec![],
 			age_restriction: None,
 		};
@@ -626,7 +757,7 @@ mod tests {
 		let stmt = &txn.statements()[1];
 		assert_eq!(
 			stmt.to_string(),
-			r#"UPDATE "users" SET "username" = 'test_user', "avatar_url" = 'http://example.com/avatar.png', "max_sessions_allowed" = 5 WHERE "users"."id" = '42' RETURNING "id", "username", "hashed_password", "is_server_owner", "avatar_url", "created_at", "deleted_at", "is_locked", "max_sessions_allowed", "permissions", "user_preferences_id", "oidc_issuer_id", "oidc_email""#
+			r#"UPDATE "users" SET "username" = 'test_user', "max_sessions_allowed" = 5 WHERE "users"."id" = '42' RETURNING "id", "username", "hashed_password", "is_server_owner", "avatar_path", "created_at", "deleted_at", "is_locked", "max_sessions_allowed", "permissions", "user_preferences_id", "oidc_issuer_id", "oidc_email""#
 		);
 	}
 }

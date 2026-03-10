@@ -264,6 +264,7 @@ mod tests {
 			None,
 			None,
 			None,
+			None,
 		);
 
 		let feed = OpdsFeed::new(

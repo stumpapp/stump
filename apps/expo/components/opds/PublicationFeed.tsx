@@ -2,6 +2,7 @@ import { FlashList } from '@shopify/flash-list'
 import { useSDK } from '@stump/client'
 import { OPDSFeed, resolveUrl } from '@stump/sdk'
 import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query'
+import { useRouter } from 'expo-router'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -12,23 +13,27 @@ import { useActiveServer } from '../activeServer'
 import { GridImageItem } from '../grid'
 import { useGridItemSize } from '../grid/useGridItemSize'
 import RefreshControl from '../RefreshControl'
-import { useFeedTitle } from './useFeedTitle'
 import { getPublicationThumbnailURL } from './utils'
 
 type Props = {
 	feed: OPDSFeed
 	onRefresh?: () => void
 	isRefreshing?: boolean
+	ListHeaderComponent?: React.ReactElement
 }
 
-export default function PublicationFeed({ feed, onRefresh, isRefreshing }: Props) {
-	useFeedTitle(feed)
-
+export default function PublicationFeed({
+	feed,
+	onRefresh,
+	isRefreshing,
+	ListHeaderComponent,
+}: Props) {
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
 	const { sdk } = useSDK()
 
+	const router = useRouter()
 	const feedURL = feed.links?.find((link) => link.rel === 'self')?.href || ''
 	const [pageSize, setPageSize] = useState(() => feed.metadata.itemsPerPage || 20)
 
@@ -83,18 +88,20 @@ export default function PublicationFeed({ feed, onRefresh, isRefreshing }: Props
 					<GridImageItem
 						uri={thumbnailURL}
 						title={publication.metadata.title}
-						href={{
-							pathname: '/opds/[id]/publication',
-							params: {
-								id: serverID,
-								url: selfURL ? resolveUrl(selfURL, sdk.rootURL) : undefined,
-							},
-						}}
+						onPress={() =>
+							router.navigate({
+								pathname: '/opds/[id]/publication',
+								params: {
+									id: serverID,
+									url: selfURL ? resolveUrl(selfURL, sdk.rootURL) : undefined,
+								},
+							})
+						}
 					/>
 				</View>
 			)
 		},
-		[serverID, sdk.rootURL],
+		[serverID, sdk.rootURL, router],
 	)
 
 	if (!publications.length) return null
@@ -112,6 +119,7 @@ export default function PublicationFeed({ feed, onRefresh, isRefreshing }: Props
 				onEndReachedThreshold={ON_END_REACHED_THRESHOLD}
 				onEndReached={onEndReached}
 				contentInsetAdjustmentBehavior="always"
+				ListHeaderComponent={ListHeaderComponent}
 				ListHeaderComponentStyle={{ paddingBottom: 16, marginHorizontal: -paddingHorizontal }}
 				refreshControl={<RefreshControl refreshing={Boolean(isRefreshing)} onRefresh={onRefresh} />}
 			/>

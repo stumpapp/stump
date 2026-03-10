@@ -281,13 +281,12 @@ export default function Screen() {
 			return <Card.Stat label="Completed" value={`${percentage}%`} />
 		}
 
-		let percentage
-		const decimal = percentageCompleted ? parseGraphQLDecimal(percentageCompleted) : null
-		if (decimal) {
-			percentage = (decimal * 100).toFixed(1)
-		} else {
-			percentage = (((page || 0) / pages) * 100).toFixed(1)
-		}
+		const fraction = percentageCompleted
+			? parseGraphQLDecimal(percentageCompleted)
+			: (page || 0) / pages
+
+		const percentage = fraction != null ? Math.max(0, Math.min(100, Math.round(fraction * 100))) : 0
+
 		return <Card.Stat label="Completed" value={percentage} suffix={'%'} />
 	}
 

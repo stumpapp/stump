@@ -348,9 +348,9 @@ export default function Screen() {
 		})
 	}
 
-	const showGroupIDontLikeAhhh =
-		publisher ||
-		seriesVolume ||
+	const showDetails =
+		formattedSize ||
+		book.extension ||
 		book.metadata?.language ||
 		(book.metadata?.ageRating && book.metadata.ageRating > 0)
 
@@ -366,10 +366,11 @@ export default function Screen() {
 				/>
 			}
 		>
-			<View className="ios:pt-safe-offset-20 pt-safe overflow-hidden pb-8">
+			<View className="ios:pt-safe-offset-20 pt-safe overflow-hidden pb-16">
 				<Animated.View
 					// -inset-24 is because when using a lot of blur, the sides get more transparent
 					// so we have to "zoom in" to have a clean line at the bottom rather than a gradient
+					// pb-16 because the rounded-t corners has negative margin to make them visible
 					className="absolute -inset-24 opacity-70 dark:opacity-30"
 					style={parallaxStyle}
 				>
@@ -471,18 +472,17 @@ export default function Screen() {
 				</View>
 			</View>
 
-			<View className="gap-8 px-4 py-8 tablet:px-6">
+			<View className="ios:rounded-t-[2rem] -mt-6 gap-8 rounded-t-3xl bg-background px-4 py-8 tablet:px-6">
 				{!!description && <DescriptionSection description={description} />}
 
-				{/* TODO: Not sure about this stat group, kinda dupe info kinda less priority too */}
 				<Card>
 					<Card.StatGroup>
-						<Card.Stat label="Pages" value={pages} />
-						<Card.Stat label="Format" value={book.extension.toUpperCase()} />
-						{formattedSize && <Card.Stat label="Size" value={formattedSize} />}
+						{!!publisher && <Card.Stat label="Publisher" value={publisher} />}
+						{!!seriesVolume && <Card.Stat label="Volume" value={seriesVolume} />}
 						{book.metadata?.year != null && book.metadata.year > 0 && (
 							<Card.Stat label="Year" value={book.metadata.year} />
 						)}
+						<Card.Stat label="Pages" value={pages} />
 					</Card.StatGroup>
 				</Card>
 
@@ -493,16 +493,6 @@ export default function Screen() {
 						onPress: () => onClickFilterField('genres', genre),
 					}))}
 				/>
-
-				<MetadataBadgeSection
-					label="Characters"
-					items={characters.map((character) => ({
-						label: character,
-						onPress: () => onClickFilterField('characters', character),
-					}))}
-				/>
-
-				<BooksAfterCursor cursor={bookID} />
 
 				{!noAcknowledgements && (
 					<View className="gap-6">
@@ -548,6 +538,16 @@ export default function Screen() {
 					</View>
 				)}
 
+				<MetadataBadgeSection
+					label="Characters"
+					items={characters.map((character) => ({
+						label: character,
+						onPress: () => onClickFilterField('characters', character),
+					}))}
+				/>
+
+				<BooksAfterCursor cursor={bookID} />
+
 				{links.length > 0 && (
 					<View className="flex w-full gap-2">
 						<Text className="ios:px-4 px-2 text-lg font-semibold text-foreground-muted">Links</Text>
@@ -560,11 +560,10 @@ export default function Screen() {
 					</View>
 				)}
 
-				{/* TODO: I don't love this group, I just shoved them together because I want to find them a home */}
-				{showGroupIDontLikeAhhh && (
+				{showDetails && (
 					<Card label="Details">
-						{publisher && <InfoRow label="Publisher" value={publisher} />}
-						{seriesVolume && <InfoRow label="Volume" value={seriesVolume.toString()} />}
+						{book.extension && <InfoRow label="Format" value={book.extension.toUpperCase()} />}
+						{!!formattedSize && <InfoRow label="Size" value={formattedSize} />}
 						{book.metadata?.language && <InfoRow label="Language" value={book.metadata.language} />}
 						{book.metadata?.ageRating != null && book.metadata.ageRating > 0 && (
 							<InfoRow label="Age Rating" value={`${book.metadata.ageRating}+`} />

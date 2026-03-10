@@ -140,6 +140,7 @@ export default function EntityTable<Entity>({
 										{
 											// If no "cover" image is present, increase the padding. Just looked better to my eyes
 											'py-2': !columns?.some((col) => col.id === 'cover'),
+											'first:pl-4': !['cover', 'position'].includes(cell.column.id),
 										},
 										'border-r border-r-edge last:border-r-0',
 									)}

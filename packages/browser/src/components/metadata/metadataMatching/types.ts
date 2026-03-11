@@ -1,8 +1,8 @@
 import type { PendingMatchRecordFragment } from '@stump/graphql'
 import { MergeStrategy } from '@stump/graphql'
 
-export type { FieldComparison } from '../metadata/fieldDefs'
-export { getMediaFieldComparisons, getSeriesFieldComparisons } from '../metadata/fieldDefs'
+export type { FieldComparison } from '../fieldDefs'
+export { getMediaFieldComparisons, getSeriesFieldComparisons } from '../fieldDefs'
 
 export type MatchRecord = PendingMatchRecordFragment
 

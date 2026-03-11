@@ -6,7 +6,7 @@ import { useCallback, useEffect } from 'react'
 import { useNavigate } from 'react-router'
 
 import { SceneContainer } from '@/components/container'
-import { ResetMetadata } from '@/components/metadataEditor'
+import { ResetMetadata } from '@/components/metadata/metadataEditor'
 import { SeriesMetadataEditor } from '@/components/series/metadata'
 import { useAppContext } from '@/context'
 import paths from '@/paths'

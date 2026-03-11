@@ -2,7 +2,7 @@ import { Button, Input, Text, ToolTip } from '@stump/components'
 import { Minus } from 'lucide-react'
 import { useFormContext, useWatch } from 'react-hook-form'
 
-import { getBindingValidation } from '../../metadata/fieldDefs'
+import { getBindingValidation } from '../../fieldDefs'
 import { useMetadataEditorContext } from '../context'
 
 type Props<Field> = {

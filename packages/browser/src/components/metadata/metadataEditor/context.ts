@@ -1,7 +1,7 @@
 import { MetadataField } from '@stump/graphql'
 import React, { createContext, useCallback, useContext } from 'react'
 
-import { BINDING_TO_METADATA_FIELD } from '../metadata/fieldDefs'
+import { BINDING_TO_METADATA_FIELD } from '../fieldDefs'
 
 export { BINDING_TO_METADATA_FIELD }
 

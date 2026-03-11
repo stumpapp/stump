@@ -1,6 +1,6 @@
 import { Suspense } from 'react'
 
-import { PendingMatchesSection } from '@/components/metadataMatching'
+import { PendingMatchesSection } from '@/components/metadata/metadataMatching'
 
 import InitFetchJob from './InitFetchJob'
 

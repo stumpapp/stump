@@ -9,7 +9,7 @@ import {
 import { useCallback, useLayoutEffect, useRef } from 'react'
 import { useWindowSize } from 'rooks'
 
-import { getCommonPinningStyles } from '../table/Table'
+import { getCommonPinningStyles } from '../../table/Table'
 import { calculateOptimalColumnWidth, calculateTableSizing } from './utils'
 
 type Props<Item> = {

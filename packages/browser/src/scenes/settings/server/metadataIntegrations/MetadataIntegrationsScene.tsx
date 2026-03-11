@@ -2,7 +2,7 @@ import { useLocaleContext } from '@stump/i18n'
 import { Helmet } from 'react-helmet'
 
 import { ContentContainer, SceneContainer } from '@/components/container'
-import { PendingMatchesSection } from '@/components/metadataMatching'
+import { PendingMatchesSection } from '@/components/metadata/metadataMatching'
 
 import { ProvidersSection } from './providers'
 

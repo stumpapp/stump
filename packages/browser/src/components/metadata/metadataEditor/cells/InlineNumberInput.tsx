@@ -1,7 +1,7 @@
 import { Button, cn, Input, ToolTip } from '@stump/components'
 import { Minus } from 'lucide-react'
 
-import type { NumberValidation } from '../../metadata/fieldDefs'
+import type { NumberValidation } from '../../fieldDefs'
 
 type Props = {
 	value: number | null | undefined

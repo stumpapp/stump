@@ -24,8 +24,8 @@ import {
 	SeriesMetadataEditorRow,
 	SeriesMetadataKeys,
 	TextCell,
-} from '@/components/metadataEditor'
-import EnumCell from '@/components/metadataEditor/cells/EnumCell'
+} from '@/components/metadata/metadataEditor'
+import EnumCell from '@/components/metadata/metadataEditor/cells/EnumCell'
 import { useAppContext } from '@/context'
 import { usePaths } from '@/paths'
 

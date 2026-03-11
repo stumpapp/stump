@@ -24,7 +24,7 @@ import {
 	MetadataEditorTable,
 	NumberCell,
 	TextCell,
-} from '@/components/metadataEditor'
+} from '@/components/metadata/metadataEditor'
 import { useAppContext } from '@/context'
 import { usePaths } from '@/paths'
 

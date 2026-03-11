@@ -5,7 +5,10 @@ use std::{
 
 use async_graphql::SimpleObject;
 use models::{
-	entity::{library, library_config, library_scan_record, media, series},
+	entity::{
+		library, library_config, library_scan_record, media, metadata_provider_config,
+		series,
+	},
 	shared::enums::FileStatus,
 };
 use sea_orm::{prelude::*, sea_query::Query, Set, TransactionTrait};
@@ -24,6 +27,7 @@ use crate::{
 			PlaceholderGenerationJobScope, ThumbnailGenerationJob,
 			ThumbnailGenerationJobParams,
 		},
+		metadata::{MetadataFetchJob, MetadataFetchJobParams},
 		scanner::utils::safely_insert_series,
 	},
 	job::{
@@ -251,6 +255,7 @@ impl JobExt for LibraryScanJob {
 			output: CoreJobOutput::LibraryScan(output.clone()),
 		}));
 
+		let did_create_media = output.created_media > 0;
 		let did_create = output.created_series > 0 || output.created_media > 0;
 		let did_update = output.updated_series > 0 || output.updated_media > 0;
 		let image_options = self
@@ -295,6 +300,31 @@ impl JobExt for LibraryScanJob {
 				))
 				.wrapped(),
 			);
+		}
+
+		let library_type = self
+			.config
+			.as_ref()
+			.map(|c| c.library_type)
+			.unwrap_or_default();
+
+		let has_relevant_provider = metadata_provider_config::Entity::find()
+			.filter(metadata_provider_config::Column::Enabled.eq(true))
+			.all(ctx.conn.as_ref())
+			.await
+			.unwrap_or_default()
+			.into_iter()
+			.any(|config| library_type.has_provider_overlap(&config.provider_type));
+
+		// Note: I figure we only care about new entities
+		if has_relevant_provider && did_create_media {
+			tracing::trace!(
+				?library_type,
+				"Metadata fetch job should be enqueued after library scan"
+			);
+			jobs.push(MetadataFetchJob::new(
+				MetadataFetchJobParams::media_in_library(self.id.clone()),
+			));
 		}
 
 		Ok((!jobs.is_empty()).then_some(jobs))

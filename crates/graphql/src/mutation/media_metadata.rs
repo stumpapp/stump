@@ -9,7 +9,7 @@ use metadata_integrations::{
 	MatchCandidate, MergeStrategy, MetadataField, MetadataFieldOverride, SearchQuery,
 };
 use models::{
-	entity::{media, metadata_fetch_record},
+	entity::{media, media_metadata, metadata_fetch_record},
 	shared::enums::{MetadataFetchStatus, UserPermission},
 };
 use sea_orm::{prelude::*, ActiveValue::Set, IntoActiveModel};
@@ -213,5 +213,46 @@ impl MediaMetadataMutation {
 			.await?;
 
 		Ok(MetadataFetchRecord::from(updated))
+	}
+
+	/// Set the locked metadata fields for a media item
+	#[graphql(guard = "PermissionGuard::one(UserPermission::EditMetadata)")]
+	async fn set_media_locked_fields(
+		&self,
+		ctx: &Context<'_>,
+		media_id: ID,
+		locked_fields: Vec<MetadataField>,
+	) -> Result<Media> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let model = media::ModelWithMetadata::find_for_user(user)
+			.filter(media::Column::Id.eq(media_id.to_string()))
+			.into_model::<media::ModelWithMetadata>()
+			.one(conn)
+			.await?
+			.ok_or("Media not found")?;
+
+		let locked_json = serde_json::to_value(&locked_fields)?;
+
+		let updated_metadata = if let Some(existing) = model.metadata {
+			let mut active = existing.into_active_model();
+			active.locked_fields = Set(Some(locked_json));
+			active.update(conn).await?
+		} else {
+			let active = media_metadata::ActiveModel {
+				media_id: Set(Some(model.media.id.clone())),
+				locked_fields: Set(Some(locked_json)),
+				..Default::default()
+			};
+			active.insert(conn).await?
+		};
+
+		let model = media::ModelWithMetadata {
+			media: model.media,
+			metadata: Some(updated_metadata),
+		};
+
+		Ok(model.into())
 	}
 }

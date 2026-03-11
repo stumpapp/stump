@@ -1,6 +1,7 @@
 use async_graphql::{Context, Json, Object, Result, SimpleObject, ID};
 use chrono::Utc;
 use itertools::chain;
+use metadata_integrations::MetadataField;
 use models::{
 	entity::{
 		last_library_visit,
@@ -930,6 +931,116 @@ impl LibraryMutation {
 		tracing::debug!("Enqueued library metadata fetch job");
 
 		Ok(true)
+	}
+
+	/// Bulk-set locked metadata fields for all series metadata in a library
+	#[graphql(guard = "PermissionGuard::one(UserPermission::EditMetadata)")]
+	async fn set_library_series_locked_fields(
+		&self,
+		ctx: &Context<'_>,
+		library_id: ID,
+		locked_fields: Vec<MetadataField>,
+	) -> Result<u64> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let library = library::Entity::find_for_user(user)
+			.filter(library::Column::Id.eq(library_id.to_string()))
+			.one(conn)
+			.await?
+			.ok_or("Library not found")?;
+
+		let locked_json = serde_json::to_value(&locked_fields)?;
+		let library_id_str = library.id.clone();
+
+		let series_ids: Vec<String> = series::Entity::find()
+			.filter(series::Column::LibraryId.eq(&library_id_str))
+			.select_only()
+			.column(series::Column::Id)
+			.into_tuple()
+			.all(conn)
+			.await?;
+
+		if series_ids.is_empty() {
+			return Ok(0);
+		}
+
+		let result = series_metadata::Entity::update_many()
+			.col_expr(
+				series_metadata::Column::LockedFields,
+				sea_orm::sea_query::Expr::value(locked_json.to_string()),
+			)
+			.filter(series_metadata::Column::SeriesId.is_in(series_ids))
+			.exec(conn)
+			.await?;
+
+		tracing::debug!(
+			library_id = ?library_id_str,
+			?locked_fields,
+			updated = result.rows_affected,
+			"Set locked fields for series metadata in library"
+		);
+
+		Ok(result.rows_affected)
+	}
+
+	/// Bulk-set locked metadata fields for all media metadata in a library
+	#[graphql(guard = "PermissionGuard::one(UserPermission::EditMetadata)")]
+	async fn set_library_media_locked_fields(
+		&self,
+		ctx: &Context<'_>,
+		library_id: ID,
+		locked_fields: Vec<MetadataField>,
+	) -> Result<u64> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let library = library::Entity::find_for_user(user)
+			.filter(library::Column::Id.eq(library_id.to_string()))
+			.one(conn)
+			.await?
+			.ok_or("Library not found")?;
+
+		let locked_json = serde_json::to_value(&locked_fields)?;
+		let library_id_str = library.id.clone();
+
+		let media_ids: Vec<String> = media::Entity::find()
+			.filter(
+				media::Column::SeriesId.in_subquery(
+					Query::select()
+						.column(series::Column::Id)
+						.from(series::Entity)
+						.and_where(series::Column::LibraryId.eq(&library_id_str))
+						.to_owned(),
+				),
+			)
+			.select_only()
+			.column(media::Column::Id)
+			.into_tuple()
+			.all(conn)
+			.await?;
+
+		if media_ids.is_empty() {
+			return Ok(0);
+		}
+
+		let result = media_metadata::Entity::update_many()
+			.col_expr(
+				media_metadata::Column::LockedFields,
+				sea_orm::sea_query::Expr::value(locked_json.to_string()),
+			)
+			.filter(media_metadata::Column::MediaId.is_in(media_ids))
+			.exec(conn)
+			.await?;
+
+		tracing::debug!(
+			library_id = ?library_id_str,
+			?locked_fields,
+			updated = result.rows_affected,
+			"Set locked fields for media metadata in library"
+		);
+
+		Ok(result.rows_affected)
 	}
 
 	/// Enqueue a scan job for a library. This will index the filesystem from the library's root path

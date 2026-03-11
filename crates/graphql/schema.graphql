@@ -1416,6 +1416,7 @@ type MediaMetadata {
 	links: [String!]!
 	pencillers: [String!]!
 	teams: [String!]!
+	lockedFields: [MetadataField!]!
 }
 
 input MediaMetadataFilterInput {
@@ -1648,6 +1649,33 @@ enum MetadataField {
 	LETTERERS
 	COVER_ARTISTS
 	WRITERS
+	FORMAT
+	TITLE_SORT
+	NUMBER
+	SERIES
+	SERIES_GROUP
+	NOTES
+	LANGUAGE
+	EDITORS
+	INKERS
+	TEAMS
+	LINKS
+	CHARACTERS
+	STORY_ARC
+	STORY_ARC_NUMBER
+	BOOK_TYPE
+	IMPRINT
+	PUBLICATION_RUN
+	PENCILLERS
+	IDENTIFIER_AMAZON
+	IDENTIFIER_CALIBRE
+	IDENTIFIER_GOOGLE
+	IDENTIFIER_MOBI_ASIN
+	IDENTIFIER_UUID
+	COMIC_ID
+	META_TYPE
+	COMIC_IMAGE
+	DESCRIPTION_FORMATTED
 }
 
 "A user-provided override value for a specific metadata field"
@@ -1772,6 +1800,11 @@ type Mutation {
 	acceptMediaMatch(mediaId: ID!, candidateIndex: Int!, strategy: MergeStrategy, excludeFields: [MetadataField!], overrides: [MetadataFieldOverride!]): MetadataFetchRecord!
 	"Reject the current match candidates for a media item"
 	rejectMediaMatch(mediaId: ID!, candidateIndex: Int!): MetadataFetchRecord!
+	"""
+	Set the locked metadata fields for a media item, preventing them from being overwritten
+	by metadata fetch operations
+	"""
+	setMediaLockedFields(mediaId: ID!, lockedFields: [MetadataField!]!): Media!
 	updateSeriesMetadata(id: ID!, input: SeriesMetadataInput!): Series!
 	resetSeriesMetadata(id: ID!, impact: MetadataResetImpact!): Series!
 	"Search external metadata providers for a series and return match candidates"
@@ -1780,6 +1813,11 @@ type Mutation {
 	acceptSeriesMatch(seriesId: ID!, candidateIndex: Int!, strategy: MergeStrategy, excludeFields: [MetadataField!], overrides: [MetadataFieldOverride!]): MetadataFetchRecord!
 	"Reject the current match candidates for a series"
 	rejectSeriesMatch(seriesId: ID!, candidateIndex: Int!): MetadataFetchRecord!
+	"""
+	Set the locked metadata fields for a series, preventing them from being overwritten
+	by metadata fetch operations
+	"""
+	setSeriesLockedFields(seriesId: ID!, lockedFields: [MetadataField!]!): Series!
 	analyzeLibrary(id: ID!, forceReanalysis: Boolean! = false): Boolean!
 	"""
 	Delete media and series from a library that match one of the following conditions:
@@ -1832,6 +1870,16 @@ type Mutation {
 	deleteLibraryThumbnails(id: ID!): Boolean!
 	"Start a job which will search external metadata providers"
 	fetchLibraryMetadata(id: ID!, forceRefetch: Boolean! = false): Boolean!
+	"""
+	Bulk-set locked metadata fields for all **series** metadata in a library.
+	Returns the number of series metadata rows updated.
+	"""
+	setLibrarySeriesLockedFields(libraryId: ID!, lockedFields: [MetadataField!]!): Int!
+	"""
+	Bulk-set locked metadata fields for all **media** (book) metadata in a library.
+	Returns the number of media metadata rows updated.
+	"""
+	setLibraryMediaLockedFields(libraryId: ID!, lockedFields: [MetadataField!]!): Int!
 	"""
 	Enqueue a scan job for a library. This will index the filesystem from the library's root path
 	and update the database accordingly.
@@ -2644,6 +2692,7 @@ type SeriesMetadata {
 	genres: [String!]!
 	links: [String!]!
 	writers: [String!]!
+	lockedFields: [MetadataField!]!
 }
 
 input SeriesMetadataFilterInput {

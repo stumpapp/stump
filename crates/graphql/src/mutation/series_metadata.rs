@@ -3,7 +3,7 @@ use metadata_integrations::{
 	MatchCandidate, MergeStrategy, MetadataField, MetadataFieldOverride,
 };
 use models::{
-	entity::{media, media_metadata, metadata_fetch_record, series},
+	entity::{media, media_metadata, metadata_fetch_record, series, series_metadata},
 	shared::enums::{MetadataFetchStatus, MetadataResetImpact, UserPermission},
 };
 use sea_orm::{prelude::*, sea_query::Query, IntoActiveModel, Set, TransactionTrait};
@@ -261,5 +261,46 @@ impl SeriesMetadataMutation {
 			.await?;
 
 		Ok(MetadataFetchRecord::from(updated))
+	}
+
+	/// Set the locked metadata fields for a series
+	#[graphql(guard = "PermissionGuard::one(UserPermission::EditMetadata)")]
+	async fn set_series_locked_fields(
+		&self,
+		ctx: &Context<'_>,
+		series_id: ID,
+		locked_fields: Vec<MetadataField>,
+	) -> Result<Series> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let model = series::ModelWithMetadata::find_for_user(user)
+			.filter(series::Column::Id.eq(series_id.to_string()))
+			.into_model::<series::ModelWithMetadata>()
+			.one(conn)
+			.await?
+			.ok_or("Series not found")?;
+
+		let locked_json = serde_json::to_value(&locked_fields)?;
+
+		let updated_metadata = if let Some(metadata) = model.metadata {
+			let mut active = metadata.into_active_model();
+			active.locked_fields = Set(Some(locked_json));
+			active.update(conn).await?
+		} else {
+			let active = series_metadata::ActiveModel {
+				series_id: Set(model.series.id.clone()),
+				locked_fields: Set(Some(locked_json)),
+				..Default::default()
+			};
+			active.insert(conn).await?
+		};
+
+		let model = series::ModelWithMetadata {
+			series: model.series,
+			metadata: Some(updated_metadata),
+		};
+
+		Ok(model.into())
 	}
 }

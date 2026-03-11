@@ -437,6 +437,29 @@ pub enum MetadataProvider {
 	Hardcover,
 }
 
+impl MetadataProvider {
+	/// Returns the library types that this provider has meaningful coverage for
+	pub fn supported_library_types(&self) -> &'static [LibraryType] {
+		match self {
+			// TODO: Determine the exact coverage of Hardcover
+			Self::Hardcover => &[
+				LibraryType::Book,
+				LibraryType::Manga,
+				LibraryType::LightNovel,
+			],
+		}
+	}
+}
+
+impl LibraryType {
+	pub fn has_provider_overlap(&self, provider: &MetadataProvider) -> bool {
+		match self {
+			Self::Mixed => true,
+			other => provider.supported_library_types().contains(other),
+		}
+	}
+}
+
 /// An enum representing the different types of metadata resets that can occur,
 /// which manifest differently depending on the context
 #[derive(

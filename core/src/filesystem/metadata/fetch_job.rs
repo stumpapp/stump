@@ -69,6 +69,10 @@ impl MetadataFetchJobParams {
 	pub fn media_in_series(series_id: Id) -> Self {
 		Self::new(MetadataFetchScope::MediaInSeries(series_id), false)
 	}
+
+	pub fn media_in_library(library_id: Id) -> Self {
+		Self::new(MetadataFetchScope::MediaInLibrary(library_id), false)
+	}
 }
 
 /// A single task for the metadata fetch job

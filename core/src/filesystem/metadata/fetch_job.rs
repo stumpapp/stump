@@ -1,12 +1,15 @@
-use std::collections::VecDeque;
+use std::collections::{HashMap, VecDeque};
 use std::sync::Arc;
 
 use async_graphql::SimpleObject;
 use metadata_integrations::{MatchCandidate, SearchQuery};
 use models::{
-	entity::{media, metadata_fetch_record, metadata_provider_config, series},
-	shared::enums::MetadataFetchStatus,
+	entity::{
+		library_config, media, metadata_fetch_record, metadata_provider_config, series,
+	},
+	shared::enums::{LibraryType, MetadataFetchStatus},
 };
+use sea_orm::QuerySelect;
 use sea_orm::{
 	prelude::*,
 	sea_query::{OnConflict, Query},
@@ -22,6 +25,24 @@ use crate::job::{
 use super::{apply, ProviderClientCache};
 
 type Id = String;
+
+async fn resolve_library_type(
+	conn: &DatabaseConnection,
+	library_id: &str,
+) -> Result<LibraryType, JobError> {
+	let config = library_config::Entity::find()
+		.filter(library_config::Column::LibraryId.eq(library_id))
+		.one(conn)
+		.await
+		.map_err(|e| JobError::InitFailed(e.to_string()))?
+		.ok_or_else(|| {
+			JobError::InitFailed(format!(
+				"Library config not found for library {library_id}"
+			))
+		})?;
+
+	Ok(config.library_type)
+}
 
 /// The scope of entities to fetch metadata for
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -82,12 +103,14 @@ pub enum MetadataFetchTask {
 	FetchSeries {
 		series_id: String,
 		series_name: String,
+		library_type: LibraryType,
 	},
 	/// Fetch metadata for a media item
 	FetchMedia {
 		media_id: String,
 		media_name: String,
 		series_name: Option<String>,
+		library_type: LibraryType,
 	},
 }
 
@@ -106,6 +129,8 @@ pub struct MetadataFetchJobOutput {
 	pub failed: u64,
 	/// Number of entities that were auto-applied
 	pub auto_applied: u64,
+	/// Number of entities that were rate-limited
+	pub rate_limited: u64,
 }
 
 impl JobOutputExt for MetadataFetchJobOutput {
@@ -116,6 +141,7 @@ impl JobOutputExt for MetadataFetchJobOutput {
 		self.skipped += updated.skipped;
 		self.failed += updated.failed;
 		self.auto_applied += updated.auto_applied;
+		self.rate_limited += updated.rate_limited;
 	}
 }
 
@@ -208,6 +234,7 @@ impl JobExt for MetadataFetchJob {
 
 		self.get_or_init_cache(ctx).await?;
 
+		// TODO: This is terrible, media needs direct fk to library
 		// TODO: The names should be entity.metadata.name.or(entity.name)
 		let tasks: VecDeque<MetadataFetchTask> = match &self.params.scope {
 			MetadataFetchScope::Series(ids) => {
@@ -216,15 +243,38 @@ impl JobExt for MetadataFetchJob {
 					.all(conn)
 					.await?;
 
+				let unique_library_ids: Vec<String> = series_list
+					.iter()
+					.filter_map(|s| s.library_id.clone())
+					.collect::<std::collections::HashSet<_>>()
+					.into_iter()
+					.collect();
+
+				let mut library_type_map: HashMap<String, LibraryType> = HashMap::new();
+
+				for library_id in &unique_library_ids {
+					let lt = resolve_library_type(conn, library_id).await?;
+					library_type_map.insert(library_id.clone(), lt);
+				}
+
 				series_list
 					.into_iter()
-					.map(|s| MetadataFetchTask::FetchSeries {
-						series_id: s.id,
-						series_name: s.name,
+					.filter_map(|s| {
+						Some(MetadataFetchTask::FetchSeries {
+							series_id: s.id,
+							series_name: s.name,
+							library_type: s
+								.library_id
+								.as_ref()
+								.and_then(|lid| library_type_map.get(lid))
+								.cloned()?,
+						})
 					})
 					.collect()
 			},
 			MetadataFetchScope::SeriesInLibrary(library_id) => {
+				let library_type = resolve_library_type(conn, library_id).await?;
+
 				let series_list = series::Entity::find()
 					.filter(series::Column::LibraryId.eq(library_id))
 					.all(conn)
@@ -235,6 +285,7 @@ impl JobExt for MetadataFetchJob {
 					.map(|s| MetadataFetchTask::FetchSeries {
 						series_id: s.id,
 						series_name: s.name,
+						library_type,
 					})
 					.collect()
 			},
@@ -245,16 +296,48 @@ impl JobExt for MetadataFetchJob {
 					.all(conn)
 					.await?;
 
+				let unique_library_ids: Vec<String> = media_list
+					.iter()
+					.filter_map(|(_, s)| s.as_ref().and_then(|s| s.library_id.clone()))
+					.collect::<std::collections::HashSet<_>>()
+					.into_iter()
+					.collect();
+
+				let mut library_type_map: HashMap<String, LibraryType> = HashMap::new();
+
+				for library_id in &unique_library_ids {
+					let lt = resolve_library_type(conn, library_id).await?;
+					library_type_map.insert(library_id.clone(), lt);
+				}
+
 				media_list
 					.into_iter()
-					.map(|(m, s)| MetadataFetchTask::FetchMedia {
-						media_id: m.id,
-						media_name: m.name,
-						series_name: s.map(|s| s.name),
+					.filter_map(|(m, s)| {
+						Some(MetadataFetchTask::FetchMedia {
+							media_id: m.id,
+							media_name: m.name,
+							series_name: s.as_ref().map(|s| s.name.clone()),
+							library_type: s
+								.as_ref()
+								.and_then(|s| s.library_id.as_ref())
+								.and_then(|lid| library_type_map.get(lid))
+								.cloned()?,
+						})
 					})
 					.collect()
 			},
 			MetadataFetchScope::MediaInSeries(series_id) => {
+				let library_id = series::Entity::find_by_id(series_id)
+					.select_only()
+					.column(series::Column::LibraryId)
+					.into_tuple::<String>()
+					.one(conn)
+					.await?
+					.ok_or_else(|| {
+						JobError::TaskFailed("Series not found".to_string())
+					})?;
+				let library_type = resolve_library_type(conn, &library_id).await?;
+
 				let media_list = media::Entity::find()
 					.filter(media::Column::SeriesId.eq(series_id))
 					.find_also_related(series::Entity)
@@ -267,10 +350,13 @@ impl JobExt for MetadataFetchJob {
 						media_id: m.id,
 						media_name: m.name,
 						series_name: s.map(|s| s.name),
+						library_type,
 					})
 					.collect()
 			},
 			MetadataFetchScope::MediaInLibrary(library_id) => {
+				let library_type = resolve_library_type(conn, library_id).await?;
+
 				let media_list = media::Entity::find()
 					.filter(
 						media::Column::SeriesId.in_subquery(
@@ -293,6 +379,7 @@ impl JobExt for MetadataFetchJob {
 						media_id: m.id,
 						media_name: m.name,
 						series_name: s.map(|s| s.name),
+						library_type,
 					})
 					.collect()
 			},
@@ -323,12 +410,12 @@ impl JobExt for MetadataFetchJob {
 			JobError::TaskFailed("Provider cache not initialized".to_string())
 		})?;
 
-		let provider_configs = metadata_provider_config::Entity::find()
+		let all_provider_configs = metadata_provider_config::Entity::find()
 			.filter(metadata_provider_config::Column::Enabled.eq(true))
 			.all(conn)
 			.await?;
 
-		if provider_configs.is_empty() {
+		if all_provider_configs.is_empty() {
 			tracing::warn!("No enabled metadata providers configured");
 			return Ok(JobTaskOutput {
 				output,
@@ -343,7 +430,26 @@ impl JobExt for MetadataFetchJob {
 			MetadataFetchTask::FetchSeries {
 				series_id,
 				series_name,
+				library_type,
 			} => {
+				let provider_configs: Vec<_> = all_provider_configs
+					.iter()
+					.filter(|c| library_type.has_provider_overlap(&c.provider_type))
+					.collect();
+
+				if provider_configs.is_empty() {
+					tracing::debug!(
+						?library_type,
+						"No compatible providers for this library type, skipping series"
+					);
+					output.total_processed = 1;
+					output.skipped = 1;
+					return Ok(JobTaskOutput {
+						output,
+						logs: vec![],
+						subtasks: vec![],
+					});
+				}
 				output.total_processed = 1;
 				ctx.report_progress(JobProgress::msg(&format!(
 					"Fetching metadata for series: {}",
@@ -356,6 +462,7 @@ impl JobExt for MetadataFetchJob {
 						.filter(metadata_fetch_record::Column::Status.is_in([
 							MetadataFetchStatus::AwaitingReview,
 							MetadataFetchStatus::Fetched,
+							MetadataFetchStatus::RateLimited,
 						]))
 						.one(conn)
 						.await?;
@@ -371,6 +478,7 @@ impl JobExt for MetadataFetchJob {
 				}
 
 				let mut all_candidates: Vec<MatchCandidate> = Vec::new();
+				let mut was_rate_limited = false;
 
 				for config in &provider_configs {
 					match provider_cache.get_or_create(config).await {
@@ -384,6 +492,17 @@ impl JobExt for MetadataFetchJob {
 							match provider.search_series(&query).await {
 								Ok(candidates) => {
 									all_candidates.extend(candidates);
+								},
+								Err(e) if e.is_rate_limited() => {
+									was_rate_limited = true;
+									logs.push(JobExecuteLog::error(format!(
+										"Rate limited by provider {:?} for series metadata",
+										config.provider_type
+									)));
+									tracing::warn!(
+										provider = ?config.provider_type,
+										"Rate limited after retries for series metadata"
+									);
 								},
 								Err(e) => {
 									logs.push(JobExecuteLog::error(format!(
@@ -412,7 +531,10 @@ impl JobExt for MetadataFetchJob {
 					}
 				}
 
-				let status = if all_candidates.is_empty() {
+				let status = if was_rate_limited && all_candidates.is_empty() {
+					output.rate_limited = 1;
+					MetadataFetchStatus::RateLimited
+				} else if all_candidates.is_empty() {
 					output.no_matches = 1;
 					MetadataFetchStatus::NoMatch
 				} else {
@@ -443,9 +565,10 @@ impl JobExt for MetadataFetchJob {
 					.exec(conn)
 					.await?;
 
-				if let Some((candidate, config)) =
-					apply::find_auto_apply_candidate(&all_candidates, &provider_configs)
-				{
+				if let Some((candidate, config)) = apply::find_auto_apply_candidate(
+					&all_candidates,
+					&all_provider_configs,
+				) {
 					tracing::info!(
 						series_id,
 						provider = candidate.provider,
@@ -484,8 +607,27 @@ impl JobExt for MetadataFetchJob {
 			MetadataFetchTask::FetchMedia {
 				media_id,
 				media_name,
+				library_type,
 				..
 			} => {
+				let provider_configs: Vec<_> = all_provider_configs
+					.iter()
+					.filter(|c| library_type.has_provider_overlap(&c.provider_type))
+					.collect();
+
+				if provider_configs.is_empty() {
+					tracing::debug!(
+						?library_type,
+						"No compatible providers for this library type, skipping media"
+					);
+					output.total_processed = 1;
+					output.skipped = 1;
+					return Ok(JobTaskOutput {
+						output,
+						logs: vec![],
+						subtasks: vec![],
+					});
+				}
 				output.total_processed = 1;
 				ctx.report_progress(JobProgress::msg(&format!(
 					"Fetching metadata for media: {}",
@@ -498,6 +640,7 @@ impl JobExt for MetadataFetchJob {
 						.filter(metadata_fetch_record::Column::Status.is_in([
 							MetadataFetchStatus::AwaitingReview,
 							MetadataFetchStatus::Fetched,
+							MetadataFetchStatus::RateLimited,
 						]))
 						.one(conn)
 						.await?;
@@ -513,6 +656,7 @@ impl JobExt for MetadataFetchJob {
 				}
 
 				let mut all_candidates: Vec<MatchCandidate> = Vec::new();
+				let mut was_rate_limited = false;
 
 				for config in &provider_configs {
 					match provider_cache.get_or_create(config).await {
@@ -526,6 +670,17 @@ impl JobExt for MetadataFetchJob {
 							match provider.search_media(&query).await {
 								Ok(candidates) => {
 									all_candidates.extend(candidates);
+								},
+								Err(e) if e.is_rate_limited() => {
+									was_rate_limited = true;
+									logs.push(JobExecuteLog::error(format!(
+										"Rate limited by provider {:?} for media metadata",
+										config.provider_type
+									)));
+									tracing::warn!(
+										provider = ?config.provider_type,
+										"Rate limited after retries for media metadata"
+									);
 								},
 								Err(e) => {
 									tracing::error!(
@@ -546,7 +701,10 @@ impl JobExt for MetadataFetchJob {
 					}
 				}
 
-				let status = if all_candidates.is_empty() {
+				let status = if was_rate_limited && all_candidates.is_empty() {
+					output.rate_limited = 1;
+					MetadataFetchStatus::RateLimited
+				} else if all_candidates.is_empty() {
 					output.no_matches = 1;
 					MetadataFetchStatus::NoMatch
 				} else {
@@ -577,9 +735,10 @@ impl JobExt for MetadataFetchJob {
 					.exec(conn)
 					.await?;
 
-				if let Some((candidate, config)) =
-					apply::find_auto_apply_candidate(&all_candidates, &provider_configs)
-				{
+				if let Some((candidate, config)) = apply::find_auto_apply_candidate(
+					&all_candidates,
+					&all_provider_configs,
+				) {
 					tracing::info!(
 						media_id,
 						provider = candidate.provider,

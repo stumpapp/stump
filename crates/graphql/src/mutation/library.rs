@@ -7,7 +7,7 @@ use models::{
 		last_library_visit,
 		library::{self, LibraryIdentSelect},
 		library_config, library_exclusion, library_scan_record, library_tag, media,
-		media_metadata, series, series_metadata, tag, user,
+		media_metadata, metadata_provider_config, series, series_metadata, tag, user,
 	},
 	shared::enums::{FileStatus, MetadataResetImpact, UserPermission},
 };
@@ -918,11 +918,30 @@ impl LibraryMutation {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let core = ctx.data::<CoreContext>()?;
 
-		let library = library::Entity::find_for_user(user)
+		let (library, config) = library::Entity::find_for_user(user)
 			.filter(library::Column::Id.eq(id.to_string()))
+			.select_also(library_config::Entity)
 			.one(core.conn.as_ref())
 			.await?
 			.ok_or("Library not found")?;
+
+		let library_type = config.ok_or("Library config not found")?.library_type;
+
+		let has_relevant_provider = metadata_provider_config::Entity::find()
+			.filter(metadata_provider_config::Column::Enabled.eq(true))
+			.all(core.conn.as_ref())
+			.await
+			.unwrap_or_default()
+			.into_iter()
+			.any(|config| library_type.has_provider_overlap(&config.provider_type));
+
+		if !has_relevant_provider {
+			tracing::debug!(
+				?library_type,
+				"No compatible metadata providers for this library type"
+			);
+			return Ok(false);
+		}
 
 		core.enqueue_job(MetadataFetchJob::new(MetadataFetchJobParams {
 			force_refetch,

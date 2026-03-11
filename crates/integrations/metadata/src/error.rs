@@ -22,4 +22,18 @@ pub enum MetadataProviderError {
 	Other(String),
 }
 
+impl MetadataProviderError {
+	/// Returns true if this error is a rate limit (429)
+	pub fn is_rate_limited(&self) -> bool {
+		match self {
+			Self::RateLimited => true,
+			Self::ReqwestError(e) => e
+				.status()
+				.is_some_and(|s| s == reqwest::StatusCode::TOO_MANY_REQUESTS),
+			Self::MiddlewareReqwestError(e) => e.to_string().contains("429"),
+			_ => false,
+		}
+	}
+}
+
 pub type MetadataResult<T> = Result<T, MetadataProviderError>;

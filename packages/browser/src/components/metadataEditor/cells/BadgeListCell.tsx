@@ -22,7 +22,11 @@ export default function BadgeListCell<Field extends string>({
 }: Props<Field>) {
 	const form = useFormContext()
 
-	const { isEditing } = useMetadataEditorContext()
+	const { isEditing, isFieldLocked } = useMetadataEditorContext()
+
+	const locked = isFieldLocked(binding)
+
+	const canEdit = isEditing && !locked
 
 	const valuesFromForm: string[] | undefined | null = useWatch({
 		control: form.control,
@@ -54,16 +58,16 @@ export default function BadgeListCell<Field extends string>({
 			const badge = (
 				<Badge
 					key={value}
-					onClick={isEditing ? undefined : () => onItemClick?.(index)}
+					onClick={canEdit ? undefined : () => onItemClick?.(index)}
 					className={cn({
-						'cursor-pointer': (onItemClick || !!url) && !isEditing,
+						'cursor-pointer': (onItemClick || !!url) && !canEdit,
 					})}
 				>
 					{value}
 				</Badge>
 			)
 
-			if (isEditing) {
+			if (canEdit) {
 				return (
 					<div className="group relative">
 						{badge}
@@ -94,16 +98,16 @@ export default function BadgeListCell<Field extends string>({
 			}
 			return badge
 		},
-		[itemUrl, onItemClick, isEditing, onRemove],
+		[itemUrl, onItemClick, canEdit, onRemove],
 	)
 
-	const data = isEditing ? valuesFromForm : values
+	const data = canEdit ? valuesFromForm : values
 
 	return (
 		<div className="flex h-full flex-wrap items-center gap-1">
 			{data?.map(renderBadge)}
 
-			{isEditing && <AddFieldsDialog binding={binding} onSave={onAppendValues} />}
+			{canEdit && <AddFieldsDialog binding={binding} onSave={onAppendValues} />}
 		</div>
 	)
 }

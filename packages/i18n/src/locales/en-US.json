@@ -830,6 +830,7 @@
 		},
 		"includeField": "Include this field",
 		"excludeField": "Exclude this field",
+		"fieldLocked": "This field is locked",
 		"reviewDialog": {
 			"previewEditor": {
 				"noCandidates": "No candidates available for this record",
@@ -860,6 +861,8 @@
 				"takeExternal": "Take external",
 				"mergeLists": "Merge lists",
 				"editManually": "Edit manually",
+				"lockField": "Lock field",
+				"unlockField": "Unlock field",
 				"reset": "Reset",
 				"undoManualEdit": "Undo manual edit"
 			}

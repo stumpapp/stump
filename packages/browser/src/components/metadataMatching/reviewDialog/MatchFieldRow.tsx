@@ -16,11 +16,19 @@ type Props = {
 
 export function MatchFieldRow({ comparison }: Props) {
 	const { t } = useLocaleContext()
-	const { strategy, excludedFields, toggleField, fieldOverrides, clearFieldOverride } =
-		useMatchReviewStore()
-	const { label, currentValue, candidateValue, field } = comparison
+	const {
+		strategy,
+		excludedFields,
+		toggleField,
+		fieldOverrides,
+		clearFieldOverride,
+		getLockedFields,
+	} = useMatchReviewStore()
+	const { binding, currentValue, candidateValue, field } = comparison
 
 	const excluded = excludedFields.has(field)
+	const locked = getLockedFields().has(field)
+	const disabled = excluded || locked
 	const override = fieldOverrides.get(field)
 	const resolved = resolveFieldValue(currentValue, candidateValue, strategy, excluded, override)
 	const willChange = getDidValuesEffectivelyChange(currentValue, resolved)
@@ -42,13 +50,15 @@ export function MatchFieldRow({ comparison }: Props) {
 			className={cn(
 				'group/edit grid grid-cols-[140px_1fr_1fr_40px_1fr_32px] items-center bg-background py-2 pl-2.5',
 				{
-					'opacity-40': excluded,
+					'opacity-40': disabled,
 				},
 			)}
 		>
-			<Text size="sm" className="font-medium">
-				{label}
-			</Text>
+			<div className="flex items-center gap-1">
+				<Text size="sm" className="font-medium">
+					{t(`metadataEditor.labels.${binding}`)}
+				</Text>
+			</div>
 
 			<div className="min-w-0 pr-3">
 				<FieldValue value={currentValue} />
@@ -61,39 +71,44 @@ export function MatchFieldRow({ comparison }: Props) {
 			<div className="flex justify-center">
 				<ToolTip
 					content={
-						excluded ? t('metadataMatching.includeField') : t('metadataMatching.excludeField')
+						locked
+							? t('metadataMatching.fieldLocked')
+							: excluded
+								? t('metadataMatching.includeField')
+								: t('metadataMatching.excludeField')
 					}
 				>
 					<CheckBox
-						variant={willChange && !excluded ? 'primary' : 'default'}
+						variant={willChange && !disabled ? 'primary' : 'default'}
 						rounded="lg"
 						checked={!excluded}
-						onClick={() => toggleField(comparison.field)}
+						onClick={() => !locked && toggleField(comparison.field)}
+						disabled={locked}
 					/>
 				</ToolTip>
 			</div>
 
 			<div className="min-w-0 pr-2.5">
-				{isEditing && !excluded ? (
+				{isEditing && !disabled ? (
 					<ResolvedFieldEditor field={field} resolvedValue={resolved} />
 				) : (
 					<FieldValue
 						value={resolved}
-						highlight={(willChange || hasOverride) && !excluded}
+						highlight={(willChange || hasOverride) && !disabled}
 						compareWith={currentValue}
 					/>
 				)}
 			</div>
 
 			<div className="flex items-center justify-center">
-				{isEditing && hasOverride ? (
+				{isEditing && hasOverride && !locked ? (
 					<ToolTip content={t('metadataMatching.reviewDialog.fieldAction.undoManualEdit')}>
 						<IconButton variant="ghost" size="xs" onClick={handleUndo}>
 							<Undo2 className="h-3.5 w-3.5" />
 						</IconButton>
 					</ToolTip>
 				) : (
-					<FieldActionMenu field={field} excluded={excluded} onEditManually={handleEditManually} />
+					<FieldActionMenu field={field} disabled={disabled} onEditManually={handleEditManually} />
 				)}
 			</div>
 		</div>

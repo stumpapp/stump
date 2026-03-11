@@ -94,6 +94,7 @@ const fragment = graphql(`
 				day
 				pageCount
 				identifierIsbn
+				lockedFields
 			}
 		}
 		series {
@@ -109,6 +110,7 @@ const fragment = graphql(`
 				status
 				ageRating
 				volume
+				lockedFields
 			}
 		}
 	}

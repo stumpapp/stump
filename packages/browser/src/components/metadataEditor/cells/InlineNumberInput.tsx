@@ -1,34 +1,23 @@
 import { Button, cn, Input, ToolTip } from '@stump/components'
 import { Minus } from 'lucide-react'
-import { useMemo } from 'react'
+
+import type { NumberValidation } from '../../metadata/fieldDefs'
 
 type Props = {
 	value: number | null | undefined
 	onChange: (value: number | null) => void
 	isDecimal?: boolean
-	fieldName?: string
+	validation?: NumberValidation
 	className?: string
-}
-
-const VALIDATION_RULES: Record<string, { min?: number; max?: number }> = {
-	ageRating: { min: 0 },
-	day: { min: 1, max: 31 },
-	month: { min: 1, max: 12 },
-	pageCount: { min: 1 },
-	volume: { min: 1 },
-	year: { min: 1900, max: new Date().getFullYear() },
-	volumeCount: { min: 0 },
 }
 
 export default function InlineNumberInput({
 	value,
 	onChange,
 	isDecimal,
-	fieldName,
+	validation,
 	className,
 }: Props) {
-	const rules = useMemo(() => (fieldName ? VALIDATION_RULES[fieldName] : undefined), [fieldName])
-
 	return (
 		<div className={cn(`group flex items-center gap-2`, className)}>
 			<Input
@@ -38,8 +27,8 @@ export default function InlineNumberInput({
 				className="font-mono text-sm"
 				containerClassName="md:w-[unset]"
 				size="sm"
-				min={rules?.min}
-				max={rules?.max}
+				min={validation?.min}
+				max={validation?.max}
 				onChange={(e) => {
 					const raw = e.target.value
 					onChange(raw ? Number(raw) : null)

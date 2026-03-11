@@ -21,9 +21,11 @@ export default function TextCell<Field extends string>({
 }: Props<Field>) {
 	const form = useFormContext()
 
-	const { isEditing } = useMetadataEditorContext()
+	const { isEditing, isFieldLocked } = useMetadataEditorContext()
 
-	if (isEditing) {
+	const locked = isFieldLocked(binding)
+
+	if (isEditing && !locked) {
 		const Component = isLong ? TextArea : Input
 		const extraProps = isLong ? {} : { size: 'sm' }
 		return (

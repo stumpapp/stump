@@ -11,6 +11,7 @@ export type MatchReviewState = {
 	excludedFields: Set<MetadataField>
 	strategy: MergeStrategy
 	fieldOverrides: Map<MetadataField, FieldOverride>
+	lockedFields: Map<MetadataField, boolean>
 
 	open: (records: MatchRecord[], startIndex?: number) => void
 	close: () => void
@@ -24,6 +25,8 @@ export type MatchReviewState = {
 	setFieldOverride: (field: MetadataField, override: FieldOverride) => void
 	clearFieldOverride: (field: MetadataField) => void
 	clearAllOverrides: () => void
+	toggleLockedField: (field: MetadataField) => void
+	getLockedFields: () => Set<MetadataField>
 }
 
 export const useMatchReviewStore = create<MatchReviewState>((set, get) => ({
@@ -34,6 +37,7 @@ export const useMatchReviewStore = create<MatchReviewState>((set, get) => ({
 	excludedFields: new Set(),
 	strategy: MergeStrategy.FillGaps,
 	fieldOverrides: new Map(),
+	lockedFields: new Map(),
 
 	open: (records, startIndex = 0) =>
 		set({
@@ -43,6 +47,7 @@ export const useMatchReviewStore = create<MatchReviewState>((set, get) => ({
 			currentCandidateIndex: 0,
 			excludedFields: new Set(),
 			fieldOverrides: new Map(),
+			lockedFields: new Map(),
 		}),
 
 	close: () =>
@@ -53,6 +58,7 @@ export const useMatchReviewStore = create<MatchReviewState>((set, get) => ({
 			currentCandidateIndex: 0,
 			excludedFields: new Set(),
 			fieldOverrides: new Map(),
+			lockedFields: new Map(),
 		}),
 
 	nextRecord: () => {
@@ -63,6 +69,7 @@ export const useMatchReviewStore = create<MatchReviewState>((set, get) => ({
 				currentCandidateIndex: 0,
 				excludedFields: new Set(),
 				fieldOverrides: new Map(),
+				lockedFields: new Map(),
 			})
 		}
 	},
@@ -75,6 +82,7 @@ export const useMatchReviewStore = create<MatchReviewState>((set, get) => ({
 				currentCandidateIndex: 0,
 				excludedFields: new Set(),
 				fieldOverrides: new Map(),
+				lockedFields: new Map(),
 			})
 		}
 	},
@@ -125,4 +133,35 @@ export const useMatchReviewStore = create<MatchReviewState>((set, get) => ({
 		}),
 
 	clearAllOverrides: () => set({ fieldOverrides: new Map() }),
+
+	toggleLockedField: (field) =>
+		set((state) => {
+			const next = new Map(state.lockedFields)
+			const record = state.records[state.currentRecordIndex]
+			const serverLocked: MetadataField[] =
+				(record?.mediaId
+					? record?.media?.metadata?.lockedFields
+					: record?.series?.metadata?.lockedFields) ?? []
+			const isCurrentlyLocked = next.has(field) ? next.get(field)! : serverLocked.includes(field)
+			next.set(field, !isCurrentlyLocked)
+			return { lockedFields: next }
+		}),
+
+	getLockedFields: () => {
+		const { records, currentRecordIndex, lockedFields } = get()
+		const record = records[currentRecordIndex]
+		const serverLocked: MetadataField[] =
+			(record?.mediaId
+				? record?.media?.metadata?.lockedFields
+				: record?.series?.metadata?.lockedFields) ?? []
+		const result = new Set<MetadataField>(serverLocked)
+		for (const [field, locked] of lockedFields) {
+			if (locked) {
+				result.add(field)
+			} else {
+				result.delete(field)
+			}
+		}
+		return result
+	},
 }))

@@ -153,7 +153,7 @@ export default function MetadataEditorTable<Item extends RowData>({
 
 				<tbody className="divide-y divide-edge">
 					{rows.map((row) => (
-						<tr key={row.id} className="flex w-fit">
+						<tr key={row.id} className="group/row flex w-fit">
 							{row.getVisibleCells().map((cell) => (
 								<td
 									className="py-2 pl-1.5 pr-1.5 first:border-r first:border-edge first:pl-4 last:pl-0 last:pr-0"

@@ -1,7 +1,7 @@
-import { useGraphQLMutation } from '@stump/client'
-import { graphql } from '@stump/graphql'
+import { useGraphQLMutation, useSDK } from '@stump/client'
+import { graphql, MetadataField } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
-import { useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
 
 import {
@@ -68,6 +68,51 @@ const rejectSeriesMatchMutation = graphql(`
 	}
 `)
 
+const setMediaLockedFieldsMutation = graphql(`
+	mutation SetMediaLockedFields($mediaId: ID!, $lockedFields: [MetadataField!]!) {
+		setMediaLockedFields(mediaId: $mediaId, lockedFields: $lockedFields) {
+			id
+		}
+	}
+`)
+
+const setSeriesLockedFieldsMutation = graphql(`
+	mutation SetSeriesLockedFields($seriesId: ID!, $lockedFields: [MetadataField!]!) {
+		setSeriesLockedFields(seriesId: $seriesId, lockedFields: $lockedFields) {
+			id
+		}
+	}
+`)
+
+export function useToggleLockedField() {
+	const { sdk } = useSDK()
+	const { records, currentRecordIndex, toggleLockedField, getLockedFields } = useMatchReviewStore()
+
+	return useCallback(
+		(field: MetadataField) => {
+			const record = records[currentRecordIndex]
+			if (!record) return
+
+			const isMedia = !!record.mediaId
+			const entityId = (isMedia ? record.mediaId : record.seriesId) ?? ''
+
+			toggleLockedField(field)
+
+			const lockedFields = Array.from(getLockedFields())
+
+			const promise = isMedia
+				? sdk.execute(setMediaLockedFieldsMutation, { mediaId: entityId, lockedFields })
+				: sdk.execute(setSeriesLockedFieldsMutation, { seriesId: entityId, lockedFields })
+
+			promise.catch(() => {
+				toggleLockedField(field)
+				toast.error('Failed to update locked fields')
+			})
+		},
+		[sdk, records, currentRecordIndex, toggleLockedField, getLockedFields],
+	)
+}
+
 export function useMatchActions() {
 	const {
 		records,
@@ -98,10 +143,10 @@ export function useMatchActions() {
 		return []
 	}, [candidate, currentMetadata, isMedia])
 
-	const client = useQueryClient()
+	const queryClient = useQueryClient()
 
 	const invalidateQueries = () => {
-		client.invalidateQueries({
+		queryClient.invalidateQueries({
 			predicate: ({ queryKey }) =>
 				queryKey.some((key) => typeof key === 'string' && key === 'pendingMetadataMatches'),
 		})
@@ -114,8 +159,8 @@ export function useMatchActions() {
 			close()
 		}
 	}
-	const onSuccess = (msg: string) => {
-		toast.success(msg)
+	const onAcceptSuccess = () => {
+		toast.success('Match accepted')
 		invalidateQueries()
 		advance()
 	}
@@ -123,7 +168,7 @@ export function useMatchActions() {
 	const { mutate: acceptMedia, isPending: isAcceptingMedia } = useGraphQLMutation(
 		acceptMediaMatchMutation,
 		{
-			onSuccess: () => onSuccess('Match accepted'),
+			onSuccess: () => onAcceptSuccess(),
 			onError: () => toast.error('Failed to accept match'),
 		},
 	)
@@ -131,7 +176,7 @@ export function useMatchActions() {
 	const { mutate: acceptSeries, isPending: isAcceptingSeries } = useGraphQLMutation(
 		acceptSeriesMatchMutation,
 		{
-			onSuccess: () => onSuccess('Match accepted'),
+			onSuccess: () => onAcceptSuccess(),
 			onError: () => toast.error('Failed to accept match'),
 		},
 	)
@@ -139,7 +184,11 @@ export function useMatchActions() {
 	const { mutate: rejectMedia, isPending: isRejectingMedia } = useGraphQLMutation(
 		rejectMediaMatchMutation,
 		{
-			onSuccess: () => onSuccess('Match rejected'),
+			onSuccess: () => {
+				toast.success('Match rejected')
+				invalidateQueries()
+				advance()
+			},
 			onError: () => toast.error('Failed to reject match'),
 		},
 	)
@@ -147,7 +196,11 @@ export function useMatchActions() {
 	const { mutate: rejectSeries, isPending: isRejectingSeries } = useGraphQLMutation(
 		rejectSeriesMatchMutation,
 		{
-			onSuccess: () => onSuccess('Match rejected'),
+			onSuccess: () => {
+				toast.success('Match rejected')
+				invalidateQueries()
+				advance()
+			},
 			onError: () => toast.error('Failed to reject match'),
 		},
 	)

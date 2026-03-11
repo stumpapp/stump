@@ -1,11 +1,13 @@
 import type { MetadataField } from '@stump/graphql'
 
+import { getNumberValidation } from '@/components/metadata/fieldDefs'
+
 import {
 	InlineBadgeListInput,
 	InlineNumberInput,
 	InlineTextInput,
 } from '../../metadataEditor/cells'
-import { FIELD_BINDING_NAME, FIELD_EDITOR_MAP, FIELD_VALIDATION_NAME } from '../fieldEditorConfig'
+import { FIELD_BINDING_NAME, FIELD_EDITOR_MAP } from '../fieldEditorConfig'
 import { useMatchReviewStore } from '../useMatchReviewStore'
 
 type Props = {
@@ -44,7 +46,7 @@ export function ResolvedFieldEditor({ field, resolvedValue }: Props) {
 				<InlineNumberInput
 					value={resolvedValue as number | null}
 					onChange={(value) => setFieldOverride(field, { type: 'custom', value })}
-					fieldName={FIELD_VALIDATION_NAME[field]}
+					validation={getNumberValidation(field)}
 				/>
 			)
 

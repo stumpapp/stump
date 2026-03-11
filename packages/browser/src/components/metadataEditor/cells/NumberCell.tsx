@@ -1,8 +1,8 @@
 import { Button, Input, Text, ToolTip } from '@stump/components'
 import { Minus } from 'lucide-react'
-import { useMemo } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
 
+import { getBindingValidation } from '../../metadata/fieldDefs'
 import { useMetadataEditorContext } from '../context'
 
 type Props<Field> = {
@@ -18,13 +18,15 @@ export default function NumberCell<Field extends string>({
 }: Props<Field>) {
 	const form = useFormContext()
 
-	const { isEditing } = useMetadataEditorContext()
+	const { isEditing, isFieldLocked } = useMetadataEditorContext()
 
-	const rules = useMemo(() => validationRules[binding as keyof typeof validationRules], [binding])
+	const locked = isFieldLocked(binding)
+
+	const rules = getBindingValidation(binding)
 
 	const formValue = useWatch({ control: form.control, name: binding })
 
-	if (isEditing) {
+	if (isEditing && !locked) {
 		return (
 			<div className="group flex items-center gap-2">
 				<Input
@@ -60,31 +62,4 @@ export default function NumberCell<Field extends string>({
 	}
 
 	return <Text className="font-mono text-sm">{value}</Text>
-}
-
-const validationRules = {
-	ageRating: {
-		min: 0,
-		max: undefined,
-	},
-	day: {
-		min: 1,
-		max: 31,
-	},
-	month: {
-		min: 1,
-		max: 12,
-	},
-	pageCount: {
-		min: 1,
-		max: undefined,
-	},
-	volume: {
-		min: 1,
-		max: undefined,
-	},
-	year: {
-		min: 1900,
-		max: new Date().getFullYear(),
-	},
 }

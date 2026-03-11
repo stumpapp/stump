@@ -1490,6 +1490,7 @@ export type MediaMetadata = {
   language?: Maybe<Scalars['String']['output']>;
   letterers: Array<Scalars['String']['output']>;
   links: Array<Scalars['String']['output']>;
+  lockedFields: Array<MetadataField>;
   mediaId?: Maybe<Scalars['String']['output']>;
   /** The external ID on the metadata provider's system */
   metadataExternalId?: Maybe<Scalars['String']['output']>;
@@ -1726,20 +1727,46 @@ export enum MetadataFetchStatus {
 export enum MetadataField {
   AgeRating = 'AGE_RATING',
   Artists = 'ARTISTS',
-  Authors = 'AUTHORS',
+  BookType = 'BOOK_TYPE',
+  Characters = 'CHARACTERS',
   Colorists = 'COLORISTS',
+  ComicId = 'COMIC_ID',
+  ComicImage = 'COMIC_IMAGE',
   Cover = 'COVER',
   CoverArtists = 'COVER_ARTISTS',
+  DescriptionFormatted = 'DESCRIPTION_FORMATTED',
+  Editors = 'EDITORS',
+  Format = 'FORMAT',
   Genres = 'GENRES',
+  IdentifierAmazon = 'IDENTIFIER_AMAZON',
+  IdentifierCalibre = 'IDENTIFIER_CALIBRE',
+  IdentifierGoogle = 'IDENTIFIER_GOOGLE',
+  IdentifierMobiAsin = 'IDENTIFIER_MOBI_ASIN',
+  IdentifierUuid = 'IDENTIFIER_UUID',
+  Imprint = 'IMPRINT',
+  Inkers = 'INKERS',
   Isbn = 'ISBN',
+  Language = 'LANGUAGE',
   Letterers = 'LETTERERS',
+  Links = 'LINKS',
+  MetaType = 'META_TYPE',
+  Notes = 'NOTES',
+  Number = 'NUMBER',
   PageCount = 'PAGE_COUNT',
+  Pencillers = 'PENCILLERS',
+  PublicationRun = 'PUBLICATION_RUN',
   Publisher = 'PUBLISHER',
   ReleaseDate = 'RELEASE_DATE',
+  Series = 'SERIES',
+  SeriesGroup = 'SERIES_GROUP',
   Status = 'STATUS',
+  StoryArc = 'STORY_ARC',
+  StoryArcNumber = 'STORY_ARC_NUMBER',
   Summary = 'SUMMARY',
   Tags = 'TAGS',
+  Teams = 'TEAMS',
   Title = 'TITLE',
+  TitleSort = 'TITLE_SORT',
   VolumeCount = 'VOLUME_COUNT',
   Writers = 'WRITERS',
   Year = 'YEAR'
@@ -1972,6 +1999,14 @@ export type Mutation = {
   sendAttachmentEmail: SendAttachmentEmailOutput;
   /** Send a message in a discussion */
   sendMessage: BookClubDiscussionMessage;
+  /** Bulk-set locked metadata fields for all media metadata in a library */
+  setLibraryMediaLockedFields: Scalars['Int']['output'];
+  /** Bulk-set locked metadata fields for all series metadata in a library */
+  setLibrarySeriesLockedFields: Scalars['Int']['output'];
+  /** Set the locked metadata fields for a media item */
+  setMediaLockedFields: Media;
+  /** Set the locked metadata fields for a series */
+  setSeriesLockedFields: Series;
   /** Suggest a book for the book club */
   suggestBook: BookClubBookSuggestion;
   /**
@@ -2545,6 +2580,30 @@ export type MutationSendAttachmentEmailArgs = {
 export type MutationSendMessageArgs = {
   discussionId: Scalars['ID']['input'];
   input: SendMessageInput;
+};
+
+
+export type MutationSetLibraryMediaLockedFieldsArgs = {
+  libraryId: Scalars['ID']['input'];
+  lockedFields: Array<MetadataField>;
+};
+
+
+export type MutationSetLibrarySeriesLockedFieldsArgs = {
+  libraryId: Scalars['ID']['input'];
+  lockedFields: Array<MetadataField>;
+};
+
+
+export type MutationSetMediaLockedFieldsArgs = {
+  lockedFields: Array<MetadataField>;
+  mediaId: Scalars['ID']['input'];
+};
+
+
+export type MutationSetSeriesLockedFieldsArgs = {
+  lockedFields: Array<MetadataField>;
+  seriesId: Scalars['ID']['input'];
 };
 
 
@@ -3708,6 +3767,7 @@ export type SeriesMetadata = {
   /** Name of imprint while under publisher */
   imprint?: Maybe<Scalars['String']['output']>;
   links: Array<Scalars['String']['output']>;
+  lockedFields: Array<MetadataField>;
   /** Type of series (e.g. "comicSeries") */
   metaType?: Maybe<Scalars['String']['output']>;
   /** The external ID on the metadata provider's system */
@@ -5184,7 +5244,7 @@ export type BookSearchOverlayQuery = { __typename?: 'Query', media: { __typename
       & { ' $fragmentRefs'?: { 'BookCardFragment': BookCardFragment } }
     )>, pageInfo: { __typename: 'CursorPaginationInfo', currentCursor?: string | null, nextCursor?: string | null, limit: number } | { __typename: 'OffsetPaginationInfo' } } };
 
-export type MediaMetadataEditorFragment = { __typename?: 'MediaMetadata', ageRating?: number | null, characters: Array<string>, colorists: Array<string>, coverArtists: Array<string>, day?: number | null, editors: Array<string>, format?: string | null, identifierAmazon?: string | null, identifierCalibre?: string | null, identifierGoogle?: string | null, identifierIsbn?: string | null, identifierMobiAsin?: string | null, identifierUuid?: string | null, genres: Array<string>, inkers: Array<string>, language?: string | null, letterers: Array<string>, links: Array<string>, month?: number | null, notes?: string | null, number?: any | null, pageCount?: number | null, pencillers: Array<string>, publisher?: string | null, series?: string | null, seriesGroup?: string | null, storyArc?: string | null, storyArcNumber?: any | null, summary?: string | null, teams: Array<string>, title?: string | null, titleSort?: string | null, volume?: number | null, writers: Array<string>, year?: number | null } & { ' $fragmentName'?: 'MediaMetadataEditorFragment' };
+export type MediaMetadataEditorFragment = { __typename?: 'MediaMetadata', ageRating?: number | null, characters: Array<string>, colorists: Array<string>, coverArtists: Array<string>, day?: number | null, editors: Array<string>, format?: string | null, identifierAmazon?: string | null, identifierCalibre?: string | null, identifierGoogle?: string | null, identifierIsbn?: string | null, identifierMobiAsin?: string | null, identifierUuid?: string | null, genres: Array<string>, inkers: Array<string>, language?: string | null, letterers: Array<string>, links: Array<string>, month?: number | null, notes?: string | null, number?: any | null, pageCount?: number | null, pencillers: Array<string>, publisher?: string | null, series?: string | null, seriesGroup?: string | null, storyArc?: string | null, storyArcNumber?: any | null, summary?: string | null, teams: Array<string>, title?: string | null, titleSort?: string | null, volume?: number | null, writers: Array<string>, year?: number | null, lockedFields: Array<MetadataField> } & { ' $fragmentName'?: 'MediaMetadataEditorFragment' };
 
 export type UpdateMediaMetadataMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -5196,6 +5256,14 @@ export type UpdateMediaMetadataMutation = { __typename?: 'Mutation', updateMedia
       { __typename?: 'MediaMetadata' }
       & { ' $fragmentRefs'?: { 'MediaMetadataEditorFragment': MediaMetadataEditorFragment } }
     ) | null } };
+
+export type MediaEditorSetLockedFieldsMutationVariables = Exact<{
+  mediaId: Scalars['ID']['input'];
+  lockedFields: Array<MetadataField> | MetadataField;
+}>;
+
+
+export type MediaEditorSetLockedFieldsMutation = { __typename?: 'Mutation', setMediaLockedFields: { __typename?: 'Media', id: string } };
 
 export type BookOverviewSceneQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -5283,7 +5351,7 @@ export type LibrarySeriesAlphabetQueryVariables = Exact<{
 
 export type LibrarySeriesAlphabetQuery = { __typename?: 'Query', libraryById?: { __typename?: 'Library', seriesAlphabet: any } | null };
 
-export type PendingMatchRecordFragment = { __typename?: 'MetadataFetchRecord', id: number, status: MetadataFetchStatus, mediaId?: string | null, seriesId?: string | null, addedAt: any, updatedAt?: any | null, matchCandidates: Array<{ __typename?: 'MatchCandidate', provider: string, externalId: string, confidence: number, metadata: { __typename: 'ExternalMediaMetadata', title?: string | null, seriesName?: string | null, seriesExternalId?: string | null, summary?: string | null, pageCount?: number | null, number?: number | null, day?: number | null, month?: number | null, year?: number | null, genres?: Array<string> | null, tags?: Array<string> | null, isbn?: string | null, isbn13?: string | null, writers?: Array<string> | null, artists?: Array<string> | null, colorists?: Array<string> | null, letterers?: Array<string> | null, coverArtists?: Array<string> | null } | { __typename: 'ExternalSeriesMetadata', alternativeTitles: Array<string>, summary?: string | null, volumeCount?: number | null, coverUrl?: string | null, status?: PublicationStatus | null, year?: number | null, endYear?: number | null, genres?: Array<string> | null, tags?: Array<string> | null, authors?: Array<string> | null, ageRating?: string | null, publisher?: string | null, seriesTitle: string }, confidenceFactors: Array<{ __typename?: 'ConfidenceFactor', factor: string, weight: number, matched: boolean }> }>, media?: { __typename?: 'Media', id: string, resolvedName: string, metadata?: { __typename?: 'MediaMetadata', title?: string | null, summary?: string | null, genres: Array<string>, writers: Array<string>, colorists: Array<string>, letterers: Array<string>, coverArtists: Array<string>, publisher?: string | null, year?: number | null, month?: number | null, day?: number | null, pageCount?: number | null, identifierIsbn?: string | null } | null } | null, series?: { __typename?: 'Series', id: string, resolvedName: string, metadata?: { __typename?: 'SeriesMetadata', title?: string | null, summary?: string | null, genres: Array<string>, writers: Array<string>, publisher?: string | null, year?: number | null, status?: string | null, ageRating?: number | null, volume?: number | null } | null } | null } & { ' $fragmentName'?: 'PendingMatchRecordFragment' };
+export type PendingMatchRecordFragment = { __typename?: 'MetadataFetchRecord', id: number, status: MetadataFetchStatus, mediaId?: string | null, seriesId?: string | null, addedAt: any, updatedAt?: any | null, matchCandidates: Array<{ __typename?: 'MatchCandidate', provider: string, externalId: string, confidence: number, metadata: { __typename: 'ExternalMediaMetadata', title?: string | null, seriesName?: string | null, seriesExternalId?: string | null, summary?: string | null, pageCount?: number | null, number?: number | null, day?: number | null, month?: number | null, year?: number | null, genres?: Array<string> | null, tags?: Array<string> | null, isbn?: string | null, isbn13?: string | null, writers?: Array<string> | null, artists?: Array<string> | null, colorists?: Array<string> | null, letterers?: Array<string> | null, coverArtists?: Array<string> | null } | { __typename: 'ExternalSeriesMetadata', alternativeTitles: Array<string>, summary?: string | null, volumeCount?: number | null, coverUrl?: string | null, status?: PublicationStatus | null, year?: number | null, endYear?: number | null, genres?: Array<string> | null, tags?: Array<string> | null, authors?: Array<string> | null, ageRating?: string | null, publisher?: string | null, seriesTitle: string }, confidenceFactors: Array<{ __typename?: 'ConfidenceFactor', factor: string, weight: number, matched: boolean }> }>, media?: { __typename?: 'Media', id: string, resolvedName: string, metadata?: { __typename?: 'MediaMetadata', title?: string | null, summary?: string | null, genres: Array<string>, writers: Array<string>, colorists: Array<string>, letterers: Array<string>, coverArtists: Array<string>, publisher?: string | null, year?: number | null, month?: number | null, day?: number | null, pageCount?: number | null, identifierIsbn?: string | null, lockedFields: Array<MetadataField> } | null } | null, series?: { __typename?: 'Series', id: string, resolvedName: string, metadata?: { __typename?: 'SeriesMetadata', title?: string | null, summary?: string | null, genres: Array<string>, writers: Array<string>, publisher?: string | null, year?: number | null, status?: string | null, ageRating?: number | null, volume?: number | null, lockedFields: Array<MetadataField> } | null } | null } & { ' $fragmentName'?: 'PendingMatchRecordFragment' };
 
 export type PendingMetadataMatchesQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -5355,6 +5423,22 @@ export type RejectSeriesMatchMutation = { __typename?: 'Mutation', rejectSeriesM
     { __typename?: 'MetadataFetchRecord' }
     & { ' $fragmentRefs'?: { 'PendingMatchRecordFragment': PendingMatchRecordFragment } }
   ) };
+
+export type SetMediaLockedFieldsMutationVariables = Exact<{
+  mediaId: Scalars['ID']['input'];
+  lockedFields: Array<MetadataField> | MetadataField;
+}>;
+
+
+export type SetMediaLockedFieldsMutation = { __typename?: 'Mutation', setMediaLockedFields: { __typename?: 'Media', id: string } };
+
+export type SetSeriesLockedFieldsMutationVariables = Exact<{
+  seriesId: Scalars['ID']['input'];
+  lockedFields: Array<MetadataField> | MetadataField;
+}>;
+
+
+export type SetSeriesLockedFieldsMutation = { __typename?: 'Mutation', setSeriesLockedFields: { __typename?: 'Series', id: string } };
 
 export type SideBarQueryQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -5447,7 +5531,7 @@ export type SeriesBooksAlphabetQueryVariables = Exact<{
 
 export type SeriesBooksAlphabetQuery = { __typename?: 'Query', seriesById?: { __typename?: 'Series', mediaAlphabet: any } | null };
 
-export type SeriesMetadataEditorFragment = { __typename?: 'SeriesMetadata', ageRating?: number | null, booktype?: string | null, characters: Array<string>, comicImage?: string | null, comicid?: number | null, descriptionFormatted?: string | null, genres: Array<string>, imprint?: string | null, links: Array<string>, metaType?: string | null, publicationRun?: string | null, publisher?: string | null, status?: string | null, summary?: string | null, title?: string | null, totalIssues?: number | null, volume?: number | null, writers: Array<string>, year?: number | null, collects: Array<{ __typename?: 'CollectedItem', series?: string | null, comicid?: string | null, issueid?: string | null, issues?: string | null }> } & { ' $fragmentName'?: 'SeriesMetadataEditorFragment' };
+export type SeriesMetadataEditorFragment = { __typename?: 'SeriesMetadata', ageRating?: number | null, booktype?: string | null, characters: Array<string>, comicImage?: string | null, comicid?: number | null, descriptionFormatted?: string | null, genres: Array<string>, imprint?: string | null, links: Array<string>, metaType?: string | null, publicationRun?: string | null, publisher?: string | null, status?: string | null, summary?: string | null, title?: string | null, totalIssues?: number | null, volume?: number | null, writers: Array<string>, year?: number | null, lockedFields: Array<MetadataField>, collects: Array<{ __typename?: 'CollectedItem', series?: string | null, comicid?: string | null, issueid?: string | null, issues?: string | null }> } & { ' $fragmentName'?: 'SeriesMetadataEditorFragment' };
 
 export type UpdateSeriesMetadataMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -5459,6 +5543,14 @@ export type UpdateSeriesMetadataMutation = { __typename?: 'Mutation', updateSeri
       { __typename?: 'SeriesMetadata' }
       & { ' $fragmentRefs'?: { 'SeriesMetadataEditorFragment': SeriesMetadataEditorFragment } }
     ) | null } };
+
+export type SeriesEditorSetLockedFieldsMutationVariables = Exact<{
+  seriesId: Scalars['ID']['input'];
+  lockedFields: Array<MetadataField> | MetadataField;
+}>;
+
+
+export type SeriesEditorSetLockedFieldsMutation = { __typename?: 'Mutation', setSeriesLockedFields: { __typename?: 'Series', id: string } };
 
 export type UseCoreEventSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
@@ -6996,6 +7088,7 @@ export const MediaMetadataEditorFragmentDoc = new TypedDocumentString(`
   volume
   writers
   year
+  lockedFields
 }
     `, {"fragmentName":"MediaMetadataEditor"}) as unknown as TypedDocumentString<MediaMetadataEditorFragment, unknown>;
 export const BookClubBookItemFragmentDoc = new TypedDocumentString(`
@@ -7093,6 +7186,7 @@ export const PendingMatchRecordFragmentDoc = new TypedDocumentString(`
       day
       pageCount
       identifierIsbn
+      lockedFields
     }
   }
   series {
@@ -7108,6 +7202,7 @@ export const PendingMatchRecordFragmentDoc = new TypedDocumentString(`
       status
       ageRating
       volume
+      lockedFields
     }
   }
 }
@@ -7139,6 +7234,7 @@ export const SeriesMetadataEditorFragmentDoc = new TypedDocumentString(`
   volume
   writers
   year
+  lockedFields
 }
     `, {"fragmentName":"SeriesMetadataEditor"}) as unknown as TypedDocumentString<SeriesMetadataEditorFragment, unknown>;
 export const BookFileInformationFragmentDoc = new TypedDocumentString(`
@@ -9497,7 +9593,15 @@ export const UpdateMediaMetadataDocument = new TypedDocumentString(`
   volume
   writers
   year
+  lockedFields
 }`) as unknown as TypedDocumentString<UpdateMediaMetadataMutation, UpdateMediaMetadataMutationVariables>;
+export const MediaEditorSetLockedFieldsDocument = new TypedDocumentString(`
+    mutation MediaEditorSetLockedFields($mediaId: ID!, $lockedFields: [MetadataField!]!) {
+  setMediaLockedFields(mediaId: $mediaId, lockedFields: $lockedFields) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<MediaEditorSetLockedFieldsMutation, MediaEditorSetLockedFieldsMutationVariables>;
 export const BookOverviewSceneDocument = new TypedDocumentString(`
     query BookOverviewScene($id: ID!) {
   mediaById(id: $id) {
@@ -9584,6 +9688,7 @@ fragment MediaMetadataEditor on MediaMetadata {
   volume
   writers
   year
+  lockedFields
 }
 fragment BookFileInformation on Media {
   id
@@ -9775,6 +9880,7 @@ export const PendingMetadataMatchesDocument = new TypedDocumentString(`
       day
       pageCount
       identifierIsbn
+      lockedFields
     }
   }
   series {
@@ -9790,6 +9896,7 @@ export const PendingMetadataMatchesDocument = new TypedDocumentString(`
       status
       ageRating
       volume
+      lockedFields
     }
   }
 }`) as unknown as TypedDocumentString<PendingMetadataMatchesQuery, PendingMetadataMatchesQueryVariables>;
@@ -9887,6 +9994,7 @@ export const AcceptMediaMatchDocument = new TypedDocumentString(`
       day
       pageCount
       identifierIsbn
+      lockedFields
     }
   }
   series {
@@ -9902,6 +10010,7 @@ export const AcceptMediaMatchDocument = new TypedDocumentString(`
       status
       ageRating
       volume
+      lockedFields
     }
   }
 }`) as unknown as TypedDocumentString<AcceptMediaMatchMutation, AcceptMediaMatchMutationVariables>;
@@ -9989,6 +10098,7 @@ export const AcceptSeriesMatchDocument = new TypedDocumentString(`
       day
       pageCount
       identifierIsbn
+      lockedFields
     }
   }
   series {
@@ -10004,6 +10114,7 @@ export const AcceptSeriesMatchDocument = new TypedDocumentString(`
       status
       ageRating
       volume
+      lockedFields
     }
   }
 }`) as unknown as TypedDocumentString<AcceptSeriesMatchMutation, AcceptSeriesMatchMutationVariables>;
@@ -10085,6 +10196,7 @@ export const RejectMediaMatchDocument = new TypedDocumentString(`
       day
       pageCount
       identifierIsbn
+      lockedFields
     }
   }
   series {
@@ -10100,6 +10212,7 @@ export const RejectMediaMatchDocument = new TypedDocumentString(`
       status
       ageRating
       volume
+      lockedFields
     }
   }
 }`) as unknown as TypedDocumentString<RejectMediaMatchMutation, RejectMediaMatchMutationVariables>;
@@ -10181,6 +10294,7 @@ export const RejectSeriesMatchDocument = new TypedDocumentString(`
       day
       pageCount
       identifierIsbn
+      lockedFields
     }
   }
   series {
@@ -10196,9 +10310,24 @@ export const RejectSeriesMatchDocument = new TypedDocumentString(`
       status
       ageRating
       volume
+      lockedFields
     }
   }
 }`) as unknown as TypedDocumentString<RejectSeriesMatchMutation, RejectSeriesMatchMutationVariables>;
+export const SetMediaLockedFieldsDocument = new TypedDocumentString(`
+    mutation SetMediaLockedFields($mediaId: ID!, $lockedFields: [MetadataField!]!) {
+  setMediaLockedFields(mediaId: $mediaId, lockedFields: $lockedFields) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<SetMediaLockedFieldsMutation, SetMediaLockedFieldsMutationVariables>;
+export const SetSeriesLockedFieldsDocument = new TypedDocumentString(`
+    mutation SetSeriesLockedFields($seriesId: ID!, $lockedFields: [MetadataField!]!) {
+  setSeriesLockedFields(seriesId: $seriesId, lockedFields: $lockedFields) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<SetSeriesLockedFieldsMutation, SetSeriesLockedFieldsMutationVariables>;
 export const SideBarQueryDocument = new TypedDocumentString(`
     query SideBarQuery {
   me {
@@ -10438,7 +10567,15 @@ export const UpdateSeriesMetadataDocument = new TypedDocumentString(`
   volume
   writers
   year
+  lockedFields
 }`) as unknown as TypedDocumentString<UpdateSeriesMetadataMutation, UpdateSeriesMetadataMutationVariables>;
+export const SeriesEditorSetLockedFieldsDocument = new TypedDocumentString(`
+    mutation SeriesEditorSetLockedFields($seriesId: ID!, $lockedFields: [MetadataField!]!) {
+  setSeriesLockedFields(seriesId: $seriesId, lockedFields: $lockedFields) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<SeriesEditorSetLockedFieldsMutation, SeriesEditorSetLockedFieldsMutationVariables>;
 export const UseCoreEventDocument = new TypedDocumentString(`
     subscription UseCoreEvent {
   readEvents {
@@ -11662,6 +11799,7 @@ export const SeriesSettingsSceneDocument = new TypedDocumentString(`
   volume
   writers
   year
+  lockedFields
 }
 fragment SeriesThumbnailSelector on Series {
   id

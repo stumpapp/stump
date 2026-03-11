@@ -17,9 +17,11 @@ export default function BadgeCell<Field extends string>({
 	onItemClick,
 	itemUrl,
 }: Props<Field>) {
-	const { isEditing } = useMetadataEditorContext()
+	const { isEditing, isFieldLocked } = useMetadataEditorContext()
 
-	if (isEditing) {
+	const locked = isFieldLocked(binding)
+
+	if (isEditing && !locked) {
 		return <TextCell binding={binding} value={value} />
 	}
 

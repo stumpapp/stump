@@ -10,7 +10,6 @@ pub enum MetadataField {
 	Summary,
 	Genres,
 	Tags,
-	Authors,
 	Artists,
 	Publisher,
 	Year,

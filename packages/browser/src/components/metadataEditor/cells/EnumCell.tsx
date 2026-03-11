@@ -17,9 +17,11 @@ export default function EnumCell<Field extends string, Value extends string>({
 }: Props<Field, Value>) {
 	const form = useFormContext()
 
-	const { isEditing } = useMetadataEditorContext()
+	const { isEditing, isFieldLocked } = useMetadataEditorContext()
 
-	if (isEditing) {
+	const locked = isFieldLocked(binding)
+
+	if (isEditing && !locked) {
 		return (
 			<NativeSelect
 				className="sm:max-w-xs"

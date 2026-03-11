@@ -1634,7 +1634,6 @@ enum MetadataField {
 	SUMMARY
 	GENRES
 	TAGS
-	AUTHORS
 	ARTISTS
 	PUBLISHER
 	YEAR
@@ -1800,10 +1799,7 @@ type Mutation {
 	acceptMediaMatch(mediaId: ID!, candidateIndex: Int!, strategy: MergeStrategy, excludeFields: [MetadataField!], overrides: [MetadataFieldOverride!]): MetadataFetchRecord!
 	"Reject the current match candidates for a media item"
 	rejectMediaMatch(mediaId: ID!, candidateIndex: Int!): MetadataFetchRecord!
-	"""
-	Set the locked metadata fields for a media item, preventing them from being overwritten
-	by metadata fetch operations
-	"""
+	"Set the locked metadata fields for a media item"
 	setMediaLockedFields(mediaId: ID!, lockedFields: [MetadataField!]!): Media!
 	updateSeriesMetadata(id: ID!, input: SeriesMetadataInput!): Series!
 	resetSeriesMetadata(id: ID!, impact: MetadataResetImpact!): Series!
@@ -1813,10 +1809,7 @@ type Mutation {
 	acceptSeriesMatch(seriesId: ID!, candidateIndex: Int!, strategy: MergeStrategy, excludeFields: [MetadataField!], overrides: [MetadataFieldOverride!]): MetadataFetchRecord!
 	"Reject the current match candidates for a series"
 	rejectSeriesMatch(seriesId: ID!, candidateIndex: Int!): MetadataFetchRecord!
-	"""
-	Set the locked metadata fields for a series, preventing them from being overwritten
-	by metadata fetch operations
-	"""
+	"Set the locked metadata fields for a series"
 	setSeriesLockedFields(seriesId: ID!, lockedFields: [MetadataField!]!): Series!
 	analyzeLibrary(id: ID!, forceReanalysis: Boolean! = false): Boolean!
 	"""
@@ -1870,15 +1863,9 @@ type Mutation {
 	deleteLibraryThumbnails(id: ID!): Boolean!
 	"Start a job which will search external metadata providers"
 	fetchLibraryMetadata(id: ID!, forceRefetch: Boolean! = false): Boolean!
-	"""
-	Bulk-set locked metadata fields for all **series** metadata in a library.
-	Returns the number of series metadata rows updated.
-	"""
+	"Bulk-set locked metadata fields for all series metadata in a library"
 	setLibrarySeriesLockedFields(libraryId: ID!, lockedFields: [MetadataField!]!): Int!
-	"""
-	Bulk-set locked metadata fields for all **media** (book) metadata in a library.
-	Returns the number of media metadata rows updated.
-	"""
+	"Bulk-set locked metadata fields for all media metadata in a library"
 	setLibraryMediaLockedFields(libraryId: ID!, lockedFields: [MetadataField!]!): Int!
 	"""
 	Enqueue a scan job for a library. This will index the filesystem from the library's root path

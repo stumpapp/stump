@@ -24,6 +24,8 @@ const fragment = graphql(`
 				}
 				thumbhash
 			}
+			height
+			width
 		}
 	}
 `)
@@ -45,7 +47,7 @@ function BookListItem({ book }: Props) {
 	const router = useRouter()
 
 	const { width, height } = useListItemSize()
-	const { url: uri, metadata: placeholderData } = data.thumbnail
+	const { url: uri, metadata: placeholderData, ...originalDimensions } = data.thumbnail
 
 	return (
 		<Pressable onPress={() => router.navigate(`/server/${serverID}/books/${data.id}`)}>
@@ -59,9 +61,13 @@ function BookListItem({ book }: Props) {
 								Authorization: sdk.authorizationHeader || '',
 							},
 						}}
-						resizeMode="stretch"
 						size={{ height, width }}
 						placeholderData={placeholderData}
+						originalDimensions={
+							originalDimensions.width && originalDimensions.height
+								? { width: originalDimensions.width, height: originalDimensions.height }
+								: null
+						}
 					/>
 
 					<View>

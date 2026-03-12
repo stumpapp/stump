@@ -93,10 +93,14 @@ export default function CollectionStackedThumbnails({ thumbnailData, layoutNumbe
 								Authorization: sdk.authorizationHeader || '',
 							},
 						}}
-						resizeMode="stretch"
 						size={currentThumbnailSize}
 						borderAndShadowStyle={{ shadowColor: 'rgba(0 0 0 / 0.5)', shadowRadius: 3 }}
 						placeholderData={currentThumbnailData.metadata}
+						originalDimensions={
+							currentThumbnailData.width && currentThumbnailData.height
+								? { width: currentThumbnailData.width, height: currentThumbnailData.height }
+								: undefined
+						}
 					/>
 				</View>
 			)

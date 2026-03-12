@@ -161,7 +161,6 @@ export default function LocationsSheetContent() {
 										...requestHeaders?.(),
 									},
 								}}
-								resizeMode="stretch"
 								size={{ height: 235 / thumbnailRatio, width: 235 }}
 								borderAndShadowStyle={{ shadowRadius: 5 }}
 							/>

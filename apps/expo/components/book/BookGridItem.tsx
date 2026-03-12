@@ -19,6 +19,8 @@ const fragment = graphql(`
 				}
 				thumbhash
 			}
+			height
+			width
 		}
 		readProgress {
 			percentageCompleted
@@ -50,6 +52,11 @@ export default function BookGridItem({ book, onPress }: Props) {
 				title={data.resolvedName}
 				onPress={onPress ?? (() => router.navigate(`/server/${serverID}/books/${data.id}`))}
 				placeholderData={data.thumbnail.metadata}
+				originalDimensions={
+					data.thumbnail.width && data.thumbnail.height
+						? { width: data.thumbnail.width, height: data.thumbnail.height }
+						: null
+				}
 				percentageCompleted={isNaN(percentageCompleted) ? undefined : percentageCompleted}
 			/>
 		</View>

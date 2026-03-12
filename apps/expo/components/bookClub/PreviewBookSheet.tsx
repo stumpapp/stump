@@ -168,7 +168,6 @@ function BookContent({ book, onConfirmAddBook }: BookContentProps) {
 								Authorization: sdk.authorizationHeader || '',
 							},
 						}}
-						resizeMode="stretch"
 						size={{ height: 235 / thumbnailRatio, width: 235 }}
 						placeholderData={placeholderData}
 						borderAndShadowStyle={{ shadowRadius: 5 }}

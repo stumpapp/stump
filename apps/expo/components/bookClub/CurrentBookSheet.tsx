@@ -131,7 +131,6 @@ export const CurrentBookSheet = forwardRef<CurrentBookSheetRef, Props>(({ book }
 								uri: thumbnailData?.url || '',
 								headers: thumbnailData?.headers,
 							}}
-							resizeMode="stretch"
 							size={{ height: 235 / thumbnailRatio, width: 235 }}
 							placeholderData={thumbnailData?.placeholderData}
 							borderAndShadowStyle={{ shadowRadius: 5 }}

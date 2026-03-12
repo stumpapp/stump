@@ -84,7 +84,6 @@ export function PastBookGridItem({ data }: Props) {
 								Authorization: sdk.authorizationHeader || '',
 							},
 						}}
-						resizeMode="stretch"
 						size={{ height: itemWidth / thumbnailRatio, width: itemWidth }}
 						placeholderData={book.entity?.thumbnail.metadata}
 						gradient={{ colors: gradientColors, locations: gradientLocations }}

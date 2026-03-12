@@ -32,6 +32,8 @@ export const BookCardFragment = graphql(`
 				}
 				thumbhash
 			}
+			height
+			width
 		}
 		readProgress {
 			percentageCompleted

@@ -75,7 +75,6 @@ export default function PublicationGroup({
 										[STUMP_SAVE_BASIC_SESSION_HEADER]: 'false',
 									},
 								}}
-								resizeMode="stretch"
 								size={{ height: itemHeight, width: itemWidth }}
 							/>
 

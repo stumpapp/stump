@@ -15,6 +15,7 @@ type Props = {
 	title: string
 	onPress: () => void
 	placeholderData?: ThumbnailPlaceholderData | null
+	originalDimensions?: { width: number; height: number } | null
 	percentageCompleted?: number | null
 }
 
@@ -56,7 +57,6 @@ export default function GridImageItem({
 								Authorization: sdk.authorizationHeader || '',
 							},
 						}}
-						resizeMode="stretch"
 						size={{ height: itemWidth / thumbnailRatio, width: itemWidth }}
 						{...thumbnailProps}
 						gradient={gradient}

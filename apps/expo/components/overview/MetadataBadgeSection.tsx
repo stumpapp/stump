@@ -53,7 +53,7 @@ export default function MetadataBadgeSection({ label, items, singleRowThreshold 
 										<Badge
 											className={cn({
 												'opacity-80': pressed,
-												'border border-edge bg-background-surface-secondary': item.onPress,
+												'bg-black/5 dark:bg-white/10': item.onPress,
 											})}
 										>
 											<Text className="text-sm">{item.label}</Text>

@@ -30,6 +30,8 @@ const fragment = graphql(`
 				}
 				thumbhash
 			}
+			height
+			width
 		}
 		seriesPosition
 		series {
@@ -66,7 +68,12 @@ function OnDeckBookItem({ book }: Props) {
 		easing: Easing.bezier(0.42, 0, 1, 1), // https://cubic-bezier.com/#.42,0,1,1
 	})
 
-	const { url: uri, metadata: placeholderData } = data.thumbnail
+	const {
+		url: uri,
+		metadata: placeholderData,
+		width: originalWidth,
+		height: originalHeight,
+	} = data.thumbnail
 
 	const seriesPosition = formatSeriesPosition(
 		Number(data.metadata?.number) || data.seriesPosition,
@@ -88,10 +95,14 @@ function OnDeckBookItem({ book }: Props) {
 								Authorization: sdk.authorizationHeader || '',
 							},
 						}}
-						resizeMode="stretch"
 						size={{ width, height }}
 						gradient={{ colors: gradientColors, locations: gradientLocations }}
 						placeholderData={placeholderData}
+						originalDimensions={
+							originalWidth && originalHeight
+								? { width: originalWidth, height: originalHeight }
+								: null
+						}
 					/>
 
 					<View className="absolute bottom-0 z-20 w-full gap-1 p-2">

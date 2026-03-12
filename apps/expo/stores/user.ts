@@ -3,7 +3,10 @@ import type { AllowedLocale } from '@stump/i18n'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 
-import { ThumbnailPlaceholderType } from '~/components/image/ThumbnailPlaceholder'
+import {
+	ThumbnailPlaceholderType,
+	ThumbnailResizeMode,
+} from '~/components/image/ThumbnailPlaceholder'
 
 import { CachePolicy } from './reader'
 import { ZustandMMKVStorage } from './store'
@@ -21,6 +24,7 @@ type MobilePreferencesStore = {
 	cachePolicy: CachePolicy
 	allowDownscaling: boolean
 	thumbnailRatio: number
+	thumbnailResizeMode: ThumbnailResizeMode
 	thumbnailPlaceholder: ThumbnailPlaceholderType
 	performanceMonitor: boolean
 	accentColor?: string | undefined
@@ -60,6 +64,7 @@ export const usePreferencesStore = create<MobilePreferencesStore>()(
 			preferNativePdf: false,
 			disableDismissGesture: false,
 			autoSyncLocalData: true,
+			thumbnailResizeMode: 'cover',
 			// Note: I default to undefined so the localization library can determine a default
 			locale: undefined,
 			opdsLayout: 'grid',

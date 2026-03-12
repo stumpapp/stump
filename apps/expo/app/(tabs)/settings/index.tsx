@@ -17,6 +17,7 @@ import {
 	ReduceAnimations,
 	ThumbnailPlaceholder,
 	ThumbnailRatio,
+	ThumbnailResizeMode,
 } from '~/components/appSettings/preferences'
 import AppPrimaryColor from '~/components/appSettings/preferences/AppPrimaryColor'
 import DisableDismissGesture from '~/components/appSettings/preferences/DisableDismissGesture'
@@ -34,6 +35,7 @@ export default function Screen() {
 					<DefaultServer />
 					<ThumbnailRatio />
 					<ThumbnailPlaceholder />
+					<ThumbnailResizeMode />
 				</Card>
 
 				<Card label="Reading">

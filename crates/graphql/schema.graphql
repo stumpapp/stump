@@ -764,10 +764,16 @@ type ImageColor {
 	percentage: Decimal!
 }
 
+type ImageDimensions {
+	width: Int!
+	height: Int!
+}
+
 type ImageMetadata {
 	averageColor: String
 	colors: [ImageColor!]!
 	thumbhash: String
+	dimensions: ImageDimensions
 }
 
 "Options for processing images throughout Stump."

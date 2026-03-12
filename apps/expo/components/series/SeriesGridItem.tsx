@@ -19,6 +19,8 @@ const fragment = graphql(`
 				}
 				thumbhash
 			}
+			height
+			width
 		}
 	}
 `)
@@ -44,6 +46,11 @@ export default function SeriesGridItem({ series, onPress }: Props) {
 				title={data.resolvedName}
 				onPress={onPress ?? (() => router.navigate(`/server/${serverID}/series/${data.id}`))}
 				placeholderData={data.thumbnail.metadata}
+				originalDimensions={
+					data.thumbnail.width && data.thumbnail.height
+						? { width: data.thumbnail.width, height: data.thumbnail.height }
+						: null
+				}
 			/>
 		</View>
 	)

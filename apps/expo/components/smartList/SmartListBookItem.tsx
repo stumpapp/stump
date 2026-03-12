@@ -38,6 +38,8 @@ const fragment = graphql(`
 				}
 				thumbhash
 			}
+			height
+			width
 		}
 	}
 `)
@@ -147,11 +149,15 @@ export default function SmartListBookItem({ book }: Props) {
 								Authorization: sdk.authorizationHeader || '',
 							},
 						}}
-						resizeMode="stretch"
 						size={{ height: thumbnailHeight, width: thumbnailWidth }}
 						cachePolicy="urlCache"
 						placeholderData={data.thumbnail.metadata}
 						gradient={gradient}
+						originalDimensions={
+							data.thumbnail.width && data.thumbnail.height
+								? { width: data.thumbnail.width, height: data.thumbnail.height }
+								: null
+						}
 					/>
 
 					{data.readProgress && layout === 'grid' && (

@@ -261,7 +261,6 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 							// undefined so it's fine
 							uri: getThumbnailPath(downloadedFile),
 						}}
-						resizeMode="stretch"
 						size={{ height, width }}
 						placeholderData={thumbnailData}
 					/>

@@ -234,6 +234,7 @@ const groups = [
 			UserPermission.DeleteLibrary,
 			UserPermission.EditMetadata,
 			UserPermission.WriteBackMetadata,
+			UserPermission.EditThumbnails,
 		],
 	},
 	{

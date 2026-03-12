@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { Pressable, ScrollView, View } from 'react-native'
 
-import { Badge, Text } from '~/components/ui'
+import { Badge, ListLabel, Text } from '~/components/ui'
 import { cn } from '~/lib/utils'
 
 type MetadataBadgeItem = {
@@ -32,13 +32,13 @@ export default function MetadataBadgeSection({ label, items, singleRowThreshold 
 	}
 
 	return (
-		<View className="gap-2">
-			<Text className="ios:px-4 px-2 text-lg font-semibold text-foreground-muted">{label}</Text>
+		<View className="-mx-4 gap-2">
+			<ListLabel className="ios:px-8 px-6">{label}</ListLabel>
 
 			<ScrollView
 				horizontal
 				showsHorizontalScrollIndicator={false}
-				contentContainerClassName="ios:px-4 gap-2 px-2"
+				contentContainerClassName="px-4 gap-2"
 			>
 				<View className="gap-2">
 					{rows.map((row, rowIndex) => (

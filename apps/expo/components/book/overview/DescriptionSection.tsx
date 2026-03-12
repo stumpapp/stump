@@ -7,6 +7,8 @@ import { stripHtml } from 'string-strip-html'
 import { Markdown, Text } from '~/components/ui'
 import { IS_IOS_24_PLUS, useColors } from '~/lib/constants'
 
+import { DottedLine } from './DottedLine'
+
 type Props = {
 	description: string
 }
@@ -20,13 +22,13 @@ export default function DescriptionSection({ description }: Props) {
 
 	return (
 		<Fragment>
-			<View className="gap-4">
+			<View className="gap-4 px-2">
 				<Text className="text-base leading-5 text-foreground-muted" numberOfLines={4}>
 					{plainPreview}
 				</Text>
 
-				<View className="flex-row items-center">
-					<View className="flex-1 border-t border-dashed border-edge opacity-70" />
+				<View className="flex-row items-center gap-1">
+					<DottedLine />
 					<Pressable onPress={() => sheetRef.current?.present()}>
 						<GlassView
 							glassEffectStyle="regular"
@@ -44,7 +46,7 @@ export default function DescriptionSection({ description }: Props) {
 							</View>
 						</GlassView>
 					</Pressable>
-					<View className="flex-1 border-t border-dashed border-edge opacity-70" />
+					<DottedLine inverted />
 				</View>
 			</View>
 

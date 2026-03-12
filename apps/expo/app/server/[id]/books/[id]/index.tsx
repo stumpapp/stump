@@ -34,11 +34,12 @@ import { InfoRow } from '~/components/book/overview'
 import { ThumbnailImage } from '~/components/image'
 import { MetadataBadgeSection } from '~/components/overview'
 import RefreshControl from '~/components/RefreshControl'
-import { Button, Card, Heading, Text } from '~/components/ui'
+import { Button, Card, Heading, ListLabel, Text } from '~/components/ui'
 import { Icon } from '~/components/ui/icon'
 import { formatSeriesPosition } from '~/lib/bookUtils'
 import { formatBytes, parseGraphQLDecimal } from '~/lib/format'
 import { useDownload } from '~/lib/hooks'
+import { cn } from '~/lib/utils'
 import { usePreferencesStore } from '~/stores'
 
 const query = graphql(`
@@ -372,11 +373,11 @@ export default function Screen() {
 				/>
 			}
 		>
-			<View className="ios:pt-safe-offset-20 pt-safe overflow-hidden pb-16">
+			<View className="ios:pt-safe-offset-20 pt-safe ios:pb-24 overflow-hidden pb-16">
 				<Animated.View
 					// -inset-24 is because when using a lot of blur, the sides get more transparent
 					// so we have to "zoom in" to have a clean line at the bottom rather than a gradient
-					// pb-16 because the rounded-t corners has negative margin to make them visible
+					// pb-16/24 because the rounded corners has negative margin to make them visible
 					className="absolute -inset-24 opacity-70 dark:opacity-30"
 					style={parallaxStyle}
 				>
@@ -482,10 +483,10 @@ export default function Screen() {
 				</View>
 			</View>
 
-			<View className="ios:rounded-t-[2rem] -mt-6 gap-8 rounded-t-3xl bg-background px-4 py-8 tablet:px-6">
+			<View className="squircle ios:rounded-[3rem] ios:-mt-[4.5rem] -mt-[2.5rem] gap-8 rounded-[2.5rem] bg-background px-4 py-6 tablet:px-6">
 				{!!description && <DescriptionSection description={description} />}
 
-				<Card>
+				<Card className={cn(!description && 'px-2')}>
 					<Card.StatGroup>
 						{!!publisher && <Card.Stat label="Publisher" value={publisher} />}
 						{!!seriesVolume && <Card.Stat label="Volume" value={seriesVolume} />}
@@ -560,7 +561,7 @@ export default function Screen() {
 
 				{links.length > 0 && (
 					<View className="flex w-full gap-2">
-						<Text className="ios:px-4 px-2 text-lg font-semibold text-foreground-muted">Links</Text>
+						<ListLabel className="ios:px-4 px-2">Links</ListLabel>
 
 						<View className="ios:px-4 flex flex-row flex-wrap gap-2 px-2">
 							{links.map((link) => (

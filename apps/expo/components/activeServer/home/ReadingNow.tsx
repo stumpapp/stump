@@ -330,7 +330,7 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 							>
 								{data.readProgress?.updatedAt
 									? formatDistanceToNow(new Date(data.readProgress?.updatedAt), { addSuffix: true })
-									: 'Unknown time ago'}
+									: 'unknown time ago'}
 							</Text>
 						</View>
 

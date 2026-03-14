@@ -351,57 +351,57 @@
 			},
 			"ignoreRules": {
 				"section": {
-					"heading": "Ignore rules",
-					"description": "Define glob patterns to ignore certain files or directories during a scan"
+					"heading": "Yoksayma kuralları",
+					"description": "Tarama sırasında belirli dosya veya dizinleri göz ardı etmek için glob kalıplarını tanımlayın"
 				},
-				"noRules": "No ignore rules have been configured",
-				"save": "Save changes",
+				"noRules": "Hiçbir yoksayma kuralı yapılandırılmamış",
+				"save": "Değişiklikleri kaydet",
 				"addRule": {
-					"label": "New rule",
-					"description": "Glob pattern to ignore files or directories",
-					"addButton": "Add rule",
+					"label": "Yeni kural",
+					"description": "Dosyaları ve klasörleri yoksaymak için glob kalıbı",
+					"addButton": "Kural ekle",
 					"ignoreParents": {
-						"title": "Ignore all parent directories",
-						"label": "Ignore parents"
+						"title": "Tüm üst dizinleri yok say",
+						"label": "Üst dizinleri yok say"
 					},
 					"ignoreSubdirs": {
-						"title": "Ignore all subdirectories",
-						"label": "Ignore subdirectories"
+						"title": "Tüm alt dizinleri yok say",
+						"label": "Alt dizinleri yok say"
 					}
 				},
-				"invalidGlob": "Invalid glob pattern",
-				"duplicateGlob": "Duplicate of an existing rule",
+				"invalidGlob": "Geçersiz glob kalıbı",
+				"duplicateGlob": "Mevcut bir kuralın kopyası",
 				"lockConfig": {
-					"lock": "Lock configuration",
-					"unlock": "Unlock configuration"
+					"lock": "Yapılandırmayı kilitle",
+					"unlock": "Yapılandırma kilidini aç"
 				},
-				"editRule": "Edit rule",
-				"deleteRule": "Delete rule",
-				"cancelEdit": "Cancel edit",
-				"confirmEdit": "Confirm edit"
+				"editRule": "Kuralı düzenle",
+				"deleteRule": "Kuralı sil",
+				"cancelEdit": "Düzenlemeyi iptal et",
+				"confirmEdit": "Düzenlemeyi onayla"
 			},
 			"convertOptions": {
 				"section": {
-					"heading": "File conversion",
-					"description": "Stump is capable of converting certain file formats to more compatible ones"
+					"heading": "Dosya dönüştürme",
+					"description": "Stump, belirli dosya formatlarını daha uyumlu formatlara dönüştürebilir"
 				},
 				"rarToZip": {
-					"label": "Convert RAR to ZIP",
-					"description": "Convert RAR/CBR files to ZIP/CBZ files during a scan"
+					"label": "RAR'ı ZIP'e dönüştür",
+					"description": "Tarama sırasında RAR/CBR dosyalarını ZIP/CBZ dosyalarına dönüştür"
 				},
 				"deleteRarAfter": {
-					"label": "Delete RAR after conversion",
-					"description": "Delete the original RAR/CBR file after conversion. This is irreversible"
+					"label": "Dönüştürme sonrası RAR'ı sil",
+					"description": "Dönüştürme işleminden sonra orijinal RAR/CBR dosyasını silin. Bu işlem geri alınamaz"
 				}
 			},
 			"scannerFeatures": {
 				"section": {
-					"heading": "Optional processing",
-					"description": "Opt-in processing features for the scanner",
-					"disclaimer": "These features involve additional file reads which may slow down the scan process"
+					"heading": "İsteğe bağlı işleme",
+					"description": "Tarayıcı için isteğe bağlı işlem özellikleri",
+					"disclaimer": "Bu özellikler, tarama işlemini yavaşlatabilecek ek dosya okuma işlemlerini gerektirir"
 				},
 				"processMetadata": {
-					"label": "Process metadata",
+					"label": "Meta veriyi işle",
 					"description": "Kütüphane dosyalarından meta verileri ayıklayın ve sonuçları veritabanında saklayın"
 				},
 				"watch": {
@@ -493,96 +493,96 @@
 					"path": "Yol",
 					"description": "Açıklama",
 					"tags": "Etiketler",
-					"pattern": "Pattern",
-					"ignoreRules": "Ignore rules",
-					"convertRar": "Convert RAR/CBR",
-					"deleteConversions": "Delete converted files",
-					"watch": "Watch directory for changes",
-					"processMetadata": "Process metadata",
-					"generateFileHashes": "Generate file hashes",
-					"generateKoreaderHashes": "Generate KoReader hashes",
-					"scaleEvenlyByFactor": "Evenly Scale",
-					"exact": "Exact Size",
-					"scaleDimension": "Explicitly Sized"
+					"pattern": "Desen",
+					"ignoreRules": "Yoksayma kuralları",
+					"convertRar": "RAR/CBR Dönüştür",
+					"deleteConversions": "Dönüştürülmüş dosyaları sil",
+					"watch": "Değişiklikler için dizini izle",
+					"processMetadata": "Meta veriyi işle",
+					"generateFileHashes": "Dosya hash değerlerini oluştur",
+					"generateKoreaderHashes": "KoReader hash değerlerini oluştur",
+					"scaleEvenlyByFactor": "Eşit Ölçeklendirme",
+					"exact": "Tam Boyut",
+					"scaleDimension": "Belirli Boyutta"
 				}
 			},
 			"buttons": {
-				"confirm": "Create Library"
+				"confirm": "Kütüphane Oluştur"
 			}
 		}
 	},
 	"fileExplorer": {
 		"uploadModal": {
 			"title": {
-				"books": "Upload books",
-				"series": "Upload series"
+				"books": "Kitap yükle",
+				"series": "Seri yükle"
 			},
 			"description": {
-				"books": "Add books directly to the current path in the file explorer",
-				"series": "Add a series directly to the current path in the file explorer"
+				"books": "Dosya gezgininde kitapları doğrudan geçerli konuma ekle",
+				"series": "Dosya gezgininde mevcut yola doğrudan bir seri ekle"
 			},
 			"seriesDisclaimer": [
-				"It must be a ",
-				"zipped file",
-				"containing the folder which should be the series, with all the books inside"
+				"Bu, diziyi oluşturan klasörü içeren ve içinde tüm kitapların bulunduğu",
+				"bir sıkıştırılmış",
+				"dosya olmalıdır"
 			],
 			"dropzone": {
-				"books": "Drag and drop books here",
-				"series": "Drag and drop a zip file here",
-				"alt": "Or click to browse your computer for books to upload"
+				"books": "Kitapları buraya sürükle ve bırak",
+				"series": "Biri zip dosyasını buraya sürükle ve bırak",
+				"alt": "Ya da yüklemek istediğiniz kitapları bilgisayarınızda aramak için buraya tıklayın"
 			},
-			"addedFiles": "Added files"
+			"addedFiles": "Eklenen dosyalar"
 		}
 	},
 	"librarySettingsScene": {
 		"heading": "Manage Library",
-		"subtitle": "Manage your library here. If you want a refresh on these settings, check out the",
-		"subtitleLink": "relevant documentation",
+		"subtitle": "Kütüphanenizi buradan yönetin. Bu ayarlarla ilgili bilgilerinizi tazelemek isterseniz,",
+		"subtitleLink": "ilgili belgelere göz atın",
 		"sidebar": {
-			"basics": "Basics",
+			"basics": "Temeller",
 			"options": {
-				"general": "General",
-				"reading": "Reading",
-				"scanning": "Scanning",
-				"thumbnails": "Thumbnails",
-				"ignore-rules": "Ignore Rules",
-				"analysis": "Analysis",
-				"label": "Options"
+				"general": "Genel",
+				"reading": "Okuma",
+				"scanning": "Tarama",
+				"thumbnails": "Küçük Resimler",
+				"ignore-rules": "Yoksayma Kuralları",
+				"analysis": "Analiz",
+				"label": "Şeçenekler"
 			},
 			"danger-zone": {
-				"access-control": "Access Control",
-				"delete": "Deletion",
-				"label": "Danger Zone"
+				"access-control": "Erişim Kontrolü",
+				"delete": "Silme",
+				"label": "Tehlikeli Bölge"
 			}
 		},
 		"basics": {
-			"title": "Basic Information",
-			"description": "The details of this library, including its name, path, and description",
+			"title": "Temel Bilgi",
+			"description": "Bu kütüphanenin adı, yolu ve açıklaması dahil olmak üzere ayrıntıları",
 			"form": {
-				"submit": "Update library"
+				"submit": "Kütüphaneyi güncelle"
 			}
 		},
 		"options/reading": {
-			"title": "Reading",
-			"description": "The default reader settings to use for books in this library. Any book can override these settings"
+			"title": "Okuma",
+			"description": "Bu kütüphanedeki kitaplar için kullanılacak varsayılan okuyucu ayarları. Herhangi bir kitap bu ayarları geçersiz kılabilir"
 		},
 		"options/scanning": {
-			"title": "Scanning",
-			"description": "Settings related to how Stump scans this library",
+			"title": "Tarama",
+			"description": "Stump'ın bu kütüphaneyi nasıl taradığına ilişkin ayarlar",
 			"sections": {
 				"configureScan": {
-					"heading": "Configure scan",
-					"description": "A scan with additional options for more fine-grained control",
+					"heading": "Taramayı yapılandır",
+					"description": "Daha ayrıntılı kontrol imkanı sunan ek seçeneklere sahip bir tarama",
 					"form": {
-						"alert": "These will override corresponding library-wide settings",
+						"alert": "Bunlar, kütüphane genelindeki ilgili ayarların yerine geçecektir",
 						"options": {
 							"forceRebuild": {
-								"label": "Force rebuild",
-								"description": "Rebuild every book in the library on disk",
-								"alert": "This will rebuild every book in the library from scratch, including metadata and hashes"
+								"label": "Yeniden oluşturmayı zorla",
+								"description": "Kütüphanedeki tüm kitapları diskten yeniden oluştur",
+								"alert": "Bu işlem, meta veriler ve hash değerleri de dahil olmak üzere, kütüphanedeki tüm kitapları sıfırdan yeniden oluşturacaktır"
 							},
 							"custom": {
-								"label": "Custom",
+								"label": "Özel",
 								"description": "Tarama ayarlarını özelleştirin",
 								"validation": {
 									"noSelection": "En az bir seçenek etkinleştirilmeli"
@@ -685,92 +685,92 @@
 		},
 		"danger-zone/delete": {
 			"title": "Deletion Actions",
-			"description": "Permanently delete this library and all of its contents or certain resources",
+			"description": "Bu kütüphaneyi ve tüm içeriğini ya da belirli kaynaklarını kalıcı olarak sil",
 			"sections": {
 				"cleanLibrary": {
-					"heading": "Clean library",
-					"description": "Remove all media and series that cannot be located on disk",
-					"disclaimerTitle": "No files will be deleted",
-					"disclaimer": "While this action will not delete any files, it will permanently delete all records relating to media and series which have a missing status",
+					"heading": "Kütüphaneyi temizle",
+					"description": "Diskte bulunamayan tüm medya ve serileri kaldır",
+					"disclaimerTitle": "Hiçbir dosya silinmeyecek",
+					"disclaimer": "Bu işlem herhangi bir dosyayı silmeyecek olsa da, eksik durumundaki medya ve serilerle ilgili tüm kayıtları kalıcı olarak silecektir",
 					"confirmation": {
-						"label": "Clean library",
-						"text": "Are you sure you want to clean this library?"
+						"label": "Kütüphaneyi temizle",
+						"text": "Kütüphaneyi temizlemek istediğinizdem emin misiniz?"
 					},
-					"emptyText": "There was nothing to clean"
+					"emptyText": "Temizlenecek bir şey yoktu"
 				},
 				"deleteLibrary": {
-					"heading": "Delete library",
+					"heading": "Kütüphaneyi sil",
 					"description": [
-						"Permanently delete this library and all its contents.",
-						"This action cannot be undone"
+						"Bu kütüphaneyi ve tüm içeriğini kalıcı olarak sil.",
+						"Bu işlem geri alınamaz"
 					]
 				}
 			}
 		}
 	},
 	"errorScene": {
-		"heading": "lol, oops",
-		"message": "An error occurred:",
+		"heading": "haydaaa, bak sen şu işe",
+		"message": "Bir hata oluştu:",
 		"buttons": {
-			"report": "Report Bug",
-			"copy": "Copy Error Details",
-			"goHome": "Go Home"
+			"report": "Hata Bildir",
+			"copy": "Hata Detaylarını Kopyala",
+			"goHome": "Anasayfaya Git"
 		}
 	},
 	"homeScene": {
 		"onDeck": {
-			"title": "Your next read",
+			"title": "Sıradaki okumanız",
 			"emptyState": {
-				"heading": "No books on deck",
-				"message": "Your next recommended books will show up here"
+				"heading": "Sırada kitap yok",
+				"message": "Sıradaki kitap önerilerin burada görünecek"
 			}
 		},
 		"continueReading": {
-			"title": "Continue reading",
+			"title": "Okumaya devam et",
 			"emptyState": {
-				"heading": "Nothing to show",
-				"message": "Any in-progress books you start will show up here"
+				"heading": "Gösterilecek bir şey yok",
+				"message": "Devam ettiğin kitaplar burada gösterilecek"
 			}
 		},
 		"recentlyAddedSeries": {
-			"title": "Recently added series",
+			"title": "En son eklenen seriler",
 			"emptyState": {
-				"heading": "No series to display",
-				"message": "Any series you add to your libraries will show up here"
+				"heading": "Gösterilecek seri yok",
+				"message": "Kütüphanelerine eklediğin seriler burada gösterilecek"
 			}
 		},
 		"recentlyAddedBooks": {
-			"title": "Recently added books",
+			"title": "En son eklenen kitaplar",
 			"emptyState": {
-				"heading": "Nothing to show",
-				"message": "Any recent books you add will show up here"
+				"heading": "Gösterilecek bir şey yok",
+				"message": "En son eklediğin kitaplar burada gösterilecek"
 			}
 		}
 	},
 	"metadataEditor": {
 		"labels": {
-			"ageRating": "Age rating",
-			"characters": "Characters",
-			"colorists": "Colorists",
-			"coverArtists": "Cover artists",
-			"day": "Day",
-			"editors": "Editors",
+			"ageRating": "Yaş sınırı",
+			"characters": "Karakterler",
+			"colorists": "Renklendirenler",
+			"coverArtists": "Kapak sanatçıları",
+			"day": "Gün",
+			"editors": "Editörler",
 			"format": "Format",
 			"identifierAmazon": "Amazon ID",
 			"identifierCalibre": "Calibre ID",
 			"identifierGoogle": "Google ID",
 			"identifierIsbn": "ISBN",
 			"identifierMobiAsin": "Mobi ASIN",
-			"identifierUuid": "Book UUID",
-			"genres": "Genres",
-			"inkers": "Inkers",
-			"language": "Language",
-			"letterers": "Letterers",
-			"links": "Links",
-			"month": "Month",
-			"notes": "Notes",
-			"number": "Number",
-			"pageCount": "Pages",
+			"identifierUuid": "Kitap UUID",
+			"genres": "Türler",
+			"inkers": "Mürekkepleyenler",
+			"language": "Dil",
+			"letterers": "Balonlayanlar",
+			"links": "Linkler",
+			"month": "Ay",
+			"notes": "Notlar",
+			"number": "Numara",
+			"pageCount": "Sayfalar",
 			"pencillers": "Çizimciler",
 			"publisher": "Yayıncı",
 			"series": "Seriler",
@@ -860,87 +860,87 @@
 						"description": "En az bir tanesi doğru olmalı"
 					},
 					"not": {
-						"label": "NOT",
-						"description": "None can be true"
+						"label": "DEĞİL",
+						"description": "Hiçbiri doğru olmamalı"
 					}
 				},
 				"grouping": {
-					"label": "Group by",
-					"description": "How the books in this smart list should be grouped",
+					"label": "Şuna göre grupla",
+					"description": "Bu akıllı listedeki kitaplar nasıl gruplandırılacağı",
 					"options": {
 						"by_books": {
-							"label": "None"
+							"label": "Hiçbiri"
 						},
 						"by_series": {
-							"label": "Series"
+							"label": "Seriler"
 						},
 						"by_library": {
-							"label": "Library"
+							"label": "Kütüphane"
 						}
 					}
 				},
 				"filters": {
-					"emptyState": "Add a group to get started",
+					"emptyState": "Başlamak için bir grup ekleyin",
 					"actions": {
-						"addFilter": "Add filter",
-						"addGroup": "Add group",
-						"deleteFilter": "Delete filter",
-						"deleteGroup": "Delete group"
+						"addFilter": "Filtre ekle",
+						"addGroup": "Grup ekle",
+						"deleteFilter": "Filtreyi sil",
+						"deleteGroup": "Grubu sil"
 					},
 					"is": "is",
 					"fieldSelect": {
 						"placeholder": "Attribute",
 						"source": {
-							"label": "Source",
-							"back": "Back",
+							"label": "Kaynak",
+							"back": "Geri",
 							"book": {
-								"label": "Book",
+								"label": "Kitap",
 								"attributes": {
-									"name": "Filename",
-									"size": "Size",
-									"extension": "Extension",
-									"status": "Status",
-									"path": "Path",
-									"pages": "Pages",
-									"tags": "Tags",
-									"createdAt": "Created at",
-									"updatedAt": "Updated at"
+									"name": "Dosya adı",
+									"size": "Boyut",
+									"extension": "Uzantı",
+									"status": "Durum",
+									"path": "Yol",
+									"pages": "Sayfalar",
+									"tags": "Etiketler",
+									"createdAt": "Oluşturulma tarihi",
+									"updatedAt": "Güncellenme tarihi"
 								}
 							},
 							"book_meta": {
 								"label": "Book Meta",
 								"attributes": {
-									"title": "Title",
-									"summary": "Summary",
-									"notes": "Notes",
-									"writers": "Writers",
-									"pencillers": "Pencillers",
-									"inkers": "Inkers",
-									"letterers": "Letterers",
-									"editors": "Editors",
-									"publisher": "Publisher",
-									"colorists": "Colorist",
-									"links": "Links",
-									"characters": "Characters",
-									"teams": "Teams",
-									"genres": "Genre",
-									"coverArtists": "Cover artists"
+									"title": "Başlık",
+									"summary": "Özet",
+									"notes": "Notlar",
+									"writers": "Yazarlar",
+									"pencillers": "Çizimciler",
+									"inkers": "Mürekkepleyenler",
+									"letterers": "Balonlayanlar",
+									"editors": "Editörler",
+									"publisher": "Yayıncı",
+									"colorists": "Renklendiren",
+									"links": "Linkler",
+									"characters": "Karakterler",
+									"teams": "Takımlar",
+									"genres": "Tür",
+									"coverArtists": "Kapak sanatçıları"
 								}
 							},
 							"series": {
-								"label": "Series",
+								"label": "Seriler",
 								"attributes": {
-									"name": "Name",
-									"path": "Path"
+									"name": "İsim",
+									"path": "Yol"
 								}
 							},
 							"series_meta": {
 								"label": "Series Meta",
 								"attributes": {
-									"title": "Title",
-									"summary": "Summary",
-									"publisher": "Publisher",
-									"imprint": "Imprint",
+									"title": "Başlık",
+									"summary": "Özet",
+									"publisher": "Yayıncı",
+									"imprint": "Künye",
 									"comicid": "Çizgi Roman ID",
 									"booktype": "Kitap türü",
 									"status": "Durum",
@@ -1050,11 +1050,11 @@
 		"inheritDisclaimer": "Bu API anahtarı tüm izinlerinizi devralacaktır, yani sizin yapabileceğiniz her şeyi yapabilir. Bu ayara dikkat edin"
 	},
 	"userSmartListsScene": {
-		"heading": "Smart lists",
+		"heading": "Akıllı listeler",
 		"subtitle": "Your favorite searches and filters saved for easy access",
 		"searchPlaceholder": "Filter smart lists",
 		"buttons": {
-			"createSmartList": "Create smart list"
+			"createSmartList": "Akıllı liste oluştur"
 		},
 		"list": {
 			"emptyState": {
@@ -1065,67 +1065,67 @@
 			"card": {
 				"meta": {
 					"figures": {
-						"books": "book",
-						"series": "series",
-						"library": "library"
+						"books": "kitap",
+						"series": "seriler",
+						"library": "kütüphane"
 					},
-					"matches": "Matches"
+					"matches": "Eşleşmeler"
 				}
 			}
 		}
 	},
 	"smartListSettingsScene": {
 		"sidebar": {
-			"basics": "Basics",
+			"basics": "Temeller",
 			"configuration": {
-				"label": "Configuration",
-				"access": "Access",
-				"filters": "Filters"
+				"label": "Yapılandırma",
+				"access": "Erişim",
+				"filters": "Filtreler"
 			},
 			"danger-zone": {
-				"delete": "Deletion",
-				"label": "Danger Zone"
+				"delete": "Silme",
+				"label": "Tehlikeli Bölge"
 			}
 		},
 		"basics": {
-			"title": "Basic Information",
-			"description": "The details of this smart list, including its name and description"
+			"title": "Temel Bilgi",
+			"description": "Bu akıllı listenin adı ve açıklaması dahil olmak üzere ayrıntıları"
 		},
 		"access": {
-			"title": "Access",
-			"description": "Control who can access this smart list",
+			"title": "Erişim",
+			"description": "Bu akıllı listeye kimlerin erişebileceğini kontrol et",
 			"sections": {
 				"visibility": {
 					"confirmation": {
-						"public": "This will make the list visible to everyone",
-						"private": "This will change the list to be private, hiding it from anyone who previously had access",
-						"shared": "You will need to share the list with specific users to give them access",
-						"fallback": "Are you sure you want to change the visibility of this list?"
+						"public": "Bu, listeyi herkese açık yapacaktır",
+						"private": "Bu, listeyi özel hale getirecek ve daha önce erişim izni olan herkesten gizleyecektir",
+						"shared": "Bu listeye erişim izni vermek için belirli kullanıcılarla paylaşmanız gerekecek",
+						"fallback": "Bu listenin görünürlüğünü değiştirmek istediğinizden emin misiniz?"
 					}
 				},
 				"accessManager": {
-					"disclaimer": "Sharing is not ready yet. Please check back later!"
+					"disclaimer": "Paylaşım henüz hazır değil. Lütfen daha sonra tekrar kontrol et!"
 				}
 			}
 		},
 		"filters": {
-			"title": "Filter Builder",
-			"description": "Manage the filters which construct this smart list"
+			"title": "Filtre Oluşturucu",
+			"description": "Bu akıllı listeyi oluşturan filtreleri yönetin"
 		},
 		"danger-zone/delete": {
-			"title": "Deletion Actions",
-			"description": "Permanently delete this smart list and all of its contents or certain resources",
+			"title": "Silme Eylemleri",
+			"description": "Bu akıllı listeyi ve tüm içeriğini ya da belirli kaynaklarını kalıcı olarak sil",
 			"sections": {
 				"deleteList": {
-					"heading": "Delete list",
+					"heading": "Listeyi sil",
 					"description": [
-						"Permanently delete this smart list and all its contents.",
-						"This action cannot be undone"
+						"Bu akıllı listeyi ve tüm içeriğini kalıcı olarak sil.",
+						"Bu işlem geri alınamaz"
 					],
 					"confirmation": {
-						"title": "Delete list",
-						"description": "Are you sure you want to delete this smart list?",
-						"confirm": "Delete list"
+						"title": "Listeyi sil",
+						"description": "Bu akıllı listeyi silmek istediğinizden emin misiniz?",
+						"confirm": "Listeyi sil"
 					}
 				}
 			}
@@ -1133,12 +1133,12 @@
 	},
 	"userSmartListScene": {
 		"navigation": {
-			"items": "Items",
-			"settings": "Settings"
+			"items": "Ögeler",
+			"settings": "Ayarlar"
 		},
 		"layout": {
 			"missingIdError": "This scene requires an ID in the URL",
-			"smartListNotFound": "Smart list not found",
+			"smartListNotFound": "Akıllı liste bulunamadı",
 			"viewCreateError": "Failed to create view",
 			"viewSaveError": "Failed to save view"
 		},
@@ -1317,7 +1317,7 @@
 					"description": "Some themes optionally support gradients for a more dynamic look"
 				},
 				"fontSelect": {
-					"label": "Font",
+					"label": "Yazı Tipi",
 					"description": "Customize the font used in the application"
 				},
 				"thumbnailRatioSelect": {

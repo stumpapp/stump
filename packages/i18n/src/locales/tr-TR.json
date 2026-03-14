@@ -93,102 +93,102 @@
 					"dokümantasyon"
 				],
 				"member": {
-					"label": "Member",
-					"placeholder": "Member",
-					"description": "The name of the default role for your book club"
+					"label": "Üye",
+					"placeholder": "Üye",
+					"description": "Kitap kulübünüzün varsayılan rolünün adı"
 				},
 				"moderator": {
-					"label": "Moderator",
-					"placeholder": "Moderator",
-					"description": "The name of the moderator role for your book club"
+					"label": "Moderatör",
+					"placeholder": "Moderatör",
+					"description": "Kitap kulübünüzün moderatör rolünün adı"
 				},
 				"admin": {
-					"label": "Admin",
-					"placeholder": "Admin",
-					"description": "The name of the admin role for your book club"
+					"label": "Yönetici",
+					"placeholder": "Yönetici",
+					"description": "Kitap kulübünüzün yönetici rolünün adı"
 				},
 				"creator": {
-					"label": "Creator",
-					"placeholder": "Creator",
-					"description": "The name of the creator role for your book club. This is you!"
+					"label": "Kurucu",
+					"placeholder": "Kurucu",
+					"description": "Kitap kulübünüzün kurucu rolünün adı. Bu sizsiniz!"
 				}
 			},
 			"membershipOptions": {
 				"displayName": {
-					"label": "Display Name",
+					"label": "Görünen Ad",
 					"placeholder": "oromei",
-					"description": "An optional display name for your membership in the book club. If set, this takes precedence over your username"
+					"description": "Kitap kulübündeki üyeliğiniz için isteğe bağlı bir görünen ad. Bu alan doldurulursa, kullanıcı adınızın yerine bu ad kullanılır"
 				},
 				"hideProgress": {
-					"label": "Hide Progress",
-					"description": "If enabled, your reading progress will be hidden from other members of the book club"
+					"label": "İlerlemeyi Gizle",
+					"description": "Bu seçenek etkinleştirildiğinde, okuma ilerlemeniz kitap kulübünün diğer üyelerinden gizlenecektir"
 				}
 			}
 		},
 		"validation": {
-			"missingName": "Name is required",
-			"alreadyTaken": "is already taken"
+			"missingName": "İsim gereklidir",
+			"alreadyTaken": "çoktan alınmış"
 		}
 	},
 	"createBookClubScene": {
-		"heading": "Create a new book club",
-		"subtitle": "You can create a private book club for a select few, or make it public for anyone on the server to join",
+		"heading": "Yeni bir kitap klübü oluştur",
+		"subtitle": "Seçkin birkaç kişi için özel bir kitap kulübü oluşturabilir ya da sunucudaki herkesin katılabileceği şekilde herkese açık hale getirebilirsiniz",
 		"form": {
-			"stepLabel": "Step",
+			"stepLabel": "Adım",
 			"steps": [
 				{
-					"label": "Basics",
-					"heading": "Basic Information",
-					"description": "The details of the club, including its name and description"
+					"label": "Temeller",
+					"heading": "Temel Bilgi",
+					"description": "Kitap kulübünün adı ve açıklaması dahil olmak üzere ayrıntıları"
 				},
 				{
-					"label": "Roles",
-					"heading": "Roles",
-					"description": "Customize the roles in your book club"
+					"label": "Roller",
+					"heading": "Roller",
+					"description": "Kitap klübündeki rolleri özelleştirin"
 				},
 				{
-					"label": "Membership",
-					"heading": "Membership Preferences",
-					"description": "Additional options for your book club"
+					"label": "Üyelik",
+					"heading": "Üyelik Tercihleri",
+					"description": "Kitap klübünüz için ek yapılandırmalar"
 				},
 				{
-					"label": "Review",
-					"heading": "Review",
-					"description": "Review your club settings before creating it"
+					"label": "Önizleme",
+					"heading": "Önizleme",
+					"description": "Oluşturmadan önce klüp ayarlarınızı kontrol edin"
 				}
 			],
 			"review": {
-				"yes": "Yes",
-				"no": "No",
-				"none": "None",
+				"yes": "Evet",
+				"no": "Hayır",
+				"none": "Hiçbiri",
 				"labels": {
-					"name": "Name",
-					"description": "Description"
+					"name": "İsim",
+					"description": "Açıklama"
 				}
 			},
-			"submit": "Create Book Club"
+			"submit": "Kitap Klübü Oluştur"
 		}
 	},
 	"bookClubSettingsScene": {
 		"sidebar": {
-			"basics": "Basics",
+			"basics": "Temeller",
 			"members": {
-				"members": "Members",
-				"roles": "Roles",
-				"label": "Membership"
+				"members": "Üyelik",
+				"roles": "Roller",
+				"label": "Üyelik"
 			},
 			"scheduling": {
-				"scheduler": "Scheduler",
-				"options": "Options",
-				"label": "Scheduling"
+				"scheduler": "Planlayıcı",
+				"options": "Şeçenekler",
+				"label": "Zamanlama"
 			},
 			"danger-zone": {
-				"delete": "Deletion",
-				"label": "Danger Zone"
+				"delete": "Silme",
+				"label": "Tehlikeli Bölge"
 			}
 		},
 		"basics": {
-			"title": "Basic Information",
+			"title": "Temel Bilgi",
 			"description": "Bu kitap kulübünün adı ve açıklaması dahil olmak üzere ayrıntıları",
 			"form": {
 				"submit": "Klübü güncelle"
@@ -300,53 +300,53 @@
 				},
 				"enableSwitch": {
 					"label": "Etkin",
-					"description": "Generate thumbnail images for this library"
+					"description": "Bu kitaplık için küçük resimler oluştur"
 				},
 				"resizeMethod": {
-					"label": "Resize Method",
+					"label": "Yeniden Boyutlandırma Yöntemi",
 					"options": {
-						"scaleEvenlyByFactor": "Evenly Scale",
-						"exact": "Exact Size",
-						"scaleDimension": "Auto Scaled",
-						"none": "None"
+						"scaleEvenlyByFactor": "Eşit Ölçeklendirme",
+						"exact": "Tam Boyut",
+						"scaleDimension": "Otomatik Ölçeklendirme",
+						"none": "Hiçbiri"
 					}
 				},
 				"scaleEvenlyByFactor": {
-					"description": "Scale the thumbnail by a factor of the original size. E.g., 0.65 will result in a thumbnail that is 65% of the original size",
+					"description": "Küçük resmi orijinal boyutunun belirli bir katı oranında küçültün. Örneğin, 0.65 değeri, orijinal boyutun %65'i kadar bir küçük resim oluşturur",
 					"factor": {
-						"label": "Scale Factor"
+						"label": "Ölçek Faktörü"
 					}
 				},
 				"exact": {
-					"description": "Resize the thumbnail to an exact size in pixels",
+					"description": "Küçük resmi tam olarak piksel cinsinden belirtilen boyuta getirin",
 					"width": {
-						"label": "Width"
+						"label": "Genişlik"
 					},
 					"height": {
-						"label": "Height"
+						"label": "Yükseklik"
 					}
 				},
 				"scaleDimension": {
-					"label": "Auto Scaled",
-					"description": "Set either the width or height of the thumbnail and auto-scale the other to keep the original aspect ratio",
+					"label": "Otomatik Ölçeklendirme",
+					"description": "Küçük resmin genişliğini veya yüksekliğini ayarlayın; orijinal en-boy oranını korumak için diğer boyut otomatik olarak ölçeklenecektir",
 					"dimension": {
-						"label": "Dimension",
+						"label": "Boyut",
 						"options": {
-							"width": "Width",
-							"height": "Height"
+							"width": "Genişlik",
+							"height": "Yükseklik"
 						}
 					},
 					"size": {
-						"label": "Size"
+						"label": "Boyut"
 					}
 				},
 				"format": {
-					"label": "Image format",
-					"description": "The format of the generated thumbnail images"
+					"label": "Görüntü formatı",
+					"description": "Oluşturulan küçük resim formatı"
 				},
 				"quality": {
-					"label": "Quality",
-					"description": "The quality of the generated thumbnail images, between 1 and 100"
+					"label": "Kalite",
+					"description": "Oluşturulan küçük resim kalitesi, 1 ile 100 arası"
 				}
 			},
 			"ignoreRules": {
@@ -1167,39 +1167,39 @@
 					}
 				},
 				"search": {
-					"placeholder": "Quick filter"
+					"placeholder": "Hızlı filtre"
 				},
 				"viewManager": {
 					"updateSelected": "Update selected",
-					"deleteSelected": "Delete view",
-					"create": "Create new view",
+					"deleteSelected": "Görünümü sil",
+					"create": "Yeni görünüm oluştur",
 					"modal": {
 						"heading": {
-							"create": "Create view",
-							"update": "Update view"
+							"create": "Görünüm oluştur",
+							"update": "Görünümü güncelle"
 						},
 						"description": {
-							"create": "Create a new view for this smart list",
-							"update": "Update the view"
+							"create": "Bu akıllı liste için yeni bir görünüm oluştur",
+							"update": "Görünümü güncelle"
 						},
 						"createForm": {
 							"name": {
-								"label": "Name",
-								"placeholder": "My view",
-								"description": "A friendly name to uniquely identify this view"
+								"label": "İsim",
+								"placeholder": "Görünümüm",
+								"description": "Bu görünümü benzersiz bir şekilde tanımlamak için kullanılan bir ad"
 							}
 						},
 						"updateForm": {
 							"name": {
-								"label": "Name",
-								"placeholder": "My view",
-								"description": "The updated name for this view, if desired"
+								"label": "İsim",
+								"placeholder": "Görünümüm",
+								"description": "İstenirse bu görünümün güncellenmiş adı"
 							}
 						}
 					},
 					"deleteModal": {
-						"title": "Delete view",
-						"description": "Are you sure you want to delete this view?"
+						"title": "Görünümü sil",
+						"description": "Bu görünümü silmek istediğinizden emin misiniz?"
 					}
 				}
 			}
@@ -1207,55 +1207,55 @@
 	},
 	"settingsScene": {
 		"navigation": {
-			"general": "General",
-			"logs": "Logs",
-			"server": "Server",
-			"jobs": "Jobs and Configuration",
-			"users": "User Management",
-			"desktop": "Desktop"
+			"general": "Genel",
+			"logs": "Günlükler",
+			"server": "Sunucu",
+			"jobs": "Görevler ve Yapılandırma",
+			"users": "Kullanıcı Yönetimi",
+			"desktop": "Masaüstü"
 		},
 		"sidebar": {
 			"personal": {
-				"account": "Account",
-				"appearance": "Preferences",
-				"api keys": "API keys",
-				"reader": "Reader",
-				"desktop": "Desktop",
-				"label": "Personal"
+				"account": "Hesap",
+				"appearance": "Tercihler",
+				"api keys": "API anahtarları",
+				"reader": "Okuyucu",
+				"desktop": "Masaüstü",
+				"label": "Kişisel"
 			},
 			"management": {
 				"general": "General",
-				"logs": "Logs",
-				"users": "Users",
-				"jobs": "Jobs",
-				"access": "Access",
-				"email": "Email",
-				"notifications": "Notifications",
-				"label": "Management"
+				"logs": "Günlükler",
+				"users": "Kullanıcılar",
+				"jobs": "Görevler",
+				"access": "Erişim",
+				"email": "E-posta",
+				"notifications": "Bildirimler",
+				"label": "Yönetim"
 			}
 		},
 		"app/account": {
-			"helmet": "Account settings",
-			"title": "Account settings",
-			"description": "Settings related to your account",
+			"helmet": "Hesap ayarları",
+			"title": "Hesap ayarları",
+			"description": "Hesabınızla ilgili ayarlar",
 			"sections": {
 				"account": {
 					"validation": {
-						"invalidUrl": "Please enter a valid URL",
-						"missingUsername": "Username is required"
+						"invalidUrl": "Lütfen geçerli bir URL girin",
+						"missingUsername": "Kullanıcı adı gereklidir"
 					},
 					"labels": {
-						"username": "Username",
-						"password": "Password",
-						"activeChangesPrompt": "You have unsaved changes"
+						"username": "Kullanıcı Adı",
+						"password": "Parola",
+						"activeChangesPrompt": "Kaydedilmemiş değişiklikleriniz var"
 					},
 					"errors": {
-						"updateFailed": "A server error occurred while updating your profile. Please try again."
+						"updateFailed": "Profilinizi güncellerken bir sunucu hatası oluştu. Lütfen tekrar deneyin."
 					},
 					"avatarPicker": {
-						"heading": "Set your Avatar Image",
-						"subtitle": "Stump supports custom avatars, which can be set by providing a URL to an image. Image uploads are not supported in order to reduce the amount of data stored on the server.",
-						"preview": "A preview will appear here once you have entered a URL.",
+						"heading": "Avatar Resmini ayarla",
+						"subtitle": "Stump, bir görüntü URL'si girerek ayarlanabilen özel avatarları desteklemektedir. Sunucuda depolanan veri miktarını azaltmak amacıyla görüntü yükleme özelliği desteklenmemektedir.",
+						"preview": "Bir URL girdiğinizde burada bir önizleme görünecektir.",
 						"labels": {
 							"imageUrl": "Image URL",
 							"customAvatar": "Custom Avatar"
@@ -1353,102 +1353,102 @@
 				},
 				"replacePrimarySidebar": {
 					"label": "Replace primary sidebar",
-					"description": "Any instance of a secondary sidebar will replace the primary sidebar instead of being displayed next to it",
+					"description": "İkincil kenar çubuğunun herhangi bir örneği, birincil kenar çubuğunun yanında görüntülenmek yerine onun yerini alacaktır",
 					"tooltips": {
-						"doubleSidebar": "This setting requires the settings sidebar to be enabled",
-						"topbar": "This setting is not currently supported when the primary navigation is set to top bar"
+						"doubleSidebar": "Bu ayarın kullanılabilmesi için ayarlar kenar çubuğunun etkinleştirilmesi gerekir",
+						"topbar": "Ana gezinme yöntemi üst çubuk olarak ayarlandığında bu ayar şu anda desteklenmemektedir"
 					}
 				},
 				"navigationArrangement": {
-					"label": "Navigation arrangement",
+					"label": "Gezinme düzeni",
 					"description": {
-						"sidebar": "Arrange and customize the navigation items in the sidebar",
-						"topbar": "Arrange and customize the navigation items in the topbar"
+						"sidebar": "Kenar çubuğundaki gezinme öğelerini düzenleyin ve kişiselleştirin",
+						"topbar": "Üst çubuktaki gezinme öğelerini düzenleyin ve kişiselleştirin"
 					},
-					"isLocked": "Arrangement is locked",
-					"lock": "Lock arrangement",
-					"unlock": "Unlock arrangement",
+					"isLocked": "Düzenleme kilitli",
+					"lock": "Düzenlemeyi kilitle",
+					"unlock": "Düzenleme kilidini aç",
 					"options": {
-						"HOME": "Home",
-						"EXPLORE": "Explore",
-						"LIBRARIES": "Libraries",
-						"BOOK_CLUBS": "Book clubs",
-						"SMART_LISTS": "Smart lists"
+						"HOME": "Anasayfa",
+						"EXPLORE": "Keşfet",
+						"LIBRARIES": "Kütüphaneler",
+						"BOOK_CLUBS": "Kitap klüpleri",
+						"SMART_LISTS": "Akıllı listeler"
 					},
 					"entityOptions": {
 						"createAction": {
-							"label": "Show create action",
-							"help": "Show the create action in the navigation"
+							"label": "Oluşturma eylemini göster",
+							"help": "Navigasyonda oluşturma eylemini göster"
 						},
 						"linkToAll": {
-							"label": "See all link",
-							"help": "A link to a page dedicated to viewing all items of this type"
+							"label": "Tüm linkleri gör",
+							"help": "Bu türdeki tüm öğeleri görüntülemek için ayrılmış bir sayfaya bağlantı"
 						}
 					}
 				},
 				"displaySpacing": {
-					"label": "Display spacing",
-					"description": "Adjusts the overall spacing between elements throughout the app",
+					"label": "Görüntü aralığı",
+					"description": "Uygulama genelinde öğeler arasındaki genel aralığı ayarlar",
 					"options": {
-						"default": "Default",
-						"compact": "Compact"
+						"default": "Varsayılan",
+						"compact": "Sıkışık"
 					},
-					"disclaimer": "* Compact display mode is not implemented yet"
+					"disclaimer": "Sıkışık görüntü modu henüz devreye alınmamıştır"
 				},
 				"maxWidthPreference": {
-					"label": "Adjusted width",
-					"description": "Stump applies a max-width to the viewport. This setting allows you to adjust or remove this limit",
-					"tooltip": "This setting is not currently supported when the primary navigation is set to sidebar"
+					"label": "Ayarlanmış genişlik",
+					"description": "Stump, görüntü alanına bir maksimum genişlik uygular. Bu ayar, bu sınırı değiştirmenize veya kaldırmanıza olanak tanır",
+					"tooltip": "Ana gezinme yöntemi kenar çubuğu olarak ayarlandığında bu ayar şu anda desteklenmemektedir"
 				},
 				"additionalPreferences": {
-					"label": "Additional preferences",
-					"description": "Customize the appearance and behavior of Stump with these additional settings"
+					"label": "Diğer tercihler",
+					"description": "Bu ek ayarlarla Stump'ın görünümünü ve davranışını özelleştirin"
 				},
 				"showThumbnailsInHeader": {
-					"label": "Show thumbnails in headers",
-					"description": "If you prefer to see thumbnails more often, this setting will show them in more places",
+					"label": "Başlıklarda küçük resimleri göster",
+					"description": "Küçük resimleri daha sık görmek isterseniz, bu ayar ile daha fazla yerde gösterilecektir",
 					"tooltips": {
-						"enabled": "This setting will show thumbnails in more places",
-						"disabled": "This setting will not show thumbnails in more places"
+						"enabled": "Bu ayar, küçük resimleri daha fazla yerde gösterecektir",
+						"disabled": "Bu ayar, daha fazla yerde küçük resimleri göstermeyecektir"
 					}
 				},
 				"hideScrollbarToggle": {
-					"label": "Hide scrollbar",
-					"description": "Some pages simply look better without a scrollbar, this setting will hide it when possible",
+					"label": "Kaydırma çubuğunu gizle",
+					"description": "Bazı sayfalar kaydırma çubuğu olmadan daha iyi görünür, bu ayar mümkün olduğunda kaydırma çubuğunu gizler",
 					"tooltips": {
-						"enabled": "This setting will hide the scrollbar on some pages",
-						"disabled": "This setting will show the scrollbar on some pages"
+						"enabled": "Bu ayar, bazı sayfalarda kaydırma çubuğunu gizleyecektir",
+						"disabled": "Bu ayar, bazı sayfalarda kaydırma çubuğunu gösterecektir"
 					}
 				},
 				"enableAlphabetFiltering": {
-					"label": "Alphabet filtering",
-					"description": "Show an alphabet filter when applicable"
+					"label": "Alfabetik filtreleme",
+					"description": "Mümkün olduğunda alfabetik filtreyi göster"
 				},
 				"enableFancyAnimations": {
-					"label": "Fancy animations",
-					"description": "A broad opt-in for fancier animations throughout the app"
+					"label": "Gösterişli animasyonlar",
+					"description": "Uygulama genelinde daha gösterişli animasyonlar için genel bir tercih seçeneği"
 				},
 				"queryIndicatorToggle": {
-					"label": "Background fetch indicator",
-					"description": "Show a loading indicator whenever a query is running in the background"
+					"label": "Arka planda veri alma göstergesi",
+					"description": "Arka planda bir sorgu çalıştırıldığında yükleme göstergesini göster"
 				},
 				"liveRefetchToggle": {
-					"label": "Live refetch",
-					"description": "Refetch queries on the fly to hydrate the UI with new data as it comes in. This can be resource intensive"
+					"label": "Anlık veri tazeleme",
+					"description": "Yeni veriler ulaştıkça arayüzü güncellemek için sorguları anlık olarak yeniler. Bu özellik yüksek kaynak tüketimine neden olabilir"
 				},
 				"enableJobOverlayToggle": {
-					"label": "Job overlay",
-					"description": "Show a floating overlay while a job is running"
+					"label": "Görev katmanı",
+					"description": "Görev yürütülürken ekran üzerinde bir katman göster"
 				}
 			}
 		},
 		"app/apiKeys": {
-			"helmet": "API keys",
-			"title": "API keys",
-			"description": "Manage your generated Stump API keys",
+			"helmet": "API anahtarları",
+			"title": "API anahtarları",
+			"description": "Oluşturduğunuz Stump API anahtarlarını yönetin",
 			"shared": {
 				"fields": {
-					"name": "Name",
+					"name": "İsim",
 					"expiration": "Expiration",
 					"last_used": "Last used",
 					"created": "Created",
@@ -1557,81 +1557,81 @@
 		"app/desktop": {
 			"helmet": "Desktop settings",
 			"title": "Desktop settings",
-			"description": "Settings related to the Stump desktop application",
+			"description": "Stump masaüstü uygulamasıyla ilgili ayarlar",
 			"sections": {
 				"configuredServers": {
-					"label": "Configured servers",
-					"description": "The list of Stump servers you can connect to",
-					"getStarted": "Add a server to get started",
+					"label": "Yapılandırılmış sunucular",
+					"description": "Bağlanabileceğiniz Stump sunucularının listesi",
+					"getStarted": "Başlamak için bir sunucu ekleyin",
 					"unreachableServer": {
-						"tooltip": "Server unreachable"
+						"tooltip": "Sunucuya ulaşılamıyor"
 					},
 					"activeServer": {
-						"tooltip": "Current server"
+						"tooltip": "Mevcut sunucu"
 					},
 					"addOrEditServer": {
 						"validation": {
-							"nameExists": "A server with this name already exists",
-							"nameForbidden": "This name is reserved",
-							"urlExists": "A server with this URL already exists"
+							"nameExists": "Bu isimde bir sunucu zaten var",
+							"nameForbidden": "Bu isim ayrılmış",
+							"urlExists": "Bu URL'de bir sunucu zaten var"
 						},
 						"fields": {
 							"name": {
-								"label": "Name",
-								"description": "A friendly name to identify this server",
-								"placeholder": "My server"
+								"label": "İsim",
+								"description": "Bu sunucuyu tanımlamak için bir isim",
+								"placeholder": "Sunucum"
 							},
 							"uri": {
 								"label": "URI",
-								"description": "The URL of the Stump server",
+								"description": "Stump sunucusunun URL'si",
 								"placeholder": "https://stump.example.com"
 							}
 						}
 					},
 					"addServer": {
-						"trigger": "Add server",
-						"title": "Add a new server",
-						"description": "Add a new Stump server to the desktop application",
-						"confirm": "Add server"
+						"trigger": "Sunucu ekle",
+						"title": "Yeni bir sunucu ekle",
+						"description": "Masaüstü uygulamasına yeni bir Stump sunucusu ekle",
+						"confirm": "Sunucu ekle"
 					},
 					"editServer": {
-						"tooltip": "Edit server",
-						"title": "Edit server",
-						"description": "Edit the details of this server",
-						"confirm": "Save changes"
+						"tooltip": "Sunucuyu düzenle",
+						"title": "Sunucuyu düzenle",
+						"description": "Bu sunucunun detaylarını düzenle",
+						"confirm": "Değişiklikleri kaydet"
 					},
 					"deleteServer": {
-						"tooltip": "Delete server",
+						"tooltip": "Sunucuyu sil",
 						"confirmation": {
-							"title": "Delete this server",
-							"description": "This will remove the server from the desktop application",
-							"disclaimerActiveServer": "This server is currently active. You will be logged out",
-							"disclaimerLastServer": "This is the last configured server. You will be logged out and have to reconfigure any servers in the initialization process",
-							"confirm": "Delete server"
+							"title": "Bu sunucuyu sil",
+							"description": "Bu işlem, sunucuyu masaüstü uygulamasından kaldıracaktır",
+							"disclaimerActiveServer": "Bu sunucu şu anda aktif. Oturumunuz kapatılacak",
+							"disclaimerLastServer": "Bu, yapılandırılmış son sunucudur. Oturumunuz kapatılacak ve başlatma işlemi sırasında sunucuları yeniden yapılandırmanız gerekecektir",
+							"confirm": "Sunucuyu sil"
 						}
 					},
 					"switchToServer": {
-						"tooltip": "Switch to server",
+						"tooltip": "Sunucuya geç",
 						"confirmation": {
-							"title": "Switch to this server",
-							"description": "This will log you out of your current server",
-							"confirm": "Switch to server",
-							"server": "Server",
+							"title": "Bu sunucuya geç",
+							"description": "Bu işlem, mevcut sunucunuzdaki oturumunuzu kapatacak",
+							"confirm": "Sunucuya geç",
+							"server": "Sunucu",
 							"uri": "URL"
 						}
 					},
 					"resetConfiguration": {
-						"label": "Delete all servers",
+						"label": "Tüm sunucuları sil",
 						"description": [
-							"Delete all configured servers from the desktop application",
-							"This action cannot be undone"
+							"Masaüstü uygulamasından tüm yapılandırılmış sunucuları kaldır",
+							"Bu işlem geri alınamaz"
 						],
 						"confirmation": {
-							"trigger": "Delete all servers",
-							"title": "Delete all servers",
-							"description": "This will remove all servers from the desktop application",
-							"disclaimer": "You will be logged out and have to reconfigure any servers in the initialization process",
-							"confirm": "Delete all servers"
+							"trigger": "Tüm sunucuları sil",
+							"title": "Tüm sunucuları sil",
+							"description": "Bu işlem, tüm sunucuları masaüstü uygulamasından kaldıracaktır",
+							"disclaimer": "Oturumunuz kapatılacak ve başlatma işlemi sırasında sunucuları yeniden yapılandırmanız gerekecektir",
+							"confirm": "Tüm sunucuları sil"
 						}
 					},
 					"resetTokens": {
@@ -1649,16 +1649,16 @@
 					}
 				},
 				"optionalFeatures": {
-					"label": "Optional features",
-					"description": "Manage the optional features unique to the desktop application",
+					"label": "İsteğe bağlı özellikler",
+					"description": "Masaüstü uygulamasına özgü isteğe bağlı özellikleri yönetin",
 					"bundledServer": {
-						"label": "Bundled server",
-						"description": "Run the bundled server in the background while the desktop application is running (requires restart)"
+						"label": "Dahili sunucu",
+						"description": "Masaüstü uygulaması çalışırken dahili sunucuyu arka planda çalıştır (yeniden başlatma gerektirir)"
 					},
 					"discordPresence": {
-						"label": "Discord Presence",
-						"description": "Display your Stump activity in Discord using Discord Rich Presence",
-						"reconnect": "Reconnect to Discord"
+						"label": "Discord Durumu",
+						"description": "Discord Rich Presence özelliğini kullanarak Discord'da Stump etkinliklerinizi görüntüleyin",
+						"reconnect": "Discord'a Yeniden Bağlan"
 					}
 				}
 			}
@@ -1768,102 +1768,102 @@
 						"columns": {
 							"name": "Type",
 							"description": "Description",
-							"status": "Status",
-							"createdAt": "Started At",
-							"elapsed": "Elapsed",
-							"tasks": "Tasks"
+							"status": "Durum",
+							"createdAt": "Başlangıç Tarihi",
+							"elapsed": "Geçen süre",
+							"tasks": "Görevler"
 						},
-						"emptyHeading": "There are no jobs to display",
-						"emptySubtitle": "You can't have a job if you don't have a job",
-						"deleteAllMessage": "Job history and statistics may be deleted from the database at any time. This action cannot be undone"
+						"emptyHeading": "Gösterilecek görev yok",
+						"emptySubtitle": "Görevin yoksa görevin yoktur",
+						"deleteAllMessage": "Görev geçmişi ve istatistikler herhangi bir zamanda veritabanından silinebilir. Bu işlem geri alınamaz"
 					},
 					"deleteJobHistory": {
-						"title": "Delete job history",
-						"description": "Permanently delete all job history from the database",
-						"confirmText": "Are you sure you want to delete all job history?",
-						"confirm": "Delete",
-						"emptyState": "No jobs to clear"
+						"title": "Görev geçmişini sil",
+						"description": "Veritabanından kalıcı olarak tüm görev geçmişini sil",
+						"confirmText": "Tüm görev geçmişini silmek istediğinden emin misin?",
+						"confirm": "Sil",
+						"emptyState": "Temizlenecek görev yok"
 					}
 				}
 			}
 		},
 		"server/users": {
-			"helmet": "User management",
-			"title": "Users",
-			"description": "Manage the users on this server",
+			"helmet": "Kullanıcı yönetimi",
+			"title": "Kullanıcılar",
+			"description": "Bu sunucudaki kullanıcıları yönet",
 			"createUser": {
-				"helmet": "Create user",
-				"title": "Create user",
-				"description": "Create a new user on this server"
+				"helmet": "Kullanıcı oluştur",
+				"title": "Kullanıcı oluştur",
+				"description": "Bu sunucudaki yeni bir kullanıcı oluştur"
 			},
 			"updateUser": {
-				"helmet": "Update user",
-				"title": "Update user",
-				"description": "Update the details of this user"
+				"helmet": "Kullanıcıyı güncelle",
+				"title": "Kullanıcıyı güncelle",
+				"description": "Bu kullanıcının detaylarını güncelle"
 			},
 			"createOrUpdateForm": {
 				"accessControl": {
-					"heading": "Access control and restrictions",
+					"heading": "Erişim kontrolü ve kısıtlamalar",
 					"subtitle": [
-						"Configure any restrictions you want to apply to this user. For more information about access control, see the",
-						"documentation"
+						"Bu kullanıcıya uygulamak istediğiniz kısıtlamaları yapılandırın. Erişim denetimi hakkında daha fazla bilgi için",
+						"dökümantasyona bakınız"
 					],
 					"ageRestriction": {
-						"label": "Age restriction",
-						"description": "Restricts the user from accessing content above the set age rating threshold",
+						"label": "Yaş kısıtlaması",
+						"description": "Kullanıcının, belirlenen yaş sınırının üzerindeki içeriğe erişmesini engeller",
 						"placeholder": "13",
 						"enforceUnset": {
-							"label": "Enforce on unset",
-							"description": "If enabled, users will be restricted from accessing content with no age rating available"
+							"label": "Derecelendirilmemiş olanları kısıtla",
+							"description": "Etkinleştirildiğinde, yaş derecelendirmesi bulunmayan içeriklere erişim kısıtlanır"
 						}
 					},
 					"tagRestriction": {
-						"label": "Tag restrictions",
-						"description": "Restricts the user from accessing content with the selected tags",
-						"placeholder": "Adult, Gore"
+						"label": "Etiket kısıtlamaları",
+						"description": "Kullanıcının, seçili etiketlere sahip içeriğe erişmesini engeller",
+						"placeholder": "Yetişkin, Şiddet"
 					}
 				},
 				"permissions": {
-					"heading": "Permissions",
+					"heading": "İzinler",
 					"subtitle": [
-						"Select the permissions you want to grant to this user. For more information on what each permission does, see the",
-						"documentation"
+						"Bu kullanıcıya vermek istediğiniz izinleri seçin. Her bir iznin ne işe yaradığı hakkında daha fazla bilgi için",
+						"dökümantasyona bakınız"
 					],
 					"bookclub": {
-						"label": "Book Clubs",
+						"label": "Kitap Klüpleri",
 						"read": {
-							"label": "Access book club features",
-							"description": "Allows the user to access book club features, including viewing and joining book clubs"
+							"label": "Kitap kulübü özelliklerine erişin",
+							"description": "Kullanıcının kitap kulüplerini görüntüleme ve bunlara katılma gibi kitap kulübü özelliklerine erişmesini sağlar"
 						},
 						"create": {
-							"label": "Create book clubs",
-							"description": "Allows the user to create new book clubs"
+							"label": "Kitap klüpleri oluştur",
+							"description": "Kullanıcının yeni kitap kulüpleri oluşturmasına olanak tanır"
 						}
 					},
 					"feature": {
-						"label": "Feature Opt-In",
+						"label": "Özellik Aboneliği",
 						"api_keys": {
-							"label": "API keys",
-							"description": "Allow the user to manage their own API keys"
+							"label": "API anahtarları",
+							"description": "Kullanıcının kendi API anahtarlarını yönetmesine izin verir"
 						},
 						"koreader_sync": {
-							"label": "KoReader sync",
-							"description": "Allow the user to access the KoReader sync integration"
+							"label": "KoReader senkronizasyonu",
+							"description": "Kullanıcının KoReader senkronizasyon entegrasyonuna erişmesine izin verir"
 						}
 					},
 					"file": {
-						"label": "File Management",
+						"label": "Dosya Yönetimi",
 						"explorer": {
 							"label": "File Explorer",
-							"description": "Allows the user to access the Library File Explorer.\nContent restriction is not supported when this feature is granted"
+							"description": "Kullanıcının çeşitli dosya gezginlerine erişmesine olanak tanır.\nBu özellik etkinleştirildiğinde içerik kısıtlamasının sağlanamayacağı unutulmamalıdır"
 						},
 						"download": {
-							"label": "Download files",
-							"description": "Allows the user to download files from the server"
+							"label": "Dosyaları indir",
+							"description": "Kullanıcının sunucudan dosyaları indirmesine izin verir"
 						},
 						"upload": {
-							"label": "Upload files",
-							"description": "Allows the user to upload files to the server"
+							"label": "Dosya yükle",
+							"description": "Kullanıcının sunucuya dosya yüklemesine izin verir"
 						}
 					},
 					"emailer": {

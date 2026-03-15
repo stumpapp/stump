@@ -1005,8 +1005,18 @@ export type Library = {
 };
 
 
+export type LibraryGenresArgs = {
+  sort?: InputMaybe<OrderDirection>;
+};
+
+
 export type LibraryMediaArgs = {
   take?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type LibraryPublishersArgs = {
+  sort?: InputMaybe<OrderDirection>;
 };
 
 

@@ -2944,6 +2944,8 @@ enum UserPermission {
 	SCAN_LIBRARY
 	"Grant access to manage the library (scan,edit,manage relations)"
 	MANAGE_LIBRARY
+	"Grant access to edit thumbnails for media/series"
+	EDIT_THUMBNAILS
 	"""
 	Grants access to edit any existing metadata for media/series. This will only
 	be applied to the database-level metadata.

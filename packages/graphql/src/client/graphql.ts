@@ -3974,6 +3974,8 @@ export enum UserPermission {
    * be applied to the database-level metadata.
    */
   EditMetadata = 'EDIT_METADATA',
+  /** Grant access to edit thumbnails for media/series */
+  EditThumbnails = 'EDIT_THUMBNAILS',
   /** Grant access to create an emailer */
   EmailerCreate = 'EMAILER_CREATE',
   /** Grant access to manage an emailer */

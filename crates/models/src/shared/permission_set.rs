@@ -75,12 +75,12 @@ impl AssociatedPermission for UserPermission {
 			},
 			UserPermission::ManageLibrary => vec![
 				UserPermission::ScanLibrary,
-				UserPermission::DeleteLibrary,
 				UserPermission::EditLibrary,
 				UserPermission::ManageLibrary,
+				UserPermission::EditThumbnails,
 			],
 			UserPermission::DeleteLibrary => {
-				vec![UserPermission::ManageLibrary, UserPermission::ScanLibrary]
+				vec![UserPermission::ManageLibrary]
 			},
 			UserPermission::CreateNotifier => vec![UserPermission::ReadNotifier],
 			UserPermission::ManageNotifier => vec![
@@ -96,6 +96,7 @@ impl AssociatedPermission for UserPermission {
 				vec![UserPermission::ReadJobs]
 			},
 			UserPermission::WriteBackMetadata => vec![UserPermission::EditMetadata],
+			UserPermission::EditThumbnails => vec![],
 			_ => vec![],
 		}
 	}

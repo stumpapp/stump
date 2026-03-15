@@ -45,6 +45,7 @@
           cargo-deny
           cargo-edit
           cargo-watch
+          bacon
 
           # Tauri deps
           curl
@@ -54,7 +55,6 @@
           openssl
           glib
           gtk3
-          libsoup_2_4
           webkitgtk_4_1
         ];
 

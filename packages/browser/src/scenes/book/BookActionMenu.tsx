@@ -211,7 +211,8 @@ export default function BookActionMenu({ book }: Props) {
 				},
 				{
 					items: [
-						...(checkPermission(UserPermission.ManageLibrary)
+						...(checkPermission(UserPermission.ManageLibrary) ||
+						checkPermission(UserPermission.EditThumbnails)
 							? [
 									{
 										label: 'Manage',

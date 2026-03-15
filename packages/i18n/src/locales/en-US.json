@@ -2394,6 +2394,10 @@
 		"WRITE_BACK_METADATA": {
 			"label": "Write back metadata",
 			"description": "Allows the user to write metadata changes back to the source files"
+		},
+		"EDIT_THUMBNAILS": {
+			"label": "Edit thumbnails",
+			"description": "Allows the user to edit thumbnails for books and series"
 		}
 	}
 }

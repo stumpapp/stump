@@ -1,5 +1,5 @@
 import { Heading } from '@stump/components'
-import { useFragment } from '@stump/graphql'
+import { useFragment, UserPermission } from '@stump/graphql'
 import sortBy from 'lodash/sortBy'
 import { Suspense, useEffect, useMemo } from 'react'
 import { Helmet } from 'react-helmet'
@@ -23,7 +23,7 @@ export default function BookOverviewScene() {
 	const {
 		data: { mediaById: media },
 	} = useBookOverview(id || '')
-	const { isServerOwner } = useAppContext()
+	const { checkPermission } = useAppContext()
 
 	if (!media) {
 		throw new Error('Book not found')
@@ -45,7 +45,7 @@ export default function BookOverviewScene() {
 	}, [id])
 
 	return (
-		<SceneContainer>
+		<SceneContainer className="gap-4">
 			<Suspense>
 				<Helmet>
 					<title>Stump | {media.resolvedName}</title>
@@ -53,7 +53,7 @@ export default function BookOverviewScene() {
 
 				<div className="flex h-full w-full flex-col gap-4">
 					<div className="flex flex-col items-center gap-3 tablet:mb-2 tablet:flex-row tablet:items-start">
-						<div className="flex w-full max-w-[200px] shrink-0 flex-col items-center gap-3">
+						<div className="flex w-full max-w-sm shrink-0 flex-col items-center gap-3 sm:max-w-[200px]">
 							<ProminentThumbnailImage
 								src={fragmentData.thumbnail.url}
 								alt={media.resolvedName}
@@ -77,7 +77,8 @@ export default function BookOverviewScene() {
 				</div>
 			</Suspense>
 
-			{isServerOwner && <BookFileInformation fragment={media} />}
+			{/*Note: There is no permission specific to file info but I am just taking a loose assumption here*/}
+			{checkPermission(UserPermission.ManageLibrary) && <BookFileInformation fragment={media} />}
 		</SceneContainer>
 	)
 }

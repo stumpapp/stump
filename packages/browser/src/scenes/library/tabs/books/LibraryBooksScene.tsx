@@ -1,4 +1,4 @@
-import { PREFETCH_STALE_TIME, useSDK, useSuspenseGraphQL } from '@stump/client'
+import { PREFETCH_STALE_TIME, useGraphQL, useSDK } from '@stump/client'
 import { usePrevious, usePreviousIsDifferent } from '@stump/components'
 import { graphql, InterfaceLayout, MediaFilterInput, MediaOrderBy } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
@@ -230,12 +230,7 @@ function LibraryBooksScene() {
 	)
 
 	const { sdk } = useSDK()
-	const {
-		data: {
-			media: { nodes, pageInfo },
-		},
-		isLoading,
-	} = useSuspenseGraphQL(
+	const { data, isLoading } = useGraphQL(
 		query,
 		getQueryKey(
 			sdk.cacheKeys.libraryBooks,
@@ -263,6 +258,15 @@ function LibraryBooksScene() {
 			},
 		},
 	)
+	const nodes = data?.media.nodes || []
+	const pageInfo = data?.media.pageInfo || {
+		__typename: 'OffsetPaginationInfo',
+		totalPages: 1,
+		currentPage: 1,
+		pageSize: pageSize,
+		pageOffset: (page - 1) * pageSize,
+		zeroBased: false,
+	}
 
 	if (pageInfo.__typename !== 'OffsetPaginationInfo') {
 		throw new Error('Expected OffsetPaginationInfo for LibraryBooksScene')

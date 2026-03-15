@@ -1,4 +1,4 @@
-import { PREFETCH_STALE_TIME, useSDK, useSuspenseGraphQL } from '@stump/client'
+import { PREFETCH_STALE_TIME, useGraphQL, useSDK } from '@stump/client'
 import { usePrevious } from '@stump/components'
 import { graphql, InterfaceLayout, MediaFilterInput, MediaOrderBy } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
@@ -223,12 +223,7 @@ function SeriesBooksScene() {
 	)
 
 	const { sdk } = useSDK()
-	const {
-		data: {
-			media: { nodes, pageInfo },
-		},
-		isLoading,
-	} = useSuspenseGraphQL(
+	const { data, isLoading } = useGraphQL(
 		query,
 		getQueryKey(
 			sdk.cacheKeys.seriesBooks,
@@ -254,6 +249,16 @@ function SeriesBooksScene() {
 			},
 		},
 	)
+
+	const nodes = data?.media.nodes || []
+	const pageInfo = data?.media.pageInfo || {
+		__typename: 'OffsetPaginationInfo',
+		currentPage: 1,
+		totalPages: 1,
+		pageSize,
+		pageOffset: (page - 1) * pageSize,
+		zeroBased: false,
+	}
 
 	if (pageInfo.__typename !== 'OffsetPaginationInfo') {
 		throw new Error('Invalid pagination type, expected OffsetPaginationInfo')

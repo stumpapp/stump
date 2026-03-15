@@ -2,7 +2,7 @@ import { useSDK } from '@stump/client'
 import { OPDSEntryBelongsTo, OPDSFeed, OPDSPublication } from '@stump/sdk'
 import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query'
 
-import { getBelongsToPosition } from './utils'
+import { getBelongsToPosition, hasLinkRel } from './utils'
 
 type UseRelatedPublicationsParams = {
 	seriesUrl?: string | null
@@ -19,7 +19,7 @@ export function useRelatedPublications({
 
 	const getNextPageParam = (lastPage: OPDSFeed) => {
 		const links = lastPage.links || []
-		const nextLink = links.find((link) => link.rel === 'next')
+		const nextLink = links.find((link) => hasLinkRel(link, 'next'))
 		if (nextLink) {
 			return nextLink.href
 		}

@@ -13,7 +13,7 @@ import { useActiveServer } from '../activeServer'
 import { GridImageItem } from '../grid'
 import { useGridItemSize } from '../grid/useGridItemSize'
 import RefreshControl from '../RefreshControl'
-import { getPublicationThumbnailURL } from './utils'
+import { getPublicationThumbnailURL, hasLinkRel } from './utils'
 
 type Props = {
 	feed: OPDSFeed
@@ -41,7 +41,7 @@ export default function PublicationFeed({
 	// the spec, so we just have to rely on the next link
 	const getNextPageParam = (lastPage: OPDSFeed) => {
 		const links = lastPage.links || []
-		const nextLink = links.find((link) => link.rel === 'next')
+		const nextLink = links.find((link) => hasLinkRel(link, 'next'))
 		if (nextLink) {
 			return nextLink.href
 		}
@@ -51,8 +51,8 @@ export default function PublicationFeed({
 	const { data, hasNextPage, fetchNextPage } = useInfiniteQuery({
 		initialPageParam: feedURL,
 		queryKey: [sdk.opds.keys.feed, feedURL, 'paged', pageSize],
-		queryFn: ({ pageParam = feedURL }) => {
-			return sdk.opds.feed(pageParam)
+		queryFn: ({ pageParam }) => {
+			return sdk.opds.feed(pageParam || feedURL)
 		},
 		placeholderData: keepPreviousData,
 		getNextPageParam,
@@ -109,6 +109,7 @@ export default function PublicationFeed({
 	return (
 		<SafeAreaView style={{ flex: 1 }} edges={['left', 'right']}>
 			<FlashList
+				key={feed.metadata.identifier + `has-header?-${Boolean(ListHeaderComponent)}`}
 				data={publications}
 				renderItem={renderItem}
 				contentContainerStyle={{

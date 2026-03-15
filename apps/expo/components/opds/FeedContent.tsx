@@ -27,14 +27,14 @@ export default function FeedContent({ feed, ...options }: Props) {
 	if (!hasContent) return null
 
 	return (
-		<View className="flex-1">
+		<View>
 			{feed.metadata.subtitle && (
 				<View className="px-4">
 					<FeedSubtitle value={feed.metadata.subtitle} />
 				</View>
 			)}
 
-			<View className="flex-1 gap-8 pt-4">
+			<View className="gap-8 pt-4">
 				<Navigation navigation={feed.navigation} {...options} />
 
 				{publicationGroups.map((group) => (

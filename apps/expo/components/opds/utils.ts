@@ -225,8 +225,14 @@ export const getStringField = (meta: OPDSMetadata, key: string) => {
 	return typeof value === 'string' ? value : null
 }
 
+export const hasLinkRel = (link: OPDSLink, target: string): boolean => {
+	const rel = link.rel
+	if (Array.isArray(rel)) return rel.includes(target)
+	return rel === target
+}
+
 export const getSelfLink = (links?: OPDSLink[] | null) =>
-	links?.find((link) => !!link?.href && link.rel === 'self')
+	links?.find((link) => !!link?.href && hasLinkRel(link, 'self'))
 
 export const getFirstSubsectionLink = (links?: OPDSLink[] | null) =>
 	links?.find((link) => !!link?.href && link.rel === 'subsection')

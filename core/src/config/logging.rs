@@ -33,23 +33,22 @@ pub fn init_tracing(config: &StumpConfig) {
 				.expect("Error invalid tracing directive for stump_server!"),
 		)
 		.add_directive(
+			"graphql=trace"
+				.parse()
+				.expect("Error invalid tracing directive for graphql!"),
+		)
+		.add_directive(
 			"tower_http=debug"
 				.parse()
 				.expect("Error invalid tracing directive for tower_http!"),
 		);
 
 	if config.verbosity > 2 {
-		env_filter = env_filter
-			.add_directive(
-				"quaint::connector::metrics=debug"
-					.parse()
-					.expect("Failed to parse tracing directive for quaint!"),
-			)
-			.add_directive(
-				"sqlx::query=debug"
-					.parse()
-					.expect("Failed to parse tracing directive for sqlx!"),
-			);
+		env_filter = env_filter.add_directive(
+			"sqlx::query=debug"
+				.parse()
+				.expect("Failed to parse tracing directive for sqlx!"),
+		);
 	}
 
 	if cfg!(debug_assertions) {

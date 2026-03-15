@@ -3,16 +3,16 @@
 		"heading": "Questo è strano",
 		"message": "Sei incappato su una pagina ancora in fase di sviluppo. Mi piacerebbe mostrarla, ma non è ancora abbastanza pronta.",
 		"homeLink": "Torna alla home",
-		"githubLink": "View the GitHub issue"
+		"githubLink": "Mostra la issue su GitHub"
 	},
 	"authScene": {
-		"claimHeading": "Initialize your server",
-		"claimText": "This Stump server is not initialized. Use the form below to create your account. Once created, you will have full access to all server features.",
+		"claimHeading": "Inizializza il server",
+		"claimText": "Questo server Stump non è inizializzato. Usa il modulo sottostante per creare il tuo account. Una volta creato, avrai accesso completo a tutte le funzionalità del server.",
 		"form": {
 			"validation": {
 				"missingUsername": "Il nome utente è obbligatorio",
 				"missingPassword": "La password è obbligatoria",
-				"usernameAlreadyExists": "Username already exists"
+				"usernameAlreadyExists": "Username già esistente"
 			},
 			"labels": {
 				"username": "Nome utente",
@@ -20,26 +20,26 @@
 			},
 			"buttons": {
 				"createAccount": "Crea un account",
-				"login": "Log in",
-				"loginWithOidc": "Log in with OIDC",
-				"createAccountWithOidc": "Create Account with OIDC"
+				"login": "Accedi",
+				"loginWithOidc": "Accedi con OIDC",
+				"createAccountWithOidc": "Crea un account con OIDC"
 			}
 		},
 		"toasts": {
 			"loggingIn": "Accesso in corso...",
-			"loggedIn": "Welcome back!",
-			"loggedInFirstTime": "Welcome!",
+			"loggedIn": "Bentornato!",
+			"loggedInFirstTime": "Benvenuto!",
 			"registering": "Registrazione in corso...",
 			"registered": "Registrazione completata!",
-			"loginFailed": "Login failed. Please try again",
-			"registrationFailed": "Registration failed. Please try again"
+			"loginFailed": "Accesso fallito. Riprova",
+			"registrationFailed": "Registrazione fallita. Riprova"
 		}
 	},
 	"adminLibrarySidebar": {
 		"libraryConfiguration": {
 			"heading": "Configurazione della libreria",
-			"subtitleCreating": "A preview of your new library will be shown below",
-			"subtitleEditing": "A preview of your library edits will be shown below"
+			"subtitleCreating": "Un'anteprima della tua nuova libreria verrà mostrata di seguito",
+			"subtitleEditing": "Un'anteprima delle modifiche alla libreria verrà mostrata di seguito"
 		}
 	},
 	"bookOverviewScene": {
@@ -53,12 +53,12 @@
 			}
 		},
 		"emailBook": {
-			"heading": "Email book",
-			"description": "Send this book to a device or email address",
+			"heading": "Invia libro per e-mail",
+			"description": "Invia questo libro a un dispositivo o a un indirizzo mail",
 			"form": {
 				"email": {
-					"label": "Email",
-					"placeholder": "Email address",
+					"label": "E-mail",
+					"placeholder": "Indirizzo e-mail",
 					"description": "An email address to send the book to. Click add to finalize each input"
 				},
 				"devices": {

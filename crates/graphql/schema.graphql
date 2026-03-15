@@ -937,8 +937,8 @@ type Library {
 	series(take: Int = null, skip: Int = null): [Series!]!
 	seriesAlphabet: JSONObject!
 	stats(allUsers: Boolean): LibraryStats!
-	genres: [String!]!
-	publishers: [String!]!
+	genres(sort: OrderDirection = null): [String!]!
+	publishers(sort: OrderDirection = null): [String!]!
 	tags: [Tag!]!
 	"""
 	A reference to the thumbnail image for the thumbnail. This will be a fully

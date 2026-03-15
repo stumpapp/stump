@@ -13,6 +13,7 @@ use models::{
 		alphabet::{AvailableAlphabet, EntityLetter},
 		enums::UserPermission,
 		image::ImageRef,
+		ordering::OrderDirection,
 	},
 };
 use sea_orm::{
@@ -153,8 +154,8 @@ impl Library {
 				LEFT JOIN media_metadata ON media.id = media_metadata.media_id
 				WHERE
 					media.series_id IN (
-						SELECT series.id 
-						FROM series 
+						SELECT series.id
+						FROM series
 						WHERE series.library_id = $1
 					)
 				GROUP BY
@@ -308,12 +309,17 @@ impl Library {
 		Ok(LibraryStats::from_query_result(&result, "")?)
 	}
 
-	async fn genres(&self, ctx: &Context<'_>) -> Result<Vec<String>> {
+	async fn genres(
+		&self,
+		ctx: &Context<'_>,
+		#[graphql(default)] sort: Option<OrderDirection>,
+	) -> Result<Vec<String>> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
 		let genre_strings = get_unique_str_list_metadata_fields(
 			self,
 			media_metadata::Column::Genres,
+			sort.unwrap_or(OrderDirection::Asc),
 			conn,
 		)
 		.await?;
@@ -321,12 +327,20 @@ impl Library {
 		Ok(genre_strings)
 	}
 
-	async fn publishers(&self, ctx: &Context<'_>) -> Result<Vec<String>> {
+	async fn publishers(
+		&self,
+		ctx: &Context<'_>,
+		#[graphql(default)] sort: Option<OrderDirection>,
+	) -> Result<Vec<String>> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let publisher_strings =
-			get_unique_metadata_fields(self, media_metadata::Column::Publisher, conn)
-				.await?;
+		let publisher_strings = get_unique_metadata_fields(
+			self,
+			media_metadata::Column::Publisher,
+			sort.unwrap_or(OrderDirection::Asc),
+			conn,
+		)
+		.await?;
 
 		Ok(publisher_strings)
 	}
@@ -389,6 +403,7 @@ pub struct LibraryStats {
 async fn get_unique_metadata_fields(
 	library: &Library,
 	column: media_metadata::Column,
+	sort: OrderDirection,
 	conn: &DatabaseConnection,
 ) -> Result<Vec<String>> {
 	let values = media_metadata::Entity::find()
@@ -417,6 +432,7 @@ async fn get_unique_metadata_fields(
 					.to_owned(),
 			),
 		)
+		.order_by(column, sort.into())
 		.into_tuple::<String>()
 		.all(conn)
 		.await?;
@@ -428,6 +444,7 @@ async fn get_unique_metadata_fields(
 async fn get_unique_str_list_metadata_fields(
 	library: &Library,
 	column: media_metadata::Column,
+	sort: OrderDirection,
 	conn: &DatabaseConnection,
 ) -> Result<Vec<String>> {
 	let csv_list = media_metadata::Entity::find()
@@ -469,5 +486,14 @@ async fn get_unique_str_list_metadata_fields(
 		}
 	}
 
-	Ok(unique_values.into_iter().collect())
+	let sorted_values = {
+		let mut vec: Vec<String> = unique_values.into_iter().collect();
+		match sort {
+			OrderDirection::Asc => vec.sort(),
+			OrderDirection::Desc => vec.sort_by(|a, b| b.cmp(a)),
+		}
+		vec
+	};
+
+	Ok(sorted_values)
 }

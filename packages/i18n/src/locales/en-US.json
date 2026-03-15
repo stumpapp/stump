@@ -261,7 +261,7 @@
 					"description": "Hide the series tab from the library navigation"
 				},
 				"skipBookOverview": {
-					"label": "Skip chapter overview",
+					"label": "Skip book overview",
 					"description": "Open the reader directly when selecting books in this library"
 				},
 				"options": {

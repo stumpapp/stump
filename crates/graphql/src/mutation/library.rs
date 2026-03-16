@@ -19,14 +19,14 @@ use sea_orm::{
 use stump_core::filesystem::{
 	image::{
 		generate_book_thumbnail, remove_thumbnails, GenerateThumbnailOptions,
-		ImageProcessorOptionsExt, PlaceholderGenerationJob,
-		PlaceholderGenerationJobConfig, PlaceholderGenerationJobScope,
-		ThumbnailGenerationJob, ThumbnailGenerationJobParams,
+		ImageProcessorOptionsExt, PlaceholderGenerationJobConfig,
+		PlaceholderGenerationJobScope, ThumbnailGenerationJobParams,
 	},
-	media::analysis::{AnalysisJobConfig, AnalyzeMediaJob, MediaAnalysisJobScope},
-	metadata::{MetadataFetchJob, MetadataFetchJobParams, MetadataFetchScope},
-	scanner::{LibraryScanJob, ScanOptions},
+	media::analysis::{AnalysisJobConfig, MediaAnalysisJobScope},
+	metadata::{MetadataFetchJobParams, MetadataFetchScope},
+	scanner::ScanOptions,
 };
+use stump_core::job::stump_job::StumpJob;
 use tokio::fs;
 
 use crate::{
@@ -67,13 +67,11 @@ impl LibraryMutation {
 			.await?
 			.ok_or("Library not found")?;
 
-		core.enqueue_job(
-			AnalyzeMediaJob::new(AnalysisJobConfig {
-				force_reanalysis,
-				scope: MediaAnalysisJobScope::Library(model.id),
-			})
-			.wrapped(),
-		)?;
+		core.enqueue(StumpJob::analyze_media(AnalysisJobConfig {
+			force_reanalysis,
+			scope: MediaAnalysisJobScope::Library(model.id),
+		}))
+		.await?;
 
 		Ok(true)
 	}
@@ -300,11 +298,12 @@ impl LibraryMutation {
 		txn.commit().await?;
 
 		if scan_after_creation {
-			core.enqueue_job(LibraryScanJob::new(
+			core.enqueue(StumpJob::library_scan(
 				created_library.id.clone(),
 				created_library.path.clone(),
 				None,
-			))?;
+			))
+			.await?;
 		}
 
 		if add_watcher {
@@ -553,11 +552,12 @@ impl LibraryMutation {
 		txn.commit().await?;
 
 		if scan_after_update {
-			core.enqueue_job(LibraryScanJob::new(
+			core.enqueue(StumpJob::library_scan(
 				updated_library.id.clone(),
 				updated_library.path.clone(),
 				None,
-			))?;
+			))
+			.await?;
 		}
 
 		if add_watcher {
@@ -812,12 +812,16 @@ impl LibraryMutation {
 			.ok_or("Library not found")?;
 		let config = config.ok_or("Library config not found")?;
 
-		let job_config = ThumbnailGenerationJob::new(
-			config.thumbnail_config.unwrap_or_default(),
-			ThumbnailGenerationJobParams::books_in_library(library.id, force_regenerate),
-		);
-
-		if let Err(error) = core.enqueue_job(job_config) {
+		if let Err(error) = core
+			.enqueue(StumpJob::thumbnail_generation(
+				config.thumbnail_config.unwrap_or_default(),
+				ThumbnailGenerationJobParams::books_in_library(
+					library.id,
+					force_regenerate,
+				),
+			))
+			.await
+		{
 			tracing::error!(?error, "Failed to enqueue thumbnail generation job");
 			return Err(error.into());
 		}
@@ -841,13 +845,17 @@ impl LibraryMutation {
 			.await?
 			.ok_or("Library not found")?;
 
-		let jobs_config = PlaceholderGenerationJob::new(PlaceholderGenerationJobConfig {
-			scope: PlaceholderGenerationJobScope::BooksInLibrary(library.id.clone()),
-			force_regenerate,
-		})
-		.wrapped();
-
-		if let Err(error) = core.enqueue_job(jobs_config) {
+		if let Err(error) = core
+			.enqueue(StumpJob::placeholder_generation(
+				PlaceholderGenerationJobConfig {
+					scope: PlaceholderGenerationJobScope::BooksInLibrary(
+						library.id.clone(),
+					),
+					force_regenerate,
+				},
+			))
+			.await
+		{
 			tracing::error!(?error, "Failed to enqueue placeholder generation job");
 			return Err(error.into());
 		}
@@ -943,10 +951,11 @@ impl LibraryMutation {
 			return Ok(false);
 		}
 
-		core.enqueue_job(MetadataFetchJob::new(MetadataFetchJobParams {
+		core.enqueue(StumpJob::metadata_fetch(MetadataFetchJobParams {
 			force_refetch,
 			scope: MetadataFetchScope::MediaInLibrary(library.id),
-		}))?;
+		}))
+		.await?;
 		tracing::debug!("Enqueued library metadata fetch job");
 
 		Ok(true)
@@ -1081,11 +1090,12 @@ impl LibraryMutation {
 			.await?
 			.ok_or("Library not found")?;
 
-		core.enqueue_job(LibraryScanJob::new(
+		core.enqueue(StumpJob::library_scan(
 			library.id,
 			library.path,
 			options.map(|o| o.0),
-		))?;
+		))
+		.await?;
 		tracing::debug!("Enqueued library scan job");
 
 		Ok(true)

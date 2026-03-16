@@ -3,7 +3,7 @@ use crate::{
 		analysis::job::{AnalyzeMediaJob, AnalyzeMediaOutput},
 		analyze_page, AnalyzedPage,
 	},
-	job::{error::JobError, JobExecuteLog, JobProgress, JobTaskOutput, WorkerCtx},
+	job::{error::JobError, JobContext, JobExecuteLog, JobProgress, JobTaskOutput},
 };
 
 use std::sync::{
@@ -63,7 +63,7 @@ async fn analyze_book_page(
 	path: String,
 	page: i32,
 	existing_analysis: ExistingPageAnalysis,
-	ctx: &WorkerCtx,
+	ctx: &JobContext,
 	force_reanalysis: bool,
 ) -> Result<BookPageAnalysisOutput, JobError> {
 	// If we aren't force reanalyzing and we have all of the things we need, return early
@@ -78,7 +78,7 @@ async fn analyze_book_page(
 		content_type,
 		height,
 		width,
-	} = analyze_page(&path, page, &ctx.config)?;
+	} = analyze_page(&path, page, ctx.config())?;
 
 	let dimensions = PageDimension { height, width };
 
@@ -91,7 +91,7 @@ async fn analyze_book_page(
 pub async fn safely_analyze_book(
 	book: MediaForProcessing,
 	existing_analysis: Option<MediaAnalysisData>,
-	ctx: &WorkerCtx,
+	ctx: &JobContext,
 	force_reanalysis: bool,
 ) -> JobTaskOutput<AnalyzeMediaJob> {
 	let mut output = AnalyzeMediaOutput::default();
@@ -113,7 +113,6 @@ pub async fn safely_analyze_book(
 		.map(|page_num| {
 			let book_path = book.path.clone();
 			let existing = existing_analysis.clone();
-			let ctx_clone = ctx.clone();
 			let completed = completed.clone();
 
 			async move {
@@ -121,12 +120,12 @@ pub async fn safely_analyze_book(
 					book_path,
 					page_num,
 					ExistingPageAnalysis::new(&existing, (page_num - 1) as usize),
-					&ctx_clone,
+					ctx,
 					force_reanalysis,
 				)
 				.await;
 				let count = completed.fetch_add(1, Ordering::Relaxed) + 1;
-				ctx_clone.report_progress(JobProgress::subtask_position(
+				ctx.report_progress(JobProgress::subtask_position(
 					count as i32,
 					page_count,
 				));
@@ -201,7 +200,7 @@ pub async fn safely_analyze_book(
 				.update_columns([media_analysis::Column::Data])
 				.to_owned(),
 		)
-		.exec(ctx.conn.as_ref())
+		.exec(ctx.conn())
 		.await
 	{
 		tracing::error!(

@@ -81,6 +81,14 @@ export type AggregatedReaction = {
   reactedByMe: Scalars['Boolean']['output'];
 };
 
+export type AnalyzeMediaOutput = {
+  __typename?: 'AnalyzeMediaOutput';
+  /** The number of media item updates performed */
+  mediaUpdated: Scalars['Int']['output'];
+  /** The number of pages in total that were analyzed to some extent */
+  pagesAnalyzed: Scalars['Int']['output'];
+};
+
 export type Apikey = {
   __typename?: 'Apikey';
   createdAt: Scalars['DateTime']['output'];
@@ -459,7 +467,7 @@ export type ConfidenceFactor = {
 /** An event that is emitted by the core and consumed by a client */
 export type CoreEvent = CreatedManySeries | CreatedMedia | CreatedOrUpdatedManyMedia | DiscoveredMissingLibrary | JobOutput | JobStarted | JobUpdate;
 
-export type CoreJobOutput = ExternalJobOutput | LibraryScanOutput | PlaceholderGenerationOutput | SeriesScanOutput | ThumbnailGenerationOutput;
+export type CoreJobOutput = AnalyzeMediaOutput | LibraryScanOutput | MetadataFetchJobOutput | PlaceholderGenerationOutput | SeriesScanOutput | ThumbnailGenerationOutput;
 
 export type CreateAnnotationInput = {
   annotationText?: InputMaybe<Scalars['String']['input']>;
@@ -513,6 +521,16 @@ export type CreateOrUpdateLibraryInput = {
   path: Scalars['String']['input'];
   scanAfterPersist?: Scalars['Boolean']['input'];
   tags?: InputMaybe<Array<Scalars['String']['input']>>;
+};
+
+export type CreateScheduledJobInput = {
+  /** The type-specific config. The kind is inferred from the variant provided. */
+  config: ScheduledJobConfigInput;
+  /** Whether the job is enabled. Defaults to `true`. */
+  enabled?: InputMaybe<Scalars['Boolean']['input']>;
+  name: Scalars['String']['input'];
+  /** A cron expression (e.g. `0 0 * * *` for daily at midnight) */
+  schedule: Scalars['String']['input'];
 };
 
 export type CreateUserInput = {
@@ -785,11 +803,6 @@ export type ExactDimensionResizeInput = {
   height: Scalars['Int']['input'];
   /** The width (in pixels) the resulting image should be resized to */
   width: Scalars['Int']['input'];
-};
-
-export type ExternalJobOutput = {
-  __typename?: 'ExternalJobOutput';
-  val: Scalars['JSON']['output'];
 };
 
 /** Metadata about a media item from an external metadata provider */
@@ -1203,6 +1216,11 @@ export enum LibraryPattern {
   CollectionBased = 'COLLECTION_BASED',
   SeriesBased = 'SERIES_BASED'
 }
+
+export type LibraryScanConfigInput = {
+  /** Library IDs to scan. An empty list means "all libraries". */
+  libraryIds: Array<Scalars['String']['input']>;
+};
 
 /** The data that is collected and updated during the execution of a library scan job */
 export type LibraryScanOutput = {
@@ -1686,6 +1704,24 @@ export enum MergeStrategy {
   PreferExternalAndMergeLists = 'PREFER_EXTERNAL_AND_MERGE_LISTS'
 }
 
+export type MetadataFetchJobOutput = {
+  __typename?: 'MetadataFetchJobOutput';
+  /** Number of entities that were auto-applied */
+  autoApplied: Scalars['Int']['output'];
+  /** Number of entities that failed during fetch */
+  failed: Scalars['Int']['output'];
+  /** Number of entities where matches were found */
+  matchesFound: Scalars['Int']['output'];
+  /** Number of entities where no matches were found */
+  noMatches: Scalars['Int']['output'];
+  /** Number of entities that were rate-limited */
+  rateLimited: Scalars['Int']['output'];
+  /** Number of entities that were skipped (already have matches) */
+  skipped: Scalars['Int']['output'];
+  /** Total number of entities processed */
+  totalProcessed: Scalars['Int']['output'];
+};
+
 export type MetadataFetchRecord = {
   __typename?: 'MetadataFetchRecord';
   acceptedMatchCandidate?: Maybe<MatchCandidate>;
@@ -1717,7 +1753,8 @@ export enum MetadataFetchStatus {
   InProgress = 'IN_PROGRESS',
   Matched = 'MATCHED',
   NotStarted = 'NOT_STARTED',
-  NoMatch = 'NO_MATCH'
+  NoMatch = 'NO_MATCH',
+  RateLimited = 'RATE_LIMITED'
 }
 
 /**
@@ -1824,6 +1861,11 @@ export enum MetadataResetImpact {
   Series = 'SERIES'
 }
 
+export type MetadataRetryConfigInput = {
+  /** Which metadata fetch statuses to retry (e.g. RATE_LIMITED, FAILED). */
+  statuses: Array<MetadataFetchStatus>;
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   /** Accept the top-ranked candidate for all pending metadata matches */
@@ -1883,7 +1925,7 @@ export type Mutation = {
    * A result containing the newly created reading list, or an error if creation failed.
    */
   createReadingList: ReadingList;
-  createScheduledJobConfig: ScheduledJobConfig;
+  createScheduledJob: ScheduledJob;
   createSmartList: SmartList;
   createSmartListView: SmartListView;
   /**
@@ -1939,7 +1981,7 @@ export type Mutation = {
    * A result containing the deleted reading list, or an error if deletion failed.
    */
   deleteReadingList: ReadingList;
-  deleteScheduledJobConfig: Scalars['Boolean']['output'];
+  deleteScheduledJob: Scalars['Boolean']['output'];
   deleteSmartList: SmartList;
   deleteSmartListView: SmartListView;
   /**
@@ -2075,7 +2117,7 @@ export type Mutation = {
    * A result containing the updated reading list, or an error if update failed.
    */
   updateReadingList: ReadingList;
-  updateScheduledJobConfig: ScheduledJobConfig;
+  updateScheduledJob: ScheduledJob;
   updateSeriesMetadata: Series;
   /**
    * Update the thumbnail for a series. This will replace the existing thumbnail with the the one
@@ -2270,8 +2312,8 @@ export type MutationCreateReadingListArgs = {
 };
 
 
-export type MutationCreateScheduledJobConfigArgs = {
-  input: ScheduledJobConfigInput;
+export type MutationCreateScheduledJobArgs = {
+  input: CreateScheduledJobInput;
 };
 
 
@@ -2401,7 +2443,7 @@ export type MutationDeleteReadingListArgs = {
 };
 
 
-export type MutationDeleteScheduledJobConfigArgs = {
+export type MutationDeleteScheduledJobArgs = {
   id: Scalars['Int']['input'];
 };
 
@@ -2740,9 +2782,9 @@ export type MutationUpdateReadingListArgs = {
 };
 
 
-export type MutationUpdateScheduledJobConfigArgs = {
+export type MutationUpdateScheduledJobArgs = {
   id: Scalars['Int']['input'];
-  input: ScheduledJobConfigInput;
+  input: UpdateScheduledJobInput;
 };
 
 
@@ -3196,7 +3238,7 @@ export type Query = {
   readingLists: PaginatedReadingListResponse;
   recentlyAddedMedia: PaginatedMediaResponse;
   recentlyAddedSeries: PaginatedSeriesResponse;
-  scheduledJobConfigs: Array<ScheduledJobConfig>;
+  scheduledJobs: Array<ScheduledJob>;
   series: PaginatedSeriesResponse;
   /** Returns the available alphabet for all series in the server */
   seriesAlphabet: Scalars['JSONObject']['output'];
@@ -3646,17 +3688,30 @@ export type ScaledDimensionResizeInput = {
   size: Scalars['Int']['input'];
 };
 
-export type ScheduledJobConfig = {
-  __typename?: 'ScheduledJobConfig';
+export type ScheduledJob = {
+  __typename?: 'ScheduledJob';
+  config?: Maybe<Scalars['JSON']['output']>;
+  createdAt: Scalars['DateTime']['output'];
+  enabled: Scalars['Boolean']['output'];
   id: Scalars['Int']['output'];
-  intervalSecs: Scalars['Int']['output'];
-  scanConfigs: Array<Library>;
+  kind: ScheduledJobKind;
+  lastRunAt?: Maybe<Scalars['DateTime']['output']>;
+  name: Scalars['String']['output'];
+  schedule: Scalars['String']['output'];
 };
 
-export type ScheduledJobConfigInput = {
-  includedLibraryIds: Array<Scalars['String']['input']>;
-  intervalSecs: Scalars['Int']['input'];
-};
+/** A oneOf input for the schedule config. The variant determines the job kind. */
+export type ScheduledJobConfigInput =
+  { libraryScan: LibraryScanConfigInput; metadataRetry?: never; }
+  |  { libraryScan?: never; metadataRetry: MetadataRetryConfigInput; };
+
+/** The kind of a scheduled job, aligned with the config variants */
+export enum ScheduledJobKind {
+  /** Scan one or more libraries on a cron schedule */
+  LibraryScan = 'LIBRARY_SCAN',
+  /** Retry fetching metadata for records that were rate-limited or failed */
+  MetadataRetry = 'METADATA_RETRY'
+}
 
 export type SendAttachmentEmailOutput = {
   __typename?: 'SendAttachmentEmailOutput';
@@ -4289,6 +4344,15 @@ export type UpdateBookClubInput = {
 
 export type UpdateCustomEmojiInput = {
   name: Scalars['String']['input'];
+};
+
+export type UpdateScheduledJobInput = {
+  /** Replace the config entirely. The kind is inferred from the variant. */
+  config?: InputMaybe<ScheduledJobConfigInput>;
+  enabled?: InputMaybe<Scalars['Boolean']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  /** A cron expression */
+  schedule?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type UpdateThumbnailInput = {
@@ -5555,7 +5619,7 @@ export type SeriesEditorSetLockedFieldsMutation = { __typename?: 'Mutation', set
 export type UseCoreEventSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
 
-export type UseCoreEventSubscription = { __typename?: 'Subscription', readEvents: { __typename: 'CreatedManySeries', count: number, libraryId: string } | { __typename: 'CreatedMedia', id: string, seriesId: string } | { __typename: 'CreatedOrUpdatedManyMedia', count: number, seriesId: string } | { __typename: 'DiscoveredMissingLibrary', id: string } | { __typename: 'JobOutput', id: string, output: { __typename: 'ExternalJobOutput' } | { __typename: 'LibraryScanOutput', createdMedia: number, createdSeries: number, updatedMedia: number, updatedSeries: number } | { __typename: 'PlaceholderGenerationOutput' } | { __typename: 'SeriesScanOutput', createdMedia: number, updatedMedia: number } | { __typename: 'ThumbnailGenerationOutput' } } | { __typename: 'JobStarted', id: string } | { __typename: 'JobUpdate', id: string, status?: JobStatus | null, message?: string | null, completedTasks?: number | null, remainingTasks?: number | null, completedSubtasks?: number | null, totalSubtasks?: number | null } };
+export type UseCoreEventSubscription = { __typename?: 'Subscription', readEvents: { __typename: 'CreatedManySeries', count: number, libraryId: string } | { __typename: 'CreatedMedia', id: string, seriesId: string } | { __typename: 'CreatedOrUpdatedManyMedia', count: number, seriesId: string } | { __typename: 'DiscoveredMissingLibrary', id: string } | { __typename: 'JobOutput', id: string, output: { __typename: 'AnalyzeMediaOutput' } | { __typename: 'LibraryScanOutput', createdMedia: number, createdSeries: number, updatedMedia: number, updatedSeries: number } | { __typename: 'MetadataFetchJobOutput' } | { __typename: 'PlaceholderGenerationOutput' } | { __typename: 'SeriesScanOutput', createdMedia: number, updatedMedia: number } | { __typename: 'ThumbnailGenerationOutput' } } | { __typename: 'JobStarted', id: string } | { __typename: 'JobUpdate', id: string, status?: JobStatus | null, message?: string | null, completedTasks?: number | null, remainingTasks?: number | null, completedSubtasks?: number | null, totalSubtasks?: number | null } };
 
 export type UsePreferencesMutationVariables = Exact<{
   input: UpdateUserPreferencesInput;
@@ -5958,7 +6022,7 @@ export type ScanRecordInspectorJobsQueryVariables = Exact<{
 }>;
 
 
-export type ScanRecordInspectorJobsQuery = { __typename?: 'Query', jobById?: { __typename?: 'Job', id: string, outputData?: { __typename: 'ExternalJobOutput' } | { __typename: 'LibraryScanOutput', totalFiles: number, totalDirectories: number, ignoredFiles: number, skippedFiles: number, ignoredDirectories: number, createdMedia: number, updatedMedia: number, createdSeries: number, updatedSeries: number } | { __typename: 'PlaceholderGenerationOutput' } | { __typename: 'SeriesScanOutput' } | { __typename: 'ThumbnailGenerationOutput' } | null, logs?: Array<{ __typename?: 'Log', id: number }> } | null };
+export type ScanRecordInspectorJobsQuery = { __typename?: 'Query', jobById?: { __typename?: 'Job', id: string, outputData?: { __typename: 'AnalyzeMediaOutput' } | { __typename: 'LibraryScanOutput', totalFiles: number, totalDirectories: number, ignoredFiles: number, skippedFiles: number, ignoredDirectories: number, createdMedia: number, updatedMedia: number, createdSeries: number, updatedSeries: number } | { __typename: 'MetadataFetchJobOutput' } | { __typename: 'PlaceholderGenerationOutput' } | { __typename: 'SeriesScanOutput' } | { __typename: 'ThumbnailGenerationOutput' } | null, logs?: Array<{ __typename?: 'Log', id: number }> } | null };
 
 export type DeleteLibraryThumbnailsMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -6260,6 +6324,27 @@ export type ServerStatsQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type ServerStatsQuery = { __typename?: 'Query', numberOfLibraries: number, numberOfSeries: number, mediaCount: number, mediaDiskUsage: number };
 
+export type CreateScheduledJobMutationVariables = Exact<{
+  input: CreateScheduledJobInput;
+}>;
+
+
+export type CreateScheduledJobMutation = { __typename?: 'Mutation', createScheduledJob: (
+    { __typename?: 'ScheduledJob' }
+    & { ' $fragmentRefs'?: { 'ScheduledJobRowFragment': ScheduledJobRowFragment } }
+  ) };
+
+export type UpdateScheduledJobMutationVariables = Exact<{
+  id: Scalars['Int']['input'];
+  input: UpdateScheduledJobInput;
+}>;
+
+
+export type UpdateScheduledJobMutation = { __typename?: 'Mutation', updateScheduledJob: (
+    { __typename?: 'ScheduledJob' }
+    & { ' $fragmentRefs'?: { 'ScheduledJobRowFragment': ScheduledJobRowFragment } }
+  ) };
+
 export type DeleteJobHistoryConfirmationMutationVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -6286,9 +6371,11 @@ export type JobActionMenuDeleteLogsMutationVariables = Exact<{
 
 export type JobActionMenuDeleteLogsMutation = { __typename?: 'Mutation', deleteJobLogs: { __typename?: 'DeleteJobAssociatedLogs', affectedRows: number } };
 
-type JobDataInspector_ExternalJobOutput_Fragment = { __typename: 'ExternalJobOutput', val: any } & { ' $fragmentName'?: 'JobDataInspector_ExternalJobOutput_Fragment' };
+type JobDataInspector_AnalyzeMediaOutput_Fragment = { __typename: 'AnalyzeMediaOutput' } & { ' $fragmentName'?: 'JobDataInspector_AnalyzeMediaOutput_Fragment' };
 
 type JobDataInspector_LibraryScanOutput_Fragment = { __typename: 'LibraryScanOutput', totalFiles: number, totalDirectories: number, ignoredFiles: number, skippedFiles: number, ignoredDirectories: number, createdMedia: number, updatedMedia: number, createdSeries: number, updatedSeries: number } & { ' $fragmentName'?: 'JobDataInspector_LibraryScanOutput_Fragment' };
+
+type JobDataInspector_MetadataFetchJobOutput_Fragment = { __typename: 'MetadataFetchJobOutput' } & { ' $fragmentName'?: 'JobDataInspector_MetadataFetchJobOutput_Fragment' };
 
 type JobDataInspector_PlaceholderGenerationOutput_Fragment = { __typename: 'PlaceholderGenerationOutput' } & { ' $fragmentName'?: 'JobDataInspector_PlaceholderGenerationOutput_Fragment' };
 
@@ -6296,34 +6383,22 @@ type JobDataInspector_SeriesScanOutput_Fragment = { __typename: 'SeriesScanOutpu
 
 type JobDataInspector_ThumbnailGenerationOutput_Fragment = { __typename: 'ThumbnailGenerationOutput', visitedFiles: number, skippedFiles: number, generatedThumbnails: number, removedThumbnails: number } & { ' $fragmentName'?: 'JobDataInspector_ThumbnailGenerationOutput_Fragment' };
 
-export type JobDataInspectorFragment = JobDataInspector_ExternalJobOutput_Fragment | JobDataInspector_LibraryScanOutput_Fragment | JobDataInspector_PlaceholderGenerationOutput_Fragment | JobDataInspector_SeriesScanOutput_Fragment | JobDataInspector_ThumbnailGenerationOutput_Fragment;
+export type JobDataInspectorFragment = JobDataInspector_AnalyzeMediaOutput_Fragment | JobDataInspector_LibraryScanOutput_Fragment | JobDataInspector_MetadataFetchJobOutput_Fragment | JobDataInspector_PlaceholderGenerationOutput_Fragment | JobDataInspector_SeriesScanOutput_Fragment | JobDataInspector_ThumbnailGenerationOutput_Fragment;
 
-export type JobSchedulerConfigQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type JobSchedulerConfigQuery = { __typename?: 'Query', libraries: { __typename?: 'PaginatedLibraryResponse', nodes: Array<{ __typename?: 'Library', id: string, name: string, emoji?: string | null }> }, scheduledJobConfigs: Array<{ __typename?: 'ScheduledJobConfig', id: number, intervalSecs: number, scanConfigs: Array<{ __typename?: 'Library', id: string, name: string }> }> };
-
-export type JobSchedulerUpdateMutationVariables = Exact<{
-  id: Scalars['Int']['input'];
-  input: ScheduledJobConfigInput;
-}>;
+export type ScheduledJobsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type JobSchedulerUpdateMutation = { __typename?: 'Mutation', updateScheduledJobConfig: { __typename?: 'ScheduledJobConfig', id: number, intervalSecs: number, scanConfigs: Array<{ __typename?: 'Library', id: string, name: string }> } };
+export type ScheduledJobsQuery = { __typename?: 'Query', libraries: { __typename?: 'PaginatedLibraryResponse', nodes: Array<{ __typename?: 'Library', id: string, name: string, emoji?: string | null }> }, scheduledJobs: Array<(
+    { __typename?: 'ScheduledJob', id: number, name: string }
+    & { ' $fragmentRefs'?: { 'ScheduledJobRowFragment': ScheduledJobRowFragment } }
+  )> };
 
-export type JobSchedulerDeleteMutationVariables = Exact<{
+export type DeleteScheduledJobMutationVariables = Exact<{
   id: Scalars['Int']['input'];
 }>;
 
 
-export type JobSchedulerDeleteMutation = { __typename?: 'Mutation', deleteScheduledJobConfig: boolean };
-
-export type JobSchedulerCreateMutationVariables = Exact<{
-  input: ScheduledJobConfigInput;
-}>;
-
-
-export type JobSchedulerCreateMutation = { __typename?: 'Mutation', createScheduledJobConfig: { __typename?: 'ScheduledJobConfig', id: number, intervalSecs: number, scanConfigs: Array<{ __typename?: 'Library', id: string, name: string }> } };
+export type DeleteScheduledJobMutation = { __typename?: 'Mutation', deleteScheduledJob: boolean };
 
 export type JobTableQueryVariables = Exact<{
   pagination: Pagination;
@@ -6331,11 +6406,14 @@ export type JobTableQueryVariables = Exact<{
 
 
 export type JobTableQuery = { __typename?: 'Query', jobs: { __typename?: 'PaginatedJobResponse', nodes: Array<{ __typename?: 'Job', id: string, name: string, description?: string | null, status: JobStatus, createdAt: any, completedAt?: any | null, msElapsed: number, logCount: number, outputData?: (
-        { __typename?: 'ExternalJobOutput' }
-        & { ' $fragmentRefs'?: { 'JobDataInspector_ExternalJobOutput_Fragment': JobDataInspector_ExternalJobOutput_Fragment } }
+        { __typename?: 'AnalyzeMediaOutput' }
+        & { ' $fragmentRefs'?: { 'JobDataInspector_AnalyzeMediaOutput_Fragment': JobDataInspector_AnalyzeMediaOutput_Fragment } }
       ) | (
         { __typename?: 'LibraryScanOutput' }
         & { ' $fragmentRefs'?: { 'JobDataInspector_LibraryScanOutput_Fragment': JobDataInspector_LibraryScanOutput_Fragment } }
+      ) | (
+        { __typename?: 'MetadataFetchJobOutput' }
+        & { ' $fragmentRefs'?: { 'JobDataInspector_MetadataFetchJobOutput_Fragment': JobDataInspector_MetadataFetchJobOutput_Fragment } }
       ) | (
         { __typename?: 'PlaceholderGenerationOutput' }
         & { ' $fragmentRefs'?: { 'JobDataInspector_PlaceholderGenerationOutput_Fragment': JobDataInspector_PlaceholderGenerationOutput_Fragment } }
@@ -6346,6 +6424,8 @@ export type JobTableQuery = { __typename?: 'Query', jobs: { __typename?: 'Pagina
         { __typename?: 'ThumbnailGenerationOutput' }
         & { ' $fragmentRefs'?: { 'JobDataInspector_ThumbnailGenerationOutput_Fragment': JobDataInspector_ThumbnailGenerationOutput_Fragment } }
       ) | null }>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', currentPage: number, totalPages: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
+
+export type ScheduledJobRowFragment = { __typename?: 'ScheduledJob', id: number, name: string, kind: ScheduledJobKind, schedule: string, config?: any | null, enabled: boolean, createdAt: any, lastRunAt?: any | null } & { ' $fragmentName'?: 'ScheduledJobRowFragment' };
 
 export type LiveLogsFeedSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
@@ -7434,11 +7514,20 @@ export const JobDataInspectorFragmentDoc = new TypedDocumentString(`
     generatedThumbnails
     removedThumbnails
   }
-  ... on ExternalJobOutput {
-    val
-  }
 }
     `, {"fragmentName":"JobDataInspector"}) as unknown as TypedDocumentString<JobDataInspectorFragment, unknown>;
+export const ScheduledJobRowFragmentDoc = new TypedDocumentString(`
+    fragment ScheduledJobRow on ScheduledJob {
+  id
+  name
+  kind
+  schedule
+  config
+  enabled
+  createdAt
+  lastRunAt
+}
+    `, {"fragmentName":"ScheduledJobRow"}) as unknown as TypedDocumentString<ScheduledJobRowFragment, unknown>;
 export const ExistingProviderCardFragmentDoc = new TypedDocumentString(`
     fragment ExistingProviderCard on MetadataProviderConfigModel {
   id
@@ -12115,6 +12204,38 @@ export const ServerStatsDocument = new TypedDocumentString(`
   mediaDiskUsage
 }
     `) as unknown as TypedDocumentString<ServerStatsQuery, ServerStatsQueryVariables>;
+export const CreateScheduledJobDocument = new TypedDocumentString(`
+    mutation CreateScheduledJob($input: CreateScheduledJobInput!) {
+  createScheduledJob(input: $input) {
+    ...ScheduledJobRow
+  }
+}
+    fragment ScheduledJobRow on ScheduledJob {
+  id
+  name
+  kind
+  schedule
+  config
+  enabled
+  createdAt
+  lastRunAt
+}`) as unknown as TypedDocumentString<CreateScheduledJobMutation, CreateScheduledJobMutationVariables>;
+export const UpdateScheduledJobDocument = new TypedDocumentString(`
+    mutation UpdateScheduledJob($id: Int!, $input: UpdateScheduledJobInput!) {
+  updateScheduledJob(id: $id, input: $input) {
+    ...ScheduledJobRow
+  }
+}
+    fragment ScheduledJobRow on ScheduledJob {
+  id
+  name
+  kind
+  schedule
+  config
+  enabled
+  createdAt
+  lastRunAt
+}`) as unknown as TypedDocumentString<UpdateScheduledJobMutation, UpdateScheduledJobMutationVariables>;
 export const DeleteJobHistoryConfirmationDocument = new TypedDocumentString(`
     mutation DeleteJobHistoryConfirmation {
   deleteJobHistory {
@@ -12139,8 +12260,8 @@ export const JobActionMenuDeleteLogsDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<JobActionMenuDeleteLogsMutation, JobActionMenuDeleteLogsMutationVariables>;
-export const JobSchedulerConfigDocument = new TypedDocumentString(`
-    query JobSchedulerConfig {
+export const ScheduledJobsDocument = new TypedDocumentString(`
+    query ScheduledJobs {
   libraries(pagination: {none: {unpaginated: true}}) {
     nodes {
       id
@@ -12148,45 +12269,27 @@ export const JobSchedulerConfigDocument = new TypedDocumentString(`
       emoji
     }
   }
-  scheduledJobConfigs {
+  scheduledJobs {
     id
-    intervalSecs
-    scanConfigs {
-      id
-      name
-    }
+    name
+    ...ScheduledJobRow
   }
 }
-    `) as unknown as TypedDocumentString<JobSchedulerConfigQuery, JobSchedulerConfigQueryVariables>;
-export const JobSchedulerUpdateDocument = new TypedDocumentString(`
-    mutation JobSchedulerUpdate($id: Int!, $input: ScheduledJobConfigInput!) {
-  updateScheduledJobConfig(id: $id, input: $input) {
-    id
-    intervalSecs
-    scanConfigs {
-      id
-      name
-    }
-  }
+    fragment ScheduledJobRow on ScheduledJob {
+  id
+  name
+  kind
+  schedule
+  config
+  enabled
+  createdAt
+  lastRunAt
+}`) as unknown as TypedDocumentString<ScheduledJobsQuery, ScheduledJobsQueryVariables>;
+export const DeleteScheduledJobDocument = new TypedDocumentString(`
+    mutation DeleteScheduledJob($id: Int!) {
+  deleteScheduledJob(id: $id)
 }
-    `) as unknown as TypedDocumentString<JobSchedulerUpdateMutation, JobSchedulerUpdateMutationVariables>;
-export const JobSchedulerDeleteDocument = new TypedDocumentString(`
-    mutation JobSchedulerDelete($id: Int!) {
-  deleteScheduledJobConfig(id: $id)
-}
-    `) as unknown as TypedDocumentString<JobSchedulerDeleteMutation, JobSchedulerDeleteMutationVariables>;
-export const JobSchedulerCreateDocument = new TypedDocumentString(`
-    mutation JobSchedulerCreate($input: ScheduledJobConfigInput!) {
-  createScheduledJobConfig(input: $input) {
-    id
-    intervalSecs
-    scanConfigs {
-      id
-      name
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<JobSchedulerCreateMutation, JobSchedulerCreateMutationVariables>;
+    `) as unknown as TypedDocumentString<DeleteScheduledJobMutation, DeleteScheduledJobMutationVariables>;
 export const JobTableDocument = new TypedDocumentString(`
     query JobTable($pagination: Pagination!) {
   jobs(pagination: $pagination) {
@@ -12240,9 +12343,6 @@ export const JobTableDocument = new TypedDocumentString(`
     skippedFiles
     generatedThumbnails
     removedThumbnails
-  }
-  ... on ExternalJobOutput {
-    val
   }
 }`) as unknown as TypedDocumentString<JobTableQuery, JobTableQueryVariables>;
 export const LiveLogsFeedDocument = new TypedDocumentString(`

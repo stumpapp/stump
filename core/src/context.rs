@@ -1,18 +1,16 @@
 use std::sync::Arc;
 
+use apalis::prelude::{MemoryStorage, MessageQueue};
 use models::entity::server_config;
 use sea_orm::{prelude::*, DatabaseConnection, MockDatabase, SelectColumns};
-use tokio::sync::{
-	broadcast::{channel, Receiver, Sender},
-	mpsc::error::SendError,
-};
+use tokio::sync::broadcast::{channel, Receiver, Sender};
 
 use crate::{
 	config::StumpConfig,
 	database,
 	event::CoreEvent,
 	filesystem::scanner::LibraryWatcher,
-	job::{Executor, JobController, JobControllerCommand},
+	job::{state::ApalisWorkerState, stump_job::StumpJob},
 	CoreError, CoreResult,
 };
 
@@ -25,9 +23,10 @@ type EventChannel = (Sender<CoreEvent>, Receiver<CoreEvent>);
 pub struct Ctx {
 	pub config: Arc<StumpConfig>,
 	pub conn: Arc<DatabaseConnection>,
-	pub job_controller: Arc<JobController>,
 	pub event_channel: Arc<EventChannel>,
 	pub library_watcher: Arc<LibraryWatcher>,
+	pub apalis_state: Arc<ApalisWorkerState>,
+	pub job_storage: MemoryStorage<StumpJob>,
 }
 
 impl Ctx {
@@ -55,17 +54,23 @@ impl Ctx {
 		);
 		let event_channel = Arc::new(channel::<CoreEvent>(1024));
 
-		let job_controller =
-			JobController::new(conn.clone(), config.clone(), event_channel.0.clone());
+		let job_storage = MemoryStorage::<StumpJob>::new();
+		let apalis_state = Arc::new(ApalisWorkerState::new(
+			conn.clone(),
+			config.clone(),
+			event_channel.0.clone(),
+			job_storage.clone(),
+		));
 		let library_watcher =
-			Arc::new(LibraryWatcher::new(conn.clone(), job_controller.clone()));
+			Arc::new(LibraryWatcher::new(conn.clone(), job_storage.clone()));
 
 		Ctx {
 			config,
 			conn,
-			job_controller,
 			event_channel,
 			library_watcher,
+			apalis_state,
+			job_storage,
 		}
 	}
 
@@ -76,18 +81,24 @@ impl Ctx {
 		let event_channel = Arc::new(channel::<CoreEvent>(1024));
 		let conn = Arc::new(mock_db.into_connection());
 
-		// Create job manager
-		let job_controller =
-			JobController::new(conn.clone(), config.clone(), event_channel.0.clone());
+		let job_storage = MemoryStorage::<StumpJob>::new();
+		let apalis_state = Arc::new(ApalisWorkerState::new(
+			conn.clone(),
+			config.clone(),
+			event_channel.0.clone(),
+			job_storage.clone(),
+		));
+
 		let library_watcher =
-			Arc::new(LibraryWatcher::new(conn.clone(), job_controller.clone()));
+			Arc::new(LibraryWatcher::new(conn.clone(), job_storage.clone()));
 
 		Ctx {
 			config,
 			conn,
-			job_controller,
 			event_channel,
 			library_watcher,
+			apalis_state,
+			job_storage,
 		}
 	}
 
@@ -129,20 +140,14 @@ impl Ctx {
 		let _ = self.event_channel.0.send(event);
 	}
 
-	/// Sends a [`JobControllerCommand`] to the job controller
-	pub fn send_job_controller_command(
-		&self,
-		command: JobControllerCommand,
-	) -> Result<(), SendError<JobControllerCommand>> {
-		self.job_controller.push_command(command)
-	}
-
-	/// Sends an [`JobControllerCommand::EnqueueJob`] event to the job manager.
-	pub fn enqueue_job(
-		&self,
-		job: Box<dyn Executor>,
-	) -> Result<(), SendError<JobControllerCommand>> {
-		self.send_job_controller_command(JobControllerCommand::EnqueueJob(job))
+	/// Enqueue a job into apalis storage
+	pub async fn enqueue(&self, job: StumpJob) -> CoreResult<()> {
+		let mut storage = self.job_storage.clone();
+		storage
+			.enqueue(job)
+			.await
+			.map_err(|_| CoreError::InternalError("Failed to enqueue job".to_string()))?;
+		Ok(())
 	}
 
 	/// Send a [`CoreEvent`] through the event channel to any clients listening

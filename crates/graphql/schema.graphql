@@ -47,6 +47,13 @@ type AggregatedReaction {
 	reactedByMe: Boolean!
 }
 
+type AnalyzeMediaOutput {
+	"The number of pages in total that were analyzed to some extent"
+	pagesAnalyzed: Int!
+	"The number of media item updates performed"
+	mediaUpdated: Int!
+}
+
 type Apikey {
 	id: Int!
 	name: String!
@@ -412,7 +419,7 @@ type ConfidenceFactor {
 "An event that is emitted by the core and consumed by a client"
 union CoreEvent = JobStarted | JobUpdate | JobOutput | DiscoveredMissingLibrary | CreatedMedia | CreatedManySeries | CreatedOrUpdatedManyMedia
 
-union CoreJobOutput = LibraryScanOutput | SeriesScanOutput | ThumbnailGenerationOutput | PlaceholderGenerationOutput | ExternalJobOutput
+union CoreJobOutput = LibraryScanOutput | SeriesScanOutput | ThumbnailGenerationOutput | PlaceholderGenerationOutput | MetadataFetchJobOutput | AnalyzeMediaOutput
 
 input CreateAnnotationInput {
 	mediaId: String!
@@ -466,6 +473,16 @@ input CreateOrUpdateLibraryInput {
 	tags: [String!]
 	config: LibraryConfigInput
 	scanAfterPersist: Boolean! = true
+}
+
+input CreateScheduledJobInput {
+	name: String!
+	"A cron expression (e.g. `0 0 * * *` for daily at midnight)"
+	schedule: String!
+	"The type-specific config. The kind is inferred from the variant provided."
+	config: ScheduledJobConfigInput!
+	"Whether the job is enabled. Defaults to `true`."
+	enabled: Boolean
 }
 
 input CreateUserInput {
@@ -731,10 +748,6 @@ input ExactDimensionResizeInput {
 	width: Int!
 	"The height (in pixels) the resulting image should be resized to"
 	height: Int!
-}
-
-type ExternalJobOutput {
-	val: JSON!
 }
 
 "Metadata about a media item from an external metadata provider"
@@ -1123,6 +1136,11 @@ enum LibraryModelOrdering {
 enum LibraryPattern {
 	SERIES_BASED
 	COLLECTION_BASED
+}
+
+input LibraryScanConfigInput {
+	"Library IDs to scan. An empty list means \"all libraries\"."
+	libraryIds: [String!]!
 }
 
 "The data that is collected and updated during the execution of a library scan job"
@@ -1591,6 +1609,23 @@ enum MergeStrategy {
 	FILL_AND_MERGE_LISTS
 }
 
+type MetadataFetchJobOutput {
+	"Total number of entities processed"
+	totalProcessed: Int!
+	"Number of entities where matches were found"
+	matchesFound: Int!
+	"Number of entities where no matches were found"
+	noMatches: Int!
+	"Number of entities that were skipped (already have matches)"
+	skipped: Int!
+	"Number of entities that failed during fetch"
+	failed: Int!
+	"Number of entities that were auto-applied"
+	autoApplied: Int!
+	"Number of entities that were rate-limited"
+	rateLimited: Int!
+}
+
 type MetadataFetchRecord {
 	id: Int!
 	status: MetadataFetchStatus!
@@ -1623,6 +1658,7 @@ enum MetadataFetchStatus {
 	MATCHED
 	NO_MATCH
 	FAILED
+	RATE_LIMITED
 }
 
 """
@@ -1726,6 +1762,11 @@ enum MetadataResetImpact {
 	- When mutating a series, will reset all its own metadata and books
 	"""
 	EVERYTHING
+}
+
+input MetadataRetryConfigInput {
+	"Which metadata fetch statuses to retry (e.g. RATE_LIMITED, FAILED)."
+	statuses: [MetadataFetchStatus!]!
 }
 
 type Mutation {
@@ -1977,9 +2018,9 @@ type Mutation {
 	updateNotifier(id: Int!, input: NotifierInput!): Notifier!
 	deleteNotifier(id: Int!): Notifier!
 	updatePublicUrl(publicUrl: String!): ServerConfigModel!
-	createScheduledJobConfig(input: ScheduledJobConfigInput!): ScheduledJobConfig!
-	updateScheduledJobConfig(id: Int!, input: ScheduledJobConfigInput!): ScheduledJobConfig!
-	deleteScheduledJobConfig(id: Int!): Boolean!
+	createScheduledJob(input: CreateScheduledJobInput!): ScheduledJob!
+	updateScheduledJob(id: Int!, input: UpdateScheduledJobInput!): ScheduledJob!
+	deleteScheduledJob(id: Int!): Boolean!
 	createMetadataProvider(input: CreateMetadataProviderConfigInput!): MetadataProviderConfigModel!
 	updateMetadataProvider(id: Int!, input: PatchMetadataProviderConfigInput!): MetadataProviderConfigModel!
 	deleteMetadataProvider(id: Int!): MetadataProviderConfigModel!
@@ -2339,7 +2380,7 @@ type Query {
 	apiKeyById(id: Int!): Apikey!
 	jobs(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedJobResponse!
 	jobById(id: ID!): Job
-	scheduledJobConfigs: [ScheduledJobConfig!]!
+	scheduledJobs: [ScheduledJob!]!
 	logs(filter: LogFilterInput! = {level: null, jobId: null, _and: null, _not: null, _or: null}, orderBy: [LogModelOrderBy!]! = [], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedLogResponse!
 	"""
 	Get information about the Stump log file, located at STUMP_CONFIG_DIR/Stump.log, or
@@ -2552,15 +2593,29 @@ input ScaledDimensionResizeInput {
 	size: Int!
 }
 
-type ScheduledJobConfig {
+type ScheduledJob {
 	id: Int!
-	intervalSecs: Int!
-	scanConfigs: [Library!]!
+	name: String!
+	kind: ScheduledJobKind!
+	schedule: String!
+	config: JSON
+	enabled: Boolean!
+	createdAt: DateTime!
+	lastRunAt: DateTime
 }
 
-input ScheduledJobConfigInput {
-	intervalSecs: Int!
-	includedLibraryIds: [String!]!
+"A oneOf input for the schedule config. The variant determines the job kind."
+input ScheduledJobConfigInput @oneOf {
+	libraryScan: LibraryScanConfigInput
+	metadataRetry: MetadataRetryConfigInput
+}
+
+"The kind of a scheduled job, aligned with the config variants"
+enum ScheduledJobKind {
+	"Scan one or more libraries on a cron schedule"
+	LIBRARY_SCAN
+	"Retry fetching metadata for records that were rate-limited or failed"
+	METADATA_RETRY
 }
 
 type SendAttachmentEmailOutput {
@@ -3147,6 +3202,15 @@ input UpdateBookClubInput {
 
 input UpdateCustomEmojiInput {
 	name: String!
+}
+
+input UpdateScheduledJobInput {
+	name: String
+	"A cron expression"
+	schedule: String
+	"Replace the config entirely. The kind is inferred from the variant."
+	config: ScheduledJobConfigInput
+	enabled: Boolean
 }
 
 input UpdateThumbnailInput {

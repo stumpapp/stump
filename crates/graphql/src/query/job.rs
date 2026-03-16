@@ -1,12 +1,12 @@
 use crate::guard::PermissionGuard;
-use crate::object::job_schedule_config::ScheduledJobConfig;
+use crate::object::job_schedule_config::ScheduledJob;
 use crate::pagination::{
 	CursorPaginationInfo, OffsetPaginationInfo, PaginatedResponse, Pagination,
 	PaginationValidator,
 };
 use crate::{data::CoreContext, object::job::Job};
 use async_graphql::{Context, Object, Result, ID};
-use models::entity::scheduled_job_config;
+use models::entity::scheduled_job;
 use models::{entity::job, shared::enums::UserPermission};
 use sea_orm::{prelude::*, QueryOrder, QuerySelect};
 
@@ -96,14 +96,11 @@ impl JobQuery {
 
 	// TODO(permissions): Determine if folks generally agree with this access
 	#[graphql(guard = "PermissionGuard::one(UserPermission::ReadJobs)")]
-	async fn scheduled_job_configs(
-		&self,
-		ctx: &Context<'_>,
-	) -> Result<Vec<ScheduledJobConfig>> {
+	async fn scheduled_jobs(&self, ctx: &Context<'_>) -> Result<Vec<ScheduledJob>> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let models = scheduled_job_config::Entity::find().all(conn).await?;
+		let models = scheduled_job::Entity::find().all(conn).await?;
 
-		Ok(models.into_iter().map(ScheduledJobConfig::from).collect())
+		Ok(models.into_iter().map(ScheduledJob::from).collect())
 	}
 }

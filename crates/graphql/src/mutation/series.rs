@@ -15,9 +15,9 @@ use sea_orm::{
 };
 use stump_core::filesystem::{
 	image::{generate_book_thumbnail, GenerateThumbnailOptions},
-	media::analysis::{AnalysisJobConfig, AnalyzeMediaJob, MediaAnalysisJobScope},
-	scanner::SeriesScanJob,
+	media::analysis::{AnalysisJobConfig, MediaAnalysisJobScope},
 };
+use stump_core::job::stump_job::StumpJob;
 
 use crate::{
 	data::{AuthContext, CoreContext},
@@ -49,13 +49,11 @@ impl SeriesMutation {
 				.await?
 				.ok_or("Series not found")?;
 
-		core.enqueue_job(
-			AnalyzeMediaJob::new(AnalysisJobConfig {
-				force_reanalysis,
-				scope: MediaAnalysisJobScope::Series(model.id),
-			})
-			.wrapped(),
-		)?;
+		core.enqueue(StumpJob::analyze_media(AnalysisJobConfig {
+			force_reanalysis,
+			scope: MediaAnalysisJobScope::Series(model.id),
+		}))
+		.await?;
 
 		Ok(true)
 	}
@@ -220,7 +218,8 @@ impl SeriesMutation {
 				.await?
 				.ok_or("Series not found")?;
 
-		core.enqueue_job(SeriesScanJob::new(model.id, model.path, None))?;
+		core.enqueue(StumpJob::series_scan(model.id, model.path, None))
+			.await?;
 
 		Ok(true)
 	}

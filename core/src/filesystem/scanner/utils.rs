@@ -31,7 +31,7 @@ use crate::{
 		scanner::options::{BookVisitOperation, CustomVisitResult},
 		series::{BuiltSeries, SeriesBuilder},
 	},
-	job::{error::JobError, JobExecuteLog, JobProgress, WorkerCtx, WorkerSendExt},
+	job::{error::JobError, JobContext, JobExecuteLog, JobProgress},
 	CoreEvent,
 };
 
@@ -239,7 +239,7 @@ pub(crate) struct MediaOperationOutput {
 /// Handles missing media by updating the database with the latest information. A media is
 /// considered missing if it was previously marked as ready and is no longer found on disk.
 pub(crate) async fn handle_missing_media(
-	ctx: &WorkerCtx,
+	ctx: &JobContext,
 	series_id: &str,
 	paths: Vec<PathBuf>,
 ) -> MediaOperationOutput {
@@ -264,7 +264,7 @@ pub(crate) async fn handle_missing_media(
 			media::Column::Status,
 			Expr::value(FileStatus::Missing.to_string()),
 		)
-		.exec(ctx.conn.as_ref())
+		.exec(ctx.conn())
 		.await
 		.map_or_else(
 			|error| {
@@ -288,7 +288,7 @@ pub(crate) async fn handle_missing_media(
 /// media is considered restored if it was previously marked as missing and has been
 /// found on disk.
 pub(crate) async fn handle_restored_media(
-	ctx: &WorkerCtx,
+	ctx: &JobContext,
 	series_id: &str,
 	ids: Vec<String>,
 ) -> MediaOperationOutput {
@@ -309,7 +309,7 @@ pub(crate) async fn handle_restored_media(
 			media::Column::Status,
 			Expr::value(FileStatus::Ready.to_string()),
 		)
-		.exec(ctx.conn.as_ref())
+		.exec(ctx.conn())
 		.await
 		.map_or_else(
 			|error| {
@@ -610,7 +610,7 @@ pub(crate) async fn safely_build_and_insert_media(
 		library_config,
 		max_concurrency,
 	}: MediaBuildOperation,
-	worker_ctx: &WorkerCtx,
+	worker_ctx: &JobContext,
 	paths: Vec<PathBuf>,
 ) -> Result<MediaOperationOutput, JobError> {
 	if paths.is_empty() {
@@ -661,7 +661,7 @@ pub(crate) async fn safely_build_and_insert_media(
 					?path,
 					"(Chunk {chunk_index}, Book {book_index}) Starting media build"
 				);
-				build_book(&path, &series_id, None, library_config, &worker_ctx.config)
+				build_book(&path, &series_id, None, library_config, worker_ctx.config())
 					.await
 					.map_err(|e| (e, path.clone()))
 			};
@@ -719,23 +719,19 @@ pub(crate) async fn safely_build_and_insert_media(
 			tracing::warn!(?book, "Book has no path?");
 			continue;
 		};
-		match create_media(&worker_ctx.conn, book).await {
+		match create_media(worker_ctx.conn(), book).await {
 			Ok(created_media) => {
 				// TODO(metadata-fetching): Track this as needing fetching (assuming enabled)
 				output.created_media += 1;
-				worker_ctx.send_batch(vec![
-					JobProgress::subtask_position(
-						atomic_cursor.fetch_add(1, Ordering::SeqCst) as i32,
-						task_count,
-					)
-					.into_worker_send(),
-					CoreEvent::CreatedMedia(CreatedMedia {
-						id: created_media.id,
-						series_id: series_id.clone(),
-						library_id: library_id.clone(),
-					})
-					.into_worker_send(),
-				]);
+				worker_ctx.report_progress(JobProgress::subtask_position(
+					atomic_cursor.fetch_add(1, Ordering::SeqCst) as i32,
+					task_count,
+				));
+				worker_ctx.emit_event(CoreEvent::CreatedMedia(CreatedMedia {
+					id: created_media.id,
+					series_id: series_id.clone(),
+					library_id: library_id.clone(),
+				}));
 			},
 			Err(e) => {
 				worker_ctx.report_progress(JobProgress::subtask_position(
@@ -774,7 +770,7 @@ pub(crate) async fn visit_and_update_media(
 		library_config,
 		max_concurrency,
 	}: MediaBuildOperation,
-	worker_ctx: &WorkerCtx,
+	worker_ctx: &JobContext,
 	params: Vec<(PathBuf, BookVisitOperation)>,
 ) -> Result<MediaOperationOutput, JobError> {
 	let mut output = MediaOperationOutput::default();
@@ -784,7 +780,7 @@ pub(crate) async fn visit_and_update_media(
 		return Ok(output);
 	}
 
-	let conn = worker_ctx.conn.as_ref();
+	let conn = worker_ctx.conn();
 	let paths_to_operation = params
 		.iter()
 		.map(|(p, o)| (p.to_string_lossy().to_string(), *o))
@@ -849,7 +845,7 @@ pub(crate) async fn visit_and_update_media(
 					?path,
 					"(Chunk {chunk_index}, Book {book_index}) Starting media visit"
 				);
-				handle_book(ctx, library_config, &worker_ctx.config)
+				handle_book(ctx, library_config, worker_ctx.config())
 					.await
 					.map_err(|e| (e, path.clone()))
 			};
@@ -891,7 +887,7 @@ pub(crate) async fn visit_and_update_media(
 
 	while let Some(result) = build_results.pop_front() {
 		let error_ctx = result.error_ctx();
-		match handle_book_visit_operation(&worker_ctx.conn, result).await {
+		match handle_book_visit_operation(worker_ctx.conn(), result).await {
 			Ok(_) => {
 				output.updated_media += 1;
 			},

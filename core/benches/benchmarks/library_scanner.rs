@@ -5,6 +5,7 @@ use std::{
 	time::Instant,
 };
 
+use apalis::prelude::MemoryStorage;
 use criterion::{criterion_group, BenchmarkId, Criterion};
 use models::{
 	entity::{job, library, library_config, media, series},
@@ -18,13 +19,10 @@ use stump_core::{
 	config::StumpConfig,
 	database::connect_at,
 	filesystem::scanner::LibraryScanJob,
-	job::{Executor, WorkerCtx, WrappedJob},
+	job::{stump_job::StumpJob, ApalisWorkerState, JobContext, JobLifecycle},
 };
 use tempfile::{Builder as TempDirBuilder, TempDir};
-use tokio::{
-	runtime::Builder,
-	sync::{broadcast, mpsc},
-};
+use tokio::{runtime::Builder, sync::broadcast};
 use uuid::Uuid;
 
 #[derive(Debug)]
@@ -82,7 +80,7 @@ fn full_scan(c: &mut Criterion) {
 					.await
 					.expect("Failed to set up test");
 
-				let conn = test_ctx.worker_ctx.conn.clone();
+				let conn = test_ctx.job_ctx.conn.clone();
 
 				println!("Starting benchmark for {}", size);
 				let start = Instant::now();
@@ -106,8 +104,9 @@ criterion_group!(benches, full_scan);
 type LibraryWithConfig = (library::Model, library_config::Model);
 
 struct TestCtx {
-	job: WrappedJob<LibraryScanJob>,
-	worker_ctx: WorkerCtx,
+	job: LibraryScanJob,
+	job_ctx: Arc<ApalisWorkerState>,
+	job_id: String,
 }
 
 struct Setup {
@@ -212,17 +211,17 @@ async fn setup_test(
 	let (conn, library, tempdirs) =
 		create_test_library(series_count, books_per_series).await?;
 
-	let job = WrappedJob::new(LibraryScanJob {
+	let job = LibraryScanJob {
 		id: library.0.id.clone(),
 		path: library.0.path.clone(),
 		config: Some(library.1.clone()),
 		options: Default::default(),
-	});
+	};
 
 	let job_id = Uuid::new_v4().to_string();
 	let _db_job = job::ActiveModel {
 		id: Set(job_id.clone()),
-		name: Set(job.name().to_string()),
+		name: Set(LibraryScanJob::NAME.to_string()),
 		..Default::default()
 	}
 	.insert(&conn)
@@ -230,19 +229,18 @@ async fn setup_test(
 
 	let config_dir = format!("{}/benches/config", env!("CARGO_MANIFEST_DIR"));
 	let config = StumpConfig::new(config_dir);
-	let worker_ctx = WorkerCtx {
-		conn: Arc::new(conn),
-		config: Arc::new(config),
-		job_id,
-		job_controller_tx: mpsc::unbounded_channel().0,
-		core_event_tx: broadcast::channel(1024).0,
-		commands_rx: async_channel::unbounded().1,
-		status_tx: async_channel::unbounded().0,
-	};
+	let job_storage = MemoryStorage::new();
+	let job_ctx = Arc::new(ApalisWorkerState::new(
+		Arc::new(conn),
+		Arc::new(config),
+		broadcast::channel(1024).0,
+		job_storage,
+	));
 	Ok(Setup {
 		test_ctx: TestCtx {
-			job: *job,
-			worker_ctx,
+			job,
+			job_ctx,
+			job_id,
 		},
 		library,
 		tempdirs,
@@ -306,9 +304,48 @@ async fn clean_up(
 async fn scan_new_library(test_ctx: TestCtx) {
 	let TestCtx {
 		mut job,
-		worker_ctx,
+		job_ctx,
+		job_id,
 	} = test_ctx;
 
-	let result = job.execute(worker_ctx).await;
-	println!("Job result: {:?}", result);
+	let handle = JobContext::new(
+		job_ctx,
+		job_id,
+		&StumpJob::LibraryScan {
+			id: job.id.clone(),
+			path: job.path.clone(),
+			options: Some(job.options),
+		},
+	)
+	.await
+	.expect("Failed to start job context");
+
+	let working_state = job.init(&handle).await.expect("Failed to init job");
+
+	use stump_core::job::JobLifecycle;
+	let stump_core::job::WorkingState {
+		output: initial_output,
+		mut tasks,
+		..
+	} = working_state;
+
+	let mut output = initial_output.unwrap_or_default();
+	use stump_core::job::JobOutputExt;
+
+	while let Some(task) = tasks.pop_front() {
+		match job.execute_task(&handle, task).await {
+			Ok(task_output) => {
+				output.update(task_output.output);
+				for subtask in task_output.subtasks.into_iter().rev() {
+					tasks.push_front(subtask);
+				}
+			},
+			Err(e) => {
+				println!("Task failed: {:?}", e);
+				return;
+			},
+		}
+	}
+
+	println!("Job result: {:?}", output);
 }

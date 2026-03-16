@@ -28,9 +28,6 @@ const fragment = graphql(`
 			generatedThumbnails
 			removedThumbnails
 		}
-		... on ExternalJobOutput {
-			val
-		}
 	}
 `)
 

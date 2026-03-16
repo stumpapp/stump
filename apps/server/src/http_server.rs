@@ -1,12 +1,14 @@
-use std::net::SocketAddr;
+use std::{net::SocketAddr, sync::Arc, time::Duration};
 
+use apalis::prelude::*;
 use axum::{extract::connect_info::Connected, serve::IncomingStream, Router};
 use stump_core::{
 	config::{bootstrap_config_dir, logging::init_tracing},
-	job::JobControllerCommand,
+	job::dispatch_job,
 	StumpCore,
 };
-use tokio::{net::TcpListener, sync::oneshot};
+use tokio::net::TcpListener;
+use tokio::sync::Notify;
 use tower_http::trace::TraceLayer;
 
 use crate::{
@@ -24,8 +26,10 @@ pub async fn run_http_server(config: StumpConfig) -> ServerResult<()> {
 	// in some initialization function. The server-specific things, e.g. watcher, scheduler,
 	// should be fully managed by the server and removed from the core...
 
-	core.get_job_controller()
-		.initialize()
+	// Cancel any islanded jobs from a previous run
+	core.get_context()
+		.apalis_state
+		.cancel_islanded_jobs()
 		.await
 		.map_err(|e| ServerError::ServerStartError(e.to_string()))?;
 
@@ -66,21 +70,16 @@ pub async fn run_http_server(config: StumpConfig) -> ServerResult<()> {
 		.layer(cors_layer)
 		.layer(TraceLayer::new_for_http());
 
+	let shutdown_notify = Arc::new(Notify::new());
+
 	// TODO: Refactor to use https://docs.rs/async-shutdown/latest/async_shutdown/
-	let cleanup = || async move {
-		println!("Initializing graceful shutdown...");
-
-		let (shutdown_tx, shutdown_rx) = oneshot::channel();
-
-		let _ = core
-			.get_context()
-			.send_job_controller_command(JobControllerCommand::Shutdown(shutdown_tx));
-
-		let _ = core.get_context().library_watcher.stop().await;
-
-		shutdown_rx
-			.await
-			.expect("Failed to successfully handle shutdown");
+	let cleanup = {
+		let shutdown_notify = shutdown_notify.clone();
+		|| async move {
+			println!("Initializing graceful shutdown...");
+			let _ = core.get_context().library_watcher.stop().await;
+			shutdown_notify.notify_waiters();
+		}
 	};
 
 	let addr = SocketAddr::from(([0, 0, 0, 0], config.port));
@@ -90,13 +89,33 @@ pub async fn run_http_server(config: StumpConfig) -> ServerResult<()> {
 
 	tracing::info!("⚡️ Stump HTTP server starting on http://{}", addr);
 
-	axum::serve(
+	// TODO: Experiment with higher concurrency, YEARS ago at this point (before enforcing WAL even)
+	// I experienced multi-writer issues but perhaps with SeaORM + WAL we can have parallel scans.
+	let monitor = Monitor::new()
+		.register(
+			WorkerBuilder::new("stump-worker")
+				.enable_tracing()
+				.data(server_ctx.apalis_state.clone())
+				.concurrency(1)
+				.backend(server_ctx.job_storage.clone())
+				.build_fn(dispatch_job),
+		)
+		.with_terminator(tokio::time::sleep(Duration::from_secs(30)))
+		.run_with_signal({
+			let shutdown_notify = shutdown_notify.clone();
+			async move {
+				shutdown_notify.notified().await;
+				Ok(())
+			}
+		});
+
+	let http = axum::serve(
 		listener,
 		app.into_make_service_with_connect_info::<StumpRequestInfo>(),
 	)
-	.with_graceful_shutdown(shutdown_signal_with_cleanup(Some(cleanup)))
-	.await
-	.expect("Failed to start Stump HTTP server!");
+	.with_graceful_shutdown(shutdown_signal_with_cleanup(Some(cleanup)));
+
+	let _ = tokio::join!(monitor, http);
 
 	Ok(())
 }

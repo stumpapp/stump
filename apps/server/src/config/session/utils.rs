@@ -21,7 +21,6 @@ pub fn get_session_layer(ctx: Arc<Ctx>) -> SessionManagerLayer<StumpSessionStore
 		);
 		tokio::task::spawn(store.clone().continuously_delete_expired(
 			tokio::time::Duration::from_secs(cleanup_interval),
-			ctx.clone(),
 		));
 	} else {
 		tracing::debug!("expired_session_cleanup_interval is set to 0. Session expiry cleanup is disabled");

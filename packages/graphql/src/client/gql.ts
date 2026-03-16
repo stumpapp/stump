@@ -265,16 +265,17 @@ type Documents = {
     "\n\tmutation ServerPublicURLUpdate($publicUrl: String!) {\n\t\tupdatePublicUrl(publicUrl: $publicUrl) {\n\t\t\tpublicUrl\n\t\t}\n\t}\n": typeof types.ServerPublicUrlUpdateDocument,
     "\n\tquery ServerPublicURL {\n\t\tserverConfig {\n\t\t\tpublicUrl\n\t\t}\n\t}\n": typeof types.ServerPublicUrlDocument,
     "\n\tquery ServerStats {\n\t\tnumberOfLibraries\n\t\tnumberOfSeries\n\t\tmediaCount\n\t\tmediaDiskUsage\n\t}\n": typeof types.ServerStatsDocument,
+    "\n\tmutation CreateScheduledJob($input: CreateScheduledJobInput!) {\n\t\tcreateScheduledJob(input: $input) {\n\t\t\t...ScheduledJobRow\n\t\t}\n\t}\n": typeof types.CreateScheduledJobDocument,
+    "\n\tmutation UpdateScheduledJob($id: Int!, $input: UpdateScheduledJobInput!) {\n\t\tupdateScheduledJob(id: $id, input: $input) {\n\t\t\t...ScheduledJobRow\n\t\t}\n\t}\n": typeof types.UpdateScheduledJobDocument,
     "\n\tmutation DeleteJobHistoryConfirmation {\n\t\tdeleteJobHistory {\n\t\t\taffectedRows\n\t\t}\n\t}\n": typeof types.DeleteJobHistoryConfirmationDocument,
     "\n\tmutation JobActionMenuCancelJob($id: ID!) {\n\t\tcancelJob(id: $id)\n\t}\n": typeof types.JobActionMenuCancelJobDocument,
     "\n\tmutation JobActionMenuDeleteJob($id: ID!) {\n\t\tcancelJob(id: $id)\n\t}\n": typeof types.JobActionMenuDeleteJobDocument,
     "\n\tmutation JobActionMenuDeleteLogs($id: ID!) {\n\t\tdeleteJobLogs(id: $id) {\n\t\t\taffectedRows\n\t\t}\n\t}\n": typeof types.JobActionMenuDeleteLogsDocument,
-    "\n\tfragment JobDataInspector on CoreJobOutput {\n\t\t__typename\n\t\t... on LibraryScanOutput {\n\t\t\ttotalFiles\n\t\t\ttotalDirectories\n\t\t\tignoredFiles\n\t\t\tskippedFiles\n\t\t\tignoredDirectories\n\t\t\tcreatedMedia\n\t\t\tupdatedMedia\n\t\t\tcreatedSeries\n\t\t\tupdatedSeries\n\t\t}\n\t\t... on SeriesScanOutput {\n\t\t\ttotalFiles\n\t\t\tignoredFiles\n\t\t\tskippedFiles\n\t\t\tcreatedMedia\n\t\t\tupdatedMedia\n\t\t}\n\t\t... on ThumbnailGenerationOutput {\n\t\t\tvisitedFiles\n\t\t\tskippedFiles\n\t\t\tgeneratedThumbnails\n\t\t\tremovedThumbnails\n\t\t}\n\t\t... on ExternalJobOutput {\n\t\t\tval\n\t\t}\n\t}\n": typeof types.JobDataInspectorFragmentDoc,
-    "\n\tquery JobSchedulerConfig {\n\t\tlibraries(pagination: { none: { unpaginated: true } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t\temoji\n\t\t\t}\n\t\t}\n\t\tscheduledJobConfigs {\n\t\t\tid\n\t\t\tintervalSecs\n\t\t\t# Note: For now scanConfigs are actually just a library node\n\t\t\tscanConfigs {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t}\n\t}\n": typeof types.JobSchedulerConfigDocument,
-    "\n\tmutation JobSchedulerUpdate($id: Int!, $input: ScheduledJobConfigInput!) {\n\t\tupdateScheduledJobConfig(id: $id, input: $input) {\n\t\t\tid\n\t\t\tintervalSecs\n\t\t\tscanConfigs {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t}\n\t}\n": typeof types.JobSchedulerUpdateDocument,
-    "\n\tmutation JobSchedulerDelete($id: Int!) {\n\t\tdeleteScheduledJobConfig(id: $id)\n\t}\n": typeof types.JobSchedulerDeleteDocument,
-    "\n\tmutation JobSchedulerCreate($input: ScheduledJobConfigInput!) {\n\t\tcreateScheduledJobConfig(input: $input) {\n\t\t\tid\n\t\t\tintervalSecs\n\t\t\tscanConfigs {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t}\n\t}\n": typeof types.JobSchedulerCreateDocument,
+    "\n\tfragment JobDataInspector on CoreJobOutput {\n\t\t__typename\n\t\t... on LibraryScanOutput {\n\t\t\ttotalFiles\n\t\t\ttotalDirectories\n\t\t\tignoredFiles\n\t\t\tskippedFiles\n\t\t\tignoredDirectories\n\t\t\tcreatedMedia\n\t\t\tupdatedMedia\n\t\t\tcreatedSeries\n\t\t\tupdatedSeries\n\t\t}\n\t\t... on SeriesScanOutput {\n\t\t\ttotalFiles\n\t\t\tignoredFiles\n\t\t\tskippedFiles\n\t\t\tcreatedMedia\n\t\t\tupdatedMedia\n\t\t}\n\t\t... on ThumbnailGenerationOutput {\n\t\t\tvisitedFiles\n\t\t\tskippedFiles\n\t\t\tgeneratedThumbnails\n\t\t\tremovedThumbnails\n\t\t}\n\t}\n": typeof types.JobDataInspectorFragmentDoc,
+    "\n\tquery ScheduledJobs {\n\t\tlibraries(pagination: { none: { unpaginated: true } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t\temoji\n\t\t\t}\n\t\t}\n\t\tscheduledJobs {\n\t\t\tid\n\t\t\tname\n\t\t\t...ScheduledJobRow\n\t\t}\n\t}\n": typeof types.ScheduledJobsDocument,
+    "\n\tmutation DeleteScheduledJob($id: Int!) {\n\t\tdeleteScheduledJob(id: $id)\n\t}\n": typeof types.DeleteScheduledJobDocument,
     "\n\tquery JobTable($pagination: Pagination!) {\n\t\tjobs(pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t\tdescription\n\t\t\t\tstatus\n\t\t\t\tcreatedAt\n\t\t\t\tcompletedAt\n\t\t\t\tmsElapsed\n\t\t\t\toutputData {\n\t\t\t\t\t...JobDataInspector\n\t\t\t\t}\n\t\t\t\tlogCount\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\tcurrentPage\n\t\t\t\t\ttotalPages\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.JobTableDocument,
+    "\n\tfragment ScheduledJobRow on ScheduledJob {\n\t\tid\n\t\tname\n\t\tkind\n\t\tschedule\n\t\tconfig\n\t\tenabled\n\t\tcreatedAt\n\t\tlastRunAt\n\t}\n": typeof types.ScheduledJobRowFragmentDoc,
     "\n\tsubscription LiveLogsFeed {\n\t\ttailLogFile\n\t}\n": typeof types.LiveLogsFeedDocument,
     "\n\tmutation DeleteLogs {\n\t\tdeleteLogs {\n\t\t\tdeleted\n\t\t}\n\t}\n": typeof types.DeleteLogsDocument,
     "\n\tquery PersistedLogs(\n\t\t$filter: LogFilterInput!\n\t\t$pagination: Pagination!\n\t\t$orderBy: [LogModelOrderBy!]!\n\t) {\n\t\tlogs(filter: $filter, pagination: $pagination, orderBy: $orderBy) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\ttimestamp\n\t\t\t\tlevel\n\t\t\t\tmessage\n\t\t\t\tjobId\n\t\t\t\tcontext\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\ttotalPages\n\t\t\t\t\tcurrentPage\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.PersistedLogsDocument,
@@ -560,16 +561,17 @@ const documents: Documents = {
     "\n\tmutation ServerPublicURLUpdate($publicUrl: String!) {\n\t\tupdatePublicUrl(publicUrl: $publicUrl) {\n\t\t\tpublicUrl\n\t\t}\n\t}\n": types.ServerPublicUrlUpdateDocument,
     "\n\tquery ServerPublicURL {\n\t\tserverConfig {\n\t\t\tpublicUrl\n\t\t}\n\t}\n": types.ServerPublicUrlDocument,
     "\n\tquery ServerStats {\n\t\tnumberOfLibraries\n\t\tnumberOfSeries\n\t\tmediaCount\n\t\tmediaDiskUsage\n\t}\n": types.ServerStatsDocument,
+    "\n\tmutation CreateScheduledJob($input: CreateScheduledJobInput!) {\n\t\tcreateScheduledJob(input: $input) {\n\t\t\t...ScheduledJobRow\n\t\t}\n\t}\n": types.CreateScheduledJobDocument,
+    "\n\tmutation UpdateScheduledJob($id: Int!, $input: UpdateScheduledJobInput!) {\n\t\tupdateScheduledJob(id: $id, input: $input) {\n\t\t\t...ScheduledJobRow\n\t\t}\n\t}\n": types.UpdateScheduledJobDocument,
     "\n\tmutation DeleteJobHistoryConfirmation {\n\t\tdeleteJobHistory {\n\t\t\taffectedRows\n\t\t}\n\t}\n": types.DeleteJobHistoryConfirmationDocument,
     "\n\tmutation JobActionMenuCancelJob($id: ID!) {\n\t\tcancelJob(id: $id)\n\t}\n": types.JobActionMenuCancelJobDocument,
     "\n\tmutation JobActionMenuDeleteJob($id: ID!) {\n\t\tcancelJob(id: $id)\n\t}\n": types.JobActionMenuDeleteJobDocument,
     "\n\tmutation JobActionMenuDeleteLogs($id: ID!) {\n\t\tdeleteJobLogs(id: $id) {\n\t\t\taffectedRows\n\t\t}\n\t}\n": types.JobActionMenuDeleteLogsDocument,
-    "\n\tfragment JobDataInspector on CoreJobOutput {\n\t\t__typename\n\t\t... on LibraryScanOutput {\n\t\t\ttotalFiles\n\t\t\ttotalDirectories\n\t\t\tignoredFiles\n\t\t\tskippedFiles\n\t\t\tignoredDirectories\n\t\t\tcreatedMedia\n\t\t\tupdatedMedia\n\t\t\tcreatedSeries\n\t\t\tupdatedSeries\n\t\t}\n\t\t... on SeriesScanOutput {\n\t\t\ttotalFiles\n\t\t\tignoredFiles\n\t\t\tskippedFiles\n\t\t\tcreatedMedia\n\t\t\tupdatedMedia\n\t\t}\n\t\t... on ThumbnailGenerationOutput {\n\t\t\tvisitedFiles\n\t\t\tskippedFiles\n\t\t\tgeneratedThumbnails\n\t\t\tremovedThumbnails\n\t\t}\n\t\t... on ExternalJobOutput {\n\t\t\tval\n\t\t}\n\t}\n": types.JobDataInspectorFragmentDoc,
-    "\n\tquery JobSchedulerConfig {\n\t\tlibraries(pagination: { none: { unpaginated: true } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t\temoji\n\t\t\t}\n\t\t}\n\t\tscheduledJobConfigs {\n\t\t\tid\n\t\t\tintervalSecs\n\t\t\t# Note: For now scanConfigs are actually just a library node\n\t\t\tscanConfigs {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t}\n\t}\n": types.JobSchedulerConfigDocument,
-    "\n\tmutation JobSchedulerUpdate($id: Int!, $input: ScheduledJobConfigInput!) {\n\t\tupdateScheduledJobConfig(id: $id, input: $input) {\n\t\t\tid\n\t\t\tintervalSecs\n\t\t\tscanConfigs {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t}\n\t}\n": types.JobSchedulerUpdateDocument,
-    "\n\tmutation JobSchedulerDelete($id: Int!) {\n\t\tdeleteScheduledJobConfig(id: $id)\n\t}\n": types.JobSchedulerDeleteDocument,
-    "\n\tmutation JobSchedulerCreate($input: ScheduledJobConfigInput!) {\n\t\tcreateScheduledJobConfig(input: $input) {\n\t\t\tid\n\t\t\tintervalSecs\n\t\t\tscanConfigs {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t}\n\t}\n": types.JobSchedulerCreateDocument,
+    "\n\tfragment JobDataInspector on CoreJobOutput {\n\t\t__typename\n\t\t... on LibraryScanOutput {\n\t\t\ttotalFiles\n\t\t\ttotalDirectories\n\t\t\tignoredFiles\n\t\t\tskippedFiles\n\t\t\tignoredDirectories\n\t\t\tcreatedMedia\n\t\t\tupdatedMedia\n\t\t\tcreatedSeries\n\t\t\tupdatedSeries\n\t\t}\n\t\t... on SeriesScanOutput {\n\t\t\ttotalFiles\n\t\t\tignoredFiles\n\t\t\tskippedFiles\n\t\t\tcreatedMedia\n\t\t\tupdatedMedia\n\t\t}\n\t\t... on ThumbnailGenerationOutput {\n\t\t\tvisitedFiles\n\t\t\tskippedFiles\n\t\t\tgeneratedThumbnails\n\t\t\tremovedThumbnails\n\t\t}\n\t}\n": types.JobDataInspectorFragmentDoc,
+    "\n\tquery ScheduledJobs {\n\t\tlibraries(pagination: { none: { unpaginated: true } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t\temoji\n\t\t\t}\n\t\t}\n\t\tscheduledJobs {\n\t\t\tid\n\t\t\tname\n\t\t\t...ScheduledJobRow\n\t\t}\n\t}\n": types.ScheduledJobsDocument,
+    "\n\tmutation DeleteScheduledJob($id: Int!) {\n\t\tdeleteScheduledJob(id: $id)\n\t}\n": types.DeleteScheduledJobDocument,
     "\n\tquery JobTable($pagination: Pagination!) {\n\t\tjobs(pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t\tdescription\n\t\t\t\tstatus\n\t\t\t\tcreatedAt\n\t\t\t\tcompletedAt\n\t\t\t\tmsElapsed\n\t\t\t\toutputData {\n\t\t\t\t\t...JobDataInspector\n\t\t\t\t}\n\t\t\t\tlogCount\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\tcurrentPage\n\t\t\t\t\ttotalPages\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.JobTableDocument,
+    "\n\tfragment ScheduledJobRow on ScheduledJob {\n\t\tid\n\t\tname\n\t\tkind\n\t\tschedule\n\t\tconfig\n\t\tenabled\n\t\tcreatedAt\n\t\tlastRunAt\n\t}\n": types.ScheduledJobRowFragmentDoc,
     "\n\tsubscription LiveLogsFeed {\n\t\ttailLogFile\n\t}\n": types.LiveLogsFeedDocument,
     "\n\tmutation DeleteLogs {\n\t\tdeleteLogs {\n\t\t\tdeleted\n\t\t}\n\t}\n": types.DeleteLogsDocument,
     "\n\tquery PersistedLogs(\n\t\t$filter: LogFilterInput!\n\t\t$pagination: Pagination!\n\t\t$orderBy: [LogModelOrderBy!]!\n\t) {\n\t\tlogs(filter: $filter, pagination: $pagination, orderBy: $orderBy) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\ttimestamp\n\t\t\t\tlevel\n\t\t\t\tmessage\n\t\t\t\tjobId\n\t\t\t\tcontext\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\ttotalPages\n\t\t\t\t\tcurrentPage\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.PersistedLogsDocument,
@@ -1608,6 +1610,14 @@ export function graphql(source: "\n\tquery ServerStats {\n\t\tnumberOfLibraries\
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
+export function graphql(source: "\n\tmutation CreateScheduledJob($input: CreateScheduledJobInput!) {\n\t\tcreateScheduledJob(input: $input) {\n\t\t\t...ScheduledJobRow\n\t\t}\n\t}\n"): typeof import('./graphql').CreateScheduledJobDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tmutation UpdateScheduledJob($id: Int!, $input: UpdateScheduledJobInput!) {\n\t\tupdateScheduledJob(id: $id, input: $input) {\n\t\t\t...ScheduledJobRow\n\t\t}\n\t}\n"): typeof import('./graphql').UpdateScheduledJobDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
 export function graphql(source: "\n\tmutation DeleteJobHistoryConfirmation {\n\t\tdeleteJobHistory {\n\t\t\taffectedRows\n\t\t}\n\t}\n"): typeof import('./graphql').DeleteJobHistoryConfirmationDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
@@ -1624,27 +1634,23 @@ export function graphql(source: "\n\tmutation JobActionMenuDeleteLogs($id: ID!) 
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n\tfragment JobDataInspector on CoreJobOutput {\n\t\t__typename\n\t\t... on LibraryScanOutput {\n\t\t\ttotalFiles\n\t\t\ttotalDirectories\n\t\t\tignoredFiles\n\t\t\tskippedFiles\n\t\t\tignoredDirectories\n\t\t\tcreatedMedia\n\t\t\tupdatedMedia\n\t\t\tcreatedSeries\n\t\t\tupdatedSeries\n\t\t}\n\t\t... on SeriesScanOutput {\n\t\t\ttotalFiles\n\t\t\tignoredFiles\n\t\t\tskippedFiles\n\t\t\tcreatedMedia\n\t\t\tupdatedMedia\n\t\t}\n\t\t... on ThumbnailGenerationOutput {\n\t\t\tvisitedFiles\n\t\t\tskippedFiles\n\t\t\tgeneratedThumbnails\n\t\t\tremovedThumbnails\n\t\t}\n\t\t... on ExternalJobOutput {\n\t\t\tval\n\t\t}\n\t}\n"): typeof import('./graphql').JobDataInspectorFragmentDoc;
+export function graphql(source: "\n\tfragment JobDataInspector on CoreJobOutput {\n\t\t__typename\n\t\t... on LibraryScanOutput {\n\t\t\ttotalFiles\n\t\t\ttotalDirectories\n\t\t\tignoredFiles\n\t\t\tskippedFiles\n\t\t\tignoredDirectories\n\t\t\tcreatedMedia\n\t\t\tupdatedMedia\n\t\t\tcreatedSeries\n\t\t\tupdatedSeries\n\t\t}\n\t\t... on SeriesScanOutput {\n\t\t\ttotalFiles\n\t\t\tignoredFiles\n\t\t\tskippedFiles\n\t\t\tcreatedMedia\n\t\t\tupdatedMedia\n\t\t}\n\t\t... on ThumbnailGenerationOutput {\n\t\t\tvisitedFiles\n\t\t\tskippedFiles\n\t\t\tgeneratedThumbnails\n\t\t\tremovedThumbnails\n\t\t}\n\t}\n"): typeof import('./graphql').JobDataInspectorFragmentDoc;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n\tquery JobSchedulerConfig {\n\t\tlibraries(pagination: { none: { unpaginated: true } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t\temoji\n\t\t\t}\n\t\t}\n\t\tscheduledJobConfigs {\n\t\t\tid\n\t\t\tintervalSecs\n\t\t\t# Note: For now scanConfigs are actually just a library node\n\t\t\tscanConfigs {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').JobSchedulerConfigDocument;
+export function graphql(source: "\n\tquery ScheduledJobs {\n\t\tlibraries(pagination: { none: { unpaginated: true } }) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t\temoji\n\t\t\t}\n\t\t}\n\t\tscheduledJobs {\n\t\t\tid\n\t\t\tname\n\t\t\t...ScheduledJobRow\n\t\t}\n\t}\n"): typeof import('./graphql').ScheduledJobsDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n\tmutation JobSchedulerUpdate($id: Int!, $input: ScheduledJobConfigInput!) {\n\t\tupdateScheduledJobConfig(id: $id, input: $input) {\n\t\t\tid\n\t\t\tintervalSecs\n\t\t\tscanConfigs {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').JobSchedulerUpdateDocument;
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n\tmutation JobSchedulerDelete($id: Int!) {\n\t\tdeleteScheduledJobConfig(id: $id)\n\t}\n"): typeof import('./graphql').JobSchedulerDeleteDocument;
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n\tmutation JobSchedulerCreate($input: ScheduledJobConfigInput!) {\n\t\tcreateScheduledJobConfig(input: $input) {\n\t\t\tid\n\t\t\tintervalSecs\n\t\t\tscanConfigs {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').JobSchedulerCreateDocument;
+export function graphql(source: "\n\tmutation DeleteScheduledJob($id: Int!) {\n\t\tdeleteScheduledJob(id: $id)\n\t}\n"): typeof import('./graphql').DeleteScheduledJobDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n\tquery JobTable($pagination: Pagination!) {\n\t\tjobs(pagination: $pagination) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\tname\n\t\t\t\tdescription\n\t\t\t\tstatus\n\t\t\t\tcreatedAt\n\t\t\t\tcompletedAt\n\t\t\t\tmsElapsed\n\t\t\t\toutputData {\n\t\t\t\t\t...JobDataInspector\n\t\t\t\t}\n\t\t\t\tlogCount\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\tcurrentPage\n\t\t\t\t\ttotalPages\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n"): typeof import('./graphql').JobTableDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tfragment ScheduledJobRow on ScheduledJob {\n\t\tid\n\t\tname\n\t\tkind\n\t\tschedule\n\t\tconfig\n\t\tenabled\n\t\tcreatedAt\n\t\tlastRunAt\n\t}\n"): typeof import('./graphql').ScheduledJobRowFragmentDoc;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

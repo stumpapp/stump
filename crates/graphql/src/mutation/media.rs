@@ -15,8 +15,9 @@ use sea_orm::{
 use stump_core::{
 	filesystem::{
 		image::{generate_book_thumbnail, GenerateThumbnailOptions},
-		media::analysis::{AnalysisJobConfig, AnalyzeMediaJob, MediaAnalysisJobScope},
+		media::analysis::{AnalysisJobConfig, MediaAnalysisJobScope},
 	},
+	job::stump_job::StumpJob,
 	utils::chain_optional_iter,
 };
 
@@ -60,13 +61,11 @@ impl MediaMutation {
 			.await?
 			.ok_or("Media not found")?;
 
-		core.enqueue_job(
-			AnalyzeMediaJob::new(AnalysisJobConfig {
-				force_reanalysis,
-				scope: MediaAnalysisJobScope::Book(model.id),
-			})
-			.wrapped(),
-		)?;
+		core.enqueue(StumpJob::analyze_media(AnalysisJobConfig {
+			force_reanalysis,
+			scope: MediaAnalysisJobScope::Book(model.id),
+		}))
+		.await?;
 
 		Ok(true)
 	}

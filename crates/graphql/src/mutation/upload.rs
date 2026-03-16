@@ -13,13 +13,10 @@ use models::{
 };
 use sea_orm::{prelude::*, sea_query::Query};
 use stump_core::filesystem::{
-	image::{
-		place_thumbnail, remove_thumbnails, ThumbnailGenerationJob,
-		ThumbnailGenerationJobParams,
-	},
-	scanner::LibraryScanJob,
+	image::{place_thumbnail, remove_thumbnails, ThumbnailGenerationJobParams},
 	ContentType,
 };
+use stump_core::job::stump_job::StumpJob;
 use tokio::fs;
 use zip::{read::ZipFile, ZipArchive};
 
@@ -90,8 +87,8 @@ impl UploadMutation {
 			copy_tempfile_to_location(value, &file_path).await?;
 		}
 
-		// Start a scan of the library
-		core.enqueue_job(LibraryScanJob::new(library.id, library.path, None))
+		core.enqueue(StumpJob::library_scan(library.id, library.path, None))
+			.await
 			.map_err(|e| {
 				tracing::error!(?e, "Failed to enqueue library scan job");
 				"Failed to enqueue library scan job".to_string()
@@ -155,8 +152,8 @@ impl UploadMutation {
 			Ok::<(), Error>(())
 		})?;
 
-		// Start a scan of the library
-		core.enqueue_job(LibraryScanJob::new(library.id, library.path, None))
+		core.enqueue(StumpJob::library_scan(library.id, library.path, None))
+			.await
 			.map_err(|e| {
 				tracing::error!(?e, "Failed to enqueue library scan job");
 				"Failed to enqueue library scan job".to_string()
@@ -234,10 +231,16 @@ impl UploadMutation {
 		let config = config.ok_or("Library config not found")?;
 		let force_regenerate = true;
 
-		if let Err(e) = core.enqueue_job(ThumbnailGenerationJob::new(
-			config.thumbnail_config.unwrap_or_default(),
-			ThumbnailGenerationJobParams::library(library.id.clone(), force_regenerate),
-		)) {
+		if let Err(e) = core
+			.enqueue(StumpJob::thumbnail_generation(
+				config.thumbnail_config.unwrap_or_default(),
+				ThumbnailGenerationJobParams::library(
+					library.id.clone(),
+					force_regenerate,
+				),
+			))
+			.await
+		{
 			tracing::error!(?e, "Failed to enqueue thumbnail generation job");
 		}
 
@@ -318,13 +321,16 @@ impl UploadMutation {
 			.ok_or("Library config not found")?;
 		let force_regenerate = true;
 
-		if let Err(e) = core.enqueue_job(ThumbnailGenerationJob::new(
-			config.thumbnail_config.unwrap_or_default(),
-			ThumbnailGenerationJobParams::series(
-				vec![series.series.id.clone()],
-				force_regenerate,
-			),
-		)) {
+		if let Err(e) = core
+			.enqueue(StumpJob::thumbnail_generation(
+				config.thumbnail_config.unwrap_or_default(),
+				ThumbnailGenerationJobParams::series(
+					vec![series.series.id.clone()],
+					force_regenerate,
+				),
+			))
+			.await
+		{
 			tracing::error!(?e, "Failed to enqueue thumbnail generation job");
 		}
 
@@ -409,13 +415,16 @@ impl UploadMutation {
 			.ok_or("Library config not found")?;
 		let force_regenerate = true;
 
-		if let Err(e) = core.enqueue_job(ThumbnailGenerationJob::new(
-			config.thumbnail_config.unwrap_or_default(),
-			ThumbnailGenerationJobParams::books(
-				vec![book.media.id.clone()],
-				force_regenerate,
-			),
-		)) {
+		if let Err(e) = core
+			.enqueue(StumpJob::thumbnail_generation(
+				config.thumbnail_config.unwrap_or_default(),
+				ThumbnailGenerationJobParams::books(
+					vec![book.media.id.clone()],
+					force_regenerate,
+				),
+			))
+			.await
+		{
 			tracing::error!(?e, "Failed to enqueue thumbnail generation job");
 		}
 
@@ -484,13 +493,16 @@ impl UploadMutation {
 			.ok_or("Library config not found")?;
 		let force_regenerate = true;
 
-		if let Err(e) = core.enqueue_job(ThumbnailGenerationJob::new(
-			config.thumbnail_config.unwrap_or_default(),
-			ThumbnailGenerationJobParams::series(
-				vec![series.series.id.clone()],
-				force_regenerate,
-			),
-		)) {
+		if let Err(e) = core
+			.enqueue(StumpJob::thumbnail_generation(
+				config.thumbnail_config.unwrap_or_default(),
+				ThumbnailGenerationJobParams::series(
+					vec![series.series.id.clone()],
+					force_regenerate,
+				),
+			))
+			.await
+		{
 			tracing::error!(?e, "Failed to enqueue thumbnail generation job");
 		}
 
@@ -564,13 +576,16 @@ impl UploadMutation {
 			.ok_or("Library config not found")?;
 		let force_regenerate = true;
 
-		if let Err(e) = core.enqueue_job(ThumbnailGenerationJob::new(
-			config.thumbnail_config.unwrap_or_default(),
-			ThumbnailGenerationJobParams::books(
-				vec![book.media.id.clone()],
-				force_regenerate,
-			),
-		)) {
+		if let Err(e) = core
+			.enqueue(StumpJob::thumbnail_generation(
+				config.thumbnail_config.unwrap_or_default(),
+				ThumbnailGenerationJobParams::books(
+					vec![book.media.id.clone()],
+					force_regenerate,
+				),
+			))
+			.await
+		{
 			tracing::error!(?e, "Failed to enqueue thumbnail generation job");
 		}
 

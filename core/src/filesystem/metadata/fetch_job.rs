@@ -18,31 +18,13 @@ use sea_orm::{
 use serde::{Deserialize, Serialize};
 
 use crate::job::{
-	error::JobError, JobExecuteLog, JobExt, JobOutputExt, JobProgress, JobTaskOutput,
-	WorkerCtx, WorkingState, WrappedJob,
+	error::JobError, JobContext, JobExecuteLog, JobLifecycle, JobOutputExt, JobProgress,
+	JobTaskOutput, WorkingState,
 };
 
 use super::{apply, ProviderClientCache};
 
 type Id = String;
-
-async fn resolve_library_type(
-	conn: &DatabaseConnection,
-	library_id: &str,
-) -> Result<LibraryType, JobError> {
-	let config = library_config::Entity::find()
-		.filter(library_config::Column::LibraryId.eq(library_id))
-		.one(conn)
-		.await
-		.map_err(|e| JobError::InitFailed(e.to_string()))?
-		.ok_or_else(|| {
-			JobError::InitFailed(format!(
-				"Library config not found for library {library_id}"
-			))
-		})?;
-
-	Ok(config.library_type)
-}
 
 /// The scope of entities to fetch metadata for
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -149,7 +131,7 @@ impl JobOutputExt for MetadataFetchJobOutput {
 #[derive(Clone)]
 pub struct MetadataFetchJob {
 	pub params: MetadataFetchJobParams,
-	provider_cache: Option<Arc<ProviderClientCache>>,
+	pub provider_cache: Option<Arc<ProviderClientCache>>,
 }
 
 // Note: We won't persist the provider cache
@@ -176,16 +158,16 @@ impl<'de> Deserialize<'de> for MetadataFetchJob {
 }
 
 impl MetadataFetchJob {
-	pub fn new(params: MetadataFetchJobParams) -> Box<WrappedJob<Self>> {
-		WrappedJob::new(Self {
+	pub fn new(params: MetadataFetchJobParams) -> Self {
+		Self {
 			params,
 			provider_cache: None,
-		})
+		}
 	}
 
 	async fn get_or_init_cache(
 		&mut self,
-		ctx: &WorkerCtx,
+		ctx: &JobContext,
 	) -> Result<Arc<ProviderClientCache>, JobError> {
 		if let Some(cache) = &self.provider_cache {
 			return Ok(Arc::clone(cache));
@@ -200,7 +182,7 @@ impl MetadataFetchJob {
 }
 
 #[async_trait::async_trait]
-impl JobExt for MetadataFetchJob {
+impl JobLifecycle for MetadataFetchJob {
 	const NAME: &'static str = "metadata_fetch";
 
 	type Output = MetadataFetchJobOutput;
@@ -228,9 +210,9 @@ impl JobExt for MetadataFetchJob {
 
 	async fn init(
 		&mut self,
-		ctx: &WorkerCtx,
+		ctx: &JobContext,
 	) -> Result<WorkingState<Self::Output, Self::Task>, JobError> {
-		let conn = ctx.conn.as_ref();
+		let conn = ctx.conn();
 
 		self.get_or_init_cache(ctx).await?;
 
@@ -393,17 +375,16 @@ impl JobExt for MetadataFetchJob {
 		Ok(WorkingState {
 			output: Some(Self::Output::default()),
 			tasks,
-			completed_tasks: 0,
 			logs: vec![],
 		})
 	}
 
 	async fn execute_task(
 		&self,
-		ctx: &WorkerCtx,
+		ctx: &JobContext,
 		task: Self::Task,
 	) -> Result<JobTaskOutput<Self>, JobError> {
-		let conn = ctx.conn.as_ref();
+		let conn = ctx.conn();
 		let mut output = Self::Output::default();
 
 		let provider_cache = self.provider_cache.as_ref().ok_or_else(|| {
@@ -781,4 +762,22 @@ impl JobExt for MetadataFetchJob {
 			subtasks: vec![],
 		})
 	}
+}
+
+async fn resolve_library_type(
+	conn: &DatabaseConnection,
+	library_id: &str,
+) -> Result<LibraryType, JobError> {
+	let config = library_config::Entity::find()
+		.filter(library_config::Column::LibraryId.eq(library_id))
+		.one(conn)
+		.await
+		.map_err(|e| JobError::InitFailed(e.to_string()))?
+		.ok_or_else(|| {
+			JobError::InitFailed(format!(
+				"Library config not found for library {library_id}"
+			))
+		})?;
+
+	Ok(config.library_type)
 }

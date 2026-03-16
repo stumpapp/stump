@@ -756,3 +756,35 @@ pub enum UserPermission {
 	/// Grant access to manage the server. This is effectively a step below server owner
 	ManageServer,
 }
+
+/// The kind of a scheduled job, aligned with the config variants
+#[derive(
+	Eq,
+	Copy,
+	Hash,
+	Debug,
+	Clone,
+	Default,
+	EnumIter,
+	PartialEq,
+	Serialize,
+	Deserialize,
+	DeriveActiveEnum,
+	EnumString,
+	Display,
+	Enum,
+)]
+#[sea_orm(
+	rs_type = "String",
+	rename_all = "SCREAMING_SNAKE_CASE",
+	db_type = "String(StringLen::None)"
+)]
+#[strum(serialize_all = "SCREAMING_SNAKE_CASE")]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum ScheduledJobKind {
+	/// Scan one or more libraries on a cron schedule
+	#[default]
+	LibraryScan,
+	/// Retry fetching metadata for records that were rate-limited or failed
+	MetadataRetry,
+}

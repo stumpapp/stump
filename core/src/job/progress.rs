@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
-use super::{JobStatus, WorkerSend, WorkerSendExt};
+use super::JobStatus;
 use async_graphql::SimpleObject;
 
 /// An update event that is emitted by a job
@@ -110,11 +110,5 @@ impl JobProgress {
 			message: Some(msg.to_string()),
 			..Self::subtask_position(index, size)
 		}
-	}
-}
-
-impl WorkerSendExt for JobProgress {
-	fn into_worker_send(self) -> WorkerSend {
-		WorkerSend::Progress(self)
 	}
 }

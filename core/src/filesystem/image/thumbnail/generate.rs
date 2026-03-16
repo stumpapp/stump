@@ -27,7 +27,7 @@ use crate::{
 		media::{get_page, get_page_async},
 		FileError,
 	},
-	job::{JobExecuteLog, JobTaskOutput, WorkerCtx},
+	job::{JobContext, JobExecuteLog, JobTaskOutput},
 };
 
 /// An error enum for thumbnail generation errors
@@ -217,7 +217,7 @@ pub async fn generate_book_thumbnail(
 async fn copy_thumbnail_to_entity<E>(
 	entity_id: &str,
 	first_book: media::MediaThumbSelect,
-	ctx: &WorkerCtx,
+	ctx: &JobContext,
 	options: GenerateThumbnailOptions,
 	update_fn: impl FnOnce(String, Option<ImageMetadata>) -> sea_orm::UpdateMany<E>,
 ) -> Result<GenerateOutput, ThumbnailGenerateError>
@@ -231,8 +231,7 @@ where
 		None => {
 			// Note that this shouldn't really happen but figured better to handle instead
 			let (data, path, _) =
-				generate_book_thumbnail(&first_book, ctx.conn.as_ref(), options.clone())
-					.await?;
+				generate_book_thumbnail(&first_book, ctx.conn(), options.clone()).await?;
 			did_regenerate = true;
 			(path.to_string_lossy().to_string(), data)
 		},
@@ -258,7 +257,7 @@ where
 		.ok_or(ThumbnailGenerateError::SourceMissingExtension)?;
 
 	let dest_path = ctx
-		.config
+		.config()
 		.get_thumbnails_dir()
 		.join(format!("{}.{}", entity_id, ext));
 
@@ -285,7 +284,7 @@ where
 	};
 
 	update_fn(dest_path.to_string_lossy().to_string(), thumbnail_metadata)
-		.exec(ctx.conn.as_ref())
+		.exec(ctx.conn())
 		.await?;
 
 	Ok((thumbnail_data, dest_path, true))
@@ -294,7 +293,7 @@ where
 #[tracing::instrument(skip_all)]
 async fn generate_series_thumbnail(
 	series: &series::SeriesThumbSelect,
-	ctx: &WorkerCtx,
+	ctx: &JobContext,
 	options: GenerateThumbnailOptions,
 ) -> Result<GenerateOutput, ThumbnailGenerateError> {
 	if let (false, Some(thumbnail_path)) = (options.force_regen, &series.thumbnail_path) {
@@ -325,7 +324,7 @@ async fn generate_series_thumbnail(
 		.filter(media::Column::SeriesId.eq(&series.id))
 		.order_by_asc(media::Column::Name)
 		.into_model::<media::MediaThumbSelect>()
-		.one(ctx.conn.as_ref())
+		.one(ctx.conn())
 		.await?;
 
 	let Some(first_book) = first_book else {
@@ -357,7 +356,7 @@ async fn generate_series_thumbnail(
 #[tracing::instrument(skip_all)]
 async fn generate_library_thumbnail(
 	library: &library::LibraryThumbSelect,
-	ctx: &WorkerCtx,
+	ctx: &JobContext,
 	options: GenerateThumbnailOptions,
 ) -> Result<GenerateOutput, ThumbnailGenerateError> {
 	if let (false, Some(thumbnail_path)) = (options.force_regen, &library.thumbnail_path)
@@ -391,7 +390,7 @@ async fn generate_library_thumbnail(
 		.order_by_asc(series::Column::Name)
 		.order_by_asc(media::Column::Name)
 		.into_model::<media::MediaThumbSelect>()
-		.one(ctx.conn.as_ref())
+		.one(ctx.conn())
 		.await?;
 
 	let Some(first_book) = first_book else {
@@ -429,7 +428,7 @@ pub enum GenerateImageSource {
 #[tracing::instrument(skip_all)]
 pub async fn safely_generate_batch(
 	sources: Vec<GenerateImageSource>,
-	ctx: &WorkerCtx,
+	ctx: &JobContext,
 	options: GenerateThumbnailOptions,
 	reporter: impl Fn(usize),
 ) -> JobTaskOutput<ThumbnailGenerationJob> {
@@ -469,7 +468,7 @@ pub async fn safely_generate_batch(
 
 				let result = match source {
 					GenerateImageSource::Book(book) => {
-						generate_book_thumbnail(book, ctx.conn.as_ref(), options).await
+						generate_book_thumbnail(book, ctx.conn(), options).await
 					},
 					GenerateImageSource::Series(series) => {
 						generate_series_thumbnail(series, ctx, options).await
@@ -529,7 +528,7 @@ pub async fn safely_generate_batch(
 #[tracing::instrument(skip_all)]
 pub async fn generate_book_placeholder(
 	book: &media::MediaThumbSelect,
-	ctx: &WorkerCtx,
+	ctx: &JobContext,
 	force_regen: bool,
 ) -> Result<(), ThumbnailGenerateError> {
 	// Skip if metadata exists and not forcing regeneration
@@ -546,7 +545,7 @@ pub async fn generate_book_placeholder(
 			fs::read(&path).await?
 		},
 		_ => {
-			let (_, data) = get_page_async(&book.path, 1, &ctx.config).await?;
+			let (_, data) = get_page_async(&book.path, 1, ctx.config()).await?;
 			data
 		},
 	};
@@ -565,7 +564,7 @@ pub async fn generate_book_placeholder(
 			media::Column::ThumbnailMeta,
 			Expr::value(thumbnail_metadata),
 		)
-		.exec(ctx.conn.as_ref())
+		.exec(ctx.conn())
 		.await?;
 
 	Ok(())
@@ -573,13 +572,13 @@ pub async fn generate_book_placeholder(
 
 async fn get_series_thumbnail_candidate(
 	series: &series::SeriesThumbSelect,
-	ctx: &WorkerCtx,
+	ctx: &JobContext,
 ) -> Result<Option<Vec<u8>>, ThumbnailGenerateError> {
 	let Some(first_book) = media::Entity::find()
 		.filter(media::Column::SeriesId.eq(series.id.clone()))
 		.order_by_asc(media::Column::Name)
 		.into_model::<media::MediaThumbSelect>()
-		.one(ctx.conn.as_ref())
+		.one(ctx.conn())
 		.await?
 	else {
 		tracing::warn!(series_id = %series.id, "No books found in series");
@@ -592,7 +591,7 @@ async fn get_series_thumbnail_candidate(
 			fs::read(&path).await?
 		},
 		_ => {
-			let (_, data) = get_page_async(&first_book.path, 1, &ctx.config).await?;
+			let (_, data) = get_page_async(&first_book.path, 1, ctx.config()).await?;
 			data
 		},
 	};
@@ -604,7 +603,7 @@ async fn get_series_thumbnail_candidate(
 #[tracing::instrument(skip_all)]
 async fn generate_series_placeholder(
 	series: &series::SeriesThumbSelect,
-	ctx: &WorkerCtx,
+	ctx: &JobContext,
 	force_regen: bool,
 ) -> Result<(), ThumbnailGenerateError> {
 	// Skip if metadata exists and not forcing regeneration
@@ -640,7 +639,7 @@ async fn generate_series_placeholder(
 			series::Column::ThumbnailMeta,
 			Expr::value(thumbnail_metadata),
 		)
-		.exec(ctx.conn.as_ref())
+		.exec(ctx.conn())
 		.await?;
 
 	Ok(())
@@ -648,7 +647,7 @@ async fn generate_series_placeholder(
 
 async fn get_library_thumbnail_candidate(
 	library: &library::LibraryThumbSelect,
-	ctx: &WorkerCtx,
+	ctx: &JobContext,
 ) -> Result<Option<Vec<u8>>, ThumbnailGenerateError> {
 	let first_book = media::Entity::find()
 		.filter(
@@ -666,7 +665,7 @@ async fn get_library_thumbnail_candidate(
 		)
 		.order_by_asc(media::Column::Name)
 		.into_model::<media::MediaThumbSelect>()
-		.one(ctx.conn.as_ref())
+		.one(ctx.conn())
 		.await?;
 
 	let Some(book) = first_book else {
@@ -680,7 +679,7 @@ async fn get_library_thumbnail_candidate(
 			fs::read(&path).await?
 		},
 		_ => {
-			let (_, data) = get_page_async(&book.path, 1, &ctx.config).await?;
+			let (_, data) = get_page_async(&book.path, 1, ctx.config()).await?;
 			data
 		},
 	};
@@ -692,7 +691,7 @@ async fn get_library_thumbnail_candidate(
 #[tracing::instrument(skip_all)]
 async fn generate_library_placeholder(
 	library: &library::LibraryThumbSelect,
-	ctx: &WorkerCtx,
+	ctx: &JobContext,
 	force_regen: bool,
 ) -> Result<(), ThumbnailGenerateError> {
 	// Skip if metadata exists and not forcing regeneration
@@ -728,7 +727,7 @@ async fn generate_library_placeholder(
 			library::Column::ThumbnailMeta,
 			Expr::value(thumbnail_metadata),
 		)
-		.exec(ctx.conn.as_ref())
+		.exec(ctx.conn())
 		.await?;
 
 	Ok(())
@@ -738,14 +737,14 @@ async fn generate_library_placeholder(
 #[tracing::instrument(skip_all)]
 pub async fn safely_generate_placeholder_batch(
 	sources: Vec<GenerateImageSource>,
-	ctx: &WorkerCtx,
+	ctx: &JobContext,
 	force_regen: bool,
 	reporter: impl Fn(usize),
 ) -> JobTaskOutput<PlaceholderGenerationJob> {
 	let mut output = PlaceholderGenerationOutput::default();
 	let mut logs = vec![];
 
-	let max_concurrency = ctx.config.max_thumbnail_concurrency;
+	let max_concurrency = ctx.config().max_thumbnail_concurrency;
 	let batch_size = max_concurrency;
 	let total_sources = sources.len();
 	tracing::debug!(

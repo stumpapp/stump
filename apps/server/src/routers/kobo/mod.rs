@@ -2,6 +2,7 @@ use axum::Router;
 
 use crate::config::state::AppState;
 
+mod queries;
 mod sync;
 mod sync_types;
 

@@ -1,14 +1,17 @@
 use axum::{
 	extract::{Path, Request, State},
 	middleware::{self, Next},
-	response::{Json, Response},
+	response::{IntoResponse, Json, Response},
 	routing::get,
 	Extension, Router,
 };
-use chrono::Utc;
 use graphql::data::AuthContext;
-use models::shared::enums::UserPermission;
+use models::{
+	entity::media::{self, ModelWithMetadata},
+	shared::enums::UserPermission,
+};
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 
 use crate::{
 	config::state::AppState,
@@ -30,12 +33,18 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		"/{api_key}",
 		Router::new()
 			.route("/v1/library/sync", get(library_sync))
+			// The Kobo requests many routes that we don't implement.
+			.route("/v1/{*path}", get(empty_json).post(empty_json))
 			.layer(middleware::from_fn(authorize)) // Note the order!
 			.layer(middleware::from_fn_with_state(
 				app_state,
 				api_key_middleware,
 			)),
 	)
+}
+
+async fn empty_json() -> APIResult<impl IntoResponse> {
+	Ok(Json(json!({})))
 }
 
 /// A secondary authorization middleware to ensure that the user has access to the
@@ -58,103 +67,28 @@ async fn library_sync(
 	Extension(req): Extension<AuthContext>,
 	Path(KoboURLParams { api_key, .. }): Path<KoboURLParams>,
 ) -> APIResult<Json<Vec<SyncItem>>> {
-	let _conn = ctx.conn.as_ref();
+	let conn = ctx.conn.as_ref();
 	let _user = req.user();
 
-	let id: String = "1234".to_string();
-
 	let base_url = "http://192.168.4.100:25601";
-	let book_url = format!("{}/kobo/{}/v1/books/{}/file/epub", base_url, api_key, id);
 
-	let item = SyncItem::NewEntitlement(NewEntitlement {
-      book_entitlement: BookEntitlement {
-			accessibility: "Full".to_string(),
-			active_period: Period { from: Utc::now() },
-			created: Utc::now(),
-      cross_revision_id: id.clone(),
-      id: id.clone(),
-      is_hidden_from_archive: false,
-      is_locked: false,
-      is_removed: false,
-      last_modified: Utc::now(),
-      origin_category: "Imported".to_string(),
-      revision_id: id.clone(),
-      status: "Active".to_string(),
-    },
-    book_metadata: BookMetadata {
-        categories: vec![
-            "00000000-0000-0000-0000-000000000001".to_string(),
-        ],
-        contributor_roles: vec![
-            ContributorRole {
-                name: "Rex Stout".to_string(),
-            }
-        ],
-        contributors: vec![
-            "Rex Stout".to_string(),
-        ],
-        cover_image_id: "0PSKKSGSRRBES".to_string(),
-        cross_revision_id: id.clone(),
-        current_display_price: DisplayPrice {
-            currency_code: "USD".to_string(),
-            total_amount: 0,
-        },
-        current_love_display_price: LoveDisplayPrice {
-            total_amount: 0,
-        },
-        description: "A prize bull, a restaurateur's tacky publicity stunt, a family feud (among the bull's owners), and the death of a family scion pit Nero Wolfe and Archie Goodwin against a special breed of killer.".to_string(),
-        download_urls: vec![
-            DownloadUrl {
-                drm_type: "None".to_string(),
-                format: "EPUB3".to_string(),
-                size: 2_848_252,
-                platform: "Generic".to_string(),
-                url: book_url,
-            }
-        ],
-        entitlement_id: id.clone(),
-        external_ids: vec![],
-        genre: "00000000-0000-0000-0000-000000000001".to_string(),
-        is_eligible_for_kobo_love: false,
-        is_internet_archive: false,
-        is_pre_order: false,
-        is_social_enabled: true,
-        isbn: "9780307756190".to_string(),
-        language: "en".to_string(),
-        phonetic_pronunciations: Empty{},
-        publication_date: Utc::now(),
-        publisher: Publisher {
-            imprint: "".to_string(),
-            name: "Random House Publishing Group".to_string(),
-        },
-        revision_id: id.clone(),
-        series: Series {
-            id: "0PSKKSF6WR6RC".to_string(),
-            name: "library".to_string(),
-            number: "1".to_string(),
-            number_float: 1.0,
-        },
-        title: "Rex Stout - Nero Wolfe 06 - Some Buried Caesar".to_string(),
-        work_id: id.clone(),
-    },
-    reading_state: ReadingState {
-        created: Utc::now(),
-        current_bookmark: CurrentBookmark {
-            last_modified: Utc::now(),
-        },
-        entitlement_id: id.clone(),
-        last_modified: Utc::now(),
-        priority_timestamp: Utc::now(),
-        statistics: Statistics {
-            last_modified: Utc::now(),
-        },
-        status_info: StatusInfo {
-            last_modified: Utc::now(),
-            status: "ReadyToRead".to_string(),
-            times_started_reading: 0,
-        },
-    }
-  });
+	// TODO: media::Entity::find_for_user
+	let items = ModelWithMetadata::find()
+		.into_model::<media::ModelWithMetadata>()
+		.all(conn)
+		.await?;
 
-	Ok(Json(vec![item]))
+	let result = items
+		.into_iter()
+		.map(|m| {
+			let book_url = format!(
+				"{}/kobo/{}/v1/books/{}/file/epub",
+				base_url, api_key, m.media.id
+			);
+
+			SyncItem::NewEntitlement(NewEntitlement::from_media(m, book_url))
+		})
+		.collect();
+
+	Ok(Json(result))
 }

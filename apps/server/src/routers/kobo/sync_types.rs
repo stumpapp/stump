@@ -47,7 +47,7 @@ pub struct BookMetadata {
 	pub cross_revision_id: String,
 	pub current_display_price: DisplayPrice,
 	pub current_love_display_price: LoveDisplayPrice,
-	pub description: String,
+	pub description: Option<String>,
 	pub download_urls: Vec<DownloadUrl>,
 	pub entitlement_id: String,
 	pub external_ids: Vec<String>,
@@ -56,13 +56,13 @@ pub struct BookMetadata {
 	pub is_internet_archive: bool,
 	pub is_pre_order: bool,
 	pub is_social_enabled: bool,
-	pub isbn: String,
+	pub isbn: Option<String>,
 	pub language: String,
 	pub phonetic_pronunciations: Empty,
-	pub publication_date: DateTime<Utc>,
-	pub publisher: Publisher,
+	pub publication_date: Option<DateTime<Utc>>,
+	pub publisher: Option<Publisher>,
 	pub revision_id: String,
-	pub series: Series,
+	pub series: Option<Series>,
 	pub title: String,
 	pub work_id: String,
 }
@@ -128,6 +128,17 @@ pub struct ReadingState {
 #[serde(rename_all = "PascalCase")]
 pub struct CurrentBookmark {
 	pub last_modified: DateTime<Utc>,
+	pub progress_percent: Option<f64>,
+	pub content_source_progress_percent: Option<f64>,
+	pub location: Option<Location>,
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "PascalCase")]
+pub struct Location {
+	pub value: Option<String>,
+	pub type_: Option<String>,
+	pub source: String,
 }
 
 #[derive(Serialize)]

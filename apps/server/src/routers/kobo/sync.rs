@@ -1,5 +1,8 @@
 use axum::{
+	body::Body,
 	extract::{Path, Request, State},
+	http::header,
+	http::HeaderMap,
 	middleware::{self, Next},
 	response::{IntoResponse, Json, Response},
 	routing::get,
@@ -12,6 +15,9 @@ use models::{
 };
 use serde::{Deserialize, Serialize};
 use serde_json::json;
+use tower_http::services::ServeFile;
+
+use sea_orm::prelude::*;
 
 use crate::{
 	config::state::AppState,
@@ -40,6 +46,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		Router::new()
 			.route("/v1/library/sync", get(library_sync))
 			.route("/v1/library/{book_id}/metadata", get(book_metadata))
+			.route("/v1/books/{book_id}/file/epub", get(book_download))
 			// The Kobo requests many routes that we don't implement.
 			.route("/v1/{*path}", get(empty_json).post(empty_json))
 			.layer(middleware::from_fn(authorize)) // Note the order!
@@ -123,4 +130,53 @@ async fn book_metadata(
 
 	let result = BookMetadata::from_media(&m, book_url);
 	Ok(Json(vec![result]))
+}
+
+async fn book_download(
+	State(ctx): State<AppState>,
+	Extension(req): Extension<AuthContext>,
+	Path(KoboAPIKeyAndBookId { book_id, .. }): Path<KoboAPIKeyAndBookId>,
+	headers: HeaderMap,
+) -> APIResult<impl IntoResponse> {
+	let user = req
+		.user_and_enforce_permissions(&[UserPermission::DownloadFile])
+		.map_err(|_| {
+			tracing::error!("User does not have permission to download file");
+			APIError::forbidden_discreet()
+		})?;
+
+	let book = media::Entity::find_for_user(&user)
+		.filter(media::Column::Id.eq(book_id.clone()))
+		.into_model::<media::MediaIdentSelect>()
+		.one(ctx.conn.as_ref())
+		.await?
+		.ok_or(APIError::NotFound("Book not found".to_string()))?;
+
+	// Note: I am reusing the original headers to support range requests
+	let mut serve_req = Request::new(Body::empty());
+	*serve_req.headers_mut() = headers;
+
+	match ServeFile::new(&book.path).try_call(serve_req).await {
+		Ok(mut response) => {
+			if let Some(filename) = std::path::Path::new(&book.path)
+				.file_name()
+				.and_then(|os_str| os_str.to_str())
+			{
+				response.headers_mut().insert(
+					header::CONTENT_DISPOSITION,
+					format!("attachment; filename=\"{}\"", filename)
+						.parse()
+						.unwrap_or_else(|_| "attachment".parse().unwrap()),
+				);
+			}
+			Ok(response)
+		},
+		Err(e) => {
+			tracing::error!(error = ?e, path = %book.path, "Error serving media file");
+			Err(APIError::InternalServerError(format!(
+				"Failed to serve file: {}",
+				e
+			)))
+		},
+	}
 }

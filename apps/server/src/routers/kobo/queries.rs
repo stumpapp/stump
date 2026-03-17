@@ -2,12 +2,70 @@ use crate::routers::kobo::sync_types::*;
 use chrono::Utc;
 use models::entity::media;
 
-impl NewEntitlement {
-	pub fn from_media(m: media::ModelWithMetadata, book_url: String) -> Self {
+impl BookMetadata {
+	pub fn from_media(m: &media::ModelWithMetadata, book_url: String) -> Self {
 		let dummy_uuid = "00000000-0000-0000-0000-000000000001";
-		let media_id = m.media.id;
+		let media_id = &m.media.id;
 
 		let writers = m.metadata.clone().and_then(|mm| mm.writers);
+
+		BookMetadata {
+			categories: vec![dummy_uuid.to_string()],
+			contributor_roles: writers
+				.clone()
+				.into_iter()
+				.map(|w| ContributorRole {
+					name: w.to_string(),
+				})
+				.collect(),
+			contributors: writers.clone().into_iter().collect(),
+			cover_image_id: "0PSKKSGSRRBES".to_string(), // TODO
+			cross_revision_id: media_id.clone(),
+			current_display_price: DisplayPrice {
+				currency_code: "USD".to_string(),
+				total_amount: 0,
+			},
+			current_love_display_price: LoveDisplayPrice { total_amount: 0 },
+			description: m.metadata.clone().and_then(|mm| mm.summary),
+			download_urls: vec![DownloadUrl {
+				drm_type: "None".to_string(),
+				format: "EPUB3".to_string(), // TODO
+				size: u64::try_from(m.media.size).unwrap_or(0),
+				platform: "Generic".to_string(),
+				url: book_url,
+			}],
+			entitlement_id: media_id.clone(),
+			external_ids: vec![],
+			genre: dummy_uuid.to_string(),
+			is_eligible_for_kobo_love: false,
+			is_internet_archive: false,
+			is_pre_order: false,
+			is_social_enabled: true,
+			isbn: m.metadata.clone().and_then(|mm| mm.identifier_isbn),
+			language: "en".to_string(),
+			phonetic_pronunciations: Empty {},
+			publication_date: None, // TODO
+			publisher: m.metadata.clone().and_then(|mm| mm.publisher).map(|mp| {
+				Publisher {
+					imprint: "".to_string(),
+					name: mp,
+				}
+			}),
+			revision_id: media_id.clone(),
+			series: None, // TODO
+			title: m
+				.metadata
+				.clone()
+				.and_then(|mm| mm.title)
+				.unwrap_or(m.media.name.clone()),
+			work_id: media_id.clone(),
+		}
+	}
+}
+
+impl NewEntitlement {
+	pub fn from_media(m: media::ModelWithMetadata, book_url: String) -> Self {
+		let media_id = &m.media.id;
 
 		NewEntitlement {
 			book_entitlement: BookEntitlement {
@@ -28,57 +86,7 @@ impl NewEntitlement {
 				revision_id: media_id.clone(),
 				status: "Active".to_string(),
 			},
-			book_metadata: BookMetadata {
-				categories: vec![dummy_uuid.to_string()],
-				contributor_roles: writers
-					.clone()
-					.into_iter()
-					.map(|w| ContributorRole {
-						name: w.to_string(),
-					})
-					.collect(),
-				contributors: writers.clone().into_iter().collect(),
-				cover_image_id: "0PSKKSGSRRBES".to_string(), // TODO
-				cross_revision_id: media_id.clone(),
-				current_display_price: DisplayPrice {
-					currency_code: "USD".to_string(),
-					total_amount: 0,
-				},
-				current_love_display_price: LoveDisplayPrice { total_amount: 0 },
-				description: m.metadata.clone().and_then(|mm| mm.summary),
-				download_urls: vec![DownloadUrl {
-					drm_type: "None".to_string(),
-					format: "EPUB3".to_string(), // TODO
-					size: u64::try_from(m.media.size).unwrap_or(0),
-					platform: "Generic".to_string(),
-					url: book_url,
-				}],
-				entitlement_id: media_id.clone(),
-				external_ids: vec![],
-				genre: dummy_uuid.to_string(),
-				is_eligible_for_kobo_love: false,
-				is_internet_archive: false,
-				is_pre_order: false,
-				is_social_enabled: true,
-				isbn: m.metadata.clone().and_then(|mm| mm.identifier_isbn),
-				language: "en".to_string(),
-				phonetic_pronunciations: Empty {},
-				publication_date: None, // TODO
-				publisher: m.metadata.clone().and_then(|mm| mm.publisher).map(|mp| {
-					Publisher {
-						imprint: "".to_string(),
-						name: mp,
-					}
-				}),
-				revision_id: media_id.clone(),
-				series: None, // TODO
-				title: m
-					.metadata
-					.clone()
-					.and_then(|mm| mm.title)
-					.unwrap_or(m.media.name),
-				work_id: media_id.clone(),
-			},
+			book_metadata: BookMetadata::from_media(&m, book_url),
 			// TODO
 			reading_state: ReadingState {
 				created: Utc::now(),

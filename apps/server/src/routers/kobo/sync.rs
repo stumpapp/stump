@@ -21,8 +21,14 @@ use crate::{
 };
 
 #[derive(Debug, Serialize, Deserialize)]
-struct KoboURLParams {
+struct KoboAPIKey {
 	api_key: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct KoboAPIKeyAndBookId {
+	api_key: String,
+	book_id: String,
 }
 
 /// Mounts the koreader sync router at `/kobo` (from the parent router).
@@ -33,6 +39,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		"/{api_key}",
 		Router::new()
 			.route("/v1/library/sync", get(library_sync))
+			.route("/v1/library/{book_id}/metadata", get(book_metadata))
 			// The Kobo requests many routes that we don't implement.
 			.route("/v1/{*path}", get(empty_json).post(empty_json))
 			.layer(middleware::from_fn(authorize)) // Note the order!
@@ -65,7 +72,7 @@ async fn authorize(req: Request, next: Next) -> APIResult<Response> {
 async fn library_sync(
 	State(ctx): State<AppState>,
 	Extension(req): Extension<AuthContext>,
-	Path(KoboURLParams { api_key, .. }): Path<KoboURLParams>,
+	Path(KoboAPIKey { api_key, .. }): Path<KoboAPIKey>,
 ) -> APIResult<Json<Vec<SyncItem>>> {
 	let conn = ctx.conn.as_ref();
 	let _user = req.user();
@@ -91,4 +98,29 @@ async fn library_sync(
 		.collect();
 
 	Ok(Json(result))
+}
+
+async fn book_metadata(
+	State(ctx): State<AppState>,
+	Extension(req): Extension<AuthContext>,
+	Path(KoboAPIKeyAndBookId { api_key, book_id }): Path<KoboAPIKeyAndBookId>,
+) -> APIResult<Json<Vec<BookMetadata>>> {
+	let conn = ctx.conn.as_ref();
+	let user = req.user();
+
+	let m = ModelWithMetadata::find_by_id_for_user(book_id, &user)
+		.into_model::<media::ModelWithMetadata>()
+		.one(conn)
+		.await?
+		.ok_or(APIError::NotFound("Book not found".to_string()))?;
+
+	let base_url = "http://192.168.4.100:25601";
+
+	let book_url = format!(
+		"{}/kobo/{}/v1/books/{}/file/epub",
+		base_url, api_key, m.media.id
+	);
+
+	let result = BookMetadata::from_media(&m, book_url);
+	Ok(Json(vec![result]))
 }

@@ -125,7 +125,7 @@ export default function PublicationGroup({
 	return (
 		<View>
 			<View className="flex flex-row items-center justify-between px-4 pb-3">
-				<ListLabel>{metadata.title || 'Publications'}</ListLabel>
+				<ListLabel className="ios:px-4 px-2">{metadata.title || 'Publications'}</ListLabel>
 
 				{selfURL && <FeedSelfURL url={selfURL} />}
 			</View>

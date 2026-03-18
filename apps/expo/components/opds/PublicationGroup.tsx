@@ -8,13 +8,13 @@ import { Rss } from 'lucide-react-native'
 import { useCallback, useMemo } from 'react'
 import { Pressable, View } from 'react-native'
 
-import { useDisplay } from '~/lib/hooks'
+import { useListItemSize } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
-import { usePreferencesStore } from '~/stores'
 
 import { useActiveServer } from '../activeServer'
 import { ThumbnailImage } from '../image'
-import { ListEmptyMessage, Text } from '../ui'
+import { ListEmptyMessage, ListLabel, Text } from '../ui'
+import FeedSelfURL from './FeedSelfURL'
 import { FeedComponentOptions } from './types'
 import { hasLinkRel, useResolveURL } from './utils'
 
@@ -24,6 +24,7 @@ type Props = {
 
 export default function PublicationGroup({
 	group: { metadata, links, publications: initialPublications },
+	// eslint-disable-next-line react/prop-types
 	renderEmpty,
 }: Props) {
 	const selfURL = links?.find((link) => hasLinkRel(link, 'self'))?.href
@@ -33,11 +34,7 @@ export default function PublicationGroup({
 		activeServer: { id: serverID },
 	} = useActiveServer()
 	const { sdk } = useSDK()
-	const { isTablet } = useDisplay()
-	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
-
-	const itemWidth = useMemo(() => (isTablet ? 150 : 100), [isTablet])
-	const itemHeight = useMemo(() => itemWidth / thumbnailRatio, [itemWidth, thumbnailRatio])
+	const { width, height, horizontalGap } = useListItemSize()
 
 	const resolveUrl = useResolveURL()
 
@@ -104,11 +101,11 @@ export default function PublicationGroup({
 										[STUMP_SAVE_BASIC_SESSION_HEADER]: 'false',
 									},
 								}}
-								size={{ height: itemHeight, width: itemWidth }}
+								size={{ height, width }}
 							/>
 
 							<View>
-								<Text className="mt-2" style={{ maxWidth: itemWidth - 4 }} numberOfLines={2}>
+								<Text className="mt-2" style={{ maxWidth: width - 4 }} numberOfLines={2}>
 									{publication.metadata.title}
 								</Text>
 							</View>
@@ -117,43 +114,20 @@ export default function PublicationGroup({
 				</Pressable>
 			)
 		},
-		[router, serverID, sdk, itemHeight, itemWidth, resolveUrl],
+		[router, serverID, sdk, width, height, resolveUrl],
 	)
 
 	if (!publications.length && !renderEmpty) return null
 
+	// TODO: Not 100% on using the ListLabel's here, but I don't necessarily want to use
+	// the Heading here like Stump home screen does. At least this will be inline with the
+	// card list sections
 	return (
 		<View>
 			<View className="flex flex-row items-center justify-between px-4 pb-3">
-				<Text className="text-xl font-medium leading-6 tracking-wide text-foreground">
-					{metadata.title || 'Publications'}
-				</Text>
+				<ListLabel>{metadata.title || 'Publications'}</ListLabel>
 
-				{selfURL && (
-					<Pressable
-						onPress={() =>
-							selfURL
-								? router.push({
-										pathname: '/opds/[id]/feed/[url]',
-										params: {
-											id: serverID,
-											url: selfURL,
-										},
-									})
-								: null
-						}
-					>
-						{({ pressed }) => (
-							<View
-								className={cn('text-center', {
-									'opacity-80': pressed,
-								})}
-							>
-								<Text className="text-fill-info">View all</Text>
-							</View>
-						)}
-					</Pressable>
-				)}
+				{selfURL && <FeedSelfURL url={selfURL} />}
 			</View>
 
 			<FlashList
@@ -165,6 +139,7 @@ export default function PublicationGroup({
 				contentContainerStyle={{ paddingHorizontal: 16 }}
 				onEndReached={onEndReached}
 				onEndReachedThreshold={0.5}
+				ItemSeparatorComponent={() => <View style={{ width: horizontalGap }} />}
 			/>
 
 			{!publications.length && <ListEmptyMessage icon={Rss} message="No publications in group" />}

@@ -13,6 +13,10 @@ type CardProps = ViewProps & {
 	 */
 	label?: string
 	/**
+	 * An optional arbitrary node to display across from the label
+	 */
+	actions?: React.ReactNode
+	/**
 	 * A description displayed under the card
 	 */
 	description?: string
@@ -26,6 +30,7 @@ type RowProps = ViewProps & {
 	label?: string
 	icon?: LucideIcon
 	disabled?: boolean
+	renderDivider?: boolean
 }
 
 type StatGroupProps = ViewProps
@@ -43,6 +48,7 @@ type StatProps = {
  */
 export function Card({
 	label,
+	actions,
 	description,
 	listEmptyStyle,
 	children,
@@ -51,9 +57,24 @@ export function Card({
 }: CardProps) {
 	const count = React.Children.count(children)
 
+	const renderHeader = () => {
+		if (!label && !actions) return null
+
+		return (
+			<View
+				className={cn('ios:px-4 flex flex-row items-center justify-between gap-4 px-2', {
+					'justify-end': !label && actions,
+				})}
+			>
+				{label && <ListLabel className="shrink-0">{label}</ListLabel>}
+				{actions && <View>{actions}</View>}
+			</View>
+		)
+	}
+
 	return (
 		<View className={cn('gap-2', className)} {...props}>
-			{label && <ListLabel className="ios:px-4 px-2">{label}</ListLabel>}
+			{renderHeader()}
 
 			{count === 0 ? (
 				<ListEmptyMessage {...listEmptyStyle} />
@@ -73,6 +94,7 @@ export function Card({
 Card.StatGroup = StatGroup
 Card.Stat = Stat
 Card.Row = Row
+Card.RowDivider = Divider
 
 // MARK: Child components
 
@@ -115,11 +137,19 @@ function Stat({ label, value, suffix }: StatProps) {
 	)
 }
 
-function Row({ label, icon, disabled, children, className, ...props }: RowProps) {
+function Row({
+	label,
+	icon,
+	disabled,
+	renderDivider = true,
+	children,
+	className,
+	...props
+}: RowProps) {
 	return (
 		// We shift up by 1px to hide the first divider in a list
 		<View className="-mt-[1px]">
-			<Divider hasIcon={!!icon} />
+			{renderDivider && <Divider hasIcon={!!icon} />}
 
 			<View
 				className={cn(

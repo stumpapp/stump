@@ -7,6 +7,7 @@ import { View } from 'react-native'
 import { BookListItem } from '~/components/book'
 import { BookListItemFragmentType } from '~/components/book/BookListItem'
 import { Heading, Text } from '~/components/ui'
+import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
 import { useListItemSize } from '~/lib/hooks'
 
 import { useActiveServer } from '../context'
@@ -72,7 +73,7 @@ function RecentlyAddedBooks() {
 				horizontal
 				contentContainerStyle={{ padding: 16 }}
 				onEndReached={onEndReached}
-				onEndReachedThreshold={0.85}
+				onEndReachedThreshold={ON_END_REACHED_THRESHOLD}
 				showsHorizontalScrollIndicator={false}
 				ItemSeparatorComponent={() => <View style={{ width: horizontalGap }} />}
 				ListEmptyComponent={<Text className="text-foreground-muted">No books recently added</Text>}

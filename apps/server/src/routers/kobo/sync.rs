@@ -118,10 +118,10 @@ async fn library_sync(
 	Path(KoboAPIKey { api_key, .. }): Path<KoboAPIKey>,
 ) -> APIResult<Json<Vec<SyncItem>>> {
 	let conn = ctx.conn.as_ref();
-	let _user = req.user();
+	let user = req.user();
 
-	// TODO: media::Entity::find_for_user
-	let items = ModelWithMetadata::find()
+	let items = ModelWithMetadata::find_for_user(&user)
+		.filter(media::Column::Extension.eq("epub"))
 		.into_model::<media::ModelWithMetadata>()
 		.all(conn)
 		.await?;

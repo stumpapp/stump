@@ -19,7 +19,7 @@ impl BookMetadata {
 				})
 				.collect(),
 			contributors: writers.clone().into_iter().collect(),
-			cover_image_id: "0PSKKSGSRRBES".to_string(), // TODO
+			cover_image_id: media_id.clone(),
 			cross_revision_id: media_id.clone(),
 			current_display_price: DisplayPrice {
 				currency_code: "USD".to_string(),

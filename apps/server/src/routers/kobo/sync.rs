@@ -11,10 +11,20 @@ use axum::{
 use graphql::data::AuthContext;
 use models::{
 	entity::media::{self, ModelWithMetadata},
-	shared::enums::UserPermission,
+	shared::{
+		enums::UserPermission,
+		image_processor_options::{
+			ExactDimensionResize, ImageProcessorOptions, ImageResizeMethod,
+			SupportedImageFormat,
+		},
+	},
 };
 use serde::{Deserialize, Serialize};
 use serde_json::json;
+use stump_core::filesystem::{
+	image::{GenericImageProcessor, ImageProcessor},
+	ContentType,
+};
 use tower_http::services::ServeFile;
 
 use sea_orm::prelude::*;
@@ -23,7 +33,8 @@ use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
 	middleware::auth::api_key_middleware,
-	routers::kobo::sync_types::*,
+	routers::{api::v2::media::get_media_thumbnail_by_id, kobo::sync_types::*},
+	utils::http::ImageResponse,
 };
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -37,6 +48,17 @@ struct KoboAPIKeyAndBookId {
 	book_id: String,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+struct KoboThumbnail {
+	api_key: String,
+	book_id: String,
+	width: u32,
+	height: u32,
+	is_greyscale: Option<String>,
+}
+
+const BASE_URL: &str = "http://192.168.4.100:25601";
+
 /// Mounts the koreader sync router at `/kobo` (from the parent router).
 /// These endpoints are not documented anywhere, but Komga's reverse-engineered
 /// implementation is a decent place to start.
@@ -44,11 +66,14 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new().nest(
 		"/{api_key}",
 		Router::new()
+			.route("/v1/initialization", get(initialization))
 			.route("/v1/library/sync", get(library_sync))
 			.route("/v1/library/{book_id}/metadata", get(book_metadata))
+      .route("/v1/books/{book_id}/thumbnail/{width}/{height}/{is_greyscale}/image.jpg", get(book_thumbnail))
+      .route("/v1/books/{book_id}/thumbnail/{width}/{height}/{quality}/{is_greyscale}/image.jpg", get(book_thumbnail))
 			.route("/v1/books/{book_id}/file/epub", get(book_download))
 			// The Kobo requests many routes that we don't implement.
-			.route("/v1/{*path}", get(empty_json).post(empty_json))
+			.route("/v1/{*path}", get(empty_json).post(empty_json).delete(empty_json))
 			.layer(middleware::from_fn(authorize)) // Note the order!
 			.layer(middleware::from_fn_with_state(
 				app_state,
@@ -76,6 +101,17 @@ async fn authorize(req: Request, next: Next) -> APIResult<Response> {
 	Ok(next.run(req).await)
 }
 
+async fn initialization(
+	Path(KoboAPIKey { api_key, .. }): Path<KoboAPIKey>,
+) -> APIResult<impl IntoResponse> {
+	Ok(Json(json![{
+		   "image_url_quality_template": format!("{}/kobo/{}/v1/books/{{ImageId}}/thumbnail/{{Width
+	}}/{{Height}}/{{Quality}}/{{IsGreyscale}}/image.jpg", BASE_URL, api_key),
+		   "image_url_template": format!("{}/kobo/{}/v1/books/{{ImageId}}/thumbnail/{{Width
+	}}/{{Height}}/image.jpg", BASE_URL, api_key),
+	}]))
+}
+
 async fn library_sync(
 	State(ctx): State<AppState>,
 	Extension(req): Extension<AuthContext>,
@@ -83,8 +119,6 @@ async fn library_sync(
 ) -> APIResult<Json<Vec<SyncItem>>> {
 	let conn = ctx.conn.as_ref();
 	let _user = req.user();
-
-	let base_url = "http://192.168.4.100:25601";
 
 	// TODO: media::Entity::find_for_user
 	let items = ModelWithMetadata::find()
@@ -97,7 +131,7 @@ async fn library_sync(
 		.map(|m| {
 			let book_url = format!(
 				"{}/kobo/{}/v1/books/{}/file/epub",
-				base_url, api_key, m.media.id
+				BASE_URL, api_key, m.media.id
 			);
 
 			SyncItem::NewEntitlement(NewEntitlement::from_media(m, book_url))
@@ -121,15 +155,46 @@ async fn book_metadata(
 		.await?
 		.ok_or(APIError::NotFound("Book not found".to_string()))?;
 
-	let base_url = "http://192.168.4.100:25601";
-
 	let book_url = format!(
 		"{}/kobo/{}/v1/books/{}/file/epub",
-		base_url, api_key, m.media.id
+		BASE_URL, api_key, m.media.id
 	);
 
 	let result = BookMetadata::from_media(&m, book_url);
 	Ok(Json(vec![result]))
+}
+
+async fn book_thumbnail(
+	State(ctx): State<AppState>,
+	Extension(req): Extension<AuthContext>,
+	Path(KoboThumbnail {
+		book_id,
+		width,
+		height,
+		..
+	}): Path<KoboThumbnail>,
+) -> APIResult<ImageResponse> {
+	let result = get_media_thumbnail_by_id(&ctx, &req.user(), book_id).await?;
+
+	// the Kobo only supports JPEGs, and doesn't need large thumbnails.
+	let jpeg_buffer = tokio::task::block_in_place(|| {
+		let converted = GenericImageProcessor::generate(
+			&result.data,
+			ImageProcessorOptions {
+				format: SupportedImageFormat::Jpeg,
+				// TODO: ImageResizeMethod::FitWithin?
+				// (similar implementation to ScaledDimensionResize)
+				resize_method: Some(ImageResizeMethod::Exact(ExactDimensionResize {
+					width: width,
+					height: height,
+				})),
+				..Default::default()
+			},
+		)?;
+		Ok::<Vec<u8>, APIError>(converted)
+	})?;
+
+	Ok(ImageResponse::new(ContentType::JPEG, jpeg_buffer))
 }
 
 async fn book_download(

@@ -1,6 +1,8 @@
-import { OPDSFeedGroup } from '@stump/sdk'
+import { useSDK } from '@stump/client'
+import { OPDSFeed, OPDSFeedGroup, OPDSNavigationLink } from '@stump/sdk'
+import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query'
 import { Rss } from 'lucide-react-native'
-import { Fragment } from 'react'
+import { Fragment, useCallback, useMemo } from 'react'
 import { View } from 'react-native'
 
 import { Divider } from '../Divider'
@@ -8,19 +10,38 @@ import { ListEmptyMessage, Text } from '../ui'
 import FeedSelfURL from './FeedSelfURL'
 import NavigationLink from './NavigationLink'
 import { FeedComponentOptions } from './types'
-import { useResolveURL } from './utils'
+import { hasLinkRel, useResolveURL } from './utils'
 
 type Props = {
 	group: OPDSFeedGroup
 } & FeedComponentOptions
 
 export default function NavigationGroup({
-	group: { metadata, links, navigation },
+	group: { metadata, links, navigation: initialNavigation },
 	renderEmpty,
 }: Props) {
-	const selfURL = links.find((link) => link.rel === 'self')?.href
+	const selfURL = links.find((link) => hasLinkRel(link, 'self'))?.href
+	const hasGroupPagination = links.some((link) => hasLinkRel(link, 'next'))
+	const { sdk } = useSDK()
 
 	const resolveUrl = useResolveURL()
+
+	const { data: paginatedData } = useInfiniteQuery({
+		initialPageParam: selfURL,
+		queryKey: [sdk.opds.keys.feed, selfURL, 'group-navigation'],
+		queryFn: ({ pageParam }) => sdk.opds.feed(pageParam || selfURL || ''),
+		placeholderData: keepPreviousData,
+		getNextPageParam: (lastPage: OPDSFeed) => {
+			const nextLink = lastPage.links?.find((link) => hasLinkRel(link, 'next'))
+			return nextLink?.href
+		},
+		enabled: !!selfURL && !!hasGroupPagination,
+	})
+
+	const navigation = useMemo(
+		() => paginatedData?.pages.flatMap((page) => page.navigation) ?? initialNavigation,
+		[paginatedData, initialNavigation],
+	)
 
 	if (!navigation.length && !renderEmpty) return null
 

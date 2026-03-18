@@ -1,7 +1,8 @@
 import { FlashList } from '@shopify/flash-list'
 import { useSDK } from '@stump/client'
-import { OPDSFeedGroup, OPDSPublication } from '@stump/sdk'
+import { OPDSFeed, OPDSFeedGroup, OPDSPublication } from '@stump/sdk'
 import { STUMP_SAVE_BASIC_SESSION_HEADER } from '@stump/sdk/constants'
+import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query'
 import { useRouter } from 'expo-router'
 import { Rss } from 'lucide-react-native'
 import { useCallback, useMemo } from 'react'
@@ -15,17 +16,18 @@ import { useActiveServer } from '../activeServer'
 import { ThumbnailImage } from '../image'
 import { ListEmptyMessage, Text } from '../ui'
 import { FeedComponentOptions } from './types'
-import { useResolveURL } from './utils'
+import { hasLinkRel, useResolveURL } from './utils'
 
 type Props = {
 	group: OPDSFeedGroup
 } & FeedComponentOptions
 
 export default function PublicationGroup({
-	group: { metadata, links, publications },
+	group: { metadata, links, publications: initialPublications },
 	renderEmpty,
 }: Props) {
-	const selfURL = links?.find((link) => link.rel === 'self')?.href
+	const selfURL = links?.find((link) => hasLinkRel(link, 'self'))?.href
+	const hasGroupPagination = links?.some((link) => hasLinkRel(link, 'next'))
 	const router = useRouter()
 	const {
 		activeServer: { id: serverID },
@@ -39,12 +41,39 @@ export default function PublicationGroup({
 
 	const resolveUrl = useResolveURL()
 
+	const {
+		data: paginatedData,
+		hasNextPage,
+		fetchNextPage,
+	} = useInfiniteQuery({
+		initialPageParam: selfURL,
+		queryKey: [sdk.opds.keys.feed, selfURL, 'group-publications'],
+		queryFn: ({ pageParam }) => sdk.opds.feed(pageParam || selfURL || ''),
+		placeholderData: keepPreviousData,
+		getNextPageParam: (lastPage: OPDSFeed) => {
+			const nextLink = lastPage.links?.find((link) => hasLinkRel(link, 'next'))
+			return nextLink?.href
+		},
+		enabled: !!selfURL && !!hasGroupPagination,
+	})
+
+	const publications = useMemo(
+		() => paginatedData?.pages.flatMap((page) => page.publications) ?? initialPublications,
+		[paginatedData, initialPublications],
+	)
+
+	const onEndReached = useCallback(() => {
+		if (hasNextPage) {
+			fetchNextPage()
+		}
+	}, [hasNextPage, fetchNextPage])
+
 	const renderItem = useCallback(
 		({ item: publication }: { item: OPDSPublication }) => {
 			const thumbnailURL = publication.images?.at(0)?.href
 				? resolveUrl(publication.images.at(0)!.href)
 				: undefined
-			const selfURL = publication.links?.find((link) => link.rel === 'self')?.href
+			const selfURL = publication.links?.find((link) => hasLinkRel(link, 'self'))?.href
 
 			return (
 				<Pressable
@@ -134,6 +163,8 @@ export default function PublicationGroup({
 				horizontal
 				showsHorizontalScrollIndicator={false}
 				contentContainerStyle={{ paddingHorizontal: 16 }}
+				onEndReached={onEndReached}
+				onEndReachedThreshold={0.5}
 			/>
 
 			{!publications.length && <ListEmptyMessage icon={Rss} message="No publications in group" />}

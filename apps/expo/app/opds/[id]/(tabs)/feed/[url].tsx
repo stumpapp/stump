@@ -1,25 +1,26 @@
-import { useRefetch, useSDK, useShowSlowLoader } from '@stump/client'
-import { useQuery } from '@tanstack/react-query'
+import { useRefetch, useShowSlowLoader } from '@stump/client'
 import { useLocalSearchParams } from 'expo-router'
 
 import ChevronBackLink from '~/components/ChevronBackLink'
 import { MaybeErrorFeed, OPDSFeed } from '~/components/opds'
+import { useOPDSFeed } from '~/components/opds/useOPDSFeed'
 import { FullScreenLoader } from '~/components/ui'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
 
 export default function Screen() {
 	const { url: feedURL } = useLocalSearchParams<{ url: string }>()
-	const { sdk } = useSDK()
+
 	const {
-		data: feed,
-		refetch,
+		feed,
+		paginationTarget,
+		publications,
+		navigation,
+		hasNextPage,
+		fetchNextPage,
 		isLoading,
 		error,
-	} = useQuery({
-		queryKey: [sdk.opds.keys.feed, feedURL],
-		queryFn: () => sdk.opds.feed(feedURL),
-		throwOnError: false,
-	})
+		refetch,
+	} = useOPDSFeed({ url: feedURL })
 
 	const [isRefetching, onRefetch] = useRefetch(refetch)
 	const showLoader = useShowSlowLoader(isLoading)
@@ -35,5 +36,16 @@ export default function Screen() {
 
 	if (!feed || !!error) return <MaybeErrorFeed error={error} onRetry={onRefetch} />
 
-	return <OPDSFeed feed={feed} onRefresh={onRefetch} isRefreshing={isRefetching} />
+	return (
+		<OPDSFeed
+			feed={feed}
+			paginationTarget={paginationTarget}
+			publications={publications}
+			navigation={navigation}
+			hasNextPage={hasNextPage}
+			fetchNextPage={fetchNextPage}
+			onRefresh={onRefetch}
+			isRefreshing={isRefetching}
+		/>
+	)
 }

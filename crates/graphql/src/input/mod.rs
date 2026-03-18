@@ -3,6 +3,7 @@ pub mod book_club;
 pub mod email_device;
 pub mod emailer;
 pub mod filesystem;
+pub mod grouping;
 pub mod library;
 pub mod media;
 pub mod notifier;

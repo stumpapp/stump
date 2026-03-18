@@ -2,7 +2,7 @@ use crate::{entity::age_restriction, shared::image::ImageMetadata};
 use async_graphql::SimpleObject;
 use async_trait::async_trait;
 use chrono::Utc;
-use filter_gen::Ordering;
+use filter_gen::{Groupable, Ordering};
 use sea_orm::{
 	prelude::*, ActiveValue, Condition, FromQueryResult, JoinType, QueryOrder,
 	QuerySelect,
@@ -18,7 +18,9 @@ use crate::{
 
 use super::{library_exclusion, media_metadata, series, series_metadata, user::AuthUser};
 
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject, Ordering)]
+#[derive(
+	Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject, Groupable, Ordering,
+)]
 #[graphql(name = "MediaModel")]
 #[sea_orm(table_name = "media")]
 pub struct Model {

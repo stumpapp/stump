@@ -15,19 +15,21 @@ use sea_orm::{
 	prelude::*,
 	sea_query::{ExprTrait, Query},
 	Condition, DatabaseBackend, FromQueryResult, JoinType, QueryOrder, QuerySelect,
-	Statement,
+	Statement, TransactionTrait,
 };
 
 use crate::{
 	data::{AuthContext, CoreContext},
 	filter::{media::MediaFilterInput, IntoFilter},
 	guard::{PermissionGuard, ServerOwnerGuard},
+	input::grouping::GroupingPathInput,
 	object::media::Media,
 	order::MediaOrderBy,
 	pagination::{
 		CursorPaginationInfo, OffsetPaginationInfo, PaginatedResponse, Pagination,
 		PaginationValidator,
 	},
+	query::smart_lists_builder::apply_multi_level_grouping,
 };
 
 #[derive(Default)]
@@ -94,6 +96,40 @@ impl MediaQuery {
 			.await?;
 
 		Ok(count as i64)
+	}
+
+	async fn grouped_media(
+		&self,
+		ctx: &Context<'_>,
+		#[graphql(default)] filter: MediaFilterInput,
+		#[graphql(default)] group_by: GroupingPathInput,
+		#[graphql(default)] limit: Option<u64>,
+	) -> Result<crate::object::smart_list_item::SmartListItems> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+		let txn = conn.begin().await?;
+
+		let mut query = media::ModelWithMetadata::find_for_user(user);
+		query = add_sessions_join_for_filter(user, &filter, query)
+			.filter(filter.into_filter())
+			.filter(media::Column::DeletedAt.is_null());
+
+		query = match limit {
+			Some(limit) => query.limit(limit),
+			None => query,
+		};
+
+		let models = query
+			.into_model::<media::ModelWithMetadata>()
+			.all(&txn)
+			.await?;
+		let books: Vec<Media> = models.into_iter().map(Media::from).collect();
+
+		let items = apply_multi_level_grouping(user, group_by, books, &txn).await?;
+
+		txn.commit().await?;
+
+		Ok(items)
 	}
 
 	// TODO: Add variant to only fetch your own sessions and remove guard

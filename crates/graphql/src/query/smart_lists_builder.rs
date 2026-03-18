@@ -1,20 +1,22 @@
 use crate::{
 	filter::IntoFilter,
+	input::grouping::{GroupingLevel, GroupingPathInput},
 	input::smart_lists::{
 		SmartListFilterGroupInput, SmartListFilterInput, SmartListGroupJoiner,
 	},
 	object::{
 		media::Media,
+		series::Series,
 		smart_list_item::{
-			SmartListGrouped, SmartListGroupedItem, SmartListItemEntity, SmartListItems,
-			SmartListUngrouped,
+			GenericGroupingValue, SmartListGrouped, SmartListGroupedItem,
+			SmartListItemEntity, SmartListItems, SmartListUngrouped,
 		},
 	},
 	query::media::{add_sessions_join_for_filter, should_add_sessions_join_for_filter},
 };
 use async_graphql::Result;
 use models::entity::{
-	library, media, series,
+	library, media, media_metadata, series,
 	smart_list::{self, SmartListGrouping},
 	user::AuthUser,
 };
@@ -37,6 +39,248 @@ pub async fn build_smart_list_items(
 		SmartListGrouping::BySeries => group_by_series(user, books, txn).await,
 		SmartListGrouping::ByLibrary => group_by_library(user, books, txn).await,
 	}
+}
+
+pub async fn apply_multi_level_grouping(
+	user: &AuthUser,
+	grouping_path: GroupingPathInput,
+	books: Vec<Media>,
+	txn: &DatabaseTransaction,
+) -> Result<SmartListItems> {
+	if grouping_path.levels.is_empty() {
+		return Ok(SmartListItems::Ungrouped(SmartListUngrouped { books }));
+	}
+
+	let grouped_items =
+		apply_grouping_iteratively(user, books, &grouping_path.levels, txn).await?;
+
+	Ok(SmartListItems::Grouped(SmartListGrouped {
+		items: grouped_items,
+	}))
+}
+
+async fn apply_grouping_iteratively(
+	user: &AuthUser,
+	books: Vec<Media>,
+	levels: &[GroupingLevel],
+	txn: &DatabaseTransaction,
+) -> Result<Vec<SmartListGroupedItem>> {
+	if levels.is_empty() {
+		return Ok(vec![]);
+	}
+
+	if levels.len() == 1 {
+		let level = &levels[0];
+		return group_single_level(user, books, level, txn).await;
+	}
+
+	let mut current_items: Vec<SmartListGroupedItem> = Vec::new();
+
+	// Level 0: Group all books by the first field → create top-level items
+	let first_level = &levels[0];
+	let level_0_groups =
+		group_single_level(user, books.clone(), first_level, txn).await?;
+
+	for group in level_0_groups {
+		let item_books = group.books.clone();
+		let item_entity = group.entity.clone();
+
+		// Skip empty groups (no books)
+		if item_books.is_empty() {
+			continue;
+		}
+
+		current_items.push(SmartListGroupedItem {
+			entity: item_entity,
+			books: vec![],
+			subgroups: Some(vec![group]),
+		});
+	}
+
+	// Process remaining levels (1, 2, ...)
+	for level_idx in 1..levels.len() {
+		let is_last_level = level_idx == levels.len() - 1;
+		let level = &levels[level_idx];
+
+		let mut next_items: Vec<SmartListGroupedItem> = Vec::new();
+
+		// For each current item (which represents a parent group),
+		// group its books by the current level's field
+		for parent_item in current_items.iter() {
+			// Get the subgroups from the previous level (these contain the books to re-group)
+			let subgroups = match &parent_item.subgroups {
+				Some(s) => s,
+				None => continue,
+			};
+
+			// Collect all books from all subgroups
+			let books_to_group: Vec<Media> =
+				subgroups.iter().flat_map(|sg| sg.books.clone()).collect();
+
+			if books_to_group.is_empty() {
+				continue;
+			}
+
+			// Group these books by the current level's field
+			let child_groups =
+				group_single_level(user, books_to_group, level, txn).await?;
+
+			// For each child group, create a new item with:
+			// - entity: the child group's entity (current level's grouping)
+			// - books: only at the last level
+			// - subgroups: the child groups
+
+			let updated_subgroups: Vec<SmartListGroupedItem> = child_groups
+				.into_iter()
+				.map(|child| {
+					let entity = child.entity.clone();
+					let books = child.books.clone();
+					let subgroups = if is_last_level {
+						None
+					} else {
+						Some(vec![child])
+					};
+					SmartListGroupedItem {
+						entity,
+						books,
+						subgroups,
+					}
+				})
+				.collect();
+
+			if updated_subgroups.is_empty() {
+				continue;
+			}
+
+			// Create the parent item with updated subgroups
+			next_items.push(SmartListGroupedItem {
+				entity: parent_item.entity.clone(),
+				books: if is_last_level {
+					updated_subgroups
+						.iter()
+						.flat_map(|sg| sg.books.clone())
+						.collect()
+				} else {
+					vec![]
+				},
+				subgroups: Some(updated_subgroups),
+			});
+		}
+
+		current_items = next_items;
+	}
+
+	Ok(current_items)
+}
+
+async fn group_single_level(
+	user: &AuthUser,
+	books: Vec<Media>,
+	level: &GroupingLevel,
+	txn: &DatabaseTransaction,
+) -> Result<Vec<SmartListGroupedItem>> {
+	match level {
+		GroupingLevel::Media(media_group_by) => {
+			let column = media_group_by.field.to_column();
+			match column {
+				media::Column::SeriesId => {
+					group_by_series_as_items(user, books, txn).await
+				},
+				_ => Ok(group_books_by_field_as_items(books, media_group_by.field)),
+			}
+		},
+		GroupingLevel::MediaMetadata(media_meta_group_by) => Ok(
+			group_books_by_metadata_field_as_items(books, media_meta_group_by.field),
+		),
+	}
+}
+
+async fn group_by_series_as_items(
+	user: &AuthUser,
+	books: Vec<Media>,
+	txn: &DatabaseTransaction,
+) -> Result<Vec<SmartListGroupedItem>> {
+	let mut series_ids: HashSet<String> = HashSet::new();
+	let mut series_map: HashMap<String, Vec<Media>> = HashMap::new();
+
+	books.into_iter().for_each(|book| {
+		if let Some(series_id) = book.model.series_id.clone() {
+			series_ids.insert(series_id.clone());
+		}
+		series_map
+			.entry(book.model.series_id.clone().unwrap_or_default())
+			.or_default()
+			.push(book);
+	});
+
+	let series_models = series::ModelWithMetadata::find_for_user(user)
+		.filter(series::Column::Id.is_in(series_ids))
+		.into_model::<series::ModelWithMetadata>()
+		.all(txn)
+		.await?;
+
+	let items: Vec<SmartListGroupedItem> = series_models
+		.into_iter()
+		.map(|series_model| {
+			let books = series_map
+				.remove(&series_model.series.id)
+				.unwrap_or_default();
+			SmartListGroupedItem {
+				entity: SmartListItemEntity::Series(Box::new(Series::from(series_model))),
+				books,
+				subgroups: None,
+			}
+		})
+		.collect();
+
+	Ok(items)
+}
+
+fn group_books_by_field_as_items(
+	books: Vec<Media>,
+	field: media::MediaModelGroupingField,
+) -> Vec<SmartListGroupedItem> {
+	let mut groups: HashMap<String, Vec<Media>> = HashMap::new();
+
+	for book in books {
+		let key = field.get_value(&book.model);
+		groups.entry(key).or_default().push(book);
+	}
+
+	groups
+		.into_iter()
+		.map(|(key, books)| SmartListGroupedItem {
+			entity: SmartListItemEntity::Generic(GenericGroupingValue { key }),
+			books,
+			subgroups: None,
+		})
+		.collect()
+}
+
+fn group_books_by_metadata_field_as_items(
+	books: Vec<Media>,
+	field: media_metadata::MediaMetadataModelGroupingField,
+) -> Vec<SmartListGroupedItem> {
+	let mut groups: HashMap<String, Vec<Media>> = HashMap::new();
+
+	for book in books {
+		let key = if let Some(metadata) = &book.metadata {
+			let k = field.get_value(&metadata.model);
+			k
+		} else {
+			String::new()
+		};
+		groups.entry(key).or_default().push(book);
+	}
+
+	groups
+		.into_iter()
+		.map(|(key, books)| SmartListGroupedItem {
+			entity: SmartListItemEntity::Generic(GenericGroupingValue { key }),
+			books,
+			subgroups: None,
+		})
+		.collect()
 }
 
 async fn group_by_series(
@@ -74,6 +318,7 @@ async fn group_by_series(
 			SmartListGroupedItem {
 				entity: SmartListItemEntity::Series(Box::new(series_model.into())),
 				books,
+				subgroups: None,
 			}
 		})
 		.collect();
@@ -141,6 +386,7 @@ async fn group_by_library(
 			SmartListGroupedItem {
 				entity: SmartListItemEntity::Library(Box::new(library_model.into())),
 				books,
+				subgroups: None,
 			}
 		})
 		.collect();

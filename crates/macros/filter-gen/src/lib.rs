@@ -2,7 +2,16 @@ use proc_macro::TokenStream;
 use quote::{format_ident, quote};
 use syn::{parse_macro_input, DeriveInput};
 
+mod grouping;
 mod ordering;
+
+#[proc_macro_derive(Groupable, attributes(groupable))]
+pub fn groupable(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+	let input = parse_macro_input!(input);
+	grouping::grouping_impl(input)
+		.unwrap_or_else(|e| e.to_compile_error())
+		.into()
+}
 
 #[proc_macro_derive(Ordering, attributes(ordering))]
 pub fn ordering(input: proc_macro::TokenStream) -> proc_macro::TokenStream {

@@ -1,5 +1,5 @@
 use async_graphql::SimpleObject;
-use filter_gen::Ordering;
+use filter_gen::{Groupable, Ordering};
 use sea_orm::{prelude::*, QueryOrder, QuerySelect};
 use serde::Serialize;
 use serde_with::skip_serializing_none;
@@ -16,6 +16,7 @@ use crate::shared::ordering::{OrderBy, OrderDirection};
 	Eq,
 	SimpleObject,
 	Serialize,
+	Groupable,
 	Ordering,
 )]
 #[graphql(name = "MediaMetadataModel")]

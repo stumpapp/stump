@@ -246,13 +246,28 @@ async fn book_to_attachment_with_content(
 		_ => {},
 	}
 
-	let content_type = ContentType::from_bytes_with_fallback(&content[..5], &extension)
-		.mime_type()
-		.parse::<EmailContentType>()
-		.map_err(|e| {
-			tracing::warn!(?e, "Failed to parse content type");
-			"Failed to parse content type".to_string()
-		})?;
+	let stump_content_type =
+		ContentType::from_bytes_with_fallback(&content[..5], &extension);
+	let mime_str = stump_content_type.mime_type();
+
+	tracing::debug!(
+		?file_name,
+		?extension,
+		?stump_content_type,
+		%mime_str,
+		"Resolved content type for attachment"
+	);
+
+	let content_type = mime_str.parse::<EmailContentType>().map_err(|e| {
+		tracing::warn!(
+			?e,
+			?file_name,
+			?extension,
+			%mime_str,
+			"Failed to parse content type into email ContentType"
+		);
+		"Failed to parse content type".to_string()
+	})?;
 
 	let attachment_meta = AttachmentMetaModel::new(
 		file_name.clone(),

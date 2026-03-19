@@ -8,6 +8,9 @@ import { ComponentProps } from 'react'
 import CreateOrUpdateEmailerForm from '../CreateOrUpdateEmailerForm'
 import { CreateOrUpdateEmailerSchema } from '../schema'
 
+// eslint-disable-next-line react/display-name
+jest.mock('../TestEmailerButton', () => () => <div>TestEmailerButton</div>)
+
 jest.mock('@stump/i18n', () => ({
 	useLocaleContext: () => ({ t: (s: string) => s }),
 }))

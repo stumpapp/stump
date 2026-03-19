@@ -7,7 +7,7 @@ use lettre::{
 		header::{self, ContentType},
 		Attachment, Mailbox, MultiPart, SinglePart,
 	},
-	transport::smtp::authentication::Credentials,
+	transport::smtp::authentication::{Credentials, Mechanism},
 	Message, SmtpTransport, Transport,
 };
 use serde::{Deserialize, Serialize};
@@ -278,6 +278,7 @@ impl EmailerClient {
 			SmtpTransport::builder_dangerous(&self.config.host)
 				.port(self.config.port)
 				.credentials(creds)
+				.authentication(vec![Mechanism::Plain, Mechanism::Login])
 				.build()
 		};
 

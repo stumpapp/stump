@@ -1726,6 +1726,8 @@ export type Mutation = {
   sendMessage: BookClubDiscussionMessage;
   /** Suggest a book for the book club */
   suggestBook: BookClubBookSuggestion;
+  /** Send a test email to verify the SMTP configuration is working */
+  testEmailer: Scalars['Boolean']['output'];
   /**
    * Toggle a reaction on a message
    *
@@ -2240,6 +2242,12 @@ export type MutationSendMessageArgs = {
 export type MutationSuggestBookArgs = {
   bookClubId: Scalars['ID']['input'];
   input: SuggestBookInput;
+};
+
+
+export type MutationTestEmailerArgs = {
+  config: EmailerClientConfig;
+  recipient: Scalars['String']['input'];
 };
 
 
@@ -5648,6 +5656,14 @@ export type EmailersListQuery = { __typename?: 'Query', emailers: Array<(
     { __typename?: 'Emailer', id: number }
     & { ' $fragmentRefs'?: { 'EmailerListItemFragment': EmailerListItemFragment } }
   )> };
+
+export type TestEmailerMutationVariables = Exact<{
+  config: EmailerClientConfig;
+  recipient: Scalars['String']['input'];
+}>;
+
+
+export type TestEmailerMutation = { __typename?: 'Mutation', testEmailer: boolean };
 
 export type ServerEmojisSectionQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -10854,6 +10870,11 @@ export const EmailersListDocument = new TypedDocumentString(`
   tlsEnabled
   username
 }`) as unknown as TypedDocumentString<EmailersListQuery, EmailersListQueryVariables>;
+export const TestEmailerDocument = new TypedDocumentString(`
+    mutation TestEmailer($config: EmailerClientConfig!, $recipient: String!) {
+  testEmailer(config: $config, recipient: $recipient)
+}
+    `) as unknown as TypedDocumentString<TestEmailerMutation, TestEmailerMutationVariables>;
 export const ServerEmojisSectionDocument = new TypedDocumentString(`
     query ServerEmojisSection {
   customEmojis {

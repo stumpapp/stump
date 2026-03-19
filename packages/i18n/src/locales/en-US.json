@@ -2102,6 +2102,16 @@
 				"submit": {
 					"create": "Create emailer",
 					"update": "Update emailer"
+				},
+				"testEmailer": {
+					"button": "Send test email",
+					"recipientLabel": "Test recipient",
+					"recipientDescription": "An email address to send the test email to",
+					"success": "Test email sent successfully",
+					"error": {
+						"title": "Failed to send test email",
+						"description": "Check your SMTP settings and try again"
+					}
 				}
 			},
 			"createEmailer": {

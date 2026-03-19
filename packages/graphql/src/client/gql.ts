@@ -243,6 +243,7 @@ type Documents = {
     "\n\tmutation DeleteEmailer($emailerId: Int!) {\n\t\tdeleteEmailer(id: $emailerId) {\n\t\t\tid\n\t\t}\n\t}\n": typeof types.DeleteEmailerDocument,
     "\n\tquery EmailerSendHistory($id: Int!, $fetchUser: Boolean!) {\n\t\temailerById(id: $id) {\n\t\t\tsendHistory {\n\t\t\t\tsentAt\n\t\t\t\trecipientEmail\n\t\t\t\tsentByUserId\n\t\t\t\tsentBy @include(if: $fetchUser) {\n\t\t\t\t\tid\n\t\t\t\t\tusername\n\t\t\t\t}\n\t\t\t\tattachmentMeta {\n\t\t\t\t\tfilename\n\t\t\t\t\tmediaId\n\t\t\t\t\tmedia {\n\t\t\t\t\t\tresolvedName\n\t\t\t\t\t}\n\t\t\t\t\tsize\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.EmailerSendHistoryDocument,
     "\n\tquery EmailersList {\n\t\temailers {\n\t\t\tid\n\t\t\t...EmailerListItem\n\t\t}\n\t}\n": typeof types.EmailersListDocument,
+    "\n\tmutation TestEmailer($config: EmailerClientConfig!, $recipient: String!) {\n\t\ttestEmailer(config: $config, recipient: $recipient)\n\t}\n": typeof types.TestEmailerDocument,
     "\n\tquery ServerEmojisSection {\n\t\tcustomEmojis {\n\t\t\tid\n\t\t\tname\n\t\t\tisAnimated\n\t\t\turl\n\t\t}\n\t}\n": typeof types.ServerEmojisSectionDocument,
     "\n\tmutation ServerEmojisSectionUploadEmoji($input: CreateCustomEmojiInput!, $upload: Upload!) {\n\t\tuploadCustomEmoji(input: $input, upload: $upload) {\n\t\t\tid\n\t\t\tname\n\t\t\tisAnimated\n\t\t\turl\n\t\t}\n\t}\n": typeof types.ServerEmojisSectionUploadEmojiDocument,
     "\n\tmutation ServerEmojisSectionRenameEmoji($id: ID!, $input: UpdateCustomEmojiInput!) {\n\t\tupdateCustomEmoji(id: $id, input: $input) {\n\t\t\tid\n\t\t\tname\n\t\t\tisAnimated\n\t\t\turl\n\t\t}\n\t}\n": typeof types.ServerEmojisSectionRenameEmojiDocument,
@@ -518,6 +519,7 @@ const documents: Documents = {
     "\n\tmutation DeleteEmailer($emailerId: Int!) {\n\t\tdeleteEmailer(id: $emailerId) {\n\t\t\tid\n\t\t}\n\t}\n": types.DeleteEmailerDocument,
     "\n\tquery EmailerSendHistory($id: Int!, $fetchUser: Boolean!) {\n\t\temailerById(id: $id) {\n\t\t\tsendHistory {\n\t\t\t\tsentAt\n\t\t\t\trecipientEmail\n\t\t\t\tsentByUserId\n\t\t\t\tsentBy @include(if: $fetchUser) {\n\t\t\t\t\tid\n\t\t\t\t\tusername\n\t\t\t\t}\n\t\t\t\tattachmentMeta {\n\t\t\t\t\tfilename\n\t\t\t\t\tmediaId\n\t\t\t\t\tmedia {\n\t\t\t\t\t\tresolvedName\n\t\t\t\t\t}\n\t\t\t\t\tsize\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.EmailerSendHistoryDocument,
     "\n\tquery EmailersList {\n\t\temailers {\n\t\t\tid\n\t\t\t...EmailerListItem\n\t\t}\n\t}\n": types.EmailersListDocument,
+    "\n\tmutation TestEmailer($config: EmailerClientConfig!, $recipient: String!) {\n\t\ttestEmailer(config: $config, recipient: $recipient)\n\t}\n": types.TestEmailerDocument,
     "\n\tquery ServerEmojisSection {\n\t\tcustomEmojis {\n\t\t\tid\n\t\t\tname\n\t\t\tisAnimated\n\t\t\turl\n\t\t}\n\t}\n": types.ServerEmojisSectionDocument,
     "\n\tmutation ServerEmojisSectionUploadEmoji($input: CreateCustomEmojiInput!, $upload: Upload!) {\n\t\tuploadCustomEmoji(input: $input, upload: $upload) {\n\t\t\tid\n\t\t\tname\n\t\t\tisAnimated\n\t\t\turl\n\t\t}\n\t}\n": types.ServerEmojisSectionUploadEmojiDocument,
     "\n\tmutation ServerEmojisSectionRenameEmoji($id: ID!, $input: UpdateCustomEmojiInput!) {\n\t\tupdateCustomEmoji(id: $id, input: $input) {\n\t\t\tid\n\t\t\tname\n\t\t\tisAnimated\n\t\t\turl\n\t\t}\n\t}\n": types.ServerEmojisSectionRenameEmojiDocument,
@@ -1477,6 +1479,10 @@ export function graphql(source: "\n\tquery EmailerSendHistory($id: Int!, $fetchU
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n\tquery EmailersList {\n\t\temailers {\n\t\t\tid\n\t\t\t...EmailerListItem\n\t\t}\n\t}\n"): typeof import('./graphql').EmailersListDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tmutation TestEmailer($config: EmailerClientConfig!, $recipient: String!) {\n\t\ttestEmailer(config: $config, recipient: $recipient)\n\t}\n"): typeof import('./graphql').TestEmailerDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

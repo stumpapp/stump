@@ -6,7 +6,7 @@
 // have since migrated to offloading alllll that complexity to Apalis directly. The in-house version
 // would not have been possible without the following other projects:
 // - https://github.com/spacedriveapp/spacedrive
-// - https://github.com/geofmureithi/apalis
+// - https://git.asonix.dog/asonix/background-jobs
 // <3
 
 use std::{collections::VecDeque, fmt::Debug};

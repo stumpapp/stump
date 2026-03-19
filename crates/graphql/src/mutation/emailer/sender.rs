@@ -71,6 +71,16 @@ pub async fn send_attachment_email(
 	send_attachment_email_for_emailer(conn, user, input, emailer, emailer_client).await
 }
 
+pub async fn send_test_email(
+	config: EmailerClientConfig,
+	templates_dir: PathBuf,
+	recipient: String,
+) -> Result<()> {
+	let client = EmailerClient::new(config, templates_dir);
+	client.send_test_email(&recipient).await?;
+	Ok(())
+}
+
 async fn send_attachment_email_for_emailer<Sender>(
 	conn: &DatabaseConnection,
 	user: &AuthUser,

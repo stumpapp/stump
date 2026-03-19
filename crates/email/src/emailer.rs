@@ -88,6 +88,23 @@ impl EmailerClient {
 		}
 	}
 
+	/// Send a test email with a small TXT attachment to verify the SMTP configuration is working.
+	pub async fn send_test_email(&self, recipient: &str) -> EmailResult<()> {
+		self.send_attachment(
+			"Test Email from Stump",
+			recipient,
+			AttachmentPayload {
+				name: "stump-test.txt".to_string(),
+				content:
+					b"Hello from Stump! Your email configuration is working correctly."
+						.to_vec(),
+				content_type: ContentType::parse("text/plain; charset=utf-8")
+					.unwrap_or(ContentType::TEXT_PLAIN),
+			},
+		)
+		.await
+	}
+
 	/// Send an email with the given subject and attachment to the given recipient.
 	/// Internally, this will just call [EmailerClient::send_attachments] with a single attachment.
 	///

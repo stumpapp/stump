@@ -38,6 +38,11 @@ pub fn init_tracing(config: &StumpConfig) {
 				.expect("Error invalid tracing directive for graphql!"),
 		)
 		.add_directive(
+			"email=trace"
+				.parse()
+				.expect("Error invalid tracing directive for email!"),
+		)
+		.add_directive(
 			"tower_http=debug"
 				.parse()
 				.expect("Error invalid tracing directive for tower_http!"),

@@ -93,8 +93,7 @@ async fn authorize(req: Request, next: Next) -> APIResult<Response> {
 		.extensions()
 		.get::<AuthContext>()
 		.ok_or(APIError::Unauthorized)?;
-	// TODO FIXME
-	ctx.enforce_permissions(&[UserPermission::AccessKoreaderSync])
+	ctx.enforce_permissions(&[UserPermission::AccessKoboSync])
 		.map_err(|_| {
 			APIError::Forbidden("You do not have permission to use Kobo sync".to_string())
 		})?;
@@ -203,6 +202,8 @@ async fn book_download(
 	Path(KoboAPIKeyAndBookId { book_id, .. }): Path<KoboAPIKeyAndBookId>,
 	headers: HeaderMap,
 ) -> APIResult<impl IntoResponse> {
+	// TODO: is this reasonable? would it ever be useful to have kobo sync permission without
+	// download file?
 	let user = req
 		.user_and_enforce_permissions(&[UserPermission::DownloadFile])
 		.map_err(|_| {

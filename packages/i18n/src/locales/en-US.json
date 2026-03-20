@@ -2363,6 +2363,10 @@
 			"label": "KoReader sync",
 			"description": "Allows the user to access the KoReader sync integration"
 		},
+		"ACCESS_KOBO_SYNC": {
+			"label": "Kobo sync",
+			"description": "Allows the user to access the Kobo sync integration"
+		},
 		"ACCESS_SMART_LIST": {
 			"label": "Smart Lists",
 			"description": "Allows the user to access smart list features, including creating and managing smart lists"

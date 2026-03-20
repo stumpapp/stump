@@ -8,6 +8,7 @@ Users can be assigned permissions that grant (or deny) them access to various fe
 | ------------------- | ---------------------- | ----------------------------------------------------------- |
 | API Keys            | `ACCESS_API_KEYS`      | Allows access to read/create their own API keys             |
 | KoReader Sync       | `ACCESS_KOREADER_SYNC` | Allows access to the KoReader sync integration              |
+| Kobo Sync           | `ACCESS_KOBO_SYNC`     | Allows access to the Kobo sync integration                  |
 | Access Book Club    | `ACCESS_BOOK_CLUB`     | Allows access to the Book Club feature                      |
 | Create Book Club    | `CREATE_BOOK_CLUB`     | Allows creating new Book Clubs                              |
 | Read Emailers       | `EMAILER_READ`         | Allows access to read any emailers in the system            |

@@ -192,10 +192,11 @@ impl APIKeyPath {
 }
 
 /// A middleware to authenticate a user by an API key in a *very* specific way. This middleware
-/// assumes that a fully qualified API key is provided in the path. This is used for two features today:
+/// assumes that a fully qualified API key is provided in the path. This is used for three features today:
 ///
 /// 1. An alternative for bearer token on the OPDS v1.2 API
 /// 2. A way to authenticate users for the KoReader sync API
+/// 3. A way to authenticate users for the Kobo sync API
 ///
 /// This isn't necessary for OPDS v2.0 as it has a more robust authentication mechanism. The koreader
 /// frontend app will send an md5 hash of whatever password you provide. Stump does not use the same

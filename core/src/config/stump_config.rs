@@ -30,6 +30,7 @@ pub mod env_keys {
 	pub const PDFIUM_KEY: &str = "PDFIUM_PATH";
 	pub const ENABLE_SWAGGER_KEY: &str = "ENABLE_SWAGGER_UI";
 	pub const ENABLE_KOREADER_SYNC_KEY: &str = "ENABLE_KOREADER_SYNC";
+	pub const ENABLE_KOBO_SYNC_KEY: &str = "ENABLE_KOBO_SYNC";
 	pub const ENABLE_OPDS_PROGRESSION_KEY: &str = "ENABLE_OPDS_PROGRESSION";
 	pub const HASH_COST_KEY: &str = "HASH_COST";
 	pub const SESSION_TTL_KEY: &str = "SESSION_TTL";
@@ -174,6 +175,11 @@ pub struct StumpConfig {
 	#[default_value(false)]
 	#[env_key(ENABLE_KOREADER_SYNC_KEY)]
 	pub enable_koreader_sync: bool,
+
+	/// Indicates if the Kobo sync feature should be enabled.
+	#[default_value(false)]
+	#[env_key(ENABLE_KOBO_SYNC_KEY)]
+	pub enable_kobo_sync: bool,
 
 	/// Indicates if OPDS page access should automatically track reading progression.
 	/// When disabled, clients loading/preloading pages won't trigger progress updates.
@@ -445,6 +451,7 @@ mod tests {
 			pdfium_path: Some("not_a_path_to_pdfium".to_string()),
 			enable_swagger: Some(false),
 			enable_koreader_sync: Some(false),
+			enable_kobo_sync: Some(false),
 			password_hash_cost: None,
 			session_ttl: None,
 			access_token_ttl: None,
@@ -492,6 +499,7 @@ mod tests {
 				pdfium_path: Some("not_a_path_to_pdfium".to_string()),
 				enable_swagger: Some(false),
 				enable_koreader_sync: Some(false),
+				enable_kobo_sync: Some(false),
 				enable_opds_progression: Some(false),
 				password_hash_cost: Some(DEFAULT_PASSWORD_HASH_COST),
 				session_ttl: Some(DEFAULT_SESSION_TTL),
@@ -559,6 +567,7 @@ mod tests {
 						pdfium_path: None,
 						enable_swagger: true,
 						enable_koreader_sync: false,
+						enable_kobo_sync: false,
 						enable_opds_progression: false,
 						password_hash_cost: 1,
 						session_ttl: DEFAULT_SESSION_TTL,

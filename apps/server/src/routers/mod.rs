@@ -18,7 +18,9 @@ pub(crate) async fn mount(app_state: AppState) -> Router<AppState> {
 		app_router = app_router.merge(koreader::mount(app_state.clone()));
 	}
 
-	app_router = app_router.merge(kobo::mount(app_state.clone()));
+	if app_state.config.enable_kobo_sync {
+		app_router = app_router.merge(kobo::mount(app_state.clone()));
+	}
 
 	app_router
 		.merge(spa::mount(app_state.clone()))

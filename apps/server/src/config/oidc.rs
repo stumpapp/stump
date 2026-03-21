@@ -124,6 +124,7 @@ pub async fn exchange_code_for_claims(
 	http_client: &reqwest::Client,
 	client: &StumpOidcClient,
 	code: String,
+	extra_audiences: Vec<String>,
 ) -> Result<OidcClaims, APIError> {
 	let token_response = client
 		.exchange_code(AuthorizationCode::new(code))?
@@ -138,7 +139,11 @@ pub async fn exchange_code_for_claims(
 		.id_token()
 		.ok_or(APIError::OIDCMissingToken)?;
 
-	let token_verifier = client.id_token_verifier();
+	let token_verifier = client
+		.id_token_verifier()
+		.set_other_audience_verifier_fn(move |aud| {
+			extra_audiences.iter().any(|a| a.as_str() == aud.as_str())
+		});
 	let id_token_claims = id_token.claims(&token_verifier, nonce_verifier)?;
 
 	Ok(OidcClaims {

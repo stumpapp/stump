@@ -181,12 +181,14 @@ async fn callback(
 			APIError::InternalServerError("Failed to initialize OIDC".to_string())
 		})?;
 
-	let claims = exchange_code_for_claims(&http_client, &client, query.code)
-		.await
-		.map_err(|e| {
-			tracing::error!("Failed to exchange code for claims: {:?}", e);
-			APIError::Unauthorized
-		})?;
+	let extra_audiences = oidc_config.get_extra_audiences();
+	let claims =
+		exchange_code_for_claims(&http_client, &client, query.code, extra_audiences)
+			.await
+			.map_err(|e| {
+				tracing::error!("Failed to exchange code for claims: {:?}", e);
+				APIError::Unauthorized
+			})?;
 
 	tracing::debug!(subject = %claims.subject, email = ?claims.email, "OIDC claims received");
 

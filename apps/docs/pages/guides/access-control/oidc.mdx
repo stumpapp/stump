@@ -88,6 +88,30 @@ identity_providers:
 4. Set the callback URLs according to [above](#callback-url)
 5. Copy the Client ID and Client Secret for use in the [Stump configuration](#required-settings)
 
+### Zitadel
+
+1. In the Zitadel Console, navigate to your project and create a new **Web** application with authentication method **Code**
+2. Set the redirect URI to the callback URL according to [above](#callback-url)
+3. Note the **Project ID** shown at the top of the project page (a numeric string like `360960386461073457`)
+4. Copy the **Client ID** from the application detail page (this is _not_ the project ID or application ID) and the **Client Secret** generated when you create the application for use in the [Stump configuration](#required-settings)
+5. Set `STUMP_OIDC_EXTRA_AUDIENCES` to the **Project ID** from step 3 — this is required because Zitadel adds the project ID to the JWT `aud` claim by default.
+
+#### Zitadel Docker Compose Example
+
+```yaml
+services:
+  stump:
+    image: aaronleopold/stump:latest
+    environment:
+      STUMP_OIDC_ENABLED: 'true'
+      STUMP_OIDC_ISSUER_URL: 'https://your-zitadel-instance.com'
+      STUMP_OIDC_CLIENT_ID: 'your-zitadel-client-id'
+      STUMP_OIDC_CLIENT_SECRET: 'your-zitadel-client-secret'
+      STUMP_OIDC_EXTRA_AUDIENCES: 'your-zitadel-project-id'
+    ports:
+      - '10801:10801'
+```
+
 ## Stump Configuration
 
 OIDC is configured in the same manner as other Stump settings, through environment variables or the toml configuration file. See [server configuration](/guides/configuration/server-options) for more details.
@@ -103,11 +127,12 @@ OIDC is configured in the same manner as other Stump settings, through environme
 
 ### Optional Settings
 
-| Variable                        | Default                | Description                                                         |
-| ------------------------------- | ---------------------- | ------------------------------------------------------------------- |
-| `STUMP_OIDC_SCOPES`             | `openid,email,profile` | Additional scopes to request from the provider (comma-separated)    |
-| `STUMP_OIDC_ALLOW_REGISTRATION` | `true`                 | Allow automatic user registration via OIDC on first login           |
-| `STUMP_OIDC_DISABLE_LOCAL_AUTH` | `false`                | Disable local username/password authentication when OIDC is enabled |
+| Variable                        | Default                | Description                                                           |
+| ------------------------------- | ---------------------- | --------------------------------------------------------------------- |
+| `STUMP_OIDC_SCOPES`             | `openid,email,profile` | Additional scopes to request from the provider (comma-separated)      |
+| `STUMP_OIDC_ALLOW_REGISTRATION` | `true`                 | Allow automatic user registration via OIDC on first login             |
+| `STUMP_OIDC_DISABLE_LOCAL_AUTH` | `false`                | Disable local username/password authentication when OIDC is enabled   |
+| `STUMP_OIDC_EXTRA_AUDIENCES`    | _(none)_               | Comma-separated list of additional trusted audiences in the ID token  |
 
 ### Docker Compose Example
 

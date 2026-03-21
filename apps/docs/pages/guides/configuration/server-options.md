@@ -238,6 +238,16 @@ Whether or not to disable local username/password authentication when OIDC is en
 | ------- | ------------- |
 | Boolean | `false`       |
 
+### STUMP_OIDC_EXTRA_AUDIENCES
+
+A **comma-separated** list of additional trusted audiences for ID token verification. This is required when using providers like Zitadel that inject extra values (e.g. the project ID) into the JWT `aud` claim. See the [OIDC](/guides/access-control/oidc) guide for more information.
+
+| Type   | Default Value |
+| ------ | ------------- |
+| String | N/A           |
+
+**Example:** `360960386461073457,another-audience`
+
 ### STUMP_PDF_CACHE_PAGES
 
 Controls whether rendered PDF pages are cached.

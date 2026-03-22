@@ -76,28 +76,24 @@ async fn apply_grouping_iteratively(
 
 	let mut current_items: Vec<SmartListGroupedItem> = Vec::new();
 
-	// Level 0: Group all books by the first field → create top-level items
 	let first_level = &levels[0];
 	let level_0_groups =
 		group_single_level(user, books.clone(), first_level, txn).await?;
 
 	for group in level_0_groups {
+		if group.books.is_empty() {
+			continue;
+		}
 		let item_books = group.books.clone();
 		let item_entity = group.entity.clone();
 
-		// Skip empty groups (no books)
-		if item_books.is_empty() {
-			continue;
-		}
-
 		current_items.push(SmartListGroupedItem {
 			entity: item_entity,
-			books: vec![],
+			books: item_books,
 			subgroups: Some(vec![group]),
 		});
 	}
 
-	// Process remaining levels (1, 2, ...)
 	for level_idx in 1..levels.len() {
 		let is_last_level = level_idx == levels.len() - 1;
 		let level = &levels[level_idx];
@@ -107,13 +103,11 @@ async fn apply_grouping_iteratively(
 		// For each current item (which represents a parent group),
 		// group its books by the current level's field
 		for parent_item in current_items.iter() {
-			// Get the subgroups from the previous level (these contain the books to re-group)
 			let subgroups = match &parent_item.subgroups {
 				Some(s) => s,
 				None => continue,
 			};
 
-			// Collect all books from all subgroups
 			let books_to_group: Vec<Media> =
 				subgroups.iter().flat_map(|sg| sg.books.clone()).collect();
 
@@ -121,7 +115,6 @@ async fn apply_grouping_iteratively(
 				continue;
 			}
 
-			// Group these books by the current level's field
 			let child_groups =
 				group_single_level(user, books_to_group, level, txn).await?;
 
@@ -152,7 +145,6 @@ async fn apply_grouping_iteratively(
 				continue;
 			}
 
-			// Create the parent item with updated subgroups
 			next_items.push(SmartListGroupedItem {
 				entity: parent_item.entity.clone(),
 				books: if is_last_level {

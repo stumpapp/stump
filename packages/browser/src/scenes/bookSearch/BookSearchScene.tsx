@@ -156,7 +156,7 @@ function BookSearchScene() {
 		[setPage],
 	)
 
-	const { layoutMode, setLayout, columns, setColumns } = useBooksLayout((state) => ({
+	const { layoutMode, setLayout, columns, setColumns } = useBooksLayout('global', (state) => ({
 		columns: state.columns,
 		layoutMode: state.layout,
 		setColumns: state.setColumns,

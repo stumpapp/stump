@@ -1,6 +1,12 @@
-import { OPDSFeed, resolveUrl } from '@stump/sdk'
+import { OPDSFeed, OPDSLink, resolveUrl } from '@stump/sdk'
 import { QueryObserverResult, RefetchOptions } from '@tanstack/react-query'
 import { createContext, useContext } from 'react'
+
+const hasLinkRel = (link: OPDSLink, target: string): boolean => {
+	const rel = link.rel
+	if (Array.isArray(rel)) return rel.includes(target)
+	return rel === target
+}
 
 export type OPDSFeedContextValue = {
 	catalog: OPDSFeed | null
@@ -27,9 +33,9 @@ export const useOPDSFeedContext = () => {
 }
 
 export const getSearchURL = (feed: OPDSFeed | null | undefined, rootURL: string | undefined) => {
-	const searchLink = feed?.links.find((link) => link.rel === 'search' && link.templated)?.href
+	const searchLink = feed?.links.find((link) => hasLinkRel(link, 'search') && link.templated)?.href
 	return searchLink ? resolveUrl(searchLink, rootURL) : undefined
 }
 
 export const feedHasSearch = (feed: OPDSFeed | null | undefined) =>
-	feed?.links.some((link) => link.rel === 'search') ?? false
+	feed?.links.some((link) => hasLinkRel(link, 'search')) ?? false

@@ -44,7 +44,6 @@ pub mod env_keys {
 	pub const PDF_CACHE_PAGES_KEY: &str = "STUMP_PDF_CACHE_PAGES";
 	pub const PDF_PRERENDER_RANGE_KEY: &str = "STUMP_PDF_PRERENDER_RANGE";
 	pub const PDF_HIGH_QUALITY_KEY: &str = "STUMP_PDF_HIGH_QUALITY";
-	// OIDC configuration keys
 	pub const OIDC_ENABLED_KEY: &str = "STUMP_OIDC_ENABLED";
 	pub const OIDC_CLIENT_ID_KEY: &str = "STUMP_OIDC_CLIENT_ID";
 	pub const OIDC_CLIENT_SECRET_KEY: &str = "STUMP_OIDC_CLIENT_SECRET";
@@ -52,6 +51,8 @@ pub mod env_keys {
 	pub const OIDC_SCOPES_KEY: &str = "STUMP_OIDC_SCOPES";
 	pub const OIDC_ALLOW_REGISTRATION_KEY: &str = "STUMP_OIDC_ALLOW_REGISTRATION";
 	pub const OIDC_DISABLE_LOCAL_AUTH_KEY: &str = "STUMP_OIDC_DISABLE_LOCAL_AUTH";
+	pub const BOOK_COMPLETION_DEDUP_TIMEOUT_SECS_KEY: &str =
+		"STUMP_BOOK_COMPLETION_DEDUP_TIMEOUT_SECS";
 }
 use env_keys::*;
 
@@ -72,6 +73,7 @@ pub mod defaults {
 	pub const DEFAULT_PDF_CACHE_PAGES: bool = true; // Enable page caching by default
 	pub const DEFAULT_PDF_PRERENDER_RANGE: u32 = 5; // Pre-render 5 pages before/after current
 	pub const DEFAULT_PDF_HIGH_QUALITY: bool = true; // Enable high-quality rendering by default
+	pub const DEFAULT_BOOK_COMPLETION_DEDUP_TIMEOUT_SECS: i64 = 60 * 60 * 24; // 1 day
 }
 use defaults::*;
 
@@ -267,6 +269,11 @@ pub struct StumpConfig {
 	#[graphql(skip)]
 	#[default_value(None)]
 	pub oidc: Option<OidcConfig>,
+
+	/// The number of seconds after which a book can be re-completed
+	#[default_value(DEFAULT_BOOK_COMPLETION_DEDUP_TIMEOUT_SECS)]
+	#[env_key(BOOK_COMPLETION_DEDUP_TIMEOUT_SECS_KEY)]
+	pub book_completion_dedup_timeout_secs: i64,
 }
 
 impl StumpConfig {
@@ -461,6 +468,7 @@ mod tests {
 			pdf_prerender_range: None,
 			pdf_high_quality: None,
 			oidc: None,
+			book_completion_dedup_timeout_secs: None,
 		};
 		partial_config.apply_to_config(&mut config);
 
@@ -509,6 +517,9 @@ mod tests {
 				pdf_prerender_range: Some(DEFAULT_PDF_PRERENDER_RANGE),
 				pdf_high_quality: Some(DEFAULT_PDF_HIGH_QUALITY),
 				oidc: None,
+				book_completion_dedup_timeout_secs: Some(
+					DEFAULT_BOOK_COMPLETION_DEDUP_TIMEOUT_SECS
+				),
 			}
 		);
 
@@ -572,6 +583,8 @@ mod tests {
 						pdf_prerender_range: DEFAULT_PDF_PRERENDER_RANGE,
 						pdf_high_quality: DEFAULT_PDF_HIGH_QUALITY,
 						oidc: None,
+						book_completion_dedup_timeout_secs:
+							DEFAULT_BOOK_COMPLETION_DEDUP_TIMEOUT_SECS,
 					}
 				);
 			},

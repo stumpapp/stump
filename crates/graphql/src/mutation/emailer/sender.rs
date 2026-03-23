@@ -71,6 +71,16 @@ pub async fn send_attachment_email(
 	send_attachment_email_for_emailer(conn, user, input, emailer, emailer_client).await
 }
 
+pub async fn send_test_email(
+	config: EmailerClientConfig,
+	templates_dir: PathBuf,
+	recipient: String,
+) -> Result<()> {
+	let client = EmailerClient::new(config, templates_dir);
+	client.send_test_email(&recipient).await?;
+	Ok(())
+}
+
 async fn send_attachment_email_for_emailer<Sender>(
 	conn: &DatabaseConnection,
 	user: &AuthUser,
@@ -236,13 +246,28 @@ async fn book_to_attachment_with_content(
 		_ => {},
 	}
 
-	let content_type = ContentType::from_bytes_with_fallback(&content[..5], &extension)
-		.mime_type()
-		.parse::<EmailContentType>()
-		.map_err(|e| {
-			tracing::warn!(?e, "Failed to parse content type");
-			"Failed to parse content type".to_string()
-		})?;
+	let stump_content_type =
+		ContentType::from_bytes_with_fallback(&content[..5], &extension);
+	let mime_str = stump_content_type.mime_type();
+
+	tracing::debug!(
+		?file_name,
+		?extension,
+		?stump_content_type,
+		%mime_str,
+		"Resolved content type for attachment"
+	);
+
+	let content_type = mime_str.parse::<EmailContentType>().map_err(|e| {
+		tracing::warn!(
+			?e,
+			?file_name,
+			?extension,
+			%mime_str,
+			"Failed to parse content type into email ContentType"
+		);
+		"Failed to parse content type".to_string()
+	})?;
 
 	let attachment_meta = AttachmentMetaModel::new(
 		file_name.clone(),

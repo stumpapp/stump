@@ -120,6 +120,14 @@ This corresponds to the `allowed_origins` configuration option in the `Stump.tom
 
 **Be sure to replace `{machine_ip}` and `{configured_port}` with the appropriate values for your environment.**
 
+### STUMP_BOOK_COMPLETION_DEDUP_TIMEOUT_SECS
+
+The number of seconds after which a book can be re-completed.
+
+| Type    | Default Value   |
+| ------- | --------------- |
+| Integer | `86400` (1 day) |
+
 ### STUMP_CLIENT_DIR
 
 The directory the contains the web bundle for the web UI

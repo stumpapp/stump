@@ -13,7 +13,10 @@ use models::{
 };
 use sea_orm::{prelude::*, sea_query::Query};
 use stump_core::filesystem::{
-	image::{place_thumbnail, remove_thumbnails, ThumbnailGenerationJobParams},
+	image::{
+		place_thumbnail, remove_thumbnails, PlaceholderGenerationJobConfig,
+		PlaceholderGenerationJobScope, ThumbnailGenerationJobParams,
+	},
 	ContentType,
 };
 use stump_core::job::stump_job::StumpJob;
@@ -166,7 +169,7 @@ impl UploadMutation {
 	// I think we can refactor this into some utility function(s) that take the model type and the ID as parameters
 
 	#[graphql(
-		guard = "OptionalFeatureGuard::new(OptionalFeature::Upload).and(PermissionGuard::new(&[UserPermission::UploadFile, UserPermission::EditLibrary]))"
+		guard = "OptionalFeatureGuard::new(OptionalFeature::Upload).and(PermissionGuard::new(&[UserPermission::UploadFile, UserPermission::EditLibrary, UserPermission::EditThumbnails]))"
 	)]
 	async fn upload_library_thumbnail(
 		&self,
@@ -229,26 +232,42 @@ impl UploadMutation {
 			.await?;
 
 		let config = config.ok_or("Library config not found")?;
-		let force_regenerate = true;
 
+		let should_enqueue_placeholder = config.thumbnail_config.is_some()
+			|| config.process_thumbnail_colors_even_without_config;
+
+		if !should_enqueue_placeholder {
+			tracing::info!(
+                "Thumbnail config is not set to process colors without config, skipping placeholder generation"
+            );
+			return Ok(library.into());
+		}
+
+		tracing::debug!(
+			"Enqueuing placeholder generation job for uploaded library thumbnail"
+		);
+
+		// Note: We do NOT enqueue a thumbnail generation job since that just overwrites the uploaded one lol. Stump will assume your
+		// uploaded image is sized accordingly. We DO enqueue a placeholder generation job to ensure the colors etc are updated
 		if let Err(e) = core
-			.enqueue(StumpJob::thumbnail_generation(
-				config.thumbnail_config.unwrap_or_default(),
-				ThumbnailGenerationJobParams::library(
-					library.id.clone(),
-					force_regenerate,
-				),
-			))
+			.enqueue(StumpJob::PlaceholderGeneration {
+				config: PlaceholderGenerationJobConfig {
+					force_regenerate: true,
+					scope: PlaceholderGenerationJobScope::Libraries(vec![library
+						.id
+						.clone()]),
+				},
+			})
 			.await
 		{
-			tracing::error!(?e, "Failed to enqueue thumbnail generation job");
+			tracing::error!(?e, "Failed to enqueue placeholder generation job");
 		}
 
 		Ok(library.into())
 	}
 
 	#[graphql(
-		guard = "OptionalFeatureGuard::new(OptionalFeature::Upload).and(PermissionGuard::new(&[UserPermission::UploadFile, UserPermission::EditLibrary]))"
+		guard = "OptionalFeatureGuard::new(OptionalFeature::Upload).and(PermissionGuard::new(&[UserPermission::UploadFile, UserPermission::EditThumbnails]))"
 	)]
 	async fn upload_series_thumbnail(
 		&self,
@@ -319,26 +338,43 @@ impl UploadMutation {
 			.one(core.conn.as_ref())
 			.await?
 			.ok_or("Library config not found")?;
-		let force_regenerate = true;
 
+		let should_enqueue_placeholder = config.thumbnail_config.is_some()
+			|| config.process_thumbnail_colors_even_without_config;
+
+		if !should_enqueue_placeholder {
+			tracing::info!(
+                "Thumbnail config is not set to process colors without config, skipping placeholder generation"
+            );
+			return Ok(series.into());
+		}
+
+		tracing::debug!(
+			"Enqueuing placeholder generation job for uploaded series thumbnail"
+		);
+
+		// Note: We do NOT enqueue a thumbnail generation job since that just overwrites the uploaded one lol. Stump will assume your
+		// uploaded image is sized accordingly. We DO enqueue a placeholder generation job to ensure the colors etc are updated
 		if let Err(e) = core
-			.enqueue(StumpJob::thumbnail_generation(
-				config.thumbnail_config.unwrap_or_default(),
-				ThumbnailGenerationJobParams::series(
-					vec![series.series.id.clone()],
-					force_regenerate,
-				),
-			))
+			.enqueue(StumpJob::PlaceholderGeneration {
+				config: PlaceholderGenerationJobConfig {
+					force_regenerate: true,
+					scope: PlaceholderGenerationJobScope::Series(vec![series
+						.series
+						.id
+						.clone()]),
+				},
+			})
 			.await
 		{
-			tracing::error!(?e, "Failed to enqueue thumbnail generation job");
+			tracing::error!(?e, "Failed to enqueue placeholder generation job");
 		}
 
 		Ok(series.into())
 	}
 
 	#[graphql(
-		guard = "OptionalFeatureGuard::new(OptionalFeature::Upload).and(PermissionGuard::new(&[UserPermission::UploadFile, UserPermission::EditLibrary]))"
+		guard = "OptionalFeatureGuard::new(OptionalFeature::Upload).and(PermissionGuard::new(&[UserPermission::UploadFile, UserPermission::EditThumbnails]))"
 	)]
 	async fn upload_media_thumbnail(
 		&self,
@@ -370,6 +406,11 @@ impl UploadMutation {
 			.and_then(|ext| ext.to_str())
 			.map(str::to_ascii_lowercase)
 			.ok_or("Expected file to have an extension")?;
+
+		tracing::trace!(
+			?extension,
+			"Determined file extension of uploaded thumbnail. Preparing to replace..."
+		);
 
 		// Note: I chose to *safely* attempt the removal as to not block the upload, however after some
 		// user testing I'd like to see if this becomes a problem. We'll see!
@@ -413,19 +454,36 @@ impl UploadMutation {
 			.one(core.conn.as_ref())
 			.await?
 			.ok_or("Library config not found")?;
-		let force_regenerate = true;
 
+		let should_enqueue_placeholder = config.thumbnail_config.is_some()
+			|| config.process_thumbnail_colors_even_without_config;
+
+		if !should_enqueue_placeholder {
+			tracing::info!(
+                "Thumbnail config is not set to process colors without config, skipping placeholder generation"
+            );
+			return Ok(book.into());
+		}
+
+		tracing::debug!(
+			"Enqueuing placeholder generation job for uploaded media thumbnail"
+		);
+
+		// Note: We do NOT enqueue a thumbnail generation job since that just overwrites the uploaded one lol. Stump will assume your
+		// uploaded image is sized accordingly. We DO enqueue a placeholder generation job to ensure the colors etc are updated
 		if let Err(e) = core
-			.enqueue(StumpJob::thumbnail_generation(
-				config.thumbnail_config.unwrap_or_default(),
-				ThumbnailGenerationJobParams::books(
-					vec![book.media.id.clone()],
-					force_regenerate,
-				),
-			))
+			.enqueue(StumpJob::PlaceholderGeneration {
+				config: PlaceholderGenerationJobConfig {
+					force_regenerate: true,
+					scope: PlaceholderGenerationJobScope::Books(vec![book
+						.media
+						.id
+						.clone()]),
+				},
+			})
 			.await
 		{
-			tracing::error!(?e, "Failed to enqueue thumbnail generation job");
+			tracing::error!(?e, "Failed to enqueue placeholder generation job");
 		}
 
 		Ok(book.into())
@@ -435,7 +493,7 @@ impl UploadMutation {
 	/// Note: This was added specifically for Komf, which would have been annyoing to
 	/// implement multipart uploads for
 	#[graphql(
-		guard = "PermissionGuard::new(&[UserPermission::UploadFile, UserPermission::EditLibrary])"
+		guard = "PermissionGuard::new(&[UserPermission::UploadFile, UserPermission::EditThumbnails])"
 	)]
 	async fn upload_series_thumbnail_base64(
 		&self,
@@ -491,19 +549,36 @@ impl UploadMutation {
 			.one(core.conn.as_ref())
 			.await?
 			.ok_or("Library config not found")?;
-		let force_regenerate = true;
 
+		let should_enqueue_placeholder = config.thumbnail_config.is_some()
+			|| config.process_thumbnail_colors_even_without_config;
+
+		if !should_enqueue_placeholder {
+			tracing::info!(
+                "Thumbnail config is not set to process colors without config, skipping placeholder generation"
+            );
+			return Ok(series.into());
+		}
+
+		tracing::debug!(
+			"Enqueuing placeholder generation job for uploaded series thumbnail"
+		);
+
+		// Note: We do NOT enqueue a thumbnail generation job since that just overwrites the uploaded one lol. Stump will assume your
+		// uploaded image is sized accordingly. We DO enqueue a placeholder generation job to ensure the colors etc are updated
 		if let Err(e) = core
-			.enqueue(StumpJob::thumbnail_generation(
-				config.thumbnail_config.unwrap_or_default(),
-				ThumbnailGenerationJobParams::series(
-					vec![series.series.id.clone()],
-					force_regenerate,
-				),
-			))
+			.enqueue(StumpJob::PlaceholderGeneration {
+				config: PlaceholderGenerationJobConfig {
+					force_regenerate: true,
+					scope: PlaceholderGenerationJobScope::Series(vec![series
+						.series
+						.id
+						.clone()]),
+				},
+			})
 			.await
 		{
-			tracing::error!(?e, "Failed to enqueue thumbnail generation job");
+			tracing::error!(?e, "Failed to enqueue placeholder generation job");
 		}
 
 		Ok(series.into())
@@ -513,7 +588,7 @@ impl UploadMutation {
 	/// Note: This was added specifically for Komf, which would have been annyoing to
 	/// implement multipart uploads for
 	#[graphql(
-		guard = "PermissionGuard::new(&[UserPermission::UploadFile, UserPermission::EditLibrary])"
+		guard = "PermissionGuard::new(&[UserPermission::UploadFile, UserPermission::EditThumbnails])"
 	)]
 	async fn upload_media_thumbnail_base64(
 		&self,
@@ -574,19 +649,36 @@ impl UploadMutation {
 			.one(core.conn.as_ref())
 			.await?
 			.ok_or("Library config not found")?;
-		let force_regenerate = true;
 
+		let should_enqueue_placeholder = config.thumbnail_config.is_some()
+			|| config.process_thumbnail_colors_even_without_config;
+
+		if !should_enqueue_placeholder {
+			tracing::info!(
+                "Thumbnail config is not set to process colors without config, skipping placeholder generation"
+            );
+			return Ok(book.into());
+		}
+
+		tracing::debug!(
+			"Enqueuing placeholder generation job for uploaded media thumbnail"
+		);
+
+		// Note: We do NOT enqueue a thumbnail generation job since that just overwrites the uploaded one lol. Stump will assume your
+		// uploaded image is sized accordingly. We DO enqueue a placeholder generation job to ensure the colors etc are updated
 		if let Err(e) = core
-			.enqueue(StumpJob::thumbnail_generation(
-				config.thumbnail_config.unwrap_or_default(),
-				ThumbnailGenerationJobParams::books(
-					vec![book.media.id.clone()],
-					force_regenerate,
-				),
-			))
+			.enqueue(StumpJob::PlaceholderGeneration {
+				config: PlaceholderGenerationJobConfig {
+					force_regenerate: true,
+					scope: PlaceholderGenerationJobScope::Books(vec![book
+						.media
+						.id
+						.clone()]),
+				},
+			})
 			.await
 		{
-			tracing::error!(?e, "Failed to enqueue thumbnail generation job");
+			tracing::error!(?e, "Failed to enqueue placeholder generation job");
 		}
 
 		Ok(book.into())
@@ -594,7 +686,8 @@ impl UploadMutation {
 }
 
 fn enforce_max_size(value: &UploadValue, max_size: usize) -> Result<()> {
-	match value.size() {
+	let size = value.size();
+	match size {
 		Ok(size) if size as usize > max_size => Err(format!(
 			"File size exceeds maximum upload size of {max_size} bytes"
 		)
@@ -603,7 +696,10 @@ fn enforce_max_size(value: &UploadValue, max_size: usize) -> Result<()> {
 			tracing::error!(?e, "Error getting file size");
 			Err(format!("Error getting file size: {e}").into())
 		},
-		_ => Ok(()),
+		_ => {
+			tracing::trace!(size = size.ok(), "Verified file size of uploaded file");
+			Ok(())
+		},
 	}
 }
 
@@ -618,6 +714,8 @@ fn enforce_valid_content_type(value: &UploadValue) -> Result<()> {
 	if !content_type.is_image() {
 		return Err("Uploaded file is not an image".into());
 	}
+
+	tracing::trace!(?content_type, "Verified content type of uploaded file");
 
 	Ok(())
 }

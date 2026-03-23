@@ -1,14 +1,18 @@
 import { useGraphQLMutation, useSDK } from '@stump/client'
-import { Button, DropdownMenu } from '@stump/components'
+import { Button, ButtonOrLink, DropdownMenu } from '@stump/components'
 import { DropdownItemGroup } from '@stump/components/dropdown/DropdownMenu'
 import { BookCardFragment, graphql, UserPermission } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
 import {
 	BookMinus,
+	BookOpen,
 	BookOpenCheck,
 	BookX,
-	DownloadCloud,
+	Download,
 	EllipsisVertical,
+	EyeOff,
+	FileText,
+	Play,
 	Send,
 	Settings,
 } from 'lucide-react'
@@ -18,6 +22,7 @@ import { toast } from 'sonner'
 
 import { useAppContext } from '@/context'
 import { usePaths } from '@/paths'
+import { EBOOK_EXTENSION, PDF_EXTENSION } from '@/utils/patterns'
 
 import DeleteHistoryConfirmation from './DeleteHistoryConfirmation'
 import EmailBookDialog from './EmailBookDialog'
@@ -107,10 +112,66 @@ export default function BookActionMenu({ book }: Props) {
 	const paths = usePaths()
 	const navigate = useNavigate()
 
+	const canDownload = checkPermission(UserPermission.DownloadFile)
+
+	const continueReadingLink = useMemo(() => {
+		if (!book.readProgress) return undefined
+		const { page, epubcfi } = book.readProgress
+		if (epubcfi) {
+			return paths.bookReader(book.id, { epubcfi, isEpub: true })
+		} else if (!!page && page > 0) {
+			return paths.bookReader(book.id, { page })
+		}
+		return undefined
+	}, [book, paths])
+
+	const getReadFromBeginningLink = useCallback(
+		(incognito: boolean) => {
+			const { id, extension } = book
+			if (extension.match(EBOOK_EXTENSION)) {
+				return paths.bookReader(id, { isEpub: true, isIncognito: incognito || undefined })
+			}
+			return paths.bookReader(id, { isIncognito: incognito || undefined, page: 1 })
+		},
+		[book, paths],
+	)
+
 	const groups = useMemo<DropdownItemGroup[]>(
 		() =>
-			// eslint-disable-next-line react-hooks/refs
 			[
+				{
+					items: [
+						...(continueReadingLink
+							? [
+									{
+										label: 'Continue reading',
+										leftIcon: <Play className="mr-2 h-4 w-4" />,
+										onClick: () => navigate(continueReadingLink),
+									},
+								]
+							: []),
+						{
+							label: 'Read from beginning',
+							leftIcon: <BookOpen className="mr-2 h-4 w-4" />,
+							onClick: () => navigate(getReadFromBeginningLink(false)),
+						},
+						{
+							label: 'Incognito mode',
+							leftIcon: <EyeOff className="mr-2 h-4 w-4" />,
+							onClick: () => navigate(getReadFromBeginningLink(true)),
+						},
+						...(book.extension?.match(PDF_EXTENSION)
+							? [
+									{
+										label: 'Native PDF viewer',
+										leftIcon: <FileText className="mr-2 h-4 w-4" />,
+										onClick: () =>
+											navigate(paths.bookReader(book.id, { isPdf: true, isStreaming: false })),
+									},
+								]
+							: []),
+					],
+				},
 				{
 					items: [
 						...(progression.isUntouched || progression.isReading
@@ -150,7 +211,8 @@ export default function BookActionMenu({ book }: Props) {
 				},
 				{
 					items: [
-						...(checkPermission(UserPermission.ManageLibrary)
+						...(checkPermission(UserPermission.ManageLibrary) ||
+						checkPermission(UserPermission.EditThumbnails)
 							? [
 									{
 										label: 'Manage',
@@ -158,19 +220,6 @@ export default function BookActionMenu({ book }: Props) {
 										onClick: () => {
 											navigate(paths.bookManagement(book.id))
 										},
-									},
-								]
-							: []),
-					],
-				},
-				{
-					items: [
-						...(checkPermission(UserPermission.DownloadFile)
-							? [
-									{
-										label: 'Download',
-										leftIcon: <DownloadCloud className="mr-2 h-4 w-4" />,
-										onClick: () => downloadRef.current?.click(),
 									},
 								]
 							: []),
@@ -187,7 +236,16 @@ export default function BookActionMenu({ book }: Props) {
 					],
 				},
 			].filter((group) => group.items.length > 0),
-		[checkPermission, progression, paths, navigate, book, actions],
+		[
+			checkPermission,
+			progression,
+			paths,
+			navigate,
+			book,
+			actions,
+			continueReadingLink,
+			getReadFromBeginningLink,
+		],
 	)
 
 	return (
@@ -214,16 +272,31 @@ export default function BookActionMenu({ book }: Props) {
 				download
 			/>
 
-			<DropdownMenu
-				align="end"
-				contentWrapperClassName="w-18 md:mt-1"
-				trigger={
-					<Button variant="ghost" size="icon">
-						<EllipsisVertical className="h-4 w-4" />
-					</Button>
-				}
-				groups={groups}
-			/>
+			<div className="flex w-full items-center gap-1">
+				{canDownload && (
+					<ButtonOrLink
+						className="w-full"
+						variant="outline"
+						onClick={() => downloadRef.current?.click()}
+						title="Download"
+						rounded="lg"
+					>
+						<Download className="mr-2 h-4 w-4" />
+						Download
+					</ButtonOrLink>
+				)}
+
+				<DropdownMenu
+					align="end"
+					contentWrapperClassName="w-48"
+					trigger={
+						<Button variant="outline" size="icon" className="h-8 w-8 shrink-0" rounded="lg">
+							<EllipsisVertical className="h-4 w-4" />
+						</Button>
+					}
+					groups={groups}
+				/>
+			</div>
 		</>
 	)
 }

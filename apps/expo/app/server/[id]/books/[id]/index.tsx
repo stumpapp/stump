@@ -21,20 +21,25 @@ import Animated, {
 } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import TImage from 'react-native-turbo-image'
-import { stripHtml } from 'string-strip-html'
 
 import { useActiveServer, useStumpServer } from '~/components/activeServer'
 import { BookMetaLink, BooksAfterCursor } from '~/components/book'
-import { BookActionMenu, DownloadButton } from '~/components/book/overview'
-import { InfoRow, LongValue } from '~/components/book/overview'
+import {
+	BookActionMenu,
+	DescriptionSection,
+	DownloadButton,
+	IdentifiersSheet,
+} from '~/components/book/overview'
+import { InfoRow } from '~/components/book/overview'
 import { ThumbnailImage } from '~/components/image'
 import { MetadataBadgeSection } from '~/components/overview'
 import RefreshControl from '~/components/RefreshControl'
-import { Button, Card, Heading, Text } from '~/components/ui'
+import { Button, Card, Heading, ListLabel, Text } from '~/components/ui'
 import { Icon } from '~/components/ui/icon'
 import { formatSeriesPosition } from '~/lib/bookUtils'
 import { formatBytes, parseGraphQLDecimal } from '~/lib/format'
 import { useDownload } from '~/lib/hooks'
+import { cn } from '~/lib/utils'
 import { usePreferencesStore } from '~/stores'
 
 const query = graphql(`
@@ -139,11 +144,6 @@ type ActiveReadingSession = NonNullable<
 	NonNullable<Pick<NonNullable<BookByIdQuery['mediaById']>, 'readProgress'>>['readProgress']
 >
 
-// TODO: I think we can rethink some of this information arch. I originally just kinda dumped
-// all of the metadata on the page but I think we can definitely curate some of it better to be
-// prettier. Like {seriesPosition} of {series.mediaCount} in {seriesName} instead of just dumping
-// the series-related metadata in a list.
-
 export default function Screen() {
 	const { id: bookID } = useLocalSearchParams<{ id: string }>()
 	const {
@@ -233,14 +233,15 @@ export default function Screen() {
 	} = book.thumbnail
 
 	const progression = book.readProgress || null
+	const isEpub = !!progression?.locator
 	const lastCompletion = book.readHistory?.at(0) || null
 
 	const formattedSize = formatBytes(book.size)
 	const description = book.metadata?.summary || ''
-	const genres = book.metadata?.genres?.map((genre) => `#${genre}`).join(', ')
+	const genres = book.metadata?.genres || []
 	const links = book.metadata?.links || []
 	const pages = book.metadata?.pageCount || book.pages
-	const characters = book.metadata?.characters?.join(', ')
+	const characters = book.metadata?.characters || []
 
 	const seriesName = book.metadata?.series || book.series.resolvedName
 	const seriesPosition = formatSeriesPosition(
@@ -259,13 +260,6 @@ export default function Screen() {
 	const inkers = book.metadata?.inkers || []
 	const letterers = book.metadata?.letterers || []
 	const coverArtists = book.metadata?.coverArtists || []
-
-	const identifierAmazon = book.metadata?.identifierAmazon
-	const identifierCalibre = book.metadata?.identifierCalibre
-	const identifierGoogle = book.metadata?.identifierGoogle
-	const identifierIsbn = book.metadata?.identifierIsbn
-	const identifierMobiAsin = book.metadata?.identifierMobiAsin
-	const identifierUuid = book.metadata?.identifierUuid
 
 	const noAcknowledgements =
 		!writers.length &&
@@ -296,13 +290,12 @@ export default function Screen() {
 			return <Card.Stat label="Completed" value={`${percentage}%`} />
 		}
 
-		let percentage
-		const decimal = percentageCompleted ? parseGraphQLDecimal(percentageCompleted) : null
-		if (decimal) {
-			percentage = (decimal * 100).toFixed(1)
-		} else {
-			percentage = (((page || 0) / pages) * 100).toFixed(1)
-		}
+		const fraction = percentageCompleted
+			? parseGraphQLDecimal(percentageCompleted)
+			: (page || 0) / pages
+
+		const percentage = fraction != null ? Math.max(0, Math.min(100, Math.round(fraction * 100))) : 0
+
 		return <Card.Stat label="Completed" value={percentage} suffix={'%'} />
 	}
 
@@ -331,6 +324,8 @@ export default function Screen() {
 			return <Card.Stat label="Locator" value={`${epubcfi?.slice(0, 4)}...${epubcfi?.slice(-4)}`} />
 		}
 	}
+
+	const currentPage = progression?.page ?? progression?.locator?.locations?.position ?? '??'
 
 	const lastCompletionDistance =
 		lastCompletion?.completedAt != null
@@ -363,6 +358,12 @@ export default function Screen() {
 		})
 	}
 
+	const showDetails =
+		formattedSize ||
+		book.extension ||
+		book.metadata?.language ||
+		(book.metadata?.ageRating && book.metadata.ageRating > 0)
+
 	return (
 		<Animated.ScrollView
 			className="flex-1 bg-background"
@@ -375,10 +376,11 @@ export default function Screen() {
 				/>
 			}
 		>
-			<View className="ios:pt-safe-offset-20 pt-safe overflow-hidden pb-8">
+			<View className="ios:pt-safe-offset-20 pt-safe ios:pb-24 overflow-hidden pb-16">
 				<Animated.View
 					// -inset-24 is because when using a lot of blur, the sides get more transparent
 					// so we have to "zoom in" to have a clean line at the bottom rather than a gradient
+					// pb-16/24 because the rounded corners has negative margin to make them visible
 					className="absolute -inset-24 opacity-70 dark:opacity-30"
 					style={parallaxStyle}
 				>
@@ -461,18 +463,16 @@ export default function Screen() {
 
 					{(progression || lastCompletion) && (
 						<Card>
-							{progression && (
-								<Card.StatGroup>
-									{progression.page && (
-										<Card.Stat label="Page" value={progression.page} suffix={` / ${pages}`} />
-									)}
-									{!progression.page && renderEpubLocator(progression)}
-									{renderPercentage(progression)}
-									{renderReadTime(progression)}
-								</Card.StatGroup>
-							)}
-
-							{lastCompletion && !progression && (
+							{progression ? (
+								<>
+									{isEpub && <Card.StatGroup>{renderEpubLocator(progression)}</Card.StatGroup>}
+									<Card.StatGroup>
+										<Card.Stat label="Page" value={currentPage} suffix={` / ${pages}`} />
+										{renderPercentage(progression)}
+										{renderReadTime(progression)}
+									</Card.StatGroup>
+								</>
+							) : (
 								<Card.StatGroup>
 									<Card.Stat label="Pages" value={pages} />
 									<Card.Stat label="Finished" value={lastCompletionDistance} />
@@ -484,33 +484,27 @@ export default function Screen() {
 				</View>
 			</View>
 
-			<View className="gap-8 px-4 py-8 tablet:px-6">
-				<Card label="Information">
-					{book.metadata?.language && <InfoRow label="Language" value={book.metadata.language} />}
-					<InfoRow label="Pages" value={pages.toString()} />
-					<InfoRow label="Kind" value={book.extension.toUpperCase()} />
-					{formattedSize && <InfoRow label="Size" value={formattedSize} />}
+			<View className="squircle ios:rounded-[3rem] ios:-mt-[4.5rem] -mt-[2.5rem] gap-8 rounded-[2.5rem] bg-background px-4 py-6 tablet:px-6">
+				{!!description && <DescriptionSection description={description} />}
+
+				<Card className={cn(!description && 'px-2')}>
+					<Card.StatGroup>
+						{!!publisher && <Card.Stat label="Publisher" value={publisher} />}
+						{!!seriesVolume && <Card.Stat label="Volume" value={seriesVolume} />}
+						{book.metadata?.year != null && book.metadata.year > 0 && (
+							<Card.Stat label="Year" value={book.metadata.year} />
+						)}
+						<Card.Stat label="Pages" value={pages} />
+					</Card.StatGroup>
 				</Card>
 
-				<Card label="Metadata" listEmptyStyle={{ message: 'No metadata available' }}>
-					{description && <LongValue label="Description" value={stripHtml(description).result} />}
-					{publisher && <InfoRow label="Publisher" value={publisher} />}
-					{seriesName && <InfoRow label="Series" value={seriesName} />}
-					{seriesPosition && (
-						<InfoRow
-							label={seriesName ? 'Position' : 'Series Position'}
-							value={seriesPosition.toString()}
-						/>
-					)}
-					{seriesVolume && (
-						<InfoRow key="seriesVolume" label="Volume" value={seriesVolume.toString()} />
-					)}
-					{/* TODO: Separate into separate section, maybe merge with links? */}
-					{genres && <InfoRow label="Genres" value={genres} />}
-					{characters && <InfoRow label="Characters" value={characters} />}
-				</Card>
-
-				<BooksAfterCursor cursor={bookID} />
+				<MetadataBadgeSection
+					label="Genres"
+					items={genres.map((genre) => ({
+						label: genre,
+						onPress: () => onClickFilterField('genres', genre),
+					}))}
+				/>
 
 				{!noAcknowledgements && (
 					<View className="gap-6">
@@ -556,11 +550,21 @@ export default function Screen() {
 					</View>
 				)}
 
+				<MetadataBadgeSection
+					label="Characters"
+					items={characters.map((character) => ({
+						label: character,
+						onPress: () => onClickFilterField('characters', character),
+					}))}
+				/>
+
+				<BooksAfterCursor cursor={bookID} />
+
 				{links.length > 0 && (
 					<View className="flex w-full gap-2">
-						<Text className="text-lg text-foreground-muted">Links</Text>
+						<ListLabel className="ios:px-4 px-2">Links</ListLabel>
 
-						<View className="flex flex-row flex-wrap gap-2">
+						<View className="ios:px-4 flex flex-row flex-wrap gap-2 px-2">
 							{links.map((link) => (
 								<BookMetaLink key={link} href={link} />
 							))}
@@ -568,15 +572,28 @@ export default function Screen() {
 					</View>
 				)}
 
-				<Card label="Identifiers">
-					<InfoRow label="Stump" value={book.id} />
-					{identifierAmazon && <InfoRow label="Amazon" value={identifierAmazon} />}
-					{identifierCalibre && <InfoRow label="Calibre" value={identifierCalibre} />}
-					{identifierGoogle && <InfoRow label="Google" value={identifierGoogle} />}
-					{identifierIsbn && <InfoRow label="ISBN" value={identifierIsbn} />}
-					{identifierMobiAsin && <InfoRow label="Mobi ASIN" value={identifierMobiAsin} />}
-					{identifierUuid && <InfoRow label="UUID" value={identifierUuid} />}
-				</Card>
+				{showDetails && (
+					<Card label="Details">
+						{book.extension && <InfoRow label="Format" value={book.extension.toUpperCase()} />}
+						{!!formattedSize && <InfoRow label="Size" value={formattedSize} />}
+						{book.metadata?.language && <InfoRow label="Language" value={book.metadata.language} />}
+						{book.metadata?.ageRating != null && book.metadata.ageRating > 0 && (
+							<InfoRow label="Age Rating" value={`${book.metadata.ageRating}+`} />
+						)}
+					</Card>
+				)}
+
+				<IdentifiersSheet
+					identifiers={{
+						stumpId: book.id,
+						amazon: book.metadata?.identifierAmazon,
+						calibre: book.metadata?.identifierCalibre,
+						google: book.metadata?.identifierGoogle,
+						isbn: book.metadata?.identifierIsbn,
+						mobiAsin: book.metadata?.identifierMobiAsin,
+						uuid: book.metadata?.identifierUuid,
+					}}
+				/>
 			</View>
 		</Animated.ScrollView>
 	)

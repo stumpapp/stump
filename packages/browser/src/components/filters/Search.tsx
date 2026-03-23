@@ -1,6 +1,6 @@
-import { cn, Input, ProgressSpinner, usePreviousIsDifferent } from '@stump/components'
+import { cn, ProgressSpinner, usePreviousIsDifferent } from '@stump/components'
 import { SearchIcon } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useDebouncedValue } from 'rooks'
 
 type Props = {
@@ -9,10 +9,6 @@ type Props = {
 	 * a page with a search already in the URL.
 	 */
 	initialValue?: string
-	/**
-	 * The label to display above the search input.
-	 */
-	label?: string
 	/**
 	 * The placeholder text to display in the search input.
 	 */
@@ -36,21 +32,25 @@ type Props = {
  */
 export default function Search({
 	initialValue,
-	label,
 	placeholder,
 	onChange,
 	isLoading,
 	isDisabled,
 }: Props) {
-	const [isFocused, setIsFocused] = useState(false)
-	// we need to debounce the onChange function so we only update once the user has stopped typing
-	// this is a common pattern for search inputs
-	const [value, setValue] = useState<string | undefined>(initialValue)
+	const inputRef = useRef<HTMLInputElement>(null)
+	const containerRef = useRef<HTMLDivElement>(null)
+	const [expanded, setExpanded] = useState(() => !!initialValue)
+	const [value, setValue] = useState(initialValue ?? '')
 	const [debouncedValue] = useDebouncedValue(value, 500)
 
-	// This isn't an ideal check, but it works for now. I was noticing WAY too
-	// many renders when I clear the search
 	const shouldCall = usePreviousIsDifferent(debouncedValue)
+
+	useEffect(() => {
+		if (initialValue) {
+			setValue(initialValue)
+			setExpanded(true)
+		}
+	}, [initialValue])
 
 	useEffect(() => {
 		if (debouncedValue !== undefined && shouldCall) {
@@ -58,28 +58,66 @@ export default function Search({
 		}
 	}, [debouncedValue, onChange, shouldCall])
 
-	const showLoader = isLoading && value !== undefined && value.length > 0
+	const handleExpand = () => {
+		if (isDisabled) return
+		setExpanded(true)
+	}
+
+	useEffect(() => {
+		if (!expanded) return
+		const el = containerRef.current
+		if (!el) return
+
+		const onEnd = (e: TransitionEvent) => {
+			if (e.propertyName === 'width') inputRef.current?.focus()
+		}
+		el.addEventListener('transitionend', onEnd)
+		return () => el.removeEventListener('transitionend', onEnd)
+	}, [expanded])
+
+	const handleBlur = () => {
+		if (!value) setExpanded(false)
+	}
+
+	const showLoader = isLoading && !!value
 
 	return (
-		<Input
+		<div
+			ref={containerRef}
+			role={expanded ? undefined : 'button'}
+			tabIndex={expanded ? undefined : 0}
+			onClick={expanded ? undefined : handleExpand}
+			onKeyDown={expanded ? undefined : (e) => e.key === 'Enter' && handleExpand()}
 			title={isDisabled ? "This functionality isn't available right now" : undefined}
-			label={label}
-			onFocus={() => setIsFocused(true)}
-			onBlur={() => setIsFocused(false)}
-			onChange={(e) => setValue(e.target.value)}
-			placeholder={placeholder || 'Search'}
-			value={value}
-			fullWidth
-			size="sm"
-			variant="activeGhost"
-			leftDecoration={<SearchIcon className="h-4 w-4 text-foreground-muted" />}
-			rightDecoration={showLoader ? <ProgressSpinner size="sm" /> : null}
 			className={cn(
-				'flex-grow transition-[width] duration-200 ease-in-out',
-				{ 'w-full flex-grow sm:w-2/5': isFocused },
-				{ 'w-2/3 cursor-pointer pr-0 sm:w-3/5 md:w-1/5': !isFocused },
+				'relative flex h-8 shrink-0 cursor-pointer items-center gap-2 overflow-hidden rounded-xl border border-edge-subtle bg-transparent text-sm transition-all duration-300 ease-in-out',
+				'text-foreground-muted hover:bg-background-surface hover:text-foreground',
+				'disabled:cursor-not-allowed disabled:opacity-50',
+				expanded ? 'w-full cursor-text sm:w-2/5' : 'w-32',
 			)}
-			disabled={isDisabled}
-		/>
+		>
+			<SearchIcon className="ml-2.5 h-4 w-4 shrink-0" />
+
+			{expanded ? (
+				<input
+					ref={inputRef}
+					type="text"
+					value={value}
+					onChange={(e) => setValue(e.target.value)}
+					onBlur={handleBlur}
+					placeholder={placeholder || 'Search'}
+					disabled={isDisabled}
+					className="h-full w-full bg-transparent pr-8 text-sm text-foreground-subtle outline-none placeholder:text-foreground-muted"
+				/>
+			) : (
+				<span className="select-none whitespace-nowrap pr-2.5 text-sm">Search</span>
+			)}
+
+			{showLoader && (
+				<div className="absolute inset-y-0 right-0 flex items-center pr-2.5">
+					<ProgressSpinner size="sm" />
+				</div>
+			)}
+		</div>
 	)
 }

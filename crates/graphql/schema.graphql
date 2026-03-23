@@ -479,9 +479,9 @@ input CreateScheduledJobInput {
 	name: String!
 	"A cron expression (e.g. `0 0 * * *` for daily at midnight)"
 	schedule: String!
-	"The type-specific config. The kind is inferred from the variant provided."
+	"The type-specific config. The kind is inferred from the variant provided"
 	config: ScheduledJobConfigInput!
-	"Whether the job is enabled. Defaults to `true`."
+	"Whether the job is enabled. Defaults to `true`"
 	enabled: Boolean
 }
 
@@ -1055,6 +1055,8 @@ type Library {
 	series(take: Int = null, skip: Int = null): [Series!]!
 	seriesAlphabet: JSONObject!
 	stats(allUsers: Boolean): LibraryStats!
+	genres(sort: OrderDirection = null): [String!]!
+	publishers(sort: OrderDirection = null): [String!]!
 	tags: [Tag!]!
 	"""
 	A reference to the thumbnail image for the thumbnail. This will be a fully
@@ -1078,6 +1080,7 @@ type LibraryConfig {
 	defaultLibraryViewMode: LibraryViewMode!
 	hideSeriesView: Boolean!
 	libraryType: LibraryType!
+	skipBookOverview: Boolean!
 	processThumbnailColorsEvenWithoutConfig: Boolean!
 	libraryId: String
 	thumbnailConfig: ImageProcessorOptions
@@ -1095,6 +1098,7 @@ input LibraryConfigInput {
 	libraryType: LibraryType!
 	defaultLibraryViewMode: LibraryViewMode!
 	hideSeriesView: Boolean!
+	skipBookOverview: Boolean!
 	thumbnailConfig: ImageProcessorOptionsInput
 	processThumbnailColorsEvenWithoutConfig: Boolean!
 	defaultReadingDir: ReadingDirection!
@@ -1139,7 +1143,7 @@ enum LibraryPattern {
 }
 
 input LibraryScanConfigInput {
-	"Library IDs to scan. An empty list means \"all libraries\"."
+	"Library IDs to scan. An empty list means \"all libraries\""
 	libraryIds: [String!]!
 }
 
@@ -1765,7 +1769,7 @@ enum MetadataResetImpact {
 }
 
 input MetadataRetryConfigInput {
-	"Which metadata fetch statuses to retry (e.g. RATE_LIMITED, FAILED)."
+	"Which metadata fetch statuses to retry (e.g. RATE_LIMITED, FAILED)"
 	statuses: [MetadataFetchStatus!]!
 }
 
@@ -2001,6 +2005,8 @@ type Mutation {
 	updateEmailer(id: Int!, input: EmailerInput!): Emailer!
 	deleteEmailer(id: Int!): Emailer!
 	sendAttachmentEmail(input: SendAttachmentEmailsInput!): SendAttachmentEmailOutput!
+	"Send a test email to verify the SMTP configuration is working"
+	testEmailer(config: EmailerClientConfig!, recipient: String!): Boolean!
 	createEmailDevice(input: EmailDeviceInput!): RegisteredEmailDevice!
 	updateEmailDevice(id: Int!, input: EmailDeviceInput!): RegisteredEmailDevice!
 	patchEmailDevice(id: Int!, input: PatchEmailDeviceInput!): RegisteredEmailDevice!
@@ -2604,7 +2610,7 @@ type ScheduledJob {
 	lastRunAt: DateTime
 }
 
-"A oneOf input for the schedule config. The variant determines the job kind."
+"A oneOf input for the schedule config"
 input ScheduledJobConfigInput @oneOf {
 	libraryScan: LibraryScanConfigInput
 	metadataRetry: MetadataRetryConfigInput
@@ -3092,6 +3098,8 @@ type StumpConfig {
 	pdfPrerenderRange: Int!
 	"Whether to enable high-quality rendering with smoothing (slower but better quality)."
 	pdfHighQuality: Boolean!
+	"The number of seconds after which a book can be re-completed"
+	bookCompletionDedupTimeoutSecs: Int!
 }
 
 type Subscription {
@@ -3208,7 +3216,7 @@ input UpdateScheduledJobInput {
 	name: String
 	"A cron expression"
 	schedule: String
-	"Replace the config entirely. The kind is inferred from the variant."
+	"Replace the config entirely. The kind is inferred from the variant"
 	config: ScheduledJobConfigInput
 	enabled: Boolean
 }
@@ -3344,6 +3352,8 @@ enum UserPermission {
 	SCAN_LIBRARY
 	"Grant access to manage the library (scan,edit,manage relations)"
 	MANAGE_LIBRARY
+	"Grant access to edit thumbnails for media/series"
+	EDIT_THUMBNAILS
 	"""
 	Grants access to edit any existing metadata for media/series. This will only
 	be applied to the database-level metadata.

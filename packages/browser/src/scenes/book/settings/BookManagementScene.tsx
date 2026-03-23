@@ -1,11 +1,12 @@
 import { useGraphQLMutation, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Alert, AlertDescription, Breadcrumbs, Button, Heading, Text } from '@stump/components'
-import { graphql } from '@stump/graphql'
+import { graphql, UserPermission } from '@stump/graphql'
 import { Construction } from 'lucide-react'
 import { useCallback, useEffect, useMemo } from 'react'
 import { useNavigate, useParams } from 'react-router'
 
 import { SceneContainer } from '@/components/container'
+import { useAppContext } from '@/context'
 import paths from '@/paths'
 
 import BookThumbnailSelector from './BookThumbnailSelector'
@@ -36,6 +37,8 @@ const analyzeMutation = graphql(`
 
 export default function BookManagementScene() {
 	const navigate = useNavigate()
+
+	const { checkPermission } = useAppContext()
 
 	const { sdk } = useSDK()
 	const { id } = useParams()
@@ -103,19 +106,23 @@ export default function BookManagementScene() {
 					</AlertDescription>
 				</Alert>
 
-				<div>
-					<Button
-						title={data ? 'Analysis already in progress' : 'Analyze this book'}
-						size="md"
-						variant="primary"
-						onClick={handleAnalyze}
-						disabled={!!data || isPending}
-					>
-						Analyze Media
-					</Button>
-				</div>
+				{checkPermission(UserPermission.ManageLibrary) && (
+					<div>
+						<Button
+							title={data ? 'Analysis already in progress' : 'Analyze this book'}
+							size="md"
+							variant="primary"
+							onClick={handleAnalyze}
+							disabled={!!data || isPending}
+						>
+							Analyze Media
+						</Button>
+					</div>
+				)}
 
-				<BookThumbnailSelector fragment={book} />
+				{checkPermission(UserPermission.EditThumbnails) && (
+					<BookThumbnailSelector fragment={book} />
+				)}
 			</div>
 		</SceneContainer>
 	)

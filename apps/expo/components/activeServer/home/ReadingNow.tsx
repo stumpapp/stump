@@ -49,6 +49,11 @@ const fragment = graphql(`
 			page
 			percentageCompleted
 			updatedAt
+			locator {
+				locations {
+					position
+				}
+			}
 		}
 	}
 `)
@@ -183,6 +188,8 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 	const { width, isTablet } = useDisplay()
 
 	const percentageCompleted = parseGraphQLDecimal(data.readProgress?.percentageCompleted)
+	const currentPage =
+		data.readProgress?.page ?? data.readProgress?.locator?.locations?.position ?? '??'
 
 	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
 	const imageHeight = IMAGE_WIDTH / thumbnailRatio
@@ -258,7 +265,6 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 	}, [isTablet, width, data])
 
 	const router = useRouter()
-	const isEbookProgress = !!data.readProgress?.epubcfi
 	const { colors: gradientColors, locations: gradientLocations } = easeGradient({
 		colorStops: {
 			0.5: { color: 'transparent' },
@@ -305,44 +311,30 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 
 					<View className="flex items-start gap-2">
 						<View className="flex w-full flex-row items-center justify-between">
-							{!isEbookProgress && !!data.readProgress?.page && data.readProgress.page > 0 && (
-								<Text
-									className="flex-wrap text-base"
-									style={{
-										color: COLORS.dark.foreground.subtle,
-										opacity: 0.9,
-									}}
-								>
-									Page {data.readProgress?.page} of {data.pages}
-								</Text>
-							)}
+							<Text
+								className="flex-wrap text-base"
+								style={{
+									color: COLORS.dark.foreground.subtle,
+									opacity: 0.9,
+								}}
+							>
+								Page {currentPage} of {data.pages}
+							</Text>
 
-							{isEbookProgress && percentageCompleted != null && (
-								<Text
-									className="flex-wrap text-base"
-									style={{
-										color: COLORS.dark.foreground.subtle,
-										opacity: 0.9,
-									}}
-								>
-									{(percentageCompleted * 100).toFixed(0)}%
-								</Text>
-							)}
-
-							{!!data.readProgress?.updatedAt && (
-								<Text
-									className="flex-wrap text-base"
-									style={{
-										color: COLORS.dark.foreground.subtle,
-										opacity: 0.9,
-									}}
-								>
-									{formatDistanceToNow(new Date(data.readProgress?.updatedAt), { addSuffix: true })}
-								</Text>
-							)}
+							<Text
+								className="flex-wrap text-base"
+								style={{
+									color: COLORS.dark.foreground.subtle,
+									opacity: 0.9,
+								}}
+							>
+								{data.readProgress?.updatedAt
+									? formatDistanceToNow(new Date(data.readProgress?.updatedAt), { addSuffix: true })
+									: 'Unknown time ago'}
+							</Text>
 						</View>
 
-						{percentageCompleted && (
+						{percentageCompleted != null && (
 							<Progress
 								className="h-1 bg-[#898d94]"
 								indicatorClassName="bg-[#f5f3ef]"

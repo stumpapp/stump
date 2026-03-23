@@ -1,6 +1,6 @@
 import { useFooterOffsetStore } from '@stump/client'
 import { cn } from '@stump/components'
-import { forwardRef, useEffect, useMemo } from 'react'
+import { forwardRef, Suspense, useEffect, useMemo } from 'react'
 import useScrollbarSize from 'react-scrollbar-size'
 import { useMediaMatch } from 'rooks'
 import { create } from 'zustand'
@@ -73,31 +73,33 @@ const URLFilterContainer = forwardRef<HTMLDivElement, Props>(
 		const scrollbarWidth = enableHideScrollbar ? 0 : adjustedWidth
 
 		return (
-			<div
-				ref={ref}
-				className={cn('flex flex-1 flex-col overflow-x-auto pb-24 md:pb-10', className)}
-				id="urlFilterContainer"
-			>
-				{children}
-
+			<Suspense>
 				<div
-					className="fixed bottom-0 z-50 flex h-12 items-center justify-between border-t border-edge bg-background px-4 md:h-10"
-					data-testid="urlFilterFooter"
-					style={{
-						right: scrollbarWidth,
-						width:
-							isMobile || primaryNavigationMode === 'TOPBAR'
-								? '100%'
-								: `calc(100% - ${SIDEBAR_WIDTH}px - ${scrollbarWidth}px)`,
-					}}
+					ref={ref}
+					className={cn('flex flex-1 flex-col overflow-x-auto pb-24 md:pb-10', className)}
+					id="urlFilterContainer"
 				>
-					<div className="flex shrink-0 items-center gap-x-2">
-						{tableControls}
-						<URLPageSize />
+					{children}
+
+					<div
+						className="fixed bottom-0 z-50 flex h-12 items-center justify-between border-t border-edge bg-background px-4 md:h-10"
+						data-testid="urlFilterFooter"
+						style={{
+							right: scrollbarWidth,
+							width:
+								isMobile || primaryNavigationMode === 'TOPBAR'
+									? '100%'
+									: `calc(100% - ${SIDEBAR_WIDTH}px - ${scrollbarWidth}px)`,
+						}}
+					>
+						<div className="flex shrink-0 items-center gap-x-2">
+							{tableControls}
+							<URLPageSize />
+						</div>
+						<URLPagination {...paginationProps} />
 					</div>
-					<URLPagination {...paginationProps} />
 				</div>
-			</div>
+			</Suspense>
 		)
 	},
 )

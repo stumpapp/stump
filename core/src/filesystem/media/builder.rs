@@ -271,6 +271,7 @@ mod tests {
 			default_library_view_mode: LibraryViewMode::Series,
 			hide_series_view: false,
 			library_type: LibraryType::Mixed,
+			skip_book_overview: false,
 		}
 	}
 }

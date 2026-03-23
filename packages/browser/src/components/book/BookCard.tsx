@@ -46,6 +46,9 @@ export const BookCardFragment = graphql(`
 			completedAt
 		}
 		createdAt
+		libraryConfig {
+			skipBookOverview
+		}
 	}
 `)
 
@@ -111,13 +114,15 @@ const BookCard = memo(function BookCard({
 			return undefined
 		}
 
-		return readingLink
+		const shouldSkipOverview = data.libraryConfig?.skipBookOverview === true
+
+		return readingLink || shouldSkipOverview
 			? paths.bookReader(data.id, {
 					epubcfi: data.readProgress?.epubcfi,
 					page: data.readProgress?.page ?? undefined,
 				})
 			: paths.bookOverview(data.id)
-	}, [readingLink, data.id, onSelect, data.readProgress, paths])
+	}, [readingLink, data.id, onSelect, data.readProgress, data.libraryConfig, paths])
 
 	const isMissing = data.status === 'MISSING'
 	const isEbookProgress = !!data.readProgress?.epubcfi

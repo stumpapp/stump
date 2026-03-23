@@ -1,152 +1,193 @@
-import { useSDK, useSuspenseGraphQL } from '@stump/client'
-import { Heading, Text } from '@stump/components'
-import {
-	BookOverviewHeaderQuery,
-	graphql,
-	MediaFilterInput,
-	MediaMetadataFilterInput,
-} from '@stump/graphql'
+import { Badge, Heading, Link, Statistic, Text } from '@stump/components'
+import { BookCardFragment, BookOverviewSceneQuery, Tag } from '@stump/graphql'
+import { ExternalLink } from 'lucide-react'
+import { Suspense } from 'react'
 
-import SearchLinkBadge from '@/components/SearchLinkBadge'
+import BadgeList from '@/components/BadgeList'
+import ReadMore from '@/components/ReadMore'
 import TagList from '@/components/tags/TagList'
+import paths from '@/paths'
+import { formatBytes } from '@/utils/format'
 
-import paths from '../../paths'
 import BookLibrarySeriesLinks from './BookLibrarySeriesLinks'
 
-export const query = graphql(`
-	query BookOverviewHeader($id: ID!) {
-		mediaById(id: $id) {
-			id
-			resolvedName
-			seriesId
-			extension
-			pages
-			metadata {
-				ageRating
-				genres
-				publisher
-				writers
-				year
-			}
-			tags {
-				id
-				name
-			}
-		}
-	}
-`)
-
 type Props = {
-	id: string
+	media: NonNullable<BookOverviewSceneQuery['mediaById']>
+	book: BookCardFragment
+	completedAt?: string | null
 }
 
-interface MetadataTableItem {
-	keynameBase: string
-	prefix: string
-	values: string[]
-	search?: MediaFilterInput
-}
+export default function BookOverviewSceneHeader({ media, book, completedAt }: Props) {
+	const metadata = media.metadata
+	const tags = media.tags as Tag[] | undefined
+	const pages = media.pages ?? 0
+	const size = media.size ?? 0
 
-function build_metadata_table(media: BookOverviewHeaderQuery['mediaById']): MetadataTableItem[] {
-	const table: MetadataTableItem[] = []
-	const metadata = media?.metadata
+	const hasStats = pages > 0 || size > 0
+	const hasMetadataBadges =
+		metadata?.publisher || metadata?.language || (metadata?.ageRating && metadata.ageRating > 0)
+	const hasGenres = metadata?.genres && metadata.genres.length > 0
+	const hasWriters = metadata?.writers && metadata.writers.length > 0
+	const hasTags = tags && tags.length > 0
+	const hasLinks = metadata?.links && metadata.links.filter((l) => !!l).length > 0
 
-	if (!metadata) {
-		return table
-	}
-
-	const add_to_table = (
-		keynameBase: string,
-		prefix: string,
-		values: string[],
-		search?: MediaMetadataFilterInput,
-	) => {
-		if (values && values.length > 0) {
-			// if all values are empty, don't add the key
-			if (values.every((v) => !v)) {
-				return
-			}
-
-			const searchMedia = search ? { metadata: search } : search
-
-			table.push({
-				keynameBase: keynameBase,
-				prefix: prefix,
-				values: values,
-				search: searchMedia,
-			})
-		}
-	}
-
-	const age_rating_num = metadata.ageRating ?? 0
-	const year_num = metadata.year ?? 0
-	const is_epub = media?.extension === 'epub'
-	const pages = media?.pages ?? 0
-
-	const publishers = [metadata.publisher ?? '']
-	const writers = metadata.writers?.filter((w) => !!w) ?? []
-	const genres = metadata.genres?.filter((g) => !!g) ?? []
-	const age_rating = age_rating_num > 0 ? [age_rating_num.toString()] : []
-	const year = year_num > 0 ? [year_num.toString()] : []
-
-	if (is_epub) {
-		add_to_table('writers', 'By ', writers, {
-			writers: { likeAnyOf: metadata?.writers || '' },
-		})
-	}
-
-	add_to_table('publisher', 'Publisher: ', publishers, {
-		publisher: { contains: metadata?.publisher || '' },
-	})
-	add_to_table('genres', 'Genres: ', genres, {
-		genres: { likeAnyOf: metadata?.genres || '' },
-	})
-	add_to_table('age_rating', 'Age Rating: ', age_rating)
-	add_to_table('year_published', 'Year: ', year, { year: { eq: year_num } })
-
-	if (pages > 0) {
-		add_to_table('pages', 'Pages: ', [pages.toString()])
-	}
-
-	return table
-}
-
-export default function BookOverviewSceneHeader({ id }: Props) {
-	const { sdk } = useSDK()
-	const {
-		data: { mediaById: media },
-	} = useSuspenseGraphQL(query, sdk.cacheKey('bookOverviewHeader', [id]), {
-		id: id || '',
-	})
-
-	if (!media) {
-		throw new Error('Book not found')
-	}
-
-	const metadata_table = build_metadata_table(media)
+	const readProgress = book.readProgress
+	const progressPercent = readProgress?.percentageCompleted
+		? Math.round(readProgress.percentageCompleted * 100)
+		: null
 
 	return (
-		<div className="flex flex-col items-center text-center tablet:items-start tablet:text-left">
-			{<Heading size="sm">{media.resolvedName}</Heading>}
+		<div className="flex w-full flex-col gap-3">
+			<div className="flex flex-wrap items-center gap-3">
+				<Heading size="lg">{media.resolvedName}</Heading>
+				{media.seriesId && (
+					<Suspense>
+						<BookLibrarySeriesLinks seriesId={media.seriesId} />
+					</Suspense>
+				)}
+			</div>
 
-			{!!metadata_table.length && (
-				<div>
-					{metadata_table.map((metadata_row) => (
-						<div key={metadata_row.keynameBase} className="flex flex-row gap-1 space-x-2">
-							<Text>{metadata_row.prefix}</Text>
-							{metadata_row.values.map((element, index) => (
-								<div key={metadata_row.keynameBase + index}>
-									<SearchLinkBadge search={metadata_row.search} text={element} />
-								</div>
-							))}
-						</div>
-					))}
+			{hasStats && (
+				<div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:flex md:flex-wrap md:gap-6">
+					{pages > 0 && <Statistic.Item label="Pages" value={pages} />}
+					{size > 0 && <Statistic.Item label="Size" value={formatBytes(size) ?? '—'} />}
+					{media.extension && (
+						<Statistic.Item label="Format" value={media.extension.toUpperCase()} />
+					)}
+					{metadata?.year && metadata.year > 0 && (
+						<Statistic.Item label="Year" value={metadata.year} />
+					)}
+					{progressPercent != null && progressPercent > 0 && progressPercent < 100 && (
+						<Statistic.Item
+							label="Progress"
+							value={`${progressPercent}%`}
+							suffix={readProgress?.page ? `(p. ${readProgress.page})` : undefined}
+						/>
+					)}
 				</div>
 			)}
 
-			{media.seriesId && <BookLibrarySeriesLinks seriesId={media.seriesId} />}
+			{hasMetadataBadges && (
+				<div className="flex flex-wrap items-center gap-2">
+					{metadata?.publisher && (
+						<Badge variant="default" size="xs" rounded="full">
+							{metadata.publisher}
+						</Badge>
+					)}
+					{metadata?.language && (
+						<Badge variant="default" size="xs" rounded="full">
+							{metadata.language}
+						</Badge>
+					)}
+					{metadata?.ageRating && metadata.ageRating > 0 && (
+						<Badge variant="warning" size="xs" rounded="full">
+							Age {metadata.ageRating}+
+						</Badge>
+					)}
+				</div>
+			)}
 
-			<TagList tags={media.tags || null} baseUrl={paths.bookSearch()} />
+			{completedAt && (
+				<Text size="xs" variant="muted">
+					{(book.readHistory?.length ?? 0) > 1 ? 'Last completed' : 'Completed'} on{' '}
+					{new Intl.DateTimeFormat(undefined, {
+						month: 'long',
+						day: 'numeric',
+						year: 'numeric',
+						hour: 'numeric',
+						minute: '2-digit',
+					}).format(new Date(completedAt))}
+				</Text>
+			)}
+
+			{!!metadata?.summary && (
+				<div className="max-w-3xl">
+					<ReadMore text={metadata.summary} />
+				</div>
+			)}
+
+			{hasGenres && (
+				<div className="flex flex-col gap-1">
+					<Text size="xs" variant="muted">
+						Genres
+					</Text>
+					<BadgeList>
+						{metadata!.genres.map((genre) => (
+							<Link
+								key={genre}
+								to={paths.bookSearchWithFilter({
+									metadata: { genres: { likeAnyOf: [genre] } },
+								})}
+								underline={false}
+							>
+								<Badge variant="secondary" size="xs" rounded="full" className="cursor-pointer">
+									{genre}
+								</Badge>
+							</Link>
+						))}
+					</BadgeList>
+				</div>
+			)}
+
+			{hasWriters && (
+				<div className="flex flex-col gap-1">
+					<Text size="xs" variant="muted">
+						Writers
+					</Text>
+					<BadgeList>
+						{metadata!.writers.map((writer) => (
+							<Link
+								key={writer}
+								to={paths.bookSearchWithFilter({
+									metadata: { writers: { likeAnyOf: [writer] } },
+								})}
+								underline={false}
+							>
+								<Badge variant="secondary" size="xs" rounded="full" className="cursor-pointer">
+									{writer}
+								</Badge>
+							</Link>
+						))}
+					</BadgeList>
+				</div>
+			)}
+
+			{hasTags && (
+				<div className="flex flex-col gap-1">
+					<Text size="xs" variant="muted">
+						Tags
+					</Text>
+					<TagList tags={tags} baseUrl={paths.bookSearch()} />
+				</div>
+			)}
+
+			{hasLinks && (
+				<div className="flex flex-col gap-1">
+					<Text size="xs" variant="muted">
+						Links
+					</Text>
+					<BadgeList>
+						{metadata!.links
+							.filter((l) => !!l)
+							.map((link) => {
+								let label = link.replace(/^(https?:\/\/)?(www\.)?/, '')
+								try {
+									label = new URL(link).hostname
+								} catch {
+									// weird but w/e
+								}
+								return (
+									<Link key={link} href={link} underline={false}>
+										<Badge variant="default" size="xs" rounded="full" className="cursor-pointer">
+											<span>{label}</span>
+											<ExternalLink className="ml-1 h-3 w-3 opacity-90" />
+										</Badge>
+									</Link>
+								)
+							})}
+					</BadgeList>
+				</div>
+			)}
 		</div>
 	)
 }

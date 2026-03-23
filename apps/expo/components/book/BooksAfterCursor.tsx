@@ -7,7 +7,7 @@ import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
 import { useListItemSize } from '~/lib/hooks'
 
 import { useActiveServer } from '../activeServer'
-import { Text } from '../ui'
+import { ListLabel } from '../ui'
 import BookListItem from './BookListItem'
 
 const query = graphql(`
@@ -63,8 +63,8 @@ export function BooksAfterCursor({ cursor }: Props) {
 	if (nodes.length === 0) return null
 
 	return (
-		<View className="gap-3">
-			<Text className="ios:px-4 px-2 text-lg font-semibold text-foreground-muted">Up Next</Text>
+		<View className="-mx-4 gap-3">
+			<ListLabel className="ios:px-8 px-6">Up Next</ListLabel>
 			<FlashList
 				data={nodes}
 				renderItem={({ item }) => <BookListItem book={item} />}

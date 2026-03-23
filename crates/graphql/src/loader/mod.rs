@@ -1,6 +1,7 @@
 pub mod author;
 pub mod favorite;
 pub mod library;
+pub mod library_config;
 pub mod log;
 pub mod media;
 pub mod media_analysis;

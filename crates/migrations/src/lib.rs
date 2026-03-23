@@ -17,6 +17,7 @@ mod m20260118_204601_add_bookmark_created_at;
 mod m20260128_000000_add_library_type;
 mod m20260207_000000_metadata_provider_integration;
 mod m20260220_000000_user_avatar_path;
+mod m20260307_000000_library_skip_book_overview;
 mod m20260311_000000_scheduled_jobs_redesign;
 
 pub struct Migrator;
@@ -42,6 +43,7 @@ impl MigratorTrait for Migrator {
 			Box::new(m20260207_000000_metadata_provider_integration::Migration),
 			Box::new(m20260220_000000_user_avatar_path::Migration),
 			Box::new(m20260311_000000_scheduled_jobs_redesign::Migration),
+			Box::new(m20260307_000000_library_skip_book_overview::Migration),
 		]
 	}
 }

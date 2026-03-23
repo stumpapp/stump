@@ -310,7 +310,7 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 							)}
 						</View>
 
-						{percentageCompleted && (
+						{percentageCompleted != null && (
 							<Progress
 								className="h-1 bg-[#898d94]"
 								indicatorClassName="bg-[#f5f3ef]"

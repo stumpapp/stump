@@ -3,7 +3,7 @@ use async_graphql::{
 };
 
 use models::{
-	entity::{library, library_config, media, media_analysis, series, tag},
+	entity::{library, media, media_analysis, series, tag},
 	shared::{analysis::MediaAnalysisData, image::ImageRef},
 };
 use num_traits::cast::ToPrimitive;
@@ -16,6 +16,7 @@ use crate::{
 	data::{AuthContext, CoreContext, ServiceContext},
 	loader::{
 		favorite::{FavoriteMediaLoaderKey, FavoritesLoader},
+		library_config::{LibraryConfigLoader, LibraryConfigLoaderKey},
 		media_analysis::{MediaAnalysisLoader, PageDimensionLoaderKey},
 		reading_session::{
 			ActiveReadingSessionLoaderKey, FinishedReadingSessionLoaderKey,
@@ -162,24 +163,14 @@ impl Media {
 	}
 
 	async fn library_config(&self, ctx: &Context<'_>) -> Result<LibraryConfig> {
-		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
-
+		let loader = ctx.data::<DataLoader<LibraryConfigLoader>>()?;
 		let series_id = self.model.series_id.clone().ok_or("Series ID not set")?;
-		let model = library_config::Entity::find()
-			.filter(
-				library_config::Column::LibraryId.in_subquery(
-					Query::select()
-						.column(series::Column::LibraryId)
-						.from(series::Entity)
-						.and_where(series::Column::Id.eq(series_id))
-						.to_owned(),
-				),
-			)
-			.one(conn)
-			.await?
-			.ok_or("Library config not found")?;
 
-		Ok(LibraryConfig::from(model))
+		loader
+			.load_one(LibraryConfigLoaderKey { series_id })
+			.await?
+			.map(LibraryConfig::from)
+			.ok_or_else(|| "Library config not found".into())
 	}
 
 	async fn analysis_data(

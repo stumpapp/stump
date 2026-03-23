@@ -159,7 +159,7 @@ export default function DownloadButton({ bookId, serverId, onDownload }: Downloa
 	const label = isCompleted ? 'Downloaded' : isActive ? 'Cancel' : 'Download'
 
 	return (
-		<Animated.View exiting={FadeOut.duration(300)}>
+		<Animated.View exiting={isCompleted ? FadeOut.duration(300) : undefined}>
 			<Button
 				variant="secondary"
 				roundness="full"

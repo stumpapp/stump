@@ -5,6 +5,7 @@ use crate::{
 	object::emailer::Emailer,
 };
 use async_graphql::{Context, Object, Result, SimpleObject};
+use email::EmailerClientConfig;
 use models::{entity::emailer, shared::enums::UserPermission};
 use sea_orm::{prelude::*, Set, TryIntoModel};
 
@@ -94,6 +95,22 @@ impl EmailerMutation {
 			sent_count: result.0,
 			errors: result.1,
 		})
+	}
+
+	/// Send a test email to verify the SMTP configuration is working
+	#[graphql(guard = "PermissionGuard::one(UserPermission::EmailerCreate)")]
+	async fn test_emailer(
+		&self,
+		ctx: &Context<'_>,
+		config: EmailerClientConfig,
+		recipient: String,
+	) -> Result<bool> {
+		let core_ctx = ctx.data::<CoreContext>()?;
+		let templates_dir = core_ctx.config.get_templates_dir();
+
+		sender::send_test_email(config, templates_dir, recipient).await?;
+
+		Ok(true)
 	}
 }
 

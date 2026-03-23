@@ -17,6 +17,7 @@ import { useColors } from '~/lib/constants'
 import { useActiveServer } from '../activeServer'
 import { Button, Input, Text } from '../ui'
 import { HeaderButton } from '../ui/header-button/header-button'
+import { hasLinkRel } from './utils'
 
 type OPDSAuthDialogProps = {
 	isOpen: boolean
@@ -119,7 +120,7 @@ export default function OPDSAuthDialog({ isOpen, authDoc, onClose }: OPDSAuthDia
 	const basicAuth = authDoc?.authentication.find(
 		(auth) => auth.type === 'http://opds-spec.org/auth/basic',
 	)
-	const logoLink = authDoc?.links.find((link) => link.rel === 'logo')
+	const logoLink = authDoc?.links.find((link) => hasLinkRel(link, 'logo'))
 	const logoURL = logoLink?.href
 		? resolveUrl(logoLink.href, sdk?.rootURL ?? activeServer?.url)
 		: undefined
@@ -162,13 +163,11 @@ export default function OPDSAuthDialog({ isOpen, authDoc, onClose }: OPDSAuthDia
 						/>
 					</View>
 				)}
-
 				{loginError && (
 					<View className="squircle mb-2 rounded-xl bg-fill-danger-secondary p-2">
 						<Text className="text-fill-danger">{loginError}</Text>
 					</View>
 				)}
-
 				<Controller
 					control={control}
 					rules={{
@@ -190,7 +189,6 @@ export default function OPDSAuthDialog({ isOpen, authDoc, onClose }: OPDSAuthDia
 					)}
 					name="username"
 				/>
-
 				<Controller
 					control={control}
 					rules={{
@@ -213,7 +211,7 @@ export default function OPDSAuthDialog({ isOpen, authDoc, onClose }: OPDSAuthDia
 					)}
 					name="password"
 				/>
-
+				{/* eslint-disable-next-line react-hooks/refs */}
 				<Button onPress={handleSubmit(onSubmit)} className="mt-4 w-full" variant="brand">
 					<Text>Login</Text>
 				</Button>

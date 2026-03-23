@@ -1,8 +1,7 @@
 use axum::{
 	body::Body,
 	extract::{Path, Request, State},
-	http::header,
-	http::HeaderMap,
+	http::{header, HeaderMap, HeaderValue},
 	middleware::{self, Next},
 	response::{IntoResponse, Json, Response},
 	routing::get,
@@ -115,9 +114,12 @@ async fn library_sync(
 	State(ctx): State<AppState>,
 	Extension(req): Extension<AuthContext>,
 	Path(KoboAPIKey { api_key, .. }): Path<KoboAPIKey>,
-) -> APIResult<Json<Vec<SyncItem>>> {
+	headers: HeaderMap,
+) -> APIResult<impl IntoResponse> {
 	let conn = ctx.conn.as_ref();
 	let user = req.user();
+
+	dbg!(headers.get("x-kobo-synctoken"));
 
 	let items = ModelWithMetadata::find_for_user(&user)
 		.filter(media::Column::Extension.eq("epub"))
@@ -125,7 +127,7 @@ async fn library_sync(
 		.all(conn)
 		.await?;
 
-	let result = items
+	let result: Vec<SyncItem> = items
 		.into_iter()
 		.map(|m| {
 			let book_url = format!(
@@ -137,7 +139,17 @@ async fn library_sync(
 		})
 		.collect();
 
-	Ok(Json(result))
+	let result: Vec<SyncItem> = result.into_iter().take(5).collect();
+
+	let mut response = Json(result).into_response();
+	// response
+	// 	.headers_mut()
+	// 	.insert("x-kobo-sync", HeaderValue::from_static("continue"));
+	// response.headers_mut().insert(
+	// 	"x-kobo-synctoken",
+	// 	HeaderValue::from_static("this is a random value"),
+	// );
+	Ok(response)
 }
 
 async fn book_metadata(

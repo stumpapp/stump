@@ -58,6 +58,29 @@ struct KoboThumbnail {
 
 const BASE_URL: &str = "http://192.168.4.100:25601";
 
+struct SyncResponse {
+	sync_items: Vec<SyncItem>,
+	sync_token: String,
+	should_continue: bool,
+}
+
+impl IntoResponse for SyncResponse {
+	fn into_response(self) -> Response {
+		let mut response = Json(self.sync_items).into_response();
+		if self.should_continue {
+			response
+				.headers_mut()
+				.insert("x-kobo-sync", HeaderValue::from_static("continue"));
+		}
+		if let Ok(header_value) = HeaderValue::from_str(self.sync_token.as_ref()) {
+			response
+				.headers_mut()
+				.insert("x-kobo-synctoken", header_value);
+		}
+		response
+	}
+}
+
 /// Mounts the koreader sync router at `/kobo` (from the parent router).
 /// These endpoints are not documented anywhere, but Komga's reverse-engineered
 /// implementation is a decent place to start.
@@ -141,15 +164,11 @@ async fn library_sync(
 
 	let result: Vec<SyncItem> = result.into_iter().take(5).collect();
 
-	let mut response = Json(result).into_response();
-	// response
-	// 	.headers_mut()
-	// 	.insert("x-kobo-sync", HeaderValue::from_static("continue"));
-	// response.headers_mut().insert(
-	// 	"x-kobo-synctoken",
-	// 	HeaderValue::from_static("this is a random value"),
-	// );
-	Ok(response)
+	Ok(SyncResponse {
+		sync_items: result,
+		should_continue: false,
+		sync_token: "this is a random value".to_string(),
+	})
 }
 
 async fn book_metadata(

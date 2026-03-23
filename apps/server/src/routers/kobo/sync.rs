@@ -1,3 +1,5 @@
+use std::str::Utf8Error;
+
 use axum::{
 	body::Body,
 	extract::{Path, Request, State},
@@ -7,6 +9,7 @@ use axum::{
 	routing::get,
 	Extension, Router,
 };
+use base64::{engine::general_purpose::STANDARD as BASE64, Engine};
 use graphql::data::AuthContext;
 use models::{
 	entity::media::{self, ModelWithMetadata},
@@ -18,12 +21,14 @@ use models::{
 		},
 	},
 };
+use reqwest::header::{InvalidHeaderValue, ToStrError};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use stump_core::filesystem::{
 	image::{GenericImageProcessor, ImageProcessor},
 	ContentType,
 };
+use thiserror::Error;
 use tower_http::services::ServeFile;
 
 use sea_orm::prelude::*;
@@ -60,7 +65,7 @@ const BASE_URL: &str = "http://192.168.4.100:25601";
 
 struct SyncResponse {
 	sync_items: Vec<SyncItem>,
-	sync_token: String,
+	sync_token: SyncToken,
 	should_continue: bool,
 }
 
@@ -72,12 +77,67 @@ impl IntoResponse for SyncResponse {
 				.headers_mut()
 				.insert("x-kobo-sync", HeaderValue::from_static("continue"));
 		}
-		if let Ok(header_value) = HeaderValue::from_str(self.sync_token.as_ref()) {
-			response
-				.headers_mut()
-				.insert("x-kobo-synctoken", header_value);
+
+		match self.sync_token.try_to_header_value() {
+			Ok(sync_token) => {
+				response
+					.headers_mut()
+					.insert("x-kobo-synctoken", sync_token);
+			},
+			Err(e) => tracing::error!(?e, "Failed to produce Kobo sync token"),
 		}
 		response
+	}
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct SyncToken {
+	// allows us to change the structure of the token in the future.
+	version: u64,
+}
+
+#[derive(Error, Debug)]
+enum SyncTokenSerializeError {
+	#[error("Could not serialize JSON: {0}")]
+	JSONError(#[from] serde_json::Error),
+	#[error("Could not encode this token as a header: {0}")]
+	InvalidHeaderError(#[from] InvalidHeaderValue),
+}
+
+#[derive(Error, Debug)]
+enum SyncTokenDeserializeError {
+	#[error("Could not deserialize string from header: {0}")]
+	HeaderToStrError(#[from] ToStrError),
+	#[error("Could not decode UTF-8: {0}")]
+	UTF8Error(#[from] Utf8Error),
+	#[error("Could not decode Base64: {0}")]
+	Base64Error(#[from] base64::DecodeError),
+	#[error("Could not deserialize JSON: {0}")]
+	JSONError(#[from] serde_json::Error),
+}
+
+impl SyncToken {
+	fn try_from_str(s: &str) -> Result<Self, SyncTokenDeserializeError> {
+		let json_bytes = BASE64.decode(s)?;
+		let json = std::str::from_utf8(&json_bytes)?;
+		serde_json::from_str(json).map_err(Into::into)
+	}
+
+	fn try_from_header_value(
+		hv: &HeaderValue,
+	) -> Result<Self, SyncTokenDeserializeError> {
+		let s = hv.to_str()?;
+		Self::try_from_str(s)
+	}
+
+	fn try_to_string(self) -> Result<String, SyncTokenSerializeError> {
+		let json = serde_json::to_string(&self)?;
+		Ok(BASE64.encode(json))
+	}
+
+	fn try_to_header_value(self) -> Result<HeaderValue, SyncTokenSerializeError> {
+		let s = self.try_to_string()?;
+		HeaderValue::from_str(s.as_ref()).map_err(Into::into)
 	}
 }
 
@@ -142,7 +202,15 @@ async fn library_sync(
 	let conn = ctx.conn.as_ref();
 	let user = req.user();
 
-	dbg!(headers.get("x-kobo-synctoken"));
+	let orig_sync_token = headers.get("x-kobo-synctoken").and_then(|h| {
+		match SyncToken::try_from_header_value(h) {
+			Ok(sync_token) => Some(sync_token),
+			Err(e) => {
+				tracing::error!(?e, "Failed to produce Kobo sync token");
+				None
+			},
+		}
+	});
 
 	let items = ModelWithMetadata::find_for_user(&user)
 		.filter(media::Column::Extension.eq("epub"))
@@ -167,7 +235,7 @@ async fn library_sync(
 	Ok(SyncResponse {
 		sync_items: result,
 		should_continue: false,
-		sync_token: "this is a random value".to_string(),
+		sync_token: SyncToken { version: 1 },
 	})
 }
 

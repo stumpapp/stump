@@ -15,7 +15,7 @@ use sea_orm::{prelude::*, sea_query::Query};
 use stump_core::filesystem::{
 	image::{
 		place_thumbnail, remove_thumbnails, PlaceholderGenerationJobConfig,
-		PlaceholderGenerationJobScope, ThumbnailGenerationJobParams,
+		PlaceholderGenerationJobScope,
 	},
 	ContentType,
 };

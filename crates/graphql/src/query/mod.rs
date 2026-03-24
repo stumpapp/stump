@@ -71,6 +71,7 @@ struct BookClubQueries(
 
 #[derive(async_graphql::MergedObject, Default)]
 struct ContentQueries(
+	AuthorQuery,
 	MediaQuery,
 	LibraryQuery,
 	SeriesQuery,

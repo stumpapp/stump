@@ -13,20 +13,3 @@ where
 		_ => Err(serde::de::Error::custom("expected string or number")),
 	}
 }
-
-/// Optional version of [`string_or_number`]
-pub fn option_string_or_number<'de, D>(
-	deserializer: D,
-) -> Result<Option<String>, D::Error>
-where
-	D: Deserializer<'de>,
-{
-	let value: Option<serde_json::Value> = Option::deserialize(deserializer)?;
-	match value {
-		None => Ok(None),
-		Some(serde_json::Value::Null) => Ok(None),
-		Some(serde_json::Value::String(s)) => Ok(Some(s)),
-		Some(serde_json::Value::Number(n)) => Ok(Some(n.to_string())),
-		_ => Err(serde::de::Error::custom("expected string, number, or null")),
-	}
-}

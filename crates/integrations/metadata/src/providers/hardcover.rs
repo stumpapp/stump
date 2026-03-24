@@ -481,11 +481,6 @@ pub type SeriesHit = Hit<SeriesDocument>;
 pub struct BookDocument {
 	#[serde(deserialize_with = "string_or_number")]
 	pub id: String,
-	pub title: Option<String>,
-	pub description: Option<String>,
-	#[serde(default)]
-	pub author_names: Vec<String>,
-	pub release_year: Option<i32>,
 }
 
 /// Document returned from series search
@@ -494,16 +489,12 @@ pub struct BookDocument {
 pub struct SeriesDocument {
 	#[serde(deserialize_with = "string_or_number")]
 	pub id: String,
-	pub name: Option<String>,
-	pub author_name: Option<String>,
 }
 
+// TODO(author-entity): collect id of author eventually
 #[derive(Debug, Deserialize)]
 pub struct AuthorRef {
-	// #[serde(default, deserialize_with = "option_string_or_number")]
-	// pub id: Option<String>,
 	pub name: Option<String>,
-	// pub slug: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]

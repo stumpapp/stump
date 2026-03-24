@@ -3,8 +3,6 @@ import React, { createContext, useCallback, useContext } from 'react'
 
 import { BINDING_TO_METADATA_FIELD } from '../fieldDefs'
 
-export { BINDING_TO_METADATA_FIELD }
-
 export enum MetadataEditorState {
 	Display,
 	Editing,

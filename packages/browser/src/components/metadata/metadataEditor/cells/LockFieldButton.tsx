@@ -1,7 +1,8 @@
 import { cn } from '@stump/components'
 import { Lock, LockOpen } from 'lucide-react'
 
-import { BINDING_TO_METADATA_FIELD, useMetadataEditorContext } from '../context'
+import { BINDING_TO_METADATA_FIELD } from '../../fieldDefs'
+import { useMetadataEditorContext } from '../context'
 
 type Props = {
 	binding: string

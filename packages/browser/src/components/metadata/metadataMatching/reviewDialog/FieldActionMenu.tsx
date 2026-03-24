@@ -23,6 +23,7 @@ type Props = {
 	onEditManually: () => void
 }
 
+// TODO: dont show merge lists option unless arr
 export function FieldActionMenu({ field, disabled, onEditManually }: Props) {
 	const { t } = useLocaleContext()
 	const { fieldOverrides, setFieldOverride, clearFieldOverride, getLockedFields } =

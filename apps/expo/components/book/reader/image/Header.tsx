@@ -9,12 +9,12 @@ import { initialWindowMetrics, useSafeAreaInsets } from 'react-native-safe-area-
 import { Heading } from '~/components/ui'
 import { HeaderButton } from '~/components/ui/header-button/header-button'
 import { COLORS } from '~/lib/constants'
-import { CONTROLS_TIMING_CONFIG } from '~/lib/constants'
 import { useDisplay } from '~/lib/hooks'
 import { useReaderStore } from '~/stores'
 import { useBookPreferences } from '~/stores/reader'
 
 import { PagedActionMenu } from '../shared/paged-action-menu/PagedActionMenu'
+import { TIMING_CONFIG } from '../shared/readerAnimations'
 import { useImageBasedReader } from './context'
 
 type Props = {
@@ -41,7 +41,7 @@ export default function Header({ onShowGlobalSettings }: Props) {
 		// 	duration: 250,
 		// 	easing: visible ? Easing.out(Easing.quad) : Easing.in(Easing.quad),
 		// })
-		opacity.value = withTiming(visible ? 1 : 0, CONTROLS_TIMING_CONFIG)
+		opacity.value = withTiming(visible ? 1 : 0, TIMING_CONFIG)
 	}, [visible, height, insets.top, opacity])
 
 	const animatedStyles = useAnimatedStyle(() => {

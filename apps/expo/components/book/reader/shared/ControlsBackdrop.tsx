@@ -4,9 +4,10 @@ import { easeGradient } from 'react-native-easing-gradient'
 import LinearGradient from 'react-native-linear-gradient'
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
 
-import { CONTROLS_TIMING_CONFIG } from '~/lib/constants'
 import { cn } from '~/lib/utils'
 import { useReaderStore } from '~/stores'
+
+import { TIMING_CONFIG } from './readerAnimations'
 
 export default function ControlsBackdrop() {
 	const controls = useReaderStore((state) => ({
@@ -16,7 +17,7 @@ export default function ControlsBackdrop() {
 
 	const animatedOpacity = useSharedValue(controls.isVisible ? 1 : 0)
 	useEffect(() => {
-		animatedOpacity.value = withTiming(controls.isVisible ? 1 : 0, CONTROLS_TIMING_CONFIG)
+		animatedOpacity.value = withTiming(controls.isVisible ? 1 : 0, TIMING_CONFIG)
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [controls.isVisible])
 

@@ -38,6 +38,7 @@ type MobilePreferencesStore = {
 	bookClubsEnabled: boolean
 	// Note: Will push more analytics to aide in debug efforts
 	enableDebugAnalytics: boolean
+	preferMinimalReader: boolean
 	/**
 	 * Patch the store with new values.
 	 */
@@ -73,6 +74,7 @@ export const usePreferencesStore = create<MobilePreferencesStore>()(
 			smartListLayout: 'grid',
 			bookClubsEnabled: false,
 			enableDebugAnalytics: false,
+			preferMinimalReader: false,
 			patch: (data) => set(data),
 		}),
 		{

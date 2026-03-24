@@ -82,9 +82,8 @@ export default function BookmarkButton({ color }: Props) {
 					className="h-6 w-6"
 					style={{
 						opacity: isLoading ? 0.4 : pressed ? 0.7 : 0.9,
-						// @ts-expect-error: Color definitely works
-						color,
 					}}
+					color={color}
 				/>
 			)}
 		</Pressable>

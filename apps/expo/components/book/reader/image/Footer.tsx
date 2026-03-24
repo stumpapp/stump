@@ -16,12 +16,12 @@ import TImage from 'react-native-turbo-image'
 
 import { getThumbnailResizeProps, TurboImage } from '~/components/image'
 import { Progress, Text } from '~/components/ui'
-import { CONTROLS_TIMING_CONFIG } from '~/lib/constants'
 import { useDisplay, usePrevious } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 import { usePreferencesStore, useReaderStore } from '~/stores'
 import { useBookPreferences, useBookReadTime } from '~/stores/reader'
 
+import { TIMING_CONFIG } from '../shared/readerAnimations'
 import { useImageBasedReader } from './context'
 
 const SIZE_MODIFIER = 1.5
@@ -75,9 +75,9 @@ export default function Footer() {
 	const translateY = useSharedValue(visible ? 0 : 50)
 	useEffect(
 		() => {
-			opacity.value = withTiming(visible ? 1 : 0, CONTROLS_TIMING_CONFIG)
+			opacity.value = withTiming(visible ? 1 : 0, TIMING_CONFIG)
 			translateY.value = withTiming(visible ? 0 : 50, {
-				...CONTROLS_TIMING_CONFIG,
+				...TIMING_CONFIG,
 				easing: visible
 					? Easing.out(Easing.quad) // slow near the start
 					: Easing.in(Easing.quad), // slow near the end

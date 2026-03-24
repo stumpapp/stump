@@ -94,6 +94,9 @@ impl IntoResponse for SyncResponse {
 struct SyncToken {
 	// allows us to change the structure of the token in the future.
 	version: u64,
+
+	offset: u64,
+	count: usize,
 }
 
 #[derive(Error, Debug)]
@@ -202,7 +205,7 @@ async fn library_sync(
 	let conn = ctx.conn.as_ref();
 	let user = req.user();
 
-	let orig_sync_token = headers.get("x-kobo-synctoken").and_then(|h| {
+	let prev_sync_token = headers.get("x-kobo-synctoken").and_then(|h| {
 		match SyncToken::try_from_header_value(h) {
 			Ok(sync_token) => Some(sync_token),
 			Err(e) => {
@@ -211,6 +214,30 @@ async fn library_sync(
 			},
 		}
 	});
+
+	// prev_sync = KoboSync.find_by_sync_token(prev_sync_token)
+	//
+	// # the last page in the sync was acknowledged, or it has been too long since it was sent.
+	// previous_sync_completed = prev_sync.mark_page_acknowledged(prev_sync_token)
+	//
+	// if prev_sync is None or previous_sync_completed:
+	//    # begin a new sync
+	//    # compute the items that should be included in this sync
+	//    # TODO: include x-kobo-deviceid, x-kobo-devicemodel, x-kobo-deviceos
+	//    # (really any x-kobo header)
+	//    sync = KoboSync.new(prev_sync: prev_sync)
+	//    sync_page = sync.get_page(0, SYNC_LIMIT)
+	// else:
+	//    # return the next page of this sync
+	//    sync = prev_sync
+	//    sync_page = sync.get_next_page(SYNC_LIMIT)
+	//
+	// sync_token = sync_page.sync_token
+	// sync_items = sync_page.get_sync_items
+	//
+	// TODO: delete any KoboSyncs prior to the prev_sync for this x-kobo-deviceid
+	//
+	// TODO: how does this interact with the proxy? especially pagination
 
 	let items = ModelWithMetadata::find_for_user(&user)
 		.filter(media::Column::Extension.eq("epub"))
@@ -231,11 +258,16 @@ async fn library_sync(
 		.collect();
 
 	let result: Vec<SyncItem> = result.into_iter().take(5).collect();
+	let count = result.len();
 
 	Ok(SyncResponse {
 		sync_items: result,
 		should_continue: false,
-		sync_token: SyncToken { version: 1 },
+		sync_token: SyncToken {
+			version: 1,
+			offset: 0,
+			count: count,
+		},
 	})
 }
 

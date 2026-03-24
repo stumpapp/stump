@@ -3,7 +3,8 @@ use models::shared::enums::MetadataFetchStatus;
 use serde::Serialize;
 
 /// A oneOf input for the schedule config
-#[derive(OneofObject)]
+#[derive(OneofObject, Serialize)]
+#[serde(tag = "config_type")]
 pub enum ScheduledJobConfigInput {
 	LibraryScan(LibraryScanConfigInput),
 	MetadataRetry(MetadataRetryConfigInput),

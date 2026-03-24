@@ -24,15 +24,6 @@ fn kind_from_config(config: &ScheduledJobConfigInput) -> ScheduledJobKind {
 	}
 }
 
-fn config_to_json(
-	config: &ScheduledJobConfigInput,
-) -> Result<serde_json::Value, serde_json::Error> {
-	match config {
-		ScheduledJobConfigInput::LibraryScan(c) => serde_json::to_value(c),
-		ScheduledJobConfigInput::MetadataRetry(c) => serde_json::to_value(c),
-	}
-}
-
 #[Object]
 impl ScheduledJobConfigMutation {
 	#[graphql(guard = "PermissionGuard::one(UserPermission::ManageServer)")]
@@ -46,7 +37,7 @@ impl ScheduledJobConfigMutation {
 		validate_create_input(&input).map_err(async_graphql::Error::new)?;
 
 		let kind = kind_from_config(&input.config);
-		let config_json = config_to_json(&input.config)?;
+		let config_json = serde_json::to_value(&input.config)?;
 
 		let model = scheduled_job::ActiveModel {
 			name: Set(input.name),
@@ -89,7 +80,7 @@ impl ScheduledJobConfigMutation {
 
 		if let Some(ref config) = input.config {
 			let kind = kind_from_config(config);
-			let config_json = config_to_json(config)?;
+			let config_json = serde_json::to_value(config)?;
 			active.kind = Set(kind);
 			active.config = Set(Some(config_json));
 		}

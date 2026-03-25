@@ -266,6 +266,26 @@ async fn initialization(
 	}]))
 }
 
+fn device_metadata(headers: &HeaderMap) -> serde_json::Map<String, serde_json::Value> {
+	let mut result = Map::new();
+	for (key, val) in headers.iter() {
+		let key = key.to_string();
+
+		if !key.starts_with("x-kobo-") || key == "x-kobo-synctoken" {
+			continue;
+		}
+
+		let val = match val.to_str() {
+			Ok(v) => v.to_string(),
+			Err(_) => continue,
+		};
+
+		result.insert(key, serde_json::Value::String(val));
+	}
+
+	result
+}
+
 async fn library_sync(
 	State(ctx): State<AppState>,
 	Extension(req): Extension<AuthContext>,
@@ -290,21 +310,7 @@ async fn library_sync(
 		tracing::error!("Client did not pass a valid x-kobo-deviceid");
 	}
 
-	let mut device_metadata = Map::new();
-	for (key, val) in headers.iter() {
-		let key = key.to_string();
-
-		if !key.starts_with("x-kobo-") || key == "x-kobo-synctoken" {
-			continue;
-		}
-
-		let val = match val.to_str() {
-			Ok(v) => v.to_string(),
-			Err(_) => continue,
-		};
-
-		device_metadata.insert(key, serde_json::Value::String(val));
-	}
+	let device_metadata = device_metadata(&headers);
 
 	let prev_sync = match prev_sync_token {
 		Some(t) => KoboSync::find(&conn, &user, t.sync_id).await,

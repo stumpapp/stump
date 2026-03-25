@@ -241,6 +241,13 @@ impl ModelWithMetadata {
 		let select = apply_library_hidden_filter(select, user);
 		apply_age_restriction_filter(select, user.age_restriction.clone())
 	}
+
+	pub fn find_by_ids_for_user(ids: Vec<String>, user: &AuthUser) -> Select<Entity> {
+		let select = ModelWithMetadata::find().filter(Column::Id.is_in(ids));
+		let select = apply_series_metadata_join(select);
+		let select = apply_library_hidden_filter(select, user);
+		apply_age_restriction_filter(select, user.age_restriction.clone())
+	}
 }
 
 #[derive(Debug, FromQueryResult)]

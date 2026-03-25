@@ -12,7 +12,11 @@ use axum::{
 use base64::{engine::general_purpose::STANDARD as BASE64, Engine};
 use graphql::data::AuthContext;
 use models::{
-	entity::media::{self, ModelWithMetadata},
+	entity::{
+		kobo_sync,
+		media::{self, ModelWithMetadata},
+		user::AuthUser,
+	},
 	shared::{
 		enums::UserPermission,
 		image_processor_options::{
@@ -22,8 +26,9 @@ use models::{
 	},
 };
 use reqwest::header::{InvalidHeaderValue, ToStrError};
+use sea_orm::Set;
 use serde::{Deserialize, Serialize};
-use serde_json::json;
+use serde_json::{json, Map};
 use stump_core::filesystem::{
 	image::{GenericImageProcessor, ImageProcessor},
 	ContentType,
@@ -95,6 +100,7 @@ struct SyncToken {
 	// allows us to change the structure of the token in the future.
 	version: u64,
 
+	sync_id: String,
 	offset: u64,
 	count: usize,
 }
@@ -141,6 +147,70 @@ impl SyncToken {
 	fn try_to_header_value(self) -> Result<HeaderValue, SyncTokenSerializeError> {
 		let s = self.try_to_string()?;
 		HeaderValue::from_str(s.as_ref()).map_err(Into::into)
+	}
+}
+
+struct KoboSync {
+	model: kobo_sync::Model,
+}
+
+impl KoboSync {
+	async fn find(db: &DatabaseConnection, user: &AuthUser, id: String) -> Option<Self> {
+		kobo_sync::Entity::find_by_id(id)
+			.one(db)
+			.await
+			.ok()?
+			.and_then(|m| {
+				if m.user_id != user.id {
+					tracing::warn!("Attempted to use another user's Kobo sync token");
+					None
+				} else {
+					Some(KoboSync { model: m })
+				}
+			})
+	}
+
+	async fn begin_new_sync(
+		db: &DatabaseConnection,
+		user: &AuthUser,
+		device_id: Option<&str>,
+		device_metadata: serde_json::Value,
+		previous_sync_at: Option<DateTimeWithTimeZone>,
+	) -> Result<Self, sea_orm::DbErr> {
+		let query = match previous_sync_at {
+			Some(previous_sync_at) => media::Entity::find_for_user(&user)
+				.filter(media::Column::Extension.eq("epub"))
+				.filter(media::Column::CreatedAt.gte(previous_sync_at)),
+			None => media::Entity::find_for_user(&user)
+				.filter(media::Column::Extension.eq("epub")),
+		};
+
+		// TODO: add modified (and deleted?) media
+		// TODO: avoid copies & retrieving unused column "path"
+		// https://www.sea-ql.org/SeaORM/docs/1.1.x/advanced-query/custom-select/#unstructured-tuple
+
+		let new_media = query
+			.into_model::<media::MediaIdentSelect>()
+			.all(db)
+			.await?;
+
+		tracing::debug!(
+			?previous_sync_at,
+			new_media_count = new_media.len(),
+			"Beginning new Kobo sync"
+		);
+
+		let sync = kobo_sync::ActiveModel {
+			user_id: Set(user.id.clone()),
+			media_ids: Set(kobo_sync::MediaIds(
+				new_media.iter().map(|m| m.id.clone()).collect(),
+			)),
+			device_id: Set(device_id.unwrap_or("").to_string()),
+			device_metadata: Set(device_metadata),
+			..Default::default()
+		};
+		let sync = sync.insert(db).await?;
+		Ok(Self { model: sync })
 	}
 }
 
@@ -209,11 +279,46 @@ async fn library_sync(
 		match SyncToken::try_from_header_value(h) {
 			Ok(sync_token) => Some(sync_token),
 			Err(e) => {
-				tracing::error!(?e, "Failed to produce Kobo sync token");
+				tracing::error!(?e, "Could not load client's Kobo sync token");
 				None
 			},
 		}
 	});
+
+	let device_id = headers.get("x-kobo-deviceid").and_then(|h| h.to_str().ok());
+	if device_id.is_none() {
+		tracing::error!("Client did not pass a valid x-kobo-deviceid");
+	}
+
+	let mut device_metadata = Map::new();
+	for (key, val) in headers.iter() {
+		let key = key.to_string();
+
+		if !key.starts_with("x-kobo-") || key == "x-kobo-synctoken" {
+			continue;
+		}
+
+		let val = match val.to_str() {
+			Ok(v) => v.to_string(),
+			Err(_) => continue,
+		};
+
+		device_metadata.insert(key, serde_json::Value::String(val));
+	}
+
+	let prev_sync = match prev_sync_token {
+		Some(t) => KoboSync::find(&conn, &user, t.sync_id).await,
+		None => None,
+	};
+
+	let sync = KoboSync::begin_new_sync(
+		&conn,
+		&user,
+		device_id,
+		serde_json::Value::Object(device_metadata),
+		prev_sync.map(|s| s.model.created_at.fixed_offset()),
+	)
+	.await?;
 
 	// prev_sync = KoboSync.find_by_sync_token(prev_sync_token)
 	//
@@ -238,8 +343,10 @@ async fn library_sync(
 	// TODO: delete any KoboSyncs prior to the prev_sync for this x-kobo-deviceid
 	//
 	// TODO: how does this interact with the proxy? especially pagination
+	// Komga proxies once its own material has been synced.
 
-	let items = ModelWithMetadata::find_for_user(&user)
+	let media_ids = sync.model.media_ids;
+	let items = ModelWithMetadata::find_by_ids_for_user(media_ids.0, &user)
 		.filter(media::Column::Extension.eq("epub"))
 		.into_model::<media::ModelWithMetadata>()
 		.all(conn)
@@ -257,13 +364,13 @@ async fn library_sync(
 		})
 		.collect();
 
-	let result: Vec<SyncItem> = result.into_iter().take(5).collect();
 	let count = result.len();
 
 	Ok(SyncResponse {
 		sync_items: result,
 		should_continue: false,
 		sync_token: SyncToken {
+			sync_id: sync.model.id,
 			version: 1,
 			offset: 0,
 			count: count,

@@ -211,7 +211,7 @@
 		},
 		"scheduling/scheduler": {
 			"title": "Scheduler",
-			"description": "Create and manage the scheduled readings for this book club"
+			"description": ""
 		},
 		"scheduling/options": {
 			"title": "Options",
@@ -224,7 +224,7 @@
 				"deleteClub": {
 					"heading": "Delete club",
 					"description": [
-						"Permanently delete this book club and all its contents.",
+						"Verwijder permanent deze boekenclub en alle inhoud ervan.",
 						"This action cannot be undone"
 					],
 					"trigger": "Delete club"

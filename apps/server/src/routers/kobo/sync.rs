@@ -66,7 +66,13 @@ struct KoboThumbnail {
 	is_greyscale: Option<String>,
 }
 
+// TODO
 const BASE_URL: &str = "http://192.168.4.100:25601";
+
+// how many items should we send in each page of a sync response?
+// this is a maximum; in some cases we may return fewer items in a page.
+// TODO: select a value, or make this configurable.
+const ITEMS_PER_PAGE: usize = 5;
 
 struct SyncResponse {
 	sync_items: Vec<SyncItem>,
@@ -100,9 +106,17 @@ struct SyncToken {
 	// allows us to change the structure of the token in the future.
 	version: u64,
 
+	// the ID of the database KoboSync
 	sync_id: String,
-	offset: u64,
-	count: usize,
+
+	// has the client retrieved all the data that was available in this session?
+	// tracking this explicitly should make it easier to support paging through proxied Kobo Store
+	// responses.
+	completed: bool,
+
+	// the offset of the next page that should be sent to the client.
+	// this is not meaningful if complete is true.
+	next_offset: usize,
 }
 
 #[derive(Error, Debug)]
@@ -212,6 +226,17 @@ impl KoboSync {
 		let sync = sync.insert(db).await?;
 		Ok(Self { model: sync })
 	}
+
+	fn next_page(&self, offset: usize) -> (Vec<String>, usize, bool) {
+		let len = self.model.media_ids.0.len();
+		let start = offset.min(len);
+		let next_offset = (offset + ITEMS_PER_PAGE).min(len);
+		(
+			self.model.media_ids.0[start..next_offset].to_vec(),
+			next_offset,
+			next_offset < self.model.media_ids.0.len(),
+		)
+	}
 }
 
 /// Mounts the koreader sync router at `/kobo` (from the parent router).
@@ -295,7 +320,7 @@ async fn library_sync(
 	let conn = ctx.conn.as_ref();
 	let user = req.user();
 
-	let prev_sync_token = headers.get("x-kobo-synctoken").and_then(|h| {
+	let client_sync_token = headers.get("x-kobo-synctoken").and_then(|h| {
 		match SyncToken::try_from_header_value(h) {
 			Ok(sync_token) => Some(sync_token),
 			Err(e) => {
@@ -312,24 +337,38 @@ async fn library_sync(
 
 	let device_metadata = device_metadata(&headers);
 
-	let prev_sync = match prev_sync_token {
-		Some(t) => KoboSync::find(&conn, &user, t.sync_id).await,
+	let prev_sync = match client_sync_token {
+		Some(ref t) => KoboSync::find(&conn, &user, t.sync_id.clone()).await,
 		None => None,
 	};
 
-	let sync = KoboSync::begin_new_sync(
-		&conn,
-		&user,
-		device_id,
-		serde_json::Value::Object(device_metadata),
-		prev_sync.map(|s| s.model.created_at.fixed_offset()),
-	)
-	.await?;
+	let previous_sync_began_at = prev_sync
+		.as_ref()
+		.map(|s| s.model.created_at.fixed_offset());
 
-	// prev_sync = KoboSync.find_by_sync_token(prev_sync_token)
+	let sync = match (
+		prev_sync,
+		client_sync_token.as_ref().map_or(true, |t| t.completed),
+	) {
+		// we're continuing an existing sync session
+		(Some(prev_sync), false) => prev_sync,
+		// there was no previous sync session, or the previous session completed
+		(_, _) => {
+			KoboSync::begin_new_sync(
+				&conn,
+				&user,
+				device_id,
+				serde_json::Value::Object(device_metadata),
+				previous_sync_began_at,
+			)
+			.await?
+		},
+	};
+
+	// prev_sync = KoboSync.find_by_sync_token(client_sync_token)
 	//
 	// # the last page in the sync was acknowledged, or it has been too long since it was sent.
-	// previous_sync_completed = prev_sync.mark_page_acknowledged(prev_sync_token)
+	// previous_sync_completed = prev_sync.mark_page_acknowledged(client_sync_token)
 	//
 	// if prev_sync is None or previous_sync_completed:
 	//    # begin a new sync
@@ -351,8 +390,11 @@ async fn library_sync(
 	// TODO: how does this interact with the proxy? especially pagination
 	// Komga proxies once its own material has been synced.
 
-	let media_ids = sync.model.media_ids;
-	let items = ModelWithMetadata::find_by_ids_for_user(media_ids.0, &user)
+	let start_offset = client_sync_token.map_or(0, |t| t.next_offset);
+
+	let (media_ids, next_offset, should_continue) = sync.next_page(start_offset);
+
+	let items = ModelWithMetadata::find_by_ids_for_user(media_ids, &user)
 		.filter(media::Column::Extension.eq("epub"))
 		.into_model::<media::ModelWithMetadata>()
 		.all(conn)
@@ -370,16 +412,14 @@ async fn library_sync(
 		})
 		.collect();
 
-	let count = result.len();
-
 	Ok(SyncResponse {
 		sync_items: result,
-		should_continue: false,
+		should_continue: should_continue,
 		sync_token: SyncToken {
-			sync_id: sync.model.id,
 			version: 1,
-			offset: 0,
-			count: count,
+			sync_id: sync.model.id,
+			completed: !should_continue,
+			next_offset: next_offset,
 		},
 	})
 }

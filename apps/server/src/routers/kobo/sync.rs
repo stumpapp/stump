@@ -264,16 +264,37 @@ impl KoboSync {
 		}
 	}
 
-	fn page_at(&self, offset: usize) -> (Vec<String>, usize, bool) {
+	fn page_at(&self, offset: usize, limit: usize) -> SyncPage {
 		let len = self.model.media_ids.0.len();
 		let start = offset.min(len);
-		let next_offset = (offset + ITEMS_PER_PAGE).min(len);
-		(
-			self.model.media_ids.0[start..next_offset].to_vec(),
-			next_offset,
-			next_offset < self.model.media_ids.0.len(),
-		)
+		let next_offset = (offset + limit).min(len);
+
+		let should_continue = next_offset < self.model.media_ids.0.len();
+
+		SyncPage {
+			media_ids: self.model.media_ids.0[start..next_offset].to_vec(),
+			should_continue: should_continue,
+
+			sync_token: SyncToken {
+				version: 1,
+				sync_id: self.model.id.clone(),
+				completed: !should_continue,
+				next_offset: next_offset,
+			},
+		}
 	}
+}
+
+struct SyncPage {
+	// IDs of database "media" that should be returned in this page.
+	media_ids: Vec<String>,
+
+	// are there more pages to retrieve in this sync session?
+	should_continue: bool,
+
+	// a token representing the state of the current sync session.
+	// this will be returned to the client, and the client will use it in its next sync request.
+	sync_token: SyncToken,
 }
 
 /// Mounts the koreader sync router at `/kobo` (from the parent router).
@@ -409,10 +430,9 @@ async fn library_sync(
 	// Komga proxies once its own material has been synced.
 
 	let start_offset = client_sync_token.map_or(0, |t| t.next_offset);
+	let sync_page = sync_session.page_at(start_offset, ITEMS_PER_PAGE);
 
-	let (media_ids, next_offset, should_continue) = sync_session.page_at(start_offset);
-
-	let items = ModelWithMetadata::find_by_ids_for_user(media_ids, &user)
+	let items = ModelWithMetadata::find_by_ids_for_user(sync_page.media_ids, &user)
 		.filter(media::Column::Extension.eq("epub"))
 		.into_model::<media::ModelWithMetadata>()
 		.all(conn)
@@ -432,13 +452,8 @@ async fn library_sync(
 
 	Ok(SyncResponse {
 		sync_items: sync_items,
-		should_continue: should_continue,
-		sync_token: SyncToken {
-			version: 1,
-			sync_id: sync_session.model.id,
-			completed: !should_continue,
-			next_offset: next_offset,
-		},
+		should_continue: sync_page.should_continue,
+		sync_token: sync_page.sync_token,
 	})
 }
 
@@ -551,7 +566,6 @@ async fn book_download(
 
 #[cfg(test)]
 mod tests {
-
 	use models::{
 		entity::{
 			kobo_sync, library, library_exclusion, media, media_metadata, series,
@@ -567,8 +581,19 @@ mod tests {
 
 	use crate::routers::kobo::sync::KoboSync;
 
-	async fn setup_schema(db: &DbConn) -> Result<(), DbErr> {
-		// Setup Schema helper
+	async fn test_database() -> DbConn {
+		let db = Database::connect("sqlite::memory:")
+			.await
+			.expect("failed to connect to test database");
+
+		create_database_tables(&db)
+			.await
+			.expect("failed to create test database tables");
+
+		db
+	}
+
+	async fn create_database_tables(db: &DbConn) -> Result<(), DbErr> {
 		let schema = Schema::new(DbBackend::Sqlite);
 
 		let tables = [
@@ -584,7 +609,6 @@ mod tests {
 		];
 
 		for stmt in tables {
-			// Execute create table statement
 			db.execute(db.get_database_backend().build(&stmt)).await?;
 		}
 
@@ -684,14 +708,7 @@ mod tests {
 
 	#[tokio::test]
 	async fn test_first_sync() {
-		let db = Database::connect("sqlite::memory:")
-			.await
-			.expect("failed to connect to test database");
-
-		// Setup database schema
-		setup_schema(&db)
-			.await
-			.expect("failed to create test database tables");
+		let db = test_database().await;
 
 		let user = ExampleUser {}.insert(&db).await;
 		let series = ExampleSeries {}.insert(&db).await;
@@ -751,5 +768,48 @@ mod tests {
 		);
 
 		// TODO: test ignoring non-epubs
+	}
+
+	#[tokio::test]
+	async fn test_pagination() {
+		let db = test_database().await;
+
+		let user = ExampleUser {}.insert(&db).await;
+		let series = ExampleSeries {}.insert(&db).await;
+
+		for i in 1..=5 {
+			ExampleMedia {
+				series_id: series.id.clone(),
+				id: Some(format!("book-{i}")),
+				..Default::default()
+			}
+			.insert(&db)
+			.await;
+		}
+
+		let user = user::AuthUser {
+			id: user.id,
+			permissions: vec![UserPermission::AccessBookClub],
+			..Default::default()
+		};
+		let sync = KoboSync::continue_or_create(
+			&db,
+			&user,
+			Some("kobo-1"),
+			serde_json::json!({}),
+			None,
+		)
+		.await
+		.expect("failed to initiate sync");
+
+		let sync_page = sync.page_at(0, 3);
+
+		assert_eq!(vec!["book-1", "book-2", "book-3"], sync_page.media_ids);
+		assert_eq!(3, sync_page.sync_token.next_offset);
+		assert_eq!(true, sync_page.should_continue);
+
+		let sync_page = sync.page_at(sync_page.sync_token.next_offset, 5);
+		assert_eq!(vec!["book-4", "book-5"], sync_page.media_ids);
+		assert_eq!(false, sync_page.should_continue);
 	}
 }

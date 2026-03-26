@@ -547,3 +547,67 @@ async fn book_download(
 		},
 	}
 }
+
+#[cfg(test)]
+mod tests {
+	use models::{
+		entity::{media, series},
+		shared::enums::FileStatus,
+	};
+	use sea_orm::{
+		ActiveModelTrait, ConnectionTrait, Database, DbBackend, DbConn, DbErr, Schema,
+	};
+
+	async fn setup_schema(db: &DbConn) -> Result<(), DbErr> {
+		// Setup Schema helper
+		let schema = Schema::new(DbBackend::Sqlite);
+
+		let tables = [
+			schema.create_table_from_entity(media::Entity),
+			schema.create_table_from_entity(series::Entity),
+		];
+
+		for stmt in tables {
+			// Execute create table statement
+			db.execute(db.get_database_backend().build(&stmt)).await?;
+		}
+
+		Ok(())
+	}
+
+	#[tokio::test]
+	async fn test_new_sync_session() {
+		let db = Database::connect("sqlite::memory:")
+			.await
+			.expect("failed to connect to test database");
+
+		// Setup database schema
+		setup_schema(&db)
+			.await
+			.expect("failed to create test database tables");
+
+		let media1 = media::ActiveModel {
+			// id: ActiveValue::Set(Uuid::new_v4().to_string()),
+			name: sea_orm::Set("Don Quixote".to_string()),
+			size: sea_orm::Set(1234),
+			extension: sea_orm::Set("epub".to_string()),
+			pages: sea_orm::Set(940),
+			// pub updated_at: Option<DateTimeWithTimeZone>,
+			// pub created_at: DateTimeWithTimeZone,
+			// pub modified_at: Option<DateTimeWithTimeZone>,
+			// pub hash: Option<String>,
+			// pub koreader_hash: Option<String>,
+			path: sea_orm::Set("Miguel de Cervantes - Don Quixote.epub".to_string()),
+			status: sea_orm::Set(FileStatus::Ready),
+			// pub thumbnail_meta: Option<ImageMetadata>,
+			// pub thumbnail_path: Option<String>,
+			// pub series_id: Option<String>,
+			// pub deleted_at: Option<DateTimeWithTimeZone>,
+			..Default::default()
+		};
+
+		let insert_res = media1.insert(&db).await.expect("could not insert media");
+
+		assert_eq!("aoeu", insert_res.id);
+	}
+}

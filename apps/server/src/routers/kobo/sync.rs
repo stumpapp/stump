@@ -204,7 +204,6 @@ impl KoboSync {
 		// TODO: add modified (and deleted?) media
 		// TODO: avoid copies & retrieving unused column "path"
 		// https://www.sea-ql.org/SeaORM/docs/1.1.x/advanced-query/custom-select/#unstructured-tuple
-
 		let new_media = query
 			.into_model::<media::MediaIdentSelect>()
 			.all(db)
@@ -555,8 +554,8 @@ mod tests {
 
 	use models::{
 		entity::{
-			kobo_sync, library_exclusion, media, media_metadata, series, series_metadata,
-			user, user_preferences,
+			kobo_sync, library, library_exclusion, media, media_metadata, series,
+			series_metadata, user, user_preferences,
 		},
 		shared::enums::{FileStatus, UserPermission},
 	};
@@ -581,6 +580,7 @@ mod tests {
 			schema.create_table_from_entity(kobo_sync::Entity),
 			schema.create_table_from_entity(user::Entity),
 			schema.create_table_from_entity(user_preferences::Entity),
+			schema.create_table_from_entity(library::Entity),
 		];
 
 		for stmt in tables {
@@ -596,6 +596,7 @@ mod tests {
 	// keeping good ergonomics.
 	#[derive(Default)]
 	struct ExampleMedia {
+		series_id: String,
 		id: Option<String>,
 		name: Option<String>,
 		extension: Option<String>,
@@ -618,6 +619,7 @@ mod tests {
 			let extension = self.extension.clone().unwrap_or("epub".to_string());
 
 			let model = media::ActiveModel {
+				series_id: ActiveValue::Set(Some(self.series_id.clone())),
 				id: ActiveValue::Set(id.clone()),
 				name: ActiveValue::Set(name.clone()),
 				size: ActiveValue::Set(1234),
@@ -665,6 +667,21 @@ mod tests {
 		}
 	}
 
+	#[derive(Default)]
+	struct ExampleSeries {}
+
+	impl ExampleSeries {
+		async fn insert(&self, db: &DbConn) -> series::Model {
+			let model = series::ActiveModel {
+				name: sea_orm::Set("example".to_string()), // TODO: allow setting, or generate
+				path: sea_orm::Set("/tmp/example-series".to_string()), // TODO: allow setting, or generate
+				..Default::default()
+			};
+
+			model.insert(db).await.expect("could not insert series")
+		}
+	}
+
 	#[tokio::test]
 	async fn test_first_sync() {
 		let db = Database::connect("sqlite::memory:")
@@ -676,7 +693,11 @@ mod tests {
 			.await
 			.expect("failed to create test database tables");
 
+		let user = ExampleUser {}.insert(&db).await;
+		let series = ExampleSeries {}.insert(&db).await;
+
 		ExampleMedia {
+			series_id: series.id.clone(),
 			id: Some("don-quixote".to_string()),
 			name: Some("Don Quixote".to_string()),
 			created_at: Some("1605-01-16T00:00:00Z".parse().unwrap()),
@@ -686,6 +707,7 @@ mod tests {
 		.await;
 
 		ExampleMedia {
+			series_id: series.id.clone(),
 			id: Some("robinson-crusoe".to_string()),
 			name: Some("Robinson Crusoe".to_string()),
 			created_at: Some("1719-04-25T00:00:00Z".parse().unwrap()),
@@ -695,6 +717,7 @@ mod tests {
 		.await;
 
 		ExampleMedia {
+			series_id: series.id.clone(),
 			id: Some("the-count-of-monte-cristo".to_string()),
 			name: Some("The Count of Monte Cristo".to_string()),
 			created_at: Some("1846-01-15T00:00:00Z".parse().unwrap()),
@@ -702,8 +725,6 @@ mod tests {
 		}
 		.insert(&db)
 		.await;
-
-		let user = ExampleUser {}.insert(&db).await;
 
 		let user = user::AuthUser {
 			id: user.id,

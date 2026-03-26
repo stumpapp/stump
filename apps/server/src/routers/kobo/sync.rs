@@ -191,6 +191,8 @@ impl KoboSync {
 		device_metadata: serde_json::Value,
 		previous_sync_at: Option<DateTimeWithTimeZone>,
 	) -> Result<Self, sea_orm::DbErr> {
+		// TODO: filter out items that are newer than the current time.
+		// otherwise there's a race.
 		let query = match previous_sync_at {
 			Some(previous_sync_at) => media::Entity::find_for_user(&user)
 				.filter(media::Column::Extension.eq("epub"))
@@ -550,13 +552,21 @@ async fn book_download(
 
 #[cfg(test)]
 mod tests {
+
 	use models::{
-		entity::{media, series},
-		shared::enums::FileStatus,
+		entity::{
+			kobo_sync, library_exclusion, media, media_metadata, series, series_metadata,
+			user, user_preferences,
+		},
+		shared::enums::{FileStatus, UserPermission},
 	};
 	use sea_orm::{
-		ActiveModelTrait, ConnectionTrait, Database, DbBackend, DbConn, DbErr, Schema,
+		prelude::DateTimeWithTimeZone, ActiveModelTrait, ActiveValue, ConnectionTrait,
+		Database, DbBackend, DbConn, DbErr, Schema,
 	};
+	use uuid::Uuid;
+
+	use crate::routers::kobo::sync::KoboSync;
 
 	async fn setup_schema(db: &DbConn) -> Result<(), DbErr> {
 		// Setup Schema helper
@@ -564,7 +574,13 @@ mod tests {
 
 		let tables = [
 			schema.create_table_from_entity(media::Entity),
+			schema.create_table_from_entity(media_metadata::Entity),
 			schema.create_table_from_entity(series::Entity),
+			schema.create_table_from_entity(series_metadata::Entity),
+			schema.create_table_from_entity(library_exclusion::Entity),
+			schema.create_table_from_entity(kobo_sync::Entity),
+			schema.create_table_from_entity(user::Entity),
+			schema.create_table_from_entity(user_preferences::Entity),
 		];
 
 		for stmt in tables {
@@ -575,8 +591,82 @@ mod tests {
 		Ok(())
 	}
 
+	// note that None here means "use some default", not necessarily "set the value to None".
+	// that may make it impossible to set some values to None. I'm not sure how to avoid that while
+	// keeping good ergonomics.
+	#[derive(Default)]
+	struct ExampleMedia {
+		id: Option<String>,
+		name: Option<String>,
+		extension: Option<String>,
+		created_at: Option<DateTimeWithTimeZone>,
+		modified_at: Option<DateTimeWithTimeZone>,
+		deleted_at: Option<DateTimeWithTimeZone>,
+	}
+
+	impl ExampleMedia {
+		async fn insert(&self, db: &DbConn) -> media::Model {
+			let id = self
+				.id
+				.clone()
+				.unwrap_or_else(|| Uuid::new_v4().to_string());
+
+			let name = self
+				.name
+				.clone()
+				.unwrap_or_else(|| format!("Test Book {id}"));
+			let extension = self.extension.clone().unwrap_or("epub".to_string());
+
+			let model = media::ActiveModel {
+				id: ActiveValue::Set(id.clone()),
+				name: ActiveValue::Set(name.clone()),
+				size: ActiveValue::Set(1234),
+				extension: sea_orm::Set(extension.clone()),
+				pages: ActiveValue::Set(940),
+				modified_at: self
+					.modified_at
+					.map_or(ActiveValue::default(), |t| ActiveValue::Set(Some(t))),
+				deleted_at: self
+					.deleted_at
+					.map_or(ActiveValue::default(), |t| ActiveValue::Set(Some(t))),
+				path: sea_orm::Set(format!("{name}.{extension}").to_string()),
+				status: sea_orm::Set(FileStatus::Ready),
+				..Default::default()
+			};
+
+			let insert_result = model.insert(db).await.expect("could not insert media");
+
+			// "created_at" is overridden by the ActiveModelBehavior, so we need to update it explicitly.
+			match self.created_at {
+				Some(t) => {
+					let mut model: media::ActiveModel = insert_result.into();
+					model.created_at = ActiveValue::Set(t);
+					model.update(db).await.expect("could not update media")
+				},
+				None => insert_result,
+			}
+		}
+	}
+
+	#[derive(Default)]
+	struct ExampleUser {}
+
+	impl ExampleUser {
+		async fn insert(&self, db: &DbConn) -> user::Model {
+			let model = user::ActiveModel {
+				username: sea_orm::Set("example".to_string()), // TODO: allow setting, or generate
+				hashed_password: sea_orm::Set("example".to_string()), // TODO: allow setting, or generate
+				is_server_owner: sea_orm::Set(true),
+				is_locked: sea_orm::Set(false),
+				..Default::default()
+			};
+
+			model.insert(db).await.expect("could not insert user")
+		}
+	}
+
 	#[tokio::test]
-	async fn test_new_sync_session() {
+	async fn test_first_sync() {
 		let db = Database::connect("sqlite::memory:")
 			.await
 			.expect("failed to connect to test database");
@@ -586,28 +676,59 @@ mod tests {
 			.await
 			.expect("failed to create test database tables");
 
-		let media1 = media::ActiveModel {
-			// id: ActiveValue::Set(Uuid::new_v4().to_string()),
-			name: sea_orm::Set("Don Quixote".to_string()),
-			size: sea_orm::Set(1234),
-			extension: sea_orm::Set("epub".to_string()),
-			pages: sea_orm::Set(940),
-			// pub updated_at: Option<DateTimeWithTimeZone>,
-			// pub created_at: DateTimeWithTimeZone,
-			// pub modified_at: Option<DateTimeWithTimeZone>,
-			// pub hash: Option<String>,
-			// pub koreader_hash: Option<String>,
-			path: sea_orm::Set("Miguel de Cervantes - Don Quixote.epub".to_string()),
-			status: sea_orm::Set(FileStatus::Ready),
-			// pub thumbnail_meta: Option<ImageMetadata>,
-			// pub thumbnail_path: Option<String>,
-			// pub series_id: Option<String>,
-			// pub deleted_at: Option<DateTimeWithTimeZone>,
+		ExampleMedia {
+			id: Some("don-quixote".to_string()),
+			name: Some("Don Quixote".to_string()),
+			created_at: Some("1605-01-16T00:00:00Z".parse().unwrap()),
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
+
+		ExampleMedia {
+			id: Some("robinson-crusoe".to_string()),
+			name: Some("Robinson Crusoe".to_string()),
+			created_at: Some("1719-04-25T00:00:00Z".parse().unwrap()),
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
+
+		ExampleMedia {
+			id: Some("the-count-of-monte-cristo".to_string()),
+			name: Some("The Count of Monte Cristo".to_string()),
+			created_at: Some("1846-01-15T00:00:00Z".parse().unwrap()),
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
+
+		let user = ExampleUser {}.insert(&db).await;
+
+		let user = user::AuthUser {
+			id: user.id,
+			permissions: vec![UserPermission::AccessBookClub],
 			..Default::default()
 		};
+		let sync = KoboSync::continue_or_create(
+			&db,
+			&user,
+			Some("kobo-1"),
+			serde_json::json!({}),
+			None,
+		)
+		.await
+		.expect("failed to initiate sync");
 
-		let insert_res = media1.insert(&db).await.expect("could not insert media");
+		assert_eq!(
+			vec![
+				"don-quixote",
+				"robinson-crusoe",
+				"the-count-of-monte-cristo"
+			],
+			sync.model.media_ids.0
+		);
 
-		assert_eq!("aoeu", insert_res.id);
+		// TODO: test ignoring non-epubs
 	}
 }

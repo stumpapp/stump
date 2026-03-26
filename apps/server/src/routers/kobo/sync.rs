@@ -227,7 +227,43 @@ impl KoboSync {
 		Ok(Self { model: sync })
 	}
 
-	fn next_page(&self, offset: usize) -> (Vec<String>, usize, bool) {
+	async fn continue_or_create(
+		db: &DatabaseConnection,
+		user: &AuthUser,
+		device_id: Option<&str>,
+		device_metadata: serde_json::Value,
+		client_sync_token: Option<&SyncToken>,
+	) -> Result<Self, sea_orm::DbErr> {
+		let prev_sync = match client_sync_token {
+			Some(ref t) => KoboSync::find(&db, &user, t.sync_id.clone()).await,
+			None => None,
+		};
+
+		let previous_sync_began_at = prev_sync
+			.as_ref()
+			.map(|s| s.model.created_at.fixed_offset());
+
+		match (
+			prev_sync,
+			client_sync_token.as_ref().map_or(true, |t| t.completed),
+		) {
+			// we're continuing an existing sync session
+			(Some(prev_sync), false) => Ok(prev_sync),
+			// there was no previous sync session, or the previous session completed
+			(_, _) => {
+				KoboSync::begin_new_sync(
+					&db,
+					&user,
+					device_id,
+					device_metadata,
+					previous_sync_began_at,
+				)
+				.await
+			},
+		}
+	}
+
+	fn page_at(&self, offset: usize) -> (Vec<String>, usize, bool) {
 		let len = self.model.media_ids.0.len();
 		let start = offset.min(len);
 		let next_offset = (offset + ITEMS_PER_PAGE).min(len);
@@ -337,33 +373,14 @@ async fn library_sync(
 
 	let device_metadata = device_metadata(&headers);
 
-	let prev_sync = match client_sync_token {
-		Some(ref t) => KoboSync::find(&conn, &user, t.sync_id.clone()).await,
-		None => None,
-	};
-
-	let previous_sync_began_at = prev_sync
-		.as_ref()
-		.map(|s| s.model.created_at.fixed_offset());
-
-	let sync = match (
-		prev_sync,
-		client_sync_token.as_ref().map_or(true, |t| t.completed),
-	) {
-		// we're continuing an existing sync session
-		(Some(prev_sync), false) => prev_sync,
-		// there was no previous sync session, or the previous session completed
-		(_, _) => {
-			KoboSync::begin_new_sync(
-				&conn,
-				&user,
-				device_id,
-				serde_json::Value::Object(device_metadata),
-				previous_sync_began_at,
-			)
-			.await?
-		},
-	};
+	let sync_session = KoboSync::continue_or_create(
+		&conn,
+		&user,
+		device_id,
+		serde_json::Value::Object(device_metadata),
+		client_sync_token.as_ref(),
+	)
+	.await?;
 
 	// prev_sync = KoboSync.find_by_sync_token(client_sync_token)
 	//
@@ -392,7 +409,7 @@ async fn library_sync(
 
 	let start_offset = client_sync_token.map_or(0, |t| t.next_offset);
 
-	let (media_ids, next_offset, should_continue) = sync.next_page(start_offset);
+	let (media_ids, next_offset, should_continue) = sync_session.page_at(start_offset);
 
 	let items = ModelWithMetadata::find_by_ids_for_user(media_ids, &user)
 		.filter(media::Column::Extension.eq("epub"))
@@ -400,7 +417,7 @@ async fn library_sync(
 		.all(conn)
 		.await?;
 
-	let result: Vec<SyncItem> = items
+	let sync_items: Vec<SyncItem> = items
 		.into_iter()
 		.map(|m| {
 			let book_url = format!(
@@ -413,11 +430,11 @@ async fn library_sync(
 		.collect();
 
 	Ok(SyncResponse {
-		sync_items: result,
+		sync_items: sync_items,
 		should_continue: should_continue,
 		sync_token: SyncToken {
 			version: 1,
-			sync_id: sync.model.id,
+			sync_id: sync_session.model.id,
 			completed: !should_continue,
 			next_offset: next_offset,
 		},

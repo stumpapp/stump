@@ -4,13 +4,7 @@ import { isPseStreamLink, OPDSLegacyEntry } from '@stump/sdk'
 import { intlFormat } from 'date-fns'
 import { forwardRef } from 'react'
 import { Image, Platform, View } from 'react-native'
-import Animated, {
-	Extrapolation,
-	interpolate,
-	useAnimatedRef,
-	useAnimatedStyle,
-	useScrollOffset,
-} from 'react-native-reanimated'
+import Animated from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import TImage from 'react-native-turbo-image'
 import { stripHtml } from 'string-strip-html'
@@ -20,7 +14,12 @@ import { useColorScheme } from '~/lib/useColorScheme'
 import { usePreferencesStore } from '~/stores'
 
 import { useActiveServer } from '../activeServer'
-import { DescriptionSection, IdentifiersSheet, InfoRow } from '../book/overview'
+import {
+	DescriptionSection,
+	IdentifiersSheet,
+	InfoRow,
+	useOverviewAnimations,
+} from '../book/overview'
 import { useFileExplorerAssets } from '../fileExplorer'
 import { ThumbnailImage, TurboImage } from '../image'
 import { useResolveURL } from '../opds/utils'
@@ -47,6 +46,7 @@ export const OPDSLegacyEntryItemSheet = forwardRef<TrueSheet, Props>(
 		const resolveUrl = useResolveURL()
 
 		const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
+		const { animatedScrollRef, parallaxStyle } = useOverviewAnimations()
 
 		const thumbnailUrl = entry.links.find(
 			(link) => link.rel === 'http://opds-spec.org/image/thumbnail',
@@ -57,16 +57,6 @@ export const OPDSLegacyEntryItemSheet = forwardRef<TrueSheet, Props>(
 		const currentPage = pseLink?.['pse:lastRead']
 
 		const description = entry.content ? stripHtml(entry.content).result : null
-
-		const animatedScrollRef = useAnimatedRef<Animated.ScrollView>()
-		const scrollOffset = useScrollOffset(animatedScrollRef)
-		const parallaxStyle = useAnimatedStyle(() => ({
-			transform: [
-				{
-					translateY: interpolate(scrollOffset.value, [0, 200], [0, 100], Extrapolation.EXTEND),
-				},
-			],
-		}))
 
 		return (
 			<TrueSheet

@@ -5,13 +5,7 @@ import { useRouter } from 'expo-router'
 import { forwardRef, useImperativeHandle, useRef } from 'react'
 import { Platform, View } from 'react-native'
 import { Linking } from 'react-native'
-import Animated, {
-	Extrapolation,
-	interpolate,
-	useAnimatedRef,
-	useAnimatedStyle,
-	useScrollOffset,
-} from 'react-native-reanimated'
+import Animated from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import TImage from 'react-native-turbo-image'
 
@@ -19,6 +13,7 @@ import { IS_IOS_24_PLUS, useColors } from '~/lib/constants'
 import { usePreferencesStore } from '~/stores'
 
 import { useActiveServer } from '../activeServer'
+import { useOverviewAnimations } from '../book/overview'
 import { ThumbnailImage } from '../image'
 import { Button, Heading, Text } from '../ui'
 import { getClubBookThumbnailData } from './utils'
@@ -54,16 +49,7 @@ export const CurrentBookSheet = forwardRef<CurrentBookSheetRef, Props>(({ book }
 
 	const thumbnailRatio = usePreferencesStore((store) => store.thumbnailRatio)
 
-	const animatedScrollRef = useAnimatedRef<Animated.ScrollView>()
-	const scrollOffset = useScrollOffset(animatedScrollRef)
-
-	const parallaxStyle = useAnimatedStyle(() => {
-		return {
-			transform: [
-				{ translateY: interpolate(scrollOffset.value, [0, 200], [0, 100], Extrapolation.EXTEND) },
-			],
-		}
-	})
+	const { animatedScrollRef, parallaxStyle } = useOverviewAnimations()
 
 	const thumbnailData = getClubBookThumbnailData(book, {
 		getHeaders: () => ({

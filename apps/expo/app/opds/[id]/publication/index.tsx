@@ -6,17 +6,16 @@ import { useNavigation, useRouter } from 'expo-router'
 import { Loader2 } from 'lucide-react-native'
 import { useCallback, useEffect, useLayoutEffect, useMemo } from 'react'
 import { Platform, View } from 'react-native'
-import Animated, {
-	Extrapolation,
-	interpolate,
-	useAnimatedRef,
-	useAnimatedStyle,
-	useScrollOffset,
-} from 'react-native-reanimated'
+import Animated from 'react-native-reanimated'
 import TImage from 'react-native-turbo-image'
 
 import { useActiveServer } from '~/components/activeServer'
-import { DescriptionSection, IdentifiersSheet, InfoRow } from '~/components/book/overview'
+import {
+	DescriptionSection,
+	IdentifiersSheet,
+	InfoRow,
+	useOverviewAnimations,
+} from '~/components/book/overview'
 import { ThumbnailImage } from '~/components/image'
 import {
 	CreditsSection,
@@ -212,16 +211,7 @@ export default function Screen() {
 		!!progression?.locator.locations?.totalProgression ||
 		!!progression?.modified
 
-	const animatedScrollRef = useAnimatedRef<Animated.ScrollView>()
-	const scrollOffset = useScrollOffset(animatedScrollRef)
-
-	const parallaxStyle = useAnimatedStyle(() => {
-		return {
-			transform: [
-				{ translateY: interpolate(scrollOffset.value, [0, 200], [0, 100], Extrapolation.EXTEND) },
-			],
-		}
-	})
+	const { animatedScrollRef, parallaxStyle } = useOverviewAnimations()
 
 	return (
 		<Animated.ScrollView className="flex-1 bg-background" ref={animatedScrollRef}>

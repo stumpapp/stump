@@ -4,13 +4,7 @@ import { formatHumanDuration } from '@stump/i18n'
 import { intlFormat } from 'date-fns'
 import { forwardRef, useMemo } from 'react'
 import { Platform, View } from 'react-native'
-import Animated, {
-	Extrapolation,
-	interpolate,
-	useAnimatedRef,
-	useAnimatedStyle,
-	useScrollOffset,
-} from 'react-native-reanimated'
+import Animated from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import TImage from 'react-native-turbo-image'
 
@@ -20,7 +14,7 @@ import { useColors } from '~/lib/constants'
 import { formatBytes } from '~/lib/format'
 import { usePreferencesStore } from '~/stores'
 
-import { DescriptionSection, InfoRow } from '../book/overview'
+import { DescriptionSection, InfoRow, useOverviewAnimations } from '../book/overview'
 import { ThumbnailImage } from '../image'
 import { MetadataBadgeSection } from '../overview'
 import { Card, Heading, Text } from '../ui'
@@ -98,15 +92,7 @@ export const DownloadedBookDetailsSheet = forwardRef<TrueSheet, Props>(
 
 		const thumbnailUri = getThumbnailPath(downloadedFile)
 
-		const animatedScrollRef = useAnimatedRef<Animated.ScrollView>()
-		const scrollOffset = useScrollOffset(animatedScrollRef)
-		const parallaxStyle = useAnimatedStyle(() => ({
-			transform: [
-				{
-					translateY: interpolate(scrollOffset.value, [0, 200], [0, 100], Extrapolation.EXTEND),
-				},
-			],
-		}))
+		const { animatedScrollRef, parallaxStyle } = useOverviewAnimations()
 
 		const showDetails =
 			formattedSize ||

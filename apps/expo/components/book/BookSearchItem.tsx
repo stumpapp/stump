@@ -94,7 +94,7 @@ export default function BookSearchItem({ book }: Props) {
 					<Text>{data.resolvedName}</Text>
 
 					<Text className="text-foreground-muted">
-						{formatBytes(data.size, 1)} • {data.pages} {pluralize('page', data.pages)}
+						{formatBytes(data.size)} • {data.pages} {pluralize('page', data.pages)}
 					</Text>
 				</View>
 			</View>

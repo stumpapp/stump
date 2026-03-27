@@ -39,7 +39,7 @@ export default function Screen() {
 	const { data: files } = useLiveQuery(
 		db.select().from(downloadedFiles).where(eq(downloadedFiles.serverId, serverID)),
 	)
-	const preferences = formatBytesSeparate(preferencesBytes, 1, 'B')
+	const preferences = formatBytesSeparate(preferencesBytes)
 
 	const downloadedFilesSum = useMemo(
 		() => files.reduce((acc, file) => acc + (file.size || 0), 0),

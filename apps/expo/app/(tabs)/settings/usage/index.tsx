@@ -53,16 +53,14 @@ export default function Screen() {
 				<View className="flex-1 gap-8 bg-background px-4 pt-8">
 					<View className="flex-row justify-around">
 						<View className="flex items-center justify-center">
-							<Heading className="font-medium">{formatBytes(data?.appTotal || 0, 0, 'MB')}</Heading>
+							<Heading className="font-medium">{formatBytes(data?.appTotal)}</Heading>
 							<Text size="sm" className="shrink-0 text-foreground-muted">
 								Non-Stump data
 							</Text>
 						</View>
 
 						<View className="flex items-center justify-center">
-							<Heading className="font-medium">
-								{formatBytes(data?.serversTotal || 0, 0, 'MB')}
-							</Heading>
+							<Heading className="font-medium">{formatBytes(data?.serversTotal)}</Heading>
 							<Text size="sm" className="shrink-0 text-foreground-muted">
 								Servers total
 							</Text>
@@ -86,7 +84,7 @@ export default function Screen() {
 									>
 										<Card.Row label={server.name}>
 											<View className="flex flex-row items-center gap-2">
-												<Text>{formatBytes(serverToUsage[server.id], 0, 'MB')}</Text>
+												<Text>{formatBytes(serverToUsage[server.id])}</Text>
 												<Icon as={ChevronRight} className="h-5 w-5 text-foreground-muted" />
 											</View>
 										</Card.Row>

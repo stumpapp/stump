@@ -41,7 +41,7 @@ use sea_orm::prelude::*;
 use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
-	middleware::auth::api_key_middleware,
+	middleware::{auth::api_key_middleware, host::HostExtractor},
 	routers::{api::v2::media::get_media_thumbnail_by_id, kobo::sync_types::*},
 	utils::http::ImageResponse,
 };
@@ -65,9 +65,6 @@ struct KoboThumbnail {
 	height: u32,
 	is_greyscale: Option<String>,
 }
-
-// TODO
-const BASE_URL: &str = "http://192.168.4.100:25601";
 
 // how many items should we send in each page of a sync response?
 // this is a maximum; in some cases we may return fewer items in a page.
@@ -339,14 +336,22 @@ async fn authorize(req: Request, next: Next) -> APIResult<Response> {
 }
 
 async fn initialization(
+	HostExtractor(host): HostExtractor,
 	Path(KoboAPIKey { api_key, .. }): Path<KoboAPIKey>,
 ) -> APIResult<impl IntoResponse> {
-	Ok(Json(json![{
-		   "image_url_quality_template": format!("{}/kobo/{}/v1/books/{{ImageId}}/thumbnail/{{Width
-	}}/{{Height}}/{{Quality}}/{{IsGreyscale}}/image.jpg", BASE_URL, api_key),
-		   "image_url_template": format!("{}/kobo/{}/v1/books/{{ImageId}}/thumbnail/{{Width
-	}}/{{Height}}/image.jpg", BASE_URL, api_key),
-	}]))
+	let base_url = host.url();
+	let template = format!(
+		"{}/kobo/{}/v1/books/{{ImageId}}/thumbnail/{{Width}}/{{Height}}/image.jpg",
+		base_url, api_key
+	);
+	let quality_template = format!(
+      "{}/kobo/{}/v1/books/{{ImageId}}/thumbnail/{{Width}}/{{Height}}/{{Quality}}/{{IsGreyscale}}/image.jpg",
+      base_url, api_key
+  );
+
+	Ok(Json(
+		json![{ "image_url_quality_template": quality_template, "image_url_template": template,	}],
+	))
 }
 
 fn device_metadata(headers: &HeaderMap) -> serde_json::Map<String, serde_json::Value> {
@@ -372,6 +377,7 @@ fn device_metadata(headers: &HeaderMap) -> serde_json::Map<String, serde_json::V
 async fn library_sync(
 	State(ctx): State<AppState>,
 	Extension(req): Extension<AuthContext>,
+	HostExtractor(host): HostExtractor,
 	Path(KoboAPIKey { api_key, .. }): Path<KoboAPIKey>,
 	headers: HeaderMap,
 ) -> APIResult<impl IntoResponse> {
@@ -443,7 +449,9 @@ async fn library_sync(
 		.map(|m| {
 			let book_url = format!(
 				"{}/kobo/{}/v1/books/{}/file/epub",
-				BASE_URL, api_key, m.media.id
+				host.url(),
+				api_key,
+				m.media.id
 			);
 
 			SyncItem::NewEntitlement(NewEntitlement::from_media(m, book_url))
@@ -460,6 +468,7 @@ async fn library_sync(
 async fn book_metadata(
 	State(ctx): State<AppState>,
 	Extension(req): Extension<AuthContext>,
+	HostExtractor(host): HostExtractor,
 	Path(KoboAPIKeyAndBookId { api_key, book_id }): Path<KoboAPIKeyAndBookId>,
 ) -> APIResult<Json<Vec<BookMetadata>>> {
 	let conn = ctx.conn.as_ref();
@@ -473,7 +482,9 @@ async fn book_metadata(
 
 	let book_url = format!(
 		"{}/kobo/{}/v1/books/{}/file/epub",
-		BASE_URL, api_key, m.media.id
+		host.url(),
+		api_key,
+		m.media.id
 	);
 
 	let result = BookMetadata::from_media(&m, book_url);

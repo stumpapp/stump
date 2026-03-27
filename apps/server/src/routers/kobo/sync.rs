@@ -812,4 +812,70 @@ mod tests {
 		assert_eq!(vec!["book-4", "book-5"], sync_page.media_ids);
 		assert_eq!(false, sync_page.should_continue);
 	}
+
+	#[tokio::test]
+	async fn test_incremental_sync() {
+		let db = test_database().await;
+
+		let user = ExampleUser {}.insert(&db).await;
+		let series = ExampleSeries {}.insert(&db).await;
+
+		for i in 1..=2 {
+			ExampleMedia {
+				series_id: series.id.clone(),
+				id: Some(format!("book-{i}")),
+				..Default::default()
+			}
+			.insert(&db)
+			.await;
+		}
+
+		let user = user::AuthUser {
+			id: user.id,
+			permissions: vec![UserPermission::AccessBookClub],
+			..Default::default()
+		};
+
+		// the client syncs all the media that is initially available
+		let sync = KoboSync::continue_or_create(
+			&db,
+			&user,
+			Some("kobo-1"),
+			serde_json::json!({}),
+			None,
+		)
+		.await
+		.expect("failed to initiate sync");
+
+		let sync_page = sync.page_at(0, 5);
+		assert_eq!(vec!["book-1", "book-2"], sync_page.media_ids);
+		assert_eq!(false, sync_page.should_continue);
+
+		// after the first sync more media was added.
+		for i in 3..=4 {
+			ExampleMedia {
+				series_id: series.id.clone(),
+				id: Some(format!("book-{i}")),
+				..Default::default()
+			}
+			.insert(&db)
+			.await;
+		}
+
+		// in the second sync the client passes the token of the first sync.
+		// this sync retrieves the new media.
+		let sync = KoboSync::continue_or_create(
+			&db,
+			&user,
+			Some("kobo-1"),
+			serde_json::json!({}),
+			Some(&sync_page.sync_token),
+		)
+		.await
+		.expect("failed to initiate sync");
+
+		let sync_page = sync.page_at(0, 5);
+		assert_eq!(vec!["book-3", "book-4"], sync_page.media_ids);
+		assert_eq!(false, sync_page.should_continue);
+	}
 }

@@ -87,7 +87,7 @@ type Documents = {
     "\n\tquery Letterers($seriesId: ID) {\n\t\tmediaMetadataOverview(seriesId: $seriesId) {\n\t\t\tletterers\n\t\t}\n\t}\n": typeof types.LetterersDocument,
     "\n\tquery SeriesMetadata($seriesId: ID) {\n\t\tmediaMetadataOverview(seriesId: $seriesId) {\n\t\t\tseries\n\t\t}\n\t}\n": typeof types.SeriesMetadataDocument,
     "\n\tquery Writers($seriesId: ID) {\n\t\tmediaMetadataOverview(seriesId: $seriesId) {\n\t\t\twriters\n\t\t}\n\t}\n": typeof types.WritersDocument,
-    "\n\tfragment BookMenu on Media {\n\t\tid\n\t\tisFavorite\n\t\tlibrary {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t\tseries {\n\t\t\tid\n\t\t\tresolvedName\n\t\t}\n\t\treadProgress {\n\t\t\t__typename\n\t\t}\n\t\treadHistory {\n\t\t\t__typename\n\t\t}\n\t}\n": typeof types.BookMenuFragmentDoc,
+    "\n\tfragment BookMenu on Media {\n\t\tid\n\t\tresolvedName\n\t\tisFavorite\n\t\tlibrary {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t\tseries {\n\t\t\tid\n\t\t\tresolvedName\n\t\t}\n\t\treadProgress {\n\t\t\t__typename\n\t\t}\n\t\treadHistory {\n\t\t\t__typename\n\t\t}\n\t}\n": typeof types.BookMenuFragmentDoc,
     "\n\tmutation BookMenuComplete($id: ID!, $isComplete: Boolean!, $page: Int) {\n\t\tmarkMediaAsComplete(id: $id, isComplete: $isComplete, page: $page) {\n\t\t\tcompletedAt\n\t\t}\n\t}\n": typeof types.BookMenuCompleteDocument,
     "\n\tmutation BookMenuDeleteSession($id: ID!) {\n\t\tdeleteMediaProgress(id: $id) {\n\t\t\t__typename\n\t\t}\n\t}\n": typeof types.BookMenuDeleteSessionDocument,
     "\n\tmutation BookMenuDeleteHistory($id: ID!) {\n\t\tdeleteMediaReadHistory(id: $id) {\n\t\t\t__typename\n\t\t}\n\t}\n": typeof types.BookMenuDeleteHistoryDocument,
@@ -363,7 +363,7 @@ const documents: Documents = {
     "\n\tquery Letterers($seriesId: ID) {\n\t\tmediaMetadataOverview(seriesId: $seriesId) {\n\t\t\tletterers\n\t\t}\n\t}\n": types.LetterersDocument,
     "\n\tquery SeriesMetadata($seriesId: ID) {\n\t\tmediaMetadataOverview(seriesId: $seriesId) {\n\t\t\tseries\n\t\t}\n\t}\n": types.SeriesMetadataDocument,
     "\n\tquery Writers($seriesId: ID) {\n\t\tmediaMetadataOverview(seriesId: $seriesId) {\n\t\t\twriters\n\t\t}\n\t}\n": types.WritersDocument,
-    "\n\tfragment BookMenu on Media {\n\t\tid\n\t\tisFavorite\n\t\tlibrary {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t\tseries {\n\t\t\tid\n\t\t\tresolvedName\n\t\t}\n\t\treadProgress {\n\t\t\t__typename\n\t\t}\n\t\treadHistory {\n\t\t\t__typename\n\t\t}\n\t}\n": types.BookMenuFragmentDoc,
+    "\n\tfragment BookMenu on Media {\n\t\tid\n\t\tresolvedName\n\t\tisFavorite\n\t\tlibrary {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t\tseries {\n\t\t\tid\n\t\t\tresolvedName\n\t\t}\n\t\treadProgress {\n\t\t\t__typename\n\t\t}\n\t\treadHistory {\n\t\t\t__typename\n\t\t}\n\t}\n": types.BookMenuFragmentDoc,
     "\n\tmutation BookMenuComplete($id: ID!, $isComplete: Boolean!, $page: Int) {\n\t\tmarkMediaAsComplete(id: $id, isComplete: $isComplete, page: $page) {\n\t\t\tcompletedAt\n\t\t}\n\t}\n": types.BookMenuCompleteDocument,
     "\n\tmutation BookMenuDeleteSession($id: ID!) {\n\t\tdeleteMediaProgress(id: $id) {\n\t\t\t__typename\n\t\t}\n\t}\n": types.BookMenuDeleteSessionDocument,
     "\n\tmutation BookMenuDeleteHistory($id: ID!) {\n\t\tdeleteMediaReadHistory(id: $id) {\n\t\t\t__typename\n\t\t}\n\t}\n": types.BookMenuDeleteHistoryDocument,
@@ -858,7 +858,7 @@ export function graphql(source: "\n\tquery Writers($seriesId: ID) {\n\t\tmediaMe
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n\tfragment BookMenu on Media {\n\t\tid\n\t\tisFavorite\n\t\tlibrary {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t\tseries {\n\t\t\tid\n\t\t\tresolvedName\n\t\t}\n\t\treadProgress {\n\t\t\t__typename\n\t\t}\n\t\treadHistory {\n\t\t\t__typename\n\t\t}\n\t}\n"): typeof import('./graphql').BookMenuFragmentDoc;
+export function graphql(source: "\n\tfragment BookMenu on Media {\n\t\tid\n\t\tresolvedName\n\t\tisFavorite\n\t\tlibrary {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t\tseries {\n\t\t\tid\n\t\t\tresolvedName\n\t\t}\n\t\treadProgress {\n\t\t\t__typename\n\t\t}\n\t\treadHistory {\n\t\t\t__typename\n\t\t}\n\t}\n"): typeof import('./graphql').BookMenuFragmentDoc;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

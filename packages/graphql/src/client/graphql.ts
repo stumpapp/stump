@@ -4647,7 +4647,7 @@ export type WritersQueryVariables = Exact<{
 
 export type WritersQuery = { __typename?: 'Query', mediaMetadataOverview: { __typename?: 'MediaMetadataOverview', writers: Array<string> } };
 
-export type BookMenuFragment = { __typename?: 'Media', id: string, isFavorite: boolean, library: { __typename?: 'Library', id: string, name: string }, series: { __typename?: 'Series', id: string, resolvedName: string }, readProgress?: { __typename: 'ActiveReadingSession' } | null, readHistory: Array<{ __typename: 'FinishedReadingSession' }> } & { ' $fragmentName'?: 'BookMenuFragment' };
+export type BookMenuFragment = { __typename?: 'Media', id: string, resolvedName: string, isFavorite: boolean, library: { __typename?: 'Library', id: string, name: string }, series: { __typename?: 'Series', id: string, resolvedName: string }, readProgress?: { __typename: 'ActiveReadingSession' } | null, readHistory: Array<{ __typename: 'FinishedReadingSession' }> } & { ' $fragmentName'?: 'BookMenuFragment' };
 
 export type BookMenuCompleteMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -6138,6 +6138,7 @@ export const OnDeckBookItemFragmentDoc = new TypedDocumentString(`
 export const BookMenuFragmentDoc = new TypedDocumentString(`
     fragment BookMenu on Media {
   id
+  resolvedName
   isFavorite
   library {
     id
@@ -7094,6 +7095,7 @@ export const BookByIdDocument = new TypedDocumentString(`
 }
     fragment BookMenu on Media {
   id
+  resolvedName
   isFavorite
   library {
     id

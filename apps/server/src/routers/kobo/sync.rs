@@ -603,12 +603,13 @@ async fn book_download(
 
 #[cfg(test)]
 mod tests {
+	use chrono::Days;
 	use models::{
 		entity::{
 			kobo_sync, library, library_exclusion, media, media_metadata, series,
 			series_metadata, user, user_preferences,
 		},
-		shared::enums::{FileStatus, UserPermission},
+		shared::enums::FileStatus,
 	};
 	use sea_orm::{
 		prelude::DateTimeWithTimeZone, ActiveModelTrait, ActiveValue, ConnectionTrait,
@@ -617,6 +618,7 @@ mod tests {
 	use uuid::Uuid;
 
 	use crate::routers::kobo::sync::KoboSync;
+	use crate::routers::kobo::sync_types::SyncItem;
 
 	async fn test_database() -> DbConn {
 		let db = Database::connect("sqlite::memory:")
@@ -782,7 +784,7 @@ mod tests {
 
 		let user = user::AuthUser {
 			id: user.id,
-			permissions: vec![UserPermission::AccessBookClub],
+			permissions: vec![],
 			..Default::default()
 		};
 		let sync = KoboSync::continue_or_create(
@@ -826,7 +828,7 @@ mod tests {
 
 		let user = user::AuthUser {
 			id: user.id,
-			permissions: vec![UserPermission::AccessBookClub],
+			permissions: vec![],
 			..Default::default()
 		};
 		let sync = KoboSync::continue_or_create(
@@ -869,7 +871,7 @@ mod tests {
 
 		let user = user::AuthUser {
 			id: user.id,
-			permissions: vec![UserPermission::AccessBookClub],
+			permissions: vec![],
 			..Default::default()
 		};
 
@@ -914,5 +916,53 @@ mod tests {
 		let sync_page = sync.paged_media_ids(0, 5);
 		assert_eq!(vec!["book-3", "book-4"], sync_page.media_ids);
 		assert_eq!(false, sync_page.should_continue);
+	}
+
+	#[tokio::test]
+	async fn test_represent_new_entitlement() {
+		let db = test_database().await;
+
+		let user = ExampleUser {}.insert(&db).await;
+		let user = user::AuthUser {
+			id: user.id,
+			permissions: vec![],
+			..Default::default()
+		};
+
+		let previous_sync_at: DateTimeWithTimeZone =
+			"2026-01-01T00:00:00Z".parse().unwrap();
+
+		let series = ExampleSeries {}.insert(&db).await;
+
+		// a newly created book.
+		let new_book = ExampleMedia {
+			series_id: series.id.clone(),
+			id: Some(format!("new-book")),
+			created_at: Some(previous_sync_at.checked_add_days(Days::new(1)).unwrap()),
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
+
+		let sync = KoboSync::begin_new_sync(
+			&db,
+			&user,
+			Some("kobo-1"),
+			serde_json::json!({}),
+			Some(previous_sync_at),
+		)
+		.await
+		.expect("failed to initiate sync");
+
+		let (_, sync_items) = sync
+			.paged_sync_items(0, 1, "https://stump.example.org/".to_string())
+			.await
+			.expect("failed to retrieve sync items");
+
+		let SyncItem::NewEntitlement(ref ent) = sync_items[0] else {
+			panic!("expected a NewEntitlement")
+		};
+
+		assert_eq!(new_book.id, ent.book_entitlement.id);
 	}
 }

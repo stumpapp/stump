@@ -556,12 +556,14 @@ async fn set_completed_media(
 		.as_ref()
 		.map(|s| s.started_at)
 		.unwrap_or_else(|| Utc::now().into());
+	let elapsed_seconds = active_session.as_ref().and_then(|s| s.elapsed_seconds);
 
 	let finished_reading_session = finished_reading_session::ActiveModel {
 		user_id: Set(user.id.clone()),
 		media_id: Set(model.media.id.to_string()),
 		started_at: Set(started_at),
 		completed_at: Set(chrono::Utc::now().into()),
+		elapsed_seconds: Set(elapsed_seconds),
 		..Default::default()
 	};
 

@@ -67,7 +67,7 @@ export default function SmartListBookItem({ book }: Props) {
 		const parts = []
 
 		if (data.size != null) {
-			const size = formatBytesSeparate(data.size, 1)
+			const size = formatBytesSeparate(data.size)
 			if (size) {
 				parts.push(`${size.value} ${size.unit}`)
 			}

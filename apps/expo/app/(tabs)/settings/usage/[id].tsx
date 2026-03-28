@@ -10,10 +10,10 @@ import { ScrollView } from 'react-native-gesture-handler'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import RefreshControl from '~/components/RefreshControl'
-import { Button, Heading, ListEmptyMessage, Text } from '~/components/ui'
+import { Button, Card, Text } from '~/components/ui'
 import { db, downloadedFiles } from '~/db'
 import { getServerStoredPreferencesUsage } from '~/lib/filesystem'
-import { formatBytesSeparate, humanizeByteUnit } from '~/lib/format'
+import { formatBytes } from '~/lib/format'
 import { useDownload } from '~/lib/hooks'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
 import { useReaderStore } from '~/stores'
@@ -39,16 +39,13 @@ export default function Screen() {
 	const { data: files } = useLiveQuery(
 		db.select().from(downloadedFiles).where(eq(downloadedFiles.serverId, serverID)),
 	)
-	const preferences = formatBytesSeparate(preferencesBytes, 1, 'B')
+	const preferencesSize = formatBytes(preferencesBytes)
 
 	const downloadedFilesSum = useMemo(
 		() => files.reduce((acc, file) => acc + (file.size || 0), 0),
 		[files],
 	)
-	const humanizedUsage = useMemo(
-		() => formatBytesSeparate(downloadedFilesSum),
-		[downloadedFilesSum],
-	)
+	const humanizedUsage = useMemo(() => formatBytes(downloadedFilesSum), [downloadedFilesSum])
 	const downloadedFilesCount = useMemo(() => files.length, [files])
 
 	const clearLibrarySettings = useReaderStore((state) => state.clearLibrarySettings)
@@ -88,35 +85,24 @@ export default function Screen() {
 			>
 				<View className="flex-1 gap-8 bg-background px-4 pt-8">
 					<View className="flex-1 gap-4">
-						<Heading>Downloads</Heading>
-
-						{!files.length && (
-							<ListEmptyMessage
-								icon={HardDriveDownload}
-								message="No downloaded files for this server"
-							/>
-						)}
+						<Card
+							label="Downloads"
+							listEmptyStyle={{
+								icon: HardDriveDownload,
+								message: 'No downloaded files for this server',
+							}}
+						>
+							<Card.StatGroup>
+								<Card.Stat label="Total files" value={downloadedFilesCount} />
+								{humanizedUsage && <Card.Stat label="Total size" value={humanizedUsage} />}
+							</Card.StatGroup>
+						</Card>
 
 						{(files.length > 0 || downloadedFilesSum > 0) && (
 							<View className="gap-4">
-								<View className="flex-row items-center justify-between">
-									<Text className="text-foreground-muted">Total files</Text>
-									<Text>{downloadedFilesCount}</Text>
-								</View>
-
-								<View className="flex-row items-center justify-between">
-									<Text className="text-foreground-muted">Total size</Text>
-									{humanizedUsage && (
-										<Text>
-											{humanizedUsage.value} {humanizedUsage.unit}
-										</Text>
-									)}
-									{/* TODO: Infer from usage */}
-									{downloadedFilesSum === 0 && <Text>Unknown</Text>}
-								</View>
-
 								<Button
 									variant="destructive"
+									roundness="full"
 									onPress={() => setIsShowingDeleteConfirm(true)}
 									size="md"
 									disabled={downloadedFilesSum === 0}
@@ -128,24 +114,18 @@ export default function Screen() {
 					</View>
 
 					<View className="flex-1 gap-4">
-						<View>
-							<Heading>Stored Preferences</Heading>
-							<Text className="text-foreground-muted">
-								Miscellaneous data like book preferences, offline reading progress, etc.
-							</Text>
-						</View>
-
-						<View className="flex-row">
-							<View className="flex items-center justify-center">
-								<Heading className="font-medium">{preferences?.value || 0}</Heading>
-								<Text size="sm" className="shrink-0 text-foreground-muted">
-									{humanizeByteUnit(preferences?.value || 0, preferences?.unit || 'B')}
-								</Text>
-							</View>
-						</View>
+						<Card
+							label="Stored Preferences"
+							description="Miscellaneous data like book preferences, offline reading progress, etc."
+						>
+							<Card.StatGroup>
+								<Card.Stat label="Total size" value={preferencesSize} />
+							</Card.StatGroup>
+						</Card>
 
 						<Button
 							variant="destructive"
+							roundness="full"
 							onPress={onClearPreferences}
 							size="md"
 							disabled={!preferencesBytes}

@@ -1,9 +1,14 @@
 import { CircleAlert, LucideIcon } from 'lucide-react-native'
-import React, { ComponentProps } from 'react'
-import { Platform, View, ViewProps } from 'react-native'
+import React, { ComponentProps, ReactNode, useState } from 'react'
+import { Easing, Platform, Pressable, View, ViewProps } from 'react-native'
+import { easeGradient } from 'react-native-easing-gradient'
+import LinearGradient from 'react-native-linear-gradient'
 
 import { Icon, Text } from '~/components/ui'
+import { useColors } from '~/lib/constants'
+import { useColorScheme } from '~/lib/useColorScheme'
 import { cn } from '~/lib/utils'
+import { usePreferencesStore } from '~/stores'
 
 // MARK: Types
 
@@ -26,13 +31,13 @@ type CardProps = ViewProps & {
 	listEmptyStyle?: ListEmptyMessageProps
 }
 
-type RowProps = ViewProps & {
+type RowProps = Omit<ViewProps, 'children'> & {
 	label?: string
 	description?: string
 	icon?: LucideIcon
 	disabled?: boolean
 	renderDivider?: boolean
-}
+} & ({ value?: string | number; children?: never } | { children?: ReactNode; value?: never })
 
 type StatGroupProps = ViewProps
 
@@ -95,6 +100,7 @@ export function Card({
 Card.StatGroup = StatGroup
 Card.Stat = Stat
 Card.Row = Row
+Card.LongRow = LongRow
 Card.RowDivider = Divider
 
 // MARK: Child components
@@ -138,49 +144,78 @@ function Stat({ label, value, suffix }: StatProps) {
 	)
 }
 
-function Row({
-	label,
-	description,
-	icon,
-	disabled,
-	renderDivider = true,
-	children,
-	className,
-	...props
-}: RowProps) {
+function Row({ value, children, ...props }: RowProps) {
 	return (
-		// We shift up by 1px to hide the first divider in a list
-		<View className="-mt-[1px]">
-			{renderDivider && <Divider hasIcon={!!icon} />}
+		<BaseRowComponent {...props}>
+			{value != undefined && (
+				<Text numberOfLines={1} className="shrink text-lg text-foreground-muted">
+					{value}
+				</Text>
+			)}
+			{children}
+		</BaseRowComponent>
+	)
+}
 
-			<View
-				className={cn(
-					'flex flex-row items-center justify-between gap-x-4 px-4 py-3.5',
-					disabled && 'pointer-events-none opacity-50',
-					className,
-				)}
-				{...props}
-			>
-				{label && (
-					<View className="shrink flex-row items-center justify-center gap-4">
-						{icon && (
-							<View className="squircle flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white/75 dark:bg-black/40">
-								<Icon as={icon} className="h-6 w-6 text-foreground-muted" />
-							</View>
-						)}
-						<View className="shrink gap-0.5">
-							<Text className="shrink text-lg">{label}</Text>
-							{description && (
-								<Text size="sm" className="text-foreground-muted">
-									{description}
-								</Text>
-							)}
+function LongRow({ value, className, ...props }: Omit<RowProps, 'children'>) {
+	const colors = useColors()
+	const { isDarkColorScheme } = useColorScheme()
+	const accentColor = usePreferencesStore((state) => state.accentColor)
+
+	const [expand, setExpand] = useState(false)
+	const [isExpandable, setIsExpandable] = useState(false)
+
+	const gradient = easeGradient({
+		colorStops: {
+			0.4: { color: isDarkColorScheme ? '#1A1A1A00' : '#F2F2F100' },
+			1: { color: isDarkColorScheme ? '#1A1A1A' : '#F2F2F1' },
+		},
+		easing: Easing.bezier(0.45, 0, 0.55, 1),
+	})
+
+	return (
+		<BaseRowComponent
+			onPress={() => setExpand(true)}
+			className={cn('flex-wrap gap-1', className)}
+			{...props}
+		>
+			{value != undefined && (
+				<View className="relative shrink items-center justify-center">
+					<Text
+						numberOfLines={expand ? undefined : 4}
+						className="text-lg text-foreground-muted"
+						onTextLayout={(e) => {
+							const isOverLimit = e.nativeEvent.lines.length >= 4
+							if (isExpandable === isOverLimit) return
+							setIsExpandable(isOverLimit)
+						}}
+					>
+						{value}
+					</Text>
+
+					{isExpandable && !expand && (
+						<View className="absolute bottom-0 right-0 z-10 items-center justify-center px-1">
+							<Text
+								style={{ color: accentColor || colors.fill.brand.DEFAULT }}
+								className="font-medium"
+							>
+								See more
+							</Text>
 						</View>
-					</View>
-				)}
-				{children}
-			</View>
-		</View>
+					)}
+
+					{isExpandable && !expand && (
+						<LinearGradient
+							colors={gradient.colors}
+							locations={gradient.locations}
+							useAngle
+							angle={172}
+							style={{ position: 'absolute', inset: 0 }}
+						/>
+					)}
+				</View>
+			)}
+		</BaseRowComponent>
 	)
 }
 
@@ -213,12 +248,64 @@ function Divider({ hasIcon, className, ...props }: { hasIcon?: boolean } & ViewP
 	)
 }
 
+function BaseRowComponent({
+	label,
+	description,
+	icon,
+	renderDivider = true,
+	children,
+	className,
+	onPress,
+	disabled,
+	...props
+}: RowProps & {
+	onPress?: () => void
+}) {
+	const Container = onPress ? Pressable : View
+	return (
+		// We shift up by 1px to hide the first divider in a list
+		<View className="-mt-[1px]">
+			{renderDivider && <Divider hasIcon={!!icon} />}
+
+			<Container
+				onPress={onPress}
+				disabled={disabled}
+				className={cn(
+					'flex flex-row items-center justify-between gap-x-4 px-4 py-3.5',
+					disabled && 'pointer-events-none opacity-50',
+					className,
+				)}
+				{...props}
+			>
+				{label && (
+					<View className="shrink flex-row items-center justify-center gap-4">
+						{icon && (
+							<View className="squircle flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white/75 dark:bg-black/40">
+								<Icon as={icon} className="h-6 w-6 text-foreground-muted" />
+							</View>
+						)}
+						<View className="shrink gap-0.5">
+							<Text className="shrink text-lg">{label}</Text>
+							{description && (
+								<Text size="sm" className="text-foreground-muted">
+									{description}
+								</Text>
+							)}
+						</View>
+					</View>
+				)}
+				{children}
+			</Container>
+		</View>
+	)
+}
+
+// MARK: Shared components
+
 type ListEmptyMessageProps = {
 	icon?: LucideIcon
 	message?: string
 }
-
-// MARK: Shared components
 
 export const ListEmptyMessage = ({ icon, message }: ListEmptyMessageProps) => (
 	<View

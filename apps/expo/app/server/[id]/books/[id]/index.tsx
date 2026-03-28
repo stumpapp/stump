@@ -23,7 +23,6 @@ import {
 	DescriptionSection,
 	DownloadButton,
 	IdentifiersSheet,
-	InfoRow,
 	useOverviewAnimations,
 } from '~/components/book/overview'
 import { ThumbnailImage } from '~/components/image'
@@ -561,11 +560,13 @@ export default function Screen() {
 
 				{showDetails && (
 					<Card label="Details">
-						{book.extension && <InfoRow label="Format" value={book.extension.toUpperCase()} />}
-						{!!formattedSize && <InfoRow label="Size" value={formattedSize} />}
-						{book.metadata?.language && <InfoRow label="Language" value={book.metadata.language} />}
+						{book.extension && <Card.Row label="Format" value={book.extension.toUpperCase()} />}
+						{!!formattedSize && <Card.Row label="Size" value={formattedSize} />}
+						{book.metadata?.language && (
+							<Card.Row label="Language" value={book.metadata.language} />
+						)}
 						{book.metadata?.ageRating != null && book.metadata.ageRating > 0 && (
-							<InfoRow label="Age Rating" value={`${book.metadata.ageRating}+`} />
+							<Card.Row label="Age Rating" value={`${book.metadata.ageRating}+`} />
 						)}
 					</Card>
 				)}

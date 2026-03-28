@@ -119,7 +119,7 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 	const handleDelete = useCallback(() => {
 		Alert.alert(
 			'Delete Book',
-			`Are you sure you want to delete "${downloadedFile.bookName || 'this book'}"?`,
+			`Are you sure you want to delete '${downloadedFile.bookName ? `'${downloadedFile.bookName}'` : 'this book'}'?`,
 			[
 				{ text: 'Cancel', style: 'cancel' },
 				{

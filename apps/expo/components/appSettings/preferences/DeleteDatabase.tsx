@@ -30,7 +30,7 @@ export default function DeleteDatabase() {
 					}
 				}}
 			>
-				<Text className="text-foreground-on-fill">Delete</Text>
+				<Text>Delete</Text>
 			</Button>
 		</AppSettingsRow>
 	)

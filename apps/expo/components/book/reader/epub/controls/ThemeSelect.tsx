@@ -77,7 +77,7 @@ const ThemePreviewButton = ({ name, config, isActive, themeNames }: ThemePreview
 			return
 		}
 
-		Alert.alert('Delete Theme', `Are you sure you want to delete "${name}"?`, [
+		Alert.alert('Delete Theme', `Are you sure you want to delete '${name}'?`, [
 			{ text: 'Cancel', style: 'cancel' },
 			{
 				text: 'Delete',

@@ -13,7 +13,6 @@ import { useActiveServer } from '~/components/activeServer'
 import {
 	DescriptionSection,
 	IdentifiersSheet,
-	InfoRow,
 	useOverviewAnimations,
 } from '~/components/book/overview'
 import { ThumbnailImage } from '~/components/image'
@@ -44,6 +43,7 @@ import {
 	useIsOPDSPublicationDownloaded,
 	useOPDSDownload,
 } from '~/lib/hooks'
+import { cn } from '~/lib/utils'
 import { usePreferencesStore } from '~/stores'
 
 import { usePublicationContext } from './context'
@@ -243,19 +243,17 @@ export default function Screen() {
 				</Animated.View>
 
 				<View className="gap-8 px-4 tablet:px-6">
-					<View className="flex items-center gap-4">
-						<ThumbnailImage
-							source={{
-								uri: thumbnailURL || '',
-								headers: {
-									...sdk.customHeaders,
-									Authorization: sdk.authorizationHeader || '',
-								},
-							}}
-							size={{ height: 235 / thumbnailRatio, width: 235 }}
-							borderAndShadowStyle={{ shadowRadius: 5 }}
-						/>
-					</View>
+					<ThumbnailImage
+						source={{
+							uri: thumbnailURL || '',
+							headers: {
+								...sdk.customHeaders,
+								Authorization: sdk.authorizationHeader || '',
+							},
+						}}
+						size={{ height: 235 / thumbnailRatio, width: 235 }}
+						borderAndShadowStyle={{ shadowRadius: 5 }}
+					/>
 
 					<View className="gap-2">
 						<Heading size="lg" className="text-center leading-6" numberOfLines={3}>
@@ -331,38 +329,40 @@ export default function Screen() {
 							</Card.StatGroup>
 						</Card>
 					)}
+
+					<View className="gap-2">
+						{/* Note: I gave some of the rounded children here less border radius because it looked better to my eyes */}
+						{!canDownload && !isDownloaded && (
+							<View className="squircle ios:rounded-3xl rounded-2xl bg-fill-warning-secondary p-3">
+								<Text>
+									{!downloadURL
+										? 'No download link available for this publication'
+										: `Unsupported file format: ${acquisitionLink?.type || 'unknown'}`}
+								</Text>
+							</View>
+						)}
+
+						{!canStream && (
+							<View className="squircle ios:rounded-3xl rounded-2xl bg-fill-info-secondary p-3">
+								<Text>This publication lacks a defined reading order and cannot be streamed</Text>
+							</View>
+						)}
+
+						{!isSupportedStream && (
+							<View className="squircle ios:rounded-3xl rounded-2xl bg-fill-info-secondary p-3">
+								<Text>
+									This publication contains unsupported media types and cannot be streamed yet
+								</Text>
+							</View>
+						)}
+					</View>
 				</View>
 			</View>
 
 			<View className="squircle ios:rounded-[3rem] ios:-mt-[4.5rem] -mt-[2.5rem] gap-8 rounded-[2.5rem] bg-background px-4 py-6 tablet:px-6">
-				{/* Note: I gave some of the rounded children here less border radius because it looked better to my eyes */}
-				{!canDownload && !isDownloaded && (
-					<View className="squircle ios:rounded-3xl rounded-2xl bg-fill-warning-secondary p-3">
-						<Text>
-							{!downloadURL
-								? 'No download link available for this publication'
-								: `Unsupported file format: ${acquisitionLink?.type || 'unknown'}`}
-						</Text>
-					</View>
-				)}
-
-				{!canStream && (
-					<View className="squircle ios:rounded-3xl rounded-2xl bg-fill-info-secondary p-3">
-						<Text>This publication lacks a defined reading order and cannot be streamed</Text>
-					</View>
-				)}
-
-				{!isSupportedStream && (
-					<View className="squircle ios:rounded-3xl rounded-2xl bg-fill-info-secondary p-3">
-						<Text>
-							This publication contains unsupported media types and cannot be streamed yet
-						</Text>
-					</View>
-				)}
-
 				{!!description && <DescriptionSection description={description} />}
 
-				<Card>
+				<Card className={cn(!description && 'px-2')}>
 					<Card.StatGroup>
 						{!!publisher && <Card.Stat label="Publisher" value={publisher} />}
 						{volume != null && <Card.Stat label="Volume" value={volume} />}
@@ -427,17 +427,17 @@ export default function Screen() {
 				)}
 
 				<Card label="Details">
-					{subtitle && <InfoRow label="Subtitle" value={subtitle} longValue />}
-					{language && <InfoRow label="Language" value={language} />}
-					{readingDirection && <InfoRow label="Reading direction" value={readingDirection} />}
+					{subtitle && <Card.LongRow label="Subtitle" value={subtitle} />}
+					{language && <Card.Row label="Language" value={language} />}
+					{readingDirection && <Card.Row label="Reading direction" value={readingDirection} />}
 					{modified && (
-						<InfoRow
+						<Card.Row
 							label="Modified"
 							value={intlFormat(modified, { month: 'long', day: 'numeric', year: 'numeric' })}
 						/>
 					)}
 					{published && (
-						<InfoRow
+						<Card.Row
 							label="Published"
 							value={intlFormat(published, { month: 'long', day: 'numeric', year: 'numeric' })}
 						/>

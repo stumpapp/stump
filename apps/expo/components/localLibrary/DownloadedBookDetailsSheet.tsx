@@ -14,7 +14,7 @@ import { useColors } from '~/lib/constants'
 import { formatBytes } from '~/lib/format'
 import { usePreferencesStore } from '~/stores'
 
-import { DescriptionSection, InfoRow, useOverviewAnimations } from '../book/overview'
+import { DescriptionSection, useOverviewAnimations } from '../book/overview'
 import { ThumbnailImage } from '../image'
 import { MetadataBadgeSection } from '../overview'
 import { Card, Heading, Text } from '../ui'
@@ -210,14 +210,14 @@ export const DownloadedBookDetailsSheet = forwardRef<TrueSheet, Props>(
 
 						{showDetails && (
 							<Card label="Details">
-								{extension && <InfoRow label="Format" value={extension} />}
-								{!!formattedSize && <InfoRow label="Size" value={formattedSize} />}
-								{metadata?.language && <InfoRow label="Language" value={metadata.language} />}
+								{extension && <Card.Row label="Format" value={extension} />}
+								{!!formattedSize && <Card.Row label="Size" value={formattedSize} />}
+								{metadata?.language && <Card.Row label="Language" value={metadata.language} />}
 								{metadata?.ageRating != null && metadata.ageRating > 0 && (
-									<InfoRow label="Age Rating" value={`${metadata.ageRating}+`} />
+									<Card.Row label="Age Rating" value={`${metadata.ageRating}+`} />
 								)}
 								{downloadedFile.downloadedAt && (
-									<InfoRow
+									<Card.Row
 										label="Downloaded"
 										value={intlFormat(new Date(downloadedFile.downloadedAt), {
 											month: 'long',

@@ -151,7 +151,7 @@ export default function BookMenu({ data }: Props) {
 	})
 
 	const confirmMarkAsRead = useCallback(() => {
-		Alert.alert('Mark as Read', `Are you sure you want to mark "${book.resolvedName}" as read?`, [
+		Alert.alert('Mark as Read', `Are you sure you want to mark '${book.resolvedName}' as read?`, [
 			{ text: 'Cancel', style: 'cancel' },
 			{ text: 'Mark as Read', onPress: () => completeBook({ id: book.id, isComplete: true }) },
 		])
@@ -160,7 +160,7 @@ export default function BookMenu({ data }: Props) {
 	const confirmClearProgress = useCallback(() => {
 		Alert.alert(
 			'Clear Progress',
-			`Are you sure you want to clear your reading for "${book.resolvedName}"?`,
+			`Are you sure you want to clear your current reading of '${book.resolvedName}'?`,
 			[
 				{ text: 'Cancel', style: 'cancel' },
 				{
@@ -175,7 +175,7 @@ export default function BookMenu({ data }: Props) {
 	const confirmDeleteReadHistory = useCallback(() => {
 		Alert.alert(
 			'Delete Read History',
-			`Are you sure you want to delete your read history for "${book.resolvedName}"?`,
+			`Are you sure you want to delete your read history for '${book.resolvedName}'?`,
 			[
 				{ text: 'Cancel', style: 'cancel' },
 				{ text: 'Delete', style: 'destructive', onPress: () => deleteReadHistory({ id: book.id }) },

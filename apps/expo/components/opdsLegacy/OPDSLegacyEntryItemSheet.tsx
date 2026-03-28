@@ -14,12 +14,7 @@ import { useColorScheme } from '~/lib/useColorScheme'
 import { usePreferencesStore } from '~/stores'
 
 import { useActiveServer } from '../activeServer'
-import {
-	DescriptionSection,
-	IdentifiersSheet,
-	InfoRow,
-	useOverviewAnimations,
-} from '../book/overview'
+import { DescriptionSection, IdentifiersSheet, useOverviewAnimations } from '../book/overview'
 import { useFileExplorerAssets } from '../fileExplorer'
 import { ThumbnailImage, TurboImage } from '../image'
 import { useResolveURL } from '../opds/utils'
@@ -154,9 +149,9 @@ export const OPDSLegacyEntryItemSheet = forwardRef<TrueSheet, Props>(
 						/>
 
 						<Card label="Details">
-							<InfoRow label="Server" value={serverName} />
+							<Card.Row label="Server" value={serverName} />
 							{entry.updated && (
-								<InfoRow
+								<Card.Row
 									label="Updated"
 									value={intlFormat(new Date(entry.updated), {
 										month: 'long',

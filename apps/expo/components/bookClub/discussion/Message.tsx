@@ -166,7 +166,7 @@ function Message({
 								<Pressable
 									key={key}
 									className={cn(
-										'flex-row items-center gap-1.5 rounded-full border px-2 py-1.5',
+										'squircle flex-row items-center gap-1.5 rounded-full border px-2 py-1.5',
 										!reaction.reactedByMe && 'border-edge bg-background-surface',
 									)}
 									onPress={onPress}

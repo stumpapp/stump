@@ -102,7 +102,7 @@ export default function MessageComposer({
 			>
 				<TextInput
 					ref={inputRef}
-					className="native:text-base max-h-[120px] min-h-[40px] flex-1 rounded-2xl border border-edge bg-background-surface px-3 py-2 text-foreground"
+					className="native:text-base squircle max-h-[120px] min-h-[40px] flex-1 rounded-2xl border border-edge bg-background-surface px-3 py-2 text-foreground"
 					placeholder={placeholder}
 					placeholderTextColor="#999"
 					value={text}

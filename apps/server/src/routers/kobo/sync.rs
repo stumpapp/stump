@@ -1,4 +1,4 @@
-use std::str::Utf8Error;
+use std::{collections::HashMap, str::Utf8Error};
 
 use axum::{
 	body::Body,
@@ -15,6 +15,7 @@ use models::{
 	entity::{
 		kobo_sync,
 		media::{self, ModelWithMetadata},
+		reading_session,
 		user::AuthUser,
 	},
 	shared::{
@@ -311,12 +312,27 @@ impl<'a> KoboSync<'a> {
 	) -> Result<(SyncPage, Vec<SyncItem>), DbErr> {
 		let sync_page = self.paged_media_ids(offset, limit);
 
-		let items =
+		let items: Vec<media::ModelWithMetadata> =
 			ModelWithMetadata::find_by_ids_for_user(&sync_page.media_ids, self.user)
 				.filter(media::Column::Extension.eq("epub"))
 				.into_model::<media::ModelWithMetadata>()
 				.all(self.db)
 				.await?;
+
+		let reading_sessions = reading_session::Entity::find()
+			.filter(reading_session::Column::UserId.eq(self.user.id.clone()))
+			.filter(reading_session::Column::MediaId.is_in(&sync_page.media_ids))
+			.all(self.db)
+			.await?;
+
+		// TODO: this is not the correct way to do this!
+		// we should be able to do this in a single query.
+		// also, we need to properly handle cases where there are multiple sessions for a single
+		// piece of media.
+		let mut reading_sessions_by_media_id = HashMap::new();
+		for rs in reading_sessions {
+			reading_sessions_by_media_id.insert(rs.media_id.clone(), rs);
+		}
 
 		let sync_items: Vec<SyncItem> = items
 			.into_iter()
@@ -324,13 +340,15 @@ impl<'a> KoboSync<'a> {
 				let book_url =
 					format!("{}/v1/books/{}/file/epub", kobo_api_base_url, m.media.id);
 
+				let rs = reading_sessions_by_media_id.get(&m.media.id);
+
 				if self
 					.model
 					.previous_sync_at
 					.map_or(true, |ps| m.media.created_at >= ps)
 				{
 					SyncItem::NewEntitlement(BookEntitlementContainer::from_media(
-						m, book_url,
+						m, rs, book_url,
 					))
 				} else {
 					SyncItem::ChangedProductMetadata(BookMetadata::from_media(

@@ -1,6 +1,6 @@
 use crate::routers::kobo::sync_types::*;
 use chrono::Utc;
-use models::entity::media;
+use models::entity::{media, reading_session};
 
 impl BookMetadata {
 	pub fn from_media(m: &media::ModelWithMetadata, book_url: String) -> Self {
@@ -63,12 +63,9 @@ impl BookMetadata {
 	}
 }
 
-impl BookEntitlementContainer {
-	pub fn from_media(m: media::ModelWithMetadata, book_url: String) -> Self {
-		let media_id = &m.media.id;
-
-		// TODO
-		let reading_state = ReadingState {
+impl ReadingState {
+	fn unread(media_id: String) -> Self {
+		ReadingState {
 			created: Utc::now(),
 			current_bookmark: CurrentBookmark {
 				last_modified: Utc::now(),
@@ -76,7 +73,7 @@ impl BookEntitlementContainer {
 				content_source_progress_percent: None,
 				location: None,
 			},
-			entitlement_id: media_id.clone(),
+			entitlement_id: media_id,
 			last_modified: Utc::now(),
 			priority_timestamp: Utc::now(),
 			statistics: Statistics {
@@ -84,10 +81,56 @@ impl BookEntitlementContainer {
 			},
 			status_info: StatusInfo {
 				last_modified: Utc::now(),
-				status: "ReadyToRead".to_string(),
+				status: Status::ReadyToRead,
 				times_started_reading: 0,
 			},
-		};
+		}
+	}
+
+	pub fn from_active_reading_session(
+		media_id: String,
+		rs: Option<&reading_session::Model>,
+	) -> Self {
+		match rs {
+			None => ReadingState::unread(media_id),
+			Some(rs) => ReadingState {
+				created: rs.started_at.to_utc(), // TODO
+				current_bookmark: CurrentBookmark {
+					last_modified: rs.updated_at.unwrap_or(rs.started_at).to_utc(), // TODO
+					progress_percent: rs
+						.percentage_completed
+						.and_then(|pc| f32::try_from(pc).ok().map(|pc| pc * 100.0)), // TODO horrible
+					content_source_progress_percent: rs
+						.percentage_completed
+						.and_then(|pc| f32::try_from(pc).ok().map(|pc| pc * 100.0)), // TODO horrible
+					location: None,                                                 // TODO kobo span
+				},
+				entitlement_id: media_id,
+				last_modified: rs.updated_at.unwrap_or(rs.started_at).to_utc(), // TODO
+				priority_timestamp: rs.updated_at.unwrap_or(rs.started_at).to_utc(), // TODO
+				statistics: Statistics {
+					last_modified: rs.updated_at.unwrap_or(rs.started_at).to_utc(), // TODO
+				},
+				status_info: StatusInfo {
+					last_modified: rs.updated_at.unwrap_or(rs.started_at).to_utc(), // TODO
+					status: Status::Reading,
+					times_started_reading: 1, // TODO we could actually track this
+				},
+			},
+		}
+	}
+}
+
+impl BookEntitlementContainer {
+	pub fn from_media(
+		m: media::ModelWithMetadata,
+		rs: Option<&reading_session::Model>,
+		book_url: String,
+	) -> Self {
+		let media_id = &m.media.id;
+
+		let reading_state =
+			ReadingState::from_active_reading_session(media_id.clone(), rs);
 
 		BookEntitlementContainer {
 			book_entitlement: BookEntitlement {

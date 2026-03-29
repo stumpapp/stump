@@ -6,6 +6,7 @@ pub enum SyncItem {
 	NewEntitlement(BookEntitlementContainer),
 	ChangedEntitlement(BookEntitlementContainer),
 	ChangedProductMetadata(BookMetadata),
+	ChangedReadingState(ReadingStateContainer),
 }
 
 #[derive(Serialize)]
@@ -14,6 +15,12 @@ pub struct BookEntitlementContainer {
 	pub book_entitlement: BookEntitlement,
 	pub book_metadata: BookMetadata,
 	pub reading_state: Option<ReadingState>,
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "PascalCase")]
+pub struct ReadingStateContainer {
+	pub reading_state: ReadingState,
 }
 
 #[derive(Serialize)]
@@ -119,7 +126,7 @@ pub struct Series {
 	pub id: String,
 	pub name: String,
 	pub number: String,
-	pub number_float: f64,
+	pub number_float: f32,
 }
 
 #[derive(Serialize)]
@@ -138,8 +145,8 @@ pub struct ReadingState {
 #[serde(rename_all = "PascalCase")]
 pub struct CurrentBookmark {
 	pub last_modified: DateTime<Utc>,
-	pub progress_percent: Option<f64>,
-	pub content_source_progress_percent: Option<f64>,
+	pub progress_percent: Option<f32>,
+	pub content_source_progress_percent: Option<f32>,
 	pub location: Option<Location>,
 }
 
@@ -161,8 +168,15 @@ pub struct Statistics {
 #[serde(rename_all = "PascalCase")]
 pub struct StatusInfo {
 	pub last_modified: DateTime<Utc>,
-	pub status: String,
+	pub status: Status,
 	pub times_started_reading: u32,
+}
+
+#[derive(Serialize, Deserialize)]
+pub enum Status {
+	ReadyToRead,
+	Finished,
+	Reading,
 }
 
 #[derive(Serialize)]

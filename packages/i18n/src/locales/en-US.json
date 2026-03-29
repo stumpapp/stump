@@ -1019,7 +1019,11 @@
 									"characters": "Characters",
 									"teams": "Teams",
 									"genres": "Genre",
-									"coverArtists": "Cover artists"
+									"coverArtists": "Cover artists",
+									"ageRating": "Age rating",
+									"year": "Year",
+									"month": "Month",
+									"day": "Day"
 								}
 							},
 							"series": {
@@ -1041,7 +1045,8 @@
 									"status": "Status",
 									"volume": "Volume",
 									"metaType": "Type",
-									"ageRating": "Age rating"
+									"ageRating": "Age rating",
+									"year": "Start year"
 								}
 							},
 							"library": {

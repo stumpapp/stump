@@ -5,13 +5,17 @@ import { ContactInformation, SupportInformation } from '~/components/appSettings
 import { AppDataUsageLink } from '~/components/appSettings/management'
 import {
 	AppLanguage,
+	AppPrimaryColor,
 	AppTheme,
 	AutoSyncLocalData,
 	DefaultServer,
 	DeleteDatabase,
+	DisableDismissGesture,
+	EnableDebugAnalytics,
 	ImageCacheActions,
 	MaskURLs,
 	PerformanceMonitor,
+	PreferMinimalReader,
 	PreferNativePdf,
 	ReaderSettingsLink,
 	ReduceAnimations,
@@ -19,8 +23,6 @@ import {
 	ThumbnailRatio,
 	ThumbnailResizeMode,
 } from '~/components/appSettings/preferences'
-import AppPrimaryColor from '~/components/appSettings/preferences/AppPrimaryColor'
-import DisableDismissGesture from '~/components/appSettings/preferences/DisableDismissGesture'
 import { BookClubsEnabled, StumpEnabled } from '~/components/appSettings/stump'
 import { Card } from '~/components/ui'
 
@@ -40,6 +42,7 @@ export default function Screen() {
 
 				<Card label="Reading">
 					<PreferNativePdf />
+					<PreferMinimalReader />
 					{Platform.OS === 'ios' && <DisableDismissGesture />}
 					<ReaderSettingsLink />
 				</Card>
@@ -63,6 +66,7 @@ export default function Screen() {
 					<PerformanceMonitor />
 					<ReduceAnimations />
 					<MaskURLs />
+					<EnableDebugAnalytics />
 				</Card>
 
 				<ContactInformation />

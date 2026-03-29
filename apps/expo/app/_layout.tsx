@@ -66,7 +66,7 @@ export default function RootLayout() {
 	const [isAnimationReady, setIsAnimationReady] = React.useState(false)
 	const [isReady, setIsReady] = React.useState(false)
 
-	const { error } = useMigrations(db, migrations)
+	const { error, success } = useMigrations(db, migrations)
 
 	const animation = React.useRef<LottieView>(null)
 	const { hideStatusBar, hideNavigationBar } = useHideSystemBars()
@@ -131,12 +131,13 @@ export default function RootLayout() {
 	}, [])
 
 	React.useEffect(() => {
+		if (!success) return
 		const manager = getDownloadQueueManager()
 		manager.initialize().catch((err) => {
 			console.error('Failed to initialize download queue manager:', err)
 			Sentry.captureException(err)
 		})
-	}, [])
+	}, [success])
 
 	let isDarkEpubTheme: boolean = isDarkColorScheme
 	if (epubThemeColors?.background && isReadingEbook) {

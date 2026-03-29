@@ -12,13 +12,7 @@ import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router'
 import { ChevronLeft } from 'lucide-react-native'
 import { useCallback, useLayoutEffect, useState } from 'react'
 import { Platform, Pressable, View } from 'react-native'
-import Animated, {
-	Extrapolation,
-	interpolate,
-	useAnimatedRef,
-	useAnimatedStyle,
-	useScrollOffset,
-} from 'react-native-reanimated'
+import Animated from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import TImage from 'react-native-turbo-image'
 
@@ -29,8 +23,8 @@ import {
 	DescriptionSection,
 	DownloadButton,
 	IdentifiersSheet,
+	useOverviewAnimations,
 } from '~/components/book/overview'
-import { InfoRow } from '~/components/book/overview'
 import { ThumbnailImage } from '~/components/image'
 import { MetadataBadgeSection } from '~/components/overview'
 import RefreshControl from '~/components/RefreshControl'
@@ -212,16 +206,7 @@ export default function Screen() {
 		}
 	}, [navigation, book, bookID])
 
-	const animatedScrollRef = useAnimatedRef<Animated.ScrollView>()
-	const scrollOffset = useScrollOffset(animatedScrollRef)
-
-	const parallaxStyle = useAnimatedStyle(() => {
-		return {
-			transform: [
-				{ translateY: interpolate(scrollOffset.value, [0, 200], [0, 100], Extrapolation.EXTEND) },
-			],
-		}
-	})
+	const { animatedScrollRef, parallaxStyle } = useOverviewAnimations()
 
 	if (!book) return null
 
@@ -453,6 +438,7 @@ export default function Screen() {
 									pathname: `/server/${serverID}/books/${bookID}/read`,
 								})
 							}
+							variant="brand"
 						>
 							{renderRead()}
 						</Button>
@@ -574,11 +560,13 @@ export default function Screen() {
 
 				{showDetails && (
 					<Card label="Details">
-						{book.extension && <InfoRow label="Format" value={book.extension.toUpperCase()} />}
-						{!!formattedSize && <InfoRow label="Size" value={formattedSize} />}
-						{book.metadata?.language && <InfoRow label="Language" value={book.metadata.language} />}
+						{book.extension && <Card.Row label="Format" value={book.extension.toUpperCase()} />}
+						{!!formattedSize && <Card.Row label="Size" value={formattedSize} />}
+						{book.metadata?.language && (
+							<Card.Row label="Language" value={book.metadata.language} />
+						)}
 						{book.metadata?.ageRating != null && book.metadata.ageRating > 0 && (
-							<InfoRow label="Age Rating" value={`${book.metadata.ageRating}+`} />
+							<Card.Row label="Age Rating" value={`${book.metadata.ageRating}+`} />
 						)}
 					</Card>
 				)}

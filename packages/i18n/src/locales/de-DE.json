@@ -54,7 +54,7 @@
 		},
 		"emailBook": {
 			"heading": "E-Mail das Buch",
-			"description": "Send this book to a device or email address",
+			"description": "Sende dieses Buch zu einem Gerät oder einer E-mail-Adresse",
 			"form": {
 				"email": {
 					"label": "E-Mail",
@@ -79,7 +79,7 @@
 			},
 			"description": {
 				"label": "Beschreibung",
-				"placeholder": "An 'Our Flag Means Death' fan club. We read pirate fiction to our hearts' content",
+				"placeholder": "Ein \"Unsere Flagge bedeutet den Tod\" Fanclub. Wir lesen Piratenfiktion nach Herzenslust",
 				"description": "Eine optionale, kurze Beschreibung deines Buchclubs"
 			},
 			"is_private": {
@@ -121,7 +121,7 @@
 				},
 				"hideProgress": {
 					"label": "Fortschritt verbergen",
-					"description": "If enabled, your reading progress will be hidden from other members of the book club"
+					"description": "Falls aktiviert, wird dein Lesefortschritt vor anderen Mitgliedern des Buchclubs verborgen"
 				}
 			}
 		},
@@ -132,13 +132,13 @@
 	},
 	"createBookClubScene": {
 		"heading": "Neuen Buchclub erstellen",
-		"subtitle": "You can create a private book club for a select few, or make it public for anyone on the server to join",
+		"subtitle": "Du kannst einen privaten Buchclub für einzelne Ausgewählte erstellen oder einen öffentlichen, welcher jeder auf dem Server beitreten kann",
 		"form": {
 			"stepLabel": "Schritt",
 			"steps": [
 				{
-					"label": "Allgemeines",
-					"heading": "Allgemeine Informationen",
+					"label": "Grundlegendes",
+					"heading": "Grundlegende Informationen",
 					"description": "Die Details des Clubs, einschließlich Name und Beschreibung"
 				},
 				{
@@ -148,7 +148,7 @@
 				},
 				{
 					"label": "Mitgliedschaft",
-					"heading": "Mitgliedschaftseinstellungen",
+					"heading": "Mitgliedschaftspräferenzen",
 					"description": "Zusätzliche Optionen für deinen Buchclub"
 				},
 				{
@@ -171,7 +171,7 @@
 	},
 	"bookClubSettingsScene": {
 		"sidebar": {
-			"basics": "Allgemeines",
+			"basics": "Grundlegendes",
 			"members": {
 				"members": "Mitglieder",
 				"roles": "Rollen",
@@ -188,7 +188,7 @@
 			}
 		},
 		"basics": {
-			"title": "Allgemeine Informationen",
+			"title": "Grundlegende Informationen",
 			"description": "Die Details dieses Buchclubs, einschließlich Name und Beschreibung",
 			"form": {
 				"submit": "Club aktualisieren"
@@ -211,7 +211,7 @@
 		},
 		"scheduling/scheduler": {
 			"title": "Planer",
-			"description": "Create and manage the scheduled readings for this book club"
+			"description": "Erstelle und verwalte die Lesetermine für diesen Buchclub"
 		},
 		"scheduling/options": {
 			"title": "Optionen",
@@ -453,14 +453,14 @@
 	},
 	"createLibraryScene": {
 		"heading": "Bibliothek erstellen",
-		"subtitle": "Libraries are used to group your books together. If you want a refresh on how they work, check out the",
+		"subtitle": "Bibliotheken dienen dazu, deine Bücher zusammenzufassen. Weitere Informationen über diese Einstellung findest du in der",
 		"subtitleLink": "dazugehörigen Dokumentation",
 		"form": {
 			"stepLabel": "Schritt",
 			"steps": [
 				{
-					"label": "Allgemeines",
-					"heading": "Allgemeine Informationen",
+					"label": "Grundlegendes",
+					"heading": "Grundlegende Informationen",
 					"description": "Die Details zu dieser Bibliothek, einschließlich Name, Pfad und Beschreibung"
 				},
 				{
@@ -536,10 +536,10 @@
 	},
 	"librarySettingsScene": {
 		"heading": "Einstellungen",
-		"subtitle": "Manage your library here. If you want a refresh on these settings, check out the",
+		"subtitle": "Verwalte deine Bibliothek hier. Weitere Informationen über diese Einstellung findest du in der",
 		"subtitleLink": "dazugehörigen Dokumentation",
 		"sidebar": {
-			"basics": "Allgemeines",
+			"basics": "Grundlegendes",
 			"configuration": {
 				"general": "Allgemein",
 				"reading": "Lesen",
@@ -556,7 +556,7 @@
 			}
 		},
 		"basics": {
-			"title": "Allgemeine Informationen",
+			"title": "Grundlegende Informationen",
 			"description": "Die Details zu dieser Bibliothek, einschließlich Name, Pfad und Beschreibung",
 			"form": {
 				"submit": "Bibliothek aktualisieren"
@@ -988,8 +988,8 @@
 			"stepLabel": "Schritt",
 			"steps": [
 				{
-					"label": "Allgemeines",
-					"heading": "Allgemeine Informationen",
+					"label": "Grundlegendes",
+					"heading": "Grundlegende Informationen",
 					"description": "Die Details dieser intelligenten Liste, einschließlich Name, Beschreibung und Sichtbarkeit"
 				},
 				{
@@ -1076,7 +1076,7 @@
 	},
 	"smartListSettingsScene": {
 		"sidebar": {
-			"basics": "Allgemeines",
+			"basics": "Grundlegendes",
 			"configuration": {
 				"label": "Konfiguration",
 				"access": "Zugriff",
@@ -1088,7 +1088,7 @@
 			}
 		},
 		"basics": {
-			"title": "Allgemeine Informationen",
+			"title": "Grundlegende Informationen",
 			"description": "Die Details dieser intelligenten Liste, einschließlich Name und Beschreibung"
 		},
 		"access": {
@@ -1098,7 +1098,7 @@
 				"visibility": {
 					"confirmation": {
 						"public": "Dies wird die Liste für alle sichtbar machen",
-						"private": "This will change the list to be private, hiding it from anyone who previously had access",
+						"private": "Dies wird die Liste privatisieren und macht sie für alle Personen unsichtbar, die zuvor Zugriff darauf hatten",
 						"shared": "Du musst die Liste mit bestimmten Benutzern teilen, um ihnen Zugriff zu gewähren",
 						"fallback": "Bist du sicher, dass du die Sichtbarkeit dieser Liste ändern möchten?"
 					}
@@ -1291,8 +1291,8 @@
 			"description": "Passe das Aussehen und die Bedienung der Anwendung an",
 			"sections": {
 				"themeAndAppearance": {
-					"label": "Theme and appearance",
-					"description": "The basic look and feel options for Stump"
+					"label": "Theme und Erscheinung",
+					"description": "Die grundlegenden Erscheinungseinstellungen für Stump"
 				},
 				"themeSelect": {
 					"label": "Design",
@@ -1313,50 +1313,50 @@
 					}
 				},
 				"gradientToggle": {
-					"label": "Enable gradients",
-					"description": "Some themes optionally support gradients for a more dynamic look"
+					"label": "Farbverläufe aktivieren",
+					"description": "Manche Designs unterstützen optional Farbverläufe für ein dynamischeres Erscheinungsbild"
 				},
 				"fontSelect": {
 					"label": "Schriftart",
 					"description": "Passe die Schriftart an, die in der Anwendung genutzt wird"
 				},
 				"thumbnailRatioSelect": {
-					"label": "Thumbnail Ratio",
-					"description": "The aspect ratio to use for thumbnails"
+					"label": "Vorschaubildverhältnis",
+					"description": "Das Seitenverhältnis für Vorschaubilder"
 				},
 				"thumbnailPlaceholder": {
-					"label": "Thumbnail placeholder",
-					"description": "The style to use for thumbnail placeholders",
+					"label": "Vorschaubild-Platzhalter",
+					"description": "Der Stil, welcher für Vorschaubild-Platzhalter benutzt wird",
 					"configuration": {
-						"grayscale": "Grayscale",
-						"averageColor": "Average color",
-						"colorful": "Colorful",
+						"grayscale": "Graustufen",
+						"averageColor": "Durchschnittsfarbe",
+						"colorful": "Farbenfroh",
 						"thumbhash": "Thumbhash"
 					}
 				},
 				"layoutAndArrangement": {
-					"label": "Layout and arrangement",
-					"description": "Customize how Stump displays information and organizes content"
+					"label": "Layout und Anordnung",
+					"description": "Passe an wie Stump Informationen anzeigt und Inhalte organisiert"
 				},
 				"primaryNavigation": {
-					"label": "Primary navigation",
-					"description": "Choose between a minimal sidebar or a topbar navigation",
+					"label": "Primäre Navigation",
+					"description": "Wähle zwischen einer minimalen Seiten- oder einer Topleisten Navigation",
 					"configuration": {
-						"sidebar": "Sidebar",
-						"topbar": "Topbar"
+						"sidebar": "Seitenleiste",
+						"topbar": "Topleiste"
 					},
-					"disclaimer": "* Settings for the unselected option will be disabled or hidden"
+					"disclaimer": "* Einstellungen für die nicht ausgewählten Optionen werden deaktiviert und ausgeblendet"
 				},
 				"doubleSidebar": {
-					"label": "Settings sidebar",
-					"description": "Enables the sidebar navigation for the settings pages. If you frequently use a smaller screen, you may want to disable this."
+					"label": "Seitenleisteneinstellungen",
+					"description": "Aktiviert die Seitenleisten-Navigation für die Einstellungsseiten. Falls du häufig einen kleineren Bildschirm verwendest, sollten du dies vielleicht deaktivieren."
 				},
 				"replacePrimarySidebar": {
-					"label": "Replace primary sidebar",
-					"description": "Any instance of a secondary sidebar will replace the primary sidebar instead of being displayed next to it",
+					"label": "Primäre Seitenleiste ersetzen",
+					"description": "Jede Instanz einer sekundären Seitenleiste ersetzt die primäre Seitenleiste, anstatt neben dieser angezeigt zu werden",
 					"tooltips": {
-						"doubleSidebar": "This setting requires the settings sidebar to be enabled",
-						"topbar": "This setting is not currently supported when the primary navigation is set to top bar"
+						"doubleSidebar": "Diese Einstellung erfordert die Seitenleisteneinstellungen aktiviert zu sein",
+						"topbar": "Diese Einstellung ist derzeit nicht unterstützt, wenn die primäre Navigation auf Topleiste eingestellt ist"
 					}
 				},
 				"navigationArrangement": {
@@ -1387,58 +1387,58 @@
 					}
 				},
 				"displaySpacing": {
-					"label": "Display spacing",
-					"description": "Adjusts the overall spacing between elements throughout the app",
+					"label": "Anzeigeabstand",
+					"description": "Ändert den allgemeinen Abstand zwischen Elementen in der gesamten App",
 					"configuration": {
-						"default": "Default",
-						"compact": "Compact"
+						"default": "Standard",
+						"compact": "Kompakt"
 					},
-					"disclaimer": "* Compact display mode is not implemented yet"
+					"disclaimer": "* Kompakter Anzeigemodus ist noch nicht implementiert"
 				},
 				"maxWidthPreference": {
-					"label": "Adjusted width",
-					"description": "Stump applies a max-width to the viewport. This setting allows you to adjust or remove this limit",
-					"tooltip": "This setting is not currently supported when the primary navigation is set to sidebar"
+					"label": "Angepasste Breite",
+					"description": "Stump wendet eine Maximalbreite auf das Ansichtsfenster an. Diese Einstellung erlaubt dir das Limit zu verändern oder ganz zu entfernen",
+					"tooltip": "Diese Einstellung ist derzeit nicht unterstützt, wenn die primäre Navigation auf Seitenleiste eingestellt ist"
 				},
 				"additionalPreferences": {
-					"label": "Additional preferences",
-					"description": "Customize the appearance and behavior of Stump with these additional settings"
+					"label": "Zusätzliche Präferenzen",
+					"description": "Passe das Aussehen und Verhalten von Stump mit diesen zusätzlichen Einstellungen an"
 				},
 				"showThumbnailsInHeader": {
-					"label": "Show thumbnails in headers",
-					"description": "If you prefer to see thumbnails more often, this setting will show them in more places",
+					"label": "Vorschaubilder in Kopfzeilen anzeigen",
+					"description": "Falls du die Vorschaubilder öfters sehen möchtest, wird diese Einstellung sie an mehr Stellen zeigen",
 					"tooltips": {
-						"enabled": "This setting will show thumbnails in more places",
-						"disabled": "This setting will not show thumbnails in more places"
+						"enabled": "Diese Einstellung wird Vorschaubilder an mehr Stellen zeigen",
+						"disabled": "Diese Einstellung wird nicht mehr Vorschaubilder an mehr Stelllen zeigen"
 					}
 				},
 				"hideScrollbarToggle": {
-					"label": "Hide scrollbar",
-					"description": "Some pages simply look better without a scrollbar, this setting will hide it when possible",
+					"label": "Scrollbar ausblenden",
+					"description": "Manche Seiten sehen einfach besser aus ohne Scrollbar. Diese Einstellung wird diese, wenn möglich, verstecken",
 					"tooltips": {
-						"enabled": "This setting will hide the scrollbar on some pages",
-						"disabled": "This setting will show the scrollbar on some pages"
+						"enabled": "Diese Einstellung versteckt die Scrollbar auf manchen Seiten",
+						"disabled": "Diese Einstellung zeigt die Scrollbar auf manchen Seiten"
 					}
 				},
 				"enableAlphabetFiltering": {
-					"label": "Alphabet filtering",
-					"description": "Show an alphabet filter when applicable"
+					"label": "Alphabetisches Filtern",
+					"description": "Zeige einen Alphabetfilter, wenn zutreffend"
 				},
 				"enableFancyAnimations": {
-					"label": "Fancy animations",
-					"description": "A broad opt-in for fancier animations throughout the app"
+					"label": "Schicke Animationen",
+					"description": "Ein generelles Opt-In für schickere Animationen in der gesamten App"
 				},
 				"queryIndicatorToggle": {
-					"label": "Background fetch indicator",
-					"description": "Show a loading indicator whenever a query is running in the background"
+					"label": "Hintergrundabrufindikator",
+					"description": "Zeige einen Ladeindikator, wenn eine Abfrage im Hintergrund ausgeführt wird"
 				},
 				"liveRefetchToggle": {
-					"label": "Live refetch",
-					"description": "Refetch queries on the fly to hydrate the UI with new data as it comes in. This can be resource intensive"
+					"label": "Live Neuaufruf",
+					"description": "Rufe Abfragen sofort neu auf, um die Benutzeroberfläche mit neuen Daten zu befüllen, sobald diese eintreffen. Dies kann sehr ressourcenintensiv sein"
 				},
 				"enableJobOverlayToggle": {
-					"label": "Job overlay",
-					"description": "Show a floating overlay while a job is running"
+					"label": "Job Overlay",
+					"description": "Zeige ein schwebendes Overlay, während ein Job läuft"
 				}
 			}
 		},
@@ -1656,7 +1656,7 @@
 						"description": "Führe den gebündelten Server im Hintergrund aus, während die Desktopanwendung läuft (Neustart erforderlich)"
 					},
 					"discordPresence": {
-						"label": "Discord Presence",
+						"label": "Discord Rich-Präsenz",
 						"description": "Zeige deine Stump Aktivität in Discord mit Discord Rich Presence",
 						"reconnect": "Wieder mit Discord verbinden"
 					}
@@ -1673,7 +1673,7 @@
 				},
 				"serverInfo": {
 					"title": "Serverinformation",
-					"description": "Allgemeine Informationen über diese Sump Serverinstanz",
+					"description": "Grundlegende Informationen über deine Stump Serverinstanz",
 					"build": {
 						"label": "Build",
 						"description": "Versions- und Build-Details",
@@ -1841,7 +1841,7 @@
 						}
 					},
 					"feature": {
-						"label": "Feature Opt-In",
+						"label": "Funktionen Opt-In",
 						"api_keys": {
 							"label": "API Schlüssel",
 							"description": "Erlaube dem Benutzer seine eigenen API Schlüssel zu verwalten"
@@ -1961,7 +1961,7 @@
 		"server/email": {
 			"helmet": "E-Maileinstellungen",
 			"title": "E-Mail",
-			"description": "Settings related to configuring an SMTP emailer for your Stump server instance",
+			"description": "Einstellungen für die Konfiguration eines SMTP Mailserver für deine Stump Serverinstanz",
 			"sections": {
 				"emailers": {
 					"title": "SMTP Mailserver",

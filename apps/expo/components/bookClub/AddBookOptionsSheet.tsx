@@ -117,7 +117,7 @@ type OptionRowProps = {
 function OptionRow({ label, description, icon, onPress }: OptionRowProps) {
 	return (
 		<Pressable onPress={onPress}>
-			<View className="ios:rounded-[2rem] flex-row items-center gap-4 rounded-3xl bg-black/5 p-4 active:opacity-80 dark:bg-white/10">
+			<View className="ios:rounded-[2rem] squircle flex-row items-center gap-4 rounded-3xl bg-black/5 p-4 active:opacity-80 dark:bg-white/10">
 				<View className="dark:bg-white/15 h-10 w-10 items-center justify-center rounded-full bg-black/10">
 					{optionIcons[icon]}
 				</View>

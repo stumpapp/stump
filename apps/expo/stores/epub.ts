@@ -12,13 +12,18 @@ import {
 	NativeTableOfContentsItem,
 	ReadiumLocation,
 	ReadiumLocator,
-	ReadiumViewRef,
 } from '~/modules/readium'
 
 import { ZustandMMKVStorage } from './store'
 
 export { BookmarkRef } from '~/components/book/reader/image/context'
 export type { Decoration } from '~/modules/readium'
+
+const JUMP_STACK_TIMEOUT_MS = 80 * 1000 // 80 seconds
+const JUMP_STACK_MAX_SIZE = 3
+// A module-level timer _feels_ kinda like a smell lol but for now its fine I think.
+// I can always put it inside the store if needed
+let jumpStackTimerId: ReturnType<typeof setTimeout> | null = null
 
 export const trimFragmentFromHref = (href: string) => {
 	return href.split('#')[0]
@@ -113,96 +118,108 @@ export const resolveTocItemByPosition = (position: ReadiumLocation['position']) 
 
 export type EmbeddedMetadata = Pick<BookMetadata, 'title' | 'author' | 'language' | 'publisher'>
 
-export type OnBookmarkCallback = (
-	locator: ReadiumLocator,
-	previewContent?: string,
-) => Promise<{ id: string } | void>
-
-export type OnCreateAnnotationCallback = (
-	locator: ReadiumLocator,
-	annotationText?: string,
-) => Promise<{ id: string }>
-
-export type OnUpdateAnnotationCallback = (
-	annotationId: string,
-	annotationText: string | null,
-) => Promise<void>
-
-export type OnDeleteAnnotationCallback = (annotationId: string) => Promise<void>
-
-export type TocSource = 'native' | 'server'
-
-// FIXME: This store has gotten way out of control. Originally, I shoved all this in a store
-// because I was using expo router for navigation between various sheets within the reader stack,
-// however since moving to a programmatic sheet we don't need the store necessarily any more. I
-// kept the same approach for annotations, mostly because I don't have the time to rethink it and refactor,
-// however it should be done at some point down the road
+export type JumpEntry = {
+	locator: ReadiumLocator
+	direction: 'back' | 'forward'
+}
 
 export type IEpubLocationStore = {
 	book?: EbookReaderBookRef
-	storeBook: (book: EbookReaderBookRef) => void
-	actions?: ReadiumViewRef | null
-	storeActions: (actions: ReadiumViewRef | null) => void
-
-	requestHeaders?: () => Record<string, string>
-	storeHeaders: (callback: (() => Record<string, string>) | undefined) => void
+	setBook: (book: EbookReaderBookRef) => void
 
 	locator?: ReadiumLocator
 	currentChapter: string
 	position: number
 	totalPages: number
 	toc: TableOfContentsItem[]
-	tocSource: TocSource | null
 	embeddedMetadata?: EmbeddedMetadata
 	positions: ReadiumLocator[]
 
-	onTocChange: (toc: TableOfContentsItem[] | string[], source: TocSource) => void
+	// Note: I originally had jumpStack as ReadiumLocator[], but faced way too many timing issues
+	// wrt resolving the direction before the button would render since navigation isn't immediate.
+	// So, before a jump is pushed the pusher will compute that so when it renders it doesn't flash
+	// the incorrect direction
+	jumpStack: JumpEntry[]
+	pushJump: (locator: ReadiumLocator, direction: 'back' | 'forward') => void
+	popJump: () => JumpEntry | undefined
+	clearJumpStack: () => void
+
+	onTocChange: (toc: TableOfContentsItem[] | string[]) => void
 	onBookLoad: (metadata?: BookMetadata, positions?: ReadiumLocator[]) => void
 	onLocationChange: (locator: ReadiumLocator) => void
 	onUnload: () => void
 
 	bookmarks: BookmarkRef[]
-	storeBookmarks: (bookmarks: BookmarkRef[]) => void
+	setBookmarks: (bookmarks: BookmarkRef[]) => void
 	addBookmark: (bookmark: BookmarkRef) => void
 	removeBookmark: (bookmarkId: string) => void
 	isCurrentLocationBookmarked: () => boolean
 	getCurrentLocationBookmark: () => BookmarkRef | undefined
 
-	onBookmark?: OnBookmarkCallback
-	storeOnBookmark: (callback: OnBookmarkCallback | undefined) => void
-	onDeleteBookmark?: (bookmarkId: string) => Promise<void>
-	storeOnDeleteBookmark: (callback: ((bookmarkId: string) => Promise<void>) | undefined) => void
-
 	annotations: Decoration[]
-	storeAnnotations: (annotations: Decoration[]) => void
+	setAnnotations: (annotations: Decoration[]) => void
 	addAnnotation: (annotation: Decoration) => void
 	updateAnnotation: (annotation: Decoration) => void
 	removeAnnotation: (annotationId: string) => void
 	getAnnotation: (annotationId: string) => Decoration | undefined
-
-	onCreateAnnotation?: OnCreateAnnotationCallback
-	storeOnCreateAnnotation: (callback: OnCreateAnnotationCallback | undefined) => void
-	onUpdateAnnotation?: OnUpdateAnnotationCallback
-	storeOnUpdateAnnotation: (callback: OnUpdateAnnotationCallback | undefined) => void
-	onDeleteAnnotation?: OnDeleteAnnotationCallback
-	storeOnDeleteAnnotation: (callback: OnDeleteAnnotationCallback | undefined) => void
 }
 
 export const useEpubLocationStore = create<IEpubLocationStore>((set, get) => ({
-	storeBook: (book) => set({ book }),
-	storeActions: (ref) => set({ actions: ref }),
-
-	requestHeaders: undefined,
-	storeHeaders: (callback) => set({ requestHeaders: callback }),
+	setBook: (book) => set({ book }),
 
 	currentChapter: '',
 	position: 0,
 	totalPages: 0,
 	toc: [],
-	tocSource: null,
 	positions: [],
 
-	onTocChange: (toc, source) => {
+	jumpStack: [],
+	pushJump: (locator, direction) => {
+		const { jumpStack } = get()
+
+		if (jumpStackTimerId) {
+			clearTimeout(jumpStackTimerId)
+		}
+
+		const entry: JumpEntry = { locator, direction }
+		const newStack = [entry, ...jumpStack].slice(0, JUMP_STACK_MAX_SIZE)
+		set({ jumpStack: newStack })
+
+		jumpStackTimerId = setTimeout(() => {
+			set({ jumpStack: [] })
+			jumpStackTimerId = null
+		}, JUMP_STACK_TIMEOUT_MS)
+	},
+	popJump: () => {
+		const { jumpStack } = get()
+		if (jumpStack.length === 0) return undefined
+
+		const [first, ...rest] = jumpStack
+		set({ jumpStack: rest })
+
+		if (jumpStackTimerId) {
+			clearTimeout(jumpStackTimerId)
+		}
+		if (rest.length > 0) {
+			jumpStackTimerId = setTimeout(() => {
+				set({ jumpStack: [] })
+				jumpStackTimerId = null
+			}, JUMP_STACK_TIMEOUT_MS)
+		} else {
+			jumpStackTimerId = null
+		}
+
+		return first
+	},
+	clearJumpStack: () => {
+		if (jumpStackTimerId) {
+			clearTimeout(jumpStackTimerId)
+			jumpStackTimerId = null
+		}
+		set({ jumpStack: [] })
+	},
+
+	onTocChange: (toc) => {
 		let parsedToc: TableOfContentsItem[] = []
 		if (typeof toc[0] === 'string') {
 			parsedToc = parseToc(toc as string[])
@@ -215,10 +232,7 @@ export const useEpubLocationStore = create<IEpubLocationStore>((set, get) => ({
 			parsedToc = addPositionsToToc(parsedToc, positions)
 		}
 
-		set({
-			toc: parsedToc,
-			tocSource: source,
-		})
+		set({ toc: parsedToc })
 	},
 	onBookLoad: (metadata, positions) =>
 		set({
@@ -234,7 +248,7 @@ export const useEpubLocationStore = create<IEpubLocationStore>((set, get) => ({
 		}),
 
 	bookmarks: [],
-	storeBookmarks: (bookmarks) => set({ bookmarks }),
+	setBookmarks: (bookmarks) => set({ bookmarks }),
 	addBookmark: (bookmark) =>
 		set((state) => ({
 			bookmarks: [...state.bookmarks, bookmark],
@@ -262,13 +276,8 @@ export const useEpubLocationStore = create<IEpubLocationStore>((set, get) => ({
 		)
 	},
 
-	onBookmark: undefined,
-	storeOnBookmark: (callback) => set({ onBookmark: callback }),
-	onDeleteBookmark: undefined,
-	storeOnDeleteBookmark: (callback) => set({ onDeleteBookmark: callback }),
-
 	annotations: [],
-	storeAnnotations: (annotations) => set({ annotations }),
+	setAnnotations: (annotations) => set({ annotations }),
 	addAnnotation: (annotation) =>
 		set((state) => ({
 			annotations: [...state.annotations, annotation],
@@ -285,31 +294,23 @@ export const useEpubLocationStore = create<IEpubLocationStore>((set, get) => ({
 		return get().annotations.find((a) => a.id === annotationId)
 	},
 
-	onCreateAnnotation: undefined,
-	storeOnCreateAnnotation: (callback) => set({ onCreateAnnotation: callback }),
-	onUpdateAnnotation: undefined,
-	storeOnUpdateAnnotation: (callback) => set({ onUpdateAnnotation: callback }),
-	onDeleteAnnotation: undefined,
-	storeOnDeleteAnnotation: (callback) => set({ onDeleteAnnotation: callback }),
-
-	onUnload: () =>
+	onUnload: () => {
+		if (jumpStackTimerId) {
+			clearTimeout(jumpStackTimerId)
+			jumpStackTimerId = null
+		}
 		set({
 			currentChapter: '',
 			position: 0,
 			totalPages: 0,
 			toc: [],
-			tocSource: null,
 			book: undefined,
 			embeddedMetadata: undefined,
-			actions: null,
 			bookmarks: [],
-			onBookmark: undefined,
-			onDeleteBookmark: undefined,
 			annotations: [],
-			onCreateAnnotation: undefined,
-			onUpdateAnnotation: undefined,
-			onDeleteAnnotation: undefined,
-		}),
+			jumpStack: [],
+		})
+	},
 }))
 
 // TODO(highlights): Think through highlight colors that make sense for each preset theme

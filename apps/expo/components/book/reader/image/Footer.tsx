@@ -5,23 +5,17 @@ import { formatHumanDuration } from '@stump/i18n'
 import { STUMP_SAVE_BASIC_SESSION_HEADER } from '@stump/sdk/constants'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Platform, Pressable, View } from 'react-native'
-import Animated, {
-	Easing,
-	useAnimatedStyle,
-	useSharedValue,
-	withTiming,
-} from 'react-native-reanimated'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import Animated from 'react-native-reanimated'
 import TImage from 'react-native-turbo-image'
 
 import { getThumbnailResizeProps, TurboImage } from '~/components/image'
 import { Progress, Text } from '~/components/ui'
-import { CONTROLS_TIMING_CONFIG } from '~/lib/constants'
 import { useDisplay, usePrevious } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 import { usePreferencesStore, useReaderStore } from '~/stores'
 import { useBookPreferences, useBookReadTime } from '~/stores/reader'
 
+import { useReaderAnimations } from '../shared/readerAnimations'
 import { useImageBasedReader } from './context'
 
 const SIZE_MODIFIER = 1.5
@@ -53,13 +47,13 @@ export default function Footer() {
 	} = useBookPreferences({ book, serverId })
 
 	const galleryRef = useRef<FlashListRef<number[]>>(null)
-	const insets = useSafeAreaInsets()
 	const { getMappingKey } = useMappingHelper()
 
 	const visible = useReaderStore((state) => state.showControls)
 	const setShowControls = useReaderStore((state) => state.setShowControls)
 	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
 	const thumbnailResizeMode = usePreferencesStore((state) => state.thumbnailResizeMode)
+	const { secondaryStyle, translateFooterStyle } = useReaderAnimations()
 
 	const [isSliderDragging, setIsSliderDragging] = useState(false)
 
@@ -70,33 +64,6 @@ export default function Footer() {
 			width: baseWidth,
 		}
 	}, [isTablet, thumbnailRatio])
-
-	const opacity = useSharedValue(visible ? 1 : 0)
-	const translateY = useSharedValue(visible ? 0 : 50)
-	useEffect(
-		() => {
-			opacity.value = withTiming(visible ? 1 : 0, CONTROLS_TIMING_CONFIG)
-			translateY.value = withTiming(visible ? 0 : 50, {
-				...CONTROLS_TIMING_CONFIG,
-				easing: visible
-					? Easing.out(Easing.quad) // slow near the start
-					: Easing.in(Easing.quad), // slow near the end
-			})
-		},
-		// eslint-disable-next-line react-compiler/react-compiler
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[visible],
-	)
-
-	const animatedStyles = useAnimatedStyle(() => {
-		return {
-			left: insets.left,
-			right: insets.right,
-			bottom: insets.bottom,
-			transform: [{ translateY: translateY.value }],
-			opacity: opacity.value,
-		}
-	})
 
 	const percentage = (currentPage / book.pages) * 100
 
@@ -513,7 +480,10 @@ export default function Footer() {
 	)
 
 	return (
-		<Animated.View className="absolute z-20 shrink gap-4" style={animatedStyles}>
+		<Animated.View
+			className="insets-x-safe bottom-safe absolute z-20 shrink gap-4"
+			style={[secondaryStyle, translateFooterStyle]}
+		>
 			{footerControls === 'images' && readingMode !== ReadingMode.ContinuousVertical && (
 				<View style={isRtl && { transform: [{ scaleX: -1 }] }}>
 					<FlashList

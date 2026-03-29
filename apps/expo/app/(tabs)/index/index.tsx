@@ -2,12 +2,11 @@ import { useRouter } from 'expo-router'
 import partition from 'lodash/partition'
 import { ExternalLink, Rss, Server } from 'lucide-react-native'
 import { Fragment, useCallback, useEffect, useState } from 'react'
-import { Linking, useWindowDimensions, View } from 'react-native'
+import { Alert, Linking, useWindowDimensions, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 
 import EmptyState from '~/components/EmptyState'
 import { useOwlHeaderOffset } from '~/components/Owl'
-import DeleteServerConfirmation from '~/components/savedServer/DeleteServerConfirmation'
 import EditServerDialog from '~/components/savedServer/EditServerDialog'
 import SavedServerListItem from '~/components/savedServer/SavedServerListItem'
 import { Button, Icon, ListEmptyMessage, ListLabel, Text } from '~/components/ui'
@@ -22,7 +21,6 @@ export default function Screen() {
 
 	const [stumpServers, opdsServers] = partition(savedServers, (server) => server.kind === 'stump')
 	const [editingServer, setEditingServer] = useState<SavedServerWithConfig | null>(null)
-	const [deletingServer, setDeletingServer] = useState<SavedServer | null>(null)
 
 	const allOPDSServers = [...stumpServers.filter((server) => server.stumpOPDS), ...opdsServers]
 
@@ -67,12 +65,19 @@ export default function Screen() {
 	// 	})),
 	// })
 
-	const onConfirmDelete = useCallback(() => {
-		if (deletingServer) {
-			deleteServer(deletingServer.id)
-			setDeletingServer(null)
-		}
-	}, [deletingServer, deleteServer])
+	const handleDeleteServer = useCallback(
+		(server: SavedServer) => {
+			const message = server.stumpOPDS
+				? `This server is registered for both Stump and OPDS. Deleting it will remove both entries.\n\nAre you sure you want to delete '${server.name}'?`
+				: `Are you sure you want to delete '${server.name}'?`
+
+			Alert.alert('Delete Server', message, [
+				{ text: 'Cancel', style: 'cancel' },
+				{ text: 'Delete', style: 'destructive', onPress: () => deleteServer(server.id) },
+			])
+		},
+		[deleteServer],
+	)
 
 	const onSelectForEdit = useCallback(
 		async (server: SavedServer) => {
@@ -97,12 +102,6 @@ export default function Screen() {
 
 	return (
 		<Fragment>
-			<DeleteServerConfirmation
-				deletingServer={deletingServer}
-				onClose={() => setDeletingServer(null)}
-				onConfirm={onConfirmDelete}
-			/>
-
 			<EditServerDialog
 				editingServer={editingServer}
 				onClose={() => setEditingServer(null)}
@@ -156,7 +155,7 @@ export default function Screen() {
 										key={server.id}
 										server={server}
 										onEdit={() => onSelectForEdit(server)}
-										onDelete={() => setDeletingServer(server)}
+										onDelete={() => handleDeleteServer(server)}
 									/>
 								))}
 							</View>
@@ -175,7 +174,7 @@ export default function Screen() {
 									server={server}
 									forceOPDS
 									onEdit={() => onSelectForEdit(server)}
-									onDelete={() => setDeletingServer(server)}
+									onDelete={() => handleDeleteServer(server)}
 								/>
 							))}
 						</View>

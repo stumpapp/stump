@@ -11,7 +11,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { IS_IOS_24_PLUS, useColors } from '~/lib/constants'
 import { formatBytesSeparate } from '~/lib/format'
 
-import { InfoRow, LongValue, MetadataBadgeSection } from '../overview'
+import { MetadataBadgeSection } from '../overview'
 import { Card, Heading, Text } from '../ui'
 
 const query = graphql(`
@@ -172,26 +172,26 @@ function SheetContent({ series: { stats, metadata, resolvedName, tags } }: Sheet
 
 				{hasAbout && (
 					<Card label="About" className="px-6">
-						{metadata?.summary && <LongValue label="Summary" value={metadata.summary} />}
+						{metadata?.summary && <Card.LongRow label="Summary" value={metadata.summary} />}
 						{metadata?.descriptionFormatted && !metadata?.summary && (
-							<LongValue label="Description" value={metadata.descriptionFormatted} />
+							<Card.LongRow label="Description" value={metadata.descriptionFormatted} />
 						)}
 					</Card>
 				)}
 
 				{hasPublicationInfo && (
 					<Card label="Publication" className="px-6">
-						{metadata?.publisher && <InfoRow label="Publisher" value={metadata.publisher} />}
-						{metadata?.imprint && <InfoRow label="Imprint" value={metadata.imprint} />}
+						{metadata?.publisher && <Card.Row label="Publisher" value={metadata.publisher} />}
+						{metadata?.imprint && <Card.Row label="Imprint" value={metadata.imprint} />}
 						{metadata?.publicationRun && (
-							<InfoRow label="Publication Run" value={metadata.publicationRun} />
+							<Card.Row label="Publication Run" value={metadata.publicationRun} />
 						)}
-						{metadata?.status && <InfoRow label="Status" value={metadata.status} />}
-						{metadata?.booktype && <InfoRow label="Book Type" value={metadata.booktype} />}
-						{metadata?.year && <InfoRow label="Year" value={metadata.year.toString()} />}
-						{metadata?.volume && <InfoRow label="Volume" value={metadata.volume.toString()} />}
+						{metadata?.status && <Card.Row label="Status" value={metadata.status} />}
+						{metadata?.booktype && <Card.Row label="Book Type" value={metadata.booktype} />}
+						{metadata?.year && <Card.Row label="Year" value={metadata.year.toString()} />}
+						{metadata?.volume && <Card.Row label="Volume" value={metadata.volume.toString()} />}
 						{metadata?.totalIssues && (
-							<InfoRow label="Total Issues" value={metadata.totalIssues.toString()} />
+							<Card.Row label="Total Issues" value={metadata.totalIssues.toString()} />
 						)}
 					</Card>
 				)}
@@ -199,9 +199,9 @@ function SheetContent({ series: { stats, metadata, resolvedName, tags } }: Sheet
 				{hasDetails && (
 					<Card label="Details" className="px-6">
 						{metadata?.ageRating && (
-							<InfoRow label="Age Rating" value={metadata.ageRating.toString()} />
+							<Card.Row label="Age Rating" value={metadata.ageRating.toString()} />
 						)}
-						{metadata?.metaType && <InfoRow label="Type" value={metadata.metaType} />}
+						{metadata?.metaType && <Card.Row label="Type" value={metadata.metaType} />}
 					</Card>
 				)}
 

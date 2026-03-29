@@ -33,6 +33,9 @@ pub struct OidcConfig {
 	/// Disable local password authentication when OIDC is enabled
 	#[serde(default)]
 	pub disable_local_auth: bool,
+	/// Additional trusted audiences for ID token verification
+	#[serde(default)]
+	pub extra_audiences: Vec<String>,
 }
 
 impl Default for OidcConfig {
@@ -45,6 +48,7 @@ impl Default for OidcConfig {
 			scopes: default_oidc_scopes(),
 			allow_registration: true,
 			disable_local_auth: false,
+			extra_audiences: Vec::new(),
 		}
 	}
 }
@@ -105,6 +109,16 @@ impl OidcConfig {
 			.and_then(|v| v.parse::<bool>().ok())
 			.unwrap_or(false);
 
+		let extra_audiences = env::var(OIDC_EXTRA_AUDIENCES_KEY)
+			.ok()
+			.map(|v| {
+				v.split(',')
+					.map(|s| s.trim().to_string())
+					.filter(|s| !s.is_empty())
+					.collect()
+			})
+			.unwrap_or_default();
+
 		Some(Self {
 			enabled,
 			client_id,
@@ -113,6 +127,7 @@ impl OidcConfig {
 			scopes,
 			allow_registration,
 			disable_local_auth,
+			extra_audiences,
 		})
 	}
 
@@ -131,6 +146,11 @@ impl OidcConfig {
 			.map(|s| s.trim().to_string())
 			.filter(|s| !s.is_empty())
 			.collect()
+	}
+
+	/// Get the extra trusted audiences for ID token verification, if any
+	pub fn get_extra_audiences(&self) -> Vec<String> {
+		self.extra_audiences.clone()
 	}
 }
 

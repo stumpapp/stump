@@ -5,6 +5,7 @@ import { useLocalSearchParams } from 'expo-router'
 import ChevronBackLink from '~/components/ChevronBackLink'
 import EmptyState from '~/components/EmptyState'
 import { MaybeErrorFeed, OPDSFeed } from '~/components/opds'
+import { PaginationTarget } from '~/components/opds/useOPDSFeed'
 import { useOPDSFeedContext } from '~/context/opds'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
 import { constructSearchURL } from '~/lib/opdsUtils'
@@ -48,5 +49,17 @@ export default function Screen() {
 		return <MaybeErrorFeed error={error} onRetry={onRefetch} />
 	}
 
-	return <OPDSFeed feed={feed} onRefresh={onRefetch} isRefreshing={isRefetching} />
+	const paginationTarget: PaginationTarget =
+		feed.publications.length > 0 ? 'publications' : feed.navigation.length > 0 ? 'navigation' : null
+
+	return (
+		<OPDSFeed
+			feed={feed}
+			paginationTarget={paginationTarget}
+			publications={feed.publications}
+			navigation={feed.navigation}
+			onRefresh={onRefetch}
+			isRefreshing={isRefetching}
+		/>
+	)
 }

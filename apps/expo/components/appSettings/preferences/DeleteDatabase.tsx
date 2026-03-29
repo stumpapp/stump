@@ -19,6 +19,7 @@ export default function DeleteDatabase() {
 			<Button
 				size="sm"
 				variant="destructive"
+				roundness="full"
 				onPress={async () => {
 					try {
 						await deleteDatabase(__DEV__)
@@ -29,7 +30,7 @@ export default function DeleteDatabase() {
 					}
 				}}
 			>
-				<Text className="text-foreground">Delete</Text>
+				<Text>Delete</Text>
 			</Button>
 		</AppSettingsRow>
 	)

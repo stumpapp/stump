@@ -2776,6 +2776,7 @@ input SeriesMetadataFilterInput {
 	booktype: FieldFilterString = null
 	volume: NumericFilterI32 = null
 	status: FieldFilterString = null
+	year: NumericFilterI32 = null
 	_and: [SeriesMetadataFilterInput!] = null
 	_not: [SeriesMetadataFilterInput!] = null
 	_or: [SeriesMetadataFilterInput!] = null

@@ -50,7 +50,10 @@ export default function Brightness() {
 					value={brightness}
 					minimumTrackTintColor={colors.slider.minimumTrack}
 					maximumTrackTintColor={colors.slider.maximumTrack}
-					onValueChange={ExpoBrightness.setSystemBrightnessAsync}
+					onValueChange={(value) => {
+						setBrightness(value)
+						ExpoBrightness.setSystemBrightnessAsync(value)
+					}}
 				/>
 			</View>
 			<Icon as={Sun} className="h-6 w-6 shrink-0 text-foreground-muted" />

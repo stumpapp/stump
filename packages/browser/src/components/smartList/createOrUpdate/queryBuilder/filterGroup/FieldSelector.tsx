@@ -198,6 +198,10 @@ const sourceOptions: Record<FilterSource, { value: string }[]> = {
 		{ value: 'links' },
 		{ value: 'characters' },
 		{ value: 'teams' },
+		{ value: 'ageRating' },
+		{ value: 'year' },
+		{ value: 'month' },
+		{ value: 'day' },
 	],
 	library: [{ value: 'name' }, { value: 'path' }],
 	series: [{ value: 'name' }, { value: 'path' }],
@@ -212,6 +216,7 @@ const sourceOptions: Record<FilterSource, { value: string }[]> = {
 		{ value: 'booktype' },
 		{ value: 'status' },
 		{ value: 'volume' },
+		{ value: 'year' },
 	],
 }
 

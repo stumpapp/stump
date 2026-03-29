@@ -10,9 +10,8 @@ import {
 import { useQueryClient } from '@tanstack/react-query'
 import { ColorSpace, getColor, OKLCH, serialize, set, sRGB } from 'colorjs.io/fn'
 import { Archive, Edit, Plus } from 'lucide-react-native'
-import { useCallback, useMemo, useRef, useState } from 'react'
-import { Easing, Platform, Pressable, View } from 'react-native'
-import Dialog from 'react-native-dialog'
+import { useCallback, useMemo, useRef } from 'react'
+import { Alert, Easing, Platform, Pressable, View } from 'react-native'
 import { easeGradient } from 'react-native-easing-gradient'
 import LinearGradient from 'react-native-linear-gradient'
 import { toast } from 'sonner-native'
@@ -157,13 +156,10 @@ export function CurrentBookCard({ data }: Props) {
 		[addBookToClub, clubId],
 	)
 
-	const [isShowingArchiveConfirm, setIsShowingArchiveConfirm] = useState(false)
-
 	const { mutate: archiveBook } = useGraphQLMutation(archiveBookMutation, {
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ['bookClubById', clubId] })
 			queryClient.invalidateQueries({ queryKey: ['bookClubContext', clubId] })
-			setIsShowingArchiveConfirm(false)
 			toast.success('Book archived', {
 				description: 'The current book has been archived',
 			})
@@ -175,6 +171,21 @@ export function CurrentBookCard({ data }: Props) {
 			})
 		},
 	})
+
+	const confirmArchiveBook = useCallback(() => {
+		Alert.alert(
+			'Archive book',
+			`Are you sure you are ready to archive ${book?.title ? `'${book?.title}'` : 'the current book'}"?`,
+			[
+				{ text: 'Cancel', style: 'cancel' },
+				{
+					text: 'Archive',
+					style: 'destructive',
+					onPress: () => archiveBook({ bookClubBookId: book?.id || '' }),
+				},
+			],
+		)
+	}, [archiveBook, book])
 
 	const isModerator = checkRole(BookClubMemberRole.Moderator)
 
@@ -253,7 +264,7 @@ export function CurrentBookCard({ data }: Props) {
 										{EditIcon}
 									</View>
 								</Pressable>
-								<Pressable onPress={() => setIsShowingArchiveConfirm(true)} disabled={!book}>
+								<Pressable onPress={confirmArchiveBook} disabled={!book}>
 									<View className="shrink-0 items-center rounded-full border border-black/10 p-2.5 dark:border-white/20">
 										{ArchiveIcon}
 									</View>
@@ -278,27 +289,7 @@ export function CurrentBookCard({ data }: Props) {
 				</View>
 			</Pressable>
 
-			{isModerator && (
-				<>
-					<AddBookOptionsSheet ref={optionsSheetRef} onAddBook={handleAddBook} />
-
-					<Dialog.Container visible={isShowingArchiveConfirm}>
-						<Dialog.Title>Archive book</Dialog.Title>
-
-						<Dialog.Description>
-							Are you sure you are ready to archive the current book?
-						</Dialog.Description>
-
-						<Dialog.Button label="Cancel" onPress={() => setIsShowingArchiveConfirm(false)} />
-						<Dialog.Button
-							label="Archive"
-							onPress={() => archiveBook({ bookClubBookId: book?.id || '' })}
-							color="red"
-							disabled={!book}
-						/>
-					</Dialog.Container>
-				</>
-			)}
+			{isModerator && <AddBookOptionsSheet ref={optionsSheetRef} onAddBook={handleAddBook} />}
 
 			{book && <CurrentBookSheet ref={bookSheetRef} book={book} />}
 		</>

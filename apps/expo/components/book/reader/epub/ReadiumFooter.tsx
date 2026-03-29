@@ -1,60 +1,55 @@
-import { useEffect, useMemo } from 'react'
-import { Platform } from 'react-native'
-import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { View } from 'react-native'
+import Animated from 'react-native-reanimated'
 
+import { FADE_IN, FADE_OUT, useReaderAnimations } from '~/components/book/reader/shared'
 import { Text } from '~/components/ui'
-import { CONTROLS_TIMING_CONFIG } from '~/lib/constants'
-import { useDisplay } from '~/lib/hooks'
-import { useReaderStore } from '~/stores'
+import { usePreferencesStore } from '~/stores'
 import { useEpubLocationStore, useEpubTheme } from '~/stores/epub'
+
+import JumpButton from './JumpButton'
 
 export const FOOTER_HEIGHT = 48
 
 export default function ReadiumFooter() {
-	const { height } = useDisplay()
-
-	const visible = useReaderStore((state) => state.showControls)
-	const position = useEpubLocationStore((state) => ({
-		page: state.position,
-		totalPages: state.totalPages,
-	}))
-
 	const { colors } = useEpubTheme()
 
-	const insets = useSafeAreaInsets()
-
-	const opacity = useSharedValue(0)
-	useEffect(() => {
-		opacity.value = withTiming(visible ? 1 : 0, CONTROLS_TIMING_CONFIG)
-	}, [visible, opacity, height, insets.bottom])
-
-	const animatedStyles = useAnimatedStyle(() => {
-		return {
-			bottom: insets.bottom + (Platform.OS === 'android' ? 12 : 0),
-			left: insets.left,
-			right: insets.right,
-			opacity: opacity.value,
-		}
-	})
-
-	const formattedPosition = useMemo(() => {
-		if (!position.page) return null
-		if (position.page < position.totalPages) {
-			return `${position.page} of ${position.totalPages}`
-		} else {
-			return `${position.page}`
-		}
-	}, [position])
+	const { secondaryStyle, primaryStyle } = useReaderAnimations()
+	const preferMinimalReader = usePreferencesStore((state) => state.preferMinimalReader)
+	const { page, pageOfTotal, formattedPageOfTotal } = usePositionFormat()
 
 	return (
-		<Animated.View
-			className="absolute z-20 h-12 flex-row items-center justify-center gap-2 px-2"
-			style={animatedStyles}
-		>
-			<Text className="font-medium" style={{ color: colors?.foreground, opacity: 0.9 }}>
-				{formattedPosition}
-			</Text>
-		</Animated.View>
+		<View className="inset-x-safe bottom-safe absolute z-20 h-12 items-center justify-center">
+			{/* Controls hidden: Page only */}
+			{!preferMinimalReader && (
+				<Animated.View className="absolute w-full items-center justify-center" style={primaryStyle}>
+					<Animated.View key={page} entering={FADE_IN} exiting={FADE_OUT}>
+						<Text className="font-medium opacity-50" style={{ color: colors?.foreground }}>
+							{page}
+						</Text>
+					</Animated.View>
+				</Animated.View>
+			)}
+
+			{/* Controls shown: Page out of total */}
+			<Animated.View className="absolute w-full items-center justify-center" style={secondaryStyle}>
+				<JumpButton />
+
+				<Animated.View key={page} entering={FADE_IN} exiting={FADE_OUT}>
+					<Text className="font-medium opacity-50" style={{ color: colors?.foreground }}>
+						{preferMinimalReader ? formattedPageOfTotal : pageOfTotal}
+					</Text>
+				</Animated.View>
+			</Animated.View>
+		</View>
 	)
+}
+
+function usePositionFormat() {
+	const page = useEpubLocationStore((state) => state.position)
+	const totalPages = useEpubLocationStore((state) => state.totalPages)
+
+	const pageOfTotal = `${page} of ${totalPages}`
+	const formattedPageOfTotal = page < totalPages ? pageOfTotal : page
+
+	return { page, pageOfTotal, formattedPageOfTotal }
 }

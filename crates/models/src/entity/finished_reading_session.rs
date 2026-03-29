@@ -2,7 +2,9 @@ use crate::prefixer::{parse_query_to_model, parse_query_to_model_optional, Prefi
 
 use super::{media, registered_reading_device, user::AuthUser};
 use async_graphql::SimpleObject;
-use sea_orm::{entity::prelude::*, FromQueryResult, QueryOrder, QuerySelect};
+use sea_orm::{
+	entity::prelude::*, ConnectionTrait, FromQueryResult, QueryOrder, QuerySelect,
+};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, SimpleObject)]
 #[graphql(name = "FinishedReadingSessionModel")]
@@ -110,7 +112,7 @@ impl Entity {
 	}
 
 	pub async fn recent_completed_record(
-		conn: &DatabaseConnection,
+		conn: &impl ConnectionTrait,
 		user_id: &str,
 		media_id: &str,
 		timeout_secs: i64,

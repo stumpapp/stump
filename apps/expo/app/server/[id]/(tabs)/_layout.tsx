@@ -128,21 +128,20 @@ export default function TabLayout() {
 					}}
 				/>
 
-				{showClubs && (
-					<Tabs.Screen
-						name="clubs"
-						options={{
-							title: 'Clubs',
-							tabBarIcon: ({ focused }) => (
-								<JSIcon
-									as={Users}
-									className={cn('h-6 w-6 text-foreground-muted', { 'text-foreground': focused })}
-								/>
-							),
-							headerShown: false,
-						}}
-					/>
-				)}
+				<Tabs.Screen
+					name="clubs"
+					options={{
+						title: 'Clubs',
+						href: showClubs ? undefined : null,
+						tabBarIcon: ({ focused }) => (
+							<JSIcon
+								as={Users}
+								className={cn('h-6 w-6 text-foreground-muted', { 'text-foreground': focused })}
+							/>
+						),
+						headerShown: false,
+					}}
+				/>
 
 				<Tabs.Screen
 					name="search"

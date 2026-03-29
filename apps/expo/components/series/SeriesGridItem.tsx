@@ -32,6 +32,7 @@ type Props = {
 	onPress?: () => void
 }
 
+// TODO(ask): Ask folks if they want progression indicators in series grids
 export default function SeriesGridItem({ series, onPress }: Props) {
 	const router = useRouter()
 	const {

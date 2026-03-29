@@ -7,10 +7,10 @@ import { Card, Text } from '~/components/ui'
 import { IS_IOS_24_PLUS, useColors } from '~/lib/constants'
 
 import { DottedLine } from './DottedLine'
-import InfoRow from './InfoRow'
 
 type Identifiers = {
-	stumpId: string
+	identifier?: string | null
+	stumpId?: string | null
 	amazon?: string | null
 	calibre?: string | null
 	google?: string | null
@@ -62,13 +62,16 @@ export default function IdentifiersSheet({ identifiers }: Props) {
 			>
 				<ScrollView className="flex-1 gap-2 px-4 py-6">
 					<Card label="Identifiers">
-						<InfoRow label="Stump" value={identifiers.stumpId} />
-						{identifiers.amazon && <InfoRow label="Amazon" value={identifiers.amazon} />}
-						{identifiers.calibre && <InfoRow label="Calibre" value={identifiers.calibre} />}
-						{identifiers.google && <InfoRow label="Google" value={identifiers.google} />}
-						{identifiers.isbn && <InfoRow label="ISBN" value={identifiers.isbn} />}
-						{identifiers.mobiAsin && <InfoRow label="Mobi ASIN" value={identifiers.mobiAsin} />}
-						{identifiers.uuid && <InfoRow label="UUID" value={identifiers.uuid} />}
+						{identifiers.stumpId && <Card.Row label="Stump" value={identifiers.stumpId} />}
+						{identifiers.identifier && (
+							<Card.Row label="Identifier" value={identifiers.identifier} />
+						)}
+						{identifiers.amazon && <Card.Row label="Amazon" value={identifiers.amazon} />}
+						{identifiers.calibre && <Card.Row label="Calibre" value={identifiers.calibre} />}
+						{identifiers.google && <Card.Row label="Google" value={identifiers.google} />}
+						{identifiers.isbn && <Card.Row label="ISBN" value={identifiers.isbn} />}
+						{identifiers.mobiAsin && <Card.Row label="Mobi ASIN" value={identifiers.mobiAsin} />}
+						{identifiers.uuid && <Card.Row label="UUID" value={identifiers.uuid} />}
 					</Card>
 				</ScrollView>
 			</TrueSheet>

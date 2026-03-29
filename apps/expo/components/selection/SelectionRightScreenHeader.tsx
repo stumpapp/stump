@@ -1,8 +1,8 @@
 import { Host, Image } from '@expo/ui/swift-ui'
 import { CheckCircle2, Share, Trash } from 'lucide-react-native'
-import { useCallback, useMemo, useState } from 'react'
-import { Platform, Pressable, View } from 'react-native'
-import Dialog from 'react-native-dialog'
+import pluralize from 'pluralize'
+import { useCallback, useMemo } from 'react'
+import { Alert, Platform, Pressable, View } from 'react-native'
 
 import { useSelectionStore } from '~/stores/selection'
 
@@ -18,83 +18,77 @@ export default function SelectionRightScreenHeader() {
 
 	const deleteAction = useMemo(() => customActions['deleteSelection'], [customActions])
 
-	const [isShowingDeleteConfirm, setIsShowingDeleteConfirm] = useState(false)
-
 	const onDeleteSelection = useCallback(async () => {
 		if (deleteAction) {
 			await deleteAction(Array.from(currentSelection))
-			setIsShowingDeleteConfirm(false)
 			onStopSelection()
 		}
 	}, [currentSelection, deleteAction, onStopSelection])
 
+	const confirmDeleteSelection = useCallback(() => {
+		Alert.alert(
+			`Delete ${currentSelection.size} ${pluralize('download', currentSelection.size)}`,
+			'This action cannot be undone.',
+			[
+				{ text: 'Cancel', style: 'cancel' },
+				{ text: 'Delete', style: 'destructive', onPress: onDeleteSelection },
+			],
+		)
+	}, [currentSelection.size, onDeleteSelection])
+
 	return (
-		<>
+		<View
+			style={{
+				flexDirection: 'row',
+				gap: 10,
+				alignItems: 'center',
+			}}
+		>
 			<View
+				accessibilityLabel="options"
 				style={{
-					flexDirection: 'row',
-					gap: 10,
+					height: 35,
+					width: 35,
+					justifyContent: 'center',
 					alignItems: 'center',
 				}}
 			>
-				<View
-					accessibilityLabel="options"
-					style={{
-						height: 35,
-						width: 35,
-						justifyContent: 'center',
-						alignItems: 'center',
-					}}
-				>
-					<Pressable onPress={onStopSelection}>{CheckIcon}</Pressable>
-				</View>
-
-				<ActionMenu
-					disabled={currentSelection.size === 0}
-					groups={[
-						{
-							items: [
-								{
-									label: 'Share',
-									icon: {
-										ios: 'square.and.arrow.up',
-										android: Share,
-									},
-									onPress: () => {},
-									disabled: true,
-								},
-							],
-						},
-						{
-							items: [
-								{
-									label: 'Delete',
-									icon: {
-										ios: 'trash',
-										android: Trash,
-									},
-									onPress: onDeleteSelection,
-									role: 'destructive',
-									disabled: !deleteAction,
-								},
-							],
-						},
-					]}
-				/>
+				<Pressable onPress={onStopSelection}>{CheckIcon}</Pressable>
 			</View>
 
-			<Dialog.Container visible={isShowingDeleteConfirm}>
-				<Dialog.Title>
-					Delete {currentSelection.size} download
-					{currentSelection.size > 1 ? 's' : ''}
-				</Dialog.Title>
-
-				<Dialog.Description>This action cannot be undone.</Dialog.Description>
-
-				<Dialog.Button label="Cancel" onPress={() => setIsShowingDeleteConfirm(false)} />
-				<Dialog.Button label="Delete" onPress={onDeleteSelection} color="red" />
-			</Dialog.Container>
-		</>
+			<ActionMenu
+				disabled={currentSelection.size === 0}
+				groups={[
+					{
+						items: [
+							{
+								label: 'Share',
+								icon: {
+									ios: 'square.and.arrow.up',
+									android: Share,
+								},
+								onPress: () => {},
+								disabled: true,
+							},
+						],
+					},
+					{
+						items: [
+							{
+								label: 'Delete',
+								icon: {
+									ios: 'trash',
+									android: Trash,
+								},
+								onPress: confirmDeleteSelection,
+								role: 'destructive',
+								disabled: !deleteAction,
+							},
+						],
+					},
+				]}
+			/>
+		</View>
 	)
 }
 

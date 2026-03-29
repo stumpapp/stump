@@ -57,6 +57,9 @@ type Props = {
 // to think through. That said, I would REALLY like to land on something that doesn't
 // make me cringe when looking at it
 
+// TODO: All the above still BUT let's just kill the thumb selector here and add a menu
+// in the header thumb on hover that lets you change if you have permissions
+
 export default function SeriesThumbnailSelector({ fragment }: Props) {
 	const series = useFragment(SeriesThumbnailSelectorFragment, fragment)
 

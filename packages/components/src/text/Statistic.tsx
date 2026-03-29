@@ -1,30 +1,46 @@
-// TODO: make me lawlz xoxo
-// honestly one of the chakra components I did not hate:
-// https://chakra-ui.com/docs/components/stat/usage
-import { VariantProps } from 'class-variance-authority'
-import type { ComponentPropsWithoutRef } from 'react'
+import { cva, VariantProps } from 'class-variance-authority'
+import type { ComponentPropsWithoutRef, ReactNode } from 'react'
 import { forwardRef } from 'react'
 import { useCountUp } from 'use-count-up'
 
 import { cn } from '../utils'
 import { textVariants } from './Text'
 
-type StatisticProps = ComponentPropsWithoutRef<'dl'>
+const statisticVariants = cva('flex flex-col', {
+	defaultVariants: {
+		size: 'md',
+	},
+	variants: {
+		size: {
+			xs: 'gap-0',
+			sm: 'gap-0.5',
+			md: 'gap-1',
+			lg: 'gap-1.5',
+		},
+	},
+})
+
+const VALUE_SIZE_MAP = {
+	xs: 'xs',
+	sm: 'sm',
+	md: 'lg',
+	lg: 'xl',
+} as const
+
+type StatisticSize = 'xs' | 'sm' | 'md' | 'lg'
+
+type StatisticProps = ComponentPropsWithoutRef<'dl'> & VariantProps<typeof statisticVariants>
 const StatisticRoot = forwardRef<HTMLDListElement, StatisticProps>(
-	({ className, ...props }, ref) => (
-		<dl ref={ref} className={cn('flex flex-col gap-1', className)} {...props} />
+	({ className, size, ...props }, ref) => (
+		<dl ref={ref} className={cn(statisticVariants({ size }), className)} {...props} />
 	),
 )
 StatisticRoot.displayName = 'Statistic'
 
 type StatisticLabelProps = VariantProps<typeof textVariants> & ComponentPropsWithoutRef<'dt'>
 const StatisticLabel = forwardRef<HTMLElement, StatisticLabelProps>(
-	({ className, variant, size = 'sm', ...props }, ref) => (
-		<dt
-			ref={ref}
-			className={cn(textVariants({ className, size, variant }), className)}
-			{...props}
-		/>
+	({ className, variant = 'muted', size = 'sm', ...props }, ref) => (
+		<dt ref={ref} className={cn(textVariants({ size, variant }), className)} {...props} />
 	),
 )
 StatisticLabel.displayName = 'StatisticLabel'
@@ -34,20 +50,32 @@ const StatisticNumber = forwardRef<HTMLElement, StatisticNumberProps>(
 	({ className, variant, size = 'lg', ...props }, ref) => (
 		<dd
 			ref={ref}
-			className={cn('font-semibold', textVariants({ className, size, variant }), className)}
+			className={cn('font-semibold', textVariants({ size, variant }), className)}
 			{...props}
 		/>
 	),
 )
 StatisticNumber.displayName = 'StatisticNumber'
 
-const StatisticStringValue = forwardRef<HTMLElement, StatisticNumberProps>(
-	({ className, variant, size = 'lg', ...props }, ref) => (
+type StatisticStringValueProps = VariantProps<typeof textVariants> &
+	ComponentPropsWithoutRef<'dd'> & {
+		suffix?: ReactNode
+	}
+const StatisticStringValue = forwardRef<HTMLElement, StatisticStringValueProps>(
+	({ className, variant, size = 'lg', suffix, children, ...props }, ref) => (
 		<dd
 			ref={ref}
-			className={cn('font-semibold', textVariants({ className, size, variant }), className)}
+			className={cn('font-semibold', textVariants({ size, variant }), className)}
 			{...props}
-		/>
+		>
+			{children}
+			{suffix != null && (
+				<span className={cn('font-normal', textVariants({ size: 'xs', variant: 'muted' }))}>
+					{' '}
+					{suffix}
+				</span>
+			)}
+		</dd>
 	),
 )
 StatisticStringValue.displayName = 'StatisticStringValue'
@@ -89,7 +117,30 @@ type StatisticSubComponents = {
 	Number: typeof StatisticNumber
 	CountUpNumber: typeof StatisticCountUpNumber
 	StringValue: typeof StatisticStringValue
+	Item: typeof StatisticItem
 }
+
+type StatisticItemProps = {
+	label: string
+	value: string | number
+	suffix?: ReactNode
+	size?: StatisticSize
+	className?: string
+}
+
+function StatisticItem({ label, value, suffix, size = 'sm', className }: StatisticItemProps) {
+	return (
+		<StatisticRoot size={size} className={className}>
+			<StatisticLabel size={size} variant="muted">
+				{label}
+			</StatisticLabel>
+			<StatisticStringValue size={size} suffix={suffix}>
+				{value}
+			</StatisticStringValue>
+		</StatisticRoot>
+	)
+}
+StatisticItem.displayName = 'StatisticItem'
 
 const Statistic = StatisticRoot as typeof StatisticRoot & StatisticSubComponents
 
@@ -97,12 +148,19 @@ Statistic.Label = StatisticLabel
 Statistic.Number = StatisticNumber
 Statistic.CountUpNumber = StatisticCountUpNumber
 Statistic.StringValue = StatisticStringValue
+Statistic.Item = StatisticItem
 
 export {
 	Statistic,
+	StatisticItem,
+	type StatisticItemProps,
 	StatisticLabel,
 	type StatisticLabelProps,
 	StatisticNumber,
 	type StatisticNumberProps,
 	type StatisticProps,
+	type StatisticSize,
+	StatisticStringValue,
+	type StatisticStringValueProps,
+	VALUE_SIZE_MAP,
 }

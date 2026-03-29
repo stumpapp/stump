@@ -18,8 +18,11 @@ import { type TableOfContentsItem, useEpubLocationStore } from '~/stores/epub'
 import { useEpubSheetStore } from '~/stores/epubSheet'
 
 import AnnotationsAndBookmarks from './AnnotationsAndBookmarks'
+import { useEpubReaderContext } from './context'
 
 export default function LocationsSheetContent() {
+	const { getRequestHeaders } = useEpubReaderContext()
+
 	const [activePage, setActivePage] = useState(0)
 	const [visibleRange, setVisibleRange] = useState({ min: 0, max: 0 })
 
@@ -37,8 +40,6 @@ export default function LocationsSheetContent() {
 	const toc = useEpubLocationStore((store) => store.toc)
 	const embeddedMetadata = useEpubLocationStore((store) => store.embeddedMetadata)
 	const currentChapter = useEpubLocationStore((store) => store.currentChapter)
-
-	const requestHeaders = useEpubLocationStore((store) => store.requestHeaders)
 
 	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
 
@@ -158,10 +159,9 @@ export default function LocationsSheetContent() {
 								source={{
 									uri: book?.thumbnail.url,
 									headers: {
-										...requestHeaders?.(),
+										...getRequestHeaders?.(),
 									},
 								}}
-								resizeMode="stretch"
 								size={{ height: 235 / thumbnailRatio, width: 235 }}
 								borderAndShadowStyle={{ shadowRadius: 5 }}
 							/>
@@ -242,19 +242,34 @@ const TableOfContentsListItem = ({
 	currentChapterActive: boolean
 	nextChapterActive: boolean
 }) => {
-	const actions = useEpubLocationStore((store) => store.actions)
+	const { readerRef } = useEpubReaderContext()
 	const closeSheet = useEpubSheetStore((state) => state.closeSheet)
+	const locator = useEpubLocationStore((state) => state.locator)
+	const position = useEpubLocationStore((state) => state.position)
+	const pushJump = useEpubLocationStore((state) => state.pushJump)
 
 	const handlePress = async () => {
+		const previousLocator = locator
+
+		// If jumping to higher position, return direction should be 'back'
+		// If jumping to lower position, return direction should be 'forward'
+		const targetPosition = item.position
+		const direction: 'back' | 'forward' =
+			targetPosition != null && position != null && targetPosition > position ? 'back' : 'forward'
+
 		// E.g.: "text/part0010.html#9H5K0-..." -> ["text/part0010.html", "9H5K0-..."]
 		const [hrefWithoutFragment, fragment] = item.content.split('#')
 
-		await actions?.goToLocation({
+		await readerRef?.goToLocation({
 			href: hrefWithoutFragment || item.content,
 			type: 'application/xhtml+xml',
 			chapterTitle: item.label,
 			locations: fragment ? { fragments: [fragment] } : {},
 		})
+
+		if (previousLocator) {
+			pushJump(previousLocator, direction)
+		}
 
 		closeSheet('locations')
 	}

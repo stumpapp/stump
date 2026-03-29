@@ -5,23 +5,17 @@ import { formatHumanDuration } from '@stump/i18n'
 import { STUMP_SAVE_BASIC_SESSION_HEADER } from '@stump/sdk/constants'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Platform, Pressable, View } from 'react-native'
-import Animated, {
-	Easing,
-	useAnimatedStyle,
-	useSharedValue,
-	withTiming,
-} from 'react-native-reanimated'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import Animated from 'react-native-reanimated'
 import TImage from 'react-native-turbo-image'
 
-import { TurboImage } from '~/components/image'
+import { getThumbnailResizeProps, TurboImage } from '~/components/image'
 import { Progress, Text } from '~/components/ui'
-import { CONTROLS_TIMING_CONFIG } from '~/lib/constants'
 import { useDisplay, usePrevious } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 import { usePreferencesStore, useReaderStore } from '~/stores'
 import { useBookPreferences, useBookReadTime } from '~/stores/reader'
 
+import { useReaderAnimations } from '../shared/readerAnimations'
 import { useImageBasedReader } from './context'
 
 const SIZE_MODIFIER = 1.5
@@ -53,12 +47,13 @@ export default function Footer() {
 	} = useBookPreferences({ book, serverId })
 
 	const galleryRef = useRef<FlashListRef<number[]>>(null)
-	const insets = useSafeAreaInsets()
 	const { getMappingKey } = useMappingHelper()
 
 	const visible = useReaderStore((state) => state.showControls)
 	const setShowControls = useReaderStore((state) => state.setShowControls)
 	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
+	const thumbnailResizeMode = usePreferencesStore((state) => state.thumbnailResizeMode)
+	const { secondaryStyle, translateFooterStyle } = useReaderAnimations()
 
 	const [isSliderDragging, setIsSliderDragging] = useState(false)
 
@@ -69,33 +64,6 @@ export default function Footer() {
 			width: baseWidth,
 		}
 	}, [isTablet, thumbnailRatio])
-
-	const opacity = useSharedValue(visible ? 1 : 0)
-	const translateY = useSharedValue(visible ? 0 : 50)
-	useEffect(
-		() => {
-			opacity.value = withTiming(visible ? 1 : 0, CONTROLS_TIMING_CONFIG)
-			translateY.value = withTiming(visible ? 0 : 50, {
-				...CONTROLS_TIMING_CONFIG,
-				easing: visible
-					? Easing.out(Easing.quad) // slow near the start
-					: Easing.in(Easing.quad), // slow near the end
-			})
-		},
-		// eslint-disable-next-line react-compiler/react-compiler
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[visible],
-	)
-
-	const animatedStyles = useAnimatedStyle(() => {
-		return {
-			left: insets.left,
-			right: insets.right,
-			bottom: insets.bottom,
-			transform: [{ translateY: translateY.value }],
-			opacity: opacity.value,
-		}
-	})
 
 	const percentage = (currentPage / book.pages) * 100
 
@@ -325,6 +293,14 @@ export default function Footer() {
 					>
 						{directionRespectingPageSet.map((pageIdx, i) => {
 							const source = pageSource(pageIdx + 1)
+
+							const { resizeMode, style } = getThumbnailResizeProps(thumbnailResizeMode, {
+								containerWidth: containerSize.width / (pageSet.length === 1 ? 1 : 2),
+								containerHeight: containerSize.height,
+								originalHeight: imageSizes?.[pageIdx]?.height || baseSize.height,
+								originalWidth: imageSizes?.[pageIdx]?.width || baseSize.width,
+							})
+
 							return (
 								<TurboImage
 									key={`thumb-${pageIdx + 1}-${i}`}
@@ -332,7 +308,7 @@ export default function Footer() {
 										uri: source.uri,
 										headers: source.headers as Record<string, string>,
 									}}
-									resizeMode="stretch"
+									resizeMode={resizeMode}
 									resize={containerSize.width * 1.5}
 									style={{
 										width: pageSet.length === 1 ? '100%' : '50%',
@@ -341,6 +317,7 @@ export default function Footer() {
 										// @ts-expect-error bug in library (to be fixed soon). StyleProp<ImageStyle> should be StyleProp<ViewStyle>
 										borderCurve: 'continuous',
 										overflow: 'hidden',
+										...style,
 									}}
 									onSuccess={({ nativeEvent }) => onImageLoaded(pageIdx, nativeEvent)}
 								/>
@@ -357,6 +334,7 @@ export default function Footer() {
 				</View>
 			)
 		},
+		// lol this dep array is absurd, def a smell
 		[
 			isSliderDragging,
 			pageSource,
@@ -366,6 +344,9 @@ export default function Footer() {
 			onImageLoaded,
 			readingDirection,
 			getPageSetIndex,
+			thumbnailResizeMode,
+			imageSizes,
+			baseSize,
 		],
 	)
 
@@ -441,17 +422,30 @@ export default function Footer() {
 								]}
 							>
 								{directionRespectingItem.map((pageIdx, i) => {
+									const source = pageSource(pageIdx + 1)
+
+									const { resizeMode, style } = getThumbnailResizeProps(thumbnailResizeMode, {
+										containerWidth: pageSetSize.width / (item.length === 1 ? 1 : 2),
+										containerHeight: pageSetSize.height,
+										originalHeight: imageSizes?.[pageIdx]?.height || baseSize.height,
+										originalWidth: imageSizes?.[pageIdx]?.width || baseSize.width,
+									})
+
 									return (
 										<TurboImage
 											key={getMappingKey(pageIdx, i)}
 											source={{
-												uri: pageSource(pageIdx + 1).uri,
-												headers: pageSource(pageIdx + 1).headers as Record<string, string>,
+												uri: source.uri,
+												headers: source.headers as Record<string, string>,
 											}}
-											resizeMode="stretch"
+											resizeMode={resizeMode}
 											// we downscale (resize) by width, so when we resize an individual image, the gallery size is halved when the item length is 2.
 											resize={(pageSetSize.width / item.length) * 1.5}
-											style={{ width: item.length === 1 ? '100%' : '50%', height: '100%' }}
+											style={{
+												width: item.length === 1 ? '100%' : '50%',
+												height: '100%',
+												...style,
+											}}
 											onSuccess={({ nativeEvent }) => onImageLoaded(pageIdx, nativeEvent)}
 										/>
 									)
@@ -479,12 +473,17 @@ export default function Footer() {
 			getMappingKey,
 			getPageSetSize,
 			isRtl,
-			baseSize.height,
+			baseSize,
+			thumbnailResizeMode,
+			imageSizes,
 		],
 	)
 
 	return (
-		<Animated.View className="absolute z-20 shrink gap-4" style={animatedStyles}>
+		<Animated.View
+			className="insets-x-safe bottom-safe absolute z-20 shrink gap-4"
+			style={[secondaryStyle, translateFooterStyle]}
+		>
 			{footerControls === 'images' && readingMode !== ReadingMode.ContinuousVertical && (
 				<View style={isRtl && { transform: [{ scaleX: -1 }] }}>
 					<FlashList

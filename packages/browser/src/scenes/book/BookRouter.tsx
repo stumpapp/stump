@@ -1,7 +1,8 @@
+import { UserPermission } from '@stump/graphql'
 import { lazy, Suspense } from 'react'
 import { Navigate, Route, Routes } from 'react-router'
 
-import ServerOwnerRouteWrapper from '@/components/ServerOwnerRouteWrapper.tsx'
+import UserPermissionRouteGuard from '@/components/UserPermissionRouteGuard.tsx'
 
 const BookSearchScene = lazy(() => import('../bookSearch/BookSearchScene.tsx'))
 const BookOverviewScene = lazy(() => import('./BookOverviewScene.tsx'))
@@ -16,7 +17,15 @@ export default function BookRouter() {
 			<Routes>
 				<Route path="/" element={<BookSearchScene />} />
 				<Route path=":id" element={<BookOverviewScene />} />
-				<Route path=":id/manage" element={<ServerOwnerRouteWrapper />}>
+				<Route
+					path=":id/manage"
+					element={
+						<UserPermissionRouteGuard
+							permissions={[UserPermission.ManageLibrary, UserPermission.EditThumbnails]}
+							enforceAll={false}
+						/>
+					}
+				>
 					<Route path="" element={<BookManagementScene />} />
 				</Route>
 				<Route path=":id/epub-reader" element={<EpubReaderScene />} />

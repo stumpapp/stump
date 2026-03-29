@@ -1,5 +1,5 @@
 import { FlashList } from '@shopify/flash-list'
-import { desc, eq } from 'drizzle-orm'
+import { and, desc, eq, isNull, lt, or, sql } from 'drizzle-orm'
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
 import { Fragment, useMemo } from 'react'
 import { View } from 'react-native'
@@ -21,7 +21,17 @@ export default function ContinueReading() {
 		db
 			.select()
 			.from(downloadedFiles)
-			.innerJoin(readProgress, eq(downloadedFiles.id, readProgress.bookId))
+			.innerJoin(
+				readProgress,
+				and(
+					eq(downloadedFiles.id, readProgress.bookId),
+					// we only care about books that haven't been finished yet
+					or(
+						isNull(readProgress.percentage),
+						lt(sql`CAST(${readProgress.percentage} AS REAL)`, 1), // let's see if we need sm like 0.998
+					),
+				),
+			)
 			.leftJoin(seriesRefs, eq(downloadedFiles.seriesId, seriesRefs.id))
 			.leftJoin(libraryRefs, eq(seriesRefs.libraryId, libraryRefs.id))
 			.orderBy(desc(readProgress.lastModified), desc(downloadedFiles.downloadedAt)),

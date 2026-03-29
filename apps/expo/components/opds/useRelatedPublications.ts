@@ -2,7 +2,7 @@ import { useSDK } from '@stump/client'
 import { OPDSEntryBelongsTo, OPDSFeed, OPDSPublication } from '@stump/sdk'
 import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query'
 
-import { getBelongsToPosition } from './utils'
+import { getBelongsToPosition, hasLinkRel } from './utils'
 
 type UseRelatedPublicationsParams = {
 	seriesUrl?: string | null
@@ -19,7 +19,7 @@ export function useRelatedPublications({
 
 	const getNextPageParam = (lastPage: OPDSFeed) => {
 		const links = lastPage.links || []
-		const nextLink = links.find((link) => link.rel === 'next')
+		const nextLink = links.find((link) => hasLinkRel(link, 'next'))
 		if (nextLink) {
 			return nextLink.href
 		}
@@ -55,14 +55,14 @@ export function useRelatedPublications({
 
 	const intoPublications = (feed: typeof seriesFeed | typeof collectionFeed) => {
 		if (!feed?.length) return null
-		return feed.filter((entry) => entry.links?.some((link) => link.rel === 'self'))
+		return feed.filter((entry) => entry.links?.some((link) => hasLinkRel(link, 'self')))
 	}
 
 	const seriesPublications = intoPublications(seriesFeed) ?? []
 	const collectionPublications = intoPublications(collectionFeed) ?? []
 
 	const keyExtractor = (entry: OPDSPublication, index: number) => {
-		const selfHref = entry.links?.find((link) => link.rel === 'self')?.href
+		const selfHref = entry.links?.find((link) => hasLinkRel(link, 'self'))?.href
 		return selfHref || entry.metadata.identifier || `${entry.metadata.title}-${index}`
 	}
 

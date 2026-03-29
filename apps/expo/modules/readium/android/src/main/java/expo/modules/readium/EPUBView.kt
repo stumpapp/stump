@@ -8,6 +8,7 @@ import android.graphics.Color
 import android.graphics.PointF
 import android.util.Log
 import android.view.View
+import android.view.ViewTreeObserver
 import android.widget.FrameLayout
 import android.widget.PopupMenu
 import android.widget.TextView
@@ -492,13 +493,23 @@ class EPUBView(context: Context, appContext: AppContext) : ExpoView(context, app
         // Note: If I don't post this, hard crash:
         // Only the original thread that created a view hierarchy can touch its views
         post {
+            // Note: I looked at how the kotlin toolkit test app positions popups (VisualReaderFragment.kt)
+            // and got this seemingly working as a means of fixing one of the bugs in github.com/stumpapp/stump/issues/885.
+            // I want to also note that I could not get that bug to reliably repro in a sim, nor on any of
+            // my physical devices.
+            val activity = appContext.currentActivity ?: return@post
+            val decorView = activity.window.decorView as? FrameLayout ?: return@post
+
+            val screenLoc = IntArray(2)
+            getLocationOnScreen(screenLoc)
+
             val anchorView = View(context).apply {
                 val params = FrameLayout.LayoutParams(1, 1)
-                params.leftMargin = rect?.centerX()?.toInt() ?: (width / 2)
-                params.topMargin = rect?.top?.toInt() ?: (height / 2)
+                params.leftMargin = screenLoc[0] + (rect?.centerX()?.toInt() ?: (width / 2))
+                params.topMargin = screenLoc[1] + (rect?.bottom?.toInt() ?: (height / 2))
                 layoutParams = params
             }
-            addView(anchorView)
+            decorView.addView(anchorView)
             
             val popup = PopupMenu(context, anchorView)
             popup.menu.add(0, 1, 0, "Edit Note")
@@ -513,10 +524,15 @@ class EPUBView(context: Context, appContext: AppContext) : ExpoView(context, app
             }
             
             popup.setOnDismissListener {
-                removeView(anchorView)
+                decorView.removeView(anchorView)
             }
-            
-            popup.show()
+
+            anchorView.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+                override fun onGlobalLayout() {
+                    anchorView.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                    popup.show()
+                }
+            })
         }
         
         return true

@@ -1,7 +1,7 @@
 use std::str::FromStr;
 
 use axum::http::{
-	header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE},
+	header::{ACCEPT, AUTHORIZATION, CACHE_CONTROL, CONTENT_TYPE, EXPIRES, PRAGMA},
 	HeaderName, HeaderValue, Method,
 };
 use local_ip_address::local_ip;
@@ -52,7 +52,10 @@ pub fn get_cors_layer(config: StumpConfig) -> CorsLayer {
 		.allow_headers([
 			ACCEPT,
 			AUTHORIZATION,
+			CACHE_CONTROL,
 			CONTENT_TYPE,
+			EXPIRES,
+			PRAGMA,
 			HeaderName::from_str(STUMP_SAVE_BASIC_SESSION_HEADER)
 				.expect("Failed to parse header name"),
 		])

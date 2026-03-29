@@ -1,5 +1,5 @@
-import { BookClubSchedule } from '@/components/bookClub'
+import { BookClubBooks } from '@/components/bookClub'
 
 export default function BookClubHomeScene() {
-	return <BookClubSchedule />
+	return <BookClubBooks />
 }

@@ -26,6 +26,8 @@ const fragment = graphql(`
 				}
 				thumbhash
 			}
+			height
+			width
 		}
 		size
 		pages
@@ -56,7 +58,12 @@ export default function BookSearchItem({ book }: Props) {
 	const router = useRouter()
 	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
 
-	const { url: uri, metadata: placeholderData } = data.thumbnail
+	const {
+		url: uri,
+		metadata: placeholderData,
+		width: originalWidth,
+		height: originalHeight,
+	} = data.thumbnail
 
 	return (
 		<Pressable
@@ -74,16 +81,20 @@ export default function BookSearchItem({ book }: Props) {
 							Authorization: sdk.authorizationHeader || '',
 						},
 					}}
-					resizeMode="stretch"
 					size={{ height: 75 / thumbnailRatio, width: 75 }}
 					placeholderData={placeholderData}
+					originalDimensions={
+						originalWidth && originalHeight
+							? { width: originalWidth, height: originalHeight }
+							: null
+					}
 				/>
 
 				<View className="flex flex-1 flex-col gap-1">
 					<Text>{data.resolvedName}</Text>
 
 					<Text className="text-foreground-muted">
-						{formatBytes(data.size, 1)} • {data.pages} {pluralize('page', data.pages)}
+						{formatBytes(data.size)} • {data.pages} {pluralize('page', data.pages)}
 					</Text>
 				</View>
 			</View>

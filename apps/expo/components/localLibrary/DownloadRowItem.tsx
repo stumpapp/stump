@@ -8,7 +8,7 @@ import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-na
 
 import { epubProgress, imageMeta, syncStatus } from '~/db'
 import { useColors } from '~/lib/constants'
-import { formatBytesSeparate } from '~/lib/format'
+import { formatBytes } from '~/lib/format'
 import { useDownload } from '~/lib/hooks'
 import { useSelectionStore } from '~/stores/selection'
 
@@ -40,6 +40,13 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 		() => imageMeta.safeParse(downloadedFile.thumbnailMeta).data,
 		[downloadedFile.thumbnailMeta],
 	)
+	const epubProgression = epubProgress.safeParse(readProgress?.epubProgress).data
+	const currentPage = useMemo(
+		() => readProgress?.page || epubProgression?.locations?.position,
+		[readProgress, epubProgression],
+	)
+	const totalPages = downloadedFile.pages
+	const size = downloadedFile.size ? formatBytes(downloadedFile.size) : null
 
 	const colors = useColors()
 
@@ -53,23 +60,21 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 	}))
 
 	const iconOpacity = useSharedValue(1)
+	const overlayOpacity = useSharedValue(0)
+
+	useEffect(() => {
+		iconOpacity.value = withTiming(selectionStore.isSelected ? 0.6 : 1, { duration: 200 })
+		overlayOpacity.value = withTiming(selectionStore.isSelected ? 1 : 0, { duration: 150 })
+	}, [selectionStore.isSelected, iconOpacity, overlayOpacity])
+
 	const syncIconStyle = useAnimatedStyle(() => ({
 		opacity: iconOpacity.value,
 	}))
-
-	const overlayOpacity = useSharedValue(0)
 	const overlayStyle = useAnimatedStyle(() => ({
 		backgroundColor: colors.foreground.brand + '33',
 		borderColor: colors.foreground.brand,
 		opacity: overlayOpacity.value,
 	}))
-
-	useEffect(() => {
-		// eslint-disable-next-line react-hooks/immutability
-		iconOpacity.value = withTiming(selectionStore.isSelected ? 0.6 : 1, { duration: 200 })
-		// eslint-disable-next-line react-hooks/immutability
-		overlayOpacity.value = withTiming(selectionStore.isSelected ? 1 : 0, { duration: 150 })
-	}, [selectionStore.isSelected, iconOpacity, overlayOpacity])
 
 	const onPress = useCallback(
 		() =>
@@ -84,10 +89,7 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 			return { isCompleted: false, hasProgress: false }
 		}
 
-		const currentPage = readProgress.page || 0
-		const totalPages = downloadedFile.pages || -1
-
-		if (totalPages > 0 && currentPage >= totalPages) {
+		if (totalPages != null && currentPage != null && totalPages > 0 && currentPage >= totalPages) {
 			return { isCompleted: true, hasProgress: true }
 		}
 
@@ -99,7 +101,7 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 		}
 
 		return { isCompleted: false, hasProgress: true }
-	}, [readProgress, downloadedFile.pages])
+	}, [readProgress, currentPage, totalPages])
 
 	const handleSelect = useCallback(() => {
 		selectionStore.setIsSelecting(true)
@@ -117,7 +119,7 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 	const handleDelete = useCallback(() => {
 		Alert.alert(
 			'Delete Book',
-			`Are you sure you want to delete "${downloadedFile.bookName || 'this book'}"?`,
+			`Are you sure you want to delete '${downloadedFile.bookName ? `'${downloadedFile.bookName}'` : 'this book'}'?`,
 			[
 				{ text: 'Cancel', style: 'cancel' },
 				{
@@ -128,39 +130,6 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 			],
 		)
 	}, [deleteBook, downloadedFile.id, downloadedFile.bookName])
-
-	// Note: I went back and forth on which order to show these pieces of info in the subtitle.
-	// The big thing in my mind was that I see page/progression more "important" than size but wasn't
-	// sure if being towards the inside vs outside made it more prominent or noticeable.
-	const renderSubtitle = () => {
-		const parts = []
-
-		if (downloadedFile.size != null) {
-			const size = formatBytesSeparate(downloadedFile.size, 1)
-			if (size) {
-				parts.push(`${size.value} ${size.unit}`)
-			}
-		}
-
-		if (downloadedFile.pages != null && downloadedFile.pages > 0) {
-			if (readProgress?.page) {
-				parts.push(`Page ${readProgress.page} of ${downloadedFile.pages}`)
-			} else {
-				parts.push(`${downloadedFile.pages} pages`)
-			}
-		}
-
-		const epubProgression = epubProgress.safeParse(readProgress?.epubProgress).data
-		// Avoid adding title if the chapter isn't named properly
-		if (
-			epubProgression?.chapterTitle &&
-			!epubProgression.chapterTitle.match(/\.(html|xml|xhtml)$/i)
-		) {
-			parts.push(epubProgression.chapterTitle)
-		}
-
-		return parts.join(' • ')
-	}
 
 	const getProgress = () => {
 		if (!readProgress) {
@@ -253,7 +222,7 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 					},
 				]}
 			>
-				<View className="relative mx-4 flex-row gap-4">
+				<View className="relative mx-4 flex-row gap-4" style={{ height }}>
 					{/* TODO: Use file icons when no thumbnail is available? */}
 					<ThumbnailImage
 						source={{
@@ -261,17 +230,15 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 							// undefined so it's fine
 							uri: getThumbnailPath(downloadedFile),
 						}}
-						resizeMode="stretch"
 						size={{ height, width }}
 						placeholderData={thumbnailData}
 					/>
 
-					<View className="flex-1 justify-center py-1.5">
-						<View className="flex flex-1 flex-row justify-between gap-2">
-							<View className="flex shrink gap-0.5">
-								<Heading numberOfLines={2}>{downloadedFile.bookName || 'Untitled'}</Heading>
-								<Text className="text-foreground-muted">{renderSubtitle()}</Text>
-							</View>
+					<View className="flex-1 justify-center gap-2 py-1.5">
+						<View className="flex-row justify-between gap-2">
+							<Heading numberOfLines={2} className="shrink">
+								{downloadedFile.bookName || 'Untitled'}
+							</Heading>
 
 							{status && (
 								<Animated.View className="mt-1 shrink-0" style={syncIconStyle}>
@@ -280,15 +247,32 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 							)}
 						</View>
 
+						<View className="flex-row items-center gap-2">
+							{currentPage && (
+								<View className="squircle flex-row items-baseline rounded-full bg-background-surface-secondary px-2.5 py-0.5">
+									<Text size="sm">{`Page ${currentPage}`}</Text>
+									<Text size="xs" className="text-foreground-muted">{` / ${totalPages}`}</Text>
+								</View>
+							)}
+
+							{size && (
+								<View className="squircle rounded-full bg-background-surface-secondary px-2.5 py-0.5">
+									<Text size="sm" className="text-foreground-muted">
+										{size}
+									</Text>
+								</View>
+							)}
+						</View>
+
 						{readProgress && (
-							<View className="flex-row items-center gap-4">
+							<View className="flex-row items-center gap-3">
 								<Progress
 									className="h-1 shrink bg-background-surface-secondary"
 									value={getProgress()}
 									style={{ height: 6, borderRadius: 3 }}
 								/>
 
-								<Text className="shrink-0 text-foreground-muted">
+								<Text size="sm" className="shrink-0 text-foreground-muted">
 									{(getProgress() || 0).toFixed(0)}%
 								</Text>
 							</View>

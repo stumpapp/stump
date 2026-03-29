@@ -225,11 +225,17 @@ export const getStringField = (meta: OPDSMetadata, key: string) => {
 	return typeof value === 'string' ? value : null
 }
 
+export const hasLinkRel = (link: OPDSLink, target: string): boolean => {
+	const rel = link.rel
+	if (Array.isArray(rel)) return rel.includes(target)
+	return rel === target
+}
+
 export const getSelfLink = (links?: OPDSLink[] | null) =>
-	links?.find((link) => !!link?.href && link.rel === 'self')
+	links?.find((link) => !!link?.href && hasLinkRel(link, 'self'))
 
 export const getFirstSubsectionLink = (links?: OPDSLink[] | null) =>
-	links?.find((link) => !!link?.href && link.rel === 'subsection')
+	links?.find((link) => !!link?.href && hasLinkRel(link, 'subsection'))
 
 // TODO: I added this for now mostly for contributor links but def requires more testing
 export const getFirstLink = (links?: OPDSLink[] | null) => links?.find((link) => !!link?.href)
@@ -277,7 +283,7 @@ export const extensionFromMime = (mime: string | null | undefined): string | nul
 }
 
 export const getAcquisitionLink = (links: OPDSPublication['links']) => {
-	return links?.find((link) => link.rel === 'http://opds-spec.org/acquisition')
+	return links?.find((link) => hasLinkRel(link, 'http://opds-spec.org/acquisition'))
 }
 
 export const getPublicationId = (
@@ -290,7 +296,7 @@ export const getPublicationId = (
 
 export const getProgressionURL = (links: OPDSPublication['links'], baseUrl?: string) => {
 	const progressionLink = links?.find(
-		(link) => link.rel === CANTOOK_PROGRESSION_REL || link.type === READIUM_PROGRESSION_TYPE,
+		(link) => hasLinkRel(link, CANTOOK_PROGRESSION_REL) || link.type === READIUM_PROGRESSION_TYPE,
 	)
 	if (progressionLink?.href) {
 		return resolveUrl(progressionLink.href, baseUrl)

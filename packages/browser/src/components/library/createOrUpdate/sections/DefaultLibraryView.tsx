@@ -8,10 +8,11 @@ export default function DefaultLibraryView() {
 	const form = useFormContext()
 	const { t } = useLocaleContext()
 
-	const [viewMode, hideSeriesView]: [LibraryViewMode, boolean] = useWatch({
-		control: form.control,
-		name: ['defaultLibraryViewMode', 'hideSeriesView'],
-	})
+	const [viewMode, hideSeriesView, skipBookOverview]: [LibraryViewMode, boolean, boolean] =
+		useWatch({
+			control: form.control,
+			name: ['defaultLibraryViewMode', 'hideSeriesView', 'skipBookOverview'],
+		})
 	const isSeriesSelected = viewMode === LibraryViewMode.Series
 
 	const handleViewModeChange = useCallback(
@@ -24,6 +25,13 @@ export default function DefaultLibraryView() {
 	const handleHideSeriesChange = useCallback(
 		(checked: boolean) => {
 			form.setValue('hideSeriesView', checked)
+		},
+		[form],
+	)
+
+	const handleSkipBookOverviewChange = useCallback(
+		(checked: boolean) => {
+			form.setValue('skipBookOverview', checked)
 		},
 		[form],
 	)
@@ -77,6 +85,13 @@ export default function DefaultLibraryView() {
 					onCheckedChange={handleHideSeriesChange}
 					label={t(getKey('hideSeriesView.label'))}
 					description={t(getKey('hideSeriesView.description'))}
+				/>
+
+				<WideSwitch
+					checked={skipBookOverview}
+					onCheckedChange={handleSkipBookOverviewChange}
+					label={t(getKey('skipBookOverview.label'))}
+					description={t(getKey('skipBookOverview.description'))}
 				/>
 			</div>
 		</div>

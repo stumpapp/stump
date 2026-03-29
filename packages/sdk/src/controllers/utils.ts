@@ -55,9 +55,7 @@ export const createRouteURLHandler =
 
 /** Formats a string with UrlSearchParams */
 export const urlWithParams = (url: string, params?: URLSearchParams) => {
-	// NOTE: it is important to decode the params because qs.stringify will encode them
-	// EVEN WITH the encode: false option set >:(
-	const paramString = decodeURIComponent(params?.toString() || '')
+	const paramString = params?.toString() || ''
 	if (paramString?.length) {
 		return `${url}?${paramString}`
 	}
@@ -88,9 +86,7 @@ export const toUrlParams = <T extends object>(
 		return params
 	}
 
-	return new URLSearchParams(
-		qs.stringify(obj, { arrayFormat: 'brackets', encode: false, skipNulls: removeEmpty }),
-	)
+	return new URLSearchParams(qs.stringify(obj, { arrayFormat: 'brackets', skipNulls: removeEmpty }))
 }
 
 /**
@@ -101,7 +97,7 @@ export const toUrlParamsString = <T extends object>(
 	params = new URLSearchParams(),
 	options: ToUrlParamsOptions = {},
 ) => {
-	return decodeURIComponent(toUrlParams(obj, params, options).toString())
+	return toUrlParams(obj, params, options).toString()
 }
 
 type ToObjectParamsOptions = {

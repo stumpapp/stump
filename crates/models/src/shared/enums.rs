@@ -587,6 +587,8 @@ pub enum UserPermission {
 	ScanLibrary,
 	/// Grant access to manage the library (scan,edit,manage relations)
 	ManageLibrary,
+	/// Grant access to edit thumbnails for media/series
+	EditThumbnails,
 	/// Grants access to edit any existing metadata for media/series. This will only
 	/// be applied to the database-level metadata.
 	EditMetadata,

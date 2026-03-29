@@ -22,3 +22,4 @@ apps/expo/assets/*.json
 packages/graphql/src/client/*.ts
 
 apps/expo/drizzle/*
+apps/expo/components/emoji/data.json

@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use async_graphql::{
 	dataloader::DataLoader, ComplexObject, Context, Result, SimpleObject,
@@ -7,12 +7,13 @@ use async_graphql::{
 use models::{
 	entity::{
 		library, library_config, library_exclusion, library_scan_record, library_tag,
-		media, series, tag, user,
+		media, media_metadata, series, tag, user,
 	},
 	shared::{
 		alphabet::{AvailableAlphabet, EntityLetter},
 		enums::UserPermission,
 		image::ImageRef,
+		ordering::OrderDirection,
 	},
 };
 use sea_orm::{
@@ -153,8 +154,8 @@ impl Library {
 				LEFT JOIN media_metadata ON media.id = media_metadata.media_id
 				WHERE
 					media.series_id IN (
-						SELECT series.id 
-						FROM series 
+						SELECT series.id
+						FROM series
 						WHERE series.library_id = $1
 					)
 				GROUP BY
@@ -308,6 +309,42 @@ impl Library {
 		Ok(LibraryStats::from_query_result(&result, "")?)
 	}
 
+	async fn genres(
+		&self,
+		ctx: &Context<'_>,
+		#[graphql(default)] sort: Option<OrderDirection>,
+	) -> Result<Vec<String>> {
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let genre_strings = get_unique_str_list_metadata_fields(
+			self,
+			media_metadata::Column::Genres,
+			sort.unwrap_or(OrderDirection::Asc),
+			conn,
+		)
+		.await?;
+
+		Ok(genre_strings)
+	}
+
+	async fn publishers(
+		&self,
+		ctx: &Context<'_>,
+		#[graphql(default)] sort: Option<OrderDirection>,
+	) -> Result<Vec<String>> {
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let publisher_strings = get_unique_metadata_fields(
+			self,
+			media_metadata::Column::Publisher,
+			sort.unwrap_or(OrderDirection::Asc),
+			conn,
+		)
+		.await?;
+
+		Ok(publisher_strings)
+	}
+
 	async fn tags(&self, ctx: &Context<'_>) -> Result<Vec<Tag>> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
@@ -334,16 +371,19 @@ impl Library {
 	async fn thumbnail(&self, ctx: &Context<'_>) -> Result<ImageRef> {
 		let service = ctx.data::<ServiceContext>()?;
 
-		// TODO: Spawn a blocking task to get the image dimensions
-		// Use a cache as to not read the file system every time?
+		let dimensions = self
+			.model
+			.thumbnail_meta
+			.as_ref()
+			.and_then(|meta| meta.dimensions.as_ref())
+			.map(|dim| (dim.width, dim.height));
 
 		Ok(ImageRef {
 			url: service
 				.format_url(format!("/api/v2/library/{}/thumbnail", self.model.id)),
-			// height: page_dimension.as_ref().map(|dim| dim.height),
-			// width: page_dimension.as_ref().map(|dim| dim.width),
+			height: dimensions.map(|(_, height)| height),
+			width: dimensions.map(|(width, _)| width),
 			metadata: self.model.thumbnail_meta.clone(),
-			..Default::default()
 		})
 	}
 }
@@ -358,4 +398,102 @@ pub struct LibraryStats {
 	completed_books: i64,
 	in_progress_books: i64,
 	total_reading_time_seconds: i64,
+}
+
+async fn get_unique_metadata_fields(
+	library: &Library,
+	column: media_metadata::Column,
+	sort: OrderDirection,
+	conn: &DatabaseConnection,
+) -> Result<Vec<String>> {
+	let values = media_metadata::Entity::find()
+		.select_only()
+		.column(column)
+		.distinct()
+		.filter(column.is_not_null())
+		// just a lil inefficient
+		.filter(
+			media_metadata::Column::MediaId.in_subquery(
+				Query::select()
+					.column(media::Column::Id)
+					.from(media::Entity)
+					.and_where(
+						media::Column::SeriesId.in_subquery(
+							Query::select()
+								.column(series::Column::Id)
+								.from(series::Entity)
+								.and_where(
+									series::Column::LibraryId
+										.eq(library.model.id.clone()),
+								)
+								.to_owned(),
+						),
+					)
+					.to_owned(),
+			),
+		)
+		.order_by(column, sort.into())
+		.into_tuple::<String>()
+		.all(conn)
+		.await?;
+
+	Ok(values)
+}
+
+/// Get unique values from fields which are string arrays
+async fn get_unique_str_list_metadata_fields(
+	library: &Library,
+	column: media_metadata::Column,
+	sort: OrderDirection,
+	conn: &DatabaseConnection,
+) -> Result<Vec<String>> {
+	let csv_list = media_metadata::Entity::find()
+		.select_only()
+		.column(column)
+		.distinct()
+		.filter(column.is_not_null())
+		// just a lil inefficient
+		.filter(
+			media_metadata::Column::MediaId.in_subquery(
+				Query::select()
+					.column(media::Column::Id)
+					.from(media::Entity)
+					.and_where(
+						media::Column::SeriesId.in_subquery(
+							Query::select()
+								.column(series::Column::Id)
+								.from(series::Entity)
+								.and_where(
+									series::Column::LibraryId
+										.eq(library.model.id.clone()),
+								)
+								.to_owned(),
+						),
+					)
+					.to_owned(),
+			),
+		)
+		.into_tuple::<String>()
+		.all(conn)
+		.await?;
+
+	let mut unique_values = HashSet::new();
+	for csv in csv_list {
+		for value in csv.split(',') {
+			if !value.trim().is_empty() {
+				unique_values.insert(value.trim().to_string());
+			}
+		}
+	}
+
+	let sorted_values = {
+		let mut vec: Vec<String> = unique_values.into_iter().collect();
+		match sort {
+			OrderDirection::Asc => vec.sort(),
+			OrderDirection::Desc => vec.sort_by(|a, b| b.cmp(a)),
+		}
+		vec
+	};
+
+	Ok(sorted_values)
 }

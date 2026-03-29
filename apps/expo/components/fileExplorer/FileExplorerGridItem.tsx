@@ -79,7 +79,6 @@ export default function FileExplorerGridItem({ file }: Props) {
 									Authorization: sdk.authorizationHeader || '',
 								},
 							}}
-							resizeMode="stretch"
 							size={{ height: 70 / thumbnailRatio, width: 70 }}
 						/>
 					)}

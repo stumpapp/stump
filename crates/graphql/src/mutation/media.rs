@@ -44,6 +44,7 @@ pub struct MediaMutation;
 
 #[Object]
 impl MediaMutation {
+	#[graphql(guard = "PermissionGuard::one(UserPermission::ManageLibrary)")]
 	async fn analyze_media(
 		&self,
 		ctx: &Context<'_>,
@@ -75,6 +76,7 @@ impl MediaMutation {
 	}
 
 	// TODO: Support converting other formats in the future
+	#[graphql(guard = "PermissionGuard::one(UserPermission::ManageLibrary)")]
 	async fn convert_media(&self, ctx: &Context<'_>, id: ID) -> Result<bool> {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let core = ctx.data::<CoreContext>()?;
@@ -98,6 +100,7 @@ impl MediaMutation {
 		Err("Not implemented".into())
 	}
 
+	#[graphql(guard = "PermissionGuard::one(UserPermission::ManageLibrary)")]
 	async fn delete_media(&self, ctx: &Context<'_>, id: ID) -> Result<Media> {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let core = ctx.data::<CoreContext>()?;
@@ -171,7 +174,7 @@ impl MediaMutation {
 	/// Update the thumbnail for a book. This will replace the existing thumbnail with the the one
 	/// associated with the provided input (book). If the book does not have a thumbnail, one
 	/// will be generated based on the library's thumbnail configuration.
-	#[graphql(guard = "PermissionGuard::one(UserPermission::EditLibrary)")]
+	#[graphql(guard = "PermissionGuard::one(UserPermission::EditThumbnails)")]
 	async fn update_media_thumbnail(
 		&self,
 		ctx: &Context<'_>,
@@ -414,19 +417,22 @@ impl MediaMutation {
 				active_session.into(),
 			)))
 		} else {
+			let txn = conn.begin().await?;
+
 			let recent_completion =
 				finished_reading_session::Entity::recent_completed_record(
-					conn,
+					&txn,
 					&user.id,
 					id.as_ref(),
-					finished_reading_session::COMPLETION_DEDUP_TIMEOUT_MINUTES,
+					core.config.book_completion_dedup_timeout_secs,
 				)
 				.await?;
 
 			// TODO: See if this creates too much churn in practice
 			if let Some(existing_session) = recent_completion {
 				// Already completed recently - delete active session but return existing finished session
-				let _ = active_session.delete(conn).await?;
+				let _ = active_session.delete(&txn).await?;
+				txn.commit().await?;
 				return Ok(ReadingProgressOutput::Finished(Box::new(
 					existing_session.into(),
 				)));
@@ -435,15 +441,12 @@ impl MediaMutation {
 			let finished_reading_session = finished_reading_session::ActiveModel {
 				user_id: Set(user.id.clone()),
 				media_id: Set(id.to_string()),
-				started_at: Set(active_session
-					.updated_at
-					.unwrap_or_else(|| chrono::Utc::now().into())),
+				started_at: Set(active_session.started_at),
 				completed_at: Set(chrono::Utc::now().into()),
 				elapsed_seconds: Set(active_session.elapsed_seconds),
 				..Default::default()
 			};
 
-			let txn = conn.begin().await?;
 			let finished_reading_session = insert_finished_reading_session(
 				Some(active_session),
 				finished_reading_session,
@@ -553,12 +556,14 @@ async fn set_completed_media(
 		.as_ref()
 		.map(|s| s.started_at)
 		.unwrap_or_else(|| Utc::now().into());
+	let elapsed_seconds = active_session.as_ref().and_then(|s| s.elapsed_seconds);
 
 	let finished_reading_session = finished_reading_session::ActiveModel {
 		user_id: Set(user.id.clone()),
 		media_id: Set(model.media.id.to_string()),
 		started_at: Set(started_at),
 		completed_at: Set(chrono::Utc::now().into()),
+		elapsed_seconds: Set(elapsed_seconds),
 		..Default::default()
 	};
 

@@ -27,6 +27,26 @@ const query = graphql(`
 				id
 				name
 			}
+			stats {
+				bookCount
+				completedBooks
+				inProgressBooks
+				totalBytes
+				totalReadingTimeSeconds
+			}
+			metadata {
+				status
+				publisher
+				year
+				genres
+				booktype
+				volume
+				totalIssues
+				writers
+				summary
+				descriptionFormatted
+				links
+			}
 			thumbnail {
 				url
 				metadata {
@@ -66,8 +86,6 @@ export default function SeriesLayout() {
 	const {
 		data: { seriesById: series },
 	} = useSuspenseGraphQL(query, ['seriesById'], { id: id || '' })
-	// TODO: stats
-	// const { stats } = useSeriesStats({ cacheTime: 1000 * 60 * 5, id })
 	const {
 		preferences: { enableHideScrollbar },
 	} = usePreferences()

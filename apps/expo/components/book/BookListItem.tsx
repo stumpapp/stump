@@ -24,6 +24,8 @@ const fragment = graphql(`
 				}
 				thumbhash
 			}
+			height
+			width
 		}
 	}
 `)
@@ -45,10 +47,10 @@ function BookListItem({ book }: Props) {
 	const router = useRouter()
 
 	const { width, height } = useListItemSize()
-	const { url: uri, metadata: placeholderData } = data.thumbnail
+	const { url: uri, metadata: placeholderData, ...originalDimensions } = data.thumbnail
 
 	return (
-		<Pressable onPress={() => router.navigate(`/server/${serverID}/books/${data.id}`)}>
+		<Pressable onPress={() => router.push(`/server/${serverID}/books/${data.id}`)}>
 			{({ pressed }) => (
 				<View className="relative" style={{ opacity: pressed ? 0.8 : 1 }}>
 					<ThumbnailImage
@@ -59,9 +61,13 @@ function BookListItem({ book }: Props) {
 								Authorization: sdk.authorizationHeader || '',
 							},
 						}}
-						resizeMode="stretch"
 						size={{ height, width }}
 						placeholderData={placeholderData}
+						originalDimensions={
+							originalDimensions.width && originalDimensions.height
+								? { width: originalDimensions.width, height: originalDimensions.height }
+								: null
+						}
 					/>
 
 					<View>

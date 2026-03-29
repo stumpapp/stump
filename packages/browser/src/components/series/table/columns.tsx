@@ -23,7 +23,7 @@ const coverColumn = columnHelper.display({
 		</Text>
 	),
 	id: 'cover',
-	size: 60,
+	size: 0,
 })
 
 const nameColumn = columnHelper.accessor(({ resolvedName }) => resolvedName, {

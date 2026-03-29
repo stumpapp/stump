@@ -270,6 +270,7 @@ mod tests {
 			watch: false,
 			default_library_view_mode: LibraryViewMode::Series,
 			hide_series_view: false,
+			skip_book_overview: false,
 		}
 	}
 }

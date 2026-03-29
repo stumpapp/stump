@@ -1,4 +1,4 @@
-use async_graphql::{CustomValidator, InputObject, InputValueError, Json};
+use async_graphql::{CustomValidator, InputObject, InputValueError, Json, ID};
 use models::{
 	entity::{book_club, book_club_member, user::AuthUser},
 	shared::book_club::{BookClubMemberRole, BookClubMemberRoleSpec},
@@ -44,12 +44,12 @@ impl CreateBookClubInput {
 		let owning_member = book_club_member::ActiveModel {
 			id: Set(Uuid::new_v4().to_string()),
 			role: Set(BookClubMemberRole::Creator),
-			is_creator: Set(true),
 			hide_progress: Set(self.creator_hide_progress),
 			display_name: Set(self.creator_display_name),
 			user_id: Set(user.id.clone()),
 			book_club_id: Set(id),
-			private_membership: Set(self.creator_hide_progress),
+			bio: Set(None),
+			joined_at: Set(chrono::Utc::now().into()),
 		};
 
 		(club, owning_member)
@@ -88,8 +88,8 @@ impl UpdateBookClubInput {
 			name,
 			description,
 			is_private,
-			member_role_spec,
 			emoji,
+			member_role_spec,
 		} = self;
 
 		active_model.description = Set(description);
@@ -115,7 +115,6 @@ pub struct BookClubInvitationInput {
 pub struct BookClubMemberInput {
 	pub user_id: String,
 	pub display_name: Option<String>,
-	pub private_membership: Option<bool>,
 }
 
 #[derive(Debug, InputObject)]
@@ -146,24 +145,21 @@ impl CustomValidator<BookClubInvitationResponseInput>
 }
 
 #[derive(Debug, InputObject)]
-pub struct CreateBookClubScheduleBook {
-	pub book: BookClubBookVariant,
-	pub start_at: Option<DateTimeWithTimeZone>,
-	pub end_at: Option<DateTimeWithTimeZone>,
-	pub discussion_duration_days: Option<i32>,
+pub struct BookClubDiscussionInput {
+	pub book_club_book_id: Option<ID>,
+	pub title: Option<String>,
+	pub is_pinned: bool,
 }
 
 #[derive(Debug, InputObject)]
-pub struct CreateBookClubScheduleInput {
-	pub default_interval_days: Option<i32>,
-	pub books: Vec<CreateBookClubScheduleBook>,
+pub struct AddBookToClubInput {
+	pub book: BookClubBookVariant,
 }
 
 #[derive(Debug, InputObject)]
 pub struct CreateBookClubMemberInput {
 	pub user_id: String,
 	pub display_name: Option<String>,
-	pub private_membership: Option<bool>,
 	pub role: BookClubMemberRole,
 }
 
@@ -173,13 +169,53 @@ impl CreateBookClubMemberInput {
 			id: Set(Uuid::new_v4().to_string()),
 			display_name: Set(self.display_name),
 			book_club_id: Set(book_club_id.to_string()),
-			private_membership: Set(self.private_membership.unwrap_or(false)),
-			hide_progress: Set(self.private_membership.unwrap_or(false)),
+			hide_progress: Set(false),
 			user_id: Set(self.user_id),
 			role: Set(self.role),
 			..Default::default()
 		}
 	}
+}
+
+#[derive(Debug, InputObject)]
+pub struct SendMessageInput {
+	pub content: String,
+	/// The parent message inside a thread, denoting this message as a child
+	pub parent_message_id: Option<String>,
+	/// An inline reply reference, NOT a child of a thread
+	pub reply_to_message_id: Option<String>,
+}
+
+#[derive(Debug, InputObject)]
+pub struct EditMessageInput {
+	pub content: String,
+}
+
+#[derive(Debug, InputObject)]
+pub struct CreateCustomEmojiInput {
+	pub name: String,
+	pub is_animated: bool,
+}
+
+#[derive(Debug, InputObject)]
+pub struct UpdateCustomEmojiInput {
+	pub name: String,
+}
+
+#[derive(Debug, InputObject)]
+pub struct SuggestBookInput {
+	pub book_id: Option<String>,
+	pub title: Option<String>,
+	pub author: Option<String>,
+	pub url: Option<String>,
+	pub notes: Option<String>,
+}
+
+#[derive(Debug, InputObject)]
+pub struct UpdateMemberProfileInput {
+	pub display_name: Option<String>,
+	pub bio: Option<String>,
+	pub hide_progress: Option<bool>,
 }
 
 #[cfg(test)]

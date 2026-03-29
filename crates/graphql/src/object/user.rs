@@ -11,7 +11,7 @@ use models::{
 use sea_orm::{prelude::*, QueryOrder};
 
 use crate::{
-	data::CoreContext,
+	data::{CoreContext, ServiceContext},
 	guard::{PermissionGuard, SelfGuard, ServerOwnerGuard},
 	pagination::{PaginatedResponse, Pagination, PaginationValidator},
 	query::media::MediaQuery,
@@ -34,6 +34,19 @@ impl From<user::Model> for User {
 
 #[ComplexObject]
 impl User {
+	async fn avatar_url(&self, ctx: &Context<'_>) -> Result<Option<String>> {
+		let service = ctx.data::<ServiceContext>()?;
+
+		if self.model.avatar_path.is_none() {
+			return Ok(None);
+		}
+
+		Ok(Some(service.format_url(format!(
+			"/api/v2/users/{}/avatar",
+			self.model.id
+		))))
+	}
+
 	#[graphql(
 		guard = "SelfGuard::new(&self.model.id).or(PermissionGuard::one(UserPermission::ManageUsers)).or(ServerOwnerGuard)"
 	)]

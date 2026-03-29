@@ -16,6 +16,7 @@ import { useCallback, useMemo } from 'react'
 import { useForm, useFormState, useWatch } from 'react-hook-form'
 
 import { CreateOrUpdateEmailerSchema, createSchema, formDefaults } from './schema'
+import TestEmailerButton from './TestEmailerButton'
 import { commonHosts, getCommonHost } from './utils'
 
 type Props = {
@@ -232,6 +233,8 @@ export default function CreateOrUpdateEmailerForm({ emailer, existingNames, onSu
 					errorMessage={errors.maxAttachmentSizeBytes?.message}
 				/>
 			</div>
+
+			<TestEmailerButton />
 
 			<div>
 				<Button type="submit" variant="primary">

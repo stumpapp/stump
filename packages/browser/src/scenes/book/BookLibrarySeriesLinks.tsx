@@ -1,71 +1,57 @@
 import { useSDK, useSuspenseGraphQL } from '@stump/client'
-import { cx, Link, Text } from '@stump/components'
+import { Badge, Link, Text } from '@stump/components'
 import { graphql } from '@stump/graphql'
-import { Fragment } from 'react'
 
 import paths from '../../paths'
-import SeriesLibraryLink from '../series/SeriesLibraryLink'
 
-const query = graphql(`
+const seriesQuery = graphql(`
 	query BookLibrarySeriesLinks($id: ID!) {
 		seriesById(id: $id) {
 			id
 			resolvedName
-			libraryId
+			library {
+				id
+				name
+			}
 		}
 	}
 `)
 
 type Props = {
 	seriesId?: string
-	linkSegments?: {
-		to?: string
-		label: string
-		noShrink?: boolean
-	}[]
 }
 
-export default function BookLibrarySeriesLinks({ seriesId, linkSegments }: Props) {
+export default function BookLibrarySeriesLinks({ seriesId }: Props) {
 	const { sdk } = useSDK()
 	const {
 		data: { seriesById: series },
-	} = useSuspenseGraphQL(query, sdk.cacheKey('seriesLinks', [seriesId]), {
+	} = useSuspenseGraphQL(seriesQuery, sdk.cacheKey('seriesLinks', [seriesId]), {
 		id: seriesId || '',
 	})
-	const renderSeriesLink = () => {
-		if (!series) {
-			return null
-		}
 
-		return (
-			<>
-				<span className="mx-2 text-foreground-muted">/</span>
-				<Link to={paths.seriesOverview(series.id)} className="line-clamp-1">
-					{series.resolvedName}
-				</Link>
-			</>
-		)
-	}
+	const library = series?.library
 
 	return (
-		<div className="flex items-center text-sm md:text-base">
-			{series?.libraryId && <SeriesLibraryLink id={series?.libraryId} />}
-			{renderSeriesLink()}
-			{linkSegments?.map((segment) => {
-				const Component = segment.to ? Link : Text
-
-				return (
-					<Fragment key={segment.label}>
-						<span className="mx-2 text-foreground-muted">/</span>
-						<Component
-							className={cx('line-clamp-1', { 'shrink-0': segment.noShrink })}
-							{...(segment.to ? { to: segment.to } : {})}
-						>
-							{segment.label}
-						</Component>
-					</Fragment>
-				)
-			})}
+		<div className="flex items-center gap-1.5">
+			{library && (
+				<Link to={paths.librarySeries(library.id)} underline={false}>
+					<Badge variant="default" size="xs" rounded="full" className="cursor-pointer">
+						{library.name}
+					</Badge>
+				</Link>
+			)}
+			{series && (
+				<>
+					<Text size="xs" variant="muted">
+						/
+					</Text>
+					<Link to={paths.seriesOverview(series.id)} underline={false}>
+						<Badge variant="primary" size="xs" rounded="full" className="cursor-pointer">
+							{series.resolvedName}
+						</Badge>
+					</Link>
+				</>
+			)}
 		</div>
 	)
 }

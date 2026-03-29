@@ -1,16 +1,15 @@
 import { ALargeSmall, TableOfContents } from 'lucide-react-native'
-import { useEffect } from 'react'
+import { useMemo } from 'react'
 import { Pressable, View } from 'react-native'
-import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
+import Animated from 'react-native-reanimated'
 import { initialWindowMetrics, useSafeAreaInsets } from 'react-native-safe-area-context'
 
+import { FADE_IN, FADE_OUT, useReaderAnimations } from '~/components/book/reader/shared'
 import ChevronBackLink from '~/components/ChevronBackLink'
 import { Text } from '~/components/ui'
 import { Icon } from '~/components/ui/icon'
-import { CONTROLS_TIMING_CONFIG } from '~/lib/constants'
-import { useDisplay } from '~/lib/hooks'
-import { useReaderStore } from '~/stores'
-import { useEpubLocationStore, useEpubTheme } from '~/stores/epub'
+import { usePreferencesStore } from '~/stores'
+import { flattenToc, useEpubLocationStore, useEpubTheme } from '~/stores/epub'
 import { useEpubSheetStore } from '~/stores/epubSheet'
 
 import BookmarkButton from './BookmarkButton'
@@ -21,71 +20,115 @@ export const HEADER_HEIGHT = 48
 // think I want to deviate a bit moving forward
 
 export default function ReadiumHeader() {
-	const { height } = useDisplay()
+	const { colors } = useEpubTheme()
+	const insets = useSafeAreaInsets()
 
-	const openSheet = useEpubSheetStore((state) => state.openSheet)
+	const { secondaryStyle, primaryStyle } = useReaderAnimations()
+	const preferMinimalReader = usePreferencesStore((state) => state.preferMinimalReader)
+	const { chapterTitle, progressText } = useChapterProgress()
 
-	const visible = useReaderStore((state) => state.showControls)
+	return (
+		<>
+			{/* Controls hidden */}
+			{!preferMinimalReader && (
+				<Animated.View
+					className="inset-x-safe absolute z-20 h-12 items-center justify-center px-8"
+					style={[{ top: initialWindowMetrics?.insets.top || insets.top }, primaryStyle]}
+				>
+					<Animated.View key={chapterTitle} entering={FADE_IN} exiting={FADE_OUT}>
+						<Text
+							numberOfLines={1}
+							style={{ color: colors?.foreground }}
+							className="font-medium opacity-50"
+						>
+							{chapterTitle}
+						</Text>
+					</Animated.View>
+				</Animated.View>
+			)}
+
+			{/* Controls shown */}
+			<Animated.View
+				className="inset-x-safe absolute z-20 h-12 flex-row items-center justify-between gap-2 px-4"
+				style={[{ top: initialWindowMetrics?.insets.top || insets.top }, secondaryStyle]}
+			>
+				<View className="flex-row items-center gap-4">
+					<ChevronBackLink
+						color={colors?.foreground}
+						style={{ opacity: 0.9 }}
+						activeOpacity={0.7}
+					/>
+					<OpenSheetButton sheet="locations" />
+				</View>
+
+				<View className="flex-1 items-center justify-center">
+					<Animated.View entering={FADE_IN} exiting={FADE_OUT}>
+						<Text
+							numberOfLines={1}
+							style={{ color: colors?.foreground }}
+							className="font-medium opacity-50"
+						>
+							{preferMinimalReader ? chapterTitle : progressText}
+						</Text>
+					</Animated.View>
+				</View>
+
+				<View className="flex-row items-center gap-4">
+					<BookmarkButton color={colors?.foreground} />
+					<OpenSheetButton sheet="settings" />
+				</View>
+			</Animated.View>
+		</>
+	)
+}
+
+function useChapterProgress() {
 	const chapterTitle = useEpubLocationStore(
 		(state) => state.currentChapter || state.book?.name || state.embeddedMetadata?.title,
 	)
-	const { colors } = useEpubTheme()
+	const toc = useEpubLocationStore((store) => store.toc)
+	const page = useEpubLocationStore((state) => state.position)
+	const totalPages = useEpubLocationStore((state) => state.totalPages)
 
-	const insets = useSafeAreaInsets()
+	const pagesLeftInChapter = useMemo(() => {
+		const flatToc = flattenToc(toc)
+		const activeIndex = flatToc.findIndex((item) => item.label === chapterTitle)
+		const nextChapter = flatToc.slice(activeIndex + 1).find((item) => item.position != null)
 
-	const opacity = useSharedValue(0)
-	useEffect(() => {
-		opacity.value = withTiming(visible ? 1 : 0, CONTROLS_TIMING_CONFIG)
-	}, [visible, opacity, height, insets.top])
-
-	const animatedStyles = useAnimatedStyle(() => {
-		return {
-			top: initialWindowMetrics?.insets.top || insets.top,
-			left: insets.left,
-			right: insets.right,
-			opacity: opacity.value,
+		if (activeIndex + 1 === flatToc.length) {
+			return totalPages - page
 		}
-	})
+		if (nextChapter?.position != null) {
+			return nextChapter.position - 1 - page
+		}
+		return null
+	}, [chapterTitle, toc, page, totalPages])
+
+	const progressText = useMemo(() => {
+		if (pagesLeftInChapter == null) return null
+		if (pagesLeftInChapter === 0) return 'Final page in chapter'
+		else return `${pagesLeftInChapter} pages left in chapter`
+	}, [pagesLeftInChapter])
+
+	return { chapterTitle, progressText }
+}
+
+function OpenSheetButton({ sheet }: { sheet: 'locations' | 'settings' }) {
+	const { colors } = useEpubTheme()
+	const openSheet = useEpubSheetStore((state) => state.openSheet)
+
+	const sheetIcon = { locations: TableOfContents, settings: ALargeSmall }
 
 	return (
-		<Animated.View
-			className="absolute z-20 h-12 flex-row items-center justify-between gap-2 px-2"
-			style={animatedStyles}
-		>
-			<View className="flex-1 flex-row items-center gap-4">
-				<ChevronBackLink style={{ color: colors?.foreground, opacity: 0.9 }} />
-				<Pressable onPress={() => openSheet('locations')}>
-					{({ pressed }) => (
-						<Icon
-							as={TableOfContents}
-							className="h-6 w-6"
-							// @ts-expect-error: Color definitely works
-							style={{ opacity: pressed ? 0.7 : 0.9, color: colors?.foreground }}
-						/>
-					)}
-				</Pressable>
-			</View>
-
-			<View className="absolute left-0 right-0 items-center justify-center px-16">
-				<Text numberOfLines={1} style={{ color: colors?.foreground }} className="max-w-[90%]">
-					{chapterTitle}
-				</Text>
-			</View>
-
-			<View className="flex-1 flex-row items-center justify-end gap-4">
-				<BookmarkButton color={colors?.foreground} />
-
-				<Pressable onPress={() => openSheet('settings')}>
-					{({ pressed }) => (
-						<Icon
-							as={ALargeSmall}
-							className="h-6 w-6"
-							// @ts-expect-error: Color definitely works
-							style={{ opacity: pressed ? 0.7 : 0.9, color: colors?.foreground }}
-						/>
-					)}
-				</Pressable>
-			</View>
-		</Animated.View>
+		<Pressable onPress={() => openSheet(sheet)}>
+			{({ pressed }) => (
+				<Icon
+					as={sheetIcon[sheet]}
+					className="h-6 w-6"
+					color={colors?.foreground}
+					style={{ opacity: pressed ? 0.7 : 0.9 }}
+				/>
+			)}
+		</Pressable>
 	)
 }

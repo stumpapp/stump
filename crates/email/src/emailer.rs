@@ -2,12 +2,12 @@ use async_graphql::InputObject;
 use std::path::PathBuf;
 
 use lettre::{
-	address::AddressError,
+	address::{Address, AddressError},
 	message::{
 		header::{self, ContentType},
-		Attachment, MultiPart, SinglePart,
+		Attachment, Mailbox, MultiPart, SinglePart,
 	},
-	transport::smtp::authentication::Credentials,
+	transport::smtp::authentication::{Credentials, Mechanism},
 	Message, SmtpTransport, Transport,
 };
 use serde::{Deserialize, Serialize};
@@ -86,6 +86,23 @@ impl EmailerClient {
 			config,
 			template_dir,
 		}
+	}
+
+	/// Send a test email with a small TXT attachment to verify the SMTP configuration is working.
+	pub async fn send_test_email(&self, recipient: &str) -> EmailResult<()> {
+		self.send_attachment(
+			"Test Email from Stump",
+			recipient,
+			AttachmentPayload {
+				name: "stump-test.txt".to_string(),
+				content:
+					b"Hello from Stump! Your email configuration is working correctly."
+						.to_vec(),
+				content_type: ContentType::parse("text/plain; charset=utf-8")
+					.unwrap_or(ContentType::TEXT_PLAIN),
+			},
+		)
+		.await
 	}
 
 	/// Send an email with the given subject and attachment to the given recipient.
@@ -177,17 +194,31 @@ impl EmailerClient {
 	///     assert!(result.is_err()); // This will fail because the SMTP server is not real
 	/// }
 	/// ```
+	#[tracing::instrument(
+		skip(self, subject, payloads),
+		fields(host = %self.config.host, port = self.config.port, tls_enabled = self.config.tls_enabled,
+	))]
 	pub async fn send_attachments(
 		&self,
 		subject: &str,
 		recipient: &str,
 		payloads: Vec<AttachmentPayload>,
 	) -> EmailResult<()> {
-		let from = self
+		let address: Address = self
 			.config
 			.sender_email
 			.parse()
 			.map_err(|e: AddressError| EmailError::InvalidEmail(e.to_string()))?;
+
+		let display_name = &self.config.sender_display_name;
+		let from = Mailbox::new(
+			if display_name.is_empty() {
+				None
+			} else {
+				Some(display_name.clone())
+			},
+			address,
+		);
 
 		let to = recipient
 			.parse()
@@ -229,24 +260,35 @@ impl EmailerClient {
 
 		// Note this issue: https://github.com/lettre/lettre/issues/359
 		let transport = if self.config.tls_enabled {
-			SmtpTransport::starttls_relay(&self.config.host)
-				.unwrap()
-				.credentials(creds)
-				.build()
+			if self.config.port == 465 {
+				tracing::debug!("Using implicit TLS (relay)");
+				SmtpTransport::relay(&self.config.host)?
+					.port(self.config.port)
+					.credentials(creds)
+					.build()
+			} else {
+				tracing::debug!("Using STARTTLS (starttls_relay)");
+				SmtpTransport::starttls_relay(&self.config.host)?
+					.port(self.config.port)
+					.credentials(creds)
+					.build()
+			}
 		} else {
-			SmtpTransport::relay(&self.config.host)?
+			tracing::warn!("TLS is disabled, using dangerous SMTP transport!");
+			SmtpTransport::builder_dangerous(&self.config.host)
 				.port(self.config.port)
 				.credentials(creds)
+				.authentication(vec![Mechanism::Plain, Mechanism::Login])
 				.build()
 		};
 
 		match transport.send(&email) {
 			Ok(res) => {
-				tracing::trace!(?res, "Email with attachments was sent");
+				tracing::debug!(?res, "Email with attachments was sent successfully");
 				Ok(())
 			},
 			Err(e) => {
-				tracing::error!(error = ?e, "Failed to send email with attachments");
+				tracing::error!(error = ?e, host = %self.config.host, port = self.config.port, "Failed to send email with attachments");
 				Err(e.into())
 			},
 		}

@@ -120,6 +120,14 @@ This corresponds to the `allowed_origins` configuration option in the `Stump.tom
 
 **Be sure to replace `{machine_ip}` and `{configured_port}` with the appropriate values for your environment.**
 
+### STUMP_BOOK_COMPLETION_DEDUP_TIMEOUT_SECS
+
+The number of seconds after which a book can be re-completed.
+
+| Type    | Default Value   |
+| ------- | --------------- |
+| Integer | `86400` (1 day) |
+
 ### STUMP_CLIENT_DIR
 
 The directory the contains the web bundle for the web UI
@@ -229,6 +237,16 @@ Whether or not to disable local username/password authentication when OIDC is en
 | Type    | Default Value |
 | ------- | ------------- |
 | Boolean | `false`       |
+
+### STUMP_OIDC_EXTRA_AUDIENCES
+
+A **comma-separated** list of additional trusted audiences for ID token verification. This is required when using providers like Zitadel that inject extra values (e.g. the project ID) into the JWT `aud` claim. See the [OIDC](/guides/access-control/oidc) guide for more information.
+
+| Type   | Default Value |
+| ------ | ------------- |
+| String | N/A           |
+
+**Example:** `360960386461073457,another-audience`
 
 ### STUMP_PDF_CACHE_PAGES
 

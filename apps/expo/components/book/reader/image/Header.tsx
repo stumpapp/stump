@@ -1,20 +1,19 @@
 import { ReadingDirection } from '@stump/graphql'
 import { useRouter } from 'expo-router'
 import { X } from 'lucide-react-native'
-import { useCallback, useEffect } from 'react'
+import { useCallback } from 'react'
 import { Platform, View } from 'react-native'
-import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
+import Animated from 'react-native-reanimated'
 import { initialWindowMetrics, useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Heading } from '~/components/ui'
 import { HeaderButton } from '~/components/ui/header-button/header-button'
 import { COLORS } from '~/lib/constants'
-import { CONTROLS_TIMING_CONFIG } from '~/lib/constants'
-import { useDisplay } from '~/lib/hooks'
 import { useReaderStore } from '~/stores'
 import { useBookPreferences } from '~/stores/reader'
 
 import { PagedActionMenu } from '../shared/paged-action-menu/PagedActionMenu'
+import { useReaderAnimations } from '../shared/readerAnimations'
 import { useImageBasedReader } from './context'
 
 type Props = {
@@ -22,7 +21,6 @@ type Props = {
 }
 
 export default function Header({ onShowGlobalSettings }: Props) {
-	const { height } = useDisplay()
 	const { book, resetTimer, serverId } = useImageBasedReader()
 	const {
 		preferences: { readingDirection },
@@ -32,27 +30,7 @@ export default function Header({ onShowGlobalSettings }: Props) {
 	// TODO: I think global incognito makes sense but isn't exposed very well right now
 	const incognito = useReaderStore((state) => state.globalSettings.incognito)
 	const insets = useSafeAreaInsets()
-	const visible = useReaderStore((state) => state.showControls)
-
-	// const translateY = useSharedValue(-200)
-	const opacity = useSharedValue(0)
-	useEffect(() => {
-		// translateY.value = withTiming(visible ? 0 : -200, {
-		// 	duration: 250,
-		// 	easing: visible ? Easing.out(Easing.quad) : Easing.in(Easing.quad),
-		// })
-		opacity.value = withTiming(visible ? 1 : 0, CONTROLS_TIMING_CONFIG)
-	}, [visible, height, insets.top, opacity])
-
-	const animatedStyles = useAnimatedStyle(() => {
-		return {
-			top: initialWindowMetrics?.insets.top || insets.top || 12,
-			left: insets.left,
-			right: insets.right,
-			// transform: [{ translateY: translateY.value }],
-			opacity: opacity.value,
-		}
-	})
+	const { secondaryStyle } = useReaderAnimations()
 
 	const onChangeReadingDirection = useCallback(() => {
 		setBookPreferences({
@@ -63,11 +41,11 @@ export default function Header({ onShowGlobalSettings }: Props) {
 
 	const router = useRouter()
 
-	// FIXME: The native buttons (iOS) shift when the y position is animated. Making the position "fixed"
-	// fixes it but we obv can't do that. For the time being, I've swapped to
-	// opacity animation to avoid the layout shift issues
 	return (
-		<Animated.View className="absolute z-20 gap-2 px-2" style={animatedStyles}>
+		<Animated.View
+			className="inset-x-safe absolute z-20 gap-2 px-2"
+			style={[{ top: initialWindowMetrics?.insets.top || insets.top }, secondaryStyle]}
+		>
 			<View className="relative flex-row items-center justify-between">
 				<HeaderButton
 					icon={{

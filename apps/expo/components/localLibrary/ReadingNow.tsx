@@ -12,7 +12,7 @@ import { stripHtml } from 'string-strip-html'
 
 import { ThumbnailImage } from '~/components/image'
 import { Heading, Progress, Text } from '~/components/ui'
-import { imageMeta, syncStatus } from '~/db'
+import { epubProgress, imageMeta, syncStatus } from '~/db'
 import { COLORS, useColors } from '~/lib/constants'
 import { parseGraphQLDecimal } from '~/lib/format'
 import { useDisplay } from '~/lib/hooks'
@@ -143,6 +143,9 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 	const { width, isTablet } = useDisplay()
 
 	const percentageCompleted = parseGraphQLDecimal(book.readProgress?.percentage)
+	const epubProgression = epubProgress.safeParse(book.readProgress?.epubProgress).data
+	const currentPage = book.readProgress?.page ?? epubProgression?.locations?.position ?? '??'
+
 	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
 	const imageHeight = IMAGE_WIDTH / thumbnailRatio
 
@@ -221,7 +224,6 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 	const thumbnailPath = useMemo(() => getThumbnailPath(book), [book])
 
 	const router = useRouter()
-	const isEbookProgress = !!book.readProgress?.epubProgress
 
 	const { colors: gradientColors, locations: gradientLocations } = easeGradient({
 		colorStops: {
@@ -242,7 +244,6 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 						// undefined so it's fine
 						uri: thumbnailPath,
 					}}
-					resizeMode="stretch"
 					size={{ height: imageHeight, width: IMAGE_WIDTH }}
 					gradient={{ colors: gradientColors, locations: gradientLocations }}
 					placeholderData={thumbnailData}
@@ -272,46 +273,36 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 
 					<View className="flex items-start gap-2">
 						<View className="flex w-full flex-row items-center justify-between">
-							{!isEbookProgress && !!book.readProgress?.page && book.readProgress.page > 0 && (
-								<Text
-									className="flex-wrap text-base"
-									style={{
-										color: COLORS.dark.foreground.subtle,
-										opacity: 0.9,
-									}}
-								>
-									Page {book.readProgress?.page} of {book.pages}
-								</Text>
-							)}
+							<Text
+								className="flex-wrap text-base"
+								style={{
+									color: COLORS.dark.foreground.subtle,
+									opacity: 0.9,
+								}}
+							>
+								{book.pages !== 0
+									? `Page ${currentPage} of ${book.pages}`
+									: percentageCompleted != null
+										? `${(percentageCompleted * 100).toFixed(0)}%`
+										: ''}
+							</Text>
 
-							{isEbookProgress && percentageCompleted != null && (
-								<Text
-									className="flex-wrap text-base"
-									style={{
-										color: COLORS.dark.foreground.subtle,
-										opacity: 0.9,
-									}}
-								>
-									{(percentageCompleted * 100).toFixed(0)}%
-								</Text>
-							)}
-
-							{!!book.readProgress?.lastModified && (
-								<Text
-									className="flex-wrap text-base"
-									style={{
-										color: COLORS.dark.foreground.subtle,
-										opacity: 0.9,
-									}}
-								>
-									{formatDistanceToNow(new Date(book.readProgress?.lastModified), {
-										addSuffix: true,
-									})}
-								</Text>
-							)}
+							<Text
+								className="flex-wrap text-base"
+								style={{
+									color: COLORS.dark.foreground.subtle,
+									opacity: 0.9,
+								}}
+							>
+								{book.readProgress?.lastModified
+									? formatDistanceToNow(new Date(book.readProgress?.lastModified), {
+											addSuffix: true,
+										})
+									: 'unknown time ago'}
+							</Text>
 						</View>
 
-						{percentageCompleted && (
+						{percentageCompleted != null && (
 							<Progress
 								className="h-1 bg-[#898d94]"
 								indicatorClassName="bg-[#f5f3ef]"

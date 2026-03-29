@@ -21,7 +21,9 @@ pub struct Model {
 	pub device_id: String,
 	#[sea_orm(column_type = "Json")]
 	pub device_metadata: Json,
+	// TODO: DateTimeWithTimeZone?
 	pub created_at: DateTimeUtc,
+	pub previous_sync_at: Option<DateTimeWithTimeZone>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

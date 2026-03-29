@@ -200,10 +200,17 @@ impl<'a> KoboSync<'a> {
 	) -> Result<Self, sea_orm::DbErr> {
 		// TODO: filter out items that are newer than the current time.
 		// otherwise there's a race.
+		// TODO: or not?
 		let query = match previous_sync_at {
+			// load things created or modified since the most recent sync
 			Some(previous_sync_at) => media::Entity::find_for_user(&user)
 				.filter(media::Column::Extension.eq("epub"))
-				.filter(media::Column::CreatedAt.gte(previous_sync_at)),
+				.filter(
+					sea_orm::Condition::any()
+						.add(media::Column::CreatedAt.gte(previous_sync_at))
+						.add(media::Column::ModifiedAt.gte(previous_sync_at)),
+				),
+			// load absolutely everything
 			None => media::Entity::find_for_user(&user)
 				.filter(media::Column::Extension.eq("epub")),
 		};
@@ -229,6 +236,7 @@ impl<'a> KoboSync<'a> {
 			)),
 			device_id: Set(device_id.unwrap_or("").to_string()),
 			device_metadata: Set(device_metadata),
+			previous_sync_at: Set(previous_sync_at),
 			..Default::default()
 		};
 		let sync = sync.insert(db).await?;
@@ -316,7 +324,19 @@ impl<'a> KoboSync<'a> {
 				let book_url =
 					format!("{}/v1/books/{}/file/epub", kobo_api_base_url, m.media.id);
 
-				SyncItem::NewEntitlement(NewEntitlement::from_media(m, book_url))
+				if self
+					.model
+					.previous_sync_at
+					.map_or(true, |ps| m.media.created_at >= ps)
+				{
+					SyncItem::NewEntitlement(BookEntitlementContainer::from_media(
+						m, book_url,
+					))
+				} else {
+					SyncItem::ChangedProductMetadata(
+						BookEntitlementContainer::from_media(m, book_url),
+					)
+				}
 			})
 			.collect();
 
@@ -961,6 +981,55 @@ mod tests {
 
 		let SyncItem::NewEntitlement(ref ent) = sync_items[0] else {
 			panic!("expected a NewEntitlement")
+		};
+
+		assert_eq!(new_book.id, ent.book_entitlement.id);
+	}
+
+	#[tokio::test]
+	async fn test_represent_changed_product_metadata() {
+		let db = test_database().await;
+
+		let user = ExampleUser {}.insert(&db).await;
+		let user = user::AuthUser {
+			id: user.id,
+			permissions: vec![],
+			..Default::default()
+		};
+
+		let previous_sync_at: DateTimeWithTimeZone =
+			"2026-01-01T00:00:00Z".parse().unwrap();
+
+		let series = ExampleSeries {}.insert(&db).await;
+
+		// a book that was modified since the last sync.
+		let new_book = ExampleMedia {
+			series_id: series.id.clone(),
+			id: Some(format!("new-book")),
+			created_at: Some(previous_sync_at.checked_sub_days(Days::new(1)).unwrap()),
+			modified_at: Some(previous_sync_at.checked_add_days(Days::new(1)).unwrap()),
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
+
+		let sync = KoboSync::begin_new_sync(
+			&db,
+			&user,
+			Some("kobo-1"),
+			serde_json::json!({}),
+			Some(previous_sync_at),
+		)
+		.await
+		.expect("failed to initiate sync");
+
+		let (_, sync_items) = sync
+			.paged_sync_items(0, 1, "https://stump.example.org/".to_string())
+			.await
+			.expect("failed to retrieve sync items");
+
+		let SyncItem::ChangedProductMetadata(ref ent) = sync_items[0] else {
+			panic!("expected a ChangedProductMetadata")
 		};
 
 		assert_eq!(new_book.id, ent.book_entitlement.id);

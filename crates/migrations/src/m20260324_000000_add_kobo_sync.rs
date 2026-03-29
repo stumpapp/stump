@@ -22,6 +22,7 @@ impl MigrationTrait for Migration {
 							.not_null()
 							.default(Expr::current_timestamp()),
 					)
+					.col(ColumnDef::new(KoboSync::PreviousSyncAt).timestamp())
 					.foreign_key(
 						ForeignKey::create()
 							.name("fk-kobo-sync-user")
@@ -51,6 +52,7 @@ enum KoboSync {
 	DeviceId,
 	DeviceMetadata,
 	CreatedAt,
+	PreviousSyncAt,
 }
 
 #[derive(Iden)]

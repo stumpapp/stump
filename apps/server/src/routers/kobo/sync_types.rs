@@ -3,15 +3,16 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize)]
 pub enum SyncItem {
-	NewEntitlement(NewEntitlement),
+	NewEntitlement(BookEntitlementContainer),
+	ChangedProductMetadata(BookEntitlementContainer),
 }
 
 #[derive(Serialize)]
 #[serde(rename_all = "PascalCase")]
-pub struct NewEntitlement {
+pub struct BookEntitlementContainer {
 	pub book_entitlement: BookEntitlement,
 	pub book_metadata: BookMetadata,
-	pub reading_state: ReadingState,
+	pub reading_state: Option<ReadingState>,
 }
 
 #[derive(Serialize)]

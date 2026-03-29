@@ -63,11 +63,33 @@ impl BookMetadata {
 	}
 }
 
-impl NewEntitlement {
+impl BookEntitlementContainer {
 	pub fn from_media(m: media::ModelWithMetadata, book_url: String) -> Self {
 		let media_id = &m.media.id;
 
-		NewEntitlement {
+		// TODO
+		let reading_state = ReadingState {
+			created: Utc::now(),
+			current_bookmark: CurrentBookmark {
+				last_modified: Utc::now(),
+				progress_percent: None,
+				content_source_progress_percent: None,
+				location: None,
+			},
+			entitlement_id: media_id.clone(),
+			last_modified: Utc::now(),
+			priority_timestamp: Utc::now(),
+			statistics: Statistics {
+				last_modified: Utc::now(),
+			},
+			status_info: StatusInfo {
+				last_modified: Utc::now(),
+				status: "ReadyToRead".to_string(),
+				times_started_reading: 0,
+			},
+		};
+
+		BookEntitlementContainer {
 			book_entitlement: BookEntitlement {
 				accessibility: "Full".to_string(),
 				active_period: Period { from: Utc::now() },
@@ -87,27 +109,7 @@ impl NewEntitlement {
 				status: "Active".to_string(),
 			},
 			book_metadata: BookMetadata::from_media(&m, book_url),
-			// TODO
-			reading_state: ReadingState {
-				created: Utc::now(),
-				current_bookmark: CurrentBookmark {
-					last_modified: Utc::now(),
-					progress_percent: None,
-					content_source_progress_percent: None,
-					location: None,
-				},
-				entitlement_id: media_id.clone(),
-				last_modified: Utc::now(),
-				priority_timestamp: Utc::now(),
-				statistics: Statistics {
-					last_modified: Utc::now(),
-				},
-				status_info: StatusInfo {
-					last_modified: Utc::now(),
-					status: "ReadyToRead".to_string(),
-					times_started_reading: 0,
-				},
-			},
+			reading_state: Some(reading_state),
 		}
 	}
 }

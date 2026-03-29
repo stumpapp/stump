@@ -333,9 +333,9 @@ impl<'a> KoboSync<'a> {
 						m, book_url,
 					))
 				} else {
-					SyncItem::ChangedProductMetadata(
-						BookEntitlementContainer::from_media(m, book_url),
-					)
+					SyncItem::ChangedProductMetadata(BookMetadata::from_media(
+						&m, book_url,
+					))
 				}
 			})
 			.collect();
@@ -1032,6 +1032,6 @@ mod tests {
 			panic!("expected a ChangedProductMetadata")
 		};
 
-		assert_eq!(new_book.id, ent.book_entitlement.id);
+		assert_eq!(new_book.id, ent.entitlement_id);
 	}
 }

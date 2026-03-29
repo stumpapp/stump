@@ -4,7 +4,8 @@ use serde::{Deserialize, Serialize};
 #[derive(Serialize)]
 pub enum SyncItem {
 	NewEntitlement(BookEntitlementContainer),
-	ChangedProductMetadata(BookEntitlementContainer),
+	ChangedEntitlement(BookEntitlementContainer),
+	ChangedProductMetadata(BookMetadata),
 }
 
 #[derive(Serialize)]

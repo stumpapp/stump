@@ -1182,10 +1182,10 @@
   dependencies:
     regenerator-runtime "^0.12.0"
 
-"@babel/runtime@^7.0.0", "@babel/runtime@^7.1.2", "@babel/runtime@^7.11.2", "@babel/runtime@^7.12.5", "@babel/runtime@^7.13.10", "@babel/runtime@^7.17.8", "@babel/runtime@^7.18.6", "@babel/runtime@^7.20.0", "@babel/runtime@^7.21.0", "@babel/runtime@^7.23.2", "@babel/runtime@^7.23.9", "@babel/runtime@^7.25.0", "@babel/runtime@^7.26.10":
-  version "7.28.4"
-  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.28.4.tgz#a70226016fabe25c5783b2f22d3e1c9bc5ca3326"
-  integrity sha512-Q/N6JNWvIvPnLDvjlE1OUBLPQHH6l3CltCEsHIujp45zQUSSh8K+gHnaEX45yAT1nyngnINhvWtzN+Nb9D8RAQ==
+"@babel/runtime@^7.0.0", "@babel/runtime@^7.1.2", "@babel/runtime@^7.11.2", "@babel/runtime@^7.12.5", "@babel/runtime@^7.13.10", "@babel/runtime@^7.17.8", "@babel/runtime@^7.18.6", "@babel/runtime@^7.20.0", "@babel/runtime@^7.21.0", "@babel/runtime@^7.23.9", "@babel/runtime@^7.25.0", "@babel/runtime@^7.26.10", "@babel/runtime@^7.29.2":
+  version "7.29.2"
+  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.29.2.tgz#9a6e2d05f4b6692e1801cd4fb176ad823930ed5e"
+  integrity sha512-JiDShH45zKHWyGe4ZNVRrCjBz8Nh9TMmZG1kh4QTK8hCBTWBi8Da+i7s1fJw7/lYpM4ccepSNfqzZ/QvABBi5g==
 
 "@babel/template@^7.18.10", "@babel/template@^7.20.7", "@babel/template@^7.25.0", "@babel/template@^7.27.1", "@babel/template@^7.27.2", "@babel/template@^7.3.3":
   version "7.27.2"
@@ -15089,12 +15089,12 @@ hyphenate-style-name@^1.0.3:
   resolved "https://registry.yarnpkg.com/hyphenate-style-name/-/hyphenate-style-name-1.1.0.tgz#1797bf50369588b47b72ca6d5e65374607cf4436"
   integrity sha512-WDC/ui2VVRrz3jOVi+XtjqkDjiVjTtFaAGiW37k6b+ohyQ5wYDOGkvCZa8+H0nx3gyvv0+BST9xuOgIyGQ00gw==
 
-i18next@^23.11.2:
-  version "23.16.8"
-  resolved "https://registry.yarnpkg.com/i18next/-/i18next-23.16.8.tgz#3ae1373d344c2393f465556f394aba5a9233b93a"
-  integrity sha512-06r/TitrM88Mg5FdUXAKL96dJMzgqLE5dv3ryBAra4KCwD9mJ4ndOTS95ZuymIGoE+2hzfdaMak2X11/es7ZWg==
+i18next@^26.0.1:
+  version "26.0.1"
+  resolved "https://registry.yarnpkg.com/i18next/-/i18next-26.0.1.tgz#de5df38603b96f6863933f1a0a4937b6451c5960"
+  integrity sha512-vtz5sXU4+nkCm8yEU+JJ6yYIx0mkg9e68W0G0PXpnOsmzLajNsW5o28DJMqbajxfsfq0gV3XdrBudsDQnwxfsQ==
   dependencies:
-    "@babel/runtime" "^7.23.2"
+    "@babel/runtime" "^7.29.2"
 
 iconv-lite@0.4.23:
   version "0.4.23"

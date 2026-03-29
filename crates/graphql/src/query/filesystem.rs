@@ -165,9 +165,7 @@ mod windows_fs {
 
 		// We check for a failed read
 		if len == 0 {
-			return Err(APIError::InternalServerError(
-				"Failed to read Win32 list of logical drives".to_string(),
-			));
+			return Err("Failed to read Win32 list of logical drives".into());
 		}
 
 		// We can iterate over the buffer to fetch a list of drives with their info

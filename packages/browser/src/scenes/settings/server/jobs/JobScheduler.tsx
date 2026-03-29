@@ -1,12 +1,5 @@
 import { useGraphQLMutation, useSDK, useSuspenseGraphQL } from '@stump/client'
-import {
-	Alert,
-	AlertDescription,
-	AlertTitle,
-	Button,
-	ConfirmationModal,
-	Text,
-} from '@stump/components'
+import { Alert, AlertDescription, AlertTitle, Button, ConfirmationModal } from '@stump/components'
 import { graphql, ScheduledJobsQuery } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { Api } from '@stump/sdk'

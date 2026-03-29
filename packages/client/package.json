@@ -19,7 +19,7 @@
 		"immer": "^10.0.4",
 		"react-use-websocket": "^4.8.1",
 		"ts-pattern": "^5.7.0",
-		"zustand": "^4.5.2"
+		"zustand": "^5.0.12"
 	},
 	"devDependencies": {
 		"@types/deep-equal": "^1.0.4",

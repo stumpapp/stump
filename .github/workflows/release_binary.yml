@@ -24,14 +24,14 @@ jobs:
     needs: build-webapp
     strategy:
       matrix:
-        # Note: macos-13 is intel-based, macos-latest is M1-based
         # See https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources
-        os: [ubuntu-22.04, macos-13, macos-latest, windows-latest]
+        # Note: macos-15-intel is x86_64, available until Aug 2027. See https://github.com/actions/runner-images/issues/13045
+        os: [ubuntu-22.04, macos-15-intel, macos-latest, windows-latest]
         include:
           - os: ubuntu-22.04
             artifact_name: linux-artifact
             artifact_filename: stump_server
-          - os: macos-13
+          - os: macos-15-intel
             artifact_name: macos-intel-artifact
             artifact_filename: stump_server
           - os: macos-latest

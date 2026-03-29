@@ -316,4 +316,8 @@ export const associatedPermissions: Record<UserPermission, UserPermission[]> = {
 	[UserPermission.EditMetadata]: [],
 	[UserPermission.WriteBackMetadata]: [UserPermission.EditMetadata],
 	[UserPermission.EditThumbnails]: [],
+	[UserPermission.MetadataProviderRead]: [],
+	[UserPermission.MetadataProviderManage]: [UserPermission.MetadataProviderRead],
+	[UserPermission.MetadataFetchRecordRead]: [UserPermission.MetadataProviderRead],
+	[UserPermission.MetadataFetchRecordManage]: [UserPermission.MetadataFetchRecordRead],
 }

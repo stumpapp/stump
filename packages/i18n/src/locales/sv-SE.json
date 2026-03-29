@@ -260,6 +260,10 @@
 					"label": "Dölj flik för serie",
 					"description": "Dölj fliken serier från bibliotekets navigering"
 				},
+				"skipBookOverview": {
+					"label": "Skip book overview",
+					"description": "Open the reader directly when selecting books in this library"
+				},
 				"options": {
 					"series": {
 						"label": "Serier",
@@ -924,7 +928,11 @@
 									"characters": "Karaktärer",
 									"teams": "Team",
 									"genres": "Genre",
-									"coverArtists": "Omslagsmålare"
+									"coverArtists": "Omslagsmålare",
+									"ageRating": "Age rating",
+									"year": "Year",
+									"month": "Month",
+									"day": "Day"
 								}
 							},
 							"series": {
@@ -946,7 +954,8 @@
 									"status": "Status",
 									"volume": "Volym",
 									"metaType": "Typ",
-									"ageRating": "Åldersgräns"
+									"ageRating": "Åldersgräns",
+									"year": "Start year"
 								}
 							},
 							"library": {
@@ -1253,20 +1262,15 @@
 						"updateFailed": "Ett serverfel uppstod vid uppdateringen av din profil. Försök igen."
 					},
 					"avatarPicker": {
-						"heading": "Ställ in din avatarbild",
-						"subtitle": "Stump stöder anpassade avatarer, som kan ställas in genom att ange en URL till en bild. Bilduppladdningar stöds inte för att minska mängden data som lagras på servern.",
-						"preview": "En förhandsvisning visas här när du har angett en webbadress.",
-						"labels": {
-							"imageUrl": "URL till Bild",
-							"customAvatar": "Anpassad Avatar"
-						},
-						"buttons": {
-							"confirm": "Bekräfta Bild",
-							"cancel": "Avbryt",
-							"edit": "Ändra",
-							"changeImage": "Ändra Bild",
-							"removeImage": "Ta Bort Bild"
-						}
+						"label": "Avatar",
+						"heading": "Upload avatar",
+						"subtitle": "You can upload any image to use as your avatar for social features in Stump",
+						"dropzone": "Drop an image or click to select",
+						"changeImage": "Change Image",
+						"removeImage": "Remove Image",
+						"removeSelection": "Remove uploaded image",
+						"uploadFailed": "Failed to upload avatar",
+						"removeFailed": "Failed to remove avatar"
 					},
 					"buttons": {
 						"confirm": "Spara Ändringar"
@@ -1691,9 +1695,38 @@
 						]
 					}
 				},
+				"helpfulLinks": {
+					"title": "Helpful links",
+					"description": "Links to resources that may be helpful for managing your Stump server instance",
+					"links": {
+						"documentation": "Documentation",
+						"changelog": "Changelog"
+					}
+				},
 				"serverPublicUrl": {
 					"label": "Offentlig URL",
 					"description": "Webbadressen som din server är tillgänglig från utanför nätverket, om det är möjligt. Detta kommer att aktivera inbjudningslänkar och andra funktioner"
+				},
+				"customEmojis": {
+					"title": "Custom emojis",
+					"description": "Upload and manage custom image emojis for your server",
+					"dropzone": "Drop an image or click to select",
+					"input": {
+						"label": "Emoji name",
+						"placeholder": "e.g. party_parrot"
+					},
+					"deleteModal": {
+						"title": "Delete emoji",
+						"description": "Are you sure you want to delete this emoji?"
+					},
+					"noCustomEmojis": "No custom emojis have been added yet",
+					"invalidName": "Please enter a valid name for your emoji",
+					"uploadError": "Failed to upload emoji",
+					"uploadSuccess": "Emoji uploaded",
+					"renameSuccess": "Emoji renamed",
+					"renameError": "Failed to rename emoji",
+					"deleteSuccess": "Emoji deleted",
+					"deleteError": "Failed to delete emoji"
 				}
 			}
 		},
@@ -2074,6 +2107,16 @@
 				"submit": {
 					"create": "Skapa e-postare",
 					"update": "Uppdatera e-postare"
+				},
+				"testEmailer": {
+					"button": "Send test email",
+					"recipientLabel": "Test recipient",
+					"recipientDescription": "An email address to send the test email to",
+					"success": "Test email sent successfully",
+					"error": {
+						"title": "Failed to send test email",
+						"description": "Check your SMTP settings and try again"
+					}
 				}
 			},
 			"createEmailer": {
@@ -2209,6 +2252,7 @@
 	"common": {
 		"add": "Lätt till",
 		"cancel": "Avbryt",
+		"clear": "Clear",
 		"confirm": "Bekräfta",
 		"delete": "Radera",
 		"enter": "Ange",
@@ -2221,6 +2265,7 @@
 		"update": "Uppdatera",
 		"upload": "Ladda Upp",
 		"uploading": "Laddar upp",
+		"uploadingEllipsis": "Uploading...",
 		"unimplemented": "Denna funktion finns inte ännu! Kom tillbaka senare",
 		"limitedFunctionality": "Detta är ännu inte fullt komplett och saknar vissa funktioner. Kom tillbaka senare",
 		"logIn": "Logga in",
@@ -2233,7 +2278,12 @@
 		"notUsedYet": "Inte använd än",
 		"never": "Aldrig",
 		"scan": "Skanna",
-		"somethingWentWrong": "Någonting gick fel"
+		"somethingWentWrong": "Någonting gick fel",
+		"fileUpload": {
+			"someRejected": "Some files were rejected. Please check the file types and try again",
+			"tooManyFiles": "You have selected too many files",
+			"noValidFiles": "No valid files were selected"
+		}
 	},
 	"userPermissions": {
 		"ACCESS_API_KEYS": {
@@ -2359,6 +2409,10 @@
 		"WRITE_BACK_METADATA": {
 			"label": "Skriv tillbaka metadata",
 			"description": "Tillåter användaren att skriva tillbaka ändrad metadata till källfilerna"
+		},
+		"EDIT_THUMBNAILS": {
+			"label": "Edit thumbnails",
+			"description": "Allows the user to edit thumbnails for books and series"
 		}
 	}
 }

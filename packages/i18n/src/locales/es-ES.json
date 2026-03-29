@@ -87,7 +87,7 @@
 				"description": "Si está habilitado, solo los usuarios que invites podrán unirse a tu club de libros"
 			},
 			"member_role_spec": {
-				"heading": "Custom role mapping",
+				"heading": "Asignación de rol personalizado",
 				"subtitle": [
 					"You can create custom names for the roles in your book club if you'd like. For more information, refer to the",
 					"documentación"
@@ -189,7 +189,7 @@
 		},
 		"basics": {
 			"title": "Basic Information",
-			"description": "The details of this book club, including its name and description",
+			"description": "Los detalles de este club de libros, incluyendo su nombre y descripción",
 			"form": {
 				"submit": "Update club"
 			}
@@ -205,7 +205,7 @@
 			"sections": {
 				"roleMappings": {
 					"heading": "Existing role mappings",
-					"description": "The current role mappings for this book club"
+					"description": "Las asignaciones de roles actuales para este club de libros"
 				}
 			}
 		},

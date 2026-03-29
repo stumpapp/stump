@@ -12,6 +12,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: cachix/install-nix-action@v17
+      - uses: cachix/install-nix-action@v31
       - name: test
         run: nix develop --command "pkg-config" "--libs" "--cflags" "gdk-3.0" "gdk-3.0 >= 3.22"

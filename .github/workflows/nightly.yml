@@ -23,7 +23,7 @@ jobs:
       changes: ${{steps.filter.outputs.changes}}
     steps:
       - uses: actions/checkout@v4
-      - uses: dorny/paths-filter@v2
+      - uses: dorny/paths-filter@v4
         id: filter
         with:
           base: 'nightly'

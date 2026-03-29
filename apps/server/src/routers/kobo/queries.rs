@@ -29,7 +29,7 @@ impl BookMetadata {
 			description: m.metadata.clone().and_then(|mm| mm.summary),
 			download_urls: vec![DownloadUrl {
 				drm_type: "None".to_string(),
-				format: "EPUB3".to_string(), // TODO
+				format: Format::EPUB, // TODO
 				size: u64::try_from(m.media.size).unwrap_or(0),
 				platform: "Generic".to_string(),
 				url: book_url,

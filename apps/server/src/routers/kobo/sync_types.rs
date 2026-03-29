@@ -92,10 +92,18 @@ pub struct LoveDisplayPrice {
 #[serde(rename_all = "PascalCase")]
 pub struct DownloadUrl {
 	pub drm_type: String,
-	pub format: String,
+	pub format: Format,
 	pub size: u64,
 	pub platform: String,
 	pub url: String,
+}
+
+#[derive(Serialize, Deserialize)]
+pub enum Format {
+	EPUB3FL,
+	EPUB,
+	EPUB3,
+	KEPUB,
 }
 
 #[derive(Serialize, Deserialize)]

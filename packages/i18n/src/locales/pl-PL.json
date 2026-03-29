@@ -260,6 +260,10 @@
 					"label": "Ukryj zakładkę serii",
 					"description": "Ukryj zakładkę serii w nawigacji biblioteki"
 				},
+				"skipBookOverview": {
+					"label": "Skip book overview",
+					"description": "Open the reader directly when selecting books in this library"
+				},
 				"options": {
 					"series": {
 						"label": "Serie",
@@ -924,7 +928,11 @@
 									"characters": "Postaci",
 									"teams": "Zespoły",
 									"genres": "Gatunek",
-									"coverArtists": "Artysta okładki"
+									"coverArtists": "Artysta okładki",
+									"ageRating": "Age rating",
+									"year": "Year",
+									"month": "Month",
+									"day": "Day"
 								}
 							},
 							"series": {
@@ -946,7 +954,8 @@
 									"status": "Status",
 									"volume": "Tom",
 									"metaType": "Typ",
-									"ageRating": "Klasyfikacja wiekowa"
+									"ageRating": "Klasyfikacja wiekowa",
+									"year": "Start year"
 								}
 							},
 							"library": {
@@ -1253,20 +1262,15 @@
 						"updateFailed": "Podczas aktualizacji profilu wystąpił błąd serwera. Spróbuj ponownie."
 					},
 					"avatarPicker": {
-						"heading": "Ustaw swój awatar",
-						"subtitle": "Stump wspiera niestandardowe awatary które można ustawić poprzez podanie odnośnika do obrazu. Przesyłanie obrazów jest nieobsługiwane w celu zmniejszenia ilości danych przechowywanych na serwerze.",
-						"preview": "Podgląd pojawi się tutaj po wprowadzeniu odnośnika.",
-						"labels": {
-							"imageUrl": "Adres obrazka",
-							"customAvatar": "Własny awatar"
-						},
-						"buttons": {
-							"confirm": "Potwierdź obraz",
-							"cancel": "Anuluj",
-							"edit": "Edytuj",
-							"changeImage": "Zmień obraz",
-							"removeImage": "Usuń obraz"
-						}
+						"label": "Avatar",
+						"heading": "Upload avatar",
+						"subtitle": "You can upload any image to use as your avatar for social features in Stump",
+						"dropzone": "Drop an image or click to select",
+						"changeImage": "Change Image",
+						"removeImage": "Remove Image",
+						"removeSelection": "Remove uploaded image",
+						"uploadFailed": "Failed to upload avatar",
+						"removeFailed": "Failed to remove avatar"
 					},
 					"buttons": {
 						"confirm": "Zapisz zmiany"
@@ -1691,9 +1695,38 @@
 						]
 					}
 				},
+				"helpfulLinks": {
+					"title": "Helpful links",
+					"description": "Links to resources that may be helpful for managing your Stump server instance",
+					"links": {
+						"documentation": "Documentation",
+						"changelog": "Changelog"
+					}
+				},
 				"serverPublicUrl": {
 					"label": "Adres publiczny",
 					"description": "Adres, pod którym serwer dostępny jest spoza Twojej sieci. Zezwala to na odnośniki z zaproszeniami i inne funkcje"
+				},
+				"customEmojis": {
+					"title": "Custom emojis",
+					"description": "Upload and manage custom image emojis for your server",
+					"dropzone": "Drop an image or click to select",
+					"input": {
+						"label": "Emoji name",
+						"placeholder": "e.g. party_parrot"
+					},
+					"deleteModal": {
+						"title": "Delete emoji",
+						"description": "Are you sure you want to delete this emoji?"
+					},
+					"noCustomEmojis": "No custom emojis have been added yet",
+					"invalidName": "Please enter a valid name for your emoji",
+					"uploadError": "Failed to upload emoji",
+					"uploadSuccess": "Emoji uploaded",
+					"renameSuccess": "Emoji renamed",
+					"renameError": "Failed to rename emoji",
+					"deleteSuccess": "Emoji deleted",
+					"deleteError": "Failed to delete emoji"
 				}
 			}
 		},
@@ -2074,6 +2107,16 @@
 				"submit": {
 					"create": "Utwórz nową wysyłkę",
 					"update": "Aktualizuj wysyłkę"
+				},
+				"testEmailer": {
+					"button": "Send test email",
+					"recipientLabel": "Test recipient",
+					"recipientDescription": "An email address to send the test email to",
+					"success": "Test email sent successfully",
+					"error": {
+						"title": "Failed to send test email",
+						"description": "Check your SMTP settings and try again"
+					}
 				}
 			},
 			"createEmailer": {
@@ -2209,6 +2252,7 @@
 	"common": {
 		"add": "Dodaj",
 		"cancel": "Anuluj",
+		"clear": "Clear",
 		"confirm": "Potwierdź",
 		"delete": "Usuń",
 		"enter": "Enter",
@@ -2221,6 +2265,7 @@
 		"update": "Aktualizuj",
 		"upload": "Prześlij",
 		"uploading": "Przesyłanie",
+		"uploadingEllipsis": "Uploading...",
 		"unimplemented": "Ta funkcjonalność nie jest jeszcze zaimplementowana! Sprawdź ponownie później",
 		"limitedFunctionality": "Funkcjonalność ta nie jest jeszcze w pełni zaimplementowana. Sprawdź później",
 		"logIn": "Zaloguj się",
@@ -2233,7 +2278,12 @@
 		"notUsedYet": "Jeszcze nieużywane",
 		"never": "Nigdy",
 		"scan": "Skanuj",
-		"somethingWentWrong": "Coś poszło nie tak"
+		"somethingWentWrong": "Coś poszło nie tak",
+		"fileUpload": {
+			"someRejected": "Some files were rejected. Please check the file types and try again",
+			"tooManyFiles": "You have selected too many files",
+			"noValidFiles": "No valid files were selected"
+		}
 	},
 	"userPermissions": {
 		"ACCESS_API_KEYS": {
@@ -2359,6 +2409,10 @@
 		"WRITE_BACK_METADATA": {
 			"label": "Zapisywanie metadanych",
 			"description": "Pozwala użytkownikowi na zapisywanie zmienionych metadanych z powrotem do plików źródłowych"
+		},
+		"EDIT_THUMBNAILS": {
+			"label": "Edit thumbnails",
+			"description": "Allows the user to edit thumbnails for books and series"
 		}
 	}
 }

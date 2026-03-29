@@ -5813,10 +5813,15 @@
   resolved "https://registry.yarnpkg.com/@rn-primitives/slot/-/slot-1.1.0.tgz#954086820fa71ddcda948e5b2b34c0bfa1cad4d4"
   integrity sha512-/6LkEPMoGGyJiCAYo3MTCy9letbH6SIm5Dw6wal/ypq3Jvar9llYJstIP2KSZNhx3PmZMN1a581KVgNZ2Jyt5g==
 
-"@rn-primitives/slot@1.2.0", "@rn-primitives/slot@^1.2.0":
+"@rn-primitives/slot@1.2.0":
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@rn-primitives/slot/-/slot-1.2.0.tgz#54f757cb324cbf4670b81456526ae60e723ec6e4"
   integrity sha512-cpbn+JLjSeq3wcA4uqgFsUimMrWYWx2Ks7r5rkwd1ds1utxynsGkLOKpYVQkATwWrYhtcoF1raxIKEqXuMN+/w==
+
+"@rn-primitives/slot@^1.4.0":
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/@rn-primitives/slot/-/slot-1.4.0.tgz#2e1cdf5ec70ec1c0f23147fd2261b0ebd74f2a3e"
+  integrity sha512-p8qIYH44HgXDbsxPFIbRS/IrKWOqb2/JDT8ivFAfhL8QSW0gtVZZo8I/wFip1vV9vRl8D3zMHUBB/PrzrN0Qww==
 
 "@rn-primitives/switch@^1.1.0":
   version "1.2.0"

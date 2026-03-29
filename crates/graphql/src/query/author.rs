@@ -8,8 +8,7 @@ use crate::{
 	data::CoreContext,
 	object::author::{Author, AuthorSeries},
 	pagination::{
-		OffsetPagination, OffsetPaginationInfo, PaginatedResponse, Pagination,
-		PaginationValidator,
+		OffsetPaginationInfo, PaginatedResponse, Pagination, PaginationValidator,
 	},
 };
 
@@ -131,26 +130,7 @@ impl AuthorQuery {
 		match pagination.resolve() {
 			Pagination::Cursor(_) => {
 				// Cursor pagination doesn't make sense for in-memory data without stable IDs
-				// Fall back to offset-based with default values
-				let offset_info = OffsetPagination::default();
-				let offset = offset_info.offset() as usize;
-				let limit = offset_info.limit() as usize;
-
-				let paginated: Vec<Author> = sorted
-					.into_iter()
-					.skip(offset)
-					.take(limit)
-					.map(|name| Author {
-						name,
-						role: None,
-						library_id: library_id.clone(),
-					})
-					.collect();
-
-				Ok(PaginatedResponse {
-					nodes: paginated,
-					page_info: OffsetPaginationInfo::new(offset_info, total_count).into(),
-				})
+				Err("Cursor pagination is not supported for authors".into())
 			},
 			Pagination::Offset(info) => {
 				let offset = info.offset() as usize;

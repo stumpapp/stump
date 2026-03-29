@@ -2202,6 +2202,11 @@ input PagedProgressInput {
 	elapsedSeconds: Int
 }
 
+type PaginatedAuthorResponse {
+	nodes: [Author!]!
+	pageInfo: PaginationInfo!
+}
+
 type PaginatedDirectoryListingResponse {
 	nodes: [DirectoryListing!]!
 	pageInfo: PaginationInfo!
@@ -2335,6 +2340,23 @@ type Query {
 	bookClubSuggestions(bookClubId: ID!, status: BookClubSuggestionStatus): [BookClubBookSuggestion!]!
 	"Get a single suggestion by ID"
 	bookClubSuggestion(suggestionId: ID!): BookClubBookSuggestion!
+	"Get a single author by name (case-insensitive exact match)"
+	authorByName(		name: String!,
+		"Optional library ID to scope the author search"
+		libraryId: String
+	): Author
+	"Get a paginated list of authors with optional search filter"
+	authors(
+		"Case-insensitive substring search filter"
+		search: String,
+		"Optional library ID to scope the author search"
+		libraryId: String,		pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}
+	): PaginatedAuthorResponse!
+	"Get a single author series by name (case-insensitive exact match)"
+	authorSeriesByName(		name: String!,
+		"Optional library ID to scope the series search"
+		libraryId: String
+	): AuthorSeries
 	mediaCount: Int!
 	finishedReadingSessionCount: Int!
 	activeReadingSessionCount: Int!

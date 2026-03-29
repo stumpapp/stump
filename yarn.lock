@@ -13294,6 +13294,13 @@ expo-font@~14.0.10:
   dependencies:
     fontfaceobserver "^2.1.0"
 
+expo-font@~55.0.4:
+  version "55.0.4"
+  resolved "https://registry.yarnpkg.com/expo-font/-/expo-font-55.0.4.tgz#3cd0187bb7761dacc05b78e741b760e25f87b128"
+  integrity sha512-ZKeGTFffPygvY5dM/9ATM2p7QDkhsaHopH7wFAWgP2lKzqUMS9B/RxCvw5CaObr9Ro7x9YptyeRKX2HmgmMfrg==
+  dependencies:
+    fontfaceobserver "^2.1.0"
+
 expo-glass-effect@^0.1.8:
   version "0.1.8"
   resolved "https://registry.yarnpkg.com/expo-glass-effect/-/expo-glass-effect-0.1.8.tgz#cede6e75b65365216ce6ed205563b6f147a95c3b"

@@ -74,7 +74,7 @@ jobs:
     needs: [parse-semver, push-or-load]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
 
       - name: Build and push docker image
         uses: ./.github/actions/build-docker

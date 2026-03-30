@@ -22,7 +22,7 @@ jobs:
     outputs:
       changes: ${{steps.filter.outputs.changes}}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: dorny/paths-filter@v4
         id: filter
         with:
@@ -44,7 +44,7 @@ jobs:
     if: ${{ needs.code-changes-check.outputs.changes != '[]' }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
 
       - name: Setup and build docker image
         uses: ./.github/actions/build-docker

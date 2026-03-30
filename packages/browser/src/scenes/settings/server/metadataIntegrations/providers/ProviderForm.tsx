@@ -15,6 +15,7 @@ import { useLocaleContext } from '@stump/i18n'
 import { startOfDay } from 'date-fns'
 import { useFormContext, useFormState, useWatch } from 'react-hook-form'
 
+import { ProviderApiKeyInput } from './ProviderApiKeyInput'
 import { PatchProviderConfigSchema } from './schema'
 
 export default function ProviderForm() {
@@ -44,7 +45,7 @@ export default function ProviderForm() {
 
 	return (
 		<>
-			<PasswordInput
+			{/*<PasswordInput
 				label={t(getKey('apiToken.label'))}
 				description={t(getKey('apiToken.description'))}
 				variant="primary"
@@ -52,7 +53,8 @@ export default function ProviderForm() {
 				{...form.register('apiToken')}
 				errorMessage={errors.apiToken?.message}
 				fullWidth
-			/>
+			/>*/}
+			<ProviderApiKeyInput />
 
 			<div className="gap-2 flex flex-col">
 				<Label>{t(getKey('apiTokenExpiresAt.label'))}</Label>

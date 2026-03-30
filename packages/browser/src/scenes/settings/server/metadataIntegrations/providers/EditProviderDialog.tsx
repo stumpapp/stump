@@ -4,6 +4,7 @@ import { Button, ConfirmationModal, Dialog, Form, ToolTip } from '@stump/compone
 import { ExistingProviderCardFragment, graphql } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
+import omit from 'lodash/omit'
 import { Cog } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -73,7 +74,7 @@ export function EditProviderDialog({ provider }: Props) {
 	const handleSubmit = (data: PatchProviderConfigSchema) => {
 		editProvider({
 			id: provider.id,
-			input: data,
+			input: omit(data, 'providerType'),
 		})
 	}
 

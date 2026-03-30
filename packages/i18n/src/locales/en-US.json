@@ -2310,7 +2310,10 @@
 			"providerForm": {
 				"apiToken": {
 					"label": "API token",
-					"description": "The API token for authenticating with this provider"
+					"description": "The API token for authenticating with this provider",
+					"validationError": "The auto-validation failed for this token",
+					"validationRequestError": "The validation request failed",
+					"validationRequestErrorUnknown": "An unknown error occurred during validation"
 				},
 				"apiTokenExpiresAt": {
 					"label": "API token expiration",

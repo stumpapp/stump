@@ -5709,14 +5709,14 @@
     "@rn-primitives/slot" "1.2.0"
     "@rn-primitives/types" "1.2.0"
 
-"@rn-primitives/avatar@~1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@rn-primitives/avatar/-/avatar-1.1.0.tgz#c22c7ccb50b4c34f4256452ac7e1150f10a0a129"
-  integrity sha512-GqhsQHeY7OP9oe3MZkl1Z0IbhIiuQX4+FxafoRK/Aes2m5386nMGK0NBaZBJy06WnFQBN52C8yq+LYv27sA86A==
+"@rn-primitives/avatar@~1.4.0":
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/@rn-primitives/avatar/-/avatar-1.4.0.tgz#b02f85b1489ca9eb788e308c4403b6f80ba2a32d"
+  integrity sha512-OOS5QSET4XEVcv4q20PAwkzZPC6LlE0mMFAMjbJ4hLA6stzQJxNaK9PaUl1AXt+x4Prh4MPOC7ktuERIKkNeYg==
   dependencies:
-    "@rn-primitives/hooks" "1.1.0"
-    "@rn-primitives/slot" "1.1.0"
-    "@rn-primitives/types" "1.1.0"
+    "@rn-primitives/hooks" "1.4.0"
+    "@rn-primitives/slot" "1.4.0"
+    "@rn-primitives/types" "1.4.0"
 
 "@rn-primitives/checkbox@^1.2.0":
   version "1.2.0"
@@ -5774,6 +5774,13 @@
   dependencies:
     "@rn-primitives/types" "1.2.0"
 
+"@rn-primitives/hooks@1.4.0":
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/@rn-primitives/hooks/-/hooks-1.4.0.tgz#218686be433ecf39f22c55959ed86e198d367a8b"
+  integrity sha512-uzu4NrThR5BEy+MHvTwHCs+KUXTmTLZrSzPHL9L8q5uGXv/BIxYJdpvlodn+DnxgTMzdul+H8rpqPLjyYQEyKw==
+  dependencies:
+    "@rn-primitives/types" "1.4.0"
+
 "@rn-primitives/label@^1.1.0":
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@rn-primitives/label/-/label-1.2.0.tgz#3b3e45c8def729c9e593cfddc64bcd15df288db0"
@@ -5813,10 +5820,15 @@
   resolved "https://registry.yarnpkg.com/@rn-primitives/slot/-/slot-1.1.0.tgz#954086820fa71ddcda948e5b2b34c0bfa1cad4d4"
   integrity sha512-/6LkEPMoGGyJiCAYo3MTCy9letbH6SIm5Dw6wal/ypq3Jvar9llYJstIP2KSZNhx3PmZMN1a581KVgNZ2Jyt5g==
 
-"@rn-primitives/slot@1.2.0", "@rn-primitives/slot@^1.2.0":
+"@rn-primitives/slot@1.2.0":
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@rn-primitives/slot/-/slot-1.2.0.tgz#54f757cb324cbf4670b81456526ae60e723ec6e4"
   integrity sha512-cpbn+JLjSeq3wcA4uqgFsUimMrWYWx2Ks7r5rkwd1ds1utxynsGkLOKpYVQkATwWrYhtcoF1raxIKEqXuMN+/w==
+
+"@rn-primitives/slot@1.4.0", "@rn-primitives/slot@^1.2.0":
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/@rn-primitives/slot/-/slot-1.4.0.tgz#2e1cdf5ec70ec1c0f23147fd2261b0ebd74f2a3e"
+  integrity sha512-p8qIYH44HgXDbsxPFIbRS/IrKWOqb2/JDT8ivFAfhL8QSW0gtVZZo8I/wFip1vV9vRl8D3zMHUBB/PrzrN0Qww==
 
 "@rn-primitives/switch@^1.1.0":
   version "1.2.0"
@@ -5851,10 +5863,15 @@
   resolved "https://registry.yarnpkg.com/@rn-primitives/types/-/types-1.1.0.tgz#2b7b0c2599dfe46329867d570f6ba8d0608f9843"
   integrity sha512-duS4La965KsVVAeytcSFDJUafw6ZScvejgxlFkwqzW06pDBRMxwfunmZmf3JZ82P/2xaEVPIGseeyblertC/+g==
 
-"@rn-primitives/types@1.2.0", "@rn-primitives/types@^1.1.0":
+"@rn-primitives/types@1.2.0":
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@rn-primitives/types/-/types-1.2.0.tgz#4fb3a01a8310d2227150ebbf7dc14c5d725c3223"
   integrity sha512-b+6zKgdKVqAfaFPSfhwlQL0dnPQXPpW890m3eguC0VDI1eOsoEvUfVb6lmgH4bum9MmI0xymq4tOUI/fsKLoCQ==
+
+"@rn-primitives/types@1.4.0", "@rn-primitives/types@^1.1.0":
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/@rn-primitives/types/-/types-1.4.0.tgz#27ddb823477f6366689ef28e10107696f11f33cd"
+  integrity sha512-U7El2BbYXZG8WZrOIV4y1wpxH8aJA/sKH3SL2tZTL153ENj8aOpZ9QwyUoAU2t+sKVPDejrKjo89HeNuIuwPGQ==
 
 "@rn-primitives/utils@1.2.0":
   version "1.2.0"

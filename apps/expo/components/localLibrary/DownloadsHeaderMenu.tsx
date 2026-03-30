@@ -16,13 +16,10 @@ export default function DownloadsHeaderMenu() {
 
 	const problemsSheetRef = useRef<TrueSheet>(null)
 
-	const { isCuratedDownloadsEnabled, setIsCuratedDownloadsEnabled } = usePreferencesStore(
-		(state) => ({
-			isCuratedDownloadsEnabled: state.showCuratedDownloads,
-			setIsCuratedDownloadsEnabled: (value: boolean) =>
-				state.patch({ showCuratedDownloads: value }),
-		}),
-	)
+	const isCuratedDownloadsEnabled = usePreferencesStore((state) => state.showCuratedDownloads)
+	const patch = usePreferencesStore((state) => state.patch)
+	const setIsCuratedDownloadsEnabled = (value: boolean) => patch({ showCuratedDownloads: value })
+
 	const { deleteAllDownloads } = useDownload()
 
 	const refetchDownloads = useDownloadsState((state) => state.increment)

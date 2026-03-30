@@ -1,3 +1,5 @@
+import { useShallow } from 'zustand/react/shallow'
+
 import { Card, Stepper, Switch } from '~/components/ui'
 import { Picker } from '~/components/ui/picker/picker'
 import type { PickerOption } from '~/components/ui/picker/types'
@@ -15,19 +17,21 @@ const TEXT_ALIGN_OPTIONS: PickerOption<TextAlignment>[] = [
 ]
 
 export default function TypographySettings() {
-	const store = useReaderStore((state) => ({
-		allowPublisherStyles: state.globalSettings.allowPublisherStyles ?? true,
-		textAlign: state.globalSettings.textAlign ?? 'justify',
-		typeScale: state.globalSettings.typeScale ?? 1.0,
-		lineHeight: state.globalSettings.lineHeight ?? 1.5,
-		paragraphIndent: state.globalSettings.paragraphIndent,
-		paragraphSpacing: state.globalSettings.paragraphSpacing,
-		wordSpacing: state.globalSettings.wordSpacing,
-		letterSpacing: state.globalSettings.letterSpacing,
-		hyphens: state.globalSettings.hyphens,
-		ligatures: state.globalSettings.ligatures,
-		setSettings: state.setGlobalSettings,
-	}))
+	const store = useReaderStore(
+		useShallow((state) => ({
+			allowPublisherStyles: state.globalSettings.allowPublisherStyles ?? true,
+			textAlign: state.globalSettings.textAlign ?? 'justify',
+			typeScale: state.globalSettings.typeScale ?? 1.0,
+			lineHeight: state.globalSettings.lineHeight ?? 1.5,
+			paragraphIndent: state.globalSettings.paragraphIndent,
+			paragraphSpacing: state.globalSettings.paragraphSpacing,
+			wordSpacing: state.globalSettings.wordSpacing,
+			letterSpacing: state.globalSettings.letterSpacing,
+			hyphens: state.globalSettings.hyphens,
+			ligatures: state.globalSettings.ligatures,
+			setSettings: state.setGlobalSettings,
+		})),
+	)
 
 	const isDisabled = store.allowPublisherStyles
 

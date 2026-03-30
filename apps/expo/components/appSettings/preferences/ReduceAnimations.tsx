@@ -1,5 +1,6 @@
 import { Rabbit } from 'lucide-react-native'
 import { View } from 'react-native'
+import { useShallow } from 'zustand/react/shallow'
 
 import { Switch } from '~/components/ui'
 import { usePreferencesStore } from '~/stores'
@@ -7,10 +8,12 @@ import { usePreferencesStore } from '~/stores'
 import AppSettingsRow from '../AppSettingsRow'
 
 export default function ReduceAnimations() {
-	const { reduceAnimations, patch } = usePreferencesStore((state) => ({
-		reduceAnimations: state.reduceAnimations,
-		patch: state.patch,
-	}))
+	const { reduceAnimations, patch } = usePreferencesStore(
+		useShallow((state) => ({
+			reduceAnimations: state.reduceAnimations,
+			patch: state.patch,
+		})),
+	)
 
 	return (
 		<AppSettingsRow

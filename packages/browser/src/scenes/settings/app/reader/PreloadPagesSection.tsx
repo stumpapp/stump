@@ -1,5 +1,6 @@
 import { Input } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
+import { useShallow } from 'zustand/react/shallow'
 
 import { useReaderStore } from '@/stores'
 
@@ -11,10 +12,12 @@ export default function PreloadPagesSection() {
 			preload: { ahead, behind },
 		},
 		setSettings,
-	} = useReaderStore((state) => ({
-		setSettings: state.setSettings,
-		settings: state.settings,
-	}))
+	} = useReaderStore(
+		useShallow((state) => ({
+			setSettings: state.setSettings,
+			settings: state.settings,
+		})),
+	)
 
 	const createChangeHandler =
 		(updater: (n: number) => void) => (e: React.ChangeEvent<HTMLInputElement>) => {

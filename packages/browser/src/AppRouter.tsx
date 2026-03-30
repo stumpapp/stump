@@ -26,10 +26,7 @@ type AppRouterProps = {
 
 export function AppRouter({ basePath }: AppRouterProps = {}) {
 	const locale = useUserStore((store) => store.userPreferences?.locale)
-
-	const { baseUrl } = useAppStore((store) => ({
-		baseUrl: store.baseUrl,
-	}))
+	const baseUrl = useAppStore((state) => state.baseUrl)
 
 	if (!baseUrl) {
 		throw new Error('Base URL is not set')

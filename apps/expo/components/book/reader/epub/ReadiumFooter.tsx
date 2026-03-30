@@ -2,6 +2,7 @@ import { useEffect, useMemo } from 'react'
 import { Platform } from 'react-native'
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useShallow } from 'zustand/react/shallow'
 
 import { Text } from '~/components/ui'
 import { CONTROLS_TIMING_CONFIG } from '~/lib/constants'
@@ -15,10 +16,12 @@ export default function ReadiumFooter() {
 	const { height } = useDisplay()
 
 	const visible = useReaderStore((state) => state.showControls)
-	const position = useEpubLocationStore((state) => ({
-		page: state.position,
-		totalPages: state.totalPages,
-	}))
+	const position = useEpubLocationStore(
+		useShallow((state) => ({
+			page: state.position,
+			totalPages: state.totalPages,
+		})),
+	)
 
 	const { colors } = useEpubTheme()
 

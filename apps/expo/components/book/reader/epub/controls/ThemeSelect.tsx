@@ -2,6 +2,7 @@ import { Plus } from 'lucide-react-native'
 import { useCallback, useMemo } from 'react'
 import { Alert, Pressable, ScrollView, View } from 'react-native'
 import * as ContextMenu from 'zeego/context-menu'
+import { useShallow } from 'zustand/react/shallow'
 
 import { Icon } from '~/components/ui/icon'
 import { IS_IOS_24_PLUS } from '~/lib/constants'
@@ -15,10 +16,12 @@ import { ThemePreview } from './customTheme/ThemePreview'
 
 export default function ThemeSelect() {
 	const { colorScheme } = useColorScheme()
-	const { themes, selectedTheme } = useEpubThemesStore((store) => ({
-		themes: store.themes,
-		selectedTheme: store.selectedTheme,
-	}))
+	const { themes, selectedTheme } = useEpubThemesStore(
+		useShallow((store) => ({
+			themes: store.themes,
+			selectedTheme: store.selectedTheme,
+		})),
+	)
 
 	const activeTheme = useMemo(
 		() => resolveThemeName(themes, selectedTheme || '', colorScheme),
@@ -58,11 +61,13 @@ type ThemePreviewButtonProps = {
 }
 
 const ThemePreviewButton = ({ name, config, isActive, themeNames }: ThemePreviewButtonProps) => {
-	const { onSelect, deleteTheme, addTheme } = useEpubThemesStore((store) => ({
-		onSelect: store.selectTheme,
-		deleteTheme: store.deleteTheme,
-		addTheme: store.addTheme,
-	}))
+	const { onSelect, deleteTheme, addTheme } = useEpubThemesStore(
+		useShallow((store) => ({
+			onSelect: store.selectTheme,
+			deleteTheme: store.deleteTheme,
+			addTheme: store.addTheme,
+		})),
+	)
 	const openCustomizeTheme = useEpubSheetStore((state) => state.openCustomizeTheme)
 
 	const handleDuplicate = useCallback(() => {

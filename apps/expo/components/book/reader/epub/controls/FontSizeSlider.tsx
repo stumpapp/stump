@@ -2,6 +2,7 @@ import Slider from '@react-native-community/slider'
 import * as Haptics from 'expo-haptics'
 import { useState } from 'react'
 import { View } from 'react-native'
+import { useShallow } from 'zustand/react/shallow'
 
 import { Text } from '~/components/ui'
 import { useColors } from '~/lib/constants'
@@ -10,10 +11,12 @@ import { useReaderStore } from '~/stores/reader'
 export default function FontSizeSlider() {
 	const colors = useColors()
 
-	const store = useReaderStore((state) => ({
-		fontSize: state.globalSettings.fontSize,
-		setFontSize: state.setGlobalSettings,
-	}))
+	const store = useReaderStore(
+		useShallow((state) => ({
+			fontSize: state.globalSettings.fontSize,
+			setFontSize: state.setGlobalSettings,
+		})),
+	)
 
 	const [value, setValue] = useState(() => sizeToScale(store.fontSize || 16))
 

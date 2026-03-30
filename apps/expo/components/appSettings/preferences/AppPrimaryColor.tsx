@@ -1,6 +1,7 @@
 import { ColorPicker, Host } from '@expo/ui/swift-ui'
 import { Pipette } from 'lucide-react-native'
 import { Platform } from 'react-native'
+import { useShallow } from 'zustand/react/shallow'
 
 import { useColors } from '~/lib/constants'
 import { usePreferencesStore } from '~/stores'
@@ -9,10 +10,12 @@ import AppSettingsRow from '../AppSettingsRow'
 
 // TODO: A picker is probably a bit too much, maybe a set of presets?
 export default function AppPrimaryColor() {
-	const store = usePreferencesStore((state) => ({
-		accentColor: state.accentColor,
-		patch: state.patch,
-	}))
+	const store = usePreferencesStore(
+		useShallow((state) => ({
+			accentColor: state.accentColor,
+			patch: state.patch,
+		})),
+	)
 
 	const onColorChange = (color: string) => {
 		store.patch({ accentColor: color })

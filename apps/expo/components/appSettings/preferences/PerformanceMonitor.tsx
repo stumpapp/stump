@@ -1,5 +1,6 @@
 import { Gauge } from 'lucide-react-native'
 import { View } from 'react-native'
+import { useShallow } from 'zustand/react/shallow'
 
 import { Switch } from '~/components/ui'
 import { usePreferencesStore } from '~/stores'
@@ -7,10 +8,12 @@ import { usePreferencesStore } from '~/stores'
 import AppSettingsRow from '../AppSettingsRow'
 
 export default function PerformanceMonitor() {
-	const { performanceMonitor, patch } = usePreferencesStore((state) => ({
-		performanceMonitor: state.performanceMonitor,
-		patch: state.patch,
-	}))
+	const { performanceMonitor, patch } = usePreferencesStore(
+		useShallow((state) => ({
+			performanceMonitor: state.performanceMonitor,
+			patch: state.patch,
+		})),
+	)
 
 	return (
 		<AppSettingsRow

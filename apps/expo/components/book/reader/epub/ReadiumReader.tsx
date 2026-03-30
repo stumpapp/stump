@@ -4,6 +4,7 @@ import setProperty from 'lodash/set'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { View } from 'react-native'
 import { initialWindowMetrics, useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useShallow } from 'zustand/react/shallow'
 
 import { FullScreenLoader } from '~/components/ui'
 import { verifyFileReadable } from '~/lib/filesystem'
@@ -124,30 +125,32 @@ export default function ReadiumReader({
 		fontWeight: rawFontWeight,
 		columnCount: rawColumnCount,
 		...preferences
-	} = useReaderStore((state) => ({
-		fontSize: state.globalSettings.fontSize,
-		fontFamily: state.globalSettings.fontFamily,
-		fontWeight: state.globalSettings.fontWeight,
-		lineHeight: state.globalSettings.lineHeight,
-		brightness: state.globalSettings.brightness,
-		publisherStyles: state.globalSettings.allowPublisherStyles,
-		pageMargins: state.globalSettings.pageMargins,
-		columnCount: state.globalSettings.columnCount,
-		imageFilter: state.globalSettings.imageFilter,
-		textAlign: state.globalSettings.textAlign,
-		typeScale: state.globalSettings.typeScale,
-		paragraphIndent: state.globalSettings.paragraphIndent,
-		paragraphSpacing: state.globalSettings.paragraphSpacing,
-		wordSpacing: state.globalSettings.wordSpacing,
-		letterSpacing: state.globalSettings.letterSpacing,
-		hyphens: state.globalSettings.hyphens,
-		ligatures: state.globalSettings.ligatures,
-		textNormalization: state.globalSettings.textNormalization,
-		verticalText: state.globalSettings.verticalText,
-		readingDirection: (state.globalSettings.readingDirection?.toLowerCase() === 'ltr'
-			? 'ltr'
-			: 'rtl') as 'ltr' | 'rtl',
-	}))
+	} = useReaderStore(
+		useShallow((state) => ({
+			fontSize: state.globalSettings.fontSize,
+			fontFamily: state.globalSettings.fontFamily,
+			fontWeight: state.globalSettings.fontWeight,
+			lineHeight: state.globalSettings.lineHeight,
+			brightness: state.globalSettings.brightness,
+			publisherStyles: state.globalSettings.allowPublisherStyles,
+			pageMargins: state.globalSettings.pageMargins,
+			columnCount: state.globalSettings.columnCount,
+			imageFilter: state.globalSettings.imageFilter,
+			textAlign: state.globalSettings.textAlign,
+			typeScale: state.globalSettings.typeScale,
+			paragraphIndent: state.globalSettings.paragraphIndent,
+			paragraphSpacing: state.globalSettings.paragraphSpacing,
+			wordSpacing: state.globalSettings.wordSpacing,
+			letterSpacing: state.globalSettings.letterSpacing,
+			hyphens: state.globalSettings.hyphens,
+			ligatures: state.globalSettings.ligatures,
+			textNormalization: state.globalSettings.textNormalization,
+			verticalText: state.globalSettings.verticalText,
+			readingDirection: (state.globalSettings.readingDirection?.toLowerCase() === 'ltr'
+				? 'ltr'
+				: 'rtl') as 'ltr' | 'rtl',
+		})),
+	)
 	const { colors } = useEpubTheme()
 
 	// Readium uses a scale factor  (1.0 = 400)
@@ -194,31 +197,33 @@ export default function ReadiumReader({
 	// is (using expo router w different screens) is no longer relevant since we have the programmatic sheets
 	// instead of navigation-based ones. I figure the callbacks and less mutable state can just go into context,
 	// which cuts the majority if not all the unnecessary store logic
-	const store = useEpubLocationStore((store) => ({
-		storeBook: store.storeBook,
-		onTocChange: store.onTocChange,
-		onBookLoad: store.onBookLoad,
-		onLocationChange: store.onLocationChange,
-		cleanup: store.onUnload,
-		storeActions: store.storeActions,
-		storeHeaders: store.storeHeaders,
-		storeBookmarks: store.storeBookmarks,
-		storeOnBookmark: store.storeOnBookmark,
-		storeOnDeleteBookmark: store.storeOnDeleteBookmark,
-		annotations: store.annotations,
-		storeAnnotations: store.storeAnnotations,
-		addAnnotation: store.addAnnotation,
-		updateAnnotation: store.updateAnnotation,
-		removeAnnotation: store.removeAnnotation,
-		getAnnotation: store.getAnnotation,
-		onCreateAnnotation: store.onCreateAnnotation,
-		onUpdateAnnotation: store.onUpdateAnnotation,
-		onDeleteAnnotation: store.onDeleteAnnotation,
-		storeOnCreateAnnotation: store.storeOnCreateAnnotation,
-		storeOnUpdateAnnotation: store.storeOnUpdateAnnotation,
-		storeOnDeleteAnnotation: store.storeOnDeleteAnnotation,
-		positions: store.positions,
-	}))
+	const store = useEpubLocationStore(
+		useShallow((store) => ({
+			storeBook: store.storeBook,
+			onTocChange: store.onTocChange,
+			onBookLoad: store.onBookLoad,
+			onLocationChange: store.onLocationChange,
+			cleanup: store.onUnload,
+			storeActions: store.storeActions,
+			storeHeaders: store.storeHeaders,
+			storeBookmarks: store.storeBookmarks,
+			storeOnBookmark: store.storeOnBookmark,
+			storeOnDeleteBookmark: store.storeOnDeleteBookmark,
+			annotations: store.annotations,
+			storeAnnotations: store.storeAnnotations,
+			addAnnotation: store.addAnnotation,
+			updateAnnotation: store.updateAnnotation,
+			removeAnnotation: store.removeAnnotation,
+			getAnnotation: store.getAnnotation,
+			onCreateAnnotation: store.onCreateAnnotation,
+			onUpdateAnnotation: store.onUpdateAnnotation,
+			onDeleteAnnotation: store.onDeleteAnnotation,
+			storeOnCreateAnnotation: store.storeOnCreateAnnotation,
+			storeOnUpdateAnnotation: store.storeOnUpdateAnnotation,
+			storeOnDeleteAnnotation: store.storeOnDeleteAnnotation,
+			positions: store.positions,
+		})),
+	)
 
 	const sdkCtx = useSDKSafe()
 

@@ -1,6 +1,7 @@
 import { Button, Heading, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { Helmet } from 'react-helmet'
+import { useShallow } from 'zustand/react/shallow'
 
 import { Container, ContentContainer } from '@/components/container'
 import { useReaderStore } from '@/stores'
@@ -14,10 +15,12 @@ import PreloadPagesSection from './PreloadPagesSection'
 export default function ReaderDefaultSettingsScene() {
 	const { t } = useLocaleContext()
 
-	const { bookPreferences, clearStore } = useReaderStore((state) => ({
-		bookPreferences: state.bookPreferences,
-		clearStore: state.clearStore,
-	}))
+	const { bookPreferences, clearStore } = useReaderStore(
+		useShallow((state) => ({
+			bookPreferences: state.bookPreferences,
+			clearStore: state.clearStore,
+		})),
+	)
 
 	const canClearStore = Object.keys(bookPreferences).length > 0
 

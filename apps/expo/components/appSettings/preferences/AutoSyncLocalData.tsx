@@ -1,5 +1,6 @@
 import { RefreshCw } from 'lucide-react-native'
 import { View } from 'react-native'
+import { useShallow } from 'zustand/react/shallow'
 
 import { Switch } from '~/components/ui'
 import { usePreferencesStore } from '~/stores'
@@ -7,10 +8,12 @@ import { usePreferencesStore } from '~/stores'
 import AppSettingsRow from '../AppSettingsRow'
 
 export default function AutoSyncLocalData() {
-	const { autoSyncLocalData, patch } = usePreferencesStore((state) => ({
-		autoSyncLocalData: state.autoSyncLocalData,
-		patch: state.patch,
-	}))
+	const { autoSyncLocalData, patch } = usePreferencesStore(
+		useShallow((state) => ({
+			autoSyncLocalData: state.autoSyncLocalData,
+			patch: state.patch,
+		})),
+	)
 
 	return (
 		<AppSettingsRow

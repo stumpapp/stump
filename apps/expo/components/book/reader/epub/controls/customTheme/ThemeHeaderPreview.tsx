@@ -1,6 +1,7 @@
 import { ReadingDirection } from '@stump/graphql'
 import { useCallback, useEffect, useState } from 'react'
 import { Pressable, TextStyle, View } from 'react-native'
+import { useShallow } from 'zustand/react/shallow'
 
 import { Text } from '~/components/ui'
 import { IS_IOS_24_PLUS } from '~/lib/constants'
@@ -24,24 +25,28 @@ type Props = {
 
 export const ThemeHeaderPreview = ({ customTheme: customThemeProp, onCancel, onSaved }: Props) => {
 	const { colorScheme } = useColorScheme()
-	const { themes, selectedTheme } = useEpubThemesStore((store) => ({
-		themes: store.themes,
-		selectedTheme: store.selectedTheme,
-	}))
+	const { themes, selectedTheme } = useEpubThemesStore(
+		useShallow((store) => ({
+			themes: store.themes,
+			selectedTheme: store.selectedTheme,
+		})),
+	)
 	// Note: A majority of style options which apply if publisher styles are false are not easily
 	// represented here in the preview, so they are excluded
 	const { fontSize, fontFamily, fontWeight, allowPublisherStyles, ...storedPreferences } =
-		useReaderStore((state) => ({
-			fontSize: state.globalSettings.fontSize,
-			fontFamily: state.globalSettings.fontFamily,
-			fontWeight: state.globalSettings.fontWeight,
-			lineHeight: state.globalSettings.lineHeight,
-			textAlign: state.globalSettings.textAlign,
-			letterSpacing: state.globalSettings.letterSpacing,
-			typeScale: state.globalSettings.typeScale,
-			allowPublisherStyles: state.globalSettings.allowPublisherStyles,
-			readingDirection: state.globalSettings.readingDirection,
-		}))
+		useReaderStore(
+			useShallow((state) => ({
+				fontSize: state.globalSettings.fontSize,
+				fontFamily: state.globalSettings.fontFamily,
+				fontWeight: state.globalSettings.fontWeight,
+				lineHeight: state.globalSettings.lineHeight,
+				textAlign: state.globalSettings.textAlign,
+				letterSpacing: state.globalSettings.letterSpacing,
+				typeScale: state.globalSettings.typeScale,
+				allowPublisherStyles: state.globalSettings.allowPublisherStyles,
+				readingDirection: state.globalSettings.readingDirection,
+			})),
+		)
 
 	const typeScale = allowPublisherStyles ? 1.0 : (storedPreferences.typeScale ?? 1.0)
 	const lineHeight = allowPublisherStyles ? 1.5 : (storedPreferences.lineHeight ?? 1.5)

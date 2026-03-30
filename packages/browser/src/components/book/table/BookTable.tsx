@@ -1,6 +1,7 @@
 import { FragmentType } from '@stump/graphql'
 import { OnChangeFn, SortingState } from '@tanstack/react-table'
 import { useCallback, useMemo } from 'react'
+import { useShallow } from 'zustand/react/shallow'
 
 import { orderingToTableSort, tableSortToOrdering, useFilterContext } from '@/components/filters'
 import { EntityTable, EntityTableProps } from '@/components/table'
@@ -13,9 +14,11 @@ import { defaultColumns } from './columns'
 type Props = Omit<EntityTableProps<FragmentType<typeof BookCardFragment>>, 'columns'>
 
 export default function BookTable(props: Props) {
-	const configuration = useBooksLayout((state) => ({
-		columns: state.columns,
-	}))
+	const configuration = useBooksLayout(
+		useShallow((state) => ({
+			columns: state.columns,
+		})),
+	)
 	const { ordering, setOrdering } = useFilterContext()
 
 	const columns = useMemo(

@@ -5,6 +5,7 @@ import { useCallback } from 'react'
 import { z } from 'zod'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
+import { useShallow } from 'zustand/react/shallow'
 
 import { useCacheStore } from './cache'
 import { ZustandMMKVStorage } from './store'
@@ -178,11 +179,19 @@ export const useSavedServers = () => {
 		setDefaultServer,
 		showStumpServers,
 		setShowStumpServers,
-	} = useSavedServerStore((state) => state)
+	} = useSavedServerStore(
+		useShallow((state) => ({
+			servers: state.servers,
+			addServer: state.addServer,
+			editServer: state.editServer,
+			removeServer: state.removeServer,
+			setDefaultServer: state.setDefaultServer,
+			showStumpServers: state.showStumpServers,
+			setShowStumpServers: state.setShowStumpServers,
+		})),
+	)
 
-	const cacheStore = useCacheStore((state) => ({
-		removeInstanceFromCache: state.removeSDK,
-	}))
+	const removeInstanceFromCache = useCacheStore((state) => state.removeSDK)
 
 	const getServerConfig = async (id: ServerID) => {
 		const config = await SecureStore.getItemAsync(formatPrefix('config', id))
@@ -303,7 +312,7 @@ export const useSavedServers = () => {
 	 */
 	const deleteServerToken = async (id: ServerID) => {
 		await SecureStore.deleteItemAsync(formatPrefix('token', id))
-		cacheStore.removeInstanceFromCache(id)
+		removeInstanceFromCache(id)
 		queryClient.removeQueries({ predicate: ({ queryKey }) => queryKey.includes(id) })
 	}
 

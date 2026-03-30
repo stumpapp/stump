@@ -5,6 +5,7 @@ import { ArrowRight } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Navigate, useLocation } from 'react-router'
 import { toast } from 'sonner'
+import { useShallow } from 'zustand/react/shallow'
 
 import { useAppStore } from '@/stores'
 
@@ -15,10 +16,12 @@ export default function ServerConnectionErrorScene() {
 	const [goHome, setGoHome] = useState(false)
 	const [showServers, setShowServers] = useState(false)
 
-	const { baseURL, platform } = useAppStore((store) => ({
-		baseURL: store.baseUrl,
-		platform: store.platform,
-	}))
+	const { baseURL, platform } = useAppStore(
+		useShallow((store) => ({
+			baseURL: store.baseUrl,
+			platform: store.platform,
+		})),
+	)
 	const isDesktop = platform !== 'browser'
 
 	const localeKey = `serverSOS.${isDesktop ? 'desktop' : 'web'}.message`

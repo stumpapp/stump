@@ -2,6 +2,7 @@ import { ComboBox, Label } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { isSupportedFont } from '@stump/sdk'
 import { useCallback } from 'react'
+import { useShallow } from 'zustand/react/shallow'
 
 import { SUPPORTED_FONT_OPTIONS } from '@/scenes/settings/app/preferences/FontSelect'
 import { useReaderStore } from '@/stores'
@@ -11,10 +12,12 @@ export default function DefaultFontFamily() {
 	const {
 		settings: { fontFamily },
 		setSettings,
-	} = useReaderStore((state) => ({
-		setSettings: state.setSettings,
-		settings: state.settings,
-	}))
+	} = useReaderStore(
+		useShallow((state) => ({
+			setSettings: state.setSettings,
+			settings: state.settings,
+		})),
+	)
 
 	const changeFont = useCallback(
 		(font?: string) => {

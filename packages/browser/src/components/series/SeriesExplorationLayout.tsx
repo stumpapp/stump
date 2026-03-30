@@ -1,14 +1,17 @@
 import { IconButton, ToolTip } from '@stump/components'
 import { InterfaceLayout } from '@stump/graphql'
 import { LayoutGrid, Table } from 'lucide-react'
+import { useShallow } from 'zustand/react/shallow'
 
 import { useSeriesLayout } from '@/stores/layout'
 
 export default function SeriesExplorationLayout() {
-	const { layout, setLayout } = useSeriesLayout((state) => ({
-		layout: state.layout,
-		setLayout: state.setLayout,
-	}))
+	const { layout, setLayout } = useSeriesLayout(
+		useShallow((state) => ({
+			layout: state.layout,
+			setLayout: state.setLayout,
+		})),
+	)
 
 	return (
 		<div className="flex shrink-0 items-center gap-1">

@@ -4,6 +4,7 @@ import { graphql, InterfaceLayout, MediaFilterInput, MediaOrderBy } from '@stump
 import { useQueryClient } from '@tanstack/react-query'
 import { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
 import { Helmet } from 'react-helmet'
+import { useShallow } from 'zustand/react/shallow'
 
 import { BookTable } from '@/components/book'
 import BookCard from '@/components/book/BookCard'
@@ -175,12 +176,14 @@ function SeriesBooksScene() {
 	const {
 		preferences: { enableAlphabetSelect },
 	} = usePreferences()
-	const { layoutMode, setLayout, columns, setColumns } = useBooksLayout((state) => ({
-		columns: state.columns,
-		layoutMode: state.layout,
-		setColumns: state.setColumns,
-		setLayout: state.setLayout,
-	}))
+	const { layoutMode, setLayout, columns, setColumns } = useBooksLayout(
+		useShallow((state) => ({
+			columns: state.columns,
+			layoutMode: state.layout,
+			setColumns: state.setColumns,
+			setLayout: state.setLayout,
+		})),
+	)
 
 	const resolvedFilters = useMemo(
 		() => [

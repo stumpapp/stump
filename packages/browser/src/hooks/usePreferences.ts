@@ -2,6 +2,7 @@ import { useGraphQLMutation } from '@stump/client'
 import { graphql, UpdateUserPreferencesInput, UserPreferences } from '@stump/graphql'
 import omit from 'lodash/omit'
 import { useCallback } from 'react'
+import { useShallow } from 'zustand/react/shallow'
 
 import { useUserStore } from '@/stores'
 
@@ -14,10 +15,12 @@ const mutation = graphql(`
 `)
 
 export function usePreferences() {
-	const { preferences, setPreferences } = useUserStore((state) => ({
-		preferences: state.userPreferences,
-		setPreferences: state.setUserPreferences,
-	}))
+	const { preferences, setPreferences } = useUserStore(
+		useShallow((state) => ({
+			preferences: state.userPreferences,
+			setPreferences: state.setUserPreferences,
+		})),
+	)
 
 	const { mutate } = useGraphQLMutation(mutation, {
 		onSuccess: (_, { input }) => {

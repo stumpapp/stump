@@ -1,5 +1,6 @@
 import { ArrowRightFromLine } from 'lucide-react-native'
 import { View } from 'react-native'
+import { useShallow } from 'zustand/react/shallow'
 
 import { Switch } from '~/components/ui'
 import { usePreferencesStore } from '~/stores'
@@ -7,10 +8,12 @@ import { usePreferencesStore } from '~/stores'
 import AppSettingsRow from '../AppSettingsRow'
 
 export default function DisableDismissGesture() {
-	const { disableDismissGesture, patch } = usePreferencesStore((state) => ({
-		disableDismissGesture: state.disableDismissGesture,
-		patch: state.patch,
-	}))
+	const { disableDismissGesture, patch } = usePreferencesStore(
+		useShallow((state) => ({
+			disableDismissGesture: state.disableDismissGesture,
+			patch: state.patch,
+		})),
+	)
 
 	return (
 		<AppSettingsRow

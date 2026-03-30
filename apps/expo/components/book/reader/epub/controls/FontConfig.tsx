@@ -1,3 +1,5 @@
+import { useShallow } from 'zustand/react/shallow'
+
 import { Card, Stepper, Switch } from '~/components/ui'
 import { Picker } from '~/components/ui/picker/picker'
 import type { PickerOption } from '~/components/ui/picker/types'
@@ -20,14 +22,16 @@ const FONT_WEIGHT_OPTIONS: PickerOption[] = [
 ]
 
 export default function FontConfig() {
-	const store = useReaderStore((state) => ({
-		fontFamily: state.globalSettings.fontFamily ?? '',
-		fontSize: state.globalSettings.fontSize ?? 16,
-		fontWeight: state.globalSettings.fontWeight ?? 400,
-		textNormalization: state.globalSettings.textNormalization ?? false,
-		verticalText: state.globalSettings.verticalText ?? false,
-		setSettings: state.setGlobalSettings,
-	}))
+	const store = useReaderStore(
+		useShallow((state) => ({
+			fontFamily: state.globalSettings.fontFamily ?? '',
+			fontSize: state.globalSettings.fontSize ?? 16,
+			fontWeight: state.globalSettings.fontWeight ?? 400,
+			textNormalization: state.globalSettings.textNormalization ?? false,
+			verticalText: state.globalSettings.verticalText ?? false,
+			setSettings: state.setGlobalSettings,
+		})),
+	)
 
 	const ensureNumber = (value: string, cb: (num: number) => void) => {
 		const parsed = parseInt(value, 10)

@@ -5,6 +5,7 @@ import setProperty from 'lodash/set'
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { FlatList, View } from 'react-native'
 import { match, P } from 'ts-pattern'
+import { useShallow } from 'zustand/react/shallow'
 
 import {
 	FilterHeaderButton,
@@ -53,10 +54,12 @@ export default function Characters() {
 	const sheetRef = useRef<FilterSheetRef>(null)
 	const [searchQuery, setSearchQuery] = useState('')
 
-	const { filters, setFilters } = useBookFilterStore((store) => ({
-		filters: store.filters,
-		setFilters: store.setFilters,
-	}))
+	const { filters, setFilters } = useBookFilterStore(
+		useShallow((store) => ({
+			filters: store.filters,
+			setFilters: store.setFilters,
+		})),
+	)
 
 	const characterFilter = useMemo(
 		() => filters.metadata?.characters?.likeAnyOf,

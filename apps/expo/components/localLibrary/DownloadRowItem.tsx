@@ -5,6 +5,7 @@ import { BookOpenCheck, CheckCircle2, CircleMinus, Info, Trash } from 'lucide-re
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { Alert, Platform, View } from 'react-native'
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
+import { useShallow } from 'zustand/react/shallow'
 
 import { epubProgress, imageMeta, syncStatus } from '~/db'
 import { useColors } from '~/lib/constants'
@@ -45,12 +46,16 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 
 	const { width, height } = useDownloadRowItemSize()
 
-	const selectionStore = useSelectionStore((state) => ({
-		isSelectionMode: state.isSelecting,
-		setIsSelecting: state.setIsSelecting,
-		onSelectItem: (id: string) => state.toggleSelection(id),
-		isSelected: state.isSelected(downloadedFile.id),
-	}))
+	const selectionStore = useSelectionStore(
+		useShallow((state) => ({
+			isSelectionMode: state.isSelecting,
+			setIsSelecting: state.setIsSelecting,
+			toggleSelection: state.toggleSelection,
+			isSelected: state.isSelected(downloadedFile.id),
+		})),
+	)
+
+	const onSelectItem = (id: string) => selectionStore.toggleSelection(id)
 
 	const iconOpacity = useSharedValue(1)
 	const syncIconStyle = useAnimatedStyle(() => ({
@@ -74,9 +79,9 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 	const onPress = useCallback(
 		() =>
 			selectionStore.isSelectionMode
-				? selectionStore.onSelectItem(downloadedFile.id)
+				? onSelectItem(downloadedFile.id)
 				: router.navigate(`/offline/${downloadedFile.id}/read`),
-		[router, downloadedFile.id, selectionStore],
+		[router, downloadedFile.id, selectionStore, onSelectItem],
 	)
 
 	const progression = useMemo(() => {
@@ -103,8 +108,8 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 
 	const handleSelect = useCallback(() => {
 		selectionStore.setIsSelecting(true)
-		selectionStore.onSelectItem(downloadedFile.id)
-	}, [selectionStore, downloadedFile.id])
+		onSelectItem(downloadedFile.id)
+	}, [selectionStore, downloadedFile.id, onSelectItem])
 
 	const handleMarkAsComplete = useCallback(() => {
 		markAsComplete(downloadedFile.id, downloadedFile.pages)

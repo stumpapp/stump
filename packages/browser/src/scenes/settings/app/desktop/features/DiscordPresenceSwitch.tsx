@@ -2,6 +2,7 @@ import { Button, Label, RawSwitch, Text, ToolTip } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { RefreshCcw } from 'lucide-react'
 import { toast } from 'sonner'
+import { useShallow } from 'zustand/react/shallow'
 
 import { usePreferences } from '@/hooks/usePreferences'
 import { useTauriRPC } from '@/hooks/useTauriRPC'
@@ -10,10 +11,12 @@ import { useUserStore } from '@/stores'
 export default function DiscordPresenceSwitch() {
 	const { setDiscordPresence } = useTauriRPC()
 	const { t } = useLocaleContext()
-	const { userPreferences, setUserPreferences } = useUserStore((state) => ({
-		setUserPreferences: state.setUserPreferences,
-		userPreferences: state.userPreferences,
-	}))
+	const { userPreferences, setUserPreferences } = useUserStore(
+		useShallow((state) => ({
+			setUserPreferences: state.setUserPreferences,
+			userPreferences: state.userPreferences,
+		})),
+	)
 	const { update } = usePreferences()
 
 	/**

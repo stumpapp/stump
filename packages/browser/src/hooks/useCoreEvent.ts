@@ -5,6 +5,7 @@ import { QueryClient, useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
 import { match, P } from 'ts-pattern'
+import { useShallow } from 'zustand/react/shallow'
 
 const subscription = graphql(`
 	subscription UseCoreEvent {
@@ -65,11 +66,13 @@ type Params = {
 
 // TODO: Attempt reconnect with re-auth
 export function useCoreEvent({ liveRefetch, onConnectionWithServerChanged }: Params) {
-	const store = useJobStore((state) => ({
-		addJob: state.addJob,
-		removeJob: state.removeJob,
-		upsertJob: state.upsertJob,
-	}))
+	const store = useJobStore(
+		useShallow((state) => ({
+			addJob: state.addJob,
+			removeJob: state.removeJob,
+			upsertJob: state.upsertJob,
+		})),
+	)
 	const client = useQueryClient()
 
 	const { sdk } = useSDK()

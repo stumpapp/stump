@@ -19,16 +19,20 @@ type Props = {
 // TODO(android): Use non-native dropdown for all of these
 
 export default function ReaderSettings({ forBook, forServer }: Props) {
-	const store = useReaderStore((state) => state)
+	const bookSettingsMap = useReaderStore((state) => state.bookSettings)
+	const globalSettings = useReaderStore((state) => state.globalSettings)
+	const addBookSettings = useReaderStore((state) => state.addBookSettings)
+	const setBookSettingsFn = useReaderStore((state) => state.setBookSettings)
+	const setGlobalSettings = useReaderStore((state) => state.setGlobalSettings)
 
 	const bookSettings = useMemo(
-		() => (forBook ? store.bookSettings[forBook] : undefined),
-		[store.bookSettings, forBook],
+		() => (forBook ? bookSettingsMap[forBook] : undefined),
+		[bookSettingsMap, forBook],
 	)
 
 	const activeSettings = useMemo(
-		() => bookSettings || store.globalSettings,
-		[bookSettings, store.globalSettings],
+		() => bookSettings || globalSettings,
+		[bookSettings, globalSettings],
 	)
 
 	const setBookPreferences = useCallback(
@@ -36,27 +40,27 @@ export default function ReaderSettings({ forBook, forServer }: Props) {
 			if (!forBook || !forServer) return
 
 			if (!bookSettings) {
-				store.addBookSettings(forBook, {
-					...store.globalSettings,
+				addBookSettings(forBook, {
+					...globalSettings,
 					...updates,
 					serverID: forServer,
 				})
 			} else {
-				store.setBookSettings(forBook, { ...updates, serverID: forServer })
+				setBookSettingsFn(forBook, { ...updates, serverID: forServer })
 			}
 		},
-		[forBook, bookSettings, store, forServer],
+		[forBook, bookSettings, addBookSettings, globalSettings, setBookSettingsFn, forServer],
 	)
 
 	const onPreferenceChange = useCallback(
 		(partial: Partial<GlobalSettings>) => {
 			if (!forBook || !forServer) {
-				store.setGlobalSettings(partial)
+				setGlobalSettings(partial)
 			} else {
 				setBookPreferences(partial)
 			}
 		},
-		[forBook, forServer, setBookPreferences, store],
+		[forBook, forServer, setBookPreferences, setGlobalSettings],
 	)
 
 	const allowDownscaling = activeSettings.allowDownscaling ?? true

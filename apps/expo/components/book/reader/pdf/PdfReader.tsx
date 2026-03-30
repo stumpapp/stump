@@ -1,6 +1,7 @@
 import { ReadingDirection, ReadingMode } from '@stump/graphql'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { View } from 'react-native'
+import { useShallow } from 'zustand/react/shallow'
 
 import { FullScreenLoader } from '~/components/ui'
 import { useDownload } from '~/lib/hooks'
@@ -122,13 +123,15 @@ export default function PdfReader({ book, initialPage, onPageChanged, ...ctx }: 
 		[],
 	)
 
-	const store = usePdfStore((store) => ({
-		storeBook: store.storeBook,
-		resetStore: store.resetStore,
-		storeActions: store.storeActions,
-		setCurrentPage: store.setCurrentPage,
-		onLoaded: store.onLoaded,
-	}))
+	const store = usePdfStore(
+		useShallow((store) => ({
+			storeBook: store.storeBook,
+			resetStore: store.resetStore,
+			storeActions: store.storeActions,
+			setCurrentPage: store.setCurrentPage,
+			onLoaded: store.onLoaded,
+		})),
+	)
 
 	useEffect(() => {
 		if (localUri) return

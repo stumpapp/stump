@@ -2,6 +2,7 @@ import { cn, cx } from '@stump/components'
 import { Suspense } from 'react'
 import { Navigate, Outlet } from 'react-router-dom'
 import { useMediaMatch } from 'rooks'
+import { useShallow } from 'zustand/react/shallow'
 
 import { Container } from '@/components/container'
 import { usePreferences } from '@/hooks'
@@ -13,9 +14,11 @@ import SettingsSideBar from './SettingsSideBar'
 export default function SettingsLayout() {
 	const isMobile = useMediaMatch('(max-width: 768px)')
 
-	const { user } = useUserStore((store) => ({
-		user: store.user,
-	}))
+	const { user } = useUserStore(
+		useShallow((store) => ({
+			user: store.user,
+		})),
+	)
 	const {
 		preferences: {
 			enableDoubleSidebar,

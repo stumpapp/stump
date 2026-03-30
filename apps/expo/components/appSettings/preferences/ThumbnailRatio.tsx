@@ -1,4 +1,5 @@
 import { Ruler } from 'lucide-react-native'
+import { useShallow } from 'zustand/react/shallow'
 
 import { Picker } from '~/components/ui/picker/picker'
 import { usePreferencesStore } from '~/stores'
@@ -6,10 +7,12 @@ import { usePreferencesStore } from '~/stores'
 import AppSettingsRow from '../AppSettingsRow'
 
 export default function ThumbnailRatio() {
-	const { thumbnailRatio, patch } = usePreferencesStore((state) => ({
-		thumbnailRatio: state.thumbnailRatio,
-		patch: state.patch,
-	}))
+	const { thumbnailRatio, patch } = usePreferencesStore(
+		useShallow((state) => ({
+			thumbnailRatio: state.thumbnailRatio,
+			patch: state.patch,
+		})),
+	)
 
 	const ratioToStringMap: Record<number, string> = {
 		[5 / 8]: '1 : 1.6',

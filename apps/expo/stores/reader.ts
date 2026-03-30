@@ -3,6 +3,7 @@ import { ReadingDirection, ReadingImageScaleFit, ReadingMode } from '@stump/grap
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
+import { useShallow } from 'zustand/react/shallow'
 
 import { useActiveServerSafe } from '~/components/activeServer'
 import { ImageReaderBookRef } from '~/components/book/reader/image/context'
@@ -172,33 +173,37 @@ export const useBookPreferences = ({ book, ...params }: Params) => {
 		throw new Error('No active server ID found for book preferences')
 	}
 
-	const store = useReaderStore((state) => state)
+	const bookSettingsMap = useReaderStore((state) => state.bookSettings)
+	const globalSettings = useReaderStore((state) => state.globalSettings)
+	const addBookSettings = useReaderStore((state) => state.addBookSettings)
+	const setBookSettingsFn = useReaderStore((state) => state.setBookSettings)
+	const setGlobalSettings = useReaderStore((state) => state.setGlobalSettings)
 
-	const bookSettings = useMemo(() => store.bookSettings[book.id], [store.bookSettings, book.id])
+	const bookSettings = useMemo(() => bookSettingsMap[book.id], [bookSettingsMap, book.id])
 
 	const setBookPreferences = useCallback(
 		(updates: Partial<BookPreferences>) => {
 			if (!bookSettings) {
-				store.addBookSettings(book.id, {
-					...store.globalSettings,
+				addBookSettings(book.id, {
+					...globalSettings,
 					...updates,
 					serverID,
 				})
 			} else {
-				store.setBookSettings(book.id, { ...updates, serverID })
+				setBookSettingsFn(book.id, { ...updates, serverID })
 			}
 		},
-		[book.id, bookSettings, store, serverID],
+		[book.id, bookSettings, addBookSettings, globalSettings, setBookSettingsFn, serverID],
 	)
 
 	return {
-		globalSettings: store.globalSettings,
+		globalSettings,
 		preferences: {
-			...store.globalSettings,
-			...(bookSettings || store.globalSettings),
+			...globalSettings,
+			...(bookSettings || globalSettings),
 		},
 		setBookPreferences,
-		updateGlobalSettings: store.setGlobalSettings,
+		updateGlobalSettings: setGlobalSettings,
 	}
 }
 
@@ -272,10 +277,12 @@ export const useBookTimer = (id: string, params: UseBookTimerParams = defaultPar
 }
 
 export const useHideSystemBars = () => {
-	const { isReading, showControls } = useReaderStore((state) => ({
-		isReading: state.isReading,
-		showControls: state.showControls,
-	}))
+	const { isReading, showControls } = useReaderStore(
+		useShallow((state) => ({
+			isReading: state.isReading,
+			showControls: state.showControls,
+		})),
+	)
 
 	// when reading, hideNavigationBar keep the android and iPad nav bar hidden
 	return { hideStatusBar: isReading && !showControls, hideNavigationBar: isReading }

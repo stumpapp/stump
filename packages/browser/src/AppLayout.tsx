@@ -32,17 +32,14 @@ export function AppLayout() {
 	const { showBoundary } = useErrorBoundary()
 
 	const { sdk } = useSDK()
-	const { showConfetti, setShowConfetti, onConnectionWithServerChanged } = useAppStore((state) => ({
-		onConnectionWithServerChanged: state.setIsConnectedWithServer,
-		platform: state.platform,
-		setShowConfetti: state.setShowConfetti,
-		showConfetti: state.showConfetti,
-	}))
-	const { storeUser, setUser, checkUserPermission } = useUserStore((state) => ({
-		checkUserPermission: state.checkUserPermission,
-		setUser: state.setUser,
-		storeUser: state.user,
-	}))
+
+	const showConfetti = useAppStore((state) => state.showConfetti)
+	const setShowConfetti = useAppStore((state) => state.setShowConfetti)
+	const onConnectionWithServerChanged = useAppStore((state) => state.setIsConnectedWithServer)
+
+	const storeUser = useUserStore((state) => state.user)
+	const checkUserPermission = useUserStore((state) => state.checkUserPermission)
+	const setUser = useUserStore((state) => state.setUser)
 
 	const { isDarkVariant, shouldUseGradient } = useTheme()
 	const [initialize, instance] = useOverlayScrollbars({
@@ -258,8 +255,6 @@ export function AppLayout() {
 					</main>
 				</div>
 
-				{/* TODO(relay): Restore */}
-				{/* {platform !== 'browser' && <ServerStatusOverlay />} */}
 				{showJobOverlay && <JobOverlay />}
 			</Suspense>
 		</AppContext.Provider>

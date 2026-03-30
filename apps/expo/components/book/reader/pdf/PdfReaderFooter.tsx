@@ -2,6 +2,7 @@ import { useEffect, useMemo } from 'react'
 import { Platform } from 'react-native'
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useShallow } from 'zustand/react/shallow'
 
 import { Text } from '~/components/ui'
 import { CONTROLS_TIMING_CONFIG } from '~/lib/constants'
@@ -18,10 +19,12 @@ export function PdfReaderFooter() {
 	const { height } = useDisplay()
 
 	const visible = useReaderStore((state) => state.showControls)
-	const position = usePdfStore((state) => ({
-		page: state.currentPage,
-		totalPages: state.book?.pages,
-	}))
+	const position = usePdfStore(
+		useShallow((state) => ({
+			page: state.currentPage,
+			totalPages: state.book?.pages,
+		})),
+	)
 
 	const insets = useSafeAreaInsets()
 

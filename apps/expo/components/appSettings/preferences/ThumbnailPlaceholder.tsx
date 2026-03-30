@@ -1,4 +1,5 @@
 import { Palette } from 'lucide-react-native'
+import { useShallow } from 'zustand/react/shallow'
 
 import { ThumbnailPlaceholderType } from '~/components/image/ThumbnailPlaceholder'
 import { Picker } from '~/components/ui/picker/picker'
@@ -9,10 +10,12 @@ import AppSettingsRow from '../AppSettingsRow'
 // TODO(android): Use non-native dropdown
 
 export default function ThumbnailPlaceholder() {
-	const { thumbnailPlaceholder, patch } = usePreferencesStore((state) => ({
-		thumbnailPlaceholder: state.thumbnailPlaceholder,
-		patch: state.patch,
-	}))
+	const { thumbnailPlaceholder, patch } = usePreferencesStore(
+		useShallow((state) => ({
+			thumbnailPlaceholder: state.thumbnailPlaceholder,
+			patch: state.patch,
+		})),
+	)
 
 	return (
 		<AppSettingsRow icon={Palette} title="Thumbnail Placeholder">

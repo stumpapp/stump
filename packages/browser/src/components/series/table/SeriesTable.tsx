@@ -1,5 +1,6 @@
 import { OnChangeFn, SortingState } from '@tanstack/react-table'
 import { useCallback, useMemo } from 'react'
+import { useShallow } from 'zustand/react/shallow'
 
 import { orderingToTableSort, tableSortToOrdering, useFilterContext } from '@/components/filters'
 import { EntityTable, EntityTableProps } from '@/components/table'
@@ -11,9 +12,11 @@ import { defaultColumns } from './columns'
 type Props = Omit<EntityTableProps<SeriesCardData>, 'columns' | 'options'>
 
 export default function SeriesTable(props: Props) {
-	const configuration = useSeriesLayout((state) => ({
-		columns: state.columns,
-	}))
+	const configuration = useSeriesLayout(
+		useShallow((state) => ({
+			columns: state.columns,
+		})),
+	)
 	const { ordering, setOrdering } = useFilterContext()
 
 	const columns = useMemo(

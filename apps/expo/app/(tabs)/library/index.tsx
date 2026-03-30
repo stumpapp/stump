@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo } from 'react'
 import { View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { match } from 'ts-pattern'
+import { useShallow } from 'zustand/react/shallow'
 
 import {
 	CuratedDownloadsHeader,
@@ -23,12 +24,14 @@ import { useSelectionStore } from '~/stores/selection'
 
 export default function Screen() {
 	// Note: The id is a workaround for https://github.com/drizzle-team/drizzle-orm/issues/2660
-	const { id, increment, sortConfig, sourceFilter } = useDownloadsState((state) => ({
-		id: state.fetchCounter,
-		increment: state.increment,
-		sortConfig: state.sort,
-		sourceFilter: state.sourceFilter,
-	}))
+	const { id, increment, sortConfig, sourceFilter } = useDownloadsState(
+		useShallow((state) => ({
+			id: state.fetchCounter,
+			increment: state.increment,
+			sortConfig: state.sort,
+			sourceFilter: state.sourceFilter,
+		})),
+	)
 
 	const orderFn = match(sortConfig.direction)
 		.with('ASC', () => asc)
@@ -115,7 +118,8 @@ export default function Screen() {
 		return indices
 	}, [sortConfig, artificiallyGroupedData])
 
-	const selectionStore = useSelectionStore((state) => state)
+	const setItemIdents = useSelectionStore((state) => state.setItemIdents)
+	const registerCustomActions = useSelectionStore((state) => state.registerCustomActions)
 
 	const customSelectionActions = useMemo(
 		() => ({
@@ -135,8 +139,8 @@ export default function Screen() {
 			const allIds =
 				data?.filter((item) => typeof item !== 'string').map((item) => item.downloaded_files.id) ||
 				[]
-			selectionStore.setItemIdents(allIds)
-			selectionStore.registerCustomActions(customSelectionActions)
+			setItemIdents(allIds)
+			registerCustomActions(customSelectionActions)
 		},
 		// eslint-disable-next-line react-compiler/react-compiler
 		// eslint-disable-next-line react-hooks/exhaustive-deps

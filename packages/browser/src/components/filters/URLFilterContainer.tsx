@@ -4,6 +4,7 @@ import { forwardRef, useEffect, useMemo } from 'react'
 import useScrollbarSize from 'react-scrollbar-size'
 import { useMediaMatch } from 'rooks'
 import { create } from 'zustand'
+import { useShallow } from 'zustand/react/shallow'
 
 import { SIDEBAR_WIDTH } from '@/components/navigation/sidebar'
 import { TablePaginationProps } from '@/components/table'
@@ -26,10 +27,12 @@ const URLFilterContainer = forwardRef<HTMLDivElement, Props>(
 			preferences: { enableHideScrollbar, primaryNavigationMode },
 		} = usePreferences()
 		const { width } = useScrollbarSize()
-		const { storedWidth, storeWidth } = useWidthStore((state) => ({
-			storeWidth: state.setWidth,
-			storedWidth: state.width,
-		}))
+		const { storedWidth, storeWidth } = useWidthStore(
+			useShallow((state) => ({
+				storeWidth: state.setWidth,
+				storedWidth: state.width,
+			})),
+		)
 
 		const storeOffset = useFooterOffsetStore((state) => state.setFooterOffset)
 

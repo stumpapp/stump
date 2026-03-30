@@ -1,6 +1,7 @@
 import { Input } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import React from 'react'
+import { useShallow } from 'zustand/react/shallow'
 
 import { useReaderStore } from '@/stores'
 
@@ -9,10 +10,12 @@ export default function DefaultFontSize() {
 	const {
 		settings: { fontSize },
 		setSettings,
-	} = useReaderStore((state) => ({
-		setSettings: state.setSettings,
-		settings: state.settings,
-	}))
+	} = useReaderStore(
+		useShallow((state) => ({
+			setSettings: state.setSettings,
+			settings: state.settings,
+		})),
+	)
 
 	const onValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const value = parseInt(e.target.value)

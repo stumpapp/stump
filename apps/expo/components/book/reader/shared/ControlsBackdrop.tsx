@@ -3,16 +3,19 @@ import { Easing, Pressable } from 'react-native'
 import { easeGradient } from 'react-native-easing-gradient'
 import LinearGradient from 'react-native-linear-gradient'
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
+import { useShallow } from 'zustand/react/shallow'
 
 import { CONTROLS_TIMING_CONFIG } from '~/lib/constants'
 import { cn } from '~/lib/utils'
 import { useReaderStore } from '~/stores'
 
 export default function ControlsBackdrop() {
-	const controls = useReaderStore((state) => ({
-		isVisible: state.showControls,
-		setVisible: state.setShowControls,
-	}))
+	const controls = useReaderStore(
+		useShallow((state) => ({
+			isVisible: state.showControls,
+			setVisible: state.setShowControls,
+		})),
+	)
 
 	const animatedOpacity = useSharedValue(controls.isVisible ? 1 : 0)
 	useEffect(() => {

@@ -17,6 +17,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { KeyboardProvider } from 'react-native-keyboard-controller'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Toaster } from 'sonner-native'
+import { useShallow } from 'zustand/react/shallow'
 
 import darkSplash from '~/assets/splash/dark.json'
 import lightSplash from '~/assets/splash/light.json'
@@ -78,11 +79,11 @@ export default function RootLayout() {
 	useFileImportListener()
 
 	const { performanceMonitor, animationEnabled, disableDismissGesture } = usePreferencesStore(
-		(state) => ({
+		useShallow((state) => ({
 			animationEnabled: !state.reduceAnimations,
 			performanceMonitor: state.performanceMonitor,
 			disableDismissGesture: state.disableDismissGesture,
-		}),
+		})),
 	)
 	const isReading = useReaderStore((state) => state.isReading)
 	const isReadingEbook = useEpubLocationStore((state) => !!state.book)

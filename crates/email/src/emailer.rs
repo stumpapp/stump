@@ -11,9 +11,8 @@ use lettre::{
 	Message, SmtpTransport, Transport,
 };
 use serde::{Deserialize, Serialize};
-use serde_json::json;
 
-use crate::{render_template, EmailError, EmailResult, EmailTemplate};
+use crate::{EmailError, EmailResult};
 
 /// The configuration for an [EmailerClient]
 #[derive(Serialize, Deserialize, InputObject)]
@@ -55,7 +54,8 @@ pub struct AttachmentPayload {
 pub struct EmailerClient {
 	/// The configuration for the email client
 	config: EmailerClientConfig,
-	/// The directory where email templates are stored
+	/// The directory where email templates are stored (currently unused, kept for future use)
+	#[allow(dead_code)]
 	template_dir: PathBuf,
 }
 
@@ -224,18 +224,16 @@ impl EmailerClient {
 			.parse()
 			.map_err(|e: AddressError| EmailError::InvalidEmail(e.to_string()))?;
 
-		let html = render_template(
-			EmailTemplate::Attachment,
-			&json!({
-				"title": "Stump Attachment",
-			}),
-			self.template_dir.clone(),
-		)?;
+		let plain_text = format!(
+			"You have a new attachment from Stump!\n\n\
+			 This email contains {} attachment(s).",
+			payloads.len()
+		);
 
 		let mut multipart_builder = MultiPart::mixed().singlepart(
 			SinglePart::builder()
-				.header(header::ContentType::TEXT_HTML)
-				.body(html),
+				.header(header::ContentType::TEXT_PLAIN)
+				.body(plain_text),
 		);
 
 		for payload in payloads {

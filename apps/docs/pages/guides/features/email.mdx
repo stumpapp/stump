@@ -46,17 +46,7 @@ A device alias refers to a named email address that can be quickly selected when
 
 A device alias may also be "inverted" to create a forbidden email address. This is useful for blocking certain email addresses from receiving books via your server. This really only comes into play when considering arbitrary send permissions, since without that permission a user would have to select from a list of device aliases which _aren't_ forbidden.
 
-## Templates
 
-Stump uses [handlebars](https://handlebarsjs.com/) for email templating. The default templates are very basic, but you can override them with your own custom templates. The only requirement is that you ensure the template fields align with the fields Stump expects.
-
-The default templates can be found [on GitHub](https://github.com/stumpapp/stump/tree/main/crates/email/templates).
-
-### Template Overrides
-
-To override a template, simply create a new template with the same name in the template directory of your Stump instance. Stump will automatically use your custom template in place of the default.
-
-The template directory defaults to a `templates` directory in the root of your Stump configuration directory. You can change this by setting the `EMAIL_TEMPLATES_DIR` environment variable. For more information on configuring Stump, see the [configuration](/guides/configuration/server-options) guide.
 
 ## Permissions
 

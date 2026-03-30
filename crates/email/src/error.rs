@@ -14,10 +14,4 @@ pub enum EmailError {
 	NoPassword,
 	#[error("Failed to send email: {0}")]
 	SendFailed(#[from] smtp::Error),
-	#[error("Failed to register template: {0}")]
-	TemplateRegistrationFailed(#[from] handlebars::TemplateError),
-	#[error("Template not found")]
-	TemplateNotFound,
-	#[error("Failed to render template: {0}")]
-	TemplateRenderFailed(#[from] handlebars::RenderError),
 }

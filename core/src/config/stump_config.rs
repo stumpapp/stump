@@ -143,12 +143,6 @@ pub struct StumpConfig {
 	#[env_key(CLIENT_KEY)]
 	pub client_dir: String,
 
-	/// An optional custom path for the templates directory.
-	#[default_value(None)]
-	#[debug_value(Some(env!("CARGO_MANIFEST_DIR").to_string() + "/../../crates/email/templates"))]
-	#[env_key("EMAIL_TEMPLATES_DIR")]
-	pub custom_templates_dir: Option<String>,
-
 	/// The configuration root for the Stump application, contains thumbnails, cache, and logs.
 	#[debug_value(super::get_default_config_dir())]
 	#[env_key(CONFIG_DIR_KEY)]
@@ -364,14 +358,6 @@ impl StumpConfig {
 		PathBuf::from(&self.config_dir).join("thumbnails")
 	}
 
-	/// Returns a `PathBuf` to the Stump templates directory.
-	pub fn get_templates_dir(&self) -> PathBuf {
-		self.custom_templates_dir.clone().map_or_else(
-			|| PathBuf::from(&self.config_dir).join("templates"),
-			PathBuf::from,
-		)
-	}
-
 	/// Returns a `PathBuf` to the Stump avatars directory
 	pub fn get_avatars_dir(&self) -> PathBuf {
 		PathBuf::from(&self.config_dir).join("avatars")
@@ -445,7 +431,7 @@ mod tests {
 			pretty_logs: Some(true),
 			db_path: Some("not_a_real_path".to_string()),
 			client_dir: Some("not_a_real_dir".to_string()),
-			custom_templates_dir: None,
+
 			enable_opds_progression: Some(false),
 			config_dir: None,
 			allowed_origins: Some(vec!["origin1".to_string(), "origin2".to_string()]),
@@ -493,7 +479,7 @@ mod tests {
 				db_path: Some("not_a_real_path".to_string()),
 				client_dir: Some("not_a_real_dir".to_string()),
 				config_dir: Some(config_dir),
-				custom_templates_dir: None,
+
 				allowed_origins: Some(vec!["origin1".to_string(), "origin2".to_string()]),
 				pdfium_path: Some("not_a_path_to_pdfium".to_string()),
 				enable_swagger: Some(false),
@@ -571,7 +557,7 @@ mod tests {
 						refresh_token_ttl: DEFAULT_REFRESH_TOKEN_TTL,
 						expired_session_cleanup_interval:
 							DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL,
-						custom_templates_dir: None,
+
 						max_scanner_concurrency: DEFAULT_MAX_SCANNER_CONCURRENCY,
 						max_thumbnail_concurrency: DEFAULT_MAX_THUMBNAIL_CONCURRENCY,
 						max_image_upload_size: DEFAULT_MAX_IMAGE_UPLOAD_SIZE,

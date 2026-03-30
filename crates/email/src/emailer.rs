@@ -1,5 +1,4 @@
 use async_graphql::InputObject;
-use std::path::PathBuf;
 
 use lettre::{
 	address::{Address, AddressError},
@@ -54,18 +53,14 @@ pub struct AttachmentPayload {
 pub struct EmailerClient {
 	/// The configuration for the email client
 	config: EmailerClientConfig,
-	/// The directory where email templates are stored (currently unused, kept for future use)
-	#[allow(dead_code)]
-	template_dir: PathBuf,
 }
 
 impl EmailerClient {
-	/// Create a new [EmailerClient] instance with the given configuration and template directory.
+	/// Create a new [EmailerClient] instance with the given configuration.
 	///
 	/// # Example
 	/// ```no_run
 	/// use email::{EmailerClient, EmailerClientConfig};
-	/// use std::path::PathBuf;
 	///
 	/// let config = EmailerClientConfig {
 	///     sender_email: "aaron@stumpapp.dev".to_string(),
@@ -78,14 +73,10 @@ impl EmailerClient {
 	///     max_attachment_size_bytes: Some(10_000_000),
 	///     max_num_attachments: Some(5),
 	/// };
-	/// let template_dir = PathBuf::from("/templates");
-	/// let emailer = EmailerClient::new(config, template_dir);
+	/// let emailer = EmailerClient::new(config);
 	/// ```
-	pub fn new(config: EmailerClientConfig, template_dir: PathBuf) -> Self {
-		Self {
-			config,
-			template_dir,
-		}
+	pub fn new(config: EmailerClientConfig) -> Self {
+		Self { config }
 	}
 
 	/// Send a test email with a small TXT attachment to verify the SMTP configuration is working.
@@ -111,7 +102,6 @@ impl EmailerClient {
 	/// # Example
 	/// ```no_run
 	/// use email::{AttachmentPayload, EmailerClient, EmailerClientConfig};
-	/// use std::path::PathBuf;
 	/// use lettre::message::header::ContentType;
 	///
 	/// async fn test() {
@@ -126,8 +116,7 @@ impl EmailerClient {
 	///         max_attachment_size_bytes: Some(10_000_000),
 	///         max_num_attachments: Some(5),
 	///     };
-	///     let template_dir = PathBuf::from("/templates");
-	///     let emailer = EmailerClient::new(config, template_dir);
+	///     let emailer = EmailerClient::new(config);
 	///
 	///     let result = emailer.send_attachment(
 	///         "Attachment Test",
@@ -157,7 +146,6 @@ impl EmailerClient {
 	/// # Example
 	/// ```no_run
 	/// use email::{AttachmentPayload, EmailerClient, EmailerClientConfig};
-	/// use std::path::PathBuf;
 	/// use lettre::message::header::ContentType;
 	///
 	/// async fn test() {
@@ -172,8 +160,7 @@ impl EmailerClient {
 	///         max_attachment_size_bytes: Some(10_000_000),
 	///         max_num_attachments: Some(5),
 	///     };
-	///     let template_dir = PathBuf::from("/templates");
-	///     let emailer = EmailerClient::new(config, template_dir);
+	///     let emailer = EmailerClient::new(config);
 	///
 	///     let result = emailer.send_attachments(
 	///         "Attachment Test",

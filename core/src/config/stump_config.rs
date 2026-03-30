@@ -23,6 +23,7 @@ pub mod env_keys {
 	pub const PORT_KEY: &str = "STUMP_PORT";
 	pub const VERBOSITY_KEY: &str = "STUMP_VERBOSITY";
 	pub const PRETTY_LOGS_KEY: &str = "STUMP_PRETTY_LOGS";
+	pub const COLORFUL_LOGS_KEY: &str = "STUMP_COLORFUL_LOGS";
 	pub const DB_PATH_KEY: &str = "STUMP_DB_PATH";
 	pub const CLIENT_KEY: &str = "STUMP_CLIENT_DIR";
 	pub const ORIGINS_KEY: &str = "STUMP_ALLOWED_ORIGINS";
@@ -131,6 +132,11 @@ pub struct StumpConfig {
 	#[default_value(true)]
 	#[env_key(PRETTY_LOGS_KEY)]
 	pub pretty_logs: bool,
+
+	/// Whether or not to include ANSI color codes in log files.
+	#[default_value(false)]
+	#[env_key(COLORFUL_LOGS_KEY)]
+	pub colorful_logs: bool,
 
 	/// An optional custom path for the database.
 	#[default_value(None)]
@@ -443,6 +449,7 @@ mod tests {
 			port: Some(1337),
 			verbosity: Some(3),
 			pretty_logs: Some(true),
+			colorful_logs: None,
 			db_path: Some("not_a_real_path".to_string()),
 			client_dir: Some("not_a_real_dir".to_string()),
 			custom_templates_dir: None,
@@ -490,6 +497,7 @@ mod tests {
 				port: Some(1337),
 				verbosity: Some(3),
 				pretty_logs: Some(true),
+				colorful_logs: Some(false),
 				db_path: Some("not_a_real_path".to_string()),
 				client_dir: Some("not_a_real_dir".to_string()),
 				config_dir: Some(config_dir),
@@ -557,6 +565,7 @@ mod tests {
 						port: 1337,
 						verbosity: 2,
 						pretty_logs: true,
+						colorful_logs: false,
 						db_path: None,
 						client_dir: "./client".to_string(),
 						config_dir,

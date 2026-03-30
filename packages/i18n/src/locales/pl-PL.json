@@ -261,8 +261,8 @@
 					"description": "Ukryj zakładkę serii w nawigacji biblioteki"
 				},
 				"skipBookOverview": {
-					"label": "Skip book overview",
-					"description": "Open the reader directly when selecting books in this library"
+					"label": "Pomiń przegląd książki",
+					"description": "Przejdź od razu do czytnika, gdy wybierasz książkę z tej biblioteki"
 				},
 				"options": {
 					"series": {
@@ -929,10 +929,10 @@
 									"teams": "Zespoły",
 									"genres": "Gatunek",
 									"coverArtists": "Artysta okładki",
-									"ageRating": "Age rating",
-									"year": "Year",
-									"month": "Month",
-									"day": "Day"
+									"ageRating": "Klasyfikacja wiekowa",
+									"year": "Rok",
+									"month": "Miesiąc",
+									"day": "Dzień"
 								}
 							},
 							"series": {
@@ -955,7 +955,7 @@
 									"volume": "Tom",
 									"metaType": "Typ",
 									"ageRating": "Klasyfikacja wiekowa",
-									"year": "Start year"
+									"year": "Rok rozpoczęcia"
 								}
 							},
 							"library": {
@@ -1262,15 +1262,15 @@
 						"updateFailed": "Podczas aktualizacji profilu wystąpił błąd serwera. Spróbuj ponownie."
 					},
 					"avatarPicker": {
-						"label": "Avatar",
-						"heading": "Upload avatar",
-						"subtitle": "You can upload any image to use as your avatar for social features in Stump",
-						"dropzone": "Drop an image or click to select",
-						"changeImage": "Change Image",
-						"removeImage": "Remove Image",
-						"removeSelection": "Remove uploaded image",
-						"uploadFailed": "Failed to upload avatar",
-						"removeFailed": "Failed to remove avatar"
+						"label": "Awatar",
+						"heading": "Prześlij awatar",
+						"subtitle": "Możesz przesłać dowolny obraz do użycia jako awatar dla funkcji społecznościowych w Stump",
+						"dropzone": "Upuść obraz lub kliknij aby wybrać",
+						"changeImage": "Zmień obraz",
+						"removeImage": "Usuń obraz",
+						"removeSelection": "Usuń przesłany obraz",
+						"uploadFailed": "Nie udało się przesłać awatara",
+						"removeFailed": "Nie udało się usunąć awatara"
 					},
 					"buttons": {
 						"confirm": "Zapisz zmiany"
@@ -1696,11 +1696,11 @@
 					}
 				},
 				"helpfulLinks": {
-					"title": "Helpful links",
-					"description": "Links to resources that may be helpful for managing your Stump server instance",
+					"title": "Przydatne odnośniki",
+					"description": "Odnośniki do zasobów, które mogą okazać się pomocne w zarządzaniu Twoim serwerem Stump",
 					"links": {
-						"documentation": "Documentation",
-						"changelog": "Changelog"
+						"documentation": "Dokumentacja",
+						"changelog": "Historia zmian"
 					}
 				},
 				"serverPublicUrl": {
@@ -1708,25 +1708,25 @@
 					"description": "Adres, pod którym serwer dostępny jest spoza Twojej sieci. Zezwala to na odnośniki z zaproszeniami i inne funkcje"
 				},
 				"customEmojis": {
-					"title": "Custom emojis",
-					"description": "Upload and manage custom image emojis for your server",
-					"dropzone": "Drop an image or click to select",
+					"title": "Niestandardowe emotikony",
+					"description": "Przesyłaj i zarządzaj niestandardowymi obrazami emotikon dla Twojego serwera",
+					"dropzone": "Upuść obraz lub kliknij aby wybrać",
 					"input": {
-						"label": "Emoji name",
-						"placeholder": "e.g. party_parrot"
+						"label": "Nazwa emotikony",
+						"placeholder": "np. imprezowa_papuga"
 					},
 					"deleteModal": {
-						"title": "Delete emoji",
-						"description": "Are you sure you want to delete this emoji?"
+						"title": "Usuń emotikonę",
+						"description": "Czy na pewno chcesz usunąć tę emotikonę?"
 					},
-					"noCustomEmojis": "No custom emojis have been added yet",
-					"invalidName": "Please enter a valid name for your emoji",
-					"uploadError": "Failed to upload emoji",
-					"uploadSuccess": "Emoji uploaded",
-					"renameSuccess": "Emoji renamed",
-					"renameError": "Failed to rename emoji",
-					"deleteSuccess": "Emoji deleted",
-					"deleteError": "Failed to delete emoji"
+					"noCustomEmojis": "Nie dodano jeszcze żadnych niestandardowych emotikon",
+					"invalidName": "Wprowadź poprawną nazwę dla emotikony",
+					"uploadError": "Nie udało się przesłać emotikony",
+					"uploadSuccess": "Przesłano emotikonę",
+					"renameSuccess": "Zmieniono nazwę emotikony",
+					"renameError": "Nie udało się zmienić nazwy emotikony",
+					"deleteSuccess": "Usunięto emotikonę",
+					"deleteError": "Nie udało się usunąć emotikony"
 				}
 			}
 		},
@@ -2109,13 +2109,13 @@
 					"update": "Aktualizuj wysyłkę"
 				},
 				"testEmailer": {
-					"button": "Send test email",
-					"recipientLabel": "Test recipient",
-					"recipientDescription": "An email address to send the test email to",
-					"success": "Test email sent successfully",
+					"button": "Wyślij wiadomość testową",
+					"recipientLabel": "Testowy odbiorca",
+					"recipientDescription": "Adres pocztowy odbierający wiadomość testową",
+					"success": "Wiadomość testowa została wysłana poprawnie",
 					"error": {
-						"title": "Failed to send test email",
-						"description": "Check your SMTP settings and try again"
+						"title": "Nie udało się wysłać wiadomości testowej",
+						"description": "Sprawdź ustawienia SMTP i spróbuj ponownie"
 					}
 				}
 			},
@@ -2252,7 +2252,7 @@
 	"common": {
 		"add": "Dodaj",
 		"cancel": "Anuluj",
-		"clear": "Clear",
+		"clear": "Wyczyść",
 		"confirm": "Potwierdź",
 		"delete": "Usuń",
 		"enter": "Enter",
@@ -2265,7 +2265,7 @@
 		"update": "Aktualizuj",
 		"upload": "Prześlij",
 		"uploading": "Przesyłanie",
-		"uploadingEllipsis": "Uploading...",
+		"uploadingEllipsis": "Przesyłanie...",
 		"unimplemented": "Ta funkcjonalność nie jest jeszcze zaimplementowana! Sprawdź ponownie później",
 		"limitedFunctionality": "Funkcjonalność ta nie jest jeszcze w pełni zaimplementowana. Sprawdź później",
 		"logIn": "Zaloguj się",
@@ -2280,9 +2280,9 @@
 		"scan": "Skanuj",
 		"somethingWentWrong": "Coś poszło nie tak",
 		"fileUpload": {
-			"someRejected": "Some files were rejected. Please check the file types and try again",
-			"tooManyFiles": "You have selected too many files",
-			"noValidFiles": "No valid files were selected"
+			"someRejected": "Niektóre pliki zostały odrzucone. Sprawdź typy plików i spróbuj ponownie",
+			"tooManyFiles": "Wybrano zbyt dużą ilość plików",
+			"noValidFiles": "Nie wybrano żadnych poprawnych plików"
 		}
 	},
 	"userPermissions": {
@@ -2411,8 +2411,8 @@
 			"description": "Pozwala użytkownikowi na zapisywanie zmienionych metadanych z powrotem do plików źródłowych"
 		},
 		"EDIT_THUMBNAILS": {
-			"label": "Edit thumbnails",
-			"description": "Allows the user to edit thumbnails for books and series"
+			"label": "Edycja miniatur",
+			"description": "Pozwala użytkownikowi na edycję miniatur książek i serii"
 		}
 	}
 }

@@ -7,7 +7,7 @@ import { Pressable, ScrollView } from 'react-native-gesture-handler'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import RefreshControl from '~/components/RefreshControl'
-import { Card, Heading, Icon, ListEmptyMessage, Text } from '~/components/ui'
+import { Card, Icon, Text } from '~/components/ui'
 import { getAppUsage } from '~/lib/filesystem'
 import { formatBytes } from '~/lib/format'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
@@ -51,29 +51,16 @@ export default function Screen() {
 				contentInsetAdjustmentBehavior="automatic"
 			>
 				<View className="flex-1 gap-8 bg-background px-4 pt-8">
-					<View className="flex-row justify-around">
-						<View className="flex items-center justify-center">
-							<Heading className="font-medium">{formatBytes(data?.appTotal || 0, 0, 'MB')}</Heading>
-							<Text size="sm" className="shrink-0 text-foreground-muted">
-								Non-Stump data
-							</Text>
-						</View>
-
-						<View className="flex items-center justify-center">
-							<Heading className="font-medium">
-								{formatBytes(data?.serversTotal || 0, 0, 'MB')}
-							</Heading>
-							<Text size="sm" className="shrink-0 text-foreground-muted">
-								Servers total
-							</Text>
-						</View>
-					</View>
+					<Card>
+						<Card.StatGroup>
+							<Card.Stat label="Non-Stump data" value={formatBytes(data?.appTotal)} />
+							<Card.Stat label="Servers total" value={formatBytes(data?.serversTotal)} />
+						</Card.StatGroup>
+					</Card>
 
 					<View className="flex-1 gap-4">
-						<Heading>Servers</Heading>
-
 						{savedServers.length > 0 && (
-							<Card>
+							<Card label="Servers" listEmptyStyle={{ icon: Server, message: 'No servers added' }}>
 								{savedServers.map((server) => (
 									<Pressable
 										key={server.id}
@@ -86,17 +73,15 @@ export default function Screen() {
 									>
 										<Card.Row label={server.name}>
 											<View className="flex flex-row items-center gap-2">
-												<Text>{formatBytes(serverToUsage[server.id], 0, 'MB')}</Text>
+												<Text className="text-foreground-muted">
+													{formatBytes(serverToUsage[server.id])}
+												</Text>
 												<Icon as={ChevronRight} className="h-5 w-5 text-foreground-muted" />
 											</View>
 										</Card.Row>
 									</Pressable>
 								))}
 							</Card>
-						)}
-
-						{savedServers.length === 0 && (
-							<ListEmptyMessage icon={Server} message="No servers added" />
 						)}
 					</View>
 				</View>

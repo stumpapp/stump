@@ -10,10 +10,23 @@ const query = graphql(`
 			...BookFileInformation
 			resolvedName
 			extension
+			seriesId
+			pages
+			size
 			metadata {
 				links
 				summary
+				ageRating
+				genres
+				language
+				publisher
+				writers
+				year
 				...MediaMetadataEditor
+			}
+			tags {
+				id
+				name
 			}
 			readHistory {
 				completedAt

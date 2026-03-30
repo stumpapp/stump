@@ -34,6 +34,7 @@ export const LibrarySettingsConfig = graphql(`
 			defaultReadingImageScaleFit
 			defaultLibraryViewMode
 			hideSeriesView
+			skipBookOverview
 			generateFileHashes
 			generateKoreaderHashes
 			processMetadata

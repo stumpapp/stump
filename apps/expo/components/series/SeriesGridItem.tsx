@@ -1,4 +1,5 @@
 import { FragmentType, graphql, useFragment } from '@stump/graphql'
+import { useRouter } from 'expo-router'
 import { View } from 'react-native'
 
 import { useActiveServer } from '../activeServer'
@@ -18,6 +19,8 @@ const fragment = graphql(`
 				}
 				thumbhash
 			}
+			height
+			width
 		}
 	}
 `)
@@ -26,9 +29,12 @@ export type ISeriesGridItemFragment = FragmentType<typeof fragment>
 
 type Props = {
 	series: ISeriesGridItemFragment
+	onPress?: () => void
 }
 
-export default function SeriesGridItem({ series }: Props) {
+// TODO(ask): Ask folks if they want progression indicators in series grids
+export default function SeriesGridItem({ series, onPress }: Props) {
+	const router = useRouter()
 	const {
 		activeServer: { id: serverID },
 	} = useActiveServer()
@@ -39,8 +45,13 @@ export default function SeriesGridItem({ series }: Props) {
 			<GridImageItem
 				uri={data.thumbnail.url}
 				title={data.resolvedName}
-				href={`/server/${serverID}/series/${data.id}`}
+				onPress={onPress ?? (() => router.navigate(`/server/${serverID}/series/${data.id}`))}
 				placeholderData={data.thumbnail.metadata}
+				originalDimensions={
+					data.thumbnail.width && data.thumbnail.height
+						? { width: data.thumbnail.width, height: data.thumbnail.height }
+						: null
+				}
 			/>
 		</View>
 	)

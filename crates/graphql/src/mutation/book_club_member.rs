@@ -50,7 +50,7 @@ impl BookClubMemberMutation {
 			.await?
 			.ok_or("Member not found")?;
 
-		if member.is_creator {
+		if member.role == BookClubMemberRole::Creator {
 			return Err("Cannot remove the creator of the book club".into());
 		}
 

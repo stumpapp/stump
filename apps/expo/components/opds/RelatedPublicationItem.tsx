@@ -9,7 +9,7 @@ import { usePreferencesStore } from '~/stores'
 import { useActiveServer } from '../activeServer'
 import { ThumbnailImage } from '../image'
 import { Text } from '../ui'
-import { getPublicationThumbnailURL } from './utils'
+import { getPublicationThumbnailURL, hasLinkRel } from './utils'
 
 type Props = {
 	item: OPDSPublication
@@ -22,7 +22,7 @@ export function RelatedPublicationItem({ item }: Props) {
 	} = useActiveServer()
 	const router = useRouter()
 
-	const selfLink = item.links?.find((link) => link.rel === 'self')?.href
+	const selfLink = item.links?.find((link) => hasLinkRel(link, 'self'))?.href
 	const resolvedPublicationURL = selfLink ? resolveUrl(selfLink, sdk.rootURL) : undefined
 	const thumbnail = getPublicationThumbnailURL(item, sdk.rootURL)
 

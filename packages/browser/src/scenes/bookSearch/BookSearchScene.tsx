@@ -158,6 +158,7 @@ function BookSearchScene() {
 	)
 
 	const { layoutMode, setLayout, columns, setColumns } = useBooksLayout(
+		'global',
 		useShallow((state) => ({
 			columns: state.columns,
 			layoutMode: state.layout,

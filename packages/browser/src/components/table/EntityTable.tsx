@@ -100,7 +100,7 @@ export default function EntityTable<Entity>({
 				}}
 			>
 				<thead>
-					<tr>
+					<tr className="divide-x divide-edge">
 						{table.getFlatHeaders().map((header) => {
 							const isSortable = header.column.getCanSort()
 							return (
@@ -132,10 +132,18 @@ export default function EntityTable<Entity>({
 
 				<tbody>
 					{rows.map((row) => (
-						<tr key={row.id} className="odd:bg-background-surface">
+						<tr key={row.id} className="divide-y divide-edge odd:bg-background-surface">
 							{row.getVisibleCells().map((cell) => (
 								<td
-									className="py-1 pl-1.5 pr-1.5 first:pl-4 last:pr-4"
+									className={cn(
+										'py-1 pl-1.5 pr-1.5',
+										{
+											// If no "cover" image is present, increase the padding. Just looked better to my eyes
+											'py-2': !columns?.some((col) => col.id === 'cover'),
+											'first:pl-4': !['cover', 'position'].includes(cell.column.id),
+										},
+										'border-r border-r-edge last:border-r-0',
+									)}
 									key={cell.id}
 									style={{
 										width: cell.column.getSize(),

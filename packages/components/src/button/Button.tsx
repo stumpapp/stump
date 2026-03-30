@@ -40,6 +40,7 @@ export const BUTTON_VARIANTS = {
 export const BUTTON_ROUNDED_VARIANTS = {
 	default: 'rounded-md',
 	full: 'rounded-full',
+	lg: 'rounded-lg',
 	none: 'rounded-none',
 }
 

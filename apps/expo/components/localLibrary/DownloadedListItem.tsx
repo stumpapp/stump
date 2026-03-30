@@ -33,7 +33,6 @@ export default function DownloadedListItem({ book }: Props) {
 							// undefined so it's fine
 							uri: getThumbnailPath(book),
 						}}
-						resizeMode="stretch"
 						size={{ height, width }}
 						placeholderData={thumbnailData}
 					/>

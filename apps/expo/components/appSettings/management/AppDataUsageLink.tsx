@@ -18,7 +18,7 @@ export default function AppDataUsageLink() {
 		throwOnError: false,
 	})
 
-	const formattedSize = formatBytes(data?.total || 0, 0, 'MB')
+	const formattedSize = formatBytes(data?.total)
 
 	const router = useRouter()
 

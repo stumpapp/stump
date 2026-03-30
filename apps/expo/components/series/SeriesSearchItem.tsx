@@ -24,6 +24,8 @@ const fragment = graphql(`
 				}
 				thumbhash
 			}
+			height
+			width
 		}
 		readCount
 		mediaCount
@@ -56,7 +58,12 @@ export default function SeriesSearchItem({ series }: Props) {
 	const router = useRouter()
 	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
 
-	const { url: uri, metadata: placeholderData } = data.thumbnail
+	const {
+		url: uri,
+		metadata: placeholderData,
+		width: originalWidth,
+		height: originalHeight,
+	} = data.thumbnail
 
 	return (
 		<Pressable
@@ -74,9 +81,13 @@ export default function SeriesSearchItem({ series }: Props) {
 							Authorization: sdk.authorizationHeader || '',
 						},
 					}}
-					resizeMode="stretch"
 					size={{ height: 75 / thumbnailRatio, width: 75 }}
 					placeholderData={placeholderData}
+					originalDimensions={
+						originalWidth && originalHeight
+							? { width: originalWidth, height: originalHeight }
+							: null
+					}
 				/>
 
 				<View className="flex flex-1 flex-col gap-1">

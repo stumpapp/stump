@@ -7,7 +7,7 @@ import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
 import { useRouter } from 'expo-router'
 import { Ellipsis } from 'lucide-react-native'
 import { useCallback, useState } from 'react'
-import { Platform, View } from 'react-native'
+import { Alert, Platform, View } from 'react-native'
 import { Pressable } from 'react-native-gesture-handler'
 import * as DropdownMenu from 'zeego/dropdown-menu'
 
@@ -24,6 +24,7 @@ import AndroidBookMenu from './AndroidBookMenu'
 const fragment = graphql(`
 	fragment BookMenu on Media {
 		id
+		resolvedName
 		isFavorite
 		library {
 			id
@@ -149,6 +150,39 @@ export default function BookMenu({ data }: Props) {
 		},
 	})
 
+	const confirmMarkAsRead = useCallback(() => {
+		Alert.alert('Mark as Read', `Are you sure you want to mark '${book.resolvedName}' as read?`, [
+			{ text: 'Cancel', style: 'cancel' },
+			{ text: 'Mark as Read', onPress: () => completeBook({ id: book.id, isComplete: true }) },
+		])
+	}, [completeBook, book.id, book.resolvedName])
+
+	const confirmClearProgress = useCallback(() => {
+		Alert.alert(
+			'Clear Progress',
+			`Are you sure you want to clear your current reading of '${book.resolvedName}'?`,
+			[
+				{ text: 'Cancel', style: 'cancel' },
+				{
+					text: 'Clear',
+					style: 'destructive',
+					onPress: () => deleteCurrentSession({ id: book.id }),
+				},
+			],
+		)
+	}, [deleteCurrentSession, book.id, book.resolvedName])
+
+	const confirmDeleteReadHistory = useCallback(() => {
+		Alert.alert(
+			'Delete Read History',
+			`Are you sure you want to delete your read history for '${book.resolvedName}'?`,
+			[
+				{ text: 'Cancel', style: 'cancel' },
+				{ text: 'Delete', style: 'destructive', onPress: () => deleteReadHistory({ id: book.id }) },
+			],
+		)
+	}, [deleteReadHistory, book.id, book.resolvedName])
+
 	const isReading = !!book.readProgress
 	const isPreviouslyCompleted = !!book.readHistory?.length
 	const isUntouched = !isReading && !isPreviouslyCompleted
@@ -163,11 +197,11 @@ export default function BookMenu({ data }: Props) {
 				book={book}
 				isFavorite={isFavorite}
 				favoriteBook={favoriteBook}
-				completeBook={() => completeBook({ id: book.id, isComplete: true })}
+				completeBook={confirmMarkAsRead}
 				isDownloaded={isDownloaded}
 				deleteBookDownload={deleteBook}
-				deleteCurrentSession={() => deleteCurrentSession({ id: book.id })}
-				deleteReadHistory={() => deleteReadHistory({ id: book.id })}
+				deleteCurrentSession={confirmClearProgress}
+				deleteReadHistory={confirmDeleteReadHistory}
 			/>
 		)
 	}
@@ -201,19 +235,13 @@ export default function BookMenu({ data }: Props) {
 						<Divider />
 
 						{(isUntouched || isReading) && (
-							<Button
-								systemImage="book.closed"
-								onPress={() => completeBook({ id: book.id, isComplete: true })}
-							>
+							<Button systemImage="book.closed" onPress={confirmMarkAsRead}>
 								Mark as Read
 							</Button>
 						)}
 
 						{isReading && (
-							<Button
-								systemImage="minus.circle"
-								onPress={() => deleteCurrentSession({ id: book.id })}
-							>
+							<Button systemImage="minus.circle" onPress={confirmClearProgress}>
 								Clear Progress
 							</Button>
 						)}
@@ -222,7 +250,7 @@ export default function BookMenu({ data }: Props) {
 							<Button
 								systemImage="rectangle.stack.badge.minus"
 								role="destructive"
-								onPress={() => deleteReadHistory({ id: book.id })}
+								onPress={confirmDeleteReadHistory}
 							>
 								Delete Read History
 							</Button>
@@ -297,10 +325,7 @@ export default function BookMenu({ data }: Props) {
 
 				<DropdownMenu.Group>
 					{(isUntouched || isReading) && (
-						<DropdownMenu.Item
-							key="markAsRead"
-							onSelect={() => completeBook({ id: book.id, isComplete: true })}
-						>
+						<DropdownMenu.Item key="markAsRead" onSelect={confirmMarkAsRead}>
 							<DropdownMenu.ItemIndicator />
 							<DropdownMenu.ItemTitle>Mark as Read</DropdownMenu.ItemTitle>
 							<DropdownMenu.ItemIcon ios={{ name: 'book.closed' }} />
@@ -308,10 +333,7 @@ export default function BookMenu({ data }: Props) {
 					)}
 
 					{isReading && (
-						<DropdownMenu.Item
-							key="clearProgress"
-							onSelect={() => deleteCurrentSession({ id: book.id })}
-						>
+						<DropdownMenu.Item key="clearProgress" onSelect={confirmClearProgress}>
 							<DropdownMenu.ItemIndicator />
 							<DropdownMenu.ItemTitle>Clear Progress</DropdownMenu.ItemTitle>
 							<DropdownMenu.ItemIcon ios={{ name: 'minus.circle' }} />
@@ -319,10 +341,7 @@ export default function BookMenu({ data }: Props) {
 					)}
 
 					{isPreviouslyCompleted && (
-						<DropdownMenu.Item
-							key="deleteHistory"
-							onSelect={() => deleteReadHistory({ id: book.id })}
-						>
+						<DropdownMenu.Item key="deleteHistory" onSelect={confirmDeleteReadHistory}>
 							<DropdownMenu.ItemIndicator />
 							<DropdownMenu.ItemTitle>Delete Read History</DropdownMenu.ItemTitle>
 							<DropdownMenu.ItemIcon ios={{ name: 'rectangle.stack.badge.minus' }} />

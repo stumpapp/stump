@@ -3,7 +3,7 @@ import { ColumnOrder, ColumnSort } from '@stump/sdk'
 import { create } from 'zustand'
 import { createJSONStorage, devtools, persist, StateStorage } from 'zustand/middleware'
 
-type LayoutStore = {
+export type LayoutStore = {
 	layout: InterfaceLayout
 	setLayout: (layout: InterfaceLayout) => void
 

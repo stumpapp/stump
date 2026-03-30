@@ -22,18 +22,21 @@ export type ThumbnailPlaceholderData = {
 } | null
 
 export type ThumbnailPlaceholderType = 'grayscale' | 'averageColor' | 'colorful' | 'thumbhash'
+export type ThumbnailResizeMode = 'cover' | 'stretch' | 'fit'
+
+type Props = {
+	placeholderData?: ThumbnailPlaceholderData
+	placeholderType?: ThumbnailPlaceholderType
+	fadeDuration?: number
+	style?: StyleProp<ImageStyle>
+}
 
 export function ThumbnailPlaceholder({
 	placeholderData,
 	placeholderType,
 	fadeDuration,
 	style,
-}: {
-	placeholderData?: ThumbnailPlaceholderData
-	placeholderType?: ThumbnailPlaceholderType
-	fadeDuration?: number
-	style?: StyleProp<ImageStyle>
-}) {
+}: Props) {
 	const thumbnailPlaceholderPreference = usePreferencesStore((state) => state.thumbnailPlaceholder)
 	const { thumbnail } = useColors()
 
@@ -55,7 +58,7 @@ export function ThumbnailPlaceholder({
 			meshColors[0], meshColors[0], meshColors[0],
 			meshColors[1], meshColors[1], meshColors[1],
 			meshColors[2], meshColors[2], meshColors[2],
-		]
+		] as string[] | null
 	}, [meshColors])
 
 	const averageColor = useMemo(() => placeholderData?.averageColor, [placeholderData?.averageColor])

@@ -32,6 +32,8 @@ pub struct SeriesMetadataFilterInput {
 	pub volume: Option<NumericFilter<i32>>,
 	#[graphql(default)]
 	pub status: Option<StringLikeFilter<String>>,
+	#[graphql(default)]
+	pub year: Option<NumericFilter<i32>>,
 
 	#[graphql(name = "_and", default)]
 	pub _and: Option<Vec<SeriesMetadataFilterInput>>,
@@ -104,6 +106,10 @@ impl IntoFilter for SeriesMetadataFilterInput {
 			.add_option(
 				self.status
 					.map(|f| apply_string_filter(series_metadata::Column::Status, f)),
+			)
+			.add_option(
+				self.year
+					.map(|f| apply_numeric_filter(series_metadata::Column::Year, f)),
 			)
 	}
 }

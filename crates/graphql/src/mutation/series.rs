@@ -111,7 +111,7 @@ impl SeriesMutation {
 	/// Update the thumbnail for a series. This will replace the existing thumbnail with the the one
 	/// associated with the provided input (book). If the book does not have a thumbnail, one
 	/// will be generated based on the library's thumbnail configuration.
-	#[graphql(guard = "PermissionGuard::one(UserPermission::EditLibrary)")]
+	#[graphql(guard = "PermissionGuard::one(UserPermission::EditThumbnails)")]
 	async fn update_series_thumbnail(
 		&self,
 		ctx: &Context<'_>,
@@ -359,8 +359,7 @@ async fn set_series_completed(
 		"Fetched unread/incomplete books for series"
 	);
 
-	// Delete any active sessions for books in this series
-	let affected_rows = reading_session::Entity::delete_many()
+	let deleted_sessions = reading_session::Entity::delete_many()
 		.filter(
 			reading_session::Column::UserId.eq(user.id.clone()).and(
 				reading_session::Column::MediaId.in_subquery(
@@ -372,22 +371,39 @@ async fn set_series_completed(
 				),
 			),
 		)
-		.exec(&tx)
-		.await?
-		.rows_affected;
-	tracing::debug!(?affected_rows, "Deleted active reading sessions for series");
+		// with returning so we can reuse the deleted session info when creating the
+		// completion records (e.g., elapsed time etc)
+		.exec_with_returning(&tx)
+		.await?;
+	tracing::debug!(
+		count = deleted_sessions.len(),
+		"Deleted active reading sessions for series"
+	);
 
+	// this just makes it more efficient to pull the previous one before creating
+	// the completion record
+	let session_map = deleted_sessions
+		.into_iter()
+		.map(|s| (s.media_id.clone(), s))
+		.collect::<std::collections::HashMap<_, _>>();
+
+	let now = DateTimeWithTimeZone::from(Utc::now());
 	let finished_sessions = book_ids_without_completion
 		.into_iter()
-		.map(|media_id| finished_reading_session::ActiveModel {
-			user_id: Set(user.id.clone()),
-			media_id: Set(media_id),
-			completed_at: Set(DateTimeWithTimeZone::from(Utc::now())),
-			..Default::default()
+		.map(|media_id| {
+			let prior = session_map.get(&media_id);
+			finished_reading_session::ActiveModel {
+				user_id: Set(user.id.clone()),
+				media_id: Set(media_id),
+				started_at: Set(prior.map(|s| s.started_at).unwrap_or(now)),
+				completed_at: Set(now),
+				elapsed_seconds: Set(prior.and_then(|s| s.elapsed_seconds)),
+				device_id: Set(prior.and_then(|s| s.device_id.clone())),
+				..Default::default()
+			}
 		})
 		.collect::<Vec<finished_reading_session::ActiveModel>>();
 
-	// Create finished reading sessions for all books in the series that are not yet completed
 	if !finished_sessions.is_empty() {
 		let count = finished_sessions.len();
 		let _ = finished_reading_session::Entity::insert_many(finished_sessions)

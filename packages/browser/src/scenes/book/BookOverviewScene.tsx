@@ -1,41 +1,29 @@
-import { ButtonOrLink, Heading, Spacer, Text } from '@stump/components'
-import { useFragment } from '@stump/graphql'
-import { intlFormat } from 'date-fns'
+import { Heading } from '@stump/components'
+import { useFragment, UserPermission } from '@stump/graphql'
 import sortBy from 'lodash/sortBy'
-import { Suspense, useEffect, useRef } from 'react'
+import { Suspense, useEffect, useMemo } from 'react'
 import { Helmet } from 'react-helmet'
 import { useParams } from 'react-router'
-import { useMediaMatch } from 'rooks'
 
 import { useBookOverview } from '@/components/book'
 import { BookCardFragment } from '@/components/book/BookCard'
 import { MediaMetadataEditor } from '@/components/book/metadata'
 import { SceneContainer } from '@/components/container'
-import LinkBadge from '@/components/LinkBadge'
-import ReadMore from '@/components/ReadMore'
 import { ProminentThumbnailImage } from '@/components/thumbnail'
 import { useAppContext } from '@/context'
-import { usePaths } from '@/paths'
-import { PDF_EXTENSION } from '@/utils/patterns'
 
 import BookActionMenu from './BookActionMenu'
 import BookFileInformation from './BookFileInformation'
 import BookOverviewSceneHeader from './BookOverviewSceneHeader'
-import BookReaderDropdown from './BookReaderDropdown'
+import BookReaderLink from './BookReaderLink'
 import BooksAfterCursor from './BooksAfterCursor'
-
-// FIXME: This looks actually ass on mobile
 
 export default function BookOverviewScene() {
 	const { id } = useParams()
 	const {
 		data: { mediaById: media },
 	} = useBookOverview(id || '')
-	const { isServerOwner } = useAppContext()
-
-	const paths = usePaths()
-	const topRef = useRef<HTMLDivElement>(null)
-	const isAtLeastTablet = useMediaMatch('(min-width: 640px)')
+	const { checkPermission } = useAppContext()
 
 	if (!media) {
 		throw new Error('Book not found')
@@ -43,17 +31,21 @@ export default function BookOverviewScene() {
 
 	const fragmentData = useFragment(BookCardFragment, media)
 
-	const completedAt = sortBy(media.readHistory, ({ completedAt }) =>
-		new Date(completedAt).getTime(),
-	).at(-1)?.completedAt
-	const links = media.metadata?.links.filter((l) => !!l) ?? []
+	const completedAt = useMemo(
+		() =>
+			sortBy(media.readHistory, ({ completedAt }) => new Date(completedAt).getTime()).at(-1)
+				?.completedAt,
+		[media.readHistory],
+	)
 
 	useEffect(() => {
-		topRef.current?.scrollIntoView({ behavior: 'smooth' })
+		const el =
+			document.querySelector('[data-artificial-scroll="true"]') || document.getElementById('main')
+		el?.scrollTo({ top: 0, behavior: 'smooth' })
 	}, [id])
 
 	return (
-		<SceneContainer ref={topRef}>
+		<SceneContainer className="gap-4">
 			<Suspense>
 				<Helmet>
 					<title>Stump | {media.resolvedName}</title>
@@ -61,67 +53,20 @@ export default function BookOverviewScene() {
 
 				<div className="flex h-full w-full flex-col gap-4">
 					<div className="flex flex-col items-center gap-3 tablet:mb-2 tablet:flex-row tablet:items-start">
-						<ProminentThumbnailImage
-							src={fragmentData.thumbnail.url}
-							alt={media.resolvedName}
-							placeholderData={fragmentData.thumbnail.metadata}
-						/>
-						<div className="flex h-full w-full flex-col gap-2 tablet:gap-4">
-							<Suspense>
-								<BookOverviewSceneHeader id={media.id} />
-							</Suspense>
-							{completedAt && (
-								<Text size="xs" variant="muted">
-									{media.readHistory.length > 1 ? 'Last completed' : 'Completed'} on{' '}
-									{intlFormat(new Date(completedAt), {
-										month: 'long',
-										day: 'numeric',
-										year: 'numeric',
-										hour: 'numeric',
-										minute: '2-digit',
-									})}
-								</Text>
-							)}
-							{isAtLeastTablet && <ReadMore text={media.metadata?.summary} />}
-							{!isAtLeastTablet && <Spacer />}
-
-							<div className="flex w-full flex-col gap-2 md:flex-row md:items-center">
-								<div className="flex w-full flex-row items-center gap-2">
-									<BookReaderDropdown book={fragmentData} />
-									<BookActionMenu book={fragmentData} />
-								</div>
-								{media.extension?.match(PDF_EXTENSION) && (
-									<ButtonOrLink
-										variant="outline"
-										href={paths.bookReader(media.id, { isPdf: true, isStreaming: false })}
-										title="Read with the native PDF viewer"
-										className="w-full md:w-auto"
-									>
-										Read with the native PDF viewer
-									</ButtonOrLink>
-								)}
+						<div className="flex w-full max-w-sm shrink-0 flex-col items-center gap-3 sm:max-w-[200px]">
+							<ProminentThumbnailImage
+								src={fragmentData.thumbnail.url}
+								alt={media.resolvedName}
+								placeholderData={fragmentData.thumbnail.metadata}
+							/>
+							<div className="flex w-full flex-col gap-2">
+								<BookReaderLink book={fragmentData} />
+								<BookActionMenu book={fragmentData} />
 							</div>
-
-							{!isAtLeastTablet && !!media.metadata?.summary && (
-								<div>
-									<Heading size="xs" className="mb-0.5">
-										Summary
-									</Heading>
-									<ReadMore text={media.metadata?.summary} />
-								</div>
-							)}
 						</div>
+
+						<BookOverviewSceneHeader media={media} book={fragmentData} completedAt={completedAt} />
 					</div>
-
-					{!!links.length && (
-						<div className="flex flex-row space-x-2">
-							{links.map((link) => (
-								<LinkBadge key={link} href={link} />
-							))}
-						</div>
-					)}
-
-					{isServerOwner && <BookFileInformation fragment={media} />}
 
 					<BooksAfterCursor cursor={media.id} />
 
@@ -131,6 +76,9 @@ export default function BookOverviewScene() {
 					</div>
 				</div>
 			</Suspense>
+
+			{/*Note: There is no permission specific to file info but I am just taking a loose assumption here*/}
+			{checkPermission(UserPermission.ManageLibrary) && <BookFileInformation fragment={media} />}
 		</SceneContainer>
 	)
 }

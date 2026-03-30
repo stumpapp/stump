@@ -26,7 +26,7 @@ import {
 async function calculatePageCount(uri: string, filename: string): Promise<number> {
 	try {
 		const extension = filename.split('.').pop()?.toLowerCase()
-		if (!extension || !['cbz', 'zip', 'pdf'].includes(extension)) {
+		if (!extension || !['cbz', 'zip', 'pdf', 'epub'].includes(extension)) {
 			return 0 // Not a paged format we can handle
 		}
 		return await StumpStreamer.getPageCount(uri)

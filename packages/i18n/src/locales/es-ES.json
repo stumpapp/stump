@@ -21,8 +21,8 @@
 			"buttons": {
 				"createAccount": "Crear cuenta",
 				"login": "Iniciar sesión",
-				"loginWithOidc": "Log in with OIDC",
-				"createAccountWithOidc": "Create Account with OIDC"
+				"loginWithOidc": "Iniciar sesión con OIDC",
+				"createAccountWithOidc": "Crear una cuenta con OIDC"
 			}
 		},
 		"toasts": {
@@ -54,7 +54,7 @@
 		},
 		"emailBook": {
 			"heading": "Enviar libro",
-			"description": "Send this book to a device or email address",
+			"description": "Enviar este libro a un dispositivo o una dirección de correo electrónico",
 			"form": {
 				"email": {
 					"label": "Correo electrónico",
@@ -78,8 +78,8 @@
 				"description": "El nombre de tu club de libros"
 			},
 			"description": {
-				"label": "Description",
-				"placeholder": "An 'Our Flag Means Death' fan club. We read pirate fiction to our hearts' content",
+				"label": "Descripción",
+				"placeholder": "Un club de fans de 'Nuestra bandera significa muerte'. Leemos ficción pirata  a nuestro antojo",
 				"description": "Una breve descripción opcional de tu club de libros"
 			},
 			"is_private": {
@@ -87,83 +87,83 @@
 				"description": "Si está habilitado, solo los usuarios que invites podrán unirse a tu club de libros"
 			},
 			"member_role_spec": {
-				"heading": "Custom role mapping",
+				"heading": "Asignación de rol personalizado",
 				"subtitle": [
-					"You can create custom names for the roles in your book club if you'd like. For more information, refer to the",
+					"Puedes crear nombres personalizados para los roles en tu club de libros. Para más información, consulta el",
 					"documentación"
 				],
 				"member": {
 					"label": "Miembro",
 					"placeholder": "Miembro",
-					"description": "The name of the default role for your book club"
+					"description": "El nombre del rol por defecto de tu club de libros"
 				},
 				"moderator": {
-					"label": "Moderator",
-					"placeholder": "Moderator",
-					"description": "The name of the moderator role for your book club"
+					"label": "Moderador",
+					"placeholder": "Moderador",
+					"description": "El nombre del rol de moderador para tu club de libros"
 				},
 				"admin": {
-					"label": "Admin",
-					"placeholder": "Admin",
-					"description": "The name of the admin role for your book club"
+					"label": "Administrador",
+					"placeholder": "Administrador",
+					"description": "El nombre del rol de administrador para tu club de libros"
 				},
 				"creator": {
-					"label": "Creator",
-					"placeholder": "Creator",
-					"description": "The name of the creator role for your book club. This is you!"
+					"label": "Creador",
+					"placeholder": "Creador",
+					"description": "El nombre del rol de creador de tu club de libros. ¡Este eres tú!"
 				}
 			},
 			"membershipOptions": {
 				"displayName": {
-					"label": "Display Name",
+					"label": "Nombre a mostrar",
 					"placeholder": "oromei",
-					"description": "An optional display name for your membership in the book club. If set, this takes precedence over your username"
+					"description": "Un nombre opcional a mostrar para tu membresía en el club de libros. Si está configurado, toma precedencia sobre tu nombre de usuario"
 				},
 				"hideProgress": {
-					"label": "Hide Progress",
-					"description": "If enabled, your reading progress will be hidden from other members of the book club"
+					"label": "Ocultar progreso",
+					"description": "Si se encuentra habilitado, tu progreso de lectura se ocultará para otros miembros del club de libros"
 				}
 			}
 		},
 		"validation": {
-			"missingName": "Name is required",
-			"alreadyTaken": "is already taken"
+			"missingName": "El nombre es requerido",
+			"alreadyTaken": "ya está en uso"
 		}
 	},
 	"createBookClubScene": {
 		"heading": "Crear nuevo club de libros",
-		"subtitle": "You can create a private book club for a select few, or make it public for anyone on the server to join",
+		"subtitle": "Puedes crear un club de libros privado para unos pocos, o crearlo público para que cualquiera en el servidor se pueda unir",
 		"form": {
-			"stepLabel": "Step",
+			"stepLabel": "Paso",
 			"steps": [
 				{
-					"label": "Basics",
+					"label": "Fundamentos",
 					"heading": "Información básica",
-					"description": "The details of the club, including its name and description"
+					"description": "Los detalles del club, incluyendo su nombre y descripción"
 				},
 				{
 					"label": "Roles",
 					"heading": "Roles",
-					"description": "Customize the roles in your book club"
+					"description": "Personalizar los roles en tu club de libros"
 				},
 				{
 					"label": "Membresía",
 					"heading": "Preferencias de Membresía",
-					"description": "Additional options for your book club"
+					"description": "Opciones adicionales para tu club de libros"
 				},
 				{
-					"label": "Review",
-					"heading": "Review",
-					"description": "Review your club settings before creating it"
+					"label": "Revisión",
+					"heading": "Revisión",
+					"description": "Revisa la configuración de tu club de libros antes de crearlo"
 				}
 			],
 			"review": {
-				"yes": "Yes",
+				"yes": "Si",
 				"no": "No",
-				"none": "None",
+				"none": "Ninguno",
 				"labels": {
-					"name": "Name",
-					"description": "Description"
+					"name": "Nombre",
+					"description": "Descripción"
 				}
 			},
 			"submit": "Crear Club de Libros"
@@ -171,63 +171,63 @@
 	},
 	"bookClubSettingsScene": {
 		"sidebar": {
-			"basics": "Basics",
+			"basics": "Fundamentos",
 			"members": {
-				"members": "Members",
+				"members": "Miembros",
 				"roles": "Roles",
-				"label": "Membership"
+				"label": "Membresía"
 			},
 			"scheduling": {
-				"scheduler": "Scheduler",
-				"options": "Options",
-				"label": "Scheduling"
+				"scheduler": "Planificador",
+				"options": "Opciones",
+				"label": "Planificación"
 			},
 			"danger-zone": {
 				"delete": "Borrado",
-				"label": "Danger Zone"
+				"label": "Zona de peligro"
 			}
 		},
 		"basics": {
-			"title": "Basic Information",
-			"description": "The details of this book club, including its name and description",
+			"title": "Información básica",
+			"description": "Los detalles de este club de libros, incluyendo su nombre y descripción",
 			"form": {
 				"submit": "Update club"
 			}
 		},
 		"members": {
-			"title": "Members",
-			"description": "Manage the members of this book club",
+			"title": "Miembros",
+			"description": "Administrar los miembros de este club de libros",
 			"sections": {}
 		},
 		"roles": {
 			"title": "Roles",
-			"description": "Customize the roles in this book club",
+			"description": "Personalizar los roles en este club de libros",
 			"sections": {
 				"roleMappings": {
-					"heading": "Existing role mappings",
-					"description": "The current role mappings for this book club"
+					"heading": "Asignación de roles existentes",
+					"description": "Las asignaciones de roles actuales para este club de libros"
 				}
 			}
 		},
 		"scheduling/scheduler": {
-			"title": "Scheduler",
-			"description": "Create and manage the scheduled readings for this book club"
+			"title": "Planificador",
+			"description": "Crear y administrar las lecturas planificadas para este club de libros"
 		},
 		"scheduling/options": {
-			"title": "Options",
-			"description": "Additional options for this book club's scheduling"
+			"title": "Opciones",
+			"description": "Opciones adicionales para la planificación de este club de libros"
 		},
 		"danger-zone/delete": {
-			"title": "Deletion Actions",
-			"description": "Permanently delete this book club and all of its contents or certain resources",
+			"title": "Acciones de borrado",
+			"description": "Borrar permanentemente este club de libros y todos sus contenidos o ciertos recursos",
 			"sections": {
 				"deleteClub": {
-					"heading": "Delete club",
+					"heading": "Borrar club",
 					"description": [
-						"Permanently delete this book club and all its contents.",
-						"This action cannot be undone"
+						"Borrar permanente este club de libros y todos sus contenidos",
+						"Esta acción no se puede revertir"
 					],
-					"trigger": "Delete club"
+					"trigger": "Borrar club"
 				}
 			}
 		}
@@ -236,91 +236,95 @@
 		"fields": {
 			"name": {
 				"label": "Nombre",
-				"description": "A friendly name for your library",
-				"placeholder": "My Library"
+				"description": "Un nombre amigable para tu biblioteca",
+				"placeholder": "Mi biblioteca"
 			},
 			"path": {
 				"label": "Ruta",
-				"description": "The path to the library as it exists on your server",
-				"placeholder": "/path/to/library"
+				"description": "La ruta para la biblioteca tal y como existe en tu servidor",
+				"placeholder": "/ruta/a/biblioteca"
 			},
 			"description": {
 				"label": "Descripción",
-				"description": "A short description of your library",
-				"placeholder": "A library of all my favorite books"
+				"description": "Una descripción breve para tu biblioteca",
+				"placeholder": "Una biblioteca de todos mis libros favoritos"
 			},
 			"tags": {
 				"label": "Etiquetas",
-				"description": "Used to categorize your library or enforce access rules"
+				"description": "Utilizado para categorizar tu biblioteca o imponer reglas de acceso"
 			},
 			"defaultLibraryView": {
-				"label": "Default library view",
-				"description": "Configure which tab is shown by default when opening this library",
+				"label": "Vista por defecto de la biblioteca",
+				"description": "Configurar cuál pestaña se muestra por defecto al abrir esta biblioteca",
 				"hideSeriesView": {
-					"label": "Hide series tab",
-					"description": "Hide the series tab from the library navigation"
+					"label": "Ocultar pestaña de series",
+					"description": "Ocultar la pestaña de series de la navegación de la biblioteca"
+				},
+				"skipBookOverview": {
+					"label": "Skip book overview",
+					"description": "Open the reader directly when selecting books in this library"
 				},
 				"options": {
 					"series": {
 						"label": "Series",
-						"description": "Show the series tab by default"
+						"description": "Mostrar por defecto la pestaña de series"
 					},
 					"books": {
-						"label": "Books",
-						"description": "Show the books tab by default"
+						"label": "Libros",
+						"description": "Mostrar por defecto la pestaña de libros"
 					}
 				}
 			},
 			"readingSettings": {
 				"section": {
-					"heading": "Reading settings",
-					"description": "Default reader settings to use for books"
+					"heading": "Opciones de lectura",
+					"description": "Opciones predeterminadas del lector a utilizar en libros"
 				},
 				"imageScaling": {
-					"label": "Image scaling",
-					"description": "How the image-based reader scales images to the page"
+					"label": "Ajuste de tamaño de imagen",
+					"description": "Como el lector basado en imágenes ajusta el tamaño de las imágenes a la página"
 				},
 				"readingMode": {
-					"label": "Default reader",
-					"description": "The default reader to use for image-based books"
+					"label": "Lector predeterminado",
+					"description": "El lector predeterminado a utilizar para libros basados en imágenes"
 				},
 				"readingDirection": {
 					"label": "Dirección de lectura",
-					"description": "Which direction the reader progresses through pages"
+					"description": "Hacia cuál dirección progresa el lector a través de las páginas"
 				}
 			},
 			"thumbnailConfig": {
 				"section": {
 					"heading": {
-						"create": "Thumbnail configuration",
-						"update": "Generation"
+						"create": "Configuración de vista en miniatura",
+						"update": "Generación"
 					},
-					"description": "Improve loading times while browsing your library by generating thumbnails for your books",
-					"disabled": "No additional configuration is required when thumbnail generation is disabled"
+					"description": "Mejora los tiempos de carga mientras navegas tu biblioteca al generar vistas en miniatura para tus libros",
+					"disabled": "No se requiere una configuración adicional cuando la generación de vistas en miniatura se encuentra desactivada"
 				},
 				"enableSwitch": {
 					"label": "Activado",
-					"description": "Generate thumbnail images for this library"
+					"description": "Generar vistas en miniatura para esta biblioteca"
 				},
 				"resizeMethod": {
-					"label": "Resize Method",
+					"label": "Método de redimensionado",
 					"options": {
-						"scaleEvenlyByFactor": "Evenly Scale",
-						"exact": "Exact Size",
-						"scaleDimension": "Auto Scaled",
-						"none": "None"
+						"scaleEvenlyByFactor": "Escalar uniformemente",
+						"exact": "Tamaño exacto",
+						"scaleDimension": "Escalado automático",
+						"none": "Ninguno"
 					}
 				},
 				"scaleEvenlyByFactor": {
-					"description": "Scale the thumbnail by a factor of the original size. E.g., 0.65 will result in a thumbnail that is 65% of the original size",
+					"description": "Escala de la vista en miniatura por un factor del tamaño original. Por ejemplo, 0.65 resultará en una vista en miniatura que es 65% del tamaño original",
 					"factor": {
-						"label": "Scale Factor"
+						"label": "Factor de escala"
 					}
 				},
 				"exact": {
-					"description": "Resize the thumbnail to an exact size in pixels",
+					"description": "Redimensionar la vista en miniatura a un tamaño exacto en píxeles",
 					"width": {
-						"label": "Width"
+						"label": "Ancho"
 					},
 					"height": {
 						"label": "Height"
@@ -328,61 +332,61 @@
 				},
 				"scaleDimension": {
 					"label": "Auto Scaled",
-					"description": "Set either the width or height of the thumbnail and auto-scale the other to keep the original aspect ratio",
+					"description": "Establecer el ancho o alto de las vistas en miniatura y escalar automáticamente el otro para mantener la relación de aspecto original",
 					"dimension": {
-						"label": "Dimension",
+						"label": "Dimensión",
 						"options": {
-							"width": "Width",
-							"height": "Height"
+							"width": "Ancho",
+							"height": "Alto"
 						}
 					},
 					"size": {
-						"label": "Size"
+						"label": "Tamaño"
 					}
 				},
 				"format": {
-					"label": "Image format",
-					"description": "The format of the generated thumbnail images"
+					"label": "Formato de imagen",
+					"description": "El formato de las imágenes de vista en miniatura generadas"
 				},
 				"quality": {
 					"label": "Calidad",
-					"description": "The quality of the generated thumbnail images, between 1 and 100"
+					"description": "La calidad de las imágenes de vista en miniatura generadas, entre 1 y 100"
 				}
 			},
 			"ignoreRules": {
 				"section": {
-					"heading": "Ignore rules",
-					"description": "Define glob patterns to ignore certain files or directories during a scan"
+					"heading": "Ignorar reglas",
+					"description": "Definir patrones de glob para ignorar ciertos archivos o directorios durante un escaneo"
 				},
-				"noRules": "No ignore rules have been configured",
+				"noRules": "No se han configurado reglas para ignorar",
 				"save": "Guardar cambios",
 				"addRule": {
 					"label": "Nueva regla",
-					"description": "Glob pattern to ignore files or directories",
+					"description": "Patrones de glob para ignorar archivos o directorios",
 					"addButton": "Añadir regla",
 					"ignoreParents": {
-						"title": "Ignore all parent directories",
-						"label": "Ignore parents"
+						"title": "Ignorar todos los directorios padre",
+						"label": "Ignorar padres"
 					},
 					"ignoreSubdirs": {
-						"title": "Ignore all subdirectories",
-						"label": "Ignore subdirectories"
+						"title": "Ignorar todos los subdirectorios",
+						"label": "Ignorar subdirectorios"
 					}
 				},
-				"invalidGlob": "Invalid glob pattern",
-				"duplicateGlob": "Duplicate of an existing rule",
+				"invalidGlob": "Patrón de glob inválido",
+				"duplicateGlob": "Duplicado de una regla existente",
 				"lockConfig": {
-					"lock": "Lock configuration",
-					"unlock": "Unlock configuration"
+					"lock": "Bloquear configuración",
+					"unlock": "Desbloquear configuración"
 				},
-				"editRule": "Edit rule",
-				"deleteRule": "Delete rule",
-				"cancelEdit": "Cancel edit",
-				"confirmEdit": "Confirm edit"
+				"editRule": "Editar regla",
+				"deleteRule": "Borrar regla",
+				"cancelEdit": "Cancelar edición",
+				"confirmEdit": "Confirmar edición"
 			},
 			"convertOptions": {
 				"section": {
-					"heading": "File conversion",
+					"heading": "Conversión de archivo",
 					"description": "Stump es capaz de convertir ciertos formatos de archivo a otros más compatibles"
 				},
 				"rarToZip": {
@@ -397,20 +401,20 @@
 			"scannerFeatures": {
 				"section": {
 					"heading": "Procesamiento opcional",
-					"description": "Opt-in processing features for the scanner",
-					"disclaimer": "These features involve additional file reads which may slow down the scan process"
+					"description": "Funciones adicionales de procesamiento para el escáner",
+					"disclaimer": "Estas funciones incluyen lecturas adicionales de archivos que pueden ralentizar el proceso de escaneo"
 				},
 				"processMetadata": {
-					"label": "Process metadata",
-					"description": "Extract any metadata from library files and store the results in the database"
+					"label": "Procesar metadatos",
+					"description": "Extraer cualquier metadato de los archivos de la biblioteca y almacenar los resultados en la base de datos"
 				},
 				"watch": {
-					"label": "Watch",
-					"description": "Watch the library directory for changes and update the database accordingly"
+					"label": "Monitorear",
+					"description": "Monitorear cambios en el directorio de la biblioteca y actualizar la base de datos respectivamente"
 				},
 				"generateFileHashes": {
 					"label": "Generar hash de archivos",
-					"description": "Generate a hash for each file in the library to detect duplicates"
+					"description": "Generar un hash para cada archivo en la biblioteca para detectar duplicados"
 				},
 				"koreaderHashes": {
 					"label": "Hash compatible con KoReader",
@@ -420,7 +424,7 @@
 			"libraryPattern": {
 				"section": {
 					"heading": "Organización",
-					"description": "Identify which pattern most closely matches the organization of your library",
+					"description": "Identificar cuál patrón coincide de manera cercana la organización de tu biblioteca",
 					"docs": [
 						"¿No estás seguro de qué elegir? Haz clic",
 						"aquí",
@@ -430,8 +434,8 @@
 					"disabled": "No puedes cambiar esta configuración"
 				},
 				"options": {
-					"label": "Library pattern",
-					"description": "The setting which determines how Stump will organize your library",
+					"label": "Patrón de biblioteca",
+					"description": "La opción que determina como Stump organizará tu biblioteca",
 					"collectionPriority": {
 						"label": "Priorizar colección",
 						"description": "Cada carpeta en el nivel superior de la raíz de la biblioteca es una sola serie"
@@ -448,12 +452,12 @@
 				"create": "Escanear tras la creación",
 				"update": "Escanear tras actualizaciones"
 			},
-			"description": "Index the library files to populate your database"
+			"description": "Indexar los archivos de la biblioteca para llenar la base de datos"
 		}
 	},
 	"createLibraryScene": {
 		"heading": "Crear nueva biblioteca",
-		"subtitle": "Libraries are used to group your books together. If you want a refresh on how they work, check out the",
+		"subtitle": "Las bibliotecas se utilizan para agrupar tus libros. Si deseas refrescar como estas funcionan, revisa el",
 		"subtitleLink": "documentación relevante",
 		"form": {
 			"stepLabel": "Etapa",
@@ -461,31 +465,31 @@
 				{
 					"label": "Información",
 					"heading": "Información básica",
-					"description": "The details of this library, including its name, path, and description"
+					"description": "Los detalles de esta biblioteca, incluyendo su nombre, ruta y descripción"
 				},
 				{
 					"label": "Escaneo",
-					"heading": "Scanning",
-					"description": "Settings related to how Stump scans this library"
+					"heading": "Escaneando",
+					"description": "Opciones de como Stump escanea esta biblioteca"
 				},
 				{
 					"label": "Miniaturas",
 					"heading": "Miniaturas",
-					"description": "The options for if and how Stump generates thumbnails for this library"
+					"description": "Opciones para habilitar y determinar como Stump genera las vistas en miniatura para esta biblioteca"
 				},
 				{
 					"label": "Revisión",
 					"heading": "Revisión",
-					"description": "Review your library settings before creating it"
+					"description": "Revisa tus configuraciones de la biblioteca antes de crearla"
 				}
 			],
 			"review": {
 				"yes": "Si",
-				"no": "No",
+				"no": " No",
 				"none": "Nada",
 				"labels": {
 					"generateThumbnails": "Generar miniaturas",
-					"processThumbnailColors": "Process thumbnail colors",
+					"processThumbnailColors": "Procesar colores de las vistas en miniatura",
 					"mode": "Modalidad",
 					"format": "Formato",
 					"quality": "Calidad",
@@ -497,13 +501,13 @@
 					"ignoreRules": "Reglas de exclusión",
 					"convertRar": "Convertir RAR/CBR",
 					"deleteConversions": "Eliminar archivos convertidos",
-					"watch": "Watch directory for changes",
+					"watch": "Monitorear cambios en el directorio",
 					"processMetadata": "Procesar metadatos",
 					"generateFileHashes": "Generar hash de archivos",
-					"generateKoreaderHashes": "Generate KoReader hashes",
-					"scaleEvenlyByFactor": "Evenly Scale",
-					"exact": "Exact Size",
-					"scaleDimension": "Explicitly Sized"
+					"generateKoreaderHashes": "Generar hashes para KoReader",
+					"scaleEvenlyByFactor": "Escalar uniformemente",
+					"exact": "Tamaño exacto",
+					"scaleDimension": "Tamaño explícito"
 				}
 			},
 			"buttons": {
@@ -536,43 +540,43 @@
 	},
 	"librarySettingsScene": {
 		"heading": "Gestionar biblioteca",
-		"subtitle": "Manage your library here. If you want a refresh on these settings, check out the",
+		"subtitle": "Administra tu biblioteca aquí. Si deseas refrescar estas opciones, revisa el",
 		"subtitleLink": "documentación importante",
 		"sidebar": {
 			"basics": "Basics",
 			"options": {
 				"general": "General",
-				"reading": "Reading",
-				"scanning": "Scanning",
-				"thumbnails": "Thumbnails",
-				"ignore-rules": "Ignore Rules",
-				"analysis": "Analysis",
-				"label": "Options"
+				"reading": "Leyendo",
+				"scanning": "Escaneando",
+				"thumbnails": "Vistas en miniatura",
+				"ignore-rules": "Ignorar reglas",
+				"analysis": "Análisis",
+				"label": "Opciones"
 			},
 			"danger-zone": {
-				"access-control": "Access Control",
-				"delete": "Deletion",
-				"label": "Danger Zone"
+				"access-control": "Control de acceso",
+				"delete": "Borrado",
+				"label": "Zona de peligro"
 			}
 		},
 		"basics": {
-			"title": "Basic Information",
-			"description": "The details of this library, including its name, path, and description",
+			"title": "Información básica",
+			"description": "Los detalles de esta biblioteca, incluyendo su nombre, ruta y descripción",
 			"form": {
-				"submit": "Update library"
+				"submit": "Actualizar biblioteca"
 			}
 		},
 		"options/reading": {
-			"title": "Reading",
-			"description": "The default reader settings to use for books in this library. Any book can override these settings"
+			"title": "Leyendo",
+			"description": "Opciones predeterminadas para utilizar en esta biblioteca. Cualquier libro puede sobreescribir estas opciones"
 		},
 		"options/scanning": {
-			"title": "Scanning",
-			"description": "Settings related to how Stump scans this library",
+			"title": "Escaneando",
+			"description": "Opciones relacionadas a como Stump escanea esta biblioteca",
 			"sections": {
 				"configureScan": {
-					"heading": "Configure scan",
-					"description": "A scan with additional options for more fine-grained control",
+					"heading": "Configurar escaneo",
+					"description": "Un escaneo con opciones adicionales para un control más preciso",
 					"form": {
 						"alert": "These will override corresponding library-wide settings",
 						"options": {
@@ -924,7 +928,11 @@
 									"characters": "Characters",
 									"teams": "Teams",
 									"genres": "Genre",
-									"coverArtists": "Cover artists"
+									"coverArtists": "Cover artists",
+									"ageRating": "Age rating",
+									"year": "Year",
+									"month": "Month",
+									"day": "Day"
 								}
 							},
 							"series": {
@@ -946,7 +954,8 @@
 									"status": "Status",
 									"volume": "Volume",
 									"metaType": "Type",
-									"ageRating": "Age rating"
+									"ageRating": "Age rating",
+									"year": "Start year"
 								}
 							},
 							"library": {
@@ -1253,20 +1262,15 @@
 						"updateFailed": "Se ha producido un error en el servidor al actualizar tu perfil. Por favor, inténtalo de nuevo."
 					},
 					"avatarPicker": {
-						"heading": "Establece tu imagen de avatar",
-						"subtitle": "Stump admite avatares personalizados, que se pueden establecer proporcionando una URL a una imagen. La subida de imágenes no está soportada para reducir la cantidad de datos almacenados en el servidor.",
-						"preview": "Una vista previa aparecerá aquí una vez que haya introducido una URL.",
-						"labels": {
-							"imageUrl": "URL de la imagen",
-							"customAvatar": "Avatar personalizado"
-						},
-						"buttons": {
-							"confirm": "Confirmar imagen",
-							"cancel": "Cancelar",
-							"edit": "Editar",
-							"changeImage": "Cambiar imagen",
-							"removeImage": "Borrar imagen"
-						}
+						"label": "Avatar",
+						"heading": "Upload avatar",
+						"subtitle": "You can upload any image to use as your avatar for social features in Stump",
+						"dropzone": "Drop an image or click to select",
+						"changeImage": "Change Image",
+						"removeImage": "Remove Image",
+						"removeSelection": "Remove uploaded image",
+						"uploadFailed": "Failed to upload avatar",
+						"removeFailed": "Failed to remove avatar"
 					},
 					"buttons": {
 						"confirm": "Guardar cambios"
@@ -1691,9 +1695,38 @@
 						]
 					}
 				},
+				"helpfulLinks": {
+					"title": "Helpful links",
+					"description": "Links to resources that may be helpful for managing your Stump server instance",
+					"links": {
+						"documentation": "Documentation",
+						"changelog": "Changelog"
+					}
+				},
 				"serverPublicUrl": {
 					"label": "URL pública",
 					"description": "La URL desde la que tu servidor es accesible fuera de tu red, si procede. Esto habilitará los enlaces de invitación y otras características"
+				},
+				"customEmojis": {
+					"title": "Custom emojis",
+					"description": "Upload and manage custom image emojis for your server",
+					"dropzone": "Drop an image or click to select",
+					"input": {
+						"label": "Emoji name",
+						"placeholder": "e.g. party_parrot"
+					},
+					"deleteModal": {
+						"title": "Delete emoji",
+						"description": "Are you sure you want to delete this emoji?"
+					},
+					"noCustomEmojis": "No custom emojis have been added yet",
+					"invalidName": "Please enter a valid name for your emoji",
+					"uploadError": "Failed to upload emoji",
+					"uploadSuccess": "Emoji uploaded",
+					"renameSuccess": "Emoji renamed",
+					"renameError": "Failed to rename emoji",
+					"deleteSuccess": "Emoji deleted",
+					"deleteError": "Failed to delete emoji"
 				}
 			}
 		},
@@ -2074,6 +2107,16 @@
 				"submit": {
 					"create": "Create emailer",
 					"update": "Update emailer"
+				},
+				"testEmailer": {
+					"button": "Send test email",
+					"recipientLabel": "Test recipient",
+					"recipientDescription": "An email address to send the test email to",
+					"success": "Test email sent successfully",
+					"error": {
+						"title": "Failed to send test email",
+						"description": "Check your SMTP settings and try again"
+					}
 				}
 			},
 			"createEmailer": {
@@ -2209,6 +2252,7 @@
 	"common": {
 		"add": "Agregar",
 		"cancel": "Cancelar",
+		"clear": "Clear",
 		"confirm": "Confirmar",
 		"delete": "Delete",
 		"enter": "Enter",
@@ -2221,6 +2265,7 @@
 		"update": "Actualizar",
 		"upload": "Subir",
 		"uploading": "Subiendo",
+		"uploadingEllipsis": "Uploading...",
 		"unimplemented": "¡Esta funcionalidad aún no está implementada! Vuelve a intentarlo más tarde",
 		"limitedFunctionality": "Esto aún no está completamente implementado y falta algunas características. Vuelve más tarde",
 		"logIn": "Iniciar sesión",
@@ -2233,7 +2278,12 @@
 		"notUsedYet": "Sin uso",
 		"never": "Nunca",
 		"scan": "Scan",
-		"somethingWentWrong": "Something went wrong"
+		"somethingWentWrong": "Something went wrong",
+		"fileUpload": {
+			"someRejected": "Some files were rejected. Please check the file types and try again",
+			"tooManyFiles": "You have selected too many files",
+			"noValidFiles": "No valid files were selected"
+		}
 	},
 	"userPermissions": {
 		"ACCESS_API_KEYS": {
@@ -2359,6 +2409,10 @@
 		"WRITE_BACK_METADATA": {
 			"label": "Write back metadata",
 			"description": "Allows the user to write metadata changes back to the source files"
+		},
+		"EDIT_THUMBNAILS": {
+			"label": "Edit thumbnails",
+			"description": "Allows the user to edit thumbnails for books and series"
 		}
 	}
 }

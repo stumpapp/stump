@@ -13,7 +13,7 @@ const buttonVariants = cva('group flex items-center justify-center squircle roun
 		variant: {
 			brand: 'bg-fill-brand active:opacity-90',
 			default: 'bg-background-surface active:opacity-90',
-			destructive: 'bg-fill-danger web:hover:opacity-90 active:opacity-90',
+			destructive: 'border border-edge bg-background active:bg-background-surface',
 			outline: 'border border-edge bg-background active:bg-background-surface',
 			secondary: 'bg-background-inverse',
 			ghost: 'active:bg-accent',
@@ -44,7 +44,7 @@ const buttonTextVariants = cva('text-base font-medium text-foreground', {
 		variant: {
 			brand: 'text-foreground-on-fill',
 			default: 'text-foreground',
-			destructive: 'text-white',
+			destructive: 'text-fill-danger',
 			outline: '',
 			secondary: 'text-foreground-on-inverse',
 			ghost: '',

@@ -9,10 +9,13 @@ import { useSeriesLayout } from '@/stores/layout'
 import { SeriesCardData } from '../SeriesCard'
 import { defaultColumns } from './columns'
 
-type Props = Omit<EntityTableProps<SeriesCardData>, 'columns' | 'options'>
+type Props = Omit<EntityTableProps<SeriesCardData>, 'columns' | 'options'> & {
+	layoutKey?: string
+}
 
-export default function SeriesTable(props: Props) {
+export default function SeriesTable({ layoutKey = 'global', ...props }: Props) {
 	const configuration = useSeriesLayout(
+		layoutKey,
 		useShallow((state) => ({
 			columns: state.columns,
 		})),

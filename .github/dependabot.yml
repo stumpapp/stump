@@ -9,6 +9,7 @@ updates:
     labels:
       - 'dependencies'
     versioning-strategy: increase
+    target-branch: 'nightly'
 
   - package-ecosystem: 'cargo'
     directory: '/'
@@ -17,6 +18,7 @@ updates:
       time: '04:00'
     labels:
       - 'dependencies'
+    target-branch: 'nightly'
 
   - package-ecosystem: 'github-actions'
     directory: '/'
@@ -25,3 +27,4 @@ updates:
       time: '05:00'
     labels:
       - 'dependencies'
+    target-branch: 'nightly'

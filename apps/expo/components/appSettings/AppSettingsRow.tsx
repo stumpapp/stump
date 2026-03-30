@@ -7,6 +7,7 @@ import { Card } from '../ui'
 type Props = {
 	icon: LucideIcon
 	title: string
+	description?: string
 	disabled?: boolean
 	onPress?: () => void
 	isLink?: boolean
@@ -16,13 +17,14 @@ type Props = {
 // link to website vs action etc
 
 const AppSettingsRow = forwardRef<View, Props>(
-	({ icon, title, disabled, children, isLink, ...props }, ref) => {
+	({ icon, title, description, disabled, children, isLink, ...props }, ref) => {
 		return (
 			<Pressable {...props} ref={ref}>
 				{({ pressed }) => (
 					<Card.Row
 						icon={icon}
 						label={title}
+						description={description}
 						style={pressed && isLink && { opacity: 0.7 }}
 						disabled={disabled}
 					>

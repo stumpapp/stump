@@ -7,6 +7,7 @@ import { useSeriesLayout } from '@/stores/layout'
 
 export default function SeriesExplorationLayout() {
 	const { layout, setLayout } = useSeriesLayout(
+		'global',
 		useShallow((state) => ({
 			layout: state.layout,
 			setLayout: state.setLayout,

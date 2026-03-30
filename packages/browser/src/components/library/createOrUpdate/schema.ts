@@ -138,6 +138,7 @@ export const buildSchema = (
 		libraryPattern: z.string().refine(isLibraryPattern).default('SERIES_BASED'),
 		defaultLibraryViewMode: z.string().refine(isLibraryViewMode).default('SERIES'),
 		hideSeriesView: z.boolean().default(false),
+		skipBookOverview: z.boolean().default(false),
 		name: z
 			.string()
 			.min(1, { message: 'Library name is required' })
@@ -221,6 +222,7 @@ export const formDefaults = (
 	defaultReadingMode: library?.config.defaultReadingMode || ReadingMode.Paged,
 	defaultLibraryViewMode: library?.config.defaultLibraryViewMode || LibraryViewMode.Series,
 	hideSeriesView: library?.config.hideSeriesView ?? false,
+	skipBookOverview: library?.config.skipBookOverview ?? false,
 	description: library?.description,
 	generateFileHashes: library?.config.generateFileHashes ?? false,
 	generateKoreaderHashes: library?.config.generateKoreaderHashes ?? false,

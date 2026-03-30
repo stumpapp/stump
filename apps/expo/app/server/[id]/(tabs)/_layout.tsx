@@ -1,11 +1,13 @@
 import { useAuthQuery, useClientContext, useSDK } from '@stump/client'
+import { UserPermission } from '@stump/graphql'
 import { isAxiosError } from 'axios'
 import { Tabs } from 'expo-router'
 import { Icon, Label, NativeTabs } from 'expo-router/unstable-native-tabs'
-import { Home, Search, SquareLibrary } from 'lucide-react-native'
+import { Home, Search, SquareLibrary, Users } from 'lucide-react-native'
 import { useEffect } from 'react'
 import { Platform } from 'react-native'
 
+import { useStumpServer } from '~/components/activeServer'
 import { ServerErrorBoundary } from '~/components/error'
 import { Icon as JSIcon } from '~/components/ui'
 import { useColors } from '~/lib/constants'
@@ -21,12 +23,15 @@ export default function TabLayout() {
 	const animationEnabled = usePreferencesStore((state) => !state.reduceAnimations)
 	const setUser = useUserStore((state) => state.setUser)
 	const autoSyncEnabled = usePreferencesStore((state) => state.autoSyncLocalData)
+	const bookClubsEnabled = usePreferencesStore((state) => state.bookClubsEnabled)
 
 	useAutoSyncActiveServer({
 		enabled: !!sdk.token && autoSyncEnabled,
 	})
 
 	const { onUnauthenticatedResponse } = useClientContext()
+
+	const { checkPermission } = useStumpServer()
 
 	const { user, error } = useAuthQuery({
 		enabled: !!sdk.token,
@@ -52,6 +57,8 @@ export default function TabLayout() {
 		}
 	}, [error, onUnauthenticatedResponse])
 
+	const showClubs = bookClubsEnabled && checkPermission(UserPermission.AccessBookClub)
+
 	if (!sdk.token || !user) {
 		return null
 	}
@@ -73,6 +80,12 @@ export default function TabLayout() {
 					<Label>Browse</Label>
 					<Icon sf="books.vertical.fill" drawable="custom_android_drawable" />
 				</NativeTabs.Trigger>
+				{showClubs && (
+					<NativeTabs.Trigger name="clubs">
+						<Label>Clubs</Label>
+						<Icon sf="square.grid.2x2.fill" drawable="custom_android_drawable" />
+					</NativeTabs.Trigger>
+				)}
 				<NativeTabs.Trigger name="search" role="search">
 					<Label>Search</Label>
 					<Icon sf="magnifyingglass" drawable="custom_android_drawable" />
@@ -108,6 +121,21 @@ export default function TabLayout() {
 						tabBarIcon: ({ focused }) => (
 							<JSIcon
 								as={SquareLibrary}
+								className={cn('h-6 w-6 text-foreground-muted', { 'text-foreground': focused })}
+							/>
+						),
+						headerShown: false,
+					}}
+				/>
+
+				<Tabs.Screen
+					name="clubs"
+					options={{
+						title: 'Clubs',
+						href: showClubs ? undefined : null,
+						tabBarIcon: ({ focused }) => (
+							<JSIcon
+								as={Users}
 								className={cn('h-6 w-6 text-foreground-muted', { 'text-foreground': focused })}
 							/>
 						),

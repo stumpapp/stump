@@ -1,0 +1,1744 @@
+use sea_orm_migration::prelude::*;
+
+#[derive(DeriveMigrationName)]
+pub struct Migration;
+
+/// Note: This migration drops and recreates ALL book club tables. The feature
+/// was never exposed to users outside local dev so this should be more than safe
+#[async_trait::async_trait]
+impl MigrationTrait for Migration {
+	async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
+		manager
+			.drop_table(
+				Table::drop()
+					.table(BookClubDiscussionMessageReactions::Table)
+					.if_exists()
+					.to_owned(),
+			)
+			.await?;
+		manager
+			.drop_table(
+				Table::drop()
+					.table(CustomEmojis::Table)
+					.if_exists()
+					.to_owned(),
+			)
+			.await?;
+		manager
+			.drop_table(
+				Table::drop()
+					.table(BookClubDiscussionMessageLikes::Table)
+					.if_exists()
+					.to_owned(),
+			)
+			.await?;
+		manager
+			.drop_table(
+				Table::drop()
+					.table(BookClubDiscussionMessage::Table)
+					.if_exists()
+					.to_owned(),
+			)
+			.await?;
+		manager
+			.drop_table(
+				Table::drop()
+					.table(BookClubDiscussions::Table)
+					.if_exists()
+					.to_owned(),
+			)
+			.await?;
+		manager
+			.drop_table(
+				Table::drop()
+					.table(BookClubBookSuggestionLikes::Table)
+					.if_exists()
+					.to_owned(),
+			)
+			.await?;
+		manager
+			.drop_table(
+				Table::drop()
+					.table(BookClubBookSuggestions::Table)
+					.if_exists()
+					.to_owned(),
+			)
+			.await?;
+		manager
+			.drop_table(
+				Table::drop()
+					.table(BookClubMemberFavoriteBooks::Table)
+					.if_exists()
+					.to_owned(),
+			)
+			.await?;
+		manager
+			.drop_table(
+				Table::drop()
+					.table(BookClubBooks::Table)
+					.if_exists()
+					.to_owned(),
+			)
+			.await?;
+		manager
+			.drop_table(
+				Table::drop()
+					.table(BookClubInvitations::Table)
+					.if_exists()
+					.to_owned(),
+			)
+			.await?;
+		manager
+			.drop_table(
+				Table::drop()
+					.table(BookClubMembers::Table)
+					.if_exists()
+					.to_owned(),
+			)
+			.await?;
+		// Note: book_club_schedules is permanently donzo, not using it moving forward
+		manager
+			.drop_table(
+				Table::drop()
+					.table(BookClubSchedules::Table)
+					.if_exists()
+					.to_owned(),
+			)
+			.await?;
+		manager
+			.drop_table(Table::drop().table(BookClubs::Table).if_exists().to_owned())
+			.await?;
+
+		// Recreate start
+
+		manager
+			.create_table(
+				Table::create()
+					.table(BookClubs::Table)
+					.if_not_exists()
+					.col(
+						ColumnDef::new(BookClubs::Id)
+							.text()
+							.not_null()
+							.primary_key(),
+					)
+					.col(ColumnDef::new(BookClubs::Name).text().not_null())
+					.col(
+						ColumnDef::new(BookClubs::Slug)
+							.text()
+							.not_null()
+							.unique_key(),
+					)
+					.col(ColumnDef::new(BookClubs::Description).text())
+					.col(ColumnDef::new(BookClubs::IsPrivate).boolean().not_null())
+					.col(ColumnDef::new(BookClubs::MemberRoleSpec).json())
+					.col(ColumnDef::new(BookClubs::CreatedAt).date_time().not_null())
+					.col(ColumnDef::new(BookClubs::Emoji).text())
+					.to_owned(),
+			)
+			.await?;
+
+		manager
+			.create_table(
+				Table::create()
+					.table(BookClubMembers::Table)
+					.if_not_exists()
+					.col(
+						ColumnDef::new(BookClubMembers::Id)
+							.text()
+							.not_null()
+							.primary_key(),
+					)
+					.col(ColumnDef::new(BookClubMembers::DisplayName).text())
+					.col(ColumnDef::new(BookClubMembers::Bio).text())
+					.col(
+						ColumnDef::new(BookClubMembers::HideProgress)
+							.boolean()
+							.not_null(),
+					)
+					.col(ColumnDef::new(BookClubMembers::Role).integer().not_null())
+					.col(
+						ColumnDef::new(BookClubMembers::JoinedAt)
+							.date_time()
+							.not_null(),
+					)
+					.col(ColumnDef::new(BookClubMembers::UserId).text().not_null())
+					.col(
+						ColumnDef::new(BookClubMembers::BookClubId)
+							.text()
+							.not_null(),
+					)
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk-book_club_members-book_club")
+							.from(BookClubMembers::Table, BookClubMembers::BookClubId)
+							.to(BookClubs::Table, BookClubs::Id)
+							.on_delete(ForeignKeyAction::Cascade)
+							.on_update(ForeignKeyAction::Cascade),
+					)
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk-book_club_members-user")
+							.from(BookClubMembers::Table, BookClubMembers::UserId)
+							.to(Users::Table, Users::Id)
+							.on_delete(ForeignKeyAction::Cascade)
+							.on_update(ForeignKeyAction::Cascade),
+					)
+					.to_owned(),
+			)
+			.await?;
+
+		manager
+			.create_table(
+				Table::create()
+					.table(BookClubInvitations::Table)
+					.if_not_exists()
+					.col(
+						ColumnDef::new(BookClubInvitations::Id)
+							.text()
+							.not_null()
+							.primary_key(),
+					)
+					.col(
+						ColumnDef::new(BookClubInvitations::Role)
+							.integer()
+							.not_null(),
+					)
+					.col(
+						ColumnDef::new(BookClubInvitations::UserId)
+							.text()
+							.not_null(),
+					)
+					.col(
+						ColumnDef::new(BookClubInvitations::BookClubId)
+							.text()
+							.not_null(),
+					)
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk-book_club_invitations-book_club")
+							.from(
+								BookClubInvitations::Table,
+								BookClubInvitations::BookClubId,
+							)
+							.to(BookClubs::Table, BookClubs::Id)
+							.on_delete(ForeignKeyAction::Cascade)
+							.on_update(ForeignKeyAction::Cascade),
+					)
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk-book_club_invitations-user")
+							.from(BookClubInvitations::Table, BookClubInvitations::UserId)
+							.to(Users::Table, Users::Id)
+							.on_delete(ForeignKeyAction::Cascade)
+							.on_update(ForeignKeyAction::Cascade),
+					)
+					.to_owned(),
+			)
+			.await?;
+
+		manager
+			.create_table(
+				Table::create()
+					.table(BookClubMemberFavoriteBooks::Table)
+					.if_not_exists()
+					.col(
+						ColumnDef::new(BookClubMemberFavoriteBooks::Id)
+							.text()
+							.not_null()
+							.primary_key(),
+					)
+					.col(ColumnDef::new(BookClubMemberFavoriteBooks::Title).text())
+					.col(ColumnDef::new(BookClubMemberFavoriteBooks::Author).text())
+					.col(ColumnDef::new(BookClubMemberFavoriteBooks::Url).text())
+					.col(ColumnDef::new(BookClubMemberFavoriteBooks::Notes).text())
+					.col(
+						ColumnDef::new(BookClubMemberFavoriteBooks::MemberId)
+							.text()
+							.not_null()
+							.unique_key(),
+					)
+					.col(ColumnDef::new(BookClubMemberFavoriteBooks::BookId).text())
+					.col(ColumnDef::new(BookClubMemberFavoriteBooks::ImageUrl).text())
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk-book_club_member_favorite_books-member")
+							.from(
+								BookClubMemberFavoriteBooks::Table,
+								BookClubMemberFavoriteBooks::MemberId,
+							)
+							.to(BookClubMembers::Table, BookClubMembers::Id)
+							.on_delete(ForeignKeyAction::Cascade)
+							.on_update(ForeignKeyAction::Cascade),
+					)
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk-book_club_member_favorite_books-book")
+							.from(
+								BookClubMemberFavoriteBooks::Table,
+								BookClubMemberFavoriteBooks::BookId,
+							)
+							.to(Media::Table, Media::Id)
+							.on_delete(ForeignKeyAction::Cascade)
+							.on_update(ForeignKeyAction::Cascade),
+					)
+					.to_owned(),
+			)
+			.await?;
+
+		manager
+			.create_table(
+				Table::create()
+					.table(BookClubBooks::Table)
+					.if_not_exists()
+					.col(
+						ColumnDef::new(BookClubBooks::Id)
+							.text()
+							.not_null()
+							.primary_key(),
+					)
+					.col(ColumnDef::new(BookClubBooks::Position).integer().not_null())
+					.col(ColumnDef::new(BookClubBooks::CompletedAt).date_time())
+					.col(ColumnDef::new(BookClubBooks::Title).text())
+					.col(ColumnDef::new(BookClubBooks::Author).text())
+					.col(ColumnDef::new(BookClubBooks::Url).text())
+					.col(ColumnDef::new(BookClubBooks::ImageUrl).text())
+					.col(ColumnDef::new(BookClubBooks::BookEntityId).text())
+					.col(ColumnDef::new(BookClubBooks::BookClubId).text().not_null())
+					.col(
+						ColumnDef::new(BookClubBooks::AddedAt)
+							.date_time()
+							.not_null(),
+					)
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk-book_club_books-book_club")
+							.from(BookClubBooks::Table, BookClubBooks::BookClubId)
+							.to(BookClubs::Table, BookClubs::Id)
+							.on_delete(ForeignKeyAction::Cascade)
+							.on_update(ForeignKeyAction::Cascade),
+					)
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk-book_club_books-book_entity")
+							.from(BookClubBooks::Table, BookClubBooks::BookEntityId)
+							.to(Media::Table, Media::Id)
+							.on_delete(ForeignKeyAction::Cascade)
+							.on_update(ForeignKeyAction::Cascade),
+					)
+					.to_owned(),
+			)
+			.await?;
+
+		manager
+			.create_table(
+				Table::create()
+					.table(BookClubBookSuggestions::Table)
+					.if_not_exists()
+					.col(
+						ColumnDef::new(BookClubBookSuggestions::Id)
+							.text()
+							.not_null()
+							.primary_key(),
+					)
+					.col(
+						ColumnDef::new(BookClubBookSuggestions::BookClubId)
+							.text()
+							.not_null(),
+					)
+					.col(ColumnDef::new(BookClubBookSuggestions::Title).text())
+					.col(ColumnDef::new(BookClubBookSuggestions::Author).text())
+					.col(ColumnDef::new(BookClubBookSuggestions::Url).text())
+					.col(ColumnDef::new(BookClubBookSuggestions::Notes).text())
+					.col(
+						ColumnDef::new(BookClubBookSuggestions::Status)
+							.text()
+							.not_null()
+							.default("PENDING"),
+					)
+					.col(ColumnDef::new(BookClubBookSuggestions::ResolvedAt).date_time())
+					.col(ColumnDef::new(BookClubBookSuggestions::ResolvedById).text())
+					.col(
+						ColumnDef::new(BookClubBookSuggestions::CreatedAt)
+							.date_time()
+							.not_null()
+							.default(Expr::current_timestamp()),
+					)
+					.col(
+						ColumnDef::new(BookClubBookSuggestions::SuggestedById)
+							.text()
+							.not_null(),
+					)
+					.col(ColumnDef::new(BookClubBookSuggestions::BookId).text())
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk-book_club_book_suggestions-club")
+							.from(
+								BookClubBookSuggestions::Table,
+								BookClubBookSuggestions::BookClubId,
+							)
+							.to(BookClubs::Table, BookClubs::Id)
+							.on_delete(ForeignKeyAction::Cascade)
+							.on_update(ForeignKeyAction::Cascade),
+					)
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk-book_club_book_suggestions-member")
+							.from(
+								BookClubBookSuggestions::Table,
+								BookClubBookSuggestions::SuggestedById,
+							)
+							.to(BookClubMembers::Table, BookClubMembers::Id)
+							.on_delete(ForeignKeyAction::Cascade)
+							.on_update(ForeignKeyAction::Cascade),
+					)
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk-book_club_book_suggestions-resolved_by")
+							.from(
+								BookClubBookSuggestions::Table,
+								BookClubBookSuggestions::ResolvedById,
+							)
+							.to(BookClubMembers::Table, BookClubMembers::Id)
+							.on_delete(ForeignKeyAction::SetNull)
+							.on_update(ForeignKeyAction::Cascade),
+					)
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk-book_club_book_suggestions-book")
+							.from(
+								BookClubBookSuggestions::Table,
+								BookClubBookSuggestions::BookId,
+							)
+							.to(Media::Table, Media::Id)
+							.on_delete(ForeignKeyAction::Cascade)
+							.on_update(ForeignKeyAction::Cascade),
+					)
+					.to_owned(),
+			)
+			.await?;
+
+		manager
+			.create_table(
+				Table::create()
+					.table(BookClubBookSuggestionLikes::Table)
+					.if_not_exists()
+					.col(
+						ColumnDef::new(BookClubBookSuggestionLikes::Id)
+							.integer()
+							.not_null()
+							.auto_increment()
+							.primary_key(),
+					)
+					.col(
+						ColumnDef::new(BookClubBookSuggestionLikes::Timestamp)
+							.date_time()
+							.not_null()
+							.default(Expr::current_timestamp()),
+					)
+					.col(
+						ColumnDef::new(BookClubBookSuggestionLikes::LikedById)
+							.text()
+							.not_null(),
+					)
+					.col(
+						ColumnDef::new(BookClubBookSuggestionLikes::SuggestionId)
+							.text()
+							.not_null(),
+					)
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk-book_club_book_suggestion_likes-suggestion")
+							.from(
+								BookClubBookSuggestionLikes::Table,
+								BookClubBookSuggestionLikes::SuggestionId,
+							)
+							.to(
+								BookClubBookSuggestions::Table,
+								BookClubBookSuggestions::Id,
+							)
+							.on_delete(ForeignKeyAction::Cascade)
+							.on_update(ForeignKeyAction::Cascade),
+					)
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk-book_club_book_suggestion_likes-member")
+							.from(
+								BookClubBookSuggestionLikes::Table,
+								BookClubBookSuggestionLikes::LikedById,
+							)
+							.to(BookClubMembers::Table, BookClubMembers::Id)
+							.on_delete(ForeignKeyAction::Cascade)
+							.on_update(ForeignKeyAction::Cascade),
+					)
+					.to_owned(),
+			)
+			.await?;
+
+		manager
+			.create_table(
+				Table::create()
+					.table(BookClubDiscussions::Table)
+					.if_not_exists()
+					.col(
+						ColumnDef::new(BookClubDiscussions::Id)
+							.text()
+							.not_null()
+							.primary_key(),
+					)
+					.col(
+						ColumnDef::new(BookClubDiscussions::IsLocked)
+							.boolean()
+							.not_null(),
+					)
+					.col(
+						ColumnDef::new(BookClubDiscussions::IsArchived)
+							.boolean()
+							.not_null(),
+					)
+					.col(ColumnDef::new(BookClubDiscussions::BookClubBookId).text())
+					.col(ColumnDef::new(BookClubDiscussions::Title).text())
+					.col(
+						ColumnDef::new(BookClubDiscussions::IsPinned)
+							.boolean()
+							.not_null(),
+					)
+					.col(ColumnDef::new(BookClubDiscussions::Emoji).text())
+					.col(
+						ColumnDef::new(BookClubDiscussions::CreatedAt)
+							.date_time()
+							.not_null()
+							.default(Expr::current_timestamp()),
+					)
+					.col(
+						ColumnDef::new(BookClubDiscussions::BookClubId)
+							.text()
+							.not_null(),
+					)
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk-book_club_discussions-book_club")
+							.from(
+								BookClubDiscussions::Table,
+								BookClubDiscussions::BookClubId,
+							)
+							.to(BookClubs::Table, BookClubs::Id)
+							.on_delete(ForeignKeyAction::Cascade)
+							.on_update(ForeignKeyAction::Cascade),
+					)
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk-book_club_discussions-book")
+							.from(
+								BookClubDiscussions::Table,
+								BookClubDiscussions::BookClubBookId,
+							)
+							.to(BookClubBooks::Table, BookClubBooks::Id)
+							.on_delete(ForeignKeyAction::SetNull)
+							.on_update(ForeignKeyAction::Cascade),
+					)
+					.to_owned(),
+			)
+			.await?;
+
+		manager
+			.create_table(
+				Table::create()
+					.table(BookClubDiscussionMessage::Table)
+					.if_not_exists()
+					.col(
+						ColumnDef::new(BookClubDiscussionMessage::Id)
+							.text()
+							.not_null()
+							.primary_key(),
+					)
+					.col(
+						ColumnDef::new(BookClubDiscussionMessage::Content)
+							.text()
+							.not_null(),
+					)
+					.col(
+						ColumnDef::new(BookClubDiscussionMessage::Timestamp)
+							.date_time()
+							.not_null(),
+					)
+					.col(ColumnDef::new(BookClubDiscussionMessage::EditedAt).date_time())
+					.col(
+						ColumnDef::new(BookClubDiscussionMessage::IsPinnedMessage)
+							.boolean()
+							.not_null(),
+					)
+					.col(ColumnDef::new(BookClubDiscussionMessage::DeletedAt).text())
+					.col(
+						ColumnDef::new(BookClubDiscussionMessage::ParentMessageId).text(),
+					)
+					.col(
+						ColumnDef::new(BookClubDiscussionMessage::DiscussionId)
+							.text()
+							.not_null(),
+					)
+					.col(ColumnDef::new(BookClubDiscussionMessage::MemberId).text())
+					.col(
+						ColumnDef::new(BookClubDiscussionMessage::BookClubId)
+							.text()
+							.not_null(),
+					)
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk-book_club_discussion_message-parent")
+							.from(
+								BookClubDiscussionMessage::Table,
+								BookClubDiscussionMessage::ParentMessageId,
+							)
+							.to(
+								BookClubDiscussionMessage::Table,
+								BookClubDiscussionMessage::Id,
+							)
+							.on_delete(ForeignKeyAction::SetNull)
+							.on_update(ForeignKeyAction::Cascade),
+					)
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk-book_club_discussion_message-discussion")
+							.from(
+								BookClubDiscussionMessage::Table,
+								BookClubDiscussionMessage::DiscussionId,
+							)
+							.to(BookClubDiscussions::Table, BookClubDiscussions::Id)
+							.on_delete(ForeignKeyAction::Cascade)
+							.on_update(ForeignKeyAction::Cascade),
+					)
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk-book_club_discussion_message-member")
+							.from(
+								BookClubDiscussionMessage::Table,
+								BookClubDiscussionMessage::MemberId,
+							)
+							.to(BookClubMembers::Table, BookClubMembers::Id)
+							.on_delete(ForeignKeyAction::Cascade)
+							.on_update(ForeignKeyAction::Cascade),
+					)
+					.col(
+						ColumnDef::new(BookClubDiscussionMessage::ReplyToMessageId)
+							.text(),
+					)
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk-book_club_discussion_message-book_club")
+							.from(
+								BookClubDiscussionMessage::Table,
+								BookClubDiscussionMessage::BookClubId,
+							)
+							.to(BookClubs::Table, BookClubs::Id)
+							.on_delete(ForeignKeyAction::Cascade)
+							.on_update(ForeignKeyAction::Cascade),
+					)
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk-bcdm-reply_to")
+							.from(
+								BookClubDiscussionMessage::Table,
+								BookClubDiscussionMessage::ReplyToMessageId,
+							)
+							.to(
+								BookClubDiscussionMessage::Table,
+								BookClubDiscussionMessage::Id,
+							)
+							.on_delete(ForeignKeyAction::SetNull)
+							.on_update(ForeignKeyAction::Cascade),
+					)
+					.to_owned(),
+			)
+			.await?;
+
+		manager
+			.create_table(
+				Table::create()
+					.table(BookClubDiscussionMessageReactions::Table)
+					.if_not_exists()
+					.col(
+						ColumnDef::new(BookClubDiscussionMessageReactions::Id)
+							.text()
+							.not_null()
+							.primary_key(),
+					)
+					.col(ColumnDef::new(BookClubDiscussionMessageReactions::Emoji).text())
+					.col(
+						ColumnDef::new(BookClubDiscussionMessageReactions::CustomEmojiId)
+							.integer(),
+					)
+					.col(
+						ColumnDef::new(BookClubDiscussionMessageReactions::CreatedAt)
+							.date_time()
+							.not_null()
+							.default(Expr::current_timestamp()),
+					)
+					.col(
+						ColumnDef::new(BookClubDiscussionMessageReactions::MemberId)
+							.text()
+							.not_null(),
+					)
+					.col(
+						ColumnDef::new(BookClubDiscussionMessageReactions::MessageId)
+							.text()
+							.not_null(),
+					)
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk-bcdmr-message")
+							.from(
+								BookClubDiscussionMessageReactions::Table,
+								BookClubDiscussionMessageReactions::MessageId,
+							)
+							.to(
+								BookClubDiscussionMessage::Table,
+								BookClubDiscussionMessage::Id,
+							)
+							.on_delete(ForeignKeyAction::Cascade)
+							.on_update(ForeignKeyAction::Cascade),
+					)
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk-bcdmr-member")
+							.from(
+								BookClubDiscussionMessageReactions::Table,
+								BookClubDiscussionMessageReactions::MemberId,
+							)
+							.to(BookClubMembers::Table, BookClubMembers::Id)
+							.on_delete(ForeignKeyAction::Cascade)
+							.on_update(ForeignKeyAction::Cascade),
+					)
+					.to_owned(),
+			)
+			.await?;
+
+		manager
+			.create_table(
+				Table::create()
+					.table(CustomEmojis::Table)
+					.if_not_exists()
+					.col(
+						ColumnDef::new(CustomEmojis::Id)
+							.integer()
+							.not_null()
+							.auto_increment()
+							.primary_key(),
+					)
+					.col(
+						ColumnDef::new(CustomEmojis::Name)
+							.text()
+							.not_null()
+							.unique_key(),
+					)
+					.col(
+						ColumnDef::new(CustomEmojis::IsAnimated)
+							.boolean()
+							.not_null()
+							.default(false),
+					)
+					.col(
+						ColumnDef::new(CustomEmojis::FileExtension)
+							.text()
+							.not_null()
+							.default("gif"),
+					)
+					.col(
+						ColumnDef::new(CustomEmojis::CreatedAt)
+							.date_time()
+							.not_null()
+							.default(Expr::current_timestamp()),
+					)
+					.col(ColumnDef::new(CustomEmojis::CreatedById).text().not_null())
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk-custom_emojis-created_by")
+							.from(CustomEmojis::Table, CustomEmojis::CreatedById)
+							.to(Users::Table, Users::Id)
+							.on_delete(ForeignKeyAction::Cascade)
+							.on_update(ForeignKeyAction::Cascade),
+					)
+					.to_owned(),
+			)
+			.await?;
+
+		// membership lookup (user_id + book_club_id)
+		manager
+			.create_index(
+				Index::create()
+					.name("idx_bcm_user_club")
+					.table(BookClubMembers::Table)
+					.col(BookClubMembers::UserId)
+					.col(BookClubMembers::BookClubId)
+					.to_owned(),
+			)
+			.await?;
+
+		// book_club_discussions by club
+		manager
+			.create_index(
+				Index::create()
+					.name("idx_bcd_club")
+					.table(BookClubDiscussions::Table)
+					.col(BookClubDiscussions::BookClubId)
+					.to_owned(),
+			)
+			.await?;
+		// book_club_discussions by book
+		manager
+			.create_index(
+				Index::create()
+					.name("idx_bcd_book")
+					.table(BookClubDiscussions::Table)
+					.col(BookClubDiscussions::BookClubBookId)
+					.to_owned(),
+			)
+			.await?;
+
+		// book_club_discussion_message by discussion+timestamp
+		manager
+			.create_index(
+				Index::create()
+					.name("idx_bcdm_discussion_ts")
+					.table(BookClubDiscussionMessage::Table)
+					.col(BookClubDiscussionMessage::DiscussionId)
+					.col(BookClubDiscussionMessage::Timestamp)
+					.to_owned(),
+			)
+			.await?;
+		// book_club_discussion_message by parent message (threads)
+		manager
+			.create_index(
+				Index::create()
+					.name("idx_bcdm_parent")
+					.table(BookClubDiscussionMessage::Table)
+					.col(BookClubDiscussionMessage::ParentMessageId)
+					.to_owned(),
+			)
+			.await?;
+		// book_club_discussion_message by club
+		manager
+			.create_index(
+				Index::create()
+					.name("idx_bcdm_club")
+					.table(BookClubDiscussionMessage::Table)
+					.col(BookClubDiscussionMessage::BookClubId)
+					.to_owned(),
+			)
+			.await?;
+
+		// Makes sure only one emoji reaction per user per message
+		manager
+			.create_index(
+				Index::create()
+					.name("idx_bcdmr_msg_member_emoji")
+					.table(BookClubDiscussionMessageReactions::Table)
+					.col(BookClubDiscussionMessageReactions::MessageId)
+					.col(BookClubDiscussionMessageReactions::MemberId)
+					.col(BookClubDiscussionMessageReactions::Emoji)
+					.col(BookClubDiscussionMessageReactions::CustomEmojiId)
+					.unique()
+					.to_owned(),
+			)
+			.await?;
+
+		// For querying all reactions on a message
+		manager
+			.create_index(
+				Index::create()
+					.name("idx_bcdmr_message")
+					.table(BookClubDiscussionMessageReactions::Table)
+					.col(BookClubDiscussionMessageReactions::MessageId)
+					.to_owned(),
+			)
+			.await?;
+
+		// book_club_discussion_message for reply_to lookup
+		manager
+			.create_index(
+				Index::create()
+					.name("idx_bcdm_reply_to")
+					.table(BookClubDiscussionMessage::Table)
+					.col(BookClubDiscussionMessage::ReplyToMessageId)
+					.to_owned(),
+			)
+			.await?;
+
+		// For making sure a user can only like a suggestion once
+		manager
+			.create_index(
+				Index::create()
+					.name("idx_bcbsl_sugg_member")
+					.table(BookClubBookSuggestionLikes::Table)
+					.col(BookClubBookSuggestionLikes::SuggestionId)
+					.col(BookClubBookSuggestionLikes::LikedById)
+					.unique()
+					.to_owned(),
+			)
+			.await?;
+
+		// book_club_book_suggestions by club
+		manager
+			.create_index(
+				Index::create()
+					.name("idx_bcbs_club")
+					.table(BookClubBookSuggestions::Table)
+					.col(BookClubBookSuggestions::BookClubId)
+					.to_owned(),
+			)
+			.await?;
+
+		// book_club_books by club
+		manager
+			.create_index(
+				Index::create()
+					.name("idx_bcb_club")
+					.table(BookClubBooks::Table)
+					.col(BookClubBooks::BookClubId)
+					.to_owned(),
+			)
+			.await?;
+
+		// book_club_invitations by user
+		manager
+			.create_index(
+				Index::create()
+					.name("idx_bci_user")
+					.table(BookClubInvitations::Table)
+					.col(BookClubInvitations::UserId)
+					.to_owned(),
+			)
+			.await?;
+		// book_club_invitations by club
+		manager
+			.create_index(
+				Index::create()
+					.name("idx_bci_club")
+					.table(BookClubInvitations::Table)
+					.col(BookClubInvitations::BookClubId)
+					.to_owned(),
+			)
+			.await?;
+
+		Ok(())
+	}
+
+	async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
+		manager
+			.drop_table(
+				Table::drop()
+					.table(BookClubDiscussionMessageReactions::Table)
+					.if_exists()
+					.to_owned(),
+			)
+			.await?;
+		manager
+			.drop_table(
+				Table::drop()
+					.table(CustomEmojis::Table)
+					.if_exists()
+					.to_owned(),
+			)
+			.await?;
+		manager
+			.drop_table(
+				Table::drop()
+					.table(BookClubDiscussionMessage::Table)
+					.if_exists()
+					.to_owned(),
+			)
+			.await?;
+		manager
+			.drop_table(
+				Table::drop()
+					.table(BookClubDiscussions::Table)
+					.if_exists()
+					.to_owned(),
+			)
+			.await?;
+		manager
+			.drop_table(
+				Table::drop()
+					.table(BookClubBookSuggestionLikes::Table)
+					.if_exists()
+					.to_owned(),
+			)
+			.await?;
+		manager
+			.drop_table(
+				Table::drop()
+					.table(BookClubBookSuggestions::Table)
+					.if_exists()
+					.to_owned(),
+			)
+			.await?;
+		manager
+			.drop_table(
+				Table::drop()
+					.table(BookClubMemberFavoriteBooks::Table)
+					.if_exists()
+					.to_owned(),
+			)
+			.await?;
+		manager
+			.drop_table(
+				Table::drop()
+					.table(BookClubBooks::Table)
+					.if_exists()
+					.to_owned(),
+			)
+			.await?;
+		manager
+			.drop_table(
+				Table::drop()
+					.table(BookClubInvitations::Table)
+					.if_exists()
+					.to_owned(),
+			)
+			.await?;
+		manager
+			.drop_table(
+				Table::drop()
+					.table(BookClubMembers::Table)
+					.if_exists()
+					.to_owned(),
+			)
+			.await?;
+		manager
+			.drop_table(Table::drop().table(BookClubs::Table).if_exists().to_owned())
+			.await?;
+
+		// Start recreate of original
+
+		manager
+			.create_table(
+				Table::create()
+					.table(BookClubs::Table)
+					.if_not_exists()
+					.col(
+						ColumnDef::new(BookClubs::Id)
+							.text()
+							.not_null()
+							.primary_key(),
+					)
+					.col(ColumnDef::new(BookClubs::Name).text().not_null())
+					.col(
+						ColumnDef::new(BookClubs::Slug)
+							.text()
+							.not_null()
+							.unique_key(),
+					)
+					.col(ColumnDef::new(BookClubs::Description).text())
+					.col(ColumnDef::new(BookClubs::IsPrivate).boolean().not_null())
+					.col(ColumnDef::new(BookClubs::MemberRoleSpec).json())
+					.col(ColumnDef::new(BookClubs::CreatedAt).date_time().not_null())
+					.col(ColumnDef::new(BookClubs::Emoji).text())
+					.to_owned(),
+			)
+			.await?;
+
+		manager
+			.create_table(
+				Table::create()
+					.table(BookClubSchedules::Table)
+					.if_not_exists()
+					.col(
+						ColumnDef::new(BookClubSchedules::Id)
+							.integer()
+							.not_null()
+							.auto_increment()
+							.primary_key(),
+					)
+					.col(ColumnDef::new(BookClubSchedules::DefaultIntervalDays).integer())
+					.col(
+						ColumnDef::new(BookClubSchedules::BookClubId)
+							.string()
+							.not_null(),
+					)
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk-book_club_schedules-book_club")
+							.from(BookClubSchedules::Table, BookClubSchedules::BookClubId)
+							.to(BookClubs::Table, BookClubs::Id)
+							.on_delete(ForeignKeyAction::Cascade)
+							.on_update(ForeignKeyAction::Cascade),
+					)
+					.to_owned(),
+			)
+			.await?;
+
+		manager
+			.create_table(
+				Table::create()
+					.table(BookClubMembers::Table)
+					.if_not_exists()
+					.col(
+						ColumnDef::new(BookClubMembers::Id)
+							.text()
+							.not_null()
+							.primary_key(),
+					)
+					.col(ColumnDef::new(BookClubMembers::DisplayName).text())
+					.col(
+						ColumnDef::new(OldBookClubMembers::IsCreator)
+							.boolean()
+							.not_null(),
+					)
+					.col(
+						ColumnDef::new(BookClubMembers::HideProgress)
+							.boolean()
+							.not_null(),
+					)
+					.col(
+						ColumnDef::new(OldBookClubMembers::PrivateMembership)
+							.boolean()
+							.not_null(),
+					)
+					.col(ColumnDef::new(BookClubMembers::Role).integer().not_null())
+					.col(ColumnDef::new(BookClubMembers::UserId).text().not_null())
+					.col(
+						ColumnDef::new(BookClubMembers::BookClubId)
+							.text()
+							.not_null(),
+					)
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk-book_club_members-book_club")
+							.from(BookClubMembers::Table, BookClubMembers::BookClubId)
+							.to(BookClubs::Table, BookClubs::Id)
+							.on_delete(ForeignKeyAction::Cascade)
+							.on_update(ForeignKeyAction::Cascade),
+					)
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk-book_club_members-user")
+							.from(BookClubMembers::Table, BookClubMembers::UserId)
+							.to(Users::Table, Users::Id)
+							.on_delete(ForeignKeyAction::Cascade)
+							.on_update(ForeignKeyAction::Cascade),
+					)
+					.to_owned(),
+			)
+			.await?;
+
+		manager
+			.create_table(
+				Table::create()
+					.table(BookClubInvitations::Table)
+					.if_not_exists()
+					.col(
+						ColumnDef::new(BookClubInvitations::Id)
+							.text()
+							.not_null()
+							.primary_key(),
+					)
+					.col(
+						ColumnDef::new(BookClubInvitations::Role)
+							.integer()
+							.not_null(),
+					)
+					.col(
+						ColumnDef::new(BookClubInvitations::UserId)
+							.text()
+							.not_null(),
+					)
+					.col(
+						ColumnDef::new(BookClubInvitations::BookClubId)
+							.text()
+							.not_null(),
+					)
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk-book_club_invitations-book_club")
+							.from(
+								BookClubInvitations::Table,
+								BookClubInvitations::BookClubId,
+							)
+							.to(BookClubs::Table, BookClubs::Id)
+							.on_delete(ForeignKeyAction::Cascade)
+							.on_update(ForeignKeyAction::Cascade),
+					)
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk-book_club_invitations-user")
+							.from(BookClubInvitations::Table, BookClubInvitations::UserId)
+							.to(Users::Table, Users::Id)
+							.on_delete(ForeignKeyAction::Cascade)
+							.on_update(ForeignKeyAction::Cascade),
+					)
+					.to_owned(),
+			)
+			.await?;
+
+		manager
+			.create_table(
+				Table::create()
+					.table(BookClubMemberFavoriteBooks::Table)
+					.if_not_exists()
+					.col(
+						ColumnDef::new(BookClubMemberFavoriteBooks::Id)
+							.text()
+							.not_null()
+							.primary_key(),
+					)
+					.col(ColumnDef::new(BookClubMemberFavoriteBooks::Title).text())
+					.col(ColumnDef::new(BookClubMemberFavoriteBooks::Author).text())
+					.col(ColumnDef::new(BookClubMemberFavoriteBooks::Url).text())
+					.col(ColumnDef::new(BookClubMemberFavoriteBooks::Notes).text())
+					.col(
+						ColumnDef::new(BookClubMemberFavoriteBooks::MemberId)
+							.text()
+							.not_null()
+							.unique_key(),
+					)
+					.col(ColumnDef::new(BookClubMemberFavoriteBooks::BookId).text())
+					.col(ColumnDef::new(BookClubMemberFavoriteBooks::ImageUrl).text())
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk-book_club_member_favorite_books-member")
+							.from(
+								BookClubMemberFavoriteBooks::Table,
+								BookClubMemberFavoriteBooks::MemberId,
+							)
+							.to(BookClubMembers::Table, BookClubMembers::Id)
+							.on_delete(ForeignKeyAction::Cascade)
+							.on_update(ForeignKeyAction::Cascade),
+					)
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk-book_club_member_favorite_books-book")
+							.from(
+								BookClubMemberFavoriteBooks::Table,
+								BookClubMemberFavoriteBooks::BookId,
+							)
+							.to(Media::Table, Media::Id)
+							.on_delete(ForeignKeyAction::Cascade)
+							.on_update(ForeignKeyAction::Cascade),
+					)
+					.to_owned(),
+			)
+			.await?;
+
+		manager
+			.create_table(
+				Table::create()
+					.table(BookClubBookSuggestions::Table)
+					.if_not_exists()
+					.col(
+						ColumnDef::new(BookClubBookSuggestions::Id)
+							.text()
+							.not_null()
+							.primary_key(),
+					)
+					.col(ColumnDef::new(BookClubBookSuggestions::Title).text())
+					.col(ColumnDef::new(BookClubBookSuggestions::Author).text())
+					.col(ColumnDef::new(BookClubBookSuggestions::Url).text())
+					.col(ColumnDef::new(BookClubBookSuggestions::Notes).text())
+					.col(
+						ColumnDef::new(BookClubBookSuggestions::SuggestedById)
+							.text()
+							.not_null(),
+					)
+					.col(ColumnDef::new(BookClubBookSuggestions::BookId).text())
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk-book_club_book_suggestions-member")
+							.from(
+								BookClubBookSuggestions::Table,
+								BookClubBookSuggestions::SuggestedById,
+							)
+							.to(BookClubMembers::Table, BookClubMembers::Id)
+							.on_delete(ForeignKeyAction::Cascade)
+							.on_update(ForeignKeyAction::Cascade),
+					)
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk-book_club_book_suggestions-book")
+							.from(
+								BookClubBookSuggestions::Table,
+								BookClubBookSuggestions::BookId,
+							)
+							.to(Media::Table, Media::Id)
+							.on_delete(ForeignKeyAction::Cascade)
+							.on_update(ForeignKeyAction::Cascade),
+					)
+					.to_owned(),
+			)
+			.await?;
+
+		manager
+			.create_table(
+				Table::create()
+					.table(BookClubBooks::Table)
+					.if_not_exists()
+					.col(
+						ColumnDef::new(BookClubBooks::Id)
+							.text()
+							.not_null()
+							.primary_key(),
+					)
+					.col(
+						ColumnDef::new(OldBookClubBooks::StartAt)
+							.date_time()
+							.not_null(),
+					)
+					.col(
+						ColumnDef::new(OldBookClubBooks::EndAt)
+							.date_time()
+							.not_null(),
+					)
+					.col(
+						ColumnDef::new(OldBookClubBooks::DiscussionDurationDays)
+							.integer(),
+					)
+					.col(ColumnDef::new(BookClubBooks::Title).text())
+					.col(ColumnDef::new(BookClubBooks::Author).text())
+					.col(ColumnDef::new(BookClubBooks::Url).text())
+					.col(ColumnDef::new(BookClubBooks::ImageUrl).text())
+					.col(ColumnDef::new(BookClubBooks::BookEntityId).text())
+					.col(ColumnDef::new(OldBookClubBooks::BookClubScheduleId).integer())
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk-book_club_books-schedule")
+							.from(
+								BookClubBooks::Table,
+								OldBookClubBooks::BookClubScheduleId,
+							)
+							.to(BookClubSchedules::Table, BookClubSchedules::Id)
+							.on_delete(ForeignKeyAction::Cascade)
+							.on_update(ForeignKeyAction::Cascade),
+					)
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk-book_club_books-book_entity")
+							.from(BookClubBooks::Table, BookClubBooks::BookEntityId)
+							.to(Media::Table, Media::Id)
+							.on_delete(ForeignKeyAction::Cascade)
+							.on_update(ForeignKeyAction::Cascade),
+					)
+					.to_owned(),
+			)
+			.await?;
+
+		manager
+			.create_table(
+				Table::create()
+					.table(BookClubBookSuggestionLikes::Table)
+					.if_not_exists()
+					.col(
+						ColumnDef::new(BookClubBookSuggestionLikes::Id)
+							.text()
+							.not_null()
+							.primary_key(),
+					)
+					.col(
+						ColumnDef::new(BookClubBookSuggestionLikes::SuggestionId)
+							.text()
+							.not_null(),
+					)
+					.col(
+						ColumnDef::new(OldBookClubBookSuggestionLikes::MemberId)
+							.text()
+							.not_null(),
+					)
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk-book_club_book_suggestion_likes-suggestion")
+							.from(
+								BookClubBookSuggestionLikes::Table,
+								BookClubBookSuggestionLikes::SuggestionId,
+							)
+							.to(
+								BookClubBookSuggestions::Table,
+								BookClubBookSuggestions::Id,
+							)
+							.on_delete(ForeignKeyAction::Cascade)
+							.on_update(ForeignKeyAction::Cascade),
+					)
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk-book_club_book_suggestion_likes-member")
+							.from(
+								BookClubBookSuggestionLikes::Table,
+								OldBookClubBookSuggestionLikes::MemberId,
+							)
+							.to(BookClubMembers::Table, BookClubMembers::Id)
+							.on_delete(ForeignKeyAction::Cascade)
+							.on_update(ForeignKeyAction::Cascade),
+					)
+					.to_owned(),
+			)
+			.await?;
+
+		manager
+			.create_table(
+				Table::create()
+					.table(BookClubDiscussions::Table)
+					.if_not_exists()
+					.col(
+						ColumnDef::new(BookClubDiscussions::Id)
+							.text()
+							.not_null()
+							.primary_key(),
+					)
+					.col(ColumnDef::new(BookClubDiscussions::Title).text().not_null())
+					.col(
+						ColumnDef::new(OldBookClubDiscussions::BookId)
+							.text()
+							.not_null(),
+					)
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk-book_club_discussions-book")
+							.from(
+								BookClubDiscussions::Table,
+								OldBookClubDiscussions::BookId,
+							)
+							.to(BookClubBooks::Table, BookClubBooks::Id)
+							.on_delete(ForeignKeyAction::Cascade)
+							.on_update(ForeignKeyAction::Cascade),
+					)
+					.to_owned(),
+			)
+			.await?;
+
+		manager
+			.create_table(
+				Table::create()
+					.table(BookClubDiscussionMessage::Table)
+					.if_not_exists()
+					.col(
+						ColumnDef::new(BookClubDiscussionMessage::Id)
+							.text()
+							.not_null()
+							.primary_key(),
+					)
+					.col(
+						ColumnDef::new(BookClubDiscussionMessage::Content)
+							.text()
+							.not_null(),
+					)
+					.col(
+						ColumnDef::new(OldBookClubDiscussionMessage::CreatedAt)
+							.date_time()
+							.not_null(),
+					)
+					.col(
+						ColumnDef::new(OldBookClubDiscussionMessage::UpdatedAt)
+							.date_time()
+							.not_null(),
+					)
+					.col(
+						ColumnDef::new(BookClubDiscussionMessage::ParentMessageId).text(),
+					)
+					.col(
+						ColumnDef::new(BookClubDiscussionMessage::DiscussionId)
+							.text()
+							.not_null(),
+					)
+					.col(
+						ColumnDef::new(BookClubDiscussionMessage::MemberId)
+							.text()
+							.not_null(),
+					)
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk-book_club_discussion_message-parent")
+							.from(
+								BookClubDiscussionMessage::Table,
+								BookClubDiscussionMessage::ParentMessageId,
+							)
+							.to(
+								BookClubDiscussionMessage::Table,
+								BookClubDiscussionMessage::Id,
+							)
+							.on_delete(ForeignKeyAction::Cascade)
+							.on_update(ForeignKeyAction::Cascade),
+					)
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk-book_club_discussion_message-discussion")
+							.from(
+								BookClubDiscussionMessage::Table,
+								BookClubDiscussionMessage::DiscussionId,
+							)
+							.to(BookClubDiscussions::Table, BookClubDiscussions::Id)
+							.on_delete(ForeignKeyAction::Cascade)
+							.on_update(ForeignKeyAction::Cascade),
+					)
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk-book_club_discussion_message-member")
+							.from(
+								BookClubDiscussionMessage::Table,
+								BookClubDiscussionMessage::MemberId,
+							)
+							.to(BookClubMembers::Table, BookClubMembers::Id)
+							.on_delete(ForeignKeyAction::Cascade)
+							.on_update(ForeignKeyAction::Cascade),
+					)
+					.to_owned(),
+			)
+			.await?;
+
+		manager
+			.create_table(
+				Table::create()
+					.table(BookClubDiscussionMessageLikes::Table)
+					.if_not_exists()
+					.col(
+						ColumnDef::new(BookClubDiscussionMessageLikes::Id)
+							.text()
+							.not_null()
+							.primary_key(),
+					)
+					.col(
+						ColumnDef::new(BookClubDiscussionMessageLikes::MessageId)
+							.text()
+							.not_null(),
+					)
+					.col(
+						ColumnDef::new(OldBookClubDiscussionMessageLikes::MemberId)
+							.text()
+							.not_null(),
+					)
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk-book_club_discussion_message_likes-message")
+							.from(
+								BookClubDiscussionMessageLikes::Table,
+								BookClubDiscussionMessageLikes::MessageId,
+							)
+							.to(
+								BookClubDiscussionMessage::Table,
+								BookClubDiscussionMessage::Id,
+							)
+							.on_delete(ForeignKeyAction::Cascade)
+							.on_update(ForeignKeyAction::Cascade),
+					)
+					.foreign_key(
+						ForeignKey::create()
+							.name("fk-book_club_discussion_message_likes-member")
+							.from(
+								BookClubDiscussionMessageLikes::Table,
+								OldBookClubDiscussionMessageLikes::MemberId,
+							)
+							.to(BookClubMembers::Table, BookClubMembers::Id)
+							.on_delete(ForeignKeyAction::Cascade)
+							.on_update(ForeignKeyAction::Cascade),
+					)
+					.to_owned(),
+			)
+			.await?;
+
+		Ok(())
+	}
+}
+
+#[derive(DeriveIden)]
+enum BookClubs {
+	Table,
+	Id,
+	Name,
+	Slug,
+	Description,
+	IsPrivate,
+	MemberRoleSpec,
+	CreatedAt,
+	Emoji,
+}
+
+#[derive(DeriveIden)]
+enum BookClubMembers {
+	Table,
+	Id,
+	DisplayName,
+	Bio,
+	HideProgress,
+	Role,
+	JoinedAt,
+	UserId,
+	BookClubId,
+}
+
+#[derive(DeriveIden)]
+enum BookClubInvitations {
+	Table,
+	Id,
+	Role,
+	UserId,
+	BookClubId,
+}
+
+#[derive(DeriveIden)]
+enum BookClubMemberFavoriteBooks {
+	Table,
+	Id,
+	Title,
+	Author,
+	Url,
+	Notes,
+	MemberId,
+	BookId,
+	ImageUrl,
+}
+
+#[derive(DeriveIden)]
+enum BookClubBooks {
+	Table,
+	Id,
+	Position,
+	CompletedAt,
+	Title,
+	Author,
+	Url,
+	ImageUrl,
+	BookEntityId,
+	BookClubId,
+	AddedAt,
+}
+
+#[derive(DeriveIden)]
+enum BookClubBookSuggestions {
+	Table,
+	Id,
+	BookClubId,
+	Title,
+	Author,
+	Url,
+	Notes,
+	Status,
+	ResolvedAt,
+	ResolvedById,
+	CreatedAt,
+	SuggestedById,
+	BookId,
+}
+
+#[derive(DeriveIden)]
+enum BookClubBookSuggestionLikes {
+	Table,
+	Id,
+	Timestamp,
+	LikedById,
+	SuggestionId,
+}
+
+#[derive(DeriveIden)]
+enum BookClubDiscussions {
+	Table,
+	Id,
+	IsLocked,
+	IsArchived,
+	BookClubBookId,
+	Title,
+	IsPinned,
+	CreatedAt,
+	BookClubId,
+	Emoji,
+}
+
+#[derive(DeriveIden)]
+enum BookClubDiscussionMessage {
+	Table,
+	Id,
+	Content,
+	Timestamp,
+	EditedAt,
+	IsPinnedMessage,
+	DeletedAt,
+	ParentMessageId,
+	ReplyToMessageId,
+	DiscussionId,
+	MemberId,
+	BookClubId,
+}
+
+#[derive(DeriveIden)]
+#[allow(dead_code)]
+enum BookClubDiscussionMessageLikes {
+	Table,
+	Id,
+	Timestamp,
+	LikedById,
+	MessageId,
+}
+
+#[derive(DeriveIden)]
+enum BookClubDiscussionMessageReactions {
+	Table,
+	Id,
+	Emoji,
+	CustomEmojiId,
+	CreatedAt,
+	MemberId,
+	MessageId,
+}
+
+#[derive(DeriveIden)]
+enum CustomEmojis {
+	Table,
+	Id,
+	Name,
+	IsAnimated,
+	FileExtension,
+	CreatedAt,
+	CreatedById,
+}
+
+// Start of OLD defs
+
+#[derive(DeriveIden)]
+enum BookClubSchedules {
+	Table,
+	Id,
+	DefaultIntervalDays,
+	BookClubId,
+}
+
+#[derive(DeriveIden)]
+enum OldBookClubMembers {
+	IsCreator,
+	PrivateMembership,
+}
+
+#[derive(DeriveIden)]
+enum OldBookClubBooks {
+	StartAt,
+	EndAt,
+	DiscussionDurationDays,
+	BookClubScheduleId,
+}
+
+#[derive(DeriveIden)]
+enum OldBookClubBookSuggestionLikes {
+	MemberId,
+}
+
+#[derive(DeriveIden)]
+enum OldBookClubDiscussions {
+	BookId,
+}
+
+#[derive(DeriveIden)]
+enum OldBookClubDiscussionMessage {
+	CreatedAt,
+	UpdatedAt,
+}
+
+#[derive(DeriveIden)]
+enum OldBookClubDiscussionMessageLikes {
+	MemberId,
+}
+
+#[derive(DeriveIden)]
+enum Users {
+	Table,
+	Id,
+}
+
+#[derive(DeriveIden)]
+enum Media {
+	Table,
+	Id,
+}

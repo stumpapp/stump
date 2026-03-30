@@ -613,11 +613,11 @@ public class EPUBView: ExpoView {
     func goForward() {
         let task = Task { [weak self] in
             guard let self = self else { return }
-            let didMove = await self.navigator?.goForward(options: NavigatorGoOptions(animated: true)) ?? false
+            guard let navigator = self.navigator else { return }
+            let didMove = await navigator.goForward(options: NavigatorGoOptions(animated: true))
             if !didMove {
                 await MainActor.run {
-                    guard let navigator = self.navigator,
-                          let currentLocator = navigator.currentLocation
+                    guard let currentLocator = navigator.currentLocation
                     else {
                         return
                     }

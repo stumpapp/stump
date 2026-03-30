@@ -3,6 +3,17 @@ type FormatSeriesPositionParams = {
 	prefix?: string
 }
 
+// TODO(metadata): Fix this at the core
+// this is kinda a bandaid fix for one of the items in https://github.com/stumpapp/stump/issues/885
+// a higher fidelity fix would be to correct at core when parsing meta
+const decodeHtmlEntities = (str: string): string =>
+	str
+		.replace(/&amp;/g, '&')
+		.replace(/&lt;/g, '<')
+		.replace(/&gt;/g, '>')
+		.replace(/&quot;/g, '"')
+		.replace(/&#039;/g, "'")
+
 /**
  * A helper to align how Stump formats book positions in a series.
  *
@@ -26,7 +37,7 @@ export const formatSeriesPosition = (
 	const withPrefix = params?.prefix ? `${params.prefix} ${primaryClause}` : primaryClause
 
 	if (params?.seriesName) {
-		return `${withPrefix} in ${params.seriesName}`
+		return `${withPrefix} in ${decodeHtmlEntities(params.seriesName)}`
 	} else if (!showOfY) {
 		return `${withPrefix} in series`
 	}

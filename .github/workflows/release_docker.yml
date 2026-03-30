@@ -70,11 +70,11 @@ jobs:
   build-stable-docker:
     if: contains(github.event.pull_request.head.ref, 'release/v')
     name: Build docker image
-    runs-on: [self-hosted-large]
+    runs-on: [self-hosted]
     needs: [parse-semver, push-or-load]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
 
       - name: Build and push docker image
         uses: ./.github/actions/build-docker

@@ -49,10 +49,12 @@ export default function BookClubHeader() {
 				maxWidth: preferTopBar ? layoutMaxWidthPx || undefined : undefined,
 			}}
 		>
-			<div className="md:max-w-xl">
+			<div className="flex flex-col gap-1 md:max-w-xl">
 				<Heading>{name}</Heading>
 				{/* TODO: read more text for long descriptions... */}
-				<Text size="md">{description}</Text>
+				<Text size="md" variant="muted">
+					{description}
+				</Text>
 
 				<div className="mt-2">
 					<Text size="sm">

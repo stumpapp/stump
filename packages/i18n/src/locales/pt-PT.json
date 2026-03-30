@@ -260,6 +260,10 @@
 					"label": "Hide series tab",
 					"description": "Hide the series tab from the library navigation"
 				},
+				"skipBookOverview": {
+					"label": "Skip book overview",
+					"description": "Open the reader directly when selecting books in this library"
+				},
 				"options": {
 					"series": {
 						"label": "Series",
@@ -904,8 +908,7 @@
 									"pages": "Pages",
 									"tags": "Tags",
 									"createdAt": "Created at",
-									"updatedAt": "Updated at",
-									"readingStatus": "Reading status"
+									"updatedAt": "Updated at"
 								}
 							},
 							"book_meta": {
@@ -925,7 +928,11 @@
 									"characters": "Characters",
 									"teams": "Teams",
 									"genres": "Genre",
-									"coverArtists": "Cover artists"
+									"coverArtists": "Cover artists",
+									"ageRating": "Age rating",
+									"year": "Year",
+									"month": "Month",
+									"day": "Day"
 								}
 							},
 							"series": {
@@ -947,7 +954,8 @@
 									"status": "Status",
 									"volume": "Volume",
 									"metaType": "Type",
-									"ageRating": "Age rating"
+									"ageRating": "Age rating",
+									"year": "Start year"
 								}
 							},
 							"library": {
@@ -977,11 +985,6 @@
 					"listValue": {
 						"placeholder": "Add values",
 						"emptyState": "No values to display"
-					},
-					"enumValue": {
-						"placeholder": "Select values",
-						"emptyState": "No options available",
-						"selectPlaceholder": "Select a value"
 					}
 				}
 			}
@@ -1259,20 +1262,15 @@
 						"updateFailed": "A server error occurred while updating your profile. Please try again."
 					},
 					"avatarPicker": {
-						"heading": "Set your Avatar Image",
-						"subtitle": "Stump supports custom avatars, which can be set by providing a URL to an image. Image uploads are not supported in order to reduce the amount of data stored on the server.",
-						"preview": "A preview will appear here once you have entered a URL.",
-						"labels": {
-							"imageUrl": "Image URL",
-							"customAvatar": "Custom Avatar"
-						},
-						"buttons": {
-							"confirm": "Confirm Image",
-							"cancel": "Cancel",
-							"edit": "Edit",
-							"changeImage": "Change Image",
-							"removeImage": "Remove Image"
-						}
+						"label": "Avatar",
+						"heading": "Upload avatar",
+						"subtitle": "You can upload any image to use as your avatar for social features in Stump",
+						"dropzone": "Drop an image or click to select",
+						"changeImage": "Change Image",
+						"removeImage": "Remove Image",
+						"removeSelection": "Remove uploaded image",
+						"uploadFailed": "Failed to upload avatar",
+						"removeFailed": "Failed to remove avatar"
 					},
 					"buttons": {
 						"confirm": "Save Changes"
@@ -1697,9 +1695,38 @@
 						]
 					}
 				},
+				"helpfulLinks": {
+					"title": "Helpful links",
+					"description": "Links to resources that may be helpful for managing your Stump server instance",
+					"links": {
+						"documentation": "Documentation",
+						"changelog": "Changelog"
+					}
+				},
 				"serverPublicUrl": {
 					"label": "Public URL",
 					"description": "The URL that your server is accessible from outside your network, if applicable. This will enable invite links and other features"
+				},
+				"customEmojis": {
+					"title": "Custom emojis",
+					"description": "Upload and manage custom image emojis for your server",
+					"dropzone": "Drop an image or click to select",
+					"input": {
+						"label": "Emoji name",
+						"placeholder": "e.g. party_parrot"
+					},
+					"deleteModal": {
+						"title": "Delete emoji",
+						"description": "Are you sure you want to delete this emoji?"
+					},
+					"noCustomEmojis": "No custom emojis have been added yet",
+					"invalidName": "Please enter a valid name for your emoji",
+					"uploadError": "Failed to upload emoji",
+					"uploadSuccess": "Emoji uploaded",
+					"renameSuccess": "Emoji renamed",
+					"renameError": "Failed to rename emoji",
+					"deleteSuccess": "Emoji deleted",
+					"deleteError": "Failed to delete emoji"
 				}
 			}
 		},
@@ -2080,6 +2107,16 @@
 				"submit": {
 					"create": "Create emailer",
 					"update": "Update emailer"
+				},
+				"testEmailer": {
+					"button": "Send test email",
+					"recipientLabel": "Test recipient",
+					"recipientDescription": "An email address to send the test email to",
+					"success": "Test email sent successfully",
+					"error": {
+						"title": "Failed to send test email",
+						"description": "Check your SMTP settings and try again"
+					}
 				}
 			},
 			"createEmailer": {
@@ -2215,6 +2252,7 @@
 	"common": {
 		"add": "Add",
 		"cancel": "Cancel",
+		"clear": "Clear",
 		"confirm": "Confirm",
 		"delete": "Delete",
 		"enter": "Enter",
@@ -2227,6 +2265,7 @@
 		"update": "Update",
 		"upload": "Upload",
 		"uploading": "Uploading",
+		"uploadingEllipsis": "Uploading...",
 		"unimplemented": "This functionality is not yet implemented! Check back later",
 		"limitedFunctionality": "This is not yet fully implemented and is lacking some features. Check back later",
 		"logIn": "Log in",
@@ -2239,7 +2278,12 @@
 		"notUsedYet": "Not used yet",
 		"never": "Never",
 		"scan": "Scan",
-		"somethingWentWrong": "Something went wrong"
+		"somethingWentWrong": "Something went wrong",
+		"fileUpload": {
+			"someRejected": "Some files were rejected. Please check the file types and try again",
+			"tooManyFiles": "You have selected too many files",
+			"noValidFiles": "No valid files were selected"
+		}
 	},
 	"userPermissions": {
 		"ACCESS_API_KEYS": {
@@ -2365,6 +2409,10 @@
 		"WRITE_BACK_METADATA": {
 			"label": "Write back metadata",
 			"description": "Allows the user to write metadata changes back to the source files"
+		},
+		"EDIT_THUMBNAILS": {
+			"label": "Edit thumbnails",
+			"description": "Allows the user to edit thumbnails for books and series"
 		}
 	}
 }

@@ -44,20 +44,14 @@ impl OpdsOpenSearch {
 		write_xml_element("InputEncoding", "UTF-8", &mut writer)?;
 		write_xml_element("OutputEncoding", "UTF-8", &mut writer)?;
 
-		let series_example = self.format_url("series?search={searchTerms}");
+		let search_url = self.format_url("search/feed?search={searchTerms}");
 
-		// start of series template URL
 		writer.write(
 			XmlEvent::start_element("Url")
-				.attr("template", &series_example)
+				.attr("template", &search_url)
 				.attr("type", OpdsLinkType::Acquisition.as_str()),
 		)?;
-		writer.write(XmlEvent::end_element())?; // end series template URL
-
-		// TODO: more templates? have to look into open search spec to see
-		// if that 'is possible' or if it is only supposed to be one
-
-		// https://developer.mozilla.org/en-US/docs/Web/OpenSearch
+		writer.write(XmlEvent::end_element())?;
 
 		writer.write(XmlEvent::end_element())?; // end of feed
 

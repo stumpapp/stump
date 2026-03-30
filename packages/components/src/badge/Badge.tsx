@@ -8,7 +8,7 @@ export const BADGE_VARIANTS = {
 	default: 'bg-background-surface-secondary text-foreground',
 	error: 'bg-red-100 text-red-800 dark:bg-red-700 dark:text-red-50',
 	primary: 'bg-fill-brand-secondary text-fill-brand',
-	secondary: 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100',
+	secondary: 'bg-background-inverse/95 text-foreground-on-inverse',
 	success: 'bg-green-100 text-green-800 dark:bg-green-700 dark:text-green-50',
 	warning: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-700 dark:text-yellow-50',
 }

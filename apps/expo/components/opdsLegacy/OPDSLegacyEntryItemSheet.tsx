@@ -4,7 +4,9 @@ import { isPseStreamLink, OPDSLegacyEntry } from '@stump/sdk'
 import { intlFormat } from 'date-fns'
 import { forwardRef } from 'react'
 import { Image, Platform, View } from 'react-native'
+import Animated from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import TImage from 'react-native-turbo-image'
 import { stripHtml } from 'string-strip-html'
 
 import { useColors } from '~/lib/constants'
@@ -12,10 +14,11 @@ import { useColorScheme } from '~/lib/useColorScheme'
 import { usePreferencesStore } from '~/stores'
 
 import { useActiveServer } from '../activeServer'
+import { DescriptionSection, IdentifiersSheet, useOverviewAnimations } from '../book/overview'
 import { useFileExplorerAssets } from '../fileExplorer'
 import { ThumbnailImage, TurboImage } from '../image'
 import { useResolveURL } from '../opds/utils'
-import { InfoRow, LongValue, MetadataBadgeSection } from '../overview'
+import { MetadataBadgeSection } from '../overview'
 import { Card, Heading } from '../ui'
 import { getIconSource } from './OPDSLegacyEntryItem'
 
@@ -38,20 +41,22 @@ export const OPDSLegacyEntryItemSheet = forwardRef<TrueSheet, Props>(
 		const resolveUrl = useResolveURL()
 
 		const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
+		const { animatedScrollRef, parallaxStyle } = useOverviewAnimations()
 
 		const thumbnailUrl = entry.links.find(
 			(link) => link.rel === 'http://opds-spec.org/image/thumbnail',
 		)?.href
+		const resolvedThumbnailUrl = thumbnailUrl ? resolveUrl(thumbnailUrl) : undefined
 		const pseLink = entry.links.find(isPseStreamLink)
 		const pageCount = pseLink?.['pse:count']
 		const currentPage = pseLink?.['pse:lastRead']
 
-		const showMetadata = Boolean(!!entry.content || pageCount != null || currentPage != null)
+		const description = entry.content ? stripHtml(entry.content).result : null
 
 		return (
 			<TrueSheet
 				ref={ref}
-				detents={['auto', 1]}
+				detents={[1]}
 				cornerRadius={24}
 				grabber
 				scrollable
@@ -60,84 +65,106 @@ export const OPDSLegacyEntryItemSheet = forwardRef<TrueSheet, Props>(
 					color: colors.sheet.grabber,
 				}}
 				style={{
-					paddingTop: 12,
 					paddingBottom: insets.bottom,
 				}}
 			>
-				<View className="flex-1 gap-8 p-6">
-					<View className="flex-row items-center gap-4">
-						{!thumbnailUrl &&
-							Platform.select({
-								ios: (
-									<TurboImage
-										source={{ uri: iconSource.localUri || iconSource.uri }}
-										style={{ width: 120, height: 120 }}
-									/>
-								),
-								android: (
-									<Image
-										// @ts-expect-error: It's fine
-										source={iconSource}
-										style={{ width: 120, height: 120 }}
-									/>
-								),
-							})}
-
-						{thumbnailUrl && (
-							<ThumbnailImage
-								source={{
-									uri: resolveUrl(thumbnailUrl),
-									headers: {
-										...sdk.customHeaders,
-										Authorization: sdk.authorizationHeader || '',
-									},
-								}}
-								resizeMode="stretch"
-								size={{ height: 110 / thumbnailRatio, width: 110 }}
-							/>
+				<Animated.ScrollView ref={animatedScrollRef}>
+					<View className="overflow-hidden pb-16">
+						{resolvedThumbnailUrl && (
+							<Animated.View
+								className="absolute -inset-12 opacity-70 dark:opacity-30"
+								style={parallaxStyle}
+							>
+								<TImage
+									source={{
+										uri: resolvedThumbnailUrl,
+										headers: {
+											...sdk.customHeaders,
+											Authorization: sdk.authorizationHeader || '',
+										},
+									}}
+									style={{ width: '100%', height: '100%' }}
+									resizeMode="cover"
+									fadeDuration={2000}
+									{...(Platform.OS === 'ios' && { indicator: { color: 'transparent' } })}
+									resize={60}
+									blur={Platform.OS === 'ios' ? 7 : 16}
+								/>
+							</Animated.View>
 						)}
 
-						<View className="flex-1 justify-center gap-1">
-							<Heading size="lg" numberOfLines={3}>
+						<View className="items-center gap-4 px-4 pb-8 pt-8">
+							{!thumbnailUrl &&
+								Platform.select({
+									ios: (
+										<TurboImage
+											source={{ uri: iconSource.localUri || iconSource.uri }}
+											style={{ width: 120, height: 120 }}
+										/>
+									),
+									android: (
+										<Image
+											// @ts-expect-error: It's fine
+											source={iconSource}
+											style={{ width: 120, height: 120 }}
+										/>
+									),
+								})}
+
+							{resolvedThumbnailUrl && (
+								<ThumbnailImage
+									source={{
+										uri: resolvedThumbnailUrl,
+										headers: {
+											...sdk.customHeaders,
+											Authorization: sdk.authorizationHeader || '',
+										},
+									}}
+									size={{ height: 200 / thumbnailRatio, width: 200 }}
+									borderAndShadowStyle={{ shadowRadius: 5 }}
+								/>
+							)}
+
+							<Heading size="lg" className="text-center leading-6" numberOfLines={3}>
 								{entry.title}
 							</Heading>
 						</View>
 					</View>
 
-					{showMetadata && (
-						<Card label="Metadata">
-							{entry.content && (
-								<LongValue label="Content" value={stripHtml(entry.content).result} />
-							)}
-							{pageCount != null && <InfoRow label="Pages" value={pageCount.toString()} />}
-							{currentPage != null && (
-								<InfoRow label="Current Page" value={currentPage.toString()} />
+					<View className="ios:rounded-[3rem] ios:-mt-[4.5rem] -mt-[2.5rem] gap-4 rounded-[2.5rem] bg-background px-4 py-6">
+						{(pageCount != null || currentPage != null) && (
+							<Card>
+								<Card.StatGroup>
+									{pageCount != null && <Card.Stat label="Pages" value={pageCount} />}
+									{currentPage != null && <Card.Stat label="Current Page" value={currentPage} />}
+								</Card.StatGroup>
+							</Card>
+						)}
+
+						{!!description && <DescriptionSection description={description} />}
+
+						<MetadataBadgeSection
+							label="Authors"
+							items={[...new Set(entry.authors?.map((author) => ({ label: author.name })) || [])]}
+						/>
+
+						<Card label="Details">
+							<Card.Row label="Server" value={serverName} />
+							{entry.updated && (
+								<Card.Row
+									label="Updated"
+									value={intlFormat(new Date(entry.updated), {
+										month: 'long',
+										day: 'numeric',
+										year: 'numeric',
+									})}
+								/>
 							)}
 						</Card>
-					)}
 
-					<MetadataBadgeSection
-						label="Authors"
-						items={[...new Set(entry.authors?.map((author) => ({ label: author.name })) || [])]}
-					/>
-
-					<Card label="Technical Info">
-						<InfoRow label="Identifier" value={entry.id} />
-						<InfoRow label="Server" value={serverName} />
-						{entry.updated && (
-							<InfoRow
-								label="Updated"
-								value={intlFormat(new Date(entry.updated), {
-									month: 'long',
-									day: 'numeric',
-									year: 'numeric',
-									hour: 'numeric',
-									minute: '2-digit',
-								})}
-							/>
-						)}
-					</Card>
-				</View>
+						<IdentifiersSheet identifiers={{ identifier: entry.id }} />
+					</View>
+				</Animated.ScrollView>
 			</TrueSheet>
 		)
 	},

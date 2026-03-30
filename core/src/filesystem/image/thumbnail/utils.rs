@@ -44,7 +44,7 @@ pub async fn remove_thumbnails(
 
 	for (idx, path) in found_thumbnails.iter().enumerate() {
 		if idx % THUMBNAIL_LOG_FREQUENCY == 0 {
-			trace!("Processed {idx} thumbnails for removal.");
+			trace!("Processed {} thumbnails for removal.", idx + 1);
 		}
 
 		match tokio::fs::remove_file(path).await {

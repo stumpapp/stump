@@ -16,7 +16,8 @@ export default function CachePolicySelect() {
 			<View className="flex-row gap-2">
 				<Button
 					size="sm"
-					variant="destructive"
+					roundness="full"
+					variant="outline"
 					onPress={async () => {
 						await TurboImage.clearMemoryCache()
 						onClearCache('Memory cache cleared')
@@ -24,9 +25,11 @@ export default function CachePolicySelect() {
 				>
 					<Text>Memory</Text>
 				</Button>
+
 				<Button
 					size="sm"
-					variant="destructive"
+					roundness="full"
+					variant="outline"
 					onPress={async () => {
 						await TurboImage.clearDiskCache()
 						onClearCache('Disk cache cleared')

@@ -91,12 +91,12 @@ export const epubProgress = z.object({
 			position: z.number().nullish(),
 			// Note: Stored as strings in the DB, so need to preprocess
 			progression: z.preprocess((val) => {
-				if (typeof val === 'string') return parseInt(val, 10)
+				if (typeof val === 'string') return parseFloat(val)
 				return val
 			}, z.number().nullish()),
 			// Note: Stored as strings in the DB, so need to preprocess
 			totalProgression: z.preprocess((val) => {
-				if (typeof val === 'string') return parseInt(val, 10)
+				if (typeof val === 'string') return parseFloat(val)
 				return val
 			}, z.number().nullish()),
 			cssSelector: z.string().nullish(),

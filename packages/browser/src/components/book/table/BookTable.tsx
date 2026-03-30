@@ -11,10 +11,14 @@ import { BookCardFragment } from '../BookCard'
 import { buildBookColumns } from '.'
 import { defaultColumns } from './columns'
 
-type Props = Omit<EntityTableProps<FragmentType<typeof BookCardFragment>>, 'columns'>
+type Props = Omit<EntityTableProps<FragmentType<typeof BookCardFragment>>, 'columns'> & {
+	layoutKey?: string
+}
 
-export default function BookTable(props: Props) {
+// Note: I needed global for book search page
+export default function BookTable({ layoutKey = 'global', ...props }: Props) {
 	const configuration = useBooksLayout(
+		layoutKey,
 		useShallow((state) => ({
 			columns: state.columns,
 		})),

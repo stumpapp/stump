@@ -1,4 +1,4 @@
-import { PREFETCH_STALE_TIME, useSDK, useSuspenseGraphQL } from '@stump/client'
+import { PREFETCH_STALE_TIME, useGraphQL, useSDK } from '@stump/client'
 import { usePrevious } from '@stump/components'
 import {
 	graphql,
@@ -262,8 +262,10 @@ export default function LibrarySeriesScene() {
 		},
 		[prefetch, id, pageSize, orderBy, filters],
 	)
+	const layoutKey = `library-${id}-series`
 
 	const { layoutMode, setLayout, columns, setColumns } = useSeriesLayout(
+		layoutKey,
 		useShallow((state) => ({
 			columns: state.columns,
 			layoutMode: state.layout,
@@ -273,12 +275,7 @@ export default function LibrarySeriesScene() {
 	)
 
 	const { sdk } = useSDK()
-	const {
-		data: {
-			series: { nodes, pageInfo },
-		},
-		isLoading,
-	} = useSuspenseGraphQL(
+	const { data, isLoading } = useGraphQL(
 		query,
 		getQueryKey(sdk.cacheKeys.librarySeries, id, page, pageSize, search, resolvedFilters, orderBy),
 		{
@@ -296,6 +293,15 @@ export default function LibrarySeriesScene() {
 			},
 		},
 	)
+	const nodes = data?.series.nodes || []
+	const pageInfo = data?.series.pageInfo || {
+		__typename: 'OffsetPaginationInfo',
+		totalPages: 1,
+		currentPage: 1,
+		pageSize: pageSize,
+		pageOffset: (page - 1) * pageSize,
+		zeroBased: false,
+	}
 
 	const [containerRef, isInView] = useIsInView<HTMLDivElement>()
 
@@ -364,6 +370,7 @@ export default function LibrarySeriesScene() {
 		} else {
 			return (
 				<SeriesTable
+					layoutKey={layoutKey}
 					items={nodes || []}
 					render={(props) => (
 						<URLFilterContainer

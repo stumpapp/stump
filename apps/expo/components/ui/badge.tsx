@@ -12,6 +12,7 @@ const badgeVariants = cva(
 		variants: {
 			variant: {
 				default: 'border-transparent bg-background-surface',
+				// TODO: Make secondary variant lol
 				secondary: 'border-transparent bg-background-surface',
 				destructive: 'border-transparent bg-fill-danger',
 				brand: 'border-edge-brand bg-fill-brand text-white',

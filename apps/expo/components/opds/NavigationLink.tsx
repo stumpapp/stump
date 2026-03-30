@@ -38,8 +38,10 @@ export default function NavigationLink({ link }: Props) {
 						'opacity-60': pressed,
 					})}
 				>
-					<Text size="lg">{link.title}</Text>
-					<Icon as={ChevronRight} className="h-6 w-6 text-foreground-muted opacity-70" />
+					<Text size="lg" className="shrink">
+						{link.title}
+					</Text>
+					<Icon as={ChevronRight} className="h-6 w-6 shrink-0 text-foreground-muted opacity-70" />
 				</View>
 			)}
 		</Pressable>

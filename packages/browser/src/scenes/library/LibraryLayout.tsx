@@ -22,10 +22,15 @@ const query = graphql(`
 			description
 			path
 			stats {
+				seriesCount
 				bookCount
 				completedBooks
 				inProgressBooks
+				totalBytes
+				totalReadingTimeSeconds
 			}
+			genres
+			publishers
 			tags {
 				id
 				name

@@ -23,6 +23,10 @@ type ActiveReadingSession {
 	elapsedSeconds: Int
 }
 
+input AddBookToClubInput {
+	book: BookClubBookInput!
+}
+
 type AgeRestriction {
 	id: Int!
 	age: Int!
@@ -33,6 +37,14 @@ type AgeRestriction {
 input AgeRestrictionInput {
 	age: Int!
 	restrictOnUnset: Boolean!
+}
+
+type AggregatedReaction {
+	emoji: String
+	customEmojiId: Int
+	customEmojiUrl: String
+	count: Int!
+	reactedByMe: Boolean!
 }
 
 type Apikey {
@@ -105,33 +117,130 @@ type BookClub {
 	isPrivate: Boolean!
 	createdAt: DateTime!
 	emoji: String
+	roleSpec: JSON!
 	creator: BookClubMember!
+	"The current book being read"
 	currentBook: BookClubBook
+	"The previous book that was read, if it exists"
+	previousBook: BookClubBook
+	"All previous books that were read, ordered by completion date (most recent first)"
+	previousBooks: [BookClubBook!]!
+	"All books in the club's queue, ordered by position"
+	books: [BookClubBook!]!
 	invitations: [BookClubInvitation!]!
 	members: [BookClubMember!]!
+	moderators: [BookClubMember!]!
 	membersCount: Int!
 	membership: BookClubMember
-	roleSpec: JSON!
-	schedule: BookClubSchedule
+	"Get discussions that are pinned for this book club"
+	pinnedDiscussions: [BookClubDiscussion!]!
+	previousDiscussionsCount: Int!
 }
 
 type BookClubBook {
 	id: String!
-	startAt: DateTime!
-	endAt: DateTime!
-	discussionDurationDays: Int
+	position: Int!
+	completedAt: DateTime
 	title: String
 	author: String
 	url: String
 	imageUrl: String
 	bookEntityId: String
-	bookClubScheduleId: Int
+	bookClubId: String!
+	addedAt: DateTime!
 	entity: Media
+	discussions: [BookClubDiscussion!]!
 }
 
 input BookClubBookInput @oneOf {
 	stored: BookClubInternalBookInput
 	external: BookClubExternalBookInput
+}
+
+type BookClubBookSuggestion {
+	id: String!
+	bookClubId: String!
+	title: String
+	author: String
+	url: String
+	notes: String
+	status: BookClubSuggestionStatus!
+	resolvedAt: DateTime
+	resolvedById: String
+	createdAt: DateTime!
+	suggestedById: String!
+	bookId: String
+	"Get the member who suggested this book"
+	suggestedBy: BookClubMember!
+	"Get the member who resolved this suggestion"
+	resolvedBy: BookClubMember
+	"""
+	Get the count of likes (votes) on this suggestion
+	TODO(dataloader): Create dataloader
+	"""
+	likeCount: Int!
+	"Check if the current user has liked this suggestion"
+	isLikedByMe: Boolean!
+}
+
+type BookClubDiscussion {
+	id: String!
+	isLocked: Boolean!
+	isArchived: Boolean!
+	bookClubBookId: String
+	title: String
+	emoji: String
+	isPinned: Boolean!
+	createdAt: DateTime!
+	bookClubId: String!
+	"Get the book this discussion is for"
+	book: BookClubBook
+	"A display name for the discussion"
+	displayName: String!
+	"""
+	Get the count of messages in this discussion (excluding deleted messages)
+	TODO(dataloader): Create dataloader
+	"""
+	messageCount: Int!
+}
+
+input BookClubDiscussionInput {
+	bookClubBookId: ID
+	title: String
+	isPinned: Boolean!
+}
+
+type BookClubDiscussionMessage {
+	id: String!
+	content: String!
+	timestamp: DateTime!
+	editedAt: DateTime
+	isPinnedMessage: Boolean!
+	deletedAt: String
+	parentMessageId: String
+	replyToMessageId: String
+	discussionId: String!
+	memberId: String
+	bookClubId: String!
+	"Get the member who posted this message"
+	member: BookClubMember
+	"""
+	Get aggregated reactions for this message, grouped by emoji, sorted by count desc
+	TODO(dataloader): Create dataloader
+	"""
+	reactions: [AggregatedReaction!]!
+	"Get the message this message is an inline reply to (if any)"
+	replyTo: BookClubDiscussionMessage
+	"""
+	Get the threaded replies to this message (if any)
+	TODO(dataloader): Create dataloader
+	"""
+	threadChildren: [BookClubDiscussionMessage!]!
+	"""
+	Get the count of threaded replies to this message (if any)
+	TODO(dataloader): Create dataloader
+	"""
+	threadChildrenCount: Int!
 }
 
 input BookClubExternalBookInput {
@@ -169,24 +278,24 @@ input BookClubInvitationResponseInput {
 type BookClubMember {
 	id: String!
 	displayName: String
-	isCreator: Boolean!
+	bio: String
 	hideProgress: Boolean!
-	privateMembership: Boolean!
 	role: BookClubMemberRole!
+	joinedAt: DateTime!
 	userId: String!
 	bookClubId: String!
 	avatarUrl: String
 	username: String!
 	user: User!
+	isCreator: Boolean!
 }
 
 input BookClubMemberInput {
 	userId: String!
 	displayName: String
-	privateMembership: Boolean
 }
 
-"The visibility of a shareable entity"
+"The role of a member within a book club"
 enum BookClubMemberRole {
 	MEMBER
 	MODERATOR
@@ -194,12 +303,11 @@ enum BookClubMemberRole {
 	CREATOR
 }
 
-type BookClubSchedule {
-	id: Int!
-	defaultIntervalDays: Int
-	bookClubId: String!
-	activeBooks: [BookClubBook!]!
-	books: [BookClubBook!]!
+"The status of a book suggestion"
+enum BookClubSuggestionStatus {
+	PENDING
+	ACCEPTED
+	REJECTED
 }
 
 type Bookmark {
@@ -286,20 +394,12 @@ input CreateBookClubInput {
 input CreateBookClubMemberInput {
 	userId: String!
 	displayName: String
-	privateMembership: Boolean
 	role: BookClubMemberRole!
 }
 
-input CreateBookClubScheduleBook {
-	book: BookClubBookInput!
-	startAt: DateTime
-	endAt: DateTime
-	discussionDurationDays: Int
-}
-
-input CreateBookClubScheduleInput {
-	defaultIntervalDays: Int
-	books: [CreateBookClubScheduleBook!]!
+input CreateCustomEmojiInput {
+	name: String!
+	isAnimated: Boolean!
 }
 
 input CreateOrUpdateLibraryInput {
@@ -342,6 +442,11 @@ type CreatedOrUpdatedManyMedia {
 	libraryId: String!
 }
 
+type CursorPaginatedBookClubDiscussionMessageResponse {
+	nodes: [BookClubDiscussionMessage!]!
+	cursorInfo: CursorPaginationInfo!
+}
+
 "A simple cursor-based pagination input object"
 input CursorPagination {
 	after: String
@@ -368,6 +473,17 @@ type CustomArrangementConfig {
 	filter: JSON
 	orderBy: String
 	links: [FilterableArrangementEntityLink!]!
+}
+
+type CustomEmoji {
+	id: Int!
+	name: String!
+	isAnimated: Boolean!
+	fileExtension: String!
+	createdAt: DateTime!
+	createdById: String!
+	"A reference to the URL of the custom emoji's thumbnail. This is not the full image, but a smaller thumbnail version."
+	url: String!
 }
 
 """
@@ -423,6 +539,10 @@ input DiscordConfigInput {
 
 type DiscoveredMissingLibrary {
 	id: String!
+}
+
+input EditMessageInput {
+	content: String!
 }
 
 "Input object for creating or updating an email device"
@@ -644,10 +764,16 @@ type ImageColor {
 	percentage: Decimal!
 }
 
+type ImageDimensions {
+	width: Int!
+	height: Int!
+}
+
 type ImageMetadata {
 	averageColor: String
 	colors: [ImageColor!]!
 	thumbhash: String
+	dimensions: ImageDimensions
 }
 
 "Options for processing images throughout Stump."
@@ -811,6 +937,8 @@ type Library {
 	series(take: Int = null, skip: Int = null): [Series!]!
 	seriesAlphabet: JSONObject!
 	stats(allUsers: Boolean): LibraryStats!
+	genres(sort: OrderDirection = null): [String!]!
+	publishers(sort: OrderDirection = null): [String!]!
 	tags: [Tag!]!
 	"""
 	A reference to the thumbnail image for the thumbnail. This will be a fully
@@ -833,6 +961,7 @@ type LibraryConfig {
 	libraryPattern: LibraryPattern!
 	defaultLibraryViewMode: LibraryViewMode!
 	hideSeriesView: Boolean!
+	skipBookOverview: Boolean!
 	processThumbnailColorsEvenWithoutConfig: Boolean!
 	libraryId: String
 	thumbnailConfig: ImageProcessorOptions
@@ -849,6 +978,7 @@ input LibraryConfigInput {
 	libraryPattern: LibraryPattern!
 	defaultLibraryViewMode: LibraryViewMode!
 	hideSeriesView: Boolean!
+	skipBookOverview: Boolean!
 	thumbnailConfig: ImageProcessorOptionsInput
 	processThumbnailColorsEvenWithoutConfig: Boolean!
 	defaultReadingDir: ReadingDirection!
@@ -1341,15 +1471,29 @@ enum MetadataResetImpact {
 }
 
 type Mutation {
-	createApiKey(input: ApikeyInput!): CreatedAPIKey!
-	updateApiKey(id: Int!, input: ApikeyInput!): Apikey!
-	deleteApiKey(id: Int!): Apikey!
-	createSmartList(input: SaveSmartListInput!): SmartList!
-	updateSmartList(id: ID!, input: SaveSmartListInput!): SmartList!
-	deleteSmartList(id: ID!): SmartList!
 	createBookClub(input: CreateBookClubInput!): BookClub!
 	updateBookClub(id: ID!, input: UpdateBookClubInput!): BookClub!
 	deleteBookClub(id: ID!): BookClub!
+	"Send a message in a discussion"
+	sendMessage(discussionId: ID!, input: SendMessageInput!): BookClubDiscussionMessage!
+	"Edit your own message"
+	editMessage(messageId: ID!, input: EditMessageInput!): BookClubDiscussionMessage!
+	"Delete (soft delete) your own message"
+	deleteMessage(messageId: ID!): BookClubDiscussionMessage!
+	"""
+	Toggle a reaction on a message
+	
+	Returns true if the reaction was added, false if removed
+	"""
+	toggleReaction(messageId: ID!, emoji: String, customEmojiId: Int): Boolean!
+	"Lock or unlock a discussion (Moderator+)"
+	lockDiscussion(discussionId: ID!, locked: Boolean!): Boolean!
+	"Pin or unpin a message (Moderator+)"
+	pinMessage(messageId: ID!, pinned: Boolean!): Boolean!
+	"Manually create a discussion for a book"
+	createDiscussion(bookClubId: ID!, input: BookClubDiscussionInput!): BookClubDiscussion!
+	"Archive or unarchive a discussion (Moderator+)"
+	archiveDiscussion(discussionId: ID!, archived: Boolean!): Boolean!
 	createBookClubInvitation(id: ID!, input: BookClubInvitationInput!): BookClubInvitation!
 	respondToBookClubInvitation(id: ID!, input: BookClubInvitationResponseInput!): BookClubInvitation!
 	"Creates a new member in the book club"
@@ -1358,27 +1502,20 @@ type Mutation {
 	removeBookClubMember(bookClubId: ID!, memberId: ID!): BookClubMember!
 	"Deletes the membership of the caller to the target book club"
 	leaveBookClub(bookClubId: ID!): BookClubMember!
-	createBookClubSchedule(id: ID!, input: CreateBookClubScheduleInput!): BookClub!
-	addBooksToBookClubSchedule(id: ID!, books: [CreateBookClubScheduleBook!]!): BookClub!
-	cancelJob(id: ID!): Boolean!
-	deleteJob(id: ID!, force: Boolean! = false): Boolean!
-	deleteJobHistory: DeleteJobHistory!
-	deleteJobLogs(id: ID!): DeleteJobAssociatedLogs!
-	createNotifier(input: NotifierInput!): Notifier!
-	updateNotifier(id: Int!, input: NotifierInput!): Notifier!
-	deleteNotifier(id: Int!): Notifier!
-	"Create a bookmark for a user"
-	createBookmark(input: BookmarkInput!): Bookmark!
-	"Delete a bookmark by ID, only if the user created it"
-	deleteBookmark(id: String!): Bookmark!
-	"Delete a bookmark by epubcfi"
-	deleteBookmarkByEpubcfi(epubcfi: String!): Bookmark!
-	"Create an annotation (highlight/note)"
-	createAnnotation(input: CreateAnnotationInput!): MediaAnnotation!
-	"Update an annotation's note text"
-	updateAnnotation(input: UpdateAnnotationInput!): MediaAnnotation!
-	"Delete an annotation by ID"
-	deleteAnnotation(id: String!): MediaAnnotation!
+	"Add a book to the club's queue"
+	addBookToClub(bookClubId: ID!, input: AddBookToClubInput!): BookClub!
+	"Mark the current book as completed"
+	completeBook(bookClubBookId: ID!): BookClub!
+	"Reorder uncompleted books in the club's queue. Completed books cannot be reordered since they are effectively archived"
+	reorderBooks(bookClubId: ID!, bookIds: [String!]!): BookClub!
+	"Suggest a book for the book club"
+	suggestBook(bookClubId: ID!, input: SuggestBookInput!): BookClubBookSuggestion!
+	"Remove your own suggestion (only before it's resolved)"
+	removeSuggestion(suggestionId: ID!): BookClubBookSuggestion!
+	"Toggle like on a suggestion"
+	toggleSuggestionLike(suggestionId: ID!): Boolean!
+	"Update the status of a suggestion (Admin+)"
+	updateSuggestionStatus(suggestionId: ID!, status: BookClubSuggestionStatus!, notes: String): BookClubBookSuggestion!
 	analyzeMedia(id: ID!, forceReanalysis: Boolean! = false): Boolean!
 	convertMedia(id: ID!): Boolean!
 	deleteMedia(id: ID!): Media!
@@ -1458,32 +1595,6 @@ type Mutation {
 	This is used to inform the UI of the last library which was visited by the user
 	"""
 	visitLibrary(id: ID!): Library!
-	deleteLogs(filter: LogFilterInput! = {level: null, jobId: null, _and: null, _not: null, _or: null}): LogDeleteOutput!
-	deleteLogFile: Boolean!
-	"""
-	Creates a new reading list.
-	
-	# Returns
-	
-	A result containing the newly created reading list, or an error if creation failed.
-	"""
-	createReadingList(input: ReadingListInput!): ReadingList!
-	"""
-	Updates an existing reading list.
-	
-	# Returns
-	
-	A result containing the updated reading list, or an error if update failed.
-	"""
-	updateReadingList(input: ReadingListInput!): ReadingList!
-	"""
-	Deletes a reading list by ID.
-	
-	# Returns
-	
-	A result containing the deleted reading list, or an error if deletion failed.
-	"""
-	deleteReadingList(id: String!): ReadingList!
 	analyzeSeries(id: ID!, forceReanalysis: Boolean! = false): Boolean!
 	favoriteSeries(id: ID!, isFavorite: Boolean!): Series!
 	"""
@@ -1502,6 +1613,18 @@ type Mutation {
 	"""
 	toggleSeriesCompletion(id: ID!, isCompleted: Boolean!): Series!
 	scanSeries(id: ID!): Boolean!
+	"Create a bookmark for a user"
+	createBookmark(input: BookmarkInput!): Bookmark!
+	"Delete a bookmark by ID, only if the user created it"
+	deleteBookmark(id: String!): Bookmark!
+	"Delete a bookmark by epubcfi"
+	deleteBookmarkByEpubcfi(epubcfi: String!): Bookmark!
+	"Create an annotation (highlight/note)"
+	createAnnotation(input: CreateAnnotationInput!): MediaAnnotation!
+	"Update an annotation's note text"
+	updateAnnotation(input: UpdateAnnotationInput!): MediaAnnotation!
+	"Delete an annotation by ID"
+	deleteAnnotation(id: String!): MediaAnnotation!
 	"""
 	Returns a list containing the newly created tags, or an error if creation failed.
 	
@@ -1534,6 +1657,16 @@ type Mutation {
 	"""
 	uploadMediaThumbnailBase64(id: ID!, image: String!): Media!
 	deleteLoginActivity: Int!
+	"""
+	Upload an avatar image for either the authenticated viewer or for any user if
+	called by a server owner
+	"""
+	uploadUserAvatar(id: ID, upload: Upload!): User!
+	"""
+	Delete the avatar for the authenticated viewer, or for any user if
+	called by a server owner (by passing `id`).
+	"""
+	deleteUserAvatar(id: ID): User!
 	createUser(input: CreateUserInput!): User!
 	updateViewer(input: UpdateUserInput!): User!
 	updateViewerPreferences(input: UpdateUserPreferencesInput!): UserPreferences!
@@ -1547,16 +1680,64 @@ type Mutation {
 	updateEmailer(id: Int!, input: EmailerInput!): Emailer!
 	deleteEmailer(id: Int!): Emailer!
 	sendAttachmentEmail(input: SendAttachmentEmailsInput!): SendAttachmentEmailOutput!
+	"Send a test email to verify the SMTP configuration is working"
+	testEmailer(config: EmailerClientConfig!, recipient: String!): Boolean!
 	createEmailDevice(input: EmailDeviceInput!): RegisteredEmailDevice!
 	updateEmailDevice(id: Int!, input: EmailDeviceInput!): RegisteredEmailDevice!
 	patchEmailDevice(id: Int!, input: PatchEmailDeviceInput!): RegisteredEmailDevice!
 	deleteEmailDevice(id: Int!): RegisteredEmailDevice!
-	createSmartListView(input: SaveSmartListView!): SmartListView!
-	updateSmartListView(originalName: String!, input: SaveSmartListView!): SmartListView!
-	deleteSmartListView(id: ID!, name: String!): SmartListView!
+	createApiKey(input: ApikeyInput!): CreatedAPIKey!
+	updateApiKey(id: Int!, input: ApikeyInput!): Apikey!
+	deleteApiKey(id: Int!): Apikey!
+	cancelJob(id: ID!): Boolean!
+	deleteJob(id: ID!, force: Boolean! = false): Boolean!
+	deleteJobHistory: DeleteJobHistory!
+	deleteJobLogs(id: ID!): DeleteJobAssociatedLogs!
+	deleteLogs(filter: LogFilterInput! = {level: null, jobId: null, _and: null, _not: null, _or: null}): LogDeleteOutput!
+	deleteLogFile: Boolean!
+	createNotifier(input: NotifierInput!): Notifier!
+	updateNotifier(id: Int!, input: NotifierInput!): Notifier!
+	deleteNotifier(id: Int!): Notifier!
+	updatePublicUrl(publicUrl: String!): ServerConfigModel!
 	createScheduledJobConfig(input: ScheduledJobConfigInput!): ScheduledJobConfig!
 	updateScheduledJobConfig(id: Int!, input: ScheduledJobConfigInput!): ScheduledJobConfig!
 	deleteScheduledJobConfig(id: Int!): Boolean!
+	createSmartList(input: SaveSmartListInput!): SmartList!
+	updateSmartList(id: ID!, input: SaveSmartListInput!): SmartList!
+	deleteSmartList(id: ID!): SmartList!
+	createSmartListView(input: SaveSmartListView!): SmartListView!
+	updateSmartListView(originalName: String!, input: SaveSmartListView!): SmartListView!
+	deleteSmartListView(id: ID!, name: String!): SmartListView!
+	"""
+	Creates a new reading list.
+	
+	# Returns
+	
+	A result containing the newly created reading list, or an error if creation failed.
+	"""
+	createReadingList(input: ReadingListInput!): ReadingList!
+	"""
+	Updates an existing reading list.
+	
+	# Returns
+	
+	A result containing the updated reading list, or an error if update failed.
+	"""
+	updateReadingList(input: ReadingListInput!): ReadingList!
+	"""
+	Deletes a reading list by ID.
+	
+	# Returns
+	
+	A result containing the deleted reading list, or an error if deletion failed.
+	"""
+	deleteReadingList(id: String!): ReadingList!
+	"Upload a new custom emoji"
+	uploadCustomEmoji(input: CreateCustomEmojiInput!, upload: Upload!): CustomEmoji!
+	"Delete a custom emoji"
+	deleteCustomEmoji(id: ID!): Boolean!
+	"Rename a custom emoji"
+	updateCustomEmoji(id: ID!, input: UpdateCustomEmojiInput!): CustomEmoji!
 }
 
 input NavigationArrangementInput {
@@ -1777,19 +1958,28 @@ type PlaceholderGenerationOutput {
 }
 
 type Query {
-	apiKeys: [Apikey!]!
-	apiKeyById(id: Int!): Apikey!
 	bookClubs(all: Boolean = null): [BookClub!]!
 	bookClubById(id: ID!): BookClub!
 	bookClubBySlug(slug: String!): BookClub
-	emailers: [Emailer!]!
-	emailerById(id: Int!): Emailer
-	emailDevices: [RegisteredEmailDevice!]!
-	emailDeviceById(id: Int!): RegisteredEmailDevice
-	listDirectory(pagination: Pagination!, input: DirectoryListingInput): PaginatedDirectoryListingResponse!
-	jobs(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedJobResponse!
-	jobById(id: ID!): Job
-	scheduledJobConfigs: [ScheduledJobConfig!]!
+	"Get a club book by ID"
+	bookClubBook(id: ID!): BookClubBook!
+	"Get a discussion by ID"
+	bookClubDiscussion(id: ID!): BookClubDiscussion!
+	"Get the discussions by the book they're associated with"
+	bookClubDiscussionByBook(bookClubBookId: ID!): [BookClubDiscussion!]!
+	"Get all discussions for a book club, ordered by pinned first, then by date created"
+	bookClubDiscussions(bookClubId: ID!): [BookClubDiscussion!]!
+	"Get a single message by ID"
+	bookClubDiscussionMessage(id: ID!): BookClubDiscussionMessage!
+	"Get messages in a discussion"
+	bookClubDiscussionMessages(discussionId: ID!, parentId: ID, pagination: CursorPagination! = {after: null, limit: 20}): CursorPaginatedBookClubDiscussionMessageResponse!
+	previousBookClubDiscussions(bookClubId: ID!): [BookClubDiscussion!]!
+	"Get all pending invitations for the current user"
+	myBookClubInvitations: [BookClubInvitation!]!
+	"Get all suggestions for a book club"
+	bookClubSuggestions(bookClubId: ID!, status: BookClubSuggestionStatus): [BookClubBookSuggestion!]!
+	"Get a single suggestion by ID"
+	bookClubSuggestion(suggestionId: ID!): BookClubBookSuggestion!
 	mediaCount: Int!
 	finishedReadingSessionCount: Int!
 	activeReadingSessionCount: Int!
@@ -1803,6 +1993,27 @@ type Query {
 	onDeck(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
 	recentlyAddedMedia(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
 	duplicateMedia: [Media!]!
+	libraries(orderBy: [LibraryModelOrderBy!]! = [{field: NAME, direction: ASC}], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}, search: String): PaginatedLibraryResponse!
+	libraryById(id: ID!): Library
+	"Returns the available alphabet for all libraries in the server"
+	librariesAlphabet: JSONObject!
+	numberOfLibraries: Int!
+	lastVisitedLibrary: Library
+	series(filter: SeriesFilterInput! = {name: null, path: null, libraryId: null, metadata: null, library: null, _and: null, _not: null, _or: null}, orderBy: [SeriesOrderBy!]! = [{series: {field: NAME, direction: ASC}}], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedSeriesResponse!
+	seriesById(id: ID!): Series
+	"Returns the available alphabet for all series in the server"
+	seriesAlphabet: JSONObject!
+	numberOfSeries: Int!
+	recentlyAddedSeries(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedSeriesResponse!
+	"Get a single epub by its media ID"
+	epubById(id: ID!): Epub!
+	"Get all bookmarks for a single epub by its media ID"
+	bookmarksByMediaId(id: ID!): [Bookmark!]!
+	"Get all annotations (highlights/notes) for a single book"
+	annotationsByMediaId(id: ID!): [MediaAnnotation!]!
+	"Returns a list of all tags."
+	tags: [Tag!]!
+	mediaMetadataOverview(seriesId: ID): MediaMetadataOverview!
 	me: User!
 	userCount: Int!
 	topReaders(take: Int): [User!]!
@@ -1810,8 +2021,32 @@ type Query {
 	userById(id: ID!): User!
 	loginActivity: [UserLoginActivity!]!
 	loginActivityById(id: ID!): [UserLoginActivity!]!
+	emailers: [Emailer!]!
+	emailerById(id: Int!): Emailer
+	emailDevices: [RegisteredEmailDevice!]!
+	emailDeviceById(id: Int!): RegisteredEmailDevice
 	getNotifiers: [Notifier!]!
 	getNotifierById(id: Int!): Notifier!
+	apiKeys: [Apikey!]!
+	apiKeyById(id: Int!): Apikey!
+	jobs(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedJobResponse!
+	jobById(id: ID!): Job
+	scheduledJobConfigs: [ScheduledJobConfig!]!
+	logs(filter: LogFilterInput! = {level: null, jobId: null, _and: null, _not: null, _or: null}, orderBy: [LogModelOrderBy!]! = [], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedLogResponse!
+	"""
+	Get information about the Stump log file, located at STUMP_CONFIG_DIR/Stump.log, or
+	~/.stump/Stump.log by default. Information such as the file size, last modified date, etc.
+	"""
+	logfileInfo: LogFileInfo!
+	stumpConfig: StumpConfig!
+	uploadConfig: UploadConfig!
+	serverConfig: ServerConfigModel!
+	listDirectory(pagination: Pagination!, input: DirectoryListingInput): PaginatedDirectoryListingResponse!
+	smartLists(input: SmartListsInput! = {all: null, mine: true, search: null}): [SmartList!]!
+	smartListById(id: ID!): SmartList
+	smartListMeta(id: ID!): SmartListMeta
+	smartListItems(id: ID!, limit: Int = null): SmartListItems!
+	smartListViews: [SmartListView!]!
 	"""
 	Retrieves a paginated list of reading lists for the current user.
 	
@@ -1827,40 +2062,8 @@ type Query {
 	A reading list with the given ID. If no reading list with this ID exists for the current user, an error will be returned.
 	"""
 	readingListById(id: ID!): ReadingList!
-	"Get a single epub by its media ID"
-	epubById(id: ID!): Epub!
-	"Get all bookmarks for a single epub by its media ID"
-	bookmarksByMediaId(id: ID!): [Bookmark!]!
-	"Get all annotations (highlights/notes) for a single book"
-	annotationsByMediaId(id: ID!): [MediaAnnotation!]!
-	libraries(orderBy: [LibraryModelOrderBy!]! = [{field: NAME, direction: ASC}], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}, search: String): PaginatedLibraryResponse!
-	libraryById(id: ID!): Library
-	"Returns the available alphabet for all libraries in the server"
-	librariesAlphabet: JSONObject!
-	numberOfLibraries: Int!
-	lastVisitedLibrary: Library
-	mediaMetadataOverview(seriesId: ID): MediaMetadataOverview!
-	smartListViews: [SmartListView!]!
-	series(filter: SeriesFilterInput! = {name: null, path: null, libraryId: null, metadata: null, library: null, _and: null, _not: null, _or: null}, orderBy: [SeriesOrderBy!]! = [{series: {field: NAME, direction: ASC}}], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedSeriesResponse!
-	seriesById(id: ID!): Series
-	"Returns the available alphabet for all series in the server"
-	seriesAlphabet: JSONObject!
-	numberOfSeries: Int!
-	recentlyAddedSeries(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedSeriesResponse!
-	"Returns a list of all tags."
-	tags: [Tag!]!
-	logs(filter: LogFilterInput! = {level: null, jobId: null, _and: null, _not: null, _or: null}, orderBy: [LogModelOrderBy!]! = [], pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedLogResponse!
-	"""
-	Get information about the Stump log file, located at STUMP_CONFIG_DIR/Stump.log, or
-	~/.stump/Stump.log by default. Information such as the file size, last modified date, etc.
-	"""
-	logfileInfo: LogFileInfo!
-	stumpConfig: StumpConfig!
-	uploadConfig: UploadConfig!
-	smartLists(input: SmartListsInput! = {all: null, mine: true, search: null}): [SmartList!]!
-	smartListById(id: ID!): SmartList
-	smartListMeta(id: ID!): SmartListMeta
-	smartListItems(id: ID!, limit: Int = null): SmartListItems!
+	"List the custom emojis available on this server"
+	customEmojis: [CustomEmoji!]!
 }
 
 "The different reading directions supported by any Stump reader"
@@ -2057,6 +2260,14 @@ input SendAttachmentEmailsInput {
 	sendTo: [EmailerSendTo!]!
 }
 
+input SendMessageInput {
+	content: String!
+	"The parent message inside a thread, denoting this message as a child"
+	parentMessageId: String
+	"An inline reply reference, NOT a child of a thread"
+	replyToMessageId: String
+}
+
 input SendToDevice {
 	id: Int!
 }
@@ -2164,6 +2375,7 @@ input SeriesMetadataFilterInput {
 	booktype: FieldFilterString = null
 	volume: NumericFilterI32 = null
 	status: FieldFilterString = null
+	year: NumericFilterI32 = null
 	_and: [SeriesMetadataFilterInput!] = null
 	_not: [SeriesMetadataFilterInput!] = null
 	_or: [SeriesMetadataFilterInput!] = null
@@ -2267,6 +2479,12 @@ type SeriesStats {
 	completedBooks: Int!
 	inProgressBooks: Int!
 	totalReadingTimeSeconds: Int!
+}
+
+type ServerConfigModel {
+	id: Int!
+	publicUrl: String
+	initialWalSetupComplete: Boolean!
 }
 
 type SmartList {
@@ -2486,11 +2704,21 @@ type StumpConfig {
 	pdfPrerenderRange: Int!
 	"Whether to enable high-quality rendering with smoothing (slower but better quality)."
 	pdfHighQuality: Boolean!
+	"The number of seconds after which a book can be re-completed"
+	bookCompletionDedupTimeoutSecs: Int!
 }
 
 type Subscription {
 	tailLogFile: String!
 	readEvents: CoreEvent!
+}
+
+input SuggestBookInput {
+	bookId: String
+	title: String
+	author: String
+	url: String
+	notes: String
 }
 
 enum SupportedFont {
@@ -2586,6 +2814,10 @@ input UpdateBookClubInput {
 	emoji: String
 }
 
+input UpdateCustomEmojiInput {
+	name: String!
+}
+
 input UpdateThumbnailInput {
 	"The ID of the media inside the series to fetch"
 	mediaId: String!
@@ -2598,7 +2830,6 @@ input UpdateThumbnailInput {
 input UpdateUserInput {
 	username: String!
 	password: String
-	avatarUrl: String
 	permissions: [UserPermission!]!
 	ageRestriction: AgeRestrictionInput = null
 	maxSessionsAllowed: Int
@@ -2653,12 +2884,13 @@ type User {
 	id: String!
 	username: String!
 	isServerOwner: Boolean!
-	avatarUrl: String
+	avatarPath: String
 	createdAt: DateTime!
 	deletedAt: DateTime
 	isLocked: Boolean!
 	maxSessionsAllowed: Int
 	oidcEmail: String
+	avatarUrl: String
 	ageRestriction: AgeRestriction
 	continueReading(pagination: Pagination! = {offset: {page: 1, pageSize: 20, zeroBased: false}}): PaginatedMediaResponse!
 	permissions: [UserPermission!]!
@@ -2717,6 +2949,8 @@ enum UserPermission {
 	SCAN_LIBRARY
 	"Grant access to manage the library (scan,edit,manage relations)"
 	MANAGE_LIBRARY
+	"Grant access to edit thumbnails for media/series"
+	EDIT_THUMBNAILS
 	"""
 	Grants access to edit any existing metadata for media/series. This will only
 	be applied to the database-level metadata.

@@ -9,6 +9,7 @@ use crate::{
 	data::{AuthContext, CoreContext},
 	guard::{BookClubRoleGuard, PermissionGuard},
 	input::book_club::{CreateBookClubInput, UpdateBookClubInput},
+	mutation::book_club_discussion::create_general_discussion,
 	object::book_club::BookClub,
 };
 
@@ -34,6 +35,8 @@ impl BookClubMutation {
 
 		let created_club = club.insert(&txn).await?;
 		let _created_member = member.insert(&txn).await?;
+		let _general_discussion =
+			create_general_discussion(&created_club.id, &txn).await?;
 
 		txn.commit().await?;
 

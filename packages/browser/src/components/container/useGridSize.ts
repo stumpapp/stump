@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useWindowSize } from 'rooks'
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { createJSONStorage, persist } from 'zustand/middleware'
 
 import { usePreferences } from '@/hooks/usePreferences'
 
@@ -97,7 +97,7 @@ export const useGridSizeStore = create<IGridSizeStore>()(
 		}),
 		{
 			name: 'stump:entity-card-density',
-			getStorage: () => localStorage,
+			storage: createJSONStorage(() => localStorage),
 		},
 	),
 )

@@ -18900,14 +18900,14 @@ napi-postinstall@^0.3.0:
   resolved "https://registry.yarnpkg.com/napi-postinstall/-/napi-postinstall-0.3.4.tgz#7af256d6588b5f8e952b9190965d6b019653bbb9"
   integrity sha512-PHI5f1O0EP5xJ9gQmFGMS6IZcrVvTjpXjz7Na41gTE7eE2hK11lg04CECCYEEjdc17EV4DO+fkGEtt7TpTaTiQ==
 
-nativewind@^4.2.1:
-  version "4.2.1"
-  resolved "https://registry.yarnpkg.com/nativewind/-/nativewind-4.2.1.tgz#ea1573fa944b84480b7ba42b69eeb2ad7cb2411e"
-  integrity sha512-10uUB2Dlli3MH3NDL5nMHqJHz1A3e/E6mzjTj6cl7hHECClJ7HpE6v+xZL+GXdbwQSnWE+UWMIMsNz7yOQkAJQ==
+nativewind@^4.2.3:
+  version "4.2.3"
+  resolved "https://registry.yarnpkg.com/nativewind/-/nativewind-4.2.3.tgz#ad7880bd2b5ac55f041d34918b9c67b00340088c"
+  integrity sha512-HglF1v6A8CqBFpXWs0d3yf4qQGurrreLuyE8FTRI/VDH8b0npZa2SDG5tviTkLiBg0s5j09mQALZOjxuocgMLA==
   dependencies:
     comment-json "^4.2.5"
     debug "^4.3.7"
-    react-native-css-interop "0.2.1"
+    react-native-css-interop "0.2.3"
 
 natural-compare@^1.4.0:
   version "1.4.0"
@@ -21119,10 +21119,10 @@ react-medium-image-zoom@^5.2.12:
   resolved "https://registry.yarnpkg.com/react-medium-image-zoom/-/react-medium-image-zoom-5.4.0.tgz#b89c74a4f631289e8a7a21af26614c58fff0ea81"
   integrity sha512-BsE+EnFVQzFIlyuuQrZ9iTwyKpKkqdFZV1ImEQN573QPqGrIUuNni7aF+sZwDcxlsuOMayCr6oO/PZR/yJnbRg==
 
-react-native-css-interop@0.2.1:
-  version "0.2.1"
-  resolved "https://registry.yarnpkg.com/react-native-css-interop/-/react-native-css-interop-0.2.1.tgz#2d08ad4a971babeba17af4b731ba542eef79ed08"
-  integrity sha512-B88f5rIymJXmy1sNC/MhTkb3xxBej1KkuAt7TiT9iM7oXz3RM8Bn+7GUrfR02TvSgKm4cg2XiSuLEKYfKwNsjA==
+react-native-css-interop@0.2.3:
+  version "0.2.3"
+  resolved "https://registry.yarnpkg.com/react-native-css-interop/-/react-native-css-interop-0.2.3.tgz#9efef674deffd8a0c70ddc9cedd1fc40c043e61b"
+  integrity sha512-wc+JI7iUfdFBqnE18HhMTtD0q9vkhuMczToA87UdHGWwMyxdT5sCcNy+i4KInPCE855IY0Ic8kLQqecAIBWz7w==
   dependencies:
     "@babel/helper-module-imports" "^7.22.15"
     "@babel/traverse" "^7.23.0"

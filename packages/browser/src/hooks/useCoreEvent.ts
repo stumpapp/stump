@@ -187,6 +187,7 @@ const handleJobOutput = async (
 	const keys = [
 		sdk.cacheKeys.scanHistory,
 		sdk.cacheKeys.getStats,
+		'missingEntities', // TODO: Put behind key?
 		...(affectedBooks > 0 ? [sdk.cacheKeys.recentlyAddedMedia, sdk.cacheKeys.media] : []),
 		...(affectedSeries > 0 ? [sdk.cacheKeys.recentlyAddedSeries, sdk.cacheKeys.series] : []),
 	] as string[]

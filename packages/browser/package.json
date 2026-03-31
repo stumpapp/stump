@@ -32,7 +32,7 @@
 		"@tauri-apps/plugin-store": "^2.0.0",
 		"ansi-to-react": "^6.2.6",
 		"class-variance-authority": "^0.7.0",
-		"clsx": "^2.1.0",
+		"clsx": "^2.1.1",
 		"colorjs.io": "^0.5.2",
 		"epubjs": "^0.3.93",
 		"framer-motion": "^10.18.0",

@@ -18,6 +18,7 @@ fn debug_setup() {
 		env!("CARGO_MANIFEST_DIR").to_string() + "/../web/dist",
 	);
 	std::env::set_var("STUMP_PROFILE", "debug");
+	std::env::set_var("STUMP_COLORFUL_LOGS", "true");
 }
 
 #[tokio::main(flavor = "multi_thread")]
@@ -25,7 +26,6 @@ async fn main() -> Result<(), EntryError> {
 	#[cfg(debug_assertions)]
 	debug_setup();
 
-	// Get STUMP_CONFIG_DIR to bootstrap startup
 	let config_dir = bootstrap_config_dir();
 
 	let config = StumpCore::init_config(config_dir)

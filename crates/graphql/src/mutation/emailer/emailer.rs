@@ -79,17 +79,11 @@ impl EmailerMutation {
 		let req_ctx = ctx.data::<AuthContext>()?;
 		let conn = core_ctx.conn.as_ref();
 		let encryption_key = core_ctx.get_encryption_key().await?;
-		let templates_dir = core_ctx.config.get_templates_dir();
 
 		validate_send_permissions(req_ctx, &input.send_to)?;
-		let result = sender::send_attachment_email(
-			conn,
-			&req_ctx.user,
-			encryption_key,
-			templates_dir,
-			input,
-		)
-		.await?;
+		let result =
+			sender::send_attachment_email(conn, &req_ctx.user, encryption_key, input)
+				.await?;
 
 		Ok(SendAttachmentEmailOutput {
 			sent_count: result.0,
@@ -101,15 +95,10 @@ impl EmailerMutation {
 	#[graphql(guard = "PermissionGuard::one(UserPermission::EmailerCreate)")]
 	async fn test_emailer(
 		&self,
-		ctx: &Context<'_>,
 		config: EmailerClientConfig,
 		recipient: String,
 	) -> Result<bool> {
-		let core_ctx = ctx.data::<CoreContext>()?;
-		let templates_dir = core_ctx.config.get_templates_dir();
-
-		sender::send_test_email(config, templates_dir, recipient).await?;
-
+		sender::send_test_email(config, recipient).await?;
 		Ok(true)
 	}
 }

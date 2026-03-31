@@ -1,5 +1,5 @@
-//! Email module for sending emails using SMTP. This module uses the `lettre` crate to send emails,
-//! and the `handlebars` crate to render email templates.
+//! Email module for sending emails using SMTP. This module uses the `lettre` crate to send emails
+//! with plain text bodies until I have a need for HTML
 
 #![warn(clippy::dbg_macro)]
 
@@ -7,13 +7,8 @@
 mod emailer;
 /// A module containing the error type for this crate
 mod error;
-/// A module containing the template rendering functionality, via the `handlebars` crate
-mod template;
 
 pub use emailer::{AttachmentPayload, EmailerClient, EmailerClientConfig};
 pub use error::{EmailError, EmailResult};
-pub use template::{
-	render_template, EmailTemplate, ATTACHMENT_TEMPLATE, BASE_TEMPLATE, TEMPLATES,
-};
 
 pub use lettre::message::header::ContentType as EmailContentType;

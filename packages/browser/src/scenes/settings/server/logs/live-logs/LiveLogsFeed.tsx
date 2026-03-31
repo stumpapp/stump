@@ -1,7 +1,7 @@
 import { useGraphQLSubscriptionCache } from '@stump/client'
 import { graphql } from '@stump/graphql'
+import Ansi from 'ansi-to-react'
 import { useEffect, useRef } from 'react'
-import stripAnsi from 'strip-ansi'
 
 const subscription = graphql(`
 	subscription LiveLogsFeed {
@@ -39,7 +39,9 @@ export default function LiveLogsFeed() {
 				className="gap-y-1.5 font-mono text-sm flex max-h-full flex-col overflow-y-auto text-foreground-subtle"
 			>
 				{data?.map(({ tailLogFile: log }, index) => (
-					<span key={`live-log-${index}`}>{stripAnsi(log)}</span>
+					<span key={`live-log-${index}`}>
+						<Ansi>{log}</Ansi>
+					</span>
 				))}
 				<div ref={scrollRef} />
 			</div>

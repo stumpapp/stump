@@ -1,3 +1,4 @@
+import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { resolve } from 'path'
 import { defineConfig } from 'vite'
@@ -24,6 +25,7 @@ export default defineConfig({
 		pkgJson: { name, version },
 	},
 	plugins: [
+		tailwindcss(),
 		react({
 			babel: {
 				plugins: [['babel-plugin-react-compiler', {}]],

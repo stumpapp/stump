@@ -1,7 +1,7 @@
 @import './themes.css';
+@import 'tw-animate-css';
 
 @plugin '@tailwindcss/typography';
-@plugin 'tailwindcss-animate';
 
 @source '../src/**/*.{ts,tsx,js,jsx}';
 @source '../../browser/src/**/*.{ts,tsx,js,jsx}';

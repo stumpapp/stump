@@ -93,5 +93,6 @@
 				"@babel/core"
 			]
 		}
-	}
+	},
+	"dependencies": {}
 }

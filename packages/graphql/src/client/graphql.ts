@@ -3709,6 +3709,8 @@ export type StumpConfig = {
   bookCompletionDedupTimeoutSecs: Scalars['Int']['output'];
   /** The client directory. */
   clientDir: Scalars['String']['output'];
+  /** Whether or not to include ANSI color codes in log files. */
+  colorfulLogs: Scalars['Boolean']['output'];
   /** The configuration root for the Stump application, contains thumbnails, cache, and logs. */
   configDir: Scalars['String']['output'];
   /** An optional custom path for the templates directory. */

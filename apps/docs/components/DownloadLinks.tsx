@@ -47,7 +47,7 @@ const hoverVariants = {
 
 export default function DownloadLinks() {
 	return (
-		<div className="relative flex w-full items-start justify-center space-x-2 md:justify-start">
+		<div className="space-x-2 md:justify-start relative flex w-full items-start justify-center">
 			{links.map((link, idx) => (
 				<motion.div
 					key={idx}
@@ -61,10 +61,10 @@ export default function DownloadLinks() {
 				>
 					<a
 						className={clsx(
-							'flex items-center rounded-md border border-transparent bg-transparent p-1 text-sm font-medium text-neutral-700 transition-all duration-300 dark:bg-opacity-90 dark:text-neutral-200 dark:shadow-sm',
+							'rounded-md p-1 text-sm font-medium text-neutral-700 dark:bg-opacity-90 dark:text-neutral-200 dark:shadow-sm flex items-center border border-transparent bg-transparent transition-all duration-300',
 							{ 'cursor-not-allowed opacity-50': link.disabled },
 							{
-								'hover:border-neutral-200 hover:bg-neutral-50 hover:text-neutral-900 focus:outline-none active:border-neutral-200 active:bg-neutral-50 active:text-neutral-600 dark:hover:border-neutral-500 dark:hover:bg-neutral-700 dark:hover:bg-opacity-100 dark:hover:text-white dark:active:text-white dark:active:opacity-90':
+								'hover:border-neutral-200 hover:bg-neutral-50 hover:text-neutral-900 active:border-neutral-200 active:bg-neutral-50 active:text-neutral-600 dark:hover:border-neutral-500 dark:hover:bg-neutral-700 dark:hover:bg-opacity-100 dark:hover:text-white dark:active:text-white focus:outline-none dark:active:opacity-90':
 									!link.disabled,
 							},
 						)}

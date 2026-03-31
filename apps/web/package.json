@@ -7,6 +7,7 @@
 		"dev": "vite --host",
 		"start": "vite preview",
 		"build": "vite build",
+		"format": "eslint --fix . && prettier --config ../../prettier.config.js --ignore-path ../../.prettierignore --write .",
 		"nuke": "rimraf node_modules"
 	},
 	"dependencies": {

@@ -104,10 +104,10 @@ export default function Home() {
 			/>
 			<div
 				data-tauri-drag-region
-				className="flex h-screen w-screen items-center bg-background py-6"
+				className="py-6 flex h-screen w-screen items-center bg-background"
 			>
-				<div className="mx-auto flex h-full w-full max-w-sm flex-col justify-center gap-6 sm:max-w-md md:max-w-xl">
-					<div className="flex flex-col gap-y-6">
+				<div className="max-w-sm gap-6 sm:max-w-md md:max-w-xl mx-auto flex h-full w-full flex-col justify-center">
+					<div className="gap-y-6 flex flex-col">
 						<div className="flex items-end justify-between">
 							<div>
 								<Heading size="sm">{t(getKey('label'))}</Heading>
@@ -120,7 +120,7 @@ export default function Home() {
 						</div>
 
 						{!savedServers.length && (
-							<div className="select-none rounded-lg border border-dashed border-edge-subtle p-4 text-foreground-muted">
+							<div className="rounded-lg p-4 border border-dashed border-edge-subtle text-foreground-muted select-none">
 								{t(getKey('getStarted'))}
 							</div>
 						)}
@@ -142,7 +142,7 @@ export default function Home() {
 						)}
 
 						<div
-							className={cn('flex flex-col gap-y-6', {
+							className={cn('gap-y-6 flex flex-col', {
 								'pointer-events-none opacity-50': savedServers.length === 0,
 							})}
 						>

@@ -10,7 +10,7 @@ import tseslint from 'typescript-eslint'
 
 export default [
 	{
-		ignores: ['**/dist/*', '**/target/**', '**/.next/**', '**/.vercel/**', '**/emoji/data.json'],
+		ignores: ['**/dist/*', '**/dev-dist/**', '**/target/**', '**/.next/**', '**/.vercel/**', '**/emoji/data.json'],
 	},
 	{
 		files: ['**/*.{js,mjs,cjs,ts,jsx,tsx}'],

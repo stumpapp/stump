@@ -11,7 +11,7 @@ export default function RemoveAllTokensSection({ onConfirmClear }: Props) {
 	const { t } = useLocaleContext()
 
 	return (
-		<div className="flex flex-col space-y-4">
+		<div className="space-y-4 flex flex-col">
 			<div>
 				<Heading size="xs">{t(getKey('label'))}</Heading>
 				<Text size="sm" variant="muted" className="mt-1">

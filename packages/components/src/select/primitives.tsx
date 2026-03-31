@@ -35,7 +35,7 @@ const SelectPrimitiveContent = React.forwardRef<
 		<SelectRadix.Content
 			ref={ref}
 			className={cn(
-				'relative z-50 min-w-[8rem] overflow-hidden rounded-md border border-edge bg-background text-foreground-subtle shadow-md animate-in fade-in-80',
+				'relative z-50 min-w-32 overflow-hidden rounded-md border border-edge bg-background text-foreground-subtle shadow-md animate-in fade-in-80',
 				className,
 			)}
 			{...props}
@@ -65,7 +65,7 @@ const SelectPrimitiveItem = React.forwardRef<
 	<SelectRadix.Item
 		ref={ref}
 		className={cn(
-			'relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm font-medium outline-none focus:bg-background-surface data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+			'relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm font-medium outline-none focus:bg-background-surface data-disabled:pointer-events-none data-disabled:opacity-50',
 			className,
 		)}
 		{...props}

@@ -23,7 +23,7 @@ const DemoChild = () => (
 			<Link href="#">See More</Link>
 		</div>
 
-		<div className="flex h-full min-h-[10rem] w-full flex-1 items-center justify-center">
+		<div className="flex h-full min-h-40 w-full flex-1 items-center justify-center">
 			<span>Card Body!</span>
 		</div>
 	</div>

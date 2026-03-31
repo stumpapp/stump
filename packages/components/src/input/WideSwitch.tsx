@@ -19,7 +19,7 @@ export function WideSwitch({
 }: WideSwitchProps) {
 	return (
 		<label htmlFor={formId} className="flex items-center justify-between" title={title}>
-			<div className="flex flex-grow flex-col gap-2 text-left">
+			<div className="flex grow flex-col gap-2 text-left">
 				<Text
 					size="sm"
 					variant="label"

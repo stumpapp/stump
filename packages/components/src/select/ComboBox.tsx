@@ -247,7 +247,7 @@ export function ComboBox({
 				<Popover.Content
 					className={cn(
 						{ [SIZE_VARIANTS[size || 'default']]: !!size },
-						'z-[1000] mt-1 max-h-96 overflow-y-auto p-0',
+						'z-1000 mt-1 max-h-96 overflow-y-auto p-0',
 						wrapperClassName,
 					)}
 					// eslint-disable-next-line react-hooks/refs

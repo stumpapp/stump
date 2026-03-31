@@ -55,7 +55,7 @@ export function RadioCardItem({
 					innerContainerClassName,
 				)}
 			>
-				<div className={cn('flex flex-shrink-0 items-center space-x-2', radioContainerClassName)}>
+				<div className={cn('flex shrink-0 items-center space-x-2', radioContainerClassName)}>
 					<RadioGroup.Item value={value} id={value} className="border-edge-subtle" />
 					<Text variant="label" className="font-normal">
 						{label}

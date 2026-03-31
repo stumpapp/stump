@@ -54,7 +54,7 @@ Whether or not to enable Swagger UI. To learn more about what Swagger UI is, vis
 | ------- | ------------- |
 | Boolean | `false`       |
 
-### ENABLE_UPLOAD
+### STUMP_ENABLE_UPLOAD
 
 | Type    | Default Value |
 | ------- | ------------- |
@@ -68,7 +68,7 @@ Controls the computational cost used when hashing user passwords.
 | ------- | ------------- |
 | Integer | `12`          |
 
-### MAX_FILE_UPLOAD_SIZE
+### STUMP_MAX_FILE_UPLOAD_SIZE
 
 The maximum allowed size, in bytes, of files uploaded via the upload interface. This configuration variable will have no effect unless `ENABLE_UPLOAD` is `true`.
 
@@ -76,7 +76,7 @@ The maximum allowed size, in bytes, of files uploaded via the upload interface. 
 | ------- | ------------------ |
 | Integer | `20971520` (20 MB) |
 
-### MAX_IMAGE_UPLOAD_SIZE
+### STUMP_MAX_IMAGE_UPLOAD_SIZE
 
 The maximum size, in bytes, for images uploaded as thumbnails for users, libraries, series, or media.
 

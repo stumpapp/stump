@@ -109,12 +109,33 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 	}, [selectionStore, downloadedFile.id])
 
 	const handleMarkAsComplete = useCallback(() => {
-		markAsComplete(downloadedFile.id, downloadedFile.pages)
-	}, [markAsComplete, downloadedFile.id, downloadedFile.pages])
+		Alert.alert(
+			'Mark as Read',
+			`Are you sure you want to mark ${downloadedFile.bookName ? `'${downloadedFile.bookName}'` : 'this book'} as read?`,
+			[
+				{ text: 'Cancel', style: 'cancel' },
+				{
+					text: 'Mark as Read',
+					onPress: () => markAsComplete(downloadedFile.id, downloadedFile.pages),
+				},
+			],
+		)
+	}, [markAsComplete, downloadedFile.id, downloadedFile.pages, downloadedFile.bookName])
 
 	const handleClearProgress = useCallback(() => {
-		clearProgress(downloadedFile.id)
-	}, [clearProgress, downloadedFile.id])
+		Alert.alert(
+			'Clear Progress',
+			`Are you sure you want to clear your current reading of ${downloadedFile.bookName ? `'${downloadedFile.bookName}'` : 'this book'}?`,
+			[
+				{ text: 'Cancel', style: 'cancel' },
+				{
+					text: 'Clear',
+					style: 'destructive',
+					onPress: () => clearProgress(downloadedFile.id),
+				},
+			],
+		)
+	}, [clearProgress, downloadedFile.id, downloadedFile.bookName])
 
 	const handleDelete = useCallback(() => {
 		Alert.alert(

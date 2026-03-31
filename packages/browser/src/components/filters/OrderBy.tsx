@@ -36,7 +36,7 @@ export default function OrderBy({ entity }: Props) {
 				<Button
 					variant="ghost"
 					className={cx('shrink-0', {
-						'!bg-background-surface': isOpen,
+						'bg-background-surface!': isOpen,
 					})}
 				>
 					<SortAsc className="mr-1.5 h-4 w-4 text-foreground-subtle" />

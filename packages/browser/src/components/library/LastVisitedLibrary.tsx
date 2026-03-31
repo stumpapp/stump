@@ -40,7 +40,7 @@ export default function LastVisitedLibrary({ container }: Props) {
 					href={paths.librarySeries(library.id)}
 					imageUrl={library.thumbnail.url}
 					isCover
-					className="flex-auto flex-shrink-0"
+					className="flex-auto shrink-0"
 					fullWidth={(imageFailed) => !imageFailed}
 				/>
 

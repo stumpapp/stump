@@ -23,7 +23,7 @@ function MetadataBadgeListCell({ values }: { values?: string[] | null }) {
 	const remaining = Math.max(values.length - visible.length, 0)
 
 	return (
-		<div className="flex max-h-[3.125rem] flex-wrap gap-1 overflow-hidden">
+		<div className="flex max-h-12.5 flex-wrap gap-1 overflow-hidden">
 			{visible.map((value) => (
 				<Badge key={value} size="sm" className="line-clamp-1 max-w-full">
 					{value}

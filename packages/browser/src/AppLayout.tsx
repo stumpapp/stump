@@ -243,7 +243,7 @@ export function AppLayout() {
 								'scrollbar-hide': storeUser.preferences?.enableHideScrollbar,
 							},
 							{
-								'bg-gradient-to-br from-background-gradient-from to-background-gradient-to':
+								'bg-linear-to-br from-background-gradient-from to-background-gradient-to':
 									shouldUseGradient,
 							},
 						)}

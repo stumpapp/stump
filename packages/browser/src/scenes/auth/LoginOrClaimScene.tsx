@@ -100,7 +100,7 @@ export default function LoginOrClaimScene() {
 	const renderHeader = () => {
 		if (isClaimed) {
 			return (
-				<div className="flex flex-shrink-0 items-center justify-center gap-4 px-2">
+				<div className="flex shrink-0 items-center justify-center gap-4 px-2">
 					<img src="/assets/favicon.png" width="80" height="80" />
 					<Heading variant="gradient" size="3xl" className="font-bold">
 						Stump

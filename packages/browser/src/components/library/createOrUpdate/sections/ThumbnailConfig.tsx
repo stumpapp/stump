@@ -116,7 +116,7 @@ export default function ThumbnailConfigForm() {
 	)
 
 	return (
-		<div className="flex flex-grow flex-col gap-6">
+		<div className="flex grow flex-col gap-6">
 			<div>
 				<Heading size="sm">
 					{t(getKey(`section.heading.${isCreating ? 'create' : 'update'}`))}

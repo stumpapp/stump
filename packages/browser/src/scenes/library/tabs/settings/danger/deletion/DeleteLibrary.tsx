@@ -33,7 +33,7 @@ export default function DeleteLibrary() {
 							type="button"
 							variant="danger"
 							onClick={() => setShowConfirmation(true)}
-							className="flex-shrink-0"
+							className="shrink-0"
 							size="md"
 						>
 							Delete library

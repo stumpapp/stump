@@ -208,7 +208,7 @@ export default function SideBar({ asChild, hidden }: Props) {
 				className={cn(
 					'relative z-10 flex h-full w-56 shrink-0 flex-col gap-4 border-r border-edge bg-sidebar px-2 py-4',
 					{
-						'bg-gradient-to-tr from-sidebar-gradient-from to-sidebar-gradient-to':
+						'bg-linear-to-tr from-sidebar-gradient-from to-sidebar-gradient-to':
 							shouldUseGradient,
 					},
 				)}

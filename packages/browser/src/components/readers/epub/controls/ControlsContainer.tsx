@@ -17,7 +17,7 @@ export default function ControlsContainer({ position, children, className }: Pro
 				'h-10 w-full shrink-0',
 				{
 					'bottom-0 left-0': position === 'bottom' && fullscreen,
-					'fixed z-[100]': fullscreen,
+					'fixed z-100': fullscreen,
 					'left-0 top-0': position === 'top' && fullscreen,
 				},
 				className,

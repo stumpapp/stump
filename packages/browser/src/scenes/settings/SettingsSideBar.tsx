@@ -35,12 +35,12 @@ export default function SettingsSideBar() {
 					? 'fixed top-12 z-50 h-screen border-r'
 					: 'fixed top-0 z-50 h-screen border-r',
 				{
-					'bg-gradient-to-l from-background-gradient-from to-background-gradient-to':
+					'bg-linear-to-l from-background-gradient-from to-background-gradient-to':
 						shouldUseGradient,
 				},
 			)}
 		>
-			<div className="flex h-full flex-grow flex-col gap-4">
+			<div className="flex h-full grow flex-col gap-4">
 				{groups
 					.map(({ label, items }) => {
 						const groupLabel = label

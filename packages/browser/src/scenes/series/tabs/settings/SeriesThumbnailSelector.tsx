@@ -161,7 +161,7 @@ export default function SeriesThumbnailSelector({ fragment }: Props) {
 					selectedBook && page ? sdk.media.bookPageURL(selectedBook.id, page) : series.thumbnail.url
 				}
 				isCover
-				className="flex-auto flex-shrink-0"
+				className="flex-auto shrink-0"
 				fullWidth={(imageFailed) => !imageFailed}
 			/>
 

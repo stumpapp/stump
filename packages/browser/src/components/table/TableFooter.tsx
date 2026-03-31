@@ -19,7 +19,7 @@ export default function TableFooter({ pagination, setPagination, pageCount, data
 	return (
 		<div className="flex h-10 items-center justify-between border-t border-edge px-2">
 			<div className="flex items-center gap-4">
-				<Text variant="muted" className="hidden flex-shrink-0 items-center gap-1 md:flex" size="sm">
+				<Text variant="muted" className="hidden shrink-0 items-center gap-1 md:flex" size="sm">
 					<span>
 						<strong>{firstIndex}</strong> to <strong>{lastIndex}</strong>
 					</span>

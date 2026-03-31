@@ -69,7 +69,7 @@ export default function SeriesCard({ data, fullWidth, variant = 'default' }: Ser
 
 	const overrides = isCoverOnly
 		? {
-				className: 'flex-shrink',
+				className: 'shrink',
 				href: undefined,
 				progress: undefined,
 				subtitle: undefined,

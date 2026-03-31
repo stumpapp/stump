@@ -32,7 +32,7 @@ export default function SmartListSettingsSideBar() {
 					: 'fixed top-0 z-50 h-screen border-r',
 			)}
 		>
-			<div className="flex h-full flex-grow flex-col gap-4">
+			<div className="flex h-full grow flex-col gap-4">
 				<div className="flex items-center space-x-2">
 					<ButtonOrLink
 						href="."

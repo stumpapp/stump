@@ -37,7 +37,7 @@ export default function ReadMore({ text }: Props) {
 			</div>
 
 			<div
-				className="pointer-events-none -mt-8 h-8 bg-gradient-to-t from-background to-transparent transition-opacity duration-150"
+				className="pointer-events-none -mt-8 h-8 bg-linear-to-t from-background to-transparent transition-opacity duration-150"
 				style={{ opacity: showingAll ? 0 : 1 }}
 			/>
 

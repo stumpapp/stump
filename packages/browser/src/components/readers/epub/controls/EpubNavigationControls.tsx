@@ -72,7 +72,7 @@ export default function EpubNavigationControls({ children }: Props) {
 	return (
 		<div className="relative flex h-full w-full flex-1 items-center gap-1" aria-hidden="true">
 			<div
-				className={cx('fixed left-2 z-[100] hidden h-1/2 w-12 items-center md:flex', {
+				className={cx('fixed left-2 z-100 hidden h-1/2 w-12 items-center md:flex', {
 					hidden: isVerticalScrolling,
 				})}
 			>
@@ -81,13 +81,13 @@ export default function EpubNavigationControls({ children }: Props) {
 				</ControlButton>
 			</div>
 			<div
-				className="fixed bottom-10 left-0 right-0 top-10 z-[99] md:hidden"
+				className="fixed bottom-10 left-0 right-0 top-10 z-99 md:hidden"
 				{...swipeHandlers}
 				onClick={() => setVisible(false)}
 			/>
 			{children}
 			<div
-				className={cx('fixed right-2 z-[100] hidden h-1/2 w-12 items-center justify-end md:flex', {
+				className={cx('fixed right-2 z-100 hidden h-1/2 w-12 items-center justify-end md:flex', {
 					hidden: isVerticalScrolling,
 				})}
 			>

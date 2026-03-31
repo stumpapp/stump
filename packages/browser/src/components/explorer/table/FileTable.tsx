@@ -90,7 +90,7 @@ export default function FileTable() {
 
 	const { rows } = table.getRowModel()
 	return (
-		<div className="relative mb-5 h-full w-full flex-1 flex-grow">
+		<div className="relative mb-5 h-full w-full flex-1 grow">
 			<AutoSizer>
 				{({ height, width }) => (
 					<TableVirtuoso

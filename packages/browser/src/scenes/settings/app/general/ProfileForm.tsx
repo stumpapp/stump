@@ -93,7 +93,7 @@ export default function ProfileForm() {
 	return (
 		<Form form={form} onSubmit={handleSubmit}>
 			<div className="flex w-full flex-col-reverse space-y-8 space-y-reverse md:max-w-2xl md:flex-row md:justify-between md:space-y-0">
-				<div className="flex flex-grow flex-col gap-6">
+				<div className="flex grow flex-col gap-6">
 					<Input
 						variant="primary"
 						className="w-full"

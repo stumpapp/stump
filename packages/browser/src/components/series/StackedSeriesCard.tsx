@@ -67,7 +67,7 @@ const StackedSeriesCard = memo(function StackedSeriesCard({ data }: Props) {
 
 			<div className="absolute left-0 top-0 z-20 w-full px-2.5 py-3">
 				<Text
-					className="line-clamp-2 !text-wrap text-base font-bold leading-tight text-white md:text-lg"
+					className="line-clamp-2 text-wrap! text-base font-bold leading-tight text-white md:text-lg"
 					style={{
 						textShadow: '2px 1px 2px rgba(0, 0, 0, 0.5)',
 					}}

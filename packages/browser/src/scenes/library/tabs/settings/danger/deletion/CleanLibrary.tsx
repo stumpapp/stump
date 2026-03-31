@@ -100,7 +100,7 @@ export default function CleanLibrary() {
 						<Button
 							type="button"
 							onClick={() => setShowConfirmation(true)}
-							className="flex-shrink-0"
+							className="shrink-0"
 							size="md"
 							disabled={!!data || isPending}
 							isLoading={isPending}

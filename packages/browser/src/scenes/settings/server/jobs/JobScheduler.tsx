@@ -279,7 +279,7 @@ export default function JobScheduler() {
 						})}
 					/>
 
-					<div className="flex-shrink-0">
+					<div className="shrink-0">
 						<Label htmlFor="intervalPreset">Interval preset</Label>
 						<NativeSelect
 							value={intervalPreset}
@@ -314,7 +314,7 @@ export default function JobScheduler() {
 					variant="primary"
 					size="md"
 					disabled={!isConfigDifferent || isSubmitting}
-					className="flex-shrink-0 md:w-32"
+					className="shrink-0 md:w-32"
 				>
 					{t('common.saveChanges')}
 				</Button>

@@ -33,7 +33,7 @@ export default function DeleteBookClubSection() {
 							type="button"
 							variant="danger"
 							onClick={() => setShowConfirmation(true)}
-							className="flex-shrink-0"
+							className="shrink-0"
 							size="md"
 						>
 							{t(getKey('trigger'))}

@@ -117,7 +117,7 @@ export default function EntityCard({
 					max={100}
 					variant="primary-dark"
 					size="sm"
-					className="!-mt-1"
+					className="-mt-1!"
 					rounded="none"
 				/>
 			)
@@ -176,14 +176,14 @@ export default function EntityCard({
 				{ 'cursor-pointer hover:border-edge-brand dark:hover:border-edge-brand': hasClickAction },
 				{ 'max-w-[16rem]': isCover },
 				{
-					'w-[10rem] sm:w-[10.666rem] md:w-[12rem]': !isFullWidth,
+					'w-40 sm:w-[10.666rem] md:w-48': !isFullWidth,
 				},
 				className,
 			)}
 		>
 			<div
 				className={cn('h-full w-full p-0', {
-					'w-[10rem] sm:w-[10.666rem] md:w-[12rem]': !isFullWidth,
+					'w-40 sm:w-[10.666rem] md:w-48': !isFullWidth,
 				})}
 				style={{ aspectRatio: thumbnailRatio }}
 			>

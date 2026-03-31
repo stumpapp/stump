@@ -33,7 +33,7 @@ export default function DangerSettingsScene() {
 								type="button"
 								variant="danger"
 								onClick={() => setShowConfirmation(true)}
-								className="flex-shrink-0"
+								className="shrink-0"
 							>
 								Delete list
 							</Button>

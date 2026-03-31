@@ -107,7 +107,7 @@ export default function UploadImageModal({ isOpen, onClose, onUploadImage }: Pro
 
 					<div
 						{...getRootProps()}
-						className="flex shrink-0 flex-grow flex-col items-center justify-center border border-dashed border-edge p-4"
+						className="flex shrink-0 grow flex-col items-center justify-center border border-dashed border-edge p-4"
 					>
 						<input {...getInputProps()} />
 						<Text variant="muted">{t(withLocaleKey('prompt'))}</Text>

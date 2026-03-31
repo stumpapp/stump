@@ -127,7 +127,7 @@ export default function IgnoreRulesConfig() {
 	}, [ctx, ignoreRules, t])
 
 	return (
-		<div className="flex max-w-2xl flex-grow flex-col gap-6">
+		<div className="flex max-w-2xl grow flex-col gap-6">
 			<div className="flex items-center justify-between">
 				<div>
 					<Heading size="sm">{t(getKey('section.heading'))}</Heading>

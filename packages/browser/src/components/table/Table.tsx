@@ -234,7 +234,7 @@ export default function Table<T, V>({
 				<div className="flex items-center gap-4">
 					<Text
 						variant="muted"
-						className="hidden flex-shrink-0 items-center gap-1 md:flex"
+						className="hidden shrink-0 items-center gap-1 md:flex"
 						size="sm"
 					>
 						{tableRows.length > 0 ? (

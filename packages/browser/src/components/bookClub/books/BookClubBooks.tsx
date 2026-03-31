@@ -123,7 +123,7 @@ export default function BookClubBooks() {
 	}
 
 	return (
-		<div className="flex h-full w-full flex-col md:-ml-4 md:w-2/3 lg:w-[28rem]">
+		<div className="flex h-full w-full flex-col md:-ml-4 md:w-2/3 lg:w-md">
 			{!!bookClub.currentBook && (
 				<Heading size="md" className="flex items-center px-4 pb-4">
 					Books

@@ -263,7 +263,7 @@ export default function UploadModal() {
 					<div
 						{...getRootProps()}
 						className={cn(
-							'flex shrink-0 flex-grow cursor-pointer flex-col items-center justify-center space-y-4 rounded-lg border border-dashed border-edge-subtle p-4 !outline-none ring-2 ring-transparent ring-offset-2 ring-offset-background-overlay',
+							'flex shrink-0 grow cursor-pointer flex-col items-center justify-center space-y-4 rounded-lg border border-dashed border-edge-subtle p-4 outline-none! ring-2 ring-transparent ring-offset-2 ring-offset-background-overlay',
 							{ 'ring-edge-brand': isFocused },
 						)}
 					>

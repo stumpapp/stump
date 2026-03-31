@@ -127,10 +127,10 @@ export function SeriesStackedThumbnails({ thumbnailData, width: cardWidth, class
 					key={index}
 					className={cn(
 						'absolute bottom-0 will-change-transform',
-						'translate-x-[var(--x)] translate-y-[var(--y)] rotate-[var(--r)]',
+						'translate-x-(--x) translate-y-(--y) rotate-(--r)',
 						shouldFancyHover && [
 							'transform-gpu duration-300',
-							'group-hover:translate-x-[var(--x-hover)] group-hover:translate-y-[var(--y-hover)] group-hover:rotate-[var(--r-hover)]',
+							'group-hover:translate-x-(--x-hover) group-hover:translate-y-(--y-hover) group-hover:rotate-(--r-hover)',
 						],
 					)}
 					style={

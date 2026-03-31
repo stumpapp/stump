@@ -145,7 +145,7 @@ export default function AvatarPicker() {
 							<div className={cx('relative h-[100px]', { 'h-[100px]': filePreview })}>
 								{filePreview && (
 									<>
-										<div className="absolute -top-0 right-0 flex items-center justify-center">
+										<div className="absolute top-0 right-0 flex items-center justify-center">
 											<IconButton
 												title={t(getKey('removeSelection'))}
 												size="xs"
@@ -194,7 +194,7 @@ export default function AvatarPicker() {
 				<Label>{t(getKey('label'))}</Label>
 				<span className="relative">
 					<Avatar
-						className="h-40 w-40 !text-2xl"
+						className="h-40 w-40 text-2xl!"
 						src={imageUrl || undefined}
 						fallback={user?.username}
 						fallbackColor="brand"

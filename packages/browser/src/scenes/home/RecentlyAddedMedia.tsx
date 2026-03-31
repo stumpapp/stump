@@ -171,7 +171,7 @@ const RecentlyAddedBookCard = memo(function RecentlyAddedBookCard({
 	return (
 		<Link
 			to={paths.bookOverview(data.id)}
-			className="group relative block flex-shrink-0 overflow-hidden rounded-lg transition-opacity hover:opacity-90"
+			className="group relative block shrink-0 overflow-hidden rounded-lg transition-opacity hover:opacity-90"
 			style={{ width: cardWidth }}
 		>
 			<ThumbnailImage
@@ -189,7 +189,7 @@ const RecentlyAddedBookCard = memo(function RecentlyAddedBookCard({
 
 			<div className="pointer-events-none absolute bottom-0 left-0 right-0 z-30 p-2">
 				<Text
-					className="line-clamp-2 !text-wrap text-sm font-semibold leading-tight text-white"
+					className="line-clamp-2 text-wrap! text-sm font-semibold leading-tight text-white"
 					style={{
 						textShadow: '1px 1px 2px rgba(0, 0, 0, 0.5)',
 					}}

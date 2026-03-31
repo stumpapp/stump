@@ -10,7 +10,7 @@ export default function ThumbnailManagementSection() {
 	const { t } = useLocaleContext()
 
 	return (
-		<div className="flex flex-grow flex-col gap-6">
+		<div className="flex grow flex-col gap-6">
 			<div>
 				<Heading size="sm">{t(getKey('heading'))}</Heading>
 				<Text size="sm" variant="muted">

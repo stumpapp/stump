@@ -36,7 +36,7 @@ export default function LibraryAdminLayout({ applySceneDefaults = true }: Props)
 		if (applySceneDefaults) {
 			return (
 				<SceneContainer
-					className={cx('flex min-h-full w-full flex-grow flex-col space-y-6', {
+					className={cx('flex min-h-full w-full grow flex-col space-y-6', {
 						'max-w-4xl': primaryNavigationMode === 'SIDEBAR',
 					})}
 				>

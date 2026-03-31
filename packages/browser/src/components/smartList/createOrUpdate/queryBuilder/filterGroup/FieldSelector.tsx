@@ -157,7 +157,7 @@ export function FieldSelector({ idx }: Props) {
 						<Command.Group
 							heading={renderGroupHeader()}
 							className={cn({
-								'[&_[cmdk-group-heading]]:px-0': !!source,
+								'**:[[cmdk-group-heading]]:px-0': !!source,
 							})}
 						>
 							{renderSource()}

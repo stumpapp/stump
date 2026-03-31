@@ -106,7 +106,7 @@ export default function EntityTable<Entity>({
 							return (
 								<th
 									key={header.id}
-									className="sticky !top-0 z-[2] h-10 bg-background pl-1.5 pr-1.5 shadow-sm first:pl-4 last:pr-4"
+									className="sticky top-0! z-2 h-10 bg-background pl-1.5 pr-1.5 shadow-sm first:pl-4 last:pr-4"
 								>
 									<div
 										className={cn('flex items-center', {

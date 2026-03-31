@@ -37,7 +37,7 @@ export default function LinkBadge({ href, text }: Props) {
 		<Badge className="line-clamp-1 flex items-center" size="sm">
 			<Link href={href} target="_blank" rel="noopener noreferrer" className="flex items-center">
 				{content}
-				<ExternalLink className="ml-1 h-3 w-3 flex-shrink-0" />
+				<ExternalLink className="ml-1 h-3 w-3 shrink-0" />
 			</Link>
 		</Badge>
 	)

@@ -103,7 +103,7 @@ export default function NextInSeries() {
 	return (
 		<div
 			className={cn(
-				'absolute top-1/2 z-[60] flex -translate-y-1/2 items-center justify-center',
+				'absolute top-1/2 z-60 flex -translate-y-1/2 items-center justify-center',
 				readingDirection === ReadingDirection.Ltr ? 'right-4' : 'left-4',
 			)}
 		>

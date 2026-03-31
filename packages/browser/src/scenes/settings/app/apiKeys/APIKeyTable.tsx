@@ -225,7 +225,7 @@ export default function APIKeyTable() {
 								return (
 									<th
 										key={header.id}
-										className="sticky !top-0 z-[2] h-10 bg-background-surface/50 px-2 shadow-sm"
+										className="sticky top-0! z-2 h-10 bg-background-surface/50 px-2 shadow-sm"
 										style={getCommonPinningStyles(header.column)}
 									>
 										<div

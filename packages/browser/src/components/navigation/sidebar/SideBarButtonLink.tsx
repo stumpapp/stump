@@ -43,7 +43,7 @@ export default function SideBarButtonLink({
 			{leftContent}
 			<Link
 				to={to}
-				className={cn('line-clamp-1 flex h-full w-full flex-1 items-center break-words p-0', {
+				className={cn('line-clamp-1 flex h-full w-full flex-1 items-center wrap-break-word p-0', {
 					'justify-center': variant === 'action',
 				})}
 			>

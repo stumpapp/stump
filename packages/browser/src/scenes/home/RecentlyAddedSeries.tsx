@@ -98,7 +98,7 @@ function RecentlyAddedSeriesCard({ series, cardWidth }: RecentlyAddedSeriesCardP
 		<Link
 			to={`/series/${series.id}`}
 			className={cn(
-				'group relative block flex-shrink-0 transition-opacity',
+				'group relative block shrink-0 transition-opacity',
 				!shouldFancyHover && 'hover:opacity-80',
 			)}
 			style={{ width: cardWidth }}
@@ -107,7 +107,7 @@ function RecentlyAddedSeriesCard({ series, cardWidth }: RecentlyAddedSeriesCardP
 
 			<div className="absolute left-0 top-0 z-20 w-full px-2.5 py-3">
 				<Text
-					className="line-clamp-2 !text-wrap text-xl font-bold leading-tight text-white"
+					className="line-clamp-2 text-wrap! text-xl font-bold leading-tight text-white"
 					style={{
 						textShadow: '2px 1px 2px rgba(0, 0, 0, 0.5)',
 					}}

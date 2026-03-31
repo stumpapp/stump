@@ -208,7 +208,7 @@ const ContinueReadingCard = memo(function ContinueReadingCard({
 	return (
 		<Link
 			to={paths.bookOverview(data.id)}
-			className="group relative block flex-shrink-0 overflow-hidden rounded-xl transition-opacity hover:opacity-90"
+			className="group relative block shrink-0 overflow-hidden rounded-xl transition-opacity hover:opacity-90"
 			style={{ width }}
 		>
 			<ThumbnailImage
@@ -226,7 +226,7 @@ const ContinueReadingCard = memo(function ContinueReadingCard({
 
 			<div className="pointer-events-none absolute bottom-0 left-0 right-0 z-30 flex flex-col gap-2 p-2.5">
 				<Text
-					className="line-clamp-2 !text-wrap text-sm font-semibold leading-tight text-white md:text-base"
+					className="line-clamp-2 text-wrap! text-sm font-semibold leading-tight text-white md:text-base"
 					style={{
 						textShadow: '1px 1px 2px rgba(0, 0, 0, 0.5)',
 					}}
@@ -260,7 +260,7 @@ const ContinueReadingCard = memo(function ContinueReadingCard({
 						max={100}
 						size="sm"
 						className="h-1 rounded-full bg-[#898d94]"
-						indicatorClassName="bg-[#f5f3ef]"
+						indicatorClassName="bg-foreground"
 					/>
 				)}
 			</div>

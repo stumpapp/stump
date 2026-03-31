@@ -197,7 +197,7 @@ const BookCard = memo(function BookCard({
 				'group relative flex flex-col gap-1',
 				'rounded-lg border border-transparent p-1 transition-colors duration-100',
 				'focus-visible:outline-none',
-				fullWidth ? 'w-full' : 'w-[10rem] shrink-0 sm:w-[10.666rem] md:w-[12rem]',
+				fullWidth ? 'w-full' : 'w-40 shrink-0 sm:w-[10.666rem] md:w-48',
 			)}
 		>
 			<div

@@ -46,7 +46,7 @@ export default function DiscordPresenceSwitch() {
 
 	return (
 		<div className="flex items-center justify-between">
-			<div className="flex flex-grow flex-col gap-2 text-left">
+			<div className="flex grow flex-col gap-2 text-left">
 				<Label htmlFor="discord_presence_switch">{t(getKey('label'))}</Label>
 				<Text size="xs" variant="muted">
 					{t(getKey('description'))}

@@ -236,7 +236,7 @@ export default function TableColumnsBottomDrawer() {
 						</div>
 
 						<div className="flex items-center justify-between">
-							<div className="flex flex-grow flex-col gap-2 text-left">
+							<div className="flex grow flex-col gap-2 text-left">
 								<Label htmlFor="enable_multi_sort">Enable multi-sort</Label>
 								<Text size="sm" variant="muted">
 									Sorting by a column removes the previous sort. This setting allows combining them,

@@ -159,14 +159,14 @@ export default function TopNavigation() {
 					maxWidth: layoutMaxWidthPx ? `${layoutMaxWidthPx}px` : undefined,
 				}}
 			>
-				<NavigationMenu className="z-[100] h-full">
+				<NavigationMenu className="z-100 h-full">
 					<div ref={ref}>
 						<NavigationMenu.List className="w-full pl-4">{sections}</NavigationMenu.List>
 					</div>
 				</NavigationMenu>
 
 				<div className="flex h-full shrink-0 items-center gap-x-2">
-					<NavigationMenu className="z-[100] h-full pr-4" viewPortProps={{ align: 'right' }}>
+					<NavigationMenu className="z-100 h-full pr-4" viewPortProps={{ align: 'right' }}>
 						<NavigationMenu.List className="w-full">
 							<SettingsNavigationItem />
 							<UserMenu />

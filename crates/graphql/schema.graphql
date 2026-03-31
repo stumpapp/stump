@@ -2645,8 +2645,6 @@ type StumpConfig {
 	dbPath: String
 	"The client directory."
 	clientDir: String!
-	"An optional custom path for the templates directory."
-	customTemplatesDir: String
 	"The configuration root for the Stump application, contains thumbnails, cache, and logs."
 	configDir: String!
 	"A list of origins for CORS."

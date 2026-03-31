@@ -3685,8 +3685,6 @@ export type StumpConfig = {
   clientDir: Scalars['String']['output'];
   /** The configuration root for the Stump application, contains thumbnails, cache, and logs. */
   configDir: Scalars['String']['output'];
-  /** An optional custom path for the templates directory. */
-  customTemplatesDir?: Maybe<Scalars['String']['output']>;
   /** An optional custom path for the database. */
   dbPath?: Maybe<Scalars['String']['output']>;
   /** Indicates if the KoReader sync feature should be enabled. */

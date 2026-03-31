@@ -1,13 +1,15 @@
 import { useGraphQL } from '@stump/client'
-import { Badge, Card, Heading, Text, ToolTip } from '@stump/components'
-import { graphql, LogModelOrdering, MissingEntity } from '@stump/graphql'
+import { Badge, Card, Heading, Link, Text } from '@stump/components'
+import { graphql, LogModelOrdering, MissingEntity, MissingEntityType } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
 import { keepPreviousData } from '@tanstack/react-query'
 import { createColumnHelper, SortingState } from '@tanstack/react-table'
 import { CircleSlash2 } from 'lucide-react'
 import { useState } from 'react'
+import { match } from 'ts-pattern'
 
 import { Table } from '@/components/table'
+import { usePaths } from '@/paths'
 
 import { useLibraryManagement } from '../../context'
 
@@ -28,6 +30,7 @@ const query = graphql(`
 					pageOffset
 					pageOffset
 					zeroBased
+					totalItems
 				}
 			}
 		}
@@ -60,6 +63,8 @@ export default function MisisngEntitiesTable() {
 		},
 	)
 
+	const paths = usePaths()
+
 	const missingEntities = data?.libraryMissingEntities.nodes ?? []
 	const pageInfo = data?.libraryMissingEntities.pageInfo
 
@@ -68,26 +73,22 @@ export default function MisisngEntitiesTable() {
 	}
 
 	const columns = [
-		columnHelper.accessor('id', {
-			cell: ({
-				row: {
-					original: { id },
-				},
-			}) => (
-				<ToolTip content={<span className="font-mono">{id}</span>}>
-					<Text size="sm" variant="muted">
-						{id.slice(0, 5)}..{id.slice(-5)}
-					</Text>
-				</ToolTip>
-			),
-			header: t(getKey('columns.id')),
-		}),
 		columnHelper.accessor('path', {
 			cell: ({
 				row: {
-					original: { path },
+					original: { id, path, type },
 				},
-			}) => <Text size="sm">{path}</Text>,
+			}) => (
+				<Link
+					to={match(type)
+						.with(MissingEntityType.Book, () => paths.bookOverview(id))
+						.with(MissingEntityType.Series, () => paths.seriesOverview(id))
+						.otherwise(() => undefined)}
+					className="line-clamp-2 text-sm text-opacity-100 no-underline hover:text-opacity-90 hover:underline"
+				>
+					{path}
+				</Link>
+			),
 			header: t(getKey('columns.path')),
 			size: 500,
 		}),
@@ -120,6 +121,7 @@ export default function MisisngEntitiesTable() {
 				}}
 				data={missingEntities}
 				fullWidth
+				totalCount={pageInfo?.totalItems}
 				emptyRenderer={() =>
 					isLoading ? null : (
 						<div className="flex min-h-[150px] flex-col items-center justify-center gap-2">

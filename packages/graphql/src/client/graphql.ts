@@ -5408,7 +5408,7 @@ export type LibraryMissingEntitiesQueryVariables = Exact<{
 }>;
 
 
-export type LibraryMissingEntitiesQuery = { __typename?: 'Query', libraryMissingEntities: { __typename?: 'PaginatedMissingEntityResponse', nodes: Array<{ __typename?: 'MissingEntity', id: string, path: string, type: MissingEntityType }>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', totalPages: number, currentPage: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
+export type LibraryMissingEntitiesQuery = { __typename?: 'Query', libraryMissingEntities: { __typename?: 'PaginatedMissingEntityResponse', nodes: Array<{ __typename?: 'MissingEntity', id: string, path: string, type: MissingEntityType }>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', totalPages: number, currentPage: number, pageSize: number, pageOffset: number, zeroBased: boolean, totalItems: number } } };
 
 export type AnalyzeLibraryMediaMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -10410,6 +10410,7 @@ export const LibraryMissingEntitiesDocument = new TypedDocumentString(`
         pageOffset
         pageOffset
         zeroBased
+        totalItems
       }
     }
   }

@@ -36,11 +36,11 @@ export interface TableProps<T = unknown, V = unknown> {
 	isZeroBasedPagination?: boolean
 	cellClassName?: string
 	onPrefetchPage?: (page: number) => void
+	totalCount?: number
 }
 
 // TODO: move into components package!
 // TODO: loading state
-// TODO: total count for pagination...
 
 export default function Table<T, V>({
 	data,
@@ -52,6 +52,7 @@ export default function Table<T, V>({
 	isZeroBasedPagination,
 	cellClassName,
 	onPrefetchPage,
+	totalCount,
 	...props
 }: TableProps<T, V>) {
 	const rootRef = useRef<HTMLDivElement | null>(null)
@@ -113,29 +114,20 @@ export default function Table<T, V>({
 	const pageCount = options.pageCount ?? table.getPageCount()
 	const dataCount = data.length
 	const viewBounds = useMemo(() => {
-		const isLessThanPage = dataCount < pageSize
+		// always prioritize provided totalCount
+		const actualTotalCount = totalCount ?? pageCount * pageSize
 
 		const expectedLastIndex = (pageIndex + 1) * pageSize
 		const expectedFirstIndex = expectedLastIndex - (pageSize - 1)
-		const expectedTotalCount = pageCount * pageSize
 
-		if (isLessThanPage) {
-			return {
-				// firstIndex will still be expectedFirstIndex
-				firstIndex: expectedFirstIndex,
-				// lastIndex will be expectedLastIndex - (pageSize - data.length)
-				lastIndex: expectedLastIndex - (pageSize - dataCount),
-				// totalCount will be expectedTotalCount - (pageSize - data.length)
-				totalCount: expectedTotalCount - (pageSize - dataCount),
-			}
-		}
+		const actualLastIndex = Math.min(expectedLastIndex, actualTotalCount)
 
 		return {
 			firstIndex: expectedFirstIndex,
-			lastIndex: expectedLastIndex,
-			totalCount: expectedTotalCount,
+			lastIndex: actualLastIndex,
+			totalCount: actualTotalCount,
 		}
-	}, [pageCount, pageSize, dataCount, pageIndex])
+	}, [pageCount, pageSize, pageIndex, totalCount])
 
 	const handleFilter = (value?: string) => {
 		const filterCol = filterColRef.current?.value

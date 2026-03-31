@@ -1,23 +1,20 @@
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { useLoginOrRegister, useOidcConfig } from '@stump/client'
 import { LoginResponse } from '@stump/sdk'
 import { Eye, EyeOff } from 'lucide-react-native'
-import { useColorScheme } from 'nativewind'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
-import { Pressable, View } from 'react-native'
-import { useSharedValue } from 'react-native-reanimated'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { Pressable, ScrollView, View } from 'react-native'
 import { z } from 'zod'
 
 import { useColors } from '~/lib/constants'
 import { startOidcLogin } from '~/lib/sdk/auth'
+import { useColorScheme } from '~/lib/useColorScheme'
 import { useUserStore } from '~/stores'
 
 import { useActiveServer } from './activeServer'
-import { Button, Text } from './ui'
-import { BottomSheet } from './ui/bottom-sheet'
+import { Button, Input, Text } from './ui'
 import { Icon } from './ui/icon'
 
 type ServerAuthDialogProps = {
@@ -34,15 +31,14 @@ export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogPr
 		onError: console.error,
 	})
 
-	const ref = useRef<BottomSheetModal | null>(null)
-	const animatedIndex = useSharedValue<number>(0)
-	const animatedPosition = useSharedValue<number>(0)
+	const ref = useRef<TrueSheet>(null)
 
 	const [isPasswordVisible, setIsPasswordVisible] = useState(false)
 	const [isOidcLoading, setIsOidcLoading] = useState(false)
 	const hasAuthSucceeded = useRef(false)
 
-	const { colorScheme } = useColorScheme()
+	const { isDarkColorScheme } = useColorScheme()
+	const colors = useColors()
 
 	const {
 		control,
@@ -61,14 +57,11 @@ export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogPr
 		}
 	}, [isOpen])
 
-	const handleChange = useCallback(
-		(index: number) => {
-			if (index === -1 && isOpen && !hasAuthSucceeded.current) {
-				onClose()
-			}
-		},
-		[isOpen, onClose],
-	)
+	const handleDismiss = useCallback(() => {
+		if (isOpen && !hasAuthSucceeded.current) {
+			onClose()
+		}
+	}, [isOpen, onClose])
 
 	const onSubmit = useCallback(
 		async ({ username, password }: LoginSchema) => {
@@ -113,35 +106,17 @@ export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogPr
 		throw new Error('Not supported yet')
 	}
 
-	const insets = useSafeAreaInsets()
-	const colors = useColors()
-
 	return (
-		<View>
-			<BottomSheet.Modal
-				ref={ref}
-				topInset={insets.top}
-				onChange={handleChange}
-				backgroundStyle={{
-					borderRadius: 24,
-					borderCurve: 'continuous',
-					overflow: 'hidden',
-					borderWidth: 1,
-					borderColor: colors.edge.DEFAULT,
-					backgroundColor: colors.background.DEFAULT,
-				}}
-				keyboardBlurBehavior="restore"
-				handleIndicatorStyle={{ backgroundColor: colorScheme === 'dark' ? '#333' : '#ccc' }}
-				handleComponent={(props) => (
-					<BottomSheet.Handle
-						{...props}
-						className="mt-2"
-						animatedIndex={animatedIndex}
-						animatedPosition={animatedPosition}
-					/>
-				)}
-			>
-				<BottomSheet.View className="flex-1 items-start gap-4 p-6">
+		<TrueSheet
+			ref={ref}
+			detents={['auto']}
+			backgroundColor={colors.background.DEFAULT}
+			grabber
+			grabberOptions={{ color: isDarkColorScheme ? '#333' : '#ccc' }}
+			onDidDismiss={handleDismiss}
+		>
+			<ScrollView className="p-6">
+				<View className="flex-1 items-start gap-4">
 					<View>
 						<Text className="text-2xl font-bold leading-6">Login</Text>
 						<Text className="text-base text-foreground-muted">
@@ -155,7 +130,7 @@ export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogPr
 							required: true,
 						}}
 						render={({ field: { onChange, onBlur, value } }) => (
-							<BottomSheet.Input
+							<Input
 								label="Username"
 								autoCorrect={false}
 								autoCapitalize="none"
@@ -180,7 +155,7 @@ export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogPr
 							<View className="w-full gap-1.5">
 								<Text className="text-base font-medium text-foreground-muted">Password</Text>
 								<View className="relative flex-row items-center">
-									<BottomSheet.Input
+									<Input
 										secureTextEntry={!isPasswordVisible}
 										autoCorrect={false}
 										autoCapitalize="none"
@@ -238,9 +213,9 @@ export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogPr
 							</Button>
 						</View>
 					)}
-				</BottomSheet.View>
-			</BottomSheet.Modal>
-		</View>
+				</View>
+			</ScrollView>
+		</TrueSheet>
 	)
 }
 

@@ -270,9 +270,12 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 
 						<View className="flex-row items-center gap-2">
 							{currentPage && (
-								<View className="squircle flex-row items-baseline rounded-full bg-background-surface-secondary px-2.5 py-0.5">
+								<View className="squircle flex-row items-end rounded-full bg-background-surface-secondary px-2.5 py-0.5">
 									<Text size="sm">{`Page ${currentPage}`}</Text>
-									<Text size="xs" className="text-foreground-muted">{` / ${totalPages}`}</Text>
+									<Text
+										size="xs"
+										className="pb-0.5 text-foreground-muted"
+									>{` / ${totalPages}`}</Text>
 								</View>
 							)}
 

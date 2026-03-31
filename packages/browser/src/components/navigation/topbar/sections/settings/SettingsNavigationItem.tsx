@@ -57,7 +57,7 @@ export default function SettingsNavigationItem() {
 				<div key={groupLabel}>
 					<Label>{groupLabel}</Label>
 
-					<ul className="flex flex-col gap-y-0.5 pt-2 text-sm">
+					<ul className="gap-y-0.5 pt-2 text-sm flex flex-col">
 						{items.map(({ to, icon, label, disabled }) => {
 							const isDisabled = disabled || (platform === 'browser' && to.includes('desktop'))
 
@@ -71,7 +71,7 @@ export default function SettingsNavigationItem() {
 										isDisabled={isDisabled}
 									>
 										<Icon className="mr-2 h-4 w-4 shrink-0" />
-										<span className="ml-1 line-clamp-1 font-medium">
+										<span className="ml-1 font-medium line-clamp-1">
 											{t(withGroup(label.toLowerCase()))}
 										</span>
 									</TopBarLinkListItem>
@@ -89,12 +89,12 @@ export default function SettingsNavigationItem() {
 			<NavigationMenu.Trigger className={classes} showChevron={false}>
 				<Cog className="h-4 w-4" />
 			</NavigationMenu.Trigger>
-			<NavigationMenu.Content className="left-auto right-0">
+			<NavigationMenu.Content className="right-0 left-auto">
 				<div
 					className={cn(
-						'grid justify-between gap-x-2 p-4 md:w-[400px]',
+						'gap-x-2 p-4 md:w-[400px] grid justify-between',
 						{
-							'grid-cols-1 md:w-[200px]': groups.length === 1,
+							'md:w-[200px] grid-cols-1': groups.length === 1,
 						},
 						{ 'grid-cols-2': groups.length === 2 },
 					)}

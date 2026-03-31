@@ -23,7 +23,7 @@ function MetadataBadgeListCell({ values }: { values?: string[] | null }) {
 	const remaining = Math.max(values.length - visible.length, 0)
 
 	return (
-		<div className="flex max-h-12.5 flex-wrap gap-1 overflow-hidden">
+		<div className="max-h-12.5 gap-1 flex flex-wrap overflow-hidden">
 			{visible.map((value) => (
 				<Badge key={value} size="sm" className="line-clamp-1 max-w-full">
 					{value}
@@ -62,7 +62,7 @@ const nameColumn = columnHelper.accessor(({ resolvedName }) => resolvedName, {
 						})
 					: paths.bookOverview(id)
 			}
-			className="line-clamp-2 text-sm text-opacity-100 no-underline hover:text-opacity-90"
+			className="text-sm text-opacity-100 hover:text-opacity-90 line-clamp-2 no-underline"
 		>
 			{getValue()}
 		</Link>

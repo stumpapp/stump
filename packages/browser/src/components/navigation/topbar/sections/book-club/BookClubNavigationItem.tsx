@@ -45,8 +45,8 @@ export default function BookClubNavigationItem({
 	const renderBookClubs = () => {
 		if (!bookClubs?.length) {
 			return (
-				<div className="flex w-full flex-1 items-center justify-start px-2">
-					<div className="flex flex-col items-start gap-y-2">
+				<div className="px-2 flex w-full flex-1 items-center justify-start">
+					<div className="gap-y-2 flex flex-col items-start">
 						<CircleSlash2 className="h-7 w-7 text-foreground-muted" />
 						<div className="text-left">
 							<Label>{t('sidebar.buttons.noBookClubs')}</Label>
@@ -63,7 +63,7 @@ export default function BookClubNavigationItem({
 			<AutoSizer>
 				{({ height, width }) => (
 					<ScrollArea
-						className="flex flex-col gap-y-2"
+						className="gap-y-2 flex flex-col"
 						style={{ height: canCreateBookClub ? height - 48 : height, width }}
 					>
 						{bookClubs.map((club) => (
@@ -78,7 +78,7 @@ export default function BookClubNavigationItem({
 									) : (
 										<Club className="mr-2 h-4 w-4 shrink-0" />
 									)}
-									<span className="line-clamp-1 font-medium">{club.name}</span>
+									<span className="font-medium line-clamp-1">{club.name}</span>
 								</TopBarLinkListItem>
 							</div>
 						))}
@@ -97,22 +97,22 @@ export default function BookClubNavigationItem({
 			<NavigationMenu.Content>
 				<div
 					style={{ width }}
-					className={cn('flex min-h-[150px] min-w-[300px] flex-col gap-3 p-2', {
+					className={cn('gap-3 p-2 flex min-h-[150px] min-w-[300px] flex-col', {
 						'md:w-[400px] lg:w-[500px]': !width,
 						'md:w-[300px] lg:w-[350px]': !width && !bookClubs?.length,
 					})}
 				>
-					<div className="flex w-full flex-1 flex-col gap-y-2">
+					<div className="gap-y-2 flex w-full flex-1 flex-col">
 						{renderBookClubs()}
 
-						<div className="flex w-full items-center gap-2">
+						<div className="gap-2 flex w-full items-center">
 							{showCreateLink && (
 								<TopBarLinkListItem
 									to={paths.bookClubCreate()}
 									isActive={location.pathname.startsWith(paths.bookClubCreate())}
-									className="justify-center self-end border border-dashed border-edge-subtle p-1"
+									className="p-1 justify-center self-end border border-dashed border-edge-subtle"
 								>
-									<span className="line-clamp-1 text-sm font-medium">
+									<span className="text-sm font-medium line-clamp-1">
 										{t('sidebar.buttons.createBookClub')}
 									</span>
 								</TopBarLinkListItem>
@@ -122,9 +122,9 @@ export default function BookClubNavigationItem({
 								<TopBarLinkListItem
 									to={paths.bookClubs()}
 									isActive={location.pathname.startsWith(paths.bookClubs())}
-									className="justify-center self-end border border-dashed border-edge-subtle p-1"
+									className="p-1 justify-center self-end border border-dashed border-edge-subtle"
 								>
-									<span className="line-clamp-1 text-sm font-medium">
+									<span className="text-sm font-medium line-clamp-1">
 										{t('sidebar.buttons.seeAll')}
 									</span>
 								</TopBarLinkListItem>

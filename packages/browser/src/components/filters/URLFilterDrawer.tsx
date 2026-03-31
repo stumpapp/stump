@@ -60,9 +60,9 @@ export default function URLFilterDrawer({ entity }: Props) {
 						</IconButton>
 
 						{activeFilters > 0 && (
-							<span className="absolute right-0 top-0 -mr-1.5 -mt-1.5 flex h-4 w-4">
-								<span className="relative inline-flex h-4 w-4 items-center justify-center rounded-full bg-fill-brand">
-									<span className="text-xxs font-semibold text-white">{activeFilters}</span>
+							<span className="right-0 top-0 -mr-1.5 -mt-1.5 h-4 w-4 absolute flex">
+								<span className="h-4 w-4 relative inline-flex items-center justify-center rounded-full bg-fill-brand">
+									<span className="font-semibold text-white text-xxs">{activeFilters}</span>
 								</span>
 							</span>
 						)}
@@ -71,7 +71,7 @@ export default function URLFilterDrawer({ entity }: Props) {
 			}
 			size={isMobile ? 'xl' : 'default'}
 			footer={
-				<div className="-mt-4 flex w-full items-center gap-x-4 py-2">
+				<div className="-mt-4 gap-x-4 py-2 flex w-full items-center">
 					<Button
 						size="sm"
 						className="w-full"

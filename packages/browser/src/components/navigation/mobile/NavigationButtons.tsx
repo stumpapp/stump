@@ -27,7 +27,7 @@ export default function NavigationButtons() {
 	})
 
 	return (
-		<div className="m-0 hidden items-center gap-1 md:flex">
+		<div className="m-0 gap-1 md:flex hidden items-center">
 			<ToolTip content="Navigate back" size="xs">
 				<IconButton variant="ghost" size="sm" onClick={navigateBackward}>
 					<ChevronLeft size="0.75rem" />

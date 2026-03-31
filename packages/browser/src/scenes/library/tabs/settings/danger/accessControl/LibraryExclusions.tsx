@@ -133,7 +133,7 @@ export default function LibraryExclusions() {
 
 	// TODO: disabled state if no options
 	return (
-		<div className="flex flex-col gap-4">
+		<div className="gap-4 flex flex-col">
 			<div>
 				<Heading size="sm">{t(getKey('heading'))}</Heading>
 				<Text size="sm" variant="muted" className="mt-1">

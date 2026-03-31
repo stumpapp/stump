@@ -14,7 +14,7 @@ function DebugSettings() {
 	const store = useDebugStore()
 
 	return (
-		<div className="flex flex-col gap-4">
+		<div className="gap-4 flex flex-col">
 			<div>
 				<h3 className="text-base font-medium text-foreground">Debug settings</h3>
 				<p className="text-sm text-foreground-muted">
@@ -22,9 +22,9 @@ function DebugSettings() {
 				</p>
 			</div>
 
-			<div className="flex flex-col gap-2">
-				<Label className="flex items-center justify-between rounded-lg border border-dashed border-fill-brand/40 bg-fill-brand-secondary p-3">
-					<div className="flex flex-col gap-1">
+			<div className="gap-2 flex flex-col">
+				<Label className="rounded-lg p-3 flex items-center justify-between border border-dashed border-fill-brand/40 bg-fill-brand-secondary">
+					<div className="gap-1 flex flex-col">
 						<span>Query Tools</span>
 						<p className="text-sm text-foreground-muted">Enable debugging tools for queries</p>
 					</div>

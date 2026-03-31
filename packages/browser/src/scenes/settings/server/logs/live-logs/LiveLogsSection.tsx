@@ -6,7 +6,7 @@ import LiveLogsFeed from './LiveLogsFeed'
 export default function LiveLogsSection() {
 	const { t } = useLocaleContext()
 	return (
-		<div className="flex flex-col gap-4">
+		<div className="gap-4 flex flex-col">
 			<div>
 				<Heading size="sm">{t('settingsScene.server/logs.sections.liveLogs.title')}</Heading>
 				<Text size="sm" variant="muted" className="mt-1">

@@ -34,7 +34,7 @@ const TabsList = React.forwardRef<
 			<TabsPrimitive.List
 				ref={ref}
 				className={cn(
-					'inline-flex items-center justify-center rounded-md border border-edge-subtle/80 bg-transparent p-1',
+					'rounded-md p-1 inline-flex items-center justify-center border border-edge-subtle/80 bg-transparent',
 					{ 'gap-1': activeOnHover },
 					className,
 				)}
@@ -53,7 +53,7 @@ const TabsTrigger = React.forwardRef<
 		{({ variant, activeOnHover }) => (
 			<TabsPrimitive.Trigger
 				className={cn(
-					'inline-flex min-w-[100px] items-center justify-center rounded-[0.185rem] px-3 py-1.5 text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm',
+					'px-3 py-1.5 text-sm font-medium data-[state=active]:shadow-sm inline-flex min-w-[100px] items-center justify-center rounded-[0.185rem] transition-all disabled:pointer-events-none disabled:opacity-50',
 					TABS_CONTENT_VARIANTS[variant] || TABS_CONTENT_VARIANTS.default,
 					{
 						'hover:data-[state=inactive]:bg-background-surface': activeOnHover && !props.disabled,
@@ -76,7 +76,7 @@ const TabsContent = React.forwardRef<
 	ComponentPropsWithoutRef<typeof TabsPrimitive.Content>
 >(({ className, ...props }, ref) => (
 	<TabsPrimitive.Content
-		className={cn('mt-2 rounded-md border border-edge-subtle p-6', className)}
+		className={cn('mt-2 rounded-md p-6 border border-edge-subtle', className)}
 		{...props}
 		ref={ref}
 	/>

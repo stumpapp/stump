@@ -40,8 +40,8 @@ export default function SmartListNavigationItem({
 	const renderSmartLists = () => {
 		if (!lists?.length) {
 			return (
-				<div className="flex w-full flex-1 items-center justify-start px-2">
-					<div className="flex flex-col items-start gap-y-2">
+				<div className="px-2 flex w-full flex-1 items-center justify-start">
+					<div className="gap-y-2 flex flex-col items-start">
 						<CircleSlash2 className="h-7 w-7 text-foreground-muted" />
 						<div className="text-left">
 							<Label>{t('sidebar.buttons.noSmartlists')}</Label>
@@ -57,7 +57,7 @@ export default function SmartListNavigationItem({
 		return (
 			<AutoSizer>
 				{({ height, width }) => (
-					<ScrollArea className="flex flex-col gap-y-2" style={{ height: height - 48, width }}>
+					<ScrollArea className="gap-y-2 flex flex-col" style={{ height: height - 48, width }}>
 						{lists.map((list) => (
 							<div key={list.id} className="w-full">
 								<TopBarLinkListItem
@@ -88,24 +88,24 @@ export default function SmartListNavigationItem({
 			<NavigationMenu.Content>
 				<div
 					style={{ width }}
-					className={cn('flex min-h-[150px] min-w-[300px] flex-col gap-3 p-2', {
+					className={cn('gap-3 p-2 flex min-h-[150px] min-w-[300px] flex-col', {
 						'md:w-[400px] lg:w-[500px]': !width,
 						'md:w-[300px] lg:w-[350px]': !width && !lists?.length,
 					})}
 				>
-					<div className="flex w-full flex-1 flex-col gap-y-2">
+					<div className="gap-y-2 flex w-full flex-1 flex-col">
 						{renderSmartLists()}
 
 						<div className="flex-1" />
 
-						<div className="flex w-full items-center gap-2">
+						<div className="gap-2 flex w-full items-center">
 							{showCreateLink && (
 								<TopBarLinkListItem
 									to={paths.smartListCreate()}
 									isActive={location.pathname.startsWith(paths.smartListCreate())}
-									className="justify-center self-end border border-dashed border-edge-subtle p-1"
+									className="p-1 justify-center self-end border border-dashed border-edge-subtle"
 								>
-									<span className="line-clamp-1 text-sm font-medium">
+									<span className="text-sm font-medium line-clamp-1">
 										{t('sidebar.buttons.createSmartlist')}
 									</span>
 								</TopBarLinkListItem>
@@ -115,9 +115,9 @@ export default function SmartListNavigationItem({
 								<TopBarLinkListItem
 									to={paths.smartLists()}
 									isActive={location.pathname.startsWith(paths.smartLists())}
-									className="justify-center self-end border border-dashed border-edge-subtle p-1"
+									className="p-1 justify-center self-end border border-dashed border-edge-subtle"
 								>
-									<span className="line-clamp-1 text-sm font-medium">
+									<span className="text-sm font-medium line-clamp-1">
 										{t('sidebar.buttons.seeAll')}
 									</span>
 								</TopBarLinkListItem>

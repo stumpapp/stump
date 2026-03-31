@@ -97,7 +97,7 @@ export default function MetadataEditorTable<Item extends RowData>({
 
 	return (
 		<Card
-			className="overflow-hidden rounded-xl border-edge"
+			className="rounded-xl overflow-hidden border-edge"
 			ref={tableContainerRef}
 			style={{
 				direction: table.options.columnResizeDirection,
@@ -123,7 +123,7 @@ export default function MetadataEditorTable<Item extends RowData>({
 										...getCommonPinningStyles(header.column),
 									},
 								}}
-								className="relative min-h-10"
+								className="min-h-10 relative"
 							>
 								{flexRender(header.column.columnDef.header, header.getContext())}
 
@@ -136,7 +136,7 @@ export default function MetadataEditorTable<Item extends RowData>({
 											ensureResizeFillsSpace(header.column.id, optimalWidth)
 										}}
 										className={cn(
-											'absolute -right-px top-0 z-50 h-full w-px cursor-col-resize touch-none opacity-0 transition-opacity duration-75 hover:opacity-50',
+											'top-0 absolute -right-px z-50 h-full w-px cursor-col-resize touch-none opacity-0 transition-opacity duration-75 hover:opacity-50',
 											{
 												'opacity-100': header.column.getIsResizing(),
 											},
@@ -156,7 +156,7 @@ export default function MetadataEditorTable<Item extends RowData>({
 						<tr key={row.id} className="flex w-fit">
 							{row.getVisibleCells().map((cell) => (
 								<td
-									className="py-2 pl-1.5 pr-1.5 first:border-r first:border-edge first:pl-4 last:pl-0 last:pr-0"
+									className="py-2 pl-1.5 pr-1.5 first:pl-4 last:pl-0 last:pr-0 first:border-r first:border-edge"
 									key={cell.id}
 									style={{
 										width: cell.column.getSize(),
@@ -172,7 +172,7 @@ export default function MetadataEditorTable<Item extends RowData>({
 					{!rows.length && (
 						<tr>
 							<td colSpan={2}>
-								<div className="flex h-32 items-center justify-center">No Metadata</div>
+								<div className="h-32 flex items-center justify-center">No Metadata</div>
 							</td>
 						</tr>
 					)}

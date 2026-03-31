@@ -35,22 +35,22 @@ export default function SeriesHeader() {
 
 	return (
 		<header
-			className={cn('flex w-full flex-col gap-4 p-4', {
+			className={cn('gap-4 p-4 flex w-full flex-col', {
 				'mx-auto': preferTopBar && !!layoutMaxWidthPx,
 			})}
 			style={{
 				maxWidth: preferTopBar ? layoutMaxWidthPx || undefined : undefined,
 			}}
 		>
-			<div className="flex w-full flex-col items-center gap-4 md:flex-row md:items-start">
+			<div className="gap-4 md:flex-row md:items-start flex w-full flex-col items-center">
 				{showThumbnailsInHeaders && (
 					<ProminentThumbnailImage src={thumbnail.url} placeholderData={thumbnail.metadata} />
 				)}
 
-				<div className="flex w-full flex-col gap-4">
+				<div className="gap-4 flex w-full flex-col">
 					<Heading size="lg">{resolvedName}</Heading>
 
-					<div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:flex md:flex-wrap md:gap-6">
+					<div className="gap-3 sm:grid-cols-3 md:flex md:flex-wrap md:gap-6 grid grid-cols-2">
 						<Statistic.Item label="Books" value={stats.bookCount} />
 						<Statistic.Item
 							label="Completed"
@@ -63,7 +63,7 @@ export default function SeriesHeader() {
 					</div>
 
 					{hasMetadataBadges && (
-						<div className="flex flex-wrap items-center gap-2">
+						<div className="gap-2 flex flex-wrap items-center">
 							{metadata?.publisher && (
 								<Badge variant="default" size="xs" rounded="full">
 									{metadata.publisher}
@@ -89,7 +89,7 @@ export default function SeriesHeader() {
 					)}
 
 					{hasGenres && (
-						<div className="flex flex-col gap-1">
+						<div className="gap-1 flex flex-col">
 							<Text size="xs" variant="muted">
 								Genres
 							</Text>
@@ -112,7 +112,7 @@ export default function SeriesHeader() {
 					)}
 
 					{hasTags && (
-						<div className="flex flex-col gap-1">
+						<div className="gap-1 flex flex-col">
 							<Text size="xs" variant="muted">
 								Tags
 							</Text>
@@ -121,7 +121,7 @@ export default function SeriesHeader() {
 					)}
 
 					{hasLinks && (
-						<div className="flex flex-col gap-1">
+						<div className="gap-1 flex flex-col">
 							<Text size="xs" variant="muted">
 								Links
 							</Text>

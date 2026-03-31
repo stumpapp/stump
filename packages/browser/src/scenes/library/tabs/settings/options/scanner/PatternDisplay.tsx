@@ -19,13 +19,13 @@ export default function PatternDisplay() {
 
 	return (
 		<div
-			className="flex w-full flex-col space-y-1.5 rounded-xl bg-fill-warning-secondary p-1 lg:w-auto"
+			className="space-y-1.5 rounded-xl p-1 lg:w-auto flex w-full flex-col bg-fill-warning-secondary"
 			data-testid="unrestricted-meta"
 		>
-			<div className="flex items-center px-2.5 py-0.5 text-fill-warning">
+			<div className="px-2.5 py-0.5 flex items-center text-fill-warning">
 				<span className="font-medium">{t(getOptionKey(`${localeKey}.label`))}</span>
 			</div>
-			<div className="rounded-lg bg-fill-warning-secondary p-2.5">
+			<div className="rounded-lg p-2.5 bg-fill-warning-secondary">
 				<Text size="sm" className="text-fill-warning">
 					{t(getOptionKey(`${localeKey}.description`))}
 				</Text>

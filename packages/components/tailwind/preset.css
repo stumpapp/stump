@@ -69,7 +69,7 @@
 	--breakpoint-3xl: 1600px;
 	--breakpoint-4xl: 1920px;
 
-  /* TODO: This makes it v3 compatible but maybe kill it */
+	/* TODO: This makes it v3 compatible but maybe kill it */
 	--default-ring-color: var(--color-brand-500);
 
 	/* MARK: animations */
@@ -118,7 +118,7 @@
 @custom-variant autofill (&:autofill, &:-webkit-autofill);
 
 @layer base {
-  /* TODO: preserve v3 default border color behavior but maybe kill? */
+	/* TODO: preserve v3 default border color behavior but maybe kill? */
 	*,
 	::after,
 	::before,

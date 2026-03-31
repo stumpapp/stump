@@ -261,7 +261,7 @@ export default function GroupedVirtualSmartListTable({ items }: Props) {
 			<TableHeaderActions />
 
 			<div
-				className="sticky top-0 z-30 flex w-full border-b border-edge bg-background-surface"
+				className="top-0 sticky z-30 flex w-full border-b border-edge bg-background-surface"
 				style={{ height: HEADER_HEIGHT }}
 			>
 				{groupTable.getHeaderGroups().map((headerGroup) => (
@@ -273,9 +273,9 @@ export default function GroupedVirtualSmartListTable({ items }: Props) {
 									key={header.id}
 									// TODO: Fix the hitbox for sorting, not the entire header just the content
 									className={cn(
-										'flex w-full items-center bg-background-surface px-4 py-2 text-sm font-medium text-foreground-subtle last:justify-end',
+										'px-4 py-2 text-sm font-medium flex w-full items-center bg-background-surface text-foreground-subtle last:justify-end',
 										{
-											'cursor-pointer select-none gap-x-2': isSortable,
+											'gap-x-2 cursor-pointer select-none': isSortable,
 										},
 									)}
 									onClick={header.column.getToggleSortingHandler()}
@@ -305,7 +305,7 @@ export default function GroupedVirtualSmartListTable({ items }: Props) {
 						const item = flatData[activeStickyGroupIndex]
 						if (item?.type !== 'group') return null
 						return item.row.getVisibleCells().map((cell) => (
-							<div key={cell.id} className="flex w-full items-center px-4 py-2 last:justify-end">
+							<div key={cell.id} className="px-4 py-2 flex w-full items-center last:justify-end">
 								{flexRender(cell.column.columnDef.cell, cell.getContext())}
 							</div>
 						))
@@ -333,9 +333,9 @@ export default function GroupedVirtualSmartListTable({ items }: Props) {
 										<div
 											key={header.id}
 											className={cn(
-												'flex items-center overflow-hidden px-4 py-2 text-xs text-foreground-muted',
+												'px-4 py-2 text-xs flex items-center overflow-hidden text-foreground-muted',
 												{
-													'cursor-pointer select-none gap-x-2': isSortable,
+													'gap-x-2 cursor-pointer select-none': isSortable,
 												},
 											)}
 											onClick={header.column.getToggleSortingHandler()}
@@ -388,7 +388,7 @@ export default function GroupedVirtualSmartListTable({ items }: Props) {
 								{item.row.getVisibleCells().map((cell) => (
 									<div
 										key={cell.id}
-										className="flex w-full items-center px-4 py-2 last:justify-end"
+										className="px-4 py-2 flex w-full items-center last:justify-end"
 									>
 										{flexRender(cell.column.columnDef.cell, cell.getContext())}
 									</div>
@@ -417,9 +417,9 @@ export default function GroupedVirtualSmartListTable({ items }: Props) {
 												<div
 													key={header.id}
 													className={cn(
-														'flex items-center overflow-hidden px-4 py-2 text-xs text-foreground-muted',
+														'px-4 py-2 text-xs flex items-center overflow-hidden text-foreground-muted',
 														{
-															'cursor-pointer select-none gap-x-2': isSortable,
+															'gap-x-2 cursor-pointer select-none': isSortable,
 														},
 													)}
 													onClick={header.column.getToggleSortingHandler()}

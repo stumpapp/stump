@@ -74,7 +74,7 @@ function Alert({
 			{dismissible && (
 				<button
 					aria-label="Dismiss this alert"
-					className="absolute right-2 top-2 opacity-50 outline-none hover:opacity-100 group-hover:opacity-80"
+					className="right-2 top-2 absolute opacity-50 outline-none group-hover:opacity-80 hover:opacity-100"
 					onClick={onDismiss}
 				>
 					<X className="size-4" />
@@ -88,7 +88,7 @@ function AlertTitle({ className, ...props }: React.ComponentProps<'div'>) {
 	return (
 		<div
 			data-slot="alert-title"
-			className={cn('col-start-2 line-clamp-1 min-h-4 font-medium tracking-tight', className)}
+			className={cn('min-h-4 font-medium tracking-tight col-start-2 line-clamp-1', className)}
 			{...props}
 		/>
 	)
@@ -99,7 +99,7 @@ function AlertDescription({ className, ...props }: React.ComponentProps<'div'>) 
 		<div
 			data-slot="alert-description"
 			className={cn(
-				'col-start-2 grid justify-items-start gap-1 text-sm text-foreground-muted [&_p]:leading-relaxed',
+				'gap-1 text-sm [&_p]:leading-relaxed col-start-2 grid justify-items-start text-foreground-muted',
 				className,
 			)}
 			{...props}

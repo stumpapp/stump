@@ -50,7 +50,7 @@ export default function BookClubSideBarSection({
 	const renderBookClubs = () => {
 		if (!bookClubs || !bookClubs.length) {
 			return (
-				<Text className="select-none px-1 py-2" variant="muted" size="sm">
+				<Text className="px-1 py-2 select-none" variant="muted" size="sm">
 					{t('sidebar.buttons.noBookClubs')}
 				</Text>
 			)
@@ -91,7 +91,7 @@ export default function BookClubSideBarSection({
 	const showLinkToAll = links.includes(FilterableArrangementEntityLink.ShowAll)
 
 	return (
-		<Accordion type="single" collapsible className="w-full py-2" defaultValue="bookClubs">
+		<Accordion type="single" collapsible className="py-2 w-full" defaultValue="bookClubs">
 			<Accordion.Item value="bookClubs" className="border-none">
 				<Accordion.Trigger noUnderline asLabel className="px-1 py-0 pb-2">
 					{t('sidebar.buttons.bookClubs')}
@@ -106,7 +106,7 @@ export default function BookClubSideBarSection({
 							{t('sidebar.buttons.seeAll')}
 						</SideBarButtonLink>
 					)}
-					<div className="ml-2 space-y-1 border-l border-l-edge pl-1">{renderBookClubs()}</div>
+					<div className="ml-2 space-y-1 pl-1 border-l border-l-edge">{renderBookClubs()}</div>
 					{showCreateLink && (
 						<SideBarButtonLink
 							to={paths.bookClubCreate()}

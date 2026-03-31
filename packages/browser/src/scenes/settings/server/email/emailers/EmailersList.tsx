@@ -29,7 +29,7 @@ export default function EmailersList() {
 
 	if (!emailers.length) {
 		return (
-			<Card className="flex min-h-[150px] flex-col items-center justify-center gap-4">
+			<Card className="gap-4 flex min-h-[150px] flex-col items-center justify-center">
 				<CircleSlash2 className="h-10 w-10 pb-2 pt-1 text-foreground-muted" />
 				<div className="text-center">
 					<Heading size="xs">{t(`${LOCALE_BASE}.emptyHeading`)}</Heading>
@@ -44,7 +44,7 @@ export default function EmailersList() {
 	}
 
 	return (
-		<div className="flex flex-col space-y-6">
+		<div className="space-y-6 flex flex-col">
 			{emailers.map((emailer) => (
 				<EmailerListItem key={emailer.id} fragment={emailer} />
 			))}

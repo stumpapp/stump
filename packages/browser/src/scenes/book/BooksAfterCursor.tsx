@@ -88,8 +88,8 @@ function BooksAfterCurrent({ cursor }: Props) {
 			onFetchMore={handleFetchMore}
 			footerHeight={64 + 17}
 			emptyState={
-				<div className="flex items-start justify-start space-x-3 rounded-lg border border-dashed border-edge-subtle px-4 py-4">
-					<span className="rounded-lg border border-edge bg-background-surface p-2">
+				<div className="space-x-3 rounded-lg px-4 py-4 flex items-start justify-start border border-dashed border-edge-subtle">
+					<span className="rounded-lg p-2 border border-edge bg-background-surface">
 						<BookX className="h-8 w-8 text-foreground-muted" />
 					</span>
 					<div>

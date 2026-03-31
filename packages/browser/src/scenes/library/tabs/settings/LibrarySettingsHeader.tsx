@@ -57,7 +57,7 @@ export default function LibrarySettingsHeader() {
 	return (
 		<header
 			className={cn(
-				'flex w-full flex-col items-start justify-between gap-4 border-b border-b-edge p-4 lg:flex-row lg:gap-0',
+				'gap-4 p-4 lg:flex-row lg:gap-0 flex w-full flex-col items-start justify-between border-b border-b-edge',
 				{
 					// Note: We make the border transparent because the width constraint when using a top bar
 					'mx-auto border-b-transparent': preferTopBar && !!layoutMaxWidthPx,
@@ -68,7 +68,7 @@ export default function LibrarySettingsHeader() {
 				maxWidth: preferTopBar ? layoutMaxWidthPx || undefined : undefined,
 			}}
 		>
-			<div className="flex flex-col space-y-4">
+			<div className="space-y-4 flex flex-col">
 				<div>
 					<Heading size="lg" className="font-bold">
 						{translatedHeader}

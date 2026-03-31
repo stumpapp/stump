@@ -126,7 +126,7 @@ export function SeriesStackedThumbnails({ thumbnailData, width: cardWidth, class
 				<div
 					key={index}
 					className={cn(
-						'absolute bottom-0 will-change-transform',
+						'bottom-0 absolute will-change-transform',
 						'translate-x-(--x) translate-y-(--y) rotate-(--r)',
 						shouldFancyHover && [
 							'transform-gpu duration-300',
@@ -207,17 +207,17 @@ export function SeriesStackedThumbnails({ thumbnailData, width: cardWidth, class
 			}}
 		>
 			<div
-				className="absolute inset-0 overflow-hidden rounded-xl border border-edge/50"
+				className="inset-0 rounded-xl absolute overflow-hidden border border-edge/50"
 				style={{
 					backgroundColor,
 					boxShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
 					contain: 'layout style paint',
 				}}
 			>
-				<div className="pointer-events-none absolute inset-0 z-10" style={gradientStyle} />
+				<div className="inset-0 pointer-events-none absolute z-10" style={gradientStyle} />
 			</div>
 
-			<div className="absolute inset-0 z-20" style={{ clipPath: `path('${clipPathString}')` }}>
+			<div className="inset-0 absolute z-20" style={{ clipPath: `path('${clipPathString}')` }}>
 				{renderThumbnails()}
 			</div>
 		</div>

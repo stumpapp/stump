@@ -22,12 +22,12 @@ export default function BookClubHeader() {
 		const avatarUrl = creator.avatarUrl ?? undefined
 
 		return (
-			<Card className="flex items-center justify-between gap-4 p-2.5">
+			<Card className="gap-4 p-2.5 flex items-center justify-between">
 				<Text size="sm" variant="muted">
 					Created by
 				</Text>
 
-				<div className="flex items-center gap-2">
+				<div className="gap-2 flex items-center">
 					<Avatar src={avatarUrl} fallback={displayName} className="h-8 w-8" />
 					<Text size="sm">{displayName}</Text>
 				</div>
@@ -40,7 +40,7 @@ export default function BookClubHeader() {
 	return (
 		<header
 			className={cn(
-				'flex w-full flex-col gap-4 p-4 md:flex-row md:items-start md:justify-between md:gap-0',
+				'gap-4 p-4 md:flex-row md:items-start md:justify-between md:gap-0 flex w-full flex-col',
 				{
 					'mx-auto': preferTopBar && !!layoutMaxWidthPx,
 				},
@@ -49,7 +49,7 @@ export default function BookClubHeader() {
 				maxWidth: preferTopBar ? layoutMaxWidthPx || undefined : undefined,
 			}}
 		>
-			<div className="flex flex-col gap-1 md:max-w-xl">
+			<div className="gap-1 md:max-w-xl flex flex-col">
 				<Heading>{name}</Heading>
 				{/* TODO: read more text for long descriptions... */}
 				<Text size="md" variant="muted">

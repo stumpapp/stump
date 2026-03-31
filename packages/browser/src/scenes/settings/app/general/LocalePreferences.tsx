@@ -23,7 +23,7 @@ export default function LocalePreferences() {
 	}, [t])
 
 	return (
-		<div className="flex flex-col gap-y-4">
+		<div className="gap-y-4 flex flex-col">
 			<div>
 				<Heading size="sm">{t('settingsScene.app/account.sections.locale.heading')}</Heading>
 				{subTitle}

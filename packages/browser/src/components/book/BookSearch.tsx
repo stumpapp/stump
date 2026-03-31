@@ -68,7 +68,7 @@ export default function BookSearch({ onBookSelect }: Props) {
 	const books = data?.pages.flatMap((page) => page.media.nodes) || []
 
 	return (
-		<div className="flex flex-1 flex-col gap-y-4">
+		<div className="gap-y-4 flex flex-1 flex-col">
 			<Input
 				placeholder="Search for a book..."
 				value={search}

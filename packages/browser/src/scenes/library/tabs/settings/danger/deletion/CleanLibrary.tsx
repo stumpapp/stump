@@ -72,7 +72,7 @@ export default function CleanLibrary() {
 	}, [cleanLibrary, id, t])
 
 	return (
-		<div className="flex flex-col space-y-4">
+		<div className="space-y-4 flex flex-col">
 			<div>
 				<Heading size="sm">{t(getKey('heading'))}</Heading>
 				<Text size="sm" variant="muted" className="mt-1">

@@ -339,7 +339,7 @@ function SideBarControl({ onClick, position, fixed }: SideBarControlProps) {
 		<div
 			className={clsx(
 				'z-50 h-full shrink-0 border border-transparent transition-all duration-300',
-				'active:border-edge-subtle active:bg-background-surface active:bg-opacity-50',
+				'active:bg-opacity-50 active:border-edge-subtle active:bg-background-surface',
 				fixed ? 'absolute w-[10%]' : 'relative mx-[-3%] flex flex-1 grow',
 				{ 'right-0': position === 'right' },
 				{ 'left-0': position === 'left' },

@@ -22,7 +22,7 @@ export default function AnalyzeMedia() {
 	const handleAnalyze = useCallback(() => mutate({ id: library.id }), [library.id, mutate])
 
 	return (
-		<div className="flex flex-col gap-6">
+		<div className="gap-6 flex flex-col">
 			<div>
 				<Heading size="sm">{t(getKey('heading'))}</Heading>
 				<Text size="sm" variant="muted">

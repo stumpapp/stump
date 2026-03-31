@@ -67,7 +67,7 @@ export default function SeriesBookGrid({ seriesId, onSelectBook }: Props) {
 				{({ height, width }) => (
 					<div
 						ref={parentRef}
-						className="overflow-y-auto overflow-x-hidden"
+						className="overflow-x-hidden overflow-y-auto"
 						style={{
 							height,
 							width,
@@ -146,7 +146,7 @@ const List = ({ data, width, onSelectBook, getScrollElement }: ListProps) => {
 							width: '100%',
 						}}
 					>
-						<div className="flex gap-2">
+						<div className="gap-2 flex">
 							{booksInRow.map((book) => {
 								const imageUrl = book?.thumbnail.url
 
@@ -154,7 +154,7 @@ const List = ({ data, width, onSelectBook, getScrollElement }: ListProps) => {
 									<EntityImage
 										key={book.id}
 										src={imageUrl}
-										className="h-auto rounded-lg object-cover"
+										className="rounded-lg h-auto object-cover"
 										style={{
 											width: `${getWidth() - 8}px`,
 											aspectRatio: thumbnailRatio,

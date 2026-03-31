@@ -26,7 +26,7 @@ export default function NumberCell<Field extends string>({
 
 	if (isEditing) {
 		return (
-			<div className="group flex items-center gap-2">
+			<div className="group gap-2 flex items-center">
 				<Input
 					type="number"
 					step={isDecimal ? 'any' : 1}

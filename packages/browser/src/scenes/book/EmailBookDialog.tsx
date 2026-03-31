@@ -111,8 +111,8 @@ function EmailBookDialog({ mediaId, isOpen, onClose, canArbitrarySendEmail }: Pr
 			return null
 		} else {
 			return (
-				<div className="flex flex-col space-y-2">
-					<div className="flex flex-wrap items-center gap-x-2">
+				<div className="space-y-2 flex flex-col">
+					<div className="gap-x-2 flex flex-wrap items-center">
 						{emails.map((email, index) => (
 							<Badge
 								key={index}
@@ -125,7 +125,7 @@ function EmailBookDialog({ mediaId, isOpen, onClose, canArbitrarySendEmail }: Pr
 						))}
 					</div>
 
-					<div className="flex w-full items-center space-x-2">
+					<div className="space-x-2 flex w-full items-center">
 						<Input
 							label={t(getFormKey('email.label'))}
 							description={t(getFormKey('email.description'))}
@@ -161,7 +161,7 @@ function EmailBookDialog({ mediaId, isOpen, onClose, canArbitrarySendEmail }: Pr
 					<Dialog.Close onClick={onClose} disabled={isSending} />
 				</Dialog.Header>
 
-				<div className="flex flex-col space-y-4">
+				<div className="space-y-4 flex flex-col">
 					<ComboBox
 						label={t(getFormKey('devices.label'))}
 						options={devices.map((device) => ({

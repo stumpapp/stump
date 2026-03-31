@@ -28,11 +28,11 @@ export const NativeSelect = forwardRef<HTMLSelectElement, NativeSelectProps>(
 					[
 						'bg-transparent focus:bg-transparent enabled:hover:bg-background-surface',
 						'border border-edge-subtle',
-						'focus:outline-none focus:ring-2 focus:ring-edge-brand focus:ring-offset-2 focus:ring-offset-background',
+						'focus:ring-2 focus:ring-edge-brand focus:ring-offset-2 focus:ring-offset-background focus:outline-none',
 						'text-sm text-foreground-subtle placeholder:text-foreground-muted',
 						'disabled:cursor-not-allowed disabled:opacity-50',
 					],
-					'flex w-full items-center justify-between rounded-md bg-transparent px-3 pl-3 pr-10 transition-all duration-150',
+					'rounded-md px-3 pl-3 pr-10 flex w-full items-center justify-between bg-transparent transition-all duration-150',
 					{
 						[SELECT_SIZES[size ?? 'default']]: size,
 					},

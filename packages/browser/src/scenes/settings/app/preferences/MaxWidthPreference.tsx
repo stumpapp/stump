@@ -52,7 +52,7 @@ export default function MaxWidthPreference() {
 
 	return (
 		<div
-			className="flex flex-col gap-y-1.5 md:max-w-md"
+			className="gap-y-1.5 md:max-w-md flex flex-col"
 			title={
 				primaryNavigationMode === 'SIDEBAR'
 					? // TODO: support it

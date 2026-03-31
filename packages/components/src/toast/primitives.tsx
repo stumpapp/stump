@@ -15,7 +15,7 @@ const ToastViewport = React.forwardRef<
 	<ToastPrimitives.Viewport
 		ref={ref}
 		className={cn(
-			'fixed top-0 z-100 flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]',
+			'top-0 p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px] fixed z-100 flex max-h-screen w-full flex-col-reverse',
 			className,
 		)}
 		{...props}
@@ -59,7 +59,7 @@ const ToastAction = React.forwardRef<
 	<ToastPrimitives.Action
 		ref={ref}
 		className={cn(
-			'inline-flex h-8 shrink-0 items-center justify-center rounded-md border border-gray-200 bg-transparent px-3 text-sm font-medium transition-colors hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 group-[.danger]:border-red-100 group-[.danger]:hover:border-gray-50 group-[.danger]:hover:bg-red-100 group-[.danger]:hover:text-red-600 group-[.danger]:focus:ring-red-400 group-[.danger]:focus:ring-offset-red-600 dark:border-gray-700 dark:text-gray-100 dark:hover:bg-gray-700 dark:hover:text-gray-100 dark:focus:ring-gray-400 dark:focus:ring-offset-gray-900 dark:data-[state=open]:bg-gray-800',
+			'h-8 rounded-md px-3 text-sm font-medium group-[.danger]:border-red-100 group-[.danger]:hover:bg-red-100 group-[.danger]:hover:text-red-600 group-[.danger]:focus:ring-red-400 group-[.danger]:focus:ring-offset-red-600 inline-flex shrink-0 items-center justify-center border border-gray-200 bg-transparent transition-colors hover:bg-gray-100 group-[.danger]:hover:border-gray-50 focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 focus:outline-none disabled:pointer-events-none disabled:opacity-50 dark:border-gray-700 dark:text-gray-100 dark:hover:bg-gray-700 dark:hover:text-gray-100 dark:focus:ring-gray-400 dark:focus:ring-offset-gray-900 dark:data-[state=open]:bg-gray-800',
 			className,
 		)}
 		{...props}
@@ -74,7 +74,7 @@ const ToastClose = React.forwardRef<
 	<ToastPrimitives.Close
 		ref={ref}
 		className={cn(
-			'absolute right-2 top-2 rounded-md p-1 text-gray-500 opacity-0 transition-opacity hover:text-gray-900 focus:opacity-100 focus:outline-none focus:ring-2 group-hover:opacity-100 group-[.danger]:text-red-300 group-[.danger]:hover:text-red-50 group-[.danger]:focus:ring-red-400 group-[.danger]:focus:ring-offset-red-600 dark:hover:text-gray-50',
+			'right-2 top-2 rounded-md p-1 group-[.danger]:text-red-300 group-[.danger]:hover:text-red-50 group-[.danger]:focus:ring-red-400 group-[.danger]:focus:ring-offset-red-600 absolute text-gray-500 opacity-0 transition-opacity group-hover:opacity-100 hover:text-gray-900 focus:opacity-100 focus:ring-2 focus:outline-none dark:hover:text-gray-50',
 			className,
 		)}
 		toast-close=""

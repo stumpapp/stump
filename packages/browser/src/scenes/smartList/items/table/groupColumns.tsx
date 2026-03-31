@@ -23,7 +23,7 @@ const buildNameColumn = (isGroupedBySeries: boolean) =>
 			return (
 				<button
 					title={isExpanded ? 'Collapse' : 'Expand'}
-					className="flex items-center gap-x-1"
+					className="gap-x-1 flex items-center"
 					onClick={getToggleExpandedHandler()}
 					disabled={!getCanExpand()}
 				>
@@ -35,7 +35,7 @@ const buildNameColumn = (isGroupedBySeries: boolean) =>
 							},
 						)}
 					/>
-					<Text className="line-clamp-1 text-left text-sm md:text-base">{name}</Text>
+					<Text className="text-sm md:text-base line-clamp-1 text-left">{name}</Text>
 				</button>
 			)
 		},
@@ -45,7 +45,7 @@ const buildNameColumn = (isGroupedBySeries: boolean) =>
 			const isAllRowsExpanded = getIsAllRowsExpanded()
 
 			return (
-				<div className="flex items-center gap-x-1">
+				<div className="gap-x-1 flex items-center">
 					<button
 						onClick={(e) => {
 							// Don't update the sorting state when clicking the expand all button

@@ -107,7 +107,7 @@ export default function UserTable() {
 			...baseColumns,
 			columnHelper.display({
 				cell: ({ row: { original } }) => (
-					<div className="inline-flex items-end md:w-2">
+					<div className="md:w-2 inline-flex items-end">
 						<UserActionMenu
 							user={original}
 							onSelectForInspect={() => setInspectingUser(original)}
@@ -197,7 +197,7 @@ const baseColumns = [
 			</Text>
 		),
 		header: () => (
-			<div className="flex w-full items-center gap-2">
+			<div className="gap-2 flex w-full items-center">
 				<span>Sessions</span>
 				<ToolTip content="The number of non-expired login sessions for this user">
 					<HelpCircle className="h-3 w-3" />

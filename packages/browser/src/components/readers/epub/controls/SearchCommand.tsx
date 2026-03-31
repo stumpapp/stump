@@ -98,7 +98,7 @@ export default function SearchCommand() {
 						<Command.Item
 							key={result.cfi}
 							onDoubleClick={() => handleGoToCfi(result.cfi)}
-							className="flex flex-col space-y-1"
+							className="space-y-1 flex flex-col"
 						>
 							<p className="w-full">
 								{result.excerpt.split(new RegExp(`(${query})`, 'gi')).map((part, idx) => {
@@ -126,7 +126,7 @@ export default function SearchCommand() {
 	const renderContent = () => {
 		if (isSearching) {
 			return (
-				<div className="flex h-32 w-full items-center justify-center">
+				<div className="h-32 flex w-full items-center justify-center">
 					<Spinner />
 				</div>
 			)
@@ -143,12 +143,12 @@ export default function SearchCommand() {
 				<Search className="h-4 w-4" />
 			</ControlButton>
 			<Command.Dialog open={open} onOpenChange={setOpen}>
-				<div className="flex items-center border-b border-b-edge px-4">
+				<div className="px-4 flex items-center border-b border-b-edge">
 					<Search className="mr-2 h-4 w-4 shrink-0 text-foreground-muted opacity-50" />
 					<input
 						placeholder="Enter a basic query to search for"
 						className={cn(
-							'flex h-11 w-full rounded-md bg-transparent py-3 text-sm text-foreground-subtle outline-none placeholder:text-foreground-muted disabled:cursor-not-allowed disabled:opacity-50',
+							'h-11 rounded-md py-3 text-sm flex w-full bg-transparent text-foreground-subtle outline-none placeholder:text-foreground-muted disabled:cursor-not-allowed disabled:opacity-50',
 						)}
 						value={query}
 						onChange={(e) => setQuery(e.target.value)}

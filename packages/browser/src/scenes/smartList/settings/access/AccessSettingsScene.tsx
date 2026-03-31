@@ -72,7 +72,7 @@ export default function AccessSettingsScene() {
 				target={visibility as EntityVisibility}
 			/>
 
-			<div className="flex flex-col gap-12">
+			<div className="gap-12 flex flex-col">
 				<Form form={form} onSubmit={handleSubmit} fieldsetClassName="flex flex-col gap-12">
 					<AccessSettings />
 

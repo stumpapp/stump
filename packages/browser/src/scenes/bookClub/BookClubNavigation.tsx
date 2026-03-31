@@ -59,10 +59,10 @@ export default function BookClubNavigation() {
 	}
 
 	return (
-		<div className="sticky top-0 z-10 w-full border-b border-edge bg-background md:relative md:top-[unset] md:z-[unset]">
+		<div className="top-0 md:relative md:top-[unset] md:z-[unset] sticky z-10 w-full border-b border-edge bg-background">
 			<nav
 				className={cn(
-					'-mb-px flex gap-x-6 overflow-x-scroll px-3 scrollbar-hide md:overflow-x-hidden',
+					'gap-x-6 px-3 md:overflow-x-hidden -mb-px scrollbar-hide flex overflow-x-scroll',
 					{
 						'mx-auto': preferTopBar && !!layoutMaxWidthPx,
 					},
@@ -74,8 +74,8 @@ export default function BookClubNavigation() {
 						to={tab.to}
 						key={tab.to}
 						underline={false}
-						className={cx('whitespace-nowrap border-b-2 px-1 py-3 text-sm font-medium', {
-							'border-edge-brand text-brand': tab.isActive,
+						className={cx('px-1 py-3 text-sm font-medium border-b-2 whitespace-nowrap', {
+							'text-brand border-edge-brand': tab.isActive,
 							'border-transparent text-foreground-muted hover:border-edge': !tab.isActive,
 						})}
 					>

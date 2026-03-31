@@ -37,7 +37,7 @@ export default function AppearanceSettingsScene() {
 			<ContentContainer>
 				<DebugSettings />
 
-				<div className="flex flex-col gap-y-8">
+				<div className="gap-y-8 flex flex-col">
 					<div>
 						<h3 className="text-base font-medium text-foreground">
 							{t(getKey('themeAndAppearance.label'))}
@@ -65,7 +65,7 @@ export default function AppearanceSettingsScene() {
 
 				<PrimaryNavigationPreference />
 
-				<div className="flex flex-col gap-y-8">
+				<div className="gap-y-8 flex flex-col">
 					<DoubleSidebarToggle />
 					<ReplacePrimarySidebarToggle />
 				</div>
@@ -77,7 +77,7 @@ export default function AppearanceSettingsScene() {
 				<DisplaySpacingPreference />
 				<MaxWidthPreference />
 
-				<div className="flex flex-col gap-y-8">
+				<div className="gap-y-8 flex flex-col">
 					<div>
 						<h3 className="text-base font-medium text-foreground">
 							{t(getKey('additionalPreferences.label'))}

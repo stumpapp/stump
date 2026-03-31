@@ -15,7 +15,7 @@ export const SmartListTableItem = ({ row, style }: Props) => {
 			{row.getVisibleCells().map((cell) => (
 				<div
 					key={cell.id}
-					className="flex items-center overflow-hidden px-4 py-2"
+					className="px-4 py-2 flex items-center overflow-hidden"
 					style={{
 						width: cell.column.getSize(),
 						minWidth: cell.column.columnDef.minSize,

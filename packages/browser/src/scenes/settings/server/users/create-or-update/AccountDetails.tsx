@@ -12,7 +12,7 @@ export default function AccountDetails() {
 	const [passwordVisible, setPasswordVisible] = useState(false)
 
 	return (
-		<div className="flex flex-col gap-4 pb-4 pt-1 md:max-w-md">
+		<div className="gap-4 pb-4 pt-1 md:max-w-md flex flex-col">
 			<Input
 				id="username"
 				variant="primary"
@@ -47,7 +47,7 @@ export default function AccountDetails() {
 				{...form.register('password')}
 			/>
 
-			<div className="flex items-center gap-1">
+			<div className="gap-1 flex items-center">
 				<Button
 					type="button"
 					onClick={() => form.setValue('password', generateRandomPassword())}

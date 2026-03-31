@@ -117,7 +117,7 @@ export default function OperatorSelect({ idx }: Props) {
 				</Button>
 			</Popover.Trigger>
 
-			<Popover.Content className="mt-1 max-h-96 w-52 overflow-y-auto p-0" align="start">
+			<Popover.Content className="mt-1 max-h-96 w-52 p-0 overflow-y-auto" align="start">
 				<Command>
 					<Command.List>
 						{selectGroups.map(({ label, operators }) => (

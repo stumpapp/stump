@@ -53,7 +53,7 @@ export default function SettingsNavigation() {
 	const renderTabs = groups.length > 1
 
 	return (
-		<div className="flex flex-col gap-y-4">
+		<div className="gap-y-4 flex flex-col">
 			{renderTabs && (
 				<Tabs value={activeRouteGroup?.label} variant="primary" activeOnHover>
 					<Tabs.List>
@@ -78,7 +78,7 @@ export default function SettingsNavigation() {
 				</Tabs>
 			)}
 
-			<div className="flex flex-col gap-y-2">
+			<div className="gap-y-2 flex flex-col">
 				<Label>Section</Label>
 				<NativeSelect
 					options={selectOptions}

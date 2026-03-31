@@ -5,7 +5,7 @@ import AnalyzeMedia from './AnalyzeMedia'
 
 export default function LibraryAnalysisScene() {
 	return (
-		<div className="flex flex-col gap-12">
+		<div className="gap-12 flex flex-col">
 			<Alert variant="warning">
 				<AlertTriangle />
 				<AlertTitle>Work in progress</AlertTitle>

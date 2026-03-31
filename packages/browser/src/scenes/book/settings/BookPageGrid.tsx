@@ -24,7 +24,7 @@ export default function BookPageGrid({ bookId, pages, selectedPage, onSelectPage
 				{({ height, width }) => (
 					<div
 						ref={setScrollElement}
-						className="overflow-y-auto overflow-x-hidden"
+						className="overflow-x-hidden overflow-y-auto"
 						style={{
 							height,
 							width,
@@ -110,7 +110,7 @@ const List = ({ bookId, pages, width, selectedPage, onSelectPage, scrollElement 
 							width: '100%',
 						}}
 					>
-						<div className="flex gap-2">
+						<div className="gap-2 flex">
 							{pagesInRow.map((pageNumber) => {
 								const imageUrl = sdk.media.bookPageURL(bookId, pageNumber)
 
@@ -119,7 +119,7 @@ const List = ({ bookId, pages, width, selectedPage, onSelectPage, scrollElement 
 										key={pageNumber}
 										src={imageUrl}
 										className={cx(
-											'h-auto rounded-md object-cover transition-colors duration-100',
+											'rounded-md h-auto object-cover transition-colors duration-100',
 											pageNumber === selectedPage
 												? 'ring-2 ring-edge-brand'
 												: 'ring-1 ring-edge hover:ring-edge-brand',

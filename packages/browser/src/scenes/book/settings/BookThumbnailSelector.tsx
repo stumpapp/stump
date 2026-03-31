@@ -138,7 +138,7 @@ export default function BookThumbnailSelector({ fragment }: Props) {
 
 			<Dialog open={isOpen} onOpenChange={handleOpenChange}>
 				<Dialog.Trigger asChild>
-					<span className="absolute bottom-2 left-2 block">
+					<span className="bottom-2 left-2 absolute block">
 						<EditThumbnailDropdown
 							onChooseSelector={() => setIsOpen(true)}
 							onUploadImage={handleUploadImage}

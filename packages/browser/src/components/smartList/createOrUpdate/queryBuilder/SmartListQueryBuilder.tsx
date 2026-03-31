@@ -24,7 +24,7 @@ export default function SmartListQueryBuilder({ disabled }: Props) {
 
 	return (
 		<>
-			<div className={cn('flex flex-col space-y-4', { 'cursor-not-allowed opacity-65': disabled })}>
+			<div className={cn('space-y-4 flex flex-col', { 'cursor-not-allowed opacity-65': disabled })}>
 				<Alert variant="info" id="smart-list-performance" dismissible>
 					<AlertTriangle />
 					<AlertDescription>{t(getKey('uiPerformance'))}</AlertDescription>
@@ -32,13 +32,13 @@ export default function SmartListQueryBuilder({ disabled }: Props) {
 
 				<GroupBy disabled={disabled} />
 
-				<div className={cn('flex items-center space-x-3.5', { 'pointer-events-none': disabled })}>
+				<div className={cn('space-x-3.5 flex items-center', { 'pointer-events-none': disabled })}>
 					<Tabs variant="primary" activeOnHover value={joiner}>
 						<Tabs.List className="rounded-lg">
 							<Tabs.Trigger
 								value="and"
 								asChild
-								className="w-8 min-w-[unset] rounded-lg px-1 text-xs"
+								className="w-8 rounded-lg px-1 text-xs min-w-[unset]"
 								onClick={() => form.setValue('filters.joiner', 'and')}
 							>
 								<Text className="cursor-pointer truncate">{t(getKey('rootJoiner.and.label'))}</Text>
@@ -47,7 +47,7 @@ export default function SmartListQueryBuilder({ disabled }: Props) {
 							<Tabs.Trigger
 								value="or"
 								asChild
-								className="w-8 min-w-[unset] rounded-lg px-1 text-xs"
+								className="w-8 rounded-lg px-1 text-xs min-w-[unset]"
 								onClick={() => form.setValue('filters.joiner', 'or')}
 							>
 								<Text className={cx('truncate', { 'cursor-pointer': true })}>
@@ -63,12 +63,12 @@ export default function SmartListQueryBuilder({ disabled }: Props) {
 				</div>
 
 				<div
-					className={cn('relative ml-4 flex flex-col space-y-8 border-l border-l-edge px-2 pt-4', {
+					className={cn('ml-4 space-y-8 px-2 pt-4 relative flex flex-col border-l border-l-edge', {
 						'pointer-events-none': disabled,
 					})}
 				>
 					{groups.length === 0 && (
-						<div className="ml-4 flex max-w-sm items-center justify-center rounded-lg border border-dashed border-edge p-4">
+						<div className="ml-4 max-w-sm rounded-lg p-4 flex items-center justify-center border border-dashed border-edge">
 							<Text variant="muted">{t(getKey('filters.emptyState'))}</Text>
 						</div>
 					)}

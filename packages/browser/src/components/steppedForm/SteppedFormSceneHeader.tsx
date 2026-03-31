@@ -15,7 +15,7 @@ export default function SteppedFormSceneHeader() {
 	const { t } = useLocaleContext()
 
 	return (
-		<header className="flex w-full flex-col space-y-6 border-b border-b-edge p-4">
+		<header className="space-y-6 p-4 flex w-full flex-col border-b border-b-edge">
 			<div>
 				<Heading size="lg" className="font-bold">
 					{t(`${localeBase}.heading`)}

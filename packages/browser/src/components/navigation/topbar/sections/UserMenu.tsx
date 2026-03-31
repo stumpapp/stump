@@ -51,19 +51,19 @@ export default function UserMenu() {
 					className="h-6 w-6"
 				/>
 			</NavigationMenu.Trigger>
-			<NavigationMenu.Content className="left-auto right-0">
-				<ul className="flex flex-col text-sm md:w-48">
+			<NavigationMenu.Content className="right-0 left-auto">
+				<ul className="text-sm md:w-48 flex flex-col">
 					<TopBarLinkListItem
-						className="rounded-none py-3"
+						className="py-3 rounded-none"
 						to={paths.notifications()}
 						isActive={location.pathname.startsWith(paths.notifications())}
 						isDisabled
 					>
 						<Bell className="mr-2 h-4 w-4 shrink-0" />
-						<span className="ml-1 line-clamp-1 font-medium">Notifications</span>
+						<span className="ml-1 font-medium line-clamp-1">Notifications</span>
 					</TopBarLinkListItem>
 
-					<TopBarButtonItem className="rounded-none py-3" onClick={logout}>
+					<TopBarButtonItem className="py-3 rounded-none" onClick={logout}>
 						<LogOut className="mr-2 h-4 w-4 shrink-0" />
 						Logout
 					</TopBarButtonItem>

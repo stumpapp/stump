@@ -18,7 +18,7 @@ export const PasswordInput = forwardRef<HTMLInputElement, Props>((props, ref) =>
 					title={showPassword ? 'Hide password' : 'Show password'}
 					type="button"
 					onClick={() => setShowPassword((prev) => !prev)}
-					className="absolute inset-y-0 right-0 flex items-center pr-3"
+					className="inset-y-0 right-0 pr-3 absolute flex items-center"
 				>
 					{showPassword ? (
 						<Eye className="h-4 w-4 text-foreground-muted" />

@@ -42,14 +42,14 @@ export default function APIKeyInspector({ apiKey, onClose }: Props) {
 		if (isAllPermissions) {
 			return (
 				<div
-					className="mx-4 my-2 flex flex-col space-y-1.5 rounded-lg bg-fill-warning-secondary p-[3px]"
+					className="mx-4 my-2 space-y-1.5 rounded-lg flex flex-col bg-fill-warning-secondary p-[3px]"
 					data-testid="unrestricted-meta"
 				>
-					<div className="flex items-center px-2.5 py-0.5 text-fill-warning">
+					<div className="px-2.5 py-0.5 flex items-center text-fill-warning">
 						<Sparkles className="mr-2 h-4 w-4" />
 						<span className="font-medium">{t(getKey('unrestrictedKey.heading'))}</span>
 					</div>
-					<div className="rounded-lg bg-fill-warning-secondary p-2.5">
+					<div className="rounded-lg p-2.5 bg-fill-warning-secondary">
 						<Text size="sm" className="text-fill-warning">
 							{t(getKey('unrestrictedKey.description'))}
 						</Text>
@@ -65,15 +65,15 @@ export default function APIKeyInspector({ apiKey, onClose }: Props) {
 
 		return (
 			<div
-				className="mx-4 my-2 flex flex-col space-y-1.5 rounded-lg bg-background-surface p-[3px]"
+				className="mx-4 my-2 space-y-1.5 rounded-lg flex flex-col bg-background-surface p-[3px]"
 				data-testid="permissions-meta"
 			>
-				<div className="flex items-center px-2.5 py-0.5 text-foreground-subtle/80">
+				<div className="px-2.5 py-0.5 flex items-center text-foreground-subtle/80">
 					<KeyRound className="mr-2 h-4 w-4" />
 					<span className="font-medium">{t(getSharedKey('fields.permissions'))}</span>
 				</div>
-				<div className="rounded-lg bg-background-surface-secondary p-2.5">
-					<div className="flex flex-wrap gap-2">
+				<div className="rounded-lg p-2.5 bg-background-surface-secondary">
+					<div className="gap-2 flex flex-wrap">
 						{permissions.map((perm) => (
 							<Badge
 								key={perm}
@@ -111,7 +111,7 @@ export default function APIKeyInspector({ apiKey, onClose }: Props) {
 					<Text size="sm">{expirationFormatted ?? t('common.never')}</Text>
 				</div>
 
-				<div className="my-2 bg-background-surface px-4 py-2" data-testid="last_used-meta">
+				<div className="my-2 px-4 py-2 bg-background-surface" data-testid="last_used-meta">
 					<Label className="text-foreground-muted">{t(getSharedKey('fields.last_used'))}</Label>
 					<Text size="sm">{lastUsedAtFormatted ?? t('common.never')}</Text>
 				</div>

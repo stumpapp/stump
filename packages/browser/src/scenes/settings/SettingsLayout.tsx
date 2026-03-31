@@ -41,12 +41,12 @@ export default function SettingsLayout() {
 		<div
 			// The overflow on the parent is intentional, as it allows the native scrollbar to be fully
 			// to the right, instead of on the potentially restricted width of the child container
-			className={cn('flex h-full w-full flex-col overflow-y-auto md:flex-row', {
+			className={cn('md:flex-row flex h-full w-full flex-col overflow-y-auto', {
 				'scrollbar-hide': enableHideScrollbar,
 			})}
 		>
 			<div
-				className={cn('flex w-full flex-col md:flex-row', {
+				className={cn('md:flex-row flex w-full flex-col', {
 					'mx-auto': preferTopBar && !!layoutMaxWidthPx,
 				})}
 				style={{

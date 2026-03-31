@@ -18,7 +18,7 @@ export default function GenericEmptyState({
 	return (
 		<div
 			className={cn(
-				'flex min-h-[150px] flex-col items-center justify-center gap-2',
+				'gap-2 flex min-h-[150px] flex-col items-center justify-center',
 				{ 'md:items-start md:justify-start': leftAlign },
 				containerClassName,
 			)}

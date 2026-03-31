@@ -41,7 +41,7 @@ export default function UserSmartListHeader() {
 
 	return (
 		<header
-			className={cn('flex w-full flex-col gap-y-4 p-4', {
+			className={cn('gap-y-4 p-4 flex w-full flex-col', {
 				'mx-auto': preferTopBar && !!layoutMaxWidthPx,
 			})}
 			style={{

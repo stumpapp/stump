@@ -51,7 +51,7 @@ export default function ServerPublicURL() {
 	const isDifferent = (serverConfig.publicUrl || '') !== publicUrl
 
 	return (
-		<div className="flex items-start gap-4">
+		<div className="gap-4 flex items-start">
 			<Input
 				label={t(getKey('label'))}
 				description={t(getKey('description'))}

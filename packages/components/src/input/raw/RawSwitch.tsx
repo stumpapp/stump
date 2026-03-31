@@ -53,7 +53,7 @@ export const RawSwitch = React.forwardRef<RawSwitchRef, RawSwitchProps>(
 			>
 				<SwitchPrimitives.Thumb
 					className={cn(
-						'pointer-events-none block rounded-full bg-white shadow-lg ring-0 transition-transform',
+						'bg-white shadow-lg pointer-events-none block rounded-full ring-0 transition-transform',
 						{
 							'h-5 w-5 data-[state=checked]:translate-x-5 data-[state=unchecked]:translate-x-0':
 								size === 'default',

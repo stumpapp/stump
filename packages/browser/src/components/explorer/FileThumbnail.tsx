@@ -109,7 +109,7 @@ export default function FileThumbnail({
 
 	return (
 		<EntityImage
-			className={cn('w-auto rounded-sm object-cover', sizeClasses)}
+			className={cn('rounded-sm w-auto object-cover', sizeClasses)}
 			style={{ aspectRatio: thumbnailRatio }}
 			src={sdk.media.thumbnailURL(book.id)}
 			onError={() => setShowFallback(true)}

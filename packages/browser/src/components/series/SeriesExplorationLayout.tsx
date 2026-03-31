@@ -11,7 +11,7 @@ export default function SeriesExplorationLayout() {
 	}))
 
 	return (
-		<div className="flex shrink-0 items-center gap-1">
+		<div className="gap-1 flex shrink-0 items-center">
 			<ToolTip content="Grid" size="sm">
 				<IconButton
 					variant="ghost"

@@ -19,7 +19,7 @@ export default function AccessSettings({ isCreating }: Props) {
 
 	return (
 		<>
-			<div className="flex max-w-xs flex-col gap-y-1.5">
+			<div className="max-w-xs gap-y-1.5 flex flex-col">
 				<Label>{t(getKey('label'))}</Label>
 				<NativeSelect
 					options={[

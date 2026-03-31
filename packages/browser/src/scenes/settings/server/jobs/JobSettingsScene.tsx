@@ -30,7 +30,7 @@ export default function JobSettingsScene() {
 				*/}
 
 			<ContentContainer>
-				<div className="flex flex-col gap-4">
+				<div className="gap-4 flex flex-col">
 					<div>
 						<Heading size="sm">{t('settingsScene.server/jobs.sections.scheduling.title')}</Heading>
 						<Text size="sm" variant="muted" className="mt-1">
@@ -43,7 +43,7 @@ export default function JobSettingsScene() {
 					</Suspense>
 				</div>
 
-				<div className="flex flex-col gap-4">
+				<div className="gap-4 flex flex-col">
 					<div className="flex items-end justify-between">
 						<div>
 							<Heading size="sm">{t('settingsScene.server/jobs.sections.history.title')}</Heading>

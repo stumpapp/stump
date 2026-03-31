@@ -62,7 +62,7 @@ export default function EmailerSendRecordAttachmentTable({ attachments }: Props)
 										<th key={header.id} className="h-10 pl-1.5 pr-1.5 first:pl-4 last:pr-4">
 											<div
 												className={cn('flex items-center', {
-													'cursor-pointer select-none gap-x-2': isSortable,
+													'gap-x-2 cursor-pointer select-none': isSortable,
 												})}
 												onClick={header.column.getToggleSortingHandler()}
 												style={{

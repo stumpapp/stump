@@ -28,11 +28,11 @@ export default function ReaderDefaultSettingsScene() {
 			</Helmet>
 
 			<ContentContainer>
-				<div className="flex flex-col gap-y-1.5 md:max-w-md">
+				<div className="gap-y-1.5 md:max-w-md flex flex-col">
 					<DefaultReadingDirection />
 				</div>
 
-				<div className="flex flex-col gap-y-8">
+				<div className="gap-y-8 flex flex-col">
 					<div>
 						<Heading size="sm">{t(getSectionKey('imageBasedBooks.label'))}</Heading>
 						<Text variant="muted" size="sm">
@@ -43,7 +43,7 @@ export default function ReaderDefaultSettingsScene() {
 					<PreloadPagesSection />
 				</div>
 
-				<div className="flex flex-col gap-y-8">
+				<div className="gap-y-8 flex flex-col">
 					<div>
 						<Heading size="sm">{t(getSectionKey('textBasedBooks.label'))}</Heading>
 						<Text variant="muted" size="sm">
@@ -51,14 +51,14 @@ export default function ReaderDefaultSettingsScene() {
 						</Text>
 					</div>
 
-					<div className="flex flex-col gap-y-1.5 md:max-w-md">
+					<div className="gap-y-1.5 md:max-w-md flex flex-col">
 						<DefaultFontFamily />
 						<DefaultFontSize />
 						<DefaultLineHeight />
 					</div>
 				</div>
 
-				<div className="flex flex-col gap-y-8">
+				<div className="gap-y-8 flex flex-col">
 					<div>
 						<Heading size="sm">{t(getSectionKey('data.sections.clearStore.label'))}</Heading>
 						<Text variant="muted" size="sm">

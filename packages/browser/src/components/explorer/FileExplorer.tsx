@@ -12,7 +12,7 @@ export default function FileExplorer() {
 
 	if (!files.length) {
 		return (
-			<div className="flex h-full w-full items-center justify-center px-4">
+			<div className="px-4 flex h-full w-full items-center justify-center">
 				<GenericEmptyState title="No files" subtitle="This folder is empty" />
 			</div>
 		)

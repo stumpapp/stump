@@ -17,7 +17,7 @@ function DynamicCardGrid({ count, renderItem }: Props) {
 			style={{
 				gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
 			}}
-			className="grid flex-1 auto-rows-max items-start justify-center gap-2 py-2 md:justify-start"
+			className="gap-2 py-2 md:justify-start grid flex-1 auto-rows-max items-start justify-center"
 		>
 			{Array.from({ length: count }).map((_, index) => renderItem(index))}
 		</div>

@@ -239,7 +239,7 @@ export default function NavigationArrangement() {
 	}, [sections, onChangeVisibility, onChangeLinks, checkPermission])
 
 	return (
-		<div className="flex w-full flex-col space-y-4">
+		<div className="space-y-4 flex w-full flex-col">
 			<div className="flex items-center justify-between">
 				<div>
 					<Label>{t(getKey('label'))}</Label>
@@ -252,8 +252,8 @@ export default function NavigationArrangement() {
 			</div>
 
 			<Card
-				className={cn('relative flex flex-col space-y-4 bg-background-surface p-4 md:max-w-xl', {
-					'cursor-not-allowed select-none opacity-60': locked,
+				className={cn('space-y-4 p-4 md:max-w-xl relative flex flex-col bg-background-surface', {
+					'cursor-not-allowed opacity-60 select-none': locked,
 				})}
 				title={locked ? t(getKey('isLocked')) : undefined}
 			>

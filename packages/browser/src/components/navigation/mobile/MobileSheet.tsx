@@ -28,14 +28,14 @@ export default function MobileSheet() {
 			onOpen={() => setOpen(true)}
 			onClose={() => setOpen(false)}
 			footer={
-				<div className="w-full pb-2">
+				<div className="pb-2 w-full">
 					<SideBarFooter />
 				</div>
 			}
 			closeIcon={false}
 			position="left"
 		>
-			<div className="flex-1 overflow-y-auto px-6">
+			<div className="px-6 flex-1 overflow-y-auto">
 				<SideBar asChild />
 			</div>
 		</Sheet>

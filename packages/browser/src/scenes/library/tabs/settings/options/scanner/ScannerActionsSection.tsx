@@ -11,8 +11,8 @@ export default function ScannerActionsSection() {
 	if (!scan) return null
 
 	return (
-		<div className="flex flex-col gap-y-6">
-			<div className="flex flex-col gap-y-3">
+		<div className="gap-y-6 flex flex-col">
+			<div className="gap-y-3 flex flex-col">
 				<div>
 					<Label className="text-base">{t(getKey('defaultScan.heading'))}</Label>
 					<Text variant="muted">{t(getKey('defaultScan.description'))}</Text>
@@ -24,7 +24,7 @@ export default function ScannerActionsSection() {
 				</div>
 			</div>
 
-			<div className="flex flex-col gap-y-3">
+			<div className="gap-y-3 flex flex-col">
 				<div>
 					<Label className="text-base">{t(getKey('configureScan.heading'))}</Label>
 					<Text variant="muted">{t(getKey('configureScan.description'))}</Text>

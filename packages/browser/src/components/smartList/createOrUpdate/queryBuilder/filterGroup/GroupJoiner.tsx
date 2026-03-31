@@ -14,13 +14,13 @@ export default function GroupJoiner() {
 	const joiner = useWatch({ control: form.control, name: `filters.groups.${groupIdx}.joiner` })
 
 	return (
-		<div className="flex items-center lg:space-x-4">
+		<div className="lg:space-x-4 flex items-center">
 			<Tabs variant="primary" activeOnHover value={joiner}>
 				<Tabs.List className="rounded-lg">
 					<Tabs.Trigger
 						value="and"
 						asChild
-						className="w-8 min-w-[unset] rounded-lg px-1 text-xs"
+						className="w-8 rounded-lg px-1 text-xs min-w-[unset]"
 						onClick={() => form.setValue(`filters.groups.${groupIdx}.joiner`, 'and')}
 					>
 						<Text className="cursor-pointer truncate">{t(getJoinerKey('and', 'label'))}</Text>
@@ -29,7 +29,7 @@ export default function GroupJoiner() {
 					<Tabs.Trigger
 						value="or"
 						asChild
-						className="w-8 min-w-[unset] rounded-lg px-1 text-xs"
+						className="w-8 rounded-lg px-1 text-xs min-w-[unset]"
 						onClick={() => form.setValue(`filters.groups.${groupIdx}.joiner`, 'or')}
 					>
 						<Text className={cn('truncate', { 'cursor-pointer': true })}>
@@ -40,7 +40,7 @@ export default function GroupJoiner() {
 					<Tabs.Trigger
 						value="not"
 						asChild
-						className="w-8 min-w-[unset] rounded-lg px-1 text-xs"
+						className="w-8 rounded-lg px-1 text-xs min-w-[unset]"
 						onClick={() => form.setValue(`filters.groups.${groupIdx}.joiner`, 'not')}
 					>
 						<Text className={cn('truncate', { 'cursor-pointer': true })}>
@@ -49,7 +49,7 @@ export default function GroupJoiner() {
 					</Tabs.Trigger>
 				</Tabs.List>
 			</Tabs>
-			<Text className="hidden text-sm lg:inline-flex" variant="muted">
+			<Text className="text-sm lg:inline-flex hidden" variant="muted">
 				{t(getJoinerKey(joiner, 'description'))}
 			</Text>
 		</div>

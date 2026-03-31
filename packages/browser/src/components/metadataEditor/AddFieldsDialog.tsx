@@ -48,7 +48,7 @@ export default function AddFieldsDialog<Field extends string>({ binding, onSave 
 					<Dialog.Close />
 				</Dialog.Header>
 
-				<div className="flex flex-col gap-y-4">
+				<div className="gap-y-4 flex flex-col">
 					<TextArea
 						placeholder={`${t('common.enter')} ${label}...`}
 						rows={4}
@@ -56,7 +56,7 @@ export default function AddFieldsDialog<Field extends string>({ binding, onSave 
 						onChange={(e) => setValue(e.target.value)}
 					/>
 
-					<div className="flex flex-wrap gap-2">
+					<div className="gap-2 flex flex-wrap">
 						{parsedValues.map((value, index) => (
 							<Badge key={index}>{value}</Badge>
 						))}

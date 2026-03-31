@@ -37,7 +37,7 @@ export default function LibraryEmoji({ emoji, placeholder, library, disabled }: 
 
 	if (disabled) {
 		return (
-			<span className="mr-2 flex h-4 w-4 shrink-0 items-center justify-center">
+			<span className="mr-2 h-4 w-4 flex shrink-0 items-center justify-center">
 				{emoji ?? placeholder}
 			</span>
 		)

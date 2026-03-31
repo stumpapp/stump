@@ -21,7 +21,7 @@ export default function BookLinksCell({ links }: Props) {
 	}
 
 	return (
-		<div className="flex flex-wrap items-center gap-1.5">
+		<div className="gap-1.5 flex flex-wrap items-center">
 			{links.map((href) => (
 				<a key={href} href={href} target="_blank" rel="noopener noreferrer">
 					<Badge size="sm">

@@ -98,7 +98,7 @@ export default function Hero() {
 
 	return (
 		<div className="mx-auto h-screen max-w-7xl px-6 lg:flex lg:px-8">
-			<div className="mx-auto max-w-2xl flex-shrink-0 lg:mx-0 lg:max-w-xl lg:pt-8">
+			<div className="mx-auto max-w-2xl shrink-0 lg:mx-0 lg:max-w-xl lg:pt-8">
 				<div className="flex flex-col items-center gap-5 md:items-start">
 					<div>
 						<h1 className="text-center text-4xl font-medium tracking-tight text-black sm:text-6xl md:text-left dark:text-neutral-100">
@@ -177,7 +177,7 @@ export default function Hero() {
 						variants={imageVariants}
 						src={imageURL}
 						alt="Demo"
-						className="w-[60rem]"
+						className="w-240"
 					/>
 				</div>
 			</div>

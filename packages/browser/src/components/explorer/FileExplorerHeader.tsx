@@ -18,7 +18,7 @@ export default function FileExplorerHeader() {
 		<header className="top-0 h-10 px-4 md:border-y-0 md:border-b sticky z-10 flex w-full justify-between border-y border-edge bg-background">
 			<nav className="h-10 gap-4 flex w-full items-center">
 				<FileExplorerNavigation />
-				<Text size="sm" className="text-opacity-80 line-clamp-1">
+				<Text size="sm" className="line-clamp-1 text-foreground/80">
 					{basename}
 				</Text>
 			</nav>

@@ -95,14 +95,10 @@ impl EmailerMutation {
 	#[graphql(guard = "PermissionGuard::one(UserPermission::EmailerCreate)")]
 	async fn test_emailer(
 		&self,
-		ctx: &Context<'_>,
 		config: EmailerClientConfig,
 		recipient: String,
 	) -> Result<bool> {
-		let core_ctx = ctx.data::<CoreContext>()?;
-
 		sender::send_test_email(config, recipient).await?;
-
 		Ok(true)
 	}
 }

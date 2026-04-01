@@ -21,7 +21,7 @@
 		"@types/react": "^19.0.0",
 		"@types/react-dom": "^19.0.0",
 		"@types/react-router-dom": "^5.3.3",
-		"@vitejs/plugin-react": "^5.0.2",
+		"@vitejs/plugin-react": "^6.0.1",
 		"autoprefixer": "^10.4.19",
 		"postcss": "^8.4.38",
 		"tailwind": "^4.0.0",

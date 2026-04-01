@@ -106,7 +106,7 @@
 		"@types/react-helmet": "^6.1.11",
 		"@types/react-router-dom": "^5.3.3",
 		"@types/react-window": "^1.8.8",
-		"@vitejs/plugin-react": "^5.0.2",
+		"@vitejs/plugin-react": "^6.0.1",
 		"cross-fetch": "^4.0.0",
 		"jest": "^30.3.0",
 		"jest-environment-jsdom": "^29.7.0",

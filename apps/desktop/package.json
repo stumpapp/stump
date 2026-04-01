@@ -32,7 +32,7 @@
 		"@tauri-apps/cli": "^2.0.3",
 		"@types/react": "^19.0.0",
 		"@types/react-dom": "^19.0.0",
-		"@vitejs/plugin-react": "^4.1.0",
+		"@vitejs/plugin-react": "^6.0.1",
 		"autoprefixer": "^10.4.16",
 		"postcss": "^8.4.31",
 		"tailwind": "^4.0.0",

@@ -101,7 +101,7 @@
 		"react-native-pager-view": "^8.0.0",
 		"react-native-performance-toolkit": "^0.2.1",
 		"react-native-quick-md5": "^3.0.9",
-		"react-native-reanimated": "~4.1.2",
+		"react-native-reanimated": "~4.3.0",
 		"react-native-reanimated-carousel": "^4.0.3",
 		"react-native-safe-area-context": "~5.6.0",
 		"react-native-screens": "~4.19.0",

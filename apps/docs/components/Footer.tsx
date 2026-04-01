@@ -70,7 +70,7 @@ export default function Footer() {
 				</div>
 
 				<div className="space-x-4 flex items-center">
-					<img className="h-8" src="/favicon.ico" alt="Stump" />
+					<img className="h-8 w-8 object-scale-down" src="/favicon.ico" alt="Stump" />
 
 					<p className="text-sm text-gray-700 dark:text-gray-200">
 						&copy; Copyright {new Date().getFullYear()} Aaron Leopold

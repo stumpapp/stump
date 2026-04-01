@@ -27,7 +27,7 @@
 		"@lodev09/react-native-true-sheet": "^3.9.1",
 		"@miblanchard/react-native-slider": "^2.6.0",
 		"@react-native-async-storage/async-storage": "2.2.0",
-		"@react-native-community/slider": "5.0.1",
+		"@react-native-community/slider": "5.1.2",
 		"@react-native-menu/menu": "^2.0.0",
 		"@react-navigation/native": "^7.1.6",
 		"@rn-primitives/accordion": "^1.2.0",

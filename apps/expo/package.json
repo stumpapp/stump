@@ -42,7 +42,7 @@
 		"@rn-primitives/radio-group": "^1.2.0",
 		"@rn-primitives/slot": "^1.2.0",
 		"@rn-primitives/switch": "^1.1.0",
-		"@rn-primitives/tabs": "^1.1.0",
+		"@rn-primitives/tabs": "^1.4.0",
 		"@rn-primitives/tooltip": "~1.1.0",
 		"@rn-primitives/types": "^1.1.0",
 		"@sentry/react-native": "~7.2.0",

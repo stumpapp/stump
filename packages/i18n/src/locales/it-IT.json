@@ -121,17 +121,17 @@
 				},
 				"hideProgress": {
 					"label": "Nascondi Progresso",
-					"description": "If enabled, your reading progress will be hidden from other members of the book club"
+					"description": "Se abilitato, i tuoi progressi di lettura saranno nascosti agli altri membri del club di libri"
 				}
 			}
 		},
 		"validation": {
-			"missingName": "Name is required",
-			"alreadyTaken": "is already taken"
+			"missingName": "Il nome è obbligatorio",
+			"alreadyTaken": "è già stato preso"
 		}
 	},
 	"createBookClubScene": {
-		"heading": "Create a new book club",
+		"heading": "Crea un nuovo club del libro",
 		"subtitle": "You can create a private book club for a select few, or make it public for anyone on the server to join",
 		"form": {
 			"stepLabel": "Step",

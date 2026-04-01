@@ -700,7 +700,21 @@
 						"label": "Bibliothek bereinigen",
 						"text": "Bist du sicher, dass du diese Bibliothek bereinigen möchtest?"
 					},
-					"emptyText": "Es gab nichts zu reinigen"
+					"emptyText": "Es gab nichts zu reinigen",
+					"missingEntitiesTable": {
+						"columns": {
+							"id": "ID",
+							"path": "Path",
+							"type": "Type"
+						},
+						"types": {
+							"BOOK": "Book",
+							"SERIES": "Series",
+							"LIBRARY": "Library"
+						},
+						"emptyHeading": "Nothing is missing for this library",
+						"emptySubtitle": "All files referenced in the database were located on disk"
+					}
 				},
 				"deleteLibrary": {
 					"heading": "Bibliothek löschen",

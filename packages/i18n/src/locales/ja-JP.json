@@ -700,7 +700,21 @@
 						"label": "ライブラリを消去",
 						"text": "このライブラリをクリーンアップしてもよろしいですか？"
 					},
-					"emptyText": "There was nothing to clean"
+					"emptyText": "There was nothing to clean",
+					"missingEntitiesTable": {
+						"columns": {
+							"id": "ID",
+							"path": "Path",
+							"type": "Type"
+						},
+						"types": {
+							"BOOK": "Book",
+							"SERIES": "Series",
+							"LIBRARY": "Library"
+						},
+						"emptyHeading": "Nothing is missing for this library",
+						"emptySubtitle": "All files referenced in the database were located on disk"
+					}
 				},
 				"deleteLibrary": {
 					"heading": "ライブラリを削除",

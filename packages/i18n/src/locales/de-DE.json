@@ -261,8 +261,8 @@
 					"description": "Verberge den Serienreiter in der Bibliotheksnavigation"
 				},
 				"skipBookOverview": {
-					"label": "Skip book overview",
-					"description": "Open the reader directly when selecting books in this library"
+					"label": "Buchübersicht überspringen",
+					"description": "Öffne den Reader direkt bei der Auswahl von Büchern in dieser Bibliotheken"
 				},
 				"options": {
 					"series": {
@@ -704,16 +704,16 @@
 					"missingEntitiesTable": {
 						"columns": {
 							"id": "ID",
-							"path": "Path",
-							"type": "Type"
+							"path": "Pfad",
+							"type": "Typ"
 						},
 						"types": {
-							"BOOK": "Book",
-							"SERIES": "Series",
-							"LIBRARY": "Library"
+							"BOOK": "Buch",
+							"SERIES": "Serien",
+							"LIBRARY": "Bibliothek"
 						},
-						"emptyHeading": "Nothing is missing for this library",
-						"emptySubtitle": "All files referenced in the database were located on disk"
+						"emptyHeading": "Nichts fehlt für diese Bibliothek",
+						"emptySubtitle": "Alle in der Datenbank gespeicherten Dateien wurden auf der Festplatte gefunden"
 					}
 				},
 				"deleteLibrary": {
@@ -943,10 +943,10 @@
 									"teams": "Teams",
 									"genres": "Genre",
 									"coverArtists": "Cover-Künstler",
-									"ageRating": "Age rating",
-									"year": "Year",
-									"month": "Month",
-									"day": "Day"
+									"ageRating": "Altersfreigabe",
+									"year": "Jahr",
+									"month": "Monat",
+									"day": "Tag"
 								}
 							},
 							"series": {
@@ -969,7 +969,7 @@
 									"volume": "Band",
 									"metaType": "Typ",
 									"ageRating": "Altersfreigabe",
-									"year": "Start year"
+									"year": "Startjahr"
 								}
 							},
 							"library": {
@@ -1277,14 +1277,14 @@
 					},
 					"avatarPicker": {
 						"label": "Avatar",
-						"heading": "Upload avatar",
-						"subtitle": "You can upload any image to use as your avatar for social features in Stump",
-						"dropzone": "Drop an image or click to select",
-						"changeImage": "Change Image",
-						"removeImage": "Remove Image",
-						"removeSelection": "Remove uploaded image",
-						"uploadFailed": "Failed to upload avatar",
-						"removeFailed": "Failed to remove avatar"
+						"heading": "Avatar hochladen",
+						"subtitle": "Du kannst jedes Bild hochladen, um dieses als Avatar für soziale Funktionen in Stump zu verwenden",
+						"dropzone": "Bild hier ablegen oder zum Auswählen klicken",
+						"changeImage": "Bild ändern",
+						"removeImage": "Bild entfernen",
+						"removeSelection": "Hochgeladenes Bild entfernen",
+						"uploadFailed": "Avatar konnte nicht hochgeladen werden",
+						"removeFailed": "Avatar konnte nicht entfernt werden"
 					},
 					"buttons": {
 						"confirm": "Änderungen speichern"
@@ -1710,11 +1710,11 @@
 					}
 				},
 				"helpfulLinks": {
-					"title": "Helpful links",
-					"description": "Links to resources that may be helpful for managing your Stump server instance",
+					"title": "Hilfreiche Links",
+					"description": "Links zu Ressourcen, die bei der Verwaltung Ihrer Stump Serverinstanz hilfreich sein könnten",
 					"links": {
-						"documentation": "Documentation",
-						"changelog": "Changelog"
+						"documentation": "Dokumentation",
+						"changelog": "Änderungsprotokoll"
 					}
 				},
 				"serverPublicUrl": {
@@ -1722,16 +1722,16 @@
 					"description": "Die URL, über die von außen auf den Server zugegriffen werden kann, sofern verfügbar. Dies aktiviert Einladungslinks und andere Funktionen"
 				},
 				"customEmojis": {
-					"title": "Custom emojis",
-					"description": "Upload and manage custom image emojis for your server",
-					"dropzone": "Drop an image or click to select",
+					"title": "Benutzerdefinierte Emojis",
+					"description": "Verwalte und lade benutzerdefinierte Bild-Emojis für deinen Server hoch",
+					"dropzone": "Ein Bild hier ablegen oder zum Auswählen klicken",
 					"input": {
-						"label": "Emoji name",
-						"placeholder": "e.g. party_parrot"
+						"label": "Emoji-Name",
+						"placeholder": "z.B. party_papagei"
 					},
 					"deleteModal": {
-						"title": "Delete emoji",
-						"description": "Are you sure you want to delete this emoji?"
+						"title": "Emoji löschen",
+						"description": "Bist du sicher dieses Emoji löschen zu wollen?"
 					},
 					"noCustomEmojis": "No custom emojis have been added yet",
 					"invalidName": "Please enter a valid name for your emoji",

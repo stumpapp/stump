@@ -54,7 +54,7 @@
 		},
 		"emailBook": {
 			"heading": "E-Mail das Buch",
-			"description": "Sende dieses Buch zu einem Gerät oder einer E-mail-Adresse",
+			"description": "Sende dieses Buch zu einem Gerät oder einer E-Mail-Adresse",
 			"form": {
 				"email": {
 					"label": "E-Mail",
@@ -468,8 +468,8 @@
 					"description": "Die Details zu dieser Bibliothek, einschließlich Name, Pfad und Beschreibung"
 				},
 				{
-					"label": "Scannt",
-					"heading": "Scannt",
+					"label": "Scannen",
+					"heading": "Scannen",
 					"description": "Einstellungen in Bezug, wie Stump diese Bibliothek scannt"
 				},
 				{
@@ -547,7 +547,7 @@
 			"options": {
 				"general": "Allgemein",
 				"reading": "Lesen",
-				"scanning": "Wird gescannt",
+				"scanning": "Scannen",
 				"thumbnails": "Vorschaubilder",
 				"ignore-rules": "Dateien ignorieren",
 				"analysis": "Analyse",
@@ -1735,12 +1735,12 @@
 					},
 					"noCustomEmojis": "Bisher wurden keine benutzerdefinierten Emojis hinzugefügt",
 					"invalidName": "Bitte gebe einen gültigen Namen für dein Emoji ein",
-					"uploadError": "Failed to upload emoji",
-					"uploadSuccess": "Emoji uploaded",
-					"renameSuccess": "Emoji renamed",
-					"renameError": "Failed to rename emoji",
-					"deleteSuccess": "Emoji deleted",
-					"deleteError": "Failed to delete emoji"
+					"uploadError": "Emoji konnte nicht hochgeladen werden",
+					"uploadSuccess": "Emoji hochgeladen",
+					"renameSuccess": "Emoji umbenannt",
+					"renameError": "Emoji konnte nicht umbenannt werden",
+					"deleteSuccess": "Emoji gelöscht",
+					"deleteError": "Emoji konnte nicht gelöscht werden"
 				}
 			}
 		},
@@ -2123,13 +2123,13 @@
 					"update": "E-Mail aktualisieren"
 				},
 				"testEmailer": {
-					"button": "Send test email",
-					"recipientLabel": "Test recipient",
-					"recipientDescription": "An email address to send the test email to",
-					"success": "Test email sent successfully",
+					"button": "Test-E-Mail verschicken",
+					"recipientLabel": "Testempfänger",
+					"recipientDescription": "Eine E-Mail-Adresse an die, die Test-E-Mail gesendet werden soll",
+					"success": "Test-E-Mail erfolgreich gesendet",
 					"error": {
-						"title": "Failed to send test email",
-						"description": "Check your SMTP settings and try again"
+						"title": "Das Versenden der Test-E-Mail ist fehlgeschlagen",
+						"description": "Überprüfe deine SMTP-Einstellungen und versuche es erneut"
 					}
 				}
 			},
@@ -2266,7 +2266,7 @@
 	"common": {
 		"add": "Hinzufügen",
 		"cancel": "Abbrechen",
-		"clear": "Clear",
+		"clear": "Löschen",
 		"confirm": "Bestätigen",
 		"delete": "Löschen",
 		"enter": "Enter",
@@ -2279,7 +2279,7 @@
 		"update": "Aktualisieren",
 		"upload": "Hochladen",
 		"uploading": "Wird hochgeladen",
-		"uploadingEllipsis": "Uploading...",
+		"uploadingEllipsis": "Wird hochgeladen...",
 		"unimplemented": "Diese Funktionalität ist noch nicht implementiert! Schaue später wieder vorbei",
 		"limitedFunctionality": "Das ist noch nicht vollständig implementiert und es fehlen noch ein paar Funktionen! Schaue später wieder vorbei",
 		"logIn": "Anmelden",
@@ -2294,9 +2294,9 @@
 		"scan": "Scannen",
 		"somethingWentWrong": "Etwas ist falsch gelaufen",
 		"fileUpload": {
-			"someRejected": "Some files were rejected. Please check the file types and try again",
-			"tooManyFiles": "You have selected too many files",
-			"noValidFiles": "No valid files were selected"
+			"someRejected": "Einige Dateien wurden abgelehnt. Bitte überprüfe die Dateitypen und versuche es erneut",
+			"tooManyFiles": "Du hast zu viele Dateien ausgewählt",
+			"noValidFiles": "Es wurden keine gültigen Dateien ausgewählt"
 		}
 	},
 	"userPermissions": {
@@ -2426,7 +2426,7 @@
 		},
 		"EDIT_THUMBNAILS": {
 			"label": "Vorschaubilder bearbeiten",
-			"description": "Allows the user to edit thumbnails for books and series"
+			"description": "Erlaubt dem Benutzer Vorschaubilder für Bücher und Serien zu bearbeiten"
 		}
 	}
 }

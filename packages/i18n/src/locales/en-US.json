@@ -707,7 +707,7 @@
 							"path": "Path",
 							"type": "Type"
 						},
-						"types":{
+						"types": {
 							"BOOK": "Book",
 							"SERIES": "Series",
 							"LIBRARY": "Library"

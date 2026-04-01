@@ -90,7 +90,7 @@ export default function Search({
 			onKeyDown={expanded ? undefined : (e) => e.key === 'Enter' && handleExpand()}
 			title={isDisabled ? "This functionality isn't available right now" : undefined}
 			className={cn(
-				'h-8 gap-2 rounded-xl text-sm relative flex shrink-0 cursor-pointer items-center overflow-hidden border border-edge-subtle bg-transparent transition-all duration-300 ease-in-out',
+				'h-8 gap-2 rounded-xl text-sm ease-in-out relative flex shrink-0 cursor-pointer items-center overflow-hidden border border-edge-subtle bg-transparent transition-all duration-300',
 				'text-foreground-muted hover:bg-background-surface hover:text-foreground',
 				'disabled:cursor-not-allowed disabled:opacity-50',
 				expanded ? 'sm:w-2/5 w-full cursor-text' : 'w-32',

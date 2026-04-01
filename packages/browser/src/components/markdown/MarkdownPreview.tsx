@@ -63,10 +63,10 @@ const Spoiler = ({ children }: PropsWithChildren) => {
 		<span
 			className={cx(
 				{
-					'text-gray text-opacity-0 cursor-pointer bg-gray-800': isSpoiler,
+					'text-gray/0 cursor-pointer bg-gray-800': isSpoiler,
 				},
 				{
-					'bg-opacity-10 bg-background': !isSpoiler,
+					'bg-background/10': !isSpoiler,
 				},
 			)}
 			onClick={() => setIsSpoiler(!isSpoiler)}

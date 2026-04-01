@@ -19,13 +19,13 @@ export default function Alphabet({
 				<div
 					key={letter}
 					className={cn(
-						'text-xs text-opacity-70 hover:text-opacity-100 flex cursor-pointer items-center justify-center text-foreground-muted',
+						'text-xs flex cursor-pointer items-center justify-center text-foreground-muted/70 hover:text-foreground-muted',
 						{
-							'text-opacity-100 text-fill-brand': startsWith === letter,
+							'text-fill-brand': startsWith === letter,
 						},
 
 						{
-							'text-opacity-20 pointer-events-none text-foreground-disabled': !alphabet?.[letter],
+							'pointer-events-none text-foreground-disabled/20': !alphabet?.[letter],
 						},
 					)}
 					onClick={() => onSelectLetter(startsWith === letter ? undefined : letter)}

@@ -35,7 +35,7 @@ const SelectPrimitiveContent = React.forwardRef<
 		<SelectRadix.Content
 			ref={ref}
 			className={cn(
-				'min-w-32 rounded-md shadow-md relative z-50 overflow-hidden border border-edge bg-background text-foreground-subtle animate-in fade-in-80',
+				'min-w-32 rounded-md shadow-md relative z-50 animate-in overflow-hidden border border-edge bg-background text-foreground-subtle fade-in-80',
 				className,
 			)}
 			{...props}

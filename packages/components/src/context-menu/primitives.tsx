@@ -42,7 +42,7 @@ const ContextMenuPrimitiveSubContent = React.forwardRef<
 	<ContextMenu.SubContent
 		ref={ref}
 		className={cn(
-			'min-w-32 rounded-md bg-white p-1 shadow-md z-50 overflow-hidden border border-gray-100 animate-in slide-in-from-left-1 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-150',
+			'min-w-32 rounded-md bg-white p-1 shadow-md z-50 animate-in overflow-hidden border border-gray-100 slide-in-from-left-1 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-150',
 			className,
 		)}
 		{...props}
@@ -58,7 +58,7 @@ const ContextMenuPrimitiveContent = React.forwardRef<
 		<ContextMenu.Content
 			ref={ref}
 			className={cn(
-				'min-w-32 rounded-md bg-white p-1 shadow-md z-50 overflow-hidden border border-gray-100 text-gray-800 animate-in fade-in-80 dark:border-gray-800 dark:bg-gray-800 dark:text-gray-150',
+				'min-w-32 rounded-md bg-white p-1 shadow-md z-50 animate-in overflow-hidden border border-gray-100 text-gray-800 fade-in-80 dark:border-gray-800 dark:bg-gray-800 dark:text-gray-150',
 				className,
 			)}
 			{...props}

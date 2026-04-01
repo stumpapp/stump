@@ -60,7 +60,7 @@ export default function MaxWidthPreference() {
 					: undefined
 			}
 		>
-			<Label className={cx({ 'text-opacity-50': primaryNavigationMode === 'SIDEBAR' })}>
+			<Label className={cx({ 'opacity-50': primaryNavigationMode === 'SIDEBAR' })}>
 				{t(getKey('label'))}
 			</Label>
 			<NativeSelect
@@ -72,7 +72,7 @@ export default function MaxWidthPreference() {
 			<Text
 				size="xs"
 				variant="muted"
-				className={cx({ 'text-opacity-50': primaryNavigationMode === 'SIDEBAR' })}
+				className={cx({ 'opacity-50': primaryNavigationMode === 'SIDEBAR' })}
 			>
 				{t(getKey('description'))}
 			</Text>

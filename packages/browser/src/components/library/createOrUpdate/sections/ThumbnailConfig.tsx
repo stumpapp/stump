@@ -263,7 +263,7 @@ export default function ThumbnailConfigForm() {
 				{enabled && (
 					<>
 						<div className="gap-2 lg:max-w-sm grid w-full items-center">
-							<Label className={cx({ 'text-opacity-50 cursor-not-allowed': !resizeMethod })}>
+							<Label className={cx({ 'cursor-not-allowed opacity-50': !resizeMethod })}>
 								{t(getKey('format.label'))}
 							</Label>
 							<NativeSelect
@@ -275,7 +275,7 @@ export default function ThumbnailConfigForm() {
 							<Text
 								size="xs"
 								variant="muted"
-								className={cx({ 'text-opacity-50 cursor-not-allowed': !enabled })}
+								className={cx({ 'cursor-not-allowed opacity-50': !enabled })}
 							>
 								{t(getKey('format.description'))}
 							</Text>

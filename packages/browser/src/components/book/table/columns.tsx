@@ -62,7 +62,7 @@ const nameColumn = columnHelper.accessor(({ resolvedName }) => resolvedName, {
 						})
 					: paths.bookOverview(id)
 			}
-			className="text-sm text-opacity-100 hover:text-opacity-90 line-clamp-2 no-underline"
+			className="text-sm line-clamp-2 no-underline hover:text-foreground/90"
 		>
 			{getValue()}
 		</Link>

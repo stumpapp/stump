@@ -26,7 +26,7 @@ export default function SideBarButtonLink({
 			className={cn(
 				'group rounded-md px-2 text-sm inline-flex h-[2.35rem] w-full shrink-0 items-center justify-start transition-all duration-150 hover:bg-sidebar-surface-hover',
 				{
-					'bg-opacity-50 text-opacity-90 hover:text-opacity-100 justify-center border border-dashed border-edge-subtle text-foreground hover:bg-sidebar-surface':
+					'justify-center border border-dashed border-edge-subtle text-foreground/90 hover:bg-sidebar-surface hover:text-foreground':
 						variant === 'action',
 				},
 				{ 'text-foreground': variant !== 'action' },

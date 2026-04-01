@@ -77,7 +77,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 						{...(descriptionProps || {})}
 						className={cn(
 							{
-								'text-opacity-50 cursor-not-allowed': props.disabled,
+								'cursor-not-allowed opacity-50': props.disabled,
 							},
 							descriptionProps?.className,
 						)}
@@ -121,7 +121,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 						{...(labelProps || {})}
 						className={cn(
 							{
-								'text-opacity-50 cursor-not-allowed': props.disabled,
+								'cursor-not-allowed opacity-50': props.disabled,
 							},
 							labelProps?.className,
 						)}

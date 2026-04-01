@@ -105,7 +105,7 @@ export default function NavigationArrangementItem({
 					'cursor-not-allowed': disabled,
 				},
 				{
-					'bg-opacity-50': !section.visible,
+					'bg-background-surface-secondary/40': !section.visible,
 				},
 				{
 					'cursor-grabbing': isDragging,

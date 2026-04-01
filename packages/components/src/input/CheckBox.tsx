@@ -27,7 +27,7 @@ export const CheckBox = React.forwardRef<RawCheckBoxRef, CheckBoxProps>(
 					{label && (
 						<Label
 							htmlFor={props.id}
-							className={cx({ 'text-opacity-50 cursor-not-allowed': props.disabled })}
+							className={cx({ 'cursor-not-allowed opacity-50': props.disabled })}
 						>
 							{label}
 						</Label>
@@ -36,7 +36,7 @@ export const CheckBox = React.forwardRef<RawCheckBoxRef, CheckBoxProps>(
 						<Text
 							size="sm"
 							variant="muted"
-							className={cx({ 'text-opacity-50 cursor-not-allowed': props.disabled })}
+							className={cx({ 'cursor-not-allowed opacity-50': props.disabled })}
 						>
 							{description}
 						</Text>

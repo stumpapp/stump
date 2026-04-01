@@ -57,17 +57,14 @@ export default function ConfiguredServer({
 						<ToolTip content={t(getKey('activeServer.tooltip'))} align="center">
 							<BadgeCheck
 								data-testid="activeBadge"
-								className="h-4 w-4 text-opacity-75 text-fill-success"
+								className="h-4 w-4 text-fill-success/75"
 								strokeWidth={0.95}
 							/>
 						</ToolTip>
 					)}
 					{isReachable === false && (
 						<ToolTip content={t(getKey('unreachableServer.tooltip'))} align="center">
-							<WifiOff
-								data-testid="unreachableBadge"
-								className="h-4 w-4 text-opacity-75 text-fill-danger"
-							/>
+							<WifiOff data-testid="unreachableBadge" className="h-4 w-4 text-fill-danger/75" />
 						</ToolTip>
 					)}
 				</span>

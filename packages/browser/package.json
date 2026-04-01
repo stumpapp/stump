@@ -86,7 +86,7 @@
 		"@babel/preset-react": "^7.24.7",
 		"@babel/preset-typescript": "^7.24.7",
 		"@graphql-codegen/cli": "^5.0.5",
-		"@graphql-codegen/near-operation-file-preset": "^3.0.0",
+		"@graphql-codegen/near-operation-file-preset": "^5.0.0",
 		"@simbathesailor/use-what-changed": "^2.0.0",
 		"@testing-library/jest-dom": "^6.5.0",
 		"@testing-library/react": "^16.0.1",

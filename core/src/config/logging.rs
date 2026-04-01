@@ -80,8 +80,7 @@ pub fn init_tracing(config: &StumpConfig) {
 			.with(
 				tracing_subscriber::fmt::layer()
 					.pretty()
-					// We don't want to use ANSI codes in the file
-					.with_ansi(false)
+					.with_ansi(config.colorful_logs)
 					.with_writer(file_appender),
 			)
 			.init();
@@ -94,8 +93,7 @@ pub fn init_tracing(config: &StumpConfig) {
 			)
 			.with(
 				tracing_subscriber::fmt::layer()
-					// We don't want to use ANSI codes in the file
-					.with_ansi(false)
+					.with_ansi(config.colorful_logs)
 					.with_writer(file_appender),
 			)
 			.init();

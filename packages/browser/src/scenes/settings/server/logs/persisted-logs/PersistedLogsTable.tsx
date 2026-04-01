@@ -1,7 +1,8 @@
-import { useSuspenseGraphQL } from '@stump/client'
+import { useGraphQL } from '@stump/client'
 import { Card, Heading, Text, ToolTip } from '@stump/components'
 import { graphql, LogModelOrdering, OrderDirection, PersistedLogsQuery } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
+import { keepPreviousData } from '@tanstack/react-query'
 import { createColumnHelper, SortingState } from '@tanstack/react-table'
 import { intlFormat, isBefore } from 'date-fns'
 import { CircleSlash2 } from 'lucide-react'
@@ -44,8 +45,6 @@ const query = graphql(`
 
 export type PersistedLog = PersistedLogsQuery['logs']['nodes'][number]
 
-// TODO: fix stutters probably from suspense?
-
 export default function PersistedLogsTable() {
 	const { t } = useLocaleContext()
 
@@ -63,33 +62,39 @@ export default function PersistedLogsTable() {
 		[sortState],
 	)
 
-	const {
-		data: {
-			logs: { nodes: logs, pageInfo },
-		},
-	} = useSuspenseGraphQL(query, ['logs', firstSort, pagination], {
-		filter: {
-			jobId: jobId
-				? {
-						eq: jobId,
-					}
-				: undefined,
-		},
-		pagination: {
-			offset: {
-				page: pagination.pageIndex + 1, // Offset is 1-based
-				pageSize: pagination.pageSize,
+	const { data, isLoading } = useGraphQL(
+		query,
+		['logs', firstSort, pagination],
+		{
+			filter: {
+				jobId: jobId
+					? {
+							eq: jobId,
+						}
+					: undefined,
 			},
-		},
-		orderBy: [
-			{
-				field: firstSort.id as LogModelOrdering,
-				direction: firstSort.desc ? OrderDirection.Desc : OrderDirection.Asc,
+			pagination: {
+				offset: {
+					page: pagination.pageIndex + 1, // Offset is 1-based
+					pageSize: pagination.pageSize,
+				},
 			},
-		],
-	})
+			orderBy: [
+				{
+					field: firstSort.id as LogModelOrdering,
+					direction: firstSort.desc ? OrderDirection.Desc : OrderDirection.Asc,
+				},
+			],
+		},
+		{
+			placeholderData: keepPreviousData,
+		},
+	)
 
-	if (pageInfo.__typename !== 'OffsetPaginationInfo') {
+	const logs = data?.logs.nodes ?? []
+	const pageInfo = data?.logs.pageInfo
+
+	if (!!pageInfo && pageInfo.__typename !== 'OffsetPaginationInfo') {
 		throw new Error('Invalid pagination type, expected OffsetPaginationInfo')
 	}
 
@@ -99,14 +104,11 @@ export default function PersistedLogsTable() {
 				sortable
 				columns={baseColumns}
 				options={{
-					debugColumns: DEBUG,
-					debugHeaders: DEBUG,
-					debugTable: DEBUG,
 					manualPagination: true,
 					manualSorting: true,
 					onPaginationChange: setPagination,
 					onSortingChange: setSortState,
-					pageCount: pageInfo.totalPages,
+					pageCount: pageInfo?.totalPages,
 					state: {
 						pagination,
 						sorting: sortState,
@@ -114,23 +116,23 @@ export default function PersistedLogsTable() {
 				}}
 				data={logs}
 				fullWidth
-				// TODO(aaron): loader
-				emptyRenderer={() => (
-					<div className="flex min-h-[150px] flex-col items-center justify-center gap-2">
-						<CircleSlash2 className="h-10 w-10 pb-2 pt-1 text-foreground-muted" />
-						<Heading size="sm">{t(`${LOCALE_BASE}.emptyHeading`)}</Heading>
-						<Text size="sm" variant="muted">
-							{t(`${LOCALE_BASE}.emptySubtitle`)}
-						</Text>
-					</div>
-				)}
+				emptyRenderer={() =>
+					isLoading ? null : (
+						<div className="flex min-h-[150px] flex-col items-center justify-center gap-2">
+							<CircleSlash2 className="h-10 w-10 pb-2 pt-1 text-foreground-muted" />
+							<Heading size="sm">{t(`${LOCALE_BASE}.emptyHeading`)}</Heading>
+							<Text size="sm" variant="muted">
+								{t(`${LOCALE_BASE}.emptySubtitle`)}
+							</Text>
+						</div>
+					)
+				}
 				isZeroBasedPagination
 			/>
 		</Card>
 	)
 }
 
-const DEBUG = import.meta.env.DEV
 const LOCALE_BASE = 'settingsScene.server/logs.sections.persistedLogs.table'
 
 const columnHelper = createColumnHelper<PersistedLog>()

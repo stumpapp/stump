@@ -22,14 +22,6 @@ The version of the Stump API to use. This should really be left alone and **not*
 
 This corresponds to the `api_version` configuration option in the `Stump.toml` file.
 
-### EMAIL_TEMPLATES_DIR
-
-The directory where Stump will look for email templates. This is only required if you want to use custom email templates. By default, Stump will look for email templates in the `templates` directory in the root of the configuration directory. E.g., if your configuration directory is `~/.stump`, Stump will look for email templates in `~/.stump/templates`.
-
-| Type   | Default Value            |
-| ------ | ------------------------ |
-| String | `{config_dir}/templates` |
-
 ### ENABLE_KOREADER_SYNC
 
 Whether or not to enable the KoReader sync integration. This is a special integration that allows KoReader to sync with Stump. To learn more about this integration, visit the [KoReader](/guides/integrations/koreader) guide.

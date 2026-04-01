@@ -36,6 +36,7 @@ pub(crate) fn mount() -> Router<AppState> {
 }
 
 #[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct OidcConfigResponse {
 	pub enabled: bool,
 	pub allow_registration: bool,

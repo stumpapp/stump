@@ -300,7 +300,7 @@ dependencies = [
  "fnv",
  "futures-channel",
  "futures-util",
- "handlebars 6.4.0",
+ "handlebars",
  "http 1.2.0",
  "indexmap 2.11.4",
  "lru",
@@ -2258,10 +2258,8 @@ name = "email"
 version = "0.1.0"
 dependencies = [
  "async-graphql",
- "handlebars 5.1.2",
  "lettre",
  "serde",
- "serde_json",
  "thiserror 2.0.17",
  "tracing",
 ]
@@ -3197,20 +3195,6 @@ dependencies = [
  "cfg-if",
  "crunchy",
  "zerocopy 0.8.27",
-]
-
-[[package]]
-name = "handlebars"
-version = "5.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d08485b96a0e6393e9e4d1b8d48cf74ad6c063cd905eb33f42c1ce3f0377539b"
-dependencies = [
- "log",
- "pest",
- "pest_derive",
- "serde",
- "serde_json",
- "thiserror 1.0.63",
 ]
 
 [[package]]

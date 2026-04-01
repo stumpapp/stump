@@ -12,6 +12,7 @@ import Animated, {
 
 import { Button, Text } from '~/components/ui'
 import { Icon } from '~/components/ui/icon'
+import { useColors } from '~/lib/constants'
 import { useDownloadQueue, useIsBookDownloaded, useIsBookDownloading } from '~/lib/hooks'
 import { usePreferencesStore } from '~/stores'
 
@@ -31,6 +32,7 @@ export default function DownloadButton({ bookId, serverId, onDownload }: Downloa
 	const isDownloaded = useIsBookDownloaded(bookId, serverId)
 
 	const accentColor = usePreferencesStore((state) => state.accentColor)
+	const colors = useColors()
 
 	const { activeItems, cancel } = useDownloadQueue({ serverId })
 
@@ -176,10 +178,7 @@ export default function DownloadButton({ bookId, serverId, onDownload }: Downloa
 				<Animated.View style={contentStyle} className="flex-row items-center gap-2">
 					<Icon
 						as={iconComponent}
-						style={{
-							// @ts-expect-error: It's fine
-							color: accentColor,
-						}}
+						color={accentColor || colors.fill.brand.DEFAULT}
 						size={20}
 						className="-ml-1"
 					/>

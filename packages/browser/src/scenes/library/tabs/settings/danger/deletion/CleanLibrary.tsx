@@ -8,15 +8,15 @@ import {
 	Heading,
 	Text,
 } from '@stump/components'
-import { graphql } from '@stump/graphql'
+import { graphql, LibraryMissingEntitiesQuery } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
+import { useQueryClient } from '@tanstack/react-query'
 import { Info } from 'lucide-react'
-import { useCallback, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 import { useLibraryManagement } from '../../context'
-
-// TODO: add query for whether a clean would do anything to disable this section
+import MisisngEntitiesTable from './MissingEntitiesTable'
 
 const mutation = graphql(`
 	mutation CleanLibrary($id: ID!) {
@@ -33,12 +33,29 @@ export default function CleanLibrary() {
 		library: { id },
 	} = useLibraryManagement()
 	const { t } = useLocaleContext()
-
-	const { mutateAsync: cleanLibrary, isPending, data } = useGraphQLMutation(mutation)
+	const { mutateAsync: cleanLibrary, isPending } = useGraphQLMutation(mutation)
 
 	const [showConfirmation, setShowConfirmation] = useState(false)
+	const [isNoneMissingState, setIsNoneMissingState] = useState(false)
 
-	const handleClean = useCallback(async () => {
+	const client = useQueryClient()
+
+	useEffect(() => {
+		const unsubscribe = client.getQueryCache().subscribe(({ query: { queryKey } }) => {
+			const [baseKey, libraryID] = queryKey
+			if (baseKey === 'missingEntities' && libraryID === id) {
+				const data = client.getQueryData<LibraryMissingEntitiesQuery>(queryKey)
+				const entities = data?.libraryMissingEntities.nodes ?? []
+				setIsNoneMissingState(entities.length === 0)
+			}
+		})
+
+		return () => {
+			unsubscribe()
+		}
+	}, [id, client])
+
+	const handleClean = async () => {
 		try {
 			toast.promise(cleanLibrary({ id }), {
 				loading: t(getKey('confirmation.loading')),
@@ -69,15 +86,43 @@ export default function CleanLibrary() {
 				toast.error(fallbackMessage)
 			}
 		}
-	}, [cleanLibrary, id, t])
+	}
 
 	return (
 		<div className="flex flex-col space-y-4">
-			<div>
-				<Heading size="sm">{t(getKey('heading'))}</Heading>
-				<Text size="sm" variant="muted" className="mt-1">
-					{t(getKey('description'))}
-				</Text>
+			<div className="flex items-end justify-between">
+				<div>
+					<Heading size="sm">{t(getKey('heading'))}</Heading>
+					<Text size="sm" variant="muted" className="mt-1">
+						{t(getKey('description'))}
+					</Text>
+				</div>
+
+				<ConfirmationModal
+					title={t(getKey('confirmation.label'))}
+					description={t(getKey('confirmation.text'))}
+					confirmText={t(getKey('confirmation.label'))}
+					confirmVariant="danger"
+					isOpen={showConfirmation}
+					onClose={() => setShowConfirmation(false)}
+					onConfirm={handleClean}
+					confirmIsLoading={isPending}
+					trigger={
+						<div>
+							<Button
+								type="button"
+								onClick={() => setShowConfirmation(true)}
+								className="flex-shrink-0"
+								size="md"
+								disabled={isNoneMissingState || isPending}
+								isLoading={isPending}
+								variant="danger"
+							>
+								{t(getKey('confirmation.label'))}
+							</Button>
+						</div>
+					}
+				/>
 			</div>
 
 			<Alert variant="info" id="clean-library-info" dismissible>
@@ -86,31 +131,9 @@ export default function CleanLibrary() {
 				<AlertDescription>{t(getKey('disclaimer'))}</AlertDescription>
 			</Alert>
 
-			<ConfirmationModal
-				title={t(getKey('confirmation.label'))}
-				description={t(getKey('confirmation.text'))}
-				confirmText={t(getKey('confirmation.label'))}
-				confirmVariant="danger"
-				isOpen={showConfirmation}
-				onClose={() => setShowConfirmation(false)}
-				onConfirm={handleClean}
-				confirmIsLoading={isPending}
-				trigger={
-					<div>
-						<Button
-							type="button"
-							onClick={() => setShowConfirmation(true)}
-							className="flex-shrink-0"
-							size="md"
-							disabled={!!data || isPending}
-							isLoading={isPending}
-							variant="danger"
-						>
-							{t(getKey('confirmation.label'))}
-						</Button>
-					</div>
-				}
-			/>
+			<Suspense>
+				<MisisngEntitiesTable />
+			</Suspense>
 		</div>
 	)
 }

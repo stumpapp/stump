@@ -34,14 +34,10 @@ struct AttachmentSenderImpl {
 }
 
 impl AttachmentSenderImpl {
-	pub fn new(
-		encryption_key: String,
-		templates_dir: PathBuf,
-		emailer: emailer::Model,
-	) -> Result<Self> {
+	pub fn new(encryption_key: String, emailer: emailer::Model) -> Result<Self> {
 		let emailer_client_config = build_emailer_client_config(encryption_key, emailer)?;
 		Ok(Self {
-			emailer_client: EmailerClient::new(emailer_client_config, templates_dir),
+			emailer_client: EmailerClient::new(emailer_client_config),
 		})
 	}
 }
@@ -62,21 +58,18 @@ pub async fn send_attachment_email(
 	conn: &DatabaseConnection,
 	user: &AuthUser,
 	encryption_key: String,
-	templates_dir: PathBuf,
 	input: SendAttachmentEmailsInput,
 ) -> Result<(usize, Vec<String>)> {
 	let emailer = get_emailer(conn).await?;
-	let emailer_client =
-		AttachmentSenderImpl::new(encryption_key, templates_dir, emailer.clone())?;
+	let emailer_client = AttachmentSenderImpl::new(encryption_key, emailer.clone())?;
 	send_attachment_email_for_emailer(conn, user, input, emailer, emailer_client).await
 }
 
 pub async fn send_test_email(
 	config: EmailerClientConfig,
-	templates_dir: PathBuf,
 	recipient: String,
 ) -> Result<()> {
-	let client = EmailerClient::new(config, templates_dir);
+	let client = EmailerClient::new(config);
 	client.send_test_email(&recipient).await?;
 	Ok(())
 }

@@ -704,16 +704,16 @@
 					"missingEntitiesTable": {
 						"columns": {
 							"id": "ID",
-							"path": "Path",
-							"type": "Type"
+							"path": "Ścieżka",
+							"type": "Typ"
 						},
 						"types": {
-							"BOOK": "Book",
-							"SERIES": "Series",
-							"LIBRARY": "Library"
+							"BOOK": "Książka",
+							"SERIES": "Seria",
+							"LIBRARY": "Biblioteka"
 						},
-						"emptyHeading": "Nothing is missing for this library",
-						"emptySubtitle": "All files referenced in the database were located on disk"
+						"emptyHeading": "Nic nie brakuje w tej bibliotece",
+						"emptySubtitle": "Wszystkie pliki przywołane w bazie danych zostały zlokalizowane na dysku"
 					}
 				},
 				"deleteLibrary": {

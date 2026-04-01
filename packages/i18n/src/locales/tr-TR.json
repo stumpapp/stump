@@ -700,7 +700,21 @@
 						"label": "Kütüphaneyi temizle",
 						"text": "Kütüphaneyi temizlemek istediğinizdem emin misiniz?"
 					},
-					"emptyText": "Temizlenecek bir şey yoktu"
+					"emptyText": "Temizlenecek bir şey yoktu",
+					"missingEntitiesTable": {
+						"columns": {
+							"id": "ID",
+							"path": "Path",
+							"type": "Type"
+						},
+						"types": {
+							"BOOK": "Book",
+							"SERIES": "Series",
+							"LIBRARY": "Library"
+						},
+						"emptyHeading": "Nothing is missing for this library",
+						"emptySubtitle": "All files referenced in the database were located on disk"
+					}
 				},
 				"deleteLibrary": {
 					"heading": "Kütüphaneyi sil",

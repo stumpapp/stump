@@ -59,12 +59,12 @@
 				"email": {
 					"label": "E-mail",
 					"placeholder": "Indirizzo e-mail",
-					"description": "An email address to send the book to. Click add to finalize each input"
+					"description": "Un indirizzo email a cui inviare il libro. Fai clic su Aggiungi per confermare ogni input"
 				},
 				"devices": {
-					"label": "Devices",
-					"placeholder": "Select devices",
-					"noFilterMatch": "No devices match the filter"
+					"label": "Dispositivi",
+					"placeholder": "Seleziona i dispositivi",
+					"noFilterMatch": "Nessun dispositivo corrisponde al filtro"
 				}
 			}
 		},
@@ -73,54 +73,54 @@
 	"createOrUpdateBookClubForm": {
 		"fields": {
 			"name": {
-				"label": "Name",
-				"placeholder": "My book club",
-				"description": "The name of your book club"
+				"label": "Nome",
+				"placeholder": "Il mio club del libro",
+				"description": "Il nome del tuo club del libro"
 			},
 			"description": {
-				"label": "Description",
-				"placeholder": "An 'Our Flag Means Death' fan club. We read pirate fiction to our hearts' content",
-				"description": "An optional, short description of your book club"
+				"label": "Descrizione",
+				"placeholder": "Un fan club del 'La nostra bandiera significa morte'. Leggiamo le fiction dei pirati divorandole completamente",
+				"description": "Una breve descrizione facoltativa del club del libro"
 			},
 			"is_private": {
-				"label": "Private club",
-				"description": "If enabled, only users you invite will be able to join your book club"
+				"label": "Club Privato",
+				"description": "Se abilitato, solo gli utenti che inviti potranno unirsi al tuo club di libri"
 			},
 			"member_role_spec": {
-				"heading": "Custom role mapping",
+				"heading": "Mappatura del ruolo personalizzata",
 				"subtitle": [
-					"You can create custom names for the roles in your book club if you'd like. For more information, refer to the",
-					"documentation"
+					"Puoi creare nomi personalizzati per i ruoli nel tuo club di libri, se vuoi. Per ulteriori informazioni, fai riferimento al",
+					"documentazione"
 				],
 				"member": {
-					"label": "Member",
-					"placeholder": "Member",
-					"description": "The name of the default role for your book club"
+					"label": "Membro",
+					"placeholder": "Membro",
+					"description": "Il nome del ruolo predefinito per il tuo club del libro"
 				},
 				"moderator": {
-					"label": "Moderator",
-					"placeholder": "Moderator",
-					"description": "The name of the moderator role for your book club"
+					"label": "Moderatore",
+					"placeholder": "Moderatore",
+					"description": "Il nome del ruolo di moderatore per il tuo club del libro"
 				},
 				"admin": {
-					"label": "Admin",
-					"placeholder": "Admin",
-					"description": "The name of the admin role for your book club"
+					"label": "Amministratore",
+					"placeholder": "Amministratore",
+					"description": "Il nome del ruolo di amministratore per il tuo club del libro"
 				},
 				"creator": {
-					"label": "Creator",
-					"placeholder": "Creator",
-					"description": "The name of the creator role for your book club. This is you!"
+					"label": "Creatore",
+					"placeholder": "Creatore",
+					"description": "Il nome del ruolo di creatore per il tuo club del libro. Questo sei tu!"
 				}
 			},
 			"membershipOptions": {
 				"displayName": {
-					"label": "Display Name",
+					"label": "Nome visualizzato",
 					"placeholder": "oromei",
-					"description": "An optional display name for your membership in the book club. If set, this takes precedence over your username"
+					"description": "Un nome opzionale per la tua iscrizione nel club del libro. Se impostato, ha la precedenza sul tuo nome utente"
 				},
 				"hideProgress": {
-					"label": "Hide Progress",
+					"label": "Nascondi Progresso",
 					"description": "If enabled, your reading progress will be hidden from other members of the book club"
 				}
 			}

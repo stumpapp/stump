@@ -700,7 +700,21 @@
 						"label": "Rensa bibliotek",
 						"text": "Är du säker på att du vill rensa detta bibliotek?"
 					},
-					"emptyText": "Det fanns inget att städa"
+					"emptyText": "Det fanns inget att städa",
+					"missingEntitiesTable": {
+						"columns": {
+							"id": "ID",
+							"path": "Path",
+							"type": "Type"
+						},
+						"types": {
+							"BOOK": "Book",
+							"SERIES": "Series",
+							"LIBRARY": "Library"
+						},
+						"emptyHeading": "Nothing is missing for this library",
+						"emptySubtitle": "All files referenced in the database were located on disk"
+					}
 				},
 				"deleteLibrary": {
 					"heading": "Radera bibliotek",

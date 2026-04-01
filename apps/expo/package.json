@@ -16,6 +16,7 @@
 		"open:ios": "xed ios",
 		"open:android": "open -a \"Android Studio\" android",
 		"postinstall": "npx tailwindcss -i ./global.css -o ./node_modules/.cache/nativewind/global.css",
+		"format": "eslint --fix . && prettier --config ../../prettier.config.js --ignore-path ../../.prettierignore --write .",
 		"nuke": "rimraf .expo node_modules ios android"
 	},
 	"dependencies": {

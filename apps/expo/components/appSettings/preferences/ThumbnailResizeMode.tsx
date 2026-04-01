@@ -1,4 +1,5 @@
 import { Maximize } from 'lucide-react-native'
+import { useShallow } from 'zustand/react/shallow'
 
 import { Picker } from '~/components/ui/picker/picker'
 import { usePreferencesStore } from '~/stores'
@@ -6,10 +7,12 @@ import { usePreferencesStore } from '~/stores'
 import AppSettingsRow from '../AppSettingsRow'
 
 export default function ThumbnailResizeMode() {
-	const { thumbnailResizeMode, patch } = usePreferencesStore((state) => ({
-		thumbnailResizeMode: state.thumbnailResizeMode,
-		patch: state.patch,
-	}))
+	const { thumbnailResizeMode, patch } = usePreferencesStore(
+		useShallow((state) => ({
+			thumbnailResizeMode: state.thumbnailResizeMode,
+			patch: state.patch,
+		})),
+	)
 
 	return (
 		<AppSettingsRow icon={Maximize} title="Thumbnail Resize">

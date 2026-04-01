@@ -62,13 +62,13 @@ export default function URLPagination({ pages, currentPage, onChangePage, onPref
 	}, [currentPage])
 
 	return (
-		<div className="flex items-center space-x-4">
-			<form className="flex shrink-0 items-center space-x-2" onSubmit={handleInputSubmit}>
+		<div className="space-x-4 flex items-center">
+			<form className="space-x-2 flex shrink-0 items-center" onSubmit={handleInputSubmit}>
 				<Input
 					type="number"
 					variant="activeGhost"
 					size="sm"
-					className="h-7 w-7 p-0 text-center text-xs [appearance:textfield] sm:h-6 sm:w-6 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+					className="h-7 w-7 p-0 text-xs sm:h-6 sm:w-6 [appearance:textfield] text-center [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
 					disabled={pages <= 1}
 					value={inputPage ?? ''}
 					onChange={handleInputChange}
@@ -80,7 +80,7 @@ export default function URLPagination({ pages, currentPage, onChangePage, onPref
 					of {pages}
 				</Text>
 			</form>
-			<div className="flex items-center space-x-1">
+			<div className="space-x-1 flex items-center">
 				<ToolTip content="Previous page" size="sm" align="end">
 					<IconButton
 						size="xs"

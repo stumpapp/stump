@@ -14,7 +14,7 @@ export default function MembershipOptions() {
 	const creatorHideProgress = form.watch('creatorHideProgress')
 
 	return (
-		<div className="flex flex-col gap-4 pt-2 md:max-w-lg">
+		<div className="gap-4 pt-2 md:max-w-lg flex flex-col">
 			<Input
 				variant="primary"
 				fullWidth

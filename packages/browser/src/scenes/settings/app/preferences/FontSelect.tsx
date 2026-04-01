@@ -42,7 +42,7 @@ export default function FontSelect() {
 	)
 
 	return (
-		<div className="flex flex-col gap-y-1.5 md:max-w-md">
+		<div className="gap-y-1.5 md:max-w-md flex flex-col">
 			<Label htmlFor="extension" className="mb-1.5">
 				{t(`${localeKey}.label`)}
 			</Label>

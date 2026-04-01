@@ -12,7 +12,7 @@ export default function HelpDocsCTA({ className, filePath }: Props) {
 	return (
 		<Link
 			href={href}
-			className={clsx('flex items-center space-x-2', className)}
+			className={clsx('space-x-2 flex items-center', className)}
 			target="_blank"
 			rel="noopener noreferrer"
 		>

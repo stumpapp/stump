@@ -17,7 +17,7 @@ export default function ControlsContainer({ position, children, className }: Pro
 				'h-10 w-full shrink-0',
 				{
 					'bottom-0 left-0': position === 'bottom' && fullscreen,
-					'fixed z-[100]': fullscreen,
+					'fixed z-100': fullscreen,
 					'left-0 top-0': position === 'top' && fullscreen,
 				},
 				className,
@@ -28,7 +28,7 @@ export default function ControlsContainer({ position, children, className }: Pro
 		>
 			<div
 				className={cn(
-					'flex h-full items-center gap-1 bg-background px-2 transition-opacity duration-150',
+					'gap-1 px-2 flex h-full items-center bg-background transition-opacity duration-150',
 					{ 'md:bg-transparent': !fullscreen },
 					{ 'opacity-100': !fullscreen || visible },
 					{ 'opacity-0': !visible && fullscreen },

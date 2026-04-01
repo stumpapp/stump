@@ -81,7 +81,7 @@ export default function SideBar({ asChild, hidden }: Props) {
 	const renderHeader = () => {
 		if (!isBrowser && isAtLeastMedium) {
 			return (
-				<header className="flex w-full justify-between gap-1">
+				<header className="gap-1 flex w-full justify-between">
 					<UserMenu />
 					<NavigationButtons />
 				</header>
@@ -173,7 +173,7 @@ export default function SideBar({ asChild, hidden }: Props) {
 			<>
 				{renderHeader()}
 
-				<div className="flex max-h-full grow flex-col gap-2 overflow-y-auto p-1 scrollbar-hide">
+				<div className="gap-2 p-1 scrollbar-hide flex max-h-full grow flex-col overflow-y-auto">
 					{isAtLeastMedium && isBrowser && <UserMenu />}
 
 					{sections}
@@ -198,7 +198,7 @@ export default function SideBar({ asChild, hidden }: Props) {
 		<motion.aside
 			key="primary-sidebar"
 			// @ts-expect-error: It is there I promise
-			className="hidden min-h-full md:inline-block"
+			className="md:inline-block hidden min-h-full"
 			animate={hidden ? 'hidden' : 'visible'}
 			variants={variants}
 			initial={false}
@@ -206,10 +206,9 @@ export default function SideBar({ asChild, hidden }: Props) {
 		>
 			<div
 				className={cn(
-					'relative z-10 flex h-full w-56 shrink-0 flex-col gap-4 border-r border-edge bg-sidebar px-2 py-4',
+					'w-56 gap-4 px-2 py-4 relative z-10 flex h-full shrink-0 flex-col border-r border-edge bg-sidebar',
 					{
-						'bg-gradient-to-tr from-sidebar-gradient-from to-sidebar-gradient-to':
-							shouldUseGradient,
+						'from-sidebar-gradient-from to-sidebar-gradient-to bg-linear-to-tr': shouldUseGradient,
 					},
 				)}
 			>

@@ -76,12 +76,12 @@ export default function UploadImageModal({ isOpen, onClose, onUploadImage }: Pro
 				<Dialog.Header>
 					<Dialog.Close onClick={onClose} />
 				</Dialog.Header>
-				<div className="flex h-[300px] flex-col gap-y-2 py-2 scrollbar-hide">
+				<div className="gap-y-2 py-2 scrollbar-hide flex h-[300px] flex-col">
 					<div className="flex h-[100px] items-center justify-center">
 						<div className={cx('relative', { 'h-[100px]': filePreview })}>
 							{filePreview && (
 								<>
-									<div className="absolute -right-2 -top-2 flex items-center justify-center">
+									<div className="-right-2 -top-2 absolute flex items-center justify-center">
 										<IconButton
 											title={t(withLocaleKey('remove'))}
 											size="xs"
@@ -107,7 +107,7 @@ export default function UploadImageModal({ isOpen, onClose, onUploadImage }: Pro
 
 					<div
 						{...getRootProps()}
-						className="flex shrink-0 flex-grow flex-col items-center justify-center border border-dashed border-edge p-4"
+						className="p-4 flex shrink-0 grow flex-col items-center justify-center border border-dashed border-edge"
 					>
 						<input {...getInputProps()} />
 						<Text variant="muted">{t(withLocaleKey('prompt'))}</Text>

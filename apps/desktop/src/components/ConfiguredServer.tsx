@@ -43,7 +43,7 @@ export default function ConfiguredServer({
 
 	return (
 		<div
-			className={cn('group flex items-center justify-between p-4', {
+			className={cn('group p-4 flex items-center justify-between', {
 				'hover:bg-background-surface-hover/10': isReachable,
 			})}
 		>
@@ -51,23 +51,20 @@ export default function ConfiguredServer({
 				className="flex grow cursor-pointer flex-col"
 				onClick={isReachable ? onSwitch : undefined}
 			>
-				<span className="flex items-center space-x-2">
+				<span className="space-x-2 flex items-center">
 					<Text>{server.name}</Text>
 					{isActive && (
 						<ToolTip content={t(getKey('activeServer.tooltip'))} align="center">
 							<BadgeCheck
 								data-testid="activeBadge"
-								className="h-4 w-4 text-fill-success text-opacity-75"
+								className="h-4 w-4 text-fill-success/75"
 								strokeWidth={0.95}
 							/>
 						</ToolTip>
 					)}
 					{isReachable === false && (
 						<ToolTip content={t(getKey('unreachableServer.tooltip'))} align="center">
-							<WifiOff
-								data-testid="unreachableBadge"
-								className="h-4 w-4 text-fill-danger text-opacity-75"
-							/>
+							<WifiOff data-testid="unreachableBadge" className="h-4 w-4 text-fill-danger/75" />
 						</ToolTip>
 					)}
 				</span>
@@ -76,7 +73,7 @@ export default function ConfiguredServer({
 				</Text>
 			</div>
 
-			<div className="flex items-center space-x-1.5 opacity-90 group-hover:opacity-100">
+			<div className="space-x-1.5 flex items-center opacity-90 group-hover:opacity-100">
 				{/* {!isActive && (
 					<ToolTip content={t(getKey('switchToServer.tooltip'))}>
 						<IconButton size="xs" onClick={onSwitch} data-testid="switchButton">

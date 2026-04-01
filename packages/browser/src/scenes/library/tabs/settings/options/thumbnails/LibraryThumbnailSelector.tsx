@@ -167,7 +167,7 @@ export default function LibraryThumbnailSelector() {
 	}
 
 	return (
-		<div className="flex flex-col gap-4">
+		<div className="gap-4 flex flex-col">
 			<div>
 				<Label>Select thumbnail</Label>
 				<Text size="sm" variant="muted">

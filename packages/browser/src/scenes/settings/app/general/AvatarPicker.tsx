@@ -140,12 +140,12 @@ export default function AvatarPicker() {
 						<Dialog.Close onClick={off} />
 					</Dialog.Header>
 
-					<div className="flex h-[300px] flex-col gap-y-4 py-2 scrollbar-hide">
+					<div className="gap-y-4 py-2 scrollbar-hide flex h-[300px] flex-col">
 						<div className="flex items-center justify-center">
 							<div className={cx('relative h-[100px]', { 'h-[100px]': filePreview })}>
 								{filePreview && (
 									<>
-										<div className="absolute -top-0 right-0 flex items-center justify-center">
+										<div className="top-0 right-0 absolute flex items-center justify-center">
 											<IconButton
 												title={t(getKey('removeSelection'))}
 												size="xs"
@@ -172,7 +172,7 @@ export default function AvatarPicker() {
 						<div
 							{...getRootProps()}
 							className={cn(
-								'flex h-full cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-edge-subtle p-4 ring-2 ring-transparent ring-offset-2 ring-offset-background',
+								'gap-2 rounded-md p-4 flex h-full cursor-pointer items-center justify-center border border-dashed border-edge-subtle ring-2 ring-transparent ring-offset-2 ring-offset-background',
 								{ 'ring-edge-brand': isDropzoneFocused },
 							)}
 						>
@@ -190,22 +190,22 @@ export default function AvatarPicker() {
 				</Dialog.Content>
 			</Dialog>
 
-			<div className="flex flex-col gap-2.5 self-center">
+			<div className="gap-2.5 flex flex-col self-center">
 				<Label>{t(getKey('label'))}</Label>
 				<span className="relative">
 					<Avatar
-						className="h-40 w-40 !text-2xl"
+						className="h-40 w-40 text-2xl!"
 						src={imageUrl || undefined}
 						fallback={user?.username}
 						fallbackColor="brand"
 						fallbackWrapperClassName="text-3xl font-medium tracking-widest"
 					/>
-					<span className="absolute bottom-0 left-0 block translate-x-2 transform">
+					<span className="bottom-0 left-0 translate-x-2 absolute block transform">
 						<DropdownMenu
 							align="start"
 							contentWrapperClassName="w-18"
 							trigger={
-								<Button variant="subtle-dark" size="xs" className="border border-edge px-2 py-1.5">
+								<Button variant="subtle-dark" size="xs" className="px-2 py-1.5 border border-edge">
 									<Edit className="mr-2 h-3 w-3" />
 									{t('common.edit')}
 								</Button>

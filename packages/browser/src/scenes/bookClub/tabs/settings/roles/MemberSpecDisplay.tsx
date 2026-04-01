@@ -18,7 +18,7 @@ export default function MemberSpecDisplay() {
 	})
 
 	return (
-		<div className="flex flex-col gap-4">
+		<div className="gap-4 flex flex-col">
 			<div className="md:max-w-lg">
 				<Heading size="sm">Custom names</Heading>
 				<Text variant="muted" size="sm">
@@ -27,19 +27,19 @@ export default function MemberSpecDisplay() {
 				</Text>
 			</div>
 
-			<Card className="w-full rounded-lg">
+			<Card className="rounded-lg w-full">
 				<table className="min-w-full divide-y divide-edge">
 					<thead className="">
 						<tr>
 							<th
 								scope="col"
-								className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-foreground sm:pl-6"
+								className="py-3.5 pl-4 pr-3 text-sm font-semibold sm:pl-6 text-left text-foreground"
 							>
 								<Text>Role</Text>
 							</th>
 							<th
 								scope="col"
-								className="border-l border-l-edge px-3 py-3.5 text-left text-sm font-semibold text-foreground"
+								className="px-3 py-3.5 text-sm font-semibold border-l border-l-edge text-left text-foreground"
 							>
 								<Text>Show as</Text>
 							</th>
@@ -54,10 +54,10 @@ export default function MemberSpecDisplay() {
 							.map(([key, value]) => {
 								return (
 									<tr key={key}>
-										<td className="py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
+										<td className="py-4 pl-4 pr-3 text-sm font-medium sm:pl-6 text-gray-900">
 											<Text size="sm">{upperFirst(key.toLowerCase())}</Text>
 										</td>
-										<td className="border-l border-l-edge px-3 py-4">
+										<td className="px-3 py-4 border-l border-l-edge">
 											<Input
 												value={String(value)}
 												onChange={(e) => {

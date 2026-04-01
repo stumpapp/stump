@@ -33,9 +33,9 @@ export default function BookFileInformation({ fragment }: Props) {
 	}
 
 	return (
-		<div className="flex flex-col space-y-1 pb-3 pt-2 text-sm">
+		<div className="space-y-1 pb-3 pt-2 text-sm flex flex-col">
 			<Heading size="xs">File Information</Heading>
-			<div className="flex space-x-4">
+			<div className="space-x-4 flex">
 				<Text size="sm" variant="muted">
 					Size: {formatBytes(data.size)}
 				</Text>

@@ -25,7 +25,7 @@ export function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
 			<img
 				src="/assets/svg/bomb.svg"
 				alt="Construction illustration"
-				className="mx-auto hidden max-h-64 w-1/2 shrink-0 object-scale-down sm:inline-block"
+				className="max-h-64 sm:inline-block mx-auto hidden w-1/2 shrink-0 object-scale-down"
 			/>
 			<div className="max-w-sm sm:max-w-md md:max-w-xl">
 				<div className="text-left">
@@ -34,7 +34,7 @@ export function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
 						{error.message || 'The error message was empty.'}
 					</p>
 				</div>
-				<div className="flex w-full items-center gap-3 pt-3">
+				<div className="gap-3 pt-3 flex w-full items-center">
 					<ButtonOrLink
 						variant="primary"
 						onClick={resetErrorBoundary}

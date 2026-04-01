@@ -94,7 +94,7 @@ export default function CreateOrUpdateEmailerForm({ emailer, existingNames, onSu
 				ignoreFill
 			/>
 
-			<div className="flex flex-col space-y-4">
+			<div className="space-y-4 flex flex-col">
 				<div>
 					<Heading size="sm" className="font-semibold">
 						{t(`${LOCALE_BASE}.smtpSettings.heading`)}
@@ -106,7 +106,7 @@ export default function CreateOrUpdateEmailerForm({ emailer, existingNames, onSu
 				</div>
 
 				{/* FIXME: A little buggy */}
-				<div className="flex flex-col space-y-1 md:max-w-sm">
+				<div className="space-y-1 md:max-w-sm flex flex-col">
 					<Label>{t(`${LOCALE_BASE}.smtpProvider.label`)}</Label>
 					<NativeSelect
 						emptyOption={{ label: 'Custom', value: undefined }}
@@ -131,7 +131,7 @@ export default function CreateOrUpdateEmailerForm({ emailer, existingNames, onSu
 					</Text>
 				</div>
 
-				<div className="flex flex-col gap-4 md:flex-row md:items-start">
+				<div className="gap-4 md:flex-row md:items-start flex flex-col">
 					<Input
 						id="smtpHost"
 						label={t(`${LOCALE_BASE}.smtpHost.label`)}
@@ -153,7 +153,7 @@ export default function CreateOrUpdateEmailerForm({ emailer, existingNames, onSu
 					/>
 				</div>
 
-				<div className="flex flex-col gap-4 lg:flex-row lg:items-start">
+				<div className="gap-4 lg:flex-row lg:items-start flex flex-col">
 					<Input
 						id="username"
 						label={t(`${LOCALE_BASE}.username.label`)}
@@ -184,7 +184,7 @@ export default function CreateOrUpdateEmailerForm({ emailer, existingNames, onSu
 				/>
 			</div>
 
-			<div className="flex flex-col space-y-4">
+			<div className="space-y-4 flex flex-col">
 				<div>
 					<Heading size="sm" className="font-semibold">
 						{t(`${LOCALE_BASE}.senderSettings.heading`)}
@@ -213,7 +213,7 @@ export default function CreateOrUpdateEmailerForm({ emailer, existingNames, onSu
 				/>
 			</div>
 
-			<div className="flex flex-col space-y-4">
+			<div className="space-y-4 flex flex-col">
 				<div>
 					<Heading size="sm" className="font-semibold">
 						{t(`${LOCALE_BASE}.additionalSettings.heading`)}

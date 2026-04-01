@@ -62,7 +62,7 @@ export default function FilterSlideOver({ prompt, formVariant }: Props) {
 			title="Filter options"
 			description={prompt || 'Use the options below to narrow your search'}
 			trigger={
-				<Button variant="ghost" className="flex h-full items-center gap-1.5">
+				<Button variant="ghost" className="gap-1.5 flex h-full items-center">
 					<Filter className="h-4 w-4" />
 					<span>Filter</span>
 					<span className="text-brand">({nonSearchFilterCount})</span>
@@ -70,7 +70,7 @@ export default function FilterSlideOver({ prompt, formVariant }: Props) {
 			}
 			size={isMobile ? 'xl' : 'default'}
 			footer={
-				<div className="flex items-center gap-4 py-2">
+				<div className="gap-4 py-2 flex items-center">
 					<Button type="button" variant="danger" onClick={handleClearFilters}>
 						Clear filters
 					</Button>

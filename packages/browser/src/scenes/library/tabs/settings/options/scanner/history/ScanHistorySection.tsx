@@ -48,7 +48,7 @@ export default function ScanningSection() {
 	}, [id, client])
 
 	return (
-		<div className="flex flex-col gap-4">
+		<div className="gap-4 flex flex-col">
 			<div className="flex items-end justify-between">
 				<div>
 					<Heading size="sm">{t(getKey('heading'))}</Heading>

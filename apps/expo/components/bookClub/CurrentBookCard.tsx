@@ -175,7 +175,7 @@ export function CurrentBookCard({ data }: Props) {
 	const confirmArchiveBook = useCallback(() => {
 		Alert.alert(
 			'Archive book',
-			`Are you sure you are ready to archive ${book?.title ? `'${book?.title}'` : 'the current book'}"?`,
+			`Are you sure you are ready to archive ${book?.title ? `'${book?.title}'` : 'the current book'}?`,
 			[
 				{ text: 'Cancel', style: 'cancel' },
 				{

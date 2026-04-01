@@ -38,21 +38,21 @@ export default function NextInSeries() {
 			<>
 				<Button
 					size="icon"
-					className="absolute right-2 top-2"
+					className="right-2 top-2 absolute"
 					variant="ghost"
 					onClick={() => setIsHidden(true)}
 				>
 					<X className="h-4 w-4" onClick={() => setIsHidden(true)} />
 				</Button>
 
-				<div className="flex flex-col gap-4">
+				<div className="gap-4 flex flex-col">
 					<div>
 						<Label className="opacity-80">Next Up:</Label>
 						<Text size="lg">{nextInSeries.name}</Text>
 					</div>
 
 					<EntityImage
-						className="rounded-xl object-contain shadow"
+						className="rounded-xl shadow object-contain"
 						src={nextInSeries.thumbnailUrl}
 					/>
 
@@ -64,7 +64,7 @@ export default function NextInSeries() {
 		)
 
 		const trigger = (
-			<div className="cursor-pointer rounded-full border border-[#898d9480] bg-black/30 p-2 backdrop-blur-sm transition-all duration-200 hover:border-[#898d94] md:bg-black/5">
+			<div className="bg-black/30 p-2 backdrop-blur-sm md:bg-black/5 cursor-pointer rounded-full border border-[#898d9480] transition-all duration-200 hover:border-[#898d94]">
 				<ArrowRight
 					className={cn('h-6 w-6 text-white', {
 						'rotate-180 transform': readingDirection === ReadingDirection.Rtl,
@@ -80,7 +80,7 @@ export default function NextInSeries() {
 					<Popover.Content
 						side={readingDirection === ReadingDirection.Ltr ? 'left' : 'right'}
 						sideOffset={8}
-						className="relative w-72"
+						className="w-72 relative"
 					>
 						{content}
 					</Popover.Content>
@@ -103,7 +103,7 @@ export default function NextInSeries() {
 	return (
 		<div
 			className={cn(
-				'absolute top-1/2 z-[60] flex -translate-y-1/2 items-center justify-center',
+				'absolute top-1/2 z-60 flex -translate-y-1/2 items-center justify-center',
 				readingDirection === ReadingDirection.Ltr ? 'right-4' : 'left-4',
 			)}
 		>

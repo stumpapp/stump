@@ -40,7 +40,7 @@ export default function ServerInfoSection() {
 	)
 
 	return (
-		<div className="flex flex-col gap-4">
+		<div className="gap-4 flex flex-col">
 			<div>
 				<Heading size="sm">{t('settingsScene.server/general.sections.serverInfo.title')}</Heading>
 				<Text size="sm" variant="muted" className="mt-1">
@@ -64,7 +64,7 @@ export default function ServerInfoSection() {
 				</Alert>
 			)}
 
-			<div className="flex flex-row flex-wrap gap-12 md:gap-8">
+			<div className="gap-12 md:gap-8 flex flex-row flex-wrap">
 				{version && (
 					<div>
 						<Label>Semantic version</Label>
@@ -73,7 +73,7 @@ export default function ServerInfoSection() {
 							target="__blank"
 							rel="noopener noreferrer"
 							className={cn(
-								'flex items-center space-x-2 text-sm hover:underline',
+								'space-x-2 text-sm flex items-center hover:underline',
 								TEXT_VARIANTS.muted,
 							)}
 							underline={false}
@@ -100,7 +100,7 @@ export default function ServerInfoSection() {
 							target="__blank"
 							rel="noopener noreferrer"
 							className={cn(
-								'flex items-center space-x-2 text-sm hover:underline',
+								'space-x-2 text-sm flex items-center hover:underline',
 								TEXT_VARIANTS.muted,
 							)}
 							underline={false}

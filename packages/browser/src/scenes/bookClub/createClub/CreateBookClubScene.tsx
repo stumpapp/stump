@@ -81,7 +81,7 @@ export default function CreateBookClubScene() {
 				<SteppedFormSceneHeader />
 
 				<SceneContainer>
-					<div className="flex flex-col gap-12">
+					<div className="gap-12 flex flex-col">
 						<Suspense>
 							<CreateBookClubForm onSubmit={handleSubmit} />
 						</Suspense>

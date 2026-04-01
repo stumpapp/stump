@@ -103,9 +103,9 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 	)
 
 	return (
-		<div className="flex flex-col gap-4" key={forBook}>
+		<div className="gap-4 flex flex-col" key={forBook}>
 			<div>
-				<Label className="text-xs font-medium uppercase text-foreground-muted">Mode</Label>
+				<Label className="text-xs font-medium text-foreground-muted uppercase">Mode</Label>
 
 				<ReadingModeSelect
 					value={activeSettings.readingMode || DEFAULT_BOOK_PREFERENCES.readingMode}
@@ -119,7 +119,7 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 			</div>
 
 			<div>
-				<Label className="text-xs font-medium uppercase text-foreground-muted">Image Options</Label>
+				<Label className="text-xs font-medium text-foreground-muted uppercase">Image Options</Label>
 
 				<DoubleSpreadBehavior
 					behavior={
@@ -141,9 +141,9 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 			</div>
 
 			<div>
-				<Label className="text-xs font-medium uppercase text-foreground-muted">Preferences</Label>
-				<div className="flex flex-col gap-3 pt-2">
-					<Label className="flex items-center justify-between px-1">
+				<Label className="text-xs font-medium text-foreground-muted uppercase">Preferences</Label>
+				<div className="gap-3 pt-2 flex flex-col">
+					<Label className="px-1 flex items-center justify-between">
 						<span>Separate second page</span>
 						<RawSwitch
 							primaryRing
@@ -153,7 +153,7 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 						/>
 					</Label>
 
-					<Label className="flex items-center justify-between px-1">
+					<Label className="px-1 flex items-center justify-between">
 						<span>Pan and zoom without Ctrl / Cmd</span>
 						<RawSwitch
 							primaryRing
@@ -163,7 +163,7 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 						/>
 					</Label>
 
-					<Label className="flex items-center justify-between px-1">
+					<Label className="px-1 flex items-center justify-between">
 						<span>Tap sides to navigate</span>
 						<RawSwitch
 							primaryRing
@@ -173,7 +173,7 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 						/>
 					</Label>
 
-					<Label className="flex items-center justify-between px-1">
+					<Label className="px-1 flex items-center justify-between">
 						<span>Reading timer</span>
 						<RawSwitch
 							primaryRing
@@ -186,7 +186,7 @@ export default function ReaderSettings({ forBook, currentPage }: Props) {
 					{/* TODO: Once UX for settings is settled remove this */}
 					{!forBook && (
 						<div>
-							<Label className="flex items-center justify-between rounded-lg border border-dashed border-fill-brand/40 bg-fill-brand-secondary p-3">
+							<Label className="rounded-lg p-3 flex items-center justify-between border border-dashed border-fill-brand/40 bg-fill-brand-secondary">
 								<span>Experimental animated reader</span>
 								<RawSwitch
 									primaryRing

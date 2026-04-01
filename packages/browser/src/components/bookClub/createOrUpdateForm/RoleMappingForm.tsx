@@ -14,8 +14,8 @@ export default function RoleMappingForm() {
 	const { errors } = useFormState({ control: form.control })
 
 	return (
-		<div className="flex flex-col gap-y-6">
-			<Card className="grid grid-cols-1 gap-6 bg-background-surface/50 p-4 md:max-w-3xl md:grid-cols-2">
+		<div className="gap-y-6 flex flex-col">
+			<Card className="gap-6 p-4 md:max-w-3xl md:grid-cols-2 grid grid-cols-1 bg-background-surface/50">
 				<Input
 					variant="primary"
 					fullWidth

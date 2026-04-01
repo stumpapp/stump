@@ -7,7 +7,7 @@ export default function LayoutButtons() {
 	const { layout, setLayout } = useFileExplorerContext()
 
 	return (
-		<div className="flex shrink-0 items-center gap-1">
+		<div className="gap-1 flex shrink-0 items-center">
 			<ToolTip content="Grid view" align="end">
 				<IconButton
 					variant="ghost"

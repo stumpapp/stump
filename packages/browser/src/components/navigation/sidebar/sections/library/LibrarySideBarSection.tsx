@@ -61,7 +61,7 @@ export default function LibrarySideBarSection({
 	const renderLibraries = () => {
 		if (!libraries || !libraries.length) {
 			return (
-				<Text className="select-none px-1 py-2" variant="muted" size="sm">
+				<Text className="px-1 py-2 select-none" variant="muted" size="sm">
 					{t('sidebar.buttons.noLibraries')}
 				</Text>
 			)
@@ -96,7 +96,7 @@ export default function LibrarySideBarSection({
 	}
 
 	return (
-		<Accordion type="single" collapsible className="w-full py-2" defaultValue="libraries">
+		<Accordion type="single" collapsible className="py-2 w-full" defaultValue="libraries">
 			<Accordion.Item value="libraries" className="border-none">
 				<Accordion.Trigger noUnderline asLabel className="px-1 py-0 pb-2">
 					{t('sidebar.buttons.libraries')}
@@ -111,7 +111,7 @@ export default function LibrarySideBarSection({
 							{t('sidebar.buttons.seeAll')}
 						</SideBarButtonLink>
 					)}
-					<div className="ml-2 space-y-1 border-l border-l-edge pl-1">{renderLibraries()}</div>
+					<div className="ml-2 space-y-1 pl-1 border-l border-l-edge">{renderLibraries()}</div>
 					{showCreateLink && (
 						<SideBarButtonLink
 							to={paths.libraryCreate()}

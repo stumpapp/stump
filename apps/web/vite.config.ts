@@ -1,8 +1,9 @@
+import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
+import type { PluginOption } from 'vite'
 import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import tsconfigPaths from 'vite-plugin-tsconfig-paths'
-import type { PluginOption } from 'vite'
 
 // https://www.npmjs.com/package/vite-plugin-node-polyfills
 import { name, version } from './package.json'
@@ -19,6 +20,7 @@ export default defineConfig({
 		pkgJson: { name, version },
 	},
 	plugins: [
+		tailwindcss(),
 		react({
 			babel: {
 				plugins: [['babel-plugin-react-compiler', {}]],

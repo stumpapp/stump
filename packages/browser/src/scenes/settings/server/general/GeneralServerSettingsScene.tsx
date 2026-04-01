@@ -30,7 +30,7 @@ export default function GeneralServerSettingsScene() {
 			</Helmet>
 
 			<ContentContainer>
-				<div className="flex flex-col gap-12">
+				<div className="gap-12 flex flex-col">
 					<Suspense>
 						<ServerStats />
 					</Suspense>

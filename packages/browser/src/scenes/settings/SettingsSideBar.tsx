@@ -30,17 +30,17 @@ export default function SettingsSideBar() {
 	return (
 		<div
 			className={cn(
-				'relative flex h-full w-48 shrink-0 flex-col border-edge bg-background px-2 py-4 text-foreground-subtle',
+				'w-48 px-2 py-4 relative flex h-full shrink-0 flex-col border-edge bg-background text-foreground-subtle',
 				primaryNavigationMode === 'TOPBAR'
-					? 'fixed top-12 z-50 h-screen border-r'
-					: 'fixed top-0 z-50 h-screen border-r',
+					? 'top-12 fixed z-50 h-screen border-r'
+					: 'top-0 fixed z-50 h-screen border-r',
 				{
-					'bg-gradient-to-l from-background-gradient-from to-background-gradient-to':
+					'from-background-gradient-from to-background-gradient-to bg-linear-to-l':
 						shouldUseGradient,
 				},
 			)}
 		>
-			<div className="flex h-full flex-grow flex-col gap-4">
+			<div className="gap-4 flex h-full grow flex-col">
 				{groups
 					.map(({ label, items }) => {
 						const groupLabel = label
@@ -54,7 +54,7 @@ export default function SettingsSideBar() {
 							<div key={groupLabel}>
 								{groupLabel && <Label>{groupLabel}</Label>}
 
-								<ul className="flex flex-col gap-y-0.5 pt-2 text-sm">
+								<ul className="gap-y-0.5 pt-2 text-sm flex flex-col">
 									{items.map(({ to, icon, label, disabled, prefetch }) => {
 										if (platform === 'browser' && to.includes('desktop')) {
 											return null
@@ -85,7 +85,7 @@ export default function SettingsSideBar() {
 						<IconButton
 							title="Go home"
 							variant="ghost"
-							className="border border-transparent p-1.5 text-foreground hover:border-edge-subtle/50 hover:bg-sidebar-surface/70"
+							className="p-1.5 border border-transparent text-foreground hover:border-edge-subtle/50 hover:bg-sidebar-surface/70"
 							onClick={() => navigate(paths.home())}
 						>
 							<Home className="h-4 w-4 -scale-x-[1] transform" />

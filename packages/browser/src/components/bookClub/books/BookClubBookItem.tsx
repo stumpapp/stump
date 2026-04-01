@@ -113,7 +113,7 @@ export default function BookClubBookItem({ data }: Props) {
 		const image = details?.imageUrl ? (
 			<ImageComponent src={details.imageUrl} className="rounded-md object-cover" />
 		) : (
-			<div className="flex h-full w-full items-center justify-center rounded-md border border-edge/80 bg-background-surface/50">
+			<div className="rounded-md flex h-full w-full items-center justify-center border border-edge/80 bg-background-surface/50">
 				<Book className="h-10 w-10 text-foreground-muted" />
 			</div>
 		)
@@ -128,7 +128,7 @@ export default function BookClubBookItem({ data }: Props) {
 					<AspectRatio ratio={2 / 3}>{image}</AspectRatio>
 				</div>
 
-				<div className="flex w-full flex-col gap-1.5 text-right">
+				<div className="gap-1.5 flex w-full flex-col text-right">
 					<Heading size="sm">{heading}</Heading>
 					{author && <Text size="xs">{author}</Text>}
 					{link && (
@@ -143,7 +143,7 @@ export default function BookClubBookItem({ data }: Props) {
 
 	return (
 		<li className="ml-4">
-			<div className="absolute -left-1.5 mt-1.5 h-3 w-3 rounded-full border border-edge bg-background-surface"></div>
+			<div className="-left-1.5 mt-1.5 h-3 w-3 absolute rounded-full border border-edge bg-background-surface"></div>
 
 			<div className="flex items-start justify-between">
 				<Text variant="muted" className="mb-1" size="sm">
@@ -152,12 +152,12 @@ export default function BookClubBookItem({ data }: Props) {
 				{renderBadge()}
 			</div>
 
-			<Card className="mt-2 flex flex-col gap-4 p-3">
+			<Card className="mt-2 gap-4 p-3 flex flex-col">
 				{renderBookInfo()}
 
 				{!isCurrent && (
 					<div
-						className={cx('flex items-center justify-between rounded-md p-3', {
+						className={cx('rounded-md p-3 flex items-center justify-between', {
 							'bg-background-surface': !isCurrent,
 							'bg-fill-brand-secondary': isCurrent,
 						})}

@@ -147,7 +147,7 @@ export const ThumbnailImage = forwardRef<HTMLDivElement, ThumbnailImageProps>(
 			onError?.()
 		}
 
-		const imageClasses = cn('absolute inset-0 z-[15] h-full w-full object-cover', imageClassName)
+		const imageClasses = cn('absolute inset-0 z-15 h-full w-full object-cover', imageClassName)
 
 		const imageStyle = { borderRadius: computedStyles.borderRadius }
 
@@ -199,17 +199,17 @@ export const ThumbnailImage = forwardRef<HTMLDivElement, ThumbnailImageProps>(
 							animate={{ opacity: isLoaded ? 1 : 0 }}
 							transition={{ duration: 0.3, ease: 'easeOut' }}
 							// @ts-expect-error: It has className
-							className="absolute inset-0 z-[15]"
+							className="inset-0 absolute z-15"
 						>
 							{renderImage()}
 						</motion.div>
 					)}
 				</AnimatePresence>
 
-				{gradientStyle && <div className="absolute inset-0 z-20" style={gradientStyle} />}
+				{gradientStyle && <div className="inset-0 absolute z-20" style={gradientStyle} />}
 
 				<div
-					className="pointer-events-none absolute inset-0 z-[25] border-thumbnail-border"
+					className="inset-0 pointer-events-none absolute z-25 border-thumbnail-border"
 					style={{
 						...borderStyle,
 						borderStyle: 'solid',

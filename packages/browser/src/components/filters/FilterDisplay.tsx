@@ -54,11 +54,11 @@ export default function FilterDisplay() {
 	}
 
 	return (
-		<Card className="hidden p-4 md:inline-block">
-			<div className="flex max-h-60 flex-wrap items-center gap-4 overflow-y-auto scrollbar-hide">
+		<Card className="p-4 md:inline-block hidden">
+			<div className="max-h-60 gap-4 scrollbar-hide flex flex-wrap items-center overflow-y-auto">
 				{Object.entries(filterMapping).map(([key, values]) => {
 					return (
-						<div key={key} className="flex items-center gap-1">
+						<div key={key} className="gap-1 flex items-center">
 							<Text size="sm" variant="muted">
 								{key} {renderPredicate(key, values)}
 							</Text>

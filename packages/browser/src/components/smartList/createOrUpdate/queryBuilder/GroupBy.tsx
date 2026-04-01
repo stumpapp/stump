@@ -26,11 +26,11 @@ export default function GroupBy({ disabled }: Props) {
 	const { t } = useLocaleContext()
 
 	return (
-		<div className="flex flex-col space-y-1.5 pb-4">
+		<div className="space-y-1.5 pb-4 flex flex-col">
 			<Label>{t(getKey('label'))}</Label>
 			<div>
 				<NativeSelect
-					className="h-8 w-[unset] py-0"
+					className="h-8 py-0 w-[unset]"
 					disabled={disabled}
 					options={[
 						{

@@ -128,7 +128,7 @@ export default function UserSmartListLayout() {
 					{displaySideBar && <SmartListSettingsSideBar />}
 
 					<SceneContainer
-						className={cn('relative flex flex-1 flex-col gap-4 md:pb-0', {
+						className={cn('gap-4 md:pb-0 relative flex flex-1 flex-col', {
 							'md:hide-scrollbar': !!enableHideScrollbar,
 							'p-0': !isSettings,
 							// pl-48 is for the sidebar, plus pl-4 for the padding

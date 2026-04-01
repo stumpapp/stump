@@ -62,7 +62,7 @@ export default function ScanConfigForm({ onScan }: Props) {
 			<RadioGroup
 				value={variant}
 				onValueChange={handleVariantChanged}
-				className="divide gap-0 space-y-0 divide-y divide-edge overflow-hidden rounded-xl border border-edge"
+				className="divide gap-0 space-y-0 rounded-xl divide-y divide-edge overflow-hidden border border-edge"
 			>
 				<RadioGroup.CardItem
 					label={t(getOptionKey('forceRebuild', 'label'))}
@@ -92,7 +92,7 @@ export default function ScanConfigForm({ onScan }: Props) {
 			)}
 
 			{variant === 'custom' && (
-				<div className="flex flex-col gap-6 p-4">
+				<div className="gap-6 p-4 flex flex-col">
 					<WideSwitch
 						label="Rebuild metadata"
 						description="Rebuild metadata for all books in the library"

@@ -1,3 +1,7 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+@source './components/**/*.{js,ts,jsx,tsx}';
+@source './pages/**/*.{js,ts,jsx,tsx,mdx}';
+@source './theme.config.tsx';
+
+@custom-variant dark (&:is(.dark, .dark *));

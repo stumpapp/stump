@@ -129,7 +129,7 @@ export default function LibraryLayout() {
 				{displaySideBar && <LibrarySettingsSidebar />}
 
 				<SceneContainer
-					className={cn('relative flex flex-1 flex-col gap-4 p-0 md:pb-0', {
+					className={cn('gap-4 p-0 md:pb-0 relative flex flex-1 flex-col', {
 						'md:hide-scrollbar': !!enableHideScrollbar,
 						'pl-48': displaySideBar,
 					})}

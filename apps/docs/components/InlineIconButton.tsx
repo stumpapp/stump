@@ -13,7 +13,7 @@ export default function InlineIconButton(props: InlineIconButtonProps) {
 	return (
 		<span
 			className={clsx(
-				'inline-flex items-center rounded-md bg-[#D3D5D7] px-1 text-black dark:bg-[#161719] dark:text-[#D3D5D7]',
+				'rounded-md px-1 text-black inline-flex items-center bg-[#D3D5D7] dark:bg-[#161719] dark:text-[#D3D5D7]',
 				{ 'p-1': !props.text },
 			)}
 		>

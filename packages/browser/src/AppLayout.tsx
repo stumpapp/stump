@@ -235,12 +235,12 @@ export function AppLayout() {
 					<main
 						id="main"
 						className={cn(
-							'flex w-full flex-1 flex-col overflow-y-auto overflow-x-hidden bg-background',
+							'flex w-full flex-1 flex-col overflow-x-hidden overflow-y-auto bg-background',
 							{
 								'scrollbar-hide': storeUser.preferences?.enableHideScrollbar,
 							},
 							{
-								'bg-gradient-to-br from-background-gradient-from to-background-gradient-to':
+								'from-background-gradient-from to-background-gradient-to bg-linear-to-br':
 									shouldUseGradient,
 							},
 						)}

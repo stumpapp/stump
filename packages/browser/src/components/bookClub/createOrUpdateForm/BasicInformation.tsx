@@ -21,7 +21,7 @@ export default function BasicBookClubInformation() {
 	})
 
 	return (
-		<div className="flex flex-grow flex-col gap-6">
+		<div className="gap-6 flex grow flex-col">
 			<Input
 				variant="primary"
 				label={t(getKey('name.label'))}

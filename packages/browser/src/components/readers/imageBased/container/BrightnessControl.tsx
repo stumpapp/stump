@@ -27,7 +27,7 @@ export default function BrightnessControl() {
 	const value = useMemo(() => (isNaN(brightness) ? 1 : brightness), [brightness])
 
 	return (
-		<div className="flex flex-col space-y-2 py-1.5">
+		<div className="space-y-2 py-1.5 flex flex-col">
 			<Label>Brightness</Label>
 			<Slider
 				value={[value]}

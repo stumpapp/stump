@@ -14,7 +14,7 @@ export default function CreateClubReview() {
 	const { t } = useLocaleContext()
 
 	return (
-		<div className="flex flex-col space-y-8">
+		<div className="space-y-8 flex flex-col">
 			<ReviewStepContainer
 				label={t(getStepKey(1, 'heading'))}
 				description={t(getStepKey(1, 'description'))}

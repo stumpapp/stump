@@ -7,7 +7,7 @@ type Props = {
 
 export default function UsernameRow({ username, avatarUrl }: Props) {
 	return (
-		<div className="flex items-center gap-3">
+		<div className="gap-3 flex items-center">
 			<Avatar className="h-7 w-7" src={avatarUrl || undefined} fallback={username} />
 			<Text size="sm">{username}</Text>
 		</div>

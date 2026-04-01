@@ -37,15 +37,15 @@ export default function ReadMore({ text }: Props) {
 			</div>
 
 			<div
-				className="pointer-events-none -mt-8 h-8 bg-gradient-to-t from-background to-transparent transition-opacity duration-150"
+				className="-mt-8 h-8 pointer-events-none bg-linear-to-t from-background to-transparent transition-opacity duration-150"
 				style={{ opacity: showingAll ? 0 : 1 }}
 			/>
 
-			<div className="relative mt-2 flex w-full items-center">
+			<div className="mt-2 relative flex w-full items-center">
 				<div className="flex-1 border-t border-dashed border-edge" />
 				<button
 					onClick={toggle}
-					className="cursor-pointer rounded-full border border-dashed border-edge bg-background px-3 py-0.5 text-xs font-medium text-foreground-muted transition-colors hover:bg-background-surface hover:text-foreground"
+					className="px-3 py-0.5 text-xs font-medium cursor-pointer rounded-full border border-dashed border-edge bg-background text-foreground-muted transition-colors hover:bg-background-surface hover:text-foreground"
 				>
 					{showingAll ? 'Read less' : 'Read more'}
 				</button>

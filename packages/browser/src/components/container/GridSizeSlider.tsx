@@ -19,7 +19,7 @@ export function GridSizeSlider() {
 
 	// TODO: Tooltip as you drag that shows a label, e.g. below but from locale files
 	return (
-		<div className="flex items-center gap-2">
+		<div className="gap-2 flex items-center">
 			<LayoutGrid className="h-4 w-4 text-foreground-muted" />
 			<Slider
 				value={[currentIndex]}

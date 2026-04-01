@@ -3,8 +3,8 @@ import { Bug } from 'lucide-react'
 
 export default function Feedback() {
 	return (
-		<div className="mx-auto flex w-full max-w-7xl flex-col gap-20 px-6 py-10 lg:px-8 lg:py-24">
-			<div className="flex flex-col gap-5">
+		<div className="max-w-7xl gap-20 px-6 py-10 lg:px-8 lg:py-24 mx-auto flex w-full flex-col">
+			<div className="gap-5 flex flex-col">
 				<h2 className="text-2xl font-bold tracking-tight text-black sm:text-4xl dark:text-neutral-100">
 					Feedback
 				</h2>
@@ -15,15 +15,15 @@ export default function Feedback() {
 				</p>
 			</div>
 
-			<div className="grid grid-cols-1 gap-x-6 gap-y-10 text-base leading-7 sm:grid-cols-2 lg:mx-0 lg:max-w-none lg:grid-cols-3 lg:gap-x-8 lg:gap-y-16">
+			<div className="gap-x-6 gap-y-10 text-base leading-7 sm:grid-cols-2 lg:mx-0 lg:max-w-none lg:grid-cols-3 lg:gap-x-8 lg:gap-y-16 grid grid-cols-1">
 				{methods.map((method) => (
-					<div className="relative pl-9" key={method.title}>
-						<dt className="inline font-semibold text-black dark:text-neutral-100">
+					<div className="pl-9 relative" key={method.title}>
+						<dt className="font-semibold text-black dark:text-neutral-100 inline">
 							{/* @ts-expect-error: its fine */}
-							<method.icon className="absolute left-1 top-1 h-5 w-5" />
+							<method.icon className="left-1 top-1 h-5 w-5 absolute" />
 							{method.title}
 						</dt>{' '}
-						<dd className="text-neutral-650 inline dark:text-neutral-400">{method.description}</dd>
+						<dd className="text-neutral-650 dark:text-neutral-400 inline">{method.description}</dd>
 					</div>
 				))}
 			</div>
@@ -39,7 +39,7 @@ const methods = [
 				The best way to provide feedback is to{' '}
 				<a
 					href="https://github.com/stumpapp/stump/issues"
-					className="text-black underline dark:text-neutral-100"
+					className="text-black dark:text-neutral-100 underline"
 					target="_blank"
 					rel="noreferrer"
 				>
@@ -57,7 +57,7 @@ const methods = [
 				Join the{' '}
 				<a
 					href="https://discord.gg/63Ybb7J3as"
-					className="text-black underline dark:text-neutral-100"
+					className="text-black dark:text-neutral-100 underline"
 					target="_blank"
 					rel="noreferrer"
 				>

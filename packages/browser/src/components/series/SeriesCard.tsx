@@ -52,7 +52,7 @@ export default function SeriesCard({ data, fullWidth, variant = 'default' }: Ser
 		const isMissing = data.status === 'MISSING'
 		if (isMissing) {
 			return (
-				<Text size="xs" className="uppercase text-amber-500">
+				<Text size="xs" className="text-amber-500 uppercase">
 					Series Missing
 				</Text>
 			)
@@ -69,7 +69,7 @@ export default function SeriesCard({ data, fullWidth, variant = 'default' }: Ser
 
 	const overrides = isCoverOnly
 		? {
-				className: 'flex-shrink',
+				className: 'shrink',
 				href: undefined,
 				progress: undefined,
 				subtitle: undefined,

@@ -34,7 +34,7 @@ function PaginationArrow({ kind, isDisabled, onClick, onMouseEnter }: Pagination
 			>
 				<div
 					className={cx(
-						'inline-flex items-center border-t-2 border-transparent pt-4 text-xs font-medium hover:border-edge-subtle md:text-sm',
+						'pt-4 text-xs font-medium md:text-sm inline-flex items-center border-t-2 border-transparent hover:border-edge-subtle',
 						!isDisabled && 'text-foreground-subtle',
 						isDisabled && 'pointer-events-none cursor-not-allowed text-foreground-muted',
 						{ 'pl-0 pr-1': kind === 'previous' },
@@ -71,9 +71,9 @@ function PaginationLink({ value, onClick, isActive, onMouseEnter }: PaginationLi
 			onClick={onClick}
 			onMouseEnter={onMouseEnter}
 			className={cn(
-				'inline-flex cursor-pointer items-center border-t-2 px-4 pt-4 text-xs font-medium text-foreground-muted md:text-sm',
+				'px-4 pt-4 text-xs font-medium md:text-sm inline-flex cursor-pointer items-center border-t-2 text-foreground-muted',
 				{
-					'border-edge-brand text-brand hover:border-edge-brand': isActive,
+					'text-brand border-edge-brand hover:border-edge-brand': isActive,
 				},
 				{
 					'border-transparent text-foreground-muted hover:border-edge-subtle': !isActive,
@@ -135,7 +135,7 @@ export default function Pagination({
 					'mt-7': position === 'bottom',
 				})}
 			>
-				<div className="-mt-px flex w-full items-start justify-between gap-2 px-4">
+				<div className="gap-2 px-4 -mt-px flex w-full items-start justify-between">
 					<PaginationArrow
 						kind="previous"
 						onClick={() => onChangePage(currentPage - 1)}
@@ -166,7 +166,7 @@ export default function Pagination({
 									onPageChange={handleEllipsisNavigate}
 									trigger={
 										<div className="-mt-1">
-											<button className="flex items-center border-t-2 border-transparent px-4 pt-4 text-xs font-medium text-foreground-muted hover:border-edge-subtle focus:outline-none md:text-sm">
+											<button className="px-4 pt-4 text-xs font-medium md:text-sm flex items-center border-t-2 border-transparent text-foreground-muted hover:border-edge-subtle focus:outline-none">
 												<MoreHorizontal className="h-4 w-4" />
 											</button>
 										</div>

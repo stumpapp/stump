@@ -51,15 +51,15 @@ export default function BookOverviewScene() {
 					<title>Stump | {media.resolvedName}</title>
 				</Helmet>
 
-				<div className="flex h-full w-full flex-col gap-4">
-					<div className="flex flex-col items-center gap-3 tablet:mb-2 tablet:flex-row tablet:items-start">
-						<div className="flex w-full max-w-sm shrink-0 flex-col items-center gap-3 sm:max-w-[200px]">
+				<div className="gap-4 flex h-full w-full flex-col">
+					<div className="gap-3 tablet:mb-2 flex flex-col items-center tablet:flex-row tablet:items-start">
+						<div className="max-w-sm gap-3 sm:max-w-[200px] flex w-full shrink-0 flex-col items-center">
 							<ProminentThumbnailImage
 								src={fragmentData.thumbnail.url}
 								alt={media.resolvedName}
 								placeholderData={fragmentData.thumbnail.metadata}
 							/>
-							<div className="flex w-full flex-col gap-2">
+							<div className="gap-2 flex w-full flex-col">
 								<BookReaderLink book={fragmentData} />
 								<BookActionMenu book={fragmentData} />
 							</div>
@@ -70,7 +70,7 @@ export default function BookOverviewScene() {
 
 					<BooksAfterCursor cursor={media.id} />
 
-					<div className="flex flex-col gap-y-2">
+					<div className="gap-y-2 flex flex-col">
 						<Heading size="sm">Metadata</Heading>
 						<MediaMetadataEditor mediaId={media.id} data={media.metadata} />
 					</div>

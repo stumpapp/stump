@@ -289,7 +289,7 @@ function PagedReader({ currentPage, onPageChange }: PagedReaderProps) {
 	useHotkeys('right, left, space, escape', (_, handler) => hotKeyHandler(handler))
 
 	return (
-		<div className="relative m-auto flex w-[100vw] justify-center">
+		<div className="relative m-auto flex w-screen justify-center">
 			{!showToolBar && tapSidesToNavigate && (
 				<SideBarControl
 					fixed={fixSideNavigation}
@@ -339,8 +339,8 @@ function SideBarControl({ onClick, position, fixed }: SideBarControlProps) {
 		<div
 			className={clsx(
 				'z-50 h-full shrink-0 border border-transparent transition-all duration-300',
-				'active:border-edge-subtle active:bg-background-surface active:bg-opacity-50',
-				fixed ? 'absolute w-[10%]' : 'relative mx-[-3%] flex flex-1 flex-grow',
+				'active:border-edge-subtle active:bg-background-surface/50',
+				fixed ? 'absolute w-[10%]' : 'relative mx-[-3%] flex flex-1 grow',
 				{ 'right-0': position === 'right' },
 				{ 'left-0': position === 'left' },
 			)}

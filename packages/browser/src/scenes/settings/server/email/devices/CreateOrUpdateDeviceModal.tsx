@@ -112,7 +112,7 @@ export default function CreateOrUpdateDeviceModal({ isOpen, updatingDevice, onCl
 					</Dialog.Title>
 					<Dialog.Close onClick={onClose} />
 				</Dialog.Header>
-				<div className="flex flex-col gap-y-2 py-2 scrollbar-hide">
+				<div className="gap-y-2 py-2 scrollbar-hide flex flex-col">
 					<Form form={form} onSubmit={handleSubmit} id="create-or-update-device-form">
 						<Input
 							label={t(getKey('name.label'))}

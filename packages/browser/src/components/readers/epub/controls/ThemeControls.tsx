@@ -17,7 +17,7 @@ export default function ThemeControls() {
 				</ControlButton>
 			</Dialog.Trigger>
 
-			<Dialog.Content size="md" className="z-[101] flex flex-col gap-4 bg-background-surface">
+			<Dialog.Content size="md" className="gap-4 z-101 flex flex-col bg-background-surface">
 				<Heading size="md">Appearance</Heading>
 
 				<FontFamily />
@@ -40,7 +40,7 @@ export default function ThemeControls() {
 			<Popover.Content
 				size="sm"
 				align="end"
-				className="z-[101] flex flex-col gap-4 bg-background-surface"
+				className="gap-4 z-101 flex flex-col bg-background-surface"
 			>
 				<FontSizeControl />
 				<LineHeightControl />

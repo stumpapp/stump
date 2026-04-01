@@ -34,24 +34,24 @@ export default function UsersStats() {
 	const [powerReader] = useMemo(() => data.topReaders, [data.topReaders])
 
 	return (
-		<div className="flex items-center gap-4 divide-x divide-edge-subtle overflow-x-scroll pb-8 scrollbar-hide">
-			<Statistic className="shrink-0 pr-5 md:pr-10">
+		<div className="gap-4 pb-8 scrollbar-hide flex items-center divide-x divide-edge-subtle overflow-x-scroll">
+			<Statistic className="pr-5 md:pr-10 shrink-0">
 				<Statistic.Label>Users</Statistic.Label>
 				<Statistic.CountUpNumber value={data.userCount} />
 			</Statistic>
 
-			<Statistic className="shrink-0 px-5 md:px-10">
+			<Statistic className="px-5 md:px-10 shrink-0">
 				<Statistic.Label>Books completed</Statistic.Label>
 				<Statistic.CountUpNumber value={data.finishedReadingSessionCount} />
 			</Statistic>
 
-			<Statistic className="shrink-0 px-5 md:px-10">
+			<Statistic className="px-5 md:px-10 shrink-0">
 				<Statistic.Label>Books in progress</Statistic.Label>
 				<Statistic.CountUpNumber value={data.activeReadingSessionCount} />
 			</Statistic>
 
 			{!!powerReader && (
-				<Statistic className="shrink-0 pl-5 md:pl-10">
+				<Statistic className="pl-5 md:pl-10 shrink-0">
 					<Statistic.Label>Power Reader</Statistic.Label>
 					<Statistic.StringValue>
 						{powerReader.username}{' '}

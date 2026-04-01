@@ -114,7 +114,7 @@ export function FieldSelector({ idx }: Props) {
 		if (source) {
 			return (
 				<button
-					className="flex w-full items-center space-x-2 text-sm"
+					className="space-x-2 text-sm flex w-full items-center"
 					onClick={() => setSource(null)}
 				>
 					<ArrowLeft className="ml-2 h-4 w-4 text-foreground-muted" />
@@ -151,13 +151,13 @@ export function FieldSelector({ idx }: Props) {
 					<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
 				</Button>
 			</Popover.Trigger>
-			<Popover.Content className="mt-1 max-h-96 w-52 overflow-y-auto p-0" align="start">
+			<Popover.Content className="mt-1 max-h-96 w-52 p-0 overflow-y-auto" align="start">
 				<Command>
 					<Command.List>
 						<Command.Group
 							heading={renderGroupHeader()}
 							className={cn({
-								'[&_[cmdk-group-heading]]:px-0': !!source,
+								'**:[[cmdk-group-heading]]:px-0': !!source,
 							})}
 						>
 							{renderSource()}

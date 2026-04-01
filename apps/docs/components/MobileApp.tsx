@@ -3,21 +3,21 @@ import Link from 'next/link'
 
 export default function MobileApp() {
 	return (
-		<div className="w-full bg-white dark:bg-[#0E0E0E]">
-			<div className="mx-auto flex min-h-screen max-w-7xl flex-col items-center gap-16 px-6 py-10 lg:gap-20 lg:px-8 lg:py-24">
-				<div className="mx-auto max-w-2xl flex-shrink-0 md:text-center lg:mx-0 lg:max-w-xl lg:pt-8">
+		<div className="bg-white w-full dark:bg-[#0E0E0E]">
+			<div className="max-w-7xl gap-16 px-6 py-10 lg:gap-20 lg:px-8 lg:py-24 mx-auto flex min-h-screen flex-col items-center">
+				<div className="max-w-2xl md:text-center lg:mx-0 lg:max-w-xl lg:pt-8 mx-auto shrink-0">
 					<h2 className="text-2xl font-bold tracking-tight text-black sm:text-4xl dark:text-neutral-100">
 						Mobile app in early alpha
 					</h2>
 
-					<p className="text-neutral-650 mx-auto mt-5 max-w-md text-base sm:text-lg md:max-w-3xl md:text-xl dark:text-neutral-400">
+					<p className="text-neutral-650 mt-5 max-w-md text-base sm:text-lg md:max-w-3xl md:text-xl dark:text-neutral-400 mx-auto">
 						An app for both iOS and Android is in the works, with a more tailored mobile-first
 						experience
 					</p>
 
-					<div className="mt-5 flex items-center justify-center gap-2">
+					<div className="mt-5 gap-2 flex items-center justify-center">
 						<Link
-							className="bg-neutral-650 dark:hover:bg-neutral-650 hover:border-neutral-450 active:border-neutral-450 dark:active:border-neutral-450 dark:hover:border-neutral-450 dark:active:bg-neutral-650 flex cursor-pointer items-center rounded-md border border-neutral-500 px-3 py-1.5 text-sm font-medium text-neutral-800 transition-all duration-300 hover:bg-neutral-600 hover:text-white focus:outline-none active:bg-neutral-50 active:text-white dark:border-neutral-500 dark:bg-neutral-700 dark:bg-opacity-90 dark:text-neutral-200 dark:shadow-sm dark:hover:bg-neutral-700 dark:hover:bg-opacity-100 dark:hover:text-white dark:active:text-white dark:active:opacity-90"
+							className="bg-neutral-650 dark:hover:bg-neutral-650 hover:border-neutral-450 active:border-neutral-450 dark:active:border-neutral-450 dark:hover:border-neutral-450 dark:active:bg-neutral-650 rounded-md border-neutral-500 px-3 py-1.5 text-sm font-medium text-neutral-800 hover:bg-neutral-600 hover:text-white active:bg-neutral-50 active:text-white dark:border-neutral-500 dark:bg-neutral-700 dark:bg-opacity-90 dark:text-neutral-200 dark:shadow-sm dark:hover:bg-neutral-700 dark:hover:bg-opacity-100 dark:hover:text-white dark:active:text-white flex cursor-pointer items-center border transition-all duration-300 focus:outline-none dark:active:opacity-90"
 							href="/guides/mobile/app"
 						>
 							<span>Documentation</span>
@@ -25,14 +25,14 @@ export default function MobileApp() {
 
 						{/* https://play.google.com/store/apps/details?id=com.stumpapp.stump */}
 						<Link
-							className="dark:active:border-neutral-650 dark:active:bg-neutral-650 flex cursor-pointer items-center space-x-2 rounded-md border border-transparent bg-transparent px-3 py-1.5 text-sm font-medium text-neutral-700 transition-all duration-300 hover:border-neutral-200 hover:bg-neutral-50 hover:text-neutral-900 focus:outline-none active:border-neutral-200 active:bg-neutral-50 active:text-neutral-600 dark:bg-opacity-90 dark:text-neutral-200 dark:shadow-sm dark:hover:border-neutral-500 dark:hover:bg-neutral-700 dark:hover:bg-opacity-100 dark:hover:text-white dark:active:text-white dark:active:opacity-90"
+							className="dark:active:border-neutral-650 dark:active:bg-neutral-650 space-x-2 rounded-md px-3 py-1.5 text-sm font-medium text-neutral-700 hover:border-neutral-200 hover:bg-neutral-50 hover:text-neutral-900 active:border-neutral-200 active:bg-neutral-50 active:text-neutral-600 dark:bg-opacity-90 dark:text-neutral-200 dark:shadow-sm dark:hover:border-neutral-500 dark:hover:bg-neutral-700 dark:hover:bg-opacity-100 dark:hover:text-white dark:active:text-white flex cursor-pointer items-center border border-transparent bg-transparent transition-all duration-300 focus:outline-none dark:active:opacity-90"
 							href="/guides/mobile/app#getting-the-app"
 						>
 							<span>Google Beta</span>
 						</Link>
 
 						<Link
-							className="dark:active:border-neutral-650 dark:active:bg-neutral-650 flex cursor-pointer items-center space-x-2 rounded-md border border-transparent bg-transparent px-3 py-1.5 text-sm font-medium text-neutral-700 transition-all duration-300 hover:border-neutral-200 hover:bg-neutral-50 hover:text-neutral-900 focus:outline-none active:border-neutral-200 active:bg-neutral-50 active:text-neutral-600 dark:bg-opacity-90 dark:text-neutral-200 dark:shadow-sm dark:hover:border-neutral-500 dark:hover:bg-neutral-700 dark:hover:bg-opacity-100 dark:hover:text-white dark:active:text-white dark:active:opacity-90"
+							className="dark:active:border-neutral-650 dark:active:bg-neutral-650 space-x-2 rounded-md px-3 py-1.5 text-sm font-medium text-neutral-700 hover:border-neutral-200 hover:bg-neutral-50 hover:text-neutral-900 active:border-neutral-200 active:bg-neutral-50 active:text-neutral-600 dark:bg-opacity-90 dark:text-neutral-200 dark:shadow-sm dark:hover:border-neutral-500 dark:hover:bg-neutral-700 dark:hover:bg-opacity-100 dark:hover:text-white dark:active:text-white flex cursor-pointer items-center border border-transparent bg-transparent transition-all duration-300 focus:outline-none dark:active:opacity-90"
 							href="https://testflight.apple.com/join/a4srR634"
 							target="_blank"
 						>
@@ -42,18 +42,18 @@ export default function MobileApp() {
 					</div>
 				</div>
 
-				<div className="mx-auto max-w-7xl lg:px-8">
+				<div className="max-w-7xl lg:px-8 mx-auto">
 					<img src="/images/expo-preview.png" className="w-auto object-scale-down" />
 				</div>
 
-				<div className="mx-auto grid max-w-2xl grid-cols-1 gap-x-6 gap-y-10 text-base leading-7 text-gray-300 sm:grid-cols-2 lg:mx-0 lg:max-w-none lg:grid-cols-3 lg:gap-x-8 lg:gap-y-16">
+				<div className="max-w-2xl gap-x-6 gap-y-10 text-base leading-7 sm:grid-cols-2 lg:mx-0 lg:max-w-none lg:grid-cols-3 lg:gap-x-8 lg:gap-y-16 mx-auto grid grid-cols-1 text-gray-300">
 					{features.map((feature) => (
-						<div className="relative pl-9" key={feature.title}>
-							<dt className="inline font-semibold text-black dark:text-neutral-100">
-								<feature.icon className="absolute left-1 top-1 h-5 w-5" />
+						<div className="pl-9 relative" key={feature.title}>
+							<dt className="font-semibold text-black dark:text-neutral-100 inline">
+								<feature.icon className="left-1 top-1 h-5 w-5 absolute" />
 								{feature.title}
 							</dt>{' '}
-							<dd className="text-neutral-650 inline dark:text-neutral-400">
+							<dd className="text-neutral-650 dark:text-neutral-400 inline">
 								{feature.description}
 							</dd>
 						</div>

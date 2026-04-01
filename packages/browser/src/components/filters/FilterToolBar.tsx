@@ -54,8 +54,8 @@ export default function FilterToolBar({
 	const renderOrderBy = !!orderBy && !!entity && !isDisabled
 
 	return (
-		<header className="flex max-w-full flex-col gap-2 px-4">
-			<div className="flex flex-col items-center gap-2 md:flex-row">
+		<header className="gap-2 px-4 flex max-w-full flex-col">
+			<div className="gap-2 md:flex-row flex flex-col items-center">
 				<Search
 					initialValue={search || ''}
 					placeholder={searchPlaceholder}
@@ -69,7 +69,7 @@ export default function FilterToolBar({
 					isLoading={isRefetching}
 					isDisabled={isDisabled}
 				/>
-				<div className="flex w-full shrink-0 gap-2 md:w-auto">
+				<div className="gap-2 md:w-auto flex w-full shrink-0">
 					{renderOrderBy && <OrderBy entity={entity} />}
 					{renderFilter && <FilterSlideOver prompt={filterSlideOverPrompt} formVariant={entity} />}
 				</div>

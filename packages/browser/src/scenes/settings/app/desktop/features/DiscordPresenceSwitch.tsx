@@ -49,7 +49,7 @@ export default function DiscordPresenceSwitch() {
 
 	return (
 		<div className="flex items-center justify-between">
-			<div className="flex flex-grow flex-col gap-2 text-left">
+			<div className="gap-2 flex grow flex-col text-left">
 				<Label htmlFor="discord_presence_switch">{t(getKey('label'))}</Label>
 				<Text size="xs" variant="muted">
 					{t(getKey('description'))}
@@ -58,7 +58,7 @@ export default function DiscordPresenceSwitch() {
 
 			<div className="w-6" />
 
-			<div className="flex items-center gap-3">
+			<div className="gap-3 flex items-center">
 				<ToolTip
 					content={t(getKey('reconnect'))}
 					isDisabled={!isChecked || !handleReconnect}

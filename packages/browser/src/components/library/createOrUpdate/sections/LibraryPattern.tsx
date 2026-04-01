@@ -27,7 +27,7 @@ export default function LibraryPatternRadioGroup() {
 
 	// Note: if this section ever becomes more than library pattern, restore the section locale keys
 	return (
-		<div className="flex flex-col gap-6">
+		<div className="gap-6 flex flex-col">
 			<div>
 				<Heading size="sm">{t(getOptionKey('label'))}</Heading>
 				<Text size="sm" variant="muted">
@@ -35,13 +35,13 @@ export default function LibraryPatternRadioGroup() {
 				</Text>
 			</div>
 
-			<div className="flex flex-col gap-y-4">
+			<div className="gap-y-4 flex flex-col">
 				<input type="hidden" {...form.register('libraryPattern')} />
 
 				<RadioGroup
 					value={libraryPattern}
 					onValueChange={handleChange}
-					className="mt-1 flex flex-col sm:flex-row"
+					className="mt-1 sm:flex-row flex flex-col"
 					disabled={!isCreating}
 					title={isCreating ? undefined : t(getKey('section.disabled'))}
 					defaultValue="SERIES_BASED"

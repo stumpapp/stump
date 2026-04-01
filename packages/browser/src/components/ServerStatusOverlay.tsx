@@ -32,18 +32,18 @@ export default function ServerStatusOverlay() {
 			{show && (
 				<motion.div
 					// @ts-expect-error: It is there I promise
-					className="fixed bottom-[1rem] right-[1rem] flex w-64 flex-col items-center justify-center rounded-md bg-background-surface p-3 shadow"
+					className="bottom-4 right-4 w-64 rounded-md p-3 shadow fixed flex flex-col items-center justify-center bg-background-surface"
 					initial={{ opacity: 0, scale: 0.9, y: 100 }}
 					animate={{ opacity: 1, scale: 1, y: 0 }}
 					exit={{ opacity: 0, scale: 0.9, y: 100 }}
 				>
-					<div className="flex w-full flex-col gap-1">
+					<div className="gap-1 flex w-full flex-col">
 						<div className="flex w-full items-center justify-between">
 							<Text size="sm">Server is not connected</Text>
 							<div className="relative">
-								<span className="flex h-2 w-2">
-									<span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75"></span>
-									<span className="relative inline-flex h-2 w-2 rounded-full bg-red-500"></span>
+								<span className="h-2 w-2 flex">
+									<span className="animate-ping bg-red-400 absolute inline-flex h-full w-full rounded-full opacity-75"></span>
+									<span className="h-2 w-2 bg-red-500 relative inline-flex rounded-full"></span>
 								</span>
 							</div>
 						</div>

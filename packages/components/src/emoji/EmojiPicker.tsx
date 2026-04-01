@@ -102,7 +102,7 @@ export default function EmojiPicker({
 						{renderTrigger()}
 					</Popover.Trigger>
 					<Popover.Content
-						className="!border-none !bg-transparent p-0 !shadow-none"
+						className="p-0 border-none! bg-transparent! shadow-none!"
 						{...contentProps}
 					>
 						<Picker data={data} onEmojiSelect={handleEmojiSelect} />

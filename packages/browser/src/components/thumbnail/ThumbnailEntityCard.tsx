@@ -82,7 +82,7 @@ export function ThumbnailEntityCard({
 			return (
 				<Text
 					size={getDensityTextSize(gridDensity)}
-					className="line-clamp-2 h-[40px] min-w-0 whitespace-normal"
+					className="min-w-0 line-clamp-2 h-[40px] whitespace-normal"
 				>
 					{title}
 				</Text>
@@ -103,7 +103,7 @@ export function ThumbnailEntityCard({
 					max={100}
 					variant="primary-dark"
 					size="sm"
-					className="!-mt-1"
+					className="-mt-1!"
 					rounded="none"
 				/>
 			)
@@ -118,7 +118,7 @@ export function ThumbnailEntityCard({
 	const renderFooter = () => {
 		if (title || subtitle) {
 			return (
-				<div className="flex flex-1 flex-col space-y-2 px-1.5 pb-1">
+				<div className="space-y-2 px-1.5 pb-1 flex flex-1 flex-col">
 					{renderTitle()}
 					{subtitle}
 				</div>
@@ -135,7 +135,7 @@ export function ThumbnailEntityCard({
 		if (hasError) {
 			return (
 				<div className="flex h-full w-full items-center justify-center bg-sidebar">
-					<Book className="absolute h-16 w-16 text-foreground-muted" />
+					<Book className="h-16 w-16 absolute text-foreground-muted" />
 				</div>
 			)
 		}
@@ -163,18 +163,18 @@ export function ThumbnailEntityCard({
 		<Container
 			{...containerProps}
 			className={cn(
-				'relative flex flex-1 flex-col space-y-1 overflow-hidden rounded-lg border-[1.5px] border-edge bg-background/80 transition-colors duration-100',
+				'space-y-1 rounded-lg relative flex flex-1 flex-col overflow-hidden border-[1.5px] border-edge bg-background/80 transition-colors duration-100',
 				{ 'cursor-pointer hover:border-edge-brand dark:hover:border-edge-brand': hasClickAction },
 				{ 'max-w-[16rem]': isCover },
 				{
-					'w-[10rem] sm:w-[10.666rem] md:w-[12rem]': !isFullWidth,
+					'w-40 sm:w-[10.666rem] md:w-48': !isFullWidth,
 				},
 				className,
 			)}
 		>
 			<div
-				className={cn('h-full w-full p-0', {
-					'w-[10rem] sm:w-[10.666rem] md:w-[12rem]': !isFullWidth,
+				className={cn('p-0 h-full w-full', {
+					'w-40 sm:w-[10.666rem] md:w-48': !isFullWidth,
 				})}
 				style={{ aspectRatio: thumbnailRatio }}
 			>

@@ -36,11 +36,11 @@ export interface TableProps<T = unknown, V = unknown> {
 	isZeroBasedPagination?: boolean
 	cellClassName?: string
 	onPrefetchPage?: (page: number) => void
+	totalCount?: number
 }
 
 // TODO: move into components package!
 // TODO: loading state
-// TODO: total count for pagination...
 
 export default function Table<T, V>({
 	data,
@@ -52,6 +52,7 @@ export default function Table<T, V>({
 	isZeroBasedPagination,
 	cellClassName,
 	onPrefetchPage,
+	totalCount,
 	...props
 }: TableProps<T, V>) {
 	const rootRef = useRef<HTMLDivElement | null>(null)
@@ -113,29 +114,20 @@ export default function Table<T, V>({
 	const pageCount = options.pageCount ?? table.getPageCount()
 	const dataCount = data.length
 	const viewBounds = useMemo(() => {
-		const isLessThanPage = dataCount < pageSize
+		// always prioritize provided totalCount
+		const actualTotalCount = totalCount ?? pageCount * pageSize
 
 		const expectedLastIndex = (pageIndex + 1) * pageSize
 		const expectedFirstIndex = expectedLastIndex - (pageSize - 1)
-		const expectedTotalCount = pageCount * pageSize
 
-		if (isLessThanPage) {
-			return {
-				// firstIndex will still be expectedFirstIndex
-				firstIndex: expectedFirstIndex,
-				// lastIndex will be expectedLastIndex - (pageSize - data.length)
-				lastIndex: expectedLastIndex - (pageSize - dataCount),
-				// totalCount will be expectedTotalCount - (pageSize - data.length)
-				totalCount: expectedTotalCount - (pageSize - dataCount),
-			}
-		}
+		const actualLastIndex = Math.min(expectedLastIndex, actualTotalCount)
 
 		return {
 			firstIndex: expectedFirstIndex,
-			lastIndex: expectedLastIndex,
-			totalCount: expectedTotalCount,
+			lastIndex: actualLastIndex,
+			totalCount: actualTotalCount,
 		}
-	}, [pageCount, pageSize, dataCount, pageIndex])
+	}, [pageCount, pageSize, pageIndex, totalCount])
 
 	const handleFilter = (value?: string) => {
 		const filterCol = filterColRef.current?.value
@@ -153,10 +145,10 @@ export default function Table<T, V>({
 	const tableRows = table.getRowModel().rows
 
 	return (
-		<div className="flex flex-col space-y-2">
+		<div className="space-y-2 flex flex-col">
 			<div className="relative" ref={rootRef} data-overlayscrollbars-initialize>
 				<div
-					className={cn('divide block max-w-full overflow-y-hidden overflow-x-scroll', {
+					className={cn('divide block max-w-full overflow-x-scroll overflow-y-hidden', {
 						'scrollbar-hide': enableHideScrollbar,
 					})}
 					ref={viewportRef}
@@ -170,7 +162,7 @@ export default function Table<T, V>({
 											<th
 												key={header.id}
 												colSpan={header.colSpan}
-												className="bg-background-surface/50 py-2.5 first:pl-2.5"
+												className="py-2.5 first:pl-2.5 bg-background-surface/50"
 												style={{
 													...getCommonPinningStyles(header.column),
 												}}
@@ -184,7 +176,7 @@ export default function Table<T, V>({
 														width: header.getSize(),
 													}}
 												>
-													<Heading className="line-clamp-1 w-full text-sm font-medium">
+													<Heading className="text-sm font-medium line-clamp-1 w-full">
 														{flexRender(header.column.columnDef.header, header.getContext())}
 													</Heading>
 													{sortable && (
@@ -230,13 +222,9 @@ export default function Table<T, V>({
 				</div>
 			</div>
 
-			<div className="flex h-10 items-center justify-between border-t border-edge px-2">
-				<div className="flex items-center gap-4">
-					<Text
-						variant="muted"
-						className="hidden flex-shrink-0 items-center gap-1 md:flex"
-						size="sm"
-					>
+			<div className="h-10 px-2 flex items-center justify-between border-t border-edge">
+				<div className="gap-4 flex items-center">
+					<Text variant="muted" className="gap-1 md:flex hidden shrink-0 items-center" size="sm">
 						{tableRows.length > 0 ? (
 							<>
 								<span>

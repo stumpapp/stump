@@ -27,7 +27,7 @@ const SceneContainer = forwardRef<HTMLDivElement, SceneContainerProps>(
 				// NOTE: adding padding bottom because of the overflow-hidden on the html element and the fixed
 				// topbar. This is... annoying.
 				className={cn(
-					'relative flex w-full flex-col p-4 pb-16 md:pb-4',
+					'p-4 pb-16 md:pb-4 relative flex w-full flex-col',
 					{
 						'mx-auto flex-1': preferTopBar && !unsetConstraints,
 					},

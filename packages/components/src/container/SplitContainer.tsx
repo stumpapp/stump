@@ -28,10 +28,10 @@ export const SplitContainer = forwardRef<HTMLDivElement, Props>(
 		return (
 			<div
 				ref={ref}
-				className={cn('grid space-y-5 md:grid-cols-12 md:space-y-0', className)}
+				className={cn('space-y-5 md:grid-cols-12 md:space-y-0 grid', className)}
 				{...props}
 			>
-				<div className="flex flex-col space-y-4 md:col-span-4">
+				<div className="space-y-4 md:col-span-4 flex flex-col">
 					{renderHeader()}
 					{renderContent()}
 				</div>

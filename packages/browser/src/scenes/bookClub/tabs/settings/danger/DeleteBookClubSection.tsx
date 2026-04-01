@@ -15,7 +15,7 @@ export default function DeleteBookClubSection() {
 	const [showConfirmation, setShowConfirmation] = useState(false)
 
 	return (
-		<div className="flex flex-col space-y-4">
+		<div className="space-y-4 flex flex-col">
 			<div>
 				<Heading size="sm">{t(getKey('heading'))}</Heading>
 				<Text size="sm" variant="muted" className="mt-1">
@@ -33,7 +33,7 @@ export default function DeleteBookClubSection() {
 							type="button"
 							variant="danger"
 							onClick={() => setShowConfirmation(true)}
-							className="flex-shrink-0"
+							className="shrink-0"
 							size="md"
 						>
 							{t(getKey('trigger'))}

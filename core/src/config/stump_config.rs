@@ -23,6 +23,7 @@ pub mod env_keys {
 	pub const PORT_KEY: &str = "STUMP_PORT";
 	pub const VERBOSITY_KEY: &str = "STUMP_VERBOSITY";
 	pub const PRETTY_LOGS_KEY: &str = "STUMP_PRETTY_LOGS";
+	pub const COLORFUL_LOGS_KEY: &str = "STUMP_COLORFUL_LOGS";
 	pub const DB_PATH_KEY: &str = "STUMP_DB_PATH";
 	pub const CLIENT_KEY: &str = "STUMP_CLIENT_DIR";
 	pub const ORIGINS_KEY: &str = "STUMP_ALLOWED_ORIGINS";
@@ -132,6 +133,11 @@ pub struct StumpConfig {
 	#[env_key(PRETTY_LOGS_KEY)]
 	pub pretty_logs: bool,
 
+	/// Whether or not to include ANSI color codes in log files.
+	#[default_value(false)]
+	#[env_key(COLORFUL_LOGS_KEY)]
+	pub colorful_logs: bool,
+
 	/// An optional custom path for the database.
 	#[default_value(None)]
 	#[env_key(DB_PATH_KEY)]
@@ -142,12 +148,6 @@ pub struct StumpConfig {
 	#[debug_value(env!("CARGO_MANIFEST_DIR").to_string() + "/../web/dist")]
 	#[env_key(CLIENT_KEY)]
 	pub client_dir: String,
-
-	/// An optional custom path for the templates directory.
-	#[default_value(None)]
-	#[debug_value(Some(env!("CARGO_MANIFEST_DIR").to_string() + "/../../crates/email/templates"))]
-	#[env_key("EMAIL_TEMPLATES_DIR")]
-	pub custom_templates_dir: Option<String>,
 
 	/// The configuration root for the Stump application, contains thumbnails, cache, and logs.
 	#[debug_value(super::get_default_config_dir())]
@@ -364,14 +364,6 @@ impl StumpConfig {
 		PathBuf::from(&self.config_dir).join("thumbnails")
 	}
 
-	/// Returns a `PathBuf` to the Stump templates directory.
-	pub fn get_templates_dir(&self) -> PathBuf {
-		self.custom_templates_dir.clone().map_or_else(
-			|| PathBuf::from(&self.config_dir).join("templates"),
-			PathBuf::from,
-		)
-	}
-
 	/// Returns a `PathBuf` to the Stump avatars directory
 	pub fn get_avatars_dir(&self) -> PathBuf {
 		PathBuf::from(&self.config_dir).join("avatars")
@@ -443,9 +435,10 @@ mod tests {
 			port: Some(1337),
 			verbosity: Some(3),
 			pretty_logs: Some(true),
+			colorful_logs: None,
 			db_path: Some("not_a_real_path".to_string()),
 			client_dir: Some("not_a_real_dir".to_string()),
-			custom_templates_dir: None,
+
 			enable_opds_progression: Some(false),
 			config_dir: None,
 			allowed_origins: Some(vec!["origin1".to_string(), "origin2".to_string()]),
@@ -490,10 +483,11 @@ mod tests {
 				port: Some(1337),
 				verbosity: Some(3),
 				pretty_logs: Some(true),
+				colorful_logs: Some(false),
 				db_path: Some("not_a_real_path".to_string()),
 				client_dir: Some("not_a_real_dir".to_string()),
 				config_dir: Some(config_dir),
-				custom_templates_dir: None,
+
 				allowed_origins: Some(vec!["origin1".to_string(), "origin2".to_string()]),
 				pdfium_path: Some("not_a_path_to_pdfium".to_string()),
 				enable_swagger: Some(false),
@@ -557,6 +551,7 @@ mod tests {
 						port: 1337,
 						verbosity: 2,
 						pretty_logs: true,
+						colorful_logs: false,
 						db_path: None,
 						client_dir: "./client".to_string(),
 						config_dir,
@@ -571,7 +566,7 @@ mod tests {
 						refresh_token_ttl: DEFAULT_REFRESH_TOKEN_TTL,
 						expired_session_cleanup_interval:
 							DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL,
-						custom_templates_dir: None,
+
 						max_scanner_concurrency: DEFAULT_MAX_SCANNER_CONCURRENCY,
 						max_thumbnail_concurrency: DEFAULT_MAX_THUMBNAIL_CONCURRENCY,
 						max_image_upload_size: DEFAULT_MAX_IMAGE_UPLOAD_SIZE,

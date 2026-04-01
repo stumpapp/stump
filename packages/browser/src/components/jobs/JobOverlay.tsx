@@ -68,7 +68,7 @@ export default function JobOverlay() {
 			{firstRunningJob && (
 				<motion.div
 					// @ts-expect-error: It does have className actually?
-					className="fixed right-[1rem] flex h-28 w-64 flex-col items-start justify-between rounded-md border border-edge-subtle bg-background-surface p-4 shadow"
+					className="right-4 h-28 w-64 rounded-md p-4 shadow fixed flex flex-col items-start justify-between border border-edge-subtle bg-background-surface"
 					initial={{ opacity: 0, scale: 0.9, y: 100 }}
 					animate={{ opacity: 1, scale: 1, y: 0 }}
 					exit={{ opacity: 0, scale: 0.9, y: 100 }}
@@ -80,7 +80,7 @@ export default function JobOverlay() {
 						{firstRunningJob.message ?? 'Job in Progress'}
 					</Text>
 
-					<div className="flex w-full flex-col gap-y-2">
+					<div className="gap-y-2 flex w-full flex-col">
 						<div className="flex w-full items-center justify-between">
 							{taskCountString && <Text size="xs">{taskCountString}</Text>}
 							{subTaskCounts && <Text size="xs">{subTaskCountString}</Text>}

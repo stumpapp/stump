@@ -40,7 +40,7 @@ export function DatePicker({
 					className={cn(
 						'w-[280px]',
 						{
-							'flex flex-col gap-1.5': !!label,
+							'gap-1.5 flex flex-col': !!label,
 						},
 						className,
 					)}
@@ -51,7 +51,7 @@ export function DatePicker({
 						size="md"
 						type="button"
 						className={cn(
-							'w-full justify-start text-left font-normal',
+							'font-normal w-full justify-start text-left',
 							!selected && 'text-foreground-muted',
 						)}
 					>
@@ -60,7 +60,7 @@ export function DatePicker({
 					</Button>
 				</div>
 			</PopoverTrigger>
-			<PopoverContent className="w-auto p-0" align={popover?.align} portal={popover?.portal}>
+			<PopoverContent className="p-0 w-auto" align={popover?.align} portal={popover?.portal}>
 				<Calendar
 					mode="single"
 					selected={selected}

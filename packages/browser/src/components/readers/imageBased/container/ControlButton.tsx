@@ -7,7 +7,7 @@ const ControlButton = forwardRef<HTMLButtonElement, ComponentProps<typeof IconBu
 			<IconButton
 				variant="ghost-on-black"
 				size="xs"
-				className={cn('hover:bg-fill-on-black focus:ring-offset-black', className)}
+				className={cn('focus:ring-offset-black hover:bg-fill-on-black', className)}
 				ref={ref}
 				pressEffect={false}
 				{...props}

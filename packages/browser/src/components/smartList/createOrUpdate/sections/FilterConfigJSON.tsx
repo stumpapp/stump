@@ -24,7 +24,7 @@ export default function FilterConfigJSON() {
 		<Accordion type="single" collapsible>
 			<Accordion.Item value="raw_filters" className="border-none">
 				<Accordion.Trigger noUnderline asLabel>
-					<div className="flex flex-col items-start gap-y-1">
+					<div className="gap-y-1 flex flex-col items-start">
 						<span>Show JSON</span>
 						<Text variant="muted" size="sm">
 							View the raw JSON representation of the filters

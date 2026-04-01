@@ -51,7 +51,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 		const renderLeftDecoration = () => {
 			if (leftDecoration) {
 				return (
-					<div className="absolute inset-y-0 left-0 flex items-center pl-3">{leftDecoration}</div>
+					<div className="inset-y-0 left-0 pl-3 absolute flex items-center">{leftDecoration}</div>
 				)
 			}
 
@@ -61,7 +61,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 		const renderRightDecoration = () => {
 			if (rightDecoration) {
 				return (
-					<div className="absolute inset-y-0 right-0 flex items-center pr-3">{rightDecoration}</div>
+					<div className="inset-y-0 right-0 pr-3 absolute flex items-center">{rightDecoration}</div>
 				)
 			}
 
@@ -77,7 +77,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 						{...(descriptionProps || {})}
 						className={cn(
 							{
-								'cursor-not-allowed text-opacity-50': props.disabled,
+								'cursor-not-allowed opacity-50': props.disabled,
 							},
 							descriptionProps?.className,
 						)}
@@ -110,7 +110,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 		return (
 			<div
 				className={cn(
-					'grid w-full items-center gap-2',
+					'gap-2 grid w-full items-center',
 					{ 'max-w-sm': !fullWidth },
 					containerClassName,
 				)}
@@ -121,7 +121,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 						{...(labelProps || {})}
 						className={cn(
 							{
-								'cursor-not-allowed text-opacity-50': props.disabled,
+								'cursor-not-allowed opacity-50': props.disabled,
 							},
 							labelProps?.className,
 						)}

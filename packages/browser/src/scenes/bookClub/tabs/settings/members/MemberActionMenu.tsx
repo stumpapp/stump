@@ -7,7 +7,7 @@ type Props = {
 
 export default function MemberActionMenu({ onSelectForRemoval }: Props) {
 	return (
-		<div className="flex flex-1 justify-end pr-2">
+		<div className="pr-2 flex flex-1 justify-end">
 			<DropdownMenu
 				groups={[
 					{

@@ -90,7 +90,7 @@ export default function FileTable() {
 
 	const { rows } = table.getRowModel()
 	return (
-		<div className="relative mb-5 h-full w-full flex-1 flex-grow">
+		<div className="mb-5 relative h-full w-full flex-1 grow">
 			<AutoSizer>
 				{({ height, width }) => (
 					<TableVirtuoso
@@ -132,14 +132,14 @@ export default function FileTable() {
 							table.getFlatHeaders().map((header) => (
 								<th
 									key={header.id}
-									className="h-10 bg-background pl-1.5 pr-1.5 first:pl-4 last:pr-4"
+									className="h-10 pl-1.5 pr-1.5 first:pl-4 last:pr-4 bg-background"
 									style={{
 										width: header.getSize(),
 									}}
 								>
 									<div
 										className={cn('flex items-center', {
-											'cursor-pointer select-none gap-x-2': header.column.getCanSort(),
+											'gap-x-2 cursor-pointer select-none': header.column.getCanSort(),
 										})}
 										onClick={header.column.getToggleSortingHandler()}
 										style={{

@@ -63,10 +63,10 @@ const Spoiler = ({ children }: PropsWithChildren) => {
 		<span
 			className={cx(
 				{
-					'cursor-pointer bg-gray-800 text-gray text-opacity-0': isSpoiler,
+					'text-gray/0 cursor-pointer bg-gray-800': isSpoiler,
 				},
 				{
-					'bg-background bg-opacity-10': !isSpoiler,
+					'bg-background/10': !isSpoiler,
 				},
 			)}
 			onClick={() => setIsSpoiler(!isSpoiler)}
@@ -79,7 +79,7 @@ const Spoiler = ({ children }: PropsWithChildren) => {
 
 const Table = forwardRef<HTMLTableElement, PropsWithChildren>((props, ref) => {
 	return (
-		<div className="my-1 overflow-hidden rounded-xl border border-edge">
+		<div className="my-1 rounded-xl overflow-hidden border border-edge">
 			<table ref={ref} {...props} className="w-full divide-y divide-edge" />
 		</div>
 	)
@@ -111,7 +111,7 @@ const Th = forwardRef<HTMLTableCellElement, PropsWithChildren>((props, ref) => {
 		<th
 			ref={ref}
 			{...props}
-			className="relative h-8 bg-background-surface/50 pl-1.5 pr-1.5 text-left text-sm first:pl-4 last:pr-4"
+			className="h-8 pl-1.5 pr-1.5 text-sm first:pl-4 last:pr-4 relative bg-background-surface/50 text-left"
 		/>
 	)
 })

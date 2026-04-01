@@ -19,11 +19,11 @@ export function WideSwitch({
 }: WideSwitchProps) {
 	return (
 		<label htmlFor={formId} className="flex items-center justify-between" title={title}>
-			<div className="flex flex-grow flex-col gap-2 text-left">
+			<div className="gap-2 flex grow flex-col text-left">
 				<Text
 					size="sm"
 					variant="label"
-					className={cn({ 'cursor-not-allowed select-none text-foreground-muted': disabled })}
+					className={cn({ 'cursor-not-allowed text-foreground-muted select-none': disabled })}
 				>
 					{label}
 				</Text>
@@ -31,7 +31,7 @@ export function WideSwitch({
 					size="sm"
 					variant="muted"
 					className={cn('max-w-[80%]', {
-						'cursor-not-allowed select-none text-foreground-muted': disabled,
+						'cursor-not-allowed text-foreground-muted select-none': disabled,
 					})}
 				>
 					{description}

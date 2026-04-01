@@ -34,17 +34,17 @@ export default function LastVisitedLibrary({ container }: Props) {
 
 	const renderContent = () => {
 		return (
-			<div className="flex flex-col gap-y-2">
+			<div className="gap-y-2 flex flex-col">
 				<Label className="text-sm">Last visited</Label>
 				<EntityCard
 					href={paths.librarySeries(library.id)}
 					imageUrl={library.thumbnail.url}
 					isCover
-					className="flex-auto flex-shrink-0"
+					className="flex-auto shrink-0"
 					fullWidth={(imageFailed) => !imageFailed}
 				/>
 
-				<Text className="line-clamp-1 text-sm" variant="muted">
+				<Text className="text-sm line-clamp-1" variant="muted">
 					{library.name}
 				</Text>
 			</div>

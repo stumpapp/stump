@@ -116,7 +116,7 @@ export default function ThumbnailConfigForm() {
 	)
 
 	return (
-		<div className="flex flex-grow flex-col gap-6">
+		<div className="gap-6 flex grow flex-col">
 			<div>
 				<Heading size="sm">
 					{t(getKey(`section.heading.${isCreating ? 'create' : 'update'}`))}
@@ -126,7 +126,7 @@ export default function ThumbnailConfigForm() {
 				</Text>
 			</div>
 
-			<div className="flex max-w-2xl flex-col gap-4">
+			<div className="max-w-2xl gap-4 flex flex-col">
 				<WideSwitch
 					description="Generate thumbnail images for this library"
 					label="Enabled"
@@ -136,8 +136,8 @@ export default function ThumbnailConfigForm() {
 
 				{!enabled && (
 					<div key="no-thumbnail-config">
-						<Card className="flex flex-col items-center gap-y-4 border-dashed p-6">
-							<span className="rounded-full border border-fill-brand-secondary bg-fill-brand p-1">
+						<Card className="gap-y-4 p-6 flex flex-col items-center border-dashed">
+							<span className="p-1 rounded-full border border-fill-brand-secondary bg-fill-brand">
 								<Check className="text-foreground" />
 							</span>
 							<Text size="sm" variant="muted">
@@ -148,8 +148,8 @@ export default function ThumbnailConfigForm() {
 				)}
 
 				{enabled && (
-					<div key="thumbnail-config" className="flex flex-col gap-4">
-						<div className="grid w-full items-center gap-1.5 lg:max-w-sm">
+					<div key="thumbnail-config" className="gap-4 flex flex-col">
+						<div className="gap-1.5 lg:max-w-sm grid w-full items-center">
 							<Label>{t(getKey('resizeMethod.label'))}</Label>
 							<NativeSelect
 								options={[
@@ -174,7 +174,7 @@ export default function ThumbnailConfigForm() {
 								<Text size="xs" variant="muted">
 									{t(getKey('scaleEvenlyByFactor.description'))}
 								</Text>
-								<div className="flex flex-col gap-2">
+								<div className="gap-2 flex flex-col">
 									<Label>{t(getKey('scaleEvenlyByFactor.factor.label'))}</Label>
 									<Input
 										contrast
@@ -226,7 +226,7 @@ export default function ThumbnailConfigForm() {
 									{t(getKey('scaleDimension.description'))}
 								</Text>
 
-								<div className="grid w-full items-center gap-2 lg:max-w-xs">
+								<div className="gap-2 lg:max-w-xs grid w-full items-center">
 									<Label>{t(getKey('scaleDimension.dimension.label'))}</Label>
 									<NativeSelect
 										options={[
@@ -262,8 +262,8 @@ export default function ThumbnailConfigForm() {
 
 				{enabled && (
 					<>
-						<div className="grid w-full items-center gap-2 lg:max-w-sm">
-							<Label className={cx({ 'cursor-not-allowed text-opacity-50': !resizeMethod })}>
+						<div className="gap-2 lg:max-w-sm grid w-full items-center">
+							<Label className={cx({ 'cursor-not-allowed opacity-50': !resizeMethod })}>
 								{t(getKey('format.label'))}
 							</Label>
 							<NativeSelect
@@ -275,7 +275,7 @@ export default function ThumbnailConfigForm() {
 							<Text
 								size="xs"
 								variant="muted"
-								className={cx({ 'cursor-not-allowed text-opacity-50': !enabled })}
+								className={cx({ 'cursor-not-allowed opacity-50': !enabled })}
 							>
 								{t(getKey('format.description'))}
 							</Text>

@@ -49,7 +49,7 @@ export default function NavBar(props: Props) {
 
 	return (
 		<motion.div
-			className="sticky top-0 z-50"
+			className="top-0 sticky z-50"
 			initial={asPath === '/' ? 'hidden' : 'visible'}
 			transition={{ duration: 0.2 }}
 			variants={{
@@ -64,5 +64,5 @@ export default function NavBar(props: Props) {
 }
 
 export function ExtraContent() {
-	return <ThemeSwitch className="hidden md:inline-block" />
+	return <ThemeSwitch className="md:inline-block hidden" />
 }

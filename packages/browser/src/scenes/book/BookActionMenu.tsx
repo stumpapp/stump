@@ -272,7 +272,7 @@ export default function BookActionMenu({ book }: Props) {
 				download
 			/>
 
-			<div className="flex w-full items-center gap-1">
+			<div className="gap-1 flex w-full items-center">
 				{canDownload && (
 					<ButtonOrLink
 						className="w-full"

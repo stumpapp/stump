@@ -148,9 +148,7 @@ function Row({ value, children, ...props }: RowProps) {
 	return (
 		<BaseRowComponent {...props}>
 			{value != undefined && (
-				<Text numberOfLines={1} className="shrink text-lg text-foreground-muted">
-					{value}
-				</Text>
+				<Text className="flex-1 text-right text-lg text-foreground-muted">{value}</Text>
 			)}
 			{children}
 		</BaseRowComponent>
@@ -162,7 +160,7 @@ function LongRow({ value, className, ...props }: Omit<RowProps, 'children'>) {
 	const { isDarkColorScheme } = useColorScheme()
 	const accentColor = usePreferencesStore((state) => state.accentColor)
 
-	const [expand, setExpand] = useState(false)
+	const [expanded, setExpanded] = useState(false)
 	const [isExpandable, setIsExpandable] = useState(false)
 
 	const gradient = easeGradient({
@@ -175,14 +173,14 @@ function LongRow({ value, className, ...props }: Omit<RowProps, 'children'>) {
 
 	return (
 		<BaseRowComponent
-			onPress={() => setExpand(true)}
+			onPress={() => setExpanded(!expanded)}
 			className={cn('flex-wrap gap-1', className)}
 			{...props}
 		>
 			{value != undefined && (
-				<View className="relative shrink items-center justify-center">
+				<View className="shrink items-end justify-center">
 					<Text
-						numberOfLines={expand ? undefined : 4}
+						numberOfLines={expanded ? undefined : 4}
 						className="text-lg text-foreground-muted"
 						onTextLayout={(e) => {
 							const isOverLimit = e.nativeEvent.lines.length >= 4
@@ -193,18 +191,7 @@ function LongRow({ value, className, ...props }: Omit<RowProps, 'children'>) {
 						{value}
 					</Text>
 
-					{isExpandable && !expand && (
-						<View className="absolute bottom-0 right-0 z-10 items-center justify-center px-1">
-							<Text
-								style={{ color: accentColor || colors.fill.brand.DEFAULT }}
-								className="font-medium"
-							>
-								See more
-							</Text>
-						</View>
-					)}
-
-					{isExpandable && !expand && (
+					{isExpandable && !expanded && (
 						<LinearGradient
 							colors={gradient.colors}
 							locations={gradient.locations}
@@ -212,6 +199,15 @@ function LongRow({ value, className, ...props }: Omit<RowProps, 'children'>) {
 							angle={172}
 							style={{ position: 'absolute', inset: 0 }}
 						/>
+					)}
+
+					{isExpandable && (
+						<Text
+							style={{ color: accentColor || colors.fill.brand.DEFAULT }}
+							className={cn('px-1 font-medium', !expanded && 'absolute bottom-0 right-0')}
+						>
+							{!expanded ? 'See more' : 'See less'}
+						</Text>
 					)}
 				</View>
 			)}

@@ -23,7 +23,7 @@ export default function DefaultReadingDirection() {
 	}
 
 	return (
-		<div className="flex flex-col gap-1.5 py-1.5">
+		<div className="gap-1.5 py-1.5 flex flex-col">
 			<Label htmlFor="reading-direction">{t(getKey('label'))}</Label>
 			<NativeSelect
 				id="reading-direction"

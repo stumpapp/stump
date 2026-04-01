@@ -13,7 +13,7 @@ export type SwitchProps = {
 
 export const Switch = React.forwardRef<RawSwitchRef, SwitchProps>(
 	({ label, containerClassName, ...props }, ref) => (
-		<div className={cn('flex items-center space-x-2', containerClassName)}>
+		<div className={cn('space-x-2 flex items-center', containerClassName)}>
 			<RawSwitch {...props} ref={ref} />
 			<Label htmlFor={props.id}>{label}</Label>
 		</div>

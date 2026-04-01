@@ -58,8 +58,8 @@ export default function MultiRowHorizontalCardList<T>({
 			return (
 				<div className="flex">
 					{emptyState || (
-						<div className="flex items-start justify-start space-x-3 rounded-lg border border-dashed border-edge-subtle px-4 py-4">
-							<span className="rounded-lg border border-edge bg-background-surface p-2">
+						<div className="space-x-3 rounded-lg px-4 py-4 flex items-start justify-start border border-dashed border-edge-subtle">
+							<span className="rounded-lg p-2 border border-edge bg-background-surface">
 								<CircleSlash2 className="h-8 w-8 text-foreground-muted" />
 							</span>
 							<div>
@@ -84,7 +84,7 @@ export default function MultiRowHorizontalCardList<T>({
 					Scroller: HorizontalScroller,
 				}}
 				itemContent={(_, column) => (
-					<div className="flex flex-col gap-3 px-1.5 pb-1">
+					<div className="gap-3 px-1.5 pb-1 flex flex-col">
 						{column.map((item) => (
 							<div key={keyExtractor(item)}>{renderItem(item)}</div>
 						))}
@@ -98,11 +98,11 @@ export default function MultiRowHorizontalCardList<T>({
 	}
 
 	return (
-		<div className="flex flex-col space-y-2">
+		<div className="space-y-2 flex flex-col">
 			<div className="flex flex-row items-center justify-between">
 				<Heading size="sm">{title}</Heading>
 				<div className={cn('self-end', { hidden: !items.length })}>
-					<div className="flex gap-2">
+					<div className="gap-2 flex">
 						<ToolTip content="Seek backwards" isDisabled={!canSkipBackward} align="end">
 							<Button
 								variant="ghost"

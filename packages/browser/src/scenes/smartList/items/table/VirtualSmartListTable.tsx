@@ -85,7 +85,7 @@ export default function VirtualSmartListTable({ books }: Props) {
 			<TableHeaderActions />
 
 			<div
-				className="sticky top-0 z-30 flex w-full border-b border-edge bg-background"
+				className="top-0 sticky z-30 flex w-full border-b border-edge bg-background"
 				style={{ height: HEADER_HEIGHT }}
 			>
 				{table.getHeaderGroups().map((headerGroup) => (
@@ -96,9 +96,9 @@ export default function VirtualSmartListTable({ books }: Props) {
 								<div
 									key={header.id}
 									className={cn(
-										'flex items-center overflow-hidden bg-background-surface px-4 py-2 text-sm font-medium text-foreground-subtle',
+										'px-4 py-2 text-sm font-medium flex items-center overflow-hidden bg-background-surface text-foreground-subtle',
 										{
-											'cursor-pointer select-none gap-x-2': isSortable,
+											'gap-x-2 cursor-pointer select-none': isSortable,
 										},
 									)}
 									onClick={header.column.getToggleSortingHandler()}

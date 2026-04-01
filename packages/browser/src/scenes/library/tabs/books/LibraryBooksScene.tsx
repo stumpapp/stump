@@ -306,7 +306,7 @@ function LibraryBooksScene() {
 						})
 					}}
 				>
-					<div className="flex flex-1 px-4 pt-4">
+					<div className="px-4 pt-4 flex flex-1">
 						{!!nodes.length && (
 							<DynamicCardGrid
 								count={nodes.length}
@@ -376,7 +376,7 @@ function LibraryBooksScene() {
 				...rest,
 			}}
 		>
-			<div className="flex flex-1 flex-col pb-4 md:pb-0">
+			<div className="pb-4 md:pb-0 flex flex-1 flex-col">
 				<Helmet>
 					<title>Stump | {library.name || ''}</title>
 				</Helmet>

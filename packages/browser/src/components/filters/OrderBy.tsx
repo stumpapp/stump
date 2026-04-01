@@ -36,7 +36,7 @@ export default function OrderBy({ entity }: Props) {
 				<Button
 					variant="ghost"
 					className={cx('shrink-0', {
-						'!bg-background-surface': isOpen,
+						'bg-background-surface!': isOpen,
 					})}
 				>
 					<SortAsc className="mr-1.5 h-4 w-4 text-foreground-subtle" />
@@ -45,7 +45,7 @@ export default function OrderBy({ entity }: Props) {
 			</Popover.Trigger>
 
 			<Popover.Content
-				className="flex flex-col gap-3 overflow-hidden border-opacity-50 bg-background shadow-sm"
+				className="gap-3 border-opacity-50 shadow-sm flex flex-col overflow-hidden bg-background"
 				align={isMobile ? 'start' : 'end'}
 			>
 				<OrderBySelect entity={entity} value={ordering.orderBy} onChange={handleChangeOrderBy} />

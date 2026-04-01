@@ -45,16 +45,16 @@ export default function FontSizeControl() {
 	const displayedFontSize = localFontSize > 50 ? 50 : localFontSize
 
 	return (
-		<div className="flex flex-col gap-y-2.5">
+		<div className="gap-y-2.5 flex flex-col">
 			<Label>Font size</Label>
-			<div className="flex items-center gap-x-2">
+			<div className="gap-x-2 flex items-center">
 				<IconButton
 					{...bindMinus({
 						callback: () => incrementFontSize(-1),
 					})}
 					variant="ghost"
 					size="xs"
-					className={isHoldingMinus ? 'select-none bg-background-surface-hover' : ''}
+					className={isHoldingMinus ? 'bg-background-surface-hover select-none' : ''}
 				>
 					<Minus className="h-4 w-4" />
 				</IconButton>
@@ -70,7 +70,7 @@ export default function FontSizeControl() {
 					})}
 					variant="ghost"
 					size="xs"
-					className={isHoldingPlus ? 'select-none bg-background-surface-hover' : ''}
+					className={isHoldingPlus ? 'bg-background-surface-hover select-none' : ''}
 				>
 					<Plus className="h-4 w-4" />
 				</IconButton>

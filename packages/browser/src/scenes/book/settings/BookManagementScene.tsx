@@ -87,8 +87,8 @@ export default function BookManagementScene() {
 
 	return (
 		<SceneContainer>
-			<div className="flex flex-col items-start gap-y-6 text-left">
-				<div className="flex flex-col gap-y-1.5">
+			<div className="gap-y-6 flex flex-col items-start text-left">
+				<div className="gap-y-1.5 flex flex-col">
 					<Breadcrumbs segments={breadcrumbs} trailingSlash />
 					<Heading size="lg" className="font-bold">
 						Manage

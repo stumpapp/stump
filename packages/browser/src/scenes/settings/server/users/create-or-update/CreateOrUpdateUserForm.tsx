@@ -153,7 +153,7 @@ export default function CreateOrUpdateUserForm({ user, existingUsernames }: Prop
 			<ContentContainer>
 				{renderErrors()}
 
-				<div className="flex flex-col gap-6">
+				<div className="gap-6 flex flex-col">
 					<div>
 						<Heading size="sm">Account details</Heading>
 						<Text size="sm" variant="muted" className="mt-1.5">
@@ -172,8 +172,8 @@ export default function CreateOrUpdateUserForm({ user, existingUsernames }: Prop
 					</>
 				)}
 
-				<div className="mt-6 flex w-full md:max-w-sm">
-					<Button type="submit" className="w-full md:max-w-sm" variant="primary">
+				<div className="mt-6 md:max-w-sm flex w-full">
+					<Button type="submit" className="md:max-w-sm w-full" variant="primary">
 						{t(
 							isCreating
 								? 'settingsScene.server/users.createOrUpdateForm.createSubmitButton'

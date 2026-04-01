@@ -102,10 +102,10 @@ export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoadi
 				return (
 					<>
 						<BasicLibraryInformation onSetShowDirectoryPicker={setShowDirectoryPicker} />
-						<div className="mt-6 flex w-full md:max-w-sm">
+						<div className="mt-6 md:max-w-sm flex w-full">
 							<Button
 								type="button"
-								className="w-full md:w-auto"
+								className="md:w-auto w-full"
 								variant="primary"
 								onClick={() => handleChangeStep(2)}
 							>
@@ -122,9 +122,9 @@ export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoadi
 						<ScannerOptInFeatures />
 						<FileConversionOptions />
 						<IgnoreRulesConfig />
-						<div className="mt-6 flex w-full md:max-w-sm">
+						<div className="mt-6 md:max-w-sm flex w-full">
 							<Button
-								className="w-full md:w-auto"
+								className="md:w-auto w-full"
 								variant="primary"
 								onClick={() => handleChangeStep(3)}
 							>
@@ -137,9 +137,9 @@ export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoadi
 				return (
 					<>
 						<ThumbnailConfig />
-						<div className="mt-6 flex w-full md:max-w-sm">
+						<div className="mt-6 md:max-w-sm flex w-full">
 							<Button
-								className="w-full md:w-auto"
+								className="md:w-auto w-full"
 								variant="primary"
 								onClick={() => handleChangeStep(4)}
 								type="button"
@@ -189,14 +189,14 @@ export default function CreateLibraryForm({ existingLibraries, onSubmit, isLoadi
 					{renderStep()}
 
 					<div
-						className={cn('mt-6 flex w-full md:max-w-sm', {
+						className={cn('mt-6 md:max-w-sm flex w-full', {
 							'invisible hidden': currentStep < 4,
 						})}
 					>
 						<Button
 							type="submit"
 							form="createLibraryForm"
-							className="w-full md:w-auto"
+							className="md:w-auto w-full"
 							variant="primary"
 							isLoading={isLoading}
 						>

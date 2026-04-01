@@ -33,23 +33,23 @@ export default function LibraryHeader() {
 
 	return (
 		<header
-			className={cn('flex w-full flex-col gap-4 p-4', {
+			className={cn('gap-4 p-4 flex w-full flex-col', {
 				'mx-auto': preferTopBar && !!layoutMaxWidthPx,
 			})}
 			style={{
 				maxWidth: preferTopBar ? layoutMaxWidthPx || undefined : undefined,
 			}}
 		>
-			<div className="flex w-full flex-col items-center gap-4 md:flex-row md:items-start">
+			<div className="gap-4 md:flex-row md:items-start flex w-full flex-col items-center">
 				{showThumbnailsInHeaders && (
 					<ProminentThumbnailImage src={thumbnail.url} placeholderData={thumbnail.metadata} />
 				)}
 
-				<div className="flex w-full flex-col gap-4">
+				<div className="gap-4 flex w-full flex-col">
 					<Heading size="lg">{name}</Heading>
 
 					{stats && (
-						<div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:flex md:flex-wrap md:gap-6">
+						<div className="gap-3 sm:grid-cols-3 md:flex md:flex-wrap md:gap-6 grid grid-cols-2">
 							<Statistic.Item label="Series" value={stats.seriesCount} />
 							<Statistic.Item label="Books" value={stats.bookCount} />
 							<Statistic.Item
@@ -80,7 +80,7 @@ export default function LibraryHeader() {
 					)}
 
 					{hasGenres && (
-						<div className="flex flex-col gap-1">
+						<div className="gap-1 flex flex-col">
 							<Text size="xs" variant="muted">
 								Genres
 							</Text>
@@ -103,7 +103,7 @@ export default function LibraryHeader() {
 					)}
 
 					{hasTags && (
-						<div className="flex flex-col gap-1">
+						<div className="gap-1 flex flex-col">
 							<Text size="xs" variant="muted">
 								Tags
 							</Text>

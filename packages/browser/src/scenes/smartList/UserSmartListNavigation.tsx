@@ -46,7 +46,7 @@ export default function UserSmartListNavigation() {
 		<div className="relative z-10 w-full border-b border-edge-subtle bg-background">
 			<nav
 				className={cn(
-					'-mb-px flex gap-x-4 overflow-x-scroll px-3 transition-colors duration-150 scrollbar-hide md:overflow-x-hidden',
+					'gap-x-4 px-3 md:overflow-x-hidden -mb-px scrollbar-hide flex overflow-x-scroll transition-colors duration-150',
 					{
 						'mx-auto': preferTopBar && !!layoutMaxWidthPx,
 					},
@@ -58,7 +58,7 @@ export default function UserSmartListNavigation() {
 						to={tab.to}
 						key={tab.to}
 						underline={false}
-						className={cn('whitespace-nowrap border-b-2 px-1 py-3 text-sm font-medium', {
+						className={cn('px-1 py-3 text-sm font-medium border-b-2 whitespace-nowrap', {
 							'border-edge-brand text-foreground-brand': tab.isActive,
 							'border-transparent text-foreground-muted': !tab.isActive,
 						})}

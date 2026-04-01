@@ -35,7 +35,7 @@ const nameColumn = columnHelper.accessor(({ resolvedName }) => resolvedName, {
 	}) => (
 		<Link
 			to={paths.seriesOverview(id)}
-			className="line-clamp-2 text-sm text-opacity-100 no-underline hover:text-opacity-90"
+			className="text-sm line-clamp-2 no-underline hover:opacity-90"
 		>
 			{getValue()}
 		</Link>

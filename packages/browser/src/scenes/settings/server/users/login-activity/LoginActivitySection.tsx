@@ -8,7 +8,7 @@ import LoginActivityTable from './LoginActivityTable'
 // TODO: move clear to top section
 export default function LoginActivitySection() {
 	return (
-		<div className="flex flex-col gap-y-4">
+		<div className="gap-y-4 flex flex-col">
 			<div className="flex items-end justify-between">
 				<div>
 					<Heading size="sm">Authentication history</Heading>
@@ -22,7 +22,7 @@ export default function LoginActivitySection() {
 				<ClearLoginActivityConfirmation />
 			</div>
 
-			<div className="flex flex-col gap-3">
+			<div className="gap-3 flex flex-col">
 				<Suspense>
 					<LoginActivityTable />
 				</Suspense>

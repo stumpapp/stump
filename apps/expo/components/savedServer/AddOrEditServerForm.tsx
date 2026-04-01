@@ -4,8 +4,7 @@ import isEqual from 'lodash/isEqual'
 import omit from 'lodash/omit'
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 import { Controller, useForm, useFormState, useWatch } from 'react-hook-form'
-import { FocusEvent, Platform, Pressable, View } from 'react-native'
-import Dialog from 'react-native-dialog'
+import { Alert, FocusEvent, Platform, Pressable, View } from 'react-native'
 import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable'
 import Reanimated, { SharedValue, useAnimatedStyle } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -16,7 +15,7 @@ import { cn } from '~/lib/utils'
 import { usePreferencesStore, useSavedServers } from '~/stores'
 import { SavedServerWithConfig } from '~/stores/savedServer'
 
-import { BottomSheet, Button, Heading, Label, Switch, Tabs, Text } from '../ui'
+import { Button, Heading, Input, Label, Switch, Tabs, Text } from '../ui'
 
 type Props = {
 	editingServer?: SavedServerWithConfig | null
@@ -76,7 +75,6 @@ export default function AddOrEditServerForm({
 
 	const [newHeaderKey, setNewHeaderKey] = useState('')
 	const [newHeaderValue, setNewHeaderValue] = useState('')
-	const [newHeaderError, setNewHeaderError] = useState('')
 
 	const addNewHeader = useCallback(() => {
 		const key = newHeaderKey.trim()
@@ -90,14 +88,13 @@ export default function AddOrEditServerForm({
 			setIsAddingHeader(false)
 		} else {
 			console.error(result.error.errors)
-			setNewHeaderError(result.error.errors[0]?.message || 'Invalid header')
+			Alert.alert('Error', result.error.errors[0]?.message || 'Invalid header')
 		}
 	}, [newHeaderKey, newHeaderValue, form])
 
 	const onCancelAddHeader = () => {
 		setNewHeaderKey('')
 		setNewHeaderValue('')
-		setNewHeaderError('')
 		setIsAddingHeader(false)
 	}
 
@@ -138,7 +135,7 @@ export default function AddOrEditServerForm({
 					<Controller
 						control={control}
 						render={({ field: { onChange, onBlur, value } }) => (
-							<BottomSheet.Input
+							<Input
 								label="Username"
 								autoCorrect={false}
 								autoCapitalize="none"
@@ -156,7 +153,7 @@ export default function AddOrEditServerForm({
 					<Controller
 						control={control}
 						render={({ field: { onChange, onBlur, value } }) => (
-							<BottomSheet.Input
+							<Input
 								label="Password"
 								autoCorrect={false}
 								autoCapitalize="none"
@@ -178,7 +175,7 @@ export default function AddOrEditServerForm({
 				<Controller
 					control={control}
 					render={({ field: { onChange, onBlur, value } }) => (
-						<BottomSheet.Input
+						<Input
 							label="Token"
 							autoCorrect={false}
 							autoCapitalize="none"
@@ -257,7 +254,7 @@ export default function AddOrEditServerForm({
 			</View>
 
 			<View className="w-full flex-row items-center justify-between">
-				<Text className="flex-1 text-base font-medium text-foreground-muted">Kind</Text>
+				<Text className="text-base font-medium text-foreground-muted">Kind</Text>
 
 				<Tabs
 					value={broadKind}
@@ -277,7 +274,7 @@ export default function AddOrEditServerForm({
 
 			{broadKind === 'opds' && (
 				<View className="w-full flex-row items-center justify-between">
-					<Text className="flex-1 text-base font-medium text-foreground-muted">OPDS Version</Text>
+					<Text className="text-base font-medium text-foreground-muted">OPDS Version</Text>
 
 					<Tabs
 						value={opdsVersion}
@@ -305,7 +302,7 @@ export default function AddOrEditServerForm({
 					required: true,
 				}}
 				render={({ field: { onChange, onBlur, value } }) => (
-					<BottomSheet.Input
+					<Input
 						label="Name"
 						autoCorrect={false}
 						autoCapitalize="none"
@@ -325,7 +322,7 @@ export default function AddOrEditServerForm({
 					required: true,
 				}}
 				render={({ field: { onChange, onBlur, value } }) => (
-					<BottomSheet.Input
+					<Input
 						label={kind === 'stump' ? 'URL' : 'Catalog URL'}
 						autoCorrect={false}
 						autoCapitalize="none"
@@ -357,7 +354,7 @@ export default function AddOrEditServerForm({
 			</View>
 
 			<View className="w-full gap-2">
-				<Text className="flex-1 text-base font-medium text-foreground-muted">Custom Headers</Text>
+				<Text className="text-base font-medium text-foreground-muted">Custom Headers</Text>
 
 				{formValues.customHeaders?.length && (
 					<View className="squircle w-full overflow-hidden rounded-lg border border-edge">
@@ -386,32 +383,40 @@ export default function AddOrEditServerForm({
 					</View>
 				)}
 
-				<Button roundness="xl" variant="outline" onPress={() => setIsAddingHeader(true)}>
-					<Text>Add header</Text>
-				</Button>
+				{isAddingHeader ? (
+					<View className="squircle gap-2 rounded-2xl border border-edge p-3">
+						<Input
+							label="Key"
+							autoCorrect={false}
+							autoCapitalize="none"
+							placeholder="Key"
+							onChangeText={setNewHeaderKey}
+						/>
+						<Input
+							label="Value"
+							autoCorrect={false}
+							autoCapitalize="none"
+							placeholder="Value"
+							onChangeText={setNewHeaderValue}
+						/>
+						<View className="flex-row justify-end gap-4">
+							<Button variant="outline" size="sm" onPress={onCancelAddHeader}>
+								<Text>Cancel</Text>
+							</Button>
+							<Button variant="brand" size="sm" onPress={addNewHeader}>
+								<Text>Save</Text>
+							</Button>
+						</View>
+					</View>
+				) : (
+					<Button roundness="xl" variant="outline" onPress={() => setIsAddingHeader(true)}>
+						<Text>Add header</Text>
+					</Button>
+				)}
 			</View>
 
-			<Dialog.Container visible={isAddingHeader}>
-				<Dialog.Title>Add custom header</Dialog.Title>
-				{newHeaderError && (
-					<Dialog.Description
-						style={{
-							color: 'red',
-						}}
-					>
-						{newHeaderError}
-					</Dialog.Description>
-				)}
-
-				<Dialog.Input placeholder="Key" onChangeText={setNewHeaderKey} autoCapitalize="none" />
-				<Dialog.Input placeholder="Value" onChangeText={setNewHeaderValue} autoCapitalize="none" />
-
-				<Dialog.Button label="Cancel" onPress={onCancelAddHeader} />
-				<Dialog.Button label="Ok" onPress={addNewHeader} />
-			</Dialog.Container>
-
 			<View className="w-full flex-row items-center justify-between">
-				<Text className="flex-1 text-base font-medium text-foreground-muted">Auth</Text>
+				<Text className="text-base font-medium text-foreground-muted">Auth</Text>
 
 				<Controller
 					control={control}
@@ -439,7 +444,7 @@ export default function AddOrEditServerForm({
 			{renderAuthMode()}
 
 			<View className="w-full gap-6">
-				<Text className="flex-1 text-base font-medium text-foreground-muted">Options</Text>
+				<Text className="text-base font-medium text-foreground-muted">Options</Text>
 				<View className="w-full flex-row items-center justify-between gap-6">
 					<Label
 						nativeID="defaultServer"

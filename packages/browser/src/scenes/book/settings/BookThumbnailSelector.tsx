@@ -132,13 +132,13 @@ export default function BookThumbnailSelector({ fragment }: Props) {
 			<EntityCard
 				imageUrl={page ? sdk.media.bookPageURL(book.id, page) : book.thumbnail.url}
 				isCover
-				className="flex-auto flex-shrink-0"
+				className="flex-auto shrink-0"
 				fullWidth={(imageFailed) => !imageFailed}
 			/>
 
 			<Dialog open={isOpen} onOpenChange={handleOpenChange}>
 				<Dialog.Trigger asChild>
-					<span className="absolute bottom-2 left-2 block">
+					<span className="bottom-2 left-2 absolute block">
 						<EditThumbnailDropdown
 							onChooseSelector={() => setIsOpen(true)}
 							onUploadImage={handleUploadImage}

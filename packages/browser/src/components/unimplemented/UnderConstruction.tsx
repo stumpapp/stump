@@ -16,14 +16,14 @@ export default function UnderConstruction({ issue }: Props) {
 			<img
 				src="/assets/svg/construction-site.svg"
 				alt="Construction illustration"
-				className="mx-auto h-72 w-1/2 shrink-0 object-scale-down sm:h-96"
+				className="h-72 sm:h-96 mx-auto w-1/2 shrink-0 object-scale-down"
 			/>
 
-			<div className="mx-auto flex max-w-lg flex-col space-y-2 text-center">
+			<div className="max-w-lg space-y-2 mx-auto flex flex-col text-center">
 				<Heading className="text-3xl font-extrabold md:text-4xl">{t(getKey('heading'))}</Heading>
 				<Text size="lg">{t(getKey('message'))}</Text>
 
-				<div className="flex items-center justify-center space-x-2">
+				<div className="space-x-2 flex items-center justify-center">
 					{issue && (
 						<ButtonOrLink
 							href={`https://github.com/stumpapp/stump/issues/${issue}`}

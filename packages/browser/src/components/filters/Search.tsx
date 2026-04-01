@@ -90,10 +90,10 @@ export default function Search({
 			onKeyDown={expanded ? undefined : (e) => e.key === 'Enter' && handleExpand()}
 			title={isDisabled ? "This functionality isn't available right now" : undefined}
 			className={cn(
-				'relative flex h-8 shrink-0 cursor-pointer items-center gap-2 overflow-hidden rounded-xl border border-edge-subtle bg-transparent text-sm transition-all duration-300 ease-in-out',
+				'h-8 gap-2 rounded-xl text-sm ease-in-out relative flex shrink-0 cursor-pointer items-center overflow-hidden border border-edge-subtle bg-transparent transition-all duration-300',
 				'text-foreground-muted hover:bg-background-surface hover:text-foreground',
 				'disabled:cursor-not-allowed disabled:opacity-50',
-				expanded ? 'w-full cursor-text sm:w-2/5' : 'w-32',
+				expanded ? 'sm:w-2/5 w-full cursor-text' : 'w-32',
 			)}
 		>
 			<SearchIcon className="ml-2.5 h-4 w-4 shrink-0" />
@@ -107,14 +107,14 @@ export default function Search({
 					onBlur={handleBlur}
 					placeholder={placeholder || 'Search'}
 					disabled={isDisabled}
-					className="h-full w-full bg-transparent pr-8 text-sm text-foreground-subtle outline-none placeholder:text-foreground-muted"
+					className="pr-8 text-sm h-full w-full bg-transparent text-foreground-subtle outline-none placeholder:text-foreground-muted"
 				/>
 			) : (
-				<span className="select-none whitespace-nowrap pr-2.5 text-sm">Search</span>
+				<span className="pr-2.5 text-sm whitespace-nowrap select-none">Search</span>
 			)}
 
 			{showLoader && (
-				<div className="absolute inset-y-0 right-0 flex items-center pr-2.5">
+				<div className="inset-y-0 right-0 pr-2.5 absolute flex items-center">
 					<ProgressSpinner size="sm" />
 				</div>
 			)}

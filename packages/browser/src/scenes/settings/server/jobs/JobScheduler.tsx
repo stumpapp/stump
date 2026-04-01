@@ -256,7 +256,7 @@ export default function JobScheduler() {
 	}, [form, config])
 
 	return (
-		<div className="my-2 flex flex-col gap-6">
+		<div className="my-2 gap-6 flex flex-col">
 			<Alert id="futureSchedulerFeatures" variant="info" dismissible>
 				<Construction />
 				<AlertDescription>
@@ -265,7 +265,7 @@ export default function JobScheduler() {
 			</Alert>
 
 			<Form form={form} onSubmit={handleSubmit}>
-				<div className="flex w-full flex-col gap-2 md:flex-row md:items-end lg:w-2/3">
+				<div className="gap-2 md:flex-row md:items-end lg:w-2/3 flex w-full flex-col">
 					<Input
 						variant="primary"
 						type="number"
@@ -279,7 +279,7 @@ export default function JobScheduler() {
 						})}
 					/>
 
-					<div className="flex-shrink-0">
+					<div className="shrink-0">
 						<Label htmlFor="intervalPreset">Interval preset</Label>
 						<NativeSelect
 							value={intervalPreset}
@@ -293,7 +293,7 @@ export default function JobScheduler() {
 					</div>
 				</div>
 
-				<div className="flex w-full flex-col gap-4 md:flex-row md:items-end md:justify-between lg:w-2/3">
+				<div className="gap-4 md:flex-row md:items-end md:justify-between lg:w-2/3 flex w-full flex-col">
 					<ComboBox
 						label={t(getFieldKey('includedLibraryIds', 'label'))}
 						description={t(getFieldKey('includedLibraryIds', 'description'))}
@@ -314,7 +314,7 @@ export default function JobScheduler() {
 					variant="primary"
 					size="md"
 					disabled={!isConfigDifferent || isSubmitting}
-					className="flex-shrink-0 md:w-32"
+					className="md:w-32 shrink-0"
 				>
 					{t('common.saveChanges')}
 				</Button>

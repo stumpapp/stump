@@ -5,7 +5,7 @@ import LibraryExclusions from './LibraryExclusions'
 
 export default function AccessControlScene() {
 	return (
-		<div className="flex flex-col gap-12">
+		<div className="gap-12 flex flex-col">
 			<LibraryExclusions />
 		</div>
 	)

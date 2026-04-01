@@ -175,12 +175,12 @@ export default function ScanHistoryTable() {
 
 	if (!scanHistory?.length) {
 		return (
-			<Card className="flex items-center justify-center border-dashed border-edge-subtle p-6">
-				<div className="flex flex-col space-y-3">
+			<Card className="p-6 flex items-center justify-center border-dashed border-edge-subtle">
+				<div className="space-y-3 flex flex-col">
 					<div className="relative flex justify-center">
-						<span className="flex items-center justify-center rounded-xl bg-background-surface p-2">
+						<span className="rounded-xl p-2 flex items-center justify-center bg-background-surface">
 							<Database className="h-6 w-6 text-foreground-muted" />
-							<Slash className="absolute h-6 w-6 scale-x-[-1] transform text-foreground opacity-80" />
+							<Slash className="h-6 w-6 absolute scale-x-[-1] transform text-foreground opacity-80" />
 						</span>
 					</div>
 
@@ -210,7 +210,7 @@ export default function ScanHistoryTable() {
 								return (
 									<th
 										key={header.id}
-										className="sticky !top-0 z-[2] h-10 bg-background-surface/50 px-2 shadow-sm"
+										className="top-0! h-10 px-2 shadow-sm sticky z-2 bg-background-surface/50"
 										style={getCommonPinningStyles(header.column)}
 									>
 										<div
@@ -233,7 +233,7 @@ export default function ScanHistoryTable() {
 							<tr key={row.id} className="">
 								{row.getVisibleCells().map((cell) => (
 									<td
-										className="h-14 bg-background px-2"
+										className="h-14 px-2 bg-background"
 										key={cell.id}
 										style={{
 											width: cell.column.getSize(),

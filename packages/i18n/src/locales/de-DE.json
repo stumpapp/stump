@@ -1733,8 +1733,8 @@
 						"title": "Emoji löschen",
 						"description": "Bist du sicher dieses Emoji löschen zu wollen?"
 					},
-					"noCustomEmojis": "No custom emojis have been added yet",
-					"invalidName": "Please enter a valid name for your emoji",
+					"noCustomEmojis": "Bisher wurden keine benutzerdefinierten Emojis hinzugefügt",
+					"invalidName": "Bitte gebe einen gültigen Namen für dein Emoji ein",
 					"uploadError": "Failed to upload emoji",
 					"uploadSuccess": "Emoji uploaded",
 					"renameSuccess": "Emoji renamed",
@@ -2425,7 +2425,7 @@
 			"description": "Erlaubt dem Benutzer Metadatenänderungen zurück auf die Quelldateien zu schreiben"
 		},
 		"EDIT_THUMBNAILS": {
-			"label": "Edit thumbnails",
+			"label": "Vorschaubilder bearbeiten",
 			"description": "Allows the user to edit thumbnails for books and series"
 		}
 	}

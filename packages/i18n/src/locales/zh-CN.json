@@ -1,155 +1,155 @@
 {
 	"underConstruction": {
-		"heading": "This is awkward",
-		"message": "You've stumbled upon a page that's still being developed. I'd love to show it to you, but it isn't quite ready yet.",
-		"homeLink": "Go Home",
-		"githubLink": "View the GitHub issue"
+		"heading": "这很尴尬",
+		"message": "你已经停留在一个仍在开发的页面上。我很乐意向你展示它，但它还没有做好准备。",
+		"homeLink": "返回首页",
+		"githubLink": "查看 GitHub 问题"
 	},
 	"authScene": {
-		"claimHeading": "Initialize your server",
-		"claimText": "This Stump server is not initialized. Use the form below to create your account. Once created, you will have full access to all server features.",
+		"claimHeading": "初始化您的服务器",
+		"claimText": "此 Stump 服务器尚未初始化。请使用下面的表单创建您的帐户。之后就能够完全访问服务器所有功能。",
 		"form": {
 			"validation": {
-				"missingUsername": "Username is required",
-				"missingPassword": "Password is required",
-				"usernameAlreadyExists": "Username already exists"
+				"missingUsername": "用户名为必填项",
+				"missingPassword": "密码为必填项",
+				"usernameAlreadyExists": "该用户已经存在"
 			},
 			"labels": {
-				"username": "Username",
-				"password": "Password"
+				"username": "用户名",
+				"password": "密码"
 			},
 			"buttons": {
-				"createAccount": "Create Account",
-				"login": "Log in",
-				"loginWithOidc": "Log in with OIDC",
-				"createAccountWithOidc": "Create Account with OIDC"
+				"createAccount": "创建账户",
+				"login": "登录",
+				"loginWithOidc": "使用 OIDC 登录",
+				"createAccountWithOidc": "使用 OIDC 创建帐户"
 			}
 		},
 		"toasts": {
-			"loggingIn": "Logging in...",
-			"loggedIn": "Welcome back!",
-			"loggedInFirstTime": "Welcome!",
-			"registering": "Registering...",
-			"registered": "Registered!",
-			"loginFailed": "Login failed. Please try again",
-			"registrationFailed": "Registration failed. Please try again"
+			"loggingIn": "登录中……",
+			"loggedIn": "欢迎回来！",
+			"loggedInFirstTime": "欢迎!",
+			"registering": "正在注册...",
+			"registered": "已注册！",
+			"loginFailed": "登录失败请重试",
+			"registrationFailed": "注册失败请重试"
 		}
 	},
 	"adminLibrarySidebar": {
 		"libraryConfiguration": {
-			"heading": "Library Configuration",
-			"subtitleCreating": "A preview of your new library will be shown below",
-			"subtitleEditing": "A preview of your library edits will be shown below"
+			"heading": "媒体库配置",
+			"subtitleCreating": "您的新书库预览将在下面显示",
+			"subtitleEditing": "您书库编辑的预览将在下方显示"
 		}
 	},
 	"bookOverviewScene": {
 		"fileInformation": {
-			"heading": "File Information",
+			"heading": "文件信息",
 			"labels": {
-				"fileSize": "File Size",
-				"fileType": "File Type",
-				"fileLocation": "File Location",
-				"fileChecksum": "Checksum"
+				"fileSize": "文件大小",
+				"fileType": "文件类型",
+				"fileLocation": "文件位置",
+				"fileChecksum": "校验和"
 			}
 		},
 		"emailBook": {
-			"heading": "Email book",
-			"description": "Send this book to a device or email address",
+			"heading": "电子邮件簿",
+			"description": "发送此书到设备或电子邮箱地址",
 			"form": {
 				"email": {
-					"label": "Email",
-					"placeholder": "Email address",
-					"description": "An email address to send the book to. Click add to finalize each input"
+					"label": "电子邮箱",
+					"placeholder": "电子邮箱地址",
+					"description": "要发送该书的电子邮箱地址。单击添加以完成每个输入"
 				},
 				"devices": {
-					"label": "Devices",
-					"placeholder": "Select devices",
-					"noFilterMatch": "No devices match the filter"
+					"label": "设备",
+					"placeholder": "选择设备",
+					"noFilterMatch": "没有符合筛选条件的设备"
 				}
 			}
 		},
-		"nextInSeries": "Next in Series"
+		"nextInSeries": "系列中的下一个"
 	},
 	"createOrUpdateBookClubForm": {
 		"fields": {
 			"name": {
-				"label": "Name",
-				"placeholder": "My book club",
-				"description": "The name of your book club"
+				"label": "名称",
+				"placeholder": "我的读书俱乐部",
+				"description": "您的读书俱乐部名称"
 			},
 			"description": {
-				"label": "Description",
-				"placeholder": "An 'Our Flag Means Death' fan club. We read pirate fiction to our hearts' content",
-				"description": "An optional, short description of your book club"
+				"label": "描述",
+				"placeholder": "《我们的旗帜意味着死亡》粉丝俱乐部。尽情阅读海盗题材漫画。",
+				"description": "您的读书俱乐部的简短描述（可选）"
 			},
 			"is_private": {
-				"label": "Private club",
-				"description": "If enabled, only users you invite will be able to join your book club"
+				"label": "私密俱乐部",
+				"description": "如果启用，只有您邀请的用户才能够加入您的读书俱乐部"
 			},
 			"member_role_spec": {
-				"heading": "Custom role mapping",
+				"heading": "自定义角色映射",
 				"subtitle": [
-					"You can create custom names for the roles in your book club if you'd like. For more information, refer to the",
-					"documentation"
+					"如果您喜欢，您可以在读书俱乐部创建自定义角色名称。想要了解更多信息，请参阅",
+					"文档"
 				],
 				"member": {
-					"label": "Member",
-					"placeholder": "Member",
-					"description": "The name of the default role for your book club"
+					"label": "成员",
+					"placeholder": "成员",
+					"description": "您的读书俱乐部默认角色的名称"
 				},
 				"moderator": {
-					"label": "Moderator",
-					"placeholder": "Moderator",
-					"description": "The name of the moderator role for your book club"
+					"label": "版主",
+					"placeholder": "版主",
+					"description": "您的读书俱乐部版主的名称"
 				},
 				"admin": {
-					"label": "Admin",
-					"placeholder": "Admin",
-					"description": "The name of the admin role for your book club"
+					"label": "管理",
+					"placeholder": "管理",
+					"description": "您的读书俱乐部管理员角色的名称"
 				},
 				"creator": {
-					"label": "Creator",
-					"placeholder": "Creator",
-					"description": "The name of the creator role for your book club. This is you!"
+					"label": "创建者",
+					"placeholder": "创建者",
+					"description": "你的读书俱乐部的创建者角色名称。这就是你！"
 				}
 			},
 			"membershipOptions": {
 				"displayName": {
-					"label": "Display Name",
+					"label": "显示名",
 					"placeholder": "oromei",
-					"description": "An optional display name for your membership in the book club. If set, this takes precedence over your username"
+					"description": "你在读书俱乐部中的可选显示名称。如果设置，它将优先于你的用户名"
 				},
 				"hideProgress": {
-					"label": "Hide Progress",
-					"description": "If enabled, your reading progress will be hidden from other members of the book club"
+					"label": "隐藏阅读进度",
+					"description": "如果启用，您的阅读进度将对读书俱乐部的其他成员隐藏"
 				}
 			}
 		},
 		"validation": {
-			"missingName": "Name is required",
-			"alreadyTaken": "is already taken"
+			"missingName": "姓名为必填项",
+			"alreadyTaken": "名称已经被使用"
 		}
 	},
 	"createBookClubScene": {
-		"heading": "Create a new book club",
-		"subtitle": "You can create a private book club for a select few, or make it public for anyone on the server to join",
+		"heading": "创建读书俱乐部",
+		"subtitle": "您可以创建一个私人读书俱乐部，或者创建一个公开的任何人都可以加入的读书俱乐部",
 		"form": {
-			"stepLabel": "Step",
+			"stepLabel": "步骤",
 			"steps": [
 				{
-					"label": "Basics",
-					"heading": "Basic Information",
-					"description": "The details of the club, including its name and description"
+					"label": "基本",
+					"heading": "基本信息",
+					"description": "俱乐部的详细信息，包括名称和描述"
 				},
 				{
-					"label": "Roles",
-					"heading": "Roles",
-					"description": "Customize the roles in your book club"
+					"label": "角色",
+					"heading": "角色",
+					"description": "自定义你的读书俱乐部中的角色"
 				},
 				{
-					"label": "Membership",
-					"heading": "Membership Preferences",
-					"description": "Additional options for your book club"
+					"label": "成员",
+					"heading": "成员设置",
+					"description": "书籍俱乐部的其他选项"
 				},
 				{
 					"label": "Review",
@@ -158,37 +158,37 @@
 				}
 			],
 			"review": {
-				"yes": "Yes",
-				"no": "No",
-				"none": "None",
+				"yes": "是",
+				"no": "否",
+				"none": "无",
 				"labels": {
-					"name": "Name",
-					"description": "Description"
+					"name": "名称",
+					"description": "描述"
 				}
 			},
-			"submit": "Create Book Club"
+			"submit": "创建读书俱乐部"
 		}
 	},
 	"bookClubSettingsScene": {
 		"sidebar": {
-			"basics": "Basics",
+			"basics": "基础",
 			"members": {
-				"members": "Members",
-				"roles": "Roles",
-				"label": "Membership"
+				"members": "成员",
+				"roles": "角色",
+				"label": "成员"
 			},
 			"scheduling": {
-				"scheduler": "Scheduler",
-				"options": "Options",
-				"label": "Scheduling"
+				"scheduler": "计划",
+				"options": "选项",
+				"label": "计划"
 			},
 			"danger-zone": {
-				"delete": "Deletion",
-				"label": "Danger Zone"
+				"delete": "删除",
+				"label": "危险操作区"
 			}
 		},
 		"basics": {
-			"title": "Basic Information",
+			"title": "基础信息",
 			"description": "The details of this book club, including its name and description",
 			"form": {
 				"submit": "Update club"
@@ -296,105 +296,105 @@
 			"thumbnailConfig": {
 				"section": {
 					"heading": {
-						"create": "Thumbnail configuration",
-						"update": "Generation"
+						"create": "缩略图配置",
+						"update": "生成"
 					},
-					"description": "Improve loading times while browsing your library by generating thumbnails for your books",
-					"disabled": "No additional configuration is required when thumbnail generation is disabled"
+					"description": "通过为你的书籍生成缩略图来改善浏览书库时的加载时间",
+					"disabled": "禁用缩略图生成时不需要额外配置"
 				},
 				"enableSwitch": {
-					"label": "Enabled",
-					"description": "Generate thumbnail images for this library"
+					"label": "已启用",
+					"description": "为该书库生成缩略图"
 				},
 				"resizeMethod": {
-					"label": "Resize Method",
+					"label": "调整尺寸方法",
 					"options": {
-						"scaleEvenlyByFactor": "Evenly Scale",
-						"exact": "Exact Size",
-						"scaleDimension": "Auto Scaled",
-						"none": "None"
+						"scaleEvenlyByFactor": "最终缩放",
+						"exact": "精确大小",
+						"scaleDimension": "自动比例",
+						"none": "无"
 					}
 				},
 				"scaleEvenlyByFactor": {
-					"description": "Scale the thumbnail by a factor of the original size. E.g., 0.65 will result in a thumbnail that is 65% of the original size",
+					"description": "缩放缩略图以原始大小的一个系数。例如，0.65 将产生一个缩略图，为原始大小的65%",
 					"factor": {
-						"label": "Scale Factor"
+						"label": "缩放比例"
 					}
 				},
 				"exact": {
-					"description": "Resize the thumbnail to an exact size in pixels",
+					"description": "将缩略图缩放到精确的像素大小",
 					"width": {
-						"label": "Width"
+						"label": "宽度"
 					},
 					"height": {
-						"label": "Height"
+						"label": "高度"
 					}
 				},
 				"scaleDimension": {
-					"label": "Auto Scaled",
-					"description": "Set either the width or height of the thumbnail and auto-scale the other to keep the original aspect ratio",
+					"label": "自动比例",
+					"description": "设置缩略图的宽度或高度并自动缩放对方，以保持原始宽度比",
 					"dimension": {
-						"label": "Dimension",
+						"label": "尺寸",
 						"options": {
-							"width": "Width",
-							"height": "Height"
+							"width": "宽度",
+							"height": "高度"
 						}
 					},
 					"size": {
-						"label": "Size"
+						"label": "大小"
 					}
 				},
 				"format": {
-					"label": "Image format",
-					"description": "The format of the generated thumbnail images"
+					"label": "图像格式",
+					"description": "生成的缩略图图像的格式"
 				},
 				"quality": {
-					"label": "Quality",
-					"description": "The quality of the generated thumbnail images, between 1 and 100"
+					"label": "质量",
+					"description": "生成的缩略图图像的质量，范围 1 到 100"
 				}
 			},
 			"ignoreRules": {
 				"section": {
-					"heading": "Ignore rules",
-					"description": "Define glob patterns to ignore certain files or directories during a scan"
+					"heading": "忽略规则",
+					"description": "定义 glob 模式以在扫描期间忽略特定文件或目录"
 				},
-				"noRules": "No ignore rules have been configured",
-				"save": "Save changes",
+				"noRules": "尚未配置忽略规则",
+				"save": "保存更改",
 				"addRule": {
-					"label": "New rule",
-					"description": "Glob pattern to ignore files or directories",
-					"addButton": "Add rule",
+					"label": "新规则",
+					"description": "用于忽略文件或目录的 glob 模式",
+					"addButton": "添加规则",
 					"ignoreParents": {
-						"title": "Ignore all parent directories",
-						"label": "Ignore parents"
+						"title": "忽略所有父目录",
+						"label": "忽略父目录"
 					},
 					"ignoreSubdirs": {
-						"title": "Ignore all subdirectories",
-						"label": "Ignore subdirectories"
+						"title": "忽略所有子目录",
+						"label": "忽略子目录"
 					}
 				},
-				"invalidGlob": "Invalid glob pattern",
-				"duplicateGlob": "Duplicate of an existing rule",
+				"invalidGlob": "无效的 glob 模式",
+				"duplicateGlob": "与现有规则重复",
 				"lockConfig": {
-					"lock": "Lock configuration",
-					"unlock": "Unlock configuration"
+					"lock": "锁定配置",
+					"unlock": "解锁配置"
 				},
-				"editRule": "Edit rule",
-				"deleteRule": "Delete rule",
-				"cancelEdit": "Cancel edit",
-				"confirmEdit": "Confirm edit"
+				"editRule": "编辑规则",
+				"deleteRule": "删除规则",
+				"cancelEdit": "取消编辑",
+				"confirmEdit": "确认编辑"
 			},
 			"convertOptions": {
 				"section": {
-					"heading": "File conversion",
-					"description": "Stump is capable of converting certain file formats to more compatible ones"
+					"heading": "文件转换",
+					"description": "Stump 能够将某些文件格式转换为更兼容的格式"
 				},
 				"rarToZip": {
-					"label": "Convert RAR to ZIP",
-					"description": "Convert RAR/CBR files to ZIP/CBZ files during a scan"
+					"label": "将 RAR 转换为 ZIP",
+					"description": "在扫描期间将 RAR/CBR 文件转换为 ZIP/CBZ 文件"
 				},
 				"deleteRarAfter": {
-					"label": "Delete RAR after conversion",
+					"label": "转换后删除 RAR",
 					"description": "Delete the original RAR/CBR file after conversion. This is irreversible"
 				}
 			},

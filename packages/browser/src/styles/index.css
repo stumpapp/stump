@@ -2,7 +2,7 @@
 @import '@stump/components/tailwind/preset.css';
 
 body {
-	@apply h-full bg-background font-inter antialiased;
+	@apply h-full bg-background antialiased;
 }
 
 #root,

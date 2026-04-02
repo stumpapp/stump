@@ -2431,7 +2431,8 @@
 	},
 	"mobileApp": {
 		"common": {
-			"none": "None"
+			"none": "None",
+			"settings": "Settings"
 		},
 		"tabs": {
 			"servers": "Servers",
@@ -2471,7 +2472,10 @@
 				}
 			},
 			"reading": {
-				"label": "Reading"
+				"label": "Reading",
+				"preferNativePdf": "Prefer Native PDF",
+				"preferMinimalReader": "Prefer Minimal Reader",
+				"disableDismissGesture": "Disable Dismiss Gesture"
 			},
 			"stump": {
 				"label": "Stump",
@@ -2483,6 +2487,7 @@
 			"debug": {
 				"label": "Debug"
 			}
-		}
+		},
+		"readerSettings": {}
 	}
 }

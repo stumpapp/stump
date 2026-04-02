@@ -10,10 +10,12 @@ import { useOwlHeaderOffset } from '~/components/Owl'
 import EditServerDialog from '~/components/savedServer/EditServerDialog'
 import SavedServerListItem from '~/components/savedServer/SavedServerListItem'
 import { Button, Icon, ListEmptyMessage, ListLabel, Text } from '~/components/ui'
+import { useTranslate } from '~/lib/hooks'
 import { useSavedServers } from '~/stores'
 import { CreateServer, SavedServer, SavedServerWithConfig } from '~/stores/savedServer'
 
 export default function Screen() {
+	const { t } = useTranslate()
 	const { savedServers, stumpEnabled, updateServer, deleteServer, getServerConfig } =
 		useSavedServers()
 	const router = useRouter()
@@ -67,16 +69,23 @@ export default function Screen() {
 
 	const handleDeleteServer = useCallback(
 		(server: SavedServer) => {
-			const message = server.stumpOPDS
-				? `This server is registered for both Stump and OPDS. Deleting it will remove both entries.\n\nAre you sure you want to delete '${server.name}'?`
-				: `Are you sure you want to delete '${server.name}'?`
-
-			Alert.alert('Delete Server', message, [
-				{ text: 'Cancel', style: 'cancel' },
-				{ text: 'Delete', style: 'destructive', onPress: () => deleteServer(server.id) },
-			])
+			Alert.alert(
+				t('savedServerActions.deleteServer.title'),
+				t('savedServerActions.deleteServer.confirmation').replace(
+					'{{serverName}}',
+					`'${server.name}'`,
+				),
+				[
+					{ text: t('common.cancel'), style: 'cancel' },
+					{
+						text: t('common.delete'),
+						style: 'destructive',
+						onPress: () => deleteServer(server.id),
+					},
+				],
+			)
 		},
-		[deleteServer],
+		[deleteServer, t],
 	)
 
 	const onSelectForEdit = useCallback(
@@ -110,8 +119,8 @@ export default function Screen() {
 
 			{isCleanSlate && (
 				<EmptyState
-					title="Nothing to show yet"
-					message="Get started by adding a server to access book collections"
+					title={t('emptyState.noServers')}
+					message={t('emptyState.cta')}
 					actions={
 						<>
 							<Button
@@ -121,12 +130,12 @@ export default function Screen() {
 								className="relative"
 								onPress={() => Linking.openURL('https://www.stumpapp.dev/guides/mobile/app')}
 							>
-								<Text>See Documentation</Text>
+								<Text>{t('emptyState.seeDocumentation')}</Text>
 
 								<Icon
 									as={ExternalLink}
 									size={16}
-									className="absolute right-4 transform text-foreground"
+									className="right-4 absolute transform text-foreground"
 								/>
 							</Button>
 						</>
@@ -141,13 +150,13 @@ export default function Screen() {
 					className="flex-1 bg-background"
 					contentInsetAdjustmentBehavior="automatic"
 				>
-					<View className="flex-1 items-start justify-start gap-5 bg-background p-4 tablet:p-6">
+					<View className="gap-5 p-4 tablet:p-6 flex-1 items-start justify-start bg-background">
 						{stumpEnabled && (
-							<View className="flex w-full items-start gap-2">
+							<View className="gap-2 flex w-full items-start">
 								<ListLabel className="px-2">Stump</ListLabel>
 
 								{!stumpServers.length && (
-									<ListEmptyMessage icon={Server} message="No Stump servers added" />
+									<ListEmptyMessage icon={Server} message={t('emptyState.noStumpServers')} />
 								)}
 
 								{stumpServers.map((server) => (
@@ -161,11 +170,11 @@ export default function Screen() {
 							</View>
 						)}
 
-						<View className="flex w-full items-start gap-2">
+						<View className="gap-2 flex w-full items-start">
 							<ListLabel className="px-2">OPDS</ListLabel>
 
 							{!allOPDSServers.length && (
-								<ListEmptyMessage icon={Rss} message="No OPDS feeds added" />
+								<ListEmptyMessage icon={Rss} message={t('emptyState.noOPDSServers')} />
 							)}
 
 							{allOPDSServers.map((server) => (

@@ -25,11 +25,14 @@ import {
 	Text,
 } from '~/components/ui'
 import { useColors } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 
 import { Icon } from '../ui/icon'
 import { DownloadSortOption, DownloadSourceFilter, useDownloadsState } from './store'
 
 export default function DownloadsHeaderSortMenu() {
+	const { t } = useTranslate()
+
 	const [isOpen, setIsOpen] = useState(false)
 
 	const sortConfig = useDownloadsState((state) => state.sort)
@@ -52,10 +55,8 @@ export default function DownloadsHeaderSortMenu() {
 		(option: DownloadSortOption) => {
 			if (sortConfig.option !== option) return null
 
-			let content = sortConfig.direction === 'ASC' ? 'A → Z' : 'Z → A'
-			if (option === 'ADDED_AT') {
-				content = sortConfig.direction === 'ASC' ? 'Oldest First' : 'Newest First'
-			}
+			const sortLocaleKey = option === 'ADDED_AT' ? 'sortDirectionDate' : 'sortDirectionText'
+			const content = t(getKey(`${sortLocaleKey}.${sortConfig.direction}`))
 
 			// TODO: Refactor based on how I refactor for Android
 			return Platform.select({
@@ -63,7 +64,7 @@ export default function DownloadsHeaderSortMenu() {
 				android: <Text className="ml-2 text-sm text-foreground-muted">{content}</Text>,
 			})
 		},
-		[sortConfig],
+		[sortConfig, t],
 	)
 
 	const handleSelection = useCallback(
@@ -95,14 +96,7 @@ export default function DownloadsHeaderSortMenu() {
 	)
 
 	const getFilterLabel = (filter: DownloadSourceFilter) => {
-		switch (filter) {
-			case 'all':
-				return 'All Books'
-			case 'server':
-				return 'Downloaded'
-			case 'imported':
-				return 'Imported'
-		}
+		return t(getKey(`sourceFilter.${filter}`))
 	}
 
 	const getFilterIcon = (filter: DownloadSourceFilter) => {
@@ -153,7 +147,9 @@ export default function DownloadsHeaderSortMenu() {
 							key="sortByName"
 							onSelect={() => handleSelection('NAME')}
 						>
-							<NativeDropdownMenu.ItemTitle>Name</NativeDropdownMenu.ItemTitle>
+							<NativeDropdownMenu.ItemTitle>
+								{t(getKey('sortBy.NAME'))}
+							</NativeDropdownMenu.ItemTitle>
 							<NativeDropdownMenu.ItemIcon ios={{ name: 'character' }} />
 							{renderSubtitle('NAME')}
 						</NativeDropdownMenu.CheckboxItem>
@@ -163,7 +159,9 @@ export default function DownloadsHeaderSortMenu() {
 							key="sortByRecent"
 							onSelect={() => handleSelection('ADDED_AT')}
 						>
-							<NativeDropdownMenu.ItemTitle>Date Added</NativeDropdownMenu.ItemTitle>
+							<NativeDropdownMenu.ItemTitle>
+								{t(getKey('sortBy.ADDED_AT'))}
+							</NativeDropdownMenu.ItemTitle>
 							<NativeDropdownMenu.ItemIcon ios={{ name: 'clock' }} />
 							{renderSubtitle('ADDED_AT')}
 						</NativeDropdownMenu.CheckboxItem>
@@ -173,7 +171,9 @@ export default function DownloadsHeaderSortMenu() {
 							key="sortBySeries"
 							onSelect={() => handleSelection('SERIES')}
 						>
-							<NativeDropdownMenu.ItemTitle>Series</NativeDropdownMenu.ItemTitle>
+							<NativeDropdownMenu.ItemTitle>
+								{t(getKey('sortBy.SERIES'))}
+							</NativeDropdownMenu.ItemTitle>
 							<NativeDropdownMenu.ItemIcon ios={{ name: 'books.vertical.fill' }} />
 							{renderSubtitle('SERIES')}
 						</NativeDropdownMenu.CheckboxItem>
@@ -223,7 +223,7 @@ export default function DownloadsHeaderSortMenu() {
 				<DropdownMenuContent
 					insets={contentInsets}
 					sideOffset={2}
-					className="w-2/3 tablet:w-64"
+					className="tablet:w-64 w-2/3"
 					align="end"
 				>
 					<DropdownMenuCheckboxItem
@@ -232,7 +232,7 @@ export default function DownloadsHeaderSortMenu() {
 						className="text-foreground"
 						closeOnPress={false}
 					>
-						<Text className="text-lg">Name</Text>
+						<Text className="text-lg">{t(getKey('sortBy.NAME'))}</Text>
 						<Icon as={ALargeSmall} size={20} className="ml-auto text-foreground-muted" />
 					</DropdownMenuCheckboxItem>
 
@@ -242,7 +242,7 @@ export default function DownloadsHeaderSortMenu() {
 						className="text-foreground"
 						closeOnPress={false}
 					>
-						<Text className="text-lg">Date Added</Text>
+						<Text className="text-lg">{t(getKey('sortBy.ADDED_AT'))}</Text>
 						<Icon as={Clock} size={20} className="ml-auto text-foreground-muted" />
 					</DropdownMenuCheckboxItem>
 
@@ -252,7 +252,7 @@ export default function DownloadsHeaderSortMenu() {
 						className="text-foreground"
 						closeOnPress={false}
 					>
-						<Text className="text-lg">Series</Text>
+						<Text className="text-lg">{t(getKey('sortBy.SERIES'))}</Text>
 						<Icon as={LibraryBig} size={20} className="ml-auto text-foreground-muted" />
 					</DropdownMenuCheckboxItem>
 
@@ -269,7 +269,7 @@ export default function DownloadsHeaderSortMenu() {
 						className="text-foreground"
 						closeOnPress={false}
 					>
-						<Text className="text-lg">Ascending</Text>
+						<Text className="text-lg">{t(getKey('sortDirectionDate.ASC'))}</Text>
 						<Icon as={ArrowUpRight} size={20} className="ml-auto text-foreground-muted" />
 					</DropdownMenuCheckboxItem>
 
@@ -282,7 +282,7 @@ export default function DownloadsHeaderSortMenu() {
 						className="text-foreground"
 						closeOnPress={false}
 					>
-						<Text className="text-lg">Descending</Text>
+						<Text className="text-lg">{t(getKey('sortDirectionDate.DESC'))}</Text>
 						<Icon as={ArrowDownLeft} size={20} className="ml-auto text-foreground-muted" />
 					</DropdownMenuCheckboxItem>
 
@@ -312,3 +312,6 @@ export default function DownloadsHeaderSortMenu() {
 	// TODO: Use ActionMenu once expo/ui better supports checkbox items with icons
 	return Component
 }
+
+const LOCALE_BASE = 'localLibrary.downloadsHeaderSortMenu'
+const getKey = (key: string) => `${LOCALE_BASE}.${key}`

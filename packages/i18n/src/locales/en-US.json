@@ -2430,22 +2430,182 @@
 		}
 	},
 	"mobileApp": {
+		"addOrEditServer": {
+			"addServer": {
+				"title": "Add Server",
+				"subtitle": "Configure a new server to access your content"
+			},
+			"editServer": {
+				"title": "Edit Server",
+				"subtitle": "Edit Server"
+			},
+			"kind": "Kind",
+			"customHeaders": {
+				"label": "Custom Headers",
+				"addHeader": "Add header",
+				"invalidHeader": "Invalid header"
+			},
+			"auth": {
+				"label": "Auth",
+				"default": {
+					"label": "Login",
+					"description": "You will be prompted to login when accessing content as needed"
+				},
+				"token": {
+					"label": "Token",
+					"placeholder": "Raw token"
+				},
+				"basic": "Basic"
+			},
+			"serverNamePlaceholder": "My Server",
+			"catalogUrl": "Catalog URL",
+			"failedToConnect": "Failed to connect to server",
+			"didConnect": "Connected",
+			"checkConnection": "Check connection",
+			"setAsDefaultServer": "Set as default server",
+			"enableOPDS": "Enable OPDS",
+			"validation": {
+				"nameAlreadyExists": "Name already exists",
+				"cannotSetAuthorizationHeader": "Cannot set Authorization header"
+			}
+		},
+		"bookActions": {
+			"markAsRead": {
+				"label": "Mark as read",
+				"confirmation": "Are you sure you want to mark {{bookTitle}} as read?"
+			},
+			"clearProgress": {
+				"label": "Clear progress",
+				"confirmation": "Are you sure you want to clear your progress for {{bookTitle}}?"
+			},
+			"deleteBook": {
+				"label": "Delete book",
+				"confirmation": "Are you sure you want to delete {{bookTitle}}?"
+			},
+			"seeDetails": "See Details"
+		},
+		"bookMetadata": {
+			"ageRating": "Age Rating",
+			"downloadedAt": "Downloaded",
+			"format": "Format",
+			"genres": "Genres",
+			"language": "Language",
+			"publisher": "Publisher",
+			"size": "Size",
+			"volume": "Volume",
+			"year": "Year"
+		},
 		"common": {
 			"cancel": "Cancel",
+			"chapter": "Chapter",
 			"clear": "Clear",
 			"confirm": "Confirm",
+			"details": "Details",
 			"delete": "Delete",
 			"downloads": "Downloads",
+			"edit": "Edit",
 			"enabled": "Enabled",
+			"enable": "Enable",
+			"error": "Error",
+			"name": "Name",
 			"none": "None",
+			"options": "Options",
+			"page": "Page",
+			"pages": "Pages",
+			"password": "Password",
+			"progress": "Progress",
+			"readTime": "Read time",
+			"readMore": "Read more",
+			"save": "Save",
+			"select": "Select",
 			"settings": "Settings",
 			"servers": "Servers",
-			"thisServer": "this server"
+			"thisBook": "this book",
+			"thisServer": "this server",
+			"unknown": "Unknown",
+			"unknownTitle": "Untitled",
+			"url": "URL",
+			"username": "Username",
+			"value": "Value",
+			"version": "Version"
+		},
+		"emptyState": {
+			"noStumpServers": "No Stump servers added",
+			"noOPDSServers": "No OPDS servers added",
+			"noServers": "No servers have been configured",
+			"cta": "Get started by adding a server to access your book collections",
+			"seeDocumentation": "See Documentation"
 		},
 		"tabs": {
 			"servers": "Servers",
 			"localLibrary": "Library",
 			"settings": "Settings"
+		},
+		"localLibrary": {
+			"title": "Local Library",
+			"emptyState": {
+				"all": {
+					"title": "Nothing to read yet",
+					"description": "Once you have books for offline reading, they will appear here"
+				},
+				"imported": {
+					"title": "No imported books",
+					"description": "Import books to read them offline"
+				},
+				"server": {
+					"title": "No downloaded books",
+					"description": "Download books from your library to read them offline"
+				}
+			},
+			"downloadQueue": {
+				"downloading": "Downloading",
+				"failed": "Failed",
+				"nothingDownloading": "Nothing is being downloaded",
+				"noActiveDownloads": "No active downloads",
+				"noFailedDownloads": "No failed downloads",
+				"downloadStarting": "Starting..."
+			},
+			"downloadsHeaderMenu": {
+				"deleteAllDownloads": {
+					"label": "Delete Books",
+					"confirmation": "Are you sure you want to delete your local library?",
+					"disclaimer": "This action cannot be undone."
+				},
+				"seeProblems": "See Problems ({{problemCount}})",
+				"hideCurated": "Hide Curated",
+				"showCurated": "Show Curated",
+				"attemptSync": "Attempt Sync"
+			},
+			"downloadsHeaderSortMenu": {
+				"sortBy": {
+					"NAME": "Name",
+					"ADDED_AT": "Date Added",
+					"SERIES": "Series"
+				},
+				"sortDirection": {
+					"ASC": "Ascending",
+					"DESC": "Descending"
+				},
+				"sortDirectionText": {
+					"ASC": "A → Z",
+					"DESC": "Z → A"
+				},
+				"sortDirectionDate": {
+					"ASC": "Oldest First",
+					"DESC": "Newest First"
+				},
+				"sourceFilter": {
+					"all": "All Books",
+					"server": "Downloaded",
+					"imported": "Imported"
+				}
+			},
+			"downloadProblemsSheet": {
+				"title": "Failed Downloads",
+				"noFailedDownloads": "No failed downloads",
+				"retryAll": "Retry All",
+				"dismissAll": "Dismiss All"
+			}
 		},
 		"settings": {
 			"preferences": {
@@ -2511,7 +2671,7 @@
 					"noDownloads": "No downloaded files for this server",
 					"storedPreferences": {
 						"label": "Stored preferences",
-						"description": "Miscellaneous data like book preferences, reading timers, etc",
+						"description": "Miscellaneous data like book preferences, reading timers, etc"
 					},
 					"clearPreferences": "Clear Preferences"
 				}
@@ -2607,6 +2767,17 @@
 					"images": "Image Gallery",
 					"slider": "Slider"
 				}
+			}
+		},
+		"savedServerActions": {
+			"clearCache": "Clear Cache",
+			"discardTokens": {
+				"label": "Discard Tokens",
+				"description": "Affects login tokens only"
+			},
+			"deleteServer": {
+				"title": "Delete Server",
+				"confirmation": "Are you sure you want to delete {{serverName}}?"
 			}
 		}
 	}

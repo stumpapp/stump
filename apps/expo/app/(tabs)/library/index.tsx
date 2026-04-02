@@ -124,7 +124,7 @@ export default function Screen() {
 	const customSelectionActions = useMemo(
 		() => ({
 			deleteSelection: async (ids: string[]) => {
-				await db.delete(downloadedFiles).where(inArray(downloadedFiles.id, ids)).run()
+				db.delete(downloadedFiles).where(inArray(downloadedFiles.id, ids)).run()
 				// Trigger re-fetch
 				increment()
 			},

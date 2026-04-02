@@ -3,15 +3,17 @@ import { Platform } from 'react-native'
 
 import { AddServerDialog } from '~/components/savedServer'
 import { IS_IOS_24_PLUS } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 import { usePreferencesStore } from '~/stores'
 
 export default function Screen() {
+	const { t } = useTranslate()
 	const animationEnabled = usePreferencesStore((state) => !state.reduceAnimations)
 
 	return (
 		<Stack
 			screenOptions={{
-				title: 'Servers',
+				title: t('tabs.servers'),
 				headerShown: Platform.OS === 'ios',
 				headerTransparent: Platform.OS === 'ios',
 				headerLargeTitle: true,

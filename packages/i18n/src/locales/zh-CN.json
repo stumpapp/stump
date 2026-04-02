@@ -533,14 +533,14 @@
 			"dropzone": {
 				"books": "拖拽书籍到此处",
 				"series": "拖拽压缩文件到此处",
-				"alt": "Or click to browse your computer for books to upload"
+				"alt": "或点击浏览你电脑中的书籍进行上传"
 			},
-			"addedFiles": "Added files"
+			"addedFiles": "已添加文件"
 		}
 	},
 	"librarySettingsScene": {
-		"heading": "Settings",
-		"subtitle": "Manage your library here. If you want a refresh on these settings, check out the",
+		"heading": "设置",
+		"subtitle": "在此管理您的资料库。如果您想要在这些设置上刷新，请查看",
 		"subtitleLink": "相关文档",
 		"sidebar": {
 			"basics": "基础",
@@ -555,66 +555,66 @@
 			},
 			"danger-zone": {
 				"access-control": "访问控制",
-				"delete": "Deletion",
-				"label": "Danger Zone"
+				"delete": "删除",
+				"label": "危险操作"
 			}
 		},
 		"basics": {
-			"title": "Basic Information",
-			"description": "The details of this library, including its name, path, and description",
+			"title": "基础信息",
+			"description": "该书库的详细信息，包括名称、路径和描述",
 			"form": {
-				"submit": "Update library"
+				"submit": "更新书库"
 			}
 		},
 		"options/reading": {
-			"title": "Reading",
-			"description": "The default reader settings to use for books in this library. Any book can override these settings"
+			"title": "阅读",
+			"description": "该书库中书籍使用的默认阅读器设置。任何书籍都可以覆盖这些设置"
 		},
 		"options/scanning": {
-			"title": "Scanning",
-			"description": "Settings related to how Stump scans this library",
+			"title": "扫描",
+			"description": "Stump 如何扫描此资料库的相关设置",
 			"sections": {
 				"configureScan": {
-					"heading": "Configure scan",
-					"description": "A scan with additional options for more fine-grained control",
+					"heading": "配置扫描",
+					"description": "具有额外选项的扫描，以实现更细粒度的控制",
 					"form": {
-						"alert": "These will override corresponding library-wide settings",
+						"alert": "这些设置将覆盖库范围内的相应设置",
 						"options": {
 							"forceRebuild": {
-								"label": "Force rebuild",
-								"description": "Rebuild every book in the library on disk",
-								"alert": "This will rebuild every book in the library from scratch, including metadata and hashes"
+								"label": "强制重建",
+								"description": "重建磁盘上书库中的每本书",
+								"alert": "这将从零开始重建书库中的每本书，包括元数据和哈希值"
 							},
 							"custom": {
-								"label": "Custom",
-								"description": "Customize the scan configuration",
+								"label": "自定义",
+								"description": "自定义扫描配置",
 								"validation": {
-									"noSelection": "At least one option must be enabled"
+									"noSelection": "至少必须启用一个选项"
 								}
 							},
 							"rebuildMeta": {
-								"label": "Rebuild metadata",
-								"description": "Rebuild metadata for books in the library"
+								"label": "重建元数据",
+								"description": "重建书库中书籍的元数据"
 							},
 							"regenHashes": {
-								"label": "Regenerate hashes",
-								"description": "Recreate hashes for books in the library"
+								"label": "重新生成哈希值",
+								"description": "重新创建书库中书籍的哈希值"
 							}
 						}
 					}
 				},
 				"defaultScan": {
-					"heading": "Default scan",
-					"description": "A standard scan to index your library for new content"
+					"heading": "默认扫描",
+					"description": "为你的书库建立索引以发现新内容的标准扫描"
 				},
 				"history": {
-					"heading": "Scan history",
-					"description": "The history of all scans recorded for this library",
-					"empty": "There are no scans recorded for this library",
-					"runScan": "Run scan",
-					"inspect": "See details",
+					"heading": "扫描历史",
+					"description": "该书库记录的所有扫描历史",
+					"empty": "该书库没有扫描记录",
+					"runScan": "运行扫描",
+					"inspect": "查看详情",
 					"inspector": {
-						"title": "Scan record",
+						"title": "扫描记录",
 						"description": "A detailed view of this scan record",
 						"fields": {
 							"library": "Library",

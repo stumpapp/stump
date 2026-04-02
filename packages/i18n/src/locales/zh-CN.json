@@ -615,193 +615,193 @@
 					"inspect": "查看详情",
 					"inspector": {
 						"title": "扫描记录",
-						"description": "A detailed view of this scan record",
+						"description": "该扫描记录的详细视图",
 						"fields": {
-							"library": "Library",
-							"date": "Date",
-							"config": "Config",
-							"jobOutput": "Job output",
-							"logs": "Logs"
+							"library": "书库",
+							"date": "日期",
+							"config": "配置",
+							"jobOutput": "任务输出",
+							"logs": "日志"
 						},
-						"logsPresent": "Logs were persisted for this job",
-						"seeLogs": "See logs"
+						"logsPresent": "此任务的日志已保存",
+						"seeLogs": "查看日志"
 					},
 					"table": {
 						"columns": {
-							"timestamp": "Scanned at",
-							"config": "Config"
+							"timestamp": "扫描时间",
+							"config": "配置"
 						},
-						"default": "Default",
-						"custom": "Custom"
+						"default": "默认",
+						"custom": "自定义"
 					},
-					"clearHistory": "Delete scan history"
+					"clearHistory": "删除扫描历史"
 				}
 			}
 		},
 		"options/thumbnails": {
-			"title": "Thumbnails",
-			"description": "Settings and management options for thumbnails in this library",
+			"title": "缩略图",
+			"description": "该书库中缩略图的设置和管理选项",
 			"sections": {
 				"management": {
-					"heading": "Manage thumbnails",
-					"description": "Manage the existing thumbnails for this library",
+					"heading": "管理缩略图",
+					"description": "管理此库现有的缩略图",
 					"thumbnailSelector": {},
 					"deleteThumbnails": {}
 				}
 			}
 		},
 		"options/analysis": {
-			"title": "Analysis",
-			"description": "Analyze the contents of this library to identify potential issues or improvements",
+			"title": "分析",
+			"description": "分析这个图书馆的内容，以确定潜在的问题或改进",
 			"sections": {
 				"analyzeBooks": {
-					"heading": "Analyze books",
-					"description": "Analyze the books in this library to attach additional metadata in the database, such as page dimensions for image-based books",
-					"disclaimerTitle": "This process is resource-intensive",
-					"disclaimer": "It may take a while to complete. In the future, it will be more configurable",
-					"analyzeButton": "Analyze books"
+					"heading": "分析书籍",
+					"description": "分析该书库中的书籍以在数据库中附加额外元数据，例如图像类书籍的页面尺寸",
+					"disclaimerTitle": "这一进程是资源密集型的",
+					"disclaimer": "可能需要一些时间才能完成。今后它将更容易配置",
+					"analyzeButton": "分析书籍"
 				},
 				"missingFiles": {
-					"heading": "Missing files",
-					"description": "Files that are referenced in the database but cannot be located on disk",
-					"noMissingFiles": "There are no missing files in this library"
+					"heading": "缺失文件",
+					"description": "数据库中引用但磁盘上找不到的文件",
+					"noMissingFiles": "该书库中没有缺失文件"
 				},
 				"duplicateFiles": {
-					"heading": "Duplicate files",
-					"description": "Files that are potentially duplicated on disk",
-					"noDuplicateFiles": "There are no duplicate files detected for this library"
+					"heading": "重复文件",
+					"description": "磁盘上可能重复的文件",
+					"noDuplicateFiles": "该书库未检测到重复文件"
 				}
 			}
 		},
 		"danger-zone/access-control": {
-			"title": "Access Control",
-			"description": "Control who can access the content in this library",
+			"title": "访问控制",
+			"description": "控制谁可以访问该书库中的内容",
 			"sections": {
 				"libraryExclusions": {
-					"heading": "Exclude users",
-					"description": "Prevent certain users from accessing this library or its contents",
-					"noUsersTitle": "No users to exclude",
-					"noUsers": "There are no other registered users to exclude from this library",
-					"updated": "Exclusions updated",
-					"failure": "Failed to update exclusions"
+					"heading": "排除用户",
+					"description": "阻止特定用户访问该书库或其内容",
+					"noUsersTitle": "没有用户可删除",
+					"noUsers": "没有其他注册用户可从此库中排除",
+					"updated": "排除列表已更新",
+					"failure": "更新排除列表失败"
 				}
 			}
 		},
 		"danger-zone/delete": {
-			"title": "Deletion",
-			"description": "Permanently delete this library and all of its contents or certain resources",
+			"title": "删除",
+			"description": "永久删除该书库及其全部内容或特定资源",
 			"sections": {
 				"cleanLibrary": {
-					"heading": "Clean library",
-					"description": "Remove all media and series that cannot be located on disk",
-					"disclaimerTitle": "No files will be deleted",
-					"disclaimer": "While this action will not delete any files, it will permanently delete all records relating to media and series which have a missing status",
+					"heading": "清理书库",
+					"description": "移除所有无法在磁盘上定位的媒体和系列",
+					"disclaimerTitle": "没有文件将被删除",
+					"disclaimer": "虽然此操作不会删除任何文件，但会永久删除所有与状态为缺失的媒体和系列相关的记录",
 					"confirmation": {
-						"label": "Clean library",
-						"text": "Are you sure you want to clean this library?"
+						"label": "清理书库",
+						"text": "你确定要清理此书库吗？"
 					},
-					"emptyText": "There was nothing to clean",
+					"emptyText": "没有可以清理的内容",
 					"missingEntitiesTable": {
 						"columns": {
-							"id": "ID",
-							"path": "Path",
-							"type": "Type"
+							"id": "充值账号ID",
+							"path": "路径",
+							"type": "类型"
 						},
 						"types": {
-							"BOOK": "Book",
-							"SERIES": "Series",
-							"LIBRARY": "Library"
+							"BOOK": "书籍",
+							"SERIES": "系列",
+							"LIBRARY": "书库"
 						},
-						"emptyHeading": "Nothing is missing for this library",
-						"emptySubtitle": "All files referenced in the database were located on disk"
+						"emptyHeading": "此库没有缺失内容",
+						"emptySubtitle": "数据库中引用的所有文件都在磁盘上"
 					}
 				},
 				"deleteLibrary": {
-					"heading": "Delete library",
+					"heading": "删除书库",
 					"description": [
-						"Permanently delete this library and all its contents.",
-						"This action cannot be undone"
+						"永久删除该书库及其全部内容。",
+						"此操作不可撤销"
 					]
 				}
 			}
 		}
 	},
 	"errorScene": {
-		"heading": "lol, oops",
-		"message": "An error occurred:",
+		"heading": "哎呀，出错了",
+		"message": "发生错误：",
 		"buttons": {
-			"report": "Report Bug",
-			"copy": "Copy Error Details",
-			"goHome": "Go Home"
+			"report": "反馈Bug",
+			"copy": "复制错误详情",
+			"goHome": "返回首页"
 		}
 	},
 	"homeScene": {
 		"onDeck": {
-			"title": "Your next read",
+			"title": "您的下一个阅读",
 			"emptyState": {
-				"heading": "No books on deck",
-				"message": "Your next recommended books will show up here"
+				"heading": "幻灯片上没有书",
+				"message": "您的下一个推荐书将显示在这里"
 			}
 		},
 		"continueReading": {
-			"title": "Continue reading",
+			"title": "继续阅读",
 			"emptyState": {
-				"heading": "Nothing to show",
-				"message": "Any in-progress books you start will show up here"
+				"heading": "没有可显示的内容",
+				"message": "你开始阅读的任何进行中的书籍都会显示在这里"
 			}
 		},
 		"recentlyAddedSeries": {
-			"title": "Recently added series",
+			"title": "最近添加的系列",
 			"emptyState": {
-				"heading": "No series to display",
-				"message": "Any series you add to your libraries will show up here"
+				"heading": "没有要显示的系列",
+				"message": "您添加到书库的任何系列都会在此显示"
 			}
 		},
 		"recentlyAddedBooks": {
-			"title": "Recently added books",
+			"title": "最近添加的书籍",
 			"emptyState": {
-				"heading": "Nothing to show",
-				"message": "Any recent books you add will show up here"
+				"heading": "没有可显示的内容",
+				"message": "你最近添加的任何书籍都会显示在这里"
 			}
 		}
 	},
 	"metadataEditor": {
 		"labels": {
-			"ageRating": "Age rating",
-			"characters": "Characters",
-			"colorists": "Colorists",
-			"coverArtists": "Cover artists",
-			"day": "Day",
-			"editors": "Editors",
-			"format": "Format",
-			"identifierAmazon": "Amazon ID",
+			"ageRating": "年龄分级",
+			"characters": "角色",
+			"colorists": "彩色列表",
+			"coverArtists": "封面艺术家",
+			"day": "白天",
+			"editors": "编辑",
+			"format": "格式",
+			"identifierAmazon": "亚马逊ID",
 			"identifierCalibre": "Calibre ID",
 			"identifierGoogle": "Google ID",
 			"identifierIsbn": "ISBN",
 			"identifierMobiAsin": "Mobi ASIN",
-			"identifierUuid": "Book UUID",
-			"genres": "Genres",
-			"inkers": "Inkers",
-			"language": "Language",
-			"letterers": "Letterers",
-			"links": "Links",
-			"month": "Month",
-			"notes": "Notes",
-			"number": "Number",
-			"pageCount": "Pages",
-			"pencillers": "Pencillers",
-			"publisher": "Publisher",
-			"series": "Series",
-			"seriesGroup": "Series group",
-			"storyArc": "Story arc",
-			"storyArcNumber": "Story arc number",
-			"summary": "Summary",
-			"teams": "Teams",
-			"title": "Title",
-			"titleSort": "Title sort",
-			"volume": "Volume",
-			"writers": "Writers",
-			"year": "Year",
+			"identifierUuid": "书籍UUID",
+			"genres": "流派",
+			"inkers": "印记商",
+			"language": "语言",
+			"letterers": "文字设计师",
+			"links": "链接",
+			"month": "月",
+			"notes": "备注",
+			"number": "数字",
+			"pageCount": "页数",
+			"pencillers": "线稿师",
+			"publisher": "出版社",
+			"series": "系列",
+			"seriesGroup": "系列组",
+			"storyArc": "故事参数",
+			"storyArcNumber": "故事参数编号",
+			"summary": "摘要",
+			"teams": "团队",
+			"title": "标题",
+			"titleSort": "标题排序",
+			"volume": "卷",
+			"writers": "作者",
+			"year": "年",
 			"metaType": "Type",
 			"imprint": "Imprint",
 			"comicid": "Comic ID",

@@ -153,8 +153,8 @@
 				},
 				{
 					"label": "审查",
-					"heading": "Review",
-					"description": "Review your club settings before creating it"
+					"heading": "审查",
+					"description": "在创建之前审查您的俱乐部设置"
 				}
 			],
 			"review": {
@@ -189,45 +189,45 @@
 		},
 		"basics": {
 			"title": "基础信息",
-			"description": "The details of this book club, including its name and description",
+			"description": "此读书俱乐部的详细信息，包括名称和描述",
 			"form": {
-				"submit": "Update club"
+				"submit": "更新俱乐部"
 			}
 		},
 		"members": {
-			"title": "Members",
-			"description": "Manage the members of this book club",
+			"title": "成员",
+			"description": "管理此读书俱乐部的成员",
 			"sections": {}
 		},
 		"roles": {
-			"title": "Roles",
-			"description": "Customize the roles in this book club",
+			"title": "角色",
+			"description": "自定义此读书俱乐部中的角色",
 			"sections": {
 				"roleMappings": {
-					"heading": "Existing role mappings",
-					"description": "The current role mappings for this book club"
+					"heading": "现有角色映射",
+					"description": "此读书俱乐部的当前角色映射"
 				}
 			}
 		},
 		"scheduling/scheduler": {
-			"title": "Scheduler",
-			"description": "Create and manage the scheduled readings for this book club"
+			"title": "计划",
+			"description": "为此读书俱乐部创建和管理阅读计划"
 		},
 		"scheduling/options": {
-			"title": "Options",
-			"description": "Additional options for this book club's scheduling"
+			"title": "选项",
+			"description": "此读书俱乐部的计划额外选项"
 		},
 		"danger-zone/delete": {
-			"title": "Deletion Actions",
-			"description": "Permanently delete this book club and all of its contents or certain resources",
+			"title": "删除操作",
+			"description": "永久删除此读书俱乐部及其全部内容或特定资源",
 			"sections": {
 				"deleteClub": {
-					"heading": "Delete club",
+					"heading": "删除俱乐部",
 					"description": [
-						"Permanently delete this book club and all its contents.",
-						"This action cannot be undone"
+						"永久删除此读书俱乐部及其全部内容。",
+						"此操作不可撤销"
 					],
-					"trigger": "Delete club"
+					"trigger": "删除俱乐部"
 				}
 			}
 		}
@@ -235,62 +235,62 @@
 	"createOrUpdateLibraryForm": {
 		"fields": {
 			"name": {
-				"label": "Name",
-				"description": "A friendly name for your library",
-				"placeholder": "My Library"
+				"label": "名称",
+				"description": "容易记住的书库名称",
+				"placeholder": "我的书库"
 			},
 			"path": {
-				"label": "Path",
-				"description": "The path to the library as it exists on your server",
+				"label": "路径",
+				"description": "您服务器上的书库路径",
 				"placeholder": "/path/to/library"
 			},
 			"description": {
-				"label": "Description",
-				"description": "A short description of your library",
-				"placeholder": "A library of all my favorite books"
+				"label": "描述",
+				"description": "您的书库的简短描述",
+				"placeholder": "我最喜欢的书库"
 			},
 			"tags": {
-				"label": "Tags",
-				"description": "Used to categorize your library or enforce access rules"
+				"label": "标签",
+				"description": "用于分类你的书库或强制执行访问规则"
 			},
 			"defaultLibraryView": {
-				"label": "Default library view",
-				"description": "Configure which tab is shown by default when opening this library",
+				"label": "默认库视图",
+				"description": "配置打开此库时默认显示的标签",
 				"hideSeriesView": {
-					"label": "Hide series tab",
-					"description": "Hide the series tab from the library navigation"
+					"label": "隐藏系列标签",
+					"description": "从库导航中隐藏系列选项卡"
 				},
 				"skipBookOverview": {
-					"label": "Skip book overview",
-					"description": "Open the reader directly when selecting books in this library"
+					"label": "跳过书籍概览",
+					"description": "选择书库时直接打开阅读器"
 				},
 				"options": {
 					"series": {
-						"label": "Series",
-						"description": "Show the series tab by default"
+						"label": "系列",
+						"description": "默认显示系列选项卡"
 					},
 					"books": {
-						"label": "Books",
-						"description": "Show the books tab by default"
+						"label": "书籍",
+						"description": "默认显示书籍选项卡"
 					}
 				}
 			},
 			"readingSettings": {
 				"section": {
-					"heading": "Reading settings",
-					"description": "Default reader settings to use for books"
+					"heading": "阅读设置",
+					"description": "用于书籍的默认阅读器设置"
 				},
 				"imageScaling": {
-					"label": "Image scaling",
-					"description": "How the image-based reader scales images to the page"
+					"label": "图像缩放",
+					"description": "图像阅读器如何将图像缩放到页面"
 				},
 				"readingMode": {
-					"label": "Default reader",
-					"description": "The default reader to use for image-based books"
+					"label": "默认阅读器",
+					"description": "用于图像类书籍的默认阅读器"
 				},
 				"readingDirection": {
-					"label": "Reading direction",
-					"description": "Which direction the reader progresses through pages"
+					"label": "阅读方向",
+					"description": "阅读器翻页的方向"
 				}
 			},
 			"thumbnailConfig": {
@@ -395,144 +395,144 @@
 				},
 				"deleteRarAfter": {
 					"label": "转换后删除 RAR",
-					"description": "Delete the original RAR/CBR file after conversion. This is irreversible"
+					"description": "转换后删除原始 RAR/CBR 文件。此操作不可撤销"
 				}
 			},
 			"scannerFeatures": {
 				"section": {
-					"heading": "Optional processing",
-					"description": "Opt-in processing features for the scanner",
-					"disclaimer": "These features involve additional file reads which may slow down the scan process"
+					"heading": "可选处理",
+					"description": "扫描器的可选处理功能",
+					"disclaimer": "这些功能涉及额外的文件读取，可能会减慢扫描过程"
 				},
 				"processMetadata": {
-					"label": "Process metadata",
-					"description": "Extract any metadata from library files and store the results in the database"
+					"label": "处理元数据",
+					"description": "从书库文件中提取任何元数据并将结果存储到数据库中"
 				},
 				"watch": {
-					"label": "Watch",
-					"description": "Watch the library directory for changes and update the database accordingly"
+					"label": "监视",
+					"description": "监视书库目录的变化并相应更新数据库"
 				},
 				"generateFileHashes": {
-					"label": "Generate file hashes",
-					"description": "Generate a hash for each file in the library to detect duplicates"
+					"label": "生成文件校验码",
+					"description": "为书库中的每个文件生成哈希值以检测重复"
 				},
 				"koreaderHashes": {
-					"label": "KoReader-compatible hashes",
-					"description": "If using KoReader, generate additional hashes in the format it expects"
+					"label": "KoReader兼容的哈希",
+					"description": "如果使用 KoReader，生成它所期望格式的额外哈希值"
 				}
 			},
 			"libraryPattern": {
 				"section": {
-					"heading": "Organization",
-					"description": "Identify which pattern most closely matches the organization of your library",
+					"heading": "组织",
+					"description": "确定哪种模式最符合你的书库的组织方式",
 					"docs": [
-						"Not sure which to choose? Click",
-						"here",
-						"for more information.",
-						"You cannot change this setting later"
+						"不确定选择哪一个？点击",
+						"这里",
+						"了解更多信息。",
+						"你稍后无法更改此设置"
 					],
-					"disabled": "You cannot change this setting"
+					"disabled": "你无法更改此设置"
 				},
 				"options": {
-					"label": "Library pattern",
-					"description": "The setting which determines how Stump will organize your library",
+					"label": "书库模式",
+					"description": "决定 Stump 如何组织你的书库的设置",
 					"collectionPriority": {
-						"label": "Collection priority",
-						"description": "Each folder at the top-most level of the library root is a single series"
+						"label": "集合优先",
+						"description": "书库根目录最顶层的每个文件夹视为一个系列"
 					},
 					"seriesPriority": {
-						"label": "Series priority",
-						"description": "Each folder at any level recursively is a single series"
+						"label": "系列优先",
+						"description": "递归任意层级的每个文件夹视为一个系列"
 					}
 				}
 			}
 		},
 		"scan": {
 			"label": {
-				"create": "Scan after creation",
-				"update": "Scan after updates"
+				"create": "创建后扫描",
+				"update": "更新后扫描"
 			},
-			"description": "Index the library files to populate your database"
+			"description": "索引书库文件以填充你的数据库"
 		}
 	},
 	"createLibraryScene": {
-		"heading": "Create library",
-		"subtitle": "Libraries are used to group your books together. If you want a refresh on how they work, check out the",
-		"subtitleLink": "relevant documentation",
+		"heading": "新建书库",
+		"subtitle": "库被用来将您的书籍分组。如果您想要刷新它们如何工作，请查看",
+		"subtitleLink": "相关文档",
 		"form": {
-			"stepLabel": "Step",
+			"stepLabel": "步骤",
 			"steps": [
 				{
-					"label": "Basics",
-					"heading": "Basic Information",
-					"description": "The details of this library, including its name, path, and description"
+					"label": "基础",
+					"heading": "基础信息",
+					"description": "该书库的详细信息，包括名称、路径和描述"
 				},
 				{
-					"label": "Scanning",
-					"heading": "Scanning",
-					"description": "Settings related to how Stump scans this library"
+					"label": "扫描",
+					"heading": "扫描",
+					"description": "Stump 如何扫描此资料库的相关设置"
 				},
 				{
-					"label": "Thumbnails",
-					"heading": "Thumbnails",
-					"description": "The options for if and how Stump generates thumbnails for this library"
+					"label": "缩略图",
+					"heading": "缩略图",
+					"description": "Stump 是否以及如何为该书库生成缩略图的选项"
 				},
 				{
-					"label": "Review",
-					"heading": "Review",
-					"description": "Review your library settings before creating it"
+					"label": "确认",
+					"heading": "确认",
+					"description": "在创建前检查你的书库设置"
 				}
 			],
 			"review": {
-				"yes": "Yes",
-				"no": "No",
-				"none": "None",
+				"yes": "是",
+				"no": "否",
+				"none": "无",
 				"labels": {
-					"generateThumbnails": "Generate thumbnails",
-					"processThumbnailColors": "Process thumbnail colors",
-					"mode": "Mode",
-					"format": "Format",
-					"quality": "Quality",
-					"name": "Name",
-					"path": "Path",
-					"description": "Description",
-					"tags": "Tags",
-					"pattern": "Pattern",
-					"ignoreRules": "Ignore rules",
-					"convertRar": "Convert RAR/CBR",
-					"deleteConversions": "Delete converted files",
-					"watch": "Watch directory for changes",
-					"processMetadata": "Process metadata",
-					"generateFileHashes": "Generate file hashes",
-					"generateKoreaderHashes": "Generate KoReader hashes",
-					"scaleEvenlyByFactor": "Evenly Scale",
-					"exact": "Exact Size",
-					"scaleDimension": "Explicitly Sized"
+					"generateThumbnails": "生成缩略图",
+					"processThumbnailColors": "处理缩略图颜色",
+					"mode": "模式",
+					"format": "格式",
+					"quality": "质量",
+					"name": "名称",
+					"path": "路径",
+					"description": "描述",
+					"tags": "标签",
+					"pattern": "模式",
+					"ignoreRules": "忽略规则",
+					"convertRar": "转换 RAR/CBR",
+					"deleteConversions": "删除转换后的文件",
+					"watch": "监视目录变化",
+					"processMetadata": "处理元数据",
+					"generateFileHashes": "生成文件哈希值",
+					"generateKoreaderHashes": "生成 KoReader 哈希值",
+					"scaleEvenlyByFactor": "最终缩放",
+					"exact": "精确大小",
+					"scaleDimension": "明确大小"
 				}
 			},
 			"buttons": {
-				"confirm": "Create Library"
+				"confirm": "新建书库"
 			}
 		}
 	},
 	"fileExplorer": {
 		"uploadModal": {
 			"title": {
-				"books": "Upload books",
-				"series": "Upload series"
+				"books": "上传书籍",
+				"series": "上传系列"
 			},
 			"description": {
-				"books": "Add books directly to the current path in the file explorer",
-				"series": "Add a series directly to the current path in the file explorer"
+				"books": "直接将书籍添加到文件浏览器中的当前路径",
+				"series": "直接将一个系列添加到文件浏览器中的当前路径"
 			},
 			"seriesDisclaimer": [
-				"It must be a ",
-				"zipped file",
-				"containing the folder which should be the series, with all the books inside"
+				"它必须是一个 ",
+				"压缩文件",
+				"包含应作为系列的文件夹，其中包含所有书籍"
 			],
 			"dropzone": {
-				"books": "Drag and drop books here",
-				"series": "Drag and drop a zip file here",
+				"books": "拖拽书籍到此处",
+				"series": "拖拽压缩文件到此处",
 				"alt": "Or click to browse your computer for books to upload"
 			},
 			"addedFiles": "Added files"
@@ -541,20 +541,20 @@
 	"librarySettingsScene": {
 		"heading": "Settings",
 		"subtitle": "Manage your library here. If you want a refresh on these settings, check out the",
-		"subtitleLink": "relevant documentation",
+		"subtitleLink": "相关文档",
 		"sidebar": {
-			"basics": "Basics",
+			"basics": "基础",
 			"options": {
-				"general": "General",
-				"reading": "Reading",
-				"scanning": "Scanning",
-				"thumbnails": "Thumbnails",
-				"ignore-rules": "Ignore Rules",
-				"analysis": "Analysis",
-				"label": "Options"
+				"general": "通用",
+				"reading": "阅读",
+				"scanning": "扫描",
+				"thumbnails": "缩略图",
+				"ignore-rules": "忽略规则",
+				"analysis": "分析",
+				"label": "选项"
 			},
 			"danger-zone": {
-				"access-control": "Access Control",
+				"access-control": "访问控制",
 				"delete": "Deletion",
 				"label": "Danger Zone"
 			}

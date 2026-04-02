@@ -2431,6 +2431,7 @@
 	},
 	"mobileApp": {
 		"common": {
+			"enabled": "Enabled",
 			"none": "None",
 			"settings": "Settings"
 		},
@@ -2479,8 +2480,10 @@
 			},
 			"stump": {
 				"label": "Stump",
-				"description": "Stump features are optional and can be turn them off if you do not need them"
+				"description": "Stump features are optional and can be turn them off if you do not need them",
+				"bookClubsEnabled": "Book Club Features"
 			},
+			"autoSyncLocalData": "Auto-Sync Local Data",
 			"management": {
 				"label": "Management"
 			},

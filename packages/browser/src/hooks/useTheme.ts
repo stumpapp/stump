@@ -71,5 +71,5 @@ export function useTheme() {
 	}
 }
 
-export const DARK_THEMES = ['dark', 'ocean', 'cosmic', 'pumpkin', 'autumn']
+export const DARK_THEMES = ['dark', 'ocean', 'cosmic', 'pumpkin', 'autumn', 'midnight']
 export const THEMES_WITH_GRADIENTS = ['cosmic']

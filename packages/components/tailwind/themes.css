@@ -533,3 +533,70 @@
 		--color-thumbnail-stack-library-end: #631c03;
 	}
 }
+
+/* note i mostly just adapted from how i theme expo */
+/* MARK: midnight theme */
+.midnight {
+	--color-background: #000000;
+	--color-background-inverse: #ffffff;
+	--color-background-overlay: #111113;
+	--color-background-overlay-hover: #17171a;
+	--color-background-surface: #0a0a0a;
+	--color-background-surface-hover: #242628;
+	--color-background-surface-secondary: #1f2123;
+
+	--color-edge: #1f2123;
+	--color-edge-brand: #cf9977;
+	--color-edge-danger: #b02a29;
+	--color-edge-info: #3f89ca;
+	--color-edge-strong: #ffffff;
+	--color-edge-subtle: #292c30;
+	--color-edge-success: #2e7d32;
+	--color-edge-warning: #d8a219;
+
+	--color-fill-brand: #c48259;
+	--color-fill-brand-hover: #cf9977;
+	--color-fill-brand-secondary: #c4825926;
+	--color-fill-danger: #e53935;
+	--color-fill-danger-hover: #ea5c59;
+	--color-fill-danger-secondary: #e5393526;
+	--color-fill-disabled: #71757d;
+	--color-fill-info: #3f89ca;
+	--color-fill-info-hover: #5f9dd3;
+	--color-fill-info-secondary: #3f89ca26;
+	--color-fill-success: #43a047;
+	--color-fill-success-hover: #54b859;
+	--color-fill-success-secondary: #43a04726;
+	--color-fill-warning: #f59e0b;
+	--color-fill-warning-hover: #f7ae32;
+	--color-fill-warning-secondary: #f59e0b26;
+	--color-fill-on-black: #242628;
+	--color-fill-on-black-muted: #242628;
+
+	--color-foreground: #f5f3ef;
+	--color-foreground-brand: #c48259;
+	--color-foreground-disabled: #898d94;
+	--color-foreground-muted: #898d94;
+	--color-foreground-subtle: #e9eaeb;
+	--color-foreground-on-inverse: #161719;
+	--color-foreground-on-black: #e9eaeb;
+	--color-foreground-on-black-muted: #b0b3b7;
+
+	--color-sidebar: #000000;
+	--color-sidebar-inverse: #ffffff;
+	--color-sidebar-overlay: #0a0a0a;
+	--color-sidebar-overlay-hover: #111113;
+	--color-sidebar-surface: #0a0a0a;
+	--color-sidebar-surface-hover: #17171a;
+	--color-sidebar-surface-secondary: #1f2123;
+
+	--color-scrollbar: #000000;
+	--color-scrollbar-thumb: hsla(0, 0%, 100%, 0.4);
+	--color-scrollbar-thumb-hover: hsla(0, 0%, 100%, 0.3);
+
+	--color-thumbnail-border: rgba(233, 234, 235, 0.1);
+	--color-thumbnail-placeholder: #1c1c1c;
+	--color-thumbnail-stack-series: #543c2f;
+	--color-thumbnail-stack-library-start: #331e11;
+	--color-thumbnail-stack-library-end: #543c2f;
+}

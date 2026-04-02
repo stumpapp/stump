@@ -48,7 +48,7 @@ impl UserMutation {
 	/// Upload an avatar image for either the authenticated viewer or for any user if
 	/// called by a server owner
 	#[graphql(
-		guard = "OptionalFeatureGuard::new(OptionalFeature::Upload).and(PermissionGuard::one(UserPermission::UploadFile))"
+		guard = "OptionalFeatureGuard::new(OptionalFeature::Upload).and(PermissionGuard::new(&[UserPermission::UploadFile, UserPermission::ChangeAvatar]))"
 	)]
 	async fn upload_user_avatar(
 		&self,
@@ -568,6 +568,11 @@ async fn update_user(
 		_ => {},
 	}
 
+	let is_different_username = input.username != by_user.username;
+	if is_different_username && !by_user.has_permission(UserPermission::ChangeUsername) {
+		return Err("You do not have permission to change the username".into());
+	}
+
 	let mut update_user = user::ActiveModel {
 		id: Set(for_user_id.clone()),
 		username: Set(input.username.clone()),
@@ -576,6 +581,9 @@ async fn update_user(
 	};
 
 	if let Some(password) = input.password.clone() {
+		if !by_user.has_permission(UserPermission::ChangePassword) {
+			return Err("You do not have permission to change the password".into());
+		}
 		let hashed_password = bcrypt::hash(password, config.password_hash_cost)?;
 		update_user.hashed_password = Set(hashed_password);
 	}

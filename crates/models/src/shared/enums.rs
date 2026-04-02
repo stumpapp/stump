@@ -561,6 +561,12 @@ pub enum UserPermission {
 	AccessBookClub,
 	/// Grant access to create a book club (access book club)
 	CreateBookClub,
+	/// Grant user access to change **their own** password
+	ChangePassword,
+	/// Grant user access to change **their own** username
+	ChangeUsername,
+	/// Grant user access to change **their own** avatar
+	ChangeAvatar,
 	/// Grant access to read any emailers in the system
 	EmailerRead,
 	/// Grant access to create an emailer

@@ -2946,6 +2946,12 @@ enum UserPermission {
 	ACCESS_BOOK_CLUB
 	"Grant access to create a book club (access book club)"
 	CREATE_BOOK_CLUB
+	"Grant user access to change **their own** password"
+	CHANGE_PASSWORD
+	"Grant user access to change **their own** username"
+	CHANGE_USERNAME
+	"Grant user access to change **their own** avatar"
+	CHANGE_AVATAR
 	"Grant access to read any emailers in the system"
 	EMAILER_READ
 	"Grant access to create an emailer"

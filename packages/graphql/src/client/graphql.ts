@@ -4013,6 +4013,12 @@ export enum UserPermission {
   AccessKoreaderSync = 'ACCESS_KOREADER_SYNC',
   /** Grant access to access the smart list feature. This includes the ability to create and edit smart lists */
   AccessSmartList = 'ACCESS_SMART_LIST',
+  /** Grant user access to change **their own** avatar */
+  ChangeAvatar = 'CHANGE_AVATAR',
+  /** Grant user access to change **their own** password */
+  ChangePassword = 'CHANGE_PASSWORD',
+  /** Grant user access to change **their own** username */
+  ChangeUsername = 'CHANGE_USERNAME',
   /** Grant access to create a book club (access book club) */
   CreateBookClub = 'CREATE_BOOK_CLUB',
   /** Grant access to create a library */

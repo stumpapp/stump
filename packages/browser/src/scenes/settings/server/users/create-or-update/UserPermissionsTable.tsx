@@ -239,7 +239,13 @@ const groups = [
 	},
 	{
 		name: 'User Management',
-		permissions: [UserPermission.ReadUsers, UserPermission.ManageUsers],
+		permissions: [
+			UserPermission.ChangePassword,
+			UserPermission.ChangeUsername,
+			UserPermission.ChangeAvatar,
+			UserPermission.ReadUsers,
+			UserPermission.ManageUsers,
+		],
 	},
 	{
 		name: 'Server Management',
@@ -316,4 +322,7 @@ export const associatedPermissions: Record<UserPermission, UserPermission[]> = {
 	[UserPermission.EditMetadata]: [],
 	[UserPermission.WriteBackMetadata]: [UserPermission.EditMetadata],
 	[UserPermission.EditThumbnails]: [],
+	[UserPermission.ChangePassword]: [],
+	[UserPermission.ChangeUsername]: [],
+	[UserPermission.ChangeAvatar]: [],
 }

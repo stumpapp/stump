@@ -65,6 +65,10 @@ impl AuthUser {
 	pub fn is(&self, user: &AuthUser) -> bool {
 		self.id == user.id
 	}
+
+	pub fn has_permission(&self, permission: UserPermission) -> bool {
+		self.is_server_owner || self.permissions.contains(&permission)
+	}
 }
 
 impl FromQueryResult for AuthUser {

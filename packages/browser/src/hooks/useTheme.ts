@@ -3,15 +3,14 @@ import { useMediaMatch } from 'rooks'
 
 import { usePreferences } from './usePreferences'
 
-// FIXME(tailwind): I missed this when upgrading to v4
 /**
  * Get a theme color from CSS custom properties
- * @param path - The dot-separated path to the color (e.g., 'thumbnail.placeholder', 'thumbnail.stack.series')
+ * @param path - The hyphen-separated path to the color (e.g., 'thumbnail-placeholder', 'thumbnail-stack-series')
  */
 export function getThemeColor(path: string): string | undefined {
-	const variableName = `--twc-${path.replace(/\./g, '-')}`
+	const variableName = `--color-${path.replace(/\./g, '-')}`
 	const value = getComputedStyle(document.documentElement).getPropertyValue(variableName).trim()
-	return value ? `hsl(${value})` : undefined
+	return value ? value : undefined
 }
 
 /**

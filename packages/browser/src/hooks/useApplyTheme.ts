@@ -44,20 +44,20 @@ export function useApplyTheme({ appTheme, appFont = SupportedFont.Inter }: Param
 		if (!htmlClasses.length || htmlClasses.some((c) => c !== resolvedTheme)) {
 			html?.classList.remove(...htmlClasses)
 			html?.classList.add(resolvedTheme)
-    }
+		}
 
-    // https://github.com/darkreader/darkreader/discussions/15128
-    if (resolvedTheme === 'dark') {
-      let meta = document.querySelector('meta[name="color-scheme"]')
-      if (!meta) {
-        meta = document.createElement('meta')
-        // @ts-expect-error: this is a valid attribute
-        meta.name = 'color-scheme'
-        // @ts-expect-error: this is a valid attribute
-        meta.content = 'dark'
-        document.head.appendChild(meta)
-      }
-    }
+		// https://github.com/darkreader/darkreader/discussions/15128
+		if (resolvedTheme === 'dark') {
+			let meta = document.querySelector('meta[name="color-scheme"]')
+			if (!meta) {
+				meta = document.createElement('meta')
+				// @ts-expect-error: this is a valid attribute
+				meta.name = 'color-scheme'
+				// @ts-expect-error: this is a valid attribute
+				meta.content = 'dark'
+				document.head.appendChild(meta)
+			}
+		}
 	}, [appTheme, prefersDark])
 
 	/**

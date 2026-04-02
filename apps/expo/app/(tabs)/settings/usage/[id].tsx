@@ -13,14 +13,14 @@ import { Button, Card, Text } from '~/components/ui'
 import { db, downloadedFiles } from '~/db'
 import { getServerStoredPreferencesUsage } from '~/lib/filesystem'
 import { formatBytes } from '~/lib/format'
-import { useDownload } from '~/lib/hooks'
+import { useDownload, useTranslate } from '~/lib/hooks'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
 import { useReaderStore } from '~/stores'
 import { useSavedServerStore } from '~/stores/savedServer'
 
 export default function Screen() {
 	const { id: serverID } = useLocalSearchParams<{ id: string }>()
-
+	const { t } = useTranslate()
 	const {
 		data: preferencesBytes,
 		refetch,
@@ -54,32 +54,38 @@ export default function Screen() {
 	}, [serverID, clearLibrarySettings, refetch])
 
 	const { deleteServerDownloads } = useDownload()
-	const onDeleteDownloads = useCallback(async () => {
+	const onDeleteDownloads = async () => {
 		try {
 			await deleteServerDownloads(serverID)
 			refetch()
 		} catch {
 			Alert.alert(
-				'Deletion Failed',
-				`There was an error deleting all all downloads from "${server?.name || 'this server'}".`,
+				t(getKey('deleteDownloads.deleteFailed.title')),
+				t(getKey('deleteDownloads.deleteFailed.description')).replace(
+					'{{serverName}}',
+					server?.name ? `'${server.name}'` : t('common.thisServer'),
+				),
 			)
 		}
-	}, [deleteServerDownloads, serverID, refetch, server?.name])
+	}
 
 	useDynamicHeader({
 		title: server?.name || '',
 	})
 
-	const handleDelete = useCallback(() => {
+	const handleDelete = () => {
 		Alert.alert(
-			'Delete Downloads',
-			`Are you sure you want to delete all downloads from ${server?.name ? `'${server?.name}'` : 'this server'}?`,
+			t(getKey('deleteDownloads.label')),
+			t(getKey('deleteDownloads.confirmation')).replace(
+				'{{serverName}}',
+				server?.name ? `'${server.name}'` : t('common.thisServer'),
+			),
 			[
-				{ text: 'Cancel', style: 'cancel' },
-				{ text: 'Delete', style: 'destructive', onPress: onDeleteDownloads },
+				{ text: t('common.cancel'), style: 'cancel' },
+				{ text: t('common.delete'), style: 'destructive', onPress: onDeleteDownloads },
 			],
 		)
-	}, [onDeleteDownloads, server?.name])
+	}
 
 	if (!server) {
 		return <Redirect href="/settings/usage" />
@@ -94,46 +100,50 @@ export default function Screen() {
 				refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
 				contentInsetAdjustmentBehavior="automatic"
 			>
-				<View className="flex-1 gap-8 bg-background px-4 pt-8">
-					<View className="flex-1 gap-4">
+				<View className="gap-8 px-4 pt-8 flex-1 bg-background">
+					<View className="gap-4 flex-1">
 						<Card
-							label="Downloads"
+							label={t('common.downloads')}
 							listEmptyStyle={{
 								icon: HardDriveDownload,
-								message: 'No downloaded files for this server',
+								message: t(getKey('noDownloads')),
 							}}
 						>
 							<Card.StatGroup>
-								<Card.Stat label="Total files" value={downloadedFilesCount} />
-								{humanizedUsage && <Card.Stat label="Total size" value={humanizedUsage} />}
+								<Card.Stat label={t(getKey('totalFiles'))} value={downloadedFilesCount} />
+								{humanizedUsage && (
+									<Card.Stat label={t(getKey('totalSize'))} value={humanizedUsage} />
+								)}
 							</Card.StatGroup>
+
 							{(files.length > 0 || downloadedFilesSum > 0) && (
-								<Card.Row label="Delete Downloads">
+								<Card.Row label={t(getKey('deleteDownloads.label'))}>
 									<Button size="sm" roundness="full" variant="destructive" onPress={handleDelete}>
-										<Text>Delete</Text>
+										<Text>{t('common.delete')}</Text>
 									</Button>
 								</Card.Row>
 							)}
 						</Card>
 					</View>
 
-					<View className="flex-1 gap-4">
+					<View className="gap-4 flex-1">
 						<Card
-							label="Stored Preferences"
-							description="Miscellaneous data like book preferences, offline reading progress, etc."
+							label={t(getKey('storedPreferences.label'))}
+							description={t(getKey('storedPreferences.description'))}
 						>
 							<Card.StatGroup>
-								<Card.Stat label="Total size" value={preferencesSize} />
+								<Card.Stat label={t(getKey('totalSize'))} value={preferencesSize} />
 							</Card.StatGroup>
+
 							{!!preferencesBytes && (
-								<Card.Row label="Clear Preferences">
+								<Card.Row label={t(getKey('clearPreferences'))}>
 									<Button
 										size="sm"
 										roundness="full"
 										variant="destructive"
 										onPress={onClearPreferences}
 									>
-										<Text>Clear</Text>
+										<Text>{t('common.clear')}</Text>
 									</Button>
 								</Card.Row>
 							)}
@@ -144,3 +154,6 @@ export default function Screen() {
 		</SafeAreaView>
 	)
 }
+
+const LOCALE_BASE = 'settings.management.dataUsage'
+const getKey = (key: string) => `${LOCALE_BASE}.${key}`

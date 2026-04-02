@@ -2431,9 +2431,16 @@
 	},
 	"mobileApp": {
 		"common": {
+			"cancel": "Cancel",
+			"clear": "Clear",
+			"confirm": "Confirm",
+			"delete": "Delete",
+			"downloads": "Downloads",
 			"enabled": "Enabled",
 			"none": "None",
-			"settings": "Settings"
+			"settings": "Settings",
+			"servers": "Servers",
+			"thisServer": "this server"
 		},
 		"tabs": {
 			"servers": "Servers",
@@ -2485,7 +2492,29 @@
 			},
 			"autoSyncLocalData": "Auto-Sync Local Data",
 			"management": {
-				"label": "Management"
+				"label": "Management",
+				"dataUsage": {
+					"label": "Data Usage",
+					"nonStumpData": "Non-Stump data",
+					"serversTotal": "Servers total",
+					"totalFiles": "Total files",
+					"totalSize": "Total size",
+					"deleteDownloads": {
+						"label": "Delete Downloads",
+						"confirmation": "Are you sure you want to delete all downloads from {{serverName}}?",
+						"deleteFailed": {
+							"title": "Deletion Failed",
+							"description": "There was an error deleting all all downloads from {{serverName}}"
+
+						}
+					},
+					"noDownloads": "No downloaded files for this server",
+					"storedPreferences": {
+						"label": "Stored preferences",
+						"description": "Miscellaneous data like book preferences, reading timers, etc",
+					},
+					"clearPreferences": "Clear Preferences"
+				}
 			},
 			"debug": {
 				"label": "Debug"

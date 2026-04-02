@@ -2546,6 +2546,17 @@
 					"label": "Debug Analytics",
 					"description": "Send additional debug-related events to help troubleshoot issues"
 				}
+			},
+			"contactInfo": {
+				"label": "Contact",
+				"email": "Email",
+				"discord": "Discord",
+				"github": "GitHub"
+			},
+			"supportInfo": {
+				"buildInformation": "Build Information",
+				"version": "Version: {{version}}",
+				"suuportIdentifier": "Support Identifier: {{supportID}}"
 			}
 		},
 		"readerSettings": {}

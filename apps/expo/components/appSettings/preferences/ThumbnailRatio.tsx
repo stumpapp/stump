@@ -5,8 +5,10 @@ import { Picker } from '~/components/ui/picker/picker'
 import { usePreferencesStore } from '~/stores'
 
 import AppSettingsRow from '../AppSettingsRow'
+import { useTranslate } from '~/lib/hooks'
 
 export default function ThumbnailRatio() {
+	const { t } = useTranslate()
 	const { thumbnailRatio, patch } = usePreferencesStore(
 		useShallow((state) => ({
 			thumbnailRatio: state.thumbnailRatio,
@@ -27,7 +29,7 @@ export default function ThumbnailRatio() {
 	const thumbnailRatioName = ratioToStringMap[thumbnailRatio]
 
 	return (
-		<AppSettingsRow icon={Ruler} title="Thumbnail Ratio">
+		<AppSettingsRow icon={Ruler} title={t('settings.preferences.thumbnailRatio')}>
 			<Picker
 				value={thumbnailRatioName || '1 : 1.5'}
 				options={[

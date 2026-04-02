@@ -4,12 +4,14 @@ import { Platform } from 'react-native'
 import { useShallow } from 'zustand/react/shallow'
 
 import { useColors } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 import { usePreferencesStore } from '~/stores'
 
 import AppSettingsRow from '../AppSettingsRow'
 
 // TODO: A picker is probably a bit too much, maybe a set of presets?
 export default function AppPrimaryColor() {
+	const { t } = useTranslate()
 	const store = usePreferencesStore(
 		useShallow((state) => ({
 			accentColor: state.accentColor,
@@ -27,7 +29,7 @@ export default function AppPrimaryColor() {
 
 	return Platform.select({
 		ios: (
-			<AppSettingsRow icon={Pipette} title="Accent">
+			<AppSettingsRow icon={Pipette} title={t('settings.preferences.appPrimaryColor')}>
 				<Host matchContents>
 					<ColorPicker
 						label=""

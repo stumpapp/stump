@@ -2430,13 +2430,59 @@
 		}
 	},
 	"mobileApp": {
+		"common": {
+			"none": "None"
+		},
 		"tabs": {
 			"servers": "Servers",
 			"localLibrary": "Library",
 			"settings": "Settings"
 		},
 		"settings": {
-
+			"preferences": {
+				"label": "Preferences",
+				"appTheme": {
+					"label": "Theme",
+					"options": {
+						"light": "Light",
+						"dark": "Dark"
+					}
+				},
+				"appPrimaryColor": "Accent",
+				"appLanguage": "Language",
+				"defaultServer": "Default Server",
+				"thumbnailRatio": "Thumbnail Ratio",
+				"thumbnailPlaceholder": {
+					"label": "Thumbnail Placeholder",
+					"options": {
+						"grayscale": "Grayscale",
+						"averageColor": "Average color",
+						"colorful": "Colorful",
+						"thumbhash": "Thumbhash"
+					}
+				},
+				"thumbnailResizeMode": {
+					"label": "Thumbnail Resize",
+					"options": {
+						"cover": "Cover",
+						"stretch": "Stretch",
+						"fit": "Fit"
+					}
+				}
+			},
+			"reading": {
+				"label": "Reading"
+			},
+			"stump": {
+				"label": "Stump",
+				"description": "Stump features are optional and can be turn them off if you do not need them"
+			},
+			"management": {
+				"label": "Management"
+			},
+			"debug": {
+				"label": "Debug"
+			}
 		}
 	}
 }

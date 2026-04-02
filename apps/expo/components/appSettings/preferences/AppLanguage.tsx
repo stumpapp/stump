@@ -9,6 +9,7 @@ import { PickerOption } from '~/components/ui/picker/types'
 import { usePreferencesStore } from '~/stores'
 
 import AppSettingsRow from '../AppSettingsRow'
+import { useTranslate } from '~/lib/hooks'
 
 const localeOptions: PickerOption<AllowedLocale>[] = Object.entries(localeNames).map(
 	([value, label]) => ({
@@ -18,6 +19,7 @@ const localeOptions: PickerOption<AllowedLocale>[] = Object.entries(localeNames)
 )
 
 export default function AppLanguage() {
+	const { t } = useTranslate()
 	const { locale, patch } = usePreferencesStore(
 		useShallow((state) => ({
 			locale: state.locale,
@@ -40,7 +42,7 @@ export default function AppLanguage() {
 	}
 
 	return (
-		<AppSettingsRow icon={Languages} title="Language">
+		<AppSettingsRow icon={Languages} title={t('settings.preferences.appLanguage')}>
 			<Picker<AllowedLocale>
 				value={currentLocale}
 				options={localeOptions}

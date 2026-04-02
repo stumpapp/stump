@@ -2517,7 +2517,35 @@
 				}
 			},
 			"debug": {
-				"label": "Debug"
+				"label": "Debug",
+				"clearCache": {
+					"memory": {
+						"button": "Memory",
+						"success": "Memory cache cleared"
+					},
+					"disk": {
+						"button": "Disk",
+						"success": "Disk cache cleared"
+					}
+				},
+				"deleteDatabase": {
+					"label": "Delete Database",
+					"success": {
+						"title": "Database deleted",
+						"description": "Please restart the app"
+					},
+					"error": {
+						"title": "Deletion failed",
+						"description": "There was an error deleting the database"
+					}
+				},
+				"performanceMonitor": "Performance Monitor",
+				"reduceAnimations": "Reduce Animations",
+				"maskUrls": "Mask URLs",
+				"debugAnalytics": {
+					"label": "Debug Analytics",
+					"description": "Send additional debug-related events to help troubleshoot issues"
+				}
 			}
 		},
 		"readerSettings": {}

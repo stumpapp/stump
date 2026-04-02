@@ -3,41 +3,47 @@ import { Alert, View } from 'react-native'
 import TurboImage from 'react-native-turbo-image'
 
 import { Button, Text } from '~/components/ui'
+import { useTranslate } from '~/lib/hooks'
 
 import AppSettingsRow from '../AppSettingsRow'
 
 export default function CachePolicySelect() {
+	const { t } = useTranslate()
+
 	const onClearCache = async (message: string) => {
 		Alert.alert(message)
 	}
 
 	return (
 		<AppSettingsRow icon={Image} title="Clear Cache">
-			<View className="flex-row gap-2">
+			<View className="gap-2 flex-row">
 				<Button
 					size="sm"
 					roundness="full"
-					variant="outline"
+					variant="destructive"
 					onPress={async () => {
 						await TurboImage.clearMemoryCache()
-						onClearCache('Memory cache cleared')
+						onClearCache(t(getKey('memory.success')))
 					}}
 				>
-					<Text>Memory</Text>
+					<Text>{t(getKey('memory.button'))}</Text>
 				</Button>
 
 				<Button
 					size="sm"
 					roundness="full"
-					variant="outline"
+					variant="destructive"
 					onPress={async () => {
 						await TurboImage.clearDiskCache()
-						onClearCache('Disk cache cleared')
+						onClearCache(t(getKey('disk.success')))
 					}}
 				>
-					<Text>Disk</Text>
+					<Text>{t(getKey('disk.button'))}</Text>
 				</Button>
 			</View>
 		</AppSettingsRow>
 	)
 }
+
+const LOCALE_BASE = 'settings.debug.clearCache'
+const getKey = (key: string) => `${LOCALE_BASE}.${key}`

@@ -2580,6 +2580,33 @@
 					"RTL": "Right to left",
 					"LTR": "Left to right"
 				}
+			},
+			"doublePageBehavior": {
+				"label": "Double Paged",
+				"options": {
+					"always": "Always",
+					"auto": "Auto",
+					"off": "Off"
+				}
+			},
+			"separateSecondPage": "Separate Second Page",
+			"imageScaling": {
+				"label": "Scaling",
+				"options": {
+					"AUTO": "Auto",
+					"HEIGHT": "Fit Height",
+					"WIDTH": "Fit Width",
+					"NONE": "None"
+				}
+			},
+			"allowDownscaling": "Downscaling",
+			"tapSidesToNavigate": "Tap Sides to Navigate",
+			"footerControls": {
+				"label": "Footer",
+				"options": {
+					"images": "Image Gallery",
+					"slider": "Slider"
+				}
 			}
 		}
 	}

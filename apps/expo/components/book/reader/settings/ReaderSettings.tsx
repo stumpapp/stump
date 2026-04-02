@@ -90,7 +90,7 @@ export default function ReaderSettings({ forBook, forServer }: Props) {
 			</Card>
 
 			<Card label={t('readerSettings.sections.imageOptions')}>
-				<Card.Row label="Double Paged">
+				<Card.Row label={t('readerSettings.doublePageBehavior.label')}>
 					<DoublePageSelect
 						behavior={activeSettings.doublePageBehavior || 'auto'}
 						onChange={(behavior) => onPreferenceChange({ doublePageBehavior: behavior })}
@@ -98,7 +98,7 @@ export default function ReaderSettings({ forBook, forServer }: Props) {
 				</Card.Row>
 
 				<Card.Row
-					label="Separate Second Page"
+					label={t('readerSettings.separateSecondPage')}
 					disabled={activeSettings.doublePageBehavior === 'off'}
 				>
 					<Switch
@@ -109,28 +109,23 @@ export default function ReaderSettings({ forBook, forServer }: Props) {
 					/>
 				</Card.Row>
 
-				<Card.Row label="Scaling">
+				<Card.Row label={t('readerSettings.imageScaling.label')}>
 					<ImageScalingSelect
 						behavior={activeSettings.imageScaling.scaleToFit}
 						onChange={(fit) => onPreferenceChange({ imageScaling: { scaleToFit: fit } })}
 					/>
 				</Card.Row>
 
-				<Card.Row label="Downscaling">
+				<Card.Row label={t('readerSettings.allowDownscaling')}>
 					<Switch
 						checked={allowDownscaling}
 						onCheckedChange={(value) => onPreferenceChange({ allowDownscaling: value })}
 					/>
 				</Card.Row>
-
-				{/* TODO: https://docs.expo.dev/versions/latest/sdk/media-library/ */}
-				<Card.Row label="Panel Downloads" disabled>
-					<Switch checked={false} onCheckedChange={() => {}} />
-				</Card.Row>
 			</Card>
 
 			<Card label={t('readerSettings.sections.controls')}>
-				<Card.Row label="Tap Sides to Navigate">
+				<Card.Row label={t('readerSettings.tapSidesToNavigate')}>
 					<Switch
 						variant="brand"
 						checked={activeSettings.tapSidesToNavigate ?? true}
@@ -138,7 +133,7 @@ export default function ReaderSettings({ forBook, forServer }: Props) {
 					/>
 				</Card.Row>
 
-				<Card.Row label="Bottom Controls">
+				<Card.Row label={t('readerSettings.footerControls.label')}>
 					<FooterControlsSelect
 						variant={activeSettings.footerControls || 'images'}
 						onChange={(variant) => onPreferenceChange({ footerControls: variant })}

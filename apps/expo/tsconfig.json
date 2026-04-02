@@ -12,14 +12,14 @@
 			"@stump/client": ["../../packages/client/src/index.ts"],
 			"@stump/client/*": ["../../packages/client/src/*"],
 			"@stump/graphql": ["../../packages/graphql/src/index.ts"],
-			"@stump/graphql/*": ["../../packages/graphql/src/*"]
+			"@stump/graphql/*": ["../../packages/graphql/src/*"],
 		},
 		"plugins": [
 			{
 				"name": "@0no-co/graphqlsp",
-				"schema": "../../crates/graphql/schema.graphql"
-			}
-		]
+				"schema": "../../crates/graphql/schema.graphql",
+			},
+		],
 	},
-	"include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts", "nativewind-env.d.ts"]
+	"include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts", "nativewind-env.d.ts"],
 }

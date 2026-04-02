@@ -2428,5 +2428,15 @@
 			"label": "Edit thumbnails",
 			"description": "Allows the user to edit thumbnails for books and series"
 		}
+	},
+	"mobileApp": {
+		"tabs": {
+			"servers": "Servers",
+			"localLibrary": "Library",
+			"settings": "Settings"
+		},
+		"settings": {
+
+		}
 	}
 }

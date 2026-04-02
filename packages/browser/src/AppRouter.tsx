@@ -33,7 +33,7 @@ export function AppRouter({ basePath }: AppRouterProps = {}) {
 	}
 
 	return (
-		<LocaleProvider locale={(locale as AllowedLocale) || 'en'}>
+		<LocaleProvider locale={(locale as AllowedLocale) || 'en-US'}>
 			<RouterProvider basePath={basePath}>
 				<Routes>
 					<Route path="/" element={<AppLayout />}>

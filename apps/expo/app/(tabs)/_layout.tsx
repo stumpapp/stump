@@ -6,10 +6,13 @@ import { Platform } from 'react-native'
 import { AddServerDialog } from '~/components/savedServer'
 import { Icon as JSIcon } from '~/components/ui'
 import { useColors } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 import { usePreferencesStore } from '~/stores'
 
 export default function TabLayout() {
+	const { t } = useTranslate()
+
 	const colors = useColors()
 	const accentColor = usePreferencesStore((state) => state.accentColor)
 
@@ -20,15 +23,15 @@ export default function TabLayout() {
 				tintColor={accentColor || colors.fill.brand.DEFAULT}
 			>
 				<NativeTabs.Trigger name="index">
-					<Label>Servers</Label>
+					<Label>{t('tabs.servers')}</Label>
 					<Icon sf="server.rack" drawable="custom_android_drawable" />
 				</NativeTabs.Trigger>
 				<NativeTabs.Trigger name="library">
-					<Label>Library</Label>
+					<Label>{t('tabs.localLibrary')}</Label>
 					<Icon sf="books.vertical" drawable="custom_android_drawable" />
 				</NativeTabs.Trigger>
 				<NativeTabs.Trigger name="settings">
-					<Label>Settings</Label>
+					<Label>{t('tabs.settings')}</Label>
 					<Icon sf="gear" drawable="custom_android_drawable" />
 				</NativeTabs.Trigger>
 			</NativeTabs>
@@ -44,7 +47,7 @@ export default function TabLayout() {
 					name="index"
 					options={{
 						headerShown: true,
-						title: 'Servers',
+						title: t('tabs.servers'),
 						tabBarIcon: ({ focused }) => (
 							<JSIcon
 								as={Server}
@@ -57,7 +60,7 @@ export default function TabLayout() {
 				<Tabs.Screen
 					name="library"
 					options={{
-						title: 'Library',
+						title: t('tabs.localLibrary'),
 						tabBarIcon: ({ focused }) => (
 							<JSIcon
 								as={HardDriveDownload}
@@ -69,7 +72,7 @@ export default function TabLayout() {
 				<Tabs.Screen
 					name="settings"
 					options={{
-						title: 'Settings',
+						title: t('tabs.settings'),
 						tabBarIcon: ({ focused }) => (
 							<JSIcon
 								as={Settings}

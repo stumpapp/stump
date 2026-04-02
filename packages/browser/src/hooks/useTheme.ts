@@ -3,6 +3,7 @@ import { useMediaMatch } from 'rooks'
 
 import { usePreferences } from './usePreferences'
 
+// FIXME(tailwind): I missed this when upgrading to v4
 /**
  * Get a theme color from CSS custom properties
  * @param path - The dot-separated path to the color (e.g., 'thumbnail.placeholder', 'thumbnail.stack.series')

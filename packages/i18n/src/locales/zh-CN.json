@@ -802,110 +802,110 @@
 			"volume": "卷",
 			"writers": "作者",
 			"year": "年",
-			"metaType": "Type",
-			"imprint": "Imprint",
-			"comicid": "Comic ID",
-			"booktype": "Book type",
-			"status": "Status",
-			"totalIssues": "Total issues",
-			"publicationRun": "Publication run",
-			"comicImage": "Comic image",
-			"descriptionFormatted": "Description (formatted)"
+			"metaType": "类型",
+			"imprint": "信息",
+			"comicid": "漫画ID",
+			"booktype": "书籍类型",
+			"status": "状态",
+			"totalIssues": "问题总数",
+			"publicationRun": "运行发布",
+			"comicImage": "漫画图像",
+			"descriptionFormatted": "描述(格式化)"
 		},
 		"addFields": {
-			"description": "Add each addition on its own line"
+			"description": "在自己的行上添加每个添加"
 		}
 	},
 	"seriesOverviewScene": {
 		"buttons": {
-			"continueReading": "Continue Reading",
-			"downloadSeries": "Download Series"
+			"continueReading": "继续阅读",
+			"downloadSeries": "下载系列"
 		}
 	},
 	"createOrUpdateSmartListForm": {
 		"validation": {
-			"nameTooShort": "Name must be at least 2 characters",
-			"nameTaken": "Cannot use this name"
+			"nameTooShort": "名称至少需要 2 个字符",
+			"nameTaken": "不能使用此名称"
 		},
 		"fields": {
 			"name": {
-				"label": "Name",
-				"placeholder": "My smart list",
-				"description": "Must be unique, but can be changed later"
+				"label": "名称",
+				"placeholder": "我的智能列表",
+				"description": "必须唯一，但稍后可以更改"
 			},
 			"description": {
-				"label": "Description",
-				"placeholder": "A very intelligent list",
-				"description": "An optional description of your smart list"
+				"label": "描述",
+				"placeholder": "一个非常智能的列表",
+				"description": "你的智能列表的可选描述"
 			},
 			"visibility": {
-				"label": "Visibility",
+				"label": "可见性",
 				"options": {
 					"public": {
-						"label": "Public",
-						"description": "Accessible to all users on the server"
+						"label": "公开",
+						"description": "服务器上的所有用户均可访问"
 					},
 					"shared": {
-						"label": "Shared",
-						"description": "Specific users can access this smart list",
-						"createDisclaimer": "You can select who this list is shared with after creation"
+						"label": "共享",
+						"description": "特定用户可以访问此智能列表",
+						"createDisclaimer": "你可以在创建后选择与此列表共享的用户"
 					},
 					"private": {
-						"label": "Private",
-						"description": "Only you can access this smart list"
+						"label": "私密",
+						"description": "只有你可以访问此智能列表"
 					}
 				}
 			},
 			"queryBuilder": {
-				"uiPerformance": "This feature is missing performance optimizations on the UI and may be slow with filters which produce large result sets. This will be improved in the future",
+				"uiPerformance": "此功能在 UI 上缺少性能优化，在产生大量结果集的筛选器下可能会较慢。将来会改进",
 				"rootJoiner": {
 					"and": {
-						"label": "AND",
-						"description": "All filter groups must be true for a book to be matched"
+						"label": "且",
+						"description": "所有筛选组都必须为真，书籍才匹配"
 					},
 					"or": {
-						"label": "OR",
-						"description": "At least one filter group must be true for a book to be matched"
+						"label": "或",
+						"description": "至少一个筛选组为真，书籍才匹配"
 					}
 				},
 				"groupJoiner": {
 					"and": {
-						"label": "AND",
-						"description": "All must be true"
+						"label": "且",
+						"description": "所有条件都必须为真"
 					},
 					"or": {
-						"label": "OR",
-						"description": "At least one must be true"
+						"label": "或",
+						"description": "至少一个条件为真"
 					},
 					"not": {
-						"label": "NOT",
-						"description": "None can be true"
+						"label": "非",
+						"description": "所有条件都不能为真"
 					}
 				},
 				"grouping": {
-					"label": "Group by",
-					"description": "How the books in this smart list should be grouped",
+					"label": "分组依据",
+					"description": "该智能列表中的书籍应如何分组",
 					"options": {
 						"by_books": {
-							"label": "None"
+							"label": "无"
 						},
 						"by_series": {
-							"label": "Series"
+							"label": "系列"
 						},
 						"by_library": {
-							"label": "Library"
+							"label": "书库"
 						}
 					}
 				},
 				"filters": {
-					"emptyState": "Add a group to get started",
+					"emptyState": "添加一个组以开始",
 					"actions": {
-						"addFilter": "Add filter",
-						"addGroup": "Add group",
-						"deleteFilter": "Delete filter",
-						"deleteGroup": "Delete group"
+						"addFilter": "添加筛选",
+						"addGroup": "添加组",
+						"deleteFilter": "删除筛选",
+						"deleteGroup": "删除组"
 					},
-					"is": "is",
+					"is": "是",
 					"fieldSelect": {
 						"placeholder": "Attribute",
 						"source": {
@@ -976,179 +976,179 @@
 								"label": "Library",
 								"attributes": {
 									"name": "Name",
-									"path": "Path"
+									"path": "路径"
 								}
 							}
 						}
 					},
 					"basicValue": {
 						"placeholder": "Value",
-						"date": "Date"
+						"date": "日期"
 					},
 					"rangeValue": {
 						"from": {
-							"date": "From date",
-							"number": "From"
+							"date": "起始日期",
+							"number": "从"
 						},
 						"to": {
-							"date": "To date",
-							"number": "To"
+							"date": "结束日期",
+							"number": "到"
 						},
-						"inclusive": "Inclusive"
+						"inclusive": "包含"
 					},
 					"listValue": {
-						"placeholder": "Add values",
-						"emptyState": "No values to display"
+						"placeholder": "添加值",
+						"emptyState": "没有可显示的值"
 					}
 				}
 			}
 		}
 	},
 	"createSmartListScene": {
-		"heading": "Create smart list",
-		"subtitle": "On-the-fly list creation based on a set of filters",
+		"heading": "创建智能列表",
+		"subtitle": "基于一组过滤规则创建实时列表",
 		"form": {
-			"stepLabel": "Step",
+			"stepLabel": "步骤",
 			"steps": [
 				{
-					"label": "Basics",
-					"heading": "Basic Information",
-					"description": "The details of this smart list, including its name, description, and visibility"
+					"label": "基础",
+					"heading": "基础信息",
+					"description": "该智能列表的详细信息，包括名称、描述和可见性"
 				},
 				{
-					"label": "Filters",
-					"heading": "Filters",
-					"description": "The filters to apply to this smart list"
+					"label": "筛选",
+					"heading": "筛选",
+					"description": "应用于该智能列表的筛选器"
 				},
 				{
-					"label": "Review",
-					"heading": "Review",
-					"description": "Review your smart list settings before creating it"
+					"label": "确认",
+					"heading": "确认",
+					"description": "在创建前检查你的智能列表设置"
 				}
 			],
 			"review": {
-				"yes": "Yes",
-				"no": "No",
-				"none": "None",
+				"yes": "是",
+				"no": "否",
+				"none": "无",
 				"labels": {
-					"name": "Name",
-					"description": "Description",
-					"visibility": "Visibility",
-					"grouping": "Group by"
+					"name": "名称",
+					"description": "描述",
+					"visibility": "可见性",
+					"grouping": "分组依据"
 				}
 			},
 			"buttons": {
-				"confirm": "Create list"
+				"confirm": "创建列表"
 			}
 		}
 	},
 	"createOrUpdateApiKey": {
 		"validation": {
-			"futureDate": "Expiration date must be in the future"
+			"futureDate": "过期日期必须在未来"
 		},
 		"fields": {
 			"name": {
-				"label": "Name",
-				"placeholder": "Koreader Sync"
+				"label": "名称",
+				"placeholder": "KoReader 同步"
 			},
 			"expiration": {
-				"label": "Expiration",
-				"placeholder": "Never"
+				"label": "过期时间",
+				"placeholder": "永不过期"
 			},
 			"expiresAt": {
-				"label": "Expires at",
-				"placeholder": "Never"
+				"label": "过期于",
+				"placeholder": "从不使用"
 			},
 			"permissions": {
 				"inherit": {
-					"label": "Inherit permissions",
-					"description": "The same permissions as your account"
+					"label": "继承权限",
+					"description": "与你的账户相同的权限"
 				},
 				"explicit": {
-					"label": "Explicit permissions",
-					"description": "Choose the permissions this key should have"
+					"label": "显式权限",
+					"description": "选择此密钥应具有的权限"
 				}
 			}
 		},
-		"inheritDisclaimer": "This API key will inherit your full permissions, which means it can do anything you can do. Be careful with this setting"
+		"inheritDisclaimer": "此 API 密钥将继承你的全部权限，这意味着它可以执行你能做的任何事情。请谨慎使用此设置"
 	},
 	"userSmartListsScene": {
-		"heading": "Smart lists",
-		"subtitle": "Your favorite searches and filters saved for easy access",
-		"searchPlaceholder": "Filter smart lists",
+		"heading": "智能清单",
+		"subtitle": "保存您喜欢的搜索和过滤器以便于访问",
+		"searchPlaceholder": "筛选智能列表",
 		"buttons": {
-			"createSmartList": "Create smart list"
+			"createSmartList": "创建智能列表"
 		},
 		"list": {
 			"emptyState": {
-				"heading": "No smart lists to display",
-				"noListsMessage": "Create a smart list to get started",
-				"noMatchesMessage": "Try changing your search query"
+				"heading": "没有要显示的智能列表",
+				"noListsMessage": "创建一个智能列表以开始",
+				"noMatchesMessage": "尝试更改您的搜索参数"
 			},
 			"card": {
 				"meta": {
 					"figures": {
-						"books": "book",
-						"series": "series",
-						"library": "library"
+						"books": "书",
+						"series": "系列",
+						"library": "库"
 					},
-					"matches": "Matches"
+					"matches": "匹配项"
 				}
 			}
 		}
 	},
 	"smartListSettingsScene": {
 		"sidebar": {
-			"basics": "Basics",
+			"basics": "基础",
 			"configuration": {
-				"label": "Configuration",
-				"access": "Access",
-				"filters": "Filters"
+				"label": "配置",
+				"access": "访问",
+				"filters": "筛选"
 			},
 			"danger-zone": {
-				"delete": "Deletion",
-				"label": "Danger Zone"
+				"delete": "删除",
+				"label": "危险操作"
 			}
 		},
 		"basics": {
-			"title": "Basic Information",
-			"description": "The details of this smart list, including its name and description"
+			"title": "基础信息",
+			"description": "该智能列表的详细信息，包括名称和描述"
 		},
 		"access": {
-			"title": "Access",
-			"description": "Control who can access this smart list",
+			"title": "访问",
+			"description": "控制谁可以访问该智能列表",
 			"sections": {
 				"visibility": {
 					"confirmation": {
-						"public": "This will make the list visible to everyone",
-						"private": "This will change the list to be private, hiding it from anyone who previously had access",
-						"shared": "You will need to share the list with specific users to give them access",
-						"fallback": "Are you sure you want to change the visibility of this list?"
+						"public": "这将使列表对所有人可见",
+						"private": "这将更改列表为私密，将其隐藏在以前曾经访问过的任何人上",
+						"shared": "你需要与特定用户共享列表以给予他们访问权限",
+						"fallback": "你确定要更改此列表的可见性吗？"
 					}
 				},
 				"accessManager": {
-					"disclaimer": "Sharing is not ready yet. Please check back later!"
+					"disclaimer": "共享功能尚未准备就绪。请稍后再试！"
 				}
 			}
 		},
 		"filters": {
-			"title": "Filter Builder",
-			"description": "Manage the filters which construct this smart list"
+			"title": "筛选构建器",
+			"description": "管理构成该智能列表的筛选器"
 		},
 		"danger-zone/delete": {
-			"title": "Deletion Actions",
-			"description": "Permanently delete this smart list and all of its contents or certain resources",
+			"title": "删除操作",
+			"description": "永久删除该智能列表及其全部内容或特定资源",
 			"sections": {
 				"deleteList": {
-					"heading": "Delete list",
+					"heading": "删除列表",
 					"description": [
-						"Permanently delete this smart list and all its contents.",
-						"This action cannot be undone"
+						"永久删除该智能列表及其全部内容。",
+						"此操作不可撤销"
 					],
 					"confirmation": {
-						"title": "Delete list",
-						"description": "Are you sure you want to delete this smart list?",
-						"confirm": "Delete list"
+						"title": "删除列表",
+						"description": "你确定要删除该智能列表吗？",
+						"confirm": "删除列表"
 					}
 				}
 			}
@@ -1156,73 +1156,73 @@
 	},
 	"userSmartListScene": {
 		"navigation": {
-			"items": "Items",
-			"settings": "Settings"
+			"items": "项目",
+			"settings": "设置"
 		},
 		"layout": {
-			"missingIdError": "This scene requires an ID in the URL",
-			"smartListNotFound": "Smart list not found",
-			"viewCreateError": "Failed to create view",
-			"viewSaveError": "Failed to save view"
+			"missingIdError": "此场景需要 URL 中的 ID",
+			"smartListNotFound": "未找到智能列表",
+			"viewCreateError": "创建视图失败",
+			"viewSaveError": "保存视图失败"
 		},
 		"header": {
-			"backLink": "Lists"
+			"backLink": "列表"
 		},
 		"itemsScene": {
-			"smartListNotFound": "Smart list not found",
+			"smartListNotFound": "未找到智能列表",
 			"actionHeader": {
 				"viewSelector": {
-					"customView": "Custom view",
-					"defaultView": "Default view",
-					"noViewsSaved": "No views saved",
-					"selectView": "Select a saved view"
+					"customView": "自定义视图",
+					"defaultView": "默认视图",
+					"noViewsSaved": "没有保存的视图",
+					"selectView": "选择一个已保存视图"
 				},
 				"filterDrawer": {
-					"heading": "Smart list filters",
-					"description": "Change the filters for this viewing session",
+					"heading": "智能列表筛选器",
+					"description": "更改此视图会话的过滤器",
 					"rawData": {
-						"heading": "Raw filter data",
-						"description": "This is how Stump will process the filters"
+						"heading": "原始过滤器数据",
+						"description": "Stump 将如何处理过滤器"
 					},
 					"buttons": {
-						"save": "Save",
-						"cancel": "Cancel"
+						"save": "保存",
+						"cancel": "取消"
 					}
 				},
 				"search": {
-					"placeholder": "Quick filter"
+					"placeholder": "快速筛选"
 				},
 				"viewManager": {
-					"updateSelected": "Update view",
-					"deleteSelected": "Delete view",
-					"create": "Create new view",
+					"updateSelected": "更新视图",
+					"deleteSelected": "删除视图",
+					"create": "创建新视图",
 					"modal": {
 						"heading": {
-							"create": "Create view",
-							"update": "Update view"
+							"create": "创建视图",
+							"update": "更新视图"
 						},
 						"description": {
-							"create": "Create a new view for this smart list",
-							"update": "Update the view"
+							"create": "为此智能列表创建新视图",
+							"update": "更新视图"
 						},
 						"createForm": {
 							"name": {
-								"label": "Name",
-								"placeholder": "My view",
-								"description": "A friendly name to uniquely identify this view"
+								"label": "名称",
+								"placeholder": "我的视图",
+								"description": "识别此视图的友好唯一名称"
 							}
 						},
 						"updateForm": {
 							"name": {
-								"label": "Name",
-								"placeholder": "My view",
-								"description": "The updated name for this view, if desired"
+								"label": "名称",
+								"placeholder": "我的视图",
+								"description": "此视图的更新名称（如果需要）"
 							}
 						}
 					},
 					"deleteModal": {
-						"title": "Delete view",
-						"description": "Are you sure you want to delete this view?"
+						"title": "删除视图",
+						"description": "你确定要删除该智能列表吗？"
 					}
 				}
 			}
@@ -1230,61 +1230,61 @@
 	},
 	"settingsScene": {
 		"navigation": {
-			"general": "General",
-			"logs": "Logs",
-			"server": "Server",
-			"jobs": "Jobs and Configuration",
-			"users": "User Management",
-			"desktop": "Desktop"
+			"general": "通用",
+			"logs": "日志",
+			"server": "服务器",
+			"jobs": "任务和配置",
+			"users": "用户管理",
+			"desktop": "桌面"
 		},
 		"sidebar": {
 			"personal": {
-				"account": "Account",
-				"appearance": "Preferences",
-				"api keys": "API keys",
-				"reader": "Reader",
-				"desktop": "Desktop",
-				"label": "Personal"
+				"account": "帐户",
+				"appearance": "首选项",
+				"api keys": "API 密钥",
+				"reader": "阅读器",
+				"desktop": "桌面",
+				"label": "个人"
 			},
 			"management": {
-				"general": "Server",
-				"logs": "Logs",
-				"users": "Users",
-				"jobs": "Jobs",
-				"access": "Access",
-				"email": "Email",
-				"notifications": "Notifications",
-				"label": "Management"
+				"general": "服务器",
+				"logs": "日志",
+				"users": "用户",
+				"jobs": "任务",
+				"access": "访问",
+				"email": "电子邮件地址",
+				"notifications": "通知",
+				"label": "管理"
 			}
 		},
 		"app/account": {
-			"helmet": "Account settings",
-			"title": "Account settings",
-			"description": "Settings related to your account",
+			"helmet": "账户设置",
+			"title": "账户设置",
+			"description": "与您的帐户相关的设置",
 			"sections": {
 				"account": {
 					"validation": {
-						"invalidUrl": "Please enter a valid URL",
-						"missingUsername": "Username is required"
+						"invalidUrl": "请输入有效的 URL 地址",
+						"missingUsername": "用户名为必填项"
 					},
 					"labels": {
-						"username": "Username",
-						"password": "Password",
-						"activeChangesPrompt": "You have unsaved changes"
+						"username": "用户名",
+						"password": "密码",
+						"activeChangesPrompt": "您有未保存的更改"
 					},
 					"errors": {
-						"updateFailed": "A server error occurred while updating your profile. Please try again."
+						"updateFailed": "更新您的个人资料时服务器发生错误。请重试。"
 					},
 					"avatarPicker": {
-						"label": "Avatar",
-						"heading": "Upload avatar",
-						"subtitle": "You can upload any image to use as your avatar for social features in Stump",
-						"dropzone": "Drop an image or click to select",
-						"changeImage": "Change Image",
-						"removeImage": "Remove Image",
-						"removeSelection": "Remove uploaded image",
-						"uploadFailed": "Failed to upload avatar",
-						"removeFailed": "Failed to remove avatar"
+						"label": "头像",
+						"heading": "上传头像",
+						"subtitle": "您可以上传任何图片作为您在Stump 中的社交功能的头像",
+						"dropzone": "拖放图片到此处或点击以选择",
+						"changeImage": "更改图像",
+						"removeImage": "删除图片",
+						"removeSelection": "删除上传的图像",
+						"uploadFailed": "头像上传失败",
+						"removeFailed": "删除头像失败"
 					},
 					"buttons": {
 						"confirm": "Save Changes"
@@ -1582,7 +1582,7 @@
 					"description": "The list of Stump servers you can connect to",
 					"getStarted": "Add a server to get started",
 					"unreachableServer": {
-						"tooltip": "Server unreachable"
+						"tooltip": "服务器不可达"
 					},
 					"activeServer": {
 						"tooltip": "Current server"

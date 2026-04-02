@@ -29,19 +29,20 @@
           openssl
         ];
 
+        rustVersion = (builtins.fromTOML (builtins.readFile ./rust-toolchain.toml)).toolchain.channel;
+        rustToolchain = pkgs.rust-bin.stable.${rustVersion}.default.override {
+          extensions = [ "rust-src" "rust-analyzer" ];
+        };
+
         packages = with pkgs; [
           git
 
           # node
           (nodePackages.yarn.override { withNode = false; })
-          nodejs_20
+          nodejs_22
 
           # rust
-          rustfmt
-          rust-analyzer
-          clippy
-          rustc
-          cargo
+          rustToolchain
           cargo-deny
           cargo-edit
           cargo-watch
@@ -59,20 +60,9 @@
         ];
 
         genericShellConfig = {
-          buildInputs = packages ++ [
-            (
-              # Needed for rust-analyzer
-              pkgs.rust-bin.stable.latest.default.override {
-                extensions = [ "rust-src" ];
-              })
-          ];
+          buildInputs = packages;
 
-          # Needed for rust-analyzer
-          RUST_SRC_PATH = "${
-              pkgs.rust-bin.stable.latest.default.override {
-                extensions = [ "rust-src" ];
-              }
-            }/lib/rustlib/src/rust/library";
+          RUST_SRC_PATH = "${rustToolchain}/lib/rustlib/src/rust/library";
 
           shellHook = ''
             export LD_LIBRARY_PATH=${

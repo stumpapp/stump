@@ -1,10 +1,12 @@
 import { ReadingDirection } from '@stump/graphql'
+import { get } from 'colorjs.io/fn'
 import { ChevronsUpDown } from 'lucide-react-native'
 import { useState } from 'react'
 import { View } from 'react-native'
 import * as DropdownMenu from 'zeego/dropdown-menu'
 
 import { Icon, Text } from '~/components/ui'
+import { useTranslate } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 
 type Props = {
@@ -13,12 +15,14 @@ type Props = {
 }
 
 export default function ReadingDirectionSelect({ direction, onChange }: Props) {
+	const { t } = useTranslate()
+
 	const [isOpen, setIsOpen] = useState(false)
 
 	return (
 		<DropdownMenu.Root onOpenChange={setIsOpen}>
 			<DropdownMenu.Trigger>
-				<View className={cn('flex-row items-center gap-1.5', { 'opacity-80': isOpen })}>
+				<View className={cn('gap-1.5 flex-row items-center', { 'opacity-80': isOpen })}>
 					<Text>{direction.toUpperCase()}</Text>
 					<Icon as={ChevronsUpDown} className="h-5 text-foreground-muted" />
 				</View>
@@ -30,7 +34,7 @@ export default function ReadingDirectionSelect({ direction, onChange }: Props) {
 					value={direction === ReadingDirection.Ltr}
 					onValueChange={() => onChange(ReadingDirection.Ltr)}
 				>
-					<DropdownMenu.ItemTitle>Left to Right</DropdownMenu.ItemTitle>
+					<DropdownMenu.ItemTitle>{t(getKey(ReadingDirection.Ltr))}</DropdownMenu.ItemTitle>
 				</DropdownMenu.CheckboxItem>
 
 				<DropdownMenu.CheckboxItem
@@ -38,9 +42,12 @@ export default function ReadingDirectionSelect({ direction, onChange }: Props) {
 					value={direction === ReadingDirection.Rtl}
 					onValueChange={() => onChange(ReadingDirection.Rtl)}
 				>
-					<DropdownMenu.ItemTitle>Right to Left</DropdownMenu.ItemTitle>
+					<DropdownMenu.ItemTitle>{t(getKey(ReadingDirection.Rtl))}</DropdownMenu.ItemTitle>
 				</DropdownMenu.CheckboxItem>
 			</DropdownMenu.Content>
 		</DropdownMenu.Root>
 	)
 }
+
+const LOCALE_BASE = 'readerSettings.readingMode'
+const getKey = (key: ReadingDirection) => `${LOCALE_BASE}.options.${key}`

@@ -2559,6 +2559,28 @@
 				"suuportIdentifier": "Support Identifier: {{supportID}}"
 			}
 		},
-		"readerSettings": {}
+		"readerSettings": {
+			"title": "Reader Settings",
+			"sections": {
+				"mode": "Mode",
+				"imageOptions": "Image Options",
+				"controls": "Controls"
+			},
+			"readingMode": {
+				"label": "Flow",
+				"options": {
+					"PAGED": "Paged",
+					"CONTINUOUS_HORIZONTAL": "Scroll (Horizontal)",
+					"CONTINUOUS_VERTICAL": "Scroll (Vertical)"
+				}
+			},
+			"readingDirection": {
+				"label": "Direction",
+				"options": {
+					"RTL": "Right to left",
+					"LTR": "Left to right"
+				}
+			}
+		}
 	}
 }

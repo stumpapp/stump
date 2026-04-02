@@ -1878,6 +1878,16 @@
 					}
 				},
 				"permissions": {
+					"groups": {
+						"accountManagement": "Account",
+						"featureAccess": "Feature access",
+						"fileManagement": "Files",
+						"emailers": "Emailers",
+						"emailing": "Emailing",
+						"libraryManagement": "Library management",
+						"userManagement": "User management",
+						"serverManagement": "Server management"
+					},
 					"heading": "Permissions",
 					"subtitle": [
 						"Select the permissions you want to grant to this user. For more information on what each permission does, see the",

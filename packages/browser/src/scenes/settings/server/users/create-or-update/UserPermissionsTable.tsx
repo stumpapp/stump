@@ -46,7 +46,7 @@ export default function UserPermissionsTable() {
 
 	const handleGroupClick = useCallback(
 		(groupId: string) => {
-			const groupPermissions = groups.find((group) => group.name === groupId)?.permissions ?? []
+			const groupPermissions = groups.find((group) => group.groupKey === groupId)?.permissions ?? []
 			const allSelected = groupPermissions.every((p) => selectedPermissions.includes(p))
 			const newSelected = allSelected
 				? selectedPermissions.filter((p) => !groupPermissions.includes(p))
@@ -59,11 +59,16 @@ export default function UserPermissionsTable() {
 	const tableData: TableRow[] = useMemo(
 		() =>
 			groups.flatMap((group) => [
-				{ type: 'group', name: group.name, id: group.name, permissions: group.permissions },
+				{
+					type: 'group',
+					groupKey: group.groupKey || '',
+					id: group.groupKey || '',
+					permissions: group.permissions,
+				},
 				...group.permissions.map((permission) => ({
 					type: 'permission' as const,
 					permission,
-					groupId: group.name,
+					groupId: group.groupKey || '',
 					label: t(getPermissionKey(permission, 'label')),
 					description: t(getPermissionKey(permission, 'description')),
 				})),
@@ -113,6 +118,7 @@ export default function UserPermissionsTable() {
 
 							if (isGroup) {
 								const groupData = row.original as Extract<TableRow, { type: 'group' }>
+								const groupName = t(getLocaleKey(`groups.${groupData.groupKey}`))
 
 								return (
 									<tr
@@ -120,7 +126,7 @@ export default function UserPermissionsTable() {
 										className="top-0 backdrop-blur-sm sticky z-10 border-b border-edge bg-background"
 									>
 										<td className="px-4 py-3 font-semibold bg-background-surface/50 text-foreground">
-											{groupData.name}
+											{groupName}
 										</td>
 										<td className="px-4 py-3 bg-background-surface/50">
 											{/* <input
@@ -135,7 +141,7 @@ export default function UserPermissionsTable() {
 												checked={groupData.permissions.every(
 													(p) => selectedPermissions?.includes(p) ?? false,
 												)}
-												onClick={() => handleGroupClick(groupData.name)}
+												onClick={() => handleGroupClick(groupData.groupKey)}
 											/>
 										</td>
 									</tr>
@@ -179,7 +185,7 @@ export default function UserPermissionsTable() {
 }
 
 type TableRow =
-	| { type: 'group'; name: string; id: string; permissions: UserPermission[] }
+	| { type: 'group'; groupKey: string; id: string; permissions: UserPermission[] }
 	| {
 			type: 'permission'
 			permission: UserPermission
@@ -196,7 +202,15 @@ const getPermissionKey = (permission: UserPermission, key: string) =>
 
 const groups = [
 	{
-		name: 'Feature Access',
+		groupKey: 'accountManagement',
+		permissions: [
+			UserPermission.ChangePassword,
+			UserPermission.ChangeUsername,
+			UserPermission.ChangeAvatar,
+		],
+	},
+	{
+		groupKey: 'featureAccess',
 		permissions: [
 			UserPermission.AccessApiKeys,
 			UserPermission.AccessBookClub,
@@ -205,7 +219,7 @@ const groups = [
 		],
 	},
 	{
-		name: 'File Management',
+		groupKey: 'fileManagement',
 		permissions: [
 			UserPermission.DownloadFile,
 			UserPermission.FileExplorer,
@@ -213,7 +227,7 @@ const groups = [
 		],
 	},
 	{
-		name: 'Emailers',
+		groupKey: 'emailers',
 		permissions: [
 			UserPermission.EmailerRead,
 			UserPermission.EmailerCreate,
@@ -221,11 +235,11 @@ const groups = [
 		],
 	},
 	{
-		name: 'Emailing',
+		groupKey: 'emailing',
 		permissions: [UserPermission.EmailSend, UserPermission.EmailArbitrarySend],
 	},
 	{
-		name: 'Library Management',
+		groupKey: 'libraryManagement',
 		permissions: [
 			UserPermission.CreateLibrary,
 			UserPermission.EditLibrary,
@@ -238,17 +252,11 @@ const groups = [
 		],
 	},
 	{
-		name: 'User Management',
-		permissions: [
-			UserPermission.ChangePassword,
-			UserPermission.ChangeUsername,
-			UserPermission.ChangeAvatar,
-			UserPermission.ReadUsers,
-			UserPermission.ManageUsers,
-		],
+		groupKey: 'userManagement',
+		permissions: [UserPermission.ReadUsers, UserPermission.ManageUsers],
 	},
 	{
-		name: 'Server Management',
+		groupKey: 'serverManagement',
 		permissions: [
 			UserPermission.ReadJobs,
 			UserPermission.ManageJobs,
@@ -268,7 +276,7 @@ const columns = [
 		cell: ({ row }) => {
 			const data = row.original
 			if (data.type === 'group') {
-				return data.name
+				return data.groupKey
 			}
 			return data.label
 		},

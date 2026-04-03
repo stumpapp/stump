@@ -216,7 +216,7 @@ impl<'a> KoboSync<'a> {
 				.filter(media::Column::Extension.eq("epub")),
 		};
 
-		// TODO: add modified (and deleted?) media
+		// TODO: add deleted media?
 		// TODO: avoid copies & retrieving unused column "path"
 		// https://www.sea-ql.org/SeaORM/docs/1.1.x/advanced-query/custom-select/#unstructured-tuple
 		let new_media = query
@@ -226,7 +226,7 @@ impl<'a> KoboSync<'a> {
 
 		tracing::debug!(
 			?previous_sync_at,
-			new_media_count = new_media.len(),
+			to_sync_media_count = new_media.len(),
 			"Beginning new Kobo sync"
 		);
 
@@ -264,10 +264,10 @@ impl<'a> KoboSync<'a> {
 			.as_ref()
 			.map(|s| s.model.created_at.fixed_offset());
 
-		match (
-			prev_sync,
-			client_sync_token.as_ref().map_or(true, |t| t.completed),
-		) {
+		let should_begin_new_sync =
+			client_sync_token.as_ref().map_or(true, |t| t.completed);
+
+		match (prev_sync, should_begin_new_sync) {
 			// we're continuing an existing sync session
 			(Some(prev_sync), false) => Ok(prev_sync),
 			// there was no previous sync session, or the previous session completed
@@ -358,6 +358,13 @@ impl<'a> KoboSync<'a> {
 			})
 			.collect();
 
+		tracing::debug!(
+			?offset,
+			?limit,
+			item_count = sync_items.len(),
+			"Generated a page of Kobo sync items"
+		);
+
 		Ok((sync_page, sync_items))
 	}
 }
@@ -388,7 +395,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
       .route("/v1/books/{book_id}/thumbnail/{width}/{height}/{quality}/{is_greyscale}/image.jpg", get(book_thumbnail))
 			.route("/v1/books/{book_id}/file/epub", get(book_download))
 			// The Kobo requests many routes that we don't implement.
-			.route("/v1/{*path}", get(empty_json).post(empty_json).delete(empty_json))
+			.route("/v1/{*path}", get(empty_json).post(empty_json).put(empty_json).delete(empty_json))
 			.layer(middleware::from_fn(authorize)) // Note the order!
 			.layer(middleware::from_fn_with_state(
 				app_state,
@@ -460,7 +467,7 @@ async fn library_sync(
 	HostExtractor(host): HostExtractor,
 	Path(KoboAPIKey { api_key, .. }): Path<KoboAPIKey>,
 	headers: HeaderMap,
-) -> APIResult<impl IntoResponse> {
+) -> APIResult<SyncResponse> {
 	let conn = ctx.conn.as_ref();
 	let user = req.user();
 

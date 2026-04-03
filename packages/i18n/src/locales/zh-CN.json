@@ -80,7 +80,7 @@
 			"description": {
 				"label": "描述",
 				"placeholder": "《我们的旗帜意味着死亡》粉丝俱乐部。尽情阅读海盗题材漫画",
-				"description": "您的读书俱乐部的简短描述（可选）"
+				"description": "您的读书俱乐部的简短描述，可选"
 			},
 			"is_private": {
 				"label": "私密俱乐部",

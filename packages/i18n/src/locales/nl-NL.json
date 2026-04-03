@@ -1254,6 +1254,7 @@
 				"access": "Access",
 				"email": "Email",
 				"notifications": "Notifications",
+				"tags": "Tags",
 				"label": "Management"
 			}
 		},
@@ -2142,6 +2143,55 @@
 				"helmet": "Update emailer",
 				"title": "Update emailer",
 				"description": "Update the details of this SMTP emailer"
+			}
+		},
+		"server/tags": {
+			"helmet": "Tag management",
+			"title": "Tags",
+			"description": "Create and manage tags for organizing your content",
+			"sections": {
+				"table": {
+					"title": "Tags",
+					"description": "All tags available on this server",
+					"empty": {
+						"title": "No tags",
+						"action": "Create your first tag to get started"
+					},
+					"columns": {
+						"name": "Name"
+					},
+					"actionMenu": {
+						"rename": "Rename"
+					}
+				},
+				"createTag": {
+					"trigger": "Create tag",
+					"modal": {
+						"heading": "Create new tag",
+						"description": "Tags can be assigned to books, series, and libraries",
+						"name": {
+							"label": "Name",
+							"placeholder": "Enter tag name"
+						},
+						"submit": "Create"
+					}
+				},
+				"renameTag": {
+					"modal": {
+						"heading": "Rename tag",
+						"description": "Change the name of this tag across all assigned items",
+						"name": {
+							"label": "Name",
+							"placeholder": "Enter new tag name"
+						},
+						"submit": "Rename"
+					}
+				},
+				"deleteTag": {
+					"title": "Delete tag",
+					"description": "This tag will be removed from all books, series, and libraries. This cannot be undone.",
+					"confirm": "Delete"
+				}
 			}
 		}
 	},

@@ -2,15 +2,17 @@ use crate::routers::kobo::sync_types::*;
 use chrono::Utc;
 use models::entity::{media, reading_session};
 
+// a UUID that we can use when we don't have an ID that is more appropriate.
+const DUMMY_UUID: &str = "00000000-0000-0000-0000-000000000001";
+
 impl BookMetadata {
 	pub fn from_media(m: &media::ModelWithMetadata, book_url: String) -> Self {
-		let dummy_uuid = "00000000-0000-0000-0000-000000000001";
 		let media_id = &m.media.id;
 
 		let writers = m.metadata.as_ref().and_then(|mm| mm.writers.clone());
 
 		BookMetadata {
-			categories: vec![dummy_uuid.to_string()],
+			categories: vec![DUMMY_UUID.to_string()],
 			contributor_roles: writers
 				.clone()
 				.into_iter()
@@ -36,7 +38,7 @@ impl BookMetadata {
 			}],
 			entitlement_id: media_id.clone(),
 			external_ids: vec![],
-			genre: dummy_uuid.to_string(),
+			genre: DUMMY_UUID.to_string(),
 			is_eligible_for_kobo_love: false,
 			is_internet_archive: false,
 			is_pre_order: false,

@@ -328,7 +328,7 @@ impl<'a> SyncPage<'a> {
 		db: &'a DatabaseConnection,
 		user: &'a AuthUser,
 		sync_id: String,
-		media_ids: &Vec<String>,
+		media_ids: &[String],
 		offset: usize,
 		limit: usize,
 		previous_sync_at: Option<DateTimeWithTimeZone>,
@@ -359,10 +359,7 @@ impl<'a> SyncPage<'a> {
 		}
 	}
 
-	async fn sync_items(
-		&self,
-		kobo_api_base_url: String,
-	) -> Result<Vec<SyncItem>, DbErr> {
+	async fn sync_items(&self, kobo_api_base_url: &str) -> Result<Vec<SyncItem>, DbErr> {
 		let items: Vec<media::ModelWithMetadata> =
 			ModelWithMetadata::find_by_ids_for_user(&self.media_ids, self.user)
 				.filter(media::Column::Extension.eq("epub"))
@@ -430,11 +427,23 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 			.route("/v1/initialization", get(initialization))
 			.route("/v1/library/sync", get(library_sync))
 			.route("/v1/library/{book_id}/metadata", get(book_metadata))
-      .route("/v1/books/{book_id}/thumbnail/{width}/{height}/{is_greyscale}/image.jpg", get(book_thumbnail))
-      .route("/v1/books/{book_id}/thumbnail/{width}/{height}/{quality}/{is_greyscale}/image.jpg", get(book_thumbnail))
+			.route(
+				"/v1/books/{book_id}/thumbnail/{width}/{height}/{is_greyscale}/image.jpg",
+				get(book_thumbnail),
+			)
+			.route(
+				"/v1/books/{book_id}/thumbnail/{width}/{height}/{quality}/{is_greyscale}/image.jpg",
+				get(book_thumbnail)
+			)
 			.route("/v1/books/{book_id}/file/epub", get(book_download))
 			// The Kobo requests many routes that we don't implement.
-			.route("/v1/{*path}", get(empty_json).post(empty_json).put(empty_json).delete(empty_json))
+			.route(
+				"/v1/{*path}",
+				get(empty_json)
+					.post(empty_json)
+					.put(empty_json)
+					.delete(empty_json),
+			)
 			.layer(middleware::from_fn(authorize)) // Note the order!
 			.layer(middleware::from_fn_with_state(
 				app_state,
@@ -563,7 +572,7 @@ async fn library_sync(
 	// Komga proxies once its own material has been synced.
 
 	let kobo_api_base_url = format!("{}/kobo/{}", host.url(), api_key);
-	let sync_items = sync_page.sync_items(kobo_api_base_url).await?;
+	let sync_items = sync_page.sync_items(kobo_api_base_url.as_str()).await?;
 
 	Ok(SyncResponse {
 		sync_items,
@@ -1045,7 +1054,7 @@ mod tests {
 			Some(previous_sync_at),
 		);
 		let sync_items = sync_page
-			.sync_items("https://stump.example.org/".to_string())
+			.sync_items("https://stump.example.org/")
 			.await
 			.expect("failed to retrieve sync items");
 
@@ -1093,7 +1102,7 @@ mod tests {
 			Some(previous_sync_at),
 		);
 		let sync_items = sync_page
-			.sync_items("https://stump.example.org/".to_string())
+			.sync_items("https://stump.example.org/")
 			.await
 			.expect("failed to retrieve sync items");
 

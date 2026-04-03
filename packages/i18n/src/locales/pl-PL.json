@@ -309,9 +309,9 @@
 				"resizeMethod": {
 					"label": "Metoda skalowania",
 					"options": {
-						"scaleEvenlyByFactor": "Skalowane równomiernie",
+						"scaleEvenlyByFactor": "Skalowanie równomierne",
 						"exact": "Dokładny wymiar",
-						"scaleDimension": "Skalowane automatycznie",
+						"scaleDimension": "Skalowanie automatyczne",
 						"none": "Żadne"
 					}
 				},
@@ -331,7 +331,7 @@
 					}
 				},
 				"scaleDimension": {
-					"label": "Skalowane automatycznie",
+					"label": "Skalowanie automatyczne",
 					"description": "Ustaw szerokość lub wysokość miniatury, a druga wartość zostanie wyskalowana automatycznie tak, aby zachować oryginalny współczynnik kształtu",
 					"dimension": {
 						"label": "Wymiar",
@@ -366,11 +366,11 @@
 					"addButton": "Dodaj regułę",
 					"ignoreParents": {
 						"title": "Pomijaj wszystkie katalogi nadrzędne",
-						"label": "Wzorce pomijania"
+						"label": "Ignoruj nadrzędne"
 					},
 					"ignoreSubdirs": {
-						"title": "Pomijaj wszystkie podkatalogi",
-						"label": "Pomijaj podkatalogi"
+						"title": "Ignoruj wszystkie podkatalogi",
+						"label": "Ignoruj podrzędne"
 					}
 				},
 				"invalidGlob": "Nieprawidłowy wzorzec",
@@ -505,7 +505,7 @@
 					"processMetadata": "Przetwarzaj metadane",
 					"generateFileHashes": "Generuj skróty plików",
 					"generateKoreaderHashes": "Generuj skróty KoReader",
-					"scaleEvenlyByFactor": "Skalowane równomiernie",
+					"scaleEvenlyByFactor": "Skalowanie równomierne",
 					"exact": "Dokładny wymiar",
 					"scaleDimension": "O stałych wymiarach"
 				}
@@ -1296,9 +1296,9 @@
 					},
 					"heading": "Język i ustawienia regionalne",
 					"subtitle": [
-						"Stump obsługuje wiele języków i ustawień regionalnych, ustaw swoje preferencje poniżej. Proszę rozważ pomoc w poprawie jakości",
+						"Stump obsługuje wiele języków i ustawień regionalnych, ustaw swoje preferencje poniżej. Jeśli jesteś w stanie, proszę rozważ pomoc w poprawie jakości",
 						"tłumaczeń Stump",
-						"jeśli jesteś w stanie!"
+						"!"
 					]
 				}
 			}

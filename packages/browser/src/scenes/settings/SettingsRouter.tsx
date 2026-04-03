@@ -20,6 +20,7 @@ const GeneralServerSettingsScene = lazy(
 )
 const ServerLogsScene = lazy(() => import('./server/logs/ServerLogsScene.tsx'))
 const JobSettingsScene = lazy(() => import('./server/jobs/JobSettingsScene.tsx'))
+const TagSettingsScene = lazy(() => import('./server/tags'))
 
 /**
  * The main router for the settings scene(s). Mostly just a collection of nested routers
@@ -42,6 +43,10 @@ export default function SettingsRouter() {
 		() => checkPermission(UserPermission.EmailerManage),
 		[checkPermission],
 	)
+	const canManageLibrary = useMemo(
+		() => checkPermission(UserPermission.ManageLibrary),
+		[checkPermission],
+	)
 
 	return (
 		<Routes>
@@ -59,6 +64,7 @@ export default function SettingsRouter() {
 				{canManageServer && <Route path="jobs" element={<JobSettingsScene />} />}
 				{canManageUsers && <Route path="users/*" element={<UsersRouter />} />}
 				{canManageEmail && <Route path="email/*" element={<EmailSettingsRouter />} />}
+				{canManageLibrary && <Route path="tags" element={<TagSettingsScene />} />}
 
 				<Route path="*" element={<Navigate to="account" replace />} />
 			</Route>

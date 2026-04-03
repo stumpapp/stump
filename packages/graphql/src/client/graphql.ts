@@ -5853,6 +5853,25 @@ export type PersistedLogsQueryVariables = Exact<{
 
 export type PersistedLogsQuery = { __typename?: 'Query', logs: { __typename?: 'PaginatedLogResponse', nodes: Array<{ __typename?: 'Log', id: number, timestamp: any, level: LogLevel, message: string, jobId?: string | null, context?: string | null }>, pageInfo: { __typename: 'CursorPaginationInfo' } | { __typename: 'OffsetPaginationInfo', totalPages: number, currentPage: number, pageSize: number, pageOffset: number, zeroBased: boolean } } };
 
+export type CreateTagModalMutationVariables = Exact<{
+  tags: Array<Scalars['String']['input']> | Scalars['String']['input'];
+}>;
+
+
+export type CreateTagModalMutation = { __typename?: 'Mutation', createTags: Array<{ __typename?: 'Tag', id: number, name: string }> };
+
+export type DeleteTagConfirmModalMutationVariables = Exact<{
+  tags: Array<Scalars['String']['input']> | Scalars['String']['input'];
+}>;
+
+
+export type DeleteTagConfirmModalMutation = { __typename?: 'Mutation', deleteTags: Array<{ __typename?: 'Tag', id: number, name: string }> };
+
+export type TagTableQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type TagTableQuery = { __typename?: 'Query', tags: Array<{ __typename?: 'Tag', id: number, name: string }> };
+
 export type UserStatsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -11176,6 +11195,30 @@ export const PersistedLogsDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<PersistedLogsQuery, PersistedLogsQueryVariables>;
+export const CreateTagModalDocument = new TypedDocumentString(`
+    mutation CreateTagModal($tags: [String!]!) {
+  createTags(tags: $tags) {
+    id
+    name
+  }
+}
+    `) as unknown as TypedDocumentString<CreateTagModalMutation, CreateTagModalMutationVariables>;
+export const DeleteTagConfirmModalDocument = new TypedDocumentString(`
+    mutation DeleteTagConfirmModal($tags: [String!]!) {
+  deleteTags(tags: $tags) {
+    id
+    name
+  }
+}
+    `) as unknown as TypedDocumentString<DeleteTagConfirmModalMutation, DeleteTagConfirmModalMutationVariables>;
+export const TagTableDocument = new TypedDocumentString(`
+    query TagTable {
+  tags {
+    id
+    name
+  }
+}
+    `) as unknown as TypedDocumentString<TagTableQuery, TagTableQueryVariables>;
 export const UserStatsDocument = new TypedDocumentString(`
     query UserStats {
   userCount

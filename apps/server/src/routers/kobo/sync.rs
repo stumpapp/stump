@@ -242,6 +242,18 @@ impl KoboSync {
 		client_sync_token: Option<&SyncToken>,
 		limit: usize,
 	) -> Result<SyncPage<'a>, sea_orm::DbErr> {
+		// if token is none
+		//   begin new session (from scratch)
+		//
+		// if token is completed
+		//   begin new session (incremental)
+		//
+		// look up session
+		// if session does not exist
+		//   begin new session (from scratch)
+		// else
+		//   continue session
+
 		let prev_sync = match client_sync_token {
 			Some(ref t) => KoboSync::find(&db, &user, t.sync_id.clone()).await,
 			None => None,

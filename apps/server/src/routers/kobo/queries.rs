@@ -29,7 +29,9 @@ impl BookMetadata {
 			description: m.metadata.clone().and_then(|mm| mm.summary),
 			download_urls: vec![DownloadUrl {
 				drm_type: "None".to_string(),
-				format: Format::EPUB, // TODO
+				// this seems to be unrelated to the EPUB 3 spec.
+				// the Kobo ignores books with format: "EPUB".
+				format: Format::EPUB3,
 				size: u64::try_from(m.media.size).unwrap_or(0),
 				platform: "Generic".to_string(),
 				url: book_url,

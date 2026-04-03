@@ -7,16 +7,14 @@ impl BookMetadata {
 		let dummy_uuid = "00000000-0000-0000-0000-000000000001";
 		let media_id = &m.media.id;
 
-		let writers = m.metadata.clone().and_then(|mm| mm.writers);
+		let writers = m.metadata.as_ref().and_then(|mm| mm.writers.clone());
 
 		BookMetadata {
 			categories: vec![dummy_uuid.to_string()],
 			contributor_roles: writers
 				.clone()
 				.into_iter()
-				.map(|w| ContributorRole {
-					name: w.to_string(),
-				})
+				.map(|w| ContributorRole { name: w })
 				.collect(),
 			contributors: writers.clone().into_iter().collect(),
 			cover_image_id: media_id.clone(),
@@ -57,8 +55,8 @@ impl BookMetadata {
 			series: None, // TODO
 			title: m
 				.metadata
-				.clone()
-				.and_then(|mm| mm.title)
+				.as_ref()
+				.and_then(|mm| mm.title.clone())
 				.unwrap_or(m.media.name.clone()),
 			work_id: media_id.clone(),
 		}

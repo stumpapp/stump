@@ -255,7 +255,7 @@ impl KoboSync {
 		//   continue session
 
 		let prev_sync = match client_sync_token {
-			Some(ref t) => KoboSync::find(&db, &user, t.sync_id.clone()).await,
+			Some(t) => KoboSync::find(&db, &user, t.sync_id.clone()).await,
 			None => None,
 		};
 
@@ -348,13 +348,13 @@ impl<'a> SyncPage<'a> {
 			previous_sync_at,
 
 			media_ids: media_ids[start..next_offset].to_vec(),
-			should_continue: should_continue,
+			should_continue,
 
 			sync_token: SyncToken {
 				version: 1,
-				sync_id: sync_id,
+				sync_id,
 				completed: !should_continue,
-				next_offset: next_offset,
+				next_offset,
 			},
 		}
 	}
@@ -393,10 +393,11 @@ impl<'a> SyncPage<'a> {
 
 				let rs = reading_sessions_by_media_id.get(&m.media.id);
 
-				if self
+				let created_since_last_sync = self
 					.previous_sync_at
-					.map_or(true, |ps| m.media.created_at >= ps)
-				{
+					.is_none_or(|ps| m.media.created_at >= ps);
+
+				if created_since_last_sync {
 					SyncItem::NewEntitlement(BookEntitlementContainer::from_media(
 						m, rs, book_url,
 					))
@@ -513,7 +514,7 @@ async fn library_sync(
 		match SyncToken::try_from_header_value(h) {
 			Ok(sync_token) => Some(sync_token),
 			Err(e) => {
-				tracing::error!(?e, "Could not load client's Kobo sync token");
+				tracing::error!(?e, "Could not parse client's Kobo sync token");
 				None
 			},
 		}
@@ -565,7 +566,7 @@ async fn library_sync(
 	let sync_items = sync_page.sync_items(kobo_api_base_url).await?;
 
 	Ok(SyncResponse {
-		sync_items: sync_items,
+		sync_items,
 		should_continue: sync_page.should_continue,
 		sync_token: sync_page.sync_token,
 	})
@@ -618,8 +619,8 @@ async fn book_thumbnail(
 				// TODO: ImageResizeMethod::FitWithin?
 				// (similar implementation to ScaledDimensionResize)
 				resize_method: Some(ImageResizeMethod::Exact(ExactDimensionResize {
-					width: width,
-					height: height,
+					width,
+					height,
 				})),
 				..Default::default()
 			},

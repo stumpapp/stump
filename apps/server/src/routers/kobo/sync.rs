@@ -263,7 +263,7 @@ impl KoboSync {
 			.as_ref()
 			.map(|s| s.model.created_at.fixed_offset());
 
-		match (client_sync_token, &prev_sync) {
+		let (session, offset) = match (client_sync_token, prev_sync) {
 			// we're continuing an existing sync session
 			(
 				Some(SyncToken {
@@ -271,17 +271,8 @@ impl KoboSync {
 					next_offset,
 					..
 				}),
-				Some(prev_sync),
-			) => Ok(SyncPage::new(
-				db,
-				user,
-				prev_sync.model.id.clone(),
-				&prev_sync.model.media_ids.0,
-				*next_offset,
-				limit,
-				// FIXME: this isn't right! in this case we still need to look at the _previous_ sync
-				previous_sync_began_at,
-			)),
+				Some(session),
+			) => (session, *next_offset),
 			// there was no previous sync session, or the previous session completed
 			(_, _) => {
 				let session = KoboSync::begin_new_sync(
@@ -293,17 +284,19 @@ impl KoboSync {
 				)
 				.await?;
 
-				Ok(SyncPage::new(
-					db,
-					user,
-					session.model.id.clone(),
-					&session.model.media_ids.0,
-					0,
-					limit,
-					previous_sync_began_at,
-				))
+				(session, 0)
 			},
-		}
+		};
+
+		Ok(SyncPage::new(
+			db,
+			user,
+			session.model.id.clone(),
+			&session.model.media_ids.0,
+			offset,
+			limit,
+			session.model.previous_sync_at,
+		))
 	}
 }
 

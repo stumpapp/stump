@@ -23,6 +23,9 @@ pub struct Model {
 	pub device_metadata: Json,
 	// TODO: DateTimeWithTimeZone?
 	pub created_at: DateTimeUtc,
+
+	// the time that the sync session before this one began.
+	// or None if there was no sync session before this one.
 	pub previous_sync_at: Option<DateTimeWithTimeZone>,
 }
 

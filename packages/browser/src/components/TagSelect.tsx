@@ -44,6 +44,13 @@ export default function TagSelect({ label, description, selected = [], onChange 
 				return exists
 			}),
 		)
+
+		// Remove any selected tags that no longer exist
+		const tagNames = new Set(tags.map((tag) => tag.name.toLowerCase()))
+		const filtered = selected.filter((s) => tagNames.has(s.value))
+		if (filtered.length !== selected.length) {
+			onChange(filtered.length > 0 ? filtered : undefined)
+		}
 	}, [tags])
 
 	const handleChange = useCallback(

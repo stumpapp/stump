@@ -8,6 +8,7 @@ import { formatRouteKey, useRouteGroups } from '@/hooks/useRouteGroups'
 import { useTheme } from '@/hooks/useTheme'
 import { usePaths } from '@/paths'
 import { SideBarLinkButton } from '@/scenes/settings'
+import { useAppStore } from '@/stores'
 
 import { useLibraryContext } from '../../context'
 import { routeGroups } from './routes'
@@ -24,6 +25,7 @@ export default function LibrarySettingsSidebar() {
 	} = usePreferences()
 	const { shouldUseGradient } = useTheme()
 	const { groups } = useRouteGroups({ routeGroups })
+	const platform = useAppStore((store) => store.platform)
 
 	return (
 		<div
@@ -35,6 +37,9 @@ export default function LibrarySettingsSidebar() {
 				{
 					'from-background-gradient-from to-background-gradient-to bg-linear-to-l':
 						shouldUseGradient,
+				},
+				{
+					'top-10': platform !== 'browser' && primaryNavigationMode === 'SIDEBAR',
 				},
 			)}
 		>

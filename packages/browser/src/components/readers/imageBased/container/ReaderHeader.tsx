@@ -1,10 +1,11 @@
-import { Link, Text } from '@stump/components'
+import { cn, Link, Text } from '@stump/components'
 import { motion } from 'framer-motion'
 import { ArrowLeft, Fullscreen, Shrink } from 'lucide-react'
 import { useFullscreen } from 'rooks'
 
 import { usePaths } from '@/paths'
 import { useBookPreferences } from '@/scenes/book/reader/useBookPreferences'
+import { useAppStore } from '@/stores'
 
 import { useImageBaseReaderContext } from '../context'
 import ControlButton from './ControlButton'
@@ -18,6 +19,8 @@ export default function ReaderHeader() {
 	} = useBookPreferences({ book })
 	const paths = usePaths()
 
+	const platform = useAppStore((store) => store.platform)
+
 	const { id, resolvedName } = book
 
 	const { isFullscreenAvailable, isFullscreenEnabled, toggleFullscreen } = useFullscreen()
@@ -27,7 +30,9 @@ export default function ReaderHeader() {
 	return (
 		<motion.nav
 			// @ts-expect-error: It does have className?
-			className="left-0 top-0 h-12 px-4 fixed z-100 flex w-full items-center text-foreground"
+			className={cn('left-0 top-0 h-12 px-4 fixed z-100 flex w-full items-center text-foreground', {
+				'top-9': platform !== 'browser',
+			})}
 			initial={false}
 			animate={showToolBar ? 'visible' : 'hidden'}
 			variants={transition}

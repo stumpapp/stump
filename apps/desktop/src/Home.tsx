@@ -40,7 +40,6 @@ export default function Home() {
 					status: await checkUrl(formatApiURL(server.url, 'v2')),
 				}) as PingResult,
 			queryKey: ['ping', server.url, server.name],
-			// refetchInterval: (query: Query<unknown, Error, unknown, readonly unknown[]>) => number | false | undefined
 			refetchInterval: (result?: PingResult) => {
 				if (!result) return false
 				return result.status ? PING_HEALTHY_INTERVAL_MS : PING_UNHEALTHY_INTERVAL_MS
@@ -102,10 +101,7 @@ export default function Home() {
 				onConfirm={onDeleteServer}
 				isLastServer={savedServers.length === 1}
 			/>
-			<div
-				data-tauri-drag-region
-				className="py-6 flex h-screen w-screen items-center bg-background"
-			>
+			<div className="py-6 flex h-full w-full items-center bg-background">
 				<div className="max-w-sm gap-6 sm:max-w-md md:max-w-xl mx-auto flex h-full w-full flex-col justify-center">
 					<div className="gap-y-6 flex flex-col">
 						<div className="flex items-end justify-between">

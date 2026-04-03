@@ -38,6 +38,9 @@ export default function SettingsSideBar() {
 					'from-background-gradient-from to-background-gradient-to bg-linear-to-l':
 						shouldUseGradient,
 				},
+				{
+					'top-10': platform !== 'browser' && primaryNavigationMode === 'SIDEBAR',
+				},
 			)}
 		>
 			<div className="gap-4 flex h-full grow flex-col">

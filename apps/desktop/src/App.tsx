@@ -7,11 +7,12 @@ import { useAppStore } from '@stump/browser/stores'
 import { DesktopAppContext, useDesktopAppContext } from '@stump/client'
 import { LocaleProvider } from '@stump/i18n'
 import { QueryClient, QueryClientContext } from '@tanstack/react-query'
-import { createStore, Store } from '@tauri-apps/plugin-store'
+import { Store } from '@tauri-apps/plugin-store'
 import { useEffect, useState } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 
+import AppTitleBar from './components/AppTitleBar'
 import Home from './Home'
 import SavedServerEntry from './SavedServerEntry'
 import { useSavedServerStore } from './stores/savedServer'
@@ -64,37 +65,43 @@ function App() {
 
 	return (
 		<BrowserRouter>
-			<Routes>
-				<Route
-					path="/"
-					element={
-						<QueryClientContext.Provider value={localClient}>
-							<LocaleProvider>
-								<Home />
-							</LocaleProvider>
-							<Toaster />
-						</QueryClientContext.Provider>
-					}
-				/>
-				<Route
-					path="server/:serverId/*"
-					element={
-						<ErrorBoundary FallbackComponent={ErrorFallback}>
-							<SavedServerEntry tauriRPC={tauriRPC} />
-						</ErrorBoundary>
-					}
-				/>
-			</Routes>
+			<div className="flex h-full flex-col">
+				<AppTitleBar />
+				<div className="flex-1 overflow-hidden">
+					<Routes>
+						<Route
+							path="/"
+							element={
+								<QueryClientContext.Provider value={localClient}>
+									<LocaleProvider>
+										<Home />
+									</LocaleProvider>
+									<Toaster />
+								</QueryClientContext.Provider>
+							}
+						/>
+						<Route
+							path="server/:serverId/*"
+							element={
+								<ErrorBoundary FallbackComponent={ErrorFallback}>
+									<SavedServerEntry tauriRPC={tauriRPC} />
+								</ErrorBoundary>
+							}
+						/>
+					</Routes>
+				</div>
+			</div>
 		</BrowserRouter>
 	)
 }
 
 export default function AppEntry() {
-	const [store, setStore] = useState<Store>()
+	const [store, setStore] = useState<Store | undefined>()
 
 	useEffect(() => {
 		const init = async () => {
-			setStore(await createStore('settings.json'))
+			const loadedStore = await Store.load('settings.json')
+			setStore(loadedStore)
 		}
 
 		if (!store) {

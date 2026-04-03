@@ -18,6 +18,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { match, P } from 'ts-pattern'
 
+import ServerAuthDialog from './components/ServerAuthDialog'
 import { ServerConfig, useSavedServers } from './stores/savedServer'
 
 type Props = Pick<StumpClientProps, 'tauriRPC'>
@@ -36,7 +37,8 @@ export default function SavedServerEntry({ tauriRPC }: Props) {
 
 	const [sdk, setSDK] = useState<Api | null>(null)
 	const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false)
-	const [user, setUser] = useUserStore((store) => [store.user, store.setUser])
+	const user = useUserStore((store) => store.user)
+	const setUser = useUserStore((store) => store.setUser)
 
 	const isServerAccessible = useRef(true)
 
@@ -127,7 +129,6 @@ export default function SavedServerEntry({ tauriRPC }: Props) {
 		}
 	}, [])
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const handleAuthDialogClose = useCallback(
 		(loginResp?: LoginResponse) => {
 			if (!loginResp || !('forUser' in loginResp) || !activeServer) {
@@ -196,7 +197,6 @@ export default function SavedServerEntry({ tauriRPC }: Props) {
 		return null
 	}
 
-	// TODO(desktop): ServerAuthDialog
 	return (
 		<StumpClientContextProvider
 			onUnauthenticatedResponse={onAuthError}
@@ -206,7 +206,7 @@ export default function SavedServerEntry({ tauriRPC }: Props) {
 			tauriRPC={tauriRPC}
 		>
 			<SDKContext.Provider value={{ sdk, setSDK }}>
-				{/* <ServerAuthDialog isOpen={isAuthDialogOpen} onClose={handleAuthDialogClose} /> */}
+				<ServerAuthDialog isOpen={isAuthDialogOpen} onClose={handleAuthDialogClose} />
 				{sdk.isAuthed && <StumpRouter basePath={`/server/${serverId}`} />}
 			</SDKContext.Provider>
 		</StumpClientContextProvider>

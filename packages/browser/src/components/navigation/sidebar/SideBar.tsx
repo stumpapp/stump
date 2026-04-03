@@ -21,7 +21,6 @@ import { usePrefetchHomeScene } from '@/scenes/home'
 import { useAppStore } from '@/stores'
 
 import UserMenu from '../../UserMenu'
-import NavigationButtons from '../mobile/NavigationButtons'
 import { BookClubSideBarSection, LibrarySideBarSection, SmartListSideBarSection } from './sections'
 import SideBarButtonLink from './SideBarButtonLink'
 import SideBarFooter from './SideBarFooter'
@@ -74,22 +73,8 @@ export default function SideBar({ asChild, hidden }: Props) {
 	const { checkPermission } = useAppContext()
 	const { shouldUseGradient } = useTheme()
 
-	const isBrowser = platform === 'browser'
 	const isAtLeastMedium = useMediaMatch('(min-width: 768px)')
 	const isMobile = useMediaMatch('(max-width: 768px)')
-
-	const renderHeader = () => {
-		if (!isBrowser && isAtLeastMedium) {
-			return (
-				<header className="gap-1 flex w-full justify-between">
-					<UserMenu />
-					<NavigationButtons />
-				</header>
-			)
-		}
-
-		return null
-	}
 
 	const checkSectionPermission = useCallback(
 		(variant: SystemArrangement) => {
@@ -171,16 +156,14 @@ export default function SideBar({ asChild, hidden }: Props) {
 	const renderContent = () => {
 		return (
 			<>
-				{renderHeader()}
-
 				<div className="gap-2 p-1 scrollbar-hide flex max-h-full grow flex-col overflow-y-auto">
-					{isAtLeastMedium && isBrowser && <UserMenu />}
+					{isAtLeastMedium && <UserMenu />}
 
 					{sections}
 				</div>
 				<Spacer />
 
-				{isAtLeastMedium && <SideBarFooter />}
+				{isAtLeastMedium && platform === 'browser' && <SideBarFooter />}
 			</>
 		)
 	}

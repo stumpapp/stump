@@ -2,6 +2,8 @@ import { SupportedFont } from '@stump/graphql'
 import { useEffect } from 'react'
 import { useMediaMatch } from 'rooks'
 
+import { DARK_THEMES } from './useTheme'
+
 /**
  * The parameters for the `useApplyTheme` hook
  */
@@ -46,8 +48,11 @@ export function useApplyTheme({ appTheme, appFont = SupportedFont.Inter }: Param
 			html?.classList.add(resolvedTheme)
 		}
 
+		const isDarkTheme =
+			DARK_THEMES.includes(resolvedTheme) || (resolvedTheme === 'system' && prefersDark)
+
 		// https://github.com/darkreader/darkreader/discussions/15128
-		if (resolvedTheme === 'dark') {
+		if (isDarkTheme) {
 			let meta = document.querySelector('meta[name="color-scheme"]')
 			if (!meta) {
 				meta = document.createElement('meta')
@@ -56,6 +61,14 @@ export function useApplyTheme({ appTheme, appFont = SupportedFont.Inter }: Param
 				// @ts-expect-error: this is a valid attribute
 				meta.content = 'dark'
 				document.head.appendChild(meta)
+			}
+		} else {
+			// if we're switching to a light theme, we need to remove it so dark reader can mess with the colors
+			// i imagine folks running dark reader won't hit this since why would they switch to light lol but
+			// figure this is "correct" so
+			const meta = document.querySelector('meta[name="color-scheme"]')
+			if (meta) {
+				document.head.removeChild(meta)
 			}
 		}
 	}, [appTheme, prefersDark])

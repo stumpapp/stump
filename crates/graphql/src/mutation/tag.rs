@@ -2,8 +2,8 @@ use crate::{data::CoreContext, object::tag::Tag};
 use async_graphql::{Context, Object, Result};
 use models::entity::tag;
 use sea_orm::{
-	prelude::*, ActiveValue::Set, DatabaseConnection, DatabaseTransaction, QuerySelect,
-	TransactionTrait,
+	prelude::*, ActiveValue::Set, DatabaseConnection, DatabaseTransaction,
+	IntoActiveModel, QuerySelect, TransactionTrait,
 };
 use std::collections::HashSet;
 
@@ -24,6 +24,13 @@ impl TagMutation {
 	) -> Result<Vec<Tag>> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 		create_tags(conn, tags).await
+	}
+
+	/// Rename a tag. Returns the updated tag, or an error if the tag was not found or the new
+	/// name already exists.
+	async fn rename_tag(&self, ctx: &Context<'_>, id: i32, name: String) -> Result<Tag> {
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+		rename_tag(conn, id, name).await
 	}
 
 	/// Delete tags. Returns a list containing the deleted tags, or an error if deletion failed.
@@ -103,6 +110,36 @@ async fn create_tags(conn: &DatabaseConnection, tags: Vec<String>) -> Result<Vec
 	txn.commit().await?;
 
 	Ok(inserted_tags.into_iter().map(Tag::from).collect())
+}
+
+async fn rename_tag(conn: &DatabaseConnection, id: i32, name: String) -> Result<Tag> {
+	let name = name.trim().to_string();
+	if name.is_empty() {
+		return Err("Tag name cannot be empty".into());
+	}
+
+	let existing = tag::Entity::find()
+		.filter(tag::Column::Name.eq(name.clone()))
+		.one(conn)
+		.await?;
+	if let Some(existing) = existing {
+		if existing.id != id {
+			return Err(format!("A tag with name '{}' already exists", name).into());
+		}
+		// Name is unchanged, just return it
+		return Ok(Tag::from(existing));
+	}
+
+	let model = tag::Entity::find_by_id(id)
+		.one(conn)
+		.await?
+		.ok_or("Tag not found")?;
+
+	let mut active_model = model.into_active_model();
+	active_model.name = Set(name);
+	let updated = active_model.update(conn).await?;
+
+	Ok(Tag::from(updated))
 }
 
 #[cfg(test)]
@@ -197,5 +234,91 @@ mod tests {
 		let tags = vec!["hello".to_string(), "hello".to_string()];
 		let unique_tags = get_unique_tags(&txn, tags).await.unwrap();
 		assert_eq!(unique_tags, vec!["hello".to_string()]);
+	}
+
+	#[tokio::test]
+	async fn test_rename_tag() {
+		let original = tag::Model {
+			id: 1,
+			name: "old_name".to_string(),
+		};
+		let renamed = tag::Model {
+			id: 1,
+			name: "new_name".to_string(),
+		};
+
+		// Query 1: find by name (no conflict) -> empty
+		// Query 2: find by id -> original
+		// Query 3: update -> renamed
+		let conn = MockDatabase::new(sea_orm::DatabaseBackend::Sqlite)
+			.append_query_results::<tag::Model, Vec<_>, Vec<Vec<_>>>(vec![
+				vec![],
+				vec![original],
+				vec![renamed.clone()],
+			])
+			.append_exec_results(vec![MockExecResult {
+				last_insert_id: 1,
+				rows_affected: 1,
+			}])
+			.into_connection();
+
+		let result = rename_tag(&conn, 1, "new_name".to_string()).await.unwrap();
+		assert_eq!(result, Tag { model: renamed });
+	}
+
+	#[tokio::test]
+	async fn test_rename_tag_empty_name() {
+		let conn = MockDatabase::new(sea_orm::DatabaseBackend::Sqlite).into_connection();
+
+		let result = rename_tag(&conn, 1, "   ".to_string()).await;
+		assert!(result.is_err());
+	}
+
+	#[tokio::test]
+	async fn test_rename_tag_conflict() {
+		let conflicting = tag::Model {
+			id: 2,
+			name: "taken".to_string(),
+		};
+
+		// Query 1: find by name -> found with different id
+		let conn = MockDatabase::new(sea_orm::DatabaseBackend::Sqlite)
+			.append_query_results::<tag::Model, Vec<_>, Vec<Vec<_>>>(vec![vec![
+				conflicting,
+			]])
+			.into_connection();
+
+		let result = rename_tag(&conn, 1, "taken".to_string()).await;
+		assert!(result.is_err());
+	}
+
+	#[tokio::test]
+	async fn test_rename_tag_unchanged() {
+		let existing = tag::Model {
+			id: 1,
+			name: "same".to_string(),
+		};
+
+		// Query 1: find by name -> found with same id (no-op)
+		let conn = MockDatabase::new(sea_orm::DatabaseBackend::Sqlite)
+			.append_query_results::<tag::Model, Vec<_>, Vec<Vec<_>>>(vec![vec![
+				existing.clone()
+			]])
+			.into_connection();
+
+		let result = rename_tag(&conn, 1, "same".to_string()).await.unwrap();
+		assert_eq!(result, Tag { model: existing });
+	}
+
+	#[tokio::test]
+	async fn test_rename_tag_not_found() {
+		// Query 1: find by name -> empty (no conflict)
+		// Query 2: find by id -> empty (not found)
+		let conn = MockDatabase::new(sea_orm::DatabaseBackend::Sqlite)
+			.append_query_results::<tag::Model, Vec<_>, Vec<Vec<_>>>(vec![vec![], vec![]])
+			.into_connection();
+
+		let result = rename_tag(&conn, 999, "new_name".to_string()).await;
+		assert!(result.is_err());
 	}
 }

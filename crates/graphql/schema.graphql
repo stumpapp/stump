@@ -1646,6 +1646,11 @@ type Mutation {
 	"""
 	createTags(tags: [String!]!): [Tag!]!
 	"""
+	Rename a tag. Returns the updated tag, or an error if the tag was not found or the new
+	name already exists.
+	"""
+	renameTag(id: Int!, name: String!): Tag!
+	"""
 	Delete tags. Returns a list containing the deleted tags, or an error if deletion failed.
 	
 	* `tags` - A non-empty list of tags to create.

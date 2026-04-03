@@ -267,6 +267,7 @@ type Documents = {
     "\n\tquery PersistedLogs(\n\t\t$filter: LogFilterInput!\n\t\t$pagination: Pagination!\n\t\t$orderBy: [LogModelOrderBy!]!\n\t) {\n\t\tlogs(filter: $filter, pagination: $pagination, orderBy: $orderBy) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\ttimestamp\n\t\t\t\tlevel\n\t\t\t\tmessage\n\t\t\t\tjobId\n\t\t\t\tcontext\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\ttotalPages\n\t\t\t\t\tcurrentPage\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": typeof types.PersistedLogsDocument,
     "\n\tmutation CreateTagModal($tags: [String!]!) {\n\t\tcreateTags(tags: $tags) {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t}\n": typeof types.CreateTagModalDocument,
     "\n\tmutation DeleteTagConfirmModal($tags: [String!]!) {\n\t\tdeleteTags(tags: $tags) {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t}\n": typeof types.DeleteTagConfirmModalDocument,
+    "\n\tmutation RenameTagModal($id: Int!, $name: String!) {\n\t\trenameTag(id: $id, name: $name) {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t}\n": typeof types.RenameTagModalDocument,
     "\n\tquery TagTable {\n\t\ttags {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t}\n": typeof types.TagTableDocument,
     "\n\tquery UserStats {\n\t\tuserCount\n\t\ttopReaders(take: 1) {\n\t\t\tid\n\t\t\tusername\n\t\t\tfinishedReadingSessionsCount\n\t\t}\n\t\tactiveReadingSessionCount\n\t\tfinishedReadingSessionCount\n\t}\n": typeof types.UserStatsDocument,
     "\n\tmutation CreateOrUpdateUserFormUpdateUser($id: ID!, $input: UpdateUserInput!) {\n\t\tupdateUser(id: $id, input: $input) {\n\t\t\tid\n\t\t\tusername\n\t\t\tageRestriction {\n\t\t\t\tage\n\t\t\t\trestrictOnUnset\n\t\t\t}\n\t\t\tpermissions\n\t\t\tmaxSessionsAllowed\n\t\t}\n\t}\n": typeof types.CreateOrUpdateUserFormUpdateUserDocument,
@@ -547,6 +548,7 @@ const documents: Documents = {
     "\n\tquery PersistedLogs(\n\t\t$filter: LogFilterInput!\n\t\t$pagination: Pagination!\n\t\t$orderBy: [LogModelOrderBy!]!\n\t) {\n\t\tlogs(filter: $filter, pagination: $pagination, orderBy: $orderBy) {\n\t\t\tnodes {\n\t\t\t\tid\n\t\t\t\ttimestamp\n\t\t\t\tlevel\n\t\t\t\tmessage\n\t\t\t\tjobId\n\t\t\t\tcontext\n\t\t\t}\n\t\t\tpageInfo {\n\t\t\t\t__typename\n\t\t\t\t... on OffsetPaginationInfo {\n\t\t\t\t\ttotalPages\n\t\t\t\t\tcurrentPage\n\t\t\t\t\tpageSize\n\t\t\t\t\tpageOffset\n\t\t\t\t\tpageOffset\n\t\t\t\t\tzeroBased\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n": types.PersistedLogsDocument,
     "\n\tmutation CreateTagModal($tags: [String!]!) {\n\t\tcreateTags(tags: $tags) {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t}\n": types.CreateTagModalDocument,
     "\n\tmutation DeleteTagConfirmModal($tags: [String!]!) {\n\t\tdeleteTags(tags: $tags) {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t}\n": types.DeleteTagConfirmModalDocument,
+    "\n\tmutation RenameTagModal($id: Int!, $name: String!) {\n\t\trenameTag(id: $id, name: $name) {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t}\n": types.RenameTagModalDocument,
     "\n\tquery TagTable {\n\t\ttags {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t}\n": types.TagTableDocument,
     "\n\tquery UserStats {\n\t\tuserCount\n\t\ttopReaders(take: 1) {\n\t\t\tid\n\t\t\tusername\n\t\t\tfinishedReadingSessionsCount\n\t\t}\n\t\tactiveReadingSessionCount\n\t\tfinishedReadingSessionCount\n\t}\n": types.UserStatsDocument,
     "\n\tmutation CreateOrUpdateUserFormUpdateUser($id: ID!, $input: UpdateUserInput!) {\n\t\tupdateUser(id: $id, input: $input) {\n\t\t\tid\n\t\t\tusername\n\t\t\tageRestriction {\n\t\t\t\tage\n\t\t\t\trestrictOnUnset\n\t\t\t}\n\t\t\tpermissions\n\t\t\tmaxSessionsAllowed\n\t\t}\n\t}\n": types.CreateOrUpdateUserFormUpdateUserDocument,
@@ -1583,6 +1585,10 @@ export function graphql(source: "\n\tmutation CreateTagModal($tags: [String!]!) 
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n\tmutation DeleteTagConfirmModal($tags: [String!]!) {\n\t\tdeleteTags(tags: $tags) {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t}\n"): typeof import('./graphql').DeleteTagConfirmModalDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n\tmutation RenameTagModal($id: Int!, $name: String!) {\n\t\trenameTag(id: $id, name: $name) {\n\t\t\tid\n\t\t\tname\n\t\t}\n\t}\n"): typeof import('./graphql').RenameTagModalDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

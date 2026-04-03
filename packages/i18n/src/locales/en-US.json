@@ -2159,6 +2159,9 @@
 					},
 					"columns": {
 						"name": "Name"
+					},
+					"actionMenu": {
+						"rename": "Rename"
 					}
 				},
 				"createTag": {
@@ -2171,6 +2174,17 @@
 							"placeholder": "Enter tag name"
 						},
 						"submit": "Create"
+					}
+				},
+				"renameTag": {
+					"modal": {
+						"heading": "Rename tag",
+						"description": "Change the name of this tag across all assigned items",
+						"name": {
+							"label": "Name",
+							"placeholder": "Enter new tag name"
+						},
+						"submit": "Rename"
 					}
 				},
 				"deleteTag": {

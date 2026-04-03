@@ -14,6 +14,7 @@ import { useMemo, useState } from 'react'
 import { getCommonPinningStyles } from '@/components/table/Table'
 
 import DeleteTagConfirmModal from './DeleteTagConfirmModal'
+import RenameTagModal from './RenameTagModal'
 
 const query = graphql(`
 	query TagTable {
@@ -39,6 +40,7 @@ export default function TagTable() {
 	)
 
 	const [deletingTag, setDeletingTag] = useState<Tag | null>(null)
+	const [renamingTag, setRenamingTag] = useState<Tag | null>(null)
 
 	const columns = useMemo(
 		() => [
@@ -64,6 +66,9 @@ export default function TagTable() {
 
 							<Dropdown.Content align="end">
 								<Dropdown.Group>
+									<Dropdown.Item onClick={() => setRenamingTag(tag)}>
+										<span>{t(getActionKey('rename'))}</span>
+									</Dropdown.Item>
 									<Dropdown.Item onClick={() => setDeletingTag(tag)}>
 										<span>{t('common.delete')}</span>
 									</Dropdown.Item>
@@ -112,6 +117,7 @@ export default function TagTable() {
 
 	return (
 		<>
+			<RenameTagModal tag={renamingTag} onClose={() => setRenamingTag(null)} />
 			<DeleteTagConfirmModal tag={deletingTag} onClose={() => setDeletingTag(null)} />
 
 			<Card className="overflow-x-auto">
@@ -170,4 +176,5 @@ const columnHelper = createColumnHelper<Tag>()
 
 const LOCALE_BASE = 'settingsScene.server/tags.sections.table'
 const getColumnKey = (key: string) => `${LOCALE_BASE}.columns.${key}`
+const getActionKey = (key: string) => `${LOCALE_BASE}.actionMenu.${key}`
 const getKey = (key: string) => `${LOCALE_BASE}.${key}`

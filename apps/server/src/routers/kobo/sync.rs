@@ -162,18 +162,12 @@ impl SyncToken {
 	}
 }
 
-struct KoboSync<'a> {
+struct KoboSync {
 	model: kobo_sync::Model,
-	db: &'a DatabaseConnection,
-	user: &'a AuthUser,
 }
 
-impl<'a> KoboSync<'a> {
-	async fn find(
-		db: &'a DatabaseConnection,
-		user: &'a AuthUser,
-		id: String,
-	) -> Option<Self> {
+impl KoboSync {
+	async fn find(db: &DatabaseConnection, user: &AuthUser, id: String) -> Option<Self> {
 		kobo_sync::Entity::find_by_id(id)
 			.one(db)
 			.await
@@ -183,18 +177,14 @@ impl<'a> KoboSync<'a> {
 					tracing::warn!("Attempted to use another user's Kobo sync token");
 					None
 				} else {
-					Some(KoboSync {
-						model: m,
-						db: db,
-						user: user,
-					})
+					Some(KoboSync { model: m })
 				}
 			})
 	}
 
 	async fn begin_new_sync(
-		db: &'a DatabaseConnection,
-		user: &'a AuthUser,
+		db: &DatabaseConnection,
+		user: &AuthUser,
 		device_id: Option<&str>,
 		device_metadata: serde_json::Value,
 		previous_sync_at: Option<DateTimeWithTimeZone>,
@@ -241,20 +231,17 @@ impl<'a> KoboSync<'a> {
 			..Default::default()
 		};
 		let sync = sync.insert(db).await?;
-		Ok(Self {
-			model: sync,
-			db: db,
-			user: user,
-		})
+		Ok(Self { model: sync })
 	}
 
-	async fn continue_or_create(
+	async fn next_page<'a>(
 		db: &'a DatabaseConnection,
 		user: &'a AuthUser,
 		device_id: Option<&str>,
 		device_metadata: serde_json::Value,
 		client_sync_token: Option<&SyncToken>,
-	) -> Result<Self, sea_orm::DbErr> {
+		limit: usize,
+	) -> Result<SyncPage<'a>, sea_orm::DbErr> {
 		let prev_sync = match client_sync_token {
 			Some(ref t) => KoboSync::find(&db, &user, t.sync_id.clone()).await,
 			None => None,
@@ -264,56 +251,115 @@ impl<'a> KoboSync<'a> {
 			.as_ref()
 			.map(|s| s.model.created_at.fixed_offset());
 
-		let should_begin_new_sync =
-			client_sync_token.as_ref().map_or(true, |t| t.completed);
-
-		match (prev_sync, should_begin_new_sync) {
+		match (client_sync_token, &prev_sync) {
 			// we're continuing an existing sync session
-			(Some(prev_sync), false) => Ok(prev_sync),
+			(
+				Some(SyncToken {
+					completed: false,
+					next_offset,
+					..
+				}),
+				Some(prev_sync),
+			) => Ok(SyncPage::new(
+				db,
+				user,
+				prev_sync.model.id.clone(),
+				&prev_sync.model.media_ids.0,
+				*next_offset,
+				limit,
+				// FIXME: this isn't right! in this case we still need to look at the _previous_ sync
+				previous_sync_began_at,
+			)),
 			// there was no previous sync session, or the previous session completed
 			(_, _) => {
-				KoboSync::begin_new_sync(
+				let session = KoboSync::begin_new_sync(
 					&db,
 					&user,
 					device_id,
 					device_metadata,
 					previous_sync_began_at,
 				)
-				.await
+				.await?;
+
+				Ok(SyncPage::new(
+					db,
+					user,
+					session.model.id.clone(),
+					&session.model.media_ids.0,
+					0,
+					limit,
+					previous_sync_began_at,
+				))
 			},
 		}
 	}
+}
 
-	fn paged_media_ids(&self, offset: usize, limit: usize) -> SyncPage {
-		let len = self.model.media_ids.0.len();
+struct SyncPage<'a> {
+	db: &'a DatabaseConnection,
+	user: &'a AuthUser,
+
+	offset: usize,
+	limit: usize,
+
+	// the time that the sync prior to this one began.
+	// used to determine what has changed with each piece of media since the last sync.
+	// TODO: store that in media_ids instead?
+	previous_sync_at: Option<DateTimeWithTimeZone>,
+
+	// IDs of database "media" that should be returned in this page.
+	media_ids: Vec<String>,
+
+	// are there more pages to retrieve in this sync session?
+	should_continue: bool,
+
+	// a token representing the state of the current sync session.
+	// this will be returned to the client, and the client will use it in its next sync request.
+	sync_token: SyncToken,
+}
+
+impl<'a> SyncPage<'a> {
+	fn new(
+		db: &'a DatabaseConnection,
+		user: &'a AuthUser,
+		sync_id: String,
+		media_ids: &Vec<String>,
+		offset: usize,
+		limit: usize,
+		previous_sync_at: Option<DateTimeWithTimeZone>,
+	) -> SyncPage<'a> {
+		let len = media_ids.len();
 		let start = offset.min(len);
 		let next_offset = (offset + limit).min(len);
 
-		let should_continue = next_offset < self.model.media_ids.0.len();
+		let should_continue = next_offset < len;
 
 		SyncPage {
-			media_ids: self.model.media_ids.0[start..next_offset].to_vec(),
+			db,
+			user,
+
+			offset,
+			limit,
+			previous_sync_at,
+
+			media_ids: media_ids[start..next_offset].to_vec(),
 			should_continue: should_continue,
 
 			sync_token: SyncToken {
 				version: 1,
-				sync_id: self.model.id.clone(),
+				sync_id: sync_id,
 				completed: !should_continue,
 				next_offset: next_offset,
 			},
 		}
 	}
 
-	async fn paged_sync_items(
+	async fn sync_items(
 		&self,
-		offset: usize,
-		limit: usize,
 		kobo_api_base_url: String,
-	) -> Result<(SyncPage, Vec<SyncItem>), DbErr> {
-		let sync_page = self.paged_media_ids(offset, limit);
-
+	) -> Result<Vec<SyncItem>, DbErr> {
 		let items: Vec<media::ModelWithMetadata> =
-			ModelWithMetadata::find_by_ids_for_user(&sync_page.media_ids, self.user)
+			ModelWithMetadata::find_by_ids_for_user(&self.media_ids, self.user)
 				.filter(media::Column::Extension.eq("epub"))
 				.into_model::<media::ModelWithMetadata>()
 				.all(self.db)
@@ -321,7 +367,7 @@ impl<'a> KoboSync<'a> {
 
 		let reading_sessions = reading_session::Entity::find()
 			.filter(reading_session::Column::UserId.eq(self.user.id.clone()))
-			.filter(reading_session::Column::MediaId.is_in(&sync_page.media_ids))
+			.filter(reading_session::Column::MediaId.is_in(&self.media_ids))
 			.all(self.db)
 			.await?;
 
@@ -343,7 +389,6 @@ impl<'a> KoboSync<'a> {
 				let rs = reading_sessions_by_media_id.get(&m.media.id);
 
 				if self
-					.model
 					.previous_sync_at
 					.map_or(true, |ps| m.media.created_at >= ps)
 				{
@@ -359,26 +404,14 @@ impl<'a> KoboSync<'a> {
 			.collect();
 
 		tracing::debug!(
-			?offset,
-			?limit,
+			?self.offset,
+			?self.limit,
 			item_count = sync_items.len(),
 			"Generated a page of Kobo sync items"
 		);
 
-		Ok((sync_page, sync_items))
+		Ok(sync_items)
 	}
-}
-
-struct SyncPage {
-	// IDs of database "media" that should be returned in this page.
-	media_ids: Vec<String>,
-
-	// are there more pages to retrieve in this sync session?
-	should_continue: bool,
-
-	// a token representing the state of the current sync session.
-	// this will be returned to the client, and the client will use it in its next sync request.
-	sync_token: SyncToken,
 }
 
 /// Mounts the koreader sync router at `/kobo` (from the parent router).
@@ -488,12 +521,13 @@ async fn library_sync(
 
 	let device_metadata = device_metadata(&headers);
 
-	let sync_session = KoboSync::continue_or_create(
+	let sync_page = KoboSync::next_page(
 		&conn,
 		&user,
 		device_id,
 		serde_json::Value::Object(device_metadata),
 		client_sync_token.as_ref(),
+		ITEMS_PER_PAGE,
 	)
 	.await?;
 
@@ -522,12 +556,8 @@ async fn library_sync(
 	// TODO: how does this interact with the proxy? especially pagination
 	// Komga proxies once its own material has been synced.
 
-	let start_offset = client_sync_token.map_or(0, |t| t.next_offset);
 	let kobo_api_base_url = format!("{}/kobo/{}", host.url(), api_key);
-
-	let (sync_page, sync_items) = sync_session
-		.paged_sync_items(start_offset, ITEMS_PER_PAGE, kobo_api_base_url)
-		.await?;
+	let sync_items = sync_page.sync_items(kobo_api_base_url).await?;
 
 	Ok(SyncResponse {
 		sync_items: sync_items,
@@ -651,8 +681,8 @@ mod tests {
 	use chrono::Days;
 	use models::{
 		entity::{
-			kobo_sync, library, library_exclusion, media, media_metadata, series,
-			series_metadata, user, user_preferences,
+			kobo_sync, library, library_exclusion, media, media_metadata,
+			reading_session, series, series_metadata, user, user_preferences,
 		},
 		shared::enums::FileStatus,
 	};
@@ -662,7 +692,7 @@ mod tests {
 	};
 	use uuid::Uuid;
 
-	use crate::routers::kobo::sync::KoboSync;
+	use crate::routers::kobo::sync::{KoboSync, SyncPage};
 	use crate::routers::kobo::sync_types::SyncItem;
 
 	async fn test_database() -> DbConn {
@@ -690,6 +720,7 @@ mod tests {
 			schema.create_table_from_entity(user::Entity),
 			schema.create_table_from_entity(user_preferences::Entity),
 			schema.create_table_from_entity(library::Entity),
+			schema.create_table_from_entity(reading_session::Entity),
 		];
 
 		for stmt in tables {
@@ -832,12 +863,13 @@ mod tests {
 			permissions: vec![],
 			..Default::default()
 		};
-		let sync = KoboSync::continue_or_create(
+		let sync_page = KoboSync::next_page(
 			&db,
 			&user,
 			Some("kobo-1"),
 			serde_json::json!({}),
 			None,
+			10,
 		)
 		.await
 		.expect("failed to initiate sync");
@@ -848,7 +880,7 @@ mod tests {
 				"robinson-crusoe",
 				"the-count-of-monte-cristo"
 			],
-			sync.model.media_ids.0
+			sync_page.media_ids,
 		);
 
 		// TODO: test ignoring non-epubs
@@ -876,25 +908,33 @@ mod tests {
 			permissions: vec![],
 			..Default::default()
 		};
-		let sync = KoboSync::continue_or_create(
+		let first_page = KoboSync::next_page(
 			&db,
 			&user,
 			Some("kobo-1"),
 			serde_json::json!({}),
 			None,
+			3,
 		)
 		.await
 		.expect("failed to initiate sync");
 
-		let sync_page = sync.paged_media_ids(0, 3);
+		assert_eq!(vec!["book-1", "book-2", "book-3"], first_page.media_ids);
+		assert_eq!(3, first_page.sync_token.next_offset);
+		assert_eq!(true, first_page.should_continue);
 
-		assert_eq!(vec!["book-1", "book-2", "book-3"], sync_page.media_ids);
-		assert_eq!(3, sync_page.sync_token.next_offset);
-		assert_eq!(true, sync_page.should_continue);
-
-		let sync_page = sync.paged_media_ids(sync_page.sync_token.next_offset, 5);
-		assert_eq!(vec!["book-4", "book-5"], sync_page.media_ids);
-		assert_eq!(false, sync_page.should_continue);
+		let second_page = KoboSync::next_page(
+			&db,
+			&user,
+			Some("kobo-1"),
+			serde_json::json!({}),
+			Some(&first_page.sync_token),
+			3,
+		)
+		.await
+		.expect("failed to continue sync");
+		assert_eq!(vec!["book-4", "book-5"], second_page.media_ids);
+		assert_eq!(false, second_page.should_continue);
 	}
 
 	#[tokio::test]
@@ -921,17 +961,17 @@ mod tests {
 		};
 
 		// the client syncs all the media that is initially available
-		let sync = KoboSync::continue_or_create(
+		let sync_page = KoboSync::next_page(
 			&db,
 			&user,
 			Some("kobo-1"),
 			serde_json::json!({}),
 			None,
+			5,
 		)
 		.await
 		.expect("failed to initiate sync");
 
-		let sync_page = sync.paged_media_ids(0, 5);
 		assert_eq!(vec!["book-1", "book-2"], sync_page.media_ids);
 		assert_eq!(false, sync_page.should_continue);
 
@@ -948,17 +988,17 @@ mod tests {
 
 		// in the second sync the client passes the token of the first sync.
 		// this sync retrieves the new media.
-		let sync = KoboSync::continue_or_create(
+		let sync_page = KoboSync::next_page(
 			&db,
 			&user,
 			Some("kobo-1"),
 			serde_json::json!({}),
 			Some(&sync_page.sync_token),
+			5,
 		)
 		.await
 		.expect("failed to initiate sync");
 
-		let sync_page = sync.paged_media_ids(0, 5);
 		assert_eq!(vec!["book-3", "book-4"], sync_page.media_ids);
 		assert_eq!(false, sync_page.should_continue);
 	}
@@ -989,18 +1029,17 @@ mod tests {
 		.insert(&db)
 		.await;
 
-		let sync = KoboSync::begin_new_sync(
+		let sync_page = SyncPage::new(
 			&db,
 			&user,
-			Some("kobo-1"),
-			serde_json::json!({}),
+			"sync_1234".to_string(),
+			&vec![new_book.id.clone()],
+			0,
+			10,
 			Some(previous_sync_at),
-		)
-		.await
-		.expect("failed to initiate sync");
-
-		let (_, sync_items) = sync
-			.paged_sync_items(0, 1, "https://stump.example.org/".to_string())
+		);
+		let sync_items = sync_page
+			.sync_items("https://stump.example.org/".to_string())
 			.await
 			.expect("failed to retrieve sync items");
 
@@ -1038,18 +1077,17 @@ mod tests {
 		.insert(&db)
 		.await;
 
-		let sync = KoboSync::begin_new_sync(
+		let sync_page = SyncPage::new(
 			&db,
 			&user,
-			Some("kobo-1"),
-			serde_json::json!({}),
+			"sync_1234".to_string(),
+			&vec![new_book.id.clone()],
+			0,
+			10,
 			Some(previous_sync_at),
-		)
-		.await
-		.expect("failed to initiate sync");
-
-		let (_, sync_items) = sync
-			.paged_sync_items(0, 1, "https://stump.example.org/".to_string())
+		);
+		let sync_items = sync_page
+			.sync_items("https://stump.example.org/".to_string())
 			.await
 			.expect("failed to retrieve sync items");
 

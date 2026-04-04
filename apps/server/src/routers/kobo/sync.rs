@@ -1,103 +1,20 @@
+// structs for managing the state of the sync process.
 use std::collections::HashMap;
 
-use axum::{
-	body::Body,
-	extract::{Path, Request, State},
-	http::{header, HeaderMap, HeaderValue},
-	middleware::{self, Next},
-	response::{IntoResponse, Json, Response},
-	routing::get,
-	Extension, Router,
-};
-use graphql::data::AuthContext;
-use models::{
-	entity::{
-		kobo_sync,
-		media::{self, ModelWithMetadata},
-		reading_session,
-		user::AuthUser,
-	},
-	shared::{
-		enums::UserPermission,
-		image_processor_options::{
-			ExactDimensionResize, ImageProcessorOptions, ImageResizeMethod,
-			SupportedImageFormat,
-		},
-	},
+use models::entity::{
+	kobo_sync,
+	media::{self, ModelWithMetadata},
+	reading_session,
+	user::AuthUser,
 };
 use sea_orm::Set;
-use serde::{Deserialize, Serialize};
-use serde_json::{json, Map};
-use stump_core::filesystem::{
-	image::{GenericImageProcessor, ImageProcessor},
-	ContentType,
-};
-use tower_http::services::ServeFile;
 
 use sea_orm::prelude::*;
 
-use crate::{
-	config::state::AppState,
-	errors::{APIError, APIResult},
-	middleware::{auth::api_key_middleware, host::HostExtractor},
-	routers::{api::v2::media::get_media_thumbnail_by_id, kobo::sync_token::SyncToken},
-	utils::http::ImageResponse,
-};
+use crate::routers::kobo::sync_token::SyncToken;
 use stump_core::kobo::sync_types::*;
 
-#[derive(Debug, Serialize, Deserialize)]
-struct KoboAPIKey {
-	api_key: String,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-struct KoboAPIKeyAndBookId {
-	api_key: String,
-	book_id: String,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-struct KoboThumbnail {
-	api_key: String,
-	book_id: String,
-	width: u32,
-	height: u32,
-	is_greyscale: Option<String>,
-}
-
-// how many items should we send in each page of a sync response?
-// this is a maximum; in some cases we may return fewer items in a page.
-// TODO: select a value, or make this configurable.
-const ITEMS_PER_PAGE: usize = 5;
-
-struct SyncResponse {
-	sync_items: Vec<SyncItem>,
-	sync_token: SyncToken,
-	should_continue: bool,
-}
-
-impl IntoResponse for SyncResponse {
-	fn into_response(self) -> Response {
-		let mut response = Json(self.sync_items).into_response();
-		if self.should_continue {
-			response
-				.headers_mut()
-				.insert("x-kobo-sync", HeaderValue::from_static("continue"));
-		}
-
-		match self.sync_token.try_to_header_value() {
-			Ok(sync_token) => {
-				response
-					.headers_mut()
-					.insert("x-kobo-synctoken", sync_token);
-			},
-			Err(e) => tracing::error!(?e, "Failed to produce Kobo sync token"),
-		}
-		response
-	}
-}
-
-struct KoboSync {
+pub struct KoboSync {
 	model: kobo_sync::Model,
 }
 
@@ -169,7 +86,7 @@ impl KoboSync {
 		Ok(Self { model: sync })
 	}
 
-	async fn next_page<'a>(
+	pub async fn next_page<'a>(
 		db: &'a DatabaseConnection,
 		user: &'a AuthUser,
 		device_id: Option<&str>,
@@ -177,6 +94,7 @@ impl KoboSync {
 		client_sync_token: Option<&SyncToken>,
 		limit: usize,
 	) -> Result<SyncPage<'a>, sea_orm::DbErr> {
+		// TODO: refactor to clarify intent?
 		// if token is none
 		//   begin new session (from scratch)
 		//
@@ -235,7 +153,7 @@ impl KoboSync {
 	}
 }
 
-struct SyncPage<'a> {
+pub struct SyncPage<'a> {
 	db: &'a DatabaseConnection,
 	user: &'a AuthUser,
 
@@ -251,11 +169,11 @@ struct SyncPage<'a> {
 	media_ids: Vec<String>,
 
 	// are there more pages to retrieve in this sync session?
-	should_continue: bool,
+	pub should_continue: bool,
 
 	// a token representing the state of the current sync session.
 	// this will be returned to the client, and the client will use it in its next sync request.
-	sync_token: SyncToken,
+	pub sync_token: SyncToken,
 }
 
 impl<'a> SyncPage<'a> {
@@ -289,7 +207,10 @@ impl<'a> SyncPage<'a> {
 		}
 	}
 
-	async fn sync_items(&self, kobo_api_base_url: &str) -> Result<Vec<SyncItem>, DbErr> {
+	pub async fn sync_items(
+		&self,
+		kobo_api_base_url: &str,
+	) -> Result<Vec<SyncItem>, DbErr> {
 		let items: Vec<media::ModelWithMetadata> =
 			ModelWithMetadata::find_by_ids_for_user(&self.media_ids, self.user)
 				.filter(media::Column::Extension.eq("epub"))
@@ -344,280 +265,6 @@ impl<'a> SyncPage<'a> {
 		);
 
 		Ok(sync_items)
-	}
-}
-
-/// Mounts the koreader sync router at `/kobo` (from the parent router).
-/// These endpoints are not documented anywhere, but Komga's reverse-engineered
-/// implementation is a decent place to start.
-pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
-	Router::new().nest(
-		"/{api_key}",
-		Router::new()
-			.route("/v1/initialization", get(initialization))
-			.route("/v1/library/sync", get(library_sync))
-			.route("/v1/library/{book_id}/metadata", get(book_metadata))
-			.route(
-				"/v1/books/{book_id}/thumbnail/{width}/{height}/{is_greyscale}/image.jpg",
-				get(book_thumbnail),
-			)
-			.route(
-				"/v1/books/{book_id}/thumbnail/{width}/{height}/{quality}/{is_greyscale}/image.jpg",
-				get(book_thumbnail)
-			)
-			.route("/v1/books/{book_id}/file/epub", get(book_download))
-			// The Kobo requests many routes that we don't implement.
-			.route(
-				"/v1/{*path}",
-				get(empty_json)
-					.post(empty_json)
-					.put(empty_json)
-					.delete(empty_json),
-			)
-			.layer(middleware::from_fn(authorize)) // Note the order!
-			.layer(middleware::from_fn_with_state(
-				app_state,
-				api_key_middleware,
-			)),
-	)
-}
-
-async fn empty_json() -> APIResult<impl IntoResponse> {
-	Ok(Json(json!({})))
-}
-
-/// A secondary authorization middleware to ensure that the user has access to the
-/// kobo sync endpoints. This is purely for convenience
-async fn authorize(req: Request, next: Next) -> APIResult<Response> {
-	let ctx = req
-		.extensions()
-		.get::<AuthContext>()
-		.ok_or(APIError::Unauthorized)?;
-	ctx.enforce_permissions(&[UserPermission::AccessKoboSync])
-		.map_err(|_| {
-			APIError::Forbidden("You do not have permission to use Kobo sync".to_string())
-		})?;
-	Ok(next.run(req).await)
-}
-
-async fn initialization(
-	HostExtractor(host): HostExtractor,
-	Path(KoboAPIKey { api_key, .. }): Path<KoboAPIKey>,
-) -> APIResult<impl IntoResponse> {
-	let base_url = host.url();
-	let template = format!(
-		"{}/kobo/{}/v1/books/{{ImageId}}/thumbnail/{{Width}}/{{Height}}/image.jpg",
-		base_url, api_key
-	);
-	let quality_template = format!(
-      "{}/kobo/{}/v1/books/{{ImageId}}/thumbnail/{{Width}}/{{Height}}/{{Quality}}/{{IsGreyscale}}/image.jpg",
-      base_url, api_key
-  );
-
-	Ok(Json(
-		json![{ "image_url_quality_template": quality_template, "image_url_template": template,	}],
-	))
-}
-
-fn device_metadata(headers: &HeaderMap) -> serde_json::Map<String, serde_json::Value> {
-	let mut result = Map::new();
-	for (key, val) in headers.iter() {
-		let key = key.to_string();
-
-		if !key.starts_with("x-kobo-") || key == "x-kobo-synctoken" {
-			continue;
-		}
-
-		let val = match val.to_str() {
-			Ok(v) => v.to_string(),
-			Err(_) => continue,
-		};
-
-		result.insert(key, serde_json::Value::String(val));
-	}
-
-	result
-}
-
-async fn library_sync(
-	State(ctx): State<AppState>,
-	Extension(req): Extension<AuthContext>,
-	HostExtractor(host): HostExtractor,
-	Path(KoboAPIKey { api_key, .. }): Path<KoboAPIKey>,
-	headers: HeaderMap,
-) -> APIResult<SyncResponse> {
-	let conn = ctx.conn.as_ref();
-	let user = req.user();
-
-	let client_sync_token = headers.get("x-kobo-synctoken").and_then(|h| {
-		match SyncToken::try_from_header_value(h) {
-			Ok(sync_token) => Some(sync_token),
-			Err(e) => {
-				tracing::error!(?e, "Could not parse client's Kobo sync token");
-				None
-			},
-		}
-	});
-
-	let device_id = headers.get("x-kobo-deviceid").and_then(|h| h.to_str().ok());
-	if device_id.is_none() {
-		tracing::error!("Client did not pass a valid x-kobo-deviceid");
-	}
-
-	let device_metadata = device_metadata(&headers);
-
-	let sync_page = KoboSync::next_page(
-		&conn,
-		&user,
-		device_id,
-		serde_json::Value::Object(device_metadata),
-		client_sync_token.as_ref(),
-		ITEMS_PER_PAGE,
-	)
-	.await?;
-
-	// prev_sync = KoboSync.find_by_sync_token(client_sync_token)
-	//
-	// # the last page in the sync was acknowledged, or it has been too long since it was sent.
-	// previous_sync_completed = prev_sync.mark_page_acknowledged(client_sync_token)
-	//
-	// if prev_sync is None or previous_sync_completed:
-	//    # begin a new sync
-	//    # compute the items that should be included in this sync
-	//    # TODO: include x-kobo-deviceid, x-kobo-devicemodel, x-kobo-deviceos
-	//    # (really any x-kobo header)
-	//    sync = KoboSync.new(prev_sync: prev_sync)
-	//    sync_page = sync.get_page(0, SYNC_LIMIT)
-	// else:
-	//    # return the next page of this sync
-	//    sync = prev_sync
-	//    sync_page = sync.get_next_page(SYNC_LIMIT)
-	//
-	// sync_token = sync_page.sync_token
-	// sync_items = sync_page.get_sync_items
-	//
-	// TODO: delete any KoboSyncs prior to the prev_sync for this x-kobo-deviceid
-	//
-	// TODO: how does this interact with the proxy? especially pagination
-	// Komga proxies once its own material has been synced.
-
-	let kobo_api_base_url = format!("{}/kobo/{}", host.url(), api_key);
-	let sync_items = sync_page.sync_items(kobo_api_base_url.as_str()).await?;
-
-	Ok(SyncResponse {
-		sync_items,
-		should_continue: sync_page.should_continue,
-		sync_token: sync_page.sync_token,
-	})
-}
-
-async fn book_metadata(
-	State(ctx): State<AppState>,
-	Extension(req): Extension<AuthContext>,
-	HostExtractor(host): HostExtractor,
-	Path(KoboAPIKeyAndBookId { api_key, book_id }): Path<KoboAPIKeyAndBookId>,
-) -> APIResult<Json<Vec<BookMetadata>>> {
-	let conn = ctx.conn.as_ref();
-	let user = req.user();
-
-	let m = ModelWithMetadata::find_by_id_for_user(book_id, &user)
-		.into_model::<media::ModelWithMetadata>()
-		.one(conn)
-		.await?
-		.ok_or(APIError::NotFound("Book not found".to_string()))?;
-
-	let book_url = format!(
-		"{}/kobo/{}/v1/books/{}/file/epub",
-		host.url(),
-		api_key,
-		m.media.id
-	);
-
-	let result = BookMetadata::from_media(&m, book_url);
-	Ok(Json(vec![result]))
-}
-
-async fn book_thumbnail(
-	State(ctx): State<AppState>,
-	Extension(req): Extension<AuthContext>,
-	Path(KoboThumbnail {
-		book_id,
-		width,
-		height,
-		..
-	}): Path<KoboThumbnail>,
-) -> APIResult<ImageResponse> {
-	let result = get_media_thumbnail_by_id(&ctx, &req.user(), book_id).await?;
-
-	// the Kobo only supports JPEGs, and doesn't need large thumbnails.
-	let jpeg_buffer = tokio::task::block_in_place(|| {
-		let converted = GenericImageProcessor::generate(
-			&result.data,
-			ImageProcessorOptions {
-				format: SupportedImageFormat::Jpeg,
-				// TODO: ImageResizeMethod::FitWithin?
-				// (similar implementation to ScaledDimensionResize)
-				resize_method: Some(ImageResizeMethod::Exact(ExactDimensionResize {
-					width,
-					height,
-				})),
-				..Default::default()
-			},
-		)?;
-		Ok::<Vec<u8>, APIError>(converted)
-	})?;
-
-	Ok(ImageResponse::new(ContentType::JPEG, jpeg_buffer))
-}
-
-async fn book_download(
-	State(ctx): State<AppState>,
-	Extension(req): Extension<AuthContext>,
-	Path(KoboAPIKeyAndBookId { book_id, .. }): Path<KoboAPIKeyAndBookId>,
-	headers: HeaderMap,
-) -> APIResult<impl IntoResponse> {
-	// TODO: is this reasonable? would it ever be useful to have kobo sync permission without
-	// download file?
-	let user = req
-		.user_and_enforce_permissions(&[UserPermission::DownloadFile])
-		.map_err(|_| {
-			tracing::error!("User does not have permission to download file");
-			APIError::forbidden_discreet()
-		})?;
-
-	let book = media::Entity::find_for_user(&user)
-		.filter(media::Column::Id.eq(book_id.clone()))
-		.into_model::<media::MediaIdentSelect>()
-		.one(ctx.conn.as_ref())
-		.await?
-		.ok_or(APIError::NotFound("Book not found".to_string()))?;
-
-	// Note: I am reusing the original headers to support range requests
-	let mut serve_req = Request::new(Body::empty());
-	*serve_req.headers_mut() = headers;
-
-	match ServeFile::new(&book.path).try_call(serve_req).await {
-		Ok(mut response) => {
-			if let Some(filename) = std::path::Path::new(&book.path)
-				.file_name()
-				.and_then(|os_str| os_str.to_str())
-			{
-				response.headers_mut().insert(
-					header::CONTENT_DISPOSITION,
-					format!("attachment; filename=\"{}\"", filename)
-						.parse()
-						.unwrap_or_else(|_| "attachment".parse().unwrap()),
-				);
-			}
-			Ok(response)
-		},
-		Err(e) => {
-			tracing::error!(error = ?e, path = %book.path, "Error serving media file");
-			Err(APIError::InternalServerError(format!(
-				"Failed to serve file: {}",
-				e
-			)))
-		},
 	}
 }
 

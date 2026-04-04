@@ -1254,7 +1254,7 @@
 				"access": "Dostęp",
 				"email": "Adres e-mail",
 				"notifications": "Powiadomienia",
-				"tags": "Tags",
+				"tags": "Etykiety",
 				"label": "Zarządzanie"
 			}
 		},
@@ -1328,7 +1328,7 @@
 						"autumn": "Jesień",
 						"cosmic": "Kosmiczny",
 						"pumpkin": "Dynia",
-						"midnight": "Midnight",
+						"midnight": "Północ",
 						"matrix": "Matrix"
 					}
 				},
@@ -2147,51 +2147,51 @@
 			}
 		},
 		"server/tags": {
-			"helmet": "Tag management",
-			"title": "Tags",
-			"description": "Create and manage tags for organizing your content",
+			"helmet": "Zarządzanie etykietami",
+			"title": "Etykiety",
+			"description": "Utwórz i zarządzaj etykietami w celu organizacji treści",
 			"sections": {
 				"table": {
-					"title": "Tags",
-					"description": "All tags available on this server",
+					"title": "Etykiety",
+					"description": "Wszystkie etykiety dostępne na tym serwerze",
 					"empty": {
-						"title": "No tags",
-						"action": "Create your first tag to get started"
+						"title": "Brak etykiet",
+						"action": "Utwórz swoją pierwszą etykietę, aby rozpocząć"
 					},
 					"columns": {
-						"name": "Name"
+						"name": "Nazwa"
 					},
 					"actionMenu": {
-						"rename": "Rename"
+						"rename": "Zmień nazwę"
 					}
 				},
 				"createTag": {
-					"trigger": "Create tag",
+					"trigger": "Utwórz etykietę",
 					"modal": {
-						"heading": "Create new tag",
-						"description": "Tags can be assigned to books, series, and libraries",
+						"heading": "Utwórz nową etykietę",
+						"description": "Etykiety mogą być przypisywane do książek, serii lub bibliotek",
 						"name": {
-							"label": "Name",
-							"placeholder": "Enter tag name"
+							"label": "Nazwa",
+							"placeholder": "Wprowadź nazwę etykiety"
 						},
-						"submit": "Create"
+						"submit": "Utwórz"
 					}
 				},
 				"renameTag": {
 					"modal": {
-						"heading": "Rename tag",
-						"description": "Change the name of this tag across all assigned items",
+						"heading": "Zmień nazwę etykiety",
+						"description": "Zmień nazwę tej etykiety we wszystkich przypisanych pozycjach",
 						"name": {
-							"label": "Name",
-							"placeholder": "Enter new tag name"
+							"label": "Nazwa",
+							"placeholder": "Wprowadź nową nazwę etykiety"
 						},
-						"submit": "Rename"
+						"submit": "Zmień nazwę"
 					}
 				},
 				"deleteTag": {
-					"title": "Delete tag",
-					"description": "This tag will be removed from all books, series, and libraries. This cannot be undone.",
-					"confirm": "Delete"
+					"title": "Usuń etykietę",
+					"description": "Etykieta zostanie usunięta ze wszystkich książek, serii i bibliotek. Operacji tej nie można cofnąć.",
+					"confirm": "Usuń"
 				}
 			}
 		}

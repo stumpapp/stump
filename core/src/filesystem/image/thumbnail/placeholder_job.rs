@@ -7,6 +7,7 @@ use sea_orm::{
 };
 
 use crate::{
+	database::{chunk_vec_into, SQLITE_BIND_LIMIT},
 	filesystem::image::thumbnail::generate::{
 		safely_generate_placeholder_batch, GenerateImageSource,
 	},
@@ -14,7 +15,6 @@ use crate::{
 		error::JobError, JobExt, JobOutputExt, JobProgress, JobTaskOutput, WorkerCtx,
 		WorkingState, WrappedJob,
 	},
-	utils::chain_optional_iter,
 };
 
 // Note: Type aliasing for clarity
@@ -131,14 +131,18 @@ impl JobExt for PlaceholderGenerationJob {
 					.into_iter()
 					.collect::<Vec<_>>();
 
-				let series = series::Entity::find()
-					.select_only()
-					.columns(series::SeriesThumbSelect::columns())
-					.filter(series::Column::Id.is_in(series_ids.clone()))
-					.into_model::<series::SeriesThumbSelect>()
-					.all(ctx.conn.as_ref())
-					.await
-					.map_err(|e| JobError::InitFailed(e.to_string()))?;
+				let mut series = Vec::with_capacity(series_ids.len());
+				for chunk in series_ids.chunks(SQLITE_BIND_LIMIT) {
+					let batch = series::Entity::find()
+						.select_only()
+						.columns(series::SeriesThumbSelect::columns())
+						.filter(series::Column::Id.is_in(chunk.to_vec()))
+						.into_model::<series::SeriesThumbSelect>()
+						.all(ctx.conn.as_ref())
+						.await
+						.map_err(|e| JobError::InitFailed(e.to_string()))?;
+					series.extend(batch);
+				}
 
 				let library_ids = series
 					.iter()
@@ -196,18 +200,18 @@ impl JobExt for PlaceholderGenerationJob {
 
 		tracing::trace!(?init_config, scope = ?self.config.scope, "Determined initial config");
 
-		let tasks = chain_optional_iter(
-			[],
-			[
-				(!init_config.media_ids.is_empty())
-					.then_some(PlaceholderGenerationTask::Media(init_config.media_ids)),
-				(!init_config.series_ids.is_empty())
-					.then_some(PlaceholderGenerationTask::Series(init_config.series_ids)),
-				(!init_config.library_ids.is_empty()).then_some(
-					PlaceholderGenerationTask::Library(init_config.library_ids),
-				),
-			],
-		);
+		let tasks: Vec<PlaceholderGenerationTask> =
+			chunk_vec_into(init_config.media_ids, PlaceholderGenerationTask::Media)
+				.into_iter()
+				.chain(chunk_vec_into(
+					init_config.series_ids,
+					PlaceholderGenerationTask::Series,
+				))
+				.chain(chunk_vec_into(
+					init_config.library_ids,
+					PlaceholderGenerationTask::Library,
+				))
+				.collect();
 
 		Ok(WorkingState {
 			output: Some(Self::Output::default()),

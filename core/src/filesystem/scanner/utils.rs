@@ -24,6 +24,7 @@ use walkdir::DirEntry;
 
 use crate::{
 	config::StumpConfig,
+	database::SQLITE_BIND_LIMIT,
 	error::{CoreError, CoreResult},
 	event::CreatedMedia,
 	filesystem::{
@@ -250,36 +251,40 @@ pub(crate) async fn handle_missing_media(
 		return output;
 	}
 
-	let _affected_rows = media::Entity::update_many()
-		.filter(media::Column::SeriesId.eq(series_id.to_string()))
-		.filter(
-			media::Column::Path.is_in(
-				paths
-					.iter()
-					.map(|p| p.to_string_lossy().to_string())
-					.collect::<Vec<String>>(),
-			),
-		)
-		.col_expr(
-			media::Column::Status,
-			Expr::value(FileStatus::Missing.to_string()),
-		)
-		.exec(ctx.conn.as_ref())
-		.await
-		.map_or_else(
-			|error| {
-				tracing::error!(error = ?error, "Failed to update missing media");
-				output.logs.push(JobExecuteLog::error(format!(
-					"Failed to update missing media: {:?}",
-					error.to_string()
-				)));
-				0
-			},
-			|res| {
-				output.updated_media += res.rows_affected;
-				res.rows_affected
-			},
-		);
+	let path_strings: Vec<String> = paths
+		.iter()
+		.map(|p| p.to_string_lossy().to_string())
+		.collect();
+
+	for (i, chunk) in path_strings.chunks(SQLITE_BIND_LIMIT).enumerate() {
+		let _affected_rows = media::Entity::update_many()
+			.filter(media::Column::SeriesId.eq(series_id.to_string()))
+			.filter(media::Column::Path.is_in(chunk.to_vec()))
+			.col_expr(
+				media::Column::Status,
+				Expr::value(FileStatus::Missing.to_string()),
+			)
+			.exec(ctx.conn.as_ref())
+			.await
+			.map_or_else(
+				|error| {
+					tracing::error!(
+						chunk = i + 1,
+						?error,
+						"Failed to update missing media chunk"
+					);
+					output.logs.push(JobExecuteLog::error(format!(
+						"Failed to update missing media: {:?}",
+						error.to_string()
+					)));
+					0
+				},
+				|res| {
+					output.updated_media += res.rows_affected;
+					res.rows_affected
+				},
+			);
+	}
 
 	output
 }
@@ -299,32 +304,37 @@ pub(crate) async fn handle_restored_media(
 		return output;
 	}
 
-	let _affected_series = media::Entity::update_many()
-		.filter(media::Column::SeriesId.eq(series_id.to_string()))
-		.filter(
-			media::Column::Id
-				.is_in(ids.iter().map(|id| id.to_string()).collect::<Vec<String>>()),
-		)
-		.col_expr(
-			media::Column::Status,
-			Expr::value(FileStatus::Ready.to_string()),
-		)
-		.exec(ctx.conn.as_ref())
-		.await
-		.map_or_else(
-			|error| {
-				tracing::error!(error = ?error, "Failed to update restored media");
-				output.logs.push(JobExecuteLog::error(format!(
-					"Failed to update restored media: {:?}",
-					error.to_string()
-				)));
-				0
-			},
-			|res| {
-				output.updated_media += res.rows_affected;
-				res.rows_affected
-			},
-		);
+	let id_strings: Vec<String> = ids.iter().map(|id| id.to_string()).collect();
+
+	for (i, chunk) in id_strings.chunks(SQLITE_BIND_LIMIT).enumerate() {
+		let _affected_series = media::Entity::update_many()
+			.filter(media::Column::SeriesId.eq(series_id.to_string()))
+			.filter(media::Column::Id.is_in(chunk.to_vec()))
+			.col_expr(
+				media::Column::Status,
+				Expr::value(FileStatus::Ready.to_string()),
+			)
+			.exec(ctx.conn.as_ref())
+			.await
+			.map_or_else(
+				|error| {
+					tracing::error!(
+						chunk = i + 1,
+						?error,
+						"Failed to update restored media chunk"
+					);
+					output.logs.push(JobExecuteLog::error(format!(
+						"Failed to update restored media: {:?}",
+						error.to_string()
+					)));
+					0
+				},
+				|res| {
+					output.updated_media += res.rows_affected;
+					res.rows_affected
+				},
+			);
+	}
 
 	output
 }
@@ -791,15 +801,16 @@ pub(crate) async fn visit_and_update_media(
 	let paths = paths_to_operation.keys().cloned().collect::<Vec<String>>();
 	let paths_len = paths.len();
 
-	let media = media::ModelWithMetadata::find()
-		.filter(
-			media::Column::Path
-				.is_in(paths.iter().map(|p| p.to_string()).collect::<Vec<String>>()),
-		)
-		.filter(media::Column::SeriesId.eq(series_id.to_string()))
-		.into_model::<media::ModelWithMetadata>()
-		.all(conn)
-		.await?;
+	let mut media = Vec::with_capacity(paths_len);
+	for chunk in paths.chunks(SQLITE_BIND_LIMIT) {
+		let batch = media::ModelWithMetadata::find()
+			.filter(media::Column::Path.is_in(chunk.to_vec()))
+			.filter(media::Column::SeriesId.eq(series_id.to_string()))
+			.into_model::<media::ModelWithMetadata>()
+			.all(conn)
+			.await?;
+		media.extend(batch);
+	}
 
 	if media.len() != paths_len {
 		output.logs.push(JobExecuteLog::warn(

@@ -9,6 +9,10 @@ use crate::{config::StumpConfig, CoreError};
 
 pub const FORCE_RESET_KEY: &str = "FORCE_DB_RESET";
 
+/// A slightly lower max number of binding params for SQL queries, I believe
+/// the default is 999
+pub const SQLITE_BIND_LIMIT: usize = 900;
+
 pub async fn connect(config: &StumpConfig) -> Result<DatabaseConnection, CoreError> {
 	let config_dir = config.get_config_dir();
 
@@ -109,4 +113,26 @@ impl FromQueryResult for JournalModeQueryResult {
 
 		Ok(Self { journal_mode })
 	}
+}
+
+/// Splits a vector of items into chunks of at most [`SQLITE_BIND_LIMIT`]
+pub fn chunk_vec_into<T, F, R>(items: Vec<T>, map_fn: F) -> Vec<R>
+where
+	F: Fn(Vec<T>) -> R,
+	T: Clone,
+{
+	if items.is_empty() {
+		return vec![];
+	}
+
+	items
+		.chunks(SQLITE_BIND_LIMIT)
+		.map(|chunk| map_fn(chunk.to_vec()))
+		.collect()
+}
+
+/// Return an estimated batch size for inserts based on the number of parameters per row.
+/// This is to reduce query complexity and avoid shit like "too many SQL variables"
+pub fn get_insert_batch_size(param_count: usize) -> usize {
+	SQLITE_BIND_LIMIT / param_count
 }

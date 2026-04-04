@@ -8,6 +8,7 @@ use models::{
 use sea_orm::{prelude::*, QuerySelect, QueryTrait};
 
 use crate::{
+	database::{chunk_vec_into, SQLITE_BIND_LIMIT},
 	filesystem::image::thumbnail::generate::{
 		safely_generate_batch, GenerateImageSource, GenerateThumbnailOptions,
 	},
@@ -15,7 +16,6 @@ use crate::{
 		error::JobError, JobExt, JobOutputExt, JobProgress, JobTaskOutput, WorkerCtx,
 		WorkingState, WrappedJob,
 	},
-	utils::chain_optional_iter,
 };
 
 // Note: I am type aliasing for the sake of clarity in what the provided Strings represent
@@ -190,14 +190,18 @@ impl JobExt for ThumbnailGenerationJob {
 					.into_iter()
 					.collect::<Vec<_>>();
 
-				let series = series::Entity::find()
-					.select_only()
-					.columns(series::SeriesThumbSelect::columns())
-					.filter(series::Column::Id.is_in(series_ids.clone()))
-					.into_model::<series::SeriesThumbSelect>()
-					.all(ctx.conn.as_ref())
-					.await
-					.map_err(|e| JobError::InitFailed(e.to_string()))?;
+				let mut series = Vec::with_capacity(series_ids.len());
+				for chunk in series_ids.chunks(SQLITE_BIND_LIMIT) {
+					let batch = series::Entity::find()
+						.select_only()
+						.columns(series::SeriesThumbSelect::columns())
+						.filter(series::Column::Id.is_in(chunk.to_vec()))
+						.into_model::<series::SeriesThumbSelect>()
+						.all(ctx.conn.as_ref())
+						.await
+						.map_err(|e| JobError::InitFailed(e.to_string()))?;
+					series.extend(batch);
+				}
 
 				let library_ids = series
 					.iter()
@@ -250,18 +254,18 @@ impl JobExt for ThumbnailGenerationJob {
 			},
 		};
 
-		let tasks = chain_optional_iter(
-			[],
-			[
-				(!init_params.media_ids.is_empty()).then_some(
-					ThumbnailGenerationTask::Media(init_params.media_ids.clone()),
-				),
-				(!init_params.series_ids.is_empty())
-					.then_some(ThumbnailGenerationTask::Series(init_params.series_ids)),
-				(!init_params.library_ids.is_empty())
-					.then_some(ThumbnailGenerationTask::Library(init_params.library_ids)),
-			],
-		);
+		let tasks: Vec<ThumbnailGenerationTask> =
+			chunk_vec_into(init_params.media_ids, ThumbnailGenerationTask::Media)
+				.into_iter()
+				.chain(chunk_vec_into(
+					init_params.series_ids,
+					ThumbnailGenerationTask::Series,
+				))
+				.chain(chunk_vec_into(
+					init_params.library_ids,
+					ThumbnailGenerationTask::Library,
+				))
+				.collect();
 
 		Ok(WorkingState {
 			output: Some(Self::Output::default()),

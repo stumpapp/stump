@@ -2698,7 +2698,7 @@
 			},
 			"stump": {
 				"label": "Stump",
-				"description": "Stump features are optional and can be turn them off if you do not need them",
+				"description": "Stump features are optional and can be turned off if you do not need them",
 				"bookClubsEnabled": "Book Club Features"
 			},
 			"autoSyncLocalData": "Auto-Sync Local Data",
@@ -2715,7 +2715,7 @@
 						"confirmation": "Are you sure you want to delete all downloads from {{serverName}}?",
 						"deleteFailed": {
 							"title": "Deletion Failed",
-							"description": "There was an error deleting all all downloads from {{serverName}}"
+							"description": "There was an error deleting all downloads from {{serverName}}"
 						}
 					},
 					"noDownloads": "No downloaded files for this server",

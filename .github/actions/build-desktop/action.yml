@@ -10,7 +10,7 @@ runs:
   using: composite
   steps:
     - name: Checkout project
-      uses: actions/checkout@v3
+      uses: actions/checkout@v6
 
     # - name: Configure environment
     #   run: |

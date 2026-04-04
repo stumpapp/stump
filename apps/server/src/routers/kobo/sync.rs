@@ -1,4 +1,4 @@
-use std::{collections::HashMap, str::Utf8Error};
+use std::collections::HashMap;
 
 use axum::{
 	body::Body,
@@ -9,7 +9,6 @@ use axum::{
 	routing::get,
 	Extension, Router,
 };
-use base64::{engine::general_purpose::STANDARD as BASE64, Engine};
 use graphql::data::AuthContext;
 use models::{
 	entity::{
@@ -26,7 +25,6 @@ use models::{
 		},
 	},
 };
-use reqwest::header::{InvalidHeaderValue, ToStrError};
 use sea_orm::Set;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Map};
@@ -34,7 +32,6 @@ use stump_core::filesystem::{
 	image::{GenericImageProcessor, ImageProcessor},
 	ContentType,
 };
-use thiserror::Error;
 use tower_http::services::ServeFile;
 
 use sea_orm::prelude::*;
@@ -43,7 +40,7 @@ use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
 	middleware::{auth::api_key_middleware, host::HostExtractor},
-	routers::api::v2::media::get_media_thumbnail_by_id,
+	routers::{api::v2::media::get_media_thumbnail_by_id, kobo::sync_token::SyncToken},
 	utils::http::ImageResponse,
 };
 use stump_core::kobo::sync_types::*;
@@ -97,69 +94,6 @@ impl IntoResponse for SyncResponse {
 			Err(e) => tracing::error!(?e, "Failed to produce Kobo sync token"),
 		}
 		response
-	}
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-struct SyncToken {
-	// allows us to change the structure of the token in the future.
-	version: u64,
-
-	// the ID of the database KoboSync
-	sync_id: String,
-
-	// has the client retrieved all the data that was available in this session?
-	// tracking this explicitly should make it easier to support paging through proxied Kobo Store
-	// responses.
-	completed: bool,
-
-	// the offset of the next page that should be sent to the client.
-	// this is not meaningful if complete is true.
-	next_offset: usize,
-}
-
-#[derive(Error, Debug)]
-enum SyncTokenSerializeError {
-	#[error("Could not serialize JSON: {0}")]
-	JSONError(#[from] serde_json::Error),
-	#[error("Could not encode this token as a header: {0}")]
-	InvalidHeaderError(#[from] InvalidHeaderValue),
-}
-
-#[derive(Error, Debug)]
-enum SyncTokenDeserializeError {
-	#[error("Could not deserialize string from header: {0}")]
-	HeaderToStrError(#[from] ToStrError),
-	#[error("Could not decode UTF-8: {0}")]
-	UTF8Error(#[from] Utf8Error),
-	#[error("Could not decode Base64: {0}")]
-	Base64Error(#[from] base64::DecodeError),
-	#[error("Could not deserialize JSON: {0}")]
-	JSONError(#[from] serde_json::Error),
-}
-
-impl SyncToken {
-	fn try_from_str(s: &str) -> Result<Self, SyncTokenDeserializeError> {
-		let json_bytes = BASE64.decode(s)?;
-		let json = std::str::from_utf8(&json_bytes)?;
-		serde_json::from_str(json).map_err(Into::into)
-	}
-
-	fn try_from_header_value(
-		hv: &HeaderValue,
-	) -> Result<Self, SyncTokenDeserializeError> {
-		let s = hv.to_str()?;
-		Self::try_from_str(s)
-	}
-
-	fn try_to_string(self) -> Result<String, SyncTokenSerializeError> {
-		let json = serde_json::to_string(&self)?;
-		Ok(BASE64.encode(json))
-	}
-
-	fn try_to_header_value(self) -> Result<HeaderValue, SyncTokenSerializeError> {
-		let s = self.try_to_string()?;
-		HeaderValue::from_str(s.as_ref()).map_err(Into::into)
 	}
 }
 
@@ -351,12 +285,7 @@ impl<'a> SyncPage<'a> {
 			media_ids: media_ids[start..next_offset].to_vec(),
 			should_continue,
 
-			sync_token: SyncToken {
-				version: 1,
-				sync_id,
-				completed: !should_continue,
-				next_offset,
-			},
+			sync_token: SyncToken::new(sync_id, !should_continue, next_offset),
 		}
 	}
 

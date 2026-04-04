@@ -43,9 +43,10 @@ use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
 	middleware::{auth::api_key_middleware, host::HostExtractor},
-	routers::{api::v2::media::get_media_thumbnail_by_id, kobo::sync_types::*},
+	routers::api::v2::media::get_media_thumbnail_by_id,
 	utils::http::ImageResponse,
 };
+use stump_core::kobo::sync_types::*;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct KoboAPIKey {
@@ -708,7 +709,7 @@ mod tests {
 	use uuid::Uuid;
 
 	use crate::routers::kobo::sync::{KoboSync, SyncPage};
-	use crate::routers::kobo::sync_types::SyncItem;
+	use stump_core::kobo::sync_types::SyncItem;
 
 	async fn test_database() -> DbConn {
 		let db = Database::connect("sqlite::memory:")

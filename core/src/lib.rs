@@ -14,6 +14,7 @@ pub mod error;
 mod event;
 pub mod filesystem;
 pub mod job;
+pub mod kobo;
 pub mod opds;
 pub mod utils;
 

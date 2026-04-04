@@ -1,4 +1,4 @@
-use crate::routers::kobo::sync_types::*;
+use crate::kobo::sync_types::*;
 use chrono::Utc;
 use models::entity::{media, reading_session};
 

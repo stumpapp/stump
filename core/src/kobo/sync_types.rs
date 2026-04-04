@@ -1,3 +1,5 @@
+// data types used in the Kobo sync API.
+
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
@@ -67,6 +69,7 @@ pub struct BookMetadata {
 	pub is_social_enabled: bool,
 	pub isbn: Option<String>,
 	pub language: String,
+	// according to Komga this is a Map<String, String>.
 	pub phonetic_pronunciations: Empty,
 	pub publication_date: Option<DateTime<Utc>>,
 	pub publisher: Option<Publisher>,

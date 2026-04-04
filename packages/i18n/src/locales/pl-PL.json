@@ -7,7 +7,7 @@
 	},
 	"authScene": {
 		"claimHeading": "Inicjalizuj serwer",
-		"claimText": "Ten serwer Stump nie został zainicjalizowany. Użyj formularza poniżej aby stworzyć konto. Gdy będzie już ono stworzone, uzyskasz pełen dostęp do wszystkich funkcji serwera.",
+		"claimText": "Ten serwer Stump nie został zainicjowany. Użyj formularza poniżej, aby stworzyć konto. Gdy będzie już ono stworzone, uzyskasz pełen dostęp do wszystkich funkcji serwera.",
 		"form": {
 			"validation": {
 				"missingUsername": "Nazwa użytkownika jest wymagana",
@@ -1637,7 +1637,7 @@
 							"description": "Spowoduje to wylogowanie z bieżącego serwera",
 							"confirm": "Przełącz na serwer",
 							"server": "Serwer",
-							"uri": "Adres URL"
+							"uri": "Odnośnik"
 						}
 					},
 					"resetConfiguration": {
@@ -2483,50 +2483,50 @@
 	"mobileApp": {
 		"addOrEditServer": {
 			"addServer": {
-				"title": "Add Server",
-				"subtitle": "Configure a new server to access your content"
+				"title": "Dodaj serwer",
+				"subtitle": "Skonfiguruj nowy serwer, aby uzyskać dostęp do swojej zawartości"
 			},
 			"editServer": {
-				"title": "Edit Server",
-				"subtitle": "Edit Server"
+				"title": "Edytuj serwer",
+				"subtitle": "Edytuj serwer"
 			},
-			"kind": "Kind",
+			"kind": "Wariant",
 			"customHeaders": {
-				"label": "Custom Headers",
-				"addHeader": "Add header",
-				"invalidHeader": "Invalid header"
+				"label": "Niestandardowe nagłówki",
+				"addHeader": "Dodaj nagłówek",
+				"invalidHeader": "Nieprawidłowy nagłówek"
 			},
 			"auth": {
-				"label": "Auth",
+				"label": "Autoryzacja",
 				"default": {
-					"label": "Login",
-					"description": "You will be prompted to login when accessing content as needed"
+					"label": "Logowanie",
+					"description": "Zostaniesz poproszony w razie potrzeby o zalogowanie się podczas dostępu do zawartości"
 				},
 				"token": {
 					"label": "Token",
-					"placeholder": "Raw token"
+					"placeholder": "Token"
 				},
-				"basic": "Basic"
+				"basic": "Podstawowe"
 			},
-			"serverNamePlaceholder": "My Server",
-			"catalogUrl": "Catalog URL",
-			"failedToConnect": "Failed to connect to server",
-			"didConnect": "Connected",
-			"checkConnection": "Check connection",
-			"setAsDefaultServer": "Set as default server",
-			"enableOPDS": "Enable OPDS",
+			"serverNamePlaceholder": "Mój serwer",
+			"catalogUrl": "Odnośnik do katalogu",
+			"failedToConnect": "Połączenie z serwerem nie powiodło się",
+			"didConnect": "Połączono",
+			"checkConnection": "Sprawdź połączenie",
+			"setAsDefaultServer": "Ustaw jako domyślny serwer",
+			"enableOPDS": "Włącz OPDS",
 			"validation": {
-				"nameAlreadyExists": "Name already exists",
-				"cannotSetAuthorizationHeader": "Cannot set Authorization header"
+				"nameAlreadyExists": "Podana nazwa jest już używana",
+				"cannotSetAuthorizationHeader": "Nie można ustawić nagłówka uwierzytelnienia"
 			}
 		},
 		"bookActions": {
 			"markAsRead": {
-				"label": "Mark as read",
-				"confirmation": "Are you sure you want to mark {{bookTitle}} as read?"
+				"label": "Oznacz jako przeczytane",
+				"confirmation": "Czy na pewno chcesz oznaczyć {{bookTitle}} jako przeczytane?"
 			},
 			"clearProgress": {
-				"label": "Clear progress",
+				"label": "Wyczyść postęp",
 				"confirmation": "Are you sure you want to clear your progress for {{bookTitle}}?"
 			},
 			"deleteBook": {

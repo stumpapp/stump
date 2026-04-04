@@ -1328,6 +1328,7 @@
 						"autumn": "Höst",
 						"cosmic": "Kosmiskt",
 						"pumpkin": "Pumpa",
+						"midnight": "Midnight",
 						"matrix": "Matris"
 					}
 				},
@@ -2477,6 +2478,357 @@
 		"EDIT_THUMBNAILS": {
 			"label": "Edit thumbnails",
 			"description": "Allows the user to edit thumbnails for books and series"
+		}
+	},
+	"mobileApp": {
+		"addOrEditServer": {
+			"addServer": {
+				"title": "Add Server",
+				"subtitle": "Configure a new server to access your content"
+			},
+			"editServer": {
+				"title": "Edit Server",
+				"subtitle": "Edit Server"
+			},
+			"kind": "Kind",
+			"customHeaders": {
+				"label": "Custom Headers",
+				"addHeader": "Add header",
+				"invalidHeader": "Invalid header"
+			},
+			"auth": {
+				"label": "Auth",
+				"default": {
+					"label": "Login",
+					"description": "You will be prompted to login when accessing content as needed"
+				},
+				"token": {
+					"label": "Token",
+					"placeholder": "Raw token"
+				},
+				"basic": "Basic"
+			},
+			"serverNamePlaceholder": "My Server",
+			"catalogUrl": "Catalog URL",
+			"failedToConnect": "Failed to connect to server",
+			"didConnect": "Connected",
+			"checkConnection": "Check connection",
+			"setAsDefaultServer": "Set as default server",
+			"enableOPDS": "Enable OPDS",
+			"validation": {
+				"nameAlreadyExists": "Name already exists",
+				"cannotSetAuthorizationHeader": "Cannot set Authorization header"
+			}
+		},
+		"bookActions": {
+			"markAsRead": {
+				"label": "Mark as read",
+				"confirmation": "Are you sure you want to mark {{bookTitle}} as read?"
+			},
+			"clearProgress": {
+				"label": "Clear progress",
+				"confirmation": "Are you sure you want to clear your progress for {{bookTitle}}?"
+			},
+			"deleteBook": {
+				"label": "Delete book",
+				"confirmation": "Are you sure you want to delete {{bookTitle}}?"
+			},
+			"seeDetails": "See Details"
+		},
+		"bookMetadata": {
+			"ageRating": "Age Rating",
+			"downloadedAt": "Downloaded",
+			"format": "Format",
+			"genres": "Genres",
+			"language": "Language",
+			"publisher": "Publisher",
+			"size": "Size",
+			"volume": "Volume",
+			"year": "Year"
+		},
+		"common": {
+			"cancel": "Cancel",
+			"chapter": "Chapter",
+			"clear": "Clear",
+			"confirm": "Confirm",
+			"details": "Details",
+			"delete": "Delete",
+			"downloads": "Downloads",
+			"edit": "Edit",
+			"enabled": "Enabled",
+			"enable": "Enable",
+			"error": "Error",
+			"name": "Name",
+			"none": "None",
+			"options": "Options",
+			"page": "Page",
+			"pages": "Pages",
+			"password": "Password",
+			"progress": "Progress",
+			"readTime": "Read time",
+			"readMore": "Read more",
+			"save": "Save",
+			"select": "Select",
+			"settings": "Settings",
+			"servers": "Servers",
+			"thisBook": "this book",
+			"thisServer": "this server",
+			"unknown": "Unknown",
+			"unknownTitle": "Untitled",
+			"url": "URL",
+			"username": "Username",
+			"value": "Value",
+			"version": "Version"
+		},
+		"emptyState": {
+			"noStumpServers": "No Stump servers added",
+			"noOPDSServers": "No OPDS servers added",
+			"noServers": "No servers have been configured",
+			"cta": "Get started by adding a server to access your book collections",
+			"seeDocumentation": "See Documentation"
+		},
+		"tabs": {
+			"servers": "Servers",
+			"localLibrary": "Library",
+			"settings": "Settings"
+		},
+		"localLibrary": {
+			"title": "Local Library",
+			"emptyState": {
+				"all": {
+					"title": "Nothing to read yet",
+					"description": "Once you have books for offline reading, they will appear here"
+				},
+				"imported": {
+					"title": "No imported books",
+					"description": "Import books to read them offline"
+				},
+				"server": {
+					"title": "No downloaded books",
+					"description": "Download books from your library to read them offline"
+				}
+			},
+			"downloadQueue": {
+				"downloading": "Downloading",
+				"failed": "Failed",
+				"nothingDownloading": "Nothing is being downloaded",
+				"noActiveDownloads": "No active downloads",
+				"noFailedDownloads": "No failed downloads",
+				"downloadStarting": "Starting..."
+			},
+			"downloadsHeaderMenu": {
+				"deleteAllDownloads": {
+					"label": "Delete Books",
+					"confirmation": "Are you sure you want to delete your local library?",
+					"disclaimer": "This action cannot be undone."
+				},
+				"seeProblems": "See Problems ({{problemCount}})",
+				"hideCurated": "Hide Curated",
+				"showCurated": "Show Curated",
+				"attemptSync": "Attempt Sync"
+			},
+			"downloadsHeaderSortMenu": {
+				"sortBy": {
+					"NAME": "Name",
+					"ADDED_AT": "Date Added",
+					"SERIES": "Series"
+				},
+				"sortDirection": {
+					"ASC": "Ascending",
+					"DESC": "Descending"
+				},
+				"sortDirectionText": {
+					"ASC": "A → Z",
+					"DESC": "Z → A"
+				},
+				"sortDirectionDate": {
+					"ASC": "Oldest First",
+					"DESC": "Newest First"
+				},
+				"sourceFilter": {
+					"all": "All Books",
+					"server": "Downloaded",
+					"imported": "Imported"
+				}
+			},
+			"downloadProblemsSheet": {
+				"title": "Failed Downloads",
+				"noFailedDownloads": "No failed downloads",
+				"retryAll": "Retry All",
+				"dismissAll": "Dismiss All"
+			}
+		},
+		"settings": {
+			"preferences": {
+				"label": "Preferences",
+				"appTheme": {
+					"label": "Theme",
+					"options": {
+						"light": "Light",
+						"dark": "Dark"
+					}
+				},
+				"appPrimaryColor": "Accent",
+				"appLanguage": "Language",
+				"defaultServer": "Default Server",
+				"thumbnailRatio": "Thumbnail Ratio",
+				"thumbnailPlaceholder": {
+					"label": "Thumbnail Placeholder",
+					"options": {
+						"grayscale": "Grayscale",
+						"averageColor": "Average color",
+						"colorful": "Colorful",
+						"thumbhash": "Thumbhash"
+					}
+				},
+				"thumbnailResizeMode": {
+					"label": "Thumbnail Resize",
+					"options": {
+						"cover": "Cover",
+						"stretch": "Stretch",
+						"fit": "Fit"
+					}
+				}
+			},
+			"reading": {
+				"label": "Reading",
+				"preferNativePdf": "Prefer Native PDF",
+				"preferMinimalReader": "Prefer Minimal Reader",
+				"disableDismissGesture": "Disable Dismiss Gesture"
+			},
+			"stump": {
+				"label": "Stump",
+				"description": "Stump features are optional and can be turn them off if you do not need them",
+				"bookClubsEnabled": "Book Club Features"
+			},
+			"autoSyncLocalData": "Auto-Sync Local Data",
+			"management": {
+				"label": "Management",
+				"dataUsage": {
+					"label": "Data Usage",
+					"nonStumpData": "Non-Stump data",
+					"serversTotal": "Servers total",
+					"totalFiles": "Total files",
+					"totalSize": "Total size",
+					"deleteDownloads": {
+						"label": "Delete Downloads",
+						"confirmation": "Are you sure you want to delete all downloads from {{serverName}}?",
+						"deleteFailed": {
+							"title": "Deletion Failed",
+							"description": "There was an error deleting all all downloads from {{serverName}}"
+						}
+					},
+					"noDownloads": "No downloaded files for this server",
+					"storedPreferences": {
+						"label": "Stored preferences",
+						"description": "Miscellaneous data like book preferences, reading timers, etc"
+					},
+					"clearPreferences": "Clear Preferences"
+				}
+			},
+			"debug": {
+				"label": "Debug",
+				"clearCache": {
+					"memory": {
+						"button": "Memory",
+						"success": "Memory cache cleared"
+					},
+					"disk": {
+						"button": "Disk",
+						"success": "Disk cache cleared"
+					}
+				},
+				"deleteDatabase": {
+					"label": "Delete Database",
+					"success": {
+						"title": "Database deleted",
+						"description": "Please restart the app"
+					},
+					"error": {
+						"title": "Deletion failed",
+						"description": "There was an error deleting the database"
+					}
+				},
+				"performanceMonitor": "Performance Monitor",
+				"reduceAnimations": "Reduce Animations",
+				"maskUrls": "Mask URLs",
+				"debugAnalytics": {
+					"label": "Debug Analytics",
+					"description": "Send additional debug-related events to help troubleshoot issues"
+				}
+			},
+			"contactInfo": {
+				"label": "Contact",
+				"email": "Email",
+				"discord": "Discord",
+				"github": "GitHub"
+			},
+			"supportInfo": {
+				"buildInformation": "Build Information",
+				"version": "Version: {{version}}",
+				"suuportIdentifier": "Support Identifier: {{supportID}}"
+			}
+		},
+		"readerSettings": {
+			"title": "Reader Settings",
+			"sections": {
+				"mode": "Mode",
+				"imageOptions": "Image Options",
+				"controls": "Controls"
+			},
+			"readingMode": {
+				"label": "Flow",
+				"options": {
+					"PAGED": "Paged",
+					"CONTINUOUS_HORIZONTAL": "Scroll (Horizontal)",
+					"CONTINUOUS_VERTICAL": "Scroll (Vertical)"
+				}
+			},
+			"readingDirection": {
+				"label": "Direction",
+				"options": {
+					"RTL": "Right to left",
+					"LTR": "Left to right"
+				}
+			},
+			"doublePageBehavior": {
+				"label": "Double Paged",
+				"options": {
+					"always": "Always",
+					"auto": "Auto",
+					"off": "Off"
+				}
+			},
+			"separateSecondPage": "Separate Second Page",
+			"imageScaling": {
+				"label": "Scaling",
+				"options": {
+					"AUTO": "Auto",
+					"HEIGHT": "Fit Height",
+					"WIDTH": "Fit Width",
+					"NONE": "None"
+				}
+			},
+			"allowDownscaling": "Downscaling",
+			"tapSidesToNavigate": "Tap Sides to Navigate",
+			"footerControls": {
+				"label": "Footer",
+				"options": {
+					"images": "Image Gallery",
+					"slider": "Slider"
+				}
+			}
+		},
+		"savedServerActions": {
+			"clearCache": "Clear Cache",
+			"discardTokens": {
+				"label": "Discard Tokens",
+				"description": "Affects login tokens only"
+			},
+			"deleteServer": {
+				"title": "Delete Server",
+				"confirmation": "Are you sure you want to delete {{serverName}}?"
+			}
 		}
 	}
 }

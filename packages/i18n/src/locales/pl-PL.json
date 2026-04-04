@@ -2527,81 +2527,81 @@
 			},
 			"clearProgress": {
 				"label": "Wyczyść postęp",
-				"confirmation": "Are you sure you want to clear your progress for {{bookTitle}}?"
+				"confirmation": "Czy na pewno chcesz wyczyścić postęp dla {{bookTitle}}?"
 			},
 			"deleteBook": {
-				"label": "Delete book",
-				"confirmation": "Are you sure you want to delete {{bookTitle}}?"
+				"label": "Usuń książkę",
+				"confirmation": "Czy na pewno chcesz usunąć {{bookTitle}}?"
 			},
-			"seeDetails": "See Details"
+			"seeDetails": "Zobacz szczegóły"
 		},
 		"bookMetadata": {
-			"ageRating": "Age Rating",
-			"downloadedAt": "Downloaded",
+			"ageRating": "Klasyfikacja wiekowa",
+			"downloadedAt": "Pobrane",
 			"format": "Format",
-			"genres": "Genres",
-			"language": "Language",
-			"publisher": "Publisher",
-			"size": "Size",
-			"volume": "Volume",
-			"year": "Year"
+			"genres": "Gatunki",
+			"language": "Język",
+			"publisher": "Wydawca",
+			"size": "Rozmiar",
+			"volume": "Tom",
+			"year": "Rok"
 		},
 		"common": {
-			"cancel": "Cancel",
-			"chapter": "Chapter",
-			"clear": "Clear",
-			"confirm": "Confirm",
-			"details": "Details",
-			"delete": "Delete",
-			"downloads": "Downloads",
-			"edit": "Edit",
-			"enabled": "Enabled",
-			"enable": "Enable",
-			"error": "Error",
-			"name": "Name",
-			"none": "None",
-			"options": "Options",
-			"page": "Page",
-			"pages": "Pages",
-			"password": "Password",
-			"progress": "Progress",
-			"readTime": "Read time",
-			"readMore": "Read more",
-			"save": "Save",
-			"select": "Select",
-			"settings": "Settings",
-			"servers": "Servers",
-			"thisBook": "this book",
-			"thisServer": "this server",
-			"unknown": "Unknown",
-			"unknownTitle": "Untitled",
-			"url": "URL",
-			"username": "Username",
-			"value": "Value",
-			"version": "Version"
+			"cancel": "Anuluj",
+			"chapter": "Rozdział",
+			"clear": "Wyczyść",
+			"confirm": "Potwierdź",
+			"details": "Szczegóły",
+			"delete": "Usuń",
+			"downloads": "Pobrane",
+			"edit": "Edytuj",
+			"enabled": "Aktywne",
+			"enable": "Aktywuj",
+			"error": "Błąd",
+			"name": "Nazwa",
+			"none": "Brak",
+			"options": "Ustawienia",
+			"page": "Strona",
+			"pages": "Strony",
+			"password": "Hasło",
+			"progress": "Postęp",
+			"readTime": "Czas czytania",
+			"readMore": "Dowiedz się więcej",
+			"save": "Zapisz",
+			"select": "Zaznacz",
+			"settings": "Ustawienia",
+			"servers": "Serwery",
+			"thisBook": "ta książka",
+			"thisServer": "ten serwer",
+			"unknown": "Nieznany",
+			"unknownTitle": "Bez tytułu",
+			"url": "Odnośnik",
+			"username": "Nazwa użytkownika",
+			"value": "Wartość",
+			"version": "Wersja"
 		},
 		"emptyState": {
-			"noStumpServers": "No Stump servers added",
-			"noOPDSServers": "No OPDS servers added",
-			"noServers": "No servers have been configured",
-			"cta": "Get started by adding a server to access your book collections",
-			"seeDocumentation": "See Documentation"
+			"noStumpServers": "Nie dodano żadnych serwerów Stump",
+			"noOPDSServers": "Nie dodano żadnych serwerów OPDS",
+			"noServers": "Nie skonfigurowano żadnych serwerów",
+			"cta": "Zacznij od dodania serwera, aby uzyskać do swojej kolekcji książek",
+			"seeDocumentation": "Zobacz dokumentację"
 		},
 		"tabs": {
-			"servers": "Servers",
-			"localLibrary": "Library",
-			"settings": "Settings"
+			"servers": "Serwery",
+			"localLibrary": "Biblioteka",
+			"settings": "Ustawienia"
 		},
 		"localLibrary": {
-			"title": "Local Library",
+			"title": "Biblioteka lokalna",
 			"emptyState": {
 				"all": {
-					"title": "Nothing to read yet",
+					"title": "Brak pozycji do czytania",
 					"description": "Once you have books for offline reading, they will appear here"
 				},
 				"imported": {
-					"title": "No imported books",
-					"description": "Import books to read them offline"
+					"title": "Brak zaimportowanych książek",
+					"description": "Zaimportuj książki, aby przeczytać je offline"
 				},
 				"server": {
 					"title": "No downloaded books",
@@ -2614,91 +2614,91 @@
 				"nothingDownloading": "Nothing is being downloaded",
 				"noActiveDownloads": "No active downloads",
 				"noFailedDownloads": "No failed downloads",
-				"downloadStarting": "Starting..."
+				"downloadStarting": "Rozpoczynanie..."
 			},
 			"downloadsHeaderMenu": {
 				"deleteAllDownloads": {
-					"label": "Delete Books",
-					"confirmation": "Are you sure you want to delete your local library?",
+					"label": "Usuń książki",
+					"confirmation": "Czy na pewno chcesz usunąć lokalną bibliotekę?",
 					"disclaimer": "This action cannot be undone."
 				},
-				"seeProblems": "See Problems ({{problemCount}})",
+				"seeProblems": "Zobacz problemy ({{problemCount}})",
 				"hideCurated": "Hide Curated",
 				"showCurated": "Show Curated",
-				"attemptSync": "Attempt Sync"
+				"attemptSync": "Spróbuj zsynchronizować"
 			},
 			"downloadsHeaderSortMenu": {
 				"sortBy": {
-					"NAME": "Name",
+					"NAME": "Nazwa",
 					"ADDED_AT": "Date Added",
-					"SERIES": "Series"
+					"SERIES": "Seria"
 				},
 				"sortDirection": {
-					"ASC": "Ascending",
-					"DESC": "Descending"
+					"ASC": "Rosnąco",
+					"DESC": "Malejąco"
 				},
 				"sortDirectionText": {
 					"ASC": "A → Z",
 					"DESC": "Z → A"
 				},
 				"sortDirectionDate": {
-					"ASC": "Oldest First",
-					"DESC": "Newest First"
+					"ASC": "Najpierw najstarsze",
+					"DESC": "Najpierw najnowsze"
 				},
 				"sourceFilter": {
-					"all": "All Books",
-					"server": "Downloaded",
-					"imported": "Imported"
+					"all": "Wszystkie książki",
+					"server": "Pobrane",
+					"imported": "Zaimportowane"
 				}
 			},
 			"downloadProblemsSheet": {
-				"title": "Failed Downloads",
-				"noFailedDownloads": "No failed downloads",
-				"retryAll": "Retry All",
-				"dismissAll": "Dismiss All"
+				"title": "Nieudane pobierania",
+				"noFailedDownloads": "Brak nieudanych pobrań",
+				"retryAll": "Ponów wszystkie",
+				"dismissAll": "Odrzucić wszystkie"
 			}
 		},
 		"settings": {
 			"preferences": {
-				"label": "Preferences",
+				"label": "Preferencje",
 				"appTheme": {
-					"label": "Theme",
+					"label": "Motyw",
 					"options": {
-						"light": "Light",
-						"dark": "Dark"
+						"light": "Jasny",
+						"dark": "Ciemny"
 					}
 				},
-				"appPrimaryColor": "Accent",
-				"appLanguage": "Language",
-				"defaultServer": "Default Server",
-				"thumbnailRatio": "Thumbnail Ratio",
+				"appPrimaryColor": "Akcent",
+				"appLanguage": "Język",
+				"defaultServer": "Domyślny serwer",
+				"thumbnailRatio": "Współczynnik miniatur",
 				"thumbnailPlaceholder": {
-					"label": "Thumbnail Placeholder",
+					"label": "Miniatury zastępcze",
 					"options": {
-						"grayscale": "Grayscale",
-						"averageColor": "Average color",
-						"colorful": "Colorful",
+						"grayscale": "Odcienie szarości",
+						"averageColor": "Średnie wartości kolorów",
+						"colorful": "Kolorowe",
 						"thumbhash": "Thumbhash"
 					}
 				},
 				"thumbnailResizeMode": {
-					"label": "Thumbnail Resize",
+					"label": "Skalowanie miniatur",
 					"options": {
-						"cover": "Cover",
-						"stretch": "Stretch",
-						"fit": "Fit"
+						"cover": "Okładka",
+						"stretch": "Rozciągnij",
+						"fit": "Dopasuj"
 					}
 				}
 			},
 			"reading": {
-				"label": "Reading",
-				"preferNativePdf": "Prefer Native PDF",
-				"preferMinimalReader": "Prefer Minimal Reader",
-				"disableDismissGesture": "Disable Dismiss Gesture"
+				"label": "Czytane",
+				"preferNativePdf": "Preferuj natywny PDF",
+				"preferMinimalReader": "Preferuj minimalny czytnik",
+				"disableDismissGesture": "Wyłącz gest odrzucania"
 			},
 			"stump": {
 				"label": "Stump",
-				"description": "Stump features are optional and can be turn them off if you do not need them",
+				"description": "Funkcje Stump są opcjonalne i, jeśli ich nie potrzebujesz, możesz je wyłączyć",
 				"bookClubsEnabled": "Book Club Features"
 			},
 			"autoSyncLocalData": "Auto-Sync Local Data",
@@ -2758,21 +2758,21 @@
 				}
 			},
 			"contactInfo": {
-				"label": "Contact",
-				"email": "Email",
+				"label": "Kontakt",
+				"email": "Adres e-mail",
 				"discord": "Discord",
 				"github": "GitHub"
 			},
 			"supportInfo": {
 				"buildInformation": "Build Information",
-				"version": "Version: {{version}}",
-				"suuportIdentifier": "Support Identifier: {{supportID}}"
+				"version": "Wersja: {{version}}",
+				"suuportIdentifier": "Identyfikator wsparcia: {{supportID}}"
 			}
 		},
 		"readerSettings": {
 			"title": "Reader Settings",
 			"sections": {
-				"mode": "Mode",
+				"mode": "Tryb",
 				"imageOptions": "Image Options",
 				"controls": "Controls"
 			},
@@ -2787,8 +2787,8 @@
 			"readingDirection": {
 				"label": "Direction",
 				"options": {
-					"RTL": "Right to left",
-					"LTR": "Left to right"
+					"RTL": "Od prawej do lewej",
+					"LTR": "Od lewej do prawej"
 				}
 			},
 			"doublePageBehavior": {
@@ -2804,15 +2804,15 @@
 				"label": "Scaling",
 				"options": {
 					"AUTO": "Auto",
-					"HEIGHT": "Fit Height",
-					"WIDTH": "Fit Width",
-					"NONE": "None"
+					"HEIGHT": "Dopasuj wysokość",
+					"WIDTH": "Dopasuj szerokość",
+					"NONE": "Brak"
 				}
 			},
 			"allowDownscaling": "Downscaling",
 			"tapSidesToNavigate": "Tap Sides to Navigate",
 			"footerControls": {
-				"label": "Footer",
+				"label": "Stopka",
 				"options": {
 					"images": "Image Gallery",
 					"slider": "Slider"
@@ -2820,14 +2820,14 @@
 			}
 		},
 		"savedServerActions": {
-			"clearCache": "Clear Cache",
+			"clearCache": "Wyczyść pamięć podręczną",
 			"discardTokens": {
-				"label": "Discard Tokens",
+				"label": "Wyczyść tokeny",
 				"description": "Affects login tokens only"
 			},
 			"deleteServer": {
-				"title": "Delete Server",
-				"confirmation": "Are you sure you want to delete {{serverName}}?"
+				"title": "Usuń serwer",
+				"confirmation": "Czy na pewno chcesz usunąć {{serverName}}?"
 			}
 		}
 	}

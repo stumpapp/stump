@@ -46,7 +46,7 @@ impl KoboSync {
 		// TODO: or not?
 		let query = match previous_sync_at {
 			// load things created or modified since the most recent sync
-			Some(previous_sync_at) => media::Entity::find_for_user(&user)
+			Some(previous_sync_at) => media::Entity::find_for_user(user)
 				.filter(media::Column::Extension.eq("epub"))
 				.filter(
 					sea_orm::Condition::any()
@@ -54,7 +54,7 @@ impl KoboSync {
 						.add(media::Column::ModifiedAt.gte(previous_sync_at)),
 				),
 			// load absolutely everything
-			None => media::Entity::find_for_user(&user)
+			None => media::Entity::find_for_user(user)
 				.filter(media::Column::Extension.eq("epub")),
 		};
 
@@ -108,7 +108,7 @@ impl KoboSync {
 		//   continue session
 
 		let prev_sync = match client_sync_token {
-			Some(t) => KoboSync::find(&db, &user, t.sync_id.clone()).await,
+			Some(t) => KoboSync::find(db, user, t.sync_id.clone()).await,
 			None => None,
 		};
 
@@ -129,8 +129,8 @@ impl KoboSync {
 			// there was no previous sync session, or the previous session completed
 			(_, _) => {
 				let session = KoboSync::begin_new_sync(
-					&db,
-					&user,
+					db,
+					user,
 					device_id,
 					device_metadata,
 					previous_sync_began_at,

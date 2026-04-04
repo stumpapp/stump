@@ -210,7 +210,7 @@ async fn library_sync(
 	let device_metadata = device_metadata(&headers);
 
 	let sync_page = KoboSync::next_page(
-		&conn,
+		conn,
 		&user,
 		device_id,
 		serde_json::Value::Object(device_metadata),

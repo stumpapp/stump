@@ -41,6 +41,7 @@ pub enum SyncTokenSerializeError {
 	InvalidHeaderError(#[from] InvalidHeaderValue),
 }
 
+#[allow(clippy::enum_variant_names)]
 #[derive(Error, Debug)]
 pub enum SyncTokenDeserializeError {
 	#[error("Could not deserialize string from header: {0}")]

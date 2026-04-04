@@ -11,6 +11,7 @@ import {
 	DefaultServer,
 	DeleteDatabase,
 	DisableDismissGesture,
+	DisplayLanguageKeys,
 	EnableDebugAnalytics,
 	ImageCacheActions,
 	MaskURLs,
@@ -69,6 +70,7 @@ export default function Screen() {
 					<PerformanceMonitor />
 					<ReduceAnimations />
 					<MaskURLs />
+					<DisplayLanguageKeys />
 					<EnableDebugAnalytics />
 				</Card>
 

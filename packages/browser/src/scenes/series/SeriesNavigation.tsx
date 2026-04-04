@@ -66,13 +66,13 @@ export default function SeriesNavigation() {
 		<div
 			ref={ref}
 			className={cn(
-				'sticky top-0 z-50 h-12 w-full border-b border-edge bg-transparent md:relative md:top-[unset] md:z-[unset]',
+				'top-0 h-12 md:relative md:top-[unset] md:z-[unset] sticky z-50 w-full border-b border-edge bg-transparent',
 				{ 'bg-background': isSticky },
 			)}
 		>
 			<nav
 				className={cn(
-					'-mb-px flex h-12 gap-x-6 overflow-x-scroll px-3 scrollbar-hide md:overflow-x-hidden',
+					'h-12 gap-x-6 px-3 md:overflow-x-hidden -mb-px scrollbar-hide flex overflow-x-scroll',
 					{
 						'mx-auto': preferTopBar && !!layoutMaxWidthPx,
 					},
@@ -86,7 +86,7 @@ export default function SeriesNavigation() {
 						underline={false}
 						onMouseEnter={tab.onHover}
 						className={cn(
-							'whitespace-nowrap border-b-2 px-1 py-3 text-sm font-medium',
+							'px-1 py-3 text-sm font-medium border-b-2 whitespace-nowrap',
 							{
 								'border-edge-brand text-foreground-brand': tab.isActive,
 								'border-transparent text-foreground-muted hover:border-edge': !tab.isActive,

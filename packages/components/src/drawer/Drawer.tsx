@@ -29,7 +29,7 @@ const DrawerOverlay: React.ForwardRefExoticComponent<
 >(({ className, ...props }, ref) => (
 	<DrawerPrimitive.Overlay
 		ref={ref}
-		className={cn('fixed inset-0 z-50 bg-black/80', className)}
+		className={cn('inset-0 bg-black/80 fixed z-50', className)}
 		{...props}
 	/>
 ))
@@ -47,7 +47,7 @@ const DrawerContent: typeof DrawerPrimitive.Content = React.forwardRef<
 		<DrawerPrimitive.Content
 			ref={ref}
 			className={cn(
-				'fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col rounded-t-[10px] border border-edge-subtle bg-background outline-none',
+				'inset-x-0 bottom-0 mt-24 fixed z-50 flex h-auto flex-col rounded-t-[10px] border border-edge-subtle bg-background outline-none',
 				className,
 			)}
 			{...props}
@@ -55,7 +55,7 @@ const DrawerContent: typeof DrawerPrimitive.Content = React.forwardRef<
 			{showTopIndicator && (
 				<button
 					type="button"
-					className="bg-muted/40 hover:bg-muted/50 mx-auto mt-4 h-2 w-[100px] scale-[99%] rounded-full outline-none transition-all duration-200 hover:scale-100 active:scale-[99%]"
+					className="bg-muted/40 hover:bg-muted/50 mt-4 h-2 mx-auto w-[100px] scale-[99%] rounded-full transition-all duration-200 outline-none hover:scale-100 active:scale-[99%]"
 				/>
 			)}
 			{children}
@@ -65,12 +65,12 @@ const DrawerContent: typeof DrawerPrimitive.Content = React.forwardRef<
 DrawerContent.displayName = 'DrawerContent'
 
 const DrawerHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-	<div className={cn('grid gap-1.5 p-4 text-center sm:text-left', className)} {...props} />
+	<div className={cn('gap-1.5 p-4 sm:text-left grid text-center', className)} {...props} />
 )
 DrawerHeader.displayName = 'DrawerHeader'
 
 const DrawerFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-	<div className={cn('mt-auto flex flex-col gap-2 p-4', className)} {...props} />
+	<div className={cn('gap-2 p-4 mt-auto flex flex-col', className)} {...props} />
 )
 DrawerFooter.displayName = 'DrawerFooter'
 
@@ -81,7 +81,7 @@ const DrawerTitle: typeof DrawerPrimitive.Title = React.forwardRef<
 	<DrawerPrimitive.Title
 		ref={ref}
 		className={cn(
-			'text-lg font-semibold leading-none tracking-tight text-foreground-subtle',
+			'text-lg font-semibold tracking-tight leading-none text-foreground-subtle',
 			className,
 		)}
 		{...props}

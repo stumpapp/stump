@@ -11,8 +11,8 @@ export default function DefaultReadingSettings() {
 
 	return (
 		<>
-			<div className="flex items-center gap-2">
-				<div className="flex flex-col gap-2">
+			<div className="gap-2 flex items-center">
+				<div className="gap-2 flex flex-col">
 					<Label>{t(getKey('imageScaling.label'))}</Label>
 					<NativeSelect
 						options={[
@@ -28,7 +28,7 @@ export default function DefaultReadingSettings() {
 					</Text>
 				</div>
 
-				<div className="flex flex-col gap-2">
+				<div className="gap-2 flex flex-col">
 					<Label>{t(getKey('readingDirection.label'))}</Label>
 					<NativeSelect
 						options={[
@@ -43,7 +43,7 @@ export default function DefaultReadingSettings() {
 				</div>
 			</div>
 
-			<div className="flex flex-col gap-2 md:w-2/3">
+			<div className="gap-2 md:w-2/3 flex flex-col">
 				<Label>{t(getKey('readingMode.label'))}</Label>
 				<NativeSelect
 					options={[

@@ -7,6 +7,7 @@ import { useStore } from 'zustand'
 import { DownloadsHeaderMenu, DownloadsHeaderSortMenu } from '~/components/localLibrary'
 import { SelectionLeftScreenHeader, SelectionRightScreenHeader } from '~/components/selection'
 import { IS_IOS_24_PLUS } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 import { usePreferencesStore } from '~/stores'
 import { createSelectionStore, SelectionContext, SelectionStore } from '~/stores/selection'
 
@@ -31,6 +32,7 @@ function AndroidHeaderWrapper({
 }
 
 export default function Screen() {
+	const { t } = useTranslate()
 	const animationEnabled = usePreferencesStore((state) => !state.reduceAnimations)
 
 	// eslint-disable-next-line react-hooks/refs
@@ -81,7 +83,7 @@ export default function Screen() {
 			<QueryClientProvider client={offlineQueryClient}>
 				<Stack
 					screenOptions={{
-						title: 'Local Library',
+						title: t('localLibrary.title'),
 						headerShown: Platform.OS === 'ios',
 						headerTransparent: Platform.OS === 'ios',
 						headerLargeTitle: true,

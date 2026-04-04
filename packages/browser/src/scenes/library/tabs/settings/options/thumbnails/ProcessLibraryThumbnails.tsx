@@ -25,7 +25,7 @@ export default function ProcessLibraryThumbnails() {
 	const iconStyle = 'mr-2 h-4 w-4'
 
 	return (
-		<div className="flex flex-col gap-4">
+		<div className="gap-4 flex flex-col">
 			<div>
 				<Label>Process thumbnail colors</Label>
 				<Text size="sm" variant="muted">

@@ -8,6 +8,7 @@ import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { Platform } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useStore } from 'zustand'
+import { useShallow } from 'zustand/react/shallow'
 
 import { BookGridItem } from '~/components/book'
 import { IBookGridItemFragment } from '~/components/book/BookGridItem'
@@ -96,11 +97,14 @@ export default function Screen() {
 
 	// eslint-disable-next-line react-hooks/refs
 	const store = useRef(createBookFilterStore()).current
-	const { filters, sort, resetFilters } = useStore(store, (state) => ({
-		filters: state.filters,
-		sort: state.sort,
-		resetFilters: state.resetFilters,
-	}))
+	const { filters, sort, resetFilters } = useStore(
+		store,
+		useShallow((state) => ({
+			filters: state.filters,
+			sort: state.sort,
+			resetFilters: state.resetFilters,
+		})),
+	)
 
 	const { data, hasNextPage, fetchNextPage, refetch } = useInfiniteSuspenseGraphQL(
 		booksQuery,

@@ -28,7 +28,7 @@ export default function ServerStats() {
 	)
 
 	return (
-		<div className="flex max-w-xl items-center justify-around gap-4 divide-x divide-edge">
+		<div className="max-w-xl gap-4 flex items-center justify-around divide-x divide-edge">
 			<Statistic className="pr-10">
 				<Statistic.Label>Libraries</Statistic.Label>
 				<Statistic.CountUpNumber value={Number(stats.libraryCount)} />

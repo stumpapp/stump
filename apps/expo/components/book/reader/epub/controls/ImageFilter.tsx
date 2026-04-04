@@ -1,3 +1,5 @@
+import { useShallow } from 'zustand/react/shallow'
+
 import { Card } from '~/components/ui'
 import { Picker } from '~/components/ui/picker/picker'
 import type { PickerOption } from '~/components/ui/picker/types'
@@ -11,10 +13,12 @@ const IMAGE_FILTER_OPTIONS: PickerOption[] = [
 ]
 
 export default function ImageFilter() {
-	const store = useReaderStore((state) => ({
-		imageFilter: state.globalSettings.imageFilter,
-		setSettings: state.setGlobalSettings,
-	}))
+	const store = useReaderStore(
+		useShallow((state) => ({
+			imageFilter: state.globalSettings.imageFilter,
+			setSettings: state.setGlobalSettings,
+		})),
+	)
 
 	const handleChange = (value: string) => {
 		const imageFilter = value === 'none' ? undefined : (value as ImageFilterType)

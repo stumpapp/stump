@@ -92,7 +92,7 @@ export default function LibraryReview() {
 	}
 
 	return (
-		<div className="flex flex-col space-y-8">
+		<div className="space-y-8 flex flex-col">
 			<StepContainer
 				label={t(getStepKey(1, 'heading'))}
 				description={t(getStepKey(1, 'description'))}
@@ -120,7 +120,7 @@ export default function LibraryReview() {
 
 				<div>
 					<Label>{t(getLabelKey('tags'))}</Label>
-					<div className="flex flex-wrap gap-1">
+					<div className="gap-1 flex flex-wrap">
 						{!state.tags?.length && (
 							<Text variant="muted" size="sm">
 								{t(getKey('none'))}
@@ -150,7 +150,7 @@ export default function LibraryReview() {
 
 				<div>
 					<Label>{t(getLabelKey('ignoreRules'))}</Label>
-					<div className="flex flex-wrap gap-1">
+					<div className="gap-1 flex flex-wrap">
 						{!state.ignoreRules?.length && (
 							<Text variant="muted" size="sm">
 								{t(getKey('none'))}
@@ -230,14 +230,14 @@ type StepContainerProps = PropsWithChildren<{
 }>
 
 const StepContainer = ({ label, description, children }: StepContainerProps) => (
-	<div className="grid grid-cols-7 justify-between space-y-4 md:space-y-0">
-		<div className="col-span-7 md:col-span-4">
+	<div className="space-y-4 md:space-y-0 grid grid-cols-7 justify-between">
+		<div className="md:col-span-4 col-span-7">
 			<Heading size="sm">{label}</Heading>
 			<Text size="sm" variant="muted" className="mt-1.5">
 				{description}
 			</Text>
 		</div>
 
-		<div className="col-span-7 flex flex-col space-y-2 md:col-span-3">{children}</div>
+		<div className="space-y-2 md:col-span-3 col-span-7 flex flex-col">{children}</div>
 	</div>
 )

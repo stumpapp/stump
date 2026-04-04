@@ -112,16 +112,16 @@ export default function CreateAPIKeyModal() {
 				</Dialog.Header>
 
 				{apiSecret && (
-					<div className="divide divide-y divide-edge rounded-lg border border-edge bg-background-surface p-0.5">
-						<div className="mb-1 flex h-8 items-center justify-between pl-3 pr-2">
-							<div className="flex items-center space-x-2">
+					<div className="divide rounded-lg p-0.5 divide-y divide-edge border border-edge bg-background-surface">
+						<div className="mb-1 h-8 pl-3 pr-2 flex items-center justify-between">
+							<div className="space-x-2 flex items-center">
 								<KeyRound className="h-4 w-4 text-foreground-muted" />
 								<Text size="sm" className="text-foreground-subtle">
 									{t(getKey('createdKey'))}
 								</Text>
 							</div>
 
-							<div className="flex items-center gap-1">
+							<div className="gap-1 flex items-center">
 								<Button size="icon" onClick={() => setHideSecret((prev) => !prev)}>
 									<VisibilityIcon className="h-4 w-4 text-foreground-muted" />
 								</Button>
@@ -131,7 +131,7 @@ export default function CreateAPIKeyModal() {
 							</div>
 						</div>
 
-						<div className="rounded-lg bg-background-surface-secondary p-3 text-sm text-foreground-subtle">
+						<div className="rounded-lg p-3 text-sm bg-background-surface-secondary text-foreground-subtle">
 							<span>
 								<code>{hideSecret ? maskedSecret : apiSecret}</code>
 							</span>

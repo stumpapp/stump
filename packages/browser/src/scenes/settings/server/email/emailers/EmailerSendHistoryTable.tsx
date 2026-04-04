@@ -39,14 +39,14 @@ export default function EmailerSendHistoryTable({ records }: Props) {
 	const { rows } = table.getRowModel()
 
 	return (
-		<div className="mx-auto w-full max-w-2xl px-1">
+		<div className="max-w-2xl px-1 mx-auto w-full">
 			<table className="w-full">
 				<thead>
 					<tr>
 						{table.getFlatHeaders().map((header) => (
 							<th key={header.id} className="h-10 first:pl-4 last:pr-4">
 								<div
-									className={cn('flex items-center gap-x-2', {
+									className={cn('gap-x-2 flex items-center', {
 										'cursor-pointer select-none': header.column.getCanSort(),
 									})}
 									onClick={header.column.getToggleSortingHandler()}
@@ -126,7 +126,7 @@ const columns = [
 				return <Text size="sm">{sentBy.username}</Text>
 			} else if (sentByUserId) {
 				return (
-					<div className="flex items-center space-x-2">
+					<div className="space-x-2 flex items-center">
 						<ToolTip content={sentByUserId} align="start" size="sm">
 							<Text size="sm">
 								{sentByUserId.slice(0, 5)}..{sentByUserId.slice(-5)}
@@ -164,7 +164,7 @@ const columns = [
 			const isAlreadyExpanded = row.getIsExpanded()
 			return (
 				<div
-					className="flex cursor-pointer items-center space-x-2"
+					className="space-x-2 flex cursor-pointer items-center"
 					onClick={row.getToggleExpandedHandler()}
 				>
 					<Text size="sm">{isAlreadyExpanded ? 'Hide' : 'Show'}</Text>

@@ -37,8 +37,8 @@ export default function BookOverviewSceneHeader({ media, book, completedAt }: Pr
 		: null
 
 	return (
-		<div className="flex w-full flex-col gap-3">
-			<div className="flex flex-wrap items-center gap-3">
+		<div className="gap-3 flex w-full flex-col">
+			<div className="gap-3 flex flex-wrap items-center">
 				<Heading size="lg">{media.resolvedName}</Heading>
 				{media.seriesId && (
 					<Suspense>
@@ -48,7 +48,7 @@ export default function BookOverviewSceneHeader({ media, book, completedAt }: Pr
 			</div>
 
 			{hasStats && (
-				<div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:flex md:flex-wrap md:gap-6">
+				<div className="gap-3 sm:grid-cols-3 md:flex md:flex-wrap md:gap-6 grid grid-cols-2">
 					{pages > 0 && <Statistic.Item label="Pages" value={pages} />}
 					{size > 0 && <Statistic.Item label="Size" value={formatBytes(size) ?? '—'} />}
 					{media.extension && (
@@ -68,7 +68,7 @@ export default function BookOverviewSceneHeader({ media, book, completedAt }: Pr
 			)}
 
 			{hasMetadataBadges && (
-				<div className="flex flex-wrap items-center gap-2">
+				<div className="gap-2 flex flex-wrap items-center">
 					{metadata?.publisher && (
 						<Badge variant="default" size="xs" rounded="full">
 							{metadata.publisher}
@@ -107,7 +107,7 @@ export default function BookOverviewSceneHeader({ media, book, completedAt }: Pr
 			)}
 
 			{hasGenres && (
-				<div className="flex flex-col gap-1">
+				<div className="gap-1 flex flex-col">
 					<Text size="xs" variant="muted">
 						Genres
 					</Text>
@@ -130,7 +130,7 @@ export default function BookOverviewSceneHeader({ media, book, completedAt }: Pr
 			)}
 
 			{hasWriters && (
-				<div className="flex flex-col gap-1">
+				<div className="gap-1 flex flex-col">
 					<Text size="xs" variant="muted">
 						Writers
 					</Text>
@@ -153,7 +153,7 @@ export default function BookOverviewSceneHeader({ media, book, completedAt }: Pr
 			)}
 
 			{hasTags && (
-				<div className="flex flex-col gap-1">
+				<div className="gap-1 flex flex-col">
 					<Text size="xs" variant="muted">
 						Tags
 					</Text>
@@ -162,7 +162,7 @@ export default function BookOverviewSceneHeader({ media, book, completedAt }: Pr
 			)}
 
 			{hasLinks && (
-				<div className="flex flex-col gap-1">
+				<div className="gap-1 flex flex-col">
 					<Text size="xs" variant="muted">
 						Links
 					</Text>

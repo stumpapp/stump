@@ -4,6 +4,7 @@ import { View } from 'react-native'
 import * as DropdownMenu from 'zeego/dropdown-menu'
 
 import { Icon, Text } from '~/components/ui'
+import { useTranslate } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 import { DoublePageBehavior } from '~/stores/reader'
 
@@ -13,13 +14,15 @@ type Props = {
 }
 
 export default function DoublePageSelect({ behavior, onChange }: Props) {
+	const { t } = useTranslate()
+
 	const [isOpen, setIsOpen] = useState(false)
 
 	return (
 		<DropdownMenu.Root onOpenChange={setIsOpen}>
 			<DropdownMenu.Trigger>
-				<View className={cn('flex-row items-center gap-1.5', { 'opacity-80': isOpen })}>
-					<Text>{BEHAVIOR_TEXT[behavior]}</Text>
+				<View className={cn('gap-1.5 flex-row items-center', { 'opacity-80': isOpen })}>
+					<Text>{t(getKey(behavior))}</Text>
 					<Icon as={ChevronsUpDown} className="h-5 text-foreground-muted" />
 				</View>
 			</DropdownMenu.Trigger>
@@ -30,7 +33,7 @@ export default function DoublePageSelect({ behavior, onChange }: Props) {
 					value={behavior === 'auto'}
 					onValueChange={() => onChange('auto')}
 				>
-					<DropdownMenu.ItemTitle>Auto</DropdownMenu.ItemTitle>
+					<DropdownMenu.ItemTitle>{t(getKey('auto'))}</DropdownMenu.ItemTitle>
 				</DropdownMenu.CheckboxItem>
 
 				<DropdownMenu.CheckboxItem
@@ -38,7 +41,7 @@ export default function DoublePageSelect({ behavior, onChange }: Props) {
 					value={behavior === 'always'}
 					onValueChange={() => onChange('always')}
 				>
-					<DropdownMenu.ItemTitle>Always</DropdownMenu.ItemTitle>
+					<DropdownMenu.ItemTitle>{t(getKey('always'))}</DropdownMenu.ItemTitle>
 				</DropdownMenu.CheckboxItem>
 
 				<DropdownMenu.CheckboxItem
@@ -46,15 +49,12 @@ export default function DoublePageSelect({ behavior, onChange }: Props) {
 					value={behavior === 'off'}
 					onValueChange={() => onChange('off')}
 				>
-					<DropdownMenu.ItemTitle>Off</DropdownMenu.ItemTitle>
+					<DropdownMenu.ItemTitle>{t(getKey('off'))}</DropdownMenu.ItemTitle>
 				</DropdownMenu.CheckboxItem>
 			</DropdownMenu.Content>
 		</DropdownMenu.Root>
 	)
 }
 
-const BEHAVIOR_TEXT: Record<DoublePageBehavior, string> = {
-	always: 'Always',
-	auto: 'Auto',
-	off: 'Off',
-}
+const LOCALE_BASE = 'readerSettings.doublePageBehavior'
+const getKey = (key: DoublePageBehavior) => `${LOCALE_BASE}.options.${key}`

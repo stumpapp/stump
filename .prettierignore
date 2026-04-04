@@ -4,6 +4,7 @@ generated.ts
 node_modules
 target
 dist
+dev-dist
 build
 .next
 .expo

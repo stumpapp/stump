@@ -113,7 +113,7 @@ export default function LibrarySeriesGrid({ libraryId, onSelectSeries }: Props) 
 				{({ height, width }) => (
 					<div
 						ref={parentRef}
-						className="overflow-y-auto overflow-x-hidden"
+						className="overflow-x-hidden overflow-y-auto"
 						style={{
 							height,
 							width,
@@ -149,11 +149,11 @@ export default function LibrarySeriesGrid({ libraryId, onSelectSeries }: Props) 
 												}}
 											>
 												<div
-													className="relative flex w-[7rem] flex-1 flex-col space-y-1 overflow-hidden rounded-md border-[1.5px] border-edge-subtle bg-background shadow-sm transition-colors duration-100 hover:border-edge-brand sm:w-[7.666rem] md:w-[9rem]"
+													className="w-28 space-y-1 rounded-md shadow-sm sm:w-[7.666rem] md:w-36 relative flex flex-1 flex-col overflow-hidden border-[1.5px] border-edge-subtle bg-background transition-colors duration-100 hover:border-edge-brand"
 													onClick={() => onSelectSeries(thisSeries)}
 												>
 													<div
-														className="relative bg-cover bg-center p-0"
+														className="p-0 relative bg-cover bg-center"
 														style={{
 															backgroundImage: `url('${imageUrl}')`,
 															aspectRatio: thumbnailRatio,

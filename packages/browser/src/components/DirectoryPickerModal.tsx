@@ -87,8 +87,8 @@ export default function DirectoryPickerModal({
 					<Dialog.Close onClick={onClose} />
 				</Dialog.Header>
 
-				<div className="flex flex-col space-y-2 overflow-hidden p-1">
-					<div className="flex items-center space-x-2">
+				<div className="space-y-2 p-1 flex flex-col overflow-hidden">
+					<div className="space-x-2 flex items-center">
 						<Button
 							className="h-8 w-8 p-0 text-sm"
 							disabled={!canGoBack}
@@ -115,7 +115,7 @@ export default function DirectoryPickerModal({
 						/>
 					</div>
 
-					<div className="flex h-[20rem] flex-col divide-y divide-edge/75 overflow-hidden">
+					<div className="h-80 flex flex-col divide-y divide-edge/75 overflow-hidden">
 						<AutoSizer>
 							{({ height, width }) => (
 								<Virtuoso
@@ -126,14 +126,14 @@ export default function DirectoryPickerModal({
 									itemContent={(index, directory) => (
 										<button
 											className={cx(
-												'my-0.5 w-full justify-start rounded-lg px-2 py-1.5 text-left hover:bg-background-surface',
+												'my-0.5 rounded-lg px-2 py-1.5 w-full justify-start text-left hover:bg-background-surface',
 												{
 													'bg-background-surface/40': index % 2 === 0,
 												},
 											)}
 											onClick={() => setPath(directory.path)}
 										>
-											<Text className="line-clamp-1 inline-flex items-center gap-x-2">
+											<Text className="gap-x-2 line-clamp-1 inline-flex items-center">
 												<Folder size="1.25rem" className="shrink-0" />
 												<span className="line-clamp-1">{directory.name}</span>
 											</Text>
@@ -147,7 +147,7 @@ export default function DirectoryPickerModal({
 					</div>
 				</div>
 
-				<Dialog.Footer className="w-full items-center gap-3 sm:justify-between sm:gap-0">
+				<Dialog.Footer className="gap-3 sm:justify-between sm:gap-0 w-full items-center">
 					<CheckBox
 						variant="primary"
 						label="Show Hidden Directories"
@@ -155,7 +155,7 @@ export default function DirectoryPickerModal({
 						onClick={toggle}
 					/>
 
-					<div className="flex w-full flex-col-reverse space-y-2 space-y-reverse sm:flex-row sm:justify-end sm:space-x-2 sm:space-y-0">
+					<div className="space-y-2 sm:flex-row sm:justify-end sm:space-x-2 sm:space-y-0 flex w-full flex-col-reverse space-y-reverse">
 						<Button onClick={onClose}>Cancel</Button>
 						<Button variant="primary" onClick={handleConfirm}>
 							Confirm

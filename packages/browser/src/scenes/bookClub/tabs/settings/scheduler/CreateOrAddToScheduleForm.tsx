@@ -78,7 +78,7 @@ export default function CreateOrAddToScheduleForm() {
 				min={1}
 			/>
 
-			<div className="flex flex-col gap-6">
+			<div className="gap-6 flex flex-col">
 				{Array.from({ length: books.length }).map((_, index) => (
 					<AddBookCard key={index} index={index} />
 				))}

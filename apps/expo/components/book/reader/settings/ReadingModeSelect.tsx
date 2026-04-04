@@ -5,6 +5,7 @@ import { View } from 'react-native'
 import * as DropdownMenu from 'zeego/dropdown-menu'
 
 import { Icon, Text } from '~/components/ui'
+import { useTranslate } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 
 type Props = {
@@ -13,13 +14,15 @@ type Props = {
 }
 
 export default function ReadingModeSelect({ mode, onChange }: Props) {
+	const { t } = useTranslate()
+
 	const [isOpen, setIsOpen] = useState(false)
 
 	return (
 		<DropdownMenu.Root onOpenChange={setIsOpen}>
 			<DropdownMenu.Trigger>
-				<View className={cn('flex-row items-center gap-1.5', { 'opacity-80': isOpen })}>
-					<Text>{READ_FLOW[mode]}</Text>
+				<View className={cn('gap-1.5 flex-row items-center', { 'opacity-80': isOpen })}>
+					<Text>{t(getOption(mode))}</Text>
 					<Icon as={ChevronsUpDown} className="h-5 text-foreground-muted" />
 				</View>
 			</DropdownMenu.Trigger>
@@ -30,7 +33,7 @@ export default function ReadingModeSelect({ mode, onChange }: Props) {
 					value={mode === ReadingMode.Paged}
 					onValueChange={() => onChange(ReadingMode.Paged)}
 				>
-					<DropdownMenu.ItemTitle>Paged</DropdownMenu.ItemTitle>
+					<DropdownMenu.ItemTitle>{t(getOption(ReadingMode.Paged))}</DropdownMenu.ItemTitle>
 				</DropdownMenu.CheckboxItem>
 
 				<DropdownMenu.CheckboxItem
@@ -38,7 +41,9 @@ export default function ReadingModeSelect({ mode, onChange }: Props) {
 					value={mode === ReadingMode.ContinuousHorizontal}
 					onValueChange={() => onChange(ReadingMode.ContinuousHorizontal)}
 				>
-					<DropdownMenu.ItemTitle>Scroll (Horizontal)</DropdownMenu.ItemTitle>
+					<DropdownMenu.ItemTitle>
+						{t(getOption(ReadingMode.ContinuousHorizontal))}
+					</DropdownMenu.ItemTitle>
 				</DropdownMenu.CheckboxItem>
 
 				<DropdownMenu.CheckboxItem
@@ -46,15 +51,15 @@ export default function ReadingModeSelect({ mode, onChange }: Props) {
 					value={mode === ReadingMode.ContinuousVertical}
 					onValueChange={() => onChange(ReadingMode.ContinuousVertical)}
 				>
-					<DropdownMenu.ItemTitle>Scroll (Vertical)</DropdownMenu.ItemTitle>
+					<DropdownMenu.ItemTitle>
+						{t(getOption(ReadingMode.ContinuousVertical))}
+					</DropdownMenu.ItemTitle>
 				</DropdownMenu.CheckboxItem>
 			</DropdownMenu.Content>
 		</DropdownMenu.Root>
 	)
 }
 
-const READ_FLOW: Record<ReadingMode, string> = {
-	[ReadingMode.Paged]: 'Paged',
-	[ReadingMode.ContinuousHorizontal]: 'Scroll (Horizontal)',
-	[ReadingMode.ContinuousVertical]: 'Scroll (Vertical)',
-}
+const LOCALE_BASE = 'readerSettings.readingMode'
+const getKey = (key: string) => `${LOCALE_BASE}.${key}`
+const getOption = (mode: ReadingMode) => getKey(`options.${mode}`)

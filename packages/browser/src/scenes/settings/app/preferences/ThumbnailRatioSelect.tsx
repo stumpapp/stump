@@ -27,7 +27,7 @@ export default function ThumbnailRatioSelect() {
 	)
 
 	return (
-		<div className="flex flex-col gap-y-1.5 md:max-w-md">
+		<div className="gap-y-1.5 md:max-w-md flex flex-col">
 			<Label>{t(getKey('label'))}</Label>
 			<NativeSelect value={closestOption.value} options={OPTIONS} onChange={handleChange} />
 			<Text size="xs" variant="muted">

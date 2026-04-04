@@ -8,7 +8,7 @@ export default function OptionalFeaturesSection() {
 	const { t } = useLocaleContext()
 
 	return (
-		<div className="flex flex-col gap-y-6">
+		<div className="gap-y-6 flex flex-col">
 			<div>
 				<Heading size="sm">{t(getKey('label'))}</Heading>
 				<Text variant="muted" size="sm">

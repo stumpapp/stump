@@ -61,7 +61,7 @@ export default function UserRestrictionsForm() {
 	}
 
 	return (
-		<div className="flex flex-col gap-y-4">
+		<div className="gap-y-4 flex flex-col">
 			<div>
 				<Heading size="sm">Access control</Heading>
 				<Text size="sm" variant="muted" className="mt-1.5">
@@ -69,8 +69,8 @@ export default function UserRestrictionsForm() {
 				</Text>
 			</div>
 
-			<div className="flex flex-col gap-8">
-				<div className="flex flex-col gap-6 md:flex-row md:items-start">
+			<div className="gap-8 flex flex-col">
+				<div className="gap-6 md:flex-row md:items-start flex flex-col">
 					<Input
 						id="ageRestriction"
 						variant="primary"

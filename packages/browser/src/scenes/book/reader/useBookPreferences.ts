@@ -2,6 +2,7 @@ import { BookPreferences, ReaderSettings, ReaderStore } from '@stump/client'
 import { PickSelect } from '@stump/components'
 import { BookReaderSceneQuery, ReadingImageScaleFit } from '@stump/graphql'
 import { useCallback, useMemo } from 'react'
+import { useShallow } from 'zustand/react/shallow'
 
 import { ImageReaderBookRef } from '@/components/readers/imageBased/context'
 import { useReaderStore } from '@/stores'
@@ -24,12 +25,14 @@ export function useBookPreferences({ book }: Params): Return {
 		setBookPreferences: storedSetBookPreferences,
 		settings,
 		setSettings,
-	} = useReaderStore((state) => ({
-		bookPreferences: state.bookPreferences,
-		setBookPreferences: state.setBookPreferences,
-		setSettings: state.setSettings,
-		settings: state.settings,
-	}))
+	} = useReaderStore(
+		useShallow((state) => ({
+			bookPreferences: state.bookPreferences,
+			setBookPreferences: state.setBookPreferences,
+			setSettings: state.setSettings,
+			settings: state.settings,
+		})),
+	)
 
 	const storedBookPreferences = useMemo(() => allPreferences[book.id], [allPreferences, book.id])
 

@@ -25,7 +25,7 @@ export default function SettingsSideBarLink({
 		<Link to={to} className={cn({ 'pointer-events-none': isDisabled })}>
 			<li
 				className={cn(
-					'flex items-center rounded-md px-2 py-1.5',
+					'rounded-md px-2 py-1.5 flex items-center',
 					isDisabled ? 'text-foreground-muted opacity-50' : 'hover:bg-background-surface-hover',
 					{
 						'bg-background-surface': isActive && !isDisabled,
@@ -34,7 +34,7 @@ export default function SettingsSideBarLink({
 				{...(prefetch ? { onMouseEnter: prefetch } : {})}
 			>
 				<Icon className="mr-2 h-4 w-4 shrink-0" />
-				<span className="ml-1 line-clamp-1 font-medium">{children}</span>
+				<span className="ml-1 font-medium line-clamp-1">{children}</span>
 			</li>
 		</Link>
 	)

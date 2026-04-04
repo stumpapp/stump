@@ -14,7 +14,7 @@ export default function SmartListReview() {
 	const { t } = useLocaleContext()
 
 	return (
-		<div className="flex flex-col space-y-8">
+		<div className="space-y-8 flex flex-col">
 			<ReviewStepContainer
 				label={t(getStepKey(1, 'heading'))}
 				description={t(getStepKey(1, 'description'))}
@@ -54,7 +54,7 @@ export default function SmartListReview() {
 			</ReviewStepContainer>
 
 			<div className="grid grid-cols-9">
-				<div className="col-span-9 md:col-span-6">
+				<div className="md:col-span-6 col-span-9">
 					<FilterConfigJSON />
 				</div>
 			</div>

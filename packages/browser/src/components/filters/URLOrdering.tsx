@@ -55,7 +55,7 @@ export default function URLOrdering({ entity }: Props) {
 			</ToolTip>
 
 			<Popover.Content
-				className="flex flex-col gap-3 overflow-hidden p-3 shadow-sm"
+				className="gap-3 p-3 shadow-sm flex flex-col overflow-hidden"
 				align={isMobile ? 'start' : 'end'}
 			>
 				<OrderBySelect entity={entity} value={orderBy || 'name'} onChange={handleChangeOrderBy} />

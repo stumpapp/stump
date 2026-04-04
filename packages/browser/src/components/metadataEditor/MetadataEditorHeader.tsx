@@ -8,7 +8,7 @@ export const MetadataEditorHeader = () => {
 	// Note: I had to separate the buttons because dynamically setting `type` based
 	// on state would trigger a submit
 	return (
-		<div className="flex h-full flex-1 items-center justify-end gap-2 pr-1.5">
+		<div className="gap-2 pr-1.5 flex h-full flex-1 items-center justify-end">
 			{state === MetadataEditorState.Editing && (
 				<Button
 					type="button"

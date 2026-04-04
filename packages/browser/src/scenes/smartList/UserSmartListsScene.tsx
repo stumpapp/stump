@@ -102,8 +102,8 @@ export default function UserSmartListsScene() {
 
 		// TODO: prolly don't scrollarea on mobile... just scroll on the page
 		return (
-			<ScrollArea className="w-full pr-3 md:w-2/3 lg:max-w-xl">
-				<div className="flex-col space-y-2">
+			<ScrollArea className="pr-3 md:w-2/3 lg:max-w-xl w-full">
+				<div className="space-y-2 flex-col">
 					{smartLists.map((list) => (
 						<SmartListCard key={list.id} data={list} />
 					))}
@@ -116,7 +116,7 @@ export default function UserSmartListsScene() {
 	// TODO: can't decide if I like the border-b
 	return (
 		<>
-			<header className="flex h-32 w-full flex-col justify-center gap-y-2 border-b border-edge px-4">
+			<header className="h-32 gap-y-2 px-4 flex w-full flex-col justify-center border-b border-edge">
 				<div>
 					<Heading size="lg" bold>
 						Smart lists
@@ -130,8 +130,8 @@ export default function UserSmartListsScene() {
 			</header>
 
 			<SceneContainer className="relative h-full overflow-hidden">
-				<div className="sticky top-0 z-10 min-h-10 bg-background py-2 backdrop-blur-sm">
-					<div className="flex w-full flex-row items-center justify-between gap-x-2 pr-3 md:w-2/3 lg:max-w-xl">
+				<div className="top-0 min-h-10 py-2 backdrop-blur-sm sticky z-10 bg-background">
+					<div className="gap-x-2 pr-3 md:w-2/3 lg:max-w-xl flex w-full flex-row items-center justify-between">
 						<Input
 							placeholder={t(withLocaleKey('searchPlaceholder'))}
 							variant="primary"

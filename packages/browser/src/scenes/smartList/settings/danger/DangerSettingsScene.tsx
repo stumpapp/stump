@@ -14,8 +14,8 @@ export default function DangerSettingsScene() {
 	const [showConfirmation, setShowConfirmation] = useState(false)
 
 	return (
-		<div className="flex flex-col gap-12">
-			<div className="flex flex-col space-y-4">
+		<div className="gap-12 flex flex-col">
+			<div className="space-y-4 flex flex-col">
 				<div>
 					<Heading size="sm">{t(getKey('heading'))}</Heading>
 					<Text size="sm" variant="muted" className="mt-1">
@@ -33,7 +33,7 @@ export default function DangerSettingsScene() {
 								type="button"
 								variant="danger"
 								onClick={() => setShowConfirmation(true)}
-								className="flex-shrink-0"
+								className="shrink-0"
 							>
 								Delete list
 							</Button>

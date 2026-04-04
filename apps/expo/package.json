@@ -16,6 +16,7 @@
 		"open:ios": "xed ios",
 		"open:android": "open -a \"Android Studio\" android",
 		"postinstall": "npx tailwindcss -i ./global.css -o ./node_modules/.cache/nativewind/global.css",
+		"format": "eslint --fix . && prettier --config ../../prettier.config.js --ignore-path ../../.prettierignore --write .",
 		"nuke": "rimraf .expo node_modules ios android"
 	},
 	"dependencies": {
@@ -51,7 +52,7 @@
 		"axios": "^1.7.9",
 		"babel-plugin-inline-import": "^3.0.0",
 		"class-variance-authority": "^0.7.0",
-		"clsx": "^2.1.0",
+		"clsx": "^2.1.1",
 		"colorjs.io": "^0.5.2",
 		"date-fns": "^4.1.0",
 		"drizzle-orm": "^0.44.6",
@@ -114,14 +115,14 @@
 		"reanimated-color-picker": "^4.1.1",
 		"sonner-native": "^0.23.0",
 		"string-strip-html": "^13.4.13",
-		"tailwind-merge": "^2.2.1",
+		"tailwind-merge": "^3.5.0",
 		"tailwindcss": "3.3.5",
 		"tailwindcss-animate": "^1.0.7",
 		"thumbhash": "^0.1.1",
 		"ts-pattern": "^5.6.2",
 		"url-join": "^5.0.0",
 		"zeego": "^3.0.6",
-		"zustand": "^4.5.2"
+		"zustand": "^5.0.12"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.26.0",

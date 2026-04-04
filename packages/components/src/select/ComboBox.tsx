@@ -162,9 +162,9 @@ export function ComboBox({
 	const renderEmptyState = () => {
 		if (onAddOption && filter) {
 			return (
-				<div className="overflow-hidden px-4">
+				<div className="px-4 overflow-hidden">
 					<Button
-						className="h-[unset] shrink-0 text-ellipsis text-wrap break-all text-brand"
+						className="text-brand h-[unset] shrink-0 text-wrap break-all text-ellipsis"
 						onClick={() => {
 							onAddOption({ label: filter, value: filter })
 							handleChange(filter)
@@ -247,7 +247,7 @@ export function ComboBox({
 				<Popover.Content
 					className={cn(
 						{ [SIZE_VARIANTS[size || 'default']]: !!size },
-						'z-[1000] mt-1 max-h-96 overflow-y-auto p-0',
+						'mt-1 max-h-96 p-0 z-1000 overflow-y-auto',
 						wrapperClassName,
 					)}
 					// eslint-disable-next-line react-hooks/refs

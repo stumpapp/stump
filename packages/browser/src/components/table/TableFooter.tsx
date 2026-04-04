@@ -17,9 +17,9 @@ export default function TableFooter({ pagination, setPagination, pageCount, data
 	const { pageIndex, pageSize } = pagination
 
 	return (
-		<div className="flex h-10 items-center justify-between border-t border-edge px-2">
-			<div className="flex items-center gap-4">
-				<Text variant="muted" className="hidden flex-shrink-0 items-center gap-1 md:flex" size="sm">
+		<div className="h-10 px-2 flex items-center justify-between border-t border-edge">
+			<div className="gap-4 flex items-center">
+				<Text variant="muted" className="gap-1 md:flex hidden shrink-0 items-center" size="sm">
 					<span>
 						<strong>{firstIndex}</strong> to <strong>{lastIndex}</strong>
 					</span>

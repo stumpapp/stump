@@ -40,7 +40,7 @@ export default function SmartListSideBarSection({
 	const renderLists = () => {
 		if (!lists || !lists.length) {
 			return (
-				<Text className="select-none px-1 py-2" variant="muted" size="sm">
+				<Text className="px-1 py-2 select-none" variant="muted" size="sm">
 					{t('sidebar.buttons.noSmartlists')}
 				</Text>
 			)
@@ -62,7 +62,7 @@ export default function SmartListSideBarSection({
 	}
 
 	return (
-		<Accordion type="single" collapsible className="w-full py-2" defaultValue="smartlists">
+		<Accordion type="single" collapsible className="py-2 w-full" defaultValue="smartlists">
 			<Accordion.Item value="smartlists" className="border-none">
 				<Accordion.Trigger noUnderline asLabel className="px-1 py-0 pb-2">
 					{t('sidebar.buttons.smartlists')}
@@ -77,7 +77,7 @@ export default function SmartListSideBarSection({
 							{t('sidebar.buttons.seeAll')}
 						</SideBarButtonLink>
 					)}
-					<div className="ml-2 space-y-1 border-l border-l-edge pl-1">{renderLists()}</div>
+					<div className="ml-2 space-y-1 pl-1 border-l border-l-edge">{renderLists()}</div>
 					{links.includes(FilterableArrangementEntityLink.Create) && (
 						<SideBarButtonLink
 							to={paths.smartListCreate()}

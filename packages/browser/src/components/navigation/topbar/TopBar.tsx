@@ -154,19 +154,19 @@ export default function TopNavigation() {
 	return (
 		<div className="h-12 w-full border-b border-edge bg-sidebar">
 			<div
-				className="mx-auto flex h-12 items-center justify-between"
+				className="h-12 mx-auto flex items-center justify-between"
 				style={{
 					maxWidth: layoutMaxWidthPx ? `${layoutMaxWidthPx}px` : undefined,
 				}}
 			>
-				<NavigationMenu className="z-[100] h-full">
+				<NavigationMenu className="z-100 h-full">
 					<div ref={ref}>
-						<NavigationMenu.List className="w-full pl-4">{sections}</NavigationMenu.List>
+						<NavigationMenu.List className="pl-4 w-full">{sections}</NavigationMenu.List>
 					</div>
 				</NavigationMenu>
 
-				<div className="flex h-full shrink-0 items-center gap-x-2">
-					<NavigationMenu className="z-[100] h-full pr-4" viewPortProps={{ align: 'right' }}>
+				<div className="gap-x-2 flex h-full shrink-0 items-center">
+					<NavigationMenu className="pr-4 z-100 h-full" viewPortProps={{ align: 'right' }}>
 						<NavigationMenu.List className="w-full">
 							<SettingsNavigationItem />
 							<UserMenu />

@@ -17,6 +17,7 @@ import {
 import { Easing, View } from 'react-native'
 import { easeGradient } from 'react-native-easing-gradient'
 import LinearGradient from 'react-native-linear-gradient'
+import { useShallow } from 'zustand/react/shallow'
 
 import { BorderAndShadow } from '~/components/BorderAndShadow'
 import { useColors } from '~/lib/constants'
@@ -40,10 +41,12 @@ export default function CollectionStackedThumbnails({ thumbnailData, layoutNumbe
 	const { sdk } = useSDK()
 	const colors = useColors()
 	const { itemWidth: cardWidth } = useCollectionItemSize()
-	const { thumbnailRatio, accentColor } = usePreferencesStore((state) => ({
-		thumbnailRatio: state.thumbnailRatio,
-		accentColor: state.accentColor,
-	}))
+	const { thumbnailRatio, accentColor } = usePreferencesStore(
+		useShallow((state) => ({
+			thumbnailRatio: state.thumbnailRatio,
+			accentColor: state.accentColor,
+		})),
+	)
 	const { isDarkColorScheme } = useColorScheme()
 
 	const baseThumbnailWidth = cardWidth * 0.282

@@ -3,6 +3,7 @@ import { useCallback, useMemo } from 'react'
 import { View } from 'react-native'
 
 import { Card, Switch } from '~/components/ui'
+import { useTranslate } from '~/lib/hooks'
 import { BookPreferences, GlobalSettings, useReaderStore } from '~/stores/reader'
 
 import DoublePageSelect from './DoublePageSelect'
@@ -19,16 +20,22 @@ type Props = {
 // TODO(android): Use non-native dropdown for all of these
 
 export default function ReaderSettings({ forBook, forServer }: Props) {
-	const store = useReaderStore((state) => state)
+	const { t } = useTranslate()
+
+	const bookSettingsMap = useReaderStore((state) => state.bookSettings)
+	const globalSettings = useReaderStore((state) => state.globalSettings)
+	const addBookSettings = useReaderStore((state) => state.addBookSettings)
+	const setBookSettingsFn = useReaderStore((state) => state.setBookSettings)
+	const setGlobalSettings = useReaderStore((state) => state.setGlobalSettings)
 
 	const bookSettings = useMemo(
-		() => (forBook ? store.bookSettings[forBook] : undefined),
-		[store.bookSettings, forBook],
+		() => (forBook ? bookSettingsMap[forBook] : undefined),
+		[bookSettingsMap, forBook],
 	)
 
 	const activeSettings = useMemo(
-		() => bookSettings || store.globalSettings,
-		[bookSettings, store.globalSettings],
+		() => bookSettings || globalSettings,
+		[bookSettings, globalSettings],
 	)
 
 	const setBookPreferences = useCallback(
@@ -36,35 +43,35 @@ export default function ReaderSettings({ forBook, forServer }: Props) {
 			if (!forBook || !forServer) return
 
 			if (!bookSettings) {
-				store.addBookSettings(forBook, {
-					...store.globalSettings,
+				addBookSettings(forBook, {
+					...globalSettings,
 					...updates,
 					serverID: forServer,
 				})
 			} else {
-				store.setBookSettings(forBook, { ...updates, serverID: forServer })
+				setBookSettingsFn(forBook, { ...updates, serverID: forServer })
 			}
 		},
-		[forBook, bookSettings, store, forServer],
+		[forBook, bookSettings, addBookSettings, globalSettings, setBookSettingsFn, forServer],
 	)
 
 	const onPreferenceChange = useCallback(
 		(partial: Partial<GlobalSettings>) => {
 			if (!forBook || !forServer) {
-				store.setGlobalSettings(partial)
+				setGlobalSettings(partial)
 			} else {
 				setBookPreferences(partial)
 			}
 		},
-		[forBook, forServer, setBookPreferences, store],
+		[forBook, forServer, setBookPreferences, setGlobalSettings],
 	)
 
 	const allowDownscaling = activeSettings.allowDownscaling ?? true
 
 	return (
-		<View className="flex-1 gap-8">
-			<Card label="Mode">
-				<Card.Row label="Flow">
+		<View className="gap-8 flex-1">
+			<Card label={t('readerSettings.sections.mode')}>
+				<Card.Row label={t('readerSettings.readingMode.label')}>
 					<ReadingModeSelect
 						mode={activeSettings.readingMode}
 						onChange={(mode) => onPreferenceChange({ readingMode: mode })}
@@ -72,7 +79,7 @@ export default function ReaderSettings({ forBook, forServer }: Props) {
 				</Card.Row>
 
 				<Card.Row
-					label="Direction"
+					label={t('readerSettings.readingDirection.label')}
 					disabled={activeSettings.readingMode === ReadingMode.ContinuousVertical}
 				>
 					<ReadingDirectionSelect
@@ -82,8 +89,8 @@ export default function ReaderSettings({ forBook, forServer }: Props) {
 				</Card.Row>
 			</Card>
 
-			<Card label="Image Options">
-				<Card.Row label="Double Paged">
+			<Card label={t('readerSettings.sections.imageOptions')}>
+				<Card.Row label={t('readerSettings.doublePageBehavior.label')}>
 					<DoublePageSelect
 						behavior={activeSettings.doublePageBehavior || 'auto'}
 						onChange={(behavior) => onPreferenceChange({ doublePageBehavior: behavior })}
@@ -91,7 +98,7 @@ export default function ReaderSettings({ forBook, forServer }: Props) {
 				</Card.Row>
 
 				<Card.Row
-					label="Separate Second Page"
+					label={t('readerSettings.separateSecondPage')}
 					disabled={activeSettings.doublePageBehavior === 'off'}
 				>
 					<Switch
@@ -102,28 +109,23 @@ export default function ReaderSettings({ forBook, forServer }: Props) {
 					/>
 				</Card.Row>
 
-				<Card.Row label="Scaling">
+				<Card.Row label={t('readerSettings.imageScaling.label')}>
 					<ImageScalingSelect
 						behavior={activeSettings.imageScaling.scaleToFit}
 						onChange={(fit) => onPreferenceChange({ imageScaling: { scaleToFit: fit } })}
 					/>
 				</Card.Row>
 
-				<Card.Row label="Downscaling">
+				<Card.Row label={t('readerSettings.allowDownscaling')}>
 					<Switch
 						checked={allowDownscaling}
 						onCheckedChange={(value) => onPreferenceChange({ allowDownscaling: value })}
 					/>
 				</Card.Row>
-
-				{/* TODO: https://docs.expo.dev/versions/latest/sdk/media-library/ */}
-				<Card.Row label="Panel Downloads" disabled>
-					<Switch checked={false} onCheckedChange={() => {}} />
-				</Card.Row>
 			</Card>
 
-			<Card label="Navigation">
-				<Card.Row label="Tap Sides to Navigate">
+			<Card label={t('readerSettings.sections.controls')}>
+				<Card.Row label={t('readerSettings.tapSidesToNavigate')}>
 					<Switch
 						variant="brand"
 						checked={activeSettings.tapSidesToNavigate ?? true}
@@ -131,7 +133,7 @@ export default function ReaderSettings({ forBook, forServer }: Props) {
 					/>
 				</Card.Row>
 
-				<Card.Row label="Bottom Controls">
+				<Card.Row label={t('readerSettings.footerControls.label')}>
 					<FooterControlsSelect
 						variant={activeSettings.footerControls || 'images'}
 						onChange={(variant) => onPreferenceChange({ footerControls: variant })}

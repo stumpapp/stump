@@ -1,0 +1,602 @@
+@theme {
+	/* MARK: backgrounds */
+	--color-background: #161719;
+	--color-background-inverse: #ffffff;
+	--color-background-overlay: #1d1b1b;
+	--color-background-overlay-hover: #222020;
+	--color-background-surface: #1b1c1d;
+	--color-background-surface-hover: #242628;
+	--color-background-surface-secondary: #1f2123;
+
+	/* MARK: edges */
+	--color-edge: #1f2123;
+	--color-edge-brand: #cf9977;
+	--color-edge-danger: #b02a29;
+	--color-edge-info: #3f89ca;
+	--color-edge-strong: #ffffff;
+	--color-edge-subtle: #292c30;
+	--color-edge-success: #2e7d32;
+	--color-edge-warning: #d8a219;
+
+	/* MARK: fills */
+	--color-fill-brand: #c48259;
+	--color-fill-brand-hover: #cf9977;
+	--color-fill-brand-secondary: #c4825926;
+	--color-fill-danger: #e53935;
+	--color-fill-danger-hover: #ea5c59;
+	--color-fill-danger-secondary: #e5393526;
+	--color-fill-disabled: #71757d;
+	--color-fill-info: #3f89ca;
+	--color-fill-info-hover: #5f9dd3;
+	--color-fill-info-secondary: #3f89ca26;
+	--color-fill-success: #43a047;
+	--color-fill-success-hover: #54b859;
+	--color-fill-success-secondary: #43a04726;
+	--color-fill-warning: #f59e0b;
+	--color-fill-warning-hover: #f7ae32;
+	--color-fill-warning-secondary: #f59e0b26;
+	--color-fill-on-black: #242628;
+	--color-fill-on-black-muted: #242628;
+
+	/* MARK: foregrounds */
+	--color-foreground: #f5f3ef;
+	--color-foreground-brand: #c48259;
+	--color-foreground-disabled: #898d94;
+	--color-foreground-muted: #898d94;
+	--color-foreground-subtle: #e9eaeb;
+	--color-foreground-on-inverse: #161719;
+	--color-foreground-on-black: #e9eaeb;
+	--color-foreground-on-black-muted: #b0b3b7;
+
+	/* MARK: sidebars */
+	--color-sidebar: #151517;
+	--color-sidebar-inverse: #ffffff;
+	--color-sidebar-overlay: #151517;
+	--color-sidebar-overlay-hover: #17171a;
+	--color-sidebar-surface: #19191b;
+	--color-sidebar-surface-hover: #1e1e20;
+	--color-sidebar-surface-secondary: #1b1b1e;
+
+	/* MARK: scrollbars */
+	--color-scrollbar: #161719;
+	--color-scrollbar-thumb: hsla(0, 0%, 100%, 0.4);
+	--color-scrollbar-thumb-hover: hsla(0, 0%, 100%, 0.3);
+
+	/* MARK: thumbnails */
+	--color-thumbnail-border: rgba(233, 234, 235, 0.1);
+	--color-thumbnail-placeholder: #1f2123;
+	--color-thumbnail-stack-series: #3d3a3a;
+	--color-thumbnail-stack-library-start: #2e2b2b;
+	--color-thumbnail-stack-library-end: #3d3a3a;
+}
+
+@layer base {
+	/* MARK: dark theme */
+	.dark {
+		--color-background: #161719;
+		--color-background-inverse: #ffffff;
+		--color-background-overlay: #1d1b1b;
+		--color-background-overlay-hover: #222020;
+		--color-background-surface: #1b1c1d;
+		--color-background-surface-hover: #242628;
+		--color-background-surface-secondary: #1f2123;
+
+		--color-edge: #1f2123;
+		--color-edge-brand: #cf9977;
+		--color-edge-danger: #b02a29;
+		--color-edge-info: #3f89ca;
+		--color-edge-strong: #ffffff;
+		--color-edge-subtle: #292c30;
+		--color-edge-success: #2e7d32;
+		--color-edge-warning: #d8a219;
+
+		--color-fill-brand: #c48259;
+		--color-fill-brand-hover: #cf9977;
+		--color-fill-brand-secondary: #c4825926;
+		--color-fill-danger: #e53935;
+		--color-fill-danger-hover: #ea5c59;
+		--color-fill-danger-secondary: #e5393526;
+		--color-fill-disabled: #71757d;
+		--color-fill-info: #3f89ca;
+		--color-fill-info-hover: #5f9dd3;
+		--color-fill-info-secondary: #3f89ca26;
+		--color-fill-success: #43a047;
+		--color-fill-success-hover: #54b859;
+		--color-fill-success-secondary: #43a04726;
+		--color-fill-warning: #f59e0b;
+		--color-fill-warning-hover: #f7ae32;
+		--color-fill-warning-secondary: #f59e0b26;
+		--color-fill-on-black: #242628;
+		--color-fill-on-black-muted: #242628;
+
+		--color-foreground: #f5f3ef;
+		--color-foreground-brand: #c48259;
+		--color-foreground-disabled: #898d94;
+		--color-foreground-muted: #898d94;
+		--color-foreground-subtle: #e9eaeb;
+		--color-foreground-on-inverse: #161719;
+		--color-foreground-on-black: #e9eaeb;
+		--color-foreground-on-black-muted: #b0b3b7;
+
+		--color-sidebar: #151517;
+		--color-sidebar-inverse: #ffffff;
+		--color-sidebar-overlay: #151517;
+		--color-sidebar-overlay-hover: #17171a;
+		--color-sidebar-surface: #19191b;
+		--color-sidebar-surface-hover: #1e1e20;
+		--color-sidebar-surface-secondary: #1b1b1e;
+
+		--color-scrollbar: #161719;
+		--color-scrollbar-thumb: hsla(0, 0%, 100%, 0.4);
+		--color-scrollbar-thumb-hover: hsla(0, 0%, 100%, 0.3);
+
+		--color-thumbnail-border: rgba(233, 234, 235, 0.1);
+		--color-thumbnail-placeholder: #1f2123;
+		--color-thumbnail-stack-series: #3d3a3a;
+		--color-thumbnail-stack-library-start: #2e2b2b;
+		--color-thumbnail-stack-library-end: #3d3a3a;
+	}
+
+	/* MARK: light theme */
+	.light {
+		--color-background: #ffffff;
+		--color-background-inverse: #161719;
+		--color-background-overlay: #f6f6f7;
+		--color-background-overlay-hover: #e9eaeb;
+		--color-background-surface: #f7f7f8;
+		--color-background-surface-hover: #ececee;
+		--color-background-surface-secondary: #f2f2f3;
+
+		--color-edge: #e9eaeb;
+		--color-edge-brand: #cf9977;
+		--color-edge-danger: #b02a29;
+		--color-edge-info: #3f89ca;
+		--color-edge-strong: #ffffff;
+		--color-edge-subtle: #d3d5d7;
+		--color-edge-success: #2e7d32;
+		--color-edge-warning: #d8a219;
+
+		--color-fill-brand: #c48259;
+		--color-fill-brand-hover: #a9663c;
+		--color-fill-brand-secondary: #c4825926;
+		--color-fill-danger: #e53935;
+		--color-fill-danger-hover: #c81e1a;
+		--color-fill-danger-secondary: #e5393526;
+		--color-fill-disabled: #71757d;
+		--color-fill-info: #3f89ca;
+		--color-fill-info-hover: #2d6ca4;
+		--color-fill-info-secondary: #3f89ca26;
+		--color-fill-success: #43a047;
+		--color-fill-success-hover: #327835;
+		--color-fill-success-secondary: #43a04726;
+		--color-fill-warning: #f59e0b;
+		--color-fill-warning-hover: #c07c08;
+		--color-fill-warning-secondary: #f59e0b26;
+		--color-fill-on-black: #242628;
+		--color-fill-on-black-muted: #242628;
+
+		--color-foreground: #000000;
+		--color-foreground-brand: #c48259;
+		--color-foreground-disabled: #93979d;
+		--color-foreground-muted: #5b5f65;
+		--color-foreground-subtle: #26272a;
+		--color-foreground-on-inverse: #f5f3ef;
+		--color-foreground-on-black: #e9eaeb;
+		--color-foreground-on-black-muted: #b0b3b7;
+
+		--color-sidebar: #f9f9f9;
+		--color-sidebar-inverse: #000000;
+		--color-sidebar-overlay: #ffffff;
+		--color-sidebar-overlay-hover: #f6f6f7;
+		--color-sidebar-surface: #f6f6f7;
+		--color-sidebar-surface-hover: #ebebed;
+		--color-sidebar-surface-secondary: #f1f1f2;
+
+		--color-scrollbar: #f2f2f3;
+		--color-scrollbar-thumb: hsla(0, 0%, 0%, 0.3);
+		--color-scrollbar-thumb-hover: hsla(0, 0%, 0%, 0.5);
+
+		--color-thumbnail-border: rgba(31, 33, 35, 0.1);
+		--color-thumbnail-placeholder: #f2f2f2;
+		--color-thumbnail-stack-series: #d4b7a7;
+		--color-thumbnail-stack-library-start: #ad9282;
+		--color-thumbnail-stack-library-end: #d4b7a7;
+	}
+
+	/* MARK: bronze theme */
+	.bronze {
+		--color-background: #ffffff;
+		--color-background-inverse: #161719;
+		--color-background-overlay: #fbfaf9;
+		--color-background-overlay-hover: #ede8e4;
+		--color-background-surface: #ede8e4;
+		--color-background-surface-hover: #e0d6cf;
+		--color-background-surface-secondary: #d3c4ba;
+
+		--color-edge: #ede8e4;
+		--color-edge-brand: #cf9977;
+		--color-edge-danger: #b02a29;
+		--color-edge-info: #3f89ca;
+		--color-edge-strong: #ffffff;
+		--color-edge-subtle: #d3c4ba;
+		--color-edge-success: #2e7d32;
+		--color-edge-warning: #d8a219;
+
+		--color-fill-brand: #c48259;
+		--color-fill-brand-hover: #a9663c;
+		--color-fill-brand-secondary: #c4825926;
+		--color-fill-danger: #e53935;
+		--color-fill-danger-hover: #c81e1a;
+		--color-fill-danger-secondary: #e5393526;
+		--color-fill-disabled: #71757d;
+		--color-fill-info: #3f89ca;
+		--color-fill-info-hover: #2d6ca4;
+		--color-fill-info-secondary: #3f89ca26;
+		--color-fill-success: #43a047;
+		--color-fill-success-hover: #327835;
+		--color-fill-success-secondary: #43a04726;
+		--color-fill-warning: #f59e0b;
+		--color-fill-warning-hover: #c07c08;
+		--color-fill-warning-secondary: #f59e0b26;
+		--color-fill-on-black: #242628;
+		--color-fill-on-black-muted: #242628;
+
+		--color-foreground: #000000;
+		--color-foreground-brand: #c48259;
+		--color-foreground-disabled: #93979d;
+		--color-foreground-muted: #5b5f65;
+		--color-foreground-subtle: #26272a;
+		--color-foreground-on-inverse: #f5f3ef;
+		--color-foreground-on-black: #e9eaeb;
+		--color-foreground-on-black-muted: #b0b3b7;
+
+		--color-sidebar: #f3f0ed;
+		--color-sidebar-inverse: #000000;
+		--color-sidebar-overlay: #ffffff;
+		--color-sidebar-overlay-hover: #f5f2f0;
+		--color-sidebar-surface: #ede8e4;
+		--color-sidebar-surface-hover: #e0d6cf;
+		--color-sidebar-surface-secondary: #d3c4ba;
+
+		--color-scrollbar: #ede8e4;
+		--color-scrollbar-thumb: hsla(0, 0%, 0%, 0.3);
+		--color-scrollbar-thumb-hover: hsla(0, 0%, 0%, 0.5);
+
+		--color-thumbnail-border: rgba(31, 33, 35, 0.1);
+		--color-thumbnail-placeholder: #ede8e4;
+		--color-thumbnail-stack-series: #d3c4ba;
+		--color-thumbnail-stack-library-start: #c4b5a9;
+		--color-thumbnail-stack-library-end: #d3c4ba;
+	}
+
+	/* MARK: ocean theme */
+	.ocean {
+		--color-background: #0b3d4d;
+		--color-background-inverse: #e8f9ff;
+		--color-background-overlay: #12455b;
+		--color-background-overlay-hover: #155a73;
+		--color-background-surface: #165564;
+		--color-background-surface-hover: #186070;
+		--color-background-surface-secondary: #227e95;
+
+		--color-edge: #165c72;
+		--color-edge-brand: #0a9396;
+		--color-edge-danger: #d62828;
+		--color-edge-info: #0096c7;
+		--color-edge-strong: #e8f9ff;
+		--color-edge-subtle: #125a6d;
+		--color-edge-success: #2e7d32;
+		--color-edge-warning: #ffba08;
+
+		--color-fill-brand: #0a9396;
+		--color-fill-brand-hover: #0a9396;
+		--color-fill-brand-secondary: #0a939626;
+		--color-fill-danger: #e63946;
+		--color-fill-danger-hover: #ec4a53;
+		--color-fill-danger-secondary: #e6394626;
+		--color-fill-disabled: #577590;
+		--color-fill-info: #0096c7;
+		--color-fill-info-hover: #0096c7;
+		--color-fill-info-secondary: #0096c726;
+		--color-fill-success: #43aa8b;
+		--color-fill-success-hover: #4fbba9;
+		--color-fill-success-secondary: #43aa8b26;
+		--color-fill-warning: #f77f00;
+		--color-fill-warning-hover: #ff8c00;
+		--color-fill-warning-secondary: #f77f0026;
+		--color-fill-on-black: #242628;
+		--color-fill-on-black-muted: #242628;
+
+		--color-foreground: #edf2f4;
+		--color-foreground-brand: #0a9396;
+		--color-foreground-disabled: #94a1ac;
+		--color-foreground-muted: #94a1ac;
+		--color-foreground-subtle: #d9e4ea;
+		--color-foreground-on-inverse: #0b3d4d;
+		--color-foreground-on-black: #edf2f4;
+		--color-foreground-on-black-muted: #b0b3b7;
+
+		--color-sidebar: #0a3644;
+		--color-sidebar-inverse: #e8f9ff;
+		--color-sidebar-overlay: #0b3d4d;
+		--color-sidebar-overlay-hover: #155a73;
+		--color-sidebar-surface: #12455b;
+		--color-sidebar-surface-hover: #14576f;
+		--color-sidebar-surface-secondary: #1b6b7d;
+
+		--color-scrollbar: #0a3644;
+		--color-scrollbar-thumb: hsla(0, 0%, 100%, 0.4);
+		--color-scrollbar-thumb-hover: hsla(0, 0%, 100%, 0.3);
+
+		--color-thumbnail-border: rgba(233, 234, 235, 0.1);
+		--color-thumbnail-placeholder: #165564;
+		--color-thumbnail-stack-series: #0a9396;
+		--color-thumbnail-stack-library-start: #125a6d;
+		--color-thumbnail-stack-library-end: #227e95;
+	}
+
+	/* MARK: cosmic theme */
+	.cosmic {
+		--color-background: #1c0f45;
+		--color-background-inverse: #f4f2ff;
+		--color-background-overlay: #28175e;
+		--color-background-overlay-hover: #311e75;
+		--color-background-surface: #24135a;
+		--color-background-surface-hover: #321e77;
+		--color-background-surface-secondary: #2a1969;
+
+		--color-edge: #2a1969;
+		--color-edge-brand: #bb86fc;
+		--color-edge-danger: #ff4757;
+		--color-edge-info: #3498db;
+		--color-edge-strong: #f4f2ff;
+		--color-edge-subtle: #311e75;
+		--color-edge-success: #2ecc71;
+		--color-edge-warning: #f39c12;
+
+		--color-fill-brand: #8e44ad;
+		--color-fill-brand-hover: #a15bbf;
+		--color-fill-brand-secondary: #8e44ad26;
+		--color-fill-danger: #ff4757;
+		--color-fill-danger-hover: #ff707c;
+		--color-fill-danger-secondary: #ff475726;
+		--color-fill-disabled: #6c567b;
+		--color-fill-info: #3498db;
+		--color-fill-info-hover: #57aae1;
+		--color-fill-info-secondary: #3498db26;
+		--color-fill-success: #2ecc71;
+		--color-fill-success-hover: #4cd787;
+		--color-fill-success-secondary: #2ecc7126;
+		--color-fill-warning: #f39c12;
+		--color-fill-warning-hover: #f5ac39;
+		--color-fill-warning-secondary: #f39c1226;
+		--color-fill-on-black: #242628;
+		--color-fill-on-black-muted: #242628;
+
+		--color-foreground: #f4f2ff;
+		--color-foreground-brand: #bb86fc;
+		--color-foreground-disabled: #a29bcc;
+		--color-foreground-muted: #a29bcc;
+		--color-foreground-subtle: #d1c5e5;
+		--color-foreground-on-inverse: #1c0f45;
+		--color-foreground-on-black: #f4f2ff;
+		--color-foreground-on-black-muted: #a29bcc;
+
+		--color-sidebar: #130a30;
+		--color-sidebar-inverse: #f4f2ff;
+		--color-sidebar-overlay: #1c0f45;
+		--color-sidebar-overlay-hover: #311e75;
+		--color-sidebar-surface: #251556;
+		--color-sidebar-surface-hover: #28175e;
+		--color-sidebar-surface-secondary: #2a1969;
+
+		--color-scrollbar: #1f0a39;
+		--color-scrollbar-thumb: hsla(0, 0%, 100%, 0.4);
+		--color-scrollbar-thumb-hover: hsla(0, 0%, 100%, 0.3);
+
+		--color-thumbnail-border: rgba(233, 234, 235, 0.1);
+		--color-thumbnail-placeholder: #24135a;
+		--color-thumbnail-stack-series: #bb86fc;
+		--color-thumbnail-stack-library-start: #6c567b;
+		--color-thumbnail-stack-library-end: #8e44ad;
+	}
+
+	/* MARK: autumn theme */
+	.autumn {
+		--color-background: #2c1a12;
+		--color-background-inverse: #fffbf3;
+		--color-background-overlay: #3b2d23;
+		--color-background-overlay-hover: #4d3f33;
+		--color-background-surface: #422f25;
+		--color-background-surface-hover: #5a3f33;
+		--color-background-surface-secondary: #4b382d;
+
+		--color-edge: #4b382d;
+		--color-edge-brand: #d0802d;
+		--color-edge-danger: #c53030;
+		--color-edge-info: #3b82f6;
+		--color-edge-strong: #fffbf3;
+		--color-edge-subtle: #4d3f33;
+		--color-edge-success: #5b8b41;
+		--color-edge-warning: #f59e0b;
+
+		--color-fill-brand: #d08732;
+		--color-fill-brand-hover: #d0802d;
+		--color-fill-brand-secondary: #d0873226;
+		--color-fill-danger: #e25837;
+		--color-fill-danger-hover: #e35f40;
+		--color-fill-danger-secondary: #e2583726;
+		--color-fill-disabled: #726a63;
+		--color-fill-info: #3b82f6;
+		--color-fill-info-hover: #5a9cf6;
+		--color-fill-info-secondary: #3b82f626;
+		--color-fill-success: #7bc96f;
+		--color-fill-success-hover: #8cd37f;
+		--color-fill-success-secondary: #7bc96f26;
+		--color-fill-warning: #ffb703;
+		--color-fill-warning-hover: #ffb70326;
+		--color-fill-warning-secondary: #ffb70326;
+		--color-fill-on-black: #242628;
+		--color-fill-on-black-muted: #242628;
+
+		--color-foreground: #f7f0e4;
+		--color-foreground-brand: #d0802d;
+		--color-foreground-disabled: #a29a8d;
+		--color-foreground-muted: #a29a8d;
+		--color-foreground-subtle: #e5dcc5;
+		--color-foreground-on-inverse: #2c1a12;
+		--color-foreground-on-black: #f7f0e4;
+		--color-foreground-on-black-muted: #a29a8d;
+
+		--color-sidebar: #25160f;
+		--color-sidebar-inverse: #fffbf3;
+		--color-sidebar-overlay: #2c1a12;
+		--color-sidebar-overlay-hover: #4d3f33;
+		--color-sidebar-surface: #35281f;
+		--color-sidebar-surface-hover: #3b2d23;
+		--color-sidebar-surface-secondary: #4b382d;
+
+		--color-scrollbar: #4b382d;
+		--color-scrollbar-thumb: hsla(0, 0%, 100%, 0.4);
+		--color-scrollbar-thumb-hover: hsla(0, 0%, 100%, 0.3);
+
+		--color-thumbnail-border: rgba(233, 234, 235, 0.1);
+		--color-thumbnail-placeholder: #422f25;
+		--color-thumbnail-stack-series: #d0802d;
+		--color-thumbnail-stack-library-start: #5a3f33;
+		--color-thumbnail-stack-library-end: #d08732;
+	}
+
+	/* MARK: pumpkin theme */
+	.pumpkin {
+		--color-background: #0c0c0c;
+		--color-background-inverse: #ffffff;
+		--color-background-overlay: #1a1a1a;
+		--color-background-overlay-hover: #333333;
+		--color-background-surface: #131313;
+		--color-background-surface-hover: #161616;
+		--color-background-surface-secondary: #ff6600;
+
+		--color-edge: #631c0370;
+		--color-edge-brand: #631c0390;
+		--color-edge-danger: #b02a29;
+		--color-edge-info: #3f89ca;
+		--color-edge-strong: #ffffff;
+		--color-edge-subtle: #631c0380;
+		--color-edge-success: #2e7d32;
+		--color-edge-warning: #d8a219;
+
+		--color-fill-brand: #481e14;
+		--color-fill-brand-hover: #34160e;
+		--color-fill-brand-secondary: #481e1480;
+		--color-fill-danger: #e53935;
+		--color-fill-danger-hover: #ea5c59;
+		--color-fill-danger-secondary: #e5393526;
+		--color-fill-disabled: #71757d;
+		--color-fill-info: #ff6600;
+		--color-fill-info-hover: #ac7fdc;
+		--color-fill-info-secondary: #ff660040;
+		--color-fill-success: #43a047;
+		--color-fill-success-hover: #54b859;
+		--color-fill-success-secondary: #43a04726;
+		--color-fill-warning: #f59e0b;
+		--color-fill-warning-hover: #f7ae32;
+		--color-fill-warning-secondary: #f59e0b26;
+		--color-fill-on-black: #242628;
+		--color-fill-on-black-muted: #242628;
+
+		--color-foreground: #f0c4ae;
+		--color-foreground-brand: #c48259;
+		--color-foreground-disabled: #898d94;
+		--color-foreground-muted: #e7a17f;
+		--color-foreground-subtle: #ecb69a;
+		--color-foreground-on-inverse: #161719;
+		--color-foreground-on-black: #f0c4ae;
+		--color-foreground-on-black-muted: #e7a17f;
+
+		--color-sidebar: #090909;
+		--color-sidebar-inverse: #ffffff;
+		--color-sidebar-overlay: #1a1a1a;
+		--color-sidebar-overlay-hover: #333333;
+		--color-sidebar-surface: #131313;
+		--color-sidebar-surface-hover: #161616;
+		--color-sidebar-surface-secondary: #00000040;
+
+		--color-scrollbar: #0c0c0c;
+		--color-scrollbar-thumb: hsla(0, 0%, 100%, 0.4);
+		--color-scrollbar-thumb-hover: hsla(0, 0%, 100%, 0.3);
+
+		--color-thumbnail-border: rgba(233, 234, 235, 0.1);
+		--color-thumbnail-placeholder: #131313;
+		--color-thumbnail-stack-series: #ff6600;
+		--color-thumbnail-stack-library-start: #481e14;
+		--color-thumbnail-stack-library-end: #631c03;
+	}
+}
+
+/* note i mostly just adapted from how i theme expo */
+/* MARK: midnight theme */
+.midnight {
+	--color-background: #000000;
+	--color-background-inverse: #ffffff;
+	--color-background-overlay: #111113;
+	--color-background-overlay-hover: #17171a;
+	--color-background-surface: #0a0a0a;
+	--color-background-surface-hover: #242628;
+	--color-background-surface-secondary: #1f2123;
+
+	--color-edge: #1f2123;
+	--color-edge-brand: #cf9977;
+	--color-edge-danger: #b02a29;
+	--color-edge-info: #3f89ca;
+	--color-edge-strong: #ffffff;
+	--color-edge-subtle: #292c30;
+	--color-edge-success: #2e7d32;
+	--color-edge-warning: #d8a219;
+
+	--color-fill-brand: #c48259;
+	--color-fill-brand-hover: #cf9977;
+	--color-fill-brand-secondary: #c4825926;
+	--color-fill-danger: #e53935;
+	--color-fill-danger-hover: #ea5c59;
+	--color-fill-danger-secondary: #e5393526;
+	--color-fill-disabled: #71757d;
+	--color-fill-info: #3f89ca;
+	--color-fill-info-hover: #5f9dd3;
+	--color-fill-info-secondary: #3f89ca26;
+	--color-fill-success: #43a047;
+	--color-fill-success-hover: #54b859;
+	--color-fill-success-secondary: #43a04726;
+	--color-fill-warning: #f59e0b;
+	--color-fill-warning-hover: #f7ae32;
+	--color-fill-warning-secondary: #f59e0b26;
+	--color-fill-on-black: #242628;
+	--color-fill-on-black-muted: #242628;
+
+	--color-foreground: #f5f3ef;
+	--color-foreground-brand: #c48259;
+	--color-foreground-disabled: #898d94;
+	--color-foreground-muted: #898d94;
+	--color-foreground-subtle: #e9eaeb;
+	--color-foreground-on-inverse: #161719;
+	--color-foreground-on-black: #e9eaeb;
+	--color-foreground-on-black-muted: #b0b3b7;
+
+	--color-sidebar: #000000;
+	--color-sidebar-inverse: #ffffff;
+	--color-sidebar-overlay: #0a0a0a;
+	--color-sidebar-overlay-hover: #111113;
+	--color-sidebar-surface: #0a0a0a;
+	--color-sidebar-surface-hover: #17171a;
+	--color-sidebar-surface-secondary: #1f2123;
+
+	--color-scrollbar: #000000;
+	--color-scrollbar-thumb: hsla(0, 0%, 100%, 0.4);
+	--color-scrollbar-thumb-hover: hsla(0, 0%, 100%, 0.3);
+
+	--color-thumbnail-border: rgba(233, 234, 235, 0.1);
+	--color-thumbnail-placeholder: #1c1c1c;
+	--color-thumbnail-stack-series: #543c2f;
+	--color-thumbnail-stack-library-start: #331e11;
+	--color-thumbnail-stack-library-end: #543c2f;
+}

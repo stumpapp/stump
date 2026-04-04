@@ -53,7 +53,7 @@ export default function FileGridItem({ file }: Props) {
 	return (
 		<ToolTip content={tooltipName} align="start">
 			<button
-				className="group flex h-full w-32 flex-col items-center justify-center gap-y-1.5 focus:outline-none"
+				className="group w-32 gap-y-1.5 flex h-full flex-col items-center justify-center focus:outline-none"
 				onDoubleClick={() => onSelect(file)}
 				{...(book
 					? {
@@ -69,7 +69,7 @@ export default function FileGridItem({ file }: Props) {
 				/>
 
 				<Text
-					className="line-clamp-2 max-w-full rounded-md p-1 group-hover:bg-background-surface-hover/80 group-focus:bg-background-surface"
+					className="rounded-md p-1 line-clamp-2 max-w-full group-hover:bg-background-surface-hover/80 group-focus:bg-background-surface"
 					size="xs"
 				>
 					{name}

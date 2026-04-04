@@ -59,7 +59,7 @@ export default function HomeScene() {
 	}
 
 	return (
-		<SceneContainer className="flex flex-col gap-6">
+		<SceneContainer className="gap-6 flex flex-col">
 			{helmet}
 
 			<ContinueReadingMedia />

@@ -26,7 +26,7 @@ export default function EpubReaderHeader() {
 
 	return (
 		<ControlsContainer position="top">
-			<div className="flex items-center gap-x-2">
+			<div className="gap-x-2 flex items-center">
 				<Link to={paths.bookOverview(bookEntity?.id || '')} title="Book Overview">
 					<ControlButton>
 						<ArrowLeft className="h-4 w-4" />
@@ -49,7 +49,7 @@ export default function EpubReaderHeader() {
 
 			<Spacer />
 
-			<div className="flex items-center gap-x-2">
+			<div className="gap-x-2 flex items-center">
 				<SearchCommand />
 				<ThemeControls />
 				<FullScreenToggle />

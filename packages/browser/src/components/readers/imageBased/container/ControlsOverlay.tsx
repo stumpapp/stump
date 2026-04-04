@@ -25,7 +25,7 @@ export default function ControlsOverlay() {
 
 			<motion.div
 				// @ts-expect-error: This exists
-				className="absolute inset-0 z-10 flex-1"
+				className="inset-0 absolute z-10 flex-1"
 				style={{
 					background:
 						'linear-gradient(0deg, hsla(0, 0%, 0%, 0.95), hsla(0, 0%, 0%, 0.80), hsla(0, 0%, 0%, 0.5), hsla(0, 0%, 0%, 0.5), hsla(0, 0%, 0%, 0.5), hsla(0, 0%, 0%, 0.5), hsla(0, 0%, 0%, 0.80), hsla(0, 0%, 0%, 0.95))',

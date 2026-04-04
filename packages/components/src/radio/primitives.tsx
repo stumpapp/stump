@@ -14,7 +14,7 @@ export const RadioGroup = React.forwardRef<
 >(({ className, ...props }, ref) => {
 	return (
 		<RadioGroupContext.Provider value={{ disabled: props.disabled }}>
-			<RadioGroupPrimitive.Root className={cn('grid gap-2', className)} {...props} ref={ref} />
+			<RadioGroupPrimitive.Root className={cn('gap-2 grid', className)} {...props} ref={ref} />
 		</RadioGroupContext.Provider>
 	)
 }) as typeof RadioGroupPrimitive.Root & RadioGroupSubComponents
@@ -32,7 +32,7 @@ const RadioGroupItem = React.forwardRef<
 		<RadioGroupPrimitive.Item
 			ref={ref}
 			className={cn(
-				'h-4 w-4 rounded-full border border-edge ring-offset-background focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-brand-400',
+				'h-4 w-4 rounded-full border border-edge ring-offset-background focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-brand-400',
 				className,
 			)}
 			{...props}

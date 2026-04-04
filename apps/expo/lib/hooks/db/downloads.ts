@@ -5,6 +5,7 @@ import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
 import * as FileSystem from 'expo-file-system/legacy'
 import { useCallback, useEffect } from 'react'
 import { toast } from 'sonner-native'
+import { useShallow } from 'zustand/react/shallow'
 
 import { useActiveServerSafe } from '~/components/activeServer'
 import { useDownloadsState } from '~/components/localLibrary/store'
@@ -68,7 +69,9 @@ export function useDownload({ serverId }: UseDownloadParams = {}) {
 	const activeServerCtx = useActiveServerSafe()
 	const serverID = serverId ?? activeServerCtx?.activeServer.id
 
-	const allServerIds = useSavedServerStore((state) => state.servers.map((srv) => srv.id))
+	const allServerIds = useSavedServerStore(
+		useShallow((state) => state.servers.map((srv) => srv.id)),
+	)
 
 	const queryClient = useQueryClient()
 

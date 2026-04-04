@@ -32,8 +32,8 @@ export default function BasicLibraryInformation({ onSetShowDirectoryPicker }: Pr
 	})
 
 	return (
-		<div className="flex flex-grow flex-col gap-6">
-			<div className="flex flex-col flex-wrap gap-y-6 md:flex-row md:gap-x-6 md:gap-y-6">
+		<div className="gap-6 flex grow flex-col">
+			<div className="gap-y-6 md:flex-row md:gap-x-6 md:gap-y-6 flex flex-col flex-wrap">
 				<Input
 					variant="primary"
 					label={t(getKey('name.label'))}

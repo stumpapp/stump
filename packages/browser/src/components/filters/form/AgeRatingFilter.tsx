@@ -61,7 +61,7 @@ export default function AgeRatingFilter({ variant = 'media' }: Props) {
 					value="custom"
 					innerContainerClassName="flex-col sm:items-start sm:justify-start gap-1.5"
 				>
-					<fieldset className="flex items-start justify-end gap-2" disabled={selection === null}>
+					<fieldset className="gap-2 flex items-start justify-end" disabled={selection === null}>
 						<Input
 							type="number"
 							placeholder={localAgeRating?.toString() ?? '8'}

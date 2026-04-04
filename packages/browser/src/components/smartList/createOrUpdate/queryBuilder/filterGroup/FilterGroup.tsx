@@ -38,9 +38,9 @@ export default function FilterGroup({ idx, group }: Props) {
 						return (
 							<div
 								key={filterIndex}
-								className="group/filter relative flex items-start p-4 md:items-center"
+								className="group/filter p-4 md:items-center relative flex items-start"
 							>
-								<div className="flex flex-1 flex-wrap items-center gap-x-4 gap-y-2 md:gap-4">
+								<div className="gap-x-4 gap-y-2 md:gap-4 flex flex-1 flex-wrap items-center">
 									<FieldSelector idx={filterIndex} />
 									{filter.field && (
 										<>
@@ -56,7 +56,7 @@ export default function FilterGroup({ idx, group }: Props) {
 									)}
 								</div>
 
-								<div className="flex h-full w-12 shrink-0 items-center justify-end transition-opacity duration-200 group-hover/filter:opacity-100 md:opacity-0">
+								<div className="w-12 md:opacity-0 flex h-full shrink-0 items-center justify-end transition-opacity duration-200 group-hover/filter:opacity-100">
 									<ToolTip content={t(getKey('actions.deleteFilter'))} align="end">
 										<IconButton
 											size="xs"
@@ -73,7 +73,7 @@ export default function FilterGroup({ idx, group }: Props) {
 					})}
 				</div>
 
-				<div className="flex h-12 items-center space-x-4 bg-background-surface/45 px-4">
+				<div className="h-12 space-x-4 px-4 flex items-center bg-background-surface/45">
 					<GroupJoiner />
 
 					<div className="flex-1" />

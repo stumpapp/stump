@@ -68,7 +68,7 @@ export default function CreateSmartListScene() {
 				<SteppedFormSceneHeader />
 
 				<SceneContainer>
-					<div className="flex flex-col gap-12">
+					<div className="gap-12 flex flex-col">
 						{createError && <Alert variant="destructive">{createError}</Alert>}
 
 						<Suspense>

@@ -43,7 +43,7 @@ export default function DefaultLibraryView() {
 	}, [hideSeriesView, viewMode, form])
 
 	return (
-		<div className="flex flex-col gap-6">
+		<div className="gap-6 flex flex-col">
 			<div>
 				<Heading size="sm">{t(getKey('label'))}</Heading>
 				<Text size="sm" variant="muted">
@@ -51,13 +51,13 @@ export default function DefaultLibraryView() {
 				</Text>
 			</div>
 
-			<div className="flex flex-col gap-y-4">
+			<div className="gap-y-4 flex flex-col">
 				<input type="hidden" {...form.register('defaultLibraryViewMode')} />
 
 				<RadioGroup
 					value={viewMode}
 					onValueChange={handleViewModeChange}
-					className="flex flex-col sm:flex-row"
+					className="sm:flex-row flex flex-col"
 					disabled={hideSeriesView}
 					defaultValue={LibraryViewMode.Series}
 				>

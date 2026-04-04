@@ -5,7 +5,7 @@ import UserTable from './UserTable'
 
 export default function UserTableSection() {
 	return (
-		<div className="flex flex-col gap-y-4">
+		<div className="gap-y-4 flex flex-col">
 			<div className="flex items-end justify-between">
 				<div>
 					<Heading size="sm">Existing accounts</Heading>
@@ -13,7 +13,7 @@ export default function UserTableSection() {
 						A list of all existing accounts on the server
 					</Text>
 				</div>
-				<div className="flex items-end gap-2">
+				<div className="gap-2 flex items-end">
 					<ButtonOrLink href="create" variant="secondary" size="sm">
 						Create user
 					</ButtonOrLink>

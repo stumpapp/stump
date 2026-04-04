@@ -6,6 +6,7 @@ import { stripHtml } from 'string-strip-html'
 
 import { Markdown, Text } from '~/components/ui'
 import { IS_IOS_24_PLUS, useColors } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 
 import { DottedLine } from './DottedLine'
 
@@ -14,6 +15,8 @@ type Props = {
 }
 
 export default function DescriptionSection({ description }: Props) {
+	const { t } = useTranslate()
+
 	const sheetRef = useRef<TrueSheet | null>(null)
 
 	const colors = useColors()
@@ -27,7 +30,7 @@ export default function DescriptionSection({ description }: Props) {
 					{strippedDescription}
 				</Text>
 
-				<View className="flex-row items-center gap-1">
+				<View className="gap-1 flex-row items-center">
 					<DottedLine />
 					<Pressable onPress={() => sheetRef.current?.present()}>
 						<GlassView
@@ -41,7 +44,7 @@ export default function DescriptionSection({ description }: Props) {
 									className="text-base font-semibold"
 									style={{ color: colors.fill.brand.DEFAULT }}
 								>
-									Read more
+									{t('common.readMore')}
 								</Text>
 							</View>
 						</GlassView>
@@ -58,7 +61,7 @@ export default function DescriptionSection({ description }: Props) {
 				backgroundColor={IS_IOS_24_PLUS ? undefined : colors.background.DEFAULT}
 				grabberOptions={{ color: colors.sheet.grabber }}
 			>
-				<ScrollView className="flex-1 p-6">
+				<ScrollView className="p-6 flex-1">
 					<Markdown>{strippedDescription}</Markdown>
 				</ScrollView>
 			</TrueSheet>

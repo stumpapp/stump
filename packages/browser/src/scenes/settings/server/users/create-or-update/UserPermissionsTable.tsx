@@ -97,14 +97,14 @@ export default function UserPermissionsTable() {
 	})
 
 	return (
-		<div className="flex flex-col gap-4">
+		<div className="gap-4 flex flex-col">
 			<div>
 				<Heading size="sm">{t(getLocaleKey('heading'))}</Heading>
 				<Text size="sm" variant="muted" className="mt-1">
 					{renderDescription()}
 				</Text>
 			</div>
-			<div className="h-96 overflow-auto rounded-lg border border-edge">
+			<div className="h-96 rounded-lg overflow-auto border border-edge">
 				<table className="w-full">
 					<tbody>
 						{table.getRowModel().rows.map((row) => {
@@ -117,12 +117,12 @@ export default function UserPermissionsTable() {
 								return (
 									<tr
 										key={row.id}
-										className="sticky top-0 z-10 border-b border-edge bg-background backdrop-blur-sm"
+										className="top-0 backdrop-blur-sm sticky z-10 border-b border-edge bg-background"
 									>
-										<td className="bg-background-surface/50 px-4 py-3 font-semibold text-foreground">
+										<td className="px-4 py-3 font-semibold bg-background-surface/50 text-foreground">
 											{groupData.name}
 										</td>
-										<td className="bg-background-surface/50 px-4 py-3">
+										<td className="px-4 py-3 bg-background-surface/50">
 											{/* <input
 											type="checkbox"
 											className="h-4 w-4 rounded border-edge text-blue-600 focus:ring-blue-500"

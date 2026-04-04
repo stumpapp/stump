@@ -31,16 +31,13 @@ const RouterContainer = (props: StumpClientProps) => {
 
 	const [mounted, setMounted] = useState(false)
 
-	const { setUser, userPreferences } = useUserStore((store) => ({
-		setUser: store.setUser,
-		userPreferences: store.userPreferences,
-	}))
-	const { baseUrl, setBaseUrl, setPlatform, setIsConnectedWithServer } = useAppStore((store) => ({
-		baseUrl: store.baseUrl,
-		setBaseUrl: store.setBaseUrl,
-		setIsConnectedWithServer: store.setIsConnectedWithServer,
-		setPlatform: store.setPlatform,
-	}))
+	const setUser = useUserStore((state) => state.setUser)
+	const userPreferences = useUserStore((state) => state.userPreferences)
+
+	const baseUrl = useAppStore((state) => state.baseUrl)
+	const setBaseUrl = useAppStore((state) => state.setBaseUrl)
+	const setPlatform = useAppStore((state) => state.setPlatform)
+	const setIsConnectedWithServer = useAppStore((state) => state.setIsConnectedWithServer)
 
 	useEffect(() => {
 		if (!baseUrl && props.baseUrl) {

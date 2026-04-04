@@ -36,7 +36,7 @@ export default function TablePagination({
 
 	// FIXME: Things get smushed together when there are too many pages
 	return (
-		<div className="flex items-center gap-1">
+		<div className="gap-1 flex items-center">
 			<Button
 				size="icon"
 				variant="ghost"

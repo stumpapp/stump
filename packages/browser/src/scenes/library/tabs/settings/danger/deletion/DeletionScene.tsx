@@ -3,7 +3,7 @@ import DeleteLibrary from './DeleteLibrary'
 
 export default function DeletionScene() {
 	return (
-		<div className="flex flex-col gap-12">
+		<div className="gap-12 flex flex-col">
 			<CleanLibrary />
 			<DeleteLibrary />
 		</div>

@@ -52,7 +52,7 @@ export default function MaxWidthPreference() {
 
 	return (
 		<div
-			className="flex flex-col gap-y-1.5 md:max-w-md"
+			className="gap-y-1.5 md:max-w-md flex flex-col"
 			title={
 				primaryNavigationMode === 'SIDEBAR'
 					? // TODO: support it
@@ -60,7 +60,7 @@ export default function MaxWidthPreference() {
 					: undefined
 			}
 		>
-			<Label className={cx({ 'text-opacity-50': primaryNavigationMode === 'SIDEBAR' })}>
+			<Label className={cx({ 'opacity-50': primaryNavigationMode === 'SIDEBAR' })}>
 				{t(getKey('label'))}
 			</Label>
 			<NativeSelect
@@ -72,7 +72,7 @@ export default function MaxWidthPreference() {
 			<Text
 				size="xs"
 				variant="muted"
-				className={cx({ 'text-opacity-50': primaryNavigationMode === 'SIDEBAR' })}
+				className={cx({ 'opacity-50': primaryNavigationMode === 'SIDEBAR' })}
 			>
 				{t(getKey('description'))}
 			</Text>

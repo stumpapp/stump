@@ -12,7 +12,7 @@ export default function BasicDetails() {
 	const { t } = useLocaleContext()
 
 	return (
-		<div className="flex flex-col gap-y-6">
+		<div className="gap-y-6 flex flex-col">
 			<Input
 				variant="primary"
 				label={t(getKey('name.label'))}

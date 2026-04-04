@@ -33,11 +33,11 @@ const navigation = {
 export default function Footer() {
 	return (
 		<footer
-			className="w-full border-t bg-[#FAFAFA] dark:border-neutral-800 dark:bg-[#0E0E0E]"
+			className="dark:border-neutral-800 w-full border-t bg-[#FAFAFA] dark:bg-[#0E0E0E]"
 			aria-labelledby="footer-heading"
 		>
-			<div className="mx-auto flex max-w-[85rem] flex-col items-center justify-center space-y-7 px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
-				<div className="flex items-center space-x-8">
+			<div className="max-w-340 space-y-7 px-4 py-12 sm:px-6 lg:px-8 lg:py-16 mx-auto flex flex-col items-center justify-center">
+				<div className="space-x-8 flex items-center">
 					{navigation.nav.map((item) => (
 						<Link
 							key={item.href}
@@ -53,7 +53,7 @@ export default function Footer() {
 						</Link>
 					))}
 				</div>
-				<div className="flex items-center space-x-6">
+				<div className="space-x-6 flex items-center">
 					{navigation.social.map((item) => (
 						<a
 							key={item.name}
@@ -69,8 +69,8 @@ export default function Footer() {
 					))}
 				</div>
 
-				<div className="flex items-center space-x-4">
-					<img className="h-8" src="/favicon.ico" alt="Stump" />
+				<div className="space-x-4 flex items-center">
+					<img className="h-8 w-8 object-scale-down" src="/favicon.ico" alt="Stump" />
 
 					<p className="text-sm text-gray-700 dark:text-gray-200">
 						&copy; Copyright {new Date().getFullYear()} Aaron Leopold

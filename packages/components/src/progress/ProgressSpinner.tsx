@@ -43,7 +43,7 @@ export const ProgressSpinner = forwardRef<ElementRef<'svg'>, ProgressSpinnerProp
 				className={cn(
 					spinnerVariants({ className, size, variant }),
 					{
-						'fill-gray-700 dark:fill-gray-100 dark:text-zinc-500':
+						'dark:text-zinc-500 fill-gray-700 dark:fill-gray-100':
 							buttonContext?.variant === 'primary',
 					},
 

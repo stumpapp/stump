@@ -24,9 +24,9 @@ export default function SideBarButtonLink({
 	return (
 		<div
 			className={cn(
-				'group inline-flex h-[2.35rem] w-full shrink-0 items-center justify-start rounded-md px-2 text-sm transition-all duration-150 hover:bg-sidebar-surface-hover',
+				'group rounded-md px-2 text-sm inline-flex h-[2.35rem] w-full shrink-0 items-center justify-start transition-all duration-150 hover:bg-sidebar-surface-hover',
 				{
-					'justify-center border border-dashed border-edge-subtle bg-opacity-50 text-foreground text-opacity-90 hover:bg-sidebar-surface hover:text-opacity-100':
+					'justify-center border border-dashed border-edge-subtle text-foreground/90 hover:bg-sidebar-surface hover:text-foreground':
 						variant === 'action',
 				},
 				{ 'text-foreground': variant !== 'action' },
@@ -43,7 +43,7 @@ export default function SideBarButtonLink({
 			{leftContent}
 			<Link
 				to={to}
-				className={cn('line-clamp-1 flex h-full w-full flex-1 items-center break-words p-0', {
+				className={cn('p-0 line-clamp-1 flex h-full w-full flex-1 items-center wrap-break-word', {
 					'justify-center': variant === 'action',
 				})}
 			>

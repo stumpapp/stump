@@ -1,11 +1,15 @@
+import { useShallow } from 'zustand/react/shallow'
+
 import { Card, Stepper } from '~/components/ui'
 import { useReaderStore } from '~/stores'
 
 export default function PageMargins() {
-	const store = useReaderStore((state) => ({
-		pageMargins: state.globalSettings.pageMargins ?? 1.0,
-		setSettings: state.setGlobalSettings,
-	}))
+	const store = useReaderStore(
+		useShallow((state) => ({
+			pageMargins: state.globalSettings.pageMargins ?? 1.0,
+			setSettings: state.setGlobalSettings,
+		})),
+	)
 
 	return (
 		<Card.Row label="Page Margins">

@@ -15,15 +15,15 @@ export default function FileExplorerHeader() {
 	const basename = useMemo(() => currentPath?.split('/').pop() ?? '', [currentPath])
 
 	return (
-		<header className="sticky top-0 z-10 flex h-10 w-full justify-between border-y border-edge bg-background px-4 md:border-y-0 md:border-b">
-			<nav className="flex h-10 w-full items-center gap-4">
+		<header className="top-0 h-10 px-4 md:border-y-0 md:border-b sticky z-10 flex w-full justify-between border-y border-edge bg-background">
+			<nav className="h-10 gap-4 flex w-full items-center">
 				<FileExplorerNavigation />
-				<Text size="sm" className="line-clamp-1 text-opacity-80">
+				<Text size="sm" className="line-clamp-1 text-foreground/80">
 					{basename}
 				</Text>
 			</nav>
 
-			<div className="flex shrink-0 items-center gap-3">
+			<div className="gap-3 flex shrink-0 items-center">
 				<LayoutButtons />
 				{uploadConfig?.enabled && <UploadModal />}
 			</div>

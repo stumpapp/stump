@@ -11,7 +11,7 @@ export default function ThemeSelect() {
 	const { theme, changeTheme } = useTheme()
 
 	return (
-		<div className="flex flex-col gap-y-1.5 md:max-w-md">
+		<div className="gap-y-1.5 md:max-w-md flex flex-col">
 			<Label htmlFor="extension" className="mb-1.5">
 				{t(`${localeKey}.label`)}
 			</Label>
@@ -26,6 +26,7 @@ export default function ThemeSelect() {
 					{ label: t(`${localeKey}.options.autumn`), value: 'autumn' },
 					{ label: t(`${localeKey}.options.cosmic`), value: 'cosmic' },
 					{ label: t(`${localeKey}.options.pumpkin`), value: 'pumpkin' },
+					{ label: t(`${localeKey}.options.midnight`), value: 'midnight' },
 				]}
 				onChange={(e) => changeTheme(e.target.value)}
 			/>

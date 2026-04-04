@@ -7,15 +7,15 @@ import { useSelectionStore } from '~/stores/selection'
 import { Icon } from '../ui/icon'
 
 export default function SelectionLeftScreenHeader() {
-	const selectionStore = useSelectionStore((state) => state)
-
-	const isSelectAll = selectionStore.isSelectAll()
+	const isSelectAll = useSelectionStore((state) => state.isSelectAll())
+	const clearSelection = useSelectionStore((state) => state.clearSelection)
+	const selectAll = useSelectionStore((state) => state.selectAll)
 
 	const onSelect = () => {
 		if (isSelectAll) {
-			selectionStore.clearSelection()
-		} else if (selectionStore.selectAll) {
-			selectionStore.selectAll()
+			clearSelection()
+		} else if (selectAll) {
+			selectAll()
 		}
 	}
 

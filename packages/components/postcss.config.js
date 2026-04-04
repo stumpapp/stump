@@ -1,3 +1,6 @@
+// TODO: Kill this file and swap to vite for stories
 module.exports = {
-	plugins: [require('tailwindcss'), require('autoprefixer')],
+	plugins: {
+		'@tailwindcss/postcss': {},
+	},
 }

@@ -20,7 +20,7 @@ export type TextAreaProps = {
 const TextArea = React.forwardRef<RawTextAreaRef, TextAreaProps>(
 	({ label, description, containerClassName, errorMessage, variant, isInvalid, ...props }, ref) => {
 		return (
-			<div className={cn('grid items-center gap-1.5', containerClassName)}>
+			<div className={cn('gap-1.5 grid items-center', containerClassName)}>
 				{label && <Label htmlFor={props.id}>{label}</Label>}
 				<RawTextArea
 					variant={variant}

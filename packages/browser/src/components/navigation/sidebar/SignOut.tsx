@@ -23,7 +23,7 @@ export default function SignOut() {
 			onConfirm={handleLogout}
 			trigger={
 				<button
-					className="flex h-[2.35rem] w-full items-center gap-1.5 bg-sidebar-overlay bg-opacity-50 px-2 text-foreground-subtle outline-none transition-colors duration-150 hover:bg-sidebar-overlay-hover"
+					className="gap-1.5 px-2 flex h-[2.35rem] w-full items-center bg-sidebar-overlay/50 text-foreground-subtle transition-colors duration-150 outline-none hover:bg-sidebar-overlay-hover"
 					onClick={on}
 				>
 					<LogOut className="h-4 w-4" />

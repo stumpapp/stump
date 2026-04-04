@@ -92,8 +92,8 @@ export default function ProfileForm() {
 
 	return (
 		<Form form={form} onSubmit={handleSubmit}>
-			<div className="flex w-full flex-col-reverse space-y-8 space-y-reverse md:max-w-2xl md:flex-row md:justify-between md:space-y-0">
-				<div className="flex flex-grow flex-col gap-6">
+			<div className="space-y-8 md:max-w-2xl md:flex-row md:justify-between md:space-y-0 flex w-full flex-col-reverse space-y-reverse">
+				<div className="gap-6 flex grow flex-col">
 					<Input
 						variant="primary"
 						className="w-full"
@@ -112,11 +112,11 @@ export default function ProfileForm() {
 						{...form.register('password')}
 					/>
 
-					<div className="flex w-full flex-col items-center gap-4 md:flex-row">
+					<div className="gap-4 md:flex-row flex w-full flex-col items-center">
 						<Button
 							variant="primary"
 							type="submit"
-							className="w-full md:w-[unset]"
+							className="md:w-[unset] w-full"
 							disabled={!hasChanges}
 						>
 							{t('settingsScene.app/account.sections.account.buttons.confirm')}

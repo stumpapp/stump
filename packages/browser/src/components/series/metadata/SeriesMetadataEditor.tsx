@@ -100,7 +100,7 @@ export default function SeriesMetadataEditor({ seriesId, data }: Props) {
 		() => [
 			columnHelper.accessor('label', {
 				header: ({ table }) => (
-					<div className="flex h-full items-center pl-4 font-bold leading-6 text-foreground/90">
+					<div className="pl-4 font-bold leading-6 flex h-full items-center text-foreground/90">
 						<Label className="flex items-center">
 							<CheckBox
 								variant="primary"

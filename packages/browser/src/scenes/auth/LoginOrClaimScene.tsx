@@ -100,7 +100,7 @@ export default function LoginOrClaimScene() {
 	const renderHeader = () => {
 		if (isClaimed) {
 			return (
-				<div className="flex flex-shrink-0 items-center justify-center gap-4 px-2">
+				<div className="gap-4 px-2 flex shrink-0 items-center justify-center">
 					<img src="/assets/favicon.png" width="80" height="80" />
 					<Heading variant="gradient" size="3xl" className="font-bold">
 						Stump
@@ -109,7 +109,7 @@ export default function LoginOrClaimScene() {
 			)
 		} else {
 			return (
-				<div className="text-left sm:max-w-md md:max-w-lg">
+				<div className="sm:max-w-md md:max-w-lg text-left">
 					<h1 className="text-4xl font-semibold text-foreground">{t('authScene.claimHeading')}</h1>
 					<p className="mt-1.5 text-base text-foreground-subtle">{t('authScene.claimText')}</p>
 				</div>
@@ -149,7 +149,7 @@ export default function LoginOrClaimScene() {
 				animate={showServers ? 'appearOut' : 'appearIn'}
 				variants={variants}
 			>
-				<div className="flex h-full w-full flex-col items-center justify-center gap-8 bg-background p-4">
+				<div className="gap-8 p-4 flex h-full w-full flex-col items-center justify-center bg-background">
 					{renderHeader()}
 					{renderError()}
 
@@ -157,7 +157,7 @@ export default function LoginOrClaimScene() {
 						form={form}
 						onSubmit={handleSubmit}
 						className={cx(
-							{ 'w-full sm:max-w-md md:max-w-lg': !isClaimed },
+							{ 'sm:max-w-md md:max-w-lg w-full': !isClaimed },
 							{ 'min-w-[20rem]': isClaimed },
 						)}
 					>
@@ -201,12 +201,12 @@ export default function LoginOrClaimScene() {
 						{oidcConfig.enabled && (
 							<>
 								{!oidcConfig.disableLocalAuth && (
-									<div className="relative my-4">
-										<div className="absolute inset-0 flex items-center">
+									<div className="my-4 relative">
+										<div className="inset-0 absolute flex items-center">
 											<div className="w-full border-t border-edge" />
 										</div>
-										<div className="relative flex justify-center text-xs uppercase">
-											<span className="bg-background px-2 text-foreground-muted">Or</span>
+										<div className="text-xs relative flex justify-center uppercase">
+											<span className="px-2 bg-background text-foreground-muted">Or</span>
 										</div>
 									</div>
 								)}
@@ -227,7 +227,7 @@ export default function LoginOrClaimScene() {
 
 						{isDesktop && (
 							<button
-								className="group flex w-full items-center justify-between border-l border-edge p-4 transition-colors duration-100 hover:border-edge-strong hover:border-opacity-70 hover:bg-background-surface/50"
+								className="group p-4 hover:border-opacity-70 flex w-full items-center justify-between border-l border-edge transition-colors duration-100 hover:border-edge-strong hover:bg-background-surface/50"
 								type="button"
 								onClick={() => setShowServers(true)}
 							>

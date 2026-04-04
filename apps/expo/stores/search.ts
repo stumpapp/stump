@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
+import { useShallow } from 'zustand/react/shallow'
 
 import { useActiveServer } from '~/components/activeServer'
 
@@ -85,9 +86,14 @@ export function useCuratedSearch() {
 	const {
 		activeServer: { id: serverId },
 	} = useActiveServer()
-	const curatedSearches = useSearchStore((state) => ({
-		searchHistory: state.searchHistory.filter((record) => record.serverId === serverId),
-		favoriteSearches: state.favoriteSearches.filter((record) => record.serverId === serverId),
-	}))
-	return curatedSearches
+	const { searchHistory, favoriteSearches } = useSearchStore(
+		useShallow((state) => ({
+			searchHistory: state.searchHistory,
+			favoriteSearches: state.favoriteSearches,
+		})),
+	)
+	return {
+		searchHistory: searchHistory.filter((record) => record.serverId === serverId),
+		favoriteSearches: favoriteSearches.filter((record) => record.serverId === serverId),
+	}
 }

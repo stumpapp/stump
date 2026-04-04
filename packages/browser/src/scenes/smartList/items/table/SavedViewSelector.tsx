@@ -111,7 +111,7 @@ export default function SavedViewSelector() {
 	return (
 		<NativeSelect
 			title={isDisabled ? translateKey('noViewsSaved') : translateKey('selectView')}
-			className="h-8 w-[185px] py-0"
+			className="h-8 py-0 w-[185px]"
 			options={finalOptions}
 			emptyOption={emptyOption}
 			disabled={isDisabled}

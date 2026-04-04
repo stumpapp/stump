@@ -2,6 +2,7 @@ import { cn, cx } from '@stump/components'
 import { Suspense } from 'react'
 import { Navigate, Outlet } from 'react-router-dom'
 import { useMediaMatch } from 'rooks'
+import { useShallow } from 'zustand/react/shallow'
 
 import { Container } from '@/components/container'
 import { usePreferences } from '@/hooks'
@@ -13,9 +14,11 @@ import SettingsSideBar from './SettingsSideBar'
 export default function SettingsLayout() {
 	const isMobile = useMediaMatch('(max-width: 768px)')
 
-	const { user } = useUserStore((store) => ({
-		user: store.user,
-	}))
+	const { user } = useUserStore(
+		useShallow((store) => ({
+			user: store.user,
+		})),
+	)
 	const {
 		preferences: {
 			enableDoubleSidebar,
@@ -41,12 +44,12 @@ export default function SettingsLayout() {
 		<div
 			// The overflow on the parent is intentional, as it allows the native scrollbar to be fully
 			// to the right, instead of on the potentially restricted width of the child container
-			className={cn('flex h-full w-full flex-col overflow-y-auto md:flex-row', {
+			className={cn('md:flex-row flex h-full w-full flex-col overflow-y-auto', {
 				'scrollbar-hide': enableHideScrollbar,
 			})}
 		>
 			<div
-				className={cn('flex w-full flex-col md:flex-row', {
+				className={cn('md:flex-row flex w-full flex-col', {
 					'mx-auto': preferTopBar && !!layoutMaxWidthPx,
 				})}
 				style={{

@@ -84,7 +84,7 @@ export default function CreateOrUpdateSavedServerForm({
 				errorMessage={errors.url?.message}
 			/>
 
-			<div className="flex flex-col gap-2">
+			<div className="gap-2 flex flex-col">
 				<Label htmlFor="authMode">Auth method</Label>
 				<NativeSelect
 					options={[
@@ -114,7 +114,7 @@ export default function CreateOrUpdateSavedServerForm({
 			)}
 
 			{authMode === 'login' && (
-				<div className="rounded-lg border border-dashed border-edge p-2">
+				<div className="rounded-lg p-2 border border-dashed border-edge">
 					<Text variant="muted" size="sm">
 						You will occasionally be prompted to log in when you connect to this server
 					</Text>

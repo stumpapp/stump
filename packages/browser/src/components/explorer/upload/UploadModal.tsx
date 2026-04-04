@@ -198,18 +198,18 @@ export default function UploadModal() {
 		if (isUploading) {
 			return (
 				<>
-					<span className="flex items-center justify-center rounded-lg border border-edge bg-background-surface/80 p-4">
+					<span className="rounded-lg p-4 flex items-center justify-center border border-edge bg-background-surface/80">
 						<ProgressSpinner className="h-7 w-7" />
 					</span>
 
 					<div className="text-center">
-						<Heading size="xs" className="flex items-center justify-center space-x-1">
+						<Heading size="xs" className="space-x-1 flex items-center justify-center">
 							{t('common.uploading')}{' '}
 							{uploadProgress > 0 && (
 								<span className="text-foreground-muted">({uploadProgress}%)</span>
 							)}
 						</Heading>
-						<div className="mt-2 flex h-4 w-64 items-center justify-center">
+						<div className="mt-2 h-4 w-64 flex items-center justify-center">
 							<ProgressBar
 								value={uploadProgress}
 								isIndeterminate={uploadProgress === 0}
@@ -225,7 +225,7 @@ export default function UploadModal() {
 			const Icon = displayedType === 'books' ? Book : FolderArchive
 			return (
 				<>
-					<span className="flex items-center justify-center rounded-lg border border-edge bg-background-surface/80 p-4">
+					<span className="rounded-lg p-4 flex items-center justify-center border border-edge bg-background-surface/80">
 						<Icon className="h-8 w-8 text-foreground-muted" />
 					</span>
 
@@ -263,7 +263,7 @@ export default function UploadModal() {
 					<div
 						{...getRootProps()}
 						className={cn(
-							'flex shrink-0 flex-grow cursor-pointer flex-col items-center justify-center space-y-4 rounded-lg border border-dashed border-edge-subtle p-4 !outline-none ring-2 ring-transparent ring-offset-2 ring-offset-background-overlay',
+							'space-y-4 rounded-lg p-4 flex shrink-0 grow cursor-pointer flex-col items-center justify-center border border-dashed border-edge-subtle ring-2 ring-transparent ring-offset-2 ring-offset-background-overlay outline-none!',
 							{ 'ring-edge-brand': isFocused },
 						)}
 					>
@@ -292,7 +292,7 @@ export default function UploadModal() {
 					<Accordion type="single" collapsible>
 						<Accordion.Item
 							value="files"
-							className="rounded-lg border-none bg-background-surface/80 px-4 py-2"
+							className="rounded-lg px-4 py-2 border-none bg-background-surface/80"
 						>
 							<Accordion.Trigger
 								noUnderline
@@ -307,11 +307,11 @@ export default function UploadModal() {
 							</Accordion.Trigger>
 
 							<Accordion.Content>
-								<div className="flex flex-col space-y-1">
+								<div className="space-y-1 flex flex-col">
 									{files.map((file, idx) => (
 										<div
 											key={file.name}
-											className="group flex items-center gap-x-2 rounded-lg border border-edge p-2"
+											className="group gap-x-2 rounded-lg p-2 flex items-center border border-edge"
 										>
 											<Text size="sm" className="line-clamp-1">
 												{file.name}

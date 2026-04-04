@@ -84,7 +84,7 @@ export default function MisisngEntitiesTable() {
 						.with(MissingEntityType.Book, () => paths.bookOverview(id))
 						.with(MissingEntityType.Series, () => paths.seriesOverview(id))
 						.otherwise(() => undefined)}
-					className="line-clamp-2 text-sm text-opacity-100 no-underline hover:text-opacity-90 hover:underline"
+					className="text-sm text-opacity-100 hover:text-opacity-90 line-clamp-2 no-underline hover:underline"
 				>
 					{path}
 				</Link>
@@ -124,7 +124,7 @@ export default function MisisngEntitiesTable() {
 				totalCount={pageInfo?.totalItems}
 				emptyRenderer={() =>
 					isLoading ? null : (
-						<div className="flex min-h-[150px] flex-col items-center justify-center gap-2">
+						<div className="gap-2 flex min-h-[150px] flex-col items-center justify-center">
 							<CircleSlash2 className="h-10 w-10 pb-2 pt-1 text-foreground-muted" />
 							<Heading size="sm">{t(`${LOCALE_BASE}.emptyHeading`)}</Heading>
 							<Text size="sm" variant="muted">

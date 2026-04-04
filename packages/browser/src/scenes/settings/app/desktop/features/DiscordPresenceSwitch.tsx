@@ -2,6 +2,7 @@ import { Button, Label, RawSwitch, Text, ToolTip } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { RefreshCcw } from 'lucide-react'
 import { toast } from 'sonner'
+import { useShallow } from 'zustand/react/shallow'
 
 import { usePreferences } from '@/hooks/usePreferences'
 import { useTauriRPC } from '@/hooks/useTauriRPC'
@@ -10,10 +11,12 @@ import { useUserStore } from '@/stores'
 export default function DiscordPresenceSwitch() {
 	const { setDiscordPresence } = useTauriRPC()
 	const { t } = useLocaleContext()
-	const { userPreferences, setUserPreferences } = useUserStore((state) => ({
-		setUserPreferences: state.setUserPreferences,
-		userPreferences: state.userPreferences,
-	}))
+	const { userPreferences, setUserPreferences } = useUserStore(
+		useShallow((state) => ({
+			setUserPreferences: state.setUserPreferences,
+			userPreferences: state.userPreferences,
+		})),
+	)
 	const { update } = usePreferences()
 
 	/**
@@ -46,7 +49,7 @@ export default function DiscordPresenceSwitch() {
 
 	return (
 		<div className="flex items-center justify-between">
-			<div className="flex flex-grow flex-col gap-2 text-left">
+			<div className="gap-2 flex grow flex-col text-left">
 				<Label htmlFor="discord_presence_switch">{t(getKey('label'))}</Label>
 				<Text size="xs" variant="muted">
 					{t(getKey('description'))}
@@ -55,7 +58,7 @@ export default function DiscordPresenceSwitch() {
 
 			<div className="w-6" />
 
-			<div className="flex items-center gap-3">
+			<div className="gap-3 flex items-center">
 				<ToolTip
 					content={t(getKey('reconnect'))}
 					isDisabled={!isChecked || !handleReconnect}

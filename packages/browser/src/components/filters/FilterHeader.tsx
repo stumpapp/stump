@@ -79,7 +79,7 @@ export default function FilterHeader({
 		<header
 			ref={ref}
 			className={cn(
-				'sticky z-50 flex h-12 w-full shrink-0 items-center justify-between gap-2 border-b border-edge px-4 md:top-0',
+				'h-12 gap-2 px-4 md:top-0 sticky z-50 flex w-full shrink-0 items-center justify-between border-b border-edge',
 				{
 					'bg-background': isSticky || !isMobile,
 				},
@@ -94,10 +94,10 @@ export default function FilterHeader({
 				isDisabled={isSearchDisabled}
 			/>
 
-			<div className="flex items-center gap-4">
+			<div className="gap-4 flex items-center">
 				{sizeControls}
 
-				<div className="flex items-center gap-x-2">
+				<div className="gap-x-2 flex items-center">
 					{orderControls}
 					{filterControls}
 				</div>

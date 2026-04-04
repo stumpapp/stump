@@ -5,6 +5,7 @@ import setProperty from 'lodash/set'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { View } from 'react-native'
 import { initialWindowMetrics, useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useShallow } from 'zustand/react/shallow'
 
 import { FullScreenLoader } from '~/components/ui'
 import { verifyFileReadable } from '~/lib/filesystem'
@@ -109,30 +110,32 @@ export default function ReadiumReader({
 		fontWeight: rawFontWeight,
 		columnCount: rawColumnCount,
 		...preferences
-	} = useReaderStore((state) => ({
-		fontSize: state.globalSettings.fontSize,
-		fontFamily: state.globalSettings.fontFamily,
-		fontWeight: state.globalSettings.fontWeight,
-		lineHeight: state.globalSettings.lineHeight,
-		brightness: state.globalSettings.brightness,
-		publisherStyles: state.globalSettings.allowPublisherStyles,
-		pageMargins: state.globalSettings.pageMargins,
-		columnCount: state.globalSettings.columnCount,
-		imageFilter: state.globalSettings.imageFilter,
-		textAlign: state.globalSettings.textAlign,
-		typeScale: state.globalSettings.typeScale,
-		paragraphIndent: state.globalSettings.paragraphIndent,
-		paragraphSpacing: state.globalSettings.paragraphSpacing,
-		wordSpacing: state.globalSettings.wordSpacing,
-		letterSpacing: state.globalSettings.letterSpacing,
-		hyphens: state.globalSettings.hyphens,
-		ligatures: state.globalSettings.ligatures,
-		textNormalization: state.globalSettings.textNormalization,
-		verticalText: state.globalSettings.verticalText,
-		readingDirection: (state.globalSettings.readingDirection?.toLowerCase() === 'ltr'
-			? 'ltr'
-			: 'rtl') as 'ltr' | 'rtl',
-	}))
+	} = useReaderStore(
+		useShallow((state) => ({
+			fontSize: state.globalSettings.fontSize,
+			fontFamily: state.globalSettings.fontFamily,
+			fontWeight: state.globalSettings.fontWeight,
+			lineHeight: state.globalSettings.lineHeight,
+			brightness: state.globalSettings.brightness,
+			publisherStyles: state.globalSettings.allowPublisherStyles,
+			pageMargins: state.globalSettings.pageMargins,
+			columnCount: state.globalSettings.columnCount,
+			imageFilter: state.globalSettings.imageFilter,
+			textAlign: state.globalSettings.textAlign,
+			typeScale: state.globalSettings.typeScale,
+			paragraphIndent: state.globalSettings.paragraphIndent,
+			paragraphSpacing: state.globalSettings.paragraphSpacing,
+			wordSpacing: state.globalSettings.wordSpacing,
+			letterSpacing: state.globalSettings.letterSpacing,
+			hyphens: state.globalSettings.hyphens,
+			ligatures: state.globalSettings.ligatures,
+			textNormalization: state.globalSettings.textNormalization,
+			verticalText: state.globalSettings.verticalText,
+			readingDirection: (state.globalSettings.readingDirection?.toLowerCase() === 'ltr'
+				? 'ltr'
+				: 'rtl') as 'ltr' | 'rtl',
+		})),
+	)
 	const { colors } = useEpubTheme()
 
 	// Readium uses a scale factor  (1.0 = 400)
@@ -175,21 +178,23 @@ export default function ReadiumReader({
 		[],
 	)
 
-	const store = useEpubLocationStore((store) => ({
-		setBook: store.setBook,
-		onTocChange: store.onTocChange,
-		onBookLoad: store.onBookLoad,
-		onLocationChange: store.onLocationChange,
-		cleanup: store.onUnload,
-		setBookmarks: store.setBookmarks,
-		annotations: store.annotations,
-		setAnnotations: store.setAnnotations,
-		addAnnotation: store.addAnnotation,
-		updateAnnotation: store.updateAnnotation,
-		removeAnnotation: store.removeAnnotation,
-		getAnnotation: store.getAnnotation,
-		positions: store.positions,
-	}))
+	const store = useEpubLocationStore(
+		useShallow((store) => ({
+			setBook: store.setBook,
+			onTocChange: store.onTocChange,
+			onBookLoad: store.onBookLoad,
+			onLocationChange: store.onLocationChange,
+			cleanup: store.onUnload,
+			setBookmarks: store.setBookmarks,
+			annotations: store.annotations,
+			setAnnotations: store.setAnnotations,
+			addAnnotation: store.addAnnotation,
+			updateAnnotation: store.updateAnnotation,
+			removeAnnotation: store.removeAnnotation,
+			getAnnotation: store.getAnnotation,
+			positions: store.positions,
+		})),
+	)
 
 	const sdkCtx = useSDKSafe()
 

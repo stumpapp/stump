@@ -58,13 +58,13 @@ const Indicator = ({ step, label, isComplete, currentStep }: IndicatorProps) => 
 	const renderIcon = () => {
 		if (isComplete) {
 			return (
-				<div className="flex h-4 w-4 items-center justify-center rounded-full bg-fill-brand text-white">
+				<div className="h-4 w-4 text-white flex items-center justify-center rounded-full bg-fill-brand">
 					<Check className="h-3 w-3" />
 				</div>
 			)
 		} else {
 			return (
-				<div className="flex h-4 w-4 items-center justify-center rounded-full border border-edge-brand/70 text-xs text-foreground-muted">
+				<div className="h-4 w-4 text-xs flex items-center justify-center rounded-full border border-edge-brand/70 text-foreground-muted">
 					{step}
 				</div>
 			)
@@ -84,7 +84,7 @@ const Indicator = ({ step, label, isComplete, currentStep }: IndicatorProps) => 
 
 	return (
 		<button
-			className={cn('flex items-center space-x-2 rounded-full border border-edge px-2.5 py-1.5', {
+			className={cn('space-x-2 px-2.5 py-1.5 flex items-center rounded-full border border-edge', {
 				'border-edge-brand': currentStep === step,
 			})}
 			onClick={handleClick}

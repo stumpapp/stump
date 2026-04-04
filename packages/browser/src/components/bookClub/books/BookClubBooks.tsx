@@ -58,9 +58,9 @@ export default function BookClubBooks() {
 	// break out the past books into separate list?
 	const renderBooks = () => {
 		return (
-			<div className="h-full w-full px-0 md:px-4">
+			<div className="px-0 md:px-4 h-full w-full">
 				<ol
-					className={cn('relative flex h-full flex-col space-y-4 border-l border-edge', {
+					className={cn('space-y-4 relative flex h-full flex-col border-l border-edge', {
 						'pb-2': showPastBooks,
 					})}
 				>
@@ -93,7 +93,7 @@ export default function BookClubBooks() {
 	const renderContent = () => {
 		if (!bookClub.currentBook && pastBooks.length === 0) {
 			return (
-				<div className="flex flex-col px-4">
+				<div className="px-4 flex flex-col">
 					<GenericEmptyState
 						title="No books to display"
 						subtitle="The club has no books scheduled"
@@ -123,9 +123,9 @@ export default function BookClubBooks() {
 	}
 
 	return (
-		<div className="flex h-full w-full flex-col md:-ml-4 md:w-2/3 lg:w-[28rem]">
+		<div className="md:-ml-4 md:w-2/3 lg:w-md flex h-full w-full flex-col">
 			{!!bookClub.currentBook && (
-				<Heading size="md" className="flex items-center px-4 pb-4">
+				<Heading size="md" className="px-4 pb-4 flex items-center">
 					Books
 				</Heading>
 			)}

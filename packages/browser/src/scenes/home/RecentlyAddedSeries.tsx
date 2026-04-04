@@ -98,16 +98,16 @@ function RecentlyAddedSeriesCard({ series, cardWidth }: RecentlyAddedSeriesCardP
 		<Link
 			to={`/series/${series.id}`}
 			className={cn(
-				'group relative block flex-shrink-0 transition-opacity',
+				'group relative block shrink-0 transition-opacity',
 				!shouldFancyHover && 'hover:opacity-80',
 			)}
 			style={{ width: cardWidth }}
 		>
 			<SeriesStackedThumbnails width={cardWidth} thumbnailData={thumbnailData} />
 
-			<div className="absolute left-0 top-0 z-20 w-full px-2.5 py-3">
+			<div className="left-0 top-0 px-2.5 py-3 absolute z-20 w-full">
 				<Text
-					className="line-clamp-2 !text-wrap text-xl font-bold leading-tight text-white"
+					className="text-xl font-bold leading-tight text-white line-clamp-2 text-wrap!"
 					style={{
 						textShadow: '2px 1px 2px rgba(0, 0, 0, 0.5)',
 					}}
@@ -115,7 +115,7 @@ function RecentlyAddedSeriesCard({ series, cardWidth }: RecentlyAddedSeriesCardP
 					{series.resolvedName}
 				</Text>
 				<Text
-					className="mt-0.5 line-clamp-1 text-sm font-medium leading-tight text-gray-200"
+					className="mt-0.5 text-sm font-medium leading-tight line-clamp-1 text-gray-200"
 					style={{
 						textShadow: '2px 1px 2px rgba(0, 0, 0, 0.5)',
 					}}
@@ -159,8 +159,8 @@ function RecentlyAddedSeries() {
 	}, [hasNextPage, isFetchingNextPage, fetchNextPage])
 
 	const emptyState = (
-		<div className="flex items-start justify-start space-x-3 rounded-lg border border-dashed border-edge-subtle px-4 py-4">
-			<span className="rounded-lg border border-edge bg-background-surface p-2">
+		<div className="space-x-3 rounded-lg px-4 py-4 flex items-start justify-start border border-dashed border-edge-subtle">
+			<span className="rounded-lg p-2 border border-edge bg-background-surface">
 				<BookCopy className="h-8 w-8 text-foreground-muted" />
 			</span>
 			<div>

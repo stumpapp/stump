@@ -51,8 +51,8 @@ export default function FileConversionOptions({ onDidChange }: Props) {
 	}, [form, convertRarToZip, hardDeleteConversions, onDidChange])
 
 	return (
-		<div className="flex flex-col gap-y-6">
-			<div className="flex flex-col gap-y-1.5">
+		<div className="gap-y-6 flex flex-col">
+			<div className="gap-y-1.5 flex flex-col">
 				<Heading size="sm">{t(getKey('section.heading'))}</Heading>
 				<Text size="sm" variant="muted">
 					{t(getKey('section.description'))}

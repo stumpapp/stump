@@ -1,5 +1,6 @@
 import { ImageDown } from 'lucide-react-native'
 import { View } from 'react-native'
+import { useShallow } from 'zustand/react/shallow'
 
 import { Switch } from '~/components/ui'
 import { usePreferencesStore } from '~/stores'
@@ -7,10 +8,12 @@ import { usePreferencesStore } from '~/stores'
 import AppSettingsRow from '../AppSettingsRow'
 
 export default function AllowDownscaling() {
-	const { allowDownscaling, patch } = usePreferencesStore((state) => ({
-		allowDownscaling: state.allowDownscaling,
-		patch: state.patch,
-	}))
+	const { allowDownscaling, patch } = usePreferencesStore(
+		useShallow((state) => ({
+			allowDownscaling: state.allowDownscaling,
+			patch: state.patch,
+		})),
+	)
 
 	return (
 		<AppSettingsRow

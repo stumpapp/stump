@@ -20,7 +20,7 @@ export function Form<T extends FieldValues>({
 		<FormProvider {...form}>
 			<form onSubmit={form.handleSubmit(onSubmit)} {...props}>
 				<fieldset
-					className={cn('flex min-w-0 flex-col gap-4', fieldsetClassName)}
+					className={cn('min-w-0 gap-4 flex flex-col', fieldsetClassName)}
 					disabled={form.formState.isSubmitting}
 				>
 					{children}

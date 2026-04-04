@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import Animated from 'react-native-reanimated'
+import { useShallow } from 'zustand/react/shallow'
 
 import { Text } from '~/components/ui'
 import { usePdfStore } from '~/stores/pdf'
@@ -12,10 +13,12 @@ export const FOOTER_HEIGHT = 48
 // const elapsedSeconds = useBookReadTime(book.id)
 
 export function PdfReaderFooter() {
-	const position = usePdfStore((state) => ({
-		page: state.currentPage,
-		totalPages: state.book?.pages,
-	}))
+	const position = usePdfStore(
+		useShallow((state) => ({
+			page: state.currentPage,
+			totalPages: state.book?.pages,
+		})),
+	)
 	const { secondaryStyle } = useReaderAnimations()
 
 	const formattedPosition = useMemo(() => {

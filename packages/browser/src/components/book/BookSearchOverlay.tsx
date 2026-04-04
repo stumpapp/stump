@@ -25,7 +25,7 @@ export default function BookSearchOverlay({ onBookSelect, sheetProps }: Props) {
 		}
 
 		return (
-			<Button variant="secondary" className="flex h-full items-center gap-1.5">
+			<Button variant="secondary" className="gap-1.5 flex h-full items-center">
 				<Search className="h-4 w-4" />
 				<span>Search for a book</span>
 			</Button>
@@ -47,7 +47,7 @@ export default function BookSearchOverlay({ onBookSelect, sheetProps }: Props) {
 			trigger={renderTrigger()}
 			size="xl"
 		>
-			<div className="flex flex-1 flex-col overflow-hidden p-4">
+			<div className="p-4 flex flex-1 flex-col overflow-hidden">
 				<BookSearch onBookSelect={handleSelectBook} />
 			</div>
 		</Sheet>

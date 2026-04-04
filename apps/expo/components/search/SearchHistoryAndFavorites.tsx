@@ -1,5 +1,6 @@
 import { Bookmark, BookmarkX, Clock, Trash } from 'lucide-react-native'
 import { Pressable, ScrollView, View } from 'react-native'
+import { useShallow } from 'zustand/react/shallow'
 
 import { useActiveServer } from '~/components/activeServer'
 import { Icon, ListLabel, Text } from '~/components/ui'
@@ -19,7 +20,14 @@ export function SearchHistoryAndFavorites({ onSelect }: Props) {
 	} = useActiveServer()
 	const { favoriteSearches, searchHistory } = useCuratedSearch()
 	const { favoriteSearch, unfavoriteSearch, clearSearchHistory, removeFromHistory } =
-		useSearchStore()
+		useSearchStore(
+			useShallow((state) => ({
+				favoriteSearch: state.favoriteSearch,
+				unfavoriteSearch: state.unfavoriteSearch,
+				clearSearchHistory: state.clearSearchHistory,
+				removeFromHistory: state.removeFromHistory,
+			})),
+		)
 	const colors = useColors()
 
 	const hasFavorites = favoriteSearches.length > 0
@@ -28,7 +36,7 @@ export function SearchHistoryAndFavorites({ onSelect }: Props) {
 
 	if (!hasFavorites && !hasHistory) {
 		return (
-			<View className="flex-1 items-center justify-center px-4 pt-20">
+			<View className="px-4 pt-20 flex-1 items-center justify-center">
 				<Text size="lg" className="text-center text-foreground-muted">
 					Your favorites and recent searches will appear here
 				</Text>
@@ -63,7 +71,7 @@ export function SearchHistoryAndFavorites({ onSelect }: Props) {
 									},
 								]}
 							>
-								<View className="flex-row items-center gap-3 py-3">
+								<View className="`gap-3 py-3 flex-row items-center">
 									<Icon as={Bookmark} size={16} color={colors.fill.brand.DEFAULT} />
 									<Text className="flex-1">{record.query}</Text>
 								</View>
@@ -120,7 +128,7 @@ export function SearchHistoryAndFavorites({ onSelect }: Props) {
 									},
 								]}
 							>
-								<View className="flex-row items-center gap-3 py-3">
+								<View className="gap-3 py-3 flex-row items-center">
 									<Icon as={Clock} size={16} color={colors.foreground.muted} />
 									<Text className="flex-1">{record.query}</Text>
 								</View>

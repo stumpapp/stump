@@ -4,6 +4,7 @@ import { forwardRef, Suspense, useEffect, useMemo } from 'react'
 import useScrollbarSize from 'react-scrollbar-size'
 import { useMediaMatch } from 'rooks'
 import { create } from 'zustand'
+import { useShallow } from 'zustand/react/shallow'
 
 import { SIDEBAR_WIDTH } from '@/components/navigation/sidebar'
 import { TablePaginationProps } from '@/components/table'
@@ -26,10 +27,12 @@ const URLFilterContainer = forwardRef<HTMLDivElement, Props>(
 			preferences: { enableHideScrollbar, primaryNavigationMode },
 		} = usePreferences()
 		const { width } = useScrollbarSize()
-		const { storedWidth, storeWidth } = useWidthStore((state) => ({
-			storeWidth: state.setWidth,
-			storedWidth: state.width,
-		}))
+		const { storedWidth, storeWidth } = useWidthStore(
+			useShallow((state) => ({
+				storeWidth: state.setWidth,
+				storedWidth: state.width,
+			})),
+		)
 
 		const storeOffset = useFooterOffsetStore((state) => state.setFooterOffset)
 
@@ -76,13 +79,13 @@ const URLFilterContainer = forwardRef<HTMLDivElement, Props>(
 			<Suspense>
 				<div
 					ref={ref}
-					className={cn('flex flex-1 flex-col overflow-x-auto pb-24 md:pb-10', className)}
+					className={cn('pb-24 md:pb-10 flex flex-1 flex-col overflow-x-auto', className)}
 					id="urlFilterContainer"
 				>
 					{children}
 
 					<div
-						className="fixed bottom-0 z-50 flex h-12 items-center justify-between border-t border-edge bg-background px-4 md:h-10"
+						className="bottom-0 h-12 px-4 md:h-10 fixed z-50 flex items-center justify-between border-t border-edge bg-background"
 						data-testid="urlFilterFooter"
 						style={{
 							right: scrollbarWidth,
@@ -92,7 +95,7 @@ const URLFilterContainer = forwardRef<HTMLDivElement, Props>(
 									: `calc(100% - ${SIDEBAR_WIDTH}px - ${scrollbarWidth}px)`,
 						}}
 					>
-						<div className="flex shrink-0 items-center gap-x-2">
+						<div className="gap-x-2 flex shrink-0 items-center">
 							{tableControls}
 							<URLPageSize />
 						</div>

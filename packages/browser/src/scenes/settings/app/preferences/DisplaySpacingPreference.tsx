@@ -22,12 +22,12 @@ export default function DisplaySpacingPreference() {
 	}
 
 	return (
-		<div className="flex flex-col gap-y-1.5">
+		<div className="gap-y-1.5 flex flex-col">
 			<Label>{t(getKey('label'))}</Label>
 			<Text size="sm" variant="muted">
 				{t(getKey('description'))}
 			</Text>
-			<div className="flex items-center gap-x-4">
+			<div className="gap-x-4 flex items-center">
 				<AppearanceOption
 					label={t(getKey('options.default'))}
 					isSelected={!enableCompactDisplay}
@@ -67,10 +67,10 @@ function AppearanceOption({
 	const isLightVariant = !isDarkVariant
 
 	return (
-		<div className="w-1/2 text-center md:w-1/3 lg:w-1/4">
+		<div className="md:w-1/3 lg:w-1/4 w-1/2 text-center">
 			<div
 				className={cn(
-					'relative flex h-32 w-full flex-col rounded-md border border-edge bg-background-surface p-2 opacity-80 transition-all duration-200',
+					'h-32 rounded-md p-2 relative flex w-full flex-col border border-edge bg-background-surface opacity-80 transition-all duration-200',
 					isDefaultDisplay ? 'gap-y-4' : 'gap-y-2',
 					{
 						'border-edge-subtle': isSelected,
@@ -89,31 +89,31 @@ function AppearanceOption({
 			>
 				<div
 					className={cx(
-						'w-full rounded-md bg-background-surface-secondary',
+						'rounded-md w-full bg-background-surface-secondary',
 						isDefaultDisplay ? 'h-1/4' : 'h-1/5',
 					)}
 				/>
 
 				<div
 					className={cx(
-						'w-2/3 rounded-md bg-background-surface-secondary',
+						'rounded-md w-2/3 bg-background-surface-secondary',
 						isDefaultDisplay ? 'h-1/4' : 'h-1/5',
 					)}
 				/>
 
 				<div
 					className={cx(
-						'w-5/6 rounded-md bg-background-surface-secondary',
+						'rounded-md w-5/6 bg-background-surface-secondary',
 						isDefaultDisplay ? 'h-1/4' : 'h-1/5',
 					)}
 				/>
 
 				{!isDefaultDisplay && (
-					<div className="h-1/5 w-full rounded-md bg-background-surface-secondary" />
+					<div className="rounded-md h-1/5 w-full bg-background-surface-secondary" />
 				)}
 
 				{isSelected && (
-					<div className="absolute bottom-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-fill-brand">
+					<div className="bottom-2 right-2 h-6 w-6 absolute flex items-center justify-center rounded-full bg-fill-brand">
 						<Check className="h-5 w-5 text-white" />
 					</div>
 				)}

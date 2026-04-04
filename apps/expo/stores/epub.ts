@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
+import { useShallow } from 'zustand/react/shallow'
 
 import { BookmarkRef, EbookReaderBookRef } from '~/components/book/reader/image/context'
 import { COLORS } from '~/lib/constants'
@@ -404,10 +405,12 @@ export const resolveThemeName = (
 
 export const useEpubTheme = () => {
 	const { colorScheme } = useColorScheme()
-	const { themes, selectedTheme } = useEpubThemesStore((store) => ({
-		themes: store.themes,
-		selectedTheme: store.selectedTheme,
-	}))
+	const { themes, selectedTheme } = useEpubThemesStore(
+		useShallow((store) => ({
+			themes: store.themes,
+			selectedTheme: store.selectedTheme,
+		})),
+	)
 
 	return useMemo(
 		() => resolveTheme(themes, selectedTheme || '', colorScheme),

@@ -114,9 +114,9 @@ export default function ScanRecordInspector({ record, onClose }: Props) {
 				</div>
 
 				{displayedData?.options?.config && (
-					<div className="flex flex-col gap-y-3 px-4 py-2">
+					<div className="gap-y-3 px-4 py-2 flex flex-col">
 						<Label className="text-foreground-muted">{t(getFieldKey('config'))}</Label>
-						<div className="rounded-xl bg-background-surface p-4">
+						<div className="rounded-xl p-4 bg-background-surface">
 							<pre className="text-xs text-foreground-muted">
 								{JSON.stringify(displayedData.options.config, null, 2)}
 							</pre>
@@ -125,9 +125,9 @@ export default function ScanRecordInspector({ record, onClose }: Props) {
 				)}
 
 				{associatedJob?.outputData && (
-					<div className="flex flex-col gap-y-3 px-4 py-2">
+					<div className="gap-y-3 px-4 py-2 flex flex-col">
 						<Label className="text-foreground-muted">{t(getFieldKey('jobOutput'))}</Label>
-						<div className="rounded-xl bg-background-surface p-4">
+						<div className="rounded-xl p-4 bg-background-surface">
 							<pre className="text-xs text-foreground-muted">
 								{JSON.stringify(associatedJob.outputData, null, 2)}
 							</pre>
@@ -136,7 +136,7 @@ export default function ScanRecordInspector({ record, onClose }: Props) {
 				)}
 
 				{!!associatedJob?.logs?.length && (
-					<div className="flex flex-col gap-y-3 px-4 py-2">
+					<div className="gap-y-3 px-4 py-2 flex flex-col">
 						<Label className="text-foreground-muted">{t(getFieldKey('logs'))}</Label>
 
 						<Alert variant="warning" className="p-2">

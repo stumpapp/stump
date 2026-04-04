@@ -168,14 +168,14 @@ const Page = ({ page, src, imageScaling: { scaleToFit }, onPageClick }: PageProp
 		className={cn(
 			'z-30 select-none',
 			{
-				'mx-auto my-0 w-auto self-center': scaleToFit === ReadingImageScaleFit.None,
+				'my-0 mx-auto w-auto self-center': scaleToFit === ReadingImageScaleFit.None,
 			},
 			{
 				'm-auto h-full max-h-screen w-auto object-cover':
 					scaleToFit === ReadingImageScaleFit.Height,
 			},
 			{
-				'mx-auto my-0 w-full object-contain': scaleToFit === ReadingImageScaleFit.Width,
+				'my-0 mx-auto w-full object-contain': scaleToFit === ReadingImageScaleFit.Width,
 			},
 		)}
 		src={src}

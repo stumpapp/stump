@@ -3,6 +3,7 @@ import { Easing, Pressable } from 'react-native'
 import { easeGradient } from 'react-native-easing-gradient'
 import LinearGradient from 'react-native-linear-gradient'
 import Animated from 'react-native-reanimated'
+import { useShallow } from 'zustand/react/shallow'
 
 import { cn } from '~/lib/utils'
 import { useReaderStore } from '~/stores'
@@ -10,10 +11,12 @@ import { useReaderStore } from '~/stores'
 import { useReaderAnimations } from './readerAnimations'
 
 export default function ControlsBackdrop() {
-	const controls = useReaderStore((state) => ({
-		isVisible: state.showControls,
-		setVisible: state.setShowControls,
-	}))
+	const controls = useReaderStore(
+		useShallow((state) => ({
+			isVisible: state.showControls,
+			setVisible: state.setShowControls,
+		})),
+	)
 	const { secondaryStyle } = useReaderAnimations()
 
 	const { colors: gradientColors, locations: gradientLocations } = useMemo(

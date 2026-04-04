@@ -237,7 +237,7 @@ export default function ServerEmojisSection() {
 	const isDropzoneFocused = isDragActive || isFileDialogActive
 
 	return (
-		<div className="flex flex-col gap-4">
+		<div className="gap-4 flex flex-col">
 			<div>
 				<Heading size="sm">{t(getKey('title'))}</Heading>
 				<Text size="sm" variant="muted" className="mt-1">
@@ -246,11 +246,11 @@ export default function ServerEmojisSection() {
 			</div>
 
 			{canManageEmojis && (
-				<div className="rounded-lg border border-edge p-3">
+				<div className="rounded-lg p-3 border border-edge">
 					<div
 						{...getRootProps()}
 						className={cn(
-							'flex cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-edge-subtle p-4 ring-2 ring-transparent ring-offset-2 ring-offset-background',
+							'gap-2 rounded-md p-4 flex cursor-pointer items-center justify-center border border-dashed border-edge-subtle ring-2 ring-transparent ring-offset-2 ring-offset-background',
 							{ 'ring-edge-brand': isDropzoneFocused },
 						)}
 					>
@@ -261,8 +261,8 @@ export default function ServerEmojisSection() {
 						</Text>
 					</div>
 
-					<div className="mt-3 flex flex-row items-end gap-3">
-						<div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-md border border-edge bg-background-surface">
+					<div className="mt-3 gap-3 flex flex-row items-end">
+						<div className="h-10 w-10 rounded-md flex items-center justify-center overflow-hidden border border-edge bg-background-surface">
 							{previewUrl && (
 								<img
 									src={previewUrl}
@@ -281,7 +281,7 @@ export default function ServerEmojisSection() {
 							/>
 						</div>
 
-						<div className="flex items-center gap-2">
+						<div className="gap-2 flex items-center">
 							<Button
 								variant="default"
 								disabled={!selectedFile || isUploading}
@@ -314,11 +314,11 @@ export default function ServerEmojisSection() {
 					<ScrollArea className={cn({ 'h-96': emojis.length > 8 })}>
 						<div className="divide-y divide-edge">
 							{emojis.map((emoji) => (
-								<div key={emoji.id} className="flex items-center gap-3 p-3">
+								<div key={emoji.id} className="gap-3 p-3 flex items-center">
 									<img src={emoji.url} alt={emoji.name} className="h-8 w-8 rounded object-cover" />
 
 									{renamingId === emoji.id ? (
-										<div className="flex flex-1 items-center gap-2">
+										<div className="gap-2 flex flex-1 items-center">
 											<Input
 												value={renameValue}
 												onChange={(event) => setRenameValue(event.target.value)}
@@ -338,7 +338,7 @@ export default function ServerEmojisSection() {
 										</div>
 									) : (
 										<>
-											<div className="rounded-lg bg-background-surface p-0.5">
+											<div className="rounded-lg p-0.5 bg-background-surface">
 												<Text size="sm" className="font-mono">
 													:{emoji.name}:
 												</Text>
@@ -347,7 +347,7 @@ export default function ServerEmojisSection() {
 											<div className="flex-1" />
 
 											{canManageEmojis && (
-												<div className="flex items-center gap-1">
+												<div className="gap-1 flex items-center">
 													<Button
 														variant="ghost"
 														size="sm"

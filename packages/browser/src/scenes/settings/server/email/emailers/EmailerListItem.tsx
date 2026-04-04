@@ -81,12 +81,12 @@ export default function EmailerListItem({ fragment }: Props) {
 	}, [canDeleteEmailer, deleteEmailer, emailer.id])
 
 	return (
-		<Card className="flex flex-col space-y-2 p-4" onMouseEnter={() => prefetchHistory()}>
+		<Card className="space-y-2 p-4 flex flex-col" onMouseEnter={() => prefetchHistory()}>
 			<div className="flex items-center justify-between">
 				<Text size="md" className="font-medium">
 					{emailer.name}
 				</Text>
-				<div className="flex items-center space-x-2">
+				<div className="space-x-2 flex items-center">
 					{emailer.isPrimary && (
 						<ToolTip content="Primary emailer" align="end" size="xs">
 							<Sparkles className="text-primary h-4 w-4" strokeWidth={1} />

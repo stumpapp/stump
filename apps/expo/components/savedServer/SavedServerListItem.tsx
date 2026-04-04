@@ -5,6 +5,7 @@ import { KeyRound, Sliders, SquareX, Trash } from 'lucide-react-native'
 import { View } from 'react-native'
 import { match } from 'ts-pattern'
 
+import { useTranslate } from '~/lib/hooks'
 import { usePreferencesStore } from '~/stores'
 import { useCacheStore } from '~/stores/cache'
 import { SavedServer, useSavedServers } from '~/stores/savedServer'
@@ -20,6 +21,8 @@ type Props = {
 }
 
 export default function SavedServerListItem({ server, onEdit, onDelete, forceOPDS }: Props) {
+	const { t } = useTranslate()
+
 	const maskURLs = usePreferencesStore((state) => state.maskURLs)
 
 	const formatURL = (url: string) => {
@@ -75,7 +78,7 @@ export default function SavedServerListItem({ server, onEdit, onDelete, forceOPD
 					{
 						items: [
 							{
-								label: 'Edit',
+								label: t('common.edit'),
 								icon: {
 									ios: 'slider.horizontal.2.square.on.square',
 									android: Sliders,
@@ -83,7 +86,7 @@ export default function SavedServerListItem({ server, onEdit, onDelete, forceOPD
 								onPress: onEdit,
 							},
 							{
-								label: 'Clear Cache',
+								label: t('savedServerActions.clearCache'),
 								icon: {
 									ios: 'clear',
 									android: SquareX,
@@ -94,8 +97,8 @@ export default function SavedServerListItem({ server, onEdit, onDelete, forceOPD
 							...(server.kind === 'stump' && !forceOPDS
 								? [
 										{
-											label: 'Discard Tokens',
-											subtext: 'Affects login tokens only',
+											label: t('savedServerActions.discardTokens.label'),
+											subtext: t('savedServerActions.discardTokens.description'),
 											icon: {
 												ios: 'key.fill',
 												android: KeyRound,
@@ -112,7 +115,7 @@ export default function SavedServerListItem({ server, onEdit, onDelete, forceOPD
 									]
 								: []),
 							{
-								label: 'Remove',
+								label: t('common.delete'),
 								icon: {
 									ios: 'trash',
 									android: Trash,
@@ -124,8 +127,8 @@ export default function SavedServerListItem({ server, onEdit, onDelete, forceOPD
 					},
 				]}
 			>
-				<View className="bg-background-muted squircle w-full items-start rounded-3xl border border-edge bg-background-surface px-4 py-3">
-					<View className="flex-1 items-start justify-center gap-1">
+				<View className="bg-background-muted squircle rounded-3xl px-4 py-3 w-full items-start border border-edge bg-background-surface">
+					<View className="gap-1 flex-1 items-start justify-center">
 						<Text className="text-lg">{server.name}</Text>
 						<Text className="flex-1 text-foreground-muted">{formatURL(server.url)}</Text>
 					</View>

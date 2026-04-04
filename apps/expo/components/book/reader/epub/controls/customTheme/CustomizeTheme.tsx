@@ -1,6 +1,7 @@
 import { Fragment, useCallback, useEffect, useState } from 'react'
 import { Alert, Pressable, ScrollView, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useShallow } from 'zustand/react/shallow'
 
 import { Input, Text } from '~/components/ui'
 import { useColorScheme } from '~/lib/useColorScheme'
@@ -32,12 +33,14 @@ export default function CustomizeTheme({ onCancel, mode = 'edit', theme: namedTh
 	const { colorScheme } = useColorScheme()
 	const insets = useSafeAreaInsets()
 
-	const { themes, selectedTheme, addTheme, selectTheme } = useEpubThemesStore((store) => ({
-		themes: store.themes,
-		selectedTheme: store.selectedTheme,
-		addTheme: store.addTheme,
-		selectTheme: store.selectTheme,
-	}))
+	const { themes, selectedTheme, addTheme, selectTheme } = useEpubThemesStore(
+		useShallow((store) => ({
+			themes: store.themes,
+			selectedTheme: store.selectedTheme,
+			addTheme: store.addTheme,
+			selectTheme: store.selectTheme,
+		})),
+	)
 
 	const isCreateMode = mode === 'create'
 	const themeToEdit = namedTheme || selectedTheme || ''

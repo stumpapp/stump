@@ -3,7 +3,7 @@ import '~/global.css'
 import { DarkTheme, DefaultTheme, Theme, ThemeProvider } from '@react-navigation/native'
 import { PortalHost } from '@rn-primitives/portal'
 import * as Sentry from '@sentry/react-native'
-import { initDateFnsLocale } from '@stump/i18n'
+import { initDateFnsLocale, LocaleProvider } from '@stump/i18n'
 import { getColor, to } from 'colorjs.io/fn'
 import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator'
 import * as Localization from 'expo-localization'
@@ -17,6 +17,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { KeyboardProvider } from 'react-native-keyboard-controller'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Toaster } from 'sonner-native'
+import { useShallow } from 'zustand/react/shallow'
 
 import darkSplash from '~/assets/splash/dark.json'
 import lightSplash from '~/assets/splash/light.json'
@@ -76,13 +77,15 @@ export default function RootLayout() {
 
 	useFileImportListener()
 
-	const { performanceMonitor, animationEnabled, disableDismissGesture } = usePreferencesStore(
-		(state) => ({
-			animationEnabled: !state.reduceAnimations,
-			performanceMonitor: state.performanceMonitor,
-			disableDismissGesture: state.disableDismissGesture,
-		}),
-	)
+	const { performanceMonitor, animationEnabled, disableDismissGesture, locale } =
+		usePreferencesStore(
+			useShallow((state) => ({
+				animationEnabled: !state.reduceAnimations,
+				performanceMonitor: state.performanceMonitor,
+				disableDismissGesture: state.disableDismissGesture,
+				locale: state.locale,
+			})),
+		)
 	const isReading = useReaderStore((state) => state.isReading)
 	const isReadingEbook = useEpubLocationStore((state) => !!state.book)
 	const { colors: epubThemeColors } = useEpubTheme()
@@ -182,93 +185,95 @@ export default function RootLayout() {
 	}
 
 	return (
-		<GestureHandlerRootView style={{ flex: 1 }}>
-			<ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
-				{performanceMonitor && <PerformanceMonitor style={{ top: insets.top || 12 }} />}
-				<KeyboardProvider>
-					<SystemBars
-						style={isDarkBackground ? 'light' : 'dark'}
-						hidden={{ statusBar: hideStatusBar, navigationBar: hideNavigationBar }}
-					/>
-					<Stack
-						// https://github.com/expo/expo/issues/15244 ?
-						// screenOptions={{
-						// 	statusBarHidden: shouldHideStatusBar,
-						// }}
-						screenOptions={{
-							animation: animationEnabled ? 'default' : 'none',
-							contentStyle: {
-								backgroundColor: colors.background.DEFAULT,
+		<LocaleProvider locale={locale}>
+			<GestureHandlerRootView style={{ flex: 1 }}>
+				<ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
+					{performanceMonitor && <PerformanceMonitor style={{ top: insets.top || 12 }} />}
+					<KeyboardProvider>
+						<SystemBars
+							style={isDarkBackground ? 'light' : 'dark'}
+							hidden={{ statusBar: hideStatusBar, navigationBar: hideNavigationBar }}
+						/>
+						<Stack
+							// https://github.com/expo/expo/issues/15244 ?
+							// screenOptions={{
+							// 	statusBarHidden: shouldHideStatusBar,
+							// }}
+							screenOptions={{
+								animation: animationEnabled ? 'default' : 'none',
+								contentStyle: {
+									backgroundColor: colors.background.DEFAULT,
+								},
+							}}
+						>
+							<Stack.Screen
+								name="(tabs)"
+								options={{
+									headerShown: false,
+									title: '',
+									animation: animationEnabled ? 'default' : 'none',
+								}}
+							/>
+							<Stack.Screen
+								name="server/[id]"
+								options={{
+									headerShown: false,
+									title: '',
+									animation: animationEnabled ? 'default' : 'none',
+									autoHideHomeIndicator: hideNavigationBar,
+									contentStyle: {
+										backgroundColor: colors.background.DEFAULT,
+									},
+								}}
+							/>
+							<Stack.Screen
+								name="opds/[id]"
+								options={{
+									headerShown: false,
+									animation: animationEnabled ? 'default' : 'none',
+								}}
+							/>
+							<Stack.Screen
+								name="opds-legacy/[id]"
+								options={{
+									headerShown: false,
+									animation: animationEnabled ? 'default' : 'none',
+								}}
+							/>
+
+							<Stack.Screen
+								name="offline"
+								options={{
+									headerShown: false,
+									title: '',
+									animation: animationEnabled ? 'default' : 'none',
+									autoHideHomeIndicator: hideNavigationBar,
+									presentation:
+										disableDismissGesture && Platform.OS === 'ios' ? 'fullScreenModal' : undefined,
+									contentStyle: {
+										backgroundColor: colors.background.DEFAULT,
+									},
+								}}
+							/>
+						</Stack>
+						<FloatingQueueButton />
+						<PortalHost />
+					</KeyboardProvider>
+
+					<Toaster
+						position="bottom-center"
+						styles={{
+							title: {
+								fontSize: 18,
+							},
+							description: {
+								fontSize: 16,
 							},
 						}}
-					>
-						<Stack.Screen
-							name="(tabs)"
-							options={{
-								headerShown: false,
-								title: '',
-								animation: animationEnabled ? 'default' : 'none',
-							}}
-						/>
-						<Stack.Screen
-							name="server/[id]"
-							options={{
-								headerShown: false,
-								title: '',
-								animation: animationEnabled ? 'default' : 'none',
-								autoHideHomeIndicator: hideNavigationBar,
-								contentStyle: {
-									backgroundColor: colors.background.DEFAULT,
-								},
-							}}
-						/>
-						<Stack.Screen
-							name="opds/[id]"
-							options={{
-								headerShown: false,
-								animation: animationEnabled ? 'default' : 'none',
-							}}
-						/>
-						<Stack.Screen
-							name="opds-legacy/[id]"
-							options={{
-								headerShown: false,
-								animation: animationEnabled ? 'default' : 'none',
-							}}
-						/>
-
-						<Stack.Screen
-							name="offline"
-							options={{
-								headerShown: false,
-								title: '',
-								animation: animationEnabled ? 'default' : 'none',
-								autoHideHomeIndicator: hideNavigationBar,
-								presentation:
-									disableDismissGesture && Platform.OS === 'ios' ? 'fullScreenModal' : undefined,
-								contentStyle: {
-									backgroundColor: colors.background.DEFAULT,
-								},
-							}}
-						/>
-					</Stack>
-					<FloatingQueueButton />
-					<PortalHost />
-				</KeyboardProvider>
-
-				<Toaster
-					position="bottom-center"
-					styles={{
-						title: {
-							fontSize: 18,
-						},
-						description: {
-							fontSize: 16,
-						},
-					}}
-				/>
-			</ThemeProvider>
-		</GestureHandlerRootView>
+					/>
+				</ThemeProvider>
+			</GestureHandlerRootView>
+		</LocaleProvider>
 	)
 }
 

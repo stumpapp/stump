@@ -77,7 +77,7 @@ export default function SettingsHeader({ renderNavigation }: Props) {
 		<header
 			className={cx(
 				'px-4 pt-4',
-				{ 'flex flex-col gap-y-8': renderNavigation },
+				{ 'gap-y-8 flex flex-col': renderNavigation },
 				{ 'mx-auto': !!maxWidth },
 			)}
 			style={{ maxWidth }}
@@ -85,7 +85,7 @@ export default function SettingsHeader({ renderNavigation }: Props) {
 			{renderNavigation && <SettingsNavigation />}
 			<div className="text-foreground-muted">
 				{backlink && (
-					<span className="flex items-center gap-x-1 text-xs text-foreground-muted">
+					<span className="gap-x-1 text-xs flex items-center text-foreground-muted">
 						<Link
 							to={`${basePath}${backlink.to}`}
 							className="text-foreground-muted no-underline hover:underline"

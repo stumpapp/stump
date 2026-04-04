@@ -95,7 +95,7 @@ export default function ReaderFooter() {
 				<div className="flex flex-col justify-end" style={containerSize}>
 					<div
 						className={cn(
-							'flex cursor-pointer overflow-hidden rounded-lg border-2 border-transparent shadow-xl transition duration-300 hover:border-edge-brand',
+							'rounded-lg shadow-xl flex cursor-pointer overflow-hidden border-2 border-transparent transition duration-300 hover:border-edge-brand',
 							{ 'rounded-[10px] border-edge-brand': isCurrentSet },
 						)}
 						style={{
@@ -136,7 +136,7 @@ export default function ReaderFooter() {
 			variants={transition}
 			transition={{ duration: 0.2, ease: 'easeInOut' }}
 			// @ts-expect-error: It does have className?
-			className="fixed bottom-0 left-0 z-[100] flex w-full flex-col justify-end gap-2 overflow-hidden bg-opacity-75 text-white shadow-lg"
+			className="bottom-0 left-0 gap-2 text-white shadow-lg fixed z-100 flex w-full flex-col justify-end overflow-hidden"
 		>
 			<Virtuoso
 				ref={virtuosoRef}
@@ -162,7 +162,7 @@ export default function ReaderFooter() {
 				}
 			/>
 
-			<div className="flex w-full flex-col gap-2 px-4 pb-4">
+			<div className="gap-2 px-4 pb-4 flex w-full flex-col">
 				<ProgressBar
 					size="sm"
 					value={currentPage}
@@ -206,7 +206,7 @@ const Item = forwardRef<HTMLDivElement, ItemProps<number[]>>(
 	({ children, style, ...props }, ref) => {
 		return (
 			<div
-				className="select-none px-1"
+				className="px-1 select-none"
 				ref={ref}
 				{...props}
 				style={{

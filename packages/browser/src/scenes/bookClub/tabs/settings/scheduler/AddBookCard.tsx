@@ -65,7 +65,7 @@ export default function AddBookCard({ index }: Props) {
 						<EntityImage src={selectedBook.thumbnail.url} className="rounded-md object-cover" />
 					</AspectRatio>
 				</div>
-				<div className="ml-4 flex flex-col gap-1.5">
+				<div className="ml-4 gap-1.5 flex flex-col">
 					<Heading size="sm" className="text-sm md:text-lg">
 						{bookName}
 					</Heading>
@@ -99,7 +99,7 @@ export default function AddBookCard({ index }: Props) {
 					</Text>
 				</div>
 
-				<div className="flex justify-between gap-4">
+				<div className="gap-4 flex justify-between">
 					{renderBookInfo()}
 					{renderSelectedBookOptions()}
 				</div>
@@ -120,7 +120,7 @@ export default function AddBookCard({ index }: Props) {
 					</Text>
 				</div>
 
-				<div className="flex w-full flex-col items-start gap-x-4 gap-y-4 md:flex-row md:gap-y-0">
+				<div className="gap-x-4 gap-y-4 md:flex-row md:gap-y-0 flex w-full flex-col items-start">
 					<Input
 						fullWidth
 						variant="primary"
@@ -147,7 +147,7 @@ export default function AddBookCard({ index }: Props) {
 	}
 
 	return (
-		<Card className="flex w-full flex-col gap-4 p-4">
+		<Card className="gap-4 p-4 flex w-full flex-col">
 			{renderBookPickerOption()}
 			{!isEntityBook && !isDefiningExternalBook && <LeftAlignedDivider text="OR" />}
 			{renderExternalBookOption()}
@@ -162,7 +162,7 @@ export default function AddBookCard({ index }: Props) {
 				</Text>
 			</div>
 
-			<div className="flex w-full flex-col items-start gap-x-4 gap-y-4 md:flex-row md:gap-y-0">
+			<div className="gap-x-4 gap-y-4 md:flex-row md:gap-y-0 flex w-full flex-col items-start">
 				<DatePicker
 					label="Start date"
 					minDate={new Date()}
@@ -181,7 +181,7 @@ export default function AddBookCard({ index }: Props) {
 
 const LeftAlignedDivider = ({ text }: { text: string }) => (
 	<div className="relative">
-		<div className="absolute inset-0 flex items-center" aria-hidden="true">
+		<div className="inset-0 absolute flex items-center" aria-hidden="true">
 			<div className="w-full border-t border-gray-75 dark:border-gray-800" />
 		</div>
 		<div className="relative flex justify-start">

@@ -7,14 +7,14 @@ type StepContainerProps = PropsWithChildren<{
 }>
 
 export const ReviewStepContainer = ({ label, description, children }: StepContainerProps) => (
-	<div className="grid grid-cols-7 justify-between space-y-4 md:space-y-0">
-		<div className="col-span-7 md:col-span-4">
+	<div className="space-y-4 md:space-y-0 grid grid-cols-7 justify-between">
+		<div className="md:col-span-4 col-span-7">
 			<Heading size="sm">{label}</Heading>
 			<Text size="sm" variant="muted" className="mt-1.5">
 				{description}
 			</Text>
 		</div>
 
-		<div className="col-span-7 flex flex-col space-y-2 md:col-span-3">{children}</div>
+		<div className="space-y-2 md:col-span-3 col-span-7 flex flex-col">{children}</div>
 	</div>
 )

@@ -27,7 +27,7 @@ export default function TextCell<Field extends string>({
 		const Component = isLong ? TextArea : Input
 		const extraProps = isLong ? {} : { size: 'sm' }
 		return (
-			<div className="group flex items-center gap-2">
+			<div className="group gap-2 flex items-center">
 				{/* @ts-expect-error: TS doesn't know I am doing this correctly lol */}
 				<Component
 					defaultValue={value || ''}

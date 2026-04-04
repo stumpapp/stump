@@ -1,3 +1,5 @@
+import { useShallow } from 'zustand/react/shallow'
+
 import { Card } from '~/components/ui'
 import { Picker } from '~/components/ui/picker/picker'
 import type { PickerOption } from '~/components/ui/picker/types'
@@ -10,10 +12,12 @@ const READING_DIRECTION_OPTIONS: PickerOption<ReadingDirection>[] = [
 ]
 
 export default function ReadingProgression() {
-	const store = useReaderStore((state) => ({
-		readingDirection: state.globalSettings.readingDirection ?? 'ltr',
-		setSettings: state.setGlobalSettings,
-	}))
+	const store = useReaderStore(
+		useShallow((state) => ({
+			readingDirection: state.globalSettings.readingDirection ?? 'ltr',
+			setSettings: state.setGlobalSettings,
+		})),
+	)
 
 	return (
 		<Card.Row label="Reading Direction">

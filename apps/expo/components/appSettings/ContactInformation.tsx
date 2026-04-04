@@ -1,17 +1,21 @@
 import { ArrowUpRight, Github, Mail } from 'lucide-react-native'
 import { Linking } from 'react-native'
 
+import { useTranslate } from '~/lib/hooks'
+
 import { Card, Icon, icons } from '../ui'
 import AppSettingsRow from './AppSettingsRow'
 
 const { Discord } = icons
 
 export default function ContactInformation() {
+	const { t } = useTranslate()
+
 	return (
 		<Card label="Contact">
 			<AppSettingsRow
 				icon={Mail}
-				title="Email"
+				title={t('settings.contactInfo.email')}
 				onPress={() => Linking.openURL('mailto:aaronleopold1221@gmail.com')}
 				isLink
 			>
@@ -21,7 +25,7 @@ export default function ContactInformation() {
 			<AppSettingsRow
 				// @ts-expect-error: It's fine
 				icon={Discord}
-				title="Discord"
+				title={t('settings.contactInfo.discord')}
 				isLink
 				onPress={() => Linking.openURL('https://discord.gg/63Ybb7J3as')}
 			>
@@ -30,7 +34,7 @@ export default function ContactInformation() {
 
 			<AppSettingsRow
 				icon={Github}
-				title="GitHub"
+				title={t('settings.contactInfo.github')}
 				isLink
 				onPress={() => Linking.openURL('https://github.com/stumpapp/stump/issues/new/choose')}
 			>

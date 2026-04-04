@@ -106,11 +106,11 @@ export default function EntityTable<Entity>({
 							return (
 								<th
 									key={header.id}
-									className="sticky !top-0 z-[2] h-10 bg-background pl-1.5 pr-1.5 shadow-sm first:pl-4 last:pr-4"
+									className="top-0! h-10 pl-1.5 pr-1.5 shadow-sm first:pl-4 last:pr-4 sticky z-2 bg-background"
 								>
 									<div
 										className={cn('flex items-center', {
-											'cursor-pointer select-none gap-x-2': isSortable,
+											'gap-x-2 cursor-pointer select-none': isSortable,
 										})}
 										onClick={header.column.getToggleSortingHandler()}
 										style={{

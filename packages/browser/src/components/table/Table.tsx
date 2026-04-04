@@ -145,10 +145,10 @@ export default function Table<T, V>({
 	const tableRows = table.getRowModel().rows
 
 	return (
-		<div className="flex flex-col space-y-2">
+		<div className="space-y-2 flex flex-col">
 			<div className="relative" ref={rootRef} data-overlayscrollbars-initialize>
 				<div
-					className={cn('divide block max-w-full overflow-y-hidden overflow-x-scroll', {
+					className={cn('divide block max-w-full overflow-x-scroll overflow-y-hidden', {
 						'scrollbar-hide': enableHideScrollbar,
 					})}
 					ref={viewportRef}
@@ -162,7 +162,7 @@ export default function Table<T, V>({
 											<th
 												key={header.id}
 												colSpan={header.colSpan}
-												className="bg-background-surface/50 py-2.5 first:pl-2.5"
+												className="py-2.5 first:pl-2.5 bg-background-surface/50"
 												style={{
 													...getCommonPinningStyles(header.column),
 												}}
@@ -176,7 +176,7 @@ export default function Table<T, V>({
 														width: header.getSize(),
 													}}
 												>
-													<Heading className="line-clamp-1 w-full text-sm font-medium">
+													<Heading className="text-sm font-medium line-clamp-1 w-full">
 														{flexRender(header.column.columnDef.header, header.getContext())}
 													</Heading>
 													{sortable && (
@@ -222,13 +222,9 @@ export default function Table<T, V>({
 				</div>
 			</div>
 
-			<div className="flex h-10 items-center justify-between border-t border-edge px-2">
-				<div className="flex items-center gap-4">
-					<Text
-						variant="muted"
-						className="hidden flex-shrink-0 items-center gap-1 md:flex"
-						size="sm"
-					>
+			<div className="h-10 px-2 flex items-center justify-between border-t border-edge">
+				<div className="gap-4 flex items-center">
+					<Text variant="muted" className="gap-1 md:flex hidden shrink-0 items-center" size="sm">
 						{tableRows.length > 0 ? (
 							<>
 								<span>

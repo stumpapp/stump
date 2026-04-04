@@ -1,48 +1,93 @@
+import { Callout } from 'nextra/components'
+
 # Theming
+
+Information about theming in Stump, including how to add new themes and fonts.
 
 ## Color palettes
 
-Stump supports code-based theming. This means that you can create your own themes by writing a few lines of code. This is done by creating a new, exported object that defines each required piece of the palette.
+Stump supports CSS-based theming using Tailwind v4's CSS custom properties. This means that you can create your own themes by defining CSS variables in the themes file. All themes are defined in a single CSS file using CSS custom properties.
 
-For example, the default dark theme for Stump can be found [here](https://github.com/stumpapp/stump/tree/nightly/packages/components/themes/dark.ts). For brevity, the entire theme won't be shown here, but let's say we wanted to make a new theme called "midnight" that is based on the dark theme, but with a darker background:
+### Adding a new theme
 
-```ts filename="themes/midnight.ts" copy
-export const midnight: StumpTheme = {
-	background: {
-		DEFAULT: '#000000',
-		// ... other background colors
-	},
-	// ... other theme definitions
+To add a new theme, you'll need to follow these steps:
+
+#### 1. Define the theme in CSS
+
+Add your theme to the [`packages/components/tailwind/themes.css`](https://github.com/stumpapp/stump/tree/nightly/packages/components/tailwind/themes.css) file. Each theme is defined as a CSS class with all the required color variables.
+
+For example, let's create a "midnight" theme that is based on the dark theme, but with a pure black background:
+
+```css filename="packages/components/tailwind/themes.css" copy
+.midnight {
+	/* MARK: backgrounds */
+	--color-background: #000000;
+	--color-background-inverse: #ffffff;
+
+	/* ... other theme colors ... */
 }
 ```
 
-Then we just need to include it in the exported `themes` object:
+You can copy an existing theme (like `.dark` or `.light`) as a starting point.
 
-```ts filename="themes/index.ts" copy
-export const themes = {
-	dark,
-	light,
-	// ... other themes
-	midnight, // <- our new theme
-}
-```
+#### 2. Add the theme to the theme selector
 
-Then we should add it to the main [`ThemeSelect` component](https://github.com/stumpapp/stump/tree/nightly/packages/browser/src/scenes/settings/app/preferences/ThemeSelect.tsx) so that it can be selected:
+Update the [`ThemeSelect` component](https://github.com/stumpapp/stump/tree/nightly/packages/browser/src/scenes/settings/app/preferences/ThemeSelect.tsx) to include your new theme in the dropdown:
 
-```tsx filename="scenes/settings/app/preferences/ThemeSelect.tsx" copy
+```tsx filename="packages/browser/src/scenes/settings/app/preferences/ThemeSelect.tsx" copy
 <NativeSelect
 	value={theme}
 	options={[
+		{ label: t(`${localeKey}.options.system`), value: 'system' },
 		{ label: t(`${localeKey}.options.light`), value: 'light' },
-		{ label: t(`${localeKey}.options.dark`), value: 'dark' },
-		{ label: t(`${localeKey}.options.bronze`), value: 'bronze' },
+		// ... existing themes ...
 		{ label: t(`${localeKey}.options.midnight`), value: 'midnight' }, // <- our new theme
 	]}
 	onChange={(e) => changeTheme(e.target.value)}
 />
 ```
 
-Note that the `label` is a translation key, so we should add it to the [`locales/en.json` file](https://github.com/stumpapp/stump/tree/nightly/packages/browser/src/i18n/locales/en.json), as well.
+#### 3. Add translation keys
+
+Add the theme name to the translation files. The main English locale file is at [`packages/i18n/src/locales/en-US.json`](https://github.com/stumpapp/stump/tree/nightly/packages/i18n/src/locales/en-US.json):
+
+```json filename="packages/i18n/src/locales/en-US.json" copy
+{
+	"settingsScene": {
+		"app/preferences": {
+			"sections": {
+				"themeSelect": {
+					"options": {
+						"system": "System",
+						"light": "Light",
+						"dark": "Dark",
+						// ... other themes ...
+						"midnight": "Midnight"
+					}
+				}
+			}
+		}
+	}
+}
+```
+
+#### 4. Update the dark themes list (if applicable)
+
+If your theme is a dark variant, add it to the `DARK_THEMES` array in [`packages/browser/src/hooks/useTheme.ts`](https://github.com/stumpapp/stump/tree/nightly/packages/browser/src/hooks/useTheme.ts):
+
+```ts filename="packages/browser/src/hooks/useTheme.ts" copy
+export const DARK_THEMES = ['dark', 'ocean', 'cosmic', 'pumpkin', 'autumn', 'midnight']
+```
+
+This ensures that the theme is recognized as a dark variant for proper UI adjustments.
+
+#### 5. Add gradient support (optional)
+
+If your theme supports gradient backgrounds, add it to the `THEMES_WITH_GRADIENTS` array in the same file:
+
+```ts filename="packages/browser/src/hooks/useTheme.ts" copy
+export const THEMES_WITH_GRADIENTS = ['cosmic', 'midnight']
+```
 
 ## Fonts
 
@@ -51,50 +96,62 @@ Stump has a limited number of fonts built-in:
 - [Inter](https://rsms.me/inter/)
 - [OpenDyslexic](https://opendyslexic.org/)
 - [Atkinson Hyperlegible](https://brailleinstitute.org/freefont)
+- [Bitter](https://fonts.google.com/specimen/Bitter)
+- [Charis](https://software.sil.org/charis/)
+- [Literata](https://fonts.google.com/specimen/Literata)
+- [Libre Baskerville](https://fonts.google.com/specimen/Libre+Baskerville)
+- [Nunito](https://fonts.google.com/specimen/Nunito)
+- [Hina Mincho](https://fonts.google.com/specimen/Hina+Mincho)
 
-If you would like a new font, it will have to be added to the project manually. This can be done by appropriately defining the font in CSS, such as:
+### Adding a new font
 
-```css filename="font/my-font.css" copy
+If you would like to add a new font, follow these steps:
+
+#### 1. Add the font files
+
+Place your font files in the [`packages/browser/public/assets/fonts`](https://github.com/stumpapp/stump/tree/main/packages/browser/public/assets/fonts) directory. Create a new folder for your font with a CSS file that defines the `@font-face` rules:
+
+```css filename="packages/browser/public/assets/fonts/my-font/my-font.css" copy
 @font-face {
 	font-family: 'My Font';
+	/* define accordingly, this is an example */
 	src: url('path/to/font.woff2') format('woff2');
 }
 ```
 
-You can see how this is done in the [fonts](https://github.com/stumpapp/stump/tree/main/packages/browser/public/assets/fonts) directory of the `browser` package.
+#### 2. Register the font in Tailwind CSS
 
-Once the font is defined, it can be added to the `fontFamily` object in the custom tailwind preset file:
+Add your font to the Tailwind preset at [`packages/components/tailwind/preset.css`](https://github.com/stumpapp/stump/tree/nightly/packages/components/tailwind/preset.css). In the `@theme` block, add your font family definition:
 
-```ts filename="tailwind/preset.ts" copy
-module.exports = {
-	// ... stuff here ...
-	theme: {
-		fontFamily: {
-			// ... other fonts
-			'myfont': ['My Font', 'sans'],
-		},
-	},
-	// ... other configurations
+```css filename="packages/components/tailwind/preset.css" copy
+@theme {
+	/* MARK: fonts */
+	--font-inter: 'Inter', ui-sans-serif, system-ui, sans-serif;
+	--font-opendyslexic: 'OpenDyslexic', ui-sans-serif, system-ui, sans-serif;
+	/* ... other fonts ... */
+	--font-myfont: 'My Font', ui-sans-serif, system-ui, sans-serif;
 }
 ```
 
-Then, the font can be used in the `FontSelect` component by adding it to `SUPPORTED_FONT_OPTIONS`:
+Also add your font to the safelist so Tailwind doesn't purge it:
 
-```tsx filename="scenes/settings/app/preferences/FontSelect.tsx" copy
-<ComboBox
-	value={app_font || 'inter'}
-	options={SUPPORTED_FONT_OPTIONS}
-	onChange={changeFont}
-	size="full"
-/>
+```css filename="packages/components/tailwind/preset.css" copy
+/* MARK: safelist fonts */
+@source inline(
+	'font-inter font-opendyslexic font-atkinsonhyperlegiblenext font-charis font-literata font-bitter font-librebaskerville font-nunito font-hinamincho font-myfont'
+);
+```
 
-// ... skipping to the bottom ...
+#### 3. Add the font to the FontSelect component
 
+Add your font to the `SUPPORTED_FONT_OPTIONS` in the [`FontSelect` component](https://github.com/stumpapp/stump/tree/nightly/packages/browser/src/scenes/settings/app/preferences/FontSelect.tsx):
+
+```tsx filename="packages/browser/src/scenes/settings/app/preferences/FontSelect.tsx" copy
 export const SUPPORTED_FONT_OPTIONS = [
 	{
 		label: 'Atkinson Hyperlegible',
-		value: 'atkinsonhyperlegible',
-		fontClassName: 'font-atkinsonhyperlegible',
+		value: 'atkinsonhyperlegiblenext',
+		fontClassName: 'font-atkinsonhyperlegiblenext',
 	},
 	{
 		label: 'Bitter',
@@ -110,7 +167,7 @@ export const SUPPORTED_FONT_OPTIONS = [
 ]
 ```
 
-This will allow users to select the new font from the settings page. In the future, it is planned to allow for the mapping of local fonts so that users can use their own fonts without needing to modify the source code. See the [Future plans](#future-plans) section for more information.
+This will allow users to select the new font from the settings page.
 
 ### Restrictions
 
@@ -124,6 +181,7 @@ There are some restrictions for which fonts can be added:
 
 ## Future plans
 
-In the future, it is planned to support arbitrary, local CSS files for overriding Stump's default theme(s). This will allow for the same level of customization but without the need for a full release cycle or the need to share your coveted theme with the world.
-
-You can track the progress of this feature [here](https://github.com/stumpapp/stump/issues/383).
+<Callout type="info">
+	Support for arbitrary, local CSS files to override Stump's default themes is planned. You can
+	track the progress of this feature in [issue #383](https://github.com/stumpapp/stump/issues/383).
+</Callout>

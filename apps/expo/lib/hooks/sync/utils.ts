@@ -10,8 +10,10 @@ import { getInstancesForServers } from '../../sdk/auth'
 export function useServerInstances() {
 	const { savedServers, getServerConfig, saveServerToken, getServerToken } = useSavedServers()
 
+	const cachedInstances = useCacheStore((state) => state.sdks)
 	const onCacheInstance = useCacheStore((state) => state.addSDK)
-	const getCachedInstance = useCacheStore((state) => (id: string) => state.sdks[id])
+
+	const getCachedInstance = useCallback((id: string) => cachedInstances[id], [cachedInstances])
 
 	const getFullServer = useCallback(
 		async (serverId: string) => {

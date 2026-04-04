@@ -11,6 +11,7 @@ import {
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Helmet } from 'react-helmet'
+import { useShallow } from 'zustand/react/shallow'
 
 import { DynamicCardGrid, GridSizeSlider } from '@/components/container'
 import {
@@ -263,12 +264,15 @@ export default function LibrarySeriesScene() {
 	)
 	const layoutKey = `library-${id}-series`
 
-	const { layoutMode, setLayout, columns, setColumns } = useSeriesLayout(layoutKey, (state) => ({
-		columns: state.columns,
-		layoutMode: state.layout,
-		setColumns: state.setColumns,
-		setLayout: state.setLayout,
-	}))
+	const { layoutMode, setLayout, columns, setColumns } = useSeriesLayout(
+		layoutKey,
+		useShallow((state) => ({
+			columns: state.columns,
+			layoutMode: state.layout,
+			setColumns: state.setColumns,
+			setLayout: state.setLayout,
+		})),
+	)
 
 	const { sdk } = useSDK()
 	const { data, isLoading } = useGraphQL(
@@ -335,7 +339,7 @@ export default function LibrarySeriesScene() {
 						})
 					}}
 				>
-					<div className="flex flex-1 px-4 pt-4">
+					<div className="px-4 pt-4 flex flex-1">
 						{!!nodes.length && (
 							<DynamicCardGrid
 								count={nodes.length}
@@ -408,7 +412,7 @@ export default function LibrarySeriesScene() {
 				...rest,
 			}}
 		>
-			<div className="flex flex-1 flex-col pb-4 md:pb-0">
+			<div className="pb-4 md:pb-0 flex flex-1 flex-col">
 				<Helmet>
 					<title>Stump | {name}</title>
 				</Helmet>

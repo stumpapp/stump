@@ -227,7 +227,7 @@ function SideBarControl({ onClick, position }: SideBarControlProps) {
 		<div
 			className={cn(
 				'absolute z-50 h-full w-[15%] border border-transparent transition-all duration-300',
-				'active:border-edge-subtle active:bg-background-surface active:bg-opacity-50',
+				'active:border-edge-subtle active:bg-background-surface/50',
 				{ 'right-0': position === 'right' },
 				{ 'left-0': position === 'left' },
 			)}

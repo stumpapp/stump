@@ -65,9 +65,9 @@ const StackedSeriesCard = memo(function StackedSeriesCard({ data }: Props) {
 		>
 			{width != null && <SeriesStackedThumbnails width={width} thumbnailData={thumbnailData} />}
 
-			<div className="absolute left-0 top-0 z-20 w-full px-2.5 py-3">
+			<div className="left-0 top-0 px-2.5 py-3 absolute z-20 w-full">
 				<Text
-					className="line-clamp-2 !text-wrap text-base font-bold leading-tight text-white md:text-lg"
+					className="text-base font-bold leading-tight text-white md:text-lg line-clamp-2 text-wrap!"
 					style={{
 						textShadow: '2px 1px 2px rgba(0, 0, 0, 0.5)',
 					}}
@@ -75,7 +75,7 @@ const StackedSeriesCard = memo(function StackedSeriesCard({ data }: Props) {
 					{data.resolvedName}
 				</Text>
 				<Text
-					className="mt-0.5 line-clamp-1 text-xs font-medium leading-tight text-gray-200 md:text-sm"
+					className="mt-0.5 text-xs font-medium leading-tight md:text-sm line-clamp-1 text-gray-200"
 					style={{
 						textShadow: '2px 1px 2px rgba(0, 0, 0, 0.5)',
 					}}

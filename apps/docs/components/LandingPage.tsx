@@ -12,11 +12,11 @@ export default function LandingPage() {
 
 	// I hate this hack, but there is a hydration issue with the image where it uses the wrong source
 	if (!mounted) {
-		return <div className="mx-auto h-screen max-w-7xl px-6 py-10 lg:flex lg:px-8 lg:py-20" />
+		return <div className="max-w-7xl px-6 py-10 lg:flex lg:px-8 lg:py-20 mx-auto h-screen" />
 	}
 
 	return (
-		<div className="flex h-full w-full flex-col items-center gap-y-12 overflow-x-hidden">
+		<div className="gap-y-12 flex h-full w-full flex-col items-center overflow-x-hidden">
 			<Hero />
 			<MobileApp />
 			<Feedback />

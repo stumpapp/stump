@@ -1,5 +1,6 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useShallow } from 'zustand/react/shallow'
 
 import { IS_IOS_24_PLUS, useColors } from '~/lib/constants'
 import { useColorScheme } from '~/lib/useColorScheme'
@@ -9,10 +10,12 @@ import { CustomizeTheme } from './controls/customTheme'
 
 export default function CustomizeThemeSheet() {
 	const sheetRef = useEpubSheetStore((state) => state.customizeThemeSheetRef)
-	const { mode, name } = useEpubSheetStore((state) => ({
-		mode: state.customizeThemeMode,
-		name: state.customizeThemeName,
-	}))
+	const { mode, name } = useEpubSheetStore(
+		useShallow((state) => ({
+			mode: state.customizeThemeMode,
+			name: state.customizeThemeName,
+		})),
+	)
 	const closeSheet = useEpubSheetStore((state) => state.closeSheet)
 
 	const { colorScheme } = useColorScheme()

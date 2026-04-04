@@ -25,7 +25,7 @@ const HoverCardContent = React.forwardRef<
 		align={align}
 		sideOffset={sideOffset}
 		className={cn(
-			'z-50 w-64 rounded-md border border-edge bg-background-overlay p-4 shadow-md outline-none animate-in zoom-in-90',
+			'w-64 rounded-md p-4 shadow-md z-50 animate-in border border-edge bg-background-overlay outline-none zoom-in-90',
 			className,
 		)}
 		{...props}

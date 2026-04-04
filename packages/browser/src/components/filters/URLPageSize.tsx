@@ -27,12 +27,12 @@ export default function URLPageSize() {
 	}, [pageSize])
 
 	return (
-		<form className="flex shrink-0 items-center space-x-2" onSubmit={handleInputSubmit}>
+		<form className="space-x-2 flex shrink-0 items-center" onSubmit={handleInputSubmit}>
 			<Input
 				type="number"
 				variant="activeGhost"
 				size="sm"
-				className="h-7 w-7 p-0 text-center text-xs [appearance:textfield] sm:h-6 sm:w-6 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+				className="h-7 w-7 p-0 text-xs sm:h-6 sm:w-6 [appearance:textfield] text-center [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
 				value={inputPageSize ?? ''}
 				onChange={handleInputChange}
 				min={1}

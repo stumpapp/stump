@@ -23,14 +23,14 @@ const ContextMenuPrimitiveSubTrigger = React.forwardRef<
 	<ContextMenu.SubTrigger
 		ref={ref}
 		className={cn(
-			'flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm font-medium outline-none focus:bg-gray-75 data-[state=open]:bg-gray-75 dark:focus:bg-gray-700 dark:data-[state=open]:bg-gray-700',
+			'rounded-sm px-2 py-1.5 text-sm font-medium flex cursor-default items-center outline-none select-none focus:bg-gray-75 data-[state=open]:bg-gray-75 dark:focus:bg-gray-700 dark:data-[state=open]:bg-gray-700',
 			inset && 'pl-8',
 			className,
 		)}
 		{...props}
 	>
 		{children}
-		<ChevronRight className="ml-auto h-4 w-4" />
+		<ChevronRight className="h-4 w-4 ml-auto" />
 	</ContextMenu.SubTrigger>
 ))
 ContextMenuPrimitiveSubTrigger.displayName = ContextMenu.SubTrigger.displayName
@@ -42,7 +42,7 @@ const ContextMenuPrimitiveSubContent = React.forwardRef<
 	<ContextMenu.SubContent
 		ref={ref}
 		className={cn(
-			'z-50 min-w-[8rem] overflow-hidden rounded-md border border-gray-100 bg-white p-1 shadow-md animate-in slide-in-from-left-1 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-150',
+			'min-w-32 rounded-md bg-white p-1 shadow-md z-50 animate-in overflow-hidden border border-gray-100 slide-in-from-left-1 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-150',
 			className,
 		)}
 		{...props}
@@ -58,7 +58,7 @@ const ContextMenuPrimitiveContent = React.forwardRef<
 		<ContextMenu.Content
 			ref={ref}
 			className={cn(
-				'z-50 min-w-[8rem] overflow-hidden rounded-md border border-gray-100 bg-white p-1 text-gray-800 shadow-md animate-in fade-in-80 dark:border-gray-800 dark:bg-gray-800 dark:text-gray-150',
+				'min-w-32 rounded-md bg-white p-1 shadow-md z-50 animate-in overflow-hidden border border-gray-100 text-gray-800 fade-in-80 dark:border-gray-800 dark:bg-gray-800 dark:text-gray-150',
 				className,
 			)}
 			{...props}
@@ -76,7 +76,7 @@ const ContextMenuPrimitiveItem = React.forwardRef<
 	<ContextMenu.Item
 		ref={ref}
 		className={cn(
-			'relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm font-medium outline-none focus:bg-gray-75 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:focus:bg-gray-700',
+			'rounded-sm px-2 py-1.5 text-sm font-medium relative flex cursor-default items-center outline-none select-none focus:bg-gray-75 data-disabled:pointer-events-none data-disabled:opacity-50 dark:focus:bg-gray-700',
 			inset && 'pl-8',
 			className,
 		)}
@@ -92,13 +92,13 @@ const ContextMenuPrimitiveCheckboxItem = React.forwardRef<
 	<ContextMenu.CheckboxItem
 		ref={ref}
 		className={cn(
-			'relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm font-medium outline-none focus:bg-gray-75 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:focus:bg-gray-700',
+			'rounded-sm py-1.5 pl-8 pr-2 text-sm font-medium relative flex cursor-default items-center outline-none select-none focus:bg-gray-75 data-disabled:pointer-events-none data-disabled:opacity-50 dark:focus:bg-gray-700',
 			className,
 		)}
 		checked={checked}
 		{...props}
 	>
-		<span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+		<span className="left-2 h-3.5 w-3.5 absolute flex items-center justify-center">
 			<ContextMenu.ItemIndicator>
 				<Check className="h-4 w-4" />
 			</ContextMenu.ItemIndicator>
@@ -115,12 +115,12 @@ const ContextMenuPrimitiveRadioItem = React.forwardRef<
 	<ContextMenu.RadioItem
 		ref={ref}
 		className={cn(
-			'relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm font-medium outline-none focus:bg-gray-75 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:focus:bg-gray-700',
+			'rounded-sm py-1.5 pl-8 pr-2 text-sm font-medium relative flex cursor-default items-center outline-none select-none focus:bg-gray-75 data-disabled:pointer-events-none data-disabled:opacity-50 dark:focus:bg-gray-700',
 			className,
 		)}
 		{...props}
 	>
-		<span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+		<span className="left-2 h-3.5 w-3.5 absolute flex items-center justify-center">
 			<ContextMenu.ItemIndicator>
 				<Circle className="h-2 w-2 fill-current" />
 			</ContextMenu.ItemIndicator>
@@ -165,7 +165,7 @@ const ContextMenuPrimitiveShortcut = ({
 	...props
 }: React.HTMLAttributes<HTMLSpanElement>) => {
 	return (
-		<span className={cn('ml-auto text-xs tracking-widest text-gray-600', className)} {...props} />
+		<span className={cn('text-xs tracking-widest ml-auto text-gray-600', className)} {...props} />
 	)
 }
 ContextMenuPrimitiveShortcut.displayName = 'ContextMenuPrimitiveShortcut'

@@ -70,7 +70,7 @@ export default function BadgeListCell<Field extends string>({
 						<Button
 							variant="danger"
 							size="icon"
-							className="absolute -right-2 -top-2 z-10 h-4 w-4 opacity-0 transition-opacity group-hover:opacity-100"
+							className="-right-2 -top-2 h-4 w-4 absolute z-10 opacity-0 transition-opacity group-hover:opacity-100"
 							aria-label="Remove item"
 							onClick={() => onRemove(index)}
 						>
@@ -100,7 +100,7 @@ export default function BadgeListCell<Field extends string>({
 	const data = isEditing ? valuesFromForm : values
 
 	return (
-		<div className="flex h-full flex-wrap items-center gap-1">
+		<div className="gap-1 flex h-full flex-wrap items-center">
 			{data?.map(renderBadge)}
 
 			{isEditing && <AddFieldsDialog binding={binding} onSave={onAppendValues} />}

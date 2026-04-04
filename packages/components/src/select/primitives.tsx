@@ -16,7 +16,7 @@ const SelectPrimitiveTrigger = React.forwardRef<
 	<SelectRadix.Trigger
 		ref={ref}
 		className={cn(
-			'focus:ring-background-400 flex h-10 w-full items-center justify-between rounded-md border border-edge bg-transparent px-3 py-2 text-sm placeholder:text-foreground-muted focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50',
+			'focus:ring-background-400 h-10 rounded-md px-3 py-2 text-sm flex w-full items-center justify-between border border-edge bg-transparent placeholder:text-foreground-muted focus:ring-2 focus:ring-offset-2 focus:ring-offset-background focus:outline-none disabled:cursor-not-allowed disabled:opacity-50',
 			className,
 		)}
 		{...props}
@@ -35,7 +35,7 @@ const SelectPrimitiveContent = React.forwardRef<
 		<SelectRadix.Content
 			ref={ref}
 			className={cn(
-				'relative z-50 min-w-[8rem] overflow-hidden rounded-md border border-edge bg-background text-foreground-subtle shadow-md animate-in fade-in-80',
+				'min-w-32 rounded-md shadow-md relative z-50 animate-in overflow-hidden border border-edge bg-background text-foreground-subtle fade-in-80',
 				className,
 			)}
 			{...props}
@@ -65,12 +65,12 @@ const SelectPrimitiveItem = React.forwardRef<
 	<SelectRadix.Item
 		ref={ref}
 		className={cn(
-			'relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm font-medium outline-none focus:bg-background-surface data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+			'rounded-sm py-1.5 pl-8 pr-2 text-sm font-medium relative flex cursor-default items-center outline-none select-none focus:bg-background-surface data-disabled:pointer-events-none data-disabled:opacity-50',
 			className,
 		)}
 		{...props}
 	>
-		<span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+		<span className="left-2 h-3.5 w-3.5 absolute flex items-center justify-center">
 			<SelectRadix.ItemIndicator>
 				<Check className="h-4 w-4" />
 			</SelectRadix.ItemIndicator>

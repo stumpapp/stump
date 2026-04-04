@@ -32,17 +32,17 @@ export default function BadgeList({ children, className, maxItems = 20 }: Props)
 					transition: 'height 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
 				}}
 			>
-				<div ref={containerRef} className={cn('flex flex-wrap gap-1', className)}>
+				<div ref={containerRef} className={cn('gap-1 flex flex-wrap', className)}>
 					{visible}
 				</div>
 			</div>
 
 			{overflows && (
-				<div className="relative mt-1.5 flex w-full items-center">
+				<div className="mt-1.5 relative flex w-full items-center">
 					<div className="flex-1 border-t border-dashed border-edge" />
 					<button
 						onClick={toggle}
-						className="cursor-pointer rounded-full border border-dashed border-edge bg-background px-3 py-0.5 text-xs font-medium text-foreground-muted transition-colors hover:bg-background-surface hover:text-foreground"
+						className="px-3 py-0.5 text-xs font-medium cursor-pointer rounded-full border border-dashed border-edge bg-background text-foreground-muted transition-colors hover:bg-background-surface hover:text-foreground"
 					>
 						{expanded ? 'See less' : `See ${items.length - maxItems} more`}
 					</button>

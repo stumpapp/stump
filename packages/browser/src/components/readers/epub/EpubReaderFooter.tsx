@@ -51,7 +51,7 @@ export default function EpubReaderFooter() {
 	return (
 		<div>
 			<ControlsContainer position="bottom" className="h-[33px]">
-				<div className="z-50 flex flex-1 flex-col gap-y-1">
+				<div className="gap-y-1 z-50 flex flex-1 flex-col">
 					<div>
 						<Text size="xs" variant="muted">
 							{chapterName} ({virtualPage}/{virtualPageCount})
@@ -68,7 +68,7 @@ export default function EpubReaderFooter() {
 							>
 								{index === currentSectionIndex && (
 									<div
-										className="absolute top-0 h-full w-[2px] bg-foreground-muted"
+										className="top-0 absolute h-full w-[2px] bg-foreground-muted"
 										style={{ left: `${chapterProgress}%` }}
 									/>
 								)}

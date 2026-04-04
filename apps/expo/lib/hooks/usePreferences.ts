@@ -1,14 +1,17 @@
 import { useUpdatePreferences } from '@stump/client'
 import { UpdateUserPreferences, UserPreferences } from '@stump/sdk'
 import { useCallback } from 'react'
+import { useShallow } from 'zustand/react/shallow'
 
 import { useUserStore } from '~/stores'
 
 export function usePreferences() {
-	const { preferences, setPreferences } = useUserStore((state) => ({
-		preferences: state.userPreferences,
-		setPreferences: state.setUserPreferences,
-	}))
+	const { preferences, setPreferences } = useUserStore(
+		useShallow((state) => ({
+			preferences: state.userPreferences,
+			setPreferences: state.setUserPreferences,
+		})),
+	)
 
 	const { update: mutate } = useUpdatePreferences({
 		onSuccess: setPreferences,

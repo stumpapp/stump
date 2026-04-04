@@ -81,9 +81,15 @@ runs:
         sudo apt-get install -y podman buildah
       shell: bash
 
-    - name: Remove existing images
+    - name: Remove existing images and manifests
       run: |
-        podman rmi ${{ env.LOCAL_IMAGES }} || true
+        podman images --format "{{.Repository}}:{{.Tag}}" \
+          | grep "^localhost/stump:" \
+          | xargs -r podman rmi --force 2>/dev/null || true
+
+        for tag in ${{ env.FORMATTED_TAGS }}; do
+          buildah manifest rm "stump:$tag" 2>/dev/null || true
+        done
       shell: bash
 
     - name: Run buildah build

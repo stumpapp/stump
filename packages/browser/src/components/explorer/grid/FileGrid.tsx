@@ -18,7 +18,7 @@ export default function FileGrid() {
 	}
 
 	return (
-		<div className="flex h-full w-full flex-1 flex-grow">
+		<div className="flex h-full w-full flex-1 grow">
 			<AutoSizer>
 				{({ height, width }) => (
 					<VirtuosoGrid

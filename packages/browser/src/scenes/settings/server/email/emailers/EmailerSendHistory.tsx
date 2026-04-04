@@ -119,7 +119,7 @@ export default function EmailerSendHistory({ emailerId, lastUsedAt }: Props) {
 			{/* TODO: clear the history option */}
 			<Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)} onOpenChange={setDrawerOpen}>
 				<Drawer.Content>
-					<div className="mx-auto w-full max-w-2xl">
+					<div className="max-w-2xl mx-auto w-full">
 						<Drawer.Header>
 							<Drawer.Title>{t(getLocaleKey('heading'))}</Drawer.Title>
 						</Drawer.Header>

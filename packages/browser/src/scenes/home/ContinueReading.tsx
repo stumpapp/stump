@@ -127,10 +127,10 @@ function ContinueReading() {
 
 	if (!nodes.length) {
 		return (
-			<div className="flex flex-col space-y-2">
+			<div className="space-y-2 flex flex-col">
 				<Heading size="sm">{t('homeScene.continueReading.title')}</Heading>
-				<div className="flex items-start justify-start space-x-3 rounded-lg border border-dashed border-edge-subtle px-4 py-4">
-					<span className="rounded-lg border border-edge bg-background-surface p-2">
+				<div className="space-x-3 rounded-lg px-4 py-4 flex items-start justify-start border border-dashed border-edge-subtle">
+					<span className="rounded-lg p-2 border border-edge bg-background-surface">
 						<BookMarked className="h-8 w-8 text-foreground-muted" />
 					</span>
 					<div>
@@ -208,7 +208,7 @@ const ContinueReadingCard = memo(function ContinueReadingCard({
 	return (
 		<Link
 			to={paths.bookOverview(data.id)}
-			className="group relative block flex-shrink-0 overflow-hidden rounded-xl transition-opacity hover:opacity-90"
+			className="group rounded-xl relative block shrink-0 overflow-hidden transition-opacity hover:opacity-90"
 			style={{ width }}
 		>
 			<ThumbnailImage
@@ -224,9 +224,9 @@ const ContinueReadingCard = memo(function ContinueReadingCard({
 				}}
 			/>
 
-			<div className="pointer-events-none absolute bottom-0 left-0 right-0 z-30 flex flex-col gap-2 p-2.5">
+			<div className="bottom-0 left-0 right-0 gap-2 p-2.5 pointer-events-none absolute z-30 flex flex-col">
 				<Text
-					className="line-clamp-2 !text-wrap text-sm font-semibold leading-tight text-white md:text-base"
+					className="text-sm font-semibold leading-tight text-white md:text-base line-clamp-2 text-wrap!"
 					style={{
 						textShadow: '1px 1px 2px rgba(0, 0, 0, 0.5)',
 					}}
@@ -234,7 +234,7 @@ const ContinueReadingCard = memo(function ContinueReadingCard({
 					{data.resolvedName}
 				</Text>
 
-				<div className="flex items-center justify-between gap-2">
+				<div className="gap-2 flex items-center justify-between">
 					{!isEbookProgress && !!data.readProgress?.page && data.readProgress.page > 0 && (
 						<Text size="xs" className="text-gray-200 opacity-90">
 							{pagesLeft} {pagesLeft === 1 ? 'page' : 'pages'} left
@@ -260,7 +260,7 @@ const ContinueReadingCard = memo(function ContinueReadingCard({
 						max={100}
 						size="sm"
 						className="h-1 rounded-full bg-[#898d94]"
-						indicatorClassName="bg-[#f5f3ef]"
+						indicatorClassName="bg-foreground"
 					/>
 				)}
 			</div>

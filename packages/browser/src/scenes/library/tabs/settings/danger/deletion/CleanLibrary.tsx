@@ -89,7 +89,7 @@ export default function CleanLibrary() {
 	}
 
 	return (
-		<div className="flex flex-col space-y-4">
+		<div className="space-y-4 flex flex-col">
 			<div className="flex items-end justify-between">
 				<div>
 					<Heading size="sm">{t(getKey('heading'))}</Heading>

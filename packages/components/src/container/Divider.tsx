@@ -23,7 +23,7 @@ const Divider = forwardRef<ElementRef<typeof SeparatorPrimitive.Root>, DividerPr
 			orientation={orientation}
 			className={cn(
 				DIVIDER_VARIANTS[variant || 'default'] || DIVIDER_VARIANTS.default,
-				orientation === 'horizontal' ? 'h-[1px] w-full' : 'h-full w-[1px]',
+				orientation === 'horizontal' ? 'h-px w-full' : 'h-full w-px',
 				className,
 			)}
 			{...props}

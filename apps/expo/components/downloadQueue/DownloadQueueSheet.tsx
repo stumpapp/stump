@@ -5,7 +5,7 @@ import { Platform, ScrollView, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { useColors } from '~/lib/constants'
-import { useDownloadQueue } from '~/lib/hooks'
+import { useDownloadQueue, useTranslate } from '~/lib/hooks'
 
 import Owl from '../Owl'
 import { Card, Tabs } from '../ui'
@@ -26,6 +26,7 @@ export const DownloadQueueSheet = forwardRef<TrueSheet, Props>(function Download
 
 	const [tab, setTab] = useState<'HEALTHY' | 'FAILED'>('HEALTHY')
 
+	const { t } = useTranslate()
 	const { pendingItems, activeItems, failedItems, cancel, retry, dismiss } = useDownloadQueue()
 
 	const activeAndPendingItems = [...activeItems, ...pendingItems]
@@ -79,7 +80,7 @@ export const DownloadQueueSheet = forwardRef<TrueSheet, Props>(function Download
 			insetAdjustment="automatic"
 			header={
 				<View className="gap-4 px-6 pt-8">
-					<View className="w-full pb-2">
+					<View className="pb-2 w-full">
 						{Platform.select({
 							ios: (
 								<View className="w-full">
@@ -99,11 +100,11 @@ export const DownloadQueueSheet = forwardRef<TrueSheet, Props>(function Download
 								<Tabs value={tab} onValueChange={(value) => setTab(value as 'HEALTHY' | 'FAILED')}>
 									<Tabs.List className="flex-row">
 										<Tabs.Trigger value="HEALTHY">
-											<Text>Downloading</Text>
+											<Text>{t('downloadQueue.downloading')}</Text>
 										</Tabs.Trigger>
 
 										<Tabs.Trigger value="FAILED">
-											<Text>Failed</Text>
+											<Text>{t('downloadQueue.failed')}</Text>
 										</Tabs.Trigger>
 									</Tabs.List>
 								</Tabs>
@@ -113,12 +114,14 @@ export const DownloadQueueSheet = forwardRef<TrueSheet, Props>(function Download
 				</View>
 			}
 		>
-			<ScrollView className="flex-1 p-6" nestedScrollEnabled>
+			<ScrollView className="p-6 flex-1" nestedScrollEnabled>
 				<View className="gap-y-6">
 					{isTotalEmptyState && (
-						<View className="items-center justify-center gap-4 py-8">
+						<View className="gap-4 py-8 items-center justify-center">
 							<Owl owl="empty" />
-							<Text className="text-lg text-foreground-muted">Nothing is being downloaded</Text>
+							<Text className="text-lg text-foreground-muted">
+								{t('downloadQueue.nothingDownloading')}
+							</Text>
 						</View>
 					)}
 
@@ -131,9 +134,11 @@ export const DownloadQueueSheet = forwardRef<TrueSheet, Props>(function Download
 					)}
 
 					{activeAndPendingItems.length === 0 && tab === 'HEALTHY' && !isTotalEmptyState && (
-						<View className="items-center justify-center gap-4 py-8">
+						<View className="gap-4 py-8 items-center justify-center">
 							<Owl owl="empty" />
-							<Text className="text-lg text-foreground-muted">No active downloads</Text>
+							<Text className="text-lg text-foreground-muted">
+								{t('downloadQueue.noActiveDownloads')}
+							</Text>
 						</View>
 					)}
 
@@ -146,9 +151,11 @@ export const DownloadQueueSheet = forwardRef<TrueSheet, Props>(function Download
 					)}
 
 					{failedItems.length === 0 && tab === 'FAILED' && !isTotalEmptyState && (
-						<View className="items-center justify-center gap-4 py-8">
+						<View className="gap-4 py-8 items-center justify-center">
 							<Owl owl="empty" />
-							<Text className="text-lg text-foreground-muted">No failed downloads</Text>
+							<Text className="text-lg text-foreground-muted">
+								{t('downloadQueue.noFailedDownloads')}
+							</Text>
 						</View>
 					)}
 				</View>

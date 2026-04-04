@@ -1,5 +1,6 @@
 import { Input } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
+import { useShallow } from 'zustand/react/shallow'
 
 import { useReaderStore } from '@/stores'
 
@@ -11,10 +12,12 @@ export default function PreloadPagesSection() {
 			preload: { ahead, behind },
 		},
 		setSettings,
-	} = useReaderStore((state) => ({
-		setSettings: state.setSettings,
-		settings: state.settings,
-	}))
+	} = useReaderStore(
+		useShallow((state) => ({
+			setSettings: state.setSettings,
+			settings: state.settings,
+		})),
+	)
 
 	const createChangeHandler =
 		(updater: (n: number) => void) => (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -32,7 +35,7 @@ export default function PreloadPagesSection() {
 
 	return (
 		<>
-			<div className="flex flex-col gap-y-1.5 md:max-w-md">
+			<div className="gap-y-1.5 md:max-w-md flex flex-col">
 				<Input
 					label={t(getKey('preloadAheadCount.label'))}
 					description={t(getKey('preloadAheadCount.description'))}
@@ -44,7 +47,7 @@ export default function PreloadPagesSection() {
 				/>
 			</div>
 
-			<div className="flex flex-col gap-y-1.5 md:max-w-md">
+			<div className="gap-y-1.5 md:max-w-md flex flex-col">
 				<Input
 					label={t(getKey('preloadBehindCount.label'))}
 					description={t(getKey('preloadBehindCount.description'))}

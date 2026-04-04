@@ -127,7 +127,7 @@ export default function IgnoreRulesConfig() {
 	}, [ctx, ignoreRules, t])
 
 	return (
-		<div className="flex max-w-2xl flex-grow flex-col gap-6">
+		<div className="max-w-2xl gap-6 flex grow flex-col">
 			<div className="flex items-center justify-between">
 				<div>
 					<Heading size="sm">{t(getKey('section.heading'))}</Heading>
@@ -140,12 +140,12 @@ export default function IgnoreRulesConfig() {
 			</div>
 
 			{!ignoreRules.length && (
-				<Card className="flex items-center justify-center border-dashed border-edge-subtle p-6">
-					<div className="flex flex-col space-y-3">
+				<Card className="p-6 flex items-center justify-center border-dashed border-edge-subtle">
+					<div className="space-y-3 flex flex-col">
 						<div className="relative flex justify-center">
-							<span className="flex items-center justify-center rounded-xl bg-background-surface p-2">
+							<span className="rounded-xl p-2 flex items-center justify-center bg-background-surface">
 								<SquareAsterisk className="h-6 w-6 text-foreground-muted" />
-								<Slash className="absolute h-6 w-6 scale-x-[-1] transform text-foreground opacity-80" />
+								<Slash className="h-6 w-6 absolute scale-x-[-1] transform text-foreground opacity-80" />
 							</span>
 						</div>
 
@@ -176,13 +176,13 @@ export default function IgnoreRulesConfig() {
 				{isEditing && (
 					<motion.div
 						// @ts-expect-error: It does have className actually?
-						className="flex flex-col space-y-4"
+						className="space-y-4 flex flex-col"
 						initial={{ height: 0, opacity: 0 }}
 						animate={{ height: 'auto', opacity: 1 }}
 						exit={{ height: 0, opacity: 0 }}
 						transition={{ duration: 0.15 }}
 					>
-						<div className="flex items-center space-x-4">
+						<div className="space-x-4 flex items-center">
 							<Input
 								className="font-mono"
 								label={t(getKey('addRule.label'))}
@@ -199,7 +199,7 @@ export default function IgnoreRulesConfig() {
 							</Button>
 						</div>
 
-						<div className="flex items-center space-x-4">
+						<div className="space-x-4 flex items-center">
 							<CheckBox
 								id="ignoreParents"
 								label={t(getKey('addRule.ignoreParents.label'))}
@@ -325,7 +325,7 @@ const ConfiguredIgnoreRule = ({ id, isReadOnly, onRemove, index }: ConfiguredIgn
 	}
 
 	return (
-		<div className="group flex flex-col space-y-4 px-3 py-1 even:bg-background-surface/50">
+		<div className="group space-y-4 px-3 py-1 flex flex-col even:bg-background-surface/50">
 			<div
 				className={cn('flex items-center justify-between', {
 					'items-center': isEditing,
@@ -334,7 +334,7 @@ const ConfiguredIgnoreRule = ({ id, isReadOnly, onRemove, index }: ConfiguredIgn
 				{renderGlob()}
 
 				<div
-					className={cn('transition-opacity-[opacity_0.3s] flex items-center space-x-2', {
+					className={cn('transition-opacity-[opacity_0.3s] space-x-2 flex items-center', {
 						'opacity-0 group-hover:opacity-100': !isEditing,
 					})}
 				>

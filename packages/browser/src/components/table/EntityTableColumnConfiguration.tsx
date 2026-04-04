@@ -276,7 +276,7 @@ export default function EntityTableColumnConfiguration({ entity, configuration, 
 			}
 			size={isMobile ? 'xl' : 'lg'}
 			footer={
-				<div className="-mt-4 flex w-full items-center gap-x-4 py-2">
+				<div className="-mt-4 gap-x-4 py-2 flex w-full items-center">
 					<Button className="w-full" onClick={handleSave}>
 						{t('common.save')}
 					</Button>
@@ -302,7 +302,7 @@ export default function EntityTableColumnConfiguration({ entity, configuration, 
 					onDragCancel={handleDragCancel}
 					onDragEnd={handleDragEnd}
 				>
-					<div className="grid grid-cols-1 gap-3 p-4 md:grid-cols-2">
+					<div className="gap-3 p-4 md:grid-cols-2 grid grid-cols-1">
 						<ColumnBucket
 							title="Visible"
 							containerId="visible-container"
@@ -368,7 +368,7 @@ function DraggableColumn({ column, moveToOtherList, buttonLabel }: DraggableColu
 			style={style}
 			{...attributes}
 			{...listeners}
-			className={`flex shrink-0 items-center justify-between rounded-md border border-edge bg-background-surface px-2 py-1 ${
+			className={`rounded-md px-2 py-1 flex shrink-0 items-center justify-between border border-edge bg-background-surface ${
 				isDragging ? 'opacity-40' : ''
 			}`}
 		>
@@ -382,7 +382,7 @@ function DraggableColumn({ column, moveToOtherList, buttonLabel }: DraggableColu
 
 function ColumnOverlay({ column }: { column: ReturnType<typeof resolveConfiguration>[number] }) {
 	return (
-		<div className="flex min-w-40 items-center justify-between rounded-md border border-edge bg-background-surface px-2 py-1 shadow-sm">
+		<div className="min-w-40 rounded-md px-2 py-1 shadow-sm flex items-center justify-between border border-edge bg-background-surface">
 			<Text size="sm">{column.label}</Text>
 		</div>
 	)
@@ -407,7 +407,7 @@ function ColumnBucket({
 	const moveLabel = title === 'Visible' ? 'Move to hidden' : 'Move to visible'
 
 	return (
-		<div ref={setNodeRef} className="rounded-md border border-edge bg-background p-3">
+		<div ref={setNodeRef} className="rounded-md p-3 border border-edge bg-background">
 			<div className="mb-2 flex items-center justify-between">
 				<Text size="sm" variant="secondary">
 					{title}
@@ -418,7 +418,7 @@ function ColumnBucket({
 			</div>
 
 			<SortableContext items={identifiers} strategy={rectSortingStrategy}>
-				<div className="flex min-h-20 flex-col gap-2">
+				<div className="min-h-20 gap-2 flex flex-col">
 					{items.map((column) => (
 						<DraggableColumn
 							column={column}
@@ -428,7 +428,7 @@ function ColumnBucket({
 						/>
 					))}
 					{items.length === 0 && (
-						<div className="flex min-h-10 items-center justify-center rounded border border-dashed border-edge px-2 py-3">
+						<div className="min-h-10 rounded px-2 py-3 flex items-center justify-center border border-dashed border-edge">
 							<Text size="xs" variant="muted">
 								Drop columns here
 							</Text>

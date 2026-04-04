@@ -32,7 +32,7 @@
 		"@tauri-apps/plugin-store": "^2.0.0",
 		"ansi-to-react": "^6.2.6",
 		"class-variance-authority": "^0.7.0",
-		"clsx": "^2.1.0",
+		"clsx": "^2.1.1",
 		"colorjs.io": "^0.5.2",
 		"epubjs": "^0.3.93",
 		"framer-motion": "^10.18.0",
@@ -79,7 +79,7 @@
 		"url-join": "^5.0.0",
 		"use-count-up": "^3.0.1",
 		"zod": "^3.23.8",
-		"zustand": "^4.5.2"
+		"zustand": "^5.0.12"
 	},
 	"devDependencies": {
 		"@babel/preset-env": "^7.25.4",

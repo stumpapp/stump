@@ -60,7 +60,7 @@ export default function DeleteLibraryThumbnails() {
 				<Button
 					variant="danger"
 					onClick={() => setShowConfirmation(true)}
-					className="flex-shrink-0"
+					className="shrink-0"
 					disabled={isPending || !!data}
 					size="md"
 				>

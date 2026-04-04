@@ -38,7 +38,7 @@ export default function MarkdownEditor({ initialState = 'writing', initialConten
 			return (
 				<textarea
 					ref={editorRef}
-					className="w-full bg-transparent px-1 py-2 text-foreground-subtle focus:outline-none"
+					className="px-1 py-2 w-full bg-transparent text-foreground-subtle focus:outline-none"
 					value={content}
 					onChange={(e) => setContent(e.target.value)}
 					rows={4}
@@ -67,7 +67,7 @@ export default function MarkdownEditor({ initialState = 'writing', initialConten
 					</Tabs.List>
 				</Tabs>
 
-				<div className="flex items-center gap-x-1.5 pr-1">
+				<div className="gap-x-1.5 pr-1 flex items-center">
 					<ToolTip content="Add spoiler" isDisabled={writingState === 'preview'}>
 						<IconButton
 							size="xs"

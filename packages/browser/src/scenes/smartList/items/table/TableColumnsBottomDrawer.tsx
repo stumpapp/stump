@@ -189,19 +189,19 @@ export default function TableColumnsBottomDrawer() {
 				</Drawer.Trigger>
 			</ToolTip>
 			<Drawer.Content>
-				<div className="mx-auto w-full max-w-2xl">
+				<div className="max-w-2xl mx-auto w-full">
 					<Drawer.Header>
 						<Drawer.Title>Table configuration</Drawer.Title>
 						<Drawer.Description>Choose which columns to display or hide</Drawer.Description>
 					</Drawer.Header>
-					<div className="flex flex-col gap-y-6 p-4 pb-0">
+					<div className="gap-y-6 p-4 pb-0 flex flex-col">
 						{isGrouped && (
 							<div>
 								<Label>Group columns</Label>
 								<Text size="sm" variant="muted">
 									This only affects the parent table by which books are grouped
 								</Text>
-								<div className="mt-3 grid grid-cols-5 gap-x-2 gap-y-4">
+								<div className="mt-3 gap-x-2 gap-y-4 grid grid-cols-5">
 									{groupColumnOptions.map(({ label, value, isSelected }) => (
 										<CheckBox
 											id={value}
@@ -221,7 +221,7 @@ export default function TableColumnsBottomDrawer() {
 							<Text size="sm" variant="muted">
 								This only affects the nested book table(s)
 							</Text>
-							<div className="mt-3 grid grid-cols-5 gap-x-2 gap-y-4">
+							<div className="mt-3 gap-x-2 gap-y-4 grid grid-cols-5">
 								{bookColumnOptions.map(({ label, value, isSelected }) => (
 									<CheckBox
 										id={value}
@@ -236,7 +236,7 @@ export default function TableColumnsBottomDrawer() {
 						</div>
 
 						<div className="flex items-center justify-between">
-							<div className="flex flex-grow flex-col gap-2 text-left">
+							<div className="gap-2 flex grow flex-col text-left">
 								<Label htmlFor="enable_multi_sort">Enable multi-sort</Label>
 								<Text size="sm" variant="muted">
 									Sorting by a column removes the previous sort. This setting allows combining them,

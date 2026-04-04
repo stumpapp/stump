@@ -35,7 +35,7 @@ export default function Breadcrumbs({
 
 				return (
 					<React.Fragment key={segment.label}>
-						{i > 0 && <span className="mx-1.5 text-foreground-muted md:mx-2">/</span>}
+						{i > 0 && <span className="mx-1.5 md:mx-2 text-foreground-muted">/</span>}
 						<Component
 							className={cx('line-clamp-1', { 'shrink-0': segment.noShrink })}
 							{...(segment.to ? { to: segment.to } : {})}

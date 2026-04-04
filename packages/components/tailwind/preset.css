@@ -1,0 +1,129 @@
+@import './themes.css';
+@import 'tw-animate-css';
+
+@plugin '@tailwindcss/typography';
+
+@source '../src/**/*.{ts,tsx,js,jsx}';
+@source '../../browser/src/**/*.{ts,tsx,js,jsx}';
+
+/* MARK: safelist fonts */
+@source inline(
+	'font-inter font-opendyslexic font-atkinsonhyperlegiblenext font-charis font-literata font-bitter font-librebaskerville font-nunito font-hinamincho'
+);
+
+@theme {
+	/* MARK: brand colors */
+	--color-brand-50: #f4e8e0;
+	--color-brand-100: #efddd1;
+	--color-brand-200: #e4c6b3;
+	--color-brand-300: #d9af95;
+	--color-brand-400: #cf9977;
+	--color-brand-500: #c48259;
+	--color-brand-600: #a9663c;
+	--color-brand-700: #7f4d2d;
+	--color-brand-800: #56341f;
+	--color-brand-900: #2d1b10;
+
+	/* MARK: gray colors */
+	--color-gray-50: #f6f6f7;
+	--color-gray-75: #e9eaeb;
+	--color-gray-100: #d3d5d7;
+	--color-gray-150: #c8cacd;
+	--color-gray-200: #bec0c4;
+	--color-gray-250: #b2b5b9;
+	--color-gray-300: #a8acb0;
+	--color-gray-350: #9da1a6;
+	--color-gray-400: #93979d;
+	--color-gray-450: #898d94;
+	--color-gray-500: #7d828a;
+	--color-gray-550: #71757d;
+	--color-gray-600: #62666d;
+	--color-gray-650: #565a5f;
+	--color-gray-700: #484b4f;
+	--color-gray-750: #3c3e42;
+	--color-gray-800: #2d2f32;
+	--color-gray-850: #252729;
+	--color-gray-900: #202224;
+	--color-gray-950: #1b1c1e;
+	--color-gray-975: #161719;
+	--color-gray-1000: #101112;
+
+	/* MARK: fonts */
+	--font-inter: 'Inter', ui-sans-serif, system-ui, sans-serif;
+	--font-opendyslexic: 'OpenDyslexic', ui-sans-serif, system-ui, sans-serif;
+	--font-atkinsonhyperlegiblenext:
+		'Atkinson Hyperlegible Next', ui-sans-serif, system-ui, sans-serif;
+	--font-charis: 'Charis', ui-serif, Georgia, serif;
+	--font-literata: 'Literata', ui-serif, Georgia, serif;
+	--font-bitter: 'Bitter', ui-serif, Georgia, serif;
+	--font-librebaskerville: 'Libre Baskerville', ui-serif, Georgia, serif;
+	--font-nunito: 'Nunito', ui-sans-serif, system-ui, sans-serif;
+	--font-hinamincho: 'Hina Mincho', ui-serif, Georgia, serif;
+
+	/* MARK: custom sizes */
+	--text-xxs: 0.65rem;
+	--origin-left-to-right-indeterminate: 0% 50%;
+
+	/* MARK: custom breakpoints */
+	--breakpoint-tablet: 640px;
+	--breakpoint-3xl: 1600px;
+	--breakpoint-4xl: 1920px;
+
+	/* TODO: This makes it v3 compatible but maybe kill it */
+	--default-ring-color: var(--color-brand-500);
+
+	/* MARK: animations */
+	--animate-accordion-down: accordion-down 0.2s ease-out;
+	--animate-accordion-up: accordion-up 0.2s ease-out;
+	--animate-indeterminate-progress: indeterminate-progress 1s infinite linear;
+
+	@keyframes accordion-down {
+		from {
+			height: 0;
+		}
+		to {
+			height: var(--radix-accordion-content-height);
+		}
+	}
+
+	@keyframes accordion-up {
+		from {
+			height: var(--radix-accordion-content-height);
+		}
+		to {
+			height: 0;
+		}
+	}
+
+	@keyframes indeterminate-progress {
+		0% {
+			transform: translateX(0) scaleX(0);
+		}
+		40% {
+			transform: translateX(0) scaleX(0.4);
+		}
+		100% {
+			transform: translateX(100%) scaleX(0.5);
+		}
+	}
+}
+
+@utility scrollbar-hide {
+	scrollbar-width: none;
+	&::-webkit-scrollbar {
+		display: none;
+	}
+}
+
+@custom-variant autofill (&:autofill, &:-webkit-autofill);
+
+@layer base {
+	/* TODO: preserve v3 default border color behavior but maybe kill? */
+	*,
+	::after,
+	::before,
+	::backdrop,
+	::file-selector-button {
+		border-color: var(--color-gray-200, currentColor);
+	}
+}

@@ -1,15 +1,18 @@
 import { Label, NativeSelect, Text } from '@stump/components'
 import { ReadingDirection } from '@stump/graphql'
 import { useLocaleContext } from '@stump/i18n'
+import { useShallow } from 'zustand/react/shallow'
 
 import { useReaderStore } from '@/stores'
 
 export default function DefaultReadingDirection() {
 	const { t } = useLocaleContext()
-	const { readingDirection, setSettings } = useReaderStore((store) => ({
-		readingDirection: store.settings.readingDirection,
-		setSettings: store.setSettings,
-	}))
+	const { readingDirection, setSettings } = useReaderStore(
+		useShallow((store) => ({
+			readingDirection: store.settings.readingDirection,
+			setSettings: store.setSettings,
+		})),
+	)
 
 	const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
 		if (e.target.value === 'LTR' || e.target.value === 'RTL') {
@@ -20,7 +23,7 @@ export default function DefaultReadingDirection() {
 	}
 
 	return (
-		<div className="flex flex-col gap-1.5 py-1.5">
+		<div className="gap-1.5 py-1.5 flex flex-col">
 			<Label htmlFor="reading-direction">{t(getKey('label'))}</Label>
 			<NativeSelect
 				id="reading-direction"

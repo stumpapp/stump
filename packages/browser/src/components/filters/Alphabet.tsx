@@ -14,18 +14,18 @@ export default function Alphabet({
 	onPrefetchLetter,
 }: Props) {
 	return (
-		<div className="flex h-8 items-center justify-around gap-1 px-4 pt-4">
+		<div className="h-8 gap-1 px-4 pt-4 flex items-center justify-around">
 			{Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i)).map((letter) => (
 				<div
 					key={letter}
 					className={cn(
-						'flex cursor-pointer items-center justify-center text-xs text-foreground-muted text-opacity-70 hover:text-opacity-100',
+						'text-xs flex cursor-pointer items-center justify-center text-foreground-muted/70 hover:text-foreground-muted',
 						{
-							'text-fill-brand text-opacity-100': startsWith === letter,
+							'text-fill-brand': startsWith === letter,
 						},
 
 						{
-							'pointer-events-none text-foreground-disabled text-opacity-20': !alphabet?.[letter],
+							'pointer-events-none text-foreground-disabled/20': !alphabet?.[letter],
 						},
 					)}
 					onClick={() => onSelectLetter(startsWith === letter ? undefined : letter)}

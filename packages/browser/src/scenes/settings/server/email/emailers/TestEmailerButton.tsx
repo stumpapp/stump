@@ -70,7 +70,7 @@ export default function TestEmailerButton() {
 	}
 
 	return (
-		<div className="flex flex-row items-center gap-2">
+		<div className="gap-2 flex flex-row items-center">
 			<Input
 				id="testRecipient"
 				label={t(getKey('recipientLabel'))}

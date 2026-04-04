@@ -1,9 +1,8 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+@import '@stump/components/tailwind/preset.css';
 
 body {
-	@apply h-full bg-background font-inter antialiased;
+	@apply h-full bg-background antialiased;
 }
 
 #root,
@@ -11,7 +10,6 @@ html {
 	@apply flex h-full flex-col overflow-hidden bg-background;
 }
 
-/* TODO: Upgrade tailwind and follow latest shadcn guides, I'm way dated */
 :root {
 	--spacing: 0.25rem;
 }
@@ -32,7 +30,7 @@ form {
 	@apply pointer-events-none z-50;
 }
 #nprogress .bar {
-	@apply fixed left-0 top-0 z-50 h-0.5 w-full bg-brand-500;
+	@apply left-0 top-0 h-0.5 fixed z-50 w-full bg-brand-500;
 }
 
 /* For Safari & Chrome only */
@@ -41,19 +39,17 @@ form {
 	height: 12px;
 }
 ::-webkit-scrollbar-track {
-	background: hsl(var(--twc-scrollbar));
+	background: var(--color-scrollbar);
 }
 ::-webkit-scrollbar-corner {
-	background: hsl(var(--twc-scrollbar));
+	background: var(--color-scrollbar);
 }
 ::-webkit-scrollbar-thumb {
-	background-color: hsl(var(--twc-scrollbar-thumb) / var(--twc-scrollbar-thumb-opacity));
+	background-color: var(--color-scrollbar-thumb);
 	border-radius: 6px;
 	border: 3px solid transparent;
 	background-clip: padding-box;
 }
 ::-webkit-scrollbar-thumb:hover {
-	background-color: hsl(
-		var(--twc-scrollbar-thumb-hover) / var(--twc-scrollbar-thumb-hover-opacity)
-	);
+	background-color: var(--color-scrollbar-thumb-hover);
 }

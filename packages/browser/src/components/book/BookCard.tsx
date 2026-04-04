@@ -132,7 +132,7 @@ const BookCard = memo(function BookCard({
 	const renderSubtitle = () => {
 		if (isMissing) {
 			return (
-				<Text size="xs" className="uppercase text-amber-500">
+				<Text size="xs" className="text-amber-500 uppercase">
 					File Missing
 				</Text>
 			)
@@ -140,7 +140,7 @@ const BookCard = memo(function BookCard({
 
 		if (progressPercent > 0 && progressPercent < 100) {
 			return (
-				<div className="flex items-center justify-between gap-1">
+				<div className="gap-1 flex items-center justify-between">
 					<Text size="xs" variant="muted">
 						{progressPercent}%
 					</Text>
@@ -194,15 +194,15 @@ const BookCard = memo(function BookCard({
 			onClick={handleClick}
 			onMouseEnter={prefetch}
 			className={cn(
-				'group relative flex flex-col gap-1',
-				'rounded-lg border border-transparent p-1 transition-colors duration-100',
+				'group gap-1 relative flex flex-col',
+				'rounded-lg p-1 border border-transparent transition-colors duration-100',
 				'focus-visible:outline-none',
-				fullWidth ? 'w-full' : 'w-[10rem] shrink-0 sm:w-[10.666rem] md:w-[12rem]',
+				fullWidth ? 'w-full' : 'w-40 sm:w-[10.666rem] md:w-48 shrink-0',
 			)}
 		>
 			<div
 				className={cn(
-					'absolute -inset-0.5 -z-10 rounded-lg',
+					'-inset-0.5 rounded-lg absolute -z-10',
 					'scale-95 opacity-0 duration-100',
 					'group-hover:scale-100 group-hover:opacity-100',
 					'group-focus-visible:scale-100 group-focus-visible:opacity-100',
@@ -235,10 +235,10 @@ const BookCard = memo(function BookCard({
 				/>
 			)}
 
-			<div className="flex h-[52px] flex-col gap-0.5 px-0.5">
+			<div className="gap-0.5 px-0.5 flex h-[52px] flex-col">
 				<Text
 					size="sm"
-					className="line-clamp-2 min-w-0 whitespace-normal font-medium leading-tight"
+					className="min-w-0 font-medium leading-tight line-clamp-2 whitespace-normal"
 				>
 					{data.resolvedName}
 				</Text>

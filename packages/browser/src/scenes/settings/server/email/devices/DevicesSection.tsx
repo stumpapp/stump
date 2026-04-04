@@ -16,7 +16,7 @@ export default function DevicesSection() {
 	const canCreateOrUpdate = canCreateEmailer || canEditEmailer
 
 	return (
-		<div className="flex flex-col gap-4">
+		<div className="gap-4 flex flex-col">
 			<div className="flex items-end justify-between">
 				<div>
 					<Heading size="sm">{t('settingsScene.server/email.sections.devices.title')}</Heading>

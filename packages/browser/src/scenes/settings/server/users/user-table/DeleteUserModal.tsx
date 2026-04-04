@@ -52,7 +52,7 @@ export default function DeleteUserModal({ deletingUser, onClose }: Props) {
 					<Dialog.Close onClick={onClose} disabled={isPending} />
 				</Dialog.Header>
 
-				<Dialog.Footer className="w-full items-center gap-3 sm:justify-between sm:gap-0">
+				<Dialog.Footer className="gap-3 sm:justify-between sm:gap-0 w-full items-center">
 					<div className="shrink-0">
 						<CheckBox
 							variant="primary"
@@ -62,7 +62,7 @@ export default function DeleteUserModal({ deletingUser, onClose }: Props) {
 						/>
 					</div>
 
-					<div className="flex w-full flex-col-reverse space-y-2 space-y-reverse sm:flex-row sm:justify-end sm:space-x-2 sm:space-y-0">
+					<div className="space-y-2 sm:flex-row sm:justify-end sm:space-x-2 sm:space-y-0 flex w-full flex-col-reverse space-y-reverse">
 						<Button onClick={onClose} disabled={isPending}>
 							Cancel
 						</Button>

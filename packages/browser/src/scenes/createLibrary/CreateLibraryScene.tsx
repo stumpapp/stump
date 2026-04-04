@@ -123,7 +123,7 @@ export default function CreateLibraryScene() {
 				<SteppedFormSceneHeader />
 
 				<SceneContainer>
-					<div className="flex flex-col gap-12">
+					<div className="gap-12 flex flex-col">
 						{createError && (
 							<Alert variant="destructive">
 								<AlertCircle />

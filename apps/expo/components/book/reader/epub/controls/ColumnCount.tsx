@@ -1,3 +1,5 @@
+import { useShallow } from 'zustand/react/shallow'
+
 import { Card } from '~/components/ui'
 import { Picker } from '~/components/ui/picker/picker'
 import type { PickerOption } from '~/components/ui/picker/types'
@@ -10,10 +12,12 @@ const COLUMN_OPTIONS: PickerOption[] = [
 ]
 
 export default function ColumnCount() {
-	const store = useReaderStore((state) => ({
-		columnCount: state.globalSettings.columnCount ?? 'auto',
-		setSettings: state.setGlobalSettings,
-	}))
+	const store = useReaderStore(
+		useShallow((state) => ({
+			columnCount: state.globalSettings.columnCount ?? 'auto',
+			setSettings: state.setGlobalSettings,
+		})),
+	)
 
 	const handleChange = (value: string) => {
 		const columnCount = value === 'auto' ? 'auto' : (parseInt(value, 10) as 1 | 2)

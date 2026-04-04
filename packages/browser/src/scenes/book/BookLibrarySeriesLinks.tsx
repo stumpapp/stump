@@ -32,7 +32,7 @@ export default function BookLibrarySeriesLinks({ seriesId }: Props) {
 	const library = series?.library
 
 	return (
-		<div className="flex items-center gap-1.5">
+		<div className="gap-1.5 flex items-center">
 			{library && (
 				<Link to={paths.librarySeries(library.id)} underline={false}>
 					<Badge variant="default" size="xs" rounded="full" className="cursor-pointer">

@@ -69,7 +69,7 @@ export default function PagePopoverForm({
 		<Popover open={isOpen} onOpenChange={handleOpenChange}>
 			<Popover.Trigger asChild={typeof trigger !== 'string'}>{trigger}</Popover.Trigger>
 			<Popover.Content size="md">
-				<div className="flex flex-col gap-2">
+				<div className="gap-2 flex flex-col">
 					<Form id={`pagination-page-entry-form-${pos}`} form={form} onSubmit={handleSubmit}>
 						<Input
 							label="Jump to another page"

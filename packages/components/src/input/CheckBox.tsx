@@ -23,11 +23,11 @@ export const CheckBox = React.forwardRef<RawCheckBoxRef, CheckBoxProps>(
 			}
 
 			return (
-				<div className="grid gap-1.5 leading-none">
+				<div className="gap-1.5 grid leading-none">
 					{label && (
 						<Label
 							htmlFor={props.id}
-							className={cx({ 'cursor-not-allowed text-opacity-50': props.disabled })}
+							className={cx({ 'cursor-not-allowed opacity-50': props.disabled })}
 						>
 							{label}
 						</Label>
@@ -36,7 +36,7 @@ export const CheckBox = React.forwardRef<RawCheckBoxRef, CheckBoxProps>(
 						<Text
 							size="sm"
 							variant="muted"
-							className={cx({ 'cursor-not-allowed text-opacity-50': props.disabled })}
+							className={cx({ 'cursor-not-allowed opacity-50': props.disabled })}
 						>
 							{description}
 						</Text>
@@ -46,7 +46,7 @@ export const CheckBox = React.forwardRef<RawCheckBoxRef, CheckBoxProps>(
 		}
 
 		return (
-			<div className="flex items-start space-x-2">
+			<div className="space-x-2 flex items-start">
 				<RawCheckBox ref={ref} {...props} />
 				{renderContent()}
 			</div>

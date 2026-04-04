@@ -9,7 +9,7 @@ export default function EmailersSection() {
 	const { t } = useLocaleContext()
 
 	return (
-		<div className="flex flex-col gap-4">
+		<div className="gap-4 flex flex-col">
 			<div>
 				<Heading size="sm">{t('settingsScene.server/email.sections.emailers.title')}</Heading>
 				<Text size="sm" variant="muted" className="mt-1">

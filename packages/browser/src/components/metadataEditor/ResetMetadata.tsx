@@ -49,7 +49,7 @@ export default function ResetMetadata({ onConfirmReset, isDisabled }: Props) {
 				<RadioGroup
 					value={impact}
 					onValueChange={handleChange}
-					className="divide gap-0 space-y-0 divide-y divide-edge overflow-hidden rounded-xl border border-edge"
+					className="divide gap-0 space-y-0 rounded-xl divide-y divide-edge overflow-hidden border border-edge"
 				>
 					<RadioGroup.CardItem
 						label="Series"

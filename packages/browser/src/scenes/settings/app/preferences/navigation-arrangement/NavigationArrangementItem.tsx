@@ -100,12 +100,12 @@ export default function NavigationArrangementItem({
 			{...attributes}
 			{...listeners}
 			className={cn(
-				'flex cursor-grab flex-col rounded-md bg-background-surface-secondary/80 outline-none focus-visible:ring-2 focus-visible:ring-edge-brand',
+				'rounded-md flex cursor-grab flex-col bg-background-surface-secondary/80 outline-none focus-visible:ring-2 focus-visible:ring-edge-brand',
 				{
 					'cursor-not-allowed': disabled,
 				},
 				{
-					'bg-opacity-50': !section.visible,
+					'bg-background-surface-secondary/40': !section.visible,
 				},
 				{
 					'cursor-grabbing': isDragging,
@@ -113,10 +113,10 @@ export default function NavigationArrangementItem({
 			)}
 		>
 			<div className="flex items-center justify-between">
-				<div className={cn('flex-1 shrink-0 py-4 pl-4', { 'opacity-60': !section.visible })}>
+				<div className={cn('py-4 pl-4 flex-1 shrink-0', { 'opacity-60': !section.visible })}>
 					<Text size="sm">{t(getItemKey(section.config.variant))}</Text>
 				</div>
-				<div className="flex items-center space-x-2 pr-4">
+				<div className="space-x-2 pr-4 flex items-center">
 					{isConfigurableSection && (
 						<IconButton
 							size="xs"
@@ -133,7 +133,7 @@ export default function NavigationArrangementItem({
 			</div>
 
 			{isConfigurableSection && showConfiguration && (
-				<div className="flex flex-wrap items-center gap-3 p-4">
+				<div className="gap-3 p-4 flex flex-wrap items-center">
 					<CheckBox
 						variant="primary"
 						label={t(getConfigKey('createAction.label'))}

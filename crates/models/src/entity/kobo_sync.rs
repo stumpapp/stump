@@ -2,8 +2,6 @@ use sea_orm::FromJsonQueryResult;
 use sea_orm::{entity::prelude::*, prelude::async_trait::async_trait, ActiveValue};
 use serde::{Deserialize, Serialize};
 
-// use super::user::AuthUser;
-
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, FromJsonQueryResult)]
 pub struct MediaIds(pub Vec<String>);
 
@@ -45,18 +43,6 @@ impl Related<super::user::Entity> for Entity {
 	fn to() -> RelationDef {
 		Relation::User.def()
 	}
-}
-
-impl Entity {
-	// pub fn find_for_user(user: &AuthUser) -> Select<Entity> {
-	// 	Entity::find().filter(Column::UserId.eq(&user.id))
-	// }
-	//
-	// pub fn find_for_user_and_media_id(user: &AuthUser, media_id: &str) -> Select<Entity> {
-	// 	Entity::find()
-	// 		.filter(Column::UserId.eq(&user.id))
-	// 		.filter(Column::MediaId.eq(media_id))
-	// }
 }
 
 #[async_trait]

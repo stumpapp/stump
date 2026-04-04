@@ -4648,6 +4648,7 @@ dependencies = [
  "models",
  "sea-orm",
  "sea-orm-migration",
+ "tokio",
 ]
 
 [[package]]

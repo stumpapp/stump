@@ -2,8 +2,13 @@
 name = "migrations"
 edition = "2021"
 
+[[bin]]
+name = "migrate"
+path = "bin/migrate.rs"
+
 [dependencies]
 sea-orm = { workspace = true }
 sea-orm-migration = { workspace = true }
+tokio = { workspace = true }
 
 models = { path = "../models" }

@@ -2597,40 +2597,40 @@
 			"emptyState": {
 				"all": {
 					"title": "Brak pozycji do czytania",
-					"description": "Once you have books for offline reading, they will appear here"
+					"description": "Tutaj pojawią się pobrane książki"
 				},
 				"imported": {
 					"title": "Brak zaimportowanych książek",
 					"description": "Zaimportuj książki, aby przeczytać je offline"
 				},
 				"server": {
-					"title": "No downloaded books",
-					"description": "Download books from your library to read them offline"
+					"title": "Brak pobranych książek",
+					"description": "Pobierz książki z biblioteki, aby odczytać je w trybie offline"
 				}
 			},
 			"downloadQueue": {
-				"downloading": "Downloading",
-				"failed": "Failed",
-				"nothingDownloading": "Nothing is being downloaded",
-				"noActiveDownloads": "No active downloads",
-				"noFailedDownloads": "No failed downloads",
+				"downloading": "Pobieranie",
+				"failed": "Niepowodzenie",
+				"nothingDownloading": "Nic nie jest pobierane",
+				"noActiveDownloads": "Brak aktywnych pobrań",
+				"noFailedDownloads": "Brak nieudanych pobrań",
 				"downloadStarting": "Rozpoczynanie..."
 			},
 			"downloadsHeaderMenu": {
 				"deleteAllDownloads": {
 					"label": "Usuń książki",
 					"confirmation": "Czy na pewno chcesz usunąć lokalną bibliotekę?",
-					"disclaimer": "This action cannot be undone."
+					"disclaimer": "Tej czynności nie można cofnąć."
 				},
 				"seeProblems": "Zobacz problemy ({{problemCount}})",
-				"hideCurated": "Hide Curated",
-				"showCurated": "Show Curated",
+				"hideCurated": "Ukryj wyselekcjonowane",
+				"showCurated": "Pokaż wyselekcjonowane",
 				"attemptSync": "Spróbuj zsynchronizować"
 			},
 			"downloadsHeaderSortMenu": {
 				"sortBy": {
 					"NAME": "Nazwa",
-					"ADDED_AT": "Date Added",
+					"ADDED_AT": "Data dodania",
 					"SERIES": "Seria"
 				},
 				"sortDirection": {
@@ -2699,62 +2699,62 @@
 			"stump": {
 				"label": "Stump",
 				"description": "Funkcje Stump są opcjonalne i, jeśli ich nie potrzebujesz, możesz je wyłączyć",
-				"bookClubsEnabled": "Book Club Features"
+				"bookClubsEnabled": "Funkcje klubu książki"
 			},
-			"autoSyncLocalData": "Auto-Sync Local Data",
+			"autoSyncLocalData": "Automatycznie synchronizuj dane lokalne",
 			"management": {
-				"label": "Management",
+				"label": "Zarządzanie",
 				"dataUsage": {
-					"label": "Data Usage",
-					"nonStumpData": "Non-Stump data",
-					"serversTotal": "Servers total",
-					"totalFiles": "Total files",
-					"totalSize": "Total size",
+					"label": "Wykorzystanie danych",
+					"nonStumpData": "Dane inne niż Stump",
+					"serversTotal": "Łącznie serwerów",
+					"totalFiles": "Łącznie plików",
+					"totalSize": "Łączny rozmiar",
 					"deleteDownloads": {
-						"label": "Delete Downloads",
-						"confirmation": "Are you sure you want to delete all downloads from {{serverName}}?",
+						"label": "Usuń pobrane",
+						"confirmation": "Czy na pewno chcesz usunąć wszystkie pobrania z {{serverName}}?",
 						"deleteFailed": {
-							"title": "Deletion Failed",
-							"description": "There was an error deleting all all downloads from {{serverName}}"
+							"title": "Usunięcie nie powiodło się",
+							"description": "Wystąpił błąd podczas usuwania wszystkich pobrań z {{serverName}}"
 						}
 					},
-					"noDownloads": "No downloaded files for this server",
+					"noDownloads": "Brak pobranych plików z tego serwera",
 					"storedPreferences": {
-						"label": "Stored preferences",
-						"description": "Miscellaneous data like book preferences, reading timers, etc"
+						"label": "Zapisane preferencje",
+						"description": "Różne dane, takie jak preferencje książek, czasy odczytu, itp."
 					},
-					"clearPreferences": "Clear Preferences"
+					"clearPreferences": "Wyczyść preferencje"
 				}
 			},
 			"debug": {
-				"label": "Debug",
+				"label": "Debugowanie",
 				"clearCache": {
 					"memory": {
-						"button": "Memory",
-						"success": "Memory cache cleared"
+						"button": "Pamięć",
+						"success": "Wyczyszczono pamięć"
 					},
 					"disk": {
-						"button": "Disk",
-						"success": "Disk cache cleared"
+						"button": "Dysk",
+						"success": "Wyczyszczono pamięć podręczną"
 					}
 				},
 				"deleteDatabase": {
-					"label": "Delete Database",
+					"label": "Usuń bazę danych",
 					"success": {
-						"title": "Database deleted",
-						"description": "Please restart the app"
+						"title": "Usunięto bazę danych",
+						"description": "Proszę uruchom aplikację ponownie"
 					},
 					"error": {
-						"title": "Deletion failed",
-						"description": "There was an error deleting the database"
+						"title": "Usunięcie nie powiodło się",
+						"description": "Wystąpił błąd podczas usuwania bazy danych"
 					}
 				},
-				"performanceMonitor": "Performance Monitor",
-				"reduceAnimations": "Reduce Animations",
-				"maskUrls": "Mask URLs",
+				"performanceMonitor": "Monitor wydajności",
+				"reduceAnimations": "Ogranicz animacje",
+				"maskUrls": "Ukryj odnośniki",
 				"debugAnalytics": {
-					"label": "Debug Analytics",
-					"description": "Send additional debug-related events to help troubleshoot issues"
+					"label": "Analityka debugowania",
+					"description": "Wyślij dodatkowe zdarzenia związane z debugowaniem, aby pomóc w rozwiązywaniu problemów"
 				}
 			},
 			"contactInfo": {
@@ -2764,58 +2764,58 @@
 				"github": "GitHub"
 			},
 			"supportInfo": {
-				"buildInformation": "Build Information",
+				"buildInformation": "Informacje o kompilacji",
 				"version": "Wersja: {{version}}",
 				"suuportIdentifier": "Identyfikator wsparcia: {{supportID}}"
 			}
 		},
 		"readerSettings": {
-			"title": "Reader Settings",
+			"title": "Ustawienia czytnika",
 			"sections": {
 				"mode": "Tryb",
-				"imageOptions": "Image Options",
-				"controls": "Controls"
+				"imageOptions": "Ustawienia obrazów",
+				"controls": "Sterowanie"
 			},
 			"readingMode": {
-				"label": "Flow",
+				"label": "Kierunek",
 				"options": {
-					"PAGED": "Paged",
-					"CONTINUOUS_HORIZONTAL": "Scroll (Horizontal)",
-					"CONTINUOUS_VERTICAL": "Scroll (Vertical)"
+					"PAGED": "Strony",
+					"CONTINUOUS_HORIZONTAL": "Przewijanie (poziome)",
+					"CONTINUOUS_VERTICAL": "Przewijanie (pionowe)"
 				}
 			},
 			"readingDirection": {
-				"label": "Direction",
+				"label": "Kierunek",
 				"options": {
 					"RTL": "Od prawej do lewej",
 					"LTR": "Od lewej do prawej"
 				}
 			},
 			"doublePageBehavior": {
-				"label": "Double Paged",
+				"label": "Podwójna strona",
 				"options": {
-					"always": "Always",
-					"auto": "Auto",
-					"off": "Off"
+					"always": "Zawsze",
+					"auto": "Automatycznie",
+					"off": "Wyłączone"
 				}
 			},
-			"separateSecondPage": "Separate Second Page",
+			"separateSecondPage": "Oddziel drugą stronę",
 			"imageScaling": {
-				"label": "Scaling",
+				"label": "Skalowanie",
 				"options": {
-					"AUTO": "Auto",
+					"AUTO": "Automatyczne",
 					"HEIGHT": "Dopasuj wysokość",
 					"WIDTH": "Dopasuj szerokość",
 					"NONE": "Brak"
 				}
 			},
-			"allowDownscaling": "Downscaling",
-			"tapSidesToNavigate": "Tap Sides to Navigate",
+			"allowDownscaling": "Skalowanie zmniejszające",
+			"tapSidesToNavigate": "Dotknij boki, aby nawigować",
 			"footerControls": {
 				"label": "Stopka",
 				"options": {
-					"images": "Image Gallery",
-					"slider": "Slider"
+					"images": "Galeria obrazów",
+					"slider": "Suwak"
 				}
 			}
 		},
@@ -2823,7 +2823,7 @@
 			"clearCache": "Wyczyść pamięć podręczną",
 			"discardTokens": {
 				"label": "Wyczyść tokeny",
-				"description": "Affects login tokens only"
+				"description": "Dotyczy tylko tokenów logowania"
 			},
 			"deleteServer": {
 				"title": "Usuń serwer",

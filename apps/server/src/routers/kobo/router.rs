@@ -112,10 +112,10 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 			// The Kobo requests many routes that we don't implement.
 			.route(
 				"/v1/{*path}",
-				get(empty_json)
-					.post(empty_json)
-					.put(empty_json)
-					.delete(empty_json),
+				get(stubbed_route_empty_success)
+					.post(stubbed_route_empty_success)
+					.put(stubbed_route_empty_success)
+					.delete(stubbed_route_empty_success),
 			)
 			.layer(middleware::from_fn(authorize)) // Note the order!
 			.layer(middleware::from_fn_with_state(
@@ -125,7 +125,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	)
 }
 
-async fn empty_json() -> APIResult<impl IntoResponse> {
+async fn stubbed_route_empty_success() -> APIResult<impl IntoResponse> {
 	Ok(Json(json!({})))
 }
 
@@ -153,9 +153,9 @@ async fn initialization(
 		base_url, api_key
 	);
 	let quality_template = format!(
-      "{}/kobo/{}/v1/books/{{ImageId}}/thumbnail/{{Width}}/{{Height}}/{{Quality}}/{{IsGreyscale}}/image.jpg",
-      base_url, api_key
-  );
+		"{}/kobo/{}/v1/books/{{ImageId}}/thumbnail/{{Width}}/{{Height}}/{{Quality}}/{{IsGreyscale}}/image.jpg",
+		base_url, api_key
+	);
 
 	Ok(Json(
 		json![{ "image_url_quality_template": quality_template, "image_url_template": template,	}],
@@ -219,26 +219,6 @@ async fn library_sync(
 	)
 	.await?;
 
-	// prev_sync = KoboSync.find_by_sync_token(client_sync_token)
-	//
-	// # the last page in the sync was acknowledged, or it has been too long since it was sent.
-	// previous_sync_completed = prev_sync.mark_page_acknowledged(client_sync_token)
-	//
-	// if prev_sync is None or previous_sync_completed:
-	//    # begin a new sync
-	//    # compute the items that should be included in this sync
-	//    # TODO: include x-kobo-deviceid, x-kobo-devicemodel, x-kobo-deviceos
-	//    # (really any x-kobo header)
-	//    sync = KoboSync.new(prev_sync: prev_sync)
-	//    sync_page = sync.get_page(0, SYNC_LIMIT)
-	// else:
-	//    # return the next page of this sync
-	//    sync = prev_sync
-	//    sync_page = sync.get_next_page(SYNC_LIMIT)
-	//
-	// sync_token = sync_page.sync_token
-	// sync_items = sync_page.get_sync_items
-	//
 	// TODO: delete any KoboSyncs prior to the prev_sync for this x-kobo-deviceid
 	//
 	// TODO: how does this interact with the proxy? especially pagination

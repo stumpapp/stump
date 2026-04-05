@@ -143,7 +143,7 @@ export default function OPDSAuthDialog({ isOpen, authDoc, onClose }: OPDSAuthDia
 				paddingBottom: insets.bottom,
 			}}
 			header={
-				<View className="mt-6 h-12 w-full items-start px-6">
+				<View className="mt-6 h-12 px-6 w-full items-start">
 					<HeaderButton
 						onPress={() => ref.current?.dismiss()}
 						ios={{
@@ -153,7 +153,7 @@ export default function OPDSAuthDialog({ isOpen, authDoc, onClose }: OPDSAuthDia
 				</View>
 			}
 		>
-			<View className="flex-1 items-start gap-4 p-6">
+			<View className="gap-4 p-6 items-start">
 				{logoURL && (
 					<View className="w-full items-center justify-center">
 						<TurboImage
@@ -164,7 +164,7 @@ export default function OPDSAuthDialog({ isOpen, authDoc, onClose }: OPDSAuthDia
 					</View>
 				)}
 				{loginError && (
-					<View className="squircle mb-2 rounded-xl bg-fill-danger-secondary p-2">
+					<View className="squircle mb-2 rounded-xl p-2 bg-fill-danger-secondary">
 						<Text className="text-fill-danger">{loginError}</Text>
 					</View>
 				)}

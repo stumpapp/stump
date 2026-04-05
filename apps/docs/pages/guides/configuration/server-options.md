@@ -312,6 +312,14 @@ The profile to use when running Stump. This should really be left alone and **no
 | ------ | ------------- |
 | String | `release`     |
 
+### STUMP_TRUST_PROXY_HEADERS
+
+Whether or not to trust proxy headers like `X-Forwarded-For` and `X-Real-IP` for determining the client's IP address. This should only be set to `true` if Stump is running behind a reverse proxy that is properly configured to set these headers, since it increases the risk of IP spoofing.
+
+| Type    | Default Value |
+| ------- | ------------- |
+| Boolean | `false`       |
+
 ### STUMP_VERBOSITY
 
 The verbosity level for Stump logs. Verbosity levels are integers that correspond to a list of log levels that will be visible, and are inclusive of all the levels below them.

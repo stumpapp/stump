@@ -59,7 +59,10 @@ where
 		let host = Host::from_request_parts(parts, state)
 			.await
 			.map_err(|_| APIError::BadRequest("Invalid host".to_string()))?;
-		let scheme = parse_scheme(parts).unwrap_or_else(|| {
+		let app_state = AppState::from_ref(state);
+		let trust_proxy_headers = app_state.config.trust_proxy_headers;
+
+		let scheme = parse_scheme(parts, trust_proxy_headers).unwrap_or_else(|| {
 			tracing::warn!(?host, "No scheme found in request, defaulting to http");
 			"http".to_string()
 		});
@@ -71,21 +74,29 @@ where
 	}
 }
 
-fn parse_scheme(parts: &mut Parts) -> Option<String> {
-	if let Some(scheme) = parse_forwarded(&parts.headers) {
-		return Some(scheme.to_string());
-	}
+fn parse_scheme(parts: &mut Parts, trust_proxy_headers: bool) -> Option<String> {
+	if trust_proxy_headers {
+		if let Some(scheme) = parse_forwarded(&parts.headers) {
+			return Some(scheme.to_string());
+		}
 
-	// X-Forwarded-Proto
-	if let Some(scheme) = parts
-		.headers
-		.get(X_FORWARDED_PROTO_HEADER_KEY)
-		.and_then(|scheme| scheme.to_str().ok())
+		if let Some(scheme) = parts
+			.headers
+			.get(X_FORWARDED_PROTO_HEADER_KEY)
+			.and_then(|scheme| scheme.to_str().ok())
+		{
+			return Some(scheme.to_string());
+		}
+	} else if parts.headers.contains_key(X_FORWARDED_PROTO_HEADER_KEY)
+		|| parts.headers.contains_key(FORWARDED)
 	{
-		return Some(scheme.to_string());
+		tracing::warn!(
+			x_forwarded_proto_header = ?parts.headers.get(X_FORWARDED_PROTO_HEADER_KEY),
+			forwarded_header = ?parts.headers.get(FORWARDED),
+			"Proxy scheme headers present but trust_proxy_headers is false, ignoring scheme from headers"
+		);
 	}
 
-	// From parts of an HTTP/2 request
 	if let Some(scheme) = parts.uri.scheme_str() {
 		return Some(scheme.to_string());
 	}
@@ -126,9 +137,12 @@ where
 
 	async fn from_request_parts(
 		parts: &mut Parts,
-		_: &S,
+		state: &S,
 	) -> Result<Self, Self::Rejection> {
-		let ip = extract_client_ip(&parts.headers, &parts.extensions)
+		let app_state = AppState::from_ref(state);
+		let trust_proxy_headers = app_state.config.trust_proxy_headers;
+
+		let ip = extract_client_ip(&parts.headers, &parts.extensions, trust_proxy_headers)
 			.unwrap_or_else(|| {
 				tracing::warn!("No client IP found in headers or connection info, defaulting to localhost");
 				"127.0.0.1".parse().unwrap()
@@ -137,28 +151,39 @@ where
 	}
 }
 
-// TODO(security): Technically a client can spoof these headers. Should I add a `trust_proxy_headers` config option?  And only process if set true?
-fn extract_client_ip(headers: &HeaderMap, extensions: &Extensions) -> Option<IpAddr> {
-	if let Some(ip) = headers
-		.get(X_REAL_IP)
-		.and_then(|h| h.to_str().ok())
-		.and_then(|s| s.trim().parse::<IpAddr>().ok())
-	{
-		tracing::trace!(?ip, "Found client IP in X-Real-IP header");
-		return Some(ip);
-	}
+fn extract_client_ip(
+	headers: &HeaderMap,
+	extensions: &Extensions,
+	trust_proxy_headers: bool,
+) -> Option<IpAddr> {
+	if trust_proxy_headers {
+		if let Some(ip) = headers
+			.get(X_REAL_IP)
+			.and_then(|h| h.to_str().ok())
+			.and_then(|s| s.trim().parse::<IpAddr>().ok())
+		{
+			tracing::trace!(?ip, "Found client IP in X-Real-IP header");
+			return Some(ip);
+		}
 
-	if let Some(ip) = headers
-		.get(X_FORWARDED_FOR)
-		.and_then(|h| h.to_str().ok())
-		.and_then(|s| {
-			s.split(',')
-				.next()
-				.map(|s| s.trim())
-				.and_then(|s| s.parse::<IpAddr>().ok())
-		}) {
-		tracing::trace!(?ip, "Found client IP in X-Forwarded-For header");
-		return Some(ip);
+		if let Some(ip) = headers
+			.get(X_FORWARDED_FOR)
+			.and_then(|h| h.to_str().ok())
+			.and_then(|s| {
+				s.split(',')
+					.next()
+					.map(|s| s.trim())
+					.and_then(|s| s.parse::<IpAddr>().ok())
+			}) {
+			tracing::trace!(?ip, "Found client IP in X-Forwarded-For header");
+			return Some(ip);
+		}
+	} else if headers.contains_key(X_REAL_IP) || headers.contains_key(X_FORWARDED_FOR) {
+		tracing::warn!(
+			x_real_header = ?headers.get(X_REAL_IP),
+			x_forwarded_for_header = ?headers.get(X_FORWARDED_FOR),
+			"Proxy headers present but trust_proxy_headers is false, ignoring client IP from headers"
+		);
 	}
 
 	if let Some(info) = extensions.get::<StumpRequestInfo>() {
@@ -183,7 +208,7 @@ mod tests {
 		headers.insert(X_REAL_IP, HeaderValue::from_static("203.0.113.42"));
 
 		let extensions = Extensions::new();
-		let ip = extract_client_ip(&headers, &extensions);
+		let ip = extract_client_ip(&headers, &extensions, true);
 
 		assert_eq!(ip, Some("203.0.113.42".parse().unwrap()));
 	}
@@ -197,7 +222,7 @@ mod tests {
 		);
 
 		let extensions = Extensions::new();
-		let ip = extract_client_ip(&headers, &extensions);
+		let ip = extract_client_ip(&headers, &extensions, true);
 
 		assert_eq!(ip, Some("203.0.113.42".parse().unwrap())); // should be the first one
 	}
@@ -209,7 +234,7 @@ mod tests {
 		headers.insert(X_FORWARDED_FOR, HeaderValue::from_static("198.51.100.1"));
 
 		let extensions = Extensions::new();
-		let ip = extract_client_ip(&headers, &extensions);
+		let ip = extract_client_ip(&headers, &extensions, true);
 
 		assert_eq!(ip, Some("203.0.113.42".parse().unwrap())); // real
 	}
@@ -222,7 +247,7 @@ mod tests {
 			ip_addr: "192.0.2.1".parse().unwrap(),
 		});
 
-		let ip = extract_client_ip(&headers, &extensions);
+		let ip = extract_client_ip(&headers, &extensions, true);
 
 		assert_eq!(ip, Some("192.0.2.1".parse().unwrap()));
 	}
@@ -232,8 +257,23 @@ mod tests {
 		let headers = HeaderMap::new();
 		let extensions = Extensions::new();
 
-		let ip = extract_client_ip(&headers, &extensions);
+		let ip = extract_client_ip(&headers, &extensions, true);
 
 		assert_eq!(ip, None);
+	}
+
+	#[test]
+	fn test_no_extract_proxy_headers_when_trust_proxy_headers_false() {
+		let mut headers = HeaderMap::new();
+		headers.insert(X_REAL_IP, HeaderValue::from_static("203.0.113.42"));
+		headers.insert(X_FORWARDED_FOR, HeaderValue::from_static("198.51.100.1"));
+
+		let mut extensions = Extensions::new();
+		extensions.insert(StumpRequestInfo {
+			ip_addr: "192.0.2.1".parse().unwrap(),
+		});
+		let ip = extract_client_ip(&headers, &extensions, false);
+
+		assert_eq!(ip, Some("192.0.2.1".parse().unwrap())); // connect info used, not headers
 	}
 }

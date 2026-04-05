@@ -55,6 +55,7 @@ pub mod env_keys {
 	pub const OIDC_EXTRA_AUDIENCES_KEY: &str = "STUMP_OIDC_EXTRA_AUDIENCES";
 	pub const BOOK_COMPLETION_DEDUP_TIMEOUT_SECS_KEY: &str =
 		"STUMP_BOOK_COMPLETION_DEDUP_TIMEOUT_SECS";
+	pub const TRUST_PROXY_HEADERS_KEY: &str = "STUMP_TRUST_PROXY_HEADERS";
 }
 use env_keys::*;
 
@@ -275,6 +276,11 @@ pub struct StumpConfig {
 	#[default_value(DEFAULT_BOOK_COMPLETION_DEDUP_TIMEOUT_SECS)]
 	#[env_key(BOOK_COMPLETION_DEDUP_TIMEOUT_SECS_KEY)]
 	pub book_completion_dedup_timeout_secs: i64,
+
+	/// Whether to trust proxy headers for determining client IP and scheme (e.g., X-Forwarded-For)
+	#[default_value(false)]
+	#[env_key(TRUST_PROXY_HEADERS_KEY)]
+	pub trust_proxy_headers: bool,
 }
 
 impl StumpConfig {
@@ -463,6 +469,7 @@ mod tests {
 			pdf_high_quality: None,
 			oidc: None,
 			book_completion_dedup_timeout_secs: None,
+			trust_proxy_headers: None,
 		};
 		partial_config.apply_to_config(&mut config);
 
@@ -515,6 +522,7 @@ mod tests {
 				book_completion_dedup_timeout_secs: Some(
 					DEFAULT_BOOK_COMPLETION_DEDUP_TIMEOUT_SECS
 				),
+				trust_proxy_headers: Some(false),
 			}
 		);
 
@@ -581,6 +589,7 @@ mod tests {
 						oidc: None,
 						book_completion_dedup_timeout_secs:
 							DEFAULT_BOOK_COMPLETION_DEDUP_TIMEOUT_SECS,
+						trust_proxy_headers: false,
 					}
 				);
 			},

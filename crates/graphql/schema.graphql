@@ -2729,6 +2729,8 @@ type StumpConfig {
 	pdfHighQuality: Boolean!
 	"The number of seconds after which a book can be re-completed"
 	bookCompletionDedupTimeoutSecs: Int!
+	"Whether to trust proxy headers for determining client IP and scheme (e.g., X-Forwarded-For)"
+	trustProxyHeaders: Boolean!
 }
 
 type Subscription {

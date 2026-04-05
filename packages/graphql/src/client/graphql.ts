@@ -3784,6 +3784,8 @@ export type StumpConfig = {
   refreshTokenTtl: Scalars['Int']['output'];
   /** The time in seconds that a login session will be valid for. */
   sessionTtl: Scalars['Int']['output'];
+  /** Whether to trust proxy headers for determining client IP and scheme (e.g., X-Forwarded-For) */
+  trustProxyHeaders: Scalars['Boolean']['output'];
   /** The verbosity with which system logs are visible (default: 1). */
   verbosity: Scalars['Int']['output'];
 };

@@ -7,7 +7,7 @@
 	},
 	"authScene": {
 		"claimHeading": "Initialisiere deinen Server",
-		"claimText": "Dieser Stump-Server ist noch nicht initialisiert. Benutze das untenstehende Formular, um ein Konto zu erstellen. Danach erhältst du vollen Zugriff auf alle Serverfunktionen.",
+		"claimText": "Dieser Stump Server ist noch nicht initialisiert. Benutze das untenstehende Formular, um ein Konto zu erstellen. Danach erhältst du vollen Zugriff auf alle Serverfunktionen.",
 		"form": {
 			"validation": {
 				"missingUsername": "Ein Benutzername ist erforderlich",
@@ -1310,7 +1310,7 @@
 			"description": "Passe das Aussehen und die Bedienung der Anwendung an",
 			"sections": {
 				"themeAndAppearance": {
-					"label": "Theme und Erscheinung",
+					"label": "Design und Erscheinung",
 					"description": "Die grundlegenden Erscheinungseinstellungen für Stump"
 				},
 				"themeSelect": {
@@ -2581,19 +2581,19 @@
 			"version": "Version"
 		},
 		"emptyState": {
-			"noStumpServers": "No Stump servers added",
-			"noOPDSServers": "No OPDS servers added",
-			"noServers": "No servers have been configured",
-			"cta": "Get started by adding a server to access your book collections",
-			"seeDocumentation": "See Documentation"
+			"noStumpServers": "Keine Stump Server hinzugefügt",
+			"noOPDSServers": "Keine OPDS Server hinzugefügt",
+			"noServers": "Keine Server wurden konfiguriert",
+			"cta": "Lege los mit einem Server hinzuzufügen, um auf deine Buchsammlungen zuzugreifen",
+			"seeDocumentation": "Siehe Dokumentation"
 		},
 		"tabs": {
-			"servers": "Servers",
-			"localLibrary": "Library",
-			"settings": "Settings"
+			"servers": "Server",
+			"localLibrary": "Bibliothek",
+			"settings": "Einstellungen"
 		},
 		"localLibrary": {
-			"title": "Local Library",
+			"title": "Lokale Bibliothek",
 			"emptyState": {
 				"all": {
 					"title": "Nothing to read yet",
@@ -2610,7 +2610,7 @@
 			},
 			"downloadQueue": {
 				"downloading": "Downloading",
-				"failed": "Failed",
+				"failed": "Fehlgeschlagen",
 				"nothingDownloading": "Nothing is being downloaded",
 				"noActiveDownloads": "No active downloads",
 				"noFailedDownloads": "No failed downloads",
@@ -2631,11 +2631,11 @@
 				"sortBy": {
 					"NAME": "Name",
 					"ADDED_AT": "Date Added",
-					"SERIES": "Series"
+					"SERIES": "Serien"
 				},
 				"sortDirection": {
-					"ASC": "Ascending",
-					"DESC": "Descending"
+					"ASC": "Aufsteigend",
+					"DESC": "Absteigend"
 				},
 				"sortDirectionText": {
 					"ASC": "A → Z",
@@ -2646,7 +2646,7 @@
 					"DESC": "Newest First"
 				},
 				"sourceFilter": {
-					"all": "All Books",
+					"all": "Alle Bücher",
 					"server": "Downloaded",
 					"imported": "Imported"
 				}
@@ -2662,15 +2662,15 @@
 			"preferences": {
 				"label": "Preferences",
 				"appTheme": {
-					"label": "Theme",
+					"label": "Design",
 					"options": {
-						"light": "Light",
-						"dark": "Dark"
+						"light": "Hell",
+						"dark": "Dunkel"
 					}
 				},
-				"appPrimaryColor": "Accent",
-				"appLanguage": "Language",
-				"defaultServer": "Default Server",
+				"appPrimaryColor": "Akzent",
+				"appLanguage": "Sprache",
+				"defaultServer": "Standardserver",
 				"thumbnailRatio": "Thumbnail Ratio",
 				"thumbnailPlaceholder": {
 					"label": "Thumbnail Placeholder",
@@ -2705,9 +2705,9 @@
 			"management": {
 				"label": "Management",
 				"dataUsage": {
-					"label": "Data Usage",
-					"nonStumpData": "Non-Stump data",
-					"serversTotal": "Servers total",
+					"label": "Datennutzung",
+					"nonStumpData": "Nicht-Stump Daten",
+					"serversTotal": "Server insgesamt",
 					"totalFiles": "Total files",
 					"totalSize": "Total size",
 					"deleteDownloads": {
@@ -2758,19 +2758,19 @@
 				}
 			},
 			"contactInfo": {
-				"label": "Contact",
-				"email": "Email",
+				"label": "Kontakt",
+				"email": "E-Mail",
 				"discord": "Discord",
 				"github": "GitHub"
 			},
 			"supportInfo": {
 				"buildInformation": "Build Information",
 				"version": "Version: {{version}}",
-				"suuportIdentifier": "Support Identifier: {{supportID}}"
+				"suuportIdentifier": "Support-Identifikator: {{supportID}}"
 			}
 		},
 		"readerSettings": {
-			"title": "Reader Settings",
+			"title": "Readereinstellungen",
 			"sections": {
 				"mode": "Mode",
 				"imageOptions": "Image Options",
@@ -2820,14 +2820,14 @@
 			}
 		},
 		"savedServerActions": {
-			"clearCache": "Clear Cache",
+			"clearCache": "Cache leeren",
 			"discardTokens": {
 				"label": "Discard Tokens",
 				"description": "Affects login tokens only"
 			},
 			"deleteServer": {
-				"title": "Delete Server",
-				"confirmation": "Are you sure you want to delete {{serverName}}?"
+				"title": "Server löschen",
+				"confirmation": "Bist du dir sicher, dass du {{serverName}} löschen möchtest?"
 			}
 		}
 	}

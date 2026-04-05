@@ -780,7 +780,7 @@
 			"identifierIsbn": "ISBN",
 			"identifierMobiAsin": "Mobi ASIN",
 			"identifierUuid": "Buch UUID",
-			"genres": "Genre",
+			"genres": "Genres",
 			"inkers": "Zeichner",
 			"language": "Sprache",
 			"letterers": "Schriftsteller",
@@ -1328,7 +1328,7 @@
 						"autumn": "Herbst",
 						"cosmic": "Kosmisch",
 						"pumpkin": "Kürbis",
-						"midnight": "Midnight",
+						"midnight": "Mitternacht",
 						"matrix": "Matrix"
 					}
 				},
@@ -2147,51 +2147,51 @@
 			}
 		},
 		"server/tags": {
-			"helmet": "Tag management",
+			"helmet": "Tag-Verwaltung",
 			"title": "Tags",
-			"description": "Create and manage tags for organizing your content",
+			"description": "Erstelle und verwalte Tags für die Organisation deiner Inhalte",
 			"sections": {
 				"table": {
 					"title": "Tags",
-					"description": "All tags available on this server",
+					"description": "Alle auf diesem Server verfügbaren Tags",
 					"empty": {
-						"title": "No tags",
-						"action": "Create your first tag to get started"
+						"title": "Keine Tags",
+						"action": "Erstelle deinen ersten Tag um loszulegen"
 					},
 					"columns": {
 						"name": "Name"
 					},
 					"actionMenu": {
-						"rename": "Rename"
+						"rename": "Umbenennen"
 					}
 				},
 				"createTag": {
-					"trigger": "Create tag",
+					"trigger": "Tag erstellen",
 					"modal": {
-						"heading": "Create new tag",
-						"description": "Tags can be assigned to books, series, and libraries",
+						"heading": "Erstelle einen neuen Tag",
+						"description": "Tags können Büchern, Serien und Bibliotheken zugewiesen werden",
 						"name": {
 							"label": "Name",
-							"placeholder": "Enter tag name"
+							"placeholder": "Tag-Name eingeben"
 						},
-						"submit": "Create"
+						"submit": "Erstellen"
 					}
 				},
 				"renameTag": {
 					"modal": {
-						"heading": "Rename tag",
-						"description": "Change the name of this tag across all assigned items",
+						"heading": "Tag umbenennen",
+						"description": "Ändere den Namen dieses Tags über alle zugewiesenen Elemente",
 						"name": {
 							"label": "Name",
-							"placeholder": "Enter new tag name"
+							"placeholder": "Neuen Tag-Namen eingeben"
 						},
-						"submit": "Rename"
+						"submit": "Umbenennen"
 					}
 				},
 				"deleteTag": {
-					"title": "Delete tag",
-					"description": "This tag will be removed from all books, series, and libraries. This cannot be undone.",
-					"confirm": "Delete"
+					"title": "Tag löschen",
+					"description": "Dieser Tag wird von allen Büchern, Serien und Bibliotheken entfernt. Dies kann nicht rückgängig gemacht werden.",
+					"confirm": "Löschen"
 				}
 			}
 		}
@@ -2483,101 +2483,101 @@
 	"mobileApp": {
 		"addOrEditServer": {
 			"addServer": {
-				"title": "Add Server",
-				"subtitle": "Configure a new server to access your content"
+				"title": "Server hinzufügen",
+				"subtitle": "Konfiguriere einen neuen Server, um auf deine Inhalte zuzugreifen"
 			},
 			"editServer": {
-				"title": "Edit Server",
-				"subtitle": "Edit Server"
+				"title": "Server bearbeiten",
+				"subtitle": "Server bearbeiten"
 			},
-			"kind": "Kind",
+			"kind": "Art",
 			"customHeaders": {
-				"label": "Custom Headers",
-				"addHeader": "Add header",
-				"invalidHeader": "Invalid header"
+				"label": "Benutzerdefinierte Header",
+				"addHeader": "Header hinzufügen",
+				"invalidHeader": "Ungültiger Header"
 			},
 			"auth": {
-				"label": "Auth",
+				"label": "Authentifizierung",
 				"default": {
 					"label": "Login",
-					"description": "You will be prompted to login when accessing content as needed"
+					"description": "Du wirst aufgefordert, dich nach Bedarf anzumelden, wenn du auf Inhalte zugreifst"
 				},
 				"token": {
 					"label": "Token",
-					"placeholder": "Raw token"
+					"placeholder": "Raw Token"
 				},
-				"basic": "Basic"
+				"basic": "Einfach"
 			},
-			"serverNamePlaceholder": "My Server",
-			"catalogUrl": "Catalog URL",
-			"failedToConnect": "Failed to connect to server",
-			"didConnect": "Connected",
-			"checkConnection": "Check connection",
-			"setAsDefaultServer": "Set as default server",
-			"enableOPDS": "Enable OPDS",
+			"serverNamePlaceholder": "Mein Server",
+			"catalogUrl": "Katalog URL",
+			"failedToConnect": "Die Verbindung zum Server ist fehlgeschlagen",
+			"didConnect": "Verbunden",
+			"checkConnection": "Verbindung überprüfen",
+			"setAsDefaultServer": "Als Standardserver festlegen",
+			"enableOPDS": "OPDS aktivieren",
 			"validation": {
-				"nameAlreadyExists": "Name already exists",
-				"cannotSetAuthorizationHeader": "Cannot set Authorization header"
+				"nameAlreadyExists": "Name ist bereits vorhanden",
+				"cannotSetAuthorizationHeader": "Authorisierungsheader kann nicht gesetzt werden"
 			}
 		},
 		"bookActions": {
 			"markAsRead": {
-				"label": "Mark as read",
-				"confirmation": "Are you sure you want to mark {{bookTitle}} as read?"
+				"label": "Als gelesen markieren",
+				"confirmation": "Bist du dir sicher, dass du {{bookTitle}} als gelesen markieren möchtest?"
 			},
 			"clearProgress": {
-				"label": "Clear progress",
-				"confirmation": "Are you sure you want to clear your progress for {{bookTitle}}?"
+				"label": "Fortschritt löschen",
+				"confirmation": "Bist du dir sicher, dass du den Fortschritt für {{bookTitle}} löschen möchtest?"
 			},
 			"deleteBook": {
-				"label": "Delete book",
-				"confirmation": "Are you sure you want to delete {{bookTitle}}?"
+				"label": "Buch löschen",
+				"confirmation": "Bist du dir sicher, dass du {{bookTitle}} löschen möchtest?"
 			},
-			"seeDetails": "See Details"
+			"seeDetails": "Details anzeigen"
 		},
 		"bookMetadata": {
-			"ageRating": "Age Rating",
-			"downloadedAt": "Downloaded",
+			"ageRating": "Altersfreigabe",
+			"downloadedAt": "Heruntergeladen",
 			"format": "Format",
 			"genres": "Genres",
-			"language": "Language",
-			"publisher": "Publisher",
-			"size": "Size",
-			"volume": "Volume",
-			"year": "Year"
+			"language": "Sprache",
+			"publisher": "Verlag",
+			"size": "Größe",
+			"volume": "Band",
+			"year": "Jahr"
 		},
 		"common": {
-			"cancel": "Cancel",
-			"chapter": "Chapter",
-			"clear": "Clear",
-			"confirm": "Confirm",
+			"cancel": "Abbrechen",
+			"chapter": "Kapitel",
+			"clear": "Löschen",
+			"confirm": "Bestätigen",
 			"details": "Details",
-			"delete": "Delete",
+			"delete": "Löschen",
 			"downloads": "Downloads",
-			"edit": "Edit",
-			"enabled": "Enabled",
-			"enable": "Enable",
-			"error": "Error",
+			"edit": "Bearbeiten",
+			"enabled": "Aktiviert",
+			"enable": "Aktivieren",
+			"error": "Fehler",
 			"name": "Name",
-			"none": "None",
-			"options": "Options",
-			"page": "Page",
-			"pages": "Pages",
-			"password": "Password",
-			"progress": "Progress",
-			"readTime": "Read time",
-			"readMore": "Read more",
-			"save": "Save",
-			"select": "Select",
-			"settings": "Settings",
-			"servers": "Servers",
-			"thisBook": "this book",
-			"thisServer": "this server",
-			"unknown": "Unknown",
-			"unknownTitle": "Untitled",
+			"none": "Keine",
+			"options": "Optionen",
+			"page": "Seite",
+			"pages": "Seiten",
+			"password": "Passwort",
+			"progress": "Fortschritt",
+			"readTime": "Lesezeit",
+			"readMore": "Mehr lesen",
+			"save": "Speichern",
+			"select": "Auswählen",
+			"settings": "Einstellungen",
+			"servers": "Server",
+			"thisBook": "dieses Buch",
+			"thisServer": "dieser Server",
+			"unknown": "Unbekannt",
+			"unknownTitle": "Unbenannt",
 			"url": "URL",
-			"username": "Username",
-			"value": "Value",
+			"username": "Benutzername",
+			"value": "Wert",
 			"version": "Version"
 		},
 		"emptyState": {

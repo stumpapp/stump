@@ -1,14 +1,19 @@
+use std::net::IpAddr;
+
 use axum::{
 	extract::{FromRef, FromRequestParts},
-	http::{request::Parts, HeaderMap},
+	http::{request::Parts, Extensions, HeaderMap},
 };
 use axum_extra::extract::Host;
+
 use reqwest::header::FORWARDED;
 use stump_core::opds::v2_0::link::OPDSLinkFinalizer;
 
-use crate::{config::state::AppState, errors::APIError};
+use crate::{config::state::AppState, errors::APIError, http_server::StumpRequestInfo};
 
 const X_FORWARDED_PROTO_HEADER_KEY: &str = "X-Forwarded-Proto";
+const X_REAL_IP: &str = "X-Real-IP";
+const X_FORWARDED_FOR: &str = "X-Forwarded-For";
 
 #[derive(Debug, Clone)]
 pub struct HostDetails {
@@ -92,7 +97,6 @@ fn parse_forwarded(headers: &HeaderMap) -> Option<&str> {
 	// if there are multiple `Forwarded` `HeaderMap::get` will return the first one
 	let forwarded_values = headers.get(FORWARDED)?.to_str().ok()?;
 
-	// get the first set of values
 	let first_value = forwarded_values.split(',').next()?;
 
 	// find the value of the `proto` field
@@ -104,4 +108,132 @@ fn parse_forwarded(headers: &HeaderMap) -> Option<&str> {
 	})
 }
 
-// TODO(281): Add tests for HostExtractor
+/// Extracts the client IP from headers in the following priority order:
+///
+/// 1. X-Real-IP - Non-standard (at least not on mozilla) but common I think
+/// 2. X-Forwarded-For - https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Forwarded-For
+///
+/// If neither header is present, falls back to direct connection info
+#[derive(Debug, Clone)]
+pub struct ClientIp(pub IpAddr);
+
+impl<S> FromRequestParts<S> for ClientIp
+where
+	AppState: FromRef<S>,
+	S: Send + Sync,
+{
+	type Rejection = std::convert::Infallible;
+
+	async fn from_request_parts(
+		parts: &mut Parts,
+		_: &S,
+	) -> Result<Self, Self::Rejection> {
+		let ip = extract_client_ip(&parts.headers, &parts.extensions)
+			.unwrap_or_else(|| {
+				tracing::warn!("No client IP found in headers or connection info, defaulting to localhost");
+				"127.0.0.1".parse().unwrap()
+			});
+		Ok(ClientIp(ip))
+	}
+}
+
+// TODO(security): Technically a client can spoof these headers. Should I add a `trust_proxy_headers` config option?  And only process if set true?
+fn extract_client_ip(headers: &HeaderMap, extensions: &Extensions) -> Option<IpAddr> {
+	if let Some(ip) = headers
+		.get(X_REAL_IP)
+		.and_then(|h| h.to_str().ok())
+		.and_then(|s| s.trim().parse::<IpAddr>().ok())
+	{
+		tracing::trace!(?ip, "Found client IP in X-Real-IP header");
+		return Some(ip);
+	}
+
+	if let Some(ip) = headers
+		.get(X_FORWARDED_FOR)
+		.and_then(|h| h.to_str().ok())
+		.and_then(|s| {
+			s.split(',')
+				.next()
+				.map(|s| s.trim())
+				.and_then(|s| s.parse::<IpAddr>().ok())
+		}) {
+		tracing::trace!(?ip, "Found client IP in X-Forwarded-For header");
+		return Some(ip);
+	}
+
+	if let Some(info) = extensions.get::<StumpRequestInfo>() {
+		tracing::trace!(
+			ip = ?info.ip_addr,
+			"Using direct connection IP"
+		);
+		return Some(info.ip_addr);
+	}
+
+	None
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use axum::http::HeaderValue;
+
+	#[test]
+	fn test_extract_client_ip_from_x_real_ip() {
+		let mut headers = HeaderMap::new();
+		headers.insert(X_REAL_IP, HeaderValue::from_static("203.0.113.42"));
+
+		let extensions = Extensions::new();
+		let ip = extract_client_ip(&headers, &extensions);
+
+		assert_eq!(ip, Some("203.0.113.42".parse().unwrap()));
+	}
+
+	#[test]
+	fn test_extract_client_ip_from_x_forwarded_for() {
+		let mut headers = HeaderMap::new();
+		headers.insert(
+			X_FORWARDED_FOR,
+			HeaderValue::from_static("203.0.113.42, 198.51.100.1, 192.0.2.1"),
+		);
+
+		let extensions = Extensions::new();
+		let ip = extract_client_ip(&headers, &extensions);
+
+		assert_eq!(ip, Some("203.0.113.42".parse().unwrap())); // should be the first one
+	}
+
+	#[test]
+	fn test_extract_client_ip_priority_x_real_ip_over_x_forwarded_for() {
+		let mut headers = HeaderMap::new();
+		headers.insert(X_REAL_IP, HeaderValue::from_static("203.0.113.42"));
+		headers.insert(X_FORWARDED_FOR, HeaderValue::from_static("198.51.100.1"));
+
+		let extensions = Extensions::new();
+		let ip = extract_client_ip(&headers, &extensions);
+
+		assert_eq!(ip, Some("203.0.113.42".parse().unwrap())); // real
+	}
+
+	#[test]
+	fn test_extract_client_ip_fallback_to_connection_info() {
+		let headers = HeaderMap::new();
+		let mut extensions = Extensions::new();
+		extensions.insert(StumpRequestInfo {
+			ip_addr: "192.0.2.1".parse().unwrap(),
+		});
+
+		let ip = extract_client_ip(&headers, &extensions);
+
+		assert_eq!(ip, Some("192.0.2.1".parse().unwrap()));
+	}
+
+	#[test]
+	fn test_extract_client_ip_no_headers_no_extensions() {
+		let headers = HeaderMap::new();
+		let extensions = Extensions::new();
+
+		let ip = extract_client_ip(&headers, &extensions);
+
+		assert_eq!(ip, None);
+	}
+}

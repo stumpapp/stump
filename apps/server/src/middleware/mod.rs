@@ -1,2 +1,4 @@
 pub mod auth;
-pub(crate) mod host;
+pub mod host;
+
+pub use host::{ClientIp, HostExtractor};

@@ -1,5 +1,5 @@
 use axum::{
-	extract::{ConnectInfo, Query, Request, State},
+	extract::{Query, Request, State},
 	http::{Response, StatusCode},
 	middleware,
 	response::IntoResponse,
@@ -31,8 +31,7 @@ use crate::{
 		state::AppState,
 	},
 	errors::{APIError, APIResult},
-	http_server::StumpRequestInfo,
-	middleware::{auth::auth_middleware, host::HostExtractor},
+	middleware::{auth::auth_middleware, ClientIp, HostExtractor},
 	utils::{default_true, fetch_session_user, hash_password, verify_password},
 };
 
@@ -127,12 +126,12 @@ async fn handle_login_attempt(
 	conn: &DatabaseConnection,
 	for_user: &user::LoginUser,
 	user_agent: UserAgent,
-	request_info: StumpRequestInfo,
+	client_ip: std::net::IpAddr,
 	success: bool,
 ) -> APIResult<user_login_activity::Model> {
 	let active_model = user_login_activity::ActiveModel {
 		user_id: Set(for_user.id.clone()),
-		ip_address: Set(request_info.ip_addr.to_string()),
+		ip_address: Set(client_ip.to_string()),
 		user_agent: Set(user_agent.to_string()),
 		timestamp: Set(Utc::now().into()),
 		authentication_successful: Set(success),
@@ -195,7 +194,7 @@ pub enum LoginResponse {
 /// user object from the session.
 async fn login(
 	TypedHeader(user_agent): TypedHeader<UserAgent>,
-	ConnectInfo(request_info): ConnectInfo<StumpRequestInfo>,
+	ClientIp(client_ip): ClientIp,
 	session: Session,
 	State(state): State<AppState>,
 	HostExtractor(details): HostExtractor,
@@ -298,7 +297,7 @@ async fn login(
 		state.conn.as_ref(),
 		&user,
 		user_agent,
-		request_info,
+		client_ip,
 		provided_valid_credentials,
 	)
 	.await;

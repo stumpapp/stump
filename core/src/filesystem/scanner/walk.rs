@@ -177,20 +177,35 @@ pub async fn walk_library(
 				.map(|s| s.id)
 				.collect::<Vec<String>>();
 
-			let (series_to_create, series_to_visit) = valid_entries
-				.par_iter()
-				.filter(|e| !missing_series.contains(&e.path().to_path_buf()))
-				.map(|e| e.path().to_owned())
-				.partition_map::<Vec<PathBuf>, Vec<PathBuf>, _, _, _>(|path| {
-					let already_exists =
-						existing_series_map.contains_key(path.to_string_lossy().as_ref());
+			let (series_to_create, series_to_visit) = {
+				// existing series in ignored_entries should be -> empty dirs but exist on disk, so we still
+				// want to visit them. relates to https://github.com/stumpapp/stump/issues/1051
+				let existing_empty_series: Vec<PathBuf> = ignored_entries
+					.iter()
+					.filter_map(|e| {
+						let path_str = e.path().to_string_lossy().to_string();
+						existing_series_map
+							.contains_key(&path_str)
+							.then(|| e.path().to_owned())
+					})
+					.collect();
 
-					if already_exists {
-						Either::Right(path)
-					} else {
-						Either::Left(path)
-					}
-				});
+				valid_entries
+					.par_iter()
+					.filter(|e| !missing_series.contains(&e.path().to_path_buf()))
+					.map(|e| e.path().to_owned())
+					.chain(existing_empty_series)
+					.partition_map::<Vec<PathBuf>, Vec<PathBuf>, _, _, _>(|path| {
+						let already_exists = existing_series_map
+							.contains_key(path.to_string_lossy().as_ref());
+
+						if already_exists {
+							Either::Right(path)
+						} else {
+							Either::Left(path)
+						}
+					})
+			};
 
 			(
 				series_to_create,

@@ -133,10 +133,19 @@ impl OidcConfig {
 
 	/// Check if OIDC is *properly* configured
 	pub fn is_configured(&self) -> bool {
-		self.enabled
+		let is_configured_properly = self.enabled
 			&& !self.client_id.is_empty()
 			&& !self.issuer_url.is_empty()
-			&& !self.client_secret.is_empty()
+			&& !self.client_secret.is_empty();
+		if !is_configured_properly && self.enabled {
+			tracing::warn!(
+				client_id = ?self.client_id,
+				issuer_url = ?self.issuer_url,
+				client_secret_set = !self.client_secret.is_empty(),
+				"OIDC is enabled but not properly configured (client_id, issuer_url, and client_secret are required)"
+			);
+		}
+		is_configured_properly
 	}
 
 	/// Get the scopes to use when requesting OIDC tokens

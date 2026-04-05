@@ -114,7 +114,11 @@ services:
 
 ## Stump Configuration
 
-OIDC is configured in the same manner as other Stump settings, through environment variables or the toml configuration file. See [server configuration](/guides/configuration/server-options) for more details.
+OIDC can be configured using either environment variables or the TOML configuration file. See [server configuration](/guides/configuration/server-options) for more details.
+
+<Callout type="warning">
+	When using the `Stump.toml` configuration file, OIDC settings must be placed under an `[oidc]` table section, **not** as flat keys with an `oidc_` prefix. See the [TOML example](#toml-example) below.
+</Callout>
 
 ### Required Settings
 
@@ -134,7 +138,12 @@ OIDC is configured in the same manner as other Stump settings, through environme
 | `STUMP_OIDC_DISABLE_LOCAL_AUTH` | `false`                | Disable local username/password authentication when OIDC is enabled  |
 | `STUMP_OIDC_EXTRA_AUDIENCES`    | _(none)_               | Comma-separated list of additional trusted audiences in the ID token |
 
-### Docker Compose Example
+### Configuration Examples
+
+<Tabs items={['Environment Variables', 'TOML File']}>
+<Tabs.Tab>
+
+#### Docker Compose Example
 
 ```yaml
 services:
@@ -152,6 +161,34 @@ services:
     ports:
       - '10801:10801'
 ```
+
+</Tabs.Tab>
+<Tabs.Tab>
+
+#### TOML Example
+
+When configuring OIDC in your `Stump.toml` file, you must use the `[oidc]` table section:
+
+```toml filename="Stump.toml"
+# other configurations...
+port = 10801
+
+[oidc]
+enabled = true
+issuer_url = "https://auth.example.com/application/o/stump/"
+client_id = "stump-client-id"
+client_secret = "super-secret-value"
+scopes = "openid,email,profile"
+allow_registration = true
+disable_local_auth = false
+```
+
+<Callout type="error">
+	Do not use flat keys like `oidc_enabled`, `oidc_client_id`, etc. in your TOML file. This format only works for environment variables (`STUMP_OIDC_ENABLED`, etc.)
+</Callout>
+
+</Tabs.Tab>
+</Tabs>
 
 ## User Management
 

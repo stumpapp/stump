@@ -2680,6 +2680,8 @@ type StumpConfig {
 	enableSwagger: Boolean!
 	"Indicates if the KoReader sync feature should be enabled."
 	enableKoreaderSync: Boolean!
+	"Indicates if the Kobo sync feature should be enabled."
+	enableKoboSync: Boolean!
 	"""
 	Indicates if OPDS page access should automatically track reading progression.
 	When disabled, clients loading/preloading pages won't trigger progress updates.
@@ -2939,6 +2941,8 @@ enum UserPermission {
 	ACCESS_API_KEYS
 	"Grant access to the koreader sync feature"
 	ACCESS_KOREADER_SYNC
+	"Grant access to the kobo sync feature"
+	ACCESS_KOBO_SYNC
 	"""
 	TODO: Expand permissions for bookclub + smartlist
 	Grant access to the book club feature

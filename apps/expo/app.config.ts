@@ -8,7 +8,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 		name: 'Stump',
 		slug: 'stump',
 		version: '0.0.0',
-		orientation: 'portrait',
+		orientation: 'default',
 		icon: './assets/images/icon.png',
 		scheme: 'stump',
 		userInterfaceStyle: 'automatic',

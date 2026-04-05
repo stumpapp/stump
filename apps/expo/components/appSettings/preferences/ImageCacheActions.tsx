@@ -15,7 +15,7 @@ export default function CachePolicySelect() {
 	}
 
 	return (
-		<AppSettingsRow icon={Image} title="Clear Cache">
+		<AppSettingsRow icon={Image} title={t(getKey('label'))}>
 			<View className="gap-2 flex-row">
 				<Button
 					size="sm"

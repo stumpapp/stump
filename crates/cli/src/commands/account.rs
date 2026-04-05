@@ -3,7 +3,7 @@ use std::{thread, time::Duration};
 use clap::Subcommand;
 use dialoguer::{theme::ColorfulTheme, Confirm, Input, Password};
 use models::entity::{
-	bookmark, finished_reading_session, reading_session, session, user,
+	bookmark, finished_reading_session, reading_session, session, user, user_preferences,
 };
 use sea_orm::{
 	prelude::*, ActiveValue::Set, IntoActiveModel, QueryTrait, TransactionTrait,
@@ -374,6 +374,14 @@ async fn migrate_oidc_account(
 		.await?;
 
 	progress.set_message("Transferring user preferences and permissions...");
+
+	// delete the user preferences since it would just be orphaned but _also_ a unique constraint violation on user_id
+	if let Some(oidc_prefs_id) = oidc_user.user_preferences_id {
+		user_preferences::Entity::delete_by_id(oidc_prefs_id)
+			.exec(&txn)
+			.await?;
+	}
+
 	let mut oidc_active = oidc_user.clone().into_active_model();
 	oidc_active.user_preferences_id = Set(local_user.user_preferences_id);
 	oidc_active.permissions = Set(local_user.permissions);

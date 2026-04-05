@@ -2698,7 +2698,7 @@
 			},
 			"stump": {
 				"label": "Stump",
-				"description": "Stump features are optional and can be turned off if you do not need them",
+				"description": "Funkcje Stump są opcjonalne i, jeśli ich nie potrzebujesz, możesz je wyłączyć",
 				"bookClubsEnabled": "Funkcje klubu książki"
 			},
 			"autoSyncLocalData": "Automatycznie synchronizuj dane lokalne",
@@ -2715,7 +2715,7 @@
 						"confirmation": "Czy na pewno chcesz usunąć wszystkie pobrania z {{serverName}}?",
 						"deleteFailed": {
 							"title": "Usunięcie nie powiodło się",
-							"description": "There was an error deleting all downloads from {{serverName}}"
+							"description": "Wystąpił błąd podczas usuwania wszystkich pobrań z {{serverName}}"
 						}
 					},
 					"noDownloads": "Brak pobranych plików z tego serwera",

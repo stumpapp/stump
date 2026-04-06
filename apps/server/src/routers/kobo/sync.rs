@@ -276,6 +276,7 @@ mod tests {
 		},
 		shared::enums::FileStatus,
 	};
+	use rand::distr::SampleString;
 	use sea_orm::{
 		prelude::DateTimeWithTimeZone, ActiveModelTrait, ActiveValue, ConnectionTrait,
 		Database, DbBackend, DbConn, DbErr, Schema,
@@ -380,13 +381,25 @@ mod tests {
 	}
 
 	#[derive(Default)]
-	struct ExampleUser {}
+	struct ExampleUser {
+		username: String,
+		hashed_password: Option<String>,
+	}
 
 	impl ExampleUser {
+		fn new<T: ToString>(username: T) -> Self {
+			ExampleUser {
+				username: username.to_string(),
+				..Default::default()
+			}
+		}
+
 		async fn insert(&self, db: &DbConn) -> user::Model {
 			let model = user::ActiveModel {
-				username: sea_orm::Set("example".to_string()), // TODO: allow setting, or generate
-				hashed_password: sea_orm::Set("example".to_string()), // TODO: allow setting, or generate
+				username: sea_orm::Set(self.username.clone()),
+				hashed_password: sea_orm::Set(
+					self.hashed_password.clone().unwrap_or("".to_string()),
+				),
 				is_server_owner: sea_orm::Set(true),
 				is_locked: sea_orm::Set(false),
 				..Default::default()
@@ -397,13 +410,22 @@ mod tests {
 	}
 
 	#[derive(Default)]
-	struct ExampleSeries {}
+	struct ExampleSeries {
+		name: Option<String>,
+		path: Option<String>,
+	}
 
 	impl ExampleSeries {
 		async fn insert(&self, db: &DbConn) -> series::Model {
+			let name = self.name.clone().unwrap_or_else(|| {
+				rand::distr::Alphabetic.sample_string(&mut rand::rng(), 16)
+			});
+
+			let path = self.path.clone().unwrap_or_else(|| format!("/tmp/{name}"));
+
 			let model = series::ActiveModel {
-				name: sea_orm::Set("example".to_string()), // TODO: allow setting, or generate
-				path: sea_orm::Set("/tmp/example-series".to_string()), // TODO: allow setting, or generate
+				name: sea_orm::Set(name),
+				path: sea_orm::Set(path),
 				..Default::default()
 			};
 
@@ -415,8 +437,8 @@ mod tests {
 	async fn test_first_sync() {
 		let db = test_database().await;
 
-		let user = ExampleUser {}.insert(&db).await;
-		let series = ExampleSeries {}.insert(&db).await;
+		let user = ExampleUser::new("ishmael").insert(&db).await;
+		let series = ExampleSeries::default().insert(&db).await;
 
 		ExampleMedia {
 			series_id: series.id.clone(),
@@ -480,8 +502,8 @@ mod tests {
 	async fn test_pagination() {
 		let db = test_database().await;
 
-		let user = ExampleUser {}.insert(&db).await;
-		let series = ExampleSeries {}.insert(&db).await;
+		let user = ExampleUser::new("ishmael").insert(&db).await;
+		let series = ExampleSeries::default().insert(&db).await;
 
 		for i in 1..=5 {
 			ExampleMedia {
@@ -531,8 +553,8 @@ mod tests {
 	async fn test_incremental_sync() {
 		let db = test_database().await;
 
-		let user = ExampleUser {}.insert(&db).await;
-		let series = ExampleSeries {}.insert(&db).await;
+		let user = ExampleUser::new("ishmael").insert(&db).await;
+		let series = ExampleSeries::default().insert(&db).await;
 
 		for i in 1..=2 {
 			ExampleMedia {
@@ -597,7 +619,7 @@ mod tests {
 	async fn test_represent_new_entitlement() {
 		let db = test_database().await;
 
-		let user = ExampleUser {}.insert(&db).await;
+		let user = ExampleUser::new("ishmael").insert(&db).await;
 		let user = user::AuthUser {
 			id: user.id,
 			permissions: vec![],
@@ -607,7 +629,7 @@ mod tests {
 		let previous_sync_at: DateTimeWithTimeZone =
 			"2026-01-01T00:00:00Z".parse().unwrap();
 
-		let series = ExampleSeries {}.insert(&db).await;
+		let series = ExampleSeries::default().insert(&db).await;
 
 		// a newly created book.
 		let new_book = ExampleMedia {
@@ -644,7 +666,7 @@ mod tests {
 	async fn test_represent_changed_product_metadata() {
 		let db = test_database().await;
 
-		let user = ExampleUser {}.insert(&db).await;
+		let user = ExampleUser::new("ishmael").insert(&db).await;
 		let user = user::AuthUser {
 			id: user.id,
 			permissions: vec![],
@@ -654,7 +676,7 @@ mod tests {
 		let previous_sync_at: DateTimeWithTimeZone =
 			"2026-01-01T00:00:00Z".parse().unwrap();
 
-		let series = ExampleSeries {}.insert(&db).await;
+		let series = ExampleSeries::default().insert(&db).await;
 
 		// a book that was modified since the last sync.
 		let new_book = ExampleMedia {

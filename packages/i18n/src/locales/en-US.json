@@ -2807,6 +2807,7 @@
 		},
 		"readerSettings": {
 			"title": "Image Reader Settings",
+			"overrideGlobalSettings": "Override global settings",
 			"sections": {
 				"mode": "Mode",
 				"imageOptions": "Image Options",

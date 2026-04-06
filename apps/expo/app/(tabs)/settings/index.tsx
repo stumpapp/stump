@@ -15,11 +15,11 @@ import {
 	EnableDebugAnalytics,
 	EpubSettings,
 	ImageCacheActions,
+	ImageReaderSettings,
 	MaskURLs,
 	PerformanceMonitor,
 	PreferMinimalReader,
 	PreferNativePdf,
-	ReaderSettingsLink,
 	ReduceAnimations,
 	ThumbnailPlaceholder,
 	ThumbnailRatio,
@@ -49,7 +49,7 @@ export default function Screen() {
 					<PreferNativePdf />
 					<PreferMinimalReader />
 					{Platform.OS === 'ios' && <DisableDismissGesture />}
-					<ReaderSettingsLink />
+					<ImageReaderSettings />
 					<EpubSettings />
 				</Card>
 

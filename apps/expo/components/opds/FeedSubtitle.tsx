@@ -4,7 +4,6 @@ import { Platform, Pressable, ScrollView } from 'react-native'
 
 import { Text } from '~/components/ui'
 import { IS_IOS_24_PLUS, useColors } from '~/lib/constants'
-import { useColorScheme } from '~/lib/useColorScheme'
 
 type Props = {
 	value: string
@@ -14,7 +13,6 @@ export default function FeedSubtitle({ value }: Props) {
 	const ref = useRef<TrueSheet | null>(null)
 
 	const colors = useColors()
-	const { isDarkColorScheme } = useColorScheme()
 
 	return (
 		<Fragment>
@@ -31,9 +29,9 @@ export default function FeedSubtitle({ value }: Props) {
 				grabber
 				scrollable
 				backgroundColor={IS_IOS_24_PLUS ? undefined : colors.background.DEFAULT}
-				grabberOptions={{ color: isDarkColorScheme ? '#333' : '#ccc' }}
+				grabberOptions={{ color: colors.sheet.grabber }}
 			>
-				<ScrollView className="flex-1 p-6">
+				<ScrollView className="p-6 flex-1">
 					<Text className="text-foreground">{value}</Text>
 				</ScrollView>
 			</TrueSheet>

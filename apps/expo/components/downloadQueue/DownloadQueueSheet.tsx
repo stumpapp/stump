@@ -66,7 +66,6 @@ export const DownloadQueueSheet = forwardRef<TrueSheet, Props>(function Download
 		<TrueSheet
 			ref={ref}
 			detents={[0.65, 1]}
-			cornerRadius={24}
 			grabber
 			scrollable
 			backgroundColor={colors.sheet.background}

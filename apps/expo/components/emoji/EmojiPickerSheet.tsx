@@ -212,7 +212,7 @@ export const EmojiPickerSheet = forwardRef<EmojiPickerSheetRef, Props>(({ onEmoj
 			<Pressable
 				key={isUnicodeEmoji ? emoji.unified : `custom:${emoji.id}`}
 				onPress={handlePress}
-				className="items-center justify-center rounded-xl"
+				className="rounded-xl items-center justify-center"
 				style={{
 					width: itemSize,
 					height: itemSize,
@@ -260,7 +260,6 @@ export const EmojiPickerSheet = forwardRef<EmojiPickerSheetRef, Props>(({ onEmoj
 		<TrueSheet
 			ref={sheetRef}
 			detents={[1]}
-			cornerRadius={24}
 			grabber
 			backgroundColor={IS_IOS_24_PLUS ? undefined : colors.sheet.background}
 			grabberOptions={{ color: colors.sheet.grabber }}
@@ -281,7 +280,7 @@ export const EmojiPickerSheet = forwardRef<EmojiPickerSheetRef, Props>(({ onEmoj
 				data={listData}
 				keyExtractor={(item) => item.key}
 				ListEmptyComponent={
-					<View className="items-center px-4 py-8">
+					<View className="px-4 py-8 items-center">
 						<Text className="text-foreground-muted">No emojis found</Text>
 					</View>
 				}
@@ -297,7 +296,7 @@ export const EmojiPickerSheet = forwardRef<EmojiPickerSheetRef, Props>(({ onEmoj
 					}
 
 					return (
-						<View className="flex-row px-4 py-0.5">
+						<View className="px-4 py-0.5 flex-row">
 							{item.emojis.map((emoji, index) => renderEmoji(emoji, index, item.emojis.length))}
 						</View>
 					)

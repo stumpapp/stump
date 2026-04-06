@@ -67,7 +67,6 @@ export const LibraryOverviewSheet = forwardRef<TrueSheet, Props>(({ libraryId },
 		<TrueSheet
 			ref={ref}
 			detents={['auto', 1]}
-			cornerRadius={24}
 			grabber
 			scrollable
 			backgroundColor={IS_IOS_24_PLUS ? undefined : colors.sheet.background}
@@ -98,7 +97,7 @@ function SheetContent({ library }: SheetContentProps) {
 	const formattedTime = formatHumanDuration(stats.totalReadingTimeSeconds, { significantUnits: 1 })
 
 	return (
-		<ScrollView className="flex-1 p-6" nestedScrollEnabled>
+		<ScrollView className="p-6 flex-1" nestedScrollEnabled>
 			<View className="gap-8">
 				<View>
 					<Heading size="2xl" numberOfLines={3}>
@@ -110,7 +109,7 @@ function SheetContent({ library }: SheetContentProps) {
 					)}
 
 					{library.tags.length > 0 && (
-						<View className="mt-4 flex flex-row flex-wrap gap-3">
+						<View className="mt-4 gap-3 flex flex-row flex-wrap">
 							{library.tags.map((tag) => (
 								<Text key={tag.name} className="text-foreground-muted">
 									#{tag.name}

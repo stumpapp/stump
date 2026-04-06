@@ -6,7 +6,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Heading, Tabs, Text } from '~/components/ui'
 import { IS_IOS_24_PLUS, useColors } from '~/lib/constants'
-import { useColorScheme } from '~/lib/useColorScheme'
 
 import { ReaderSettings } from '../settings'
 import { useImageBasedReader } from './context'
@@ -23,8 +22,6 @@ export default function ImageReaderGlobalSettingsDialog({ isOpen, onClose }: Pro
 	} = useImageBasedReader()
 
 	const ref = useRef<TrueSheet | null>(null)
-
-	const { colorScheme } = useColorScheme()
 
 	const [modality, setModality] = useState<'book' | 'global'>('book')
 
@@ -52,23 +49,20 @@ export default function ImageReaderGlobalSettingsDialog({ isOpen, onClose }: Pro
 		<TrueSheet
 			ref={ref}
 			detents={[0.5, 1]}
-			cornerRadius={24}
 			grabber
 			scrollable
 			backgroundColor={IS_IOS_24_PLUS ? undefined : colors.background.DEFAULT}
-			grabberOptions={{
-				color: colorScheme === 'dark' ? '#333' : '#ccc',
-			}}
+			grabberOptions={{ color: colors.sheet.grabber }}
 			onDidDismiss={onClose}
 			insetAdjustment="automatic"
 		>
 			<ScrollView
-				className="flex-1 p-6"
+				className="p-6 flex-1"
 				contentContainerStyle={{ alignItems: 'flex-start' }}
 				nestedScrollEnabled
 			>
 				<View
-					className="w-full flex-1 gap-8"
+					className="gap-8 w-full flex-1"
 					style={{
 						paddingBottom: insets.bottom,
 					}}

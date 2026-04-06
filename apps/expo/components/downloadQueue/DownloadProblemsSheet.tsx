@@ -31,7 +31,6 @@ export const DownloadProblemsSheet = forwardRef<TrueSheet, Props>(function Downl
 		<TrueSheet
 			ref={ref}
 			detents={['auto', 1]}
-			cornerRadius={24}
 			grabber
 			scrollable
 			backgroundColor={colors.sheet.background}

@@ -77,7 +77,6 @@ const UpdateAnnotationSheet = forwardRef<UpdateAnnotationSheetRef, Props>(
 			<TrueSheet
 				ref={sheetRef}
 				detents={['auto', 1]}
-				cornerRadius={24}
 				grabber
 				backgroundColor={IS_IOS_24_PLUS ? undefined : colors.background.DEFAULT}
 				grabberOptions={{
@@ -94,8 +93,8 @@ const UpdateAnnotationSheet = forwardRef<UpdateAnnotationSheetRef, Props>(
 			>
 				<View className="gap-4 p-4">
 					{highlightedText && (
-						<View className="rounded-lg bg-background-surface p-3">
-							<Text className="italic text-foreground-muted" numberOfLines={3}>
+						<View className="rounded-lg p-3 bg-background-surface">
+							<Text className="text-foreground-muted italic" numberOfLines={3}>
 								&ldquo;{highlightedText}&rdquo;
 							</Text>
 						</View>
@@ -113,7 +112,7 @@ const UpdateAnnotationSheet = forwardRef<UpdateAnnotationSheetRef, Props>(
 							placeholderTextColor={colors.foreground.muted}
 							multiline
 							numberOfLines={3}
-							className="min-h-[80px] rounded-lg border border-edge bg-background-surface p-3 text-foreground"
+							className="rounded-lg p-3 min-h-[80px] border border-edge bg-background-surface text-foreground"
 							textAlignVertical="top"
 						/>
 					</View>

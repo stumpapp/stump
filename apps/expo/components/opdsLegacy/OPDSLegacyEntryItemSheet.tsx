@@ -57,7 +57,6 @@ export const OPDSLegacyEntryItemSheet = forwardRef<TrueSheet, Props>(
 			<TrueSheet
 				ref={ref}
 				detents={[1]}
-				cornerRadius={24}
 				grabber
 				scrollable
 				backgroundColor={colors.sheet.background}
@@ -69,10 +68,10 @@ export const OPDSLegacyEntryItemSheet = forwardRef<TrueSheet, Props>(
 				}}
 			>
 				<Animated.ScrollView ref={animatedScrollRef}>
-					<View className="overflow-hidden pb-16">
+					<View className="pb-16 overflow-hidden">
 						{resolvedThumbnailUrl && (
 							<Animated.View
-								className="absolute -inset-12 opacity-70 dark:opacity-30"
+								className="-inset-12 absolute opacity-70 dark:opacity-30"
 								style={parallaxStyle}
 							>
 								<TImage
@@ -93,7 +92,7 @@ export const OPDSLegacyEntryItemSheet = forwardRef<TrueSheet, Props>(
 							</Animated.View>
 						)}
 
-						<View className="items-center gap-4 px-4 pb-8 pt-8">
+						<View className="gap-4 px-4 pb-8 pt-8 items-center">
 							{!thumbnailUrl &&
 								Platform.select({
 									ios: (
@@ -125,13 +124,13 @@ export const OPDSLegacyEntryItemSheet = forwardRef<TrueSheet, Props>(
 								/>
 							)}
 
-							<Heading size="lg" className="text-center leading-6" numberOfLines={3}>
+							<Heading size="lg" className="leading-6 text-center" numberOfLines={3}>
 								{entry.title}
 							</Heading>
 						</View>
 					</View>
 
-					<View className="ios:rounded-[3rem] ios:-mt-[4.5rem] -mt-[2.5rem] gap-4 rounded-[2.5rem] bg-background px-4 py-6">
+					<View className="ios:rounded-[3rem] ios:-mt-[4.5rem] gap-4 px-4 py-6 -mt-[2.5rem] rounded-[2.5rem] bg-background">
 						{(pageCount != null || currentPage != null) && (
 							<Card>
 								<Card.StatGroup>

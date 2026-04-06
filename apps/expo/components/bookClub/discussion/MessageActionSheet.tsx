@@ -100,24 +100,23 @@ export const MessageActionSheet = forwardRef<MessageActionSheetRef, Props>(
 			<TrueSheet
 				ref={sheetRef}
 				detents={['auto']}
-				cornerRadius={24}
 				grabber
 				backgroundColor={IS_IOS_24_PLUS ? undefined : colors.sheet.background}
 				grabberOptions={{ color: colors.sheet.grabber }}
 			>
 				<View className="pb-8 pt-2">
-					<View className="flex-row items-center justify-around px-6 py-3">
+					<View className="px-6 py-3 flex-row items-center justify-around">
 						{/* TODO: slice(0,6) once i pass curated ones */}
 						{quickEmojis.map((emoji) => (
 							<Pressable key={emoji} onPress={() => handleEmojiPress(emoji)}>
-								<View className="h-11 w-11 items-center justify-center rounded-full bg-black/5 dark:bg-white/10">
+								<View className="h-11 w-11 bg-black/5 dark:bg-white/10 items-center justify-center rounded-full">
 									<Text size="xl">{emoji}</Text>
 								</View>
 							</Pressable>
 						))}
 
 						<Pressable onPress={handleOpenEmojiPicker}>
-							<View className="h-11 w-11 items-center justify-center rounded-full bg-black/5 dark:bg-white/10">
+							<View className="h-11 w-11 bg-black/5 dark:bg-white/10 items-center justify-center rounded-full">
 								<Icon as={SmilePlus} className="h-5 w-5 text-foreground-muted" />
 							</View>
 						</Pressable>
@@ -185,7 +184,7 @@ function ActionRow({ icon, label, description, onPress, disabled, destructive }:
 		<Pressable onPress={onPress} disabled={disabled}>
 			<View
 				className={cn(
-					'ios:rounded-[2rem] flex-row items-center gap-4 rounded-3xl p-4',
+					'ios:rounded-[2rem] gap-4 rounded-3xl p-4 flex-row items-center',
 					destructive ? 'dark:bg-red-500/15 bg-red-500/10' : 'bg-black/5 dark:bg-white/10',
 					disabled ? 'opacity-40' : 'active:opacity-80',
 				)}
@@ -202,7 +201,7 @@ function ActionRow({ icon, label, description, onPress, disabled, destructive }:
 						className={cn(destructive ? 'text-fill-danger' : 'text-foreground-muted')}
 					/>
 				</View>
-				<View className="flex-1 gap-0.5">
+				<View className="gap-0.5 flex-1">
 					<Text className={cn('font-medium', destructive ? 'text-fill-danger' : '')}>{label}</Text>
 					{description && (
 						<Text

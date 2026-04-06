@@ -361,7 +361,19 @@ async fn migrate_oidc_account(
 
 	let progress = default_progress_spinner();
 
+	conn.execute_unprepared("PRAGMA foreign_keys = OFF").await?;
+
 	let txn = conn.begin().await?;
+
+	progress.set_message("Transferring reviews...");
+	review::Entity::update_many()
+		.col_expr(
+			review::Column::UserId,
+			sea_orm::sea_query::Expr::value(oidc_user.id.clone()),
+		)
+		.filter(review::Column::UserId.eq(local_user.id.clone()))
+		.exec(&txn)
+		.await?;
 
 	progress.set_message("Transferring reading sessions...");
 	reading_session::Entity::update_many()
@@ -507,25 +519,35 @@ async fn migrate_oidc_account(
 
 	progress.set_message("Transferring user preferences and permissions...");
 
-	// delete the user preferences since it would just be orphaned but _also_ a unique constraint violation on user_id
 	if let Some(oidc_prefs_id) = oidc_user.user_preferences_id {
 		user_preferences::Entity::delete_by_id(oidc_prefs_id)
 			.exec(&txn)
 			.await?;
 	}
 
-	let mut oidc_active = oidc_user.clone().into_active_model();
+	progress.set_message("Deleting local account...");
+	user::Entity::delete_by_id(local_user.id).exec(&txn).await?;
+
+	progress.set_message("Updating OIDC account with local account data...");
+
+	let oidc_user_in_txn = user::Entity::find_by_id(oidc_user.id.clone())
+		.one(&txn)
+		.await?
+		.ok_or_else(|| {
+			CliError::OperationFailed("OIDC user not found in transaction".to_string())
+		})?;
+
+	let mut oidc_active = oidc_user_in_txn.into_active_model();
 	oidc_active.user_preferences_id = Set(local_user.user_preferences_id);
 	oidc_active.permissions = Set(local_user.permissions);
 	oidc_active.username = Set(local_user.username.clone());
 	oidc_active.is_server_owner = Set(is_server_owner);
 	oidc_active.update(&txn).await?;
 
-	progress.set_message("Deleting local account...");
-	user::Entity::delete_by_id(local_user.id).exec(&txn).await?;
-
 	progress.set_message("Committing changes...");
 	txn.commit().await?;
+
+	conn.execute_unprepared("PRAGMA foreign_keys = ON").await?;
 
 	progress.finish_with_message(format!(
 		"Successfully migrated local account '{}' to OIDC account!",

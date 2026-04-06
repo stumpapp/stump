@@ -232,7 +232,7 @@ async fn library_sync(
 	Ok(SyncResponse {
 		sync_items,
 		should_continue: sync_page.should_continue,
-		sync_token: sync_token,
+		sync_token,
 	})
 }
 

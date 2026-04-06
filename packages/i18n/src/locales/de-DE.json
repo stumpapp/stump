@@ -2613,24 +2613,24 @@
 				"failed": "Fehlgeschlagen",
 				"nothingDownloading": "Es wird nichts heruntergeladen",
 				"noActiveDownloads": "Keine aktiven Downloads",
-				"noFailedDownloads": "No failed downloads",
-				"downloadStarting": "Starting..."
+				"noFailedDownloads": "Keine fehlgeschlagenen Downloads",
+				"downloadStarting": "Wird gestartet..."
 			},
 			"downloadsHeaderMenu": {
 				"deleteAllDownloads": {
-					"label": "Delete Books",
-					"confirmation": "Are you sure you want to delete your local library?",
-					"disclaimer": "This action cannot be undone."
+					"label": "Bücher löschen",
+					"confirmation": "Bist du sicher, dass du deine lokale Bibliothek löschen möchtest?",
+					"disclaimer": "Diese Aktion kann nicht rückgängig gemacht werden."
 				},
-				"seeProblems": "See Problems ({{problemCount}})",
-				"hideCurated": "Hide Curated",
-				"showCurated": "Show Curated",
-				"attemptSync": "Attempt Sync"
+				"seeProblems": "Siehe Probleme ({{problemCount}})",
+				"hideCurated": "Kuratiert ausblenden",
+				"showCurated": "Kuratiert anzeigen",
+				"attemptSync": "Versuche Synchronisierung"
 			},
 			"downloadsHeaderSortMenu": {
 				"sortBy": {
 					"NAME": "Name",
-					"ADDED_AT": "Date Added",
+					"ADDED_AT": "Datum Hinzugefügt",
 					"SERIES": "Serien"
 				},
 				"sortDirection": {
@@ -2642,25 +2642,25 @@
 					"DESC": "Z → A"
 				},
 				"sortDirectionDate": {
-					"ASC": "Oldest First",
-					"DESC": "Newest First"
+					"ASC": "Älteste Zuerst",
+					"DESC": "Neueste Zuerst"
 				},
 				"sourceFilter": {
 					"all": "Alle Bücher",
-					"server": "Downloaded",
-					"imported": "Imported"
+					"server": "Heruntergeladen",
+					"imported": "Importiert"
 				}
 			},
 			"downloadProblemsSheet": {
-				"title": "Failed Downloads",
-				"noFailedDownloads": "No failed downloads",
-				"retryAll": "Retry All",
-				"dismissAll": "Dismiss All"
+				"title": "Fehlgeschlagene Downloads",
+				"noFailedDownloads": "Keine fehlgeschlagenen Downloads",
+				"retryAll": "Alle erneut versuchen",
+				"dismissAll": "Alle verwerfen"
 			}
 		},
 		"settings": {
 			"preferences": {
-				"label": "Preferences",
+				"label": "Präferenzen",
 				"appTheme": {
 					"label": "Design",
 					"options": {
@@ -2671,50 +2671,50 @@
 				"appPrimaryColor": "Akzent",
 				"appLanguage": "Sprache",
 				"defaultServer": "Standardserver",
-				"thumbnailRatio": "Thumbnail Ratio",
+				"thumbnailRatio": "Vorschaubildverhältnis",
 				"thumbnailPlaceholder": {
-					"label": "Thumbnail Placeholder",
+					"label": "Vorschaubild-Platzhalter",
 					"options": {
-						"grayscale": "Grayscale",
-						"averageColor": "Average color",
-						"colorful": "Colorful",
+						"grayscale": "Graustufen",
+						"averageColor": "Durchschnittsfarbe",
+						"colorful": "Farbenfroh",
 						"thumbhash": "Thumbhash"
 					}
 				},
 				"thumbnailResizeMode": {
-					"label": "Thumbnail Resize",
+					"label": "Vorschaubildgrößenanpassung",
 					"options": {
 						"cover": "Cover",
-						"stretch": "Stretch",
-						"fit": "Fit"
+						"stretch": "Strecken",
+						"fit": "Anpassen"
 					}
 				}
 			},
 			"reading": {
-				"label": "Reading",
-				"preferNativePdf": "Prefer Native PDF",
-				"preferMinimalReader": "Prefer Minimal Reader",
-				"disableDismissGesture": "Disable Dismiss Gesture"
+				"label": "Lesen",
+				"preferNativePdf": "Native PDF bevorzugen",
+				"preferMinimalReader": "Minimalen Leser bevorzugen",
+				"disableDismissGesture": "Deaktiviere Zurück-Geste"
 			},
 			"stump": {
 				"label": "Stump",
-				"description": "Stump features are optional and can be turned off if you do not need them",
-				"bookClubsEnabled": "Book Club Features"
+				"description": "Stump-Funktionen sind optional und können deaktiviert, wenn du diese nicht benötigst",
+				"bookClubsEnabled": "Buchclubfunktionen"
 			},
-			"autoSyncLocalData": "Auto-Sync Local Data",
+			"autoSyncLocalData": "Lokale Daten automatisch synchronisieren",
 			"management": {
-				"label": "Management",
+				"label": "Verwaltung",
 				"dataUsage": {
 					"label": "Datennutzung",
 					"nonStumpData": "Nicht-Stump Daten",
 					"serversTotal": "Server insgesamt",
-					"totalFiles": "Total files",
-					"totalSize": "Total size",
+					"totalFiles": "Dateien gesamt",
+					"totalSize": "Gesamtgröße",
 					"deleteDownloads": {
-						"label": "Delete Downloads",
-						"confirmation": "Are you sure you want to delete all downloads from {{serverName}}?",
+						"label": "Downloads löschen",
+						"confirmation": "Bist du dir sicher, dass du alle Downloads von {{serverName}} löschen möchtest?",
 						"deleteFailed": {
-							"title": "Deletion Failed",
+							"title": "Löschen fehlgeschlagen",
 							"description": "There was an error deleting all downloads from {{serverName}}"
 						}
 					},
@@ -2730,8 +2730,8 @@
 				"label": "Debug",
 				"clearCache": {
 					"memory": {
-						"button": "Memory",
-						"success": "Memory cache cleared"
+						"button": "Speicher",
+						"success": "Speicher Cache geleert"
 					},
 					"disk": {
 						"button": "Disk",
@@ -2739,22 +2739,22 @@
 					}
 				},
 				"deleteDatabase": {
-					"label": "Delete Database",
+					"label": "Datenbank löschen",
 					"success": {
-						"title": "Database deleted",
-						"description": "Please restart the app"
+						"title": "Datenbank gelöscht",
+						"description": "Bitte starte die App neu"
 					},
 					"error": {
-						"title": "Deletion failed",
-						"description": "There was an error deleting the database"
+						"title": "Löschen fehlgeschlagen",
+						"description": "Es ist ein Fehler beim Löschen der Datenbank aufgetreten"
 					}
 				},
-				"performanceMonitor": "Performance Monitor",
-				"reduceAnimations": "Reduce Animations",
-				"maskUrls": "Mask URLs",
+				"performanceMonitor": "Leistungsüberwachung",
+				"reduceAnimations": "Animationen verringern",
+				"maskUrls": "URLs verstecken",
 				"debugAnalytics": {
-					"label": "Debug Analytics",
-					"description": "Send additional debug-related events to help troubleshoot issues"
+					"label": "Debug-Analysen",
+					"description": "Sende zusätzliche Debug-bezogene Ereignisse, um bei der Fehlerbehebung zu helfen"
 				}
 			},
 			"contactInfo": {
@@ -2764,7 +2764,7 @@
 				"github": "GitHub"
 			},
 			"supportInfo": {
-				"buildInformation": "Build Information",
+				"buildInformation": "Versionsinformationen",
 				"version": "Version: {{version}}",
 				"suuportIdentifier": "Support-Identifikator: {{supportID}}"
 			}
@@ -2772,58 +2772,58 @@
 		"readerSettings": {
 			"title": "Readereinstellungen",
 			"sections": {
-				"mode": "Mode",
-				"imageOptions": "Image Options",
-				"controls": "Controls"
+				"mode": "Modus",
+				"imageOptions": "Bildoptionen",
+				"controls": "Steuerung"
 			},
 			"readingMode": {
-				"label": "Flow",
+				"label": "Fließend",
 				"options": {
-					"PAGED": "Paged",
-					"CONTINUOUS_HORIZONTAL": "Scroll (Horizontal)",
-					"CONTINUOUS_VERTICAL": "Scroll (Vertical)"
+					"PAGED": "Geseitigt",
+					"CONTINUOUS_HORIZONTAL": "Scrollen (Horizontal)",
+					"CONTINUOUS_VERTICAL": "Scrollen (Vertikal)"
 				}
 			},
 			"readingDirection": {
-				"label": "Direction",
+				"label": "Richtung",
 				"options": {
-					"RTL": "Right to left",
-					"LTR": "Left to right"
+					"RTL": "Rechts nach links",
+					"LTR": "Links nach rechts"
 				}
 			},
 			"doublePageBehavior": {
-				"label": "Double Paged",
+				"label": "Zweiseitig",
 				"options": {
-					"always": "Always",
+					"always": "Immer",
 					"auto": "Auto",
-					"off": "Off"
+					"off": "Aus"
 				}
 			},
-			"separateSecondPage": "Separate Second Page",
+			"separateSecondPage": "Separate zweite Seite",
 			"imageScaling": {
-				"label": "Scaling",
+				"label": "Skalierung",
 				"options": {
 					"AUTO": "Auto",
-					"HEIGHT": "Fit Height",
-					"WIDTH": "Fit Width",
-					"NONE": "None"
+					"HEIGHT": "Höhe anpassen",
+					"WIDTH": "Breite anpassen",
+					"NONE": "Keine"
 				}
 			},
-			"allowDownscaling": "Downscaling",
-			"tapSidesToNavigate": "Tap Sides to Navigate",
+			"allowDownscaling": "Herabskalieren",
+			"tapSidesToNavigate": "Seiten zum Navigieren antippen",
 			"footerControls": {
 				"label": "Footer",
 				"options": {
-					"images": "Image Gallery",
-					"slider": "Slider"
+					"images": "Bildergalerie",
+					"slider": "Schieberegler"
 				}
 			}
 		},
 		"savedServerActions": {
 			"clearCache": "Cache leeren",
 			"discardTokens": {
-				"label": "Discard Tokens",
-				"description": "Affects login tokens only"
+				"label": "Token verwerfen",
+				"description": "Betrifft nur Login-Tokens"
 			},
 			"deleteServer": {
 				"title": "Server löschen",

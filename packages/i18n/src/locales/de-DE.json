@@ -2596,23 +2596,23 @@
 			"title": "Lokale Bibliothek",
 			"emptyState": {
 				"all": {
-					"title": "Nothing to read yet",
-					"description": "Once you have books for offline reading, they will appear here"
+					"title": "Noch nichts zu lesen",
+					"description": "Sobald du Bücher zum Offline-Lesen hast, werden sie hier erscheinen"
 				},
 				"imported": {
-					"title": "No imported books",
-					"description": "Import books to read them offline"
+					"title": "Keine importierten Bücher",
+					"description": "Bücher zum Offline-Lesen importieren"
 				},
 				"server": {
-					"title": "No downloaded books",
-					"description": "Download books from your library to read them offline"
+					"title": "Keine heruntergeladenen Bücher",
+					"description": "Lade Bücher aus deiner Bibliothek herunter, um diese offline zu lesen"
 				}
 			},
 			"downloadQueue": {
-				"downloading": "Downloading",
+				"downloading": "Wird heruntergeladen",
 				"failed": "Fehlgeschlagen",
-				"nothingDownloading": "Nothing is being downloaded",
-				"noActiveDownloads": "No active downloads",
+				"nothingDownloading": "Es wird nichts heruntergeladen",
+				"noActiveDownloads": "Keine aktiven Downloads",
 				"noFailedDownloads": "No failed downloads",
 				"downloadStarting": "Starting..."
 			},

@@ -10,6 +10,7 @@ use models::entity::{
 use sea_orm::Set;
 
 use sea_orm::prelude::*;
+use sea_orm::query::*;
 
 use crate::routers::kobo::sync_token::SyncToken;
 use stump_core::kobo::sync_types::*;
@@ -45,11 +46,8 @@ impl KoboSync {
 		device_metadata: serde_json::Value,
 		previous_sync_at: Option<DateTimeWithTimeZone>,
 	) -> Result<Self, sea_orm::DbErr> {
-		// TODO: filter out items that are newer than the current time.
-		// otherwise there's a race.
-		// TODO: or not?
 		let query = match previous_sync_at {
-			// load things created or modified since the most recent sync
+			// load things created or modified since the last sync session
 			Some(previous_sync_at) => media::Entity::find_for_user(user)
 				.filter(media::Column::Extension.eq("epub"))
 				.filter(
@@ -57,24 +55,16 @@ impl KoboSync {
 						.add(media::Column::CreatedAt.gte(previous_sync_at))
 						.add(media::Column::ModifiedAt.gte(previous_sync_at)),
 				),
-			// load absolutely everything
+			// we're starting from scratch, load absolutely everything
 			None => media::Entity::find_for_user(user)
 				.filter(media::Column::Extension.eq("epub")),
 		};
 
-		// TODO: add deleted media?
-		// TODO: avoid copies & retrieving unused column "path"
-		// https://www.sea-ql.org/SeaORM/docs/1.1.x/advanced-query/custom-select/#unstructured-tuple
-		let new_media = query
-			.into_model::<media::MediaIdentSelect>()
-			.all(db)
-			.await?;
+		let media_ids = query.column(media::Column::Id).into_tuple().all(db).await?;
 
 		let sync_session = kobo_sync_session::ActiveModel {
 			user_id: Set(user.id.clone()),
-			media_ids: Set(kobo_sync_session::MediaIds(
-				new_media.iter().map(|m| m.id.clone()).collect(),
-			)),
+			media_ids: Set(kobo_sync_session::MediaIds(media_ids)),
 			device_id: Set(device_id.unwrap_or("").to_string()),
 			device_metadata: Set(device_metadata),
 			previous_sync_at: Set(previous_sync_at),
@@ -84,7 +74,7 @@ impl KoboSync {
 
 		tracing::debug!(
 			?previous_sync_at,
-			to_sync_media_count = new_media.len(),
+			to_sync_media_count = sync_session.media_ids.0.len(),
 			sync_id = sync_session.id,
 			"Beginning new Kobo sync session"
 		);

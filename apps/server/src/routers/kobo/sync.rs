@@ -519,7 +519,7 @@ mod tests {
 
 		assert_eq!(vec!["book-1", "book-2", "book-3"], first_page.media_ids);
 		assert_eq!(3, first_page.sync_token.next_offset);
-		assert_eq!(true, first_page.should_continue);
+		assert!(first_page.should_continue);
 
 		let second_page = KoboSync::next_page(
 			&db,
@@ -532,7 +532,7 @@ mod tests {
 		.await
 		.expect("failed to continue sync");
 		assert_eq!(vec!["book-4", "book-5"], second_page.media_ids);
-		assert_eq!(false, second_page.should_continue);
+		assert!(!second_page.should_continue);
 	}
 
 	#[tokio::test]
@@ -571,7 +571,7 @@ mod tests {
 		.expect("failed to initiate sync");
 
 		assert_eq!(vec!["book-1", "book-2"], sync_page.media_ids);
-		assert_eq!(false, sync_page.should_continue);
+		assert!(!sync_page.should_continue);
 
 		// after the first sync more media was added.
 		for i in 3..=4 {
@@ -598,7 +598,7 @@ mod tests {
 		.expect("failed to initiate sync");
 
 		assert_eq!(vec!["book-3", "book-4"], sync_page.media_ids);
-		assert_eq!(false, sync_page.should_continue);
+		assert!(!sync_page.should_continue);
 	}
 
 	#[tokio::test]

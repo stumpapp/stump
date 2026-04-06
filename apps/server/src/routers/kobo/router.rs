@@ -1,8 +1,7 @@
 use crate::routers::kobo::sync::KoboSync;
 use axum::{
-	body::Body,
 	extract::{Path, Request, State},
-	http::{header, HeaderMap, HeaderValue},
+	http::{HeaderMap, HeaderValue},
 	middleware::{self, Next},
 	response::{IntoResponse, Json, Response},
 	routing::get,
@@ -25,9 +24,6 @@ use stump_core::filesystem::{
 	image::{GenericImageProcessor, ImageProcessor},
 	ContentType,
 };
-use tower_http::services::ServeFile;
-
-use sea_orm::prelude::*;
 
 use crate::{
 	config::state::AppState,
@@ -35,6 +31,7 @@ use crate::{
 	middleware::{auth::api_key_middleware, host::HostExtractor},
 	routers::{api::v2::media::get_media_thumbnail_by_id, kobo::sync_token::SyncToken},
 	utils::http::ImageResponse,
+	utils::serve_media,
 };
 use stump_core::kobo::sync_types::*;
 
@@ -304,47 +301,5 @@ async fn book_download(
 	Path(KoboAPIKeyAndBookId { book_id, .. }): Path<KoboAPIKeyAndBookId>,
 	headers: HeaderMap,
 ) -> APIResult<impl IntoResponse> {
-	// TODO: is this reasonable? would it ever be useful to have kobo sync permission without
-	// download file?
-	let user = req
-		.user_and_enforce_permissions(&[UserPermission::DownloadFile])
-		.map_err(|_| {
-			tracing::error!("User does not have permission to download file");
-			APIError::forbidden_discreet()
-		})?;
-
-	let book = media::Entity::find_for_user(&user)
-		.filter(media::Column::Id.eq(book_id.clone()))
-		.into_model::<media::MediaIdentSelect>()
-		.one(ctx.conn.as_ref())
-		.await?
-		.ok_or(APIError::NotFound("Book not found".to_string()))?;
-
-	// Note: I am reusing the original headers to support range requests
-	let mut serve_req = Request::new(Body::empty());
-	*serve_req.headers_mut() = headers;
-
-	match ServeFile::new(&book.path).try_call(serve_req).await {
-		Ok(mut response) => {
-			if let Some(filename) = std::path::Path::new(&book.path)
-				.file_name()
-				.and_then(|os_str| os_str.to_str())
-			{
-				response.headers_mut().insert(
-					header::CONTENT_DISPOSITION,
-					format!("attachment; filename=\"{}\"", filename)
-						.parse()
-						.unwrap_or_else(|_| "attachment".parse().unwrap()),
-				);
-			}
-			Ok(response)
-		},
-		Err(e) => {
-			tracing::error!(error = ?e, path = %book.path, "Error serving media file");
-			Err(APIError::InternalServerError(format!(
-				"Failed to serve file: {}",
-				e
-			)))
-		},
-	}
+	serve_media::serve_media_file(req, headers, ctx.conn.as_ref(), book_id).await
 }

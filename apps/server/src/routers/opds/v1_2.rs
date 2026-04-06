@@ -1,9 +1,8 @@
 use std::path::PathBuf;
 
 use axum::{
-	body::Body,
 	extract::{Path, Query, State},
-	http::{header, HeaderMap, Request},
+	http::HeaderMap,
 	middleware,
 	response::IntoResponse,
 	routing::get,
@@ -16,10 +15,7 @@ use models::{
 		finished_reading_session, library, media, media_metadata, reading_session,
 		series, series_metadata,
 	},
-	shared::{
-		enums::UserPermission,
-		image_processor_options::{ImageProcessorOptions, SupportedImageFormat},
-	},
+	shared::image_processor_options::{ImageProcessorOptions, SupportedImageFormat},
 };
 use sea_orm::{
 	prelude::*, sea_query::OnConflict, QueryOrder, QuerySelect, QueryTrait, Set,
@@ -45,13 +41,15 @@ use stump_core::{
 		v2_0::entity::OPDSPublicationEntity,
 	},
 };
-use tower_http::services::ServeFile;
 
 use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
 	middleware::auth::{api_key_middleware, auth_middleware},
-	utils::http::{ImageResponse, Xml},
+	utils::{
+		http::{ImageResponse, Xml},
+		serve_media,
+	},
 };
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
@@ -941,45 +939,5 @@ async fn download_book(
 	Extension(req): Extension<AuthContext>,
 	headers: HeaderMap,
 ) -> APIResult<impl IntoResponse> {
-	let user = req
-		.user_and_enforce_permissions(&[UserPermission::DownloadFile])
-		.map_err(|_| {
-			tracing::error!("User does not have permission to download file");
-			APIError::forbidden_discreet()
-		})?;
-
-	let book = media::Entity::find_for_user(&user)
-		.filter(media::Column::Id.eq(id.clone()))
-		.into_model::<media::MediaIdentSelect>()
-		.one(ctx.conn.as_ref())
-		.await?
-		.ok_or(APIError::NotFound("Book not found".to_string()))?;
-
-	// Note: I am reusing the original headers to support range requests
-	let mut serve_req = Request::new(Body::empty());
-	*serve_req.headers_mut() = headers;
-
-	match ServeFile::new(&book.path).try_call(serve_req).await {
-		Ok(mut response) => {
-			if let Some(filename) = std::path::Path::new(&book.path)
-				.file_name()
-				.and_then(|os_str| os_str.to_str())
-			{
-				response.headers_mut().insert(
-					header::CONTENT_DISPOSITION,
-					format!("attachment; filename=\"{}\"", filename)
-						.parse()
-						.unwrap_or_else(|_| "attachment".parse().unwrap()),
-				);
-			}
-			Ok(response)
-		},
-		Err(e) => {
-			tracing::error!(error = ?e, path = %book.path, "Error serving media file");
-			Err(APIError::InternalServerError(format!(
-				"Failed to serve file: {}",
-				e
-			)))
-		},
-	}
+	serve_media::serve_media_file(req, headers, ctx.conn.as_ref(), id).await
 }

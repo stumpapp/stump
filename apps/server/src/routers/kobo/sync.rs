@@ -104,9 +104,13 @@ impl KoboSync {
 		//   begin new session (from scratch)
 		// else
 		//   continue session
+		let sync_id = client_sync_token.map(|token| match token {
+			SyncToken::IncompleteV1 { sync_id, .. }
+			| SyncToken::CompletedV1 { sync_id, .. } => sync_id.clone(),
+		});
 
-		let prev_sync = match client_sync_token {
-			Some(t) => KoboSync::find(db, user, t.sync_id.clone()).await,
+		let prev_sync = match sync_id {
+			Some(sync_id) => KoboSync::find(db, user, sync_id).await,
 			None => None,
 		};
 
@@ -116,14 +120,9 @@ impl KoboSync {
 
 		let (session, offset) = match (client_sync_token, prev_sync) {
 			// we're continuing an existing sync session
-			(
-				Some(SyncToken {
-					completed: false,
-					next_offset,
-					..
-				}),
-				Some(session),
-			) => (session, *next_offset),
+			(Some(SyncToken::IncompleteV1 { next_offset, .. }), Some(session)) => {
+				(session, *next_offset)
+			},
 			// there was no previous sync session, or the previous session completed
 			(_, _) => {
 				let session = KoboSync::begin_new_sync(
@@ -283,7 +282,10 @@ mod tests {
 	};
 	use uuid::Uuid;
 
-	use crate::routers::kobo::sync::{KoboSync, SyncPage};
+	use crate::routers::kobo::{
+		sync::{KoboSync, SyncPage},
+		sync_token::SyncToken,
+	};
 	use stump_core::kobo::sync_types::SyncItem;
 
 	async fn test_database() -> DbConn {
@@ -532,7 +534,12 @@ mod tests {
 		.expect("failed to initiate sync");
 
 		assert_eq!(vec!["book-1", "book-2", "book-3"], first_page.media_ids);
-		assert_eq!(3, first_page.sync_token.next_offset);
+
+		let SyncToken::IncompleteV1 { next_offset, .. } = first_page.sync_token else {
+			panic!("expected an sync token with a next page")
+		};
+
+		assert_eq!(3, next_offset);
 		assert!(first_page.should_continue);
 
 		let second_page = KoboSync::next_page(

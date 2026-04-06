@@ -3,7 +3,10 @@ use std::{thread, time::Duration};
 use clap::Subcommand;
 use dialoguer::{theme::ColorfulTheme, Confirm, Input, Password};
 use models::entity::{
-	bookmark, finished_reading_session, reading_session, session, user, user_preferences,
+	api_key, book_club_member, bookmark, favorite_library, favorite_media,
+	favorite_series, finished_reading_session, last_library_visit, library_exclusion,
+	media_annotation, reading_session, refresh_token, review, session, user,
+	user_login_activity, user_preferences,
 };
 use sea_orm::{
 	prelude::*, ActiveValue::Set, IntoActiveModel, QueryTrait, TransactionTrait,
@@ -309,6 +312,20 @@ async fn migrate_oidc_account(
 
 	progress.finish_and_clear();
 
+	let mut is_server_owner = local_user.is_server_owner;
+
+	// i went back and forth a bit on whether to even handle this here, since there is a dedicated command for changing server ownership.
+	// ultimately i added it, but with extra confirmation
+	if local_user.is_server_owner {
+		is_server_owner = Confirm::new()
+            .with_prompt(format!(
+                "The local account '{}' is currently the server owner. Do you want to transfer server ownership to the OIDC account '{}' as part of this migration?",
+                local_user.username, oidc_user.username
+            ))
+            .default(false)
+            .interact()?;
+	}
+
 	println!("\nMigration Summary:");
 	println!(
 		"  Local account: {} (ID: {})",
@@ -320,7 +337,7 @@ async fn migrate_oidc_account(
 	);
 	println!("\nThis will:");
 	println!("  1. Transfer all reading sessions and history");
-	println!("  2. Transfer bookmarks");
+	println!("  2. Transfer all user-associated data like bookmarks and annotations");
 	println!("  3. Transfer user preferences");
 	println!("  4. Transfer permissions");
 	println!(
@@ -328,6 +345,9 @@ async fn migrate_oidc_account(
 		local_user.username
 	);
 	println!("  6. Delete local account '{}'", local_user.username);
+	if is_server_owner {
+		println!("  7. Transfer server ownership to OIDC account");
+	}
 
 	let confirmation = Confirm::new()
 		.with_prompt("\nAre you sure you want to continue?")
@@ -363,6 +383,72 @@ async fn migrate_oidc_account(
 		.exec(&txn)
 		.await?;
 
+	// running list of user-associated entities:
+	// - bookmarks
+	// - media annotations
+	// - favorites (library, media, series)
+	// - visit tracking (library)
+	// - book club memberships and favorite books within those memberships
+	//
+	// more sensative ones:
+	// - api_keys (arguably)
+	// - login activity
+	// - library exclusions
+	//
+	// these, however, will be deleted for security:
+	// - refresh tokens
+	// - sessions
+
+	progress.set_message("Transferring library visit tracking...");
+	last_library_visit::Entity::update_many()
+		.col_expr(
+			last_library_visit::Column::UserId,
+			sea_orm::sea_query::Expr::value(oidc_user.id.clone()),
+		)
+		.filter(last_library_visit::Column::UserId.eq(local_user.id.clone()))
+		.exec(&txn)
+		.await?;
+
+	progress.set_message("Transferring library exclusions...");
+	library_exclusion::Entity::update_many()
+		.col_expr(
+			library_exclusion::Column::UserId,
+			sea_orm::sea_query::Expr::value(oidc_user.id.clone()),
+		)
+		.filter(library_exclusion::Column::UserId.eq(local_user.id.clone()))
+		.exec(&txn)
+		.await?;
+
+	progress.set_message("Deleting refresh tokens and any active auth sessions...");
+	refresh_token::Entity::delete_many()
+		.filter(refresh_token::Column::UserId.eq(local_user.id.clone()))
+		.exec(&txn)
+		.await?;
+	session::Entity::delete_many()
+		.filter(session::Column::UserId.eq(local_user.id.clone()))
+		.exec(&txn)
+		.await?;
+
+	progress.set_message("Transferring login activity...");
+	user_login_activity::Entity::update_many()
+		.col_expr(
+			user_login_activity::Column::UserId,
+			sea_orm::sea_query::Expr::value(oidc_user.id.clone()),
+		)
+		.filter(user_login_activity::Column::UserId.eq(local_user.id.clone()))
+		.exec(&txn)
+		.await?;
+
+	progress.set_message("Transferring API keys...");
+	api_key::Entity::update_many()
+		.col_expr(
+			api_key::Column::UserId,
+			sea_orm::sea_query::Expr::value(oidc_user.id.clone()),
+		)
+		.filter(api_key::Column::UserId.eq(local_user.id.clone()))
+		.exec(&txn)
+		.await?;
+
 	progress.set_message("Transferring bookmarks...");
 	bookmark::Entity::update_many()
 		.col_expr(
@@ -370,6 +456,52 @@ async fn migrate_oidc_account(
 			sea_orm::sea_query::Expr::value(oidc_user.id.clone()),
 		)
 		.filter(bookmark::Column::UserId.eq(local_user.id.clone()))
+		.exec(&txn)
+		.await?;
+
+	progress.set_message("Transferring annotations...");
+	media_annotation::Entity::update_many()
+		.col_expr(
+			media_annotation::Column::UserId,
+			sea_orm::sea_query::Expr::value(oidc_user.id.clone()),
+		)
+		.filter(media_annotation::Column::UserId.eq(local_user.id.clone()))
+		.exec(&txn)
+		.await?;
+
+	progress.set_message("Transferring favorites...");
+	favorite_library::Entity::update_many()
+		.col_expr(
+			favorite_library::Column::UserId,
+			sea_orm::sea_query::Expr::value(oidc_user.id.clone()),
+		)
+		.filter(favorite_library::Column::UserId.eq(local_user.id.clone()))
+		.exec(&txn)
+		.await?;
+	favorite_media::Entity::update_many()
+		.col_expr(
+			favorite_media::Column::UserId,
+			sea_orm::sea_query::Expr::value(oidc_user.id.clone()),
+		)
+		.filter(favorite_media::Column::UserId.eq(local_user.id.clone()))
+		.exec(&txn)
+		.await?;
+	favorite_series::Entity::update_many()
+		.col_expr(
+			favorite_series::Column::UserId,
+			sea_orm::sea_query::Expr::value(oidc_user.id.clone()),
+		)
+		.filter(favorite_series::Column::UserId.eq(local_user.id.clone()))
+		.exec(&txn)
+		.await?;
+
+	progress.set_message("Transferring book club memberships...");
+	book_club_member::Entity::update_many()
+		.col_expr(
+			book_club_member::Column::UserId,
+			sea_orm::sea_query::Expr::value(oidc_user.id.clone()),
+		)
+		.filter(book_club_member::Column::UserId.eq(local_user.id.clone()))
 		.exec(&txn)
 		.await?;
 
@@ -386,6 +518,7 @@ async fn migrate_oidc_account(
 	oidc_active.user_preferences_id = Set(local_user.user_preferences_id);
 	oidc_active.permissions = Set(local_user.permissions);
 	oidc_active.username = Set(local_user.username.clone());
+	oidc_active.is_server_owner = Set(is_server_owner);
 	oidc_active.update(&txn).await?;
 
 	progress.set_message("Deleting local account...");

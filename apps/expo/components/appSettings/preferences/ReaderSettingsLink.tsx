@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router'
-import { ChevronRight, Settings2 } from 'lucide-react-native'
+import { ChevronRight, GalleryThumbnails } from 'lucide-react-native'
 import { View } from 'react-native'
 
 import { Icon } from '~/components/ui'
@@ -12,8 +12,8 @@ export default function ReaderSettingsLink() {
 	const router = useRouter()
 	return (
 		<AppSettingsRow
-			icon={Settings2}
-			title={t('common.settings')}
+			icon={GalleryThumbnails}
+			title={t('readerSettings.title')}
 			onPress={() => router.push('/settings/reader')}
 			isLink
 		>

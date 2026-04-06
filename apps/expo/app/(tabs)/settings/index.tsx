@@ -13,6 +13,7 @@ import {
 	DisableDismissGesture,
 	DisplayLanguageKeys,
 	EnableDebugAnalytics,
+	EpubSettings,
 	ImageCacheActions,
 	MaskURLs,
 	PerformanceMonitor,
@@ -49,6 +50,7 @@ export default function Screen() {
 					<PreferMinimalReader />
 					{Platform.OS === 'ios' && <DisableDismissGesture />}
 					<ReaderSettingsLink />
+					<EpubSettings />
 				</Card>
 
 				<Card

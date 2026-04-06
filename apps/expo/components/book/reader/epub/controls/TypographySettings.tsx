@@ -3,20 +3,14 @@ import { useShallow } from 'zustand/react/shallow'
 import { Card, Stepper, Switch } from '~/components/ui'
 import { Picker } from '~/components/ui/picker/picker'
 import type { PickerOption } from '~/components/ui/picker/types'
+import { useTranslate } from '~/lib/hooks'
 import { TextAlignment } from '~/modules/readium'
 import { useReaderStore } from '~/stores'
 
 import PublisherStyles from './PublisherStyles'
 
-const TEXT_ALIGN_OPTIONS: PickerOption<TextAlignment>[] = [
-	{ label: 'Start', value: 'start' },
-	{ label: 'Left', value: 'left' },
-	{ label: 'Center', value: 'center' },
-	{ label: 'Right', value: 'right' },
-	{ label: 'Justify', value: 'justify' },
-]
-
 export default function TypographySettings() {
+	const { t } = useTranslate()
 	const store = useReaderStore(
 		useShallow((state) => ({
 			allowPublisherStyles: state.globalSettings.allowPublisherStyles ?? true,
@@ -33,22 +27,30 @@ export default function TypographySettings() {
 		})),
 	)
 
+	const textAlignOptions: PickerOption<TextAlignment>[] = [
+		{ label: t(getKey('textAlignment.options.start')), value: 'start' },
+		{ label: t(getKey('textAlignment.options.left')), value: 'left' },
+		{ label: t(getKey('textAlignment.options.center')), value: 'center' },
+		{ label: t(getKey('textAlignment.options.right')), value: 'right' },
+		{ label: t(getKey('textAlignment.options.justify')), value: 'justify' },
+	]
+
 	const isDisabled = store.allowPublisherStyles
 
 	return (
 		<Card>
 			<PublisherStyles />
 
-			<Card.Row label="Text Alignment" disabled={isDisabled}>
+			<Card.Row label={t(getKey('textAlignment.label'))} disabled={isDisabled}>
 				<Picker
 					value={store.textAlign}
-					options={TEXT_ALIGN_OPTIONS}
+					options={textAlignOptions}
 					onValueChange={(value) => store.setSettings({ textAlign: value })}
 					disabled={isDisabled}
 				/>
 			</Card.Row>
 
-			<Card.Row label="Type Scale" disabled={isDisabled}>
+			<Card.Row label={t(getKey('typeScale'))} disabled={isDisabled}>
 				<Stepper
 					value={store.typeScale}
 					onChange={(val) => store.setSettings({ typeScale: val === 1.0 ? undefined : val })}
@@ -57,11 +59,11 @@ export default function TypographySettings() {
 					step={0.1}
 					disabled={isDisabled}
 					formatValue={(val) => val.toFixed(1)}
-					accessibilityLabel="Type Scale"
+					accessibilityLabel={t(getKey('typeScale'))}
 				/>
 			</Card.Row>
 
-			<Card.Row label="Line Height" disabled={isDisabled}>
+			<Card.Row label={t(getKey('lineHeight'))} disabled={isDisabled}>
 				<Stepper
 					value={store.lineHeight}
 					onChange={(val) => store.setSettings({ lineHeight: val === 1.5 ? undefined : val })}
@@ -70,11 +72,11 @@ export default function TypographySettings() {
 					step={0.1}
 					disabled={isDisabled}
 					formatValue={(val) => val.toFixed(1)}
-					accessibilityLabel="Line Height"
+					accessibilityLabel={t(getKey('lineHeight'))}
 				/>
 			</Card.Row>
 
-			<Card.Row label="Paragraph Indent" disabled={isDisabled}>
+			<Card.Row label={t(getKey('paragraphIndent'))} disabled={isDisabled}>
 				<Stepper
 					value={store.paragraphIndent ?? 0}
 					onChange={(val) => store.setSettings({ paragraphIndent: val === 0 ? undefined : val })}
@@ -84,11 +86,11 @@ export default function TypographySettings() {
 					disabled={isDisabled}
 					unit="%"
 					formatValue={(val) => Math.round(val * 100).toString()}
-					accessibilityLabel="Paragraph Indent"
+					accessibilityLabel={t(getKey('paragraphIndent'))}
 				/>
 			</Card.Row>
 
-			<Card.Row label="Paragraph Spacing" disabled={isDisabled}>
+			<Card.Row label={t(getKey('paragraphSpacing'))} disabled={isDisabled}>
 				<Stepper
 					value={store.paragraphSpacing ?? 0}
 					onChange={(val) => store.setSettings({ paragraphSpacing: val === 0 ? undefined : val })}
@@ -98,11 +100,11 @@ export default function TypographySettings() {
 					disabled={isDisabled}
 					unit="%"
 					formatValue={(val) => Math.round(val * 100).toString()}
-					accessibilityLabel="Paragraph Spacing"
+					accessibilityLabel={t(getKey('paragraphSpacing'))}
 				/>
 			</Card.Row>
 
-			<Card.Row label="Word Spacing" disabled={isDisabled}>
+			<Card.Row label={t(getKey('wordSpacing'))} disabled={isDisabled}>
 				<Stepper
 					value={store.wordSpacing ?? 0}
 					onChange={(val) => store.setSettings({ wordSpacing: val === 0 ? undefined : val })}
@@ -112,11 +114,11 @@ export default function TypographySettings() {
 					disabled={isDisabled}
 					unit="%"
 					formatValue={(val) => Math.round(val * 100).toString()}
-					accessibilityLabel="Word Spacing"
+					accessibilityLabel={t(getKey('wordSpacing'))}
 				/>
 			</Card.Row>
 
-			<Card.Row label="Letter Spacing" disabled={isDisabled}>
+			<Card.Row label={t(getKey('letterSpacing'))} disabled={isDisabled}>
 				<Stepper
 					value={store.letterSpacing ?? 0}
 					onChange={(val) => store.setSettings({ letterSpacing: val === 0 ? undefined : val })}
@@ -126,29 +128,32 @@ export default function TypographySettings() {
 					disabled={isDisabled}
 					unit="%"
 					formatValue={(val) => Math.round(val * 100).toString()}
-					accessibilityLabel="Letter Spacing"
+					accessibilityLabel={t(getKey('letterSpacing'))}
 				/>
 			</Card.Row>
 
-			<Card.Row label="Hyphens" disabled={isDisabled}>
+			<Card.Row label={t(getKey('hyphens'))} disabled={isDisabled}>
 				<Switch
 					checked={store.hyphens ?? false}
 					onCheckedChange={(checked) => store.setSettings({ hyphens: checked ? true : undefined })}
-					accessibilityLabel="Toggle Hyphens"
+					accessibilityLabel={t(getKey('hyphens'))}
 					disabled={isDisabled}
 				/>
 			</Card.Row>
 
-			<Card.Row label="Ligatures" disabled={isDisabled}>
+			<Card.Row label={t(getKey('ligatures'))} disabled={isDisabled}>
 				<Switch
 					checked={store.ligatures ?? false}
 					onCheckedChange={(checked) =>
 						store.setSettings({ ligatures: checked ? true : undefined })
 					}
-					accessibilityLabel="Toggle Ligatures"
+					accessibilityLabel={t(getKey('ligatures'))}
 					disabled={isDisabled}
 				/>
 			</Card.Row>
 		</Card>
 	)
 }
+
+const LOCALE_BASE = 'epubSettings'
+const getKey = (key: string) => `${LOCALE_BASE}.${key}`

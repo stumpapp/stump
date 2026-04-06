@@ -2,7 +2,7 @@
 use std::collections::HashMap;
 
 use models::entity::{
-	kobo_sync,
+	kobo_sync_session,
 	media::{self, ModelWithMetadata},
 	reading_session,
 	user::AuthUser,
@@ -15,12 +15,12 @@ use crate::routers::kobo::sync_token::SyncToken;
 use stump_core::kobo::sync_types::*;
 
 pub struct KoboSync {
-	model: kobo_sync::Model,
+	model: kobo_sync_session::Model,
 }
 
 impl KoboSync {
 	async fn find(db: &DatabaseConnection, user: &AuthUser, id: String) -> Option<Self> {
-		kobo_sync::Entity::find_by_id(id)
+		kobo_sync_session::Entity::find_by_id(id)
 			.one(db)
 			.await
 			.ok()?
@@ -70,9 +70,9 @@ impl KoboSync {
 			.all(db)
 			.await?;
 
-		let sync = kobo_sync::ActiveModel {
+		let sync_session = kobo_sync_session::ActiveModel {
 			user_id: Set(user.id.clone()),
-			media_ids: Set(kobo_sync::MediaIds(
+			media_ids: Set(kobo_sync_session::MediaIds(
 				new_media.iter().map(|m| m.id.clone()).collect(),
 			)),
 			device_id: Set(device_id.unwrap_or("").to_string()),
@@ -80,16 +80,18 @@ impl KoboSync {
 			previous_sync_at: Set(previous_sync_at),
 			..Default::default()
 		};
-		let sync = sync.insert(db).await?;
+		let sync_session = sync_session.insert(db).await?;
 
 		tracing::debug!(
 			?previous_sync_at,
 			to_sync_media_count = new_media.len(),
-			sync_id = sync.id,
-			"Beginning new Kobo sync"
+			sync_id = sync_session.id,
+			"Beginning new Kobo sync session"
 		);
 
-		Ok(Self { model: sync })
+		Ok(Self {
+			model: sync_session,
+		})
 	}
 
 	pub async fn next_page<'a>(
@@ -279,7 +281,7 @@ mod tests {
 	use chrono::Days;
 	use models::{
 		entity::{
-			kobo_sync, library, library_exclusion, media, media_metadata,
+			kobo_sync_session, library, library_exclusion, media, media_metadata,
 			reading_session, series, series_metadata, user, user_preferences,
 		},
 		shared::enums::FileStatus,
@@ -314,7 +316,7 @@ mod tests {
 			schema.create_table_from_entity(series::Entity),
 			schema.create_table_from_entity(series_metadata::Entity),
 			schema.create_table_from_entity(library_exclusion::Entity),
-			schema.create_table_from_entity(kobo_sync::Entity),
+			schema.create_table_from_entity(kobo_sync_session::Entity),
 			schema.create_table_from_entity(user::Entity),
 			schema.create_table_from_entity(user_preferences::Entity),
 			schema.create_table_from_entity(library::Entity),

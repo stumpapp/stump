@@ -9,24 +9,33 @@ impl MigrationTrait for Migration {
 		manager
 			.create_table(
 				Table::create()
-					.table(KoboSync::Table)
+					.table(KoboSyncSession::Table)
 					.if_not_exists()
-					.col(ColumnDef::new(KoboSync::Id).text().not_null().primary_key())
-					.col(ColumnDef::new(KoboSync::UserId).text().not_null())
-					.col(ColumnDef::new(KoboSync::MediaIds).json().not_null())
-					.col(ColumnDef::new(KoboSync::DeviceId).text().not_null())
-					.col(ColumnDef::new(KoboSync::DeviceMetadata).json().not_null())
 					.col(
-						ColumnDef::new(KoboSync::CreatedAt)
+						ColumnDef::new(KoboSyncSession::Id)
+							.text()
+							.not_null()
+							.primary_key(),
+					)
+					.col(ColumnDef::new(KoboSyncSession::UserId).text().not_null())
+					.col(ColumnDef::new(KoboSyncSession::MediaIds).json().not_null())
+					.col(ColumnDef::new(KoboSyncSession::DeviceId).text().not_null())
+					.col(
+						ColumnDef::new(KoboSyncSession::DeviceMetadata)
+							.json()
+							.not_null(),
+					)
+					.col(
+						ColumnDef::new(KoboSyncSession::CreatedAt)
 							.timestamp()
 							.not_null()
 							.default(Expr::current_timestamp()),
 					)
-					.col(ColumnDef::new(KoboSync::PreviousSyncAt).timestamp())
+					.col(ColumnDef::new(KoboSyncSession::PreviousSyncAt).timestamp())
 					.foreign_key(
 						ForeignKey::create()
 							.name("fk-kobo-sync-user")
-							.from(KoboSync::Table, KoboSync::UserId)
+							.from(KoboSyncSession::Table, KoboSyncSession::UserId)
 							.to(Users::Table, Users::Id)
 							.on_delete(ForeignKeyAction::Cascade)
 							.on_update(ForeignKeyAction::Cascade),
@@ -38,13 +47,13 @@ impl MigrationTrait for Migration {
 
 	async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
 		manager
-			.drop_table(Table::drop().table(KoboSync::Table).to_owned())
+			.drop_table(Table::drop().table(KoboSyncSession::Table).to_owned())
 			.await
 	}
 }
 
 #[derive(Iden)]
-enum KoboSync {
+enum KoboSyncSession {
 	Table,
 	Id,
 	UserId,

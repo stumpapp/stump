@@ -26,7 +26,11 @@ impl KoboSync {
 			.ok()?
 			.and_then(|m| {
 				if m.user_id != user.id {
-					tracing::warn!("Attempted to use another user's Kobo sync token");
+					tracing::warn!(
+						authed_user = user.id,
+						token_user = m.user_id,
+						"Attempted to use another user's Kobo sync token"
+					);
 					None
 				} else {
 					Some(KoboSync { model: m })
@@ -66,12 +70,6 @@ impl KoboSync {
 			.all(db)
 			.await?;
 
-		tracing::debug!(
-			?previous_sync_at,
-			to_sync_media_count = new_media.len(),
-			"Beginning new Kobo sync"
-		);
-
 		let sync = kobo_sync::ActiveModel {
 			user_id: Set(user.id.clone()),
 			media_ids: Set(kobo_sync::MediaIds(
@@ -83,6 +81,14 @@ impl KoboSync {
 			..Default::default()
 		};
 		let sync = sync.insert(db).await?;
+
+		tracing::debug!(
+			?previous_sync_at,
+			to_sync_media_count = new_media.len(),
+			sync_id = sync.id,
+			"Beginning new Kobo sync"
+		);
+
 		Ok(Self { model: sync })
 	}
 

@@ -200,7 +200,8 @@ async fn library_sync(
 
 	let device_id = headers.get("x-kobo-deviceid").and_then(|h| h.to_str().ok());
 	if device_id.is_none() {
-		tracing::error!("Client did not pass a valid x-kobo-deviceid");
+		// the device ID is not critical to the sync process, but it's useful metadata.
+		tracing::warn!("Client did not pass a valid x-kobo-deviceid");
 	}
 
 	let device_metadata = device_metadata(&headers);

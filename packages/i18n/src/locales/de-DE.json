@@ -2715,15 +2715,15 @@
 						"confirmation": "Bist du dir sicher, dass du alle Downloads von {{serverName}} löschen möchtest?",
 						"deleteFailed": {
 							"title": "Löschen fehlgeschlagen",
-							"description": "There was an error deleting all downloads from {{serverName}}"
+							"description": "Es gab einen Fehler beim Löschen aller Downloads von {{serverName}}"
 						}
 					},
-					"noDownloads": "No downloaded files for this server",
+					"noDownloads": "Keine heruntergeladenen Dateien für diesen Server",
 					"storedPreferences": {
-						"label": "Stored preferences",
-						"description": "Miscellaneous data like book preferences, reading timers, etc"
+						"label": "Gespeicherte Präferenzen",
+						"description": "Sonstige Daten wie Buchpräferenzen, Lesezeiten, etc"
 					},
-					"clearPreferences": "Clear Preferences"
+					"clearPreferences": "Präferenzen löschen"
 				}
 			},
 			"debug": {
@@ -2731,11 +2731,11 @@
 				"clearCache": {
 					"memory": {
 						"button": "Speicher",
-						"success": "Speicher Cache geleert"
+						"success": "Speicher-Cache geleert"
 					},
 					"disk": {
-						"button": "Disk",
-						"success": "Disk cache cleared"
+						"button": "Festplatte",
+						"success": "Festplatten-Cache geleert"
 					}
 				},
 				"deleteDatabase": {

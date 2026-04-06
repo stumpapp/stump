@@ -622,7 +622,7 @@ mod tests {
 		// a newly created book.
 		let new_book = ExampleMedia {
 			series_id: series.id.clone(),
-			id: Some(format!("new-book")),
+			id: Some("new-book".to_string()),
 			created_at: Some(previous_sync_at.checked_add_days(Days::new(1)).unwrap()),
 			..Default::default()
 		}
@@ -633,7 +633,7 @@ mod tests {
 			&db,
 			&user,
 			"sync_1234".to_string(),
-			&vec![new_book.id.clone()],
+			std::slice::from_ref(&new_book.id),
 			0,
 			10,
 			Some(previous_sync_at),
@@ -669,7 +669,7 @@ mod tests {
 		// a book that was modified since the last sync.
 		let new_book = ExampleMedia {
 			series_id: series.id.clone(),
-			id: Some(format!("new-book")),
+			id: Some("new-book".to_string()),
 			created_at: Some(previous_sync_at.checked_sub_days(Days::new(1)).unwrap()),
 			modified_at: Some(previous_sync_at.checked_add_days(Days::new(1)).unwrap()),
 			..Default::default()
@@ -681,7 +681,7 @@ mod tests {
 			&db,
 			&user,
 			"sync_1234".to_string(),
-			&vec![new_book.id.clone()],
+			std::slice::from_ref(&new_book.id),
 			0,
 			10,
 			Some(previous_sync_at),

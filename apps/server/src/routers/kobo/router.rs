@@ -65,7 +65,7 @@ const ITEMS_PER_PAGE: usize = 5;
 
 struct SyncResponse {
 	sync_items: Vec<SyncItem>,
-	sync_token: SyncToken,
+	sync_token: HeaderValue,
 	should_continue: bool,
 }
 
@@ -78,14 +78,10 @@ impl IntoResponse for SyncResponse {
 				.insert("x-kobo-sync", HeaderValue::from_static("continue"));
 		}
 
-		match self.sync_token.try_to_header_value() {
-			Ok(sync_token) => {
-				response
-					.headers_mut()
-					.insert("x-kobo-synctoken", sync_token);
-			},
-			Err(e) => tracing::error!(?e, "Failed to produce Kobo sync token"),
-		}
+		response
+			.headers_mut()
+			.insert("x-kobo-synctoken", self.sync_token);
+
 		response
 	}
 }
@@ -227,10 +223,18 @@ async fn library_sync(
 	let kobo_api_base_url = format!("{}/kobo/{}", host.url(), api_key);
 	let sync_items = sync_page.sync_items(kobo_api_base_url.as_str()).await?;
 
+	// if we don't send a sync token the client will send no sync token on its next sync,
+	// essentially starting the sync process from scratch. that's not a disaster, but it's
+	// a weird enough case that it's simpler to error loudly.
+	let sync_token = sync_page.sync_token.try_to_header_value().map_err(|e| {
+		tracing::warn!(?e, "Failed to produce Kobo sync token");
+		APIError::InternalServerError("Could not produce a Kobo sync token".to_string())
+	})?;
+
 	Ok(SyncResponse {
 		sync_items,
 		should_continue: sync_page.should_continue,
-		sync_token: sync_page.sync_token,
+		sync_token: sync_token,
 	})
 }
 

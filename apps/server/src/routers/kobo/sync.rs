@@ -20,7 +20,11 @@ pub struct KoboSync {
 }
 
 impl KoboSync {
-	async fn find(db: &DatabaseConnection, user: &AuthUser, id: String) -> Option<Self> {
+	async fn find<T: Into<String>>(
+		db: &DatabaseConnection,
+		user: &AuthUser,
+		id: T,
+	) -> Option<Self> {
 		kobo_sync_session::Entity::find_by_id(id)
 			.one(db)
 			.await
@@ -141,17 +145,13 @@ impl KoboSync {
 		//   continue session
 		let sync_id = client_sync_token.map(|token| match token {
 			SyncToken::IncompleteV1 { sync_id, .. }
-			| SyncToken::CompletedV1 { sync_id, .. } => sync_id.clone(),
+			| SyncToken::CompletedV1 { sync_id, .. } => sync_id.to_string(),
 		});
 
 		let prev_sync_session = match sync_id {
-			Some(ref sync_id) => KoboSync::find(db, user, sync_id.clone()).await,
+			Some(ref sync_id) => KoboSync::find(db, user, sync_id).await,
 			None => None,
 		};
-
-		let previous_sync_began_at = prev_sync_session
-			.as_ref()
-			.map(|s| s.model.created_at.fixed_offset());
 
 		let (session, offset) = match (client_sync_token, prev_sync_session) {
 			// we're continuing an existing sync session
@@ -159,7 +159,10 @@ impl KoboSync {
 				(session, *next_offset)
 			},
 			// there was no previous sync session, or the previous session completed
-			(_, _) => {
+			(_, prev_sync_session) => {
+				let previous_sync_began_at =
+					prev_sync_session.map(|s| s.model.created_at.fixed_offset());
+
 				// once the device has acknowledged session N (prev_sync_session) we no longer need session N-1.
 				let keep_sessions: Vec<String> = sync_id.into_iter().collect();
 				KoboSync::prune_sync_sessions(db, user, device_id, &keep_sessions).await;

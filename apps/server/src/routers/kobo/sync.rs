@@ -290,22 +290,12 @@ impl<'a> SyncPage<'a> {
 #[cfg(test)]
 mod tests {
 	use chrono::Days;
-	use models::{
-		entity::{
-			finished_reading_session, kobo_sync_session, library, library_exclusion,
-			media, media_metadata, reading_session, series, series_metadata, user,
-			user_preferences,
-		},
-		shared::enums::FileStatus,
-	};
-	use rand::distr::SampleString;
+	use models::entity::{kobo_sync_session, user};
+	use sea_orm::prelude::DateTimeWithTimeZone;
 	use sea_orm::query::*;
 	use sea_orm::EntityTrait;
-	use sea_orm::{
-		prelude::DateTimeWithTimeZone, ActiveModelTrait, ActiveValue, ConnectionTrait,
-		Database, DbBackend, DbConn, DbErr, Schema,
-	};
-	use uuid::Uuid;
+	use tests::db::test_database;
+	use tests::fake_data;
 
 	use crate::routers::kobo::{
 		sync::{KoboSync, SyncPage},
@@ -313,162 +303,14 @@ mod tests {
 	};
 	use stump_core::kobo::sync_types::SyncItem;
 
-	async fn test_database() -> DbConn {
-		let db = Database::connect("sqlite::memory:")
-			.await
-			.expect("failed to connect to test database");
-
-		create_database_tables(&db)
-			.await
-			.expect("failed to create test database tables");
-
-		db
-	}
-
-	async fn create_database_tables(db: &DbConn) -> Result<(), DbErr> {
-		let schema = Schema::new(DbBackend::Sqlite);
-
-		let tables = [
-			schema.create_table_from_entity(media::Entity),
-			schema.create_table_from_entity(media_metadata::Entity),
-			schema.create_table_from_entity(series::Entity),
-			schema.create_table_from_entity(series_metadata::Entity),
-			schema.create_table_from_entity(library_exclusion::Entity),
-			schema.create_table_from_entity(kobo_sync_session::Entity),
-			schema.create_table_from_entity(user::Entity),
-			schema.create_table_from_entity(user_preferences::Entity),
-			schema.create_table_from_entity(library::Entity),
-			schema.create_table_from_entity(reading_session::Entity),
-			schema.create_table_from_entity(finished_reading_session::Entity),
-		];
-
-		for stmt in tables {
-			db.execute(db.get_database_backend().build(&stmt)).await?;
-		}
-
-		Ok(())
-	}
-
-	// note that None here means "use some default", not necessarily "set the value to None".
-	// that may make it impossible to set some values to None. I'm not sure how to avoid that while
-	// keeping good ergonomics.
-	#[derive(Default)]
-	struct ExampleMedia {
-		series_id: String,
-		id: Option<String>,
-		name: Option<String>,
-		extension: Option<String>,
-		created_at: Option<DateTimeWithTimeZone>,
-		modified_at: Option<DateTimeWithTimeZone>,
-		deleted_at: Option<DateTimeWithTimeZone>,
-	}
-
-	impl ExampleMedia {
-		async fn insert(&self, db: &DbConn) -> media::Model {
-			let id = self
-				.id
-				.clone()
-				.unwrap_or_else(|| Uuid::new_v4().to_string());
-
-			let name = self
-				.name
-				.clone()
-				.unwrap_or_else(|| format!("Test Book {id}"));
-			let extension = self.extension.clone().unwrap_or("epub".to_string());
-
-			let model = media::ActiveModel {
-				series_id: ActiveValue::Set(Some(self.series_id.clone())),
-				id: ActiveValue::Set(id.clone()),
-				name: ActiveValue::Set(name.clone()),
-				size: ActiveValue::Set(1234),
-				extension: sea_orm::Set(extension.clone()),
-				pages: ActiveValue::Set(940),
-				modified_at: self
-					.modified_at
-					.map_or(ActiveValue::default(), |t| ActiveValue::Set(Some(t))),
-				deleted_at: self
-					.deleted_at
-					.map_or(ActiveValue::default(), |t| ActiveValue::Set(Some(t))),
-				path: sea_orm::Set(format!("{name}.{extension}").to_string()),
-				status: sea_orm::Set(FileStatus::Ready),
-				..Default::default()
-			};
-
-			let insert_result = model.insert(db).await.expect("could not insert media");
-
-			// "created_at" is overridden by the ActiveModelBehavior, so we need to update it explicitly.
-			match self.created_at {
-				Some(t) => {
-					let mut model: media::ActiveModel = insert_result.into();
-					model.created_at = ActiveValue::Set(t);
-					model.update(db).await.expect("could not update media")
-				},
-				None => insert_result,
-			}
-		}
-	}
-
-	#[derive(Default)]
-	struct ExampleUser {
-		username: String,
-		hashed_password: Option<String>,
-	}
-
-	impl ExampleUser {
-		fn new<T: ToString>(username: T) -> Self {
-			ExampleUser {
-				username: username.to_string(),
-				..Default::default()
-			}
-		}
-
-		async fn insert(&self, db: &DbConn) -> user::Model {
-			let model = user::ActiveModel {
-				username: sea_orm::Set(self.username.clone()),
-				hashed_password: sea_orm::Set(
-					self.hashed_password.clone().unwrap_or("".to_string()),
-				),
-				is_server_owner: sea_orm::Set(true),
-				is_locked: sea_orm::Set(false),
-				..Default::default()
-			};
-
-			model.insert(db).await.expect("could not insert user")
-		}
-	}
-
-	#[derive(Default)]
-	struct ExampleSeries {
-		name: Option<String>,
-		path: Option<String>,
-	}
-
-	impl ExampleSeries {
-		async fn insert(&self, db: &DbConn) -> series::Model {
-			let name = self.name.clone().unwrap_or_else(|| {
-				rand::distr::Alphabetic.sample_string(&mut rand::rng(), 16)
-			});
-
-			let path = self.path.clone().unwrap_or_else(|| format!("/tmp/{name}"));
-
-			let model = series::ActiveModel {
-				name: sea_orm::Set(name),
-				path: sea_orm::Set(path),
-				..Default::default()
-			};
-
-			model.insert(db).await.expect("could not insert series")
-		}
-	}
-
 	#[tokio::test]
 	async fn test_first_sync() {
 		let db = test_database().await;
 
-		let user = ExampleUser::new("ishmael").insert(&db).await;
-		let series = ExampleSeries::default().insert(&db).await;
+		let user = fake_data::User::new("ishmael").insert(&db).await;
+		let series = fake_data::Series::default().insert(&db).await;
 
-		ExampleMedia {
+		fake_data::Media {
 			series_id: series.id.clone(),
 			id: Some("don-quixote".to_string()),
 			name: Some("Don Quixote".to_string()),
@@ -478,7 +320,7 @@ mod tests {
 		.insert(&db)
 		.await;
 
-		ExampleMedia {
+		fake_data::Media {
 			series_id: series.id.clone(),
 			id: Some("robinson-crusoe".to_string()),
 			name: Some("Robinson Crusoe".to_string()),
@@ -488,7 +330,7 @@ mod tests {
 		.insert(&db)
 		.await;
 
-		ExampleMedia {
+		fake_data::Media {
 			series_id: series.id.clone(),
 			id: Some("the-count-of-monte-cristo".to_string()),
 			name: Some("The Count of Monte Cristo".to_string()),
@@ -530,11 +372,11 @@ mod tests {
 	async fn test_pagination() {
 		let db = test_database().await;
 
-		let user = ExampleUser::new("ishmael").insert(&db).await;
-		let series = ExampleSeries::default().insert(&db).await;
+		let user = fake_data::User::new("ishmael").insert(&db).await;
+		let series = fake_data::Series::default().insert(&db).await;
 
 		for i in 1..=5 {
-			ExampleMedia {
+			fake_data::Media {
 				series_id: series.id.clone(),
 				id: Some(format!("book-{i}")),
 				..Default::default()
@@ -586,11 +428,11 @@ mod tests {
 	async fn test_incremental_sync() {
 		let db = test_database().await;
 
-		let user = ExampleUser::new("ishmael").insert(&db).await;
-		let series = ExampleSeries::default().insert(&db).await;
+		let user = fake_data::User::new("ishmael").insert(&db).await;
+		let series = fake_data::Series::default().insert(&db).await;
 
 		for i in 1..=2 {
-			ExampleMedia {
+			fake_data::Media {
 				series_id: series.id.clone(),
 				id: Some(format!("book-{i}")),
 				..Default::default()
@@ -622,7 +464,7 @@ mod tests {
 
 		// after the first sync more media was added.
 		for i in 3..=4 {
-			ExampleMedia {
+			fake_data::Media {
 				series_id: series.id.clone(),
 				id: Some(format!("book-{i}")),
 				..Default::default()
@@ -652,7 +494,7 @@ mod tests {
 	async fn test_represent_new_entitlement() {
 		let db = test_database().await;
 
-		let user = ExampleUser::new("ishmael").insert(&db).await;
+		let user = fake_data::User::new("ishmael").insert(&db).await;
 		let user = user::AuthUser {
 			id: user.id,
 			permissions: vec![],
@@ -662,10 +504,10 @@ mod tests {
 		let previous_sync_at: DateTimeWithTimeZone =
 			"2026-01-01T00:00:00Z".parse().unwrap();
 
-		let series = ExampleSeries::default().insert(&db).await;
+		let series = fake_data::Series::default().insert(&db).await;
 
 		// a newly created book.
-		let new_book = ExampleMedia {
+		let new_book = fake_data::Media {
 			series_id: series.id.clone(),
 			id: Some("new-book".to_string()),
 			created_at: Some(previous_sync_at.checked_add_days(Days::new(1)).unwrap()),
@@ -699,7 +541,7 @@ mod tests {
 	async fn test_represent_changed_product_metadata() {
 		let db = test_database().await;
 
-		let user = ExampleUser::new("ishmael").insert(&db).await;
+		let user = fake_data::User::new("ishmael").insert(&db).await;
 		let user = user::AuthUser {
 			id: user.id,
 			permissions: vec![],
@@ -709,10 +551,10 @@ mod tests {
 		let previous_sync_at: DateTimeWithTimeZone =
 			"2026-01-01T00:00:00Z".parse().unwrap();
 
-		let series = ExampleSeries::default().insert(&db).await;
+		let series = fake_data::Series::default().insert(&db).await;
 
 		// a book that was modified since the last sync.
-		let new_book = ExampleMedia {
+		let new_book = fake_data::Media {
 			series_id: series.id.clone(),
 			id: Some("new-book".to_string()),
 			created_at: Some(previous_sync_at.checked_sub_days(Days::new(1)).unwrap()),
@@ -747,7 +589,7 @@ mod tests {
 	async fn test_sync_pruning() {
 		let db = test_database().await;
 
-		let user = ExampleUser::new("ishmael").insert(&db).await;
+		let user = fake_data::User::new("ishmael").insert(&db).await;
 
 		let user = user::AuthUser {
 			id: user.id,

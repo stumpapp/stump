@@ -561,6 +561,19 @@ where
 			.await?;
 	}
 
+	// if we do not swap the user_preferences_id the account "breaks" because no preferences exist.
+	// i added a fix for that, however the migration should still to the remap as it is correct
+	if let Some(local_prefs_id) = local_user.user_preferences_id {
+		user_preferences::Entity::update_many()
+			.col_expr(
+				user_preferences::Column::UserId,
+				sea_orm::sea_query::Expr::value(Some(oidc_user.id.clone())),
+			)
+			.filter(user_preferences::Column::Id.eq(local_prefs_id))
+			.exec(&txn)
+			.await?;
+	}
+
 	post_message("Deleting local account...");
 	user::Entity::delete_by_id(local_user.id).exec(&txn).await?;
 
@@ -644,7 +657,7 @@ mod tests {
 			let model = user.unwrap_or_else(|| Self::active_model());
 
 			let user = model.insert(db).await.expect("could not insert user");
-			let _user_preferences = user_preferences::ActiveModel {
+			let user_preferences = user_preferences::ActiveModel {
 				user_id: Set(Some(user.id.clone())),
 				..Default::default()
 			}
@@ -652,7 +665,21 @@ mod tests {
 			.await
 			.expect("could not insert user preferences");
 
-			user
+			user::Entity::update_many()
+				.col_expr(
+					user::Column::UserPreferencesId,
+					sea_orm::sea_query::Expr::value(Some(user_preferences.id)),
+				)
+				.filter(user::Column::Id.eq(user.id.clone()))
+				.exec(db)
+				.await
+				.expect("could not update user with preferences id");
+
+			user::Entity::find_by_id(user.id)
+				.one(db)
+				.await
+				.expect("could not find updated user")
+				.expect("user should exist after update")
 		}
 	}
 
@@ -975,6 +1002,22 @@ mod tests {
 			updated_oidc_user.is_server_owner,
 			"OIDC user should be server owner"
 		);
+
+		if let Some(prefs_id) = updated_oidc_user.user_preferences_id {
+			let preferences = user_preferences::Entity::find_by_id(prefs_id)
+				.one(&db)
+				.await
+				.expect("Failed to query user preferences")
+				.expect("User preferences should exist");
+			// see https://discord.com/channels/972593831172272148/1490415985524609264/1491118111401705494
+			assert_eq!(
+				preferences.user_id,
+				Some(oidc_user.id.clone()),
+				"User preferences should point back to OIDC user"
+			);
+		} else {
+			panic!("OIDC user should have preferences");
+		}
 
 		let reading_sessions = reading_session::Entity::find()
 			.filter(reading_session::Column::UserId.eq(&oidc_user.id))

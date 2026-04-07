@@ -212,8 +212,6 @@ async fn library_sync(
 	)
 	.await?;
 
-	// TODO: delete any KoboSyncs prior to the prev_sync for this x-kobo-deviceid
-
 	let kobo_api_base_url = format!("{}/kobo/{}", host.url(), api_key);
 	let sync_items = sync_page.sync_items(kobo_api_base_url.as_str()).await?;
 

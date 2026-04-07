@@ -39,6 +39,41 @@ impl KoboSync {
 			})
 	}
 
+	/// Delete Kobo sync sessions that are no longer relevant.
+	/// These database rows can be relatively large, and they're not very useful once the
+	/// session has been completed.
+	async fn prune_sync_sessions(
+		db: &DatabaseConnection,
+		user: &AuthUser,
+		device_id: Option<&str>,
+		keep_sessions: &[String],
+	) {
+		let Some(device_id) = device_id else {
+			return;
+		};
+
+		let res = kobo_sync_session::Entity::delete_many()
+			.filter(kobo_sync_session::Column::UserId.eq(user.id.clone()))
+			.filter(kobo_sync_session::Column::DeviceId.eq(device_id))
+			.filter(kobo_sync_session::Column::Id.is_not_in(keep_sessions))
+			.exec(db)
+			.await;
+
+		match res {
+			Ok(res) => {
+				if res.rows_affected != 0 {
+					tracing::debug!(
+						rows_affected = res.rows_affected,
+						"Pruned Kobo sync sessions"
+					);
+				}
+			},
+			Err(e) => {
+				tracing::error!(?e, "Failed to prune Kobo sync sessions");
+			},
+		}
+	}
+
 	async fn begin_new_sync(
 		db: &DatabaseConnection,
 		user: &AuthUser,
@@ -109,22 +144,26 @@ impl KoboSync {
 			| SyncToken::CompletedV1 { sync_id, .. } => sync_id.clone(),
 		});
 
-		let prev_sync = match sync_id {
-			Some(sync_id) => KoboSync::find(db, user, sync_id).await,
+		let prev_sync_session = match sync_id {
+			Some(ref sync_id) => KoboSync::find(db, user, sync_id.clone()).await,
 			None => None,
 		};
 
-		let previous_sync_began_at = prev_sync
+		let previous_sync_began_at = prev_sync_session
 			.as_ref()
 			.map(|s| s.model.created_at.fixed_offset());
 
-		let (session, offset) = match (client_sync_token, prev_sync) {
+		let (session, offset) = match (client_sync_token, prev_sync_session) {
 			// we're continuing an existing sync session
 			(Some(SyncToken::IncompleteV1 { next_offset, .. }), Some(session)) => {
 				(session, *next_offset)
 			},
 			// there was no previous sync session, or the previous session completed
 			(_, _) => {
+				// once the device has acknowledged session N (prev_sync_session) we no longer need session N-1.
+				let keep_sessions: Vec<String> = sync_id.into_iter().collect();
+				KoboSync::prune_sync_sessions(db, user, device_id, &keep_sessions).await;
+
 				let session = KoboSync::begin_new_sync(
 					db,
 					user,
@@ -276,6 +315,8 @@ mod tests {
 		shared::enums::FileStatus,
 	};
 	use rand::distr::SampleString;
+	use sea_orm::query::*;
+	use sea_orm::EntityTrait;
 	use sea_orm::{
 		prelude::DateTimeWithTimeZone, ActiveModelTrait, ActiveValue, ConnectionTrait,
 		Database, DbBackend, DbConn, DbErr, Schema,
@@ -715,5 +756,51 @@ mod tests {
 		};
 
 		assert_eq!(new_book.id, ent.entitlement_id);
+	}
+
+	#[tokio::test]
+	async fn test_sync_pruning() {
+		let db = test_database().await;
+
+		let user = ExampleUser::new("ishmael").insert(&db).await;
+
+		let user = user::AuthUser {
+			id: user.id,
+			permissions: vec![],
+			..Default::default()
+		};
+
+		// do 5 successive syncs.
+		let mut sync_token: Option<SyncToken> = None;
+		let mut sync_ids = vec![];
+		for _ in 1..=5 {
+			let sync_page = KoboSync::next_page(
+				&db,
+				&user,
+				Some("kobo-1"),
+				serde_json::json!({}),
+				sync_token.as_ref(),
+				10,
+			)
+			.await
+			.expect("failed to initiate sync");
+
+			let SyncToken::CompletedV1 { ref sync_id, .. } = sync_page.sync_token else {
+				panic!("expected an sync token without a next page")
+			};
+
+			sync_ids.push(sync_id.clone());
+			sync_token = Some(sync_page.sync_token);
+		}
+
+		let sessions_in_db: Vec<String> = kobo_sync_session::Entity::find()
+			.column(kobo_sync_session::Column::Id)
+			.into_tuple()
+			.all(&db)
+			.await
+			.expect("could not load Kobo sync sessions from database");
+
+		// the database should only contain the last 2 syncs.
+		assert_eq!(sync_ids[3..], sessions_in_db)
 	}
 }

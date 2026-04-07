@@ -1,23 +1,16 @@
-import { Button, ContextMenu, Divider, Host } from '@expo/ui/swift-ui'
 import { useGraphQLMutation } from '@stump/client'
 import { BookByIdQuery, FragmentType, graphql, useFragment } from '@stump/graphql'
 import { useQueryClient } from '@tanstack/react-query'
 import { and, eq } from 'drizzle-orm'
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
-import { useRouter } from 'expo-router'
-import { Ellipsis } from 'lucide-react-native'
-import { useCallback, useState } from 'react'
-import { Alert, Platform, View } from 'react-native'
-import { Pressable } from 'react-native-gesture-handler'
-import * as DropdownMenu from 'zeego/dropdown-menu'
+import { Stack, useNavigation, useRouter } from 'expo-router'
+import { useCallback, useLayoutEffect } from 'react'
+import { Alert, Platform } from 'react-native'
 
 import { useActiveServer } from '~/components/activeServer'
-import { Icon } from '~/components/ui'
 import { db, downloadedFiles } from '~/db'
-import { IS_IOS_24_PLUS } from '~/lib/constants'
 import { useDownload } from '~/lib/hooks'
 import { useFavoriteBook } from '~/lib/hooks/useFavoriteBook'
-import { cn } from '~/lib/utils'
 
 import AndroidBookMenu from './AndroidBookMenu'
 
@@ -189,10 +182,8 @@ export default function BookMenu({ data }: Props) {
 
 	const router = useRouter()
 
-	const [isOpen, setIsOpen] = useState(false)
-
-	if (Platform.OS === 'android') {
-		return (
+	return Platform.select({
+		android: (
 			<AndroidBookMenu
 				book={book}
 				isFavorite={isFavorite}
@@ -203,189 +194,87 @@ export default function BookMenu({ data }: Props) {
 				deleteCurrentSession={confirmClearProgress}
 				deleteReadHistory={confirmDeleteReadHistory}
 			/>
-		)
-	}
+		),
+		ios: (
+			<>
+				<Stack.Toolbar placement="right">
+					<Stack.Toolbar.Menu icon="ellipsis">
+						<Stack.Toolbar.Menu inline>
+							<Stack.Toolbar.MenuAction
+								icon={isFavorite ? 'heart.fill' : 'heart'}
+								onPress={() => favoriteBook()}
+							>
+								{isFavorite ? 'Unfavorite' : 'Favorite'}
+							</Stack.Toolbar.MenuAction>
+						</Stack.Toolbar.Menu>
 
-	// TODO: Once I figure out how to do the subtitles with expo/ui, I can remove zeego
-	if (IS_IOS_24_PLUS) {
-		return (
-			<Host matchContents>
-				<ContextMenu>
-					<ContextMenu.Trigger>
-						<View
-							accessibilityLabel="options"
-							style={{
-								height: 35,
-								width: 35,
-								justifyContent: 'center',
-								alignItems: 'center',
-							}}
+						<Stack.Toolbar.Menu inline>
+							{(isUntouched || isReading) && (
+								<Stack.Toolbar.MenuAction icon="book.closed" onPress={confirmMarkAsRead}>
+									Mark as Read
+								</Stack.Toolbar.MenuAction>
+							)}
+
+							{isReading && (
+								<Stack.Toolbar.MenuAction icon="minus.circle" onPress={confirmClearProgress}>
+									Clear Progress
+								</Stack.Toolbar.MenuAction>
+							)}
+
+							{isPreviouslyCompleted && (
+								<Stack.Toolbar.MenuAction
+									icon="rectangle.stack.badge.minus"
+									onPress={confirmDeleteReadHistory}
+								>
+									Delete Read History
+								</Stack.Toolbar.MenuAction>
+							)}
+						</Stack.Toolbar.Menu>
+
+						<Stack.Toolbar.MenuAction
+							icon="arrow.up.right"
+							onPress={() => router.push(`/server/${book.id}/libraries/${book.library.id}`)}
+							subtitle={book.library.name}
 						>
-							<Icon as={Ellipsis} size={24} className="text-foreground" />
-						</View>
-					</ContextMenu.Trigger>
-					<ContextMenu.Items>
-						<Button
-							systemImage={isFavorite ? 'heart.fill' : 'heart'}
-							onPress={() => favoriteBook()}
-							label={isFavorite ? 'Unfavorite' : 'Favorite'}
-						/>
+							Go to Library
+						</Stack.Toolbar.MenuAction>
 
-						<Divider />
-
-						{(isUntouched || isReading) && (
-							<Button systemImage="book.closed" onPress={confirmMarkAsRead} label="Mark as Read" />
-						)}
-
-						{isReading && (
-							<Button
-								systemImage="minus.circle"
-								onPress={confirmClearProgress}
-								label="Clear Progress"
-							/>
-						)}
-
-						{isPreviouslyCompleted && (
-							<Button
-								systemImage="rectangle.stack.badge.minus"
-								role="destructive"
-								onPress={confirmDeleteReadHistory}
-								label="Delete Read History"
-							/>
-						)}
-
-						<Divider />
-
-						<Button
-							systemImage="arrow.up.right"
-							onPress={() =>
-								router.push({
-									// @ts-expect-error: I need to use less ambiguous [id]s, e.g. [libraryId]
-									pathname: `/server/${book.id}/libraries/${book.library.id}`,
-								})
-							}
-							label={`Go to Library \n${book.library.name}`}
-						/>
-
-						<Button
-							systemImage="arrow.up.right"
-							onPress={() =>
-								router.push({
-									// @ts-expect-error: I need to use less ambiguous [id]s, e.g. [libraryId]
-									pathname: `/server/${book.id}/series/${book.series.id}`,
-								})
-							}
-							label={`Go to Series \n${book.series.resolvedName}`}
-						/>
+						<Stack.Toolbar.MenuAction
+							icon="arrow.up.right"
+							onPress={() => router.push(`/server/${book.id}/series/${book.series.id}`)}
+							subtitle={book.series.resolvedName}
+						>
+							Go to Series
+						</Stack.Toolbar.MenuAction>
 
 						{isDownloaded && (
-							<>
-								<Divider />
-
-								<Button
-									systemImage="trash"
-									role="destructive"
-									onPress={() => deleteBook()}
-									label="Delete Download"
-								/>
-							</>
+							<Stack.Toolbar.Menu inline>
+								<Stack.Toolbar.MenuAction icon="trash" onPress={() => deleteBook()} destructive>
+									Delete Download
+								</Stack.Toolbar.MenuAction>
+							</Stack.Toolbar.Menu>
 						)}
-					</ContextMenu.Items>
-				</ContextMenu>
-			</Host>
-		)
+					</Stack.Toolbar.Menu>
+				</Stack.Toolbar>
+			</>
+		),
+		default: null,
+	})
+}
+
+export function useBookMenu(book?: FragmentType<typeof fragment> | null) {
+	const navigation = useNavigation()
+	useLayoutEffect(() => {
+		if (book && Platform.OS === 'android') {
+			navigation.setOptions({
+				headerRight: () => <BookMenu data={book} />,
+			})
+		}
+	}, [navigation, book])
+
+	if (Platform.OS === 'ios' && book) {
+		return <BookMenu data={book} />
 	}
 
-	// https://docs.expo.dev/versions/latest/sdk/symbols/
-	// https://github.com/nandorojo/zeego/issues/90
-	return (
-		<DropdownMenu.Root open={isOpen} onOpenChange={setIsOpen}>
-			<DropdownMenu.Trigger>
-				<Pressable onPress={() => setIsOpen((prev) => !prev)}>
-					{({ pressed }) => (
-						<View className={cn(pressed && 'opacity-70')}>
-							<Ellipsis size={20} className="text-foreground" />
-						</View>
-					)}
-				</Pressable>
-			</DropdownMenu.Trigger>
-
-			<DropdownMenu.Content>
-				<DropdownMenu.Item key="isFavorite" onSelect={() => favoriteBook()}>
-					<DropdownMenu.ItemIndicator />
-					<DropdownMenu.ItemTitle>{isFavorite ? 'Unfavorite' : 'Favorite'}</DropdownMenu.ItemTitle>
-					<DropdownMenu.ItemIcon
-						ios={{ name: isFavorite ? 'heart.fill' : 'heart' }}
-						androidIconName="favorite"
-					/>
-				</DropdownMenu.Item>
-
-				<DropdownMenu.Group>
-					{(isUntouched || isReading) && (
-						<DropdownMenu.Item key="markAsRead" onSelect={confirmMarkAsRead}>
-							<DropdownMenu.ItemIndicator />
-							<DropdownMenu.ItemTitle>Mark as Read</DropdownMenu.ItemTitle>
-							<DropdownMenu.ItemIcon ios={{ name: 'book.closed' }} />
-						</DropdownMenu.Item>
-					)}
-
-					{isReading && (
-						<DropdownMenu.Item key="clearProgress" onSelect={confirmClearProgress}>
-							<DropdownMenu.ItemIndicator />
-							<DropdownMenu.ItemTitle>Clear Progress</DropdownMenu.ItemTitle>
-							<DropdownMenu.ItemIcon ios={{ name: 'minus.circle' }} />
-						</DropdownMenu.Item>
-					)}
-
-					{isPreviouslyCompleted && (
-						<DropdownMenu.Item key="deleteHistory" onSelect={confirmDeleteReadHistory}>
-							<DropdownMenu.ItemIndicator />
-							<DropdownMenu.ItemTitle>Delete Read History</DropdownMenu.ItemTitle>
-							<DropdownMenu.ItemIcon ios={{ name: 'rectangle.stack.badge.minus' }} />
-						</DropdownMenu.Item>
-					)}
-				</DropdownMenu.Group>
-
-				<DropdownMenu.Group>
-					<DropdownMenu.Item
-						key="library"
-						onSelect={() =>
-							router.push({
-								// @ts-expect-error: I need to use less ambiguous [id]s, e.g. [libraryId]
-								pathname: `/server/${book.id}/libraries/${book.library.id}`,
-							})
-						}
-					>
-						<DropdownMenu.ItemIndicator />
-						<DropdownMenu.ItemTitle>Go to Library</DropdownMenu.ItemTitle>
-						<DropdownMenu.ItemSubtitle>{book.library.name}</DropdownMenu.ItemSubtitle>
-						<DropdownMenu.ItemIcon ios={{ name: 'arrow.up.right' }} />
-					</DropdownMenu.Item>
-
-					<DropdownMenu.Item
-						key="series"
-						onSelect={() =>
-							router.push({
-								// @ts-expect-error: I need to use less ambiguous [id]s, e.g. [libraryId]
-								pathname: `/server/${book.id}/series/${book.series.id}`,
-							})
-						}
-					>
-						<DropdownMenu.ItemIndicator />
-						<DropdownMenu.ItemTitle>Go to Series</DropdownMenu.ItemTitle>
-						<DropdownMenu.ItemSubtitle>{book.series.resolvedName}</DropdownMenu.ItemSubtitle>
-						<DropdownMenu.ItemIcon ios={{ name: 'arrow.up.right' }} />
-					</DropdownMenu.Item>
-				</DropdownMenu.Group>
-
-				{isDownloaded && (
-					<DropdownMenu.Item key="deleteDownload" onSelect={() => deleteBook()}>
-						<DropdownMenu.ItemIndicator />
-						<DropdownMenu.ItemTitle>Delete Download</DropdownMenu.ItemTitle>
-						<DropdownMenu.ItemIcon ios={{ name: 'trash' }} />
-					</DropdownMenu.Item>
-				)}
-			</DropdownMenu.Content>
-		</DropdownMenu.Root>
-	)
+	return null
 }

@@ -119,13 +119,15 @@ export const useReaderStore = create<ReaderStore>()(
 				bookSettings: {},
 				addBookSettings: (id, preferences) =>
 					set({ bookSettings: { ...get().bookSettings, [id]: preferences } }),
-				setBookSettings: (id, updates) =>
+				setBookSettings: (id, updates) => {
+					const bookPreferences = get().bookSettings?.[id]
 					set({
 						bookSettings: {
 							...get().bookSettings,
-							[id]: { ...get().bookSettings[id], ...updates },
+							...(bookPreferences ? { [id]: { ...bookPreferences, ...updates } } : {}),
 						},
-					}),
+					})
+				},
 
 				bookCache: {},
 				setBookCache: (id, data) => {
@@ -209,6 +211,7 @@ export const useBookPreferences = ({ book, ...params }: Params) => {
 
 	return {
 		globalSettings,
+		overrideGlobalSettings,
 		preferences: {
 			...globalSettings,
 			...(overrideGlobalSettings && bookSettings ? bookSettings : {}),

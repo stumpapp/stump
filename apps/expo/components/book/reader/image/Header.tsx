@@ -1,7 +1,5 @@
-import { ReadingDirection } from '@stump/graphql'
 import { useRouter } from 'expo-router'
 import { X } from 'lucide-react-native'
-import { useCallback } from 'react'
 import { Platform, View } from 'react-native'
 import Animated from 'react-native-reanimated'
 import { initialWindowMetrics, useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -9,8 +7,6 @@ import { initialWindowMetrics, useSafeAreaInsets } from 'react-native-safe-area-
 import { Heading } from '~/components/ui'
 import { HeaderButton } from '~/components/ui/header-button/header-button'
 import { COLORS } from '~/lib/constants'
-import { useReaderStore } from '~/stores'
-import { useBookPreferences } from '~/stores/reader'
 
 import { PagedActionMenu } from '../shared/paged-action-menu/PagedActionMenu'
 import { useReaderAnimations } from '../shared/readerAnimations'
@@ -22,28 +18,15 @@ type Props = {
 
 export default function Header({ onShowGlobalSettings }: Props) {
 	const { book, resetTimer, serverId } = useImageBasedReader()
-	const {
-		preferences: { readingDirection },
-		setBookPreferences,
-	} = useBookPreferences({ book, serverId })
 
-	// TODO: I think global incognito makes sense but isn't exposed very well right now
-	const incognito = useReaderStore((state) => state.globalSettings.incognito)
 	const insets = useSafeAreaInsets()
 	const { secondaryStyle } = useReaderAnimations()
-
-	const onChangeReadingDirection = useCallback(() => {
-		setBookPreferences({
-			readingDirection:
-				readingDirection === ReadingDirection.Ltr ? ReadingDirection.Rtl : ReadingDirection.Ltr,
-		})
-	}, [readingDirection, setBookPreferences])
 
 	const router = useRouter()
 
 	return (
 		<Animated.View
-			className="inset-x-safe absolute z-20 gap-2 px-2"
+			className="inset-x-safe gap-2 px-2 absolute z-20"
 			style={[{ top: initialWindowMetrics?.insets.top || insets.top }, secondaryStyle]}
 		>
 			<View className="relative flex-row items-center justify-between">
@@ -68,11 +51,9 @@ export default function Header({ onShowGlobalSettings }: Props) {
 				/>
 
 				<PagedActionMenu
-					incognito={incognito}
 					book={book}
 					serverId={serverId}
 					onResetTimer={resetTimer}
-					onChangeReadingDirection={onChangeReadingDirection}
 					onShowSettings={onShowGlobalSettings}
 				/>
 			</View>

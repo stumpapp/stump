@@ -14,6 +14,7 @@ import {
 	DisplayLanguageKeys,
 	EnableDebugAnalytics,
 	EpubSettings,
+	GlobalIncognito,
 	ImageCacheActions,
 	ImageReaderSettings,
 	MaskURLs,
@@ -49,6 +50,7 @@ export default function Screen() {
 					<PreferNativePdf />
 					<PreferMinimalReader />
 					{Platform.OS === 'ios' && <DisableDismissGesture />}
+					<GlobalIncognito />
 					<ImageReaderSettings />
 					<EpubSettings />
 				</Card>

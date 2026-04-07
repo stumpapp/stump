@@ -2721,7 +2721,8 @@
 				"label": "Reading",
 				"preferNativePdf": "Prefer Native PDF",
 				"preferMinimalReader": "Prefer Minimal Reader",
-				"disableDismissGesture": "Disable Dismiss Gesture"
+				"disableDismissGesture": "Disable Dismiss Gesture",
+				"incognitoReading": "Incognito Reading"
 			},
 			"stump": {
 				"label": "Stump",
@@ -2854,7 +2855,12 @@
 					"images": "Image Gallery",
 					"slider": "Slider"
 				}
-			}
+			},
+			"readingTimer": {
+				"label": "Reading Timer",
+				"resetTimer": "Reset Timer"
+			},
+			"allSettings": "All Settings"
 		},
 		"epubSettings": {
 			"title": "Epub Reader Settings",

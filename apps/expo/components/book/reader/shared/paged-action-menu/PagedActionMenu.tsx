@@ -1,12 +1,6 @@
 import { ReadingDirection, ReadingMode } from '@stump/graphql'
-import {
-	CircleEllipsis,
-	Glasses,
-	Settings2,
-	SquareArrowLeft,
-	SquareArrowRight,
-} from 'lucide-react-native'
-import { useCallback, useState } from 'react'
+import { CircleEllipsis, Settings2, SquareArrowLeft, SquareArrowRight } from 'lucide-react-native'
+import { useState } from 'react'
 import { View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
@@ -28,33 +22,34 @@ import {
 } from '~/components/ui'
 import { Icon } from '~/components/ui/icon'
 import { COLORS } from '~/lib/constants'
-import { useBookPreferences } from '~/stores/reader'
+import { useTranslate } from '~/lib/hooks'
+import { BookPreferences, useBookPreferences } from '~/stores/reader'
 
 import { PagedActionMenuProps } from './types'
 
 export function PagedActionMenu({
-	incognito,
 	book,
 	serverId,
 	onResetTimer,
-	onChangeReadingDirection,
 	onShowSettings,
 }: PagedActionMenuProps) {
+	const { t } = useTranslate()
 	const [isOpen, setIsOpen] = useState(false)
 
 	const {
 		preferences: { readingDirection, readingMode, trackElapsedTime },
+		overrideGlobalSettings,
 		setBookPreferences,
 		updateGlobalSettings,
 	} = useBookPreferences({ book, serverId })
 
-	const handleChangeReadingDirection = useCallback(() => {
-		setBookPreferences({
-			readingDirection:
-				readingDirection === ReadingDirection.Ltr ? ReadingDirection.Rtl : ReadingDirection.Ltr,
-		})
-		onChangeReadingDirection?.()
-	}, [readingDirection, setBookPreferences, onChangeReadingDirection])
+	const handleUpdateSettings = (updates: Partial<BookPreferences>) => {
+		if (overrideGlobalSettings) {
+			return setBookPreferences(updates)
+		} else {
+			return updateGlobalSettings(updates)
+		}
+	}
 
 	const insets = useSafeAreaInsets()
 
@@ -69,7 +64,7 @@ export function PagedActionMenu({
 		<DropdownMenu onOpenChange={setIsOpen}>
 			<DropdownMenuTrigger asChild>
 				<Button
-					className="squircle h-[unset] w-[unset] rounded-full border p-1 tablet:p-2"
+					className="squircle p-1 tablet:p-2 h-[unset] w-[unset] rounded-full border"
 					variant="ghost"
 					size="icon"
 					style={{
@@ -104,29 +99,39 @@ export function PagedActionMenu({
 			<DropdownMenuContent
 				insets={contentInsets}
 				sideOffset={2}
-				className="w-2/3 tablet:w-64"
+				className="tablet:w-64 w-2/3"
 				align="end"
 			>
 				<DropdownMenuGroup>
 					<DropdownMenuSub>
 						<DropdownMenuSubTrigger className="text-foreground">
-							<Text className="text-lg">Presets</Text>
+							<Text className="text-lg">{t('readerSettings.readingMode.label')}</Text>
 						</DropdownMenuSubTrigger>
 						<DropdownMenuSubContent>
 							<DropdownMenuRadioGroup
 								value={readingMode}
 								onValueChange={(value) => {
-									setBookPreferences({ readingMode: value as ReadingMode })
+									handleUpdateSettings({ readingMode: value as ReadingMode })
 								}}
 							>
-								<DropdownMenuRadioItem value="PAGED" className="text-foreground">
-									<Text className="text-lg">Paged</Text>
+								<DropdownMenuRadioItem value={ReadingMode.Paged} className="text-foreground">
+									<Text className="text-lg">{t('readerSettings.readingMode.options.PAGED')}</Text>
 								</DropdownMenuRadioItem>
-								<DropdownMenuRadioItem value="CONTINUOUS_HORIZONTAL" className="text-foreground">
-									<Text className="text-lg">Horizontal Scroll</Text>
+								<DropdownMenuRadioItem
+									value={ReadingMode.ContinuousHorizontal}
+									className="text-foreground"
+								>
+									<Text className="text-lg">
+										{t('readerSettings.readingMode.options.CONTINUOUS_HORIZONTAL')}
+									</Text>
 								</DropdownMenuRadioItem>
-								<DropdownMenuRadioItem value="CONTINUOUS_VERTICAL" className="text-foreground">
-									<Text className="text-lg">Vertical Scroll</Text>
+								<DropdownMenuRadioItem
+									value={ReadingMode.ContinuousVertical}
+									className="text-foreground"
+								>
+									<Text className="text-lg">
+										{t('readerSettings.readingMode.options.CONTINUOUS_VERTICAL')}
+									</Text>
 								</DropdownMenuRadioItem>
 							</DropdownMenuRadioGroup>
 						</DropdownMenuSubContent>
@@ -135,14 +140,16 @@ export function PagedActionMenu({
 				<DropdownMenuSeparator />
 				<DropdownMenuItem
 					className="text-foreground"
-					onPress={() => updateGlobalSettings({ incognito: !incognito })}
+					onPress={() =>
+						handleUpdateSettings({
+							readingDirection:
+								readingDirection === ReadingDirection.Ltr
+									? ReadingDirection.Rtl
+									: ReadingDirection.Ltr,
+						})
+					}
 				>
-					<Text className="text-lg">Incognito</Text>
-					<Icon as={Glasses} size={20} className="ml-auto text-foreground-muted" />
-				</DropdownMenuItem>
-				<DropdownMenuSeparator />
-				<DropdownMenuItem className="text-foreground" onPress={handleChangeReadingDirection}>
-					<Text className="text-lg">Reading Direction</Text>
+					<Text className="text-lg">{t('readerSettings.readingDirection.label')}</Text>
 					<Icon
 						as={readingDirection === ReadingDirection.Ltr ? SquareArrowRight : SquareArrowLeft}
 						size={20}
@@ -153,7 +160,7 @@ export function PagedActionMenu({
 
 				<DropdownMenuSub>
 					<DropdownMenuSubTrigger className="text-foreground">
-						<Text className="text-lg">Reading Timer</Text>
+						<Text className="text-lg">{t('readerSettings.readingTimer.label')}</Text>
 					</DropdownMenuSubTrigger>
 					<DropdownMenuSubContent>
 						<DropdownMenuItem
@@ -161,7 +168,7 @@ export function PagedActionMenu({
 							onPress={() => setBookPreferences({ trackElapsedTime: !trackElapsedTime })}
 							closeOnPress={false}
 						>
-							<Text className="text-lg">Enabled</Text>
+							<Text className="text-lg">{t('common.enabled')}</Text>
 							<View className="ml-auto">
 								<Switch
 									size="tiny"
@@ -179,7 +186,7 @@ export function PagedActionMenu({
 								disabled={!trackElapsedTime || !onResetTimer}
 								onPress={onResetTimer}
 							>
-								<Text className="text-lg">Reset Timer</Text>
+								<Text className="text-lg">{t('readerSettings.readingTimer.resetTimer')}</Text>
 							</DropdownMenuItem>
 						)}
 					</DropdownMenuSubContent>
@@ -190,7 +197,7 @@ export function PagedActionMenu({
 						<DropdownMenuSeparator variant="group" />
 
 						<DropdownMenuItem className="text-foreground" onPress={onShowSettings}>
-							<Text className="text-lg">Preferences</Text>
+							<Text className="text-lg">{t('readerSettings.allSettings')}</Text>
 							<Icon as={Settings2} size={20} className="ml-auto text-foreground-muted" />
 						</DropdownMenuItem>
 					</>

@@ -65,6 +65,7 @@ base64.workspace = true
 temp-env = "0.3.6"
 tempfile.workspace = true
 criterion = { version = "0.5.1", features = ["html_reports", "async_tokio"] }
+tests = { path = "../crates/tests" }
 
 [build-dependencies]
 chrono.workspace = true

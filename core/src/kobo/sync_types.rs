@@ -153,7 +153,7 @@ pub struct CurrentBookmark {
 	pub location: Option<Location>,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Debug, PartialEq)]
 #[serde(rename_all = "PascalCase")]
 pub struct Location {
 	pub value: Option<String>,
@@ -175,7 +175,7 @@ pub struct StatusInfo {
 	pub times_started_reading: u32,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub enum Status {
 	ReadyToRead,
 	Finished,

@@ -8289,6 +8289,7 @@ dependencies = [
  "stump-config-gen",
  "temp-env",
  "tempfile",
+ "tests",
  "thiserror 2.0.17",
  "thumbhash",
  "tokio",
@@ -8871,8 +8872,10 @@ dependencies = [
 name = "tests"
 version = "0.1.0"
 dependencies = [
+ "chrono",
  "models",
  "rand 0.9.2",
+ "rust_decimal",
  "sea-orm",
  "uuid 1.18.1",
 ]

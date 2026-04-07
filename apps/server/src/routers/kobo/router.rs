@@ -13,7 +13,7 @@ use models::{
 	shared::{
 		enums::UserPermission,
 		image_processor_options::{
-			ExactDimensionResize, ImageProcessorOptions, ImageResizeMethod,
+			FitWithinResize, ImageProcessorOptions, ImageResizeMethod,
 			SupportedImageFormat,
 		},
 	},
@@ -276,9 +276,7 @@ async fn book_thumbnail(
 			&result.data,
 			ImageProcessorOptions {
 				format: SupportedImageFormat::Jpeg,
-				// TODO: ImageResizeMethod::FitWithin?
-				// (similar implementation to ScaledDimensionResize)
-				resize_method: Some(ImageResizeMethod::Exact(ExactDimensionResize {
+				resize_method: Some(ImageResizeMethod::FitWithin(FitWithinResize {
 					width,
 					height,
 				})),

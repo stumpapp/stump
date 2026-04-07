@@ -1,5 +1,5 @@
 import { Button, Host, Image } from '@expo/ui/swift-ui'
-import { cornerRadius, frame, glassEffect } from '@expo/ui/swift-ui/modifiers'
+import { cornerRadius, frame, glassEffect, tint } from '@expo/ui/swift-ui/modifiers'
 import { View } from 'react-native'
 
 import { useColors } from '~/lib/constants'
@@ -23,8 +23,6 @@ export function HeaderButton({
 				<Button
 					role={role}
 					onPress={onPress}
-					// variant={variant}
-					// color={variant === 'glassProminent' ? colors.fill.brand.DEFAULT : undefined}
 					modifiers={[
 						...(isGlass
 							? [
@@ -40,6 +38,7 @@ export function HeaderButton({
 									}),
 								]
 							: []),
+						...(variant === 'glassProminent' ? [tint(colors.fill.brand.DEFAULT)] : []),
 						cornerRadius(999),
 					]}
 				>

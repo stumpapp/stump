@@ -1,9 +1,11 @@
 import { useShallow } from 'zustand/react/shallow'
 
 import { Card, Stepper } from '~/components/ui'
+import { useTranslate } from '~/lib/hooks'
 import { useReaderStore } from '~/stores'
 
 export default function PageMargins() {
+	const { t } = useTranslate()
 	const store = useReaderStore(
 		useShallow((state) => ({
 			pageMargins: state.globalSettings.pageMargins ?? 1.0,
@@ -12,7 +14,7 @@ export default function PageMargins() {
 	)
 
 	return (
-		<Card.Row label="Page Margins">
+		<Card.Row label={t('epubSettings.pageMargins')}>
 			<Stepper
 				value={store.pageMargins}
 				onChange={(val) => store.setSettings({ pageMargins: val })}
@@ -21,7 +23,7 @@ export default function PageMargins() {
 				step={0.1}
 				unit="%"
 				formatValue={(val) => Math.round(val * 100).toString()}
-				accessibilityLabel="Page Margins"
+				accessibilityLabel={t('epubSettings.pageMargins')}
 			/>
 		</Card.Row>
 	)

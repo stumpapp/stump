@@ -3,7 +3,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useShallow } from 'zustand/react/shallow'
 
 import { IS_IOS_24_PLUS, useColors } from '~/lib/constants'
-import { useColorScheme } from '~/lib/useColorScheme'
 import { useEpubSheetStore } from '~/stores/epubSheet'
 
 import { CustomizeTheme } from './controls/customTheme'
@@ -18,7 +17,6 @@ export default function CustomizeThemeSheet() {
 	)
 	const closeSheet = useEpubSheetStore((state) => state.closeSheet)
 
-	const { colorScheme } = useColorScheme()
 	const colors = useColors()
 	const insets = useSafeAreaInsets()
 
@@ -30,13 +28,10 @@ export default function CustomizeThemeSheet() {
 		<TrueSheet
 			ref={sheetRef}
 			detents={[1]}
-			cornerRadius={24}
 			grabber
 			scrollable
 			backgroundColor={IS_IOS_24_PLUS ? undefined : colors.background.DEFAULT}
-			grabberOptions={{
-				color: colorScheme === 'dark' ? '#333' : '#ccc',
-			}}
+			grabberOptions={{ color: colors.sheet.grabber }}
 			style={{
 				paddingBottom: insets.bottom,
 			}}

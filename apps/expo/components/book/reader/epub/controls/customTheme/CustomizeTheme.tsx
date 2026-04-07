@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useShallow } from 'zustand/react/shallow'
 
 import { Input, Text } from '~/components/ui'
+import { useTranslate } from '~/lib/hooks'
 import { useColorScheme } from '~/lib/useColorScheme'
 import { cn } from '~/lib/utils'
 import { EPUBReaderThemeConfig } from '~/modules/readium'
@@ -30,6 +31,7 @@ const NEW_THEME_DEFAULTS: StoredConfig = {
 }
 
 export default function CustomizeTheme({ onCancel, mode = 'edit', theme: namedTheme }: Props) {
+	const { t } = useTranslate()
 	const { colorScheme } = useColorScheme()
 	const insets = useSafeAreaInsets()
 
@@ -174,34 +176,34 @@ export default function CustomizeTheme({ onCancel, mode = 'edit', theme: namedTh
 				<Input
 					value={name}
 					onChangeText={setName}
-					placeholder="Theme name"
+					placeholder={t(getKey('placeholder'))}
 					editable={isCreateMode || !isDefaultTheme}
 				/>
 
 				<ColorPickerRow
-					label="Background"
+					label={t(getKey('background'))}
 					value={customTheme.colors?.background ?? '#FFFFFF'}
 					onChange={onChangeBackground}
 				/>
 
 				<ColorPickerRow
-					label="Text"
+					label={t(getKey('text'))}
 					value={customTheme.colors?.foreground ?? '#000000'}
 					onChange={onChangeForeground}
 				/>
 
 				<ColorPickerRow
-					label="Highlight"
+					label={t(getKey('highlight'))}
 					value={customTheme.colors?.highlight ?? '#FFEB3B'}
 					onChange={onChangeHighlight}
 				/>
 
-				<View className="h-px bg-black/10 dark:bg-white/10" />
+				<View className="bg-black/10 dark:bg-white/10 h-px" />
 
-				<Text className="text-xl">Premade themes</Text>
-				<View className="flex-row flex-wrap gap-y-2">
+				<Text className="text-xl">{t(getKey('premadeThemes'))}</Text>
+				<View className="gap-y-2 flex-row flex-wrap">
 					{PREMADE_THEMES.map((theme) => (
-						<View className="w-1/4 px-1" key={theme.name}>
+						<View className="px-1 w-1/4" key={theme.name}>
 							<Pressable onPress={() => applyPremadeTheme(theme)}>
 								{({ pressed }) => (
 									<ThemePreview
@@ -291,3 +293,6 @@ const PREMADE_THEMES: PremadeTheme[] = [
 		name: 'Mahogany',
 	},
 ]
+
+const LOCALE_BASE = 'epubSettings.customizeTheme'
+const getKey = (key: string) => `${LOCALE_BASE}.${key}`

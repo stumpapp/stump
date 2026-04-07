@@ -75,6 +75,9 @@ export type ReaderStore = {
 	bookTimers: Record<string, ElapsedSeconds>
 	setBookTimer: (id: string, timer: ElapsedSeconds) => void
 
+	bookOverrides: Record<string, boolean>
+	setBookOverride: (id: string, override: boolean) => void
+
 	showControls: boolean
 	setShowControls: (show: boolean) => void
 }
@@ -123,6 +126,7 @@ export const useReaderStore = create<ReaderStore>()(
 							[id]: { ...get().bookSettings[id], ...updates },
 						},
 					}),
+
 				bookCache: {},
 				setBookCache: (id, data) => {
 					set({
@@ -140,9 +144,14 @@ export const useReaderStore = create<ReaderStore>()(
 							),
 						),
 					}),
+
 				bookTimers: {},
 				setBookTimer: (id, elapsedSeconds) =>
 					set({ bookTimers: { ...get().bookTimers, [id]: elapsedSeconds } }),
+
+				bookOverrides: {},
+				setBookOverride: (id, override) =>
+					set({ bookOverrides: { ...get().bookOverrides, [id]: override } }),
 
 				showControls: false,
 				setShowControls: (show) => set({ showControls: show }),
@@ -175,11 +184,13 @@ export const useBookPreferences = ({ book, ...params }: Params) => {
 
 	const bookSettingsMap = useReaderStore((state) => state.bookSettings)
 	const globalSettings = useReaderStore((state) => state.globalSettings)
+	const bookOverrides = useReaderStore((state) => state.bookOverrides)
 	const addBookSettings = useReaderStore((state) => state.addBookSettings)
 	const setBookSettingsFn = useReaderStore((state) => state.setBookSettings)
 	const setGlobalSettings = useReaderStore((state) => state.setGlobalSettings)
 
 	const bookSettings = useMemo(() => bookSettingsMap[book.id], [bookSettingsMap, book.id])
+	const overrideGlobalSettings = useMemo(() => bookOverrides[book.id], [bookOverrides, book.id])
 
 	const setBookPreferences = useCallback(
 		(updates: Partial<BookPreferences>) => {
@@ -200,7 +211,7 @@ export const useBookPreferences = ({ book, ...params }: Params) => {
 		globalSettings,
 		preferences: {
 			...globalSettings,
-			...(bookSettings || globalSettings),
+			...(overrideGlobalSettings && bookSettings ? bookSettings : {}),
 		},
 		setBookPreferences,
 		updateGlobalSettings: setGlobalSettings,

@@ -108,7 +108,6 @@ export const DownloadedBookDetailsSheet = forwardRef<TrueSheet, Props>(
 			<TrueSheet
 				ref={ref}
 				detents={[1]}
-				cornerRadius={24}
 				grabber
 				scrollable
 				backgroundColor={colors.sheet.background}

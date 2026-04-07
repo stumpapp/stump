@@ -6,7 +6,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Icon, Text } from '~/components/ui'
 import { useColors } from '~/lib/constants'
-import { useColorScheme } from '~/lib/useColorScheme'
 import { cn } from '~/lib/utils'
 
 export interface FilterSheetRef {
@@ -33,7 +32,6 @@ const FilterSheet = forwardRef<FilterSheetRef, Props>(function FilterSheet(
 
 	const _Icon = icon ?? ListFilter
 
-	const { colorScheme } = useColorScheme()
 	const colors = useColors()
 	const insets = useSafeAreaInsets()
 
@@ -65,7 +63,7 @@ const FilterSheet = forwardRef<FilterSheetRef, Props>(function FilterSheet(
 				{({ pressed }) => (
 					<View
 						className={cn(
-							'squircle flex flex-grow-0 flex-row items-center justify-center rounded-full bg-background-surface-secondary px-3 py-2',
+							'squircle px-3 py-2 flex flex-grow-0 flex-row items-center justify-center rounded-full bg-background-surface-secondary',
 							pressed && 'opacity-70',
 						)}
 						style={{
@@ -86,13 +84,10 @@ const FilterSheet = forwardRef<FilterSheetRef, Props>(function FilterSheet(
 			<TrueSheet
 				ref={sheetRef}
 				detents={[1]}
-				cornerRadius={24}
 				grabber
 				scrollable
 				backgroundColor={colors.background.DEFAULT}
-				grabberOptions={{
-					color: colorScheme === 'dark' ? '#333' : '#ccc',
-				}}
+				grabberOptions={{ color: colors.sheet.grabber }}
 				onDidPresent={() => setIsOpen(true)}
 				onDidDismiss={() => setIsOpen(false)}
 				style={{
@@ -106,7 +101,7 @@ const FilterSheet = forwardRef<FilterSheetRef, Props>(function FilterSheet(
 						gap: 0,
 					}}
 				>
-					{header && <View className="w-full px-4">{header}</View>}
+					{header && <View className="px-4 w-full">{header}</View>}
 
 					{children}
 				</View>

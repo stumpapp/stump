@@ -136,7 +136,6 @@ export const AddBookSheet = forwardRef<AddBookSheetRef, Props>(({ onAddBook }, r
 			ref={sheetRef}
 			detents={[1]}
 			dimmed={false}
-			cornerRadius={24}
 			grabber
 			scrollable
 			backgroundColor={IS_IOS_24_PLUS ? undefined : colors.sheet.background}

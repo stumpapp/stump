@@ -3,7 +3,6 @@ import { useCallback, useEffect, useRef } from 'react'
 import { ScrollView } from 'react-native-gesture-handler'
 
 import { useColors } from '~/lib/constants'
-import { useColorScheme } from '~/lib/useColorScheme'
 import { CreateServer, SavedServerWithConfig } from '~/stores/savedServer'
 
 import AddOrEditServerForm, {
@@ -18,7 +17,6 @@ type Props = {
 }
 
 export default function EditServerDialog({ editingServer, onClose, onSubmit }: Props) {
-	const { isDarkColorScheme } = useColorScheme()
 	const colors = useColors()
 
 	const ref = useRef<TrueSheet>(null)
@@ -46,7 +44,7 @@ export default function EditServerDialog({ editingServer, onClose, onSubmit }: P
 			scrollable
 			scrollableOptions={{ keyboardScrollOffset: 8 }}
 			grabber
-			grabberOptions={{ color: isDarkColorScheme ? '#333' : '#ccc' }}
+			grabberOptions={{ color: colors.sheet.grabber }}
 			onDidDismiss={onClose}
 		>
 			<ScrollView className="p-6">

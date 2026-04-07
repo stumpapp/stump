@@ -6,7 +6,6 @@ import { ScrollView } from 'react-native'
 import { Pressable } from 'react-native-gesture-handler'
 
 import { IS_IOS_24_PLUS, useColors } from '~/lib/constants'
-import { useColorScheme } from '~/lib/useColorScheme'
 import { cn } from '~/lib/utils'
 import { useSavedServers } from '~/stores'
 
@@ -18,7 +17,6 @@ import AddOrEditServerForm, {
 
 export default function AddServerDialog() {
 	const { createServer } = useSavedServers()
-	const { isDarkColorScheme } = useColorScheme()
 	const colors = useColors()
 
 	const ref = useRef<TrueSheet>(null)
@@ -63,7 +61,7 @@ export default function AddServerDialog() {
 				scrollable
 				scrollableOptions={{ keyboardScrollOffset: 8 }}
 				grabber
-				grabberOptions={{ color: isDarkColorScheme ? '#333' : '#ccc' }}
+				grabberOptions={{ color: colors.sheet.grabber }}
 			>
 				<ScrollView className="p-6">
 					<AddOrEditServerForm onSubmit={onSubmit} onClose={() => ref.current?.dismiss()} />

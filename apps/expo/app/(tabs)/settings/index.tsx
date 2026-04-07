@@ -11,13 +11,15 @@ import {
 	DefaultServer,
 	DeleteDatabase,
 	DisableDismissGesture,
+	DisplayLanguageKeys,
 	EnableDebugAnalytics,
+	EpubSettings,
 	ImageCacheActions,
+	ImageReaderSettings,
 	MaskURLs,
 	PerformanceMonitor,
 	PreferMinimalReader,
 	PreferNativePdf,
-	ReaderSettingsLink,
 	ReduceAnimations,
 	ThumbnailPlaceholder,
 	ThumbnailRatio,
@@ -47,7 +49,8 @@ export default function Screen() {
 					<PreferNativePdf />
 					<PreferMinimalReader />
 					{Platform.OS === 'ios' && <DisableDismissGesture />}
-					<ReaderSettingsLink />
+					<ImageReaderSettings />
+					<EpubSettings />
 				</Card>
 
 				<Card
@@ -69,6 +72,7 @@ export default function Screen() {
 					<PerformanceMonitor />
 					<ReduceAnimations />
 					<MaskURLs />
+					<DisplayLanguageKeys />
 					<EnableDebugAnalytics />
 				</Card>
 

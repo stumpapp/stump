@@ -64,7 +64,6 @@ export const AddBookOptionsSheet = forwardRef<AddBookOptionsSheetRef, Props>(
 			<TrueSheet
 				ref={sheetRef}
 				detents={['auto']}
-				cornerRadius={24}
 				grabber
 				backgroundColor={IS_IOS_24_PLUS ? undefined : colors.sheet.background}
 				grabberOptions={{ color: colors.sheet.grabber }}
@@ -117,11 +116,11 @@ type OptionRowProps = {
 function OptionRow({ label, description, icon, onPress }: OptionRowProps) {
 	return (
 		<Pressable onPress={onPress}>
-			<View className="ios:rounded-[2rem] squircle flex-row items-center gap-4 rounded-3xl bg-black/5 p-4 active:opacity-80 dark:bg-white/10">
-				<View className="dark:bg-white/15 h-10 w-10 items-center justify-center rounded-full bg-black/10">
+			<View className="ios:rounded-[2rem] squircle gap-4 rounded-3xl bg-black/5 p-4 dark:bg-white/10 flex-row items-center active:opacity-80">
+				<View className="dark:bg-white/15 h-10 w-10 bg-black/10 items-center justify-center rounded-full">
 					{optionIcons[icon]}
 				</View>
-				<View className="flex-1 gap-0.5">
+				<View className="gap-0.5 flex-1">
 					<Text className="text-base font-medium">{label}</Text>
 					<Text className="text-sm text-foreground-muted">{description}</Text>
 				</View>

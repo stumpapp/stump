@@ -2756,6 +2756,7 @@
 			"debug": {
 				"label": "Debug",
 				"clearCache": {
+					"label": "Clear Cache",
 					"memory": {
 						"button": "Memory",
 						"success": "Memory cache cleared"
@@ -2779,6 +2780,14 @@
 				"performanceMonitor": "Performance Monitor",
 				"reduceAnimations": "Reduce Animations",
 				"maskUrls": "Mask URLs",
+				"displayLanguageKeys": {
+					"label": "Display Language Keys",
+					"options": {
+						"none": "None",
+						"abbreviated": "Abbreviated",
+						"full": "Full"
+					}
+				},
 				"debugAnalytics": {
 					"label": "Debug Analytics",
 					"description": "Send additional debug-related events to help troubleshoot issues"
@@ -2797,7 +2806,8 @@
 			}
 		},
 		"readerSettings": {
-			"title": "Reader Settings",
+			"title": "Image Reader Settings",
+			"overrideGlobalSettings": "Override global settings",
 			"sections": {
 				"mode": "Mode",
 				"imageOptions": "Image Options",
@@ -2844,6 +2854,72 @@
 					"images": "Image Gallery",
 					"slider": "Slider"
 				}
+			}
+		},
+		"epubSettings": {
+			"title": "Epub Reader Settings",
+			"typeface": "Typeface",
+			"fontSize": "Font Size",
+			"fontWeight": {
+				"label": "Font Weight",
+				"options": {
+					"light": "Light",
+					"normal": "Normal",
+					"medium": "Medium",
+					"bold": "Bold"
+				}
+			},
+			"textNormalization": "Text Normalization",
+			"verticalText": "Vertical Text",
+			"readingDirection": {
+				"label": "Reading Direction",
+				"options": {
+					"rtl": "Right to left",
+					"ltr": "Left to right"
+				}
+			},
+			"columns": {
+				"label": "Columns",
+				"options": {
+					"auto": "Auto",
+					"single": "Single",
+					"double": "Double"
+				}
+			},
+			"pageMargins": "Page Margins",
+			"imageFilter": {
+				"label": "Image Filter",
+				"options": {
+					"none": "None",
+					"darken": "Darken",
+					"invert": "Invert"
+				}
+			},
+			"publisherStyles": "Publisher Styles",
+			"textAlignment": {
+				"label": "Text Alignment",
+				"options": {
+					"start": "Start",
+					"left": "Left",
+					"center": "Center",
+					"right": "Right",
+					"justify": "Justify"
+				}
+			},
+			"typeScale": "Type Scale",
+			"lineHeight": "Line Height",
+			"paragraphIndent": "Paragraph Indent",
+			"paragraphSpacing": "Paragraph Spacing",
+			"wordSpacing": "Word Spacing",
+			"letterSpacing": "Letter Spacing",
+			"hyphens": "Hyphens",
+			"ligatures": "Ligatures",
+			"customizeTheme": {
+				"placeholder": "Theme name",
+				"background": "Background",
+				"text": "Text",
+				"highlight": "Highlight",
+				"premadeThemes": "Premade themes"
 			}
 		},
 		"savedServerActions": {

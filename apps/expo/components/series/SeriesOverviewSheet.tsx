@@ -93,7 +93,6 @@ export const SeriesOverviewSheet = forwardRef<TrueSheet, Props>(({ seriesId }, r
 		<TrueSheet
 			ref={ref}
 			detents={['auto', 1]}
-			cornerRadius={24}
 			grabber
 			scrollable
 			backgroundColor={IS_IOS_24_PLUS ? undefined : colors.sheet.background}
@@ -134,7 +133,7 @@ function SheetContent({ series: { stats, metadata, resolvedName, tags } }: Sheet
 	const hasAbout = metadata?.summary || metadata?.descriptionFormatted
 
 	return (
-		<ScrollView className="flex-1 px-4 py-6" nestedScrollEnabled>
+		<ScrollView className="px-4 py-6 flex-1" nestedScrollEnabled>
 			<View className="gap-6">
 				<View className="px-2">
 					<Heading size="2xl" numberOfLines={3}>
@@ -142,7 +141,7 @@ function SheetContent({ series: { stats, metadata, resolvedName, tags } }: Sheet
 					</Heading>
 
 					{tags.length > 0 && (
-						<View className="mt-4 flex flex-row flex-wrap gap-3">
+						<View className="mt-4 gap-3 flex flex-row flex-wrap">
 							{tags.map((tag) => (
 								<Text key={tag.name} className="text-foreground-muted">
 									#{tag.name}

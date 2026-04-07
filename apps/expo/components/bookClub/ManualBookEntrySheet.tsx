@@ -76,7 +76,6 @@ export const ManualBookEntrySheet = forwardRef<ManualBookEntrySheetRef, Props>(
 			<TrueSheet
 				ref={sheetRef}
 				detents={['auto', 1]}
-				cornerRadius={24}
 				grabber
 				scrollable
 				backgroundColor={IS_IOS_24_PLUS ? undefined : colors.sheet.background}

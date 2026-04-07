@@ -12,7 +12,6 @@ import { z } from 'zod'
 
 import { useColors } from '~/lib/constants'
 import { startOidcLogin } from '~/lib/sdk/auth'
-import { useColorScheme } from '~/lib/useColorScheme'
 import { useUserStore } from '~/stores'
 
 import { useActiveServer } from './activeServer'
@@ -39,7 +38,6 @@ export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogPr
 	const [isOidcLoading, setIsOidcLoading] = useState(false)
 	const hasAuthSucceeded = useRef(false)
 
-	const { isDarkColorScheme } = useColorScheme()
 	const colors = useColors()
 
 	const {
@@ -114,7 +112,7 @@ export default function ServerAuthDialog({ isOpen, onClose }: ServerAuthDialogPr
 			detents={['auto', 1]}
 			backgroundColor={colors.background.DEFAULT}
 			grabber
-			grabberOptions={{ color: isDarkColorScheme ? '#333' : '#ccc' }}
+			grabberOptions={{ color: colors.sheet.grabber }}
 			onDidDismiss={handleDismiss}
 			scrollable={false}
 		>

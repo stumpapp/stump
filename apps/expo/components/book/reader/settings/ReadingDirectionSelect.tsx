@@ -1,5 +1,4 @@
 import { ReadingDirection } from '@stump/graphql'
-import { get } from 'colorjs.io/fn'
 import { ChevronsUpDown } from 'lucide-react-native'
 import { useState } from 'react'
 import { View } from 'react-native'
@@ -49,5 +48,5 @@ export default function ReadingDirectionSelect({ direction, onChange }: Props) {
 	)
 }
 
-const LOCALE_BASE = 'readerSettings.readingMode'
+const LOCALE_BASE = 'readerSettings.readingDirection'
 const getKey = (key: ReadingDirection) => `${LOCALE_BASE}.options.${key}`

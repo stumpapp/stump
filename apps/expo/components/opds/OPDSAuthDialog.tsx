@@ -132,7 +132,6 @@ export default function OPDSAuthDialog({ isOpen, authDoc, onClose }: OPDSAuthDia
 		<TrueSheet
 			ref={ref}
 			detents={['auto', 1]}
-			cornerRadius={24}
 			grabber
 			backgroundColor={colors.background.DEFAULT}
 			grabberOptions={{

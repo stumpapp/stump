@@ -15,6 +15,8 @@ export const useUserStore = createUserStore(ZustandMMKVStorage)
 
 export type ListLayout = 'grid' | 'list'
 
+export type DisplayLanguageKeysType = 'none' | 'abbreviated' | 'full'
+
 type MobilePreferencesStore = {
 	showTabLabels: boolean
 	maskURLs: boolean
@@ -39,6 +41,7 @@ type MobilePreferencesStore = {
 	// Note: Will push more analytics to aide in debug efforts
 	enableDebugAnalytics: boolean
 	preferMinimalReader: boolean
+	displayLanguageKeys: DisplayLanguageKeysType
 	/**
 	 * Patch the store with new values.
 	 */
@@ -75,6 +78,7 @@ export const usePreferencesStore = create<MobilePreferencesStore>()(
 			bookClubsEnabled: false,
 			enableDebugAnalytics: false,
 			preferMinimalReader: false,
+			displayLanguageKeys: 'none',
 			patch: (data) => set(data),
 		}),
 		{

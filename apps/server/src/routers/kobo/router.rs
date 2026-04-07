@@ -57,8 +57,7 @@ struct KoboThumbnail {
 
 // how many items should we send in each page of a sync response?
 // this is a maximum; in some cases we may return fewer items in a page.
-// TODO: select a value, or make this configurable.
-const ITEMS_PER_PAGE: usize = 5;
+const ITEMS_PER_PAGE: usize = 100;
 
 struct SyncResponse {
 	sync_items: Vec<SyncItem>,

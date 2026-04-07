@@ -192,26 +192,29 @@ impl KoboSync {
 	}
 }
 
+/// a page of library sync results.
 pub struct SyncPage<'a> {
 	db: &'a DatabaseConnection,
 	user: &'a AuthUser,
 
+	/// an offset from the beginning of all the updates in this session.
 	offset: usize,
+
+	/// the maximum number of updates to return in this page.
 	limit: usize,
 
-	// the time that the sync prior to this one began.
-	// used to determine what has changed with each piece of media since the last sync.
-	// TODO: store that in media_ids instead?
+	/// the time that the sync prior to this one began.
+	/// used to determine what has changed with each piece of media since the last sync.
 	previous_sync_at: Option<DateTimeWithTimeZone>,
 
-	// IDs of database "media" that should be returned in this page.
+	/// IDs of database media objects that should be returned in this page.
 	media_ids: Vec<String>,
 
-	// are there more pages to retrieve in this sync session?
+	/// are there more pages to retrieve in this sync session?
 	pub should_continue: bool,
 
-	// a token representing the state of the current sync session.
-	// this will be returned to the client, and the client will use it in its next sync request.
+	/// a token representing the state of the current sync session.
+	/// this will be returned to the client, and the client will use it in its next sync request.
 	pub sync_token: SyncToken,
 }
 

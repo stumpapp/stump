@@ -1,4 +1,3 @@
-import { PickSelect } from '@stump/components'
 import {
 	CreateLibrarySceneExistingLibrariesQuery,
 	LibraryConfigInput,
@@ -250,7 +249,8 @@ export const intoThumbnailConfig = (
 	const converted = match(config.resizeMethod)
 		.with({ mode: 'scaleEvenlyByFactor' }, ({ factor }) => {
 			return {
-				...config,
+				format: config.format,
+				quality: config.quality,
 				resizeMethod: {
 					scaleEvenlyByFactor: {
 						factor,
@@ -260,7 +260,8 @@ export const intoThumbnailConfig = (
 		})
 		.with({ mode: 'scaleDimension' }, ({ dimension, size }) => {
 			return {
-				...config,
+				format: config.format,
+				quality: config.quality,
 				resizeMethod: {
 					scaleDimension: {
 						dimension: dimension as ScaledDimensionResize['dimension'],
@@ -271,7 +272,8 @@ export const intoThumbnailConfig = (
 		})
 		.with({ mode: 'exact' }, ({ height, width }) => {
 			return {
-				...config,
+				format: config.format,
+				quality: config.quality,
 				resizeMethod: {
 					exact: {
 						height,
@@ -280,7 +282,13 @@ export const intoThumbnailConfig = (
 				},
 			}
 		})
-		.otherwise(() => null)
+		.otherwise(() => {
+			return {
+				format: config.format,
+				quality: config.quality,
+				resizeMethod: null,
+			}
+		})
 
 	return omit(converted, 'enabled')
 }
@@ -342,23 +350,4 @@ export const intoFormThumbnailConfig = (
 	console.warn('Unknown thumbnail resize method:', config.resizeMethod)
 
 	return baseConfig
-}
-
-/**
- * A function to ensure that the thumbnail config is valid before returning it
- */
-export const ensureValidThumbnailConfig = (
-	config: PickSelect<CreateOrUpdateLibrarySchema, 'thumbnailConfig'>,
-) => {
-	const { enabled, resizeMethod } = config
-	if (!enabled || !resizeMethod) {
-		return null
-	}
-
-	const parseResult = thumbnailConfig.safeParse(intoThumbnailConfig(config))
-	if (!parseResult.success) {
-		console.warn('Invalid thumbnail config:', parseResult.error.format())
-		return null
-	}
-	return parseResult.data
 }

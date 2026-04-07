@@ -1,6 +1,6 @@
 import { useSDK } from '@stump/client'
 import { Tabs } from 'expo-router'
-import { Icon, Label, NativeTabs } from 'expo-router/unstable-native-tabs'
+import { NativeTabs } from 'expo-router/unstable-native-tabs'
 import { Rss, Search } from 'lucide-react-native'
 import { Platform } from 'react-native'
 
@@ -31,15 +31,15 @@ export default function TabLayout() {
 				minimizeBehavior="onScrollDown"
 			>
 				<NativeTabs.Trigger name="feed">
-					<Label>Feeds</Label>
-					<Icon
+					<NativeTabs.Trigger.Label>Feeds</NativeTabs.Trigger.Label>
+					<NativeTabs.Trigger.Icon
 						sf={{ default: 'dot.radiowaves.up.forward', selected: 'dot.radiowaves.up.forward' }}
 					/>
 				</NativeTabs.Trigger>
 				{hasSearch && (
 					<NativeTabs.Trigger name="search" role="search">
-						<Label>Search</Label>
-						<Icon sf="magnifyingglass" />
+						<NativeTabs.Trigger.Label>Search</NativeTabs.Trigger.Label>
+						<NativeTabs.Trigger.Icon sf="magnifyingglass" />
 					</NativeTabs.Trigger>
 				)}
 			</NativeTabs>

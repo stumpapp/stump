@@ -1,5 +1,6 @@
-import { CircularProgress as AndroidCircularProgress } from '@expo/ui/jetpack-compose'
-import { CircularProgress as IosCircularProgress, Host } from '@expo/ui/swift-ui'
+import { CircularProgressIndicator as AndroidCircularProgress } from '@expo/ui/jetpack-compose'
+import { Host, ProgressView as IosCircularProgress } from '@expo/ui/swift-ui'
+import { progressViewStyle, tint } from '@expo/ui/swift-ui/modifiers'
 import { Platform, View } from 'react-native'
 
 import { useColors } from '~/lib/constants'
@@ -12,9 +13,10 @@ type NativeLoaderProps = {
 	color: string
 }
 
+// https://docs.expo.dev/versions/latest/sdk/ui/swift-ui/progressview/
 const IosLoader = ({ color }: NativeLoaderProps) => (
 	<Host style={{ width: 300 }}>
-		<IosCircularProgress color={color} />
+		<IosCircularProgress modifiers={[progressViewStyle('circular'), tint(color)]} />
 	</Host>
 )
 
@@ -23,9 +25,8 @@ const AndroidLoader = ({ color }: NativeLoaderProps) => {
 	const colors = useColors()
 	return (
 		<AndroidCircularProgress
-			style={{ width: 35 }}
 			color={color}
-			elementColors={{ trackColor: colorScheme === 'dark' ? colors.foreground.muted : '#cccccc' }}
+			trackColor={colorScheme === 'dark' ? colors.foreground.muted : '#cccccc'}
 		/>
 	)
 }

@@ -2,7 +2,7 @@ import { useAuthQuery, useClientContext, useSDK } from '@stump/client'
 import { UserPermission } from '@stump/graphql'
 import { isAxiosError } from 'axios'
 import { Tabs } from 'expo-router'
-import { Icon, Label, NativeTabs } from 'expo-router/unstable-native-tabs'
+import { NativeTabs } from 'expo-router/unstable-native-tabs'
 import { Home, Search, SquareLibrary, Users } from 'lucide-react-native'
 import { useEffect } from 'react'
 import { Platform } from 'react-native'
@@ -70,25 +70,25 @@ export default function TabLayout() {
 				minimizeBehavior="onScrollDown"
 			>
 				<NativeTabs.Trigger name="index">
-					<Label>Home</Label>
-					<Icon
+					<NativeTabs.Trigger.Label>Home</NativeTabs.Trigger.Label>
+					<NativeTabs.Trigger.Icon
 						sf={{ default: 'house', selected: 'house.fill' }}
 						drawable="custom_android_drawable"
 					/>
 				</NativeTabs.Trigger>
 				<NativeTabs.Trigger name="browse">
-					<Label>Browse</Label>
-					<Icon sf="books.vertical.fill" drawable="custom_android_drawable" />
+					<NativeTabs.Trigger.Label>Browse</NativeTabs.Trigger.Label>
+					<NativeTabs.Trigger.Icon sf="books.vertical.fill" drawable="custom_android_drawable" />
 				</NativeTabs.Trigger>
 				{showClubs && (
 					<NativeTabs.Trigger name="clubs">
-						<Label>Clubs</Label>
-						<Icon sf="square.grid.2x2.fill" drawable="custom_android_drawable" />
+						<NativeTabs.Trigger.Label>Clubs</NativeTabs.Trigger.Label>
+						<NativeTabs.Trigger.Icon sf="square.grid.2x2.fill" drawable="custom_android_drawable" />
 					</NativeTabs.Trigger>
 				)}
 				<NativeTabs.Trigger name="search" role="search">
-					<Label>Search</Label>
-					<Icon sf="magnifyingglass" drawable="custom_android_drawable" />
+					<NativeTabs.Trigger.Label>Search</NativeTabs.Trigger.Label>
+					<NativeTabs.Trigger.Icon sf="magnifyingglass" drawable="custom_android_drawable" />
 				</NativeTabs.Trigger>
 			</NativeTabs>
 		),

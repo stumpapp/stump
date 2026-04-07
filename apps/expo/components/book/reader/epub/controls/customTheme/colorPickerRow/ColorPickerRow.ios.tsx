@@ -11,7 +11,7 @@ type Props = {
 
 export function ColorPickerRow({ label, value, onChange }: Props) {
 	return (
-		<View className="flex-row items-center justify-between py-2">
+		<View className="py-2 flex-row items-center justify-between">
 			<Text className="text-lg">{label}</Text>
 			<Host matchContents>
 				<ColorPicker
@@ -19,7 +19,7 @@ export function ColorPickerRow({ label, value, onChange }: Props) {
 					key={value}
 					label=""
 					selection={value}
-					onValueChanged={onChange}
+					onSelectionChange={onChange}
 					supportsOpacity={false}
 				/>
 			</Host>

@@ -67,9 +67,9 @@
 		"typescript-eslint": "^8.48.1"
 	},
 	"resolutions": {
-		"@types/react": "=19.1.0",
-		"react": "=19.1.0",
-		"react-dom": "=19.1.0",
+		"@types/react": "=19.2.0",
+		"react": "=19.2.0",
+		"react-dom": "=19.2.0",
 		"expo-constants": "=18.0.12",
 		"expo-linking": "=8.0.11"
 	},

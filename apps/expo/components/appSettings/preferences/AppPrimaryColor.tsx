@@ -34,7 +34,7 @@ export default function AppPrimaryColor() {
 					<ColorPicker
 						label=""
 						selection={store.accentColor || brand.DEFAULT}
-						onValueChanged={onColorChange}
+						onSelectionChange={onColorChange}
 						supportsOpacity={false}
 					/>
 				</Host>

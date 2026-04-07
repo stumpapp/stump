@@ -7,7 +7,7 @@ import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
 
 import { useActiveServer } from '../activeServer'
 import { useGridItemSize } from '../grid/useGridItemSize'
-import SeriesGridItem, { ISeriesGridItemFragment } from './SeriesGridItem'
+import SeriesGridItem from './SeriesGridItem'
 
 const query = graphql(`
 	query RecentlyAddedSeriesGrid($pagination: Pagination) {
@@ -54,7 +54,7 @@ export default function RecentlyAddedSeries({ header }: Props) {
 
 	return (
 		<FlashList
-			key={`recently-added-series-list-${data?.pages[0].series.nodes.length ? 'at-least-one-item' : 'empty'}`} // Force re-render when switching between empty and non-empty states
+			key={`recently-added-series-list-${data?.pages[0]?.series.nodes.length ? 'at-least-one-item' : 'empty'}`} // Force re-render when switching between empty and non-empty states
 			data={data?.pages.flatMap((page) => page.series.nodes) || []}
 			renderItem={({ item }) => <SeriesGridItem series={item} />}
 			contentContainerStyle={{

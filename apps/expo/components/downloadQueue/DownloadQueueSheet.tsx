@@ -1,4 +1,5 @@
-import { Host, Picker } from '@expo/ui/swift-ui'
+import { Host, Picker, Text as SwiftText } from '@expo/ui/swift-ui'
+import { pickerStyle, tag } from '@expo/ui/swift-ui/modifiers'
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { forwardRef, useState } from 'react'
 import { Platform, ScrollView, View } from 'react-native'
@@ -86,13 +87,14 @@ export const DownloadQueueSheet = forwardRef<TrueSheet, Props>(function Download
 								<View className="w-full">
 									<Host matchContents style={{ width: 'auto' }}>
 										<Picker
-											options={['Downloading', 'Failed']}
-											selectedIndex={tab === 'HEALTHY' ? 0 : 1}
-											onOptionSelected={({ nativeEvent: { index } }) => {
-												setTab(index === 0 ? 'HEALTHY' : 'FAILED')
+											modifiers={[pickerStyle('segmented')]}
+											onSelectionChange={(selection) => {
+												setTab(selection === 'HEALTHY' ? 'HEALTHY' : 'FAILED')
 											}}
-											variant="segmented"
-										/>
+										>
+											<SwiftText modifiers={[tag('HEALTHY')]}>Downloading</SwiftText>
+											<SwiftText modifiers={[tag('FAILED')]}>Failed</SwiftText>
+										</Picker>
 									</Host>
 								</View>
 							),

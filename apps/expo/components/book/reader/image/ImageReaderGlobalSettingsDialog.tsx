@@ -1,4 +1,5 @@
-import { Host, Picker } from '@expo/ui/swift-ui'
+import { Host, Picker, Text as SwiftText } from '@expo/ui/swift-ui'
+import { pickerStyle, tag } from '@expo/ui/swift-ui/modifiers'
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { useEffect, useRef, useState } from 'react'
 import { Platform, ScrollView, View } from 'react-native'
@@ -63,12 +64,12 @@ export default function ImageReaderGlobalSettingsDialog({ isOpen, onClose }: Pro
 			insetAdjustment="automatic"
 		>
 			<ScrollView
-				className="flex-1 p-6"
+				className="p-6 flex-1"
 				contentContainerStyle={{ alignItems: 'flex-start' }}
 				nestedScrollEnabled
 			>
 				<View
-					className="w-full flex-1 gap-8"
+					className="gap-8 w-full flex-1"
 					style={{
 						paddingBottom: insets.bottom,
 					}}
@@ -81,17 +82,18 @@ export default function ImageReaderGlobalSettingsDialog({ isOpen, onClose }: Pro
 								ios: (
 									<Host matchContents style={{ width: 120 }}>
 										<Picker
-											options={['Book', 'Global']}
-											selectedIndex={modality === 'book' ? 0 : 1}
-											onOptionSelected={({ nativeEvent: { index } }) => {
-												if (index === 0) {
+											modifiers={[pickerStyle('segmented')]}
+											onSelectionChange={(selection) => {
+												if (selection === 'book') {
 													setModality('book')
 												} else {
 													setModality('global')
 												}
 											}}
-											variant="segmented"
-										/>
+										>
+											<SwiftText modifiers={[tag('book')]}>Book</SwiftText>
+											<SwiftText modifiers={[tag('global')]}>Global</SwiftText>
+										</Picker>
 									</Host>
 								),
 								android: (

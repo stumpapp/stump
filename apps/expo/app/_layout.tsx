@@ -194,11 +194,8 @@ export default function RootLayout() {
 							style={isDarkBackground ? 'light' : 'dark'}
 							hidden={{ statusBar: hideStatusBar, navigationBar: hideNavigationBar }}
 						/>
+
 						<Stack
-							// https://github.com/expo/expo/issues/15244 ?
-							// screenOptions={{
-							// 	statusBarHidden: shouldHideStatusBar,
-							// }}
 							screenOptions={{
 								animation: animationEnabled ? 'default' : 'none',
 								contentStyle: {
@@ -214,6 +211,7 @@ export default function RootLayout() {
 									animation: animationEnabled ? 'default' : 'none',
 								}}
 							/>
+
 							<Stack.Screen
 								name="server/[id]"
 								options={{

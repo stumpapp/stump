@@ -1,4 +1,5 @@
-import { Host, Picker } from '@expo/ui/swift-ui'
+import { Host, Picker, Text as SwiftText } from '@expo/ui/swift-ui'
+import { pickerStyle, tag } from '@expo/ui/swift-ui/modifiers'
 import { FlashList } from '@shopify/flash-list'
 import { intlFormat } from 'date-fns'
 import { Bookmark, Highlighter, Notebook, Trash } from 'lucide-react-native'
@@ -15,8 +16,6 @@ import { useEpubSheetStore } from '~/stores/epubSheet'
 import { useEpubReaderContext } from './context'
 
 type Tab = 'ALL' | 'NOTES' | 'HIGHLIGHTS' | 'BOOKMARKS'
-
-const TAB_ARRANGEMENT: Tab[] = ['ALL', 'NOTES', 'HIGHLIGHTS', 'BOOKMARKS']
 
 export default function AnnotationsAndBookmarks() {
 	const { readerRef, onDeleteBookmark, onDeleteAnnotation } = useEpubReaderContext()
@@ -153,19 +152,22 @@ type HeaderProps = {
 
 function ListHeader({ tab, setTab }: HeaderProps) {
 	return (
-		<View className="w-full px-4 pb-2">
+		<View className="px-4 pb-2 w-full">
 			{Platform.select({
 				ios: (
 					<View className="w-full">
 						<Host matchContents style={{ width: 'auto' }}>
 							<Picker
-								options={['All', 'Notes', 'Highlights', 'Bookmarks']}
-								selectedIndex={TAB_ARRANGEMENT.indexOf(tab)}
-								onOptionSelected={({ nativeEvent: { index } }) => {
-									setTab(TAB_ARRANGEMENT[index] || 'ALL')
+								modifiers={[pickerStyle('segmented')]}
+								onSelectionChange={(selection) => {
+									setTab((selection as Tab) || 'ALL')
 								}}
-								variant="segmented"
-							/>
+							>
+								<SwiftText modifiers={[tag('ALL')]}>All</SwiftText>
+								<SwiftText modifiers={[tag('NOTES')]}>Notes</SwiftText>
+								<SwiftText modifiers={[tag('HIGHLIGHTS')]}>Highlights</SwiftText>
+								<SwiftText modifiers={[tag('BOOKMARKS')]}>Bookmarks</SwiftText>
+							</Picker>
 						</Host>
 					</View>
 				),
@@ -235,7 +237,7 @@ function AnnotationListItem({ annotation, onTap, onDelete }: Props) {
 					},
 				]}
 			>
-				<View className={cn('flex-1 px-4 py-3')}>
+				<View className={cn('px-4 py-3 flex-1')}>
 					<View className="flex-row justify-between">
 						<Text className="text-base font-medium" numberOfLines={1}>
 							{title}
@@ -296,7 +298,7 @@ function BookmarkListItem({ bookmark, onDelete, onTap }: BookmarkProps) {
 					},
 				]}
 			>
-				<View className={cn('flex-1 px-4 py-3')}>
+				<View className={cn('px-4 py-3 flex-1')}>
 					<View className="flex-row justify-between">
 						<Text className="text-base font-medium" numberOfLines={1}>
 							{title}

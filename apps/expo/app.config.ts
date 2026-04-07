@@ -12,7 +12,6 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 		icon: './assets/images/icon.png',
 		scheme: 'stump',
 		userInterfaceStyle: 'automatic',
-		newArchEnabled: true,
 		assetBundlePatterns: ['**/*'],
 		ios: {
 			supportsTablet: true,

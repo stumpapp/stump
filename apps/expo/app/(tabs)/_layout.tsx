@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router'
-import { Icon, Label, NativeTabs } from 'expo-router/unstable-native-tabs'
+import { NativeTabs } from 'expo-router/unstable-native-tabs'
 import { HardDriveDownload, Server, Settings } from 'lucide-react-native'
 import { Platform } from 'react-native'
 
@@ -23,16 +23,16 @@ export default function TabLayout() {
 				tintColor={accentColor || colors.fill.brand.DEFAULT}
 			>
 				<NativeTabs.Trigger name="index">
-					<Label>{t('tabs.servers')}</Label>
-					<Icon sf="server.rack" drawable="custom_android_drawable" />
+					<NativeTabs.Trigger.Label>{t('tabs.servers')}</NativeTabs.Trigger.Label>
+					<NativeTabs.Trigger.Icon sf="server.rack" drawable="custom_android_drawable" />
 				</NativeTabs.Trigger>
 				<NativeTabs.Trigger name="library">
-					<Label>{t('tabs.localLibrary')}</Label>
-					<Icon sf="books.vertical" drawable="custom_android_drawable" />
+					<NativeTabs.Trigger.Label>{t('tabs.localLibrary')}</NativeTabs.Trigger.Label>
+					<NativeTabs.Trigger.Icon sf="books.vertical" drawable="custom_android_drawable" />
 				</NativeTabs.Trigger>
 				<NativeTabs.Trigger name="settings">
-					<Label>{t('tabs.settings')}</Label>
-					<Icon sf="gear" drawable="custom_android_drawable" />
+					<NativeTabs.Trigger.Label>{t('tabs.settings')}</NativeTabs.Trigger.Label>
+					<NativeTabs.Trigger.Icon sf="gear" drawable="custom_android_drawable" />
 				</NativeTabs.Trigger>
 			</NativeTabs>
 		),

@@ -1,4 +1,5 @@
 import { Button, ContextMenu, Host } from '@expo/ui/swift-ui'
+import { disabled } from '@expo/ui/swift-ui/modifiers'
 import { OPDSMetadata } from '@stump/sdk'
 import { Ellipsis } from 'lucide-react-native'
 import { Platform, View } from 'react-native'
@@ -84,11 +85,10 @@ export default function PublicationMenu({ publicationUrl, metadata }: Props) {
 					<Button
 						systemImage="trash"
 						role="destructive"
-						disabled={!isDownloaded || isDeleting}
 						onPress={handleDeleteDownload}
-					>
-						Delete Download
-					</Button>
+						label="Delete Download"
+						modifiers={[disabled(!isDownloaded || isDeleting)]}
+					/>
 				</ContextMenu.Items>
 			</ContextMenu>
 		</Host>

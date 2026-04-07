@@ -228,22 +228,21 @@ export default function BookMenu({ data }: Props) {
 						<Button
 							systemImage={isFavorite ? 'heart.fill' : 'heart'}
 							onPress={() => favoriteBook()}
-						>
-							{isFavorite ? 'Unfavorite' : 'Favorite'}
-						</Button>
+							label={isFavorite ? 'Unfavorite' : 'Favorite'}
+						/>
 
 						<Divider />
 
 						{(isUntouched || isReading) && (
-							<Button systemImage="book.closed" onPress={confirmMarkAsRead}>
-								Mark as Read
-							</Button>
+							<Button systemImage="book.closed" onPress={confirmMarkAsRead} label="Mark as Read" />
 						)}
 
 						{isReading && (
-							<Button systemImage="minus.circle" onPress={confirmClearProgress}>
-								Clear Progress
-							</Button>
+							<Button
+								systemImage="minus.circle"
+								onPress={confirmClearProgress}
+								label="Clear Progress"
+							/>
 						)}
 
 						{isPreviouslyCompleted && (
@@ -251,9 +250,8 @@ export default function BookMenu({ data }: Props) {
 								systemImage="rectangle.stack.badge.minus"
 								role="destructive"
 								onPress={confirmDeleteReadHistory}
-							>
-								Delete Read History
-							</Button>
+								label="Delete Read History"
+							/>
 						)}
 
 						<Divider />
@@ -266,10 +264,8 @@ export default function BookMenu({ data }: Props) {
 									pathname: `/server/${book.id}/libraries/${book.library.id}`,
 								})
 							}
-						>
-							{/* TODO: Expo UI doesn't seem to support anything but strings as children, which means the subtitle is not available :( */}
-							{`Go to Library \n${book.library.name}`}
-						</Button>
+							label={`Go to Library \n${book.library.name}`}
+						/>
 
 						<Button
 							systemImage="arrow.up.right"
@@ -279,18 +275,19 @@ export default function BookMenu({ data }: Props) {
 									pathname: `/server/${book.id}/series/${book.series.id}`,
 								})
 							}
-						>
-							{/* TODO: Expo UI doesn't seem to support anything but strings as children, which means the subtitle is not available :( */}
-							{`Go to Series \n${book.series.resolvedName}`}
-						</Button>
+							label={`Go to Series \n${book.series.resolvedName}`}
+						/>
 
 						{isDownloaded && (
 							<>
 								<Divider />
 
-								<Button systemImage="trash" role="destructive" onPress={() => deleteBook()}>
-									Delete Download
-								</Button>
+								<Button
+									systemImage="trash"
+									role="destructive"
+									onPress={() => deleteBook()}
+									label="Delete Download"
+								/>
 							</>
 						)}
 					</ContextMenu.Items>

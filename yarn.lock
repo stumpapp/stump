@@ -2288,6 +2288,25 @@
     xcode "^3.0.1"
     xml2js "0.6.0"
 
+"@expo/config-plugins@~55.0.8":
+  version "55.0.8"
+  resolved "https://registry.yarnpkg.com/@expo/config-plugins/-/config-plugins-55.0.8.tgz#1b3f2b06b941b113ddc920be179b90c86eb82ef9"
+  integrity sha512-8WfWTRntTCcowfOS+tHdB0z98gKetTwktg4G5TWkCkXVa8Jt1NUnvzaaU4UHk2vbR2U4N84RyZJFizSwfF6C9g==
+  dependencies:
+    "@expo/config-types" "^55.0.5"
+    "@expo/json-file" "~10.0.13"
+    "@expo/plist" "^0.5.2"
+    "@expo/sdk-runtime-versions" "^1.0.0"
+    chalk "^4.1.2"
+    debug "^4.3.5"
+    getenv "^2.0.0"
+    glob "^13.0.0"
+    resolve-from "^5.0.0"
+    semver "^7.5.4"
+    slugify "^1.6.6"
+    xcode "^3.0.1"
+    xml2js "0.6.0"
+
 "@expo/config-types@^54.0.10":
   version "54.0.10"
   resolved "https://registry.yarnpkg.com/@expo/config-types/-/config-types-54.0.10.tgz#688f4338255d2fdea970f44e2dfd8e8d37dec292"
@@ -2323,6 +2342,23 @@
   integrity sha512-qVih0IrjupykH/yAUilZqW1RCpqm8TKG8XJabji2VHI1LstGqw0NJAsBjX927yns08u/fFJTwOsB4PYOoq1HiA==
   dependencies:
     "@expo/config-plugins" "~55.0.7"
+    "@expo/config-types" "^55.0.5"
+    "@expo/json-file" "^10.0.13"
+    "@expo/require-utils" "^55.0.3"
+    deepmerge "^4.3.1"
+    getenv "^2.0.0"
+    glob "^13.0.0"
+    resolve-from "^5.0.0"
+    resolve-workspace-root "^2.0.0"
+    semver "^7.6.0"
+    slugify "^1.3.4"
+
+"@expo/config@~55.0.13":
+  version "55.0.13"
+  resolved "https://registry.yarnpkg.com/@expo/config/-/config-55.0.13.tgz#9ecd4b51527ef3e6e67512cd402d93a18b346461"
+  integrity sha512-mO6le0JXEk7whsIb5E7rT36wOtdcLRFlApc7eLCOyu24uQUvWKk00HSEPVjiOuMd7EgYz/8JBPCA+Rb96uNjIg==
+  dependencies:
+    "@expo/config-plugins" "~55.0.8"
     "@expo/config-types" "^55.0.5"
     "@expo/json-file" "^10.0.13"
     "@expo/require-utils" "^55.0.3"
@@ -13416,13 +13452,21 @@ expo-build-properties@~55.0.11:
     resolve-from "^5.0.0"
     semver "^7.6.0"
 
-expo-constants@=18.0.12, expo-constants@~18.0.12, expo-constants@~55.0.11:
+expo-constants@~18.0.12:
   version "18.0.12"
   resolved "https://registry.yarnpkg.com/expo-constants/-/expo-constants-18.0.12.tgz#3e67f7109ffd03eaa5514c19875a767c39f5a2ca"
   integrity sha512-WzcKYMVNRRu4NcSzfIVRD5aUQFnSpTZgXFrlWmm19xJoDa4S3/PQNi6PNTBRc49xz9h8FT7HMxRKaC8lr0gflA==
   dependencies:
     "@expo/config" "~12.0.12"
     "@expo/env" "~2.0.8"
+
+expo-constants@~55.0.11, expo-constants@~55.0.12:
+  version "55.0.12"
+  resolved "https://registry.yarnpkg.com/expo-constants/-/expo-constants-55.0.12.tgz#4649b5030c418832417239ba6960d820a1dff683"
+  integrity sha512-e2oxzvPyBv0t51o/lNuiiBtYFQcv3rWnTUvIH0GXRjHkg8LHHePly1vJ5oGg5KO2v8qprleDp9g6s5YD0MIUtQ==
+  dependencies:
+    "@expo/config" "~55.0.13"
+    "@expo/env" "~2.1.1"
 
 expo-crypto@~55.0.12:
   version "55.0.12"

@@ -8,21 +8,20 @@ use axum::{
 	Extension, Router,
 };
 use graphql::data::AuthContext;
-use models::{
-	entity::media::{self, ModelWithMetadata},
-	shared::{
-		enums::UserPermission,
-		image_processor_options::{
-			FitWithinResize, ImageProcessorOptions, ImageResizeMethod,
-			SupportedImageFormat,
-		},
+use models::shared::{
+	enums::UserPermission,
+	image_processor_options::{
+		FitWithinResize, ImageProcessorOptions, ImageResizeMethod, SupportedImageFormat,
 	},
 };
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Map};
-use stump_core::filesystem::{
-	image::{GenericImageProcessor, ImageProcessor},
-	ContentType,
+use stump_core::{
+	filesystem::{
+		image::{GenericImageProcessor, ImageProcessor},
+		ContentType,
+	},
+	kobo::entity::MediaWithMetadataAndReadingSessions,
 };
 
 use crate::{
@@ -239,8 +238,8 @@ async fn book_metadata(
 	let conn = ctx.conn.as_ref();
 	let user = req.user();
 
-	let m = ModelWithMetadata::find_by_id_for_user(book_id, &user)
-		.into_model::<media::ModelWithMetadata>()
+	let m = MediaWithMetadataAndReadingSessions::find_by_id_for_user(book_id, &user)
+		.into_model::<MediaWithMetadataAndReadingSessions>()
 		.one(conn)
 		.await?
 		.ok_or(APIError::NotFound("Book not found".to_string()))?;

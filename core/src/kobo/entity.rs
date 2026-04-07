@@ -1,12 +1,73 @@
+use models::{
+	entity::{
+		finished_reading_session, media, media_metadata, reading_session, user::AuthUser,
+	},
+	prefixer::{parse_query_to_model, parse_query_to_model_optional},
+};
+use sea_orm::{prelude::*, FromQueryResult, Select};
+
 use crate::kobo::sync_types::*;
 use chrono::Utc;
-use models::entity::{media, reading_session};
+
+#[derive(Debug, Clone)]
+pub struct MediaWithMetadataAndReadingSessions {
+	pub media: media::Model,
+	pub metadata: Option<media_metadata::Model>,
+	pub reading_session: Option<reading_session::Model>,
+	pub finished_reading_session: Option<finished_reading_session::Model>,
+}
+
+impl MediaWithMetadataAndReadingSessions {
+	pub fn find_by_id_for_user(id: String, user: &AuthUser) -> Select<media::Entity> {
+		media::ModelWithMetadata::find_by_id_for_user(id, user)
+			.left_join(reading_session::Entity)
+			.left_join(finished_reading_session::Entity)
+	}
+
+	// TODO: should this take a more generic type?
+	pub fn find_by_ids_for_user(
+		ids: &Vec<String>,
+		user: &AuthUser,
+	) -> Select<media::Entity> {
+		media::ModelWithMetadata::find_for_user(user)
+			.filter(media::Column::Id.is_in(ids))
+			.left_join(reading_session::Entity)
+			.left_join(finished_reading_session::Entity)
+	}
+}
+
+impl FromQueryResult for MediaWithMetadataAndReadingSessions {
+	fn from_query_result(
+		res: &sea_orm::QueryResult,
+		_pre: &str,
+	) -> Result<Self, sea_orm::DbErr> {
+		let media = parse_query_to_model::<media::Model, media::Entity>(res)?;
+		let metadata = parse_query_to_model_optional::<
+			media_metadata::Model,
+			media_metadata::Entity,
+		>(res)?;
+		let reading_session = parse_query_to_model_optional::<
+			reading_session::Model,
+			reading_session::Entity,
+		>(res)?;
+		let finished_reading_session = parse_query_to_model_optional::<
+			finished_reading_session::Model,
+			finished_reading_session::Entity,
+		>(res)?;
+		Ok(Self {
+			media,
+			metadata,
+			reading_session,
+			finished_reading_session,
+		})
+	}
+}
 
 // a UUID that we can use when we don't have an ID that is more appropriate.
 const DUMMY_UUID: &str = "00000000-0000-0000-0000-000000000001";
 
 impl BookMetadata {
-	pub fn from_media(m: &media::ModelWithMetadata, book_url: String) -> Self {
+	pub fn from_media(m: &MediaWithMetadataAndReadingSessions, book_url: String) -> Self {
 		let media_id = &m.media.id;
 
 		let writers = m.metadata.as_ref().and_then(|mm| mm.writers.clone());
@@ -124,15 +185,14 @@ impl ReadingState {
 }
 
 impl BookEntitlementContainer {
-	pub fn from_media(
-		m: media::ModelWithMetadata,
-		rs: Option<&reading_session::Model>,
-		book_url: String,
-	) -> Self {
+	pub fn from_media(m: MediaWithMetadataAndReadingSessions, book_url: String) -> Self {
 		let media_id = &m.media.id;
 
-		let reading_state =
-			ReadingState::from_active_reading_session(media_id.clone(), rs);
+		// TODO: handle finished reading sessions
+		let reading_state = ReadingState::from_active_reading_session(
+			media_id.clone(),
+			m.reading_session.as_ref(),
+		);
 
 		BookEntitlementContainer {
 			book_entitlement: BookEntitlement {

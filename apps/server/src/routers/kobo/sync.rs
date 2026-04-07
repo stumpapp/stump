@@ -1,10 +1,6 @@
-// structs for managing the state of the sync process.
-use std::collections::HashMap;
-
 use models::entity::{
 	kobo_sync_session,
-	media::{self, ModelWithMetadata},
-	reading_session,
+	media::{self},
 	user::AuthUser,
 };
 use sea_orm::Set;
@@ -13,7 +9,7 @@ use sea_orm::prelude::*;
 use sea_orm::query::*;
 
 use crate::routers::kobo::sync_token::SyncToken;
-use stump_core::kobo::sync_types::*;
+use stump_core::kobo::{entity::MediaWithMetadataAndReadingSessions, sync_types::*};
 
 pub struct KoboSync {
 	model: kobo_sync_session::Model,
@@ -248,27 +244,15 @@ impl<'a> SyncPage<'a> {
 		&self,
 		kobo_api_base_url: &str,
 	) -> Result<Vec<SyncItem>, DbErr> {
-		let items: Vec<media::ModelWithMetadata> =
-			ModelWithMetadata::find_by_ids_for_user(&self.media_ids, self.user)
-				.filter(media::Column::Extension.eq("epub"))
-				.into_model::<media::ModelWithMetadata>()
-				.all(self.db)
-				.await?;
-
-		let reading_sessions = reading_session::Entity::find()
-			.filter(reading_session::Column::UserId.eq(self.user.id.clone()))
-			.filter(reading_session::Column::MediaId.is_in(&self.media_ids))
+		let items: Vec<MediaWithMetadataAndReadingSessions> =
+			MediaWithMetadataAndReadingSessions::find_by_ids_for_user(
+				&self.media_ids,
+				self.user,
+			)
+			.filter(media::Column::Extension.eq("epub"))
+			.into_model::<MediaWithMetadataAndReadingSessions>()
 			.all(self.db)
 			.await?;
-
-		// TODO: this is not the correct way to do this!
-		// we should be able to do this in a single query.
-		// also, we need to properly handle cases where there are multiple sessions for a single
-		// piece of media.
-		let mut reading_sessions_by_media_id = HashMap::new();
-		for rs in reading_sessions {
-			reading_sessions_by_media_id.insert(rs.media_id.clone(), rs);
-		}
 
 		let sync_items: Vec<SyncItem> = items
 			.into_iter()
@@ -276,15 +260,13 @@ impl<'a> SyncPage<'a> {
 				let book_url =
 					format!("{}/v1/books/{}/file/epub", kobo_api_base_url, m.media.id);
 
-				let rs = reading_sessions_by_media_id.get(&m.media.id);
-
 				let created_since_last_sync = self
 					.previous_sync_at
 					.is_none_or(|ps| m.media.created_at >= ps);
 
 				if created_since_last_sync {
 					SyncItem::NewEntitlement(BookEntitlementContainer::from_media(
-						m, rs, book_url,
+						m, book_url,
 					))
 				} else {
 					SyncItem::ChangedProductMetadata(BookMetadata::from_media(
@@ -310,8 +292,9 @@ mod tests {
 	use chrono::Days;
 	use models::{
 		entity::{
-			kobo_sync_session, library, library_exclusion, media, media_metadata,
-			reading_session, series, series_metadata, user, user_preferences,
+			finished_reading_session, kobo_sync_session, library, library_exclusion,
+			media, media_metadata, reading_session, series, series_metadata, user,
+			user_preferences,
 		},
 		shared::enums::FileStatus,
 	};
@@ -356,6 +339,7 @@ mod tests {
 			schema.create_table_from_entity(user_preferences::Entity),
 			schema.create_table_from_entity(library::Entity),
 			schema.create_table_from_entity(reading_session::Entity),
+			schema.create_table_from_entity(finished_reading_session::Entity),
 		];
 
 		for stmt in tables {

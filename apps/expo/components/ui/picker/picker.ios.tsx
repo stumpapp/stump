@@ -15,7 +15,7 @@ export function Picker<T extends string = string>({
 
 	return (
 		// This negative margin is because there is some padding around the picker making it larger than it's true size
-		<Host matchContents style={{ marginHorizontal: -12, marginVertical: -6 }}>
+		<Host matchContents style={{ marginHorizontal: -12, marginVertical: -6 }} ignoreSafeArea="all">
 			<NativePicker
 				modifiers={[
 					pickerStyle('menu'),

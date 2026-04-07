@@ -91,7 +91,7 @@ const Switch = React.forwardRef<SwitchPrimitives.RootRef, Props>(
 		// https://docs.expo.dev/versions/latest/sdk/ui/swift-ui/toggle/
 		if (Platform.OS === 'ios') {
 			return (
-				<Host matchContents>
+				<Host matchContents ignoreSafeArea="all">
 					<IosSwitch
 						isOn={props.checked}
 						onIsOnChange={(checked) => {

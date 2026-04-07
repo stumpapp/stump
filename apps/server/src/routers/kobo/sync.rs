@@ -131,18 +131,13 @@ impl KoboSync {
 		client_sync_token: Option<&SyncToken>,
 		limit: usize,
 	) -> Result<SyncPage<'a>, sea_orm::DbErr> {
-		// TODO: refactor to clarify intent?
-		// if token is none
-		//   begin new session (from scratch)
-		//
-		// if token is completed
-		//   begin new session (incremental)
-		//
-		// look up session
-		// if session does not exist
-		//   begin new session (from scratch)
-		// else
-		//   continue session
+		// there are 3 possibilities here:
+		// 1. the client did not provide a sync token (or did not provide a valid sync token)
+		//    -> we should begin a new session, and sync the entire library.
+		// 2. the client provided a "Completed" sync token, acknowledging the completion of a session
+		//    -> we should begin a new session, syncing things that changed since the completed session.
+		// 3. the client provided an "Incomplete" sync token
+		//    -> we should continue the session referenced in the token.
 		let sync_id = client_sync_token.map(|token| match token {
 			SyncToken::IncompleteV1 { sync_id, .. }
 			| SyncToken::CompletedV1 { sync_id, .. } => sync_id.to_string(),
@@ -154,12 +149,12 @@ impl KoboSync {
 		};
 
 		let (session, offset) = match (client_sync_token, prev_sync_session) {
-			// we're continuing an existing sync session
 			(Some(SyncToken::IncompleteV1 { next_offset, .. }), Some(session)) => {
+				// we're continuing an existing sync session
 				(session, *next_offset)
 			},
-			// there was no previous sync session, or the previous session completed
 			(_, prev_sync_session) => {
+				// there was no previous sync session, or the previous session completed
 				let previous_sync_began_at =
 					prev_sync_session.map(|s| s.model.created_at.fixed_offset());
 

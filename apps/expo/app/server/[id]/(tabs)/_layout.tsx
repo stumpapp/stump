@@ -63,6 +63,34 @@ export default function TabLayout() {
 		return null
 	}
 
+	// TODO: sort this out. i wanted to see what the native tabs on android would look like
+	return (
+		<NativeTabs
+			tintColor={accentColor || colors.fill.brand.DEFAULT}
+			backgroundColor={colors.background.overlay.DEFAULT}
+			minimizeBehavior="onScrollDown"
+		>
+			<NativeTabs.Trigger name="index">
+				<NativeTabs.Trigger.Label>Home</NativeTabs.Trigger.Label>
+				<NativeTabs.Trigger.Icon sf={{ default: 'house', selected: 'house.fill' }} md="home" />
+			</NativeTabs.Trigger>
+			<NativeTabs.Trigger name="browse">
+				<NativeTabs.Trigger.Label>Browse</NativeTabs.Trigger.Label>
+				<NativeTabs.Trigger.Icon sf="books.vertical.fill" md="newsstand" />
+			</NativeTabs.Trigger>
+			{showClubs && (
+				<NativeTabs.Trigger name="clubs">
+					<NativeTabs.Trigger.Label>Clubs</NativeTabs.Trigger.Label>
+					<NativeTabs.Trigger.Icon sf="square.grid.2x2.fill" md="groups" />
+				</NativeTabs.Trigger>
+			)}
+			<NativeTabs.Trigger name="search" role="search">
+				<NativeTabs.Trigger.Label>Search</NativeTabs.Trigger.Label>
+				<NativeTabs.Trigger.Icon sf="magnifyingglass" md="search" />
+			</NativeTabs.Trigger>
+		</NativeTabs>
+	)
+
 	return Platform.select({
 		ios: (
 			<NativeTabs

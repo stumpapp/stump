@@ -16,6 +16,29 @@ export default function TabLayout() {
 	const colors = useColors()
 	const accentColor = usePreferencesStore((state) => state.accentColor)
 
+	// TODO: sort this out. i wanted to see what the native tabs on android would look like
+	// if sticking wiht this, we need to add the header in the child screen as we do on ios
+	return (
+		<NativeTabs
+			minimizeBehavior="onScrollDown"
+			tintColor={accentColor || colors.fill.brand.DEFAULT}
+			backgroundColor={colors.background.overlay.DEFAULT}
+		>
+			<NativeTabs.Trigger name="index">
+				<NativeTabs.Trigger.Label>{t('tabs.servers')}</NativeTabs.Trigger.Label>
+				<NativeTabs.Trigger.Icon sf="server.rack" md="database" />
+			</NativeTabs.Trigger>
+			<NativeTabs.Trigger name="library">
+				<NativeTabs.Trigger.Label>{t('tabs.localLibrary')}</NativeTabs.Trigger.Label>
+				<NativeTabs.Trigger.Icon sf="books.vertical" md="newsstand" />
+			</NativeTabs.Trigger>
+			<NativeTabs.Trigger name="settings">
+				<NativeTabs.Trigger.Label>{t('tabs.settings')}</NativeTabs.Trigger.Label>
+				<NativeTabs.Trigger.Icon sf="gear" md="settings" />
+			</NativeTabs.Trigger>
+		</NativeTabs>
+	)
+
 	return Platform.select({
 		ios: (
 			<NativeTabs

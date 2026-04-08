@@ -63,12 +63,13 @@ export default function TabLayout() {
 		return null
 	}
 
-	// TODO: sort this out. i wanted to see what the native tabs on android would look like
 	return (
 		<NativeTabs
-			tintColor={accentColor || colors.fill.brand.DEFAULT}
-			backgroundColor={colors.background.overlay.DEFAULT}
 			minimizeBehavior="onScrollDown"
+			tintColor={colors.fill.brand.DEFAULT}
+			backgroundColor={colors.tabbar}
+			rippleColor={colors.fill.brand.secondary}
+			labelVisibilityMode="labeled"
 		>
 			<NativeTabs.Trigger name="index">
 				<NativeTabs.Trigger.Label>Home</NativeTabs.Trigger.Label>
@@ -76,7 +77,7 @@ export default function TabLayout() {
 			</NativeTabs.Trigger>
 			<NativeTabs.Trigger name="browse">
 				<NativeTabs.Trigger.Label>Browse</NativeTabs.Trigger.Label>
-				<NativeTabs.Trigger.Icon sf="books.vertical.fill" md="newsstand" />
+				<NativeTabs.Trigger.Icon sf="books.vertical.fill" md="explore" />
 			</NativeTabs.Trigger>
 			{showClubs && (
 				<NativeTabs.Trigger name="clubs">

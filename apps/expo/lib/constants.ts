@@ -29,6 +29,8 @@ export const IS_IOS_24_PLUS = Platform.OS === 'ios' && parseInt(Platform.Version
 
 export const ON_END_REACHED_THRESHOLD = Platform.OS === 'ios' ? 0.75 : 0.6
 
+// TODO: android-specific tab bar color
+
 const light = {
 	background: {
 		DEFAULT: '#ffffff',
@@ -117,6 +119,7 @@ const light = {
 		background: '#ffffff',
 		grabber: '#ccc',
 	},
+	tabbar: '#f7f7f8',
 }
 
 type Theme = typeof light
@@ -209,6 +212,7 @@ const dark: Theme = {
 		background: '#000000',
 		grabber: '#333',
 	},
+	tabbar: '#060606',
 }
 
 export const COLORS = {

@@ -16,13 +16,13 @@ export default function TabLayout() {
 	const colors = useColors()
 	const accentColor = usePreferencesStore((state) => state.accentColor)
 
-	// TODO: sort this out. i wanted to see what the native tabs on android would look like
-	// if sticking wiht this, we need to add the header in the child screen as we do on ios
 	return (
 		<NativeTabs
 			minimizeBehavior="onScrollDown"
-			tintColor={accentColor || colors.fill.brand.DEFAULT}
-			backgroundColor={colors.background.overlay.DEFAULT}
+			tintColor={colors.fill.brand.DEFAULT}
+			backgroundColor={colors.tabbar}
+			rippleColor={colors.fill.brand.secondary}
+			labelVisibilityMode="labeled"
 		>
 			<NativeTabs.Trigger name="index">
 				<NativeTabs.Trigger.Label>{t('tabs.servers')}</NativeTabs.Trigger.Label>
@@ -38,75 +38,4 @@ export default function TabLayout() {
 			</NativeTabs.Trigger>
 		</NativeTabs>
 	)
-
-	return Platform.select({
-		ios: (
-			<NativeTabs
-				minimizeBehavior="onScrollDown"
-				tintColor={accentColor || colors.fill.brand.DEFAULT}
-			>
-				<NativeTabs.Trigger name="index">
-					<NativeTabs.Trigger.Label>{t('tabs.servers')}</NativeTabs.Trigger.Label>
-					<NativeTabs.Trigger.Icon sf="server.rack" drawable="custom_android_drawable" />
-				</NativeTabs.Trigger>
-				<NativeTabs.Trigger name="library">
-					<NativeTabs.Trigger.Label>{t('tabs.localLibrary')}</NativeTabs.Trigger.Label>
-					<NativeTabs.Trigger.Icon sf="books.vertical" drawable="custom_android_drawable" />
-				</NativeTabs.Trigger>
-				<NativeTabs.Trigger name="settings">
-					<NativeTabs.Trigger.Label>{t('tabs.settings')}</NativeTabs.Trigger.Label>
-					<NativeTabs.Trigger.Icon sf="gear" drawable="custom_android_drawable" />
-				</NativeTabs.Trigger>
-			</NativeTabs>
-		),
-
-		android: (
-			<Tabs
-				screenOptions={{
-					tabBarActiveTintColor: colors.foreground.DEFAULT,
-				}}
-			>
-				<Tabs.Screen
-					name="index"
-					options={{
-						headerShown: true,
-						title: t('tabs.servers'),
-						tabBarIcon: ({ focused }) => (
-							<JSIcon
-								as={Server}
-								className={cn('h-6 w-6 text-foreground-muted', { 'text-foreground': focused })}
-							/>
-						),
-						headerRight: () => <AddServerDialog />,
-					}}
-				/>
-				<Tabs.Screen
-					name="library"
-					options={{
-						title: t('tabs.localLibrary'),
-						tabBarIcon: ({ focused }) => (
-							<JSIcon
-								as={HardDriveDownload}
-								className={cn('h-6 w-6 text-foreground-muted', { 'text-foreground': focused })}
-							/>
-						),
-					}}
-				/>
-				<Tabs.Screen
-					name="settings"
-					options={{
-						title: t('tabs.settings'),
-						tabBarIcon: ({ focused }) => (
-							<JSIcon
-								as={Settings}
-								className={cn('h-6 w-6 text-foreground-muted', { 'text-foreground': focused })}
-							/>
-						),
-						// Hide the header for this route
-						headerShown: false,
-					}}
-				/>
-			</Tabs>
-		),
-	})
 }

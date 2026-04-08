@@ -58,7 +58,6 @@ export default function DownloadsHeaderSortMenu() {
 			const sortLocaleKey = option === 'ADDED_AT' ? 'sortDirectionDate' : 'sortDirectionText'
 			const content = t(getKey(`${sortLocaleKey}.${sortConfig.direction}`))
 
-			// TODO: Refactor based on how I refactor for Android
 			return Platform.select({
 				ios: <NativeDropdownMenu.ItemSubtitle>{content}</NativeDropdownMenu.ItemSubtitle>,
 				android: <Text className="ml-2 text-sm text-foreground-muted">{content}</Text>,
@@ -66,6 +65,11 @@ export default function DownloadsHeaderSortMenu() {
 		},
 		[sortConfig, t],
 	)
+
+	const renderAndroidLabel = (option: DownloadSortOption, direction: 'ASC' | 'DESC') => {
+		const sortLocaleKey = option === 'ADDED_AT' ? 'sortDirectionDate' : 'sortDirectionText'
+		return t(getKey(`${sortLocaleKey}.${direction}`))
+	}
 
 	const handleSelection = useCallback(
 		(option: DownloadSortOption) => {
@@ -269,7 +273,7 @@ export default function DownloadsHeaderSortMenu() {
 						className="text-foreground"
 						closeOnPress={false}
 					>
-						<Text className="text-lg">{t(getKey('sortDirectionDate.ASC'))}</Text>
+						<Text className="text-lg">{renderAndroidLabel(sortConfig.option, 'ASC')}</Text>
 						<Icon as={ArrowUpRight} size={20} className="ml-auto text-foreground-muted" />
 					</DropdownMenuCheckboxItem>
 
@@ -282,7 +286,7 @@ export default function DownloadsHeaderSortMenu() {
 						className="text-foreground"
 						closeOnPress={false}
 					>
-						<Text className="text-lg">{t(getKey('sortDirectionDate.DESC'))}</Text>
+						<Text className="text-lg">{renderAndroidLabel(sortConfig.option, 'DESC')}</Text>
 						<Icon as={ArrowDownLeft} size={20} className="ml-auto text-foreground-muted" />
 					</DropdownMenuCheckboxItem>
 

@@ -1,7 +1,13 @@
 import { TrueSheet, TrueSheetProps } from '@lodev09/react-native-true-sheet'
 import { getColor, serialize } from 'colorjs.io/fn'
-import { useContext, useRef } from 'react'
-import { ScrollView, View } from 'react-native'
+import { useContext, useEffect, useRef } from 'react'
+import { View } from 'react-native'
+import Animated, {
+	interpolateColor,
+	useAnimatedStyle,
+	useSharedValue,
+	withTiming,
+} from 'react-native-reanimated'
 
 import { Heading, Switch, Text } from '~/components/ui'
 import { IS_IOS_24_PLUS, useColors } from '~/lib/constants'
@@ -10,6 +16,7 @@ import { useColorScheme } from '~/lib/useColorScheme'
 import { usePreferencesStore, useReaderStore } from '~/stores'
 
 import { ReaderSettings } from '../settings'
+import { FADE_TIMING_CONFIG } from '../shared'
 import { ImageBasedReaderContext } from './context'
 
 export default function ImageReaderSettingsSheet(props: TrueSheetProps) {
@@ -32,6 +39,20 @@ export default function ImageReaderSettingsSheet(props: TrueSheetProps) {
 	color.alpha = isDarkColorScheme ? 0.1 : 0.2
 	const backgroundColor = serialize(color, { format: 'hex' })
 
+	const bgOpacity = useSharedValue(0)
+
+	useEffect(() => {
+		bgOpacity.value = withTiming(overrideGlobalSettings ? 1 : 0, FADE_TIMING_CONFIG)
+	}, [overrideGlobalSettings, bgOpacity])
+
+	const animatedScrollViewStyle = useAnimatedStyle(() => {
+		return {
+			// add a slight tint if global settings are not used
+			// this visually helps to confirm the switch did something if no settings change
+			backgroundColor: interpolateColor(bgOpacity.value, [0, 1], ['transparent', backgroundColor]),
+		}
+	})
+
 	return (
 		<TrueSheet
 			name="imageReaderSettings"
@@ -42,17 +63,13 @@ export default function ImageReaderSettingsSheet(props: TrueSheetProps) {
 			backgroundColor={IS_IOS_24_PLUS ? undefined : colors.background.DEFAULT}
 			grabberOptions={{ color: colors.sheet.grabber }}
 			insetAdjustment="automatic"
-			style={{
-				// add a slight tint if global settings are not used
-				// this visually helps to confirm the switch did something if no settings change
-				backgroundColor: overrideGlobalSettings ? backgroundColor : undefined,
-			}}
 			{...props}
 		>
-			<ScrollView
+			<Animated.ScrollView
 				className="p-6 flex-1"
 				contentContainerStyle={{ alignItems: 'flex-start' }}
 				nestedScrollEnabled
+				style={animatedScrollViewStyle}
 			>
 				<View className="gap-8 w-full flex-1">
 					<View className="flex flex-row items-center justify-between">
@@ -84,7 +101,7 @@ export default function ImageReaderSettingsSheet(props: TrueSheetProps) {
 							: {})}
 					/>
 				</View>
-			</ScrollView>
+			</Animated.ScrollView>
 		</TrueSheet>
 	)
 }

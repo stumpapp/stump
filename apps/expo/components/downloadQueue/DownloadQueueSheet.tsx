@@ -86,13 +86,18 @@ export const DownloadQueueSheet = forwardRef<TrueSheet, Props>(function Download
 								<View className="w-full">
 									<Host matchContents style={{ width: 'auto' }}>
 										<Picker
+											selection={tab}
 											modifiers={[pickerStyle('segmented')]}
 											onSelectionChange={(selection) => {
 												setTab(selection === 'HEALTHY' ? 'HEALTHY' : 'FAILED')
 											}}
 										>
-											<SwiftText modifiers={[tag('HEALTHY')]}>Downloading</SwiftText>
-											<SwiftText modifiers={[tag('FAILED')]}>Failed</SwiftText>
+											<SwiftText modifiers={[tag('HEALTHY')]}>
+												{t('localLibrary.downloadQueue.downloading')}
+											</SwiftText>
+											<SwiftText modifiers={[tag('FAILED')]}>
+												{t('localLibrary.downloadQueue.failed')}
+											</SwiftText>
 										</Picker>
 									</Host>
 								</View>
@@ -101,11 +106,11 @@ export const DownloadQueueSheet = forwardRef<TrueSheet, Props>(function Download
 								<Tabs value={tab} onValueChange={(value) => setTab(value as 'HEALTHY' | 'FAILED')}>
 									<Tabs.List className="flex-row">
 										<Tabs.Trigger value="HEALTHY">
-											<Text>{t('downloadQueue.downloading')}</Text>
+											<Text>{t('localLibrary.downloadQueue.downloading')}</Text>
 										</Tabs.Trigger>
 
 										<Tabs.Trigger value="FAILED">
-											<Text>{t('downloadQueue.failed')}</Text>
+											<Text>{t('localLibrary.downloadQueue.failed')}</Text>
 										</Tabs.Trigger>
 									</Tabs.List>
 								</Tabs>
@@ -121,7 +126,7 @@ export const DownloadQueueSheet = forwardRef<TrueSheet, Props>(function Download
 						<View className="gap-4 py-8 items-center justify-center">
 							<Owl owl="empty" />
 							<Text className="text-lg text-foreground-muted">
-								{t('downloadQueue.nothingDownloading')}
+								{t('localLibrary.downloadQueue.nothingDownloading')}
 							</Text>
 						</View>
 					)}
@@ -138,7 +143,7 @@ export const DownloadQueueSheet = forwardRef<TrueSheet, Props>(function Download
 						<View className="gap-4 py-8 items-center justify-center">
 							<Owl owl="empty" />
 							<Text className="text-lg text-foreground-muted">
-								{t('downloadQueue.noActiveDownloads')}
+								{t('localLibrary.downloadQueue.noActiveDownloads')}
 							</Text>
 						</View>
 					)}
@@ -155,7 +160,7 @@ export const DownloadQueueSheet = forwardRef<TrueSheet, Props>(function Download
 						<View className="gap-4 py-8 items-center justify-center">
 							<Owl owl="empty" />
 							<Text className="text-lg text-foreground-muted">
-								{t('downloadQueue.noFailedDownloads')}
+								{t('localLibrary.downloadQueue.noFailedDownloads')}
 							</Text>
 						</View>
 					)}

@@ -84,7 +84,7 @@ export default function Screen() {
 				<Stack
 					screenOptions={{
 						title: t('localLibrary.title'),
-						headerShown: Platform.OS === 'ios',
+						headerShown: true,
 						headerTransparent: Platform.OS === 'ios',
 						headerLargeTitle: true,
 						headerBlurEffect: IS_IOS_24_PLUS ? undefined : 'regular',

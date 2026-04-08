@@ -19,6 +19,7 @@ import { TextClassContext } from '~/components/ui/text'
 import { cn } from '~/lib/utils'
 
 // TODO(android): Would be nice to add https://docs.expo.dev/versions/latest/sdk/blur-view/
+// TODO(android): this looks ass, it looks very web but should be very "android" since iOS doesn't use it
 
 const DropdownMenu = DropdownMenuPrimitive.Root
 
@@ -52,7 +53,7 @@ function DropdownMenuSubTrigger({
 		>
 			<DropdownMenuPrimitive.SubTrigger
 				className={cn(
-					'squircle group flex flex-row items-center rounded-lg px-2 py-2 active:bg-background-surface sm:py-1.5',
+					'squircle group rounded-lg px-2 py-2 sm:py-1.5 flex flex-row items-center active:bg-background-surface',
 					open && 'bg-background-surface',
 					inset && 'pl-8',
 					className,
@@ -79,7 +80,7 @@ function DropdownMenuSubContent({
 		<NativeOnlyAnimatedView entering={FadeIn}>
 			<DropdownMenuPrimitive.SubContent
 				className={cn(
-					'squircle overflow-hidden rounded-md border border-edge bg-background p-1 shadow-lg shadow-black/5',
+					'squircle rounded-md p-1 shadow-lg shadow-black/5 overflow-hidden border border-edge bg-background',
 					className,
 				)}
 				{...props}
@@ -120,7 +121,7 @@ function DropdownMenuContent({
 						<TextClassContext.Provider value="text-foreground-subtle">
 							<DropdownMenuPrimitive.Content
 								className={cn(
-									'squircle min-w-[8rem] overflow-hidden rounded-xl border border-edge bg-background p-1 shadow-lg shadow-black/5',
+									'squircle rounded-xl p-1 shadow-lg shadow-black/5 min-w-[8rem] overflow-hidden border border-edge bg-background',
 									className,
 								)}
 								{...props}
@@ -153,7 +154,7 @@ function DropdownMenuItem({
 		>
 			<DropdownMenuPrimitive.Item
 				className={cn(
-					'squircle group relative flex flex-row items-center gap-2 rounded-lg px-2 py-2 active:bg-background-surface sm:py-1.5',
+					'squircle group gap-2 rounded-lg px-2 py-2 sm:py-1.5 relative flex flex-row items-center active:bg-background-surface',
 					variant === 'destructive' && 'active:bg-fill-danger-secondary',
 					props.disabled && 'opacity-50',
 					inset && 'pl-8',
@@ -177,13 +178,13 @@ function DropdownMenuCheckboxItem({
 		<TextClassContext.Provider value="text-base text-foreground select-none group-active:text-accent-foreground">
 			<DropdownMenuPrimitive.CheckboxItem
 				className={cn(
-					'squircle group relative flex flex-row items-center gap-2 rounded-lg py-2 pl-8 pr-2 active:bg-background-surface sm:py-1.5',
+					'squircle group gap-2 rounded-lg py-2 pl-8 pr-2 sm:py-1.5 relative flex flex-row items-center active:bg-background-surface',
 					props.disabled && 'opacity-50',
 					className,
 				)}
 				{...props}
 			>
-				<View className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+				<View className="left-2 h-3.5 w-3.5 absolute flex items-center justify-center">
 					<DropdownMenuPrimitive.ItemIndicator>
 						<Icon
 							as={Check}
@@ -212,13 +213,13 @@ function DropdownMenuRadioItem({
 		<TextClassContext.Provider value="text-base text-foreground select-none group-active:text-accent-foreground">
 			<DropdownMenuPrimitive.RadioItem
 				className={cn(
-					'squircle group relative flex flex-row items-center gap-2 rounded-lg py-2 pl-8 pr-2 active:bg-background-surface sm:py-1.5',
+					'squircle group gap-2 rounded-lg py-2 pl-8 pr-2 sm:py-1.5 relative flex flex-row items-center active:bg-background-surface',
 					props.disabled && 'opacity-50',
 					className,
 				)}
 				{...props}
 			>
-				<View className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+				<View className="left-2 h-3.5 w-3.5 absolute flex items-center justify-center">
 					<DropdownMenuPrimitive.ItemIndicator>
 						<Icon as={Check} className={cn('h-5 w-5 font-medium text-foreground')} />
 					</DropdownMenuPrimitive.ItemIndicator>
@@ -241,7 +242,7 @@ function DropdownMenuLabel({
 	return (
 		<DropdownMenuPrimitive.Label
 			className={cn(
-				'px-2 py-2 text-sm font-medium text-foreground sm:py-1.5',
+				'px-2 py-2 text-sm font-medium sm:py-1.5 text-foreground',
 				inset && 'pl-8',
 				className,
 			)}
@@ -271,7 +272,7 @@ function DropdownMenuSeparator({ className, variant = 'item', ...props }: Separa
 function DropdownMenuShortcut({ className, ...props }: TextProps & React.RefAttributes<Text>) {
 	return (
 		<Text
-			className={cn('ml-auto text-xs tracking-widest text-foreground-muted', className)}
+			className={cn('text-xs tracking-widest ml-auto text-foreground-muted', className)}
 			{...props}
 		/>
 	)

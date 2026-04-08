@@ -71,8 +71,8 @@ export default function ReadingNow({ books }: Props) {
 		})
 
 	return (
-		<View className="flex items-start gap-4">
-			<View className="absolute left-0 top-0 z-30 w-[20px]" style={{ height: imageHeight + 8 }} />
+		<View className="gap-4 flex items-start">
+			<View className="left-0 top-0 absolute z-30 w-[20px]" style={{ height: imageHeight + 8 }} />
 
 			<View className="w-full">
 				<Carousel
@@ -167,7 +167,7 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 		const links = bookMetadata?.links || []
 
 		return (
-			<View className="flex flex-col flex-wrap gap-2">
+			<View className="gap-2 flex flex-col flex-wrap">
 				<Heading
 					style={{
 						width: contentWidth,
@@ -202,7 +202,7 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 
 				{links.length > 0 && (
 					<View
-						className="flex flex-row flex-wrap gap-2"
+						className="gap-2 flex flex-row flex-wrap"
 						style={{
 							width: contentWidth,
 						}}
@@ -236,8 +236,8 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 	})
 
 	return (
-		<View className="flex flex-row gap-4">
-			<Pressable onPress={() => router.push(`/offline/${book.id}/read`)}>
+		<View className="gap-4 flex flex-row">
+			<Pressable onPress={() => router.push(`/offline/${book.id}`)}>
 				<ThumbnailImage
 					source={{
 						// @ts-expect-error: URI doesn't like undefined but it shows a placeholder when
@@ -250,12 +250,12 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 				/>
 
 				{status && (
-					<View className="absolute right-0 z-20 w-full items-end p-3 shadow">
+					<View className="right-0 p-3 shadow absolute z-20 w-full items-end">
 						<SyncIcon status={status} size={24} />
 					</View>
 				)}
 
-				<View className="absolute bottom-0 z-20 w-full gap-2 p-3">
+				<View className="bottom-0 gap-2 p-3 absolute z-20 w-full">
 					{!isTablet && (
 						<Text
 							className="text-2xl font-bold leading-8"
@@ -271,10 +271,10 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 						</Text>
 					)}
 
-					<View className="flex items-start gap-2">
+					<View className="gap-2 flex items-start">
 						<View className="flex w-full flex-row items-center justify-between">
 							<Text
-								className="flex-wrap text-base"
+								className="text-base flex-wrap"
 								style={{
 									color: COLORS.dark.foreground.subtle,
 									opacity: 0.9,
@@ -288,7 +288,7 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 							</Text>
 
 							<Text
-								className="flex-wrap text-base"
+								className="text-base flex-wrap"
 								style={{
 									color: COLORS.dark.foreground.subtle,
 									opacity: 0.9,

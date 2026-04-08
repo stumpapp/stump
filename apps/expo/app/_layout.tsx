@@ -77,15 +77,13 @@ export default function RootLayout() {
 
 	useFileImportListener()
 
-	const { performanceMonitor, animationEnabled, disableDismissGesture, locale } =
-		usePreferencesStore(
-			useShallow((state) => ({
-				animationEnabled: !state.reduceAnimations,
-				performanceMonitor: state.performanceMonitor,
-				disableDismissGesture: state.disableDismissGesture,
-				locale: state.locale,
-			})),
-		)
+	const { performanceMonitor, animationEnabled, locale } = usePreferencesStore(
+		useShallow((state) => ({
+			animationEnabled: !state.reduceAnimations,
+			performanceMonitor: state.performanceMonitor,
+			locale: state.locale,
+		})),
+	)
 	const isReading = useReaderStore((state) => state.isReading)
 	const isReadingEbook = useEpubLocationStore((state) => !!state.book)
 	const { colors: epubThemeColors } = useEpubTheme()
@@ -246,8 +244,6 @@ export default function RootLayout() {
 									title: '',
 									animation: animationEnabled ? 'default' : 'none',
 									autoHideHomeIndicator: hideNavigationBar,
-									presentation:
-										disableDismissGesture && Platform.OS === 'ios' ? 'fullScreenModal' : undefined,
 									contentStyle: {
 										backgroundColor: colors.background.DEFAULT,
 									},

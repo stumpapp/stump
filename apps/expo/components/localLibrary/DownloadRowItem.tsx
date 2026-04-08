@@ -1,8 +1,7 @@
 import { Host, Image } from '@expo/ui/swift-ui'
-import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { useRouter } from 'expo-router'
-import { BookOpenCheck, CheckCircle2, CircleMinus, Info, Trash } from 'lucide-react-native'
-import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { CheckCircle2, Trash } from 'lucide-react-native'
+import { useCallback, useEffect, useMemo } from 'react'
 import { Alert, Platform, View } from 'react-native'
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
 import { useShallow } from 'zustand/react/shallow'
@@ -17,7 +16,6 @@ import { ThumbnailImage } from '../image'
 import { Heading, Progress, Text } from '../ui'
 import { ContextMenu } from '../ui/context-menu/context-menu'
 import { Icon } from '../ui/icon'
-import { DownloadedBookDetailsSheet } from './DownloadedBookDetailsSheet'
 import { SyncIcon } from './sync-icon/SyncIcon'
 import { DownloadedFile } from './types'
 import { useDownloadRowItemSize } from './useDownloadRowItemSize'
@@ -29,11 +27,10 @@ type Props = {
 
 export default function DownloadRowItem({ downloadedFile }: Props) {
 	const router = useRouter()
-	const sheetRef = useRef<TrueSheet>(null)
 
 	const { t } = useTranslate()
 
-	const { deleteBook, markAsComplete, clearProgress } = useDownload({
+	const { deleteBook } = useDownload({
 		serverId: downloadedFile.serverId,
 	})
 
@@ -90,68 +87,14 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 		() =>
 			selectionStore.isSelectionMode
 				? onSelectItem(downloadedFile.id)
-				: router.navigate(`/offline/${downloadedFile.id}/read`),
+				: router.navigate(`/offline/${downloadedFile.id}`),
 		[router, downloadedFile.id, selectionStore, onSelectItem],
 	)
-
-	const progression = useMemo(() => {
-		if (!readProgress) {
-			return { isCompleted: false, hasProgress: false }
-		}
-
-		if (totalPages != null && currentPage != null && totalPages > 0 && currentPage >= totalPages) {
-			return { isCompleted: true, hasProgress: true }
-		}
-
-		if (readProgress.percentage) {
-			const parsed = parseFloat(readProgress.percentage)
-			if (!isNaN(parsed) && parsed >= 0.99) {
-				return { isCompleted: true, hasProgress: true }
-			}
-		}
-
-		return { isCompleted: false, hasProgress: true }
-	}, [readProgress, currentPage, totalPages])
 
 	const handleSelect = useCallback(() => {
 		selectionStore.setIsSelecting(true)
 		onSelectItem(downloadedFile.id)
 	}, [selectionStore, downloadedFile.id, onSelectItem])
-
-	const handleMarkAsComplete = useCallback(() => {
-		Alert.alert(
-			t('bookActions.markAsRead.label'),
-			t('bookActions.markAsRead.confirmation').replace(
-				'{{bookTitle}}',
-				downloadedFile.bookName ? `'${downloadedFile.bookName}'` : t('common.thisBook'),
-			),
-			[
-				{ text: t('common.cancel'), style: 'cancel' },
-				{
-					text: t('bookActions.markAsRead.label'),
-					onPress: () => markAsComplete(downloadedFile.id, downloadedFile.pages),
-				},
-			],
-		)
-	}, [markAsComplete, downloadedFile.id, downloadedFile.pages, downloadedFile.bookName, t])
-
-	const handleClearProgress = useCallback(() => {
-		Alert.alert(
-			t('bookActions.clearProgress.label'),
-			t('bookActions.clearProgress.confirmation').replace(
-				'{{bookTitle}}',
-				downloadedFile.bookName ? `'${downloadedFile.bookName}'` : t('common.thisBook'),
-			),
-			[
-				{ text: t('common.cancel'), style: 'cancel' },
-				{
-					text: t('common.clear'),
-					style: 'destructive',
-					onPress: () => clearProgress(downloadedFile.id),
-				},
-			],
-		)
-	}, [clearProgress, downloadedFile.id, downloadedFile.bookName, t])
 
 	const handleDelete = useCallback(() => {
 		Alert.alert(
@@ -202,14 +145,6 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 					{
 						items: [
 							{
-								label: t('bookActions.seeDetails'),
-								icon: {
-									ios: 'info.circle',
-									android: Info,
-								},
-								onPress: () => sheetRef.current?.present(),
-							},
-							{
 								label: t('common.select'),
 								icon: {
 									ios: 'checkmark.circle',
@@ -217,34 +152,6 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 								},
 								onPress: handleSelect,
 							},
-						],
-					},
-					{
-						items: [
-							...(!progression.isCompleted
-								? [
-										{
-											label: t('bookActions.markAsRead.label'),
-											icon: {
-												ios: 'book.closed',
-												android: BookOpenCheck,
-											},
-											onPress: handleMarkAsComplete,
-										} as const,
-									]
-								: []),
-							...(progression.hasProgress
-								? [
-										{
-											label: t('bookActions.clearProgress.label'),
-											icon: {
-												ios: 'minus.circle',
-												android: CircleMinus,
-											},
-											onPress: handleClearProgress,
-										} as const,
-									]
-								: []),
 						],
 					},
 					{
@@ -330,8 +237,6 @@ export default function DownloadRowItem({ downloadedFile }: Props) {
 					</Animated.View>
 				</View>
 			</ContextMenu>
-
-			<DownloadedBookDetailsSheet ref={sheetRef} downloadedFile={downloadedFile} />
 		</>
 	)
 }

@@ -2,9 +2,11 @@ import { View } from 'react-native'
 import { useShallow } from 'zustand/react/shallow'
 
 import { Switch, Text } from '~/components/ui'
+import { useTranslate } from '~/lib/hooks'
 import { useReaderStore } from '~/stores'
 
 export default function PublisherStyles() {
+	const { t } = useTranslate()
 	const store = useReaderStore(
 		useShallow((state) => ({
 			allowPublisherStyles: state.globalSettings.allowPublisherStyles,
@@ -13,7 +15,7 @@ export default function PublisherStyles() {
 	)
 
 	return (
-		<View className="w-full flex-row items-center justify-between px-6 py-4">
+		<View className="px-6 py-4 w-full flex-row items-center justify-between">
 			<Text
 				nativeID="defaultServer"
 				onPress={() => {
@@ -21,7 +23,7 @@ export default function PublisherStyles() {
 				}}
 				className="text-lg"
 			>
-				Publisher styles
+				{t('epubSettings.publisherStyles')}
 			</Text>
 
 			<View>
@@ -30,7 +32,7 @@ export default function PublisherStyles() {
 					onCheckedChange={() => {
 						store.setAllowPublisherStyles({ allowPublisherStyles: !store.allowPublisherStyles })
 					}}
-					accessibilityLabel="Toggle publisher styles"
+					accessibilityLabel={t('epubSettings.publisherStyles')}
 					accessibilityState={{ checked: store.allowPublisherStyles }}
 				/>
 			</View>

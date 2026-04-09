@@ -509,7 +509,8 @@ class DownloadQueueManager {
 		result: FileSystem.FileSystemDownloadResult,
 	): Promise<void> {
 		try {
-			const size = Number(result.headers['Content-Length'] ?? 0)
+			// android seems to have all lowercase headers
+			const size = Number(result.headers['Content-Length'] ?? result.headers['content-length'] ?? 0)
 			const metadata = item.metadata ? downloadQueueMetadata.safeParse(item.metadata).data : null
 
 			await DownloadRepository.addFile(

@@ -3,6 +3,7 @@ import { useRef, useState } from 'react'
 import { Pressable, View } from 'react-native'
 import ColorPicker, { HueSlider, Panel1 } from 'reanimated-color-picker'
 
+import { SheetBackDetection } from '~/components/SheetBackDetection'
 import { Button, Text } from '~/components/ui'
 import { useColors } from '~/lib/constants'
 
@@ -16,6 +17,8 @@ export function ColorPickerRow({ label, value, onChange }: Props) {
 	const sheetRef = useRef<TrueSheet>(null)
 	const [tempColor, setTempColor] = useState(value)
 	const colors = useColors()
+
+	const [isOpen, setIsOpen] = useState(false)
 
 	const openPicker = () => {
 		setTempColor(value)
@@ -53,6 +56,8 @@ export function ColorPickerRow({ label, value, onChange }: Props) {
 				dismissible={false}
 				backgroundColor={colors.background.DEFAULT}
 				grabberOptions={{ color: colors.sheet.grabber }}
+				onDidPresent={() => setIsOpen(true)}
+				onDidDismiss={() => setIsOpen(false)}
 			>
 				<View className="gap-4 p-4 pb-8">
 					<Text className="text-lg font-medium text-center">{label}</Text>
@@ -78,6 +83,8 @@ export function ColorPickerRow({ label, value, onChange }: Props) {
 					</View>
 				</View>
 			</TrueSheet>
+
+			<SheetBackDetection ref={sheetRef} isOpen={isOpen} />
 		</>
 	)
 }

@@ -2,7 +2,7 @@ import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { useSDK } from '@stump/client'
 import { isPseStreamLink, OPDSLegacyEntry } from '@stump/sdk'
 import { intlFormat } from 'date-fns'
-import { forwardRef } from 'react'
+import { forwardRef, useState } from 'react'
 import { Image, Platform, View } from 'react-native'
 import Animated from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -19,6 +19,7 @@ import { useFileExplorerAssets } from '../fileExplorer'
 import { ThumbnailImage, TurboImage } from '../image'
 import { useResolveURL } from '../opds/utils'
 import { MetadataBadgeSection } from '../overview'
+import { SheetBackDetection } from '../SheetBackDetection'
 import { Card, Heading } from '../ui'
 import { getIconSource } from './OPDSLegacyEntryItem'
 
@@ -53,118 +54,128 @@ export const OPDSLegacyEntryItemSheet = forwardRef<TrueSheet, Props>(
 
 		const description = entry.content ? stripHtml(entry.content).result : null
 
+		const [isOpen, setIsOpen] = useState(false)
+
 		return (
-			<TrueSheet
-				ref={ref}
-				detents={[1]}
-				grabber
-				scrollable
-				backgroundColor={colors.sheet.background}
-				grabberOptions={{
-					color: colors.sheet.grabber,
-				}}
-				style={{
-					paddingBottom: insets.bottom,
-				}}
-			>
-				<Animated.ScrollView ref={animatedScrollRef}>
-					<View className="pb-16 overflow-hidden">
-						{resolvedThumbnailUrl && (
-							<Animated.View
-								className="-inset-12 absolute opacity-70 dark:opacity-30"
-								style={parallaxStyle}
-							>
-								<TImage
-									source={{
-										uri: resolvedThumbnailUrl,
-										headers: {
-											...sdk.customHeaders,
-											Authorization: sdk.authorizationHeader || '',
-										},
-									}}
-									style={{ width: '100%', height: '100%' }}
-									resizeMode="cover"
-									fadeDuration={2000}
-									{...(Platform.OS === 'ios' && { indicator: { color: 'transparent' } })}
-									resize={60}
-									blur={Platform.OS === 'ios' ? 7 : 16}
-								/>
-							</Animated.View>
-						)}
-
-						<View className="gap-4 px-4 pb-8 pt-8 items-center">
-							{!thumbnailUrl &&
-								Platform.select({
-									ios: (
-										<TurboImage
-											source={{ uri: iconSource.localUri || iconSource.uri }}
-											style={{ width: 120, height: 120 }}
-										/>
-									),
-									android: (
-										<Image
-											// @ts-expect-error: It's fine
-											source={iconSource}
-											style={{ width: 120, height: 120 }}
-										/>
-									),
-								})}
-
+			<>
+				<TrueSheet
+					ref={ref}
+					detents={[1]}
+					grabber
+					scrollable
+					backgroundColor={colors.sheet.background}
+					grabberOptions={{
+						color: colors.sheet.grabber,
+					}}
+					style={{
+						paddingBottom: insets.bottom,
+					}}
+					insetAdjustment="automatic"
+					onDidPresent={() => setIsOpen(true)}
+					onDidDismiss={() => setIsOpen(false)}
+				>
+					<Animated.ScrollView ref={animatedScrollRef}>
+						<View className="pb-16 overflow-hidden">
 							{resolvedThumbnailUrl && (
-								<ThumbnailImage
-									source={{
-										uri: resolvedThumbnailUrl,
-										headers: {
-											...sdk.customHeaders,
-											Authorization: sdk.authorizationHeader || '',
-										},
-									}}
-									size={{ height: 200 / thumbnailRatio, width: 200 }}
-									borderAndShadowStyle={{ shadowRadius: 5 }}
-								/>
+								<Animated.View
+									className="-inset-12 absolute opacity-70 dark:opacity-30"
+									style={parallaxStyle}
+								>
+									<TImage
+										source={{
+											uri: resolvedThumbnailUrl,
+											headers: {
+												...sdk.customHeaders,
+												Authorization: sdk.authorizationHeader || '',
+											},
+										}}
+										style={{ width: '100%', height: '100%' }}
+										resizeMode="cover"
+										fadeDuration={2000}
+										{...(Platform.OS === 'ios' && { indicator: { color: 'transparent' } })}
+										resize={60}
+										blur={Platform.OS === 'ios' ? 7 : 16}
+									/>
+								</Animated.View>
 							)}
 
-							<Heading size="lg" className="leading-6 text-center" numberOfLines={3}>
-								{entry.title}
-							</Heading>
-						</View>
-					</View>
-
-					<View className="ios:rounded-[3rem] ios:-mt-[4.5rem] gap-4 px-4 py-6 -mt-[2.5rem] rounded-[2.5rem] bg-background">
-						{(pageCount != null || currentPage != null) && (
-							<Card>
-								<Card.StatGroup>
-									{pageCount != null && <Card.Stat label="Pages" value={pageCount} />}
-									{currentPage != null && <Card.Stat label="Current Page" value={currentPage} />}
-								</Card.StatGroup>
-							</Card>
-						)}
-
-						{!!description && <DescriptionSection description={description} />}
-
-						<MetadataBadgeSection
-							label="Authors"
-							items={[...new Set(entry.authors?.map((author) => ({ label: author.name })) || [])]}
-						/>
-
-						<Card label="Details">
-							<Card.Row label="Server" value={serverName} />
-							{entry.updated && (
-								<Card.Row
-									label="Updated"
-									value={intlFormat(new Date(entry.updated), {
-										month: 'long',
-										day: 'numeric',
-										year: 'numeric',
+							<View className="gap-4 px-4 pb-8 pt-8 items-center">
+								{!thumbnailUrl &&
+									Platform.select({
+										ios: (
+											<TurboImage
+												source={{ uri: iconSource.localUri || iconSource.uri }}
+												style={{ width: 120, height: 120 }}
+											/>
+										),
+										android: (
+											<Image
+												// @ts-expect-error: It's fine
+												source={iconSource}
+												style={{ width: 120, height: 120 }}
+											/>
+										),
 									})}
-								/>
-							)}
-						</Card>
 
-						<IdentifiersSheet identifiers={{ identifier: entry.id }} />
-					</View>
-				</Animated.ScrollView>
-			</TrueSheet>
+								{resolvedThumbnailUrl && (
+									<ThumbnailImage
+										source={{
+											uri: resolvedThumbnailUrl,
+											headers: {
+												...sdk.customHeaders,
+												Authorization: sdk.authorizationHeader || '',
+											},
+										}}
+										size={{ height: 200 / thumbnailRatio, width: 200 }}
+										borderAndShadowStyle={{ shadowRadius: 5 }}
+									/>
+								)}
+
+								<Heading size="lg" className="leading-6 text-center" numberOfLines={3}>
+									{entry.title}
+								</Heading>
+							</View>
+						</View>
+
+						<View className="ios:rounded-[3rem] ios:-mt-[4.5rem] gap-4 px-4 py-6 -mt-[2.5rem] rounded-[2.5rem] bg-background">
+							{(pageCount != null || currentPage != null) && (
+								<Card>
+									<Card.StatGroup>
+										{pageCount != null && <Card.Stat label="Pages" value={pageCount} />}
+										{currentPage != null && <Card.Stat label="Current Page" value={currentPage} />}
+									</Card.StatGroup>
+								</Card>
+							)}
+
+							{!!description && <DescriptionSection description={description} />}
+
+							<MetadataBadgeSection
+								label="Authors"
+								items={[...new Set(entry.authors?.map((author) => ({ label: author.name })) || [])]}
+							/>
+
+							<Card label="Details">
+								<Card.Row label="Server" value={serverName} />
+								{entry.updated && (
+									<Card.Row
+										label="Updated"
+										value={intlFormat(new Date(entry.updated), {
+											month: 'long',
+											day: 'numeric',
+											year: 'numeric',
+										})}
+									/>
+								)}
+							</Card>
+
+							<IdentifiersSheet identifiers={{ identifier: entry.id }} />
+						</View>
+					</Animated.ScrollView>
+				</TrueSheet>
+
+				{/*@ts-expect-error: it should be fine*/}
+				{ref && <SheetBackDetection ref={ref} isOpen={isOpen} />}
+			</>
 		)
 	},
 )

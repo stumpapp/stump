@@ -15,6 +15,7 @@ import { z } from 'zod'
 import { useColors } from '~/lib/constants'
 
 import { useActiveServer } from '../activeServer'
+import { SheetBackDetection } from '../SheetBackDetection'
 import { Button, Input, Text } from '../ui'
 import { HeaderButton } from '../ui/header-button/header-button'
 import { hasLinkRel } from './utils'
@@ -129,93 +130,97 @@ export default function OPDSAuthDialog({ isOpen, authDoc, onClose }: OPDSAuthDia
 	const passwordLabel = basicAuth?.labels?.password || 'Password'
 
 	return (
-		<TrueSheet
-			ref={ref}
-			detents={['auto', 1]}
-			grabber
-			backgroundColor={colors.background.DEFAULT}
-			grabberOptions={{
-				color: colors.sheet.grabber,
-			}}
-			onDidDismiss={handleDismiss}
-			style={{
-				paddingBottom: insets.bottom,
-			}}
-			header={
-				<View className="mt-6 h-12 px-6 w-full items-start">
-					<HeaderButton
-						onPress={() => ref.current?.dismiss()}
-						ios={{
-							variant: 'glass',
+		<>
+			<TrueSheet
+				ref={ref}
+				detents={['auto', 1]}
+				grabber
+				backgroundColor={colors.background.DEFAULT}
+				grabberOptions={{
+					color: colors.sheet.grabber,
+				}}
+				onDidDismiss={handleDismiss}
+				style={{
+					paddingBottom: insets.bottom,
+				}}
+				header={
+					<View className="mt-6 h-12 px-6 w-full items-start">
+						<HeaderButton
+							onPress={() => ref.current?.dismiss()}
+							ios={{
+								variant: 'glass',
+							}}
+						/>
+					</View>
+				}
+			>
+				<View className="gap-4 p-6 items-start">
+					{logoURL && (
+						<View className="w-full items-center justify-center">
+							<TurboImage
+								className="self-center"
+								source={{ uri: logoURL }}
+								style={{ width: 100, height: 100 }}
+							/>
+						</View>
+					)}
+					{loginError && (
+						<View className="squircle mb-2 rounded-xl p-2 bg-fill-danger-secondary">
+							<Text className="text-fill-danger">{loginError}</Text>
+						</View>
+					)}
+					<Controller
+						control={control}
+						rules={{
+							required: true,
 						}}
+						render={({ field: { onChange, onBlur, value } }) => (
+							<Input
+								label={usernameLabel}
+								autoCorrect={false}
+								autoCapitalize="none"
+								autoComplete="username"
+								textContentType="username"
+								placeholder={usernameLabel}
+								onBlur={onBlur}
+								onChangeText={onChange}
+								value={value}
+								errorMessage={errors.username?.message}
+							/>
+						)}
+						name="username"
 					/>
+					<Controller
+						control={control}
+						rules={{
+							required: true,
+						}}
+						render={({ field: { onChange, onBlur, value } }) => (
+							<Input
+								label={passwordLabel}
+								secureTextEntry
+								autoCorrect={false}
+								autoCapitalize="none"
+								autoComplete="password"
+								textContentType="password"
+								placeholder={passwordLabel}
+								onBlur={onBlur}
+								onChangeText={onChange}
+								value={value}
+								errorMessage={errors.password?.message}
+							/>
+						)}
+						name="password"
+					/>
+					{/* eslint-disable-next-line react-hooks/refs */}
+					<Button onPress={handleSubmit(onSubmit)} className="mt-4 w-full" variant="brand">
+						<Text>Login</Text>
+					</Button>
 				</View>
-			}
-		>
-			<View className="gap-4 p-6 items-start">
-				{logoURL && (
-					<View className="w-full items-center justify-center">
-						<TurboImage
-							className="self-center"
-							source={{ uri: logoURL }}
-							style={{ width: 100, height: 100 }}
-						/>
-					</View>
-				)}
-				{loginError && (
-					<View className="squircle mb-2 rounded-xl p-2 bg-fill-danger-secondary">
-						<Text className="text-fill-danger">{loginError}</Text>
-					</View>
-				)}
-				<Controller
-					control={control}
-					rules={{
-						required: true,
-					}}
-					render={({ field: { onChange, onBlur, value } }) => (
-						<Input
-							label={usernameLabel}
-							autoCorrect={false}
-							autoCapitalize="none"
-							autoComplete="username"
-							textContentType="username"
-							placeholder={usernameLabel}
-							onBlur={onBlur}
-							onChangeText={onChange}
-							value={value}
-							errorMessage={errors.username?.message}
-						/>
-					)}
-					name="username"
-				/>
-				<Controller
-					control={control}
-					rules={{
-						required: true,
-					}}
-					render={({ field: { onChange, onBlur, value } }) => (
-						<Input
-							label={passwordLabel}
-							secureTextEntry
-							autoCorrect={false}
-							autoCapitalize="none"
-							autoComplete="password"
-							textContentType="password"
-							placeholder={passwordLabel}
-							onBlur={onBlur}
-							onChangeText={onChange}
-							value={value}
-							errorMessage={errors.password?.message}
-						/>
-					)}
-					name="password"
-				/>
-				{/* eslint-disable-next-line react-hooks/refs */}
-				<Button onPress={handleSubmit(onSubmit)} className="mt-4 w-full" variant="brand">
-					<Text>Login</Text>
-				</Button>
-			</View>
-		</TrueSheet>
+			</TrueSheet>
+
+			<SheetBackDetection ref={ref} isOpen={isOpen} />
+		</>
 	)
 }
 

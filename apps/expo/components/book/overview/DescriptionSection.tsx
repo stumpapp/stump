@@ -1,9 +1,10 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { GlassView } from 'expo-glass-effect'
-import { Fragment, useRef } from 'react'
+import { Fragment, useRef, useState } from 'react'
 import { Platform, Pressable, ScrollView, View } from 'react-native'
 import { stripHtml } from 'string-strip-html'
 
+import { SheetBackDetection } from '~/components/SheetBackDetection'
 import { Markdown, Text } from '~/components/ui'
 import { IS_IOS_24_PLUS, useColors } from '~/lib/constants'
 import { useTranslate } from '~/lib/hooks'
@@ -22,6 +23,8 @@ export default function DescriptionSection({ description }: Props) {
 	const colors = useColors()
 
 	const strippedDescription = stripHtml(description).result
+
+	const [isOpen, setIsOpen] = useState(false)
 
 	return (
 		<Fragment>
@@ -60,11 +63,15 @@ export default function DescriptionSection({ description }: Props) {
 				scrollable
 				backgroundColor={IS_IOS_24_PLUS ? undefined : colors.background.DEFAULT}
 				grabberOptions={{ color: colors.sheet.grabber }}
+				onDidPresent={() => setIsOpen(true)}
+				onDidDismiss={() => setIsOpen(false)}
 			>
 				<ScrollView className="p-6 flex-1">
 					<Markdown>{strippedDescription}</Markdown>
 				</ScrollView>
 			</TrueSheet>
+
+			<SheetBackDetection ref={sheetRef} isOpen={isOpen} />
 		</Fragment>
 	)
 }

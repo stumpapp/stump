@@ -3,7 +3,7 @@ import { PREFETCH_STALE_TIME, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { graphql, SeriesOverviewSheetQuery } from '@stump/graphql'
 import { formatHumanDuration } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
-import { forwardRef } from 'react'
+import { forwardRef, useState } from 'react'
 import { View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -12,6 +12,7 @@ import { IS_IOS_24_PLUS, useColors } from '~/lib/constants'
 import { formatBytesSeparate } from '~/lib/format'
 
 import { MetadataBadgeSection } from '../overview'
+import { SheetBackDetection } from '../SheetBackDetection'
 import { Card, Heading, Text } from '../ui'
 
 const query = graphql(`
@@ -81,6 +82,7 @@ export const SeriesOverviewSheet = forwardRef<TrueSheet, Props>(({ seriesId }, r
 	} = useSuspenseGraphQL(query, sdk.cacheKey('seriesById', ['overviewSheet', seriesId]), {
 		id: seriesId,
 	})
+	const [isOpen, setIsOpen] = useState(false)
 
 	const colors = useColors()
 	const insets = useSafeAreaInsets()
@@ -90,22 +92,29 @@ export const SeriesOverviewSheet = forwardRef<TrueSheet, Props>(({ seriesId }, r
 	}
 
 	return (
-		<TrueSheet
-			ref={ref}
-			detents={['auto', 1]}
-			grabber
-			scrollable
-			backgroundColor={IS_IOS_24_PLUS ? undefined : colors.sheet.background}
-			grabberOptions={{
-				color: colors.sheet.grabber,
-			}}
-			style={{
-				paddingBottom: insets.bottom,
-			}}
-			insetAdjustment="automatic"
-		>
-			<SheetContent series={series} />
-		</TrueSheet>
+		<>
+			<TrueSheet
+				ref={ref}
+				detents={['auto', 1]}
+				grabber
+				scrollable
+				backgroundColor={IS_IOS_24_PLUS ? undefined : colors.sheet.background}
+				grabberOptions={{
+					color: colors.sheet.grabber,
+				}}
+				style={{
+					paddingBottom: insets.bottom,
+				}}
+				insetAdjustment="automatic"
+				onDidPresent={() => setIsOpen(true)}
+				onDidDismiss={() => setIsOpen(false)}
+			>
+				<SheetContent series={series} />
+			</TrueSheet>
+
+			{/*@ts-expect-error: it should be fine*/}
+			{ref && <SheetBackDetection ref={ref} isOpen={isOpen} />}
+		</>
 	)
 })
 SeriesOverviewSheet.displayName = 'SeriesOverviewSheet'

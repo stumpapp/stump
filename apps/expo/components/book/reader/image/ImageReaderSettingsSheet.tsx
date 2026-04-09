@@ -1,6 +1,6 @@
 import { TrueSheet, TrueSheetProps } from '@lodev09/react-native-true-sheet'
 import { getColor, serialize } from 'colorjs.io/fn'
-import { useContext, useEffect, useRef } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import { View } from 'react-native'
 import Animated, {
 	interpolateColor,
@@ -9,6 +9,7 @@ import Animated, {
 	withTiming,
 } from 'react-native-reanimated'
 
+import { SheetBackDetection } from '~/components/SheetBackDetection'
 import { Heading, Switch, Text } from '~/components/ui'
 import { IS_IOS_24_PLUS, useColors } from '~/lib/constants'
 import { useTranslate } from '~/lib/hooks'
@@ -53,55 +54,63 @@ export default function ImageReaderSettingsSheet(props: TrueSheetProps) {
 		}
 	})
 
+	const [isOpen, setIsOpen] = useState(false)
+
 	return (
-		<TrueSheet
-			name="imageReaderSettings"
-			ref={ref}
-			detents={[0.5, 1]}
-			grabber
-			scrollable
-			backgroundColor={IS_IOS_24_PLUS ? undefined : colors.background.DEFAULT}
-			grabberOptions={{ color: colors.sheet.grabber }}
-			insetAdjustment="automatic"
-			{...props}
-		>
-			<Animated.ScrollView
-				className="p-6 flex-1"
-				contentContainerStyle={{ alignItems: 'flex-start' }}
-				nestedScrollEnabled
-				style={animatedScrollViewStyle}
+		<>
+			<TrueSheet
+				name="imageReaderSettings"
+				ref={ref}
+				detents={[0.5, 1]}
+				grabber
+				scrollable
+				backgroundColor={IS_IOS_24_PLUS ? undefined : colors.background.DEFAULT}
+				grabberOptions={{ color: colors.sheet.grabber }}
+				insetAdjustment="automatic"
+				{...props}
+				onDidPresent={() => setIsOpen(true)}
+				onDidDismiss={() => setIsOpen(false)}
 			>
-				<View className="gap-8 w-full flex-1">
-					<View className="flex flex-row items-center justify-between">
-						<Heading size="lg">{t('common.settings')}</Heading>
+				<Animated.ScrollView
+					className="p-6 flex-1"
+					contentContainerStyle={{ alignItems: 'flex-start' }}
+					nestedScrollEnabled
+					style={animatedScrollViewStyle}
+				>
+					<View className="gap-8 w-full flex-1">
+						<View className="flex flex-row items-center justify-between">
+							<Heading size="lg">{t('common.settings')}</Heading>
 
-						{!!context && (
-							<View className="gap-1 flex-row items-center">
-								<Text className="text-foreground-muted">
-									{t('readerSettings.overrideGlobalSettings')}
-								</Text>
-								<Switch
-									checked={overrideGlobalSettings}
-									onCheckedChange={(checked) => {
-										if (bookId) {
-											setBookOverride(bookId, checked)
-										}
-									}}
-								/>
-							</View>
-						)}
+							{!!context && (
+								<View className="gap-1 flex-row items-center">
+									<Text className="text-foreground-muted">
+										{t('readerSettings.overrideGlobalSettings')}
+									</Text>
+									<Switch
+										checked={overrideGlobalSettings}
+										onCheckedChange={(checked) => {
+											if (bookId) {
+												setBookOverride(bookId, checked)
+											}
+										}}
+									/>
+								</View>
+							)}
+						</View>
+
+						<ReaderSettings
+							{...(overrideGlobalSettings && bookId && serverId
+								? {
+										forBook: bookId,
+										forServer: serverId,
+									}
+								: {})}
+						/>
 					</View>
+				</Animated.ScrollView>
+			</TrueSheet>
 
-					<ReaderSettings
-						{...(overrideGlobalSettings && bookId && serverId
-							? {
-									forBook: bookId,
-									forServer: serverId,
-								}
-							: {})}
-					/>
-				</View>
-			</Animated.ScrollView>
-		</TrueSheet>
+			<SheetBackDetection ref={ref} isOpen={isOpen} />
+		</>
 	)
 }

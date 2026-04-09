@@ -1,7 +1,9 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
+import { useState } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useShallow } from 'zustand/react/shallow'
 
+import { SheetBackDetection } from '~/components/SheetBackDetection'
 import { IS_IOS_24_PLUS, useColors } from '~/lib/constants'
 import { useEpubSheetStore } from '~/stores/epubSheet'
 
@@ -20,24 +22,32 @@ export default function CustomizeThemeSheet() {
 	const colors = useColors()
 	const insets = useSafeAreaInsets()
 
+	const [isOpen, setIsOpen] = useState(false)
+
 	const handleClose = () => {
 		closeSheet('customizeTheme')
 	}
 
 	return (
-		<TrueSheet
-			ref={sheetRef}
-			detents={[1]}
-			grabber
-			scrollable
-			backgroundColor={IS_IOS_24_PLUS ? undefined : colors.background.DEFAULT}
-			grabberOptions={{ color: colors.sheet.grabber }}
-			style={{
-				paddingBottom: insets.bottom,
-			}}
-			insetAdjustment="automatic"
-		>
-			<CustomizeTheme onCancel={handleClose} mode={mode} theme={name} />
-		</TrueSheet>
+		<>
+			<TrueSheet
+				ref={sheetRef}
+				detents={[1]}
+				grabber
+				scrollable
+				backgroundColor={IS_IOS_24_PLUS ? undefined : colors.background.DEFAULT}
+				grabberOptions={{ color: colors.sheet.grabber }}
+				style={{
+					paddingBottom: insets.bottom,
+				}}
+				insetAdjustment="automatic"
+				onDidPresent={() => setIsOpen(true)}
+				onDidDismiss={() => setIsOpen(false)}
+			>
+				<CustomizeTheme onCancel={handleClose} mode={mode} theme={name} />
+			</TrueSheet>
+
+			<SheetBackDetection ref={sheetRef} isOpen={isOpen} />
+		</>
 	)
 }

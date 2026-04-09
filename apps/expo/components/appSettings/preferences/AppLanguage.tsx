@@ -6,10 +6,10 @@ import { useShallow } from 'zustand/react/shallow'
 
 import { Picker } from '~/components/ui/picker/picker'
 import { PickerOption } from '~/components/ui/picker/types'
+import { useTranslate } from '~/lib/hooks'
 import { usePreferencesStore } from '~/stores'
 
 import AppSettingsRow from '../AppSettingsRow'
-import { useTranslate } from '~/lib/hooks'
 
 const localeOptions: PickerOption<AllowedLocale>[] = Object.entries(localeNames).map(
 	([value, label]) => ({

@@ -105,7 +105,7 @@ function AndroidColorPicker({ selection, onSelectionChange }: Props) {
 				onDidPresent={() => setIsOpen(true)}
 				onDidDismiss={() => setIsOpen(false)}
 				header={
-					<View className="px-2 pt-4 pb-2 flex-row justify-between">
+					<View className="px-2 pt-4 flex-row justify-between">
 						<HeaderButton icon={{ ios: 'xmark', android: X }} onPress={handleCancel} />
 
 						<HeaderButton

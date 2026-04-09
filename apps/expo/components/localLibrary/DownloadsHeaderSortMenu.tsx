@@ -24,8 +24,8 @@ import {
 	DropdownMenuTrigger,
 	Text,
 } from '~/components/ui'
-import { useColors } from '~/lib/constants'
 import { useTranslate } from '~/lib/hooks'
+import { cn } from '~/lib/utils'
 
 import { Icon } from '../ui/icon'
 import { DownloadSortOption, DownloadSourceFilter, useDownloadsState } from './store'
@@ -41,8 +41,6 @@ export default function DownloadsHeaderSortMenu() {
 	const setSourceFilter = useDownloadsState((state) => state.setSourceFilter)
 
 	const insets = useSafeAreaInsets()
-
-	const colors = useColors()
 
 	const contentInsets = {
 		top: insets.top,
@@ -201,22 +199,25 @@ export default function DownloadsHeaderSortMenu() {
 			</NativeDropdownMenu.Root>
 		),
 		android: (
-			<DropdownMenu>
+			<DropdownMenu onOpenChange={setIsOpen}>
 				<DropdownMenuTrigger asChild>
-					<Button
-						className="squircle ml-2 mr-2 h-12 w-12 rounded-full border border-edge"
-						variant="ghost"
-						size="icon"
-					>
+					<Button className="squircle mr-2" variant="ghost" size="icon">
 						{({ pressed }) => (
-							<View className="squircle items-center justify-center rounded-full">
+							// TODO(colors): should formalize this pattern into the dropdown trigger by some means instead of copy/pasting
+							<View
+								className={cn(
+									'squircle p-2 items-center justify-center rounded-full border border-transparent bg-transparent transition-colors duration-200',
+									{
+										'bg-black/10 dark:bg-white/5 border-edge': isOpen,
+									},
+								)}
+							>
 								<Icon
 									as={ListFilter}
 									size={20}
+									className="text-foreground"
 									style={{
-										opacity: isOpen ? 0.5 : pressed ? 0.7 : 1,
-										// @ts-expect-error: It's fine
-										color: colors.foreground.subtle,
+										opacity: pressed ? 0.7 : 1,
 									}}
 								/>
 							</View>
@@ -265,7 +266,7 @@ export default function DownloadsHeaderSortMenu() {
 					<DropdownMenuCheckboxItem
 						// Note: The key here is a bit annoying but it forces a re-render when switching to avoid the
 						// onCheckedChange overriding the reasonable default direction when switching sort options
-						key={sortConfig.option}
+						key={sortConfig.option + 'ASC'}
 						checked={sortConfig.direction === 'ASC'}
 						onCheckedChange={() => {
 							setDirection('ASC')
@@ -280,7 +281,7 @@ export default function DownloadsHeaderSortMenu() {
 					<DropdownMenuCheckboxItem
 						// Note: The key here is a bit annoying but it forces a re-render when switching to avoid the
 						// onCheckedChange overriding the reasonable default direction when switching sort options
-						key={sortConfig.option}
+						key={sortConfig.option + 'DESC'}
 						checked={sortConfig.direction === 'DESC'}
 						onCheckedChange={() => setDirection('DESC')}
 						className="text-foreground"

@@ -121,7 +121,7 @@ function DropdownMenuContent({
 						<TextClassContext.Provider value="text-foreground-subtle">
 							<DropdownMenuPrimitive.Content
 								className={cn(
-									'squircle rounded-xl p-1 shadow-lg shadow-black/5 min-w-[8rem] overflow-hidden border border-edge bg-background',
+									'squircle rounded-2xl shadow-lg shadow-black/5 p-2 min-w-[8rem] overflow-hidden border border-edge bg-background',
 									className,
 								)}
 								{...props}
@@ -261,7 +261,7 @@ function DropdownMenuSeparator({ className, variant = 'item', ...props }: Separa
 		<DropdownMenuPrimitive.Separator
 			className={cn(
 				'-mx-1 my-1 h-px bg-edge opacity-80',
-				{ 'h-2': variant === 'group' },
+				{ 'h-0.5': variant === 'group' },
 				className,
 			)}
 			{...props}

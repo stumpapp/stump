@@ -47,7 +47,7 @@ const buttonTextVariants = cva('text-base font-medium text-foreground', {
 			destructive: 'text-fill-danger',
 			outline: '',
 			secondary: 'text-foreground-on-inverse',
-			ghost: '',
+			ghost: 'text-foreground',
 		},
 		size: {
 			default: '',

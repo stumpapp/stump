@@ -1,4 +1,7 @@
-import { CircularProgressIndicator as AndroidCircularProgress } from '@expo/ui/jetpack-compose'
+import {
+	CircularProgressIndicator as AndroidCircularProgress,
+	Host as AndroidHost,
+} from '@expo/ui/jetpack-compose'
 import { Host, ProgressView as IosCircularProgress } from '@expo/ui/swift-ui'
 import { progressViewStyle, tint } from '@expo/ui/swift-ui/modifiers'
 import { Platform, View } from 'react-native'
@@ -24,10 +27,12 @@ const AndroidLoader = ({ color }: NativeLoaderProps) => {
 	const { colorScheme } = useColorScheme()
 	const colors = useColors()
 	return (
-		<AndroidCircularProgress
-			color={color}
-			trackColor={colorScheme === 'dark' ? colors.foreground.muted : '#cccccc'}
-		/>
+		<AndroidHost matchContents>
+			<AndroidCircularProgress
+				color={color}
+				trackColor={colorScheme === 'dark' ? colors.foreground.muted : '#cccccc'}
+			/>
+		</AndroidHost>
 	)
 }
 
@@ -35,9 +40,10 @@ const WrappedLoader = ({ color }: Partial<NativeLoaderProps>) => {
 	const accentColor = usePreferencesStore((state) => state.accentColor)
 	const colors = useColors()
 
-	const Component = Platform.OS === 'ios' ? IosLoader : AndroidLoader
-
-	return <Component color={color || accentColor || colors.fill.brand.DEFAULT} />
+	return Platform.select({
+		ios: <IosLoader color={color || accentColor || colors.fill.brand.DEFAULT} />,
+		android: <AndroidLoader color={color || accentColor || colors.fill.brand.DEFAULT} />,
+	})
 }
 
 const Loader = ({ color }: Partial<NativeLoaderProps>) => <WrappedLoader color={color} />

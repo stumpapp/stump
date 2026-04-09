@@ -1,7 +1,9 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { checkOPDSURL, checkUrl, formatApiURL } from '@stump/sdk'
+import { GlassView } from 'expo-glass-effect'
 import isEqual from 'lodash/isEqual'
 import omit from 'lodash/omit'
+import { Check, X } from 'lucide-react-native'
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 import { Controller, useForm, useFormState, useWatch } from 'react-hook-form'
 import { Alert, FocusEvent, Platform, Pressable, View } from 'react-native'
@@ -11,12 +13,16 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { match, P } from 'ts-pattern'
 import { z } from 'zod'
 
+import { useColors } from '~/lib/constants'
 import { useTranslate } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 import { usePreferencesStore, useSavedServers } from '~/stores'
 import { SavedServerWithConfig } from '~/stores/savedServer'
 
-import { Button, Heading, Input, Label, Switch, Tabs, Text } from '../ui'
+import { DottedLine } from '../book/overview/DottedLine'
+import { Button, Heading, Input, Label, Loader, Switch, Text } from '../ui'
+import { HeaderButton } from '../ui/header-button/header-button'
+import { SegmentedPicker } from '../ui/segmented-picker/segmented-picker'
 
 type Props = {
 	editingServer?: SavedServerWithConfig | null
@@ -31,6 +37,7 @@ export default function AddOrEditServerForm({
 	onClose,
 	onInputFocused,
 }: Props) {
+	const colors = useColors()
 	const { t } = useTranslate()
 	const { savedServers, stumpEnabled } = useSavedServers()
 
@@ -50,6 +57,7 @@ export default function AddOrEditServerForm({
 	const maskURLs = usePreferencesStore((state) => state.maskURLs)
 
 	const [didConnect, setDidConnect] = useState(false)
+	const [isCheckingConnection, setIsCheckingConnection] = useState(false)
 
 	const [kind, url] = useWatch({ control, name: ['kind', 'url'] })
 
@@ -63,6 +71,11 @@ export default function AddOrEditServerForm({
 	const broadKind = useMemo(() => (kind === 'stump' ? 'stump' : 'opds'), [kind])
 
 	const checkConnection = useCallback(async () => {
+		setIsCheckingConnection(true)
+
+		// artificial delay for ✨aesthetic ✨
+		await new Promise((resolve) => setTimeout(resolve, 500)) // should give at least one loop of the loader (ish)
+
 		const isValid =
 			kind === 'stump' ? await checkUrl(formatApiURL(url, 'v2')) : await checkOPDSURL(url)
 		if (!isValid) {
@@ -74,6 +87,7 @@ export default function AddOrEditServerForm({
 			form.clearErrors('url')
 			setDidConnect(true)
 		}
+		setIsCheckingConnection(false)
 	}, [kind, url, form, setDidConnect, t])
 
 	const [isAddingHeader, setIsAddingHeader] = useState(false)
@@ -228,24 +242,27 @@ export default function AddOrEditServerForm({
 
 	const insets = useSafeAreaInsets()
 
+	// TODO: imperative handle for the form so we can put the header buttons in the containing sheet, utilizing
+	// `header` properly so it doesn't hide when scrolled
 	return (
 		<View
-			className="gap-4 w-full"
+			className="gap-5 w-full"
 			style={{ paddingBottom: Platform.OS === 'android' ? 32 : insets.bottom }}
 		>
 			<View className="pb-2 flex-row items-center justify-between">
-				<Pressable onPress={onClose}>
-					<Text className="text-foreground-muted">{t('common.cancel')}</Text>
-				</Pressable>
+				<HeaderButton
+					ios={{ variant: 'glass' }}
+					icon={{ ios: 'xmark', android: X }}
+					onPress={onClose}
+				/>
 
-				<Button
-					size="sm"
-					variant="brand"
+				<HeaderButton
+					ios={{ variant: 'glassProminent' }}
+					android={{ variant: 'prominent' }}
 					onPress={handleSubmit(onSubmit)}
 					disabled={editingServer ? !isUpdateReady : false}
-				>
-					<Text>{t('common.save')}</Text>
-				</Button>
+					icon={{ ios: 'checkmark', android: Check }}
+				/>
 			</View>
 
 			<View>
@@ -260,20 +277,14 @@ export default function AddOrEditServerForm({
 			<View className="w-full flex-row items-center justify-between">
 				<Text className="text-base font-medium text-foreground-muted">{t(getKey('kind'))}</Text>
 
-				<Tabs
+				<SegmentedPicker
 					value={broadKind}
+					options={[
+						{ label: 'Stump', value: 'stump' },
+						{ label: 'OPDS', value: 'opds' },
+					]}
 					onValueChange={(v) => form.setValue('kind', v as 'stump' | 'opds' | 'opds-legacy')}
-				>
-					<Tabs.List className="flex-row">
-						<Tabs.Trigger value="stump">
-							<Text>Stump</Text>
-						</Tabs.Trigger>
-
-						<Tabs.Trigger value="opds">
-							<Text>OPDS</Text>
-						</Tabs.Trigger>
-					</Tabs.List>
-				</Tabs>
+				/>
 			</View>
 
 			{broadKind === 'opds' && (
@@ -282,23 +293,17 @@ export default function AddOrEditServerForm({
 						OPDS {t('common.version')}
 					</Text>
 
-					<Tabs
+					<SegmentedPicker
 						value={opdsVersion}
+						options={[
+							{ label: 'v1.2', value: 'v1' },
+							{ label: 'v2.0', value: 'v2' },
+						]}
 						onValueChange={(v) => {
 							setOpdsVersion(v as 'v1' | 'v2')
 							form.setValue('kind', v === 'v1' ? 'opds-legacy' : 'opds')
 						}}
-					>
-						<Tabs.List className="flex-row">
-							<Tabs.Trigger value="v1">
-								<Text>v1.2</Text>
-							</Tabs.Trigger>
-
-							<Tabs.Trigger value="v2">
-								<Text>v2.0</Text>
-							</Tabs.Trigger>
-						</Tabs.List>
-					</Tabs>
+					/>
 				</View>
 			)}
 
@@ -344,19 +349,34 @@ export default function AddOrEditServerForm({
 				name="url"
 			/>
 
-			<View className="flex-row justify-end">
-				<Button
-					variant="outline"
-					size="sm"
-					className={cn('squircle rounded-lg bg-background-surface', {
-						'opacity-70': !url,
-						'bg-fill-success-secondary': didConnect,
-					})}
-					disabled={!url}
-					onPress={checkConnection}
-				>
-					<Text>{t(getKey(didConnect ? 'didConnect' : 'checkConnection'))}</Text>
-				</Button>
+			<View className="gap-1 my-2 flex-row items-center">
+				<DottedLine />
+				<Pressable disabled={!url} onPress={checkConnection}>
+					<GlassView
+						glassEffectStyle="regular"
+						style={{ borderRadius: 999, opacity: !url ? 0.65 : 1 }}
+						tintColor={didConnect ? colors.fill.success.secondary : undefined}
+						isInteractive={!!url}
+						// only affects android
+						className={cn('border border-edge bg-background-surface', {
+							'border-transparent bg-transparent': isCheckingConnection,
+							'bg-fill-success-secondary': didConnect,
+						})}
+					>
+						<View className="px-4 py-2">
+							{isCheckingConnection ? (
+								<View className="h-6 w-6 items-center justify-center">
+									<Loader />
+								</View>
+							) : (
+								<Text className="text-base font-semibold">
+									{t(getKey(didConnect ? 'didConnect' : 'checkConnection'))}
+								</Text>
+							)}
+						</View>
+					</GlassView>
+				</Pressable>
+				<DottedLine inverted />
 			</View>
 
 			<View className="gap-2 w-full">
@@ -408,16 +428,16 @@ export default function AddOrEditServerForm({
 							onChangeText={setNewHeaderValue}
 						/>
 						<View className="gap-4 flex-row justify-end">
-							<Button variant="outline" size="sm" onPress={onCancelAddHeader}>
+							<Button variant="outline" size="sm" roundness="full" onPress={onCancelAddHeader}>
 								<Text>{t('common.cancel')}</Text>
 							</Button>
-							<Button variant="brand" size="sm" onPress={addNewHeader}>
+							<Button variant="brand" size="sm" roundness="full" onPress={addNewHeader}>
 								<Text>{t('common.save')}</Text>
 							</Button>
 						</View>
 					</View>
 				) : (
-					<Button roundness="xl" variant="outline" onPress={() => setIsAddingHeader(true)}>
+					<Button roundness="full" variant="outline" onPress={() => setIsAddingHeader(true)}>
 						<Text>{t(getKey('customHeaders.addHeader'))}</Text>
 					</Button>
 				)}
@@ -431,21 +451,15 @@ export default function AddOrEditServerForm({
 				<Controller
 					control={control}
 					render={({ field: { onChange, value } }) => (
-						<Tabs value={value} onValueChange={onChange}>
-							<Tabs.List className="flex-row">
-								<Tabs.Trigger value="default">
-									<Text>{t(getKey('auth.default.label'))}</Text>
-								</Tabs.Trigger>
-
-								<Tabs.Trigger value="basic">
-									<Text>{t(getKey('auth.basic'))}</Text>
-								</Tabs.Trigger>
-
-								<Tabs.Trigger value="token">
-									<Text>{t(getKey('auth.token.label'))}</Text>
-								</Tabs.Trigger>
-							</Tabs.List>
-						</Tabs>
+						<SegmentedPicker
+							value={value}
+							options={[
+								{ label: t(getKey('auth.default.label')), value: 'default' },
+								{ label: t(getKey('auth.basic')), value: 'basic' },
+								{ label: t(getKey('auth.token.label')), value: 'token' },
+							]}
+							onValueChange={(v) => onChange(v as 'default' | 'basic' | 'token')}
+						/>
 					)}
 					name="authMode"
 				/>

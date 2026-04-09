@@ -1,6 +1,6 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { Plus } from 'lucide-react-native'
-import { useCallback, useRef } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { View } from 'react-native'
 import { ScrollView } from 'react-native'
 import { Pressable } from 'react-native-gesture-handler'
@@ -9,6 +9,7 @@ import { IS_IOS_24_PLUS, useColors } from '~/lib/constants'
 import { cn } from '~/lib/utils'
 import { useSavedServers } from '~/stores'
 
+import { SheetBackDetection } from '../SheetBackDetection'
 import { Icon } from '../ui/icon'
 import AddOrEditServerForm, {
 	AddOrEditServerSchema,
@@ -28,6 +29,8 @@ export default function AddServerDialog() {
 		},
 		[createServer],
 	)
+
+	const [isOpen, setIsOpen] = useState(false)
 
 	return (
 		<View>
@@ -62,11 +65,15 @@ export default function AddServerDialog() {
 				scrollableOptions={{ keyboardScrollOffset: 8 }}
 				grabber
 				grabberOptions={{ color: colors.sheet.grabber }}
+				onDidPresent={() => setIsOpen(true)}
+				onDidDismiss={() => setIsOpen(false)}
 			>
 				<ScrollView className="p-6">
 					<AddOrEditServerForm onSubmit={onSubmit} onClose={() => ref.current?.dismiss()} />
 				</ScrollView>
 			</TrueSheet>
+
+			<SheetBackDetection ref={ref} isOpen={isOpen} />
 		</View>
 	)
 }

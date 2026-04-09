@@ -32,10 +32,14 @@ export function Picker<T extends string = string>({
 			<DropdownMenuTrigger asChild disabled={disabled}>
 				<Button
 					variant="ghost"
-					className={cn('gap-2 flex-row items-center justify-between', className)}
+					className={cn('gap-2 px-0 h-[unset] flex-row items-center justify-between', className)}
+					size="sm"
 				>
 					<Text
-						className={cn('text-foreground-muted', !selectedOption && 'text-foreground-subtle')}
+						className={cn(
+							'text-lg text-foreground-muted',
+							!selectedOption && 'text-foreground-subtle',
+						)}
 					>
 						{selectedOption?.label ?? placeholder}
 					</Text>

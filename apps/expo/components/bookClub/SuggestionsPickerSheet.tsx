@@ -8,7 +8,7 @@ import {
 	SuggestionsPickerSheetQuery,
 } from '@stump/graphql'
 import { BookOpen } from 'lucide-react-native'
-import { forwardRef, useCallback, useImperativeHandle, useRef } from 'react'
+import { forwardRef, useCallback, useImperativeHandle, useRef, useState } from 'react'
 import { View } from 'react-native'
 import { Pressable } from 'react-native-gesture-handler'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -16,6 +16,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { IS_IOS_24_PLUS, useColors } from '~/lib/constants'
 
 import ListEmpty from '../ListEmpty'
+import { SheetBackDetection } from '../SheetBackDetection'
 import { Icon, SheetHeader, Text } from '../ui'
 import { useBookClubContext } from './context'
 
@@ -92,31 +93,39 @@ export const SuggestionsPickerSheet = forwardRef<SuggestionsPickerSheetRef, Prop
 
 		const suggestions = data?.bookClubSuggestions ?? []
 
+		const [isOpen, setIsOpen] = useState(false)
+
 		return (
-			<TrueSheet
-				ref={sheetRef}
-				detents={[1]}
-				grabber
-				scrollable
-				backgroundColor={IS_IOS_24_PLUS ? undefined : colors.sheet.background}
-				grabberOptions={{ color: colors.sheet.grabber }}
-				style={{ paddingBottom: insets.bottom }}
-				insetAdjustment="automatic"
-				header={
-					<SheetHeader title="Member suggestions" onClose={() => sheetRef.current?.dismiss()} />
-				}
-			>
-				<FlashList
-					data={suggestions}
-					renderItem={({ item }) => (
-						<SuggestionRow suggestion={item} onSelect={() => handleSelectSuggestion(item)} />
-					)}
-					contentContainerStyle={{ paddingVertical: 8, paddingHorizontal: 16 }}
-					contentInsetAdjustmentBehavior="automatic"
-					ListEmptyComponent={<ListEmpty message="No pending suggestions from members yet" />}
-					ItemSeparatorComponent={() => <View className="h-2" />}
-				/>
-			</TrueSheet>
+			<>
+				<TrueSheet
+					ref={sheetRef}
+					detents={[1]}
+					grabber
+					scrollable
+					backgroundColor={IS_IOS_24_PLUS ? undefined : colors.sheet.background}
+					grabberOptions={{ color: colors.sheet.grabber }}
+					style={{ paddingBottom: insets.bottom }}
+					insetAdjustment="automatic"
+					header={
+						<SheetHeader title="Member suggestions" onClose={() => sheetRef.current?.dismiss()} />
+					}
+					onDidPresent={() => setIsOpen(true)}
+					onDidDismiss={() => setIsOpen(false)}
+				>
+					<FlashList
+						data={suggestions}
+						renderItem={({ item }) => (
+							<SuggestionRow suggestion={item} onSelect={() => handleSelectSuggestion(item)} />
+						)}
+						contentContainerStyle={{ paddingVertical: 8, paddingHorizontal: 16 }}
+						contentInsetAdjustmentBehavior="automatic"
+						ListEmptyComponent={<ListEmpty message="No pending suggestions from members yet" />}
+						ItemSeparatorComponent={() => <View className="h-2" />}
+					/>
+				</TrueSheet>
+
+				<SheetBackDetection ref={sheetRef} isOpen={isOpen} />
+			</>
 		)
 	},
 )

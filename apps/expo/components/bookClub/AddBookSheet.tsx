@@ -11,6 +11,7 @@ import { useActiveServer } from '../activeServer'
 import BookGridItem from '../book/BookGridItem'
 import { useGridItemSize } from '../grid/useGridItemSize'
 import ListEmpty from '../ListEmpty'
+import { SheetBackDetection } from '../SheetBackDetection'
 import { Button, Input, Text } from '../ui'
 import { PreviewBookSheet, PreviewBookSheetRef } from './PreviewBookSheet'
 
@@ -75,6 +76,7 @@ export const AddBookSheet = forwardRef<AddBookSheetRef, Props>(({ onAddBook }, r
 	const [search, setSearch] = useState('')
 
 	const [previewBookId, setPreviewBookId] = useState<string | null>(null)
+	const [isOpen, setIsOpen] = useState(false)
 
 	const onSelectBook = (bookId: string) => {
 		setPreviewBookId(bookId)
@@ -132,68 +134,74 @@ export const AddBookSheet = forwardRef<AddBookSheetRef, Props>(({ onAddBook }, r
 	const isFiltered = Object.keys(filters ?? {}).length > 0
 
 	return (
-		<TrueSheet
-			ref={sheetRef}
-			detents={[1]}
-			dimmed={false}
-			grabber
-			scrollable
-			backgroundColor={IS_IOS_24_PLUS ? undefined : colors.sheet.background}
-			grabberOptions={{
-				color: colors.sheet.grabber,
-			}}
-			style={{
-				paddingBottom: insets.bottom,
-			}}
-			insetAdjustment="automatic"
-		>
-			<FlashList
-				data={data?.pages.flatMap((page) => page.media.nodes) || []}
-				renderItem={({ item }) => (
-					<BookGridItem book={item} onPress={() => onSelectBook(item.id)} />
-				)}
-				contentContainerStyle={{
-					paddingVertical: 16,
-					paddingHorizontal: paddingHorizontal,
+		<>
+			<TrueSheet
+				ref={sheetRef}
+				detents={[1]}
+				dimmed={false}
+				grabber
+				scrollable
+				backgroundColor={IS_IOS_24_PLUS ? undefined : colors.sheet.background}
+				grabberOptions={{
+					color: colors.sheet.grabber,
 				}}
-				numColumns={numColumns}
-				onEndReachedThreshold={ON_END_REACHED_THRESHOLD}
-				onEndReached={onEndReached}
-				contentInsetAdjustmentBehavior="automatic"
-				ListHeaderComponentStyle={{ paddingBottom: 16 }}
-				ListHeaderComponent={
-					<Input value={search} onChangeText={setSearch} placeholder="Search books..." />
-				}
-				ListEmptyComponent={
-					<ListEmpty
-						message={isFiltered ? 'No books found matching your filters' : 'No books returned'}
-						actions={
-							<>
-								{isFiltered && (
-									<Button roundness="full" variant="secondary" onPress={() => setSearch('')}>
-										<Text>Clear Filters</Text>
-									</Button>
-								)}
-								<Button roundness="full" onPress={() => refetch()}>
-									<Text>Refresh</Text>
-								</Button>
-							</>
-						}
-					/>
-				}
-			/>
-
-			<PreviewBookSheet
-				ref={previewSheetRef}
-				bookId={previewBookId}
-				onConfirmAddBook={() => {
-					if (previewBookId) {
-						onAddBook({ stored: { id: previewBookId } })
-						previewSheetRef.current?.close()
+				style={{
+					paddingBottom: insets.bottom,
+				}}
+				insetAdjustment="automatic"
+				onDidPresent={() => setIsOpen(true)}
+				onDidDismiss={() => setIsOpen(false)}
+			>
+				<FlashList
+					data={data?.pages.flatMap((page) => page.media.nodes) || []}
+					renderItem={({ item }) => (
+						<BookGridItem book={item} onPress={() => onSelectBook(item.id)} />
+					)}
+					contentContainerStyle={{
+						paddingVertical: 16,
+						paddingHorizontal: paddingHorizontal,
+					}}
+					numColumns={numColumns}
+					onEndReachedThreshold={ON_END_REACHED_THRESHOLD}
+					onEndReached={onEndReached}
+					contentInsetAdjustmentBehavior="automatic"
+					ListHeaderComponentStyle={{ paddingBottom: 16 }}
+					ListHeaderComponent={
+						<Input value={search} onChangeText={setSearch} placeholder="Search books..." />
 					}
-				}}
-			/>
-		</TrueSheet>
+					ListEmptyComponent={
+						<ListEmpty
+							message={isFiltered ? 'No books found matching your filters' : 'No books returned'}
+							actions={
+								<>
+									{isFiltered && (
+										<Button roundness="full" variant="secondary" onPress={() => setSearch('')}>
+											<Text>Clear Filters</Text>
+										</Button>
+									)}
+									<Button roundness="full" onPress={() => refetch()}>
+										<Text>Refresh</Text>
+									</Button>
+								</>
+							}
+						/>
+					}
+				/>
+
+				<PreviewBookSheet
+					ref={previewSheetRef}
+					bookId={previewBookId}
+					onConfirmAddBook={() => {
+						if (previewBookId) {
+							onAddBook({ stored: { id: previewBookId } })
+							previewSheetRef.current?.close()
+						}
+					}}
+				/>
+			</TrueSheet>
+
+			<SheetBackDetection ref={sheetRef} isOpen={isOpen} />
+		</>
 	)
 })
 

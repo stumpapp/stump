@@ -1,13 +1,14 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { BookClubBookInput } from '@stump/graphql'
-import { forwardRef, useCallback, useImperativeHandle, useRef } from 'react'
+import { forwardRef, useCallback, useImperativeHandle, useRef, useState } from 'react'
 import { Controller, useForm, useFormState } from 'react-hook-form'
 import { ScrollView, View } from 'react-native'
 import { z } from 'zod'
 
 import { IS_IOS_24_PLUS, useColors } from '~/lib/constants'
 
+import { SheetBackDetection } from '../SheetBackDetection'
 import { Input, SheetHeader } from '../ui'
 
 const schema = z.object({
@@ -45,6 +46,8 @@ export const ManualBookEntrySheet = forwardRef<ManualBookEntrySheetRef, Props>(
 		})
 		const { errors } = useFormState({ control })
 
+		const [isOpen, setIsOpen] = useState(false)
+
 		useImperativeHandle(ref, () => ({
 			open: () => {
 				sheetRef.current?.present()
@@ -55,6 +58,7 @@ export const ManualBookEntrySheet = forwardRef<ManualBookEntrySheetRef, Props>(
 		}))
 
 		const handleDismiss = useCallback(() => {
+			setIsOpen(false)
 			reset()
 		}, [reset])
 
@@ -73,99 +77,104 @@ export const ManualBookEntrySheet = forwardRef<ManualBookEntrySheetRef, Props>(
 		)
 
 		return (
-			<TrueSheet
-				ref={sheetRef}
-				detents={['auto', 1]}
-				grabber
-				scrollable
-				backgroundColor={IS_IOS_24_PLUS ? undefined : colors.sheet.background}
-				grabberOptions={{ color: colors.sheet.grabber }}
-				onDidDismiss={handleDismiss}
-				header={
-					<SheetHeader
-						title="Enter book details"
-						onClose={() => sheetRef.current?.dismiss()}
-						onSubmit={handleSubmit(onSubmit)}
-					/>
-				}
-			>
-				<ScrollView
-					contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
-					keyboardShouldPersistTaps="handled"
+			<>
+				<TrueSheet
+					ref={sheetRef}
+					detents={['auto', 1]}
+					grabber
+					scrollable
+					backgroundColor={IS_IOS_24_PLUS ? undefined : colors.sheet.background}
+					grabberOptions={{ color: colors.sheet.grabber }}
+					onDidPresent={() => setIsOpen(true)}
+					onDidDismiss={handleDismiss}
+					header={
+						<SheetHeader
+							title="Enter book details"
+							onClose={() => sheetRef.current?.dismiss()}
+							onSubmit={handleSubmit(onSubmit)}
+						/>
+					}
 				>
-					<View className="gap-4">
-						<Controller
-							control={control}
-							name="title"
-							render={({ field: { onChange, onBlur, value } }) => (
-								<Input
-									label="Title"
-									placeholder="Book title"
-									value={value}
-									onChangeText={onChange}
-									onBlur={onBlur}
-									errorMessage={errors.title?.message}
-									autoCapitalize="words"
-									autoCorrect={false}
-								/>
-							)}
-						/>
+					<ScrollView
+						contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
+						keyboardShouldPersistTaps="handled"
+					>
+						<View className="gap-4">
+							<Controller
+								control={control}
+								name="title"
+								render={({ field: { onChange, onBlur, value } }) => (
+									<Input
+										label="Title"
+										placeholder="Book title"
+										value={value}
+										onChangeText={onChange}
+										onBlur={onBlur}
+										errorMessage={errors.title?.message}
+										autoCapitalize="words"
+										autoCorrect={false}
+									/>
+								)}
+							/>
 
-						<Controller
-							control={control}
-							name="author"
-							render={({ field: { onChange, onBlur, value } }) => (
-								<Input
-									label="Author"
-									placeholder="Author name"
-									value={value}
-									onChangeText={onChange}
-									onBlur={onBlur}
-									errorMessage={errors.author?.message}
-									autoCapitalize="words"
-									autoCorrect={false}
-								/>
-							)}
-						/>
+							<Controller
+								control={control}
+								name="author"
+								render={({ field: { onChange, onBlur, value } }) => (
+									<Input
+										label="Author"
+										placeholder="Author name"
+										value={value}
+										onChangeText={onChange}
+										onBlur={onBlur}
+										errorMessage={errors.author?.message}
+										autoCapitalize="words"
+										autoCorrect={false}
+									/>
+								)}
+							/>
 
-						<Controller
-							control={control}
-							name="url"
-							render={({ field: { onChange, onBlur, value } }) => (
-								<Input
-									label="URL (optional)"
-									placeholder="https://..."
-									value={value}
-									onChangeText={onChange}
-									onBlur={onBlur}
-									errorMessage={errors.url?.message}
-									keyboardType="url"
-									autoCapitalize="none"
-									autoCorrect={false}
-								/>
-							)}
-						/>
+							<Controller
+								control={control}
+								name="url"
+								render={({ field: { onChange, onBlur, value } }) => (
+									<Input
+										label="URL (optional)"
+										placeholder="https://..."
+										value={value}
+										onChangeText={onChange}
+										onBlur={onBlur}
+										errorMessage={errors.url?.message}
+										keyboardType="url"
+										autoCapitalize="none"
+										autoCorrect={false}
+									/>
+								)}
+							/>
 
-						<Controller
-							control={control}
-							name="imageUrl"
-							render={({ field: { onChange, onBlur, value } }) => (
-								<Input
-									label="Cover image URL (optional)"
-									placeholder="https://..."
-									value={value}
-									onChangeText={onChange}
-									onBlur={onBlur}
-									errorMessage={errors.imageUrl?.message}
-									keyboardType="url"
-									autoCapitalize="none"
-									autoCorrect={false}
-								/>
-							)}
-						/>
-					</View>
-				</ScrollView>
-			</TrueSheet>
+							<Controller
+								control={control}
+								name="imageUrl"
+								render={({ field: { onChange, onBlur, value } }) => (
+									<Input
+										label="Cover image URL (optional)"
+										placeholder="https://..."
+										value={value}
+										onChangeText={onChange}
+										onBlur={onBlur}
+										errorMessage={errors.imageUrl?.message}
+										keyboardType="url"
+										autoCapitalize="none"
+										autoCorrect={false}
+									/>
+								)}
+							/>
+						</View>
+					</ScrollView>
+				</TrueSheet>
+
+				<SheetBackDetection ref={sheetRef} isOpen={isOpen} />
+			</>
 		)
 	},
 )

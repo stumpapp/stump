@@ -1,8 +1,9 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { GlassView } from 'expo-glass-effect'
-import { Fragment, useRef } from 'react'
+import { Fragment, useRef, useState } from 'react'
 import { Platform, Pressable, ScrollView, View } from 'react-native'
 
+import { SheetBackDetection } from '~/components/SheetBackDetection'
 import { Card, Text } from '~/components/ui'
 import { IS_IOS_24_PLUS, useColors } from '~/lib/constants'
 
@@ -25,12 +26,13 @@ type Props = {
 
 export default function IdentifiersSheet({ identifiers }: Props) {
 	const sheetRef = useRef<TrueSheet | null>(null)
+	const [isOpen, setIsOpen] = useState(false)
 
 	const colors = useColors()
 
 	return (
 		<Fragment>
-			<View className="mt-2 flex-row items-center gap-1">
+			<View className="mt-2 gap-1 flex-row items-center">
 				<DottedLine />
 				<Pressable onPress={() => sheetRef.current?.present()}>
 					<GlassView
@@ -59,8 +61,10 @@ export default function IdentifiersSheet({ identifiers }: Props) {
 				scrollable
 				backgroundColor={IS_IOS_24_PLUS ? undefined : colors.background.DEFAULT}
 				grabberOptions={{ color: colors.sheet.grabber }}
+				onDidPresent={() => setIsOpen(true)}
+				onDidDismiss={() => setIsOpen(false)}
 			>
-				<ScrollView className="flex-1 gap-2 px-4 py-6">
+				<ScrollView className="gap-2 px-4 py-6 flex-1">
 					<Card label="Identifiers">
 						{identifiers.stumpId && <Card.Row label="Stump" value={identifiers.stumpId} />}
 						{identifiers.identifier && (
@@ -75,6 +79,8 @@ export default function IdentifiersSheet({ identifiers }: Props) {
 					</Card>
 				</ScrollView>
 			</TrueSheet>
+
+			<SheetBackDetection ref={sheetRef} isOpen={isOpen} />
 		</Fragment>
 	)
 }

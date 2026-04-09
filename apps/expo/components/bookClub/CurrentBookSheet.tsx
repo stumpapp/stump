@@ -2,7 +2,7 @@ import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { useSDK } from '@stump/client'
 import { CurrentBookCardFragment } from '@stump/graphql'
 import { useRouter } from 'expo-router'
-import { forwardRef, useImperativeHandle, useRef } from 'react'
+import { forwardRef, useImperativeHandle, useRef, useState } from 'react'
 import { Platform, View } from 'react-native'
 import { Linking } from 'react-native'
 import Animated from 'react-native-reanimated'
@@ -15,6 +15,7 @@ import { usePreferencesStore } from '~/stores'
 import { useActiveServer } from '../activeServer'
 import { useOverviewAnimations } from '../book/overview'
 import { ThumbnailImage } from '../image'
+import { SheetBackDetection } from '../SheetBackDetection'
 import { Button, Heading, Text } from '../ui'
 import { getClubBookThumbnailData } from './utils'
 
@@ -69,81 +70,89 @@ export const CurrentBookSheet = forwardRef<CurrentBookSheetRef, Props>(({ book }
 		}
 	}
 
+	const [isOpen, setIsOpen] = useState(false)
+
 	return (
-		<TrueSheet
-			ref={sheetRef}
-			detents={[1]}
-			dimmed={false}
-			grabber
-			scrollable
-			backgroundColor={IS_IOS_24_PLUS ? undefined : colors.sheet.background}
-			grabberOptions={{
-				color: colors.sheet.grabber,
-			}}
-			style={{
-				paddingBottom: insets.bottom,
-			}}
-			insetAdjustment="automatic"
-		>
-			<Animated.ScrollView className="flex-1 bg-background" ref={animatedScrollRef}>
-				<View className="ios:pt-safe-offset-20 pt-safe pb-8 overflow-hidden">
-					<Animated.View
-						// -inset-24 is because when using a lot of blur, the sides get more transparent
-						// so we have to "zoom in" to have a clean line at the bottom rather than a gradient
-						className="-inset-24 absolute opacity-70 dark:opacity-30"
-						style={parallaxStyle}
-					>
-						<TImage
-							source={{
-								uri: thumbnailData?.url || '',
-								headers: thumbnailData?.headers,
-							}}
-							style={{ width: '100%', height: '100%' }}
-							resizeMode="cover"
-							fadeDuration={2000}
-							{...(Platform.OS === 'ios' && { indicator: { color: 'transparent' } })}
-							// android only supports up to blur={25} which doesn't look good,
-							// but if we heavily downscale first, the following looks near identical to using
-							// original res with blur={40} on ios, which is what I originally settled on
-							resize={60}
-							blur={Platform.OS === 'ios' ? 7 : 16}
-						/>
-					</Animated.View>
+		<>
+			<TrueSheet
+				ref={sheetRef}
+				detents={[1]}
+				dimmed={false}
+				grabber
+				scrollable
+				backgroundColor={IS_IOS_24_PLUS ? undefined : colors.sheet.background}
+				grabberOptions={{
+					color: colors.sheet.grabber,
+				}}
+				style={{
+					paddingBottom: insets.bottom,
+				}}
+				insetAdjustment="automatic"
+				onDidPresent={() => setIsOpen(true)}
+				onDidDismiss={() => setIsOpen(false)}
+			>
+				<Animated.ScrollView className="flex-1 bg-background" ref={animatedScrollRef}>
+					<View className="ios:pt-safe-offset-20 pt-safe pb-8 overflow-hidden">
+						<Animated.View
+							// -inset-24 is because when using a lot of blur, the sides get more transparent
+							// so we have to "zoom in" to have a clean line at the bottom rather than a gradient
+							className="-inset-24 absolute opacity-70 dark:opacity-30"
+							style={parallaxStyle}
+						>
+							<TImage
+								source={{
+									uri: thumbnailData?.url || '',
+									headers: thumbnailData?.headers,
+								}}
+								style={{ width: '100%', height: '100%' }}
+								resizeMode="cover"
+								fadeDuration={2000}
+								{...(Platform.OS === 'ios' && { indicator: { color: 'transparent' } })}
+								// android only supports up to blur={25} which doesn't look good,
+								// but if we heavily downscale first, the following looks near identical to using
+								// original res with blur={40} on ios, which is what I originally settled on
+								resize={60}
+								blur={Platform.OS === 'ios' ? 7 : 16}
+							/>
+						</Animated.View>
 
-					<View className="gap-8 px-4 tablet:px-6">
-						<ThumbnailImage
-							source={{
-								uri: thumbnailData?.url || '',
-								headers: thumbnailData?.headers,
-							}}
-							size={{ height: 235 / thumbnailRatio, width: 235 }}
-							placeholderData={thumbnailData?.placeholderData}
-							borderAndShadowStyle={{ shadowRadius: 5 }}
-						/>
+						<View className="gap-8 px-4 tablet:px-6">
+							<ThumbnailImage
+								source={{
+									uri: thumbnailData?.url || '',
+									headers: thumbnailData?.headers,
+								}}
+								size={{ height: 235 / thumbnailRatio, width: 235 }}
+								placeholderData={thumbnailData?.placeholderData}
+								borderAndShadowStyle={{ shadowRadius: 5 }}
+							/>
 
-						<View className="gap-2">
-							<Heading size="lg" className="leading-6 text-center">
-								{book.entity?.resolvedName || book.title}
-							</Heading>
+							<View className="gap-2">
+								<Heading size="lg" className="leading-6 text-center">
+									{book.entity?.resolvedName || book.title}
+								</Heading>
+							</View>
+
+							<View className="gap-x-2 tablet:max-w-sm flex w-full flex-row items-center tablet:self-center">
+								<Button
+									variant="brand"
+									className="flex-1"
+									roundness="full"
+									onPress={onGoToBook}
+									disabled={!book.entity?.id && !book.url}
+								>
+									<Text>Go to Book</Text>
+								</Button>
+							</View>
+
+							{/* TODO: Add more details here */}
 						</View>
-
-						<View className="gap-x-2 tablet:max-w-sm flex w-full flex-row items-center tablet:self-center">
-							<Button
-								variant="brand"
-								className="flex-1"
-								roundness="full"
-								onPress={onGoToBook}
-								disabled={!book.entity?.id && !book.url}
-							>
-								<Text>Go to Book</Text>
-							</Button>
-						</View>
-
-						{/* TODO: Add more details here */}
 					</View>
-				</View>
-			</Animated.ScrollView>
-		</TrueSheet>
+				</Animated.ScrollView>
+			</TrueSheet>
+
+			<SheetBackDetection ref={sheetRef} isOpen={isOpen} />
+		</>
 	)
 })
 CurrentBookSheet.displayName = 'CurrentBookSheet'

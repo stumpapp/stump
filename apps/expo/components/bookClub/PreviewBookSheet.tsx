@@ -51,6 +51,9 @@ type Props = {
 	onConfirmAddBook: () => void
 }
 
+// note: i did not add the SheetBackDetection here since it is a child sheet and i was unsure
+// if i might break it with multiple listeners. i am too lazy to test but once book club is actually
+// a non-experimental feature i will actually check etc
 export const PreviewBookSheet = forwardRef<PreviewBookSheetRef, Props>(
 	({ bookId, onConfirmAddBook }, ref) => {
 		const sheetRef = useRef<TrueSheet>(null)

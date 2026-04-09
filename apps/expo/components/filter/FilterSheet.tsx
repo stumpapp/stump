@@ -8,6 +8,8 @@ import { Icon, Text } from '~/components/ui'
 import { useColors } from '~/lib/constants'
 import { cn } from '~/lib/utils'
 
+import { SheetBackDetection } from '../SheetBackDetection'
+
 export interface FilterSheetRef {
 	open: () => void
 	close: () => void
@@ -106,6 +108,8 @@ const FilterSheet = forwardRef<FilterSheetRef, Props>(function FilterSheet(
 					{children}
 				</View>
 			</TrueSheet>
+
+			<SheetBackDetection ref={sheetRef} isOpen={isOpen} />
 		</View>
 	)
 })

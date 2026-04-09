@@ -212,7 +212,7 @@ const dark: Theme = {
 		background: '#000000',
 		grabber: '#333',
 	},
-	tabbar: '#060606',
+	tabbar: '#0B0B0B',
 }
 
 export const COLORS = {

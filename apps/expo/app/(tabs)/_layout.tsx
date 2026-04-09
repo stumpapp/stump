@@ -1,20 +1,12 @@
-import { Tabs } from 'expo-router'
 import { NativeTabs } from 'expo-router/unstable-native-tabs'
-import { HardDriveDownload, Server, Settings } from 'lucide-react-native'
-import { Platform } from 'react-native'
 
-import { AddServerDialog } from '~/components/savedServer'
-import { Icon as JSIcon } from '~/components/ui'
 import { useColors } from '~/lib/constants'
 import { useTranslate } from '~/lib/hooks'
-import { cn } from '~/lib/utils'
-import { usePreferencesStore } from '~/stores'
 
 export default function TabLayout() {
 	const { t } = useTranslate()
 
 	const colors = useColors()
-	const accentColor = usePreferencesStore((state) => state.accentColor)
 
 	return (
 		<NativeTabs

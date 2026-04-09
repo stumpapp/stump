@@ -1,4 +1,4 @@
-import { ChevronDown } from 'lucide-react-native'
+import { ChevronsUpDown } from 'lucide-react-native'
 import { View } from 'react-native'
 
 import { usePortalHost } from '~/lib/PortalHostContext'
@@ -37,14 +37,14 @@ export function Picker<T extends string = string>({
 				>
 					<Text
 						className={cn(
-							'text-lg text-foreground-muted',
+							'text-lg font-normal text-foreground-muted',
 							!selectedOption && 'text-foreground-subtle',
 						)}
 					>
 						{selectedOption?.label ?? placeholder}
 					</Text>
 					<View>
-						<Icon as={ChevronDown} size={16} className="text-foreground-subtle" />
+						<Icon as={ChevronsUpDown} size={16} className="text-foreground-subtle" />
 					</View>
 				</Button>
 			</DropdownMenuTrigger>

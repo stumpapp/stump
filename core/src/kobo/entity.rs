@@ -11,11 +11,18 @@ use sea_orm::{
 use crate::kobo::sync_types::*;
 use chrono::Utc;
 
+#[derive(Debug, Clone, FromQueryResult)]
+pub struct ReadingSession {
+	pub started_at: DateTimeWithTimeZone,
+	pub updated_at: Option<DateTimeWithTimeZone>,
+	pub percentage_completed: Option<Decimal>,
+}
+
 #[derive(Debug, Clone)]
 pub struct MediaWithMetadataAndReadingSessions {
 	pub media: media::Model,
 	pub metadata: Option<media_metadata::Model>,
-	pub reading_session: Option<reading_session::Model>,
+	pub reading_session: Option<ReadingSession>,
 	pub finished_reading_session_count: u32,
 	pub finished_reading_session_last_completed_at: Option<DateTimeWithTimeZone>,
 }
@@ -28,8 +35,12 @@ fn apply_reading_session_joins(
 	let user_id1 = user.id.clone();
 	let user_id2 = user.id.clone();
 
-	// TODO: is there a cleaner way to do this? can i use the existing Prefixer and also use the
-	// other filters from MediaWithMetadata?
+	// it would be nice to use `.select_also` here instead of manually selecting columns, but
+	// that doesn't work with `.into_model`.
+	//
+	// we're using a custom `ReadingSession` struct to insulate us from changes to
+	// `reading_session`: if the entity requires columns that aren't selected here, then
+	// `parse_query_to_model_optional` will silently return None.
 	query
 		.column_as(reading_session::Column::Id, "reading_sessionsid")
 		.column_as(
@@ -44,8 +55,6 @@ fn apply_reading_session_joins(
 			reading_session::Column::PercentageCompleted,
 			"reading_sessionspercentage_completed",
 		)
-		.column_as(reading_session::Column::MediaId, "reading_sessionsmedia_id")
-		.column_as(reading_session::Column::UserId, "reading_sessionsuser_id")
 		// LEFT JOIN reading_sessions on media.id = reading_sessions.media_id
 		//  AND reading_sessions.user_id = $user_id
 		.join(
@@ -113,7 +122,7 @@ impl FromQueryResult for MediaWithMetadataAndReadingSessions {
 			media_metadata::Entity,
 		>(res)?;
 		let reading_session = parse_query_to_model_optional::<
-			reading_session::Model,
+			ReadingSession,
 			reading_session::Entity,
 		>(res)?;
 		Ok(Self {
@@ -238,10 +247,7 @@ impl ReadingState {
 		}
 	}
 
-	pub fn from_active_reading_session(
-		media_id: String,
-		rs: &reading_session::Model,
-	) -> Self {
+	pub fn from_active_reading_session(media_id: String, rs: &ReadingSession) -> Self {
 		ReadingState {
 			created: rs.started_at.to_utc(), // TODO
 			current_bookmark: CurrentBookmark {

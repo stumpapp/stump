@@ -1,6 +1,6 @@
-use crate::{data::CoreContext, object::tag::Tag};
+use crate::{data::CoreContext, guard::PermissionGuard, object::tag::Tag};
 use async_graphql::{Context, Object, Result};
-use models::entity::tag;
+use models::{entity::tag, shared::enums::UserPermission};
 use sea_orm::{
 	prelude::*, ActiveValue::Set, DatabaseConnection, DatabaseTransaction,
 	IntoActiveModel, QuerySelect, TransactionTrait,
@@ -17,6 +17,7 @@ impl TagMutation {
 	/// If any of the tags already exist an error is returned.
 	///
 	/// * `tags` - A non-empty list of tags to create.
+	#[graphql(guard = "PermissionGuard::one(UserPermission::ManageLibrary)")]
 	async fn create_tags(
 		&self,
 		ctx: &Context<'_>,
@@ -28,6 +29,7 @@ impl TagMutation {
 
 	/// Rename a tag. Returns the updated tag, or an error if the tag was not found or the new
 	/// name already exists.
+	#[graphql(guard = "PermissionGuard::one(UserPermission::ManageLibrary)")]
 	async fn rename_tag(&self, ctx: &Context<'_>, id: i32, name: String) -> Result<Tag> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 		rename_tag(conn, id, name).await
@@ -35,7 +37,8 @@ impl TagMutation {
 
 	/// Delete tags. Returns a list containing the deleted tags, or an error if deletion failed.
 	///
-	/// * `tags` - A non-empty list of tags to create.
+	/// * `tags` - A non-empty list of tags to delete.
+	#[graphql(guard = "PermissionGuard::one(UserPermission::ManageLibrary)")]
 	async fn delete_tags(
 		&self,
 		ctx: &Context<'_>,

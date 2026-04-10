@@ -1695,7 +1695,7 @@ export type Mutation = {
   /**
    * Delete tags. Returns a list containing the deleted tags, or an error if deletion failed.
    *
-   * * `tags` - A non-empty list of tags to create.
+   * * `tags` - A non-empty list of tags to delete.
    */
   deleteTags: Array<Tag>;
   deleteUser: User;

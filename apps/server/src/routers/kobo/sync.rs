@@ -81,18 +81,18 @@ impl KoboSync {
 		device_metadata: serde_json::Value,
 		previous_sync_at: Option<DateTimeWithTimeZone>,
 	) -> Result<Self, sea_orm::DbErr> {
+		let query = media::Entity::find_for_user(user)
+			.filter(media::Column::Extension.eq("epub"));
+
 		let query = match previous_sync_at {
 			// load things created or modified since the last sync session
-			Some(previous_sync_at) => media::Entity::find_for_user(user)
-				.filter(media::Column::Extension.eq("epub"))
-				.filter(
-					sea_orm::Condition::any()
-						.add(media::Column::CreatedAt.gte(previous_sync_at))
-						.add(media::Column::ModifiedAt.gte(previous_sync_at)),
-				),
+			Some(previous_sync_at) => query.filter(
+				sea_orm::Condition::any()
+					.add(media::Column::CreatedAt.gte(previous_sync_at))
+					.add(media::Column::ModifiedAt.gte(previous_sync_at)),
+			),
 			// we're starting from scratch, load absolutely everything
-			None => media::Entity::find_for_user(user)
-				.filter(media::Column::Extension.eq("epub")),
+			None => query,
 		};
 
 		let media_ids = query.column(media::Column::Id).into_tuple().all(db).await?;
@@ -364,8 +364,6 @@ mod tests {
 			],
 			sync_page.media_ids,
 		);
-
-		// TODO: test ignoring non-epubs
 	}
 
 	#[tokio::test]
@@ -629,5 +627,65 @@ mod tests {
 
 		// the database should only contain the last 2 syncs.
 		assert_eq!(sync_ids[3..], sessions_in_db)
+	}
+
+	#[tokio::test]
+	async fn test_only_includes_epubs() {
+		let db = test_database().await;
+
+		let user = fake_data::User::new("ishmael").insert(&db).await;
+		let series = fake_data::Series::default().insert(&db).await;
+
+		fake_data::Media {
+			series_id: series.id.clone(),
+			id: Some("don-quixote".to_string()),
+			name: Some("Don Quixote".to_string()),
+			created_at: Some("1605-01-16T00:00:00Z".parse().unwrap()),
+			extension: Some("epub".to_string()),
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
+
+		fake_data::Media {
+			series_id: series.id.clone(),
+			id: Some("action-comics-i".to_string()),
+			name: Some("Action Comics #1".to_string()),
+			created_at: Some("1938-04-18T00:00:00Z".parse().unwrap()),
+			extension: Some("cbz".to_string()),
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
+
+		fake_data::Media {
+			series_id: series.id.clone(),
+			id: Some("voynich-manuscript".to_string()),
+			name: Some("Voynich Manuscript".to_string()),
+			created_at: Some("1400-01-01T00:00:00Z".parse().unwrap()),
+			extension: Some("pdf".to_string()),
+			..Default::default()
+		}
+		.insert(&db)
+		.await;
+
+		let user = user::AuthUser {
+			id: user.id,
+			permissions: vec![],
+			..Default::default()
+		};
+		let sync_page = KoboSync::next_page(
+			&db,
+			&user,
+			Some("kobo-1"),
+			serde_json::json!({}),
+			None,
+			10,
+		)
+		.await
+		.expect("failed to initiate sync");
+
+		// we don't include CBZs or PDFs
+		assert_eq!(vec!["don-quixote",], sync_page.media_ids,);
 	}
 }

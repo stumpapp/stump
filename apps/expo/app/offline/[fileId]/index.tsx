@@ -51,7 +51,11 @@ export default function Screen() {
 		})),
 	)
 
-	useFocusEffect(useCallback(() => increment(), [increment]))
+	useFocusEffect(
+		useCallback(() => {
+			increment()
+		}, [increment]),
+	)
 
 	const {
 		data: [record],

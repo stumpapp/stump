@@ -16,11 +16,7 @@ import { BookFilterHeader } from '~/components/book/filterHeader'
 import { useGridItemSize } from '~/components/grid/useGridItemSize'
 import ListEmpty from '~/components/ListEmpty'
 import RefreshControl from '~/components/RefreshControl'
-import {
-	SeriesActionMenu,
-	SeriesOverviewSheet,
-	usePrefetchSeriesOverview,
-} from '~/components/series'
+import { SeriesOverviewSheet, usePrefetchSeriesOverview, useSeriesMenu } from '~/components/series'
 import { Button, RefreshButton, Text } from '~/components/ui'
 import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
 import { useDownloadSeries } from '~/lib/hooks/db/downloadSeries'
@@ -82,18 +78,24 @@ export default function Screen() {
 	useDynamicHeader({
 		title: series.resolvedName,
 		showBackButton,
-		headerRight: () => (
-			<SeriesActionMenu
-				seriesId={id}
-				onShowOverview={() => sheetRef.current?.present()}
-				onDownloadSeries={() => downloadSeries(id)}
-			/>
-		),
+		// headerRight: () => (
+		// 	<SeriesActionMenu
+		// 		seriesId={id}
+		// 		onShowOverview={() => sheetRef.current?.present()}
+		// 		onDownloadSeries={() => downloadSeries(id)}
+		// 	/>
+		// ),
 	})
 
 	useEffect(() => {
 		prefetch(id)
 	}, [id, prefetch])
+
+	const menuFragment = useSeriesMenu({
+		seriesId: id,
+		onShowOverview: () => sheetRef.current?.present(),
+		onDownloadSeries: () => downloadSeries(id),
+	})
 
 	// eslint-disable-next-line react-hooks/refs
 	const store = useRef(createBookFilterStore()).current
@@ -137,6 +139,7 @@ export default function Screen() {
 
 	return (
 		<BookFilterContext.Provider value={store}>
+			{menuFragment}
 			<SafeAreaView
 				style={{ flex: 1 }}
 				edges={['left', 'right', ...(Platform.OS === 'ios' ? [] : ['bottom' as const])]}

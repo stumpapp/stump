@@ -30,9 +30,10 @@ export default function Layout() {
 					headerBlurEffect: IS_IOS_24_PLUS ? undefined : 'regular',
 					headerLargeTitle: true,
 					headerLargeTitleStyle: { fontSize: 30 },
-					headerRight: canCreateClubs
-						? () => <Link href={`/server/${serverID}/clubs/create`}>{PlusIcon}</Link>
-						: undefined,
+					headerRight:
+						canCreateClubs && Platform.OS === 'android'
+							? () => <Link href={`/server/${serverID}/clubs/create`}>{PlusIcon}</Link>
+							: undefined,
 				}}
 			/>
 

@@ -11,6 +11,7 @@ import { useGridItemSize } from '~/components/grid/useGridItemSize'
 import {
 	LibraryActionMenu,
 	LibraryOverviewSheet,
+	useLibraryMenu,
 	usePrefetchLibraryOverview,
 } from '~/components/library'
 import ListEmpty from '~/components/ListEmpty'
@@ -62,9 +63,11 @@ export default function Screen() {
 
 	useDynamicHeader({
 		title: library.name,
-		headerRight: () => (
-			<LibraryActionMenu libraryId={id} onShowOverview={() => sheetRef.current?.present()} />
-		),
+	})
+
+	const menuFragment = useLibraryMenu({
+		libraryId: id,
+		onShowOverview: () => sheetRef.current?.present(),
 	})
 
 	useEffect(() => {
@@ -93,48 +96,51 @@ export default function Screen() {
 	}, [hasNextPage, fetchNextPage])
 
 	return (
-		<SafeAreaView
-			style={{ flex: 1 }}
-			edges={['left', 'right', ...(Platform.OS === 'ios' ? [] : ['bottom' as const])]}
-		>
-			<FlashList
-				data={nodes}
-				renderItem={({ item }) => <SeriesGridItem series={item} />}
-				contentContainerStyle={{
-					paddingHorizontal: paddingHorizontal,
-					paddingVertical: 16,
-				}}
-				numColumns={numColumns}
-				onEndReachedThreshold={ON_END_REACHED_THRESHOLD}
-				onEndReached={onEndReached}
-				contentInsetAdjustmentBehavior="automatic"
-				refreshControl={
-					nodes.length > 0 ? (
-						<RefreshControl refreshing={isRefetching} onRefresh={handleRefetch} />
-					) : undefined
-				}
-				ListEmptyComponent={
-					<ListEmpty
-						title="This library is empty"
-						message="Once you've added series to this library, they'll show up here"
-						actions={
-							<>
-								<RefreshButton
-									className="flex-row items-center"
-									roundness="full"
-									size="lg"
-									onPress={() => handleRefetch()}
-									isRefreshing={isRefetching}
-								>
-									<Text>Refresh</Text>
-								</RefreshButton>
-							</>
-						}
-					/>
-				}
-			/>
+		<>
+			{menuFragment}
+			<SafeAreaView
+				style={{ flex: 1 }}
+				edges={['left', 'right', ...(Platform.OS === 'ios' ? [] : ['bottom' as const])]}
+			>
+				<FlashList
+					data={nodes}
+					renderItem={({ item }) => <SeriesGridItem series={item} />}
+					contentContainerStyle={{
+						paddingHorizontal: paddingHorizontal,
+						paddingVertical: 16,
+					}}
+					numColumns={numColumns}
+					onEndReachedThreshold={ON_END_REACHED_THRESHOLD}
+					onEndReached={onEndReached}
+					contentInsetAdjustmentBehavior="automatic"
+					refreshControl={
+						nodes.length > 0 ? (
+							<RefreshControl refreshing={isRefetching} onRefresh={handleRefetch} />
+						) : undefined
+					}
+					ListEmptyComponent={
+						<ListEmpty
+							title="This library is empty"
+							message="Once you've added series to this library, they'll show up here"
+							actions={
+								<>
+									<RefreshButton
+										className="flex-row items-center"
+										roundness="full"
+										size="lg"
+										onPress={() => handleRefetch()}
+										isRefreshing={isRefetching}
+									>
+										<Text>Refresh</Text>
+									</RefreshButton>
+								</>
+							}
+						/>
+					}
+				/>
 
-			<LibraryOverviewSheet ref={sheetRef} libraryId={id} />
-		</SafeAreaView>
+				<LibraryOverviewSheet ref={sheetRef} libraryId={id} />
+			</SafeAreaView>
+		</>
 	)
 }

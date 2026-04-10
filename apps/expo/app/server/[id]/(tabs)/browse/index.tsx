@@ -80,7 +80,7 @@ export default function Screen() {
 		>
 			<RecentlyAddedSeries
 				header={
-					<View className="flex gap-5">
+					<View className="gap-5 flex">
 						<View>
 							{visibleItems.map((item, idx) => (
 								<Fragment key={item.id}>
@@ -90,12 +90,12 @@ export default function Screen() {
 									>
 										{({ pressed }) => (
 											<View
-												className={cn('flex-row items-center justify-between px-4', {
+												className={cn('px-4 tablet:py-1 flex-row items-center justify-between', {
 													'opacity-60': pressed,
 												})}
 											>
 												<View
-													className={cn('flex flex-row items-center gap-4 py-4', {
+													className={cn('gap-4 py-4 flex flex-row items-center', {
 														'pt-1': idx === 0,
 													})}
 												>

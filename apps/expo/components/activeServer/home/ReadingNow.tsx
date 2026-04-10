@@ -1,8 +1,14 @@
 import { useSDK } from '@stump/client'
-import { FragmentType, graphql, useFragment } from '@stump/graphql'
+import {
+	FragmentType,
+	graphql,
+	MediaFilterInput,
+	MediaMetadataFilterInput,
+	useFragment,
+} from '@stump/graphql'
 import { formatDistanceToNow } from 'date-fns'
 import { useRouter } from 'expo-router'
-import { useCallback, useRef } from 'react'
+import { useRef } from 'react'
 import { Easing, Pressable, View } from 'react-native'
 import { easeGradient } from 'react-native-easing-gradient'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
@@ -11,12 +17,12 @@ import Carousel, { ICarouselInstance, Pagination } from 'react-native-reanimated
 import { scheduleOnRN } from 'react-native-worklets'
 import { stripHtml } from 'string-strip-html'
 
-import { BookMetaLink } from '~/components/book'
 import { ThumbnailImage } from '~/components/image'
-import { Heading, Progress, Text } from '~/components/ui'
+import { Badge, Heading, Progress, Text } from '~/components/ui'
 import { COLORS, useColors } from '~/lib/constants'
 import { parseGraphQLDecimal } from '~/lib/format'
 import { useDisplay } from '~/lib/hooks'
+import { cn } from '~/lib/utils'
 import { usePreferencesStore } from '~/stores'
 
 import { useActiveServer } from '../context'
@@ -29,6 +35,8 @@ const fragment = graphql(`
 			summary
 			genres
 			links
+			publisher
+			year
 		}
 		thumbnail {
 			url
@@ -108,11 +116,11 @@ export default function ReadingNow({ books }: Props) {
 		})
 
 	return (
-		<View className="flex items-start gap-4">
+		<View className="gap-4 flex items-start">
 			{/* <Heading size="xl">Jump Back In</Heading> */}
 
 			{/* This view prevents the left 20px of the carousel from overriding swipe back navigation */}
-			<View className="absolute left-0 top-0 z-30 w-[20px]" style={{ height: imageHeight + 8 }} />
+			<View className="left-0 top-0 absolute z-30 w-[20px]" style={{ height: imageHeight + 8 }} />
 
 			<View className="w-full">
 				<Carousel
@@ -187,6 +195,9 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 	const { sdk } = useSDK()
 	const { width, isTablet } = useDisplay()
 
+	const router = useRouter()
+	const colors = useColors()
+
 	const percentageCompleted = parseGraphQLDecimal(data.readProgress?.percentageCompleted)
 	const currentPage =
 		data.readProgress?.page ?? data.readProgress?.locator?.locations?.position ?? '??'
@@ -199,8 +210,27 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 			? { width: data.thumbnail.width, height: data.thumbnail.height }
 			: null
 
+	const onClickFilterField = (
+		field: Exclude<keyof MediaMetadataFilterInput, '_or' | '_and' | '_not'>,
+		value: string,
+	) => {
+		const filter = {
+			metadata: {
+				[field]: {
+					// Note: Most of these are "arrays" stored as comma-separated string
+					likeAnyOf: [value],
+				},
+			},
+		} satisfies MediaFilterInput
+		const filterString = JSON.stringify(filter)
+		router.push({
+			// @ts-expect-error: String path
+			pathname: `/server/${serverID}/books?initialFilters=${filterString}`,
+		})
+	}
+
 	// TODO: figure out why I need explicit widths for *each* elem
-	const renderBookContent = useCallback(() => {
+	const renderTabletContent = () => {
 		if (!isTablet) return null
 
 		const contentWidth =
@@ -211,11 +241,14 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 			60 // gap between other carousel items
 
 		const description = stripHtml(data.metadata?.summary || '').result
-		const genres = data.metadata?.genres?.map((genre) => `#${genre}`).join(', ')
-		const links = data.metadata?.links || []
+		const genresSlice = (data.metadata?.genres || []).slice(0, 4)
 
+		const publisher = data.metadata?.publisher
+		const year = data.metadata?.year
+
+		// TODO(tablet): sort this out, could be better
 		return (
-			<View className="flex flex-col flex-wrap gap-2">
+			<View className="gap-4 flex flex-col flex-wrap">
 				<Heading
 					style={{
 						width: contentWidth,
@@ -223,6 +256,31 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 				>
 					{data.resolvedName}
 				</Heading>
+
+				{(publisher || year) && (
+					<View
+						className="gap-2 flex flex-row flex-wrap items-center"
+						style={{
+							width: contentWidth,
+						}}
+					>
+						{publisher && (
+							<Badge
+								style={{
+									backgroundColor: colors.fill.brand.secondary,
+								}}
+							>
+								<Text className="text-sm">{publisher}</Text>
+							</Badge>
+						)}
+
+						{year && (
+							<Badge>
+								<Text className="text-sm">{year}</Text>
+							</Badge>
+						)}
+					</View>
+				)}
 
 				{description && (
 					<Text
@@ -236,35 +294,37 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 				)}
 
 				<View />
-				<View />
 
-				{genres && (
-					<Text
-						style={{
-							width: contentWidth,
-						}}
-					>
-						{genres}
-					</Text>
-				)}
-
-				{links.length > 0 && (
+				{genresSlice.length > 0 && (
 					<View
-						className="flex flex-row flex-wrap gap-2"
+						className="gap-2 flex flex-row flex-wrap items-center"
 						style={{
 							width: contentWidth,
 						}}
 					>
-						{links.slice(0, 3).map((link) => (
-							<BookMetaLink key={link} href={link} />
+						{genresSlice.map((genre, itemIndex) => (
+							<Pressable
+								key={`${genre}-${itemIndex}`}
+								onPress={() => onClickFilterField('genres', genre)}
+								disabled={!genre}
+							>
+								{({ pressed }) => (
+									<Badge
+										className={cn('bg-black/5 dark:bg-white/10', {
+											'opacity-80': pressed,
+										})}
+									>
+										<Text className="text-sm">{genre}</Text>
+									</Badge>
+								)}
+							</Pressable>
 						))}
 					</View>
 				)}
 			</View>
 		)
-	}, [isTablet, width, data])
+	}
 
-	const router = useRouter()
 	const { colors: gradientColors, locations: gradientLocations } = easeGradient({
 		colorStops: {
 			0.5: { color: 'transparent' },
@@ -277,7 +337,7 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 	const { url: uri, metadata: placeholderData } = data.thumbnail
 
 	return (
-		<View className="flex flex-row gap-4">
+		<View className="gap-4 flex flex-row">
 			<Pressable onPress={() => router.navigate(`/server/${serverID}/books/${data.id}`)}>
 				<ThumbnailImage
 					source={{
@@ -293,7 +353,7 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 					originalDimensions={originalDimensions}
 				/>
 
-				<View className="absolute bottom-0 z-20 w-full gap-2 p-3">
+				<View className="bottom-0 gap-2 p-3 absolute z-20 w-full">
 					{!isTablet && (
 						<Text
 							className="text-2xl font-bold leading-8"
@@ -309,10 +369,10 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 						</Text>
 					)}
 
-					<View className="flex items-start gap-2">
+					<View className="gap-2 flex items-start">
 						<View className="flex w-full flex-row items-center justify-between">
 							<Text
-								className="flex-wrap text-base"
+								className="text-base flex-wrap"
 								style={{
 									color: COLORS.dark.foreground.subtle,
 									opacity: 0.9,
@@ -322,7 +382,7 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 							</Text>
 
 							<Text
-								className="flex-wrap text-base"
+								className="text-base flex-wrap"
 								style={{
 									color: COLORS.dark.foreground.subtle,
 									opacity: 0.9,
@@ -345,7 +405,7 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 				</View>
 			</Pressable>
 
-			{renderBookContent()}
+			{renderTabletContent()}
 		</View>
 	)
 }

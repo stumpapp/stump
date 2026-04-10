@@ -1,7 +1,9 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
+import { Stack } from 'expo-router'
 import { AlertCircle, CheckCircle, Menu, RefreshCw, Sparkles, Trash } from 'lucide-react-native'
 import { useRef } from 'react'
 import { Alert } from 'react-native'
+import { Platform } from 'react-native'
 
 import {
 	useDownload,
@@ -52,8 +54,63 @@ export default function DownloadsHeaderMenu() {
 
 	const { syncAll } = useFullSync()
 
-	return (
-		<>
+	const menu = Platform.select({
+		ios: (
+			<Stack.Toolbar placement="right">
+				<Stack.Toolbar.Menu icon="ellipsis">
+					<Stack.Toolbar.Menu inline>
+						<Stack.Toolbar.MenuAction
+							icon="checkmark.circle"
+							onPress={() => setIsSelecting(true)}
+							disabled={downloadsCount === 0}
+						>
+							{t('common.select')}
+						</Stack.Toolbar.MenuAction>
+						<Stack.Toolbar.MenuAction
+							icon="arrow.trianglehead.2.clockwise.rotate.90"
+							// Note: I removed the guard that checked if there was unsynced local progress since
+							// now a sync is always bi-directional (so we might be able to pull)
+							onPress={async () => {
+								await syncAll()
+								refetchDownloads()
+							}}
+						>
+							{t(getKey('attemptSync'))}
+						</Stack.Toolbar.MenuAction>
+						<Stack.Toolbar.MenuAction
+							icon="sparkles.rectangle.stack"
+							onPress={() => setIsCuratedDownloadsEnabled(!isCuratedDownloadsEnabled)}
+						>
+							{t(getKey(isCuratedDownloadsEnabled ? 'hideCurated' : 'showCurated'))}
+						</Stack.Toolbar.MenuAction>
+						{failedDownloadsCount > 0 && (
+							<Stack.Toolbar.MenuAction
+								icon="exclamationmark.triangle"
+								onPress={() => {
+									problemsSheetRef.current?.present()
+								}}
+							>
+								{t(getKey('seeProblems')).replace(
+									'{{problemsCount}}',
+									failedDownloadsCount.toString(),
+								)}
+							</Stack.Toolbar.MenuAction>
+						)}
+					</Stack.Toolbar.Menu>
+					<Stack.Toolbar.Menu inline>
+						<Stack.Toolbar.MenuAction
+							icon="trash"
+							onPress={confirmDeleteAllDownloads}
+							destructive
+							disabled={downloadsCount === 0}
+						>
+							{t(getKey('deleteAllDownloads.label'))}
+						</Stack.Toolbar.MenuAction>
+					</Stack.Toolbar.Menu>
+				</Stack.Toolbar.Menu>
+			</Stack.Toolbar>
+		),
+		android: (
 			<ActionMenu
 				icon={{
 					ios: 'ellipsis',
@@ -129,6 +186,12 @@ export default function DownloadsHeaderMenu() {
 					},
 				]}
 			/>
+		),
+	})
+
+	return (
+		<>
+			{menu}
 
 			<DownloadProblemsSheet ref={problemsSheetRef} />
 		</>

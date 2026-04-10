@@ -45,8 +45,8 @@ export default function Screen() {
 						},
 						headerLeft: () =>
 							isSelecting ? <SelectionLeftScreenHeader /> : <DownloadsHeaderSortMenu />,
-						headerRight: () =>
-							isSelecting ? <SelectionRightScreenHeader /> : <DownloadsHeaderMenu />,
+						// headerRight: () =>
+						// 	isSelecting ? <SelectionRightScreenHeader /> : <DownloadsHeaderMenu />,
 						// TODO: Check in on unstable_headerRightItems once available
 					}}
 				/>

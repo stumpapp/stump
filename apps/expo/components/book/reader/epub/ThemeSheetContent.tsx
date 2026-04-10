@@ -19,7 +19,7 @@ export default function ThemeSheetContent() {
 	// alignment randomly, adding a View container around the native element fixes it (sometimes)
 	// but then breaks other rows. It's killing me. I'm ignoring it for now but AHH
 	return (
-		<View className="flex-1 gap-8 py-3">
+		<View className="gap-8 py-3 android:pb-12 flex-1">
 			<Brightness />
 
 			<ThemeSelect />

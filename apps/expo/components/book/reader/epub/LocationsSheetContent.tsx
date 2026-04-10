@@ -20,6 +20,13 @@ import { useEpubSheetStore } from '~/stores/epubSheet'
 import AnnotationsAndBookmarks from './AnnotationsAndBookmarks'
 import { useEpubReaderContext } from './context'
 
+// TODO(ux): the more i use this the more i dislike it. a running list of thoughts:
+// - the overview isn't as important, if i click a button signaling toc at the very least it should open toc first
+// - i am starting to really dislike the pager view. it _kinda_ made sense to colocate toc + annotations, however i
+//   am realizing (at least for me) i'd rather them separate
+// maybe we can do sm like ((Aa) (Bookmark) (Ellipsis)) (or move Aa into ellipsis), either move toc into ellipses
+// or keep it separate on left, then shove more functionality into ellipsis (page jump, search eventually, bookmarks/annotations, etc)
+
 export default function LocationsSheetContent() {
 	const { getRequestHeaders } = useEpubReaderContext()
 

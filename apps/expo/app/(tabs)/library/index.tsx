@@ -14,6 +14,7 @@ import {
 	DownloadRowItem,
 	intoDownloadedFile,
 	NoDownloadsOnDevice,
+	useLocalLibraryMenu,
 } from '~/components/localLibrary'
 import { useDownloadsState } from '~/components/localLibrary/store'
 import { Text } from '~/components/ui'
@@ -23,6 +24,8 @@ import { usePreferencesStore } from '~/stores'
 import { useSelectionStore } from '~/stores/selection'
 
 export default function Screen() {
+	const menuFragment = useLocalLibraryMenu()
+
 	// Note: The id is a workaround for https://github.com/drizzle-team/drizzle-orm/issues/2660
 	const { id, increment, sortConfig, sourceFilter } = useDownloadsState(
 		useShallow((state) => ({
@@ -160,21 +163,25 @@ export default function Screen() {
 	}
 
 	return (
-		<FlashList
-			data={artificiallyGroupedData}
-			renderItem={renderItem}
-			keyExtractor={(item) => (typeof item === 'string' ? item : item.downloaded_files.id)}
-			contentContainerStyle={{
-				paddingVertical: 16,
-			}}
-			contentInsetAdjustmentBehavior="always"
-			ItemSeparatorComponent={() => <View className="h-6" />}
-			ListHeaderComponent={
-				showCuratedDownloads && !isSelecting ? <CuratedDownloadsHeader /> : undefined
-			}
-			stickyHeaderIndices={stickyHeaderIndices}
-			getItemType={(item) => (typeof item === 'string' ? 'sectionHeader' : 'row')}
-			maintainVisibleContentPosition={{ disabled: true }}
-		/>
+		<>
+			{menuFragment}
+
+			<FlashList
+				data={artificiallyGroupedData}
+				renderItem={renderItem}
+				keyExtractor={(item) => (typeof item === 'string' ? item : item.downloaded_files.id)}
+				contentContainerStyle={{
+					paddingVertical: 16,
+				}}
+				contentInsetAdjustmentBehavior="always"
+				ItemSeparatorComponent={() => <View className="h-6" />}
+				ListHeaderComponent={
+					showCuratedDownloads && !isSelecting ? <CuratedDownloadsHeader /> : undefined
+				}
+				stickyHeaderIndices={stickyHeaderIndices}
+				getItemType={(item) => (typeof item === 'string' ? 'sectionHeader' : 'row')}
+				maintainVisibleContentPosition={{ disabled: true }}
+			/>
+		</>
 	)
 }

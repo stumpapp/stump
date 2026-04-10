@@ -31,10 +31,6 @@ fn apply_reading_session_joins(
 	query: Select<media::Entity>,
 	user: &AuthUser,
 ) -> Select<media::Entity> {
-	// this can't possibly be right?
-	let user_id1 = user.id.clone();
-	let user_id2 = user.id.clone();
-
 	// it would be nice to use `.select_also` here instead of manually selecting columns, but
 	// that doesn't work with `.into_model`.
 	//
@@ -59,14 +55,14 @@ fn apply_reading_session_joins(
 		//  AND reading_sessions.user_id = $user_id
 		.join(
 			JoinType::LeftJoin,
-			media::Relation::ReadingSession
-				.def()
-				.on_condition(move |_left, right| {
-					// TODO: is this a good use of the "move" keyword?
+			media::Relation::ReadingSession.def().on_condition({
+				let user_id = user.id.clone();
+				move |_left, right| {
 					Expr::col((right, reading_session::Column::UserId))
-						.eq(user_id1.clone())
+						.eq(user_id.clone())
 						.into_condition()
-				}),
+				}
+			}),
 		)
 		.column_as(
 			finished_reading_session::Column::Id.count(),
@@ -80,14 +76,14 @@ fn apply_reading_session_joins(
 		//  AND finished_reading_sessions.user_id = $user_id
 		.join(
 			JoinType::LeftJoin,
-			media::Relation::FinishedReadingSession.def().on_condition(
+			media::Relation::FinishedReadingSession.def().on_condition({
+				let user_id = user.id.clone();
 				move |_left, right| {
-					// TODO: is this a good use of the "move" keyword?
 					Expr::col((right, finished_reading_session::Column::UserId))
-						.eq(user_id2.clone())
+						.eq(user_id.clone())
 						.into_condition()
-				},
-			),
+				}
+			}),
 		)
 		// we need this to avoid having one result row per finished reading session.
 		// i'm skeptical that this will work with non-sqlite backends!

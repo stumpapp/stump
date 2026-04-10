@@ -481,7 +481,7 @@ export default function Footer() {
 
 	return (
 		<Animated.View
-			className="insets-x-safe bottom-safe absolute z-20 shrink gap-4"
+			className="insets-x-safe bottom-safe gap-4 absolute z-20 shrink"
 			style={[secondaryStyle, translateFooterStyle]}
 		>
 			{footerControls === 'images' && readingMode !== ReadingMode.ContinuousVertical && (
@@ -508,7 +508,7 @@ export default function Footer() {
 			<View className={cn('gap-2 px-3', { 'pb-1': Platform.OS === 'android' })}>
 				{(footerControls === 'images' || readingMode === ReadingMode.ContinuousVertical) && (
 					<Progress
-						className="h-1 bg-[#898d94]"
+						className="h-1 bg-white/40"
 						indicatorClassName="bg-[#f5f3ef]"
 						value={percentage}
 						inverted={

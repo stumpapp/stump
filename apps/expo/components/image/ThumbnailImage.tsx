@@ -66,14 +66,13 @@ export const ThumbnailImage = ({
 	// So we must not make it a child of BorderAndShadow, and must use inset: -0.1 and manually round the corners
 	const gradientElement = gradient?.colors && (
 		<LinearGradient
-			colors={gradient.colors}
-			locations={gradient.locations}
 			style={{
 				position: 'absolute',
 				zIndex: 20,
 				inset: Platform.OS === 'android' ? -0.1 : 0,
 				borderRadius: Platform.OS === 'android' ? borderRadius : undefined,
 			}}
+			{...gradient}
 		/>
 	)
 

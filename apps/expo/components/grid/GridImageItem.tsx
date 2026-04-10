@@ -2,6 +2,7 @@ import { useSDK } from '@stump/client'
 import { Check } from 'lucide-react-native'
 import { Easing, Pressable, View } from 'react-native'
 import { easeGradient } from 'react-native-easing-gradient'
+import { LinearGradientProps } from 'react-native-linear-gradient'
 
 import { cn } from '~/lib/utils'
 import { usePreferencesStore } from '~/stores'
@@ -32,26 +33,19 @@ export default function GridImageItem({
 
 	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
 
-	const { colors: gradientColors, locations: gradientLocations } = easeGradient({
-		colorStops: {
-			0.5: { color: 'transparent' },
-			1: { color: 'rgba(0, 0, 0, 0.90)' },
-		},
-		extraColorStopsPerTransition: 16,
-		easing: Easing.bezier(0.42, 0, 1, 1), // https://cubic-bezier.com/#.42,0,1,1
-	})
-
-	const gradient =
-		percentageCompleted != null
-			? { colors: gradientColors, locations: gradientLocations }
-			: undefined
+	const resolvedGradient =
+		percentageCompleted == null
+			? undefined
+			: percentageCompleted < 100
+				? READING_GRADIENT
+				: COMPLETED_GRADIENT
 
 	const thumbnailHeight = itemWidth / thumbnailRatio
 
 	return (
 		<Pressable onPress={onPress}>
 			{({ pressed }) => (
-				<View className={cn('flex-1 gap-2 pb-4', { 'opacity-80': pressed })}>
+				<View className={cn('gap-2 pb-4 flex-1', { 'opacity-80': pressed })}>
 					<View style={{ width: itemWidth, height: thumbnailHeight }}>
 						<ThumbnailImage
 							source={{
@@ -63,13 +57,13 @@ export default function GridImageItem({
 							}}
 							size={{ height: thumbnailHeight, width: itemWidth }}
 							{...thumbnailProps}
-							gradient={gradient}
+							gradient={resolvedGradient}
 						/>
 
 						{percentageCompleted != null && percentageCompleted < 100 && (
-							<View className="absolute bottom-2 left-2 right-2 z-30">
+							<View className="bottom-2 left-2 right-2 absolute z-30">
 								<Progress
-									className="h-1 bg-[#898d94]"
+									className="h-1 bg-white/40"
 									indicatorClassName="bg-[#f5f3ef]"
 									value={percentageCompleted}
 								/>
@@ -78,12 +72,12 @@ export default function GridImageItem({
 
 						{percentageCompleted != null && percentageCompleted >= 100 && (
 							<View
-								className="absolute bottom-2 right-2 z-30 flex items-center justify-center rounded-full bg-white/75 p-1.5 dark:bg-black/50"
+								className="bottom-2 right-2 bg-white/40 p-1 absolute z-30 flex items-center justify-center rounded-full"
 								style={{
 									borderRadius: 999, // idky i android having problems with rounded-full here
 								}}
 							>
-								<Icon as={Check} className="shadow" size={20} />
+								<Icon as={Check} className="shadow" size={20} color="#f5f3ef" strokeWidth={2.5} />
 							</View>
 						)}
 					</View>
@@ -104,3 +98,25 @@ export default function GridImageItem({
 		</Pressable>
 	)
 }
+
+const COMPLETED_GRADIENT = {
+	...easeGradient({
+		colorStops: {
+			0.7: { color: 'transparent' },
+			1: { color: 'rgba(0, 0, 0, 0.80)' },
+		},
+		extraColorStopsPerTransition: 16,
+		easing: Easing.bezier(0.4, 0, 0.6, 1),
+	}),
+	useAngle: true,
+	angle: 145,
+} satisfies LinearGradientProps
+
+const READING_GRADIENT = easeGradient({
+	colorStops: {
+		0.8: { color: 'transparent' },
+		1: { color: 'rgba(0, 0, 0, 0.80)' },
+	},
+	extraColorStopsPerTransition: 16,
+	easing: Easing.bezier(0.42, 0, 0.7, 1),
+}) satisfies LinearGradientProps

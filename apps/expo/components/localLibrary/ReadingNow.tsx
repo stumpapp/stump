@@ -325,7 +325,7 @@ function ReadingNowItem({ book }: ReadingNowItemProps) {
 
 						{percentageCompleted != null && (
 							<Progress
-								className="h-1 bg-[#898d94]"
+								className="h-1 bg-white/40"
 								indicatorClassName="bg-[#f5f3ef]"
 								value={percentageCompleted * 100}
 							/>

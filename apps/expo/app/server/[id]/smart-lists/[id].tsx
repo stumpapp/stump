@@ -128,8 +128,10 @@ export default function Screen() {
 
 	const isCollapsibleList = smartList?.items.__typename === 'SmartListGrouped'
 
-	const collapsedItems = useSmartListGroupStore(
-		(state) => state.collapsedGroupsByList.get(id) || new Set(),
+	const collapsedGroupsByList = useSmartListGroupStore((state) => state.collapsedGroupsByList)
+	const collapsedItems = useMemo(
+		() => collapsedGroupsByList.get(id) || new Set(),
+		[collapsedGroupsByList, id],
 	)
 
 	const clearList = useSmartListGroupStore((state) => state.clearList)

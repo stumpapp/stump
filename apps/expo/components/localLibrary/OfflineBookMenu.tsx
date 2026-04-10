@@ -1,10 +1,7 @@
-import { Button, ContextMenu, Divider, Host } from '@expo/ui/swift-ui'
-import { useRouter } from 'expo-router'
-import { Ellipsis } from 'lucide-react-native'
-import { useCallback, useMemo } from 'react'
-import { Alert, Platform, View } from 'react-native'
+import { Stack, useNavigation, useRouter } from 'expo-router'
+import { useCallback, useLayoutEffect, useMemo } from 'react'
+import { Alert, Platform } from 'react-native'
 
-import { Icon } from '~/components/ui'
 import { epubProgress } from '~/db'
 import { useDownload, useTranslate } from '~/lib/hooks'
 
@@ -108,60 +105,56 @@ export default function OfflineBookMenu({ downloadedFile }: Props) {
 		)
 	}, [deleteBook, downloadedFile.id, downloadedFile.bookName, t, router])
 
-	if (Platform.OS === 'android') {
-		return (
+	return Platform.select({
+		ios: (
+			<Stack.Toolbar placement="right">
+				<Stack.Toolbar.Menu icon="ellipsis">
+					<Stack.Toolbar.Menu inline>
+						{!progression.isCompleted && (
+							<Stack.Toolbar.MenuAction icon="book.closed" onPress={handleMarkAsComplete}>
+								{t('bookActions.markAsRead.label')}
+							</Stack.Toolbar.MenuAction>
+						)}
+
+						{progression.hasProgress && (
+							<Stack.Toolbar.MenuAction icon="minus.circle" onPress={handleClearProgress}>
+								{t('bookActions.clearProgress.label')}
+							</Stack.Toolbar.MenuAction>
+						)}
+					</Stack.Toolbar.Menu>
+
+					<Stack.Toolbar.MenuAction icon="trash" destructive onPress={handleDelete}>
+						{t('bookActions.deleteBook.label')}
+					</Stack.Toolbar.MenuAction>
+				</Stack.Toolbar.Menu>
+			</Stack.Toolbar>
+		),
+		android: (
 			<AndroidOfflineBookMenu
 				handleMarkAsComplete={handleMarkAsComplete}
 				handleClearProgress={handleClearProgress}
 				handleDelete={handleDelete}
 				progression={progression}
 			/>
-		)
+		),
+	})
+}
+
+export function useOfflineBookMenu({ downloadedFile }: { downloadedFile?: DownloadedFile | null }) {
+	const navigation = useNavigation()
+	useLayoutEffect(() => {
+		if (Platform.OS === 'android' && downloadedFile) {
+			navigation.setOptions({
+				headerRight: () => <OfflineBookMenu downloadedFile={downloadedFile} />,
+			})
+		}
+	}, [navigation, downloadedFile])
+
+	if (!downloadedFile) return null
+
+	if (Platform.OS === 'ios') {
+		return <OfflineBookMenu downloadedFile={downloadedFile} />
 	}
 
-	return (
-		<Host matchContents>
-			<ContextMenu>
-				<ContextMenu.Trigger>
-					<View
-						accessibilityLabel="options"
-						style={{
-							height: 35,
-							width: 35,
-							justifyContent: 'center',
-							alignItems: 'center',
-						}}
-					>
-						<Icon as={Ellipsis} size={24} className="text-foreground" />
-					</View>
-				</ContextMenu.Trigger>
-				<ContextMenu.Items>
-					{!progression.isCompleted && (
-						<Button
-							systemImage="book.closed"
-							onPress={handleMarkAsComplete}
-							label={t('bookActions.markAsRead.label')}
-						/>
-					)}
-
-					{progression.hasProgress && (
-						<Button
-							systemImage="minus.circle"
-							onPress={handleClearProgress}
-							label={t('bookActions.clearProgress.label')}
-						/>
-					)}
-
-					<Divider />
-
-					<Button
-						systemImage="trash"
-						role="destructive"
-						onPress={handleDelete}
-						label={t('bookActions.deleteBook.label')}
-					/>
-				</ContextMenu.Items>
-			</ContextMenu>
-		</Host>
-	)
+	return null
 }

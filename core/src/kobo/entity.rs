@@ -4,6 +4,7 @@ use models::{
 	},
 	prefixer::{parse_query_to_model, parse_query_to_model_optional},
 };
+use rust_decimal::prelude::ToPrimitive;
 use sea_orm::{
 	prelude::*, sea_query::IntoCondition, FromQueryResult, JoinType, QuerySelect, Select,
 };
@@ -96,9 +97,8 @@ impl MediaWithMetadataAndReadingSessions {
 		apply_reading_session_joins(select, user)
 	}
 
-	// TODO: should this take a more generic type?
 	pub fn find_by_ids_for_user(
-		ids: &Vec<String>,
+		ids: &[String],
 		user: &AuthUser,
 	) -> Select<media::Entity> {
 		let select = media::ModelWithMetadata::find_for_user(user)
@@ -141,6 +141,31 @@ impl BookMetadata {
 		let media_id = &m.media.id;
 
 		let writers = m.metadata.as_ref().and_then(|mm| mm.writers.clone());
+		let publication_date =
+			m.metadata
+				.as_ref()
+				.and_then(|mm| match (mm.year, mm.month, mm.day) {
+					(Some(year), month, day) => Date::from_ymd_opt(
+						year,
+						month.and_then(|v| u32::try_from(v).ok()).unwrap_or(1),
+						day.and_then(|v| u32::try_from(v).ok()).unwrap_or(1),
+					),
+					_ => None,
+				});
+
+		let series = m.metadata.as_ref().and_then(|mm| {
+			match (m.media.series_id.clone(), mm.series.clone(), mm.number) {
+				(Some(series_id), Some(series), series_number) => Some(Series {
+					id: series_id,
+					name: series,
+					number: series_number
+						.map(|n| n.to_string())
+						.unwrap_or("1".to_string()),
+					number_float: series_number.and_then(|n| n.to_f32()).unwrap_or(1.0),
+				}),
+				_ => None,
+			}
+		});
 
 		BookMetadata {
 			categories: vec![DUMMY_UUID.to_string()],
@@ -157,7 +182,7 @@ impl BookMetadata {
 				total_amount: 0,
 			},
 			current_love_display_price: LoveDisplayPrice { total_amount: 0 },
-			description: m.metadata.clone().and_then(|mm| mm.summary),
+			description: m.metadata.as_ref().and_then(|mm| mm.summary.clone()),
 			download_urls: vec![DownloadUrl {
 				drm_type: "None".to_string(),
 				// this seems to be unrelated to the EPUB 3 spec.
@@ -174,18 +199,23 @@ impl BookMetadata {
 			is_internet_archive: false,
 			is_pre_order: false,
 			is_social_enabled: true,
-			isbn: m.metadata.clone().and_then(|mm| mm.identifier_isbn),
+			isbn: m
+				.metadata
+				.as_ref()
+				.and_then(|mm| mm.identifier_isbn.clone()),
 			language: "en".to_string(),
 			phonetic_pronunciations: Empty {},
-			publication_date: None, // TODO
-			publisher: m.metadata.clone().and_then(|mm| mm.publisher).map(|mp| {
-				Publisher {
+			publication_date: publication_date
+				.and_then(|pd| pd.and_hms_opt(0, 0, 0))
+				.map(|pd| pd.and_utc()),
+			publisher: m.metadata.as_ref().and_then(|mm| mm.publisher.clone()).map(
+				|mp| Publisher {
 					imprint: "".to_string(),
 					name: mp,
-				}
-			}),
+				},
+			),
 			revision_id: media_id.clone(),
-			series: None, // TODO
+			series,
 			title: m
 				.metadata
 				.as_ref()
@@ -198,45 +228,47 @@ impl BookMetadata {
 
 impl ReadingState {
 	fn unread(media_id: String) -> Self {
+		let now = Utc::now();
+
 		ReadingState {
-			created: Utc::now(),
+			created: now,
 			current_bookmark: CurrentBookmark {
-				last_modified: Utc::now(),
+				last_modified: now,
 				progress_percent: None,
 				content_source_progress_percent: None,
 				location: None,
 			},
 			entitlement_id: media_id,
-			last_modified: Utc::now(),
-			priority_timestamp: Utc::now(),
-			statistics: Statistics {
-				last_modified: Utc::now(),
-			},
+			last_modified: now,
+			priority_timestamp: now,
+			statistics: Statistics { last_modified: now },
 			status_info: StatusInfo {
-				last_modified: Utc::now(),
+				last_modified: now,
 				status: Status::ReadyToRead,
 				times_started_reading: 0,
 			},
 		}
 	}
 
-	fn finished(media_id: String) -> Self {
+	fn finished(media_id: String, last_completed_at: DateTimeWithTimeZone) -> Self {
+		let utc_completed_at = last_completed_at.to_utc();
+
 		ReadingState {
 			created: Utc::now(),
 			current_bookmark: CurrentBookmark {
-				last_modified: Utc::now(),
+				last_modified: utc_completed_at,
 				progress_percent: None,
 				content_source_progress_percent: None,
 				location: None,
 			},
 			entitlement_id: media_id,
-			last_modified: Utc::now(),
-			priority_timestamp: Utc::now(),
+			last_modified: utc_completed_at,
+			priority_timestamp: utc_completed_at,
 			statistics: Statistics {
-				last_modified: Utc::now(),
+				last_modified: utc_completed_at,
 			},
 			status_info: StatusInfo {
-				last_modified: Utc::now(),
+				last_modified: utc_completed_at,
 				status: Status::Finished,
 				times_started_reading: 1,
 			},
@@ -244,28 +276,29 @@ impl ReadingState {
 	}
 
 	pub fn from_active_reading_session(media_id: String, rs: &ReadingSession) -> Self {
+		let updated_or_started_at = rs.updated_at.unwrap_or(rs.started_at).to_utc();
+		let percent_complete = rs
+			.percentage_completed
+			.and_then(|pc| pc.to_f32().map(|pc| pc * 100.0));
+
 		ReadingState {
-			created: rs.started_at.to_utc(), // TODO
+			created: Utc::now(),
 			current_bookmark: CurrentBookmark {
-				last_modified: rs.updated_at.unwrap_or(rs.started_at).to_utc(), // TODO
-				progress_percent: rs
-					.percentage_completed
-					.and_then(|pc| f32::try_from(pc).ok().map(|pc| pc * 100.0)), // TODO horrible
-				content_source_progress_percent: rs
-					.percentage_completed
-					.and_then(|pc| f32::try_from(pc).ok().map(|pc| pc * 100.0)), // TODO horrible
-				location: None,                                                 // TODO kobo span
+				last_modified: updated_or_started_at,
+				progress_percent: percent_complete,
+				content_source_progress_percent: percent_complete,
+				location: None, // this is where the Kobo span will go once we are able to compute it.
 			},
 			entitlement_id: media_id,
-			last_modified: rs.updated_at.unwrap_or(rs.started_at).to_utc(), // TODO
-			priority_timestamp: rs.updated_at.unwrap_or(rs.started_at).to_utc(), // TODO
+			last_modified: updated_or_started_at,
+			priority_timestamp: updated_or_started_at,
 			statistics: Statistics {
-				last_modified: rs.updated_at.unwrap_or(rs.started_at).to_utc(), // TODO
+				last_modified: updated_or_started_at,
 			},
 			status_info: StatusInfo {
-				last_modified: rs.updated_at.unwrap_or(rs.started_at).to_utc(), // TODO
+				last_modified: updated_or_started_at,
 				status: Status::Reading,
-				times_started_reading: 1, // TODO we could actually track this
+				times_started_reading: 1,
 			},
 		}
 	}
@@ -285,7 +318,9 @@ impl BookEntitlementContainer {
 					active_reading_session,
 				)
 			},
-			(_, Some(_)) => ReadingState::finished(media_id.to_string()),
+			(_, Some(last_completed_at)) => {
+				ReadingState::finished(media_id.to_string(), last_completed_at)
+			},
 			(_, _) => ReadingState::unread(media_id.to_string()),
 		};
 

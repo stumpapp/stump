@@ -9,33 +9,33 @@ impl MigrationTrait for Migration {
 		manager
 			.create_table(
 				Table::create()
-					.table(KoboSyncSession::Table)
+					.table(KoboSyncSessions::Table)
 					.if_not_exists()
 					.col(
-						ColumnDef::new(KoboSyncSession::Id)
+						ColumnDef::new(KoboSyncSessions::Id)
 							.text()
 							.not_null()
 							.primary_key(),
 					)
-					.col(ColumnDef::new(KoboSyncSession::UserId).text().not_null())
-					.col(ColumnDef::new(KoboSyncSession::MediaIds).json().not_null())
-					.col(ColumnDef::new(KoboSyncSession::DeviceId).text().not_null())
+					.col(ColumnDef::new(KoboSyncSessions::UserId).text().not_null())
+					.col(ColumnDef::new(KoboSyncSessions::MediaIds).json().not_null())
+					.col(ColumnDef::new(KoboSyncSessions::DeviceId).text().not_null())
 					.col(
-						ColumnDef::new(KoboSyncSession::DeviceMetadata)
+						ColumnDef::new(KoboSyncSessions::DeviceMetadata)
 							.json()
 							.not_null(),
 					)
 					.col(
-						ColumnDef::new(KoboSyncSession::CreatedAt)
+						ColumnDef::new(KoboSyncSessions::CreatedAt)
 							.timestamp()
 							.not_null()
 							.default(Expr::current_timestamp()),
 					)
-					.col(ColumnDef::new(KoboSyncSession::PreviousSyncAt).timestamp())
+					.col(ColumnDef::new(KoboSyncSessions::PreviousSyncAt).timestamp())
 					.foreign_key(
 						ForeignKey::create()
 							.name("fk-kobo-sync-user")
-							.from(KoboSyncSession::Table, KoboSyncSession::UserId)
+							.from(KoboSyncSessions::Table, KoboSyncSessions::UserId)
 							.to(Users::Table, Users::Id)
 							.on_delete(ForeignKeyAction::Cascade)
 							.on_update(ForeignKeyAction::Cascade),
@@ -47,13 +47,13 @@ impl MigrationTrait for Migration {
 
 	async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
 		manager
-			.drop_table(Table::drop().table(KoboSyncSession::Table).to_owned())
+			.drop_table(Table::drop().table(KoboSyncSessions::Table).to_owned())
 			.await
 	}
 }
 
 #[derive(Iden)]
-enum KoboSyncSession {
+enum KoboSyncSessions {
 	Table,
 	Id,
 	UserId,

@@ -35,6 +35,7 @@ export default function Screen() {
 	const [sdk, setSDK] = useState<Api | null>(() => cachedInstance.current || null)
 	const [isInitiallyConnecting, setIsInitiallyConnecting] = useState(() => !cachedInstance.current)
 	const [isAutoAuthenticating, setIsAutoAuthenticating] = useState(false)
+	const [retryCounter, setRetryCounter] = useState(0)
 	const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false)
 	const [user, setUser] = useState<AuthUser | null>(null)
 	const [fatalError, setFatalError] = useState<Error | null>(null)
@@ -112,6 +113,7 @@ export default function Screen() {
 		saveServerToken,
 		addInstanceToCache,
 		isAutoAuthenticating,
+		retryCounter,
 	])
 
 	useEffect(
@@ -144,6 +146,7 @@ export default function Screen() {
 		setUser(null)
 		setIsAuthDialogOpen(false)
 		setIsAutoAuthenticating(false)
+		setRetryCounter((k) => k + 1)
 	}, [])
 
 	/**

@@ -12,8 +12,8 @@ type ThemePreviewProps = ViewProps & {
 export const ThemePreview = ({ name, theme, className, style, ...props }: ThemePreviewProps) => (
 	<View
 		className={cn(
-			'squircle aspect-[6/5] w-24 items-center justify-center rounded-3xl shadow',
-			'border border-black/10 dark:border-white/10',
+			'squircle w-24 rounded-3xl shadow aspect-[6/5] items-center justify-center',
+			'border-black/10 dark:border-white/10 border',
 			className,
 		)}
 		style={[{ backgroundColor: theme.colors?.background }, style]}
@@ -21,11 +21,11 @@ export const ThemePreview = ({ name, theme, className, style, ...props }: ThemeP
 	>
 		<Text
 			style={{ color: theme.colors?.foreground }}
-			className="items-center justify-center text-2xl"
+			className="text-2xl items-center justify-center"
 		>
 			Aa
 		</Text>
-		<Text className="text-center text-base" style={{ color: theme.colors?.foreground }}>
+		<Text className="text-base text-center" style={{ color: theme.colors?.foreground }}>
 			{name}
 		</Text>
 	</View>

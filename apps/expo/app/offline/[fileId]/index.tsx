@@ -3,14 +3,14 @@ import { formatHumanDuration } from '@stump/i18n'
 import { intlFormat } from 'date-fns'
 import { eq } from 'drizzle-orm'
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
-import { useFocusEffect, useLocalSearchParams, useNavigation, useRouter } from 'expo-router'
-import { ChevronLeft } from 'lucide-react-native'
-import { useCallback, useLayoutEffect, useMemo } from 'react'
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router'
+import { useCallback, useMemo } from 'react'
 import { Platform, Pressable, View } from 'react-native'
 import Animated from 'react-native-reanimated'
 import TImage from 'react-native-turbo-image'
 import { useShallow } from 'zustand/react/shallow'
 
+import BackLink from '~/components/BackLink'
 import { DescriptionSection, useOverviewAnimations } from '~/components/book/overview'
 import { ThumbnailImage } from '~/components/image'
 import { intoDownloadedFile } from '~/components/localLibrary'
@@ -181,9 +181,7 @@ export default function Screen() {
 					<View className="gap-6 px-4 tablet:px-6">
 						{Platform.OS === 'android' && (
 							<View className="pt-2 flex flex-row justify-between">
-								<Pressable onPress={() => router.back()}>
-									<Icon as={ChevronLeft} className="h-6 w-6" />
-								</Pressable>
+								<BackLink iconClassName="mr-[unset]" />
 							</View>
 						)}
 

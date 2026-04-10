@@ -23,6 +23,7 @@ import {
 	useRelatedPublications,
 } from '~/components/opds'
 import FeedSelfURL from '~/components/opds/FeedSelfURL'
+import { usePublicationMenu } from '~/components/opds/PublicationMenu'
 import {
 	extensionFromMime,
 	getAcquisitionLink,
@@ -68,9 +69,14 @@ export default function Screen() {
 	useLayoutEffect(() => {
 		navigation.setOptions({
 			title: title || 'Publication',
-			headerRight: () => <PublicationMenu publicationUrl={url} metadata={metadata} />,
+			// headerRight: () => <PublicationMenu publicationUrl={url} metadata={metadata} />,
 		})
 	}, [navigation, url, title, metadata])
+
+	const menuFragment = usePublicationMenu({
+		publicationUrl: url,
+		metadata,
+	})
 
 	const firstPageURL = readingOrder?.[0]?.href
 		? resolveUrl(readingOrder[0].href, sdk.rootURL)
@@ -214,250 +220,256 @@ export default function Screen() {
 	const { animatedScrollRef, parallaxStyle } = useOverviewAnimations()
 
 	return (
-		<Animated.ScrollView className="flex-1 bg-background" ref={animatedScrollRef}>
-			<View className="ios:pt-safe-offset-20 pt-safe ios:pb-24 overflow-hidden pb-16">
-				<Animated.View
-					// -inset-24 is because when using a lot of blur, the sides get more transparent
-					// so we have to "zoom in" to have a clean line at the bottom rather than a gradient
-					className="absolute -inset-24 opacity-70 dark:opacity-30"
-					style={parallaxStyle}
-				>
-					<TImage
-						source={{
-							uri: thumbnailURL || '',
-							headers: {
-								...sdk.customHeaders,
-								Authorization: sdk.authorizationHeader || '',
-							},
-						}}
-						style={{ width: '100%', height: '100%' }}
-						resizeMode="cover"
-						fadeDuration={2000}
-						{...(Platform.OS === 'ios' && { indicator: { color: 'transparent' } })}
-						// android only supports up to blur={25} which doesn't look good,
-						// but if we heavily downscale first, the following looks near identical to using
-						// original res with blur={40} on ios, which is what I originally settled on
-						resize={60}
-						blur={Platform.OS === 'ios' ? 7 : 16}
-					/>
-				</Animated.View>
+		<>
+			{menuFragment}
 
-				<View className="gap-8 px-4 tablet:px-6">
-					<ThumbnailImage
-						source={{
-							uri: thumbnailURL || '',
-							headers: {
-								...sdk.customHeaders,
-								Authorization: sdk.authorizationHeader || '',
-							},
-						}}
-						size={{ height: 235 / thumbnailRatio, width: 235 }}
-						borderAndShadowStyle={{ shadowRadius: 5 }}
-					/>
+			<Animated.ScrollView className="flex-1 bg-background" ref={animatedScrollRef}>
+				<View className="ios:pt-safe-offset-20 pt-safe ios:pb-24 pb-16 overflow-hidden">
+					<Animated.View
+						// -inset-24 is because when using a lot of blur, the sides get more transparent
+						// so we have to "zoom in" to have a clean line at the bottom rather than a gradient
+						className="-inset-24 absolute opacity-70 dark:opacity-30"
+						style={parallaxStyle}
+					>
+						<TImage
+							source={{
+								uri: thumbnailURL || '',
+								headers: {
+									...sdk.customHeaders,
+									Authorization: sdk.authorizationHeader || '',
+								},
+							}}
+							style={{ width: '100%', height: '100%' }}
+							resizeMode="cover"
+							fadeDuration={2000}
+							{...(Platform.OS === 'ios' && { indicator: { color: 'transparent' } })}
+							// android only supports up to blur={25} which doesn't look good,
+							// but if we heavily downscale first, the following looks near identical to using
+							// original res with blur={40} on ios, which is what I originally settled on
+							resize={60}
+							blur={Platform.OS === 'ios' ? 7 : 16}
+						/>
+					</Animated.View>
 
-					<View className="gap-2">
-						<Heading size="lg" className="text-center leading-6" numberOfLines={3}>
-							{title || 'Untitled'}
-						</Heading>
+					<View className="gap-8 px-4 tablet:px-6">
+						<ThumbnailImage
+							source={{
+								uri: thumbnailURL || '',
+								headers: {
+									...sdk.customHeaders,
+									Authorization: sdk.authorizationHeader || '',
+								},
+							}}
+							size={{ height: 235 / thumbnailRatio, width: 235 }}
+							borderAndShadowStyle={{ shadowRadius: 5 }}
+						/>
 
-						{seriesText && (
-							<Text className="text-center text-base text-foreground-muted" numberOfLines={1}>
-								{seriesText}
-							</Text>
-						)}
-					</View>
+						<View className="gap-2">
+							<Heading size="lg" className="leading-6 text-center" numberOfLines={3}>
+								{title || 'Untitled'}
+							</Heading>
 
-					<View className="flex w-full flex-row items-center gap-2 tablet:max-w-sm tablet:self-center">
-						<Button
-							variant="brand"
-							className="flex-1"
-							roundness="full"
-							onPress={() =>
-								router.push({
-									pathname: `/opds/[id]/publication/read`,
-									params: { url, id: serverID },
-								})
-							}
-							disabled={!canStream || !isSupportedStream}
-						>
-							<Text>Stream</Text>
-						</Button>
-						{!isDownloaded && (
+							{seriesText && (
+								<Text className="text-base text-center text-foreground-muted" numberOfLines={1}>
+									{seriesText}
+								</Text>
+							)}
+						</View>
+
+						<View className="gap-2 tablet:max-w-sm flex w-full flex-row items-center tablet:self-center">
 							<Button
-								variant="secondary"
+								variant="brand"
+								className="flex-1"
 								roundness="full"
-								disabled={!canDownload || isDownloading}
-								onPress={onDownloadBook}
-								className="flex-row gap-2"
+								onPress={() =>
+									router.push({
+										pathname: `/opds/[id]/publication/read`,
+										params: { url, id: serverID },
+									})
+								}
+								disabled={!canStream || !isSupportedStream}
 							>
-								{isDownloading && (
-									<View className="pointer-events-none animate-spin">
-										<Icon
-											className="h-5 w-5"
-											as={Loader2}
-											style={{
-												// @ts-expect-error: It's fine
-												color: accentColor,
-											}}
-										/>
-									</View>
-								)}
-								<Text>Download</Text>
+								<Text>Stream</Text>
 							</Button>
-						)}
-					</View>
+							{!isDownloaded && (
+								<Button
+									variant="secondary"
+									roundness="full"
+									disabled={!canDownload || isDownloading}
+									onPress={onDownloadBook}
+									className="gap-2 flex-row"
+								>
+									{isDownloading && (
+										<View className="animate-spin pointer-events-none">
+											<Icon
+												className="h-5 w-5"
+												as={Loader2}
+												style={{
+													// @ts-expect-error: It's fine
+													color: accentColor,
+												}}
+											/>
+										</View>
+									)}
+									<Text>Download</Text>
+								</Button>
+							)}
+						</View>
 
-					{progression && existsSomeProgression && (
-						<Card>
-							<Card.StatGroup>
-								{progression.locator.locations?.position && (
-									<Card.Stat
-										label="Page"
-										value={progression.locator.locations.position || '1'}
-										suffix={
-											numberOfPages != null && numberOfPages > 0 ? ` / ${numberOfPages}` : undefined
-										}
-									/>
-								)}
-								{progression.locator.locations?.totalProgression != null && (
-									<Card.Stat
-										label="Completed"
-										value={`${Math.round((progression.locator.locations?.totalProgression ?? 0) * 100)}%`}
-									/>
-								)}
-								{renderModifiedStat(progression)}
-							</Card.StatGroup>
-						</Card>
-					)}
-
-					<View className="gap-2">
-						{/* Note: I gave some of the rounded children here less border radius because it looked better to my eyes */}
-						{!canDownload && !isDownloaded && (
-							<View className="squircle ios:rounded-3xl rounded-2xl bg-fill-warning-secondary p-3">
-								<Text>
-									{!downloadURL
-										? 'No download link available for this publication'
-										: `Unsupported file format: ${acquisitionLink?.type || 'unknown'}`}
-								</Text>
-							</View>
+						{progression && existsSomeProgression && (
+							<Card>
+								<Card.StatGroup>
+									{progression.locator.locations?.position && (
+										<Card.Stat
+											label="Page"
+											value={progression.locator.locations.position || '1'}
+											suffix={
+												numberOfPages != null && numberOfPages > 0
+													? ` / ${numberOfPages}`
+													: undefined
+											}
+										/>
+									)}
+									{progression.locator.locations?.totalProgression != null && (
+										<Card.Stat
+											label="Completed"
+											value={`${Math.round((progression.locator.locations?.totalProgression ?? 0) * 100)}%`}
+										/>
+									)}
+									{renderModifiedStat(progression)}
+								</Card.StatGroup>
+							</Card>
 						)}
 
-						{!canStream && (
-							<View className="squircle ios:rounded-3xl rounded-2xl bg-fill-info-secondary p-3">
-								<Text>This publication lacks a defined reading order and cannot be streamed</Text>
-							</View>
-						)}
+						<View className="gap-2">
+							{/* Note: I gave some of the rounded children here less border radius because it looked better to my eyes */}
+							{!canDownload && !isDownloaded && (
+								<View className="squircle ios:rounded-3xl rounded-2xl p-3 bg-fill-warning-secondary">
+									<Text>
+										{!downloadURL
+											? 'No download link available for this publication'
+											: `Unsupported file format: ${acquisitionLink?.type || 'unknown'}`}
+									</Text>
+								</View>
+							)}
 
-						{!isSupportedStream && (
-							<View className="squircle ios:rounded-3xl rounded-2xl bg-fill-info-secondary p-3">
-								<Text>
-									This publication contains unsupported media types and cannot be streamed yet
-								</Text>
-							</View>
-						)}
+							{!canStream && (
+								<View className="squircle ios:rounded-3xl rounded-2xl p-3 bg-fill-info-secondary">
+									<Text>This publication lacks a defined reading order and cannot be streamed</Text>
+								</View>
+							)}
+
+							{!isSupportedStream && (
+								<View className="squircle ios:rounded-3xl rounded-2xl p-3 bg-fill-info-secondary">
+									<Text>
+										This publication contains unsupported media types and cannot be streamed yet
+									</Text>
+								</View>
+							)}
+						</View>
 					</View>
 				</View>
-			</View>
 
-			<View className="squircle ios:rounded-[3rem] ios:-mt-[4.5rem] -mt-[2.5rem] gap-8 rounded-[2.5rem] bg-background px-4 py-6 tablet:px-6">
-				{!!description && <DescriptionSection description={description} />}
+				<View className="squircle ios:rounded-[3rem] ios:-mt-[4.5rem] gap-8 px-4 py-6 tablet:px-6 -mt-[2.5rem] rounded-[2.5rem] bg-background">
+					{!!description && <DescriptionSection description={description} />}
 
-				<Card className={cn(!description && 'px-2')}>
-					<Card.StatGroup>
-						{!!publisher && <Card.Stat label="Publisher" value={publisher} />}
-						{volume != null && <Card.Stat label="Volume" value={volume} />}
-						{issue != null && <Card.Stat label="Issue" value={issue} />}
-						{!!numberOfPages && <Card.Stat label="Pages" value={numberOfPages} />}
-					</Card.StatGroup>
-				</Card>
+					<Card className={cn(!description && 'px-2')}>
+						<Card.StatGroup>
+							{!!publisher && <Card.Stat label="Publisher" value={publisher} />}
+							{volume != null && <Card.Stat label="Volume" value={volume} />}
+							{issue != null && <Card.Stat label="Issue" value={issue} />}
+							{!!numberOfPages && <Card.Stat label="Pages" value={numberOfPages} />}
+						</Card.StatGroup>
+					</Card>
 
-				<MetadataBadgeSection
-					label="Subjects"
-					items={subjects.map((subject) => ({
-						label: subject.label,
-						onPress: () => goToFeedLink(getFirstLink(subject.links)),
-					}))}
-				/>
-
-				<CreditsSection
-					metadata={metadata}
-					onPressCredit={(credit) => goToFeedLink(getFirstLink(credit.links))}
-				/>
-
-				{seriesPublications.length > 0 && (
-					<View className="gap-3">
-						<View className="ios:px-4 flex flex-row items-center justify-between px-2">
-							<Text className="text-lg font-semibold text-foreground-muted">
-								{belongsToSeries?.name || 'Series Books'}
-							</Text>
-							{seriesUrl && <FeedSelfURL url={seriesUrl} />}
-						</View>
-						<FlashList
-							data={seriesPublications}
-							renderItem={({ item }) => <RelatedPublicationItem item={item} />}
-							horizontal
-							showsHorizontalScrollIndicator={false}
-							contentContainerStyle={{ paddingHorizontal: Platform.OS === 'ios' ? 16 : 8 }}
-							initialScrollIndex={initialSeriesPublicationIndex}
-							keyExtractor={keyExtractor}
-							onEndReached={fetchMoreSeriesPublications}
-						/>
-					</View>
-				)}
-
-				{collectionPublications.length > 0 && (
-					<View className="gap-3">
-						<View className="ios:px-4 flex flex-row items-center justify-between px-2">
-							<Text className="text-lg font-semibold text-foreground-muted">
-								{belongsToCollection?.name || 'Collection Books'}
-							</Text>
-							{collectionUrl && <FeedSelfURL url={collectionUrl} />}
-						</View>
-						<FlashList
-							data={collectionPublications}
-							renderItem={({ item }) => <RelatedPublicationItem item={item} />}
-							horizontal
-							showsHorizontalScrollIndicator={false}
-							contentContainerStyle={{ paddingHorizontal: Platform.OS === 'ios' ? 16 : 8 }}
-							initialScrollIndex={initialCollectionPublicationIndex}
-							keyExtractor={keyExtractor}
-							onEndReached={fetchMoreCollectionPublications}
-						/>
-					</View>
-				)}
-
-				<Card label="Details">
-					{subtitle && <Card.LongRow label="Subtitle" value={subtitle} />}
-					{language && <Card.Row label="Language" value={language} />}
-					{readingDirection && <Card.Row label="Reading direction" value={readingDirection} />}
-					{modified && (
-						<Card.Row
-							label="Modified"
-							value={intlFormat(modified, { month: 'long', day: 'numeric', year: 'numeric' })}
-						/>
-					)}
-					{published && (
-						<Card.Row
-							label="Published"
-							value={intlFormat(published, { month: 'long', day: 'numeric', year: 'numeric' })}
-						/>
-					)}
-				</Card>
-
-				{identifier && (
-					<IdentifiersSheet
-						identifiers={
-							isStumpOPDS
-								? {
-										stumpId: identifier,
-									}
-								: {
-										identifier,
-									}
-						}
+					<MetadataBadgeSection
+						label="Subjects"
+						items={subjects.map((subject) => ({
+							label: subject.label,
+							onPress: () => goToFeedLink(getFirstLink(subject.links)),
+						}))}
 					/>
-				)}
-			</View>
-		</Animated.ScrollView>
+
+					<CreditsSection
+						metadata={metadata}
+						onPressCredit={(credit) => goToFeedLink(getFirstLink(credit.links))}
+					/>
+
+					{seriesPublications.length > 0 && (
+						<View className="gap-3">
+							<View className="ios:px-4 px-2 flex flex-row items-center justify-between">
+								<Text className="text-lg font-semibold text-foreground-muted">
+									{belongsToSeries?.name || 'Series Books'}
+								</Text>
+								{seriesUrl && <FeedSelfURL url={seriesUrl} />}
+							</View>
+							<FlashList
+								data={seriesPublications}
+								renderItem={({ item }) => <RelatedPublicationItem item={item} />}
+								horizontal
+								showsHorizontalScrollIndicator={false}
+								contentContainerStyle={{ paddingHorizontal: Platform.OS === 'ios' ? 16 : 8 }}
+								initialScrollIndex={initialSeriesPublicationIndex}
+								keyExtractor={keyExtractor}
+								onEndReached={fetchMoreSeriesPublications}
+							/>
+						</View>
+					)}
+
+					{collectionPublications.length > 0 && (
+						<View className="gap-3">
+							<View className="ios:px-4 px-2 flex flex-row items-center justify-between">
+								<Text className="text-lg font-semibold text-foreground-muted">
+									{belongsToCollection?.name || 'Collection Books'}
+								</Text>
+								{collectionUrl && <FeedSelfURL url={collectionUrl} />}
+							</View>
+							<FlashList
+								data={collectionPublications}
+								renderItem={({ item }) => <RelatedPublicationItem item={item} />}
+								horizontal
+								showsHorizontalScrollIndicator={false}
+								contentContainerStyle={{ paddingHorizontal: Platform.OS === 'ios' ? 16 : 8 }}
+								initialScrollIndex={initialCollectionPublicationIndex}
+								keyExtractor={keyExtractor}
+								onEndReached={fetchMoreCollectionPublications}
+							/>
+						</View>
+					)}
+
+					<Card label="Details">
+						{subtitle && <Card.LongRow label="Subtitle" value={subtitle} />}
+						{language && <Card.Row label="Language" value={language} />}
+						{readingDirection && <Card.Row label="Reading direction" value={readingDirection} />}
+						{modified && (
+							<Card.Row
+								label="Modified"
+								value={intlFormat(modified, { month: 'long', day: 'numeric', year: 'numeric' })}
+							/>
+						)}
+						{published && (
+							<Card.Row
+								label="Published"
+								value={intlFormat(published, { month: 'long', day: 'numeric', year: 'numeric' })}
+							/>
+						)}
+					</Card>
+
+					{identifier && (
+						<IdentifiersSheet
+							identifiers={
+								isStumpOPDS
+									? {
+											stumpId: identifier,
+										}
+									: {
+											identifier,
+										}
+							}
+						/>
+					)}
+				</View>
+			</Animated.ScrollView>
+		</>
 	)
 }

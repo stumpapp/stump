@@ -6,8 +6,8 @@ import { QueryClient } from '@tanstack/react-query'
 import { useLocalSearchParams, useNavigation } from 'expo-router'
 import { useCallback, useLayoutEffect, useMemo } from 'react'
 
+import BackLink from '~/components/BackLink'
 import BookGridItem from '~/components/book/BookGridItem'
-import ChevronBackLink from '~/components/ChevronBackLink'
 import { useGridItemSize } from '~/components/grid/useGridItemSize'
 import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
 
@@ -55,7 +55,7 @@ export default function Screen() {
 			headerShown: true,
 			headerTitle: 'Search Results',
 			headerBackButtonMenuEnabled: true,
-			headerLeft: () => <ChevronBackLink />,
+			headerLeft: () => <BackLink />,
 		})
 	}, [navigation])
 

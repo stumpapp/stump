@@ -9,14 +9,14 @@ import {
 import { formatHumanDuration } from '@stump/i18n'
 import { formatDistanceToNow } from 'date-fns'
 import { useLocalSearchParams, useRouter } from 'expo-router'
-import { ChevronLeft } from 'lucide-react-native'
 import { useCallback, useState } from 'react'
-import { Platform, Pressable, View } from 'react-native'
+import { Platform, View } from 'react-native'
 import Animated from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import TImage from 'react-native-turbo-image'
 
 import { useActiveServer, useStumpServer } from '~/components/activeServer'
+import BackLink from '~/components/BackLink'
 import { BookMetaLink, BooksAfterCursor } from '~/components/book'
 import {
 	BookActionMenu,
@@ -377,9 +377,7 @@ export default function Screen() {
 					<View className="gap-8 px-4 tablet:px-6">
 						{Platform.OS === 'android' && book && (
 							<View className="pt-2 flex flex-row justify-between">
-								<Pressable onPress={() => router.back()}>
-									<Icon as={ChevronLeft} className="h-6 w-6" />
-								</Pressable>
+								<BackLink iconClassName="mr-[unset]" />
 
 								<BookActionMenu data={book} />
 							</View>

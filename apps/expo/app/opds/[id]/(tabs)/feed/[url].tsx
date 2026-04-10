@@ -1,7 +1,7 @@
 import { useRefetch, useShowSlowLoader } from '@stump/client'
 import { useLocalSearchParams } from 'expo-router'
 
-import ChevronBackLink from '~/components/ChevronBackLink'
+import BackLink from '~/components/BackLink'
 import { MaybeErrorFeed, OPDSFeed } from '~/components/opds'
 import { useOPDSFeed } from '~/components/opds/useOPDSFeed'
 import { FullScreenLoader } from '~/components/ui'
@@ -27,7 +27,7 @@ export default function Screen() {
 
 	useDynamicHeader({
 		title: feed?.metadata.title || '',
-		headerLeft: () => <ChevronBackLink />,
+		headerLeft: () => <BackLink />,
 	})
 
 	if (showLoader) return <FullScreenLoader label="Loading..." />

@@ -2,7 +2,7 @@ import { FlashList } from '@shopify/flash-list'
 import { useRefetch, useShowSlowLoader } from '@stump/client'
 
 import { useActiveServer } from '~/components/activeServer'
-import ChevronBackLink from '~/components/ChevronBackLink'
+import BackLink from '~/components/BackLink'
 import {
 	MaybeErrorLegacyFeed,
 	OPDSLegacyEntryDivider,
@@ -36,7 +36,7 @@ export default function Screen() {
 
 	useDynamicHeader({
 		title: activeServer?.name || 'OPDS Feed',
-		headerLeft: () => <ChevronBackLink />,
+		headerLeft: () => <BackLink />,
 		headerRight: () => <OPDSLegacyFeedActionMenu />,
 	})
 

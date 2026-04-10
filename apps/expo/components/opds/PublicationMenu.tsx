@@ -1,7 +1,7 @@
-import { Button, ContextMenu, Host } from '@expo/ui/swift-ui'
-import { disabled } from '@expo/ui/swift-ui/modifiers'
 import { OPDSMetadata } from '@stump/sdk'
+import { Stack, useNavigation } from 'expo-router'
 import { Ellipsis } from 'lucide-react-native'
+import { useLayoutEffect } from 'react'
 import { Platform, View } from 'react-native'
 import { Pressable } from 'react-native-gesture-handler'
 import * as DropdownMenu from 'zeego/dropdown-menu'
@@ -31,8 +31,22 @@ export default function PublicationMenu({ publicationUrl, metadata }: Props) {
 		})
 	}
 
-	if (Platform.OS === 'android') {
-		return (
+	return Platform.select({
+		ios: (
+			<Stack.Toolbar placement="right">
+				<Stack.Toolbar.Menu icon="ellipsis">
+					<Stack.Toolbar.MenuAction
+						icon="trash"
+						onPress={handleDeleteDownload}
+						destructive
+						disabled={!isDownloaded || isDeleting}
+					>
+						Delete Download
+					</Stack.Toolbar.MenuAction>
+				</Stack.Toolbar.Menu>
+			</Stack.Toolbar>
+		),
+		android: (
 			<DropdownMenu.Root>
 				<DropdownMenu.Trigger>
 					<Pressable>
@@ -62,35 +76,23 @@ export default function PublicationMenu({ publicationUrl, metadata }: Props) {
 					</DropdownMenu.Item>
 				</DropdownMenu.Content>
 			</DropdownMenu.Root>
-		)
+		),
+	})
+}
+
+export function usePublicationMenu(props: Props) {
+	const navigation = useNavigation()
+	useLayoutEffect(() => {
+		if (Platform.OS === 'android') {
+			navigation.setOptions({
+				headerRight: () => <PublicationMenu {...props} />,
+			})
+		}
+	}, [navigation, props])
+
+	if (Platform.OS === 'ios') {
+		return <PublicationMenu {...props} />
 	}
 
-	return (
-		<Host matchContents>
-			<ContextMenu>
-				<ContextMenu.Trigger>
-					<View
-						accessibilityLabel="options"
-						style={{
-							height: 35,
-							width: 35,
-							justifyContent: 'center',
-							alignItems: 'center',
-						}}
-					>
-						<Icon as={Ellipsis} size={24} className="text-foreground" />
-					</View>
-				</ContextMenu.Trigger>
-				<ContextMenu.Items>
-					<Button
-						systemImage="trash"
-						role="destructive"
-						onPress={handleDeleteDownload}
-						label="Delete Download"
-						modifiers={[disabled(!isDownloaded || isDeleting)]}
-					/>
-				</ContextMenu.Items>
-			</ContextMenu>
-		</Host>
-	)
+	return null
 }

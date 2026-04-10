@@ -4,8 +4,8 @@ import { Pressable, View } from 'react-native'
 import Animated from 'react-native-reanimated'
 import { initialWindowMetrics, useSafeAreaInsets } from 'react-native-safe-area-context'
 
+import BackLink from '~/components/BackLink'
 import { FADE_IN, FADE_OUT, useReaderAnimations } from '~/components/book/reader/shared'
-import ChevronBackLink from '~/components/ChevronBackLink'
 import { Text } from '~/components/ui'
 import { Icon } from '~/components/ui/icon'
 import { usePreferencesStore } from '~/stores'
@@ -32,7 +32,7 @@ export default function ReadiumHeader() {
 			{/* Controls hidden */}
 			{!preferMinimalReader && (
 				<Animated.View
-					className="inset-x-safe absolute z-20 h-12 items-center justify-center px-8"
+					className="inset-x-safe h-12 px-8 absolute z-20 items-center justify-center"
 					style={[{ top: initialWindowMetrics?.insets.top || insets.top }, primaryStyle]}
 				>
 					<Animated.View key={chapterTitle} entering={FADE_IN} exiting={FADE_OUT}>
@@ -49,14 +49,15 @@ export default function ReadiumHeader() {
 
 			{/* Controls shown */}
 			<Animated.View
-				className="inset-x-safe absolute z-20 h-12 flex-row items-center justify-between gap-2 px-4"
+				className="inset-x-safe h-12 gap-2 px-4 absolute z-20 flex-row items-center justify-between"
 				style={[{ top: initialWindowMetrics?.insets.top || insets.top }, secondaryStyle]}
 			>
-				<View className="flex-row items-center gap-4">
-					<ChevronBackLink
+				<View className="gap-4 flex-row items-center">
+					<BackLink
 						color={colors?.foreground}
 						style={{ opacity: 0.9 }}
 						activeOpacity={0.7}
+						iconClassName="mr-[unset]"
 					/>
 					<OpenSheetButton sheet="locations" />
 				</View>
@@ -73,7 +74,7 @@ export default function ReadiumHeader() {
 					</Animated.View>
 				</View>
 
-				<View className="flex-row items-center gap-4">
+				<View className="gap-4 flex-row items-center">
 					<BookmarkButton color={colors?.foreground} />
 					<OpenSheetButton sheet="settings" />
 				</View>

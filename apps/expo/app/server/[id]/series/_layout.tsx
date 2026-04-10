@@ -1,7 +1,7 @@
 import { Stack } from 'expo-router'
 import { Platform } from 'react-native'
 
-import ChevronBackLink from '~/components/ChevronBackLink'
+import BackLink from '~/components/BackLink'
 import { IS_IOS_24_PLUS } from '~/lib/constants'
 import { usePreferencesStore } from '~/stores'
 
@@ -26,7 +26,7 @@ export default function Screen() {
 					headerLargeTitle: Platform.OS === 'ios',
 					headerBlurEffect: IS_IOS_24_PLUS ? undefined : 'regular',
 					animation: animationEnabled ? 'default' : 'none',
-					headerLeft: Platform.OS === 'android' ? undefined : () => <ChevronBackLink />,
+					headerLeft: Platform.OS === 'android' ? undefined : () => <BackLink />,
 				}}
 			/>
 

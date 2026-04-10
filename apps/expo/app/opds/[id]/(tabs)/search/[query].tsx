@@ -2,7 +2,7 @@ import { useRefetch, useSDK } from '@stump/client'
 import { useQuery } from '@tanstack/react-query'
 import { useLocalSearchParams } from 'expo-router'
 
-import ChevronBackLink from '~/components/ChevronBackLink'
+import BackLink from '~/components/BackLink'
 import EmptyState from '~/components/EmptyState'
 import { MaybeErrorFeed, OPDSFeed } from '~/components/opds'
 import { PaginationTarget } from '~/components/opds/useOPDSFeed'
@@ -33,7 +33,7 @@ export default function Screen() {
 
 	useDynamicHeader({
 		title: query || 'Search Results',
-		headerLeft: () => <ChevronBackLink />,
+		headerLeft: () => <BackLink />,
 	})
 
 	if (isLoading) return null

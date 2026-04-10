@@ -1,7 +1,7 @@
 import { Stack } from 'expo-router'
 import { Platform } from 'react-native'
 
-import ChevronBackLink from '~/components/ChevronBackLink'
+import BackLink from '~/components/BackLink'
 import { usePreferencesStore } from '~/stores'
 
 export default function Screen() {
@@ -13,7 +13,7 @@ export default function Screen() {
 				name="[bookId]"
 				options={{
 					headerShown: false,
-					headerLeft: Platform.OS === 'android' ? undefined : () => <ChevronBackLink />,
+					headerLeft: Platform.OS === 'android' ? undefined : () => <BackLink />,
 				}}
 			/>
 		</Stack>

@@ -3,7 +3,7 @@ import { useRefetch, useShowSlowLoader } from '@stump/client'
 import { useLocalSearchParams } from 'expo-router'
 import { View } from 'react-native'
 
-import ChevronBackLink from '~/components/ChevronBackLink'
+import BackLink from '~/components/BackLink'
 import EmptyState from '~/components/EmptyState'
 import {
 	MaybeErrorLegacyFeed,
@@ -43,7 +43,7 @@ export default function Screen() {
 
 	useDynamicHeader({
 		title: query || 'Search Results',
-		headerLeft: () => <ChevronBackLink />,
+		headerLeft: () => <BackLink />,
 		headerRight: () => <OPDSLegacyFeedActionMenu />,
 	})
 

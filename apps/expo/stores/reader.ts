@@ -113,8 +113,24 @@ export const useReaderStore = create<ReaderStore>()(
 				isReading: false,
 				setIsReading: (reading) => set({ isReading: reading }),
 				globalSettings: DEFAULT_BOOK_PREFERENCES,
-				setGlobalSettings: (updates: Partial<GlobalSettings>) =>
-					set({ globalSettings: { ...get().globalSettings, ...updates } }),
+				setGlobalSettings: (updates: Partial<GlobalSettings>) => {
+					// NOTE: i added this timeout to fix a weird crash that happens in very specific circumstances
+					// when updating globalSettings from within a native callback (e.g. zeego + truesheet).
+					// i honestly don't fully understand why this fixed it, it was a shot in the dark to try
+					// and see if defering the update until after interactions would help, and once added i did
+					// not observe the error. the crash was reported in testflight, so no issue to link to, but
+					// i confirmed it on both platforms. super weird:
+					// - go into paged reader for book where you have not messed with settings (will not work otherwise)
+					// - open action menu and if:
+					//   1. clicking shortcut to toggle direction, works FINE
+					//   2. click into settings -> change direction -> crash with red herring nativation context error
+					// - go back into book, change settings -> it's fine
+					// - go into new book (new non-messed with book), go into settings first, change settings -> crash
+					// an onlooker is probably thinking "well why not timeout more colocated to the actual update in reader settigns?"
+					// i did, and for whatever reason (even though logically identical) it did not work. so, unforunately, the timeout
+					// is here for now
+					setTimeout(() => set({ globalSettings: { ...get().globalSettings, ...updates } }))
+				},
 
 				bookSettings: {},
 				addBookSettings: (id, preferences) =>

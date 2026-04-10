@@ -1,7 +1,7 @@
 import { Stack } from 'expo-router'
 import { Platform, View } from 'react-native'
 
-import ChevronBackLink from '~/components/ChevronBackLink'
+import BackLink from '~/components/BackLink'
 import { FileExplorerAssetsProvider } from '~/components/fileExplorer'
 import { ENABLE_LARGE_HEADER, IS_IOS_24_PLUS } from '~/lib/constants'
 import { usePreferencesStore } from '~/stores'
@@ -34,7 +34,7 @@ export default function Screen() {
 												alignItems: 'center',
 											}}
 										>
-											<ChevronBackLink />
+											<BackLink />
 										</View>
 									),
 						headerTransparent: Platform.OS === 'ios',

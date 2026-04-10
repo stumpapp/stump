@@ -60,7 +60,6 @@ export function PickerSheet<T extends string = string>({
 				ref={sheetRef}
 				detents={['auto', 1]}
 				grabber
-				dismissible={false} // false bc interferes with scroll for whatever reason
 				backgroundColor={colors.background.DEFAULT}
 				grabberOptions={{ color: colors.sheet.grabber }}
 				onDidPresent={() => setIsOpen(true)}
@@ -72,7 +71,7 @@ export function PickerSheet<T extends string = string>({
 				}
 				scrollable
 			>
-				<ScrollView className="px-2 flex-1">
+				<ScrollView className="px-2 flex-1" nestedScrollEnabled>
 					{options.map((option) => (
 						<PickerSheetOption
 							key={option.value}

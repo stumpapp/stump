@@ -1,7 +1,7 @@
 import { useRefetch, useShowSlowLoader } from '@stump/client'
 
 import { useActiveServer } from '~/components/activeServer'
-import ChevronBackLink from '~/components/ChevronBackLink'
+import BackLink from '~/components/BackLink'
 import { MaybeErrorFeed, OPDSFeed } from '~/components/opds'
 import { FullScreenLoader } from '~/components/ui'
 import { useOPDSFeedContext } from '~/context/opds'
@@ -15,7 +15,7 @@ export default function Screen() {
 
 	useDynamicHeader({
 		title: activeServer?.name,
-		headerLeft: () => <ChevronBackLink />,
+		headerLeft: () => <BackLink />,
 	})
 
 	if (showLoader) return <FullScreenLoader label="Loading..." />

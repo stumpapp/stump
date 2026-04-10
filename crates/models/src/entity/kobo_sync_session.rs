@@ -1,3 +1,4 @@
+use chrono::Utc;
 use sea_orm::FromJsonQueryResult;
 use sea_orm::{entity::prelude::*, prelude::async_trait::async_trait, ActiveValue};
 use serde::{Deserialize, Serialize};
@@ -12,17 +13,21 @@ pub struct Model {
 	pub id: String,
 	#[sea_orm(column_type = "Text")]
 	pub user_id: String,
+
+	/// a JSON array of media IDs that should be synced as part of this session.
 	#[sea_orm(column_type = "Json")]
 	pub media_ids: MediaIds,
+
 	#[sea_orm(column_type = "Text")]
 	pub device_id: String,
+
 	#[sea_orm(column_type = "Json")]
 	pub device_metadata: Json,
-	// TODO: DateTimeWithTimeZone?
-	pub created_at: DateTimeUtc,
 
-	// the time that the sync session before this one began.
-	// or None if there was no sync session before this one.
+	pub created_at: DateTimeWithTimeZone,
+
+	/// the time that the sync session before this one began.
+	/// or None if there was no sync session before this one.
 	pub previous_sync_at: Option<DateTimeWithTimeZone>,
 }
 
@@ -51,7 +56,7 @@ impl ActiveModelBehavior for ActiveModel {
 		C: ConnectionTrait,
 	{
 		if insert {
-			self.created_at = ActiveValue::Set(chrono::Utc::now());
+			self.created_at = ActiveValue::Set(DateTimeWithTimeZone::from(Utc::now()));
 			if self.id.is_not_set() {
 				self.id = ActiveValue::Set(Uuid::new_v4().to_string());
 			}

@@ -103,7 +103,7 @@ export class DownloadRepository {
 			console.error('Error generating thumbnail for downloaded file:', error)
 		}
 
-		return db.transaction(async (tx) => {
+		const downloadedFile = await db.transaction(async (tx) => {
 			if (relations?.seriesRef) {
 				await tx
 					.insert(seriesRefs)
@@ -199,6 +199,12 @@ export class DownloadRepository {
 				.returning()
 			return result[0]
 		})
+
+		if (!downloadedFile) {
+			throw new Error('Failed to add downloaded file')
+		}
+
+		return downloadedFile
 	}
 
 	/**

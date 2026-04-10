@@ -5,7 +5,7 @@ import { eq } from 'drizzle-orm'
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router'
 import { useCallback, useMemo } from 'react'
-import { Platform, Pressable, View } from 'react-native'
+import { Platform, View } from 'react-native'
 import Animated from 'react-native-reanimated'
 import TImage from 'react-native-turbo-image'
 import { useShallow } from 'zustand/react/shallow'
@@ -75,13 +75,6 @@ export default function Screen() {
 		return intoDownloadedFile(record)
 	}, [record])
 
-	// useLayoutEffect(() => {
-	// 	if (downloadedFile) {
-	// 		navigation.setOptions({
-	// 			headerRight: () => <OfflineBookMenu downloadedFile={downloadedFile} />,
-	// 		})
-	// 	}
-	// }, [navigation, downloadedFile])
 	const menuFragment = useOfflineBookMenu({ downloadedFile })
 
 	const { animatedScrollRef, parallaxStyle } = useOverviewAnimations()

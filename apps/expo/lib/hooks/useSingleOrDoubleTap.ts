@@ -21,7 +21,6 @@ export function useSingleOrDoubleTap({ onSingleTap, onDoubleTap, delay = 300 }: 
 				}
 			} else {
 				lastTap.current = now
-				// @ts-expect-error: It's fine
 				timeout.current = setTimeout(() => {
 					onSingleTap(event)
 					timeout.current = null

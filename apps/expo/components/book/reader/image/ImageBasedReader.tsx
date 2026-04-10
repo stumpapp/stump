@@ -78,6 +78,7 @@ export default function ImageBasedReader({ initialPage, onPastEndReached }: Prop
 				flashListRef?.current?.scrollToIndex({ index: scrollTo, animated: false })
 			}
 		},
+		// eslint-disable-next-line react-compiler/react-compiler
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[deviceOrientationChanged, doublePageBehaviorChanged],
 	)
@@ -143,8 +144,9 @@ export default function ImageBasedReader({ initialPage, onPastEndReached }: Prop
 					/>
 				)}
 				getItemType={(item) => {
+					const itemZero = item[0]
 					if (item.length === 2) return 'double'
-					else if ((imageSizes?.[item[0]]?.ratio || 0) >= 1) return 'landscape'
+					else if (itemZero != null && (imageSizes?.[itemZero]?.ratio || 0) >= 1) return 'landscape'
 					else return 'single'
 				}}
 				contentContainerStyle={
@@ -159,7 +161,11 @@ export default function ImageBasedReader({ initialPage, onPastEndReached }: Prop
 					if (!firstVisibleItem) return
 
 					const { item } = firstVisibleItem
-					const page = item[item.length - 1] + 1
+
+					const itemIdx = item[item.length - 1]
+					if (itemIdx == null) return
+
+					const page = itemIdx + 1
 
 					if (firstVisibleItem) {
 						handlePageChanged(page)
@@ -266,6 +272,8 @@ const PageSet = React.memo(
 			[showControls, setShowControls, onCheckForNavigationTaps, tapSidesToNavigate],
 		)
 
+		const [imageRatio, setImageRatio] = useState<number | undefined>(undefined)
+
 		const onImageLoaded = useCallback(
 			(event: NativeSyntheticEvent<Success>, idxIdx: number) => {
 				const { height, width } = event.nativeEvent
@@ -278,6 +286,7 @@ const PageSet = React.memo(
 				if (isDifferent) {
 					setImageSizes((prev) => {
 						const actualIdx = indexes[idxIdx]
+						if (actualIdx == null) return prev
 						prev[actualIdx] = { height, width, ratio }
 						return prev
 					})
@@ -286,7 +295,6 @@ const PageSet = React.memo(
 			[setImageSizes, sizes, indexes],
 		)
 
-		const [imageRatio, setImageRatio] = useState<number | undefined>(undefined)
 		const roughPageRenderWidth = indexes.length > 1 ? maxWidth / 2 : maxWidth
 
 		const isRtl = readingDirection === ReadingDirection.Rtl
@@ -313,7 +321,7 @@ const PageSet = React.memo(
 				>
 					<View
 						className={cn('relative flex-row items-center justify-center', {
-							'mx-auto gap-0': indexes.length > 1,
+							'gap-0 mx-auto': indexes.length > 1,
 						})}
 						style={{
 							height:

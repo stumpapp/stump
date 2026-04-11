@@ -14,6 +14,7 @@ export default function TabLayout() {
 			tintColor={colors.fill.brand.DEFAULT}
 			backgroundColor={colors.tabbar}
 			rippleColor={colors.fill.brand.secondary}
+			indicatorColor={colors.fill.brand.secondary}
 			labelVisibilityMode="labeled"
 		>
 			<NativeTabs.Trigger name="index">

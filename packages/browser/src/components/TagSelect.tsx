@@ -74,7 +74,7 @@ export default function TagSelect({ label, description, selected = [], onChange 
 
 	return (
 		<ComboBox
-			label={label || 'Tags'}
+			label={label ?? 'Tags'}
 			description={description}
 			options={options}
 			value={[...selected].sort((a, b) => a.label.localeCompare(b.label)).map(({ value }) => value)}

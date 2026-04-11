@@ -14,7 +14,7 @@
 		"build": "tsc",
 		"storybook": "storybook dev -p 6006",
 		"build-storybook": "storybook build",
-		"nuke": "rimraf node_modules"
+		"clean": "rimraf node_modules"
 	},
 	"dependencies": {
 		"@emoji-mart/react": "^1.1.1",

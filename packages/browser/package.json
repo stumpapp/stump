@@ -10,7 +10,7 @@
 		"lint": "eslint .",
 		"format": "eslint --fix . && prettier --config ../../prettier.config.js --ignore-path ../../.prettierignore --write .",
 		"test": "jest",
-		"nuke": "rimraf node_modules"
+		"clean": "rimraf node_modules"
 	},
 	"exports": {
 		".": "./src/index.ts",

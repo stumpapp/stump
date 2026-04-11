@@ -12,7 +12,7 @@
 		"deploy-preview": "vercel",
 		"deploy": "vercel --prod",
 		"format": "eslint --fix . && prettier --config ../../prettier.config.js --ignore-path ../../.prettierignore --write .",
-		"nuke": "rimraf node_modules"
+		"clean": "rimraf node_modules"
 	},
 	"keywords": [],
 	"author": "",

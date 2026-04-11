@@ -33,7 +33,7 @@
 		"dev:web": "concurrently -n server,web -c green.bold,blue.bold \"bacon run-server --headless\" \"yarn web dev\"",
 		"dev:expo": "concurrently -n server,expo -c green.bold,blue.bold \"bacon run-server --headless\" \"yarn expo dev\"",
 		"format": "lerna run format --stream --parallel",
-		"nuke": "lerna run nuke",
+		"clean": "lerna run clean",
 		"android": "expo run:android",
 		"ios": "expo run:ios"
 	},

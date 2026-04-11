@@ -15,7 +15,7 @@
 		"build:mac-arm": "yarn exec vite build && tauri build --target aarch64-apple-darwin -- --features bundled-server",
 		"build:windows": "tauri build --target x86_64-pc-windows-msvc -- --features bundled-server",
 		"format": "eslint --fix . && prettier --config ../../prettier.config.js --ignore-path ../../.prettierignore --write .",
-		"nuke": "yarn exec rimraf node_modules"
+		"clean": "yarn exec rimraf node_modules"
 	},
 	"dependencies": {
 		"@stump/browser": "*",

@@ -2730,12 +2730,12 @@
 				"label": "Debug",
 				"clearCache": {
 					"memory": {
-						"button": "Speicher",
-						"success": "Speicher-Cache geleert"
+						"button": "RAM",
+						"success": "RAM-Cache geleert"
 					},
 					"disk": {
-						"button": "Festplatte",
-						"success": "Festplatten-Cache geleert"
+						"button": "Speicher",
+						"success": "Speicher-Cache geleert"
 					}
 				},
 				"deleteDatabase": {
@@ -2777,7 +2777,7 @@
 				"controls": "Steuerung"
 			},
 			"readingMode": {
-				"label": "Fließend",
+				"label": "Fluss",
 				"options": {
 					"PAGED": "Geseitigt",
 					"CONTINUOUS_HORIZONTAL": "Scrollen (Horizontal)",

@@ -12,7 +12,7 @@ export default function ContactInformation() {
 	const { t } = useTranslate()
 
 	return (
-		<Card label="Contact">
+		<Card label={t('settings.contactInfo.label')}>
 			<AppSettingsRow
 				icon={Mail}
 				iconBackgroundColor="#ff2700"

@@ -9,7 +9,7 @@ import { useShallow } from 'zustand/react/shallow'
 import { SheetBackDetection } from '~/components/SheetBackDetection'
 import { Text } from '~/components/ui'
 import { HeaderButton } from '~/components/ui/header-button/header-button'
-import { useColors } from '~/lib/constants'
+import { SETTINGS_COLORS, useColors } from '~/lib/constants'
 import { useTranslate } from '~/lib/hooks'
 import { usePreferencesStore } from '~/stores'
 
@@ -35,7 +35,11 @@ export default function AppPrimaryColor() {
 
 	return Platform.select({
 		ios: (
-			<AppSettingsRow icon={Pipette} title={t('settings.preferences.appPrimaryColor')}>
+			<AppSettingsRow
+				icon={Pipette}
+				iconBackgroundColor={SETTINGS_COLORS.majorVisuals}
+				title={t('settings.preferences.appPrimaryColor')}
+			>
 				<Host matchContents>
 					<ColorPicker
 						label=""

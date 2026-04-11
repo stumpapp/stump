@@ -29,6 +29,18 @@ export const IS_IOS_24_PLUS = Platform.OS === 'ios' && parseInt(Platform.Version
 
 export const ON_END_REACHED_THRESHOLD = Platform.OS === 'ios' ? 0.75 : 0.6
 
+// Note: These are vague categories that do not matter, and it doesn't matter
+// if the setting fits the category name that well, as long as it looks good
+export const SETTINGS_COLORS = {
+	majorVisuals: '#be193a',
+	minorVisuals: '#3287d5',
+	interactive: '#1ea550',
+	server: '#c46e07',
+	data: '#3fa7a9',
+	hiding: '#484395',
+	destructive: '#fd6bd5',
+}
+
 // TODO: android-specific tab bar color
 
 const light = {

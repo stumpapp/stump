@@ -3,6 +3,7 @@ import { View } from 'react-native'
 import { useShallow } from 'zustand/react/shallow'
 
 import { Switch } from '~/components/ui'
+import { SETTINGS_COLORS } from '~/lib/constants'
 import { useTranslate } from '~/lib/hooks'
 import { usePreferencesStore } from '~/stores'
 
@@ -20,6 +21,7 @@ export default function PreferMinimalReader() {
 	return (
 		<AppSettingsRow
 			icon={Spotlight}
+			iconBackgroundColor={SETTINGS_COLORS.minorVisuals}
 			title={t('settings.reading.preferMinimalReader')}
 			onPress={() => patch({ preferMinimalReader: !preferMinimalReader })}
 		>

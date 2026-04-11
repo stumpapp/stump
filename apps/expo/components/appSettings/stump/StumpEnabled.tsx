@@ -2,6 +2,7 @@ import { Box } from 'lucide-react-native'
 import { View } from 'react-native'
 
 import { Switch } from '~/components/ui'
+import { SETTINGS_COLORS } from '~/lib/constants'
 import { useTranslate } from '~/lib/hooks'
 import { useSavedServers } from '~/stores/savedServer'
 
@@ -14,6 +15,7 @@ export default function StumpEnabled() {
 	return (
 		<AppSettingsRow
 			icon={Box}
+			iconBackgroundColor={SETTINGS_COLORS.server}
 			title={t('common.enabled')}
 			onPress={() => setStumpEnabled(!stumpEnabled)}
 		>

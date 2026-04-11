@@ -2,6 +2,7 @@ import { HatGlasses } from 'lucide-react-native'
 import { useShallow } from 'zustand/react/shallow'
 
 import { Switch } from '~/components/ui'
+import { SETTINGS_COLORS } from '~/lib/constants'
 import { useTranslate } from '~/lib/hooks'
 import { useReaderStore } from '~/stores'
 
@@ -19,6 +20,7 @@ export default function GlobalIncognito() {
 	return (
 		<AppSettingsRow
 			icon={HatGlasses}
+			iconBackgroundColor={SETTINGS_COLORS.hiding}
 			title={t('settings.reading.incognitoReading')}
 			onPress={() => updateGlobalSettings({ incognito: !incognito })}
 		>

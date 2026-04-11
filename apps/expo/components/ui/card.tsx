@@ -1,3 +1,4 @@
+import { clone, getColor, serialize, set } from 'colorjs.io/fn'
 import { CircleAlert, LucideIcon } from 'lucide-react-native'
 import React, { ComponentProps, ReactNode, useState } from 'react'
 import { Easing, Platform, Pressable, View, ViewProps } from 'react-native'
@@ -35,6 +36,7 @@ type RowProps = Omit<ViewProps, 'children'> & {
 	label?: string
 	description?: string
 	icon?: LucideIcon
+	iconBackgroundColor?: string
 	disabled?: boolean
 	renderDivider?: boolean
 } & ({ value?: string | number; children?: never } | { children?: ReactNode; value?: never })
@@ -248,6 +250,7 @@ function BaseRowComponent({
 	label,
 	description,
 	icon,
+	iconBackgroundColor,
 	renderDivider = true,
 	children,
 	className,
@@ -275,11 +278,7 @@ function BaseRowComponent({
 			>
 				{label && (
 					<View className="gap-4 shrink flex-row items-center justify-center">
-						{icon && (
-							<View className="squircle h-8 w-8 rounded-xl bg-white/75 dark:bg-black/40 flex shrink-0 items-center justify-center">
-								<Icon as={icon} className="h-6 w-6 text-foreground-muted" />
-							</View>
-						)}
+						{icon && <GradientIcon icon={icon} backgroundColor={iconBackgroundColor} />}
 						<View className="gap-0.5 shrink">
 							<Text className="text-lg shrink">{label}</Text>
 							{description && (
@@ -292,6 +291,36 @@ function BaseRowComponent({
 				)}
 				{children}
 			</Container>
+		</View>
+	)
+}
+
+function GradientIcon({ icon, backgroundColor }: { icon: LucideIcon; backgroundColor?: string }) {
+	const lightPlainColor = getColor(backgroundColor || '#404040')
+	const darkPlainColor = clone(lightPlainColor)
+	set(lightPlainColor, { 'oklch.l': (l) => l + 0.1 })
+	set(darkPlainColor, { 'oklch.l': (l) => l - 0.1 })
+
+	const lightColor = serialize(lightPlainColor, { format: 'hex' })
+	const darkColor = serialize(darkPlainColor, { format: 'hex' })
+
+	const gradient = easeGradient({
+		colorStops: {
+			0: { color: lightColor },
+			1: { color: darkColor },
+		},
+		easing: Easing.bezier(0.3, 0, 0.8, 1),
+	})
+
+	return (
+		<View className="squircle h-8 w-8 rounded-xl flex shrink-0 items-center justify-center">
+			<LinearGradient
+				{...gradient}
+				useAngle
+				angle={195}
+				style={{ position: 'absolute', inset: 0 }}
+			/>
+			<Icon as={icon} size={18} strokeWidth={1.8} absoluteStrokeWidth color="white" />
 		</View>
 	)
 }

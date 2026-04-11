@@ -2,6 +2,7 @@ import { Globe } from 'lucide-react-native'
 import { useShallow } from 'zustand/react/shallow'
 
 import { Picker } from '~/components/ui/picker/picker'
+import { SETTINGS_COLORS } from '~/lib/constants'
 import { useTranslate } from '~/lib/hooks'
 import { usePreferencesStore } from '~/stores'
 import { DisplayLanguageKeysType } from '~/stores/user'
@@ -18,7 +19,11 @@ export default function DisplayLanguageKeys() {
 	)
 
 	return (
-		<AppSettingsRow icon={Globe} title={t(getKey('label'))}>
+		<AppSettingsRow
+			icon={Globe}
+			iconBackgroundColor={SETTINGS_COLORS.interactive}
+			title={t(getKey('label'))}
+		>
 			<Picker<DisplayLanguageKeysType>
 				value={displayLanguageKeys}
 				options={[

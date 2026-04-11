@@ -4,6 +4,7 @@ import { View } from 'react-native'
 
 import ImageReaderSettingsSheet from '~/components/book/reader/image/ImageReaderSettingsSheet'
 import { Icon } from '~/components/ui'
+import { SETTINGS_COLORS } from '~/lib/constants'
 import { useTranslate } from '~/lib/hooks'
 
 import AppSettingsRow from '../AppSettingsRow'
@@ -15,6 +16,7 @@ export default function ImageReaderSettings() {
 		<>
 			<AppSettingsRow
 				icon={GalleryThumbnails}
+				iconBackgroundColor={SETTINGS_COLORS.majorVisuals}
 				title={t('readerSettings.title')}
 				onPress={() => TrueSheet.present('imageReaderSettings')}
 				isLink

@@ -8,6 +8,7 @@ import { useShallow } from 'zustand/react/shallow'
 import { Picker } from '~/components/ui/picker/picker'
 import { PickerOption } from '~/components/ui/picker/types'
 import { PickerSheet } from '~/components/ui/picker-sheet'
+import { SETTINGS_COLORS } from '~/lib/constants'
 import { useTranslate } from '~/lib/hooks'
 import { usePreferencesStore } from '~/stores'
 
@@ -44,7 +45,11 @@ export default function AppLanguage() {
 	}
 
 	return (
-		<AppSettingsRow icon={Languages} title={t('settings.preferences.appLanguage')}>
+		<AppSettingsRow
+			icon={Languages}
+			iconBackgroundColor={SETTINGS_COLORS.interactive}
+			title={t('settings.preferences.appLanguage')}
+		>
 			{Platform.select({
 				ios: (
 					<Picker<AllowedLocale>

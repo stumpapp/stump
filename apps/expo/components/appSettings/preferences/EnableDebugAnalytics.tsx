@@ -3,10 +3,11 @@ import { View } from 'react-native'
 import { useShallow } from 'zustand/react/shallow'
 
 import { Switch } from '~/components/ui'
+import { SETTINGS_COLORS } from '~/lib/constants'
+import { useTranslate } from '~/lib/hooks'
 import { usePreferencesStore } from '~/stores'
 
 import AppSettingsRow from '../AppSettingsRow'
-import { useTranslate } from '~/lib/hooks'
 
 export default function EnableDebugAnalytics() {
 	const { t } = useTranslate()
@@ -20,6 +21,7 @@ export default function EnableDebugAnalytics() {
 	return (
 		<AppSettingsRow
 			icon={Bug}
+			iconBackgroundColor={SETTINGS_COLORS.data}
 			title={t(getKey('label'))}
 			description={t(getKey('description'))}
 			onPress={() => patch({ enableDebugAnalytics: !enableDebugAnalytics })}

@@ -3,6 +3,7 @@ import { View } from 'react-native'
 import { useShallow } from 'zustand/react/shallow'
 
 import { Switch } from '~/components/ui'
+import { SETTINGS_COLORS } from '~/lib/constants'
 import { useTranslate } from '~/lib/hooks'
 import { usePreferencesStore } from '~/stores'
 
@@ -20,6 +21,7 @@ export default function BookClubsEnabled() {
 	return (
 		<AppSettingsRow
 			icon={Users}
+			iconBackgroundColor={SETTINGS_COLORS.hiding}
 			title={t('settings.stump.bookClubsEnabled')}
 			onPress={() => patch({ bookClubsEnabled: !bookClubsEnabled })}
 		>

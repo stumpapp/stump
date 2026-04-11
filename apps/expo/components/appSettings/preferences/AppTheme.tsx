@@ -1,6 +1,7 @@
 import { Paintbrush } from 'lucide-react-native'
 
 import { Picker } from '~/components/ui/picker/picker'
+import { SETTINGS_COLORS } from '~/lib/constants'
 import { useTranslate } from '~/lib/hooks'
 import { useColorScheme } from '~/lib/useColorScheme'
 
@@ -11,7 +12,11 @@ export default function AppTheme() {
 	const { colorScheme, setColorScheme } = useColorScheme()
 
 	return (
-		<AppSettingsRow icon={Paintbrush} title={t(getKey('label'))}>
+		<AppSettingsRow
+			icon={Paintbrush}
+			iconBackgroundColor={SETTINGS_COLORS.majorVisuals}
+			title={t(getKey('label'))}
+		>
 			<Picker<'light' | 'dark'>
 				value={colorScheme}
 				options={[

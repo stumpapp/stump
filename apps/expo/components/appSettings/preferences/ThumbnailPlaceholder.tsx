@@ -3,6 +3,7 @@ import { useShallow } from 'zustand/react/shallow'
 
 import { ThumbnailPlaceholderType } from '~/components/image/ThumbnailPlaceholder'
 import { Picker } from '~/components/ui/picker/picker'
+import { SETTINGS_COLORS } from '~/lib/constants'
 import { useTranslate } from '~/lib/hooks'
 import { usePreferencesStore } from '~/stores'
 
@@ -20,7 +21,11 @@ export default function ThumbnailPlaceholder() {
 	)
 
 	return (
-		<AppSettingsRow icon={Palette} title={t(getKey('label'))}>
+		<AppSettingsRow
+			icon={Palette}
+			iconBackgroundColor={SETTINGS_COLORS.minorVisuals}
+			title={t(getKey('label'))}
+		>
 			<Picker<ThumbnailPlaceholderType>
 				value={thumbnailPlaceholder}
 				options={[

@@ -15,6 +15,7 @@ export default function ContactInformation() {
 		<Card label="Contact">
 			<AppSettingsRow
 				icon={Mail}
+				iconBackgroundColor="#ff2700"
 				title={t('settings.contactInfo.email')}
 				onPress={() => Linking.openURL('mailto:aaronleopold1221@gmail.com')}
 				isLink
@@ -25,6 +26,7 @@ export default function ContactInformation() {
 			<AppSettingsRow
 				// @ts-expect-error: It's fine
 				icon={Discord}
+				iconBackgroundColor="#5865f2"
 				title={t('settings.contactInfo.discord')}
 				isLink
 				onPress={() => Linking.openURL('https://discord.gg/63Ybb7J3as')}
@@ -34,6 +36,7 @@ export default function ContactInformation() {
 
 			<AppSettingsRow
 				icon={Github}
+				iconBackgroundColor="#1C1B1E"
 				title={t('settings.contactInfo.github')}
 				isLink
 				onPress={() => Linking.openURL('https://github.com/stumpapp/stump/issues/new/choose')}

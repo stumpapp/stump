@@ -3,6 +3,7 @@ import { Alert } from 'react-native'
 
 import { Button, Text } from '~/components/ui'
 import { deleteDatabase } from '~/db'
+import { SETTINGS_COLORS } from '~/lib/constants'
 import { useTranslate } from '~/lib/hooks'
 
 import AppSettingsRow from '../AppSettingsRow'
@@ -15,7 +16,11 @@ export default function DeleteDatabase() {
 	}
 
 	return (
-		<AppSettingsRow icon={Database} title="Delete Database">
+		<AppSettingsRow
+			icon={Database}
+			iconBackgroundColor={SETTINGS_COLORS.destructive}
+			title="Delete Database"
+		>
 			<Button
 				size="sm"
 				variant="destructive"

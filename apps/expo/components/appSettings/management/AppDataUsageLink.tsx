@@ -4,6 +4,7 @@ import { ChevronRight, HardDrive } from 'lucide-react-native'
 import { View } from 'react-native'
 
 import { Icon, Text } from '~/components/ui'
+import { SETTINGS_COLORS } from '~/lib/constants'
 import { getAppUsage } from '~/lib/filesystem'
 import { formatBytes } from '~/lib/format'
 import { useTranslate } from '~/lib/hooks'
@@ -27,6 +28,7 @@ export default function AppDataUsageLink() {
 	return (
 		<AppSettingsRow
 			icon={HardDrive}
+			iconBackgroundColor={SETTINGS_COLORS.data}
 			title={t('settings.management.dataUsage.label')}
 			isLink
 			onPress={() =>

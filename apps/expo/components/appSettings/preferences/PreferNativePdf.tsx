@@ -3,6 +3,7 @@ import { View } from 'react-native'
 import { useShallow } from 'zustand/react/shallow'
 
 import { Switch } from '~/components/ui'
+import { SETTINGS_COLORS } from '~/lib/constants'
 import { useTranslate } from '~/lib/hooks'
 import { usePreferencesStore } from '~/stores'
 
@@ -20,6 +21,7 @@ export default function PreferNativePdf() {
 	return (
 		<AppSettingsRow
 			icon={FileDown}
+			iconBackgroundColor={SETTINGS_COLORS.majorVisuals}
 			title={t('settings.reading.preferNativePdf')}
 			onPress={() => patch({ preferNativePdf: !preferNativePdf })}
 		>

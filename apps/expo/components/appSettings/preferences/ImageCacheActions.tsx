@@ -3,6 +3,7 @@ import { Alert, View } from 'react-native'
 import TurboImage from 'react-native-turbo-image'
 
 import { Button, Text } from '~/components/ui'
+import { SETTINGS_COLORS } from '~/lib/constants'
 import { useTranslate } from '~/lib/hooks'
 
 import AppSettingsRow from '../AppSettingsRow'
@@ -15,7 +16,11 @@ export default function CachePolicySelect() {
 	}
 
 	return (
-		<AppSettingsRow icon={Image} title={t(getKey('label'))}>
+		<AppSettingsRow
+			icon={Image}
+			iconBackgroundColor={SETTINGS_COLORS.destructive}
+			title={t(getKey('label'))}
+		>
 			<View className="gap-2 flex-row">
 				<Button
 					size="sm"

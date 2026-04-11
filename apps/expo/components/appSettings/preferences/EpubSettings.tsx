@@ -5,6 +5,7 @@ import { View } from 'react-native'
 import CustomizeThemeSheet from '~/components/book/reader/epub/CustomizeThemeSheet'
 import EpubSettingsSheet from '~/components/book/reader/epub/EpubSettingsSheet'
 import { Icon } from '~/components/ui'
+import { SETTINGS_COLORS } from '~/lib/constants'
 import { useTranslate } from '~/lib/hooks'
 
 import AppSettingsRow from '../AppSettingsRow'
@@ -15,6 +16,7 @@ export default function EpubSettings() {
 		<>
 			<AppSettingsRow
 				icon={Pilcrow}
+				iconBackgroundColor={SETTINGS_COLORS.majorVisuals}
 				title={t('epubSettings.title')}
 				onPress={() => TrueSheet.present('epubSettings')}
 				isLink

@@ -33,32 +33,32 @@ export default function AppPrimaryColor() {
 		fill: { brand },
 	} = useColors()
 
-	return Platform.select({
-		ios: (
-			<AppSettingsRow
-				icon={Pipette}
-				iconBackgroundColor={SETTINGS_COLORS.majorVisuals}
-				title={t('settings.preferences.appPrimaryColor')}
-			>
-				<Host matchContents>
-					<ColorPicker
-						label=""
+	return (
+		<AppSettingsRow
+			icon={Pipette}
+			iconBackgroundColor={SETTINGS_COLORS.majorVisuals}
+			title={t('settings.preferences.appPrimaryColor')}
+		>
+			{Platform.select({
+				ios: (
+					<Host matchContents>
+						<ColorPicker
+							label=""
+							selection={store.accentColor || brand.DEFAULT}
+							onSelectionChange={onColorChange}
+							supportsOpacity={false}
+						/>
+					</Host>
+				),
+				android: (
+					<AndroidColorPicker
 						selection={store.accentColor || brand.DEFAULT}
 						onSelectionChange={onColorChange}
-						supportsOpacity={false}
 					/>
-				</Host>
-			</AppSettingsRow>
-		),
-		android: (
-			<AppSettingsRow icon={Pipette} title={t('settings.preferences.appPrimaryColor')}>
-				<AndroidColorPicker
-					selection={store.accentColor || brand.DEFAULT}
-					onSelectionChange={onColorChange}
-				/>
-			</AppSettingsRow>
-		),
-	})
+				),
+			})}
+		</AppSettingsRow>
+	)
 }
 
 type Props = {

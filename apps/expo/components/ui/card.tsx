@@ -300,8 +300,14 @@ function GradientIcon({ icon, backgroundColor }: { icon: LucideIcon; backgroundC
 
 	const lightPlainColor = getColor(backgroundColor || '#404040')
 	const darkPlainColor = clone(lightPlainColor)
-	set(lightPlainColor, { 'oklch.l': (l) => l + (isDarkColorScheme ? 0.1 : 0.15) })
-	set(darkPlainColor, { 'oklch.l': (l) => l + (isDarkColorScheme ? -0.1 : 0.05) })
+	set(lightPlainColor, {
+		'oklch.l': (l) => l + (isDarkColorScheme ? 0.1 : 0.18),
+		'oklch.c': (c) => c * (isDarkColorScheme ? 1 : 1.2),
+	})
+	set(darkPlainColor, {
+		'oklch.l': (l) => l + (isDarkColorScheme ? -0.1 : 0.05),
+		'oklch.c': (c) => c * (isDarkColorScheme ? 1 : 1.2),
+	})
 
 	const lightColor = serialize(lightPlainColor, { format: 'hex' })
 	const darkColor = serialize(darkPlainColor, { format: 'hex' })

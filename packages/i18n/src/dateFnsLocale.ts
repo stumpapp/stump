@@ -150,7 +150,7 @@ export function formatHumanDuration(
 	},
 ): string {
 	if (seconds <= 0) {
-		return formatDuration({ seconds: 0 }, { format: ['seconds'] })
+		return formatDuration({ seconds: 0 }, { zero: true, format: ['seconds'] })
 	}
 
 	const h = Math.trunc(seconds / 3600)

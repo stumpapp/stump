@@ -104,7 +104,7 @@ export default function ImageBasedReaderContainer({
 				flashListRef,
 			}}
 		>
-			<View className="fixed inset-0 flex-1 bg-black">
+			<View className="inset-0 bg-black fixed flex-1">
 				<ControlsOverlay />
 
 				{nextInSeries && (

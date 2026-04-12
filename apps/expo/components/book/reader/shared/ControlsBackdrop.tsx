@@ -35,7 +35,12 @@ export default function ControlsBackdrop() {
 	)
 
 	return (
-		<Animated.View className={cn('absolute inset-0 z-10 flex-1')} style={secondaryStyle}>
+		<Animated.View
+			className={cn('inset-0 absolute z-10 flex-1')}
+			style={secondaryStyle}
+			// on android, when hidden the backdrop eats touches and prevents swiping to paginate
+			pointerEvents={controls.isVisible ? 'auto' : 'none'}
+		>
 			<Pressable onPress={() => controls.setVisible(false)} style={{ flex: 1 }}>
 				<LinearGradient colors={gradientColors} locations={gradientLocations} style={{ flex: 1 }} />
 			</Pressable>

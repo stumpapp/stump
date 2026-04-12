@@ -296,10 +296,12 @@ function BaseRowComponent({
 }
 
 function GradientIcon({ icon, backgroundColor }: { icon: LucideIcon; backgroundColor?: string }) {
+	const { isDarkColorScheme } = useColorScheme()
+
 	const lightPlainColor = getColor(backgroundColor || '#404040')
 	const darkPlainColor = clone(lightPlainColor)
-	set(lightPlainColor, { 'oklch.l': (l) => l + 0.1 })
-	set(darkPlainColor, { 'oklch.l': (l) => l - 0.1 })
+	set(lightPlainColor, { 'oklch.l': (l) => l + (isDarkColorScheme ? 0.1 : 0.15) })
+	set(darkPlainColor, { 'oklch.l': (l) => l + (isDarkColorScheme ? -0.1 : 0.05) })
 
 	const lightColor = serialize(lightPlainColor, { format: 'hex' })
 	const darkColor = serialize(darkPlainColor, { format: 'hex' })
@@ -309,7 +311,7 @@ function GradientIcon({ icon, backgroundColor }: { icon: LucideIcon; backgroundC
 			0: { color: lightColor },
 			1: { color: darkColor },
 		},
-		easing: Easing.bezier(0.3, 0, 0.8, 1),
+		easing: Easing.bezier(0.42, 0, 0.58, 1),
 	})
 
 	return (
@@ -321,6 +323,7 @@ function GradientIcon({ icon, backgroundColor }: { icon: LucideIcon; backgroundC
 				style={{ position: 'absolute', inset: 0 }}
 			/>
 			<Icon as={icon} size={18} strokeWidth={1.8} absoluteStrokeWidth color="white" />
+			<View className="inset-0 rounded-xl dark:border-white/10 border-white/30 squircle absolute border-[0.75px]" />
 		</View>
 	)
 }

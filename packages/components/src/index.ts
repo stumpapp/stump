@@ -22,7 +22,13 @@ export { Card, CardGrid, type CardProps, HoverCard, type HoverCardProps } from '
 export { Command, type CommandProps } from './command'
 export { Divider, Spacer, type SpacerProps, SplitContainer } from './container'
 export { ContextMenu, type ContextMenuProps } from './context-menu'
-export { ConfirmationModal, type ConfirmationModalProps, Dialog } from './dialog'
+export {
+	ConfirmationModal,
+	type ConfirmationModalProps,
+	Dialog,
+	TypeToConfirmModal,
+	type TypeToConfirmModalProps,
+} from './dialog'
 export { Drawer } from './drawer'
 export { Dropdown, DropdownMenu, type DropdownMenuProps } from './dropdown'
 export { EmojiPicker } from './emoji'

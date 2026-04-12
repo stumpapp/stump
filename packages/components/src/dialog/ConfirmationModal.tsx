@@ -13,6 +13,7 @@ export type ConfirmationModalProps = {
 	children?: React.ReactNode
 	confirmText?: string
 	confirmIsLoading?: boolean
+	confirmDisabled?: boolean
 	cancelText?: string
 	closeIcon?: boolean
 	triggerVariant?: ButtonVariant
@@ -32,6 +33,7 @@ export function ConfirmationModal({
 	confirmText,
 	cancelText,
 	confirmIsLoading,
+	confirmDisabled,
 	closeIcon = true,
 	triggerVariant,
 	confirmVariant = 'primary',
@@ -77,6 +79,7 @@ export function ConfirmationModal({
 						form={formId}
 						variant={confirmVariant}
 						onClick={onConfirm}
+						disabled={confirmDisabled}
 						isLoading={confirmIsLoading}
 					>
 						{confirmText || 'Confirm'}

@@ -154,6 +154,7 @@ function parseMissingKeyHandler(missingKey: string) {
 
 i18n.use(initReactI18next).init({
 	fallbackLng: 'en-US',
+	fallbackNS: 'en-US',
 	interpolation: {
 		escapeValue: false, // not needed for react as it escapes by default
 	},

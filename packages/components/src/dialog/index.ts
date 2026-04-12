@@ -1,4 +1,5 @@
 export { ConfirmationModal, type ConfirmationModalProps } from './ConfirmationModal'
+export { TypeToConfirmModal, type TypeToConfirmModalProps } from './TypeToConfirmModal'
 export {
 	Dialog,
 	DialogContent,

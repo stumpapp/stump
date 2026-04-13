@@ -78,13 +78,11 @@ export default function DeleteLibraryConfirmation({
 		}
 	}, [error])
 
-	const i18nValues = { type: 'library' }
-
 	return (
 		<TypeToConfirmModal
-			title={t(getKey('title'), i18nValues)}
-			description={t(getKey('description'), i18nValues)}
-			confirmText={t(getKey('confirm'), i18nValues)}
+			title={t(getKey('title'))}
+			description={t(getKey('description'))}
+			confirmText={t(getKey('confirm'))}
 			confirmVariant="danger"
 			isOpen={isOpen}
 			onClose={onClose}

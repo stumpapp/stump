@@ -78,11 +78,13 @@ export default function DeleteLibraryConfirmation({
 		}
 	}, [error])
 
+	const entityI18nValues = { name: libraryName, type: 'library' }
+
 	return (
 		<TypeToConfirmModal
-			title={t(getKey('title'))}
-			description={t(getKey('description'))}
-			confirmText={t(getKey('confirm'))}
+			title={t(getKey('title'), entityI18nValues)}
+			description={t(getKey('description'), entityI18nValues)}
+			confirmText={t(getKey('confirm'), entityI18nValues)}
 			confirmVariant="danger"
 			isOpen={isOpen}
 			onClose={onClose}
@@ -90,7 +92,7 @@ export default function DeleteLibraryConfirmation({
 			confirmIsLoading={isPending}
 			trigger={trigger}
 			confirmationValue={libraryName}
-			instructionText={t(getKey('typeToConfirm'))}
+			instructionText={t(getKey('typeToConfirm'), entityI18nValues)}
 		/>
 	)
 }

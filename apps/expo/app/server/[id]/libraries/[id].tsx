@@ -2,14 +2,16 @@ import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { FlashList } from '@shopify/flash-list'
 import { useInfiniteSuspenseGraphQL, useRefetch, useSuspenseGraphQL } from '@stump/client'
 import { graphql } from '@stump/graphql'
+import { formatHumanDurationSeparate } from '@stump/i18n'
 import { useLocalSearchParams } from 'expo-router'
+import { BookCheck, BookOpen, Clock, Layers } from 'lucide-react-native'
 import { useCallback, useEffect, useRef } from 'react'
-import { Platform } from 'react-native'
+import { Platform, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
+import { Divider } from '~/components/Divider'
 import { useGridItemSize } from '~/components/grid/useGridItemSize'
 import {
-	LibraryActionMenu,
 	LibraryOverviewSheet,
 	useLibraryMenu,
 	usePrefetchLibraryOverview,
@@ -17,14 +19,22 @@ import {
 import ListEmpty from '~/components/ListEmpty'
 import RefreshControl from '~/components/RefreshControl'
 import SeriesGridItem from '~/components/series/SeriesGridItem'
+import { MiniStatCard } from '~/components/StatCard'
 import { RefreshButton, Text } from '~/components/ui'
-import { ON_END_REACHED_THRESHOLD } from '~/lib/constants'
+import { ON_END_REACHED_THRESHOLD, STAT_COLORS } from '~/lib/constants'
 import { useDynamicHeader } from '~/lib/hooks/useDynamicHeader'
 
 const query = graphql(`
 	query LibrarySeriesScreenSeriesName($id: ID!) {
 		libraryById(id: $id) {
 			name
+			stats {
+				bookCount
+				seriesCount
+				completedBooks
+				inProgressBooks
+				totalReadingTimeSeconds
+			}
 		}
 	}
 `)
@@ -95,6 +105,8 @@ export default function Screen() {
 		}
 	}, [hasNextPage, fetchNextPage])
 
+	const formattedTime = formatHumanDurationSeparate(library.stats.totalReadingTimeSeconds)
+
 	return (
 		<>
 			{menuFragment}
@@ -112,6 +124,37 @@ export default function Screen() {
 					numColumns={numColumns}
 					onEndReachedThreshold={ON_END_REACHED_THRESHOLD}
 					onEndReached={onEndReached}
+					ListHeaderComponent={
+						<View className="gap-4">
+							<View className="px-4 gap-2 flex-row flex-wrap">
+								<MiniStatCard
+									value={library.stats.inProgressBooks}
+									icon={BookOpen}
+									baseColor={STAT_COLORS.inProgress}
+								/>
+
+								<MiniStatCard
+									value={library.stats.completedBooks}
+									suffix={`/ ${library.stats.bookCount}`}
+									icon={BookCheck}
+									baseColor={STAT_COLORS.completed}
+								/>
+								<MiniStatCard
+									value={library.stats.seriesCount}
+									icon={Layers}
+									baseColor={STAT_COLORS.series}
+								/>
+								<MiniStatCard
+									value={formattedTime ? formattedTime.value : '??'}
+									suffix={formattedTime ? formattedTime.unit : undefined}
+									icon={Clock}
+									baseColor={STAT_COLORS.readingTime}
+								/>
+							</View>
+							<Divider />
+						</View>
+					}
+					ListHeaderComponentStyle={{ paddingBottom: 16, marginHorizontal: -paddingHorizontal }}
 					contentInsetAdjustmentBehavior="automatic"
 					refreshControl={
 						nodes.length > 0 ? (

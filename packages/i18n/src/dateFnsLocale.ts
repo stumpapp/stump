@@ -173,3 +173,15 @@ export function formatHumanDuration(
 		},
 	)
 }
+
+/**
+ * Format a duration in human-readable form, separating the unit and value.
+ *
+ * Only returns one significant unit (hours, minutes or seconds).
+ */
+export function formatHumanDurationSeparate(seconds: number) {
+	const formattedDuration = formatHumanDuration(seconds, { significantUnits: 1 })
+	const [, value, unit] = formattedDuration.match(/^(\d+)\s*(.+)$/) || []
+	if (!value || !unit) return
+	return { value, unit }
+}

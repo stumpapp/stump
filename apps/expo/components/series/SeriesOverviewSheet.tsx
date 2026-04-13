@@ -1,7 +1,7 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { PREFETCH_STALE_TIME, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { graphql, SeriesOverviewSheetQuery } from '@stump/graphql'
-import { formatHumanDuration } from '@stump/i18n'
+import { formatHumanDurationSeparate } from '@stump/i18n'
 import { useQueryClient } from '@tanstack/react-query'
 import { BookCheck, BookOpen, Clock, HardDrive, Library } from 'lucide-react-native'
 import { forwardRef, useState } from 'react'
@@ -9,7 +9,7 @@ import { View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { IS_IOS_24_PLUS, useColors } from '~/lib/constants'
+import { IS_IOS_24_PLUS, STAT_COLORS, useColors } from '~/lib/constants'
 import { formatBytesSeparate } from '~/lib/format'
 
 import { useGridItemSize } from '../grid/useGridItemSize'
@@ -128,9 +128,7 @@ type SheetContentProps = {
 
 function SheetContent({ series: { stats, metadata, resolvedName, tags } }: SheetContentProps) {
 	const formattedSize = formatBytesSeparate(stats.totalBytes)
-	const formattedTime = formatHumanDuration(stats.totalReadingTimeSeconds, { significantUnits: 1 })
-	// hopefully suffix is okay for other languages
-	const [, formattedTimeValue, formattedTimeUnit] = formattedTime.match(/^(\d+)\s*(.+)$/) || []
+	const formattedTime = formatHumanDurationSeparate(stats.totalReadingTimeSeconds)
 
 	const { itemWidth } = useGridItemSize({
 		horizontalGap: 7, // gap-2 on grid = 7px
@@ -142,34 +140,34 @@ function SheetContent({ series: { stats, metadata, resolvedName, tags } }: Sheet
 			label: 'In Progress',
 			value: stats.inProgressBooks,
 			icon: BookOpen,
-			baseColor: '#f59e0b', // amber-500
+			baseColor: STAT_COLORS.inProgress,
 		},
 		{
 			label: 'Completed',
 			value: stats.completedBooks,
 			suffix: `/ ${stats.bookCount}`,
 			icon: BookCheck,
-			baseColor: '#f87171', // red-400
+			baseColor: STAT_COLORS.completed,
 		},
 		{
 			label: 'Books',
 			value: stats.bookCount,
 			icon: Library,
-			baseColor: '#60a5fa', // blue-400
+			baseColor: STAT_COLORS.books,
 		},
 		{
 			label: 'Reading Time',
-			value: formattedTimeValue || 0,
-			suffix: formattedTimeUnit,
+			value: formattedTime ? formattedTime.value : '??',
+			suffix: formattedTime ? formattedTime.unit : undefined,
 			icon: Clock,
-			baseColor: '#34d399', // emerald-400
+			baseColor: STAT_COLORS.readingTime,
 		},
 		{
 			label: 'Size',
 			value: formattedSize ? formattedSize.value : 'Unknown',
 			suffix: formattedSize ? formattedSize.unit : '',
 			icon: HardDrive,
-			baseColor: '#94a3b8', // slate-400
+			baseColor: STAT_COLORS.size,
 		},
 	] satisfies StatCardProps[]
 

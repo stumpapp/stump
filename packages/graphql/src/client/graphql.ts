@@ -4447,7 +4447,7 @@ export type LibrarySeriesScreenSeriesNameQueryVariables = Exact<{
 }>;
 
 
-export type LibrarySeriesScreenSeriesNameQuery = { __typename?: 'Query', libraryById?: { __typename?: 'Library', name: string } | null };
+export type LibrarySeriesScreenSeriesNameQuery = { __typename?: 'Query', libraryById?: { __typename?: 'Library', name: string, stats: { __typename?: 'LibraryStats', bookCount: number, seriesCount: number, completedBooks: number, inProgressBooks: number, totalReadingTimeSeconds: number } } | null };
 
 export type LibrarySeriesScreenQueryVariables = Exact<{
   filter: SeriesFilterInput;
@@ -4475,7 +4475,7 @@ export type SeriesBooksSceneSeriesNameQueryVariables = Exact<{
 }>;
 
 
-export type SeriesBooksSceneSeriesNameQuery = { __typename?: 'Query', seriesById?: { __typename?: 'Series', resolvedName: string } | null };
+export type SeriesBooksSceneSeriesNameQuery = { __typename?: 'Query', seriesById?: { __typename?: 'Series', resolvedName: string, stats: { __typename?: 'SeriesStats', bookCount: number, completedBooks: number, inProgressBooks: number, totalReadingTimeSeconds: number } } | null };
 
 export type SeriesBooksScreenQueryVariables = Exact<{
   filter: MediaFilterInput;
@@ -7909,6 +7909,13 @@ export const LibrarySeriesScreenSeriesNameDocument = new TypedDocumentString(`
     query LibrarySeriesScreenSeriesName($id: ID!) {
   libraryById(id: $id) {
     name
+    stats {
+      bookCount
+      seriesCount
+      completedBooks
+      inProgressBooks
+      totalReadingTimeSeconds
+    }
   }
 }
     `) as unknown as TypedDocumentString<LibrarySeriesScreenSeriesNameQuery, LibrarySeriesScreenSeriesNameQueryVariables>;
@@ -7986,6 +7993,12 @@ export const SeriesBooksSceneSeriesNameDocument = new TypedDocumentString(`
     query SeriesBooksSceneSeriesName($id: ID!) {
   seriesById(id: $id) {
     resolvedName
+    stats {
+      bookCount
+      completedBooks
+      inProgressBooks
+      totalReadingTimeSeconds
+    }
   }
 }
     `) as unknown as TypedDocumentString<SeriesBooksSceneSeriesNameQuery, SeriesBooksSceneSeriesNameQueryVariables>;

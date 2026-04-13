@@ -41,6 +41,15 @@ export const SETTINGS_COLORS = {
 	destructive: '#fd6bd5',
 }
 
+export const STAT_COLORS = {
+	inProgress: '#f59e0b', // amber-500
+	completed: '#34d399', // emerald-400
+	books: '#60a5fa', // blue-400
+	series: '#c084fc', // purple-400
+	readingTime: '#fb7185', // rose-400
+	size: '#94a3b8', // slate-400
+}
+
 // TODO: android-specific tab bar color
 
 const light = {

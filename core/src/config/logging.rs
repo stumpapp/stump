@@ -11,8 +11,8 @@ pub const STUMP_SHADOW_TEXT: &str = include_str!("stump_shadow_text.txt");
 /// both the console and a file in the config directory. The file is called `Stump.log`
 /// by default.
 pub fn init_tracing(config: &StumpConfig) {
-	let config_dir = config.get_config_dir();
-	let file_appender = tracing_appender::rolling::never(config_dir, "Stump.log");
+	let log_dir = config.get_log_dir();
+	let file_appender = tracing_appender::rolling::never(log_dir, "Stump.log");
 
 	let max_level = match config.verbosity {
 		0 => LevelFilter::OFF,

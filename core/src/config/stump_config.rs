@@ -23,6 +23,7 @@ pub mod env_keys {
 	pub const PORT_KEY: &str = "STUMP_PORT";
 	pub const VERBOSITY_KEY: &str = "STUMP_VERBOSITY";
 	pub const PRETTY_LOGS_KEY: &str = "STUMP_PRETTY_LOGS";
+	pub const LOG_DIR_KEY: &str = "STUMP_LOG_DIR";
 	pub const COLORFUL_LOGS_KEY: &str = "STUMP_COLORFUL_LOGS";
 	pub const DB_PATH_KEY: &str = "STUMP_DB_PATH";
 	pub const CLIENT_KEY: &str = "STUMP_CLIENT_DIR";
@@ -132,6 +133,11 @@ pub struct StumpConfig {
 	#[default_value(true)]
 	#[env_key(PRETTY_LOGS_KEY)]
 	pub pretty_logs: bool,
+
+	/// The directory where the applicaiton logs will be stored
+	#[default_value(None)]
+	#[env_key(LOG_DIR_KEY)]
+	pub log_dir: Option<String>,
 
 	/// Whether or not to include ANSI color codes in log files.
 	#[default_value(false)]
@@ -354,6 +360,13 @@ impl StumpConfig {
 		PathBuf::from(&self.config_dir)
 	}
 
+	pub fn get_log_dir(&self) -> PathBuf {
+		match &self.log_dir {
+			Some(value) => PathBuf::from(value),
+			None => self.get_config_dir(),
+		}
+	}
+
 	/// Returns a `PathBuf` to the Stump cache directory.
 	pub fn get_cache_dir(&self) -> PathBuf {
 		PathBuf::from(&self.config_dir).join("cache")
@@ -435,6 +448,7 @@ mod tests {
 			port: Some(1337),
 			verbosity: Some(3),
 			pretty_logs: Some(true),
+			log_dir: None,
 			colorful_logs: None,
 			db_path: Some("not_a_real_path".to_string()),
 			client_dir: Some("not_a_real_dir".to_string()),
@@ -483,6 +497,7 @@ mod tests {
 				port: Some(1337),
 				verbosity: Some(3),
 				pretty_logs: Some(true),
+				log_dir: None,
 				colorful_logs: Some(false),
 				db_path: Some("not_a_real_path".to_string()),
 				client_dir: Some("not_a_real_dir".to_string()),
@@ -551,6 +566,7 @@ mod tests {
 						port: 1337,
 						verbosity: 2,
 						pretty_logs: true,
+						log_dir: None,
 						colorful_logs: false,
 						db_path: None,
 						client_dir: "./client".to_string(),

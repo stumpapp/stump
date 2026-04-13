@@ -15,7 +15,7 @@ const dateFnsLocaleLoaders: Record<AllowedLocale, () => Promise<Locale>> = {
 	'en-GB': () => import('date-fns/locale/en-GB').then((m) => m.enGB),
 	'en-US': () => import('date-fns/locale/en-US').then((m) => m.enUS),
 	'es-ES': () => import('date-fns/locale/es').then((m) => m.es),
-	'fa-IR': () => import('date-fns/locale/fa').then((m) => m.fa),
+	'fa-IR': () => import('date-fns/locale/fa-IR').then((m) => m.faIR),
 	'fi-FI': () => import('date-fns/locale/fi').then((m) => m.fi),
 	'fr-FR': () => import('date-fns/locale/fr').then((m) => m.fr),
 	'he-IL': () => import('date-fns/locale/he').then((m) => m.he),

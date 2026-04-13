@@ -16,6 +16,7 @@ export const localeNames: Record<AllowedLocale, string> = {
 	'en-GB': 'English (UK)',
 	'en-US': 'English (US)',
 	'es-ES': 'Español',
+	'fa-IR': 'فارسی',
 	'fi-FI': 'Suomi',
 	'fr-FR': 'Français',
 	'he-IL': 'עברית',

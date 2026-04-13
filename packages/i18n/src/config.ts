@@ -12,6 +12,7 @@ import {
 	enGB,
 	enUS,
 	esES,
+	faIR,
 	fiFI,
 	frFR,
 	heIL,
@@ -65,6 +66,9 @@ export const resources = {
 	},
 	'es-ES': {
 		'es-ES': esES,
+	},
+	'fa-IR': {
+		'fa-IR': faIR,
 	},
 	'fi-FI': {
 		'fi-FI': fiFI,

@@ -1,7 +1,7 @@
 import { useRouter } from 'expo-router'
 import partition from 'lodash/partition'
 import { ExternalLink, Rss, Server } from 'lucide-react-native'
-import { Fragment, useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Alert, Linking, ScrollView, useWindowDimensions, View } from 'react-native'
 
 import EmptyState from '~/components/EmptyState'

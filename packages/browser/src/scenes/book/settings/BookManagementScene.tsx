@@ -2,13 +2,14 @@ import { useGraphQLMutation, useSDK, useSuspenseGraphQL } from '@stump/client'
 import { Alert, AlertDescription, Breadcrumbs, Button, Heading, Text } from '@stump/components'
 import { graphql, UserPermission } from '@stump/graphql'
 import { Construction } from 'lucide-react'
-import { useCallback, useEffect, useMemo } from 'react'
+import { Suspense, useCallback, useEffect, useMemo } from 'react'
 import { useNavigate, useParams } from 'react-router'
 
 import { SceneContainer } from '@/components/container'
 import { useAppContext } from '@/context'
 import paths from '@/paths'
 
+import BookTagEditor from './BookTagEditor'
 import BookThumbnailSelector from './BookThumbnailSelector'
 
 const query = graphql(`
@@ -23,6 +24,10 @@ const query = graphql(`
 			series {
 				id
 				resolvedName
+			}
+			tags {
+				id
+				name
 			}
 			...BookThumbnailSelector
 		}
@@ -107,21 +112,45 @@ export default function BookManagementScene() {
 				</Alert>
 
 				{checkPermission(UserPermission.ManageLibrary) && (
-					<div>
-						<Button
-							title={data ? 'Analysis already in progress' : 'Analyze this book'}
-							size="md"
-							variant="primary"
-							onClick={handleAnalyze}
-							disabled={!!data || isPending}
-						>
-							Analyze Media
-						</Button>
+					<div className="gap-y-2 flex flex-col">
+						<div>
+							<Heading size="sm">Analysis</Heading>
+							<Text size="sm" variant="muted">
+								Re-analyze this book to update metadata from its file
+							</Text>
+						</div>
+
+						<div>
+							<Button
+								title={data ? 'Analysis already in progress' : 'Analyze this book'}
+								size="md"
+								variant="primary"
+								onClick={handleAnalyze}
+								disabled={!!data || isPending}
+							>
+								Analyze Media
+							</Button>
+						</div>
 					</div>
 				)}
 
+				{checkPermission(UserPermission.EditMetadata) && (
+					<Suspense>
+						<BookTagEditor mediaId={book.id} tags={book.tags} />
+					</Suspense>
+				)}
+
 				{checkPermission(UserPermission.EditThumbnails) && (
-					<BookThumbnailSelector fragment={book} />
+					<div className="gap-y-2 flex flex-col">
+						<div>
+							<Heading size="sm">Thumbnail</Heading>
+							<Text size="sm" variant="muted">
+								Change the cover image for this book
+							</Text>
+						</div>
+
+						<BookThumbnailSelector fragment={book} />
+					</div>
 				)}
 			</div>
 		</SceneContainer>

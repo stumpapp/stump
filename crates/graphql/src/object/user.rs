@@ -8,7 +8,7 @@ use models::{
 	},
 	shared::{enums::UserPermission, permission_set::PermissionSet},
 };
-use sea_orm::{prelude::*, QueryOrder};
+use sea_orm::{prelude::*, ActiveValue, QueryOrder};
 
 use crate::{
 	data::{CoreContext, ServiceContext},
@@ -86,11 +86,32 @@ impl User {
 	async fn preferences(&self, ctx: &Context<'_>) -> Result<UserPreferences> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let preferences = user_preferences::Entity::find()
+		let preferences = match user_preferences::Entity::find()
 			.filter(user_preferences::Column::UserId.eq(&self.model.id))
 			.one(conn)
 			.await?
-			.ok_or("User preferences not found")?;
+		{
+			Some(prefs) => prefs,
+			None => {
+				// this is a bit of an edge case, originally cropping up after an oidc account migration where the cli command
+				// did not remap the preferences back to the user. this manifested in an error after login, effectively bricking the
+				// account. obv not ideal, so while i don't expect this to be common id rather just recreate in this scenario and
+				// let the user reconfig their preferences. worst case is a dangling preferences record
+				// see https://discord.com/channels/972593831172272148/1490415985524609264/1491118111401705494
+				tracing::warn!(
+					user = self.model.username,
+					"Failed to load preferences for user. Recreating with defaults..."
+				);
+				let new_preferences = user_preferences::ActiveModel {
+					user_id: ActiveValue::Set(Some(self.model.id.clone())),
+					..Default::default()
+				}
+				.insert(conn)
+				.await?;
+
+				new_preferences
+			},
+		};
 
 		Ok(preferences.into())
 	}

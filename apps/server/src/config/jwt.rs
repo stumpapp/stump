@@ -1,7 +1,8 @@
+use std::sync::LazyLock;
+
 use chrono::{DateTime, Duration, FixedOffset, Utc};
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
 use models::entity::refresh_token;
-use once_cell::sync::Lazy;
 use rand::distr::{Alphanumeric, SampleString};
 use sea_orm::{prelude::*, ActiveValue, IntoActiveModel};
 use serde::{Deserialize, Serialize};
@@ -16,12 +17,12 @@ use crate::{
 ///
 /// Note: _Technically_ it will only be initialized after the first attempt to use it, not
 /// necessarily when the server starts. I don't see an issue with this, but it's worth noting.
-static ACCESS_TOKEN_SECRET: Lazy<String> =
-	Lazy::new(|| Alphanumeric.sample_string(&mut rand::rng(), 60));
+static ACCESS_TOKEN_SECRET: LazyLock<String> =
+	LazyLock::new(|| Alphanumeric.sample_string(&mut rand::rng(), 60));
 
 /// The secret used to sign the refresh tokens, recycles every time the server is restarted*
-static REFRESH_TOKEN_SECRET: Lazy<String> =
-	Lazy::new(|| Alphanumeric.sample_string(&mut rand::rng(), 60));
+static REFRESH_TOKEN_SECRET: LazyLock<String> =
+	LazyLock::new(|| Alphanumeric.sample_string(&mut rand::rng(), 60));
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]

@@ -1695,7 +1695,7 @@ export type Mutation = {
   /**
    * Delete tags. Returns a list containing the deleted tags, or an error if deletion failed.
    *
-   * * `tags` - A non-empty list of tags to create.
+   * * `tags` - A non-empty list of tags to delete.
    */
   deleteTags: Array<Tag>;
   deleteUser: User;
@@ -1742,6 +1742,11 @@ export type Mutation = {
   sendAttachmentEmail: SendAttachmentEmailOutput;
   /** Send a message in a discussion */
   sendMessage: BookClubDiscussionMessage;
+  /**
+   * Set the tags for a media item. Creates any tags that don't exist yet, links new ones,
+   * and unlinks removed ones. Returns the updated media item.
+   */
+  setMediaTags: Media;
   /** Suggest a book for the book club */
   suggestBook: BookClubBookSuggestion;
   /** Send a test email to verify the SMTP configuration is working */
@@ -2260,6 +2265,12 @@ export type MutationSendAttachmentEmailArgs = {
 export type MutationSendMessageArgs = {
   discussionId: Scalars['ID']['input'];
   input: SendMessageInput;
+};
+
+
+export type MutationSetMediaTagsArgs = {
+  id: Scalars['ID']['input'];
+  tags: Array<Scalars['String']['input']>;
 };
 
 
@@ -5149,7 +5160,7 @@ export type BookManagementSceneQueryVariables = Exact<{
 
 
 export type BookManagementSceneQuery = { __typename?: 'Query', mediaById?: (
-    { __typename?: 'Media', id: string, resolvedName: string, library: { __typename?: 'Library', id: string, name: string }, series: { __typename?: 'Series', id: string, resolvedName: string } }
+    { __typename?: 'Media', id: string, resolvedName: string, library: { __typename?: 'Library', id: string, name: string }, series: { __typename?: 'Series', id: string, resolvedName: string }, tags: Array<{ __typename?: 'Tag', id: number, name: string }> }
     & { ' $fragmentRefs'?: { 'BookThumbnailSelectorFragment': BookThumbnailSelectorFragment } }
   ) | null };
 
@@ -5159,6 +5170,14 @@ export type BookManagementSceneAnalyzeMutationVariables = Exact<{
 
 
 export type BookManagementSceneAnalyzeMutation = { __typename?: 'Mutation', analyzeMedia: boolean };
+
+export type BookTagEditorSetTagsMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  tags: Array<Scalars['String']['input']> | Scalars['String']['input'];
+}>;
+
+
+export type BookTagEditorSetTagsMutation = { __typename?: 'Mutation', setMediaTags: { __typename?: 'Media', id: string, tags: Array<{ __typename?: 'Tag', id: number, name: string }> } };
 
 export type BookThumbnailSelectorFragment = { __typename?: 'Media', id: string, pages: number, thumbnail: { __typename?: 'ImageRef', url: string } } & { ' $fragmentName'?: 'BookThumbnailSelectorFragment' };
 
@@ -9690,6 +9709,10 @@ export const BookManagementSceneDocument = new TypedDocumentString(`
       id
       resolvedName
     }
+    tags {
+      id
+      name
+    }
     ...BookThumbnailSelector
   }
 }
@@ -9705,6 +9728,17 @@ export const BookManagementSceneAnalyzeDocument = new TypedDocumentString(`
   analyzeMedia(id: $id)
 }
     `) as unknown as TypedDocumentString<BookManagementSceneAnalyzeMutation, BookManagementSceneAnalyzeMutationVariables>;
+export const BookTagEditorSetTagsDocument = new TypedDocumentString(`
+    mutation BookTagEditorSetTags($id: ID!, $tags: [String!]!) {
+  setMediaTags(id: $id, tags: $tags) {
+    id
+    tags {
+      id
+      name
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<BookTagEditorSetTagsMutation, BookTagEditorSetTagsMutationVariables>;
 export const BookThumbnailSelectorUpdateDocument = new TypedDocumentString(`
     mutation BookThumbnailSelectorUpdate($id: ID!, $input: PageBasedThumbnailInput!) {
   updateMediaThumbnail(id: $id, input: $input) {

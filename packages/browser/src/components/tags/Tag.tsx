@@ -1,4 +1,4 @@
-import { Link, Text } from '@stump/components'
+import { Badge, Link } from '@stump/components'
 import { Tag } from '@stump/graphql'
 import { Fragment } from 'react'
 
@@ -7,16 +7,20 @@ type Props = {
 	href?: string
 }
 
-// TODO: more styling
 export default function TagComponent({ tag, href }: Props) {
 	const Container = href ? Link : Fragment
 	const containerProps = href ? { href, underline: false } : {}
 
 	return (
 		<Container {...containerProps}>
-			<Text variant="muted" size="xs">
-				#{tag.name}
-			</Text>
+			<Badge
+				variant="secondary"
+				size="xs"
+				rounded="full"
+				className={href ? 'cursor-pointer' : undefined}
+			>
+				{tag.name}
+			</Badge>
 		</Container>
 	)
 }

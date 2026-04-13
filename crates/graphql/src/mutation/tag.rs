@@ -1,9 +1,16 @@
-use crate::{data::CoreContext, object::tag::Tag};
-use async_graphql::{Context, Object, Result};
-use models::entity::tag;
+use crate::{
+	data::{AuthContext, CoreContext},
+	guard::PermissionGuard,
+	object::{media::Media, tag::Tag},
+};
+use async_graphql::{Context, Object, Result, ID};
+use models::{
+	entity::{media, media_tag, tag},
+	shared::enums::UserPermission,
+};
 use sea_orm::{
-	prelude::*, ActiveValue::Set, DatabaseConnection, DatabaseTransaction,
-	IntoActiveModel, QuerySelect, TransactionTrait,
+	prelude::*, sea_query::Query, ActiveValue::Set, DatabaseConnection,
+	DatabaseTransaction, IntoActiveModel, QuerySelect, TransactionTrait,
 };
 use std::collections::HashSet;
 
@@ -17,6 +24,7 @@ impl TagMutation {
 	/// If any of the tags already exist an error is returned.
 	///
 	/// * `tags` - A non-empty list of tags to create.
+	#[graphql(guard = "PermissionGuard::one(UserPermission::ManageLibrary)")]
 	async fn create_tags(
 		&self,
 		ctx: &Context<'_>,
@@ -28,14 +36,85 @@ impl TagMutation {
 
 	/// Rename a tag. Returns the updated tag, or an error if the tag was not found or the new
 	/// name already exists.
+	#[graphql(guard = "PermissionGuard::one(UserPermission::ManageLibrary)")]
 	async fn rename_tag(&self, ctx: &Context<'_>, id: i32, name: String) -> Result<Tag> {
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 		rename_tag(conn, id, name).await
 	}
 
+	/// Set the tags for a media item. Creates any tags that don't exist yet, links new ones,
+	/// and unlinks removed ones. Returns the updated media item.
+	#[graphql(guard = "PermissionGuard::one(UserPermission::EditMetadata)")]
+	async fn set_media_tags(
+		&self,
+		ctx: &Context<'_>,
+		id: ID,
+		tags: Vec<String>,
+	) -> Result<Media> {
+		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
+		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
+
+		let model = media::ModelWithMetadata::find_for_user(user)
+			.filter(media::Column::Id.eq(id.to_string()))
+			.into_model::<media::ModelWithMetadata>()
+			.one(conn)
+			.await?
+			.ok_or("Media not found")?;
+
+		let existing_tags = tag::Entity::find()
+			.filter(
+				tag::Column::Id.in_subquery(
+					Query::select()
+						.column(media_tag::Column::TagId)
+						.from(media_tag::Entity)
+						.and_where(media_tag::Column::MediaId.eq(model.media.id.clone()))
+						.to_owned(),
+				),
+			)
+			.all(conn)
+			.await?;
+
+		let txn = conn.begin().await?;
+
+		let (to_connect, to_disconnect) = sync_tags(&txn, &tags, &existing_tags).await?;
+
+		if !to_disconnect.is_empty() {
+			media_tag::Entity::delete_many()
+				.filter(
+					media_tag::Column::TagId
+						.is_in(to_disconnect)
+						.and(media_tag::Column::MediaId.eq(model.media.id.clone())),
+				)
+				.exec(&txn)
+				.await?;
+		}
+
+		if !to_connect.is_empty() {
+			let media_id = model.media.id.clone();
+			media_tag::Entity::insert_many(
+				to_connect
+					.into_iter()
+					.map(|tag_id| media_tag::ActiveModel {
+						media_id: Set(media_id.clone()),
+						tag_id: Set(tag_id),
+						..Default::default()
+					})
+					.collect::<Vec<_>>(),
+			)
+			.on_conflict_do_nothing()
+			.exec(&txn)
+			.await?;
+		}
+
+		txn.commit().await?;
+
+		Ok(model.into())
+	}
+
 	/// Delete tags. Returns a list containing the deleted tags, or an error if deletion failed.
 	///
-	/// * `tags` - A non-empty list of tags to create.
+	/// * `tags` - A non-empty list of tags to delete.
+	#[graphql(guard = "PermissionGuard::one(UserPermission::ManageLibrary)")]
 	async fn delete_tags(
 		&self,
 		ctx: &Context<'_>,
@@ -110,6 +189,65 @@ async fn create_tags(conn: &DatabaseConnection, tags: Vec<String>) -> Result<Vec
 	txn.commit().await?;
 
 	Ok(inserted_tags.into_iter().map(Tag::from).collect())
+}
+
+/// Given desired tag names and the tags currently linked to an entity, resolves which tags
+/// need to be created, connected, and disconnected. Returns `(tag_ids_to_connect, tag_ids_to_disconnect)`.
+///
+/// Tags in `desired` that don't exist in the database are created. Tags currently linked but
+/// not in `desired` are marked for disconnection.
+pub(crate) async fn sync_tags(
+	txn: &DatabaseTransaction,
+	desired: &[String],
+	existing_linked: &[tag::Model],
+) -> Result<(Vec<i32>, Vec<i32>)> {
+	// Tags in desired that are NOT currently linked to this entity
+	let tags_not_linked = desired
+		.iter()
+		.filter(|name| !existing_linked.iter().any(|t| t.name == **name))
+		.collect::<Vec<_>>();
+
+	// Of those, which already exist in the tags table (but aren't linked to this entity)?
+	let tags_existing_but_not_linked = tag::Entity::find()
+		.filter(tag::Column::Name.is_in(tags_not_linked.clone()))
+		.all(txn)
+		.await?;
+
+	// The rest need to be created
+	let tags_to_create = tags_not_linked
+		.iter()
+		.filter(|name| {
+			!tags_existing_but_not_linked
+				.iter()
+				.any(|t| t.name == ***name)
+		})
+		.map(|name| tag::ActiveModel {
+			name: Set(name.to_string()),
+			..Default::default()
+		})
+		.collect::<Vec<_>>();
+
+	let created_tags = if !tags_to_create.is_empty() {
+		tag::Entity::insert_many(tags_to_create)
+			.exec_with_returning_many(txn)
+			.await?
+	} else {
+		vec![]
+	};
+
+	let to_connect = tags_existing_but_not_linked
+		.iter()
+		.chain(created_tags.iter())
+		.map(|tag| tag.id)
+		.collect::<Vec<_>>();
+
+	let to_disconnect = existing_linked
+		.iter()
+		.filter(|tag| !desired.iter().any(|name| name == &tag.name))
+		.map(|tag| tag.id)
+		.collect::<Vec<_>>();
+
+	Ok((to_connect, to_disconnect))
 }
 
 async fn rename_tag(conn: &DatabaseConnection, id: i32, name: String) -> Result<Tag> {
@@ -320,5 +458,124 @@ mod tests {
 
 		let result = rename_tag(&conn, 999, "new_name".to_string()).await;
 		assert!(result.is_err());
+	}
+
+	#[tokio::test]
+	async fn test_sync_tags_all_new() {
+		let created = vec![
+			tag::Model {
+				id: 1,
+				name: "a".to_string(),
+			},
+			tag::Model {
+				id: 2,
+				name: "b".to_string(),
+			},
+		];
+
+		// Query 1: find existing tags by name (not linked) -> none exist in DB
+		// Query 2: insert_many returns created tags
+		let mock_db = MockDatabase::new(sea_orm::DatabaseBackend::Sqlite)
+			.append_query_results::<tag::Model, Vec<_>, Vec<Vec<_>>>(vec![
+				vec![],
+				created.clone(),
+			])
+			.append_exec_results(vec![MockExecResult {
+				last_insert_id: 1,
+				rows_affected: 2,
+			}])
+			.into_connection();
+		let txn = mock_db.begin().await.unwrap();
+
+		let desired = vec!["a".to_string(), "b".to_string()];
+		let existing_linked: Vec<tag::Model> = vec![];
+
+		let (mut to_connect, to_disconnect) =
+			sync_tags(&txn, &desired, &existing_linked).await.unwrap();
+		to_connect.sort();
+		assert_eq!(to_connect, vec![1, 2]);
+		assert!(to_disconnect.is_empty());
+	}
+
+	#[tokio::test]
+	async fn test_sync_tags_add_and_keep() {
+		let existing_linked = vec![tag::Model {
+			id: 1,
+			name: "keep".to_string(),
+		}];
+		let existing_in_db = vec![tag::Model {
+			id: 2,
+			name: "add".to_string(),
+		}];
+
+		// Query 1: find tags by name not linked -> "add" exists in DB
+		let mock_db = MockDatabase::new(sea_orm::DatabaseBackend::Sqlite)
+			.append_query_results::<tag::Model, Vec<_>, Vec<Vec<_>>>(vec![
+				existing_in_db.clone()
+			])
+			.into_connection();
+		let txn = mock_db.begin().await.unwrap();
+
+		let desired = vec!["keep".to_string(), "add".to_string()];
+
+		let (to_connect, to_disconnect) =
+			sync_tags(&txn, &desired, &existing_linked).await.unwrap();
+		assert_eq!(to_connect, vec![2]);
+		assert!(to_disconnect.is_empty());
+	}
+
+	#[tokio::test]
+	async fn test_sync_tags_remove() {
+		let existing_linked = vec![
+			tag::Model {
+				id: 1,
+				name: "keep".to_string(),
+			},
+			tag::Model {
+				id: 2,
+				name: "remove".to_string(),
+			},
+		];
+
+		// Query 1: find tags by name not linked -> empty (no new tags to look up)
+		let mock_db = MockDatabase::new(sea_orm::DatabaseBackend::Sqlite)
+			.append_query_results::<tag::Model, Vec<_>, Vec<Vec<_>>>(vec![vec![]])
+			.into_connection();
+		let txn = mock_db.begin().await.unwrap();
+
+		let desired = vec!["keep".to_string()];
+
+		let (to_connect, to_disconnect) =
+			sync_tags(&txn, &desired, &existing_linked).await.unwrap();
+		assert!(to_connect.is_empty());
+		assert_eq!(to_disconnect, vec![2]);
+	}
+
+	#[tokio::test]
+	async fn test_sync_tags_empty_desired() {
+		let existing_linked = vec![
+			tag::Model {
+				id: 1,
+				name: "a".to_string(),
+			},
+			tag::Model {
+				id: 2,
+				name: "b".to_string(),
+			},
+		];
+
+		// Query 1: find tags by name not linked -> empty (nothing desired)
+		let mock_db = MockDatabase::new(sea_orm::DatabaseBackend::Sqlite)
+			.append_query_results::<tag::Model, Vec<_>, Vec<Vec<_>>>(vec![vec![]])
+			.into_connection();
+		let txn = mock_db.begin().await.unwrap();
+
+		let desired: Vec<String> = vec![];
+
+		let (to_connect, mut to_disconnect) =
+			sync_tags(&txn, &desired, &existing_linked).await.unwrap();
+		to_disconnect.sort();
+		assert!(to_connect.is_empty());
+		assert_eq!(to_disconnect, vec![1, 2]);
 	}
 }

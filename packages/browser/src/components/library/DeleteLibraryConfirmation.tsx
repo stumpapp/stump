@@ -90,7 +90,7 @@ export default function DeleteLibraryConfirmation({
 			confirmIsLoading={isPending}
 			trigger={trigger}
 			confirmationValue={libraryName}
-			instructionText={t(getKey('typeToConfirm'), { name: libraryName })}
+			instructionText={t(getKey('typeToConfirm'))}
 		/>
 	)
 }

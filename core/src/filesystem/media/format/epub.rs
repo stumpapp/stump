@@ -1,5 +1,5 @@
 use merge::Merge;
-use quick_xml::{events::Event, Reader};
+use quick_xml::{escape::unescape, events::Event, Reader};
 use std::{collections::HashMap, fs::File, io::BufReader, path::PathBuf};
 
 const ACCEPTED_EPUB_COVER_MIMES: [&str; 2] = ["image/jpeg", "image/png"];
@@ -514,7 +514,12 @@ fn parse_opf_xml(opf_content: &str) -> Result<HashMap<String, Vec<String>>, File
 	let mut buf = Vec::new();
 	let mut opf_metadata: HashMap<String, Vec<String>> = HashMap::new();
 
+	// tags which _might_ contain html, will be handled differently if encountered
+	const HTML_CONTENT_TAGS: [&str; 3] = ["description", "summary", "synopsis"];
+
 	loop {
+		let mut html_tag_to_read: Option<(String, String)> = None;
+
 		match reader.read_event_into(&mut buf) {
 			Ok(Event::Start(ref e)) => {
 				let tag_name = String::from_utf8_lossy(e.name().as_ref()).to_string();
@@ -523,29 +528,33 @@ fn parse_opf_xml(opf_content: &str) -> Result<HashMap<String, Vec<String>>, File
 					.unwrap_or(tag_name.as_str())
 					.to_string();
 
-				current_tag = base_tag.clone();
+				if HTML_CONTENT_TAGS.contains(&base_tag.as_str()) {
+					html_tag_to_read = Some((tag_name, base_tag));
+				} else {
+					current_tag = base_tag.clone();
 
-				// Check for attributes that modify the tag name
-				for attr in e.attributes().flatten() {
-					match attr.key.as_ref() {
-						b"opf:scheme" if base_tag == "identifier" => {
-							let scheme =
-								String::from_utf8_lossy(&attr.value).to_lowercase();
-							current_tag = format!("identifier_{}", scheme);
-						},
-						b"name" if tag_name == "meta" => {
-							let name = String::from_utf8_lossy(&attr.value);
-							current_tag = name.trim_start_matches("calibre:").to_string();
-						},
-						b"property" if tag_name == "meta" => {
-							let property = String::from_utf8_lossy(&attr.value);
-							current_tag = property.to_string();
-						},
-						b"property" if tag_name == "opf:meta" => {
-							let property = String::from_utf8_lossy(&attr.value);
-							current_tag = property.to_string();
-						},
-						_ => {},
+					for attr in e.attributes().flatten() {
+						match attr.key.as_ref() {
+							b"opf:scheme" if base_tag == "identifier" => {
+								let scheme =
+									String::from_utf8_lossy(&attr.value).to_lowercase();
+								current_tag = format!("identifier_{}", scheme);
+							},
+							b"name" if tag_name == "meta" => {
+								let name = String::from_utf8_lossy(&attr.value);
+								current_tag =
+									name.trim_start_matches("calibre:").to_string();
+							},
+							b"property" if tag_name == "meta" => {
+								let property = String::from_utf8_lossy(&attr.value);
+								current_tag = property.to_string();
+							},
+							b"property" if tag_name == "opf:meta" => {
+								let property = String::from_utf8_lossy(&attr.value);
+								current_tag = property.to_string();
+							},
+							_ => {},
+						}
 					}
 				}
 			},
@@ -672,6 +681,26 @@ fn parse_opf_xml(opf_content: &str) -> Result<HashMap<String, Vec<String>>, File
 			},
 			_ => {},
 		}
+
+		if let Some((full_tag, base_tag)) = html_tag_to_read.take() {
+			let end = quick_xml::events::BytesEnd::new(&full_tag);
+			match reader.read_text(end.name()) {
+				Ok(raw_text) => {
+					let text = unescape(&raw_text)
+						.map(|c| c.into_owned())
+						.unwrap_or_else(|_| raw_text.into_owned());
+					let trimmed = text.trim().to_string();
+
+					if !trimmed.is_empty() {
+						opf_metadata.entry(base_tag).or_default().push(trimmed);
+					}
+				},
+				Err(e) => {
+					tracing::warn!("Error reading {} content: {}", base_tag, e);
+				},
+			}
+		}
+
 		buf.clear();
 	}
 
@@ -956,14 +985,6 @@ mod tests {
 		assert_eq!(contributors.len(), 1);
 		assert!(contributors[0].contains("calibre"));
 
-		let _descriptions = metadata
-			.get("description")
-			.expect("Should have description");
-		// FIXME: The XML parser is not correctly handling HTML tags within the description.
-		// For the time being, I've uncommented this test but I definitely want to fix it...
-		// assert_eq!(descriptions.len(), 1);
-		// assert!(descriptions[0].contains("Victorian mansion"));
-
 		assert_eq!(
 			metadata.get("identifier_calibre"),
 			Some(&vec!["106".to_string()])
@@ -1028,6 +1049,54 @@ mod tests {
 		for key in expected_keys.iter() {
 			assert!(metadata.contains_key(*key), "Missing expected key: {}", key);
 		}
+	}
+
+	#[test]
+	fn test_parse_calibre_html_description_opf() {
+		let opf_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+			.join("integration-tests")
+			.join("data")
+			.join("calibre-html-descriptions.opf");
+
+		let opf_content = std::fs::read_to_string(&opf_path)
+			.expect("Failed to read calibre-html-descriptions.opf test file");
+
+		let metadata = parse_opf_xml(&opf_content)
+			.expect("Failed to parse calibre-html-descriptions.opf");
+
+		assert_eq!(
+			metadata.get("title"),
+			Some(&vec!["Heated Rivalry".to_string()])
+		);
+		assert_eq!(
+			metadata.get("creator"),
+			Some(&vec!["Rachel Reid".to_string()])
+		);
+
+		let descriptions = metadata
+			.get("description")
+			.expect("Should have description");
+		assert_eq!(
+			descriptions.len(),
+			1,
+			"Description should be a single entry"
+		);
+		let description = &descriptions[0];
+
+		assert!(description.contains("Pro hockey star Shane Hollander"));
+		assert!(description.contains("Boston Bears captain Ilya Rozanov"));
+		assert!(description.contains("<div>"));
+		assert!(description.contains("<p>"));
+		assert!(description.contains("<br>"));
+		assert!(description.contains("</p>"));
+		assert!(description.contains("</div>"));
+
+		assert_eq!(
+			metadata.get("series"),
+			Some(&vec!["Game Changers".to_string()])
+		);
+		assert_eq!(metadata.get("series_index"), Some(&vec!["2".to_string()]));
+		assert_eq!(metadata.get("language"), Some(&vec!["eng".to_string()]));
 	}
 
 	#[test]

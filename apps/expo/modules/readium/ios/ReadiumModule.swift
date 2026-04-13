@@ -18,7 +18,7 @@ public class ReadiumModule: Module {
 
         AsyncFunction("getResource") { (bookId: String, linkJson: [String: Any]) -> String in
             let link = try Link(json: linkJson)
-            let resource = try BookService.instance.getResource(for: bookId, link: link)
+            let resource = try await BookService.instance.getResource(for: bookId, link: link)
             if link.mediaType?.type.starts(with: "image/") == true {
                 let data = try await resource.read().get()
                 return data.base64EncodedString()

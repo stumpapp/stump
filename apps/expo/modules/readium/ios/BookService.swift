@@ -29,9 +29,11 @@ enum BookServiceError: LocalizedError {
     }
 }
 
-public final class BookService {
+// for me to reference again inevitably:
+// - https://docs.swift.org/swift-book/documentation/the-swift-programming-language/concurrency/#Actors
+public actor BookService {
     /// An instance of AssetRetriever for accessing publication assets
-    public let assetRetriever: AssetRetriever
+    public nonisolated let assetRetriever: AssetRetriever
     /// An instance of PublicationOpener for opening publications
     private let publicationOpener: PublicationOpener
 

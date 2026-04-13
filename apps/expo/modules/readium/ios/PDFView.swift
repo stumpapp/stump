@@ -291,7 +291,7 @@ public class PDFView: ExpoView {
         isInitialized = false
 
         if let bookId = props?.bookId {
-            BookService.instance.closePublication(for: bookId)
+            Task { await BookService.instance.closePublication(for: bookId) }
         }
     }
 

@@ -516,7 +516,7 @@ public class EPUBView: ExpoView {
 
         // Remove publication from cache
         if let bookId = props?.bookId {
-            BookService.instance.closePublication(for: bookId)
+            Task { await BookService.instance.closePublication(for: bookId) }
         }
     }
 

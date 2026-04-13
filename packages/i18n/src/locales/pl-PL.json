@@ -2321,10 +2321,10 @@
 		"confirm": "Potwierdź",
 		"delete": "Usuń",
 		"deleteConfirmation": {
-			"title": "Delete {{type}}",
-			"description": "Are you sure you want to delete this {{type}}? This action cannot be undone.",
-			"confirm": "Delete {{type}}",
-			"typeToConfirm": "Type {{name}} to confirm:"
+			"title": "Usuń {{type}}",
+			"description": "Czy na pewno chcesz usunąć {{type}}? Tej czynności nie można cofnąć.",
+			"confirm": "Usuń {{type}}",
+			"typeToConfirm": "Wprowadź {{name}} aby potwierdzić:"
 		},
 		"enter": "Enter",
 		"save": "Zapisz",

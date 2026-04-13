@@ -60,7 +60,7 @@ export default function BookTagEditor({ mediaId, tags }: Props) {
 	)
 
 	return (
-		<div className="flex flex-col gap-y-2">
+		<div className="gap-y-2 flex flex-col">
 			<div>
 				<Heading size="sm">Tags</Heading>
 				<Text size="sm" variant="muted">

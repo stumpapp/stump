@@ -112,7 +112,7 @@ export default function BookManagementScene() {
 				</Alert>
 
 				{checkPermission(UserPermission.ManageLibrary) && (
-					<div className="flex flex-col gap-y-2">
+					<div className="gap-y-2 flex flex-col">
 						<div>
 							<Heading size="sm">Analysis</Heading>
 							<Text size="sm" variant="muted">
@@ -141,7 +141,7 @@ export default function BookManagementScene() {
 				)}
 
 				{checkPermission(UserPermission.EditThumbnails) && (
-					<div className="flex flex-col gap-y-2">
+					<div className="gap-y-2 flex flex-col">
 						<div>
 							<Heading size="sm">Thumbnail</Heading>
 							<Text size="sm" variant="muted">

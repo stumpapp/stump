@@ -2669,6 +2669,8 @@ type StumpConfig {
 	verbosity: Int!
 	"Whether or not to pretty print logs."
 	prettyLogs: Boolean!
+	"The directory where the applicaiton logs will be stored"
+	logDir: String
 	"Whether or not to include ANSI color codes in log files."
 	colorfulLogs: Boolean!
 	"An optional custom path for the database."

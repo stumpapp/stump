@@ -3750,6 +3750,8 @@ export type StumpConfig = {
   enableUpload: Scalars['Boolean']['output'];
   /** The interval at which automatic deleted session cleanup is performed. */
   expiredSessionCleanupInterval: Scalars['Int']['output'];
+  /** The directory where the applicaiton logs will be stored */
+  logDir?: Maybe<Scalars['String']['output']>;
   /** The maximum size, in bytes, of files that can be uploaded to be included in libraries. */
   maxFileUploadSize: Scalars['Int']['output'];
   /**

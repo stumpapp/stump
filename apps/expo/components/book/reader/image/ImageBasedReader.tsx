@@ -143,12 +143,6 @@ export default function ImageBasedReader({ initialPage, onPastEndReached }: Prop
 						onPastEndReached={onPastEndReached}
 					/>
 				)}
-				getItemType={(item) => {
-					const itemZero = item[0]
-					if (item.length === 2) return 'double'
-					else if (itemZero != null && (imageSizes?.[itemZero]?.ratio || 0) >= 1) return 'landscape'
-					else return 'single'
-				}}
 				contentContainerStyle={
 					isVertical && { paddingTop: insets.top, paddingBottom: insets.bottom }
 				}

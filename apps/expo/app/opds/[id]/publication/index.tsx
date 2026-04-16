@@ -16,12 +16,7 @@ import {
 	useOverviewAnimations,
 } from '~/components/book/overview'
 import { ThumbnailImage } from '~/components/image'
-import {
-	CreditsSection,
-	PublicationMenu,
-	RelatedPublicationItem,
-	useRelatedPublications,
-} from '~/components/opds'
+import { CreditsSection, RelatedPublicationItem, useRelatedPublications } from '~/components/opds'
 import FeedSelfURL from '~/components/opds/FeedSelfURL'
 import { usePublicationMenu } from '~/components/opds/PublicationMenu'
 import {
@@ -242,7 +237,6 @@ export default function Screen() {
 							style={{ width: '100%', height: '100%' }}
 							resizeMode="cover"
 							fadeDuration={2000}
-							{...(Platform.OS === 'ios' && { indicator: { color: 'transparent' } })}
 							// android only supports up to blur={25} which doesn't look good,
 							// but if we heavily downscale first, the following looks near identical to using
 							// original res with blur={40} on ios, which is what I originally settled on

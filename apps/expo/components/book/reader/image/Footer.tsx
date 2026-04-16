@@ -10,6 +10,7 @@ import TImage from 'react-native-turbo-image'
 
 import { getThumbnailResizeProps, TurboImage } from '~/components/image'
 import { Progress, Text } from '~/components/ui'
+import { useColors } from '~/lib/constants'
 import { useDisplay, usePrevious } from '~/lib/hooks'
 import { cn } from '~/lib/utils'
 import { usePreferencesStore, useReaderStore } from '~/stores'
@@ -54,6 +55,7 @@ export default function Footer() {
 	const thumbnailRatio = usePreferencesStore((state) => state.thumbnailRatio)
 	const thumbnailResizeMode = usePreferencesStore((state) => state.thumbnailResizeMode)
 	const { secondaryStyle, translateFooterStyle } = useReaderAnimations()
+	const colors = useColors()
 
 	const [isSliderDragging, setIsSliderDragging] = useState(false)
 
@@ -317,6 +319,7 @@ export default function Footer() {
 										// @ts-expect-error bug in library (to be fixed soon). StyleProp<ImageStyle> should be StyleProp<ViewStyle>
 										borderCurve: 'continuous',
 										overflow: 'hidden',
+										backgroundColor: colors.thumbnail.placeholder,
 										...style,
 									}}
 									onSuccess={({ nativeEvent }) => onImageLoaded(pageIdx, nativeEvent)}
@@ -347,6 +350,7 @@ export default function Footer() {
 			thumbnailResizeMode,
 			imageSizes,
 			baseSize,
+			colors,
 		],
 	)
 
@@ -444,6 +448,7 @@ export default function Footer() {
 											style={{
 												width: item.length === 1 ? '100%' : '50%',
 												height: '100%',
+												backgroundColor: colors.thumbnail.placeholder,
 												...style,
 											}}
 											onSuccess={({ nativeEvent }) => onImageLoaded(pageIdx, nativeEvent)}
@@ -476,6 +481,7 @@ export default function Footer() {
 			baseSize,
 			thumbnailResizeMode,
 			imageSizes,
+			colors,
 		],
 	)
 

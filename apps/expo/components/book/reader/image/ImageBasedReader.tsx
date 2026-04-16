@@ -350,7 +350,6 @@ const PageSet = React.memo(
 										maxWidth: indexes.length > 1 ? '50%' : '100%',
 										aspectRatio: imageRatio,
 									}}
-									indicator={{ color: 'transparent' }}
 									resizeMode="contain"
 									resize={allowDownscaling ? roughPageRenderWidth * 1.2 : undefined}
 									onSuccess={(event) => onImageLoaded(event, i)}

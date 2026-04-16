@@ -19,7 +19,6 @@ import { useDownloadsState } from '~/components/localLibrary/store'
 import { getThumbnailPath } from '~/components/localLibrary/utils'
 import { MetadataBadgeSection } from '~/components/overview'
 import { Button, Card, Heading, Text } from '~/components/ui'
-import { Icon } from '~/components/ui/icon'
 import {
 	db,
 	downloadedFiles,
@@ -161,7 +160,6 @@ export default function Screen() {
 								style={{ width: '100%', height: '100%' }}
 								resizeMode="cover"
 								fadeDuration={2000}
-								{...(Platform.OS === 'ios' && { indicator: { color: 'transparent' } })}
 								resize={60}
 								// android only supports up to blur={25} which doesn't look good,
 								// but if we heavily downscale first, the following looks near identical to using

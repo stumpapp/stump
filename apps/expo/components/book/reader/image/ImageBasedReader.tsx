@@ -62,6 +62,8 @@ export default function ImageBasedReader({ initialPage, onPastEndReached }: Prop
 	const { height, width } = useWindowDimensions()
 	const insets = useSafeAreaInsets()
 
+	const [zoomResetCounter, setZoomResetCounter] = useState(0)
+
 	const deviceOrientation = useMemo(
 		() => (width > height ? 'landscape' : 'portrait'),
 		[width, height],
@@ -141,6 +143,7 @@ export default function ImageBasedReader({ initialPage, onPastEndReached }: Prop
 						maxHeight={height}
 						readingDirection="horizontal"
 						onPastEndReached={onPastEndReached}
+						zoomResetCounter={zoomResetCounter}
 					/>
 				)}
 				contentContainerStyle={
@@ -172,6 +175,7 @@ export default function ImageBasedReader({ initialPage, onPastEndReached }: Prop
 				initialScrollIndexParams={isVertical ? { viewOffset: -insets.top } : undefined}
 				showsHorizontalScrollIndicator={false}
 				onScroll={handleScroll}
+				onMomentumScrollEnd={() => setZoomResetCounter((c) => c + 1)}
 			/>
 		</View>
 	)
@@ -186,6 +190,7 @@ type PageSetProps = {
 	maxHeight: number
 	readingDirection: 'vertical' | 'horizontal'
 	onPastEndReached?: () => void
+	zoomResetCounter: number
 }
 
 const PageSet = React.memo(
@@ -198,6 +203,7 @@ const PageSet = React.memo(
 		maxHeight,
 		onPastEndReached,
 		// readingDirection,
+		zoomResetCounter,
 	}: PageSetProps) => {
 		const { book, pageURL, flashListRef, pageSets, setImageSizes, requestHeaders, serverId } =
 			useImageBasedReader()
@@ -214,6 +220,10 @@ const PageSet = React.memo(
 		const tapThresholdRatio = isTablet ? 4 : 5
 
 		const zoomableRef = useRef<ZoomableRef>(null)
+
+		useEffect(() => {
+			zoomableRef.current?.reset()
+		}, [zoomResetCounter])
 
 		const onCheckForNavigationTaps = useCallback(
 			(x: number) => {

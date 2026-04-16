@@ -34,6 +34,7 @@ pub mod series_metadata;
 pub mod smart_list_item;
 pub mod smart_list_view;
 pub mod smart_lists;
+pub mod stats;
 pub mod tag;
 pub mod user;
 pub mod user_login_activity;

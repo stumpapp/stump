@@ -25,7 +25,7 @@ use crate::{
 	data::{AuthContext, CoreContext, ServiceContext},
 	guard::PermissionGuard,
 	loader::favorite::{FavoriteLibraryLoaderKey, FavoritesLoader},
-	object::{library_scan_record::LibraryScanRecord, media::Media},
+	object::{library_scan_record::LibraryScanRecord, media::Media, stats::LibraryStats},
 };
 
 use super::{library_config::LibraryConfig, series::Series, tag::Tag, user::User};
@@ -255,58 +255,15 @@ impl Library {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let result = conn
-			.query_one(Statement::from_sql_and_values(
-				DatabaseBackend::Sqlite,
-				r"
-				WITH library_media AS (
-					SELECT media.id, media.size
-					FROM media
-					INNER JOIN series ON media.series_id = series.id
-					WHERE series.library_id = $1
-				),
-				base_counts AS (
-					SELECT
-						COUNT(*) AS book_count,
-						IFNULL(SUM(size), 0) AS total_bytes,
-						(SELECT COUNT(*) FROM series WHERE series.library_id = $1) AS series_count
-					FROM library_media
-				),
-				finished_stats AS (
-					SELECT
-						COUNT(DISTINCT frs.media_id) AS completed_books,
-						IFNULL(SUM(frs.elapsed_seconds), 0) AS finished_reading_time
-					FROM finished_reading_sessions frs
-					WHERE frs.media_id IN (SELECT id FROM library_media)
-						AND ($2 IS TRUE OR frs.user_id = $3)
-				),
-				active_stats AS (
-					SELECT
-						COUNT(DISTINCT rs.media_id) AS in_progress_books,
-						IFNULL(SUM(rs.elapsed_seconds), 0) AS active_reading_time
-					FROM reading_sessions rs
-					WHERE rs.media_id IN (SELECT id FROM library_media)
-						AND ($2 IS TRUE OR rs.user_id = $3)
-				)
-				SELECT
-					base_counts.book_count,
-					base_counts.total_bytes,
-					base_counts.series_count,
-					finished_stats.completed_books,
-					active_stats.in_progress_books,
-					(finished_stats.finished_reading_time + active_stats.active_reading_time) AS total_reading_time_seconds
-				FROM base_counts, finished_stats, active_stats;
-				",
-				[
-					self.model.id.clone().into(),
-					all_users.unwrap_or(false).into(),
-					user.id.clone().into(),
-				],
-			))
-			.await?
-			.ok_or("Library stats failed to be calculated")?;
+		let stats = LibraryStats::fetch(
+			conn,
+			Some(self.model.id.clone()),
+			user.id.clone(),
+			all_users.unwrap_or(false),
+		)
+		.await?;
 
-		Ok(LibraryStats::from_query_result(&result, "")?)
+		Ok(stats)
 	}
 
 	async fn genres(
@@ -386,18 +343,6 @@ impl Library {
 			metadata: self.model.thumbnail_meta.clone(),
 		})
 	}
-}
-
-// Note: SQLx does not support u64 :'(
-// See https://github.com/launchbadge/sqlx/issues/499
-#[derive(Debug, FromQueryResult, SimpleObject)]
-pub struct LibraryStats {
-	series_count: i64,
-	book_count: i64,
-	total_bytes: i64,
-	completed_books: i64,
-	in_progress_books: i64,
-	total_reading_time_seconds: i64,
 }
 
 async fn get_unique_metadata_fields(

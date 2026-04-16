@@ -26,7 +26,7 @@ use crate::{
 		series_count::SeriesCountLoader,
 		series_finished_count::{FinishedCountLoaderKey, SeriesFinishedCountLoader},
 	},
-	object::series_metadata::SeriesMetadata,
+	object::{series_metadata::SeriesMetadata, stats::SeriesStats},
 };
 
 use super::{library::Library, media::Media, tag::Tag};
@@ -333,51 +333,15 @@ impl Series {
 		let AuthContext { user, .. } = ctx.data::<AuthContext>()?;
 		let conn = ctx.data::<CoreContext>()?.conn.as_ref();
 
-		let result = conn
-			.query_one(Statement::from_sql_and_values(
-				DatabaseBackend::Sqlite,
-				r"
-				WITH base_counts AS (
-					SELECT
-						COUNT(*) AS book_count,
-						IFNULL(SUM(media.size), 0) AS total_bytes
-					FROM media
-					WHERE media.series_id = $1
-				),
-				finished_stats AS (
-					SELECT
-						COUNT(DISTINCT frs.media_id) AS completed_books,
-						IFNULL(SUM(frs.elapsed_seconds), 0) AS finished_reading_time
-					FROM finished_reading_sessions frs
-					WHERE frs.media_id IN (SELECT id FROM media WHERE series_id = $1)
-						AND ($2 IS TRUE OR frs.user_id = $3)
-				),
-				active_stats AS (
-					SELECT
-						COUNT(DISTINCT rs.media_id) AS in_progress_books,
-						IFNULL(SUM(rs.elapsed_seconds), 0) AS active_reading_time
-					FROM reading_sessions rs
-					WHERE rs.media_id IN (SELECT id FROM media WHERE series_id = $1)
-						AND ($2 IS TRUE OR rs.user_id = $3)
-				)
-				SELECT
-					base_counts.book_count,
-					base_counts.total_bytes,
-					finished_stats.completed_books,
-					active_stats.in_progress_books,
-					(finished_stats.finished_reading_time + active_stats.active_reading_time) AS total_reading_time_seconds
-				FROM base_counts, finished_stats, active_stats;
-				",
-				[
-					self.model.id.clone().into(),
-					all_users.unwrap_or(false).into(),
-					user.id.clone().into(),
-				],
-			))
-			.await?
-			.ok_or("Series stats failed to be calculated")?;
+		let stats = SeriesStats::fetch(
+			conn,
+			self.model.id.clone(),
+			user.id.clone(),
+			all_users.unwrap_or(false),
+		)
+		.await?;
 
-		Ok(SeriesStats::from_query_result(&result, "")?)
+		Ok(stats)
 	}
 }
 
@@ -398,17 +362,3 @@ async fn get_series_progress(ctx: &Context<'_>, series_id: String) -> Result<(i6
 
 	Ok((media_count, finished_count))
 }
-
-// Note: SQLx does not support u64 :'(
-// See https://github.com/launchbadge/sqlx/issues/499
-#[derive(Debug, FromQueryResult, SimpleObject)]
-pub struct SeriesStats {
-	book_count: i64,
-	total_bytes: i64,
-	completed_books: i64,
-	in_progress_books: i64,
-	total_reading_time_seconds: i64,
-}
-
-#[cfg(test)]
-mod tests {}

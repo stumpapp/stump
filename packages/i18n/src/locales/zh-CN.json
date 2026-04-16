@@ -1254,7 +1254,7 @@
 				"access": "访问",
 				"email": "电子邮件地址",
 				"notifications": "通知",
-				"tags": "Tags",
+				"tags": "标签：",
 				"label": "管理"
 			}
 		},
@@ -1328,7 +1328,7 @@
 						"autumn": "秋色",
 						"cosmic": "宇宙",
 						"pumpkin": "南瓜",
-						"midnight": "Midnight",
+						"midnight": "午夜",
 						"matrix": "矩阵"
 					}
 				},
@@ -1348,7 +1348,7 @@
 					"label": "缩略图占位符",
 					"description": "缩略图占位符使用的样式",
 					"options": {
-						"grayscale": "Grayscale",
+						"grayscale": "灰度",
 						"averageColor": "平均颜色",
 						"colorful": "彩色化",
 						"thumbhash": "缩略图哈希"
@@ -2147,51 +2147,51 @@
 			}
 		},
 		"server/tags": {
-			"helmet": "Tag management",
-			"title": "Tags",
-			"description": "Create and manage tags for organizing your content",
+			"helmet": "标签管理",
+			"title": "标签",
+			"description": "创建和管理标签以组织您的内容",
 			"sections": {
 				"table": {
-					"title": "Tags",
-					"description": "All tags available on this server",
+					"title": "标签",
+					"description": "此服务器上可用的所有标签",
 					"empty": {
-						"title": "No tags",
-						"action": "Create your first tag to get started"
+						"title": "无标签",
+						"action": "创建您的第一个标签以开始使用"
 					},
 					"columns": {
-						"name": "Name"
+						"name": "名称"
 					},
 					"actionMenu": {
-						"rename": "Rename"
+						"rename": "重命名"
 					}
 				},
 				"createTag": {
-					"trigger": "Create tag",
+					"trigger": "创建标签",
 					"modal": {
-						"heading": "Create new tag",
-						"description": "Tags can be assigned to books, series, and libraries",
+						"heading": "创建新标签",
+						"description": "标签可以分配给书籍、系列和书库",
 						"name": {
-							"label": "Name",
-							"placeholder": "Enter tag name"
+							"label": "名称",
+							"placeholder": "输入标签名称"
 						},
-						"submit": "Create"
+						"submit": "创建"
 					}
 				},
 				"renameTag": {
 					"modal": {
-						"heading": "Rename tag",
-						"description": "Change the name of this tag across all assigned items",
+						"heading": "重命名标签",
+						"description": "更改所有已分配项中的标签名称",
 						"name": {
-							"label": "Name",
-							"placeholder": "Enter new tag name"
+							"label": "名称",
+							"placeholder": "输入新标签名称"
 						},
-						"submit": "Rename"
+						"submit": "重命名"
 					}
 				},
 				"deleteTag": {
-					"title": "Delete tag",
-					"description": "This tag will be removed from all books, series, and libraries. This cannot be undone.",
-					"confirm": "Delete"
+					"title": "删除标签",
+					"description": "此标签将从所有书籍、系列和书库中移除。此操作不可撤销。",
+					"confirm": "删除"
 				}
 			}
 		}
@@ -2483,351 +2483,351 @@
 	"mobileApp": {
 		"addOrEditServer": {
 			"addServer": {
-				"title": "Add Server",
-				"subtitle": "Configure a new server to access your content"
+				"title": "添加服务器",
+				"subtitle": "配置新服务器以访问您的内容"
 			},
 			"editServer": {
-				"title": "Edit Server",
-				"subtitle": "Edit Server"
+				"title": "编辑服务器",
+				"subtitle": "编辑服务器"
 			},
-			"kind": "Kind",
+			"kind": "类型",
 			"customHeaders": {
-				"label": "Custom Headers",
-				"addHeader": "Add header",
-				"invalidHeader": "Invalid header"
+				"label": "自定义标头",
+				"addHeader": "添加标头",
+				"invalidHeader": "无效的标头"
 			},
 			"auth": {
-				"label": "Auth",
+				"label": "认证",
 				"default": {
-					"label": "Login",
-					"description": "You will be prompted to login when accessing content as needed"
+					"label": "登录",
+					"description": "访问内容时将提示您登录"
 				},
 				"token": {
-					"label": "Token",
-					"placeholder": "Raw token"
+					"label": "令牌",
+					"placeholder": "原始令牌"
 				},
-				"basic": "Basic"
+				"basic": "基本"
 			},
-			"serverNamePlaceholder": "My Server",
-			"catalogUrl": "Catalog URL",
-			"failedToConnect": "Failed to connect to server",
-			"didConnect": "Connected",
-			"checkConnection": "Check connection",
-			"setAsDefaultServer": "Set as default server",
-			"enableOPDS": "Enable OPDS",
+			"serverNamePlaceholder": "我的服务器",
+			"catalogUrl": "目录 URL",
+			"failedToConnect": "连接到服务器失败",
+			"didConnect": "已连接",
+			"checkConnection": "检查连接",
+			"setAsDefaultServer": "设为默认服务器",
+			"enableOPDS": "启用 OPDS",
 			"validation": {
-				"nameAlreadyExists": "Name already exists",
-				"cannotSetAuthorizationHeader": "Cannot set Authorization header"
+				"nameAlreadyExists": "名称已存在",
+				"cannotSetAuthorizationHeader": "无法设置授权标头"
 			}
 		},
 		"bookActions": {
 			"markAsRead": {
-				"label": "Mark as read",
-				"confirmation": "Are you sure you want to mark {{bookTitle}} as read?"
+				"label": "标记为已读",
+				"confirmation": "您确定要将 {{bookTitle}} 标记为已读吗？"
 			},
 			"clearProgress": {
-				"label": "Clear progress",
-				"confirmation": "Are you sure you want to clear your progress for {{bookTitle}}?"
+				"label": "清除进度",
+				"confirmation": "您确定要清除 {{bookTitle}} 的进度吗？"
 			},
 			"deleteBook": {
-				"label": "Delete book",
-				"confirmation": "Are you sure you want to delete {{bookTitle}}?"
+				"label": "删除书籍",
+				"confirmation": "您确定要删除 {{bookTitle}} 吗？"
 			},
-			"seeDetails": "See Details"
+			"seeDetails": "查看详情"
 		},
 		"bookMetadata": {
-			"ageRating": "Age Rating",
-			"downloadedAt": "Downloaded",
-			"format": "Format",
-			"genres": "Genres",
-			"language": "Language",
-			"publisher": "Publisher",
-			"size": "Size",
-			"volume": "Volume",
-			"year": "Year"
+			"ageRating": "年龄分级",
+			"downloadedAt": "下载时间",
+			"format": "格式",
+			"genres": "类型",
+			"language": "语言",
+			"publisher": "出版社",
+			"size": "大小",
+			"volume": "卷",
+			"year": "年份"
 		},
 		"common": {
-			"cancel": "Cancel",
-			"chapter": "Chapter",
-			"clear": "Clear",
-			"confirm": "Confirm",
-			"details": "Details",
-			"delete": "Delete",
-			"downloads": "Downloads",
-			"edit": "Edit",
-			"enabled": "Enabled",
-			"enable": "Enable",
-			"error": "Error",
-			"name": "Name",
-			"none": "None",
-			"options": "Options",
-			"page": "Page",
-			"pages": "Pages",
-			"password": "Password",
-			"progress": "Progress",
-			"readTime": "Read time",
-			"readMore": "Read more",
-			"save": "Save",
-			"select": "Select",
-			"settings": "Settings",
-			"servers": "Servers",
-			"thisBook": "this book",
-			"thisServer": "this server",
-			"unknown": "Unknown",
-			"unknownTitle": "Untitled",
+			"cancel": "取消",
+			"chapter": "章节",
+			"clear": "清除",
+			"confirm": "确认",
+			"details": "详情",
+			"delete": "删除",
+			"downloads": "下载",
+			"edit": "编辑",
+			"enabled": "已启用",
+			"enable": "启用",
+			"error": "错误",
+			"name": "名称",
+			"none": "无",
+			"options": "选项",
+			"page": "页面",
+			"pages": "页",
+			"password": "密码",
+			"progress": "进度",
+			"readTime": "阅读时间",
+			"readMore": "阅读更多",
+			"save": "保存",
+			"select": "选择",
+			"settings": "设置",
+			"servers": "服务器",
+			"thisBook": "本书",
+			"thisServer": "此服务器",
+			"unknown": "未知",
+			"unknownTitle": "无标题",
 			"url": "URL",
-			"username": "Username",
-			"value": "Value",
-			"version": "Version"
+			"username": "用户名",
+			"value": "值",
+			"version": "版本"
 		},
 		"emptyState": {
-			"noStumpServers": "No Stump servers added",
-			"noOPDSServers": "No OPDS servers added",
-			"noServers": "No servers have been configured",
-			"cta": "Get started by adding a server to access your book collections",
-			"seeDocumentation": "See Documentation"
+			"noStumpServers": "未添加 Stump 服务器",
+			"noOPDSServers": "未添加 OPDS 服务器",
+			"noServers": "未配置服务器",
+			"cta": "通过添加服务器来开始访问您的书籍收藏",
+			"seeDocumentation": "查看文档"
 		},
 		"tabs": {
-			"servers": "Servers",
-			"localLibrary": "Library",
-			"settings": "Settings"
+			"servers": "服务器",
+			"localLibrary": "本地书库",
+			"settings": "设置"
 		},
 		"localLibrary": {
-			"title": "Local Library",
+			"title": "本地书库",
 			"emptyState": {
 				"all": {
-					"title": "Nothing to read yet",
-					"description": "Once you have books for offline reading, they will appear here"
+					"title": "暂无可阅读的内容",
+					"description": "一旦您下载了离线阅读的书籍，它们将显示在这里"
 				},
 				"imported": {
-					"title": "No imported books",
-					"description": "Import books to read them offline"
+					"title": "未导入书籍",
+					"description": "导入书籍以离线阅读"
 				},
 				"server": {
-					"title": "No downloaded books",
-					"description": "Download books from your library to read them offline"
+					"title": "未下载书籍",
+					"description": "从书库下载书籍以离线阅读"
 				}
 			},
 			"downloadQueue": {
-				"downloading": "Downloading",
-				"failed": "Failed",
-				"nothingDownloading": "Nothing is being downloaded",
-				"noActiveDownloads": "No active downloads",
-				"noFailedDownloads": "No failed downloads",
-				"downloadStarting": "Starting..."
+				"downloading": "正在下载",
+				"failed": "失败",
+				"nothingDownloading": "没有正在下载的内容",
+				"noActiveDownloads": "无活动下载",
+				"noFailedDownloads": "无失败下载",
+				"downloadStarting": "正在开始..."
 			},
 			"downloadsHeaderMenu": {
 				"deleteAllDownloads": {
-					"label": "Delete Books",
-					"confirmation": "Are you sure you want to delete your local library?",
-					"disclaimer": "This action cannot be undone."
+					"label": "删除书籍",
+					"confirmation": "您确定要删除本地书库吗？",
+					"disclaimer": "此操作不可撤销。"
 				},
-				"seeProblems": "See Problems ({{problemCount}})",
-				"hideCurated": "Hide Curated",
-				"showCurated": "Show Curated",
-				"attemptSync": "Attempt Sync"
+				"seeProblems": "查看问题 ({{problemCount}})",
+				"hideCurated": "隐藏精选",
+				"showCurated": "显示精选",
+				"attemptSync": "尝试同步"
 			},
 			"downloadsHeaderSortMenu": {
 				"sortBy": {
-					"NAME": "Name",
-					"ADDED_AT": "Date Added",
-					"SERIES": "Series"
+					"NAME": "名称",
+					"ADDED_AT": "添加日期",
+					"SERIES": "系列"
 				},
 				"sortDirection": {
-					"ASC": "Ascending",
-					"DESC": "Descending"
+					"ASC": "升序",
+					"DESC": "降序"
 				},
 				"sortDirectionText": {
-					"ASC": "A → Z",
-					"DESC": "Z → A"
+					"ASC": "A -> Z",
+					"DESC": "Z -> A"
 				},
 				"sortDirectionDate": {
-					"ASC": "Oldest First",
-					"DESC": "Newest First"
+					"ASC": "最早优先",
+					"DESC": "最新优先"
 				},
 				"sourceFilter": {
-					"all": "All Books",
-					"server": "Downloaded",
-					"imported": "Imported"
+					"all": "所有书籍",
+					"server": "已下载",
+					"imported": "已导入"
 				}
 			},
 			"downloadProblemsSheet": {
-				"title": "Failed Downloads",
-				"noFailedDownloads": "No failed downloads",
-				"retryAll": "Retry All",
-				"dismissAll": "Dismiss All"
+				"title": "下载失败",
+				"noFailedDownloads": "无失败下载",
+				"retryAll": "全部重试",
+				"dismissAll": "全部忽略"
 			}
 		},
 		"settings": {
 			"preferences": {
-				"label": "Preferences",
+				"label": "首选项",
 				"appTheme": {
-					"label": "Theme",
+					"label": "主题",
 					"options": {
-						"light": "Light",
-						"dark": "Dark"
+						"light": "浅色",
+						"dark": "深色"
 					}
 				},
-				"appPrimaryColor": "Accent",
-				"appLanguage": "Language",
-				"defaultServer": "Default Server",
-				"thumbnailRatio": "Thumbnail Ratio",
+				"appPrimaryColor": "强调色",
+				"appLanguage": "语言",
+				"defaultServer": "默认服务器",
+				"thumbnailRatio": "缩略图比例",
 				"thumbnailPlaceholder": {
-					"label": "Thumbnail Placeholder",
+					"label": "缩略图占位符",
 					"options": {
-						"grayscale": "Grayscale",
-						"averageColor": "Average color",
-						"colorful": "Colorful",
-						"thumbhash": "Thumbhash"
+						"grayscale": "灰度",
+						"averageColor": "平均颜色",
+						"colorful": "彩色",
+						"thumbhash": "缩略图哈希"
 					}
 				},
 				"thumbnailResizeMode": {
-					"label": "Thumbnail Resize",
+					"label": "缩略图调整",
 					"options": {
-						"cover": "Cover",
-						"stretch": "Stretch",
-						"fit": "Fit"
+						"cover": "覆盖",
+						"stretch": "拉伸",
+						"fit": "适应"
 					}
 				}
 			},
 			"reading": {
-				"label": "Reading",
-				"preferNativePdf": "Prefer Native PDF",
-				"preferMinimalReader": "Prefer Minimal Reader",
-				"disableDismissGesture": "Disable Dismiss Gesture"
+				"label": "阅读",
+				"preferNativePdf": "优先使用原生 PDF",
+				"preferMinimalReader": "优先使用极简阅读器",
+				"disableDismissGesture": "禁用关闭手势"
 			},
 			"stump": {
 				"label": "Stump",
-				"description": "Stump features are optional and can be turned off if you do not need them",
-				"bookClubsEnabled": "Book Club Features"
+				"description": "Stump 功能是可选的，如果您不需要可以关闭",
+				"bookClubsEnabled": "读书俱乐部功能"
 			},
-			"autoSyncLocalData": "Auto-Sync Local Data",
+			"autoSyncLocalData": "自动同步本地数据",
 			"management": {
-				"label": "Management",
+				"label": "管理",
 				"dataUsage": {
-					"label": "Data Usage",
-					"nonStumpData": "Non-Stump data",
-					"serversTotal": "Servers total",
-					"totalFiles": "Total files",
-					"totalSize": "Total size",
+					"label": "数据使用",
+					"nonStumpData": "非 Stump 数据",
+					"serversTotal": "服务器总计",
+					"totalFiles": "文件总数",
+					"totalSize": "总大小",
 					"deleteDownloads": {
-						"label": "Delete Downloads",
-						"confirmation": "Are you sure you want to delete all downloads from {{serverName}}?",
+						"label": "删除下载",
+						"confirmation": "您确定要删除来自 {{serverName}} 的所有下载吗？",
 						"deleteFailed": {
-							"title": "Deletion Failed",
-							"description": "There was an error deleting all downloads from {{serverName}}"
+							"title": "删除失败",
+							"description": "删除来自 {{serverName}} 的所有下载时出错"
 						}
 					},
-					"noDownloads": "No downloaded files for this server",
+					"noDownloads": "此服务器无下载文件",
 					"storedPreferences": {
-						"label": "Stored preferences",
-						"description": "Miscellaneous data like book preferences, reading timers, etc"
+						"label": "存储的首选项",
+						"description": "书籍首选项、阅读计时器等杂项数据"
 					},
-					"clearPreferences": "Clear Preferences"
+					"clearPreferences": "清除首选项"
 				}
 			},
 			"debug": {
-				"label": "Debug",
+				"label": "调试",
 				"clearCache": {
 					"memory": {
-						"button": "Memory",
-						"success": "Memory cache cleared"
+						"button": "内存",
+						"success": "内存缓存已清除"
 					},
 					"disk": {
-						"button": "Disk",
-						"success": "Disk cache cleared"
+						"button": "磁盘",
+						"success": "磁盘缓存已清除"
 					}
 				},
 				"deleteDatabase": {
-					"label": "Delete Database",
+					"label": "删除数据库",
 					"success": {
-						"title": "Database deleted",
-						"description": "Please restart the app"
+						"title": "数据库已删除",
+						"description": "请重启应用"
 					},
 					"error": {
-						"title": "Deletion failed",
-						"description": "There was an error deleting the database"
+						"title": "删除失败",
+						"description": "删除数据库时出错"
 					}
 				},
-				"performanceMonitor": "Performance Monitor",
-				"reduceAnimations": "Reduce Animations",
-				"maskUrls": "Mask URLs",
+				"performanceMonitor": "性能监控",
+				"reduceAnimations": "减少动画",
+				"maskUrls": "隐藏 URL",
 				"debugAnalytics": {
-					"label": "Debug Analytics",
-					"description": "Send additional debug-related events to help troubleshoot issues"
+					"label": "调试分析",
+					"description": "发送额外的调试相关事件以帮助排查问题"
 				}
 			},
 			"contactInfo": {
-				"label": "Contact",
-				"email": "Email",
+				"label": "联系信息",
+				"email": "电子邮件",
 				"discord": "Discord",
-				"github": "GitHub"
+				"github": "Github"
 			},
 			"supportInfo": {
-				"buildInformation": "Build Information",
-				"version": "Version: {{version}}",
-				"suuportIdentifier": "Support Identifier: {{supportID}}"
+				"buildInformation": "构建信息",
+				"version": "版本：{{version}}",
+				"suuportIdentifier": "支持标识符：{{supportID}}"
 			}
 		},
 		"readerSettings": {
-			"title": "Reader Settings",
+			"title": "阅读器设置",
 			"sections": {
-				"mode": "Mode",
-				"imageOptions": "Image Options",
-				"controls": "Controls"
+				"mode": "模式",
+				"imageOptions": "图像选项",
+				"controls": "控件"
 			},
 			"readingMode": {
-				"label": "Flow",
+				"label": "流动",
 				"options": {
-					"PAGED": "Paged",
-					"CONTINUOUS_HORIZONTAL": "Scroll (Horizontal)",
-					"CONTINUOUS_VERTICAL": "Scroll (Vertical)"
+					"PAGED": "分页",
+					"CONTINUOUS_HORIZONTAL": "滚动（水平）",
+					"CONTINUOUS_VERTICAL": "滚动（垂直）"
 				}
 			},
 			"readingDirection": {
-				"label": "Direction",
+				"label": "方向",
 				"options": {
-					"RTL": "Right to left",
-					"LTR": "Left to right"
+					"RTL": "从右到左",
+					"LTR": "从左到右"
 				}
 			},
 			"doublePageBehavior": {
-				"label": "Double Paged",
+				"label": "双页行为",
 				"options": {
-					"always": "Always",
-					"auto": "Auto",
-					"off": "Off"
+					"always": "总是",
+					"auto": "自动",
+					"off": "关闭"
 				}
 			},
-			"separateSecondPage": "Separate Second Page",
+			"separateSecondPage": "分离第二页",
 			"imageScaling": {
-				"label": "Scaling",
+				"label": "缩放",
 				"options": {
-					"AUTO": "Auto",
-					"HEIGHT": "Fit Height",
-					"WIDTH": "Fit Width",
-					"NONE": "None"
+					"AUTO": "自动",
+					"HEIGHT": "适应高度",
+					"WIDTH": "适应宽度",
+					"NONE": "无"
 				}
 			},
-			"allowDownscaling": "Downscaling",
-			"tapSidesToNavigate": "Tap Sides to Navigate",
+			"allowDownscaling": "缩小",
+			"tapSidesToNavigate": "点击两侧导航",
 			"footerControls": {
-				"label": "Footer",
+				"label": "页脚",
 				"options": {
-					"images": "Image Gallery",
-					"slider": "Slider"
+					"images": "图像画廊",
+					"slider": "滑块"
 				}
 			}
 		},
 		"savedServerActions": {
-			"clearCache": "Clear Cache",
+			"clearCache": "清除缓存",
 			"discardTokens": {
-				"label": "Discard Tokens",
-				"description": "Affects login tokens only"
+				"label": "丢弃令牌",
+				"description": "仅影响登录令牌"
 			},
 			"deleteServer": {
-				"title": "Delete Server",
-				"confirmation": "Are you sure you want to delete {{serverName}}?"
+				"title": "删除服务器",
+				"confirmation": "您确定要删除 {{serverName}} 吗？"
 			}
 		}
 	}

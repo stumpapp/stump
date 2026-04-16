@@ -17,6 +17,7 @@ mod m20260118_204601_add_bookmark_created_at;
 mod m20260220_000000_user_avatar_path;
 mod m20260307_000000_library_skip_book_overview;
 mod m20260404_185829_add_name_indexes;
+mod m20260406_000000_add_kobo_sync_sessions;
 
 pub struct Migrator;
 
@@ -40,6 +41,7 @@ impl MigratorTrait for Migrator {
 			Box::new(m20260220_000000_user_avatar_path::Migration),
 			Box::new(m20260307_000000_library_skip_book_overview::Migration),
 			Box::new(m20260404_185829_add_name_indexes::Migration),
+			Box::new(m20260406_000000_add_kobo_sync_sessions::Migration),
 		]
 	}
 }

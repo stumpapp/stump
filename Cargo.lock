@@ -8290,6 +8290,7 @@ dependencies = [
  "stump-config-gen",
  "temp-env",
  "tempfile",
+ "tests",
  "thiserror 2.0.17",
  "thumbhash",
  "tokio",
@@ -8370,6 +8371,7 @@ dependencies = [
  "sha2",
  "stump_core",
  "tempfile",
+ "tests",
  "thiserror 2.0.17",
  "time",
  "tokio",
@@ -8864,6 +8866,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bab24d30b911b2376f3a13cc2cd443142f0c81dda04c118693e35b3835757755"
 dependencies = [
  "winapi-util",
+]
+
+[[package]]
+name = "tests"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "models",
+ "rand 0.9.2",
+ "rust_decimal",
+ "sea-orm",
+ "uuid 1.18.1",
 ]
 
 [[package]]

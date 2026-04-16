@@ -74,6 +74,7 @@ export default function LibraryOptionsMenu({ library }: Props) {
 				isOpen={isDeleting}
 				onClose={() => setIsDeleting(false)}
 				libraryId={library.id}
+				libraryName={library.name}
 			/>
 
 			<DropdownMenu

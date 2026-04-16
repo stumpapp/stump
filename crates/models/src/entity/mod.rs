@@ -20,6 +20,7 @@ pub mod favorite_media;
 pub mod favorite_series;
 pub mod finished_reading_session;
 pub mod job;
+pub mod kobo_sync_session;
 pub mod last_library_visit;
 pub mod library;
 pub mod library_config;

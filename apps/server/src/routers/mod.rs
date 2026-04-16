@@ -3,6 +3,7 @@ use axum::Router;
 use crate::config::state::AppState;
 
 mod api;
+mod kobo;
 mod koreader;
 mod opds;
 mod spa;
@@ -15,6 +16,10 @@ pub(crate) async fn mount(app_state: AppState) -> Router<AppState> {
 
 	if app_state.config.enable_koreader_sync {
 		app_router = app_router.merge(koreader::mount(app_state.clone()));
+	}
+
+	if app_state.config.enable_kobo_sync {
+		app_router = app_router.merge(kobo::mount(app_state.clone()));
 	}
 
 	app_router

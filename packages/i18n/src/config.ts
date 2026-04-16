@@ -12,6 +12,7 @@ import {
 	enGB,
 	enUS,
 	esES,
+	faIR,
 	fiFI,
 	frFR,
 	heIL,
@@ -65,6 +66,9 @@ export const resources = {
 	},
 	'es-ES': {
 		'es-ES': esES,
+	},
+	'fa-IR': {
+		'fa-IR': faIR,
 	},
 	'fi-FI': {
 		'fi-FI': fiFI,
@@ -154,6 +158,7 @@ function parseMissingKeyHandler(missingKey: string) {
 
 i18n.use(initReactI18next).init({
 	fallbackLng: 'en-US',
+	fallbackNS: 'en-US',
 	interpolation: {
 		escapeValue: false, // not needed for react as it escapes by default
 	},

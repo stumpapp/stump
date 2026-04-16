@@ -92,7 +92,6 @@ export const OPDSLegacyEntryItemSheet = forwardRef<TrueSheet, Props>(
 										style={{ width: '100%', height: '100%' }}
 										resizeMode="cover"
 										fadeDuration={2000}
-										{...(Platform.OS === 'ios' && { indicator: { color: 'transparent' } })}
 										resize={60}
 										blur={Platform.OS === 'ios' ? 7 : 16}
 									/>

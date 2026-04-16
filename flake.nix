@@ -73,13 +73,12 @@
 
         # android setup
         pinnedJDK = androidPkgs.jdk17;
-        androidNdkVersion = "26.1.10909125";
         androidComposition = androidPkgs.androidenv.composeAndroidPackages {
-          buildToolsVersions = [ "34.0.0" "35.0.0" ];
-          platformVersions = [ "34" "35" ];
+          buildToolsVersions = [ "35.0.0" "36.0.0" ];
+          platformVersions = [ "35" "36" ];
           cmakeVersions = [ "3.10.2" "3.22.1" ];
           includeNDK = true;
-          ndkVersions = [ androidNdkVersion ];
+          ndkVersions = [ "27.0.12077973" "27.1.12297006" ];
         };
         androidSdk = androidComposition.androidsdk;
 
@@ -97,6 +96,9 @@
           buildInputs = genericShellConfig.buildInputs ++ androidPackages;
 
           JAVA_HOME = pinnedJDK;
+          JAVA_OPTS = "-Xms8g -Xmx8g";
+          ANDROID_HOME =
+            "${androidComposition.androidsdk}/libexec/android-sdk";
           ANDROID_SDK_ROOT =
             "${androidComposition.androidsdk}/libexec/android-sdk";
           ANDROID_NDK_ROOT = "${android-sdk-root}/ndk-bundle";

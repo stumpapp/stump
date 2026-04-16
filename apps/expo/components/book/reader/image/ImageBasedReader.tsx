@@ -32,7 +32,6 @@ type ImageDimension = {
 // Not 100% sure, it is REALLY janky right now.
 // When Zoomable is on the list for continuous scrolling, panning is weird because there is the list scroll
 // and the Zoomable pan, but Zoomable pan vertically/horizontally won't scroll the vertical/horizontal list
-// TODO: Account for device orientation AND reading direction
 // TODO: Account for the image scaling settings
 
 type Props = {
@@ -61,6 +60,8 @@ export default function ImageBasedReader({ initialPage, onPastEndReached }: Prop
 	} = useBookPreferences({ book, serverId })
 	const { height, width } = useWindowDimensions()
 	const insets = useSafeAreaInsets()
+
+	const [zoomResetCounter, setZoomResetCounter] = useState(0)
 
 	const deviceOrientation = useMemo(
 		() => (width > height ? 'landscape' : 'portrait'),
@@ -127,28 +128,21 @@ export default function ImageBasedReader({ initialPage, onPastEndReached }: Prop
 	return (
 		<View style={[{ width, height }, isRtl && { transform: [{ scaleX: -1 }] }]}>
 			<FlashList
-				key={isVertical ? 'vertical' : 'horizontal'}
+				key={`${isVertical}-${deviceOrientation}`}
 				ref={flashListRef}
 				data={pageSets}
 				keyExtractor={(item) => item.toString()}
 				renderItem={({ item, index }) => (
 					<PageSet
-						deviceOrientation={deviceOrientation}
 						index={index}
 						indexes={item as [number, number]}
 						sizes={item.map((i: number) => imageSizes[i]).filter((i) => i != null)}
 						maxWidth={width}
 						maxHeight={height}
-						readingDirection="horizontal"
 						onPastEndReached={onPastEndReached}
+						zoomResetCounter={zoomResetCounter}
 					/>
 				)}
-				getItemType={(item) => {
-					const itemZero = item[0]
-					if (item.length === 2) return 'double'
-					else if (itemZero != null && (imageSizes?.[itemZero]?.ratio || 0) >= 1) return 'landscape'
-					else return 'single'
-				}}
 				contentContainerStyle={
 					isVertical && { paddingTop: insets.top, paddingBottom: insets.bottom }
 				}
@@ -178,35 +172,42 @@ export default function ImageBasedReader({ initialPage, onPastEndReached }: Prop
 				initialScrollIndexParams={isVertical ? { viewOffset: -insets.top } : undefined}
 				showsHorizontalScrollIndicator={false}
 				onScroll={handleScroll}
+				onMomentumScrollEnd={() => setZoomResetCounter((c) => c + 1)}
 			/>
 		</View>
 	)
 }
 
 type PageSetProps = {
-	deviceOrientation: string
 	index: number
 	indexes: [number, number]
 	sizes: ImageDimension[]
 	maxWidth: number
 	maxHeight: number
-	readingDirection: 'vertical' | 'horizontal'
 	onPastEndReached?: () => void
+	zoomResetCounter: number
 }
 
 const PageSet = React.memo(
 	({
-		// deviceOrientation,
 		index,
 		indexes,
 		sizes,
 		maxWidth,
 		maxHeight,
 		onPastEndReached,
-		// readingDirection,
+		zoomResetCounter,
 	}: PageSetProps) => {
-		const { book, pageURL, flashListRef, pageSets, setImageSizes, requestHeaders, serverId } =
-			useImageBasedReader()
+		const {
+			book,
+			pageURL,
+			flashListRef,
+			pageSets,
+			imageSizes,
+			setImageSizes,
+			requestHeaders,
+			serverId,
+		} = useImageBasedReader()
 		const {
 			preferences: { tapSidesToNavigate, readingDirection, readingMode, allowDownscaling },
 		} = useBookPreferences({ book, serverId })
@@ -221,10 +222,12 @@ const PageSet = React.memo(
 
 		const zoomableRef = useRef<ZoomableRef>(null)
 
+		useEffect(() => {
+			zoomableRef.current?.reset()
+		}, [zoomResetCounter])
+
 		const onCheckForNavigationTaps = useCallback(
 			(x: number) => {
-				if (readingMode === ReadingMode.ContinuousVertical) return
-
 				const isLeft = x < maxWidth / tapThresholdRatio
 				const isRight = x > maxWidth - maxWidth / tapThresholdRatio
 
@@ -249,7 +252,6 @@ const PageSet = React.memo(
 				readingDirection,
 				pageSets,
 				onPastEndReached,
-				readingMode,
 			],
 		)
 
@@ -257,7 +259,7 @@ const PageSet = React.memo(
 			(event: GestureStateChangeEvent<TapGestureHandlerEventPayload>) => {
 				if (event.state !== State.ACTIVE) return
 
-				if (!tapSidesToNavigate) {
+				if (!tapSidesToNavigate || readingMode !== ReadingMode.Paged) {
 					setShowControls(!showControls)
 					return
 				}
@@ -269,17 +271,16 @@ const PageSet = React.memo(
 					setShowControls(!showControls)
 				}
 			},
-			[showControls, setShowControls, onCheckForNavigationTaps, tapSidesToNavigate],
+			[showControls, setShowControls, onCheckForNavigationTaps, tapSidesToNavigate, readingMode],
 		)
 
-		const [imageRatio, setImageRatio] = useState<number | undefined>(undefined)
+		const imageRatio = imageSizes?.[index]?.ratio
 
 		const onImageLoaded = useCallback(
 			(event: NativeSyntheticEvent<Success>, idxIdx: number) => {
 				const { height, width } = event.nativeEvent
 				if (!height || !width) return
 				const ratio = width / height
-				setImageRatio(ratio)
 
 				const pageSize = sizes[idxIdx]
 				const isDifferent = pageSize?.height !== height || pageSize?.width !== width
@@ -349,7 +350,6 @@ const PageSet = React.memo(
 										maxWidth: indexes.length > 1 ? '50%' : '100%',
 										aspectRatio: imageRatio,
 									}}
-									indicator={{ color: 'transparent' }}
 									resizeMode="contain"
 									resize={allowDownscaling ? roughPageRenderWidth * 1.2 : undefined}
 									onSuccess={(event) => onImageLoaded(event, i)}

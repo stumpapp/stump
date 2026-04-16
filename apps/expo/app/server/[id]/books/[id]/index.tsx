@@ -30,7 +30,6 @@ import { ThumbnailImage } from '~/components/image'
 import { MetadataBadgeSection } from '~/components/overview'
 import RefreshControl from '~/components/RefreshControl'
 import { Button, Card, Heading, ListLabel, Text } from '~/components/ui'
-import { Icon } from '~/components/ui/icon'
 import { formatSeriesPosition } from '~/lib/bookUtils'
 import { formatBytes, parseGraphQLDecimal } from '~/lib/format'
 import { useDownload } from '~/lib/hooks'
@@ -365,7 +364,6 @@ export default function Screen() {
 							style={{ width: '100%', height: '100%' }}
 							resizeMode="cover"
 							fadeDuration={2000}
-							{...(Platform.OS === 'ios' && { indicator: { color: 'transparent' } })}
 							// android only supports up to blur={25} which doesn't look good,
 							// but if we heavily downscale first, the following looks near identical to using
 							// original res with blur={40} on ios, which is what I originally settled on

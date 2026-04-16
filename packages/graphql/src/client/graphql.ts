@@ -3750,6 +3750,8 @@ export type StumpConfig = {
   enableUpload: Scalars['Boolean']['output'];
   /** The interval at which automatic deleted session cleanup is performed. */
   expiredSessionCleanupInterval: Scalars['Int']['output'];
+  /** The directory where the applicaiton logs will be stored */
+  logDir?: Maybe<Scalars['String']['output']>;
   /** The maximum size, in bytes, of files that can be uploaded to be included in libraries. */
   maxFileUploadSize: Scalars['Int']['output'];
   /**
@@ -4024,6 +4026,8 @@ export enum UserPermission {
   AccessBookClub = 'ACCESS_BOOK_CLUB',
   /** Grant access to the koreader sync feature */
   AccessKoreaderSync = 'ACCESS_KOREADER_SYNC',
+  /** Grant access to the kobo sync feature */
+  AccessKoboSync = 'ACCESS_KOBO_SYNC',
   /** Grant access to access the smart list feature. This includes the ability to create and edit smart lists */
   AccessSmartList = 'ACCESS_SMART_LIST',
   /** Grant user access to change **their own** avatar */

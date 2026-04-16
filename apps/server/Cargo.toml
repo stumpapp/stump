@@ -64,6 +64,7 @@ zip.workspace = true
 axum-test = "17.2.0"
 maplit.workspace = true
 tokio = { workspace = true, features = ["full", "test-util"] }
+tests = { path = "../../crates/tests" }
 
 [build-dependencies]
 chrono.workspace = true

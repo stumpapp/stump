@@ -1,7 +1,6 @@
 use axum::{
-	body::Body,
 	extract::{Path, State},
-	http::{header, HeaderMap, Request},
+	http::HeaderMap,
 	middleware,
 	response::IntoResponse,
 	routing::get,
@@ -10,7 +9,7 @@ use axum::{
 use graphql::data::AuthContext;
 use models::{
 	entity::{library, library_config, media, series, user::AuthUser},
-	shared::{enums::UserPermission, image_processor_options::SupportedImageFormat},
+	shared::image_processor_options::SupportedImageFormat,
 };
 use sea_orm::{prelude::*, sea_query::Query, QuerySelect};
 use stump_core::{
@@ -20,13 +19,12 @@ use stump_core::{
 	},
 	Ctx,
 };
-use tower_http::services::ServeFile;
 
 use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
 	middleware::auth::auth_middleware,
-	utils::http::ImageResponse,
+	utils::{http::ImageResponse, serve_media},
 };
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
@@ -48,47 +46,7 @@ pub(crate) async fn get_media_file(
 	Extension(req): Extension<AuthContext>,
 	headers: HeaderMap,
 ) -> APIResult<impl IntoResponse> {
-	let user = req
-		.user_and_enforce_permissions(&[UserPermission::DownloadFile])
-		.map_err(|_| {
-			tracing::error!("User does not have permission to download file");
-			APIError::forbidden_discreet()
-		})?;
-
-	let book = media::Entity::find_for_user(&user)
-		.filter(media::Column::Id.eq(id.clone()))
-		.into_model::<media::MediaIdentSelect>()
-		.one(ctx.conn.as_ref())
-		.await?
-		.ok_or(APIError::NotFound("Book not found".to_string()))?;
-
-	// Note: I am reusing the original headers to support range requests
-	let mut serve_req = Request::new(Body::empty());
-	*serve_req.headers_mut() = headers;
-
-	match ServeFile::new(&book.path).try_call(serve_req).await {
-		Ok(mut response) => {
-			if let Some(filename) = std::path::Path::new(&book.path)
-				.file_name()
-				.and_then(|os_str| os_str.to_str())
-			{
-				response.headers_mut().insert(
-					header::CONTENT_DISPOSITION,
-					format!("attachment; filename=\"{}\"", filename)
-						.parse()
-						.unwrap_or_else(|_| "attachment".parse().unwrap()),
-				);
-			}
-			Ok(response)
-		},
-		Err(e) => {
-			tracing::error!(error = ?e, path = %book.path, "Error serving media file");
-			Err(APIError::InternalServerError(format!(
-				"Failed to serve file: {}",
-				e
-			)))
-		},
-	}
+	serve_media::serve_media_file(req, headers, ctx.conn.as_ref(), id).await
 }
 
 pub(crate) async fn get_media_thumbnail(

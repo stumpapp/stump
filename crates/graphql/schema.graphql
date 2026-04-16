@@ -759,6 +759,32 @@ type FinishedReadingSessionModel {
 	elapsedSeconds: Int
 }
 
+"""
+A resize option which will resize the image to fit within the given dimensions,
+maintaining the aspect ratio.
+
+If the image already fits within the dimensions, it will not be scaled up.
+"""
+type FitWithinResize {
+	"The maximum width (in pixels) of the resulting image"
+	width: Int!
+	"The maximum height (in pixels) of the resulting image"
+	height: Int!
+}
+
+"""
+A resize option which will resize the image to fit within the given dimensions,
+maintaining the aspect ratio.
+
+If the image already fits within the dimensions, it will not be scaled up.
+"""
+input FitWithinResizeInput {
+	"The maximum width (in pixels) of the resulting image"
+	width: Int!
+	"The maximum height (in pixels) of the resulting image"
+	height: Int!
+}
+
 type ImageColor {
 	color: String!
 	percentage: Decimal!
@@ -816,13 +842,14 @@ type ImageRef {
 }
 
 "The resize options to use when generating an image"
-union ImageResizeMethod = ExactDimensionResize | ScaleEvenlyByFactor | ScaledDimensionResize
+union ImageResizeMethod = ExactDimensionResize | ScaleEvenlyByFactor | ScaledDimensionResize | FitWithinResize
 
 "The resize options to use when generating an image"
 input ImageResizeMethodInput @oneOf {
 	exact: ExactDimensionResizeInput
 	scaleEvenlyByFactor: ScaleEvenlyByFactorInput
 	scaleDimension: ScaledDimensionResizeInput
+	fitWithin: FitWithinResizeInput
 }
 
 type InProgressBooks {
@@ -2669,6 +2696,8 @@ type StumpConfig {
 	verbosity: Int!
 	"Whether or not to pretty print logs."
 	prettyLogs: Boolean!
+	"The directory where the applicaiton logs will be stored"
+	logDir: String
 	"Whether or not to include ANSI color codes in log files."
 	colorfulLogs: Boolean!
 	"An optional custom path for the database."
@@ -2685,6 +2714,8 @@ type StumpConfig {
 	enableSwagger: Boolean!
 	"Indicates if the KoReader sync feature should be enabled."
 	enableKoreaderSync: Boolean!
+	"Indicates if the Kobo sync feature should be enabled."
+	enableKoboSync: Boolean!
 	"""
 	Indicates if OPDS page access should automatically track reading progression.
 	When disabled, clients loading/preloading pages won't trigger progress updates.
@@ -2946,6 +2977,8 @@ enum UserPermission {
 	ACCESS_API_KEYS
 	"Grant access to the koreader sync feature"
 	ACCESS_KOREADER_SYNC
+	"Grant access to the kobo sync feature"
+	ACCESS_KOBO_SYNC
 	"""
 	TODO: Expand permissions for bookclub + smartlist
 	Grant access to the book club feature

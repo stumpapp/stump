@@ -4,7 +4,7 @@ import { AllowedLocale } from './config'
 
 export type LocaleContextProps = {
 	locale: AllowedLocale
-	t: (key: string) => string
+	t: (key: string, options?: Record<string, unknown>) => string
 }
 
 export const getDefaultLocale = (defaultValue: AllowedLocale = 'en-US') => {

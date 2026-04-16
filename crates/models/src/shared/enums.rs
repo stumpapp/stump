@@ -556,6 +556,8 @@ pub enum UserPermission {
 	AccessAPIKeys,
 	/// Grant access to the koreader sync feature
 	AccessKoreaderSync,
+	/// Grant access to the kobo sync feature
+	AccessKoboSync,
 	///TODO: Expand permissions for bookclub + smartlist
 	/// Grant access to the book club feature
 	AccessBookClub,

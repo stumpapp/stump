@@ -1,0 +1,12 @@
+[package]
+name = "tests"
+version.workspace = true
+edition = "2021"
+
+[dependencies]
+sea-orm.workspace = true
+models = { path = "../models" }
+uuid.workspace = true
+rand.workspace = true
+rust_decimal.workspace = true
+chrono.workspace = true

@@ -1,6 +1,7 @@
 mod auth;
 pub mod http;
 mod serde;
+pub mod serve_media;
 mod signal;
 mod time;
 

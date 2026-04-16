@@ -1,6 +1,7 @@
 import { useGraphQLMutation } from '@stump/client'
-import { ConfirmationModal } from '@stump/components'
+import { TypeToConfirmModal } from '@stump/components'
 import { graphql, UserPermission } from '@stump/graphql'
+import { useLocaleContext } from '@stump/i18n'
 import { isAxiosError } from '@stump/sdk'
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo } from 'react'
@@ -18,16 +19,27 @@ const mutation = graphql(`
 	}
 `)
 
+const LOCALE_KEY = 'common.deleteConfirmation'
+const getKey = (key: string) => `${LOCALE_KEY}.${key}`
+
 type Props = {
 	libraryId: string
+	libraryName: string
 	onClose: () => void
 	isOpen: boolean
 	trigger?: React.ReactNode
 }
 
-export default function DeleteLibraryConfirmation({ isOpen, libraryId, onClose, trigger }: Props) {
+export default function DeleteLibraryConfirmation({
+	isOpen,
+	libraryId,
+	libraryName,
+	onClose,
+	trigger,
+}: Props) {
 	const navigate = useNavigate()
 	const client = useQueryClient()
+	const { t } = useLocaleContext()
 
 	const {
 		mutate: deleteLibrary,
@@ -66,17 +78,21 @@ export default function DeleteLibraryConfirmation({ isOpen, libraryId, onClose, 
 		}
 	}, [error])
 
+	const entityI18nValues = { name: libraryName, type: 'library' }
+
 	return (
-		<ConfirmationModal
-			title="Delete Library"
-			description="Are you sure you want to delete this library? This action cannot be undone."
-			confirmText="Delete Library"
+		<TypeToConfirmModal
+			title={t(getKey('title'), entityI18nValues)}
+			description={t(getKey('description'), entityI18nValues)}
+			confirmText={t(getKey('confirm'), entityI18nValues)}
 			confirmVariant="danger"
 			isOpen={isOpen}
 			onClose={onClose}
 			onConfirm={handleDelete}
 			confirmIsLoading={isPending}
 			trigger={trigger}
+			confirmationValue={libraryName}
+			instructionText={t(getKey('typeToConfirm'), entityI18nValues)}
 		/>
 	)
 }

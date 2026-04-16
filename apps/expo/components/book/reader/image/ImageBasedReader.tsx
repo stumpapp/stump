@@ -32,7 +32,6 @@ type ImageDimension = {
 // Not 100% sure, it is REALLY janky right now.
 // When Zoomable is on the list for continuous scrolling, panning is weird because there is the list scroll
 // and the Zoomable pan, but Zoomable pan vertically/horizontally won't scroll the vertical/horizontal list
-// TODO: Account for device orientation AND reading direction
 // TODO: Account for the image scaling settings
 
 type Props = {
@@ -129,19 +128,17 @@ export default function ImageBasedReader({ initialPage, onPastEndReached }: Prop
 	return (
 		<View style={[{ width, height }, isRtl && { transform: [{ scaleX: -1 }] }]}>
 			<FlashList
-				key={isVertical ? 'vertical' : 'horizontal'}
+				key={`${isVertical}-${deviceOrientation}`}
 				ref={flashListRef}
 				data={pageSets}
 				keyExtractor={(item) => item.toString()}
 				renderItem={({ item, index }) => (
 					<PageSet
-						deviceOrientation={deviceOrientation}
 						index={index}
 						indexes={item as [number, number]}
 						sizes={item.map((i: number) => imageSizes[i]).filter((i) => i != null)}
 						maxWidth={width}
 						maxHeight={height}
-						readingDirection="horizontal"
 						onPastEndReached={onPastEndReached}
 						zoomResetCounter={zoomResetCounter}
 					/>
@@ -182,27 +179,23 @@ export default function ImageBasedReader({ initialPage, onPastEndReached }: Prop
 }
 
 type PageSetProps = {
-	deviceOrientation: string
 	index: number
 	indexes: [number, number]
 	sizes: ImageDimension[]
 	maxWidth: number
 	maxHeight: number
-	readingDirection: 'vertical' | 'horizontal'
 	onPastEndReached?: () => void
 	zoomResetCounter: number
 }
 
 const PageSet = React.memo(
 	({
-		// deviceOrientation,
 		index,
 		indexes,
 		sizes,
 		maxWidth,
 		maxHeight,
 		onPastEndReached,
-		// readingDirection,
 		zoomResetCounter,
 	}: PageSetProps) => {
 		const { book, pageURL, flashListRef, pageSets, setImageSizes, requestHeaders, serverId } =
@@ -227,8 +220,6 @@ const PageSet = React.memo(
 
 		const onCheckForNavigationTaps = useCallback(
 			(x: number) => {
-				if (readingMode === ReadingMode.ContinuousVertical) return
-
 				const isLeft = x < maxWidth / tapThresholdRatio
 				const isRight = x > maxWidth - maxWidth / tapThresholdRatio
 
@@ -253,7 +244,6 @@ const PageSet = React.memo(
 				readingDirection,
 				pageSets,
 				onPastEndReached,
-				readingMode,
 			],
 		)
 
@@ -261,7 +251,7 @@ const PageSet = React.memo(
 			(event: GestureStateChangeEvent<TapGestureHandlerEventPayload>) => {
 				if (event.state !== State.ACTIVE) return
 
-				if (!tapSidesToNavigate) {
+				if (!tapSidesToNavigate || readingMode !== ReadingMode.Paged) {
 					setShowControls(!showControls)
 					return
 				}
@@ -273,7 +263,7 @@ const PageSet = React.memo(
 					setShowControls(!showControls)
 				}
 			},
-			[showControls, setShowControls, onCheckForNavigationTaps, tapSidesToNavigate],
+			[showControls, setShowControls, onCheckForNavigationTaps, tapSidesToNavigate, readingMode],
 		)
 
 		const [imageRatio, setImageRatio] = useState<number | undefined>(undefined)

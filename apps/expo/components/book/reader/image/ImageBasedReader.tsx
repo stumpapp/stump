@@ -198,8 +198,16 @@ const PageSet = React.memo(
 		onPastEndReached,
 		zoomResetCounter,
 	}: PageSetProps) => {
-		const { book, pageURL, flashListRef, pageSets, setImageSizes, requestHeaders, serverId } =
-			useImageBasedReader()
+		const {
+			book,
+			pageURL,
+			flashListRef,
+			pageSets,
+			imageSizes,
+			setImageSizes,
+			requestHeaders,
+			serverId,
+		} = useImageBasedReader()
 		const {
 			preferences: { tapSidesToNavigate, readingDirection, readingMode, allowDownscaling },
 		} = useBookPreferences({ book, serverId })
@@ -266,14 +274,13 @@ const PageSet = React.memo(
 			[showControls, setShowControls, onCheckForNavigationTaps, tapSidesToNavigate, readingMode],
 		)
 
-		const [imageRatio, setImageRatio] = useState<number | undefined>(undefined)
+		const imageRatio = imageSizes?.[index]?.ratio
 
 		const onImageLoaded = useCallback(
 			(event: NativeSyntheticEvent<Success>, idxIdx: number) => {
 				const { height, width } = event.nativeEvent
 				if (!height || !width) return
 				const ratio = width / height
-				setImageRatio(ratio)
 
 				const pageSize = sizes[idxIdx]
 				const isDifferent = pageSize?.height !== height || pageSize?.width !== width

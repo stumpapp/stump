@@ -17,6 +17,7 @@ import ListEmpty from '~/components/ListEmpty'
 import RefreshControl from '~/components/RefreshControl'
 import { SeriesGridItem } from '~/components/series'
 import { SeriesFilterHeader } from '~/components/series/filterHeader'
+import { SeriesListHeader } from '~/components/series/listHeader'
 import { ISeriesGridItemFragment } from '~/components/series/SeriesGridItem'
 import { MiniStatCard } from '~/components/StatCard'
 import { Button, RefreshButton, Text } from '~/components/ui'
@@ -107,88 +108,54 @@ export default function Screen() {
 	useScrollToTop(listRef)
 
 	return (
-		<SeriesFilterContext.Provider value={store}>
-			<SafeAreaView style={{ flex: 1 }} edges={['left', 'right']}>
-				<FlashList
-					ref={listRef}
-					data={nodes}
-					renderItem={({ item }) => <SeriesGridItem series={item} />}
-					contentContainerStyle={{
-						paddingVertical: 16,
-						paddingHorizontal: paddingHorizontal,
-					}}
-					numColumns={numColumns}
-					onEndReachedThreshold={ON_END_REACHED_THRESHOLD}
-					onEndReached={onEndReached}
-					contentInsetAdjustmentBehavior="always"
-					ListHeaderComponent={
-						<View className="gap-4">
-							<View className="px-4 gap-2 flex-row flex-wrap">
-								<MiniStatCard
-									value={librariesStats.inProgressBooks}
-									icon={BookOpen}
-									baseColor={STAT_COLORS.inProgress}
-								/>
+		<FlashList
+			ref={listRef}
+			data={nodes}
+			renderItem={({ item }) => <SeriesGridItem series={item} />}
+			contentContainerStyle={{
+				paddingVertical: 16,
+				paddingHorizontal: paddingHorizontal,
+			}}
+			numColumns={numColumns}
+			onEndReachedThreshold={ON_END_REACHED_THRESHOLD}
+			onEndReached={onEndReached}
+			contentInsetAdjustmentBehavior="always"
+			ListHeaderComponent={<SeriesListHeader stats={librariesStats} />}
+			ListHeaderComponentStyle={{ paddingBottom: 16, marginHorizontal: -paddingHorizontal }}
+			refreshControl={
+				nodes.length > 0 ? (
+					<RefreshControl refreshing={isRefetching} onRefresh={handleRefetch} />
+				) : undefined
+			}
+			ListEmptyComponent={
+				<ListEmpty
+					message={isFiltered ? 'No series found matching your filters' : 'No series returned'}
+					actions={
+						<>
+							{isFiltered && (
+								<Button
+									roundness="full"
+									variant="secondary"
+									size="lg"
+									onPress={() => resetFilters()}
+								>
+									<Text>Clear Filters</Text>
+								</Button>
+							)}
 
-								<MiniStatCard
-									value={librariesStats.completedBooks}
-									suffix={`/ ${librariesStats.bookCount}`}
-									icon={BookCheck}
-									baseColor={STAT_COLORS.completed}
-								/>
-								<MiniStatCard
-									value={librariesStats.seriesCount}
-									icon={Layers}
-									baseColor={STAT_COLORS.series}
-								/>
-								<MiniStatCard
-									value={formattedTime ? formattedTime.value : '??'}
-									suffix={formattedTime ? formattedTime.unit : undefined}
-									icon={Clock}
-									baseColor={STAT_COLORS.readingTime}
-								/>
-							</View>
-							<Divider />
-							<SeriesFilterHeader />
-						</View>
-					}
-					ListHeaderComponentStyle={{ paddingBottom: 16, marginHorizontal: -paddingHorizontal }}
-					refreshControl={
-						nodes.length > 0 ? (
-							<RefreshControl refreshing={isRefetching} onRefresh={handleRefetch} />
-						) : undefined
-					}
-					ListEmptyComponent={
-						<ListEmpty
-							message={isFiltered ? 'No series found matching your filters' : 'No series returned'}
-							actions={
-								<>
-									{isFiltered && (
-										<Button
-											roundness="full"
-											variant="secondary"
-											size="lg"
-											onPress={() => resetFilters()}
-										>
-											<Text>Clear Filters</Text>
-										</Button>
-									)}
-
-									<RefreshButton
-										className="flex-row items-center"
-										roundness="full"
-										size="lg"
-										onPress={() => handleRefetch()}
-										isRefreshing={isRefetching}
-									>
-										<Text>Refresh</Text>
-									</RefreshButton>
-								</>
-							}
-						/>
+							<RefreshButton
+								className="flex-row items-center"
+								roundness="full"
+								size="lg"
+								onPress={() => handleRefetch()}
+								isRefreshing={isRefetching}
+							>
+								<Text>Refresh</Text>
+							</RefreshButton>
+						</>
 					}
 				/>
-			</SafeAreaView>
-		</SeriesFilterContext.Provider>
+			}
+		/>
 	)
 }
